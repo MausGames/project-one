@@ -4,4 +4,4 @@ cd bin/linux
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.
 
 # start game
-./CoreApp_gcc
+./ProjectOne_gcc
