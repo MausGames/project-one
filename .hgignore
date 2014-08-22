@@ -1,6 +1,6 @@
 syntax: glob
-*.exe
 backup/
+material/screenshots/
 projects/visualstudio/ProjectOne/Debug/
 projects/visualstudio/ProjectOne/Release/
 projects/visualstudio/*.opensdf
