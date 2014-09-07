@@ -11,17 +11,39 @@
 // setup all defined resources
 static void SetupResources()
 {
-    Core::Manager::Resource->Load<coreTexture>("environment_grass_diff.png", CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_grass_diff.png");
-    Core::Manager::Resource->Load<coreTexture>("environment_grass_norm.png", CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_grass_norm.png");
+    Core::Manager::Resource->Load<coreModel>  ("default_square.md5mesh",     CORE_RESOURCE_UPDATE_AUTO,   "data/models/default_square.md5mesh");
+
+    Core::Manager::Resource->Load<coreTexture>("default_white.png",          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/default_white.png");
+    Core::Manager::Resource->Load<coreTexture>("environment_clouds.png",     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds.png");
     Core::Manager::Resource->Load<coreTexture>("environment_dust_diff.png",  CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_dust_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_dust_norm.png",  CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_dust_norm.png");
+    Core::Manager::Resource->Load<coreTexture>("environment_grass_diff.png", CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_grass_diff.png");
+    Core::Manager::Resource->Load<coreTexture>("environment_grass_norm.png", CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_grass_norm.png");
+    Core::Manager::Resource->Load<coreTexture>("environment_water_norm.png", CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_water_norm.png");
+    Core::Manager::Resource->Load<coreTexture>("menu_background_black.png",  CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_background_black.png");
 
+    Core::Manager::Resource->Load<coreShader> ("default_2d.vert",            CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/default_2d.vert");
+    Core::Manager::Resource->Load<coreShader> ("default_2d.frag",            CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/default_2d.frag");
     Core::Manager::Resource->Load<coreShader> ("environment_outdoor.vert",   CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_outdoor.vert");
     Core::Manager::Resource->Load<coreShader> ("environment_outdoor.frag",   CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_outdoor.frag");
+    Core::Manager::Resource->Load<coreShader> ("environment_water.vert",     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_water.vert");
+    Core::Manager::Resource->Load<coreShader> ("environment_water.frag",     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_water.frag");
+
+    Core::Manager::Resource->Load<coreFont>   ("ethnocentric.ttf",           CORE_RESOURCE_UPDATE_AUTO,   "data/fonts/ethnocentric.ttf");
+
+    ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("default_2d_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("default_2d.vert")
+        ->AttachShader("default_2d.frag")
+        ->Finish();
 
     ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("environment_outdoor_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("environment_outdoor.vert")
         ->AttachShader("environment_outdoor.frag")
+        ->Finish();
+
+    ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("environment_water_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("environment_water.vert")
+        ->AttachShader("environment_water.frag")
         ->Finish();
 }
 
@@ -43,7 +65,7 @@ void CoreApp::Setup()
     Core::System->SetWindowIcon("data/textures/game_icon.png");
     
     // set view frustum
-    Core::Graphics->ResizeView(Core::System->GetResolution(), DEG_TO_RAD(55.0f), 0.1f, 1000.0f);
+    Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 50.0f, 500.0f);
     
     // set cursor
 #if defined(_CORE_LINUX_)

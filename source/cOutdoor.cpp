@@ -14,6 +14,8 @@
 cOutdoor::cOutdoor(const char* pcTextureTop, const char* pcTextureBottom, const coreByte& iAlgorithm, const float& fGrade)noexcept
 : m_iRenderOffset   (0)
 , m_fMoveOffset     (0.0f)
+, m_iAlgorithm      (0)
+, m_fGrade          (0.0f)
 , m_fShadowStrength (0.0f)
 {
     // load outdoor geometry
@@ -45,6 +47,11 @@ void cOutdoor::Render()
     // enable all resources
     if(this->Enable())
     {
+        //m_pShader->SetUniform("u_mShadow", m_mTransform*
+        //                               g_pEnvironment->GetTransform()*
+        //                               g_pShadow->GetLightMatrix());
+        //m_pShader->SetUniform("u_fShadow", g_bShadow ? m_fShadow : 0.0f);
+
         // draw the model
         glDrawRangeElements(m_pModel->GetPrimitiveType(), 0, OUTDOOR_TOTAL_VERTICES, OUTDOOR_RANGE, m_pModel->GetIndexType(), r_cast<const GLvoid*>(m_iRenderOffset));
     }
@@ -55,9 +62,6 @@ void cOutdoor::Render()
 // move the outdoor-surface
 void cOutdoor::Move()
 {
-
-    if(Core::Input->GetMouseButton(CORE_INPUT_LEFT, CORE_INPUT_HOLD)) this->SetMoveOffset(m_fMoveOffset + Core::Input->GetMouseRelative().y * -20.0f);
-
     // move the 3d-object
     coreObject3D::Move();
 }
@@ -75,6 +79,10 @@ void cOutdoor::LoadGeometry(const coreByte& iAlgorithm, const float& fGrade)
     // delete old data
     m_pModel->Unload();
     for(int i = 0; i < OUTDOOR_TOTAL_VERTICES; ++i) m_afHeight[i] = 0.0f;
+
+    // save properties
+    m_iAlgorithm = iAlgorithm;
+    m_fGrade     = fGrade; 
 
     // select algorithm function
     std::function<float(const float&, const float&)> pAlgorithmFunc;
@@ -245,8 +253,8 @@ void cOutdoor::SetMoveOffset(const float& fMoveOffset)
 
     // set and clamp new value
     m_fMoveOffset = fMoveOffset;
-    while(m_fMoveOffset < 0.0f)    m_fMoveOffset += fHeight;
-    while(m_fMoveOffset > fHeight) m_fMoveOffset -= fHeight;
+    while(m_fMoveOffset <  0.0f)    m_fMoveOffset += fHeight;
+    while(m_fMoveOffset >= fHeight) m_fMoveOffset -= fHeight;
 
     // set object position
     this->SetPosition(coreVector3(0.0f, -m_fMoveOffset * OUTDOOR_DETAIL, 0.0f));
@@ -256,32 +264,10 @@ void cOutdoor::SetMoveOffset(const float& fMoveOffset)
 }
 
 
-
-
-/*
-
-
 // ****************************************************************
-// Außengebiet zeichnen
-void cOutdoor::Render()
+// reset with the resource manager
+void cOutdoor::__Reset(const coreResourceReset& bInit)
 {
-    // Shader aktualisieren
-    m_pShader->Enable();
-    m_pShader->SetUniform("u_mShadow", m_mTransform*
-                                       g_pEnvironment->GetTransform()*
-                                       g_pShadow->GetLightMatrix());
-    m_pShader->SetUniform("u_fShadow", g_bShadow ? m_fShadow : 0.0f);
-    m_pShader->Disable();
-
-    // Texturen setzen und Objekt zeichnen
-    m_pColorMap2->Enable(4);
-    m_pNormalMap2->Enable(5);
-    m_pSpecularMap2->Enable(6);
-    g_pShadow->GetShadow()->EnableRead(7);
-    coreObject3D::Render();
-    m_pColorMap2->Disable(4);
-    m_pNormalMap2->Disable(5);
-    m_pSpecularMap2->Disable(6);
-    g_pShadow->GetShadow()->DisableRead(7);
+    if(bInit) this->LoadGeometry(m_iAlgorithm, m_fGrade);
+    else m_pModel->Unload();
 }
-*/

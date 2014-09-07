@@ -64,7 +64,7 @@ void main()
         fShadow = 0.0;
     }
     
-    vec3 v3Diffuse = v4Texture.rgb * (1.0 - fShadow) * (1.3 * max(0.0, fBumpFactor) + 0.3);
+    vec3 v3Diffuse = v4Texture.rgb * ((1.0 - fShadow) * (1.3 * max(0.0, fBumpFactor) + 0.3));
     
     vec3 v3Specular;
     if(fRefFactor > 0.0) v3Specular = vec3(0.3 * v4Texture.a * pow(fRefFactor, 25.0));
