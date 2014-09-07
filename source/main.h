@@ -40,6 +40,11 @@
 
 
 // ****************************************************************
+// global variables
+extern coreVector2 g_vGameResolution;   // precalculated 1:1 resolution
+
+
+// ****************************************************************
 // game header files
 #include "cOutdoor.h"
 #include "cWater.h"

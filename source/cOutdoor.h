@@ -10,6 +10,8 @@
 #ifndef _P1_GUARD_OUTDOOR_H_
 #define _P1_GUARD_OUTDOOR_H_
 
+// TODO: use triangle-strip with primitive-restart ?
+
 
 // ****************************************************************
 // outdoor definitions
@@ -33,7 +35,7 @@
 
 // ****************************************************************
 // outdoor-surface class
-class cOutdoor final : public coreObject3D
+class cOutdoor final : public coreObject3D, public coreResourceRelation
 {
 private:
     struct sVertex
@@ -52,6 +54,9 @@ private:
 
     coreUint m_iRenderOffset;                   // current render offset
     float    m_fMoveOffset;                     // current move offset
+
+    coreByte m_iAlgorithm;                      // geometry algorithm ID
+    float    m_fGrade;                          // randomness grade
 
     float m_fShadowStrength;                    // shadow intensity on the outdoor-surface
 
@@ -82,6 +87,9 @@ public:
 
 private:
     DISABLE_COPY(cOutdoor)
+
+    // reset with the resource manager
+    void __Reset(const coreResourceReset& bInit)override;
 };
 
 

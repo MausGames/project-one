@@ -46,30 +46,23 @@ struct coreLight
 
     layout(std140) uniform b_Global
     {
-        // transformation uniforms
-        mat4 u_m4ViewProj;
-        mat4 u_m4Camera;
-        mat4 u_m4Perspective;
-        mat4 u_m4Ortho;
-        vec4 u_v4Resolution;
-
         // ambient uniforms
         coreLight u_asLight[CORE_NUM_LIGHTS];
     };
 
 #else
 
-    // transformation uniforms
-    uniform mat4 u_m4ViewProj;
-    uniform mat4 u_m4Camera;
-    uniform mat4 u_m4Perspective;
-    uniform mat4 u_m4Ortho;
-    uniform vec4 u_v4Resolution;
-
     // ambient uniforms
     uniform coreLight u_asLight[CORE_NUM_LIGHTS];
 
 #endif
+
+// transformation uniforms
+uniform mat4 u_m4ViewProj;
+uniform mat4 u_m4Camera;
+uniform mat4 u_m4Perspective;
+uniform mat4 u_m4Ortho;
+uniform vec4 u_v4Resolution;
 
 // 3d-object uniforms
 uniform mat4 u_m4ModelView;
@@ -238,9 +231,9 @@ vec2 u_v2TexOffset = u_v4TexParam.zw;
     
 #define coreDot3Transform(i,o) \
     o.x = dot(i, t);           \
-	o.y = dot(i, b);           \
-	o.z = dot(i, n);           \
-	o   = normalize(o);
+    o.y = dot(i, b);           \
+    o.z = dot(i, n);           \
+    o   = normalize(o);
 
 // square length functions
 float coreLengthSq(in vec2 v) {return dot(v, v);}
