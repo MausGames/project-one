@@ -12,19 +12,18 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\source\application.cpp" />
-    <ClCompile Include="..\..\..\source\cEnvironment.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\source\cOutdoor.cpp" />
-    <ClCompile Include="..\..\..\source\cWater.cpp" />
+    <ClCompile Include="..\..\..\source\environment\cEnvironment.cpp" />
+    <ClCompile Include="..\..\..\source\environment\cOutdoor.cpp" />
+    <ClCompile Include="..\..\..\source\environment\cWater.cpp" />
     <ClCompile Include="..\..\..\source\main.cpp" />
+    <ClCompile Include="..\..\..\source\visuals\cPostProcessing.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\source\cEnvironment.h" />
-    <ClInclude Include="..\..\..\source\cOutdoor.h" />
-    <ClInclude Include="..\..\..\source\cWater.h" />
+    <ClInclude Include="..\..\..\source\environment\cEnvironment.h" />
+    <ClInclude Include="..\..\..\source\environment\cOutdoor.h" />
+    <ClInclude Include="..\..\..\source\environment\cWater.h" />
     <ClInclude Include="..\..\..\source\main.h" />
+    <ClInclude Include="..\..\..\source\visuals\cPostProcessing.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{323E13E4-2099-4F61-B4D4-BC1612D1B6B0}</ProjectGuid>
@@ -104,6 +103,7 @@
       <ExceptionHandling>false</ExceptionHandling>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <StringPooling>true</StringPooling>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

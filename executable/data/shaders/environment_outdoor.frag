@@ -44,8 +44,8 @@ void main()
     float fBumpFactor   = dot(v3MathLightDir, v3BumpNormal); 
     
     vec3 v3MathViewDir = normalize(v_v3ViewDir);
-    vec3 v3RefNormal  = normalize((2.0 * fBumpFactor * v3BumpNormal) - v3MathLightDir); 
-    float fRefFactor  = max(0.0, dot(v3MathViewDir, v3RefNormal));
+    vec3 v3ReflNormal  = normalize((2.0 * fBumpFactor * v3BumpNormal) - v3MathLightDir); 
+    float fReflFactor  = max(0.0, dot(v3MathViewDir, v3ReflNormal));
     
     float fShadow;
     //if(u_fShadowVal > 0.0 && u_v4Color.a > 0.0)
@@ -67,8 +67,8 @@ void main()
     vec3 v3Diffuse = v4Texture.rgb * ((1.0 - fShadow) * (1.3 * max(0.0, fBumpFactor) + 0.3));
     
     vec3 v3Specular;
-    if(fRefFactor > 0.0) v3Specular = vec3(0.3 * v4Texture.a * pow(fRefFactor, 25.0));
-                    else v3Specular = vec3(0.0);
+    if(fReflFactor > 0.0) v3Specular = vec3(0.3 * v4Texture.a * pow(fReflFactor, 25.0));
+                     else v3Specular = vec3(0.0);
     
     gl_FragColor = vec4(v3Diffuse + v3Specular, 1.0);
 }

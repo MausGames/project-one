@@ -13,7 +13,7 @@
 // constructor
 cOutdoor::cOutdoor(const char* pcTextureTop, const char* pcTextureBottom, const coreByte& iAlgorithm, const float& fGrade)noexcept
 : m_iRenderOffset   (0)
-, m_fMoveOffset     (0.0f)
+, m_fFlyOffset      (0.0f)
 , m_iAlgorithm      (0)
 , m_fGrade          (0.0f)
 , m_fShadowStrength (0.0f)
@@ -47,6 +47,7 @@ void cOutdoor::Render()
     // enable all resources
     if(this->Enable())
     {
+        // TODO #
         //m_pShader->SetUniform("u_mShadow", m_mTransform*
         //                               g_pEnvironment->GetTransform()*
         //                               g_pShadow->GetLightMatrix());
@@ -172,8 +173,8 @@ void cOutdoor::LoadGeometry(const coreByte& iAlgorithm, const float& fGrade)
         const int iDown  = MAX(y-1, 0)                    *OUTDOOR_WIDTH + x;
         const int iUp    = MIN(y+1, OUTDOOR_HEIGHT_FULL-1)*OUTDOOR_WIDTH + x;
 
-        aVertexData[i].vNormal = -coreVector3::Cross((aVertexData[iLeft].vPosition - aVertexData[iRight].vPosition).Normalize(), 
-                                                     (aVertexData[iDown].vPosition - aVertexData[iUp   ].vPosition).Normalize());
+        aVertexData[i].vNormal = coreVector3::Cross((aVertexData[iLeft].vPosition - aVertexData[iRight].vPosition).Normalize(), 
+                                                    (aVertexData[iDown].vPosition - aVertexData[iUp   ].vPosition).Normalize());
     }
 
     // calculate tangents
@@ -201,7 +202,7 @@ void cOutdoor::LoadGeometry(const coreByte& iAlgorithm, const float& fGrade)
     {
         // finish the Gram-Schmidt process to calculate the tangent vector and binormal sign (w)
         aVertexData[i].vTangent = coreVector4((avOrtho1[i] - aVertexData[i].vNormal * coreVector3::Dot(aVertexData[i].vNormal, avOrtho1[i])).Normalize(),
-                                          SIGN(coreVector3::Dot(coreVector3::Cross(aVertexData[i].vNormal, avOrtho1[i]), avOrtho2[i])));
+                                              SIGN(coreVector3::Dot(coreVector3::Cross(aVertexData[i].vNormal, avOrtho1[i]), avOrtho2[i])));
     }
 
     // create vertex buffer
@@ -222,14 +223,14 @@ void cOutdoor::LoadGeometry(const coreByte& iAlgorithm, const float& fGrade)
 float cOutdoor::RetrieveHeight(const coreVector2& vPosition)
 {
     // convert real position to block position
-    const float fX = (vPosition.x-this->GetPosition().x) / OUTDOOR_DETAIL + float(OUTDOOR_WIDTH) * 0.5f;
-    const float fY = (vPosition.y-this->GetPosition().y) / OUTDOOR_DETAIL + float(OUTDOOR_VIEW)  * 0.5f;
+    const float fX = (vPosition.x-this->GetPosition().x) / OUTDOOR_DETAIL + float(OUTDOOR_WIDTH/2);
+    const float fY = (vPosition.y-this->GetPosition().y) / OUTDOOR_DETAIL + float(OUTDOOR_VIEW/2);
 
     // retrieve all four corners of the block
-    const int iI00 = int(FLOOR(fY)) * OUTDOOR_WIDTH + int(FLOOR(fX));
-    const int iI01 = iI00 + 1;
-    const int iI10 = iI00     + OUTDOOR_WIDTH;
-    const int iI11 = iI00 + 1 + OUTDOOR_WIDTH;
+    const int iI00 = int(FLOOR(fY)) * OUTDOOR_WIDTH + int(FLOOR(fX));   // bottom left
+    const int iI01 = iI00 + 1;                                          // bottom right
+    const int iI10 = iI00     + OUTDOOR_WIDTH;                          // top left
+    const int iI11 = iI00 + 1 + OUTDOOR_WIDTH;                          // top right
     ASSERT(0 <= iI00 && iI11 < OUTDOOR_TOTAL_VERTICES);
     
     // retrieve height values of the corners
@@ -241,33 +242,17 @@ float cOutdoor::RetrieveHeight(const coreVector2& vPosition)
     // interpolate between all height values
     const float fFractX = FRACT(fX);
     const float fFractY = FRACT(fY);
-    return LERP(LERP(fH00, fH10, fFractX), LERP(fH01, fH11, fFractX), fFractY);
+    return LERP(LERP(fH00, fH01, fFractX), LERP(fH10, fH11, fFractX), fFractY);
 }
 
 
 // ****************************************************************
-// set current move offset
-void cOutdoor::SetMoveOffset(const float& fMoveOffset)
+// set current fly offset
+void cOutdoor::SetFlyOffset(const float& fFlyOffset)
 {
-    constexpr_var float fHeight = float(OUTDOOR_HEIGHT);
-
-    // set and clamp new value
-    m_fMoveOffset = fMoveOffset;
-    while(m_fMoveOffset <  0.0f)    m_fMoveOffset += fHeight;
-    while(m_fMoveOffset >= fHeight) m_fMoveOffset -= fHeight;
-
-    // set object position
-    this->SetPosition(coreVector3(0.0f, -m_fMoveOffset * OUTDOOR_DETAIL, 0.0f));
+    // set new value
+    m_fFlyOffset = fFlyOffset;
 
     // calculate render offset
-    m_iRenderOffset = (coreUint(FLOOR(m_fMoveOffset)) % OUTDOOR_HEIGHT) * OUTDOOR_BLOCKS_X * OUTDOOR_PER_INDICES * 2;
-}
-
-
-// ****************************************************************
-// reset with the resource manager
-void cOutdoor::__Reset(const coreResourceReset& bInit)
-{
-    if(bInit) this->LoadGeometry(m_iAlgorithm, m_fGrade);
-    else m_pModel->Unload();
+    m_iRenderOffset = (coreUint(FLOOR(m_fFlyOffset)) % OUTDOOR_HEIGHT) * OUTDOOR_BLOCKS_X * OUTDOOR_PER_INDICES * 2;
 }
