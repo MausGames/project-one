@@ -35,7 +35,7 @@
 
 // ****************************************************************
 // outdoor-surface class
-class cOutdoor final : public coreObject3D, public coreResourceRelation
+class cOutdoor final : public coreObject3D
 {
 private:
     struct sVertex
@@ -53,7 +53,7 @@ private:
     float m_afHeight[OUTDOOR_TOTAL_VERTICES];   // height data for height calculations
 
     coreUint m_iRenderOffset;                   // current render offset
-    float    m_fMoveOffset;                     // current move offset
+    float    m_fFlyOffset;                      // current fly offset
 
     coreByte m_iAlgorithm;                      // geometry algorithm ID
     float    m_fGrade;                          // randomness grade
@@ -76,20 +76,17 @@ public:
     float RetrieveHeight(const coreVector2& vPosition);
 
     // set object properties
-    void        SetMoveOffset    (const float& fMoveOffset);
+    void        SetFlyOffset     (const float& fFlyOffset);
     inline void SetShadowStrength(const float& fShadowStrength) {m_fShadowStrength = fShadowStrength;}
 
     // get object properties
     inline const coreUint& GetRenderOffset  ()const {return m_iRenderOffset;}
-    inline const float&    GetMoveOffset    ()const {return m_fMoveOffset;}
+    inline const float&    GetFlyOffset     ()const {return m_fFlyOffset;}
     inline const float&    GetShadowStrength()const {return m_fShadowStrength;}
 
 
 private:
     DISABLE_COPY(cOutdoor)
-
-    // reset with the resource manager
-    void __Reset(const coreResourceReset& bInit)override;
 };
 
 

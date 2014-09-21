@@ -8,89 +8,36 @@
 //////////////////////////////////////////////////////
 #include "main.h"
 
-coreVector2 g_vGameResolution = coreVector2(0.0f,0.0f);
+coreVector2      g_vGameResolution = coreVector2(0.0f,0.0f);
 
+cEnvironment*    g_pEnvironment    = NULL;
+cPostProcessing* g_pPostProcessing = NULL;
 
-
-coreFrameBuffer* pFrameBuffer = NULL;   // no pointer later
-
-cOutdoor* pOutdoor = NULL;
-cWater*   pWater   = NULL;
-
-coreObject2D aSideArea[2];
-coreObject2D aSideLine[2];
-
-coreLabel* pFPS = NULL;
-
-
-// uebergang erst starten wenn ressourcen geladen
-// restart required rot anzeigen
-// flimmerndes schiff
-// reflexion streuen ?
-// background wechsel mit oben-unten, links-rechts, schräg, oder ring-animation (gegen fluchrichtung ?)
-// 4 interface alternativen (innen-außen, seitlich-unten)
-
+static coreModelPtr pSquare = NULL;   // square model handle
 
 
 // ****************************************************************
 // init the application
 void CoreApp::Init()
 {
-    const coreVector2& vResolution = Core::System->GetResolution();
-
-    const float fMinRes = vResolution.Min();
+    // 
+    const float fMinRes = Core::System->GetResolution().Min();
     g_vGameResolution   = coreVector2(fMinRes, fMinRes);
 
+    // 
+    g_pEnvironment    = new cEnvironment();
+    g_pPostProcessing = new cPostProcessing();
 
-    pFrameBuffer = new coreFrameBuffer();
-    pFrameBuffer->AttachTargetBuffer(CORE_FRAMEBUFFER_TARGET_COLOR, 0, CORE_TEXTURE_SPEC_RGB);
-    pFrameBuffer->AttachTargetBuffer(CORE_FRAMEBUFFER_TARGET_DEPTH, 0, CORE_TEXTURE_SPEC_DEPTH);
-    pFrameBuffer->Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED);
-
-    pOutdoor = new cOutdoor("grass", "dust", 1, 4.0f);
-    pWater   = new cWater();
-
-
-    const coreVector2 vFlip = (vResolution.AspectRatio() < 1.0f) ? coreVector2(0.0f,1.0f) : coreVector2(1.0f,0.0f);
-    for(int i = 0; i < 2; ++i)
-    {
-        const float fSide = (i ? 1.0f : -1.0f);
-
-        aSideArea[i].DefineProgram("default_2d_program");
-        aSideArea[i].DefineTexture(0, "menu_background_black.png");
-
-        aSideArea[i].SetSize     ((vResolution - g_vGameResolution) / vResolution.yx() * 0.5f + vFlip.yx());
-        aSideArea[i].SetCenter   (vFlip * (fSide *  0.5f));
-        aSideArea[i].SetAlignment(vFlip * (fSide * -1.0f));
-        aSideArea[i].SetTexSize  (aSideArea[i].GetSize() * 3.0f);
-        aSideArea[i].Move();
-        
-        aSideLine[i].DefineProgram("default_2d_program");
-        aSideLine[i].DefineTexture(0, "default_white.png");
-
-        aSideLine[i].SetPosition (vFlip * (fSide * (-aSideArea[i].GetSize() + 0.011f)));
-        aSideLine[i].SetSize     (vFlip * 0.006f + vFlip.yx());
-        aSideLine[i].SetCenter   (aSideArea[i].GetCenter());
-        aSideLine[i].SetAlignment(aSideArea[i].GetAlignment());
-        aSideLine[i].SetColor3   (coreVector3(0.8f,0.8f,0.8f));
-        aSideLine[i].Move();
-    }
-
-
-    pFPS = new coreLabel();
-    pFPS->Construct("ethnocentric.ttf", 24, 8);
-    pFPS->SetPosition (coreVector2(0.008f, 0.0f));
-    pFPS->SetCenter   (coreVector2( -0.5f, 0.5f));
-    pFPS->SetAlignment(coreVector2(  1.0f,-1.0f));
-
-
-    Core::Graphics->SetLight(0, coreVector4(0.0f,0.0f,0.0f,0.0f),
-                                coreVector4(coreVector3(1.0f,-1.1f,-0.85f).Normalize(), 0.0f),
-                                coreVector4(0.0f,0.0f,0.0f,0.0f));
-
+    // 
     Core::Graphics->SetCamera(coreVector3(0.0f,0.0f,110.0f), 
                               Core::Graphics->GetCamDirection(), 
                               Core::Graphics->GetCamOrientation());
+
+    
+
+ 
+    // hold square model active
+    pSquare = Core::Manager::Resource->Get<coreModel>("default_square.md5mesh");
 }
 
 
@@ -98,18 +45,12 @@ void CoreApp::Init()
 // exit the application
 void CoreApp::Exit()
 {
-    SAFE_DELETE(pFrameBuffer)
+    // 
+    SAFE_DELETE(g_pEnvironment)
+    SAFE_DELETE(g_pPostProcessing)
 
-    SAFE_DELETE(pOutdoor)
-    SAFE_DELETE(pWater)
-
-    for(int i = 0; i < 2; ++i)
-    {
-        aSideArea[i].Undefine();
-        aSideLine[i].Undefine();
-    }
-
-    SAFE_DELETE(pFPS)
+    // 
+    pSquare = NULL;
 }
 
 
@@ -117,42 +58,16 @@ void CoreApp::Exit()
 // render the application
 void CoreApp::Render()
 {
+    // 
+    Core::Graphics->SetLight(0, coreVector4(0.0f,0.0f,0.0f,0.0f),
+                                coreVector4(LIGHT_DIRECTION * coreMatrix4::RotationZ(Core::Graphics->GetCamOrientation().xy() * coreVector2(-1.0f,1.0f)), 0.0f),
+                                coreVector4(0.0f,0.0f,0.0f,0.0f));
 
-    pWater->UpdateReflection();
+    // 
+    g_pEnvironment->Render();
 
-    pFrameBuffer->StartDraw();
-    {
-        pFrameBuffer->Clear(CORE_FRAMEBUFFER_TARGET_DEPTH);
-        glDisable(GL_BLEND); // TODO: put in environment class
-        {
-            pOutdoor->Render();
-            pWater->Render(pFrameBuffer);
-        }
-        glEnable(GL_BLEND);
-
-    }
-    coreFrameBuffer::EndDraw();
-
-
-    pFrameBuffer->Blit(CORE_FRAMEBUFFER_TARGET_COLOR, NULL, 0, 0, 
-                       coreUint(Core::System->GetResolution().x - g_vGameResolution.x) / 2,
-                       coreUint(Core::System->GetResolution().y - g_vGameResolution.y) / 2, 
-                       coreUint(pFrameBuffer->GetResolution().x),
-                       coreUint(pFrameBuffer->GetResolution().y));
-
-    pFrameBuffer->Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR | CORE_FRAMEBUFFER_TARGET_DEPTH);
-
-
-    glDisable(GL_DEPTH_TEST);
-    {
-        for(int i = 0; i < 2; ++i)
-        {
-            aSideArea[i].Render();
-            aSideLine[i].Render();
-        }
-        pFPS->Render();
-    }
-    glEnable(GL_DEPTH_TEST);
+    // 
+    g_pPostProcessing->Apply();
 }
 
 
@@ -160,18 +75,11 @@ void CoreApp::Render()
 // move the application
 void CoreApp::Move()
 {
-    if(Core::Input->GetMouseButton(CORE_INPUT_LEFT, CORE_INPUT_HOLD)) 
-    {
-        const float fMove = Core::Input->GetMouseRelative().y * -20.0f;
-        pOutdoor->SetMoveOffset(pOutdoor->GetMoveOffset() + fMove);
-        pWater->SetMoveOffset  (pWater->GetMoveOffset()   + fMove);
-    }
+    // DEBUG #
+    g_pEnvironment->SetTargetSide(Core::Input->GetMousePosition() * 60.0f);
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(A), CORE_INPUT_PRESS))
+        g_pEnvironment->ChangeBackground(2);
 
-
-    pOutdoor->Move();
-    pWater->Move();
-
-
-    pFPS->SetText(PRINT("%.1f", 1.0f / Core::System->GetTime()));
-    pFPS->Move();
+    // 
+    g_pEnvironment->Move();
 }

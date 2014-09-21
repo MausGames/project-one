@@ -38,17 +38,32 @@
 #define COLOR_SILVER_L  218, 218, 224
 #define COLOR_GOLD_L    255, 219,   0
 
+#define LIGHT_DIRECTION coreVector3(0.583953857f,-0.642349243f,-0.496360779f)
 
-// ****************************************************************
-// global variables
-extern coreVector2 g_vGameResolution;   // precalculated 1:1 resolution
+#define ENABLE_ID                           \
+    virtual const int&  GetID  ()const = 0; \
+    virtual const char* GetName()const = 0;
+
+#define ASSIGN_ID(i,n)                                      \
+    static const int ID = i;                                \
+    inline const int&  GetID  ()const override {return ID;} \
+    inline const char* GetName()const override {return n;}
 
 
 // ****************************************************************
 // game header files
-#include "cOutdoor.h"
-#include "cWater.h"
-//#include "cEnvironment.h"
+#include "environment/cOutdoor.h"
+#include "environment/cWater.h"
+#include "environment/cEnvironment.h"
+#include "visuals/cPostProcessing.h"
+
+
+// ****************************************************************
+// global variables
+extern coreVector2      g_vGameResolution;   // precalculated 1:1 resolution
+
+extern cEnvironment*    g_pEnvironment;      // 
+extern cPostProcessing* g_pPostProcessing;   // 
 
 
 #endif // _P1_GUARD_MAIN_H_

@@ -22,7 +22,7 @@ class cWater : public coreObject3D
 {
 protected:
     coreFlow m_fAnimation;                // water animation value
-    float m_fMoveOffset;                  // current move offset
+    float    m_fFlyOffset;                // current fly offset
                                       
     coreFrameBuffer m_iAboveReflection;   // reflection frame buffer
     coreFrameBuffer m_iBelowRefraction;   // refraction frame buffer with geometric depth
@@ -35,17 +35,17 @@ public:
     virtual ~cWater();
 
     // render and move the water-surface
-    virtual void Render(coreFrameBuffer* pEnvironment);
+    virtual void Render(coreFrameBuffer* pBackground);
     virtual void Move()override;
 
     // update reflection frame buffer
     void UpdateReflection();
 
     // set object properties
-    void SetMoveOffset(const float& fMoveOffset);
+    void SetFlyOffset(const float& fFlyOffset);
 
     // get object properties
-    inline const float&     GetMoveOffset()const {return m_fMoveOffset;}
+    inline const float&     GetFlyOffset ()const {return m_fFlyOffset;}
     inline coreFrameBuffer* GetReflection()      {return &m_iAboveReflection;}
     inline coreFrameBuffer* GetRefraction()      {return &m_iBelowRefraction;}
 
