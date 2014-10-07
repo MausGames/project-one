@@ -58,7 +58,7 @@ private:
     coreByte m_iAlgorithm;                      // geometry algorithm ID
     float    m_fGrade;                          // randomness grade
 
-    float m_fShadowStrength;                    // shadow intensity on the outdoor-surface
+    cShadow m_ShadowMap;                        // shadow map object
 
 
 public:
@@ -75,14 +75,15 @@ public:
     // retrieve height value
     float RetrieveHeight(const coreVector2& vPosition);
 
+    // access shadow map object
+    inline cShadow* GetShadowMap() {return &m_ShadowMap;}
+
     // set object properties
-    void        SetFlyOffset     (const float& fFlyOffset);
-    inline void SetShadowStrength(const float& fShadowStrength) {m_fShadowStrength = fShadowStrength;}
+    void SetFlyOffset(const float& fFlyOffset);
 
     // get object properties
-    inline const coreUint& GetRenderOffset  ()const {return m_iRenderOffset;}
-    inline const float&    GetFlyOffset     ()const {return m_fFlyOffset;}
-    inline const float&    GetShadowStrength()const {return m_fShadowStrength;}
+    inline const coreUint& GetRenderOffset()const {return m_iRenderOffset;}
+    inline const float&    GetFlyOffset   ()const {return m_fFlyOffset;}
 
 
 private:

@@ -38,7 +38,7 @@ public:
     virtual void Render(coreFrameBuffer* pBackground);
     virtual void Move()override;
 
-    // update reflection frame buffer
+    // update water reflection map
     void UpdateReflection();
 
     // set object properties

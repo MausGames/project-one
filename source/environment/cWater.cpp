@@ -93,20 +93,17 @@ void cWater::Move()
 
 
 // ****************************************************************
+// update water reflection map
 void cWater::UpdateReflection()
 {
-    // TODO #
-    // if(!CONFIG_REFLECTION) return; (sky-plane?)
-
     // save current camera properties
     const coreVector3 vOldCamPos = Core::Graphics->GetCamPosition();
     const coreVector3 vOldCamOri = Core::Graphics->GetCamOrientation();
 
     // flip camera upside-down
-    const coreVector3 vNewCamPos = vOldCamPos * coreVector3(1.0f,1.0f,-1.0f) + 2.0f * this->GetPosition();
-    Core::Graphics->SetCamera(vNewCamPos, coreVector3(0.0f,0.0f,1.0f), coreVector3(0.0f,1.0f,0.0f));
+    Core::Graphics->SetCamera(CAMERA_POSITION * coreVector3(1.0f,1.0f,-1.0f), -CAMERA_DIRECTION, CAMERA_ORIENTATION);
     
-    // create reflection buffer
+    // create reflection frame buffer
     m_iAboveReflection.StartDraw();
     {
         // move and render the sky-plane
@@ -115,11 +112,14 @@ void cWater::UpdateReflection()
         m_Sky.Move();
         m_Sky.Render();
 
-        // TODO #
+        if(g_CurConfig.iReflection)
+        {
+            // TODO #
+        }
     }
 
     // reset camera
-    Core::Graphics->SetCamera(vOldCamPos, coreVector3(0.0f,0.0f,-1.0f), vOldCamOri);
+    Core::Graphics->SetCamera(vOldCamPos, CAMERA_DIRECTION, vOldCamOri);
 }
 
 

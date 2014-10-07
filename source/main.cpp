@@ -10,34 +10,46 @@
 
 coreVector2      g_vGameResolution = coreVector2(0.0f,0.0f);
 
-cEnvironment*    g_pEnvironment    = NULL;
 cPostProcessing* g_pPostProcessing = NULL;
+cEnvironment*    g_pEnvironment    = NULL;
 
-static coreModelPtr pSquare = NULL;   // square model handle
+#define SHOW_FPS
+#if defined(SHOW_FPS)
+
+    static coreLabel* m_pFPS = NULL;   // frame rate label for debugging purpose
+    static float m_fFPSValue = 0.0f;   // current smooth frame rate value
+
+#endif
 
 
 // ****************************************************************
 // init the application
 void CoreApp::Init()
 {
-    // 
+    // calculate biggest possible 1:1 resolution
     const float fMinRes = Core::System->GetResolution().Min();
     g_vGameResolution   = coreVector2(fMinRes, fMinRes);
 
-    // 
-    g_pEnvironment    = new cEnvironment();
+    // set camera to default values
+    Core::Graphics->SetCamera(CAMERA_POSITION, CAMERA_DIRECTION, CAMERA_ORIENTATION);
+
+    // load configuration
+    LoadConfig();
+
+    // create and init main components
+    cShadow::GlobalInit();
     g_pPostProcessing = new cPostProcessing();
+    g_pEnvironment    = new cEnvironment();
 
-    // 
-    Core::Graphics->SetCamera(coreVector3(0.0f,0.0f,110.0f), 
-                              Core::Graphics->GetCamDirection(), 
-                              Core::Graphics->GetCamOrientation());
+#if defined(SHOW_FPS)
 
-    
+    // create frame rate label
+    m_pFPS = new coreLabel("ethnocentric.ttf", 24, 8);
+    m_pFPS->SetPosition (coreVector2(0.008f, 0.0f));
+    m_pFPS->SetCenter   (coreVector2( -0.5f, 0.5f));
+    m_pFPS->SetAlignment(coreVector2(  1.0f,-1.0f));
 
- 
-    // hold square model active
-    pSquare = Core::Manager::Resource->Get<coreModel>("default_square.md5mesh");
+#endif
 }
 
 
@@ -45,12 +57,16 @@ void CoreApp::Init()
 // exit the application
 void CoreApp::Exit()
 {
-    // 
+    // delete frame rate label
+    SAFE_DELETE(m_pFPS)
+
+    // delete and exit main components
     SAFE_DELETE(g_pEnvironment)
     SAFE_DELETE(g_pPostProcessing)
+    cShadow::GlobalExit();
 
-    // 
-    pSquare = NULL;
+    // save configuration
+    SaveConfig();
 }
 
 
@@ -58,16 +74,27 @@ void CoreApp::Exit()
 // render the application
 void CoreApp::Render()
 {
-    // 
-    Core::Graphics->SetLight(0, coreVector4(0.0f,0.0f,0.0f,0.0f),
-                                coreVector4(LIGHT_DIRECTION * coreMatrix4::RotationZ(Core::Graphics->GetCamOrientation().xy() * coreVector2(-1.0f,1.0f)), 0.0f),
-                                coreVector4(0.0f,0.0f,0.0f,0.0f));
+    // update the shadow map class
+    cShadow::GlobalUpdate();
 
-    // 
+    // render the environment
     g_pEnvironment->Render();
 
-    // 
+    // apply post-processing
     g_pPostProcessing->Apply();
+
+#if defined(SHOW_FPS)
+
+    if(!Core::Input->GetKeyboardButton(CORE_INPUT_KEY(PRINTSCREEN), CORE_INPUT_PRESS))
+    {
+        // update, move and render frame rate
+        if(Core::System->GetTime()) m_fFPSValue = m_fFPSValue * 0.95f + RCP(Core::System->GetTime()) * 0.05f;
+        m_pFPS->SetText(PRINT("%.1f", m_fFPSValue));
+        m_pFPS->Move();
+        m_pFPS->Render();
+    }
+
+#endif
 }
 
 
@@ -80,6 +107,6 @@ void CoreApp::Move()
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(A), CORE_INPUT_PRESS))
         g_pEnvironment->ChangeBackground(2);
 
-    // 
+    // move the environment
     g_pEnvironment->Move();
 }

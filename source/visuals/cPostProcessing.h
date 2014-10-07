@@ -16,11 +16,10 @@
 class cPostProcessing final : coreObject2D
 {
 private:
-    coreObject2D m_aSideArea[2];   // 
-    coreObject2D m_aSideLine[2];   // 
+    coreObject2D m_aSideArea[2];   // objects outside of the game area
+    coreObject2D m_aSideLine[2];   // additional highlight objects
 
-    coreLabel m_FPS;               // 
-    float m_fFPSValue;             // 
+    coreByte m_iAlternate;         // alternating value to render side-objects at lower frequency
 
 
 public:
@@ -29,6 +28,12 @@ public:
 
     // apply post-processing
     void Apply();
+
+    // recompile post-processing shader-program
+    void Recompile();
+
+    // get current side
+    inline const coreByte& GetAlternate()const {return m_iAlternate;}
 
 
 private:
