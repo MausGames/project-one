@@ -8,27 +8,31 @@
 //////////////////////////////////////////////////////
 #include "main.h"
 
+
 // ****************************************************************
 // constructor
 cPostProcessing::cPostProcessing()noexcept
-: m_fFPSValue (0.0f)
+: m_iAlternate (0)
 {
     const coreVector2& vResolution = Core::System->GetResolution();
 
-    // 
+    // load post-processing shader-program
     this->DefineProgram("full_post_program");
+    this->Recompile();
+
+    // set object properties
     this->SetSize     (coreVector2(1.0f, 1.0f));
     this->SetTexSize  (coreVector2(1.0f,-1.0f));
     this->SetTexOffset(coreVector2(0.0f, 1.0f));
     this->Move();
 
-    // 
+    // place objects left-right or top-down depending on window aspect ratio
     const coreVector2 vFlip = (vResolution.AspectRatio() < 1.0f) ? coreVector2(0.0f,1.0f) : coreVector2(1.0f,0.0f);
     for(int i = 0; i < 2; ++i)
     {
         const float fSide = (i ? 1.0f : -1.0f);
 
-        // 
+        // create area side-objects
         m_aSideArea[i].DefineProgram("default_2d_program");
         m_aSideArea[i].DefineTexture(0, "menu_background_black.png");
 
@@ -38,7 +42,7 @@ cPostProcessing::cPostProcessing()noexcept
         m_aSideArea[i].SetTexSize  (m_aSideArea[i].GetSize() * 3.0f);
         m_aSideArea[i].Move();
         
-        // 
+        // create highlight side-objects
         m_aSideLine[i].DefineProgram("default_2d_program");
         m_aSideLine[i].DefineTexture(0, "default_white.png");
 
@@ -49,12 +53,6 @@ cPostProcessing::cPostProcessing()noexcept
         m_aSideLine[i].SetColor3   (coreVector3(0.8f,0.8f,0.8f));
         m_aSideLine[i].Move();
     }
-
-    // 
-    m_FPS.Construct("ethnocentric.ttf", 24, 8);
-    m_FPS.SetPosition (coreVector2(0.008f, 0.0f));
-    m_FPS.SetCenter   (coreVector2( -0.5f, 0.5f));
-    m_FPS.SetAlignment(coreVector2(  1.0f,-1.0f));
 }
 
 
@@ -69,35 +67,52 @@ cPostProcessing::~cPostProcessing()
 // apply post-processing
 void cPostProcessing::Apply()
 {
-    // 
+    // switch back to default frame buffer
     coreFrameBuffer::EndDraw();
 
-    // 
+    // bind environment/background frame buffer
     this->DefineTexture(0, g_pEnvironment->GetFrameBuffer()->GetColorTarget(0).pTexture);
 
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
     {
-        // 
+        // post-process
         this->Render();
 
-        // 
-        for(int i = 0; i < 2; ++i) m_aSideArea[i].Render();
-        for(int i = 0; i < 2; ++i) m_aSideLine[i].Render();
+        // render side-objects
+        m_iAlternate = 1 - m_iAlternate;
+        m_aSideArea[m_iAlternate].Render();
+        m_aSideLine[m_iAlternate].Render();
 
-        // 
-        if(!Core::Input->GetKeyboardButton(CORE_INPUT_KEY(PRINTSCREEN), CORE_INPUT_PRESS))
-        {
-            if(Core::System->GetTime()) m_fFPSValue = m_fFPSValue * 0.95f + RCP(Core::System->GetTime()) * 0.05f;
-            m_FPS.SetText(PRINT("%.1f", m_fFPSValue));
-            m_FPS.Move();
-            m_FPS.Render();
-        }
+#if defined(_CORE_DEBUG_)
+
+        // render other side-objects
+        m_aSideArea[1 - m_iAlternate].Render();
+        m_aSideLine[1 - m_iAlternate].Render();
+
+#endif
     }
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
 
-    // 
+    // invalidate environment/background frame buffer
     g_pEnvironment->GetFrameBuffer()->Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
     this->DefineTexture(0, NULL);
+}
+
+
+// ****************************************************************
+// recompile post-processing shader-program
+void cPostProcessing::Recompile()
+{
+    // set fragment shader configuration
+    ((coreShader*)Core::Manager::Resource->Get<coreShader>("full_post.frag")->GetResource())
+        ->SetCustomCode(""); // TODO #
+
+    // recompile and relink
+    m_pProgram.GetHandle()->Reload();
+
+    // finish now
+    glFinish();
+    Core::Manager::Resource->UpdateResources();
 }

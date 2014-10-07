@@ -12,14 +12,26 @@
 
 
 // ****************************************************************
+// environment definitions
+#define GRASS_STONES_1_NUM   (512u)
+#define GRASS_STONES_2_NUM   (768u)
+#define GRASS_STONES_1_SIZE  (2.5f)
+#define GRASS_STONES_2_SIZE  (2.0f)
+#define GRASS_STONES_RESERVE (256u)
+#define GRASS_CLOUDS_NUM     (96u)
+#define GRASS_CLOUDS_RESERVE (115u)   // tested
+
+
+// ****************************************************************
 // backgroud interface
 class cBackground
 {
 protected:               
-    coreFrameBuffer m_iFrameBuffer;                     // background frame buffer
+    coreFrameBuffer m_iFrameBuffer;                     // background frame buffer (intern, multisampled)
     coreFrameBuffer m_iResolvedTexture;                 // resolved texture
 
     cOutdoor* m_pOutdoor;                               // outdoor-surface object (optional)
+    cWater*   m_pWater;                                 // water-surface object (optional)
 
     std::vector<coreBatchList*> m_apGroundObjectList;   // persistent objects connected to the ground
     std::vector<coreBatchList*> m_apAirObjectList;      // persistent objects floating in the air
@@ -42,21 +54,26 @@ public:
     void ClearObjects();
 
     // access frame buffer
-    inline coreFrameBuffer* GetFrameBuffer()     {return &m_iFrameBuffer;}
     inline coreFrameBuffer* GetResolvedTexture() {return &m_iResolvedTexture;}
 
     // access background components
     inline cOutdoor*                    GetOutdoor         ()const {return m_pOutdoor;}
+    inline cWater*                      GetWater           ()const {return m_pWater;}
     inline std::vector<coreBatchList*>* GetGroundObjectList()      {return &m_apGroundObjectList;}
     inline std::vector<coreBatchList*>* GetAirObjectList   ()      {return &m_apAirObjectList;}
+
+
+protected:
+    // create infinite looking object list
+    static void _FillInfinite(coreBatchList* pObjectList);
 
 
 private:
     DISABLE_COPY(cBackground)
 
     // render and move routine for derived classes
-    virtual void RenderOwn() {}
-    virtual void MoveOwn()   {}
+    virtual void __RenderOwn() {}
+    virtual void __MoveOwn()   {} 
 };
 
 
@@ -77,6 +94,7 @@ private:
     float       m_afSpeed    [2];     // movement speed
 
     float m_fFlyOffset;               // global fly offset (directly accessed by background objects)
+    float m_fSideOffset;              // global side offset
 
 
 public:
@@ -120,11 +138,23 @@ private:
 
 
 // ****************************************************************
+// empty background class
+class cEmptyBackground final : public cBackground
+{
+public:
+    cEmptyBackground()noexcept {}
+    ~cEmptyBackground()        {}
+
+    ASSIGN_ID(0, "Empty")
+};
+
+
+// ****************************************************************
 // grass background class
 class cGrass final : public cBackground
 {
 private:
-    cWater m_Water;   // water-surface object
+    coreSoundPtr m_pNatureSound;   // nature sound-effect
     
 
 public:
@@ -135,9 +165,8 @@ public:
 
 
 private:
-    // render and move the grass background
-    void RenderOwn()override;
-    void MoveOwn  ()override;
+    // move the grass background
+    void __MoveOwn()override;
 };
 
 

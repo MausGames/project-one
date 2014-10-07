@@ -10,6 +10,6 @@
 
 void FragmentMain()
 {
-    // TODO
-    gl_FragColor = vec4(coreTexture2D(0, v_av2TexCoord[0]).rgb, 1.0);
+    // draw plain black (full color-mask is disabled anyway)
+    gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
 }

@@ -8,29 +8,30 @@
 //////////////////////////////////////////////////////
 
 
-// normal map resolution
-const float c_fMapResolution = 0.42;
+// constant values
+const float c_fMapResolution   = 0.42;                                          // normal map resolution
+const vec3  c_v3LightDirection = vec3(0.583953857,-0.642349243,-0.496360779);   // overridden light direction
 
-// overridden light direction
-const vec3 c_v3LightDirection = vec3(0.583953857,-0.642349243,-0.496360779);
-
-// water animation uniforms
-uniform float u_fTime;
-uniform float u_fOffset;
+// water uniforms
+uniform float u_fTime;     // current animation value
+uniform float u_fOffset;   // current y-position offset
 
 	
-void main()
+void VertexMain()
 {
-    vec3 v3ViewDir = vec3(u_m4ModelView     * vec4(a_v3Position, 1.0));
-    gl_Position    =      u_m4ModelViewProj * vec4(a_v3Position, 1.0);
+    // transform view direction and position
+    vec3 v3ViewDir = coreObject3DViewDir().xyz;
+    gl_Position    = coreObject3DPosition();
 
-    coreDot3VertInit     (u_m3Normal, a_v3Normal, a_v4Tangent);
-    coreDot3VertTransform(-c_v3LightDirection, v_av4LightDir[0].xyz);
-    coreDot3VertTransform(-v3ViewDir,          v_v3ViewDir);
+    // dot-3 transform lighting vectors (resolved)
+    v_av4LightDir[0].xyz = vec3(-c_v3LightDirection.x, c_v3LightDirection.y, -c_v3LightDirection.z);
+    v_v3ViewDir          = normalize(vec3(-v3ViewDir.x, v3ViewDir.y, -v3ViewDir.z));
 
+    // calculate current mapping base
     vec2 vMapCoord = vec2(a_v2Texture.x * c_fMapResolution, 
                           a_v2Texture.y * c_fMapResolution + u_fOffset);
     
+    // transform texture coordinates with different animation properties
     v_av2TexCoord[0] = (vMapCoord + (vec2( u_fTime,      u_fTime)))     * 1.0;
     v_av2TexCoord[1] = (vMapCoord + (vec2( u_fTime*0.5, -u_fTime*0.3))) * 2.0;
     v_av2TexCoord[2] = (vMapCoord + (vec2(-u_fTime*0.1,  u_fTime*0.1))) * 8.0;

@@ -12,11 +12,10 @@
 // ****************************************************************
 // constructor
 cOutdoor::cOutdoor(const char* pcTextureTop, const char* pcTextureBottom, const coreByte& iAlgorithm, const float& fGrade)noexcept
-: m_iRenderOffset   (0)
-, m_fFlyOffset      (0.0f)
-, m_iAlgorithm      (0)
-, m_fGrade          (0.0f)
-, m_fShadowStrength (0.0f)
+: m_iRenderOffset (0)
+, m_fFlyOffset    (0.0f)
+, m_iAlgorithm    (0)
+, m_fGrade        (0.0f)
 {
     // load outdoor geometry
     m_pModel = Core::Manager::Resource->LoadNew<coreModel>();
@@ -47,11 +46,14 @@ void cOutdoor::Render()
     // enable all resources
     if(this->Enable())
     {
-        // TODO #
-        //m_pShader->SetUniform("u_mShadow", m_mTransform*
-        //                               g_pEnvironment->GetTransform()*
-        //                               g_pShadow->GetLightMatrix());
-        //m_pShader->SetUniform("u_fShadow", g_bShadow ? m_fShadow : 0.0f);
+        if(g_CurConfig.iShadow) 
+        {
+            // send shadow matrix to shader-program
+            cShadow::ApplyShadowMatrix(this->GetProgram());
+
+            // enable shadow map
+            m_ShadowMap.GetFrameBuffer()->GetDepthTarget().pTexture->Enable(CORE_TEXTURE_SHADOW + 0);
+        }        
 
         // draw the model
         glDrawRangeElements(m_pModel->GetPrimitiveType(), 0, OUTDOOR_TOTAL_VERTICES, OUTDOOR_RANGE, m_pModel->GetIndexType(), r_cast<const GLvoid*>(m_iRenderOffset));

@@ -8,8 +8,12 @@
 //////////////////////////////////////////////////////
 
 
-void FragmentMain()
+// shadow uniforms
+uniform mat4 u_m4ShadowMatrix;   // own shadow view-projection matrix
+
+
+void VertexMain()
 {
-    // TODO
-    gl_FragColor = vec4(coreTexture2D(0, v_av2TexCoord[0]).rgb, 1.0);
+    // transform position viewed from the light source
+    gl_Position = u_m4ShadowMatrix * (u_m4Transform * vec4(a_v3Position, 1.0));
 }
