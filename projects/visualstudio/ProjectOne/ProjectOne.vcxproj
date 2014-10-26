@@ -16,7 +16,11 @@
     <ClCompile Include="..\..\..\source\environment\cOutdoor.cpp" />
     <ClCompile Include="..\..\..\source\environment\cWater.cpp" />
     <ClCompile Include="..\..\..\source\files\cConfig.cpp" />
+    <ClCompile Include="..\..\..\source\game\cGame.cpp" />
+    <ClCompile Include="..\..\..\source\game\cPlayer.cpp" />
     <ClCompile Include="..\..\..\source\main.cpp" />
+    <ClCompile Include="..\..\..\source\visuals\cForeground.cpp" />
+    <ClCompile Include="..\..\..\source\visuals\cOutline.cpp" />
     <ClCompile Include="..\..\..\source\visuals\cPostProcessing.cpp" />
     <ClCompile Include="..\..\..\source\visuals\cShadow.cpp" />
   </ItemGroup>
@@ -25,7 +29,11 @@
     <ClInclude Include="..\..\..\source\environment\cOutdoor.h" />
     <ClInclude Include="..\..\..\source\environment\cWater.h" />
     <ClInclude Include="..\..\..\source\files\cConfig.h" />
+    <ClInclude Include="..\..\..\source\game\cGame.h" />
+    <ClInclude Include="..\..\..\source\game\cPlayer.h" />
     <ClInclude Include="..\..\..\source\main.h" />
+    <ClInclude Include="..\..\..\source\visuals\cForeground.h" />
+    <ClInclude Include="..\..\..\source\visuals\cOutline.h" />
     <ClInclude Include="..\..\..\source\visuals\cPostProcessing.h" />
     <ClInclude Include="..\..\..\source\visuals\cShadow.h" />
   </ItemGroup>

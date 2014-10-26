@@ -37,7 +37,7 @@ void SaveConfig()
 
     // write specific values
     Core::Config->SetInt(CONFIG_SHADOW,     g_OldConfig.iShadow);
-    Core::Config->SetInt(CONFIG_REFLECTION, g_OldConfig.iReflection );
+    Core::Config->SetInt(CONFIG_REFLECTION, g_OldConfig.iReflection);
 
     // save configuration file
     Core::Config->Save();

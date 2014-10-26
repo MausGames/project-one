@@ -26,7 +26,7 @@
 // backgroud interface
 class cBackground
 {
-protected:               
+protected:
     coreFrameBuffer m_iFrameBuffer;                     // background frame buffer (intern, multisampled)
     coreFrameBuffer m_iResolvedTexture;                 // resolved texture
 
@@ -95,6 +95,8 @@ private:
 
     float m_fFlyOffset;               // global fly offset (directly accessed by background objects)
     float m_fSideOffset;              // global side offset
+    coreVector3 m_vCameraPos;         // moved camera position
+    coreVector3 m_vLightDir;          // rotated light direction
 
 
 public:
@@ -126,7 +128,12 @@ public:
     inline const coreVector2& GetDirection()const {return m_avDirection[0];}
     inline const coreVector2& GetSide     ()const {return m_avSide     [0];}
     inline const float&       GetSpeed    ()const {return m_afSpeed    [0];}
-    inline const float&       GetFlyOffset()const {return m_fFlyOffset;}
+
+    // get offset values
+    inline const float&       GetFlyOffset ()const {return m_fFlyOffset;}
+    inline const float&       GetSideOffset()const {return m_fSideOffset;}
+    inline const coreVector3& GetCameraPos ()const {return m_vCameraPos;}
+    inline const coreVector3& GetLightDir  ()const {return m_vLightDir;}
 
 
 private:
@@ -146,6 +153,11 @@ public:
     ~cEmptyBackground()        {}
 
     ASSIGN_ID(0, "Empty")
+
+
+private:
+    // render the empty background
+    inline void __RenderOwn()override {glClearColor(0.0f, 0.0f, 0.0f, 0.0f); m_iFrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR); glClearColor(0.5f, 0.5f, 0.5f, 0.0f);}
 };
 
 

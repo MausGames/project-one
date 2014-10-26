@@ -10,6 +10,8 @@
 #ifndef _P1_GUARD_WATER_H_
 #define _P1_GUARD_WATER_H_
 
+// TODO: reduce reflection-framebuffer without reflection enabled
+
 
 // ****************************************************************
 // water definitions
@@ -38,8 +40,9 @@ public:
     virtual void Render(coreFrameBuffer* pBackground);
     virtual void Move()override;
 
-    // update water reflection map
+    // update water reflection and depth map
     void UpdateReflection();
+    void UpdateDepth(cOutdoor* pOutdoor);
 
     // set object properties
     void SetFlyOffset(const float& fFlyOffset);

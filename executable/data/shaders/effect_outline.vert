@@ -10,11 +10,7 @@
 
 void VertexMain()
 {
-    // transform position (override depth for better early depth-test)
-    gl_Position   = coreObject3DPosition();
-    gl_Position.z = 0.3 * gl_Position.w;
-    
-    // transform texture coordinates
-    v_av2TexCoord[0] = a_v2RawTexCoord + u_v2TexOffset;
-    v_av2TexCoord[1] = a_v2RawTexCoord;
+    // transform position normal-resized (override depth to draw behind base object with depth-test)
+    gl_Position   = u_m4ViewProj * vec4(coreQuatApply(u_v4Rotation, (a_v3RawPosition * u_v3Size) + (a_v3RawNormal * 0.22)) + u_v3Position, 1.0);
+    gl_Position.z = 0.5 * gl_Position.w;
 }

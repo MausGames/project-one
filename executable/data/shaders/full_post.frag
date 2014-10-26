@@ -10,6 +10,12 @@
 
 void FragmentMain()
 {
-    // TODO
-    gl_FragColor = vec4(coreTexture2D(0, v_av2TexCoord[0]).rgb, 1.0);
+    vec4 v4Foreground = coreTexture2D(1, v_av2TexCoord[0]);
+    
+    if(v4Foreground.a == 1.0) gl_FragColor = vec4(v4Foreground.rgb, 1.0);
+    else
+    {
+        vec3 v3Environment = coreTexture2D(0, v_av2TexCoord[0]).rgb;
+        gl_FragColor = vec4(mix(v3Environment, v4Foreground.rgb / v4Foreground.a, v4Foreground.a), 1.0);
+    }
 }
