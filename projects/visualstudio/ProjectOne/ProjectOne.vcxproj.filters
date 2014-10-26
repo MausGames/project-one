@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\..\source\application.cpp" />
+    <ClCompile Include="..\..\..\source\main.cpp" />
+    <ClCompile Include="..\..\..\source\environment\cEnvironment.cpp">
+      <Filter>environment</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\environment\cOutdoor.cpp">
+      <Filter>environment</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\environment\cWater.cpp">
+      <Filter>environment</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\visuals\cPostProcessing.cpp">
+      <Filter>visuals</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\visuals\cShadow.cpp">
+      <Filter>visuals</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\files\cConfig.cpp">
+      <Filter>files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\game\cPlayer.cpp">
+      <Filter>game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\visuals\cOutline.cpp">
+      <Filter>visuals</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\game\cGame.cpp">
+      <Filter>game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\visuals\cForeground.cpp">
+      <Filter>visuals</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\source\main.h" />
+    <ClInclude Include="..\..\..\source\environment\cEnvironment.h">
+      <Filter>environment</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\environment\cOutdoor.h">
+      <Filter>environment</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\environment\cWater.h">
+      <Filter>environment</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\visuals\cPostProcessing.h">
+      <Filter>visuals</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\visuals\cShadow.h">
+      <Filter>visuals</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\files\cConfig.h">
+      <Filter>files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\game\cPlayer.h">
+      <Filter>game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\visuals\cOutline.h">
+      <Filter>visuals</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\game\cGame.h">
+      <Filter>game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\visuals\cForeground.h">
+      <Filter>visuals</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="environment">
+      <UniqueIdentifier>{11f29e90-da30-4728-9181-57b2d076d495}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="visuals">
+      <UniqueIdentifier>{fe9feb7c-ec8b-4a85-a6ba-430c5e4f41a7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="files">
+      <UniqueIdentifier>{cba88762-fa4c-44bb-a6f6-b094a8cf3dde}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game">
+      <UniqueIdentifier>{f3437c2b-9f83-4a31-9e05-db08c171e2cc}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

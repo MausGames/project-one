@@ -9,9 +9,12 @@
 #include "main.h"
 
 coreVector2      g_vGameResolution = coreVector2(0.0f,0.0f);
-
+                                   
 cPostProcessing* g_pPostProcessing = NULL;
+cOutline*        g_pOutline        = NULL;
+cForeground*     g_pForeground     = NULL;
 cEnvironment*    g_pEnvironment    = NULL;
+cGame*           g_pGame           = NULL;
 
 #define SHOW_FPS
 #if defined(SHOW_FPS)
@@ -20,6 +23,7 @@ cEnvironment*    g_pEnvironment    = NULL;
     static float m_fFPSValue = 0.0f;   // current smooth frame rate value
 
 #endif
+
 
 
 // ****************************************************************
@@ -39,7 +43,10 @@ void CoreApp::Init()
     // create and init main components
     cShadow::GlobalInit();
     g_pPostProcessing = new cPostProcessing();
+    g_pOutline        = new cOutline();
+    g_pForeground     = new cForeground();
     g_pEnvironment    = new cEnvironment();
+    g_pGame           = new cGame();
 
 #if defined(SHOW_FPS)
 
@@ -61,7 +68,10 @@ void CoreApp::Exit()
     SAFE_DELETE(m_pFPS)
 
     // delete and exit main components
+    SAFE_DELETE(g_pGame)
     SAFE_DELETE(g_pEnvironment)
+    SAFE_DELETE(g_pForeground)
+    SAFE_DELETE(g_pOutline)
     SAFE_DELETE(g_pPostProcessing)
     cShadow::GlobalExit();
 
@@ -79,6 +89,17 @@ void CoreApp::Render()
 
     // render the environment
     g_pEnvironment->Render();
+
+    // create foreground frame buffer
+    g_pForeground->Start();
+    {
+        // render the game
+        if(g_pGame) g_pGame->Render();
+
+        // apply outline-effect
+        g_pOutline->Apply();
+    }
+    g_pForeground->End();
 
     // apply post-processing
     g_pPostProcessing->Apply();
@@ -109,4 +130,7 @@ void CoreApp::Move()
 
     // move the environment
     g_pEnvironment->Move();
+
+    // move the game
+    if(g_pGame) g_pGame->Move();
 }

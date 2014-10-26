@@ -7,33 +7,38 @@
 //*------------------------------------------------*//
 //////////////////////////////////////////////////////
 #pragma once
-#ifndef _P1_GUARD_POSTPROCESSING_H_
-#define _P1_GUARD_POSTPROCESSING_H_
+#ifndef _P1_GUARD_GAME_H_
+#define _P1_GUARD_GAME_H_
 
 
 // ****************************************************************
-// post-processing class
-class cPostProcessing final : public coreObject2D
+// game definitions
+#define GAME_PLAYER_NUM (2u)
+
+
+// ****************************************************************
+// game class
+class cGame final
 {
 private:
-    coreObject2D m_aSideArea[2];   // objects outside of the game area
-    coreObject2D m_aSideLine[2];   // additional highlight objects
+    cPlayer m_aPlayer[GAME_PLAYER_NUM];
 
 
 public:
-    cPostProcessing()noexcept;
-    ~cPostProcessing();
+    cGame()noexcept;
+    ~cGame();
 
-    // apply post-processing
-    void Apply();
+    // render and move the game
+    void Render();
+    void Move();
 
-    // recompile post-processing shader-program
-    void Recompile();
+    // access game objects
+    inline cPlayer* GetPlayer(const coreByte& iIndex) {return &m_aPlayer[iIndex];}
 
 
 private:
-    DISABLE_COPY(cPostProcessing)
+    DISABLE_COPY(cGame)
 };
 
 
-#endif // _P1_GUARD_POSTPROCESSING_H_
+#endif // _P1_GUARD_GAME_H_

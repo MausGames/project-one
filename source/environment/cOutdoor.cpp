@@ -46,14 +46,8 @@ void cOutdoor::Render()
     // enable all resources
     if(this->Enable())
     {
-        if(g_CurConfig.iShadow) 
-        {
-            // send shadow matrix to shader-program
-            cShadow::ApplyShadowMatrix(this->GetProgram());
-
-            // enable shadow map
-            m_ShadowMap.GetFrameBuffer()->GetDepthTarget().pTexture->Enable(CORE_TEXTURE_SHADOW + 0);
-        }        
+        // send shadow matrix to shader-program
+        cShadow::ApplyShadowMatrix(this->GetProgram());
 
         // draw the model
         glDrawRangeElements(m_pModel->GetPrimitiveType(), 0, OUTDOOR_TOTAL_VERTICES, OUTDOOR_RANGE, m_pModel->GetIndexType(), r_cast<const GLvoid*>(m_iRenderOffset));
@@ -74,10 +68,10 @@ void cOutdoor::Move()
 // load outdoor geometry
 void cOutdoor::LoadGeometry(const coreByte& iAlgorithm, const float& fGrade)
 {
-    sVertex     aVertexData[OUTDOOR_TOTAL_VERTICES];
-    coreUshort  aiIndexData[OUTDOOR_TOTAL_INDICES];
-    coreVector3 avOrtho1   [OUTDOOR_TOTAL_VERTICES];
-    coreVector3 avOrtho2   [OUTDOOR_TOTAL_VERTICES];
+    coreModel::coreVertex aVertexData[OUTDOOR_TOTAL_VERTICES];
+    coreUshort            aiIndexData[OUTDOOR_TOTAL_INDICES];
+    coreVector3           avOrtho1   [OUTDOOR_TOTAL_VERTICES];
+    coreVector3           avOrtho2   [OUTDOOR_TOTAL_VERTICES];
 
     // delete old data
     m_pModel->Unload();
@@ -91,15 +85,15 @@ void cOutdoor::LoadGeometry(const coreByte& iAlgorithm, const float& fGrade)
     std::function<float(const float&, const float&)> pAlgorithmFunc;
     switch(iAlgorithm)
     {
-    case 3:  pAlgorithmFunc = [](const float& x, const float& y) {float r = -(COS((x - float(OUTDOOR_WIDTH)*0.5f)*0.075f*PI)*5.0f);                                                                                        return r;}; break;
-    case 1:  pAlgorithmFunc = [](const float& x, const float& y) {float r =  (ABS(SIN(x*0.075f*PI)*8.0f + SIN(y*0.075f*PI)*8.0f) - 6.0f);                                                                                  return r;}; break;
-    case 2:  pAlgorithmFunc = [](const float& x, const float& y) {float r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/float(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 13.0f);                                                      return r;}; break;
-    case 4:  pAlgorithmFunc = [](const float& x, const float& y) {float r = -(ABS(SIN(y*0.150f*PI)*0.25f - 0.5f*(x/float(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.150f*PI) - 0.0f; if(r <    0.0f) r = -1.0f; return r;}; break;
-    case 7:  pAlgorithmFunc = [](const float& x, const float& y) {float r = -(ABS(SIN(y*0.075f*PI)*0.25f + 0.5f*(x/float(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.075f*PI) - 1.5f; if(r < -100.0f) r = -1.0f; return r;}; break;
-    case 5:  pAlgorithmFunc = [](const float& x, const float& y) {float r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/float(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.150f*PI) - 1.0f;                            return r;}; break;
-    case 6:  pAlgorithmFunc = [](const float& x, const float& y) {float r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/float(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.075f*PI) + 3.0f;                            return r;}; break;
-    case 8:  pAlgorithmFunc = [](const float& x, const float& y) {float r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/float(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.075f*PI) + 1.0f;                            return r;}; break;
-    default: ASSERT(false) return;
+    default: ASSERT(false)
+    case 3:  pAlgorithmFunc = [](const float& x, const float& y) {float r = -(COS((x - I_TO_F(OUTDOOR_WIDTH)*0.5f)*0.075f*PI)*5.0f);                                                                                        return r;}; break;
+    case 1:  pAlgorithmFunc = [](const float& x, const float& y) {float r =  (ABS(SIN(x*0.075f*PI)*8.0f + SIN(y*0.075f*PI)*8.0f) - 6.0f);                                                                                   return r;}; break;
+    case 2:  pAlgorithmFunc = [](const float& x, const float& y) {float r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 13.0f);                                                      return r;}; break;
+    case 4:  pAlgorithmFunc = [](const float& x, const float& y) {float r = -(ABS(SIN(y*0.150f*PI)*0.25f - 0.5f*(x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.150f*PI) - 0.0f; if(r <    0.0f) r = -1.0f; return r;}; break;
+    case 7:  pAlgorithmFunc = [](const float& x, const float& y) {float r = -(ABS(SIN(y*0.075f*PI)*0.25f + 0.5f*(x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.075f*PI) - 1.5f; if(r < -100.0f) r = -1.0f; return r;}; break;
+    case 5:  pAlgorithmFunc = [](const float& x, const float& y) {float r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.150f*PI) - 1.0f;                            return r;}; break;
+    case 6:  pAlgorithmFunc = [](const float& x, const float& y) {float r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.075f*PI) + 3.0f;                            return r;}; break;
+    case 8:  pAlgorithmFunc = [](const float& x, const float& y) {float r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.075f*PI) + 1.0f;                            return r;}; break;
     }
 
     // create vertices
@@ -109,7 +103,7 @@ void cOutdoor::LoadGeometry(const coreByte& iAlgorithm, const float& fGrade)
         const int y = i / OUTDOOR_WIDTH;
 
         // calculate level (height) of the vertex
-        float fLevel = pAlgorithmFunc(float(x), float(y));
+        float fLevel = pAlgorithmFunc(I_TO_F(x), I_TO_F(y));
         if(fGrade)
         {
             // add randomness to the level and smooth out water-intersection-area
@@ -125,8 +119,8 @@ void cOutdoor::LoadGeometry(const coreByte& iAlgorithm, const float& fGrade)
         fLevel += WATER_HEIGHT;
 
         // set vertex position and texture coordinates
-        aVertexData[i].vPosition = coreVector3(float(x - OUTDOOR_WIDTH/2) * OUTDOOR_DETAIL, float(y - OUTDOOR_VIEW/2) * OUTDOOR_DETAIL, fLevel);
-        aVertexData[i].vTexture  = coreVector2(float(x), float(y)) * 0.25f;
+        aVertexData[i].vPosition = coreVector3(I_TO_F(x - OUTDOOR_WIDTH/2) * OUTDOOR_DETAIL, I_TO_F(y - OUTDOOR_VIEW/2) * OUTDOOR_DETAIL, fLevel);
+        aVertexData[i].vTexCoord = coreVector2(I_TO_F(x), I_TO_F(y)) * 0.25f;
 
         // save height value
         m_afHeight[i] = fLevel;
@@ -185,8 +179,8 @@ void cOutdoor::LoadGeometry(const coreByte& iAlgorithm, const float& fGrade)
         // calculate triangle sides
         const coreVector3 A1 = aVertexData[aiIndexData[i+1]].vPosition - aVertexData[aiIndexData[i+0]].vPosition;
         const coreVector3 A2 = aVertexData[aiIndexData[i+2]].vPosition - aVertexData[aiIndexData[i+0]].vPosition;
-        const coreVector2 B1 = aVertexData[aiIndexData[i+1]].vTexture  - aVertexData[aiIndexData[i+0]].vTexture;
-        const coreVector2 B2 = aVertexData[aiIndexData[i+2]].vTexture  - aVertexData[aiIndexData[i+0]].vTexture;
+        const coreVector2 B1 = aVertexData[aiIndexData[i+1]].vTexCoord - aVertexData[aiIndexData[i+0]].vTexCoord;
+        const coreVector2 B2 = aVertexData[aiIndexData[i+2]].vTexCoord - aVertexData[aiIndexData[i+0]].vTexCoord;
 
         // calculate local tangent vector parameters
         const float R = RCP(B1.s*B2.t - B2.s*B1.t);
@@ -207,12 +201,35 @@ void cOutdoor::LoadGeometry(const coreByte& iAlgorithm, const float& fGrade)
                                               SIGN(coreVector3::Dot(coreVector3::Cross(aVertexData[i].vNormal, avOrtho1[i]), avOrtho2[i])));
     }
 
-    // create vertex buffer
-    coreVertexBuffer* pBuffer = m_pModel->CreateVertexBuffer(OUTDOOR_TOTAL_VERTICES, sizeof(sVertex), aVertexData, CORE_DATABUFFER_STORAGE_STATIC);
-    pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_POSITION_NUM, 3, GL_FLOAT, 0);
-    pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_TEXTURE_NUM,  2, GL_FLOAT, 3*sizeof(float));
-    pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_NORMAL_NUM,   3, GL_FLOAT, 5*sizeof(float));
-    pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_TANGENT_NUM,  4, GL_FLOAT, 8*sizeof(float));
+    if(CORE_GL_SUPPORT(ARB_vertex_type_2_10_10_10_rev))
+    {
+        // reduce total vertex size
+        coreModel::coreVertexPacked aPackedData[OUTDOOR_TOTAL_VERTICES];
+        for(coreUint i = 0; i < OUTDOOR_TOTAL_VERTICES; ++i)
+        {
+            // convert specific vertex attributes
+            aPackedData[i].vPosition = aVertexData[i].vPosition;
+            aPackedData[i].vTexCoord = aVertexData[i].vTexCoord;
+            aPackedData[i].iNormal   = coreVector4(aVertexData[i].vNormal, 0.0f).PackSnorm210();
+            aPackedData[i].iTangent  = aVertexData[i].vTangent.PackSnorm210();
+        }
+
+        // create compressed vertex buffer
+        coreVertexBuffer* pBuffer = m_pModel->CreateVertexBuffer(OUTDOOR_TOTAL_VERTICES, sizeof(coreModel::coreVertexPacked), aPackedData, CORE_DATABUFFER_STORAGE_STATIC);
+        pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_POSITION_NUM, 3, GL_FLOAT,              0);
+        pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_TEXCOORD_NUM, 2, GL_FLOAT,              3*sizeof(float));
+        pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_NORMAL_NUM,   4, GL_INT_2_10_10_10_REV, 5*sizeof(float));
+        pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_TANGENT_NUM,  4, GL_INT_2_10_10_10_REV, 5*sizeof(float) + 1*sizeof(coreUint));
+    }
+    else
+    {
+        // create vertex buffer
+        coreVertexBuffer* pBuffer = m_pModel->CreateVertexBuffer(OUTDOOR_TOTAL_VERTICES, sizeof(coreModel::coreVertex), aVertexData, CORE_DATABUFFER_STORAGE_STATIC);
+        pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_POSITION_NUM, 3, GL_FLOAT, 0);
+        pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_TEXCOORD_NUM, 2, GL_FLOAT, 3*sizeof(float));
+        pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_NORMAL_NUM,   3, GL_FLOAT, 5*sizeof(float));
+        pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_TANGENT_NUM,  4, GL_FLOAT, 8*sizeof(float));
+    }
 
     // create index buffer
     m_pModel->CreateIndexBuffer(OUTDOOR_TOTAL_INDICES, sizeof(coreUshort), aiIndexData, CORE_DATABUFFER_STORAGE_STATIC);
@@ -225,14 +242,14 @@ void cOutdoor::LoadGeometry(const coreByte& iAlgorithm, const float& fGrade)
 float cOutdoor::RetrieveHeight(const coreVector2& vPosition)
 {
     // convert real position to block position
-    const float fX = (vPosition.x-this->GetPosition().x) / OUTDOOR_DETAIL + float(OUTDOOR_WIDTH/2);
-    const float fY = (vPosition.y-this->GetPosition().y) / OUTDOOR_DETAIL + float(OUTDOOR_VIEW/2);
+    const float fX = (vPosition.x-this->GetPosition().x) / OUTDOOR_DETAIL + I_TO_F(OUTDOOR_WIDTH/2);
+    const float fY = (vPosition.y-this->GetPosition().y) / OUTDOOR_DETAIL + I_TO_F(OUTDOOR_VIEW /2);
 
     // retrieve all four corners of the block
-    const int iI00 = int(FLOOR(fY)) * OUTDOOR_WIDTH + int(FLOOR(fX));   // bottom left
-    const int iI01 = iI00 + 1;                                          // bottom right
-    const int iI10 = iI00     + OUTDOOR_WIDTH;                          // top left
-    const int iI11 = iI00 + 1 + OUTDOOR_WIDTH;                          // top right
+    const int iI00 = F_TO_SI(fY) * OUTDOOR_WIDTH + F_TO_SI(fX);   // bottom left
+    const int iI01 = iI00 + 1;                                    // bottom right
+    const int iI10 = iI00     + OUTDOOR_WIDTH;                    // top left
+    const int iI11 = iI00 + 1 + OUTDOOR_WIDTH;                    // top right
     ASSERT(0 <= iI00 && iI11 < OUTDOOR_TOTAL_VERTICES);
     
     // retrieve height values of the corners
@@ -256,5 +273,5 @@ void cOutdoor::SetFlyOffset(const float& fFlyOffset)
     m_fFlyOffset = fFlyOffset;
 
     // calculate render offset
-    m_iRenderOffset = (coreUint(FLOOR(m_fFlyOffset)) % OUTDOOR_HEIGHT) * OUTDOOR_BLOCKS_X * OUTDOOR_PER_INDICES * 2;
+    m_iRenderOffset = (F_TO_SI(m_fFlyOffset) % OUTDOOR_HEIGHT) * OUTDOOR_BLOCKS_X * OUTDOOR_PER_INDICES * 2;
 }

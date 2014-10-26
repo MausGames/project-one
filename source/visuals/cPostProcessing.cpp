@@ -12,7 +12,6 @@
 // ****************************************************************
 // constructor
 cPostProcessing::cPostProcessing()noexcept
-: m_iAlternate (0)
 {
     const coreVector2& vResolution = Core::System->GetResolution();
 
@@ -70,8 +69,9 @@ void cPostProcessing::Apply()
     // switch back to default frame buffer
     coreFrameBuffer::EndDraw();
 
-    // bind environment/background frame buffer
+    // bind all required frame buffers
     this->DefineTexture(0, g_pEnvironment->GetFrameBuffer()->GetColorTarget(0).pTexture);
+    this->DefineTexture(1, g_pForeground ->GetFrameBuffer()->GetColorTarget(0).pTexture);
 
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
@@ -80,24 +80,17 @@ void cPostProcessing::Apply()
         this->Render();
 
         // render side-objects
-        m_iAlternate = 1 - m_iAlternate;
-        m_aSideArea[m_iAlternate].Render();
-        m_aSideLine[m_iAlternate].Render();
-
-#if defined(_CORE_DEBUG_)
-
-        // render other side-objects
-        m_aSideArea[1 - m_iAlternate].Render();
-        m_aSideLine[1 - m_iAlternate].Render();
-
-#endif
+        for(int i = 0; i < 2; ++i) m_aSideArea[i].Render();
+        for(int i = 0; i < 2; ++i) m_aSideLine[i].Render();
     }
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
 
-    // invalidate environment/background frame buffer
+    // invalidate all frame buffers
     g_pEnvironment->GetFrameBuffer()->Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
+    g_pForeground ->GetFrameBuffer()->Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
     this->DefineTexture(0, NULL);
+    this->DefineTexture(1, NULL);
 }
 
 

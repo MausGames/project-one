@@ -17,11 +17,12 @@ cWater::cWater()noexcept
 {
     // create reflection and refraction buffers
     m_iAboveReflection.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0, CORE_TEXTURE_SPEC_RGB);
-    m_iAboveReflection.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED);
+    m_iAboveReflection.AttachTargetBuffer (CORE_FRAMEBUFFER_TARGET_DEPTH, 0, CORE_TEXTURE_SPEC_DEPTH);
+    m_iAboveReflection.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     m_iBelowRefraction.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0, CORE_TEXTURE_SPEC_RGB);
     m_iBelowRefraction.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_DEPTH, 0, CORE_TEXTURE_SPEC_DEPTH);
-    m_iBelowRefraction.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED);
+    m_iBelowRefraction.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     // create sky-plane object
     m_Sky.DefineTexture(0, "environment_clouds_blue.png");
@@ -59,20 +60,20 @@ void cWater::Render(coreFrameBuffer* pBackground)
 {
     if(!this->GetProgram().IsUsable()) return;
 
-    // blit current background into own refraction buffer
-    pBackground->Blit(CORE_FRAMEBUFFER_TARGET_COLOR | CORE_FRAMEBUFFER_TARGET_DEPTH, &m_iBelowRefraction);
+    // blit current background color into own refraction buffer
+    pBackground->Blit(CORE_FRAMEBUFFER_TARGET_COLOR, &m_iBelowRefraction);
 
     // update all water uniforms
     this->GetProgram()->Enable();
-    this->GetProgram()->SendUniform("u_fTime",   m_fAnimation);
-    this->GetProgram()->SendUniform("u_fOffset", m_fFlyOffset * -0.0125f);
-    this->GetProgram()->SendUniform("u_fSmooth", 0.5f - (this->GetPosition().z - WATER_HEIGHT));
+    this->GetProgram()->SendUniform("u_v1Time",   m_fAnimation);
+    this->GetProgram()->SendUniform("u_v1Offset", m_fFlyOffset * -0.0125f);
+    this->GetProgram()->SendUniform("u_v1Smooth", 0.5f - (this->GetPosition().z - WATER_HEIGHT));
 
     // render the 3d-object
     coreObject3D::Render();
     
     // invalidate all frame buffer objects
-    m_iAboveReflection.Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
+    m_iAboveReflection.Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR | CORE_FRAMEBUFFER_TARGET_DEPTH);
     m_iBelowRefraction.Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR | CORE_FRAMEBUFFER_TARGET_DEPTH);
 }
 
@@ -82,7 +83,7 @@ void cWater::Render(coreFrameBuffer* pBackground)
 void cWater::Move()
 {
     // update animation value
-    m_fAnimation.Update(0.02f);
+    m_fAnimation.Update(0.016f);
 
     // move water level up and down
     this->SetPosition(coreVector3(0.0f, m_fFlyOffset * OUTDOOR_DETAIL, WATER_HEIGHT + 0.3f * SIN(40.0f * m_fAnimation)));
@@ -96,30 +97,76 @@ void cWater::Move()
 // update water reflection map
 void cWater::UpdateReflection()
 {
-    // save current camera properties
+    // save current camera and light properties
     const coreVector3 vOldCamPos = Core::Graphics->GetCamPosition();
     const coreVector3 vOldCamOri = Core::Graphics->GetCamOrientation();
+    const coreVector4 vOldLight  = Core::Graphics->GetLight(0).vDirection;
 
-    // flip camera upside-down
-    Core::Graphics->SetCamera(CAMERA_POSITION * coreVector3(1.0f,1.0f,-1.0f), -CAMERA_DIRECTION, CAMERA_ORIENTATION);
-    
-    // create reflection frame buffer
+    // flip camera upside-down and override light
+    Core::Graphics->SetCamera(-CAMERA_POSITION + coreVector3(0.0f, 0.0f, WATER_HEIGHT*2.0f), -CAMERA_DIRECTION, CAMERA_ORIENTATION);
+    Core::Graphics->SetLight (0, coreVector4(0.0f,0.0f,0.0f,0.0f), coreVector4(LIGHT_DIRECTION, 0.0f), coreVector4(0.0f,0.0f,0.0f,0.0f));
+
+    // fill reflection frame buffer
     m_iAboveReflection.StartDraw();
+    m_iAboveReflection.Clear(CORE_FRAMEBUFFER_TARGET_DEPTH);
     {
-        // move and render the sky-plane
-        m_Sky.SetDirection(vOldCamOri.xy());
-        m_Sky.SetTexOffset(coreVector2(vOldCamPos.x * 0.006f, m_Sky.GetTexOffset().y));
-        m_Sky.Move();
-        m_Sky.Render();
+        // flip projection left-right (also culling!, after StartDraw())
+        c_cast<coreMatrix4*>(&Core::Graphics->GetPerspective())->_11 *= -1.0f;
 
-        if(g_CurConfig.iReflection)
+        // render depth pre-pass with foreground objects
+        cShadow::RenderForegroundDepth();
+
+        if(g_CurConfig.iReflection && g_pGame)
         {
-            // TODO #
+            glCullFace(GL_FRONT);
+            {
+                // render all relevant game objects
+                g_pGame->GetPlayer(0)->Render();
+            }
+            glCullFace(GL_BACK);
         }
+
+        glDisable(GL_BLEND);
+        {
+            // move and render the sky-plane
+            m_Sky.SetDirection(vOldCamOri.xy());
+            m_Sky.SetTexOffset(coreVector2(vOldCamPos.x * 0.006f, m_Sky.GetTexOffset().y));
+            m_Sky.Move();
+            m_Sky.Render();
+        }
+        glEnable(GL_BLEND);
+
+        // apply outline-effect
+        if(g_CurConfig.iReflection) g_pOutline->Apply();
     }
 
-    // reset camera
+    // reset camera, light and projection
     Core::Graphics->SetCamera(vOldCamPos, CAMERA_DIRECTION, vOldCamOri);
+    Core::Graphics->SetLight (0, coreVector4(0.0f,0.0f,0.0f,0.0f), vOldLight, coreVector4(0.0f,0.0f,0.0f,0.0f));
+    c_cast<coreMatrix4*>(&Core::Graphics->GetPerspective())->_11 *= -1.0f;
+}
+
+
+// ****************************************************************
+// update water depth map
+void cWater::UpdateDepth(cOutdoor* pOutdoor)
+{
+    if(pOutdoor)
+    {
+        // fill only depth component of refraction frame buffer
+        m_iBelowRefraction.StartDraw();
+        {
+            glDepthFunc(GL_ALWAYS);   // better performance than depth-clear
+            glDrawBuffer(GL_NONE);
+            {
+                // render the outdoor-surface
+                pOutdoor->Render();
+            }
+            glDepthFunc(GL_LEQUAL);
+            glDrawBuffer(GL_COLOR_ATTACHMENT0);
+        }
+    }
+    else m_iBelowRefraction.Clear(CORE_FRAMEBUFFER_TARGET_DEPTH);
 }
 
 
@@ -131,5 +178,5 @@ void cWater::SetFlyOffset(const float& fFlyOffset)
     m_fFlyOffset = fFlyOffset;
 
     // move sky-plane texture
-    m_Sky.SetTexOffset(coreVector2(0.0f, (-7.0f / float(OUTDOOR_HEIGHT)) * m_fFlyOffset));
+    m_Sky.SetTexOffset(coreVector2(0.0f, (-7.0f / I_TO_F(OUTDOOR_HEIGHT)) * m_fFlyOffset));
 }

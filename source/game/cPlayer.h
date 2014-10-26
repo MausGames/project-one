@@ -7,33 +7,35 @@
 //*------------------------------------------------*//
 //////////////////////////////////////////////////////
 #pragma once
-#ifndef _P1_GUARD_POSTPROCESSING_H_
-#define _P1_GUARD_POSTPROCESSING_H_
+#ifndef _P1_GUARD_PLAYER_H_
+#define _P1_GUARD_PLAYER_H_
 
 
 // ****************************************************************
-// post-processing class
-class cPostProcessing final : public coreObject2D
+// player entity class
+class cPlayer final : public coreObject3D
 {
 private:
-    coreObject2D m_aSideArea[2];   // objects outside of the game area
-    coreObject2D m_aSideLine[2];   // additional highlight objects
+    bool m_bDead;   // completely removed from the game
 
 
 public:
-    cPostProcessing()noexcept;
-    ~cPostProcessing();
+    cPlayer()noexcept;
+    ~cPlayer();
 
-    // apply post-processing
-    void Apply();
+    // render and move the player
+    void Render()override;
+    void Move  ()override;
 
-    // recompile post-processing shader-program
-    void Recompile();
+    // control life and death
+    void Resurrect();
+    void Kill(const bool& bAnimated);
+    inline const bool& IsDead()const {return m_bDead;}
 
 
 private:
-    DISABLE_COPY(cPostProcessing)
+    DISABLE_COPY(cPlayer)
 };
 
 
-#endif // _P1_GUARD_POSTPROCESSING_H_
+#endif // _P1_GUARD_PLAYER_H_

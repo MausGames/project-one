@@ -22,7 +22,7 @@ cBackground::cBackground()noexcept
 
     // create resolved texture
     m_iResolvedTexture.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0, CORE_TEXTURE_SPEC_RGB);
-    m_iResolvedTexture.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED);
+    m_iResolvedTexture.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 }
 
 
@@ -65,18 +65,25 @@ cBackground::~cBackground()
 // render the background
 void cBackground::Render()
 {
+    if(m_pWater)
+    {
+        // update water reflection and depth map
+        m_pWater->UpdateReflection();
+        m_pWater->UpdateDepth(m_pOutdoor);
+    }
+
     // update shadow map
     if(m_pOutdoor) m_pOutdoor->GetShadowMap()->Update();
 
-    // update water reflection map
-    if(m_pWater) m_pWater->UpdateReflection();
-
-    // create background frame buffer
+    // fill background frame buffer
     m_iFrameBuffer.StartDraw();
-    m_iFrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_DEPTH);
+    m_iFrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR | CORE_FRAMEBUFFER_TARGET_DEPTH);   // color-clear improves performance (with multisampling and depth pre-pass)
     {
         glDisable(GL_BLEND);
         {
+            // render depth pre-pass with foreground objects
+            cShadow::RenderForegroundDepth();
+
             // send shadow matrix to single shader-program
                  if(!m_apAddObject.empty())        cShadow::ApplyShadowMatrix(m_apAddObject.front()->GetProgram());
             else if(!m_apGroundObjectList.empty()) cShadow::ApplyShadowMatrix(m_apGroundObjectList.front()->List()->front()->GetProgram());
@@ -95,31 +102,31 @@ void cBackground::Render()
             // render the outdoor-surface
             if(m_pOutdoor) m_pOutdoor->Render();
 
-            // TODO # transparent additional objects
+            // TODO # transparent additional objects (not alpha-depended, think about explosion-splashs)
 
             // render the water-surface
             if(m_pWater) m_pWater->Render(&m_iFrameBuffer);
         }
         glEnable(GL_BLEND);
 
-        glDisable(GL_DEPTH_TEST);
+        glDepthMask(false);
         {
             // render all air objects
             FOR_EACH(it, m_apAirObjectList)
                 (*it)->Render();
         }
-        glEnable(GL_DEPTH_TEST);
+        glDepthMask(true);
+
+        // call individual render routine
+        this->__RenderOwn();
     }
-
-    // call individual render routine
-    this->__RenderOwn();
-
-    // invalidate shadow map
-    if(g_CurConfig.iShadow && m_pOutdoor) m_pOutdoor->GetShadowMap()->GetFrameBuffer()->Invalidate(CORE_FRAMEBUFFER_TARGET_DEPTH);
 
     // resolve frame buffer to texture
     m_iFrameBuffer.Blit      (CORE_FRAMEBUFFER_TARGET_COLOR, &m_iResolvedTexture);
     m_iFrameBuffer.Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR | CORE_FRAMEBUFFER_TARGET_DEPTH);
+
+    // invalidate shadow map
+    if(g_CurConfig.iShadow && m_pOutdoor) m_pOutdoor->GetShadowMap()->GetFrameBuffer()->Invalidate(CORE_FRAMEBUFFER_TARGET_DEPTH);
 }
 
 
@@ -145,7 +152,7 @@ void cBackground::Move()
     FOR_EACH(it, m_apGroundObjectList)
     {
         FOR_EACH(et, *(*it)->List())
-            (*et)->SetEnabled(coreMath::InRange((*et)->GetPosition().y, g_pEnvironment->GetFlyOffset() * OUTDOOR_DETAIL, 100.0f) ? 
+            (*et)->SetEnabled(coreMath::InRange((*et)->GetPosition().y, g_pEnvironment->GetCameraPos().y, 80.0f) ? 
                               CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
         (*it)->MoveNormal();
     }
@@ -154,7 +161,7 @@ void cBackground::Move()
     FOR_EACH(it, m_apAirObjectList)
     {
         FOR_EACH(et, *(*it)->List())
-            (*et)->SetEnabled(coreMath::InRange((*et)->GetPosition().y, g_pEnvironment->GetFlyOffset() * OUTDOOR_DETAIL, 100.0f) ?
+            (*et)->SetEnabled(coreMath::InRange((*et)->GetPosition().y, g_pEnvironment->GetCameraPos().y, 100.0f) ?
                               CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
         (*it)->MoveNormal();
     }
@@ -194,12 +201,12 @@ void cBackground::_FillInfinite(coreBatchList* pObjectList)
     {
         coreObject3D* pOldObject = (*pObjectList->List())[i];
 
-        // check for visibility at the start
-        if(pOldObject->GetPosition().y < float(OUTDOOR_VIEW) * OUTDOOR_DETAIL * 0.5f)
+        // check for position at the start area
+        if(pOldObject->GetPosition().y < I_TO_F(OUTDOOR_VIEW) * OUTDOOR_DETAIL * 0.5f)
         {
             // copy object and move it to the end
             coreObject3D* pNewObject = new coreObject3D(*pOldObject);
-            pNewObject->SetPosition(pNewObject->GetPosition() + coreVector3(0.0f, float(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL, 0.0f));
+            pNewObject->SetPosition(pNewObject->GetPosition() + coreVector3(0.0f, I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL, 0.0f));
 
             // bind the new object
             pObjectList->BindObject(pNewObject);
@@ -216,10 +223,12 @@ cEnvironment::cEnvironment()noexcept
 , m_Transition     (coreTimer(1.0f, 1.0f, 1))
 , m_fFlyOffset     (0.0f)
 , m_fSideOffset    (0.0f)
+, m_vCameraPos     (CAMERA_POSITION)
+, m_vLightDir      (LIGHT_DIRECTION)
 {
     // create environment frame buffer
     m_iFrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0, CORE_TEXTURE_SPEC_RGB);
-    m_iFrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED);
+    m_iFrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     // create mix object
     m_MixObject.DefineProgram("full_transition_program");
@@ -231,7 +240,7 @@ cEnvironment::cEnvironment()noexcept
     // reset transformation properties
     m_avDirection[1] = m_avDirection[0] = coreVector2(0.0f,1.0f);
     m_avSide     [1] = m_avSide     [0] = coreVector2(0.0f,0.0f);
-    m_afSpeed    [1] = m_afSpeed    [0] = 6.0f;
+    m_afSpeed    [1] = m_afSpeed    [0] = 0.0f;
 
     // load first background
     m_pBackground = new cEmptyBackground();
@@ -259,15 +268,9 @@ cEnvironment::~cEnvironment()
 // render the environment
 void cEnvironment::Render()
 {
-    // set environment camera
-    Core::Graphics->SetCamera(coreVector3(m_fSideOffset, m_fFlyOffset * OUTDOOR_DETAIL, Core::Graphics->GetCamPosition().z),
-                              CAMERA_DIRECTION,
-                              coreVector3(m_avDirection[0], 0.0f));
-
-    // set environment light (and rotate with camera)
-    Core::Graphics->SetLight(0, coreVector4(0.0f,0.0f,0.0f,0.0f),
-                                coreVector4(LIGHT_DIRECTION * coreMatrix4::RotationZ(Core::Graphics->GetCamOrientation().xy() * coreVector2(-1.0f,1.0f)), 0.0f),
-                                coreVector4(0.0f,0.0f,0.0f,0.0f));
+    // set environment camera and light
+    Core::Graphics->SetCamera(m_vCameraPos, CAMERA_DIRECTION, coreVector3(m_avDirection[0], 0.0f));
+    Core::Graphics->SetLight (0, coreVector4(0.0f,0.0f,0.0f,0.0f), coreVector4(m_vLightDir, 0.0f), coreVector4(0.0f,0.0f,0.0f,0.0f));
 
     // render current background
     m_pBackground->Render(); 
@@ -281,7 +284,7 @@ void cEnvironment::Render()
 
             // set transition time
             m_MixObject.GetProgram()->Enable();
-            m_MixObject.GetProgram()->SendUniform("u_fTransition", m_Transition.GetValue(CORE_TIMER_GET_NORMAL));
+            m_MixObject.GetProgram()->SendUniform("u_v1Transition", m_Transition.GetValue(CORE_TIMER_GET_NORMAL));
 
             // mix both backgrounds together
             m_iFrameBuffer.StartDraw();
@@ -307,12 +310,16 @@ void cEnvironment::Move()
 
     // calculate global fly offset
     m_fFlyOffset += Core::System->GetTime() * m_afSpeed[0];
-    while(m_fFlyOffset <  0.0f)                  m_fFlyOffset += float(OUTDOOR_HEIGHT);
-    while(m_fFlyOffset >= float(OUTDOOR_HEIGHT)) m_fFlyOffset -= float(OUTDOOR_HEIGHT);
+    while(m_fFlyOffset <  0.0f)                   m_fFlyOffset += I_TO_F(OUTDOOR_HEIGHT);
+    while(m_fFlyOffset >= I_TO_F(OUTDOOR_HEIGHT)) m_fFlyOffset -= I_TO_F(OUTDOOR_HEIGHT);
 
     // calculate global side offset (only perpendicular to flight direction, never on diagonal camera (smooth with max-min))
     const coreVector2 vAbsDir = coreVector2(ABS(m_avDirection[0].x), ABS(m_avDirection[0].y));
     m_fSideOffset             = coreVector2::Dot(m_avDirection[0].yx(), m_avSide[0]) * (vAbsDir.Max() - vAbsDir.Min());
+
+    // calculate camera and light values
+    m_vCameraPos = coreVector3(m_fSideOffset, m_fFlyOffset * OUTDOOR_DETAIL, CAMERA_POSITION.z);
+    m_vLightDir  = LIGHT_DIRECTION * coreMatrix4::RotationZ(m_avDirection[0] * coreVector2(-1.0f,1.0f));
 
     // move current background
     m_pBackground->Move();
@@ -411,13 +418,13 @@ cGrass::cGrass()noexcept
 
         // select position and height test function
         std::function<float(const float&, const float&)> pTestFunc;
-        if(j) pTestFunc = [](const float& h, const float& y) {return (h > -23.0f && h < -18.0f && (int(y+160.0f) % 80 < 40));};
+        if(j) pTestFunc = [](const float& h, const float& y) {return (h > -23.0f && h < -18.0f && (F_TO_SI(y+160.0f) % 80 < 40));};
          else pTestFunc = [](const float& h, const float& y) {return (h > -20.0f && h < -18.0f);};
     
         for(int i = 0; i < iStoneTries; ++i)
         {
             // calculate position and height
-            const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.45f, 0.45f) * float(OUTDOOR_WIDTH), (float(i)/float(iStoneTries)) * float(OUTDOOR_HEIGHT) - float(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
+            const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.45f, 0.45f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(iStoneTries)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
             const float       fHeight   = m_pOutdoor->RetrieveHeight(vPosition);
 
             // test for valid values
@@ -458,7 +465,7 @@ cGrass::cGrass()noexcept
     for(int i = 0; i < GRASS_CLOUDS_NUM; ++i)
     {
         // calculate position and height
-        const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.3f, 0.3f) * float(OUTDOOR_WIDTH), (float(i)/float(GRASS_CLOUDS_NUM)) * float(OUTDOOR_HEIGHT) - float(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
+        const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.3f, 0.3f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(GRASS_CLOUDS_NUM)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
         const float       fHeight   = Core::Rand->Float(20.0f, 60.0f);
 
         // load object resources
@@ -509,7 +516,8 @@ cGrass::~cGrass()
 // move the grass background
 void cGrass::__MoveOwn()
 {
-    // adjust volume of the nature sound-effect TODO # sound-volume per config value
+    // adjust volume of the nature sound-effect
+    // TODO # sound-volume per config value
     if(m_pNatureSound->EnableRef(this))
-        m_pNatureSound->SetVolume(6.0f * g_pEnvironment->GetTransition().GetValue((g_pEnvironment->GetBackground()->GetID() == cGrass::ID) ? CORE_TIMER_GET_NORMAL : CORE_TIMER_GET_REVERSED));
+        m_pNatureSound->SetVolume(6.0f * g_pEnvironment->GetTransition().GetValue((g_pEnvironment->GetBackground() == this) ? CORE_TIMER_GET_NORMAL : CORE_TIMER_GET_REVERSED));
 }
