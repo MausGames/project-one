@@ -4,7 +4,39 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <logicalFolder name="environment" displayName="environment" projectFiles="true">
+        <itemPath>../../source/environment/cEnvironment.cpp</itemPath>
+        <itemPath>../../source/environment/cEnvironment.h</itemPath>
+        <itemPath>../../source/environment/cOutdoor.cpp</itemPath>
+        <itemPath>../../source/environment/cOutdoor.h</itemPath>
+        <itemPath>../../source/environment/cWater.cpp</itemPath>
+        <itemPath>../../source/environment/cWater.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="files" displayName="files" projectFiles="true">
+        <itemPath>../../source/files/cConfig.cpp</itemPath>
+        <itemPath>../../source/files/cConfig.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="game" displayName="game" projectFiles="true">
+        <itemPath>../../source/game/cGame.cpp</itemPath>
+        <itemPath>../../source/game/cGame.h</itemPath>
+        <itemPath>../../source/game/cPlayer.cpp</itemPath>
+        <itemPath>../../source/game/cPlayer.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="menu" displayName="menu" projectFiles="true">
+      </logicalFolder>
+      <logicalFolder name="visuals" displayName="visuals" projectFiles="true">
+        <itemPath>../../source/visuals/cForeground.cpp</itemPath>
+        <itemPath>../../source/visuals/cForeground.h</itemPath>
+        <itemPath>../../source/visuals/cOutline.cpp</itemPath>
+        <itemPath>../../source/visuals/cOutline.h</itemPath>
+        <itemPath>../../source/visuals/cPostProcessing.cpp</itemPath>
+        <itemPath>../../source/visuals/cPostProcessing.h</itemPath>
+        <itemPath>../../source/visuals/cShadow.cpp</itemPath>
+        <itemPath>../../source/visuals/cShadow.h</itemPath>
+      </logicalFolder>
+      <itemPath>../../source/application.cpp</itemPath>
       <itemPath>../../source/main.cpp</itemPath>
+      <itemPath>../../source/main.h</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -81,7 +113,75 @@
           </makeArtifact>
         </requiredProjects>
       </compileType>
+      <item path="../../source/application.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/environment/cEnvironment.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/cEnvironment.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/cOutdoor.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/cOutdoor.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/cWater.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/cWater.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/files/cConfig.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/files/cConfig.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/game/cGame.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/game/cGame.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/game/cPlayer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/game/cPlayer.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../../source/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/main.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visuals/cForeground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visuals/cForeground.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visuals/cOutline.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visuals/cOutline.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visuals/cPostProcessing.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visuals/cPostProcessing.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/visuals/cShadow.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visuals/cShadow.h" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
     <conf name="Debug_Linux_gcc" type="1">
@@ -137,7 +237,75 @@
           </makeArtifact>
         </requiredProjects>
       </compileType>
+      <item path="../../source/application.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/environment/cEnvironment.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/cEnvironment.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/cOutdoor.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/cOutdoor.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/cWater.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/cWater.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/files/cConfig.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/files/cConfig.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/game/cGame.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/game/cGame.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/game/cPlayer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/game/cPlayer.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../../source/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/main.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visuals/cForeground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visuals/cForeground.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visuals/cOutline.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visuals/cOutline.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visuals/cPostProcessing.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visuals/cPostProcessing.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/visuals/cShadow.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visuals/cShadow.h" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
     <conf name="Debug_Linux_clang" type="1">
@@ -193,7 +361,75 @@
           </makeArtifact>
         </requiredProjects>
       </compileType>
+      <item path="../../source/application.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/environment/cEnvironment.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/cEnvironment.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/cOutdoor.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/cOutdoor.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/cWater.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/cWater.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/files/cConfig.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/files/cConfig.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/game/cGame.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/game/cGame.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/game/cPlayer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/game/cPlayer.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../../source/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/main.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visuals/cForeground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visuals/cForeground.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visuals/cOutline.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visuals/cOutline.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visuals/cPostProcessing.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visuals/cPostProcessing.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/visuals/cShadow.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visuals/cShadow.h" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
     <conf name="Release_Windows_mingw" type="1">
@@ -262,7 +498,75 @@
           </makeArtifact>
         </requiredProjects>
       </compileType>
+      <item path="../../source/application.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/environment/cEnvironment.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/cEnvironment.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/cOutdoor.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/cOutdoor.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/cWater.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/cWater.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/files/cConfig.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/files/cConfig.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/game/cGame.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/game/cGame.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/game/cPlayer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/game/cPlayer.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../../source/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/main.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visuals/cForeground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visuals/cForeground.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visuals/cOutline.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visuals/cOutline.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visuals/cPostProcessing.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visuals/cPostProcessing.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/visuals/cShadow.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visuals/cShadow.h" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
     <conf name="Release_Linux_gcc" type="1">
@@ -327,7 +631,75 @@
           </makeArtifact>
         </requiredProjects>
       </compileType>
+      <item path="../../source/application.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/environment/cEnvironment.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/cEnvironment.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/cOutdoor.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/cOutdoor.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/cWater.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/cWater.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/files/cConfig.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/files/cConfig.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/game/cGame.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/game/cGame.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/game/cPlayer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/game/cPlayer.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../../source/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/main.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visuals/cForeground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visuals/cForeground.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visuals/cOutline.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visuals/cOutline.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visuals/cPostProcessing.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visuals/cPostProcessing.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/visuals/cShadow.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visuals/cShadow.h" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
     <conf name="Release_Linux_clang" type="1">
@@ -391,7 +763,75 @@
           </makeArtifact>
         </requiredProjects>
       </compileType>
+      <item path="../../source/application.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/environment/cEnvironment.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/cEnvironment.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/cOutdoor.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/cOutdoor.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/cWater.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/cWater.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/files/cConfig.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/files/cConfig.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/game/cGame.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/game/cGame.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/game/cPlayer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/game/cPlayer.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../../source/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/main.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visuals/cForeground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visuals/cForeground.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visuals/cOutline.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visuals/cOutline.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visuals/cPostProcessing.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visuals/cPostProcessing.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/visuals/cShadow.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visuals/cShadow.h" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
   </confs>

@@ -30,21 +30,20 @@ cBackground::cBackground()noexcept
 // destructor
 cBackground::~cBackground()
 {
-    // remove all ground objects
-    FOR_EACH(it, m_apGroundObjectList)
+    // remove all persistent objects
+    auto pRemoveObjectsFunc = [](std::vector<coreBatchList*>* papList)
     {
-        FOR_EACH(et, *(*it)->List())
-            SAFE_DELETE(*et)
-        SAFE_DELETE(*it)
-    }
-
-    // remove all air objects
-    FOR_EACH(it, m_apAirObjectList)
-    {
-        FOR_EACH(et, *(*it)->List())
-            SAFE_DELETE(*et)
-        SAFE_DELETE(*it)
-    }
+        FOR_EACH(it, *papList)
+        {
+            // delete single objects within the list
+            FOR_EACH(et, *(*it)->List())
+                SAFE_DELETE(*et)
+            SAFE_DELETE(*it)
+        }
+    };
+    pRemoveObjectsFunc(&m_apGroundObjectList);
+    pRemoveObjectsFunc(&m_apDecalObjectList);
+    pRemoveObjectsFunc(&m_apAirObjectList);
 
     // remove all additional objects
     this->ClearObjects();
@@ -69,7 +68,7 @@ void cBackground::Render()
     {
         // update water reflection and depth map
         m_pWater->UpdateReflection();
-        m_pWater->UpdateDepth(m_pOutdoor);
+        m_pWater->UpdateDepth(m_pOutdoor, m_apGroundObjectList);
     }
 
     // update shadow map
@@ -85,15 +84,22 @@ void cBackground::Render()
             cShadow::RenderForegroundDepth();
 
             // send shadow matrix to single shader-program
-                 if(!m_apAddObject.empty())        cShadow::ApplyShadowMatrix(m_apAddObject.front()->GetProgram());
-            else if(!m_apGroundObjectList.empty()) cShadow::ApplyShadowMatrix(m_apGroundObjectList.front()->List()->front()->GetProgram());
+            if(!m_apAddObject.empty() || !m_apGroundObjectList.empty())
+            {
+                cShadow::EnableShadowRead(SHADOW_HANDLE_OBJECT_SIMPLE);
+                cShadow::EnableShadowRead(SHADOW_HANDLE_OBJECT);
+            }
 
             // render additional objects
             FOR_EACH(it, m_apAddObject)
                 (*it)->Render();
 
             // send shadow matrix to instanced shader-program
-            if(!m_apGroundObjectList.empty()) cShadow::ApplyShadowMatrix(m_apGroundObjectList.front()->GetProgram());
+            if(!m_apGroundObjectList.empty())
+            {
+                cShadow::EnableShadowRead(SHADOW_HANDLE_OBJECT_SIMPLE_INST);
+                cShadow::EnableShadowRead(SHADOW_HANDLE_OBJECT_INST);
+            }
 
             // render all ground objects
             FOR_EACH(it, m_apGroundObjectList)
@@ -102,12 +108,22 @@ void cBackground::Render()
             // render the outdoor-surface
             if(m_pOutdoor) m_pOutdoor->Render();
 
-            // TODO # transparent additional objects (not alpha-depended, think about explosion-splashs)
+            // TODO # put transparent add-objects and decals here
 
             // render the water-surface
             if(m_pWater) m_pWater->Render(&m_iFrameBuffer);
         }
         glEnable(GL_BLEND);
+
+        glDisable(GL_DEPTH_TEST);
+        {
+            // TODO # transparent additional objects
+
+            // render all transparent ground objects
+            FOR_EACH(it, m_apDecalObjectList)
+                (*it)->Render();
+        }
+        glEnable(GL_DEPTH_TEST);
 
         glDepthMask(false);
         {
@@ -126,7 +142,7 @@ void cBackground::Render()
     m_iFrameBuffer.Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR | CORE_FRAMEBUFFER_TARGET_DEPTH);
 
     // invalidate shadow map
-    if(g_CurConfig.iShadow && m_pOutdoor) m_pOutdoor->GetShadowMap()->GetFrameBuffer()->Invalidate(CORE_FRAMEBUFFER_TARGET_DEPTH);
+    if(g_CurConfig.Graphics.iShadow && m_pOutdoor) m_pOutdoor->GetShadowMap()->GetFrameBuffer()->Invalidate(CORE_FRAMEBUFFER_TARGET_DEPTH);
 }
 
 
@@ -148,23 +164,21 @@ void cBackground::Move()
         m_pWater->Move();
     }
 
-    // control and move ground objects
-    FOR_EACH(it, m_apGroundObjectList)
+    // control and move all objects
+    auto pControlObjectsFunc = [](std::vector<coreBatchList*>* papList, const float& fRange)
     {
-        FOR_EACH(et, *(*it)->List())
-            (*et)->SetEnabled(coreMath::InRange((*et)->GetPosition().y, g_pEnvironment->GetCameraPos().y, 80.0f) ? 
-                              CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
-        (*it)->MoveNormal();
-    }
-
-    // control and move air objects
-    FOR_EACH(it, m_apAirObjectList)
-    {
-        FOR_EACH(et, *(*it)->List())
-            (*et)->SetEnabled(coreMath::InRange((*et)->GetPosition().y, g_pEnvironment->GetCameraPos().y, 100.0f) ?
-                              CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
-        (*it)->MoveNormal();
-    }
+        FOR_EACH(it, *papList)
+        {
+            // enable only objects in the current view
+            FOR_EACH(et, *(*it)->List())
+                (*et)->SetEnabled(coreMath::InRange((*et)->GetPosition().y, g_pEnvironment->GetCameraPos().y, fRange) ? 
+                                  CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+            (*it)->MoveNormal();
+        }
+    };
+    pControlObjectsFunc(&m_apGroundObjectList, 80.0f);
+    pControlObjectsFunc(&m_apDecalObjectList,  80.0f);
+    pControlObjectsFunc(&m_apAirObjectList,    80.0f);
 
     // TODO # handle additional objects
 
@@ -179,7 +193,7 @@ void cBackground::AddObject(coreObject3D* pObject, const coreVector3& vRelativeP
 {
     // TODO #
 
-    // object gets shadow-shader (bool for trivial objects ? -> no, progam-swapping otherwise)
+    // object gets shadow-shader
 }
 
 
@@ -204,7 +218,7 @@ void cBackground::_FillInfinite(coreBatchList* pObjectList)
         // check for position at the start area
         if(pOldObject->GetPosition().y < I_TO_F(OUTDOOR_VIEW) * OUTDOOR_DETAIL * 0.5f)
         {
-            // copy object and move it to the end
+            // copy object and move it to the end area
             coreObject3D* pNewObject = new coreObject3D(*pOldObject);
             pNewObject->SetPosition(pNewObject->GetPosition() + coreVector3(0.0f, I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL, 0.0f));
 
@@ -212,6 +226,21 @@ void cBackground::_FillInfinite(coreBatchList* pObjectList)
             pObjectList->BindObject(pNewObject);
         }
     }
+}
+
+
+// ****************************************************************
+// check for intersection with other objects
+bool cBackground::_CheckIntersection(coreBatchList* pObjectList, const coreVector2& vNewPos, const float& fDistanceSq)
+{
+    // loop through all objects
+    FOR_EACH(it, *pObjectList->List())
+    {
+        // check for quadratic distance
+        if(((*it)->GetPosition().xy() - vNewPos).LengthSq() < fDistanceSq)
+            return true;
+    }
+    return false;
 }
 
 
@@ -240,11 +269,11 @@ cEnvironment::cEnvironment()noexcept
     // reset transformation properties
     m_avDirection[1] = m_avDirection[0] = coreVector2(0.0f,1.0f);
     m_avSide     [1] = m_avSide     [0] = coreVector2(0.0f,0.0f);
-    m_afSpeed    [1] = m_afSpeed    [0] = 0.0f;
+    m_afSpeed    [1] = m_afSpeed    [0] = 3.0f;
 
     // load first background
     m_pBackground = new cEmptyBackground();
-    this->ChangeBackground(Core::Config->GetInt("Game", "Background", cGrass::ID));
+    this->ChangeBackground(Core::Config->GetInt("Game", "Background", s_cast<int>(cGrass::ID)));
 }
 
 
@@ -305,7 +334,7 @@ void cEnvironment::Move()
     // update all transformation properties
     const float fFactor = Core::System->GetTime() * 2.0f;
     m_avDirection[0] = (m_avDirection[0] + (m_avDirection[1] - m_avDirection[0]) * fFactor).Normalize();
-    m_avSide     [0] =  m_avSide     [0] + (m_avSide     [1] - m_avSide     [0]) * fFactor;
+    m_avSide     [0] =  m_avSide     [0] + (m_avSide     [1] - m_avSide     [0]) * fFactor * 8.0f;
     m_afSpeed    [0] =  m_afSpeed    [0] + (m_afSpeed    [1] - m_afSpeed    [0]) * fFactor;
 
     // calculate global fly offset
@@ -401,6 +430,9 @@ void cEnvironment::__Reset(const coreResourceReset& bInit)
 // constructor
 cGrass::cGrass()noexcept
 {
+    coreBatchList* pList1;
+    coreBatchList* pList2;
+
     // create outdoor-surface object
     m_pOutdoor = new cOutdoor("grass", "dust", 1, 4.0f);
 
@@ -408,87 +440,184 @@ cGrass::cGrass()noexcept
     m_pWater = new cWater();
 
     // allocate stone list
-    coreBatchList* pList = new coreBatchList(GRASS_STONES_RESERVE);
-    pList->DefineProgram("object_inst_shadow_program");
-
-    for(int j = 0; j < 2; ++j)
+    pList1 = new coreBatchList(GRASS_STONES_RESERVE);
+    pList1->DefineProgram("object_shadow_inst_program");
     {
-        const int   iStoneTries = j ? GRASS_STONES_2_NUM  : GRASS_STONES_1_NUM;
-        const float fStoneSize  = j ? GRASS_STONES_2_SIZE : GRASS_STONES_1_SIZE;
+        for(int j = 0; j < 2; ++j)
+        {
+            const coreUint iStoneTries = j ? GRASS_STONES_2_NUM  : GRASS_STONES_1_NUM;
+            const float    fStoneSize  = j ? GRASS_STONES_2_SIZE : GRASS_STONES_1_SIZE;
 
-        // select position and height test function
-        std::function<float(const float&, const float&)> pTestFunc;
-        if(j) pTestFunc = [](const float& h, const float& y) {return (h > -23.0f && h < -18.0f && (F_TO_SI(y+160.0f) % 80 < 40));};
-         else pTestFunc = [](const float& h, const float& y) {return (h > -20.0f && h < -18.0f);};
+            // select position and height test function
+            std::function<float(const float&, const float&)> pTestFunc;
+            if(j) pTestFunc = [](const float& h, const float& y) {return (h > -23.0f && h < -18.0f && (F_TO_SI(y+160.0f) % 80 < 40));};
+             else pTestFunc = [](const float& h, const float& y) {return (h > -20.0f && h < -18.0f);};
     
-        for(int i = 0; i < iStoneTries; ++i)
+            for(coreUint i = 0; i < iStoneTries; ++i)
+            {
+                // calculate position and height
+                const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.45f, 0.45f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(iStoneTries)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
+                const float       fHeight   = m_pOutdoor->RetrieveHeight(vPosition);
+
+                // test for valid values
+                if(pTestFunc(fHeight, vPosition.y))
+                {
+                    // load object resources
+                    coreObject3D* pObject = new coreObject3D();
+                    pObject->DefineModel  ("environment_rock_high.md5mesh");
+                    pObject->DefineTexture(0, "environment_stone_diff.png");
+                    pObject->DefineTexture(1, "environment_stone_norm.png");
+                    pObject->DefineProgram("object_shadow_program");
+
+                    // set object properties
+                    pObject->SetPosition   (coreVector3(vPosition, fHeight));
+                    pObject->SetSize       (coreVector3::Rand(0.8f,1.7f, 0.8f,1.7f, 0.8f,1.7f) * fStoneSize);
+                    pObject->SetDirection  (coreVector3::Rand());
+                    pObject->SetOrientation(coreVector3::Rand());
+                    pObject->SetColor3     (coreVector3(1.0f,1.0f,1.0f) * Core::Rand->Float(0.8f, 1.0f));
+
+                    // add object to the list
+                    pList1->BindObject(pObject);
+                }
+            }
+        }
+
+        // post-process list and add it to the ground
+        cBackground::_FillInfinite(pList1);
+        pList1->ShrinkToFit();
+        m_apGroundObjectList.push_back(pList1);
+    
+        // bind stone list to shadow map
+        m_pOutdoor->GetShadowMap()->BindList(pList1);
+    }
+
+    // allocate reed lists
+    pList1 = new coreBatchList(GRASS_REEDS_1_RESERVE);
+    pList1->DefineProgram("object_shadow_simple_inst_program");
+
+    pList2 = new coreBatchList(GRASS_REEDS_2_RESERVE);
+    pList2->DefineProgram("object_shadow_simple_inst_program");
+    {
+        for(coreUint i = 0; i < GRASS_REEDS_NUM; ++i)
         {
             // calculate position and height
-            const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.45f, 0.45f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(iStoneTries)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
+            const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.45f, 0.45f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(GRASS_REEDS_NUM)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
             const float       fHeight   = m_pOutdoor->RetrieveHeight(vPosition);
 
             // test for valid values
-            if(pTestFunc(fHeight, vPosition.y))
+            if(fHeight > -23.0f && fHeight < -18.0f && (F_TO_SI(vPosition.y+160.0f) % 80 < 40))
             {
-                // load object resources
-                coreObject3D* pObject = new coreObject3D();
-                pObject->DefineModel  ("rock.md5mesh");
-                pObject->DefineTexture(0, "environment_stone_diff.png");
-                pObject->DefineTexture(1, "environment_stone_norm.png");
-                pObject->DefineProgram("object_shadow_program");
+                if(!cBackground::_CheckIntersection(m_apGroundObjectList[0], vPosition, 12.0f))
+                {
+                    // determine object type
+                    const bool bType = (Core::Rand->Int(2) || fHeight >= -20.0f) ? true : false;
 
-                // set object properties
-                pObject->SetPosition   (coreVector3(vPosition, fHeight));
-                pObject->SetDirection  (coreVector3::Rand());
-                pObject->SetOrientation(coreVector3::Rand());
-                pObject->SetSize       (coreVector3::Rand(0.75f,1.8f, 0.75f,1.8f, 0.75f,1.8f) * fStoneSize);
-                pObject->SetColor3     (coreVector3(1.0f,1.0f,1.0f) * Core::Rand->Float(0.8f, 1.0f));
+                    // load object resources
+                    coreObject3D* pObject = new coreObject3D();
+                    pObject->DefineModel  (bType ? "environment_reed_01.md3" : "environment_reed_02.md3");
+                    pObject->DefineTexture(0, "environment_reed.png");
+                    pObject->DefineProgram("object_shadow_simple_program");
 
-                // add object to the list
-                pList->BindObject(pObject);
+                    // set object properties
+                    pObject->SetPosition   (coreVector3(vPosition, fHeight-1.0f));
+                    pObject->SetSize       (coreVector3::Rand(1.3f,1.6f, 1.3f,1.6f, 1.3f,1.6f) * 2.0f);
+                    pObject->SetDirection  (coreVector3(0.0f,0.0f,-1.0f));
+                    pObject->SetOrientation(coreVector3(coreVector2::Rand(), 0.0f));
+                    pObject->SetColor3     (coreVector3(1.0f, 1.0f * Core::Rand->Float(0.55f, 0.7f), 0.5f));
+
+                    // add object to the list
+                    if(bType) pList1->BindObject(pObject);
+                         else pList2->BindObject(pObject);
+                }
             }
         }
+
+        // post-process lists and add them to the ground
+        cBackground::_FillInfinite(pList1);
+        pList1->ShrinkToFit();
+        m_apGroundObjectList.push_back(pList1);
+
+        cBackground::_FillInfinite(pList2);
+        pList2->ShrinkToFit();
+        m_apGroundObjectList.push_back(pList2);
+    
+        // bind reed lists to shadow map
+        m_pOutdoor->GetShadowMap()->BindList(pList1);
+        m_pOutdoor->GetShadowMap()->BindList(pList2);
     }
 
-    // post-process list and add it to the ground
-    cBackground::_FillInfinite(pList);
-    pList->ShrinkToFit();
-    m_apGroundObjectList.push_back(pList);
-    
-    // bind stone list to shadow map
-    m_pOutdoor->GetShadowMap()->BindList(pList);
+    // allocate flower list
+    pList1 = new coreBatchList(GRASS_FLOWERS_RESERVE);
+    pList1->DefineProgram("effect_decal_spheric_inst_program");
+    {
+        for(coreUint i = 0; i < GRASS_FLOWERS_NUM; ++i)
+        {
+            // calculate position and height
+            const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.45f, 0.45f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(GRASS_FLOWERS_NUM)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
+            const float       fHeight   = m_pOutdoor->RetrieveHeight(vPosition);
+
+            // test for valid values
+            if(fHeight > -15.5f)
+            {
+                if(!cBackground::_CheckIntersection(pList1, vPosition, 70.0f))
+                {
+                    // load object resources
+                    coreObject3D* pObject = new coreObject3D();
+                    pObject->DefineModel  ("default_square.md5mesh");
+                    pObject->DefineTexture(0, "environment_covert.png");
+                    pObject->DefineProgram("effect_decal_spheric_program");
+
+                    // set object properties
+                    pObject->SetPosition   (coreVector3(vPosition, fHeight-0.5f));
+                    pObject->SetSize       (coreVector3(coreVector2(1.65f,1.65f) * Core::Rand->Float(8.5f, 10.0f), 1.0f));
+                    pObject->SetDirection  (coreVector3(0.0f,0.0f,-1.0f));
+                    pObject->SetOrientation(coreVector3(coreVector2::Rand(), 0.0f));
+                    pObject->SetTexOffset  (coreVector2::Rand(0.0f,10.0f, 0.0f,10.0f));
+
+                    // add object to the list
+                    pList1->BindObject(pObject);
+                }
+            }
+        }
+
+        // post-process list and add it to the ground
+        cBackground::_FillInfinite(pList1);
+        pList1->ShrinkToFit();
+        m_apDecalObjectList.push_back(pList1);
+    }
 
     // allocate cloud list
-    pList = new coreBatchList(GRASS_CLOUDS_RESERVE);
-    pList->DefineProgram("environment_clouds_inst_program");
-
-    for(int i = 0; i < GRASS_CLOUDS_NUM; ++i)
+    pList1 = new coreBatchList(GRASS_CLOUDS_RESERVE);
+    pList1->DefineProgram("environment_clouds_inst_program");
     {
-        // calculate position and height
-        const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.3f, 0.3f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(GRASS_CLOUDS_NUM)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
-        const float       fHeight   = Core::Rand->Float(20.0f, 60.0f);
+        for(coreUint i = 0; i < GRASS_CLOUDS_NUM; ++i)
+        {
+            // calculate position and height
+            const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.3f, 0.3f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(GRASS_CLOUDS_NUM)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
+            const float       fHeight   = Core::Rand->Float(20.0f, 60.0f);
 
-        // load object resources
-        coreObject3D* pObject = new coreObject3D();
-        pObject->DefineModel  ("default_square.md5mesh");
-        pObject->DefineTexture(0, "environment_clouds_mid.png");
-        pObject->DefineProgram("environment_clouds_program");
+            // load object resources
+            coreObject3D* pObject = new coreObject3D();
+            pObject->DefineModel  ("default_square.md5mesh");
+            pObject->DefineTexture(0, "environment_clouds_mid.png");
+            pObject->DefineProgram("environment_clouds_program");
 
-        // set object properties
-        pObject->SetPosition   (coreVector3(vPosition, fHeight));
-        pObject->SetDirection  (coreVector3(0.0f,0.0f,-1.0f));
-        pObject->SetOrientation(coreVector3(coreVector2::Rand(), 0.0f));
-        pObject->SetSize       (coreVector3(coreVector2(2.5f,2.5f) * Core::Rand->Float(15.0f, 21.0f), 1.0f));
-        pObject->SetAlpha      (0.8f);
-        pObject->SetTexOffset  (coreVector2::Rand(0.0f,10.0f, 0.0f,10.0f));
+            // set object properties
+            pObject->SetPosition   (coreVector3(vPosition, fHeight));
+            pObject->SetSize       (coreVector3(coreVector2(2.2f,2.2f) * Core::Rand->Float(15.0f, 21.0f), 1.0f));
+            pObject->SetDirection  (coreVector3(0.0f,0.0f,-1.0f));
+            pObject->SetOrientation(coreVector3(coreVector2::Rand(), 0.0f));
+            pObject->SetAlpha      (0.8f);
+            pObject->SetTexOffset  (coreVector2::Rand(0.0f,10.0f, 0.0f,10.0f));
 
-        // add object to the list
-        pList->BindObject(pObject);
+            // add object to the list
+            pList1->BindObject(pObject);
+        }
+
+        // post-process list and add it to the air
+        cBackground::_FillInfinite(pList1);
+        m_apAirObjectList.push_back(pList1);
     }
-
-    // post-process list and add it to the air
-    cBackground::_FillInfinite(pList);
-    m_apAirObjectList.push_back(pList);
 
     // load nature sound-effect
     m_pNatureSound = Core::Manager::Resource->Get<coreSound>("environment_nature.wav");
@@ -507,8 +636,8 @@ cGrass::~cGrass()
     if(m_pNatureSound->EnableRef(this))
         m_pNatureSound->Stop();
 
-    // unbind stone list from shadow map
-    m_pOutdoor->GetShadowMap()->UnbindList(m_apGroundObjectList[0]);
+    // unbind all lists from shadow map
+    m_pOutdoor->GetShadowMap()->ClearLists();
 }
 
 

@@ -13,7 +13,7 @@
 
 // ****************************************************************
 // game definitions
-#define GAME_PLAYER_NUM (2u)
+#define GAME_PLAYERS (2u)   // maximum number of players
 
 
 // ****************************************************************
@@ -21,7 +21,7 @@
 class cGame final
 {
 private:
-    cPlayer m_aPlayer[GAME_PLAYER_NUM];
+    cPlayer m_aPlayer[GAME_PLAYERS];   // player objects
 
 
 public:

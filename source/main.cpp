@@ -16,14 +16,13 @@ cForeground*     g_pForeground     = NULL;
 cEnvironment*    g_pEnvironment    = NULL;
 cGame*           g_pGame           = NULL;
 
-#define SHOW_FPS
-#if defined(SHOW_FPS)
+#define _DIRECT_DEBUG_ (1)
+#if defined(_DIRECT_DEBUG_)
 
     static coreLabel* m_pFPS = NULL;   // frame rate label for debugging purpose
     static float m_fFPSValue = 0.0f;   // current smooth frame rate value
 
 #endif
-
 
 
 // ****************************************************************
@@ -48,7 +47,7 @@ void CoreApp::Init()
     g_pEnvironment    = new cEnvironment();
     g_pGame           = new cGame();
 
-#if defined(SHOW_FPS)
+#if defined(_DIRECT_DEBUG_)
 
     // create frame rate label
     m_pFPS = new coreLabel("ethnocentric.ttf", 24, 8);
@@ -104,7 +103,7 @@ void CoreApp::Render()
     // apply post-processing
     g_pPostProcessing->Apply();
 
-#if defined(SHOW_FPS)
+#if defined(_DIRECT_DEBUG_)
 
     if(!Core::Input->GetKeyboardButton(CORE_INPUT_KEY(PRINTSCREEN), CORE_INPUT_PRESS))
     {
@@ -123,14 +122,23 @@ void CoreApp::Render()
 // move the application
 void CoreApp::Move()
 {
-    // DEBUG #
-    g_pEnvironment->SetTargetSide(Core::Input->GetMousePosition() * 60.0f);
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(A), CORE_INPUT_PRESS))
-        g_pEnvironment->ChangeBackground(2);
+    // update input interface
+    UpdateInput();
 
     // move the environment
     g_pEnvironment->Move();
 
     // move the game
     if(g_pGame) g_pGame->Move();
+
+#if defined(_DIRECT_DEBUG_)
+
+    for(int i = 0; i < 8; ++i)
+    {
+        // override background
+        if(Core::Input->GetKeyboardButton(coreInputKey(i + int(CORE_INPUT_KEY(1))), CORE_INPUT_PRESS))
+            g_pEnvironment->ChangeBackground(i + 1);
+    }
+
+#endif
 }

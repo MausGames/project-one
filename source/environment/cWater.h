@@ -15,7 +15,7 @@
 
 // ****************************************************************
 // water definitions
-#define WATER_HEIGHT (-20.0f)
+#define WATER_HEIGHT (-20.0f)   // default water-surface z-position
 
 
 // ****************************************************************
@@ -42,7 +42,7 @@ public:
 
     // update water reflection and depth map
     void UpdateReflection();
-    void UpdateDepth(cOutdoor* pOutdoor);
+    void UpdateDepth(cOutdoor* pOutdoor, const std::vector<coreBatchList*>& apGroundObjectList);
 
     // set object properties
     void SetFlyOffset(const float& fFlyOffset);
@@ -56,8 +56,9 @@ public:
 private:
     DISABLE_COPY(cWater)
      
-    // hide default render function
-    inline void Render()override {ASSERT(false)}
+    // hide default render functions
+    inline void Render(const coreProgramPtr& pProgram)override {ASSERT(false)}
+    inline void Render()override                               {ASSERT(false)}
 };
 
 

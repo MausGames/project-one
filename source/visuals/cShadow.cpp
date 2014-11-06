@@ -54,22 +54,26 @@ void cShadow::Update()
     FOR_EACH(it, s_apGlobalList)   FOR_EACH_SET(et, it+1, s_apGlobalList)   ASSERT((*it) != (*et))
 
 #endif
-
+    
     // fill the shadow map
     m_iFrameBuffer.StartDraw();
     m_iFrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_DEPTH);
     {
-        // render all single shadow-casting objects
-        cShadow::__RenderSingle(s_amDrawShadowMatrix[0], m_apList,       m_apObject);
-        cShadow::__RenderSingle(s_amDrawShadowMatrix[1], s_apGlobalList, s_apGlobalObject);
+        glEnable(GL_POLYGON_OFFSET_FILL);
+        {
+            // render all single shadow-casting objects
+            cShadow::__RenderSingle(s_amDrawShadowMatrix[0], m_apList,       m_apObject);
+            cShadow::__RenderSingle(s_amDrawShadowMatrix[1], s_apGlobalList, s_apGlobalObject);
 
-        // render all lists with shadow-casting objects
-        cShadow::__RenderInstanced(s_amDrawShadowMatrix[0], m_apList);
-        cShadow::__RenderInstanced(s_amDrawShadowMatrix[1], s_apGlobalList);
+            // render all lists with shadow-casting objects
+            cShadow::__RenderInstanced(s_amDrawShadowMatrix[0], m_apList);
+            cShadow::__RenderInstanced(s_amDrawShadowMatrix[1], s_apGlobalList);
+        }
+        glDisable(GL_POLYGON_OFFSET_FILL);
     }
 
     // enable shadow map
-    m_iFrameBuffer.GetDepthTarget().pTexture->Enable(CORE_TEXTURE_SHADOW + 0);
+    m_iFrameBuffer.GetDepthTarget().pTexture->Enable(CORE_TEXTURE_SHADOW + 0); 
 }
 
 
@@ -77,8 +81,8 @@ void cShadow::Update()
 // adjust to current configuration
 void cShadow::Reconfigure()
 {
-    if(m_iLevel == g_CurConfig.iShadow) return;
-    m_iLevel = g_CurConfig.iShadow;
+    if(m_iLevel == g_CurConfig.Graphics.iShadow) return;
+    m_iLevel = g_CurConfig.Graphics.iShadow;
 
     // delete old shadow map
     m_iFrameBuffer.Delete();
@@ -87,7 +91,7 @@ void cShadow::Reconfigure()
     {
         // create shadow map frame buffer
         m_iFrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_DEPTH, 0, CORE_TEXTURE_SPEC_DEPTH);
-        m_iFrameBuffer.Create(g_vGameResolution * ((m_iLevel == 1) ? 1.0f : 1.6f), CORE_FRAMEBUFFER_CREATE_NORMAL);
+        m_iFrameBuffer.Create(g_vGameResolution * ((m_iLevel == 1) ? 1.0f : 1.8f), CORE_FRAMEBUFFER_CREATE_NORMAL);
 
         // enable depth value comparison
         m_iFrameBuffer.GetDepthTarget().pTexture->ShadowSampling(true);
@@ -104,12 +108,17 @@ void cShadow::GlobalInit()
     s_pProgramInstanced = Core::Manager::Resource->Get<coreProgram>("effect_shadow_inst_program");
 
     // load shader-programs with shadow maps
-    s_apHandle[0] = Core::Manager::Resource->Get<coreProgram>("environment_outdoor_program");
-    s_apHandle[1] = Core::Manager::Resource->Get<coreProgram>("object_shadow_program");
-    s_apHandle[2] = Core::Manager::Resource->Get<coreProgram>("object_inst_shadow_program");   // instancing-property handled in Recompile()
+    s_apHandle[SHADOW_HANDLE_OUTDOOR]            = Core::Manager::Resource->Get<coreProgram>("environment_outdoor_program");
+    s_apHandle[SHADOW_HANDLE_OBJECT]             = Core::Manager::Resource->Get<coreProgram>("object_shadow_program");
+    s_apHandle[SHADOW_HANDLE_OBJECT_INST]        = Core::Manager::Resource->Get<coreProgram>("object_shadow_inst_program");
+    s_apHandle[SHADOW_HANDLE_OBJECT_SIMPLE]      = Core::Manager::Resource->Get<coreProgram>("object_shadow_simple_program");
+    s_apHandle[SHADOW_HANDLE_OBJECT_SIMPLE_INST] = Core::Manager::Resource->Get<coreProgram>("object_shadow_simple_inst_program");
 
     // adjust shader-programs
     cShadow::Recompile();
+
+    // set polygon fill properties (to reduce projective aliasing)
+    glPolygonOffset(1.1f, 4.0f);
 }
 
 
@@ -126,7 +135,7 @@ void cShadow::GlobalExit()
     // unload all shader-programs
     s_pProgramSingle    = NULL;
     s_pProgramInstanced = NULL;
-    for(int i = 0; i < SHADOW_HANDLES; ++i)
+    for(coreByte i = 0; i < SHADOW_HANDLES; ++i)
         s_apHandle[i] = NULL;
 }
 
@@ -135,7 +144,7 @@ void cShadow::GlobalExit()
 // update the shadow map class
 void cShadow::GlobalUpdate()
 {
-    if(!g_CurConfig.iShadow) return;
+    if(!g_CurConfig.Graphics.iShadow) return;
 
     // define orthographic projection
     constexpr_var float A =          SHADOW_CLIP_FAR + SHADOW_CLIP_NEAR;
@@ -160,10 +169,10 @@ void cShadow::GlobalUpdate()
                                            P.x,  P.y, 0.0f, 1.0f);
 
     // calculate high light direction (to reduce shadow length)
-    const coreVector3 vHighLight = (g_pEnvironment->GetLightDir() * coreVector3(1.0f,1.0f,2.0f)).Normalize();
+    const coreVector3 vHighLight = (g_pEnvironment->GetLightDir() * coreVector3(1.0f,1.0f,2.5f)).Normalize();
 
     // calculate full draw and read shadow matrices
-    s_amDrawShadowMatrix[0] = coreMatrix4::Camera(vHighLight * -SHADOW_VIEW_DISTANCE + coreVector3(g_pEnvironment->GetCameraPos().xy(), WATER_HEIGHT) + coreVector3::Rand(SHADOW_JITTER), 
+    s_amDrawShadowMatrix[0] = coreMatrix4::Camera(vHighLight * -SHADOW_VIEW_DISTANCE + coreVector3(g_pEnvironment->GetCameraPos().xy(), WATER_HEIGHT), 
                                                   vHighLight, SHADOW_VIEW_ORIENTATION) * mOrtho;
     s_amDrawShadowMatrix[1] = mMove * s_amDrawShadowMatrix[0];
     s_mReadShadowMatrix     = s_amDrawShadowMatrix[0] * mNorm;
@@ -174,10 +183,11 @@ void cShadow::GlobalUpdate()
 // recompile shader-programs with shadow maps
 void cShadow::Recompile()
 {
-    for(int i = 0; i < SHADOW_HANDLES; ++i)
+    for(coreByte i = 0; i < SHADOW_HANDLES; ++i)
     {
-        const char* pcConfig = PRINT("%s %s", g_CurConfig.iShadow ? "#define _P1_SHADOW_ (1) \n"  : "",
-                                              (i == 2)            ? CORE_SHADER_OPTION_INSTANCING : "");
+        const bool bInstanced = (i == SHADOW_HANDLE_OBJECT_INST || i == SHADOW_HANDLE_OBJECT_SIMPLE_INST) ? true : false;
+        const char* pcConfig  = PRINT("%s %s", g_CurConfig.Graphics.iShadow ? "#define _P1_SHADOW_ (1) \n"  : "",
+                                               bInstanced                   ? CORE_SHADER_OPTION_INSTANCING : "");
 
         // change configuration of related shaders
         FOR_EACH(it, s_apHandle[i]->GetShader())
@@ -194,14 +204,14 @@ void cShadow::Recompile()
 
 
 // ****************************************************************
-// apply read shadow matrix
-void cShadow::ApplyShadowMatrix(const coreProgramPtr& pProgram)
+// enable shader-program and apply read shadow matrix
+void cShadow::EnableShadowRead(const coreByte& iProgramHandle)
 {
-    if(!g_CurConfig.iShadow) return;
+    if(!g_CurConfig.Graphics.iShadow) return;
 
     // send read shadow matrix to shader-program
-    pProgram->Enable();
-    pProgram->SendUniform(SHADOW_SHADER_MATRIX, s_mReadShadowMatrix, false);
+    s_apHandle[iProgramHandle]->Enable();
+    s_apHandle[iProgramHandle]->SendUniform(SHADOW_SHADER_MATRIX, s_mReadShadowMatrix, false);
 }
 
 
@@ -252,11 +262,19 @@ void cShadow::__RenderInstanced(const coreMatrix4& mTransform, const std::vector
 {
     if(apList.empty()) return;
 
-    // send shadow matrix to instanced shader-program
-    if(!s_pProgramInstanced.IsUsable()) return;
-    if(!s_pProgramInstanced->Enable())  return;
-    s_pProgramInstanced->SendUniform(SHADOW_SHADER_MATRIX, mTransform, false);
+    // only enable and update shader-program on instancing
+    FOR_EACH(et, apList)
+    {
+        if((*et)->IsInstanced())
+        {
+            // send shadow matrix to instanced shader-program
+            if(!s_pProgramInstanced.IsUsable()) return;
+            if(!s_pProgramInstanced->Enable())  return;
+            s_pProgramInstanced->SendUniform(SHADOW_SHADER_MATRIX, mTransform, false);
    
-    // render lists with objects
-    FOR_EACH(it, apList) {if((*it)->IsInstanced()) (*it)->Render(s_pProgramInstanced, NULL);}
+            // render lists with objects
+            FOR_EACH(it, apList) {if((*it)->IsInstanced()) (*it)->Render(s_pProgramInstanced, NULL);}
+            return;
+        }
+    }
 }

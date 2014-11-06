@@ -8,6 +8,8 @@
 //////////////////////////////////////////////////////
 #include "main.h"
 
+//#define _FOREGROUND_FRAMEBUFFER_ (1)   // use multisampled frame buffer instead of screen-copy (currently faster ?!)
+
 
 // ****************************************************************
 // constructor
@@ -43,6 +45,9 @@ void cForeground::Start()
     // set foreground camera and light
     Core::Graphics->SetCamera(CAMERA_POSITION, CAMERA_DIRECTION, CAMERA_ORIENTATION);
     Core::Graphics->SetLight (0, coreVector4(0.0f,0.0f,0.0f,0.0f), coreVector4(LIGHT_DIRECTION, 0.0f), coreVector4(0.0f,0.0f,0.0f,0.0f));
+
+    // adjust blending function (to correctly aggregate alpha values)
+    glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
 #if defined(_FOREGROUND_FRAMEBUFFER_)
 
@@ -92,6 +97,9 @@ void cForeground::End()
     }
 
 #endif
+
+    // reset blending function
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 

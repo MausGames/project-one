@@ -47,12 +47,12 @@
 #define LIGHT_DIRECTION    coreVector3(0.583953857f, -0.642349243f, -0.496360779f)
 
 #define ENABLE_ID                           \
-    virtual const int&  GetID  ()const = 0; \
+    virtual const int   GetID  ()const = 0; \
     virtual const char* GetName()const = 0;
 
 #define ASSIGN_ID(i,n)                                      \
     static const int ID = i;                                \
-    inline const int&  GetID  ()const override {return ID;} \
+    inline const int   GetID  ()const override {return ID;} \
     inline const char* GetName()const override {return n;}
 
 
@@ -62,10 +62,13 @@
 #include "visuals/cForeground.h"
 #include "visuals/cShadow.h"
 #include "visuals/cOutline.h"
+#include "visuals/cSpecialEffects.h"
 #include "visuals/cPostProcessing.h"
 #include "environment/cOutdoor.h"
 #include "environment/cWater.h"
 #include "environment/cEnvironment.h"
+#include "game/cBullet.h"
+#include "game/cWeapon.h"
 #include "game/cPlayer.h"
 #include "game/cGame.h"
 

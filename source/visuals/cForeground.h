@@ -13,7 +13,7 @@
 
 // ****************************************************************
 // foreground definitions
-//#define _FOREGROUND_FRAMEBUFFER_ (1)  // use multisampled frame buffer instead of screen-copy (currently faster ?!)
+#define FOREGROUND_AREA (coreVector2(41.5f,41.5f))   // default range of the foreground plane (-0.5 to +0.5, needs to be adapted after camera height change)
 
 
 // ****************************************************************
