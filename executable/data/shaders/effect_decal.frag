@@ -10,15 +10,26 @@
 
 void FragmentMain()
 {
-    // calculate quadratic distance from the center as alpha value
-    float v1Alpha = 1.0 - coreLengthSq(2.0 * v_av2TexCoord[1] - 1.0);
+#if defined(_P1_SPHERIC_)
+
+    // calculate quartic distance from the center as alpha value
+    float v1Alpha = coreLengthSq(2.0 * v_av2TexCoord[1] - 1.0);
+          v1Alpha = 1.0 - v1Alpha * v1Alpha;
     
     // only draw visible area
     if(v1Alpha > 0.0) 
     {
-        // draw as alpha map with decent highlights
-        float v1Value = coreTexture2D(0, v_av2TexCoord[0]).r;
-        gl_FragColor  = vec4(vec3(0.4 + 0.6 * v1Value), v1Value * v1Alpha * u_v4Color.a);
+        // draw color with alpha
+        vec4 v4Texture = coreTexture2D(0, v_av2TexCoord[0]);
+        gl_FragColor  = vec4(v4Texture.rgb, v4Texture.a * v1Alpha) * u_v4Color;
     }
     else gl_FragColor = vec4(0.0);
+    
+#else
+
+    // draw color with alpha
+    vec4 v4Texture = coreTexture2D(0, v_av2TexCoord[0]);
+    gl_FragColor   = v4Texture * u_v4Color;
+    
+#endif
 }
