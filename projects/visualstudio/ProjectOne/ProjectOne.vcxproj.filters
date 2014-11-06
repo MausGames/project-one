@@ -33,6 +33,15 @@
     <ClCompile Include="..\..\..\source\visuals\cForeground.cpp">
       <Filter>visuals</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\visuals\cSpecialEffects.cpp">
+      <Filter>visuals</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\game\cBullet.cpp">
+      <Filter>game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\game\cWeapon.cpp">
+      <Filter>game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\main.h" />
@@ -65,6 +74,15 @@
     </ClInclude>
     <ClInclude Include="..\..\..\source\visuals\cForeground.h">
       <Filter>visuals</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\visuals\cSpecialEffects.h">
+      <Filter>visuals</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\game\cBullet.h">
+      <Filter>game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\game\cWeapon.h">
+      <Filter>game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

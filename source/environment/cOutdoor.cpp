@@ -47,7 +47,7 @@ void cOutdoor::Render()
     if(this->Enable())
     {
         // send shadow matrix to shader-program
-        cShadow::ApplyShadowMatrix(this->GetProgram());
+        cShadow::EnableShadowRead(SHADOW_HANDLE_OUTDOOR);
 
         // draw the model
         glDrawRangeElements(m_pModel->GetPrimitiveType(), 0, OUTDOOR_TOTAL_VERTICES, OUTDOOR_RANGE, m_pModel->GetIndexType(), r_cast<const GLvoid*>(m_iRenderOffset));

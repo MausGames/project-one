@@ -67,7 +67,6 @@ void cWater::Render(coreFrameBuffer* pBackground)
     this->GetProgram()->Enable();
     this->GetProgram()->SendUniform("u_v1Time",   m_fAnimation);
     this->GetProgram()->SendUniform("u_v1Offset", m_fFlyOffset * -0.0125f);
-    this->GetProgram()->SendUniform("u_v1Smooth", 0.5f - (this->GetPosition().z - WATER_HEIGHT));
 
     // render the 3d-object
     coreObject3D::Render();
@@ -86,7 +85,7 @@ void cWater::Move()
     m_fAnimation.Update(0.016f);
 
     // move water level up and down
-    this->SetPosition(coreVector3(0.0f, m_fFlyOffset * OUTDOOR_DETAIL, WATER_HEIGHT + 0.3f * SIN(40.0f * m_fAnimation)));
+    this->SetPosition(coreVector3(0.0f, m_fFlyOffset * OUTDOOR_DETAIL, WATER_HEIGHT + 0.4f * SIN(40.0f * m_fAnimation)));
 
     // move the 3d-object
     coreObject3D::Move();
@@ -116,7 +115,7 @@ void cWater::UpdateReflection()
         // render depth pre-pass with foreground objects
         cShadow::RenderForegroundDepth();
 
-        if(g_CurConfig.iReflection && g_pGame)
+        if(g_CurConfig.Graphics.iReflection && g_pGame)
         {
             glCullFace(GL_FRONT);
             {
@@ -137,7 +136,7 @@ void cWater::UpdateReflection()
         glEnable(GL_BLEND);
 
         // apply outline-effect
-        if(g_CurConfig.iReflection) g_pOutline->Apply();
+        if(g_CurConfig.Graphics.iReflection) g_pOutline->Apply();
     }
 
     // reset camera, light and projection
@@ -149,7 +148,7 @@ void cWater::UpdateReflection()
 
 // ****************************************************************
 // update water depth map
-void cWater::UpdateDepth(cOutdoor* pOutdoor)
+void cWater::UpdateDepth(cOutdoor* pOutdoor, const std::vector<coreBatchList*>& apGroundObjectList)
 {
     if(pOutdoor)
     {
@@ -161,6 +160,10 @@ void cWater::UpdateDepth(cOutdoor* pOutdoor)
             {
                 // render the outdoor-surface
                 pOutdoor->Render();
+
+                // render all ground objects (after outdoor-surface, because of GL_ALWAYS)
+                FOR_EACH(it, apGroundObjectList)
+                    (*it)->Render();
             }
             glDepthFunc(GL_LEQUAL);
             glDrawBuffer(GL_COLOR_ATTACHMENT0);

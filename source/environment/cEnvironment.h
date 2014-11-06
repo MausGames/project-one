@@ -10,16 +10,23 @@
 #ifndef _P1_GUARD_ENVIRONMENT_H_
 #define _P1_GUARD_ENVIRONMENT_H_
 
+// TODO: affect decals by early depth-pass
+
 
 // ****************************************************************
 // environment definitions
-#define GRASS_STONES_1_NUM   (512u)
-#define GRASS_STONES_2_NUM   (768u)
-#define GRASS_STONES_1_SIZE  (2.5f)
-#define GRASS_STONES_2_SIZE  (2.0f)
-#define GRASS_STONES_RESERVE (256u)
-#define GRASS_CLOUDS_NUM     (96u)
-#define GRASS_CLOUDS_RESERVE (115u)   // tested
+#define GRASS_STONES_1_NUM    (512u)
+#define GRASS_STONES_2_NUM    (768u)
+#define GRASS_STONES_1_SIZE   (2.5f)
+#define GRASS_STONES_2_SIZE   (2.0f)
+#define GRASS_STONES_RESERVE  (256u)
+#define GRASS_REEDS_NUM       (1536u)
+#define GRASS_REEDS_1_RESERVE (512u)
+#define GRASS_REEDS_2_RESERVE (256u)
+#define GRASS_FLOWERS_NUM     (512u)
+#define GRASS_FLOWERS_RESERVE (256u)
+#define GRASS_CLOUDS_NUM      (96u)
+#define GRASS_CLOUDS_RESERVE  (115u)   // tested
 
 
 // ****************************************************************
@@ -34,6 +41,7 @@ protected:
     cWater*   m_pWater;                                 // water-surface object (optional)
 
     std::vector<coreBatchList*> m_apGroundObjectList;   // persistent objects connected to the ground
+    std::vector<coreBatchList*> m_apDecalObjectList;    // persistent transparent objects connected to the ground
     std::vector<coreBatchList*> m_apAirObjectList;      // persistent objects floating in the air
                                                                             
     std::vector<coreObject3D*> m_apAddObject;           // temporary additional objects
@@ -60,12 +68,16 @@ public:
     inline cOutdoor*                    GetOutdoor         ()const {return m_pOutdoor;}
     inline cWater*                      GetWater           ()const {return m_pWater;}
     inline std::vector<coreBatchList*>* GetGroundObjectList()      {return &m_apGroundObjectList;}
+    inline std::vector<coreBatchList*>* GetDecalObjectList ()      {return &m_apDecalObjectList;}
     inline std::vector<coreBatchList*>* GetAirObjectList   ()      {return &m_apAirObjectList;}
 
 
 protected:
     // create infinite looking object list
     static void _FillInfinite(coreBatchList* pObjectList);
+
+    // check for intersection with other objects
+    static bool _CheckIntersection(coreBatchList* pObjectList, const coreVector2& vNewPos, const float& fDistanceSq);
 
 
 private:
@@ -232,7 +244,7 @@ class cSea : public cBackground
 private:
     coreTexture* m_pWindCircle;                  // Textur für Wind-Ausschnitte
     vector<coreVector3> m_avCloudPos2;          // Gespeicherte Position der Wolken-Sprites
-
+    // seetang, seesterne, muscheln, verschwommen
 
 public:
     cSea()noexcept;
@@ -257,7 +269,7 @@ private:
     coreSprite* m_apWind[3];     // Wind-Animation
     coreVector2 m_avOffset[3];   // Versatz des Windes
     float m_fWave;                 // Aktuelle Schwingung
-
+    // rauch mit schein, lava, kleine feuer, funken
 
 public:
     cLava()noexcept;
@@ -280,7 +292,7 @@ private:
     coreSprite* m_apWind[2];        // Wind-Animation
     coreVector2 m_avOffset[2];        // Versatz des Windes
     coreVector2 m_avDirection[2];   // Wind-Richtung
-
+    // sandsturm, zerstörte teile, knochen?
 
 public:
     cDesert()noexcept;
@@ -304,7 +316,7 @@ private:
 
     coreSprite* m_apWind[5];     // Wind-Animation
     coreVector2 m_avOffset[5];   // Versatz des Windes
-
+    // zersplittertes eis am wasser, schnee, dicke wolken
 
 public:
     cSnow()noexcept;
@@ -380,7 +392,7 @@ private:
 
     coreSprite* m_apWind[4];     // Wind-Animation
     coreVector2 m_avOffset[4];   // Versatz des Windes
-
+    // umliegendes holz, tote bäume, seeblätter
 
 public:
     cMoss()noexcept;

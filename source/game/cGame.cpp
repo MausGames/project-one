@@ -13,8 +13,16 @@
 // constructor
 cGame::cGame()
 {
-    m_aPlayer[0].Resurrect();
-    m_aPlayer[1].Resurrect();
+    // create first player
+    m_aPlayer[0].Configure(0, coreVector3(0.0f/360.0f, 68.0f/100.0f, 90.0f/100.0f).HSVtoRGB(), g_CurConfig.Input.aiType[0]);
+    m_aPlayer[0].Resurrect(coreVector2(-10.0f,0.0f));
+    
+    if(false)
+    {
+        // TODO #
+        m_aPlayer[1].Configure(1, coreVector3(201.0f/360.0f, 74.0f/100.0f, 85.0f/100.0f).HSVtoRGB(), g_CurConfig.Input.aiType[1]);
+        m_aPlayer[1].Resurrect(coreVector2(10.0f,0.0f));
+    }
 }
 
 
@@ -26,13 +34,13 @@ cGame::~cGame()
 }
 
 
-
 // ****************************************************************
 // render the game
 void cGame::Render()
 {
-    // 
-    m_aPlayer[0].Render();
+    // render all players
+    for(coreByte i = 0; i < GAME_PLAYERS; ++i)
+        m_aPlayer[i].Render();
 }
 
 
@@ -40,7 +48,17 @@ void cGame::Render()
 // move the game
 void cGame::Move()
 {
-    // 
-    m_aPlayer[0].SetPosition(coreVector3(Core::Input->GetMousePosition() * 150.0f, 0.0f));
-    m_aPlayer[0].Move();
+    // move all players
+    for(coreByte i = 0; i < GAME_PLAYERS; ++i)
+        m_aPlayer[i].Move();
+
+    // calculate center of player positions
+    coreVector2 vCenterPos;
+         if(m_aPlayer[0].IsDead()) vCenterPos =  m_aPlayer[1].GetPosition().xy();
+    else if(m_aPlayer[1].IsDead()) vCenterPos =  m_aPlayer[0].GetPosition().xy();
+                              else vCenterPos = (m_aPlayer[0].GetPosition().xy() + m_aPlayer[1].GetPosition().xy()) * 0.5f;
+    STATIC_ASSERT(GAME_PLAYERS == 2);
+
+    // set environment side
+    g_pEnvironment->SetTargetSide(vCenterPos * 0.65f);
 }
