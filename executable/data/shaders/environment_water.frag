@@ -11,8 +11,8 @@
 // constant values
 const vec3 c_v3Blue = vec3(0.0, 0.43, 0.69);   // default surface color
 
-// water uniforms
-uniform float u_v1Smooth;   // dynamic smoothing value for better shores
+// shader input
+varying float v_v1Smooth;   // height offset for smooth shores
 
 
 void FragmentMain()
@@ -41,8 +41,8 @@ void FragmentMain()
           v1ReflFactor  = 0.7 * pow(v1ReflFactor, 55.0);
           
     // adjust depth value
-    v1Depth  = smoothstep(0.64, 0.735, v1Depth) * 0.8 * (1.0 + v1ReflFactor);
-    v1Depth -= smoothstep(0.4,  0.3,   v1Depth) * u_v1Smooth;
+    v1Depth  = smoothstep(0.64, 0.735, v1Depth) * 0.8 * (1.0 + v1ReflFactor) + v_v1Smooth;
+    v1Depth -= (1.0 - smoothstep(0.3, 0.4, v1Depth)) * 0.5;
    
     // lookup refraction texture
     vec3 v3BelowRefraction = coreTexture2D(2, v2ScreenCoord + v2Distortion * v1Depth).rgb;
