@@ -21,7 +21,7 @@ void VertexMain()
     // transform position and texture coordinates
     gl_Position      = u_m4ViewProj     * vec4(a_v3RawPosition, 1.0);
     v_v4ShadowPixel  = u_m4ShadowMatrix * vec4(a_v3RawPosition, 1.0);
-    v_av2TexCoord[0] = a_v2RawTexCoord;
+    v_av2TexCoord[0] = a_v3RawPosition.xy * 0.04167;
     
     // dot-3 transform lighting vectors
     coreDot3VertexInit();

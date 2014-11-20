@@ -16,7 +16,7 @@ void FragmentMain()
 {
     // lookup textures
     vec3 v3TexNormal = coreTexture2D(1, v_av2TexCoord[0]).xyz;
-    vec4 v4TexColor  = coreTexture2D(0, v_av2TexCoord[0]);
+    vec3 v3TexColor  = coreTexture2D(0, v_av2TexCoord[0]).rgb;
     
 #if (_CORE_QUALITY_) == 0 || defined(_P1_SIMPLE_)
 
@@ -45,8 +45,8 @@ void FragmentMain()
     float v1ReflFactor  = max(0.0, dot(v3MathViewDir, v3ReflNormal));
 
     // calculate diffuse and specular value
-    vec3 v3Diffuse  = v4TexColor.rgb * (v1Light * (1.3 * max(0.0, v1BumpFactor) + 0.5));
-	vec3 v3Specular = vec3(0.3 * v4TexColor.a * pow(v1ReflFactor, 25.0));
+    vec3 v3Diffuse  = v3TexColor * (v1Light * (1.3 * max(0.0, v1BumpFactor) + 0.5));
+	vec3 v3Specular = vec3(0.3 * 0.5 * pow(v1ReflFactor, 25.0));
 
     // draw final color
     gl_FragColor = vec4((v3Diffuse + v3Specular) * u_v4Color.rgb, u_v4Color.a);
