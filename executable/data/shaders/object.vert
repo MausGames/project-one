@@ -21,7 +21,7 @@ void VertexMain()
     vec4 v4NewPosition = vec4(coreObject3DTransform(), 1.0);
     gl_Position        = u_m4ViewProj     * v4NewPosition;
     v_v4ShadowPixel    = u_m4ShadowMatrix * v4NewPosition;
-    v_av2TexCoord[0]   = coreObject3DTexCoord();
+    v_av2TexCoord[0]   = a_v2RawTexCoord;
     
     // dot-3 transform lighting vectors
     coreDot3VertexInit();
