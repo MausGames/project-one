@@ -10,17 +10,19 @@
 #ifndef _P1_GUARD_PLAYER_H_
 #define _P1_GUARD_PLAYER_H_
 
+// TODO: optimize player-ship models and textures
+
 
 // ****************************************************************
 // player entity class
-class cPlayer final : public coreObject3D
+class cPlayer final : public cShip
 {
 private:
     coreVector2 m_vNewPos;    // new position for smooth movement and animation
     bool m_bDead;             // completely removed from the game
 
-    coreByte m_iInputIndex;   // input set identifier 
-    
+    coreByte m_iInputIndex;   // input set identifier
+
 
 public:
     cPlayer()noexcept;
@@ -40,10 +42,6 @@ public:
 
     // get object properties
     inline const coreByte& GetInputIndex()const {return m_iInputIndex;}
-
-
-private:
-    DISABLE_COPY(cPlayer)
 };
 
 

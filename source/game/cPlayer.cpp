@@ -11,13 +11,14 @@
 
 // ****************************************************************
 // constructor
-cPlayer::cPlayer()
+cPlayer::cPlayer()noexcept
 : m_vNewPos     (coreVector2(0.0f,0.0f))
 , m_bDead       (true)
 , m_iInputIndex (0)
 {
-    // load shader-program
+    // load object resources
     this->DefineProgram("object_ship_program");
+    this->DefineTexture(0, "ship_player.png");
 
     // set object properties
     this->SetPosition   (coreVector3(m_vNewPos,0.0f));
@@ -40,18 +41,18 @@ cPlayer::~cPlayer()
 void cPlayer::Configure(const coreByte& iAppearanceType, const coreVector3& vColor, const coreByte& iInputIndex)
 {
     // select appearance type
-    const char* pcModel;
-    const char* pcTexture;
+    const char* pcModelHigh;
+    const char* pcModelLow;
     switch(iAppearanceType)
     {
     default: ASSERT(false)
-    case 0: pcModel = "ship_player_off.md3"; pcTexture = "ship_player_off.png"; break;
-    case 1: pcModel = "ship_player_def.md3"; pcTexture = "ship_player_def.png"; break;
+    case 0: pcModelHigh = "ship_player_off_high.md3"; pcModelLow = "ship_player_off_low.md3"; break;
+    case 1: pcModelHigh = "ship_player_def_high.md3"; pcModelLow = "ship_player_def_low.md3"; break;
     }
 
-    // load object resources
-    this->DefineModel  (pcModel);
-    this->DefineTexture(0, pcTexture);
+    // load models
+    this->DefineModel   (pcModelHigh);
+    this->DefineModelLow(pcModelLow);
 
     // save color value (may also be overridden outside)
     this->SetColor3(vColor);
@@ -84,11 +85,11 @@ void cPlayer::Move()
         m_vNewPos += g_aInput[m_iInputIndex].vMove * Core::System->GetTime() * 50.0f;
 
         // restrict movement to the foreground area
-             if(m_vNewPos.x < -FOREGROUND_AREA.x) m_vNewPos.x = -FOREGROUND_AREA.x; 
-        else if(m_vNewPos.x >  FOREGROUND_AREA.x) m_vNewPos.x =  FOREGROUND_AREA.x; 
-             if(m_vNewPos.y < -FOREGROUND_AREA.y) m_vNewPos.y = -FOREGROUND_AREA.y; 
-        else if(m_vNewPos.y >  FOREGROUND_AREA.y) m_vNewPos.y =  FOREGROUND_AREA.y; 
-        
+             if(m_vNewPos.x < -FOREGROUND_AREA.x) m_vNewPos.x = -FOREGROUND_AREA.x;
+        else if(m_vNewPos.x >  FOREGROUND_AREA.x) m_vNewPos.x =  FOREGROUND_AREA.x;
+             if(m_vNewPos.y < -FOREGROUND_AREA.y) m_vNewPos.y = -FOREGROUND_AREA.y;
+        else if(m_vNewPos.y >  FOREGROUND_AREA.y) m_vNewPos.y =  FOREGROUND_AREA.y;
+
         // calculate smooth position-offset
         const coreVector2 vDiff   = m_vNewPos - this->GetPosition().xy();
         const coreVector2 vOffset = vDiff * Core::System->GetTime() * 40.0f;

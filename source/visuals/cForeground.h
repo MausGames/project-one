@@ -21,10 +21,8 @@
 class cForeground final : coreResourceRelation
 {
 private:
-    coreFrameBuffer m_iFrameBuffer;       // foreground frame buffer (intern, multisampled)
-    coreFrameBuffer m_iResolvedTexture;   // resolved texture
-
-    coreMatrix4 m_mViewProj;              // foreground view-projection matrix
+    coreFrameBuffer m_iFrameBuffer;   // foreground frame buffer (only texture)
+    coreMatrix4     m_mViewProj;      // foreground view-projection matrix
 
 
 public:
@@ -35,8 +33,8 @@ public:
     void Start();
     void End();
 
-     // access frame buffer
-    inline coreFrameBuffer* GetFrameBuffer() {return &m_iResolvedTexture;}   // different name
+    // access frame buffer
+    inline coreFrameBuffer* GetFrameBuffer() {return &m_iFrameBuffer;}
 
     // get object properties
     inline const coreMatrix4& GetViewProj()const {return m_mViewProj;}

@@ -20,7 +20,7 @@ static void CheckConfig(cConfig* pConfig)
     // clamp input set selections
     for(coreByte i = 0; i < INPUT_TYPES; ++i)
         pConfig->Input.aiType[i] = CLAMP(pConfig->Input.aiType[i], 0, int(INPUT_SETS-1));
-    
+
     // loop trough input sets
     for(coreByte i = 0; i < INPUT_SETS;  ++i)
     {

@@ -40,7 +40,7 @@ cPostProcessing::cPostProcessing()noexcept
         m_aSideArea[i].SetAlignment(vFlip * (fSide * -1.0f));
         m_aSideArea[i].SetTexSize  (m_aSideArea[i].GetSize() * 3.0f);
         m_aSideArea[i].Move();
-        
+
         // create highlight side-objects
         m_aSideLine[i].DefineProgram("default_2d_program");
         m_aSideLine[i].DefineTexture(0, "default_white.png");

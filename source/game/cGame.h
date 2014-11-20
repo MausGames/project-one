@@ -23,6 +23,8 @@ class cGame final
 private:
     cPlayer m_aPlayer[GAME_PLAYERS];   // player objects
 
+    cEnemy* m_apTest[30];
+
 
 public:
     cGame()noexcept;

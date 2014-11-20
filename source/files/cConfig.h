@@ -15,7 +15,7 @@
 // configuration definitions
 #define CONFIG_GRAPHICS_SHADOW     "Graphics", "Shadow",                             (1)
 #define CONFIG_GRAPHICS_REFLECTION "Graphics", "Reflection",                         (1)
-                                                                                     
+
 #define CONFIG_INPUT_TYPE(p)       "Input",    PRINT("P%d_Type",      (p)),          (p)
 #define CONFIG_INPUT_MOVE_LEFT(s)  "Input",    PRINT("S%d_MoveLeft",  (s)),          (CORE_INPUT_KEY(A))
 #define CONFIG_INPUT_MOVE_RIGHT(s) "Input",    PRINT("S%d_MoveRight", (s)),          (CORE_INPUT_KEY(D))
@@ -43,7 +43,7 @@ struct cConfig
         int iReflection;   // water reflection level
     }
     Graphics;
-    
+
     struct
     {
         int aiType[INPUT_TYPES];           // selected input set (each element should have a different value)

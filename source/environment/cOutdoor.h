@@ -38,6 +38,28 @@
 class cOutdoor final : public coreObject3D
 {
 private:
+    // vertex structure
+    struct sVertex
+    {
+        coreVector3 vPosition;   // vertex position
+        coreVector3 vNormal;     // normal vector
+        coreVector4 vTangent;    // additional tangent vector
+
+        constexpr_func sVertex()noexcept;
+    };
+
+    // compressed vertex structure
+    struct sVertexPacked
+    {
+        coreVector3 vPosition;   // vertex position
+        coreUint    iNormal;     // normal vector
+        coreUint    iTangent;    // additional tangent vector
+
+        constexpr_func sVertexPacked()noexcept;
+    };
+
+
+private:
     float m_afHeight[OUTDOOR_TOTAL_VERTICES];   // height data for height calculations
 
     coreUint m_iRenderOffset;                   // current render offset
@@ -77,6 +99,26 @@ public:
 private:
     DISABLE_COPY(cOutdoor)
 };
+
+
+// ****************************************************************
+// constructor
+constexpr_func cOutdoor::sVertex::sVertex()noexcept
+: vPosition (coreVector3(0.0f,0.0f,0.0f))
+, vNormal   (coreVector3(0.0f,0.0f,0.0f))
+, vTangent  (coreVector4(0.0f,0.0f,0.0f,0.0f))
+{
+}
+
+
+// ****************************************************************
+// constructor
+constexpr_func cOutdoor::sVertexPacked::sVertexPacked()noexcept
+: vPosition (coreVector3(0.0f,0.0f,0.0f))
+, iNormal   (0)
+, iTangent  (0)
+{
+}
 
 
 #endif // _P1_GUARD_OUTDOOR_H_

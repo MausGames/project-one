@@ -4,7 +4,7 @@
 //| Direct modifications may be overwritten |//
 //*-----------------------------------------*//
 ///////////////////////////////////////////////
-#include "Core.h"
+#include "main.h"
 
 
 // ****************************************************************
@@ -14,10 +14,26 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreModel>  ("default_square.md5mesh",          CORE_RESOURCE_UPDATE_AUTO,   "data/models/default_square.md5mesh");
     Core::Manager::Resource->Load<coreModel>  ("environment_reed_01.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_reed_01.md3");
     Core::Manager::Resource->Load<coreModel>  ("environment_reed_02.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_reed_02.md3");
-    Core::Manager::Resource->Load<coreModel>  ("environment_rock.md5mesh",        CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_rock.md5mesh");
-    Core::Manager::Resource->Load<coreModel>  ("ship_player_def.md3",             CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_def.md3");
-    Core::Manager::Resource->Load<coreModel>  ("ship_player_off.md3",             CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_off.md3");
-    
+    Core::Manager::Resource->Load<coreModel>  ("environment_stone_01.md3",        CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_stone_01.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_enemy_arrow_high.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_arrow_high.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_enemy_arrow_low.md3",        CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_arrow_low.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_enemy_cinder_high.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_cinder_high.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_enemy_cinder_low.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_cinder_low.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_enemy_freezer_high.md3",     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_freezer_high.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_enemy_freezer_low.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_freezer_low.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_enemy_miner_high.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_miner_high.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_enemy_miner_low.md3",        CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_miner_low.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_enemy_scout_high.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_scout_high.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_enemy_scout_low.md3",        CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_scout_low.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_enemy_star_high.md3",        CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_star_high.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_enemy_star_low.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_star_low.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_enemy_warrior_high.md3",     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_warrior_high.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_enemy_warrior_low.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_warrior_low.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_player_def_high.md3",        CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_def_high.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_player_def_low.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_def_low.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_player_off_high.md3",        CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_off_high.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_player_off_low.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_off_low.md3");
+
     Core::Manager::Resource->Load<coreTexture>("default_white.png",               CORE_RESOURCE_UPDATE_AUTO,   "data/textures/default_white.png");
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_blue.png",     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_blue.png");
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_low.png",      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_low.png");
@@ -33,8 +49,8 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreTexture>("environment_stone_norm.png",      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_stone_norm.png");
     Core::Manager::Resource->Load<coreTexture>("environment_water_norm.png",      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_water_norm.png");
     Core::Manager::Resource->Load<coreTexture>("menu_background_black.png",       CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_background_black.png");
-    Core::Manager::Resource->Load<coreTexture>("ship_player_def.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/ship_player_def.png");
-    Core::Manager::Resource->Load<coreTexture>("ship_player_off.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/ship_player_off.png");
+    Core::Manager::Resource->Load<coreTexture>("ship_enemy.png",                  CORE_RESOURCE_UPDATE_AUTO,   "data/textures/ship_enemy.png");
+    Core::Manager::Resource->Load<coreTexture>("ship_player.png",                 CORE_RESOURCE_UPDATE_AUTO,   "data/textures/ship_player.png");
 
     Core::Manager::Resource->Load<coreShader> ("default_2d.vert",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/default_2d.vert");
     Core::Manager::Resource->Load<coreShader> ("default_2d.frag",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/default_2d.frag");
@@ -43,9 +59,9 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreShader> ("default_3d_inst.vert",            CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/default_3d.vert", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("default_3d_inst.frag",            CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/default_3d.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("effect_decal.vert",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.vert");
-    Core::Manager::Resource->Load<coreShader> ("effect_decal_spheric.frag",       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", "#define _P1_SPHERIC_ (1) \n");
+    Core::Manager::Resource->Load<coreShader> ("effect_decal_spheric.frag",       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", SHADER_SPHERIC);
     Core::Manager::Resource->Load<coreShader> ("effect_decal_inst.vert",          CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.vert", CORE_SHADER_OPTION_INSTANCING);
-    Core::Manager::Resource->Load<coreShader> ("effect_decal_spheric_inst.frag",  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", CORE_SHADER_OPTION_INSTANCING "#define _P1_SPHERIC_ (1) \n");
+    Core::Manager::Resource->Load<coreShader> ("effect_decal_spheric_inst.frag",  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", CORE_SHADER_OPTION_INSTANCING SHADER_SPHERIC);
     Core::Manager::Resource->Load<coreShader> ("effect_outline.vert",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.vert");
     Core::Manager::Resource->Load<coreShader> ("effect_outline.frag",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_outline_inst.vert",        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.vert", CORE_SHADER_OPTION_INSTANCING);
@@ -64,16 +80,16 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreShader> ("full_transition.frag",            CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_transition.frag");
     Core::Manager::Resource->Load<coreShader> ("object.vert",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert");
     Core::Manager::Resource->Load<coreShader> ("object.frag",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.frag");
-    Core::Manager::Resource->Load<coreShader> ("object_shadow.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.frag");
-    Core::Manager::Resource->Load<coreShader> ("object_shadow_simple.frag",       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.frag", "#define _P1_SIMPLE_ (1) \n");
+    Core::Manager::Resource->Load<coreShader> ("object_shadow.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.frag", SHADER_SHADOW);
+    Core::Manager::Resource->Load<coreShader> ("object_shadow_simple.frag",       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.frag", SHADER_SHADOW SHADER_SIMPLE);
     Core::Manager::Resource->Load<coreShader> ("object_ship.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag");
     Core::Manager::Resource->Load<coreShader> ("object_inst.vert",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("object_inst.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.frag", CORE_SHADER_OPTION_INSTANCING);
-    Core::Manager::Resource->Load<coreShader> ("object_shadow_inst.frag",         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.frag", CORE_SHADER_OPTION_INSTANCING);
-    Core::Manager::Resource->Load<coreShader> ("object_shadow_simple_inst.frag",  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.frag", CORE_SHADER_OPTION_INSTANCING "#define _P1_SIMPLE_ (1) \n");
+    Core::Manager::Resource->Load<coreShader> ("object_shadow_inst.frag",         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.frag", CORE_SHADER_OPTION_INSTANCING SHADER_SHADOW);
+    Core::Manager::Resource->Load<coreShader> ("object_shadow_simple_inst.frag",  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.frag", CORE_SHADER_OPTION_INSTANCING SHADER_SHADOW SHADER_SIMPLE);
 
     Core::Manager::Resource->Load<coreSound>  ("environment_nature.wav",          CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_nature.wav");
-                                                                                  
+
     Core::Manager::Resource->Load<coreFont>   ("ethnocentric.ttf",                CORE_RESOURCE_UPDATE_AUTO,   "data/fonts/ethnocentric.ttf");
 
     ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("default_2d_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
@@ -203,10 +219,10 @@ void CoreApp::Setup()
     // set window title and icon
     Core::System->SetWindowTitle("Project One");
     Core::System->SetWindowIcon("data/textures/game_icon.png");
-    
+
     // set view frustum
     Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 50.0f, 500.0f);
-    
+
     // set cursor
 #if defined(_CORE_LINUX_)
     Core::Input->DefineCursor("data/textures/default_cursor_low.png");

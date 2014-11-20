@@ -17,13 +17,13 @@
 // environment definitions
 #define GRASS_STONES_1_NUM    (512u)
 #define GRASS_STONES_2_NUM    (768u)
-#define GRASS_STONES_1_SIZE   (2.5f)
+#define GRASS_STONES_1_SIZE   (2.2f)
 #define GRASS_STONES_2_SIZE   (2.0f)
 #define GRASS_STONES_RESERVE  (256u)
-#define GRASS_REEDS_NUM       (1536u)
+#define GRASS_REEDS_NUM       (2048u)
 #define GRASS_REEDS_1_RESERVE (512u)
-#define GRASS_REEDS_2_RESERVE (256u)
-#define GRASS_FLOWERS_NUM     (512u)
+#define GRASS_REEDS_2_RESERVE (128u)
+#define GRASS_FLOWERS_NUM     (768u)
 #define GRASS_FLOWERS_RESERVE (256u)
 #define GRASS_CLOUDS_NUM      (96u)
 #define GRASS_CLOUDS_RESERVE  (115u)   // tested
@@ -43,9 +43,9 @@ protected:
     std::vector<coreBatchList*> m_apGroundObjectList;   // persistent objects connected to the ground
     std::vector<coreBatchList*> m_apDecalObjectList;    // persistent transparent objects connected to the ground
     std::vector<coreBatchList*> m_apAirObjectList;      // persistent objects floating in the air
-                                                                            
+
     std::vector<coreObject3D*> m_apAddObject;           // temporary additional objects
-                                                    
+
 
 public:
     cBackground()noexcept;
@@ -77,7 +77,8 @@ protected:
     static void _FillInfinite(coreBatchList* pObjectList);
 
     // check for intersection with other objects
-    static bool _CheckIntersection(coreBatchList* pObjectList, const coreVector2& vNewPos, const float& fDistanceSq);
+    static bool _CheckIntersection     (coreBatchList* pObjectList, const coreVector2& vNewPos, const float& fDistanceSq);
+    static bool _CheckIntersectionQuick(coreBatchList* pObjectList, const coreVector2& vNewPos, const float& fDistanceSq);
 
 
 private:
@@ -85,7 +86,7 @@ private:
 
     // render and move routine for derived classes
     virtual void __RenderOwn() {}
-    virtual void __MoveOwn()   {} 
+    virtual void __MoveOwn()   {}
 };
 
 
@@ -97,7 +98,7 @@ private:
     cBackground* m_pBackground;       // current background instance (should never be NULL)
     cBackground* m_pOldBackground;    // previous background instance (may be NULL)
 
-    coreFrameBuffer m_iFrameBuffer;   // environment frame buffer used for transition mixing (only texture!)
+    coreFrameBuffer m_iFrameBuffer;   // environment frame buffer used for transition mixing (only texture)
     coreObject2D    m_MixObject;      // fullscreen object for transition mixing
     coreTimer       m_Transition;     // background-transition timer
 
@@ -135,7 +136,7 @@ public:
     inline void SetTargetDirection(const coreVector2& vDirection) {m_avDirection[1] = vDirection; ASSERT(vDirection.IsNormalized())}
     inline void SetTargetSide     (const coreVector2& vSide)      {m_avSide     [1] = vSide;}
     inline void SetTargetSpeed    (const float&       fSpeed)     {m_afSpeed    [1] = fSpeed;}
-    
+
     // get current transformation properties
     inline const coreVector2& GetDirection()const {return m_avDirection[0];}
     inline const coreVector2& GetSide     ()const {return m_avSide     [0];}
@@ -179,7 +180,7 @@ class cGrass final : public cBackground
 {
 private:
     coreSoundPtr m_pNatureSound;   // nature sound-effect
-    
+
 
 public:
     cGrass()noexcept;
