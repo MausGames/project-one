@@ -17,8 +17,10 @@
     <ClCompile Include="..\..\..\source\environment\cWater.cpp" />
     <ClCompile Include="..\..\..\source\files\cConfig.cpp" />
     <ClCompile Include="..\..\..\source\game\cBullet.cpp" />
+    <ClCompile Include="..\..\..\source\game\cEnemy.cpp" />
     <ClCompile Include="..\..\..\source\game\cGame.cpp" />
     <ClCompile Include="..\..\..\source\game\cPlayer.cpp" />
+    <ClCompile Include="..\..\..\source\game\cShip.cpp" />
     <ClCompile Include="..\..\..\source\game\cWeapon.cpp" />
     <ClCompile Include="..\..\..\source\main.cpp" />
     <ClCompile Include="..\..\..\source\visuals\cForeground.cpp" />
@@ -33,8 +35,10 @@
     <ClInclude Include="..\..\..\source\environment\cWater.h" />
     <ClInclude Include="..\..\..\source\files\cConfig.h" />
     <ClInclude Include="..\..\..\source\game\cBullet.h" />
+    <ClInclude Include="..\..\..\source\game\cEnemy.h" />
     <ClInclude Include="..\..\..\source\game\cGame.h" />
     <ClInclude Include="..\..\..\source\game\cPlayer.h" />
+    <ClInclude Include="..\..\..\source\game\cShip.h" />
     <ClInclude Include="..\..\..\source\game\cWeapon.h" />
     <ClInclude Include="..\..\..\source\main.h" />
     <ClInclude Include="..\..\..\source\visuals\cForeground.h" />
@@ -97,6 +101,9 @@
       <ExceptionHandling>false</ExceptionHandling>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MinimalRebuild>false</MinimalRebuild>
+      <SmallerTypeCheck>true</SmallerTypeCheck>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -122,6 +129,8 @@
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <StringPooling>true</StringPooling>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

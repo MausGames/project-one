@@ -19,7 +19,7 @@ coreMatrix4                 cShadow::s_mReadShadowMatrix            = coreMatrix
 
 // ****************************************************************
 // constructor
-cShadow::cShadow()
+cShadow::cShadow()noexcept
 : m_iLevel (0xFF)
 {
     // create shadow map
@@ -118,7 +118,7 @@ void cShadow::GlobalInit()
     cShadow::Recompile();
 
     // set polygon fill properties (to reduce projective aliasing)
-    glPolygonOffset(1.1f, 4.0f);
+    glPolygonOffset(3.3f, 12.0f);
 }
 
 
@@ -185,9 +185,11 @@ void cShadow::Recompile()
 {
     for(coreByte i = 0; i < SHADOW_HANDLES; ++i)
     {
-        const bool bInstanced = (i == SHADOW_HANDLE_OBJECT_INST || i == SHADOW_HANDLE_OBJECT_SIMPLE_INST) ? true : false;
-        const char* pcConfig  = PRINT("%s %s", g_CurConfig.Graphics.iShadow ? "#define _P1_SHADOW_ (1) \n"  : "",
-                                               bInstanced                   ? CORE_SHADER_OPTION_INSTANCING : "");
+        const bool  bSimple    = (i == SHADOW_HANDLE_OBJECT_SIMPLE || i == SHADOW_HANDLE_OBJECT_SIMPLE_INST) ? true : false;
+        const bool  bInstanced = (i == SHADOW_HANDLE_OBJECT_INST   || i == SHADOW_HANDLE_OBJECT_SIMPLE_INST) ? true : false;
+        const char* pcConfig   = PRINT("%s %s %s", g_CurConfig.Graphics.iShadow ? SHADER_SHADOW                 : "",
+                                                   bSimple                      ? SHADER_SIMPLE                 : "",
+                                                   bInstanced                   ? CORE_SHADER_OPTION_INSTANCING : "");
 
         // change configuration of related shaders
         FOR_EACH(it, s_apHandle[i]->GetShader())

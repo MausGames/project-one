@@ -29,7 +29,7 @@
 #define COLOR_BRONZE_F     coreVector3(0.925f, 0.663f, 0.259f)
 #define COLOR_SILVER_F     coreVector3(0.855f, 0.855f, 0.878f)
 #define COLOR_GOLD_F       coreVector3(1.000f, 0.859f, 0.000f)
-                           
+
 #define COLOR_YELLOW_L     255, 210, 100
 #define COLOR_ORANGE_L     255, 113,  58
 #define COLOR_RED_L        255,  70,  70
@@ -39,12 +39,16 @@
 #define COLOR_BRONZE_L     236, 169,  66
 #define COLOR_SILVER_L     218, 218, 224
 #define COLOR_GOLD_L       255, 219,   0
-                           
+
 #define CAMERA_POSITION    coreVector3(0.0f, 0.0f, 110.0f)
 #define CAMERA_DIRECTION   coreVector3(0.0f, 0.0f,  -1.0f)
 #define CAMERA_ORIENTATION coreVector3(0.0f, 1.0f,   0.0f)
-                           
+
 #define LIGHT_DIRECTION    coreVector3(0.583953857f, -0.642349243f, -0.496360779f)
+
+#define SHADER_SHADOW      "#define _P1_SHADOW_  (1) \n"
+#define SHADER_SIMPLE      "#define _P1_SIMPLE_  (1) \n"
+#define SHADER_SPHERIC     "#define _P1_SPHERIC_ (1) \n"
 
 #define ENABLE_ID                           \
     virtual const int   GetID  ()const = 0; \
@@ -69,13 +73,15 @@
 #include "environment/cEnvironment.h"
 #include "game/cBullet.h"
 #include "game/cWeapon.h"
+#include "game/cShip.h"
+#include "game/cEnemy.h"
 #include "game/cPlayer.h"
 #include "game/cGame.h"
 
 
 // ****************************************************************
 // global variables
-extern coreVector2      g_vGameResolution;       // precalculated 1:1 resolution
+extern coreVector2      g_vGameResolution;       // pre-calculated 1:1 resolution
 
 extern cPostProcessing* g_pPostProcessing;       // main post-processing object
 extern cOutline*        g_pOutline;              // main outline-effect object

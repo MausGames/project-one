@@ -171,7 +171,7 @@ void cBackground::Move()
         {
             // enable only objects in the current view
             FOR_EACH(et, *(*it)->List())
-                (*et)->SetEnabled(coreMath::InRange((*et)->GetPosition().y, g_pEnvironment->GetCameraPos().y, fRange) ? 
+                (*et)->SetEnabled(coreMath::InRange((*et)->GetPosition().y, g_pEnvironment->GetCameraPos().y, fRange) ?
                                   CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
             (*it)->MoveNormal();
         }
@@ -243,6 +243,18 @@ bool cBackground::_CheckIntersection(coreBatchList* pObjectList, const coreVecto
     return false;
 }
 
+bool cBackground::_CheckIntersectionQuick(coreBatchList* pObjectList, const coreVector2& vNewPos, const float& fDistanceSq)
+{
+    // compare only with last object
+    if(!pObjectList->List()->empty())
+    {
+        // check for quadratic distance
+        if((pObjectList->List()->back()->GetPosition().xy() - vNewPos).LengthSq() < fDistanceSq)
+            return true;
+    }
+    return false;
+}
+
 
 // ****************************************************************
 // constructor
@@ -302,7 +314,7 @@ void cEnvironment::Render()
     Core::Graphics->SetLight (0, coreVector4(0.0f,0.0f,0.0f,0.0f), coreVector4(m_vLightDir, 0.0f), coreVector4(0.0f,0.0f,0.0f,0.0f));
 
     // render current background
-    m_pBackground->Render(); 
+    m_pBackground->Render();
 
     if(m_Transition.GetStatus())
     {
@@ -452,7 +464,7 @@ cGrass::cGrass()noexcept
             std::function<float(const float&, const float&)> pTestFunc;
             if(j) pTestFunc = [](const float& h, const float& y) {return (h > -23.0f && h < -18.0f && (F_TO_SI(y+160.0f) % 80 < 40));};
              else pTestFunc = [](const float& h, const float& y) {return (h > -20.0f && h < -18.0f);};
-    
+
             for(coreUint i = 0; i < iStoneTries; ++i)
             {
                 // calculate position and height
@@ -462,22 +474,25 @@ cGrass::cGrass()noexcept
                 // test for valid values
                 if(pTestFunc(fHeight, vPosition.y))
                 {
-                    // load object resources
-                    coreObject3D* pObject = new coreObject3D();
-                    pObject->DefineModel  ("environment_rock_high.md5mesh");
-                    pObject->DefineTexture(0, "environment_stone_diff.png");
-                    pObject->DefineTexture(1, "environment_stone_norm.png");
-                    pObject->DefineProgram("object_shadow_program");
+                    if(!j || !cBackground::_CheckIntersection(pList1, vPosition, 16.0f))
+                    {
+                        // load object resources
+                        coreObject3D* pObject = new coreObject3D();
+                        pObject->DefineModel  ("environment_stone_01.md3");
+                        pObject->DefineTexture(0, "environment_stone_diff.png");
+                        pObject->DefineTexture(1, "environment_stone_norm.png");
+                        pObject->DefineProgram("object_shadow_program");
 
-                    // set object properties
-                    pObject->SetPosition   (coreVector3(vPosition, fHeight));
-                    pObject->SetSize       (coreVector3::Rand(0.8f,1.7f, 0.8f,1.7f, 0.8f,1.7f) * fStoneSize);
-                    pObject->SetDirection  (coreVector3::Rand());
-                    pObject->SetOrientation(coreVector3::Rand());
-                    pObject->SetColor3     (coreVector3(1.0f,1.0f,1.0f) * Core::Rand->Float(0.8f, 1.0f));
+                        // set object properties
+                        pObject->SetPosition   (coreVector3(vPosition, fHeight+0.2f));
+                        pObject->SetSize       (coreVector3::Rand(0.85f,1.3f, 0.85f,1.3f, 0.85f,1.3f) * Core::Rand->Float(1.0f, 1.3f) * fStoneSize);
+                        pObject->SetDirection  (coreVector3::Rand());
+                        pObject->SetOrientation(coreVector3::Rand());
+                        pObject->SetColor3     (coreVector3(1.0f,1.0f,1.0f) * Core::Rand->Float(0.85f, 1.0f));
 
-                    // add object to the list
-                    pList1->BindObject(pObject);
+                        // add object to the list
+                        pList1->BindObject(pObject);
+                    }
                 }
             }
         }
@@ -486,17 +501,17 @@ cGrass::cGrass()noexcept
         cBackground::_FillInfinite(pList1);
         pList1->ShrinkToFit();
         m_apGroundObjectList.push_back(pList1);
-    
+
         // bind stone list to shadow map
         m_pOutdoor->GetShadowMap()->BindList(pList1);
     }
 
     // allocate reed lists
     pList1 = new coreBatchList(GRASS_REEDS_1_RESERVE);
-    pList1->DefineProgram("object_shadow_simple_inst_program");
+    pList1->DefineProgram("object_shadow_inst_program");
 
     pList2 = new coreBatchList(GRASS_REEDS_2_RESERVE);
-    pList2->DefineProgram("object_shadow_simple_inst_program");
+    pList2->DefineProgram("object_shadow_inst_program");
     {
         for(coreUint i = 0; i < GRASS_REEDS_NUM; ++i)
         {
@@ -507,19 +522,22 @@ cGrass::cGrass()noexcept
             // test for valid values
             if(fHeight > -23.0f && fHeight < -18.0f && (F_TO_SI(vPosition.y+160.0f) % 80 < 40))
             {
-                if(!cBackground::_CheckIntersection(m_apGroundObjectList[0], vPosition, 12.0f))
+                if(!cBackground::_CheckIntersection     (m_apGroundObjectList[0], vPosition, 25.0f) &&
+                   !cBackground::_CheckIntersectionQuick(pList1,                  vPosition, 25.0f) &&
+                   !cBackground::_CheckIntersectionQuick(pList2,                  vPosition, 25.0f))
                 {
                     // determine object type
-                    const bool bType = (Core::Rand->Int(2) || fHeight >= -20.0f) ? true : false;
+                    const bool bType = (Core::Rand->Int(3) || fHeight >= -20.0f) ? true : false;
 
                     // load object resources
                     coreObject3D* pObject = new coreObject3D();
                     pObject->DefineModel  (bType ? "environment_reed_01.md3" : "environment_reed_02.md3");
                     pObject->DefineTexture(0, "environment_reed.png");
-                    pObject->DefineProgram("object_shadow_simple_program");
+                    pObject->DefineTexture(1, "environment_grass_norm.png");
+                    pObject->DefineProgram("object_shadow_program");
 
                     // set object properties
-                    pObject->SetPosition   (coreVector3(vPosition, fHeight-1.0f));
+                    pObject->SetPosition   (coreVector3(vPosition, fHeight-0.8f));
                     pObject->SetSize       (coreVector3::Rand(1.3f,1.6f, 1.3f,1.6f, 1.3f,1.6f) * 2.0f);
                     pObject->SetDirection  (coreVector3(0.0f,0.0f,-1.0f));
                     pObject->SetOrientation(coreVector3(coreVector2::Rand(), 0.0f));
@@ -540,7 +558,7 @@ cGrass::cGrass()noexcept
         cBackground::_FillInfinite(pList2);
         pList2->ShrinkToFit();
         m_apGroundObjectList.push_back(pList2);
-    
+
         // bind reed lists to shadow map
         m_pOutdoor->GetShadowMap()->BindList(pList1);
         m_pOutdoor->GetShadowMap()->BindList(pList2);
@@ -557,14 +575,14 @@ cGrass::cGrass()noexcept
             const float       fHeight   = m_pOutdoor->RetrieveHeight(vPosition);
 
             // test for valid values
-            if(fHeight > -15.5f)
+            if(fHeight > -15.0f)
             {
-                if(!cBackground::_CheckIntersection(pList1, vPosition, 70.0f))
+                if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 64.0f))
                 {
                     // load object resources
                     coreObject3D* pObject = new coreObject3D();
                     pObject->DefineModel  ("default_square.md5mesh");
-                    pObject->DefineTexture(0, "environment_covert.png");
+                    pObject->DefineTexture(0, "environment_flowers.png");
                     pObject->DefineProgram("effect_decal_spheric_program");
 
                     // set object properties
@@ -604,7 +622,7 @@ cGrass::cGrass()noexcept
 
             // set object properties
             pObject->SetPosition   (coreVector3(vPosition, fHeight));
-            pObject->SetSize       (coreVector3(coreVector2(2.2f,2.2f) * Core::Rand->Float(15.0f, 21.0f), 1.0f));
+            pObject->SetSize       (coreVector3(coreVector2(2.1f,2.1f) * Core::Rand->Float(15.0f, 21.0f), 1.0f));
             pObject->SetDirection  (coreVector3(0.0f,0.0f,-1.0f));
             pObject->SetOrientation(coreVector3(coreVector2::Rand(), 0.0f));
             pObject->SetAlpha      (0.8f);

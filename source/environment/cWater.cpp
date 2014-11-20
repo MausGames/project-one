@@ -49,7 +49,7 @@ cWater::cWater()noexcept
 // destructor
 cWater::~cWater()
 {
-    // explicitely undefine to detach textures
+    // explicitly undefine to detach textures
     this->Undefine();
 }
 
@@ -70,7 +70,7 @@ void cWater::Render(coreFrameBuffer* pBackground)
 
     // render the 3d-object
     coreObject3D::Render();
-    
+
     // invalidate all frame buffer objects
     m_iAboveReflection.Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR | CORE_FRAMEBUFFER_TARGET_DEPTH);
     m_iBelowRefraction.Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR | CORE_FRAMEBUFFER_TARGET_DEPTH);
@@ -120,7 +120,8 @@ void cWater::UpdateReflection()
             glCullFace(GL_FRONT);
             {
                 // render all relevant game objects
-                g_pGame->GetPlayer(0)->Render();
+                for(coreByte i = 0; i < GAME_PLAYERS; ++i)
+                    g_pGame->GetPlayer(i)->Render();
             }
             glCullFace(GL_BACK);
         }

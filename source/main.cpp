@@ -9,7 +9,7 @@
 #include "main.h"
 
 coreVector2      g_vGameResolution = coreVector2(0.0f,0.0f);
-                                   
+
 cPostProcessing* g_pPostProcessing = NULL;
 cOutline*        g_pOutline        = NULL;
 cForeground*     g_pForeground     = NULL;
