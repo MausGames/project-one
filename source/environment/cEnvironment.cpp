@@ -461,9 +461,9 @@ cGrass::cGrass()noexcept
             const float    fStoneSize  = j ? GRASS_STONES_2_SIZE : GRASS_STONES_1_SIZE;
 
             // select position and height test function
-            std::function<float(const float&, const float&)> pTestFunc;
-            if(j) pTestFunc = [](const float& h, const float& y) {return (h > -23.0f && h < -18.0f && (F_TO_SI(y+160.0f) % 80 < 40));};
-             else pTestFunc = [](const float& h, const float& y) {return (h > -20.0f && h < -18.0f);};
+            std::function<float(const float&, const float&)> nTestFunc;
+            if(j) nTestFunc = [](const float& h, const float& y) {return (h > -23.0f && h < -18.0f && (F_TO_SI(y+160.0f) % 80 < 40));};
+             else nTestFunc = [](const float& h, const float& y) {return (h > -20.0f && h < -18.0f);};
 
             for(coreUint i = 0; i < iStoneTries; ++i)
             {
@@ -472,7 +472,7 @@ cGrass::cGrass()noexcept
                 const float       fHeight   = m_pOutdoor->RetrieveHeight(vPosition);
 
                 // test for valid values
-                if(pTestFunc(fHeight, vPosition.y))
+                if(nTestFunc(fHeight, vPosition.y))
                 {
                     if(!j || !cBackground::_CheckIntersection(pList1, vPosition, 16.0f))
                     {
