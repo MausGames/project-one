@@ -52,7 +52,7 @@ void cForeground::Start()
 // end foreground aggregation
 void cForeground::End()
 {
-    // copy screen space to texture
+    // copy screen space to texture (faster than dedicated multisampled FBO, but only once)
     m_iFrameBuffer.GetColorTarget(0).pTexture->Enable(0);
     glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
   	                    F_TO_SI(Core::Graphics->GetViewResolution().x - m_iFrameBuffer.GetResolution().x) / 2,

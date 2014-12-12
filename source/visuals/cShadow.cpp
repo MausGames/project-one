@@ -273,7 +273,7 @@ void cShadow::__RenderInstanced(const coreMatrix4& mTransform, const std::vector
             if(!s_pProgramInstanced.IsUsable()) return;
             if(!s_pProgramInstanced->Enable())  return;
             s_pProgramInstanced->SendUniform(SHADOW_SHADER_MATRIX, mTransform, false);
-   
+
             // render lists with objects
             FOR_EACH(it, apList) {if((*it)->IsInstanced()) (*it)->Render(s_pProgramInstanced, NULL);}
             return;

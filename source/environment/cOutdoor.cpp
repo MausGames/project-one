@@ -82,18 +82,18 @@ void cOutdoor::LoadGeometry(const coreByte& iAlgorithm, const float& fGrade)
     m_fGrade     = fGrade;
 
     // select algorithm function
-    std::function<float(const float&, const float&)> pAlgorithmFunc;
+    std::function<float(const float&, const float&)> nAlgorithmFunc;
     switch(iAlgorithm)
     {
     default: ASSERT(false)
-    case 3:  pAlgorithmFunc = [](const float& x, const float& y) {float r = -(COS((x - I_TO_F(OUTDOOR_WIDTH)*0.5f)*0.075f*PI)*5.0f);                                                                                        return r;}; break;
-    case 1:  pAlgorithmFunc = [](const float& x, const float& y) {float r =  (ABS(SIN(x*0.075f*PI)*8.0f + SIN(y*0.075f*PI)*8.0f) - 6.0f);                                                                                   return r;}; break;
-    case 2:  pAlgorithmFunc = [](const float& x, const float& y) {float r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 13.0f);                                                      return r;}; break;
-    case 4:  pAlgorithmFunc = [](const float& x, const float& y) {float r = -(ABS(SIN(y*0.150f*PI)*0.25f - 0.5f*(x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.150f*PI) - 0.0f; if(r <    0.0f) r = -1.0f; return r;}; break;
-    case 7:  pAlgorithmFunc = [](const float& x, const float& y) {float r = -(ABS(SIN(y*0.075f*PI)*0.25f + 0.5f*(x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.075f*PI) - 1.5f; if(r < -100.0f) r = -1.0f; return r;}; break;
-    case 5:  pAlgorithmFunc = [](const float& x, const float& y) {float r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.150f*PI) - 1.0f;                            return r;}; break;
-    case 6:  pAlgorithmFunc = [](const float& x, const float& y) {float r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.075f*PI) + 3.0f;                            return r;}; break;
-    case 8:  pAlgorithmFunc = [](const float& x, const float& y) {float r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.075f*PI) + 1.0f;                            return r;}; break;
+    case 3: nAlgorithmFunc = [](const float& x, const float& y) {float r = -(COS((x - I_TO_F(OUTDOOR_WIDTH)*0.5f)*0.075f*PI)*5.0f);                                                                                        return r;}; break;
+    case 1: nAlgorithmFunc = [](const float& x, const float& y) {float r =  (ABS(SIN(x*0.075f*PI)*8.0f + SIN(y*0.075f*PI)*8.0f) - 6.0f);                                                                                   return r;}; break;
+    case 2: nAlgorithmFunc = [](const float& x, const float& y) {float r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 13.0f);                                                      return r;}; break;
+    case 4: nAlgorithmFunc = [](const float& x, const float& y) {float r = -(ABS(SIN(y*0.150f*PI)*0.25f - 0.5f*(x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.150f*PI) - 0.0f; if(r <    0.0f) r = -1.0f; return r;}; break;
+    case 7: nAlgorithmFunc = [](const float& x, const float& y) {float r = -(ABS(SIN(y*0.075f*PI)*0.25f + 0.5f*(x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.075f*PI) - 1.5f; if(r < -100.0f) r = -1.0f; return r;}; break;
+    case 5: nAlgorithmFunc = [](const float& x, const float& y) {float r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.150f*PI) - 1.0f;                            return r;}; break;
+    case 6: nAlgorithmFunc = [](const float& x, const float& y) {float r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.075f*PI) + 3.0f;                            return r;}; break;
+    case 8: nAlgorithmFunc = [](const float& x, const float& y) {float r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.075f*PI) + 1.0f;                            return r;}; break;
     }
 
     // create vertices
@@ -103,7 +103,7 @@ void cOutdoor::LoadGeometry(const coreByte& iAlgorithm, const float& fGrade)
         const int y = i / OUTDOOR_WIDTH;
 
         // calculate level (height) of the vertex
-        float fLevel = pAlgorithmFunc(I_TO_F(x), I_TO_F(y));
+        float fLevel = nAlgorithmFunc(I_TO_F(x), I_TO_F(y));
         if(fGrade)
         {
             // add randomness to the level and smooth out water-intersection-area
@@ -200,32 +200,36 @@ void cOutdoor::LoadGeometry(const coreByte& iAlgorithm, const float& fGrade)
                                               SIGN(coreVector3::Dot(coreVector3::Cross(aVertexData[i].vNormal, avOrtho1[i]), avOrtho2[i])));
     }
 
+    GLuint iNormFormat;
+    std::function<coreUint(const coreVector4&)> nPackFunc;
     if(CORE_GL_SUPPORT(ARB_vertex_type_2_10_10_10_rev))
     {
-        // reduce total vertex size
-        sVertexPacked aPackedData[OUTDOOR_TOTAL_VERTICES];
-        for(coreUint i = 0; i < OUTDOOR_TOTAL_VERTICES; ++i)
-        {
-            // convert specific vertex attributes
-            aPackedData[i].vPosition = aVertexData[i].vPosition;
-            aPackedData[i].iNormal   = coreVector4(aVertexData[i].vNormal, 0.0f).PackSnorm210();
-            aPackedData[i].iTangent  = aVertexData[i].vTangent.PackSnorm210();
-        }
-
-        // create compressed vertex buffer
-        coreVertexBuffer* pBuffer = m_pModel->CreateVertexBuffer(OUTDOOR_TOTAL_VERTICES, sizeof(sVertexPacked), aPackedData, CORE_DATABUFFER_STORAGE_STATIC);
-        pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_POSITION_NUM, 3, GL_FLOAT,              0);
-        pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_NORMAL_NUM,   4, GL_INT_2_10_10_10_REV, 3*sizeof(float));
-        pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_TANGENT_NUM,  4, GL_INT_2_10_10_10_REV, 3*sizeof(float) + 1*sizeof(coreUint));
+        // use high-precision packed format
+        iNormFormat = GL_INT_2_10_10_10_REV;
+        nPackFunc   = [](const coreVector4& vVector) {return vVector.PackSnorm210();};
     }
     else
     {
-        // create vertex buffer
-        coreVertexBuffer* pBuffer = m_pModel->CreateVertexBuffer(OUTDOOR_TOTAL_VERTICES, sizeof(sVertex), aVertexData, CORE_DATABUFFER_STORAGE_STATIC);
-        pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_POSITION_NUM, 3, GL_FLOAT, 0);
-        pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_NORMAL_NUM,   3, GL_FLOAT, 3*sizeof(float));
-        pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_TANGENT_NUM,  4, GL_FLOAT, 6*sizeof(float));
+        // use low-precision byte format
+        iNormFormat = GL_BYTE;
+        nPackFunc   = [](const coreVector4& vVector) {return vVector.PackSnorm4x8();};
     }
+
+    // reduce total vertex size
+    sVertexPacked aPackedData[OUTDOOR_TOTAL_VERTICES];
+    for(coreUint i = 0; i < OUTDOOR_TOTAL_VERTICES; ++i)
+    {
+        // convert specific vertex attributes
+        aPackedData[i].vPosition = aVertexData[i].vPosition;
+        aPackedData[i].iNormal   = nPackFunc(coreVector4(aVertexData[i].vNormal, 0.0f));
+        aPackedData[i].iTangent  = nPackFunc(aVertexData[i].vTangent);
+    }
+
+    // create vertex buffer
+    coreVertexBuffer* pBuffer = m_pModel->CreateVertexBuffer(OUTDOOR_TOTAL_VERTICES, sizeof(sVertexPacked), aPackedData, CORE_DATABUFFER_STORAGE_STATIC);
+    pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_POSITION_NUM, 3, GL_FLOAT,    0);
+    pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_NORMAL_NUM,   4, iNormFormat, 3*sizeof(float));
+    pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_TANGENT_NUM,  4, iNormFormat, 3*sizeof(float) + 1*sizeof(coreUint));
 
     // create index buffer
     m_pModel->CreateIndexBuffer(OUTDOOR_TOTAL_INDICES, sizeof(coreUshort), aiIndexData, CORE_DATABUFFER_STORAGE_STATIC);

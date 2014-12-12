@@ -31,7 +31,7 @@ void FragmentMain()
     float v1BumpFactor   = dot(v3MathLightDir, v3BumpNormal);
     
     // set distortion vector and lookup reflection texture
-    vec2 v2Distortion      = v3BumpNormal.xy * 0.018;
+    vec2 v2Distortion      = v3BumpNormal.xy * 0.02;
     vec3 v3AboveReflection = coreTexture2D(1, v2ScreenCoord + v2Distortion).rgb;
     
     // calculate dot-3 reflection factor
