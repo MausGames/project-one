@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configurationDescriptor version="94">
+<configurationDescriptor version="95">
   <projectmakefile>Makefile</projectmakefile>
   <confs>
     <conf name="Debug_Windows_mingw" type="1">
@@ -27,7 +27,7 @@
           <runcommandpicklistitem>"${OUTPUT_PATH}"</runcommandpicklistitem>
         </runcommandpicklist>
         <runcommand>"${OUTPUT_PATH}"</runcommand>
-        <rundir>../../executable/bin/windows/</rundir>
+        <rundir>../../executable/bin/windows/x86/</rundir>
         <buildfirst>true</buildfirst>
         <console-type>2</console-type>
         <terminal-type>0</terminal-type>
@@ -61,7 +61,7 @@
           <runcommandpicklistitem>"${OUTPUT_PATH}"</runcommandpicklistitem>
         </runcommandpicklist>
         <runcommand>"${OUTPUT_PATH}"</runcommand>
-        <rundir>../../executable/bin/linux/</rundir>
+        <rundir>../../executable/bin/linux/x64/</rundir>
         <buildfirst>true</buildfirst>
         <console-type>2</console-type>
         <terminal-type>0</terminal-type>
@@ -95,7 +95,7 @@
           <runcommandpicklistitem>"${OUTPUT_PATH}"</runcommandpicklistitem>
         </runcommandpicklist>
         <runcommand>"${OUTPUT_PATH}"</runcommand>
-        <rundir>../../executable/bin/linux/</rundir>
+        <rundir>../../executable/bin/linux/x64/</rundir>
         <buildfirst>true</buildfirst>
         <console-type>2</console-type>
         <terminal-type>0</terminal-type>
@@ -129,7 +129,7 @@
           <runcommandpicklistitem>"${OUTPUT_PATH}"</runcommandpicklistitem>
         </runcommandpicklist>
         <runcommand>"${OUTPUT_PATH}"</runcommand>
-        <rundir>../../executable/bin/windows/</rundir>
+        <rundir>../../executable/bin/windows/x86/</rundir>
         <buildfirst>true</buildfirst>
         <console-type>2</console-type>
         <terminal-type>0</terminal-type>
@@ -163,7 +163,7 @@
           <runcommandpicklistitem>"${OUTPUT_PATH}"</runcommandpicklistitem>
         </runcommandpicklist>
         <runcommand>"${OUTPUT_PATH}"</runcommand>
-        <rundir>../../executable/bin/linux/</rundir>
+        <rundir>../../executable/bin/linux/x64/</rundir>
         <buildfirst>true</buildfirst>
         <console-type>2</console-type>
         <terminal-type>0</terminal-type>
@@ -175,7 +175,7 @@
     <conf name="Release_Linux_clang" type="1">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
-        <platform>2</platform>
+        <platform>3</platform>
       </toolsSet>
       <dbx_gdbdebugger version="1">
         <gdb_pathmaps>
@@ -197,7 +197,7 @@
           <runcommandpicklistitem>"${OUTPUT_PATH}"</runcommandpicklistitem>
         </runcommandpicklist>
         <runcommand>"${OUTPUT_PATH}"</runcommand>
-        <rundir>../../executable/bin/linux/</rundir>
+        <rundir>../../executable/bin/linux/x64/</rundir>
         <buildfirst>true</buildfirst>
         <console-type>2</console-type>
         <terminal-type>0</terminal-type>

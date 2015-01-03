@@ -46,7 +46,7 @@ struct cConfig
 
     struct
     {
-        int aiType[INPUT_TYPES];           // selected input set (each element should have a different value)
+        coreByte aiType[INPUT_TYPES];      // selected input set (each element should have a different value)
         struct
         {
             int iMoveLeft;                 // key for moving left (ignored on joystick/gamepad)

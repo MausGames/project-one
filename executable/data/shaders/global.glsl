@@ -108,17 +108,14 @@ vec3 coreHSVtoRGB(const in vec3 v3HSV)
 
     float s = V * S;
     float t = s * (H - h);
-
     float p = V - s;
-    float q = V - t;
-    float o = p + t;
 
-    if(h == 1.0) return vec3(q, V, p);
-    if(h == 2.0) return vec3(p, V, o);
-    if(h == 3.0) return vec3(p, q, V);
-    if(h == 4.0) return vec3(o, p, V);
-    if(h == 5.0) return vec3(V, p, q);
-                 return vec3(V, o, p);
+    if(h == 1.0) return vec3(V - t, V,     p);
+    if(h == 2.0) return vec3(p,     V,     p + t);
+    if(h == 3.0) return vec3(p,     V - t, V);
+    if(h == 4.0) return vec3(p + t, p,     V);
+    if(h == 5.0) return vec3(V,     p,     V - t);
+                 return vec3(V,     p + t, p);
 }
 vec3 coreRGBtoHSV(const in vec3 v3RGB)
 {
@@ -486,7 +483,6 @@ uniform sampler2DShadow u_as2TextureShadow[CORE_NUM_TEXTURES_SHADOW];
     vec3 coreParticleRange()
     {
     #if defined(_CORE_OPTION_NO_ROTATION_)
-    
         return coreTranspose(coreToMat3(u_m4Camera)) * vec3(a_v3RawPosition.xy * a_v1DivScale, 0.0);
     #else
         float v1Sin = sin(a_v1DivAngle);

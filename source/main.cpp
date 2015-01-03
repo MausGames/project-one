@@ -17,12 +17,6 @@ cEnvironment*    g_pEnvironment    = NULL;
 cGame*           g_pGame           = NULL;
 
 #define _DIRECT_DEBUG_ (1)
-#if defined(_DIRECT_DEBUG_)
-
-    static coreLabel* m_pFPS = NULL;   // frame rate label for debugging purpose
-    static float m_fFPSValue = 0.0f;   // current smooth frame rate value
-
-#endif
 
 
 // ****************************************************************
@@ -46,16 +40,6 @@ void CoreApp::Init()
     g_pForeground     = new cForeground();
     g_pEnvironment    = new cEnvironment();
     g_pGame           = new cGame();
-
-#if defined(_DIRECT_DEBUG_)
-
-    // create frame rate label
-    m_pFPS = new coreLabel("ethnocentric.ttf", 24, 8);
-    m_pFPS->SetPosition (coreVector2(0.008f, 0.0f));
-    m_pFPS->SetCenter   (coreVector2( -0.5f, 0.5f));
-    m_pFPS->SetAlignment(coreVector2(  1.0f,-1.0f));
-
-#endif
 }
 
 
@@ -63,9 +47,6 @@ void CoreApp::Init()
 // exit the application
 void CoreApp::Exit()
 {
-    // delete frame rate label
-    SAFE_DELETE(m_pFPS)
-
     // delete and exit main components
     SAFE_DELETE(g_pGame)
     SAFE_DELETE(g_pEnvironment)
@@ -86,35 +67,34 @@ void CoreApp::Render()
     // update the shadow map class
     cShadow::GlobalUpdate();
 
-    // render the environment
-    g_pEnvironment->Render();
-
-    // create foreground frame buffer
-    g_pForeground->Start();
+    Core::Debug->MeasureStart("Background");
     {
-        // render the game
-        if(g_pGame) g_pGame->Render();
-
-        // apply outline-effect
-        g_pOutline->Apply();
+        // render the environment
+        g_pEnvironment->Render();
     }
-    g_pForeground->End();
+    Core::Debug->MeasureEnd("Background");
 
-    // apply post-processing
-    g_pPostProcessing->Apply();
-
-#if defined(_DIRECT_DEBUG_)
-
-    if(!Core::Input->GetKeyboardButton(CORE_INPUT_KEY(PRINTSCREEN), CORE_INPUT_PRESS))
+    Core::Debug->MeasureStart("Foreground");
     {
-        // update, move and render frame rate
-        if(Core::System->GetTime()) m_fFPSValue = m_fFPSValue * 0.95f + RCP(Core::System->GetTime()) * 0.05f;
-        m_pFPS->SetText(PRINT("%.1f", m_fFPSValue));
-        m_pFPS->Move();
-        m_pFPS->Render();
-    }
+        // create foreground frame buffer
+        g_pForeground->Start();
+        {
+            // render the game
+            if(g_pGame) g_pGame->Render();
 
-#endif
+            // apply outline-effect
+            g_pOutline->Apply();
+        }
+        g_pForeground->End();
+    }
+    Core::Debug->MeasureEnd("Foreground");
+
+    Core::Debug->MeasureStart("Post Processing");
+    {
+        // apply post-processing
+        g_pPostProcessing->Apply();
+    }
+    Core::Debug->MeasureEnd("Post Processing");
 }
 
 

@@ -31,7 +31,7 @@
 
 // ****************************************************************
 // backgroud interface
-class cBackground
+class INTERFACE cBackground
 {
 protected:
     coreFrameBuffer m_iFrameBuffer;                     // background frame buffer (intern, multisampled)
@@ -77,8 +77,8 @@ protected:
     static void _FillInfinite(coreBatchList* pObjectList);
 
     // check for intersection with other objects
-    static bool _CheckIntersection     (coreBatchList* pObjectList, const coreVector2& vNewPos, const float& fDistanceSq);
-    static bool _CheckIntersectionQuick(coreBatchList* pObjectList, const coreVector2& vNewPos, const float& fDistanceSq);
+    static bool _CheckIntersection     (const coreBatchList* pObjectList, const coreVector2& vNewPos, const float& fDistanceSq);
+    static bool _CheckIntersectionQuick(const coreBatchList* pObjectList, const coreVector2& vNewPos, const float& fDistanceSq);
 
 
 private:
@@ -206,14 +206,14 @@ class cSpace : public cBackground
 private:
     coreSprite* m_pBackground;               // Hintergrund des Weltraums
     coreSprite* m_pStar;                     // Sterne des Weltraums
-                                             
+
     float m_fOffset;                         // Versatz des Hintergrunds
-                                             
+
     coreVector3 m_avColor[2];                // Farb-Werte des Hintergrunds
     float m_fFactor;                         // Misch-Faktor
 
     coreSprite* m_pOutdoorWrap;              // Tiefenüberzeichner für Außen-Bereiche
-                                             
+
     coreObject3D* m_apMeteor[NUM_METEORS];   // Meteoriten-Objekte
     coreInstanceList* m_apMeteorList[2];     // Instanzierte Liste für die Meteoriten
 
@@ -223,7 +223,7 @@ private:
 
     BOOL m_bUseMeteor;                       // Meteoriten-Animation verwenden
     BOOL m_bUseOutdoor;                      // Außengebiet verwenden
-    
+
 
 public:
     cSpace(const BYTE &Type)noexcept;
@@ -408,7 +408,7 @@ public:
 };
 
 
-#endif 
+#endif
 
 
 #endif // _P1_GUARD_ENVIRONMENT_H_

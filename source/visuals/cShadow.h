@@ -21,7 +21,7 @@
 #define SHADOW_CLIP_FAR          (140.0f)                                        // far clipping plane
 #define SHADOW_DETAIL_X          (0.014f)                                        // view size of the shadow map (higher = sharper, but more artifacts)
 #define SHADOW_DETAIL_Y          (0.013f)                                        // same for Y
-                                                  
+
 #define SHADOW_HANDLES                   (5u)                 // number of handles for shader-programs with shadow maps
 #define SHADOW_HANDLE_OUTDOOR            (0u)                 // outdoor-surface handle
 #define SHADOW_HANDLE_OBJECT             (1u)                 // single object handle

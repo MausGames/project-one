@@ -38,7 +38,7 @@ cGame::cGame()noexcept
 
     //m_apTest[1]->SetSize(coreVector3(0.99f, 1.0f, 1.0f));
 
-    for(int i = 0; i < ARRAY_SIZE(m_apTest); ++i)
+    for(int i = 0; i < int(ARRAY_SIZE(m_apTest)); ++i)
     {
         if(m_apTest[i]) m_apTest[i]->SetPosition(coreVector3(FOREGROUND_AREA.x * I_TO_F(i-3) * 0.22f, 10.0f, 0.0f));
        // if(m_apTest[i]) m_apTest[i]->SetDirection(coreVector3(-1.0f,-1.0f,0.0f).Normalize());
@@ -50,7 +50,7 @@ cGame::cGame()noexcept
 // destructor
 cGame::~cGame()
 {
-    for(int i = 0; i < ARRAY_SIZE(m_apTest); ++i)
+    for(int i = 0; i < int(ARRAY_SIZE(m_apTest)); ++i)
         SAFE_DELETE(m_apTest[i])
 }
 
@@ -64,7 +64,7 @@ void cGame::Render()
         m_aPlayer[i].Render();
 
 
-    for(int i = 0; i < ARRAY_SIZE(m_apTest); ++i)
+    for(int i = 0; i < int(ARRAY_SIZE(m_apTest)); ++i)
         if(m_apTest[i]) m_apTest[i]->Render();
 }
 
@@ -88,6 +88,6 @@ void cGame::Move()
     g_pEnvironment->SetTargetSide(vCenterPos * 0.65f);
 
 
-    for(int i = 0; i < ARRAY_SIZE(m_apTest); ++i)
+    for(int i = 0; i < int(ARRAY_SIZE(m_apTest)); ++i)
         if(m_apTest[i]) m_apTest[i]->Move();
 }

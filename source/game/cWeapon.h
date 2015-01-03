@@ -13,7 +13,7 @@
 
 // ****************************************************************
 // 
-class cWeapon final
+class INTERFACE cWeapon
 {
 private:
 
