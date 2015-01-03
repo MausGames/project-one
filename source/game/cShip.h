@@ -13,7 +13,7 @@
 
 // ****************************************************************
 // ship interface
-class cShip : public coreObject3D
+class INTERFACE cShip : public coreObject3D
 {
 private:
     coreModelPtr m_pModelLow;   // low-polygon model object (used for depth-only, shadow, outline-effect)

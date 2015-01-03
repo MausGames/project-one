@@ -25,10 +25,10 @@ class cWater : public coreObject3D
 protected:
     coreFlow m_fAnimation;                // water animation value
     float    m_fFlyOffset;                // current fly offset
-                                      
+
     coreFrameBuffer m_iAboveReflection;   // reflection frame buffer
     coreFrameBuffer m_iBelowRefraction;   // refraction frame buffer with geometric depth
-                                      
+
     coreObject2D m_Sky;                   // sky-plane as reflection background
 
 
@@ -55,7 +55,7 @@ public:
 
 private:
     DISABLE_COPY(cWater)
-     
+
     // hide default render functions
     inline void Render(const coreProgramPtr& pProgram)override {ASSERT(false)}
     inline void Render()override                               {ASSERT(false)}

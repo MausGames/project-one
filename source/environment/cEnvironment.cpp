@@ -210,7 +210,7 @@ void cBackground::ClearObjects()
 void cBackground::_FillInfinite(coreBatchList* pObjectList)
 {
     // save current size and loop through all objects
-    const coreUint iCurSize = pObjectList->List()->size();
+    const coreUint iCurSize = coreUint(pObjectList->List()->size());
     for(coreUint i = 0; i < iCurSize; ++i)
     {
         coreObject3D* pOldObject = (*pObjectList->List())[i];
@@ -231,7 +231,7 @@ void cBackground::_FillInfinite(coreBatchList* pObjectList)
 
 // ****************************************************************
 // check for intersection with other objects
-bool cBackground::_CheckIntersection(coreBatchList* pObjectList, const coreVector2& vNewPos, const float& fDistanceSq)
+bool cBackground::_CheckIntersection(const coreBatchList* pObjectList, const coreVector2& vNewPos, const float& fDistanceSq)
 {
     // loop through all objects
     FOR_EACH(it, *pObjectList->List())
@@ -243,7 +243,7 @@ bool cBackground::_CheckIntersection(coreBatchList* pObjectList, const coreVecto
     return false;
 }
 
-bool cBackground::_CheckIntersectionQuick(coreBatchList* pObjectList, const coreVector2& vNewPos, const float& fDistanceSq)
+bool cBackground::_CheckIntersectionQuick(const coreBatchList* pObjectList, const coreVector2& vNewPos, const float& fDistanceSq)
 {
     // compare only with last object
     if(!pObjectList->List()->empty())
@@ -625,7 +625,7 @@ cGrass::cGrass()noexcept
             pObject->SetSize       (coreVector3(coreVector2(2.1f,2.1f) * Core::Rand->Float(15.0f, 21.0f), 1.0f));
             pObject->SetDirection  (coreVector3(0.0f,0.0f,-1.0f));
             pObject->SetOrientation(coreVector3(coreVector2::Rand(), 0.0f));
-            pObject->SetAlpha      (0.8f);
+            pObject->SetAlpha      (0.7f);
             pObject->SetTexOffset  (coreVector2::Rand(0.0f,10.0f, 0.0f,10.0f));
 
             // add object to the list

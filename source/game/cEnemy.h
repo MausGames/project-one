@@ -12,8 +12,8 @@
 
 
 // ****************************************************************
-// enemy entity class
-class cEnemy : public cShip
+// enemy entity interface
+class INTERFACE cEnemy : public cShip
 {
 protected:
 

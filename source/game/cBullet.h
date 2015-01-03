@@ -13,7 +13,7 @@
 
 // ****************************************************************
 // 
-class cBullet final
+class INTERFACE cBullet
 {
 private:
 

@@ -19,7 +19,7 @@ static void CheckConfig(cConfig* pConfig)
 {
     // clamp input set selections
     for(coreByte i = 0; i < INPUT_TYPES; ++i)
-        pConfig->Input.aiType[i] = CLAMP(pConfig->Input.aiType[i], 0, int(INPUT_SETS-1));
+        pConfig->Input.aiType[i] = CLAMP<coreByte>(pConfig->Input.aiType[i], 0, INPUT_SETS-1);
 
     // loop trough input sets
     for(coreByte i = 0; i < INPUT_SETS;  ++i)
@@ -138,9 +138,9 @@ void UpdateInput()
 {
     for(coreByte i = 0; i < INPUT_TYPES; ++i)
     {
-        const int&  iType = g_CurConfig.Input.aiType[i];
-        const auto& oSet  = g_CurConfig.Input.aSet[iType];
-        cInput&     oMap  = g_aInput[iType];
+        const coreByte& iType = g_CurConfig.Input.aiType[i];
+        const auto&     oSet  = g_CurConfig.Input.aSet[iType];
+        cInput&         oMap  = g_aInput[iType];
 
         // reset mapped input values
         std::memset(&oMap, 0, sizeof(oMap));

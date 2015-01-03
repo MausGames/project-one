@@ -6,11 +6,11 @@
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
-			<Target title="Debug_Windows_mingw">
-				<Option output="../../executable/bin/windows/ProjectOne_mingw_debug" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="../../executable/bin/windows" />
+			<Target title="Debug_Windows_x86_mingw">
+				<Option output="../../executable/bin/windows/x86/ProjectOne_mingw_debug" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../../executable/bin/windows/x86" />
 				<Option object_output="obj/Debug/" />
-				<Option external_deps="../../../CoreEngine/projects/libCoreEngine_mingw_debug.a;" />
+				<Option external_deps="../../../CoreEngine/output/windows/x86/libCoreEngine_mingw_debug.a;" />
 				<Option type="0" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -31,16 +31,16 @@
 					<Add library="ogg" />
 					<Add library="vorbis" />
 					<Add library="vorbisfile" />
-					<Add directory="../../../CoreEngine/libraries/windows" />
-					<Add directory="../../../CoreEngine/libraries/windows/mingw" />
-					<Add directory="../../../CoreEngine/projects/" />
+					<Add directory="../../../CoreEngine/libraries/bin/windows/x86" />
+					<Add directory="../../../CoreEngine/libraries/bin/windows/x86/mingw" />
+					<Add directory="../../../CoreEngine/output/windows/x86" />
 				</Linker>
 			</Target>
-			<Target title="Debug_Linux_gcc">
-				<Option output="../../executable/bin/linux/ProjectOne_gcc_debug" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="../../executable/bin/linux" />
+			<Target title="Debug_Linux_x64_gcc">
+				<Option output="../../executable/bin/linux/x64/ProjectOne_gcc_debug" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../../executable/bin/linux/x64" />
 				<Option object_output="obj/Debug/" />
-				<Option external_deps="../../../CoreEngine/projects/libCoreEngine_gcc_debug.a;" />
+				<Option external_deps="../../../CoreEngine/output/linux/x64/libCoreEngine_gcc_debug.a;" />
 				<Option type="0" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -58,15 +58,15 @@
 					<Add library="ogg" />
 					<Add library="vorbis" />
 					<Add library="vorbisfile" />
-					<Add directory="../../../CoreEngine/libraries/linux" />
-					<Add directory="../../../CoreEngine/projects/" />
+					<Add directory="../../../CoreEngine/libraries/bin/linux/x64" />
+					<Add directory="../../../CoreEngine/output/linux/x64" />
 				</Linker>
 			</Target>
-			<Target title="Release_Windows_mingw">
-				<Option output="../../executable/bin/windows/ProjectOne_mingw" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="../../executable/bin/windows" />
+			<Target title="Release_Windows_x86_mingw">
+				<Option output="../../executable/bin/windows/x86/ProjectOne_mingw" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../../executable/bin/windows/x86" />
 				<Option object_output="obj/Release/" />
-				<Option external_deps="../../../CoreEngine/projects/libCoreEngine_mingw.a;" />
+				<Option external_deps="../../../CoreEngine/output/windows/x86/libCoreEngine_mingw.a;" />
 				<Option type="0" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -89,16 +89,16 @@
 					<Add library="ogg" />
 					<Add library="vorbis" />
 					<Add library="vorbisfile" />
-					<Add directory="../../../CoreEngine/libraries/windows" />
-					<Add directory="../../../CoreEngine/libraries/windows/mingw" />
-					<Add directory="../../../CoreEngine/projects/" />
+					<Add directory="../../../CoreEngine/libraries/bin/windows/x86" />
+					<Add directory="../../../CoreEngine/libraries/bin/windows/x86/mingw" />
+					<Add directory="../../../CoreEngine/output/windows/x86" />
 				</Linker>
 			</Target>
-			<Target title="Release_Linux_gcc">
-				<Option output="../../executable/bin/linux/ProjectOne_gcc" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="../../executable/bin/linux" />
+			<Target title="Release_Linux_x64_gcc">
+				<Option output="../../executable/bin/linux/x64/ProjectOne_gcc" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../../executable/bin/linux/x64" />
 				<Option object_output="obj/Release/" />
-				<Option external_deps="../../../CoreEngine/projects/libCoreEngine_gcc.a;" />
+				<Option external_deps="../../../CoreEngine/output/linux/x64/libCoreEngine_gcc.a;" />
 				<Option type="0" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -116,8 +116,8 @@
 					<Add library="ogg" />
 					<Add library="vorbis" />
 					<Add library="vorbisfile" />
-					<Add directory="../../../CoreEngine/libraries/linux" />
-					<Add directory="../../../CoreEngine/projects/" />
+					<Add directory="../../../CoreEngine/libraries/bin/linux/x64" />
+					<Add directory="../../../CoreEngine/output/linux/x64" />
 				</Linker>
 			</Target>
 		</Build>
