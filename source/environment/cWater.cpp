@@ -60,7 +60,7 @@ void cWater::Render(coreFrameBuffer* pBackground)
 {
     if(!this->GetProgram().IsUsable()) return;
 
-    // blit current background color into own refraction buffer
+    // blit current background color into own refraction buffer (# hotspot)
     pBackground->Blit(CORE_FRAMEBUFFER_TARGET_COLOR, &m_iBelowRefraction);
 
     // update all water uniforms

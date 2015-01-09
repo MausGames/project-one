@@ -18,7 +18,7 @@ void FragmentMain()
     vec3 v3TexNormal = coreTexture2D(1, v_av2TexCoord[0]).xyz;
     vec3 v3TexColor  = coreTexture2D(0, v_av2TexCoord[0]).rgb;
     
-#if (_CORE_QUALITY_) == 0 || defined(_P1_SIMPLE_)
+#if (_CORE_QUALITY_) == 0
 
     // ignore normal map
     v3TexNormal = vec3(0.5,0.5,1.0);

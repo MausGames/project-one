@@ -66,7 +66,7 @@ cPostProcessing::~cPostProcessing()
 // apply post-processing
 void cPostProcessing::Apply()
 {
-    // switch back to default frame buffer
+    // switch back to default frame buffer (again)
     coreFrameBuffer::EndDraw();
 
     // bind all required frame buffers

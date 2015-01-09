@@ -49,7 +49,7 @@ void cOutline::Apply()
         FOR_EACH(it, m_apObject)
             (*it)->Render(s_pProgramSingle);
 
-        // draw list with objects
+        // draw lists with objects
         FOR_EACH(it, m_apList)
             (*it)->Render(s_pProgramInstanced, s_pProgramSingle);
     }

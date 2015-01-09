@@ -22,12 +22,10 @@
 #define SHADOW_DETAIL_X          (0.014f)                                        // view size of the shadow map (higher = sharper, but more artifacts)
 #define SHADOW_DETAIL_Y          (0.013f)                                        // same for Y
 
-#define SHADOW_HANDLES                   (5u)                 // number of handles for shader-programs with shadow maps
+#define SHADOW_HANDLES                   (3u)                 // number of handles for shader-programs with shadow maps
 #define SHADOW_HANDLE_OUTDOOR            (0u)                 // outdoor-surface handle
 #define SHADOW_HANDLE_OBJECT             (1u)                 // single object handle
 #define SHADOW_HANDLE_OBJECT_INST        (2u)                 // instanced object handle
-#define SHADOW_HANDLE_OBJECT_SIMPLE      (3u)                 // single simple object handle (simple = no normal mapping)
-#define SHADOW_HANDLE_OBJECT_SIMPLE_INST (4u)                 // instanced simple object handle
 #define SHADOW_SHADER_MATRIX             "u_m4ShadowMatrix"   // name of the shadow matrix uniform (transformation)
 
 

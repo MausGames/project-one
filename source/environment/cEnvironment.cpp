@@ -85,10 +85,7 @@ void cBackground::Render()
 
             // send shadow matrix to single shader-program
             if(!m_apAddObject.empty() || !m_apGroundObjectList.empty())
-            {
-                cShadow::EnableShadowRead(SHADOW_HANDLE_OBJECT_SIMPLE);
                 cShadow::EnableShadowRead(SHADOW_HANDLE_OBJECT);
-            }
 
             // render additional objects
             FOR_EACH(it, m_apAddObject)
@@ -96,10 +93,7 @@ void cBackground::Render()
 
             // send shadow matrix to instanced shader-program
             if(!m_apGroundObjectList.empty())
-            {
-                cShadow::EnableShadowRead(SHADOW_HANDLE_OBJECT_SIMPLE_INST);
                 cShadow::EnableShadowRead(SHADOW_HANDLE_OBJECT_INST);
-            }
 
             // render all ground objects
             FOR_EACH(it, m_apGroundObjectList)
@@ -108,7 +102,7 @@ void cBackground::Render()
             // render the outdoor-surface
             if(m_pOutdoor) m_pOutdoor->Render();
 
-            // TODO # put transparent add-objects and decals here
+            // TODO # put transparent add-objects and decals here (to be in water)
 
             // render the water-surface
             if(m_pWater) m_pWater->Render(&m_iFrameBuffer);
