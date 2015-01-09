@@ -47,7 +47,6 @@
 #define LIGHT_DIRECTION    coreVector3(0.583953857f, -0.642349243f, -0.496360779f)
 
 #define SHADER_SHADOW      "#define _P1_SHADOW_  (1) \n"
-#define SHADER_SIMPLE      "#define _P1_SIMPLE_  (1) \n"
 #define SHADER_SPHERIC     "#define _P1_SPHERIC_ (1) \n"
 
 #define ENABLE_ID                           \

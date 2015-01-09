@@ -81,12 +81,10 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreShader> ("object.vert",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert");
     Core::Manager::Resource->Load<coreShader> ("object.frag",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.frag");
     Core::Manager::Resource->Load<coreShader> ("object_shadow.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.frag", SHADER_SHADOW);
-    Core::Manager::Resource->Load<coreShader> ("object_shadow_simple.frag",       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.frag", SHADER_SHADOW SHADER_SIMPLE);
     Core::Manager::Resource->Load<coreShader> ("object_ship.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag");
     Core::Manager::Resource->Load<coreShader> ("object_inst.vert",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("object_inst.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("object_shadow_inst.frag",         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.frag", CORE_SHADER_OPTION_INSTANCING SHADER_SHADOW);
-    Core::Manager::Resource->Load<coreShader> ("object_shadow_simple_inst.frag",  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.frag", CORE_SHADER_OPTION_INSTANCING SHADER_SHADOW SHADER_SIMPLE);
 
     Core::Manager::Resource->Load<coreSound>  ("environment_nature.wav",          CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_nature.wav");
 
@@ -177,11 +175,6 @@ static void SetupResources()
         ->AttachShader("object_shadow.frag")
         ->Finish();
 
-    ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("object_shadow_simple_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
-        ->AttachShader("object.vert")
-        ->AttachShader("object_shadow_simple.frag")
-        ->Finish();
-
     ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("object_ship_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("object.vert")
         ->AttachShader("object_ship.frag")
@@ -195,11 +188,6 @@ static void SetupResources()
     ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("object_shadow_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("object_inst.vert")
         ->AttachShader("object_shadow_inst.frag")
-        ->Finish();
-
-    ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("object_shadow_simple_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
-        ->AttachShader("object_inst.vert")
-        ->AttachShader("object_shadow_simple_inst.frag")
         ->Finish();
 }
 

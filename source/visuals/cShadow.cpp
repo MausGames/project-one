@@ -54,7 +54,7 @@ void cShadow::Update()
     FOR_EACH(it, s_apGlobalList)   FOR_EACH_SET(et, it+1, s_apGlobalList)   ASSERT((*it) != (*et))
 
 #endif
-    
+
     // fill the shadow map
     m_iFrameBuffer.StartDraw();
     m_iFrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_DEPTH);
@@ -73,7 +73,7 @@ void cShadow::Update()
     }
 
     // enable shadow map
-    m_iFrameBuffer.GetDepthTarget().pTexture->Enable(CORE_TEXTURE_SHADOW + 0); 
+    m_iFrameBuffer.GetDepthTarget().pTexture->Enable(CORE_TEXTURE_SHADOW + 0);
 }
 
 
@@ -108,11 +108,9 @@ void cShadow::GlobalInit()
     s_pProgramInstanced = Core::Manager::Resource->Get<coreProgram>("effect_shadow_inst_program");
 
     // load shader-programs with shadow maps
-    s_apHandle[SHADOW_HANDLE_OUTDOOR]            = Core::Manager::Resource->Get<coreProgram>("environment_outdoor_program");
-    s_apHandle[SHADOW_HANDLE_OBJECT]             = Core::Manager::Resource->Get<coreProgram>("object_shadow_program");
-    s_apHandle[SHADOW_HANDLE_OBJECT_INST]        = Core::Manager::Resource->Get<coreProgram>("object_shadow_inst_program");
-    s_apHandle[SHADOW_HANDLE_OBJECT_SIMPLE]      = Core::Manager::Resource->Get<coreProgram>("object_shadow_simple_program");
-    s_apHandle[SHADOW_HANDLE_OBJECT_SIMPLE_INST] = Core::Manager::Resource->Get<coreProgram>("object_shadow_simple_inst_program");
+    s_apHandle[SHADOW_HANDLE_OUTDOOR]     = Core::Manager::Resource->Get<coreProgram>("environment_outdoor_program");
+    s_apHandle[SHADOW_HANDLE_OBJECT]      = Core::Manager::Resource->Get<coreProgram>("object_shadow_program");
+    s_apHandle[SHADOW_HANDLE_OBJECT_INST] = Core::Manager::Resource->Get<coreProgram>("object_shadow_inst_program");
 
     // adjust shader-programs
     cShadow::Recompile();
@@ -185,11 +183,8 @@ void cShadow::Recompile()
 {
     for(coreByte i = 0; i < SHADOW_HANDLES; ++i)
     {
-        const bool  bSimple    = (i == SHADOW_HANDLE_OBJECT_SIMPLE || i == SHADOW_HANDLE_OBJECT_SIMPLE_INST) ? true : false;
-        const bool  bInstanced = (i == SHADOW_HANDLE_OBJECT_INST   || i == SHADOW_HANDLE_OBJECT_SIMPLE_INST) ? true : false;
-        const char* pcConfig   = PRINT("%s %s %s", g_CurConfig.Graphics.iShadow ? SHADER_SHADOW                 : "",
-                                                   bSimple                      ? SHADER_SIMPLE                 : "",
-                                                   bInstanced                   ? CORE_SHADER_OPTION_INSTANCING : "");
+        const char* pcConfig = PRINT("%s %s", g_CurConfig.Graphics.iShadow     ? SHADER_SHADOW                 : "",
+                                              (i == SHADOW_HANDLE_OBJECT_INST) ? CORE_SHADER_OPTION_INSTANCING : "");
 
         // change configuration of related shaders
         FOR_EACH(it, s_apHandle[i]->GetShader())

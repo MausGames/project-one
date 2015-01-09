@@ -11,6 +11,7 @@
 #define _P1_GUARD_ENVIRONMENT_H_
 
 // TODO: affect decals by early depth-pass
+// TODO: render depth-quads on unused background areas (transition!)
 
 
 // ****************************************************************
@@ -30,7 +31,7 @@
 
 
 // ****************************************************************
-// backgroud interface
+// background interface
 class INTERFACE cBackground
 {
 protected:
