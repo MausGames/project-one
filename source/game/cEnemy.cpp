@@ -25,6 +25,9 @@ cEnemy::cEnemy()noexcept
     // add enemy to global shadow and outline
     cShadow::BindGlobalObject(this);
     g_pOutline->BindObject(this);
+
+
+    this->ChangeType(TYPE_ENEMY);
 }
 
 
@@ -35,6 +38,9 @@ cEnemy::~cEnemy()
     // remove enemy from global shadow and outline
     cShadow::UnbindGlobalObject(this);
     g_pOutline->UnbindObject(this);
+
+
+    this->ChangeType(0);
 }
 
 

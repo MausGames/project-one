@@ -449,7 +449,7 @@ cGrass::cGrass()noexcept
     pList1 = new coreBatchList(GRASS_STONES_RESERVE);
     pList1->DefineProgram("object_shadow_inst_program");
     {
-        for(int j = 0; j < 2; ++j)
+        for(int j = 0; j < 2; ++j)   // types
         {
             const coreUint iStoneTries = j ? GRASS_STONES_2_NUM  : GRASS_STONES_1_NUM;
             const float    fStoneSize  = j ? GRASS_STONES_2_SIZE : GRASS_STONES_1_SIZE;
@@ -533,8 +533,8 @@ cGrass::cGrass()noexcept
                     // set object properties
                     pObject->SetPosition   (coreVector3(vPosition, fHeight-0.8f));
                     pObject->SetSize       (coreVector3::Rand(1.3f,1.6f, 1.3f,1.6f, 1.3f,1.6f) * 2.0f);
-                    pObject->SetDirection  (coreVector3(0.0f,0.0f,-1.0f));
-                    pObject->SetOrientation(coreVector3(coreVector2::Rand(), 0.0f));
+                    pObject->SetDirection  (coreVector3(coreVector2::Rand(), 0.0f));
+                    pObject->SetOrientation(coreVector3(0.0f,0.0f,1.0f));
                     pObject->SetColor3     (coreVector3(1.0f, 1.0f * Core::Rand->Float(0.55f, 0.7f), 0.5f));
 
                     // add object to the list
@@ -564,30 +564,33 @@ cGrass::cGrass()noexcept
     {
         for(coreUint i = 0; i < GRASS_FLOWERS_NUM; ++i)
         {
-            // calculate position and height
-            const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.45f, 0.45f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(GRASS_FLOWERS_NUM)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
-            const float       fHeight   = m_pOutdoor->RetrieveHeight(vPosition);
-
-            // test for valid values
-            if(fHeight > -15.0f)
+            for(coreUint j = 0; j < 3; ++j)   // tries
             {
-                if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 64.0f))
+                // calculate position and height
+                const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.45f, 0.45f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(GRASS_FLOWERS_NUM)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
+                const float       fHeight   = m_pOutdoor->RetrieveHeight(vPosition);
+
+                // test for valid values
+                if(fHeight > -15.0f)
                 {
-                    // load object resources
-                    coreObject3D* pObject = new coreObject3D();
-                    pObject->DefineModel  ("default_square.md5mesh");
-                    pObject->DefineTexture(0, "environment_flowers.png");
-                    pObject->DefineProgram("effect_decal_spheric_program");
+                    if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 64.0f))
+                    {
+                        // load object resources
+                        coreObject3D* pObject = new coreObject3D();
+                        pObject->DefineModel  (Core::Manager::Object->GetLowModel());
+                        pObject->DefineTexture(0, "environment_flowers.png");
+                        pObject->DefineProgram("effect_decal_spheric_program");
 
-                    // set object properties
-                    pObject->SetPosition   (coreVector3(vPosition, fHeight-0.5f));
-                    pObject->SetSize       (coreVector3(coreVector2(1.65f,1.65f) * Core::Rand->Float(8.5f, 10.0f), 1.0f));
-                    pObject->SetDirection  (coreVector3(0.0f,0.0f,-1.0f));
-                    pObject->SetOrientation(coreVector3(coreVector2::Rand(), 0.0f));
-                    pObject->SetTexOffset  (coreVector2::Rand(0.0f,10.0f, 0.0f,10.0f));
+                        // set object properties
+                        pObject->SetPosition (coreVector3(vPosition, fHeight-0.5f));
+                        pObject->SetSize     (coreVector3(coreVector2(1.65f,1.65f) * Core::Rand->Float(8.5f, 10.0f), 1.0f));
+                        pObject->SetDirection(coreVector3(coreVector2::Rand(), 0.0f));
+                        pObject->SetTexOffset(coreVector2::Rand(0.0f,10.0f, 0.0f,10.0f));
 
-                    // add object to the list
-                    pList1->BindObject(pObject);
+                        // add object to the list
+                        pList1->BindObject(pObject);
+                        break;
+                    }
                 }
             }
         }
@@ -610,17 +613,16 @@ cGrass::cGrass()noexcept
 
             // load object resources
             coreObject3D* pObject = new coreObject3D();
-            pObject->DefineModel  ("default_square.md5mesh");
+            pObject->DefineModel  (Core::Manager::Object->GetLowModel());
             pObject->DefineTexture(0, "environment_clouds_mid.png");
             pObject->DefineProgram("environment_clouds_program");
 
             // set object properties
-            pObject->SetPosition   (coreVector3(vPosition, fHeight));
-            pObject->SetSize       (coreVector3(coreVector2(2.1f,2.1f) * Core::Rand->Float(15.0f, 21.0f), 1.0f));
-            pObject->SetDirection  (coreVector3(0.0f,0.0f,-1.0f));
-            pObject->SetOrientation(coreVector3(coreVector2::Rand(), 0.0f));
-            pObject->SetAlpha      (0.7f);
-            pObject->SetTexOffset  (coreVector2::Rand(0.0f,10.0f, 0.0f,10.0f));
+            pObject->SetPosition (coreVector3(vPosition, fHeight));
+            pObject->SetSize     (coreVector3(coreVector2(2.1f,2.1f) * Core::Rand->Float(15.0f, 21.0f), 1.0f));
+            pObject->SetDirection(coreVector3(coreVector2::Rand(), 0.0f));
+            pObject->SetAlpha    (0.7f);
+            pObject->SetTexOffset(coreVector2::Rand(0.0f,10.0f, 0.0f,10.0f));
 
             // add object to the list
             pList1->BindObject(pObject);

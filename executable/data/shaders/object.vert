@@ -18,7 +18,7 @@ varying vec4 v_v4ShadowPixel;   // pixel coordinates viewed from the light sourc
 void VertexMain()
 {
     // transform position and texture coordinates
-    vec4 v4NewPosition = vec4(coreObject3DTransform(), 1.0);
+    vec4 v4NewPosition = vec4(coreObject3DTransformRaw(), 1.0);
     gl_Position        = u_m4ViewProj     * v4NewPosition;
     v_v4ShadowPixel    = u_m4ShadowMatrix * v4NewPosition;
     v_av2TexCoord[0]   = a_v2RawTexCoord;

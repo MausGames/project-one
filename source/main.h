@@ -49,6 +49,9 @@
 #define SHADER_SHADOW      "#define _P1_SHADOW_  (1) \n"
 #define SHADER_SPHERIC     "#define _P1_SPHERIC_ (1) \n"
 
+#define TYPE_PLAYER        (1)
+#define TYPE_ENEMY         (10)
+
 #define ENABLE_ID                           \
     virtual const int   GetID  ()const = 0; \
     virtual const char* GetName()const = 0;

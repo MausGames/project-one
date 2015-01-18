@@ -119,6 +119,9 @@ void cPlayer::Resurrect(const coreVector2& vPosition)
     // add player to global shadow and outline
     cShadow::BindGlobalObject(this);
     g_pOutline->BindObject(this);
+
+
+    this->ChangeType(TYPE_PLAYER);
 }
 
 
@@ -133,4 +136,7 @@ void cPlayer::Kill(const bool& bAnimated)
     // remove player from global shadow and outline
     cShadow::UnbindGlobalObject(this);
     g_pOutline->UnbindObject(this);
+
+
+    this->ChangeType(0);
 }

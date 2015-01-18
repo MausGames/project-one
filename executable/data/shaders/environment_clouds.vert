@@ -11,10 +11,10 @@
 void VertexMain()
 {
     // transform position (override depth for better early depth-test)
-    gl_Position   = coreObject3DPosition();
+    gl_Position   = coreObject3DPositionLow();
     gl_Position.z = 0.25 * gl_Position.w;
     
     // transform texture coordinates
-    v_av2TexCoord[0] = a_v2RawTexCoord + u_v2TexOffset;
-    v_av2TexCoord[1] = a_v2RawTexCoord;
+    v_av2TexCoord[0] = a_v2LowTexCoord + u_v2TexOffset;
+    v_av2TexCoord[1] = a_v2LowTexCoord;
 }

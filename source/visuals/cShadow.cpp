@@ -170,7 +170,7 @@ void cShadow::GlobalUpdate()
     const coreVector3 vHighLight = (g_pEnvironment->GetLightDir() * coreVector3(1.0f,1.0f,2.5f)).Normalize();
 
     // calculate full draw and read shadow matrices
-    s_amDrawShadowMatrix[0] = coreMatrix4::Camera(vHighLight * -SHADOW_VIEW_DISTANCE + coreVector3(g_pEnvironment->GetCameraPos().xy(), WATER_HEIGHT), 
+    s_amDrawShadowMatrix[0] = coreMatrix4::Camera(vHighLight * -SHADOW_VIEW_DISTANCE + coreVector3(g_pEnvironment->GetCameraPos().xy(), WATER_HEIGHT),
                                                   vHighLight, SHADOW_VIEW_ORIENTATION) * mOrtho;
     s_amDrawShadowMatrix[1] = mMove * s_amDrawShadowMatrix[0];
     s_mReadShadowMatrix     = s_amDrawShadowMatrix[0] * mNorm;

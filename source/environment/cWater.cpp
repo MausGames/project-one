@@ -27,10 +27,10 @@ cWater::cWater()noexcept
     // create sky-plane object
     m_Sky.DefineTexture(0, "environment_clouds_blue.png");
     m_Sky.DefineProgram("default_2d_program");
-    m_Sky.SetSize(coreVector2(1.0f,1.0f) * SQRT(2.0f));
+    m_Sky.SetSize      (coreVector2(1.0f,1.0f) * SQRT(2.0f));
 
     // load object resources
-    this->DefineModel  ("default_square.md5mesh");
+    this->DefineModel  (Core::Manager::Object->GetLowModel());
     this->DefineTexture(0, "environment_water_norm.png");
     this->DefineTexture(1, m_iAboveReflection.GetColorTarget(0).pTexture);
     this->DefineTexture(2, m_iBelowRefraction.GetColorTarget(0).pTexture);
@@ -38,10 +38,8 @@ cWater::cWater()noexcept
     this->DefineProgram("environment_water_program");
 
     // set object properties
-    this->SetPosition   (coreVector3(  0.0f,   0.0f,  WATER_HEIGHT));
-    this->SetDirection  (coreVector3(  0.0f,   0.0f, -1.0f));
-    this->SetOrientation(coreVector3(  0.0f,   1.0f,  0.0f));
-    this->SetSize       (coreVector3(200.0f, 200.0f,  1.0f));
+    this->SetPosition(coreVector3(  0.0f,   0.0f, WATER_HEIGHT));
+    this->SetSize    (coreVector3(200.0f, 200.0f, 1.0f));
 }
 
 
@@ -60,7 +58,7 @@ void cWater::Render(coreFrameBuffer* pBackground)
 {
     if(!this->GetProgram().IsUsable()) return;
 
-    // blit current background color into own refraction buffer (# hotspot)
+    // blit current background color into own refraction buffer
     pBackground->Blit(CORE_FRAMEBUFFER_TARGET_COLOR, &m_iBelowRefraction);
 
     // update all water uniforms

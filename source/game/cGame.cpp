@@ -82,7 +82,7 @@ void cGame::Move()
          if(m_aPlayer[0].IsDead()) vCenterPos =  m_aPlayer[1].GetPosition().xy();
     else if(m_aPlayer[1].IsDead()) vCenterPos =  m_aPlayer[0].GetPosition().xy();
                               else vCenterPos = (m_aPlayer[0].GetPosition().xy() + m_aPlayer[1].GetPosition().xy()) * 0.5f;
-    STATIC_ASSERT(GAME_PLAYERS == 2);
+    STATIC_ASSERT(GAME_PLAYERS == 2)
 
     // set environment side
     g_pEnvironment->SetTargetSide(vCenterPos * 0.65f);

@@ -16,7 +16,7 @@ cForeground*     g_pForeground     = NULL;
 cEnvironment*    g_pEnvironment    = NULL;
 cGame*           g_pGame           = NULL;
 
-#define _DIRECT_DEBUG_ (0)
+#define _DIRECT_DEBUG_ (1)
 
 
 // ****************************************************************

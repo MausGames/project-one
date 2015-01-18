@@ -44,7 +44,7 @@ cOutdoor::~cOutdoor()
 void cOutdoor::Render()
 {
     // enable all resources
-    if(this->Enable())
+    if(this->Prepare())
     {
         // send shadow matrix to shader-program
         cShadow::EnableShadowRead(SHADOW_HANDLE_OUTDOOR);

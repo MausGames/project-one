@@ -11,7 +11,6 @@
 // setup all defined resources
 static void SetupResources()
 {
-    Core::Manager::Resource->Load<coreModel>  ("default_square.md5mesh",          CORE_RESOURCE_UPDATE_AUTO,   "data/models/default_square.md5mesh");
     Core::Manager::Resource->Load<coreModel>  ("environment_reed_01.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_reed_01.md3");
     Core::Manager::Resource->Load<coreModel>  ("environment_reed_02.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_reed_02.md3");
     Core::Manager::Resource->Load<coreModel>  ("environment_stone_01.md3",        CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_stone_01.md3");
@@ -34,7 +33,6 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreModel>  ("ship_player_off_high.md3",        CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_off_high.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_player_off_low.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_off_low.md3");
 
-    Core::Manager::Resource->Load<coreTexture>("default_white.png",               CORE_RESOURCE_UPDATE_AUTO,   "data/textures/default_white.png");
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_blue.png",     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_blue.png");
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_low.png",      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_low.png");
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_mid.png",      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_mid.png");
@@ -52,12 +50,6 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreTexture>("ship_enemy.png",                  CORE_RESOURCE_UPDATE_AUTO,   "data/textures/ship_enemy.png");
     Core::Manager::Resource->Load<coreTexture>("ship_player.png",                 CORE_RESOURCE_UPDATE_AUTO,   "data/textures/ship_player.png");
 
-    Core::Manager::Resource->Load<coreShader> ("default_2d.vert",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/default_2d.vert");
-    Core::Manager::Resource->Load<coreShader> ("default_2d.frag",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/default_2d.frag");
-    Core::Manager::Resource->Load<coreShader> ("default_3d.vert",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/default_3d.vert");
-    Core::Manager::Resource->Load<coreShader> ("default_3d.frag",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/default_3d.frag");
-    Core::Manager::Resource->Load<coreShader> ("default_3d_inst.vert",            CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/default_3d.vert", CORE_SHADER_OPTION_INSTANCING);
-    Core::Manager::Resource->Load<coreShader> ("default_3d_inst.frag",            CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/default_3d.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("effect_decal.vert",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.vert");
     Core::Manager::Resource->Load<coreShader> ("effect_decal_spheric.frag",       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", SHADER_SPHERIC);
     Core::Manager::Resource->Load<coreShader> ("effect_decal_inst.vert",          CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.vert", CORE_SHADER_OPTION_INSTANCING);
@@ -89,21 +81,6 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreSound>  ("environment_nature.wav",          CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_nature.wav");
 
     Core::Manager::Resource->Load<coreFont>   ("ethnocentric.ttf",                CORE_RESOURCE_UPDATE_AUTO,   "data/fonts/ethnocentric.ttf");
-
-    ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("default_2d_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
-        ->AttachShader("default_2d.vert")
-        ->AttachShader("default_2d.frag")
-        ->Finish();
-
-    ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("default_3d_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
-        ->AttachShader("default_3d.vert")
-        ->AttachShader("default_3d.frag")
-        ->Finish();
-
-    ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("default_3d_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
-        ->AttachShader("default_3d_inst.vert")
-        ->AttachShader("default_3d_inst.frag")
-        ->Finish();
 
     ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("effect_decal_spheric_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("effect_decal.vert")
