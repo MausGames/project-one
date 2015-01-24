@@ -12,6 +12,7 @@
 
 // TODO: affect decals by early depth-pass
 // TODO: render depth-quads on unused background areas (transition!)
+// TODO: cache environment resources on loading (currently 100s of resource lookups)
 
 
 // ****************************************************************
@@ -163,9 +164,6 @@ private:
 class cEmptyBackground final : public cBackground
 {
 public:
-    cEmptyBackground()noexcept {}
-    ~cEmptyBackground()        {}
-
     ASSIGN_ID(0, "Empty")
 
 
@@ -196,220 +194,94 @@ private:
 };
 
 
-
-#if 0
-
 // ****************************************************************
-// Weltraum
-#define NUM_METEORS 62
-class cSpace : public cBackground
+// 
+class cSea final : public cBackground
 {
 private:
-    coreSprite* m_pBackground;               // Hintergrund des Weltraums
-    coreSprite* m_pStar;                     // Sterne des Weltraums
 
-    float m_fOffset;                         // Versatz des Hintergrunds
-
-    coreVector3 m_avColor[2];                // Farb-Werte des Hintergrunds
-    float m_fFactor;                         // Misch-Faktor
-
-    coreSprite* m_pOutdoorWrap;              // Tiefenüberzeichner für Außen-Bereiche
-
-    coreObject3D* m_apMeteor[NUM_METEORS];   // Meteoriten-Objekte
-    coreInstanceList* m_apMeteorList[2];     // Instanzierte Liste für die Meteoriten
-
-    float m_fAngle;                          // Rotation der Meteoriten
-    float m_fSpeed;                          // Bewegungsgeschwindigkeit der Meteoriten
-    coreVector2 m_vMeteorDir;                // Flugrichtung der Meteoriten
-
-    BOOL m_bUseMeteor;                       // Meteoriten-Animation verwenden
-    BOOL m_bUseOutdoor;                      // Außengebiet verwenden
-
-
-public:
-    cSpace(const BYTE &Type)noexcept;
-    ~cSpace();
-
-    // Weltraum zeichnen und berechnen
-    void Render()override;
-    void Move  ()override;
-
-    // Übergeordnete Animation zeichnen
-    void RenderOverlay();
-};
-
-
-// ****************************************************************
-// Meeres-Gebiet
-class cSea : public cBackground
-{
-private:
-    coreTexture* m_pWindCircle;                  // Textur für Wind-Ausschnitte
-    vector<coreVector3> m_avCloudPos2;          // Gespeicherte Position der Wolken-Sprites
-    // seetang, seesterne, muscheln, verschwommen
 
 public:
     cSea()noexcept;
     ~cSea();
 
-    // Meeres-Gebiet zeichnen und berechnen
-    void Render()override;
-    void Move  ()override;
-
-    // Übergeordnete Animation zeichnen
-    void RenderOverlay();
+    ASSIGN_ID(2, "Sea")
 };
 
 
 // ****************************************************************
-// Vulkan-Gebiet
-class cLava : public cBackground
+// 
+class cDesert final : public cBackground
 {
 private:
-    cMagma* m_pMagma;             // Magma-Oberfläche
 
-    coreSprite* m_apWind[3];     // Wind-Animation
-    coreVector2 m_avOffset[3];   // Versatz des Windes
-    float m_fWave;                 // Aktuelle Schwingung
-    // rauch mit schein, lava, kleine feuer, funken
-
-public:
-    cLava()noexcept;
-    ~cLava();
-
-    // Vulkan-Gebiet zeichnen und berechnen
-    void Render()override;
-    void Move  ()override;
-
-    // Übergeordnete Animation zeichnen
-    void RenderOverlay();
-};
-
-
-// ****************************************************************
-// Wüsten-Gebiet
-class cDesert : public cBackground
-{
-private:
-    coreSprite* m_apWind[2];        // Wind-Animation
-    coreVector2 m_avOffset[2];        // Versatz des Windes
-    coreVector2 m_avDirection[2];   // Wind-Richtung
-    // sandsturm, zerstörte teile, knochen?
 
 public:
     cDesert()noexcept;
     ~cDesert();
 
-    // Wüsten-Gebiet zeichnen und berechnen
-    void Render()override;
-    void Move  ()override;
-
-    // Übergeordnete Animation zeichnen
-    void RenderOverlay();
+    ASSIGN_ID(3, "Desert")
 };
 
 
 // ****************************************************************
-// Schnee-Gebiet
-class cSnow : public cBackground
+// 
+class cSpace final : public cBackground
 {
 private:
-    cWater* m_pWater;             // Wasser-Oberfläche
 
-    coreSprite* m_apWind[5];     // Wind-Animation
-    coreVector2 m_avOffset[5];   // Versatz des Windes
-    // zersplittertes eis am wasser, schnee, dicke wolken
+
+public:
+    cSpace()noexcept;
+    ~cSpace();
+
+    ASSIGN_ID(4, "Space")
+};
+
+
+// ****************************************************************
+// 
+class cVolcano final : public cBackground
+{
+private:
+
+
+public:
+    cVolcano()noexcept;
+    ~cVolcano();
+
+    ASSIGN_ID(5, "Volcano")
+};
+
+
+// ****************************************************************
+// 
+class cSnow final : public cBackground
+{
+private:
+
 
 public:
     cSnow()noexcept;
     ~cSnow();
 
-    // Schnee-Gebiet zeichnen und berechnen
-    void Render()override;
-    void Move  ()override;
-
-    // Übergeordnete Animation zeichnen
-    void RenderOverlay();
+    ASSIGN_ID(6, "Snow")
 };
 
 
 // ****************************************************************
-// Felsen-Gebiet
-class cRock : public cBackground
+// 
+class cMoss final : public cBackground
 {
 private:
-    coreSprite* m_pBlack;          // Verdunklung
 
-    coreFrameBuffer* m_pLight;      // Licht-Textur
-    coreObject2D* m_apSpot[15];   // Licht-Objekte
-    BYTE m_NumSpots;              // Aktive Licht-Objekte über 4
-
-    coreSprite* m_apWind[2];      // Wind-Animation
-    coreVector2 m_avOffset[2];    // Versatz des Windes
-
-    float m_fBaseDarkness;          // Basis-Dunkelheit
-    float m_fTrueDarkness;          // Echte Dunkelheit
-
-
-public:
-    cRock()noexcept;
-    ~cRock();
-
-    // Felsen-Gebiet zeichnen und berechnen
-    void Render()override;
-    void Move  ()override;
-
-    // Übergeordnete Animation zeichnen
-    void RenderOverlay();
-
-    // Basis-Dunkelheit setzen
-    inline void SetBaseDarkness(const float &fValue) {m_fBaseDarkness = fValue;}
-};
-
-
-// ****************************************************************
-// Mars-Gebiet
-class cMars : public cBackground
-{
-public:
-    cMars()noexcept;
-    ~cMars();
-
-    // Mars-Gebiet zeichnen und berechnen
-    void Render()override;
-    void Move  ()override;
-};
-
-
-// ****************************************************************
-// Moos-Gebiet
-class cMoss : public cBackground
-{
-private:
-    cWater* m_pWater;             // Wasser-Oberfläche
-
-    coreSprite* m_pBlack;         // Verdunklung
-    coreSprite* m_pSpark;         // Blitzleuchten
-    coreTimer* m_apThunder[3];   // Donner-Zähler
-
-    coreSprite* m_apWind[4];     // Wind-Animation
-    coreVector2 m_avOffset[4];   // Versatz des Windes
-    // umliegendes holz, tote bäume, seeblätter
 
 public:
     cMoss()noexcept;
     ~cMoss();
 
-    // Mars-Gebiet zeichnen und berechnen
-    void Render()override;
-    void Move  ()override;
-
-    // Übergeordnete Animation zeichnen
-    void RenderOverlay();
+    ASSIGN_ID(7, "Moss")
 };
-
-
-#endif
 
 
 #endif // _P1_GUARD_ENVIRONMENT_H_

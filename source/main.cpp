@@ -72,7 +72,7 @@ void CoreApp::Render()
         // render the environment
         g_pEnvironment->Render();
     }
-    Core::Debug->MeasureEnd  ("Background");
+    Core::Debug->MeasureEnd("Background");
     Core::Debug->MeasureStart("Foreground");
     {
         // create foreground frame buffer
@@ -86,7 +86,7 @@ void CoreApp::Render()
         }
         g_pForeground->End();
     }
-    Core::Debug->MeasureEnd  ("Foreground");
+    Core::Debug->MeasureEnd("Foreground");
     Core::Debug->MeasureStart("Post Processing");
     {
         // apply post-processing

@@ -24,6 +24,7 @@
     <ClCompile Include="..\..\..\source\environment\cOutdoor.cpp" />
     <ClCompile Include="..\..\..\source\environment\cWater.cpp" />
     <ClCompile Include="..\..\..\source\files\cConfig.cpp" />
+    <ClCompile Include="..\..\..\source\files\cSave.cpp" />
     <ClCompile Include="..\..\..\source\game\cBullet.cpp" />
     <ClCompile Include="..\..\..\source\game\cEnemy.cpp" />
     <ClCompile Include="..\..\..\source\game\cGame.cpp" />
@@ -31,6 +32,8 @@
     <ClCompile Include="..\..\..\source\game\cShip.cpp" />
     <ClCompile Include="..\..\..\source\game\cWeapon.cpp" />
     <ClCompile Include="..\..\..\source\main.cpp" />
+    <ClCompile Include="..\..\..\source\menu\cCombatText.cpp" />
+    <ClCompile Include="..\..\..\source\menu\cInterface.cpp" />
     <ClCompile Include="..\..\..\source\visuals\cForeground.cpp" />
     <ClCompile Include="..\..\..\source\visuals\cOutline.cpp" />
     <ClCompile Include="..\..\..\source\visuals\cPostProcessing.cpp" />
@@ -42,6 +45,7 @@
     <ClInclude Include="..\..\..\source\environment\cOutdoor.h" />
     <ClInclude Include="..\..\..\source\environment\cWater.h" />
     <ClInclude Include="..\..\..\source\files\cConfig.h" />
+    <ClInclude Include="..\..\..\source\files\cSave.h" />
     <ClInclude Include="..\..\..\source\game\cBullet.h" />
     <ClInclude Include="..\..\..\source\game\cEnemy.h" />
     <ClInclude Include="..\..\..\source\game\cGame.h" />
@@ -49,6 +53,8 @@
     <ClInclude Include="..\..\..\source\game\cShip.h" />
     <ClInclude Include="..\..\..\source\game\cWeapon.h" />
     <ClInclude Include="..\..\..\source\main.h" />
+    <ClInclude Include="..\..\..\source\menu\cCombatText.h" />
+    <ClInclude Include="..\..\..\source\menu\cInterface.h" />
     <ClInclude Include="..\..\..\source\visuals\cForeground.h" />
     <ClInclude Include="..\..\..\source\visuals\cOutline.h" />
     <ClInclude Include="..\..\..\source\visuals\cPostProcessing.h" />

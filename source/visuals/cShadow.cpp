@@ -95,6 +95,9 @@ void cShadow::Reconfigure()
 
         // enable depth value comparison
         m_iFrameBuffer.GetDepthTarget().pTexture->ShadowSampling(true);
+
+        // set polygon fill properties (to reduce projective aliasing, not in GlobalInit, because of reset-method)
+        glPolygonOffset(3.3f, 12.0f);
     }
 }
 
@@ -114,9 +117,6 @@ void cShadow::GlobalInit()
 
     // adjust shader-programs
     cShadow::Recompile();
-
-    // set polygon fill properties (to reduce projective aliasing)
-    glPolygonOffset(3.3f, 12.0f);
 }
 
 
@@ -207,7 +207,8 @@ void cShadow::EnableShadowRead(const coreByte& iProgramHandle)
     if(!g_CurConfig.Graphics.iShadow) return;
 
     // send read shadow matrix to shader-program
-    s_apHandle[iProgramHandle]->Enable();
+    if(!s_apHandle[iProgramHandle].IsUsable()) return;
+    if(!s_apHandle[iProgramHandle]->Enable())  return;
     s_apHandle[iProgramHandle]->SendUniform(SHADOW_SHADER_MATRIX, s_mReadShadowMatrix, false);
 }
 

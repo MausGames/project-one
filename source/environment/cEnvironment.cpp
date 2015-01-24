@@ -428,7 +428,36 @@ float cEnvironment::RetrieveSafeHeight(const coreVector2& vPosition)
 // reset with the resource manager
 void cEnvironment::__Reset(const coreResourceReset& bInit)
 {
-    // TODO #
+    if(bInit)
+    {
+        const int iID = P_TO_I(m_pBackground);
+
+        // re-create background with saved ID
+        m_pBackground = NULL;
+        this->ChangeBackground(iID);
+
+        // re-create environment frame buffer
+        m_iFrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+    }
+    else
+    {
+        const int iID = m_pBackground->GetID();
+
+        // unbind textures and stop possible transition
+        m_MixObject.DefineTexture(0, NULL);
+        m_MixObject.DefineTexture(1, NULL);
+        m_Transition.Stop();
+
+        // delete both backgrounds
+        SAFE_DELETE(m_pOldBackground)
+        SAFE_DELETE(m_pBackground)
+
+        // delete environment frame buffer
+        m_iFrameBuffer.Delete();
+
+        // save background ID
+        m_pBackground = r_cast<cBackground*>(I_TO_P(iID));
+    }
 }
 
 

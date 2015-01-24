@@ -20,8 +20,11 @@ private:
 
 public:
     cWeapon()noexcept;
-    ~cWeapon();
+    virtual ~cWeapon();
 
+
+private:
+    DISABLE_COPY(cWeapon)
 };
 
 

@@ -115,11 +115,16 @@ void cWater::UpdateReflection()
 
         if(g_CurConfig.Graphics.iReflection && g_pGame)
         {
+            // render all relevant game objects
             glCullFace(GL_FRONT);
             {
-                // render all relevant game objects
+                // render all players
                 for(coreByte i = 0; i < GAME_PLAYERS; ++i)
                     g_pGame->GetPlayer(i)->Render();
+
+                // render all active enemies
+                FOR_EACH(it, *g_pGame->GetEnemyList())
+                    (*it)->Render();
             }
             glCullFace(GL_BACK);
         }

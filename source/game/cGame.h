@@ -21,7 +21,11 @@
 class cGame final
 {
 private:
-    cPlayer m_aPlayer[GAME_PLAYERS];   // player objects
+    cPlayer m_aPlayer[GAME_PLAYERS];      // player objects
+    std::vector<cEnemy*> m_apEnemyList;   // list with active enemies
+
+    cBulletManager m_BulletManager;       // bullet manager
+
 
     cEnemy* m_apTest[30];
 
@@ -35,7 +39,9 @@ public:
     void Move();
 
     // access game objects
-    inline cPlayer* GetPlayer(const coreByte& iIndex) {return &m_aPlayer[iIndex];}
+    inline cPlayer*              GetPlayer       (const coreByte& iIndex) {return &m_aPlayer[iIndex];}
+    inline std::vector<cEnemy*>* GetEnemyList    ()                       {return &m_apEnemyList;}
+    inline cBulletManager*       GetBulletManager()                       {return &m_BulletManager;}
 
 
 private:

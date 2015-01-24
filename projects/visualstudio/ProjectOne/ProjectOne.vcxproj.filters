@@ -48,6 +48,15 @@
     <ClCompile Include="..\..\..\source\game\cShip.cpp">
       <Filter>game</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\files\cSave.cpp">
+      <Filter>files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\menu\cCombatText.cpp">
+      <Filter>menu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\menu\cInterface.cpp">
+      <Filter>menu</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\main.h" />
@@ -96,6 +105,15 @@
     <ClInclude Include="..\..\..\source\game\cShip.h">
       <Filter>game</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\source\files\cSave.h">
+      <Filter>files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\menu\cCombatText.h">
+      <Filter>menu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\menu\cInterface.h">
+      <Filter>menu</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="environment">
@@ -109,6 +127,9 @@
     </Filter>
     <Filter Include="game">
       <UniqueIdentifier>{f3437c2b-9f83-4a31-9e05-db08c171e2cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="menu">
+      <UniqueIdentifier>{82bb5fd3-d0bb-42c9-8684-03d3af233b0d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

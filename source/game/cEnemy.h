@@ -15,7 +15,7 @@
 // enemy entity interface
 class INTERFACE cEnemy : public cShip
 {
-protected:
+private:
 
 
 public:

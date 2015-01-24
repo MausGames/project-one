@@ -26,7 +26,7 @@ cEnemy::cEnemy()noexcept
     cShadow::BindGlobalObject(this);
     g_pOutline->BindObject(this);
 
-
+    // enable collision
     this->ChangeType(TYPE_ENEMY);
 }
 
@@ -39,7 +39,7 @@ cEnemy::~cEnemy()
     cShadow::UnbindGlobalObject(this);
     g_pOutline->UnbindObject(this);
 
-
+    // disable collision
     this->ChangeType(0);
 }
 

@@ -50,7 +50,9 @@
 #define SHADER_SPHERIC     "#define _P1_SPHERIC_ (1) \n"
 
 #define TYPE_PLAYER        (1)
-#define TYPE_ENEMY         (10)
+#define TYPE_ENEMY         (2)
+#define TYPE_BULLET_PLAYER (11)
+#define TYPE_BULLET_ENEMY  (12)
 
 #define ENABLE_ID                           \
     virtual const int   GetID  ()const = 0; \

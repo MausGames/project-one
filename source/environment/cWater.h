@@ -80,15 +80,11 @@ public:
 class cRain final : public cWater
 {
 private:
-    coreFrameBuffer* m_pRainBuffer;               // 
-    //coreContainer<coreSprite>* m_paRainSprite;  // 
-    coreTimer* m_pRainTimer;                      // 
 
 
 public:
 
-    // 
-    void UpdateRain();
+
 };
 
 

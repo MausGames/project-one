@@ -26,6 +26,7 @@ cGame::cGame()noexcept
 
 
 
+
     std::memset(m_apTest, 0, sizeof(m_apTest));
 
     m_apTest[0] = new cScout();
@@ -42,6 +43,7 @@ cGame::cGame()noexcept
     {
         if(m_apTest[i]) m_apTest[i]->SetPosition(coreVector3(FOREGROUND_AREA.x * I_TO_F(i-3) * 0.22f, 10.0f, 0.0f));
        // if(m_apTest[i]) m_apTest[i]->SetDirection(coreVector3(-1.0f,-1.0f,0.0f).Normalize());
+        if(m_apTest[i]) m_apEnemyList.push_back(m_apTest[i]);
     }
 }
 
@@ -50,6 +52,10 @@ cGame::cGame()noexcept
 // destructor
 cGame::~cGame()
 {
+    // clear memory
+    m_apEnemyList.clear();
+
+
     for(int i = 0; i < int(ARRAY_SIZE(m_apTest)); ++i)
         SAFE_DELETE(m_apTest[i])
 }
@@ -63,9 +69,12 @@ void cGame::Render()
     for(coreByte i = 0; i < GAME_PLAYERS; ++i)
         m_aPlayer[i].Render();
 
+    // render all active enemies
+    FOR_EACH(it, m_apEnemyList)
+        (*it)->Render();
 
-    for(int i = 0; i < int(ARRAY_SIZE(m_apTest)); ++i)
-        if(m_apTest[i]) m_apTest[i]->Render();
+    // render the bullet manager
+    m_BulletManager.Render();
 }
 
 
@@ -77,17 +86,21 @@ void cGame::Move()
     for(coreByte i = 0; i < GAME_PLAYERS; ++i)
         m_aPlayer[i].Move();
 
+    // move all active enemies
+    FOR_EACH(it, m_apEnemyList)
+        (*it)->Move();
+
+    // move the bullet manager
+    m_BulletManager.Move();
+
     // calculate center of player positions
     coreVector2 vCenterPos;
-         if(m_aPlayer[0].IsDead()) vCenterPos =  m_aPlayer[1].GetPosition().xy();
-    else if(m_aPlayer[1].IsDead()) vCenterPos =  m_aPlayer[0].GetPosition().xy();
-                              else vCenterPos = (m_aPlayer[0].GetPosition().xy() + m_aPlayer[1].GetPosition().xy()) * 0.5f;
+         if(m_aPlayer[0].GetStatus() & PLAYER_STATUS_DEAD) vCenterPos =  m_aPlayer[1].GetPosition().xy();
+    else if(m_aPlayer[1].GetStatus() & PLAYER_STATUS_DEAD) vCenterPos =  m_aPlayer[0].GetPosition().xy();
+                                                      else vCenterPos = (m_aPlayer[0].GetPosition().xy() +
+                                                                         m_aPlayer[1].GetPosition().xy()) * 0.5f;
     STATIC_ASSERT(GAME_PLAYERS == 2)
 
     // set environment side
     g_pEnvironment->SetTargetSide(vCenterPos * 0.65f);
-
-
-    for(int i = 0; i < int(ARRAY_SIZE(m_apTest)); ++i)
-        if(m_apTest[i]) m_apTest[i]->Move();
 }
