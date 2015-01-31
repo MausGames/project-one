@@ -13,14 +13,14 @@ uniform mat4 u_m4ShadowMatrix;   // own shadow view-projection matrix (with coor
 
 // shader output
 varying float v_v1Mix;           // mix value between both outdoor textures
-varying vec4  v_v4ShadowPixel;   // pixel coordinates viewed from the light source
+varying vec4  v_v4ShadowCoord;   // pixel coordinates viewed from the light source
 
         
 void VertexMain()
 {   
     // transform position and texture coordinates
     gl_Position      = u_m4ViewProj     * vec4(a_v3RawPosition, 1.0);
-    v_v4ShadowPixel  = u_m4ShadowMatrix * vec4(a_v3RawPosition, 1.0);
+    v_v4ShadowCoord  = u_m4ShadowMatrix * vec4(a_v3RawPosition, 1.0);
     v_av2TexCoord[0] = a_v3RawPosition.xy * 0.04167;
     
     // dot-3 transform lighting vectors

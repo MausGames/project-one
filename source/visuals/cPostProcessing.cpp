@@ -56,13 +56,6 @@ cPostProcessing::cPostProcessing()noexcept
 
 
 // ****************************************************************
-// destructor
-cPostProcessing::~cPostProcessing()
-{
-}
-
-
-// ****************************************************************
 // apply post-processing
 void cPostProcessing::Apply()
 {
@@ -72,6 +65,7 @@ void cPostProcessing::Apply()
     // bind all required frame buffers
     this->DefineTexture(0, g_pEnvironment->GetFrameBuffer()->GetColorTarget(0).pTexture);
     this->DefineTexture(1, g_pForeground ->GetFrameBuffer()->GetColorTarget(0).pTexture);
+    this->DefineTexture(2, g_pGlow       ->GetFrameBuffer()->GetColorTarget(0).pTexture);
 
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
@@ -89,8 +83,10 @@ void cPostProcessing::Apply()
     // invalidate all frame buffers
     g_pEnvironment->GetFrameBuffer()->Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
     g_pForeground ->GetFrameBuffer()->Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
+    g_pGlow       ->GetFrameBuffer()->Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
     this->DefineTexture(0, NULL);
     this->DefineTexture(1, NULL);
+    this->DefineTexture(2, NULL);
 }
 
 

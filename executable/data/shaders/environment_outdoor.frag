@@ -10,14 +10,14 @@
 
 // shader input
 varying float v_v1Mix;           // mix value between both outdoor textures
-varying vec4  v_v4ShadowPixel;   // pixel coordinates viewed from the light source
+varying vec4  v_v4ShadowCoord;   // pixel coordinates viewed from the light source
 
 
 void FragmentMain()
 { 
     vec3 v3TexNormal;
     vec3 v3TexColor;
-    if(v_v1Mix <= 0.001)
+    if(v_v1Mix <= 0.001)   // # performance boost
     {
         // lookup only lower outdoor textures
         v3TexNormal = coreTexture2D(3, v_av2TexCoord[0]).xyz;
@@ -46,7 +46,7 @@ void FragmentMain()
 #if defined(_P1_SHADOW_)
 
     // apply shadow mapping with depth value comparison
-    float v1Light = 1.0 - coreTextureShadow(0, v_v4ShadowPixel) * 0.5;
+    float v1Light = 1.0 - coreTextureShadow(0, v_v4ShadowCoord) * 0.5;
     
 #else
     const float v1Light = 1.0;

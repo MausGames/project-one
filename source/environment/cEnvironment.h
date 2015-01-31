@@ -10,7 +10,6 @@
 #ifndef _P1_GUARD_ENVIRONMENT_H_
 #define _P1_GUARD_ENVIRONMENT_H_
 
-// TODO: affect decals by early depth-pass
 // TODO: render depth-quads on unused background areas (transition!)
 // TODO: cache environment resources on loading (currently 100s of resource lookups)
 
@@ -53,6 +52,7 @@ public:
     cBackground()noexcept;
     virtual ~cBackground();
 
+    DISABLE_COPY(cBackground)
     ENABLE_ID
 
     // render and move the background
@@ -76,7 +76,7 @@ public:
 
 protected:
     // create infinite looking object list
-    static void _FillInfinite(coreBatchList* pObjectList);
+    static void _FillInfinite(coreBatchList* OUTPUT pObjectList);
 
     // check for intersection with other objects
     static bool _CheckIntersection     (const coreBatchList* pObjectList, const coreVector2& vNewPos, const float& fDistanceSq);
@@ -84,9 +84,7 @@ protected:
 
 
 private:
-    DISABLE_COPY(cBackground)
-
-    // render and move routine for derived classes
+    // render and move routines for derived classes
     virtual void __RenderOwn() {}
     virtual void __MoveOwn()   {}
 };
@@ -117,6 +115,8 @@ private:
 public:
     cEnvironment()noexcept;
     ~cEnvironment();
+
+    DISABLE_COPY(cEnvironment)
 
     // render and move the environment
     void Render();
@@ -152,8 +152,6 @@ public:
 
 
 private:
-    DISABLE_COPY(cEnvironment)
-
     // reset with the resource manager
     void __Reset(const coreResourceReset& bInit)override;
 };
@@ -161,31 +159,35 @@ private:
 
 // ****************************************************************
 // empty background class
-class cEmptyBackground final : public cBackground
+class cNoBackground final : public cBackground
 {
 public:
-    ASSIGN_ID(0, "Empty")
+    cNoBackground()noexcept {}
+
+    DISABLE_COPY(cNoBackground)
+    ASSIGN_ID(0, "NoBackground")
 
 
 private:
     // render the empty background
-    inline void __RenderOwn()override {glClearColor(0.0f, 0.0f, 0.0f, 0.0f); m_iFrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR); glClearColor(0.5f, 0.5f, 0.5f, 0.0f);}
+    inline void __RenderOwn()override {glClearColor(0.0f, 0.0f, 0.0f, 0.0f); m_iFrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR); glClearColor(CLEAR_COLOR);}
 };
 
 
 // ****************************************************************
 // grass background class
-class cGrass final : public cBackground
+class cGrassBackground final : public cBackground
 {
 private:
     coreSoundPtr m_pNatureSound;   // nature sound-effect
 
 
 public:
-    cGrass()noexcept;
-    ~cGrass();
+    cGrassBackground()noexcept;
+    ~cGrassBackground();
 
-    ASSIGN_ID(1, "Grass")
+    DISABLE_COPY(cGrassBackground)
+    ASSIGN_ID(1, "GrassBackground")
 
 
 private:
@@ -196,91 +198,73 @@ private:
 
 // ****************************************************************
 // 
-class cSea final : public cBackground
+class cSeaBackground final : public cBackground
 {
-private:
-
-
 public:
-    cSea()noexcept;
-    ~cSea();
+    cSeaBackground()noexcept {}
 
-    ASSIGN_ID(2, "Sea")
+    DISABLE_COPY(cSeaBackground)
+    ASSIGN_ID(2, "SeaBackground")
 };
 
 
 // ****************************************************************
 // 
-class cDesert final : public cBackground
+class cDesertBackground final : public cBackground
 {
-private:
-
-
 public:
-    cDesert()noexcept;
-    ~cDesert();
+    cDesertBackground()noexcept {}
 
-    ASSIGN_ID(3, "Desert")
+    DISABLE_COPY(cDesertBackground)
+    ASSIGN_ID(3, "DesertBackground")
 };
 
 
 // ****************************************************************
 // 
-class cSpace final : public cBackground
+class cSpaceBackground final : public cBackground
 {
-private:
-
-
 public:
-    cSpace()noexcept;
-    ~cSpace();
+    cSpaceBackground()noexcept {}
 
-    ASSIGN_ID(4, "Space")
+    DISABLE_COPY(cSpaceBackground)
+    ASSIGN_ID(4, "SpaceBackground")
 };
 
 
 // ****************************************************************
 // 
-class cVolcano final : public cBackground
+class cVolcanoBackground final : public cBackground
 {
-private:
-
-
 public:
-    cVolcano()noexcept;
-    ~cVolcano();
+    cVolcanoBackground()noexcept {}
 
-    ASSIGN_ID(5, "Volcano")
+    DISABLE_COPY(cVolcanoBackground)
+    ASSIGN_ID(5, "VolcanoBackground")
 };
 
 
 // ****************************************************************
 // 
-class cSnow final : public cBackground
+class cSnowBackground final : public cBackground
 {
-private:
-
-
 public:
-    cSnow()noexcept;
-    ~cSnow();
+    cSnowBackground()noexcept {}
 
-    ASSIGN_ID(6, "Snow")
+    DISABLE_COPY(cSnowBackground)
+    ASSIGN_ID(6, "SnowBackground")
 };
 
 
 // ****************************************************************
 // 
-class cMoss final : public cBackground
+class cMossBackground final : public cBackground
 {
-private:
-
-
 public:
-    cMoss()noexcept;
-    ~cMoss();
+    cMossBackground()noexcept {}
 
-    ASSIGN_ID(7, "Moss")
+    DISABLE_COPY(cMossBackground)
+    ASSIGN_ID(7, "MossBackground")
 };
 
 

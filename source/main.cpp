@@ -10,8 +10,11 @@
 
 coreVector2      g_vGameResolution = coreVector2(0.0f,0.0f);
 
+cOutline*        g_pOutlineFull    = NULL;
+cOutline*        g_pOutlineDirect  = NULL;
+cGlow*           g_pGlow           = NULL;
 cPostProcessing* g_pPostProcessing = NULL;
-cOutline*        g_pOutline        = NULL;
+
 cForeground*     g_pForeground     = NULL;
 cEnvironment*    g_pEnvironment    = NULL;
 cGame*           g_pGame           = NULL;
@@ -35,8 +38,10 @@ void CoreApp::Init()
 
     // create and init main components
     cShadow::GlobalInit();
+    g_pOutlineFull    = new cOutline(OUTLINE_SHADER_FULL);
+    g_pOutlineDirect  = new cOutline(OUTLINE_SHADER_DIRECT);
+    g_pGlow           = new cGlow();
     g_pPostProcessing = new cPostProcessing();
-    g_pOutline        = new cOutline();
     g_pForeground     = new cForeground();
     g_pEnvironment    = new cEnvironment();
     g_pGame           = new cGame();
@@ -51,8 +56,10 @@ void CoreApp::Exit()
     SAFE_DELETE(g_pGame)
     SAFE_DELETE(g_pEnvironment)
     SAFE_DELETE(g_pForeground)
-    SAFE_DELETE(g_pOutline)
     SAFE_DELETE(g_pPostProcessing)
+    SAFE_DELETE(g_pGlow)
+    SAFE_DELETE(g_pOutlineDirect)
+    SAFE_DELETE(g_pOutlineFull)
     cShadow::GlobalExit();
 
     // save configuration
@@ -64,9 +71,15 @@ void CoreApp::Exit()
 // render the application
 void CoreApp::Render()
 {
-    // update the shadow map class
-    cShadow::GlobalUpdate();
+    Core::Debug->MeasureStart("Updates");
+    {
+        // update the shadow map class
+        cShadow::GlobalUpdate();
 
+        // 
+        g_pGlow->Update();
+    }
+    Core::Debug->MeasureEnd("Updates");
     Core::Debug->MeasureStart("Background");
     {
         // render the environment
@@ -82,7 +95,8 @@ void CoreApp::Render()
             if(g_pGame) g_pGame->Render();
 
             // apply outline-effect
-            g_pOutline->Apply();
+            g_pOutlineFull  ->Apply();
+            g_pOutlineDirect->Apply();
         }
         g_pForeground->End();
     }
@@ -111,11 +125,14 @@ void CoreApp::Move()
 
 #if defined(_DIRECT_DEBUG_)
 
-    for(int i = 0; i < 8; ++i)
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LSHIFT), CORE_INPUT_HOLD))
     {
-        // override background
-        if(Core::Input->GetKeyboardButton(coreInputKey(i + int(CORE_INPUT_KEY(1))), CORE_INPUT_PRESS))
-            g_pEnvironment->ChangeBackground(i + 1);
+        for(int i = 0; i < 8; ++i)
+        {
+            // override background
+            if(Core::Input->GetKeyboardButton(coreInputKey(i + int(CORE_INPUT_KEY(1))), CORE_INPUT_PRESS))
+                g_pEnvironment->ChangeBackground(i + 1);
+        }
     }
 
 #endif

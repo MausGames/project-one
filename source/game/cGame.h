@@ -34,6 +34,8 @@ public:
     cGame()noexcept;
     ~cGame();
 
+    DISABLE_COPY(cGame)
+
     // render and move the game
     void Render();
     void Move();
@@ -42,10 +44,6 @@ public:
     inline cPlayer*              GetPlayer       (const coreByte& iIndex) {return &m_aPlayer[iIndex];}
     inline std::vector<cEnemy*>* GetEnemyList    ()                       {return &m_apEnemyList;}
     inline cBulletManager*       GetBulletManager()                       {return &m_BulletManager;}
-
-
-private:
-    DISABLE_COPY(cGame)
 };
 
 

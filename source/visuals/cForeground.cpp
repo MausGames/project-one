@@ -21,13 +21,6 @@ cForeground::cForeground()noexcept
 
 
 // ****************************************************************
-// destructor
-cForeground::~cForeground()
-{
-}
-
-
-// ****************************************************************
 // start foreground aggregation
 void cForeground::Start()
 {
@@ -44,7 +37,7 @@ void cForeground::Start()
     // clear color buffer
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-    glClearColor(0.5f, 0.5f, 0.5f, 0.0f);
+    glClearColor(CLEAR_COLOR);
 }
 
 

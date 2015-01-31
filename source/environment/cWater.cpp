@@ -28,6 +28,7 @@ cWater::cWater()noexcept
     m_Sky.DefineTexture(0, "environment_clouds_blue.png");
     m_Sky.DefineProgram("default_2d_program");
     m_Sky.SetSize      (coreVector2(1.0f,1.0f) * SQRT(2.0f));
+    m_Sky.SetTexSize   (coreVector2(WATER_SKY_SIZE, WATER_SKY_SIZE));
 
     // load object resources
     this->DefineModel  (Core::Manager::Object->GetLowModel());
@@ -110,7 +111,7 @@ void cWater::UpdateReflection()
         // flip projection left-right (also culling!, after StartDraw())
         c_cast<coreMatrix4*>(&Core::Graphics->GetPerspective())->_11 *= -1.0f;
 
-        // render depth pre-pass with foreground objects
+        // render depth pass with foreground objects
         cShadow::RenderForegroundDepth();
 
         if(g_CurConfig.Graphics.iReflection && g_pGame)
@@ -133,14 +134,18 @@ void cWater::UpdateReflection()
         {
             // move and render the sky-plane
             m_Sky.SetDirection(vOldCamOri.xy());
-            m_Sky.SetTexOffset(coreVector2(vOldCamPos.x * 0.006f, m_Sky.GetTexOffset().y));
+            m_Sky.SetTexOffset(coreVector2(vOldCamPos.x * 0.007f * WATER_SKY_SIZE, m_Sky.GetTexOffset().y));
             m_Sky.Move();
             m_Sky.Render();
         }
         glEnable(GL_BLEND);
 
         // apply outline-effect
-        if(g_CurConfig.Graphics.iReflection) g_pOutline->Apply();
+        if(g_CurConfig.Graphics.iReflection)
+        {
+            g_pOutlineFull  ->Apply();
+            g_pOutlineDirect->Apply();
+        }
     }
 
     // reset camera, light and projection
@@ -185,5 +190,5 @@ void cWater::SetFlyOffset(const float& fFlyOffset)
     m_fFlyOffset = fFlyOffset;
 
     // move sky-plane texture
-    m_Sky.SetTexOffset(coreVector2(0.0f, (-7.0f / I_TO_F(OUTDOOR_HEIGHT)) * m_fFlyOffset));
+    m_Sky.SetTexOffset(coreVector2(0.0f, ((-7.0f * WATER_SKY_SIZE) / I_TO_F(OUTDOOR_HEIGHT)) * m_fFlyOffset));
 }

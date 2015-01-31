@@ -35,6 +35,7 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreModel>  ("ship_player_off_high.md3",        CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_off_high.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_player_off_low.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_off_low.md3");
 
+    Core::Manager::Resource->Load<coreTexture>("effect_energy.png",               CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_energy.png");
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_blue.png",     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_blue.png");
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_low.png",      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_low.png");
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_mid.png",      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_mid.png");
@@ -57,12 +58,19 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreShader> ("effect_decal_inst.vert",          CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.vert", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("effect_decal_spheric_inst.frag",  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", CORE_SHADER_OPTION_INSTANCING SHADER_SPHERIC);
     Core::Manager::Resource->Load<coreShader> ("effect_energy.vert",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert");
+    Core::Manager::Resource->Load<coreShader> ("effect_energy_spheric.vert",      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", SHADER_SPHERIC);
+    Core::Manager::Resource->Load<coreShader> ("effect_energy_direct.vert",       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", SHADER_DIRECT);
     Core::Manager::Resource->Load<coreShader> ("effect_energy.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_energy_inst.vert",         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", CORE_SHADER_OPTION_INSTANCING);
+    Core::Manager::Resource->Load<coreShader> ("effect_energy_spheric_inst.vert", CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", CORE_SHADER_OPTION_INSTANCING SHADER_SPHERIC);
+    Core::Manager::Resource->Load<coreShader> ("effect_energy_direct_inst.vert",  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", CORE_SHADER_OPTION_INSTANCING SHADER_DIRECT);
     Core::Manager::Resource->Load<coreShader> ("effect_energy_inst.frag",         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("effect_outline.vert",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.vert");
     Core::Manager::Resource->Load<coreShader> ("effect_outline.frag",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.frag");
+    Core::Manager::Resource->Load<coreShader> ("effect_outline_direct.frag",      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.frag", SHADER_DIRECT);
     Core::Manager::Resource->Load<coreShader> ("effect_outline_inst.vert",        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.vert", CORE_SHADER_OPTION_INSTANCING);
+    Core::Manager::Resource->Load<coreShader> ("effect_outline_inst.frag",        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.frag", CORE_SHADER_OPTION_INSTANCING);
+    Core::Manager::Resource->Load<coreShader> ("effect_outline_direct_inst.frag", CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.frag", CORE_SHADER_OPTION_INSTANCING SHADER_DIRECT);
     Core::Manager::Resource->Load<coreShader> ("effect_shadow.vert",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_shadow.vert");
     Core::Manager::Resource->Load<coreShader> ("effect_shadow.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_shadow.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_shadow_inst.vert",         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_shadow.vert", CORE_SHADER_OPTION_INSTANCING);
@@ -74,16 +82,17 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreShader> ("environment_outdoor.frag",        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_outdoor.frag");
     Core::Manager::Resource->Load<coreShader> ("environment_water.vert",          CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_water.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("environment_water.frag",          CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_water.frag");
+    Core::Manager::Resource->Load<coreShader> ("full_blur_1.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_blur_1.frag");
+    Core::Manager::Resource->Load<coreShader> ("full_blur_2.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_blur_2.frag");
     Core::Manager::Resource->Load<coreShader> ("full_post.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_post.frag");
     Core::Manager::Resource->Load<coreShader> ("full_transition.frag",            CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_transition.frag");
     Core::Manager::Resource->Load<coreShader> ("object.vert",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert");
-    Core::Manager::Resource->Load<coreShader> ("object.frag",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.frag");
-    Core::Manager::Resource->Load<coreShader> ("object_shadow.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.frag", SHADER_SHADOW);
+    Core::Manager::Resource->Load<coreShader> ("object_ground.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ground.frag", SHADER_SHADOW);
     Core::Manager::Resource->Load<coreShader> ("object_ship.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag");
     Core::Manager::Resource->Load<coreShader> ("object_inst.vert",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert", CORE_SHADER_OPTION_INSTANCING);
-    Core::Manager::Resource->Load<coreShader> ("object_inst.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.frag", CORE_SHADER_OPTION_INSTANCING);
-    Core::Manager::Resource->Load<coreShader> ("object_shadow_inst.frag",         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.frag", CORE_SHADER_OPTION_INSTANCING SHADER_SHADOW);
+    Core::Manager::Resource->Load<coreShader> ("object_ground_inst.frag",         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ground.frag", CORE_SHADER_OPTION_INSTANCING SHADER_SHADOW);
 
+    Core::Manager::Resource->Load<coreSound>  ("bullet_ray.wav",                  CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/bullet_ray.wav");
     Core::Manager::Resource->Load<coreSound>  ("environment_nature.wav",          CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_nature.wav");
 
     Core::Manager::Resource->Load<coreFont>   ("ethnocentric.ttf",                CORE_RESOURCE_UPDATE_AUTO,   "data/fonts/ethnocentric.ttf");
@@ -108,6 +117,26 @@ static void SetupResources()
         ->AttachShader("effect_energy_inst.frag")
         ->Finish();
 
+    ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("effect_energy_spheric_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_energy_spheric.vert")
+        ->AttachShader("effect_energy.frag")
+        ->Finish();
+
+    ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("effect_energy_spheric_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_energy_spheric_inst.vert")
+        ->AttachShader("effect_energy_inst.frag")
+        ->Finish();
+
+    ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("effect_energy_direct_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_energy_direct.vert")
+        ->AttachShader("effect_energy.frag")
+        ->Finish();
+
+    ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("effect_energy_direct_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_energy_direct_inst.vert")
+        ->AttachShader("effect_energy_inst.frag")
+        ->Finish();
+
     ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("effect_outline_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("effect_outline.vert")
         ->AttachShader("effect_outline.frag")
@@ -115,7 +144,17 @@ static void SetupResources()
 
     ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("effect_outline_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("effect_outline_inst.vert")
-        ->AttachShader("effect_outline.frag")
+        ->AttachShader("effect_outline_inst.frag")
+        ->Finish();
+
+    ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("effect_outline_direct_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_outline.vert")
+        ->AttachShader("effect_outline_direct.frag")
+        ->Finish();
+
+    ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("effect_outline_direct_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_outline_inst.vert")
+        ->AttachShader("effect_outline_direct_inst.frag")
         ->Finish();
 
     ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("effect_shadow_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
@@ -148,6 +187,16 @@ static void SetupResources()
         ->AttachShader("environment_water.frag")
         ->Finish();
 
+    ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("full_blur_1_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("default_2d.vert")
+        ->AttachShader("full_blur_1.frag")
+        ->Finish();
+
+    ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("full_blur_2_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("default_2d.vert")
+        ->AttachShader("full_blur_2.frag")
+        ->Finish();
+
     ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("full_post_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("default_2d.vert")
         ->AttachShader("full_post.frag")
@@ -158,14 +207,9 @@ static void SetupResources()
         ->AttachShader("full_transition.frag")
         ->Finish();
 
-    ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("object_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+    ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("object_ground_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("object.vert")
-        ->AttachShader("object.frag")
-        ->Finish();
-
-    ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("object_shadow_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
-        ->AttachShader("object.vert")
-        ->AttachShader("object_shadow.frag")
+        ->AttachShader("object_ground.frag")
         ->Finish();
 
     ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("object_ship_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
@@ -173,14 +217,9 @@ static void SetupResources()
         ->AttachShader("object_ship.frag")
         ->Finish();
 
-    ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("object_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+    ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("object_ground_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("object_inst.vert")
-        ->AttachShader("object_inst.frag")
-        ->Finish();
-
-    ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("object_shadow_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
-        ->AttachShader("object_inst.vert")
-        ->AttachShader("object_shadow_inst.frag")
+        ->AttachShader("object_ground_inst.frag")
         ->Finish();
 }
 

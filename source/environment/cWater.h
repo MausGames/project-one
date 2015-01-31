@@ -15,7 +15,8 @@
 
 // ****************************************************************
 // water definitions
-#define WATER_HEIGHT (-20.0f)   // default water-surface z-position
+#define WATER_HEIGHT   (-20.0f)   // default water-surface z-position
+#define WATER_SKY_SIZE (3.0f)     // texture size of the sky-plane
 
 
 // ****************************************************************
@@ -36,6 +37,8 @@ public:
     cWater()noexcept;
     virtual ~cWater();
 
+    DISABLE_COPY(cWater)
+
     // render and move the water-surface
     virtual void Render(coreFrameBuffer* pBackground);
     virtual void Move()override;
@@ -54,8 +57,6 @@ public:
 
 
 private:
-    DISABLE_COPY(cWater)
-
     // hide default render functions
     inline void Render(const coreProgramPtr& pProgram)override {ASSERT(false)}
     inline void Render()override                               {ASSERT(false)}
@@ -63,28 +64,24 @@ private:
 
 
 // ****************************************************************
-// 
+// ice-surface class
 class cIce final : public cWater
 {
-private:
-
-
 public:
+    cIce()noexcept {}
 
-
+    DISABLE_COPY(cIce)
 };
 
 
 // ****************************************************************
-// 
+// rain-surface class
 class cRain final : public cWater
 {
-private:
-
-
 public:
+    cRain()noexcept {}
 
-
+    DISABLE_COPY(cRain)
 };
 
 

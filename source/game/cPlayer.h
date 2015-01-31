@@ -24,7 +24,7 @@ enum ePlayerStatus : coreByte
 class cPlayer final : public cShip
 {
 private:
-    coreVector2 m_vNewPos;    // new position for smooth movement and animation
+    cWeapon* m_pWeapon;       // main weapon object (bullet factory)
     coreByte m_iInputIndex;   // input set identifier
 
 
@@ -32,8 +32,11 @@ public:
     cPlayer()noexcept;
     ~cPlayer();
 
+    DISABLE_COPY(cPlayer)
+
     // configure the player
-    void Configure(const coreByte& iAppearanceType, const coreVector3& vColor, const coreByte& iInputIndex);
+    void Configure  (const coreByte& iAppearanceType, const coreVector3& vColor, const coreByte& iInputIndex);
+    void EquipWeapon(const int&      iID);
 
     // render and move the player
     void Render()override;

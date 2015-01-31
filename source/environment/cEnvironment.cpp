@@ -80,7 +80,7 @@ void cBackground::Render()
     {
         glDisable(GL_BLEND);
         {
-            // render depth pre-pass with foreground objects
+            // render depth pass with foreground objects
             cShadow::RenderForegroundDepth();
 
             // send shadow matrix to single shader-program
@@ -109,18 +109,12 @@ void cBackground::Render()
         }
         glEnable(GL_BLEND);
 
-        glDisable(GL_DEPTH_TEST);
+        glDepthMask(false);
         {
-            // TODO # transparent additional objects
-
             // render all transparent ground objects
             FOR_EACH(it, m_apDecalObjectList)
                 (*it)->Render();
-        }
-        glEnable(GL_DEPTH_TEST);
 
-        glDepthMask(false);
-        {
             // render all air objects
             FOR_EACH(it, m_apAirObjectList)
                 (*it)->Render();
@@ -201,7 +195,7 @@ void cBackground::ClearObjects()
 
 // ****************************************************************
 // create infinite looking object list
-void cBackground::_FillInfinite(coreBatchList* pObjectList)
+void cBackground::_FillInfinite(coreBatchList* OUTPUT pObjectList)
 {
     // save current size and loop through all objects
     const coreUint iCurSize = coreUint(pObjectList->List()->size());
@@ -278,8 +272,8 @@ cEnvironment::cEnvironment()noexcept
     m_afSpeed    [1] = m_afSpeed    [0] = 3.0f;
 
     // load first background
-    m_pBackground = new cEmptyBackground();
-    this->ChangeBackground(Core::Config->GetInt("Game", "Background", s_cast<int>(cGrass::ID)));
+    m_pBackground = new cNoBackground();
+    this->ChangeBackground(Core::Config->GetInt("Game", "Background", s_cast<int>(cGrassBackground::ID)));
 }
 
 
@@ -390,7 +384,14 @@ void cEnvironment::ChangeBackground(const coreByte& iID)
     switch(iID)
     {
     default: ASSERT(false)
-    case cGrass::ID: m_pBackground = new cGrass(); break;
+    case cNoBackground     ::ID: m_pBackground = new cNoBackground     (); break;
+    case cGrassBackground  ::ID: m_pBackground = new cGrassBackground  (); break;
+    case cSeaBackground    ::ID: m_pBackground = new cSeaBackground    (); break;
+    case cDesertBackground ::ID: m_pBackground = new cDesertBackground (); break;
+    case cSpaceBackground  ::ID: m_pBackground = new cSpaceBackground  (); break;
+    case cVolcanoBackground::ID: m_pBackground = new cVolcanoBackground(); break;
+    case cSnowBackground   ::ID: m_pBackground = new cSnowBackground   (); break;
+    case cMossBackground   ::ID: m_pBackground = new cMossBackground   (); break;
     }
 
     if(m_pOldBackground)
@@ -463,7 +464,7 @@ void cEnvironment::__Reset(const coreResourceReset& bInit)
 
 // ****************************************************************
 // constructor
-cGrass::cGrass()noexcept
+cGrassBackground::cGrassBackground()noexcept
 {
     coreBatchList* pList1;
     coreBatchList* pList2;
@@ -476,7 +477,7 @@ cGrass::cGrass()noexcept
 
     // allocate stone list
     pList1 = new coreBatchList(GRASS_STONES_RESERVE);
-    pList1->DefineProgram("object_shadow_inst_program");
+    pList1->DefineProgram("object_ground_inst_program");
     {
         for(int j = 0; j < 2; ++j)   // types
         {
@@ -504,7 +505,7 @@ cGrass::cGrass()noexcept
                         pObject->DefineModel  ("environment_stone_01.md3");
                         pObject->DefineTexture(0, "environment_stone_diff.png");
                         pObject->DefineTexture(1, "environment_stone_norm.png");
-                        pObject->DefineProgram("object_shadow_program");
+                        pObject->DefineProgram("object_ground_program");
 
                         // set object properties
                         pObject->SetPosition   (coreVector3(vPosition, fHeight+0.2f));
@@ -531,10 +532,10 @@ cGrass::cGrass()noexcept
 
     // allocate reed lists
     pList1 = new coreBatchList(GRASS_REEDS_1_RESERVE);
-    pList1->DefineProgram("object_shadow_inst_program");
+    pList1->DefineProgram("object_ground_inst_program");
 
     pList2 = new coreBatchList(GRASS_REEDS_2_RESERVE);
-    pList2->DefineProgram("object_shadow_inst_program");
+    pList2->DefineProgram("object_ground_inst_program");
     {
         for(coreUint i = 0; i < GRASS_REEDS_NUM; ++i)
         {
@@ -557,7 +558,7 @@ cGrass::cGrass()noexcept
                     pObject->DefineModel  (bType ? "environment_reed_01.md3" : "environment_reed_02.md3");
                     pObject->DefineTexture(0, "environment_reed.png");
                     pObject->DefineTexture(1, "environment_grass_norm.png");
-                    pObject->DefineProgram("object_shadow_program");
+                    pObject->DefineProgram("object_ground_program");
 
                     // set object properties
                     pObject->SetPosition   (coreVector3(vPosition, fHeight-0.8f));
@@ -673,7 +674,7 @@ cGrass::cGrass()noexcept
 
 // ****************************************************************
 // destructor
-cGrass::~cGrass()
+cGrassBackground::~cGrassBackground()
 {
     // stop nature sound-effect
     if(m_pNatureSound->EnableRef(this))
@@ -686,7 +687,7 @@ cGrass::~cGrass()
 
 // ****************************************************************
 // move the grass background
-void cGrass::__MoveOwn()
+void cGrassBackground::__MoveOwn()
 {
     // adjust volume of the nature sound-effect
     // TODO # sound-volume per config value

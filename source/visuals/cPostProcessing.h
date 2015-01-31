@@ -10,6 +10,8 @@
 #ifndef _P1_GUARD_POSTPROCESSING_H_
 #define _P1_GUARD_POSTPROCESSING_H_
 
+// TODO: don't upate shader uniforms on single fullscreen objects (postprocessing, transition, glow, etc.)
+
 
 // ****************************************************************
 // post-processing class
@@ -22,17 +24,14 @@ private:
 
 public:
     cPostProcessing()noexcept;
-    ~cPostProcessing();
+
+    DISABLE_COPY(cPostProcessing)
 
     // apply post-processing
     void Apply();
 
     // recompile post-processing shader-program
     void Recompile();
-
-
-private:
-    DISABLE_COPY(cPostProcessing)
 };
 
 

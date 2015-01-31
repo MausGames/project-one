@@ -19,11 +19,7 @@ private:
 
 
 public:
-
-
-
-private:
-    DISABLE_TORS(cSpecialEffects)
+    DISABLE_CONSTRUCTION(cSpecialEffects)
 };
 
 

@@ -75,6 +75,8 @@ public:
     cOutdoor(const char* pcTextureTop, const char* pcTextureBottom, const coreByte& iAlgorithm, const float& fGrade)noexcept;
     ~cOutdoor();
 
+    DISABLE_COPY(cOutdoor)
+
     // render and move the outdoor-surface
     void Render()override;
     void Move  ()override;
@@ -94,10 +96,6 @@ public:
     // get object properties
     inline const coreUint& GetRenderOffset()const {return m_iRenderOffset;}
     inline const float&    GetFlyOffset   ()const {return m_fFlyOffset;}
-
-
-private:
-    DISABLE_COPY(cOutdoor)
 };
 
 

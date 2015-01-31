@@ -12,7 +12,7 @@
 // ****************************************************************
 // constructor
 cPlayer::cPlayer()noexcept
-: m_vNewPos     (coreVector2(0.0f,0.0f))
+: m_pWeapon     (NULL)
 , m_iInputIndex (0)
 {
     // load object resources
@@ -20,12 +20,15 @@ cPlayer::cPlayer()noexcept
     this->DefineTexture(0, "ship_player.png");
 
     // set object properties
-    this->SetPosition   (coreVector3(m_vNewPos,0.0f));
     this->SetDirection  (coreVector3(0.0f,1.0f,0.0f));
     this->SetOrientation(coreVector3(0.0f,0.0f,1.0f));
 
     // set initial status
     m_iStatus = PLAYER_STATUS_DEAD;
+
+    // load first weapon
+    m_pWeapon = new cNoWeapon();
+    m_pWeapon->SetOwner(this);
 }
 
 
@@ -35,6 +38,9 @@ cPlayer::~cPlayer()
 {
     // remove player from the game
     this->Kill(false);
+
+    // 
+    SAFE_DELETE(m_pWeapon)
 }
 
 
@@ -62,6 +68,30 @@ void cPlayer::Configure(const coreByte& iAppearanceType, const coreVector3& vCol
     // save input index
     m_iInputIndex = iInputIndex;
     WARN_IF(m_iInputIndex >= INPUT_SETS) m_iInputIndex = 0;
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::EquipWeapon(const int& iID)
+{
+    if(m_pWeapon) if(m_pWeapon->GetID() == iID) return;
+
+    // delete possible old weapon
+    SAFE_DELETE(m_pWeapon)
+
+    // create new weapon
+    switch(iID)
+    {
+    default: ASSERT(false)
+    case cNoWeapon   ::ID: m_pWeapon = new cNoWeapon   (); break;
+    case cRayWeapon  ::ID: m_pWeapon = new cRayWeapon  (); break;
+    case cPulseWeapon::ID: m_pWeapon = new cPulseWeapon(); break;
+    case cWaveWeapon ::ID: m_pWeapon = new cWaveWeapon (); break;
+    case cTeslaWeapon::ID: m_pWeapon = new cTeslaWeapon(); break;
+    case cAntiWeapon ::ID: m_pWeapon = new cAntiWeapon (); break;
+    }
+    m_pWeapon->SetOwner(this);
 }
 
 
@@ -102,16 +132,9 @@ void cPlayer::Move()
     // move the 3d-object
     coreObject3D::Move();
 
-
-
-
-
-
-
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(SPACE), CORE_INPUT_PRESS))
-        g_pGame->GetBulletManager()->AddBullet<cOrb>(TYPE_BULLET_PLAYER, this->GetPosition().xy(), coreVector2(0.0f,1.0f));
-
-
+    // 
+    const bool bShoot = (g_aInput[m_iInputIndex].iButtonHold & BIT(0)) ? true : false;
+    m_pWeapon->Update(bShoot);
 }
 
 
@@ -129,7 +152,7 @@ void cPlayer::Resurrect(const coreVector2& vPosition)
 
     // add player to global shadow and outline
     cShadow::BindGlobalObject(this);
-    g_pOutline->BindObject(this);
+    g_pOutlineFull->BindObject(this);
 
     // enable collision
     this->ChangeType(TYPE_PLAYER);
@@ -146,7 +169,7 @@ void cPlayer::Kill(const bool& bAnimated)
 
     // remove player from global shadow and outline
     cShadow::UnbindGlobalObject(this);
-    g_pOutline->UnbindObject(this);
+    g_pOutlineFull->UnbindObject(this);
 
     // disable collision
     this->ChangeType(0);

@@ -18,7 +18,7 @@
 enum eBulletStatus : coreByte
 {
     BULLET_STATUS_READY  = 0x01,     // bullet is ready to be created
-    BULLET_STATUS_ACTIVE = 0x02      // bullet is currently flying around, doing stuff
+    BULLET_STATUS_ACTIVE = 0x02      // bullet is currently flying around, doing stuff (no checking required, is managed)
 };
 
 
@@ -26,22 +26,40 @@ enum eBulletStatus : coreByte
 // bullet interface
 class INTERFACE cBullet : public coreObject3D
 {
+protected:
+    int    m_iDamage;   // 
+    cShip* m_pOwner;    // 
+
+
 public:
     cBullet()noexcept;
-    virtual ~cBullet();
+    virtual ~cBullet() {}
 
+    FRIEND_CLASS(cBulletManager)
+    ENABLE_COPY (cBullet)
     ENABLE_ID
 
-    // render and move the bullet
-    void Render()override;
-    void Move  ()override;
+    // move the bullet
+    void Move()override;
 
     // control status
-    void Activate  (const int&  iType, const coreVector2& vPosition, const coreVector2& vDirection);
+    void Activate  (const int&  iDamage, cShip* pOwner, const int& iType, const coreVector2& vPosition, const coreVector2& vDirection);
     void Deactivate(const bool& bAnimated);
 
-    // shader-program name for bullet set
-    static inline const char* GetInstancedProgramName() {ASSERT(false) return "";}
+    // get object properties
+    inline const int& GetDamage()const {return m_iDamage;}
+    inline cShip*     GetOwner ()const {return m_pOwner;}
+
+    // bullet set configuration values
+    static inline const char* GetProgramInstancedName() {ASSERT(false) return "";}
+    static inline cOutline*   GetOutlineObject       () {ASSERT(false) return g_pOutlineFull;}
+
+
+private:
+    // render and move routines for derived classes (render functions executed by manager)
+    virtual void __RenderOwnBefore() {}
+    virtual void __RenderOwnAfter () {}
+    virtual void __MoveOwn        () {}
 };
 
 
@@ -58,12 +76,13 @@ private:
         sBulletSetGen()noexcept;
         virtual ~sBulletSetGen() {}
     };
-    template <typename T> struct sBulletSet : public sBulletSetGen
+    template <typename T> struct sBulletSet final : public sBulletSetGen
     {
         std::vector<T> aBulletPool;   // semi-dynamic container with all bullets
         coreUint iCurBullet;          // current bullet (next one to check)
 
         sBulletSet()noexcept;
+        ~sBulletSet();
     };
 
 
@@ -75,47 +94,65 @@ public:
     cBulletManager()noexcept;
     ~cBulletManager();
 
+    DISABLE_COPY(cBulletManager)
+
     // render and move the bullet manager
     void Render();
     void Move();
 
     // add and remove bullets
-    template <typename T> T* AddBullet(const int& iType, const coreVector2& vPosition, const coreVector2& vDirection);
+    template <typename T> T* AddBullet(const int& iDamage, cShip* pOwner, const int& iType, const coreVector2& vPosition, const coreVector2& vDirection);
     void ClearBullets();
-
-
-private:
-    DISABLE_COPY(cBulletManager)
 };
 
 
 // ****************************************************************
 // ray bullet class
-class cRay final : public cBullet
+class cRayBullet final : public cBullet
 {
+private:
+    coreFlow m_fAnimation;   // 
+
+
 public:
-    cRay()noexcept;
-    ~cRay();
+    cRayBullet()noexcept;
 
-    ASSIGN_ID(1, "Ray")
+    ENABLE_COPY(cRayBullet)
+    ASSIGN_ID(1, "RayBullet")
 
-    // shader-program name for bullet-set
-    static inline const char* GetInstancedProgramName() {return "effect_energy_inst_program";}
+    // bullet set configuration values
+    static inline const char* GetProgramInstancedName() {return "effect_energy_direct_inst_program";}
+    static inline cOutline*   GetOutlineObject       () {return g_pOutlineDirect;}
+
+
+private:
+    // move the ray bullet
+    void __MoveOwn()override;
 };
 
 
 // ****************************************************************
 // orb bullet class
-class cOrb final : public cBullet
+class cOrbBullet final : public cBullet
 {
+private:
+    coreFlow m_fAnimation;   // 
+
+
 public:
-    cOrb()noexcept;
-    ~cOrb();
+    cOrbBullet()noexcept;
 
-    ASSIGN_ID(2, "Orb")
+    ENABLE_COPY(cOrbBullet)
+    ASSIGN_ID(2, "OrbBullet")
 
-    // shader-program name for bullet-set
-    static inline const char* GetInstancedProgramName() {return "effect_energy_inst_program";}
+    // bullet set configuration values
+    static inline const char* GetProgramInstancedName() {return "effect_energy_inst_program";}
+    static inline cOutline*   GetOutlineObject       () {return g_pOutlineFull;}
+
+
+private:
+    // move the orb bullet
+    void __MoveOwn()override;
 };
 
 
@@ -125,7 +162,11 @@ template <typename T> cBulletManager::sBulletSet<T>::sBulletSet()noexcept
 : iCurBullet (0)
 {
     // set shader-program
-    oBulletActive.DefineProgram(T::GetInstancedProgramName());
+    oBulletActive.DefineProgram(T::GetProgramInstancedName());
+
+    // 
+    T::GetOutlineObject()->BindList(&oBulletActive);
+    g_pGlow->BindList(&oBulletActive);
 
     // set bullet pool to initial size
     aBulletPool.resize(BULLET_SET_INIT_SIZE);
@@ -133,8 +174,18 @@ template <typename T> cBulletManager::sBulletSet<T>::sBulletSet()noexcept
 
 
 // ****************************************************************
+// destructor
+template <typename T> cBulletManager::sBulletSet<T>::~sBulletSet()
+{
+    // 
+    T::GetOutlineObject()->UnbindList(&oBulletActive);
+    g_pGlow->UnbindList(&oBulletActive);
+}
+
+
+// ****************************************************************
 // add bullet to the game
-template <typename T> T* cBulletManager::AddBullet(const int& iType, const coreVector2& vPosition, const coreVector2& vDirection)
+template <typename T> T* cBulletManager::AddBullet(const int& iDamage, cShip* pOwner, const int& iType, const coreVector2& vPosition, const coreVector2& vDirection)
 {
     // get requested bullet set
     sBulletSet<T>* pSet;
@@ -159,7 +210,7 @@ template <typename T> T* cBulletManager::AddBullet(const int& iType, const coreV
         if(pBullet->GetStatus() & BULLET_STATUS_READY)
         {
             // prepare bullet and add to active list
-            pBullet->Activate(iType, vPosition, vDirection);
+            pBullet->Activate(iDamage, pOwner, iType, vPosition, vDirection);
             pSet->oBulletActive.BindObject(pBullet);
 
             return pBullet;
@@ -180,7 +231,7 @@ template <typename T> T* cBulletManager::AddBullet(const int& iType, const coreV
 
     // execute again with first new bullet (overhead should be low, requested bullet set is cached)
     pSet->iCurBullet = iSize-1;
-    return this->AddBullet<T>(iType, vPosition, vDirection);
+    return this->AddBullet<T>(iDamage, pOwner, iType, vPosition, vDirection);
 }
 
 

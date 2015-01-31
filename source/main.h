@@ -46,8 +46,11 @@
 
 #define LIGHT_DIRECTION    coreVector3(0.583953857f, -0.642349243f, -0.496360779f)
 
-#define SHADER_SHADOW      "#define _P1_SHADOW_  (1) \n"
-#define SHADER_SPHERIC     "#define _P1_SPHERIC_ (1) \n"
+#define CLEAR_COLOR        0.5f, 0.5f, 0.5f, 0.0f
+
+#define SHADER_SHADOW      "#define _P1_SHADOW_  (1) \n"   // outdoor, object_ground
+#define SHADER_SPHERIC     "#define _P1_SPHERIC_ (1) \n"   // decal, energy
+#define SHADER_DIRECT      "#define _P1_DIRECT_  (1) \n"   // outline, energy
 
 #define TYPE_PLAYER        (1)
 #define TYPE_ENEMY         (2)
@@ -65,13 +68,29 @@
 
 
 // ****************************************************************
+// forward declarations
+class cShip;
+class cPlayer;
+
+
+// ****************************************************************
 // game header files
+extern coreVector2      g_vGameResolution;   // pre-calculated 1:1 resolution
+
+#include "additional/cBindContainer.h"
 #include "files/cConfig.h"
-#include "visuals/cForeground.h"
 #include "visuals/cShadow.h"
 #include "visuals/cOutline.h"
+#include "visuals/cGlow.h"
 #include "visuals/cSpecialEffects.h"
+#include "visuals/cForeground.h"
 #include "visuals/cPostProcessing.h"
+
+extern cOutline*        g_pOutlineFull;      // main full outline-effect object
+extern cOutline*        g_pOutlineDirect;    // main direct outline-effect object
+extern cGlow*           g_pGlow;             // main glow-effect object
+extern cPostProcessing* g_pPostProcessing;   // main post-processing object
+
 #include "environment/cOutdoor.h"
 #include "environment/cWater.h"
 #include "environment/cEnvironment.h"
@@ -82,16 +101,9 @@
 #include "game/cPlayer.h"
 #include "game/cGame.h"
 
-
-// ****************************************************************
-// global variables
-extern coreVector2      g_vGameResolution;       // pre-calculated 1:1 resolution
-
-extern cPostProcessing* g_pPostProcessing;       // main post-processing object
-extern cOutline*        g_pOutline;              // main outline-effect object
-extern cForeground*     g_pForeground;           // main foreground object
-extern cEnvironment*    g_pEnvironment;          // main environment object
-extern cGame*           g_pGame;                 // main game object
+extern cForeground*     g_pForeground;       // main foreground object
+extern cEnvironment*    g_pEnvironment;      // main environment object
+extern cGame*           g_pGame;             // main game object
 
 
 #endif // _P1_GUARD_MAIN_H_

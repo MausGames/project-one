@@ -11,23 +11,11 @@
 
 // ****************************************************************
 // constructor
-cOutline::cOutline()noexcept
+cOutline::cOutline(const char* pcProgramSingleName, const char* pcProgramInstancedName)noexcept
 {
     // load shader-programs for outlined objects
-    s_pProgramSingle    = Core::Manager::Resource->Get<coreProgram>("effect_outline_program");
-    s_pProgramInstanced = Core::Manager::Resource->Get<coreProgram>("effect_outline_inst_program");
-}
-
-
-// ****************************************************************
-// destructor
-cOutline::~cOutline()
-{
-    ASSERT(m_apObject.empty() && m_apList.empty())
-
-    // remove all outlined objects and lists
-    this->ClearObjects();
-    this->ClearLists();
+    s_pProgramSingle    = Core::Manager::Resource->Get<coreProgram>(pcProgramSingleName);
+    s_pProgramInstanced = Core::Manager::Resource->Get<coreProgram>(pcProgramInstancedName);
 }
 
 
@@ -38,8 +26,7 @@ void cOutline::Apply()
 #if defined(_CORE_DEBUG_)
 
     // check for duplicate objects and lists
-    FOR_EACH(it, m_apObject) FOR_EACH_SET(et, it+1, m_apObject) ASSERT((*it) != (*et))
-    FOR_EACH(it, m_apList)   FOR_EACH_SET(et, it+1, m_apList)   ASSERT((*it) != (*et))
+    this->_CheckDuplicates();
 
 #endif
 

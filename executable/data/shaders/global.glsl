@@ -357,6 +357,7 @@ uniform sampler2DShadow u_as2TextureShadow[CORE_NUM_TEXTURES_SHADOW];
         #define u_v3Position  (a_v3DivPosition)
         #define u_v3Size      (a_v3DivSize)
         #define u_v4Rotation  (a_v4DivRotation)
+        #define u_v4Color     (a_v4DivColor)
         #define u_v2TexSize   (a_v4DivTexParam.xy)
         #define u_v2TexOffset (a_v4DivTexParam.zw)
     #else
@@ -506,18 +507,6 @@ uniform sampler2DShadow u_as2TextureShadow[CORE_NUM_TEXTURES_SHADOW];
     vec2 coreObject3DTexCoordLow() {return a_v2LowTexCoord * u_v2TexSize + u_v2TexOffset;}
     vec2 coreObject2DTexCoord()    {return a_v2LowTexCoord * u_v2TexSize + u_v2TexOffset;}
     vec2 coreParticleTexCoord()    {return a_v2LowTexCoord;}
-
-    // recommended color value access
-    vec4 coreObject3DColor()
-    {
-    #if defined(_CORE_OPTION_INSTANCING_)
-        return v_v4VarColor;
-    #else
-        return u_v4Color;
-    #endif
-    }
-    #define coreObject2DColor() (u_v4Color)
-    #define coreParticleColor() (coreObject3DColor())
 
     // dot-3 bump mapping initialization and transformation
     vec3 g_n, g_t, g_b;

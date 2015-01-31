@@ -8,13 +8,11 @@
 //////////////////////////////////////////////////////
 #include "main.h"
 
-std::vector<coreObject3D*>  cShadow::s_apGlobalObject;           // = NULL;
-std::vector<coreBatchList*> cShadow::s_apGlobalList;             // = NULL;
-coreProgramPtr              cShadow::s_pProgramSingle               = NULL;
-coreProgramPtr              cShadow::s_pProgramInstanced            = NULL;
-coreProgramPtr              cShadow::s_apHandle[SHADOW_HANDLES]; // = NULL;
-coreMatrix4                 cShadow::s_amDrawShadowMatrix[2];    // = coreMatrix4::Identity();
-coreMatrix4                 cShadow::s_mReadShadowMatrix            = coreMatrix4::Identity();
+coreProgramPtr cShadow::s_pProgramSingle               = NULL;
+coreProgramPtr cShadow::s_pProgramInstanced            = NULL;
+coreProgramPtr cShadow::s_apHandle[SHADOW_HANDLES]; // = NULL;
+coreMatrix4    cShadow::s_amDrawShadowMatrix[2];    // = coreMatrix4::Identity();
+coreMatrix4    cShadow::s_mReadShadowMatrix            = coreMatrix4::Identity();
 
 
 // ****************************************************************
@@ -28,18 +26,6 @@ cShadow::cShadow()noexcept
 
 
 // ****************************************************************
-// destructor
-cShadow::~cShadow()
-{
-    ASSERT(m_apObject.empty() && m_apList.empty())
-
-    // remove all shadow objects and lists
-    this->ClearObjects();
-    this->ClearLists();
-}
-
-
-// ****************************************************************
 // update the shadow map
 void cShadow::Update()
 {
@@ -48,10 +34,8 @@ void cShadow::Update()
 #if defined(_CORE_DEBUG_)
 
     // check for duplicate objects and lists
-    FOR_EACH(it, m_apObject)       FOR_EACH_SET(et, it+1, m_apObject)       ASSERT((*it) != (*et))
-    FOR_EACH(it, m_apList)         FOR_EACH_SET(et, it+1, m_apList)         ASSERT((*it) != (*et))
-    FOR_EACH(it, s_apGlobalObject) FOR_EACH_SET(et, it+1, s_apGlobalObject) ASSERT((*it) != (*et))
-    FOR_EACH(it, s_apGlobalList)   FOR_EACH_SET(et, it+1, s_apGlobalList)   ASSERT((*it) != (*et))
+    this->_CheckDuplicates();
+    cGlobalBindContainer::_CheckGlobalDuplicates();
 
 #endif
 
@@ -112,8 +96,8 @@ void cShadow::GlobalInit()
 
     // load shader-programs with shadow maps
     s_apHandle[SHADOW_HANDLE_OUTDOOR]     = Core::Manager::Resource->Get<coreProgram>("environment_outdoor_program");
-    s_apHandle[SHADOW_HANDLE_OBJECT]      = Core::Manager::Resource->Get<coreProgram>("object_shadow_program");
-    s_apHandle[SHADOW_HANDLE_OBJECT_INST] = Core::Manager::Resource->Get<coreProgram>("object_shadow_inst_program");
+    s_apHandle[SHADOW_HANDLE_OBJECT]      = Core::Manager::Resource->Get<coreProgram>("object_ground_program");
+    s_apHandle[SHADOW_HANDLE_OBJECT_INST] = Core::Manager::Resource->Get<coreProgram>("object_ground_inst_program");
 
     // adjust shader-programs
     cShadow::Recompile();
@@ -124,17 +108,13 @@ void cShadow::GlobalInit()
 // exit the shadow map class
 void cShadow::GlobalExit()
 {
-    ASSERT(s_apGlobalObject.empty() && s_apGlobalList.empty())
-
-    // remove all global shadow-casting objects and lists
-    cShadow::ClearGlobalObjects();
-    cShadow::ClearGlobalLists();
+    // remove all global objects and lists
+    cGlobalBindContainer::_GlobalExit();
 
     // unload all shader-programs
     s_pProgramSingle    = NULL;
     s_pProgramInstanced = NULL;
-    for(coreByte i = 0; i < SHADOW_HANDLES; ++i)
-        s_apHandle[i] = NULL;
+    for(coreByte i = 0; i < SHADOW_HANDLES; ++i) s_apHandle[i] = NULL;
 }
 
 
@@ -272,7 +252,7 @@ void cShadow::__RenderInstanced(const coreMatrix4& mTransform, const std::vector
 
             // render lists with objects
             FOR_EACH(it, apList) {if((*it)->IsInstanced()) (*it)->Render(s_pProgramInstanced, NULL);}
-            return;
+            return; // #
         }
     }
 }

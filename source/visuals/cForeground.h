@@ -10,6 +10,8 @@
 #ifndef _P1_GUARD_FOREGROUND_H_
 #define _P1_GUARD_FOREGROUND_H_
 
+// TODO: convert frame buffer to simple texture ? (Invalidate)
+
 
 // ****************************************************************
 // foreground definitions
@@ -18,7 +20,7 @@
 
 // ****************************************************************
 // foreground aggregation class
-class cForeground final : coreResourceRelation
+class cForeground final : public coreResourceRelation
 {
 private:
     coreFrameBuffer m_iFrameBuffer;   // foreground frame buffer (only texture)
@@ -27,7 +29,8 @@ private:
 
 public:
     cForeground()noexcept;
-    ~cForeground();
+
+    DISABLE_COPY(cForeground)
 
     // start and end foreground aggregation
     void Start();
@@ -41,8 +44,6 @@ public:
 
 
 private:
-    DISABLE_COPY(cForeground)
-
     // reset with the resource manager
     void __Reset(const coreResourceReset& bInit)override;
 };

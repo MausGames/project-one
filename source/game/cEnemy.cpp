@@ -24,7 +24,7 @@ cEnemy::cEnemy()noexcept
 
     // add enemy to global shadow and outline
     cShadow::BindGlobalObject(this);
-    g_pOutline->BindObject(this);
+    g_pOutlineFull->BindObject(this);
 
     // enable collision
     this->ChangeType(TYPE_ENEMY);
@@ -37,7 +37,7 @@ cEnemy::~cEnemy()
 {
     // remove enemy from global shadow and outline
     cShadow::UnbindGlobalObject(this);
-    g_pOutline->UnbindObject(this);
+    g_pOutlineFull->UnbindObject(this);
 
     // disable collision
     this->ChangeType(0);
@@ -70,7 +70,7 @@ void cEnemy::Move()
 
 // ****************************************************************
 // constructor
-cScout::cScout()noexcept
+cScoutEnemy::cScoutEnemy()noexcept
 {
     // load models
     this->DefineModel   ("ship_enemy_scout_high.md3");
@@ -82,15 +82,8 @@ cScout::cScout()noexcept
 
 
 // ****************************************************************
-// destructor
-cScout::~cScout()
-{
-}
-
-
-// ****************************************************************
 // constructor
-cWarrior::cWarrior()noexcept
+cWarriorEnemy::cWarriorEnemy()noexcept
 {
     // load models
     this->DefineModel   ("ship_enemy_warrior_high.md3");
@@ -102,15 +95,8 @@ cWarrior::cWarrior()noexcept
 
 
 // ****************************************************************
-// destructor
-cWarrior::~cWarrior()
-{
-}
-
-
-// ****************************************************************
 // constructor
-cStar::cStar()noexcept
+cStarEnemy::cStarEnemy()noexcept
 : m_fAngle (0.0f)
 {
     // load models
@@ -123,15 +109,8 @@ cStar::cStar()noexcept
 
 
 // ****************************************************************
-// destructor
-cStar::~cStar()
-{
-}
-
-
-// ****************************************************************
 // move the star enemy
-void cStar::__MoveOwn()
+void cStarEnemy::__MoveOwn()
 {
     // update rotation angle
     m_fAngle.Update(-3.0f);
@@ -144,7 +123,7 @@ void cStar::__MoveOwn()
 
 // ****************************************************************
 // constructor
-cArrow::cArrow()noexcept
+cArrowEnemy::cArrowEnemy()noexcept
 : m_fAngle (0.0f)
 {
     // load models
@@ -157,15 +136,8 @@ cArrow::cArrow()noexcept
 
 
 // ****************************************************************
-// destructor
-cArrow::~cArrow()
-{
-}
-
-
-// ****************************************************************
 // move the arrow enemy
-void cArrow::__MoveOwn()
+void cArrowEnemy::__MoveOwn()
 {
     // update rotation angle
     m_fAngle.Update(-3.0f);
@@ -179,7 +151,7 @@ void cArrow::__MoveOwn()
 
 // ****************************************************************
 // constructor
-cMiner::cMiner()noexcept
+cMinerEnemy::cMinerEnemy()noexcept
 {
     // load models
     this->DefineModel   ("ship_enemy_miner_high.md3");
@@ -191,15 +163,8 @@ cMiner::cMiner()noexcept
 
 
 // ****************************************************************
-// destructor
-cMiner::~cMiner()
-{
-}
-
-
-// ****************************************************************
 // constructor
-cFreezer::cFreezer()noexcept
+cFreezerEnemy::cFreezerEnemy()noexcept
 : m_fAngle (0.0f)
 {
     // load models
@@ -212,15 +177,8 @@ cFreezer::cFreezer()noexcept
 
 
 // ****************************************************************
-// destructor
-cFreezer::~cFreezer()
-{
-}
-
-
-// ****************************************************************
 // move the freezer enemy
-void cFreezer::__MoveOwn()
+void cFreezerEnemy::__MoveOwn()
 {
     // update rotation angle (opposed to arrow enemy)
     m_fAngle.Update(2.0f);
@@ -234,7 +192,7 @@ void cFreezer::__MoveOwn()
 
 // ****************************************************************
 // constructor
-cCinder::cCinder()noexcept
+cCinderEnemy::cCinderEnemy()noexcept
 : m_fAngle (0.0f)
 {
     // load models
@@ -247,15 +205,8 @@ cCinder::cCinder()noexcept
 
 
 // ****************************************************************
-// destructor
-cCinder::~cCinder()
-{
-}
-
-
-// ****************************************************************
 // move the cinder enemy
-void cCinder::__MoveOwn()
+void cCinderEnemy::__MoveOwn()
 {
     // update rotation angle
     m_fAngle.Update(-2.0f);

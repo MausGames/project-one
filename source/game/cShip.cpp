@@ -12,19 +12,13 @@
 // ****************************************************************
 // constructor
 cShip::cShip()noexcept
+: m_vNewPos (coreVector2(0.0f,0.0f))
 {
 }
 
 
 // ****************************************************************
-// destructor
-cShip::~cShip()
-{
-}
-
-
-// ****************************************************************
-// render the ship
+// render the ship (low-polygon)
 void cShip::Render(const coreProgramPtr& pProgram)
 {
     if(!this->IsEnabled(CORE_OBJECT_ENABLE_RENDER)) return;

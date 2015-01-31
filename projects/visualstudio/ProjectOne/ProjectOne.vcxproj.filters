@@ -57,6 +57,12 @@
     <ClCompile Include="..\..\..\source\menu\cInterface.cpp">
       <Filter>menu</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\visuals\cGlow.cpp">
+      <Filter>visuals</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\additional\cBindContainer.cpp">
+      <Filter>additional</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\main.h" />
@@ -114,6 +120,12 @@
     <ClInclude Include="..\..\..\source\menu\cInterface.h">
       <Filter>menu</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\source\visuals\cGlow.h">
+      <Filter>visuals</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\additional\cBindContainer.h">
+      <Filter>additional</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="environment">
@@ -130,6 +142,9 @@
     </Filter>
     <Filter Include="menu">
       <UniqueIdentifier>{82bb5fd3-d0bb-42c9-8684-03d3af233b0d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="additional">
+      <UniqueIdentifier>{b5236847-0adc-43fb-b72c-e45beb3466cf}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

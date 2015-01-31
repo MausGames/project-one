@@ -15,13 +15,11 @@
 // enemy entity interface
 class INTERFACE cEnemy : public cShip
 {
-private:
-
-
 public:
     cEnemy()noexcept;
     virtual ~cEnemy();
 
+    DISABLE_COPY(cEnemy)
     ENABLE_ID
 
     // render and move the enemy
@@ -30,55 +28,49 @@ public:
 
 
 private:
-    // render and move routine for derived classes
-    virtual void __RenderOwn() {}
+    // render and move routines for derived classes
+    virtual void __RenderOwn() {}   // TODO # like bullet ?
     virtual void __MoveOwn()   {}
 };
 
 
 // ****************************************************************
 // scout enemy class
-class cScout final : public cEnemy
+class cScoutEnemy final : public cEnemy
 {
-private:
-
-
 public:
-    cScout()noexcept;
-    ~cScout();
+    cScoutEnemy()noexcept;
 
-    ASSIGN_ID(1, "Scout")
+    DISABLE_COPY(cScoutEnemy)
+    ASSIGN_ID(1, "ScoutEnemy")
 };
 
 
 // ****************************************************************
 // warrior enemy class
-class cWarrior final : public cEnemy
+class cWarriorEnemy final : public cEnemy
 {
-private:
-
-
 public:
-    cWarrior()noexcept;
-    ~cWarrior();
+    cWarriorEnemy()noexcept;
 
-    ASSIGN_ID(2, "Warrior")
+    DISABLE_COPY(cWarriorEnemy)
+    ASSIGN_ID(2, "WarriorEnemy")
 };
 
 
 // ****************************************************************
 // star enemy class
-class cStar final : public cEnemy
+class cStarEnemy final : public cEnemy
 {
 private:
     coreFlow m_fAngle;   // rotation angle
 
 
 public:
-    cStar()noexcept;
-    ~cStar();
+    cStarEnemy()noexcept;
 
-    ASSIGN_ID(3, "Star")
+    DISABLE_COPY(cStarEnemy)
+    ASSIGN_ID(3, "StarEnemy")
 
 
 private:
@@ -89,17 +81,17 @@ private:
 
 // ****************************************************************
 // arrow enemy class
-class cArrow final : public cEnemy
+class cArrowEnemy final : public cEnemy
 {
 private:
     coreFlow m_fAngle;   // rotation angle
 
 
 public:
-    cArrow()noexcept;
-    ~cArrow();
+    cArrowEnemy()noexcept;
 
-    ASSIGN_ID(4, "Arrow")
+    DISABLE_COPY(cArrowEnemy)
+    ASSIGN_ID(4, "ArrowEnemy")
 
 
 private:
@@ -110,32 +102,29 @@ private:
 
 // ****************************************************************
 // miner enemy class
-class cMiner final : public cEnemy
+class cMinerEnemy final : public cEnemy
 {
-private:
-
-
 public:
-    cMiner()noexcept;
-    ~cMiner();
+    cMinerEnemy()noexcept;
 
-    ASSIGN_ID(5, "Miner")
+    DISABLE_COPY(cMinerEnemy)
+    ASSIGN_ID(5, "MinerEnemy")
 };
 
 
 // ****************************************************************
 // freezer enemy class
-class cFreezer final : public cEnemy
+class cFreezerEnemy final : public cEnemy
 {
 private:
     coreFlow m_fAngle;   // rotation angle
 
 
 public:
-    cFreezer()noexcept;
-    ~cFreezer();
+    cFreezerEnemy()noexcept;
 
-    ASSIGN_ID(6, "Freezer")
+    DISABLE_COPY(cFreezerEnemy)
+    ASSIGN_ID(6, "FreezerEnemy")
 
 
 private:
@@ -146,17 +135,17 @@ private:
 
 // ****************************************************************
 // cinder enemy class
-class cCinder final : public cEnemy
+class cCinderEnemy final : public cEnemy
 {
 private:
     coreFlow m_fAngle;   // rotation angle
 
 
 public:
-    cCinder()noexcept;
-    ~cCinder();
+    cCinderEnemy()noexcept;
 
-    ASSIGN_ID(7, "Cinder")
+    DISABLE_COPY(cCinderEnemy)
+    ASSIGN_ID(7, "CinderEnemy")
 
 
 private:

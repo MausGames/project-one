@@ -14,8 +14,9 @@
 cGame::cGame()noexcept
 {
     // create first player
-    m_aPlayer[0].Configure(1, coreVector3(201.0f/360.0f, 74.0f/100.0f, 85.0f/100.0f).HSVtoRGB(), g_CurConfig.Input.aiType[0]);
-    m_aPlayer[0].Resurrect(coreVector2(-10.0f,0.0f));
+    m_aPlayer[0].Configure  (1, coreVector3(201.0f/360.0f, 74.0f/100.0f, 85.0f/100.0f).HSVtoRGB(), g_CurConfig.Input.aiType[0]);
+    m_aPlayer[0].EquipWeapon(cRayWeapon::ID);
+    m_aPlayer[0].Resurrect  (coreVector2(-10.0f,0.0f));
 
     if(true)
     {
@@ -29,13 +30,13 @@ cGame::cGame()noexcept
 
     std::memset(m_apTest, 0, sizeof(m_apTest));
 
-    m_apTest[0] = new cScout();
-    m_apTest[1] = new cWarrior();
-    m_apTest[2] = new cStar();
-    m_apTest[3] = new cArrow();
-    m_apTest[4] = new cMiner();
-    m_apTest[5] = new cFreezer();
-    m_apTest[6] = new cCinder();
+    m_apTest[0] = new cScoutEnemy();
+    m_apTest[1] = new cWarriorEnemy();
+    m_apTest[2] = new cStarEnemy();
+    m_apTest[3] = new cArrowEnemy();
+    m_apTest[4] = new cMinerEnemy();
+    m_apTest[5] = new cFreezerEnemy();
+    m_apTest[6] = new cCinderEnemy();
 
     //m_apTest[1]->SetSize(coreVector3(0.99f, 1.0f, 1.0f));
 
