@@ -17,12 +17,12 @@ class INTERFACE cWeapon
 {
 protected:
     coreTimer    m_CooldownTimer;   // controls the cooldown between two successive shots
-    coreSoundPtr m_pShootSound;     // 
+    coreSoundPtr m_pShootSound;     // shooting sound-effect
 
-    coreByte m_iLevel;              // 
-    cPlayer* m_pOwner;              // 
+    coreByte m_iLevel;              // current weapon level
+    cPlayer* m_pOwner;              // associated owner of the weapon (and bullets)
 
-    bool m_bLastStatus;             // 
+    bool m_bLastStatus;             // last shoot status (to determine trigger and release)
 
 
 public:
@@ -32,7 +32,7 @@ public:
     DISABLE_COPY(cWeapon)
     ENABLE_ID
 
-    // 
+    // update the weapon
     bool Update(const bool& bShootStatus);
 
     // set object properties
@@ -44,7 +44,7 @@ public:
 
 
 private:
-    // 
+    // event routines for derived classes
     virtual void __TriggerOwn() {}
     virtual void __ReleaseOwn() {}
     virtual void __ShootOwn  () {}
@@ -68,7 +68,7 @@ public:
 class cRayWeapon final : public cWeapon
 {
 private:
-    bool m_bSpread;   // 
+    bool m_bSpread;   // bullet spread status (0 = concentrated, 1 = wide)
 
 
 public:
@@ -79,7 +79,7 @@ public:
 
 
 private:
-    // 
+    // release and shoot with the ray weapon
     void __ReleaseOwn()override;
     void __ShootOwn  ()override;
 };

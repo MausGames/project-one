@@ -13,6 +13,8 @@
 
 // ****************************************************************
 // player definitions
+#define PLAYER_WEAPONS (2u)     // number of weapons a player can carry
+
 enum ePlayerStatus : coreByte
 {
     PLAYER_STATUS_DEAD = 0x01   // completely removed from the game
@@ -24,8 +26,8 @@ enum ePlayerStatus : coreByte
 class cPlayer final : public cShip
 {
 private:
-    cWeapon* m_pWeapon;       // main weapon object (bullet factory)
-    coreByte m_iInputIndex;   // input set identifier
+    cWeapon* m_apWeapon[PLAYER_WEAPONS];   // main weapon objects (bullet factories)
+    coreByte m_iInputIndex;                // input set identifier
 
 
 public:
@@ -36,7 +38,7 @@ public:
 
     // configure the player
     void Configure  (const coreByte& iAppearanceType, const coreVector3& vColor, const coreByte& iInputIndex);
-    void EquipWeapon(const int&      iID);
+    void EquipWeapon(const coreByte& iIndex, const int& iID);
 
     // render and move the player
     void Render()override;

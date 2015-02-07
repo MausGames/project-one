@@ -14,6 +14,13 @@
 
 
 // ****************************************************************
+// post-processing definitions
+#define POST_TEXTURE_UNIT_ENVIRONMENT (0)   // texture unit for the environment frame buffer
+#define POST_TEXTURE_UNIT_FOREGROUND  (1)   // same for foreground
+#define POST_TEXTURE_UNIT_GLOW        (2)   // same for glow
+
+
+// ****************************************************************
 // post-processing class
 class cPostProcessing final : public coreObject2D
 {

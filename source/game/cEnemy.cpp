@@ -12,6 +12,7 @@
 // ****************************************************************
 // constructor
 cEnemy::cEnemy()noexcept
+: m_iBaseColor (0)
 {
     // load object resources
     this->DefineProgram("object_ship_program");
@@ -69,6 +70,26 @@ void cEnemy::Move()
 
 
 // ****************************************************************
+// 
+bool cEnemy::TakeDamage(const int& iDamage)
+{
+
+    m_iCurHealth -= iDamage;
+
+    if(m_iCurHealth <= 0)
+    {
+        m_iCurHealth = 0;
+    }
+
+
+    this->SetColor3(LERP(coreVector3(0.5f,0.5f,0.5f), coreVector4::UnpackUnorm4x8(m_iBaseColor).xyz(), (float(m_iCurHealth) / float(m_iMaxHealth))));
+
+
+    return (m_iCurHealth == 0) ? true : false;
+}
+
+
+// ****************************************************************
 // constructor
 cScoutEnemy::cScoutEnemy()noexcept
 {
@@ -78,6 +99,10 @@ cScoutEnemy::cScoutEnemy()noexcept
 
     // set color value
     this->SetColor3(coreVector3(201.0f/360.0f, 74.0f/100.0f, 85.0f/100.0f).HSVtoRGB());
+    m_iBaseColor = this->GetColor4().PackUnorm4x8();
+
+    // 
+    m_iMaxHealth = m_iCurHealth = 100;
 }
 
 
@@ -91,6 +116,10 @@ cWarriorEnemy::cWarriorEnemy()noexcept
 
     // set color value
     this->SetColor3(coreVector3(51.0f/360.0f, 100.0f/100.0f, 85.0f/100.0f).HSVtoRGB());
+    m_iBaseColor = this->GetColor4().PackUnorm4x8();
+
+    // 
+    m_iMaxHealth = m_iCurHealth = 100;
 }
 
 
@@ -105,6 +134,10 @@ cStarEnemy::cStarEnemy()noexcept
 
     // set color value
     this->SetColor3(coreVector3(0.0f/360.0f, 68.0f/100.0f, 90.0f/100.0f).HSVtoRGB());
+    m_iBaseColor = this->GetColor4().PackUnorm4x8();
+
+    // 
+    m_iMaxHealth = m_iCurHealth = 100;
 }
 
 
@@ -132,6 +165,10 @@ cArrowEnemy::cArrowEnemy()noexcept
 
     // set color value
     this->SetColor3(coreVector3(34.0f/360.0f, 100.0f/100.0f, 100.0f/100.0f).HSVtoRGB());
+    m_iBaseColor = this->GetColor4().PackUnorm4x8();
+
+    // 
+    m_iMaxHealth = m_iCurHealth = 100;
 }
 
 
@@ -159,6 +196,10 @@ cMinerEnemy::cMinerEnemy()noexcept
 
     // set color value
     this->SetColor3(coreVector3(183.0f/360.0f, 70.0f/100.0f, 85.0f/100.0f).HSVtoRGB());
+    m_iBaseColor = this->GetColor4().PackUnorm4x8();
+
+    // 
+    m_iMaxHealth = m_iCurHealth = 100;
 }
 
 
@@ -173,6 +214,10 @@ cFreezerEnemy::cFreezerEnemy()noexcept
 
     // set color value
     this->SetColor3(coreVector3(208.0f/360.0f, 32.0f/100.0f, 90.0f/100.0f).HSVtoRGB());
+    m_iBaseColor = this->GetColor4().PackUnorm4x8();
+
+    // 
+    m_iMaxHealth = m_iCurHealth = 100;
 }
 
 
@@ -201,6 +246,10 @@ cCinderEnemy::cCinderEnemy()noexcept
 
     // set color value
     this->SetColor3(coreVector3(0.0f/360.0f, 0.0f/100.0f, 60.0f/100.0f).HSVtoRGB());
+    m_iBaseColor = this->GetColor4().PackUnorm4x8();
+
+    // 
+    m_iMaxHealth = m_iCurHealth = 100;
 }
 
 

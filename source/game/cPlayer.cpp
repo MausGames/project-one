@@ -12,8 +12,7 @@
 // ****************************************************************
 // constructor
 cPlayer::cPlayer()noexcept
-: m_pWeapon     (NULL)
-, m_iInputIndex (0)
+: m_iInputIndex (0)
 {
     // load object resources
     this->DefineProgram("object_ship_program");
@@ -26,9 +25,12 @@ cPlayer::cPlayer()noexcept
     // set initial status
     m_iStatus = PLAYER_STATUS_DEAD;
 
-    // load first weapon
-    m_pWeapon = new cNoWeapon();
-    m_pWeapon->SetOwner(this);
+    // load first weapons
+    for(int i = 0; i < PLAYER_WEAPONS; ++i)
+    {
+        m_apWeapon[i] = new cNoWeapon();
+        m_apWeapon[i]->SetOwner(this);
+    }
 }
 
 
@@ -39,8 +41,8 @@ cPlayer::~cPlayer()
     // remove player from the game
     this->Kill(false);
 
-    // 
-    SAFE_DELETE(m_pWeapon)
+    // delete weapon objects
+    for(int i = 0; i < PLAYER_WEAPONS; ++i) SAFE_DELETE(m_apWeapon[i])
 }
 
 
@@ -62,7 +64,7 @@ void cPlayer::Configure(const coreByte& iAppearanceType, const coreVector3& vCol
     this->DefineModel   (pcModelHigh);
     this->DefineModelLow(pcModelLow);
 
-    // save color value (may also be overridden outside)
+    // save color value
     this->SetColor3(vColor);
 
     // save input index
@@ -72,26 +74,36 @@ void cPlayer::Configure(const coreByte& iAppearanceType, const coreVector3& vCol
 
 
 // ****************************************************************
-// 
-void cPlayer::EquipWeapon(const int& iID)
+// equip new main weapon
+void cPlayer::EquipWeapon(const coreByte& iIndex, const int& iID)
 {
-    if(m_pWeapon) if(m_pWeapon->GetID() == iID) return;
+    ASSERT(iIndex < PLAYER_WEAPONS)
+    if(m_apWeapon[iIndex]) if(m_apWeapon[iIndex]->GetID() == iID) return;
 
     // delete possible old weapon
-    SAFE_DELETE(m_pWeapon)
+    SAFE_DELETE(m_apWeapon[iIndex])
 
     // create new weapon
     switch(iID)
     {
     default: ASSERT(false)
-    case cNoWeapon   ::ID: m_pWeapon = new cNoWeapon   (); break;
-    case cRayWeapon  ::ID: m_pWeapon = new cRayWeapon  (); break;
-    case cPulseWeapon::ID: m_pWeapon = new cPulseWeapon(); break;
-    case cWaveWeapon ::ID: m_pWeapon = new cWaveWeapon (); break;
-    case cTeslaWeapon::ID: m_pWeapon = new cTeslaWeapon(); break;
-    case cAntiWeapon ::ID: m_pWeapon = new cAntiWeapon (); break;
+    case cNoWeapon   ::ID: m_apWeapon[iIndex] = new cNoWeapon   (); break;
+    case cRayWeapon  ::ID: m_apWeapon[iIndex] = new cRayWeapon  (); break;
+    case cPulseWeapon::ID: m_apWeapon[iIndex] = new cPulseWeapon(); break;
+    case cWaveWeapon ::ID: m_apWeapon[iIndex] = new cWaveWeapon (); break;
+    case cTeslaWeapon::ID: m_apWeapon[iIndex] = new cTeslaWeapon(); break;
+    case cAntiWeapon ::ID: m_apWeapon[iIndex] = new cAntiWeapon (); break;
     }
-    m_pWeapon->SetOwner(this);
+    m_apWeapon[iIndex]->SetOwner(this);
+
+#if defined(_CORE_DEBUG_)
+
+    // same weapon should not be equipped twice
+    for(int i = 0; i < PLAYER_WEAPONS; ++i)
+        for(int j = i+1; j < PLAYER_WEAPONS; ++j)
+            ASSERT(m_apWeapon[i]->GetID() != m_apWeapon[j]->GetID())
+
+#endif
 }
 
 
@@ -99,7 +111,7 @@ void cPlayer::EquipWeapon(const int& iID)
 // render the player
 void cPlayer::Render()
 {
-    if(m_iStatus & PLAYER_STATUS_DEAD) return;
+    if(CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_DEAD)) return;
 
     // render the 3d-object
     coreObject3D::Render();
@@ -110,7 +122,7 @@ void cPlayer::Render()
 // move the player
 void cPlayer::Move()
 {
-    if(m_iStatus & PLAYER_STATUS_DEAD) return;
+    if(CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_DEAD)) return;
 
     // move the ship
     m_vNewPos += g_aInput[m_iInputIndex].vMove * Core::System->GetTime() * 50.0f;
@@ -132,9 +144,12 @@ void cPlayer::Move()
     // move the 3d-object
     coreObject3D::Move();
 
-    // 
-    const bool bShoot = (g_aInput[m_iInputIndex].iButtonHold & BIT(0)) ? true : false;
-    m_pWeapon->Update(bShoot);
+    // update the weapons (shooting and stuff)
+    for(int i = 0; i < PLAYER_WEAPONS; ++i)
+    {
+        const bool bShoot = CONTAINS_BIT(g_aInput[m_iInputIndex].iButtonHold, i) ? true : false;
+        m_apWeapon[i]->Update(bShoot);
+    }
 }
 
 
@@ -143,12 +158,12 @@ void cPlayer::Move()
 void cPlayer::Resurrect(const coreVector2& vPosition)
 {
     // resurrect player
-    if(!(m_iStatus & PLAYER_STATUS_DEAD)) return;
-    m_iStatus &= ~PLAYER_STATUS_DEAD;
+    if(!CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_DEAD)) return;
+    REMOVE_VALUE(m_iStatus, PLAYER_STATUS_DEAD)
 
     // reset player properties
     m_vNewPos = vPosition;
-    this->SetPosition(coreVector3(vPosition,0.0f));
+    this->SetPosition(coreVector3(vPosition, 0.0f));
 
     // add player to global shadow and outline
     cShadow::BindGlobalObject(this);
@@ -164,8 +179,11 @@ void cPlayer::Resurrect(const coreVector2& vPosition)
 void cPlayer::Kill(const bool& bAnimated)
 {
     // kill player
-    if(m_iStatus & PLAYER_STATUS_DEAD) return;
-    m_iStatus |= PLAYER_STATUS_DEAD;
+    if(CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_DEAD)) return;
+    ADD_VALUE(m_iStatus, PLAYER_STATUS_DEAD)
+
+    // reset weapon shoot status
+    for(int i = 0; i < PLAYER_WEAPONS; ++i) m_apWeapon[i]->Update(false);
 
     // remove player from global shadow and outline
     cShadow::UnbindGlobalObject(this);

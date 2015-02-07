@@ -10,14 +10,6 @@
 
 
 // ****************************************************************
-// constructor
-cShip::cShip()noexcept
-: m_vNewPos (coreVector2(0.0f,0.0f))
-{
-}
-
-
-// ****************************************************************
 // render the ship (low-polygon)
 void cShip::Render(const coreProgramPtr& pProgram)
 {

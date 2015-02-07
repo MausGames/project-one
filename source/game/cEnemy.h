@@ -15,6 +15,10 @@
 // enemy entity interface
 class INTERFACE cEnemy : public cShip
 {
+protected:
+    coreUint m_iBaseColor;   // 
+
+
 public:
     cEnemy()noexcept;
     virtual ~cEnemy();
@@ -26,10 +30,13 @@ public:
     void Render()override;
     void Move  ()override;
 
+    // 
+    bool TakeDamage(const int& iDamage);
+
 
 private:
     // render and move routines for derived classes
-    virtual void __RenderOwn() {}   // TODO # like bullet ?
+    virtual void __RenderOwn() {}   // TODO # like bullet ? 
     virtual void __MoveOwn()   {}
 };
 

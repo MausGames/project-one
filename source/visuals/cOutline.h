@@ -13,8 +13,8 @@
 
 // ****************************************************************
 // outline definitions
-#define OUTLINE_SHADER_FULL   "effect_outline_program",        "effect_outline_inst_program"          // 
-#define OUTLINE_SHADER_DIRECT "effect_outline_direct_program", "effect_outline_direct_inst_program"   // 
+#define OUTLINE_SHADER_FULL   "effect_outline_program",        "effect_outline_inst_program"          // shader-program names for full outlining
+#define OUTLINE_SHADER_DIRECT "effect_outline_direct_program", "effect_outline_direct_inst_program"   // shader-program names for directional interpolated outlining
 
 
 // ****************************************************************

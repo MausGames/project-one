@@ -15,6 +15,7 @@
 // configuration definitions
 #define CONFIG_GRAPHICS_SHADOW     "Graphics", "Shadow",                             (1)
 #define CONFIG_GRAPHICS_REFLECTION "Graphics", "Reflection",                         (1)
+#define CONFIG_GRAPHICS_GLOW       "Graphics", "Glow",                               (1)
 
 #define CONFIG_INPUT_TYPE(p)       "Input",    PRINT("P%d_Type",      (p)),          (p)
 #define CONFIG_INPUT_MOVE_LEFT(s)  "Input",    PRINT("S%d_MoveLeft",  (s)),          (CORE_INPUT_KEY(A))
@@ -41,6 +42,7 @@ struct cConfig
     {
         int iShadow;       // shadow level
         int iReflection;   // water reflection level
+        int iGlow;         // glow level
     }
     Graphics;
 

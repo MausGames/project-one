@@ -32,7 +32,7 @@ cBindContainer::~cBindContainer()
 
 
 // ****************************************************************
-// 
+// check for duplicate objects and lists
 void cBindContainer::_CheckDuplicates()const
 {
 #if defined(_CORE_DEBUG_)
@@ -46,7 +46,19 @@ void cBindContainer::_CheckDuplicates()const
 
 
 // ****************************************************************
-// 
+// exit the global bind container interface
+void cGlobalBindContainer::_GlobalExit()
+{
+    ASSERT(s_apGlobalObject.empty() && s_apGlobalList.empty())
+
+    // remove all remaining global objects and lists
+    cGlobalBindContainer::ClearGlobalObjects();
+    cGlobalBindContainer::ClearGlobalLists();
+}
+
+
+// ****************************************************************
+// check for global duplicate objects and lists
 void cGlobalBindContainer::_CheckGlobalDuplicates()
 {
 #if defined(_CORE_DEBUG_)
@@ -56,16 +68,4 @@ void cGlobalBindContainer::_CheckGlobalDuplicates()
     FOR_EACH(it, s_apGlobalList)   FOR_EACH_SET(et, it+1, s_apGlobalList)   ASSERT((*it) != (*et))
 
 #endif
-}
-
-
-// ****************************************************************
-// 
-void cGlobalBindContainer::_GlobalExit()
-{
-    ASSERT(s_apGlobalObject.empty() && s_apGlobalList.empty())
-
-    // remove all remaining global objects and lists
-    cGlobalBindContainer::ClearGlobalObjects();
-    cGlobalBindContainer::ClearGlobalLists();
 }

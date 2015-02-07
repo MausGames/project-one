@@ -39,8 +39,8 @@ cWater::cWater()noexcept
     this->DefineProgram("environment_water_program");
 
     // set object properties
-    this->SetPosition(coreVector3(  0.0f,   0.0f, WATER_HEIGHT));
-    this->SetSize    (coreVector3(200.0f, 200.0f, 1.0f));
+    this->SetPosition(coreVector3(      0.0f,       0.0f, WATER_HEIGHT));
+    this->SetSize    (coreVector3(WATER_SIZE, WATER_SIZE,         1.0f));
 }
 
 

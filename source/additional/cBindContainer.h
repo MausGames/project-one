@@ -12,7 +12,7 @@
 
 
 // ****************************************************************
-// 
+// bind container interface
 class INTERFACE cBindContainer
 {
 protected:
@@ -40,13 +40,13 @@ public:
 
 
 protected:
-    // 
+    // check for duplicate objects and lists
     void _CheckDuplicates()const;
 };
 
 
 // ****************************************************************
-// 
+// global bind container interface
 class INTERFACE cGlobalBindContainer
 {
 protected:
@@ -74,11 +74,11 @@ public:
 
 
 protected:
-    // 
-    static void _CheckGlobalDuplicates();
-
-    // 
+    // exit the global bind container interface
     static void _GlobalExit();
+
+    // check for global duplicate objects and lists
+    static void _CheckGlobalDuplicates();
 };
 
 

@@ -10,8 +10,6 @@
 #ifndef _P1_GUARD_FOREGROUND_H_
 #define _P1_GUARD_FOREGROUND_H_
 
-// TODO: convert frame buffer to simple texture ? (Invalidate)
-
 
 // ****************************************************************
 // foreground definitions
@@ -23,12 +21,13 @@
 class cForeground final : public coreResourceRelation
 {
 private:
-    coreFrameBuffer m_iFrameBuffer;   // foreground frame buffer (only texture)
-    coreMatrix4     m_mViewProj;      // foreground view-projection matrix
+    coreTexturePtr m_pTexture;    // foreground texture
+    coreMatrix4    m_mViewProj;   // foreground view-projection matrix
 
 
 public:
     cForeground()noexcept;
+    ~cForeground();
 
     DISABLE_COPY(cForeground)
 
@@ -36,8 +35,8 @@ public:
     void Start();
     void End();
 
-    // access frame buffer
-    inline coreFrameBuffer* GetFrameBuffer() {return &m_iFrameBuffer;}
+    // access texture
+    inline const coreTexturePtr& GetTexture() {return m_pTexture;}
 
     // get object properties
     inline const coreMatrix4& GetViewProj()const {return m_mViewProj;}

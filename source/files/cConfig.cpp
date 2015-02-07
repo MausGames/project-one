@@ -73,6 +73,7 @@ void LoadConfig()
     // read graphics values
     g_OldConfig.Graphics.iShadow     = Core::Config->GetInt(CONFIG_GRAPHICS_SHADOW);
     g_OldConfig.Graphics.iReflection = Core::Config->GetInt(CONFIG_GRAPHICS_REFLECTION);
+    g_OldConfig.Graphics.iGlow       = Core::Config->GetInt(CONFIG_GRAPHICS_GLOW);
 
     // read input values
     for(coreByte i = 0; i < INPUT_TYPES; ++i)
@@ -109,6 +110,7 @@ void SaveConfig()
     // write graphics values
     Core::Config->SetInt(CONFIG_GRAPHICS_SHADOW,     g_OldConfig.Graphics.iShadow);
     Core::Config->SetInt(CONFIG_GRAPHICS_REFLECTION, g_OldConfig.Graphics.iReflection);
+    Core::Config->SetInt(CONFIG_GRAPHICS_GLOW,       g_OldConfig.Graphics.iGlow);
 
     // write input values
     for(coreByte i = 0; i < INPUT_TYPES; ++i)
@@ -160,16 +162,16 @@ void UpdateInput()
                 if(oSet.aiButton[j] <= 0)
                 {
                     // check for mouse buttons
-                    if(Core::Input->GetMouseButton(-oSet.aiButton[j], CORE_INPUT_PRESS))   BIT_SET(oMap.iButtonPress,   j);
-                    if(Core::Input->GetMouseButton(-oSet.aiButton[j], CORE_INPUT_RELEASE)) BIT_SET(oMap.iButtonRelease, j);
-                    if(Core::Input->GetMouseButton(-oSet.aiButton[j], CORE_INPUT_HOLD))    BIT_SET(oMap.iButtonHold,    j);
+                    if(Core::Input->GetMouseButton(-oSet.aiButton[j], CORE_INPUT_PRESS))   ADD_BIT(oMap.iButtonPress,   j);
+                    if(Core::Input->GetMouseButton(-oSet.aiButton[j], CORE_INPUT_RELEASE)) ADD_BIT(oMap.iButtonRelease, j);
+                    if(Core::Input->GetMouseButton(-oSet.aiButton[j], CORE_INPUT_HOLD))    ADD_BIT(oMap.iButtonHold,    j);
                 }
                 else
                 {
                     // check for keyboard buttons
-                    if(Core::Input->GetKeyboardButton(coreInputKey(oSet.aiButton[j]), CORE_INPUT_PRESS))   BIT_SET(oMap.iButtonPress,   j);
-                    if(Core::Input->GetKeyboardButton(coreInputKey(oSet.aiButton[j]), CORE_INPUT_RELEASE)) BIT_SET(oMap.iButtonRelease, j);
-                    if(Core::Input->GetKeyboardButton(coreInputKey(oSet.aiButton[j]), CORE_INPUT_HOLD))    BIT_SET(oMap.iButtonHold,    j);
+                    if(Core::Input->GetKeyboardButton(coreInputKey(oSet.aiButton[j]), CORE_INPUT_PRESS))   ADD_BIT(oMap.iButtonPress,   j);
+                    if(Core::Input->GetKeyboardButton(coreInputKey(oSet.aiButton[j]), CORE_INPUT_RELEASE)) ADD_BIT(oMap.iButtonRelease, j);
+                    if(Core::Input->GetKeyboardButton(coreInputKey(oSet.aiButton[j]), CORE_INPUT_HOLD))    ADD_BIT(oMap.iButtonHold,    j);
                 }
             }
         }
@@ -183,9 +185,9 @@ void UpdateInput()
             // map button input
             for(coreByte j = 0; j < INPUT_BUTTONS; ++j)
             {
-                if(Core::Input->GetJoystickButton(iJoystickID, oSet.aiButton[j], CORE_INPUT_PRESS))   BIT_SET(oMap.iButtonPress,   j);
-                if(Core::Input->GetJoystickButton(iJoystickID, oSet.aiButton[j], CORE_INPUT_RELEASE)) BIT_SET(oMap.iButtonRelease, j);
-                if(Core::Input->GetJoystickButton(iJoystickID, oSet.aiButton[j], CORE_INPUT_HOLD))    BIT_SET(oMap.iButtonHold,    j);
+                if(Core::Input->GetJoystickButton(iJoystickID, oSet.aiButton[j], CORE_INPUT_PRESS))   ADD_BIT(oMap.iButtonPress,   j);
+                if(Core::Input->GetJoystickButton(iJoystickID, oSet.aiButton[j], CORE_INPUT_RELEASE)) ADD_BIT(oMap.iButtonRelease, j);
+                if(Core::Input->GetJoystickButton(iJoystickID, oSet.aiButton[j], CORE_INPUT_HOLD))    ADD_BIT(oMap.iButtonHold,    j);
             }
         }
 

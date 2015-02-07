@@ -63,9 +63,9 @@ void cPostProcessing::Apply()
     coreFrameBuffer::EndDraw();
 
     // bind all required frame buffers
-    this->DefineTexture(0, g_pEnvironment->GetFrameBuffer()->GetColorTarget(0).pTexture);
-    this->DefineTexture(1, g_pForeground ->GetFrameBuffer()->GetColorTarget(0).pTexture);
-    this->DefineTexture(2, g_pGlow       ->GetFrameBuffer()->GetColorTarget(0).pTexture);
+    this->DefineTexture(POST_TEXTURE_UNIT_ENVIRONMENT, g_pEnvironment->GetFrameBuffer()->GetColorTarget(0).pTexture);
+    this->DefineTexture(POST_TEXTURE_UNIT_FOREGROUND,  g_pForeground ->GetTexture    ());
+    this->DefineTexture(POST_TEXTURE_UNIT_GLOW,        g_pGlow       ->GetFrameBuffer()->GetColorTarget(0).pTexture);
 
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
@@ -82,11 +82,11 @@ void cPostProcessing::Apply()
 
     // invalidate all frame buffers
     g_pEnvironment->GetFrameBuffer()->Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
-    g_pForeground ->GetFrameBuffer()->Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
+    g_pForeground ->GetTexture    ()->Invalidate(0);
     g_pGlow       ->GetFrameBuffer()->Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
-    this->DefineTexture(0, NULL);
-    this->DefineTexture(1, NULL);
-    this->DefineTexture(2, NULL);
+    this->DefineTexture(POST_TEXTURE_UNIT_ENVIRONMENT, NULL);
+    this->DefineTexture(POST_TEXTURE_UNIT_FOREGROUND,  NULL);
+    this->DefineTexture(POST_TEXTURE_UNIT_GLOW,        NULL);
 }
 
 
@@ -96,7 +96,7 @@ void cPostProcessing::Recompile()
 {
     // set fragment shader configuration
     ((coreShader*)Core::Manager::Resource->Get<coreShader>("full_post.frag")->GetResource())
-        ->SetCustomCode(""); // TODO #
+        ->SetCustomCode(""); // TODO # 
 
     // recompile and relink
     m_pProgram.GetHandle()->Reload();

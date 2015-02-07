@@ -24,8 +24,13 @@ cBullet::cBullet()noexcept
 // render and move the bullet
 void cBullet::Move()
 {
-    // 
+    // call individual move routine
     this->__MoveOwn();
+
+    // deactivate bullet when leaving the defined area
+    if((this->GetPosition().x < -FOREGROUND_AREA.x * BULLET_AREA_FACTOR) || (this->GetPosition().x > FOREGROUND_AREA.x * BULLET_AREA_FACTOR) ||
+       (this->GetPosition().y < -FOREGROUND_AREA.y * BULLET_AREA_FACTOR) || (this->GetPosition().y > FOREGROUND_AREA.y * BULLET_AREA_FACTOR))
+        this->Deactivate(false);
 
     // move the 3d-object
     coreObject3D::Move();
@@ -37,11 +42,11 @@ void cBullet::Move()
 void cBullet::Activate(const int& iDamage, cShip* pOwner, const int& iType, const coreVector2& vPosition, const coreVector2& vDirection)
 {
     // activate bullet and remove readiness
-    if(m_iStatus & BULLET_STATUS_ACTIVE) return;
-    m_iStatus |=  BULLET_STATUS_ACTIVE;
-    m_iStatus &= ~BULLET_STATUS_READY;
+    if(CONTAINS_VALUE(m_iStatus, BULLET_STATUS_ACTIVE)) return;
+    ADD_VALUE   (m_iStatus, BULLET_STATUS_ACTIVE)
+    REMOVE_VALUE(m_iStatus, BULLET_STATUS_READY)
 
-    // 
+    // save damage value and owner
     m_iDamage = iDamage;
     m_pOwner  = pOwner;
 
@@ -59,8 +64,8 @@ void cBullet::Activate(const int& iDamage, cShip* pOwner, const int& iType, cons
 void cBullet::Deactivate(const bool& bAnimated)
 {
     // deactivate bullet (will be cleaned up by bullet manager)
-    if(!(m_iStatus & BULLET_STATUS_ACTIVE)) return;
-    m_iStatus &= ~BULLET_STATUS_ACTIVE;
+    if(!CONTAINS_VALUE(m_iStatus, BULLET_STATUS_ACTIVE)) return;
+    REMOVE_VALUE(m_iStatus, BULLET_STATUS_ACTIVE)
 
     // disable collision
     this->ChangeType(0);
@@ -104,14 +109,14 @@ void cBulletManager::Render()
     {
         coreBatchList* pBulletActive = &it->second->oBulletActive;
 
-        // 
+        // call individual preceding render routines
         FOR_EACH(et, *pBulletActive->List())
             s_cast<cBullet*>(*et)->__RenderOwnBefore();
 
         // render bullet set
         it->second->oBulletActive.Render();
 
-        // 
+        // call individual subsequent render routines
         FOR_EACH(et, *pBulletActive->List())
             s_cast<cBullet*>(*et)->__RenderOwnAfter();
     }
@@ -127,23 +132,23 @@ void cBulletManager::Move()
     {
         coreBatchList* pBulletActive = &it->second->oBulletActive;
 
-        // move the bullet set
-        pBulletActive->MoveNormal();
-
         // loop through all bullets
         FOR_EACH_DYN(et, *pBulletActive->List())
         {
             coreObject3D* pBullet = (*et);
 
             // check current bullet status
-            if(!(pBullet->GetStatus() & BULLET_STATUS_ACTIVE))
+            if(!CONTAINS_VALUE(pBullet->GetStatus(), BULLET_STATUS_ACTIVE))
             {
                 // clean up bullet and make ready again
-                pBullet->SetStatus(pBullet->GetStatus() & BULLET_STATUS_READY);
+                pBullet->SetStatus(pBullet->GetStatus() | BULLET_STATUS_READY);
                 DYN_REMOVE(et, *pBulletActive->List())
             }
             else DYN_KEEP(et)
         }
+
+        // move the bullet set (after deletions)
+        pBulletActive->MoveNormal();
     }
 }
 
@@ -170,7 +175,7 @@ void cBulletManager::ClearBullets()
 // ****************************************************************
 // constructor
 cRayBullet::cRayBullet()noexcept
-: m_fAnimation (Core::Rand->Float(10.0f))
+: m_fAnimation (Core::Rand->Float(1.0f))
 {
     // load object resources
     this->DefineModel  ("bullet_ray.md3");
@@ -190,10 +195,10 @@ cRayBullet::cRayBullet()noexcept
 // move the ray bullet
 void cRayBullet::__MoveOwn()
 {
-    // 
+    // fly around (size modified)
     this->SetPosition(this->GetPosition() + this->GetDirection() * (45.0f * this->GetSize().y * Core::System->GetTime()));
 
-    // 
+    // update texture animation
     m_fAnimation.Update(0.4f);
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
 }
@@ -202,7 +207,7 @@ void cRayBullet::__MoveOwn()
 // ****************************************************************
 // constructor
 cOrbBullet::cOrbBullet()noexcept
-: m_fAnimation (Core::Rand->Float(10.0f))
+: m_fAnimation (Core::Rand->Float(1.0f))
 {
     // load object resources
     this->DefineModel  ("bullet_orb.md3");
@@ -210,9 +215,9 @@ cOrbBullet::cOrbBullet()noexcept
     this->DefineProgram("effect_energy_program");
 
     // set object properties
-    this->SetSize   (coreVector3( 1.6f,  1.6f,1.6f));
-    this->SetColor3 (coreVector3(0.09f,0.387f,0.9f));
-    this->SetTexSize(coreVector2( 0.4f,  0.4f));
+    this->SetSize   (coreVector3(  1.6f,  1.6f,  1.6f));
+    this->SetColor3 (coreVector3(0.090f,0.387f,0.900f));
+    this->SetTexSize(coreVector2(  0.4f,  0.4f));
 
     // coreVector3(0.3f, 0.7f, 0.3f)*0.8f green
     // coreVector3(0.9f, 0.25f, 0.25f)*0.8f red
@@ -225,10 +230,10 @@ cOrbBullet::cOrbBullet()noexcept
 // move the orb bullet
 void cOrbBullet::__MoveOwn()
 {
-    // 
+    // fly around
     this->SetPosition(this->GetPosition() + this->GetDirection() * (30.0f * Core::System->GetTime()));
 
-    // 
+    // update texture animation
     m_fAnimation.Update(-0.2f);
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
 }

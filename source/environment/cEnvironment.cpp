@@ -102,7 +102,7 @@ void cBackground::Render()
             // render the outdoor-surface
             if(m_pOutdoor) m_pOutdoor->Render();
 
-            // TODO # put transparent add-objects and decals here (to be in water)
+            // TODO # put transparent add-objects and decals here (to be in water) 
 
             // render the water-surface
             if(m_pWater) m_pWater->Render(&m_iFrameBuffer);
@@ -168,7 +168,7 @@ void cBackground::Move()
     pControlObjectsFunc(&m_apDecalObjectList,  80.0f);
     pControlObjectsFunc(&m_apAirObjectList,    80.0f);
 
-    // TODO # handle additional objects
+    // TODO # handle additional objects 
 
     // call individual move routine
     this->__MoveOwn();
@@ -179,9 +179,7 @@ void cBackground::Move()
 // add additional object
 void cBackground::AddObject(coreObject3D* pObject, const coreVector3& vRelativePos)
 {
-    // TODO #
-
-    // object gets shadow-shader
+    // TODO # object gets shadow-shader 
 }
 
 
@@ -189,7 +187,7 @@ void cBackground::AddObject(coreObject3D* pObject, const coreVector3& vRelativeP
 // remove all additional objects
 void cBackground::ClearObjects()
 {
-    // TODO #
+    // TODO # 
 }
 
 
@@ -284,7 +282,7 @@ cEnvironment::~cEnvironment()
     // save last background
     Core::Config->SetInt("Game", "Background", m_pBackground->GetID());
 
-    // explicitly undefine the mix object
+    // explicitly undefine to detach textures
     m_MixObject.Undefine();
 
     // delete background instances
@@ -690,7 +688,7 @@ cGrassBackground::~cGrassBackground()
 void cGrassBackground::__MoveOwn()
 {
     // adjust volume of the nature sound-effect
-    // TODO # sound-volume per config value
+    // TODO # sound-volume per config value 
     if(m_pNatureSound->EnableRef(this))
         m_pNatureSound->SetVolume(6.0f * g_pEnvironment->GetTransition().GetValue((g_pEnvironment->GetBackground() == this) ? CORE_TIMER_GET_NORMAL : CORE_TIMER_GET_REVERSED));
 }

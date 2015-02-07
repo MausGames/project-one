@@ -13,7 +13,8 @@
 
 // ****************************************************************
 // bullet definitions
-#define BULLET_SET_INIT_SIZE (32u)   // initial allocation size when creating a new bullet set
+#define BULLET_SET_INIT_SIZE (32u)    // initial allocation size when creating a new bullet set
+#define BULLET_AREA_FACTOR   (1.5f)   // size factor for foreground area where the bullet remains active
 
 enum eBulletStatus : coreByte
 {
@@ -27,8 +28,8 @@ enum eBulletStatus : coreByte
 class INTERFACE cBullet : public coreObject3D
 {
 protected:
-    int    m_iDamage;   // 
-    cShip* m_pOwner;    // 
+    int    m_iDamage;   // damage value
+    cShip* m_pOwner;    // associated owner of the bullet
 
 
 public:
@@ -50,9 +51,9 @@ public:
     inline const int& GetDamage()const {return m_iDamage;}
     inline cShip*     GetOwner ()const {return m_pOwner;}
 
-    // bullet set configuration values
-    static inline const char* GetProgramInstancedName() {ASSERT(false) return "";}
-    static inline cOutline*   GetOutlineObject       () {ASSERT(false) return g_pOutlineFull;}
+    // bullet configuration values
+    static inline const char* ConfigProgramInstancedName() {ASSERT(false) return "";}
+    static inline cOutline*   ConfigOutlineObject       () {ASSERT(false) return g_pOutlineFull;}
 
 
 private:
@@ -111,7 +112,7 @@ public:
 class cRayBullet final : public cBullet
 {
 private:
-    coreFlow m_fAnimation;   // 
+    coreFlow m_fAnimation;   // animation value
 
 
 public:
@@ -120,9 +121,9 @@ public:
     ENABLE_COPY(cRayBullet)
     ASSIGN_ID(1, "RayBullet")
 
-    // bullet set configuration values
-    static inline const char* GetProgramInstancedName() {return "effect_energy_direct_inst_program";}
-    static inline cOutline*   GetOutlineObject       () {return g_pOutlineDirect;}
+    // bullet configuration values
+    static inline const char* ConfigProgramInstancedName() {return "effect_energy_direct_inst_program";}
+    static inline cOutline*   ConfigOutlineObject       () {return g_pOutlineDirect;}
 
 
 private:
@@ -136,7 +137,7 @@ private:
 class cOrbBullet final : public cBullet
 {
 private:
-    coreFlow m_fAnimation;   // 
+    coreFlow m_fAnimation;   // animation value
 
 
 public:
@@ -145,9 +146,9 @@ public:
     ENABLE_COPY(cOrbBullet)
     ASSIGN_ID(2, "OrbBullet")
 
-    // bullet set configuration values
-    static inline const char* GetProgramInstancedName() {return "effect_energy_inst_program";}
-    static inline cOutline*   GetOutlineObject       () {return g_pOutlineFull;}
+    // bullet configuration values
+    static inline const char* ConfigProgramInstancedName() {return "effect_energy_inst_program";}
+    static inline cOutline*   ConfigOutlineObject       () {return g_pOutlineFull;}
 
 
 private:
@@ -162,10 +163,10 @@ template <typename T> cBulletManager::sBulletSet<T>::sBulletSet()noexcept
 : iCurBullet (0)
 {
     // set shader-program
-    oBulletActive.DefineProgram(T::GetProgramInstancedName());
+    oBulletActive.DefineProgram(T::ConfigProgramInstancedName());
 
-    // 
-    T::GetOutlineObject()->BindList(&oBulletActive);
+    // add bullet to outline and glow
+    T::ConfigOutlineObject()->BindList(&oBulletActive);
     g_pGlow->BindList(&oBulletActive);
 
     // set bullet pool to initial size
@@ -177,8 +178,8 @@ template <typename T> cBulletManager::sBulletSet<T>::sBulletSet()noexcept
 // destructor
 template <typename T> cBulletManager::sBulletSet<T>::~sBulletSet()
 {
-    // 
-    T::GetOutlineObject()->UnbindList(&oBulletActive);
+    // remove bullet from outline and glow
+    T::ConfigOutlineObject()->UnbindList(&oBulletActive);
     g_pGlow->UnbindList(&oBulletActive);
 }
 
@@ -207,7 +208,7 @@ template <typename T> T* cBulletManager::AddBullet(const int& iDamage, cShip* pO
 
         // check current bullet status
         T* pBullet = &pSet->aBulletPool[pSet->iCurBullet];
-        if(pBullet->GetStatus() & BULLET_STATUS_READY)
+        if(CONTAINS_VALUE(pBullet->GetStatus(), BULLET_STATUS_READY))
         {
             // prepare bullet and add to active list
             pBullet->Activate(iDamage, pOwner, iType, vPosition, vDirection);
@@ -225,7 +226,7 @@ template <typename T> T* cBulletManager::AddBullet(const int& iDamage, cShip* pO
     pSet->oBulletActive.Clear();
     FOR_EACH(it, pSet->aBulletPool)
     {
-        if(it->GetStatus() & BULLET_STATUS_ACTIVE)
+        if(CONTAINS_VALUE(it->GetStatus(), BULLET_STATUS_ACTIVE))
             pSet->oBulletActive.BindObject(&(*it));
     }
 

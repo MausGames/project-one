@@ -15,7 +15,7 @@ cGame::cGame()noexcept
 {
     // create first player
     m_aPlayer[0].Configure  (1, coreVector3(201.0f/360.0f, 74.0f/100.0f, 85.0f/100.0f).HSVtoRGB(), g_CurConfig.Input.aiType[0]);
-    m_aPlayer[0].EquipWeapon(cRayWeapon::ID);
+    m_aPlayer[0].EquipWeapon(0, cRayWeapon::ID);
     m_aPlayer[0].Resurrect  (coreVector2(-10.0f,0.0f));
 
     if(true)
@@ -96,12 +96,28 @@ void cGame::Move()
 
     // calculate center of player positions
     coreVector2 vCenterPos;
-         if(m_aPlayer[0].GetStatus() & PLAYER_STATUS_DEAD) vCenterPos =  m_aPlayer[1].GetPosition().xy();
-    else if(m_aPlayer[1].GetStatus() & PLAYER_STATUS_DEAD) vCenterPos =  m_aPlayer[0].GetPosition().xy();
-                                                      else vCenterPos = (m_aPlayer[0].GetPosition().xy() +
-                                                                         m_aPlayer[1].GetPosition().xy()) * 0.5f;
+         if(CONTAINS_VALUE(m_aPlayer[0].GetStatus(), PLAYER_STATUS_DEAD)) vCenterPos =  m_aPlayer[1].GetPosition().xy();
+    else if(CONTAINS_VALUE(m_aPlayer[1].GetStatus(), PLAYER_STATUS_DEAD)) vCenterPos =  m_aPlayer[0].GetPosition().xy();
+                                                                     else vCenterPos = (m_aPlayer[0].GetPosition().xy()  +
+                                                                                        m_aPlayer[1].GetPosition().xy()) * 0.5f;
     STATIC_ASSERT(GAME_PLAYERS == 2)
 
     // set environment side
     g_pEnvironment->SetTargetSide(vCenterPos * 0.65f);
+
+
+
+    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_BULLET_ENEMY, [](cPlayer* pPlayer, cBullet* pBullet, const bool& bFirst)
+    {
+    });
+    Core::Manager::Object->TestCollision(TYPE_ENEMY, TYPE_BULLET_PLAYER, [](cEnemy* pEnemy, cBullet* pBullet, const bool& bFirst)
+    {
+
+
+        pEnemy->TakeDamage(pBullet->GetDamage());
+
+        pBullet->Deactivate(true);
+
+    });
+
 }

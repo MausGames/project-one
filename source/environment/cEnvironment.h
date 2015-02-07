@@ -197,7 +197,7 @@ private:
 
 
 // ****************************************************************
-// 
+// sea background class
 class cSeaBackground final : public cBackground
 {
 public:
@@ -209,7 +209,7 @@ public:
 
 
 // ****************************************************************
-// 
+// desert background class
 class cDesertBackground final : public cBackground
 {
 public:
@@ -221,7 +221,7 @@ public:
 
 
 // ****************************************************************
-// 
+// space background class
 class cSpaceBackground final : public cBackground
 {
 public:
@@ -233,7 +233,7 @@ public:
 
 
 // ****************************************************************
-// 
+// volcano background class
 class cVolcanoBackground final : public cBackground
 {
 public:
@@ -245,7 +245,7 @@ public:
 
 
 // ****************************************************************
-// 
+// snow background class
 class cSnowBackground final : public cBackground
 {
 public:
@@ -257,7 +257,7 @@ public:
 
 
 // ****************************************************************
-// 
+// moss background class
 class cMossBackground final : public cBackground
 {
 public:

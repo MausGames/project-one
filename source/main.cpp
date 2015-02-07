@@ -76,7 +76,7 @@ void CoreApp::Render()
         // update the shadow map class
         cShadow::GlobalUpdate();
 
-        // 
+        // update the glow-effect
         g_pGlow->Update();
     }
     Core::Debug->MeasureEnd("Updates");
