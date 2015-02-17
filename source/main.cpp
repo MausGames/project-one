@@ -9,6 +9,7 @@
 #include "main.h"
 
 coreVector2      g_vGameResolution = coreVector2(0.0f,0.0f);
+coreVector2      g_vMenuCenter     = coreVector2(0.0f,0.0f);
 
 cOutline*        g_pOutlineFull    = NULL;
 cOutline*        g_pOutlineDirect  = NULL;
@@ -17,9 +18,8 @@ cPostProcessing* g_pPostProcessing = NULL;
 
 cForeground*     g_pForeground     = NULL;
 cEnvironment*    g_pEnvironment    = NULL;
+cMenu*           g_pMenu           = NULL;
 cGame*           g_pGame           = NULL;
-
-#define _DIRECT_DEBUG_ (1)
 
 
 // ****************************************************************
@@ -29,6 +29,7 @@ void CoreApp::Init()
     // calculate biggest possible 1:1 resolution
     const float fMinRes = Core::System->GetResolution().Min();
     g_vGameResolution   = coreVector2(fMinRes, fMinRes);
+    g_vMenuCenter       = g_vGameResolution / Core::System->GetResolution() * 0.5f;
 
     // set camera to default values
     Core::Graphics->SetCamera(CAMERA_POSITION, CAMERA_DIRECTION, CAMERA_ORIENTATION);
@@ -44,7 +45,7 @@ void CoreApp::Init()
     g_pPostProcessing = new cPostProcessing();
     g_pForeground     = new cForeground();
     g_pEnvironment    = new cEnvironment();
-    g_pGame           = new cGame();
+    g_pMenu           = new cMenu();
 }
 
 
@@ -54,6 +55,7 @@ void CoreApp::Exit()
 {
     // delete and exit main components
     SAFE_DELETE(g_pGame)
+    SAFE_DELETE(g_pMenu)
     SAFE_DELETE(g_pEnvironment)
     SAFE_DELETE(g_pForeground)
     SAFE_DELETE(g_pPostProcessing)
@@ -71,34 +73,44 @@ void CoreApp::Exit()
 // render the application
 void CoreApp::Render()
 {
-    Core::Debug->MeasureStart("Updates");
+    Core::Debug->MeasureStart("Update");
     {
-        // update the shadow map class
-        cShadow::GlobalUpdate();
-
         // update the glow-effect
         g_pGlow->Update();
+
+        // TODO # distortion low-resolution
+
+        // update the shadow map class
+        cShadow::GlobalUpdate();
     }
-    Core::Debug->MeasureEnd("Updates");
-    Core::Debug->MeasureStart("Background");
+    Core::Debug->MeasureEnd("Update");
+    Core::Debug->MeasureStart("Environment");
     {
         // render the environment
         g_pEnvironment->Render();
     }
-    Core::Debug->MeasureEnd("Background");
+    Core::Debug->MeasureEnd("Environment");
     Core::Debug->MeasureStart("Foreground");
     {
-        // create foreground frame buffer
-        g_pForeground->Start();
+        if(g_pGame)
         {
-            // render the game
-            if(g_pGame) g_pGame->Render();
+            // create foreground frame buffer
+            g_pForeground->Start();
+            {
+                // render the game
+                g_pGame->Render();
 
-            // apply outline-effect
-            g_pOutlineFull  ->Apply();
-            g_pOutlineDirect->Apply();
+                // apply outline-effect
+                g_pOutlineFull  ->Apply();
+                g_pOutlineDirect->Apply();
+            }
+            g_pForeground->End();
         }
-        g_pForeground->End();
+        else
+        {
+            // clear the foreground
+            g_pForeground->Clear();
+        }
     }
     Core::Debug->MeasureEnd("Foreground");
     Core::Debug->MeasureStart("Post Processing");
@@ -107,6 +119,19 @@ void CoreApp::Render()
         g_pPostProcessing->Apply();
     }
     Core::Debug->MeasureEnd("Post Processing");
+    Core::Debug->MeasureStart("Interface");
+    {
+        glDisable(GL_DEPTH_TEST);
+        {
+            // 
+            if(g_pGame) g_pGame->RenderOverlay();
+
+            // render the menu
+            g_pMenu->Render();
+        }
+        glEnable(GL_DEPTH_TEST);
+    }
+    Core::Debug->MeasureEnd("Interface");
 }
 
 
@@ -120,20 +145,27 @@ void CoreApp::Move()
     // move the environment
     g_pEnvironment->Move();
 
+    // move the menu
+    g_pMenu->Move();
+
     // move the game
     if(g_pGame) g_pGame->Move();
 
-#if defined(_DIRECT_DEBUG_)
 
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LSHIFT), CORE_INPUT_HOLD))
+
+    // TODO ### 
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(K), CORE_INPUT_PRESS))
     {
-        for(int i = 0; i < 8; ++i)
+        SAFE_DELETE(g_pGame)
+    }
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(L), CORE_INPUT_PRESS))
+    {
+        if(!g_pGame)
         {
-            // override background
-            if(Core::Input->GetKeyboardButton(coreInputKey(i + int(CORE_INPUT_KEY(1))), CORE_INPUT_PRESS))
-                g_pEnvironment->ChangeBackground(i + 1);
+            g_pGame = new cGame();
+            g_pGame->LoadMission(cMellanMission::ID);
         }
     }
-
-#endif
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS))
+        Core::System->Quit();
 }

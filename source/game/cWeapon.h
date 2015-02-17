@@ -41,6 +41,7 @@ public:
 
     // get object properties
     inline const coreByte& GetLevel()const {return m_iLevel;}
+    inline cPlayer*        GetOwner()const {return m_pOwner;}
 
 
 private:
@@ -59,7 +60,7 @@ public:
     cNoWeapon()noexcept {}
 
     DISABLE_COPY(cNoWeapon)
-    ASSIGN_ID(0, "NoWeapon")
+    ASSIGN_ID(0, "Nothing")
 };
 
 
@@ -75,7 +76,7 @@ public:
     cRayWeapon()noexcept;
 
     DISABLE_COPY(cRayWeapon)
-    ASSIGN_ID(1, "RayWeapon")
+    ASSIGN_ID(1, "Laser Gun")
 
 
 private:
@@ -93,7 +94,7 @@ public:
     cPulseWeapon()noexcept {}
 
     DISABLE_COPY(cPulseWeapon)
-    ASSIGN_ID(2, "PulseWeapon")
+    ASSIGN_ID(2, "Pulse Cannon")
 };
 
 
@@ -105,7 +106,7 @@ public:
     cWaveWeapon()noexcept {}
 
     DISABLE_COPY(cWaveWeapon)
-    ASSIGN_ID(3, "WaveWeapon")
+    ASSIGN_ID(3, "Wave Mortar")
 };
 
 
@@ -117,7 +118,7 @@ public:
     cTeslaWeapon()noexcept {}
 
     DISABLE_COPY(cTeslaWeapon)
-    ASSIGN_ID(4, "TeslaWeapon")
+    ASSIGN_ID(4, "Tesla Rifle")
 };
 
 
@@ -129,7 +130,7 @@ public:
     cAntiWeapon()noexcept {}
 
     DISABLE_COPY(cAntiWeapon)
-    ASSIGN_ID(5, "AntiWeapon")
+    ASSIGN_ID(5, "Antimatter")
 };
 
 

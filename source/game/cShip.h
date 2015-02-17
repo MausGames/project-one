@@ -23,10 +23,12 @@ protected:
     coreVector2 m_vNewPos;      // new position for smooth movement and animation
 
 
-public:
+protected:
     constexpr_weak cShip()noexcept;
-    virtual ~cShip() {}
+    ~cShip() {}
 
+
+public:
     DISABLE_COPY(cShip)
 
     // define the visual appearance
@@ -37,8 +39,9 @@ public:
     void Render(const coreProgramPtr& pProgram)override;
 
     // get object properties
-    inline const int& GetMaxHealth()const {return m_iMaxHealth;}
-    inline const int& GetCurHealth()const {return m_iCurHealth;}
+    inline const int&         GetMaxHealth()const {return m_iMaxHealth;}
+    inline const int&         GetCurHealth()const {return m_iCurHealth;}
+    inline const coreVector2& GetNewPos   ()const {return m_vNewPos;}
 };
 
 

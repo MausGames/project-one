@@ -27,6 +27,9 @@ cEnemy::cEnemy()noexcept
     cShadow::BindGlobalObject(this);
     g_pOutlineFull->BindObject(this);
 
+    // add enemy to game
+    g_pGame->__BindEnemy(this);
+
     // enable collision
     this->ChangeType(TYPE_ENEMY);
 }
@@ -39,6 +42,9 @@ cEnemy::~cEnemy()
     // remove enemy from global shadow and outline
     cShadow::UnbindGlobalObject(this);
     g_pOutlineFull->UnbindObject(this);
+
+    // remove enemy from game
+    g_pGame->__UnbindEnemy(this);
 
     // disable collision
     this->ChangeType(0);
@@ -71,21 +77,19 @@ void cEnemy::Move()
 
 // ****************************************************************
 // 
-bool cEnemy::TakeDamage(const int& iDamage)
+void cEnemy::TakeDamage(const int& iDamage)
 {
-
+    // 
     m_iCurHealth -= iDamage;
 
+    // 
     if(m_iCurHealth <= 0)
     {
         m_iCurHealth = 0;
     }
 
-
+    // 
     this->SetColor3(LERP(coreVector3(0.5f,0.5f,0.5f), coreVector4::UnpackUnorm4x8(m_iBaseColor).xyz(), (float(m_iCurHealth) / float(m_iMaxHealth))));
-
-
-    return (m_iCurHealth == 0) ? true : false;
 }
 
 

@@ -22,7 +22,7 @@ void VertexMain()
     gl_Position        = u_m4ViewProj     * v4NewPosition;
     v_v4ShadowCoord    = u_m4ShadowMatrix * v4NewPosition;
     v_av2TexCoord[0]   = a_v2RawTexCoord;
-    
+
     // dot-3 transform lighting vectors
     coreDot3VertexInit();
     v_av4LightDir[0].xyz = coreDot3VertexTransform(-u_aLight[0].v4Direction.xyz);

@@ -12,29 +12,11 @@
     <ClCompile Include="..\..\..\source\environment\cWater.cpp">
       <Filter>environment</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\visuals\cPostProcessing.cpp">
-      <Filter>visuals</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\source\visuals\cShadow.cpp">
-      <Filter>visuals</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\source\files\cConfig.cpp">
-      <Filter>files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\source\game\cPlayer.cpp">
       <Filter>game</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\visuals\cOutline.cpp">
-      <Filter>visuals</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\source\game\cGame.cpp">
       <Filter>game</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\source\visuals\cForeground.cpp">
-      <Filter>visuals</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\source\visuals\cSpecialEffects.cpp">
-      <Filter>visuals</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\game\cBullet.cpp">
       <Filter>game</Filter>
@@ -48,20 +30,65 @@
     <ClCompile Include="..\..\..\source\game\cShip.cpp">
       <Filter>game</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\files\cSave.cpp">
-      <Filter>files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\source\menu\cCombatText.cpp">
-      <Filter>menu</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\source\menu\cInterface.cpp">
-      <Filter>menu</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\source\visuals\cGlow.cpp">
-      <Filter>visuals</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\source\additional\cBindContainer.cpp">
       <Filter>additional</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\game\boss\0101_cCrossfieldBoss.cpp">
+      <Filter>game\boss</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\game\boss\cBoss.cpp">
+      <Filter>game\boss</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\game\mission\01_cMellanMission.cpp">
+      <Filter>game\mission</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\game\mission\cMission.cpp">
+      <Filter>game\mission</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\visual\cForeground.cpp">
+      <Filter>visual</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\visual\cGlow.cpp">
+      <Filter>visual</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\visual\cOutline.cpp">
+      <Filter>visual</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\visual\cPostProcessing.cpp">
+      <Filter>visual</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\visual\cShadow.cpp">
+      <Filter>visual</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\visual\cSpecialEffects.cpp">
+      <Filter>visual</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\file\cConfig.cpp">
+      <Filter>file</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\file\cSave.cpp">
+      <Filter>file</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\interface\cCombatText.cpp">
+      <Filter>interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\interface\cInterface.cpp">
+      <Filter>interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\interface\menu\cMenu.cpp">
+      <Filter>interface\menu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\interface\cTooltip.cpp">
+      <Filter>interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\interface\cMsgBox.cpp">
+      <Filter>interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\interface\menu\02_cMainMenu.cpp">
+      <Filter>interface\menu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\interface\menu\01_cIntroMenu.cpp">
+      <Filter>interface\menu</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -75,29 +102,11 @@
     <ClInclude Include="..\..\..\source\environment\cWater.h">
       <Filter>environment</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\source\visuals\cPostProcessing.h">
-      <Filter>visuals</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\source\visuals\cShadow.h">
-      <Filter>visuals</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\source\files\cConfig.h">
-      <Filter>files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\source\game\cPlayer.h">
       <Filter>game</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\source\visuals\cOutline.h">
-      <Filter>visuals</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\source\game\cGame.h">
       <Filter>game</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\source\visuals\cForeground.h">
-      <Filter>visuals</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\source\visuals\cSpecialEffects.h">
-      <Filter>visuals</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\source\game\cBullet.h">
       <Filter>game</Filter>
@@ -111,40 +120,82 @@
     <ClInclude Include="..\..\..\source\game\cShip.h">
       <Filter>game</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\source\files\cSave.h">
-      <Filter>files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\source\menu\cCombatText.h">
-      <Filter>menu</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\source\menu\cInterface.h">
-      <Filter>menu</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\source\visuals\cGlow.h">
-      <Filter>visuals</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\source\additional\cBindContainer.h">
       <Filter>additional</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\game\boss\cBoss.h">
+      <Filter>game\boss</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\game\mission\cMission.h">
+      <Filter>game\mission</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\visual\cForeground.h">
+      <Filter>visual</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\visual\cGlow.h">
+      <Filter>visual</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\visual\cOutline.h">
+      <Filter>visual</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\visual\cPostProcessing.h">
+      <Filter>visual</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\visual\cShadow.h">
+      <Filter>visual</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\visual\cSpecialEffects.h">
+      <Filter>visual</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\file\cConfig.h">
+      <Filter>file</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\file\cSave.h">
+      <Filter>file</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\interface\cCombatText.h">
+      <Filter>interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\interface\cInterface.h">
+      <Filter>interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\interface\menu\cMenu.h">
+      <Filter>interface\menu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\interface\cTooltip.h">
+      <Filter>interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\interface\cMsgBox.h">
+      <Filter>interface</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="environment">
       <UniqueIdentifier>{11f29e90-da30-4728-9181-57b2d076d495}</UniqueIdentifier>
     </Filter>
-    <Filter Include="visuals">
-      <UniqueIdentifier>{fe9feb7c-ec8b-4a85-a6ba-430c5e4f41a7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="files">
-      <UniqueIdentifier>{cba88762-fa4c-44bb-a6f6-b094a8cf3dde}</UniqueIdentifier>
-    </Filter>
     <Filter Include="game">
       <UniqueIdentifier>{f3437c2b-9f83-4a31-9e05-db08c171e2cc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="menu">
-      <UniqueIdentifier>{82bb5fd3-d0bb-42c9-8684-03d3af233b0d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="additional">
       <UniqueIdentifier>{b5236847-0adc-43fb-b72c-e45beb3466cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\boss">
+      <UniqueIdentifier>{0f555031-364b-4f70-98c6-10d175c08678}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\mission">
+      <UniqueIdentifier>{bbaef394-ffd4-4718-938d-ba4f4ce1a617}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="file">
+      <UniqueIdentifier>{cba88762-fa4c-44bb-a6f6-b094a8cf3dde}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="visual">
+      <UniqueIdentifier>{fe9feb7c-ec8b-4a85-a6ba-430c5e4f41a7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="interface">
+      <UniqueIdentifier>{82bb5fd3-d0bb-42c9-8684-03d3af233b0d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="interface\menu">
+      <UniqueIdentifier>{c860351c-f7f7-4bd3-a3aa-6c3100dafa20}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -27,6 +27,6 @@ void FragmentMain()
     v3Color += (3.0/16.0) * coreTexture2D(0, v_av2TexCoord[0] + vec2(0.003 *  1.0, 0.0)).rgb;
     v3Color += (2.0/16.0) * coreTexture2D(0, v_av2TexCoord[0] + vec2(0.003 *  2.0, 0.0)).rgb;
     v3Color += (1.0/16.0) * coreTexture2D(0, v_av2TexCoord[0] + vec2(0.003 *  3.0, 0.0)).rgb;
-    
+
     gl_FragColor = vec4(v3Color, 1.0);
 }

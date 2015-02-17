@@ -42,7 +42,8 @@ cPlayer::~cPlayer()
     this->Kill(false);
 
     // delete weapon objects
-    for(int i = 0; i < PLAYER_WEAPONS; ++i) SAFE_DELETE(m_apWeapon[i])
+    for(int i = 0; i < PLAYER_WEAPONS; ++i)
+        SAFE_DELETE(m_apWeapon[i])
 }
 
 

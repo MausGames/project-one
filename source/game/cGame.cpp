@@ -12,40 +12,17 @@
 // ****************************************************************
 // constructor
 cGame::cGame()noexcept
+: m_pMission (NULL)
 {
     // create first player
     m_aPlayer[0].Configure  (1, coreVector3(201.0f/360.0f, 74.0f/100.0f, 85.0f/100.0f).HSVtoRGB(), g_CurConfig.Input.aiType[0]);
     m_aPlayer[0].EquipWeapon(0, cRayWeapon::ID);
-    m_aPlayer[0].Resurrect  (coreVector2(-10.0f,0.0f));
+    m_aPlayer[0].Resurrect  (coreVector2(-10.0f,-25.0f));
 
-    if(true)
-    {
-        // TODO #
-        m_aPlayer[1].Configure(0, coreVector3(0.0f/360.0f, 68.0f/100.0f, 90.0f/100.0f).HSVtoRGB(), g_CurConfig.Input.aiType[1]);
-        m_aPlayer[1].Resurrect(coreVector2(10.0f,0.0f));
-    }
+    // coreVector3(0.0f/360.0f, 68.0f/100.0f, 90.0f/100.0f).HSVtoRGB() red
 
-
-
-
-    std::memset(m_apTest, 0, sizeof(m_apTest));
-
-    m_apTest[0] = new cScoutEnemy();
-    m_apTest[1] = new cWarriorEnemy();
-    m_apTest[2] = new cStarEnemy();
-    m_apTest[3] = new cArrowEnemy();
-    m_apTest[4] = new cMinerEnemy();
-    m_apTest[5] = new cFreezerEnemy();
-    m_apTest[6] = new cCinderEnemy();
-
-    //m_apTest[1]->SetSize(coreVector3(0.99f, 1.0f, 1.0f));
-
-    for(int i = 0; i < int(ARRAY_SIZE(m_apTest)); ++i)
-    {
-        if(m_apTest[i]) m_apTest[i]->SetPosition(coreVector3(FOREGROUND_AREA.x * I_TO_F(i-3) * 0.22f, 10.0f, 0.0f));
-       // if(m_apTest[i]) m_apTest[i]->SetDirection(coreVector3(-1.0f,-1.0f,0.0f).Normalize());
-        if(m_apTest[i]) m_apEnemyList.push_back(m_apTest[i]);
-    }
+    // load first mission
+    m_pMission = new cNoMission();
 }
 
 
@@ -53,12 +30,12 @@ cGame::cGame()noexcept
 // destructor
 cGame::~cGame()
 {
-    // clear memory
+    // 
+    SAFE_DELETE(m_pMission)
+
+    // remove all remaining enemies
+    ASSERT(m_apEnemyList.empty())
     m_apEnemyList.clear();
-
-
-    for(int i = 0; i < int(ARRAY_SIZE(m_apTest)); ++i)
-        SAFE_DELETE(m_apTest[i])
 }
 
 
@@ -76,6 +53,16 @@ void cGame::Render()
 
     // render the bullet manager
     m_BulletManager.Render();
+}
+
+
+// ****************************************************************
+// 
+void cGame::RenderOverlay()
+{
+    // 
+    m_CombatText.Render();
+    m_Interface .Render();
 }
 
 
@@ -109,15 +96,42 @@ void cGame::Move()
 
     Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_BULLET_ENEMY, [](cPlayer* pPlayer, cBullet* pBullet, const bool& bFirst)
     {
+
     });
     Core::Manager::Object->TestCollision(TYPE_ENEMY, TYPE_BULLET_PLAYER, [](cEnemy* pEnemy, cBullet* pBullet, const bool& bFirst)
     {
-
-
         pEnemy->TakeDamage(pBullet->GetDamage());
-
         pBullet->Deactivate(true);
-
     });
 
+
+
+    // 
+    m_CombatText.Move();
+    m_Interface .Move();
+}
+
+
+// ****************************************************************
+// 
+void cGame::LoadMission(const int& iID)
+{
+    if(m_pMission) if(m_pMission->GetID() == iID) return;
+
+    // delete possible old mission
+    SAFE_DELETE(m_pMission)
+
+    // load new mission
+    switch(iID)
+    {
+    default: ASSERT(false)
+    case cNoMission     ::ID: m_pMission = new cNoMission     (); break;
+    case cMellanMission ::ID: m_pMission = new cMellanMission (); break;
+    case cNevoMission   ::ID: m_pMission = new cNevoMission   (); break;
+    case cHarenaMission ::ID: m_pMission = new cHarenaMission (); break;
+    case cRutilusMission::ID: m_pMission = new cRutilusMission(); break;
+    case cGeluMission   ::ID: m_pMission = new cGeluMission   (); break;
+    case cCalorMission  ::ID: m_pMission = new cCalorMission  (); break;
+    case cMuscusMission ::ID: m_pMission = new cMuscusMission (); break;
+    }
 }

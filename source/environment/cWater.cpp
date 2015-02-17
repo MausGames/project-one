@@ -126,6 +126,8 @@ void cWater::UpdateReflection()
                 // render all active enemies
                 FOR_EACH(it, *g_pGame->GetEnemyList())
                     (*it)->Render();
+
+                // no bullets, only their outlines
             }
             glCullFace(GL_BACK);
         }
@@ -141,7 +143,7 @@ void cWater::UpdateReflection()
         glEnable(GL_BLEND);
 
         // apply outline-effect
-        if(g_CurConfig.Graphics.iReflection)
+        if(g_CurConfig.Graphics.iReflection && g_pGame)
         {
             g_pOutlineFull  ->Apply();
             g_pOutlineDirect->Apply();
@@ -164,7 +166,7 @@ void cWater::UpdateDepth(cOutdoor* pOutdoor, const std::vector<coreBatchList*>& 
         // fill only depth component of refraction frame buffer
         m_iBelowRefraction.StartDraw();
         {
-            glDepthFunc(GL_ALWAYS);   // better performance than depth-clear
+            glDepthFunc (GL_ALWAYS);   // better performance than depth-clear
             glDrawBuffer(GL_NONE);
             {
                 // render the outdoor-surface
@@ -174,7 +176,7 @@ void cWater::UpdateDepth(cOutdoor* pOutdoor, const std::vector<coreBatchList*>& 
                 FOR_EACH(it, apGroundObjectList)
                     (*it)->Render();
             }
-            glDepthFunc(GL_LEQUAL);
+            glDepthFunc (GL_LEQUAL);
             glDrawBuffer(GL_COLOR_ATTACHMENT0);
         }
     }

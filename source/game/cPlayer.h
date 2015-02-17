@@ -26,7 +26,7 @@ enum ePlayerStatus : coreByte
 class cPlayer final : public cShip
 {
 private:
-    cWeapon* m_apWeapon[PLAYER_WEAPONS];   // main weapon objects (bullet factories)
+    cWeapon* m_apWeapon[PLAYER_WEAPONS];   // main weapon objects (bullet factories, should never be NULL)
     coreByte m_iInputIndex;                // input set identifier
 
 
@@ -36,7 +36,7 @@ public:
 
     DISABLE_COPY(cPlayer)
 
-    // configure the player
+    // configure and equip the player
     void Configure  (const coreByte& iAppearanceType, const coreVector3& vColor, const coreByte& iInputIndex);
     void EquipWeapon(const coreByte& iIndex, const int& iID);
 

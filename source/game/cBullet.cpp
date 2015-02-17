@@ -93,7 +93,7 @@ cBulletManager::~cBulletManager()
 {
     // delete all bullet sets
     FOR_EACH(it, m_apBulletSet)
-        SAFE_DELETE(it->second)
+        SAFE_DELETE(*it)
 
     // clear memory
     m_apBulletSet.clear();
@@ -107,14 +107,14 @@ void cBulletManager::Render()
     // loop through all bullet sets
     FOR_EACH(it, m_apBulletSet)
     {
-        coreBatchList* pBulletActive = &it->second->oBulletActive;
+        coreBatchList* pBulletActive = &(*it)->oBulletActive;
 
         // call individual preceding render routines
         FOR_EACH(et, *pBulletActive->List())
             s_cast<cBullet*>(*et)->__RenderOwnBefore();
 
         // render bullet set
-        it->second->oBulletActive.Render();
+        (*it)->oBulletActive.Render();
 
         // call individual subsequent render routines
         FOR_EACH(et, *pBulletActive->List())
@@ -130,7 +130,7 @@ void cBulletManager::Move()
     // loop through all bullet sets
     FOR_EACH(it, m_apBulletSet)
     {
-        coreBatchList* pBulletActive = &it->second->oBulletActive;
+        coreBatchList* pBulletActive = &(*it)->oBulletActive;
 
         // loop through all bullets
         FOR_EACH_DYN(et, *pBulletActive->List())
@@ -160,7 +160,7 @@ void cBulletManager::ClearBullets()
     // loop trough all bullet sets
     FOR_EACH(it, m_apBulletSet)
     {
-        coreBatchList* pBulletActive = &it->second->oBulletActive;
+        coreBatchList* pBulletActive = &(*it)->oBulletActive;
 
         // deactivate each active bullet
         FOR_EACH(et, *pBulletActive->List())
@@ -183,9 +183,10 @@ cRayBullet::cRayBullet()noexcept
     this->DefineProgram("effect_energy_direct_program");
 
     // set object properties
-    this->SetSize   (coreVector3(2.5f,2.5f,2.5f));
-    this->SetColor3 (coreVector3(0.9f,0.8f,0.4f));
-    this->SetTexSize(coreVector2(0.4f,0.2f));
+    this->SetSize             (coreVector3(2.5f,2.5f,  2.5f));
+    this->SetCollisionModifier(coreVector3(1.0f,0.333f,1.0f));   // model with offset
+    this->SetColor3           (coreVector3(0.9f,0.8f,  0.4f));
+    this->SetTexSize          (coreVector2(0.4f,0.2f));
 
     // coreVector3(1.0f, 0.4f, 0.0f) orange
 }
@@ -215,9 +216,9 @@ cOrbBullet::cOrbBullet()noexcept
     this->DefineProgram("effect_energy_program");
 
     // set object properties
-    this->SetSize   (coreVector3(  1.6f,  1.6f,  1.6f));
+    this->SetSize   (coreVector3(1.6f,  1.6f,  1.6f));
     this->SetColor3 (coreVector3(0.090f,0.387f,0.900f));
-    this->SetTexSize(coreVector2(  0.4f,  0.4f));
+    this->SetTexSize(coreVector2(0.4f,  0.4f));
 
     // coreVector3(0.3f, 0.7f, 0.3f)*0.8f green
     // coreVector3(0.9f, 0.25f, 0.25f)*0.8f red

@@ -62,7 +62,8 @@ private:
 private:
     float m_afHeight[OUTDOOR_TOTAL_VERTICES];   // height data for height calculations
 
-    coreUint m_iRenderOffset;                   // current render offset
+    coreUint m_iVertexOffset;                   // current vertex offset
+    coreUint m_iIndexOffset;                    // current index offset
     float    m_fFlyOffset;                      // current fly offset
 
     coreByte m_iAlgorithm;                      // geometry algorithm ID
@@ -77,11 +78,11 @@ public:
 
     DISABLE_COPY(cOutdoor)
 
-    // render and move the outdoor-surface
+    // render the outdoor-surface
     void Render()override;
-    void Move  ()override;
 
-    // load outdoor geometry
+    // load outdoor resources
+    void LoadTextures(const char* pcTextureTop, const char* pcTextureBottom);
     void LoadGeometry(const coreByte& iAlgorithm, const float& fGrade);
 
     // retrieve height value
@@ -94,7 +95,8 @@ public:
     void SetFlyOffset(const float& fFlyOffset);
 
     // get object properties
-    inline const coreUint& GetRenderOffset()const {return m_iRenderOffset;}
+    inline const coreUint& GetVertexOffset()const {return m_iVertexOffset;}
+    inline const coreUint& GetIndexOffset ()const {return m_iIndexOffset;}
     inline const float&    GetFlyOffset   ()const {return m_fFlyOffset;}
 };
 

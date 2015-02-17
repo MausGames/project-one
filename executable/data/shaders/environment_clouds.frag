@@ -11,10 +11,10 @@
 void FragmentMain()
 {
     // calculate quadratic distance from the center as alpha value
-    float v1Alpha = 1.0 - coreLengthSq(2.0 * v_av2TexCoord[1] - 1.0);
-    
+    float v1Alpha = 1.0 - coreLengthSq(v_av2TexCoord[1]);
+
     // only draw visible area
-    if(v1Alpha > 0.0) 
+    if(v1Alpha > 0.0)
     {
         // draw as alpha map with decent highlights
         float v1Value = coreTexture2D(0, v_av2TexCoord[0]).r;

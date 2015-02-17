@@ -1,1 +1,4 @@
 $LANGUAGE = Deutsch
+$START_GAME = Spielen
+$EXIT_GAME = Beenden
+$CREDITS = Credits

@@ -1,0 +1,45 @@
+//////////////////////////////////////////////////////
+//*------------------------------------------------*//
+//| Part of Project One (http://www.maus-games.at) |//
+//*------------------------------------------------*//
+//| Released under the zlib License                |//
+//| More information available in the readme file  |//
+//*------------------------------------------------*//
+//////////////////////////////////////////////////////
+#pragma once
+#ifndef _P1_GUARD_BOSS_H_
+#define _P1_GUARD_BOSS_H_
+
+
+// ****************************************************************
+// boss entity interface
+class INTERFACE cBoss : public cEnemy
+{
+public:
+    cBoss()noexcept;
+    virtual ~cBoss() {}
+
+    DISABLE_COPY(cBoss)
+    ENABLE_ID
+};
+
+
+// ****************************************************************
+// crossfield boss class
+class cCrossfieldBoss final : public cBoss
+{
+public:
+    cCrossfieldBoss()noexcept;
+
+    DISABLE_COPY(cCrossfieldBoss)
+    ASSIGN_ID(101, "Crossfield")
+
+
+private:
+    // 
+    void __RenderOwn()override;
+    void __MoveOwn  ()override;
+};
+
+
+#endif // _P1_GUARD_BOSS_H_

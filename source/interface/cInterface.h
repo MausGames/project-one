@@ -13,6 +13,20 @@
 
 // ****************************************************************
 // 
+class cInterface final : public coreMenu
+{
+private:
+    coreLabel m_Health;   // 
+
+
+public:
+    cInterface()noexcept;
+
+    DISABLE_COPY(cInterface)
+
+    // 
+    void Move()override;
+};
 
 
 #endif // _P1_GUARD_INTERFACE_H_

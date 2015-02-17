@@ -1,16 +1,44 @@
-//////////////////////////////////////////////////////
-//*------------------------------------------------*//
-//| Part of Project One (http://www.maus-games.at) |//
-//*------------------------------------------------*//
-//| Released under the zlib License                |//
-//| More information available in the readme file  |//
-//*------------------------------------------------*//
-//////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
+//*-------------------------------------------------------------------------------*//
+//|    _____  _____   ____       _ ______ _____ _______     ____  _   _ ______    |//
+//|   |  __ \|  __ \ / __ \     | |  ____/ ____|__   __|   / __ \| \ | |  ____|   |//
+//|   | |__) | |__) | |  | |    | | |__ | |       | |     | |  | |  \| | |__      |//
+//|   |  ___/|  _  /| |  | |_   | |  __|| |       | |     | |  | |     |  __|     |//
+//|   | |    | | \ \| |__| | |__| | |___| |____   | |     | |__| | |\  | |____    |//
+//|   |_|    |_|  \_\\____/ \____/|______\_____|  |_|      \____/|_| \_|______|   |//
+//|                                                                               |//
+//*-------------------------------------------------------------------------------*//
+/////////////////////////////////////////////////////////////////////////////////////
+//*-------------------------------------------------------------------------------*//
+//| Project One v0.1.0a (http://www.maus-games.at)                                |//
+//*-------------------------------------------------------------------------------*//
+//| Copyright (c) 2010-2015 Martin Mauersics                                      |//
+//|                                                                               |//
+//| This software is provided 'as-is', without any express or implied             |//
+//| warranty. In no event will the authors be held liable for any damages         |//
+//| arising from the use of this software.                                        |//
+//|                                                                               |//
+//| Permission is granted to anyone to use this software for any purpose,         |//
+//| including commercial applications, and to alter it and redistribute it        |//
+//| freely, subject to the following restrictions:                                |//
+//|                                                                               |//
+//|   1. The origin of this software must not be misrepresented; you must not     |//
+//|   claim that you wrote the original software. If you use this software        |//
+//|   in a product, an acknowledgment in the product documentation would be       |//
+//|   appreciated but is not required.                                            |//
+//|                                                                               |//
+//|   2. Altered source versions must be plainly marked as such, and must not be  |//
+//|   misrepresented as being the original software.                              |//
+//|                                                                               |//
+//|   3. This notice may not be removed or altered from any source                |//
+//|   distribution.                                                               |//
+//*-------------------------------------------------------------------------------*//
+/////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 #ifndef _P1_GUARD_MAIN_H_
 #define _P1_GUARD_MAIN_H_
 
-// NOTE: Update Order (C = view change): distortion -C-> glow -C-> [(water -C->) (shadow --->) background] -C-> foreground ---> *
+// TODO: create timer and int-value as tick-multiplier for sustained damage
 
 
 // ****************************************************************
@@ -46,9 +74,8 @@
 
 #define LIGHT_DIRECTION    coreVector3(0.583953857f, -0.642349243f, -0.496360779f)
 
-#define CLEAR_COLOR        0.5f, 0.5f, 0.5f, 0.0f
-
 #define SHADER_SHADOW      "#define _P1_SHADOW_  (1) \n"   // outdoor, object_ground
+#define SHADER_GLOW        "#define _P1_GLOW_    (1) \n"   // post
 #define SHADER_SPHERIC     "#define _P1_SPHERIC_ (1) \n"   // decal, energy
 #define SHADER_DIRECT      "#define _P1_DIRECT_  (1) \n"   // outline, energy
 
@@ -66,6 +93,8 @@
     inline const int   GetID  ()const override {return ID;} \
     inline const char* GetName()const override {return n;}
 
+#define CONTAINS(c,i) (std::find((c).begin(), (c).end(), (i)) != (c).end())
+
 
 // ****************************************************************
 // forward declarations
@@ -76,15 +105,16 @@ class cPlayer;
 // ****************************************************************
 // game header files
 extern coreVector2      g_vGameResolution;   // pre-calculated 1:1 resolution
+extern coreVector2      g_vMenuCenter;       // 
 
 #include "additional/cBindContainer.h"
-#include "files/cConfig.h"
-#include "visuals/cShadow.h"
-#include "visuals/cOutline.h"
-#include "visuals/cGlow.h"
-#include "visuals/cSpecialEffects.h"
-#include "visuals/cForeground.h"
-#include "visuals/cPostProcessing.h"
+#include "file/cConfig.h"
+#include "visual/cShadow.h"
+#include "visual/cOutline.h"
+#include "visual/cGlow.h"
+#include "visual/cSpecialEffects.h"
+#include "visual/cForeground.h"
+#include "visual/cPostProcessing.h"
 
 extern cOutline*        g_pOutlineFull;      // main full outline-effect object
 extern cOutline*        g_pOutlineDirect;    // main direct outline-effect object
@@ -94,15 +124,23 @@ extern cPostProcessing* g_pPostProcessing;   // main post-processing object
 #include "environment/cOutdoor.h"
 #include "environment/cWater.h"
 #include "environment/cEnvironment.h"
+#include "interface/cCombatText.h"
+#include "interface/cInterface.h"
+#include "interface/cMsgBox.h"
+#include "interface/cTooltip.h"
+#include "interface/menu/cMenu.h"
 #include "game/cBullet.h"
 #include "game/cWeapon.h"
 #include "game/cShip.h"
 #include "game/cEnemy.h"
 #include "game/cPlayer.h"
+#include "game/boss/cBoss.h"
+#include "game/mission/cMission.h"
 #include "game/cGame.h"
 
 extern cForeground*     g_pForeground;       // main foreground object
 extern cEnvironment*    g_pEnvironment;      // main environment object
+extern cMenu*           g_pMenu;             // main menu object
 extern cGame*           g_pGame;             // main game object
 
 

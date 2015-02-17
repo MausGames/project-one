@@ -31,7 +31,7 @@ public:
     void Move  ()override;
 
     // 
-    bool TakeDamage(const int& iDamage);
+    void TakeDamage(const int& iDamage);
 
 
 private:
@@ -49,7 +49,7 @@ public:
     cScoutEnemy()noexcept;
 
     DISABLE_COPY(cScoutEnemy)
-    ASSIGN_ID(1, "ScoutEnemy")
+    ASSIGN_ID(1, "Scout")
 };
 
 
@@ -61,7 +61,7 @@ public:
     cWarriorEnemy()noexcept;
 
     DISABLE_COPY(cWarriorEnemy)
-    ASSIGN_ID(2, "WarriorEnemy")
+    ASSIGN_ID(2, "Warrior")
 };
 
 
@@ -77,7 +77,7 @@ public:
     cStarEnemy()noexcept;
 
     DISABLE_COPY(cStarEnemy)
-    ASSIGN_ID(3, "StarEnemy")
+    ASSIGN_ID(3, "Star")
 
 
 private:
@@ -98,7 +98,7 @@ public:
     cArrowEnemy()noexcept;
 
     DISABLE_COPY(cArrowEnemy)
-    ASSIGN_ID(4, "ArrowEnemy")
+    ASSIGN_ID(4, "Arrow")
 
 
 private:
@@ -115,7 +115,7 @@ public:
     cMinerEnemy()noexcept;
 
     DISABLE_COPY(cMinerEnemy)
-    ASSIGN_ID(5, "MinerEnemy")
+    ASSIGN_ID(5, "Miner")
 };
 
 
@@ -131,7 +131,7 @@ public:
     cFreezerEnemy()noexcept;
 
     DISABLE_COPY(cFreezerEnemy)
-    ASSIGN_ID(6, "FreezerEnemy")
+    ASSIGN_ID(6, "Freezer")
 
 
 private:
@@ -152,7 +152,7 @@ public:
     cCinderEnemy()noexcept;
 
     DISABLE_COPY(cCinderEnemy)
-    ASSIGN_ID(7, "CinderEnemy")
+    ASSIGN_ID(7, "Cinder")
 
 
 private:

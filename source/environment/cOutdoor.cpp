@@ -12,20 +12,21 @@
 // ****************************************************************
 // constructor
 cOutdoor::cOutdoor(const char* pcTextureTop, const char* pcTextureBottom, const coreByte& iAlgorithm, const float& fGrade)noexcept
-: m_iRenderOffset (0)
+: m_iVertexOffset (0)
+, m_iIndexOffset  (0)
 , m_fFlyOffset    (0.0f)
 , m_iAlgorithm    (0)
 , m_fGrade        (0.0f)
 {
+    // load outdoor textures
+    m_apTexture[2] = Core::Manager::Resource->LoadNew<coreTexture>();
+    this->LoadTextures(pcTextureTop, pcTextureBottom);
+
     // load outdoor geometry
     m_pModel = Core::Manager::Resource->LoadNew<coreModel>();
     this->LoadGeometry(iAlgorithm, fGrade);
 
-    // load object resources
-    this->DefineTexture(0, PRINT("environment_%s_diff.png", pcTextureTop));
-    this->DefineTexture(1, PRINT("environment_%s_norm.png", pcTextureTop));
-    this->DefineTexture(2, PRINT("environment_%s_diff.png", pcTextureBottom));
-    this->DefineTexture(3, PRINT("environment_%s_norm.png", pcTextureBottom));
+    // load shader-program
     this->DefineProgram("environment_outdoor_program");
 }
 
@@ -34,7 +35,8 @@ cOutdoor::cOutdoor(const char* pcTextureTop, const char* pcTextureBottom, const 
 // destructor
 cOutdoor::~cOutdoor()
 {
-    // free model
+    // free resources
+    Core::Manager::Resource->Free(&m_apTexture[2]);
     Core::Manager::Resource->Free(&m_pModel);
 }
 
@@ -50,17 +52,57 @@ void cOutdoor::Render()
         cShadow::EnableShadowRead(SHADOW_HANDLE_OUTDOOR);
 
         // draw the model
-        glDrawRangeElements(m_pModel->GetPrimitiveType(), 0, OUTDOOR_TOTAL_VERTICES, OUTDOOR_RANGE, m_pModel->GetIndexType(), r_cast<const GLvoid*>(m_iRenderOffset));
+        glDrawRangeElements(m_pModel->GetPrimitiveType(), m_iVertexOffset, m_iVertexOffset + (OUTDOOR_VIEW+1)*OUTDOOR_WIDTH, OUTDOOR_RANGE, m_pModel->GetIndexType(), I_TO_P(m_iIndexOffset));
     }
 }
 
 
 // ****************************************************************
-// move the outdoor-surface
-void cOutdoor::Move()
+// load outdoor textures
+void cOutdoor::LoadTextures(const char* pcTextureTop, const char* pcTextureBottom)
 {
-    // move the 3d-object
-    coreObject3D::Move();
+    // load color textures
+    this->DefineTexture(0, PRINT("environment_%s_diff.png", pcTextureTop));
+    this->DefineTexture(1, PRINT("environment_%s_diff.png", pcTextureBottom));
+
+    // FUN FACT:
+    // apparently a "similar" method has an U.S. patent by HP (http://www.google.co.in/patents/US6337684)
+    // how can someone "invent" the fundamental unit-sphere formula [1 = x*x + y*y + z*z] ?
+
+    // delete old data
+    m_apTexture[2]->Unload();
+
+    // retrieve normal map files
+    coreFile* pFile1 = Core::Manager::Resource->RetrieveFile(PRINT("data/textures/environment_%s_norm.png", pcTextureTop));
+    coreFile* pFile2 = Core::Manager::Resource->RetrieveFile(PRINT("data/textures/environment_%s_norm.png", pcTextureBottom));
+    WARN_IF(!pFile1 || !pFile2) return;
+
+    // decompress files to plain pixel data
+    SDL_Surface* pSurface1 = IMG_LoadTyped_RW(SDL_RWFromConstMem(pFile1->GetData(), pFile1->GetSize()), true, coreData::StrExtension(pFile1->GetPath()));
+    SDL_Surface* pSurface2 = IMG_LoadTyped_RW(SDL_RWFromConstMem(pFile2->GetData(), pFile2->GetSize()), true, coreData::StrExtension(pFile2->GetPath()));
+    WARN_IF((pSurface1->format->BitsPerPixel != 24) || (pSurface2->format->BitsPerPixel != 24)) return;
+
+    // allocate required memory
+    const coreUint iSize   = pSurface1->w * pSurface1->h * 4;
+    coreByte*      pMerged = new coreByte[iSize];
+
+    // merge XY components of both normal maps (Z can be calculated in shader)
+    for(coreUint i = 0, j = 0; i < iSize; i += 4, j += 3)
+    {
+        std::memcpy(pMerged + i,     s_cast<coreByte*>(pSurface1->pixels) + j, 2);
+        std::memcpy(pMerged + i + 2, s_cast<coreByte*>(pSurface2->pixels) + j, 2);
+    }
+
+    // create final normal texture
+    m_apTexture[2]->Create(pSurface1->w, pSurface1->h, CORE_TEXTURE_SPEC_RGBA, GL_REPEAT, true);
+    m_apTexture[2]->Modify(0, 0, pSurface1->w, pSurface1->h, iSize, pMerged);
+
+    // free required memory
+    SAFE_DELETE_ARRAY(pMerged)
+    SDL_FreeSurface(pSurface1);
+    SDL_FreeSurface(pSurface2);
+    pFile1->UnloadData();
+    pFile2->UnloadData();
 }
 
 
@@ -133,8 +175,8 @@ void cOutdoor::LoadGeometry(const coreByte& iAlgorithm, const float& fGrade)
             const int f = i * OUTDOOR_WIDTH + j;
             const int t = f + OUTDOOR_HEIGHT * OUTDOOR_WIDTH;
 
-            aVertexData[t].vPosition.z  = aVertexData[f].vPosition.z;
-            m_afHeight[t]               = m_afHeight[f];
+            aVertexData[t].vPosition.z = aVertexData[f].vPosition.z;
+            m_afHeight[t]              = m_afHeight[f];
         }
     }
 
@@ -237,6 +279,7 @@ void cOutdoor::LoadGeometry(const coreByte& iAlgorithm, const float& fGrade)
     Core::Log->Info("Outdoor-Surface loaded");
 }
 
+
 // ****************************************************************
 // retrieve height value
 float cOutdoor::RetrieveHeight(const coreVector2& vPosition)
@@ -271,7 +314,9 @@ void cOutdoor::SetFlyOffset(const float& fFlyOffset)
 {
     // set new value
     m_fFlyOffset = fFlyOffset;
+    ASSERT(F_TO_SI(m_fFlyOffset) < OUTDOOR_HEIGHT)
 
-    // calculate render offset
-    m_iRenderOffset = (F_TO_SI(m_fFlyOffset) % OUTDOOR_HEIGHT) * OUTDOOR_BLOCKS_X * OUTDOOR_PER_INDICES * 2;
+    // calculate vertex and index offset
+    m_iVertexOffset = F_TO_SI(m_fFlyOffset) * OUTDOOR_WIDTH;
+    m_iIndexOffset  = F_TO_SI(m_fFlyOffset) * OUTDOOR_BLOCKS_X * OUTDOOR_PER_INDICES * sizeof(coreUshort);
 }

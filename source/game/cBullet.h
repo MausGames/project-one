@@ -102,7 +102,7 @@ public:
     void Move();
 
     // add and remove bullets
-    template <typename T> T* AddBullet(const int& iDamage, cShip* pOwner, const int& iType, const coreVector2& vPosition, const coreVector2& vDirection);
+    template <typename T> RETURN_RESTRICT T* AddBullet(const int& iDamage, cShip* pOwner, const int& iType, const coreVector2& vPosition, const coreVector2& vDirection);
     void ClearBullets();
 };
 
@@ -119,7 +119,7 @@ public:
     cRayBullet()noexcept;
 
     ENABLE_COPY(cRayBullet)
-    ASSIGN_ID(1, "RayBullet")
+    ASSIGN_ID(1, "Ray")
 
     // bullet configuration values
     static inline const char* ConfigProgramInstancedName() {return "effect_energy_direct_inst_program";}
@@ -144,7 +144,7 @@ public:
     cOrbBullet()noexcept;
 
     ENABLE_COPY(cOrbBullet)
-    ASSIGN_ID(2, "OrbBullet")
+    ASSIGN_ID(2, "Orb")
 
     // bullet configuration values
     static inline const char* ConfigProgramInstancedName() {return "effect_energy_inst_program";}
@@ -186,7 +186,7 @@ template <typename T> cBulletManager::sBulletSet<T>::~sBulletSet()
 
 // ****************************************************************
 // add bullet to the game
-template <typename T> T* cBulletManager::AddBullet(const int& iDamage, cShip* pOwner, const int& iType, const coreVector2& vPosition, const coreVector2& vDirection)
+template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const int& iDamage, cShip* pOwner, const int& iType, const coreVector2& vPosition, const coreVector2& vDirection)
 {
     // get requested bullet set
     sBulletSet<T>* pSet;

@@ -31,19 +31,18 @@ cBackground::cBackground()noexcept
 cBackground::~cBackground()
 {
     // remove all persistent objects
-    auto pRemoveObjectsFunc = [](std::vector<coreBatchList*>* papList)
+    auto nRemoveObjectsFunc = [](std::vector<coreBatchList*>* papList)
     {
         FOR_EACH(it, *papList)
         {
             // delete single objects within the list
-            FOR_EACH(et, *(*it)->List())
-                SAFE_DELETE(*et)
+            FOR_EACH(et, *(*it)->List()) SAFE_DELETE(*et)
             SAFE_DELETE(*it)
         }
     };
-    pRemoveObjectsFunc(&m_apGroundObjectList);
-    pRemoveObjectsFunc(&m_apDecalObjectList);
-    pRemoveObjectsFunc(&m_apAirObjectList);
+    nRemoveObjectsFunc(&m_apGroundObjectList);
+    nRemoveObjectsFunc(&m_apDecalObjectList);
+    nRemoveObjectsFunc(&m_apAirObjectList);
 
     // remove all additional objects
     this->ClearObjects();
@@ -74,10 +73,16 @@ void cBackground::Render()
     // update shadow map
     if(m_pOutdoor) m_pOutdoor->GetShadowMap()->Update();
 
+    // 
+    glClearColor(ENVIRONMENT_CLEAR_COLOR);
+
     // fill background frame buffer
     m_iFrameBuffer.StartDraw();
     m_iFrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR | CORE_FRAMEBUFFER_TARGET_DEPTH);   // color-clear improves performance (with multisampling and depth pre-pass)
     {
+        // 
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
         glDisable(GL_BLEND);
         {
             // render depth pass with foreground objects
@@ -102,7 +107,7 @@ void cBackground::Render()
             // render the outdoor-surface
             if(m_pOutdoor) m_pOutdoor->Render();
 
-            // TODO # put transparent add-objects and decals here (to be in water) 
+            // TODO # put transparent additional objects and decals here (to be in water) 
 
             // render the water-surface
             if(m_pWater) m_pWater->Render(&m_iFrameBuffer);
@@ -153,20 +158,33 @@ void cBackground::Move()
     }
 
     // control and move all objects
-    auto pControlObjectsFunc = [](std::vector<coreBatchList*>* papList, const float& fRange)
+    auto nControlObjectsFunc = [](std::vector<coreBatchList*>* papList, const float& fRange)
     {
         FOR_EACH(it, *papList)
         {
+            bool bUpdate = false;
+
             // enable only objects in the current view
             FOR_EACH(et, *(*it)->List())
-                (*et)->SetEnabled(coreMath::InRange((*et)->GetPosition().y, g_pEnvironment->GetCameraPos().y, fRange) ?
-                                  CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
-            (*it)->MoveNormal();
+            {
+                coreObject3D* pObject = (*et);
+
+                // determine visibility and compare with current status
+                const bool bIsVisible = coreMath::InRange(pObject->GetPosition().y, g_pEnvironment->GetCameraPos().y, fRange);
+                if(bIsVisible != pObject->IsEnabled(CORE_OBJECT_ENABLE_ALL))
+                {
+                    pObject->SetEnabled(bIsVisible ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+                    bUpdate = true;
+                }
+            }
+
+            // move only when necessary (also to reduce instancing updates)
+            if(bUpdate) (*it)->MoveNormal();
         }
     };
-    pControlObjectsFunc(&m_apGroundObjectList, 80.0f);
-    pControlObjectsFunc(&m_apDecalObjectList,  80.0f);
-    pControlObjectsFunc(&m_apAirObjectList,    80.0f);
+    nControlObjectsFunc(&m_apGroundObjectList, 80.0f);
+    nControlObjectsFunc(&m_apDecalObjectList,  80.0f);
+    nControlObjectsFunc(&m_apAirObjectList,    80.0f);
 
     // TODO # handle additional objects 
 
@@ -259,19 +277,20 @@ cEnvironment::cEnvironment()noexcept
 
     // create mix object
     m_MixObject.DefineProgram("full_transition_program");
-    m_MixObject.SetSize     (coreVector2(1.0f, 1.0f));
-    m_MixObject.SetTexSize  (coreVector2(1.0f,-1.0f));
-    m_MixObject.SetTexOffset(coreVector2(0.0f, 1.0f));
+    m_MixObject.SetSize      (coreVector2(1.0f, 1.0f));
+    m_MixObject.SetTexSize   (coreVector2(1.0f,-1.0f));
+    m_MixObject.SetTexOffset (coreVector2(0.0f, 1.0f));
     m_MixObject.Move();
 
     // reset transformation properties
     m_avDirection[1] = m_avDirection[0] = coreVector2(0.0f,1.0f);
     m_avSide     [1] = m_avSide     [0] = coreVector2(0.0f,0.0f);
-    m_afSpeed    [1] = m_afSpeed    [0] = 3.0f;
+    m_afSpeed    [1] = m_afSpeed    [0] = 2.0f;
 
     // load first background
     m_pBackground = new cNoBackground();
-    this->ChangeBackground(Core::Config->GetInt("Game", "Background", s_cast<int>(cGrassBackground::ID)));
+    this->ChangeBackground(MAX(Core::Config->GetInt("Game", "Background", 0), s_cast<int>(cGrassBackground::ID)));
+    m_Transition.SetValue(-2.0f);
 }
 
 
@@ -318,8 +337,8 @@ void cEnvironment::Render()
             m_MixObject.Render();
 
             // invalidate single backgrounds
-            m_pOldBackground->GetResolvedTexture()->Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
-            m_pBackground   ->GetResolvedTexture()->Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
+            m_pOldBackground->GetResolvedTexture()->GetColorTarget(0).pTexture->Invalidate(0);
+            m_pBackground   ->GetResolvedTexture()->GetColorTarget(0).pTexture->Invalidate(0);
         }
     }
 }
@@ -479,8 +498,8 @@ cGrassBackground::cGrassBackground()noexcept
     {
         for(int j = 0; j < 2; ++j)   // types
         {
-            const coreUint iStoneTries = j ? GRASS_STONES_2_NUM  : GRASS_STONES_1_NUM;
-            const float    fStoneSize  = j ? GRASS_STONES_2_SIZE : GRASS_STONES_1_SIZE;
+            const coreUint iStoneTries = j ? GRASS_STONES_2_NUM : GRASS_STONES_1_NUM;
+            const float    fStoneSize  = j ? 2.0f               : 2.2f;
 
             // select position and height test function
             std::function<float(const float&, const float&)> nTestFunc;

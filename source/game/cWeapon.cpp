@@ -66,8 +66,8 @@ void cRayWeapon::__ReleaseOwn()
 // shoot with the ray weapon
 void cRayWeapon::__ShootOwn()
 {
-    const coreVector2 vPos = m_pOwner->GetPosition ().xy();
     const coreVector2 vDir = m_pOwner->GetDirection().xy();
+    const coreVector2 vPos = m_pOwner->GetPosition ().xy() + vDir*3.0f;
     const coreVector2 vTan = vDir.yx();
 
     if(m_bSpread)

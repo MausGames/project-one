@@ -20,7 +20,7 @@ uniform float u_v1Offset;   // current y-position offset
 // shader output
 varying float v_v1Smooth;   // height offset for smooth shores
 
-	
+
 void VertexMain()
 {
     // transform view direction and position
@@ -33,14 +33,14 @@ void VertexMain()
     v_v3ViewDir          = normalize(vec3(-v3ViewDir.x, v3ViewDir.y, -v3ViewDir.z));
 
     // calculate current mapping base
-    vec2 vMapCoord = -vec2(a_v2LowTexCoord.x * c_v1MapResolution, 
+    vec2 vMapCoord = -vec2(a_v2LowTexCoord.x * c_v1MapResolution,
                            a_v2LowTexCoord.y * c_v1MapResolution + u_v1Offset);
-    
+
     // transform texture coordinates with different animation properties
     v_av2TexCoord[0] = (vMapCoord + (vec2( u_v1Time,      u_v1Time)))     * 1.0;
     v_av2TexCoord[1] = (vMapCoord + (vec2( u_v1Time*0.5, -u_v1Time*0.3))) * 2.0;
     v_av2TexCoord[2] = (vMapCoord + (vec2(-u_v1Time*0.1,  u_v1Time*0.1))) * 8.0;
-    
+
     // calculate height offset
     v_v1Smooth = 0.042 * (u_v3Position.z - c_v1WaterHeight);
 }

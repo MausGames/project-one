@@ -12,22 +12,26 @@
 
 // TODO: render depth-quads on unused background areas (transition!)
 // TODO: cache environment resources on loading (currently 100s of resource lookups)
+// TODO: merge stone diff and norm textures (own shader ?)
 
 
 // ****************************************************************
 // environment definitions
-#define GRASS_STONES_1_NUM    (512u)
-#define GRASS_STONES_2_NUM    (768u)
-#define GRASS_STONES_1_SIZE   (2.2f)
-#define GRASS_STONES_2_SIZE   (2.0f)
-#define GRASS_STONES_RESERVE  (256u)
-#define GRASS_REEDS_NUM       (2048u)
-#define GRASS_REEDS_1_RESERVE (512u)
-#define GRASS_REEDS_2_RESERVE (128u)
-#define GRASS_FLOWERS_NUM     (384u)
-#define GRASS_FLOWERS_RESERVE (256u)
-#define GRASS_CLOUDS_NUM      (96u)
-#define GRASS_CLOUDS_RESERVE  (115u)   // tested
+#define ENVIRONMENT_CLEAR_COLOR 0.5f, 0.5f, 0.5f, 0.0f   // 
+
+
+// ****************************************************************
+// environment distribution values
+#define GRASS_STONES_1_NUM      (512u)
+#define GRASS_STONES_2_NUM      (768u)
+#define GRASS_STONES_RESERVE    (256u)
+#define GRASS_REEDS_NUM         (2048u)
+#define GRASS_REEDS_1_RESERVE   (512u)
+#define GRASS_REEDS_2_RESERVE   (128u)
+#define GRASS_FLOWERS_NUM       (384u)
+#define GRASS_FLOWERS_RESERVE   (256u)
+#define GRASS_CLOUDS_NUM        (96u)
+#define GRASS_CLOUDS_RESERVE    (115u)   // # tested
 
 
 // ****************************************************************
@@ -165,12 +169,12 @@ public:
     cNoBackground()noexcept {}
 
     DISABLE_COPY(cNoBackground)
-    ASSIGN_ID(0, "NoBackground")
+    ASSIGN_ID(0, "Nothing")
 
 
 private:
     // render the empty background
-    inline void __RenderOwn()override {glClearColor(0.0f, 0.0f, 0.0f, 0.0f); m_iFrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR); glClearColor(CLEAR_COLOR);}
+    inline void __RenderOwn()override {m_iFrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);}
 };
 
 
@@ -187,7 +191,7 @@ public:
     ~cGrassBackground();
 
     DISABLE_COPY(cGrassBackground)
-    ASSIGN_ID(1, "GrassBackground")
+    ASSIGN_ID(1, "Grass")
 
 
 private:
@@ -204,7 +208,7 @@ public:
     cSeaBackground()noexcept {}
 
     DISABLE_COPY(cSeaBackground)
-    ASSIGN_ID(2, "SeaBackground")
+    ASSIGN_ID(2, "Sea")
 };
 
 
@@ -216,7 +220,7 @@ public:
     cDesertBackground()noexcept {}
 
     DISABLE_COPY(cDesertBackground)
-    ASSIGN_ID(3, "DesertBackground")
+    ASSIGN_ID(3, "Desert")
 };
 
 
@@ -228,7 +232,7 @@ public:
     cSpaceBackground()noexcept {}
 
     DISABLE_COPY(cSpaceBackground)
-    ASSIGN_ID(4, "SpaceBackground")
+    ASSIGN_ID(4, "Space")
 };
 
 
@@ -240,7 +244,7 @@ public:
     cVolcanoBackground()noexcept {}
 
     DISABLE_COPY(cVolcanoBackground)
-    ASSIGN_ID(5, "VolcanoBackground")
+    ASSIGN_ID(5, "Volcano")
 };
 
 
@@ -252,7 +256,7 @@ public:
     cSnowBackground()noexcept {}
 
     DISABLE_COPY(cSnowBackground)
-    ASSIGN_ID(6, "SnowBackground")
+    ASSIGN_ID(6, "Snow")
 };
 
 
@@ -264,7 +268,7 @@ public:
     cMossBackground()noexcept {}
 
     DISABLE_COPY(cMossBackground)
-    ASSIGN_ID(7, "MossBackground")
+    ASSIGN_ID(7, "Moss")
 };
 
 
