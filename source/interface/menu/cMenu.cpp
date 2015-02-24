@@ -12,11 +12,25 @@
 // ****************************************************************
 // constructor
 cMenu::cMenu()noexcept
-: coreMenu (2, SURFACE_INTRO)
+: coreMenu (3, SURFACE_INTRO)
 {
-    // 
-    this->BindObject(SURFACE_INTRO, &m_IntroMenu);
-    this->BindObject(SURFACE_MAIN,  &m_MainMenu);
+    // create intro and main menu
+    m_pIntroMenu = new cIntroMenu();
+    m_pMainMenu  = new cMainMenu();
+
+    // bind menu objects
+    this->BindObject(SURFACE_INTRO, m_pIntroMenu);
+    this->BindObject(SURFACE_MAIN,  m_pMainMenu);
+}
+
+
+// ****************************************************************
+// destructor
+cMenu::~cMenu()
+{
+    // delete intro and main menu
+    SAFE_DELETE(m_pIntroMenu)
+    SAFE_DELETE(m_pMainMenu)
 }
 
 
@@ -27,26 +41,52 @@ void cMenu::Move()
     // move the menu
     coreMenu::Move();
 
+    // control mouse with joystick
+    Core::Input->UseMouseWithJoystick(0, 0, 1, 0.4f);
+    Core::Input->UseMouseWithJoystick(1, 0, 1, 0.4f);
+
     if(this->GetCurSurface() == SURFACE_INTRO)
     {
         // 
-        if(m_IntroMenu.GetStatus()) this->ChangeSurface(SURFACE_MAIN, 1.0f);
+        if(m_pIntroMenu->GetStatus()) this->ChangeSurface(SURFACE_MAIN, 1.0f);
     }
     else if(this->GetCurSurface() == SURFACE_MAIN)
     {
+        if(m_pMainMenu->GetStatus())
+        {
+            // 
+            this->ChangeSurface(SURFACE_EMPTY, 1.0f);
 
+            // 
+            ASSERT(!g_pGame)
+            g_pGame = new cGame(false);
+            g_pGame->LoadMission(cMellanMission::ID);
+
+            // unload expendable menu resources
+            Core::Manager::Resource->AttachFunction([this]()
+            {
+                if(!this->GetTransition().GetStatus())
+                {
+                    // delete intro and main menu
+                    SAFE_DELETE(m_pIntroMenu)
+                    SAFE_DELETE(m_pMainMenu)
+                    return CORE_OK;
+                }
+                return CORE_BUSY;
+            });
+        }
     }
 }
 
 
 // ****************************************************************
-// 
-void cMenu::UpdateButton(coreButton* OUTPUT pButton)
+// default button update routine
+void cMenu::UpdateButton(coreButton* OUTPUT pButton, const bool& bFocused)
 {
-    // 
-    const float fLight = pButton->IsFocused() ? MENU_LIGHT_ACTIVE : MENU_LIGHT_IDLE;
+    // select visible strength
+    const float fLight = bFocused ? MENU_LIGHT_ACTIVE : MENU_LIGHT_IDLE;
 
-    // 
+    // set button and caption color
     pButton              ->SetColor3(coreVector3(1.0f,1.0f,1.0f) * (fLight));
-    pButton->GetCaption()->SetColor3(coreVector3(1.0f,1.0f,1.0f) * (fLight * MENU_TEXT_CONTRAST));
+    pButton->GetCaption()->SetColor3(coreVector3(1.0f,1.0f,1.0f) * (fLight * MENU_CONTRAST_WHITE));
 }

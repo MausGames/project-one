@@ -20,9 +20,7 @@ cPostProcessing::cPostProcessing()noexcept
     this->Recompile();
 
     // set object properties
-    this->SetSize     (coreVector2(1.0f, 1.0f));
-    this->SetTexSize  (coreVector2(1.0f,-1.0f));
-    this->SetTexOffset(coreVector2(0.0f, 1.0f));
+    this->SetSize(coreVector2(1.0f,1.0f));
     this->Move();
 
     // place objects left-right or top-down depending on window aspect ratio
@@ -57,6 +55,7 @@ void cPostProcessing::Apply()
     this->DefineTexture(POST_TEXTURE_UNIT_ENVIRONMENT, g_pEnvironment->GetFrameBuffer()->GetColorTarget(0).pTexture);
     this->DefineTexture(POST_TEXTURE_UNIT_FOREGROUND,  g_pForeground ->GetFrameBuffer()->GetColorTarget(0).pTexture);
     this->DefineTexture(POST_TEXTURE_UNIT_GLOW,        g_pGlow       ->GetFrameBuffer()->GetColorTarget(0).pTexture);
+    this->DefineTexture(POST_TEXTURE_UNIT_DISTORTION,  g_pDistortion ->GetFrameBuffer()->GetColorTarget(0).pTexture);
 
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
@@ -74,9 +73,11 @@ void cPostProcessing::Apply()
     g_pEnvironment->GetFrameBuffer()->GetColorTarget(0).pTexture->Invalidate(0);
     g_pForeground ->GetFrameBuffer()->GetColorTarget(0).pTexture->Invalidate(0);
     g_pGlow       ->GetFrameBuffer()->GetColorTarget(0).pTexture->Invalidate(0);
+    g_pDistortion ->GetFrameBuffer()->GetColorTarget(0).pTexture->Invalidate(0);
     this->DefineTexture(POST_TEXTURE_UNIT_ENVIRONMENT, NULL);
     this->DefineTexture(POST_TEXTURE_UNIT_FOREGROUND,  NULL);
     this->DefineTexture(POST_TEXTURE_UNIT_GLOW,        NULL);
+    this->DefineTexture(POST_TEXTURE_UNIT_DISTORTION,  NULL);
 }
 
 

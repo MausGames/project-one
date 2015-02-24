@@ -18,6 +18,7 @@
 #define POST_TEXTURE_UNIT_ENVIRONMENT (1)   // texture unit for the environment frame buffer
 #define POST_TEXTURE_UNIT_FOREGROUND  (0)   // same for foreground
 #define POST_TEXTURE_UNIT_GLOW        (2)   // same for glow
+#define POST_TEXTURE_UNIT_DISTORTION  (3)   // same for distortion
 
 
 // ****************************************************************

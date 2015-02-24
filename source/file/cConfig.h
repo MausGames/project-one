@@ -10,12 +10,15 @@
 #ifndef _P1_GUARD_CONFIG_H_
 #define _P1_GUARD_CONFIG_H_
 
+// TODO: transfer to Core Engine
+
 
 // ****************************************************************
 // configuration definitions
 #define CONFIG_GRAPHICS_SHADOW     "Graphics", "Shadow",                             (1)
 #define CONFIG_GRAPHICS_REFLECTION "Graphics", "Reflection",                         (1)
 #define CONFIG_GRAPHICS_GLOW       "Graphics", "Glow",                               (1)
+#define CONFIG_GRAPHICS_DISTORTION "Graphics", "Distortion",                         (1)
 
 #define CONFIG_INPUT_TYPE(p)       "Input",    PRINT("P%d_Type",      (p)),          (p)
 #define CONFIG_INPUT_MOVE_LEFT(s)  "Input",    PRINT("S%d_MoveLeft",  (s)),          (CORE_INPUT_KEY(A))
@@ -24,14 +27,14 @@
 #define CONFIG_INPUT_MOVE_UP(s)    "Input",    PRINT("S%d_MoveUp",    (s)),          (CORE_INPUT_KEY(W))
 #define CONFIG_INPUT_BUTTON(s,n)   "Input",    PRINT("S%d_Button%d",  (s), (n) + 1), ((n) + int(CORE_INPUT_KEY(1)))
 
-#define INPUT_TYPES         (2u)                                          // number of input set selections (independent from number of players, but should be equal or more)
+#define INPUT_TYPES         (PLAYERS)                                     // number of input set selections
 #define INPUT_BUTTONS       (4u)                                          // number of input buttons per set
 #define INPUT_SETS_KEYBOARD (INPUT_TYPES)                                 // number of keyboard and mouse sets
 #define INPUT_SETS_JOYSTICK (INPUT_TYPES)                                 // number of joystick/gamepad sets
 #define INPUT_SETS          (INPUT_SETS_KEYBOARD + INPUT_SETS_JOYSTICK)   // total number of sets
 
-STATIC_ASSERT(INPUT_TYPES   <= INPUT_SETS);
-STATIC_ASSERT(INPUT_BUTTONS <= sizeof(coreByte)*8);
+STATIC_ASSERT(INPUT_TYPES   <= INPUT_SETS)
+STATIC_ASSERT(INPUT_BUTTONS <= sizeof(coreByte)*8)
 
 
 // ****************************************************************
@@ -42,7 +45,8 @@ struct cConfig
     {
         int iShadow;       // shadow level
         int iReflection;   // water reflection level
-        int iGlow;         // glow level
+        int iGlow;         // fullscreen glow level
+        int iDistortion;   // fullscreen distortion level
     }
     Graphics;
 

@@ -14,7 +14,7 @@
 
 
 // ****************************************************************
-// 
+// tooltip class
 class cTooltip final : public coreObject2D
 {
 public:

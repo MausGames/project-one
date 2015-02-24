@@ -72,7 +72,7 @@ void cShadow::Reconfigure()
         // enable depth value comparison
         m_iFrameBuffer.GetDepthTarget().pTexture->ShadowSampling(true);
 
-        // set polygon fill properties (to reduce projective aliasing, not in GlobalInit, because of reset-method)
+        // set polygon fill properties (to reduce projective aliasing, not in GlobalInit, because of easier engine-reset)
         glPolygonOffset(3.3f, 12.0f);
     }
 }
@@ -215,16 +215,18 @@ void cShadow::__Reset(const coreResourceReset& bInit)
 // render single shadow-casting objects
 void cShadow::__RenderSingle(const coreMatrix4& mTransform, const std::vector<coreBatchList*>& apList, const std::vector<coreObject3D*>& apObject)
 {
-    if(apList.empty() && apObject.empty()) return;
+    // only enable and update without instancing
+    if(!apObject.empty() || std::any_of(apList.begin(), apList.end(), [](coreBatchList* pList) {return !pList->IsInstanced();}))
+    {
+        // send shadow matrix to single shader-program
+        if(!s_pProgramSingle.IsUsable()) return;
+        if(!s_pProgramSingle->Enable())  return;
+        s_pProgramSingle->SendUniform(SHADOW_SHADER_MATRIX, mTransform, false);
 
-    // send shadow matrix to single shader-program
-    if(!s_pProgramSingle.IsUsable()) return;
-    if(!s_pProgramSingle->Enable())  return;
-    s_pProgramSingle->SendUniform(SHADOW_SHADER_MATRIX, mTransform, false);
-
-    // render single objects
-    FOR_EACH(it, apObject) (*it)->Render(s_pProgramSingle);
-    FOR_EACH(it, apList)   {if(!(*it)->IsInstanced()) (*it)->Render(NULL, s_pProgramSingle);}
+        // render single objects
+        FOR_EACH(it, apObject) (*it)->Render(s_pProgramSingle);
+        FOR_EACH(it, apList)   {if(!(*it)->IsInstanced()) (*it)->Render(NULL, s_pProgramSingle);}
+    }
 }
 
 
@@ -232,21 +234,15 @@ void cShadow::__RenderSingle(const coreMatrix4& mTransform, const std::vector<co
 // render lists with shadow-casting objects
 void cShadow::__RenderInstanced(const coreMatrix4& mTransform, const std::vector<coreBatchList*>& apList)
 {
-    if(apList.empty()) return;
-
-    // only enable and update shader-program on instancing
-    FOR_EACH(et, apList)
+    // only enable and update on instancing
+    if(std::any_of(apList.begin(), apList.end(), [](coreBatchList* pList) {return pList->IsInstanced();}))
     {
-        if((*et)->IsInstanced())
-        {
-            // send shadow matrix to instanced shader-program
-            if(!s_pProgramInstanced.IsUsable()) return;
-            if(!s_pProgramInstanced->Enable())  return;
-            s_pProgramInstanced->SendUniform(SHADOW_SHADER_MATRIX, mTransform, false);
+        // send shadow matrix to instanced shader-program
+        if(!s_pProgramInstanced.IsUsable()) return;
+        if(!s_pProgramInstanced->Enable())  return;
+        s_pProgramInstanced->SendUniform(SHADOW_SHADER_MATRIX, mTransform, false);
 
-            // render lists with objects
-            FOR_EACH(it, apList) {if((*it)->IsInstanced()) (*it)->Render(s_pProgramInstanced, NULL);}
-            return; // #
-        }
+        // render lists with objects
+        FOR_EACH(it, apList) {if((*it)->IsInstanced()) (*it)->Render(s_pProgramInstanced, NULL);}
     }
 }

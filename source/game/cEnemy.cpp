@@ -12,26 +12,17 @@
 // ****************************************************************
 // constructor
 cEnemy::cEnemy()noexcept
-: m_iBaseColor (0)
 {
     // load object resources
     this->DefineProgram("object_ship_program");
     this->DefineTexture(0, "ship_enemy.png");
 
     // set object properties
-    this->SetPosition   (coreVector3(1000.0f, 0.0f,0.0f));
-    this->SetDirection  (coreVector3(   0.0f,-1.0f,0.0f));
-    this->SetOrientation(coreVector3(   0.0f, 0.0f,1.0f));
+    this->SetDirection  (coreVector3(0.0f,-1.0f,0.0f));
+    this->SetOrientation(coreVector3(0.0f, 0.0f,1.0f));
 
-    // add enemy to global shadow and outline
-    cShadow::BindGlobalObject(this);
-    g_pOutlineFull->BindObject(this);
-
-    // add enemy to game
-    g_pGame->__BindEnemy(this);
-
-    // enable collision
-    this->ChangeType(TYPE_ENEMY);
+    // set initial status
+    m_iStatus = ENEMY_STATUS_DEAD;
 }
 
 
@@ -39,27 +30,20 @@ cEnemy::cEnemy()noexcept
 // destructor
 cEnemy::~cEnemy()
 {
-    // remove enemy from global shadow and outline
-    cShadow::UnbindGlobalObject(this);
-    g_pOutlineFull->UnbindObject(this);
-
-    // remove enemy from game
-    g_pGame->__UnbindEnemy(this);
-
-    // disable collision
-    this->ChangeType(0);
+    // remove enemy from the game
+    this->Kill(false);
 }
 
 
 // ****************************************************************
-// render the enemy
-void cEnemy::Render()
+// configure the enemy
+void cEnemy::Configure(const int& iHealth, const coreVector3& vColor)
 {
-    // call individual render routine
-    this->__RenderOwn();
+    // set maximum and current health value
+    m_iMaxHealth = m_iCurHealth = iHealth;
 
-    // render the 3d-object
-    coreObject3D::Render();
+    // save color value
+    this->SetBaseColor(vColor);
 }
 
 
@@ -76,8 +60,8 @@ void cEnemy::Move()
 
 
 // ****************************************************************
-// 
-void cEnemy::TakeDamage(const int& iDamage)
+// reduce current health
+void cEnemy::TakeDamage(const int& iDamage, cPlayer* pAttacker)
 {
     // 
     m_iCurHealth -= iDamage;
@@ -89,7 +73,39 @@ void cEnemy::TakeDamage(const int& iDamage)
     }
 
     // 
-    this->SetColor3(LERP(coreVector3(0.5f,0.5f,0.5f), coreVector4::UnpackUnorm4x8(m_iBaseColor).xyz(), (float(m_iCurHealth) / float(m_iMaxHealth))));
+    this->SetColor3(LERP(coreVector3(0.5f,0.5f,0.5f), this->GetBaseColor(), (I_TO_F(m_iCurHealth) / I_TO_F(m_iMaxHealth))));
+}
+
+
+// ****************************************************************
+// add enemy to the game
+void cEnemy::Resurrect(const coreVector2& vPosition)
+{
+    // resurrect enemy
+    if(!CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_DEAD)) return;
+    REMOVE_VALUE(m_iStatus, ENEMY_STATUS_DEAD)
+
+    // bind enemy to active list
+    g_pGame->__BindEnemy(this);
+
+    // add ship to the game
+    cShip::_Resurrect(vPosition, TYPE_ENEMY);
+}
+
+
+// ****************************************************************
+// remove enemy from the game
+void cEnemy::Kill(const bool& bAnimated)
+{
+    // kill enemy
+    if(CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_DEAD)) return;
+    ADD_VALUE(m_iStatus, ENEMY_STATUS_DEAD)
+
+    // unbind enemy from active list
+    g_pGame->__UnbindEnemy(this);
+
+    // remove ship from the game
+    cShip::_Kill(bAnimated);
 }
 
 
@@ -101,12 +117,8 @@ cScoutEnemy::cScoutEnemy()noexcept
     this->DefineModel   ("ship_enemy_scout_high.md3");
     this->DefineModelLow("ship_enemy_scout_low.md3");
 
-    // set color value
-    this->SetColor3(coreVector3(201.0f/360.0f, 74.0f/100.0f, 85.0f/100.0f).HSVtoRGB());
-    m_iBaseColor = this->GetColor4().PackUnorm4x8();
-
-    // 
-    m_iMaxHealth = m_iCurHealth = 100;
+    // configure the enemy
+    this->Configure(100, coreVector3(201.0f/360.0f, 74.0f/100.0f, 85.0f/100.0f).HSVtoRGB());
 }
 
 
@@ -118,12 +130,8 @@ cWarriorEnemy::cWarriorEnemy()noexcept
     this->DefineModel   ("ship_enemy_warrior_high.md3");
     this->DefineModelLow("ship_enemy_warrior_low.md3");
 
-    // set color value
-    this->SetColor3(coreVector3(51.0f/360.0f, 100.0f/100.0f, 85.0f/100.0f).HSVtoRGB());
-    m_iBaseColor = this->GetColor4().PackUnorm4x8();
-
-    // 
-    m_iMaxHealth = m_iCurHealth = 100;
+    // configure the enemy
+    this->Configure(100, coreVector3(51.0f/360.0f, 100.0f/100.0f, 85.0f/100.0f).HSVtoRGB());
 }
 
 
@@ -136,12 +144,8 @@ cStarEnemy::cStarEnemy()noexcept
     this->DefineModel   ("ship_enemy_star_high.md3");
     this->DefineModelLow("ship_enemy_star_low.md3");
 
-    // set color value
-    this->SetColor3(coreVector3(0.0f/360.0f, 68.0f/100.0f, 90.0f/100.0f).HSVtoRGB());
-    m_iBaseColor = this->GetColor4().PackUnorm4x8();
-
-    // 
-    m_iMaxHealth = m_iCurHealth = 100;
+    // configure the enemy
+    this->Configure(100, coreVector3(0.0f/360.0f, 68.0f/100.0f, 90.0f/100.0f).HSVtoRGB());
 }
 
 
@@ -167,12 +171,8 @@ cArrowEnemy::cArrowEnemy()noexcept
     this->DefineModel   ("ship_enemy_arrow_high.md3");
     this->DefineModelLow("ship_enemy_arrow_low.md3");
 
-    // set color value
-    this->SetColor3(coreVector3(34.0f/360.0f, 100.0f/100.0f, 100.0f/100.0f).HSVtoRGB());
-    m_iBaseColor = this->GetColor4().PackUnorm4x8();
-
-    // 
-    m_iMaxHealth = m_iCurHealth = 100;
+    // configure the enemy
+    this->Configure(100, coreVector3(34.0f/360.0f, 100.0f/100.0f, 100.0f/100.0f).HSVtoRGB());
 }
 
 
@@ -198,12 +198,8 @@ cMinerEnemy::cMinerEnemy()noexcept
     this->DefineModel   ("ship_enemy_miner_high.md3");
     this->DefineModelLow("ship_enemy_miner_low.md3");
 
-    // set color value
-    this->SetColor3(coreVector3(183.0f/360.0f, 70.0f/100.0f, 85.0f/100.0f).HSVtoRGB());
-    m_iBaseColor = this->GetColor4().PackUnorm4x8();
-
-    // 
-    m_iMaxHealth = m_iCurHealth = 100;
+    // configure the enemy
+    this->Configure(100, coreVector3(183.0f/360.0f, 70.0f/100.0f, 85.0f/100.0f).HSVtoRGB());
 }
 
 
@@ -216,12 +212,8 @@ cFreezerEnemy::cFreezerEnemy()noexcept
     this->DefineModel   ("ship_enemy_freezer_high.md3");
     this->DefineModelLow("ship_enemy_freezer_low.md3");
 
-    // set color value
-    this->SetColor3(coreVector3(208.0f/360.0f, 32.0f/100.0f, 90.0f/100.0f).HSVtoRGB());
-    m_iBaseColor = this->GetColor4().PackUnorm4x8();
-
-    // 
-    m_iMaxHealth = m_iCurHealth = 100;
+    // configure the enemy
+    this->Configure(100, coreVector3(208.0f/360.0f, 32.0f/100.0f, 90.0f/100.0f).HSVtoRGB());
 }
 
 
@@ -248,12 +240,8 @@ cCinderEnemy::cCinderEnemy()noexcept
     this->DefineModel   ("ship_enemy_cinder_high.md3");
     this->DefineModelLow("ship_enemy_cinder_low.md3");
 
-    // set color value
-    this->SetColor3(coreVector3(0.0f/360.0f, 0.0f/100.0f, 60.0f/100.0f).HSVtoRGB());
-    m_iBaseColor = this->GetColor4().PackUnorm4x8();
-
-    // 
-    m_iMaxHealth = m_iCurHealth = 100;
+    // configure the enemy
+    this->Configure(100, coreVector3(0.0f/360.0f, 0.0f/100.0f, 60.0f/100.0f).HSVtoRGB());
 }
 
 

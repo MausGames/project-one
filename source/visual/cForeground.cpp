@@ -27,9 +27,10 @@ void cForeground::Start()
     // switch back to default frame buffer
     coreFrameBuffer::EndDraw();
 
-    // set foreground camera and light
+    // set foreground camera, light and view
     Core::Graphics->SetCamera(CAMERA_POSITION, CAMERA_DIRECTION, CAMERA_ORIENTATION);
     Core::Graphics->SetLight (0, coreVector4(0.0f,0.0f,0.0f,0.0f), coreVector4(LIGHT_DIRECTION, 0.0f), coreVector4(0.0f,0.0f,0.0f,0.0f));
+    Core::Graphics->SetView  (g_vGameResolution, Core::Graphics->GetFOV(), Core::Graphics->GetNearClip(), Core::Graphics->GetFarClip());
 
     // adjust blending function (to correctly aggregate alpha values)
     glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
@@ -45,9 +46,7 @@ void cForeground::End()
 {
     // copy default frame buffer to texture (faster than dedicated multisampled FBO, but only once)
     const coreTexturePtr& pTexture = m_iFrameBuffer.GetColorTarget(0).pTexture;
-    pTexture->CopyFrameBuffer(F_TO_SI(Core::Graphics->GetViewResolution().x - m_iFrameBuffer.GetResolution().x) / 2,
-                              F_TO_SI(Core::Graphics->GetViewResolution().y - m_iFrameBuffer.GetResolution().y) / 2,
-                              0, 0,
+    pTexture->CopyFrameBuffer(0, 0, 0, 0,
                               F_TO_SI(m_iFrameBuffer.GetResolution().x),
                               F_TO_SI(m_iFrameBuffer.GetResolution().y));
 
@@ -57,6 +56,9 @@ void cForeground::End()
         constexpr_var GLenum aiAttachment[2] = {GL_COLOR, GL_DEPTH};
         glInvalidateFramebuffer(GL_FRAMEBUFFER, 2, aiAttachment);
     }
+
+    // reset view
+    Core::Graphics->SetView(Core::System->GetResolution(), Core::Graphics->GetFOV(), Core::Graphics->GetNearClip(), Core::Graphics->GetFarClip());
 
     // reset blending function
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

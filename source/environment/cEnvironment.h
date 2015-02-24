@@ -10,28 +10,29 @@
 #ifndef _P1_GUARD_ENVIRONMENT_H_
 #define _P1_GUARD_ENVIRONMENT_H_
 
-// TODO: render depth-quads on unused background areas (transition!)
+// TODO: render depth-quads or use scissor test on unused background areas (transition!)
 // TODO: cache environment resources on loading (currently 100s of resource lookups)
 // TODO: merge stone diff and norm textures (own shader ?)
+// TODO: make clear color similar to lower texture color
 
 
 // ****************************************************************
 // environment definitions
-#define ENVIRONMENT_CLEAR_COLOR 0.5f, 0.5f, 0.5f, 0.0f   // 
+#define ENVIRONMENT_CLEAR_COLOR 0.5f, 0.5f, 0.5f, 0.0f   // environment clear color (may leak on distorted water refraction)
 
 
 // ****************************************************************
 // environment distribution values
-#define GRASS_STONES_1_NUM      (512u)
-#define GRASS_STONES_2_NUM      (768u)
-#define GRASS_STONES_RESERVE    (256u)
-#define GRASS_REEDS_NUM         (2048u)
-#define GRASS_REEDS_1_RESERVE   (512u)
-#define GRASS_REEDS_2_RESERVE   (128u)
-#define GRASS_FLOWERS_NUM       (384u)
-#define GRASS_FLOWERS_RESERVE   (256u)
-#define GRASS_CLOUDS_NUM        (96u)
-#define GRASS_CLOUDS_RESERVE    (115u)   // # tested
+#define GRASS_STONES_1_NUM    (512u)
+#define GRASS_STONES_2_NUM    (768u)
+#define GRASS_STONES_RESERVE  (256u)
+#define GRASS_REEDS_NUM       (2048u)
+#define GRASS_REEDS_1_RESERVE (512u)
+#define GRASS_REEDS_2_RESERVE (128u)
+#define GRASS_FLOWERS_NUM     (2028u)
+#define GRASS_FLOWERS_RESERVE (256u)
+#define GRASS_CLOUDS_NUM      (96u)
+#define GRASS_CLOUDS_RESERVE  (115u)   // # tested
 
 
 // ****************************************************************
@@ -115,6 +116,8 @@ private:
     coreVector3 m_vCameraPos;         // moved camera position
     coreVector3 m_vLightDir;          // rotated light direction
 
+    bool m_bActive;                   // enables the environment (only for first background-transition on intro)
+
 
 public:
     cEnvironment()noexcept;
@@ -153,6 +156,9 @@ public:
     inline const float&       GetSideOffset()const {return m_fSideOffset;}
     inline const coreVector3& GetCameraPos ()const {return m_vCameraPos;}
     inline const coreVector3& GetLightDir  ()const {return m_vLightDir;}
+
+    // enable the environment
+    inline void Activate() {m_bActive = true;}
 
 
 private:
@@ -205,7 +211,7 @@ private:
 class cSeaBackground final : public cBackground
 {
 public:
-    cSeaBackground()noexcept {}
+    cSeaBackground()noexcept;
 
     DISABLE_COPY(cSeaBackground)
     ASSIGN_ID(2, "Sea")

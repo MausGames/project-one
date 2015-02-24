@@ -12,20 +12,56 @@
 
 
 // ****************************************************************
-// 
-class cInterface final : public coreMenu
+// interface definitions
+#define INTERFACE_VIEWS (PLAYERS)   // 
+
+
+// ****************************************************************
+// interface class
+class cInterface final
 {
 private:
-    coreLabel m_Health;   // 
+    // player view structure
+    struct sPlayerView
+    {
+        coreObject2D m_aHealthBar[2];   // (0 = background, 1 = foreground) 
+        coreLabel    m_HealthValue;     // 
+        coreLabel    m_ScoreMission;    // 
+        coreLabel    m_ScoreBoss;       // 
+        coreLabel    m_Combo;           // 
+        coreLabel    m_Chain;           // 
+
+        sPlayerView()noexcept;
+    };
+
+
+private:
+    sPlayerView* m_apView[INTERFACE_VIEWS];   // 
+
+    coreObject2D m_aBossHealthBar[2];         // (0 = background, 1 = foreground) 
+    coreLabel    m_BossHealthValue;           // 
+    coreLabel    m_BossName;                  // 
+
+    coreObject2D m_BannerBar;                 // 
+    coreLabel    m_BannerMain;                // 
+    coreLabel    m_aBannerSub[3];             // 
+
+    coreLabel m_aTimeMission[2];              // (0 = seconds, 1 = milliseconds) 
+    coreLabel m_aTimeBoss   [2];              // (0 = seconds, 1 = milliseconds) 
 
 
 public:
-    cInterface()noexcept;
+    cInterface(const coreByte& iNumViews)noexcept;
+    ~cInterface();
 
     DISABLE_COPY(cInterface)
 
-    // 
-    void Move()override;
+    // render and move the interface
+    void Render();
+    void Move();
+
+    // funktion zum anzeigen des missions-banners
+    // funktion zum anzeigen eines boss-banners, dedicated zum übersteuern
 };
 
 

@@ -6,22 +6,11 @@
 //| More information available in the readme file  |//
 //*------------------------------------------------*//
 //////////////////////////////////////////////////////
-#pragma once
-#ifndef _P1_GUARD_MSGBOX_H_
-#define _P1_GUARD_MSGBOX_H_
-
-// TODO: transfer to Core Engine
 
 
-// ****************************************************************
-// message box class
-class cMsgBox final : public coreObject2D
+void FragmentMain()
 {
-public:
-    cMsgBox()noexcept;
-
-    DISABLE_COPY(cMsgBox)
-};
-
-
-#endif // _P1_GUARD_MSGBOX_H_
+    // draw texture with subtle white glow
+    vec4 v4Texture = coreTexture2D(0, v_av2TexCoord[0]);
+    gl_FragColor   = vec4(mix(vec3(1.0), v4Texture.rgb, v4Texture.a), v4Texture.a) * u_v4Color;
+}

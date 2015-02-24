@@ -20,8 +20,11 @@ cMellanMission::cMellanMission()noexcept
 
 
 
-    m_Crossfield.SetPosition(coreVector3(0.0f,15.0f,0.0f));
+    //m_Crossfield.Resurrect(coreVector2(0.0f,15.0f));
 
-    for(int i = 0; i < ARRAY_SIZE(m_aScout); ++i)
-        m_aScout[i].SetPosition(coreVector3((-27.0f+i*6.0f)*1.2f,0.0f,0.0f));
+    //for(int i = 0; i < ARRAY_SIZE(m_aScout); ++i)
+    //    m_aScout[i].SetPosition(coreVector3((-27.0f+i*6.0f)*1.2f,0.0f,0.0f));
+
+    //m_aScout[2].Configure(200, coreVector3(118.0f/360.0f, 54.0f/100.0f, 66.0f/100.0f).HSVtoRGB());
+    //m_aScout[2].SetSize(m_aScout[2].GetSize() * 1.1f);
 }

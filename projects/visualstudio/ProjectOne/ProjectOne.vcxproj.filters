@@ -90,6 +90,9 @@
     <ClCompile Include="..\..\..\source\interface\menu\01_cIntroMenu.cpp">
       <Filter>interface\menu</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\visual\cDistortion.cpp">
+      <Filter>visual</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\main.h" />
@@ -167,6 +170,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\source\interface\cMsgBox.h">
       <Filter>interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\visual\cDistortion.h">
+      <Filter>visual</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

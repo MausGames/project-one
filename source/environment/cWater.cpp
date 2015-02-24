@@ -124,8 +124,9 @@ void cWater::UpdateReflection()
                     g_pGame->GetPlayer(i)->Render();
 
                 // render all active enemies
-                FOR_EACH(it, *g_pGame->GetEnemyList())
-                    (*it)->Render();
+                FOR_EACH(it, *g_pGame->GetEnemyList()) (*it)->__RenderOwnBefore();
+                FOR_EACH(it, *g_pGame->GetEnemyList()) (*it)->  Render();
+                FOR_EACH(it, *g_pGame->GetEnemyList()) (*it)->__RenderOwnAfter();
 
                 // no bullets, only their outlines
             }
@@ -192,5 +193,5 @@ void cWater::SetFlyOffset(const float& fFlyOffset)
     m_fFlyOffset = fFlyOffset;
 
     // move sky-plane texture
-    m_Sky.SetTexOffset(coreVector2(0.0f, ((-7.0f * WATER_SKY_SIZE) / I_TO_F(OUTDOOR_HEIGHT)) * m_fFlyOffset));
+    m_Sky.SetTexOffset(coreVector2(0.0f, ((-8.0f * WATER_SKY_SIZE) / I_TO_F(OUTDOOR_HEIGHT)) * m_fFlyOffset));
 }

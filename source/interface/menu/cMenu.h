@@ -10,6 +10,8 @@
 #ifndef _P1_GUARD_MENU_H_
 #define _P1_GUARD_MENU_H_
 
+// TODO: language and main menu control with keyboard+joystick, cursor gets invisible on these inputs, in game menu only cursor
+
 
 // ****************************************************************
 // menu definitions
@@ -18,15 +20,17 @@
 #define MENU_FONT_MEDIUM   "ethnocentric.ttf", 20
 #define MENU_FONT_BIG      "ethnocentric.ttf", 30
 
-#define MENU_LIGHT_ACTIVE  (1.0f)
-#define MENU_LIGHT_IDLE    (0.667f)
-#define MENU_TEXT_CONTRAST (0.8f)
+#define MENU_LIGHT_ACTIVE   (1.0f)     // visible strength of active menu objects
+#define MENU_LIGHT_IDLE     (0.667f)   // visible strength of idle menu objects
+#define MENU_CONTRAST_WHITE (0.8f)     // white contrast value (to reduce eye strain)
+#define MENU_CONTRAST_BLACK (0.04f)    // black contrast value
 
 
 // ****************************************************************
 // menu surface numbers
-#define SURFACE_INTRO          (0)
-#define SURFACE_MAIN           (1)
+#define SURFACE_EMPTY          (0)
+#define SURFACE_INTRO          (1)
+#define SURFACE_MAIN           (2)
 
 #define SURFACE_INTRO_EMPTY    (0)
 #define SURFACE_INTRO_LOGO     (1)
@@ -41,13 +45,13 @@
 class cIntroMenu final : public coreMenu
 {
 private:
-    coreObject2D m_MausLogo;                       // 
+    coreObject2D m_MausLogo;                         // Maus logo
 
-    coreTimer m_IntroTimer;                        // 
-    coreByte  m_iIntroStatus;                      // 
+    coreTimer m_IntroTimer;                          // intro animation timer
+    coreByte  m_iIntroStatus;                        // current intro animation status
 
-    std::vector<coreButton*> m_apLanguageButton;   // 
-    std::vector<std::string> m_asLanguagePath;     // 
+    coreLookupStr<coreButton*> m_apLanguageButton;   // list with buttons for valid language files
+    coreByte m_iCurLanguage;                         // current selected language button
 
 
 public:
@@ -66,13 +70,17 @@ public:
 class cMainMenu final : public coreMenu
 {
 private:
-    coreObject2D m_GameLogo;      // 
+    coreObject2D m_GameLogo;      // game logo
+    coreObject2D m_Background;    // background object (credits surface)
 
-    coreButton m_StartButton;     // 
-    coreButton m_CreditsButton;   // 
-    coreButton m_ExitButton;      // 
+    coreButton m_StartButton;     // start button
+    coreButton m_CreditsButton;   // credits button
+    coreButton m_ExitButton;      // exit button
+    coreButton m_BackButton;      // back button (credits surface)
 
-    coreLabel m_VersionInfo;      // 
+    coreLabel m_VersionInfo;      // hard-coded version info string
+
+    coreByte m_iCurButton;        // current selected menu button
 
 
 public:
@@ -90,23 +98,28 @@ public:
 class cMenu final : public coreMenu
 {
 private:
-    cIntroMenu m_IntroMenu;   // 
-    cMainMenu  m_MainMenu;    // 
+    cIntroMenu* m_pIntroMenu;   // intro menu object (dynamically unloaded)
+    cMainMenu*  m_pMainMenu;    // main menu object (dynamically unloaded)
 
-    cMsgBox  m_MsgBox;        // 
-    cTooltip m_Tooltip;       // 
+    cMsgBox  m_MsgBox;          // message box overlay
+    cTooltip m_Tooltip;         // tooltip overlay
 
 
 public:
     cMenu()noexcept;
+    ~cMenu();
 
     DISABLE_COPY(cMenu)
 
     // move the menu
     void Move();
 
-    // 
-    static void UpdateButton(coreButton* OUTPUT pButton);
+    // display special menu overlays
+    void ShowMsgBox () {}
+    void ShowTooltip() {}
+
+    // default menu update routines
+    static void UpdateButton(coreButton* OUTPUT pButton, const bool& bFocused);
 };
 
 

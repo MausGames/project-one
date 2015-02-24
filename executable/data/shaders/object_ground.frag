@@ -48,7 +48,7 @@ void FragmentMain()
     float v1ReflFactor  = max(0.0, dot(v3MathViewDir, v3ReflNormal));
 
     // calculate diffuse and specular value
-    vec3 v3Diffuse  = v3TexColor * (v1Light * (1.3 * max(0.0, v1BumpFactor) + 0.5));
+    vec3 v3Diffuse  = v3TexColor * (v1Light * (1.2 * max(0.0, v1BumpFactor) + 0.6));
     vec3 v3Specular = vec3(0.3 * 0.5 * pow(v1ReflFactor, 25.0));
 
     // draw final color

@@ -14,11 +14,14 @@ void FragmentMain()
 
     // calculate quartic distance from the center as alpha value
     float v1Alpha = coreLengthSq(v_av2TexCoord[1]);
-          v1Alpha = 1.0 - v1Alpha * v1Alpha;
 
     // only draw visible area
-    if(v1Alpha > 0.0)
+    if(v1Alpha < 1.0)
     {
+        v1Alpha *= v1Alpha;
+        v1Alpha *= v1Alpha;
+        v1Alpha  = 1.0 - v1Alpha;
+        
         // draw color with alpha
         vec4 v4Texture = coreTexture2D(0, v_av2TexCoord[0]);
         gl_FragColor  = vec4(v4Texture.rgb, v4Texture.a * v1Alpha) * u_v4Color;

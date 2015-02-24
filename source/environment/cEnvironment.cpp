@@ -73,14 +73,14 @@ void cBackground::Render()
     // update shadow map
     if(m_pOutdoor) m_pOutdoor->GetShadowMap()->Update();
 
-    // 
+    // set environment clear color
     glClearColor(ENVIRONMENT_CLEAR_COLOR);
 
     // fill background frame buffer
     m_iFrameBuffer.StartDraw();
     m_iFrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR | CORE_FRAMEBUFFER_TARGET_DEPTH);   // color-clear improves performance (with multisampling and depth pre-pass)
     {
-        // 
+        // reset clear color
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
         glDisable(GL_BLEND);
@@ -88,17 +88,13 @@ void cBackground::Render()
             // render depth pass with foreground objects
             cShadow::RenderForegroundDepth();
 
-            // send shadow matrix to single shader-program
-            if(!m_apAddObject.empty() || !m_apGroundObjectList.empty())
-                cShadow::EnableShadowRead(SHADOW_HANDLE_OBJECT);
+            // send shadow matrix to shader-programs
+            cShadow::EnableShadowRead(SHADOW_HANDLE_OBJECT);
+            cShadow::EnableShadowRead(SHADOW_HANDLE_OBJECT_INST);
 
             // render additional objects
             FOR_EACH(it, m_apAddObject)
                 (*it)->Render();
-
-            // send shadow matrix to instanced shader-program
-            if(!m_apGroundObjectList.empty())
-                cShadow::EnableShadowRead(SHADOW_HANDLE_OBJECT_INST);
 
             // render all ground objects
             FOR_EACH(it, m_apGroundObjectList)
@@ -249,11 +245,14 @@ bool cBackground::_CheckIntersection(const coreBatchList* pObjectList, const cor
 
 bool cBackground::_CheckIntersectionQuick(const coreBatchList* pObjectList, const coreVector2& vNewPos, const float& fDistanceSq)
 {
-    // compare only with last object
-    if(!pObjectList->List()->empty())
+    auto it = pObjectList->List()->end();
+    auto et = pObjectList->List()->begin();
+
+    // compare only with last few objects
+    for(int i = 5; i-- && it != et; )
     {
         // check for quadratic distance
-        if((pObjectList->List()->back()->GetPosition().xy() - vNewPos).LengthSq() < fDistanceSq)
+        if(((*(--it))->GetPosition().xy() - vNewPos).LengthSq() < fDistanceSq)
             return true;
     }
     return false;
@@ -265,11 +264,12 @@ bool cBackground::_CheckIntersectionQuick(const coreBatchList* pObjectList, cons
 cEnvironment::cEnvironment()noexcept
 : m_pBackground    (NULL)
 , m_pOldBackground (NULL)
-, m_Transition     (coreTimer(1.0f, 1.0f, 1))
+, m_Transition     (coreTimer(1.3f, 0.9f, 1))
 , m_fFlyOffset     (0.0f)
 , m_fSideOffset    (0.0f)
 , m_vCameraPos     (CAMERA_POSITION)
 , m_vLightDir      (LIGHT_DIRECTION)
+, m_bActive        (false)
 {
     // create environment frame buffer
     m_iFrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0, CORE_TEXTURE_SPEC_RGB);
@@ -277,9 +277,8 @@ cEnvironment::cEnvironment()noexcept
 
     // create mix object
     m_MixObject.DefineProgram("full_transition_program");
-    m_MixObject.SetSize      (coreVector2(1.0f, 1.0f));
-    m_MixObject.SetTexSize   (coreVector2(1.0f,-1.0f));
-    m_MixObject.SetTexOffset (coreVector2(0.0f, 1.0f));
+    m_MixObject.DefineTexture(2, "menu_background_black.png");
+    m_MixObject.SetSize      (coreVector2(1.0f,1.0f));
     m_MixObject.Move();
 
     // reset transformation properties
@@ -290,7 +289,6 @@ cEnvironment::cEnvironment()noexcept
     // load first background
     m_pBackground = new cNoBackground();
     this->ChangeBackground(MAX(Core::Config->GetInt("Game", "Background", 0), s_cast<int>(cGrassBackground::ID)));
-    m_Transition.SetValue(-2.0f);
 }
 
 
@@ -332,9 +330,15 @@ void cEnvironment::Render()
             m_MixObject.GetProgram()->Enable();
             m_MixObject.GetProgram()->SendUniform("u_v1Transition", m_Transition.GetValue(CORE_TIMER_GET_NORMAL));
 
-            // mix both backgrounds together
-            m_iFrameBuffer.StartDraw();
-            m_MixObject.Render();
+            glDisable(GL_DEPTH_TEST);
+            glDisable(GL_BLEND);
+            {
+                // mix both backgrounds together
+                m_iFrameBuffer.StartDraw();
+                m_MixObject.Render();
+            }
+            glEnable(GL_DEPTH_TEST);
+            glEnable(GL_BLEND);
 
             // invalidate single backgrounds
             m_pOldBackground->GetResolvedTexture()->GetColorTarget(0).pTexture->Invalidate(0);
@@ -372,8 +376,8 @@ void cEnvironment::Move()
 
     if(m_Transition.GetStatus())
     {
-        // update transition and move old background
-        if(m_Transition.Update(1.0f))
+        // update transition and move old background (do not update while new background is still loading)
+        if(!Core::Manager::Resource->IsLoading() && m_bActive && m_Transition.Update(1.0f))
         {
             // delete old background
             m_MixObject.DefineTexture(0, NULL);
@@ -415,6 +419,7 @@ void cEnvironment::ChangeBackground(const coreByte& iID)
     {
         // start transition
         m_Transition.Play(CORE_TIMER_PLAY_RESET);
+        m_Transition.SetValue(-0.1f);
 
         // set transition textures
         m_MixObject.DefineTexture(0, m_pOldBackground->GetResolvedTexture()->GetColorTarget(0).pTexture);
@@ -487,7 +492,7 @@ cGrassBackground::cGrassBackground()noexcept
     coreBatchList* pList2;
 
     // create outdoor-surface object
-    m_pOutdoor = new cOutdoor("grass", "dust", 1, 4.0f);
+    m_pOutdoor = new cOutdoor("grass", "dust", 2, 4.0f);
 
     // create water-surface object
     m_pWater = new cWater();
@@ -556,37 +561,41 @@ cGrassBackground::cGrassBackground()noexcept
     {
         for(coreUint i = 0; i < GRASS_REEDS_NUM; ++i)
         {
-            // calculate position and height
-            const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.45f, 0.45f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(GRASS_REEDS_NUM)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
-            const float       fHeight   = m_pOutdoor->RetrieveHeight(vPosition);
-
-            // test for valid values
-            if(fHeight > -23.0f && fHeight < -18.0f && (F_TO_SI(vPosition.y+160.0f) % 80 < 40))
+            for(coreUint j = 0; j < 3; ++j)   // tries
             {
-                if(!cBackground::_CheckIntersection     (m_apGroundObjectList[0], vPosition, 25.0f) &&
-                   !cBackground::_CheckIntersectionQuick(pList1,                  vPosition, 25.0f) &&
-                   !cBackground::_CheckIntersectionQuick(pList2,                  vPosition, 25.0f))
+                // calculate position and height
+                const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.45f, 0.45f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(GRASS_REEDS_NUM)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
+                const float       fHeight   = m_pOutdoor->RetrieveHeight(vPosition);
+
+                // test for valid values
+                if(fHeight > -23.0f && fHeight < -18.0f && (F_TO_SI(vPosition.y+160.0f) % 80 < 40))
                 {
-                    // determine object type
-                    const bool bType = (Core::Rand->Int(3) || fHeight >= -20.0f) ? true : false;
+                    if(!cBackground::_CheckIntersectionQuick(pList1,                  vPosition, 25.0f) &&
+                       !cBackground::_CheckIntersectionQuick(pList2,                  vPosition, 25.0f) &&
+                       !cBackground::_CheckIntersection     (m_apGroundObjectList[0], vPosition, 25.0f))
+                    {
+                        // determine object type
+                        const bool bType = (Core::Rand->Int(3) || fHeight >= -20.0f) ? true : false;
 
-                    // load object resources
-                    coreObject3D* pObject = new coreObject3D();
-                    pObject->DefineModel  (bType ? "environment_reed_01.md3" : "environment_reed_02.md3");
-                    pObject->DefineTexture(0, "environment_reed.png");
-                    pObject->DefineTexture(1, "environment_grass_norm.png");
-                    pObject->DefineProgram("object_ground_program");
+                        // load object resources
+                        coreObject3D* pObject = new coreObject3D();
+                        pObject->DefineModel  (bType ? "environment_reed_01.md3" : "environment_reed_02.md3");
+                        pObject->DefineTexture(0, "environment_reed.png");
+                        pObject->DefineTexture(1, "environment_grass_norm.png");
+                        pObject->DefineProgram("object_ground_program");
 
-                    // set object properties
-                    pObject->SetPosition   (coreVector3(vPosition, fHeight-0.8f));
-                    pObject->SetSize       (coreVector3::Rand(1.3f,1.6f, 1.3f,1.6f, 1.3f,1.6f) * 2.0f);
-                    pObject->SetDirection  (coreVector3(coreVector2::Rand(), 0.0f));
-                    pObject->SetOrientation(coreVector3(0.0f,0.0f,1.0f));
-                    pObject->SetColor3     (coreVector3(1.0f, 1.0f * Core::Rand->Float(0.55f, 0.7f), 0.5f));
+                        // set object properties
+                        pObject->SetPosition   (coreVector3(vPosition, fHeight-0.8f));
+                        pObject->SetSize       (coreVector3::Rand(1.3f,1.6f, 1.3f,1.6f, 1.3f,1.6f) * 2.0f);
+                        pObject->SetDirection  (coreVector3(coreVector2::Rand(), 0.0f));
+                        pObject->SetOrientation(coreVector3(0.0f,0.0f,1.0f));
+                        pObject->SetColor3     (coreVector3(1.0f, 1.0f * Core::Rand->Float(0.55f, 0.7f), 0.5f));
 
-                    // add object to the list
-                    if(bType) pList1->BindObject(pObject);
-                         else pList2->BindObject(pObject);
+                        // add object to the list
+                        if(bType) pList1->BindObject(pObject);
+                             else pList2->BindObject(pObject);
+                        break;
+                    }
                 }
             }
         }
@@ -609,18 +618,18 @@ cGrassBackground::cGrassBackground()noexcept
     pList1 = new coreBatchList(GRASS_FLOWERS_RESERVE);
     pList1->DefineProgram("effect_decal_spheric_inst_program");
     {
-        for(coreUint i = 0; i < GRASS_FLOWERS_NUM; ++i)
+        for(coreUint i = GRASS_FLOWERS_NUM; i--; )
         {
-            for(coreUint j = 0; j < 3; ++j)   // tries
+            for(coreUint j = 0; j < 15; ++j)   // tries
             {
                 // calculate position and height
                 const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.45f, 0.45f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(GRASS_FLOWERS_NUM)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
                 const float       fHeight   = m_pOutdoor->RetrieveHeight(vPosition);
 
                 // test for valid values
-                if(fHeight > -15.0f)
+                if(fHeight > -14.5f)
                 {
-                    if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 64.0f))
+                    if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 225.0f))
                     {
                         // load object resources
                         coreObject3D* pObject = new coreObject3D();
@@ -629,8 +638,8 @@ cGrassBackground::cGrassBackground()noexcept
                         pObject->DefineProgram("effect_decal_spheric_program");
 
                         // set object properties
-                        pObject->SetPosition (coreVector3(vPosition, fHeight-0.5f));
-                        pObject->SetSize     (coreVector3(coreVector2(1.65f,1.65f) * Core::Rand->Float(8.5f, 10.0f), 1.0f));
+                        pObject->SetPosition (coreVector3(vPosition, fHeight-0.8f));
+                        pObject->SetSize     (coreVector3(coreVector2(1.65f,1.65f) * Core::Rand->Float(9.0f, 10.0f), 1.0f));
                         pObject->SetDirection(coreVector3(coreVector2::Rand(), 0.0f));
                         pObject->SetTexOffset(coreVector2::Rand(0.0f,10.0f, 0.0f,10.0f));
 
@@ -710,4 +719,13 @@ void cGrassBackground::__MoveOwn()
     // TODO # sound-volume per config value 
     if(m_pNatureSound->EnableRef(this))
         m_pNatureSound->SetVolume(6.0f * g_pEnvironment->GetTransition().GetValue((g_pEnvironment->GetBackground() == this) ? CORE_TIMER_GET_NORMAL : CORE_TIMER_GET_REVERSED));
+}
+
+
+// ****************************************************************
+// constructor
+cSeaBackground::cSeaBackground()noexcept
+{
+    // create outdoor-surface object 
+    m_pOutdoor = new cOutdoor("dust", "dust", 2, 4.0f);
 }

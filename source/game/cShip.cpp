@@ -32,3 +32,34 @@ void cShip::Render(const coreProgramPtr& pProgram)
     m_pModelLow->Enable();
     m_pModelLow->Draw();
 }
+
+
+// ****************************************************************
+// add ship to the game
+void cShip::_Resurrect(const coreVector2& vPosition, const int& iType)
+{
+    // reset ship properties
+    m_iCurHealth = m_iMaxHealth;
+    m_vNewPos    = vPosition;
+    this->SetPosition(coreVector3(vPosition, 0.0f));
+
+    // add ship to global shadow and outline
+    cShadow::BindGlobalObject(this);
+    g_pOutlineFull->BindObject(this);
+
+    // enable collision
+    this->ChangeType(iType);
+}
+
+
+// ****************************************************************
+// remove ship from the game
+void cShip::_Kill(const bool& bAnimated)
+{
+    // remove ship from global shadow and outline
+    cShadow::UnbindGlobalObject(this);
+    g_pOutlineFull->UnbindObject(this);
+
+    // disable collision
+    this->ChangeType(0);
+}

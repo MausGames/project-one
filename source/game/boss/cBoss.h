@@ -37,8 +37,8 @@ public:
 
 private:
     // 
-    void __RenderOwn()override;
-    void __MoveOwn  ()override;
+    void __RenderOwnBefore()override;
+    void __MoveOwn        ()override;
 };
 
 

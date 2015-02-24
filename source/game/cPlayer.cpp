@@ -12,7 +12,9 @@
 // ****************************************************************
 // constructor
 cPlayer::cPlayer()noexcept
-: m_iInputIndex (0)
+: m_iInputIndex    (0)
+, m_iScoreMission  (0)
+, m_fChainCooldown (0.0f)
 {
     // load object resources
     this->DefineProgram("object_ship_program");
@@ -23,7 +25,8 @@ cPlayer::cPlayer()noexcept
     this->SetOrientation(coreVector3(0.0f,0.0f,1.0f));
 
     // set initial status
-    m_iStatus = PLAYER_STATUS_DEAD;
+    m_iStatus = PLAYER_STATUS_DEAD | PLAYER_STATUS_NO_INPUT_ALL;
+    m_iMaxHealth = m_iCurHealth = 100;
 
     // load first weapons
     for(int i = 0; i < PLAYER_WEAPONS; ++i)
@@ -31,6 +34,9 @@ cPlayer::cPlayer()noexcept
         m_apWeapon[i] = new cNoWeapon();
         m_apWeapon[i]->SetOwner(this);
     }
+
+    // reset scoring stats
+    this->ResetStats();
 }
 
 
@@ -49,16 +55,16 @@ cPlayer::~cPlayer()
 
 // ****************************************************************
 // configure the player
-void cPlayer::Configure(const coreByte& iAppearanceType, const coreVector3& vColor, const coreByte& iInputIndex)
+void cPlayer::Configure(const coreByte& iShipType, const coreVector3& vColor, const coreByte& iInputIndex)
 {
     // select appearance type
     const char* pcModelHigh;
     const char* pcModelLow;
-    switch(iAppearanceType)
+    switch(iShipType)
     {
     default: ASSERT(false)
-    case 0: pcModelHigh = "ship_player_off_high.md3"; pcModelLow = "ship_player_off_low.md3"; break;
-    case 1: pcModelHigh = "ship_player_def_high.md3"; pcModelLow = "ship_player_def_low.md3"; break;
+    case PLAYER_SHIP_OFF: pcModelHigh = "ship_player_off_high.md3"; pcModelLow = "ship_player_off_low.md3"; break;
+    case PLAYER_SHIP_DEF: pcModelHigh = "ship_player_def_high.md3"; pcModelLow = "ship_player_def_low.md3"; break;
     }
 
     // load models
@@ -66,7 +72,7 @@ void cPlayer::Configure(const coreByte& iAppearanceType, const coreVector3& vCol
     this->DefineModelLow(pcModelLow);
 
     // save color value
-    this->SetColor3(vColor);
+    this->SetBaseColor(vColor);
 
     // save input index
     m_iInputIndex = iInputIndex;
@@ -125,14 +131,17 @@ void cPlayer::Move()
 {
     if(CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_DEAD)) return;
 
-    // move the ship
-    m_vNewPos += g_aInput[m_iInputIndex].vMove * Core::System->GetTime() * 50.0f;
+    if(!CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
+    {
+        // move the ship
+        m_vNewPos += g_aInput[m_iInputIndex].vMove * Core::System->GetTime() * 50.0f;
 
-    // restrict movement to the foreground area
-         if(m_vNewPos.x < -FOREGROUND_AREA.x) m_vNewPos.x = -FOREGROUND_AREA.x;
-    else if(m_vNewPos.x >  FOREGROUND_AREA.x) m_vNewPos.x =  FOREGROUND_AREA.x;
-         if(m_vNewPos.y < -FOREGROUND_AREA.y) m_vNewPos.y = -FOREGROUND_AREA.y;
-    else if(m_vNewPos.y >  FOREGROUND_AREA.y) m_vNewPos.y =  FOREGROUND_AREA.y;
+        // restrict movement to the foreground area
+             if(m_vNewPos.x < -FOREGROUND_AREA.x) m_vNewPos.x = -FOREGROUND_AREA.x;
+        else if(m_vNewPos.x >  FOREGROUND_AREA.x) m_vNewPos.x =  FOREGROUND_AREA.x;
+             if(m_vNewPos.y < -FOREGROUND_AREA.y) m_vNewPos.y = -FOREGROUND_AREA.y;
+        else if(m_vNewPos.y >  FOREGROUND_AREA.y) m_vNewPos.y =  FOREGROUND_AREA.y;
+    }
 
     // calculate smooth position-offset
     const coreVector2 vDiff   = m_vNewPos - this->GetPosition().xy();
@@ -148,9 +157,27 @@ void cPlayer::Move()
     // update the weapons (shooting and stuff)
     for(int i = 0; i < PLAYER_WEAPONS; ++i)
     {
-        const bool bShoot = CONTAINS_BIT(g_aInput[m_iInputIndex].iButtonHold, i) ? true : false;
+        const bool bShoot = CONTAINS_BIT(g_aInput[m_iInputIndex].iButtonHold, i) ? !CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_WEAPON) : false;
         m_apWeapon[i]->Update(bShoot);
     }
+}
+
+
+// ****************************************************************
+// reduce current health
+void cPlayer::TakeDamage(const int& iDamage)
+{
+    // 
+    m_iCurHealth -= iDamage;
+
+    // 
+    if(m_iCurHealth <= 0)
+    {
+        m_iCurHealth = 0;
+    }
+
+    // 
+    this->SetColor3(LERP(coreVector3(0.5f,0.5f,0.5f), this->GetBaseColor(), (I_TO_F(m_iCurHealth) / I_TO_F(m_iMaxHealth))));
 }
 
 
@@ -162,16 +189,8 @@ void cPlayer::Resurrect(const coreVector2& vPosition)
     if(!CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_DEAD)) return;
     REMOVE_VALUE(m_iStatus, PLAYER_STATUS_DEAD)
 
-    // reset player properties
-    m_vNewPos = vPosition;
-    this->SetPosition(coreVector3(vPosition, 0.0f));
-
-    // add player to global shadow and outline
-    cShadow::BindGlobalObject(this);
-    g_pOutlineFull->BindObject(this);
-
-    // enable collision
-    this->ChangeType(TYPE_PLAYER);
+    // add ship to the game
+    cShip::_Resurrect(vPosition, TYPE_PLAYER);
 }
 
 
@@ -186,10 +205,53 @@ void cPlayer::Kill(const bool& bAnimated)
     // reset weapon shoot status
     for(int i = 0; i < PLAYER_WEAPONS; ++i) m_apWeapon[i]->Update(false);
 
-    // remove player from global shadow and outline
-    cShadow::UnbindGlobalObject(this);
-    g_pOutlineFull->UnbindObject(this);
+    // remove ship from the game
+    cShip::_Kill(bAnimated);
+}
 
-    // disable collision
-    this->ChangeType(0);
+
+// ****************************************************************
+// 
+void cPlayer::AddScore(const coreUint& iValue, const bool& bModified)
+{
+
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::AddCombo(const coreUint& iValue)
+{
+
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::AddCombo(const float&    fModifier)
+{
+
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::AddChain(const coreUint& iValue)
+{
+
+}
+
+
+// ****************************************************************
+// reset scoring stats
+void cPlayer::ResetStats()
+{
+    // 
+    m_iScoreMission = 0;
+    std::memset(m_aiScoreBoss, 0, sizeof(m_aiScoreBoss));
+
+    // 
+    m_iComboValue[1] = m_iComboValue[0] = 0;
+    m_iChainValue[1] = m_iChainValue[0] = 0;
+    m_fChainCooldown = 0.0f;
 }

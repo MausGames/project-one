@@ -6,22 +6,15 @@
 //| More information available in the readme file  |//
 //*------------------------------------------------*//
 //////////////////////////////////////////////////////
-#pragma once
-#ifndef _P1_GUARD_MSGBOX_H_
-#define _P1_GUARD_MSGBOX_H_
-
-// TODO: transfer to Core Engine
 
 
-// ****************************************************************
-// message box class
-class cMsgBox final : public coreObject2D
+void VertexMain()
 {
-public:
-    cMsgBox()noexcept;
+    // transform position
+    gl_Position = coreObject2DPosition();
 
-    DISABLE_COPY(cMsgBox)
-};
-
-
-#endif // _P1_GUARD_MSGBOX_H_
+    // forward simplified texture coordinates for various resolutions
+    vec2 vNewTexCoord = a_v3RawPosition.xy + vec2(0.5);
+    v_av2TexCoord[0]  = vNewTexCoord;
+    v_av2TexCoord[1]  = vNewTexCoord * 3.0;
+}

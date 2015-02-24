@@ -44,6 +44,7 @@
     <ClCompile Include="..\..\..\source\interface\menu\02_cMainMenu.cpp" />
     <ClCompile Include="..\..\..\source\interface\menu\cMenu.cpp" />
     <ClCompile Include="..\..\..\source\main.cpp" />
+    <ClCompile Include="..\..\..\source\visual\cDistortion.cpp" />
     <ClCompile Include="..\..\..\source\visual\cForeground.cpp" />
     <ClCompile Include="..\..\..\source\visual\cGlow.cpp" />
     <ClCompile Include="..\..\..\source\visual\cOutline.cpp" />
@@ -72,6 +73,7 @@
     <ClInclude Include="..\..\..\source\interface\cTooltip.h" />
     <ClInclude Include="..\..\..\source\interface\menu\cMenu.h" />
     <ClInclude Include="..\..\..\source\main.h" />
+    <ClInclude Include="..\..\..\source\visual\cDistortion.h" />
     <ClInclude Include="..\..\..\source\visual\cForeground.h" />
     <ClInclude Include="..\..\..\source\visual\cGlow.h" />
     <ClInclude Include="..\..\..\source\visual\cOutline.h" />

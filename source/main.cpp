@@ -14,6 +14,7 @@ coreVector2      g_vMenuCenter     = coreVector2(0.0f,0.0f);
 cOutline*        g_pOutlineFull    = NULL;
 cOutline*        g_pOutlineDirect  = NULL;
 cGlow*           g_pGlow           = NULL;
+cDistortion*     g_pDistortion     = NULL;
 cPostProcessing* g_pPostProcessing = NULL;
 
 cForeground*     g_pForeground     = NULL;
@@ -29,7 +30,7 @@ void CoreApp::Init()
     // calculate biggest possible 1:1 resolution
     const float fMinRes = Core::System->GetResolution().Min();
     g_vGameResolution   = coreVector2(fMinRes, fMinRes);
-    g_vMenuCenter       = g_vGameResolution / Core::System->GetResolution() * 0.5f;
+    g_vMenuCenter       = g_vGameResolution / Core::System->GetResolution();
 
     // set camera to default values
     Core::Graphics->SetCamera(CAMERA_POSITION, CAMERA_DIRECTION, CAMERA_ORIENTATION);
@@ -42,6 +43,7 @@ void CoreApp::Init()
     g_pOutlineFull    = new cOutline(OUTLINE_SHADER_FULL);
     g_pOutlineDirect  = new cOutline(OUTLINE_SHADER_DIRECT);
     g_pGlow           = new cGlow();
+    g_pDistortion     = new cDistortion();
     g_pPostProcessing = new cPostProcessing();
     g_pForeground     = new cForeground();
     g_pEnvironment    = new cEnvironment();
@@ -59,6 +61,7 @@ void CoreApp::Exit()
     SAFE_DELETE(g_pEnvironment)
     SAFE_DELETE(g_pForeground)
     SAFE_DELETE(g_pPostProcessing)
+    SAFE_DELETE(g_pDistortion)
     SAFE_DELETE(g_pGlow)
     SAFE_DELETE(g_pOutlineDirect)
     SAFE_DELETE(g_pOutlineFull)
@@ -78,7 +81,8 @@ void CoreApp::Render()
         // update the glow-effect
         g_pGlow->Update();
 
-        // TODO # distortion low-resolution
+        // update the distortion-effect
+        g_pDistortion->Update();
 
         // update the shadow map class
         cShadow::GlobalUpdate();
@@ -123,7 +127,7 @@ void CoreApp::Render()
     {
         glDisable(GL_DEPTH_TEST);
         {
-            // 
+            // render the overlay separately
             if(g_pGame) g_pGame->RenderOverlay();
 
             // render the menu
@@ -162,10 +166,14 @@ void CoreApp::Move()
     {
         if(!g_pGame)
         {
-            g_pGame = new cGame();
+            g_pGame = new cGame(false);
             g_pGame->LoadMission(cMellanMission::ID);
         }
     }
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS))
+        g_pEnvironment->ChangeBackground(cGrassBackground::ID);
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2), CORE_INPUT_PRESS))
+        g_pEnvironment->ChangeBackground(cSeaBackground::ID);
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS))
         Core::System->Quit();
 }

@@ -13,7 +13,8 @@
 
 // ****************************************************************
 // mission definitions
-#define MISSION_BOSSES (3u)   // default number of bosses per mission
+#define MISSION_BOSSES  (3u)     // default number of bosses per mission
+#define MISSION_NO_BOSS (0xFF)   // 
 
 
 // ****************************************************************
@@ -23,6 +24,9 @@ class INTERFACE cMission
 protected:
     cBoss* m_apBoss[MISSION_BOSSES];   // 
 
+    cBoss*   m_pCurBoss;               // 
+    coreByte m_iCurBossNum;            // 
+
 
 public:
     cMission()noexcept;
@@ -31,10 +35,15 @@ public:
     DISABLE_COPY(cMission)
     ENABLE_ID
 
-    // access 
-    inline cBoss* GetBoss(const coreByte& iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_apBoss[iIndex];}
+    // access mission objects
+    inline cBoss*          GetBoss      (const coreByte& iIndex)const {ASSERT (iIndex < MISSION_BOSSES) return m_apBoss[iIndex];}
+    inline cBoss*          GetCurBoss   ()const                       {return m_pCurBoss;}
+    inline const coreByte& GetCurBossNum()const                       {return m_iCurBossNum;}
 
-    // ASSERT IN MOVE
+
+protected:
+    // 
+    void _SetCurBoss(const coreByte& iIndex);
 };
 
 

@@ -2,3 +2,4 @@ $LANGUAGE = English
 $START_GAME = Play Game
 $EXIT_GAME = Exit Game
 $CREDITS = Credits
+$BACK = Back

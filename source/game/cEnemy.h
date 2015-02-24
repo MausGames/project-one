@@ -12,32 +12,45 @@
 
 
 // ****************************************************************
+// enemy definitions
+enum eEnemyStatus : coreByte
+{
+    ENEMY_STATUS_DEAD = 0x01   // completely removed from the game
+};
+
+
+// ****************************************************************
 // enemy entity interface
 class INTERFACE cEnemy : public cShip
 {
-protected:
-    coreUint m_iBaseColor;   // 
-
-
 public:
     cEnemy()noexcept;
     virtual ~cEnemy();
 
+    FRIEND_CLASS(cGame)
+    FRIEND_CLASS(cWater)
     DISABLE_COPY(cEnemy)
     ENABLE_ID
 
-    // render and move the enemy
-    void Render()override;
-    void Move  ()override;
+    // configure the enemy
+    void Configure(const int& iHealth, const coreVector3& vColor);
 
-    // 
-    void TakeDamage(const int& iDamage);
+    // move the enemy
+    void Move()override;
+
+    // reduce current health
+    void TakeDamage(const int& iDamage, cPlayer* pAttacker);
+
+    // control life and death
+    void Resurrect(const coreVector2& vPosition);
+    void Kill     (const bool&        bAnimated);
 
 
 private:
-    // render and move routines for derived classes
-    virtual void __RenderOwn() {}   // TODO # like bullet ? 
-    virtual void __MoveOwn()   {}
+    // render and move routines for derived classes (render functions executed by game and water)
+    virtual void __RenderOwnBefore() {}
+    virtual void __RenderOwnAfter () {}
+    virtual void __MoveOwn        () {}
 };
 
 

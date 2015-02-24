@@ -79,6 +79,8 @@
 #define SHADER_SPHERIC     "#define _P1_SPHERIC_ (1) \n"   // decal, energy
 #define SHADER_DIRECT      "#define _P1_DIRECT_  (1) \n"   // outline, energy
 
+#define PLAYERS            (2u)
+
 #define TYPE_PLAYER        (1)
 #define TYPE_ENEMY         (2)
 #define TYPE_BULLET_PLAYER (11)
@@ -105,13 +107,14 @@ class cPlayer;
 // ****************************************************************
 // game header files
 extern coreVector2      g_vGameResolution;   // pre-calculated 1:1 resolution
-extern coreVector2      g_vMenuCenter;       // 
+extern coreVector2      g_vMenuCenter;       // pre-calculated menu center modifier
 
 #include "additional/cBindContainer.h"
 #include "file/cConfig.h"
 #include "visual/cShadow.h"
 #include "visual/cOutline.h"
 #include "visual/cGlow.h"
+#include "visual/cDistortion.h"
 #include "visual/cSpecialEffects.h"
 #include "visual/cForeground.h"
 #include "visual/cPostProcessing.h"
@@ -119,6 +122,7 @@ extern coreVector2      g_vMenuCenter;       //
 extern cOutline*        g_pOutlineFull;      // main full outline-effect object
 extern cOutline*        g_pOutlineDirect;    // main direct outline-effect object
 extern cGlow*           g_pGlow;             // main glow-effect object
+extern cDistortion*     g_pDistortion;       // main distortion-effect object
 extern cPostProcessing* g_pPostProcessing;   // main post-processing object
 
 #include "environment/cOutdoor.h"
@@ -133,9 +137,9 @@ extern cPostProcessing* g_pPostProcessing;   // main post-processing object
 #include "game/cWeapon.h"
 #include "game/cShip.h"
 #include "game/cEnemy.h"
-#include "game/cPlayer.h"
 #include "game/boss/cBoss.h"
 #include "game/mission/cMission.h"
+#include "game/cPlayer.h"
 #include "game/cGame.h"
 
 extern cForeground*     g_pForeground;       // main foreground object
