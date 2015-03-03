@@ -25,7 +25,7 @@ cPlayer::cPlayer()noexcept
     this->SetOrientation(coreVector3(0.0f,0.0f,1.0f));
 
     // set initial status
-    m_iStatus = PLAYER_STATUS_DEAD | PLAYER_STATUS_NO_INPUT_ALL;
+    m_iStatus = PLAYER_STATUS_DEAD;
     m_iMaxHealth = m_iCurHealth = 100;
 
     // load first weapons
@@ -141,15 +141,15 @@ void cPlayer::Move()
         else if(m_vNewPos.x >  FOREGROUND_AREA.x) m_vNewPos.x =  FOREGROUND_AREA.x;
              if(m_vNewPos.y < -FOREGROUND_AREA.y) m_vNewPos.y = -FOREGROUND_AREA.y;
         else if(m_vNewPos.y >  FOREGROUND_AREA.y) m_vNewPos.y =  FOREGROUND_AREA.y;
+
+        // calculate smooth position-offset
+        const coreVector2 vDiff   = m_vNewPos - this->GetPosition().xy();
+        const coreVector2 vOffset = vDiff * Core::System->GetTime() * 40.0f;
+
+        // set new position and orientation
+        this->SetPosition   (coreVector3(vOffset + this->GetPosition().xy(), 0.0f));
+        this->SetOrientation(coreVector3(CLAMP(vDiff.x, -0.6f, 0.6f), 0.0f, 1.0f).Normalize());
     }
-
-    // calculate smooth position-offset
-    const coreVector2 vDiff   = m_vNewPos - this->GetPosition().xy();
-    const coreVector2 vOffset = vDiff * Core::System->GetTime() * 40.0f;
-
-    // set new position and orientation
-    this->SetPosition   (this->GetPosition() + coreVector3(vOffset, 0.0f));
-    this->SetOrientation(coreVector3(CLAMP(vDiff.x, -0.6f, 0.6f), 0.0f, 1.0f).Normalize());
 
     // move the 3d-object
     coreObject3D::Move();
@@ -225,10 +225,7 @@ void cPlayer::AddCombo(const coreUint& iValue)
 
 }
 
-
-// ****************************************************************
-// 
-void cPlayer::AddCombo(const float&    fModifier)
+void cPlayer::AddCombo(const float& fModifier)
 {
 
 }

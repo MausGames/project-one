@@ -176,4 +176,6 @@ void CoreApp::Move()
         g_pEnvironment->ChangeBackground(cSeaBackground::ID);
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS))
         Core::System->Quit();
+
+    g_pEnvironment->SetTargetSpeed(g_pGame ? 8.0f : 2.0f);
 }

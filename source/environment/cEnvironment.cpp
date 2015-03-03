@@ -73,26 +73,17 @@ void cBackground::Render()
     // update shadow map
     if(m_pOutdoor) m_pOutdoor->GetShadowMap()->Update();
 
-    // set environment clear color
-    glClearColor(ENVIRONMENT_CLEAR_COLOR);
-
     // fill background frame buffer
     m_iFrameBuffer.StartDraw();
-    m_iFrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR | CORE_FRAMEBUFFER_TARGET_DEPTH);   // color-clear improves performance (with multisampling and depth pre-pass)
+    m_iFrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR | CORE_FRAMEBUFFER_TARGET_DEPTH);   // color-clear improves performance
     {
-        // reset clear color
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
         glDisable(GL_BLEND);
         {
-            // render depth pass with foreground objects
-            cShadow::RenderForegroundDepth();
-
             // send shadow matrix to shader-programs
             cShadow::EnableShadowRead(SHADOW_HANDLE_OBJECT);
             cShadow::EnableShadowRead(SHADOW_HANDLE_OBJECT_INST);
 
-            // render additional objects
+            // render all additional objects
             FOR_EACH(it, m_apAddObject)
                 (*it)->Render();
 
@@ -180,7 +171,7 @@ void cBackground::Move()
     };
     nControlObjectsFunc(&m_apGroundObjectList, 80.0f);
     nControlObjectsFunc(&m_apDecalObjectList,  80.0f);
-    nControlObjectsFunc(&m_apAirObjectList,    80.0f);
+    nControlObjectsFunc(&m_apAirObjectList,    75.0f);
 
     // TODO # handle additional objects 
 
@@ -419,7 +410,7 @@ void cEnvironment::ChangeBackground(const coreByte& iID)
     {
         // start transition
         m_Transition.Play(CORE_TIMER_PLAY_RESET);
-        m_Transition.SetValue(-0.1f);
+        m_Transition.SetValue(-0.15f);
 
         // set transition textures
         m_MixObject.DefineTexture(0, m_pOldBackground->GetResolvedTexture()->GetColorTarget(0).pTexture);
@@ -718,7 +709,7 @@ void cGrassBackground::__MoveOwn()
     // adjust volume of the nature sound-effect
     // TODO # sound-volume per config value 
     if(m_pNatureSound->EnableRef(this))
-        m_pNatureSound->SetVolume(6.0f * g_pEnvironment->GetTransition().GetValue((g_pEnvironment->GetBackground() == this) ? CORE_TIMER_GET_NORMAL : CORE_TIMER_GET_REVERSED));
+        m_pNatureSound->SetVolume(MAX(6.0f * g_pEnvironment->GetTransition().GetValue((g_pEnvironment->GetBackground() == this) ? CORE_TIMER_GET_NORMAL : CORE_TIMER_GET_REVERSED), 0.0f));
 }
 
 

@@ -16,10 +16,16 @@ cMainMenu::cMainMenu()noexcept
 , m_iCurButton (0)
 {
     // create menu objects
-    m_GameLogo.DefineProgram("menu_sharp_program");
-    m_GameLogo.DefineTexture(0, "game_logo.png");
-    m_GameLogo.SetPosition  (coreVector2(0.0f,0.17f));
-    m_GameLogo.SetSize      (coreVector2(1.0f,1.0f) * 0.4f);
+    m_aGameLogo[0].DefineProgram("menu_sharp_logo_program");
+    m_aGameLogo[0].DefineTexture(0, "game_logo_back.png");
+    m_aGameLogo[0].SetPosition  (coreVector2(0.0f,0.172f));
+    m_aGameLogo[0].SetSize      (coreVector2(1.0f,1.0f) * 0.405f);
+    m_aGameLogo[0].SetColor3    (coreVector3(1.0f,1.0f,1.0f) * 1.05f);
+
+    m_aGameLogo[1].DefineProgram("menu_sharp_program");
+    m_aGameLogo[1].DefineTexture(0, "game_logo_front.png");
+    m_aGameLogo[1].SetPosition  (m_aGameLogo[0].GetPosition() + coreVector2(0.0f,0.028f));
+    m_aGameLogo[1].SetSize      (coreVector2(1.0f,0.5f) * 0.43f);
 
     m_Background.DefineProgram("menu_border_program");
     m_Background.DefineTexture(0, "menu_background_black.png");
@@ -57,7 +63,8 @@ cMainMenu::cMainMenu()noexcept
     m_VersionInfo.SetText     (PRINT("(c) 2010-2015 Maus Games - v0.1.0 new alpha - %s %.5s", __DATE__, __TIME__));
 
     // bind menu objects
-    this->BindObject(SURFACE_MAIN_DEFAULT, &m_GameLogo);
+    this->BindObject(SURFACE_MAIN_DEFAULT, &m_aGameLogo[0]);
+    this->BindObject(SURFACE_MAIN_DEFAULT, &m_aGameLogo[1]);
     this->BindObject(SURFACE_MAIN_DEFAULT, &m_StartButton);
     this->BindObject(SURFACE_MAIN_DEFAULT, &m_CreditsButton);
     this->BindObject(SURFACE_MAIN_DEFAULT, &m_ExitButton);
@@ -78,7 +85,7 @@ void cMainMenu::Move()
     m_iStatus = 0;
 
     // 
-    m_GameLogo.SetColor3(coreVector3(1.0f,1.0f,1.0f) * (1.08f + 0.08f * SIN(4.0f * float(Core::System->GetTotalTime()))));
+    m_aGameLogo[0].SetDirection(coreVector2::Direction(float(Core::System->GetTotalTime()) * -0.05f));
 
     if(this->GetCurSurface() == SURFACE_MAIN_DEFAULT)
     {

@@ -12,16 +12,18 @@
 uniform mat4 u_m4ShadowMatrix;   // own shadow view-projection matrix (with coordinate adjustment)
 
 // shader output
-varying vec4 v_v4ShadowCoord;   // pixel coordinates viewed from the light source
+varying vec4 v_v4ShadowCoord;    // pixel coordinates viewed from the light source
 
 
 void VertexMain()
 {
-    // transform position and texture coordinates
+    // transform position and shadow projection
     vec4 v4NewPosition = vec4(coreObject3DTransformRaw(), 1.0);
     gl_Position        = u_m4ViewProj     * v4NewPosition;
     v_v4ShadowCoord    = u_m4ShadowMatrix * v4NewPosition;
-    v_av2TexCoord[0]   = a_v2RawTexCoord;
+    
+    // forward texture coordinates
+    v_av2TexCoord[0] = a_v2RawTexCoord;
 
     // dot-3 transform lighting vectors
     coreDot3VertexInit();

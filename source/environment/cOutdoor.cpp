@@ -19,7 +19,7 @@ cOutdoor::cOutdoor(const char* pcTextureTop, const char* pcTextureBottom, const 
 , m_fGrade        (0.0f)
 {
     // load outdoor textures
-    m_apTexture[2] = Core::Manager::Resource->LoadNew<coreTexture>();
+    m_pNormalMap = Core::Manager::Resource->LoadNew<coreTexture>();
     this->LoadTextures(pcTextureTop, pcTextureBottom);
 
     // load outdoor geometry
@@ -36,7 +36,8 @@ cOutdoor::cOutdoor(const char* pcTextureTop, const char* pcTextureBottom, const 
 cOutdoor::~cOutdoor()
 {
     // free resources
-    Core::Manager::Resource->Free(&m_apTexture[2]);
+    this->DefineTexture(2, NULL);
+    Core::Manager::Resource->Free(&m_pNormalMap);
     Core::Manager::Resource->Free(&m_pModel);
 }
 
@@ -65,44 +66,60 @@ void cOutdoor::LoadTextures(const char* pcTextureTop, const char* pcTextureBotto
     this->DefineTexture(0, PRINT("environment_%s_diff.png", pcTextureTop));
     this->DefineTexture(1, PRINT("environment_%s_diff.png", pcTextureBottom));
 
-    // FUN FACT:
-    // apparently a "similar" method has an U.S. patent by HP (http://www.google.co.in/patents/US6337684)
-    // how can someone "invent" the fundamental unit-sphere formula [1 = x*x + y*y + z*z] ?
+    // unbind normal map to prevent concurrency problems
+    this->DefineTexture(2, NULL);
 
-    // delete old data
-    m_apTexture[2]->Unload();
-
-    // retrieve normal map files
-    coreFile* pFile1 = Core::Manager::Resource->RetrieveFile(PRINT("data/textures/environment_%s_norm.png", pcTextureTop));
-    coreFile* pFile2 = Core::Manager::Resource->RetrieveFile(PRINT("data/textures/environment_%s_norm.png", pcTextureBottom));
-    WARN_IF(!pFile1 || !pFile2) return;
-
-    // decompress files to plain pixel data
-    SDL_Surface* pSurface1 = IMG_LoadTyped_RW(SDL_RWFromConstMem(pFile1->GetData(), pFile1->GetSize()), true, coreData::StrExtension(pFile1->GetPath()));
-    SDL_Surface* pSurface2 = IMG_LoadTyped_RW(SDL_RWFromConstMem(pFile2->GetData(), pFile2->GetSize()), true, coreData::StrExtension(pFile2->GetPath()));
-    WARN_IF((pSurface1->format->BitsPerPixel != 24) || (pSurface2->format->BitsPerPixel != 24)) return;
-
-    // allocate required memory
-    const coreUint iSize   = pSurface1->w * pSurface1->h * 4;
-    coreByte*      pMerged = new coreByte[iSize];
-
-    // merge XY components of both normal maps (Z can be calculated in shader)
-    for(coreUint i = 0, j = 0; i < iSize; i += 4, j += 3)
+    Core::Manager::Resource->AttachFunction([=]()
     {
-        std::memcpy(pMerged + i,     s_cast<coreByte*>(pSurface1->pixels) + j, 2);
-        std::memcpy(pMerged + i + 2, s_cast<coreByte*>(pSurface2->pixels) + j, 2);
-    }
+        // FUN FACT:
+        // apparently a "similar" method has an U.S. patent by HP (http://www.google.co.in/patents/US6337684)
+        // how can someone "invent" the fundamental unit-sphere formula [1 = x*x + y*y + z*z] ?
 
-    // create final normal texture
-    m_apTexture[2]->Create(pSurface1->w, pSurface1->h, CORE_TEXTURE_SPEC_RGBA, GL_REPEAT, true);
-    m_apTexture[2]->Modify(0, 0, pSurface1->w, pSurface1->h, iSize, pMerged);
+        // delete old data
+        m_pNormalMap->Unload();
 
-    // free required memory
-    SAFE_DELETE_ARRAY(pMerged)
-    SDL_FreeSurface(pSurface1);
-    SDL_FreeSurface(pSurface2);
-    pFile1->UnloadData();
-    pFile2->UnloadData();
+        // retrieve normal map files
+        coreFile* pFile1 = Core::Manager::Resource->RetrieveFile(PRINT("data/textures/environment_%s_norm.png", pcTextureTop));
+        coreFile* pFile2 = Core::Manager::Resource->RetrieveFile(PRINT("data/textures/environment_%s_norm.png", pcTextureBottom));
+        WARN_IF(!pFile1 || !pFile2) return CORE_OK;
+
+        // decompress files to plain pixel data
+        SDL_Surface* pSurface1 = IMG_LoadTyped_RW(SDL_RWFromConstMem(pFile1->GetData(), pFile1->GetSize()), true, coreData::StrExtension(pFile1->GetPath()));
+        SDL_Surface* pSurface2 = IMG_LoadTyped_RW(SDL_RWFromConstMem(pFile2->GetData(), pFile2->GetSize()), true, coreData::StrExtension(pFile2->GetPath()));
+        WARN_IF((pSurface1->format->BitsPerPixel != 24) || (pSurface2->format->BitsPerPixel != 24)) return CORE_OK;
+
+        // allocate required memory
+        const coreUint iSize   = pSurface1->w * pSurface1->h * 4;
+        coreByte*      pMerged = new coreByte[iSize];
+
+        // merge XY components of both normal maps (Z can be calculated in shader)
+        for(coreUint i = 0, j = 0; i < iSize; i += 4, j += 3)
+        {
+            std::memcpy(pMerged + i,     s_cast<coreByte*>(pSurface1->pixels) + j, 2);
+            std::memcpy(pMerged + i + 2, s_cast<coreByte*>(pSurface2->pixels) + j, 2);
+        }
+
+        // create final normal map
+        m_pNormalMap->Create(pSurface1->w, pSurface1->h, CORE_TEXTURE_SPEC_RGBA, GL_REPEAT, true);
+        m_pNormalMap->Modify(0, 0, pSurface1->w, pSurface1->h, iSize, pMerged);
+
+        // wait until texture-upload is finished
+        coreSync oSync;
+        oSync.Create();
+        oSync.Check(GL_TIMEOUT_IGNORED, CORE_SYNC_CHECK_FLUSHED);
+
+        // bind normal map safely
+        this->DefineTexture(2, m_pNormalMap);
+
+        // free all temporary resources
+        SAFE_DELETE_ARRAY(pMerged)
+        SDL_FreeSurface(pSurface1);
+        SDL_FreeSurface(pSurface2);
+        pFile1->UnloadData();
+        pFile2->UnloadData();
+
+        return CORE_OK;
+    });
 }
 
 

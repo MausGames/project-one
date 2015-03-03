@@ -35,7 +35,7 @@ cWater::cWater()noexcept
     this->DefineTexture(0, "environment_water_norm.png");
     this->DefineTexture(1, m_iAboveReflection.GetColorTarget(0).pTexture);
     this->DefineTexture(2, m_iBelowRefraction.GetColorTarget(0).pTexture);
-    this->DefineTexture(3, m_iBelowRefraction.GetDepthTarget().pTexture);
+    this->DefineTexture(3, m_iBelowRefraction.GetDepthTarget() .pTexture);
     this->DefineProgram("environment_water_program");
 
     // set object properties
@@ -110,9 +110,6 @@ void cWater::UpdateReflection()
     {
         // flip projection left-right (also culling!, after StartDraw())
         c_cast<coreMatrix4*>(&Core::Graphics->GetPerspective())->_11 *= -1.0f;
-
-        // render depth pass with foreground objects
-        cShadow::RenderForegroundDepth();
 
         if(g_CurConfig.Graphics.iReflection && g_pGame)
         {

@@ -70,6 +70,7 @@ private:
     float    m_fGrade;                          // randomness grade
 
     cShadow m_ShadowMap;                        // shadow map object
+    coreTexturePtr m_pNormalMap;                // normal map object
 
 
 public:

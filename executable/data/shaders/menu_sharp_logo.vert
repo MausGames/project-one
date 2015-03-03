@@ -10,11 +10,10 @@
 
 void VertexMain()
 {
-    // transform position
-    gl_Position = coreObject2DPosition();
+    // transform position and texture coordinates
+    gl_Position      = coreObject2DPosition();
+    v_av2TexCoord[0] = a_v2LowTexCoord;
 
-    // forward simplified texture coordinates
-    vec2 vNewTexCoord = a_v3RawPosition.xy + vec2(0.5);
-    v_av2TexCoord[0]  = vNewTexCoord;
-    v_av2TexCoord[1]  = vNewTexCoord * 3.0;   // for transition
+    // squeeze the X-axis a bit
+    gl_Position.x *= 0.31;
 }

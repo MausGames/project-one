@@ -18,7 +18,9 @@ void VertexMain()
     vec4 v4NewPosition = vec4(coreObject3DTransformRaw(), 1.0);
     vec3 v3ViewDir     = (u_m4Camera   * v4NewPosition).xyz;
     gl_Position        =  u_m4ViewProj * v4NewPosition;
-    v_av2TexCoord[0]   = coreObject3DTexCoordRaw();
+    
+    // transform texture coordinates
+    v_av2TexCoord[0] = coreObject3DTexCoordRaw();
 
     // calculate light and color intensity (stronger on the side)
     float v1Base = dot(normalize(-v3ViewDir), coreQuatApply(u_v4Rotation, a_v3RawNormal));

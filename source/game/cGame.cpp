@@ -83,6 +83,51 @@ void cGame::RenderOverlay()
 // move the game
 void cGame::Move()
 {
+    if(CONTAINS_VALUE(m_iStatus, GAME_STATUS_LOADING))
+    {
+        // do not start while game resources are still loading
+        if(Core::Manager::Resource->IsLoading()) return;
+        REMOVE_VALUE(m_iStatus, GAME_STATUS_LOADING)
+    }
+
+    if(CONTAINS_VALUE(m_iStatus, GAME_STATUS_INTRO))
+    {
+        if(m_fTimeMission > 0.0f)
+        {
+            // end intro and start the actual game
+            REMOVE_VALUE(m_iStatus, GAME_STATUS_INTRO)
+            ADD_VALUE   (m_iStatus, GAME_STATUS_PLAY)
+
+            // re-enable player controls
+            for(coreByte i = 0; i < GAME_PLAYERS; ++i)
+                m_aPlayer[i].RemoveStatus(PLAYER_STATUS_NO_INPUT_ALL);
+        }
+        else
+        {
+            // create spline for intro animation (YZ)
+            coreSpline2 oSpline;
+            oSpline.AddNode(coreVector2(-140.0f,-10.0f), coreVector2( 1.0f, 0.0f));
+            oSpline.AddNode(coreVector2(  10.0f, 10.0f), coreVector2(-1.0f,-1.0f).Normalize());
+            oSpline.AddNode(coreVector2( -30.0f,  0.0f), coreVector2(-1.0f, 0.0f));
+
+            for(coreByte i = 0; i < GAME_PLAYERS; ++i)
+            {
+                cPlayer& oPlayer = m_aPlayer[i];
+                if(CONTAINS_VALUE(oPlayer.GetStatus(), PLAYER_STATUS_DEAD)) continue;
+
+                // calculate new player position and rotation
+                const float       fTime = CLAMP((i ? 1.0f : 1.08f) + m_fTimeMission / GAME_INTRO_DURATION, 0.0f, 1.0f);
+                const coreVector2 vPos  = oSpline.CalcPosition  (LERPB(0.0f, oSpline.GetTotalDistance(), fTime));
+                const coreVector2 vDir  = coreVector2::Direction(LERPS(0.0f, 4.0f*PI,                    fTime));
+
+                // fly player animated into the game field
+                oPlayer.SetPosition   (coreVector3(oPlayer.GetPosition().x, vPos));
+                oPlayer.SetNewPos     (coreVector2(oPlayer.GetPosition().xy()));
+                oPlayer.SetOrientation(coreVector3(vDir.x, 0.0f, vDir.y));
+            }
+        }
+    }
+
     // move all players
     for(coreByte i = 0; i < GAME_PLAYERS; ++i)
         m_aPlayer[i].Move();
@@ -101,6 +146,10 @@ void cGame::Move()
     m_CombatText.Move();
     m_Interface .Move();
 
+    // update total mission and boss time (if currently active)
+    m_fTimeMission.Update(1.0f);
+    if(m_pMission->GetCurBoss()) m_afTimeBoss[m_pMission->GetCurBossIndex()].Update(1.0f);
+
     // calculate center of player positions
     coreVector2 vCenterPos;
          if(CONTAINS_VALUE(m_aPlayer[1].GetStatus(), PLAYER_STATUS_DEAD)) vCenterPos =  m_aPlayer[0].GetPosition().xy();
@@ -110,18 +159,6 @@ void cGame::Move()
     // set environment side
     g_pEnvironment->SetTargetSide(vCenterPos * 0.65f);
     STATIC_ASSERT(GAME_PLAYERS == 2)
-
-
-
-
-
-    // 
-    m_fTimeMission.Update(1.0f);
-    if(m_fTimeMission > 0.0f)
-    {
-        if(m_pMission->GetCurBoss())
-            m_afTimeBoss[m_pMission->GetCurBossNum()].Update(1.0f);
-    }
 }
 
 
@@ -151,40 +188,45 @@ void cGame::LoadMission(const int& iID)
     if(iID != cNoMission::ID)
     {
         // 
-        m_fTimeMission = -GAME_INTRO_TIME;
-        std::memset(m_afTimeBoss, 0, sizeof(m_afTimeBoss));
+        m_Interface.FillMission(m_pMission->GetName(), PRINT("Mission %d", m_pMission->GetID()));
 
         // 
-        m_iStatus = GAME_STATUS_INTRO;
+        m_fTimeMission = -(GAME_INTRO_DURATION + GAME_INTRO_DELAY);
+        std::memset(m_afTimeBoss, 0, sizeof(m_afTimeBoss));
+
+        // set initial status
+        m_iStatus = GAME_STATUS_INTRO | GAME_STATUS_LOADING;
 
         if(m_bCoop)
         {
-            // 
+            // reset all available players
             for(coreByte i = 0; i < GAME_PLAYERS; ++i)
             {
                 m_aPlayer[i].Kill(false);
-                m_aPlayer[i].Resurrect(coreVector2(40.0f * (I_TO_F(i) - 0.5f * I_TO_F(GAME_PLAYERS-1)), -70.0f));
+                m_aPlayer[i].Resurrect(coreVector2(20.0f * (I_TO_F(i) - 0.5f * I_TO_F(GAME_PLAYERS-1)), -100.0f));
+                m_aPlayer[i].AddStatus(PLAYER_STATUS_NO_INPUT_ALL);
             }
         }
         else
         {
-            // 
+            // reset only the first player
             m_aPlayer[0].Kill(false);
-            m_aPlayer[0].Resurrect(coreVector2(0.0f,-70.0f));
+            m_aPlayer[0].Resurrect(coreVector2(0.0f,-100.0f));
+            m_aPlayer[0].AddStatus(PLAYER_STATUS_NO_INPUT_ALL);
         }
     }
 }
 
 
 // ****************************************************************
-// 
+// restart current mission
 void cGame::RestartMission()
 {
-    // 
+    // save mission ID
     const int iID = m_pMission->GetID();
     ASSERT(iID != cNoMission::ID)
 
-    // 
+    // delete mission and create it again
     this->LoadMission(cNoMission::ID);
     this->LoadMission(iID);
 }

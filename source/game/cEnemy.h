@@ -23,6 +23,11 @@ enum eEnemyStatus : coreByte
 // enemy entity interface
 class INTERFACE cEnemy : public cShip
 {
+protected:
+    coreSpline2* m_pPath;
+    coreVector2  m_vPathOffset;
+
+
 public:
     cEnemy()noexcept;
     virtual ~cEnemy();
@@ -33,7 +38,8 @@ public:
     ENABLE_ID
 
     // configure the enemy
-    void Configure(const int& iHealth, const coreVector3& vColor);
+    void Configure (const int&   iHealth, const coreVector3& vColor);
+    void PutOnTrack(coreSpline2* pPath,   const coreVector2& vPathOffset);
 
     // move the enemy
     void Move()override;

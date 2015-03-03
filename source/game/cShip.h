@@ -16,7 +16,7 @@
 class INTERFACE cShip : public coreObject3D
 {
 protected:
-    coreModelPtr m_pModelLow;   // low-polygon model object (used for depth-only, shadow, outline)
+    coreModelPtr m_pModelLow;   // low-polygon model object (used for shadow, outline)
     coreUint m_iBaseColor;      // packed base color for interpolations
 
     int m_iMaxHealth;           // maximum health value (armor)
@@ -40,8 +40,13 @@ public:
     using coreObject3D::Render;
     void Render(const coreProgramPtr& pProgram)override;
 
+    // add or remove status values
+    inline void AddStatus   (const coreByte& iStatus) {ADD_VALUE   (m_iStatus, iStatus)}
+    inline void RemoveStatus(const coreByte& iStatus) {REMOVE_VALUE(m_iStatus, iStatus)}
+
     // set object properties
-    inline void SetBaseColor(const coreVector3& vBaseColor) {m_iBaseColor = coreVector4(vBaseColor, 0.0f).PackUnorm4x8();}
+    inline void SetBaseColor(const coreVector3& vBaseColor) {m_iBaseColor = coreVector4(vBaseColor, 0.0f).PackUnorm4x8(); this->SetColor3(vBaseColor);}
+    inline void SetNewPos   (const coreVector2& vNewPos)    {m_vNewPos    = vNewPos;}
 
     // get object properties
     inline coreVector3        GetBaseColor()const {return coreVector4::UnpackUnorm4x8(m_iBaseColor).xyz();}

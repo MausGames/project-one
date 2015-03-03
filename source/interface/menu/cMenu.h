@@ -11,6 +11,7 @@
 #define _P1_GUARD_MENU_H_
 
 // TODO: language and main menu control with keyboard+joystick, cursor gets invisible on these inputs, in game menu only cursor
+// TODO: short YES-no questions: Exit Game ? Return to Menu ?
 
 
 // ****************************************************************
@@ -19,6 +20,7 @@
 #define MENU_FONT_SMALL    "ethnocentric.ttf", 13
 #define MENU_FONT_MEDIUM   "ethnocentric.ttf", 20
 #define MENU_FONT_BIG      "ethnocentric.ttf", 30
+#define MENU_FONT_HUGE     "ethnocentric.ttf", 70
 
 #define MENU_LIGHT_ACTIVE   (1.0f)     // visible strength of active menu objects
 #define MENU_LIGHT_IDLE     (0.667f)   // visible strength of idle menu objects
@@ -70,17 +72,17 @@ public:
 class cMainMenu final : public coreMenu
 {
 private:
-    coreObject2D m_GameLogo;      // game logo
-    coreObject2D m_Background;    // background object (credits surface)
+    coreObject2D m_aGameLogo[2];   // game logo (0 = back, 1 = front)
+    coreObject2D m_Background;     // background object (credits surface)
 
-    coreButton m_StartButton;     // start button
-    coreButton m_CreditsButton;   // credits button
-    coreButton m_ExitButton;      // exit button
-    coreButton m_BackButton;      // back button (credits surface)
+    coreButton m_StartButton;      // start button
+    coreButton m_CreditsButton;    // credits button
+    coreButton m_ExitButton;       // exit button
+    coreButton m_BackButton;       // back button (credits surface)
 
-    coreLabel m_VersionInfo;      // hard-coded version info string
+    coreLabel m_VersionInfo;       // hard-coded version info string
 
-    coreByte m_iCurButton;        // current selected menu button
+    coreByte m_iCurButton;         // current selected menu button
 
 
 public:
@@ -112,14 +114,15 @@ public:
     DISABLE_COPY(cMenu)
 
     // move the menu
-    void Move();
+    void Move()override;
 
     // display special menu overlays
     void ShowMsgBox () {}
     void ShowTooltip() {}
 
-    // default menu update routines
-    static void UpdateButton(coreButton* OUTPUT pButton, const bool& bFocused);
+    // default menu routines
+    static void        UpdateButton(coreButton* OUTPUT pButton, const bool& bFocused);
+    static coreVector3 HealthColor (const float& fValue);
 };
 
 

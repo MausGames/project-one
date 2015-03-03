@@ -14,7 +14,7 @@
 // ****************************************************************
 // mission definitions
 #define MISSION_BOSSES  (3u)     // default number of bosses per mission
-#define MISSION_NO_BOSS (0xFF)   // 
+#define MISSION_NO_BOSS (0xFF)   // no boss currently active (error-value)
 
 
 // ****************************************************************
@@ -22,10 +22,10 @@
 class INTERFACE cMission
 {
 protected:
-    cBoss* m_apBoss[MISSION_BOSSES];   // 
+    cBoss* m_apBoss[MISSION_BOSSES];   // pointers to all available bosses
 
-    cBoss*   m_pCurBoss;               // 
-    coreByte m_iCurBossNum;            // 
+    cBoss*   m_pCurBoss;               // pointer to currently active boss
+    coreByte m_iCurBossIndex;            // index of the active boss (or error-value)
 
 
 public:
@@ -36,13 +36,13 @@ public:
     ENABLE_ID
 
     // access mission objects
-    inline cBoss*          GetBoss      (const coreByte& iIndex)const {ASSERT (iIndex < MISSION_BOSSES) return m_apBoss[iIndex];}
-    inline cBoss*          GetCurBoss   ()const                       {return m_pCurBoss;}
-    inline const coreByte& GetCurBossNum()const                       {return m_iCurBossNum;}
+    inline cBoss*          GetBoss        (const coreByte& iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_apBoss[iIndex];}
+    inline cBoss*          GetCurBoss     ()const                       {return m_pCurBoss;}
+    inline const coreByte& GetCurBossIndex()const                       {return m_iCurBossIndex;}
 
 
 protected:
-    // 
+    // set boss active
     void _SetCurBoss(const coreByte& iIndex);
 };
 

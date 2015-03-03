@@ -20,7 +20,12 @@ void FragmentMain()
         // lookup environment and glow map
         vec3 v3Environment = coreTexture2D(1, v_av2TexCoord[0]).rgb;
         vec3 v3Glow        = coreTexture2D(2, v_av2TexCoord[0]).rgb;
-
+        
+        //float v1Max = coreMax3(v3Environment.r, v3Environment.g, v3Environment.b);
+        //float v1Max = (v3Environment.r + v3Environment.g + v3Environment.b) / 3.0;
+        //float v1Invert = (1.0 - v1Max) * 0.9;
+        //v3Environment = vec3(v1Invert);
+        
 #if !defined(_P1_GLOW_)
 
         // ignore glow map

@@ -186,23 +186,6 @@ void cShadow::EnableShadowRead(const coreByte& iProgramHandle)
 
 
 // ****************************************************************
-// render depth pass with foreground objects
-void cShadow::RenderForegroundDepth()
-{
-    // draw only into the currently active depth buffer
-    glDepthFunc (GL_ALWAYS);
-    glDrawBuffer(GL_NONE);
-    {
-        // render all global objects (foreground, instanced first)
-        cShadow::__RenderInstanced(g_pForeground->GetViewProj(), s_apGlobalList);
-        cShadow::__RenderSingle   (g_pForeground->GetViewProj(), s_apGlobalList, s_apGlobalObject);
-    }
-    glDepthFunc (GL_LEQUAL);
-    glDrawBuffer(GL_COLOR_ATTACHMENT0);
-}
-
-
-// ****************************************************************
 // reset with the resource manager
 void cShadow::__Reset(const coreResourceReset& bInit)
 {

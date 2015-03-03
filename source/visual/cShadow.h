@@ -73,9 +73,6 @@ public:
     // enable shader-program and apply read shadow matrix
     static void EnableShadowRead(const coreByte& iProgramHandle);
 
-    // render depth pass with foreground objects
-    static void RenderForegroundDepth();
-
 
 private:
     // reset with the resource manager

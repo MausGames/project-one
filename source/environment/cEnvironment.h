@@ -13,12 +13,6 @@
 // TODO: render depth-quads or use scissor test on unused background areas (transition!)
 // TODO: cache environment resources on loading (currently 100s of resource lookups)
 // TODO: merge stone diff and norm textures (own shader ?)
-// TODO: make clear color similar to lower texture color
-
-
-// ****************************************************************
-// environment definitions
-#define ENVIRONMENT_CLEAR_COLOR 0.5f, 0.5f, 0.5f, 0.0f   // environment clear color (may leak on distorted water refraction)
 
 
 // ****************************************************************

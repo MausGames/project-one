@@ -62,6 +62,8 @@ void cMenu::Move()
             g_pGame = new cGame(false);
             g_pGame->LoadMission(cMellanMission::ID);
 
+            // TODO: menue-riss bei start oder seitlicher fade-out # 
+
             // unload expendable menu resources
             Core::Manager::Resource->AttachFunction([this]()
             {
@@ -89,4 +91,16 @@ void cMenu::UpdateButton(coreButton* OUTPUT pButton, const bool& bFocused)
     // set button and caption color
     pButton              ->SetColor3(coreVector3(1.0f,1.0f,1.0f) * (fLight));
     pButton->GetCaption()->SetColor3(coreVector3(1.0f,1.0f,1.0f) * (fLight * MENU_CONTRAST_WHITE));
+}
+
+
+// ****************************************************************
+// 
+coreVector3 cMenu::HealthColor(const float& fValue)
+{
+    ASSERT(0.0f <= fValue && fValue <= 1.0f)
+
+    // 
+    if(fValue >= 0.5f) return LERP(COLOR_YELLOW_F, COLOR_GREEN_F,  fValue*2.0f - 1.0f);
+                       return LERP(COLOR_RED_F,    COLOR_YELLOW_F, fValue*2.0f);
 }

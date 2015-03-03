@@ -22,9 +22,9 @@
 enum ePlayerStatus : coreByte
 {
     PLAYER_STATUS_DEAD            = 0x01,   // completely removed from the game
-    PLAYER_STATUS_NO_INPUT_MOVE   = 0x02,   // 
-    PLAYER_STATUS_NO_INPUT_WEAPON = 0x04,   // 
-    PLAYER_STATUS_NO_INPUT_SKILL  = 0x08,   // 
+    PLAYER_STATUS_NO_INPUT_MOVE   = 0x02,   // disable player movement (user controls only)
+    PLAYER_STATUS_NO_INPUT_WEAPON = 0x04,   // disable player weapons
+    PLAYER_STATUS_NO_INPUT_SKILL  = 0x08,   // disable player skills
     PLAYER_STATUS_NO_INPUT_ALL    = PLAYER_STATUS_NO_INPUT_MOVE | PLAYER_STATUS_NO_INPUT_WEAPON | PLAYER_STATUS_NO_INPUT_SKILL
 };
 

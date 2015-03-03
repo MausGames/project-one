@@ -13,14 +13,16 @@
 
 // ****************************************************************
 // game definitions
-#define GAME_PLAYERS    (PLAYERS)   // default number of players
-#define GAME_INTRO_TIME (4.0f)      // 
+#define GAME_PLAYERS        (PLAYERS)   // default number of players
+#define GAME_INTRO_DELAY    (0.2f)      // 
+#define GAME_INTRO_DURATION (3.5f)      // 
 
 enum cGameStatus : coreByte
 {
-    GAME_STATUS_INTRO = 0x01,   // 
-    GAME_STATUS_PLAY  = 0x02,   // 
-    GAME_STATUS_OUTRO = 0x03    // (two bits) 
+    GAME_STATUS_INTRO   = 0x01,   // 
+    GAME_STATUS_PLAY    = 0x02,   // 
+    GAME_STATUS_OUTRO   = 0x03,   // (two bits) 
+    GAME_STATUS_LOADING = 0x04    // 
 };
 
 

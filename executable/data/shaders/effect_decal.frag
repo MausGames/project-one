@@ -24,7 +24,7 @@ void FragmentMain()
         
         // draw color with alpha
         vec4 v4Texture = coreTexture2D(0, v_av2TexCoord[0]);
-        gl_FragColor  = vec4(v4Texture.rgb, v4Texture.a * v1Alpha) * u_v4Color;
+        gl_FragColor   = vec4(v4Texture.rgb, v4Texture.a * v1Alpha) * u_v4Color;
     }
     else gl_FragColor = vec4(0.0);
 
