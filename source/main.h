@@ -39,6 +39,7 @@
 #define _P1_GUARD_MAIN_H_
 
 // TODO: create timer and int-value as tick-multiplier for sustained damage
+// TODO: remove magic numbers (regularly)
 
 
 // ****************************************************************
@@ -58,15 +59,15 @@
 #define COLOR_SILVER_F     coreVector3(0.855f, 0.855f, 0.878f)
 #define COLOR_GOLD_F       coreVector3(1.000f, 0.859f, 0.000f)
 
-#define COLOR_YELLOW_L     255, 210, 100
-#define COLOR_ORANGE_L     255, 113,  58
-#define COLOR_RED_L        255,  70,  70
-#define COLOR_PURPLE_L     181,  85, 255
-#define COLOR_BLUE_L        26, 179, 255
-#define COLOR_GREEN_L       30, 190,  90
-#define COLOR_BRONZE_L     236, 169,  66
-#define COLOR_SILVER_L     218, 218, 224
-#define COLOR_GOLD_L       255, 219,   0
+#define COLOR_YELLOW_L     255u, 210u, 100u
+#define COLOR_ORANGE_L     255u, 113u,  58u
+#define COLOR_RED_L        255u,  70u,  70u
+#define COLOR_PURPLE_L     181u,  85u, 255u
+#define COLOR_BLUE_L        26u, 179u, 255u
+#define COLOR_GREEN_L       30u, 190u,  90u
+#define COLOR_BRONZE_L     236u, 169u,  66u
+#define COLOR_SILVER_L     218u, 218u, 224u
+#define COLOR_GOLD_L       255u, 219u,   0u
 
 #define CAMERA_POSITION    coreVector3(0.0f, 0.0f, 110.0f)
 #define CAMERA_DIRECTION   coreVector3(0.0f, 0.0f,  -1.0f)
@@ -86,14 +87,14 @@
 #define TYPE_BULLET_PLAYER (11)
 #define TYPE_BULLET_ENEMY  (12)
 
-#define ENABLE_ID                           \
-    virtual const int   GetID  ()const = 0; \
-    virtual const char* GetName()const = 0;
+#define ENABLE_ID                               \
+    virtual const coreInt32 GetID  ()const = 0; \
+    virtual const coreChar* GetName()const = 0;
 
-#define ASSIGN_ID(i,n)                                      \
-    static const int ID = i;                                \
-    inline const int   GetID  ()const override {return ID;} \
-    inline const char* GetName()const override {return n;}
+#define ASSIGN_ID(i,n)                                          \
+    static const coreInt32 ID = i;                              \
+    inline const coreInt32 GetID  ()const override {return ID;} \
+    inline const coreChar* GetName()const override {return n;}
 
 #define CONTAINS(c,i) (std::find((c).begin(), (c).end(), (i)) != (c).end())
 
@@ -102,6 +103,9 @@
 // forward declarations
 class cShip;
 class cPlayer;
+class cEnemy;
+class cBoss;
+class cMission;
 
 
 // ****************************************************************
@@ -127,6 +131,7 @@ extern cPostProcessing* g_pPostProcessing;   // main post-processing object
 
 #include "environment/cOutdoor.h"
 #include "environment/cWater.h"
+#include "environment/background/cBackground.h"
 #include "environment/cEnvironment.h"
 #include "interface/cCombatText.h"
 #include "interface/cInterface.h"

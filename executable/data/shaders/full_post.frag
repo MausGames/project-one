@@ -10,30 +10,18 @@
 
 void FragmentMain()
 {
-    // lookup foreground map
-    vec4 v4Foreground = coreTexture2D(0, v_av2TexCoord[0]);
+    // lookup textures
+    vec4 v4Foreground  = coreTexture2D(0, v_av2TexCoord[0]);
+    vec3 v3Environment = coreTexture2D(1, v_av2TexCoord[0]).rgb * u_v4Color.a;
+    vec3 v3Glow        = coreTexture2D(2, v_av2TexCoord[0]).rgb;
 
-    // draw only foreground on solid pixels
-    if(v4Foreground.a >= 0.999) gl_FragColor = vec4(v4Foreground.rgb, 1.0);
-    else
-    {
-        // lookup environment and glow map
-        vec3 v3Environment = coreTexture2D(1, v_av2TexCoord[0]).rgb;
-        vec3 v3Glow        = coreTexture2D(2, v_av2TexCoord[0]).rgb;
-        
-        //float v1Max = coreMax3(v3Environment.r, v3Environment.g, v3Environment.b);
-        //float v1Max = (v3Environment.r + v3Environment.g + v3Environment.b) / 3.0;
-        //float v1Invert = (1.0 - v1Max) * 0.9;
-        //v3Environment = vec3(v1Invert);
-        
 #if !defined(_P1_GLOW_)
 
-        // ignore glow map
-        v3Glow = vec3(0.0);
+    // ignore glow map
+    v3Glow = vec3(0.0);
 
 #endif
 
-        // draw blend between all textures (glow only on environment for high contrast)
-        gl_FragColor = vec4(mix(v3Environment + v3Glow, v4Foreground.rgb / v4Foreground.a, v4Foreground.a), 1.0);
-    }
+    // draw blend between all textures (glow only on environment for high contrast)
+    gl_FragColor = vec4(mix(v3Environment + v3Glow, v4Foreground.rgb / v4Foreground.a, v4Foreground.a), 1.0);
 }

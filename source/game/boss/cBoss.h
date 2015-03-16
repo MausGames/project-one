@@ -12,15 +12,31 @@
 
 
 // ****************************************************************
+// boss definitions
+#define BOSS_TIMERS (4u)   // 
+
+
+// ****************************************************************
 // boss entity interface
 class INTERFACE cBoss : public cEnemy
 {
+protected:
+    coreUint8 m_iPhase;                // 
+    coreUint8 m_iLevel;                // 
+
+    coreTimer m_aTimer[BOSS_TIMERS];   // 
+
+
 public:
     cBoss()noexcept;
     virtual ~cBoss() {}
 
     DISABLE_COPY(cBoss)
     ENABLE_ID
+
+    // 
+    inline const coreUint8& GetPhase()const {return m_iPhase;}
+    inline const coreUint8& GetLevel()const {return m_iLevel;}
 };
 
 

@@ -26,7 +26,7 @@ cIntroMenu::cIntroMenu()noexcept
     // bind menu objects
     this->BindObject(SURFACE_INTRO_LOGO, &m_MausLogo);
 
-    const bool bSelectLanguage = Core::Language->GetNumStrings() ? false : true;
+    const coreBool bSelectLanguage = Core::Language->GetNumStrings() ? false : true;
     if(bSelectLanguage)
     {
         // 
@@ -35,11 +35,11 @@ cIntroMenu::cIntroMenu()noexcept
         if(asFile.empty()) Core::Log->Error("No language files found (data/languages/*.lng)");
 
         // 
-        const float fOffset = I_TO_F(asFile.size()) * 0.5f - 0.5f;
+        const coreFloat fOffset = I_TO_F(asFile.size()) * 0.5f - 0.5f;
         FOR_EACH(it, asFile)
         {
             // create new language button
-            coreButton* pButton = new coreButton(MENU_BUTTON, MENU_FONT_BIG, 0);
+            coreButton* pButton = new coreButton(MENU_BUTTON, MENU_FONT_MEDIUM_3, 0);
             pButton->DefineProgram("menu_border_program");
             pButton->SetPosition  (coreVector2(0.0f, 0.15f * (fOffset - I_TO_F(m_apLanguageButton.size()))));
             pButton->SetSize      (coreVector2(0.3f, 0.07f) * 1.5f);
@@ -80,15 +80,15 @@ void cIntroMenu::Move()
     if(this->GetCurSurface() == SURFACE_INTRO_LANGUAGE)
     {
         // 
-        FOR_EACH(it, m_apLanguageButton) if((*it)->IsFocused())     m_iCurLanguage =  coreByte(it - m_apLanguageButton.begin());
-        FOR_EACH(it, m_apLanguageButton) cMenu::UpdateButton((*it), m_iCurLanguage == coreByte(it - m_apLanguageButton.begin()));
+        FOR_EACH(it, m_apLanguageButton) if((*it)->IsFocused())     m_iCurLanguage =  coreUint8(it - m_apLanguageButton.begin());
+        FOR_EACH(it, m_apLanguageButton) cMenu::UpdateButton((*it), m_iCurLanguage == coreUint8(it - m_apLanguageButton.begin()));
 
         // 
         FOR_EACH(it, m_apLanguageButton)
         {
             if((*it)->IsClicked())
             {
-                const char* pcPath = m_apLanguageButton.get_key(it)->c_str();
+                const coreChar* pcPath = m_apLanguageButton.get_key(it)->c_str();
 
                 // 
                 Core::Language->Load(pcPath);

@@ -56,7 +56,7 @@ void FragmentMain()
 #if (_CORE_QUALITY_) == 0
 
     // ignore normal map
-    v2TexNormal = vec2(0.0);
+    v2TexNormal = vec2(0.5);
 
 #endif
 

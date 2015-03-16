@@ -11,6 +11,7 @@
 #define _P1_GUARD_WATER_H_
 
 // TODO: reduce reflection-framebuffer without reflection enabled
+// TODO: water-surface clipping for refraction
 
 
 // ****************************************************************
@@ -25,8 +26,8 @@
 class cWater : public coreObject3D
 {
 protected:
-    coreFlow m_fAnimation;                // water animation value
-    float    m_fFlyOffset;                // current fly offset
+    coreFlow  m_fAnimation;               // water animation value
+    coreFloat m_fFlyOffset;               // current fly offset
 
     coreFrameBuffer m_iAboveReflection;   // reflection frame buffer
     coreFrameBuffer m_iBelowRefraction;   // refraction frame buffer with geometric depth
@@ -49,10 +50,10 @@ public:
     void UpdateDepth(cOutdoor* pOutdoor, const std::vector<coreBatchList*>& apGroundObjectList);
 
     // set object properties
-    void SetFlyOffset(const float& fFlyOffset);
+    void SetFlyOffset(const coreFloat& fFlyOffset);
 
     // get object properties
-    inline const float&     GetFlyOffset ()const {return m_fFlyOffset;}
+    inline const coreFloat& GetFlyOffset ()const {return m_fFlyOffset;}
     inline coreFrameBuffer* GetReflection()      {return &m_iAboveReflection;}
     inline coreFrameBuffer* GetRefraction()      {return &m_iBelowRefraction;}
 

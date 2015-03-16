@@ -13,13 +13,13 @@
 
 // ****************************************************************
 // interface definitions
-#define INTERFACE_VIEWS             (PLAYERS)   // 
+#define INTERFACE_VIEWS (PLAYERS)               // number of player views
 
-#define INTERFACE_MISSION_START     (-1.0f)     // 
-#define INTERFACE_MISSION_DURATION   (3.0f)     // 
-#define INTERFACE_MISSION_SPEED      (4.0f)     // 
-#define INTERFACE_MISSION_ANIMATION  (2.9f)     // 
-#define INTERFACE_MISSION_SWAP       (2.0f)     // 
+#define INTERFACE_BANNER_TYPE_BOSS    (false)   // boss banner type
+#define INTERFACE_BANNER_TYPE_MISSION (true)    // mission banner type
+#define INTERFACE_BANNER_SPEED        (4.0f)    // fade-in and fade-out speed
+#define INTERFACE_BANNER_DURATION     (3.0f)    // display duration (with fading)
+#define INTERFACE_BANNER_ANIMATION    (2.9f)    // animation duration
 
 
 // ****************************************************************
@@ -30,39 +30,38 @@ private:
     // player view structure
     struct sPlayerView
     {
-        coreObject2D m_aHealthBar  [2];   // (0 = background, 1 = foreground) 
-        coreLabel    m_aHealthValue[2];   // (0 = ##UNUSED##, 1 = actual value) # 
-        coreLabel    m_ScoreMission;      // 
-        coreLabel    m_ScoreBoss;         // ##UNUSED## 
-        coreLabel    m_Combo;             // 
-        coreLabel    m_Chain;             // 
+        coreObject2D m_aHealthBar  [2];   // player health bar   (0 = background, 1 = foreground)
+        coreLabel    m_aHealthValue[2];   // player health value (0 = armor text, 1 = actual value)
+        coreLabel    m_Score;             // score label
+        coreLabel    m_Combo;             // combo label
+        coreLabel    m_Chain;             // chain label
 
-        sPlayerView()noexcept;
+        sPlayerView()noexcept {}
+        void Construct(const coreUintW& iIndex);
     };
 
 
 private:
-    sPlayerView* m_apView[INTERFACE_VIEWS];   // 
+    sPlayerView m_aView[INTERFACE_VIEWS];   // player views
+    coreUint8   m_iNumViews;                // number of constructed player views
 
-    coreObject2D m_aBossHealthBar  [2];       // (0 = background, 1 = foreground) 
-    coreLabel    m_aBossHealthValue[2];       // (0 = percent, 1 = actual value) 
-    coreLabel    m_BossName;                  // 
+    coreObject2D m_aBossHealthBar  [2];     // boss health bar   (0 = background, 1 = foreground)
+    coreLabel    m_aBossHealthValue[2];     // boss health value (0 = percent,    1 = actual value)
+    coreLabel    m_aBossTime       [2];     // current boss time (0 = seconds,    1 = deciseconds)
+    coreLabel    m_BossName;                // current boss name
 
-    coreObject2D m_BannerBar;                 // 
-    coreLabel    m_BannerMain;                // 
-    coreLabel    m_aBannerSub[3];             // 
+    coreObject2D m_BannerBar;               // banner background
+    coreLabel    m_aBannerText[4];          // banner labels
+    coreFloat    m_fBannerStart;            // animation start time
+    coreBool     m_bBannerType;             // animation type (boss, mission)
 
-    coreLabel m_aTimeMission[2];              // (0 = seconds, 1 = milliseconds) ##UNUSED## 
-    coreLabel m_aTimeBoss   [2];              // 
-
-    float m_fAlphaAll;                        // 
-    float m_fAlphaBoss;                       // 
-    bool  m_bVisible;                         // 
+    coreFloat m_fAlphaAll;                  // overall alpha value (except for banner)
+    coreFloat m_fAlphaBoss;                 // boss alpha value
+    coreBool  m_bVisible;                   // visibility status
 
 
 public:
-    cInterface(const coreByte& iNumViews)noexcept;
-    ~cInterface();
+    explicit cInterface(const coreUint8& iNumViews)noexcept;
 
     DISABLE_COPY(cInterface)
 
@@ -70,14 +69,17 @@ public:
     void Render();
     void Move();
 
-    // 
-    void FillMission(const char* pcMain, const char* pcSub);
-    void FillBoss   (const char* pcMain, const char* pcSub);
+    // control banner animation
+    void ShowBoss   (const coreChar* pcMain, const coreChar* pcSub);
+    void ShowBoss   (const cBoss*    pBoss);
+    void ShowMission(const coreChar* pcMain, const coreChar* pcSub);
+    void ShowMission(const cMission* pMission);
+    coreBool ActiveBanner()const;
 
-    // 
-    inline void SetAlphaAll (const float& fAlpha)   {m_fAlphaAll  = fAlpha;}
-    inline void SetAlphaBoss(const float& fAlpha)   {m_fAlphaBoss = fAlpha;}
-    inline void SetVisible  (const bool&  bVisible) {m_bVisible   = bVisible;}
+    // set object properties
+    inline void SetAlphaAll (const coreFloat& fAlpha)   {m_fAlphaAll  = fAlpha;}
+    inline void SetAlphaBoss(const coreFloat& fAlpha)   {m_fAlphaBoss = fAlpha;}
+    inline void SetVisible  (const coreBool&  bVisible) {m_bVisible   = bVisible;}
 };
 
 

@@ -51,5 +51,5 @@ void FragmentMain()
     v3AboveReflection = 0.84 * (0.51 * c_v3Blue + 0.59 * v3AboveReflection + vec3(v1ReflFactor));
 
     // draw final color
-    gl_FragColor = vec4(mix(v3BelowRefraction, v3AboveReflection, v1Depth) * (0.93 + 0.12 * v1BumpFactor), 1.0);
+    gl_FragColor = vec4(mix(v3BelowRefraction, v3AboveReflection, v1Depth) * (0.92 + 0.12 * v1BumpFactor), 1.0);
 }

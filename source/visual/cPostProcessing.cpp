@@ -25,9 +25,9 @@ cPostProcessing::cPostProcessing()noexcept
 
     // place objects left-right or top-down depending on window aspect ratio
     const coreVector2 vFlip = (vResolution.AspectRatio() < 1.0f) ? coreVector2(0.0f,1.0f) : coreVector2(1.0f,0.0f);
-    for(int i = 0; i < 2; ++i)
+    for(coreUintW i = 0; i < 2; ++i)
     {
-        const float fSide = (i ? 1.0f : -1.0f);
+        const coreFloat fSide = (i ? 1.0f : -1.0f);
 
         // create side-objects
         m_aSideArea[i].DefineProgram("menu_border_program");
@@ -48,6 +48,11 @@ cPostProcessing::cPostProcessing()noexcept
 // apply post-processing
 void cPostProcessing::Apply()
 {
+
+    //this->SetAlpha(g_pGame ? (1.0f - 0.2f*CLAMP(g_pGame->GetTimeMission()-2.0f, 0.0f, 1.0f)) : 1.0f);
+    // shader!
+
+
     // switch back to default frame buffer (again)
     coreFrameBuffer::EndDraw();
 
@@ -64,7 +69,7 @@ void cPostProcessing::Apply()
         this->Render();
 
         // render side-objects
-        for(int i = 0; i < 2; ++i) m_aSideArea[i].Render();
+        for(coreUintW i = 0; i < 2; ++i) m_aSideArea[i].Render();
     }
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -85,7 +90,7 @@ void cPostProcessing::Apply()
 // recompile post-processing shader-program
 void cPostProcessing::Recompile()
 {
-    const char* pcConfig = PRINT("%s", g_CurConfig.Graphics.iGlow ? SHADER_GLOW : "");
+    const coreChar* pcConfig = PRINT("%s", g_CurConfig.Graphics.iGlow ? SHADER_GLOW : "");
 
     // change configuration of post-processing shader
     ((coreShader*)Core::Manager::Resource->Get<coreShader>("full_post.frag")->GetResource())
@@ -102,9 +107,9 @@ void cPostProcessing::Recompile()
 
 // ****************************************************************
 // set side-object opacity
-void cPostProcessing::SetSideOpacity(const float& fValue)
+void cPostProcessing::SetSideOpacity(const coreFloat& fValue)
 {
     // change color instead of transparency (blending is disabled)
     const coreVector3 vColor = coreVector3(1.0f,1.0f,1.0f) * CLAMP(fValue, 0.0f, 1.0f);
-    for(int i = 0; i < 2; ++i) m_aSideArea[i].SetColor3(vColor);
+    for(coreUintW i = 0; i < 2; ++i) m_aSideArea[i].SetColor3(vColor);
 }

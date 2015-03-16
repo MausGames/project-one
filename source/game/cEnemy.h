@@ -13,9 +13,10 @@
 
 // ****************************************************************
 // enemy definitions
-enum eEnemyStatus : coreByte
+enum eEnemyStatus : coreUint8
 {
-    ENEMY_STATUS_DEAD = 0x01   // completely removed from the game
+    ENEMY_STATUS_DEAD   = 0x01,   // completely removed from the game
+    ENEMY_STATUS_SILENT = 0x02    //  no-shoot # 
 };
 
 
@@ -24,8 +25,11 @@ enum eEnemyStatus : coreByte
 class INTERFACE cEnemy : public cShip
 {
 protected:
-    coreSpline2* m_pPath;
-    coreVector2  m_vPathOffset;
+    coreSpline2* m_pPath;         // 
+    coreVector2  m_vPathOffset;   // 
+
+    coreFlow  m_fLifeTime;        // 
+    coreUint8 m_iNumShots;        // 
 
 
 public:
@@ -38,18 +42,27 @@ public:
     ENABLE_ID
 
     // configure the enemy
-    void Configure (const int&   iHealth, const coreVector3& vColor);
-    void PutOnTrack(coreSpline2* pPath,   const coreVector2& vPathOffset);
+    void Configure (const coreInt32& iHealth, const coreVector3& vColor);
+    void SetupTrack(coreSpline2* pPath, const coreVector2& vPathOffset);
 
-    // move the enemy
-    void Move()override;
+    // render and move the enemy
+    void Render()override;
+    void Move  ()override;
 
     // reduce current health
-    void TakeDamage(const int& iDamage, cPlayer* pAttacker);
+    void TakeDamage(const coreInt32& iDamage, cPlayer* pAttacker);
 
     // control life and death
-    void Resurrect(const coreVector2& vPosition);
-    void Kill     (const bool&        bAnimated);
+    void Resurrect();
+    void Resurrect(const coreVector2& vPosition, const coreVector2& vDirection);
+    void Kill     (const coreBool&    bAnimated);
+
+
+protected:
+    // 
+    coreBool _DefaultShooting      (const coreFloat& fFireRate);
+    coreBool _DefaultMovementPath  (const coreFloat& fDistance);
+    coreBool _DefaultMovementTarget(const coreVector2& vTarget, const coreFloat& fSpeedTurn, const coreFloat& fSpeedMove);
 
 
 private:
@@ -69,6 +82,11 @@ public:
 
     DISABLE_COPY(cScoutEnemy)
     ASSIGN_ID(1, "Scout")
+
+
+private:
+    // 
+    void __MoveOwn()override;
 };
 
 
@@ -81,6 +99,11 @@ public:
 
     DISABLE_COPY(cWarriorEnemy)
     ASSIGN_ID(2, "Warrior")
+
+
+private:
+    // 
+    void __MoveOwn()override;
 };
 
 

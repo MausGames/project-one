@@ -42,7 +42,7 @@ void cGlow::Update()
     if(!g_CurConfig.Graphics.iGlow) return;
 
     // create glow only with active objects
-    bool bActive = !m_apObject.empty();
+    coreBool bActive = !m_apObject.empty();
     FOR_EACH(it, m_apList)
     {
         if((*it)->GetCurEnabled())

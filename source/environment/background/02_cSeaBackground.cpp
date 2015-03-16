@@ -6,14 +6,13 @@
 //| More information available in the readme file  |//
 //*------------------------------------------------*//
 //////////////////////////////////////////////////////
+#include "main.h"
 
 
-void VertexMain()
+// ****************************************************************
+// constructor
+cSeaBackground::cSeaBackground()noexcept
 {
-    // transform position and texture coordinates
-    gl_Position      = coreObject2DPosition();
-    v_av2TexCoord[0] = a_v2LowTexCoord;
-
-    // squeeze the X-axis a bit
-    gl_Position.x *= 0.31;
+    // create outdoor-surface object 
+    m_pOutdoor = new cOutdoor("dust", "dust", 2, 4.0f);
 }

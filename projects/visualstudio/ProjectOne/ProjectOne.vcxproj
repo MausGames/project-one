@@ -21,6 +21,9 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\source\additional\cBindContainer.cpp" />
     <ClCompile Include="..\..\..\source\application.cpp" />
+    <ClCompile Include="..\..\..\source\environment\background\01_cGrassBackground.cpp" />
+    <ClCompile Include="..\..\..\source\environment\background\02_cSeaBackground.cpp" />
+    <ClCompile Include="..\..\..\source\environment\background\cBackground.cpp" />
     <ClCompile Include="..\..\..\source\environment\cEnvironment.cpp" />
     <ClCompile Include="..\..\..\source\environment\cOutdoor.cpp" />
     <ClCompile Include="..\..\..\source\environment\cWater.cpp" />
@@ -34,7 +37,7 @@
     <ClCompile Include="..\..\..\source\game\cPlayer.cpp" />
     <ClCompile Include="..\..\..\source\game\cShip.cpp" />
     <ClCompile Include="..\..\..\source\game\cWeapon.cpp" />
-    <ClCompile Include="..\..\..\source\game\mission\01_cMellanMission.cpp" />
+    <ClCompile Include="..\..\..\source\game\mission\01_cViridoMission.cpp" />
     <ClCompile Include="..\..\..\source\game\mission\cMission.cpp" />
     <ClCompile Include="..\..\..\source\interface\cCombatText.cpp" />
     <ClCompile Include="..\..\..\source\interface\cInterface.cpp" />
@@ -54,6 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\additional\cBindContainer.h" />
+    <ClInclude Include="..\..\..\source\environment\background\cBackground.h" />
     <ClInclude Include="..\..\..\source\environment\cEnvironment.h" />
     <ClInclude Include="..\..\..\source\environment\cOutdoor.h" />
     <ClInclude Include="..\..\..\source\environment\cWater.h" />
@@ -160,7 +164,7 @@
     <ClCompile>
       <PrecompiledHeader>
       </PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -192,7 +196,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <SmallerTypeCheck>true</SmallerTypeCheck>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -205,7 +209,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
@@ -240,7 +244,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>

@@ -18,14 +18,27 @@
 
 
 // ****************************************************************
+// phase management macros
+#define PHASE_MAIN         m_anPhase.push_back([&]()                               // 
+#define PHASE_SUB(t)       ((m_fPhaseTimeBefore <= (t)) && ((t) < m_fPhaseTime))   // 
+#define PHASE_END_NOW      {m_anPhase.pop_back(); m_fPhaseTime = 0.0f;}            // 
+#define PHASE_END_AFTER(t) {if(m_fPhaseTime >= (t)) PHASE_END_NOW}                 // 
+
+
+// ****************************************************************
 // mission interface
 class INTERFACE cMission
 {
 protected:
-    cBoss* m_apBoss[MISSION_BOSSES];   // pointers to all available bosses
+    cBoss* m_apBoss[MISSION_BOSSES];                 // pointers to all available bosses
 
-    cBoss*   m_pCurBoss;               // pointer to currently active boss
-    coreByte m_iCurBossIndex;            // index of the active boss (or error-value)
+    cBoss*    m_pCurBoss;                            // pointer to currently active boss
+    coreUintW m_iCurBossIndex;                       // index of the active boss (or error-value)
+
+    std::vector<std::function<void()> > m_anPhase;   // 
+
+    coreFlow  m_fPhaseTime;                          // 
+    coreFloat m_fPhaseTimeBefore;                    // 
 
 
 public:
@@ -35,15 +48,28 @@ public:
     DISABLE_COPY(cMission)
     ENABLE_ID
 
+    // setup the mission
+    void Setup();
+
+    // move the mission
+    void Move();
+
     // access mission objects
-    inline cBoss*          GetBoss        (const coreByte& iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_apBoss[iIndex];}
-    inline cBoss*          GetCurBoss     ()const                       {return m_pCurBoss;}
-    inline const coreByte& GetCurBossIndex()const                       {return m_iCurBossIndex;}
+    inline cBoss*           GetBoss        (const coreUintW& iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_apBoss[iIndex];}
+    inline cBoss*           GetCurBoss     ()const                        {return m_pCurBoss;}
+    inline const coreUintW& GetCurBossIndex()const                        {return m_iCurBossIndex;}
 
 
 protected:
-    // set boss active
-    void _SetCurBoss(const coreByte& iIndex);
+    // set active boss
+    void _SetCurBoss(const coreUintW& iIndex);
+    void _SetCurBoss(const cBoss*     pBoss);
+
+
+private:
+    // setup and move routines for derived classes
+    virtual void __SetupOwn() {}
+    virtual void __MoveOwn () {}
 };
 
 
@@ -60,19 +86,29 @@ public:
 
 
 // ****************************************************************
-// Mellan mission class
-class cMellanMission final : public cMission
+// Virido mission class
+class cViridoMission final : public cMission
 {
 private:
     cCrossfieldBoss m_Crossfield;   // 
-    cScoutEnemy     m_aScout[10];   // 
+
+    cScoutEnemy   m_aScout[10];     // 
+    cWarriorEnemy m_Warrior;        // 
+
+    coreSpline2 m_Spline;           // 
 
 
 public:
-    cMellanMission()noexcept;
+    cViridoMission()noexcept;
 
-    DISABLE_COPY(cMellanMission)
-    ASSIGN_ID(1, "Mellan")
+    DISABLE_COPY(cViridoMission)
+    ASSIGN_ID(1, "Virido")
+
+
+private:
+    // setup and move the Virido mission
+    void __SetupOwn()override;
+    void __MoveOwn ()override;
 };
 
 
@@ -149,7 +185,19 @@ public:
 
 
 // ****************************************************************
-// Veneta ??? Virido Rupes Shor Ater
+// Ater mission class
+class cAterMission final : public cMission
+{
+public:
+    cAterMission()noexcept {}
+
+    DISABLE_COPY(cAterMission)
+    ASSIGN_ID(8, "Ater")
+};
+
+
+// ****************************************************************
+// Veneta ??? Mellan Rupes Shor
 //class ??? final : public cMission
 //{
 //public:

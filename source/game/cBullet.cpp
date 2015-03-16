@@ -39,7 +39,7 @@ void cBullet::Move()
 
 // ****************************************************************
 // prepare and start up bullet
-void cBullet::Activate(const int& iDamage, cShip* pOwner, const int& iType, const coreVector2& vPosition, const coreVector2& vDirection)
+void cBullet::Activate(const coreInt32& iDamage, cShip* pOwner, const coreInt32& iType, const coreVector2& vPosition, const coreVector2& vDirection)
 {
     // activate bullet and remove readiness
     if(CONTAINS_VALUE(m_iStatus, BULLET_STATUS_ACTIVE)) return;
@@ -61,7 +61,7 @@ void cBullet::Activate(const int& iDamage, cShip* pOwner, const int& iType, cons
 
 // ****************************************************************
 // shut down bullet
-void cBullet::Deactivate(const bool& bAnimated)
+void cBullet::Deactivate(const coreBool& bAnimated)
 {
     // deactivate bullet (will be cleaned up by bullet manager)
     if(!CONTAINS_VALUE(m_iStatus, BULLET_STATUS_ACTIVE)) return;

@@ -34,8 +34,8 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreModel>  ("ship_enemy_warrior_low.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_warrior_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_player_def_high.md3",        CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_def_high.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_player_def_low.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_def_low.md3");
-    Core::Manager::Resource->Load<coreModel>  ("ship_player_off_high.md3",        CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_off_high.md3");
-    Core::Manager::Resource->Load<coreModel>  ("ship_player_off_low.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_off_low.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_player_atk_high.md3",        CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_atk_high.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_player_atk_low.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_atk_low.md3");
 
     Core::Manager::Resource->Load<coreTexture>("effect_energy.png",               CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_energy.png");
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_blue.png",     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_blue.png");
@@ -51,8 +51,7 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreTexture>("environment_stone_diff.png",      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_stone_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_stone_norm.png",      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_stone_norm.png");
     Core::Manager::Resource->Load<coreTexture>("environment_water_norm.png",      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_water_norm.png");
-    Core::Manager::Resource->Load<coreTexture>("game_logo_back.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/game_logo_back.png");
-    Core::Manager::Resource->Load<coreTexture>("game_logo_front.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/game_logo_front.png");
+    Core::Manager::Resource->Load<coreTexture>("game_logo.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/game_logo.png");
     Core::Manager::Resource->Load<coreTexture>("maus_logo.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/maus_logo.png");
     Core::Manager::Resource->Load<coreTexture>("menu_background_black.png",       CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_background_black.png");
     Core::Manager::Resource->Load<coreTexture>("menu_detail_01.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_detail_01.png");
@@ -99,7 +98,6 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreShader> ("menu_animate.frag",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_animate.frag");
     Core::Manager::Resource->Load<coreShader> ("menu_border.vert",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_border.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("menu_border.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_border.frag");
-    Core::Manager::Resource->Load<coreShader> ("menu_sharp_logo.vert",            CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_sharp_logo.vert");
     Core::Manager::Resource->Load<coreShader> ("menu_sharp.frag",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_sharp.frag");
     Core::Manager::Resource->Load<coreShader> ("object.vert",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert");
     Core::Manager::Resource->Load<coreShader> ("object_ground.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ground.frag", SHADER_SHADOW);
@@ -230,11 +228,6 @@ static void SetupResources()
     ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("menu_border_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("menu_border.vert")
         ->AttachShader("menu_border.frag")
-        ->Finish();
-
-    ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("menu_sharp_logo_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
-        ->AttachShader("menu_sharp_logo.vert")
-        ->AttachShader("menu_sharp.frag")
         ->Finish();
 
     ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("menu_sharp_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())

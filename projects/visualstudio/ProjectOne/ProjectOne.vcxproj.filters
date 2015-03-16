@@ -39,9 +39,6 @@
     <ClCompile Include="..\..\..\source\game\boss\cBoss.cpp">
       <Filter>game\boss</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\game\mission\01_cMellanMission.cpp">
-      <Filter>game\mission</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\source\game\mission\cMission.cpp">
       <Filter>game\mission</Filter>
     </ClCompile>
@@ -92,6 +89,18 @@
     </ClCompile>
     <ClCompile Include="..\..\..\source\visual\cDistortion.cpp">
       <Filter>visual</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\game\mission\01_cViridoMission.cpp">
+      <Filter>game\mission</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\environment\background\01_cGrassBackground.cpp">
+      <Filter>environment\background</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\environment\background\cBackground.cpp">
+      <Filter>environment\background</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\environment\background\02_cSeaBackground.cpp">
+      <Filter>environment\background</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -174,6 +183,9 @@
     <ClInclude Include="..\..\..\source\visual\cDistortion.h">
       <Filter>visual</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\source\environment\background\cBackground.h">
+      <Filter>environment\background</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="environment">
@@ -202,6 +214,9 @@
     </Filter>
     <Filter Include="interface\menu">
       <UniqueIdentifier>{c860351c-f7f7-4bd3-a3aa-6c3100dafa20}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="environment\background">
+      <UniqueIdentifier>{c509ba18-b93f-49da-8dcc-2fcba6b09c3d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

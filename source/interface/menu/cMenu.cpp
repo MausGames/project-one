@@ -60,7 +60,7 @@ void cMenu::Move()
             // 
             ASSERT(!g_pGame)
             g_pGame = new cGame(false);
-            g_pGame->LoadMission(cMellanMission::ID);
+            g_pGame->LoadMission(cViridoMission::ID);
 
             // TODO: menue-riss bei start oder seitlicher fade-out # 
 
@@ -83,10 +83,10 @@ void cMenu::Move()
 
 // ****************************************************************
 // default button update routine
-void cMenu::UpdateButton(coreButton* OUTPUT pButton, const bool& bFocused)
+void cMenu::UpdateButton(coreButton* OUTPUT pButton, const coreBool& bFocused)
 {
     // select visible strength
-    const float fLight = bFocused ? MENU_LIGHT_ACTIVE : MENU_LIGHT_IDLE;
+    const coreFloat fLight = bFocused ? MENU_LIGHT_ACTIVE : MENU_LIGHT_IDLE;
 
     // set button and caption color
     pButton              ->SetColor3(coreVector3(1.0f,1.0f,1.0f) * (fLight));
@@ -96,7 +96,7 @@ void cMenu::UpdateButton(coreButton* OUTPUT pButton, const bool& bFocused)
 
 // ****************************************************************
 // 
-coreVector3 cMenu::HealthColor(const float& fValue)
+coreVector3 cMenu::HealthColor(const coreFloat& fValue)
 {
     ASSERT(0.0f <= fValue && fValue <= 1.0f)
 

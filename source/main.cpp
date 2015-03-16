@@ -28,9 +28,9 @@ cGame*           g_pGame           = NULL;
 void CoreApp::Init()
 {
     // calculate biggest possible 1:1 resolution
-    const float fMinRes = Core::System->GetResolution().Min();
-    g_vGameResolution   = coreVector2(fMinRes, fMinRes);
-    g_vMenuCenter       = g_vGameResolution / Core::System->GetResolution();
+    const coreFloat fMinRes = Core::System->GetResolution().Min();
+    g_vGameResolution = coreVector2(fMinRes, fMinRes);
+    g_vMenuCenter     = g_vGameResolution / Core::System->GetResolution();
 
     // set camera to default values
     Core::Graphics->SetCamera(CAMERA_POSITION, CAMERA_DIRECTION, CAMERA_ORIENTATION);
@@ -167,7 +167,7 @@ void CoreApp::Move()
         if(!g_pGame)
         {
             g_pGame = new cGame(false);
-            g_pGame->LoadMission(cMellanMission::ID);
+            g_pGame->LoadMission(cViridoMission::ID);
         }
     }
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS))

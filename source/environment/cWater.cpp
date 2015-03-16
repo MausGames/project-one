@@ -117,7 +117,7 @@ void cWater::UpdateReflection()
             glCullFace(GL_FRONT);
             {
                 // render all players
-                for(coreByte i = 0; i < GAME_PLAYERS; ++i)
+                for(coreUintW i = 0; i < GAME_PLAYERS; ++i)
                     g_pGame->GetPlayer(i)->Render();
 
                 // render all active enemies
@@ -184,7 +184,7 @@ void cWater::UpdateDepth(cOutdoor* pOutdoor, const std::vector<coreBatchList*>& 
 
 // ****************************************************************
 // set current fly offset
-void cWater::SetFlyOffset(const float& fFlyOffset)
+void cWater::SetFlyOffset(const coreFloat& fFlyOffset)
 {
     // set new value
     m_fFlyOffset = fFlyOffset;

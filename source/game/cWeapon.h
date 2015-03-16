@@ -19,10 +19,10 @@ protected:
     coreTimer    m_CooldownTimer;   // controls the cooldown between two successive shots
     coreSoundPtr m_pShootSound;     // shooting sound-effect
 
-    coreByte m_iLevel;              // current weapon level
-    cPlayer* m_pOwner;              // associated owner of the weapon (and bullets)
+    coreUint8 m_iLevel;             // current weapon level
+    cPlayer*  m_pOwner;             // associated owner of the weapon (and bullets)
 
-    bool m_bLastStatus;             // last shoot status (to determine trigger and release)
+    coreBool m_bLastStatus;         // last shoot status (to determine trigger and release)
 
 
 public:
@@ -33,15 +33,15 @@ public:
     ENABLE_ID
 
     // update the weapon
-    bool Update(const bool& bShootStatus);
+    coreBool Update(const coreBool& bShootStatus);
 
     // set object properties
-    inline void SetLevel(const coreByte& iLevel) {m_iLevel = iLevel;}
-    inline void SetOwner(cPlayer*        pOwner) {m_pOwner = pOwner;}
+    inline void SetLevel(const coreUint8& iLevel) {m_iLevel = iLevel;}
+    inline void SetOwner(cPlayer*         pOwner) {m_pOwner = pOwner;}
 
     // get object properties
-    inline const coreByte& GetLevel()const {return m_iLevel;}
-    inline cPlayer*        GetOwner()const {return m_pOwner;}
+    inline const coreUint8& GetLevel()const {return m_iLevel;}
+    inline cPlayer*         GetOwner()const {return m_pOwner;}
 
 
 private:
@@ -69,7 +69,7 @@ public:
 class cRayWeapon final : public cWeapon
 {
 private:
-    bool m_bSpread;   // bullet spread status (0 = concentrated, 1 = wide)
+    coreBool m_bSpread;   // bullet spread status (0 = concentrated, 1 = wide)
 
 
 public:

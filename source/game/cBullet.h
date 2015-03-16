@@ -10,13 +10,15 @@
 #ifndef _P1_GUARD_BULLET_H_
 #define _P1_GUARD_BULLET_H_
 
+// TODO: adapt depth values of bullets (outlining, enemy<>player)
+
 
 // ****************************************************************
 // bullet definitions
 #define BULLET_SET_INIT_SIZE (32u)    // initial allocation size when creating a new bullet set
-#define BULLET_AREA_FACTOR   (1.5f)   // size factor for foreground area where the bullet remains active
+#define BULLET_AREA_FACTOR   (1.2f)   // size factor for foreground area where the bullet remains active
 
-enum eBulletStatus : coreByte
+enum eBulletStatus : coreUint8
 {
     BULLET_STATUS_READY  = 0x01,     // bullet is ready to be created
     BULLET_STATUS_ACTIVE = 0x02      // bullet is currently flying around, doing stuff (no checking required, is managed)
@@ -28,8 +30,8 @@ enum eBulletStatus : coreByte
 class INTERFACE cBullet : public coreObject3D
 {
 protected:
-    int    m_iDamage;   // damage value
-    cShip* m_pOwner;    // associated owner of the bullet
+    coreInt32 m_iDamage;   // damage value
+    cShip*    m_pOwner;    // associated owner of the bullet
 
 
 public:
@@ -44,16 +46,16 @@ public:
     void Move()override;
 
     // control status
-    void Activate  (const int&  iDamage, cShip* pOwner, const int& iType, const coreVector2& vPosition, const coreVector2& vDirection);
-    void Deactivate(const bool& bAnimated);
+    void Activate  (const coreInt32& iDamage, cShip* pOwner, const coreInt32& iType, const coreVector2& vPosition, const coreVector2& vDirection);
+    void Deactivate(const coreBool&  bAnimated);
 
     // get object properties
-    inline const int& GetDamage()const {return m_iDamage;}
-    inline cShip*     GetOwner ()const {return m_pOwner;}
+    inline const coreInt32& GetDamage()const {return m_iDamage;}
+    inline       cShip*     GetOwner ()const {return m_pOwner;}
 
     // bullet configuration values
-    static inline const char* ConfigProgramInstancedName() {ASSERT(false) return "";}
-    static inline cOutline*   ConfigOutlineObject       () {ASSERT(false) return g_pOutlineFull;}
+    static inline const coreChar* ConfigProgramInstancedName() {ASSERT(false) return "";}
+    static inline cOutline*       ConfigOutlineObject       () {ASSERT(false) return g_pOutlineFull;}
 
 
 private:
@@ -80,7 +82,7 @@ private:
     template <typename T> struct sBulletSet final : public sBulletSetGen
     {
         std::vector<T> aBulletPool;   // semi-dynamic container with all bullets
-        coreUint iCurBullet;          // current bullet (next one to check)
+        coreUintW iCurBullet;         // current bullet (next one to check)
 
         sBulletSet()noexcept;
         ~sBulletSet();
@@ -88,7 +90,7 @@ private:
 
 
 private:
-    coreLookup<int, sBulletSetGen*> m_apBulletSet;   // bullet sets (each for a different inherited bullet class)
+    coreLookup<coreInt32, sBulletSetGen*> m_apBulletSet;   // bullet sets (each for a different inherited bullet class)
 
 
 public:
@@ -102,7 +104,7 @@ public:
     void Move();
 
     // add and remove bullets
-    template <typename T> RETURN_RESTRICT T* AddBullet(const int& iDamage, cShip* pOwner, const int& iType, const coreVector2& vPosition, const coreVector2& vDirection);
+    template <typename T> RETURN_RESTRICT T* AddBullet(const coreInt32& iDamage, cShip* pOwner, const coreInt32& iType, const coreVector2& vPosition, const coreVector2& vDirection);
     void ClearBullets();
 };
 
@@ -122,8 +124,8 @@ public:
     ASSIGN_ID(1, "Ray")
 
     // bullet configuration values
-    static inline const char* ConfigProgramInstancedName() {return "effect_energy_direct_inst_program";}
-    static inline cOutline*   ConfigOutlineObject       () {return g_pOutlineDirect;}
+    static inline const coreChar* ConfigProgramInstancedName() {return "effect_energy_direct_inst_program";}
+    static inline cOutline*       ConfigOutlineObject       () {return g_pOutlineDirect;}
 
 
 private:
@@ -147,8 +149,8 @@ public:
     ASSIGN_ID(2, "Orb")
 
     // bullet configuration values
-    static inline const char* ConfigProgramInstancedName() {return "effect_energy_inst_program";}
-    static inline cOutline*   ConfigOutlineObject       () {return g_pOutlineFull;}
+    static inline const coreChar* ConfigProgramInstancedName() {return "effect_energy_inst_program";}
+    static inline cOutline*       ConfigOutlineObject       () {return g_pOutlineFull;}
 
 
 private:
@@ -186,7 +188,7 @@ template <typename T> cBulletManager::sBulletSet<T>::~sBulletSet()
 
 // ****************************************************************
 // add bullet to the game
-template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const int& iDamage, cShip* pOwner, const int& iType, const coreVector2& vPosition, const coreVector2& vDirection)
+template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt32& iDamage, cShip* pOwner, const coreInt32& iType, const coreVector2& vPosition, const coreVector2& vDirection)
 {
     // get requested bullet set
     sBulletSet<T>* pSet;
@@ -199,10 +201,10 @@ template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const int& iD
     else pSet = s_cast<sBulletSet<T>*>(m_apBulletSet[T::ID]);
 
     // save current pool size
-    const coreUint iSize = coreUint(pSet->aBulletPool.size());
+    const coreUintW iSize = pSet->aBulletPool.size();
 
     // loop through all bullets
-    for(coreUint i = 0; i < iSize; ++i)
+    for(coreUintW i = iSize; i--; )
     {
         if(++pSet->iCurBullet >= iSize) pSet->iCurBullet = 0;
 

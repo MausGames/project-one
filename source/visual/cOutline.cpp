@@ -11,7 +11,7 @@
 
 // ****************************************************************
 // constructor
-cOutline::cOutline(const char* pcProgramSingleName, const char* pcProgramInstancedName)noexcept
+cOutline::cOutline(const coreChar* pcProgramSingleName, const coreChar* pcProgramInstancedName)noexcept
 {
     // load shader-programs for outlined objects
     s_pProgramSingle    = Core::Manager::Resource->Get<coreProgram>(pcProgramSingleName);

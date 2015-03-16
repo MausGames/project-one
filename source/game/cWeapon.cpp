@@ -11,7 +11,7 @@
 
 // ****************************************************************
 // update the weapon
-bool cWeapon::Update(const bool& bShootStatus)
+coreBool cWeapon::Update(const coreBool& bShootStatus)
 {
     ASSERT(m_pOwner)
 
@@ -66,6 +66,7 @@ void cRayWeapon::__ReleaseOwn()
 // shoot with the ray weapon
 void cRayWeapon::__ShootOwn()
 {
+    // 
     const coreVector2 vDir = m_pOwner->GetDirection().xy();
     const coreVector2 vPos = m_pOwner->GetPosition ().xy() + vDir*3.0f;
     const coreVector2 vTan = vDir.yx();

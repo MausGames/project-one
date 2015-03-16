@@ -16,41 +16,36 @@ cMainMenu::cMainMenu()noexcept
 , m_iCurButton (0)
 {
     // create menu objects
-    m_aGameLogo[0].DefineProgram("menu_sharp_logo_program");
-    m_aGameLogo[0].DefineTexture(0, "game_logo_back.png");
-    m_aGameLogo[0].SetPosition  (coreVector2(0.0f,0.172f));
-    m_aGameLogo[0].SetSize      (coreVector2(1.0f,1.0f) * 0.405f);
-    m_aGameLogo[0].SetColor3    (coreVector3(1.0f,1.0f,1.0f) * 1.05f);
-
-    m_aGameLogo[1].DefineProgram("menu_sharp_program");
-    m_aGameLogo[1].DefineTexture(0, "game_logo_front.png");
-    m_aGameLogo[1].SetPosition  (m_aGameLogo[0].GetPosition() + coreVector2(0.0f,0.028f));
-    m_aGameLogo[1].SetSize      (coreVector2(1.0f,0.5f) * 0.43f);
+    m_GameLogo.DefineProgram("menu_sharp_program");
+    m_GameLogo.DefineTexture(0, "game_logo.png");
+    m_GameLogo.SetPosition  (coreVector2(0.0f,0.17f));
+    m_GameLogo.SetSize      (coreVector2(1.0f,1.0f) * 0.4f);
+    m_GameLogo.SetColor3    (coreVector3(1.0f,1.0f,1.0f) * 1.15f);
 
     m_Background.DefineProgram("menu_border_program");
     m_Background.DefineTexture(0, "menu_background_black.png");
     m_Background.SetPosition  (coreVector2(0.0f,0.05f));
     m_Background.SetSize      (coreVector2(0.6f,0.4f));
 
-    m_StartButton.Construct    (MENU_BUTTON, MENU_FONT_MEDIUM, 0);
+    m_StartButton.Construct    (MENU_BUTTON, MENU_FONT_MEDIUM_2, 0);
     m_StartButton.DefineProgram("menu_border_program");
     m_StartButton.SetPosition  (coreVector2(0.0f,-0.08f));
     m_StartButton.SetSize      (coreVector2(0.3f, 0.07f));
     m_StartButton.GetCaption()->SetTextLanguage("START_GAME");
 
-    m_CreditsButton.Construct    (MENU_BUTTON, MENU_FONT_MEDIUM, 0);
+    m_CreditsButton.Construct    (MENU_BUTTON, MENU_FONT_MEDIUM_2, 0);
     m_CreditsButton.DefineProgram("menu_border_program");
     m_CreditsButton.SetPosition  (m_StartButton.GetPosition() - coreVector2(0.0f,0.09f));
     m_CreditsButton.SetSize      (m_StartButton.GetSize());
     m_CreditsButton.GetCaption()->SetTextLanguage("CREDITS");
 
-    m_ExitButton.Construct    (MENU_BUTTON, MENU_FONT_MEDIUM, 0);
+    m_ExitButton.Construct    (MENU_BUTTON, MENU_FONT_MEDIUM_2, 0);
     m_ExitButton.DefineProgram("menu_border_program");
     m_ExitButton.SetPosition  (m_StartButton.GetPosition() - coreVector2(0.0f,0.18f));
     m_ExitButton.SetSize      (m_StartButton.GetSize());
     m_ExitButton.GetCaption()->SetTextLanguage("EXIT_GAME");
 
-    m_BackButton.Construct    (MENU_BUTTON, MENU_FONT_MEDIUM, 0);
+    m_BackButton.Construct    (MENU_BUTTON, MENU_FONT_MEDIUM_2, 0);
     m_BackButton.DefineProgram("menu_border_program");
     m_BackButton.SetPosition  (m_ExitButton.GetPosition());
     m_BackButton.SetSize      (m_ExitButton.GetSize());
@@ -63,8 +58,7 @@ cMainMenu::cMainMenu()noexcept
     m_VersionInfo.SetText     (PRINT("(c) 2010-2015 Maus Games - v0.1.0 new alpha - %s %.5s", __DATE__, __TIME__));
 
     // bind menu objects
-    this->BindObject(SURFACE_MAIN_DEFAULT, &m_aGameLogo[0]);
-    this->BindObject(SURFACE_MAIN_DEFAULT, &m_aGameLogo[1]);
+    this->BindObject(SURFACE_MAIN_DEFAULT, &m_GameLogo);
     this->BindObject(SURFACE_MAIN_DEFAULT, &m_StartButton);
     this->BindObject(SURFACE_MAIN_DEFAULT, &m_CreditsButton);
     this->BindObject(SURFACE_MAIN_DEFAULT, &m_ExitButton);
@@ -83,9 +77,6 @@ void cMainMenu::Move()
     // move the menu
     coreMenu::Move();
     m_iStatus = 0;
-
-    // 
-    m_aGameLogo[0].SetDirection(coreVector2::Direction(float(Core::System->GetTotalTime()) * -0.05f));
 
     if(this->GetCurSurface() == SURFACE_MAIN_DEFAULT)
     {

@@ -41,7 +41,7 @@ public:
     void Recompile();
 
     // set side-object opacity
-    void SetSideOpacity(const float& fValue);
+    void SetSideOpacity(const coreFloat& fValue);
 };
 
 

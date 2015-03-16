@@ -16,7 +16,7 @@
 #else
 
     // constant values
-    const float v_v1Strength = 0.65;
+    const float v_v1Strength = 0.7;
 
 #endif
 

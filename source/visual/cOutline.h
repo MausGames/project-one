@@ -27,7 +27,7 @@ private:
 
 
 public:
-    cOutline(const char* pcProgramSingleName, const char* pcProgramInstancedName)noexcept;
+    cOutline(const coreChar* pcProgramSingleName, const coreChar* pcProgramInstancedName)noexcept;
 
     DISABLE_COPY(cOutline)
 

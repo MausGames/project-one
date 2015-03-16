@@ -106,7 +106,7 @@ void cShadow::GlobalExit()
     // unload all shader-programs
     s_pProgramSingle    = NULL;
     s_pProgramInstanced = NULL;
-    for(coreByte i = 0; i < SHADOW_HANDLES; ++i) s_apHandle[i] = NULL;
+    for(coreUintW i = 0; i < SHADOW_HANDLES; ++i) s_apHandle[i] = NULL;
 }
 
 
@@ -117,8 +117,8 @@ void cShadow::GlobalUpdate()
     if(!g_CurConfig.Graphics.iShadow) return;
 
     // define orthographic projection
-    constexpr_var float A =          SHADOW_CLIP_FAR + SHADOW_CLIP_NEAR;
-    constexpr_var float I = -1.0f / (SHADOW_CLIP_FAR - SHADOW_CLIP_NEAR);
+    constexpr_var coreFloat A =          SHADOW_CLIP_FAR + SHADOW_CLIP_NEAR;
+    constexpr_var coreFloat I = -1.0f / (SHADOW_CLIP_FAR - SHADOW_CLIP_NEAR);
     constexpr_var coreMatrix4 mOrtho = coreMatrix4(SHADOW_DETAIL_X,            0.0f,   0.0f, 0.0f,
                                                               0.0f, SHADOW_DETAIL_Y,   0.0f, 0.0f,
                                                               0.0f,            0.0f, 2.0f*I, 0.0f,
@@ -153,10 +153,10 @@ void cShadow::GlobalUpdate()
 // recompile shader-programs with shadow maps
 void cShadow::Recompile()
 {
-    for(coreByte i = 0; i < SHADOW_HANDLES; ++i)
+    for(coreUintW i = 0; i < SHADOW_HANDLES; ++i)
     {
-        const char* pcConfig = PRINT("%s %s", g_CurConfig.Graphics.iShadow     ? SHADER_SHADOW                 : "",
-                                              (i == SHADOW_HANDLE_OBJECT_INST) ? CORE_SHADER_OPTION_INSTANCING : "");
+        const coreChar* pcConfig = PRINT("%s %s", g_CurConfig.Graphics.iShadow     ? SHADER_SHADOW                 : "",
+                                                  (i == SHADOW_HANDLE_OBJECT_INST) ? CORE_SHADER_OPTION_INSTANCING : "");
 
         // change configuration of related shaders
         FOR_EACH(it, s_apHandle[i]->GetShader())
@@ -174,7 +174,7 @@ void cShadow::Recompile()
 
 // ****************************************************************
 // enable shader-program and apply read shadow matrix
-void cShadow::EnableShadowRead(const coreByte& iProgramHandle)
+void cShadow::EnableShadowRead(const coreUintW& iProgramHandle)
 {
     if(!g_CurConfig.Graphics.iShadow) return;
 

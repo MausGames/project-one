@@ -52,29 +52,29 @@ private:
     struct sVertexPacked
     {
         coreVector3 vPosition;   // vertex position
-        coreUint    iNormal;     // normal vector
-        coreUint    iTangent;    // additional tangent vector
+        coreUint32  iNormal;     // normal vector
+        coreUint32  iTangent;    // additional tangent vector
 
         constexpr_func sVertexPacked()noexcept;
     };
 
 
 private:
-    float m_afHeight[OUTDOOR_TOTAL_VERTICES];   // height data for height calculations
+    coreFloat m_afHeight[OUTDOOR_TOTAL_VERTICES];   // height data for height calculations
 
-    coreUint m_iVertexOffset;                   // current vertex offset
-    coreUint m_iIndexOffset;                    // current index offset
-    float    m_fFlyOffset;                      // current fly offset
+    coreUint32 m_iVertexOffset;                     // current vertex offset
+    coreUint32 m_iIndexOffset;                      // current index offset
+    coreFloat  m_fFlyOffset;                        // current fly offset
 
-    coreByte m_iAlgorithm;                      // geometry algorithm ID
-    float    m_fGrade;                          // randomness grade
+    coreUint8 m_iAlgorithm;                         // geometry algorithm ID
+    coreFloat m_fGrade;                             // randomness grade
 
-    cShadow m_ShadowMap;                        // shadow map object
-    coreTexturePtr m_pNormalMap;                // normal map object
+    cShadow m_ShadowMap;                            // shadow map object
+    coreTexturePtr m_pNormalMap;                    // normal map object
 
 
 public:
-    cOutdoor(const char* pcTextureTop, const char* pcTextureBottom, const coreByte& iAlgorithm, const float& fGrade)noexcept;
+    cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom, const coreUint8& iAlgorithm, const coreFloat& fGrade)noexcept;
     ~cOutdoor();
 
     DISABLE_COPY(cOutdoor)
@@ -83,22 +83,22 @@ public:
     void Render()override;
 
     // load outdoor resources
-    void LoadTextures(const char* pcTextureTop, const char* pcTextureBottom);
-    void LoadGeometry(const coreByte& iAlgorithm, const float& fGrade);
+    void LoadTextures(const coreChar* pcTextureTop, const coreChar* pcTextureBottom);
+    void LoadGeometry(const coreUint8& iAlgorithm, const coreFloat& fGrade);
 
     // retrieve height value
-    float RetrieveHeight(const coreVector2& vPosition);
+    coreFloat RetrieveHeight(const coreVector2& vPosition);
 
     // access shadow map object
     inline cShadow* GetShadowMap() {return &m_ShadowMap;}
 
     // set object properties
-    void SetFlyOffset(const float& fFlyOffset);
+    void SetFlyOffset(const coreFloat& fFlyOffset);
 
     // get object properties
-    inline const coreUint& GetVertexOffset()const {return m_iVertexOffset;}
-    inline const coreUint& GetIndexOffset ()const {return m_iIndexOffset;}
-    inline const float&    GetFlyOffset   ()const {return m_fFlyOffset;}
+    inline const coreUint32& GetVertexOffset()const {return m_iVertexOffset;}
+    inline const coreUint32& GetIndexOffset ()const {return m_iIndexOffset;}
+    inline const coreFloat&  GetFlyOffset   ()const {return m_fFlyOffset;}
 };
 
 

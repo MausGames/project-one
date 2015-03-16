@@ -36,12 +36,13 @@ void cShip::Render(const coreProgramPtr& pProgram)
 
 // ****************************************************************
 // add ship to the game
-void cShip::_Resurrect(const coreVector2& vPosition, const int& iType)
+void cShip::_Resurrect(const coreVector2& vPosition, const coreVector2& vDirection, const coreInt32& iType)
 {
     // reset ship properties
     m_iCurHealth = m_iMaxHealth;
-    m_vNewPos    = vPosition;
-    this->SetPosition(coreVector3(vPosition, 0.0f));
+    this->SetPosition (coreVector3(vPosition,  0.0f));
+    this->SetDirection(coreVector3(vDirection, 0.0f));
+    this->SetColor3   (this->GetBaseColor());
 
     // add ship to global shadow and outline
     cShadow::BindGlobalObject(this);
@@ -54,7 +55,7 @@ void cShip::_Resurrect(const coreVector2& vPosition, const int& iType)
 
 // ****************************************************************
 // remove ship from the game
-void cShip::_Kill(const bool& bAnimated)
+void cShip::_Kill(const coreBool& bAnimated)
 {
     // remove ship from global shadow and outline
     cShadow::UnbindGlobalObject(this);

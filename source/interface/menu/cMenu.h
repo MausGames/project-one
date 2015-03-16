@@ -18,9 +18,10 @@
 // menu definitions
 #define MENU_BUTTON        "menu_background_black.png", "menu_background_black.png"
 #define MENU_FONT_SMALL    "ethnocentric.ttf", 13
-#define MENU_FONT_MEDIUM   "ethnocentric.ttf", 20
-#define MENU_FONT_BIG      "ethnocentric.ttf", 30
-#define MENU_FONT_HUGE     "ethnocentric.ttf", 70
+#define MENU_FONT_MEDIUM_2 "ethnocentric.ttf", 20
+#define MENU_FONT_MEDIUM_3 "ethnocentric.ttf", 30
+#define MENU_FONT_BIG_4    "ethnocentric.ttf", 40
+#define MENU_FONT_BIG_7    "ethnocentric.ttf", 70
 
 #define MENU_LIGHT_ACTIVE   (1.0f)     // visible strength of active menu objects
 #define MENU_LIGHT_IDLE     (0.667f)   // visible strength of idle menu objects
@@ -50,10 +51,10 @@ private:
     coreObject2D m_MausLogo;                         // Maus logo
 
     coreTimer m_IntroTimer;                          // intro animation timer
-    coreByte  m_iIntroStatus;                        // current intro animation status
+    coreUint8 m_iIntroStatus;                        // current intro animation status
 
     coreLookupStr<coreButton*> m_apLanguageButton;   // list with buttons for valid language files
-    coreByte m_iCurLanguage;                         // current selected language button
+    coreUint8 m_iCurLanguage;                        // current selected language button
 
 
 public:
@@ -72,17 +73,17 @@ public:
 class cMainMenu final : public coreMenu
 {
 private:
-    coreObject2D m_aGameLogo[2];   // game logo (0 = back, 1 = front)
-    coreObject2D m_Background;     // background object (credits surface)
+    coreObject2D m_GameLogo;      // game logo
+    coreObject2D m_Background;    // background object (credits surface)
 
-    coreButton m_StartButton;      // start button
-    coreButton m_CreditsButton;    // credits button
-    coreButton m_ExitButton;       // exit button
-    coreButton m_BackButton;       // back button (credits surface)
+    coreButton m_StartButton;     // start button
+    coreButton m_CreditsButton;   // credits button
+    coreButton m_ExitButton;      // exit button
+    coreButton m_BackButton;      // back button (credits surface)
 
-    coreLabel m_VersionInfo;       // hard-coded version info string
+    coreLabel m_VersionInfo;      // hard-coded version info string
 
-    coreByte m_iCurButton;         // current selected menu button
+    coreUint8 m_iCurButton;       // current selected menu button
 
 
 public:
@@ -121,8 +122,8 @@ public:
     void ShowTooltip() {}
 
     // default menu routines
-    static void        UpdateButton(coreButton* OUTPUT pButton, const bool& bFocused);
-    static coreVector3 HealthColor (const float& fValue);
+    static void        UpdateButton(coreButton* OUTPUT pButton, const coreBool& bFocused);
+    static coreVector3 HealthColor (const coreFloat& fValue);
 };
 
 

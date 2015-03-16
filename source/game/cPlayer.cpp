@@ -15,6 +15,7 @@ cPlayer::cPlayer()noexcept
 : m_iInputIndex    (0)
 , m_iScoreMission  (0)
 , m_fChainCooldown (0.0f)
+, m_vNewPos        (coreVector2(0.0f,0.0f))
 {
     // load object resources
     this->DefineProgram("object_ship_program");
@@ -29,7 +30,7 @@ cPlayer::cPlayer()noexcept
     m_iMaxHealth = m_iCurHealth = 100;
 
     // load first weapons
-    for(int i = 0; i < PLAYER_WEAPONS; ++i)
+    for(coreUintW i = 0; i < PLAYER_WEAPONS; ++i)
     {
         m_apWeapon[i] = new cNoWeapon();
         m_apWeapon[i]->SetOwner(this);
@@ -48,28 +49,33 @@ cPlayer::~cPlayer()
     this->Kill(false);
 
     // delete weapon objects
-    for(int i = 0; i < PLAYER_WEAPONS; ++i)
+    for(coreUintW i = 0; i < PLAYER_WEAPONS; ++i)
         SAFE_DELETE(m_apWeapon[i])
 }
 
 
 // ****************************************************************
 // configure the player
-void cPlayer::Configure(const coreByte& iShipType, const coreVector3& vColor, const coreByte& iInputIndex)
+void cPlayer::Configure(const coreUintW& iShipType, const coreVector3& vColor, const coreUintW& iInputIndex)
 {
     // select appearance type
-    const char* pcModelHigh;
-    const char* pcModelLow;
+    const coreChar* pcModelHigh;
+    const coreChar* pcModelLow;
     switch(iShipType)
     {
     default: ASSERT(false)
-    case PLAYER_SHIP_OFF: pcModelHigh = "ship_player_off_high.md3"; pcModelLow = "ship_player_off_low.md3"; break;
+    case PLAYER_SHIP_ATK: pcModelHigh = "ship_player_atk_high.md3"; pcModelLow = "ship_player_atk_low.md3"; break;
     case PLAYER_SHIP_DEF: pcModelHigh = "ship_player_def_high.md3"; pcModelLow = "ship_player_def_low.md3"; break;
     }
 
     // load models
     this->DefineModel   (pcModelHigh);
     this->DefineModelLow(pcModelLow);
+    this->GetModel().GetHandle()->OnLoadOnce([&]()
+    {
+        // normalize collision size of different ship models
+        this->SetCollisionModifier((coreVector3(1.0f,1.0f,1.0f) * PLAYER_COLLISION_SIZE) / this->GetModel()->GetBoundingRange());
+    });
 
     // save color value
     this->SetBaseColor(vColor);
@@ -82,7 +88,7 @@ void cPlayer::Configure(const coreByte& iShipType, const coreVector3& vColor, co
 
 // ****************************************************************
 // equip new main weapon
-void cPlayer::EquipWeapon(const coreByte& iIndex, const int& iID)
+void cPlayer::EquipWeapon(const coreUintW& iIndex, const coreInt32& iID)
 {
     ASSERT(iIndex < PLAYER_WEAPONS)
     if(m_apWeapon[iIndex]) if(m_apWeapon[iIndex]->GetID() == iID) return;
@@ -106,8 +112,8 @@ void cPlayer::EquipWeapon(const coreByte& iIndex, const int& iID)
 #if defined(_CORE_DEBUG_)
 
     // same weapon should not be equipped twice
-    for(int i = 0; i < PLAYER_WEAPONS; ++i)
-        for(int j = i+1; j < PLAYER_WEAPONS; ++j)
+    for(coreUintW i = 0; i < PLAYER_WEAPONS; ++i)
+        for(coreUintW j = i+1; j < PLAYER_WEAPONS; ++j)
             ASSERT(m_apWeapon[i]->GetID() != m_apWeapon[j]->GetID())
 
 #endif
@@ -155,9 +161,9 @@ void cPlayer::Move()
     coreObject3D::Move();
 
     // update the weapons (shooting and stuff)
-    for(int i = 0; i < PLAYER_WEAPONS; ++i)
+    for(coreUintW i = 0; i < PLAYER_WEAPONS; ++i)
     {
-        const bool bShoot = CONTAINS_BIT(g_aInput[m_iInputIndex].iButtonHold, i) ? !CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_WEAPON) : false;
+        const coreBool bShoot = CONTAINS_BIT(g_aInput[m_iInputIndex].iButtonHold, i) ? !CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_WEAPON) : false;
         m_apWeapon[i]->Update(bShoot);
     }
 }
@@ -165,7 +171,7 @@ void cPlayer::Move()
 
 // ****************************************************************
 // reduce current health
-void cPlayer::TakeDamage(const int& iDamage)
+void cPlayer::TakeDamage(const coreInt32& iDamage)
 {
     // 
     m_iCurHealth -= iDamage;
@@ -189,21 +195,24 @@ void cPlayer::Resurrect(const coreVector2& vPosition)
     if(!CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_DEAD)) return;
     REMOVE_VALUE(m_iStatus, PLAYER_STATUS_DEAD)
 
+    // 
+    m_vNewPos = vPosition;
+
     // add ship to the game
-    cShip::_Resurrect(vPosition, TYPE_PLAYER);
+    cShip::_Resurrect(vPosition, coreVector2(0.0f,1.0f), TYPE_PLAYER);
 }
 
 
 // ****************************************************************
 // remove player from the game
-void cPlayer::Kill(const bool& bAnimated)
+void cPlayer::Kill(const coreBool& bAnimated)
 {
     // kill player
     if(CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_DEAD)) return;
     ADD_VALUE(m_iStatus, PLAYER_STATUS_DEAD)
 
     // reset weapon shoot status
-    for(int i = 0; i < PLAYER_WEAPONS; ++i) m_apWeapon[i]->Update(false);
+    for(coreUintW i = 0; i < PLAYER_WEAPONS; ++i) m_apWeapon[i]->Update(false);
 
     // remove ship from the game
     cShip::_Kill(bAnimated);
@@ -212,7 +221,7 @@ void cPlayer::Kill(const bool& bAnimated)
 
 // ****************************************************************
 // 
-void cPlayer::AddScore(const coreUint& iValue, const bool& bModified)
+void cPlayer::AddScore(const coreUint32& iValue, const coreBool& bModified)
 {
 
 }
@@ -220,12 +229,12 @@ void cPlayer::AddScore(const coreUint& iValue, const bool& bModified)
 
 // ****************************************************************
 // 
-void cPlayer::AddCombo(const coreUint& iValue)
+void cPlayer::AddCombo(const coreUint32& iValue)
 {
 
 }
 
-void cPlayer::AddCombo(const float& fModifier)
+void cPlayer::AddCombo(const coreFloat& fModifier)
 {
 
 }
@@ -233,7 +242,7 @@ void cPlayer::AddCombo(const float& fModifier)
 
 // ****************************************************************
 // 
-void cPlayer::AddChain(const coreUint& iValue)
+void cPlayer::AddChain(const coreUint32& iValue)
 {
 
 }

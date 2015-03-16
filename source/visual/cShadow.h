@@ -38,7 +38,7 @@ class cShadow final : public cBindContainer, public cGlobalBindContainer, public
 {
 private:
     coreFrameBuffer m_iFrameBuffer;                     // shadow map frame buffer (depth only)
-    coreByte m_iLevel;                                  // current configuration level
+    coreUint8 m_iLevel;                                 // current configuration level
 
     static coreProgramPtr s_pProgramSingle;             // shader-program for single shadow-casting objects
     static coreProgramPtr s_pProgramInstanced;          // shader-program for instanced shadow-casting objects
@@ -71,7 +71,7 @@ public:
     static void Recompile();
 
     // enable shader-program and apply read shadow matrix
-    static void EnableShadowRead(const coreByte& iProgramHandle);
+    static void EnableShadowRead(const coreUintW& iProgramHandle);
 
 
 private:

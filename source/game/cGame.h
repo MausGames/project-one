@@ -17,7 +17,7 @@
 #define GAME_INTRO_DELAY    (0.2f)      // 
 #define GAME_INTRO_DURATION (3.5f)      // 
 
-enum cGameStatus : coreByte
+enum cGameStatus : coreUint8
 {
     GAME_STATUS_INTRO   = 0x01,   // 
     GAME_STATUS_PLAY    = 0x02,   // 
@@ -43,12 +43,12 @@ private:
     coreFlow m_fTimeMission;                 // total time in mission
     coreFlow m_afTimeBoss[MISSION_BOSSES];   // total time per boss battle
 
-    coreByte m_iStatus;                      // 
-    bool m_bCoop;                            // 
+    coreUint8 m_iStatus;                     // 
+    coreBool  m_bCoop;                       // 
 
 
 public:
-    cGame(const bool& bCoop)noexcept;
+    explicit cGame(const coreBool& bCoop)noexcept;
     ~cGame();
 
     FRIEND_CLASS(cEnemy)
@@ -62,27 +62,32 @@ public:
     void RenderOverlay();
 
     // control active mission
-    void LoadMission(const int& iID);
+    void LoadMission(const coreInt32& iID);
     void RestartMission();
 
     // access game objects
-    inline cPlayer*              GetPlayer       (const coreByte& iIndex) {ASSERT(iIndex < GAME_PLAYERS) return &m_aPlayer[iIndex];}
-    inline std::vector<cEnemy*>* GetEnemyList    ()                       {return &m_apEnemyList;}
-    inline cBulletManager*       GetBulletManager()                       {return &m_BulletManager;}
-    inline cCombatText*          GetCombatText   ()                       {return &m_CombatText;}
-    inline cInterface*           GetInterface    ()                       {return &m_Interface;}
-    inline cMission*             GetMission      ()const                  {return m_pMission;}
+    inline cPlayer*              GetPlayer       (const coreUintW& iIndex) {ASSERT(iIndex < GAME_PLAYERS) return &m_aPlayer[iIndex];}
+    inline std::vector<cEnemy*>* GetEnemyList    ()                        {return &m_apEnemyList;}
+    inline cBulletManager*       GetBulletManager()                        {return &m_BulletManager;}
+    inline cCombatText*          GetCombatText   ()                        {return &m_CombatText;}
+    inline cInterface*           GetInterface    ()                        {return &m_Interface;}
+    inline cMission*             GetMission      ()const                   {return m_pMission;}
+
+    // 
+    cPlayer* FindPlayer(const coreVector2& vPosition);
+    cEnemy*  FindEnemy (const coreVector2& vPosition);
 
     // get object properties
-    inline const float&    GetTimeMission()const                       {return m_fTimeMission;}
-    inline const float&    GetTimeBoss   (const coreByte& iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_afTimeBoss[iIndex];}
-    inline const coreByte& GetStatus     ()const                       {return m_iStatus;}
-    inline const bool&     GetCoop       ()const                       {return m_bCoop;}
+    inline const coreFloat& GetTimeMission()const                        {return m_fTimeMission;}
+    inline const coreFloat& GetTimeBoss   (const coreUintW& iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_afTimeBoss[iIndex];}
+    inline const coreUint8& GetStatus     ()const                        {return m_iStatus;}
+    inline const coreBool&  GetCoop       ()const                        {return m_bCoop;}
 
 
 private:
-    // handle default object collisions
-    void __HandleCollisions();
+    // 
+    coreBool __HandleIntro();
+    void     __HandleCollisions();
 
     // manage enemies
     inline void __BindEnemy  (cEnemy* pEnemy) {ASSERT(!CONTAINS(m_apEnemyList, pEnemy)) m_apEnemyList.push_back(pEnemy);}

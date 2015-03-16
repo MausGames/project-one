@@ -18,15 +18,15 @@ cInput  g_aInput[INPUT_SETS]; // = NULL;
 static void CheckConfig(cConfig* pConfig)
 {
     // clamp input set selections
-    for(coreByte i = 0; i < INPUT_TYPES; ++i)
-        pConfig->Input.aiType[i] = CLAMP<coreByte>(pConfig->Input.aiType[i], 0, INPUT_SETS-1);
+    for(coreUintW i = 0; i < INPUT_TYPES; ++i)
+        pConfig->Input.aiType[i] = CLAMP(pConfig->Input.aiType[i], 0u, INPUT_SETS-1);
 
     // loop trough input sets
-    for(coreByte i = 0; i < INPUT_SETS;  ++i)
+    for(coreUintW i = 0; i < INPUT_SETS;  ++i)
     {
-        const int iFrom = (i < INPUT_SETS_KEYBOARD) ? -(CORE_INPUT_BUTTONS_MOUSE   -1) : 0;
-        const int iTo   = (i < INPUT_SETS_KEYBOARD) ?  (CORE_INPUT_BUTTONS_KEYBOARD-1) : (CORE_INPUT_BUTTONS_JOYSTICK-1);
-        auto&     oSet  = pConfig->Input.aSet[i];
+        const coreInt16 iFrom = (i < INPUT_SETS_KEYBOARD) ? -coreInt16(CORE_INPUT_BUTTONS_MOUSE   -1) : 0;
+        const coreInt16 iTo   = (i < INPUT_SETS_KEYBOARD) ?  coreInt16(CORE_INPUT_BUTTONS_KEYBOARD-1) : coreInt16(CORE_INPUT_BUTTONS_JOYSTICK-1);
+        auto&           oSet  = pConfig->Input.aSet[i];
 
         // clamp movement keys
         oSet.iMoveLeft  = CLAMP(oSet.iMoveLeft,  iFrom, iTo);
@@ -35,19 +35,19 @@ static void CheckConfig(cConfig* pConfig)
         oSet.iMoveUp    = CLAMP(oSet.iMoveUp,    iFrom, iTo);
 
         // clamp input buttons
-        for(coreByte j = 0; j < INPUT_BUTTONS; ++j)
+        for(coreUintW j = 0; j < INPUT_BUTTONS; ++j)
             oSet.aiButton[j] = CLAMP(oSet.aiButton[j], iFrom, iTo);
     }
 
     // check for input sets with more than one selection
-    for(coreByte i = 0; i < INPUT_TYPES; ++i)
+    for(coreUintW i = 0; i < INPUT_TYPES; ++i)
     {
-        for(coreByte j = i+1; j < INPUT_TYPES; ++j)
+        for(coreUintW j = i+1; j < INPUT_TYPES; ++j)
         {
             WARN_IF(pConfig->Input.aiType[i] == pConfig->Input.aiType[j])
             {
                 // reset all selections to default values
-                for(coreByte k = 0; k < INPUT_TYPES; ++k)
+                for(coreUintW k = 0; k < INPUT_TYPES; ++k)
                     pConfig->Input.aiType[k] = k;
 
                 // leave all loops
@@ -77,17 +77,17 @@ void LoadConfig()
     g_OldConfig.Graphics.iDistortion = Core::Config->GetInt(CONFIG_GRAPHICS_DISTORTION);
 
     // read input values
-    for(coreByte i = 0; i < INPUT_TYPES; ++i)
+    for(coreUintW i = 0; i < INPUT_TYPES; ++i)
     {
         g_OldConfig.Input.aiType[i] = Core::Config->GetInt(CONFIG_INPUT_TYPE(i));
     }
-    for(coreByte i = 0; i < INPUT_SETS;  ++i)
+    for(coreUintW i = 0; i < INPUT_SETS;  ++i)
     {
         g_OldConfig.Input.aSet[i].iMoveLeft  = Core::Config->GetInt(CONFIG_INPUT_MOVE_LEFT (i));
         g_OldConfig.Input.aSet[i].iMoveRight = Core::Config->GetInt(CONFIG_INPUT_MOVE_RIGHT(i));
         g_OldConfig.Input.aSet[i].iMoveDown  = Core::Config->GetInt(CONFIG_INPUT_MOVE_DOWN (i));
         g_OldConfig.Input.aSet[i].iMoveUp    = Core::Config->GetInt(CONFIG_INPUT_MOVE_UP   (i));
-        for(coreByte j = 0; j < INPUT_BUTTONS; ++j)
+        for(coreUintW j = 0; j < INPUT_BUTTONS; ++j)
         {
             g_OldConfig.Input.aSet[i].aiButton[j] = Core::Config->GetInt(CONFIG_INPUT_BUTTON(i, j));
         }
@@ -115,17 +115,17 @@ void SaveConfig()
     Core::Config->SetInt(CONFIG_GRAPHICS_DISTORTION, g_OldConfig.Graphics.iDistortion);
 
     // write input values
-    for(coreByte i = 0; i < INPUT_TYPES; ++i)
+    for(coreUintW i = 0; i < INPUT_TYPES; ++i)
     {
         Core::Config->SetInt(CONFIG_INPUT_TYPE(i), g_OldConfig.Input.aiType[i]);
     }
-    for(coreByte i = 0; i < INPUT_SETS;  ++i)
+    for(coreUintW i = 0; i < INPUT_SETS;  ++i)
     {
         Core::Config->SetInt(CONFIG_INPUT_MOVE_LEFT (i), g_OldConfig.Input.aSet[i].iMoveLeft);
         Core::Config->SetInt(CONFIG_INPUT_MOVE_RIGHT(i), g_OldConfig.Input.aSet[i].iMoveRight);
         Core::Config->SetInt(CONFIG_INPUT_MOVE_DOWN (i), g_OldConfig.Input.aSet[i].iMoveDown);
         Core::Config->SetInt(CONFIG_INPUT_MOVE_UP   (i), g_OldConfig.Input.aSet[i].iMoveUp);
-        for(coreByte j = 0; j < INPUT_BUTTONS; ++j)
+        for(coreUintW j = 0; j < INPUT_BUTTONS; ++j)
         {
             Core::Config->SetInt(CONFIG_INPUT_BUTTON(i, j), g_OldConfig.Input.aSet[i].aiButton[j]);
         }
@@ -140,11 +140,11 @@ void SaveConfig()
 // update input interface
 void UpdateInput()
 {
-    for(coreByte i = 0; i < INPUT_TYPES; ++i)
+    for(coreUintW i = 0; i < INPUT_TYPES; ++i)
     {
-        const coreByte& iType = g_CurConfig.Input.aiType[i];
-        const auto&     oSet  = g_CurConfig.Input.aSet[iType];
-        cInput&         oMap  = g_aInput[iType];
+        const coreUint8& iType = g_CurConfig.Input.aiType[i];
+        const auto&      oSet  = g_CurConfig.Input.aSet[iType];
+        cInput&          oMap  = g_aInput[iType];
 
         // reset mapped input values
         std::memset(&oMap, 0, sizeof(oMap));
@@ -159,14 +159,14 @@ void UpdateInput()
             else if(Core::Input->GetKeyboardButton(coreInputKey(oSet.iMoveUp),    CORE_INPUT_HOLD)) oMap.vMove.y =  1.0f;
 
             // map button input
-            for(coreByte j = 0; j < INPUT_BUTTONS; ++j)
+            for(coreUintW j = 0; j < INPUT_BUTTONS; ++j)
             {
                 if(oSet.aiButton[j] <= 0)
                 {
                     // check for mouse buttons
-                    if(Core::Input->GetMouseButton(-oSet.aiButton[j], CORE_INPUT_PRESS))   ADD_BIT(oMap.iButtonPress,   j);
-                    if(Core::Input->GetMouseButton(-oSet.aiButton[j], CORE_INPUT_RELEASE)) ADD_BIT(oMap.iButtonRelease, j);
-                    if(Core::Input->GetMouseButton(-oSet.aiButton[j], CORE_INPUT_HOLD))    ADD_BIT(oMap.iButtonHold,    j);
+                    if(Core::Input->GetMouseButton(coreUint8(-oSet.aiButton[j]), CORE_INPUT_PRESS))   ADD_BIT(oMap.iButtonPress,   j);
+                    if(Core::Input->GetMouseButton(coreUint8(-oSet.aiButton[j]), CORE_INPUT_RELEASE)) ADD_BIT(oMap.iButtonRelease, j);
+                    if(Core::Input->GetMouseButton(coreUint8(-oSet.aiButton[j]), CORE_INPUT_HOLD))    ADD_BIT(oMap.iButtonHold,    j);
                 }
                 else
                 {
@@ -179,17 +179,17 @@ void UpdateInput()
         }
         else   // # joystick/gamepad
         {
-            const coreByte iJoystickID = iType - INPUT_SETS_KEYBOARD;
+            const coreUintW iJoystickID = iType - INPUT_SETS_KEYBOARD;
 
             // map movement input
             oMap.vMove = Core::Input->GetJoystickRelative(iJoystickID);
 
             // map button input
-            for(coreByte j = 0; j < INPUT_BUTTONS; ++j)
+            for(coreUintW j = 0; j < INPUT_BUTTONS; ++j)
             {
-                if(Core::Input->GetJoystickButton(iJoystickID, oSet.aiButton[j], CORE_INPUT_PRESS))   ADD_BIT(oMap.iButtonPress,   j);
-                if(Core::Input->GetJoystickButton(iJoystickID, oSet.aiButton[j], CORE_INPUT_RELEASE)) ADD_BIT(oMap.iButtonRelease, j);
-                if(Core::Input->GetJoystickButton(iJoystickID, oSet.aiButton[j], CORE_INPUT_HOLD))    ADD_BIT(oMap.iButtonHold,    j);
+                if(Core::Input->GetJoystickButton(iJoystickID, coreUint8(oSet.aiButton[j]), CORE_INPUT_PRESS))   ADD_BIT(oMap.iButtonPress,   j);
+                if(Core::Input->GetJoystickButton(iJoystickID, coreUint8(oSet.aiButton[j]), CORE_INPUT_RELEASE)) ADD_BIT(oMap.iButtonRelease, j);
+                if(Core::Input->GetJoystickButton(iJoystickID, coreUint8(oSet.aiButton[j]), CORE_INPUT_HOLD))    ADD_BIT(oMap.iButtonHold,    j);
             }
         }
 
