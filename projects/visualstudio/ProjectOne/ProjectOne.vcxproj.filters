@@ -102,6 +102,12 @@
     <ClCompile Include="..\..\..\source\environment\background\02_cSeaBackground.cpp">
       <Filter>environment\background</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\game\boss\0102_cTorusBoss.cpp">
+      <Filter>game\boss</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\game\boss\0103_cVausBoss.cpp">
+      <Filter>game\boss</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\main.h" />

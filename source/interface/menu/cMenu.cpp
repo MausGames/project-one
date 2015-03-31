@@ -12,7 +12,7 @@
 // ****************************************************************
 // constructor
 cMenu::cMenu()noexcept
-: coreMenu (3, SURFACE_INTRO)
+: coreMenu (3u, SURFACE_INTRO)
 {
     // create intro and main menu
     m_pIntroMenu = new cIntroMenu();
@@ -42,8 +42,8 @@ void cMenu::Move()
     coreMenu::Move();
 
     // control mouse with joystick
-    Core::Input->UseMouseWithJoystick(0, 0, 1, 0.4f);
-    Core::Input->UseMouseWithJoystick(1, 0, 1, 0.4f);
+    Core::Input->UseMouseWithJoystick(0u, 0u, 1u, 0.4f);
+    Core::Input->UseMouseWithJoystick(1u, 0u, 1u, 0.4f);
 
     if(this->GetCurSurface() == SURFACE_INTRO)
     {

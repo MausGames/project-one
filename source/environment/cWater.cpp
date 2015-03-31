@@ -16,26 +16,26 @@ cWater::cWater()noexcept
 , m_fFlyOffset (0.0f)
 {
     // create reflection and refraction buffers
-    m_iAboveReflection.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0, CORE_TEXTURE_SPEC_RGB);
-    m_iAboveReflection.AttachTargetBuffer (CORE_FRAMEBUFFER_TARGET_DEPTH, 0, CORE_TEXTURE_SPEC_DEPTH);
+    m_iAboveReflection.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB);
+    m_iAboveReflection.AttachTargetBuffer (CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH);
     m_iAboveReflection.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
-    m_iBelowRefraction.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0, CORE_TEXTURE_SPEC_RGB);
-    m_iBelowRefraction.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_DEPTH, 0, CORE_TEXTURE_SPEC_DEPTH);
+    m_iBelowRefraction.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB);
+    m_iBelowRefraction.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH);
     m_iBelowRefraction.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     // create sky-plane object
-    m_Sky.DefineTexture(0, "environment_clouds_blue.png");
+    m_Sky.DefineTexture(0u, "environment_clouds_blue.png");
     m_Sky.DefineProgram("default_2d_program");
     m_Sky.SetSize      (coreVector2(1.0f,1.0f) * SQRT(2.0f));
     m_Sky.SetTexSize   (coreVector2(WATER_SKY_SIZE, WATER_SKY_SIZE));
 
     // load object resources
     this->DefineModel  (Core::Manager::Object->GetLowModel());
-    this->DefineTexture(0, "environment_water_norm.png");
-    this->DefineTexture(1, m_iAboveReflection.GetColorTarget(0).pTexture);
-    this->DefineTexture(2, m_iBelowRefraction.GetColorTarget(0).pTexture);
-    this->DefineTexture(3, m_iBelowRefraction.GetDepthTarget() .pTexture);
+    this->DefineTexture(0u, "environment_water_norm.png");
+    this->DefineTexture(1u, m_iAboveReflection.GetColorTarget(0u).pTexture);
+    this->DefineTexture(2u, m_iBelowRefraction.GetColorTarget(0u).pTexture);
+    this->DefineTexture(3u, m_iBelowRefraction.GetDepthTarget()  .pTexture);
     this->DefineProgram("environment_water_program");
 
     // set object properties
@@ -98,39 +98,20 @@ void cWater::UpdateReflection()
     // save current camera and light properties
     const coreVector3 vOldCamPos = Core::Graphics->GetCamPosition();
     const coreVector3 vOldCamOri = Core::Graphics->GetCamOrientation();
-    const coreVector4 vOldLight  = Core::Graphics->GetLight(0).vDirection;
+    const coreVector4 vOldLight  = Core::Graphics->GetLight(0u).vDirection;
 
     // flip camera upside-down and override light
     Core::Graphics->SetCamera(-CAMERA_POSITION + coreVector3(0.0f, 0.0f, WATER_HEIGHT*2.0f), -CAMERA_DIRECTION, CAMERA_ORIENTATION);
-    Core::Graphics->SetLight (0, coreVector4(0.0f,0.0f,0.0f,0.0f), coreVector4(LIGHT_DIRECTION, 0.0f), coreVector4(0.0f,0.0f,0.0f,0.0f));
+    Core::Graphics->SetLight (0u, coreVector4(0.0f,0.0f,0.0f,0.0f), coreVector4(LIGHT_DIRECTION, 0.0f), coreVector4(0.0f,0.0f,0.0f,0.0f));
 
     // fill reflection frame buffer
     m_iAboveReflection.StartDraw();
-    m_iAboveReflection.Clear(CORE_FRAMEBUFFER_TARGET_DEPTH);
     {
         // flip projection left-right (also culling!, after StartDraw())
-        c_cast<coreMatrix4*>(&Core::Graphics->GetPerspective())->_11 *= -1.0f;
+        c_cast<coreMatrix4&>(Core::Graphics->GetPerspective())._11 *= -1.0f;
 
-        if(g_CurConfig.Graphics.iReflection && g_pGame)
-        {
-            // render all relevant game objects
-            glCullFace(GL_FRONT);
-            {
-                // render all players
-                for(coreUintW i = 0; i < GAME_PLAYERS; ++i)
-                    g_pGame->GetPlayer(i)->Render();
-
-                // render all active enemies
-                FOR_EACH(it, *g_pGame->GetEnemyList()) (*it)->__RenderOwnBefore();
-                FOR_EACH(it, *g_pGame->GetEnemyList()) (*it)->  Render();
-                FOR_EACH(it, *g_pGame->GetEnemyList()) (*it)->__RenderOwnAfter();
-
-                // no bullets, only their outlines
-            }
-            glCullFace(GL_BACK);
-        }
-
-        glDisable(GL_BLEND);
+        glDepthFunc(GL_ALWAYS);   // better performance than depth-clear
+        glDisable  (GL_BLEND);
         {
             // move and render the sky-plane
             m_Sky.SetDirection(vOldCamOri.xy());
@@ -138,20 +119,28 @@ void cWater::UpdateReflection()
             m_Sky.Move();
             m_Sky.Render();
         }
-        glEnable(GL_BLEND);
+        glDepthFunc(GL_LEQUAL);
+        glEnable   (GL_BLEND);
 
-        // apply outline-effect
         if(g_CurConfig.Graphics.iReflection && g_pGame)
         {
-            g_pOutlineFull  ->Apply();
-            g_pOutlineDirect->Apply();
+            glCullFace(GL_FRONT);
+            {
+                // render the game
+                g_pGame->Render();
+
+                // apply outline-effect
+                g_pOutlineFull  ->Apply();
+                g_pOutlineDirect->Apply();
+            }
+            glCullFace(GL_BACK);
         }
     }
 
     // reset camera, light and projection
     Core::Graphics->SetCamera(vOldCamPos, CAMERA_DIRECTION, vOldCamOri);
-    Core::Graphics->SetLight (0, coreVector4(0.0f,0.0f,0.0f,0.0f), vOldLight, coreVector4(0.0f,0.0f,0.0f,0.0f));
-    c_cast<coreMatrix4*>(&Core::Graphics->GetPerspective())->_11 *= -1.0f;
+    Core::Graphics->SetLight (0u, coreVector4(0.0f,0.0f,0.0f,0.0f), vOldLight, coreVector4(0.0f,0.0f,0.0f,0.0f));
+    c_cast<coreMatrix4&>(Core::Graphics->GetPerspective())._11 *= -1.0f;
 }
 
 

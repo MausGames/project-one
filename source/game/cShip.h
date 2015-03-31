@@ -10,7 +10,7 @@
 #ifndef _P1_GUARD_SHIP_H_
 #define _P1_GUARD_SHIP_H_
 
-// TODO: change high-resolution models with pre-baked normal-maps
+// TODO: change high-resolution models with pre-baked normal-maps or tessellation ?
 
 
 // ****************************************************************
@@ -23,6 +23,8 @@ protected:
 
     coreInt32 m_iMaxHealth;      // maximum health value (armor)
     coreInt32 m_iCurHealth;      // current health value (armor)
+
+    coreFloat m_fBlink;          // blink intensity (to highlight successful hits)
 
 
 protected:
@@ -56,17 +58,24 @@ public:
 
 protected:
     // 
+    coreBool _TakeDamage(const coreInt32& iDamage);
+
+    // 
     void _Resurrect(const coreVector2& vPosition, const coreVector2& vDirection, const coreInt32& iType);
     void _Kill     (const coreBool&    bAnimated);
+
+    // 
+    void _UpdateBlink();
 };
 
 
 // ****************************************************************
 // constructor
 constexpr_weak cShip::cShip()noexcept
-: m_iBaseColor (0)
+: m_iBaseColor (0u)
 , m_iMaxHealth (0)
 , m_iCurHealth (0)
+, m_fBlink     (0.0f)
 {
 }
 

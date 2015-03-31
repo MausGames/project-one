@@ -12,22 +12,22 @@
 // ****************************************************************
 // constructor
 cGame::cGame(const coreBool& bCoop)noexcept
-: m_Interface    (bCoop ? 2 : 1)
+: m_Interface    (bCoop ? 2u : 1u)
 , m_pMission     (NULL)
 , m_fTimeMission (0.0f)
-, m_iStatus      (0)
+, m_iStatus      (0u)
 , m_bCoop        (bCoop)
 {
     // configure first player
     m_aPlayer[0].Configure  (PLAYER_SHIP_ATK, coreVector3(0.0f/360.0f, 68.0f/100.0f, 90.0f/100.0f).HSVtoRGB(), g_CurConfig.Input.aiType[0]);
-    m_aPlayer[0].EquipWeapon(0, cRayWeapon::ID);
+    m_aPlayer[0].EquipWeapon(0u, cRayWeapon::ID);
 
     if(m_bCoop)
     {
         // configure second player
         m_aPlayer[1].Configure  (PLAYER_SHIP_DEF, coreVector3(201.0f/360.0f, 74.0f/100.0f, 85.0f/100.0f).HSVtoRGB(), g_CurConfig.Input.aiType[1]);
-        m_aPlayer[1].EquipWeapon(0, cRayWeapon::ID);
-        STATIC_ASSERT(GAME_PLAYERS == 2)
+        m_aPlayer[1].EquipWeapon(0u, cRayWeapon::ID);
+        STATIC_ASSERT(GAME_PLAYERS == 2u)
     }
 
     // load first mission
@@ -56,7 +56,7 @@ cGame::~cGame()
 void cGame::Render()
 {
     // render all players
-    for(coreUintW i = 0; i < GAME_PLAYERS; ++i)
+    for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
         m_aPlayer[i].Render();
 
     // render all active enemies
@@ -94,15 +94,15 @@ void cGame::Move()
     m_pMission->Move();
 
     // move all players
-    for(coreUintW i = 0; i < GAME_PLAYERS; ++i)
+    for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
         m_aPlayer[i].Move();
 
     // move all active enemies
-    for(coreUintW i = 0, ie = m_apEnemyList.size(); i < ie; ++i)
+    for(coreUintW i = 0u, ie = m_apEnemyList.size(); i < ie; ++i)
     {
         m_apEnemyList[i]->Move();
 
-        // 
+        // handle self-removing
         if(ie > m_apEnemyList.size()) {--i; --ie;}
     }
 
@@ -119,7 +119,7 @@ void cGame::Move()
     // set environment side
     if(m_bCoop) g_pEnvironment->SetTargetSide((m_aPlayer[0].GetPosition().xy() + m_aPlayer[1].GetPosition().xy()) * 0.5f * 0.65f);
            else g_pEnvironment->SetTargetSide( m_aPlayer[0].GetPosition().xy()                                           * 0.65f);
-    STATIC_ASSERT(GAME_PLAYERS == 2)
+    STATIC_ASSERT(GAME_PLAYERS == 2u)
 }
 
 
@@ -154,7 +154,7 @@ void cGame::LoadMission(const coreInt32& iID)
 
         // 
         m_fTimeMission = -(GAME_INTRO_DURATION + GAME_INTRO_DELAY);
-        for(coreUintW i = 0; i < MISSION_BOSSES; ++i) m_afTimeBoss[i] = m_fTimeMission;
+        for(coreUintW i = 0u; i < MISSION_BOSSES; ++i) m_afTimeBoss[i] = -INTERFACE_BANNER_DURATION;
 
         // set initial status
         m_iStatus = GAME_STATUS_INTRO | GAME_STATUS_LOADING;
@@ -162,7 +162,7 @@ void cGame::LoadMission(const coreInt32& iID)
         if(m_bCoop)
         {
             // reset all available players
-            for(coreUintW i = 0; i < GAME_PLAYERS; ++i)
+            for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
             {
                 m_aPlayer[i].Kill(false);
                 m_aPlayer[i].Resurrect(coreVector2(20.0f * (I_TO_F(i) - 0.5f * I_TO_F(GAME_PLAYERS-1)), -100.0f));
@@ -205,7 +205,7 @@ cPlayer* cGame::FindPlayer(const coreVector2& vPosition)
     cPlayer*  pPlayer = &m_aPlayer[0];
     coreFloat fDiffSq = 1.0e06f;
 
-    for(coreUintW i = 0; i < GAME_PLAYERS; ++i)
+    for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
     {
         cPlayer& oCurPlayer = m_aPlayer[i];
         if(CONTAINS_VALUE(oCurPlayer.GetStatus(), PLAYER_STATUS_DEAD)) continue;
@@ -230,7 +230,7 @@ cPlayer* cGame::FindPlayer(const coreVector2& vPosition)
 cEnemy* cGame::FindEnemy(const coreVector2& vPosition)
 {
     // 
-    cEnemy*   pEnemy  = m_pMission->GetBoss(0);
+    cEnemy*   pEnemy  = m_pMission->GetBoss(0u);
     coreFloat fDiffSq = 1.0e06f;
 
     FOR_EACH(it, m_apEnemyList)
@@ -272,7 +272,7 @@ coreBool cGame::__HandleIntro()
             ADD_VALUE   (m_iStatus, GAME_STATUS_PLAY)
 
             // re-enable player controls
-            for(coreUintW i = 0; i < GAME_PLAYERS; ++i)
+            for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
                 m_aPlayer[i].RemoveStatus(PLAYER_STATUS_NO_INPUT_ALL);
         }
         else
@@ -283,7 +283,7 @@ coreBool cGame::__HandleIntro()
             oSpline.AddNode(coreVector2(  10.0f, 10.0f), coreVector2(-1.0f,-1.0f).Normalize());
             oSpline.AddNode(coreVector2( -30.0f,  0.0f), coreVector2(-1.0f, 0.0f));
 
-            for(coreUintW i = 0; i < GAME_PLAYERS; ++i)
+            for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
             {
                 cPlayer& oPlayer = m_aPlayer[i];
                 if(CONTAINS_VALUE(oPlayer.GetStatus(), PLAYER_STATUS_DEAD)) continue;
@@ -316,24 +316,21 @@ void cGame::__HandleCollisions()
 
     Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_BULLET_ENEMY, [](cPlayer* pPlayer, cBullet* pBullet, const coreBool& bFirst)
     {
-
-
+        // 
         pPlayer->TakeDamage(pBullet->GetDamage());
         pBullet->Deactivate(true);
-
     });
 
     Core::Manager::Object->TestCollision(TYPE_ENEMY, TYPE_BULLET_PLAYER, [](cEnemy* pEnemy, cBullet* pBullet, const coreBool& bFirst)
     {
+        // 
         if((ABS(pEnemy->GetPosition().x) >= FOREGROUND_AREA.x * 1.1f) ||
            (ABS(pEnemy->GetPosition().y) >= FOREGROUND_AREA.y * 1.1f)) return;
 
-
-        pEnemy->TakeDamage(pBullet->GetDamage(), s_cast<cPlayer*>(pBullet->GetOwner()));
+        // 
+        pEnemy ->TakeDamage(pBullet->GetDamage(), s_cast<cPlayer*>(pBullet->GetOwner()));
         pBullet->Deactivate(true);
-
     });
-
 
     //Core::Manager::Object->TestCollision(TYPE_BULLET_ENEMY, TYPE_BULLET_PLAYER, [](cBullet* pBullet1, cBullet* pBullet2, const coreBool& bFirst)
     //{

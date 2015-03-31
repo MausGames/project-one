@@ -8,6 +8,10 @@
 //////////////////////////////////////////////////////
 
 
+// animation uniforms
+uniform float u_v1Blink;   // base blink intensity (to highlight successful hits)
+
+
 void FragmentMain()
 {
     // lookup texture (rgb = base-color, a = color-modifier)
@@ -26,7 +30,10 @@ void FragmentMain()
     // calculate diffuse and specular value
     vec3 v3Diffuse  = v4TexColor.rgb * (1.4 * max(0.0, v1BumpFactor) + 0.4);
     vec3 v3Specular = vec3(0.2 * 0.5 * pow(v1ReflFactor, 25.0));
+    
+    // calculate smooth blink color
+    vec3 v3Blink = vec3(u_v1Blink * (1.0 - 0.9*abs(dot(v3MathViewDir, v3BumpNormal))));
 
     // draw final color
-    gl_FragColor = vec4((v3Diffuse + v3Specular) * mix(vec3(1.0), u_v4Color.rgb*1.5, v4TexColor.a), u_v4Color.a);
+    gl_FragColor = vec4((v3Diffuse + v3Specular) * mix(vec3(1.0), u_v4Color.rgb*1.5, v4TexColor.a) + v3Blink, u_v4Color.a);
 }

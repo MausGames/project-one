@@ -17,7 +17,7 @@ cGrassBackground::cGrassBackground()noexcept
     coreBatchList* pList2;
 
     // create outdoor-surface object
-    m_pOutdoor = new cOutdoor("grass", "dust", 2, 4.0f);
+    m_pOutdoor = new cOutdoor("grass", "dust", 2u, 4.0f);
 
     // create water-surface object
     m_pWater = new cWater();
@@ -26,7 +26,7 @@ cGrassBackground::cGrassBackground()noexcept
     pList1 = new coreBatchList(GRASS_STONES_RESERVE);
     pList1->DefineProgram("object_ground_inst_program");
     {
-        for(coreUintW j = 0; j < 2; ++j)   // types
+        for(coreUintW j = 0u; j < 2u; ++j)   // types
         {
             const coreUintW iStoneTries = j ? GRASS_STONES_2_NUM : GRASS_STONES_1_NUM;
             const coreFloat fStoneSize  = j ? 2.0f               : 2.2f;
@@ -36,7 +36,7 @@ cGrassBackground::cGrassBackground()noexcept
             if(j) nTestFunc = [](const coreFloat& h, const coreFloat& y) {return (h > -23.0f && h < -18.0f && (F_TO_SI(y+160.0f) % 80 < 40));};
              else nTestFunc = [](const coreFloat& h, const coreFloat& y) {return (h > -20.0f && h < -18.0f);};
 
-            for(coreUintW i = 0; i < iStoneTries; ++i)
+            for(coreUintW i = 0u; i < iStoneTries; ++i)
             {
                 // calculate position and height
                 const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.45f, 0.45f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(iStoneTries)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
@@ -50,8 +50,8 @@ cGrassBackground::cGrassBackground()noexcept
                         // load object resources
                         coreObject3D* pObject = new coreObject3D();
                         pObject->DefineModel  ("environment_stone_01.md3");
-                        pObject->DefineTexture(0, "environment_stone_diff.png");
-                        pObject->DefineTexture(1, "environment_stone_norm.png");
+                        pObject->DefineTexture(0u, "environment_stone_diff.png");
+                        pObject->DefineTexture(1u, "environment_stone_norm.png");
                         pObject->DefineProgram("object_ground_program");
 
                         // set object properties
@@ -84,9 +84,9 @@ cGrassBackground::cGrassBackground()noexcept
     pList2 = new coreBatchList(GRASS_REEDS_2_RESERVE);
     pList2->DefineProgram("object_ground_inst_program");
     {
-        for(coreUintW i = 0; i < GRASS_REEDS_NUM; ++i)
+        for(coreUintW i = 0u; i < GRASS_REEDS_NUM; ++i)
         {
-            for(coreUintW j = 0; j < 3; ++j)   // tries
+            for(coreUintW j = 0u; j < 3u; ++j)   // tries
             {
                 // calculate position and height
                 const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.45f, 0.45f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(GRASS_REEDS_NUM)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
@@ -105,8 +105,8 @@ cGrassBackground::cGrassBackground()noexcept
                         // load object resources
                         coreObject3D* pObject = new coreObject3D();
                         pObject->DefineModel  (bType ? "environment_reed_01.md3" : "environment_reed_02.md3");
-                        pObject->DefineTexture(0, "environment_reed.png");
-                        pObject->DefineTexture(1, "environment_grass_norm.png");
+                        pObject->DefineTexture(0u, "environment_reed.png");
+                        pObject->DefineTexture(1u, "environment_grass_norm.png");
                         pObject->DefineProgram("object_ground_program");
 
                         // set object properties
@@ -145,7 +145,7 @@ cGrassBackground::cGrassBackground()noexcept
     {
         for(coreUintW i = GRASS_FLOWERS_NUM; i--; )
         {
-            for(coreUintW j = 0; j < 15; ++j)   // tries
+            for(coreUintW j = 0u; j < 15u; ++j)   // tries
             {
                 // calculate position and height
                 const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.45f, 0.45f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(GRASS_FLOWERS_NUM)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
@@ -159,7 +159,7 @@ cGrassBackground::cGrassBackground()noexcept
                         // load object resources
                         coreObject3D* pObject = new coreObject3D();
                         pObject->DefineModel  (Core::Manager::Object->GetLowModel());
-                        pObject->DefineTexture(0, "environment_flowers.png");
+                        pObject->DefineTexture(0u, "environment_flowers.png");
                         pObject->DefineProgram("effect_decal_spheric_program");
 
                         // set object properties
@@ -186,7 +186,7 @@ cGrassBackground::cGrassBackground()noexcept
     pList1 = new coreBatchList(GRASS_CLOUDS_RESERVE);
     pList1->DefineProgram("environment_clouds_inst_program");
     {
-        for(coreUintW i = 0; i < GRASS_CLOUDS_NUM; ++i)
+        for(coreUintW i = 0u; i < GRASS_CLOUDS_NUM; ++i)
         {
             // calculate position and height
             const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.3f, 0.3f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(GRASS_CLOUDS_NUM)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
@@ -195,7 +195,7 @@ cGrassBackground::cGrassBackground()noexcept
             // load object resources
             coreObject3D* pObject = new coreObject3D();
             pObject->DefineModel  (Core::Manager::Object->GetLowModel());
-            pObject->DefineTexture(0, "environment_clouds_mid.png");
+            pObject->DefineTexture(0u, "environment_clouds_mid.png");
             pObject->DefineProgram("environment_clouds_program");
 
             // set object properties

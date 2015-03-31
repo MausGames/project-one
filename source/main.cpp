@@ -22,6 +22,8 @@ cEnvironment*    g_pEnvironment    = NULL;
 cMenu*           g_pMenu           = NULL;
 cGame*           g_pGame           = NULL;
 
+static coreUint64 m_iOldPerfTime = 0u;   // 
+
 
 // ****************************************************************
 // init the application
@@ -143,17 +145,46 @@ void CoreApp::Render()
 // move the application
 void CoreApp::Move()
 {
-    // update input interface
-    UpdateInput();
+    if(g_pGame)
+    {
+        coreUint64 iNewPerfTime = 0u;
+        coreFloat  fDifference  = FRAMERATE_TIME;
 
-    // move the environment
-    g_pEnvironment->Move();
+        // 
+        do
+        {
+            // 
+            if(3.0f*fDifference < FRAMERATE_TIME)
+                SDL_Delay(1u);
 
-    // move the menu
-    g_pMenu->Move();
+            // 
+            iNewPerfTime = SDL_GetPerformanceCounter();
+            fDifference  = coreFloat(coreDouble(iNewPerfTime - m_iOldPerfTime) * Core::System->GetPerfFrequency());
+        }
+        while(fDifference < FRAMERATE_TIME);
 
-    // move the game
-    if(g_pGame) g_pGame->Move();
+        // 
+        m_iOldPerfTime = iNewPerfTime;
+
+        // override elapsed time to fixed value
+        if(Core::System->GetTime()) c_cast<coreFloat&>(Core::System->GetTime()) = FRAMERATE_TIME;
+    }
+
+    Core::Debug->MeasureStart("Move");
+    {
+        // update input interface
+        UpdateInput();
+
+        // move the environment
+        g_pEnvironment->Move();
+
+        // move the menu
+        g_pMenu->Move();
+
+        // move the game
+        if(g_pGame) g_pGame->Move();
+    }
+    Core::Debug->MeasureEnd("Move");
 
 
 

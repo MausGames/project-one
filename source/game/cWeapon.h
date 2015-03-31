@@ -137,8 +137,8 @@ public:
 // ****************************************************************
 // constructor
 constexpr_func cWeapon::cWeapon()noexcept
-: m_CooldownTimer (coreTimer(1.0f, 1.0f, 1))
-, m_iLevel        (0)
+: m_CooldownTimer (coreTimer(1.0f, 1.0f, 1u))
+, m_iLevel        (0u)
 , m_pOwner        (NULL)
 , m_bLastStatus   (false)
 {

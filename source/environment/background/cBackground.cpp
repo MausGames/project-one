@@ -16,12 +16,12 @@ cBackground::cBackground()noexcept
 , m_pWater   (NULL)
 {
     // create background frame buffer
-    m_iFrameBuffer.AttachTargetBuffer(CORE_FRAMEBUFFER_TARGET_COLOR, 0, CORE_TEXTURE_SPEC_RGB);
-    m_iFrameBuffer.AttachTargetBuffer(CORE_FRAMEBUFFER_TARGET_DEPTH, 0, CORE_TEXTURE_SPEC_DEPTH);
+    m_iFrameBuffer.AttachTargetBuffer(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB);
+    m_iFrameBuffer.AttachTargetBuffer(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH);
     m_iFrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED);
 
     // create resolved texture
-    m_iResolvedTexture.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0, CORE_TEXTURE_SPEC_RGB);
+    m_iResolvedTexture.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB);
     m_iResolvedTexture.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 }
 
@@ -202,7 +202,7 @@ void cBackground::_FillInfinite(coreBatchList* OUTPUT pObjectList)
 {
     // save current size and loop through all objects
     const coreUintW iCurSize = pObjectList->List()->size();
-    for(coreUintW i = 0; i < iCurSize; ++i)
+    for(coreUintW i = 0u; i < iCurSize; ++i)
     {
         coreObject3D* pOldObject = (*pObjectList->List())[i];
 
@@ -240,7 +240,7 @@ coreBool cBackground::_CheckIntersectionQuick(const coreBatchList* pObjectList, 
     auto et = pObjectList->List()->begin();
 
     // compare only with last few objects
-    for(coreUintW i = 5; i-- && it != et; )
+    for(coreUintW i = 5u; i-- && it != et; )
     {
         // check for quadratic distance
         if(((*(--it))->GetPosition().xy() - vNewPos).LengthSq() < fDistanceSq)

@@ -12,14 +12,14 @@
 // ****************************************************************
 // constructor
 cIntroMenu::cIntroMenu()noexcept
-: coreMenu       (3, SURFACE_INTRO_EMPTY)
-, m_IntroTimer   (coreTimer(1.5f, 0.5f, 1))
-, m_iIntroStatus (0)
-, m_iCurLanguage (0)
+: coreMenu       (3u, SURFACE_INTRO_EMPTY)
+, m_IntroTimer   (coreTimer(1.5f, 0.5f, 1u))
+, m_iIntroStatus (0u)
+, m_iCurLanguage (0u)
 {
     // create menu objects
     m_MausLogo.DefineProgram("default_2d_program");
-    m_MausLogo.DefineTexture(0, "maus_logo.png");
+    m_MausLogo.DefineTexture(0u, "maus_logo.png");
     m_MausLogo.SetPosition  (coreVector2(0.0f,0.0f));
     m_MausLogo.SetSize      (coreVector2(2.0f,1.0f) * 0.2f);
 
@@ -39,7 +39,7 @@ cIntroMenu::cIntroMenu()noexcept
         FOR_EACH(it, asFile)
         {
             // create new language button
-            coreButton* pButton = new coreButton(MENU_BUTTON, MENU_FONT_MEDIUM_3, 0);
+            coreButton* pButton = new coreButton(MENU_BUTTON, MENU_FONT_MEDIUM_3, 0u);
             pButton->DefineProgram("menu_border_program");
             pButton->SetPosition  (coreVector2(0.0f, 0.15f * (fOffset - I_TO_F(m_apLanguageButton.size()))));
             pButton->SetSize      (coreVector2(0.3f, 0.07f) * 1.5f);
@@ -117,12 +117,12 @@ void cIntroMenu::Move()
         }
 
         // 
-        if(m_iIntroStatus == 0)
+        if(m_iIntroStatus == 0u)
         {
             if(m_IntroTimer.GetValue(CORE_TIMER_GET_NORMAL) >= 1.0f)
             {
                 // 
-                m_iIntroStatus = 1;
+                m_iIntroStatus = 1u;
                 this->ChangeSurface(SURFACE_INTRO_EMPTY, 1.0f);
 
                 // 

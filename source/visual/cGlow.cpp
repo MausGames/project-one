@@ -16,13 +16,13 @@ cGlow::cGlow()noexcept
     const coreVector2 vGlowResolution = g_vGameResolution * GLOW_SCALE_FACTOR;
 
     // create glow frame buffer
-    m_iFrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0, CORE_TEXTURE_SPEC_RGB);
+    m_iFrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB);
     m_iFrameBuffer.Create(vGlowResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     // create blur frame buffers
-    m_aiBlurStage[0].AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0, CORE_TEXTURE_SPEC_RGB);
+    m_aiBlurStage[0].AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB);
     m_aiBlurStage[0].Create(vGlowResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
-    m_aiBlurStage[1].AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0, CORE_TEXTURE_SPEC_RGB);
+    m_aiBlurStage[1].AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB);
     m_aiBlurStage[1].Create(vGlowResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     // load shader-programs for separate convolution
@@ -74,7 +74,7 @@ void cGlow::Update()
             m_aiBlurStage[1].StartDraw();
             {
                 m_Transformer.DefineProgram(m_apBlurProgram[0]);
-                m_Transformer.DefineTexture(0, m_aiBlurStage[0].GetColorTarget(0).pTexture);
+                m_Transformer.DefineTexture(0u, m_aiBlurStage[0].GetColorTarget(0u).pTexture);
                 m_Transformer.Render();
             }
 
@@ -85,7 +85,7 @@ void cGlow::Update()
             m_iFrameBuffer.StartDraw();
             {
                 m_Transformer.DefineProgram(m_apBlurProgram[1]);
-                m_Transformer.DefineTexture(0, m_aiBlurStage[1].GetColorTarget(0).pTexture);
+                m_Transformer.DefineTexture(0u, m_aiBlurStage[1].GetColorTarget(0u).pTexture);
                 m_Transformer.Render();
             }
 

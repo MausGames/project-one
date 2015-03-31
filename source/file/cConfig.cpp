@@ -18,11 +18,11 @@ cInput  g_aInput[INPUT_SETS]; // = NULL;
 static void CheckConfig(cConfig* pConfig)
 {
     // clamp input set selections
-    for(coreUintW i = 0; i < INPUT_TYPES; ++i)
-        pConfig->Input.aiType[i] = CLAMP(pConfig->Input.aiType[i], 0u, INPUT_SETS-1);
+    for(coreUintW i = 0u; i < INPUT_TYPES; ++i)
+        pConfig->Input.aiType[i] = CLAMP(pConfig->Input.aiType[i], 0u, INPUT_SETS-1u);
 
     // loop trough input sets
-    for(coreUintW i = 0; i < INPUT_SETS;  ++i)
+    for(coreUintW i = 0u; i < INPUT_SETS;  ++i)
     {
         const coreInt16 iFrom = (i < INPUT_SETS_KEYBOARD) ? -coreInt16(CORE_INPUT_BUTTONS_MOUSE   -1) : 0;
         const coreInt16 iTo   = (i < INPUT_SETS_KEYBOARD) ?  coreInt16(CORE_INPUT_BUTTONS_KEYBOARD-1) : coreInt16(CORE_INPUT_BUTTONS_JOYSTICK-1);
@@ -35,19 +35,19 @@ static void CheckConfig(cConfig* pConfig)
         oSet.iMoveUp    = CLAMP(oSet.iMoveUp,    iFrom, iTo);
 
         // clamp input buttons
-        for(coreUintW j = 0; j < INPUT_BUTTONS; ++j)
+        for(coreUintW j = 0u; j < INPUT_BUTTONS; ++j)
             oSet.aiButton[j] = CLAMP(oSet.aiButton[j], iFrom, iTo);
     }
 
     // check for input sets with more than one selection
-    for(coreUintW i = 0; i < INPUT_TYPES; ++i)
+    for(coreUintW i = 0u; i < INPUT_TYPES; ++i)
     {
-        for(coreUintW j = i+1; j < INPUT_TYPES; ++j)
+        for(coreUintW j = i+1u; j < INPUT_TYPES; ++j)
         {
             WARN_IF(pConfig->Input.aiType[i] == pConfig->Input.aiType[j])
             {
                 // reset all selections to default values
-                for(coreUintW k = 0; k < INPUT_TYPES; ++k)
+                for(coreUintW k = 0u; k < INPUT_TYPES; ++k)
                     pConfig->Input.aiType[k] = k;
 
                 // leave all loops
@@ -77,17 +77,17 @@ void LoadConfig()
     g_OldConfig.Graphics.iDistortion = Core::Config->GetInt(CONFIG_GRAPHICS_DISTORTION);
 
     // read input values
-    for(coreUintW i = 0; i < INPUT_TYPES; ++i)
+    for(coreUintW i = 0u; i < INPUT_TYPES; ++i)
     {
         g_OldConfig.Input.aiType[i] = Core::Config->GetInt(CONFIG_INPUT_TYPE(i));
     }
-    for(coreUintW i = 0; i < INPUT_SETS;  ++i)
+    for(coreUintW i = 0u; i < INPUT_SETS;  ++i)
     {
         g_OldConfig.Input.aSet[i].iMoveLeft  = Core::Config->GetInt(CONFIG_INPUT_MOVE_LEFT (i));
         g_OldConfig.Input.aSet[i].iMoveRight = Core::Config->GetInt(CONFIG_INPUT_MOVE_RIGHT(i));
         g_OldConfig.Input.aSet[i].iMoveDown  = Core::Config->GetInt(CONFIG_INPUT_MOVE_DOWN (i));
         g_OldConfig.Input.aSet[i].iMoveUp    = Core::Config->GetInt(CONFIG_INPUT_MOVE_UP   (i));
-        for(coreUintW j = 0; j < INPUT_BUTTONS; ++j)
+        for(coreUintW j = 0u; j < INPUT_BUTTONS; ++j)
         {
             g_OldConfig.Input.aSet[i].aiButton[j] = Core::Config->GetInt(CONFIG_INPUT_BUTTON(i, j));
         }
@@ -115,17 +115,17 @@ void SaveConfig()
     Core::Config->SetInt(CONFIG_GRAPHICS_DISTORTION, g_OldConfig.Graphics.iDistortion);
 
     // write input values
-    for(coreUintW i = 0; i < INPUT_TYPES; ++i)
+    for(coreUintW i = 0u; i < INPUT_TYPES; ++i)
     {
         Core::Config->SetInt(CONFIG_INPUT_TYPE(i), g_OldConfig.Input.aiType[i]);
     }
-    for(coreUintW i = 0; i < INPUT_SETS;  ++i)
+    for(coreUintW i = 0u; i < INPUT_SETS;  ++i)
     {
         Core::Config->SetInt(CONFIG_INPUT_MOVE_LEFT (i), g_OldConfig.Input.aSet[i].iMoveLeft);
         Core::Config->SetInt(CONFIG_INPUT_MOVE_RIGHT(i), g_OldConfig.Input.aSet[i].iMoveRight);
         Core::Config->SetInt(CONFIG_INPUT_MOVE_DOWN (i), g_OldConfig.Input.aSet[i].iMoveDown);
         Core::Config->SetInt(CONFIG_INPUT_MOVE_UP   (i), g_OldConfig.Input.aSet[i].iMoveUp);
-        for(coreUintW j = 0; j < INPUT_BUTTONS; ++j)
+        for(coreUintW j = 0u; j < INPUT_BUTTONS; ++j)
         {
             Core::Config->SetInt(CONFIG_INPUT_BUTTON(i, j), g_OldConfig.Input.aSet[i].aiButton[j]);
         }
@@ -140,7 +140,7 @@ void SaveConfig()
 // update input interface
 void UpdateInput()
 {
-    for(coreUintW i = 0; i < INPUT_TYPES; ++i)
+    for(coreUintW i = 0u; i < INPUT_TYPES; ++i)
     {
         const coreUint8& iType = g_CurConfig.Input.aiType[i];
         const auto&      oSet  = g_CurConfig.Input.aSet[iType];
@@ -159,7 +159,7 @@ void UpdateInput()
             else if(Core::Input->GetKeyboardButton(coreInputKey(oSet.iMoveUp),    CORE_INPUT_HOLD)) oMap.vMove.y =  1.0f;
 
             // map button input
-            for(coreUintW j = 0; j < INPUT_BUTTONS; ++j)
+            for(coreUintW j = 0u; j < INPUT_BUTTONS; ++j)
             {
                 if(oSet.aiButton[j] <= 0)
                 {
@@ -185,7 +185,7 @@ void UpdateInput()
             oMap.vMove = Core::Input->GetJoystickRelative(iJoystickID);
 
             // map button input
-            for(coreUintW j = 0; j < INPUT_BUTTONS; ++j)
+            for(coreUintW j = 0u; j < INPUT_BUTTONS; ++j)
             {
                 if(Core::Input->GetJoystickButton(iJoystickID, coreUint8(oSet.aiButton[j]), CORE_INPUT_PRESS))   ADD_BIT(oMap.iButtonPress,   j);
                 if(Core::Input->GetJoystickButton(iJoystickID, coreUint8(oSet.aiButton[j]), CORE_INPUT_RELEASE)) ADD_BIT(oMap.iButtonRelease, j);

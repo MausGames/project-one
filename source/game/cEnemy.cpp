@@ -12,14 +12,12 @@
 // ****************************************************************
 // constructor
 cEnemy::cEnemy()noexcept
-: m_pPath       (NULL)
-, m_vPathOffset (coreVector2(0.0f,0.0f))
-, m_fLifeTime   (0.0f)
-, m_iNumShots   (0)
+: m_fLifeTime (0.0f)
+, m_iNumShots (0u)
 {
     // load object resources
     this->DefineProgram("object_ship_program");
-    this->DefineTexture(0, "ship_enemy.png");
+    this->DefineTexture(0u, "ship_enemy.png");
 
     // set object properties
     this->SetDirection  (coreVector3(0.0f,-1.0f,0.0f));
@@ -52,20 +50,13 @@ void cEnemy::Configure(const coreInt32& iHealth, const coreVector3& vColor)
 
 
 // ****************************************************************
-// 
-void cEnemy::SetupTrack(coreSpline2* pPath, const coreVector2& vPathOffset)
-{
-    // 
-    m_pPath       = pPath;
-    m_vPathOffset = vPathOffset;
-}
-
-
-// ****************************************************************
 // render the enemy
 void cEnemy::Render()
 {
     ASSERT(!CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_DEAD))
+
+    // 
+    this->_UpdateBlink();
 
     // render the 3d-object
     coreObject3D::Render();
@@ -94,32 +85,25 @@ void cEnemy::Move()
 void cEnemy::TakeDamage(const coreInt32& iDamage, cPlayer* pAttacker)
 {
     // 
-    m_iCurHealth -= iDamage;
-
-    // 
-    if(m_iCurHealth <= 0)
+    if(this->_TakeDamage(iDamage))
     {
-        m_iCurHealth = 0;
+        // 
         this->Kill(true);
         return;
     }
-
-    // 
-    this->SetColor3(LERP(coreVector3(0.5f,0.5f,0.5f), this->GetBaseColor(), (I_TO_F(m_iCurHealth) / I_TO_F(m_iMaxHealth))));
 }
 
 
 // ****************************************************************
 // add enemy to the game
-void cEnemy::Resurrect()
+void cEnemy::Resurrect(const coreSpline2& oPath)
 {
-    ASSERT(m_pPath)
     ASSERT(CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_DEAD))
 
     // 
     coreVector2 vPosition;
     coreVector2 vDirection;
-    m_pPath->CalcPosDir(0.0f, &vPosition, &vDirection);
+    oPath.CalcPosDir(0.0f, &vPosition, &vDirection);
 
     // 
     this->Resurrect(vPosition, vDirection);
@@ -133,7 +117,7 @@ void cEnemy::Resurrect(const coreVector2& vPosition, const coreVector2& vDirecti
 
     // 
     m_fLifeTime = 0.0f;
-    m_iNumShots = 0;
+    m_iNumShots = 0u;
 
     // bind enemy to active list
     g_pGame->__BindEnemy(this);
@@ -161,9 +145,48 @@ void cEnemy::Kill(const coreBool& bAnimated)
 
 // ****************************************************************
 // 
-coreBool cEnemy::_DefaultShooting(const coreFloat& fFireRate)
+coreBool cEnemy::DefaultMovePath(const coreSpline2& oPath, const coreVector2& vOffset, const coreFloat& fDistance)
 {
-    ASSERT(fFireRate <= 30.0f)
+    // 
+    coreVector2 vPosition;
+    coreVector2 vDirection;
+    oPath.CalcPosDir(MIN(fDistance, oPath.GetTotalDistance()), &vPosition, &vDirection);
+
+    // 
+    this->SetPosition (coreVector3(vPosition + vOffset, 0.0f));
+    this->SetDirection(coreVector3(vDirection,          0.0f));
+
+    // 
+    return (fDistance >= oPath.GetTotalDistance()) ? true : false;
+}
+
+
+// ****************************************************************
+// 
+coreBool cEnemy::DefaultMoveTarget(const coreVector2& vTarget, const coreFloat& fSpeedTurn, const coreFloat& fSpeedMove)
+{
+    // 
+    const coreVector2 vDiff = vTarget - this->GetPosition().xy();
+    const coreVector2 vAim  = vDiff.Normalized();
+
+    // 
+    const coreVector2 vDirection = (this->GetDirection().xy() + vAim       * (fSpeedTurn * Core::System->GetTime())).Normalize();
+    const coreVector2 vPosition  =  this->GetPosition ().xy() + vDirection * (fSpeedMove * Core::System->GetTime());
+
+    // 
+    this->SetPosition (coreVector3(vPosition,  0.0f));
+    if(vDiff.LengthSq() < 0.5f) return true;
+    this->SetDirection(coreVector3(vDirection, 0.0f));
+
+    return false;
+}
+
+
+// ****************************************************************
+// 
+coreBool cEnemy::DefaultShoot(const coreFloat& fFireRate)
+{
+    ASSERT(fFireRate <= I_TO_F(FRAMERATE))
 
     // 
     if(!CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_SILENT))
@@ -186,58 +209,6 @@ coreBool cEnemy::_DefaultShooting(const coreFloat& fFireRate)
 
 
 // ****************************************************************
-// 
-coreBool cEnemy::_DefaultMovementPath(const coreFloat& fDistance)
-{
-    if(m_pPath)
-    {
-        // 
-        if(fDistance >= m_pPath->GetTotalDistance())
-        {
-            this->Kill(false);
-            return true;
-        }
-
-        // 
-        coreVector2 vPosition;
-        coreVector2 vDirection;
-        m_pPath->CalcPosDir(fDistance, &vPosition, &vDirection);
-
-        // 
-        this->SetPosition (coreVector3(vPosition + m_vPathOffset, 0.0f));
-        this->SetDirection(coreVector3(vDirection,                0.0f));
-    }
-
-    return false;
-}
-
-
-// ****************************************************************
-// 
-coreBool cEnemy::_DefaultMovementTarget(const coreVector2& vTarget, const coreFloat& fSpeedTurn, const coreFloat& fSpeedMove)
-{
-    // 
-    const coreVector2 vDiff = vTarget - this->GetPosition().xy();
-    if(vDiff.LengthSq() < 0.5f)
-    {
-        this->Kill(false);
-        return true;
-    }
-
-    // 
-    const coreVector2 vAim       = vDiff.Normalized();
-    const coreVector2 vDirection = (this->GetDirection().xy() + vAim       * (fSpeedTurn * Core::System->GetTime())).Normalize();
-    const coreVector2 vPosition  =  this->GetPosition ().xy() + vDirection * (fSpeedMove * Core::System->GetTime());
-
-    // 
-    this->SetPosition (coreVector3(vPosition,  0.0f));
-    this->SetDirection(coreVector3(vDirection, 0.0f));
-
-    return false;
-}
-
-
-// ****************************************************************
 // constructor
 cScoutEnemy::cScoutEnemy()noexcept
 {
@@ -251,19 +222,9 @@ cScoutEnemy::cScoutEnemy()noexcept
 
 
 // ****************************************************************
-// 
+// move the scout enemy
 void cScoutEnemy::__MoveOwn()
 {
-    // 
-    if(this->_DefaultMovementPath(30.0f * m_fLifeTime)) return;
-
-    if(this->_DefaultShooting(10.0f))
-    {
-        cPlayer* pPlayer = g_pGame->FindPlayer(this->GetPosition().xy());
-
-        g_pGame->GetBulletManager()->AddBullet<cOrbBullet>(5, this, TYPE_BULLET_ENEMY, this->GetPosition().xy(),
-                                                           (pPlayer->GetPosition().xy() - this->GetPosition().xy()).Normalize());
-    }
 
 }
 
@@ -282,23 +243,9 @@ cWarriorEnemy::cWarriorEnemy()noexcept
 
 
 // ****************************************************************
-// 
+// move the warrior enemy
 void cWarriorEnemy::__MoveOwn()
 {
-    // 
-    if(this->_DefaultMovementPath(10.0f * m_fLifeTime)) return;
-
-    if(this->_DefaultShooting(5.0f))
-    {
-        cPlayer* pPlayer = g_pGame->FindPlayer(this->GetPosition().xy());
-        const coreVector2 vPos = pPlayer->GetPosition().xy();
-        const coreVector2 vDir = (vPos - this->GetPosition().xy()).Normalize();
-        const coreVector2 vTan = vDir.yx();
-
-        g_pGame->GetBulletManager()->AddBullet<cOrbBullet>(5, this, TYPE_BULLET_ENEMY, this->GetPosition().xy(),  vDir);
-        g_pGame->GetBulletManager()->AddBullet<cOrbBullet>(5, this, TYPE_BULLET_ENEMY, this->GetPosition().xy(), (vDir + vTan*0.1f).Normalize());
-        g_pGame->GetBulletManager()->AddBullet<cOrbBullet>(5, this, TYPE_BULLET_ENEMY, this->GetPosition().xy(), (vDir - vTan*0.1f).Normalize());
-    }
 
 }
 

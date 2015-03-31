@@ -12,10 +12,10 @@
 // ****************************************************************
 // constructor
 cOutdoor::cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom, const coreUint8& iAlgorithm, const coreFloat& fGrade)noexcept
-: m_iVertexOffset (0)
-, m_iIndexOffset  (0)
+: m_iVertexOffset (0u)
+, m_iIndexOffset  (0u)
 , m_fFlyOffset    (0.0f)
-, m_iAlgorithm    (0)
+, m_iAlgorithm    (0u)
 , m_fGrade        (0.0f)
 {
     // load outdoor textures
@@ -36,7 +36,7 @@ cOutdoor::cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom
 cOutdoor::~cOutdoor()
 {
     // free resources
-    this->DefineTexture(2, NULL);
+    this->DefineTexture(2u, NULL);
     Core::Manager::Resource->Free(&m_pNormalMap);
     Core::Manager::Resource->Free(&m_pModel);
 }
@@ -46,15 +46,23 @@ cOutdoor::~cOutdoor()
 // render the outdoor-surface
 void cOutdoor::Render()
 {
-    // enable all resources
-    if(this->Prepare())
-    {
-        // send shadow matrix to shader-program
-        cShadow::EnableShadowRead(SHADOW_HANDLE_OUTDOOR);
+    // check for model status
+    if(!m_pModel.IsUsable()) return;
 
-        // draw the model
-        glDrawRangeElements(m_pModel->GetPrimitiveType(), m_iVertexOffset, m_iVertexOffset + (OUTDOOR_VIEW+1)*OUTDOOR_WIDTH, OUTDOOR_RANGE, m_pModel->GetIndexType(), I_TO_P(m_iIndexOffset));
-    }
+    // enable the shader-program
+    if(!m_pProgram.IsUsable()) return;
+    if(!m_pProgram->Enable())  return;
+
+    // send shadow matrix to shader-program
+    cShadow::EnableShadowRead(SHADOW_HANDLE_OUTDOOR);
+
+    // enable all active textures
+    for(coreUintW i = 0u; i < CORE_TEXTURE_UNITS; ++i)
+        if(m_apTexture[i].IsUsable()) m_apTexture[i]->Enable(i);
+
+    // draw the model
+    m_pModel->Enable();
+    glDrawRangeElements(m_pModel->GetPrimitiveType(), m_iVertexOffset, m_iVertexOffset + (OUTDOOR_VIEW+1u)*OUTDOOR_WIDTH, OUTDOOR_RANGE, m_pModel->GetIndexType(), I_TO_P(m_iIndexOffset));
 }
 
 
@@ -63,11 +71,11 @@ void cOutdoor::Render()
 void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcTextureBottom)
 {
     // load color textures
-    this->DefineTexture(0, PRINT("environment_%s_diff.png", pcTextureTop));
-    this->DefineTexture(1, PRINT("environment_%s_diff.png", pcTextureBottom));
+    this->DefineTexture(0u, PRINT("environment_%s_diff.png", pcTextureTop));
+    this->DefineTexture(1u, PRINT("environment_%s_diff.png", pcTextureBottom));
 
     // unbind normal map to prevent concurrency problems
-    this->DefineTexture(2, NULL);
+    this->DefineTexture(2u, NULL);
 
     Core::Manager::Resource->AttachFunction([=]()
     {
@@ -86,24 +94,24 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
         // decompress files to plain pixel data
         SDL_Surface* pSurface1 = IMG_LoadTyped_RW(SDL_RWFromConstMem(pFile1->GetData(), pFile1->GetSize()), true, coreData::StrExtension(pFile1->GetPath()));
         SDL_Surface* pSurface2 = IMG_LoadTyped_RW(SDL_RWFromConstMem(pFile2->GetData(), pFile2->GetSize()), true, coreData::StrExtension(pFile2->GetPath()));
-        WARN_IF((pSurface1->format->BitsPerPixel != 24) || (pSurface2->format->BitsPerPixel != 24)) return CORE_OK;
+        WARN_IF((pSurface1->format->BitsPerPixel != 24u) || (pSurface2->format->BitsPerPixel != 24u)) return CORE_OK;
 
         // allocate required memory
-        const coreUintW iSize = pSurface1->w * pSurface1->h * 4;
+        const coreUintW iSize = pSurface1->w * pSurface1->h * 4u;
         coreByte* pOutput = new coreByte[iSize];
         coreByte* pInput1 = s_cast<coreByte*>(pSurface1->pixels);
         coreByte* pInput2 = s_cast<coreByte*>(pSurface2->pixels);
 
         // merge XY components of both normal maps (Z can be calculated in shader)
-        for(coreUintW i = 0, j = 0; i < iSize; i += 4, j += 3)
+        for(coreUintW i = 0u, j = 0u; i < iSize; i += 4u, j += 3u)
         {
-            std::memcpy(pOutput + i,     pInput1 + j, 2);
-            std::memcpy(pOutput + i + 2, pInput2 + j, 2);
+            std::memcpy(pOutput + i,      pInput1 + j, 2u);
+            std::memcpy(pOutput + i + 2u, pInput2 + j, 2u);
         }
 
         // create final normal map
-        m_pNormalMap->Create(pSurface1->w, pSurface1->h, CORE_TEXTURE_SPEC_RGBA, GL_REPEAT, true);
-        m_pNormalMap->Modify(0, 0, pSurface1->w, pSurface1->h, iSize, pOutput);
+        m_pNormalMap->Create(pSurface1->w, pSurface1->h, CORE_TEXTURE_SPEC_RGBA, CORE_TEXTURE_MODE_FILTER | CORE_TEXTURE_MODE_REPEAT);
+        m_pNormalMap->Modify(0u, 0u, pSurface1->w, pSurface1->h, iSize, pOutput);
 
         // wait until texture-upload is finished
         coreSync oSync;
@@ -111,7 +119,7 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
         oSync.Check(GL_TIMEOUT_IGNORED, CORE_SYNC_CHECK_FLUSHED);
 
         // bind normal map safely
-        this->DefineTexture(2, m_pNormalMap);
+        this->DefineTexture(2u, m_pNormalMap);
 
         // free all temporary resources
         SAFE_DELETE_ARRAY(pOutput)
@@ -136,7 +144,7 @@ void cOutdoor::LoadGeometry(const coreUint8& iAlgorithm, const coreFloat& fGrade
 
     // delete old data
     m_pModel->Unload();
-    for(coreUintW i = 0; i < OUTDOOR_TOTAL_VERTICES; ++i) m_afHeight[i] = 0.0f;
+    for(coreUintW i = 0u; i < OUTDOOR_TOTAL_VERTICES; ++i) m_afHeight[i] = 0.0f;
 
     // save properties
     m_iAlgorithm = iAlgorithm;
@@ -147,18 +155,18 @@ void cOutdoor::LoadGeometry(const coreUint8& iAlgorithm, const coreFloat& fGrade
     switch(iAlgorithm)
     {
     default: ASSERT(false)
-    case 1: nAlgorithmFunc = [](const coreFloat& x, const coreFloat& y) {coreFloat r = -(COS((x - I_TO_F(OUTDOOR_WIDTH)*0.5f)*0.075f*PI)*5.0f);                                                                                        return r;}; break;
-    case 2: nAlgorithmFunc = [](const coreFloat& x, const coreFloat& y) {coreFloat r =  (ABS(SIN(x*0.075f*PI)*8.0f + SIN(y*0.075f*PI)*8.0f) - 6.0f);                                                                                   return r;}; break;
-    case 3: nAlgorithmFunc = [](const coreFloat& x, const coreFloat& y) {coreFloat r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 13.0f);                                                      return r;}; break;
-    case 4: nAlgorithmFunc = [](const coreFloat& x, const coreFloat& y) {coreFloat r = -(ABS(SIN(y*0.150f*PI)*0.25f - 0.5f*(x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.150f*PI) - 0.0f; if(r <    0.0f) r = -1.0f; return r;}; break;
-    case 5: nAlgorithmFunc = [](const coreFloat& x, const coreFloat& y) {coreFloat r = -(ABS(SIN(y*0.075f*PI)*0.25f + 0.5f*(x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.075f*PI) - 1.5f; if(r < -100.0f) r = -1.0f; return r;}; break;
-    case 6: nAlgorithmFunc = [](const coreFloat& x, const coreFloat& y) {coreFloat r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.150f*PI) - 1.0f;                            return r;}; break;
-    case 7: nAlgorithmFunc = [](const coreFloat& x, const coreFloat& y) {coreFloat r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.075f*PI) + 3.0f;                            return r;}; break;
-    case 8: nAlgorithmFunc = [](const coreFloat& x, const coreFloat& y) {coreFloat r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.075f*PI) + 1.0f;                            return r;}; break;
+    case 1u: nAlgorithmFunc = [](const coreFloat& x, const coreFloat& y) {coreFloat r = -(COS((x - I_TO_F(OUTDOOR_WIDTH)*0.5f)*0.075f*PI)*5.0f);                                                                                        return r;}; break;
+    case 2u: nAlgorithmFunc = [](const coreFloat& x, const coreFloat& y) {coreFloat r =  (ABS(SIN(x*0.075f*PI)*8.0f + SIN(y*0.075f*PI)*8.0f) - 6.0f);                                                                                   return r;}; break;
+    case 3u: nAlgorithmFunc = [](const coreFloat& x, const coreFloat& y) {coreFloat r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 13.0f);                                                      return r;}; break;
+    case 4u: nAlgorithmFunc = [](const coreFloat& x, const coreFloat& y) {coreFloat r = -(ABS(SIN(y*0.150f*PI)*0.25f - 0.5f*(x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.150f*PI) - 0.0f; if(r <    0.0f) r = -1.0f; return r;}; break;
+    case 5u: nAlgorithmFunc = [](const coreFloat& x, const coreFloat& y) {coreFloat r = -(ABS(SIN(y*0.075f*PI)*0.25f + 0.5f*(x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.075f*PI) - 1.5f; if(r < -100.0f) r = -1.0f; return r;}; break;
+    case 6u: nAlgorithmFunc = [](const coreFloat& x, const coreFloat& y) {coreFloat r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.150f*PI) - 1.0f;                            return r;}; break;
+    case 7u: nAlgorithmFunc = [](const coreFloat& x, const coreFloat& y) {coreFloat r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.075f*PI) + 3.0f;                            return r;}; break;
+    case 8u: nAlgorithmFunc = [](const coreFloat& x, const coreFloat& y) {coreFloat r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.075f*PI) + 1.0f;                            return r;}; break;
     }
 
     // create vertices
-    for(coreUintW i = 0; i < OUTDOOR_TOTAL_VERTICES; ++i)
+    for(coreUintW i = 0u; i < OUTDOOR_TOTAL_VERTICES; ++i)
     {
         const coreInt32 x = i % OUTDOOR_WIDTH;
         const coreInt32 y = i / OUTDOOR_WIDTH;
@@ -187,9 +195,9 @@ void cOutdoor::LoadGeometry(const coreUint8& iAlgorithm, const coreFloat& fGrade
     }
 
     // sync beginning and ending height to create an infinite looking grid when resetting the position
-    for(coreUintW i = 0; i < OUTDOOR_VIEW; ++i)
+    for(coreUintW i = 0u; i < OUTDOOR_VIEW; ++i)
     {
-        for(coreUintW j = 0; j < OUTDOOR_WIDTH; ++j)
+        for(coreUintW j = 0u; j < OUTDOOR_WIDTH; ++j)
         {
             const coreUintW f = i * OUTDOOR_WIDTH + j;
             const coreUintW t = f + OUTDOOR_HEIGHT * OUTDOOR_WIDTH;
@@ -200,61 +208,61 @@ void cOutdoor::LoadGeometry(const coreUint8& iAlgorithm, const coreFloat& fGrade
     }
 
     // create indices
-    coreUintW iIndex = 0;
-    for(coreUintW y = 0; y < OUTDOOR_BLOCKS_Y; ++y)
+    coreUintW iIndex = 0u;
+    for(coreUintW y = 0u; y < OUTDOOR_BLOCKS_Y; ++y)
     {
-        for(coreUintW x = 0; x < OUTDOOR_BLOCKS_X; ++x)
+        for(coreUintW x = 0u; x < OUTDOOR_BLOCKS_X; ++x)
         {
             const coreUint16 iVertex = x + y*OUTDOOR_WIDTH;
 
-            aiIndexData[iIndex+0] = iVertex;
-            aiIndexData[iIndex+1] = iVertex + 1;
-            aiIndexData[iIndex+2] = iVertex + 1 + OUTDOOR_WIDTH;
-            aiIndexData[iIndex+3] = iVertex;
-            aiIndexData[iIndex+4] = iVertex + 1 + OUTDOOR_WIDTH;
-            aiIndexData[iIndex+5] = iVertex     + OUTDOOR_WIDTH;
+            aiIndexData[iIndex+0u] = iVertex;
+            aiIndexData[iIndex+1u] = iVertex + 1u;
+            aiIndexData[iIndex+2u] = iVertex + 1u + OUTDOOR_WIDTH;
+            aiIndexData[iIndex+3u] = iVertex;
+            aiIndexData[iIndex+4u] = iVertex + 1u + OUTDOOR_WIDTH;
+            aiIndexData[iIndex+5u] = iVertex      + OUTDOOR_WIDTH;
 
-            iIndex += 6;
+            iIndex += 6u;
         }
     }
 
     // calculate normals
-    for(coreUintW i = 0; i < OUTDOOR_TOTAL_VERTICES; ++i)
+    for(coreUintW i = 0u; i < OUTDOOR_TOTAL_VERTICES; ++i)
     {
         const coreInt32 x = i % OUTDOOR_WIDTH;
         const coreInt32 y = i / OUTDOOR_WIDTH;
 
-        const coreUintW iLeft  = MAX(x-1, 0)                     + y*OUTDOOR_WIDTH;
-        const coreUintW iRight = MIN(x+1, OUTDOOR_WIDTH      -1) + y*OUTDOOR_WIDTH;
-        const coreUintW iDown  = MAX(y-1, 0)                    *OUTDOOR_WIDTH + x;
-        const coreUintW iUp    = MIN(y+1, OUTDOOR_HEIGHT_FULL-1)*OUTDOOR_WIDTH + x;
+        const coreUintW iLeft  = MAX(x-1, 0)                                + y*OUTDOOR_WIDTH;
+        const coreUintW iRight = MIN(x+1, coreInt32(OUTDOOR_WIDTH)      -1) + y*OUTDOOR_WIDTH;
+        const coreUintW iDown  = MAX(y-1, 0)                               *OUTDOOR_WIDTH + x;
+        const coreUintW iUp    = MIN(y+1, coreInt32(OUTDOOR_HEIGHT_FULL)-1)*OUTDOOR_WIDTH + x;
 
         aVertexData[i].vNormal = coreVector3::Cross((aVertexData[iLeft].vPosition - aVertexData[iRight].vPosition).Normalize(),
                                                     (aVertexData[iDown].vPosition - aVertexData[iUp   ].vPosition).Normalize());
     }
 
     // calculate tangents
-    for(coreUintW i = 0; i < OUTDOOR_TOTAL_INDICES; i += 3)
+    for(coreUintW i = 0u; i < OUTDOOR_TOTAL_INDICES; i += 3u)
     {
         // calculate triangle sides
-        const coreVector3 A1 = aVertexData[aiIndexData[i+1]].vPosition - aVertexData[aiIndexData[i+0]].vPosition;
-        const coreVector3 A2 = aVertexData[aiIndexData[i+2]].vPosition - aVertexData[aiIndexData[i+0]].vPosition;
-        const coreVector2 B1 = coreVector2(0.25f, (i%2) ? 0.0f : 0.25f);
-        const coreVector2 B2 = coreVector2((i%2) ? 0.25f : 0.0f, 0.25f);
+        const coreVector3 A1 = aVertexData[aiIndexData[i+1u]].vPosition - aVertexData[aiIndexData[i+0u]].vPosition;
+        const coreVector3 A2 = aVertexData[aiIndexData[i+2u]].vPosition - aVertexData[aiIndexData[i+0u]].vPosition;
+        const coreVector2 B1 = coreVector2(0.25f, (i%2u) ? 0.0f : 0.25f);
+        const coreVector2 B2 = coreVector2((i%2u) ? 0.25f : 0.0f, 0.25f);
 
         // calculate local tangent vector parameters
         const coreFloat   R  = RCP(B1.s*B2.t - B2.s*B1.t);
         const coreVector3 D1 = (A1*B2.t - A2*B1.t) * R;
         const coreVector3 D2 = (A2*B1.s - A1*B2.s) * R;
 
-        for(coreUintW j = 0; j < 3; ++j)
+        for(coreUintW j = 0u; j < 3u; ++j)
         {
             // add local values to each point of the triangle
             avOrtho1[aiIndexData[i+j]] += D1;
             avOrtho2[aiIndexData[i+j]] += D2;
         }
     }
-    for(coreUintW i = 0; i < OUTDOOR_TOTAL_VERTICES; ++i)
+    for(coreUintW i = 0u; i < OUTDOOR_TOTAL_VERTICES; ++i)
     {
         // finish the Gram-Schmidt process to calculate the tangent vector and binormal sign (w)
         aVertexData[i].vTangent = coreVector4((avOrtho1[i] - aVertexData[i].vNormal * coreVector3::Dot(aVertexData[i].vNormal, avOrtho1[i])).Normalize(),
@@ -278,7 +286,7 @@ void cOutdoor::LoadGeometry(const coreUint8& iAlgorithm, const coreFloat& fGrade
 
     // reduce total vertex size
     sVertexPacked aPackedData[OUTDOOR_TOTAL_VERTICES];
-    for(coreUintW i = 0; i < OUTDOOR_TOTAL_VERTICES; ++i)
+    for(coreUintW i = 0u; i < OUTDOOR_TOTAL_VERTICES; ++i)
     {
         // convert specific vertex attributes
         aPackedData[i].vPosition = aVertexData[i].vPosition;
@@ -288,9 +296,9 @@ void cOutdoor::LoadGeometry(const coreUint8& iAlgorithm, const coreFloat& fGrade
 
     // create vertex buffer
     coreVertexBuffer* pBuffer = m_pModel->CreateVertexBuffer(OUTDOOR_TOTAL_VERTICES, sizeof(sVertexPacked), aPackedData, CORE_DATABUFFER_STORAGE_STATIC);
-    pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_POSITION_NUM, 3, GL_FLOAT,    false, 0);
-    pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_NORMAL_NUM,   4, iNormFormat, false, 3*sizeof(coreFloat));
-    pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_TANGENT_NUM,  4, iNormFormat, false, 3*sizeof(coreFloat) + 1*sizeof(coreUint32));
+    pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_POSITION_NUM, 3u, GL_FLOAT,    false, 0u);
+    pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_NORMAL_NUM,   4u, iNormFormat, false, 3u*sizeof(coreFloat));
+    pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_TANGENT_NUM,  4u, iNormFormat, false, 3u*sizeof(coreFloat) + 1u*sizeof(coreUint32));
 
     // create index buffer
     m_pModel->CreateIndexBuffer(OUTDOOR_TOTAL_INDICES, sizeof(coreUint16), aiIndexData, CORE_DATABUFFER_STORAGE_STATIC);
@@ -309,9 +317,9 @@ coreFloat cOutdoor::RetrieveHeight(const coreVector2& vPosition)
 
     // retrieve all four corners of the block
     const coreUintW iI00 = F_TO_UI(fY) * OUTDOOR_WIDTH + F_TO_UI(fX);   // bottom left
-    const coreUintW iI01 = iI00 + 1;                                    // bottom right
-    const coreUintW iI10 = iI00     + OUTDOOR_WIDTH;                    // top left
-    const coreUintW iI11 = iI00 + 1 + OUTDOOR_WIDTH;                    // top right
+    const coreUintW iI01 = iI00 + 1u;                                   // bottom right
+    const coreUintW iI10 = iI00      + OUTDOOR_WIDTH;                   // top left
+    const coreUintW iI11 = iI00 + 1u + OUTDOOR_WIDTH;                   // top right
     ASSERT(iI00 < OUTDOOR_TOTAL_VERTICES && iI11 < OUTDOOR_TOTAL_VERTICES);
 
     // retrieve height values of the corners

@@ -15,18 +15,18 @@
 
 // ****************************************************************
 // outdoor definitions
-#define OUTDOOR_VIEW           (31)                                              // visible rows
+#define OUTDOOR_VIEW           (31u)                                             // visible rows
 #define OUTDOOR_DETAIL         (6.0f)                                            // size of a block
 
-#define OUTDOOR_WIDTH          (31)                                              // vertices per row
-#define OUTDOOR_HEIGHT         (160)                                             // vertices per column
+#define OUTDOOR_WIDTH          (31u)                                             // vertices per row
+#define OUTDOOR_HEIGHT         (160u)                                            // vertices per column
 #define OUTDOOR_HEIGHT_FULL    (OUTDOOR_HEIGHT + OUTDOOR_VIEW)                   // with double vertices
 
-#define OUTDOOR_BLOCKS_X       (OUTDOOR_WIDTH-1)                                 // blocks per row
-#define OUTDOOR_BLOCKS_Y       (OUTDOOR_HEIGHT_FULL-1)                           // blocks per column
+#define OUTDOOR_BLOCKS_X       (OUTDOOR_WIDTH-1u)                                // blocks per row
+#define OUTDOOR_BLOCKS_Y       (OUTDOOR_HEIGHT_FULL-1u)                          // blocks per column
 #define OUTDOOR_BLOCKS         (OUTDOOR_BLOCKS_X * OUTDOOR_BLOCKS_Y)             // number of all blocks
 
-#define OUTDOOR_PER_INDICES    (6)                                               // indices per block
+#define OUTDOOR_PER_INDICES    (6u)                                              // indices per block
 #define OUTDOOR_TOTAL_VERTICES (OUTDOOR_WIDTH * OUTDOOR_HEIGHT_FULL)             // total number of vertices
 #define OUTDOOR_TOTAL_INDICES  (OUTDOOR_PER_INDICES * OUTDOOR_BLOCKS)            // total number of indices
 
@@ -116,8 +116,8 @@ constexpr_func cOutdoor::sVertex::sVertex()noexcept
 // constructor
 constexpr_func cOutdoor::sVertexPacked::sVertexPacked()noexcept
 : vPosition (coreVector3(0.0f,0.0f,0.0f))
-, iNormal   (0)
-, iTangent  (0)
+, iNormal   (0u)
+, iTangent  (0u)
 {
 }
 

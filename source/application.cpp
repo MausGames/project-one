@@ -11,13 +11,21 @@
 // setup all defined resources
 static void SetupResources()
 {
+    Core::Manager::Resource->Load<coreModel>  ("bullet_cone.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_cone.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_ray.md3",                  CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_ray.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_orb.md3",                  CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_orb.md3");
     Core::Manager::Resource->Load<coreModel>  ("environment_reed_01.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_reed_01.md3");
     Core::Manager::Resource->Load<coreModel>  ("environment_reed_02.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_reed_02.md3");
     Core::Manager::Resource->Load<coreModel>  ("environment_stone_01.md3",        CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_stone_01.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_boomerang.md3",            CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boomerang.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_circle_01.md3",            CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_circle_01.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_paddle.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_paddle.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_crossfield_high.md3",   CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_crossfield_high.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_crossfield_low.md3",    CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_crossfield_low.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_torus_high.md3",        CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_torus_high.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_torus_low.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_torus_low.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_vaus_high.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_vaus_high.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_vaus_low.md3",          CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_vaus_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_enemy_arrow_high.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_arrow_high.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_enemy_arrow_low.md3",        CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_arrow_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_enemy_cinder_high.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_cinder_high.md3");
@@ -42,15 +50,15 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_low.png",      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_low.png");
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_mid.png",      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_mid.png");
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_high.png",     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_high.png");
-    Core::Manager::Resource->Load<coreTexture>("environment_flowers.png",         CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_flowers.png");
+    Core::Manager::Resource->Load<coreTexture>("environment_flowers.png",         CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_flowers.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_dust_diff.png",       CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_dust_diff.png");
-    Core::Manager::Resource->Load<coreTexture>("environment_dust_norm.png",       CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_dust_norm.png");
+    Core::Manager::Resource->Load<coreTexture>("environment_dust_norm.png",       CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_dust_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_grass_diff.png",      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_grass_diff.png");
-    Core::Manager::Resource->Load<coreTexture>("environment_grass_norm.png",      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_grass_norm.png");
+    Core::Manager::Resource->Load<coreTexture>("environment_grass_norm.png",      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_grass_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_reed.png",            CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_reed.png");
     Core::Manager::Resource->Load<coreTexture>("environment_stone_diff.png",      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_stone_diff.png");
-    Core::Manager::Resource->Load<coreTexture>("environment_stone_norm.png",      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_stone_norm.png");
-    Core::Manager::Resource->Load<coreTexture>("environment_water_norm.png",      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_water_norm.png");
+    Core::Manager::Resource->Load<coreTexture>("environment_stone_norm.png",      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_stone_norm.png", false);
+    Core::Manager::Resource->Load<coreTexture>("environment_water_norm.png",      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_water_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("game_logo.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/game_logo.png");
     Core::Manager::Resource->Load<coreTexture>("maus_logo.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/maus_logo.png");
     Core::Manager::Resource->Load<coreTexture>("menu_background_black.png",       CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_background_black.png");

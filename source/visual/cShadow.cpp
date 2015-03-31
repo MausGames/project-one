@@ -18,7 +18,7 @@ coreMatrix4    cShadow::s_mReadShadowMatrix            = coreMatrix4::Identity()
 // ****************************************************************
 // constructor
 cShadow::cShadow()noexcept
-: m_iLevel (0xFF)
+: m_iLevel (0xFFu)
 {
     // create shadow map
     this->Reconfigure();
@@ -49,7 +49,7 @@ void cShadow::Update()
     }
 
     // enable shadow map
-    m_iFrameBuffer.GetDepthTarget().pTexture->Enable(CORE_TEXTURE_SHADOW + 0);
+    m_iFrameBuffer.GetDepthTarget().pTexture->Enable(CORE_TEXTURE_SHADOW + 0u);
 }
 
 
@@ -66,8 +66,8 @@ void cShadow::Reconfigure()
     if(m_iLevel)
     {
         // create shadow map frame buffer
-        m_iFrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_DEPTH, 0, CORE_TEXTURE_SPEC_DEPTH);
-        m_iFrameBuffer.Create(g_vGameResolution * ((m_iLevel == 1) ? 1.0f : 1.7f), CORE_FRAMEBUFFER_CREATE_NORMAL);
+        m_iFrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH);
+        m_iFrameBuffer.Create(g_vGameResolution * ((m_iLevel == 1u) ? 1.0f : 1.7f), CORE_FRAMEBUFFER_CREATE_NORMAL);
 
         // enable depth value comparison
         m_iFrameBuffer.GetDepthTarget().pTexture->ShadowSampling(true);
@@ -106,7 +106,7 @@ void cShadow::GlobalExit()
     // unload all shader-programs
     s_pProgramSingle    = NULL;
     s_pProgramInstanced = NULL;
-    for(coreUintW i = 0; i < SHADOW_HANDLES; ++i) s_apHandle[i] = NULL;
+    for(coreUintW i = 0u; i < SHADOW_HANDLES; ++i) s_apHandle[i] = NULL;
 }
 
 
@@ -133,8 +133,8 @@ void cShadow::GlobalUpdate()
     // assemble additional movement matrix for foreground objects
     const coreVector3& P = g_pEnvironment->GetCameraPos();
     const coreVector2& D = g_pEnvironment->GetDirection();
-    const coreMatrix4 mMove = coreMatrix4( D.y, -D.x, 0.0f, 0.0f,
-                                           D.x,  D.y, 0.0f, 0.0f,
+    const coreMatrix4 mMove = coreMatrix4( D.y,  D.x, 0.0f, 0.0f,
+                                          -D.x,  D.y, 0.0f, 0.0f,
                                           0.0f, 0.0f, 1.0f, 0.0f,
                                            P.x,  P.y, 0.0f, 1.0f);
 
@@ -143,7 +143,7 @@ void cShadow::GlobalUpdate()
 
     // calculate full draw and read shadow matrices
     s_amDrawShadowMatrix[0] = coreMatrix4::Camera(vHighLight * -SHADOW_VIEW_DISTANCE + coreVector3(g_pEnvironment->GetCameraPos().xy(), WATER_HEIGHT),
-                                                  vHighLight, coreVector3(0.0f,1.0f,0.0f)) * mOrtho;
+                                                  vHighLight, coreVector3(g_pEnvironment->GetDirection().InvertedX(), 0.0f)) * mOrtho;
     s_amDrawShadowMatrix[1] = mMove * s_amDrawShadowMatrix[0];
     s_mReadShadowMatrix     = s_amDrawShadowMatrix[0] * mNorm;
 }
@@ -153,7 +153,7 @@ void cShadow::GlobalUpdate()
 // recompile shader-programs with shadow maps
 void cShadow::Recompile()
 {
-    for(coreUintW i = 0; i < SHADOW_HANDLES; ++i)
+    for(coreUintW i = 0u; i < SHADOW_HANDLES; ++i)
     {
         const coreChar* pcConfig = PRINT("%s %s", g_CurConfig.Graphics.iShadow     ? SHADER_SHADOW                 : "",
                                                   (i == SHADOW_HANDLE_OBJECT_INST) ? CORE_SHADER_OPTION_INSTANCING : "");
@@ -189,7 +189,7 @@ void cShadow::EnableShadowRead(const coreUintW& iProgramHandle)
 // reset with the resource manager
 void cShadow::__Reset(const coreResourceReset& bInit)
 {
-    if(bInit) {m_iLevel = 0xFF; this->Reconfigure();}
+    if(bInit) {m_iLevel = 0xFFu; this->Reconfigure();}
          else m_iFrameBuffer.Delete();
 }
 

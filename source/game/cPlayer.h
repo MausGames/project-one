@@ -13,19 +13,19 @@
 
 // ****************************************************************
 // player definitions
-#define PLAYER_WEAPONS        (1u)      // number of weapons a player can carry
-#define PLAYER_COLLISION_SIZE (0.75f)   // 
-#define PLAYER_SHIP_ATK       (0)       // 
-#define PLAYER_SHIP_DEF       (1)       // 
+#define PLAYER_WEAPONS        (1u)     // number of weapons a player can carry
+#define PLAYER_COLLISION_SIZE (0.3f)   // 
+#define PLAYER_SHIP_ATK       (0u)     // 
+#define PLAYER_SHIP_DEF       (1u)     // 
 
 #define PLAYER_COMBO(x) (LERP(50.0f, 1.0f, RCP(1.0f + I_TO_F(x)*0.0002f)))
 
 enum ePlayerStatus : coreUint8
 {
-    PLAYER_STATUS_DEAD            = 0x01,   // completely removed from the game
-    PLAYER_STATUS_NO_INPUT_MOVE   = 0x02,   // disable player movement (user controls only)
-    PLAYER_STATUS_NO_INPUT_WEAPON = 0x04,   // disable player weapons
-    PLAYER_STATUS_NO_INPUT_SKILL  = 0x08,   // disable player skills
+    PLAYER_STATUS_DEAD            = 0x01u,   // completely removed from the game
+    PLAYER_STATUS_NO_INPUT_MOVE   = 0x02u,   // disable player movement (user controls only)
+    PLAYER_STATUS_NO_INPUT_WEAPON = 0x04u,   // disable player weapons
+    PLAYER_STATUS_NO_INPUT_SKILL  = 0x08u,   // disable player skills
     PLAYER_STATUS_NO_INPUT_ALL    = PLAYER_STATUS_NO_INPUT_MOVE | PLAYER_STATUS_NO_INPUT_WEAPON | PLAYER_STATUS_NO_INPUT_SKILL
 };
 

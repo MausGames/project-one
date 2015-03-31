@@ -15,8 +15,8 @@
 // enemy definitions
 enum eEnemyStatus : coreUint8
 {
-    ENEMY_STATUS_DEAD   = 0x01,   // completely removed from the game
-    ENEMY_STATUS_SILENT = 0x02    //  no-shoot # 
+    ENEMY_STATUS_DEAD   = 0x01u,   // completely removed from the game
+    ENEMY_STATUS_SILENT = 0x02u    // not able to attack
 };
 
 
@@ -25,11 +25,8 @@ enum eEnemyStatus : coreUint8
 class INTERFACE cEnemy : public cShip
 {
 protected:
-    coreSpline2* m_pPath;         // 
-    coreVector2  m_vPathOffset;   // 
-
-    coreFlow  m_fLifeTime;        // 
-    coreUint8 m_iNumShots;        // 
+    coreFlow  m_fLifeTime;   // 
+    coreUint8 m_iNumShots;   // 
 
 
 public:
@@ -37,13 +34,11 @@ public:
     virtual ~cEnemy();
 
     FRIEND_CLASS(cGame)
-    FRIEND_CLASS(cWater)
     DISABLE_COPY(cEnemy)
     ENABLE_ID
 
     // configure the enemy
-    void Configure (const coreInt32& iHealth, const coreVector3& vColor);
-    void SetupTrack(coreSpline2* pPath, const coreVector2& vPathOffset);
+    void Configure(const coreInt32& iHealth, const coreVector3& vColor);
 
     // render and move the enemy
     void Render()override;
@@ -53,20 +48,21 @@ public:
     void TakeDamage(const coreInt32& iDamage, cPlayer* pAttacker);
 
     // control life and death
-    void Resurrect();
+    void Resurrect(const coreSpline2& oPath);
     void Resurrect(const coreVector2& vPosition, const coreVector2& vDirection);
     void Kill     (const coreBool&    bAnimated);
 
-
-protected:
     // 
-    coreBool _DefaultShooting      (const coreFloat& fFireRate);
-    coreBool _DefaultMovementPath  (const coreFloat& fDistance);
-    coreBool _DefaultMovementTarget(const coreVector2& vTarget, const coreFloat& fSpeedTurn, const coreFloat& fSpeedMove);
+    coreBool DefaultMovePath  (const coreSpline2& oPath, const coreVector2& vOffset, const coreFloat& fDistance);
+    coreBool DefaultMoveTarget(const coreVector2& vTarget, const coreFloat& fSpeedTurn, const coreFloat& fSpeedMove);
+    coreBool DefaultShoot     (const coreFloat& fFireRate);
+
+    // get object properties
+    inline const coreFloat& GetLifeTime()const {return m_fLifeTime;}
 
 
 private:
-    // render and move routines for derived classes (render functions executed by game and water)
+    // render and move routines for derived classes (render functions executed by game)
     virtual void __RenderOwnBefore() {}
     virtual void __RenderOwnAfter () {}
     virtual void __MoveOwn        () {}
@@ -85,7 +81,7 @@ public:
 
 
 private:
-    // 
+    // move the scout enemy
     void __MoveOwn()override;
 };
 
@@ -102,7 +98,7 @@ public:
 
 
 private:
-    // 
+    // move the warrior enemy
     void __MoveOwn()override;
 };
 

@@ -13,16 +13,16 @@
 
 // ****************************************************************
 // mission definitions
-#define MISSION_BOSSES  (3u)     // default number of bosses per mission
-#define MISSION_NO_BOSS (0xFF)   // no boss currently active (error-value)
+#define MISSION_BOSSES  (3u)      // default number of bosses per mission
+#define MISSION_NO_BOSS (0xFFu)   // no boss currently active (error-value)
 
 
 // ****************************************************************
-// phase management macros
-#define PHASE_MAIN         m_anPhase.push_back([&]()                               // 
-#define PHASE_SUB(t)       ((m_fPhaseTimeBefore <= (t)) && ((t) < m_fPhaseTime))   // 
-#define PHASE_END_NOW      {m_anPhase.pop_back(); m_fPhaseTime = 0.0f;}            // 
-#define PHASE_END_AFTER(t) {if(m_fPhaseTime >= (t)) PHASE_END_NOW}                 // 
+// stage management macros
+#define STAGE_MAIN            m_anStage.push_back([&]()                               // 
+#define STAGE_SUB(t)          ((m_fStageTimeBefore <= (t)) && ((t) < m_fStageTime))   // 
+#define STAGE_FINISH_NOW      {m_anStage.pop_back(); m_fStageTime = 0.0f;}            // 
+#define STAGE_FINISH_AFTER(t) {if(m_fStageTime >= (t)) STAGE_END_NOW}                 // 
 
 
 // ****************************************************************
@@ -35,10 +35,10 @@ protected:
     cBoss*    m_pCurBoss;                            // pointer to currently active boss
     coreUintW m_iCurBossIndex;                       // index of the active boss (or error-value)
 
-    std::vector<std::function<void()> > m_anPhase;   // 
+    std::vector<std::function<void()> > m_anStage;   // 
 
-    coreFlow  m_fPhaseTime;                          // 
-    coreFloat m_fPhaseTimeBefore;                    // 
+    coreFlow  m_fStageTime;                          // 
+    coreFloat m_fStageTimeBefore;                    // 
 
 
 public:
@@ -54,16 +54,14 @@ public:
     // move the mission
     void Move();
 
+    // set active boss
+    void SetCurBoss(const coreUintW& iIndex);
+    void SetCurBoss(const cBoss*     pBoss);
+
     // access mission objects
     inline cBoss*           GetBoss        (const coreUintW& iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_apBoss[iIndex];}
     inline cBoss*           GetCurBoss     ()const                        {return m_pCurBoss;}
     inline const coreUintW& GetCurBossIndex()const                        {return m_iCurBossIndex;}
-
-
-protected:
-    // set active boss
-    void _SetCurBoss(const coreUintW& iIndex);
-    void _SetCurBoss(const cBoss*     pBoss);
 
 
 private:
@@ -91,11 +89,8 @@ class cViridoMission final : public cMission
 {
 private:
     cCrossfieldBoss m_Crossfield;   // 
-
-    cScoutEnemy   m_aScout[10];     // 
-    cWarriorEnemy m_Warrior;        // 
-
-    coreSpline2 m_Spline;           // 
+    cTorusBoss      m_Torus;        // 
+    cVausBoss       m_Vaus;         // 
 
 
 public:
@@ -194,18 +189,6 @@ public:
     DISABLE_COPY(cAterMission)
     ASSIGN_ID(8, "Ater")
 };
-
-
-// ****************************************************************
-// Veneta ??? Mellan Rupes Shor
-//class ??? final : public cMission
-//{
-//public:
-//    ???()noexcept {}
-//
-//    DISABLE_COPY(???)
-//    ASSIGN_ID(666, "???")
-//};
 
 
 #endif // _P1_GUARD_MISSION_H_

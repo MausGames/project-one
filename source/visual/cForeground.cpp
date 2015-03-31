@@ -15,7 +15,7 @@ cForeground::cForeground()noexcept
 : m_mViewProj (Core::Graphics->GetCamera() * coreMatrix4::Perspective(g_vGameResolution, Core::Graphics->GetFOV(), Core::Graphics->GetNearClip(), Core::Graphics->GetFarClip()))
 {
     // create foreground frame buffer (texture with alpha)
-    m_iFrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0, CORE_TEXTURE_SPEC_RGBA);
+    m_iFrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGBA);
     m_iFrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 }
 
@@ -29,7 +29,7 @@ void cForeground::Start()
 
     // set foreground camera, light and view
     Core::Graphics->SetCamera(CAMERA_POSITION, CAMERA_DIRECTION, CAMERA_ORIENTATION);
-    Core::Graphics->SetLight (0, coreVector4(0.0f,0.0f,0.0f,0.0f), coreVector4(LIGHT_DIRECTION, 0.0f), coreVector4(0.0f,0.0f,0.0f,0.0f));
+    Core::Graphics->SetLight (0u, coreVector4(0.0f,0.0f,0.0f,0.0f), coreVector4(LIGHT_DIRECTION, 0.0f), coreVector4(0.0f,0.0f,0.0f,0.0f));
     Core::Graphics->SetView  (g_vGameResolution, Core::Graphics->GetFOV(), Core::Graphics->GetNearClip(), Core::Graphics->GetFarClip());
 
     // adjust blending function (to correctly aggregate alpha values)
@@ -45,8 +45,8 @@ void cForeground::Start()
 void cForeground::End()
 {
     // copy default frame buffer to texture (faster than dedicated multisampled FBO, but only once)
-    const coreTexturePtr& pTexture = m_iFrameBuffer.GetColorTarget(0).pTexture;
-    pTexture->CopyFrameBuffer(0, 0, 0, 0,
+    const coreTexturePtr& pTexture = m_iFrameBuffer.GetColorTarget(0u).pTexture;
+    pTexture->CopyFrameBuffer(0u, 0u, 0u, 0u,
                               F_TO_UI(m_iFrameBuffer.GetResolution().x),
                               F_TO_UI(m_iFrameBuffer.GetResolution().y));
 

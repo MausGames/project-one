@@ -15,41 +15,41 @@ void cInterface::sPlayerView::Construct(const coreUintW& iIndex)
 {
     // create view objects
     m_aHealthBar[0].DefineProgram("default_2d_program");
-    m_aHealthBar[0].DefineTexture(0, "menu_detail_01.png");
+    m_aHealthBar[0].DefineTexture(0u, "menu_detail_01.png");
     m_aHealthBar[0].SetPosition  (coreVector2( 0.0f, 0.005f));
     m_aHealthBar[0].SetSize      (coreVector2( 4.0f, 0.4f) * 0.07f);
     m_aHealthBar[0].SetCenter    (coreVector2(-0.5f,-0.5f) * g_vMenuCenter);
     m_aHealthBar[0].SetAlignment (coreVector2( 1.0f, 1.0f));
 
     m_aHealthBar[1].DefineProgram("default_2d_program");
-    m_aHealthBar[1].DefineTexture(0, "menu_detail_01.png");
+    m_aHealthBar[1].DefineTexture(0u, "menu_detail_01.png");
     m_aHealthBar[1].SetPosition  (m_aHealthBar[0].GetPosition() + coreVector2(0.01f,0.01f) * 0.5f);
     m_aHealthBar[1].SetSize      (m_aHealthBar[0].GetSize()     - coreVector2(0.01f,0.01f));
     m_aHealthBar[1].SetCenter    (m_aHealthBar[0].GetCenter());
     m_aHealthBar[1].SetAlignment (m_aHealthBar[0].GetAlignment());
 
-    m_aHealthValue[0].Construct      (MENU_FONT_SMALL, 0);
+    m_aHealthValue[0].Construct      (MENU_FONT_SMALL, 0u);
     m_aHealthValue[0].SetPosition    (m_aHealthBar[0].GetPosition() + coreVector2(0.035f,0.01f));
     m_aHealthValue[0].SetCenter      (m_aHealthBar[0].GetCenter());
     m_aHealthValue[0].SetAlignment   (m_aHealthBar[0].GetAlignment());
     m_aHealthValue[0].SetTextLanguage("ARMOR");
 
-    m_aHealthValue[1].Construct   (MENU_FONT_SMALL, 10);
+    m_aHealthValue[1].Construct   (MENU_FONT_SMALL, 10u);
     m_aHealthValue[1].SetPosition (m_aHealthBar[0].GetPosition() + coreVector2(m_aHealthBar[0].GetSize().x-0.035f,0.01f));
     m_aHealthValue[1].SetCenter   (m_aHealthBar[0].GetCenter());
     m_aHealthValue[1].SetAlignment(coreVector2(-1.0f,1.0f));
 
-    m_Score.Construct   (MENU_FONT_MEDIUM_2, 7);
+    m_Score.Construct   (MENU_FONT_MEDIUM_2, 7u);
     m_Score.SetPosition (m_aHealthBar[0].GetPosition() + coreVector2(0.017f,0.035f));
     m_Score.SetCenter   (m_aHealthBar[0].GetCenter());
     m_Score.SetAlignment(m_aHealthBar[0].GetAlignment());
 
-    m_Combo.Construct   (MENU_FONT_SMALL, 6);
+    m_Combo.Construct   (MENU_FONT_SMALL, 6u);
     m_Combo.SetPosition (m_aHealthBar[0].GetPosition() + coreVector2(m_aHealthBar[0].GetSize().x-0.017f,0.038f));
     m_Combo.SetCenter   (m_aHealthBar[0].GetCenter());
     m_Combo.SetAlignment(coreVector2(-1.0f,1.0f));
 
-    m_Chain.Construct   (MENU_FONT_SMALL, 8);
+    m_Chain.Construct   (MENU_FONT_SMALL, 8u);
     m_Chain.SetPosition (m_Score.GetPosition() + coreVector2(0.001f,0.03f));
     m_Chain.SetCenter   (m_Score.GetCenter());
     m_Chain.SetAlignment(m_Score.GetAlignment());
@@ -69,56 +69,56 @@ cInterface::cInterface(const coreUint8& iNumViews)noexcept
     ASSERT(m_iNumViews <= INTERFACE_VIEWS)
 
     // construct player views
-    for(coreUintW i = 0, ie = m_iNumViews; i < ie; ++i)
+    for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i)
         m_aView[i].Construct(i);
 
     // create interface objects
     m_aBossHealthBar[0].DefineProgram("default_2d_program");
-    m_aBossHealthBar[0].DefineTexture(0, "menu_detail_02.png");
+    m_aBossHealthBar[0].DefineTexture(0u, "menu_detail_02.png");
     m_aBossHealthBar[0].SetPosition  (coreVector2( 0.0f,-0.005f));
     m_aBossHealthBar[0].SetSize      (coreVector2( 8.0f, 0.4f) * 0.07f);
     m_aBossHealthBar[0].SetCenter    (coreVector2(-0.5f, 0.5f) * g_vMenuCenter);
     m_aBossHealthBar[0].SetAlignment (coreVector2( 1.0f,-1.0f));
 
     m_aBossHealthBar[1].DefineProgram("default_2d_program");
-    m_aBossHealthBar[1].DefineTexture(0, "menu_detail_02.png");
+    m_aBossHealthBar[1].DefineTexture(0u, "menu_detail_02.png");
     m_aBossHealthBar[1].SetPosition  (m_aBossHealthBar[0].GetPosition() + coreVector2(0.01f,-0.01f) * 0.5f);
     m_aBossHealthBar[1].SetSize      (m_aBossHealthBar[0].GetSize()     - coreVector2(0.01f, 0.01f));
     m_aBossHealthBar[1].SetCenter    (m_aBossHealthBar[0].GetCenter());
     m_aBossHealthBar[1].SetAlignment (m_aBossHealthBar[0].GetAlignment());
 
-    m_aBossHealthValue[0].Construct   (MENU_FONT_SMALL, 7);
+    m_aBossHealthValue[0].Construct   (MENU_FONT_SMALL, 7u);
     m_aBossHealthValue[0].SetPosition (m_aBossHealthBar[0].GetPosition() + coreVector2(0.05f,-0.01f));
     m_aBossHealthValue[0].SetCenter   (m_aBossHealthBar[0].GetCenter());
     m_aBossHealthValue[0].SetAlignment(m_aBossHealthBar[0].GetAlignment());
 
-    m_aBossHealthValue[1].Construct   (MENU_FONT_SMALL, 14);
+    m_aBossHealthValue[1].Construct   (MENU_FONT_SMALL, 14u);
     m_aBossHealthValue[1].SetPosition (m_aBossHealthBar[0].GetPosition() + coreVector2(m_aBossHealthBar[0].GetSize().x-0.05f,-0.01f));
     m_aBossHealthValue[1].SetCenter   (m_aBossHealthBar[0].GetCenter());
     m_aBossHealthValue[1].SetAlignment(coreVector2(-1.0f,-1.0f));
 
-    m_BossName.Construct   (MENU_FONT_MEDIUM_2, 0);
+    m_BossName.Construct   (MENU_FONT_MEDIUM_2, 0u);
     m_BossName.SetPosition (coreVector2(-0.009f,-0.004f));
     m_BossName.SetCenter   (coreVector2( 0.5f,   0.5f) * g_vMenuCenter);
     m_BossName.SetAlignment(coreVector2(-1.0f,  -1.0f));
 
-    m_aBossTime[0].Construct   (MENU_FONT_MEDIUM_2, 5);
+    m_aBossTime[0].Construct   (MENU_FONT_MEDIUM_2, 5u);
     m_aBossTime[0].SetPosition (m_BossName.GetPosition() + coreVector2(-0.023f,-0.025f));
     m_aBossTime[0].SetCenter   (m_BossName.GetCenter());
     m_aBossTime[0].SetAlignment(m_BossName.GetAlignment());
 
-    m_aBossTime[1].Construct   (MENU_FONT_MEDIUM_2, 2);
+    m_aBossTime[1].Construct   (MENU_FONT_MEDIUM_2, 2u);
     m_aBossTime[1].SetPosition (m_BossName.GetPosition() + coreVector2(0.0f,-0.025f));
     m_aBossTime[1].SetCenter   (m_BossName.GetCenter());
     m_aBossTime[1].SetAlignment(m_BossName.GetAlignment());
 
     m_BannerBar.DefineProgram("menu_animate_program");
-    m_BannerBar.DefineTexture(0, "menu_detail_03.png");
-    m_BannerBar.DefineTexture(1, "menu_background_black.png");
+    m_BannerBar.DefineTexture(0u, "menu_detail_03.png");
+    m_BannerBar.DefineTexture(1u, "menu_background_black.png");
 
-    m_aBannerText[0].Construct(MENU_FONT_BIG_7,    0);
-    m_aBannerText[1].Construct(MENU_FONT_BIG_7,    0);
-    m_aBannerText[2].Construct(MENU_FONT_MEDIUM_2, 0);
+    m_aBannerText[0].Construct(MENU_FONT_BIG_7,    0u);
+    m_aBannerText[1].Construct(MENU_FONT_BIG_7,    0u);
+    m_aBannerText[2].Construct(MENU_FONT_MEDIUM_2, 0u);
     m_aBannerText[0].SetColor3(coreVector3(0.75f,0.75f,0.75f) * MENU_CONTRAST_WHITE);
     m_aBannerText[1].SetColor3(coreVector3(0.75f,0.75f,0.75f) * MENU_CONTRAST_WHITE);
     m_aBannerText[2].SetColor3(coreVector3(0.75f,0.75f,0.75f) * MENU_CONTRAST_WHITE);
@@ -133,7 +133,7 @@ void cInterface::Render()
     if(m_fAlphaAll)
     {
         // loop through all player views
-        for(coreUintW i = 0, ie = m_iNumViews; i < ie; ++i)
+        for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i)
         {
             sPlayerView& oView = m_aView[i];
 
@@ -177,7 +177,7 @@ void cInterface::Render()
 void cInterface::Move()
 {
     // loop through all player views
-    for(coreUintW i = 0, ie = m_iNumViews; i < ie; ++i)
+    for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i)
     {
         sPlayerView& oView   = m_aView[i];
         cPlayer*     pPlayer = g_pGame->GetPlayer(i);
@@ -260,14 +260,6 @@ void cInterface::Move()
         m_BossName           .Move();
     }
 
-    // smoothly toggle interface visibility (after forwarding, can be overloaded)
-    if(m_bVisible) {if(m_fAlphaAll < 1.0f) m_fAlphaAll = MIN(m_fAlphaAll + Core::System->GetTime(), 1.0f);}
-              else {if(m_fAlphaAll > 0.0f) m_fAlphaAll = MAX(m_fAlphaAll - Core::System->GetTime(), 0.0f);}
-
-    // TODO ### 
-    // if(pBoss) {if(m_fAlphaBoss < 1.0f) m_fAlphaBoss = MIN(m_fAlphaBoss + Core::System->GetTime(), 1.0f);}
-    //      else {if(m_fAlphaBoss > 0.0f) m_fAlphaBoss = MAX(m_fAlphaBoss - Core::System->GetTime(), 0.0f);}
-
     // check for active banner
     const coreFloat fBanner = g_pGame->GetTimeMission() - m_fBannerStart;
     if((fBanner <= INTERFACE_BANNER_DURATION) && (fBanner >= 0.0f))
@@ -278,7 +270,7 @@ void cInterface::Move()
 
         // slash banner across screen (# direction can be swapped, also alpha value is used as texture coordinate correction)
         const coreBool bLeftRight = (fBanner < (INTERFACE_BANNER_DURATION * 0.5f)) ? false : true;
-        m_BannerBar.SetPosition ((bLeftRight ?     0.5f : -0.5f) * (1.0f-fVisibility) * m_BannerBar.GetDirection().yx());
+        m_BannerBar.SetPosition ((bLeftRight ?        0.5f : -0.5f) * (1.0f-fVisibility) * m_BannerBar.GetDirection().yx());
         m_BannerBar.SetAlpha    ( bLeftRight ? fVisibility :  1.0f);
 
         // animate banner bar
@@ -304,6 +296,16 @@ void cInterface::Move()
         m_aBannerText[2].Move();
         m_aBannerText[3].Move();
     }
+
+    // smoothly toggle interface visibility (after forwarding, can be overloaded)
+    if(m_bVisible)
+         {if(m_fAlphaAll < 1.0f) m_fAlphaAll = MIN(m_fAlphaAll + Core::System->GetTime(), 1.0f);}
+    else {if(m_fAlphaAll > 0.0f) m_fAlphaAll = MAX(m_fAlphaAll - Core::System->GetTime(), 0.0f);}
+
+    // smoothly toggle boss data visibility
+    if(pBoss && (m_bBannerType == INTERFACE_BANNER_TYPE_BOSS) && (fBanner >= INTERFACE_BOSS_DELAY))
+         {if(m_fAlphaBoss < 1.0f) m_fAlphaBoss = MIN(m_fAlphaBoss + Core::System->GetTime(), 1.0f);}
+    else {if(m_fAlphaBoss > 0.0f) m_fAlphaBoss = MAX(m_fAlphaBoss - Core::System->GetTime(), 0.0f);}
 }
 
 
@@ -332,7 +334,7 @@ void cInterface::ShowBoss(const coreChar* pcMain, const coreChar* pcSub)
     m_bBannerType  = INTERFACE_BANNER_TYPE_BOSS;
     {
         // and realign objects as boss banner
-        m_aBannerText[3].Construct(MENU_FONT_BIG_4, 0);
+        m_aBannerText[3].Construct(MENU_FONT_BIG_4, 0u);
 
         m_aBannerText[2].SetPosition(coreVector2(0.0f, 0.027f));
         m_aBannerText[3].SetPosition(coreVector2(0.0f,-0.012f));
@@ -351,7 +353,7 @@ void cInterface::ShowBoss(const coreChar* pcMain, const coreChar* pcSub)
 
 void cInterface::ShowBoss(const cBoss* pBoss)
 {
-    // 
+    // show default boss banner
     this->ShowBoss(pBoss->GetName(), Core::Language->GetString(PRINT("BOSS_TITLE_%04d", pBoss->GetID())));
 }
 
@@ -378,7 +380,7 @@ void cInterface::ShowMission(const coreChar* pcMain, const coreChar* pcSub)
     m_bBannerType  = INTERFACE_BANNER_TYPE_MISSION;
     {
         // and realign objects as mission banner
-        m_aBannerText[3].Construct(MENU_FONT_MEDIUM_3, 0);
+        m_aBannerText[3].Construct(MENU_FONT_MEDIUM_3, 0u);
 
         m_aBannerText[2].SetPosition(coreVector2(0.0f, 0.025f));
         m_aBannerText[3].SetPosition(coreVector2(0.0f,-0.01f));
@@ -397,7 +399,7 @@ void cInterface::ShowMission(const coreChar* pcMain, const coreChar* pcSub)
 
 void cInterface::ShowMission(const cMission* pMission)
 {
-    // 
+    // show default mission banner
     this->ShowMission(pMission->GetName(), PRINT("%s %d", Core::Language->GetString("STAGE"), pMission->GetID()));
 }
 

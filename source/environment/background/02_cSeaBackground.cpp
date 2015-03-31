@@ -13,6 +13,6 @@
 // constructor
 cSeaBackground::cSeaBackground()noexcept
 {
-    // create outdoor-surface object 
-    m_pOutdoor = new cOutdoor("dust", "dust", 2, 4.0f);
+    // create outdoor-surface object
+    m_pOutdoor = new cOutdoor("dust", "dust", 2u, 4.0f);
 }

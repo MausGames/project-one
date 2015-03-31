@@ -69,27 +69,27 @@ void cRayWeapon::__ShootOwn()
     // 
     const coreVector2 vDir = m_pOwner->GetDirection().xy();
     const coreVector2 vPos = m_pOwner->GetPosition ().xy() + vDir*3.0f;
-    const coreVector2 vTan = vDir.yx();
+    const coreVector2 vTan = vDir.Rotated90();
 
     if(m_bSpread)
     {
         // shoot wide
         g_pGame->GetBulletManager()->AddBullet<cRayBullet>(6, m_pOwner, TYPE_BULLET_PLAYER, vPos + vTan*1.1f, (vDir + vTan*0.425f).Normalize())->SetSize(coreVector3(2.5f,2.5f,2.5f));
         g_pGame->GetBulletManager()->AddBullet<cRayBullet>(6, m_pOwner, TYPE_BULLET_PLAYER, vPos - vTan*1.1f, (vDir - vTan*0.425f).Normalize())->SetSize(coreVector3(2.5f,2.5f,2.5f));
-        g_pGame->GetBulletManager()->AddBullet<cRayBullet>(4, m_pOwner, TYPE_BULLET_PLAYER, vPos + vTan*2.2f, (vDir + vTan*0.500f).Normalize())->SetSize(coreVector3(2.5f,2.5f,2.5f)*0.9f);
-        g_pGame->GetBulletManager()->AddBullet<cRayBullet>(4, m_pOwner, TYPE_BULLET_PLAYER, vPos - vTan*2.2f, (vDir - vTan*0.500f).Normalize())->SetSize(coreVector3(2.5f,2.5f,2.5f)*0.9f);
-        g_pGame->GetBulletManager()->AddBullet<cRayBullet>(2, m_pOwner, TYPE_BULLET_PLAYER, vPos + vTan*3.3f, (vDir + vTan*0.575f).Normalize())->SetSize(coreVector3(2.5f,2.5f,2.5f)*0.8f);
-        g_pGame->GetBulletManager()->AddBullet<cRayBullet>(2, m_pOwner, TYPE_BULLET_PLAYER, vPos - vTan*3.3f, (vDir - vTan*0.575f).Normalize())->SetSize(coreVector3(2.5f,2.5f,2.5f)*0.8f);
+        g_pGame->GetBulletManager()->AddBullet<cRayBullet>(4, m_pOwner, TYPE_BULLET_PLAYER, vPos + vTan*2.2f, (vDir + vTan*0.500f).Normalize())->SetSize(coreVector3(2.5f,2.5f,2.5f) * 0.9f);
+        g_pGame->GetBulletManager()->AddBullet<cRayBullet>(4, m_pOwner, TYPE_BULLET_PLAYER, vPos - vTan*2.2f, (vDir - vTan*0.500f).Normalize())->SetSize(coreVector3(2.5f,2.5f,2.5f) * 0.9f);
+        g_pGame->GetBulletManager()->AddBullet<cRayBullet>(2, m_pOwner, TYPE_BULLET_PLAYER, vPos + vTan*3.3f, (vDir + vTan*0.575f).Normalize())->SetSize(coreVector3(2.5f,2.5f,2.5f) * 0.8f);
+        g_pGame->GetBulletManager()->AddBullet<cRayBullet>(2, m_pOwner, TYPE_BULLET_PLAYER, vPos - vTan*3.3f, (vDir - vTan*0.575f).Normalize())->SetSize(coreVector3(2.5f,2.5f,2.5f) * 0.8f);
     }
     else
     {
         // shoot concentrated
         g_pGame->GetBulletManager()->AddBullet<cRayBullet>(6, m_pOwner, TYPE_BULLET_PLAYER, vPos + vTan*1.1f, (vDir + vTan*0.025f).Normalize())->SetSize(coreVector3(2.5f,2.5f,2.5f));
         g_pGame->GetBulletManager()->AddBullet<cRayBullet>(6, m_pOwner, TYPE_BULLET_PLAYER, vPos - vTan*1.1f, (vDir - vTan*0.025f).Normalize())->SetSize(coreVector3(2.5f,2.5f,2.5f));
-        g_pGame->GetBulletManager()->AddBullet<cRayBullet>(4, m_pOwner, TYPE_BULLET_PLAYER, vPos + vTan*2.2f, (vDir + vTan*0.050f).Normalize())->SetSize(coreVector3(2.5f,2.5f,2.5f)*0.9f);
-        g_pGame->GetBulletManager()->AddBullet<cRayBullet>(4, m_pOwner, TYPE_BULLET_PLAYER, vPos - vTan*2.2f, (vDir - vTan*0.050f).Normalize())->SetSize(coreVector3(2.5f,2.5f,2.5f)*0.9f);
-        g_pGame->GetBulletManager()->AddBullet<cRayBullet>(2, m_pOwner, TYPE_BULLET_PLAYER, vPos + vTan*3.3f, (vDir + vTan*0.075f).Normalize())->SetSize(coreVector3(2.5f,2.5f,2.5f)*0.8f);
-        g_pGame->GetBulletManager()->AddBullet<cRayBullet>(2, m_pOwner, TYPE_BULLET_PLAYER, vPos - vTan*3.3f, (vDir - vTan*0.075f).Normalize())->SetSize(coreVector3(2.5f,2.5f,2.5f)*0.8f);
+        g_pGame->GetBulletManager()->AddBullet<cRayBullet>(4, m_pOwner, TYPE_BULLET_PLAYER, vPos + vTan*2.2f, (vDir + vTan*0.050f).Normalize())->SetSize(coreVector3(2.5f,2.5f,2.5f) * 0.9f);
+        g_pGame->GetBulletManager()->AddBullet<cRayBullet>(4, m_pOwner, TYPE_BULLET_PLAYER, vPos - vTan*2.2f, (vDir - vTan*0.050f).Normalize())->SetSize(coreVector3(2.5f,2.5f,2.5f) * 0.9f);
+        g_pGame->GetBulletManager()->AddBullet<cRayBullet>(2, m_pOwner, TYPE_BULLET_PLAYER, vPos + vTan*3.3f, (vDir + vTan*0.075f).Normalize())->SetSize(coreVector3(2.5f,2.5f,2.5f) * 0.8f);
+        g_pGame->GetBulletManager()->AddBullet<cRayBullet>(2, m_pOwner, TYPE_BULLET_PLAYER, vPos - vTan*3.3f, (vDir - vTan*0.075f).Normalize())->SetSize(coreVector3(2.5f,2.5f,2.5f) * 0.8f);
     }
 
     // play shooting sound-effect

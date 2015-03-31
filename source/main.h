@@ -40,6 +40,7 @@
 
 // TODO: create timer and int-value as tick-multiplier for sustained damage
 // TODO: remove magic numbers (regularly)
+// TODO: implement time-delta and FPS lock, patterns (movements, bullets) are time dependant, a lock would prevent this dependency
 
 
 // ****************************************************************
@@ -49,6 +50,10 @@
 
 // ****************************************************************
 // general definitions
+#define PLAYERS            (2u)
+#define FRAMERATE          (60u)
+#define FRAMERATE_TIME     (1.0f / I_TO_F(FRAMERATE))
+
 #define COLOR_YELLOW_F     coreVector3(1.000f, 0.824f, 0.392f)
 #define COLOR_ORANGE_F     coreVector3(1.000f, 0.443f, 0.227f)
 #define COLOR_RED_F        coreVector3(1.000f, 0.275f, 0.275f)
@@ -79,8 +84,6 @@
 #define SHADER_GLOW        "#define _P1_GLOW_    (1) \n"   // post
 #define SHADER_SPHERIC     "#define _P1_SPHERIC_ (1) \n"   // decal, energy
 #define SHADER_DIRECT      "#define _P1_DIRECT_  (1) \n"   // outline, energy
-
-#define PLAYERS            (2u)
 
 #define TYPE_PLAYER        (1)
 #define TYPE_ENEMY         (2)

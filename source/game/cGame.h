@@ -19,10 +19,10 @@
 
 enum cGameStatus : coreUint8
 {
-    GAME_STATUS_INTRO   = 0x01,   // 
-    GAME_STATUS_PLAY    = 0x02,   // 
-    GAME_STATUS_OUTRO   = 0x03,   // (two bits) 
-    GAME_STATUS_LOADING = 0x04    // 
+    GAME_STATUS_INTRO   = 0x01u,   // 
+    GAME_STATUS_PLAY    = 0x02u,   // 
+    GAME_STATUS_OUTRO   = 0x03u,   // (two bits) 
+    GAME_STATUS_LOADING = 0x04u    // 
 };
 
 

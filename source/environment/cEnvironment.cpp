@@ -14,7 +14,7 @@
 cEnvironment::cEnvironment()noexcept
 : m_pBackground    (NULL)
 , m_pOldBackground (NULL)
-, m_Transition     (coreTimer(1.3f, 0.9f, 1))
+, m_Transition     (coreTimer(1.3f, 0.9f, 1u))
 , m_fFlyOffset     (0.0f)
 , m_fSideOffset    (0.0f)
 , m_vCameraPos     (CAMERA_POSITION)
@@ -22,12 +22,12 @@ cEnvironment::cEnvironment()noexcept
 , m_bActive        (false)
 {
     // create environment frame buffer
-    m_iFrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0, CORE_TEXTURE_SPEC_RGB);
+    m_iFrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB);
     m_iFrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     // create mix object
     m_MixObject.DefineProgram("full_transition_program");
-    m_MixObject.DefineTexture(2, "menu_background_black.png");
+    m_MixObject.DefineTexture(2u, "menu_background_black.png");
     m_MixObject.SetSize      (coreVector2(1.0f,1.0f));
     m_MixObject.Move();
 
@@ -63,8 +63,8 @@ cEnvironment::~cEnvironment()
 void cEnvironment::Render()
 {
     // set environment camera and light
-    Core::Graphics->SetCamera(m_vCameraPos, CAMERA_DIRECTION, coreVector3(m_avDirection[0], 0.0f));
-    Core::Graphics->SetLight (0, coreVector4(0.0f,0.0f,0.0f,0.0f), coreVector4(m_vLightDir, 0.0f), coreVector4(0.0f,0.0f,0.0f,0.0f));
+    Core::Graphics->SetCamera(m_vCameraPos, CAMERA_DIRECTION, coreVector3(m_avDirection[0].InvertedX(), 0.0f));
+    Core::Graphics->SetLight (0u, coreVector4(0.0f,0.0f,0.0f,0.0f), coreVector4(m_vLightDir, 0.0f), coreVector4(0.0f,0.0f,0.0f,0.0f));
 
     // render current background
     m_pBackground->Render();
@@ -91,8 +91,8 @@ void cEnvironment::Render()
             glEnable(GL_BLEND);
 
             // invalidate single backgrounds
-            m_pOldBackground->GetResolvedTexture()->GetColorTarget(0).pTexture->Invalidate(0);
-            m_pBackground   ->GetResolvedTexture()->GetColorTarget(0).pTexture->Invalidate(0);
+            m_pOldBackground->GetResolvedTexture()->GetColorTarget(0u).pTexture->Invalidate(0u);
+            m_pBackground   ->GetResolvedTexture()->GetColorTarget(0u).pTexture->Invalidate(0u);
         }
     }
 }
@@ -104,7 +104,7 @@ void cEnvironment::Move()
 {
     // update all transformation properties
     const coreFloat fFactor = Core::System->GetTime() * 2.0f;
-    m_avDirection[0] = (m_avDirection[0] + (m_avDirection[1] - m_avDirection[0]) * fFactor).Normalize();
+    m_avDirection[0] = (m_avDirection[0] + (m_avDirection[1] - m_avDirection[0]) * fFactor * 4.0f).Normalize();
     m_avSide     [0] =  m_avSide     [0] + (m_avSide     [1] - m_avSide     [0]) * fFactor * 8.0f;
     m_afSpeed    [0] =  m_afSpeed    [0] + (m_afSpeed    [1] - m_afSpeed    [0]) * fFactor * 0.8f;
 
@@ -114,12 +114,12 @@ void cEnvironment::Move()
     while(m_fFlyOffset >= I_TO_F(OUTDOOR_HEIGHT)) m_fFlyOffset -= I_TO_F(OUTDOOR_HEIGHT);
 
     // calculate global side offset (only perpendicular to flight direction, never on diagonal camera (smooth with max-min))
-    const coreVector2 vAbsDir = coreVector2(ABS(m_avDirection[0].x), ABS(m_avDirection[0].y));
-    m_fSideOffset             = coreVector2::Dot(m_avDirection[0].yx(), m_avSide[0]) * (vAbsDir.Max() - vAbsDir.Min());
+    const coreVector2 vAbsDir = m_avDirection[0].Abs();
+    m_fSideOffset             = 0.0f;//coreVector2::Dot(m_avDirection[0].Rotated90(), m_avSide[0]) * (vAbsDir.Max() - vAbsDir.Min()); TODO # 
 
     // calculate camera and light values
     m_vCameraPos = coreVector3(m_fSideOffset, m_fFlyOffset * OUTDOOR_DETAIL, CAMERA_POSITION.z);
-    m_vLightDir  = LIGHT_DIRECTION * coreMatrix4::RotationZ(m_avDirection[0] * coreVector2(-1.0f,1.0f));
+    m_vLightDir  = LIGHT_DIRECTION * coreMatrix4::RotationZ(m_avDirection[0]);
 
     // move current background
     m_pBackground->Move();
@@ -130,7 +130,7 @@ void cEnvironment::Move()
         if(!Core::Manager::Resource->IsLoading() && m_bActive && m_Transition.Update(1.0f))
         {
             // delete old background
-            m_MixObject.DefineTexture(0, NULL);
+            m_MixObject.DefineTexture(0u, NULL);
             SAFE_DELETE(m_pOldBackground)
         }
         else m_pOldBackground->Move();
@@ -145,7 +145,7 @@ void cEnvironment::ChangeBackground(const coreInt32& iID)
     if(m_pBackground) if(m_pBackground->GetID() == iID) return;
 
     // delete possible old background
-    m_MixObject.DefineTexture(0, NULL);
+    m_MixObject.DefineTexture(0u, NULL);
     SAFE_DELETE(m_pOldBackground)
 
     // make current to old
@@ -172,8 +172,8 @@ void cEnvironment::ChangeBackground(const coreInt32& iID)
         m_Transition.SetValue(-0.15f);
 
         // set transition textures
-        m_MixObject.DefineTexture(0, m_pOldBackground->GetResolvedTexture()->GetColorTarget(0).pTexture);
-        m_MixObject.DefineTexture(1, m_pBackground   ->GetResolvedTexture()->GetColorTarget(0).pTexture);
+        m_MixObject.DefineTexture(0u, m_pOldBackground->GetResolvedTexture()->GetColorTarget(0u).pTexture);
+        m_MixObject.DefineTexture(1u, m_pBackground   ->GetResolvedTexture()->GetColorTarget(0u).pTexture);
     }
 }
 
@@ -217,8 +217,8 @@ void cEnvironment::__Reset(const coreResourceReset& bInit)
         const coreInt32 iID = m_pBackground->GetID();
 
         // unbind textures and stop possible transition
-        m_MixObject.DefineTexture(0, NULL);
-        m_MixObject.DefineTexture(1, NULL);
+        m_MixObject.DefineTexture(0u, NULL);
+        m_MixObject.DefineTexture(1u, NULL);
         m_Transition.Stop();
 
         // delete both backgrounds

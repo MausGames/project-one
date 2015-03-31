@@ -13,13 +13,14 @@
 
 // ****************************************************************
 // interface definitions
-#define INTERFACE_VIEWS (PLAYERS)               // number of player views
+#define INTERFACE_VIEWS               (PLAYERS)   // number of player views
+#define INTERFACE_BOSS_DELAY          (1.5f)      // 
 
-#define INTERFACE_BANNER_TYPE_BOSS    (false)   // boss banner type
-#define INTERFACE_BANNER_TYPE_MISSION (true)    // mission banner type
-#define INTERFACE_BANNER_SPEED        (4.0f)    // fade-in and fade-out speed
-#define INTERFACE_BANNER_DURATION     (3.0f)    // display duration (with fading)
-#define INTERFACE_BANNER_ANIMATION    (2.9f)    // animation duration
+#define INTERFACE_BANNER_TYPE_BOSS    (false)     // boss banner type
+#define INTERFACE_BANNER_TYPE_MISSION (true)      // mission banner type
+#define INTERFACE_BANNER_SPEED        (4.0f)      // fade-in and fade-out speed
+#define INTERFACE_BANNER_DURATION     (3.0f)      // display duration (with fading)
+#define INTERFACE_BANNER_ANIMATION    (2.9f)      // animation duration
 
 
 // ****************************************************************
@@ -47,7 +48,7 @@ private:
 
     coreObject2D m_aBossHealthBar  [2];     // boss health bar   (0 = background, 1 = foreground)
     coreLabel    m_aBossHealthValue[2];     // boss health value (0 = percent,    1 = actual value)
-    coreLabel    m_aBossTime       [2];     // current boss time (0 = seconds,    1 = deciseconds)
+    coreLabel    m_aBossTime       [2];     // current boss time (0 = seconds,    1 = deci-seconds)
     coreLabel    m_BossName;                // current boss name
 
     coreObject2D m_BannerBar;               // banner background
