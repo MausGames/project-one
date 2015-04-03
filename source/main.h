@@ -130,6 +130,7 @@ extern cOutline*        g_pOutlineFull;      // main full outline-effect object
 extern cOutline*        g_pOutlineDirect;    // main direct outline-effect object
 extern cGlow*           g_pGlow;             // main glow-effect object
 extern cDistortion*     g_pDistortion;       // main distortion-effect object
+extern cSpecialEffects* g_pSpecialEffects;   // main special-effects object
 extern cPostProcessing* g_pPostProcessing;   // main post-processing object
 
 #include "environment/cOutdoor.h"

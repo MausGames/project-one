@@ -65,6 +65,9 @@ void cGlow::Update()
             // draw lists with objects
             FOR_EACH(it, m_apList)
                 (*it)->Render();
+
+            // always draw special-effects
+            g_pSpecialEffects->Render();
         }
 
         glDisable(GL_DEPTH_TEST);

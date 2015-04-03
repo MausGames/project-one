@@ -15,6 +15,7 @@ cOutline*        g_pOutlineFull    = NULL;
 cOutline*        g_pOutlineDirect  = NULL;
 cGlow*           g_pGlow           = NULL;
 cDistortion*     g_pDistortion     = NULL;
+cSpecialEffects* g_pSpecialEffects = NULL;
 cPostProcessing* g_pPostProcessing = NULL;
 
 cForeground*     g_pForeground     = NULL;
@@ -46,6 +47,7 @@ void CoreApp::Init()
     g_pOutlineDirect  = new cOutline(OUTLINE_SHADER_DIRECT);
     g_pGlow           = new cGlow();
     g_pDistortion     = new cDistortion();
+    g_pSpecialEffects = new cSpecialEffects();
     g_pPostProcessing = new cPostProcessing();
     g_pForeground     = new cForeground();
     g_pEnvironment    = new cEnvironment();
@@ -63,6 +65,7 @@ void CoreApp::Exit()
     SAFE_DELETE(g_pEnvironment)
     SAFE_DELETE(g_pForeground)
     SAFE_DELETE(g_pPostProcessing)
+    SAFE_DELETE(g_pSpecialEffects)
     SAFE_DELETE(g_pDistortion)
     SAFE_DELETE(g_pGlow)
     SAFE_DELETE(g_pOutlineDirect)
@@ -109,6 +112,9 @@ void CoreApp::Render()
                 // apply outline-effect
                 g_pOutlineFull  ->Apply();
                 g_pOutlineDirect->Apply();
+
+                // render special-effects
+                g_pSpecialEffects->Render();
             }
             g_pForeground->End();
         }
@@ -153,7 +159,7 @@ void CoreApp::Move()
         // 
         do
         {
-            // 
+            // sleep a bit on very high framerates (probably vsync disabled)
             if(3.0f*fDifference < FRAMERATE_TIME)
                 SDL_Delay(1u);
 
@@ -183,30 +189,38 @@ void CoreApp::Move()
 
         // move the game
         if(g_pGame) g_pGame->Move();
+
+        // move special-effects
+        g_pSpecialEffects->Move();
     }
     Core::Debug->MeasureEnd("Move");
 
 
 
-    // TODO ### 
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(K), CORE_INPUT_PRESS))
-    {
-        SAFE_DELETE(g_pGame)
-    }
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(L), CORE_INPUT_PRESS))
-    {
-        if(!g_pGame)
-        {
-            g_pGame = new cGame(false);
-            g_pGame->LoadMission(cViridoMission::ID);
-        }
-    }
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS))
-        g_pEnvironment->ChangeBackground(cGrassBackground::ID);
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2), CORE_INPUT_PRESS))
-        g_pEnvironment->ChangeBackground(cSeaBackground::ID);
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS))
-        Core::System->Quit();
 
-    g_pEnvironment->SetTargetSpeed(g_pGame ? 8.0f : 2.0f);
+    // TODO ########################## 
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(K), CORE_INPUT_PRESS))
+        {
+            SAFE_DELETE(g_pGame)
+        }
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(L), CORE_INPUT_PRESS))
+        {
+            if(!g_pGame)
+            {
+                g_pGame = new cGame(false);
+                g_pGame->LoadMission(cViridoMission::ID);
+            }
+        }
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS))
+            g_pEnvironment->ChangeBackground(cGrassBackground::ID);
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2), CORE_INPUT_PRESS))
+            g_pEnvironment->ChangeBackground(cSeaBackground::ID);
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS))
+            Core::System->Quit();
+
+        g_pEnvironment->SetTargetSpeed(g_pGame ? 8.0f : 2.0f);
+
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(H), CORE_INPUT_PRESS))
+            g_pSpecialEffects->ShakeScreen(1.0f);
+    // TODO ########################## 
 }

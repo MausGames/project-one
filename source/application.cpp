@@ -46,6 +46,8 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreModel>  ("ship_player_atk_low.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_atk_low.md3");
 
     Core::Manager::Resource->Load<coreTexture>("effect_energy.png",               CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_energy.png");
+    Core::Manager::Resource->Load<coreTexture>("effect_particle_32.png",          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_particle_32.png", false);
+    Core::Manager::Resource->Load<coreTexture>("effect_particle_64.png",          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_particle_64.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_blue.png",     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_blue.png");
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_low.png",      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_low.png");
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_mid.png",      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_mid.png");
@@ -86,6 +88,10 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreShader> ("effect_outline_inst.vert",        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.vert", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("effect_outline_inst.frag",        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("effect_outline_direct_inst.frag", CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.frag", CORE_SHADER_OPTION_INSTANCING SHADER_DIRECT);
+    Core::Manager::Resource->Load<coreShader> ("effect_particle.vert",            CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_particle.vert", CORE_SHADER_OPTION_INSTANCING);
+    Core::Manager::Resource->Load<coreShader> ("effect_particle_dark.frag",       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_particle_dark.frag", CORE_SHADER_OPTION_INSTANCING);
+    Core::Manager::Resource->Load<coreShader> ("effect_particle_fire.frag",       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_particle_fire.frag", CORE_SHADER_OPTION_INSTANCING);
+    Core::Manager::Resource->Load<coreShader> ("effect_particle_smoke.frag",      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_particle_smoke.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("effect_shadow.vert",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_shadow.vert");
     Core::Manager::Resource->Load<coreShader> ("effect_shadow.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_shadow.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_shadow_inst.vert",         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_shadow.vert", CORE_SHADER_OPTION_INSTANCING);
@@ -176,6 +182,21 @@ static void SetupResources()
     ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("effect_outline_direct_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("effect_outline_inst.vert")
         ->AttachShader("effect_outline_direct_inst.frag")
+        ->Finish();
+
+    ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("effect_particle_dark_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_particle.vert")
+        ->AttachShader("effect_particle_dark.frag")
+        ->Finish();
+
+    ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("effect_particle_fire_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_particle.vert")
+        ->AttachShader("effect_particle_fire.frag")
+        ->Finish();
+
+    ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("effect_particle_smoke_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_particle.vert")
+        ->AttachShader("effect_particle_smoke.frag")
         ->Finish();
 
     ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("effect_shadow_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())

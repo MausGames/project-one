@@ -57,6 +57,10 @@ void cForeground::End()
         glInvalidateFramebuffer(GL_FRAMEBUFFER, 2, aiAttachment);
     }
 
+    // also clear color buffer on screen shake
+    if(g_pSpecialEffects->GetShakeStrength())
+        glClear(GL_COLOR_BUFFER_BIT);
+
     // reset view
     Core::Graphics->SetView(Core::System->GetResolution(), Core::Graphics->GetFOV(), Core::Graphics->GetNearClip(), Core::Graphics->GetFarClip());
 

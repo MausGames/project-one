@@ -27,7 +27,7 @@ cVausBoss::cVausBoss()noexcept
 
 
 
-    m_Bump.DefineModel  ("object_bump.md3");
+    m_Bump.DefineModel  ("object_paddle.md3");
     m_Bump.DefineTexture(0u, "effect_energy.png");
     m_Bump.DefineProgram("effect_energy_direct_program");
     m_Bump.SetSize      (coreVector3(3.5f,2.5f,2.5f));

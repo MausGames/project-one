@@ -21,7 +21,7 @@ cBoss::cBoss()noexcept
 
     // 
     m_MoveTimer.Set(1.0f, 1.0f, 1u);
-    for(coreUintW i = 0u; i < BOSS_TIMERS; ++i) m_aShootTimer[i].Set(1.0f, 1.0f, 0xFFFFu);
+    for(coreUintW i = 0u; i < BOSS_TIMERS; ++i) m_aShootTimer[i].Set(1.0f, 1.0f, 0);
 }
 
 
