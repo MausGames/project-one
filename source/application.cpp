@@ -14,12 +14,14 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreModel>  ("bullet_cone.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_cone.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_ray.md3",                  CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_ray.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_orb.md3",                  CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_orb.md3");
+    Core::Manager::Resource->Load<coreModel>  ("bullet_wave.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_wave.md3");
     Core::Manager::Resource->Load<coreModel>  ("environment_reed_01.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_reed_01.md3");
     Core::Manager::Resource->Load<coreModel>  ("environment_reed_02.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_reed_02.md3");
     Core::Manager::Resource->Load<coreModel>  ("environment_stone_01.md3",        CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_stone_01.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_boomerang.md3",            CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boomerang.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_circle_01.md3",            CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_circle_01.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_paddle.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_paddle.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_tube.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tube.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_crossfield_high.md3",   CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_crossfield_high.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_crossfield_low.md3",    CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_crossfield_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_torus_high.md3",        CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_torus_high.md3");
@@ -45,9 +47,9 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreModel>  ("ship_player_atk_high.md3",        CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_atk_high.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_player_atk_low.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_atk_low.md3");
 
-    Core::Manager::Resource->Load<coreTexture>("effect_energy.png",               CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_energy.png");
+    Core::Manager::Resource->Load<coreTexture>("effect_energy.png",               CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_energy.png", false);
     Core::Manager::Resource->Load<coreTexture>("effect_particle_32.png",          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_particle_32.png", false);
-    Core::Manager::Resource->Load<coreTexture>("effect_particle_64.png",          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_particle_64.png", false);
+    Core::Manager::Resource->Load<coreTexture>("effect_particle_128.png",         CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_particle_128.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_blue.png",     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_blue.png");
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_low.png",      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_low.png");
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_mid.png",      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_mid.png");

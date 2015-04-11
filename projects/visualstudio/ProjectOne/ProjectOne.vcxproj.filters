@@ -108,6 +108,9 @@
     <ClCompile Include="..\..\..\source\game\boss\0103_cVausBoss.cpp">
       <Filter>game\boss</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\interface\cCombatStats.cpp">
+      <Filter>interface</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\main.h" />
@@ -191,6 +194,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\source\environment\background\cBackground.h">
       <Filter>environment\background</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\interface\cCombatStats.h">
+      <Filter>interface</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

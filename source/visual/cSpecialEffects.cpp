@@ -23,10 +23,10 @@ cSpecialEffects::cSpecialEffects()noexcept
     m_ParticleDark.DefineTexture(0u, "effect_particle_32.png");
 
     m_ParticleSmoke.DefineProgram("effect_particle_smoke_program");
-    m_ParticleSmoke.DefineTexture(0u, "effect_particle_64.png");
+    m_ParticleSmoke.DefineTexture(0u, "effect_particle_128.png");
 
     m_ParticleFire.DefineProgram("effect_particle_fire_program");
-    m_ParticleFire.DefineTexture(0u, "effect_particle_64.png");
+    m_ParticleFire.DefineTexture(0u, "effect_particle_128.png");
 
     // 
     m_ShakeTimer.Play(CORE_TIMER_PLAY_RESET);
@@ -79,7 +79,7 @@ void cSpecialEffects::Move()
 void cSpecialEffects::CreateParticleDarkSplash(const coreUintW& iNum, const coreVector3& vPosition, const coreFloat& fSize)
 {
     // 
-    m_ParticleDark.GetEmptyEffect()->CreateParticle(iNum, [&](coreParticle* pParticle)
+    m_ParticleDark.GetEmptyEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
     {
         pParticle->SetPositionRel(vPosition+coreVector3::Rand(1.0f), coreVector3::Rand(-fSize, fSize));
         pParticle->SetScaleAbs   (3.5f,                              1.0f);
@@ -95,7 +95,7 @@ void cSpecialEffects::CreateParticleDarkSplash(const coreUintW& iNum, const core
 void cSpecialEffects::CreateParticleSmokeSplash(const coreUintW& iNum, const coreVector3& vPosition, const coreFloat& fSize)
 {
     // 
-    m_ParticleSmoke.GetEmptyEffect()->CreateParticle(iNum, [&](coreParticle* pParticle)
+    m_ParticleSmoke.GetEmptyEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
     {
         pParticle->SetPositionRel(vPosition+coreVector3::Rand(1.0f), coreVector3::Rand(-fSize, fSize));
         pParticle->SetScaleAbs   (3.0f,                              12.5f);
@@ -111,7 +111,7 @@ void cSpecialEffects::CreateParticleSmokeSplash(const coreUintW& iNum, const cor
 void cSpecialEffects::CreateParticleFireSplash(const coreUintW& iNum, const coreVector3& vPosition, const coreFloat& fSize)
 {
     // 
-    m_ParticleFire.GetEmptyEffect()->CreateParticle(iNum, [&](coreParticle* pParticle)
+    m_ParticleFire.GetEmptyEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
     {
         pParticle->SetPositionRel(vPosition+coreVector3::Rand(3.0f), coreVector3::Rand(-fSize, fSize));
         pParticle->SetScaleAbs   (4.0f,                              10.0f);

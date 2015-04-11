@@ -38,6 +38,15 @@ cPlayer::cPlayer()noexcept
 
     // reset scoring stats
     this->ResetStats();
+
+    // 
+    m_Exhaust.DefineProgram("effect_energy_direct_program");
+    m_Exhaust.DefineTexture(0u, "effect_energy.png");
+    m_Exhaust.DefineModel  ("object_tube.md3");
+    m_Exhaust.SetDirection (this->GetDirection());
+    m_Exhaust.SetColor4    (coreVector4(0.306f,0.527f,1.0f,0.7f));
+    m_Exhaust.SetTexSize   (coreVector2(0.5f,  0.25f));
+    m_Exhaust.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 }
 
 
@@ -51,6 +60,9 @@ cPlayer::~cPlayer()
     // delete weapon objects
     for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
         SAFE_DELETE(m_apWeapon[i])
+
+    // 
+    this->SetExhaust(0.0f);
 }
 
 
@@ -131,6 +143,9 @@ void cPlayer::Render()
 
     // render the 3d-object
     coreObject3D::Render();
+
+    // 
+    m_Exhaust.Render();
 }
 
 
@@ -164,10 +179,12 @@ void cPlayer::Move()
     coreObject3D::Move();
 
     // update the weapons (shooting and stuff)
+    const coreBool bArmed = CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_WEAPON) ? false : true;
     for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
     {
-        const coreBool bShoot = CONTAINS_BIT(g_aInput[m_iInputIndex].iButtonHold, i) ? !CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_WEAPON) : false;
-        m_apWeapon[i]->Update(bShoot);
+        const coreBool bShoot  = CONTAINS_BIT(g_aInput[m_iInputIndex].iButtonHold,  i*2u)      ? bArmed : false;
+        const coreBool bChange = CONTAINS_BIT(g_aInput[m_iInputIndex].iButtonPress, i*2u + 1u) ? bArmed : false;
+        m_apWeapon[i]->Update(bShoot, bChange);
     }
 }
 
@@ -209,7 +226,7 @@ void cPlayer::Kill(const coreBool& bAnimated)
     ADD_VALUE(m_iStatus, PLAYER_STATUS_DEAD)
 
     // reset weapon shoot status
-    for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i) m_apWeapon[i]->Update(false);
+    for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i) m_apWeapon[i]->Update(false, false);
 
     // remove ship from the game
     cShip::_Kill(bAnimated);
@@ -257,4 +274,25 @@ void cPlayer::ResetStats()
     m_iComboValue[1] = m_iComboValue[0] = 0u;
     m_iChainValue[1] = m_iChainValue[0] = 0u;
     m_fChainCooldown = 0.0f;
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::SetExhaust(const coreFloat& fStrength)
+{
+    // 
+    const coreFloat fLen  = fStrength * 40.0f;
+    const coreFloat fSize = 1.0f -  fStrength * 0.25f;
+
+    // 
+         if( fStrength && !m_Exhaust.IsEnabled(CORE_OBJECT_ENABLE_ALL)) g_pGlow->BindObject  (&m_Exhaust);
+    else if(!fStrength &&  m_Exhaust.IsEnabled(CORE_OBJECT_ENABLE_ALL)) g_pGlow->UnbindObject(&m_Exhaust);
+
+    // 
+    m_Exhaust.SetSize     (coreVector3(fSize, fLen, fSize) * 0.6f);
+    m_Exhaust.SetTexOffset(coreVector2(0.0f, coreFloat(Core::System->GetTotalTime()) * 0.75f));
+    m_Exhaust.SetPosition (this->GetPosition() + coreVector3(0.0f, -(4.0f + m_Exhaust.GetSize().y), 0.0f));
+    m_Exhaust.SetEnabled  (fStrength ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+    m_Exhaust.Move();
 }

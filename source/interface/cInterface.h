@@ -75,7 +75,7 @@ public:
     void ShowBoss   (const cBoss*    pBoss);
     void ShowMission(const coreChar* pcMain, const coreChar* pcSub);
     void ShowMission(const cMission* pMission);
-    coreBool ActiveBanner()const;
+    coreBool IsBannerActive()const;
 
     // set object properties
     inline void SetAlphaAll (const coreFloat& fAlpha)   {m_fAlphaAll  = fAlpha;}

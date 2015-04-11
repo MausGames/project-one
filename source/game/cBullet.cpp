@@ -13,6 +13,7 @@
 // constructor
 cBullet::cBullet()noexcept
 : m_iDamage (0)
+, m_fSpeed  (0.0f)
 , m_pOwner  (NULL)
 {
     // set initial status
@@ -39,15 +40,16 @@ void cBullet::Move()
 
 // ****************************************************************
 // prepare and start up bullet
-void cBullet::Activate(const coreInt32& iDamage, cShip* pOwner, const coreInt32& iType, const coreVector2& vPosition, const coreVector2& vDirection)
+void cBullet::Activate(const coreInt32& iDamage, const coreFloat& fSpeed, cShip* pOwner, const coreInt32& iType, const coreVector2& vPosition, const coreVector2& vDirection)
 {
     // activate bullet and remove readiness
     if(CONTAINS_VALUE(m_iStatus, BULLET_STATUS_ACTIVE)) return;
     ADD_VALUE   (m_iStatus, BULLET_STATUS_ACTIVE)
     REMOVE_VALUE(m_iStatus, BULLET_STATUS_READY)
 
-    // save damage value and owner
+    // save damage, speed and owner
     m_iDamage = iDamage;
+    m_fSpeed  = fSpeed * BULLET_SPEED_FACTOR;
     m_pOwner  = pOwner;
 
     // reset bullet properties
@@ -192,8 +194,8 @@ cRayBullet::cRayBullet()noexcept
 // move the ray bullet
 void cRayBullet::__MoveOwn()
 {
-    // fly around (size modified)
-    this->SetPosition(this->GetPosition() + this->GetDirection() * (45.0f * this->GetSize().y * Core::System->GetTime()));
+    // fly around
+    this->SetPosition(this->GetPosition() + this->GetDirection() * (m_fSpeed * Core::System->GetTime()));
 
     // update texture animation
     m_fAnimation.Update(0.4f);
@@ -221,7 +223,7 @@ cOrbBullet::cOrbBullet()noexcept
 void cOrbBullet::__MoveOwn()
 {
     // fly around
-    this->SetPosition(this->GetPosition() + this->GetDirection() * (30.0f * Core::System->GetTime()));
+    this->SetPosition(this->GetPosition() + this->GetDirection() * (m_fSpeed * Core::System->GetTime()));
 
     // update texture animation
     m_fAnimation.Update(-0.2f);
@@ -237,7 +239,7 @@ cConeBullet::cConeBullet()noexcept
     // load object resources
     this->DefineModel  ("bullet_cone.md3");
     this->DefineTexture(0u, "effect_energy.png");
-    this->DefineProgram("effect_energy_direct_program");
+    this->DefineProgram("effect_energy_program");
 
     // set object properties
     this->SetTexSize(coreVector2(0.5f,0.2f));
@@ -249,9 +251,37 @@ cConeBullet::cConeBullet()noexcept
 void cConeBullet::__MoveOwn()
 {
     // fly around
-    this->SetPosition(this->GetPosition() + this->GetDirection() * (40.0f * Core::System->GetTime()));
+    this->SetPosition(this->GetPosition() + this->GetDirection() * (m_fSpeed * Core::System->GetTime()));
 
     // update texture animation
     m_fAnimation.Update(0.2f);
+    this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
+}
+
+
+// ****************************************************************
+// constructor
+cWaveBullet::cWaveBullet()noexcept
+: m_fAnimation (Core::Rand->Float(1.0f))
+{
+    // load object resources
+    this->DefineModel  ("bullet_wave.md3");
+    this->DefineTexture(0u, "effect_energy.png");
+    this->DefineProgram("effect_energy_direct_program");
+
+    // set object properties
+    this->SetTexSize(coreVector2(0.3f,0.25f) * 0.35f);
+}
+
+
+// ****************************************************************
+// move the wave bullet
+void cWaveBullet::__MoveOwn()
+{
+    // fly around
+    this->SetPosition(this->GetPosition() + this->GetDirection() * (m_fSpeed * Core::System->GetTime()));
+
+    // update texture animation
+    m_fAnimation.Update(0.1f);
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
 }

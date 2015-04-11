@@ -119,6 +119,9 @@ void cEnemy::Resurrect(const coreVector2& vPosition, const coreVector2& vDirecti
     m_fLifeTime = 0.0f;
     m_iNumShots = 0u;
 
+    // 
+    this->__ResurrectOwn();
+
     // bind enemy to active list
     g_pGame->__BindEnemy(this);
 
@@ -134,6 +137,9 @@ void cEnemy::Kill(const coreBool& bAnimated)
     // kill enemy
     if(CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_DEAD)) return;
     ADD_VALUE(m_iStatus, ENEMY_STATUS_DEAD)
+
+    // 
+    this->__KillOwn();
 
     // unbind enemy from active list
     g_pGame->__UnbindEnemy(this);
@@ -184,6 +190,65 @@ coreBool cEnemy::DefaultMoveTarget(const coreVector2& vTarget, const coreFloat& 
 
 // ****************************************************************
 // 
+void cEnemy::DefaultMoveLerp(const coreVector2& vFromRawPos, const coreVector2& vToRawPos, const coreFloat& fTime)
+{
+    // 
+    this->SetPosition(coreVector3(LERP(vFromRawPos, vToRawPos, fTime) * FOREGROUND_AREA, 0.0f));
+}
+
+
+// ****************************************************************
+// 
+void cEnemy::DefaultRotate(const coreFloat& fAngle)
+{
+    // rotate around z-axis
+    const coreVector2 vDir = coreVector2::Direction(fAngle);
+    this->SetDirection(coreVector3(vDir, 0.0f));
+}
+
+
+// ****************************************************************
+// 
+void cEnemy::DefaultRotateLerp(const coreFloat& fFromAngle, const coreFloat& fToAngle, const coreFloat& fTime)
+{
+    // rotate around z-axis
+    this->DefaultRotate(LERP(fFromAngle, fToAngle, fTime));
+}
+
+
+// ****************************************************************
+// 
+void cEnemy::DefaultOrientate(const coreFloat& fAngle)
+{
+    // rotate around direction axis
+    const coreVector3& vDir = this->GetDirection();
+    const coreVector2  vOri = coreVector2::Direction(fAngle);
+    this->SetOrientation(coreVector3(-vOri.x*vDir.y, vOri.x*vDir.x, vOri.y));
+}
+
+
+// ****************************************************************
+// 
+void cEnemy::DefaultOrientateLerp(const coreFloat& fFromAngle, const coreFloat& fToAngle, const coreFloat& fTime)
+{
+    // rotate around direction axis
+    this->DefaultOrientate(LERP(fFromAngle, fToAngle, fTime));
+}
+
+
+// ****************************************************************
+// 
+void cEnemy::DefaultMultiate(const coreFloat& fAngle)
+{
+    // rotate around the rotating direction axis
+    const coreVector2 vDir = coreVector2::Direction(fAngle);
+    this->SetDirection  (coreVector3(vDir, 0.0f));
+    this->SetOrientation(coreVector3(-vDir.x*vDir.y, vDir.x*vDir.x, vDir.y));
+}
+
+
+// ****************************************************************
+// 
 coreBool cEnemy::DefaultShoot(const coreFloat& fFireRate)
 {
     ASSERT(fFireRate <= I_TO_F(FRAMERATE))
@@ -222,14 +287,6 @@ cScoutEnemy::cScoutEnemy()noexcept
 
 
 // ****************************************************************
-// move the scout enemy
-void cScoutEnemy::__MoveOwn()
-{
-
-}
-
-
-// ****************************************************************
 // constructor
 cWarriorEnemy::cWarriorEnemy()noexcept
 {
@@ -239,14 +296,6 @@ cWarriorEnemy::cWarriorEnemy()noexcept
 
     // configure the enemy
     this->Configure(100, coreVector3(51.0f/360.0f, 100.0f/100.0f, 85.0f/100.0f).HSVtoRGB());
-}
-
-
-// ****************************************************************
-// move the warrior enemy
-void cWarriorEnemy::__MoveOwn()
-{
-
 }
 
 
@@ -272,8 +321,7 @@ void cStarEnemy::__MoveOwn()
     m_fAngle.Update(-3.0f);
 
     // rotate around z-axis
-    const coreVector2 vDir = coreVector2::Direction(m_fAngle);
-    this->SetDirection(coreVector3(vDir, 0.0f));
+    this->DefaultRotate(m_fAngle);
 }
 
 
@@ -299,9 +347,7 @@ void cArrowEnemy::__MoveOwn()
     m_fAngle.Update(-3.0f);
 
     // rotate around direction axis
-    const coreVector3& vDir = this->GetDirection();
-    const coreVector2  vOri = coreVector2::Direction(m_fAngle);
-    this->SetOrientation(coreVector3(-vOri.x*vDir.y, vOri.x*vDir.x, vOri.y));
+    this->DefaultOrientate(m_fAngle);
 }
 
 
@@ -340,9 +386,7 @@ void cFreezerEnemy::__MoveOwn()
     m_fAngle.Update(2.0f);
 
     // rotate around direction axis
-    const coreVector3& vDir = this->GetDirection();
-    const coreVector2  vOri = coreVector2::Direction(m_fAngle);
-    this->SetOrientation(coreVector3(-vOri.x*vDir.y, vOri.x*vDir.x, vOri.y));
+    this->DefaultOrientate(m_fAngle);
 }
 
 
@@ -368,7 +412,5 @@ void cCinderEnemy::__MoveOwn()
     m_fAngle.Update(-2.0f);
 
     // rotate around the rotating direction axis
-    const coreVector2 vDir = coreVector2::Direction(m_fAngle);
-    this->SetDirection  (coreVector3(vDir, 0.0f));
-    this->SetOrientation(coreVector3(-vDir.x*vDir.y, vDir.x*vDir.x, vDir.y));
+    this->DefaultMultiate(m_fAngle);
 }

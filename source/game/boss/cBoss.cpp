@@ -12,85 +12,80 @@
 // ****************************************************************
 // constructor
 cBoss::cBoss()noexcept
-: m_iPhase  (0u)
-, m_iLevel  (0u)
-, m_vOldPos (coreVector2(0.0f,0.0f))
+: m_iPhase (0u)
+, m_iLevel (0u)
 {
     // 
-    std::memset(m_aiCounter, 0, sizeof(m_aiCounter));
+    for(coreUintW i = 0u; i < BOSS_TIMERS; ++i)
+        m_aTimer[i].Set(1.0f, 1.0f, 0u);
 
     // 
-    m_MoveTimer.Set(1.0f, 1.0f, 1u);
-    for(coreUintW i = 0u; i < BOSS_TIMERS; ++i) m_aShootTimer[i].Set(1.0f, 1.0f, 0);
+    std::memset(m_aiTimerLine, 0, sizeof(m_aiTimerLine));
+    std::memset(m_aiCounter,   0, sizeof(m_aiCounter));
 }
 
 
 // ****************************************************************
 // 
-void cBoss::_PhaseMove(const coreVector2& vFromPos, const coreVector2& vToPos, const coreFloat& fSpeed, const std::function<coreFloat(coreFloat, coreFloat, coreFloat)>&& nLerp, const std::function<void()>&& nInitFunc, const std::function<void(coreFloat)>&& nUpdateFunc, const std::function<void()>&& nExitFunc)
+void cBoss::_PhaseTimer(const coreUintW& iTimerIndex, const coreUint16 iCodeLine, const coreFloat& fSpeed, const std::function<coreFloat(coreFloat, coreFloat, coreFloat)>&& nLerpFunc, const std::function<void(coreFloat, coreFloat, coreBool)>&& nUpdateFunc)
 {
-    if(!m_MoveTimer.GetStatus())
+    // 
+    ASSERT(iTimerIndex < BOSS_TIMERS)
+    coreTimer&  oTimer     = m_aTimer     [iTimerIndex];
+    coreUint16& iTimerLine = m_aiTimerLine[iTimerIndex];
+
+    // 
+    if(iTimerLine != iCodeLine)
     {
-        // 
-        m_MoveTimer.Play(CORE_TIMER_PLAY_RESET);
+        iTimerLine = iCodeLine;
 
         // 
-        nInitFunc();
-        nUpdateFunc(0.0f);
+        oTimer.SetMaxLoops(1u);
+        oTimer.Play(CORE_TIMER_PLAY_RESET);
+
+        // 
+        nUpdateFunc(0.0f, 0.0f, false);
     }
     else
     {
         // 
-        if(m_MoveTimer.Update(fSpeed))
-        {
-            // 
-            this->SetPosition(coreVector3(vToPos * FOREGROUND_AREA, 0.0f));
-            m_vOldPos = vToPos;
+        const coreFloat fTimeBefore = nLerpFunc(0.0f, 1.0f, oTimer.GetValue(CORE_TIMER_GET_NORMAL));
+        oTimer.Update(fSpeed);
+        const coreFloat fTime       = nLerpFunc(0.0f, 1.0f, oTimer.GetValue(CORE_TIMER_GET_NORMAL));
 
-            // 
-            nUpdateFunc(1.0f);
-            nExitFunc();
-        }
-        else
-        {
-            // 
-            const coreFloat fTime = nLerp(0.0f, 1.0f, m_MoveTimer.GetValue(CORE_TIMER_GET_NORMAL));
-
-            // 
-            this->SetPosition(coreVector3(LERP(vFromPos, vToPos, fTime) * FOREGROUND_AREA, 0.0f));
-            nUpdateFunc(fTime);
-        }
+        // 
+        nUpdateFunc(fTime, fTimeBefore, !oTimer.GetStatus());
     }
 }
 
 
 // ****************************************************************
 // 
-void cBoss::_PhaseShoot(const coreUintW& iTimerIndex, const coreUint16& iShots, const coreFloat& fSpeed, const std::function<void()>&& nInitFunc, const std::function<void(coreUint16)>&& nUpdateFunc, const std::function<void()>&& nExitFunc)
+void cBoss::_PhaseTicker(const coreUintW& iTimerIndex, const coreUint16 iCodeLine, const coreUint16& iTicks, const coreFloat& fRate, const std::function<void(coreUint16, coreBool)>&& nUpdateFunc)
 {
+    // 
     ASSERT(iTimerIndex < BOSS_TIMERS)
-    coreTimer& oTimer = m_aShootTimer[iTimerIndex];
+    coreTimer&  oTimer     = m_aTimer     [iTimerIndex];
+    coreUint16& iTimerLine = m_aiTimerLine[iTimerIndex];
 
-    if(!oTimer.GetStatus())
+    // 
+    if(iTimerLine != iCodeLine)
     {
-        // 
-        oTimer.Play(CORE_TIMER_PLAY_RESET);
+        iTimerLine = iCodeLine;
 
         // 
-        nInitFunc();
+        oTimer.SetMaxLoops(0u);
+        oTimer.Play(CORE_TIMER_PLAY_RESET);
     }
 
     // 
-    if(oTimer.Update(fSpeed))
+    if(oTimer.Update(fRate))
     {
         // 
-        nUpdateFunc(oTimer.GetCurLoops());
+        if((oTimer.GetCurLoops() >= iTicks) && iTicks)
+            oTimer.Pause();
 
-        if(oTimer.GetCurLoops() >= iShots)
-        {
-            // 
-            oTimer.Stop();
-            nExitFunc();
-        }
+        // 
+        nUpdateFunc(oTimer.GetCurLoops()-1u, !oTimer.GetStatus());
     }
 }

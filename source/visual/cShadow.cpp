@@ -199,7 +199,7 @@ void cShadow::__Reset(const coreResourceReset& bInit)
 void cShadow::__RenderSingle(const coreMatrix4& mTransform, const std::vector<coreBatchList*>& apList, const std::vector<coreObject3D*>& apObject)
 {
     // only enable and update without instancing
-    if(!apObject.empty() || std::any_of(apList.begin(), apList.end(), [](coreBatchList* pList) {return !pList->IsInstanced();}))
+    if(!apObject.empty() || std::any_of(apList.begin(), apList.end(), [](const coreBatchList* pList) {return !pList->IsInstanced();}))
     {
         // send shadow matrix to single shader-program
         if(!s_pProgramSingle.IsUsable()) return;
@@ -218,7 +218,7 @@ void cShadow::__RenderSingle(const coreMatrix4& mTransform, const std::vector<co
 void cShadow::__RenderInstanced(const coreMatrix4& mTransform, const std::vector<coreBatchList*>& apList)
 {
     // only enable and update on instancing
-    if(std::any_of(apList.begin(), apList.end(), [](coreBatchList* pList) {return pList->IsInstanced();}))
+    if(std::any_of(apList.begin(), apList.end(), [](const coreBatchList* pList) {return pList->IsInstanced();}))
     {
         // send shadow matrix to instanced shader-program
         if(!s_pProgramInstanced.IsUsable()) return;

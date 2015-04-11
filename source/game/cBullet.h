@@ -15,8 +15,9 @@
 
 // ****************************************************************
 // bullet definitions
-#define BULLET_SET_INIT_SIZE (32u)    // initial allocation size when creating a new bullet set
-#define BULLET_AREA_FACTOR   (1.2f)   // size factor for foreground area where the bullet remains active
+#define BULLET_SET_INIT_SIZE (32u)     // initial allocation size when creating a new bullet set
+#define BULLET_AREA_FACTOR   (1.2f)    // size factor for foreground area where the bullet remains active
+#define BULLET_SPEED_FACTOR  (30.0f)   // 
 
 enum eBulletStatus : coreUint8
 {
@@ -31,7 +32,9 @@ class INTERFACE cBullet : public coreObject3D
 {
 protected:
     coreInt32 m_iDamage;   // damage value
-    cShip*    m_pOwner;    // associated owner of the bullet
+    coreFloat m_fSpeed;    // 
+
+    cShip* m_pOwner;       // associated owner of the bullet
 
 
 public:
@@ -46,11 +49,12 @@ public:
     void Move()override;
 
     // control status
-    void Activate  (const coreInt32& iDamage, cShip* pOwner, const coreInt32& iType, const coreVector2& vPosition, const coreVector2& vDirection);
+    void Activate  (const coreInt32& iDamage, const coreFloat& fSpeed, cShip* pOwner, const coreInt32& iType, const coreVector2& vPosition, const coreVector2& vDirection);
     void Deactivate(const coreBool&  bAnimated);
 
     // get object properties
     inline const coreInt32& GetDamage()const {return m_iDamage;}
+    inline const coreFloat& GetSpeed ()const {return m_fSpeed;}
     inline       cShip*     GetOwner ()const {return m_pOwner;}
 
     // bullet configuration values
@@ -59,7 +63,7 @@ public:
 
 
 private:
-    // render and move routines for derived classes (render functions executed by manager)
+    // own routines for derived classes (render functions executed by manager)
     virtual void __RenderOwnBefore() {}
     virtual void __RenderOwnAfter () {}
     virtual void __MoveOwn        () {}
@@ -104,7 +108,7 @@ public:
     void Move();
 
     // add and remove bullets
-    template <typename T> RETURN_RESTRICT T* AddBullet(const coreInt32& iDamage, cShip* pOwner, const coreInt32& iType, const coreVector2& vPosition, const coreVector2& vDirection);
+    template <typename T> RETURN_RESTRICT T* AddBullet(const coreInt32& iDamage, const coreFloat& fSpeed, cShip* pOwner, const coreInt32& iType, const coreVector2& vPosition, const coreVector2& vDirection);
     void ClearBullets();
 };
 
@@ -124,7 +128,7 @@ public:
     ASSIGN_ID(1, "Ray")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(2.5f,2.5f,2.5f)); this->SetColor3(coreVector3(0.9f,0.8f,0.4f));}
+    inline void ResetProperties() {this->SetSize(coreVector3(2.5f,2.5f,2.5f)); this->SetColor3(coreVector3(0.9f,0.8f,0.4f) * 0.95f);}
 
     // change default color (yellow)
     inline void MakeOrange() {this->SetColor3(coreVector3(1.0f,0.4f,0.0f));}
@@ -144,6 +148,9 @@ private:
 };
 
 
+// 2 PULSE
+
+
 // ****************************************************************
 // orb bullet class
 class cOrbBullet final : public cBullet
@@ -156,7 +163,7 @@ public:
     cOrbBullet()noexcept;
 
     ENABLE_COPY(cOrbBullet)
-    ASSIGN_ID(2, "Orb")
+    ASSIGN_ID(3, "Orb")
 
     // reset base properties
     inline void ResetProperties() {this->SetSize(coreVector3(1.6f,1.6f,1.6f)); this->SetColor3(coreVector3(0.09f,0.387f,0.9f));}
@@ -191,7 +198,7 @@ public:
     cConeBullet()noexcept;
 
     ENABLE_COPY(cConeBullet)
-    ASSIGN_ID(3, "Cone")
+    ASSIGN_ID(4, "Cone")
 
     // reset base properties
     inline void ResetProperties() {this->SetSize(coreVector3(1.35f,1.55f,1.35f)); this->SetColor3(coreVector3(1.0f,0.4f,0.0f));}
@@ -210,6 +217,41 @@ public:
 
 private:
     // move the cone bullet
+    void __MoveOwn()override;
+};
+
+
+// ****************************************************************
+// wave bullet class
+class cWaveBullet final : public cBullet
+{
+private:
+    coreFlow m_fAnimation;   // animation value
+
+
+public:
+    cWaveBullet()noexcept;
+
+    ENABLE_COPY(cWaveBullet)
+    ASSIGN_ID(5, "Wave")
+
+    // reset base properties
+    inline void ResetProperties() {this->SetSize(coreVector3(0.35f,1.55f,0.35f)); this->SetColor3(coreVector3(0.3f,0.7f,0.3f) * 1.2f);}
+
+    // change default color (green)
+    inline void MakeYellow() {}
+    inline void MakeOrange() {}
+    inline void MakeRed   () {}
+    inline void MakeViolet() {}
+    inline void MakeBlue  () {}
+
+    // bullet configuration values
+    static inline const coreChar* ConfigProgramInstancedName() {return "effect_energy_direct_inst_program";}
+    static inline cOutline*       ConfigOutlineObject       () {return g_pOutlineDirect;}
+
+
+private:
+    // move the wave bullet
     void __MoveOwn()override;
 };
 
@@ -243,7 +285,7 @@ template <typename T> cBulletManager::sBulletSet<T>::~sBulletSet()
 
 // ****************************************************************
 // add bullet to the game
-template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt32& iDamage, cShip* pOwner, const coreInt32& iType, const coreVector2& vPosition, const coreVector2& vDirection)
+template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt32& iDamage, const coreFloat& fSpeed, cShip* pOwner, const coreInt32& iType, const coreVector2& vPosition, const coreVector2& vDirection)
 {
     // get requested bullet set
     sBulletSet<T>* pSet;
@@ -268,7 +310,7 @@ template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt
         if(CONTAINS_VALUE(pBullet->GetStatus(), BULLET_STATUS_READY))
         {
             // prepare bullet and add to active list
-            pBullet->Activate(iDamage, pOwner, iType, vPosition, vDirection);
+            pBullet->Activate(iDamage, fSpeed, pOwner, iType, vPosition, vDirection);
             pBullet->ResetProperties();
             pSet->oBulletActive.BindObject(pBullet);
 
@@ -290,7 +332,7 @@ template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt
 
     // execute again with first new bullet (overhead should be low, requested bullet set is cached)
     pSet->iCurBullet = iSize - 1u;
-    return this->AddBullet<T>(iDamage, pOwner, iType, vPosition, vDirection);
+    return this->AddBullet<T>(iDamage, fSpeed, pOwner, iType, vPosition, vDirection);
 }
 
 

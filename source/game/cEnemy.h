@@ -53,16 +53,24 @@ public:
     void Kill     (const coreBool&    bAnimated);
 
     // 
-    coreBool DefaultMovePath  (const coreSpline2& oPath, const coreVector2& vOffset, const coreFloat& fDistance);
-    coreBool DefaultMoveTarget(const coreVector2& vTarget, const coreFloat& fSpeedTurn, const coreFloat& fSpeedMove);
-    coreBool DefaultShoot     (const coreFloat& fFireRate);
+    coreBool DefaultMovePath     (const coreSpline2& oPath, const coreVector2& vOffset, const coreFloat& fDistance);
+    coreBool DefaultMoveTarget   (const coreVector2& vTarget, const coreFloat& fSpeedTurn, const coreFloat& fSpeedMove);
+    void     DefaultMoveLerp     (const coreVector2& vFromRawPos, const coreVector2& vToRawPos, const coreFloat& fTime);
+    void     DefaultRotate       (const coreFloat& fAngle);
+    void     DefaultRotateLerp   (const coreFloat& fFromAngle, const coreFloat& fToAngle, const coreFloat& fTime);
+    void     DefaultOrientate    (const coreFloat& fAngle);
+    void     DefaultOrientateLerp(const coreFloat& fFromAngle, const coreFloat& fToAngle, const coreFloat& fTime);
+    void     DefaultMultiate     (const coreFloat& fAngle);
+    coreBool DefaultShoot        (const coreFloat& fFireRate);
 
     // get object properties
     inline const coreFloat& GetLifeTime()const {return m_fLifeTime;}
 
 
 private:
-    // render and move routines for derived classes (render functions executed by game)
+    // own routines for derived classes (render functions executed by game)
+    virtual void __ResurrectOwn   () {}
+    virtual void __KillOwn        () {}
     virtual void __RenderOwnBefore() {}
     virtual void __RenderOwnAfter () {}
     virtual void __MoveOwn        () {}
@@ -78,11 +86,6 @@ public:
 
     DISABLE_COPY(cScoutEnemy)
     ASSIGN_ID(1, "Scout")
-
-
-private:
-    // move the scout enemy
-    void __MoveOwn()override;
 };
 
 
@@ -95,11 +98,6 @@ public:
 
     DISABLE_COPY(cWarriorEnemy)
     ASSIGN_ID(2, "Warrior")
-
-
-private:
-    // move the warrior enemy
-    void __MoveOwn()override;
 };
 
 

@@ -31,7 +31,7 @@ cBackground::cBackground()noexcept
 cBackground::~cBackground()
 {
     // remove all persistent objects
-    auto nRemoveObjectsFunc = [](std::vector<coreBatchList*>* papList)
+    auto nRemoveObjectsFunc = [](std::vector<coreBatchList*>* OUTPUT papList)
     {
         FOR_EACH(it, *papList)
         {
@@ -145,7 +145,7 @@ void cBackground::Move()
     }
 
     // control and move all objects
-    auto nControlObjectsFunc = [](std::vector<coreBatchList*>* papList, const coreFloat& fRange)
+    auto nControlObjectsFunc = [](std::vector<coreBatchList*>* OUTPUT papList, const coreFloat& fRange)
     {
         FOR_EACH(it, *papList)
         {

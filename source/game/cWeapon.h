@@ -19,8 +19,8 @@ protected:
     coreTimer    m_CooldownTimer;   // controls the cooldown between two successive shots
     coreSoundPtr m_pShootSound;     // shooting sound-effect
 
-    coreUint8 m_iLevel;             // current weapon level
     cPlayer*  m_pOwner;             // associated owner of the weapon (and bullets)
+    coreUint8 m_iLevel;             // current weapon level
 
     coreBool m_bLastStatus;         // last shoot status (to determine trigger and release)
 
@@ -33,21 +33,22 @@ public:
     ENABLE_ID
 
     // update the weapon
-    coreBool Update(const coreBool& bShootStatus);
+    coreBool Update(const coreBool& bShootStatus, const coreBool& bChangeStatus);
 
     // set object properties
-    inline void SetLevel(const coreUint8& iLevel) {m_iLevel = iLevel;}
     inline void SetOwner(cPlayer*         pOwner) {m_pOwner = pOwner;}
+    inline void SetLevel(const coreUint8& iLevel) {m_iLevel = iLevel;}
 
     // get object properties
-    inline const coreUint8& GetLevel()const {return m_iLevel;}
     inline cPlayer*         GetOwner()const {return m_pOwner;}
+    inline const coreUint8& GetLevel()const {return m_iLevel;}
 
 
 private:
-    // event routines for derived classes
+    // own routines for derived classes
     virtual void __TriggerOwn() {}
     virtual void __ReleaseOwn() {}
+    virtual void __ChangeOwn () {}
     virtual void __ShootOwn  () {}
 };
 
@@ -69,7 +70,7 @@ public:
 class cRayWeapon final : public cWeapon
 {
 private:
-    coreBool m_bSpread;   // bullet spread status (0 = concentrated, 1 = wide)
+    coreUint8 m_iSpread;   // bullet spread status (0 = front, 1 = back, 2 = sides, 3 = diagonal)
 
 
 public:
@@ -80,9 +81,9 @@ public:
 
 
 private:
-    // release and shoot with the ray weapon
-    void __ReleaseOwn()override;
-    void __ShootOwn  ()override;
+    // change and shoot with the ray weapon
+    void __ChangeOwn()override;
+    void __ShootOwn ()override;
 };
 
 
@@ -138,8 +139,8 @@ public:
 // constructor
 constexpr_func cWeapon::cWeapon()noexcept
 : m_CooldownTimer (coreTimer(1.0f, 1.0f, 1u))
-, m_iLevel        (0u)
 , m_pOwner        (NULL)
+, m_iLevel        (0u)
 , m_bLastStatus   (false)
 {
 }

@@ -40,7 +40,6 @@
 
 // TODO: create timer and int-value as tick-multiplier for sustained damage
 // TODO: remove magic numbers (regularly)
-// TODO: implement time-delta and FPS lock, patterns (movements, bullets) are time dependant, a lock would prevent this dependency
 
 
 // ****************************************************************
@@ -89,6 +88,7 @@
 #define TYPE_ENEMY         (2)
 #define TYPE_BULLET_PLAYER (11)
 #define TYPE_BULLET_ENEMY  (12)
+#define TYPE_OBJECT(x)     (100+x)
 
 #define ENABLE_ID                               \
     virtual const coreInt32 GetID  ()const = 0; \
@@ -100,6 +100,14 @@
     inline const coreChar* GetName()const override {return n;}
 
 #define CONTAINS(c,i) (std::find((c).begin(), (c).end(), (i)) != (c).end())
+
+inline FUNC_CONST coreFloat AngleDiff(const coreFloat& x, const coreFloat& y)
+{
+    coreFloat A = (x - y);
+    while(A < -PI) A += 2.0f*PI;
+    while(A >  PI) A -= 2.0f*PI;
+    return A;
+}
 
 
 // ****************************************************************
@@ -137,6 +145,7 @@ extern cPostProcessing* g_pPostProcessing;   // main post-processing object
 #include "environment/cWater.h"
 #include "environment/background/cBackground.h"
 #include "environment/cEnvironment.h"
+#include "interface/cCombatStats.h"
 #include "interface/cCombatText.h"
 #include "interface/cInterface.h"
 #include "interface/cMsgBox.h"

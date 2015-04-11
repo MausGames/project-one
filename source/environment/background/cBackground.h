@@ -82,9 +82,9 @@ protected:
 
 
 private:
-    // render and move routines for derived classes
+    // own routines for derived classes
     virtual void __RenderOwn() {}
-    virtual void __MoveOwn()   {}
+    virtual void __MoveOwn  () {}
 };
 
 

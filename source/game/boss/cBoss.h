@@ -19,15 +19,11 @@
 
 // ****************************************************************
 // phase management macros
-#define PHASE_MAIN_MOVE(a,b,c,d) this->_PhaseMove (a, b, c, d
-#define PHASE_MAIN_SHOOT(a,b,c)  this->_PhaseShoot(a, b, c
-#define PHASE_SUB_INIT()         ,[&]()
-#define PHASE_SUB_UPDATE(...)    ,[&](__VA_ARGS__)
-#define PHASE_SUB_EXIT()         ,[&]()
-#define PHASE_END                );
-
-#define PHASE_RESET_TIMER_MOVE     {this->m_MoveTimer.Stop();}
-#define PHASE_RESET_TIMER_SHOOT(i) {this->m_aShootTimer[i].Stop();}
+#define PHASE_CONTROL_TIMER(a,b,c)  this->_PhaseTimer (a, __LINE__, b, c, [&](const coreFloat&  fTime, const coreFloat& fTimeBefore, const coreBool& __bEnd)
+#define PHASE_CONTROL_TICKER(a,b,c) this->_PhaseTicker(a, __LINE__, b, c, [&](const coreUint16& iTick,                               const coreBool& __bEnd)
+#define PHASE_SUB(t)                ((fTimeBefore <= (t)) && ((t) <= fTime))
+#define PHASE_RESET(i)              {m_aTimer[i].Stop(); m_aiTimerLine[i] = 0u;}
+#define PHASE_FINISHED              (__bEnd)
 
 #define LERP_LINEAR    (&LERP <coreFloat>)
 #define LERP_SMOOTH    (&LERPS<coreFloat>)
@@ -37,7 +33,7 @@
 
 // ****************************************************************
 // 
-#define CROSSFIELD_BOOMERANGS (4u)   // 
+#define CROSSFIELD_BOOMERANGS (6u)   // 
 #define CROSSFIELD_TRAILS     (3u)   // 
 
 
@@ -46,14 +42,12 @@
 class INTERFACE cBoss : public cEnemy
 {
 protected:
-    coreUint8 m_iPhase;                     // 
-    coreUint8 m_iLevel;                     // 
+    coreTimer  m_aTimer     [BOSS_TIMERS];     // 
+    coreUint16 m_aiTimerLine[BOSS_TIMERS];     // 
+    coreInt16  m_aiCounter  [BOSS_COUNTERS];   // 
 
-    coreTimer m_MoveTimer;                  // 
-    coreTimer m_aShootTimer[BOSS_TIMERS];   // 
-    coreInt16 m_aiCounter[BOSS_COUNTERS];   // 
-
-    coreVector2 m_vOldPos;                  // 
+    coreUint8 m_iPhase;                        // 
+    coreUint8 m_iLevel;                        // 
 
 
 public:
@@ -69,13 +63,9 @@ public:
 
 
 protected:
-    // default phase routines (# quite a mess, but good enough) 
-    void        _PhaseMove (const coreVector2& vFromPos,    const coreVector2& vToPos, const coreFloat& fSpeed, const std::function<coreFloat(coreFloat, coreFloat, coreFloat)>&& nLerp, const std::function<void()>&& nInitFunc, const std::function<void(coreFloat)>&&  nUpdateFunc, const std::function<void()>&& nExitFunc);
-    inline void _PhaseMove (const coreVector2& vFromPos,    const coreVector2& vToPos, const coreFloat& fSpeed, const std::function<coreFloat(coreFloat, coreFloat, coreFloat)>&& nLerp,                                          const std::function<void(coreFloat)>&&  nUpdateFunc, const std::function<void()>&& nExitFunc) {this->_PhaseMove (vFromPos, vToPos, fSpeed, std::move(nLerp), [](){}, std::move(nUpdateFunc), std::move(nExitFunc));}
-    inline void _PhaseMove (const coreVector2& vFromPos,    const coreVector2& vToPos, const coreFloat& fSpeed, const std::function<coreFloat(coreFloat, coreFloat, coreFloat)>&& nLerp,                                          const std::function<void(coreFloat)>&&  nUpdateFunc)                                          {this->_PhaseMove (vFromPos, vToPos, fSpeed, std::move(nLerp), [](){}, std::move(nUpdateFunc), [](){});}
-    void        _PhaseShoot(const coreUintW&   iTimerIndex, const coreUint16&  iShots, const coreFloat& fSpeed,                                                                          const std::function<void()>&& nInitFunc, const std::function<void(coreUint16)>&& nUpdateFunc, const std::function<void()>&& nExitFunc);
-    inline void _PhaseShoot(const coreUintW&   iTimerIndex, const coreUint16&  iShots, const coreFloat& fSpeed,                                                                                                                   const std::function<void(coreUint16)>&& nUpdateFunc, const std::function<void()>&& nExitFunc) {this->_PhaseShoot(iTimerIndex, iShots, fSpeed,                [](){}, std::move(nUpdateFunc), std::move(nExitFunc));}
-    inline void _PhaseShoot(const coreUintW&   iTimerIndex, const coreUint16&  iShots, const coreFloat& fSpeed,                                                                                                                   const std::function<void(coreUint16)>&& nUpdateFunc)                                          {this->_PhaseShoot(iTimerIndex, iShots, fSpeed,                [](){}, std::move(nUpdateFunc), [](){});}
+    // 
+    void _PhaseTimer (const coreUintW& iTimerIndex, const coreUint16 iCodeLine, const coreFloat&  fSpeed, const std::function<coreFloat(coreFloat, coreFloat, coreFloat)>&& nLerpFunc, const std::function<void(coreFloat, coreFloat, coreBool)>&& nUpdateFunc);
+    void _PhaseTicker(const coreUintW& iTimerIndex, const coreUint16 iCodeLine, const coreUint16& iTicks, const coreFloat& fRate,                                                      const std::function<void(coreUint16,           coreBool)>&& nUpdateFunc);
 };
 
 
@@ -104,15 +94,18 @@ public:
 
 private:
     // 
+    void __ResurrectOwn   ()override;
+    void __KillOwn        ()override;
     void __RenderOwnBefore()override;
-    void __MoveOwn        ()override;
     void __RenderOwnAfter ()override;
+    void __MoveOwn        ()override;
 
     // 
-    coreVector2 __RepeatPosition (const coreVector2& vPosition, const coreFloat& fThreshold, coreBool* OUTPUT pbChange);
-    void        __RotateDirection(const coreFloat& fAngleFrom, const coreFloat& fAngleTo, const coreFloat& fLerp);
-    void        __EncodeDirection(const coreUintW& iIndex, const coreVector2& vDirection);
-    coreVector2 __DecodeDirection(const coreUintW& iIndex);
+    coreVector2 __RepeatPosition  (const coreVector2& vPosition, const coreFloat& fThreshold, coreBool* OUTPUT pbChange);
+    void        __EncodeDirection (const coreUintW& iIndex, const coreVector2& vDirection);
+    coreVector2 __DecodeDirection (const coreUintW& iIndex);
+    void        __EnableBoomerang (const coreUintW& iIndex, const coreVector2& vPosition, const coreVector2& vDirection);
+    void        __DisableBoomerang(const coreUintW& iIndex, const coreBool& bAnimated);
 };
 
 
@@ -137,8 +130,8 @@ public:
 private:
     // 
     void __RenderOwnBefore()override;
-    void __MoveOwn        ()override;
     void __RenderOwnAfter ()override;
+    void __MoveOwn        ()override;
 };
 
 
@@ -163,8 +156,8 @@ public:
 private:
     // 
     void __RenderOwnBefore()override;
-    void __MoveOwn        ()override;
     void __RenderOwnAfter ()override;
+    void __MoveOwn        ()override;
 };
 
 

@@ -38,6 +38,10 @@ void CoreApp::Init()
     // set camera to default values
     Core::Graphics->SetCamera(CAMERA_POSITION, CAMERA_DIRECTION, CAMERA_ORIENTATION);
 
+    // set listener to default values
+    Core::Audio->SetListener(coreVector3(0.0f,0.0f,10.0f), coreVector3(0.0f,0.0f,0.0f),
+                             coreVector3(0.0f,0.0f,-1.0f), coreVector3(0.0f,1.0f,0.0f));
+
     // load configuration
     LoadConfig();
 

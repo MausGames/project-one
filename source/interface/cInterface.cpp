@@ -160,7 +160,7 @@ void cInterface::Render()
         }
     }
 
-    if(this->ActiveBanner())
+    if(this->IsBannerActive())
     {
         // render banner
         m_BannerBar     .Render();
@@ -183,7 +183,7 @@ void cInterface::Move()
         cPlayer*     pPlayer = g_pGame->GetPlayer(i);
 
         // set health bar size
-        const coreFloat fPercent = I_TO_F(pPlayer->GetCurHealth()) * RCP(I_TO_F(pPlayer->GetMaxHealth()));
+        const coreFloat fPercent = pPlayer->GetCurHealthPct();
         oView.m_aHealthBar[1].SetSize   ((oView.m_aHealthBar[0].GetSize() - coreVector2(0.01f,0.01f)) * coreVector2(fPercent, 1.0f));
         oView.m_aHealthBar[1].SetTexSize(coreVector2(fPercent, 1.0f));
 
@@ -222,7 +222,7 @@ void cInterface::Move()
     if(pBoss)
     {
         // set health bar size
-        const coreFloat fPercent = I_TO_F(pBoss->GetCurHealth()) * RCP(I_TO_F(pBoss->GetMaxHealth()));
+        const coreFloat fPercent = pBoss->GetCurHealthPct();
         m_aBossHealthBar[1].SetSize   ((m_aBossHealthBar[0].GetSize() - coreVector2(0.01f,0.01f)) * coreVector2(fPercent, 1.0f));
         m_aBossHealthBar[1].SetTexSize(coreVector2(fPercent, 1.0f));
 
@@ -406,7 +406,7 @@ void cInterface::ShowMission(const cMission* pMission)
 
 // ****************************************************************
 // check for active banner
-coreBool cInterface::ActiveBanner()const
+coreBool cInterface::IsBannerActive()const
 {
     // compare with mission-time offset
     return ((g_pGame->GetTimeMission() - m_fBannerStart) <= INTERFACE_BANNER_DURATION) ? true : false;

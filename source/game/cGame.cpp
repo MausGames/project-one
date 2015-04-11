@@ -73,6 +73,9 @@ void cGame::Render()
 // render the overlay separately
 void cGame::RenderOverlay()
 {
+    // 
+    m_CombatStats.Apply();
+
     // render all overlay objects
     m_CombatText.Render();
     m_Interface .Render();
@@ -207,15 +210,15 @@ cPlayer* cGame::FindPlayer(const coreVector2& vPosition)
 
     for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
     {
-        cPlayer& oCurPlayer = m_aPlayer[i];
-        if(CONTAINS_VALUE(oCurPlayer.GetStatus(), PLAYER_STATUS_DEAD)) continue;
+        cPlayer* pCurPlayer = &m_aPlayer[i];
+        if(CONTAINS_VALUE(pCurPlayer->GetStatus(), PLAYER_STATUS_DEAD)) continue;
 
         // 
-        const coreFloat fCurDiffSq = (oCurPlayer.GetPosition().xy() - vPosition).LengthSq();
+        const coreFloat fCurDiffSq = (pCurPlayer->GetPosition().xy() - vPosition).LengthSq();
         if(fCurDiffSq < fDiffSq)
         {
             // 
-            pPlayer = &oCurPlayer;
+            pPlayer = pCurPlayer;
             fDiffSq = fCurDiffSq;
         }
     }
@@ -297,6 +300,7 @@ coreBool cGame::__HandleIntro()
                 oPlayer.SetPosition   (coreVector3(oPlayer.GetPosition().x, vPos));
                 oPlayer.SetNewPos     (coreVector2(oPlayer.GetPosition().xy()));
                 oPlayer.SetOrientation(coreVector3(vDir.x, 0.0f, vDir.y));
+                oPlayer.SetExhaust    (LERPB(1.0f, 0.0f, fTime));
             }
         }
     }
@@ -309,16 +313,16 @@ coreBool cGame::__HandleIntro()
 // handle default object collisions
 void cGame::__HandleCollisions()
 {
-    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_ENEMY, [](cPlayer* pPlayer, cEnemy* pEnemy, const coreBool& bFirst)
+    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_ENEMY, [](cPlayer* OUTPUT pPlayer, cEnemy* OUTPUT pEnemy, const coreBool& bFirst)
     {
 
     });
 
-    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_BULLET_ENEMY, [](cPlayer* pPlayer, cBullet* pBullet, const coreBool& bFirst)
+    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_BULLET_ENEMY, [](cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreBool& bFirst)
     {
 
 
-        g_pSpecialEffects->CreateParticleFireSplash(5u, pBullet->GetPosition(), 10.0f);
+        //g_pSpecialEffects->CreateParticleFireSplash(5u, pBullet->GetPosition(), 10.0f);
 
 
         // 
@@ -326,15 +330,16 @@ void cGame::__HandleCollisions()
         pBullet->Deactivate(true);
     });
 
-    Core::Manager::Object->TestCollision(TYPE_ENEMY, TYPE_BULLET_PLAYER, [](cEnemy* pEnemy, cBullet* pBullet, const coreBool& bFirst)
+    Core::Manager::Object->TestCollision(TYPE_ENEMY, TYPE_BULLET_PLAYER, [](cEnemy* OUTPUT pEnemy, cBullet* OUTPUT pBullet, const coreBool& bFirst)
     {
         // 
         if((ABS(pEnemy->GetPosition().x) >= FOREGROUND_AREA.x * 1.1f) ||
            (ABS(pEnemy->GetPosition().y) >= FOREGROUND_AREA.y * 1.1f)) return;
 
 
-        g_pSpecialEffects->CreateParticleDarkSplash(3u, pBullet->GetPosition(), 10.0f);
+        //g_pSpecialEffects->CreateParticleDarkSplash(3u, pBullet->GetPosition(), 10.0f);
         //g_pSpecialEffects->CreateParticleSmokeSplash(2u, pBullet->GetPosition(), 10.0f);
+
         //g_pSpecialEffects->CreateParticleFireSplash(5u, pBullet->GetPosition(), 10.0f);
 
 
@@ -343,7 +348,7 @@ void cGame::__HandleCollisions()
         pBullet->Deactivate(true);
     });
 
-    //Core::Manager::Object->TestCollision(TYPE_BULLET_ENEMY, TYPE_BULLET_PLAYER, [](cBullet* pBullet1, cBullet* pBullet2, const coreBool& bFirst)
+    //Core::Manager::Object->TestCollision(TYPE_BULLET_ENEMY, TYPE_BULLET_PLAYER, [](cBullet* OUTPUT pBullet1, cBullet* OUTPUT pBullet2, const coreBool& bFirst)
     //{
 
     //    pBullet1->Deactivate(true);

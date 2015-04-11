@@ -51,9 +51,10 @@ public:
     inline void SetBaseColor(const coreVector3& vBaseColor) {m_iBaseColor = coreVector4(vBaseColor, 0.0f).PackUnorm4x8(); this->SetColor3(vBaseColor);}
 
     // get object properties
-    inline coreVector3      GetBaseColor()const {return coreVector4::UnpackUnorm4x8(m_iBaseColor).xyz();}
-    inline const coreInt32& GetMaxHealth()const {return m_iMaxHealth;}
-    inline const coreInt32& GetCurHealth()const {return m_iCurHealth;}
+    inline coreVector3      GetBaseColor   ()const {return coreVector4::UnpackUnorm4x8(m_iBaseColor).xyz();}
+    inline const coreInt32& GetMaxHealth   ()const {return m_iMaxHealth;}
+    inline const coreInt32& GetCurHealth   ()const {return m_iCurHealth;}
+    inline const coreFloat  GetCurHealthPct()const {return I_TO_F(m_iCurHealth) * RCP(I_TO_F(m_iMaxHealth));}
 
 
 protected:

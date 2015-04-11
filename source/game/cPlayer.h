@@ -47,6 +47,8 @@ private:
 
     coreVector2 m_vNewPos;                      // new position for smooth movement and animation
 
+    coreObject3D m_Exhaust;                     // 
+
 
 public:
     cPlayer()noexcept;
@@ -77,7 +79,8 @@ public:
     void ResetStats();
 
     // set object properties
-    inline void SetNewPos(const coreVector2& vNewPos) {m_vNewPos = vNewPos;}
+    inline void SetNewPos (const coreVector2& vNewPos) {m_vNewPos = vNewPos;}
+    void        SetExhaust(const coreFloat&   fStrength);
 
     // get object properties
     inline const coreUintW&   GetInputIndex  ()const                        {return m_iInputIndex;}

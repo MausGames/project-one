@@ -19,10 +19,10 @@
 
 // ****************************************************************
 // stage management macros
-#define STAGE_MAIN            m_anStage.push_back([&]()                               // 
-#define STAGE_SUB(t)          ((m_fStageTimeBefore <= (t)) && ((t) < m_fStageTime))   // 
-#define STAGE_FINISH_NOW      {m_anStage.pop_back(); m_fStageTime = 0.0f;}            // 
-#define STAGE_FINISH_AFTER(t) {if(m_fStageTime >= (t)) STAGE_END_NOW}                 // 
+#define STAGE_MAIN            m_anStage.push_back([&]()                                // 
+#define STAGE_SUB(t)          ((m_fStageTimeBefore <= (t)) && ((t) <= m_fStageTime))   // 
+#define STAGE_FINISH_NOW      {m_anStage.pop_back(); m_fStageTime = 0.0f;}             // 
+#define STAGE_FINISH_AFTER(t) {if(m_fStageTime >= (t)) STAGE_END_NOW}                  // 
 
 
 // ****************************************************************
@@ -65,7 +65,7 @@ public:
 
 
 private:
-    // setup and move routines for derived classes
+    // own routines for derived classes
     virtual void __SetupOwn() {}
     virtual void __MoveOwn () {}
 };
