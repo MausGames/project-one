@@ -21,6 +21,7 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreModel>  ("object_boomerang.md3",            CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boomerang.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_circle_01.md3",            CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_circle_01.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_paddle.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_paddle.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_sphere.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_sphere.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_tube.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tube.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_crossfield_high.md3",   CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_crossfield_high.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_crossfield_low.md3",    CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_crossfield_low.md3");
@@ -50,6 +51,7 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreTexture>("effect_energy.png",               CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_energy.png", false);
     Core::Manager::Resource->Load<coreTexture>("effect_particle_32.png",          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_particle_32.png", false);
     Core::Manager::Resource->Load<coreTexture>("effect_particle_128.png",         CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_particle_128.png", false);
+    Core::Manager::Resource->Load<coreTexture>("effect_wave_norm.png",            CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_wave_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_blue.png",     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_blue.png");
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_low.png",      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_low.png");
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_mid.png",      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_mid.png");
@@ -76,12 +78,15 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreShader> ("effect_decal_spheric.frag",       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", SHADER_SPHERIC);
     Core::Manager::Resource->Load<coreShader> ("effect_decal_inst.vert",          CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.vert", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("effect_decal_spheric_inst.frag",  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", CORE_SHADER_OPTION_INSTANCING SHADER_SPHERIC);
+    Core::Manager::Resource->Load<coreShader> ("effect_distortion.frag",          CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_distortion.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_energy.vert",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert");
     Core::Manager::Resource->Load<coreShader> ("effect_energy_spheric.vert",      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", SHADER_SPHERIC);
+    Core::Manager::Resource->Load<coreShader> ("effect_energy_invert.vert",       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", SHADER_INVERT);
     Core::Manager::Resource->Load<coreShader> ("effect_energy_direct.vert",       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", SHADER_DIRECT);
     Core::Manager::Resource->Load<coreShader> ("effect_energy.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_energy_inst.vert",         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("effect_energy_spheric_inst.vert", CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", CORE_SHADER_OPTION_INSTANCING SHADER_SPHERIC);
+    Core::Manager::Resource->Load<coreShader> ("effect_energy_invert_inst.vert",  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", CORE_SHADER_OPTION_INSTANCING SHADER_INVERT);
     Core::Manager::Resource->Load<coreShader> ("effect_energy_direct_inst.vert",  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", CORE_SHADER_OPTION_INSTANCING SHADER_DIRECT);
     Core::Manager::Resource->Load<coreShader> ("effect_energy_inst.frag",         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("effect_outline.vert",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.vert");
@@ -91,6 +96,7 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreShader> ("effect_outline_inst.frag",        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("effect_outline_direct_inst.frag", CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.frag", CORE_SHADER_OPTION_INSTANCING SHADER_DIRECT);
     Core::Manager::Resource->Load<coreShader> ("effect_particle.vert",            CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_particle.vert", CORE_SHADER_OPTION_INSTANCING);
+    Core::Manager::Resource->Load<coreShader> ("effect_particle_color.frag",      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_particle_color.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("effect_particle_dark.frag",       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_particle_dark.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("effect_particle_fire.frag",       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_particle_fire.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("effect_particle_smoke.frag",      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_particle_smoke.frag", CORE_SHADER_OPTION_INSTANCING);
@@ -108,7 +114,7 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreShader> ("full.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full.vert");
     Core::Manager::Resource->Load<coreShader> ("full_blur_1.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_blur_1.frag");
     Core::Manager::Resource->Load<coreShader> ("full_blur_2.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_blur_2.frag");
-    Core::Manager::Resource->Load<coreShader> ("full_post.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_post.frag", SHADER_GLOW);
+    Core::Manager::Resource->Load<coreShader> ("full_post.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_post.frag", SHADER_GLOW SHADER_DISTORTION);
     Core::Manager::Resource->Load<coreShader> ("full_transition.frag",            CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_transition.frag");
     Core::Manager::Resource->Load<coreShader> ("menu_animate.vert",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_animate.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("menu_animate.frag",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_animate.frag");
@@ -123,6 +129,7 @@ static void SetupResources()
 
     Core::Manager::Resource->Load<coreSound>  ("bullet_ray.wav",                  CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/bullet_ray.wav");
     Core::Manager::Resource->Load<coreSound>  ("environment_nature.wav",          CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_nature.wav");
+    Core::Manager::Resource->Load<coreSound>  ("explosion_energy.wav",            CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/explosion_energy.wav");
 
     Core::Manager::Resource->Load<coreFont>   ("ethnocentric.ttf",                CORE_RESOURCE_UPDATE_AUTO,   "data/fonts/ethnocentric.ttf");
 
@@ -134,6 +141,11 @@ static void SetupResources()
     ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("effect_decal_spheric_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("effect_decal_inst.vert")
         ->AttachShader("effect_decal_spheric_inst.frag")
+        ->Finish();
+
+    ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("effect_distortion_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("default_2d.vert")
+        ->AttachShader("effect_distortion.frag")
         ->Finish();
 
     ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("effect_energy_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
@@ -153,6 +165,16 @@ static void SetupResources()
 
     ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("effect_energy_spheric_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("effect_energy_spheric_inst.vert")
+        ->AttachShader("effect_energy_inst.frag")
+        ->Finish();
+
+    ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("effect_energy_invert_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_energy_invert.vert")
+        ->AttachShader("effect_energy.frag")
+        ->Finish();
+
+    ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("effect_energy_invert_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_energy_invert_inst.vert")
         ->AttachShader("effect_energy_inst.frag")
         ->Finish();
 
@@ -184,6 +206,11 @@ static void SetupResources()
     ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("effect_outline_direct_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("effect_outline_inst.vert")
         ->AttachShader("effect_outline_direct_inst.frag")
+        ->Finish();
+
+    ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("effect_particle_color_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_particle.vert")
+        ->AttachShader("effect_particle_color.frag")
         ->Finish();
 
     ((coreProgram*)Core::Manager::Resource->Load<coreProgram>("effect_particle_dark_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())

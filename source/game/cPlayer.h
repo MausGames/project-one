@@ -14,7 +14,7 @@
 // ****************************************************************
 // player definitions
 #define PLAYER_WEAPONS        (1u)     // number of weapons a player can carry
-#define PLAYER_COLLISION_SIZE (0.3f)   // 
+#define PLAYER_COLLISION_SIZE (0.2f)   // 
 #define PLAYER_SHIP_ATK       (0u)     // 
 #define PLAYER_SHIP_DEF       (1u)     // 
 
@@ -25,7 +25,7 @@ enum ePlayerStatus : coreUint8
     PLAYER_STATUS_DEAD            = 0x01u,   // completely removed from the game
     PLAYER_STATUS_NO_INPUT_MOVE   = 0x02u,   // disable player movement (user controls only)
     PLAYER_STATUS_NO_INPUT_WEAPON = 0x04u,   // disable player weapons
-    PLAYER_STATUS_NO_INPUT_SKILL  = 0x08u,   // disable player skills
+    PLAYER_STATUS_NO_INPUT_SKILL  = 0x08u,   // disable player skills 
     PLAYER_STATUS_NO_INPUT_ALL    = PLAYER_STATUS_NO_INPUT_MOVE | PLAYER_STATUS_NO_INPUT_WEAPON | PLAYER_STATUS_NO_INPUT_SKILL
 };
 
@@ -43,7 +43,7 @@ private:
 
     coreUint32 m_iComboValue[2];                // absolute values for combo calculations (0 = current value, 1 = max value) 
     coreUint32 m_iChainValue[2];                // 
-    coreFlow   m_fChainCooldown;                // 
+    coreFloat  m_fChainCooldown;                // 
 
     coreVector2 m_vNewPos;                      // new position for smooth movement and animation
 
@@ -76,21 +76,24 @@ public:
     void AddCombo(const coreUint32& iValue);
     void AddCombo(const coreFloat&  fModifier);
     void AddChain(const coreUint32& iValue);
-    void ResetStats();
+    void ReduceCombo  ();
+    void TransferChain();
+    void ResetStats   ();
 
     // set object properties
     inline void SetNewPos (const coreVector2& vNewPos) {m_vNewPos = vNewPos;}
     void        SetExhaust(const coreFloat&   fStrength);
 
     // get object properties
-    inline const coreUintW&   GetInputIndex  ()const                        {return m_iInputIndex;}
-    inline const coreUint32&  GetScoreMission()const                        {return m_iScoreMission;}
-    inline const coreUint32&  GetScoreBoss   (const coreUintW& iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_aiScoreBoss[iIndex];}
-    inline       coreFloat    GetCurCombo    ()const                        {return PLAYER_COMBO(m_iComboValue[0]);}
-    inline       coreFloat    GetMaxCombo    ()const                        {return PLAYER_COMBO(m_iComboValue[1]);}
-    inline const coreUint32&  GetCurChain    ()const                        {return m_iChainValue[0];}
-    inline const coreUint32&  GetMaxChain    ()const                        {return m_iChainValue[1];}
-    inline const coreVector2& GetNewPos      ()const                        {return m_vNewPos;}
+    inline const coreUintW&   GetInputIndex   ()const                        {return m_iInputIndex;}
+    inline const coreUint32&  GetScoreMission ()const                        {return m_iScoreMission;}
+    inline const coreUint32&  GetScoreBoss    (const coreUintW& iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_aiScoreBoss[iIndex];}
+    inline       coreFloat    GetCurCombo     ()const                        {return PLAYER_COMBO(m_iComboValue[0]);}
+    inline       coreFloat    GetMaxCombo     ()const                        {return PLAYER_COMBO(m_iComboValue[1]);}
+    inline const coreUint32&  GetCurChain     ()const                        {return m_iChainValue[0];}
+    inline const coreUint32&  GetMaxChain     ()const                        {return m_iChainValue[1];}
+    inline const coreFloat&   GetChainCooldown()const                        {return m_fChainCooldown;}
+    inline const coreVector2& GetNewPos       ()const                        {return m_vNewPos;}
 };
 
 

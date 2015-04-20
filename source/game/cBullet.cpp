@@ -69,6 +69,11 @@ void cBullet::Deactivate(const coreBool& bAnimated)
     if(!CONTAINS_VALUE(m_iStatus, BULLET_STATUS_ACTIVE)) return;
     REMOVE_VALUE(m_iStatus, BULLET_STATUS_ACTIVE)
 
+    // 
+    if(this->GetType() == TYPE_BULLET_PLAYER)
+         ;//g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 2.0f, 1u, this->GetColor3()); 
+    else g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 6.0f, 3u, this->GetColor3());
+
     // disable collision
     this->ChangeType(0);
 }
@@ -103,7 +108,7 @@ cBulletManager::~cBulletManager()
 
 
 // ****************************************************************
-// render the bullet mangager
+// render the bullet manager
 void cBulletManager::Render()
 {
     // loop through all bullet sets
@@ -171,6 +176,13 @@ void cBulletManager::ClearBullets()
         // clear list
         pBulletActive->Clear();
     }
+}
+
+void cBulletManager::ClearBullets(const coreInt32& iType)
+{
+    // 
+    const auto oEnemyBullets = Core::Manager::Object->GetObjectList(iType);
+    FOR_EACH(it, oEnemyBullets) if(*it) s_cast<cBullet*>(*it)->Deactivate(true);
 }
 
 

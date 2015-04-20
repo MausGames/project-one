@@ -13,7 +13,11 @@
 
 //****************************************************************
 // distortion definitions
-#define DISTORTION_SCALE_FACTOR (0.5f)   // resolution factor of the distortion frame buffer 
+#define DISTORTION_SCALE_FACTOR (0.5f)           // resolution factor of the distortion frame buffer
+#define DISTORTION_WAVES        (4u)             // 
+
+#define DISTORTION_WAVE_SMALL   (2.5f), (3.0f)   // 
+#define DISTORTION_WAVE_BIG     (5.0f), (3.0f)   // 
 
 
 // ****************************************************************
@@ -21,7 +25,10 @@
 class cDistortion final : public coreResourceRelation
 {
 private:
-    coreFrameBuffer m_iFrameBuffer;   // distortion frame buffer (only texture, reduced resolution) 
+    coreFrameBuffer m_iFrameBuffer;           // distortion frame buffer (only 2-channel texture, reduced resolution)
+
+    coreObject2D m_aWave[DISTORTION_WAVES];   // 
+    coreUintW    m_iCurWave;                  // 
 
 
 public:
@@ -31,6 +38,9 @@ public:
 
     // update the distortion-effect
     void Update();
+
+    // 
+    void CreateWave(const coreVector3& vPosition, const coreFloat& fScale, const coreFloat& fSpeed);
 
     // access frame buffer
     inline coreFrameBuffer* GetFrameBuffer() {return &m_iFrameBuffer;}

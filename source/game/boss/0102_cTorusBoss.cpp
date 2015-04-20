@@ -32,7 +32,7 @@ cTorusBoss::cTorusBoss()noexcept
     {
         m_aCircle[i].DefineModel  ("object_circle_01.md3");
         m_aCircle[i].DefineTexture(0u, "effect_energy.png");
-        m_aCircle[i].DefineProgram("effect_energy_spheric_program");
+        m_aCircle[i].DefineProgram("effect_energy_invert_program");
         m_aCircle[i].SetSize      (this->GetSize());
         m_aCircle[i].SetColor3    (coreVector3(0.3f,0.7f,0.3f) * 0.8f);
         m_aCircle[i].SetTexSize   (coreVector2(1.2f,1.2f));

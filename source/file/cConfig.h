@@ -15,6 +15,10 @@
 
 // ****************************************************************
 // configuration definitions
+#define CONFIG_GAME_COMBAT_DAMAGE  "Game",     "CombatDamage",                        (1)
+#define CONFIG_GAME_COMBAT_CHAIN   "Game",     "CombatChain",                         (1)
+#define CONFIG_GAME_COMBAT_COMBO   "Game",     "CombatCombo",                         (1)
+
 #define CONFIG_GRAPHICS_SHADOW     "Graphics", "Shadow",                              (1)
 #define CONFIG_GRAPHICS_REFLECTION "Graphics", "Reflection",                          (1)
 #define CONFIG_GRAPHICS_GLOW       "Graphics", "Glow",                                (1)
@@ -41,6 +45,18 @@ STATIC_ASSERT(INPUT_BUTTONS <= sizeof(coreUint8)*8u)
 // configuration variables
 struct cConfig
 {
+    struct
+    {
+        struct
+        {
+            coreUint8 iDamage;   // 
+            coreUint8 iChain;    // 
+            coreUint8 iCombo;    // 
+        }
+        Combat;
+    }
+    Game;
+
     struct
     {
         coreUint8 iShadow;       // shadow level

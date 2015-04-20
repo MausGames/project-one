@@ -104,3 +104,15 @@ coreVector3 cMenu::HealthColor(const coreFloat& fValue)
     if(fValue >= 0.5f) return LERP(COLOR_YELLOW_F, COLOR_GREEN_F,  fValue*2.0f - 1.0f);
                        return LERP(COLOR_RED_F,    COLOR_YELLOW_F, fValue*2.0f);
 }
+
+
+// ****************************************************************
+// 
+coreVector3 cMenu::ChainColor(const coreFloat& fValue)
+{
+    ASSERT(0.0f <= fValue && fValue <= 1.0f)
+
+    // 
+    if(fValue >= 0.5f) return LERP(COLOR_PURPLE_F, COLOR_BLUE_F,   fValue*2.0f - 1.0f);
+                       return LERP(COLOR_RED_F,    COLOR_PURPLE_F, fValue*2.0f);
+}

@@ -85,6 +85,13 @@ void cEnemy::Move()
 void cEnemy::TakeDamage(const coreInt32& iDamage, cPlayer* pAttacker)
 {
     // 
+    if(pAttacker)
+    {
+        pAttacker->AddCombo(1u);
+        pAttacker->AddChain(1u); // TODO # clamp on health 
+    }
+
+    // 
     if(this->_TakeDamage(iDamage))
     {
         // 
@@ -119,14 +126,14 @@ void cEnemy::Resurrect(const coreVector2& vPosition, const coreVector2& vDirecti
     m_fLifeTime = 0.0f;
     m_iNumShots = 0u;
 
-    // 
-    this->__ResurrectOwn();
-
     // bind enemy to active list
     g_pGame->__BindEnemy(this);
 
     // add ship to the game
     cShip::_Resurrect(vPosition, vDirection, TYPE_ENEMY);
+
+    // 
+    this->__ResurrectOwn();
 }
 
 
@@ -138,14 +145,14 @@ void cEnemy::Kill(const coreBool& bAnimated)
     if(CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_DEAD)) return;
     ADD_VALUE(m_iStatus, ENEMY_STATUS_DEAD)
 
-    // 
-    this->__KillOwn();
-
     // unbind enemy from active list
     g_pGame->__UnbindEnemy(this);
 
     // remove ship from the game
     cShip::_Kill(bAnimated);
+
+    // 
+    this->__KillOwn();
 }
 
 

@@ -49,10 +49,16 @@ void cInterface::sPlayerView::Construct(const coreUintW& iIndex)
     m_Combo.SetCenter   (m_aHealthBar[0].GetCenter());
     m_Combo.SetAlignment(coreVector2(-1.0f,1.0f));
 
-    m_Chain.Construct   (MENU_FONT_SMALL, 8u);
-    m_Chain.SetPosition (m_Score.GetPosition() + coreVector2(0.001f,0.03f));
-    m_Chain.SetCenter   (m_Score.GetCenter());
-    m_Chain.SetAlignment(m_Score.GetAlignment());
+    m_ChainBar.DefineProgram("default_2d_program");
+    m_ChainBar.DefineTexture(0u, "default_white.png");
+    m_ChainBar.SetPosition  (m_Score.GetPosition() + coreVector2(0.001f,0.055f));
+    m_ChainBar.SetCenter    (m_Score.GetCenter());
+    m_ChainBar.SetAlignment (m_Score.GetAlignment());
+
+    m_ChainValue.Construct   (MENU_FONT_SMALL, 8u);
+    m_ChainValue.SetPosition (m_Score.GetPosition() + coreVector2(0.001f,0.03f));
+    m_ChainValue.SetCenter   (m_Score.GetCenter());
+    m_ChainValue.SetAlignment(m_Score.GetAlignment());
 }
 
 
@@ -123,6 +129,9 @@ cInterface::cInterface(const coreUint8& iNumViews)noexcept
     m_aBannerText[1].SetColor3(coreVector3(0.75f,0.75f,0.75f) * MENU_CONTRAST_WHITE);
     m_aBannerText[2].SetColor3(coreVector3(0.75f,0.75f,0.75f) * MENU_CONTRAST_WHITE);
     m_aBannerText[3].SetColor3(coreVector3(1.00f,1.00f,1.00f) * MENU_CONTRAST_WHITE);
+
+    // 
+    this->UpdateLayout();
 }
 
 
@@ -144,7 +153,8 @@ void cInterface::Render()
             oView.m_aHealthValue[1].Render();
             oView.m_Score          .Render();
             oView.m_Combo          .Render();
-            oView.m_Chain          .Render();
+            oView.m_ChainValue     .Render();   // # swapped
+            oView.m_ChainBar       .Render();   // # swapped
         }
 
         if(m_fAlphaBoss)
@@ -192,11 +202,15 @@ void cInterface::Move()
         oView.m_aHealthBar[0].SetColor3(vColor * 0.2f);
         oView.m_aHealthBar[1].SetColor3(vColor * 0.9f);
 
+        // set chain bar size and color
+        oView.m_ChainBar.SetSize  (coreVector2(0.05f * MIN(pPlayer->GetChainCooldown()*1.1f, 1.0f), 0.005f));
+        oView.m_ChainBar.SetColor3(cMenu::ChainColor(pPlayer->GetChainCooldown()));
+
         // display player values
         oView.m_aHealthValue[1].SetText(PRINT("%d / %d", pPlayer->GetCurHealth(), pPlayer->GetMaxHealth()));
         oView.m_Score          .SetText(PRINT("%06d",    pPlayer->GetScoreMission()));
         oView.m_Combo          .SetText(PRINT("x%.1f",   pPlayer->GetCurCombo()));
-        oView.m_Chain          .SetText(pPlayer->GetCurChain() ? PRINT("+%d", pPlayer->GetCurChain()) : "");
+        oView.m_ChainValue     .SetText(pPlayer->GetCurChain() ? PRINT("+%d", pPlayer->GetCurChain()) : "");
 
         // set player transparency
         oView.m_aHealthBar[0]  .SetAlpha(m_fAlphaAll);
@@ -205,7 +219,8 @@ void cInterface::Move()
         oView.m_aHealthValue[1].SetAlpha(m_fAlphaAll);
         oView.m_Score          .SetAlpha(m_fAlphaAll);
         oView.m_Combo          .SetAlpha(m_fAlphaAll);
-        oView.m_Chain          .SetAlpha(m_fAlphaAll);
+        oView.m_ChainBar       .SetAlpha(m_fAlphaAll);
+        oView.m_ChainValue     .SetAlpha(m_fAlphaAll);
 
         // move player
         oView.m_aHealthBar[0]  .Move();
@@ -214,7 +229,8 @@ void cInterface::Move()
         oView.m_aHealthValue[1].Move();
         oView.m_Score          .Move();
         oView.m_Combo          .Move();
-        oView.m_Chain          .Move();
+        oView.m_ChainBar       .Move();
+        oView.m_ChainValue     .Move();
     }
 
     // check for active boss
@@ -410,4 +426,89 @@ coreBool cInterface::IsBannerActive()const
 {
     // compare with mission-time offset
     return ((g_pGame->GetTimeMission() - m_fBannerStart) <= INTERFACE_BANNER_DURATION) ? true : false;
+}
+
+
+// ****************************************************************
+// 
+void cInterface::UpdateLayout()
+{return;
+/*
+        for(coreUintW i = 0u; i < INTERFACE_VIEWS; ++i)
+        {
+            sPlayerView& oView = m_aView[i];
+
+
+            oView.m_aHealthBar[0]  .SetCenter(coreVector2(-0.5f,-0.5f));
+            oView.m_aHealthBar[1]  .SetCenter(oView.m_aHealthBar[0].GetCenter());
+            oView.m_aHealthValue[0].SetCenter(oView.m_aHealthBar[0].GetCenter());
+            oView.m_aHealthValue[1].SetCenter(oView.m_aHealthBar[0].GetCenter());
+            oView.m_Score          .SetCenter(oView.m_aHealthBar[0].GetCenter());
+            oView.m_Combo          .SetCenter(oView.m_aHealthBar[0].GetCenter());
+            oView.m_ChainBar       .SetCenter(oView.m_aHealthBar[0].GetCenter());
+            oView.m_ChainValue     .SetCenter(oView.m_aHealthBar[0].GetCenter());
+
+            m_aBossHealthBar[0]  .SetCenter(coreVector2(-0.5f,0.5f));
+            m_aBossHealthBar[1]  .SetCenter(m_aBossHealthBar[0].GetCenter());
+            m_aBossHealthValue[0].SetCenter(m_aBossHealthBar[0].GetCenter());
+            m_aBossHealthValue[1].SetCenter(m_aBossHealthBar[0].GetCenter());
+
+            m_aBossTime[0].SetCenter(coreVector2(0.5f,0.5f));
+            m_aBossTime[1].SetCenter(m_aBossTime[0].GetCenter());
+            m_BossName    .SetCenter(m_aBossTime[0].GetCenter());
+
+
+            m_aBossHealthBar[0].SetDirection(coreVector2(1.0f,0.0f));
+            m_aBossHealthBar[1].SetDirection(m_aBossHealthBar[0].GetDirection());
+            */
+        //    oView.m_aHealthBar[0]  .SetDirection(coreVector2(1.0f,0.0f));
+        //    oView.m_aHealthBar[1]  .SetDirection(oView.m_aHealthBar[0].GetDirection());
+        //
+        //
+        //
+        //    oView.m_aHealthBar[0].SetPosition  (coreVector2( 0.005f, 0.0f));
+        //    oView.m_aHealthBar[0].SetSize      (coreVector2( 4.0f, 0.4f) * 0.07f);
+        //    oView.m_aHealthBar[0].SetCenter    (coreVector2(-0.5f,-0.5f) * g_vMenuCenter);
+        //    oView.m_aHealthBar[0].SetAlignment (coreVector2( 1.0f, 1.0f));
+        //
+        //    oView.m_aHealthBar[1].SetPosition  (oView.m_aHealthBar[0].GetPosition() + coreVector2(0.01f,0.01f) * 0.5f);
+        //    oView.m_aHealthBar[1].SetSize      (oView.m_aHealthBar[0].GetSize()     - coreVector2(0.01f,0.01f));
+        //    oView.m_aHealthBar[1].SetCenter    (oView.m_aHealthBar[0].GetCenter());
+        //    oView.m_aHealthBar[1].SetAlignment (oView.m_aHealthBar[0].GetAlignment());
+        //
+        //
+        //    oView.m_aHealthValue[0].SetPosition    (oView.m_aHealthBar[0].GetPosition() + coreVector2(0.015f,0.03f));
+        //    oView.m_aHealthValue[0].SetCenter      (oView.m_aHealthBar[0].GetCenter());
+        //    oView.m_aHealthValue[0].SetAlignment   (oView.m_aHealthBar[0].GetAlignment());
+        //
+        //    oView.m_aHealthValue[1].SetPosition (oView.m_aHealthBar[0].GetPosition() + coreVector2(0.015f,0.01f));
+        //    oView.m_aHealthValue[1].SetCenter   (oView.m_aHealthBar[0].GetCenter());
+        //    oView.m_aHealthValue[1].SetAlignment(oView.m_aHealthBar[0].GetAlignment());
+        //
+        //        //oView.m_Score.Construct   (MENU_FONT_SMALL, 7u);
+        //    oView.m_Score.SetPosition (coreVector2(-0.02f,0.3f));
+        //    oView.m_Score.SetCenter   (oView.m_aHealthBar[0].GetCenter());
+        //    oView.m_Score.SetAlignment(coreVector2(-1.0f,1.0f));
+        //
+        //    oView.m_Combo.SetPosition (oView.m_aHealthBar[0].GetPosition() + coreVector2(oView.m_aHealthBar[0].GetSize().x-0.017f,0.08f+0.003f));
+        //    oView.m_Combo.SetCenter   (oView.m_aHealthBar[0].GetCenter());
+        //    oView.m_Combo.SetAlignment(coreVector2(-1.0f,1.0f));
+        //
+        //    oView.m_Chain.SetPosition (oView.m_Score.GetPosition() + coreVector2(0.001f,0.03f));
+        //    oView.m_Chain.SetCenter   (oView.m_Score.GetCenter());
+        //    oView.m_Chain.SetAlignment(coreVector2(1.0f,1.0f));
+        //
+        //
+        //
+        //        oView.m_aHealthBar[0]  .SetAlignment(oView.m_aHealthBar[0]  .GetAlignment().InvertedX());
+        //        oView.m_aHealthBar[0]  .SetPosition (oView.m_aHealthBar[0]  .GetPosition ().InvertedX() + coreVector2(-0.015f,0.0f));
+        //        oView.m_aHealthBar[1]  .SetAlignment(oView.m_aHealthBar[1]  .GetAlignment().InvertedX());
+        //        oView.m_aHealthBar[1]  .SetPosition (oView.m_aHealthBar[1]  .GetPosition ().InvertedX() + coreVector2(-0.015f,0.0f));
+        //        oView.m_aHealthValue[0].SetAlignment(oView.m_aHealthValue[0].GetAlignment().InvertedX());
+        //        oView.m_aHealthValue[0].SetPosition (oView.m_aHealthValue[0].GetPosition ().InvertedX() + coreVector2(-0.01f,0.0f));
+        //        oView.m_aHealthValue[1].SetAlignment(oView.m_aHealthValue[1].GetAlignment().InvertedX());
+        //        oView.m_aHealthValue[1].SetPosition (oView.m_aHealthValue[1].GetPosition ().InvertedX() + coreVector2(-0.01f,0.0f));
+        //
+      //  }
+
 }

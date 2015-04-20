@@ -10,11 +10,27 @@
 
 void FragmentMain()
 {
-    // lookup textures
-    vec4 v4Foreground  = coreTexture2D(0, v_av2TexCoord[0]);
-    vec3 v3Environment = coreTexture2D(1, v_av2TexCoord[0]).rgb * u_v4Color.a;
-    vec3 v3Glow        = coreTexture2D(2, v_av2TexCoord[0]).rgb;
+    // 
+    vec2 v2Distortion = coreTexture2D(3, v_av2TexCoord[0]).rg;   // # low-res
 
+#if !defined(_P1_DISTORTION)
+
+    // ignore distortion map
+    v2Distortion = vec2(0.0);
+
+#endif
+
+    vec2 v2TexCoord = v_av2TexCoord[0];
+    
+    // 
+    if(any(bvec4(lessThan(v2Distortion, vec2(127.0/255.0)), greaterThan(v2Distortion, vec2(128.0/255.0)))))
+        v2TexCoord += (v2Distortion * 2.0 - 1.0) * 0.5 * vec2(-1.0,1.0);
+
+    // lookup textures
+    vec4 v4Foreground  = coreTexture2D(0, v2TexCoord);
+    vec3 v3Environment = coreTexture2D(1, v2TexCoord).rgb * u_v4Color.a;
+    vec3 v3Glow        = coreTexture2D(2, v2TexCoord).rgb;   // # low-res
+    
 #if !defined(_P1_GLOW_)
 
     // ignore glow map

@@ -35,9 +35,8 @@ private:
     std::vector<cEnemy*> m_apEnemyList;      // list with pointers to active enemy objects
     cBulletManager m_BulletManager;          // bullet manager
 
-    cCombatStats m_CombatStats;              // combat stats overlay
-    cCombatText  m_CombatText;               // combat text overlay
-    cInterface   m_Interface;                // interface overlay
+    cCombatText m_CombatText;                // combat text overlay
+    cInterface  m_Interface;                 // interface overlay
 
     cMission* m_pMission;                    // active mission (should never be NULL)
 

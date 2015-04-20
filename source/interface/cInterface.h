@@ -35,7 +35,8 @@ private:
         coreLabel    m_aHealthValue[2];   // player health value (0 = armor text, 1 = actual value)
         coreLabel    m_Score;             // score label
         coreLabel    m_Combo;             // combo label
-        coreLabel    m_Chain;             // chain label
+        coreObject2D m_ChainBar;          // chain bar
+        coreLabel    m_ChainValue;        // chain value
 
         sPlayerView()noexcept {}
         void Construct(const coreUintW& iIndex);
@@ -76,6 +77,9 @@ public:
     void ShowMission(const coreChar* pcMain, const coreChar* pcSub);
     void ShowMission(const cMission* pMission);
     coreBool IsBannerActive()const;
+
+    // 
+    void UpdateLayout();
 
     // set object properties
     inline void SetAlphaAll (const coreFloat& fAlpha)   {m_fAlphaAll  = fAlpha;}

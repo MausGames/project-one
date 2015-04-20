@@ -22,6 +22,7 @@ cBoss::cBoss()noexcept
     // 
     std::memset(m_aiTimerLine, 0, sizeof(m_aiTimerLine));
     std::memset(m_aiCounter,   0, sizeof(m_aiCounter));
+    std::memset(m_avVector,    0, sizeof(m_avVector));
 }
 
 

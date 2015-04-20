@@ -10,6 +10,7 @@
 
 coreVector2      g_vGameResolution = coreVector2(0.0f,0.0f);
 coreVector2      g_vMenuCenter     = coreVector2(0.0f,0.0f);
+coreMusicPlayer  g_MusicPlayer; // = 0x00;
 
 cOutline*        g_pOutlineFull    = NULL;
 cOutline*        g_pOutlineDirect  = NULL;
@@ -45,6 +46,10 @@ void CoreApp::Init()
     // load configuration
     LoadConfig();
 
+    // 
+    g_MusicPlayer.AddMusicFolder("data/music/", "*.ogg");
+    g_MusicPlayer.Control()->Play();
+
     // create and init main components
     cShadow::GlobalInit();
     g_pOutlineFull    = new cOutline(OUTLINE_SHADER_FULL);
@@ -75,6 +80,9 @@ void CoreApp::Exit()
     SAFE_DELETE(g_pOutlineDirect)
     SAFE_DELETE(g_pOutlineFull)
     cShadow::GlobalExit();
+
+    // 
+    g_MusicPlayer.ClearMusic();
 
     // save configuration
     SaveConfig();
@@ -199,6 +207,8 @@ void CoreApp::Move()
     }
     Core::Debug->MeasureEnd("Move");
 
+    // 
+    g_MusicPlayer.Update();
 
 
 
@@ -222,9 +232,36 @@ void CoreApp::Move()
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS))
             Core::System->Quit();
 
-        g_pEnvironment->SetTargetSpeed(g_pGame ? 8.0f : 2.0f);
+        if(!g_pGame) g_pEnvironment->SetTargetSpeed(2.0f);
 
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(H), CORE_INPUT_PRESS))
             g_pSpecialEffects->ShakeScreen(1.0f);
+
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(G), CORE_INPUT_PRESS))
+        {
+            if(g_pGame)
+            {
+                const coreVector3 vPos = g_pGame->GetPlayer(0u)->GetPosition();
+                g_pDistortion    ->CreateWave       (vPos, DISTORTION_WAVE_BIG);
+                g_pSpecialEffects->CreateSplashColor(vPos, SPECIAL_SPLASH_BIG, coreVector3(0.09f,0.387f,0.9f));
+
+                g_pSpecialEffects->PlaySound(vPos, 1.0f, SOUND_EXPLOSION_ENERGY_BIG);
+
+                //g_pSpecialEffects->CreateWave(vPos,      5.0f, 3.0f, coreVector3(0.3f,0.7f, 0.3f)  * 0.9f);
+                //g_pSpecialEffects->CreateParticleColorSplash(50u, vPos, 100.0f, coreVector3(0.3f,0.7f, 0.3f)  * 0.9f);
+                //g_pSpecialEffects->CreateWave(vPos,      5.0f, 3.0f, coreVector3(0.09f,0.387f,0.9f));
+            }
+        }
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(F), CORE_INPUT_PRESS))
+        {
+            if(g_pGame)
+            {
+                const coreVector3 vPos = g_pGame->GetPlayer(0u)->GetPosition();
+                g_pDistortion    ->CreateWave          (vPos, DISTORTION_WAVE_BIG);
+                g_pSpecialEffects->CreateDirectionColor(vPos, coreVector3(0.0f,1.0f,0.0f), SPECIAL_SPLASH_BIG, coreVector3(0.09f,0.387f,0.9f));
+
+                //g_pSpecialEffects->PlaySound(vPos, 1.0f, SOUND_EXPLOSION_ENERGY_BIG);
+            }
+        }
     // TODO ########################## 
 }

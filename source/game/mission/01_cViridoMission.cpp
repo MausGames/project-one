@@ -17,6 +17,11 @@ cViridoMission::cViridoMission()noexcept
     m_apBoss[0] = &m_Crossfield;
     m_apBoss[1] = &m_Torus;
     m_apBoss[2] = &m_Vaus;
+
+    // 
+    g_pEnvironment->SetTargetDirection(coreVector2(0.0f,1.0f));
+    g_pEnvironment->SetTargetSide     (coreVector2(0.0f,0.0f));
+    g_pEnvironment->SetTargetSpeed    (8.0f);
 }
 
 

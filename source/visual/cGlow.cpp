@@ -42,17 +42,7 @@ void cGlow::Update()
     if(!g_CurConfig.Graphics.iGlow) return;
 
     // create glow only with active objects
-    coreBool bActive = !m_apObject.empty();
-    FOR_EACH(it, m_apList)
-    {
-        if((*it)->GetCurEnabled())
-        {
-            bActive = true;
-            break;
-        }
-    }
-
-    if(bActive)
+    if(!m_apObject.empty() || std::any_of(m_apList.begin(), m_apList.end(), [](const coreBatchList* pList) {return pList->GetCurEnabled() ? true : false;}))
     {
         // draw into first blur stage
         m_aiBlurStage[0].StartDraw();

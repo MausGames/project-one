@@ -102,7 +102,8 @@ void cPostProcessing::Apply()
 // recompile post-processing shader-program
 void cPostProcessing::Recompile()
 {
-    const coreChar* pcConfig = PRINT("%s", g_CurConfig.Graphics.iGlow ? SHADER_GLOW : "");
+    const coreChar* pcConfig = PRINT("%s %s", g_CurConfig.Graphics.iGlow       ? SHADER_GLOW       : "",
+                                              g_CurConfig.Graphics.iDistortion ? SHADER_DISTORTION : "");
 
     // change configuration of post-processing shader
     ((coreShader*)Core::Manager::Resource->Get<coreShader>("full_post.frag")->GetResource())

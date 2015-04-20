@@ -30,6 +30,10 @@ void VertexMain()
 
 #if defined(_P1_SPHERIC_)
 
+    v_v1Strength = (1.1 - v1Base) * 3.5;
+    
+#elif defined(_P1_INVERT_)
+
     v_v1Strength = (1.4 - v1Base) * 3.5;
 
 #elif defined(_P1_DIRECT_)

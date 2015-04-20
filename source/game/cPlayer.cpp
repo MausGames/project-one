@@ -158,7 +158,8 @@ void cPlayer::Move()
     if(!CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
     {
         // move the ship
-        m_vNewPos += g_aInput[m_iInputIndex].vMove * Core::System->GetTime() * 40.0f;
+        const coreFloat fSpeed = CONTAINS_BIT(g_aInput[m_iInputIndex].iButtonHold, 0u) ? 20.0f : 50.0f;
+        m_vNewPos += g_aInput[m_iInputIndex].vMove * Core::System->GetTime() * fSpeed;
 
         // restrict movement to the foreground area
              if(m_vNewPos.x < -FOREGROUND_AREA.x) m_vNewPos.x = -FOREGROUND_AREA.x;
@@ -178,6 +179,13 @@ void cPlayer::Move()
     // move the 3d-object
     coreObject3D::Move();
 
+    // 
+    if(m_fChainCooldown)
+    {
+        if(!(m_fChainCooldown = MAX(m_fChainCooldown - Core::System->GetTime(), 0.0f)))
+            this->TransferChain();
+    }
+
     // update the weapons (shooting and stuff)
     const coreBool bArmed = CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_WEAPON) ? false : true;
     for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
@@ -193,6 +201,13 @@ void cPlayer::Move()
 // reduce current health
 void cPlayer::TakeDamage(const coreInt32& iDamage)
 {
+    // 
+    g_pGame->GetCombatText()->AddDamage(iDamage, this->GetPosition());
+
+    // 
+    this->TransferChain();
+    this->ReduceCombo();
+
     // 
     if(this->_TakeDamage(iDamage))
     {
@@ -237,7 +252,14 @@ void cPlayer::Kill(const coreBool& bAnimated)
 // 
 void cPlayer::AddScore(const coreUint32& iValue, const coreBool& bModified)
 {
+    const coreUint32 iFinalValue = bModified ? (iValue * this->GetCurCombo()) : iValue;
 
+    // 
+    m_iScoreMission += iFinalValue;
+
+    // 
+    if(g_pGame->GetMission()->GetCurBoss())
+        m_aiScoreBoss[g_pGame->GetMission()->GetCurBossIndex()] += iFinalValue;
 }
 
 
@@ -245,7 +267,16 @@ void cPlayer::AddScore(const coreUint32& iValue, const coreBool& bModified)
 // 
 void cPlayer::AddCombo(const coreUint32& iValue)
 {
+    const coreUint32 iOld = F_TO_UI(this->GetCurCombo());
 
+    // 
+    m_iComboValue[0] += iValue;
+    m_iComboValue[1]  = MAX(m_iComboValue[0], m_iComboValue[1]);
+
+    const coreUint32 iNew = F_TO_UI(this->GetCurCombo());
+
+    // 
+    if(iOld != iNew) g_pGame->GetCombatText()->AddCombo(iNew, this->GetPosition());
 }
 
 void cPlayer::AddCombo(const coreFloat& fModifier)
@@ -258,7 +289,39 @@ void cPlayer::AddCombo(const coreFloat& fModifier)
 // 
 void cPlayer::AddChain(const coreUint32& iValue)
 {
+    // 
+    m_iChainValue[0] += iValue;
+    m_iChainValue[1]  = MAX(m_iChainValue[0], m_iChainValue[1]);
 
+    // 
+    m_fChainCooldown = 1.0f;
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::ReduceCombo()
+{
+
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::TransferChain()
+{
+    if(m_iChainValue[0])
+    {
+        // 
+        g_pGame->GetCombatText()->AddChain(m_iChainValue[0], this->GetPosition());
+
+        // 
+        this->AddScore(m_iChainValue[0], true);
+        m_iChainValue[0] = 0u;
+
+        // 
+        m_fChainCooldown = 0.0f;
+    }
 }
 
 

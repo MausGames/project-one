@@ -15,6 +15,7 @@
 // boss definitions
 #define BOSS_TIMERS   (4u)   // 
 #define BOSS_COUNTERS (8u)   // 
+#define BOSS_VECTORS  (4u)   // 
 
 
 // ****************************************************************
@@ -33,7 +34,7 @@
 
 // ****************************************************************
 // 
-#define CROSSFIELD_BOOMERANGS (6u)   // 
+#define CROSSFIELD_BOOMERANGS (4u)   // 
 #define CROSSFIELD_TRAILS     (3u)   // 
 
 
@@ -42,12 +43,14 @@
 class INTERFACE cBoss : public cEnemy
 {
 protected:
-    coreTimer  m_aTimer     [BOSS_TIMERS];     // 
-    coreUint16 m_aiTimerLine[BOSS_TIMERS];     // 
-    coreInt16  m_aiCounter  [BOSS_COUNTERS];   // 
+    coreTimer  m_aTimer     [BOSS_TIMERS];    // 
+    coreUint16 m_aiTimerLine[BOSS_TIMERS];    // 
 
-    coreUint8 m_iPhase;                        // 
-    coreUint8 m_iLevel;                        // 
+    coreInt16   m_aiCounter[BOSS_COUNTERS];   // 
+    coreVector3 m_avVector [BOSS_VECTORS];
+
+    coreUint8 m_iPhase;                       // 
+    coreUint8 m_iLevel;                       // 
 
 
 public:

@@ -45,6 +45,7 @@
 // ****************************************************************
 // engine header
 #include "Core.h"
+#include <deque>
 
 
 // ****************************************************************
@@ -79,10 +80,12 @@
 
 #define LIGHT_DIRECTION    coreVector3(0.583953857f, -0.642349243f, -0.496360779f)
 
-#define SHADER_SHADOW      "#define _P1_SHADOW_  (1) \n"   // outdoor, object_ground
-#define SHADER_GLOW        "#define _P1_GLOW_    (1) \n"   // post
-#define SHADER_SPHERIC     "#define _P1_SPHERIC_ (1) \n"   // decal, energy
-#define SHADER_DIRECT      "#define _P1_DIRECT_  (1) \n"   // outline, energy
+#define SHADER_SHADOW      "#define _P1_SHADOW_    (1) \n"   // outdoor, object_ground
+#define SHADER_GLOW        "#define _P1_GLOW_      (1) \n"   // post
+#define SHADER_DISTORTION  "#define _P1_DISTORTION (1) \n"   // post
+#define SHADER_SPHERIC     "#define _P1_SPHERIC_   (1) \n"   // decal, energy
+#define SHADER_INVERT      "#define _P1_INVERT_    (1) \n"   // energy
+#define SHADER_DIRECT      "#define _P1_DIRECT_    (1) \n"   // outline, energy
 
 #define TYPE_PLAYER        (1)
 #define TYPE_ENEMY         (2)
@@ -123,6 +126,7 @@ class cMission;
 // game header files
 extern coreVector2      g_vGameResolution;   // pre-calculated 1:1 resolution
 extern coreVector2      g_vMenuCenter;       // pre-calculated menu center modifier
+extern coreMusicPlayer  g_MusicPlayer;       // 
 
 #include "additional/cBindContainer.h"
 #include "file/cConfig.h"
@@ -145,7 +149,6 @@ extern cPostProcessing* g_pPostProcessing;   // main post-processing object
 #include "environment/cWater.h"
 #include "environment/background/cBackground.h"
 #include "environment/cEnvironment.h"
-#include "interface/cCombatStats.h"
 #include "interface/cCombatText.h"
 #include "interface/cInterface.h"
 #include "interface/cMsgBox.h"

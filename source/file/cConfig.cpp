@@ -70,6 +70,11 @@ void LoadConfig()
     // load configuration file
     Core::Config->Load();
 
+    // read game values
+    g_OldConfig.Game.Combat.iDamage  = Core::Config->GetInt(CONFIG_GAME_COMBAT_DAMAGE);
+    g_OldConfig.Game.Combat.iChain   = Core::Config->GetInt(CONFIG_GAME_COMBAT_CHAIN);
+    g_OldConfig.Game.Combat.iCombo   = Core::Config->GetInt(CONFIG_GAME_COMBAT_COMBO);
+
     // read graphics values
     g_OldConfig.Graphics.iShadow     = Core::Config->GetInt(CONFIG_GRAPHICS_SHADOW);
     g_OldConfig.Graphics.iReflection = Core::Config->GetInt(CONFIG_GRAPHICS_REFLECTION);
@@ -107,6 +112,11 @@ void SaveConfig()
 {
     // equalize both structures
     g_OldConfig = g_CurConfig;
+
+    // write game values
+    Core::Config->SetInt(CONFIG_GAME_COMBAT_DAMAGE,  g_OldConfig.Game.Combat.iDamage);
+    Core::Config->SetInt(CONFIG_GAME_COMBAT_CHAIN,   g_OldConfig.Game.Combat.iChain);
+    Core::Config->SetInt(CONFIG_GAME_COMBAT_COMBO,   g_OldConfig.Game.Combat.iCombo);
 
     // write graphics values
     Core::Config->SetInt(CONFIG_GRAPHICS_SHADOW,     g_OldConfig.Graphics.iShadow);

@@ -17,11 +17,11 @@
 // ****************************************************************
 // menu definitions
 #define MENU_BUTTON        "menu_background_black.png", "menu_background_black.png"
-#define MENU_FONT_SMALL    "ethnocentric.ttf", 13u
-#define MENU_FONT_MEDIUM_2 "ethnocentric.ttf", 20u
-#define MENU_FONT_MEDIUM_3 "ethnocentric.ttf", 30u
-#define MENU_FONT_BIG_4    "ethnocentric.ttf", 40u
-#define MENU_FONT_BIG_7    "ethnocentric.ttf", 70u
+#define MENU_FONT_SMALL    "ethnocentric.ttf", (13u)
+#define MENU_FONT_MEDIUM_2 "ethnocentric.ttf", (20u)
+#define MENU_FONT_MEDIUM_3 "ethnocentric.ttf", (30u)
+#define MENU_FONT_BIG_4    "ethnocentric.ttf", (40u)
+#define MENU_FONT_BIG_7    "ethnocentric.ttf", (70u)
 
 #define MENU_LIGHT_ACTIVE   (1.0f)     // visible strength of active menu objects
 #define MENU_LIGHT_IDLE     (0.667f)   // visible strength of idle menu objects
@@ -124,6 +124,7 @@ public:
     // default menu routines
     static void        UpdateButton(coreButton* OUTPUT pButton, const coreBool& bFocused);
     static coreVector3 HealthColor (const coreFloat& fValue);
+    static coreVector3 ChainColor  (const coreFloat& fValue);
 };
 
 

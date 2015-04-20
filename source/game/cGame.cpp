@@ -73,9 +73,6 @@ void cGame::Render()
 // render the overlay separately
 void cGame::RenderOverlay()
 {
-    // 
-    m_CombatStats.Apply();
-
     // render all overlay objects
     m_CombatText.Render();
     m_Interface .Render();
@@ -321,10 +318,6 @@ void cGame::__HandleCollisions()
     Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_BULLET_ENEMY, [](cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreBool& bFirst)
     {
 
-
-        //g_pSpecialEffects->CreateParticleFireSplash(5u, pBullet->GetPosition(), 10.0f);
-
-
         // 
         pPlayer->TakeDamage(pBullet->GetDamage());
         pBullet->Deactivate(true);
@@ -336,23 +329,10 @@ void cGame::__HandleCollisions()
         if((ABS(pEnemy->GetPosition().x) >= FOREGROUND_AREA.x * 1.1f) ||
            (ABS(pEnemy->GetPosition().y) >= FOREGROUND_AREA.y * 1.1f)) return;
 
-
-        //g_pSpecialEffects->CreateParticleDarkSplash(3u, pBullet->GetPosition(), 10.0f);
-        //g_pSpecialEffects->CreateParticleSmokeSplash(2u, pBullet->GetPosition(), 10.0f);
-
-        //g_pSpecialEffects->CreateParticleFireSplash(5u, pBullet->GetPosition(), 10.0f);
-
-
         // 
+        const coreInt32 iOldHealth = pEnemy->GetCurHealth();
+
         pEnemy ->TakeDamage(pBullet->GetDamage(), s_cast<cPlayer*>(pBullet->GetOwner()));
-        pBullet->Deactivate(true);
+        pBullet->Deactivate(iOldHealth != pEnemy->GetCurHealth());
     });
-
-    //Core::Manager::Object->TestCollision(TYPE_BULLET_ENEMY, TYPE_BULLET_PLAYER, [](cBullet* OUTPUT pBullet1, cBullet* OUTPUT pBullet2, const coreBool& bFirst)
-    //{
-
-    //    pBullet1->Deactivate(true);
-    //    pBullet2->Deactivate(true);
-
-    //});
 }

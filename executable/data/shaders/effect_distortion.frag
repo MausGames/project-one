@@ -6,23 +6,11 @@
 //| More information available in the readme file  |//
 //*------------------------------------------------*//
 //////////////////////////////////////////////////////
-#pragma once
-#ifndef _P1_GUARD_COMBATSTATS_H_
-#define _P1_GUARD_COMBATSTATS_H_
 
 
-// ****************************************************************
-// combat stats class
-class cCombatStats final
+void FragmentMain()
 {
-public:
-    cCombatStats()noexcept;
-
-    DISABLE_COPY(cCombatStats)
-
-    // apply combat stats
-    void Apply();
-};
-
-
-#endif // _P1_GUARD_COMBATSTATS_H_
+    // draw distortion map (only two channels)
+    vec2 v2Distortion = coreTexture2D(0, v_av2TexCoord[0]).rg;
+    gl_FragColor      = vec4(v2Distortion, 0.0, u_v4Color.a);
+}
