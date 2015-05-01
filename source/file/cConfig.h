@@ -15,6 +15,7 @@
 
 // ****************************************************************
 // configuration definitions
+#define CONFIG_GAME_TRANSPARENT    "Game",     "Transparent",                         (0)
 #define CONFIG_GAME_COMBAT_DAMAGE  "Game",     "CombatDamage",                        (1)
 #define CONFIG_GAME_COMBAT_CHAIN   "Game",     "CombatChain",                         (1)
 #define CONFIG_GAME_COMBAT_COMBO   "Game",     "CombatCombo",                         (1)
@@ -47,11 +48,12 @@ struct cConfig
 {
     struct
     {
+        coreUint8 iTransparent;   // 
         struct
         {
-            coreUint8 iDamage;   // 
-            coreUint8 iChain;    // 
-            coreUint8 iCombo;    // 
+            coreUint8 iDamage;    // 
+            coreUint8 iChain;     // 
+            coreUint8 iCombo;     // 
         }
         Combat;
     }

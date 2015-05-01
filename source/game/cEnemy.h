@@ -71,8 +71,8 @@ private:
     // own routines for derived classes (render functions executed by game)
     virtual void __ResurrectOwn   () {}
     virtual void __KillOwn        () {}
-    virtual void __RenderOwnBefore() {}
-    virtual void __RenderOwnAfter () {}
+    virtual void __RenderOwnWeak  () {}
+    virtual void __RenderOwnStrong() {}
     virtual void __MoveOwn        () {}
 };
 

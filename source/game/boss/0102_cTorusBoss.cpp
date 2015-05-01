@@ -30,14 +30,12 @@ cTorusBoss::cTorusBoss()noexcept
 
     for(coreUintW i = 0u; i < 2u; ++i)
     {
-        m_aCircle[i].DefineModel  ("object_circle_01.md3");
+        m_aCircle[i].DefineModel  ("object_circle_02.md3");
         m_aCircle[i].DefineTexture(0u, "effect_energy.png");
         m_aCircle[i].DefineProgram("effect_energy_invert_program");
         m_aCircle[i].SetSize      (this->GetSize());
         m_aCircle[i].SetColor3    (coreVector3(0.3f,0.7f,0.3f) * 0.8f);
-        m_aCircle[i].SetTexSize   (coreVector2(1.2f,1.2f));
-
-        //g_pGlow->BindObject(&m_aCircle[i]); ## 
+        m_aCircle[i].SetTexSize   (coreVector2(1.25f,1.25f));
     }
 
 }
@@ -47,27 +45,45 @@ cTorusBoss::cTorusBoss()noexcept
 // destructor
 cTorusBoss::~cTorusBoss()
 {
-    // 
-    //for(coreUintW i = 0u; i < 2u; ++i)
-    //    g_pGlow->UnbindObject(&m_aCircle[i]); ## 
 }
 
 
 // ****************************************************************
 // 
-void cTorusBoss::__RenderOwnBefore()
+void cTorusBoss::__ResurrectOwn()
 {
-}
-
-
-// ****************************************************************
-// 
-void cTorusBoss::__RenderOwnAfter()
-{
-    // 
     for(coreUintW i = 0u; i < 2u; ++i)
-        m_aCircle[i].Render();
+        g_pGlow->BindObject(&m_aCircle[i]);
+}
 
+
+// ****************************************************************
+// 
+void cTorusBoss::__KillOwn()
+{
+    for(coreUintW i = 0u; i < 2u; ++i)
+        g_pGlow->UnbindObject(&m_aCircle[i]);
+}
+
+
+// ****************************************************************
+// 
+void cTorusBoss::__RenderOwnWeak()
+{
+    glDepthFunc(GL_ALWAYS);
+    {
+        // 
+        for(coreUintW i = 0u; i < 2u; ++i)
+            m_aCircle[i].Render();
+    }
+    glDepthFunc(GL_LEQUAL);
+}
+
+
+// ****************************************************************
+// 
+void cTorusBoss::__RenderOwnStrong()
+{
 }
 
 
@@ -96,7 +112,7 @@ void cTorusBoss::__MoveOwn()
 
     const coreFloat fFade = 1.0f - FRACT(ABS(m_fAnimation));
     m_aCircle[1].SetSize(this->GetSize() * (0.5f + 0.5f*fFade));
-    m_aCircle[1].SetAlpha(0.5f*fFade);
+    m_aCircle[1].SetAlpha(1.0f * fFade);
 
     for(coreUintW i = 0u; i < 2u; ++i)
     {

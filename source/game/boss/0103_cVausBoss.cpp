@@ -27,15 +27,13 @@ cVausBoss::cVausBoss()noexcept
 
 
 
-    m_Bump.DefineModel  ("object_paddle.md3");
-    m_Bump.DefineTexture(0u, "effect_energy.png");
-    m_Bump.DefineProgram("effect_energy_direct_program");
-    m_Bump.SetSize      (coreVector3(3.5f,2.5f,2.5f));
-    m_Bump.SetColor3    (coreVector3(0.1f,0.43f,1.0f));
-    m_Bump.SetTexSize   (coreVector2(1.2f,0.25f) * 0.5f);
+    m_Paddle.DefineModel  ("object_paddle.md3");
+    m_Paddle.DefineTexture(0u, "effect_energy.png");
+    m_Paddle.DefineProgram("effect_energy_direct_program");
+    m_Paddle.SetSize      (coreVector3(3.5f,2.5f,2.5f));
+    m_Paddle.SetColor3    (coreVector3(0.1f,0.43f,1.0f));
+    m_Paddle.SetTexSize   (coreVector2(1.2f,0.25f) * 0.5f);
 
-    //g_pOutlineDirect->BindObject(&m_Bump); ## 
-    //g_pGlow->BindObject(&m_Bump);
 
 
 }
@@ -45,23 +43,42 @@ cVausBoss::cVausBoss()noexcept
 // destructor
 cVausBoss::~cVausBoss()
 {
-    //g_pOutlineDirect->UnbindObject(&m_Bump); ## 
-    //g_pGlow->UnbindObject(&m_Bump);
 }
 
 
 // ****************************************************************
 // 
-void cVausBoss::__RenderOwnBefore()
+void cVausBoss::__ResurrectOwn()
+{
+    g_aaOutline[PRIO_STRONG][STYLE_DIRECT].BindObject(&m_Paddle);
+    g_pGlow->BindObject(&m_Paddle);
+}
+
+
+// ****************************************************************
+// 
+void cVausBoss::__KillOwn()
+{
+    g_aaOutline[PRIO_STRONG][STYLE_DIRECT].UnbindObject(&m_Paddle);
+    g_pGlow->UnbindObject(&m_Paddle);
+}
+
+
+// ****************************************************************
+// 
+void cVausBoss::__RenderOwnWeak()
 {
 }
 
 
 // ****************************************************************
 // 
-void cVausBoss::__RenderOwnAfter()
+void cVausBoss::__RenderOwnStrong()
 {
-    m_Bump.Render();
+    // 
+    glDepthFunc(GL_ALWAYS);
+    m_Paddle.Render();
+    glDepthFunc(GL_LEQUAL);
 }
 
 
@@ -79,10 +96,10 @@ void cVausBoss::__MoveOwn()
     //const coreVector2 vDir = coreVector2::Direction(m_fAnimation);
     //this->SetOrientation(coreVector3(0.0f, vDir));
 
-    m_Bump.SetPosition   (coreVector3(this->GetPosition ().xy() + this->GetDirection().xy().Rotate90() * 3.0f, 0.0f));
-    m_Bump.SetDirection  (coreVector3(this->GetDirection().xy().Rotate90(), 0.0f));
-    m_Bump.SetOrientation(this->GetOrientation());
-    m_Bump.SetTexOffset  (coreVector2(0.0f, m_fAnimation * -0.1f));
-    m_Bump.Move();
+    m_Paddle.SetPosition   (coreVector3(this->GetPosition ().xy() + this->GetDirection().xy().Rotate90() * 3.0f, 0.0f));
+    m_Paddle.SetDirection  (coreVector3(this->GetDirection().xy().Rotate90(), 0.0f));
+    m_Paddle.SetOrientation(this->GetOrientation());
+    m_Paddle.SetTexOffset  (coreVector2(0.0f, m_fAnimation * -0.1f));
+    m_Paddle.Move();
 
 }

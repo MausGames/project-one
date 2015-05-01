@@ -40,7 +40,7 @@ void cBullet::Move()
 
 // ****************************************************************
 // prepare and start up bullet
-void cBullet::Activate(const coreInt32& iDamage, const coreFloat& fSpeed, cShip* pOwner, const coreInt32& iType, const coreVector2& vPosition, const coreVector2& vDirection)
+void cBullet::Activate(const coreInt32& iDamage, const coreFloat& fSpeed, cShip* pOwner, const coreVector2& vPosition, const coreVector2& vDirection, const coreInt32& iType)
 {
     // activate bullet and remove readiness
     if(CONTAINS_VALUE(m_iStatus, BULLET_STATUS_ACTIVE)) return;
@@ -70,9 +70,7 @@ void cBullet::Deactivate(const coreBool& bAnimated)
     REMOVE_VALUE(m_iStatus, BULLET_STATUS_ACTIVE)
 
     // 
-    if(this->GetType() == TYPE_BULLET_PLAYER)
-         ;//g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 2.0f, 1u, this->GetColor3()); 
-    else g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 6.0f, 3u, this->GetColor3());
+    if(bAnimated) g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 6.0f, 3u, this->GetColor3());
 
     // disable collision
     this->ChangeType(0);
@@ -89,7 +87,9 @@ cBulletManager::sBulletSetGen::sBulletSetGen()noexcept
 
 // ****************************************************************
 // constructor
-cBulletManager::cBulletManager()noexcept
+cBulletManager::cBulletManager(const coreInt32& iType)noexcept
+: m_iType     ((iType))
+, m_iPriority ((iType == TYPE_BULLET_PLAYER) ? PRIO_PLAYER : PRIO_ENEMY)
 {
 }
 
@@ -98,9 +98,18 @@ cBulletManager::cBulletManager()noexcept
 // destructor
 cBulletManager::~cBulletManager()
 {
-    // delete all bullet sets
+    // 
+    g_aaOutline[m_iPriority][STYLE_FULL]  .ClearLists();
+    g_aaOutline[m_iPriority][STYLE_DIRECT].ClearLists();
+
     FOR_EACH(it, m_apBulletSet)
+    {
+        // remove bullet set from glow
+        g_pGlow->UnbindList(&(*it)->oBulletActive);
+
+        // delete bullet set
         SAFE_DELETE(*it)
+    }
 
     // clear memory
     m_apBulletSet.clear();
@@ -162,7 +171,7 @@ void cBulletManager::Move()
 
 // ****************************************************************
 // remove all bullets
-void cBulletManager::ClearBullets()
+void cBulletManager::ClearBullets(const coreBool& bAnimated)
 {
     // loop trough all bullet sets
     FOR_EACH(it, m_apBulletSet)
@@ -171,18 +180,11 @@ void cBulletManager::ClearBullets()
 
         // deactivate each active bullet
         FOR_EACH(et, *pBulletActive->List())
-            s_cast<cBullet*>(*et)->Deactivate(true);
+            s_cast<cBullet*>(*et)->Deactivate(bAnimated);
 
         // clear list
         pBulletActive->Clear();
     }
-}
-
-void cBulletManager::ClearBullets(const coreInt32& iType)
-{
-    // 
-    const auto oEnemyBullets = Core::Manager::Object->GetObjectList(iType);
-    FOR_EACH(it, oEnemyBullets) if(*it) s_cast<cBullet*>(*it)->Deactivate(true);
 }
 
 
@@ -194,7 +196,7 @@ cRayBullet::cRayBullet()noexcept
     // load object resources
     this->DefineModel  ("bullet_ray.md3");
     this->DefineTexture(0u, "effect_energy.png");
-    this->DefineProgram("effect_energy_direct_program");
+    this->DefineProgram("effect_energy_bullet_direct_program");
 
     // set object properties
     this->SetCollisionModifier(coreVector3(1.0f,0.333f,1.0f));   // model with offset
@@ -223,7 +225,7 @@ cOrbBullet::cOrbBullet()noexcept
     // load object resources
     this->DefineModel  ("bullet_orb.md3");
     this->DefineTexture(0u, "effect_energy.png");
-    this->DefineProgram("effect_energy_program");
+    this->DefineProgram("effect_energy_bullet_program");
 
     // set object properties
     this->SetTexSize(coreVector2(0.4f,0.4f));
@@ -251,7 +253,7 @@ cConeBullet::cConeBullet()noexcept
     // load object resources
     this->DefineModel  ("bullet_cone.md3");
     this->DefineTexture(0u, "effect_energy.png");
-    this->DefineProgram("effect_energy_program");
+    this->DefineProgram("effect_energy_bullet_program");
 
     // set object properties
     this->SetTexSize(coreVector2(0.5f,0.2f));
@@ -279,10 +281,10 @@ cWaveBullet::cWaveBullet()noexcept
     // load object resources
     this->DefineModel  ("bullet_wave.md3");
     this->DefineTexture(0u, "effect_energy.png");
-    this->DefineProgram("effect_energy_direct_program");
+    this->DefineProgram("effect_energy_bullet_direct_program");
 
     // set object properties
-    this->SetTexSize(coreVector2(0.3f,0.25f) * 0.35f);
+    this->SetTexSize(coreVector2(0.1f,0.25f) * 1.0f);
 }
 
 
@@ -294,6 +296,6 @@ void cWaveBullet::__MoveOwn()
     this->SetPosition(this->GetPosition() + this->GetDirection() * (m_fSpeed * Core::System->GetTime()));
 
     // update texture animation
-    m_fAnimation.Update(0.1f);
+    m_fAnimation.Update(0.15f);
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
 }

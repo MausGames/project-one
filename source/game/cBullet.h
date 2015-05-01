@@ -49,12 +49,13 @@ public:
     void Move()override;
 
     // control status
-    void Activate  (const coreInt32& iDamage, const coreFloat& fSpeed, cShip* pOwner, const coreInt32& iType, const coreVector2& vPosition, const coreVector2& vDirection);
+    void Activate  (const coreInt32& iDamage, const coreFloat& fSpeed, cShip* pOwner, const coreVector2& vPosition, const coreVector2& vDirection, const coreInt32& iType);
     void Deactivate(const coreBool&  bAnimated);
 
     // 
     inline cBullet* MakeSmaller(const coreFloat& fFactor) {this->SetSize  (this->GetSize  () * fFactor); return this;}
     inline cBullet* MakeDarker (const coreFloat& fFactor) {this->SetColor3(this->GetColor3() * fFactor); return this;}
+    inline cBullet* MakeLighter(const coreFloat& fFactor) {this->SetAlpha (this->GetAlpha () * fFactor); return this;}
 
     // get object properties
     inline const coreInt32& GetDamage()const {return m_iDamage;}
@@ -63,7 +64,7 @@ public:
 
     // bullet configuration values
     static inline const coreChar* ConfigProgramInstancedName() {ASSERT(false) return "";}
-    static inline cOutline*       ConfigOutlineObject       () {ASSERT(false) return g_pOutlineFull;}
+    static inline coreUintW       ConfigOutlineStyle        () {ASSERT(false) return STYLE_FULL;}
 
 
 private:
@@ -90,19 +91,21 @@ private:
     template <typename T> struct sBulletSet final : public sBulletSetGen
     {
         std::vector<T> aBulletPool;   // semi-dynamic container with all bullets
-        coreUintW iCurBullet;         // current bullet (next one to check)
+        coreUintW      iCurBullet;    // current bullet (next one to check)
 
-        sBulletSet()noexcept;
-        ~sBulletSet();
+        explicit sBulletSet(const coreUintW iPriority)noexcept;
     };
 
 
 private:
     coreLookup<coreInt32, sBulletSetGen*> m_apBulletSet;   // bullet sets (each for a different inherited bullet class)
 
+    coreInt32 m_iType;                                     // 
+    coreUintW m_iPriority;                                 // 
+
 
 public:
-    cBulletManager()noexcept;
+    explicit cBulletManager(const coreInt32& iType)noexcept;
     ~cBulletManager();
 
     DISABLE_COPY(cBulletManager)
@@ -112,9 +115,11 @@ public:
     void Move();
 
     // add and remove bullets
-    template <typename T> RETURN_RESTRICT T* AddBullet(const coreInt32& iDamage, const coreFloat& fSpeed, cShip* pOwner, const coreInt32& iType, const coreVector2& vPosition, const coreVector2& vDirection);
-    void ClearBullets();
-    void ClearBullets(const coreInt32& iType);
+    template <typename T> RETURN_RESTRICT T* AddBullet(const coreInt32& iDamage, const coreFloat& fSpeed, cShip* pOwner, const coreVector2& vPosition, const coreVector2& vDirection);
+    void ClearBullets(const coreBool& bAnimated);
+
+    // 
+    template <typename F> void ForEachBullet(F&& nFunction);
 };
 
 
@@ -133,18 +138,18 @@ public:
     ASSIGN_ID(1, "Ray")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(2.5f,2.5f,2.5f)); this->SetColor3(coreVector3(0.9f,0.8f,0.4f) * 0.95f);}
+    inline void ResetProperties() {this->SetSize(coreVector3(2.5f,2.5f,2.5f)); this->SetColor3(coreVector3(0.9f,0.8f,0.4f) * 0.9f); this->SetAlpha(1.0f);}
 
     // change default color (yellow)
-    inline cRayBullet* MakeOrange() {this->SetColor3(coreVector3(1.0f,0.4f,0.0f)); return this;}
+    inline cRayBullet* MakeOrange() {this->SetColor3(coreVector3(1.0f, 0.4f,0.0f)); return this;}
     inline cRayBullet* MakeRed   () {return this;}
-    inline cRayBullet* MakeViolet() {return this;}
+    inline cRayBullet* MakePurple() {this->SetColor3(coreVector3(0.45f,0.2f,1.0f)); return this;}
     inline cRayBullet* MakeBlue  () {return this;}
     inline cRayBullet* MakeGreen () {return this;}
 
     // bullet configuration values
-    static inline const coreChar* ConfigProgramInstancedName() {return "effect_energy_direct_inst_program";}
-    static inline cOutline*       ConfigOutlineObject       () {return g_pOutlineDirect;}
+    static inline const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
+    static inline coreUintW       ConfigOutlineStyle        () {return STYLE_DIRECT;}
 
 
 private:
@@ -171,18 +176,18 @@ public:
     ASSIGN_ID(3, "Orb")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(1.6f,1.6f,1.6f)); this->SetColor3(coreVector3(0.09f,0.387f,0.9f));}
+    inline void ResetProperties() {this->SetSize(coreVector3(1.6f,1.6f,1.6f)); this->SetColor3(coreVector3(0.09f,0.387f,0.9f)); this->SetAlpha(1.0f);}
 
     // change default color (blue)
     inline cOrbBullet* MakeYellow() {return this;}
     inline cOrbBullet* MakeOrange() {this->SetColor3(coreVector3(1.0f,0.3f, 0.0f));         return this;}
     inline cOrbBullet* MakeRed   () {this->SetColor3(coreVector3(0.9f,0.25f,0.25f) * 0.8f); return this;}
-    inline cOrbBullet* MakeViolet() {this->SetColor3(coreVector3(0.4f,0.15f,1.0f));         return this;}
+    inline cOrbBullet* MakePurple() {this->SetColor3(coreVector3(0.4f,0.15f,1.0f));         return this;}
     inline cOrbBullet* MakeGreen () {this->SetColor3(coreVector3(0.3f,0.7f, 0.3f)  * 0.8f); return this;}
 
     // bullet configuration values
-    static inline const coreChar* ConfigProgramInstancedName() {return "effect_energy_inst_program";}
-    static inline cOutline*       ConfigOutlineObject       () {return g_pOutlineFull;}
+    static inline const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_inst_program";}
+    static inline coreUintW       ConfigOutlineStyle        () {return STYLE_FULL;}
 
 
 private:
@@ -206,18 +211,18 @@ public:
     ASSIGN_ID(4, "Cone")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(1.35f,1.55f,1.35f)); this->SetColor3(coreVector3(1.0f,0.4f,0.0f));}
+    inline void ResetProperties() {this->SetSize(coreVector3(1.35f,1.55f,1.35f) * 1.05f); this->SetColor3(coreVector3(1.0f,0.4f,0.0f)); this->SetAlpha(1.0f);}
 
     // change default color (orange)
     inline cConeBullet* MakeYellow() {this->SetColor3(coreVector3(0.9f,0.8f,0.4f) * 0.9f); return this;}
     inline cConeBullet* MakeRed   () {return this;}
-    inline cConeBullet* MakeViolet() {return this;}
+    inline cConeBullet* MakePurple() {return this;}
     inline cConeBullet* MakeBlue  () {return this;}
     inline cConeBullet* MakeGreen () {return this;}
 
     // bullet configuration values
-    static inline const coreChar* ConfigProgramInstancedName() {return "effect_energy_inst_program";}
-    static inline cOutline*       ConfigOutlineObject       () {return g_pOutlineDirect;}
+    static inline const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_inst_program";}
+    static inline coreUintW       ConfigOutlineStyle        () {return STYLE_DIRECT;}
 
 
 private:
@@ -241,18 +246,18 @@ public:
     ASSIGN_ID(5, "Wave")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(0.35f,1.5f,0.35f) * 1.1f); this->SetColor3(coreVector3(0.3f,0.7f,0.3f) * 1.2f);}
+    inline void ResetProperties() {this->SetSize(coreVector3(1.5f,1.5f,1.5f) * 1.25f); this->SetColor3(coreVector3(0.3f,0.7f,0.3f) * 1.1f); this->SetAlpha(1.0f);}
 
     // change default color (green)
     inline cWaveBullet* MakeYellow() {return this;}
     inline cWaveBullet* MakeOrange() {return this;}
     inline cWaveBullet* MakeRed   () {return this;}
-    inline cWaveBullet* MakeViolet() {return this;}
+    inline cWaveBullet* MakePurple() {return this;}
     inline cWaveBullet* MakeBlue  () {return this;}
 
     // bullet configuration values
-    static inline const coreChar* ConfigProgramInstancedName() {return "effect_energy_direct_inst_program";}
-    static inline cOutline*       ConfigOutlineObject       () {return g_pOutlineDirect;}
+    static inline const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
+    static inline coreUintW       ConfigOutlineStyle        () {return STYLE_DIRECT;}
 
 
 private:
@@ -263,14 +268,14 @@ private:
 
 // ****************************************************************
 // constructor
-template <typename T> cBulletManager::sBulletSet<T>::sBulletSet()noexcept
+template <typename T> cBulletManager::sBulletSet<T>::sBulletSet(const coreUintW iPriority)noexcept
 : iCurBullet (0u)
 {
     // set shader-program
     oBulletActive.DefineProgram(T::ConfigProgramInstancedName());
 
-    // add bullet to outline and glow
-    T::ConfigOutlineObject()->BindList(&oBulletActive);
+    // add bullet set to outline and glow
+    g_aaOutline[iPriority][T::ConfigOutlineStyle()].BindList(&oBulletActive);
     g_pGlow->BindList(&oBulletActive);
 
     // set bullet pool to initial size
@@ -279,25 +284,15 @@ template <typename T> cBulletManager::sBulletSet<T>::sBulletSet()noexcept
 
 
 // ****************************************************************
-// destructor
-template <typename T> cBulletManager::sBulletSet<T>::~sBulletSet()
-{
-    // remove bullet from outline and glow
-    T::ConfigOutlineObject()->UnbindList(&oBulletActive);
-    g_pGlow->UnbindList(&oBulletActive);
-}
-
-
-// ****************************************************************
 // add bullet to the game
-template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt32& iDamage, const coreFloat& fSpeed, cShip* pOwner, const coreInt32& iType, const coreVector2& vPosition, const coreVector2& vDirection)
+template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt32& iDamage, const coreFloat& fSpeed, cShip* pOwner, const coreVector2& vPosition, const coreVector2& vDirection)
 {
     // get requested bullet set
     sBulletSet<T>* pSet;
     if(!m_apBulletSet.count(T::ID))
     {
         // create new bullet set
-        pSet = new sBulletSet<T>();
+        pSet = new sBulletSet<T>(m_iPriority);
         m_apBulletSet[T::ID] = pSet;
     }
     else pSet = s_cast<sBulletSet<T>*>(m_apBulletSet[T::ID]);
@@ -315,7 +310,7 @@ template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt
         if(CONTAINS_VALUE(pBullet->GetStatus(), BULLET_STATUS_READY))
         {
             // prepare bullet and add to active list
-            pBullet->Activate(iDamage, fSpeed, pOwner, iType, vPosition, vDirection);
+            pBullet->Activate(iDamage, fSpeed, pOwner, vPosition, vDirection, m_iType);
             pBullet->ResetProperties();
             pSet->oBulletActive.BindObject(pBullet);
 
@@ -337,7 +332,24 @@ template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt
 
     // execute again with first new bullet (overhead should be low, requested bullet set is cached)
     pSet->iCurBullet = iSize - 1u;
-    return this->AddBullet<T>(iDamage, fSpeed, pOwner, iType, vPosition, vDirection);
+    return this->AddBullet<T>(iDamage, fSpeed, pOwner, vPosition, vDirection);
+}
+
+
+// ****************************************************************
+// 
+template <typename F> void cBulletManager::ForEachBullet(F&& nFunction)
+{
+    // 
+    const auto& oBulletList = Core::Manager::Object->GetObjectList(m_iType);
+    FOR_EACH(it, oBulletList)
+    {
+        cBullet* pBullet = s_cast<cBullet*>(*it);
+        if(!pBullet) continue;
+
+        // 
+        nFunction(pBullet);
+    }
 }
 
 

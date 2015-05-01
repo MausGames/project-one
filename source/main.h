@@ -51,8 +51,8 @@
 // ****************************************************************
 // general definitions
 #define PLAYERS            (2u)
-#define FRAMERATE          (60u)
-#define FRAMERATE_TIME     (1.0f / I_TO_F(FRAMERATE))
+#define FRAMERATE_VALUE    (60.0f)
+#define FRAMERATE_TIME     (1.0f / FRAMERATE_VALUE)
 
 #define COLOR_YELLOW_F     coreVector3(1.000f, 0.824f, 0.392f)
 #define COLOR_ORANGE_F     coreVector3(1.000f, 0.443f, 0.227f)
@@ -80,18 +80,27 @@
 
 #define LIGHT_DIRECTION    coreVector3(0.583953857f, -0.642349243f, -0.496360779f)
 
-#define SHADER_SHADOW      "#define _P1_SHADOW_    (1) \n"   // outdoor, object_ground
-#define SHADER_GLOW        "#define _P1_GLOW_      (1) \n"   // post
-#define SHADER_DISTORTION  "#define _P1_DISTORTION (1) \n"   // post
-#define SHADER_SPHERIC     "#define _P1_SPHERIC_   (1) \n"   // decal, energy
-#define SHADER_INVERT      "#define _P1_INVERT_    (1) \n"   // energy
-#define SHADER_DIRECT      "#define _P1_DIRECT_    (1) \n"   // outline, energy
+#define SHADER_SHADOW      "#define _P1_SHADOW_     (1) \n"   // outdoor, object_ground
+#define SHADER_GLOW        "#define _P1_GLOW_       (1) \n"   // post
+#define SHADER_DISTORTION  "#define _P1_DISTORTION_ (1) \n"   // post
+#define SHADER_DARKNESS    "#define _P1_DARKNESS_   (1) \n"   // object_ship
+#define SHADER_BULLET      "#define _P1_BULLET_     (1) \n"   // energy
+#define SHADER_SPHERIC     "#define _P1_SPHERIC_    (1) \n"   // decal, energy
+#define SHADER_INVERT      "#define _P1_INVERT_     (1) \n"   // energy
+#define SHADER_DIRECT      "#define _P1_DIRECT_     (1) \n"   // outline, energy
 
 #define TYPE_PLAYER        (1)
 #define TYPE_ENEMY         (2)
 #define TYPE_BULLET_PLAYER (11)
 #define TYPE_BULLET_ENEMY  (12)
 #define TYPE_OBJECT(x)     (100+x)
+
+#define PRIO_WEAK          (0u)
+#define PRIO_STRONG        (2u)
+#define PRIO_PLAYER        (1u)
+#define PRIO_ENEMY         (3u)
+#define STYLE_FULL         (0u)
+#define STYLE_DIRECT       (1u)
 
 #define ENABLE_ID                               \
     virtual const coreInt32 GetID  ()const = 0; \
@@ -138,8 +147,7 @@ extern coreMusicPlayer  g_MusicPlayer;       //
 #include "visual/cForeground.h"
 #include "visual/cPostProcessing.h"
 
-extern cOutline*        g_pOutlineFull;      // main full outline-effect object
-extern cOutline*        g_pOutlineDirect;    // main direct outline-effect object
+extern cOutline         g_aaOutline[4][2];   // main outline-layer objects
 extern cGlow*           g_pGlow;             // main glow-effect object
 extern cDistortion*     g_pDistortion;       // main distortion-effect object
 extern cSpecialEffects* g_pSpecialEffects;   // main special-effects object

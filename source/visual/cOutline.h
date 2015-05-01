@@ -18,7 +18,7 @@
 
 
 // ****************************************************************
-// outline-effect class
+// outline-layer class
 class cOutline final : public cBindContainer
 {
 private:
@@ -27,11 +27,15 @@ private:
 
 
 public:
-    cOutline(const coreChar* pcProgramSingleName, const coreChar* pcProgramInstancedName)noexcept;
+    cOutline()noexcept {}
 
     DISABLE_COPY(cOutline)
 
-    // apply outline-effect
+    // 
+    void Init(const coreChar* pcProgramSingleName, const coreChar* pcProgramInstancedName);
+    void Exit();
+
+    // apply outline-layer
     void Apply();
 };
 

@@ -33,7 +33,7 @@ public:
     ENABLE_ID
 
     // update the weapon
-    coreBool Update(const coreBool& bShootStatus, const coreBool& bChangeStatus);
+    coreBool Update(const coreBool& bShootStatus);
 
     // set object properties
     inline void SetOwner(cPlayer*         pOwner) {m_pOwner = pOwner;}
@@ -48,7 +48,6 @@ private:
     // own routines for derived classes
     virtual void __TriggerOwn() {}
     virtual void __ReleaseOwn() {}
-    virtual void __ChangeOwn () {}
     virtual void __ShootOwn  () {}
 };
 
@@ -69,10 +68,6 @@ public:
 // ray weapon class
 class cRayWeapon final : public cWeapon
 {
-private:
-    coreUint8 m_iSpread;   // bullet spread status (0 = front, 1 = back, 2 = sides, 3 = diagonal)
-
-
 public:
     cRayWeapon()noexcept;
 
@@ -81,9 +76,8 @@ public:
 
 
 private:
-    // change and shoot with the ray weapon
-    void __ChangeOwn()override;
-    void __ShootOwn ()override;
+    //shoot with the ray weapon
+    void __ShootOwn()override;
 };
 
 
@@ -91,11 +85,21 @@ private:
 // pulse weapon class
 class cPulseWeapon final : public cWeapon
 {
+private:
+    coreUint8 m_iCharge;   // 
+    coreBool  m_bSide;     // 
+
+
 public:
-    cPulseWeapon()noexcept {}
+    cPulseWeapon()noexcept;
 
     DISABLE_COPY(cPulseWeapon)
     ASSIGN_ID(2, "Pulse Cannon")
+
+
+private:
+    //shoot with the pulse weapon
+    void __ShootOwn()override;
 };
 
 

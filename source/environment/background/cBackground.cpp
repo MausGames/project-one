@@ -101,7 +101,7 @@ void cBackground::Render()
         }
         glEnable(GL_BLEND);
 
-        glDepthMask(false);
+        glDisable(GL_DEPTH_TEST);
         {
             // render all transparent ground objects
             FOR_EACH(it, m_apDecalObjectList)
@@ -111,7 +111,7 @@ void cBackground::Render()
             FOR_EACH(it, m_apAirObjectList)
                 (*it)->Render();
         }
-        glDepthMask(true);
+        glEnable(GL_DEPTH_TEST);
 
         // call individual render routine
         this->__RenderOwn();

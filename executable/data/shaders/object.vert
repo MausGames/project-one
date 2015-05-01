@@ -24,6 +24,7 @@ void VertexMain()
     
     // forward texture coordinates
     v_av2TexCoord[0] = a_v2RawTexCoord;
+    v_av2TexCoord[1] = coreObject3DTexCoordRaw();
 
     // dot-3 transform lighting vectors
     coreDot3VertexInit();

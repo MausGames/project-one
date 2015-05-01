@@ -99,8 +99,8 @@ private:
     // 
     void __ResurrectOwn   ()override;
     void __KillOwn        ()override;
-    void __RenderOwnBefore()override;
-    void __RenderOwnAfter ()override;
+    void __RenderOwnWeak  ()override;
+    void __RenderOwnStrong()override;
     void __MoveOwn        ()override;
 
     // 
@@ -132,8 +132,10 @@ public:
 
 private:
     // 
-    void __RenderOwnBefore()override;
-    void __RenderOwnAfter ()override;
+    void __ResurrectOwn   ()override;
+    void __KillOwn        ()override;
+    void __RenderOwnWeak  ()override;
+    void __RenderOwnStrong()override;
     void __MoveOwn        ()override;
 };
 
@@ -143,7 +145,7 @@ private:
 class cVausBoss final : public cBoss
 {
 private:
-    coreObject3D m_Bump;     // 
+    coreObject3D m_Paddle;   // 
 
     coreFlow m_fAnimation;   // animation value
 
@@ -158,8 +160,10 @@ public:
 
 private:
     // 
-    void __RenderOwnBefore()override;
-    void __RenderOwnAfter ()override;
+    void __ResurrectOwn   ()override;
+    void __KillOwn        ()override;
+    void __RenderOwnWeak  ()override;
+    void __RenderOwnStrong()override;
     void __MoveOwn        ()override;
 };
 

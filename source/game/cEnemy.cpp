@@ -258,7 +258,7 @@ void cEnemy::DefaultMultiate(const coreFloat& fAngle)
 // 
 coreBool cEnemy::DefaultShoot(const coreFloat& fFireRate)
 {
-    ASSERT(fFireRate <= I_TO_F(FRAMERATE))
+    ASSERT(fFireRate <= FRAMERATE_VALUE)
 
     // 
     if(!CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_SILENT))

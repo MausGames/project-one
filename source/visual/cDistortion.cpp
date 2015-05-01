@@ -58,7 +58,7 @@ void cDistortion::Update()
 
                     // 
                     oWave.SetAlpha(MAX(oWave.GetAlpha() - fSpeed * Core::System->GetTime(), 0.0f));
-                    oWave.SetSize (coreVector2(0.1f,0.1f) * (fScale * (1.0f - oWave.GetAlpha())));
+                    oWave.SetSize (coreVector2(0.1f,0.1f) * (ABS(fScale) * ((fScale < 0.0f) ? oWave.GetAlpha() : (1.0f - oWave.GetAlpha()))));
                     oWave.Move();
                     oWave.Render();
                 }
@@ -86,7 +86,7 @@ void cDistortion::CreateWave(const coreVector3& vPosition, const coreFloat& fSca
 
     // 
     oWave.SetPosition(vProjection.xy() * (RCP(vProjection.w) * 0.5f * DISTORTION_SCALE_FACTOR));
-    oWave.SetSize    (coreVector2(0.0f,0.0f));
+    oWave.SetSize    (coreVector2(1.0f,1.0f) * MAX(fScale, 0.0f));
     oWave.SetColor4  (coreVector4(fScale, fSpeed, 0.0f, 1.0f));
 }
 

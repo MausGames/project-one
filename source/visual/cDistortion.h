@@ -13,11 +13,12 @@
 
 //****************************************************************
 // distortion definitions
-#define DISTORTION_SCALE_FACTOR (0.5f)           // resolution factor of the distortion frame buffer
-#define DISTORTION_WAVES        (4u)             // 
+#define DISTORTION_SCALE_FACTOR (0.5f)            // resolution factor of the distortion frame buffer
+#define DISTORTION_WAVES        (4u)              // 
 
-#define DISTORTION_WAVE_SMALL   (2.5f), (3.0f)   // 
-#define DISTORTION_WAVE_BIG     (5.0f), (3.0f)   // 
+#define DISTORTION_WAVE_SMALL   ( 2.5f), (3.0f)   // 
+#define DISTORTION_WAVE_BIG     ( 5.0f), (3.0f)   // 
+#define DISTORTION_WAVE_BIG_REV (-3.0f), (1.7f)   // 
 
 
 // ****************************************************************

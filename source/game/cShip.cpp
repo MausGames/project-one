@@ -64,7 +64,7 @@ void cShip::_Resurrect(const coreVector2& vPosition, const coreVector2& vDirecti
 
     // add ship to global shadow and outline
     cShadow::BindGlobalObject(this);
-    g_pOutlineFull->BindObject(this);
+    g_aaOutline[PRIO_WEAK][STYLE_FULL].BindObject(this);
 
     // enable collision
     this->ChangeType(iType);
@@ -77,7 +77,7 @@ void cShip::_Kill(const coreBool& bAnimated)
 {
     // remove ship from global shadow and outline
     cShadow::UnbindGlobalObject(this);
-    g_pOutlineFull->UnbindObject(this);
+    g_aaOutline[PRIO_WEAK][STYLE_FULL].UnbindObject(this);
 
     // disable collision
     this->ChangeType(0);

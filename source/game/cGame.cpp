@@ -12,11 +12,13 @@
 // ****************************************************************
 // constructor
 cGame::cGame(const coreBool& bCoop)noexcept
-: m_Interface    (bCoop ? 2u : 1u)
-, m_pMission     (NULL)
-, m_fTimeMission (0.0f)
-, m_iStatus      (0u)
-, m_bCoop        (bCoop)
+: m_BulletManagerPlayer (TYPE_BULLET_PLAYER)
+, m_BulletManagerEnemy  (TYPE_BULLET_ENEMY)
+, m_Interface           (bCoop ? 2u : 1u)
+, m_pMission            (NULL)
+, m_fTimeMission        (0.0f)
+, m_iStatus             (0u)
+, m_bCoop               (bCoop)
 {
     // configure first player
     m_aPlayer[0].Configure  (PLAYER_SHIP_ATK, coreVector3(0.0f/360.0f, 68.0f/100.0f, 90.0f/100.0f).HSVtoRGB(), g_CurConfig.Input.aiType[0]);
@@ -26,7 +28,7 @@ cGame::cGame(const coreBool& bCoop)noexcept
     {
         // configure second player
         m_aPlayer[1].Configure  (PLAYER_SHIP_DEF, coreVector3(201.0f/360.0f, 74.0f/100.0f, 85.0f/100.0f).HSVtoRGB(), g_CurConfig.Input.aiType[1]);
-        m_aPlayer[1].EquipWeapon(0u, cRayWeapon::ID);
+        m_aPlayer[1].EquipWeapon(0u, cPulseWeapon::ID);
         STATIC_ASSERT(GAME_PLAYERS == 2u)
     }
 
@@ -60,12 +62,53 @@ void cGame::Render()
         m_aPlayer[i].Render();
 
     // render all active enemies
-    FOR_EACH(it, m_apEnemyList) (*it)->__RenderOwnBefore();
-    FOR_EACH(it, m_apEnemyList) (*it)->  Render();
-    FOR_EACH(it, m_apEnemyList) (*it)->__RenderOwnAfter();
+    FOR_EACH(it, m_apEnemyList)
+        (*it)->Render();
 
-    // render the bullet manager
-    m_BulletManager.Render();
+    // move everything to the back (can be overdrawn)
+    glDepthRange(0.4f, 1.0f);
+    {
+        // 
+        FOR_EACH(it, m_apEnemyList) (*it)->__RenderOwnWeak();
+
+        // apply weak effect outline-layer
+        g_aaOutline[PRIO_WEAK][STYLE_FULL]  .Apply();
+        g_aaOutline[PRIO_WEAK][STYLE_DIRECT].Apply();
+    }
+    glDepthRange(0.2f, 1.0f);
+    {
+        // render low-priority bullet manager
+        m_BulletManagerPlayer.Render();
+
+        // apply player-bullet outline-layer
+        g_aaOutline[PRIO_PLAYER][STYLE_FULL]  .Apply();
+        g_aaOutline[PRIO_PLAYER][STYLE_DIRECT].Apply();
+    }
+
+    // move everything to the front (should always be visible to player)
+    glDepthRange(0.0f, 0.7f);
+    {
+        // 
+        FOR_EACH(it, m_apEnemyList) (*it)->__RenderOwnStrong();
+
+        // apply strong effect outline-layer
+        g_aaOutline[PRIO_STRONG][STYLE_FULL]  .Apply();
+        g_aaOutline[PRIO_STRONG][STYLE_DIRECT].Apply();
+    }
+    glDepthRange(0.0f, 0.5f);
+    {
+        // render high-priority bullet manager
+        glDepthFunc(GL_ALWAYS);
+        m_BulletManagerEnemy.Render();
+        glDepthFunc(GL_LEQUAL);
+
+        // apply enemy-bullet outline-layer
+        g_aaOutline[PRIO_ENEMY][STYLE_FULL]  .Apply();
+        g_aaOutline[PRIO_ENEMY][STYLE_DIRECT].Apply();
+    }
+
+    // reset depth range
+    glDepthRange(0.0f, 1.0f);
 }
 
 
@@ -106,8 +149,9 @@ void cGame::Move()
         if(ie > m_apEnemyList.size()) {--i; --ie;}
     }
 
-    // move the bullet manager
-    m_BulletManager.Move();
+    // move the bullet managers
+    m_BulletManagerPlayer.Move();
+    m_BulletManagerEnemy .Move();
 
     // handle default object collisions
     this->__HandleCollisions();
@@ -297,7 +341,7 @@ coreBool cGame::__HandleIntro()
                 oPlayer.SetPosition   (coreVector3(oPlayer.GetPosition().x, vPos));
                 oPlayer.SetNewPos     (coreVector2(oPlayer.GetPosition().xy()));
                 oPlayer.SetOrientation(coreVector3(vDir.x, 0.0f, vDir.y));
-                oPlayer.SetExhaust    (LERPB(1.0f, 0.0f, fTime));
+                oPlayer.UpdateExhaust (LERPB(1.0f, 0.0f, fTime));
             }
         }
     }
@@ -317,7 +361,6 @@ void cGame::__HandleCollisions()
 
     Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_BULLET_ENEMY, [](cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreBool& bFirst)
     {
-
         // 
         pPlayer->TakeDamage(pBullet->GetDamage());
         pBullet->Deactivate(true);
@@ -330,9 +373,7 @@ void cGame::__HandleCollisions()
            (ABS(pEnemy->GetPosition().y) >= FOREGROUND_AREA.y * 1.1f)) return;
 
         // 
-        const coreInt32 iOldHealth = pEnemy->GetCurHealth();
-
         pEnemy ->TakeDamage(pBullet->GetDamage(), s_cast<cPlayer*>(pBullet->GetOwner()));
-        pBullet->Deactivate(iOldHealth != pEnemy->GetCurHealth());
+        pBullet->Deactivate(false);
     });
 }

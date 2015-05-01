@@ -24,8 +24,8 @@
 #define GRASS_REEDS_2_RESERVE (128u)
 #define GRASS_FLOWERS_NUM     (2048u)
 #define GRASS_FLOWERS_RESERVE (256u)
-#define GRASS_CLOUDS_NUM      (96u)
-#define GRASS_CLOUDS_RESERVE  (115u)   // # tested
+#define GRASS_CLOUDS_NUM      (64u)
+#define GRASS_CLOUDS_RESERVE  (78u)   // # tested
 
 
 // ****************************************************************

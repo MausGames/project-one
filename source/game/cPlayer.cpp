@@ -15,15 +15,18 @@ cPlayer::cPlayer()noexcept
 : m_iInputIndex    (0u)
 , m_iScoreMission  (0u)
 , m_fChainCooldown (0.0f)
+, m_fDarkAnimation (0.0f)
 , m_vNewPos        (coreVector2(0.0f,0.0f))
 {
     // load object resources
     this->DefineProgram("object_ship_program");
     this->DefineTexture(0u, "ship_player.png");
+    this->DefineTexture(1u, "menu_background_black.png");
 
     // set object properties
     this->SetDirection  (coreVector3(0.0f,1.0f,0.0f));
     this->SetOrientation(coreVector3(0.0f,0.0f,1.0f));
+    this->SetTexSize    (coreVector2(1.2f,1.2f));
 
     // set initial status
     m_iStatus = PLAYER_STATUS_DEAD;
@@ -40,9 +43,20 @@ cPlayer::cPlayer()noexcept
     this->ResetStats();
 
     // 
-    m_Exhaust.DefineProgram("effect_energy_direct_program");
-    m_Exhaust.DefineTexture(0u, "effect_energy.png");
+    m_pDarkProgram = Core::Manager::Resource->Get<coreProgram>("object_ship_darkness_program");
+
+    // 
+    m_Bubble.DefineModel  ("object_sphere.md3");
+    m_Bubble.DefineTexture(0u, "effect_energy.png");
+    m_Bubble.DefineProgram("effect_energy_spheric_program");
+    m_Bubble.SetColor4    (coreVector4(0.5f,0.5f,0.5f,0.0f));
+    m_Bubble.SetTexSize   (coreVector2(5.0f,5.0f));
+    m_Bubble.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+
+    // 
     m_Exhaust.DefineModel  ("object_tube.md3");
+    m_Exhaust.DefineTexture(0u, "effect_energy.png");
+    m_Exhaust.DefineProgram("effect_energy_direct_program");
     m_Exhaust.SetDirection (this->GetDirection());
     m_Exhaust.SetColor4    (coreVector4(0.306f,0.527f,1.0f,0.7f));
     m_Exhaust.SetTexSize   (coreVector2(0.5f,  0.25f));
@@ -62,7 +76,11 @@ cPlayer::~cPlayer()
         SAFE_DELETE(m_apWeapon[i])
 
     // 
-    this->SetExhaust(0.0f);
+    this->TransformDark(PLAYER_DARK_RESET);
+
+    // 
+    this->DisableBubble();
+    this->UpdateExhaust(0.0f);
 }
 
 
@@ -138,14 +156,19 @@ void cPlayer::Render()
 {
     if(CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_DEAD)) return;
 
+    glDisable(GL_DEPTH_TEST);
+    {
+        // 
+        m_Bubble .Render();
+        m_Exhaust.Render();
+    }
+    glEnable(GL_DEPTH_TEST);
+
     // 
     this->_UpdateBlink();
 
     // render the 3d-object
     coreObject3D::Render();
-
-    // 
-    m_Exhaust.Render();
 }
 
 
@@ -187,12 +210,35 @@ void cPlayer::Move()
     }
 
     // update the weapons (shooting and stuff)
-    const coreBool bArmed = CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_WEAPON) ? false : true;
     for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
     {
-        const coreBool bShoot  = CONTAINS_BIT(g_aInput[m_iInputIndex].iButtonHold,  i*2u)      ? bArmed : false;
-        const coreBool bChange = CONTAINS_BIT(g_aInput[m_iInputIndex].iButtonPress, i*2u + 1u) ? bArmed : false;
-        m_apWeapon[i]->Update(bShoot, bChange);
+        const coreBool bShoot = CONTAINS_BIT(g_aInput[m_iInputIndex].iButtonHold, i) ? !CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) : false;;
+        m_apWeapon[i]->Update(bShoot);
+    }
+
+    // 
+    if(CONTAINS_BIT(g_aInput[m_iInputIndex].iButtonPress, PLAYER_WEAPONS))
+        this->TransformDark(CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_DARKNESS) ? PLAYER_DARK_OFF : PLAYER_DARK_ON);
+
+    if(m_Bubble.IsEnabled(CORE_OBJECT_ENABLE_ALL))
+    {
+        // 
+        m_fDarkAnimation.Update(-1.0f);
+        this->SetTexOffset(coreVector2(0.0f, m_fDarkAnimation * 0.25f));
+
+        // 
+        if(CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_DARKNESS))
+             m_Bubble.SetAlpha(MIN(m_Bubble.GetAlpha() + 4.0f*Core::System->GetTime(), 0.8f));
+        else m_Bubble.SetAlpha(MAX(m_Bubble.GetAlpha() - 4.0f*Core::System->GetTime(), 0.0f));
+
+        // 
+        if(!m_Bubble.GetAlpha()) this->DisableBubble();
+
+        // 
+        m_Bubble.SetPosition (this->GetPosition());
+        m_Bubble.SetSize     (coreVector3(1.25f,1.25f,1.25f) * m_Bubble.GetAlpha() * PLAYER_DARK_BUBBLE_SIZE);
+        m_Bubble.SetTexOffset(coreVector2(0.0f, m_fDarkAnimation * 0.1f));
+        m_Bubble.Move();
     }
 }
 
@@ -241,7 +287,7 @@ void cPlayer::Kill(const coreBool& bAnimated)
     ADD_VALUE(m_iStatus, PLAYER_STATUS_DEAD)
 
     // reset weapon shoot status
-    for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i) m_apWeapon[i]->Update(false, false);
+    for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i) m_apWeapon[i]->Update(false);
 
     // remove ship from the game
     cShip::_Kill(bAnimated);
@@ -342,7 +388,79 @@ void cPlayer::ResetStats()
 
 // ****************************************************************
 // 
-void cPlayer::SetExhaust(const coreFloat& fStrength)
+void cPlayer::TransformDark(const coreUint8& iStatus)
+{
+    // 
+    const coreBool bDark = CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_DARKNESS);
+    if(bDark == (!iStatus)) return;
+
+    if(iStatus == PLAYER_DARK_ON)
+    {
+        ADD_VALUE(m_iStatus, PLAYER_STATUS_DARKNESS)
+
+        // 
+        g_pDistortion    ->CreateWave      (this->GetPosition(), DISTORTION_WAVE_SMALL);
+        g_pSpecialEffects->CreateSplashDark(this->GetPosition(), SPECIAL_SPLASH_SMALL);
+
+        // 
+        this->EnableBubble();
+    }
+    else if(iStatus == PLAYER_DARK_OFF)
+    {
+        REMOVE_VALUE(m_iStatus, PLAYER_STATUS_DARKNESS)
+
+        // 
+        g_pDistortion    ->CreateWave      (this->GetPosition(), DISTORTION_WAVE_BIG);
+        g_pSpecialEffects->CreateSplashDark(this->GetPosition(), SPECIAL_SPLASH_BIG);
+
+        // 
+        g_pGame->GetBulletManagerEnemy()->ForEachBullet([&](cBullet* OUTPUT pBullet)
+        {
+            // 
+            pBullet->Deactivate(false);
+
+            // 
+            const coreVector2 vDir = (pBullet->GetPosition().xy() - this->GetPosition().xy()).Normalize();
+            g_pSpecialEffects->CreateDirectionColor(pBullet->GetPosition(), coreVector3(vDir, 0.0f), 60.0f, 2u, pBullet->GetColor3());
+        });
+    }
+    else REMOVE_VALUE(m_iStatus, PLAYER_STATUS_DARKNESS)
+
+    // 
+    std::swap(m_pDarkProgram, m_pProgram);
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::EnableBubble()
+{
+    WARN_IF(m_Bubble.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    m_Bubble.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    g_pGlow->BindObject(&m_Bubble);
+
+    // 
+    m_fDarkAnimation = 0.0f;
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::DisableBubble()
+{
+    if(!m_Bubble.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    m_Bubble.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    g_pGlow->UnbindObject(&m_Bubble);
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::UpdateExhaust(const coreFloat& fStrength)
 {
     // 
     const coreFloat fLen  = fStrength * 40.0f;

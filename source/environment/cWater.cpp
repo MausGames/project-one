@@ -124,15 +124,9 @@ void cWater::UpdateReflection()
 
         if(g_CurConfig.Graphics.iReflection && g_pGame)
         {
+            // render the game
             glCullFace(GL_FRONT);
-            {
-                // render the game
-                g_pGame->Render();
-
-                // apply outline-effect
-                g_pOutlineFull  ->Apply();
-                g_pOutlineDirect->Apply();
-            }
+            g_pGame->Render();
             glCullFace(GL_BACK);
         }
     }

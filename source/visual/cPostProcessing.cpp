@@ -61,9 +61,9 @@ void cPostProcessing::Apply()
     coreFrameBuffer::EndDraw();
 
     // 
-    if(g_pGame && (g_pGame->GetTimeMission() >= 2.0f))
-         this->SetAlpha(MAX(this->GetAlpha() - 0.1f*Core::System->GetTime(), 0.85f));
-    else this->SetAlpha(MIN(this->GetAlpha() + 0.1f*Core::System->GetTime(), 1.0f));
+    //if(g_pGame && (g_pGame->GetTimeMission() >= 2.0f))
+    //     this->SetAlpha(MAX(this->GetAlpha() - 0.1f*Core::System->GetTime(), 0.9f));
+    //else this->SetAlpha(MIN(this->GetAlpha() + 0.1f*Core::System->GetTime(), 1.0f));
 
     // bind all required frame buffers
     this->DefineTexture(POST_TEXTURE_UNIT_ENVIRONMENT, g_pEnvironment->GetFrameBuffer()->GetColorTarget(0u).pTexture);
@@ -78,7 +78,7 @@ void cPostProcessing::Apply()
         this->Render();
 
         // render side-objects
-        for(coreUintW i = 0u; i < 2u; ++i) m_aSideArea [i].Render();
+        for(coreUintW i = 0u; i < 2u; ++i) m_aSideArea[i].Render();
     }
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);

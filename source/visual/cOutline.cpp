@@ -10,8 +10,8 @@
 
 
 // ****************************************************************
-// constructor
-cOutline::cOutline(const coreChar* pcProgramSingleName, const coreChar* pcProgramInstancedName)noexcept
+// 
+void cOutline::Init(const coreChar* pcProgramSingleName, const coreChar* pcProgramInstancedName)
 {
     // load shader-programs for outlined objects
     s_pProgramSingle    = Core::Manager::Resource->Get<coreProgram>(pcProgramSingleName);
@@ -20,7 +20,17 @@ cOutline::cOutline(const coreChar* pcProgramSingleName, const coreChar* pcProgra
 
 
 // ****************************************************************
-// apply outline-effect
+// 
+void cOutline::Exit()
+{
+    // 
+    s_pProgramSingle    = NULL;
+    s_pProgramInstanced = NULL;
+}
+
+
+// ****************************************************************
+// apply outline-layer
 void cOutline::Apply()
 {
     glDepthMask(false);

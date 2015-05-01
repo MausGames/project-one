@@ -33,7 +33,9 @@ class cGame final
 private:
     cPlayer m_aPlayer[GAME_PLAYERS];         // player objects
     std::vector<cEnemy*> m_apEnemyList;      // list with pointers to active enemy objects
-    cBulletManager m_BulletManager;          // bullet manager
+
+    cBulletManager m_BulletManagerPlayer;    // low-priority bullet manager
+    cBulletManager m_BulletManagerEnemy;     // high-priority bullet manager
 
     cCombatText m_CombatText;                // combat text overlay
     cInterface  m_Interface;                 // interface overlay
@@ -66,12 +68,13 @@ public:
     void RestartMission();
 
     // access game objects
-    inline cPlayer*              GetPlayer       (const coreUintW& iIndex) {ASSERT(iIndex < GAME_PLAYERS) return &m_aPlayer[iIndex];}
-    inline std::vector<cEnemy*>* GetEnemyList    ()                        {return &m_apEnemyList;}
-    inline cBulletManager*       GetBulletManager()                        {return &m_BulletManager;}
-    inline cCombatText*          GetCombatText   ()                        {return &m_CombatText;}
-    inline cInterface*           GetInterface    ()                        {return &m_Interface;}
-    inline cMission*             GetMission      ()const                   {return m_pMission;}
+    inline cPlayer*              GetPlayer             (const coreUintW& iIndex) {ASSERT(iIndex < GAME_PLAYERS) return &m_aPlayer[iIndex];}
+    inline std::vector<cEnemy*>* GetEnemyList          ()                        {return &m_apEnemyList;}
+    inline cBulletManager*       GetBulletManagerPlayer()                        {return &m_BulletManagerPlayer;}
+    inline cBulletManager*       GetBulletManagerEnemy ()                        {return &m_BulletManagerEnemy;}
+    inline cCombatText*          GetCombatText         ()                        {return &m_CombatText;}
+    inline cInterface*           GetInterface          ()                        {return &m_Interface;}
+    inline cMission*             GetMission            ()const                   {return m_pMission;}
 
     // 
     cPlayer* FindPlayer(const coreVector2& vPosition);

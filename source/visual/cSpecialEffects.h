@@ -10,19 +10,24 @@
 #ifndef _P1_GUARD_SPECIALEFFECTS_H_
 #define _P1_GUARD_SPECIALEFFECTS_H_
 
+// TODO: glowing waves
+
 
 // ****************************************************************
 // 
-#define SPECIAL_WAVES        (4u)              // 
-#define SPECIAL_SOUNDS       (8u)              // 
+#define SPECIAL_WAVES           (4u)              // 
+#define SPECIAL_SOUNDS          (8u)              // 
 
-#define SPECIAL_SPLASH_SMALL (50.0f),  (25u)   // 
-#define SPECIAL_SPLASH_BIG   (100.0f), (50u)   // 
+#define SPECIAL_SPLASH_SMALL    (50.0f),  (25u)   // 
+#define SPECIAL_SPLASH_BIG      (100.0f), (50u)   // 
+#define SPECIAL_DIRECTION_SMALL (50.0f),  (25u)   // 
+#define SPECIAL_DIRECTION_BIG   (100.0f), (50u)   // 
+#define SPECIAL_CHARGE_BIG      (35.0f),  (40u)   // 
 
 enum eSoundEffect : coreUint16   // 0xAABBu -> AA sub-index, BB file-index
 {
-    SOUND_EXPLOSION_ENERGY_SMALL = 0x0100u,
-    SOUND_EXPLOSION_ENERGY_BIG   = 0x0200u
+    SOUND_EXPLOSION_ENERGY_SMALL = 0x0000u,
+    SOUND_EXPLOSION_ENERGY_BIG   = 0x0100u
 };
 
 
@@ -60,7 +65,13 @@ public:
     void CreateSplashSmoke(const coreVector3& vPosition, const coreFloat& fScale, const coreUintW& iNum);
     void CreateSplashFire (const coreVector3& vPosition, const coreFloat& fScale, const coreUintW& iNum);
 
+    // 
     void CreateDirectionColor(const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat& fScale, const coreUintW& iNum, const coreVector3& vColor);
+    void CreateDirectionDark (const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat& fScale, const coreUintW& iNum);
+
+    // 
+    void CreateChargeColor(const coreVector3& vPosition, const coreFloat& fScale, const coreUintW& iNum, const coreVector3& vColor);
+    void CreateChargeDark (const coreVector3& vPosition, const coreFloat& fScale, const coreUintW& iNum);
 
     // 
     void CreateWave(const coreVector3& vPosition, const coreFloat& fScale, const coreFloat& fSpeed, const coreVector3& vColor);
@@ -72,11 +83,7 @@ public:
     inline void ShakeScreen(const coreFloat& fStrength) {m_fShakeStrength = fStrength;}
 
     // 
-    inline coreParticleSystem* GetParticleColor()      {return &m_ParticleColor;}
-    inline coreParticleSystem* GetParticleDark ()      {return &m_ParticleDark;}
-    inline coreParticleSystem* GetParticleSmoke()      {return &m_ParticleSmoke;}
-    inline coreParticleSystem* GetParticleFire ()      {return &m_ParticleFire;}
-    inline const coreFloat&    GetShakeStrength()const {return m_fShakeStrength;}
+    inline const coreFloat& GetShakeStrength()const {return m_fShakeStrength;}
 };
 
 

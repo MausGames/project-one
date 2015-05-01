@@ -13,7 +13,7 @@ void FragmentMain()
     // 
     vec2 v2Distortion = coreTexture2D(3, v_av2TexCoord[0]).rg;   // # low-res
 
-#if !defined(_P1_DISTORTION)
+#if !defined(_P1_DISTORTION_)
 
     // ignore distortion map
     v2Distortion = vec2(0.0);

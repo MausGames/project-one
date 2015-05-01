@@ -8,21 +8,20 @@
 //////////////////////////////////////////////////////
 #include "main.h"
 
-coreVector2      g_vGameResolution = coreVector2(0.0f,0.0f);
-coreVector2      g_vMenuCenter     = coreVector2(0.0f,0.0f);
-coreMusicPlayer  g_MusicPlayer; // = 0x00;
+coreVector2      g_vGameResolution     = coreVector2(0.0f,0.0f);
+coreVector2      g_vMenuCenter         = coreVector2(0.0f,0.0f);
+coreMusicPlayer  g_MusicPlayer;     // = 0x00;
 
-cOutline*        g_pOutlineFull    = NULL;
-cOutline*        g_pOutlineDirect  = NULL;
-cGlow*           g_pGlow           = NULL;
-cDistortion*     g_pDistortion     = NULL;
-cSpecialEffects* g_pSpecialEffects = NULL;
-cPostProcessing* g_pPostProcessing = NULL;
+cOutline         g_aaOutline[4][2]; // = 0x00;
+cGlow*           g_pGlow               = NULL;
+cDistortion*     g_pDistortion         = NULL;
+cSpecialEffects* g_pSpecialEffects     = NULL;
+cPostProcessing* g_pPostProcessing     = NULL;
 
-cForeground*     g_pForeground     = NULL;
-cEnvironment*    g_pEnvironment    = NULL;
-cMenu*           g_pMenu           = NULL;
-cGame*           g_pGame           = NULL;
+cForeground*     g_pForeground         = NULL;
+cEnvironment*    g_pEnvironment        = NULL;
+cMenu*           g_pMenu               = NULL;
+cGame*           g_pGame               = NULL;
 
 static coreUint64 m_iOldPerfTime = 0u;   // 
 
@@ -52,8 +51,11 @@ void CoreApp::Init()
 
     // create and init main components
     cShadow::GlobalInit();
-    g_pOutlineFull    = new cOutline(OUTLINE_SHADER_FULL);
-    g_pOutlineDirect  = new cOutline(OUTLINE_SHADER_DIRECT);
+    for(coreUintW i = 0u; i < ARRAY_SIZE(g_aaOutline); ++i)
+    {
+        g_aaOutline[i][STYLE_FULL]  .Init(OUTLINE_SHADER_FULL);
+        g_aaOutline[i][STYLE_DIRECT].Init(OUTLINE_SHADER_DIRECT);
+    }
     g_pGlow           = new cGlow();
     g_pDistortion     = new cDistortion();
     g_pSpecialEffects = new cSpecialEffects();
@@ -77,8 +79,11 @@ void CoreApp::Exit()
     SAFE_DELETE(g_pSpecialEffects)
     SAFE_DELETE(g_pDistortion)
     SAFE_DELETE(g_pGlow)
-    SAFE_DELETE(g_pOutlineDirect)
-    SAFE_DELETE(g_pOutlineFull)
+    for(coreUintW i = 0u; i < ARRAY_SIZE(g_aaOutline); ++i)
+    {
+        g_aaOutline[i][STYLE_FULL]  .Exit();
+        g_aaOutline[i][STYLE_DIRECT].Exit();
+    }
     cShadow::GlobalExit();
 
     // 
@@ -120,10 +125,6 @@ void CoreApp::Render()
             {
                 // render the game
                 g_pGame->Render();
-
-                // apply outline-effect
-                g_pOutlineFull  ->Apply();
-                g_pOutlineDirect->Apply();
 
                 // render special-effects
                 g_pSpecialEffects->Render();
@@ -212,6 +213,8 @@ void CoreApp::Move()
 
 
 
+
+
     // TODO ########################## 
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(K), CORE_INPUT_PRESS))
         {
@@ -221,7 +224,7 @@ void CoreApp::Move()
         {
             if(!g_pGame)
             {
-                g_pGame = new cGame(false);
+                g_pGame = new cGame(true);
                 g_pGame->LoadMission(cViridoMission::ID);
             }
         }
@@ -242,8 +245,11 @@ void CoreApp::Move()
             if(g_pGame)
             {
                 const coreVector3 vPos = g_pGame->GetPlayer(0u)->GetPosition();
-                g_pDistortion    ->CreateWave       (vPos, DISTORTION_WAVE_BIG);
-                g_pSpecialEffects->CreateSplashColor(vPos, SPECIAL_SPLASH_BIG, coreVector3(0.09f,0.387f,0.9f));
+
+                g_pDistortion    ->CreateWave      (vPos, -3.0f, 1.7f);
+                g_pSpecialEffects->CreateChargeDark(vPos, 35.0f, 40u);//, coreVector3(0.09f,0.387f,0.9f));
+                g_pDistortion    ->CreateWave      (vPos, DISTORTION_WAVE_BIG);
+                g_pSpecialEffects->CreateSplashDark(vPos, SPECIAL_SPLASH_BIG);//, COLOR_RED_F);
 
                 g_pSpecialEffects->PlaySound(vPos, 1.0f, SOUND_EXPLOSION_ENERGY_BIG);
 

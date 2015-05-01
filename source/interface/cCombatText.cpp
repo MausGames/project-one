@@ -33,7 +33,7 @@ cCombatText::cCombatText()noexcept
 {
     // create label objects
     for(coreUintW i = 0u; i < COMBAT_LABELS; ++i)
-        m_aLabel[i].Construct("ethnocentric.ttf", 26u, 32u);
+        m_aLabel[i].Construct(MENU_FONT_MEDIUM_2, 16u);
 
     // 
     std::memset(m_afTimer, 0, sizeof(m_afTimer));
@@ -81,7 +81,7 @@ void cCombatText::Move()
         if(fCurTimer)
         {
             // update animation timer
-            fCurTimer = MAX(fCurTimer - Core::System->GetTime(), 0.0f);
+            fCurTimer = MAX(fCurTimer - 0.8f*Core::System->GetTime(), 0.0f);
 
             // 
             for(coreUintW j = i+1u; j < COMBAT_LABELS; ++j)
@@ -112,7 +112,7 @@ void cCombatText::Move()
 
             // update label objects
             coreLabel& oLabel = m_aLabel[i];
-            oLabel.SetPosition(coreVector2(0.0f, 0.1f * (1.0f - fCurTimer)));
+            oLabel.SetPosition(coreVector2(0.0f, 0.03f * (1.0f - fCurTimer)));
             oLabel.SetAlpha   (MIN(fCurTimer * 5.0f, 1.0f));
             oLabel.Move();
         }
