@@ -13,9 +13,14 @@
 
 // ****************************************************************
 // game definitions
-#define GAME_PLAYERS        (PLAYERS)   // default number of players
-#define GAME_INTRO_DELAY    (0.2f)      // 
-#define GAME_INTRO_DURATION (3.5f)      // 
+#define GAME_PLAYERS        (PLAYERS)        // default number of players
+#define GAME_INTRO_DELAY    (0.2f)           // 
+#define GAME_INTRO_DURATION (3.5f)           // 
+
+#define GAME_DEPTH_WEAK     (0.4f), (1.0f)   // 
+#define GAME_DEPTH_PLAYER   (0.2f), (1.0f)   // 
+#define GAME_DEPTH_STRONG   (0.0f), (0.7f)   // 
+#define GAME_DEPTH_ENEMY    (0.0f), (0.5f)   // 
 
 enum cGameStatus : coreUint8
 {
@@ -37,8 +42,9 @@ private:
     cBulletManager m_BulletManagerPlayer;    // low-priority bullet manager
     cBulletManager m_BulletManagerEnemy;     // high-priority bullet manager
 
-    cCombatText m_CombatText;                // combat text overlay
-    cInterface  m_Interface;                 // interface overlay
+    cCombatStats m_CombatStats;              // combat stats overlay
+    cCombatText  m_CombatText;               // combat text overlay
+    cInterface   m_Interface;                // interface overlay
 
     cMission* m_pMission;                    // active mission (should never be NULL)
 
@@ -72,6 +78,7 @@ public:
     inline std::vector<cEnemy*>* GetEnemyList          ()                        {return &m_apEnemyList;}
     inline cBulletManager*       GetBulletManagerPlayer()                        {return &m_BulletManagerPlayer;}
     inline cBulletManager*       GetBulletManagerEnemy ()                        {return &m_BulletManagerEnemy;}
+    inline cCombatStats*         GetComboBoxInfo       ()                        {return &m_CombatStats;}
     inline cCombatText*          GetCombatText         ()                        {return &m_CombatText;}
     inline cInterface*           GetInterface          ()                        {return &m_Interface;}
     inline cMission*             GetMission            ()const                   {return m_pMission;}
@@ -79,6 +86,7 @@ public:
     // 
     cPlayer* FindPlayer(const coreVector2& vPosition);
     cEnemy*  FindEnemy (const coreVector2& vPosition);
+    template <typename F> void ForEachPlayer(F&& nFunction);
 
     // get object properties
     inline const coreFloat& GetTimeMission()const                        {return m_fTimeMission;}
@@ -96,6 +104,22 @@ private:
     inline void __BindEnemy  (cEnemy* pEnemy) {ASSERT(!CONTAINS(m_apEnemyList, pEnemy)) m_apEnemyList.push_back(pEnemy);}
     inline void __UnbindEnemy(cEnemy* pEnemy) {FOR_EACH(it, m_apEnemyList) {if((*it) == pEnemy) {m_apEnemyList.erase(it); return;}} ASSERT(false)}
 };
+
+
+// ****************************************************************
+// 
+template <typename F> void cGame::ForEachPlayer(F&& nFunction)
+{
+    // 
+    for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+    {
+        cPlayer* pCurPlayer = &m_aPlayer[i];
+        if(CONTAINS_VALUE(pCurPlayer->GetStatus(), PLAYER_STATUS_DEAD)) continue;
+
+        // 
+        nFunction(pCurPlayer);
+    }
+}
 
 
 #endif // _P1_GUARD_GAME_H_

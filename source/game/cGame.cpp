@@ -66,7 +66,7 @@ void cGame::Render()
         (*it)->Render();
 
     // move everything to the back (can be overdrawn)
-    glDepthRange(0.4f, 1.0f);
+    glDepthRange(GAME_DEPTH_WEAK);
     {
         // 
         FOR_EACH(it, m_apEnemyList) (*it)->__RenderOwnWeak();
@@ -75,7 +75,7 @@ void cGame::Render()
         g_aaOutline[PRIO_WEAK][STYLE_FULL]  .Apply();
         g_aaOutline[PRIO_WEAK][STYLE_DIRECT].Apply();
     }
-    glDepthRange(0.2f, 1.0f);
+    glDepthRange(GAME_DEPTH_PLAYER);
     {
         // render low-priority bullet manager
         m_BulletManagerPlayer.Render();
@@ -86,7 +86,7 @@ void cGame::Render()
     }
 
     // move everything to the front (should always be visible to player)
-    glDepthRange(0.0f, 0.7f);
+    glDepthRange(GAME_DEPTH_STRONG);
     {
         // 
         FOR_EACH(it, m_apEnemyList) (*it)->__RenderOwnStrong();
@@ -95,7 +95,7 @@ void cGame::Render()
         g_aaOutline[PRIO_STRONG][STYLE_FULL]  .Apply();
         g_aaOutline[PRIO_STRONG][STYLE_DIRECT].Apply();
     }
-    glDepthRange(0.0f, 0.5f);
+    glDepthRange(GAME_DEPTH_ENEMY);
     {
         // render high-priority bullet manager
         glDepthFunc(GL_ALWAYS);
@@ -109,6 +109,9 @@ void cGame::Render()
 
     // reset depth range
     glDepthRange(0.0f, 1.0f);
+
+    // 
+    FOR_EACH(it, m_apEnemyList) (*it)->__RenderOwnAfter();
 }
 
 
@@ -116,7 +119,10 @@ void cGame::Render()
 // render the overlay separately
 void cGame::RenderOverlay()
 {
-    // render all overlay objects
+    // apply combat stats
+    m_CombatStats.Apply();
+
+    // render combat text and interface
     m_CombatText.Render();
     m_Interface .Render();
 }
@@ -356,7 +362,13 @@ void cGame::__HandleCollisions()
 {
     Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_ENEMY, [](cPlayer* OUTPUT pPlayer, cEnemy* OUTPUT pEnemy, const coreBool& bFirst)
     {
+        if(!bFirst) return;
 
+        // 
+        pPlayer->TakeDamage(15);
+
+        // 
+        g_pSpecialEffects->MacroExplosionPhysicalSmall(coreVector3((pPlayer->GetPosition().xy() + pEnemy->GetPosition().xy()) * 0.5f, 0.0f));
     });
 
     Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_BULLET_ENEMY, [](cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreBool& bFirst)

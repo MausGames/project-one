@@ -31,7 +31,7 @@ public:
 
     DISABLE_COPY(cOutline)
 
-    // 
+    // init and exit the outline-layer
     void Init(const coreChar* pcProgramSingleName, const coreChar* pcProgramInstancedName);
     void Exit();
 

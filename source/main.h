@@ -63,6 +63,7 @@
 #define COLOR_BRONZE_F     coreVector3(0.925f, 0.663f, 0.259f)
 #define COLOR_SILVER_F     coreVector3(0.855f, 0.855f, 0.878f)
 #define COLOR_GOLD_F       coreVector3(1.000f, 0.859f, 0.000f)
+#define COLOR_FIRE_F       coreVector3(234.0f/255.0f, 72.0f/255.0f, 10.0f/255.0f) * 1.08f
 
 #define COLOR_YELLOW_L     255u, 210u, 100u
 #define COLOR_ORANGE_L     255u, 113u,  58u
@@ -80,6 +81,7 @@
 
 #define LIGHT_DIRECTION    coreVector3(0.583953857f, -0.642349243f, -0.496360779f)
 
+// shader modifiers
 #define SHADER_SHADOW      "#define _P1_SHADOW_     (1) \n"   // outdoor, object_ground
 #define SHADER_GLOW        "#define _P1_GLOW_       (1) \n"   // post
 #define SHADER_DISTORTION  "#define _P1_DISTORTION_ (1) \n"   // post
@@ -87,14 +89,16 @@
 #define SHADER_BULLET      "#define _P1_BULLET_     (1) \n"   // energy
 #define SHADER_SPHERIC     "#define _P1_SPHERIC_    (1) \n"   // decal, energy
 #define SHADER_INVERT      "#define _P1_INVERT_     (1) \n"   // energy
-#define SHADER_DIRECT      "#define _P1_DIRECT_     (1) \n"   // outline, energy
+#define SHADER_DIRECT      "#define _P1_DIRECT_     (1) \n"   // outline, energy, effect_distortion
 
+// collision types
 #define TYPE_PLAYER        (1)
 #define TYPE_ENEMY         (2)
 #define TYPE_BULLET_PLAYER (11)
 #define TYPE_BULLET_ENEMY  (12)
 #define TYPE_OBJECT(x)     (100+x)
 
+// outline priorities and styles
 #define PRIO_WEAK          (0u)
 #define PRIO_STRONG        (2u)
 #define PRIO_PLAYER        (1u)
@@ -102,17 +106,19 @@
 #define STYLE_FULL         (0u)
 #define STYLE_DIRECT       (1u)
 
-#define ENABLE_ID                               \
-    virtual const coreInt32 GetID  ()const = 0; \
+// sub-class and object ID macros
+#define ENABLE_ID                                              \
+    virtual const coreInt32 GetID  ()const = 0;                \
     virtual const coreChar* GetName()const = 0;
-
-#define ASSIGN_ID(i,n)                                          \
-    static const coreInt32 ID = i;                              \
-    inline const coreInt32 GetID  ()const override {return ID;} \
+#define ASSIGN_ID(i,n)                                         \
+    static const coreInt32 ID = i;                             \
+    inline const coreInt32 GetID  ()const override {return i;} \
     inline const coreChar* GetName()const override {return n;}
 
+// container check macro
 #define CONTAINS(c,i) (std::find((c).begin(), (c).end(), (i)) != (c).end())
 
+// angle difference helper-function
 inline FUNC_CONST coreFloat AngleDiff(const coreFloat& x, const coreFloat& y)
 {
     coreFloat A = (x - y);
@@ -135,7 +141,7 @@ class cMission;
 // game header files
 extern coreVector2      g_vGameResolution;   // pre-calculated 1:1 resolution
 extern coreVector2      g_vMenuCenter;       // pre-calculated menu center modifier
-extern coreMusicPlayer  g_MusicPlayer;       // 
+extern coreMusicPlayer  g_MusicPlayer;       // central music-player
 
 #include "additional/cBindContainer.h"
 #include "file/cConfig.h"
@@ -147,7 +153,7 @@ extern coreMusicPlayer  g_MusicPlayer;       //
 #include "visual/cForeground.h"
 #include "visual/cPostProcessing.h"
 
-extern cOutline         g_aaOutline[4][2];   // main outline-layer objects
+extern cOutline         g_aaOutline[4][2];   // main outline-layer objects (priority, style)
 extern cGlow*           g_pGlow;             // main glow-effect object
 extern cDistortion*     g_pDistortion;       // main distortion-effect object
 extern cSpecialEffects* g_pSpecialEffects;   // main special-effects object
@@ -157,6 +163,7 @@ extern cPostProcessing* g_pPostProcessing;   // main post-processing object
 #include "environment/cWater.h"
 #include "environment/background/cBackground.h"
 #include "environment/cEnvironment.h"
+#include "interface/cCombatStats.h"
 #include "interface/cCombatText.h"
 #include "interface/cInterface.h"
 #include "interface/cMsgBox.h"

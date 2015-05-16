@@ -103,15 +103,14 @@ void cEnvironment::Render()
 void cEnvironment::Move()
 {
     // update all transformation properties
-    const coreFloat fFactor = Core::System->GetTime() * 2.0f;
-    m_avDirection[0] = (m_avDirection[0] + (m_avDirection[1] - m_avDirection[0]) * fFactor * 4.0f).Normalize();
-    m_avSide     [0] =  m_avSide     [0] + (m_avSide     [1] - m_avSide     [0]) * fFactor * 8.0f;
-    m_afSpeed    [0] =  m_afSpeed    [0] + (m_afSpeed    [1] - m_afSpeed    [0]) * fFactor * 0.8f;
+    m_avDirection[0] = (m_avDirection[0] + (m_avDirection[1] - m_avDirection[0]) * Core::System->GetTime() *  8.0f).Normalize();
+    m_avSide     [0] =  m_avSide     [0] + (m_avSide     [1] - m_avSide     [0]) * Core::System->GetTime() * 16.0f;
+    m_afSpeed    [0] =  m_afSpeed    [0] + (m_afSpeed    [1] - m_afSpeed    [0]) * Core::System->GetTime() *  1.6f;
 
     // calculate global fly offset
     m_fFlyOffset += Core::System->GetTime() * m_afSpeed[0];
-    while(m_fFlyOffset <  0.0f)                   m_fFlyOffset += I_TO_F(OUTDOOR_HEIGHT);
-    while(m_fFlyOffset >= I_TO_F(OUTDOOR_HEIGHT)) m_fFlyOffset -= I_TO_F(OUTDOOR_HEIGHT);
+    while(m_fFlyOffset <  0.0f)                   {m_fFlyOffset += I_TO_F(OUTDOOR_HEIGHT); m_pBackground->ShoveObjects( I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL); if(m_pOldBackground) m_pOldBackground->ShoveObjects( I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL);}
+    while(m_fFlyOffset >= I_TO_F(OUTDOOR_HEIGHT)) {m_fFlyOffset -= I_TO_F(OUTDOOR_HEIGHT); m_pBackground->ShoveObjects(-I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL); if(m_pOldBackground) m_pOldBackground->ShoveObjects(-I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL);}
 
     // calculate global side offset (only perpendicular to flight direction, never on diagonal camera (smooth with max-min))
     const coreVector2 vAbsDir = m_avDirection[0].Abs();
@@ -119,7 +118,7 @@ void cEnvironment::Move()
 
     // calculate camera and light values
     m_vCameraPos = coreVector3(m_fSideOffset, m_fFlyOffset * OUTDOOR_DETAIL, CAMERA_POSITION.z);
-    m_vLightDir  = LIGHT_DIRECTION * coreMatrix4::RotationZ(m_avDirection[0]);
+    m_vLightDir  = LIGHT_DIRECTION * coreMatrix3::Rotation(m_avDirection[0]);
 
     // move current background
     m_pBackground->Move();

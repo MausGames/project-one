@@ -10,7 +10,7 @@
 
 
 // ****************************************************************
-// 
+// init the outline-layer
 void cOutline::Init(const coreChar* pcProgramSingleName, const coreChar* pcProgramInstancedName)
 {
     // load shader-programs for outlined objects
@@ -20,10 +20,10 @@ void cOutline::Init(const coreChar* pcProgramSingleName, const coreChar* pcProgr
 
 
 // ****************************************************************
-// 
+// exit the outline-layer
 void cOutline::Exit()
 {
-    // 
+    // unload shader-programs
     s_pProgramSingle    = NULL;
     s_pProgramInstanced = NULL;
 }

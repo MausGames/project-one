@@ -10,6 +10,9 @@
 #ifndef _P1_GUARD_BOSS_H_
 #define _P1_GUARD_BOSS_H_
 
+// TODO: boomerangs of Crossfield may generate double-hits because of rotating box collision (when moving away from it)
+// TODO: boomerangs need no heap allocation! (though pointer-access -> array-access)
+
 
 // ****************************************************************
 // boss definitions
@@ -20,11 +23,11 @@
 
 // ****************************************************************
 // phase management macros
-#define PHASE_CONTROL_TIMER(a,b,c)  this->_PhaseTimer (a, __LINE__, b, c, [&](const coreFloat&  fTime, const coreFloat& fTimeBefore, const coreBool& __bEnd)
-#define PHASE_CONTROL_TICKER(a,b,c) this->_PhaseTicker(a, __LINE__, b, c, [&](const coreUint16& iTick,                               const coreBool& __bEnd)
-#define PHASE_SUB(t)                ((fTimeBefore <= (t)) && ((t) <= fTime))
-#define PHASE_RESET(i)              {m_aTimer[i].Stop(); m_aiTimerLine[i] = 0u;}
-#define PHASE_FINISHED              (__bEnd)
+#define PHASE_CONTROL_TIMER(a,b,c)  this->_PhaseTimer (a, __LINE__, b, c, [&](const coreFloat&  fTime, const coreFloat& fTimeBefore, const coreBool& __bEnd)   // 
+#define PHASE_CONTROL_TICKER(a,b,c) this->_PhaseTicker(a, __LINE__, b, c, [&](const coreUint16& iTick,                               const coreBool& __bEnd)   // 
+#define PHASE_SUB(t)                ((fTimeBefore <= (t)) && ((t) <= fTime))                                                                                   // 
+#define PHASE_RESET(i)              {m_aTimer[i].Stop(); m_aiTimerLine[i] = 0u;}                                                                               // 
+#define PHASE_FINISHED              (__bEnd)                                                                                                                   // 
 
 #define LERP_LINEAR    (&LERP <coreFloat>)
 #define LERP_SMOOTH    (&LERPS<coreFloat>)
@@ -34,8 +37,13 @@
 
 // ****************************************************************
 // 
-#define CROSSFIELD_BOOMERANGS (4u)   // 
-#define CROSSFIELD_TRAILS     (3u)   // 
+#define CROSSFIELD_BOOMERANGS (4u)      // 
+#define CROSSFIELD_TRAILS     (3u)      // 
+
+#define TORUS_RAY_SIZE        coreVector3(0.7f,50.0f,0.7f)   // 
+#define TORUS_RAY_TEXSIZE     coreVector2(0.5f, 1.5f)        // 
+#define TORUS_RAY_OFFSET      (8.0f)                         // 
+#define TORUS_RAYWAVE_SIZE    coreVector3(1.6f, 5.0f,1.3f)   // 
 
 
 // ****************************************************************
@@ -47,7 +55,7 @@ protected:
     coreUint16 m_aiTimerLine[BOSS_TIMERS];    // 
 
     coreInt16   m_aiCounter[BOSS_COUNTERS];   // 
-    coreVector3 m_avVector [BOSS_VECTORS];
+    coreVector3 m_avVector [BOSS_VECTORS];    // 
 
     coreUint8 m_iPhase;                       // 
     coreUint8 m_iLevel;                       // 
@@ -117,9 +125,15 @@ private:
 class cTorusBoss final : public cBoss
 {
 private:
-    coreObject3D m_aCircle[2];   // 
+    coreObject3D m_aRay    [3];   // 
+    coreObject3D m_aRayWave[3];   // 
 
-    coreFlow m_fAnimation;       // animation value
+    coreObject3D m_Emitter;       // 
+    coreObject3D m_aCircle[2];    // 
+
+    coreFlow m_fAnimation;        // animation value
+
+    //orb-explosion effect into direction, not centered
 
 
 public:
@@ -136,7 +150,14 @@ private:
     void __KillOwn        ()override;
     void __RenderOwnWeak  ()override;
     void __RenderOwnStrong()override;
+    void __RenderOwnAfter ()override;
     void __MoveOwn        ()override;
+
+    // 
+    coreVector3 __GetRotaDirection(const coreFloat& fBaseAngle);
+    void        __SetRotaAttack   (const coreInt16& iType, const coreBool& bAnimated);
+    void        __EnableRay       (const coreUintW& iIndex);
+    void        __DisableRay      (const coreUintW& iIndex);
 };
 
 

@@ -12,7 +12,8 @@
 // ****************************************************************
 // constructor
 cDistortion::cDistortion()noexcept
-: m_iCurWave (0u)
+: m_iCurWave  (0u)
+, m_iCurBurst (0u)
 {
     // create distortion frame buffer
     m_iFrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RG);
@@ -24,6 +25,14 @@ cDistortion::cDistortion()noexcept
         m_aWave[i].DefineTexture(0u, "effect_wave_norm.png");
         m_aWave[i].DefineProgram("effect_distortion_program");
         m_aWave[i].SetAlpha     (0.0f);
+    }
+
+    // 
+    for(coreUintW i = 0u; i < DISTORTION_BURSTS; ++i)
+    {
+        m_aBurst[i].DefineTexture(0u, "effect_wave_norm.png");
+        m_aBurst[i].DefineProgram("effect_distortion_direct_program");
+        m_aBurst[i].SetAlpha     (0.0f);
     }
 }
 
@@ -37,8 +46,9 @@ void cDistortion::Update()
     // 
     glClearColor(0.5f, 0.5f, 0.0f, 0.0f);
 
-    // create distortion only with active waves
-    if(std::any_of(m_aWave, m_aWave + DISTORTION_WAVES, [](const coreObject2D& oWave) {return oWave.GetAlpha() ? true : false;}))
+    // create distortion only with active objects
+    if(std::any_of(m_aWave,  m_aWave  + DISTORTION_WAVES,  [](const coreObject2D& oWave)  {return oWave .GetAlpha() ? true : false;}) ||
+       std::any_of(m_aBurst, m_aBurst + DISTORTION_BURSTS, [](const coreObject2D& oBurst) {return oBurst.GetAlpha() ? true : false;}))
     {
         // 
         m_iFrameBuffer.StartDraw();
@@ -62,6 +72,23 @@ void cDistortion::Update()
                     oWave.Move();
                     oWave.Render();
                 }
+
+                // 
+                for(coreUintW i = 0u; i < DISTORTION_BURSTS; ++i)
+                {
+                    coreObject2D& oBurst = m_aBurst[i];
+                    if(!oBurst.GetAlpha()) continue;
+
+                    // 
+                    const coreFloat& fScale = oBurst.GetColor4().x;
+                    const coreFloat  fSpeed = oBurst.GetColor4().yz().Length();
+
+                    // 
+                    oBurst.SetAlpha(MAX(oBurst.GetAlpha() - fSpeed * Core::System->GetTime(), 0.0f));
+                    oBurst.SetSize (coreVector2(0.1f,0.1f) * (fScale * (1.0f - oBurst.GetAlpha())));
+                    oBurst.Move();
+                    oBurst.Render();
+                }
             }
             glEnable(GL_DEPTH_TEST);
         }
@@ -74,7 +101,7 @@ void cDistortion::Update()
 
 
 // ****************************************************************
-// 
+// create animated distortion-wave
 void cDistortion::CreateWave(const coreVector3& vPosition, const coreFloat& fScale, const coreFloat& fSpeed)
 {
     // 
@@ -82,12 +109,24 @@ void cDistortion::CreateWave(const coreVector3& vPosition, const coreFloat& fSca
     coreObject2D& oWave = m_aWave[m_iCurWave];
 
     // 
-    const coreVector4 vProjection = coreVector4(vPosition, 1.0f) * g_pForeground->GetViewProj();
+    oWave.SetPosition(g_pForeground->Project(vPosition) * DISTORTION_SCALE_FACTOR);
+    oWave.SetColor4  (coreVector4(fScale, fSpeed, 0.0f, 1.0f));
+}
+
+
+// ****************************************************************
+// create animated distortion-burst
+void cDistortion::CreateBurst(const coreVector3& vPosition, const coreVector2& vDirection, const coreFloat& fScale, const coreFloat& fSpeed)
+{
+    ASSERT(vDirection.IsNormalized() && (fScale > 0.0f))
 
     // 
-    oWave.SetPosition(vProjection.xy() * (RCP(vProjection.w) * 0.5f * DISTORTION_SCALE_FACTOR));
-    oWave.SetSize    (coreVector2(1.0f,1.0f) * MAX(fScale, 0.0f));
-    oWave.SetColor4  (coreVector4(fScale, fSpeed, 0.0f, 1.0f));
+    if(++m_iCurBurst >= DISTORTION_BURSTS) m_iCurBurst = 0u;
+    coreObject2D& oBurst = m_aBurst[m_iCurBurst];
+
+    // 
+    oBurst.SetPosition(g_pForeground->Project(vPosition) * DISTORTION_SCALE_FACTOR);
+    oBurst.SetColor4  (coreVector4(fScale, vDirection * fSpeed, 1.0f));
 }
 
 

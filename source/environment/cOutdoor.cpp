@@ -81,7 +81,7 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
     {
         // FUN FACT:
         // apparently a "similar" method has an U.S. patent by HP (http://www.google.co.in/patents/US6337684)
-        // how can someone "invent" the fundamental unit-sphere formula [1 = x*x + y*y + z*z] ?
+        // so they "invented" the fundamental unit-sphere formula [1 = x*x + y*y + z*z]
 
         // delete old data
         m_pNormalMap->Unload();
@@ -336,12 +336,49 @@ coreFloat cOutdoor::RetrieveHeight(const coreVector2& vPosition)
 
 
 // ****************************************************************
+// retrieve ray intersection point
+coreVector3 cOutdoor::RetrieveIntersect(const coreVector3& vRayPosition, const coreVector3& vRayDirection)
+{
+    ASSERT(vRayDirection.z < 0.0f)
+    coreVector3 vOutput = vRayPosition;
+
+    // naive ray-tracing with fixed step-size
+    for(coreUintW i = 100u; i--; )
+    {
+        ASSERT(i)
+
+        // 
+        if(ABS(vOutput.x) > I_TO_F(OUTDOOR_WIDTH/2) * OUTDOOR_DETAIL ||
+           ABS(vOutput.y) > I_TO_F(OUTDOOR_VIEW /2) * OUTDOOR_DETAIL)
+           break;
+
+        // 
+        const coreFloat& fCurHeight = this->RetrieveHeight(vOutput.xy());
+        if(fCurHeight > vOutput.z)
+        {
+            // 
+            vOutput += vRayDirection * (2.0f * (fCurHeight - vOutput.z) * RCP(vRayDirection.z));
+            break;
+        }
+
+        // 
+        vOutput += vRayDirection * 2.0f;
+    }
+
+    return vOutput;
+}
+
+
+// ****************************************************************
 // set current fly offset
 void cOutdoor::SetFlyOffset(const coreFloat& fFlyOffset)
 {
     // set new value
     m_fFlyOffset = fFlyOffset;
     ASSERT(F_TO_UI(m_fFlyOffset) < OUTDOOR_HEIGHT)
+
+    // 
+    this->SetPosition(coreVector3(0.0f, m_fFlyOffset * -OUTDOOR_DETAIL, 0.0f));
 
     // calculate vertex and index offset
     m_iVertexOffset = F_TO_UI(m_fFlyOffset) * OUTDOOR_WIDTH;

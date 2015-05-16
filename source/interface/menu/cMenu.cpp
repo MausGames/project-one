@@ -42,8 +42,11 @@ void cMenu::Move()
     coreMenu::Move();
 
     // control mouse with joystick
-    Core::Input->UseMouseWithJoystick(0u, 0u, 1u, 0.4f);
-    Core::Input->UseMouseWithJoystick(1u, 0u, 1u, 0.4f);
+    for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
+    {
+        Core::Input->ForwardDpadToStick(i);
+        Core::Input->UseMouseWithJoystick(i, 0u, 1u, 0.4f);
+    }
 
     if(this->GetCurSurface() == SURFACE_INTRO)
     {
@@ -61,6 +64,9 @@ void cMenu::Move()
             ASSERT(!g_pGame)
             g_pGame = new cGame(false);
             g_pGame->LoadMission(cViridoMission::ID);
+
+            // 
+            if(!Core::Debug->IsEnabled()) Core::Input->ShowCursor(false);
 
             // TODO: menue-riss bei start oder seitlicher fade-out # 
 

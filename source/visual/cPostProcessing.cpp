@@ -60,7 +60,7 @@ void cPostProcessing::Apply()
     // switch back to default frame buffer (again)
     coreFrameBuffer::EndDraw();
 
-    // 
+    // reduce background intensity
     //if(g_pGame && (g_pGame->GetTimeMission() >= 2.0f))
     //     this->SetAlpha(MAX(this->GetAlpha() - 0.1f*Core::System->GetTime(), 0.9f));
     //else this->SetAlpha(MIN(this->GetAlpha() + 0.1f*Core::System->GetTime(), 1.0f));
@@ -125,7 +125,7 @@ void cPostProcessing::SetSideOpacity(const coreFloat& fValue)
     // change color instead of transparency (blending is disabled)
     const coreVector3 vColor = coreVector3(1.0f,1.0f,1.0f) * CLAMP(fValue, 0.0f, 1.0f);
 
-    // 
+    // update all relevant side-objects
     for(coreUintW i = 0u; i < 2u; ++i) m_aSideArea[i].SetColor3(vColor);
     m_Watermark.SetColor3(vColor * MENU_CONTRAST_WHITE);
 }

@@ -13,10 +13,10 @@
 
 // ****************************************************************
 // player definitions
-#define PLAYER_WEAPONS          (1u)        // number of weapons a player can carry
-#define PLAYER_COLLISION_SIZE   (0.2f)      // 
-#define PLAYER_DARK_INVINCIBLE  (0.5f)      // 
-#define PLAYER_DARK_BUBBLE_SIZE (5.2f)      // 
+#define PLAYER_WEAPONS          (1u)     // number of weapons a player can carry
+#define PLAYER_COLLISION_SIZE   (0.2f)   // 
+#define PLAYER_DARK_INVINCIBLE  (0.5f)   // 
+#define PLAYER_DARK_BUBBLE_SIZE (5.2f)   // 
 
 #define PLAYER_SHIP_ATK   (0u)   // 
 #define PLAYER_SHIP_DEF   (1u)   // 
@@ -51,8 +51,9 @@ private:
     coreUint32 m_iChainValue[2];                // 
     coreFloat  m_fChainCooldown;                // 
 
-    coreFlow       m_fDarkAnimation;            // 
     coreProgramPtr m_pDarkProgram;              // 
+    coreFlow       m_fDarkAnimation;            // 
+    coreFloat      m_fDarkTime;                 //            
 
     coreVector2 m_vNewPos;                      // new position for smooth movement and animation
 
@@ -110,6 +111,7 @@ public:
     inline const coreUint32&  GetCurChain     ()const                        {return m_iChainValue[0];}
     inline const coreUint32&  GetMaxChain     ()const                        {return m_iChainValue[1];}
     inline const coreFloat&   GetChainCooldown()const                        {return m_fChainCooldown;}
+    inline const coreFloat&   GetDarkTime     ()const                        {return m_fDarkTime;}
     inline const coreVector2& GetNewPos       ()const                        {return m_vNewPos;}
 };
 

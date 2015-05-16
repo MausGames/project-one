@@ -12,6 +12,8 @@
 
 // TODO: cache environment resources on loading (currently 100s of resource lookups)
 // TODO: merge stone diff and norm textures (own shader ?)
+// TODO: clouds on grass background need no heap allocation! (beware of _FillInfinite and destructor delete)
+// TODO: cleanup-function for background batch-lists ?
 
 
 // ****************************************************************
@@ -33,17 +35,18 @@
 class INTERFACE cBackground
 {
 protected:
-    coreFrameBuffer m_iFrameBuffer;                     // background frame buffer (intern, multisampled)
-    coreFrameBuffer m_iResolvedTexture;                 // resolved texture
+    coreFrameBuffer m_iFrameBuffer;                        // background frame buffer (intern, multisampled)
+    coreFrameBuffer m_iResolvedTexture;                    // resolved texture
 
-    cOutdoor* m_pOutdoor;                               // outdoor-surface object (optional)
-    cWater*   m_pWater;                                 // water-surface object (optional)
+    cOutdoor* m_pOutdoor;                                  // outdoor-surface object (optional)
+    cWater*   m_pWater;                                    // water-surface object (optional)
 
-    std::vector<coreBatchList*> m_apGroundObjectList;   // persistent objects connected to the ground
-    std::vector<coreBatchList*> m_apDecalObjectList;    // persistent transparent objects connected to the ground
-    std::vector<coreBatchList*> m_apAirObjectList;      // persistent objects floating in the air
+    std::vector<coreBatchList*> m_apGroundObjectList;      // persistent objects connected to the ground
+    std::vector<coreBatchList*> m_apDecalObjectList;       // persistent transparent objects connected to the ground
+    std::vector<coreBatchList*> m_apAirObjectList;         // persistent objects floating in the air
 
-    std::vector<coreObject3D*> m_apAddObject;           // temporary additional objects
+    std::vector<coreObject3D*>            m_apAddObject;   // temporary additional objects
+    coreLookup<coreUint8, coreBatchList*> m_apAddList;     // 
 
 
 public:
@@ -58,7 +61,10 @@ public:
     void Move();
 
     // manage additional objects
-    void AddObject(coreObject3D* pObject, const coreVector3& vRelativePos);
+    void AddObject   (coreObject3D* pObject, const coreVector3& vRelativePos);
+    void AddObject   (coreObject3D* pObject, const coreVector3& vRelativePos, const coreUint8& iListIndex);
+    void AddList     (const coreUint8& iListIndex, const coreUint32& iCapacity, const coreChar* pcProgramInstancedName);
+    void ShoveObjects(const coreFloat& fOffset);
     void ClearObjects();
 
     // access frame buffer

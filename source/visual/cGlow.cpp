@@ -41,8 +41,8 @@ void cGlow::Update()
 {
     if(!g_CurConfig.Graphics.iGlow) return;
 
-    // create glow only with active objects
-    if(!m_apObject.empty() || std::any_of(m_apList.begin(), m_apList.end(), [](const coreBatchList* pList) {return pList->GetCurEnabled() ? true : false;}))
+    // create glow only with active game
+    if(g_pGame)
     {
         // draw into first blur stage
         m_aiBlurStage[0].StartDraw();

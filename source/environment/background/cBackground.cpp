@@ -49,7 +49,7 @@ cBackground::~cBackground()
 
     // clear memory
     m_apGroundObjectList.clear();
-    m_apAirObjectList.clear();
+    m_apAirObjectList   .clear();
 
     // delete outdoor-surface object
     SAFE_DELETE(m_pOutdoor)
@@ -83,10 +83,6 @@ void cBackground::Render()
             cShadow::EnableShadowRead(SHADOW_HANDLE_OBJECT);
             cShadow::EnableShadowRead(SHADOW_HANDLE_OBJECT_INST);
 
-            // render all additional objects
-            FOR_EACH(it, m_apAddObject)
-                (*it)->Render();
-
             // render all ground objects
             FOR_EACH(it, m_apGroundObjectList)
                 (*it)->Render();
@@ -94,7 +90,19 @@ void cBackground::Render()
             // render the outdoor-surface
             if(m_pOutdoor) m_pOutdoor->Render();
 
-            // TODO # put transparent additional objects and decals here (to be in water) 
+            glEnable (GL_BLEND);
+            glDisable(GL_DEPTH_TEST);
+            {
+                // render all transparent ground objects
+                FOR_EACH(it, m_apDecalObjectList)
+                    (*it)->Render();
+
+                // render all additional objects (instancing first)
+                FOR_EACH(it, m_apAddList)   (*it)->Render();
+                FOR_EACH(it, m_apAddObject) (*it)->Render();
+            }
+            glDisable(GL_BLEND);
+            glEnable (GL_DEPTH_TEST);
 
             // render the water-surface
             if(m_pWater) m_pWater->Render(&m_iFrameBuffer);
@@ -103,10 +111,6 @@ void cBackground::Render()
 
         glDisable(GL_DEPTH_TEST);
         {
-            // render all transparent ground objects
-            FOR_EACH(it, m_apDecalObjectList)
-                (*it)->Render();
-
             // render all air objects
             FOR_EACH(it, m_apAirObjectList)
                 (*it)->Render();
@@ -144,7 +148,7 @@ void cBackground::Move()
         m_pWater->Move();
     }
 
-    // control and move all objects
+    // control and move all persistent objects
     auto nControlObjectsFunc = [](std::vector<coreBatchList*>* OUTPUT papList, const coreFloat& fRange)
     {
         FOR_EACH(it, *papList)
@@ -173,7 +177,27 @@ void cBackground::Move()
     nControlObjectsFunc(&m_apDecalObjectList,  80.0f);
     nControlObjectsFunc(&m_apAirObjectList,    75.0f);
 
-    // TODO # handle additional objects 
+    // control all additional objects
+    auto nControlAddFunc = [](std::vector<coreObject3D*>* OUTPUT papObject, const coreFloat& fRange)
+    {
+        FOR_EACH_DYN(it, *papObject)
+        {
+            // 
+            if(coreMath::InRange((*it)->GetPosition().y, g_pEnvironment->GetCameraPos().y, fRange)) DYN_KEEP(it)
+            else
+            {
+                // 
+                SAFE_DELETE(*it)
+                DYN_REMOVE(it, *papObject)
+            }
+        }
+    };
+    nControlAddFunc(&m_apAddObject, 80.0f);
+    FOR_EACH(it, m_apAddList) nControlAddFunc((*it)->List(), 80.0f);
+
+    // move all additional objects
+    FOR_EACH(it, m_apAddObject) (*it)->Move();
+    FOR_EACH(it, m_apAddList)   (*it)->MoveNormal();
 
     // call individual move routine
     this->__MoveOwn();
@@ -184,7 +208,71 @@ void cBackground::Move()
 // add additional object
 void cBackground::AddObject(coreObject3D* pObject, const coreVector3& vRelativePos)
 {
-    // TODO # object gets shadow-shader 
+    ASSERT(pObject)
+
+    // TODO # object gets shadow-shader (also below) 
+
+    // 
+    pObject->SetPosition(vRelativePos + coreVector3(g_pEnvironment->GetCameraPos().xy(), 0.0f));
+    m_apAddObject.push_back(pObject);
+}
+
+void cBackground::AddObject(coreObject3D* pObject, const coreVector3& vRelativePos, const coreUint8& iListIndex)
+{
+    ASSERT(pObject && m_apAddList.count(iListIndex))
+
+    // 
+    pObject->SetPosition(vRelativePos + coreVector3(g_pEnvironment->GetCameraPos().xy(), 0.0f));
+    m_apAddList.at(iListIndex)->BindObject(pObject);
+}
+
+
+// ****************************************************************
+// 
+void cBackground::AddList(const coreUint8& iListIndex, const coreUint32& iCapacity, const coreChar* pcProgramInstancedName)
+{
+    // 
+    coreBatchList* pList;
+    if(!m_apAddList.count(iListIndex))
+    {
+        // 
+        pList = new coreBatchList(iCapacity);
+        m_apAddList[iListIndex] = pList;
+    }
+    else
+    {
+        // 
+        pList = m_apAddList[iListIndex];
+        pList->Reallocate(iCapacity);
+    }
+
+    // 
+    pList->DefineProgram(pcProgramInstancedName);
+}
+
+
+// ****************************************************************
+// 
+void cBackground::ShoveObjects(const coreFloat& fOffset)
+{
+    // 
+    FOR_EACH(it, m_apAddObject)
+    {
+        // 
+        const coreVector3& vPos = (*it)->GetPosition();
+        (*it)->SetPosition(coreVector3(vPos.x, vPos.y + fOffset, vPos.z));
+    }
+
+    // 
+    FOR_EACH(it, m_apAddList)
+    {
+        FOR_EACH(et, *(*it)->List())
+        {
+            // 
+            const coreVector3& vPos = (*et)->GetPosition();
+            (*et)->SetPosition(coreVector3(vPos.x, vPos.y + fOffset, vPos.z));
+        }
+    }
 }
 
 
@@ -192,7 +280,18 @@ void cBackground::AddObject(coreObject3D* pObject, const coreVector3& vRelativeP
 // remove all additional objects
 void cBackground::ClearObjects()
 {
-    // TODO # 
+    // 
+    FOR_EACH(it, m_apAddObject) SAFE_DELETE(*it)
+    FOR_EACH(it, m_apAddList)
+    {
+        // 
+        FOR_EACH(et, *(*it)->List()) SAFE_DELETE(*et)
+        SAFE_DELETE(*it)
+    }
+
+    // clear memory
+    m_apAddObject.clear();
+    m_apAddList  .clear();
 }
 
 

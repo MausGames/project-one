@@ -23,7 +23,9 @@ cEnvironment*    g_pEnvironment        = NULL;
 cMenu*           g_pMenu               = NULL;
 cGame*           g_pGame               = NULL;
 
-static coreUint64 m_iOldPerfTime = 0u;   // 
+static coreUint64 m_iOldPerfTime = 0u;   // last measured high-precision time value
+static void LockFramerate();             // lock framerate and override elapsed time
+static void DebugGame();                 // debug and test game separately
 
 
 // ****************************************************************
@@ -45,8 +47,8 @@ void CoreApp::Init()
     // load configuration
     LoadConfig();
 
-    // 
-    g_MusicPlayer.AddMusicFolder("data/music/", "*.ogg");
+    // load all available music files
+    g_MusicPlayer.AddMusicFolder("data/music", "*.ogg");
     g_MusicPlayer.Control()->Play();
 
     // create and init main components
@@ -86,7 +88,7 @@ void CoreApp::Exit()
     }
     cShadow::GlobalExit();
 
-    // 
+    // remove all music files
     g_MusicPlayer.ClearMusic();
 
     // save configuration
@@ -100,10 +102,8 @@ void CoreApp::Render()
 {
     Core::Debug->MeasureStart("Update");
     {
-        // update the glow-effect
-        g_pGlow->Update();
-
-        // update the distortion-effect
+        // update glow- and distortion-effect
+        g_pGlow      ->Update();
         g_pDistortion->Update();
 
         // update the shadow map class
@@ -164,110 +164,161 @@ void CoreApp::Render()
 // move the application
 void CoreApp::Move()
 {
-    if(g_pGame)
-    {
-        coreUint64 iNewPerfTime = 0u;
-        coreFloat  fDifference  = FRAMERATE_TIME;
-
-        // 
-        do
-        {
-            // sleep a bit on very high framerates (probably vsync disabled)
-            if(3.0f*fDifference < FRAMERATE_TIME)
-                SDL_Delay(1u);
-
-            // 
-            iNewPerfTime = SDL_GetPerformanceCounter();
-            fDifference  = coreFloat(coreDouble(iNewPerfTime - m_iOldPerfTime) * Core::System->GetPerfFrequency());
-        }
-        while(fDifference < FRAMERATE_TIME);
-
-        // 
-        m_iOldPerfTime = iNewPerfTime;
-
-        // override elapsed time to fixed value
-        if(Core::System->GetTime()) c_cast<coreFloat&>(Core::System->GetTime()) = FRAMERATE_TIME;
-    }
+    // lock framerate and override elapsed time
+    if(g_pGame) LockFramerate();
 
     Core::Debug->MeasureStart("Move");
     {
         // update input interface
         UpdateInput();
 
-        // move the environment
+        // move environment, menu and game
         g_pEnvironment->Move();
-
-        // move the menu
-        g_pMenu->Move();
-
-        // move the game
+        g_pMenu       ->Move();
         if(g_pGame) g_pGame->Move();
 
         // move special-effects
         g_pSpecialEffects->Move();
+
+        // update the music-player
+        g_MusicPlayer.Update();
     }
     Core::Debug->MeasureEnd("Move");
 
-    // 
-    g_MusicPlayer.Update();
+    // debug and test game separately
+    if(Core::Debug->IsEnabled()) DebugGame();
+}
 
 
+// ****************************************************************
+// lock framerate and override elapsed time
+static void LockFramerate()
+{
+    coreUint64 iNewPerfTime = 0u;
+    coreFloat  fDifference  = FRAMERATE_TIME;
+
+    // spin as long as frame time is too low (to remove pattern dependencies and increase consistency and fairness)
+    do
+    {
+        // sleep a bit on very high framerates (probably vsync disabled)
+        if(3.0f*fDifference < FRAMERATE_TIME)
+            SDL_Delay(1u);
+
+        // measure and calculate current frame time
+        iNewPerfTime = SDL_GetPerformanceCounter();
+        fDifference  = coreFloat(coreDouble(iNewPerfTime - m_iOldPerfTime) * Core::System->GetPerfFrequency());
+    }
+    while(fDifference < FRAMERATE_TIME);
+
+    // save last high-precision time value
+    m_iOldPerfTime = iNewPerfTime;
+
+    // override elapsed time
+    if(Core::System->GetTime()) c_cast<coreFloat&>(Core::System->GetTime()) = FRAMERATE_TIME;
+}
 
 
+// ****************************************************************
+// debug and test game separately
+static void DebugGame()
+{
+    // ########################## DEBUG ##########################
 
-    // TODO ########################## 
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(K), CORE_INPUT_PRESS))
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(K), CORE_INPUT_PRESS))
+    {
+        SAFE_DELETE(g_pGame)
+    }
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(L), CORE_INPUT_PRESS))
+    {
+        if(!g_pGame)
         {
-            SAFE_DELETE(g_pGame)
+            g_pGame = new cGame(false);
+            g_pGame->LoadMission(cViridoMission::ID);
         }
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(L), CORE_INPUT_PRESS))
+    }
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS))
+        g_pEnvironment->ChangeBackground(cGrassBackground::ID);
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2), CORE_INPUT_PRESS))
+        g_pEnvironment->ChangeBackground(cSeaBackground::ID);
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS))
+        Core::System->Quit();
+
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(H), CORE_INPUT_PRESS))
+        g_pSpecialEffects->ShakeScreen(1.0f);
+
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(G), CORE_INPUT_PRESS))
+    {
+        if(g_pGame)
         {
-            if(!g_pGame)
-            {
-                g_pGame = new cGame(true);
-                g_pGame->LoadMission(cViridoMission::ID);
-            }
+            const coreVector3 vPos = g_pGame->GetPlayer(0u)->GetPosition();
+
+            g_pDistortion    ->CreateWave       (vPos, DISTORTION_WAVE_BIG);
+            g_pSpecialEffects->CreateSplashColor(vPos, SPECIAL_SPLASH_BIG, coreVector3(0.09f,0.387f,0.9f));
+            g_pSpecialEffects->CreateBlast      (vPos, SPECIAL_BLAST_BIG,  LERP(coreVector3(0.5f,0.5f,0.5f), coreVector3(0.09f,0.387f,0.9f), 0.5f));
+
+            g_pSpecialEffects->PlaySound(vPos, 1.0f, SOUND_EXPLOSION_ENERGY_BIG);
         }
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS))
-            g_pEnvironment->ChangeBackground(cGrassBackground::ID);
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2), CORE_INPUT_PRESS))
-            g_pEnvironment->ChangeBackground(cSeaBackground::ID);
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS))
-            Core::System->Quit();
-
-        if(!g_pGame) g_pEnvironment->SetTargetSpeed(2.0f);
-
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(H), CORE_INPUT_PRESS))
-            g_pSpecialEffects->ShakeScreen(1.0f);
-
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(G), CORE_INPUT_PRESS))
+    }
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(B), CORE_INPUT_PRESS))
+    {
+        if(g_pGame)
         {
-            if(g_pGame)
-            {
-                const coreVector3 vPos = g_pGame->GetPlayer(0u)->GetPosition();
+            const coreVector3 vPos = g_pGame->GetPlayer(0u)->GetPosition();
 
-                g_pDistortion    ->CreateWave      (vPos, -3.0f, 1.7f);
-                g_pSpecialEffects->CreateChargeDark(vPos, 35.0f, 40u);//, coreVector3(0.09f,0.387f,0.9f));
-                g_pDistortion    ->CreateWave      (vPos, DISTORTION_WAVE_BIG);
-                g_pSpecialEffects->CreateSplashDark(vPos, SPECIAL_SPLASH_BIG);//, COLOR_RED_F);
-
-                g_pSpecialEffects->PlaySound(vPos, 1.0f, SOUND_EXPLOSION_ENERGY_BIG);
-
-                //g_pSpecialEffects->CreateWave(vPos,      5.0f, 3.0f, coreVector3(0.3f,0.7f, 0.3f)  * 0.9f);
-                //g_pSpecialEffects->CreateParticleColorSplash(50u, vPos, 100.0f, coreVector3(0.3f,0.7f, 0.3f)  * 0.9f);
-                //g_pSpecialEffects->CreateWave(vPos,      5.0f, 3.0f, coreVector3(0.09f,0.387f,0.9f));
-            }
+            g_pDistortion    ->CreateWave      (vPos, DISTORTION_WAVE_SMALL);
+            g_pSpecialEffects->CreateSplashDark(vPos, SPECIAL_SPLASH_SMALL);//, COLOR_RED_F);
+            g_pSpecialEffects->CreateBlast     (vPos, SPECIAL_BLAST_SMALL, coreVector3(0.5f,0.5f,0.5f));
         }
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(F), CORE_INPUT_PRESS))
+    }
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(F), CORE_INPUT_PRESS))
+    {
+        if(g_pGame)
         {
-            if(g_pGame)
-            {
-                const coreVector3 vPos = g_pGame->GetPlayer(0u)->GetPosition();
-                g_pDistortion    ->CreateWave          (vPos, DISTORTION_WAVE_BIG);
-                g_pSpecialEffects->CreateDirectionColor(vPos, coreVector3(0.0f,1.0f,0.0f), SPECIAL_SPLASH_BIG, coreVector3(0.09f,0.387f,0.9f));
-
-                //g_pSpecialEffects->PlaySound(vPos, 1.0f, SOUND_EXPLOSION_ENERGY_BIG);
-            }
+            const coreVector3 vPos = g_pGame->GetPlayer(0u)->GetPosition();
+            g_pDistortion    ->CreateBurst    (vPos, coreVector2(1.0f,0.0f),      DISTORTION_WAVE_BIG);
+            g_pSpecialEffects->CreateBlowColor(vPos, coreVector3(1.0f,0.0f,0.0f), SPECIAL_BLOW_BIG, coreVector3(0.09f,0.387f,0.9f));
         }
-    // TODO ########################## 
+    }
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(V), CORE_INPUT_PRESS))
+    {
+        if(g_pGame)
+        {
+            const coreVector3 vPos = g_pGame->GetPlayer(0u)->GetPosition();
+            g_pDistortion    ->CreateBurst    (vPos, coreVector2(1.0f,0.0f),      DISTORTION_WAVE_SMALL);
+            g_pSpecialEffects->CreateBlowColor(vPos, coreVector3(1.0f,0.0f,0.0f), SPECIAL_BLOW_SMALL, coreVector3(0.09f,0.387f,0.9f));
+        }
+    }
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(N), CORE_INPUT_PRESS))
+    {
+        if(g_pGame)
+        {
+            const coreVector3 vPos = g_pGame->GetPlayer(0u)->GetPosition();
+
+            g_pDistortion    ->CreateWave       (vPos, DISTORTION_WAVE_SMALL);
+            g_pSpecialEffects->CreateSplashFire (vPos, SPECIAL_EXPLOSION_SMALL);
+            g_pSpecialEffects->CreateSplashColor(vPos, SPECIAL_SPLASH_SMALL, coreVector3(234.0f/255.0f, 72.0f/255.0f, 10.0f/255.0f) * 1.08f);
+            g_pSpecialEffects->PlaySound        (vPos, 1.0f, SOUND_EXPLOSION_PHYSICAL_SMALL);
+            g_pSpecialEffects->ShakeScreen      (SPECIAL_SHAKE_SMALL);
+
+
+        }
+    }
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(M), CORE_INPUT_PRESS))
+    {
+        if(g_pGame)
+        {
+            const coreVector3 vPos = g_pGame->GetPlayer(0u)->GetPosition();
+            //g_pDistortion    ->CreateWave       (vPos, DISTORTION_WAVE_BIG);
+            //g_pSpecialEffects->CreateSplashFire (vPos, SPECIAL_EXPLOSION_BIG);
+            //g_pSpecialEffects->CreateSplashColor(vPos, SPECIAL_SPLASH_BIG, coreVector3(234.0f/255.0f, 72.0f/255.0f, 10.0f/255.0f) * 1.08f);
+            //g_pSpecialEffects->PlaySound        (vPos, 1.0f, SOUND_EXPLOSION_PHYSICAL_BIG);
+            //g_pSpecialEffects->ShakeScreen      (SPECIAL_SHAKE_BIG);
+
+            //g_pSpecialEffects->MacroExplosionPhysicalBig(vPos);
+
+            g_pSpecialEffects->CreateRing(vPos, coreVector3(0.0f,0.0f,1.0f), coreVector3(0.0f,1.0f,0.0f), SPECIAL_BLAST_BIG, LERP(coreVector3(0.5f,0.5f,0.5f), coreVector3(0.09f,0.387f,0.9f), 0.5f));
+        }
+    }
+
+    // ########################## DEBUG ##########################
 }

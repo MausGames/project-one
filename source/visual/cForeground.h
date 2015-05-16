@@ -34,14 +34,14 @@ public:
     void Start();
     void End();
 
+    // project world-position into screen-space
+    inline FUNC_PURE coreVector2 Project(const coreVector3& vPosition) {const coreVector4 A = coreVector4(vPosition, 1.0f) * m_mViewProj; return A.xy() * (RCP(A.w) * 0.5f);}
+
     // clear the foreground
     inline void Clear() {m_iFrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);}
 
     // access frame buffer
     inline coreFrameBuffer* GetFrameBuffer() {return &m_iFrameBuffer;}
-
-    // get object properties
-    inline const coreMatrix4& GetViewProj()const {return m_mViewProj;}
 
 
 private:

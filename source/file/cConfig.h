@@ -48,12 +48,12 @@ struct cConfig
 {
     struct
     {
-        coreUint8 iTransparent;   // 
+        coreUint8 iTransparent;   // transparent player bullets
         struct
         {
-            coreUint8 iDamage;    // 
-            coreUint8 iChain;     // 
-            coreUint8 iCombo;     // 
+            coreUint8 iDamage;    // show damage as combat text
+            coreUint8 iChain;     // show chain as combat text
+            coreUint8 iCombo;     // show combo as combat text
         }
         Combat;
     }

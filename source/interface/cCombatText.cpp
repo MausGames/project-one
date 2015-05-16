@@ -35,7 +35,7 @@ cCombatText::cCombatText()noexcept
     for(coreUintW i = 0u; i < COMBAT_LABELS; ++i)
         m_aLabel[i].Construct(MENU_FONT_MEDIUM_2, 16u);
 
-    // 
+    // reset animation timers
     std::memset(m_afTimer, 0, sizeof(m_afTimer));
 }
 
@@ -83,7 +83,7 @@ void cCombatText::Move()
             // update animation timer
             fCurTimer = MAX(fCurTimer - 0.8f*Core::System->GetTime(), 0.0f);
 
-            // 
+            // move overlaying label objects away from each other
             for(coreUintW j = i+1u; j < COMBAT_LABELS; ++j)
             {
                 if(m_afTimer[j])
@@ -121,16 +121,13 @@ void cCombatText::Move()
 
 
 // ****************************************************************
-// 
+// add new combat text
 void cCombatText::AddText(const coreChar* pcText, const coreVector3& vPosition, const coreVector3& vColor)
 {
     ASSERT(pcText)
 
-    // 
-    const coreVector4 vProjection = coreVector4(vPosition, 1.0f) * g_pForeground->GetViewProj();
-
-    // 
-    m_aData.push_back(sData(pcText, vProjection.xy() * (RCP(vProjection.w) * 0.5f), vColor));
+    // insert new text data
+    m_aData.push_back(sData(pcText, g_pForeground->Project(vPosition), vColor));
 }
 
 

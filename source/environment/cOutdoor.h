@@ -87,7 +87,8 @@ public:
     void LoadGeometry(const coreUint8& iAlgorithm, const coreFloat& fGrade);
 
     // retrieve height value
-    coreFloat RetrieveHeight(const coreVector2& vPosition);
+    coreFloat   RetrieveHeight   (const coreVector2& vPosition);
+    coreVector3 RetrieveIntersect(const coreVector3& vRayPosition, const coreVector3& vRayDirection);
 
     // access shadow map object
     inline cShadow* GetShadowMap() {return &m_ShadowMap;}

@@ -10,8 +10,6 @@
 #ifndef _P1_GUARD_COMBATTEXT_H_
 #define _P1_GUARD_COMBATTEXT_H_
 
-// TODO: implement health and chain bars, sparks and darkness bar
-
 
 // ****************************************************************
 // combat text definitions

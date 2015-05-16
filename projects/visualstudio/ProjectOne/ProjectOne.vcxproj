@@ -41,6 +41,7 @@
     <ClCompile Include="..\..\..\source\game\cWeapon.cpp" />
     <ClCompile Include="..\..\..\source\game\mission\01_cViridoMission.cpp" />
     <ClCompile Include="..\..\..\source\game\mission\cMission.cpp" />
+    <ClCompile Include="..\..\..\source\interface\cCombatStats.cpp" />
     <ClCompile Include="..\..\..\source\interface\cCombatText.cpp" />
     <ClCompile Include="..\..\..\source\interface\cInterface.cpp" />
     <ClCompile Include="..\..\..\source\interface\cMsgBox.cpp" />
@@ -73,6 +74,7 @@
     <ClInclude Include="..\..\..\source\game\cShip.h" />
     <ClInclude Include="..\..\..\source\game\cWeapon.h" />
     <ClInclude Include="..\..\..\source\game\mission\cMission.h" />
+    <ClInclude Include="..\..\..\source\interface\cCombatStats.h" />
     <ClInclude Include="..\..\..\source\interface\cCombatText.h" />
     <ClInclude Include="..\..\..\source\interface\cInterface.h" />
     <ClInclude Include="..\..\..\source\interface\cMsgBox.h" />

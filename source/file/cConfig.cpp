@@ -8,9 +8,9 @@
 //////////////////////////////////////////////////////
 #include "main.h"
 
-cConfig g_CurConfig;          // = NULL;
-cConfig g_OldConfig;          // = NULL;
-cInput  g_aInput[INPUT_SETS]; // = NULL;
+cConfig g_CurConfig;          // = 0x00;
+cConfig g_OldConfig;          // = 0x00;
+cInput  g_aInput[INPUT_SETS]; // = 0x00;
 
 
 // ****************************************************************
@@ -192,6 +192,9 @@ void UpdateInput()
         else   // # joystick/gamepad
         {
             const coreUintW iJoystickID = iType - INPUT_SETS_KEYBOARD;
+
+            // 
+            Core::Input->ForwardDpadToStick(iJoystickID);
 
             // map movement input
             oMap.vMove = Core::Input->GetJoystickRelative(iJoystickID);

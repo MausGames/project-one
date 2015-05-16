@@ -16,6 +16,7 @@ cPlayer::cPlayer()noexcept
 , m_iScoreMission  (0u)
 , m_fChainCooldown (0.0f)
 , m_fDarkAnimation (0.0f)
+, m_fDarkTime      (0.0f)
 , m_vNewPos        (coreVector2(0.0f,0.0f))
 {
     // load object resources
@@ -240,6 +241,24 @@ void cPlayer::Move()
         m_Bubble.SetTexOffset(coreVector2(0.0f, m_fDarkAnimation * 0.1f));
         m_Bubble.Move();
     }
+
+
+
+    // 
+    if(m_fDarkTime)
+    {
+        coreBool bGrace = false;
+
+        // 
+        Core::Manager::Object->TestCollision(TYPE_BULLET_ENEMY, &m_Bubble, [&bGrace](const cBullet* pBullet, const coreBool& bFirst)
+        {
+            bGrace = true;
+        });
+
+        // 
+        if((m_fDarkTime += (bGrace ? 0.25f : -0.5f) * Core::System->GetTime()) <= 0.0f) this->TransformDark(PLAYER_DARK_RESET);
+        m_fDarkTime = CLAMP(m_fDarkTime, 0.0f, 1.0f);
+    }
 }
 
 
@@ -401,6 +420,11 @@ void cPlayer::TransformDark(const coreUint8& iStatus)
         // 
         g_pDistortion    ->CreateWave      (this->GetPosition(), DISTORTION_WAVE_SMALL);
         g_pSpecialEffects->CreateSplashDark(this->GetPosition(), SPECIAL_SPLASH_SMALL);
+        g_pSpecialEffects->CreateBlast     (this->GetPosition(), SPECIAL_BLAST_SMALL, m_Bubble.GetColor3());
+
+        // 
+        m_fDarkAnimation = 0.0f;
+        m_fDarkTime      = 1.0f;
 
         // 
         this->EnableBubble();
@@ -412,6 +436,7 @@ void cPlayer::TransformDark(const coreUint8& iStatus)
         // 
         g_pDistortion    ->CreateWave      (this->GetPosition(), DISTORTION_WAVE_BIG);
         g_pSpecialEffects->CreateSplashDark(this->GetPosition(), SPECIAL_SPLASH_BIG);
+        g_pSpecialEffects->CreateBlast     (this->GetPosition(), SPECIAL_BLAST_BIG, m_Bubble.GetColor3());
 
         // 
         g_pGame->GetBulletManagerEnemy()->ForEachBullet([&](cBullet* OUTPUT pBullet)
@@ -421,7 +446,7 @@ void cPlayer::TransformDark(const coreUint8& iStatus)
 
             // 
             const coreVector2 vDir = (pBullet->GetPosition().xy() - this->GetPosition().xy()).Normalize();
-            g_pSpecialEffects->CreateDirectionColor(pBullet->GetPosition(), coreVector3(vDir, 0.0f), 60.0f, 2u, pBullet->GetColor3());
+            g_pSpecialEffects->CreateBlowColor(pBullet->GetPosition(), coreVector3(vDir, 0.0f), 60.0f, 2u, pBullet->GetColor3());
         });
     }
     else REMOVE_VALUE(m_iStatus, PLAYER_STATUS_DARKNESS)
@@ -440,9 +465,6 @@ void cPlayer::EnableBubble()
     // 
     m_Bubble.SetEnabled(CORE_OBJECT_ENABLE_ALL);
     g_pGlow->BindObject(&m_Bubble);
-
-    // 
-    m_fDarkAnimation = 0.0f;
 }
 
 

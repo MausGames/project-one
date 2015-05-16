@@ -73,6 +73,7 @@ private:
     virtual void __KillOwn        () {}
     virtual void __RenderOwnWeak  () {}
     virtual void __RenderOwnStrong() {}
+    virtual void __RenderOwnAfter () {}
     virtual void __MoveOwn        () {}
 };
 

@@ -29,12 +29,21 @@ cViridoMission::cViridoMission()noexcept
 // setup the Virido mission
 void cViridoMission::__SetupOwn()
 {
+    //STAGE_MAIN
+    //{
+    //    // 
+    //    if(STAGE_SUB(0.0f)) m_Crossfield.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
+    //
+    //    // 
+    //    if(g_pGame->GetEnemyList()->empty())
+    //        STAGE_FINISH_NOW
+    //});
+
     STAGE_MAIN
     {
         // 
-        if(STAGE_SUB(0.0f)) m_Crossfield.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
-        if(STAGE_SUB(0.0f)) m_Torus     .Resurrect(coreVector2(0.0f,0.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
-        if(STAGE_SUB(0.0f)) m_Vaus      .Resurrect(coreVector2(0.0f,0.5f) * FOREGROUND_AREA, coreVector2(1.0f, 0.0f));
+        if(STAGE_SUB(0.0f)) m_Torus.Resurrect(coreVector2(0.0f,0.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
+        //if(STAGE_SUB(0.0f)) m_Vaus.Resurrect(coreVector2(0.0f,0.5f) * FOREGROUND_AREA, coreVector2(1.0f, 0.0f));
 
         // 
         if(g_pGame->GetEnemyList()->empty())
