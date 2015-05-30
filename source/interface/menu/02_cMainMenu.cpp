@@ -19,7 +19,7 @@ cMainMenu::cMainMenu()noexcept
     m_GameLogo.DefineProgram("menu_sharp_program");
     m_GameLogo.DefineTexture(0, "game_logo.png");
     m_GameLogo.SetPosition  (coreVector2(0.0f,0.17f));
-    m_GameLogo.SetSize      (coreVector2(1.0f,1.0f) * 0.4f);
+    m_GameLogo.SetSize      (coreVector2(1.0f,1.0f) * 0.42f);
     m_GameLogo.SetColor3    (coreVector3(1.0f,1.0f,1.0f) * 1.15f);
 
     m_Background.DefineProgram("menu_border_program");

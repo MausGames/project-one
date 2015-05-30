@@ -12,30 +12,17 @@
 // ****************************************************************
 // constructor
 cVausBoss::cVausBoss()noexcept
-: m_fAnimation (0.0f)
+: m_iScoutOrder (0u)
 {
     // load models
     this->DefineModel   ("ship_boss_vaus_high.md3");
     this->DefineModelLow("ship_boss_vaus_low.md3");
 
     // 
-    this->SetSize             (coreVector3(2.5f,2.5f,2.5f));
-    //this->SetCollisionModifier(coreVector3(0.8f,0.8f,1.0f));
+    this->SetSize(coreVector3(2.5f,2.5f,2.5f));
 
     // configure the boss
     this->Configure(10000, coreVector3(51.0f/360.0f, 100.0f/100.0f, 85.0f/100.0f).HSVtoRGB());
-
-
-
-    m_Paddle.DefineModel  ("object_paddle.md3");
-    m_Paddle.DefineTexture(0u, "effect_energy.png");
-    m_Paddle.DefineProgram("effect_energy_direct_program");
-    m_Paddle.SetSize      (coreVector3(3.5f,2.5f,2.5f));
-    m_Paddle.SetColor3    (coreVector3(0.1f,0.43f,1.0f));
-    m_Paddle.SetTexSize   (coreVector2(1.2f,0.25f) * 0.5f);
-
-
-
 }
 
 
@@ -43,6 +30,8 @@ cVausBoss::cVausBoss()noexcept
 // destructor
 cVausBoss::~cVausBoss()
 {
+    // 
+    s_cast<cViridoMission*>(g_pGame->GetMission())->DisablePaddle(0u, false);
 }
 
 
@@ -50,8 +39,11 @@ cVausBoss::~cVausBoss()
 // 
 void cVausBoss::__ResurrectOwn()
 {
-    g_aaOutline[PRIO_STRONG][STYLE_DIRECT].BindObject(&m_Paddle);
-    g_pGlow->BindObject(&m_Paddle);
+    cViridoMission* pMission = s_cast<cViridoMission*>(g_pGame->GetMission());
+
+    // 
+    pMission->EnableBall  (0u, coreVector2(0.0f,0.0f), coreVector2(-0.5f,1.0f).Normalize());
+    pMission->EnablePaddle(0u);
 }
 
 
@@ -59,26 +51,10 @@ void cVausBoss::__ResurrectOwn()
 // 
 void cVausBoss::__KillOwn()
 {
-    g_aaOutline[PRIO_STRONG][STYLE_DIRECT].UnbindObject(&m_Paddle);
-    g_pGlow->UnbindObject(&m_Paddle);
-}
+    cViridoMission* pMission = s_cast<cViridoMission*>(g_pGame->GetMission());
 
-
-// ****************************************************************
-// 
-void cVausBoss::__RenderOwnWeak()
-{
-}
-
-
-// ****************************************************************
-// 
-void cVausBoss::__RenderOwnStrong()
-{
     // 
-    glDepthFunc(GL_ALWAYS);
-    m_Paddle.Render();
-    glDepthFunc(GL_LEQUAL);
+    pMission->DisablePaddle(0u, true);
 }
 
 
@@ -86,20 +62,106 @@ void cVausBoss::__RenderOwnStrong()
 // 
 void cVausBoss::__MoveOwn()
 {
+    cViridoMission* pMission = s_cast<cViridoMission*>(g_pGame->GetMission());
+    coreObject3D*   pBall    = pMission->GetBall(0u);
+
+  
+
+    // ################################################################
+    // 
+    if(m_iPhase == 0u)
+    {
+        PHASE_CONTROL_TIMER(0u, 0.25f, LERP_BREAK)
+        {
+            // 
+            this->DefaultMoveLerp(coreVector2(0.0f,-2.0f), coreVector2(this->GetPosition().x / FOREGROUND_AREA.x, -0.95f), fTime);
+
+            // 
+            if(PHASE_FINISHED)
+                ++m_iPhase;
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 1u)
+    {
+        PHASE_CONTROL_TICKER(0u, 0u, 2.0f)
+        {
+            m_iPhase = 10u;
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 10u)
+    {
+        PHASE_CONTROL_TICKER(0u, 0u, 2.0f)
+        {
+            m_iPhase = 10u;
+
+        });
+    }
 
 
+    PHASE_CONTROL_TICKER(2u, 0u, 1.0f)
+    {
+        for(coreUintW i = 0u; i < VIRIDO_SCOUTS; ++i)
+        {
+            cScoutEnemy* pScout = pMission->GetScout(i);
+
+            cPlayer* pPlayer = g_pGame->FindPlayer(pScout->GetPosition().xy());
+
+            const coreVector2 vDir = (pPlayer->GetPosition().xy() - pScout->GetPosition().xy()).Normalize();
+
+            g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.4f, this, pScout->GetPosition().xy(), vDir)->MakeYellow();
+        }
+
+    });
+
+
+    for(coreUintW i = 0u; i < VIRIDO_SCOUTS; ++i)
+    {
+        cScoutEnemy* pScout = pMission->GetScout(i);
+
+        const coreVector2 vGridPos = coreVector2(-0.7f + 0.2f*I_TO_F(i%8u), 0.5f + 0.2f*I_TO_F((i/8u + (CONTAINS_BIT(m_iScoutOrder, i%8u) ? 1u : 0u)) & 0x01u)) * FOREGROUND_AREA;
+
+        if(CONTAINS_VALUE(pScout->GetStatus(), ENEMY_STATUS_DEAD))
+        {
+            m_iScoutOrder ^= BIT(i%8u);
+            pScout->Resurrect(vGridPos + coreVector2(0.0f, 2.0f*FOREGROUND_AREA.y), coreVector2(0.0f,-1.0f));
+        }
+
+        pScout->DefaultMoveSmooth(vGridPos, 4.0f, 40.0f);
+    }
+
+    STATIC_ASSERT(VIRIDO_SCOUTS/2u <= sizeof(m_iScoutOrder)*8u)
+
+
+    const coreVector2 vDiff  = pBall->GetPosition().xy() - this->GetPosition().xy();
+    const coreFloat   fSpeed = vDiff.x * RCP(MAX((ABS(vDiff.y) - 5.0f) / 5.0f, 1.0f));
 
     // 
-    m_fAnimation.Update(-1.0f);
+    this->SetPosition(coreVector3(this->GetPosition().x + fSpeed, this->GetPosition().yz()));
 
-    //// rotate around z-axis
-    //const coreVector2 vDir = coreVector2::Direction(m_fAnimation);
-    //this->SetOrientation(coreVector3(0.0f, vDir));
 
-    m_Paddle.SetPosition   (coreVector3(this->GetPosition ().xy() + this->GetDirection().xy().Rotate90() * 3.0f, 0.0f));
-    m_Paddle.SetDirection  (coreVector3(this->GetDirection().xy().Rotate90(), 0.0f));
-    m_Paddle.SetOrientation(this->GetOrientation());
-    m_Paddle.SetTexOffset  (coreVector2(0.0f, m_fAnimation * -0.1f));
-    m_Paddle.Move();
+
+    if(pMission->GetPaddleBounce(0u))
+    {
+        const coreVector2 vPos = this->GetPosition().xy();
+
+        const coreFloat fAngle = this->GetDirection().xy().Angle();
+        for(coreUintW i = 0u; i < 7u; ++i)
+        {
+            //if(3u <= i && i <= 3u) continue;
+
+            const coreVector2 vDir = coreVector2::Direction(fAngle + 0.25f * I_TO_F(i - 3u));
+            g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.6f - 0.2f * ABS(I_TO_F(i - 3u)), this, vPos + vDir*5.0f, vDir);
+            g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.6f - 0.2f * ABS(I_TO_F(i - 3u)), this, vPos + vDir*2.5f, vDir);
+        }
+
+        //g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.0f, this, this->GetPosition().xy(), this->GetDirection().xy());
+    }
+
 
 }

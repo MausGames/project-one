@@ -122,9 +122,9 @@ public:
     void ShowTooltip() {}
 
     // default menu routines
-    static void        UpdateButton(coreButton* OUTPUT pButton, const coreBool& bFocused);
-    static coreVector3 HealthColor (const coreFloat& fValue);
-    static coreVector3 ChainColor  (const coreFloat& fValue);
+    static void UpdateButton(coreButton* OUTPUT pButton, const coreBool& bFocused);
+    static coreVector3 FUNC_CONST HealthColor(const coreFloat& fValue);
+    static coreVector3 FUNC_CONST ChainColor (const coreFloat& fValue);
 };
 
 

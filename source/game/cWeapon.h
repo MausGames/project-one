@@ -10,6 +10,8 @@
 #ifndef _P1_GUARD_WEAPON_H_
 #define _P1_GUARD_WEAPON_H_
 
+// TODO: weapons have to share their cooldown!! otherwise you can cheat
+
 
 // ****************************************************************
 // weapon interface
@@ -46,6 +48,7 @@ public:
 
 private:
     // own routines for derived classes
+    virtual void __UpdateOwn (const coreBool& bShootStatus) {}
     virtual void __TriggerOwn() {}
     virtual void __ReleaseOwn() {}
     virtual void __ShootOwn  () {}
@@ -68,6 +71,10 @@ public:
 // ray weapon class
 class cRayWeapon final : public cWeapon
 {
+private:
+    coreBool m_bSide;   // 
+
+
 public:
     cRayWeapon()noexcept;
 
@@ -76,7 +83,7 @@ public:
 
 
 private:
-    //shoot with the ray weapon
+    // shoot with the ray weapon
     void __ShootOwn()override;
 };
 
@@ -86,7 +93,7 @@ private:
 class cPulseWeapon final : public cWeapon
 {
 private:
-    coreUint8 m_iCharge;   // 
+    coreFloat m_fCharge;   // 
     coreBool  m_bSide;     // 
 
 
@@ -98,8 +105,9 @@ public:
 
 
 private:
-    //shoot with the pulse weapon
-    void __ShootOwn()override;
+    // update and shoot with the pulse weapon
+    void __UpdateOwn(const coreBool& bShootStatus)override;
+    void __ShootOwn ()override;
 };
 
 
@@ -107,11 +115,21 @@ private:
 // wave weapon class
 class cWaveWeapon final : public cWeapon
 {
+private:
+    coreBool m_bSide;   // 
+
+
 public:
-    cWaveWeapon()noexcept {}
+    cWaveWeapon()noexcept;
 
     DISABLE_COPY(cWaveWeapon)
     ASSIGN_ID(3, "Wave Mortar")
+
+
+private:
+    // release and shoot with the wave weapon
+    void __ReleaseOwn()override;
+    void __ShootOwn  ()override;
 };
 
 
@@ -119,11 +137,20 @@ public:
 // tesla weapon class
 class cTeslaWeapon final : public cWeapon
 {
+private:
+    coreInt8 m_iSide;   // 
+
+
 public:
-    cTeslaWeapon()noexcept {}
+    cTeslaWeapon()noexcept;
 
     DISABLE_COPY(cTeslaWeapon)
     ASSIGN_ID(4, "Tesla Rifle")
+
+
+private:
+    // shoot with the tesla weapon
+    void __ShootOwn()override;
 };
 
 
@@ -142,7 +169,7 @@ public:
 // ****************************************************************
 // constructor
 constexpr_func cWeapon::cWeapon()noexcept
-: m_CooldownTimer (coreTimer(1.0f, 1.0f, 1u))
+: m_CooldownTimer (coreTimer(1.0f, 1.0f, 0u))
 , m_pOwner        (NULL)
 , m_iLevel        (0u)
 , m_bLastStatus   (false)

@@ -22,7 +22,8 @@ cGame::cGame(const coreBool& bCoop)noexcept
 {
     // configure first player
     m_aPlayer[0].Configure  (PLAYER_SHIP_ATK, coreVector3(0.0f/360.0f, 68.0f/100.0f, 90.0f/100.0f).HSVtoRGB(), g_CurConfig.Input.aiType[0]);
-    m_aPlayer[0].EquipWeapon(0u, cRayWeapon::ID);
+    m_aPlayer[0].EquipWeapon(0u, cRayWeapon  ::ID);
+    m_aPlayer[0].EquipWeapon(1u, cPulseWeapon::ID);
 
     if(m_bCoop)
     {
@@ -44,6 +45,10 @@ cGame::cGame(const coreBool& bCoop)noexcept
 // destructor
 cGame::~cGame()
 {
+    // 
+    m_BulletManagerPlayer.ClearBullets(false);
+    m_BulletManagerEnemy .ClearBullets(false);
+
     // delete last mission
     SAFE_DELETE(m_pMission)
 
@@ -70,6 +75,7 @@ void cGame::Render()
     {
         // 
         FOR_EACH(it, m_apEnemyList) (*it)->__RenderOwnWeak();
+        m_pMission->__RenderOwnWeak();
 
         // apply weak effect outline-layer
         g_aaOutline[PRIO_WEAK][STYLE_FULL]  .Apply();
@@ -90,10 +96,15 @@ void cGame::Render()
     {
         // 
         FOR_EACH(it, m_apEnemyList) (*it)->__RenderOwnStrong();
+        m_pMission->__RenderOwnStrong();
 
         // apply strong effect outline-layer
         g_aaOutline[PRIO_STRONG][STYLE_FULL]  .Apply();
         g_aaOutline[PRIO_STRONG][STYLE_DIRECT].Apply();
+
+        // 
+        FOR_EACH(it, m_apEnemyList) (*it)->__RenderOwnAfter();
+        m_pMission->__RenderOwnAfter();
     }
     glDepthRange(GAME_DEPTH_ENEMY);
     {
@@ -109,9 +120,6 @@ void cGame::Render()
 
     // reset depth range
     glDepthRange(0.0f, 1.0f);
-
-    // 
-    FOR_EACH(it, m_apEnemyList) (*it)->__RenderOwnAfter();
 }
 
 
@@ -140,20 +148,22 @@ void cGame::Move()
     if(m_pMission->GetCurBoss()) m_afTimeBoss[m_pMission->GetCurBossIndex()].Update(1.0f);
 
     // move the mission
-    m_pMission->Move();
-
-    // move all players
-    for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
-        m_aPlayer[i].Move();
-
-    // move all active enemies
-    for(coreUintW i = 0u, ie = m_apEnemyList.size(); i < ie; ++i)
+    m_pMission->MoveBefore();
     {
-        m_apEnemyList[i]->Move();
+        // move all players
+        for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+            m_aPlayer[i].Move();
 
-        // handle self-removing
-        if(ie > m_apEnemyList.size()) {--i; --ie;}
+        // move all active enemies
+        for(coreUintW i = 0u, ie = m_apEnemyList.size(); i < ie; ++i)
+        {
+            m_apEnemyList[i]->Move();
+
+            // handle self-removing
+            if(ie > m_apEnemyList.size()) {--i; --ie;}
+        }
     }
+    m_pMission->MoveAfter();
 
     // move the bullet managers
     m_BulletManagerPlayer.Move();
@@ -246,14 +256,14 @@ void cGame::RestartMission()
 
 // ****************************************************************
 // 
-cPlayer* cGame::FindPlayer(const coreVector2& vPosition)
+cPlayer* RETURN_NONNULL cGame::FindPlayer(const coreVector2& vPosition)
 {
     // 
     if(!m_bCoop) return &m_aPlayer[0];
 
     // 
     cPlayer*  pPlayer = &m_aPlayer[0];
-    coreFloat fDiffSq = 1.0e06f;
+    coreFloat fLenSq  = 1.0e06f;
 
     for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
     {
@@ -261,12 +271,12 @@ cPlayer* cGame::FindPlayer(const coreVector2& vPosition)
         if(CONTAINS_VALUE(pCurPlayer->GetStatus(), PLAYER_STATUS_DEAD)) continue;
 
         // 
-        const coreFloat fCurDiffSq = (pCurPlayer->GetPosition().xy() - vPosition).LengthSq();
-        if(fCurDiffSq < fDiffSq)
+        const coreFloat fCurLenSq = (pCurPlayer->GetPosition().xy() - vPosition).LengthSq();
+        if(fCurLenSq < fLenSq)
         {
             // 
             pPlayer = pCurPlayer;
-            fDiffSq = fCurDiffSq;
+            fLenSq  = fCurLenSq;
         }
     }
 
@@ -277,23 +287,23 @@ cPlayer* cGame::FindPlayer(const coreVector2& vPosition)
 
 // ****************************************************************
 // 
-cEnemy* cGame::FindEnemy(const coreVector2& vPosition)
+cEnemy* RETURN_NONNULL cGame::FindEnemy(const coreVector2& vPosition)
 {
     // 
-    cEnemy*   pEnemy  = m_pMission->GetBoss(0u);
-    coreFloat fDiffSq = 1.0e06f;
+    cEnemy*   pEnemy = m_pMission->GetBoss(0u);
+    coreFloat fLenSq = 1.0e06f;
 
     FOR_EACH(it, m_apEnemyList)
     {
         cEnemy* pCurEnemy = (*it);
 
         // 
-        const coreFloat fCurDiffSq = (pCurEnemy->GetPosition().xy() - vPosition).LengthSq();
-        if(fCurDiffSq < fDiffSq)
+        const coreFloat fCurLenSq = (pCurEnemy->GetPosition().xy() - vPosition).LengthSq();
+        if(fCurLenSq < fLenSq)
         {
             // 
-            pEnemy  = pCurEnemy;
-            fDiffSq = fCurDiffSq;
+            pEnemy = pCurEnemy;
+            fLenSq = fCurLenSq;
         }
     }
 
@@ -343,6 +353,10 @@ coreBool cGame::__HandleIntro()
                 const coreVector2 vPos  = oSpline.CalcPosition  (LERPB(0.0f, oSpline.GetTotalDistance(), fTime));
                 const coreVector2 vDir  = coreVector2::Direction(LERPS(0.0f, 4.0f*PI,                    fTime));
 
+                // 
+                if((oPlayer.GetPosition().y < -FOREGROUND_AREA.y) && (vPos.x >= -FOREGROUND_AREA.y))
+                    g_pSpecialEffects->CreateBlowColor(oPlayer.GetPosition(), coreVector3(0.0f,1.0f,0.0f), SPECIAL_BLOW_SMALL, COLOR_FIRE_BLUE);
+
                 // fly player animated into the game field
                 oPlayer.SetPosition   (coreVector3(oPlayer.GetPosition().x, vPos));
                 oPlayer.SetNewPos     (coreVector2(oPlayer.GetPosition().xy()));
@@ -368,7 +382,8 @@ void cGame::__HandleCollisions()
         pPlayer->TakeDamage(15);
 
         // 
-        g_pSpecialEffects->MacroExplosionPhysicalSmall(coreVector3((pPlayer->GetPosition().xy() + pEnemy->GetPosition().xy()) * 0.5f, 0.0f));
+        const coreVector3 vCenter = coreVector3((pPlayer->GetPosition().xy() + pEnemy->GetPosition().xy()) * 0.5f, 0.0f);
+        g_pSpecialEffects->MacroExplosionPhysicalSmall(vCenter);
     });
 
     Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_BULLET_ENEMY, [](cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreBool& bFirst)
@@ -384,8 +399,18 @@ void cGame::__HandleCollisions()
         if((ABS(pEnemy->GetPosition().x) >= FOREGROUND_AREA.x * 1.1f) ||
            (ABS(pEnemy->GetPosition().y) >= FOREGROUND_AREA.y * 1.1f)) return;
 
-        // 
-        pEnemy ->TakeDamage(pBullet->GetDamage(), s_cast<cPlayer*>(pBullet->GetOwner()));
-        pBullet->Deactivate(false);
+        if(!CONTAINS_VALUE(pEnemy->GetStatus(), ENEMY_STATUS_DEAD)) // TODO # check why I need this, dead enemies should not be in the manager 
+        {
+            // 
+            pEnemy ->TakeDamage(pBullet->GetDamage(), s_cast<cPlayer*>(pBullet->GetOwner()));
+            pBullet->Deactivate(false);
+        }
     });
+
+    //Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, TYPE_BULLET_ENEMY, [](cBullet* OUTPUT pBullet1, cBullet* OUTPUT pBullet2, const coreBool& bFirst)
+    //{
+    //    // 
+    //    pBullet1->Deactivate(true);
+    //    pBullet2->Deactivate(true);
+    //});
 }

@@ -12,9 +12,10 @@
 // ****************************************************************
 // constructor
 cBullet::cBullet()noexcept
-: m_iDamage (0)
-, m_fSpeed  (0.0f)
-, m_pOwner  (NULL)
+: m_iDamage    (0)
+, m_fSpeed     (0.0f)
+, m_pOwner     (NULL)
+, m_fAnimation (0.0f)
 {
     // set initial status
     m_iStatus = BULLET_STATUS_READY;
@@ -52,9 +53,13 @@ void cBullet::Activate(const coreInt32& iDamage, const coreFloat& fSpeed, cShip*
     m_fSpeed  = fSpeed * BULLET_SPEED_FACTOR;
     m_pOwner  = pOwner;
 
+    // reset animation value
+    m_fAnimation = Core::Rand->Float(1.0f);
+
     // reset bullet properties
     this->SetPosition (coreVector3(vPosition,  0.0f));
     this->SetDirection(coreVector3(vDirection, 0.0f));
+    this->SetAlpha    (1.0f);
 
     // enable collision
     this->ChangeType(iType);
@@ -70,7 +75,11 @@ void cBullet::Deactivate(const coreBool& bAnimated)
     REMOVE_VALUE(m_iStatus, BULLET_STATUS_ACTIVE)
 
     // 
-    if(bAnimated) g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 6.0f, 3u, this->GetColor3());
+    if(bAnimated)
+    {
+        g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 5.0f, 3u, this->GetColor3());
+        this->__ImpactOwn();
+    }
 
     // disable collision
     this->ChangeType(0);
@@ -191,7 +200,6 @@ void cBulletManager::ClearBullets(const coreBool& bAnimated)
 // ****************************************************************
 // constructor
 cRayBullet::cRayBullet()noexcept
-: m_fAnimation (Core::Rand->Float(1.0f))
 {
     // load object resources
     this->DefineModel  ("bullet_ray.md3");
@@ -209,7 +217,39 @@ cRayBullet::cRayBullet()noexcept
 void cRayBullet::__MoveOwn()
 {
     // fly around
-    this->SetPosition(this->GetPosition() + this->GetDirection() * (m_fSpeed * Core::System->GetTime()));
+    this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetDirection().xy() * (m_fSpeed * Core::System->GetTime()), 0.0f));
+
+    // update texture animation
+    m_fAnimation.Update(0.4f);
+    this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
+}
+
+
+// ****************************************************************
+// constructor
+cPulseBullet::cPulseBullet()noexcept
+: m_fAcceleration (0.0f)
+{
+    // load object resources
+    this->DefineModel  ("bullet_ray.md3");
+    this->DefineTexture(0u, "effect_energy.png");
+    this->DefineProgram("effect_energy_bullet_direct_program");
+
+    // set object properties
+    this->SetCollisionModifier(coreVector3(1.0f,0.333f,1.0f));   // model with offset
+    this->SetTexSize          (coreVector2(0.4f,0.2f));
+}
+
+
+// ****************************************************************
+// move the pulse bullet
+void cPulseBullet::__MoveOwn()
+{
+    // 
+    m_fAcceleration.Update(2.5f);
+
+    // fly around
+    this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetDirection().xy() * (m_fSpeed * m_fAcceleration * Core::System->GetTime()), 0.0f));
 
     // update texture animation
     m_fAnimation.Update(0.4f);
@@ -220,7 +260,6 @@ void cRayBullet::__MoveOwn()
 // ****************************************************************
 // constructor
 cOrbBullet::cOrbBullet()noexcept
-: m_fAnimation (Core::Rand->Float(1.0f))
 {
     // load object resources
     this->DefineModel  ("bullet_orb.md3");
@@ -237,7 +276,7 @@ cOrbBullet::cOrbBullet()noexcept
 void cOrbBullet::__MoveOwn()
 {
     // fly around
-    this->SetPosition(this->GetPosition() + this->GetDirection() * (m_fSpeed * Core::System->GetTime()));
+    this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetDirection().xy() * (m_fSpeed * Core::System->GetTime()), 0.0f));
 
     // update texture animation
     m_fAnimation.Update(-0.2f);
@@ -248,7 +287,6 @@ void cOrbBullet::__MoveOwn()
 // ****************************************************************
 // constructor
 cConeBullet::cConeBullet()noexcept
-: m_fAnimation (Core::Rand->Float(1.0f))
 {
     // load object resources
     this->DefineModel  ("bullet_cone.md3");
@@ -265,7 +303,7 @@ cConeBullet::cConeBullet()noexcept
 void cConeBullet::__MoveOwn()
 {
     // fly around
-    this->SetPosition(this->GetPosition() + this->GetDirection() * (m_fSpeed * Core::System->GetTime()));
+    this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetDirection().xy() * (m_fSpeed * Core::System->GetTime()), 0.0f));
 
     // update texture animation
     m_fAnimation.Update(0.2f);
@@ -276,7 +314,6 @@ void cConeBullet::__MoveOwn()
 // ****************************************************************
 // constructor
 cWaveBullet::cWaveBullet()noexcept
-: m_fAnimation (Core::Rand->Float(1.0f))
 {
     // load object resources
     this->DefineModel  ("bullet_wave.md3");
@@ -284,7 +321,7 @@ cWaveBullet::cWaveBullet()noexcept
     this->DefineProgram("effect_energy_bullet_direct_program");
 
     // set object properties
-    this->SetTexSize(coreVector2(0.1f,0.25f) * 1.0f);
+    this->SetTexSize(coreVector2(0.1f,0.25f));
 }
 
 
@@ -293,9 +330,36 @@ cWaveBullet::cWaveBullet()noexcept
 void cWaveBullet::__MoveOwn()
 {
     // fly around
-    this->SetPosition(this->GetPosition() + this->GetDirection() * (m_fSpeed * Core::System->GetTime()));
+    this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetDirection().xy() * (m_fSpeed * Core::System->GetTime()), 0.0f));
 
     // update texture animation
     m_fAnimation.Update(0.15f);
+    this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
+}
+
+
+// ****************************************************************
+// constructor
+cTeslaBullet::cTeslaBullet()noexcept
+{
+    // load object resources
+    this->DefineModel  ("bullet_orb.md3");
+    this->DefineTexture(0u, "effect_energy.png");
+    this->DefineProgram("effect_energy_bullet_spheric_program");
+
+    // set object properties
+    this->SetTexSize(coreVector2(0.4f,0.4f));
+}
+
+
+// ****************************************************************
+// move the tesla bullet
+void cTeslaBullet::__MoveOwn()
+{
+    // fly around
+    this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetDirection().xy() * (m_fSpeed * Core::System->GetTime()), 0.0f));
+
+    // update texture animation
+    m_fAnimation.Update(-0.2f);
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
 }

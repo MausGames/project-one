@@ -14,6 +14,7 @@
 cDistortion::cDistortion()noexcept
 : m_iCurWave  (0u)
 , m_iCurBurst (0u)
+, m_bActive   (false)
 {
     // create distortion frame buffer
     m_iFrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RG);
@@ -41,14 +42,20 @@ cDistortion::cDistortion()noexcept
 // update the distortion-effect
 void cDistortion::Update()
 {
-    if(!g_CurConfig.Graphics.iDistortion) return;
+    if(!g_CurConfig.Graphics.iDistortion)
+    {
+        // 
+        m_bActive = false;
+        return;
+    }
 
     // 
     glClearColor(0.5f, 0.5f, 0.0f, 0.0f);
 
     // create distortion only with active objects
-    if(std::any_of(m_aWave,  m_aWave  + DISTORTION_WAVES,  [](const coreObject2D& oWave)  {return oWave .GetAlpha() ? true : false;}) ||
-       std::any_of(m_aBurst, m_aBurst + DISTORTION_BURSTS, [](const coreObject2D& oBurst) {return oBurst.GetAlpha() ? true : false;}))
+    m_bActive = std::any_of(m_aWave,  m_aWave  + DISTORTION_WAVES,  [](const coreObject2D& oWave)  {return oWave .GetAlpha() ? true : false;}) ||
+                std::any_of(m_aBurst, m_aBurst + DISTORTION_BURSTS, [](const coreObject2D& oBurst) {return oBurst.GetAlpha() ? true : false;});
+    if(m_bActive)
     {
         // 
         m_iFrameBuffer.StartDraw();
@@ -81,7 +88,7 @@ void cDistortion::Update()
 
                     // 
                     const coreFloat& fScale = oBurst.GetColor4().x;
-                    const coreFloat  fSpeed = oBurst.GetColor4().yz().Length();
+                    const coreFloat  fSpeed = oBurst.GetColor4().yz().LengthSq();
 
                     // 
                     oBurst.SetAlpha(MAX(oBurst.GetAlpha() - fSpeed * Core::System->GetTime(), 0.0f));
@@ -126,7 +133,7 @@ void cDistortion::CreateBurst(const coreVector3& vPosition, const coreVector2& v
 
     // 
     oBurst.SetPosition(g_pForeground->Project(vPosition) * DISTORTION_SCALE_FACTOR);
-    oBurst.SetColor4  (coreVector4(fScale, vDirection * fSpeed, 1.0f));
+    oBurst.SetColor4  (coreVector4(fScale, vDirection * SQRT(fSpeed), 1.0f));
 }
 
 

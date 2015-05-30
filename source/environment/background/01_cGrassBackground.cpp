@@ -240,8 +240,8 @@ cGrassBackground::~cGrassBackground()
 // move the grass background
 void cGrassBackground::__MoveOwn()
 {
-    // adjust volume of the nature sound-effect
     // TODO # sound-volume per config value 
+    // adjust volume of the nature sound-effect
     if(m_pNatureSound->EnableRef(this))
         m_pNatureSound->SetVolume(MAX(6.0f * g_pEnvironment->GetTransition().GetValue((g_pEnvironment->GetBackground() == this) ? CORE_TIMER_GET_NORMAL : CORE_TIMER_GET_REVERSED), 0.0f));
 }

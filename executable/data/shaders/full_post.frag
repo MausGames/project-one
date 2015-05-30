@@ -10,25 +10,22 @@
 
 void FragmentMain()
 {
+    vec2 v2TexCoord = v_av2TexCoord[0];
+
+#if defined(_P1_DISTORTION_)
+
     // 
     vec2 v2Distortion = coreTexture2D(3, v_av2TexCoord[0]).rg;   // # low-res
-
-#if !defined(_P1_DISTORTION_)
-
-    // ignore distortion map
-    v2Distortion = vec2(0.0);
-
-#endif
-
-    vec2 v2TexCoord = v_av2TexCoord[0];
     
     // 
     if(any(bvec4(lessThan(v2Distortion, vec2(127.0/255.0)), greaterThan(v2Distortion, vec2(128.0/255.0)))))
-        v2TexCoord += (v2Distortion * 2.0 - 1.0) * 0.5 * vec2(-1.0,1.0);
+        v2TexCoord += (v2Distortion * 2.0 - 1.0) * vec2(-0.5,0.5);
+
+#endif
 
     // lookup textures
     vec4 v4Foreground  = coreTexture2D(0, v2TexCoord);
-    vec3 v3Environment = coreTexture2D(1, v2TexCoord).rgb * u_v4Color.a;
+    vec3 v3Environment = coreTexture2D(1, v2TexCoord).rgb;
     vec3 v3Glow        = coreTexture2D(2, v2TexCoord).rgb;   // # low-res
     
 #if !defined(_P1_GLOW_)
@@ -39,5 +36,5 @@ void FragmentMain()
 #endif
 
     // draw blend between all textures (glow only on environment for high contrast)
-    gl_FragColor = vec4(mix(v3Environment + v3Glow, v4Foreground.rgb / v4Foreground.a, v4Foreground.a), 1.0);
+    gl_FragColor = vec4(mix(v3Environment * u_v4Color.a + v3Glow, v4Foreground.rgb / v4Foreground.a, v4Foreground.a), 1.0);
 }

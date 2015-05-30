@@ -31,7 +31,7 @@ void FragmentMain()
     float v1BumpFactor   = dot(v3MathLightDir, v3BumpNormal);
 
     // set distortion vector and lookup reflection texture
-    vec2 v2Distortion      = v3BumpNormal.xy * 0.021;
+    vec2 v2Distortion      = v3BumpNormal.xy * 0.022;
     vec3 v3AboveReflection = coreTexture2D(1, v2ScreenCoord + v2Distortion).rgb;
 
     // calculate dot-3 reflection factor
@@ -51,5 +51,5 @@ void FragmentMain()
     v3AboveReflection = 0.84 * (0.51 * c_v3Blue + 0.59 * v3AboveReflection + vec3(v1ReflFactor));
 
     // draw final color
-    gl_FragColor = vec4(mix(v3BelowRefraction, v3AboveReflection, v1Depth) * (0.92 + 0.12 * v1BumpFactor), 1.0);
+    gl_FragColor = vec4(mix(v3BelowRefraction, v3AboveReflection, v1Depth) * (0.9 + 0.12 * v1BumpFactor), 1.0);
 }

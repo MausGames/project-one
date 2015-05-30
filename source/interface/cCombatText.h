@@ -53,9 +53,9 @@ public:
 
     // add new combat text
     void        AddText  (const coreChar*   pcText, const coreVector3& vPosition, const coreVector3& vColor);
-    inline void AddDamage(const coreInt32&  iValue, const coreVector3& vPosition) {if(g_CurConfig.Game.Combat.iDamage) this->AddText(PRINT("%u",  iValue), vPosition, COLOR_RED_F);}
-    inline void AddChain (const coreUint32& iValue, const coreVector3& vPosition) {if(g_CurConfig.Game.Combat.iChain)  this->AddText(PRINT("+%u", iValue), vPosition, COLOR_BLUE_F);}
-    inline void AddCombo (const coreUint32& iValue, const coreVector3& vPosition) {if(g_CurConfig.Game.Combat.iCombo)  this->AddText(PRINT("x%u", iValue), vPosition, COLOR_PURPLE_F);}
+    inline void AddDamage(const coreInt32&  iValue, const coreVector3& vPosition) {if(g_CurConfig.Game.Combat.iDamage) this->AddText(PRINT("%u",  iValue), vPosition, COLOR_MENU_RED);}
+    inline void AddChain (const coreUint32& iValue, const coreVector3& vPosition) {if(g_CurConfig.Game.Combat.iChain)  this->AddText(PRINT("+%u", iValue), vPosition, COLOR_MENU_BLUE);}
+    inline void AddCombo (const coreUint32& iValue, const coreVector3& vPosition) {if(g_CurConfig.Game.Combat.iCombo)  this->AddText(PRINT("x%u", iValue), vPosition, COLOR_MENU_PURPLE);}
 
      // reset all active label objects
     void Reset();

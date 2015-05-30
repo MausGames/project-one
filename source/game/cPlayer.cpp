@@ -12,7 +12,7 @@
 // ****************************************************************
 // constructor
 cPlayer::cPlayer()noexcept
-: m_iInputIndex    (0u)
+: m_pInput         (NULL)
 , m_iScoreMission  (0u)
 , m_fChainCooldown (0.0f)
 , m_fDarkAnimation (0.0f)
@@ -59,8 +59,8 @@ cPlayer::cPlayer()noexcept
     m_Exhaust.DefineTexture(0u, "effect_energy.png");
     m_Exhaust.DefineProgram("effect_energy_direct_program");
     m_Exhaust.SetDirection (this->GetDirection());
-    m_Exhaust.SetColor4    (coreVector4(0.306f,0.527f,1.0f,0.7f));
-    m_Exhaust.SetTexSize   (coreVector2(0.5f,  0.25f));
+    m_Exhaust.SetColor4    (coreVector4(COLOR_FIRE_BLUE, 0.7f));
+    m_Exhaust.SetTexSize   (coreVector2(0.5f,0.25f));
     m_Exhaust.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 }
 
@@ -111,9 +111,10 @@ void cPlayer::Configure(const coreUintW& iShipType, const coreVector3& vColor, c
     // save color value
     this->SetBaseColor(vColor);
 
-    // save input index
-    m_iInputIndex = iInputIndex;
-    WARN_IF(m_iInputIndex >= INPUT_SETS) m_iInputIndex = 0u;
+    // save input set
+    WARN_IF(iInputIndex >= INPUT_SETS)
+         m_pInput = &g_aInput[0];
+    else m_pInput = &g_aInput[iInputIndex];
 }
 
 
@@ -182,8 +183,8 @@ void cPlayer::Move()
     if(!CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
     {
         // move the ship
-        const coreFloat fSpeed = CONTAINS_BIT(g_aInput[m_iInputIndex].iButtonHold, 0u) ? 20.0f : 50.0f;
-        m_vNewPos += g_aInput[m_iInputIndex].vMove * Core::System->GetTime() * fSpeed;
+        const coreFloat fSpeed = (!CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && (m_pInput->iButtonHold & BITLINE(PLAYER_WEAPONS))) ? 20.0f : 50.0f;
+        m_vNewPos += m_pInput->vMove * (Core::System->GetTime() * fSpeed);
 
         // restrict movement to the foreground area
              if(m_vNewPos.x < -FOREGROUND_AREA.x) m_vNewPos.x = -FOREGROUND_AREA.x;
@@ -193,7 +194,7 @@ void cPlayer::Move()
 
         // calculate smooth position-offset
         const coreVector2 vDiff   = m_vNewPos - this->GetPosition().xy();
-        const coreVector2 vOffset = vDiff * Core::System->GetTime() * 40.0f;
+        const coreVector2 vOffset = vDiff * (Core::System->GetTime() * 40.0f);
 
         // set new position and orientation
         this->SetPosition   (coreVector3(vOffset + this->GetPosition().xy(), 0.0f));
@@ -213,12 +214,15 @@ void cPlayer::Move()
     // update the weapons (shooting and stuff)
     for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
     {
-        const coreBool bShoot = CONTAINS_BIT(g_aInput[m_iInputIndex].iButtonHold, i) ? !CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) : false;;
+        const coreBool bShoot = !CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && ((m_pInput->iButtonHold & BITLINE(i+1u)) == BIT(i));
         m_apWeapon[i]->Update(bShoot);
     }
 
+
+
+
     // 
-    if(CONTAINS_BIT(g_aInput[m_iInputIndex].iButtonPress, PLAYER_WEAPONS))
+    if(CONTAINS_BIT(m_pInput->iButtonPress, PLAYER_WEAPONS))
         this->TransformDark(CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_DARKNESS) ? PLAYER_DARK_OFF : PLAYER_DARK_ON);
 
     if(m_Bubble.IsEnabled(CORE_OBJECT_ENABLE_ALL))
@@ -243,7 +247,7 @@ void cPlayer::Move()
     }
 
 
-
+    // TODO # 
     // 
     if(m_fDarkTime)
     {
@@ -276,7 +280,7 @@ void cPlayer::TakeDamage(const coreInt32& iDamage)
     // 
     if(this->_TakeDamage(iDamage))
     {
-
+        // TODO # 
     }
 }
 
@@ -346,7 +350,7 @@ void cPlayer::AddCombo(const coreUint32& iValue)
 
 void cPlayer::AddCombo(const coreFloat& fModifier)
 {
-
+    // TODO # 
 }
 
 
@@ -367,7 +371,7 @@ void cPlayer::AddChain(const coreUint32& iValue)
 // 
 void cPlayer::ReduceCombo()
 {
-
+    // TODO # 
 }
 
 

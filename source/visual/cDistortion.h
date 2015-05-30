@@ -20,6 +20,8 @@
 #define DISTORTION_WAVE_SMALL   ( 2.5f), (3.0f)   // 
 #define DISTORTION_WAVE_BIG     ( 5.0f), (3.0f)   // 
 #define DISTORTION_WAVE_BIG_REV (-3.0f), (1.7f)   // 
+#define DISTORTION_BURST_SMALL  ( 2.5f), (3.0f)   // 
+#define DISTORTION_BURST_BIG    ( 5.0f), (3.0f)   // 
 
 
 // ****************************************************************
@@ -34,6 +36,8 @@ private:
 
     coreObject2D m_aBurst[DISTORTION_BURSTS];   // 
     coreUintW    m_iCurBurst;                   // 
+
+    coreBool m_bActive;                         // 
 
 
 public:
@@ -50,6 +54,9 @@ public:
 
     // access frame buffer
     inline coreFrameBuffer* GetFrameBuffer() {return &m_iFrameBuffer;}
+
+    // 
+    inline const coreBool& IsActive()const {return m_bActive;}
 
 
 private:

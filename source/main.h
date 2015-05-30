@@ -50,61 +50,59 @@
 
 // ****************************************************************
 // general definitions
-#define PLAYERS            (2u)
-#define FRAMERATE_VALUE    (60.0f)
-#define FRAMERATE_TIME     (1.0f / FRAMERATE_VALUE)
+#define PLAYERS             (2u)
+#define FRAMERATE_VALUE     (60.0f)
+#define FRAMERATE_TIME      (1.0f / FRAMERATE_VALUE)
 
-#define COLOR_YELLOW_F     coreVector3(1.000f, 0.824f, 0.392f)
-#define COLOR_ORANGE_F     coreVector3(1.000f, 0.443f, 0.227f)
-#define COLOR_RED_F        coreVector3(1.000f, 0.275f, 0.275f)
-#define COLOR_PURPLE_F     coreVector3(0.710f, 0.333f, 1.000f)
-#define COLOR_BLUE_F       coreVector3(0.102f, 0.702f, 1.000f)
-#define COLOR_GREEN_F      coreVector3(0.118f, 0.745f, 0.353f)
-#define COLOR_BRONZE_F     coreVector3(0.925f, 0.663f, 0.259f)
-#define COLOR_SILVER_F     coreVector3(0.855f, 0.855f, 0.878f)
-#define COLOR_GOLD_F       coreVector3(1.000f, 0.859f, 0.000f)
-#define COLOR_FIRE_F       coreVector3(234.0f/255.0f, 72.0f/255.0f, 10.0f/255.0f) * 1.08f
+#define CAMERA_POSITION     coreVector3(0.0f, 0.0f, 110.0f)
+#define CAMERA_DIRECTION    coreVector3(0.0f, 0.0f,  -1.0f)
+#define CAMERA_ORIENTATION  coreVector3(0.0f, 1.0f,   0.0f)
 
-#define COLOR_YELLOW_L     255u, 210u, 100u
-#define COLOR_ORANGE_L     255u, 113u,  58u
-#define COLOR_RED_L        255u,  70u,  70u
-#define COLOR_PURPLE_L     181u,  85u, 255u
-#define COLOR_BLUE_L        26u, 179u, 255u
-#define COLOR_GREEN_L       30u, 190u,  90u
-#define COLOR_BRONZE_L     236u, 169u,  66u
-#define COLOR_SILVER_L     218u, 218u, 224u
-#define COLOR_GOLD_L       255u, 219u,   0u
+#define LIGHT_DIRECTION     coreVector3(0.583953857f, -0.642349243f, -0.496360779f)
 
-#define CAMERA_POSITION    coreVector3(0.0f, 0.0f, 110.0f)
-#define CAMERA_DIRECTION   coreVector3(0.0f, 0.0f,  -1.0f)
-#define CAMERA_ORIENTATION coreVector3(0.0f, 1.0f,   0.0f)
-
-#define LIGHT_DIRECTION    coreVector3(0.583953857f, -0.642349243f, -0.496360779f)
+// color values
+#define COLOR_MENU_YELLOW   coreVector3(1.000f, 0.824f, 0.392f)
+#define COLOR_MENU_ORANGE   coreVector3(1.000f, 0.443f, 0.227f)
+#define COLOR_MENU_RED      coreVector3(1.000f, 0.275f, 0.275f)
+#define COLOR_MENU_PURPLE   coreVector3(0.710f, 0.333f, 1.000f)
+#define COLOR_MENU_BLUE     coreVector3(0.102f, 0.702f, 1.000f)
+#define COLOR_MENU_GREEN    coreVector3(0.118f, 0.745f, 0.353f)
+#define COLOR_MENU_BRONZE   coreVector3(0.925f, 0.663f, 0.259f)
+#define COLOR_MENU_SILVER   coreVector3(0.855f, 0.855f, 0.878f)
+#define COLOR_MENU_GOLD     coreVector3(1.000f, 0.859f, 0.000f)
+#define COLOR_ENERGY_YELLOW coreVector3(0.900f, 0.800f, 0.380f)
+#define COLOR_ENERGY_ORANGE coreVector3(1.000f, 0.400f, 0.000f)
+#define COLOR_ENERGY_RED    coreVector3(1.000f, 0.275f, 0.275f)
+#define COLOR_ENERGY_PURPLE coreVector3(0.450f, 0.200f, 1.000f)
+#define COLOR_ENERGY_BLUE   coreVector3(0.100f, 0.430f, 1.000f)
+#define COLOR_ENERGY_GREEN  coreVector3(0.270f, 0.710f, 0.270f)
+#define COLOR_FIRE_ORANGE   coreVector3(0.991f, 0.305f, 0.042f)
+#define COLOR_FIRE_BLUE     coreVector3(0.306f, 0.527f, 1.000f)
 
 // shader modifiers
-#define SHADER_SHADOW      "#define _P1_SHADOW_     (1) \n"   // outdoor, object_ground
-#define SHADER_GLOW        "#define _P1_GLOW_       (1) \n"   // post
-#define SHADER_DISTORTION  "#define _P1_DISTORTION_ (1) \n"   // post
-#define SHADER_DARKNESS    "#define _P1_DARKNESS_   (1) \n"   // object_ship
-#define SHADER_BULLET      "#define _P1_BULLET_     (1) \n"   // energy
-#define SHADER_SPHERIC     "#define _P1_SPHERIC_    (1) \n"   // decal, energy
-#define SHADER_INVERT      "#define _P1_INVERT_     (1) \n"   // energy
-#define SHADER_DIRECT      "#define _P1_DIRECT_     (1) \n"   // outline, energy, effect_distortion
+#define SHADER_SHADOW       "#define _P1_SHADOW_     (1) \n"   // outdoor, object_ground
+#define SHADER_GLOW         "#define _P1_GLOW_       (1) \n"   // post
+#define SHADER_DISTORTION   "#define _P1_DISTORTION_ (1) \n"   // post
+#define SHADER_DARKNESS     "#define _P1_DARKNESS_   (1) \n"   // object_ship
+#define SHADER_BULLET       "#define _P1_BULLET_     (1) \n"   // energy
+#define SHADER_SPHERIC      "#define _P1_SPHERIC_    (1) \n"   // decal, energy
+#define SHADER_INVERT       "#define _P1_INVERT_     (1) \n"   // energy
+#define SHADER_DIRECT       "#define _P1_DIRECT_     (1) \n"   // outline, energy, effect_distortion
 
 // collision types
-#define TYPE_PLAYER        (1)
-#define TYPE_ENEMY         (2)
-#define TYPE_BULLET_PLAYER (11)
-#define TYPE_BULLET_ENEMY  (12)
-#define TYPE_OBJECT(x)     (100+x)
+#define TYPE_PLAYER         (1)
+#define TYPE_ENEMY          (2)
+#define TYPE_BULLET_PLAYER  (11)
+#define TYPE_BULLET_ENEMY   (12)
+#define TYPE_OBJECT(x)      (100+x)
 
 // outline priorities and styles
-#define PRIO_WEAK          (0u)
-#define PRIO_STRONG        (2u)
-#define PRIO_PLAYER        (1u)
-#define PRIO_ENEMY         (3u)
-#define STYLE_FULL         (0u)
-#define STYLE_DIRECT       (1u)
+#define PRIO_WEAK           (0u)
+#define PRIO_STRONG         (2u)
+#define PRIO_PLAYER         (1u)
+#define PRIO_ENEMY          (3u)
+#define STYLE_FULL          (0u)
+#define STYLE_DIRECT        (1u)
 
 // sub-class and object ID macros
 #define ENABLE_ID                                              \

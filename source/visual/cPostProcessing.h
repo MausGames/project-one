@@ -10,7 +10,7 @@
 #ifndef _P1_GUARD_POSTPROCESSING_H_
 #define _P1_GUARD_POSTPROCESSING_H_
 
-// TODO: don't upate shader uniforms on single fullscreen objects (postprocessing, transition, glow, etc.)
+// TODO: don't update shader uniforms on single fullscreen objects (postprocessing, transition, glow, etc.)
 // TODO: remove watermark
 
 
@@ -27,8 +27,11 @@
 class cPostProcessing final : public coreObject2D
 {
 private:
-    coreObject2D m_aSideArea[2];   // objects outside of the game area
-    coreLabel    m_Watermark;      // temporary Twitter watermark
+    coreProgramPtr m_pProgramSimple;      // 
+    coreProgramPtr m_pProgramDistorted;   // 
+
+    coreObject2D m_aSideArea[2];          // objects outside of the game area
+    coreLabel    m_Watermark;             // temporary Twitter watermark
 
 
 public:
@@ -39,7 +42,7 @@ public:
     // apply post-processing
     void Apply();
 
-    // recompile post-processing shader-program
+    // recompile post-processing shader-programs
     void Recompile();
 
     // set side-object opacity

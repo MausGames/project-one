@@ -13,7 +13,7 @@
 // constructor
 cEnemy::cEnemy()noexcept
 : m_fLifeTime (0.0f)
-, m_iNumShots (0u)
+, m_nRoutine  (NULL)
 {
     // load object resources
     this->DefineProgram("object_ship_program");
@@ -25,6 +25,7 @@ cEnemy::cEnemy()noexcept
 
     // set initial status
     m_iStatus = ENEMY_STATUS_DEAD;
+    m_aiNumShots[1] = m_aiNumShots[0] = 0u;
 }
 
 
@@ -72,8 +73,9 @@ void cEnemy::Move()
     // 
     m_fLifeTime.Update(1.0f);
 
-    // call individual move routine
+    // call individual move routines
     this->__MoveOwn();
+    if(m_nRoutine) m_nRoutine(this);
 
     // move the 3d-object
     coreObject3D::Move();
@@ -103,7 +105,7 @@ void cEnemy::TakeDamage(const coreInt32& iDamage, cPlayer* pAttacker)
 
 // ****************************************************************
 // add enemy to the game
-void cEnemy::Resurrect(const coreSpline2& oPath)
+void cEnemy::Resurrect(const coreSpline2& oPath, const coreVector2& vFactor, const coreVector2& vOffset)
 {
     ASSERT(CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_DEAD))
 
@@ -113,7 +115,7 @@ void cEnemy::Resurrect(const coreSpline2& oPath)
     oPath.CalcPosDir(0.0f, &vPosition, &vDirection);
 
     // 
-    this->Resurrect(vPosition, vDirection);
+    this->Resurrect((vPosition * vFactor) + vOffset, (vDirection * vFactor).Normalize());
 }
 
 void cEnemy::Resurrect(const coreVector2& vPosition, const coreVector2& vDirection)
@@ -123,8 +125,8 @@ void cEnemy::Resurrect(const coreVector2& vPosition, const coreVector2& vDirecti
     REMOVE_VALUE(m_iStatus, ENEMY_STATUS_DEAD)
 
     // 
-    m_fLifeTime = 0.0f;
-    m_iNumShots = 0u;
+    m_fLifeTime     = 0.0f;
+    m_aiNumShots[1] = m_aiNumShots[0] = 0u;
 
     // bind enemy to active list
     g_pGame->__BindEnemy(this);
@@ -158,7 +160,7 @@ void cEnemy::Kill(const coreBool& bAnimated)
 
 // ****************************************************************
 // 
-coreBool cEnemy::DefaultMovePath(const coreSpline2& oPath, const coreVector2& vOffset, const coreFloat& fDistance)
+coreBool cEnemy::DefaultMovePath(const coreSpline2& oPath, const coreVector2& vFactor, const coreVector2& vOffset, const coreFloat& fDistance)
 {
     // 
     coreVector2 vPosition;
@@ -166,8 +168,8 @@ coreBool cEnemy::DefaultMovePath(const coreSpline2& oPath, const coreVector2& vO
     oPath.CalcPosDir(MIN(fDistance, oPath.GetTotalDistance()), &vPosition, &vDirection);
 
     // 
-    this->SetPosition (coreVector3(vPosition + vOffset, 0.0f));
-    this->SetDirection(coreVector3(vDirection,          0.0f));
+    this->SetPosition (coreVector3((vPosition  * vFactor) + vOffset,   0.0f));
+    this->SetDirection(coreVector3((vDirection * vFactor).Normalize(), 0.0f));
 
     // 
     return (fDistance >= oPath.GetTotalDistance()) ? true : false;
@@ -176,8 +178,10 @@ coreBool cEnemy::DefaultMovePath(const coreSpline2& oPath, const coreVector2& vO
 
 // ****************************************************************
 // 
-coreBool cEnemy::DefaultMoveTarget(const coreVector2& vTarget, const coreFloat& fSpeedTurn, const coreFloat& fSpeedMove)
+coreBool cEnemy::DefaultMoveTarget(const coreVector2& vTarget, const coreFloat& fSpeedMove, const coreFloat& fSpeedTurn)
 {
+    ASSERT((fSpeedMove >= 0.0f) && (fSpeedTurn >= 0.0f))
+
     // 
     const coreVector2 vDiff = vTarget - this->GetPosition().xy();
     const coreVector2 vAim  = vDiff.Normalized();
@@ -190,6 +194,28 @@ coreBool cEnemy::DefaultMoveTarget(const coreVector2& vTarget, const coreFloat& 
     this->SetPosition (coreVector3(vPosition,  0.0f));
     if(vDiff.LengthSq() < 0.5f) return true;
     this->SetDirection(coreVector3(vDirection, 0.0f));
+
+    return false;
+}
+
+
+// ****************************************************************
+// 
+coreBool cEnemy::DefaultMoveSmooth(const coreVector2& vPosition, const coreFloat& fSpeedMove, const coreFloat& fClampMove)
+{
+    ASSERT((fSpeedMove >= 0.0f) && (fClampMove >= 0.0f))
+
+    // 
+    const coreVector2 vDiff = vPosition - this->GetPosition().xy();
+    const coreVector2 vAim  = vDiff.Normalized();
+    const coreFloat fSpeed = MIN(vDiff.Length() * fSpeedMove, fClampMove);
+
+    // 
+    const coreVector2 vPosition2 = this->GetPosition().xy() + vAim * (fSpeed * Core::System->GetTime());
+
+    // 
+    this->SetPosition(coreVector3(vPosition2, 0.0f));
+    if(fSpeed < 0.5f) return true;   
 
     return false;
 }
@@ -211,6 +237,16 @@ void cEnemy::DefaultRotate(const coreFloat& fAngle)
     // rotate around z-axis
     const coreVector2 vDir = coreVector2::Direction(fAngle);
     this->SetDirection(coreVector3(vDir, 0.0f));
+}
+
+
+// ****************************************************************
+// 
+coreBool cEnemy::DefaultRotateSmooth(const coreVector2& vDirection, const coreFloat& fSpeedTurn, const coreFloat& fClampTurn)
+{
+    ASSERT(vDirection.IsNormalized() && (fSpeedTurn >= 0.0f) && (fClampTurn >= 0.0f))
+
+    return true;
 }
 
 
@@ -256,7 +292,7 @@ void cEnemy::DefaultMultiate(const coreFloat& fAngle)
 
 // ****************************************************************
 // 
-coreBool cEnemy::DefaultShoot(const coreFloat& fFireRate)
+coreBool cEnemy::DefaultShoot(const coreFloat& fFireRate, const coreUint8& iMaxShots)
 {
     ASSERT(fFireRate <= FRAMERATE_VALUE)
 
@@ -264,14 +300,16 @@ coreBool cEnemy::DefaultShoot(const coreFloat& fFireRate)
     if(!CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_SILENT))
     {
         // 
-        const coreUint8 iCurShots = F_TO_UI(m_fLifeTime * fFireRate) & 0xFF;
-        if(m_iNumShots != iCurShots)
+        if(m_aiNumShots[0] >= iMaxShots) return false;
+
+        // 
+        const coreUint8 iCurShots = F_TO_UI(m_fLifeTime * fFireRate) & 0xFFu;
+        if(m_aiNumShots[1] != iCurShots)
         {
-            // 
-            ++m_iNumShots;
-            ASSERT(m_iNumShots == iCurShots)
+            m_aiNumShots[1] = iCurShots;
 
             // 
+            ++m_aiNumShots[0];
             return true;
         }
     }
@@ -289,7 +327,7 @@ cScoutEnemy::cScoutEnemy()noexcept
     this->DefineModelLow("ship_enemy_scout_low.md3");
 
     // configure the enemy
-    this->Configure(30, coreVector3(201.0f/360.0f, 74.0f/100.0f, 85.0f/100.0f).HSVtoRGB());
+    this->Configure(10, coreVector3(201.0f/360.0f, 74.0f/100.0f, 85.0f/100.0f).HSVtoRGB());
 }
 
 

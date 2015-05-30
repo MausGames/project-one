@@ -53,23 +53,30 @@ void cMission::Setup()
 
 // ****************************************************************
 // move the mission
-void cMission::Move()
+void cMission::MoveBefore()
 {
-    if(m_anStage.empty()) return;
-
-    // 
-    m_fStageTimeBefore = m_fStageTime;
-    m_fStageTime.Update(1.0f);
-
-    // 
-    m_anStage.back()();
-    if(m_anStage.empty())
+    if(!m_anStage.empty())
     {
-        // TODO # end mission? 
+        // 
+        m_fStageTimeBefore = m_fStageTime;
+        m_fStageTime.Update(1.0f);
+
+        // 
+        m_anStage.back()();
+        if(m_anStage.empty())
+        {
+            // TODO # end mission? 
+        }
     }
 
-    // call individual move routine
-    this->__MoveOwn();
+    // 
+    this->__MoveOwnBefore();
+}
+
+void cMission::MoveAfter()
+{
+    // 
+    this->__MoveOwnAfter();
 }
 
 

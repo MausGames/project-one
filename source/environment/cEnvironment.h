@@ -50,7 +50,7 @@ public:
 
     // control active background
     void ChangeBackground(const coreInt32& iID);
-    inline cBackground*     GetBackground   ()const {return m_pBackground;}
+    inline cBackground*     GetBackground   ()const {ASSERT(m_pBackground) return m_pBackground;}
     inline cBackground*     GetOldBackground()const {return m_pOldBackground;}
     inline const coreTimer& GetTransition   ()const {return m_Transition;}
 

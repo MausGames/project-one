@@ -15,6 +15,10 @@
 // TODO: clouds on grass background need no heap allocation! (beware of _FillInfinite and destructor delete)
 // TODO: cleanup-function for background batch-lists ?
 
+// ****************************************************************
+// background definitions
+#define BACKGROUND_OBJECT_RANGE (80.0f)   // 
+
 
 // ****************************************************************
 // background distribution values

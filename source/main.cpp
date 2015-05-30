@@ -194,6 +194,8 @@ void CoreApp::Move()
 // lock framerate and override elapsed time
 static void LockFramerate()
 {
+#if (1)
+
     coreUint64 iNewPerfTime = 0u;
     coreFloat  fDifference  = FRAMERATE_TIME;
 
@@ -215,6 +217,8 @@ static void LockFramerate()
 
     // override elapsed time
     if(Core::System->GetTime()) c_cast<coreFloat&>(Core::System->GetTime()) = FRAMERATE_TIME;
+
+#endif
 }
 
 
@@ -232,7 +236,7 @@ static void DebugGame()
     {
         if(!g_pGame)
         {
-            g_pGame = new cGame(false);
+            g_pGame = new cGame(true);
             g_pGame->LoadMission(cViridoMission::ID);
         }
     }
@@ -275,7 +279,7 @@ static void DebugGame()
         if(g_pGame)
         {
             const coreVector3 vPos = g_pGame->GetPlayer(0u)->GetPosition();
-            g_pDistortion    ->CreateBurst    (vPos, coreVector2(1.0f,0.0f),      DISTORTION_WAVE_BIG);
+            g_pDistortion    ->CreateBurst    (vPos, coreVector2(1.0f,0.0f),      DISTORTION_BURST_BIG);
             g_pSpecialEffects->CreateBlowColor(vPos, coreVector3(1.0f,0.0f,0.0f), SPECIAL_BLOW_BIG, coreVector3(0.09f,0.387f,0.9f));
         }
     }
@@ -284,7 +288,7 @@ static void DebugGame()
         if(g_pGame)
         {
             const coreVector3 vPos = g_pGame->GetPlayer(0u)->GetPosition();
-            g_pDistortion    ->CreateBurst    (vPos, coreVector2(1.0f,0.0f),      DISTORTION_WAVE_SMALL);
+            g_pDistortion    ->CreateBurst    (vPos, coreVector2(1.0f,0.0f),      DISTORTION_BURST_SMALL);
             g_pSpecialEffects->CreateBlowColor(vPos, coreVector3(1.0f,0.0f,0.0f), SPECIAL_BLOW_SMALL, coreVector3(0.09f,0.387f,0.9f));
         }
     }
@@ -319,6 +323,30 @@ static void DebugGame()
             g_pSpecialEffects->CreateRing(vPos, coreVector3(0.0f,0.0f,1.0f), coreVector3(0.0f,1.0f,0.0f), SPECIAL_BLAST_BIG, LERP(coreVector3(0.5f,0.5f,0.5f), coreVector3(0.09f,0.387f,0.9f), 0.5f));
         }
     }
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(O), CORE_INPUT_PRESS))
+    {
+        if(g_pGame && g_pGame->GetMission()->GetCurBoss())
+        {
+            g_pGame->GetMission()->GetCurBoss()->TakeDamage(1000, NULL);
+        }
+    }
+
+    //std::function<void()> test = []()
+    //{
+    //
+    //};
+
+    coreUintW iSize = sizeof(cBullet); // 280
+    iSize = iSize;
+
+    coreVector2 A = coreVector2::Rand();
+    coreVector2 B = A * 15.0f;
+    coreVector2 C = A * SQRT(15.0f);
+
+    coreFloat D = B.Length();
+    coreFloat E = C.LengthSq();
+
+    D = E;
 
     // ########################## DEBUG ##########################
 }

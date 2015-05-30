@@ -78,14 +78,14 @@ public:
     inline std::vector<cEnemy*>* GetEnemyList          ()                        {return &m_apEnemyList;}
     inline cBulletManager*       GetBulletManagerPlayer()                        {return &m_BulletManagerPlayer;}
     inline cBulletManager*       GetBulletManagerEnemy ()                        {return &m_BulletManagerEnemy;}
-    inline cCombatStats*         GetComboBoxInfo       ()                        {return &m_CombatStats;}
+    inline cCombatStats*         GetCombatStats        ()                        {return &m_CombatStats;}
     inline cCombatText*          GetCombatText         ()                        {return &m_CombatText;}
     inline cInterface*           GetInterface          ()                        {return &m_Interface;}
-    inline cMission*             GetMission            ()const                   {return m_pMission;}
+    inline cMission*             GetMission            ()const                   {ASSERT(m_pMission) return m_pMission;}
 
     // 
-    cPlayer* FindPlayer(const coreVector2& vPosition);
-    cEnemy*  FindEnemy (const coreVector2& vPosition);
+    cPlayer* RETURN_NONNULL FindPlayer(const coreVector2& vPosition);
+    cEnemy*  RETURN_NONNULL FindEnemy (const coreVector2& vPosition);
     template <typename F> void ForEachPlayer(F&& nFunction);
 
     // get object properties

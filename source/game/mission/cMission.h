@@ -22,7 +22,17 @@
 #define STAGE_MAIN            m_anStage.push_back([&]()                                // 
 #define STAGE_SUB(t)          ((m_fStageTimeBefore <= (t)) && ((t) <= m_fStageTime))   // 
 #define STAGE_FINISH_NOW      {m_anStage.pop_back(); m_fStageTime = 0.0f;}             // 
-#define STAGE_FINISH_AFTER(t) {if(m_fStageTime >= (t)) STAGE_END_NOW}                  // 
+#define STAGE_FINISH_AFTER(t) {if(m_fStageTime >= (t)) STAGE_FINISH_NOW}               // 
+
+
+// ****************************************************************
+// 
+#define VIRIDO_BALLS      (2u)                                    // 
+#define VIRIDO_TRAILS     (4u)                                    // 
+#define VIRIDO_RAWS       (VIRIDO_BALLS * (VIRIDO_TRAILS + 1u))   // 
+#define VIRIDO_PADDLES    (PLAYERS + 1u)                          // 
+#define VIRIDO_SCOUTS     (16u)                                   // 
+#define VIRIDO_BALL_SPEED (1.5f)                                  // 
 
 
 // ****************************************************************
@@ -45,6 +55,7 @@ public:
     cMission()noexcept;
     virtual ~cMission() {}
 
+    FRIEND_CLASS(cGame)
     DISABLE_COPY(cMission)
     ENABLE_ID
 
@@ -52,7 +63,8 @@ public:
     void Setup();
 
     // move the mission
-    void Move();
+    void MoveBefore();
+    void MoveAfter ();
 
     // set active boss
     void SetCurBoss(const coreUintW& iIndex);
@@ -65,9 +77,13 @@ public:
 
 
 private:
-    // own routines for derived classes
-    virtual void __SetupOwn() {}
-    virtual void __MoveOwn () {}
+    // own routines for derived classes (render functions executed by game)
+    virtual void __SetupOwn       () {}
+    virtual void __RenderOwnWeak  () {}
+    virtual void __RenderOwnStrong() {}
+    virtual void __RenderOwnAfter () {}
+    virtual void __MoveOwnBefore  () {}
+    virtual void __MoveOwnAfter   () {}
 };
 
 
@@ -88,22 +104,50 @@ public:
 class cViridoMission final : public cMission
 {
 private:
-    cCrossfieldBoss m_Crossfield;   // 
-    cTorusBoss      m_Torus;        // 
-    cVausBoss       m_Vaus;         // 
+    cCrossfieldBoss m_Crossfield;                   // 
+    cTorusBoss      m_Torus;                        // 
+    cVausBoss       m_Vaus;                         // 
+
+    coreBatchList m_Ball;                           // 
+    coreBatchList m_BallTrail;                      // 
+    coreObject3D  m_aBallRaw[VIRIDO_RAWS];          // 
+
+    coreObject3D m_aPaddle      [VIRIDO_PADDLES];   // 
+    coreObject3D m_aPaddleSphere[VIRIDO_PADDLES];   // 
+
+    cScoutEnemy m_aScout[VIRIDO_SCOUTS];            // 
+
+    coreUint8 m_iBounce;                            // 
+    coreFlow  m_fAnimation;                         // animation value
 
 
 public:
     cViridoMission()noexcept;
+    ~cViridoMission();
 
     DISABLE_COPY(cViridoMission)
     ASSIGN_ID(1, "Virido")
 
+    // 
+    void EnableBall (const coreUintW& iIndex, const coreVector2& vPosition, const coreVector2& vDirection);
+    void DisableBall(const coreUintW& iIndex, const coreBool& bAnimated);
+
+    // 
+    void EnablePaddle (const coreUintW& iIndex);
+    void DisablePaddle(const coreUintW& iIndex, const coreBool& bAnimated);
+
+    // 
+    inline coreObject3D* GetBall        (const coreUintW& iIndex)      {ASSERT(iIndex < VIRIDO_BALLS)         return &m_aBallRaw[iIndex * (VIRIDO_TRAILS + 1u)];}
+    inline cScoutEnemy*  GetScout       (const coreUintW& iIndex)      {ASSERT(iIndex < VIRIDO_SCOUTS)        return &m_aScout  [iIndex];}
+    inline coreBool      GetPaddleBounce(const coreUintW& iIndex)const {ASSERT(iIndex < sizeof(m_iBounce)*8u) return CONTAINS_BIT(m_iBounce, iIndex);}
+
 
 private:
-    // setup and move the Virido mission
-    void __SetupOwn()override;
-    void __MoveOwn ()override;
+    // setup, render and move the Virido mission
+    void __SetupOwn       ()override;
+    void __RenderOwnWeak  ()override;
+    void __RenderOwnStrong()override;
+    void __MoveOwnAfter   ()override;
 };
 
 

@@ -58,7 +58,7 @@ void VertexMain()
     v_v1Strength = (0.9 - v1Base) * 3.5;
     
     // increase depth on the back to improve overlapping
-    gl_Position.z += max((0.9-a_v2RawTexCoord.y) * gl_Position.w, 0.0);
+    gl_Position.z += (1.0-a_v2RawTexCoord.y) * gl_Position.w;
 
 #else
 

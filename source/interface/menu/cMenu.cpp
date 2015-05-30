@@ -66,7 +66,7 @@ void cMenu::Move()
             g_pGame->LoadMission(cViridoMission::ID);
 
             // 
-            if(!Core::Debug->IsEnabled()) Core::Input->ShowCursor(false);
+            Core::Input->ShowCursor(false);
 
             // TODO: menue-riss bei start oder seitlicher fade-out # 
 
@@ -102,23 +102,23 @@ void cMenu::UpdateButton(coreButton* OUTPUT pButton, const coreBool& bFocused)
 
 // ****************************************************************
 // 
-coreVector3 cMenu::HealthColor(const coreFloat& fValue)
+coreVector3 FUNC_CONST cMenu::HealthColor(const coreFloat& fValue)
 {
     ASSERT(0.0f <= fValue && fValue <= 1.0f)
 
     // 
-    if(fValue >= 0.5f) return LERP(COLOR_YELLOW_F, COLOR_GREEN_F,  fValue*2.0f - 1.0f);
-                       return LERP(COLOR_RED_F,    COLOR_YELLOW_F, fValue*2.0f);
+    if(fValue >= 0.5f) return LERP(COLOR_MENU_YELLOW, COLOR_MENU_GREEN,  fValue*2.0f - 1.0f);
+                       return LERP(COLOR_MENU_RED,    COLOR_MENU_YELLOW, fValue*2.0f);
 }
 
 
 // ****************************************************************
 // 
-coreVector3 cMenu::ChainColor(const coreFloat& fValue)
+coreVector3 FUNC_CONST cMenu::ChainColor(const coreFloat& fValue)
 {
     ASSERT(0.0f <= fValue && fValue <= 1.0f)
 
     // 
-    if(fValue >= 0.5f) return LERP(COLOR_PURPLE_F, COLOR_BLUE_F,   fValue*2.0f - 1.0f);
-                       return LERP(COLOR_RED_F,    COLOR_PURPLE_F, fValue*2.0f);
+    if(fValue >= 0.5f) return LERP(COLOR_MENU_PURPLE, COLOR_MENU_BLUE,   fValue*2.0f - 1.0f);
+                       return LERP(COLOR_MENU_RED,    COLOR_MENU_PURPLE, fValue*2.0f);
 }

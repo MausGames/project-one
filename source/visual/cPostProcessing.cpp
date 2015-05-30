@@ -15,8 +15,9 @@ cPostProcessing::cPostProcessing()noexcept
 {
     const coreVector2& vResolution = Core::System->GetResolution();
 
-    // load post-processing shader-program
-    this->DefineProgram("full_post_program");
+    // load post-processing shader-programs
+    m_pProgramSimple    = Core::Manager::Resource->Get<coreProgram>("full_post_program");
+    m_pProgramDistorted = Core::Manager::Resource->Get<coreProgram>("full_post_distorted_program");
     this->Recompile();
 
     // set object properties
@@ -62,8 +63,12 @@ void cPostProcessing::Apply()
 
     // reduce background intensity
     //if(g_pGame && (g_pGame->GetTimeMission() >= 2.0f))
-    //     this->SetAlpha(MAX(this->GetAlpha() - 0.1f*Core::System->GetTime(), 0.9f));
+    //     this->SetAlpha(MAX(this->GetAlpha() - 0.1f*Core::System->GetTime(), 0.8f));
     //else this->SetAlpha(MIN(this->GetAlpha() + 0.1f*Core::System->GetTime(), 1.0f));
+
+    // 
+    if(g_pDistortion->IsActive()) this->DefineProgram(m_pProgramDistorted);
+                             else this->DefineProgram(m_pProgramSimple);
 
     // bind all required frame buffers
     this->DefineTexture(POST_TEXTURE_UNIT_ENVIRONMENT, g_pEnvironment->GetFrameBuffer()->GetColorTarget(0u).pTexture);
@@ -99,18 +104,19 @@ void cPostProcessing::Apply()
 
 
 // ****************************************************************
-// recompile post-processing shader-program
+// recompile post-processing shader-programs
 void cPostProcessing::Recompile()
 {
-    const coreChar* pcConfig = PRINT("%s %s", g_CurConfig.Graphics.iGlow       ? SHADER_GLOW       : "",
-                                              g_CurConfig.Graphics.iDistortion ? SHADER_DISTORTION : "");
+    const coreChar* pcConfig1 =                g_CurConfig.Graphics.iGlow ? SHADER_GLOW : "";
+    const coreChar* pcConfig2 = PRINT("%s %s", g_CurConfig.Graphics.iGlow ? SHADER_GLOW : "", SHADER_DISTORTION);
 
-    // change configuration of post-processing shader
-    ((coreShader*)Core::Manager::Resource->Get<coreShader>("full_post.frag")->GetResource())
-        ->SetCustomCode(pcConfig);
+    // change configuration of post-processing shaders
+    s_cast<coreShader*>(Core::Manager::Resource->Get<coreShader>("full_post.frag")          ->GetResource())->SetCustomCode(pcConfig1);
+    s_cast<coreShader*>(Core::Manager::Resource->Get<coreShader>("full_post_distorted.frag")->GetResource())->SetCustomCode(pcConfig2);
 
     // recompile and relink
-    m_pProgram.GetHandle()->Reload();
+    m_pProgramSimple   .GetHandle()->Reload();
+    m_pProgramDistorted.GetHandle()->Reload();
 
     // finish now
     glFinish();

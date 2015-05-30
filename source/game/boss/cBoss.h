@@ -11,7 +11,6 @@
 #define _P1_GUARD_BOSS_H_
 
 // TODO: boomerangs of Crossfield may generate double-hits because of rotating box collision (when moving away from it)
-// TODO: boomerangs need no heap allocation! (though pointer-access -> array-access)
 
 
 // ****************************************************************
@@ -37,8 +36,9 @@
 
 // ****************************************************************
 // 
-#define CROSSFIELD_BOOMERANGS (4u)      // 
-#define CROSSFIELD_TRAILS     (3u)      // 
+#define CROSSFIELD_BOOMERANGS (4u)                                                 // 
+#define CROSSFIELD_TRAILS     (3u)                                                 // 
+#define CROSSFIELD_RAWS       (CROSSFIELD_BOOMERANGS * (CROSSFIELD_TRAILS + 1u))   // 
 
 #define TORUS_RAY_SIZE        coreVector3(0.7f,50.0f,0.7f)   // 
 #define TORUS_RAY_TEXSIZE     coreVector2(0.5f, 1.5f)        // 
@@ -90,9 +90,10 @@ private:
 
     coreBatchList m_Boomerang;                           // 
     coreBatchList m_BoomerangTrail;                      // 
+    coreObject3D  m_aBoomerangRaw[CROSSFIELD_RAWS];      // 
 
-    coreUint16 m_iPackedDir;                             // 
-    coreFlow   m_fAnimation;                             // animation value
+    coreUint8 m_iPackedDir;                              // 
+    coreFlow  m_fAnimation;                              // animation value
 
 
 public:
@@ -133,8 +134,6 @@ private:
 
     coreFlow m_fAnimation;        // animation value
 
-    //orb-explosion effect into direction, not centered
-
 
 public:
     cTorusBoss()noexcept;
@@ -143,12 +142,14 @@ public:
     DISABLE_COPY(cTorusBoss)
     ASSIGN_ID(102, "Torus")
 
+    // 
+    void Render()override;
+
 
 private:
     // 
     void __ResurrectOwn   ()override;
     void __KillOwn        ()override;
-    void __RenderOwnWeak  ()override;
     void __RenderOwnStrong()override;
     void __RenderOwnAfter ()override;
     void __MoveOwn        ()override;
@@ -158,6 +159,7 @@ private:
     void        __SetRotaAttack   (const coreInt16& iType, const coreBool& bAnimated);
     void        __EnableRay       (const coreUintW& iIndex);
     void        __DisableRay      (const coreUintW& iIndex);
+    void        __CreateOverdrive (const coreUintW& iIndex, const coreVector3& vIntersect, const coreFloat& fTime, const coreBool& bGround);
 };
 
 
@@ -166,9 +168,7 @@ private:
 class cVausBoss final : public cBoss
 {
 private:
-    coreObject3D m_Paddle;   // 
-
-    coreFlow m_fAnimation;   // animation value
+    coreUint8 m_iScoutOrder;   // 
 
 
 public:
@@ -181,11 +181,9 @@ public:
 
 private:
     // 
-    void __ResurrectOwn   ()override;
-    void __KillOwn        ()override;
-    void __RenderOwnWeak  ()override;
-    void __RenderOwnStrong()override;
-    void __MoveOwn        ()override;
+    void __ResurrectOwn()override;
+    void __KillOwn     ()override;
+    void __MoveOwn     ()override;
 };
 
 

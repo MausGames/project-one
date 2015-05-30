@@ -26,7 +26,7 @@ void cShip::Render(const coreProgramPtr& pProgram)
     pProgram->SendUniform(CORE_SHADER_UNIFORM_3D_POSITION, this->GetPosition());
     pProgram->SendUniform(CORE_SHADER_UNIFORM_3D_SIZE,     this->GetSize());
     pProgram->SendUniform(CORE_SHADER_UNIFORM_3D_ROTATION, m_vRotation);
-    pProgram->SendUniform(CORE_SHADER_UNIFORM_COLOR,       m_vColor);
+    pProgram->SendUniform(CORE_SHADER_UNIFORM_COLOR,       m_vColor);   // # alpha
 
     // draw the model
     m_pModelLow->Enable();
@@ -81,6 +81,9 @@ void cShip::_Kill(const coreBool& bAnimated)
 
     // disable collision
     this->ChangeType(0);
+
+    // 
+    if(bAnimated) g_pSpecialEffects->MacroExplosionPhysicalSmall(this->GetPosition());
 }
 
 
@@ -96,7 +99,7 @@ void cShip::_UpdateBlink()
 
     // 
     this->GetProgram()->Enable();
-    this->GetProgram()->SendUniform("u_v1Blink", MIN(m_fBlink, 1.0f));
+    this->GetProgram()->SendUniform("u_v1Blink", MIN(m_fBlink, 1.0f) * 0.8f);
 
     // 
     if(m_fBlink) m_fBlink = MAX(m_fBlink - 3.0f*Core::System->GetTime(), 0.0f);

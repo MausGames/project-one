@@ -10,6 +10,8 @@
 #ifndef _P1_GUARD_ENEMY_H_
 #define _P1_GUARD_ENEMY_H_
 
+// TODO: definitely add automatic enemy batching like the bullet manager! 
+
 
 // ****************************************************************
 // enemy definitions
@@ -25,8 +27,10 @@ enum eEnemyStatus : coreUint8
 class INTERFACE cEnemy : public cShip
 {
 protected:
-    coreFlow  m_fLifeTime;   // 
-    coreUint8 m_iNumShots;   // 
+    coreFlow  m_fLifeTime;                     // 
+    coreUint8 m_aiNumShots[2];                 // (0 = value, 1 = helper) 
+
+    std::function<void(cEnemy*)> m_nRoutine;   // custom move routine
 
 
 public:
@@ -48,23 +52,29 @@ public:
     void TakeDamage(const coreInt32& iDamage, cPlayer* pAttacker);
 
     // control life and death
-    void Resurrect(const coreSpline2& oPath);
+    void Resurrect(const coreSpline2& oPath,     const coreVector2& vFactor, const coreVector2& vOffset);
     void Resurrect(const coreVector2& vPosition, const coreVector2& vDirection);
     void Kill     (const coreBool&    bAnimated);
 
     // 
-    coreBool DefaultMovePath     (const coreSpline2& oPath, const coreVector2& vOffset, const coreFloat& fDistance);
-    coreBool DefaultMoveTarget   (const coreVector2& vTarget, const coreFloat& fSpeedTurn, const coreFloat& fSpeedMove);
+    template <typename F> void ChangeRoutine(F&& nRoutine) {m_nRoutine = nRoutine;}
+
+    // 
+    coreBool DefaultMovePath     (const coreSpline2& oPath, const coreVector2& vFactor, const coreVector2& vOffset, const coreFloat& fDistance);
+    coreBool DefaultMoveTarget   (const coreVector2& vTarget, const coreFloat& fSpeedMove, const coreFloat& fSpeedTurn);
+    coreBool DefaultMoveSmooth   (const coreVector2& vPosition, const coreFloat& fSpeedMove, const coreFloat& fClampMove);
     void     DefaultMoveLerp     (const coreVector2& vFromRawPos, const coreVector2& vToRawPos, const coreFloat& fTime);
     void     DefaultRotate       (const coreFloat& fAngle);
+    coreBool DefaultRotateSmooth (const coreVector2& vDirection, const coreFloat& fSpeedTurn, const coreFloat& fClampTurn);
     void     DefaultRotateLerp   (const coreFloat& fFromAngle, const coreFloat& fToAngle, const coreFloat& fTime);
     void     DefaultOrientate    (const coreFloat& fAngle);
     void     DefaultOrientateLerp(const coreFloat& fFromAngle, const coreFloat& fToAngle, const coreFloat& fTime);
     void     DefaultMultiate     (const coreFloat& fAngle);
-    coreBool DefaultShoot        (const coreFloat& fFireRate);
+    coreBool DefaultShoot        (const coreFloat& fFireRate, const coreUint8& iMaxShots);
 
     // get object properties
     inline const coreFloat& GetLifeTime()const {return m_fLifeTime;}
+    inline const coreUint8& GetNumShots()const {return m_aiNumShots[0];}
 
 
 private:

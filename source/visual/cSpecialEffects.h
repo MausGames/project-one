@@ -62,6 +62,7 @@ private:
     coreUintW    m_iCurRing;                  // 
 
     coreSoundPtr m_apSound[SPECIAL_SOUNDS];   // 
+    coreUint32   m_iSoundGuard;               // 
 
     coreTimer m_ShakeTimer;                   // 
     coreFloat m_fShakeStrength;               // 
@@ -108,6 +109,10 @@ public:
     void MacroExplosionDarkBig      (const coreVector3& vPosition);
     void MacroExplosionPhysicalSmall(const coreVector3& vPosition);
     void MacroExplosionPhysicalBig  (const coreVector3& vPosition);
+    void MacroEruptionColorSmall    (const coreVector3& vPosition, const coreVector2& vDirection, const coreVector3& vColor);
+    void MacroEruptionColorBig      (const coreVector3& vPosition, const coreVector2& vDirection, const coreVector3& vColor);
+    void MacroEruptionDarkSmall     (const coreVector3& vPosition, const coreVector2& vDirection);
+    void MacroEruptionDarkBig       (const coreVector3& vPosition, const coreVector2& vDirection);
 };
 
 

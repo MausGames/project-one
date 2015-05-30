@@ -173,9 +173,9 @@ void cBackground::Move()
             if(bUpdate) (*it)->MoveNormal();
         }
     };
-    nControlObjectsFunc(&m_apGroundObjectList, 80.0f);
-    nControlObjectsFunc(&m_apDecalObjectList,  80.0f);
-    nControlObjectsFunc(&m_apAirObjectList,    75.0f);
+    nControlObjectsFunc(&m_apGroundObjectList, BACKGROUND_OBJECT_RANGE);
+    nControlObjectsFunc(&m_apDecalObjectList,  BACKGROUND_OBJECT_RANGE);
+    nControlObjectsFunc(&m_apAirObjectList,    BACKGROUND_OBJECT_RANGE - 5.0f);
 
     // control all additional objects
     auto nControlAddFunc = [](std::vector<coreObject3D*>* OUTPUT papObject, const coreFloat& fRange)
@@ -192,8 +192,8 @@ void cBackground::Move()
             }
         }
     };
-    nControlAddFunc(&m_apAddObject, 80.0f);
-    FOR_EACH(it, m_apAddList) nControlAddFunc((*it)->List(), 80.0f);
+    nControlAddFunc(&m_apAddObject, BACKGROUND_OBJECT_RANGE);
+    FOR_EACH(it, m_apAddList) nControlAddFunc((*it)->List(), BACKGROUND_OBJECT_RANGE);
 
     // move all additional objects
     FOR_EACH(it, m_apAddObject) (*it)->Move();
@@ -219,11 +219,16 @@ void cBackground::AddObject(coreObject3D* pObject, const coreVector3& vRelativeP
 
 void cBackground::AddObject(coreObject3D* pObject, const coreVector3& vRelativePos, const coreUint8& iListIndex)
 {
-    ASSERT(pObject && m_apAddList.count(iListIndex))
+    ASSERT(pObject)
 
     // 
-    pObject->SetPosition(vRelativePos + coreVector3(g_pEnvironment->GetCameraPos().xy(), 0.0f));
-    m_apAddList.at(iListIndex)->BindObject(pObject);
+    WARN_IF(!m_apAddList.count(iListIndex)) this->AddObject(pObject, vRelativePos);
+    else
+    {
+        // 
+        pObject->SetPosition(vRelativePos + coreVector3(g_pEnvironment->GetCameraPos().xy(), 0.0f));
+        m_apAddList.at(iListIndex)->BindObject(pObject);
+    }
 }
 
 

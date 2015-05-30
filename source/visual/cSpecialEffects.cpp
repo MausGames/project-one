@@ -18,6 +18,7 @@ cSpecialEffects::cSpecialEffects()noexcept
 , m_ParticleFire   (256u)
 , m_iCurBlast      (0u)
 , m_iCurRing       (0u)
+, m_iSoundGuard    (0u)
 , m_ShakeTimer     (coreTimer(1.0f, 30.0f, 0u))
 , m_fShakeStrength (0.0f)
 {
@@ -66,6 +67,8 @@ cSpecialEffects::cSpecialEffects()noexcept
 
     // 
     m_ShakeTimer.Play(CORE_TIMER_PLAY_RESET);
+
+    STATIC_ASSERT(SPECIAL_SOUNDS <= sizeof(m_iSoundGuard)*8)
 }
 
 
@@ -150,6 +153,9 @@ void cSpecialEffects::Move()
         oRing.SetSize (coreVector3(8.0f,8.0f,8.0f) * (fScale * (1.0f - oRing.GetAlpha())));
         oRing.Move();
     }
+
+    // 
+    m_iSoundGuard = 0u;
 
     // 
     if(m_fShakeStrength && m_ShakeTimer.Update(1.0f))
@@ -328,9 +334,15 @@ void cSpecialEffects::PlaySound(const coreVector3& vPosition, const coreFloat& f
 {
     ASSERT(fVolume)
 
-    coreFloat fBaseVolume, fBasePitch, fBasePitchRnd;
+    // 
+    const coreUintW iFileIndex = iSoundIndex & 0xFFu;
 
     // 
+    if(CONTAINS_BIT(m_iSoundGuard, iFileIndex)) return;
+    ADD_BIT(m_iSoundGuard, iFileIndex)
+
+    // 
+    coreFloat fBaseVolume, fBasePitch, fBasePitchRnd;
     switch(iSoundIndex)
     {
     default: ASSERT(false)
@@ -343,7 +355,7 @@ void cSpecialEffects::PlaySound(const coreVector3& vPosition, const coreFloat& f
     }
 
     // 
-    m_apSound[iSoundIndex & 0xFFu]->PlayPosition(NULL, fVolume * fBaseVolume, fBasePitch, fBasePitchRnd, false, vPosition);
+    m_apSound[iFileIndex]->PlayPosition(NULL, fVolume * fBaseVolume, fBasePitch, fBasePitchRnd, false, vPosition);
 }
 
 
@@ -407,7 +419,7 @@ void cSpecialEffects::MacroExplosionPhysicalSmall(const coreVector3& vPosition)
 {
     // 
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_SMALL);
-    this         ->CreateSplashColor(vPosition, SPECIAL_SPLASH_SMALL, COLOR_FIRE_F);
+    this         ->CreateSplashColor(vPosition, SPECIAL_SPLASH_SMALL, COLOR_FIRE_ORANGE);
     this         ->CreateSplashFire (vPosition, SPECIAL_EXPLOSION_SMALL);
     this         ->PlaySound        (vPosition, 1.0f, SOUND_EXPLOSION_PHYSICAL_SMALL);
     this         ->ShakeScreen      (SPECIAL_SHAKE_SMALL);
@@ -417,8 +429,40 @@ void cSpecialEffects::MacroExplosionPhysicalBig(const coreVector3& vPosition)
 {
     // 
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_BIG);
-    this         ->CreateSplashColor(vPosition, SPECIAL_SPLASH_BIG, COLOR_FIRE_F);
+    this         ->CreateSplashColor(vPosition, SPECIAL_SPLASH_BIG, COLOR_FIRE_ORANGE);
     this         ->CreateSplashFire (vPosition, SPECIAL_EXPLOSION_BIG);
     this         ->PlaySound        (vPosition, 1.0f, SOUND_EXPLOSION_PHYSICAL_BIG);
     this         ->ShakeScreen      (SPECIAL_SHAKE_BIG);
+}
+
+void cSpecialEffects::MacroEruptionColorSmall(const coreVector3& vPosition, const coreVector2& vDirection, const coreVector3& vColor)
+{
+    // 
+    g_pDistortion->CreateBurst    (vPosition,             vDirection,        DISTORTION_BURST_SMALL);
+    this         ->CreateBlowColor(vPosition, coreVector3(vDirection, 0.0f), SPECIAL_BLOW_SMALL, vColor);
+    this         ->PlaySound      (vPosition, 1.0f, SOUND_EXPLOSION_ENERGY_SMALL);
+}
+
+void cSpecialEffects::MacroEruptionColorBig(const coreVector3& vPosition, const coreVector2& vDirection, const coreVector3& vColor)
+{
+    // 
+    g_pDistortion->CreateBurst    (vPosition,             vDirection,        DISTORTION_BURST_BIG);
+    this         ->CreateBlowColor(vPosition, coreVector3(vDirection, 0.0f), SPECIAL_BLOW_BIG, vColor);
+    this         ->PlaySound      (vPosition, 1.0f, SOUND_EXPLOSION_ENERGY_BIG);
+}
+
+void cSpecialEffects::MacroEruptionDarkSmall(const coreVector3& vPosition, const coreVector2& vDirection)
+{
+    // 
+    g_pDistortion->CreateBurst   (vPosition,             vDirection,        DISTORTION_BURST_SMALL);
+    this         ->CreateBlowDark(vPosition, coreVector3(vDirection, 0.0f), SPECIAL_BLOW_SMALL);
+    this         ->PlaySound     (vPosition, 1.0f, SOUND_EXPLOSION_ENERGY_SMALL);
+}
+
+void cSpecialEffects::MacroEruptionDarkBig(const coreVector3& vPosition, const coreVector2& vDirection)
+{
+    // 
+    g_pDistortion->CreateBurst   (vPosition,             vDirection,        DISTORTION_BURST_BIG);
+    this         ->CreateBlowDark(vPosition, coreVector3(vDirection, 0.0f), SPECIAL_BLOW_BIG);
+    this         ->PlaySound     (vPosition, 1.0f, SOUND_EXPLOSION_ENERGY_BIG);
 }
