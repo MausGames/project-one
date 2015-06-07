@@ -12,15 +12,17 @@
 // ****************************************************************
 // constructor
 cMenu::cMenu()noexcept
-: coreMenu (3u, SURFACE_INTRO)
+: coreMenu (5u, SURFACE_INTRO)
 {
     // create intro and main menu
     m_pIntroMenu = new cIntroMenu();
     m_pMainMenu  = new cMainMenu();
 
     // bind menu objects
-    this->BindObject(SURFACE_INTRO, m_pIntroMenu);
-    this->BindObject(SURFACE_MAIN,  m_pMainMenu);
+    this->BindObject(SURFACE_INTRO,  m_pIntroMenu);
+    this->BindObject(SURFACE_MAIN,   m_pMainMenu);
+    this->BindObject(SURFACE_GAME,   &m_GameMenu);
+    this->BindObject(SURFACE_CONFIG, &m_ConfigMenu);
 }
 
 
@@ -31,6 +33,18 @@ cMenu::~cMenu()
     // delete intro and main menu
     SAFE_DELETE(m_pIntroMenu)
     SAFE_DELETE(m_pMainMenu)
+}
+
+
+// ****************************************************************
+// render the menu
+void cMenu::Render()
+{
+    // 
+    coreMenu::Render();
+
+    // 
+    m_Tooltip.Render();
 }
 
 
@@ -50,25 +64,18 @@ void cMenu::Move()
 
     if(this->GetCurSurface() == SURFACE_INTRO)
     {
-        // 
-        if(m_pIntroMenu->GetStatus()) this->ChangeSurface(SURFACE_MAIN, 1.0f);
+        if(m_pIntroMenu->GetStatus())
+        {
+            // 
+            this->ChangeSurface(SURFACE_MAIN, 1.0f);
+        }
     }
     else if(this->GetCurSurface() == SURFACE_MAIN)
     {
         if(m_pMainMenu->GetStatus())
         {
             // 
-            this->ChangeSurface(SURFACE_EMPTY, 1.0f);
-
-            // 
-            ASSERT(!g_pGame)
-            g_pGame = new cGame(false);
-            g_pGame->LoadMission(cViridoMission::ID);
-
-            // 
-            Core::Input->ShowCursor(false);
-
-            // TODO: menue-riss bei start oder seitlicher fade-out # 
+            this->ChangeSurface(SURFACE_GAME, 1.0f);
 
             // unload expendable menu resources
             Core::Manager::Resource->AttachFunction([this]()
@@ -84,6 +91,41 @@ void cMenu::Move()
             });
         }
     }
+    else if(this->GetCurSurface() == SURFACE_GAME)
+    {
+        if(m_GameMenu.GetStatus() == 1)
+        {
+            // 
+            this->ChangeSurface(SURFACE_EMPTY, 1.0f);
+
+            // 
+            ASSERT(!g_pGame)
+            g_pGame = new cGame(false);
+            g_pGame->LoadMission(cViridoMission::ID);
+
+            // 
+            Core::Input->ShowCursor(false);
+
+            // TODO: menue-riss bei start oder seitlicher fade-out # 
+            // außerdem bei start im main-menue animation und explosion des logos oder riss in mitte
+        }
+        else if(m_GameMenu.GetStatus() == 2)
+        {
+            // 
+            this->ChangeSurface(SURFACE_CONFIG, 3.0f);
+        }
+    }
+    else if(this->GetCurSurface() == SURFACE_CONFIG)
+    {
+        if(m_ConfigMenu.GetStatus())
+        {
+            // 
+            this->ChangeSurface(SURFACE_GAME, 3.0f);
+        }
+    }
+
+    // 
+    m_Tooltip.Move();
 }
 
 
@@ -91,6 +133,8 @@ void cMenu::Move()
 // default button update routine
 void cMenu::UpdateButton(coreButton* OUTPUT pButton, const coreBool& bFocused)
 {
+    ASSERT(pButton)
+
     // select visible strength
     const coreFloat fLight = bFocused ? MENU_LIGHT_ACTIVE : MENU_LIGHT_IDLE;
 

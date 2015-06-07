@@ -41,6 +41,13 @@ cWater::cWater()noexcept
     // set object properties
     this->SetPosition(coreVector3(      0.0f,       0.0f, WATER_HEIGHT));
     this->SetSize    (coreVector3(WATER_SIZE, WATER_SIZE,         1.0f));
+
+    // 
+    m_apTexture[0].GetHandle()->OnLoadOnce([&]()
+    {
+        glBindTexture(GL_TEXTURE_2D, m_apTexture[0]->GetTexture());
+        if(CORE_GL_SUPPORT(EXT_texture_filter_anisotropic)) glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 0.0f);
+    });
 }
 
 

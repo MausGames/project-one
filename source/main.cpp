@@ -23,9 +23,11 @@ cEnvironment*    g_pEnvironment        = NULL;
 cMenu*           g_pMenu               = NULL;
 cGame*           g_pGame               = NULL;
 
-static coreUint64 m_iOldPerfTime = 0u;   // last measured high-precision time value
-static void LockFramerate();             // lock framerate and override elapsed time
-static void DebugGame();                 // debug and test game separately
+static coreUint64 m_iOldPerfTime = 0u;      // last measured high-precision time value
+static coreBool   m_bHardLock    = false;   // 
+static void InitFramerate();                // 
+static void LockFramerate();                // lock framerate and override elapsed time
+static void DebugGame();                    // debug and test game separately
 
 
 // ****************************************************************
@@ -43,6 +45,9 @@ void CoreApp::Init()
     // set listener to default values
     Core::Audio->SetListener(coreVector3(0.0f,0.0f,10.0f), coreVector3(0.0f,0.0f,0.0f),
                              coreVector3(0.0f,0.0f,-1.0f), coreVector3(0.0f,1.0f,0.0f));
+
+    // 
+    InitFramerate();
 
     // load configuration
     LoadConfig();
@@ -191,29 +196,58 @@ void CoreApp::Move()
 
 
 // ****************************************************************
+// 
+static void InitFramerate()
+{
+    SDL_Window* pWindow = Core::System->GetWindow();
+
+    // 
+    SDL_DisplayMode oMode;
+    SDL_GetWindowDisplayMode(pWindow, &oMode);
+
+    if(oMode.refresh_rate != F_TO_SI(FRAMERATE_VALUE))
+    {
+        // 
+        oMode.refresh_rate = F_TO_SI(FRAMERATE_VALUE);
+        SDL_SetWindowDisplayMode(pWindow, &oMode);
+        SDL_GetWindowDisplayMode(pWindow, &oMode);
+
+        // 
+        if(oMode.refresh_rate != F_TO_SI(FRAMERATE_VALUE))
+            m_bHardLock = true;
+    }
+}
+
+
+// ****************************************************************
 // lock framerate and override elapsed time
 static void LockFramerate()
 {
 #if (1)
 
-    coreUint64 iNewPerfTime = 0u;
-    coreFloat  fDifference  = FRAMERATE_TIME;
-
-    // spin as long as frame time is too low (to remove pattern dependencies and increase consistency and fairness)
-    do
+    if(m_bHardLock)
     {
-        // sleep a bit on very high framerates (probably vsync disabled)
-        if(3.0f*fDifference < FRAMERATE_TIME)
-            SDL_Delay(1u);
+        coreUint64 iNewPerfTime;
+        coreFloat  fDifference;
 
         // measure and calculate current frame time
-        iNewPerfTime = SDL_GetPerformanceCounter();
-        fDifference  = coreFloat(coreDouble(iNewPerfTime - m_iOldPerfTime) * Core::System->GetPerfFrequency());
-    }
-    while(fDifference < FRAMERATE_TIME);
+        auto nMeasureFunc = [&]()
+        {
+            iNewPerfTime = SDL_GetPerformanceCounter();
+            fDifference  = coreFloat(coreDouble(iNewPerfTime - m_iOldPerfTime) * Core::System->GetPerfFrequency());
+        };
 
-    // save last high-precision time value
-    m_iOldPerfTime = iNewPerfTime;
+        // spin as long as frame time is too low
+        for(nMeasureFunc(); fDifference < FRAMERATE_TIME; nMeasureFunc())
+        {
+            // 
+            const coreUint32 iSleep = MAX(F_TO_UI((FRAMERATE_TIME - fDifference) * 1000.0f), 1u) - 1u;
+            if(iSleep) SDL_Delay(iSleep);
+        }
+
+        // save last high-precision time value
+        m_iOldPerfTime = iNewPerfTime;
+    }
 
     // override elapsed time
     if(Core::System->GetTime()) c_cast<coreFloat&>(Core::System->GetTime()) = FRAMERATE_TIME;
@@ -330,6 +364,14 @@ static void DebugGame()
             g_pGame->GetMission()->GetCurBoss()->TakeDamage(1000, NULL);
         }
     }
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(P), CORE_INPUT_PRESS))
+    {
+        if(g_pGame)
+        {
+            cPlayer* pPlayer = g_pGame->GetPlayer(0u);
+            pPlayer->SetForce(coreVector2(80.0f,40.0f));
+        }
+    }
 
     //std::function<void()> test = []()
     //{
@@ -348,5 +390,11 @@ static void DebugGame()
 
     D = E;
 
+    const char* pcTest = SDL_GetDisplayName(0);
+    pcTest = pcTest;
+
+    //Core::Debug->MeasureStart("Log");
+    //for(coreUintW i = 0u; i < 1000u; ++i) coreData::FileExists("data/license.txt");
+    //Core::Debug->MeasureEnd("Log");
     // ########################## DEBUG ##########################
 }

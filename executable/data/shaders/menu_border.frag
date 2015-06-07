@@ -29,6 +29,6 @@ void FragmentMain()
     else
     {
         // draw interior
-        gl_FragColor = vec4(coreTexture2D(0, v_av2TexCoord[0]).rgb + c_v1Black, 1.0) * u_v4Color;
+        gl_FragColor = vec4(coreTexture2D(0, v_av2TexCoord[0]).rgb + vec3(c_v1Black), 1.0) * u_v4Color;
     }
 }

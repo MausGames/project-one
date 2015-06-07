@@ -40,10 +40,10 @@
 #define CROSSFIELD_TRAILS     (3u)                                                 // 
 #define CROSSFIELD_RAWS       (CROSSFIELD_BOOMERANGS * (CROSSFIELD_TRAILS + 1u))   // 
 
-#define TORUS_RAY_SIZE        coreVector3(0.7f,50.0f,0.7f)   // 
-#define TORUS_RAY_TEXSIZE     coreVector2(0.5f, 1.5f)        // 
-#define TORUS_RAY_OFFSET      (8.0f)                         // 
-#define TORUS_RAYWAVE_SIZE    coreVector3(1.6f, 5.0f,1.3f)   // 
+#define TORUS_RAY_SIZE        (coreVector3(0.7f,50.0f,0.7f))   // 
+#define TORUS_RAY_TEXSIZE     (coreVector2(0.5f, 1.5f))        // 
+#define TORUS_RAY_OFFSET      (8.0f)                           // 
+#define TORUS_RAYWAVE_SIZE    (coreVector3(1.6f, 5.0f,1.3f))   // 
 
 
 // ****************************************************************

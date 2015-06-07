@@ -48,6 +48,8 @@
     <ClCompile Include="..\..\..\source\interface\cTooltip.cpp" />
     <ClCompile Include="..\..\..\source\interface\menu\01_cIntroMenu.cpp" />
     <ClCompile Include="..\..\..\source\interface\menu\02_cMainMenu.cpp" />
+    <ClCompile Include="..\..\..\source\interface\menu\03_cGameMenu.cpp" />
+    <ClCompile Include="..\..\..\source\interface\menu\04_cConfigMenu.cpp" />
     <ClCompile Include="..\..\..\source\interface\menu\cMenu.cpp" />
     <ClCompile Include="..\..\..\source\main.cpp" />
     <ClCompile Include="..\..\..\source\visual\cDistortion.cpp" />

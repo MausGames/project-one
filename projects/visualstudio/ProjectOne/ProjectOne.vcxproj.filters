@@ -111,6 +111,12 @@
     <ClCompile Include="..\..\..\source\interface\cCombatStats.cpp">
       <Filter>interface</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\interface\menu\03_cGameMenu.cpp">
+      <Filter>interface\menu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\interface\menu\04_cConfigMenu.cpp">
+      <Filter>interface\menu</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\main.h" />

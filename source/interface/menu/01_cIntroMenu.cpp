@@ -15,7 +15,7 @@ cIntroMenu::cIntroMenu()noexcept
 : coreMenu       (3u, SURFACE_INTRO_EMPTY)
 , m_IntroTimer   (coreTimer(1.5f, 0.5f, 1u))
 , m_iIntroStatus (0u)
-, m_iCurLanguage (0u)
+, m_iSelected    (0u)
 {
     // create menu objects
     m_MausLogo.DefineProgram("default_2d_program");
@@ -26,7 +26,8 @@ cIntroMenu::cIntroMenu()noexcept
     // bind menu objects
     this->BindObject(SURFACE_INTRO_LOGO, &m_MausLogo);
 
-    const coreBool bSelectLanguage = Core::Language->GetNumStrings() ? false : true;
+    // 
+    const coreBool bSelectLanguage = Core::Language->GetPath()[0] ? false : true;
     if(bSelectLanguage)
     {
         // 
@@ -80,8 +81,8 @@ void cIntroMenu::Move()
     if(this->GetCurSurface() == SURFACE_INTRO_LANGUAGE)
     {
         // 
-        FOR_EACH(it, m_apLanguageButton) if((*it)->IsFocused())     m_iCurLanguage =  coreUint8(it - m_apLanguageButton.begin());
-        FOR_EACH(it, m_apLanguageButton) cMenu::UpdateButton((*it), m_iCurLanguage == coreUint8(it - m_apLanguageButton.begin()));
+        FOR_EACH(it, m_apLanguageButton) if((*it)->IsFocused())     m_iSelected =  coreUint8(it - m_apLanguageButton.begin());
+        FOR_EACH(it, m_apLanguageButton) cMenu::UpdateButton((*it), m_iSelected == coreUint8(it - m_apLanguageButton.begin()));
 
         // 
         FOR_EACH(it, m_apLanguageButton)

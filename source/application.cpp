@@ -155,6 +155,7 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreSound>  ("environment_nature.wav",                 CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_nature.wav");
 
     Core::Manager::Resource->Load<coreFont>   ("ethnocentric.ttf",                       CORE_RESOURCE_UPDATE_AUTO,   "data/fonts/ethnocentric.ttf");
+    Core::Manager::Resource->Load<coreFont>   ("fontawesome.ttf",                        CORE_RESOURCE_UPDATE_AUTO,   "data/fonts/fontawesome.ttf");
 
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_decal_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("effect_decal.vert")

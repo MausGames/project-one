@@ -114,11 +114,15 @@ private:
 
     coreObject3D m_aPaddle      [VIRIDO_PADDLES];   // 
     coreObject3D m_aPaddleSphere[VIRIDO_PADDLES];   // 
+    cShip*       m_apOwner      [VIRIDO_PADDLES];   // 
 
-    cScoutEnemy m_aScout[VIRIDO_SCOUTS];            // 
+    cScoutEnemy   m_aScout[VIRIDO_SCOUTS];          // 
+    cWarriorEnemy m_Warrior;                        // 
 
-    coreUint8 m_iBounce;                            // 
-    coreFlow  m_fAnimation;                         // animation value
+    coreUint8 m_iBounceState;                       // 
+    coreBool  m_bBounceReal;                        // 
+
+    coreFlow m_fAnimation;                          // animation value
 
 
 public:
@@ -133,13 +137,18 @@ public:
     void DisableBall(const coreUintW& iIndex, const coreBool& bAnimated);
 
     // 
-    void EnablePaddle (const coreUintW& iIndex);
+    void EnablePaddle (const coreUintW& iIndex, cShip* pOwner);
     void DisablePaddle(const coreUintW& iIndex, const coreBool& bAnimated);
 
     // 
-    inline coreObject3D* GetBall        (const coreUintW& iIndex)      {ASSERT(iIndex < VIRIDO_BALLS)         return &m_aBallRaw[iIndex * (VIRIDO_TRAILS + 1u)];}
-    inline cScoutEnemy*  GetScout       (const coreUintW& iIndex)      {ASSERT(iIndex < VIRIDO_SCOUTS)        return &m_aScout  [iIndex];}
-    inline coreBool      GetPaddleBounce(const coreUintW& iIndex)const {ASSERT(iIndex < sizeof(m_iBounce)*8u) return CONTAINS_BIT(m_iBounce, iIndex);}
+    inline void     SetBounceReal (const coreBool&  bStatus)     {m_bBounceReal = bStatus;}
+    inline coreBool GetBounceState(const coreUintW& iIndex)const {ASSERT(iIndex < sizeof(m_iBounceState)*8u) return CONTAINS_BIT(m_iBounceState, iIndex);}
+
+    // 
+    inline coreObject3D*  GetBall   (const coreUintW& iIndex) {ASSERT(iIndex < VIRIDO_BALLS)   return &m_aBallRaw[iIndex * (VIRIDO_TRAILS + 1u)];}
+    inline coreObject3D*  GetPaddle (const coreUintW& iIndex) {ASSERT(iIndex < VIRIDO_PADDLES) return &m_aPaddle [iIndex];}
+    inline cScoutEnemy*   GetScout  (const coreUintW& iIndex) {ASSERT(iIndex < VIRIDO_SCOUTS)  return &m_aScout  [iIndex];}
+    inline cWarriorEnemy* GetWarrior()                        {return &m_Warrior;}
 
 
 private:

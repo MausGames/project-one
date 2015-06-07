@@ -111,6 +111,9 @@ private:
 template <typename F> void cGame::ForEachPlayer(F&& nFunction)
 {
     // 
+    if(!m_bCoop) {nFunction(&m_aPlayer[0]); return;}
+
+    // 
     for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
     {
         cPlayer* pCurPlayer = &m_aPlayer[i];

@@ -10,6 +10,11 @@
 
 
 // ****************************************************************
+// counter identifier
+#define SCOUT_RESURRECTIONS (0u)
+
+
+// ****************************************************************
 // constructor
 cVausBoss::cVausBoss()noexcept
 : m_iScoutOrder (0u)
@@ -30,8 +35,11 @@ cVausBoss::cVausBoss()noexcept
 // destructor
 cVausBoss::~cVausBoss()
 {
+    cViridoMission* pMission = s_cast<cViridoMission*>(g_pGame->GetMission());
+
     // 
-    s_cast<cViridoMission*>(g_pGame->GetMission())->DisablePaddle(0u, false);
+    for(coreUintW i = 0u; i < VIRIDO_PADDLES; ++i)
+        pMission->DisablePaddle(i, false);
 }
 
 
@@ -40,10 +48,15 @@ cVausBoss::~cVausBoss()
 void cVausBoss::__ResurrectOwn()
 {
     cViridoMission* pMission = s_cast<cViridoMission*>(g_pGame->GetMission());
+    cWarriorEnemy*  pWarrior = pMission->GetWarrior();
 
     // 
     pMission->EnableBall  (0u, coreVector2(0.0f,0.0f), coreVector2(-0.5f,1.0f).Normalize());
-    pMission->EnablePaddle(0u);
+    pMission->EnablePaddle(0u, this);
+    pMission->EnablePaddle(1u, pWarrior);
+
+    // 
+    pWarrior->Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
 }
 
 
@@ -54,7 +67,8 @@ void cVausBoss::__KillOwn()
     cViridoMission* pMission = s_cast<cViridoMission*>(g_pGame->GetMission());
 
     // 
-    pMission->DisablePaddle(0u, true);
+    for(coreUintW i = 0u; i < VIRIDO_PADDLES; ++i)
+        pMission->DisablePaddle(i, true);
 }
 
 
@@ -64,22 +78,25 @@ void cVausBoss::__MoveOwn()
 {
     cViridoMission* pMission = s_cast<cViridoMission*>(g_pGame->GetMission());
     coreObject3D*   pBall    = pMission->GetBall(0u);
-
-  
+    cWarriorEnemy*  pWarrior = pMission->GetWarrior();
 
     // ################################################################
     // 
     if(m_iPhase == 0u)
     {
-        PHASE_CONTROL_TIMER(0u, 0.25f, LERP_BREAK)
+        if(m_aiCounter[SCOUT_RESURRECTIONS] >= 60)
         {
-            // 
-            this->DefaultMoveLerp(coreVector2(0.0f,-2.0f), coreVector2(this->GetPosition().x / FOREGROUND_AREA.x, -0.95f), fTime);
+            PHASE_CONTROL_TIMER(0u, 0.25f, LERP_BREAK)
+            {
+                // 
+                const coreFloat fCur = this->GetPosition().x / FOREGROUND_AREA.x;
+                this->DefaultMoveLerp(coreVector2(fCur, -2.0f), coreVector2(fCur, -0.95f), fTime);
 
-            // 
-            if(PHASE_FINISHED)
-                ++m_iPhase;
-        });
+                // 
+                if(PHASE_FINISHED)
+                    ++m_iPhase;
+            });
+        }
     }
 
     // ################################################################
@@ -104,64 +121,114 @@ void cVausBoss::__MoveOwn()
     }
 
 
-    PHASE_CONTROL_TICKER(2u, 0u, 1.0f)
+
+    
+    if(pWarrior->GetCurHealthPct() < 0.9f)
     {
+
+        PHASE_CONTROL_TICKER(2u, 0u, 1.0f)
+        {
+            for(coreUintW i = 0u; i < VIRIDO_SCOUTS; ++i)
+            {
+                cScoutEnemy* pScout = pMission->GetScout(i);
+                if(CONTAINS_VALUE(pScout->GetStatus(), ENEMY_STATUS_DEAD)) continue;
+
+                cPlayer* pPlayer = g_pGame->FindPlayer(pScout->GetPosition().xy());
+
+                const coreVector2 vDir = (pPlayer->GetPosition().xy() - pScout->GetPosition().xy()).Normalize();
+
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.4f, this, pScout->GetPosition().xy(), vDir)->MakeYellow();
+            }
+
+        });
+
+
+
         for(coreUintW i = 0u; i < VIRIDO_SCOUTS; ++i)
         {
             cScoutEnemy* pScout = pMission->GetScout(i);
 
-            cPlayer* pPlayer = g_pGame->FindPlayer(pScout->GetPosition().xy());
+            const coreUintW A = (i/8u + (CONTAINS_BIT(m_iScoutOrder, i%8u) ? 1u : 0u)) & 0x01u;
 
-            const coreVector2 vDir = (pPlayer->GetPosition().xy() - pScout->GetPosition().xy()).Normalize();
+            const coreVector2 vGridPos = coreVector2(-0.7f + 0.2f*I_TO_F(i%8u), 0.47f + 0.2f*I_TO_F(A)) * FOREGROUND_AREA;
 
-            g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.4f, this, pScout->GetPosition().xy(), vDir)->MakeYellow();
+            if(CONTAINS_VALUE(pScout->GetStatus(), ENEMY_STATUS_DEAD))
+            {
+                if(!A) m_iScoutOrder ^= BIT(i%8u);
+
+                if(m_aiCounter[SCOUT_RESURRECTIONS] < 100)//40)
+                {
+                    pScout->Resurrect(vGridPos + coreVector2(0.0f, 3.0f*FOREGROUND_AREA.y), coreVector2(0.0f,-1.0f));
+                    ++m_aiCounter[SCOUT_RESURRECTIONS];
+                }
+            }
+
+            pScout->DefaultMoveSmooth(vGridPos, 3.0f, 30.0f);
         }
 
-    });
+        STATIC_ASSERT(VIRIDO_SCOUTS/2u <= sizeof(m_iScoutOrder)*8u)
 
-
-    for(coreUintW i = 0u; i < VIRIDO_SCOUTS; ++i)
-    {
-        cScoutEnemy* pScout = pMission->GetScout(i);
-
-        const coreVector2 vGridPos = coreVector2(-0.7f + 0.2f*I_TO_F(i%8u), 0.5f + 0.2f*I_TO_F((i/8u + (CONTAINS_BIT(m_iScoutOrder, i%8u) ? 1u : 0u)) & 0x01u)) * FOREGROUND_AREA;
-
-        if(CONTAINS_VALUE(pScout->GetStatus(), ENEMY_STATUS_DEAD))
-        {
-            m_iScoutOrder ^= BIT(i%8u);
-            pScout->Resurrect(vGridPos + coreVector2(0.0f, 2.0f*FOREGROUND_AREA.y), coreVector2(0.0f,-1.0f));
-        }
-
-        pScout->DefaultMoveSmooth(vGridPos, 4.0f, 40.0f);
     }
 
-    STATIC_ASSERT(VIRIDO_SCOUTS/2u <= sizeof(m_iScoutOrder)*8u)
+    const coreFloat fDiff  = pBall->GetPosition().x - this->GetPosition().x;
+    const coreFloat fSpeed = fDiff * 20.0f * Core::System->GetTime();// * RCP(MAX((ABS(vDiff.y) - 5.0f) / 4.0f, 1.0f));
 
-
-    const coreVector2 vDiff  = pBall->GetPosition().xy() - this->GetPosition().xy();
-    const coreFloat   fSpeed = vDiff.x * RCP(MAX((ABS(vDiff.y) - 5.0f) / 5.0f, 1.0f));
 
     // 
     this->SetPosition(coreVector3(this->GetPosition().x + fSpeed, this->GetPosition().yz()));
 
 
 
-    if(pMission->GetPaddleBounce(0u))
+    //g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer)
+    //{
+    //    const coreVector3& vCurPos = pPlayer->GetPosition();
+    //    pPlayer->SetPosition(coreVector3(vCurPos.x, MAX(vCurPos.y, this->GetPosition().y + 9.5f), vCurPos.z));
+    //    pPlayer->SetNewPos  (pPlayer->GetPosition().xy());
+    //});
+
+
+    //Core::Manager::Object->TestCollision(TYPE_PLAYER, this, [&](cPlayer* OUTPUT pPlayer, const coreBool& bFirst)
+    //{
+    //    const coreVector2 vDiff = pPlayer->GetPosition().xy() - this->GetPosition().xy();
+    //    const coreVector2 vSize = pPlayer->GetCollisionRange().xy() + this->GetCollisionRange().xy();
+    //
+    //    const coreVector2 vMove = coreVector2(MAX(vSize.x - ABS(vDiff.x), 0.0f) * SIGN(vDiff.x),
+    //                                          MAX(vSize.y - ABS(vDiff.y), 0.0f) * SIGN(vDiff.y));
+    //    //pPlayer->SetForce(vForce * 50.0f);
+    //
+    //    pPlayer->SetPosition(coreVector3(pPlayer->GetPosition().xy() + vMove, 0.0f));
+    //});
+    
+
+    pWarrior->DefaultMoveSmooth(coreVector2(this->GetPosition().x, 0.93f * FOREGROUND_AREA.y), 2.0f, 20.0f);
+    pWarrior->SetPosition(coreVector3(this->GetPosition().x, pWarrior->GetPosition().yz()));
+
+
+    for(coreUintW j = 0u; j < 2u; ++j)
     {
-        const coreVector2 vPos = this->GetPosition().xy();
-
-        const coreFloat fAngle = this->GetDirection().xy().Angle();
-        for(coreUintW i = 0u; i < 7u; ++i)
+        if(pMission->GetBounceState(j))
         {
-            //if(3u <= i && i <= 3u) continue;
+            coreObject3D* pPaddle = pMission->GetPaddle(j);
 
-            const coreVector2 vDir = coreVector2::Direction(fAngle + 0.25f * I_TO_F(i - 3u));
-            g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.6f - 0.2f * ABS(I_TO_F(i - 3u)), this, vPos + vDir*5.0f, vDir);
-            g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.6f - 0.2f * ABS(I_TO_F(i - 3u)), this, vPos + vDir*2.5f, vDir);
+            const coreVector2 vPos = pPaddle->GetPosition().xy();
+
+            const coreFloat fAngle = pPaddle->GetDirection().xy().Angle();
+            for(coreUintW i = 0u; i < 7u; ++i)
+            {
+                const coreVector2 vDir = coreVector2::Direction(fAngle + 0.25f * I_TO_F(i - 3u));
+                auto* pBullet1 = g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.4f, this, vPos + vDir*5.0f, vDir);
+                auto* pBullet2 = g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.4f, this, vPos + vDir*2.5f, vDir);
+
+                if(j)
+                {
+                    pBullet1->MakeRed();
+                    pBullet2->MakeRed();
+                }
+            }
         }
-
-        //g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.0f, this, this->GetPosition().xy(), this->GetDirection().xy());
     }
 
+    g_pEnvironment->SetTargetSide(this->GetPosition().xy() * MIN(m_fLifeTime*0.1f, 1.0f) * 0.5f);
 
+    // fängt ball, geht runter, bild dreht sich, kommt oben rauf und macht seinen ersten erngieangriff
 }

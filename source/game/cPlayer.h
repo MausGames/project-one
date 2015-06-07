@@ -56,6 +56,7 @@ private:
     coreFloat      m_fDarkTime;                 // 
 
     coreVector2 m_vNewPos;                      // new position for smooth movement and animation
+    coreVector2 m_vForce;                       // 
 
     coreObject3D m_Bubble;                      // 
     coreObject3D m_Exhaust;                     // 
@@ -101,6 +102,7 @@ public:
 
     // set object properties
     inline void SetNewPos(const coreVector2& vNewPos) {m_vNewPos = vNewPos;}
+    inline void SetForce (const coreVector2& vForce)  {m_vForce  = vForce;}
 
     // get object properties
     inline const coreUint32&  GetScoreMission ()const                        {return m_iScoreMission;}

@@ -18,6 +18,7 @@ cPlayer::cPlayer()noexcept
 , m_fDarkAnimation (0.0f)
 , m_fDarkTime      (0.0f)
 , m_vNewPos        (coreVector2(0.0f,0.0f))
+, m_vForce         (coreVector2(0.0f,0.0f))
 {
     // load object resources
     this->DefineProgram("object_ship_program");
@@ -185,6 +186,13 @@ void cPlayer::Move()
         // move the ship
         const coreFloat fSpeed = (!CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && (m_pInput->iButtonHold & BITLINE(PLAYER_WEAPONS))) ? 20.0f : 50.0f;
         m_vNewPos += m_pInput->vMove * (Core::System->GetTime() * fSpeed);
+
+        // 
+        if(!m_vForce.IsNull())
+        {
+            m_vNewPos += m_vForce * Core::System->GetTime();
+            m_vForce  *= 1.0f - 3.0f*Core::System->GetTime();
+        }
 
         // restrict movement to the foreground area
              if(m_vNewPos.x < -FOREGROUND_AREA.x) m_vNewPos.x = -FOREGROUND_AREA.x;

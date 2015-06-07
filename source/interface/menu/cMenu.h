@@ -22,6 +22,7 @@
 #define MENU_FONT_MEDIUM_3 "ethnocentric.ttf", (30u)
 #define MENU_FONT_BIG_4    "ethnocentric.ttf", (40u)
 #define MENU_FONT_BIG_7    "ethnocentric.ttf", (70u)
+#define MENU_ICON_MEDIUM_2 "fontawesome.ttf",  (24u)
 
 #define MENU_LIGHT_ACTIVE   (1.0f)     // visible strength of active menu objects
 #define MENU_LIGHT_IDLE     (0.667f)   // visible strength of idle menu objects
@@ -34,13 +35,27 @@
 #define SURFACE_EMPTY          (0u)
 #define SURFACE_INTRO          (1u)
 #define SURFACE_MAIN           (2u)
+#define SURFACE_GAME           (3u)
+#define SURFACE_CONFIG         (4u)
 
 #define SURFACE_INTRO_EMPTY    (0u)
 #define SURFACE_INTRO_LOGO     (1u)
 #define SURFACE_INTRO_LANGUAGE (2u)
 
 #define SURFACE_MAIN_DEFAULT   (0u)
-#define SURFACE_MAIN_CREDITS   (1u)
+
+#define SURFACE_GAME_MISSION   (0u)
+#define SURFACE_GAME_TROPHY    (1u)
+
+#define SURFACE_CONFIG_VIDEO   (0u)
+#define SURFACE_CONFIG_AUDIO   (1u)
+#define SURFACE_CONFIG_INPUT   (2u)
+#define SURFACE_CONFIG_MISC    (3u)
+
+
+// ****************************************************************
+// 
+#define ICON_POWER_OFF "\xEF\x80\x91"
 
 
 // ****************************************************************
@@ -54,7 +69,7 @@ private:
     coreUint8 m_iIntroStatus;                        // current intro animation status
 
     coreLookupStr<coreButton*> m_apLanguageButton;   // list with buttons for valid language files
-    coreUint8 m_iCurLanguage;                        // current selected language button
+    coreUint8 m_iSelected;                           // current selected language button
 
 
 public:
@@ -74,16 +89,13 @@ class cMainMenu final : public coreMenu
 {
 private:
     coreObject2D m_GameLogo;       // game logo
-    coreObject2D m_Background;     // background object (credits surface)
 
     coreButton m_StartButton;      // start button
-    coreButton m_CreditsButton;    // credits button
     coreButton m_ExitButton;       // exit button
-    coreButton m_BackButton;       // back button (credits surface)
 
-    coreLabel m_aVersionInfo[2];   // hard-coded version info string
+    coreLabel m_aVersionInfo[2];   // hard-coded version info strings
 
-    coreUint8 m_iCurButton;        // current selected menu button
+    coreUint8 m_iSelected;         // current selected menu button
 
 
 public:
@@ -97,12 +109,60 @@ public:
 
 
 // ****************************************************************
+// game menu class
+class cGameMenu final : public coreMenu
+{
+private:
+    coreObject2D m_Background;   // 
+
+    coreButton m_StartButton;    // start button
+
+    coreButton m_ConfigButton;   // config button
+    coreButton m_ExtraButton;    // extra button
+    coreButton m_ExitButton;     // exit button
+
+
+public:
+    cGameMenu()noexcept;
+
+    DISABLE_COPY(cGameMenu)
+
+    // move the game menu
+    void Move()override;
+};
+
+
+// ****************************************************************
+// config menu class
+class cConfigMenu final : public coreMenu
+{
+private:
+    coreObject2D m_Background;   // 
+
+    coreButton m_SaveButton;     // save button
+    coreButton m_CancelButton;   // cancel button
+
+
+public:
+    cConfigMenu()noexcept;
+
+    DISABLE_COPY(cConfigMenu)
+
+    // move the config menu
+    void Move()override;
+};
+
+
+// ****************************************************************
 // master menu class
 class cMenu final : public coreMenu
 {
 private:
     cIntroMenu* m_pIntroMenu;   // intro menu object (dynamically unloaded)
     cMainMenu*  m_pMainMenu;    // main menu object (dynamically unloaded)
+
+    cGameMenu   m_GameMenu;     // game menu object
+    cConfigMenu m_ConfigMenu;   // config menu object
 
     cMsgBox  m_MsgBox;          // message box overlay
     cTooltip m_Tooltip;         // tooltip overlay
@@ -114,12 +174,13 @@ public:
 
     DISABLE_COPY(cMenu)
 
-    // move the menu
-    void Move()override;
+    // render and move the menu
+    void Render()override;
+    void Move  ()override;
 
-    // display special menu overlays
-    void ShowMsgBox () {}
-    void ShowTooltip() {}
+    // access special menu overlays
+    inline cMsgBox*  GetMsgBox () {return &m_MsgBox;}
+    inline cTooltip* GetTooltip() {return &m_Tooltip;}
 
     // default menu routines
     static void UpdateButton(coreButton* OUTPUT pButton, const coreBool& bFocused);

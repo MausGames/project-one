@@ -12,10 +12,11 @@
 // ****************************************************************
 // constructor
 cViridoMission::cViridoMission()noexcept
-: m_Ball       (VIRIDO_BALLS)
-, m_BallTrail  (VIRIDO_BALLS * VIRIDO_TRAILS)
-, m_iBounce    (0u)
-, m_fAnimation (0.0f)
+: m_Ball         (VIRIDO_BALLS)
+, m_BallTrail    (VIRIDO_BALLS * VIRIDO_TRAILS)
+, m_iBounceState (0u)
+, m_bBounceReal  (false)
+, m_fAnimation   (0.0f)
 {
     // 
     m_apBoss[0] = &m_Crossfield;
@@ -70,7 +71,7 @@ cViridoMission::cViridoMission()noexcept
         m_aPaddle[i].DefineTexture(0u, "effect_energy.png");
         m_aPaddle[i].DefineProgram("effect_energy_bullet_direct_program");
         m_aPaddle[i].SetSize      (bBoss ? coreVector3(3.5f,2.5f,2.5f) : coreVector3(2.5f,2.5f,2.5f));
-        m_aPaddle[i].SetColor3    (bBoss ? COLOR_ENERGY_BLUE           : (COLOR_ENERGY_RED * 0.9f));
+        m_aPaddle[i].SetColor3    (bBoss ? COLOR_ENERGY_BLUE           : COLOR_ENERGY_RED);
         m_aPaddle[i].SetTexSize   (coreVector2(1.2f,0.25f) * 0.5f);
         m_aPaddle[i].SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
         m_aPaddle[i].SetCollisionModifier(coreVector3(0.6f,1.0f,1.0f));
@@ -79,6 +80,9 @@ cViridoMission::cViridoMission()noexcept
         m_aPaddleSphere[i].DefineModel("object_sphere.md3");
         m_aPaddleSphere[i].SetSize    (bBoss ? coreVector3(30.0f,30.0f,30.0f) : coreVector3(15.0f,15.0f,15.0f));
     }
+
+    // 
+    std::memset(m_apOwner, 0, sizeof(m_apOwner));
 }
 
 
@@ -191,7 +195,7 @@ void cViridoMission::__SetupOwn()
         // 
         STAGE_FINISH_AFTER(2.0f)
     });
-
+    */
     STAGE_MAIN
     {
         // 
@@ -202,14 +206,18 @@ void cViridoMission::__SetupOwn()
             STAGE_FINISH_NOW
     });
 
-    */
+    
     STAGE_MAIN
     {
         if(STAGE_SUB(0.0f))
         {
             // 
             for(coreUintW i = 0u; i < VIRIDO_SCOUTS; ++i)
-                m_aScout[i].SetCollisionModifier(coreVector3(1.2f,1.2f,1.5f));
+                m_aScout[i].SetCollisionModifier(coreVector3(1.2f,1.2f,1.5f)); // TODO # make quadratic! 
+
+
+            m_Warrior.SetSize(m_Warrior.GetSize() * 1.2f);
+
 
             // 
             m_Vaus.Resurrect(coreVector2(0.0f,-2.0f) * FOREGROUND_AREA, coreVector2(0.0f,1.0f));
@@ -323,11 +331,16 @@ void cViridoMission::__MoveOwnAfter()
 
         // 
         const coreBool bBoss  = i ? false : true;
-        const cShip*   pOwner = bBoss ? s_cast<cShip*>(&m_Vaus) : s_cast<cShip*>(g_pGame->GetPlayer(i-1u));
 
         // 
-        oPaddle.SetPosition (coreVector3(pOwner->GetPosition ().xy() + pOwner->GetDirection().xy() * (bBoss ? 3.0f : 4.0f), 0.0f));
-        oPaddle.SetDirection(coreVector3(pOwner->GetDirection().xy(), 0.0f));
+        const cShip* pOwner = m_apOwner[i];
+        if(pOwner)
+        {
+            oPaddle.SetPosition (coreVector3(pOwner->GetPosition ().xy() + pOwner->GetDirection().xy() * (bBoss ? 3.0f : 4.0f), 0.0f));
+            oPaddle.SetDirection(coreVector3(pOwner->GetDirection().xy(), 0.0f));
+        }
+
+        // 
         oPaddle.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.5f));
         oPaddle.Move();
 
@@ -341,11 +354,17 @@ void cViridoMission::__MoveOwnAfter()
     {
         if(!bFirst) return;
 
+        // 
+        pPlayer->TakeDamage(10);
+
+        // 
+        const coreVector3 vCenter = coreVector3((pPlayer->GetPosition().xy() + pBall->GetPosition().xy()) * 0.5f, 0.0f);
+        g_pSpecialEffects->MacroExplosionColorSmall(vCenter, COLOR_ENERGY_GREEN);
     });
 
     // 
-    m_iBounce = 0u;
-    STATIC_ASSERT(VIRIDO_PADDLES <= sizeof(m_iBounce)*8u)
+    m_iBounceState = 0u;
+    STATIC_ASSERT(VIRIDO_PADDLES <= sizeof(m_iBounceState)*8u)
 
     // 
     Core::Manager::Object->TestCollision(TYPE_OBJECT(3), TYPE_OBJECT(2), [&](coreObject3D* OUTPUT pPaddle, coreObject3D* OUTPUT pBall, const coreBool& bFirst)
@@ -367,7 +386,7 @@ void cViridoMission::__MoveOwnAfter()
                     const coreVector2 vBallPos = pBall->GetPosition ().xy();
                     const coreVector2 vBallDir = pBall->GetDirection().xy();
 
-                    if(i)
+                    if(m_bBounceReal)
                     {
                         // 
                         coreVector2 vNewDir = coreVector2::Reflect(vBallDir, (vBallPos - oPaddleSphere.GetPosition().xy()).Normalize());
@@ -382,7 +401,7 @@ void cViridoMission::__MoveOwnAfter()
                     }
 
                     // 
-                    ADD_BIT(m_iBounce, i)
+                    ADD_BIT(m_iBounceState, i)
 
                     // 
                     nEffectFunc(vBallPos + vBallDir * pBall->GetSize().x);
@@ -410,7 +429,7 @@ void cViridoMission::__MoveOwnAfter()
         Core::Manager::Object->TestCollision(TYPE_ENEMY, &oBall, [&](cEnemy* OUTPUT pEnemy, const coreBool& bFirst)
         {
             // 
-            if(pEnemy == &m_Vaus) return;
+            if(pEnemy->GetID() != cScoutEnemy::ID) return;
 
             // 
             const coreFloat fNewLenSq = (pEnemy->GetPosition().xy() - vOldBallPos).LengthSq();
@@ -438,9 +457,8 @@ void cViridoMission::__MoveOwnAfter()
             oBall.SetPosition (coreVector3(vBallPos + vDiff * (3.0f * Core::System->GetTime()), 0.0f));
             oBall.SetDirection(coreVector3(vNewDir, 0.0f));
 
-
-            pCurEnemy->Kill(true);   
-
+            // 
+            pCurEnemy->Kill(true);
 
             // 
             nEffectFunc(vBallPos + vBallDir * oBall.GetSize().x);
@@ -508,10 +526,13 @@ void cViridoMission::DisableBall(const coreUintW& iIndex, const coreBool& bAnima
 
 // ****************************************************************
 // 
-void cViridoMission::EnablePaddle(const coreUintW& iIndex)
+void cViridoMission::EnablePaddle(const coreUintW& iIndex, cShip* pOwner)
 {
     ASSERT(iIndex < VIRIDO_PADDLES)
     coreObject3D& oPaddle = m_aPaddle[iIndex];
+
+    // 
+    m_apOwner[iIndex] = pOwner;
 
     // 
     if(oPaddle.GetType()) return;

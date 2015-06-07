@@ -175,11 +175,6 @@ void cGame::Move()
     // move all overlay objects
     m_CombatText.Move();
     m_Interface .Move();
-
-    // set environment side
-    if(m_bCoop) g_pEnvironment->SetTargetSide((m_aPlayer[0].GetPosition().xy() + m_aPlayer[1].GetPosition().xy()) * 0.5f * 0.65f);
-           else g_pEnvironment->SetTargetSide( m_aPlayer[0].GetPosition().xy()                                           * 0.65f);
-    STATIC_ASSERT(GAME_PLAYERS == 2u)
 }
 
 
@@ -399,18 +394,8 @@ void cGame::__HandleCollisions()
         if((ABS(pEnemy->GetPosition().x) >= FOREGROUND_AREA.x * 1.1f) ||
            (ABS(pEnemy->GetPosition().y) >= FOREGROUND_AREA.y * 1.1f)) return;
 
-        if(!CONTAINS_VALUE(pEnemy->GetStatus(), ENEMY_STATUS_DEAD)) // TODO # check why I need this, dead enemies should not be in the manager 
-        {
-            // 
-            pEnemy ->TakeDamage(pBullet->GetDamage(), s_cast<cPlayer*>(pBullet->GetOwner()));
-            pBullet->Deactivate(false);
-        }
+        // 
+        pEnemy ->TakeDamage(pBullet->GetDamage(), s_cast<cPlayer*>(pBullet->GetOwner()));
+        pBullet->Deactivate(false);
     });
-
-    //Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, TYPE_BULLET_ENEMY, [](cBullet* OUTPUT pBullet1, cBullet* OUTPUT pBullet2, const coreBool& bFirst)
-    //{
-    //    // 
-    //    pBullet1->Deactivate(true);
-    //    pBullet2->Deactivate(true);
-    //});
 }

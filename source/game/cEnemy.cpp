@@ -192,7 +192,7 @@ coreBool cEnemy::DefaultMoveTarget(const coreVector2& vTarget, const coreFloat& 
 
     // 
     this->SetPosition (coreVector3(vPosition,  0.0f));
-    if(vDiff.LengthSq() < 0.5f) return true;
+    if(vDiff.LengthSq() < 0.1f) return true;
     this->SetDirection(coreVector3(vDirection, 0.0f));
 
     return false;
@@ -208,14 +208,14 @@ coreBool cEnemy::DefaultMoveSmooth(const coreVector2& vPosition, const coreFloat
     // 
     const coreVector2 vDiff = vPosition - this->GetPosition().xy();
     const coreVector2 vAim  = vDiff.Normalized();
-    const coreFloat fSpeed = MIN(vDiff.Length() * fSpeedMove, fClampMove);
+    const coreFloat   fLen  = MIN(vDiff.Length() * fSpeedMove, fClampMove);
 
     // 
-    const coreVector2 vPosition2 = this->GetPosition().xy() + vAim * (fSpeed * Core::System->GetTime());
+    const coreVector2 vNewPos = this->GetPosition().xy() + vAim * (fLen * Core::System->GetTime());
 
     // 
-    this->SetPosition(coreVector3(vPosition2, 0.0f));
-    if(fSpeed < 0.5f) return true;   
+    this->SetPosition(coreVector3(vNewPos, 0.0f));
+    if(fLen < 0.1f) return true;
 
     return false;
 }
@@ -340,7 +340,7 @@ cWarriorEnemy::cWarriorEnemy()noexcept
     this->DefineModelLow("ship_enemy_warrior_low.md3");
 
     // configure the enemy
-    this->Configure(100, coreVector3(51.0f/360.0f, 100.0f/100.0f, 85.0f/100.0f).HSVtoRGB());
+    this->Configure(400, coreVector3(51.0f/360.0f, 100.0f/100.0f, 85.0f/100.0f).HSVtoRGB());
 }
 
 

@@ -40,6 +40,7 @@
 
 // TODO: create timer and int-value as tick-multiplier for sustained damage
 // TODO: remove magic numbers (regularly)
+// TODO: test framerate-lock for g-sync stuff
 
 
 // ****************************************************************
@@ -54,30 +55,30 @@
 #define FRAMERATE_VALUE     (60.0f)
 #define FRAMERATE_TIME      (1.0f / FRAMERATE_VALUE)
 
-#define CAMERA_POSITION     coreVector3(0.0f, 0.0f, 110.0f)
-#define CAMERA_DIRECTION    coreVector3(0.0f, 0.0f,  -1.0f)
-#define CAMERA_ORIENTATION  coreVector3(0.0f, 1.0f,   0.0f)
+#define CAMERA_POSITION     (coreVector3(0.0f, 0.0f, 110.0f))
+#define CAMERA_DIRECTION    (coreVector3(0.0f, 0.0f,  -1.0f))
+#define CAMERA_ORIENTATION  (coreVector3(0.0f, 1.0f,   0.0f))
 
-#define LIGHT_DIRECTION     coreVector3(0.583953857f, -0.642349243f, -0.496360779f)
+#define LIGHT_DIRECTION     (coreVector3(0.583953857f, -0.642349243f, -0.496360779f))
 
 // color values
-#define COLOR_MENU_YELLOW   coreVector3(1.000f, 0.824f, 0.392f)
-#define COLOR_MENU_ORANGE   coreVector3(1.000f, 0.443f, 0.227f)
-#define COLOR_MENU_RED      coreVector3(1.000f, 0.275f, 0.275f)
-#define COLOR_MENU_PURPLE   coreVector3(0.710f, 0.333f, 1.000f)
-#define COLOR_MENU_BLUE     coreVector3(0.102f, 0.702f, 1.000f)
-#define COLOR_MENU_GREEN    coreVector3(0.118f, 0.745f, 0.353f)
-#define COLOR_MENU_BRONZE   coreVector3(0.925f, 0.663f, 0.259f)
-#define COLOR_MENU_SILVER   coreVector3(0.855f, 0.855f, 0.878f)
-#define COLOR_MENU_GOLD     coreVector3(1.000f, 0.859f, 0.000f)
-#define COLOR_ENERGY_YELLOW coreVector3(0.900f, 0.800f, 0.380f)
-#define COLOR_ENERGY_ORANGE coreVector3(1.000f, 0.400f, 0.000f)
-#define COLOR_ENERGY_RED    coreVector3(1.000f, 0.275f, 0.275f)
-#define COLOR_ENERGY_PURPLE coreVector3(0.450f, 0.200f, 1.000f)
-#define COLOR_ENERGY_BLUE   coreVector3(0.100f, 0.430f, 1.000f)
-#define COLOR_ENERGY_GREEN  coreVector3(0.270f, 0.710f, 0.270f)
-#define COLOR_FIRE_ORANGE   coreVector3(0.991f, 0.305f, 0.042f)
-#define COLOR_FIRE_BLUE     coreVector3(0.306f, 0.527f, 1.000f)
+#define COLOR_MENU_YELLOW   (coreVector3(1.000f, 0.824f, 0.392f))
+#define COLOR_MENU_ORANGE   (coreVector3(1.000f, 0.443f, 0.227f))
+#define COLOR_MENU_RED      (coreVector3(1.000f, 0.275f, 0.275f))
+#define COLOR_MENU_PURPLE   (coreVector3(0.710f, 0.333f, 1.000f))
+#define COLOR_MENU_BLUE     (coreVector3(0.102f, 0.702f, 1.000f))
+#define COLOR_MENU_GREEN    (coreVector3(0.118f, 0.745f, 0.353f))
+#define COLOR_MENU_BRONZE   (coreVector3(0.925f, 0.663f, 0.259f))
+#define COLOR_MENU_SILVER   (coreVector3(0.855f, 0.855f, 0.878f))
+#define COLOR_MENU_GOLD     (coreVector3(1.000f, 0.859f, 0.000f))
+#define COLOR_ENERGY_YELLOW (coreVector3(0.900f, 0.800f, 0.380f))
+#define COLOR_ENERGY_ORANGE (coreVector3(1.000f, 0.400f, 0.000f))
+#define COLOR_ENERGY_RED    (coreVector3(1.000f, 0.275f, 0.275f))
+#define COLOR_ENERGY_PURPLE (coreVector3(0.450f, 0.200f, 1.000f))
+#define COLOR_ENERGY_BLUE   (coreVector3(0.100f, 0.430f, 1.000f))
+#define COLOR_ENERGY_GREEN  (coreVector3(0.270f, 0.710f, 0.270f))
+#define COLOR_FIRE_ORANGE   (coreVector3(0.991f, 0.305f, 0.042f))
+#define COLOR_FIRE_BLUE     (coreVector3(0.306f, 0.527f, 1.000f))
 
 // shader modifiers
 #define SHADER_SHADOW       "#define _P1_SHADOW_     (1) \n"   // outdoor, object_ground

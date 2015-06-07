@@ -211,6 +211,7 @@ cGrassBackground::cGrassBackground()noexcept
 
         // post-process list and add it to the air
         cBackground::_FillInfinite(pList1);
+        ASSERT(pList1->GetCurCapacity() == GRASS_CLOUDS_RESERVE)
         m_apAirObjectList.push_back(pList1);
     }
 
