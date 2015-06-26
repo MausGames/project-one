@@ -70,13 +70,22 @@ public:
     // recompile shader-programs with shadow maps
     static void Recompile();
 
-    // enable shader-program and apply read shadow matrix
+    // 
     static void EnableShadowRead(const coreUintW& iProgramHandle);
+    static inline void SendTransformSingle   (const coreMatrix4& mTransform) {cShadow::__SendTransform(s_pProgramSingle,    mTransform);}
+    static inline void SendTransformInstanced(const coreMatrix4& mTransform) {cShadow::__SendTransform(s_pProgramInstanced, mTransform);}
+
+    // 
+    static inline const coreProgramPtr& GetProgramSingle   () {return s_pProgramSingle;}
+    static inline const coreProgramPtr& GetProgramInstanced() {return s_pProgramInstanced;}
 
 
 private:
     // reset with the resource manager
     void __Reset(const coreResourceReset& bInit)override;
+
+    // 
+    static void __SendTransform(const coreProgramPtr& pProgram, const coreMatrix4& mTransform);
 
     // render shadow-casting objects
     static void __RenderSingle   (const coreMatrix4& mTransform, const std::vector<coreBatchList*>& apList, const std::vector<coreObject3D*>& apObject);

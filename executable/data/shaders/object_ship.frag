@@ -39,6 +39,13 @@ void FragmentMain()
     vec3  v3MathViewDir = normalize(v_v3ViewDir);
     vec3  v3ReflNormal  = normalize((2.0 * v1BumpFactor * v3BumpNormal) - v3MathLightDir);
     float v1ReflFactor  = max(0.0, dot(v3MathViewDir, v3ReflNormal));
+    
+#if defined(_P1_GLOW_)
+    
+    // make highlighted area glowing
+    v1BumpFactor += v4TexColor.a * 0.5;
+    
+#endif
 
     // calculate diffuse and specular value
     vec3 v3Diffuse  = v4TexColor.rgb * (1.4 * max(0.0, v1BumpFactor) + 0.4);

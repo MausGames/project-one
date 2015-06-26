@@ -12,7 +12,9 @@
 static void SetupResources()
 {
     Core::Manager::Resource->Load<coreModel>  ("bullet_cone.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_cone.md3");
+    Core::Manager::Resource->Load<coreModel>  ("bullet_mine.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_mine.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_ray.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_ray.md3");
+    Core::Manager::Resource->Load<coreModel>  ("bullet_rocket.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_rocket.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_orb.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_orb.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_wave.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_wave.md3");
     Core::Manager::Resource->Load<coreModel>  ("environment_reed_01.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_reed_01.md3");
@@ -52,9 +54,11 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreModel>  ("ship_player_atk_low.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_atk_low.md3");
 
     Core::Manager::Resource->Load<coreTexture>("effect_energy.png",                      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_energy.png", false);
+    Core::Manager::Resource->Load<coreTexture>("effect_lightning.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_lightning.png");
     Core::Manager::Resource->Load<coreTexture>("effect_particle_32.png",                 CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_particle_32.png");
     Core::Manager::Resource->Load<coreTexture>("effect_particle_128.png",                CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_particle_128.png");
     Core::Manager::Resource->Load<coreTexture>("effect_soot.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_soot.png");
+    Core::Manager::Resource->Load<coreTexture>("effect_wave.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_wave.png", false);
     Core::Manager::Resource->Load<coreTexture>("effect_wave_norm.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_wave_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_blue.png",            CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_blue.png");
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_low.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_low.png");
@@ -105,6 +109,10 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreShader> ("effect_energy_bullet_invert_inst.vert",  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", CORE_SHADER_OPTION_INSTANCING SHADER_BULLET SHADER_INVERT);
     Core::Manager::Resource->Load<coreShader> ("effect_energy_bullet_direct_inst.vert",  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", CORE_SHADER_OPTION_INSTANCING SHADER_BULLET SHADER_DIRECT);
     Core::Manager::Resource->Load<coreShader> ("effect_energy_inst.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.frag", CORE_SHADER_OPTION_INSTANCING);
+    Core::Manager::Resource->Load<coreShader> ("effect_lightning.vert",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_lightning.vert");
+    Core::Manager::Resource->Load<coreShader> ("effect_lightning.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_lightning.frag");
+    Core::Manager::Resource->Load<coreShader> ("effect_lightning_inst.vert",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_lightning.vert", CORE_SHADER_OPTION_INSTANCING);
+    Core::Manager::Resource->Load<coreShader> ("effect_lightning_inst.frag",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_lightning.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("effect_outline.vert",                    CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.vert");
     Core::Manager::Resource->Load<coreShader> ("effect_outline.frag",                    CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_outline_direct.vert",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.vert", SHADER_DIRECT);
@@ -139,19 +147,26 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreShader> ("menu_animate.frag",                      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_animate.frag");
     Core::Manager::Resource->Load<coreShader> ("menu_border.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_border.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("menu_border.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_border.frag");
+    Core::Manager::Resource->Load<coreShader> ("menu_circle.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_circle.vert", CORE_SHADER_OPTION_NO_ROTATION);
+    Core::Manager::Resource->Load<coreShader> ("menu_circle.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_circle.frag");
     Core::Manager::Resource->Load<coreShader> ("menu_sharp.frag",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_sharp.frag");
     Core::Manager::Resource->Load<coreShader> ("object.vert",                            CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert");
     Core::Manager::Resource->Load<coreShader> ("object_ground.frag",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ground.frag", SHADER_SHADOW);
     Core::Manager::Resource->Load<coreShader> ("object_ship.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag");
     Core::Manager::Resource->Load<coreShader> ("object_ship_darkness.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", SHADER_DARKNESS);
+    Core::Manager::Resource->Load<coreShader> ("object_ship_glow.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", SHADER_GLOW);
     Core::Manager::Resource->Load<coreShader> ("object_inst.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("object_ground_inst.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ground.frag", CORE_SHADER_OPTION_INSTANCING SHADER_SHADOW);
+    Core::Manager::Resource->Load<coreShader> ("object_ship_glow_inst.frag",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", CORE_SHADER_OPTION_INSTANCING SHADER_GLOW);
 
+    Core::Manager::Resource->Load<coreSound>  ("bullet_mine.wav",                        CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/bullet_mine.wav");
     Core::Manager::Resource->Load<coreSound>  ("bullet_pulse.wav",                       CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/bullet_pulse.wav");
     Core::Manager::Resource->Load<coreSound>  ("bullet_ray.wav",                         CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/bullet_ray.wav");
     Core::Manager::Resource->Load<coreSound>  ("bullet_tesla.wav",                       CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/bullet_tesla.wav");
+    Core::Manager::Resource->Load<coreSound>  ("bullet_wave.wav",                        CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/bullet_wave.wav");
     Core::Manager::Resource->Load<coreSound>  ("effect_explosion_energy.wav",            CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/effect_explosion_energy.wav");
     Core::Manager::Resource->Load<coreSound>  ("effect_explosion_physical.wav",          CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/effect_explosion_physical.wav");
+    Core::Manager::Resource->Load<coreSound>  ("effect_launch.wav",                      CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/effect_launch.wav");
     Core::Manager::Resource->Load<coreSound>  ("environment_nature.wav",                 CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_nature.wav");
 
     Core::Manager::Resource->Load<coreFont>   ("ethnocentric.ttf",                       CORE_RESOURCE_UPDATE_AUTO,   "data/fonts/ethnocentric.ttf");
@@ -267,6 +282,16 @@ static void SetupResources()
         ->AttachShader("effect_energy_inst.frag")
         ->Finish();
 
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_lightning_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_lightning.vert")
+        ->AttachShader("effect_lightning.frag")
+        ->Finish();
+
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_lightning_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_lightning_inst.vert")
+        ->AttachShader("effect_lightning_inst.frag")
+        ->Finish();
+
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_outline_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("effect_outline.vert")
         ->AttachShader("effect_outline.frag")
@@ -372,6 +397,11 @@ static void SetupResources()
         ->AttachShader("menu_border.frag")
         ->Finish();
 
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_circle_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("menu_circle.vert")
+        ->AttachShader("menu_circle.frag")
+        ->Finish();
+
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_sharp_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("default_2d.vert")
         ->AttachShader("menu_sharp.frag")
@@ -392,9 +422,19 @@ static void SetupResources()
         ->AttachShader("object_ship_darkness.frag")
         ->Finish();
 
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ship_glow_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("object.vert")
+        ->AttachShader("object_ship_glow.frag")
+        ->Finish();
+
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ground_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("object_inst.vert")
         ->AttachShader("object_ground_inst.frag")
+        ->Finish();
+
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ship_glow_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("object_inst.vert")
+        ->AttachShader("object_ship_glow_inst.frag")
         ->Finish();
 }
 

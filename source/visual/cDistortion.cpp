@@ -17,7 +17,7 @@ cDistortion::cDistortion()noexcept
 , m_bActive   (false)
 {
     // create distortion frame buffer
-    m_iFrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RG);
+    m_iFrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_GL_SUPPORT(ARB_texture_rg) ? CORE_TEXTURE_SPEC_RG : CORE_TEXTURE_SPEC_RGB);
     m_iFrameBuffer.Create(g_vGameResolution * DISTORTION_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     // 

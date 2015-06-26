@@ -30,7 +30,7 @@ cMainMenu::cMainMenu()noexcept
 
     m_ExitButton.Construct    (MENU_BUTTON, MENU_FONT_MEDIUM_2, 0u);
     m_ExitButton.DefineProgram("menu_border_program");
-    m_ExitButton.SetPosition  (m_StartButton.GetPosition() - coreVector2(0.0f,0.09f));
+    m_ExitButton.SetPosition  (m_StartButton.GetPosition() + coreVector2(0.0f,-0.09f));
     m_ExitButton.SetSize      (m_StartButton.GetSize());
     m_ExitButton.GetCaption()->SetTextLanguage("EXIT_GAME");
 
@@ -41,7 +41,7 @@ cMainMenu::cMainMenu()noexcept
     m_aVersionInfo[0].SetText     ("(c) 2010-2015 Martin Mauersics (@MausGames)");
 
     m_aVersionInfo[1].Construct   (MENU_FONT_SMALL, 0u);
-    m_aVersionInfo[1].SetPosition (m_aVersionInfo[0].GetPosition() - coreVector2(0.0f,0.02f));
+    m_aVersionInfo[1].SetPosition (m_aVersionInfo[0].GetPosition() + coreVector2(0.0f,-0.02f));
     m_aVersionInfo[1].SetCenter   (m_aVersionInfo[0].GetCenter());
     m_aVersionInfo[1].SetAlignment(m_aVersionInfo[0].GetAlignment());
     m_aVersionInfo[1].SetText     (PRINT("Project One - v0.1.0a third edition - %s %.5s", __DATE__, __TIME__));

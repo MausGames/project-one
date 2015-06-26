@@ -44,6 +44,7 @@ void cMenu::Render()
     coreMenu::Render();
 
     // 
+    m_MsgBox .Render();
     m_Tooltip.Render();
 }
 
@@ -52,6 +53,9 @@ void cMenu::Render()
 // move the menu
 void cMenu::Move()
 {
+    // 
+    m_MsgBox.Move();
+
     // move the menu
     coreMenu::Move();
 
@@ -131,16 +135,17 @@ void cMenu::Move()
 
 // ****************************************************************
 // default button update routine
-void cMenu::UpdateButton(coreButton* OUTPUT pButton, const coreBool& bFocused)
+void cMenu::UpdateButton(coreButton* OUTPUT pButton, const coreBool& bFocused, const coreVector3 vFocusColor)
 {
     ASSERT(pButton)
 
     // select visible strength
-    const coreFloat fLight = bFocused ? MENU_LIGHT_ACTIVE : MENU_LIGHT_IDLE;
+    const coreFloat   fLight = bFocused ? MENU_LIGHT_ACTIVE                                     : MENU_LIGHT_IDLE;
+    const coreVector3 vColor = bFocused ? LERP(coreVector3(1.0f,1.0f,1.0f), vFocusColor, 0.75f) : coreVector3(1.0f,1.0f,1.0f);
 
     // set button and caption color
-    pButton              ->SetColor3(coreVector3(1.0f,1.0f,1.0f) * (fLight));
-    pButton->GetCaption()->SetColor3(coreVector3(1.0f,1.0f,1.0f) * (fLight * MENU_CONTRAST_WHITE));
+    pButton              ->SetColor3(vColor * (fLight));
+    pButton->GetCaption()->SetColor3(vColor * (fLight * MENU_CONTRAST_WHITE));
 }
 
 

@@ -35,7 +35,7 @@ void cInterface::sPlayerView::Construct(const coreUintW& iIndex)
     m_aHealthValue[0].SetTextLanguage("ARMOR");
 
     m_aHealthValue[1].Construct   (MENU_FONT_SMALL, 10u);
-    m_aHealthValue[1].SetPosition (m_aHealthBar[0].GetPosition() + coreVector2(m_aHealthBar[0].GetSize().x-0.035f,0.01f));
+    m_aHealthValue[1].SetPosition (m_aHealthBar[0].GetPosition() + coreVector2(m_aHealthBar[0].GetSize().x - 0.035f, 0.01f));
     m_aHealthValue[1].SetCenter   (m_aHealthBar[0].GetCenter());
     m_aHealthValue[1].SetAlignment(coreVector2(-1.0f,1.0f));
 
@@ -45,7 +45,7 @@ void cInterface::sPlayerView::Construct(const coreUintW& iIndex)
     m_Score.SetAlignment(m_aHealthBar[0].GetAlignment());
 
     m_Combo.Construct   (MENU_FONT_SMALL, 6u);
-    m_Combo.SetPosition (m_aHealthBar[0].GetPosition() + coreVector2(m_aHealthBar[0].GetSize().x-0.017f,0.038f));
+    m_Combo.SetPosition (m_aHealthBar[0].GetPosition() + coreVector2(m_aHealthBar[0].GetSize().x - 0.017f, 0.038f));
     m_Combo.SetCenter   (m_aHealthBar[0].GetCenter());
     m_Combo.SetAlignment(coreVector2(-1.0f,1.0f));
 
@@ -99,7 +99,7 @@ cInterface::cInterface(const coreUint8& iNumViews)noexcept
     m_aBossHealthValue[0].SetAlignment(m_aBossHealthBar[0].GetAlignment());
 
     m_aBossHealthValue[1].Construct   (MENU_FONT_SMALL, 14u);
-    m_aBossHealthValue[1].SetPosition (m_aBossHealthBar[0].GetPosition() + coreVector2(m_aBossHealthBar[0].GetSize().x-0.05f,-0.01f));
+    m_aBossHealthValue[1].SetPosition (m_aBossHealthBar[0].GetPosition() + coreVector2(m_aBossHealthBar[0].GetSize().x - 0.05f, -0.01f));
     m_aBossHealthValue[1].SetCenter   (m_aBossHealthBar[0].GetCenter());
     m_aBossHealthValue[1].SetAlignment(coreVector2(-1.0f,-1.0f));
 
@@ -144,17 +144,17 @@ void cInterface::Render()
         // loop through all player views
         for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i)
         {
-            //sPlayerView& oView = m_aView[i];
+            sPlayerView& oView = m_aView[i];
 
             // render player
-            //oView.m_aHealthBar[0]  .Render();
-            //oView.m_aHealthBar[1]  .Render();
-            //oView.m_aHealthValue[0].Render();
-            //oView.m_aHealthValue[1].Render();
-            //oView.m_Score          .Render();
-            //oView.m_Combo          .Render();
-            //oView.m_ChainValue     .Render();   // # swapped
-            //oView.m_ChainBar       .Render();   // # swapped
+            oView.m_aHealthBar[0]  .Render();
+            oView.m_aHealthBar[1]  .Render();
+            oView.m_aHealthValue[0].Render();
+            oView.m_aHealthValue[1].Render();
+            oView.m_Score          .Render();
+            oView.m_Combo          .Render();
+            oView.m_ChainValue     .Render();   // # swapped
+            oView.m_ChainBar       .Render();   // # swapped
         }
 
         if(m_fAlphaBoss)

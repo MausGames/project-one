@@ -10,12 +10,13 @@
 #ifndef _P1_GUARD_BULLET_H_
 #define _P1_GUARD_BULLET_H_
 
-// TODO: adapt depth values of bullets (outlining, enemy<>player)
+// TODO: pre-allocate bullets (at least for player) at the beginning to improve resource loading
+// TODO: mines have no shadow -> shadow true,false on set-creation
 
 
 // ****************************************************************
 // bullet definitions
-#define BULLET_SET_INIT_SIZE (32u)     // initial allocation size when creating a new bullet set
+#define BULLET_SET_INIT_SIZE (16u)     // initial allocation size when creating a new bullet set
 #define BULLET_AREA_FACTOR   (1.2f)    // size factor for foreground area where the bullet remains active
 #define BULLET_SPEED_FACTOR  (30.0f)   // 
 
@@ -54,9 +55,10 @@ public:
     void Deactivate(const coreBool&  bAnimated);
 
     // 
-    inline cBullet* MakeSmaller(const coreFloat& fFactor) {this->SetSize  (this->GetSize  () * fFactor); return this;}
-    inline cBullet* MakeDarker (const coreFloat& fFactor) {this->SetColor3(this->GetColor3() * fFactor); return this;}
-    inline cBullet* MakeLighter(const coreFloat& fFactor) {this->SetAlpha (this->GetAlpha () * fFactor); return this;}
+    inline cBullet* MakeSmaller(const coreFloat&   fFactor) {this->SetSize  (this->GetSize  () * fFactor); return this;}
+    inline cBullet* MakeSmaller(const coreVector3& vFactor) {this->SetSize  (this->GetSize  () * vFactor); return this;}
+    inline cBullet* MakeDarker (const coreFloat&   fFactor) {this->SetColor3(this->GetColor3() * fFactor); return this;}
+    inline cBullet* MakeLighter(const coreFloat&   fFactor) {this->SetAlpha (this->GetAlpha () * fFactor); return this;}
 
     // get object properties
     inline const coreInt32& GetDamage()const {return m_iDamage;}
@@ -66,6 +68,7 @@ public:
     // bullet configuration values
     static inline const coreChar* ConfigProgramInstancedName() {ASSERT(false) return "";}
     static inline coreUintW       ConfigOutlineStyle        () {ASSERT(false) return STYLE_FULL;}
+    static inline coreBool        ConfigShadow              () {ASSERT(false) return false;}
 
 
 private:
@@ -86,6 +89,7 @@ private:
     struct INTERFACE sBulletSetGen
     {
         coreBatchList oBulletActive;   // list with active bullets
+        coreUint8     iStatus;         // 
 
         sBulletSetGen()noexcept;
         virtual ~sBulletSetGen() {}
@@ -148,6 +152,7 @@ public:
     // bullet configuration values
     static inline const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
     static inline coreUintW       ConfigOutlineStyle        () {return STYLE_DIRECT;}
+    static inline coreBool        ConfigShadow              () {return false;}
 
 
 private:
@@ -160,10 +165,6 @@ private:
 // pulse bullet class
 class cPulseBullet final : public cBullet
 {
-private:
-    coreFlow m_fAcceleration;   // 
-
-
 public:
     cPulseBullet()noexcept;
 
@@ -171,7 +172,7 @@ public:
     ASSIGN_ID(2, "Pulse")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(2.5f,2.5f,2.5f) * 1.3f); this->SetColor3(COLOR_ENERGY_PURPLE); m_fAcceleration = 0.5f;}
+    inline void ResetProperties() {this->SetSize(coreVector3(2.5f,2.5f,2.5f) * 1.3f); this->SetColor3(COLOR_ENERGY_PURPLE);}
 
     // change default color (purple)
     inline cPulseBullet* MakeYellow() {return this;}
@@ -183,6 +184,7 @@ public:
     // bullet configuration values
     static inline const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
     static inline coreUintW       ConfigOutlineStyle        () {return STYLE_DIRECT;}
+    static inline coreBool        ConfigShadow              () {return false;}
 
 
 private:
@@ -214,6 +216,7 @@ public:
     // bullet configuration values
     static inline const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_inst_program";}
     static inline coreUintW       ConfigOutlineStyle        () {return STYLE_FULL;}
+    static inline coreBool        ConfigShadow              () {return false;}
 
 
 private:
@@ -245,6 +248,7 @@ public:
     // bullet configuration values
     static inline const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_inst_program";}
     static inline coreUintW       ConfigOutlineStyle        () {return STYLE_DIRECT;}
+    static inline coreBool        ConfigShadow              () {return false;}
 
 
 private:
@@ -276,6 +280,7 @@ public:
     // bullet configuration values
     static inline const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
     static inline coreUintW       ConfigOutlineStyle        () {return STYLE_DIRECT;}
+    static inline coreBool        ConfigShadow              () {return false;}
 
 
 private:
@@ -288,6 +293,11 @@ private:
 // tesla bullet class
 class cTeslaBullet final : public cBullet
 {
+private:
+    coreFlow m_fLightningTime;   // 
+    coreBool m_bLightningSide;   // 
+
+
 public:
     cTeslaBullet()noexcept;
 
@@ -295,7 +305,7 @@ public:
     ASSIGN_ID(6, "Tesla")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(2.5f,2.5f,2.5f)); this->SetColor3(COLOR_ENERGY_BLUE * 0.9f);}
+    inline void ResetProperties() {this->SetSize(coreVector3(2.5f,2.5f,2.5f)); this->SetColor3(COLOR_ENERGY_BLUE * 0.9f); m_fLightningTime = 1.0f;}
 
     // change default color (blue)
     inline cTeslaBullet* MakeYellow() {return this;}
@@ -307,11 +317,76 @@ public:
     // bullet configuration values
     static inline const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_spheric_inst_program";}
     static inline coreUintW       ConfigOutlineStyle        () {return STYLE_FULL;}
+    static inline coreBool        ConfigShadow              () {return false;}
 
 
 private:
     // move the tesla bullet
     void __MoveOwn()override;
+};
+
+
+// ****************************************************************
+// mine bullet class
+class cMineBullet final : public cBullet
+{
+private:
+    coreVector2 m_vFlyDir;   // 
+
+
+    coreObject3D m_Wave;       
+
+
+
+public:
+    cMineBullet()noexcept;
+
+    ENABLE_COPY(cMineBullet)
+    ASSIGN_ID(7, "Mine")
+
+    // reset base properties
+    inline void ResetProperties() {this->SetSize(coreVector3(2.0f,2.0f,2.0f)); m_vFlyDir = coreVector2(0.0f,0.0f);}
+
+    // 
+    inline cMineBullet* SetFlyDir(const coreVector2& vFlyDir) {ASSERT(vFlyDir.IsNormalized()) m_vFlyDir = vFlyDir; return this;}
+
+    // bullet configuration values
+    static inline const coreChar* ConfigProgramInstancedName() {return "object_ship_glow_inst_program";}
+    static inline coreUintW       ConfigOutlineStyle        () {return STYLE_FULL;}
+    static inline coreBool        ConfigShadow              () {return true;}
+
+
+private:
+    // render and move the mine bullet   
+    void __ImpactOwn      ()override;
+    void __RenderOwnBefore()override;
+    void __MoveOwn        ()override;
+};
+
+
+// ****************************************************************
+// rocket bullet class
+class cRocketBullet final : public cBullet
+{
+public:
+    cRocketBullet()noexcept;
+
+    ENABLE_COPY(cRocketBullet)
+    ASSIGN_ID(8, "Rocket")
+
+    // reset base properties
+    inline void ResetProperties() {this->SetSize(coreVector3(1.7f,1.7f,1.7f));}
+
+    // bullet configuration values
+    static inline const coreChar* ConfigProgramInstancedName() {return "object_ship_glow_inst_program";}
+    static inline coreUintW       ConfigOutlineStyle        () {return STYLE_FULL;}
+    static inline coreBool        ConfigShadow              () {return true;}
+
+
+private:
+    // impact and move the rocket bullet
+    void __ImpactOwn()override;
+    void __MoveOwn  ()override;
 };
 
 
@@ -326,6 +401,13 @@ template <typename T> cBulletManager::sBulletSet<T>::sBulletSet(const coreUintW 
     // add bullet set to outline and glow
     g_aaOutline[iPriority][T::ConfigOutlineStyle()].BindList(&oBulletActive);
     g_pGlow->BindList(&oBulletActive);
+
+    // 
+    if(T::ConfigShadow())
+    {
+        ADD_BIT(iStatus, 0u)
+        cShadow::BindGlobalList(&oBulletActive);
+    }
 
     // set bullet pool to initial size
     aBulletPool.resize(BULLET_SET_INIT_SIZE);

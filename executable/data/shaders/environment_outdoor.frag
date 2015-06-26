@@ -62,7 +62,7 @@ void FragmentMain()
 
     // calculate dot-3 bump factor
     vec3  v3MathLightDir = normalize(v_av4LightDir[0].xyz);
-    vec3  v3BumpNormal   = normalize(coreUnpackNormal(v2TexNormal));
+    vec3  v3BumpNormal   = coreUnpackNormalDeriv(v2TexNormal);
     float v1BumpFactor   = dot(v3MathLightDir, v3BumpNormal);
 
     // calculate dot-3 reflection factor

@@ -105,7 +105,7 @@ cViridoMission::~cViridoMission()
 // setup the Virido mission
 void cViridoMission::__SetupOwn()
 {
-    /*
+
     STAGE_MAIN
     {
         // 
@@ -195,7 +195,7 @@ void cViridoMission::__SetupOwn()
         // 
         STAGE_FINISH_AFTER(2.0f)
     });
-    */
+
     STAGE_MAIN
     {
         // 

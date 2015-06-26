@@ -22,14 +22,14 @@ cConfigMenu::cConfigMenu()noexcept
 
     m_SaveButton.Construct    (MENU_BUTTON, MENU_FONT_MEDIUM_2, 0u);
     m_SaveButton.DefineProgram("menu_border_program");
-    m_SaveButton.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,-0.5f) - coreVector2(0.0f,0.02f));
+    m_SaveButton.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,-0.5f) + coreVector2(0.0f,-0.02f));
     m_SaveButton.SetSize      (coreVector2(0.3f,0.07f));
     m_SaveButton.SetAlignment (coreVector2(1.0f,-1.0f));
     m_SaveButton.GetCaption()->SetTextLanguage("SAVE");
 
     m_CancelButton.Construct    (MENU_BUTTON, MENU_FONT_MEDIUM_2, 0u);
     m_CancelButton.DefineProgram("menu_border_program");
-    m_CancelButton.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.5f,-0.5f) - coreVector2(0.0f,0.02f));
+    m_CancelButton.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.5f,-0.5f) + coreVector2(0.0f,-0.02f));
     m_CancelButton.SetSize      (m_SaveButton.GetSize());
     m_CancelButton.SetAlignment (coreVector2(-1.0f,-1.0f));
     m_CancelButton.GetCaption()->SetTextLanguage("CANCEL");

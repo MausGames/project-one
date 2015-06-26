@@ -44,6 +44,25 @@ cOutdoor::~cOutdoor()
 
 // ****************************************************************
 // render the outdoor-surface
+void cOutdoor::Render(const coreProgramPtr& pProgram)
+{
+    // check for model status
+    if(!m_pModel.IsUsable()) return;
+
+    // enable the shader-program
+    if(!pProgram.IsUsable()) return;
+    if(!pProgram->Enable())  return;
+
+    // update all object uniforms
+    pProgram->SendUniform(CORE_SHADER_UNIFORM_3D_POSITION, coreVector3(0.0f,0.0f,0.0f));
+    pProgram->SendUniform(CORE_SHADER_UNIFORM_3D_SIZE,     coreVector3(1.0f,1.0f,1.0f));
+    pProgram->SendUniform(CORE_SHADER_UNIFORM_3D_ROTATION, coreVector4::QuatIdentity());
+
+    // draw the model
+    m_pModel->Enable();
+    glDrawRangeElements(m_pModel->GetPrimitiveType(), m_iVertexOffset, m_iVertexOffset + OUTDOOR_RANGE, OUTDOOR_COUNT, m_pModel->GetIndexType(), I_TO_P(m_iIndexOffset));
+}
+
 void cOutdoor::Render()
 {
     // check for model status
@@ -62,7 +81,7 @@ void cOutdoor::Render()
 
     // draw the model
     m_pModel->Enable();
-    glDrawRangeElements(m_pModel->GetPrimitiveType(), m_iVertexOffset, m_iVertexOffset + (OUTDOOR_VIEW+1u)*OUTDOOR_WIDTH, OUTDOOR_RANGE, m_pModel->GetIndexType(), I_TO_P(m_iIndexOffset));
+    glDrawRangeElements(m_pModel->GetPrimitiveType(), m_iVertexOffset, m_iVertexOffset + OUTDOOR_RANGE, OUTDOOR_COUNT, m_pModel->GetIndexType(), I_TO_P(m_iIndexOffset));
 }
 
 
@@ -79,10 +98,6 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
 
     Core::Manager::Resource->AttachFunction([=]()
     {
-        // FUN FACT:
-        // apparently a "similar" method has an U.S. patent by HP (http://www.google.co.in/patents/US6337684)
-        // so they "invented" the fundamental unit-sphere formula [1 = x*x + y*y + z*z]
-
         // delete old data
         m_pNormalMap->Unload();
 
@@ -102,11 +117,28 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
         coreByte* pInput1 = s_cast<coreByte*>(pSurface1->pixels);
         coreByte* pInput2 = s_cast<coreByte*>(pSurface2->pixels);
 
-        // merge XY components of both normal maps (Z can be calculated in shader)
+        // merge XY components of both normal maps (divided by Z, partial-derivative)
         for(coreUintW i = 0u, j = 0u; i < iSize; i += 4u, j += 3u)
         {
-            std::memcpy(pOutput + i,      pInput1 + j, 2u);
-            std::memcpy(pOutput + i + 2u, pInput2 + j, 2u);
+            const coreFloat x1 =          (coreFloat(*(pInput1 + j))      - 127.5f);
+            const coreFloat y1 =          (coreFloat(*(pInput1 + j + 1u)) - 127.5f);
+            const coreFloat z1 = 127.5f / (coreFloat(*(pInput1 + j + 2u)) - 127.5f);
+            const coreFloat x2 =          (coreFloat(*(pInput2 + j))      - 127.5f);
+            const coreFloat y2 =          (coreFloat(*(pInput2 + j + 1u)) - 127.5f);
+            const coreFloat z2 = 127.5f / (coreFloat(*(pInput2 + j + 2u)) - 127.5f);
+
+            const coreFloat xz1 = x1 * z1 + 127.5f;
+            const coreFloat yz1 = y1 * z1 + 127.5f;
+            const coreFloat xz2 = x2 * z2 + 127.5f;
+            const coreFloat yz2 = y2 * z2 + 127.5f;
+
+            ASSERT(xz1 <= 255.0f && yz1 <= 255.0f &&
+                   xz2 <= 255.0f && yz2 <= 255.0f)
+
+            const coreByte aiPixel[4] = {coreByte(xz1), coreByte(yz1),
+                                         coreByte(xz2), coreByte(yz2)};
+
+            std::memcpy(pOutput + i, aiPixel, 4u);
         }
 
         // create final normal map

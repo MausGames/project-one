@@ -326,21 +326,6 @@ static void DebugGame()
             g_pSpecialEffects->CreateBlowColor(vPos, coreVector3(1.0f,0.0f,0.0f), SPECIAL_BLOW_SMALL, coreVector3(0.09f,0.387f,0.9f));
         }
     }
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(N), CORE_INPUT_PRESS))
-    {
-        if(g_pGame)
-        {
-            const coreVector3 vPos = g_pGame->GetPlayer(0u)->GetPosition();
-
-            g_pDistortion    ->CreateWave       (vPos, DISTORTION_WAVE_SMALL);
-            g_pSpecialEffects->CreateSplashFire (vPos, SPECIAL_EXPLOSION_SMALL);
-            g_pSpecialEffects->CreateSplashColor(vPos, SPECIAL_SPLASH_SMALL, coreVector3(234.0f/255.0f, 72.0f/255.0f, 10.0f/255.0f) * 1.08f);
-            g_pSpecialEffects->PlaySound        (vPos, 1.0f, SOUND_EXPLOSION_PHYSICAL_SMALL);
-            g_pSpecialEffects->ShakeScreen      (SPECIAL_SHAKE_SMALL);
-
-
-        }
-    }
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(M), CORE_INPUT_PRESS))
     {
         if(g_pGame)
@@ -392,6 +377,35 @@ static void DebugGame()
 
     const char* pcTest = SDL_GetDisplayName(0);
     pcTest = pcTest;
+
+    coreVector3 vA = coreVector3::Rand();
+    coreVector3 vB = coreVector3::Rand();
+
+    coreVector3 vC = coreVector3::Cross(vA, vB);
+
+    coreVector3 vD = (vA * vB.yzx() - vA.yzx() * vB).yzx();
+
+    vC = vD;
+
+
+    coreVector4 v1 = coreVector4(0.0f, -1.0f, coreVector2::Rand());
+    coreUint64 un = v1.PackFloat4x16();
+    coreVector4 v2 = coreVector4::UnpackFloat4x16(un);
+
+    v1 = v2;
+
+
+    //coreFloat f1 = 1.23f;
+    //coreFloat f2 = 65.32f;
+    //
+    //coreUint16 u1 = float16(f1);
+    //coreUint16 u2 = float16(f2);
+    //
+    //coreFloat f3 = float32(u1);
+    //coreFloat f4 = float32(u2);
+    //
+    //f1 = f2;
+    //f3 = f4;
 
     //Core::Debug->MeasureStart("Log");
     //for(coreUintW i = 0u; i < 1000u; ++i) coreData::FileExists("data/license.txt");

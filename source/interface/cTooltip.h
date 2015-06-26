@@ -18,9 +18,10 @@
 
 // ****************************************************************
 // tooltip definitions
-#define TOOLTIP_LINES        (8u)                          // 
-#define TOOLTIP_LINE_HEIGHT  (0.02f)                       // 
-#define TOOLTIP_MOUSE_OFFSET (coreVector2(-0.02f,0.02f))   // 
+#define TOOLTIP_LINES        (8u)                           // 
+#define TOOLTIP_LINE_HEIGHT  (0.02f)                        // 
+#define TOOLTIP_BORDER_SIZE  (coreVector2( 0.02f,0.016f))   // 
+#define TOOLTIP_MOUSE_OFFSET (coreVector2(-0.02f,0.02f))    // 
 
 #define TOOLTIP_PRINT(f,...) (this + __LINE__ * 100u), f, ##__VA_ARGS__   // 
 #define TOOLTIP_ONELINER     (1000.0f)                                    // 
@@ -44,7 +45,7 @@ public:
 
     DISABLE_COPY(cTooltip)
 
-    // 
+    // render and move the tooltip
     void Render()override;
     void Move  ()override;
 
@@ -65,6 +66,7 @@ template <typename... A> void cTooltip::ShowText(const coreFloat& fWidth, const 
 {
     // 
     m_bDisplay = true;
+    this->SetCenter(Core::Input->GetMousePosition());
 
     // 
     if(m_pLastRef == pRef) return;

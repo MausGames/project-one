@@ -16,6 +16,8 @@ cSpecialEffects::cSpecialEffects()noexcept
 , m_ParticleDark   (256u)
 , m_ParticleSmoke  (512u)
 , m_ParticleFire   (256u)
+, m_LightningList  (SPECIAL_LIGHTNINGS)
+, m_iCurLightning  (0u)
 , m_iCurBlast      (0u)
 , m_iCurRing       (0u)
 , m_iSoundGuard    (0u)
@@ -31,6 +33,17 @@ cSpecialEffects::cSpecialEffects()noexcept
     m_ParticleSmoke.DefineTexture(0u, "effect_particle_128.png");
     m_ParticleFire .DefineProgram("effect_particle_fire_program");
     m_ParticleFire .DefineTexture(0u, "effect_particle_128.png");
+
+    // 
+    for(coreUintW i = 0u; i < SPECIAL_LIGHTNINGS; ++i)
+    {
+        m_aLightning[i].DefineModel  (Core::Manager::Object->GetLowModel());
+        m_aLightning[i].DefineTexture(0u, "effect_lightning.png");
+        m_aLightning[i].DefineProgram("effect_lightning_program");
+        m_aLightning[i].SetAlpha     (0.0f);
+    }
+    std::memset(m_apLightningOwner, 0, sizeof(m_apLightningOwner));
+    m_LightningList.DefineProgram("effect_lightning_inst_program");
 
     // 
     for(coreUintW i = 0u; i < SPECIAL_BLASTS; ++i)
@@ -68,7 +81,7 @@ cSpecialEffects::cSpecialEffects()noexcept
     // 
     m_ShakeTimer.Play(CORE_TIMER_PLAY_RESET);
 
-    STATIC_ASSERT(SPECIAL_SOUNDS <= sizeof(m_iSoundGuard)*8)
+    STATIC_ASSERT(SPECIAL_SOUNDS <= sizeof(m_iSoundGuard)*8u)
 }
 
 
@@ -83,9 +96,15 @@ void cSpecialEffects::Render()
         m_ParticleDark .Render();
         m_ParticleSmoke.Render();
 
-        // render fire particle system (with additive blending)
+        // enable additive blending
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-        m_ParticleFire.Render();
+        {
+            // render fire particle system
+            m_ParticleFire.Render();
+
+            // 
+            m_LightningList.Render();
+        }
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         // 
@@ -121,6 +140,24 @@ void cSpecialEffects::Move()
     m_ParticleDark .Move();
     m_ParticleSmoke.Move();
     m_ParticleFire .Move();
+
+    // 
+    FOR_EACH_DYN(it, *m_LightningList.List())
+    {
+        coreObject3D* pLightning = (*it);
+
+        // 
+        coreObject3D* pOwner = m_apLightningOwner[pLightning - m_aLightning];
+        if(pOwner) pLightning->SetPosition(pOwner->GetPosition());
+
+        // 
+        pLightning->SetAlpha(pLightning->GetAlpha() - /*2.2f*/4.0f * Core::System->GetTime());
+
+        // 
+        if(pLightning->GetAlpha() > 0.0f) DYN_KEEP  (it)
+                                     else DYN_REMOVE(it, *m_LightningList.List())
+    }
+    m_LightningList.MoveNormal();
 
     // 
     for(coreUintW i = 0u; i < SPECIAL_BLASTS; ++i)
@@ -290,6 +327,113 @@ void cSpecialEffects::CreateChargeDark(const coreVector3& vPosition, const coreF
         pParticle->SetColor4Abs  (coreVector4(0.0f,0.0f,0.0f,1.0f), coreVector4(0.0f,0.0f,0.0f,0.0f));
         pParticle->SetSpeed      (1.7f * Core::Rand->Float(0.9f, 1.1f));
     });
+}
+
+
+// ****************************************************************
+// 
+coreFloat cSpecialEffects::CreateLightning(const coreVector2& vPosFrom, const coreVector2& vPosTo, const coreFloat& fWidth, const coreVector3& vColor, const coreVector2& vTexSizeFactor, const coreFloat& fTexOffset)
+{
+    // 
+    if(++m_iCurLightning >= SPECIAL_LIGHTNINGS) m_iCurLightning = 0u;
+    coreObject3D& oLightning = m_aLightning[m_iCurLightning];
+
+    // 
+    m_apLightningOwner[m_iCurLightning] = NULL;
+
+
+
+
+    const coreVector2 vDiff =  vPosTo - vPosFrom;
+
+
+    //if(vDiff.LengthSq() < fWidth*fWidth*0.5f)
+    //{
+    //    const coreFloat fSide = (vDiff.x >= 0.0f) ? -1.0f : 1.0f;
+    //
+    //    const coreVector2 vEdgePos = vPosFrom + (fWidth * fSide * 0.8f) * vDiff.Rotated90().Normalize();
+    //
+    //    g_pSpecialEffects->CreateLightning(vPosFrom, vEdgePos, fWidth, vColor, coreVector2(-fSide,0.92f), 0.0f);
+    //    g_pSpecialEffects->CreateLightning(vEdgePos, vPosTo,   fWidth, vColor, coreVector2( fSide,0.97f), 0.53f);
+    //
+    //    return 1.0f;
+    //}
+
+
+
+    const coreVector2 vPos  = (vPosTo + vPosFrom) * 0.5f;
+    const coreVector2 vDir  = vDiff.Normalized();
+    const coreFloat   fLen  = vDiff.Length();
+
+    const coreVector2 vSize = coreVector2(fWidth, fLen);
+
+
+    coreFloat fTexLen = vSize.yx().AspectRatio() * SPECIAL_LIGHTNING_CUTOUT * SPECIAL_LIGHTNING_RESIZE;
+    if(fTexLen > 0.5f) fTexLen = std::round(fTexLen * 2.0f) * 0.5f;
+    else fTexLen = 0.5f;
+
+
+    // 
+    oLightning.SetPosition (coreVector3(vPos, 0.0f));
+    oLightning.SetSize     (coreVector3( vSize,      1.0f));
+    oLightning.SetDirection(coreVector3(-vDir, 0.0f));
+    oLightning.SetColor4   (coreVector4( vColor,     1.0f));
+
+    if(vDiff.LengthSq() < fWidth*fWidth*0.5f)
+    {
+        oLightning.SetTexSize  (coreVector2( 0.5f, 0.25f) * vTexSizeFactor);
+        oLightning.SetTexOffset(coreVector2(0.125f - oLightning.GetTexSize().x * 0.5f, (oLightning.GetTexSize().y - 0.25f) * -0.5f));
+    }
+    else
+    {
+
+    oLightning.SetTexSize  (coreVector2( SPECIAL_LIGHTNING_CUTOUT, fTexLen) * vTexSizeFactor);
+    oLightning.SetTexOffset(coreVector2((1.0f - oLightning.GetTexSize().x) * 0.5f, fTexOffset));
+    }
+
+    // 
+    ASSERT(!CONTAINS(*m_LightningList.List(), &oLightning))
+    m_LightningList.BindObject(&oLightning);
+
+    return fTexLen + fTexOffset;
+}
+
+void cSpecialEffects::CreateLightning(coreObject3D* pOwner, const coreVector2& vDirection, const coreVector2& vSize, const coreVector3& vColor, const coreVector2& vTexSizeFactor, const coreFloat& fTexOffset)
+{
+    //// 
+    //const coreFloat fNewOffset = this->CreateLightning(coreVector3(0.0f,0.0f,0.0f), vDirection, vSize, vColor, vTexSizeFactor, fTexOffset);
+    //
+    //// 
+    //m_apLightningOwner[m_iCurLightning] = pOwner;
+    //
+    //return fNewOffset;
+
+
+
+
+    // 
+    if(++m_iCurLightning >= SPECIAL_LIGHTNINGS) m_iCurLightning = 0u;
+    coreObject3D& oLightning = m_aLightning[m_iCurLightning];
+
+    // 
+    m_apLightningOwner[m_iCurLightning] = pOwner;
+
+
+
+    coreFloat fTexLen = vSize.yx().AspectRatio() * SPECIAL_LIGHTNING_CUTOUT * SPECIAL_LIGHTNING_RESIZE;
+
+
+    // 
+    oLightning.SetPosition (pOwner->GetPosition());
+    oLightning.SetSize     (coreVector3( vSize,      1.0f));
+    oLightning.SetDirection(coreVector3(-vDirection, 0.0f));
+    oLightning.SetColor4   (coreVector4( vColor,     1.0f));
+    oLightning.SetTexSize  (coreVector2( SPECIAL_LIGHTNING_CUTOUT, fTexLen) * vTexSizeFactor);
+    oLightning.SetTexOffset(coreVector2((1.0f - oLightning.GetTexSize().x) * 0.5f, fTexOffset));
+
+    // 
+    ASSERT(!CONTAINS(*m_LightningList.List(), &oLightning))
+    m_LightningList.BindObject(&oLightning);
 }
 
 

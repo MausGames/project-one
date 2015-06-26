@@ -18,7 +18,8 @@
 class cCombatStats final
 {
 private:
-    coreObject2D m_Bar;   // 
+    coreObject2D m_Bar;      // 
+    coreObject2D m_Circle;   // 
 
 
 public:

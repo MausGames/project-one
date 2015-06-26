@@ -157,12 +157,18 @@ void cWater::UpdateDepth(cOutdoor* pOutdoor, const std::vector<coreBatchList*>& 
             glDepthFunc (GL_ALWAYS);   // better performance than depth-clear
             glDrawBuffer(GL_NONE);
             {
+                const coreMatrix4 mViewProj = Core::Graphics->GetCamera() * Core::Graphics->GetPerspective();
+
+                // use shadow shaders for light-weight depth rendering
+                cShadow::SendTransformInstanced(mViewProj);
+                cShadow::SendTransformSingle   (mViewProj);
+
                 // render the outdoor-surface
-                pOutdoor->Render();
+                pOutdoor->Render(cShadow::GetProgramSingle());
 
                 // render all ground objects (after outdoor-surface, because of GL_ALWAYS)
                 FOR_EACH(it, apGroundObjectList)
-                    (*it)->Render();
+                    (*it)->Render(cShadow::GetProgramInstanced(), cShadow::GetProgramSingle());
             }
             glDepthFunc (GL_LEQUAL);
             glDrawBuffer(GL_COLOR_ATTACHMENT0);

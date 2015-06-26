@@ -12,29 +12,37 @@
 
 // TODO: glowing waves
 // TODO: particles should not overdraw outlines (at least color-particles)
+// TODO: make lightning owner with position-offset
 
 
 // ****************************************************************
 // special-effects definitions
-#define SPECIAL_BLASTS          (4u)              // number of energy-blasts
-#define SPECIAL_RINGS           (4u)              // number of energy-rings
-#define SPECIAL_SOUNDS          (8u)              // number of sound-effect files
+#define SPECIAL_LIGHTNINGS       (32u)             // 
+#define SPECIAL_BLASTS           (4u)              // number of energy-blasts
+#define SPECIAL_RINGS            (4u)              // number of energy-rings
+#define SPECIAL_SOUNDS           (8u)              // number of sound-effect files
 
-#define SPECIAL_SPLASH_TINY     (25.0f),  (13u)   // 
-#define SPECIAL_SPLASH_SMALL    (50.0f),  (25u)   // 
-#define SPECIAL_SPLASH_BIG      (100.0f), (50u)   // 
-#define SPECIAL_BLOW_SMALL      (50.0f),  (25u)   // 
-#define SPECIAL_BLOW_BIG        (100.0f), (50u)   // 
-#define SPECIAL_CHARGE_BIG      (35.0f),  (40u)   // 
+#define SPECIAL_LIGHTNING_RESIZE (0.66f)           // 
+#define SPECIAL_LIGHTNING_CUTOUT (0.5f)            // 
 
-#define SPECIAL_EXPLOSION_SMALL (10.0f), (40u)    // 
-#define SPECIAL_EXPLOSION_BIG   (20.0f), (80u)    // 
+#define SPECIAL_SPLASH_TINY      (25.0f),  (13u)   // 
+#define SPECIAL_SPLASH_SMALL     (50.0f),  (25u)   // 
+#define SPECIAL_SPLASH_BIG       (100.0f), (50u)   // 
+#define SPECIAL_BLOW_SMALL       (50.0f),  (25u)   // 
+#define SPECIAL_BLOW_BIG         (100.0f), (50u)   // 
+#define SPECIAL_CHARGE_BIG       (35.0f),  (40u)   // 
 
-#define SPECIAL_BLAST_SMALL     (2.0f), (3.5f)    // 
-#define SPECIAL_BLAST_BIG       (4.0f), (3.5f)    // 
+#define SPECIAL_EXPLOSION_SMALL  (10.0f), (40u)    // 
+#define SPECIAL_EXPLOSION_BIG    (20.0f), (80u)    // 
 
-#define SPECIAL_SHAKE_SMALL     (0.6f)            // 
-#define SPECIAL_SHAKE_BIG       (1.2f)            // 
+#define SPECIAL_LIGHTNING_SMALL  (11.0f)           // 
+#define SPECIAL_LIGHTNING_BIG    (25.0f)           // 
+
+#define SPECIAL_BLAST_SMALL      (2.0f), (3.5f)    // 
+#define SPECIAL_BLAST_BIG        (4.0f), (3.5f)    // 
+
+#define SPECIAL_SHAKE_SMALL      (0.6f)            // 
+#define SPECIAL_SHAKE_BIG        (1.2f)            // 
 
 enum eSoundEffect : coreUint16   // 0xAABBu -> AA sub-index, BB file-index
 {
@@ -50,22 +58,27 @@ enum eSoundEffect : coreUint16   // 0xAABBu -> AA sub-index, BB file-index
 class cSpecialEffects final
 {
 private:
-    coreParticleSystem m_ParticleColor;       // color particle system
-    coreParticleSystem m_ParticleDark;        // dark particle system
-    coreParticleSystem m_ParticleSmoke;       // smoke particle system
-    coreParticleSystem m_ParticleFire;        // fire particle system
+    coreParticleSystem m_ParticleColor;                     // color particle system
+    coreParticleSystem m_ParticleDark;                      // dark particle system
+    coreParticleSystem m_ParticleSmoke;                     // smoke particle system
+    coreParticleSystem m_ParticleFire;                      // fire particle system
 
-    coreObject3D m_aBlast[SPECIAL_BLASTS];    // 
-    coreUintW    m_iCurBlast;                 // 
+    coreObject3D  m_aLightning      [SPECIAL_LIGHTNINGS];   // 
+    coreObject3D* m_apLightningOwner[SPECIAL_LIGHTNINGS];   // 
+    coreBatchList m_LightningList;                          // 
+    coreUintW     m_iCurLightning;                          // 
 
-    coreObject3D m_aRing[SPECIAL_RINGS];      // 
-    coreUintW    m_iCurRing;                  // 
+    coreObject3D m_aBlast[SPECIAL_BLASTS];                  // 
+    coreUintW    m_iCurBlast;                               // 
 
-    coreSoundPtr m_apSound[SPECIAL_SOUNDS];   // 
-    coreUint32   m_iSoundGuard;               // 
+    coreObject3D m_aRing[SPECIAL_RINGS];                    // 
+    coreUintW    m_iCurRing;                                // 
 
-    coreTimer m_ShakeTimer;                   // 
-    coreFloat m_fShakeStrength;               // 
+    coreSoundPtr m_apSound[SPECIAL_SOUNDS];                 // 
+    coreUint32   m_iSoundGuard;                             // 
+
+    coreTimer m_ShakeTimer;                                 // 
+    coreFloat m_fShakeStrength;                             // 
 
 
 public:
@@ -92,6 +105,10 @@ public:
     void CreateChargeDark (const coreVector3& vPosition, const coreFloat& fScale, const coreUintW& iNum);
 
     // 
+    coreFloat CreateLightning(const coreVector2& vPosFrom, const coreVector2& vPosTo,     const coreFloat&   fWidth, const coreVector3& vColor, const coreVector2& vTexSizeFactor, const coreFloat& fTexOffset);
+    void      CreateLightning(coreObject3D*      pOwner,   const coreVector2& vDirection, const coreVector2& vSize,  const coreVector3& vColor, const coreVector2& vTexSizeFactor, const coreFloat& fTexOffset);
+
+    // 
     void CreateBlast(const coreVector3& vPosition,                                                                 const coreFloat& fScale, const coreFloat& fSpeed, const coreVector3& vColor);
     void CreateRing (const coreVector3& vPosition, const coreVector3& vDirection, const coreVector3& vOrientation, const coreFloat& fScale, const coreFloat& fSpeed, const coreVector3& vColor);
 
@@ -113,6 +130,8 @@ public:
     void MacroEruptionColorBig      (const coreVector3& vPosition, const coreVector2& vDirection, const coreVector3& vColor);
     void MacroEruptionDarkSmall     (const coreVector3& vPosition, const coreVector2& vDirection);
     void MacroEruptionDarkBig       (const coreVector3& vPosition, const coreVector2& vDirection);
+    void MacroEruptionPhysicalSmall (const coreVector3& vPosition, const coreVector2& vDirection);
+    void MacroEruptionPhysicalBig   (const coreVector3& vPosition, const coreVector2& vDirection);
 };
 
 

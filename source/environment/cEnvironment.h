@@ -10,7 +10,7 @@
 #ifndef _P1_GUARD_ENVIRONMENT_H_
 #define _P1_GUARD_ENVIRONMENT_H_
 
-// TODO: render depth-quads or use scissor test on unused background areas (for transition!)
+// TODO: render depth-quads or use scissor test (works bad, no gain) on unused background areas (for transition!)
 // TODO: make "side" parameterized
 
 

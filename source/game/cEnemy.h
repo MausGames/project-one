@@ -18,7 +18,8 @@
 enum eEnemyStatus : coreUint8
 {
     ENEMY_STATUS_DEAD   = 0x01u,   // completely removed from the game
-    ENEMY_STATUS_SILENT = 0x02u    // not able to attack
+    ENEMY_STATUS_SILENT = 0x02u,   // not able to attack
+    ENEMY_STATUS_BOSS   = 0x04u    // 
 };
 
 

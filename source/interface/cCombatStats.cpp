@@ -14,8 +14,14 @@
 cCombatStats::cCombatStats()noexcept
 {
     // 
-    m_Bar.DefineProgram("default_2d_program");
     m_Bar.DefineTexture(0u, "default_white.png");
+    m_Bar.DefineProgram("default_2d_program");
+
+
+
+    // 
+    m_Circle.DefineTexture(0u, "default_white.png");
+    m_Circle.DefineProgram("menu_circle_program");
 }
 
 
@@ -40,6 +46,38 @@ void cCombatStats::Apply()
         }
 
     });
+
+    const coreFloat fValue = 1.0f - FRACT(0.1f*coreFloat(Core::System->GetTotalTime()));
+
+    const coreVector3 vColor = (fValue < 0.25f) ? COLOR_MENU_RED : COLOR_MENU_YELLOW;
+
+
+    //m_Circle.SetPosition (coreVector2(0.0f,-0.04f));
+    //m_Circle.SetCenter   (g_pForeground->Project(coreVector3(0.0f,0.0f,0.0f)) * g_vMenuCenter);
+    //m_Circle.SetSize     (coreVector2(0.11f,0.11f));
+    //m_Circle.SetColor4   (coreVector4(vColor * 0.2f, 0.9f));
+    ////m_Circle.SetTexOffset(coreVector2::Direction(2.0f*PI*FRACT(0.1f*coreFloat(Core::System->GetTotalTime()))));
+    //m_Circle.SetTexOffset(coreVector2(2.0f*PI*fValue, 0.0f));
+    //m_Circle.Move();
+    //m_Circle.Render();
+    //
+    //m_Circle.SetPosition (coreVector2(0.0f,-0.04f));
+    //m_Circle.SetCenter   (g_pForeground->Project(coreVector3(0.0f,0.0f,0.0f)) * g_vMenuCenter);
+    //m_Circle.SetSize     (coreVector2(0.09f,0.09f));
+    //m_Circle.SetColor4   (coreVector4(vColor * 0.2f, 0.9f));
+    ////m_Circle.SetTexOffset(coreVector2::Direction(2.0f*PI*FRACT(0.1f*coreFloat(Core::System->GetTotalTime()))));
+    //m_Circle.SetTexOffset(coreVector2(2.0f*PI*fValue, 0.0f));
+    //m_Circle.Move();
+    //m_Circle.Render();
+
+    m_Circle.SetPosition (coreVector2(0.0f,-0.04f));
+    m_Circle.SetCenter   (g_pForeground->Project(coreVector3(0.0f,0.0f,0.0f)) * g_vMenuCenter);
+    m_Circle.SetSize     (coreVector2(0.1f,0.1f));
+    m_Circle.SetColor4   (coreVector4(vColor * 0.9f, 0.8f));
+    //m_Circle.SetTexOffset(coreVector2::Direction(2.0f*PI*FRACT(0.1f*coreFloat(Core::System->GetTotalTime()))));
+    m_Circle.SetTexOffset(coreVector2(2.0f*PI*fValue, 0.0f));
+    m_Circle.Move();
+    m_Circle.Render();
 
 
 

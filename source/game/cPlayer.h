@@ -13,7 +13,7 @@
 
 // ****************************************************************
 // player definitions
-#define PLAYER_WEAPONS          (2u)     // number of weapons a player can carry
+#define PLAYER_WEAPONS          (1u)     // number of weapons a player can carry
 #define PLAYER_COLLISION_SIZE   (0.2f)   // 
 #define PLAYER_DARK_INVINCIBLE  (0.5f)   // 
 #define PLAYER_DARK_BUBBLE_SIZE (5.2f)   // 

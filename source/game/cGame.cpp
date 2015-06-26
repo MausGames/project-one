@@ -22,8 +22,7 @@ cGame::cGame(const coreBool& bCoop)noexcept
 {
     // configure first player
     m_aPlayer[0].Configure  (PLAYER_SHIP_ATK, coreVector3(0.0f/360.0f, 68.0f/100.0f, 90.0f/100.0f).HSVtoRGB(), g_CurConfig.Input.aiType[0]);
-    m_aPlayer[0].EquipWeapon(0u, cRayWeapon  ::ID);
-    m_aPlayer[0].EquipWeapon(1u, cPulseWeapon::ID);
+    m_aPlayer[0].EquipWeapon(0u, cRayWeapon::ID);
 
     if(m_bCoop)
     {
@@ -276,6 +275,7 @@ cPlayer* RETURN_NONNULL cGame::FindPlayer(const coreVector2& vPosition)
     }
 
     // 
+    ASSERT(pPlayer)
     return pPlayer;
 }
 
@@ -303,6 +303,7 @@ cEnemy* RETURN_NONNULL cGame::FindEnemy(const coreVector2& vPosition)
     }
 
     // 
+    ASSERT(pEnemy)
     return pEnemy;
 }
 
@@ -349,8 +350,8 @@ coreBool cGame::__HandleIntro()
                 const coreVector2 vDir  = coreVector2::Direction(LERPS(0.0f, 4.0f*PI,                    fTime));
 
                 // 
-                if((oPlayer.GetPosition().y < -FOREGROUND_AREA.y) && (vPos.x >= -FOREGROUND_AREA.y))
-                    g_pSpecialEffects->CreateBlowColor(oPlayer.GetPosition(), coreVector3(0.0f,1.0f,0.0f), SPECIAL_BLOW_SMALL, COLOR_FIRE_BLUE);
+                //if((oPlayer.GetPosition().y < -FOREGROUND_AREA.y) && (vPos.x >= -FOREGROUND_AREA.y)) 
+                //    g_pSpecialEffects->CreateBlowColor(oPlayer.GetPosition(), coreVector3(0.0f,1.0f,0.0f), SPECIAL_BLOW_SMALL, COLOR_FIRE_BLUE); 
 
                 // fly player animated into the game field
                 oPlayer.SetPosition   (coreVector3(oPlayer.GetPosition().x, vPos));
@@ -396,6 +397,6 @@ void cGame::__HandleCollisions()
 
         // 
         pEnemy ->TakeDamage(pBullet->GetDamage(), s_cast<cPlayer*>(pBullet->GetOwner()));
-        pBullet->Deactivate(false);
+        pBullet->Deactivate(true);
     });
 }

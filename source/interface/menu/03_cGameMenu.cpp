@@ -28,7 +28,7 @@ cGameMenu::cGameMenu()noexcept
 
     m_ConfigButton.Construct    (MENU_BUTTON, MENU_FONT_MEDIUM_2, 0u);
     m_ConfigButton.DefineProgram("menu_border_program");
-    m_ConfigButton.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,-0.5f) - coreVector2(0.0f,0.02f));
+    m_ConfigButton.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,-0.5f) + coreVector2(0.0f,-0.02f));
     m_ConfigButton.SetSize      (m_StartButton.GetSize());
     m_ConfigButton.SetAlignment (coreVector2(1.0f,-1.0f));
     m_ConfigButton.GetCaption()->SetTextLanguage("SETTINGS");
@@ -42,7 +42,7 @@ cGameMenu::cGameMenu()noexcept
 
     m_ExitButton.Construct    (MENU_BUTTON, MENU_ICON_MEDIUM_2, 0u);
     m_ExitButton.DefineProgram("menu_border_program");
-    m_ExitButton.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.5f,-0.5f) - coreVector2(0.0f,0.02f));
+    m_ExitButton.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.5f,-0.5f) + coreVector2(0.0f,-0.02f));
     m_ExitButton.SetSize      (coreVector2( 1.0f, 1.0f) * m_StartButton.GetSize().y);
     m_ExitButton.SetAlignment (coreVector2(-1.0f,-1.0f));
     m_ExitButton.GetCaption()->SetText(ICON_POWER_OFF);
@@ -70,13 +70,10 @@ void cGameMenu::Move()
         cMenu::UpdateButton(&m_StartButton,  m_StartButton .IsFocused());
         cMenu::UpdateButton(&m_ConfigButton, m_ConfigButton.IsFocused());
         cMenu::UpdateButton(&m_ExtraButton,  m_ExtraButton .IsFocused());
-        cMenu::UpdateButton(&m_ExitButton,   m_ExitButton  .IsFocused());
+        cMenu::UpdateButton(&m_ExitButton,   m_ExitButton  .IsFocused(), COLOR_MENU_RED);
 
         // 
-        if(m_ExtraButton.IsFocused()) g_pMenu->GetTooltip()->ShowText(0.2f, TOOLTIP_PRINT("123 123 13 543 643 dfs%f fd", 0.2f));
-        if(m_ExitButton.IsFocused()) g_pMenu->GetTooltip()->ShowText(0.2f, "A fast hunter, who blocks the way on the beginning of your journey. He does not always attack from the front.");
-
-        //g_pMenu->GetTooltip()->ShowText(NULL, Core::Language->GetString("EXIT_GAME"), TOOLTIP_ONELINER);
+        if(m_ExitButton.IsFocused()) g_pMenu->GetTooltip()->ShowText(TOOLTIP_ONELINER, Core::Language->GetString("EXIT_GAME"));
 
         if(this->GetAlpha() >= 1.0f)
         {
@@ -90,10 +87,18 @@ void cGameMenu::Move()
                 // 
                 m_iStatus = 2;
             }
+            else if(m_ExtraButton.IsClicked())
+            {
+                
+            }
             else if(m_ExitButton.IsClicked())
             {
                 // 
-                Core::System->Quit();
+                g_pMenu->GetMsgBox()->ShowQuestion("Exit Game ?", [](const coreInt32& iStatus)
+                {
+                    if(iStatus == MSGBOX_STATUS_YES)
+                        Core::System->Quit();
+                });
             }
         }
     }

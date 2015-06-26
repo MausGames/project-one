@@ -26,7 +26,7 @@ enum cGameStatus : coreUint8
 {
     GAME_STATUS_INTRO   = 0x01u,   // 
     GAME_STATUS_PLAY    = 0x02u,   // 
-    GAME_STATUS_OUTRO   = 0x03u,   // (two bits) 
+    GAME_STATUS_OUTRO   = 0x03u,   // (# two bits) 
     GAME_STATUS_LOADING = 0x04u    // 
 };
 
@@ -87,6 +87,7 @@ public:
     cPlayer* RETURN_NONNULL FindPlayer(const coreVector2& vPosition);
     cEnemy*  RETURN_NONNULL FindEnemy (const coreVector2& vPosition);
     template <typename F> void ForEachPlayer(F&& nFunction);
+    template <typename F> void ForEachEnemy (F&& nFunction);
 
     // get object properties
     inline const coreFloat& GetTimeMission()const                        {return m_fTimeMission;}
@@ -122,6 +123,16 @@ template <typename F> void cGame::ForEachPlayer(F&& nFunction)
         // 
         nFunction(pCurPlayer);
     }
+}
+
+
+// ****************************************************************
+// 
+template <typename F> void cGame::ForEachEnemy(F&& nFunction)
+{
+    // 
+    FOR_EACH(it, m_apEnemyList)
+        nFunction(*it);
 }
 
 

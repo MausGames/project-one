@@ -30,7 +30,8 @@
 #define OUTDOOR_TOTAL_VERTICES (OUTDOOR_WIDTH * OUTDOOR_HEIGHT_FULL)             // total number of vertices
 #define OUTDOOR_TOTAL_INDICES  (OUTDOOR_PER_INDICES * OUTDOOR_BLOCKS)            // total number of indices
 
-#define OUTDOOR_RANGE (OUTDOOR_BLOCKS_X * OUTDOOR_PER_INDICES * OUTDOOR_VIEW)    // vertices to draw at once
+#define OUTDOOR_RANGE (OUTDOOR_WIDTH * (OUTDOOR_VIEW+1u))                        // 
+#define OUTDOOR_COUNT (OUTDOOR_BLOCKS_X * OUTDOOR_PER_INDICES * OUTDOOR_VIEW)    // vertices to draw at once 
 
 
 // ****************************************************************
@@ -80,6 +81,7 @@ public:
     DISABLE_COPY(cOutdoor)
 
     // render the outdoor-surface
+    void Render(const coreProgramPtr& pProgram)override;
     void Render()override;
 
     // load outdoor resources

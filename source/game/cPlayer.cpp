@@ -21,9 +21,9 @@ cPlayer::cPlayer()noexcept
 , m_vForce         (coreVector2(0.0f,0.0f))
 {
     // load object resources
-    this->DefineProgram("object_ship_program");
     this->DefineTexture(0u, "ship_player.png");
     this->DefineTexture(1u, "menu_background_black.png");
+    this->DefineProgram("object_ship_program");
 
     // set object properties
     this->SetDirection  (coreVector3(0.0f,1.0f,0.0f));
@@ -184,7 +184,7 @@ void cPlayer::Move()
     if(!CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
     {
         // move the ship
-        const coreFloat fSpeed = (!CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && (m_pInput->iButtonHold & BITLINE(PLAYER_WEAPONS))) ? 20.0f : 50.0f;
+        const coreFloat fSpeed = (!CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && CONTAINS_BIT(m_pInput->iButtonHold, 0u)) ? 20.0f : 50.0f;
         m_vNewPos += m_pInput->vMove * (Core::System->GetTime() * fSpeed);
 
         // 
@@ -222,15 +222,15 @@ void cPlayer::Move()
     // update the weapons (shooting and stuff)
     for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
     {
-        const coreBool bShoot = !CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && ((m_pInput->iButtonHold & BITLINE(i+1u)) == BIT(i));
-        m_apWeapon[i]->Update(bShoot);
+        const coreUint8 iShoot = (!CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT)) ? ((m_pInput->iButtonHold & (BITLINE(WEAPON_MODES) << (i*WEAPON_MODES))) >> (i*WEAPON_MODES)) : 0u;
+        m_apWeapon[i]->Update(iShoot);
     }
 
 
 
 
     // 
-    if(CONTAINS_BIT(m_pInput->iButtonPress, PLAYER_WEAPONS))
+    if(CONTAINS_BIT(m_pInput->iButtonPress, PLAYER_WEAPONS*2u))
         this->TransformDark(CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_DARKNESS) ? PLAYER_DARK_OFF : PLAYER_DARK_ON);
 
     if(m_Bubble.IsEnabled(CORE_OBJECT_ENABLE_ALL))
@@ -268,7 +268,7 @@ void cPlayer::Move()
         });
 
         // 
-        if((m_fDarkTime += (bGrace ? 0.25f : -0.5f) * Core::System->GetTime()) <= 0.0f) this->TransformDark(PLAYER_DARK_RESET);
+        if((m_fDarkTime += (bGrace ? 0.25f : -0.5f)   *0.1f    * Core::System->GetTime()) <= 0.0f) this->TransformDark(PLAYER_DARK_RESET);
         m_fDarkTime = CLAMP(m_fDarkTime, 0.0f, 1.0f);
     }
 }
@@ -318,7 +318,7 @@ void cPlayer::Kill(const coreBool& bAnimated)
     ADD_VALUE(m_iStatus, PLAYER_STATUS_DEAD)
 
     // reset weapon shoot status
-    for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i) m_apWeapon[i]->Update(false);
+    for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i) m_apWeapon[i]->Update(0u);
 
     // remove ship from the game
     cShip::_Kill(bAnimated);

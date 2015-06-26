@@ -17,12 +17,12 @@
 // ****************************************************************
 // menu definitions
 #define MENU_BUTTON        "menu_background_black.png", "menu_background_black.png"
-#define MENU_FONT_SMALL    "ethnocentric.ttf", (13u)
-#define MENU_FONT_MEDIUM_2 "ethnocentric.ttf", (20u)
-#define MENU_FONT_MEDIUM_3 "ethnocentric.ttf", (30u)
-#define MENU_FONT_BIG_4    "ethnocentric.ttf", (40u)
-#define MENU_FONT_BIG_7    "ethnocentric.ttf", (70u)
-#define MENU_ICON_MEDIUM_2 "fontawesome.ttf",  (24u)
+#define MENU_FONT_SMALL    "ethnocentric.ttf", (13u), true
+#define MENU_FONT_MEDIUM_2 "ethnocentric.ttf", (20u), true
+#define MENU_FONT_MEDIUM_3 "ethnocentric.ttf", (30u), true
+#define MENU_FONT_BIG_4    "ethnocentric.ttf", (40u), true
+#define MENU_FONT_BIG_7    "ethnocentric.ttf", (70u), true
+#define MENU_ICON_MEDIUM_2 "fontawesome.ttf",  (24u), true
 
 #define MENU_LIGHT_ACTIVE   (1.0f)     // visible strength of active menu objects
 #define MENU_LIGHT_IDLE     (0.667f)   // visible strength of idle menu objects
@@ -56,6 +56,8 @@
 // ****************************************************************
 // 
 #define ICON_POWER_OFF "\xEF\x80\x91"
+#define ICON_CHECK     "\xEF\x80\x8C"
+#define ICON_TIMES     "\xEF\x80\x8D"
 
 
 // ****************************************************************
@@ -183,7 +185,7 @@ public:
     inline cTooltip* GetTooltip() {return &m_Tooltip;}
 
     // default menu routines
-    static void UpdateButton(coreButton* OUTPUT pButton, const coreBool& bFocused);
+    static void UpdateButton(coreButton* OUTPUT pButton, const coreBool& bFocused, const coreVector3 vFocusColor = coreVector3(1.0f,1.0f,1.0f));
     static coreVector3 FUNC_CONST HealthColor(const coreFloat& fValue);
     static coreVector3 FUNC_CONST ChainColor (const coreFloat& fValue);
 };

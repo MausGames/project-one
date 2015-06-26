@@ -13,6 +13,7 @@
 // TODO: reduce reflection-framebuffer without reflection enabled
 // TODO: water-surface clipping for refraction
 // TODO: improve this damn water normal map
+// TODO: alpha mapping water (no distortion) for very bad hardware
 
 
 // ****************************************************************

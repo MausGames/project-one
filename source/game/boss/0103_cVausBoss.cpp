@@ -156,7 +156,7 @@ void cVausBoss::__MoveOwn()
             {
                 if(!A) m_iScoutOrder ^= BIT(i%8u);
 
-                if(m_aiCounter[SCOUT_RESURRECTIONS] < 100)//40)
+                if(m_aiCounter[SCOUT_RESURRECTIONS] < 80)//40)
                 {
                     pScout->Resurrect(vGridPos + coreVector2(0.0f, 3.0f*FOREGROUND_AREA.y), coreVector2(0.0f,-1.0f));
                     ++m_aiCounter[SCOUT_RESURRECTIONS];

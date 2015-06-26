@@ -16,8 +16,8 @@ cEnemy::cEnemy()noexcept
 , m_nRoutine  (NULL)
 {
     // load object resources
-    this->DefineProgram("object_ship_program");
     this->DefineTexture(0u, "ship_enemy.png");
+    this->DefineProgram("object_ship_program");
 
     // set object properties
     this->SetDirection  (coreVector3(0.0f,-1.0f,0.0f));
