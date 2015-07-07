@@ -117,6 +117,9 @@
     <ClCompile Include="..\..\..\source\interface\menu\04_cConfigMenu.cpp">
       <Filter>interface\menu</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\interface\menu\05_cExtraMenu.cpp">
+      <Filter>interface\menu</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\main.h" />

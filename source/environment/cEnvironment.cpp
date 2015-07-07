@@ -38,7 +38,7 @@ cEnvironment::cEnvironment()noexcept
 
     // load first background
     m_pBackground = new cNoBackground();
-    this->ChangeBackground(MAX(Core::Config->GetInt("Game", "Background", 0), s_cast<coreInt32>(cGrassBackground::ID)));
+    this->ChangeBackground(MAX(Core::Config->GetInt("Game", "Background", 0), REF_ID(cGrassBackground::ID)));
 }
 
 

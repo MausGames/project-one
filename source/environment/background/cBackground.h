@@ -110,7 +110,7 @@ public:
 
 
 private:
-    // render the empty background
+    // execute own routines
     inline void __RenderOwn()override {m_iFrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);}
 };
 
@@ -132,7 +132,7 @@ public:
 
 
 private:
-    // move the grass background
+    // execute own routines
     void __MoveOwn()override;
 };
 

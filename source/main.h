@@ -113,6 +113,7 @@
     static const coreInt32 ID = i;                             \
     inline const coreInt32 GetID  ()const override {return i;} \
     inline const coreChar* GetName()const override {return n;}
+#define REF_ID(i) (s_cast<coreInt32>(i))
 
 // container check macro
 #define CONTAINS(c,i) (std::find((c).begin(), (c).end(), (i)) != (c).end())

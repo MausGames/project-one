@@ -41,7 +41,7 @@ cPostProcessing::cPostProcessing()noexcept
     }
 
     // create watermark
-    m_Watermark.Construct   (MENU_FONT_SMALL, 0u);
+    m_Watermark.Construct   (MENU_FONT_SMALL, MENU_OUTLINE_SMALL, 0u);
     m_Watermark.SetPosition (coreVector2(-0.01f, 0.015f));
     m_Watermark.SetDirection(coreVector2( 1.0f,  0.0f));
     m_Watermark.SetCenter   (coreVector2( 0.5f, -0.5f));
@@ -107,8 +107,11 @@ void cPostProcessing::Apply()
 // recompile post-processing shader-programs
 void cPostProcessing::Recompile()
 {
-    const coreChar* pcConfig1 =                g_CurConfig.Graphics.iGlow ? SHADER_GLOW : "";
-    const coreChar* pcConfig2 = PRINT("%s %s", g_CurConfig.Graphics.iGlow ? SHADER_GLOW : "", SHADER_DISTORTION);
+#if !defined(CONFIG_FORCE)
+
+    const coreChar* pcConfig1 =                g_CurConfig.Graphics.iGlow       ? SHADER_GLOW       : "";
+    const coreChar* pcConfig2 = PRINT("%s %s", g_CurConfig.Graphics.iGlow       ? SHADER_GLOW       : "",
+                                               g_CurConfig.Graphics.iDistortion ? SHADER_DISTORTION : "");
 
     // change configuration of post-processing shaders
     s_cast<coreShader*>(Core::Manager::Resource->Get<coreShader>("full_post.frag")          ->GetResource())->SetCustomCode(pcConfig1);
@@ -121,6 +124,8 @@ void cPostProcessing::Recompile()
     // finish now
     glFinish();
     Core::Manager::Resource->UpdateResources();
+
+#endif
 }
 
 

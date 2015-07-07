@@ -450,7 +450,7 @@ void cTorusBoss::__MoveOwn()
     {
         PHASE_CONTROL_TICKER(0u, 0u, 1.0f/6.0f)
         {
-            m_iPhase = (m_aiCounter[BALL_STATUS] < VIRIDO_BALLS) ? 40u : 14u;
+            m_iPhase = (m_aiCounter[BALL_STATUS] < coreInt16(VIRIDO_BALLS)) ? 40u : 14u;
 
             // 
             this->__SetRotaAttack(0, true);

@@ -32,18 +32,18 @@ cMsgBox::cMsgBox()noexcept
     m_Box.SetSize      (coreVector2(0.45f,0.25f));
 
     // 
-    m_Msg.Construct  (MENU_FONT_MEDIUM_2, 0u);
+    m_Msg.Construct  (MENU_FONT_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
     m_Msg.SetPosition(m_Box.GetPosition() + coreVector2(0.0f,0.045f));
 
     // 
-    m_Yes.Construct    (MENU_BUTTON, MENU_ICON_MEDIUM_2, 0u);
+    m_Yes.Construct    (MENU_BUTTON, MENU_ICON_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
     m_Yes.DefineProgram("menu_border_program");
     m_Yes.SetPosition  (m_Box.GetPosition() + coreVector2(-0.1f,-0.05f));
     m_Yes.SetSize      (coreVector2(0.07f,0.07f));
     m_Yes.GetCaption()->SetText(ICON_CHECK);
 
     // 
-    m_No.Construct    (MENU_BUTTON, MENU_ICON_MEDIUM_2, 0u);
+    m_No.Construct    (MENU_BUTTON, MENU_ICON_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
     m_No.DefineProgram("menu_border_program");
     m_No.SetPosition  (m_Yes.GetPosition().InvertedX());
     m_No.SetSize      (m_Yes.GetSize());

@@ -54,6 +54,24 @@ coreBool cWeapon::Update(const coreUint8& iShootStatus)
 
 
 // ****************************************************************
+// 
+void cWeapon::Render()
+{
+    // 
+    this->__RenderOwn();
+}
+
+
+// ****************************************************************
+// 
+void cWeapon::RenderOverlay()
+{
+    // 
+    this->__RenderOverlayOwn();
+}
+
+
+// ****************************************************************
 // constructor
 cRayWeapon::cRayWeapon()noexcept
 {
@@ -147,7 +165,7 @@ cPulseWeapon::cPulseWeapon()noexcept
 void cPulseWeapon::__UpdateOwn(const coreUint8& iShootStatus)
 {
     // 
-    if(!CONTAINS_BIT(iShootStatus, 0)) m_fCharge = MIN(m_fCharge + m_CooldownTimer.GetSpeed() * Core::System->GetTime(), 3.0f);
+    if(!CONTAINS_BIT(iShootStatus, 0u)) m_fCharge = MIN(m_fCharge + m_CooldownTimer.GetSpeed() * Core::System->GetTime(), 3.0f);
 }
 
 
@@ -169,7 +187,7 @@ void cPulseWeapon::__ShootOwn()
     switch(F_TO_UI(m_fCharge))
     {
     case 3:
-        break;
+        //break;
 
     case 2:
         g_pGame->GetBulletManagerPlayer()->AddBullet<cPulseBullet>(12, 1.5f, m_pOwner, vPos + vDir*4.0f + vTan*2.6f, (vDir + vTan*0.025f*0.8f).Normalize())->MakeSmaller(1.15f)->MakeLighter(fAlpha);
@@ -205,15 +223,40 @@ cWaveWeapon::cWaveWeapon()noexcept
 
     // load shooting sound-effect
     m_pShootSound = Core::Manager::Resource->Get<coreSound>("bullet_wave.wav");
+
+
+    // 
+    m_Arrow.Construct(MENU_ICON_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
+    m_Arrow.SetColor4(coreVector4(COLOR_ENERGY_GREEN, 0.8f));
+    m_Arrow.SetText  (ICON_CARET_UP);
 }
 
 
 // ****************************************************************
 // 
-void cWaveWeapon::__ReleaseOwn(const coreUint8& iMode)
+void cWaveWeapon::__UpdateOwn(const coreUint8& iShootStatus)
+{
+    if(CONTAINS_BIT(iShootStatus, 1u)) 
+    {
+        static coreUint8 iTest = 0u;
+        if(++iTest >= 6u)
+        {
+            iTest = 0u;
+
+            m_bSide = true;
+            this->__ShootOwn();
+            m_bSide = false;
+        }
+    }
+}
+
+
+// ****************************************************************
+// 
+void cWaveWeapon::__TriggerOwn(const coreUint8& iMode)
 {
     // 
-    if(iMode == 1u) m_bSide = !m_bSide;
+    //if(iMode == 1u) m_bSide = !m_bSide;
 }
 
 
@@ -233,6 +276,26 @@ void cWaveWeapon::__ShootOwn()
 
     // play shooting sound-effect
     m_pShootSound->PlayPosition(NULL, 1.0f, 1.0f, 0.0f, false, m_pOwner->GetPosition());
+}
+
+
+// ****************************************************************
+// 
+void cWaveWeapon::__RenderOverlayOwn()
+{
+    const coreVector2 vDir = m_bSide ? coreVector2(1.0f,0.0f) : coreVector2(0.0f,1.0f);
+
+    m_Arrow.SetCenter(g_pForeground->Project(m_pOwner->GetPosition()) * g_vMenuCenter);
+
+    m_Arrow.SetPosition (vDir * 0.055f);
+    m_Arrow.SetDirection(vDir.InvertedX());
+    m_Arrow.Move();
+    m_Arrow.Render();
+
+    m_Arrow.SetPosition (-vDir * 0.055f);
+    m_Arrow.SetDirection(-vDir.InvertedX());
+    m_Arrow.Move();
+    m_Arrow.Render();
 }
 
 
@@ -373,7 +436,7 @@ void cTeslaWeapon::__TriggerOwn(const coreUint8& iMode)
                 aapStrikePair[iNum][1] = pObject;
                 ++iNum;
 
-                pLastBullet = (cBullet*)pObject;
+                pLastBullet = s_cast<cBullet*>(pObject);
             }
         });
     }

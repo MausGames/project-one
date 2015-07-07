@@ -18,8 +18,8 @@ cIntroMenu::cIntroMenu()noexcept
 , m_iSelected    (0u)
 {
     // create menu objects
-    m_MausLogo.DefineProgram("default_2d_program");
     m_MausLogo.DefineTexture(0u, "maus_logo.png");
+    m_MausLogo.DefineProgram("default_2d_program");
     m_MausLogo.SetPosition  (coreVector2(0.0f,0.0f));
     m_MausLogo.SetSize      (coreVector2(2.0f,1.0f) * 0.2f);
 
@@ -31,20 +31,18 @@ cIntroMenu::cIntroMenu()noexcept
     if(bSelectLanguage)
     {
         // 
-        std::vector<std::string> asFile;
-        coreData::ScanFolder("data/languages", "*.lng", &asFile);
-        if(asFile.empty()) Core::Log->Error("No language files found (data/languages/*.lng)");
+        const coreLookupStr<std::string>& asLanguageList = cMenu::GetLanguageList();
 
         // 
-        const coreFloat fOffset = I_TO_F(asFile.size()) * 0.5f - 0.5f;
-        FOR_EACH(it, asFile)
+        const coreFloat fOffset = I_TO_F(asLanguageList.size()) * 0.5f - 0.5f;
+        FOR_EACH(it, asLanguageList)
         {
             // create new language button
-            coreButton* pButton = new coreButton(MENU_BUTTON, MENU_FONT_MEDIUM_3, 0u);
+            coreButton* pButton = new coreButton(MENU_BUTTON, MENU_FONT_MEDIUM_3, MENU_OUTLINE_SMALL, 0u);
             pButton->DefineProgram("menu_border_program");
             pButton->SetPosition  (coreVector2(0.0f, 0.15f * (fOffset - I_TO_F(m_apLanguageButton.size()))));
             pButton->SetSize      (coreVector2(0.3f, 0.07f) * 1.5f);
-            pButton->GetCaption()->SetText(coreLanguage(it->c_str()).GetString("LANGUAGE"));
+            pButton->GetCaption()->SetText(asLanguageList.get_key(it)->c_str());
 
             // 
             this->BindObject(SURFACE_INTRO_LANGUAGE, pButton);
@@ -78,6 +76,7 @@ void cIntroMenu::Move()
     coreMenu::Move();
     m_iStatus = 0;
 
+    // 
     if(this->GetCurSurface() == SURFACE_INTRO_LANGUAGE)
     {
         // 

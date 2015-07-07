@@ -105,7 +105,7 @@ public:
 
 
 private:
-    // 
+    // execute own routines
     void __ResurrectOwn   ()override;
     void __KillOwn        ()override;
     void __RenderOwnWeak  ()override;
@@ -147,7 +147,7 @@ public:
 
 
 private:
-    // 
+    // execute own routines
     void __ResurrectOwn   ()override;
     void __KillOwn        ()override;
     void __RenderOwnStrong()override;
@@ -180,7 +180,7 @@ public:
 
 
 private:
-    // 
+    // execute own routines
     void __ResurrectOwn()override;
     void __KillOwn     ()override;
     void __MoveOwn     ()override;

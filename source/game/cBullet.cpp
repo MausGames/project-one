@@ -75,11 +75,7 @@ void cBullet::Deactivate(const coreBool& bAnimated)
     REMOVE_VALUE(m_iStatus, BULLET_STATUS_ACTIVE)
 
     // 
-    if(bAnimated)
-    {
-        //g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 5.0f, 3u, this->GetColor3());  
-        this->__ImpactOwn();
-    }
+    if(bAnimated) this->__ImpactOwn();
 
     // disable collision
     this->ChangeType(0);
@@ -273,6 +269,15 @@ cOrbBullet::cOrbBullet()noexcept
 
     // set object properties
     this->SetTexSize(coreVector2(0.4f,0.4f));
+}
+
+
+// ****************************************************************
+// 
+void cOrbBullet::__ImpactOwn()
+{
+    // 
+    g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 5.0f, 3u, this->GetColor3());
 }
 
 

@@ -41,5 +41,5 @@ void FragmentMain()
     //float v1Alpha = 1.0;
     
     // draw texture with subtle white glow
-    gl_FragColor   = vec4(v3Color * v1Alpha, v1Alpha * u_v4Color.a);
+    gl_FragColor = vec4(v3Color * v1Alpha, v1Alpha * u_v4Color.a);
 }

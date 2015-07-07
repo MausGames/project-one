@@ -21,7 +21,7 @@
 // stage management macros
 #define STAGE_MAIN            m_anStage.push_back([&]()                                // 
 #define STAGE_SUB(t)          ((m_fStageTimeBefore <= (t)) && ((t) <= m_fStageTime))   // 
-#define STAGE_FINISH_NOW      {m_anStage.pop_back(); m_fStageTime = 0.0f;}             // 
+#define STAGE_FINISH_NOW      {m_fStageTime = 0.0f; m_anStage.pop_back();}             //
 #define STAGE_FINISH_AFTER(t) {if(m_fStageTime >= (t)) STAGE_FINISH_NOW}               // 
 
 
@@ -152,7 +152,7 @@ public:
 
 
 private:
-    // setup, render and move the Virido mission
+    // execute own routines
     void __SetupOwn       ()override;
     void __RenderOwnWeak  ()override;
     void __RenderOwnStrong()override;

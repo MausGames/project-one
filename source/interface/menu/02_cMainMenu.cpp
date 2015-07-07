@@ -16,31 +16,31 @@ cMainMenu::cMainMenu()noexcept
 , m_iSelected (0u)
 {
     // create menu objects
-    m_GameLogo.DefineProgram("menu_sharp_program");
     m_GameLogo.DefineTexture(0, "game_logo.png");
+    m_GameLogo.DefineProgram("menu_sharp_program");
     m_GameLogo.SetPosition  (coreVector2(0.0f,0.15f));
     m_GameLogo.SetSize      (coreVector2(1.0f,1.0f) * 0.52f);
     m_GameLogo.SetColor3    (coreVector3(1.0f,1.0f,1.0f) * 1.05f);
 
-    m_StartButton.Construct    (MENU_BUTTON, MENU_FONT_MEDIUM_2, 0u);
+    m_StartButton.Construct    (MENU_BUTTON, MENU_FONT_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
     m_StartButton.DefineProgram("menu_border_program");
     m_StartButton.SetPosition  (coreVector2(0.0f,-0.19f));
     m_StartButton.SetSize      (coreVector2(0.3f, 0.07f));
     m_StartButton.GetCaption()->SetTextLanguage("START_GAME");
 
-    m_ExitButton.Construct    (MENU_BUTTON, MENU_FONT_MEDIUM_2, 0u);
+    m_ExitButton.Construct    (MENU_BUTTON, MENU_FONT_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
     m_ExitButton.DefineProgram("menu_border_program");
     m_ExitButton.SetPosition  (m_StartButton.GetPosition() + coreVector2(0.0f,-0.09f));
     m_ExitButton.SetSize      (m_StartButton.GetSize());
     m_ExitButton.GetCaption()->SetTextLanguage("EXIT_GAME");
 
-    m_aVersionInfo[0].Construct   (MENU_FONT_SMALL, 0u);
+    m_aVersionInfo[0].Construct   (MENU_FONT_SMALL, MENU_OUTLINE_SMALL, 0u);
     m_aVersionInfo[0].SetPosition (coreVector2(0.0f, 0.03f));
     m_aVersionInfo[0].SetCenter   (coreVector2(0.0f,-0.5f) * g_vMenuCenter);
     m_aVersionInfo[0].SetAlignment(coreVector2(0.0f, 1.0f));
     m_aVersionInfo[0].SetText     ("(c) 2010-2015 Martin Mauersics (@MausGames)");
 
-    m_aVersionInfo[1].Construct   (MENU_FONT_SMALL, 0u);
+    m_aVersionInfo[1].Construct   (MENU_FONT_SMALL, MENU_OUTLINE_SMALL, 0u);
     m_aVersionInfo[1].SetPosition (m_aVersionInfo[0].GetPosition() + coreVector2(0.0f,-0.02f));
     m_aVersionInfo[1].SetCenter   (m_aVersionInfo[0].GetCenter());
     m_aVersionInfo[1].SetAlignment(m_aVersionInfo[0].GetAlignment());
@@ -63,28 +63,37 @@ void cMainMenu::Move()
     coreMenu::Move();
     m_iStatus = 0;
 
-    if(this->GetCurSurface() == SURFACE_MAIN_DEFAULT)
+    // 
+    switch(this->GetCurSurface())
     {
-        // 
-             if(m_StartButton.IsFocused()) m_iSelected = 0u;
-        else if(m_ExitButton .IsFocused()) m_iSelected = 1u;
-
-        // 
-        cMenu::UpdateButton(&m_StartButton, m_iSelected == 0u);
-        cMenu::UpdateButton(&m_ExitButton,  m_iSelected == 1u);
-
-        if(this->GetAlpha() >= 1.0f)
+    case SURFACE_MAIN_DEFAULT:
         {
-            if(m_StartButton.IsClicked())
+            // 
+                 if(m_StartButton.IsFocused()) m_iSelected = 0u;
+            else if(m_ExitButton .IsFocused()) m_iSelected = 1u;
+
+            // 
+            cMenu::UpdateButton(&m_StartButton, m_iSelected == 0u);
+            cMenu::UpdateButton(&m_ExitButton,  m_iSelected == 1u);
+
+            if(this->GetAlpha() >= 1.0f)
             {
-                // 
-                m_iStatus = 1;
-            }
-            else if(m_ExitButton.IsClicked())
-            {
-                // 
-                Core::System->Quit();
+                if(m_StartButton.IsClicked())
+                {
+                    // 
+                    m_iStatus = 1;
+                }
+                else if(m_ExitButton.IsClicked())
+                {
+                    // 
+                    Core::System->Quit();
+                }
             }
         }
+        break;
+
+    default:
+        ASSERT(false)
+        break;
     }
 }

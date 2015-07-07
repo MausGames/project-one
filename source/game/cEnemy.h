@@ -36,7 +36,7 @@ protected:
 
 public:
     cEnemy()noexcept;
-    virtual ~cEnemy();
+    virtual ~cEnemy() {ASSERT(CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_DEAD))}
 
     FRIEND_CLASS(cGame)
     DISABLE_COPY(cEnemy)
@@ -129,7 +129,7 @@ public:
 
 
 private:
-    // move the star enemy
+    // execute own routines
     void __MoveOwn()override;
 };
 
@@ -150,7 +150,7 @@ public:
 
 
 private:
-    // move the arrow enemy
+    // execute own routines
     void __MoveOwn()override;
 };
 
@@ -183,7 +183,7 @@ public:
 
 
 private:
-    // move the freezer enemy
+    // execute own routines
     void __MoveOwn()override;
 };
 
@@ -204,7 +204,7 @@ public:
 
 
 private:
-    // move the cinder enemy
+    // execute own routines
     void __MoveOwn()override;
 };
 

@@ -19,7 +19,8 @@
 // ****************************************************************
 // tooltip definitions
 #define TOOLTIP_LINES        (8u)                           // 
-#define TOOLTIP_LINE_HEIGHT  (0.02f)                        // 
+#define TOOLTIP_LINE_HEIGHT  (0.022f)                       // 
+#define TOOLTIP_OUTLINE_SIZE (1u)                           // 
 #define TOOLTIP_BORDER_SIZE  (coreVector2( 0.02f,0.016f))   // 
 #define TOOLTIP_MOUSE_OFFSET (coreVector2(-0.02f,0.02f))    // 
 

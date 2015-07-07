@@ -88,7 +88,7 @@ void cWater::Render(coreFrameBuffer* pBackground)
 void cWater::Move()
 {
     // update animation value
-    m_fAnimation.Update(0.016f);
+    m_fAnimation.Update(0.008f);
 
     // move water level up and down
     this->SetPosition(coreVector3(0.0f, m_fFlyOffset * OUTDOOR_DETAIL, WATER_HEIGHT + 0.4f * SIN(40.0f * m_fAnimation)));

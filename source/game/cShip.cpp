@@ -81,9 +81,6 @@ void cShip::_Kill(const coreBool& bAnimated)
 
     // disable collision
     this->ChangeType(0);
-
-    // 
-    if(bAnimated) g_pSpecialEffects->MacroExplosionPhysicalSmall(this->GetPosition());
 }
 
 

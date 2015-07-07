@@ -17,6 +17,15 @@ cInput  g_aInput[INPUT_SETS]; // = 0x00;
 // check configuration for valid values
 static void CheckConfig(cConfig* pConfig)
 {
+#if defined(CONFIG_FORCE)
+
+    // force specific settings
+    g_OldConfig.Graphics.iReflection = 1;
+    g_OldConfig.Graphics.iGlow       = 1;
+    g_OldConfig.Graphics.iDistortion = 1;
+
+#endif
+
     // clamp input set selections
     for(coreUintW i = 0u; i < INPUT_TYPES; ++i)
         pConfig->Input.aiType[i] = CLAMP(pConfig->Input.aiType[i], 0u, INPUT_SETS-1u);

@@ -28,7 +28,7 @@ cTooltip::cTooltip()noexcept
     // 
     for(coreUintW i = 0u; i < TOOLTIP_LINES; ++i)
     {
-        m_aLine[i].Construct   (MENU_FONT_SMALL, 64u);
+        m_aLine[i].Construct   (MENU_FONT_SMALL, TOOLTIP_OUTLINE_SIZE, 0u);
         m_aLine[i].SetAlignment(coreVector2(1.0f,-1.0f));
         m_aLine[i].SetColor3   (coreVector3(1.0f,1.0f,1.0f) * MENU_CONTRAST_WHITE);
     }
@@ -92,7 +92,7 @@ void cTooltip::__ShowText(const coreFloat& fWidth, const coreChar* pcText)
 {
     const coreFontPtr& pFont   = m_aLine[0].GetFont();
     const coreUint8&   iHeight = m_aLine[0].GetHeight();
-    const coreFloat    fFactor = RCP(g_vGameResolution.x) / CORE_LABEL_DETAIL;
+    const coreFloat    fFactor = RCP(Core::System->GetResolution().y) / CORE_LABEL_DETAIL;
 
     // 
     coreChar* pcCursor    = c_cast<coreChar*>(pcText);
@@ -141,7 +141,7 @@ void cTooltip::__ShowText(const coreFloat& fWidth, const coreChar* pcText)
         {
             // 
             coreInt32 iAdvance;
-            pFont->RetrieveGlyphMetrics(coreUint16(*pcCursor), iHeight, NULL, NULL, NULL, NULL, &iAdvance);
+            pFont->RetrieveGlyphMetrics(coreUint16(*pcCursor), iHeight, TOOLTIP_OUTLINE_SIZE, NULL, NULL, NULL, NULL, &iAdvance);
             const coreFloat fAdvance = I_TO_F(iAdvance) * fFactor;
 
             // 
@@ -167,7 +167,7 @@ void cTooltip::__ShowText(const coreFloat& fWidth, const coreChar* pcText)
 
     // 
     m_aLine[m_iNumLines++].SetText(pcLineBegin);
-    fMaxWidth = MAX(fMaxWidth, fCurWidth) + I_TO_F(2u * FONT_OUTLINE_SIZE) * fFactor;
+    fMaxWidth = MAX(fMaxWidth, fCurWidth) + I_TO_F(2u * TOOLTIP_OUTLINE_SIZE) * fFactor;
 
     // 
     this->SetSize(coreVector2(fMaxWidth, TOOLTIP_LINE_HEIGHT * I_TO_F(m_iNumLines)) + TOOLTIP_BORDER_SIZE);

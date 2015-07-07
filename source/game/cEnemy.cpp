@@ -30,15 +30,6 @@ cEnemy::cEnemy()noexcept
 
 
 // ****************************************************************
-// destructor
-cEnemy::~cEnemy()
-{
-    // remove enemy from the game
-    this->Kill(false);
-}
-
-
-// ****************************************************************
 // configure the enemy
 void cEnemy::Configure(const coreInt32& iHealth, const coreVector3& vColor)
 {
@@ -146,6 +137,14 @@ void cEnemy::Kill(const coreBool& bAnimated)
     // kill enemy
     if(CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_DEAD)) return;
     ADD_VALUE(m_iStatus, ENEMY_STATUS_DEAD)
+
+    // 
+    if(bAnimated)
+    {
+        if(CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_BOSS))
+             g_pSpecialEffects->MacroExplosionPhysicalBig  (this->GetPosition());
+        else g_pSpecialEffects->MacroExplosionPhysicalSmall(this->GetPosition());
+    }
 
     // unbind enemy from active list
     g_pGame->__UnbindEnemy(this);

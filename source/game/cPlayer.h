@@ -42,7 +42,7 @@ class cPlayer final : public cShip
 {
 private:
     cWeapon* m_apWeapon[PLAYER_WEAPONS];        // main weapon objects (bullet factories, should never be NULL)
-    cInput*  m_pInput;                          // pointer to associated input set
+    cInput*  m_pInput;                          // pointer to associated input set (should never be NULL)
 
     coreUint32 m_iScoreMission;                 // 
     coreUint32 m_aiScoreBoss[MISSION_BOSSES];   // 
@@ -100,6 +100,9 @@ public:
     void DisableBubble();
     void UpdateExhaust(const coreFloat& fStrength);
 
+    // 
+    inline cWeapon* GetWeapon(const coreUintW& iIndex) {ASSERT(iIndex < PLAYER_WEAPONS && m_apWeapon[iIndex]) return m_apWeapon[iIndex];}
+
     // set object properties
     inline void SetNewPos(const coreVector2& vNewPos) {m_vNewPos = vNewPos;}
     inline void SetForce (const coreVector2& vForce)  {m_vForce  = vForce;}
@@ -114,6 +117,7 @@ public:
     inline const coreFloat&   GetChainCooldown()const                        {return m_fChainCooldown;}
     inline const coreFloat&   GetDarkTime     ()const                        {return m_fDarkTime;}
     inline const coreVector2& GetNewPos       ()const                        {return m_vNewPos;}
+    inline const coreVector2& GetForce        ()const                        {return m_vForce;}
 };
 
 

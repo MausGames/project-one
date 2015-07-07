@@ -50,6 +50,7 @@
     <ClCompile Include="..\..\..\source\interface\menu\02_cMainMenu.cpp" />
     <ClCompile Include="..\..\..\source\interface\menu\03_cGameMenu.cpp" />
     <ClCompile Include="..\..\..\source\interface\menu\04_cConfigMenu.cpp" />
+    <ClCompile Include="..\..\..\source\interface\menu\05_cExtraMenu.cpp" />
     <ClCompile Include="..\..\..\source\interface\menu\cMenu.cpp" />
     <ClCompile Include="..\..\..\source\main.cpp" />
     <ClCompile Include="..\..\..\source\visual\cDistortion.cpp" />
@@ -192,8 +193,6 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -203,6 +202,8 @@
       <SmallerTypeCheck>true</SmallerTypeCheck>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <WarningLevel>Level4</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

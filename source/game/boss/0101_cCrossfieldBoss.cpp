@@ -95,6 +95,7 @@ cCrossfieldBoss::~cCrossfieldBoss()
 
     // 
     m_aiCounter[RESURRECT_STATUS] = 1;
+    this->Kill(false);
 }
 
 

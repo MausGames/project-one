@@ -271,13 +271,13 @@ static void DebugGame()
         if(!g_pGame)
         {
             g_pGame = new cGame(true);
-            g_pGame->LoadMission(cViridoMission::ID);
+            g_pGame->LoadMission(REF_ID(cViridoMission::ID));
         }
     }
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS))
-        g_pEnvironment->ChangeBackground(cGrassBackground::ID);
+        g_pEnvironment->ChangeBackground(REF_ID(cGrassBackground::ID));
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2), CORE_INPUT_PRESS))
-        g_pEnvironment->ChangeBackground(cSeaBackground::ID);
+        g_pEnvironment->ChangeBackground(REF_ID(cSeaBackground::ID));
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS))
         Core::System->Quit();
 
@@ -358,6 +358,14 @@ static void DebugGame()
         }
     }
 
+    if(g_pGame)
+    {
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(7), CORE_INPUT_PRESS)) g_pGame->GetPlayer(0u)->EquipWeapon(0u, REF_ID(cRayWeapon  ::ID));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(8), CORE_INPUT_PRESS)) g_pGame->GetPlayer(0u)->EquipWeapon(0u, REF_ID(cPulseWeapon::ID));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(9), CORE_INPUT_PRESS)) g_pGame->GetPlayer(0u)->EquipWeapon(0u, REF_ID(cWaveWeapon ::ID));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(0), CORE_INPUT_PRESS)) g_pGame->GetPlayer(0u)->EquipWeapon(0u, REF_ID(cTeslaWeapon::ID));
+    }
+
     //std::function<void()> test = []()
     //{
     //
@@ -393,6 +401,10 @@ static void DebugGame()
     coreVector4 v2 = coreVector4::UnpackFloat4x16(un);
 
     v1 = v2;
+
+
+    //g_pEnvironment->Activate();
+    //g_pPostProcessing->SetSideOpacity(1.0f);
 
 
     //coreFloat f1 = 1.23f;

@@ -28,23 +28,23 @@ void cInterface::sPlayerView::Construct(const coreUintW& iIndex)
     m_aHealthBar[1].SetCenter    (m_aHealthBar[0].GetCenter());
     m_aHealthBar[1].SetAlignment (m_aHealthBar[0].GetAlignment());
 
-    m_aHealthValue[0].Construct      (MENU_FONT_SMALL, 0u);
+    m_aHealthValue[0].Construct      (MENU_FONT_SMALL, MENU_OUTLINE_SMALL, 0u);
     m_aHealthValue[0].SetPosition    (m_aHealthBar[0].GetPosition() + coreVector2(0.035f,0.01f));
     m_aHealthValue[0].SetCenter      (m_aHealthBar[0].GetCenter());
     m_aHealthValue[0].SetAlignment   (m_aHealthBar[0].GetAlignment());
     m_aHealthValue[0].SetTextLanguage("ARMOR");
 
-    m_aHealthValue[1].Construct   (MENU_FONT_SMALL, 10u);
+    m_aHealthValue[1].Construct   (MENU_FONT_SMALL, MENU_OUTLINE_SMALL, 10u);
     m_aHealthValue[1].SetPosition (m_aHealthBar[0].GetPosition() + coreVector2(m_aHealthBar[0].GetSize().x - 0.035f, 0.01f));
     m_aHealthValue[1].SetCenter   (m_aHealthBar[0].GetCenter());
     m_aHealthValue[1].SetAlignment(coreVector2(-1.0f,1.0f));
 
-    m_Score.Construct   (MENU_FONT_MEDIUM_2, 7u);
+    m_Score.Construct   (MENU_FONT_MEDIUM_2, MENU_OUTLINE_SMALL, 7u);
     m_Score.SetPosition (m_aHealthBar[0].GetPosition() + coreVector2(0.017f,0.035f));
     m_Score.SetCenter   (m_aHealthBar[0].GetCenter());
     m_Score.SetAlignment(m_aHealthBar[0].GetAlignment());
 
-    m_Combo.Construct   (MENU_FONT_SMALL, 6u);
+    m_Combo.Construct   (MENU_FONT_SMALL, MENU_OUTLINE_SMALL, 6u);
     m_Combo.SetPosition (m_aHealthBar[0].GetPosition() + coreVector2(m_aHealthBar[0].GetSize().x - 0.017f, 0.038f));
     m_Combo.SetCenter   (m_aHealthBar[0].GetCenter());
     m_Combo.SetAlignment(coreVector2(-1.0f,1.0f));
@@ -55,7 +55,7 @@ void cInterface::sPlayerView::Construct(const coreUintW& iIndex)
     m_ChainBar.SetCenter    (m_Score.GetCenter());
     m_ChainBar.SetAlignment (m_Score.GetAlignment());
 
-    m_ChainValue.Construct   (MENU_FONT_SMALL, 8u);
+    m_ChainValue.Construct   (MENU_FONT_SMALL, MENU_OUTLINE_SMALL, 8u);
     m_ChainValue.SetPosition (m_Score.GetPosition() + coreVector2(0.001f,0.03f));
     m_ChainValue.SetCenter   (m_Score.GetCenter());
     m_ChainValue.SetAlignment(m_Score.GetAlignment());
@@ -93,27 +93,27 @@ cInterface::cInterface(const coreUint8& iNumViews)noexcept
     m_aBossHealthBar[1].SetCenter    (m_aBossHealthBar[0].GetCenter());
     m_aBossHealthBar[1].SetAlignment (m_aBossHealthBar[0].GetAlignment());
 
-    m_aBossHealthValue[0].Construct   (MENU_FONT_SMALL, 7u);
+    m_aBossHealthValue[0].Construct   (MENU_FONT_SMALL, MENU_OUTLINE_SMALL, 7u);
     m_aBossHealthValue[0].SetPosition (m_aBossHealthBar[0].GetPosition() + coreVector2(0.05f,-0.01f));
     m_aBossHealthValue[0].SetCenter   (m_aBossHealthBar[0].GetCenter());
     m_aBossHealthValue[0].SetAlignment(m_aBossHealthBar[0].GetAlignment());
 
-    m_aBossHealthValue[1].Construct   (MENU_FONT_SMALL, 14u);
+    m_aBossHealthValue[1].Construct   (MENU_FONT_SMALL, MENU_OUTLINE_SMALL, 14u);
     m_aBossHealthValue[1].SetPosition (m_aBossHealthBar[0].GetPosition() + coreVector2(m_aBossHealthBar[0].GetSize().x - 0.05f, -0.01f));
     m_aBossHealthValue[1].SetCenter   (m_aBossHealthBar[0].GetCenter());
     m_aBossHealthValue[1].SetAlignment(coreVector2(-1.0f,-1.0f));
 
-    m_BossName.Construct   (MENU_FONT_MEDIUM_2, 0u);
+    m_BossName.Construct   (MENU_FONT_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
     m_BossName.SetPosition (coreVector2(-0.009f,-0.004f));
     m_BossName.SetCenter   (coreVector2( 0.5f,   0.5f) * g_vMenuCenter);
     m_BossName.SetAlignment(coreVector2(-1.0f,  -1.0f));
 
-    m_aBossTime[0].Construct   (MENU_FONT_MEDIUM_2, 5u);
+    m_aBossTime[0].Construct   (MENU_FONT_MEDIUM_2, MENU_OUTLINE_SMALL, 5u);
     m_aBossTime[0].SetPosition (m_BossName.GetPosition() + coreVector2(-0.023f,-0.025f));
     m_aBossTime[0].SetCenter   (m_BossName.GetCenter());
     m_aBossTime[0].SetAlignment(m_BossName.GetAlignment());
 
-    m_aBossTime[1].Construct   (MENU_FONT_MEDIUM_2, 2u);
+    m_aBossTime[1].Construct   (MENU_FONT_MEDIUM_2, MENU_OUTLINE_SMALL, 2u);
     m_aBossTime[1].SetPosition (m_BossName.GetPosition() + coreVector2(0.0f,-0.025f));
     m_aBossTime[1].SetCenter   (m_BossName.GetCenter());
     m_aBossTime[1].SetAlignment(m_BossName.GetAlignment());
@@ -122,9 +122,9 @@ cInterface::cInterface(const coreUint8& iNumViews)noexcept
     m_BannerBar.DefineTexture(0u, "menu_detail_03.png");
     m_BannerBar.DefineTexture(1u, "menu_background_black.png");
 
-    m_aBannerText[0].Construct(MENU_FONT_BIG_7,    0u);
-    m_aBannerText[1].Construct(MENU_FONT_BIG_7,    0u);
-    m_aBannerText[2].Construct(MENU_FONT_MEDIUM_2, 0u);
+    m_aBannerText[0].Construct(MENU_FONT_BIG_7,    MENU_OUTLINE_SMALL, 0u);
+    m_aBannerText[1].Construct(MENU_FONT_BIG_7,    MENU_OUTLINE_SMALL, 0u);
+    m_aBannerText[2].Construct(MENU_FONT_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
     m_aBannerText[0].SetColor3(coreVector3(0.75f,0.75f,0.75f) * MENU_CONTRAST_WHITE);
     m_aBannerText[1].SetColor3(coreVector3(0.75f,0.75f,0.75f) * MENU_CONTRAST_WHITE);
     m_aBannerText[2].SetColor3(coreVector3(0.75f,0.75f,0.75f) * MENU_CONTRAST_WHITE);
@@ -350,7 +350,7 @@ void cInterface::ShowBoss(const coreChar* pcMain, const coreChar* pcSub)
     m_bBannerType  = INTERFACE_BANNER_TYPE_BOSS;
     {
         // and realign objects as boss banner
-        m_aBannerText[3].Construct(MENU_FONT_BIG_4, 0u);
+        m_aBannerText[3].Construct(MENU_FONT_BIG_4, MENU_OUTLINE_SMALL, 0u);
 
         m_aBannerText[2].SetPosition(coreVector2(0.0f, 0.027f));
         m_aBannerText[3].SetPosition(coreVector2(0.0f,-0.012f));
@@ -396,7 +396,7 @@ void cInterface::ShowMission(const coreChar* pcMain, const coreChar* pcSub)
     m_bBannerType  = INTERFACE_BANNER_TYPE_MISSION;
     {
         // and realign objects as mission banner
-        m_aBannerText[3].Construct(MENU_FONT_MEDIUM_3, 0u);
+        m_aBannerText[3].Construct(MENU_FONT_MEDIUM_3, MENU_OUTLINE_SMALL, 0u);
 
         m_aBannerText[2].SetPosition(coreVector2(0.0f, 0.025f));
         m_aBannerText[3].SetPosition(coreVector2(0.0f,-0.01f));

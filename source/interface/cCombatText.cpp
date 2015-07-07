@@ -33,7 +33,7 @@ cCombatText::cCombatText()noexcept
 {
     // create label objects
     for(coreUintW i = 0u; i < COMBAT_LABELS; ++i)
-        m_aLabel[i].Construct(MENU_FONT_MEDIUM_2, 16u);
+        m_aLabel[i].Construct(MENU_FONT_MEDIUM_2, MENU_OUTLINE_SMALL, 16u);
 
     // reset animation timers
     std::memset(m_afTimer, 0, sizeof(m_afTimer));

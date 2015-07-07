@@ -156,7 +156,7 @@ public:
 
 
 private:
-    // move the ray bullet
+    // execute own routines
     void __MoveOwn()override;
 };
 
@@ -188,7 +188,7 @@ public:
 
 
 private:
-    // move the pulse bullet
+    // execute own routines
     void __MoveOwn()override;
 };
 
@@ -220,8 +220,9 @@ public:
 
 
 private:
-    // move the orb bullet
-    void __MoveOwn()override;
+    // execute own routines
+    void __ImpactOwn()override;
+    void __MoveOwn  ()override;
 };
 
 
@@ -252,7 +253,7 @@ public:
 
 
 private:
-    // move the cone bullet
+    // execute own routines
     void __MoveOwn()override;
 };
 
@@ -284,7 +285,7 @@ public:
 
 
 private:
-    // move the wave bullet
+    // execute own routines
     void __MoveOwn()override;
 };
 
@@ -321,7 +322,7 @@ public:
 
 
 private:
-    // move the tesla bullet
+    // execute own routines
     void __MoveOwn()override;
 };
 
@@ -357,7 +358,7 @@ public:
 
 
 private:
-    // render and move the mine bullet   
+    // execute own routines
     void __ImpactOwn      ()override;
     void __RenderOwnBefore()override;
     void __MoveOwn        ()override;
@@ -384,7 +385,7 @@ public:
 
 
 private:
-    // impact and move the rocket bullet
+    // execute own routines
     void __ImpactOwn()override;
     void __MoveOwn  ()override;
 };
@@ -420,13 +421,13 @@ template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt
 {
     // get requested bullet set
     sBulletSet<T>* pSet;
-    if(!m_apBulletSet.count(T::ID))
+    if(!m_apBulletSet.count(REF_ID(T::ID)))
     {
         // create new bullet set
         pSet = new sBulletSet<T>(m_iPriority);
-        m_apBulletSet[T::ID] = pSet;
+        m_apBulletSet[REF_ID(T::ID)] = pSet;
     }
-    else pSet = s_cast<sBulletSet<T>*>(m_apBulletSet[T::ID]);
+    else pSet = s_cast<sBulletSet<T>*>(m_apBulletSet[REF_ID(T::ID)]);
 
     // save current pool size
     const coreUintW iSize = pSet->aBulletPool.size();

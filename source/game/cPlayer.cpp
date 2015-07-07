@@ -12,7 +12,7 @@
 // ****************************************************************
 // constructor
 cPlayer::cPlayer()noexcept
-: m_pInput         (NULL)
+: m_pInput         (&g_aInput[0])
 , m_iScoreMission  (0u)
 , m_fChainCooldown (0.0f)
 , m_fDarkAnimation (0.0f)
@@ -172,6 +172,10 @@ void cPlayer::Render()
 
     // render the 3d-object
     coreObject3D::Render();
+
+    // 
+    for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
+        m_apWeapon[i]->Render();
 }
 
 
@@ -184,7 +188,9 @@ void cPlayer::Move()
     if(!CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
     {
         // move the ship
-        const coreFloat fSpeed = (!CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && CONTAINS_BIT(m_pInput->iButtonHold, 0u)) ? 20.0f : 50.0f;
+        //const coreFloat fSpeed = (!CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && CONTAINS_BIT(m_pInput->iButtonHold, 0u)) ? 20.0f : 50.0f;
+        const coreFloat fSpeed = (!CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && (m_pInput->iButtonHold & BITLINE(PLAYER_WEAPONS*WEAPON_MODES))) ? 20.0f : 50.0f;
+         
         m_vNewPos += m_pInput->vMove * (Core::System->GetTime() * fSpeed);
 
         // 
@@ -316,6 +322,9 @@ void cPlayer::Kill(const coreBool& bAnimated)
     // kill player
     if(CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_DEAD)) return;
     ADD_VALUE(m_iStatus, PLAYER_STATUS_DEAD)
+
+    // 
+    if(bAnimated) g_pSpecialEffects->MacroExplosionPhysicalBig(this->GetPosition());
 
     // reset weapon shoot status
     for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i) m_apWeapon[i]->Update(0u);

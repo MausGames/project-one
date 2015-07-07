@@ -15,7 +15,7 @@ varying float v_v1Strength;   // outline intensity
 void VertexMain()
 {
     // transform position normal-resized
-    gl_Position = u_m4ViewProj * vec4(coreQuatApply(u_v4Rotation, (a_v3RawPosition * u_v3Size) + (a_v3RawNormal * 0.32)) + u_v3Position, 1.0);
+    gl_Position = u_m4ViewProj * vec4(coreQuatApply(u_v4Rotation, (a_v3RawPosition * u_v3Size) + (a_v3RawNormal * 0.31)) + u_v3Position, 1.0);
 
 #if defined(_P1_DIRECT_)
 

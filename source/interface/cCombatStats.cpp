@@ -17,8 +17,6 @@ cCombatStats::cCombatStats()noexcept
     m_Bar.DefineTexture(0u, "default_white.png");
     m_Bar.DefineProgram("default_2d_program");
 
-
-
     // 
     m_Circle.DefineTexture(0u, "default_white.png");
     m_Circle.DefineProgram("menu_circle_program");
@@ -32,8 +30,12 @@ void cCombatStats::Apply()
 
 
 
-    g_pGame->ForEachPlayer([&](const cPlayer* pPlayer)
+
+
+    g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer)
     {
+        for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
+            pPlayer->GetWeapon(i)->RenderOverlay();
 
         if(pPlayer->GetDarkTime())
         {
@@ -77,7 +79,7 @@ void cCombatStats::Apply()
     //m_Circle.SetTexOffset(coreVector2::Direction(2.0f*PI*FRACT(0.1f*coreFloat(Core::System->GetTotalTime()))));
     m_Circle.SetTexOffset(coreVector2(2.0f*PI*fValue, 0.0f));
     m_Circle.Move();
-    m_Circle.Render();
+    //m_Circle.Render();
 
 
 

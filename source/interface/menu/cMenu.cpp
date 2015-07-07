@@ -12,7 +12,7 @@
 // ****************************************************************
 // constructor
 cMenu::cMenu()noexcept
-: coreMenu (5u, SURFACE_INTRO)
+: coreMenu (6u, SURFACE_CONFIG) // # SURFACE_INTRO 
 {
     // create intro and main menu
     m_pIntroMenu = new cIntroMenu();
@@ -23,6 +23,7 @@ cMenu::cMenu()noexcept
     this->BindObject(SURFACE_MAIN,   m_pMainMenu);
     this->BindObject(SURFACE_GAME,   &m_GameMenu);
     this->BindObject(SURFACE_CONFIG, &m_ConfigMenu);
+    this->BindObject(SURFACE_EXTRA,  &m_ExtraMenu);
 }
 
 
@@ -66,66 +67,96 @@ void cMenu::Move()
         Core::Input->UseMouseWithJoystick(i, 0u, 1u, 0.4f);
     }
 
-    if(this->GetCurSurface() == SURFACE_INTRO)
+    // 
+    switch(this->GetCurSurface())
     {
-        if(m_pIntroMenu->GetStatus())
-        {
-            // 
-            this->ChangeSurface(SURFACE_MAIN, 1.0f);
-        }
-    }
-    else if(this->GetCurSurface() == SURFACE_MAIN)
-    {
-        if(m_pMainMenu->GetStatus())
-        {
-            // 
-            this->ChangeSurface(SURFACE_GAME, 1.0f);
+    case SURFACE_EMPTY:
+        break;
 
-            // unload expendable menu resources
-            Core::Manager::Resource->AttachFunction([this]()
+    case SURFACE_INTRO:
+        {
+            if(m_pIntroMenu->GetStatus())
             {
-                if(!this->GetTransition().GetStatus())
+                // switch to main menu
+                this->ChangeSurface(SURFACE_MAIN, 1.0f);
+            }
+        }
+        break;
+
+    case SURFACE_MAIN:
+        {
+            if(m_pMainMenu->GetStatus())
+            {
+                // switch to game menu
+                this->ChangeSurface(SURFACE_GAME, 1.0f);
+
+                // unload expendable menu resources
+                Core::Manager::Resource->AttachFunction([this]()
                 {
-                    // delete intro and main menu
-                    SAFE_DELETE(m_pIntroMenu)
-                    SAFE_DELETE(m_pMainMenu)
-                    return CORE_OK;
-                }
-                return CORE_BUSY;
-            });
+                    if(!this->GetTransition().GetStatus())
+                    {
+                        // delete intro and main menu
+                        SAFE_DELETE(m_pIntroMenu)
+                        SAFE_DELETE(m_pMainMenu)
+                        return CORE_OK;
+                    }
+                    return CORE_BUSY;
+                });
+            }
         }
-    }
-    else if(this->GetCurSurface() == SURFACE_GAME)
-    {
-        if(m_GameMenu.GetStatus() == 1)
-        {
-            // 
-            this->ChangeSurface(SURFACE_EMPTY, 1.0f);
+        break;
 
-            // 
-            ASSERT(!g_pGame)
-            g_pGame = new cGame(false);
-            g_pGame->LoadMission(cViridoMission::ID);
-
-            // 
-            Core::Input->ShowCursor(false);
-
-            // TODO: menue-riss bei start oder seitlicher fade-out # 
-            // außerdem bei start im main-menue animation und explosion des logos oder riss in mitte
-        }
-        else if(m_GameMenu.GetStatus() == 2)
+    case SURFACE_GAME:
         {
-            // 
-            this->ChangeSurface(SURFACE_CONFIG, 3.0f);
+            if(m_GameMenu.GetStatus() == 1)
+            {
+                // 
+                this->ChangeSurface(SURFACE_EMPTY, 1.0f);
+
+                // 
+                ASSERT(!g_pGame)
+                g_pGame = new cGame(false);
+                g_pGame->LoadMission(REF_ID(cViridoMission::ID));
+
+                // 
+                Core::Input->ShowCursor(false);
+            }
+            else if(m_GameMenu.GetStatus() == 2)
+            {
+                // switch to config menu
+                this->ChangeSurface(SURFACE_CONFIG, 3.0f);
+            }
+            else if(m_GameMenu.GetStatus() == 3)
+            {
+                // switch to extra menu
+                this->ChangeSurface(SURFACE_EXTRA, 3.0f);
+            }
         }
-    }
-    else if(this->GetCurSurface() == SURFACE_CONFIG)
-    {
-        if(m_ConfigMenu.GetStatus())
+        break;
+
+    case SURFACE_CONFIG:
         {
-            // 
-            this->ChangeSurface(SURFACE_GAME, 3.0f);
+            if(m_ConfigMenu.GetStatus())
+            {
+                // return to game menu
+                this->ChangeSurface(SURFACE_GAME, 3.0f);
+            }
         }
+        break;
+
+    case SURFACE_EXTRA:
+        {
+            if(m_ExtraMenu.GetStatus())
+            {
+                // return to game menu
+                this->ChangeSurface(SURFACE_GAME, 3.0f);
+            }
+        }
+        break;
+
+    default:
+        ASSERT(false)
+        break;
     }
 
     // 
@@ -134,8 +165,30 @@ void cMenu::Move()
 
 
 // ****************************************************************
+// 
+const coreLookupStr<std::string>& cMenu::GetLanguageList()
+{
+    // static language list (key = name, value = path)
+    static coreLookupStr<std::string> asLanguage;
+
+    if(asLanguage.empty())
+    {
+        // 
+        std::vector<std::string> asFile;
+        coreData::ScanFolder("data/languages", "*.lng", &asFile);
+        if(asFile.empty()) Core::Log->Error("No language files found (data/languages/*.lng)");
+
+        // 
+        FOR_EACH(it, asFile) asLanguage[coreLanguage(it->c_str()).GetString("LANGUAGE")] = std::move(*it);
+    }
+
+    return asLanguage;
+}
+
+
+// ****************************************************************
 // default button update routine
-void cMenu::UpdateButton(coreButton* OUTPUT pButton, const coreBool& bFocused, const coreVector3 vFocusColor)
+void cMenu::UpdateButton(coreButton* OUTPUT pButton, const coreBool& bFocused, const coreVector3& vFocusColor)
 {
     ASSERT(pButton)
 
@@ -146,6 +199,34 @@ void cMenu::UpdateButton(coreButton* OUTPUT pButton, const coreBool& bFocused, c
     // set button and caption color
     pButton              ->SetColor3(vColor * (fLight));
     pButton->GetCaption()->SetColor3(vColor * (fLight * MENU_CONTRAST_WHITE));
+}
+
+void cMenu::UpdateButton(coreButton* OUTPUT pButton, const coreBool& bFocused)
+{
+    // 
+    cMenu::UpdateButton(pButton, bFocused, coreVector3(1.0f,1.0f,1.0f));
+}
+
+
+// ****************************************************************
+// 
+void cMenu::UpdateSwitchBox(coreSwitchBoxU8* OUTPUT pSwitchBox)
+{
+    coreButton* pArrow1 = pSwitchBox->GetArrow(0u);
+    coreButton* pArrow2 = pSwitchBox->GetArrow(1u);
+
+    // 
+    pArrow1->SetAlpha(pSwitchBox->GetAlpha() * ((pSwitchBox->GetCurIndex() == 0u)                             ? 0.25f : (pArrow1->IsFocused() ? 1.0f : 0.5f)));
+    pArrow2->SetAlpha(pSwitchBox->GetAlpha() * ((pSwitchBox->GetCurIndex() == pSwitchBox->GetNumEntries()-1u) ? 0.25f : (pArrow2->IsFocused() ? 1.0f : 0.5f)));
+}
+
+
+// ****************************************************************
+// 
+void cMenu::UpdateCheckBox(coreCheckBox* OUTPUT pCheckBox)
+{
+    // 
+    pCheckBox->SetAlpha(pCheckBox->GetAlpha() * (pCheckBox->IsFocused() ? 1.0f : 0.5f));
 }
 
 

@@ -102,8 +102,9 @@ private:
     void     __HandleCollisions();
 
     // manage enemies
-    inline void __BindEnemy  (cEnemy* pEnemy) {ASSERT(!CONTAINS(m_apEnemyList, pEnemy)) m_apEnemyList.push_back(pEnemy);}
-    inline void __UnbindEnemy(cEnemy* pEnemy) {FOR_EACH(it, m_apEnemyList) {if((*it) == pEnemy) {m_apEnemyList.erase(it); return;}} ASSERT(false)}
+    inline void __BindEnemy   (cEnemy* pEnemy) {ASSERT(!CONTAINS(m_apEnemyList, pEnemy)) m_apEnemyList.push_back(pEnemy);}
+    inline void __UnbindEnemy (cEnemy* pEnemy) {FOR_EACH(it, m_apEnemyList) {if((*it) == pEnemy) {m_apEnemyList.erase(it); return;}} ASSERT(false)}
+    inline void __ClearEnemies()               {this->ForEachEnemy([](cEnemy* OUTPUT pEnemy) {pEnemy->Kill(false);});}
 };
 
 
@@ -131,7 +132,10 @@ template <typename F> void cGame::ForEachPlayer(F&& nFunction)
 template <typename F> void cGame::ForEachEnemy(F&& nFunction)
 {
     // 
-    FOR_EACH(it, m_apEnemyList)
+    auto apCopy = m_apEnemyList;
+
+    // 
+    FOR_EACH(it, apCopy)
         nFunction(*it);
 }
 

@@ -39,6 +39,10 @@ public:
     // update the weapon
     coreBool Update(const coreUint8& iShootStatus);
 
+    // 
+    void Render();
+    void RenderOverlay();
+
     // set object properties
     inline void SetOwner(cPlayer* pOwner) {m_pOwner = pOwner;}
 
@@ -48,10 +52,12 @@ public:
 
 private:
     // own routines for derived classes
-    virtual void __UpdateOwn (const coreUint8& iShootStatus) {}
-    virtual void __TriggerOwn(const coreUint8& iMode)        {}
-    virtual void __ReleaseOwn(const coreUint8& iMode)        {}
-    virtual void __ShootOwn  ()                              {}
+    virtual void __UpdateOwn       (const coreUint8& iShootStatus) {}
+    virtual void __TriggerOwn      (const coreUint8& iMode)        {}
+    virtual void __ReleaseOwn      (const coreUint8& iMode)        {}
+    virtual void __ShootOwn        ()                              {}
+    virtual void __RenderOwn       ()                              {}
+    virtual void __RenderOverlayOwn()                              {}
 };
 
 
@@ -85,9 +91,9 @@ public:
 
 
 private:
-    // trigger and shoot with the ray weapon
+    // execute own routines
     void __TriggerOwn(const coreUint8& iMode)override;
-    void __ShootOwn()override;
+    void __ShootOwn  ()override;
 };
 
 
@@ -110,7 +116,7 @@ public:
 
 
 private:
-    // update and shoot with the pulse weapon
+    // execute own routines
     void __UpdateOwn(const coreUint8& iShootStatus)override;
     void __ShootOwn ()override;
 };
@@ -125,6 +131,8 @@ private:
 
     coreSoundPtr m_pShootSound;   // shooting sound-effect 
 
+    coreLabel m_Arrow;            // 
+
 
 public:
     cWaveWeapon()noexcept;
@@ -134,9 +142,11 @@ public:
 
 
 private:
-    // release and shoot with the wave weapon
-    void __ReleaseOwn(const coreUint8& iMode)override;
-    void __ShootOwn  ()override;
+    // execute own routines
+    void __UpdateOwn       (const coreUint8& iShootStatus)override;
+    void __TriggerOwn      (const coreUint8& iMode)override;
+    void __ShootOwn        ()override;
+    void __RenderOverlayOwn()override;
 };
 
 
@@ -159,9 +169,9 @@ public:
 
 
 private:
-    // trigger and shoot with the tesla weapon
+    // execute own routines
     void __TriggerOwn(const coreUint8& iMode)override;
-    void __ShootOwn()override;
+    void __ShootOwn  ()override;
 };
 
 

@@ -5,8 +5,32 @@ $CREDITS = Credits
 $SETTINGS = Settings
 $EXTRAS = Extras
 $BACK = Back
-$ARMOR = Armor
-$STAGE = Stage
+
+$CONFIG_VIDEO = Video
+$CONFIG_AUDIO = Audio
+$CONFIG_INPUT = Input
+$CONFIG_GAME = Game
+
+$CONFIG_VIDEO_RESOLUTION = Resolution
+$CONFIG_VIDEO_DISPLAYMODE = Display Mode
+$CONFIG_VIDEO_ANTIALIASING = Anti Aliasing
+$CONFIG_VIDEO_TEXTUREFILTER = Texture Filter
+$CONFIG_VIDEO_ASSETQUALITY = Asset Quality
+$CONFIG_VIDEO_SHADOWQUALITY = Shadow Quality
+$CONFIG_AUDIO_OVERALLVOLUME = Overall Volume
+$CONFIG_AUDIO_MUSICVOLUME = Music Volume
+$CONFIG_AUDIO_EFFECTVOLUME = Effect Volume
+$CONFIG_AUDIO_AMBIENTSOUND = Ambient Sound
+$CONFIG_GAME_LANGUAGE = Language
+
+$VALUE_OFF = Off
+$VALUE_LOW = Low
+$VALUE_HIGH = High
+$DISPLAY_DESKTOP = Desktop
+$DISPLAY_WINDOW = Window
+$DISPLAY_FULLSCREEN = Fullscreen
+
+$QUESTION_EXIT_GAME = Exit Game ?
 $OK_1 = Nice!
 $OK_2 = All right
 $OK_3 = Fine
@@ -22,6 +46,10 @@ $NO_2 = Not now
 $NO_3 = Not at all
 $NO_4 = No way
 $NO_5 = 
+
+$ARMOR = Armor
+$STAGE = Stage
+
 $BOSS_TITLE_0101 = The Bountyhunter
 $BOSS_TITLE_0102 = The Ring of Destruction
 $BOSS_TITLE_0103 = The Last Survivor

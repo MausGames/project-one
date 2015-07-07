@@ -4,7 +4,17 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <logicalFolder name="additional" displayName="additional" projectFiles="true">
+        <itemPath>../../source/additional/cBindContainer.cpp</itemPath>
+        <itemPath>../../source/additional/cBindContainer.h</itemPath>
+      </logicalFolder>
       <logicalFolder name="environment" displayName="environment" projectFiles="true">
+        <logicalFolder name="background" displayName="background" projectFiles="true">
+          <itemPath>../../source/environment/background/01_cGrassBackground.cpp</itemPath>
+          <itemPath>../../source/environment/background/02_cSeaBackground.cpp</itemPath>
+          <itemPath>../../source/environment/background/cBackground.cpp</itemPath>
+          <itemPath>../../source/environment/background/cBackground.h</itemPath>
+        </logicalFolder>
         <itemPath>../../source/environment/cEnvironment.cpp</itemPath>
         <itemPath>../../source/environment/cEnvironment.h</itemPath>
         <itemPath>../../source/environment/cOutdoor.cpp</itemPath>
@@ -13,10 +23,24 @@
         <itemPath>../../source/environment/cWater.h</itemPath>
       </logicalFolder>
       <logicalFolder name="files" displayName="files" projectFiles="true">
-        <itemPath>../../source/files/cConfig.cpp</itemPath>
-        <itemPath>../../source/files/cConfig.h</itemPath>
+        <itemPath>../../source/file/cConfig.cpp</itemPath>
+        <itemPath>../../source/file/cConfig.h</itemPath>
+        <itemPath>../../source/file/cSave.cpp</itemPath>
+        <itemPath>../../source/file/cSave.h</itemPath>
       </logicalFolder>
       <logicalFolder name="game" displayName="game" projectFiles="true">
+        <logicalFolder name="boss" displayName="boss" projectFiles="true">
+          <itemPath>../../source/game/boss/0101_cCrossfieldBoss.cpp</itemPath>
+          <itemPath>../../source/game/boss/0102_cTorusBoss.cpp</itemPath>
+          <itemPath>../../source/game/boss/0103_cVausBoss.cpp</itemPath>
+          <itemPath>../../source/game/boss/cBoss.cpp</itemPath>
+          <itemPath>../../source/game/boss/cBoss.h</itemPath>
+        </logicalFolder>
+        <logicalFolder name="mission" displayName="mission" projectFiles="true">
+          <itemPath>../../source/game/mission/01_cViridoMission.cpp</itemPath>
+          <itemPath>../../source/game/mission/cMission.cpp</itemPath>
+          <itemPath>../../source/game/mission/cMission.h</itemPath>
+        </logicalFolder>
         <itemPath>../../source/game/cBullet.cpp</itemPath>
         <itemPath>../../source/game/cBullet.h</itemPath>
         <itemPath>../../source/game/cEnemy.cpp</itemPath>
@@ -30,19 +54,41 @@
         <itemPath>../../source/game/cWeapon.cpp</itemPath>
         <itemPath>../../source/game/cWeapon.h</itemPath>
       </logicalFolder>
-      <logicalFolder name="menu" displayName="menu" projectFiles="true">
+      <logicalFolder name="interface" displayName="interface" projectFiles="true">
+        <logicalFolder name="menu" displayName="menu" projectFiles="true">
+          <itemPath>../../source/interface/menu/01_cIntroMenu.cpp</itemPath>
+          <itemPath>../../source/interface/menu/02_cMainMenu.cpp</itemPath>
+          <itemPath>../../source/interface/menu/03_cGameMenu.cpp</itemPath>
+          <itemPath>../../source/interface/menu/04_cConfigMenu.cpp</itemPath>
+          <itemPath>../../source/interface/menu/cMenu.cpp</itemPath>
+          <itemPath>../../source/interface/menu/cMenu.h</itemPath>
+        </logicalFolder>
+        <itemPath>../../source/interface/cCombatStats.cpp</itemPath>
+        <itemPath>../../source/interface/cCombatStats.h</itemPath>
+        <itemPath>../../source/interface/cCombatText.cpp</itemPath>
+        <itemPath>../../source/interface/cCombatText.h</itemPath>
+        <itemPath>../../source/interface/cInterface.cpp</itemPath>
+        <itemPath>../../source/interface/cInterface.h</itemPath>
+        <itemPath>../../source/interface/cMsgBox.cpp</itemPath>
+        <itemPath>../../source/interface/cMsgBox.h</itemPath>
+        <itemPath>../../source/interface/cTooltip.cpp</itemPath>
+        <itemPath>../../source/interface/cTooltip.h</itemPath>
       </logicalFolder>
       <logicalFolder name="visuals" displayName="visuals" projectFiles="true">
-        <itemPath>../../source/visuals/cForeground.cpp</itemPath>
-        <itemPath>../../source/visuals/cForeground.h</itemPath>
-        <itemPath>../../source/visuals/cOutline.cpp</itemPath>
-        <itemPath>../../source/visuals/cOutline.h</itemPath>
-        <itemPath>../../source/visuals/cPostProcessing.cpp</itemPath>
-        <itemPath>../../source/visuals/cPostProcessing.h</itemPath>
-        <itemPath>../../source/visuals/cShadow.cpp</itemPath>
-        <itemPath>../../source/visuals/cShadow.h</itemPath>
-        <itemPath>../../source/visuals/cSpecialEffects.cpp</itemPath>
-        <itemPath>../../source/visuals/cSpecialEffects.h</itemPath>
+        <itemPath>../../source/visual/cDistortion.cpp</itemPath>
+        <itemPath>../../source/visual/cDistortion.h</itemPath>
+        <itemPath>../../source/visual/cForeground.cpp</itemPath>
+        <itemPath>../../source/visual/cForeground.h</itemPath>
+        <itemPath>../../source/visual/cGlow.cpp</itemPath>
+        <itemPath>../../source/visual/cGlow.h</itemPath>
+        <itemPath>../../source/visual/cOutline.cpp</itemPath>
+        <itemPath>../../source/visual/cOutline.h</itemPath>
+        <itemPath>../../source/visual/cPostProcessing.cpp</itemPath>
+        <itemPath>../../source/visual/cPostProcessing.h</itemPath>
+        <itemPath>../../source/visual/cShadow.cpp</itemPath>
+        <itemPath>../../source/visual/cShadow.h</itemPath>
+        <itemPath>../../source/visual/cSpecialEffects.cpp</itemPath>
+        <itemPath>../../source/visual/cSpecialEffects.h</itemPath>
       </logicalFolder>
       <itemPath>../../source/application.cpp</itemPath>
       <itemPath>../../source/main.cpp</itemPath>
@@ -123,7 +169,37 @@
           </makeArtifact>
         </requiredProjects>
       </compileType>
+      <item path="../../source/additional/cBindContainer.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/additional/cBindContainer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../../source/application.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/environment/background/01_cGrassBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/02_cSeaBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/cBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/cBackground.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="../../source/environment/cEnvironment.cpp"
             ex="false"
@@ -152,9 +228,32 @@
       </item>
       <item path="../../source/environment/cWater.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../../source/files/cConfig.cpp" ex="false" tool="1" flavor2="0">
+      <item path="../../source/file/cConfig.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="../../source/files/cConfig.h" ex="false" tool="3" flavor2="0">
+      <item path="../../source/file/cConfig.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/file/cSave.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/file/cSave.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/game/boss/0101_cCrossfieldBoss.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/game/boss/0102_cTorusBoss.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/game/boss/0103_cVausBoss.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/game/boss/cBoss.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/game/boss/cBoss.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../source/game/cBullet.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -180,41 +279,138 @@
       </item>
       <item path="../../source/game/cWeapon.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../../source/main.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../source/main.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cForeground.cpp"
+      <item path="../../source/game/mission/01_cViridoMission.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../../source/visuals/cForeground.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cOutline.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cOutline.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cPostProcessing.cpp"
+      <item path="../../source/game/mission/cMission.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../../source/visuals/cPostProcessing.h"
+      <item path="../../source/game/mission/cMission.h"
             ex="false"
             tool="3"
             flavor2="0">
       </item>
-      <item path="../../source/visuals/cShadow.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cShadow.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cSpecialEffects.cpp"
+      <item path="../../source/interface/cCombatStats.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../../source/visuals/cSpecialEffects.h"
+      <item path="../../source/interface/cCombatStats.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cCombatText.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cCombatText.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cInterface.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cInterface.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cMsgBox.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/interface/cMsgBox.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/interface/cTooltip.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cTooltip.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/01_cIntroMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/02_cMainMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/03_cGameMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/04_cConfigMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/cMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/cMenu.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/main.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cDistortion.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visual/cDistortion.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cForeground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visual/cForeground.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cGlow.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visual/cGlow.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cOutline.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visual/cOutline.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cPostProcessing.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visual/cPostProcessing.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/visual/cShadow.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visual/cShadow.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cSpecialEffects.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visual/cSpecialEffects.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -273,7 +469,37 @@
           </makeArtifact>
         </requiredProjects>
       </compileType>
+      <item path="../../source/additional/cBindContainer.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/additional/cBindContainer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../../source/application.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/environment/background/01_cGrassBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/02_cSeaBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/cBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/cBackground.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="../../source/environment/cEnvironment.cpp"
             ex="false"
@@ -302,9 +528,32 @@
       </item>
       <item path="../../source/environment/cWater.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../../source/files/cConfig.cpp" ex="false" tool="1" flavor2="0">
+      <item path="../../source/file/cConfig.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="../../source/files/cConfig.h" ex="false" tool="3" flavor2="0">
+      <item path="../../source/file/cConfig.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/file/cSave.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/file/cSave.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/game/boss/0101_cCrossfieldBoss.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/game/boss/0102_cTorusBoss.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/game/boss/0103_cVausBoss.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/game/boss/cBoss.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/game/boss/cBoss.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../source/game/cBullet.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -330,41 +579,138 @@
       </item>
       <item path="../../source/game/cWeapon.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../../source/main.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../source/main.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cForeground.cpp"
+      <item path="../../source/game/mission/01_cViridoMission.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../../source/visuals/cForeground.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cOutline.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cOutline.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cPostProcessing.cpp"
+      <item path="../../source/game/mission/cMission.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../../source/visuals/cPostProcessing.h"
+      <item path="../../source/game/mission/cMission.h"
             ex="false"
             tool="3"
             flavor2="0">
       </item>
-      <item path="../../source/visuals/cShadow.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cShadow.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cSpecialEffects.cpp"
+      <item path="../../source/interface/cCombatStats.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../../source/visuals/cSpecialEffects.h"
+      <item path="../../source/interface/cCombatStats.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cCombatText.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cCombatText.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cInterface.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cInterface.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cMsgBox.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/interface/cMsgBox.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/interface/cTooltip.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cTooltip.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/01_cIntroMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/02_cMainMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/03_cGameMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/04_cConfigMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/cMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/cMenu.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/main.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cDistortion.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visual/cDistortion.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cForeground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visual/cForeground.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cGlow.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visual/cGlow.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cOutline.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visual/cOutline.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cPostProcessing.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visual/cPostProcessing.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/visual/cShadow.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visual/cShadow.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cSpecialEffects.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visual/cSpecialEffects.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -423,7 +769,37 @@
           </makeArtifact>
         </requiredProjects>
       </compileType>
+      <item path="../../source/additional/cBindContainer.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/additional/cBindContainer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../../source/application.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/environment/background/01_cGrassBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/02_cSeaBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/cBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/cBackground.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="../../source/environment/cEnvironment.cpp"
             ex="false"
@@ -452,9 +828,32 @@
       </item>
       <item path="../../source/environment/cWater.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../../source/files/cConfig.cpp" ex="false" tool="1" flavor2="0">
+      <item path="../../source/file/cConfig.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="../../source/files/cConfig.h" ex="false" tool="3" flavor2="0">
+      <item path="../../source/file/cConfig.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/file/cSave.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/file/cSave.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/game/boss/0101_cCrossfieldBoss.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/game/boss/0102_cTorusBoss.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/game/boss/0103_cVausBoss.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/game/boss/cBoss.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/game/boss/cBoss.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../source/game/cBullet.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -480,41 +879,138 @@
       </item>
       <item path="../../source/game/cWeapon.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../../source/main.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../source/main.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cForeground.cpp"
+      <item path="../../source/game/mission/01_cViridoMission.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../../source/visuals/cForeground.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cOutline.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cOutline.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cPostProcessing.cpp"
+      <item path="../../source/game/mission/cMission.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../../source/visuals/cPostProcessing.h"
+      <item path="../../source/game/mission/cMission.h"
             ex="false"
             tool="3"
             flavor2="0">
       </item>
-      <item path="../../source/visuals/cShadow.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cShadow.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cSpecialEffects.cpp"
+      <item path="../../source/interface/cCombatStats.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../../source/visuals/cSpecialEffects.h"
+      <item path="../../source/interface/cCombatStats.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cCombatText.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cCombatText.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cInterface.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cInterface.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cMsgBox.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/interface/cMsgBox.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/interface/cTooltip.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cTooltip.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/01_cIntroMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/02_cMainMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/03_cGameMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/04_cConfigMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/cMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/cMenu.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/main.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cDistortion.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visual/cDistortion.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cForeground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visual/cForeground.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cGlow.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visual/cGlow.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cOutline.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visual/cOutline.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cPostProcessing.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visual/cPostProcessing.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/visual/cShadow.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visual/cShadow.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cSpecialEffects.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visual/cSpecialEffects.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -586,7 +1082,37 @@
           </makeArtifact>
         </requiredProjects>
       </compileType>
+      <item path="../../source/additional/cBindContainer.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/additional/cBindContainer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../../source/application.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/environment/background/01_cGrassBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/02_cSeaBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/cBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/cBackground.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="../../source/environment/cEnvironment.cpp"
             ex="false"
@@ -615,9 +1141,32 @@
       </item>
       <item path="../../source/environment/cWater.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../../source/files/cConfig.cpp" ex="false" tool="1" flavor2="0">
+      <item path="../../source/file/cConfig.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="../../source/files/cConfig.h" ex="false" tool="3" flavor2="0">
+      <item path="../../source/file/cConfig.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/file/cSave.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/file/cSave.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/game/boss/0101_cCrossfieldBoss.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/game/boss/0102_cTorusBoss.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/game/boss/0103_cVausBoss.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/game/boss/cBoss.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/game/boss/cBoss.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../source/game/cBullet.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -643,41 +1192,138 @@
       </item>
       <item path="../../source/game/cWeapon.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../../source/main.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../source/main.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cForeground.cpp"
+      <item path="../../source/game/mission/01_cViridoMission.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../../source/visuals/cForeground.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cOutline.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cOutline.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cPostProcessing.cpp"
+      <item path="../../source/game/mission/cMission.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../../source/visuals/cPostProcessing.h"
+      <item path="../../source/game/mission/cMission.h"
             ex="false"
             tool="3"
             flavor2="0">
       </item>
-      <item path="../../source/visuals/cShadow.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cShadow.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cSpecialEffects.cpp"
+      <item path="../../source/interface/cCombatStats.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../../source/visuals/cSpecialEffects.h"
+      <item path="../../source/interface/cCombatStats.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cCombatText.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cCombatText.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cInterface.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cInterface.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cMsgBox.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/interface/cMsgBox.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/interface/cTooltip.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cTooltip.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/01_cIntroMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/02_cMainMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/03_cGameMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/04_cConfigMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/cMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/cMenu.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/main.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cDistortion.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visual/cDistortion.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cForeground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visual/cForeground.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cGlow.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visual/cGlow.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cOutline.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visual/cOutline.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cPostProcessing.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visual/cPostProcessing.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/visual/cShadow.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visual/cShadow.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cSpecialEffects.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visual/cSpecialEffects.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -745,7 +1391,37 @@
           </makeArtifact>
         </requiredProjects>
       </compileType>
+      <item path="../../source/additional/cBindContainer.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/additional/cBindContainer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../../source/application.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/environment/background/01_cGrassBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/02_cSeaBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/cBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/cBackground.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="../../source/environment/cEnvironment.cpp"
             ex="false"
@@ -774,9 +1450,32 @@
       </item>
       <item path="../../source/environment/cWater.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../../source/files/cConfig.cpp" ex="false" tool="1" flavor2="0">
+      <item path="../../source/file/cConfig.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="../../source/files/cConfig.h" ex="false" tool="3" flavor2="0">
+      <item path="../../source/file/cConfig.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/file/cSave.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/file/cSave.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/game/boss/0101_cCrossfieldBoss.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/game/boss/0102_cTorusBoss.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/game/boss/0103_cVausBoss.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/game/boss/cBoss.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/game/boss/cBoss.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../source/game/cBullet.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -802,41 +1501,138 @@
       </item>
       <item path="../../source/game/cWeapon.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../../source/main.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../source/main.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cForeground.cpp"
+      <item path="../../source/game/mission/01_cViridoMission.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../../source/visuals/cForeground.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cOutline.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cOutline.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cPostProcessing.cpp"
+      <item path="../../source/game/mission/cMission.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../../source/visuals/cPostProcessing.h"
+      <item path="../../source/game/mission/cMission.h"
             ex="false"
             tool="3"
             flavor2="0">
       </item>
-      <item path="../../source/visuals/cShadow.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cShadow.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cSpecialEffects.cpp"
+      <item path="../../source/interface/cCombatStats.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../../source/visuals/cSpecialEffects.h"
+      <item path="../../source/interface/cCombatStats.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cCombatText.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cCombatText.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cInterface.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cInterface.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cMsgBox.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/interface/cMsgBox.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/interface/cTooltip.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cTooltip.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/01_cIntroMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/02_cMainMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/03_cGameMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/04_cConfigMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/cMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/cMenu.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/main.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cDistortion.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visual/cDistortion.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cForeground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visual/cForeground.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cGlow.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visual/cGlow.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cOutline.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visual/cOutline.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cPostProcessing.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visual/cPostProcessing.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/visual/cShadow.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visual/cShadow.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cSpecialEffects.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visual/cSpecialEffects.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -903,7 +1699,37 @@
           </makeArtifact>
         </requiredProjects>
       </compileType>
+      <item path="../../source/additional/cBindContainer.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/additional/cBindContainer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../../source/application.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/environment/background/01_cGrassBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/02_cSeaBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/cBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/cBackground.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="../../source/environment/cEnvironment.cpp"
             ex="false"
@@ -932,9 +1758,32 @@
       </item>
       <item path="../../source/environment/cWater.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../../source/files/cConfig.cpp" ex="false" tool="1" flavor2="0">
+      <item path="../../source/file/cConfig.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="../../source/files/cConfig.h" ex="false" tool="3" flavor2="0">
+      <item path="../../source/file/cConfig.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/file/cSave.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/file/cSave.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/game/boss/0101_cCrossfieldBoss.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/game/boss/0102_cTorusBoss.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/game/boss/0103_cVausBoss.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/game/boss/cBoss.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/game/boss/cBoss.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../source/game/cBullet.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -960,41 +1809,138 @@
       </item>
       <item path="../../source/game/cWeapon.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../../source/main.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../source/main.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cForeground.cpp"
+      <item path="../../source/game/mission/01_cViridoMission.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../../source/visuals/cForeground.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cOutline.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cOutline.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cPostProcessing.cpp"
+      <item path="../../source/game/mission/cMission.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../../source/visuals/cPostProcessing.h"
+      <item path="../../source/game/mission/cMission.h"
             ex="false"
             tool="3"
             flavor2="0">
       </item>
-      <item path="../../source/visuals/cShadow.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cShadow.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/visuals/cSpecialEffects.cpp"
+      <item path="../../source/interface/cCombatStats.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../../source/visuals/cSpecialEffects.h"
+      <item path="../../source/interface/cCombatStats.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cCombatText.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cCombatText.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cInterface.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cInterface.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cMsgBox.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/interface/cMsgBox.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/interface/cTooltip.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/cTooltip.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/01_cIntroMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/02_cMainMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/03_cGameMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/04_cConfigMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/cMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/interface/menu/cMenu.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/main.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cDistortion.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visual/cDistortion.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cForeground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visual/cForeground.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cGlow.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visual/cGlow.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cOutline.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visual/cOutline.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cPostProcessing.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visual/cPostProcessing.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../source/visual/cShadow.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visual/cShadow.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cSpecialEffects.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/visual/cSpecialEffects.h"
             ex="false"
             tool="3"
             flavor2="0">

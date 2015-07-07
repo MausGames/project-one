@@ -9,7 +9,8 @@
 
 
 // constant values
-const vec3 c_v3Blue = vec3(0.0, 0.43, 0.69);   // default surface color
+const vec3 c_v3Blue     = vec3(0.0, 0.43, 0.69);                           // default surface color
+const vec3 c_v3LightDir = vec3(-0.583953857, -0.642349243, 0.496360779);   // overridden light direction
 
 // shader input
 varying float v_v1Smooth;   // height offset for smooth shores
@@ -20,14 +21,14 @@ void FragmentMain()
     vec2 v2ScreenCoord = gl_FragCoord.xy * u_v4Resolution.zw;
 
     // lookup normal map (multiple times) and depth map
-    vec3  v3BumpNormal1 = normalize(coreTexture2D(0, v_av2TexCoord[0].st).xyz * 2.0 - 1.0);
-    vec3  v3BumpNormal2 = normalize(coreTexture2D(0, v_av2TexCoord[1].st).xyz * 2.0 - 1.0);
-    vec3  v3BumpNormal3 = normalize(coreTexture2D(0, v_av2TexCoord[2].st).xyz * 2.0 - 1.0);
+    vec3  v3BumpNormal1 = coreTexture2D(0, v_av2TexCoord[0].st).xyz;
+    vec3  v3BumpNormal2 = coreTexture2D(0, v_av2TexCoord[1].st).xyz;
     float v1Depth       = coreTexture2D(3, v2ScreenCoord).r;
 
     // calculate dot-3 bump factor
-    vec3  v3MathLightDir = normalize(v_av4LightDir[0].xyz);
-    vec3  v3BumpNormal   = normalize(v3BumpNormal1 + v3BumpNormal2 + v3BumpNormal3);
+    vec3  v3MathLightDir = c_v3LightDir;
+    vec3  v3BumpNormal   = (v3BumpNormal1 + v3BumpNormal2) * 2.0 - 2.0;
+          v3BumpNormal   = normalize(vec3(v3BumpNormal.xy, v3BumpNormal.z / 2.0));
     float v1BumpFactor   = dot(v3MathLightDir, v3BumpNormal);
 
     // set distortion vector and lookup reflection texture
@@ -38,7 +39,7 @@ void FragmentMain()
     vec3  v3MathViewDir = normalize(v_v3ViewDir);
     vec3  v3ReflNormal  = normalize((2.0 * v1BumpFactor * v3BumpNormal) - v3MathLightDir);
     float v1ReflFactor  = max(0.0, dot(v3MathViewDir, v3ReflNormal));
-          v1ReflFactor  = 0.72 * pow(v1ReflFactor, 62.0);
+          v1ReflFactor  = 0.6 * pow(v1ReflFactor, 70.0);
 
     // adjust depth value
     v1Depth = smoothstep(0.64, 0.735, v1Depth) * 0.8 * (1.0 + v1ReflFactor) + v_v1Smooth;
@@ -48,8 +49,8 @@ void FragmentMain()
     vec3 v3BelowRefraction = coreTexture2D(2, v2ScreenCoord + v2Distortion * v1Depth).rgb;
 
     // adjust reflection value
-    v3AboveReflection = 0.84 * (0.51 * c_v3Blue + 0.59 * v3AboveReflection + vec3(v1ReflFactor));
+    v3AboveReflection = mix(c_v3Blue, v3AboveReflection, max(0.0, dot(v3BumpNormal, v3MathViewDir)-0.3)) + vec3(v1ReflFactor);
 
     // draw final color
-    gl_FragColor = vec4(mix(v3BelowRefraction, v3AboveReflection, v1Depth) * (0.9 + 0.12 * v1BumpFactor), 1.0);
+    gl_FragColor = vec4(mix(v3BelowRefraction, v3AboveReflection, v1Depth) * (0.85 + 0.2*v1BumpFactor), 1.0);
 }

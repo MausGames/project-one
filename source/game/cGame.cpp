@@ -22,13 +22,13 @@ cGame::cGame(const coreBool& bCoop)noexcept
 {
     // configure first player
     m_aPlayer[0].Configure  (PLAYER_SHIP_ATK, coreVector3(0.0f/360.0f, 68.0f/100.0f, 90.0f/100.0f).HSVtoRGB(), g_CurConfig.Input.aiType[0]);
-    m_aPlayer[0].EquipWeapon(0u, cRayWeapon::ID);
+    m_aPlayer[0].EquipWeapon(0u, REF_ID(cRayWeapon::ID));
 
     if(m_bCoop)
     {
         // configure second player
         m_aPlayer[1].Configure  (PLAYER_SHIP_DEF, coreVector3(201.0f/360.0f, 74.0f/100.0f, 85.0f/100.0f).HSVtoRGB(), g_CurConfig.Input.aiType[1]);
-        m_aPlayer[1].EquipWeapon(0u, cPulseWeapon::ID);
+        m_aPlayer[1].EquipWeapon(0u, REF_ID(cPulseWeapon::ID));
         STATIC_ASSERT(GAME_PLAYERS == 2u)
     }
 
@@ -49,6 +49,7 @@ cGame::~cGame()
     m_BulletManagerEnemy .ClearBullets(false);
 
     // delete last mission
+    this->__ClearEnemies();
     SAFE_DELETE(m_pMission)
 
     // remove all remaining enemies
@@ -154,13 +155,8 @@ void cGame::Move()
             m_aPlayer[i].Move();
 
         // move all active enemies
-        for(coreUintW i = 0u, ie = m_apEnemyList.size(); i < ie; ++i)
-        {
-            m_apEnemyList[i]->Move();
-
-            // handle self-removing
-            if(ie > m_apEnemyList.size()) {--i; --ie;}
-        }
+        this->ForEachEnemy([](cEnemy* OUTPUT pEnemy)
+            {pEnemy->Move();});
     }
     m_pMission->MoveAfter();
 
@@ -184,6 +180,7 @@ void cGame::LoadMission(const coreInt32& iID)
     if(m_pMission) if(m_pMission->GetID() == iID) return;
 
     // delete possible old mission
+    this->__ClearEnemies();
     SAFE_DELETE(m_pMission)
 
     // create new mission
@@ -243,7 +240,7 @@ void cGame::RestartMission()
     ASSERT(iID != cNoMission::ID)
 
     // delete mission and create it again
-    this->LoadMission(cNoMission::ID);
+    this->LoadMission(REF_ID(cNoMission::ID));
     this->LoadMission(iID);
 }
 

@@ -14,10 +14,10 @@ void FragmentMain()
 
 #if defined(_P1_DISTORTION_)
 
-    // 
+    // lookup distortion map
     vec2 v2Distortion = coreTexture2D(3, v_av2TexCoord[0]).rg;   // # low-res
     
-    // 
+    // move texture coordinates
     if(any(bvec4(lessThan(v2Distortion, vec2(127.0/255.0)), greaterThan(v2Distortion, vec2(128.0/255.0)))))
         v2TexCoord += (v2Distortion * 2.0 - 1.0) * vec2(-0.5,0.5);
 
