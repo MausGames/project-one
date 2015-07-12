@@ -116,7 +116,7 @@ cBulletManager::~cBulletManager()
         g_pGlow->UnbindList(pBulletActive);
 
         // 
-        if(CONTAINS_BIT((*it)->iStatus, 0u)) cShadow::UnbindGlobalList(pBulletActive);
+        if(CONTAINS_BIT((*it)->iStatus, 0u)) cShadow::GetGlobalContainer()->UnbindList(pBulletActive);
 
         // delete bullet set
         SAFE_DELETE(*it)

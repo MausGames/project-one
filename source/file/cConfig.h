@@ -26,6 +26,8 @@
 #define CONFIG_GRAPHICS_GLOW       "Graphics", "Glow",                                (1)
 #define CONFIG_GRAPHICS_DISTORTION "Graphics", "Distortion",                          (1)
 
+#define CONFIG_AUDIO_AMBIENT       "Audio",    "Ambient",                             (1)
+
 #define CONFIG_INPUT_TYPE(p)       "Input",    PRINT("P%u_Type",      (p)),           (p)
 #define CONFIG_INPUT_MOVE_LEFT(s)  "Input",    PRINT("S%u_MoveLeft",  (s)),           (CORE_INPUT_KEY(A))
 #define CONFIG_INPUT_MOVE_RIGHT(s) "Input",    PRINT("S%u_MoveRight", (s)),           (CORE_INPUT_KEY(D))
@@ -70,6 +72,12 @@ struct cConfig
         coreUint8 iDistortion;   // fullscreen distortion level
     }
     Graphics;
+
+    struct
+    {
+        coreUint8 iAmbient;   // 
+    }
+    Audio;
 
     struct
     {

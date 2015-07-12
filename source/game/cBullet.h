@@ -407,7 +407,7 @@ template <typename T> cBulletManager::sBulletSet<T>::sBulletSet(const coreUintW 
     if(T::ConfigShadow())
     {
         ADD_BIT(iStatus, 0u)
-        cShadow::BindGlobalList(&oBulletActive);
+        cShadow::GetGlobalContainer()->BindList(&oBulletActive);
     }
 
     // set bullet pool to initial size

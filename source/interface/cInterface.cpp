@@ -125,10 +125,10 @@ cInterface::cInterface(const coreUint8& iNumViews)noexcept
     m_aBannerText[0].Construct(MENU_FONT_BIG_7,    MENU_OUTLINE_SMALL, 0u);
     m_aBannerText[1].Construct(MENU_FONT_BIG_7,    MENU_OUTLINE_SMALL, 0u);
     m_aBannerText[2].Construct(MENU_FONT_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
-    m_aBannerText[0].SetColor3(coreVector3(0.75f,0.75f,0.75f) * MENU_CONTRAST_WHITE);
-    m_aBannerText[1].SetColor3(coreVector3(0.75f,0.75f,0.75f) * MENU_CONTRAST_WHITE);
-    m_aBannerText[2].SetColor3(coreVector3(0.75f,0.75f,0.75f) * MENU_CONTRAST_WHITE);
-    m_aBannerText[3].SetColor3(coreVector3(1.00f,1.00f,1.00f) * MENU_CONTRAST_WHITE);
+    m_aBannerText[0].SetColor3(COLOR_MENU_WHITE * 0.75f);
+    m_aBannerText[1].SetColor3(COLOR_MENU_WHITE * 0.75f);
+    m_aBannerText[2].SetColor3(COLOR_MENU_WHITE * 0.75f);
+    m_aBannerText[3].SetColor3(COLOR_MENU_WHITE);
 
     // 
     this->UpdateLayout();

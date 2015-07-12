@@ -54,6 +54,9 @@ public:
     template <typename... A> void ShowText(const coreFloat& fWidth, const void* pRef, const coreChar* pcFormat, A&&... vArgs);
     void                          ShowText(const coreFloat& fWidth, const coreChar* pcText);
 
+    // 
+    inline void Reset() {m_pLastRef = NULL;}
+
 
 private:
     // 

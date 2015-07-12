@@ -91,6 +91,9 @@ void LoadConfig()
     g_OldConfig.Graphics.iGlow       = Core::Config->GetInt(CONFIG_GRAPHICS_GLOW);
     g_OldConfig.Graphics.iDistortion = Core::Config->GetInt(CONFIG_GRAPHICS_DISTORTION);
 
+    // read audio values
+    g_OldConfig.Audio.iAmbient       = Core::Config->GetInt(CONFIG_AUDIO_AMBIENT);
+
     // read input values
     for(coreUintW i = 0u; i < INPUT_TYPES; ++i)
     {
@@ -134,6 +137,9 @@ void SaveConfig()
     Core::Config->SetInt(CONFIG_GRAPHICS_REFLECTION, g_OldConfig.Graphics.iReflection);
     Core::Config->SetInt(CONFIG_GRAPHICS_GLOW,       g_OldConfig.Graphics.iGlow);
     Core::Config->SetInt(CONFIG_GRAPHICS_DISTORTION, g_OldConfig.Graphics.iDistortion);
+
+    // write audio values
+    Core::Config->SetInt(CONFIG_AUDIO_AMBIENT,       g_OldConfig.Audio.iAmbient);
 
     // write input values
     for(coreUintW i = 0u; i < INPUT_TYPES; ++i)

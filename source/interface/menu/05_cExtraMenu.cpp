@@ -20,18 +20,18 @@ cExtraMenu::cExtraMenu()noexcept
     m_Background.SetPosition  (coreVector2(0.0f,0.05f));
     m_Background.SetSize      (coreVector2(0.8f,0.6f));
 
-    m_CancelButton.Construct    (MENU_BUTTON, MENU_FONT_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
-    m_CancelButton.DefineProgram("menu_border_program");
-    m_CancelButton.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.5f,-0.5f) + coreVector2(0.0f,-0.02f));
-    m_CancelButton.SetSize      (coreVector2(0.3f,0.07f));
-    m_CancelButton.SetAlignment (coreVector2(-1.0f,-1.0f));
-    m_CancelButton.GetCaption()->SetTextLanguage("CANCEL");
+    m_BackButton.Construct    (MENU_BUTTON, MENU_ICON_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
+    m_BackButton.DefineProgram("menu_border_program");
+    m_BackButton.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.5f,-0.5f) + coreVector2(0.0f,-0.02f));
+    m_BackButton.SetSize      (coreVector2( 0.07f, 0.07f)); // * m_SaveButton.GetSize().y);
+    m_BackButton.SetAlignment (coreVector2(-1.0f, -1.0f));
+    m_BackButton.GetCaption()->SetText(ICON_SHARE);
 
     // bind menu objects
     for(coreUintW i = 0u; i < this->GetNumSurfaces(); ++i)
     {
         this->BindObject(i, &m_Background);
-        this->BindObject(i, &m_CancelButton);
+        this->BindObject(i, &m_BackButton);
     }
 }
 
@@ -59,11 +59,11 @@ void cExtraMenu::Move()
     }
 
     // 
-    cMenu::UpdateButton(&m_CancelButton, m_CancelButton.IsFocused());
+    cMenu::UpdateButton(&m_BackButton, m_BackButton.IsFocused());
 
     if(this->GetAlpha() >= 1.0f)
     {
-        if(m_CancelButton.IsClicked())
+        if(m_BackButton.IsClicked())
         {
             // 
             m_iStatus = 1;

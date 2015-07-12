@@ -25,7 +25,6 @@ cGame*           g_pGame               = NULL;
 
 static coreUint64 m_iOldPerfTime = 0u;      // last measured high-precision time value
 static coreBool   m_bHardLock    = false;   // 
-static void InitFramerate();                // 
 static void LockFramerate();                // lock framerate and override elapsed time
 static void DebugGame();                    // debug and test game separately
 
@@ -34,11 +33,6 @@ static void DebugGame();                    // debug and test game separately
 // init the application
 void CoreApp::Init()
 {
-    // calculate biggest possible 1:1 resolution
-    const coreFloat fMinRes = Core::System->GetResolution().Min();
-    g_vGameResolution = coreVector2(fMinRes, fMinRes);
-    g_vMenuCenter     = g_vGameResolution / Core::System->GetResolution();
-
     // set camera to default values
     Core::Graphics->SetCamera(CAMERA_POSITION, CAMERA_DIRECTION, CAMERA_ORIENTATION);
 
@@ -47,6 +41,7 @@ void CoreApp::Init()
                              coreVector3(0.0f,0.0f,-1.0f), coreVector3(0.0f,1.0f,0.0f));
 
     // 
+    InitResolution(Core::System->GetResolution());
     InitFramerate();
 
     // load configuration
@@ -197,7 +192,17 @@ void CoreApp::Move()
 
 // ****************************************************************
 // 
-static void InitFramerate()
+void InitResolution(const coreVector2& vResolution)
+{
+    // calculate biggest possible 1:1 resolution
+    g_vGameResolution = coreVector2(1.0f,1.0f) * vResolution.Min();
+    g_vMenuCenter     = g_vGameResolution / vResolution;
+}
+
+
+// ****************************************************************
+// 
+void InitFramerate()
 {
     SDL_Window* pWindow = Core::System->GetWindow();
 
@@ -383,7 +388,7 @@ static void DebugGame()
 
     D = E;
 
-    const char* pcTest = SDL_GetDisplayName(0);
+    const coreChar* pcTest = SDL_GetDisplayName(0);
     pcTest = pcTest;
 
     coreVector3 vA = coreVector3::Rand();
@@ -402,6 +407,9 @@ static void DebugGame()
 
     v1 = v2;
 
+    coreSet<const coreChar*> apcList;
+
+    apcList.insert(pcTest);
 
     //g_pEnvironment->Activate();
     //g_pPostProcessing->SetSideOpacity(1.0f);

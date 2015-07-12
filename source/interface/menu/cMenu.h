@@ -13,6 +13,8 @@
 // TODO: language and main menu control with keyboard+joystick, cursor gets invisible on these inputs, in game menu only cursor
 // TODO: short YES-no questions: Exit Game ? Return to Menu ?
 // TODO: menue-riss bei start oder seitlicher fade-out, ausserdem bei start im main-menue animation und explosion des logos oder riss in mitte
+// TODO: move mouse to buttons on joystick-input
+// TODO: real-time sound-configuration
 
 
 // ****************************************************************
@@ -83,6 +85,7 @@
 #define ICON_TIMES      "\xEF\x80\x8D"
 #define ICON_CARET_UP   "\xEF\x83\x98"
 #define ICON_CHEVRON_UP "\xEF\x81\xB7"
+#define ICON_SHARE      "\xEF\x81\xA4"
 
 
 // ****************************************************************
@@ -171,19 +174,19 @@ public:
 class cConfigMenu final : public coreMenu
 {
 private:
-    coreObject2D m_Background;   // 
+    coreObject2D m_Background;                // 
 
-    coreButton m_VideoTab;       // 
-    coreButton m_AudioTab;       // 
-    coreButton m_InputTab;       // 
-    coreButton m_GameTab;        // 
+    coreButton m_VideoTab;                    // 
+    coreButton m_AudioTab;                    // 
+    coreButton m_InputTab;                    // 
+    coreButton m_GameTab;                     // 
 
-    coreButton m_SaveButton;     // save button
-    coreButton m_CancelButton;   // cancel button
+    coreButton m_SaveButton;                  // save button
+    coreButton m_DiscardButton;               // discard button
+    coreButton m_BackButton;                  // back button
 
-
-    coreLabel    m_aLabel[MENU_CONFIG_MAX];   
-    coreObject2D m_aLine [MENU_CONFIG_MAX];   
+    coreLabel    m_aLabel[MENU_CONFIG_MAX];   // 
+    coreObject2D m_aLine [MENU_CONFIG_MAX];   // 
 
     coreSwitchBoxU8 m_Resolution;
     coreSwitchBoxU8 m_DisplayMode;
@@ -195,7 +198,7 @@ private:
     coreSwitchBoxU8 m_OverallVolume;
     coreSwitchBoxU8 m_MusicVolume;
     coreSwitchBoxU8 m_EffectVolume;
-    coreCheckBox    m_AmbientSound;
+    coreSwitchBoxU8 m_AmbientSound;
 
     coreSwitchBoxU8 m_Language;
 
@@ -207,6 +210,17 @@ public:
 
     // move the config menu
     void Move()override;
+
+    // 
+    void CheckValues();
+    void LoadValues ();
+    void SaveValues ();
+
+
+private:
+    // 
+    void __UpdateShadowQuality();
+    void __UpdateLanguage     ();
 };
 
 
@@ -217,7 +231,7 @@ class cExtraMenu final : public coreMenu
 private:
     coreObject2D m_Background;   // 
 
-    coreButton m_CancelButton;   // cancel button
+    coreButton m_BackButton;     // back button
 
 
 public:
@@ -265,7 +279,6 @@ public:
     static void UpdateButton(coreButton* OUTPUT pButton, const coreBool& bFocused, const coreVector3& vFocusColor);
     static void UpdateButton(coreButton* OUTPUT pButton, const coreBool& bFocused);
     static void UpdateSwitchBox(coreSwitchBoxU8* OUTPUT pSwitchBox);
-    static void UpdateCheckBox (coreCheckBox*    OUTPUT pCheckBox);
     static coreVector3 FUNC_CONST HealthColor(const coreFloat& fValue);
     static coreVector3 FUNC_CONST ChainColor (const coreFloat& fValue);
 };

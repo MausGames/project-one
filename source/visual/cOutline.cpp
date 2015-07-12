@@ -36,11 +36,11 @@ void cOutline::Apply()
     //glDepthMask(false);
     {
         // draw single objects
-        FOR_EACH(it, m_apObject)
+        FOR_EACH(it, this->GetObjectSet())
             (*it)->Render(s_pProgramSingle);
 
         // draw lists with objects
-        FOR_EACH(it, m_apList)
+        FOR_EACH(it, this->GetListSet())
             (*it)->Render(s_pProgramInstanced, s_pProgramSingle);
     }
     //glDepthMask(true);

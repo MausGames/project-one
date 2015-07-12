@@ -34,6 +34,7 @@ cMsgBox::cMsgBox()noexcept
     // 
     m_Msg.Construct  (MENU_FONT_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
     m_Msg.SetPosition(m_Box.GetPosition() + coreVector2(0.0f,0.045f));
+    m_Msg.SetColor3  (COLOR_MENU_WHITE);
 
     // 
     m_Yes.Construct    (MENU_BUTTON, MENU_ICON_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);

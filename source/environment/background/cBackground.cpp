@@ -210,8 +210,6 @@ void cBackground::AddObject(coreObject3D* pObject, const coreVector3& vRelativeP
 {
     ASSERT(pObject)
 
-    // TODO # object gets shadow-shader (also below) 
-
     // 
     pObject->SetPosition(vRelativePos + coreVector3(g_pEnvironment->GetCameraPos().xy(), 0.0f));
     m_apAddObject.push_back(pObject);

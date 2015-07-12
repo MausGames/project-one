@@ -4,6 +4,9 @@ $EXIT_GAME = Exit Game
 $CREDITS = Credits
 $SETTINGS = Settings
 $EXTRAS = Extras
+
+$SAVE = Save
+$DISCARD = Discard
 $BACK = Back
 
 $CONFIG_VIDEO = Video
@@ -24,6 +27,7 @@ $CONFIG_AUDIO_AMBIENTSOUND = Ambient Sound
 $CONFIG_GAME_LANGUAGE = Language
 
 $VALUE_OFF = Off
+$VALUE_ON = On
 $VALUE_LOW = Low
 $VALUE_HIGH = High
 $DISPLAY_DESKTOP = Desktop
@@ -31,6 +35,7 @@ $DISPLAY_WINDOW = Window
 $DISPLAY_FULLSCREEN = Fullscreen
 
 $QUESTION_EXIT_GAME = Exit Game ?
+$QUESTION_SAVE = Save changes ?
 $OK_1 = Nice!
 $OK_2 = All right
 $OK_3 = Fine

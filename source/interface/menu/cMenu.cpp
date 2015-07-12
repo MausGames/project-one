@@ -12,7 +12,7 @@
 // ****************************************************************
 // constructor
 cMenu::cMenu()noexcept
-: coreMenu (6u, SURFACE_CONFIG) // # SURFACE_INTRO 
+: coreMenu (6u, SURFACE_INTRO)
 {
     // create intro and main menu
     m_pIntroMenu = new cIntroMenu();
@@ -125,6 +125,10 @@ void cMenu::Move()
             {
                 // switch to config menu
                 this->ChangeSurface(SURFACE_CONFIG, 3.0f);
+
+                // 
+                m_ConfigMenu.ChangeSurface(SURFACE_CONFIG_VIDEO, 0.0f);
+                m_ConfigMenu.LoadValues();
             }
             else if(m_GameMenu.GetStatus() == 3)
             {
@@ -193,18 +197,21 @@ void cMenu::UpdateButton(coreButton* OUTPUT pButton, const coreBool& bFocused, c
     ASSERT(pButton)
 
     // select visible strength
-    const coreFloat   fLight = bFocused ? MENU_LIGHT_ACTIVE                                     : MENU_LIGHT_IDLE;
-    const coreVector3 vColor = bFocused ? LERP(coreVector3(1.0f,1.0f,1.0f), vFocusColor, 0.75f) : coreVector3(1.0f,1.0f,1.0f);
+    const coreFloat   fLight = bFocused ? MENU_LIGHT_ACTIVE : MENU_LIGHT_IDLE;
+    const coreVector3 vColor = bFocused ? vFocusColor       : COLOR_MENU_WHITE;
 
     // set button and caption color
-    pButton              ->SetColor3(vColor * (fLight));
-    pButton->GetCaption()->SetColor3(vColor * (fLight * MENU_CONTRAST_WHITE));
+    pButton              ->SetColor3(vColor * (fLight / MENU_CONTRAST_WHITE));
+    pButton->GetCaption()->SetColor3(vColor * (fLight));
+
+    // 
+    if(pButton->GetOverride() < 0) pButton->SetAlpha(pButton->GetAlpha() * 0.5f);
 }
 
 void cMenu::UpdateButton(coreButton* OUTPUT pButton, const coreBool& bFocused)
 {
     // 
-    cMenu::UpdateButton(pButton, bFocused, coreVector3(1.0f,1.0f,1.0f));
+    cMenu::UpdateButton(pButton, bFocused, COLOR_MENU_WHITE);
 }
 
 
@@ -212,21 +219,24 @@ void cMenu::UpdateButton(coreButton* OUTPUT pButton, const coreBool& bFocused)
 // 
 void cMenu::UpdateSwitchBox(coreSwitchBoxU8* OUTPUT pSwitchBox)
 {
-    coreButton* pArrow1 = pSwitchBox->GetArrow(0u);
-    coreButton* pArrow2 = pSwitchBox->GetArrow(1u);
+    ASSERT(pSwitchBox)
+
+    auto UpdateArrowFunc = [&](coreButton* OUTPUT pArrow, const coreUintW& iEntries)
+    {
+        const coreBool bEnd = (pSwitchBox->GetCurIndex() == iEntries);
+
+        // 
+        const coreFloat fAlpha = bEnd ? 0.25f           : (pArrow->IsFocused() ? 1.0f              : 0.75f);
+        const coreFloat fLight = bEnd ? MENU_LIGHT_IDLE : (pArrow->IsFocused() ? MENU_LIGHT_ACTIVE : MENU_LIGHT_IDLE);
+
+        // 
+        pArrow              ->SetAlpha (pSwitchBox->GetAlpha() * fAlpha);
+        pArrow->GetCaption()->SetColor3(COLOR_MENU_WHITE       * fLight);
+    };
 
     // 
-    pArrow1->SetAlpha(pSwitchBox->GetAlpha() * ((pSwitchBox->GetCurIndex() == 0u)                             ? 0.25f : (pArrow1->IsFocused() ? 1.0f : 0.5f)));
-    pArrow2->SetAlpha(pSwitchBox->GetAlpha() * ((pSwitchBox->GetCurIndex() == pSwitchBox->GetNumEntries()-1u) ? 0.25f : (pArrow2->IsFocused() ? 1.0f : 0.5f)));
-}
-
-
-// ****************************************************************
-// 
-void cMenu::UpdateCheckBox(coreCheckBox* OUTPUT pCheckBox)
-{
-    // 
-    pCheckBox->SetAlpha(pCheckBox->GetAlpha() * (pCheckBox->IsFocused() ? 1.0f : 0.5f));
+    UpdateArrowFunc(pSwitchBox->GetArrow(0u), 0u);
+    UpdateArrowFunc(pSwitchBox->GetArrow(1u), pSwitchBox->GetNumEntries() - 1u);
 }
 
 

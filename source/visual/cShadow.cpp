@@ -8,6 +8,7 @@
 //////////////////////////////////////////////////////
 #include "main.h"
 
+cBindContainer cShadow::s_GlobalContainer;          // = NULL;
 coreProgramPtr cShadow::s_pProgramSingle               = NULL;
 coreProgramPtr cShadow::s_pProgramInstanced            = NULL;
 coreProgramPtr cShadow::s_apHandle[SHADOW_HANDLES]; // = NULL;
@@ -38,12 +39,12 @@ void cShadow::Update()
         glEnable(GL_POLYGON_OFFSET_FILL);
         {
             // render all lists with shadow-casting objects
-            cShadow::__RenderInstanced(s_amDrawShadowMatrix[0], m_apList);
-            cShadow::__RenderInstanced(s_amDrawShadowMatrix[1], s_apGlobalList);
+            cShadow::__RenderInstanced(s_amDrawShadowMatrix[0], this->GetListSet());
+            cShadow::__RenderInstanced(s_amDrawShadowMatrix[1], s_GlobalContainer.GetListSet());
 
             // render all single shadow-casting objects
-            cShadow::__RenderSingle(s_amDrawShadowMatrix[0], m_apList,       m_apObject);
-            cShadow::__RenderSingle(s_amDrawShadowMatrix[1], s_apGlobalList, s_apGlobalObject);
+            cShadow::__RenderSingle(s_amDrawShadowMatrix[0], this->GetListSet(),             this->GetObjectSet());
+            cShadow::__RenderSingle(s_amDrawShadowMatrix[1], s_GlobalContainer.GetListSet(), s_GlobalContainer.GetObjectSet());
         }
         glDisable(GL_POLYGON_OFFSET_FILL);
     }
@@ -100,9 +101,6 @@ void cShadow::GlobalInit()
 // exit the shadow map class
 void cShadow::GlobalExit()
 {
-    // remove all global objects and lists
-    cGlobalBindContainer::_GlobalExit();
-
     // unload all shader-programs
     s_pProgramSingle    = NULL;
     s_pProgramInstanced = NULL;

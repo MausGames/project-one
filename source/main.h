@@ -62,6 +62,7 @@
 #define LIGHT_DIRECTION     (coreVector3(0.583953857f, -0.642349243f, -0.496360779f))
 
 // color values
+#define COLOR_MENU_WHITE    (coreVector3(1.000f, 1.000f, 1.000f) * MENU_CONTRAST_WHITE)
 #define COLOR_MENU_YELLOW   (coreVector3(1.000f, 0.824f, 0.392f))
 #define COLOR_MENU_ORANGE   (coreVector3(1.000f, 0.443f, 0.227f))
 #define COLOR_MENU_RED      (coreVector3(1.000f, 0.275f, 0.275f))
@@ -126,6 +127,9 @@ inline FUNC_CONST coreFloat AngleDiff(const coreFloat& x, const coreFloat& y)
     while(A >  PI) A -= 2.0f*PI;
     return A;
 }
+
+extern void InitResolution(const coreVector2& vResolution);   // 
+extern void InitFramerate();                                  // 
 
 
 // ****************************************************************

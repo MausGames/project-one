@@ -10,6 +10,8 @@
 #ifndef _P1_GUARD_GAME_H_
 #define _P1_GUARD_GAME_H_
 
+// TODO: enemy bullet cleanup on mission unload
+
 
 // ****************************************************************
 // game definitions
@@ -37,7 +39,7 @@ class cGame final
 {
 private:
     cPlayer m_aPlayer[GAME_PLAYERS];         // player objects
-    std::vector<cEnemy*> m_apEnemyList;      // list with pointers to active enemy objects
+    coreSet<cEnemy*> m_apEnemyList;          // list with pointers to active enemy objects
 
     cBulletManager m_BulletManagerPlayer;    // low-priority bullet manager
     cBulletManager m_BulletManagerEnemy;     // high-priority bullet manager
@@ -102,8 +104,8 @@ private:
     void     __HandleCollisions();
 
     // manage enemies
-    inline void __BindEnemy   (cEnemy* pEnemy) {ASSERT(!CONTAINS(m_apEnemyList, pEnemy)) m_apEnemyList.push_back(pEnemy);}
-    inline void __UnbindEnemy (cEnemy* pEnemy) {FOR_EACH(it, m_apEnemyList) {if((*it) == pEnemy) {m_apEnemyList.erase(it); return;}} ASSERT(false)}
+    inline void __BindEnemy   (cEnemy* pEnemy) {ASSERT(!m_apEnemyList.count(pEnemy)) m_apEnemyList.insert(pEnemy);}
+    inline void __UnbindEnemy (cEnemy* pEnemy) {ASSERT( m_apEnemyList.count(pEnemy)) m_apEnemyList.erase (pEnemy);}
     inline void __ClearEnemies()               {this->ForEachEnemy([](cEnemy* OUTPUT pEnemy) {pEnemy->Kill(false);});}
 };
 

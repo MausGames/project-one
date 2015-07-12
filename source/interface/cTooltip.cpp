@@ -30,7 +30,7 @@ cTooltip::cTooltip()noexcept
     {
         m_aLine[i].Construct   (MENU_FONT_SMALL, TOOLTIP_OUTLINE_SIZE, 0u);
         m_aLine[i].SetAlignment(coreVector2(1.0f,-1.0f));
-        m_aLine[i].SetColor3   (coreVector3(1.0f,1.0f,1.0f) * MENU_CONTRAST_WHITE);
+        m_aLine[i].SetColor3   (COLOR_MENU_WHITE);
     }
 }
 
@@ -42,12 +42,12 @@ void cTooltip::Render()
     if(!m_bDisplay) return;
     m_bDisplay = false;
 
-    // 
-    coreObject2D::Render();
+    //// 
+    //coreObject2D::Render();
 
-    // 
-    for(coreUintW i = 0u; i < m_iNumLines; ++i)
-        m_aLine[i].Render();
+    //// 
+    //for(coreUintW i = 0u; i < m_iNumLines; ++i)
+    //    m_aLine[i].Render();
 }
 
 
@@ -91,8 +91,8 @@ void cTooltip::ShowText(const coreFloat& fWidth, const coreChar* pcText)
 void cTooltip::__ShowText(const coreFloat& fWidth, const coreChar* pcText)
 {
     const coreFontPtr& pFont   = m_aLine[0].GetFont();
-    const coreUint8&   iHeight = m_aLine[0].GetHeight();
-    const coreFloat    fFactor = RCP(Core::System->GetResolution().y) / CORE_LABEL_DETAIL;
+    const coreUint8    iHeight = CORE_LABEL_HEIGHT_RELATIVE(m_aLine[0].GetHeight());
+    const coreFloat    fFactor = CORE_LABEL_SIZE_FACTOR;
 
     // 
     coreChar* pcCursor    = c_cast<coreChar*>(pcText);
@@ -141,7 +141,7 @@ void cTooltip::__ShowText(const coreFloat& fWidth, const coreChar* pcText)
         {
             // 
             coreInt32 iAdvance;
-            pFont->RetrieveGlyphMetrics(coreUint16(*pcCursor), iHeight, TOOLTIP_OUTLINE_SIZE, NULL, NULL, NULL, NULL, &iAdvance);
+            const coreUint8 iBytes   = pFont->RetrieveGlyphMetrics(pcCursor, iHeight, TOOLTIP_OUTLINE_SIZE, NULL, NULL, NULL, NULL, &iAdvance);
             const coreFloat fAdvance = I_TO_F(iAdvance) * fFactor;
 
             // 
@@ -151,6 +151,9 @@ void cTooltip::__ShowText(const coreFloat& fWidth, const coreChar* pcText)
                 fLineWidth = fCurWidth;
                 fSkip      = fCurWidth + fAdvance;   // with whitespace
             }
+
+            //
+            pcCursor += iBytes - 1u;
 
             // 
             fCurWidth += fAdvance;

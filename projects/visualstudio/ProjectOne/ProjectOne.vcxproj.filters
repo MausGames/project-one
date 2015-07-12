@@ -30,9 +30,6 @@
     <ClCompile Include="..\..\..\source\game\cShip.cpp">
       <Filter>game</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\additional\cBindContainer.cpp">
-      <Filter>additional</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\source\game\boss\0101_cCrossfieldBoss.cpp">
       <Filter>game\boss</Filter>
     </ClCompile>

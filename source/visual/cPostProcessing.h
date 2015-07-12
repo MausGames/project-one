@@ -24,7 +24,7 @@
 
 // ****************************************************************
 // post-processing class
-class cPostProcessing final : public coreObject2D
+class cPostProcessing final : public coreObject2D, public coreResourceRelation
 {
 private:
     coreProgramPtr m_pProgramSimple;      // 
@@ -47,6 +47,11 @@ public:
 
     // set side-object opacity
     void SetSideOpacity(const coreFloat& fValue);
+
+
+private:
+    // reset with the resource manager
+    void __Reset(const coreResourceReset& bInit)override;
 };
 
 

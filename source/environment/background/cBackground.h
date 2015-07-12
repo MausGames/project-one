@@ -14,6 +14,8 @@
 // TODO: merge stone diff and norm textures (own shader ?)
 // TODO: clouds on grass background need no heap allocation! (beware of _FillInfinite and destructor delete)
 // TODO: cleanup-function for background batch-lists ?
+// TODO: added object gets shadow-shader 
+
 
 // ****************************************************************
 // background definitions

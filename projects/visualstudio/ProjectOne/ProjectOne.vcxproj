@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\source\additional\cBindContainer.cpp" />
     <ClCompile Include="..\..\..\source\application.cpp" />
     <ClCompile Include="..\..\..\source\environment\background\01_cGrassBackground.cpp" />
     <ClCompile Include="..\..\..\source\environment\background\02_cSeaBackground.cpp" />

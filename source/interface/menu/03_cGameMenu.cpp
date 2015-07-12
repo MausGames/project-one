@@ -78,13 +78,13 @@ cGameMenu::cGameMenu()noexcept
     m_StartButton.Construct    (MENU_BUTTON, MENU_FONT_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
     m_StartButton.DefineProgram("menu_border_program");
     m_StartButton.SetPosition  (coreVector2(0.0f,-0.28f));
-    m_StartButton.SetSize      (coreVector2(0.3f,0.07f));
+    m_StartButton.SetSize      (coreVector2(0.3f,0.07f) * 1.1f);
     m_StartButton.GetCaption()->SetTextLanguage("START_GAME");
 
     m_ConfigButton.Construct    (MENU_BUTTON, MENU_FONT_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
     m_ConfigButton.DefineProgram("menu_border_program");
     m_ConfigButton.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,-0.5f) + coreVector2(0.0f,-0.02f));
-    m_ConfigButton.SetSize      (m_StartButton.GetSize());
+    m_ConfigButton.SetSize      (coreVector2(0.3f,0.07f));
     m_ConfigButton.SetAlignment (coreVector2(1.0f,-1.0f));
     m_ConfigButton.GetCaption()->SetTextLanguage("SETTINGS");
 
@@ -98,7 +98,7 @@ cGameMenu::cGameMenu()noexcept
     m_ExitButton.Construct    (MENU_BUTTON, MENU_ICON_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
     m_ExitButton.DefineProgram("menu_border_program");
     m_ExitButton.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.5f,-0.5f) + coreVector2(0.0f,-0.02f));
-    m_ExitButton.SetSize      (coreVector2( 1.0f, 1.0f) * m_StartButton.GetSize().y);
+    m_ExitButton.SetSize      (coreVector2( 1.0f, 1.0f) * m_ConfigButton.GetSize().y);
     m_ExitButton.SetAlignment (coreVector2(-1.0f,-1.0f));
     m_ExitButton.GetCaption()->SetText(ICON_POWER_OFF);
 

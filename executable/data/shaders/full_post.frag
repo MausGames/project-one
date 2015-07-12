@@ -36,5 +36,5 @@ void FragmentMain()
 #endif
 
     // draw blend between all textures (glow only on environment for high contrast)
-    gl_FragColor = vec4(mix(v3Environment * u_v4Color.a + v3Glow, v4Foreground.rgb / v4Foreground.a, v4Foreground.a), 1.0);
+    gl_FragColor = vec4(mix(v3Environment + v3Glow, v4Foreground.rgb / v4Foreground.a, v4Foreground.a), 1.0);
 }

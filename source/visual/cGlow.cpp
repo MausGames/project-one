@@ -49,11 +49,11 @@ void cGlow::Update()
         m_aiBlurStage[0].Clear(CORE_FRAMEBUFFER_TARGET_COLOR);
         {
             // draw single objects
-            FOR_EACH(it, m_apObject)
+            FOR_EACH(it, this->GetObjectSet())
                 (*it)->Render();
 
             // draw lists with objects
-            FOR_EACH(it, m_apList)
+            FOR_EACH(it, this->GetListSet())
                 (*it)->Render();
 
             // always draw special-effects
