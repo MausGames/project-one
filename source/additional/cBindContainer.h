@@ -26,7 +26,7 @@ protected:
 
 
 public:
-    DISABLE_COPY(cBindContainer)
+    ENABLE_COPY(cBindContainer)
 
     // manage objects
     inline void BindObject  (coreObject3D* pObject) {ASSERT(!m_apObject.count(pObject)) m_apObject.insert(pObject);}
@@ -38,21 +38,20 @@ public:
     inline void UnbindList(coreBatchList* pList) {ASSERT( m_apList.count(pList)) m_apList.erase (pList);}
     inline void ClearLists()                     {m_apList.clear();}
 
-    // 
+    // get bound objects and lists
     inline const coreSet<coreObject3D*>&  GetObjectSet()const {return m_apObject;}
     inline const coreSet<coreBatchList*>& GetListSet  ()const {return m_apList;}
 };
 
 
 // ****************************************************************
-// 
-class cBindContainerIn : public cBindContainer
+// stand-alone bind container class
+class cBindContainerIn final : public cBindContainer
 {
 public:
     cBindContainerIn()noexcept {}
-    ~cBindContainerIn()        {}
 
-    DISABLE_COPY(cBindContainerIn)
+    ENABLE_COPY(cBindContainerIn)
 };
 
 

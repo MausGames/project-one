@@ -75,7 +75,7 @@ struct cConfig
 
     struct
     {
-        coreUint8 iAmbient;   // 
+        coreUint8 iAmbient;   // ambient sound effects
     }
     Audio;
 

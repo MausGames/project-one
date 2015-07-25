@@ -24,7 +24,7 @@ cMenu*           g_pMenu               = NULL;
 cGame*           g_pGame               = NULL;
 
 static coreUint64 m_iOldPerfTime = 0u;      // last measured high-precision time value
-static coreBool   m_bHardLock    = false;   // 
+static coreBool   m_bHardLock    = false;   // status to force framerate with busy-waiting
 static void LockFramerate();                // lock framerate and override elapsed time
 static void DebugGame();                    // debug and test game separately
 
@@ -40,7 +40,7 @@ void CoreApp::Init()
     Core::Audio->SetListener(coreVector3(0.0f,0.0f,10.0f), coreVector3(0.0f,0.0f,0.0f),
                              coreVector3(0.0f,0.0f,-1.0f), coreVector3(0.0f,1.0f,0.0f));
 
-    // 
+    // init game-system properties
     InitResolution(Core::System->GetResolution());
     InitFramerate();
 
@@ -191,7 +191,7 @@ void CoreApp::Move()
 
 
 // ****************************************************************
-// 
+// init resolution properties
 void InitResolution(const coreVector2& vResolution)
 {
     // calculate biggest possible 1:1 resolution
@@ -201,23 +201,23 @@ void InitResolution(const coreVector2& vResolution)
 
 
 // ****************************************************************
-// 
+// init framerate properties
 void InitFramerate()
 {
     SDL_Window* pWindow = Core::System->GetWindow();
 
-    // 
+    // get current display mode
     SDL_DisplayMode oMode;
     SDL_GetWindowDisplayMode(pWindow, &oMode);
 
     if(oMode.refresh_rate != F_TO_SI(FRAMERATE_VALUE))
     {
-        // 
+        // try to override framerate manually
         oMode.refresh_rate = F_TO_SI(FRAMERATE_VALUE);
         SDL_SetWindowDisplayMode(pWindow, &oMode);
         SDL_GetWindowDisplayMode(pWindow, &oMode);
 
-        // 
+        // check again and enable hard-lock on error
         if(oMode.refresh_rate != F_TO_SI(FRAMERATE_VALUE))
             m_bHardLock = true;
     }
@@ -245,7 +245,7 @@ static void LockFramerate()
         // spin as long as frame time is too low
         for(nMeasureFunc(); fDifference < FRAMERATE_TIME; nMeasureFunc())
         {
-            // 
+            // sleep (once) to reduce overhead
             const coreUint32 iSleep = MAX(F_TO_UI((FRAMERATE_TIME - fDifference) * 1000.0f), 1u) - 1u;
             if(iSleep) SDL_Delay(iSleep);
         }
@@ -405,7 +405,6 @@ static void DebugGame()
     coreUint64 un = v1.PackFloat4x16();
     coreVector4 v2 = coreVector4::UnpackFloat4x16(un);
 
-    
 
 
     coreSet<const coreChar*> apcList;

@@ -42,7 +42,7 @@ cWater::cWater()noexcept
     this->SetPosition(coreVector3(      0.0f,       0.0f, WATER_HEIGHT));
     this->SetSize    (coreVector3(WATER_SIZE, WATER_SIZE,         1.0f));
 
-    // 
+    // remove default texture filter (not visible, better performance)
     m_apTexture[0].GetHandle()->OnLoadOnce([&]()
     {
         glBindTexture(GL_TEXTURE_2D, m_apTexture[0]->GetTexture());

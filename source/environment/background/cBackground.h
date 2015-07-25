@@ -12,14 +12,13 @@
 
 // TODO: cache environment resources on loading (currently 100s of resource lookups)
 // TODO: merge stone diff and norm textures (own shader ?)
-// TODO: clouds on grass background need no heap allocation! (beware of _FillInfinite and destructor delete)
-// TODO: cleanup-function for background batch-lists ?
+// TODO: clouds on grass background need no separate heap allocation! (beware of _FillInfinite and destructor delete)
 // TODO: added object gets shadow-shader
 
 
 // ****************************************************************
 // background definitions
-#define BACKGROUND_OBJECT_RANGE (80.0f)   // 
+#define BACKGROUND_OBJECT_RANGE (80.0f)   // default (+/-) Y-range where objects on ground are considered visible
 
 
 // ****************************************************************
@@ -32,8 +31,8 @@
 #define GRASS_REEDS_2_RESERVE (128u)
 #define GRASS_FLOWERS_NUM     (2048u)
 #define GRASS_FLOWERS_RESERVE (256u)
-#define GRASS_CLOUDS_NUM      (64u)//(640u)  
-#define GRASS_CLOUDS_RESERVE  (78u)//(780u)   // # tested  
+#define GRASS_CLOUDS_NUM      (64u)
+#define GRASS_CLOUDS_RESERVE  (78u)   // # tested
 
 
 // ****************************************************************
@@ -52,7 +51,7 @@ protected:
     std::vector<coreBatchList*> m_apAirObjectList;         // persistent objects floating in the air
 
     std::vector<coreObject3D*>            m_apAddObject;   // temporary additional objects
-    coreLookup<coreUint8, coreBatchList*> m_apAddList;     // 
+    coreLookup<coreUint8, coreBatchList*> m_apAddList;     // optimized lists for temporary additional objects
 
 
 public:
@@ -135,8 +134,7 @@ public:
     ASSIGN_ID(1, "Grass")
 
 
-    
-      
+
     inline coreObject2D* GetWhite() {return &m_White;}  
 
 

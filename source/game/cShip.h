@@ -18,7 +18,7 @@
 class INTERFACE cShip : public coreObject3D
 {
 protected:
-    coreModelPtr m_pModelHigh;   // 
+    coreModelPtr m_pModelHigh;   // high-polygon model objects (used for default shading)
     coreModelPtr m_pModelLow;    // low-polygon model object (used for shadow, outline)
     coreUint32   m_iBaseColor;   // packed base color for interpolations
 
@@ -42,7 +42,7 @@ public:
     inline const coreModelPtr& DefineModelLow (const coreModelPtr& pModel) {m_pModelLow  = pModel;                                          return m_pModelLow;}
     inline const coreModelPtr& DefineModelLow (const coreChar*     pcName) {m_pModelLow  = Core::Manager::Resource->Get<coreModel>(pcName); return m_pModelLow;}
 
-    // render the ship (low-polygon)
+    // render the ship (low-polygon only)
     using coreObject3D::Render;
     void Render(const coreProgramPtr& pProgram)override;
 

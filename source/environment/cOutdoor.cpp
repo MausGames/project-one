@@ -379,21 +379,21 @@ coreVector3 cOutdoor::RetrieveIntersect(const coreVector3& vRayPosition, const c
     {
         ASSERT(i)
 
-        // 
+        // check for boundaries
         if(ABS(vOutput.x) > I_TO_F(OUTDOOR_WIDTH/2) * OUTDOOR_DETAIL ||
            ABS(vOutput.y) > I_TO_F(OUTDOOR_VIEW /2) * OUTDOOR_DETAIL)
            break;
 
-        // 
+        // retrieve and check height at current position
         const coreFloat& fCurHeight = this->RetrieveHeight(vOutput.xy());
         if(fCurHeight > vOutput.z)
         {
-            // 
+            // intersection found, step back to improve precision
             vOutput += vRayDirection * (2.0f * (fCurHeight - vOutput.z) * RCP(vRayDirection.z));
             break;
         }
 
-        // 
+        // next step
         vOutput += vRayDirection * 2.0f;
     }
 
@@ -409,7 +409,7 @@ void cOutdoor::SetFlyOffset(const coreFloat& fFlyOffset)
     m_fFlyOffset = fFlyOffset;
     ASSERT(F_TO_UI(m_fFlyOffset) < OUTDOOR_HEIGHT)
 
-    // 
+    // set position (XY only used in height-calculations)
     this->SetPosition(coreVector3(0.0f, m_fFlyOffset * -OUTDOOR_DETAIL, 0.0f));
 
     // calculate vertex and index offset

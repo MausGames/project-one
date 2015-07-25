@@ -126,8 +126,8 @@ inline FUNC_CONST coreFloat AngleDiff(const coreFloat& x, const coreFloat& y)
     return A;
 }
 
-extern void InitResolution(const coreVector2& vResolution);   // 
-extern void InitFramerate();                                  // 
+extern void InitResolution(const coreVector2& vResolution);   // init resolution properties (1:1)
+extern void InitFramerate();                                  // init framerate properties (lock)
 
 
 // ****************************************************************

@@ -215,18 +215,18 @@ cGrassBackground::cGrassBackground()noexcept
     }
 
 
-    m_White.DefineTexture(0u, "environment_clouds_blue.png");
-    m_White.DefineProgram("menu_grey_program");
-    m_White.SetSize(coreVector2(1.0f,1.0f));
-    m_White.SetTexSize(coreVector2(1.0f,1.0f) * 1.2f);
-    //m_White.SetColor3(coreVector3(0.0f, 0.43f, 0.69f) /*coreVector3(112.0f/255.0f,66.0f/255.0f,20.0f/255.0f)* 2.0f*/ );
-    //m_White.SetColor3(LERP(coreVector3(1.0f,1.0f,1.0f), coreVector3(0.0f, 0.43f, 0.69f), 0.1f));
-    m_White.Move();
+    m_White.DefineTexture(0u, "environment_clouds_blue.png"); 
+    m_White.DefineProgram("menu_grey_program"); 
+    m_White.SetSize(coreVector2(1.0f,1.0f)); 
+    m_White.SetTexSize(coreVector2(1.0f,1.0f) * 1.2f); 
+    //m_White.SetColor3(coreVector3(0.0f, 0.43f, 0.69f) /*coreVector3(112.0f/255.0f,66.0f/255.0f,20.0f/255.0f)* 2.0f*/ ); 
+    //m_White.SetColor3(LERP(coreVector3(1.0f,1.0f,1.0f), coreVector3(0.0f, 0.43f, 0.69f), 0.1f)); 
+    m_White.Move(); 
 
 
     // load nature sound-effect
-    //m_pNatureSound = Core::Manager::Resource->Get<coreSound>("environment_nature.wav");
-    m_pNatureSound = Core::Manager::Resource->Get<coreSound>("environment_wind.wav");
+    //m_pNatureSound = Core::Manager::Resource->Get<coreSound>("environment_nature.wav"); 
+    m_pNatureSound = Core::Manager::Resource->Get<coreSound>("environment_wind.wav"); 
     m_pNatureSound.GetHandle()->OnLoadOnce([&]()
     {
         m_pNatureSound->PlayRelative(this, 0.0f, 1.0f, 0.0f, true);
@@ -248,9 +248,9 @@ cGrassBackground::~cGrassBackground()
 // render the grass background
 void cGrassBackground::__RenderOwn()
 {
-    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_DEPTH_TEST); 
     //m_White.Render(); 
-    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST); 
 }
 
 
@@ -258,15 +258,14 @@ void cGrassBackground::__RenderOwn()
 // move the grass background
 void cGrassBackground::__MoveOwn()
 {
-    //g_pEnvironment->SetTargetSpeed    (8.0f - 2.0f*m_White.GetAlpha());
+    //g_pEnvironment->SetTargetSpeed    (8.0f - 2.0f*m_White.GetAlpha()); 
 
+     
     m_White.SetTexOffset(coreVector2(0.0f, m_White.GetTexOffset().y - 0.65f/8.0f * Core::System->GetTime() * g_pEnvironment->GetSpeed()));
 
-
-    
+     
     //m_White.SetColor3(LERP(coreVector3(1.0f,1.0f,1.0f), /*coreVector3(0.0f, 0.43f, 0.69f)*/coreVector3(112.0f/255.0f,66.0f/255.0f,20.0f/255.0f)* 2.0f, m_White.GetAlpha()));
 
-    
 
     // TODO # sound-volume per config value 
     // adjust volume of the nature sound-effect

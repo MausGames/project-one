@@ -10,7 +10,7 @@
 
 
 // ****************************************************************
-// render the ship (low-polygon)
+// render the ship (low-polygon only)
 void cShip::Render(const coreProgramPtr& pProgram)
 {
     if(!this->IsEnabled(CORE_OBJECT_ENABLE_RENDER)) return;

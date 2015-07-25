@@ -183,11 +183,11 @@ void cBackground::Move()
     {
         FOR_EACH_DYN(it, *papObject)
         {
-            // 
+            // keep object while in current view
             if(coreMath::InRange((*it)->GetPosition().y, g_pEnvironment->GetCameraPos().y, fRange)) DYN_KEEP(it)
             else
             {
-                // 
+                // remove object when not visible anymore
                 SAFE_DELETE(*it)
                 DYN_REMOVE(it, *papObject)
             }
@@ -211,7 +211,7 @@ void cBackground::AddObject(coreObject3D* pObject, const coreVector3& vRelativeP
 {
     ASSERT(pObject)
 
-    // 
+    // set position and add object
     pObject->SetPosition(vRelativePos + coreVector3(g_pEnvironment->GetCameraPos().xy(), 0.0f));
     m_apAddObject.push_back(pObject);
 }
@@ -220,11 +220,11 @@ void cBackground::AddObject(coreObject3D* pObject, const coreVector3& vRelativeP
 {
     ASSERT(pObject)
 
-    // 
+    // check for available pre-defined list (use fallback on error)
     WARN_IF(!m_apAddList.count(iListIndex)) this->AddObject(pObject, vRelativePos);
     else
     {
-        // 
+        // set position and add object to optimized list
         pObject->SetPosition(vRelativePos + coreVector3(g_pEnvironment->GetCameraPos().xy(), 0.0f));
         m_apAddList.at(iListIndex)->BindObject(pObject);
     }
@@ -232,51 +232,45 @@ void cBackground::AddObject(coreObject3D* pObject, const coreVector3& vRelativeP
 
 
 // ****************************************************************
-// 
+// pre-define an optimized list
 void cBackground::AddList(const coreUint8& iListIndex, const coreUint32& iCapacity, const coreChar* pcProgramInstancedName)
 {
-    // 
+    // check for available pre-defined list
     coreBatchList* pList;
     if(!m_apAddList.count(iListIndex))
     {
-        // 
+        // create and save new list
         pList = new coreBatchList(iCapacity);
         m_apAddList[iListIndex] = pList;
     }
     else
     {
-        // 
+        // reallocate existing list
         pList = m_apAddList[iListIndex];
         pList->Reallocate(iCapacity);
     }
 
-    // 
+    // load shader-program
     pList->DefineProgram(pcProgramInstancedName);
 }
 
 
 // ****************************************************************
-// 
+// move additional objects (for infinite background)
 void cBackground::ShoveObjects(const coreFloat& fOffset)
 {
-    // 
-    FOR_EACH(it, m_apAddObject)
+    // update objects and lists
+    auto nUpdatePosFunc = [&fOffset](std::vector<coreObject3D*>* OUTPUT papObject)
     {
-        // 
-        const coreVector3& vPos = (*it)->GetPosition();
-        (*it)->SetPosition(coreVector3(vPos.x, vPos.y + fOffset, vPos.z));
-    }
-
-    // 
-    FOR_EACH(it, m_apAddList)
-    {
-        FOR_EACH(et, *(*it)->List())
+        FOR_EACH(it, *papObject)
         {
-            // 
-            const coreVector3& vPos = (*et)->GetPosition();
-            (*et)->SetPosition(coreVector3(vPos.x, vPos.y + fOffset, vPos.z));
+            // add offset to position
+            const coreVector3& vPos = (*it)->GetPosition();
+            (*it)->SetPosition(coreVector3(vPos.x, vPos.y + fOffset, vPos.z));
         }
-    }
+    };
+    nUpdatePosFunc(&m_apAddObject);
+    FOR_EACH(it, m_apAddList) nUpdatePosFunc((*it)->List());
 }
 
 
@@ -284,11 +278,10 @@ void cBackground::ShoveObjects(const coreFloat& fOffset)
 // remove all additional objects
 void cBackground::ClearObjects()
 {
-    // 
+    // delete objects and lists
     FOR_EACH(it, m_apAddObject) SAFE_DELETE(*it)
     FOR_EACH(it, m_apAddList)
     {
-        // 
         FOR_EACH(et, *(*it)->List()) SAFE_DELETE(*et)
         SAFE_DELETE(*it)
     }

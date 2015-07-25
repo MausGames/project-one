@@ -208,7 +208,7 @@ void UpdateInput()
         {
             const coreUintW iJoystickID = iType - INPUT_SETS_KEYBOARD;
 
-            // 
+            // forward d-pad input to stick input
             Core::Input->ForwardDpadToStick(iJoystickID);
 
             // map movement input
