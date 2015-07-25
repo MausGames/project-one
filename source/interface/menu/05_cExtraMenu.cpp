@@ -17,8 +17,8 @@ cExtraMenu::cExtraMenu()noexcept
     // create menu objects
     m_Background.DefineTexture(0u, "menu_background_black.png");
     m_Background.DefineProgram("menu_border_program");
-    m_Background.SetPosition  (coreVector2(0.0f,0.05f));
-    m_Background.SetSize      (coreVector2(0.8f,0.6f));
+    m_Background.SetPosition  (coreVector2(0.0f,0.0f));
+    m_Background.SetSize      (coreVector2(0.8f,0.55f));
 
     m_BackButton.Construct    (MENU_BUTTON, MENU_ICON_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
     m_BackButton.DefineProgram("menu_border_program");
@@ -58,9 +58,6 @@ void cExtraMenu::Move()
         break;
     }
 
-    // 
-    cMenu::UpdateButton(&m_BackButton, m_BackButton.IsFocused());
-
     if(this->GetAlpha() >= 1.0f)
     {
         if(m_BackButton.IsClicked())
@@ -69,4 +66,10 @@ void cExtraMenu::Move()
             m_iStatus = 1;
         }
     }
+
+    // 
+    cMenu::UpdateButton(&m_BackButton, m_BackButton.IsFocused());
+
+    // 
+    if(m_BackButton.IsFocused()) g_pMenu->GetTooltip()->ShowText(TOOLTIP_ONELINER, Core::Language->GetString("BACK"));
 }

@@ -150,7 +150,7 @@ private:
     coreObject2D m_aTest2[5];     // 
     coreObject2D m_aTest3[5];     // 
     coreLabel    m_aTest4[5];     // 
-
+    coreLabel m_aDemo[4];
 
     coreButton m_StartButton;    // start button
 

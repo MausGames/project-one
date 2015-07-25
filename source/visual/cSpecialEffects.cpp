@@ -77,6 +77,8 @@ cSpecialEffects::cSpecialEffects()noexcept
     nLoadSoundFunc(m_apSound, SOUND_EXPLOSION_ENERGY_BIG,     "effect_explosion_energy.wav");
     nLoadSoundFunc(m_apSound, SOUND_EXPLOSION_PHYSICAL_SMALL, "effect_explosion_physical.wav");
     nLoadSoundFunc(m_apSound, SOUND_EXPLOSION_PHYSICAL_BIG,   "effect_explosion_physical.wav");
+    nLoadSoundFunc(m_apSound, SOUND_RUSH_SHORT,               "effect_rush.wav");
+    nLoadSoundFunc(m_apSound, SOUND_RUSH_LONG,                "effect_rush.wav");
 
     // 
     m_ShakeTimer.Play(CORE_TIMER_PLAY_RESET);
@@ -392,7 +394,7 @@ coreFloat cSpecialEffects::CreateLightning(const coreVector2& vPosFrom, const co
     }
 
     // 
-    ASSERT(!CONTAINS(*m_LightningList.List(), &oLightning))
+    ASSERT(m_LightningList.List()->size() <= SPECIAL_LIGHTNINGS)
     m_LightningList.BindObject(&oLightning);
 
     return fTexLen + fTexOffset;
@@ -432,7 +434,7 @@ void cSpecialEffects::CreateLightning(coreObject3D* pOwner, const coreVector2& v
     oLightning.SetTexOffset(coreVector2((1.0f - oLightning.GetTexSize().x) * 0.5f, fTexOffset));
 
     // 
-    ASSERT(!CONTAINS(*m_LightningList.List(), &oLightning))
+    ASSERT(m_LightningList.List()->size() <= SPECIAL_LIGHTNINGS)
     m_LightningList.BindObject(&oLightning);
 }
 
@@ -494,8 +496,8 @@ void cSpecialEffects::PlaySound(const coreVector3& vPosition, const coreFloat& f
     case SOUND_EXPLOSION_ENERGY_BIG:     fBaseVolume = 3.0f; fBasePitch = 0.8f; fBasePitchRnd = 0.1f; break;
     case SOUND_EXPLOSION_PHYSICAL_SMALL: fBaseVolume = 1.0f; fBasePitch = 0.9f; fBasePitchRnd = 0.1f; break;
     case SOUND_EXPLOSION_PHYSICAL_BIG:   fBaseVolume = 1.0f; fBasePitch = 0.6f; fBasePitchRnd = 0.1f; break;
-    //case SOUND_RUSH_SHORT:             fBaseVolume = 1.5f; fBasePitch = 1.5f; fBasePitchRnd = 0.1f; break;
-    //case SOUND_RUSH_LONG:              fBaseVolume = 1.5f; fBasePitch = 1.0f; fBasePitchRnd = 0.1f; break;
+    case SOUND_RUSH_SHORT:               fBaseVolume = 1.5f; fBasePitch = 1.5f; fBasePitchRnd = 0.1f; break;
+    case SOUND_RUSH_LONG:                fBaseVolume = 1.5f; fBasePitch = 1.0f; fBasePitchRnd = 0.1f; break;
     }
 
     // 

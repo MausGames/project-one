@@ -49,7 +49,9 @@ enum eSoundEffect : coreUint16   // 0xAABBu -> AA sub-index, BB file-index
     SOUND_EXPLOSION_ENERGY_SMALL   = 0x0000u,
     SOUND_EXPLOSION_ENERGY_BIG     = 0x0100u,
     SOUND_EXPLOSION_PHYSICAL_SMALL = 0x0001u,
-    SOUND_EXPLOSION_PHYSICAL_BIG   = 0x0101u
+    SOUND_EXPLOSION_PHYSICAL_BIG   = 0x0101u,
+    SOUND_RUSH_SHORT               = 0x0002u,
+    SOUND_RUSH_LONG                = 0x0102u
 };
 
 

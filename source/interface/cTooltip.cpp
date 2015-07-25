@@ -22,8 +22,9 @@ cTooltip::cTooltip()noexcept
 
     // 
     this->SetPosition (TOOLTIP_MOUSE_OFFSET);
-    this->SetAlignment(coreVector2(-1.0f,1.0f));
-    this->SetColor3   (coreVector3(1.0f,1.0f,1.0f) * MENU_CONTRAST_BLACK);
+    this->SetAlignment(coreVector2(TOOLTIP_MOUSE_OFFSET.x ? SIGN(TOOLTIP_MOUSE_OFFSET.x) : 0.0f,
+                                   TOOLTIP_MOUSE_OFFSET.y ? SIGN(TOOLTIP_MOUSE_OFFSET.y) : 0.0f));
+    this->SetColor3   (COLOR_MENU_BLACK);
 
     // 
     for(coreUintW i = 0u; i < TOOLTIP_LINES; ++i)
@@ -42,12 +43,12 @@ void cTooltip::Render()
     if(!m_bDisplay) return;
     m_bDisplay = false;
 
-    //// 
-    //coreObject2D::Render();
+    // 
+    coreObject2D::Render();
 
-    //// 
-    //for(coreUintW i = 0u; i < m_iNumLines; ++i)
-    //    m_aLine[i].Render();
+    // 
+    for(coreUintW i = 0u; i < m_iNumLines; ++i)
+        m_aLine[i].Render();
 }
 
 
@@ -176,6 +177,6 @@ void cTooltip::__ShowText(const coreFloat& fWidth, const coreChar* pcText)
     this->SetSize(coreVector2(fMaxWidth, TOOLTIP_LINE_HEIGHT * I_TO_F(m_iNumLines)) + TOOLTIP_BORDER_SIZE);
 
     // 
-    const coreVector2 vBase = (this->GetSize() - 0.5f * TOOLTIP_BORDER_SIZE).InvertX() + TOOLTIP_MOUSE_OFFSET;
+    const coreVector2 vBase = (this->GetSize() * this->GetAlignment() + (TOOLTIP_BORDER_SIZE - this->GetSize()) * m_aLine[0].GetAlignment()) * 0.5f + TOOLTIP_MOUSE_OFFSET;
     for(coreUintW i = 0u; i < m_iNumLines; ++i) m_aLine[i].SetPosition(coreVector2(vBase.x, vBase.y - TOOLTIP_LINE_HEIGHT * I_TO_F(i)));
 }

@@ -52,6 +52,7 @@ cBackground::~cBackground()
     m_apAirObjectList   .clear();
 
     // delete outdoor-surface object
+    if(m_pOutdoor) m_pOutdoor->GetShadowMap()->ClearLists();
     SAFE_DELETE(m_pOutdoor)
 
     // delete water-surface object
@@ -109,6 +110,9 @@ void cBackground::Render()
         }
         glEnable(GL_BLEND);
 
+        // call individual render routine
+        this->__RenderOwn();
+
         glDisable(GL_DEPTH_TEST);
         {
             // render all air objects
@@ -116,9 +120,6 @@ void cBackground::Render()
                 (*it)->Render();
         }
         glEnable(GL_DEPTH_TEST);
-
-        // call individual render routine
-        this->__RenderOwn();
     }
 
     // resolve frame buffer to texture

@@ -49,7 +49,7 @@ void CoreApp::Init()
 
     // load all available music files
     g_MusicPlayer.AddMusicFolder("data/music", "*.ogg");
-    g_MusicPlayer.Control()->Play();
+    //g_MusicPlayer.Control()->Play();
 
     // create and init main components
     cShadow::GlobalInit();
@@ -405,11 +405,15 @@ static void DebugGame()
     coreUint64 un = v1.PackFloat4x16();
     coreVector4 v2 = coreVector4::UnpackFloat4x16(un);
 
-    v1 = v2;
+    
+
 
     coreSet<const coreChar*> apcList;
-
     apcList.insert(pcTest);
+
+    coreSet<const coreChar*> apcList2 = std::move(apcList);
+
+    v1 = v2;
 
     //g_pEnvironment->Activate();
     //g_pPostProcessing->SetSideOpacity(1.0f);

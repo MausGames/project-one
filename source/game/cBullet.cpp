@@ -86,7 +86,7 @@ void cBullet::Deactivate(const coreBool& bAnimated)
 // constructor
 cBulletManager::sBulletSetGen::sBulletSetGen()noexcept
 : oBulletActive (BULLET_SET_INIT_SIZE)
-, iStatus       (0u)
+, bShadow       (false)
 {
 }
 
@@ -116,7 +116,7 @@ cBulletManager::~cBulletManager()
         g_pGlow->UnbindList(pBulletActive);
 
         // 
-        if(CONTAINS_BIT((*it)->iStatus, 0u)) cShadow::GetGlobalContainer()->UnbindList(pBulletActive);
+        if((*it)->bShadow) cShadow::GetGlobalContainer()->UnbindList(pBulletActive);
 
         // delete bullet set
         SAFE_DELETE(*it)
@@ -487,6 +487,7 @@ void cRocketBullet::__MoveOwn()
 {
 
     m_fSpeed += 2.0f * BULLET_SPEED_FACTOR * Core::System->GetTime();
+    if(m_fSpeed > 300.0f) this->Deactivate(true);
 
 
     // fly around
@@ -501,12 +502,17 @@ void cRocketBullet::__MoveOwn()
    // if(++iHalf >= 3u) iHalf = 0u;
    // if(!iHalf) g_pSpecialEffects->CreateSplashColor(this->GetPosition() - this->GetDirection() * 4.5f, 25.0f, 1u, coreVector3(0.5f,0.5f,0.5f));
 
-    const cEnemy* pEnemy = g_pGame->FindEnemy(this->GetPosition().xy());
 
-    const coreVector2 vDiffNorm = (pEnemy->GetPosition().xy() - this->GetPosition().xy()).Normalize();
-    const coreVector2 vNewDir   = (this->GetDirection().xy() + vDiffNorm * (0.05f * m_fSpeed * Core::System->GetTime())).Normalize();
+    /**/
+    const cEnemy* pEnemy = g_pGame->GetEnemyManager()->FindEnemy(this->GetPosition().xy());
+
+    if(pEnemy)
+    {
+        const coreVector2 vDiffNorm = (pEnemy->GetPosition().xy() - this->GetPosition().xy()).Normalize();
+        const coreVector2 vNewDir   = (this->GetDirection().xy() + vDiffNorm * (0.05f * m_fSpeed * Core::System->GetTime())).Normalize();
     
-    this->SetDirection(coreVector3(vNewDir, 0.0f));
+        this->SetDirection(coreVector3(vNewDir, 0.0f));/**/
+    }
     this->SetColor3   (coreVector3(0.0f, 0.6f + 0.4f * SIN(PI*m_fAnimation), 0.0f));
-
+    
 }

@@ -89,7 +89,7 @@ private:
     struct INTERFACE sBulletSetGen
     {
         coreBatchList oBulletActive;   // list with active bullets
-        coreUint8     iStatus;         // 
+        coreBool      bShadow;         // 
 
         sBulletSetGen()noexcept;
         virtual ~sBulletSetGen() {}
@@ -406,7 +406,7 @@ template <typename T> cBulletManager::sBulletSet<T>::sBulletSet(const coreUintW 
     // 
     if(T::ConfigShadow())
     {
-        ADD_BIT(iStatus, 0u)
+        bShadow = true;
         cShadow::GetGlobalContainer()->BindList(&oBulletActive);
     }
 

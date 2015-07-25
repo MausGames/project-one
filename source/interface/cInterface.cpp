@@ -144,17 +144,17 @@ void cInterface::Render()
         // loop through all player views
         for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i)
         {
-            sPlayerView& oView = m_aView[i];
+            //sPlayerView& oView = m_aView[i];
 
             // render player
-            oView.m_aHealthBar[0]  .Render();
-            oView.m_aHealthBar[1]  .Render();
-            oView.m_aHealthValue[0].Render();
-            oView.m_aHealthValue[1].Render();
-            oView.m_Score          .Render();
-            oView.m_Combo          .Render();
-            oView.m_ChainValue     .Render();   // # swapped
-            oView.m_ChainBar       .Render();   // # swapped
+            //oView.m_aHealthBar[0]  .Render();
+            //oView.m_aHealthBar[1]  .Render();
+            //oView.m_aHealthValue[0].Render();
+            //oView.m_aHealthValue[1].Render();
+            //oView.m_Score          .Render();
+            //oView.m_Combo          .Render();
+            //oView.m_ChainValue     .Render();   // # swapped
+            //oView.m_ChainBar       .Render();   // # swapped
         }
 
         if(m_fAlphaBoss)
@@ -416,7 +416,7 @@ void cInterface::ShowMission(const coreChar* pcMain, const coreChar* pcSub)
 void cInterface::ShowMission(const cMission* pMission)
 {
     // show default mission banner
-    this->ShowMission(pMission->GetName(), PRINT("%s %d", Core::Language->GetString("STAGE"), pMission->GetID()));
+    //this->ShowMission(pMission->GetName(), PRINT("%s %d", Core::Language->GetString("STAGE"), pMission->GetID()));
 }
 
 

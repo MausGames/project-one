@@ -8,8 +8,8 @@
 //////////////////////////////////////////////////////
 
 
-// animation uniforms
-uniform float u_v1Blink;   // base blink intensity (to highlight successful hits)
+// shader input
+varying float v_v1Blink;   // base blink intensity (to highlight successful hits)
 
 
 void FragmentMain()
@@ -45,14 +45,19 @@ void FragmentMain()
     // make highlighted area glowing
     v1BumpFactor += v4TexColor.a * 0.5;
     
+    // ignore blink color
+    const vec3 v3Blink = vec3(0.0);
+    
+#else
+ 
+    // calculate smooth blink color
+    vec3 v3Blink = vec3(v_v1Blink * (1.0 - 0.9*abs(dot(v3MathViewDir, v3BumpNormal))));
+    
 #endif
 
     // calculate diffuse and specular value
     vec3 v3Diffuse  = v4TexColor.rgb * (1.4 * max(0.0, v1BumpFactor) + 0.4);
     vec3 v3Specular = vec3(0.2 * 0.5 * pow(v1ReflFactor, 25.0));
-    
-    // calculate smooth blink color
-    vec3 v3Blink = vec3(u_v1Blink * (1.0 - 0.9*abs(dot(v3MathViewDir, v3BumpNormal))));
 
     // draw final color
     gl_FragColor = vec4((v3Diffuse + v3Specular) * mix(vec3(1.0), v3Highlight, v4TexColor.a) + v3Blink, u_v4Color.a);

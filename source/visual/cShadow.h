@@ -40,7 +40,7 @@ private:
     coreFrameBuffer m_iFrameBuffer;                     // shadow map frame buffer (depth only)
     coreUint8 m_iLevel;                                 // current configuration level
 
-    static cBindContainer s_GlobalContainer;            // 
+    static cBindContainerIn s_GlobalContainer;          // 
 
     static coreProgramPtr s_pProgramSingle;             // shader-program for single shadow-casting objects
     static coreProgramPtr s_pProgramInstanced;          // shader-program for instanced shadow-casting objects
@@ -70,7 +70,7 @@ public:
     static void GlobalUpdate();
 
     // access global bind container
-    static inline cBindContainer* GetGlobalContainer() {return &s_GlobalContainer;}
+    static inline cBindContainerIn* GetGlobalContainer() {return &s_GlobalContainer;}
 
     // recompile shader-programs with shadow maps
     static void Recompile();

@@ -34,7 +34,7 @@ cCrossfieldBoss::cCrossfieldBoss()noexcept
     this->SetCollisionModifier(coreVector3(0.9f,0.9f,0.9f));
 
     // configure the boss
-    this->Configure(4000, coreVector3(0.0f/360.0f, 68.0f/100.0f, 90.0f/100.0f).HSVtoRGB());
+    this->Configure(2500, coreVector3(0.0f/360.0f, 68.0f/100.0f, 90.0f/100.0f).HSVtoRGB()); //4000 
 
     // create duplicate object
     m_Duplicate.DefineModel         ("ship_boss_crossfield_high.md3");
@@ -168,7 +168,7 @@ void cCrossfieldBoss::__KillOwn()
         coreObject3D::Move();
 
         // 
-        this->Configure(800, this->GetBaseColor());
+        this->Configure(700, this->GetBaseColor()); // 800 
         this->Resurrect(this->GetPosition().xy(), this->GetDirection().xy());
 
         // 
@@ -237,8 +237,9 @@ void cCrossfieldBoss::__MoveOwn()
 
     // 
     const coreObject3D* pBase         = m_aiCounter[DUPLICATE_STATUS] ? &m_Duplicate : this;
-    const coreVector2   vOldBasePos   = pBase->GetPosition ().xy();
-    const coreFloat     fOldBaseAngle = pBase->GetDirection().xy().Angle();
+    const coreVector2   vOldBasePos   = pBase->GetPosition   ().xy();
+    const coreFloat     fOldBaseAngle = pBase->GetDirection  ().xy().Angle();
+    const coreFloat     fOldBaseOri   = pBase->GetOrientation().xz().Angle();   // # no y
 
     // 
     m_fAnimation.Update(0.2f);
@@ -263,7 +264,7 @@ void cCrossfieldBoss::__MoveOwn()
     // 
     else if(m_iPhase == 1u)
     {
-        PHASE_CONTROL_TICKER(0u, 0u, 1.0f/9.0f)
+        PHASE_CONTROL_TICKER(0u, 0u, 1.0f/0.0001f)  
         {
             ++m_iPhase;
         });
@@ -404,12 +405,12 @@ void cCrossfieldBoss::__MoveOwn()
             }
         });
 
-        PHASE_CONTROL_TIMER(2u, 1.0f/10.0f, LERP_SMOOTH)
+        PHASE_CONTROL_TIMER(2u, 1.0f/6.0f, LERP_SMOOTH)
         {
             const coreFloat fSideTime = m_aiCounter[CURRENT_SIDE] ? fTime : (1.0f - fTime);
 
             // 
-            this->DefaultOrientateLerp(0.0f*PI, 20.0f*PI, fSideTime);
+            this->DefaultOrientateLerp(0.0f*PI, 14.0f*PI, fSideTime);
 
             // 
             if(PHASE_FINISHED)
@@ -509,18 +510,35 @@ void cCrossfieldBoss::__MoveOwn()
     // 
     else if(m_iPhase == 23u)
     {
-        PHASE_CONTROL_TIMER(0u, 1.0f/15.0f, LERP_SMOOTH)
+        PHASE_CONTROL_TIMER(0u, 1.0f/10.0f, LERP_SMOOTH)
         {
             const coreFloat fSideSign = m_aiCounter[CURRENT_SIDE] ? -1.0f : 1.0f;
 
             // 
-            this->SetPosition      (coreVector3(coreVector2::Direction(LERP(0.0f*PI, fSideSign * -6.0f*PI, fTime)) * FOREGROUND_AREA * 0.75f, 0.0f));
-            this->DefaultRotateLerp(1.0f*PI, fSideSign * 25.0f*PI, fTime);
+            this->SetPosition      (coreVector3(coreVector2::Direction(LERP(0.0f*PI, fSideSign * -4.0f*PI, fTime)) * FOREGROUND_AREA * 0.75f, 0.0f));
+            this->DefaultRotateLerp(1.0f*PI, fSideSign * 21.0f*PI, fTime);
+
+
+              
+            //PHASE_CONTROL_TICKER(1u, 0u, (2.0f + 4.0f * SIN(fTime*PI)) * 0.2f)   // increase shoot-speed with movement-speed
+            //{
+            //
+            //        // 
+            //        const coreVector2 vDir = -this->GetPosition().xy().Normalize();
+            //        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.5f, this, this->GetPosition().xy(), vDir);
+            //        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.4f, this, this->GetPosition().xy(), vDir);
+            //        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.3f, this, this->GetPosition().xy(), vDir);
+            //
+            //});
+              
+
 
             // 
             if(PHASE_FINISHED)
             {
                 ++m_iPhase;
+                //PHASE_RESET(0u)            
+                //PHASE_RESET(1u)            
 
                 // 
                 m_aiCounter[BOOMERANG_TARGET] = 1;
@@ -798,21 +816,24 @@ void cCrossfieldBoss::__MoveOwn()
         const coreFloat fRcpTime = RCP(Core::System->GetTime());
 
         // 
-        const coreVector2 vCurBasePos   = pBase->GetPosition ().xy();
-        const coreFloat   fCurBaseAngle = pBase->GetDirection().xy().Angle();
+        const coreVector2 vCurBasePos   = pBase->GetPosition   ().xy();
+        const coreFloat   fCurBaseAngle = pBase->GetDirection  ().xy().Angle();
+        const coreFloat   fCurBaseOri   = pBase->GetOrientation().xz().Angle();   // # no y
         const coreVector2 vOffsetPos    =          (vCurBasePos -  vOldBasePos)   * fRcpTime * 0.05f;
         const coreFloat   fOffsetAngle  = AngleDiff(fCurBaseAngle, fOldBaseAngle) * fRcpTime * 0.055f;
+        const coreFloat   fOffsetOri    = AngleDiff(fCurBaseOri,   fOldBaseOri)   * fRcpTime * 0.06f;
 
         for(coreUintW i = 0u; i < CROSSFIELD_TRAILS; ++i)
         {
             // 
             const coreVector2 vNewPos =                        vCurBasePos   - vOffsetPos   * I_TO_F(CROSSFIELD_TRAILS-i);
             const coreVector2 vNewDir = coreVector2::Direction(fCurBaseAngle - fOffsetAngle * I_TO_F(CROSSFIELD_TRAILS-i));
+            const coreVector2 vNewOri = coreVector2::Direction(fCurBaseOri   - fOffsetOri   * I_TO_F(CROSSFIELD_TRAILS-i));
 
             // 
-            m_aDuplicateTrail[i].SetPosition   (coreVector3(vNewPos, 0.0f));
-            m_aDuplicateTrail[i].SetDirection  (coreVector3(vNewDir, 0.0f));
-            m_aDuplicateTrail[i].SetOrientation(pBase->GetOrientation());
+            m_aDuplicateTrail[i].SetPosition   (coreVector3(vNewPos,   0.0f));
+            m_aDuplicateTrail[i].SetDirection  (coreVector3(vNewDir,   0.0f));
+            m_aDuplicateTrail[i].SetOrientation(coreVector3(vNewOri.x, 0.0f, vNewOri.y));
             m_aDuplicateTrail[i].SetTexOffset  (coreVector2(0.0f, m_fAnimation));
             m_aDuplicateTrail[i].Move();
         }

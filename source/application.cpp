@@ -150,6 +150,7 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreShader> ("menu_border.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_border.frag");
     Core::Manager::Resource->Load<coreShader> ("menu_circle.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_circle.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("menu_circle.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_circle.frag");
+    Core::Manager::Resource->Load<coreShader> ("menu_grey.frag",                         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_grey.frag");
     Core::Manager::Resource->Load<coreShader> ("menu_inner.vert",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_inner.vert");
     Core::Manager::Resource->Load<coreShader> ("menu_inner.frag",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_inner.frag");
     Core::Manager::Resource->Load<coreShader> ("menu_sharp.frag",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_sharp.frag");
@@ -160,6 +161,7 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreShader> ("object_ship_glow.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", SHADER_GLOW);
     Core::Manager::Resource->Load<coreShader> ("object_inst.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("object_ground_inst.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ground.frag", CORE_SHADER_OPTION_INSTANCING SHADER_SHADOW);
+    Core::Manager::Resource->Load<coreShader> ("object_ship_inst.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("object_ship_glow_inst.frag",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", CORE_SHADER_OPTION_INSTANCING SHADER_GLOW);
 
     Core::Manager::Resource->Load<coreSound>  ("bullet_mine.wav",                        CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/bullet_mine.wav");
@@ -170,7 +172,9 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreSound>  ("effect_explosion_energy.wav",            CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/effect_explosion_energy.wav");
     Core::Manager::Resource->Load<coreSound>  ("effect_explosion_physical.wav",          CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/effect_explosion_physical.wav");
     Core::Manager::Resource->Load<coreSound>  ("effect_launch.wav",                      CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/effect_launch.wav");
+    Core::Manager::Resource->Load<coreSound>  ("effect_rush.wav",                        CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/effect_rush.wav");
     Core::Manager::Resource->Load<coreSound>  ("environment_nature.wav",                 CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_nature.wav");
+    Core::Manager::Resource->Load<coreSound>  ("environment_wind.wav",                   CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_wind.wav");
 
     Core::Manager::Resource->Load<coreFont>   ("ethnocentric.ttf",                       CORE_RESOURCE_UPDATE_AUTO,   "data/fonts/ethnocentric.ttf");
     Core::Manager::Resource->Load<coreFont>   ("fontawesome.ttf",                        CORE_RESOURCE_UPDATE_AUTO,   "data/fonts/fontawesome.ttf");
@@ -405,6 +409,11 @@ static void SetupResources()
         ->AttachShader("menu_circle.frag")
         ->Finish();
 
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_grey_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("default_2d.vert")
+        ->AttachShader("menu_grey.frag")
+        ->Finish();
+
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_inner_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("menu_inner.vert")
         ->AttachShader("menu_inner.frag")
@@ -438,6 +447,11 @@ static void SetupResources()
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ground_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("object_inst.vert")
         ->AttachShader("object_ground_inst.frag")
+        ->Finish();
+
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ship_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("object_inst.vert")
+        ->AttachShader("object_ship_inst.frag")
         ->Finish();
 
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ship_glow_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())

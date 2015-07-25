@@ -31,7 +31,6 @@
 #define VIRIDO_TRAILS     (4u)                                    // 
 #define VIRIDO_RAWS       (VIRIDO_BALLS * (VIRIDO_TRAILS + 1u))   // 
 #define VIRIDO_PADDLES    (PLAYERS + 1u)                          // 
-#define VIRIDO_SCOUTS     (16u)                                   // 
 #define VIRIDO_BALL_SPEED (1.5f)                                  // 
 
 
@@ -55,16 +54,18 @@ public:
     cMission()noexcept;
     virtual ~cMission() {}
 
-    FRIEND_CLASS(cGame)
     DISABLE_COPY(cMission)
     ENABLE_ID
 
     // setup the mission
     void Setup();
 
-    // move the mission
-    void MoveBefore();
-    void MoveAfter ();
+    // render and move the mission
+    void RenderWeak  ();
+    void RenderStrong();
+    void RenderAfter ();
+    void MoveBefore  ();
+    void MoveAfter   ();
 
     // set active boss
     void SetCurBoss(const coreUintW& iIndex);
@@ -77,7 +78,7 @@ public:
 
 
 private:
-    // own routines for derived classes (render functions executed by game)
+    // own routines for derived classes
     virtual void __SetupOwn       () {}
     virtual void __RenderOwnWeak  () {}
     virtual void __RenderOwnStrong() {}
@@ -116,11 +117,11 @@ private:
     coreObject3D m_aPaddleSphere[VIRIDO_PADDLES];   // 
     cShip*       m_apOwner      [VIRIDO_PADDLES];   // 
 
-    cScoutEnemy   m_aScout[VIRIDO_SCOUTS];          // 
-    cWarriorEnemy m_Warrior;                        // 
-
     coreUint8 m_iBounceState;                       // 
     coreBool  m_bBounceReal;                        // 
+
+    coreLabel m_Overlay;                            //      
+    coreFloat m_fOverlayTime;                       //      
 
     coreFlow m_fAnimation;                          // animation value
 
@@ -145,10 +146,8 @@ public:
     inline coreBool GetBounceState(const coreUintW& iIndex)const {ASSERT(iIndex < sizeof(m_iBounceState)*8u) return CONTAINS_BIT(m_iBounceState, iIndex);}
 
     // 
-    inline coreObject3D*  GetBall   (const coreUintW& iIndex) {ASSERT(iIndex < VIRIDO_BALLS)   return &m_aBallRaw[iIndex * (VIRIDO_TRAILS + 1u)];}
-    inline coreObject3D*  GetPaddle (const coreUintW& iIndex) {ASSERT(iIndex < VIRIDO_PADDLES) return &m_aPaddle [iIndex];}
-    inline cScoutEnemy*   GetScout  (const coreUintW& iIndex) {ASSERT(iIndex < VIRIDO_SCOUTS)  return &m_aScout  [iIndex];}
-    inline cWarriorEnemy* GetWarrior()                        {return &m_Warrior;}
+    inline coreObject3D* GetBall  (const coreUintW& iIndex) {ASSERT(iIndex < VIRIDO_BALLS)   return &m_aBallRaw[iIndex * (VIRIDO_TRAILS + 1u)];}
+    inline coreObject3D* GetPaddle(const coreUintW& iIndex) {ASSERT(iIndex < VIRIDO_PADDLES) return &m_aPaddle [iIndex];}
 
 
 private:
@@ -156,6 +155,7 @@ private:
     void __SetupOwn       ()override;
     void __RenderOwnWeak  ()override;
     void __RenderOwnStrong()override;
+    void __RenderOwnAfter ()override;
     void __MoveOwnAfter   ()override;
 };
 

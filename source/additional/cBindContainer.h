@@ -13,17 +13,19 @@
 
 // ****************************************************************
 // bind container interface
-class cBindContainer
+class INTERFACE cBindContainer
 {
 private:
     coreSet<coreObject3D*>  m_apObject;   // bound objects
     coreSet<coreBatchList*> m_apList;     // bound lists with objects
 
 
-public:
+protected:
     cBindContainer()noexcept {}
     inline ~cBindContainer();
 
+
+public:
     DISABLE_COPY(cBindContainer)
 
     // manage objects
@@ -39,6 +41,18 @@ public:
     // 
     inline const coreSet<coreObject3D*>&  GetObjectSet()const {return m_apObject;}
     inline const coreSet<coreBatchList*>& GetListSet  ()const {return m_apList;}
+};
+
+
+// ****************************************************************
+// 
+class cBindContainerIn : public cBindContainer
+{
+public:
+    cBindContainerIn()noexcept {}
+    ~cBindContainerIn()        {}
+
+    DISABLE_COPY(cBindContainerIn)
 };
 
 

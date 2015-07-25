@@ -72,7 +72,15 @@ cGameMenu::cGameMenu()noexcept
     m_aTest4[3].SetText("Tesla");
     m_aTest4[4].SetText("Antimatter");
     
-
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aDemo); ++i) 
+    {
+        m_aDemo[i].Construct  (MENU_FONT_SMALL, MENU_OUTLINE_SMALL, 0u);
+        m_aDemo[i].SetPosition(coreVector2(0.0f, 0.1f - 0.02f*I_TO_F(i) - (i ? 0.01f : 0.0f)));
+    }
+    m_aDemo[0].SetText("Demo Notes:");
+    m_aDemo[1].SetText("[WASD] + [Left Mouse Button]");
+    m_aDemo[2].SetText("[ESC] closes the application");
+    m_aDemo[3].SetText("you cannot die");
 
 
     m_StartButton.Construct    (MENU_BUTTON, MENU_FONT_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
@@ -104,10 +112,11 @@ cGameMenu::cGameMenu()noexcept
 
     // bind menu objects
     this->BindObject(SURFACE_GAME_MISSION, &m_Background);
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aTest);  ++i) this->BindObject(SURFACE_GAME_MISSION, &m_aTest[i]);
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aTest3); ++i) this->BindObject(SURFACE_GAME_MISSION, &m_aTest3[i]);
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aTest2); ++i) this->BindObject(SURFACE_GAME_MISSION, &m_aTest2[i]);
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aTest4); ++i) this->BindObject(SURFACE_GAME_MISSION, &m_aTest4[i]);
+    //for(coreUintW i = 0u; i < ARRAY_SIZE(m_aTest);  ++i) this->BindObject(SURFACE_GAME_MISSION, &m_aTest[i]);
+    //for(coreUintW i = 0u; i < ARRAY_SIZE(m_aTest3); ++i) this->BindObject(SURFACE_GAME_MISSION, &m_aTest3[i]);
+    //for(coreUintW i = 0u; i < ARRAY_SIZE(m_aTest2); ++i) this->BindObject(SURFACE_GAME_MISSION, &m_aTest2[i]);
+    //for(coreUintW i = 0u; i < ARRAY_SIZE(m_aTest4); ++i) this->BindObject(SURFACE_GAME_MISSION, &m_aTest4[i]);
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aDemo); ++i) this->BindObject(SURFACE_GAME_MISSION, &m_aDemo[i]);
     this->BindObject(SURFACE_GAME_MISSION, &m_StartButton);
     this->BindObject(SURFACE_GAME_MISSION, &m_ConfigButton);
     this->BindObject(SURFACE_GAME_MISSION, &m_ExtraButton);

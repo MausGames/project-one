@@ -16,6 +16,7 @@ cViridoMission::cViridoMission()noexcept
 , m_BallTrail    (VIRIDO_BALLS * VIRIDO_TRAILS)
 , m_iBounceState (0u)
 , m_bBounceReal  (false)
+, m_fOverlayTime (-(GAME_INTRO_DURATION + 4.5f))   //#  
 , m_fAnimation   (0.0f)
 {
     // 
@@ -83,6 +84,16 @@ cViridoMission::cViridoMission()noexcept
 
     // 
     std::memset(m_apOwner, 0, sizeof(m_apOwner));
+
+    // 
+    m_Overlay.Construct   (MENU_FONT_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
+    //m_Overlay.SetPosition (m_aHealthBar[0].GetPosition() + coreVector2(0.017f,0.035f));
+    //m_Overlay.SetCenter   (m_aHealthBar[0].GetCenter());
+    //m_Overlay.SetAlignment(m_aHealthBar[0].GetAlignment());
+    //m_Overlay.SetColor3(COLOR_MENU_WHITE);
+    m_Overlay.SetAlpha(0.0f);
+    m_Overlay.SetText("A game by Martin Mauersics");
+    //m_Overlay.SetText("Project One");
 }
 
 
@@ -109,13 +120,6 @@ void cViridoMission::__SetupOwn()
     STAGE_MAIN
     {
         // 
-        m_Crossfield.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
-        STAGE_FINISH_AFTER(2.5f)
-    });
-
-    STAGE_MAIN
-    {
-        // 
         coreSpline2 oSpline;
         oSpline.AddNode(coreVector2(-0.8f, 1.5f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
         oSpline.AddNode(coreVector2( 0.8f,-1.5f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
@@ -123,20 +127,20 @@ void cViridoMission::__SetupOwn()
 
         for(coreUintW i = 0u; i < 10u; ++i)
         {
-            cEnemy& oEnemy = m_aScout[i];
-
             if(STAGE_SUB(I_TO_F(i)*0.4f))
             {
+                cEnemy& oEnemy = *g_pGame->GetEnemyManager()->AddEnemy<cScoutEnemy>();
+
                 oEnemy.Resurrect(oSpline, coreVector2((i/5u) ? -1.0f : 1.0f, 1.0f), coreVector2(0.0f,0.0f));
                 oEnemy.ChangeRoutine([oSpline, i](cEnemy* OUTPUT pEnemy)
                 {
-                     if(pEnemy->DefaultMovePath(oSpline, coreVector2((i/5u) ? -1.0f : 1.0f, 1.0f), coreVector2(0.0f,0.0f), pEnemy->GetLifeTime() * 50.0f))
+                    if(pEnemy->DefaultMovePath(oSpline, coreVector2((i/5u) ? -1.0f : 1.0f, 1.0f), coreVector2(0.0f,0.0f), pEnemy->GetLifeTime() * 50.0f))
                         pEnemy->Kill(false);
 
-                    if(pEnemy->GetLifeTime() > 0.5f && pEnemy->DefaultShoot(10.0f, 10u))
+                    if(pEnemy->GetLifeTime() > 0.5f && pEnemy->DefaultShoot(10.0f, (i%5u)+1u)) // 10u
                     {
                         const coreVector2 vDir = (g_pGame->FindPlayer(pEnemy->GetPosition().xy())->GetPosition().xy() - pEnemy->GetPosition().xy()).Normalize();
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.5f, pEnemy, pEnemy->GetPosition().xy(), vDir);
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.5f, pEnemy, pEnemy->GetPosition().xy(), vDir)->MakeOrange();
                     }
                 });
             }
@@ -157,33 +161,157 @@ void cViridoMission::__SetupOwn()
 
         for(coreUintW i = 0u; i < 6u; ++i)
         {
-            cEnemy& oEnemy = m_aScout[i];
-
             if(STAGE_SUB(I_TO_F(i)*0.4f))
             {
+                cEnemy& oEnemy = *g_pGame->GetEnemyManager()->AddEnemy<cScoutEnemy>();
+
                 oEnemy.Resurrect(oSpline, coreVector2(1.0f,1.0f), coreVector2((i%2u) ? -0.2f : 0.2f, 0.0f) * FOREGROUND_AREA);
                 oEnemy.ChangeRoutine([oSpline, i](cEnemy* OUTPUT pEnemy)
                 {
-                     if(pEnemy->DefaultMovePath(oSpline, coreVector2(1.0f,1.0f), coreVector2((i%2u) ? -0.2f : 0.2f, 0.0f) * FOREGROUND_AREA, pEnemy->GetLifeTime() * 50.0f))
+                    if(pEnemy->DefaultMovePath(oSpline, coreVector2(1.0f,1.0f), coreVector2((i%2u) ? -0.2f : 0.2f, 0.0f) * FOREGROUND_AREA, pEnemy->GetLifeTime() * 50.0f))
                         pEnemy->Kill(false);
 
-                    if(pEnemy->GetLifeTime() > 0.5f && pEnemy->DefaultShoot(10.0f, 10u))
+                    if(pEnemy->GetLifeTime() > 0.5f && pEnemy->DefaultShoot(10.0f, i+1u)) // 10u
                     {
                         const coreVector2 vDir = (g_pGame->FindPlayer(pEnemy->GetPosition().xy())->GetPosition().xy() - pEnemy->GetPosition().xy()).Normalize();
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.5f, pEnemy, pEnemy->GetPosition().xy(), vDir);
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.5f, pEnemy, pEnemy->GetPosition().xy(), vDir)->MakeOrange();
                     }
                 });
             }
         }
 
         // 
-        STAGE_FINISH_AFTER(5.0f)
+        STAGE_FINISH_AFTER(4.5f)
     });
 
     STAGE_MAIN
     {
         // 
-        if(g_pGame->GetEnemyList()->empty())
+        m_Overlay.SetText("Project One");
+        m_fOverlayTime = g_pGame->GetTimeMission();
+
+        // 
+        STAGE_FINISH_AFTER(1.0f)
+    });
+
+    STAGE_MAIN
+    {   
+        const coreFloat fNewAlpha = CLAMP(1.0f - 0.35f * m_fStageTime, 0.0f, 1.0f);
+
+        s_cast<cGrassBackground*>(g_pEnvironment->GetBackground())->GetWhite()->SetAlpha(fNewAlpha);
+
+        // 
+        STAGE_FINISH_AFTER(3.5f)
+    });
+
+    STAGE_MAIN
+    {
+        const coreFloat fNewAlpha = CLAMP(1.0f - 0.25f * m_fStageTime, 0.0f, 1.0f);
+
+        auto apCloud = g_pEnvironment->GetBackground()->GetAirObjectList()->front()->List();
+        for(coreUintW i = 0u, ie = apCloud->size(); i < ie; ++i)
+        {
+            (*apCloud)[i]->SetAlpha((i % 10u) ? fNewAlpha : 1.0f);
+        }
+
+
+        // 
+        coreSpline2 oSpline;
+        oSpline.AddNode(coreVector2( 1.5f,0.8f) * FOREGROUND_AREA, coreVector2(-1.0f,0.0f));
+        oSpline.AddNode(coreVector2(-1.5f,0.8f) * FOREGROUND_AREA, coreVector2(-1.0f,0.0f));
+
+        for(coreUintW i = 0u; i < 6u; ++i)
+        {
+            if(STAGE_SUB(I_TO_F(i)*0.4f))
+            {
+                cEnemy& oEnemy = *g_pGame->GetEnemyManager()->AddEnemy<cScoutEnemy>();
+
+                oEnemy.Resurrect(oSpline, coreVector2(1.0f,1.0f), coreVector2(0.0f,0.0f));
+                oEnemy.ChangeRoutine([oSpline, i](cEnemy* OUTPUT pEnemy)
+                {
+                    if(pEnemy->DefaultMovePath(oSpline, coreVector2(1.0f,1.0f), coreVector2(0.0f,0.0f), pEnemy->GetLifeTime() * 40.0f))
+                        pEnemy->Kill(false);
+
+                    if(pEnemy->GetLifeTime() > 0.5f && pEnemy->DefaultShoot(8.0f, i ? 100u : 0u)) // 10u
+                    {
+                        const coreVector2 vDir = pEnemy->GetDirection().xy().Rotate90();
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.5f, pEnemy, pEnemy->GetPosition().xy(),  vDir)->MakeYellow();
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.5f, pEnemy, pEnemy->GetPosition().xy(), -vDir)->MakeYellow();
+                    }
+                });
+            }
+        }
+
+        // 
+        STAGE_FINISH_AFTER(4.5f)
+    });
+
+    STAGE_MAIN
+    {   
+        s_cast<cGrassBackground*>(g_pEnvironment->GetBackground())->GetWhite()->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
+        auto pList = g_pEnvironment->GetBackground()->GetAirObjectList()->front();
+        auto apCloud = pList->List();
+        for(coreUintW i = 0u, ie = apCloud->size(); i < ie; ++i)
+        {
+            if(i % 10u) SAFE_DELETE((*apCloud)[i]);
+        }
+        FOR_EACH_DYN(it, *apCloud)
+        {
+            if(*it) DYN_KEEP  (it)
+               else DYN_REMOVE(it, *apCloud)
+        }
+
+        pList->MoveNormal();
+
+        // 
+        STAGE_FINISH_NOW
+    });
+
+    STAGE_MAIN
+    {
+        // 
+        coreSpline2 oSpline;
+        oSpline.AddNode(coreVector2(-1.5f,0.8f) * FOREGROUND_AREA, coreVector2(1.0f,0.0f));
+        oSpline.AddNode(coreVector2( 1.5f,0.8f) * FOREGROUND_AREA, coreVector2(1.0f,0.0f));
+
+        for(coreUintW i = 0u; i < 6u; ++i)
+        {
+            if(STAGE_SUB(I_TO_F(i)*0.4f))
+            {
+                cEnemy& oEnemy = *g_pGame->GetEnemyManager()->AddEnemy<cScoutEnemy>();
+
+                oEnemy.Resurrect(oSpline, coreVector2(1.0f,1.0f), coreVector2(0.0f,0.0f));
+                oEnemy.ChangeRoutine([oSpline, i](cEnemy* OUTPUT pEnemy)
+                {
+                    if(pEnemy->DefaultMovePath(oSpline, coreVector2(1.0f,1.0f), coreVector2(0.0f,0.0f), pEnemy->GetLifeTime() * 40.0f))
+                        pEnemy->Kill(false);
+
+                    if(pEnemy->GetLifeTime() > 0.5f && pEnemy->DefaultShoot(8.0f, i ? 100u : 0u)) // 10u
+                    {
+                        const coreVector2 vDir = pEnemy->GetDirection().xy().Rotate90();
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.5f, pEnemy, pEnemy->GetPosition().xy(),  vDir)->MakeYellow();
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.5f, pEnemy, pEnemy->GetPosition().xy(), -vDir)->MakeYellow();
+                    }
+                });
+            }
+        }
+
+        // 
+        STAGE_FINISH_AFTER(4.5f)
+    });
+
+    STAGE_MAIN
+    {
+        // 
+        m_Crossfield.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
+        STAGE_FINISH_NOW
+    });
+
+    STAGE_MAIN
+    {
+        // 
+        if(CONTAINS_VALUE(m_Crossfield.GetStatus(), ENEMY_STATUS_DEAD))
             STAGE_FINISH_NOW
     });
 
@@ -202,31 +330,44 @@ void cViridoMission::__SetupOwn()
         if(STAGE_SUB(0.0f)) m_Torus.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
 
         // 
-        if(g_pGame->GetEnemyList()->empty())
+        if(CONTAINS_VALUE(m_Torus.GetStatus(), ENEMY_STATUS_DEAD))
             STAGE_FINISH_NOW
     });
 
-    
     STAGE_MAIN
     {
-        if(STAGE_SUB(0.0f))
-        {
-            // 
-            for(coreUintW i = 0u; i < VIRIDO_SCOUTS; ++i)
-                m_aScout[i].SetCollisionModifier(coreVector3(1.2f,1.2f,1.5f)); // TODO # make quadratic! 
+        // 
+        m_Overlay.SetText("Demo Over - Thank you for playing!");
+        m_fOverlayTime = g_pGame->GetTimeMission();
 
-
-            m_Warrior.SetSize(m_Warrior.GetSize() * 1.2f);
-
-
-            // 
-            m_Vaus.Resurrect(coreVector2(0.0f,-2.0f) * FOREGROUND_AREA, coreVector2(0.0f,1.0f));
-        }
+        g_pEnvironment->SetTargetDirection(coreVector2(0.0f,1.0f));
+        g_pEnvironment->SetTargetSide     (coreVector2(0.0f,0.0f));
+        g_pEnvironment->SetTargetSpeed    (2.0f);
 
         // 
-        if(g_pGame->GetEnemyList()->empty())
-            STAGE_FINISH_NOW
+        STAGE_FINISH_AFTER(10000.0f)
     });
+
+    //STAGE_MAIN
+    //{
+    //    if(STAGE_SUB(0.0f))
+    //    {
+    //        // 
+    //        for(coreUintW i = 0u; i < VIRIDO_SCOUTS; ++i)
+    //            m_aScout[i].SetCollisionModifier(coreVector3(1.2f,1.2f,1.5f)); // TODO # make quadratic! 
+    //
+    //
+    //        m_Warrior.SetSize(m_Warrior.GetSize() * 1.2f);
+    //
+    //
+    //        // 
+    //        m_Vaus.Resurrect(coreVector2(0.0f,-2.0f) * FOREGROUND_AREA, coreVector2(0.0f,1.0f));
+    //    }
+    //
+    //    // 
+    //    if(g_pGame->GetEnemyList()->empty())
+    //        STAGE_FINISH_NOW
+    //});
 }
 
 
@@ -262,10 +403,27 @@ void cViridoMission::__RenderOwnStrong()
 
 // ****************************************************************
 // 
+void cViridoMission::__RenderOwnAfter()
+{
+    glDisable(GL_DEPTH_TEST);
+    m_Overlay.Render();
+    glEnable(GL_DEPTH_TEST);
+}
+
+
+// ****************************************************************
+// 
 void cViridoMission::__MoveOwnAfter()
 {
     // 
     m_fAnimation.Update(0.2f);
+
+
+    if(g_pGame->GetTimeMission() >= m_fOverlayTime && g_pGame->GetTimeMission() < (m_fOverlayTime + 6.5f))  
+         m_Overlay.SetAlpha(MIN(m_Overlay.GetAlpha() + 1.0f * Core::System->GetTime(), 1.0f));  
+    else m_Overlay.SetAlpha(MAX(m_Overlay.GetAlpha() - 1.0f * Core::System->GetTime(), 0.0f));  
+    m_Overlay.Move();  
+
 
     // 
     auto nEffectFunc = [](const coreVector2& vEffectPos)

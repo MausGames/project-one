@@ -21,8 +21,8 @@
 #define TOOLTIP_LINES        (8u)                           // 
 #define TOOLTIP_LINE_HEIGHT  (0.022f)                       // 
 #define TOOLTIP_OUTLINE_SIZE (1u)                           // 
-#define TOOLTIP_BORDER_SIZE  (coreVector2( 0.02f,0.016f))   // 
-#define TOOLTIP_MOUSE_OFFSET (coreVector2(-0.02f,0.02f))    // 
+#define TOOLTIP_BORDER_SIZE  (coreVector2(0.02f, 0.016f))   // 
+#define TOOLTIP_MOUSE_OFFSET (coreVector2(0.03f,-0.03f))    // 
 
 #define TOOLTIP_PRINT(f,...) (this + __LINE__ * 100u), f, ##__VA_ARGS__   // 
 #define TOOLTIP_ONELINER     (1000.0f)                                    // 

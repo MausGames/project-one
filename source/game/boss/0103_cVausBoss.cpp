@@ -48,7 +48,7 @@ cVausBoss::~cVausBoss()
 void cVausBoss::__ResurrectOwn()
 {
     cViridoMission* pMission = s_cast<cViridoMission*>(g_pGame->GetMission());
-    cWarriorEnemy*  pWarrior = pMission->GetWarrior();
+    cWarriorEnemy*  pWarrior = NULL;//pMission->GetWarrior();
 
     // 
     pMission->EnableBall  (0u, coreVector2(0.0f,0.0f), coreVector2(-0.5f,1.0f).Normalize());
@@ -78,7 +78,7 @@ void cVausBoss::__MoveOwn()
 {
     cViridoMission* pMission = s_cast<cViridoMission*>(g_pGame->GetMission());
     coreObject3D*   pBall    = pMission->GetBall(0u);
-    cWarriorEnemy*  pWarrior = pMission->GetWarrior();
+    cWarriorEnemy*  pWarrior = NULL;//pMission->GetWarrior();
 
     // ################################################################
     // 
@@ -123,52 +123,52 @@ void cVausBoss::__MoveOwn()
 
 
     
-    if(pWarrior->GetCurHealthPct() < 0.9f)
-    {
-
-        PHASE_CONTROL_TICKER(2u, 0u, 1.0f)
-        {
-            for(coreUintW i = 0u; i < VIRIDO_SCOUTS; ++i)
-            {
-                cScoutEnemy* pScout = pMission->GetScout(i);
-                if(CONTAINS_VALUE(pScout->GetStatus(), ENEMY_STATUS_DEAD)) continue;
-
-                cPlayer* pPlayer = g_pGame->FindPlayer(pScout->GetPosition().xy());
-
-                const coreVector2 vDir = (pPlayer->GetPosition().xy() - pScout->GetPosition().xy()).Normalize();
-
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.4f, this, pScout->GetPosition().xy(), vDir)->MakeYellow();
-            }
-
-        });
-
-
-
-        for(coreUintW i = 0u; i < VIRIDO_SCOUTS; ++i)
-        {
-            cScoutEnemy* pScout = pMission->GetScout(i);
-
-            const coreUintW A = (i/8u + (CONTAINS_BIT(m_iScoutOrder, i%8u) ? 1u : 0u)) & 0x01u;
-
-            const coreVector2 vGridPos = coreVector2(-0.7f + 0.2f*I_TO_F(i%8u), 0.47f + 0.2f*I_TO_F(A)) * FOREGROUND_AREA;
-
-            if(CONTAINS_VALUE(pScout->GetStatus(), ENEMY_STATUS_DEAD))
-            {
-                if(!A) m_iScoutOrder ^= BIT(i%8u);
-
-                if(m_aiCounter[SCOUT_RESURRECTIONS] < 80)//40)
-                {
-                    pScout->Resurrect(vGridPos + coreVector2(0.0f, 3.0f*FOREGROUND_AREA.y), coreVector2(0.0f,-1.0f));
-                    ++m_aiCounter[SCOUT_RESURRECTIONS];
-                }
-            }
-
-            pScout->DefaultMoveSmooth(vGridPos, 3.0f, 30.0f);
-        }
-
-        STATIC_ASSERT(VIRIDO_SCOUTS/2u <= sizeof(m_iScoutOrder)*8u)
-
-    }
+    //if(pWarrior->GetCurHealthPct() < 0.9f)
+    //{
+    //
+    //    PHASE_CONTROL_TICKER(2u, 0u, 1.0f)
+    //    {
+    //        for(coreUintW i = 0u; i < VIRIDO_SCOUTS; ++i)
+    //        {
+    //            cScoutEnemy* pScout = pMission->GetScout(i);
+    //            if(CONTAINS_VALUE(pScout->GetStatus(), ENEMY_STATUS_DEAD)) continue;
+    //
+    //            cPlayer* pPlayer = g_pGame->FindPlayer(pScout->GetPosition().xy());
+    //
+    //            const coreVector2 vDir = (pPlayer->GetPosition().xy() - pScout->GetPosition().xy()).Normalize();
+    //
+    //            g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.4f, this, pScout->GetPosition().xy(), vDir)->MakeYellow();
+    //        }
+    //
+    //    });
+    //
+    //
+    //
+    //    for(coreUintW i = 0u; i < VIRIDO_SCOUTS; ++i)
+    //    {
+    //        cScoutEnemy* pScout = pMission->GetScout(i);
+    //
+    //        const coreUintW A = (i/8u + (CONTAINS_BIT(m_iScoutOrder, i%8u) ? 1u : 0u)) & 0x01u;
+    //
+    //        const coreVector2 vGridPos = coreVector2(-0.7f + 0.2f*I_TO_F(i%8u), 0.47f + 0.2f*I_TO_F(A)) * FOREGROUND_AREA;
+    //
+    //        if(CONTAINS_VALUE(pScout->GetStatus(), ENEMY_STATUS_DEAD))
+    //        {
+    //            if(!A) m_iScoutOrder ^= BIT(i%8u);
+    //
+    //            if(m_aiCounter[SCOUT_RESURRECTIONS] < 80)//40)
+    //            {
+    //                pScout->Resurrect(vGridPos + coreVector2(0.0f, 3.0f*FOREGROUND_AREA.y), coreVector2(0.0f,-1.0f));
+    //                ++m_aiCounter[SCOUT_RESURRECTIONS];
+    //            }
+    //        }
+    //
+    //        pScout->DefaultMoveSmooth(vGridPos, 3.0f, 30.0f);
+    //    }
+    //
+    //    STATIC_ASSERT(VIRIDO_SCOUTS/2u <= sizeof(m_iScoutOrder)*8u)
+    //
+    //}
 
     const coreFloat fDiff  = pBall->GetPosition().x - this->GetPosition().x;
     const coreFloat fSpeed = fDiff * 20.0f * Core::System->GetTime();// * RCP(MAX((ABS(vDiff.y) - 5.0f) / 4.0f, 1.0f));

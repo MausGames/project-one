@@ -63,6 +63,7 @@
 
 // color values
 #define COLOR_MENU_WHITE    (coreVector3(1.000f, 1.000f, 1.000f) * MENU_CONTRAST_WHITE)
+#define COLOR_MENU_BLACK    (coreVector3(1.000f, 1.000f, 1.000f) * MENU_CONTRAST_BLACK)
 #define COLOR_MENU_YELLOW   (coreVector3(1.000f, 0.824f, 0.392f))
 #define COLOR_MENU_ORANGE   (coreVector3(1.000f, 0.443f, 0.227f))
 #define COLOR_MENU_RED      (coreVector3(1.000f, 0.275f, 0.275f))
@@ -115,9 +116,6 @@
     inline const coreInt32 GetID  ()const override {return i;} \
     inline const coreChar* GetName()const override {return n;}
 #define REF_ID(i) (s_cast<coreInt32>(i))
-
-// container check macro
-#define CONTAINS(c,i) (std::find((c).begin(), (c).end(), (i)) != (c).end())
 
 // angle difference helper-function
 inline FUNC_CONST coreFloat AngleDiff(const coreFloat& x, const coreFloat& y)

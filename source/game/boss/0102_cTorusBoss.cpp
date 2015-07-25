@@ -30,7 +30,7 @@ cTorusBoss::cTorusBoss()noexcept
     this->SetCollisionModifier(coreVector3(0.8f,0.8f,1.0f));
 
     // configure the boss
-    this->Configure(4000, coreVector3(0.0f/360.0f, 0.0f/100.0f, 60.0f/100.0f).HSVtoRGB());
+    this->Configure(2500, coreVector3(0.0f/360.0f, 0.0f/100.0f, 60.0f/100.0f).HSVtoRGB()); // 4000
 
     // 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRay); ++i)
@@ -377,7 +377,7 @@ void cTorusBoss::__MoveOwn()
     // 
     else if(m_iPhase == 33u)
     {
-        PHASE_CONTROL_TICKER(0u, 0u, 1.0f/6.0f)
+        PHASE_CONTROL_TICKER(0u, 0u, 1.0f/4.0f)
         {
             ++m_iPhase;
         });
@@ -448,7 +448,7 @@ void cTorusBoss::__MoveOwn()
     // 
     else if(m_iPhase == 35u)
     {
-        PHASE_CONTROL_TICKER(0u, 0u, 1.0f/6.0f)
+        PHASE_CONTROL_TICKER(0u, 0u, 1.0f/4.0f)
         {
             m_iPhase = (m_aiCounter[BALL_STATUS] < coreInt16(VIRIDO_BALLS)) ? 40u : 14u;
 
@@ -783,7 +783,7 @@ void cTorusBoss::__CreateOverdrive(const coreUintW& iIndex, const coreVector3& v
             }
 
             // 
-            g_pSpecialEffects->ShakeScreen(0.08f + 0.47f * SIN(PI * fTime));
+            g_pSpecialEffects->ShakeScreen(0.1f + 0.55f * SIN(PI * fTime));
 
             // 
             vOldHit = vNewHit;

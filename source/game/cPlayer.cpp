@@ -28,7 +28,6 @@ cPlayer::cPlayer()noexcept
     // set object properties
     this->SetDirection  (coreVector3(0.0f,1.0f,0.0f));
     this->SetOrientation(coreVector3(0.0f,0.0f,1.0f));
-    this->SetTexSize    (coreVector2(1.2f,1.2f));
 
     // set initial status
     m_iStatus = PLAYER_STATUS_DEAD;
@@ -101,8 +100,8 @@ void cPlayer::Configure(const coreUintW& iShipType, const coreVector3& vColor, c
     }
 
     // load models
-    this->DefineModel   (pcModelHigh);
-    this->DefineModelLow(pcModelLow);
+    this->DefineModelHigh(pcModelHigh);
+    this->DefineModelLow (pcModelLow);
     this->GetModel().GetHandle()->OnLoadOnce([&]()
     {
         // normalize collision size of different ship models
@@ -311,7 +310,7 @@ void cPlayer::Resurrect(const coreVector2& vPosition)
     m_vNewPos = vPosition;
 
     // add ship to the game
-    cShip::_Resurrect(vPosition, coreVector2(0.0f,1.0f), TYPE_PLAYER);
+    cShip::_Resurrect(true, vPosition, coreVector2(0.0f,1.0f), TYPE_PLAYER);
 }
 
 
@@ -323,14 +322,14 @@ void cPlayer::Kill(const coreBool& bAnimated)
     if(CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_DEAD)) return;
     ADD_VALUE(m_iStatus, PLAYER_STATUS_DEAD)
 
-    // 
-    if(bAnimated) g_pSpecialEffects->MacroExplosionPhysicalBig(this->GetPosition());
-
     // reset weapon shoot status
     for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i) m_apWeapon[i]->Update(0u);
 
+    // 
+    if(bAnimated) g_pSpecialEffects->MacroExplosionPhysicalBig(this->GetPosition());
+
     // remove ship from the game
-    cShip::_Kill(bAnimated);
+    cShip::_Kill(true, bAnimated);
 }
 
 

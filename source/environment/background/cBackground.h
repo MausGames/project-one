@@ -14,7 +14,7 @@
 // TODO: merge stone diff and norm textures (own shader ?)
 // TODO: clouds on grass background need no heap allocation! (beware of _FillInfinite and destructor delete)
 // TODO: cleanup-function for background batch-lists ?
-// TODO: added object gets shadow-shader 
+// TODO: added object gets shadow-shader
 
 
 // ****************************************************************
@@ -32,8 +32,8 @@
 #define GRASS_REEDS_2_RESERVE (128u)
 #define GRASS_FLOWERS_NUM     (2048u)
 #define GRASS_FLOWERS_RESERVE (256u)
-#define GRASS_CLOUDS_NUM      (64u)
-#define GRASS_CLOUDS_RESERVE  (78u)   // # tested
+#define GRASS_CLOUDS_NUM      (64u)//(640u)  
+#define GRASS_CLOUDS_RESERVE  (78u)//(780u)   // # tested  
 
 
 // ****************************************************************
@@ -122,6 +122,8 @@ private:
 class cGrassBackground final : public cBackground
 {
 private:
+    coreObject2D m_White;  
+
     coreSoundPtr m_pNatureSound;   // nature sound-effect
 
 
@@ -133,9 +135,15 @@ public:
     ASSIGN_ID(1, "Grass")
 
 
+    
+      
+    inline coreObject2D* GetWhite() {return &m_White;}  
+
+
 private:
     // execute own routines
-    void __MoveOwn()override;
+    void __RenderOwn()override;
+    void __MoveOwn  ()override;
 };
 
 

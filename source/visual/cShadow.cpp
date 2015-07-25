@@ -8,12 +8,12 @@
 //////////////////////////////////////////////////////
 #include "main.h"
 
-cBindContainer cShadow::s_GlobalContainer;          // = NULL;
-coreProgramPtr cShadow::s_pProgramSingle               = NULL;
-coreProgramPtr cShadow::s_pProgramInstanced            = NULL;
-coreProgramPtr cShadow::s_apHandle[SHADOW_HANDLES]; // = NULL;
-coreMatrix4    cShadow::s_amDrawShadowMatrix[2];    // = coreMatrix4::Identity();
-coreMatrix4    cShadow::s_mReadShadowMatrix            = coreMatrix4::Identity();
+cBindContainerIn cShadow::s_GlobalContainer;          // = NULL;
+coreProgramPtr   cShadow::s_pProgramSingle               = NULL;
+coreProgramPtr   cShadow::s_pProgramInstanced            = NULL;
+coreProgramPtr   cShadow::s_apHandle[SHADOW_HANDLES]; // = NULL;
+coreMatrix4      cShadow::s_amDrawShadowMatrix[2];    // = coreMatrix4::Identity();
+coreMatrix4      cShadow::s_mReadShadowMatrix            = coreMatrix4::Identity();
 
 
 // ****************************************************************

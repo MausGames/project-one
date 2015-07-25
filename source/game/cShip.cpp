@@ -54,7 +54,7 @@ coreBool cShip::_TakeDamage(const coreInt32& iDamage)
 
 // ****************************************************************
 // add ship to the game
-void cShip::_Resurrect(const coreVector2& vPosition, const coreVector2& vDirection, const coreInt32& iType)
+void cShip::_Resurrect(const coreBool& bSingle, const coreVector2& vPosition, const coreVector2& vDirection, const coreInt32& iType)
 {
     // reset ship properties
     m_iCurHealth = m_iMaxHealth;
@@ -63,8 +63,11 @@ void cShip::_Resurrect(const coreVector2& vPosition, const coreVector2& vDirecti
     this->SetColor3   (this->GetBaseColor());
 
     // add ship to global shadow and outline
-    cShadow::GetGlobalContainer()->BindObject(this);
-    g_aaOutline[PRIO_WEAK][STYLE_FULL].BindObject(this);
+    if(bSingle)
+    {
+        cShadow::GetGlobalContainer()->BindObject(this);
+        g_aaOutline[PRIO_WEAK][STYLE_FULL].BindObject(this);
+    }
 
     // enable collision
     this->ChangeType(iType);
@@ -73,11 +76,14 @@ void cShip::_Resurrect(const coreVector2& vPosition, const coreVector2& vDirecti
 
 // ****************************************************************
 // remove ship from the game
-void cShip::_Kill(const coreBool& bAnimated)
+void cShip::_Kill(const coreBool& bSingle, const coreBool& bAnimated)
 {
     // remove ship from global shadow and outline
-    cShadow::GetGlobalContainer()->UnbindObject(this);
-    g_aaOutline[PRIO_WEAK][STYLE_FULL].UnbindObject(this);
+    if(bSingle)
+    {
+        cShadow::GetGlobalContainer()->UnbindObject(this);
+        g_aaOutline[PRIO_WEAK][STYLE_FULL].UnbindObject(this);
+    }
 
     // disable collision
     this->ChangeType(0);
@@ -88,16 +94,13 @@ void cShip::_Kill(const coreBool& bAnimated)
 // 
 void cShip::_UpdateBlink()
 {
-    if(!this->GetProgram().IsUsable()) return;
-
     // 
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(PRINTSCREEN), CORE_INPUT_PRESS))
         m_fBlink = 0.0f;
 
     // 
-    this->GetProgram()->Enable();
-    this->GetProgram()->SendUniform("u_v1Blink", MIN(m_fBlink, 1.0f) * 0.8f);
+    this->SetTexSize(coreVector2(MIN(m_fBlink, 1.0f) * 0.8f, 0.0f));
 
     // 
-    if(m_fBlink) m_fBlink = MAX(m_fBlink - 3.0f*Core::System->GetTime(), 0.0f);
+    m_fBlink = MAX(m_fBlink - 3.0f*Core::System->GetTime(), 0.0f);
 }

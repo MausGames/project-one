@@ -26,6 +26,7 @@ cMission::cMission()noexcept
 // setup the mission
 void cMission::Setup()
 {
+    // 
     ASSERT(m_anStage.empty())
     m_anStage.clear();
 
@@ -48,6 +49,27 @@ void cMission::Setup()
         ASSERT(m_apBoss[i])
 
 #endif
+}
+
+
+// ****************************************************************
+// render the mission
+void cMission::RenderWeak()
+{
+    // 
+    this->__RenderOwnWeak();
+}
+
+void cMission::RenderStrong()
+{
+    // 
+    this->__RenderOwnStrong();
+}
+
+void cMission::RenderAfter()
+{
+    // 
+    this->__RenderOwnAfter();
 }
 
 

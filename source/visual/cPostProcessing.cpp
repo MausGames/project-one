@@ -31,7 +31,7 @@ cPostProcessing::cPostProcessing()noexcept
     m_Watermark.SetDirection(coreVector2( 1.0f,  0.0f));
     m_Watermark.SetCenter   (coreVector2( 0.5f, -0.5f));
     m_Watermark.SetAlignment(coreVector2(-1.0f,  1.0f));
-    m_Watermark.SetText     ("@MausGames");
+    m_Watermark.SetText     ("Project One (@MausGames - work in progress)");
     m_Watermark.Move();
 
     // reset side-object opacity

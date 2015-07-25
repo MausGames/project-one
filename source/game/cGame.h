@@ -10,13 +10,13 @@
 #ifndef _P1_GUARD_GAME_H_
 #define _P1_GUARD_GAME_H_
 
-// TODO: enemy bullet cleanup on mission unload
+// TODO: enemy bullet (and enemy?) cleanup on mission unload
 
 
 // ****************************************************************
 // game definitions
 #define GAME_PLAYERS        (PLAYERS)        // default number of players
-#define GAME_INTRO_DELAY    (0.2f)           // 
+#define GAME_INTRO_DELAY    (5.5f)           // 
 #define GAME_INTRO_DURATION (3.5f)           // 
 
 #define GAME_DEPTH_WEAK     (0.4f), (1.0f)   // 
@@ -39,8 +39,8 @@ class cGame final
 {
 private:
     cPlayer m_aPlayer[GAME_PLAYERS];         // player objects
-    coreSet<cEnemy*> m_apEnemyList;          // list with pointers to active enemy objects
 
+    cEnemyManager  m_EnemyManager;           // enemy manager
     cBulletManager m_BulletManagerPlayer;    // low-priority bullet manager
     cBulletManager m_BulletManagerEnemy;     // high-priority bullet manager
 
@@ -61,7 +61,6 @@ public:
     explicit cGame(const coreBool& bCoop)noexcept;
     ~cGame();
 
-    FRIEND_CLASS(cEnemy)
     DISABLE_COPY(cGame)
 
     // render and move the game
@@ -75,21 +74,19 @@ public:
     void LoadMission(const coreInt32& iID);
     void RestartMission();
 
-    // access game objects
-    inline cPlayer*              GetPlayer             (const coreUintW& iIndex) {ASSERT(iIndex < GAME_PLAYERS) return &m_aPlayer[iIndex];}
-    inline std::vector<cEnemy*>* GetEnemyList          ()                        {return &m_apEnemyList;}
-    inline cBulletManager*       GetBulletManagerPlayer()                        {return &m_BulletManagerPlayer;}
-    inline cBulletManager*       GetBulletManagerEnemy ()                        {return &m_BulletManagerEnemy;}
-    inline cCombatStats*         GetCombatStats        ()                        {return &m_CombatStats;}
-    inline cCombatText*          GetCombatText         ()                        {return &m_CombatText;}
-    inline cInterface*           GetInterface          ()                        {return &m_Interface;}
-    inline cMission*             GetMission            ()const                   {ASSERT(m_pMission) return m_pMission;}
-
     // 
     cPlayer* RETURN_NONNULL FindPlayer(const coreVector2& vPosition);
-    cEnemy*  RETURN_NONNULL FindEnemy (const coreVector2& vPosition);
     template <typename F> void ForEachPlayer(F&& nFunction);
-    template <typename F> void ForEachEnemy (F&& nFunction);
+
+    // access game objects
+    inline cPlayer*        GetPlayer             (const coreUintW& iIndex) {ASSERT(iIndex < GAME_PLAYERS) return &m_aPlayer[iIndex];}
+    inline cEnemyManager*  GetEnemyManager       ()                        {return &m_EnemyManager;}
+    inline cBulletManager* GetBulletManagerPlayer()                        {return &m_BulletManagerPlayer;}
+    inline cBulletManager* GetBulletManagerEnemy ()                        {return &m_BulletManagerEnemy;}
+    inline cCombatStats*   GetCombatStats        ()                        {return &m_CombatStats;}
+    inline cCombatText*    GetCombatText         ()                        {return &m_CombatText;}
+    inline cInterface*     GetInterface          ()                        {return &m_Interface;}
+    inline cMission*       GetMission            ()const                   {ASSERT(m_pMission) return m_pMission;}
 
     // get object properties
     inline const coreFloat& GetTimeMission()const                        {return m_fTimeMission;}
@@ -102,11 +99,6 @@ private:
     // 
     coreBool __HandleIntro();
     void     __HandleCollisions();
-
-    // manage enemies
-    inline void __BindEnemy   (cEnemy* pEnemy) {ASSERT(!m_apEnemyList.count(pEnemy)) m_apEnemyList.insert(pEnemy);}
-    inline void __UnbindEnemy (cEnemy* pEnemy) {ASSERT( m_apEnemyList.count(pEnemy)) m_apEnemyList.erase (pEnemy);}
-    inline void __ClearEnemies()               {this->ForEachEnemy([](cEnemy* OUTPUT pEnemy) {pEnemy->Kill(false);});}
 };
 
 
@@ -126,19 +118,6 @@ template <typename F> void cGame::ForEachPlayer(F&& nFunction)
         // 
         nFunction(pCurPlayer);
     }
-}
-
-
-// ****************************************************************
-// 
-template <typename F> void cGame::ForEachEnemy(F&& nFunction)
-{
-    // 
-    auto apCopy = m_apEnemyList;
-
-    // 
-    FOR_EACH(it, apCopy)
-        nFunction(*it);
 }
 
 

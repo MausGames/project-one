@@ -49,12 +49,8 @@ cGame::~cGame()
     m_BulletManagerEnemy .ClearBullets(false);
 
     // delete last mission
-    this->__ClearEnemies();
     SAFE_DELETE(m_pMission)
-
-    // remove all remaining enemies
-    ASSERT(m_apEnemyList.empty())
-    m_apEnemyList.clear();
+    m_EnemyManager.ClearEnemies(false);
 }
 
 
@@ -66,16 +62,15 @@ void cGame::Render()
     for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
         m_aPlayer[i].Render();
 
-    // render all active enemies
-    FOR_EACH(it, m_apEnemyList)
-        (*it)->Render();
+    // render all enemies
+    m_EnemyManager.Render();
 
     // move everything to the back (can be overdrawn)
     glDepthRange(GAME_DEPTH_WEAK);
     {
         // 
-        FOR_EACH(it, m_apEnemyList) (*it)->__RenderOwnWeak();
-        m_pMission->__RenderOwnWeak();
+        m_EnemyManager.RenderWeak();
+        m_pMission   ->RenderWeak();
 
         // apply weak effect outline-layer
         g_aaOutline[PRIO_WEAK][STYLE_FULL]  .Apply();
@@ -95,16 +90,16 @@ void cGame::Render()
     glDepthRange(GAME_DEPTH_STRONG);
     {
         // 
-        FOR_EACH(it, m_apEnemyList) (*it)->__RenderOwnStrong();
-        m_pMission->__RenderOwnStrong();
+        m_EnemyManager.RenderStrong();
+        m_pMission   ->RenderStrong();
 
         // apply strong effect outline-layer
         g_aaOutline[PRIO_STRONG][STYLE_FULL]  .Apply();
         g_aaOutline[PRIO_STRONG][STYLE_DIRECT].Apply();
 
         // 
-        FOR_EACH(it, m_apEnemyList) (*it)->__RenderOwnAfter();
-        m_pMission->__RenderOwnAfter();
+        m_EnemyManager.RenderAfter();
+        m_pMission   ->RenderAfter();
     }
     glDepthRange(GAME_DEPTH_ENEMY);
     {
@@ -154,9 +149,8 @@ void cGame::Move()
         for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
             m_aPlayer[i].Move();
 
-        // move all active enemies
-        this->ForEachEnemy([](cEnemy* OUTPUT pEnemy)
-            {pEnemy->Move();});
+        // move all enemies
+        m_EnemyManager.Move();
     }
     m_pMission->MoveAfter();
 
@@ -180,8 +174,8 @@ void cGame::LoadMission(const coreInt32& iID)
     if(m_pMission) if(m_pMission->GetID() == iID) return;
 
     // delete possible old mission
-    this->__ClearEnemies();
     SAFE_DELETE(m_pMission)
+    m_EnemyManager.ClearEnemies(false);
 
     // create new mission
     switch(iID)
@@ -256,6 +250,7 @@ cPlayer* RETURN_NONNULL cGame::FindPlayer(const coreVector2& vPosition)
     cPlayer*  pPlayer = &m_aPlayer[0];
     coreFloat fLenSq  = 1.0e06f;
 
+    // 
     for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
     {
         cPlayer* pCurPlayer = &m_aPlayer[i];
@@ -274,34 +269,6 @@ cPlayer* RETURN_NONNULL cGame::FindPlayer(const coreVector2& vPosition)
     // 
     ASSERT(pPlayer)
     return pPlayer;
-}
-
-
-// ****************************************************************
-// 
-cEnemy* RETURN_NONNULL cGame::FindEnemy(const coreVector2& vPosition)
-{
-    // 
-    cEnemy*   pEnemy = m_pMission->GetBoss(0u);
-    coreFloat fLenSq = 1.0e06f;
-
-    FOR_EACH(it, m_apEnemyList)
-    {
-        cEnemy* pCurEnemy = (*it);
-
-        // 
-        const coreFloat fCurLenSq = (pCurEnemy->GetPosition().xy() - vPosition).LengthSq();
-        if(fCurLenSq < fLenSq)
-        {
-            // 
-            pEnemy = pCurEnemy;
-            fLenSq = fCurLenSq;
-        }
-    }
-
-    // 
-    ASSERT(pEnemy)
-    return pEnemy;
 }
 
 
@@ -347,8 +314,12 @@ coreBool cGame::__HandleIntro()
                 const coreVector2 vDir  = coreVector2::Direction(LERPS(0.0f, 4.0f*PI,                    fTime));
 
                 // 
-                //if((oPlayer.GetPosition().y < -FOREGROUND_AREA.y) && (vPos.x >= -FOREGROUND_AREA.y)) 
-                //    g_pSpecialEffects->CreateBlowColor(oPlayer.GetPosition(), coreVector3(0.0f,1.0f,0.0f), SPECIAL_BLOW_SMALL, COLOR_FIRE_BLUE); 
+                if((oPlayer.GetPosition().y < -FOREGROUND_AREA.y) && (vPos.x >= -FOREGROUND_AREA.y))
+                {
+                    g_pSpecialEffects->PlaySound      (oPlayer.GetPosition(), 1.0f, SOUND_RUSH_LONG);
+                    g_pSpecialEffects->CreateBlowColor(oPlayer.GetPosition(), coreVector3(0.0f,1.0f,0.0f), SPECIAL_BLOW_SMALL, COLOR_FIRE_BLUE);
+                    g_MusicPlayer.Control()->Play();  
+                }
 
                 // fly player animated into the game field
                 oPlayer.SetPosition   (coreVector3(oPlayer.GetPosition().x, vPos));
