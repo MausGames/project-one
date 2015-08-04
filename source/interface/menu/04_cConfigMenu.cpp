@@ -242,7 +242,7 @@ void cConfigMenu::Move()
             else if(m_ShadowQuality.GetCurIndex() == 2u) m_ShadowQuality.GetCaption()->SetColor3(COLOR_MENU_GREEN);
 
             // 
-            if(m_ShadowQuality.IsClickedArrow())
+            if(m_ShadowQuality.IsClickedArrow(CORE_INPUT_LEFT, CORE_INPUT_HOLD))
                 this->__UpdateShadowQuality();
         }
         break;
@@ -259,6 +259,10 @@ void cConfigMenu::Move()
             m_OverallVolume.GetCaption()->SetColor3(cMenu::HealthColor(I_TO_F(m_OverallVolume.GetCurEntry().second) * 0.01f));
             m_MusicVolume  .GetCaption()->SetColor3(cMenu::HealthColor(I_TO_F(m_MusicVolume  .GetCurEntry().second) * 0.01f));
             m_EffectVolume .GetCaption()->SetColor3(cMenu::HealthColor(I_TO_F(m_EffectVolume .GetCurEntry().second) * 0.01f));
+
+            // 
+            if(m_OverallVolume.IsClickedArrow(CORE_INPUT_LEFT, CORE_INPUT_HOLD))
+                this->__UpdateOverallVolume();
         }
         break;
 
@@ -371,6 +375,7 @@ void cConfigMenu::CheckValues()
 void cConfigMenu::LoadValues()
 {
     const coreUintW iShadowQualityIndex = m_ShadowQuality.GetCurIndex();
+    const coreUintW iOverallVolumeIndex = m_OverallVolume.GetCurIndex();
     const coreUintW iLanguageIndex      = m_Language     .GetCurIndex();
 
     // 
@@ -397,10 +402,11 @@ void cConfigMenu::LoadValues()
     const coreLookupStr<std::string>& asLanguageList = cMenu::GetLanguageList();
     m_Language.SelectIndex(std::find(asLanguageList.begin(), asLanguageList.end(), Core::Config->GetString(CORE_CONFIG_SYSTEM_LANGUAGE)) - asLanguageList.begin());
 
-    //
+    // 
     if(m_SaveButton.GetOverride() >= 0)
     {
         if(iShadowQualityIndex != m_ShadowQuality.GetCurIndex()) this->__UpdateShadowQuality();
+        if(iOverallVolumeIndex != m_OverallVolume.GetCurIndex()) this->__UpdateOverallVolume();
         if(iLanguageIndex      != m_Language     .GetCurIndex()) this->__UpdateLanguage();
     }
 
@@ -470,6 +476,15 @@ void cConfigMenu::__UpdateShadowQuality()
 
 // ****************************************************************
 // 
+void cConfigMenu::__UpdateOverallVolume()
+{
+    // 
+    Core::Audio->SetVolume(I_TO_F(m_OverallVolume.GetCurEntry().second) * 0.01f);
+}
+
+
+// ****************************************************************
+// 
 void cConfigMenu::__UpdateLanguage()
 {
     // 
@@ -477,5 +492,5 @@ void cConfigMenu::__UpdateLanguage()
     Core::Language->Load(asLanguageList.at(m_Language.GetCurEntry().first->c_str()).c_str());
 
     // 
-    g_pMenu->GetTooltip()->Reset();
+    g_pMenu->GetTooltip()->Invalidate();
 }

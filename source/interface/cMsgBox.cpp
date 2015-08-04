@@ -120,7 +120,7 @@ void cMsgBox::Move()
         cMenu::UpdateButton(&m_Yes, m_Yes.IsFocused(), COLOR_MENU_GREEN);
 
         // 
-        if(m_Yes.IsFocused()) {g_pMenu->GetTooltip()->ShowText(TOOLTIP_ONELINER, Core::Language->GetString(PRINT("OK_%u", 1u + (m_iCurTooltip & 0x0Fu))));}
+        //if(m_Yes.IsFocused()) {g_pMenu->GetTooltip()->ShowText(TOOLTIP_ONELINER, Core::Language->GetString(PRINT("OK_%u", 1u + (m_iCurTooltip & 0x0Fu))));}
         if(m_Yes.IsClicked()) {m_nCallback(MSGBOX_STATUS_OK); m_nCallback = NULL;}
     }
     else if(m_iType == MSGBOX_TYPE_QUESTION)
@@ -136,8 +136,8 @@ void cMsgBox::Move()
         cMenu::UpdateButton(&m_No,  m_No .IsFocused(), COLOR_MENU_RED);
 
         // 
-             if(m_Yes.IsFocused())         {g_pMenu->GetTooltip()->ShowText(TOOLTIP_ONELINER, Core::Language->GetString(PRINT("YES_%u", 1u + ((m_iCurTooltip & 0xF0u) >> 4u))));}
-        else if(m_No .IsFocused())         {g_pMenu->GetTooltip()->ShowText(TOOLTIP_ONELINER, Core::Language->GetString(PRINT("NO_%u",  1u +  (m_iCurTooltip & 0x0Fu))));}
+        //     if(m_Yes.IsFocused())         {g_pMenu->GetTooltip()->ShowText(TOOLTIP_ONELINER, Core::Language->GetString(PRINT("YES_%u", 1u + ((m_iCurTooltip & 0xF0u) >> 4u))));}
+        //else if(m_No .IsFocused())         {g_pMenu->GetTooltip()->ShowText(TOOLTIP_ONELINER, Core::Language->GetString(PRINT("NO_%u",  1u +  (m_iCurTooltip & 0x0Fu))));}
              if(m_Yes.IsClicked())         {m_nCallback(MSGBOX_STATUS_YES); m_nCallback = NULL;}
         else if(m_No .IsClicked() || bEsc) {m_nCallback(MSGBOX_STATUS_NO);  m_nCallback = NULL;}
     }

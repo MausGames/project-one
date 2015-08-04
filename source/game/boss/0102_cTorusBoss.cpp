@@ -30,7 +30,7 @@ cTorusBoss::cTorusBoss()noexcept
     this->SetCollisionModifier(coreVector3(0.8f,0.8f,1.0f));
 
     // configure the boss
-    this->Configure(2500, coreVector3(0.0f/360.0f, 0.0f/100.0f, 60.0f/100.0f).HSVtoRGB()); // 4000
+    this->Configure(2800, coreVector3(0.0f/360.0f, 0.0f/100.0f, 60.0f/100.0f).HSVtoRGB()); // 4000
 
     // 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRay); ++i)
@@ -82,18 +82,6 @@ cTorusBoss::cTorusBoss()noexcept
 
 
 // ****************************************************************
-// destructor
-cTorusBoss::~cTorusBoss()
-{
-    // 
-    this->__SetRotaAttack(0, false);
-
-    // 
-    m_aiCounter[BALL_STATUS] = 1;
-}
-
-
-// ****************************************************************
 // 
 void cTorusBoss::Render()
 {
@@ -115,7 +103,7 @@ void cTorusBoss::__ResurrectOwn()
 
 // ****************************************************************
 // 
-void cTorusBoss::__KillOwn()
+void cTorusBoss::__KillOwn(const coreBool& bAnimated)
 {
     if(!m_aiCounter[BALL_STATUS])
     {
@@ -130,10 +118,10 @@ void cTorusBoss::__KillOwn()
     }
 
     // 
-    g_pGame->GetBulletManagerEnemy()->ClearBullets(true);
+    g_pGame->GetBulletManagerEnemy()->ClearBullets(bAnimated);   
 
     // 
-    this->__SetRotaAttack(0, true);
+    this->__SetRotaAttack(0, bAnimated);
 
     // 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCircle); ++i)

@@ -22,8 +22,8 @@ cEnvironment::cEnvironment()noexcept
 , m_bActive        (false)
 {
     // create environment frame buffer
-    m_iFrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB);
-    m_iFrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+    m_FrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB);
+    m_FrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     // create mix object
     m_MixObject.DefineProgram("full_transition_program");
@@ -38,7 +38,7 @@ cEnvironment::cEnvironment()noexcept
 
     // load first background
     m_pBackground = new cNoBackground();
-    this->ChangeBackground(MAX(Core::Config->GetInt("Game", "Background", 0), REF_ID(cGrassBackground::ID)));
+    this->ChangeBackground(MAX(Core::Config->GetInt("Game", "Background", 0), REF_ID(cCloudBackground::ID)));
 }
 
 
@@ -84,7 +84,7 @@ void cEnvironment::Render()
             glDisable(GL_BLEND);
             {
                 // mix both backgrounds together
-                m_iFrameBuffer.StartDraw();
+                m_FrameBuffer.StartDraw();
                 m_MixObject.Render();
             }
             glEnable(GL_DEPTH_TEST);
@@ -156,6 +156,7 @@ void cEnvironment::ChangeBackground(const coreInt32& iID)
     default: ASSERT(false)
     case cNoBackground     ::ID: m_pBackground = new cNoBackground     (); break;
     case cGrassBackground  ::ID: m_pBackground = new cGrassBackground  (); break;
+    case cCloudBackground  ::ID: m_pBackground = new cCloudBackground  (); break;
     case cSeaBackground    ::ID: m_pBackground = new cSeaBackground    (); break;
     case cDesertBackground ::ID: m_pBackground = new cDesertBackground (); break;
     case cSpaceBackground  ::ID: m_pBackground = new cSpaceBackground  (); break;
@@ -209,7 +210,7 @@ void cEnvironment::__Reset(const coreResourceReset& bInit)
         this->ChangeBackground(iID);
 
         // re-create environment frame buffer
-        m_iFrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+        m_FrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
     }
     else
     {
@@ -225,7 +226,7 @@ void cEnvironment::__Reset(const coreResourceReset& bInit)
         SAFE_DELETE(m_pBackground)
 
         // delete environment frame buffer
-        m_iFrameBuffer.Delete();
+        m_FrameBuffer.Delete();
 
         // save background ID
         m_pBackground = r_cast<cBackground*>(I_TO_P(iID));

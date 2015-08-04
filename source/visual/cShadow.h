@@ -37,10 +37,10 @@
 class cShadow final : public cBindContainer, public coreResourceRelation
 {
 private:
-    coreFrameBuffer m_iFrameBuffer;                     // shadow map frame buffer (depth only)
+    coreFrameBuffer m_FrameBuffer;                      // shadow map frame buffer (depth only)
     coreUint8 m_iLevel;                                 // current configuration level
 
-    static cBindContainerIn s_GlobalContainer;          // 
+    static cBindContainerIn s_GlobalContainer;          // global shadow-casting objects (in all frame buffers)
 
     static coreProgramPtr s_pProgramSingle;             // shader-program for single shadow-casting objects
     static coreProgramPtr s_pProgramInstanced;          // shader-program for instanced shadow-casting objects
@@ -62,7 +62,7 @@ public:
     void Reconfigure();
 
     // access frame buffer object
-    inline coreFrameBuffer* GetFrameBuffer() {return &m_iFrameBuffer;}
+    inline coreFrameBuffer* GetFrameBuffer() {return &m_FrameBuffer;}
 
     // control the shadow map class
     static void GlobalInit();

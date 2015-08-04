@@ -8,7 +8,7 @@
 //////////////////////////////////////////////////////
 
 
-// shadow uniforms
+// shader uniforms
 uniform mat4 u_m4ShadowMatrix;   // own shadow view-projection matrix
 
 

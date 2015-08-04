@@ -14,6 +14,7 @@
 // TODO: merge stone diff and norm textures (own shader ?)
 // TODO: clouds on grass background need no separate heap allocation! (beware of _FillInfinite and destructor delete)
 // TODO: added object gets shadow-shader
+// TODO: overlay on cloud background creates redundant overdraw
 
 
 // ****************************************************************
@@ -33,6 +34,7 @@
 #define GRASS_FLOWERS_RESERVE (256u)
 #define GRASS_CLOUDS_NUM      (64u)
 #define GRASS_CLOUDS_RESERVE  (78u)   // # tested
+#define GRASS_CLOUDS_DENSITY  (10u)
 
 
 // ****************************************************************
@@ -40,8 +42,8 @@
 class INTERFACE cBackground
 {
 protected:
-    coreFrameBuffer m_iFrameBuffer;                        // background frame buffer (intern, multisampled)
-    coreFrameBuffer m_iResolvedTexture;                    // resolved texture
+    coreFrameBuffer m_FrameBuffer;                         // background frame buffer (intern, multisampled)
+    coreFrameBuffer m_ResolvedTexture;                     // resolved texture
 
     cOutdoor* m_pOutdoor;                                  // outdoor-surface object (optional)
     cWater*   m_pWater;                                    // water-surface object (optional)
@@ -73,7 +75,7 @@ public:
     void ClearObjects();
 
     // access frame buffer
-    inline coreFrameBuffer* GetResolvedTexture() {return &m_iResolvedTexture;}
+    inline coreFrameBuffer* GetResolvedTexture() {return &m_ResolvedTexture;}
 
     // access background components
     inline cOutdoor*                    GetOutdoor         ()const {return m_pOutdoor;}
@@ -112,30 +114,52 @@ public:
 
 private:
     // execute own routines
-    inline void __RenderOwn()override {m_iFrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);}
+    inline void __RenderOwn()override {m_FrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);}
 };
 
 
 // ****************************************************************
 // grass background class
-class cGrassBackground final : public cBackground
+class cGrassBackground : public cBackground
 {
 private:
-    coreObject2D m_White;  
-
     coreSoundPtr m_pNatureSound;   // nature sound-effect
 
 
 public:
-    cGrassBackground()noexcept;
-    ~cGrassBackground();
+    explicit cGrassBackground(const coreUint8& iCloudDensity = 1u)noexcept;
+    virtual ~cGrassBackground();
 
     DISABLE_COPY(cGrassBackground)
-    ASSIGN_ID(1, "Grass")
+    ASSIGN_ID(11, "Grass")
 
 
+protected:
+    // execute own routines
+    void __MoveOwn()override;
+};
 
-    inline coreObject2D* GetWhite() {return &m_White;}  
+
+// ****************************************************************
+// cloudy grass background class
+class cCloudBackground final : public cGrassBackground
+{
+private:
+    coreObject2D m_Overlay;      // 
+    coreSoundPtr m_pWindSound;   // wind sound-effect
+
+
+public:
+    cCloudBackground()noexcept;
+    ~cCloudBackground();
+
+    DISABLE_COPY(cCloudBackground)
+    ASSIGN_ID(1, "Cloud")
+
+    // 
+    void SetCloudAlpha  (const coreFloat& fAlpha);
+    void SetOverlayAlpha(const coreFloat& fAlpha);
+    void ReduceClouds();
 
 
 private:

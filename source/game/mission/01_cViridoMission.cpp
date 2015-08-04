@@ -117,6 +117,40 @@ cViridoMission::~cViridoMission()
 void cViridoMission::__SetupOwn()
 {
 
+
+    STAGE_MAIN
+    {
+        // 
+        coreSpline2 oSpline;
+        oSpline.AddNode(coreVector2(-1.5f, 0.2f) * FOREGROUND_AREA, coreVector2(1.0f,0.0f));
+        oSpline.AddNode(coreVector2( 1.5f,-0.4f) * FOREGROUND_AREA, coreVector2(1.0f,0.0f));
+
+
+        for(coreUintW i = 0u; i < 10u; ++i)
+        {
+            if(STAGE_SUB(I_TO_F(i)*0.3f + ((i >= 5u)*1.0f)))
+            {
+                cEnemy& oEnemy = *g_pGame->GetEnemyManager()->AddEnemy<cScoutEnemy>();
+
+                oEnemy.Resurrect();
+                oEnemy.SetBaseColor((i/5u) ? coreVector3(51.0f/360.0f, 100.0f/100.0f, 85.0f/100.0f).HSVtoRGB() :
+                                             coreVector3(201.0f/360.0f, 74.0f/100.0f, 85.0f/100.0f).HSVtoRGB());
+                oEnemy.ChangeRoutine([oSpline, i](cEnemy* OUTPUT pEnemy)
+                {
+                    if(pEnemy->DefaultMovePath(oSpline, coreVector2((i/5u) ? -1.0f : 1.0f,1.0f), coreVector2(0.0f, 0.7f - 0.1f*I_TO_F(i%5u)) * FOREGROUND_AREA, pEnemy->GetLifeTime() * 35.0f))
+                    {
+                        pEnemy->Kill(false);
+                        return; // # remove dependency (remove function on init (EnemyManager), not on kill  
+                    }
+                });
+            }
+        }
+
+        // 
+        STAGE_FINISH_AFTER(5.5f)
+    });
+
+
     STAGE_MAIN
     {
         // 
@@ -127,62 +161,29 @@ void cViridoMission::__SetupOwn()
 
         for(coreUintW i = 0u; i < 10u; ++i)
         {
-            if(STAGE_SUB(I_TO_F(i)*0.4f))
+            if(STAGE_SUB(I_TO_F(i)*0.3f + ((i >= 5u)*1.0f)))
             {
                 cEnemy& oEnemy = *g_pGame->GetEnemyManager()->AddEnemy<cScoutEnemy>();
 
-                oEnemy.Resurrect(oSpline, coreVector2((i/5u) ? -1.0f : 1.0f, 1.0f), coreVector2(0.0f,0.0f));
+                oEnemy.Resurrect();
+                oEnemy.SetBaseColor((i/5u) ? coreVector3(51.0f/360.0f, 100.0f/100.0f, 85.0f/100.0f).HSVtoRGB() :
+                                             coreVector3(201.0f/360.0f, 74.0f/100.0f, 85.0f/100.0f).HSVtoRGB());
                 oEnemy.ChangeRoutine([oSpline, i](cEnemy* OUTPUT pEnemy)
                 {
-                    if(pEnemy->DefaultMovePath(oSpline, coreVector2((i/5u) ? -1.0f : 1.0f, 1.0f), coreVector2(0.0f,0.0f), pEnemy->GetLifeTime() * 50.0f))
-                        pEnemy->Kill(false);
-
-                    if(pEnemy->GetLifeTime() > 0.5f && pEnemy->DefaultShoot(10.0f, (i%5u)+1u)) // 10u
+                    const coreFloat fSide = (i/5u) ? -1.0f : 1.0f;
+                    if(pEnemy->DefaultMovePath(oSpline, coreVector2(fSide, 1.0f), coreVector2(0.1f*I_TO_F(i%5u-1u) * fSide, 0.0f) * FOREGROUND_AREA, pEnemy->GetLifeTime() * 40.0f))
                     {
-                        const coreVector2 vDir = (g_pGame->FindPlayer(pEnemy->GetPosition().xy())->GetPosition().xy() - pEnemy->GetPosition().xy()).Normalize();
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.5f, pEnemy, pEnemy->GetPosition().xy(), vDir)->MakeOrange();
-                    }
-                });
-            }
-
-        }
-
-        // 
-        STAGE_FINISH_AFTER(5.0f)
-    });
-
-    STAGE_MAIN
-    {
-        // 
-        coreSpline2 oSpline;
-        oSpline.AddNode(coreVector2(0.0f, 1.5f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
-        oSpline.AddNode(coreVector2(0.0f,-1.5f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
-
-
-        for(coreUintW i = 0u; i < 6u; ++i)
-        {
-            if(STAGE_SUB(I_TO_F(i)*0.4f))
-            {
-                cEnemy& oEnemy = *g_pGame->GetEnemyManager()->AddEnemy<cScoutEnemy>();
-
-                oEnemy.Resurrect(oSpline, coreVector2(1.0f,1.0f), coreVector2((i%2u) ? -0.2f : 0.2f, 0.0f) * FOREGROUND_AREA);
-                oEnemy.ChangeRoutine([oSpline, i](cEnemy* OUTPUT pEnemy)
-                {
-                    if(pEnemy->DefaultMovePath(oSpline, coreVector2(1.0f,1.0f), coreVector2((i%2u) ? -0.2f : 0.2f, 0.0f) * FOREGROUND_AREA, pEnemy->GetLifeTime() * 50.0f))
                         pEnemy->Kill(false);
-
-                    if(pEnemy->GetLifeTime() > 0.5f && pEnemy->DefaultShoot(10.0f, i+1u)) // 10u
-                    {
-                        const coreVector2 vDir = (g_pGame->FindPlayer(pEnemy->GetPosition().xy())->GetPosition().xy() - pEnemy->GetPosition().xy()).Normalize();
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.5f, pEnemy, pEnemy->GetPosition().xy(), vDir)->MakeOrange();
+                        return;
                     }
                 });
             }
         }
 
         // 
-        STAGE_FINISH_AFTER(4.5f)
+        STAGE_FINISH_AFTER(5.5f)
     });
+
 
     STAGE_MAIN
     {
@@ -195,25 +196,105 @@ void cViridoMission::__SetupOwn()
     });
 
     STAGE_MAIN
-    {   
+    {
         const coreFloat fNewAlpha = CLAMP(1.0f - 0.35f * m_fStageTime, 0.0f, 1.0f);
+        s_cast<cCloudBackground*>(g_pEnvironment->GetBackground())->SetOverlayAlpha(fNewAlpha);
 
-        s_cast<cGrassBackground*>(g_pEnvironment->GetBackground())->GetWhite()->SetAlpha(fNewAlpha);
 
         // 
-        STAGE_FINISH_AFTER(3.5f)
+        STAGE_FINISH_AFTER(4.0f)
     });
 
     STAGE_MAIN
     {
-        const coreFloat fNewAlpha = CLAMP(1.0f - 0.25f * m_fStageTime, 0.0f, 1.0f);
+        const coreFloat fNewAlpha = 0.33f + 0.67f*CLAMP(1.0f - m_fStageTime / 8.5f, 0.0f, 1.0f);
+        s_cast<cCloudBackground*>(g_pEnvironment->GetBackground())->SetCloudAlpha(fNewAlpha);
 
-        auto apCloud = g_pEnvironment->GetBackground()->GetAirObjectList()->front()->List();
-        for(coreUintW i = 0u, ie = apCloud->size(); i < ie; ++i)
+
+        // 
+        coreSpline2 oSpline;
+        oSpline.AddNode(coreVector2(-0.6f, 1.5f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
+        oSpline.AddNode(coreVector2(-0.1f,-0.1f) * FOREGROUND_AREA, coreVector2(1.0f,-1.0f).Normalize());
+        oSpline.AddNode(coreVector2( 1.5f,-0.6f) * FOREGROUND_AREA, coreVector2(1.0f, 0.0f));
+
+        coreSpline2 oSpline2;
+        oSpline2.AddNode(coreVector2(-0.6f, 1.5f).Rotated90().InvertX() * FOREGROUND_AREA, coreVector2(0.0f,-1.0f).Rotated90().InvertX());
+        oSpline2.AddNode(coreVector2(-0.1f,-0.1f).Rotated90().InvertX() * FOREGROUND_AREA, coreVector2(1.0f,-1.0f).Rotated90().InvertX().Normalize());
+        oSpline2.AddNode(coreVector2( 1.5f,-0.6f).Rotated90().InvertX() * FOREGROUND_AREA, coreVector2(1.0f, 0.0f).Rotated90().InvertX());
+
+
+        for(coreUintW i = 0u; i < 12u; ++i)
         {
-            (*apCloud)[i]->SetAlpha((i % 10u) ? fNewAlpha : 1.0f);
+            if(STAGE_SUB(I_TO_F(i/3)*2.0f))
+            {
+                cEnemy& oEnemy = *g_pGame->GetEnemyManager()->AddEnemy<cScoutEnemy>();
+
+                oEnemy.Resurrect();
+                oEnemy.SetBaseColor(coreVector3(0.0f/360.0f, 68.0f/100.0f, 90.0f/100.0f).HSVtoRGB());
+                oEnemy.ChangeRoutine([oSpline, oSpline2, i](cEnemy* OUTPUT pEnemy)
+                {
+                    if(pEnemy->DefaultMovePath((i >= 6u) ? oSpline2 : oSpline, coreVector2(((i%6) >= 3u) ? -1.0f : 1.0f, 1.0f), coreVector2(I_TO_F((i%3u)-1u)*0.2f, ((i%3u) == 1u) ? -0.2f : 0.0f) * FOREGROUND_AREA, pEnemy->GetLifeTime() * 40.0f))
+                    {
+                        pEnemy->Kill(false);
+                        return;
+                    }
+
+                    if(pEnemy->GetLifeTime() > 0.4f && pEnemy->DefaultShoot(10.0f, 2u + 4u*(i/6u))) // 10u
+                    {
+                        const coreVector2 vDir = (g_pGame->FindPlayer(pEnemy->GetPosition().xy())->GetPosition().xy() - pEnemy->GetPosition().xy()).Normalize();
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 2.0f, pEnemy, pEnemy->GetPosition().xy(), vDir)->MakeOrange();
+                    }
+                });
+            }
         }
 
+        // 
+        STAGE_FINISH_AFTER(8.5f)
+    });
+
+    STAGE_MAIN
+    {
+        const coreFloat fNewAlpha = 0.33f*CLAMP(1.0f - m_fStageTime / 4.0f, 0.0f, 1.0f);
+        s_cast<cCloudBackground*>(g_pEnvironment->GetBackground())->SetCloudAlpha(fNewAlpha);
+
+        // 
+        coreSpline2 oSpline;
+        oSpline.AddNode(coreVector2(-1.5f,0.8f) * FOREGROUND_AREA, coreVector2(1.0f,0.0f));
+        oSpline.AddNode(coreVector2( 1.5f,0.8f) * FOREGROUND_AREA, coreVector2(1.0f,0.0f));
+
+        for(coreUintW i = 0u; i < 6u; ++i)
+        {
+            if(STAGE_SUB(I_TO_F(i)*0.4f))
+            {
+                cEnemy& oEnemy = *g_pGame->GetEnemyManager()->AddEnemy<cScoutEnemy>();
+
+                oEnemy.Resurrect();
+                oEnemy.SetBaseColor((i) ? coreVector3(51.0f/360.0f, 100.0f/100.0f, 85.0f/100.0f).HSVtoRGB() :
+                                          coreVector3(201.0f/360.0f, 74.0f/100.0f, 85.0f/100.0f).HSVtoRGB());
+                oEnemy.ChangeRoutine([oSpline, i](cEnemy* OUTPUT pEnemy)
+                {
+                    if(pEnemy->DefaultMovePath(oSpline, coreVector2(1.0f,1.0f), coreVector2(0.0f,0.0f), pEnemy->GetLifeTime() * 40.0f))
+                    {
+                        pEnemy->Kill(false);
+                        return;
+                    }
+
+                    if(pEnemy->GetLifeTime() > 0.5f && pEnemy->DefaultShoot(8.0f, i ? 100u : 0u)) // 10u
+                    {
+                        const coreVector2 vDir = pEnemy->GetDirection().xy().Rotate90();
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.5f, pEnemy, pEnemy->GetPosition().xy(),  vDir)->MakeYellow();
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.5f, pEnemy, pEnemy->GetPosition().xy(), -vDir)->MakeYellow();
+                    }
+                });
+            }
+        }
+
+        // 
+        STAGE_FINISH_AFTER(4.0f)
+    });
+
+    STAGE_MAIN
+    {
 
         // 
         coreSpline2 oSpline;
@@ -226,11 +307,16 @@ void cViridoMission::__SetupOwn()
             {
                 cEnemy& oEnemy = *g_pGame->GetEnemyManager()->AddEnemy<cScoutEnemy>();
 
-                oEnemy.Resurrect(oSpline, coreVector2(1.0f,1.0f), coreVector2(0.0f,0.0f));
+                oEnemy.Resurrect();
+                oEnemy.SetBaseColor((!i) ? coreVector3(51.0f/360.0f, 100.0f/100.0f, 85.0f/100.0f).HSVtoRGB() :
+                                           coreVector3(201.0f/360.0f, 74.0f/100.0f, 85.0f/100.0f).HSVtoRGB());
                 oEnemy.ChangeRoutine([oSpline, i](cEnemy* OUTPUT pEnemy)
                 {
                     if(pEnemy->DefaultMovePath(oSpline, coreVector2(1.0f,1.0f), coreVector2(0.0f,0.0f), pEnemy->GetLifeTime() * 40.0f))
+                    {
                         pEnemy->Kill(false);
+                        return;
+                    }
 
                     if(pEnemy->GetLifeTime() > 0.5f && pEnemy->DefaultShoot(8.0f, i ? 100u : 0u)) // 10u
                     {
@@ -243,63 +329,18 @@ void cViridoMission::__SetupOwn()
         }
 
         // 
-        STAGE_FINISH_AFTER(4.5f)
+        STAGE_FINISH_AFTER(3.5f)
     });
 
     STAGE_MAIN
-    {   
-        s_cast<cGrassBackground*>(g_pEnvironment->GetBackground())->GetWhite()->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    {
+        s_cast<cCloudBackground*>(g_pEnvironment->GetBackground())->ReduceClouds();
 
-        auto pList = g_pEnvironment->GetBackground()->GetAirObjectList()->front();
-        auto apCloud = pList->List();
-        for(coreUintW i = 0u, ie = apCloud->size(); i < ie; ++i)
-        {
-            if(i % 10u) SAFE_DELETE((*apCloud)[i]);
-        }
-        FOR_EACH_DYN(it, *apCloud)
-        {
-            if(*it) DYN_KEEP  (it)
-               else DYN_REMOVE(it, *apCloud)
-        }
-
-        pList->MoveNormal();
 
         // 
         STAGE_FINISH_NOW
     });
 
-    STAGE_MAIN
-    {
-        // 
-        coreSpline2 oSpline;
-        oSpline.AddNode(coreVector2(-1.5f,0.8f) * FOREGROUND_AREA, coreVector2(1.0f,0.0f));
-        oSpline.AddNode(coreVector2( 1.5f,0.8f) * FOREGROUND_AREA, coreVector2(1.0f,0.0f));
-
-        for(coreUintW i = 0u; i < 6u; ++i)
-        {
-            if(STAGE_SUB(I_TO_F(i)*0.4f))
-            {
-                cEnemy& oEnemy = *g_pGame->GetEnemyManager()->AddEnemy<cScoutEnemy>();
-
-                oEnemy.Resurrect(oSpline, coreVector2(1.0f,1.0f), coreVector2(0.0f,0.0f));
-                oEnemy.ChangeRoutine([oSpline, i](cEnemy* OUTPUT pEnemy)
-                {
-                    if(pEnemy->DefaultMovePath(oSpline, coreVector2(1.0f,1.0f), coreVector2(0.0f,0.0f), pEnemy->GetLifeTime() * 40.0f))
-                        pEnemy->Kill(false);
-
-                    if(pEnemy->GetLifeTime() > 0.5f && pEnemy->DefaultShoot(8.0f, i ? 100u : 0u)) // 10u
-                    {
-                        const coreVector2 vDir = pEnemy->GetDirection().xy().Rotate90();
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.5f, pEnemy, pEnemy->GetPosition().xy(),  vDir)->MakeYellow();
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.5f, pEnemy, pEnemy->GetPosition().xy(), -vDir)->MakeYellow();
-                    }
-                });
-            }
-        }
-
-        // 
-        STAGE_FINISH_AFTER(4.5f)
-    });
 
     STAGE_MAIN
     {
@@ -337,7 +378,7 @@ void cViridoMission::__SetupOwn()
     STAGE_MAIN
     {
         // 
-        m_Overlay.SetText("Demo Over - Thank you for playing!");
+        m_Overlay.SetText("Thank you for playing!");
         m_fOverlayTime = g_pGame->GetTimeMission();
 
         g_pEnvironment->SetTargetDirection(coreVector2(0.0f,1.0f));

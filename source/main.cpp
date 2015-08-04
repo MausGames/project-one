@@ -40,14 +40,14 @@ void CoreApp::Init()
     Core::Audio->SetListener(coreVector3(0.0f,0.0f,10.0f), coreVector3(0.0f,0.0f,0.0f),
                              coreVector3(0.0f,0.0f,-1.0f), coreVector3(0.0f,1.0f,0.0f));
 
-    // init game-system properties
+    // init system properties
     InitResolution(Core::System->GetResolution());
     InitFramerate();
 
     // load configuration
     LoadConfig();
 
-    // load all available music files
+    // load available music files
     g_MusicPlayer.AddMusicFolder("data/music", "*.ogg");
     //g_MusicPlayer.Control()->Play();
 
@@ -187,6 +187,10 @@ void CoreApp::Move()
 
     // debug and test game separately
     if(Core::Debug->IsEnabled()) DebugGame();
+
+
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS)) 
+        Core::System->Quit(); 
 }
 
 
@@ -282,7 +286,7 @@ static void DebugGame()
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS))
         g_pEnvironment->ChangeBackground(REF_ID(cGrassBackground::ID));
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2), CORE_INPUT_PRESS))
-        g_pEnvironment->ChangeBackground(REF_ID(cSeaBackground::ID));
+        g_pEnvironment->ChangeBackground(REF_ID(cCloudBackground::ID));
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS))
         Core::System->Quit();
 

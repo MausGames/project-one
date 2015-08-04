@@ -33,8 +33,8 @@ void cShadow::Update()
     if(!m_iLevel) return;
 
     // fill the shadow map
-    m_iFrameBuffer.StartDraw();
-    m_iFrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_DEPTH);
+    m_FrameBuffer.StartDraw();
+    m_FrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_DEPTH);
     {
         glEnable(GL_POLYGON_OFFSET_FILL);
         {
@@ -50,7 +50,7 @@ void cShadow::Update()
     }
 
     // enable shadow map
-    m_iFrameBuffer.GetDepthTarget().pTexture->Enable(CORE_TEXTURE_SHADOW + 0u);
+    m_FrameBuffer.GetDepthTarget().pTexture->Enable(CORE_TEXTURE_SHADOW + 0u);
 }
 
 
@@ -62,16 +62,16 @@ void cShadow::Reconfigure()
     m_iLevel = g_CurConfig.Graphics.iShadow;
 
     // delete old shadow map
-    m_iFrameBuffer.Delete();
+    m_FrameBuffer.Delete();
 
     if(m_iLevel)
     {
         // create shadow map frame buffer
-        m_iFrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH);
-        m_iFrameBuffer.Create(g_vGameResolution * ((m_iLevel == 1u) ? 1.0f : 1.7f), CORE_FRAMEBUFFER_CREATE_NORMAL);
+        m_FrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH);
+        m_FrameBuffer.Create(g_vGameResolution * ((m_iLevel == 1u) ? 1.0f : 1.7f), CORE_FRAMEBUFFER_CREATE_NORMAL);
 
         // enable depth value comparison
-        m_iFrameBuffer.GetDepthTarget().pTexture->ShadowSampling(true);
+        m_FrameBuffer.GetDepthTarget().pTexture->ShadowSampling(true);
 
         // set polygon fill properties (to reduce projective aliasing, not in GlobalInit, because of easier engine-reset)
         glPolygonOffset(3.3f, 12.0f);
@@ -139,9 +139,12 @@ void cShadow::GlobalUpdate()
     // increase light direction height (to reduce shadow length)
     const coreVector3 vHighLight = (g_pEnvironment->GetLightDir() * coreVector3(1.0f, 1.0f, SHADOW_HEIGHT_FACTOR)).Normalize();
 
+    // 
+    const coreMatrix4 mCamera = coreMatrix4::Camera(vHighLight * -SHADOW_VIEW_DISTANCE + coreVector3(g_pEnvironment->GetCameraPos().xy(), WATER_HEIGHT),
+                                                    vHighLight, coreVector3(g_pEnvironment->GetDirection().InvertedX(), 0.0f));
+
     // calculate full draw and read shadow matrices
-    s_amDrawShadowMatrix[0] = coreMatrix4::Camera(vHighLight * -SHADOW_VIEW_DISTANCE + coreVector3(g_pEnvironment->GetCameraPos().xy(), WATER_HEIGHT),
-                                                  vHighLight, coreVector3(g_pEnvironment->GetDirection().InvertedX(), 0.0f)) * mOrtho;
+    s_amDrawShadowMatrix[0] = mCamera * mOrtho;
     s_amDrawShadowMatrix[1] = mMove * s_amDrawShadowMatrix[0];
     s_mReadShadowMatrix     = s_amDrawShadowMatrix[0] * mNorm;
 }
@@ -187,7 +190,7 @@ void cShadow::EnableShadowRead(const coreUintW& iProgramHandle)
 void cShadow::__Reset(const coreResourceReset& bInit)
 {
     if(bInit) {m_iLevel = 0xFFu; this->Reconfigure();}
-         else m_iFrameBuffer.Delete();
+         else m_FrameBuffer.Delete();
 }
 
 

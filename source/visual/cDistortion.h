@@ -30,7 +30,7 @@
 class cDistortion final : public coreResourceRelation
 {
 private:
-    coreFrameBuffer m_iFrameBuffer;             // distortion frame buffer (only 2-channel texture, reduced resolution)
+    coreFrameBuffer m_FrameBuffer;              // distortion frame buffer (only 2-channel texture, reduced resolution)
 
     coreObject2D m_aWave[DISTORTION_WAVES];     // 
     coreUintW    m_iCurWave;                    // 
@@ -54,7 +54,7 @@ public:
     void CreateBurst(const coreVector3& vPosition, const coreVector2& vDirection, const coreFloat& fScale, const coreFloat& fSpeed);
 
     // access frame buffer
-    inline coreFrameBuffer* GetFrameBuffer() {return &m_iFrameBuffer;}
+    inline coreFrameBuffer* GetFrameBuffer() {return &m_FrameBuffer;}
 
     // 
     inline const coreBool& IsActive()const {return m_bActive;}

@@ -37,7 +37,7 @@ void FragmentMain()
 
     // calculate dot-3 reflection factor
     vec3  v3MathViewDir = normalize(v_v3ViewDir);
-    vec3  v3ReflNormal  = normalize((2.0 * v1BumpFactor * v3BumpNormal) - v3MathLightDir);
+    vec3  v3ReflNormal  = normalize((2.0 * v1BumpFactor) * v3BumpNormal - v3MathLightDir);
     float v1ReflFactor  = max(0.0, dot(v3MathViewDir, v3ReflNormal));
           v1ReflFactor  = 0.6 * pow(v1ReflFactor, 70.0);
 

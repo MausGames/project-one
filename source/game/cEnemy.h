@@ -55,6 +55,7 @@ public:
     void TakeDamage(const coreInt32& iDamage, cPlayer* pAttacker);
 
     // control life and death
+    void Resurrect();
     void Resurrect(const coreSpline2& oPath,     const coreVector2& vFactor, const coreVector2& vOffset);
     void Resurrect(const coreVector2& vPosition, const coreVector2& vDirection);
     void Kill     (const coreBool&    bAnimated);
@@ -82,12 +83,12 @@ public:
 
 private:
     // own routines for derived classes (render functions executed by game)
-    virtual void __ResurrectOwn   () {}
-    virtual void __KillOwn        () {}
-    virtual void __RenderOwnWeak  () {}
-    virtual void __RenderOwnStrong() {}
-    virtual void __RenderOwnAfter () {}
-    virtual void __MoveOwn        () {}
+    virtual void __ResurrectOwn   ()                          {}
+    virtual void __KillOwn        (const coreBool& bAnimated) {}
+    virtual void __RenderOwnWeak  ()                          {}
+    virtual void __RenderOwnStrong()                          {}
+    virtual void __RenderOwnAfter ()                          {}
+    virtual void __MoveOwn        ()                          {}
 };
 
 
@@ -310,6 +311,7 @@ template <typename T> RETURN_RESTRICT T* cEnemyManager::AddEnemy()
         {
             // add to active list
             pSet->oEnemyActive.BindObject(pEnemy);
+            pEnemy->RemoveStatus(ENEMY_STATUS_READY);
 
             return pEnemy;
         }

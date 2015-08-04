@@ -296,7 +296,7 @@ void cOutdoor::LoadGeometry(const coreUint8& iAlgorithm, const coreFloat& fGrade
     }
     for(coreUintW i = 0u; i < OUTDOOR_TOTAL_VERTICES; ++i)
     {
-        // finish the Gram-Schmidt process to calculate the tangent vector and binormal sign (w)
+        // finish the Gram-Schmidt process to calculate the tangent vector and bitangent sign (w)
         aVertexData[i].vTangent = coreVector4((avOrtho1[i] - aVertexData[i].vNormal * coreVector3::Dot(aVertexData[i].vNormal, avOrtho1[i])).Normalize(),
                                               SIGN(coreVector3::Dot(coreVector3::Cross(aVertexData[i].vNormal, avOrtho1[i]), avOrtho2[i])));
     }

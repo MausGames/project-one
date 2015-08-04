@@ -49,8 +49,8 @@ cGame::~cGame()
     m_BulletManagerEnemy .ClearBullets(false);
 
     // delete last mission
-    SAFE_DELETE(m_pMission)
     m_EnemyManager.ClearEnemies(false);
+    SAFE_DELETE(m_pMission)
 }
 
 
@@ -174,8 +174,8 @@ void cGame::LoadMission(const coreInt32& iID)
     if(m_pMission) if(m_pMission->GetID() == iID) return;
 
     // delete possible old mission
-    SAFE_DELETE(m_pMission)
     m_EnemyManager.ClearEnemies(false);
+    SAFE_DELETE(m_pMission)
 
     // create new mission
     switch(iID)

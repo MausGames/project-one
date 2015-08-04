@@ -28,6 +28,7 @@ cPlayer::cPlayer()noexcept
     // set object properties
     this->SetDirection  (coreVector3(0.0f,1.0f,0.0f));
     this->SetOrientation(coreVector3(0.0f,0.0f,1.0f));
+    this->SetTexSize    (coreVector2(1.2f,1.2f));
 
     // set initial status
     m_iStatus = PLAYER_STATUS_DEAD;
@@ -186,9 +187,12 @@ void cPlayer::Move()
 
     if(!CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
     {
+        //if(CONTAINS_BIT(m_pInput->iButtonPress, 1u)) this->SetDirection(-this->GetDirection());
+
+
         // move the ship
-        //const coreFloat fSpeed = (!CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && CONTAINS_BIT(m_pInput->iButtonHold, 0u)) ? 20.0f : 50.0f;
-        const coreFloat fSpeed = (!CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && (m_pInput->iButtonHold & BITLINE(PLAYER_WEAPONS*WEAPON_MODES))) ? 20.0f : 50.0f;
+        const coreFloat fSpeed = (!CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && CONTAINS_BIT(m_pInput->iButtonHold, 0u)) ? 20.0f : 50.0f;
+        //const coreFloat fSpeed = (!CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && (m_pInput->iButtonHold & BITLINE(PLAYER_WEAPONS*WEAPON_MODES))) ? 20.0f : 50.0f;
          
         m_vNewPos += m_pInput->vMove * (Core::System->GetTime() * fSpeed);
 

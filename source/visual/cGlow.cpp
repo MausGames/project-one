@@ -16,14 +16,14 @@ cGlow::cGlow()noexcept
     const coreVector2 vGlowResolution = g_vGameResolution * GLOW_SCALE_FACTOR;
 
     // create glow frame buffer
-    m_iFrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB);
-    m_iFrameBuffer.Create(vGlowResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+    m_FrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB);
+    m_FrameBuffer.Create(vGlowResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     // create blur frame buffers
-    m_aiBlurStage[0].AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB);
-    m_aiBlurStage[0].Create(vGlowResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
-    m_aiBlurStage[1].AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB);
-    m_aiBlurStage[1].Create(vGlowResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+    m_aBlurStage[0].AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB);
+    m_aBlurStage[0].Create(vGlowResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+    m_aBlurStage[1].AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB);
+    m_aBlurStage[1].Create(vGlowResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     // load shader-programs for separate convolution
     m_apBlurProgram[0] = Core::Manager::Resource->Get<coreProgram>("full_blur_1_program");
@@ -45,8 +45,8 @@ void cGlow::Update()
     if(g_pGame)
     {
         // draw into first blur stage
-        m_aiBlurStage[0].StartDraw();
-        m_aiBlurStage[0].Clear(CORE_FRAMEBUFFER_TARGET_COLOR);
+        m_aBlurStage[0].StartDraw();
+        m_aBlurStage[0].Clear(CORE_FRAMEBUFFER_TARGET_COLOR);
         {
             // draw single objects
             FOR_EACH(it, this->GetObjectSet())
@@ -64,31 +64,31 @@ void cGlow::Update()
         glDisable(GL_BLEND);
         {
             // forward to second blur stage (X convolution)
-            m_aiBlurStage[1].StartDraw();
+            m_aBlurStage[1].StartDraw();
             {
                 m_Transformer.DefineProgram(m_apBlurProgram[0]);
-                m_Transformer.DefineTexture(0u, m_aiBlurStage[0].GetColorTarget(0u).pTexture);
+                m_Transformer.DefineTexture(0u, m_aBlurStage[0].GetColorTarget(0u).pTexture);
                 m_Transformer.Render();
             }
 
             // invalidate first blur stage
-            m_aiBlurStage[0].Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
+            m_aBlurStage[0].Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
 
             // forward to final glow frame buffer (Y convolution)
-            m_iFrameBuffer.StartDraw();
+            m_FrameBuffer.StartDraw();
             {
                 m_Transformer.DefineProgram(m_apBlurProgram[1]);
-                m_Transformer.DefineTexture(0u, m_aiBlurStage[1].GetColorTarget(0u).pTexture);
+                m_Transformer.DefineTexture(0u, m_aBlurStage[1].GetColorTarget(0u).pTexture);
                 m_Transformer.Render();
             }
 
             // invalidate second blur stage
-            m_aiBlurStage[1].Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
+            m_aBlurStage[1].Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
         }
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
     }
-    else m_iFrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);
+    else m_FrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);
 }
 
 
@@ -101,15 +101,15 @@ void cGlow::__Reset(const coreResourceReset& bInit)
         const coreVector2 vGlowResolution = g_vGameResolution * GLOW_SCALE_FACTOR;
 
         // re-create all frame buffers
-        m_iFrameBuffer  .Create(vGlowResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
-        m_aiBlurStage[0].Create(vGlowResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
-        m_aiBlurStage[1].Create(vGlowResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+        m_FrameBuffer  .Create(vGlowResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+        m_aBlurStage[0].Create(vGlowResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+        m_aBlurStage[1].Create(vGlowResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
     }
     else
     {
         // delete all frame buffers
-        m_iFrameBuffer  .Delete();
-        m_aiBlurStage[0].Delete();
-        m_aiBlurStage[1].Delete();
+        m_FrameBuffer  .Delete();
+        m_aBlurStage[0].Delete();
+        m_aBlurStage[1].Delete();
     }
 }

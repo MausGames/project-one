@@ -34,7 +34,7 @@ cCrossfieldBoss::cCrossfieldBoss()noexcept
     this->SetCollisionModifier(coreVector3(0.9f,0.9f,0.9f));
 
     // configure the boss
-    this->Configure(2500, coreVector3(0.0f/360.0f, 68.0f/100.0f, 90.0f/100.0f).HSVtoRGB()); //4000 
+    this->Configure(2800, coreVector3(0.0f/360.0f, 68.0f/100.0f, 90.0f/100.0f).HSVtoRGB());
 
     // create duplicate object
     m_Duplicate.DefineModel         ("ship_boss_crossfield_high.md3");
@@ -86,20 +86,6 @@ cCrossfieldBoss::cCrossfieldBoss()noexcept
 
 
 // ****************************************************************
-// destructor
-cCrossfieldBoss::~cCrossfieldBoss()
-{
-    // 
-    for(coreUintW i = 0u; i < CROSSFIELD_BOOMERANGS ; ++i)
-        this->__DisableBoomerang(i, false);
-
-    // 
-    m_aiCounter[RESURRECT_STATUS] = 1;
-    this->Kill(false);
-}
-
-
-// ****************************************************************
 // 
 void cCrossfieldBoss::__ResurrectOwn()
 {
@@ -123,19 +109,19 @@ void cCrossfieldBoss::__ResurrectOwn()
 
 // ****************************************************************
 // 
-void cCrossfieldBoss::__KillOwn()
+void cCrossfieldBoss::__KillOwn(const coreBool& bAnimated)
 {
     // 
-    g_pGame->GetBulletManagerEnemy()->ClearBullets(true);
+    g_pGame->GetBulletManagerEnemy()->ClearBullets(bAnimated);   
 
     // 
     for(coreUintW i = 0u; i < CROSSFIELD_BOOMERANGS; ++i)
-        this->__DisableBoomerang(i, true);
+        this->__DisableBoomerang(i, bAnimated);
 
     // 
-    if(m_aiCounter[RESURRECT_STATUS] == 0)
+    if((m_aiCounter[RESURRECT_STATUS] == 0) && bAnimated)
     {
-        m_aiCounter[RESURRECT_STATUS] = 1;
+        m_aiCounter[RESURRECT_STATUS]= 1;
 
         // 
         this->DefineProgram(m_Duplicate.GetProgram());
@@ -168,7 +154,7 @@ void cCrossfieldBoss::__KillOwn()
         coreObject3D::Move();
 
         // 
-        this->Configure(700, this->GetBaseColor()); // 800 
+        this->Configure(700, this->GetBaseColor());
         this->Resurrect(this->GetPosition().xy(), this->GetDirection().xy());
 
         // 
@@ -251,8 +237,8 @@ void cCrossfieldBoss::__MoveOwn()
         PHASE_CONTROL_TIMER(0u, 0.44f, LERP_LINEAR)
         {
             // 
-            this->DefaultMoveLerp  (coreVector2(-0.667f,2.0f), coreVector2(-0.667f,-2.0f), fTime);
-            this->DefaultRotateLerp(0.0f*PI,                   7.0f*PI,                    fTime);
+            this->DefaultMoveLerp  (coreVector2(0.667f,2.0f), coreVector2(0.667f,-2.0f), fTime);
+            this->DefaultRotateLerp(0.0f*PI,                  7.0f*PI,                   fTime);
 
             // 
             if(PHASE_FINISHED)

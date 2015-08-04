@@ -32,18 +32,6 @@ cVausBoss::cVausBoss()noexcept
 
 
 // ****************************************************************
-// destructor
-cVausBoss::~cVausBoss()
-{
-    cViridoMission* pMission = s_cast<cViridoMission*>(g_pGame->GetMission());
-
-    // 
-    for(coreUintW i = 0u; i < VIRIDO_PADDLES; ++i)
-        pMission->DisablePaddle(i, false);
-}
-
-
-// ****************************************************************
 // 
 void cVausBoss::__ResurrectOwn()
 {
@@ -62,13 +50,13 @@ void cVausBoss::__ResurrectOwn()
 
 // ****************************************************************
 // 
-void cVausBoss::__KillOwn()
+void cVausBoss::__KillOwn(const coreBool& bAnimated)
 {
     cViridoMission* pMission = s_cast<cViridoMission*>(g_pGame->GetMission());
 
     // 
     for(coreUintW i = 0u; i < VIRIDO_PADDLES; ++i)
-        pMission->DisablePaddle(i, true);
+        pMission->DisablePaddle(i, bAnimated);
 }
 
 

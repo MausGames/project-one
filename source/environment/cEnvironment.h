@@ -19,23 +19,23 @@
 class cEnvironment final : public coreResourceRelation
 {
 private:
-    cBackground* m_pBackground;       // current background instance (should never be NULL)
-    cBackground* m_pOldBackground;    // previous background instance (may be NULL)
+    cBackground* m_pBackground;      // current background instance (should never be NULL)
+    cBackground* m_pOldBackground;   // previous background instance (may be NULL)
 
-    coreFrameBuffer m_iFrameBuffer;   // environment frame buffer used for transition mixing (only texture)
-    coreObject2D    m_MixObject;      // fullscreen object for transition mixing
-    coreTimer       m_Transition;     // background-transition timer
+    coreFrameBuffer m_FrameBuffer;   // environment frame buffer used for transition mixing (only texture)
+    coreObject2D    m_MixObject;     // fullscreen object for transition mixing
+    coreTimer       m_Transition;    // background-transition timer
 
-    coreVector2 m_avDirection[2];     // background direction (0 = current value, 1 = target value)
-    coreVector2 m_avSide     [2];     // background position offset
-    coreFloat   m_afSpeed    [2];     // movement speed
+    coreVector2 m_avDirection[2];    // background direction (0 = current value, 1 = target value)
+    coreVector2 m_avSide     [2];    // background position offset
+    coreFloat   m_afSpeed    [2];    // movement speed
 
-    coreFloat   m_fFlyOffset;         // global fly offset (directly accessed by background objects)
-    coreFloat   m_fSideOffset;        // global side offset
-    coreVector3 m_vCameraPos;         // moved camera position
-    coreVector3 m_vLightDir;          // rotated light direction
+    coreFloat   m_fFlyOffset;        // global fly offset (directly accessed by background objects)
+    coreFloat   m_fSideOffset;       // global side offset
+    coreVector3 m_vCameraPos;        // moved camera position
+    coreVector3 m_vLightDir;         // rotated light direction
 
-    coreBool m_bActive;               // enables the environment (only for first background-transition on intro)
+    coreBool m_bActive;              // enables the environment (only for first background-transition on intro)
 
 
 public:
@@ -58,7 +58,7 @@ public:
     coreFloat RetrieveSafeHeight(const coreVector2& vPosition);
 
     // access frame buffer
-    inline coreFrameBuffer* GetFrameBuffer() {return m_Transition.GetStatus() ? &m_iFrameBuffer : m_pBackground->GetResolvedTexture();}
+    inline coreFrameBuffer* GetFrameBuffer() {return m_Transition.GetStatus() ? &m_FrameBuffer : m_pBackground->GetResolvedTexture();}
 
     // set target transformation properties
     inline void SetTargetDirection(const coreVector2& vDirection) {m_avDirection[1] = vDirection; ASSERT(vDirection.IsNormalized())}

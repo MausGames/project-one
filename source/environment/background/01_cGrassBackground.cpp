@@ -11,7 +11,7 @@
 
 // ****************************************************************
 // constructor
-cGrassBackground::cGrassBackground()noexcept
+cGrassBackground::cGrassBackground(const coreUint8& iCloudDensity)noexcept
 {
     coreBatchList* pList1;
     coreBatchList* pList2;
@@ -183,13 +183,13 @@ cGrassBackground::cGrassBackground()noexcept
     }
 
     // allocate cloud list
-    pList1 = new coreBatchList(GRASS_CLOUDS_RESERVE);
+    pList1 = new coreBatchList(GRASS_CLOUDS_RESERVE * iCloudDensity);
     pList1->DefineProgram("environment_clouds_inst_program");
     {
-        for(coreUintW i = 0u; i < GRASS_CLOUDS_NUM; ++i)
+        for(coreUintW i = 0u, ie = GRASS_CLOUDS_NUM * iCloudDensity; i < ie; ++i)
         {
             // calculate position and height
-            const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.3f, 0.3f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(GRASS_CLOUDS_NUM)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
+            const coreVector2 vPosition = coreVector2(Core::Rand->Float(0.3f) * (Core::Rand->Bool() ? 1.0f : -1.0f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(GRASS_CLOUDS_NUM * iCloudDensity)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
             const coreFloat   fHeight   = Core::Rand->Float(20.0f, 60.0f);
 
             // load object resources
@@ -202,6 +202,7 @@ cGrassBackground::cGrassBackground()noexcept
             pObject->SetPosition (coreVector3(vPosition, fHeight));
             pObject->SetSize     (coreVector3(coreVector2(2.1f,2.1f) * Core::Rand->Float(15.0f, 21.0f), 1.0f));
             pObject->SetDirection(coreVector3(coreVector2::Rand(), 0.0f));
+            pObject->SetColor3   (coreVector3(1.0f * (0.8f + 0.2f * fHeight/60.0f), 1.0f, 1.0f));
             pObject->SetTexOffset(coreVector2::Rand(0.0f,10.0f, 0.0f,10.0f));
 
             // add object to the list
@@ -210,23 +211,12 @@ cGrassBackground::cGrassBackground()noexcept
 
         // post-process list and add it to the air
         cBackground::_FillInfinite(pList1);
-        ASSERT(pList1->GetCurCapacity() == GRASS_CLOUDS_RESERVE)
+        ASSERT(pList1->GetCurCapacity() == GRASS_CLOUDS_RESERVE * iCloudDensity)
         m_apAirObjectList.push_back(pList1);
     }
 
-
-    m_White.DefineTexture(0u, "environment_clouds_blue.png"); 
-    m_White.DefineProgram("menu_grey_program"); 
-    m_White.SetSize(coreVector2(1.0f,1.0f)); 
-    m_White.SetTexSize(coreVector2(1.0f,1.0f) * 1.2f); 
-    //m_White.SetColor3(coreVector3(0.0f, 0.43f, 0.69f) /*coreVector3(112.0f/255.0f,66.0f/255.0f,20.0f/255.0f)* 2.0f*/ ); 
-    //m_White.SetColor3(LERP(coreVector3(1.0f,1.0f,1.0f), coreVector3(0.0f, 0.43f, 0.69f), 0.1f)); 
-    m_White.Move(); 
-
-
     // load nature sound-effect
-    //m_pNatureSound = Core::Manager::Resource->Get<coreSound>("environment_nature.wav"); 
-    m_pNatureSound = Core::Manager::Resource->Get<coreSound>("environment_wind.wav"); 
+    m_pNatureSound = Core::Manager::Resource->Get<coreSound>("environment_nature.wav");
     m_pNatureSound.GetHandle()->OnLoadOnce([&]()
     {
         m_pNatureSound->PlayRelative(this, 0.0f, 1.0f, 0.0f, true);
@@ -245,30 +235,128 @@ cGrassBackground::~cGrassBackground()
 
 
 // ****************************************************************
-// render the grass background
-void cGrassBackground::__RenderOwn()
+// move the grass background
+void cGrassBackground::__MoveOwn()
 {
-    glDisable(GL_DEPTH_TEST); 
-    //m_White.Render(); 
-    glEnable(GL_DEPTH_TEST); 
+    // TODO # sound-volume per config value 
+    // adjust volume of the nature sound-effect
+    if(m_pNatureSound->EnableRef(this))
+        m_pNatureSound->SetVolume(MAX(g_pEnvironment->GetTransition().GetValue((g_pEnvironment->GetBackground() == this) ? CORE_TIMER_GET_NORMAL : CORE_TIMER_GET_REVERSED), 0.0f));
 }
 
 
 // ****************************************************************
-// move the grass background
-void cGrassBackground::__MoveOwn()
+// constructor
+cCloudBackground::cCloudBackground()noexcept
+: cGrassBackground (GRASS_CLOUDS_DENSITY)
 {
-    //g_pEnvironment->SetTargetSpeed    (8.0f - 2.0f*m_White.GetAlpha()); 
+    // 
+    m_Overlay.DefineTexture(0u, "environment_clouds_blue.png");
+    m_Overlay.DefineProgram("menu_grey_program");
+    m_Overlay.SetSize      (coreVector2(1.0f,1.0f));
+    m_Overlay.SetColor3    (coreVector3(1.0f,1.0f,1.0f) * 0.5f);
+    m_Overlay.SetTexSize   (coreVector2(1.0f,1.0f) * 1.2f);
+    m_Overlay.Move();
 
-     
-    m_White.SetTexOffset(coreVector2(0.0f, m_White.GetTexOffset().y - 0.65f/8.0f * Core::System->GetTime() * g_pEnvironment->GetSpeed()));
+    // load wind sound-effect
+    m_pWindSound = Core::Manager::Resource->Get<coreSound>("environment_wind.wav");
+    m_pWindSound.GetHandle()->OnLoadOnce([&]()
+    {
+        m_pWindSound->PlayRelative(this, 0.0f, 1.0f, 0.0f, true);
+    });
+}
 
-     
-    //m_White.SetColor3(LERP(coreVector3(1.0f,1.0f,1.0f), /*coreVector3(0.0f, 0.43f, 0.69f)*/coreVector3(112.0f/255.0f,66.0f/255.0f,20.0f/255.0f)* 2.0f, m_White.GetAlpha()));
+
+// ****************************************************************
+// destructor
+cCloudBackground::~cCloudBackground()
+{
+    // stop wind sound-effect
+    if(m_pWindSound->EnableRef(this))
+        m_pWindSound->Stop();
+}
 
 
-    // TODO # sound-volume per config value 
-    // adjust volume of the nature sound-effect
-    if(m_pNatureSound->EnableRef(this))
-        m_pNatureSound->SetVolume(MAX(6.0f /6.0f* g_pEnvironment->GetTransition().GetValue((g_pEnvironment->GetBackground() == this) ? CORE_TIMER_GET_NORMAL : CORE_TIMER_GET_REVERSED), 0.0f));
+// ****************************************************************
+// 
+void cCloudBackground::SetCloudAlpha(const coreFloat& fAlpha)
+{
+    // 
+    auto apCloud = this->GetAirObjectList()->front()->List();
+
+    // 
+    for(coreUintW i = 0u, ie = apCloud->size(); i < ie; ++i)
+    {
+        if(i % GRASS_CLOUDS_DENSITY)
+            (*apCloud)[i]->SetAlpha((i % 2u) ? MAX(fAlpha*2.0f - 1.0f, 0.0f) : MIN(fAlpha*2.0f, 1.0f));
+    }
+}
+
+
+// ****************************************************************
+// 
+void cCloudBackground::SetOverlayAlpha(const coreFloat& fAlpha)
+{
+    // 
+    m_Overlay.SetAlpha  (fAlpha);
+    m_Overlay.SetEnabled(fAlpha ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+}
+
+
+// ****************************************************************
+// 
+void cCloudBackground::ReduceClouds()
+{
+    // 
+    auto pAir    = this->GetAirObjectList()->front();
+    auto apCloud = pAir->List();
+
+    ASSERT(GRASS_CLOUDS_NUM * GRASS_CLOUDS_DENSITY <= apCloud->size())
+
+    // 
+    for(coreUintW i = 0u, ie = apCloud->size(); i < ie; ++i)
+    {
+        if(i % GRASS_CLOUDS_DENSITY)
+            SAFE_DELETE((*apCloud)[i]);
+    }
+
+    // 
+    FOR_EACH_DYN(it, *apCloud)
+    {
+        if(*it) DYN_KEEP  (it)
+           else DYN_REMOVE(it, *apCloud)
+    }
+
+    // 
+    pAir->MoveNormal();
+}
+
+
+// ****************************************************************
+// render the cloudy grass background
+void cCloudBackground::__RenderOwn()
+{
+    if(m_Overlay.IsEnabled(CORE_OBJECT_ENABLE_ALL))
+    {
+        // 
+        glDisable(GL_DEPTH_TEST);
+        m_Overlay.Render();
+        glEnable(GL_DEPTH_TEST);
+    }
+}
+
+
+// ****************************************************************
+// move the cloudy grass background
+void cCloudBackground::__MoveOwn()
+{
+    // 
+    m_Overlay.SetTexOffset(coreVector2(0.0f, m_Overlay.GetTexOffset().y - 0.65f/8.0f * Core::System->GetTime() * g_pEnvironment->GetSpeed()));
+
+    // 
+    if(m_pWindSound->EnableRef(this))
+        m_pWindSound->SetVolume(MAX(g_pEnvironment->GetTransition().GetValue((g_pEnvironment->GetBackground() == this) ? CORE_TIMER_GET_NORMAL : CORE_TIMER_GET_REVERSED), 0.0f));
+
+    // 
+    cGrassBackground::__MoveOwn();
 }

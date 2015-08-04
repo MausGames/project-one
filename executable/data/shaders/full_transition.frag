@@ -8,7 +8,7 @@
 //////////////////////////////////////////////////////
 
 
-// transition uniforms
+// shader uniforms
 uniform float u_v1Transition;   // current transition time
 
 

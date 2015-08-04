@@ -28,13 +28,13 @@
 class cWater : public coreObject3D
 {
 protected:
-    coreFlow  m_fAnimation;               // water animation value
-    coreFloat m_fFlyOffset;               // current fly offset
+    coreFlow  m_fAnimation;              // water animation value
+    coreFloat m_fFlyOffset;              // current fly offset
 
-    coreFrameBuffer m_iAboveReflection;   // reflection frame buffer
-    coreFrameBuffer m_iBelowRefraction;   // refraction frame buffer with geometric depth
+    coreFrameBuffer m_AboveReflection;   // reflection frame buffer
+    coreFrameBuffer m_BelowRefraction;   // refraction frame buffer with geometric depth
 
-    coreObject2D m_Sky;                   // sky-plane as reflection background
+    coreObject2D m_Sky;                  // sky-plane as reflection background
 
 
 public:
@@ -56,8 +56,8 @@ public:
 
     // get object properties
     inline const coreFloat& GetFlyOffset ()const {return m_fFlyOffset;}
-    inline coreFrameBuffer* GetReflection()      {return &m_iAboveReflection;}
-    inline coreFrameBuffer* GetRefraction()      {return &m_iBelowRefraction;}
+    inline coreFrameBuffer* GetReflection()      {return &m_AboveReflection;}
+    inline coreFrameBuffer* GetRefraction()      {return &m_BelowRefraction;}
 
 
 private:

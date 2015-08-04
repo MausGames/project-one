@@ -8,8 +8,9 @@
 //////////////////////////////////////////////////////
 
 
-// shadow uniforms
-uniform mat4 u_m4ShadowMatrix;    // own shadow view-projection matrix (with coordinate adjustment)
+// shader uniforms
+uniform mat4  u_m4ShadowMatrix;   // own shadow view-projection matrix (with coordinate adjustment)
+uniform float u_v1Blink;          // 
 
 // shader output
 varying vec4  v_v4ShadowCoord;    // pixel coordinates viewed from the light source
@@ -25,10 +26,10 @@ void VertexMain()
     
     // forward texture coordinates
     v_av2TexCoord[0] = a_v2RawTexCoord;
-    v_av2TexCoord[1] = a_v2RawTexCoord * 1.2 + u_v2TexOffset;
+    v_av2TexCoord[1] = coreObject3DTexCoordRaw();
     
     // forward blink intensity
-    v_v1Blink = u_v2TexSize.x;
+    v_v1Blink = u_v1Blink;
 
     // dot-3 transform lighting vectors
     coreDot3VertexInit();

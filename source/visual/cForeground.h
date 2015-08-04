@@ -21,8 +21,8 @@
 class cForeground final : public coreResourceRelation
 {
 private:
-    coreFrameBuffer m_iFrameBuffer;   // foreground frame buffer (only texture, but in FBO for fast clear)
-    coreMatrix4     m_mViewProj;      // foreground view-projection matrix
+    coreFrameBuffer m_FrameBuffer;   // foreground frame buffer (only texture, but in FBO for fast clear)
+    coreMatrix4     m_mViewProj;     // foreground view-projection matrix
 
 
 public:
@@ -38,10 +38,10 @@ public:
     inline FUNC_PURE coreVector2 Project(const coreVector3& vPosition) {const coreVector4 A = coreVector4(vPosition, 1.0f) * m_mViewProj; return A.xy() * (RCP(A.w) * 0.5f);}
 
     // clear the foreground
-    inline void Clear() {m_iFrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);}
+    inline void Clear() {m_FrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);}
 
     // access frame buffer
-    inline coreFrameBuffer* GetFrameBuffer() {return &m_iFrameBuffer;}
+    inline coreFrameBuffer* GetFrameBuffer() {return &m_FrameBuffer;}
 
 
 private:

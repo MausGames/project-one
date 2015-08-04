@@ -82,6 +82,12 @@ void cEnemy::TakeDamage(const coreInt32& iDamage, cPlayer* pAttacker)
 
 // ****************************************************************
 // add enemy to the game
+void cEnemy::Resurrect()
+{
+    // 
+    this->Resurrect(coreVector2(1000.0f,1000.0f), coreVector2(0.0f,-1.0f));
+}
+
 void cEnemy::Resurrect(const coreSpline2& oPath, const coreVector2& vFactor, const coreVector2& vOffset)
 {
     ASSERT(CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_DEAD))
@@ -129,22 +135,21 @@ void cEnemy::Kill(const coreBool& bAnimated)
     m_nRoutine = NULL;
 
     // 
-    if(bAnimated)
-    {
-        if(CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_BOSS))
-             g_pSpecialEffects->MacroExplosionPhysicalBig  (this->GetPosition());
-        else g_pSpecialEffects->MacroExplosionPhysicalSmall(this->GetPosition());
-    }
-
-    // 
     const coreBool bBoss = CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_BOSS);
     if(bBoss) g_pGame->GetEnemyManager()->UnbindEnemy(this);
+
+    // 
+    if(bAnimated)
+    {
+        if(bBoss) g_pSpecialEffects->MacroExplosionPhysicalBig  (this->GetPosition());
+             else g_pSpecialEffects->MacroExplosionPhysicalSmall(this->GetPosition());
+    }
 
     // remove ship from the game
     cShip::_Kill(bBoss, bAnimated);
 
     // 
-    this->__KillOwn();
+    this->__KillOwn(bAnimated);
 }
 
 
@@ -364,15 +369,18 @@ void cEnemyManager::Render()
 
         FOR_EACH(et, *pEnemyActive->List())
             (*et)->DefineModel(s_cast<cEnemy*>(*et)->GetModelHigh());
-        //pEnemyActive->DefineModelOver(NULL);
 
         // render enemy set
-        pEnemyActive->Render();
+        //pEnemyActive->Render();
+        FOR_EACH(et, *pEnemyActive->List())
+        {
+            s_cast<cEnemy*>(*et)->_UpdateBlink();
+            (*et)->Render();
+        }
 
         FOR_EACH(et, *pEnemyActive->List())
             (*et)->DefineModel(s_cast<cEnemy*>(*et)->GetModelLow());
 
-        //pEnemyActive->DefineModelOver(s_cast<cShip*>(pEnemyActive->List()->front())->GetModelLow());
     }
 
     // 
@@ -495,6 +503,7 @@ void cEnemyManager::ClearEnemies(const coreBool& bAnimated)
         (*it)->Kill(bAnimated);
 
     // 
+    ASSERT(!m_apAdditional.size())
     m_apAdditional.clear();
 }
 
@@ -535,7 +544,7 @@ cScoutEnemy::cScoutEnemy()noexcept
 {
     // load models
     this->DefineModelHigh("ship_enemy_scout_high.md3");
-    this->DefineModelLow ("ship_enemy_warrior_low.md3");
+    this->DefineModelLow ("ship_enemy_scout_low.md3");
 
     // configure the enemy
     this->Configure(10, coreVector3(201.0f/360.0f, 74.0f/100.0f, 85.0f/100.0f).HSVtoRGB());

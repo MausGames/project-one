@@ -77,17 +77,15 @@ cGameMenu::cGameMenu()noexcept
         m_aDemo[i].Construct  (MENU_FONT_SMALL, MENU_OUTLINE_SMALL, 0u);
         m_aDemo[i].SetPosition(coreVector2(0.0f, 0.1f - 0.02f*I_TO_F(i) - (i ? 0.01f : 0.0f)));
     }
-    m_aDemo[0].SetText("Demo Notes:");
     m_aDemo[1].SetText("[WASD] + [Left Mouse Button]");
     m_aDemo[2].SetText("[ESC] closes the application");
-    m_aDemo[3].SetText("you cannot die");
 
 
     m_StartButton.Construct    (MENU_BUTTON, MENU_FONT_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
     m_StartButton.DefineProgram("menu_border_program");
     m_StartButton.SetPosition  (coreVector2(0.0f,-0.28f));
     m_StartButton.SetSize      (coreVector2(0.3f,0.07f) * 1.1f);
-    m_StartButton.GetCaption()->SetTextLanguage("START_GAME");
+    m_StartButton.GetCaption()->SetText("START");
 
     m_ConfigButton.Construct    (MENU_BUTTON, MENU_FONT_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
     m_ConfigButton.DefineProgram("menu_border_program");

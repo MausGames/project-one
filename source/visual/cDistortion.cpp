@@ -17,8 +17,8 @@ cDistortion::cDistortion()noexcept
 , m_bActive   (false)
 {
     // create distortion frame buffer
-    m_iFrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_GL_SUPPORT(ARB_texture_rg) ? CORE_TEXTURE_SPEC_RG : CORE_TEXTURE_SPEC_RGB);
-    m_iFrameBuffer.Create(g_vGameResolution * DISTORTION_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
+    m_FrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_GL_SUPPORT(ARB_texture_rg) ? CORE_TEXTURE_SPEC_RG : CORE_TEXTURE_SPEC_RGB);
+    m_FrameBuffer.Create(g_vGameResolution * DISTORTION_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     // 
     for(coreUintW i = 0u; i < DISTORTION_WAVES; ++i)
@@ -58,8 +58,8 @@ void cDistortion::Update()
     if(m_bActive)
     {
         // 
-        m_iFrameBuffer.StartDraw();
-        m_iFrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);
+        m_FrameBuffer.StartDraw();
+        m_FrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);
         {
             glDisable(GL_DEPTH_TEST);
             {
@@ -100,7 +100,7 @@ void cDistortion::Update()
             glEnable(GL_DEPTH_TEST);
         }
     }
-    else m_iFrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);
+    else m_FrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);
 
     // 
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -141,6 +141,6 @@ void cDistortion::CreateBurst(const coreVector3& vPosition, const coreVector2& v
 // reset with the resource manager
 void cDistortion::__Reset(const coreResourceReset& bInit)
 {
-    if(bInit) m_iFrameBuffer.Create(g_vGameResolution * DISTORTION_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
-         else m_iFrameBuffer.Delete();
+    if(bInit) m_FrameBuffer.Create(g_vGameResolution * DISTORTION_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
+         else m_FrameBuffer.Delete();
 }

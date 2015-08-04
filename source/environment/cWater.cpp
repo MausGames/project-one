@@ -16,13 +16,13 @@ cWater::cWater()noexcept
 , m_fFlyOffset (0.0f)
 {
     // create reflection and refraction buffers
-    m_iAboveReflection.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB);
-    m_iAboveReflection.AttachTargetBuffer (CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH);
-    m_iAboveReflection.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+    m_AboveReflection.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB);
+    m_AboveReflection.AttachTargetBuffer (CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH);
+    m_AboveReflection.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
-    m_iBelowRefraction.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB);
-    m_iBelowRefraction.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH);
-    m_iBelowRefraction.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+    m_BelowRefraction.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB);
+    m_BelowRefraction.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH);
+    m_BelowRefraction.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     // create sky-plane object
     m_Sky.DefineTexture(0u, "environment_clouds_blue.png");
@@ -33,9 +33,9 @@ cWater::cWater()noexcept
     // load object resources
     this->DefineModel  (Core::Manager::Object->GetLowModel());
     this->DefineTexture(0u, "environment_water_norm.png");
-    this->DefineTexture(1u, m_iAboveReflection.GetColorTarget(0u).pTexture);
-    this->DefineTexture(2u, m_iBelowRefraction.GetColorTarget(0u).pTexture);
-    this->DefineTexture(3u, m_iBelowRefraction.GetDepthTarget()  .pTexture);
+    this->DefineTexture(1u, m_AboveReflection.GetColorTarget(0u).pTexture);
+    this->DefineTexture(2u, m_BelowRefraction.GetColorTarget(0u).pTexture);
+    this->DefineTexture(3u, m_BelowRefraction.GetDepthTarget()  .pTexture);
     this->DefineProgram("environment_water_program");
 
     // set object properties
@@ -67,7 +67,7 @@ void cWater::Render(coreFrameBuffer* pBackground)
     if(!this->GetProgram().IsUsable()) return;
 
     // blit current background color into own refraction buffer
-    pBackground->Blit(CORE_FRAMEBUFFER_TARGET_COLOR, &m_iBelowRefraction);
+    pBackground->Blit(CORE_FRAMEBUFFER_TARGET_COLOR, &m_BelowRefraction);
 
     // update all water uniforms
     this->GetProgram()->Enable();
@@ -78,8 +78,8 @@ void cWater::Render(coreFrameBuffer* pBackground)
     coreObject3D::Render();
 
     // invalidate all frame buffer objects
-    m_iAboveReflection.Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR | CORE_FRAMEBUFFER_TARGET_DEPTH);
-    m_iBelowRefraction.Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR | CORE_FRAMEBUFFER_TARGET_DEPTH);
+    m_AboveReflection.Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR | CORE_FRAMEBUFFER_TARGET_DEPTH);
+    m_BelowRefraction.Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR | CORE_FRAMEBUFFER_TARGET_DEPTH);
 }
 
 
@@ -112,7 +112,7 @@ void cWater::UpdateReflection()
     Core::Graphics->SetLight (0u, coreVector4(0.0f,0.0f,0.0f,0.0f), coreVector4(LIGHT_DIRECTION, 0.0f), coreVector4(0.0f,0.0f,0.0f,0.0f));
 
     // fill reflection frame buffer
-    m_iAboveReflection.StartDraw();
+    m_AboveReflection.StartDraw();
     {
         // flip projection left-right (also culling!, after StartDraw())
         c_cast<coreMatrix4&>(Core::Graphics->GetPerspective())._11 *= -1.0f;
@@ -152,7 +152,7 @@ void cWater::UpdateDepth(cOutdoor* pOutdoor, const std::vector<coreBatchList*>& 
     if(pOutdoor)
     {
         // fill only depth component of refraction frame buffer
-        m_iBelowRefraction.StartDraw();
+        m_BelowRefraction.StartDraw();
         {
             glDepthFunc (GL_ALWAYS);   // better performance than depth-clear
             glDrawBuffer(GL_NONE);
@@ -174,7 +174,7 @@ void cWater::UpdateDepth(cOutdoor* pOutdoor, const std::vector<coreBatchList*>& 
             glDrawBuffer(GL_COLOR_ATTACHMENT0);
         }
     }
-    else m_iBelowRefraction.Clear(CORE_FRAMEBUFFER_TARGET_DEPTH);
+    else m_BelowRefraction.Clear(CORE_FRAMEBUFFER_TARGET_DEPTH);
 }
 
 

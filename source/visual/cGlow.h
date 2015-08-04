@@ -21,9 +21,9 @@
 class cGlow final : public cBindContainer, public coreResourceRelation
 {
 private:
-    coreFrameBuffer m_iFrameBuffer;       // glow frame buffer (only texture, reduced resolution)
+    coreFrameBuffer m_FrameBuffer;        // glow frame buffer (only texture, reduced resolution)
 
-    coreFrameBuffer m_aiBlurStage  [2];   // blur frame buffers (stages for separate convolution, X and Y)
+    coreFrameBuffer m_aBlurStage   [2];   // blur frame buffers (stages for separate convolution, X and Y)
     coreProgramPtr  m_apBlurProgram[2];   // shader-programs for each stage
     coreObject2D    m_Transformer;        // object to draw into the next stage
 
@@ -37,7 +37,7 @@ public:
     void Update();
 
     // access frame buffer
-    inline coreFrameBuffer* GetFrameBuffer() {return &m_iFrameBuffer;}
+    inline coreFrameBuffer* GetFrameBuffer() {return &m_FrameBuffer;}
 
 
 private:

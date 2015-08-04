@@ -79,7 +79,7 @@
 
 
 // ****************************************************************
-// 
+// icon codes (UTF-8)
 #define ICON_POWER_OFF  "\xEF\x80\x91"
 #define ICON_CHECK      "\xEF\x80\x8C"
 #define ICON_TIMES      "\xEF\x80\x8D"
@@ -220,6 +220,7 @@ public:
 private:
     // 
     void __UpdateShadowQuality();
+    void __UpdateOverallVolume();
     void __UpdateLanguage     ();
 };
 

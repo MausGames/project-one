@@ -24,7 +24,7 @@
 // phase management macros
 #define PHASE_CONTROL_TIMER(a,b,c)  this->_PhaseTimer (a, __LINE__, b, c, [&](const coreFloat&  fTime, const coreFloat& fTimeBefore, const coreBool& __bEnd)   // 
 #define PHASE_CONTROL_TICKER(a,b,c) this->_PhaseTicker(a, __LINE__, b, c, [&](const coreUint16& iTick,                               const coreBool& __bEnd)   // 
-#define PHASE_SUB(t)                ((fTimeBefore <= (t)) && ((t) <= fTime))                                                                                   // 
+#define PHASE_SUB(t)                ((fTimeBefore <= (t)) && ((t) < fTime))                                                                                    // 
 #define PHASE_RESET(i)              {m_aTimer[i].Stop(); m_aiTimerLine[i] = 0u;}                                                                               // 
 #define PHASE_FINISHED              (__bEnd)                                                                                                                   // 
 
@@ -98,7 +98,6 @@ private:
 
 public:
     cCrossfieldBoss()noexcept;
-    ~cCrossfieldBoss();
 
     DISABLE_COPY(cCrossfieldBoss)
     ASSIGN_ID(101, "Crossfield")
@@ -107,7 +106,7 @@ public:
 private:
     // execute own routines
     void __ResurrectOwn   ()override;
-    void __KillOwn        ()override;
+    void __KillOwn        (const coreBool& bAnimated)override;
     void __RenderOwnWeak  ()override;
     void __RenderOwnStrong()override;
     void __MoveOwn        ()override;
@@ -137,7 +136,6 @@ private:
 
 public:
     cTorusBoss()noexcept;
-    ~cTorusBoss();
 
     DISABLE_COPY(cTorusBoss)
     ASSIGN_ID(102, "Torus")
@@ -149,7 +147,7 @@ public:
 private:
     // execute own routines
     void __ResurrectOwn   ()override;
-    void __KillOwn        ()override;
+    void __KillOwn        (const coreBool& bAnimated)override;
     void __RenderOwnStrong()override;
     void __RenderOwnAfter ()override;
     void __MoveOwn        ()override;
@@ -173,7 +171,6 @@ private:
 
 public:
     cVausBoss()noexcept;
-    ~cVausBoss();
 
     DISABLE_COPY(cVausBoss)
     ASSIGN_ID(103, "Vaus")
@@ -182,7 +179,7 @@ public:
 private:
     // execute own routines
     void __ResurrectOwn()override;
-    void __KillOwn     ()override;
+    void __KillOwn     (const coreBool& bAnimated)override;
     void __MoveOwn     ()override;
 };
 

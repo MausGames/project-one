@@ -44,12 +44,12 @@ void FragmentMain()
 
     // calculate dot-3 reflection factor
     vec3  v3MathViewDir = normalize(v_v3ViewDir);
-    vec3  v3ReflNormal  = normalize((2.0 * v1BumpFactor * v3BumpNormal) - v3MathLightDir);
+    vec3  v3ReflNormal  = normalize((2.0 * v1BumpFactor) * v3BumpNormal - v3MathLightDir);
     float v1ReflFactor  = max(0.0, dot(v3MathViewDir, v3ReflNormal));
 
     // calculate diffuse and specular value
     vec3 v3Diffuse  = v3TexColor * (v1Light * (1.2 * max(0.0, v1BumpFactor) + 0.6));
-    vec3 v3Specular = vec3(0.3 * 0.5 * pow(v1ReflFactor, 25.0));
+    vec3 v3Specular = vec3(0.15 * pow(v1ReflFactor, 25.0));
 
     // draw final color
     gl_FragColor = vec4((v3Diffuse + v3Specular) * u_v4Color.rgb, u_v4Color.a);

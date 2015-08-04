@@ -76,7 +76,7 @@ void cWeapon::RenderOverlay()
 cRayWeapon::cRayWeapon()noexcept
 {
     // set base fire-rate
-    m_CooldownTimer.SetSpeed(12.0f);
+    m_CooldownTimer.SetSpeed(14.0f);
 
     // load shooting sound-effect
     m_pShootSound  = Core::Manager::Resource->Get<coreSound>("bullet_ray.wav");
@@ -89,6 +89,7 @@ cRayWeapon::cRayWeapon()noexcept
 // 
 void cRayWeapon::__TriggerOwn(const coreUint8& iMode)
 {
+    /*
     if(iMode == 0u)
     {
         //// 
@@ -132,6 +133,7 @@ void cRayWeapon::__TriggerOwn(const coreUint8& iMode)
 
         g_pGame->GetBulletManagerPlayer()->AddBullet<cRocketBullet>(12, 1.0f, m_pOwner, vPos + vTrueDir*4.0f, vTrueDir);
     }
+    */
 }
 
 
@@ -149,8 +151,8 @@ void cRayWeapon::__ShootOwn()
     // 
     //g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(2, 3.75f, m_pOwner, vPos + vDir*6.0f + vTan*1.1f, (vDir + vTan*0.025f*0.5f).Normalize())->MakeLighter(fAlpha);
     //g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(2, 3.75f, m_pOwner, vPos + vDir*6.0f - vTan*1.1f, (vDir - vTan*0.025f*0.5f).Normalize())->MakeLighter(fAlpha);
-    g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(2, 3.75f, m_pOwner, vPos + vDir*6.0f + vTan*1.4f, vDir)->MakeLighter(fAlpha);
-    g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(2, 3.75f, m_pOwner, vPos + vDir*6.0f - vTan*1.4f, vDir)->MakeLighter(fAlpha);
+    g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(2, 5.0f, m_pOwner, vPos + vDir*6.0f + vTan*1.4f, vDir)->MakeLighter(fAlpha);
+    g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(2, 5.0f, m_pOwner, vPos + vDir*6.0f - vTan*1.4f, vDir)->MakeLighter(fAlpha);
 
     // 
     //if(CONTAINS_VALUE(m_pOwner->GetStatus(), PLAYER_STATUS_DARKNESS))

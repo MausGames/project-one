@@ -19,10 +19,10 @@
 
 // ****************************************************************
 // stage management macros
-#define STAGE_MAIN            m_anStage.push_back([&]()                                // 
-#define STAGE_SUB(t)          ((m_fStageTimeBefore <= (t)) && ((t) <= m_fStageTime))   // 
-#define STAGE_FINISH_NOW      {m_fStageTime = 0.0f; m_anStage.pop_back();}             //
-#define STAGE_FINISH_AFTER(t) {if(m_fStageTime >= (t)) STAGE_FINISH_NOW}               // 
+#define STAGE_MAIN            m_anStage.push_back([&]()                               // 
+#define STAGE_SUB(t)          ((m_fStageTimeBefore <= (t)) && ((t) < m_fStageTime))   // 
+#define STAGE_FINISH_NOW      {m_fStageTime = 0.0f; m_anStage.pop_back();}            //
+#define STAGE_FINISH_AFTER(t) {if(m_fStageTime >= (t)) STAGE_FINISH_NOW}              // 
 
 
 // ****************************************************************

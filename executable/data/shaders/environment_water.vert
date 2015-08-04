@@ -12,7 +12,7 @@
 const float c_v1MapResolution = 0.42;    // normal map resolution
 const float c_v1WaterHeight   = -20.0;   // default water z-position
 
-// water uniforms
+// shader uniforms
 uniform float u_v1Time;     // current animation value
 uniform float u_v1Offset;   // current y-position offset
 

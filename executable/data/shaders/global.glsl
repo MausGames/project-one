@@ -140,13 +140,25 @@ vec3 coreRGBtoHSV(const in vec3 v3RGB)
 float coreLengthSq(const in vec2 v) {return dot(v, v);}
 float coreLengthSq(const in vec3 v) {return dot(v, v);}
 
-// vector normal decompression
-vec3 coreUnpackNormal(const in vec2 v)
+// vector normal pack and unpack
+vec2 corePackNormalSphere(const in vec3 v)
+{
+    float A = inversesqrt(v.z * 8.0 + 8.0);
+    return v.xy * A + 0.5;   
+} 
+vec3 coreUnpackNormalSphere(const in vec2 v)
+{
+    vec2  A = v * 4.0 - 2.0;
+    float B = coreLengthSq(A);
+    float C = sqrt(1.0 - B / 4.0);
+    return vec3(A * C, 1.0 - B / 2.0);
+}
+vec3 coreUnpackNormalMap(const in vec2 v)
 {
     vec2 A = v * 2.0 - 1.0;
     return normalize(vec3(A, sqrt(1.0 - coreLengthSq(A))));
 }
-vec3 coreUnpackNormalDeriv(const in vec2 v)
+vec3 coreUnpackNormalMapDeriv(const in vec2 v)
 {
     vec2 A = v * 2.0 - 1.0;
     return normalize(vec3(A, 1.0));
