@@ -45,8 +45,6 @@ private:
         coreVector3 vPosition;   // vertex position
         coreVector3 vNormal;     // normal vector
         coreVector4 vTangent;    // additional tangent vector
-
-        constexpr_func sVertex()noexcept;
     };
 
     // compressed vertex structure
@@ -55,8 +53,6 @@ private:
         coreVector3 vPosition;   // vertex position
         coreUint32  iNormal;     // normal vector
         coreUint32  iTangent;    // additional tangent vector
-
-        constexpr_func sVertexPacked()noexcept;
     };
 
 
@@ -103,26 +99,6 @@ public:
     inline const coreUint32& GetIndexOffset ()const {return m_iIndexOffset;}
     inline const coreFloat&  GetFlyOffset   ()const {return m_fFlyOffset;}
 };
-
-
-// ****************************************************************
-// constructor
-constexpr_func cOutdoor::sVertex::sVertex()noexcept
-: vPosition (coreVector3(0.0f,0.0f,0.0f))
-, vNormal   (coreVector3(0.0f,0.0f,0.0f))
-, vTangent  (coreVector4(0.0f,0.0f,0.0f,0.0f))
-{
-}
-
-
-// ****************************************************************
-// constructor
-constexpr_func cOutdoor::sVertexPacked::sVertexPacked()noexcept
-: vPosition (coreVector3(0.0f,0.0f,0.0f))
-, iNormal   (0u)
-, iTangent  (0u)
-{
-}
 
 
 #endif // _P1_GUARD_OUTDOOR_H_

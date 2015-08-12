@@ -76,7 +76,7 @@ void cWeapon::RenderOverlay()
 cRayWeapon::cRayWeapon()noexcept
 {
     // set base fire-rate
-    m_CooldownTimer.SetSpeed(14.0f);
+    m_CooldownTimer.SetSpeed(15.0f);
 
     // load shooting sound-effect
     m_pShootSound  = Core::Manager::Resource->Get<coreSound>("bullet_ray.wav");

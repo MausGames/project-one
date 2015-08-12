@@ -81,6 +81,16 @@
 #define COLOR_ENERGY_GREEN  (coreVector3(0.270f, 0.710f, 0.270f))
 #define COLOR_FIRE_ORANGE   (coreVector3(0.991f, 0.305f, 0.042f))
 #define COLOR_FIRE_BLUE     (coreVector3(0.306f, 0.527f, 1.000f))
+#define COLOR_ENEMY_YELLOW  (coreVector3( 51.0f/360.0f, 100.0f/100.0f,  85.0f/100.0f).HSVtoRGB())
+#define COLOR_ENEMY_ORANGE  (coreVector3( 34.0f/360.0f, 100.0f/100.0f, 100.0f/100.0f).HSVtoRGB())
+#define COLOR_ENEMY_RED     (coreVector3(  0.0f/360.0f,  68.0f/100.0f,  90.0f/100.0f).HSVtoRGB())
+#define COLOR_ENEMY_PURPLE  (purple)
+#define COLOR_ENEMY_BLUE    (coreVector3(201.0f/360.0f,  74.0f/100.0f,  85.0f/100.0f).HSVtoRGB())
+#define COLOR_ENEMY_CYAN    (coreVector3(183.0f/360.0f,  70.0f/100.0f,  85.0f/100.0f).HSVtoRGB())
+#define COLOR_ENEMY_GREEN   (green)
+#define COLOR_ENEMY_BROWN   (brown)
+#define COLOR_ENEMY_GREY    (coreVector3(  0.0f/360.0f,   0.0f/100.0f,  60.0f/100.0f).HSVtoRGB())
+#define COLOR_ENEMY_ICE     (coreVector3(208.0f/360.0f,  32.0f/100.0f,  90.0f/100.0f).HSVtoRGB())
 
 // shader modifiers
 #define SHADER_SHADOW       "#define _P1_SHADOW_     (1) \n"   // outdoor, object_ground

@@ -8,9 +8,9 @@
 //////////////////////////////////////////////////////
 #include "main.h"
 
-cConfig g_CurConfig;          // = 0x00;
-cConfig g_OldConfig;          // = 0x00;
-cInput  g_aInput[INPUT_SETS]; // = 0x00;
+cConfig g_CurConfig          = {};
+cConfig g_OldConfig          = {};
+cInput  g_aInput[INPUT_SETS] = {{}};
 
 
 // ****************************************************************

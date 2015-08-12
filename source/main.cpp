@@ -8,20 +8,20 @@
 //////////////////////////////////////////////////////
 #include "main.h"
 
-coreVector2      g_vGameResolution     = coreVector2(0.0f,0.0f);
-coreVector2      g_vMenuCenter         = coreVector2(0.0f,0.0f);
-coreMusicPlayer  g_MusicPlayer;     // = 0x00;
+coreVector2      g_vGameResolution = coreVector2(0.0f,0.0f);
+coreVector2      g_vMenuCenter     = coreVector2(0.0f,0.0f);
+coreMusicPlayer  g_MusicPlayer     = {};
 
-cOutline         g_aaOutline[4][2]; // = 0x00;
-cGlow*           g_pGlow               = NULL;
-cDistortion*     g_pDistortion         = NULL;
-cSpecialEffects* g_pSpecialEffects     = NULL;
-cPostProcessing* g_pPostProcessing     = NULL;
+cOutline         g_aaOutline[4][2] = {{{}}};
+cGlow*           g_pGlow           = NULL;
+cDistortion*     g_pDistortion     = NULL;
+cSpecialEffects* g_pSpecialEffects = NULL;
+cPostProcessing* g_pPostProcessing = NULL;
 
-cForeground*     g_pForeground         = NULL;
-cEnvironment*    g_pEnvironment        = NULL;
-cMenu*           g_pMenu               = NULL;
-cGame*           g_pGame               = NULL;
+cForeground*     g_pForeground     = NULL;
+cEnvironment*    g_pEnvironment    = NULL;
+cMenu*           g_pMenu           = NULL;
+cGame*           g_pGame           = NULL;
 
 static coreUint64 m_iOldPerfTime = 0u;      // last measured high-precision time value
 static coreBool   m_bHardLock    = false;   // status to force framerate with busy-waiting
@@ -187,10 +187,6 @@ void CoreApp::Move()
 
     // debug and test game separately
     if(Core::Debug->IsEnabled()) DebugGame();
-
-
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS)) 
-        Core::System->Quit(); 
 }
 
 
@@ -270,6 +266,9 @@ static void LockFramerate()
 static void DebugGame()
 {
     // ########################## DEBUG ##########################
+#if defined(_CORE_MSVC_)
+    #pragma warning(disable : 4189)
+#endif
 
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(K), CORE_INPUT_PRESS))
     {
@@ -375,6 +374,17 @@ static void DebugGame()
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(0), CORE_INPUT_PRESS)) g_pGame->GetPlayer(0u)->EquipWeapon(0u, REF_ID(cTeslaWeapon::ID));
     }
 
+    static coreFloat TEST = 0.0f;
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(T), CORE_INPUT_HOLD))
+    {
+        TEST += 10.0f * Core::System->GetTime();
+    }
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(Y), CORE_INPUT_HOLD))
+    {
+        TEST -= 10.0f * Core::System->GetTime();
+    }
+    g_pEnvironment->SetTargetHeight(TEST);
+
     //std::function<void()> test = []()
     //{
     //
@@ -390,10 +400,8 @@ static void DebugGame()
     coreFloat D = B.Length();
     coreFloat E = C.LengthSq();
 
-    D = E;
-
     const coreChar* pcTest = SDL_GetDisplayName(0);
-    pcTest = pcTest;
+
 
     coreVector3 vA = coreVector3::Rand();
     coreVector3 vB = coreVector3::Rand();
@@ -402,7 +410,6 @@ static void DebugGame()
 
     coreVector3 vD = (vA * vB.yzx() - vA.yzx() * vB).yzx();
 
-    vC = vD;
 
 
     coreVector4 v1 = coreVector4(0.0f, -1.0f, coreVector2::Rand());
@@ -416,7 +423,46 @@ static void DebugGame()
 
     coreSet<const coreChar*> apcList2 = std::move(apcList);
 
-    v1 = v2;
+    coreVector2 aaa;
+    coreVector2 bbb = coreVector2(std::numeric_limits<float>::signaling_NaN(), 1.0f);
+    coreVector2 ccc = aaa + bbb;
+
+    coreUintW iSize2 = sizeof(CoreInput);
+
+
+    //Core::Debug->MeasureStart("snprintf");
+    //
+    //coreChar acString[256];
+    //
+    //for(coreUintW i = 0u; i < 10000u; ++i)
+    //    snprintf(acString, 255, "hallo %d %.2f", (int)Core::Input->GetJoystickNum(), D);
+    //
+    //Core::Debug->MeasureEnd("snprintf");
+    //
+    //Core::Debug->MeasureStart("_snprintf");
+    //
+    //for(coreUintW i = 0u; i < 10000u; ++i)
+    //    _snprintf(acString, 255, "hallo %d %.2f", (int)Core::Input->GetJoystickNum(), D);
+    //
+    //Core::Debug->MeasureEnd("_snprintf");
+    //Core::Debug->MeasureStart("print");
+    //
+    //for(coreUintW i = 0u; i < 10000u; ++i)
+    //    PRINT("hallo %d %.2f", (int)Core::Input->GetJoystickNum(), D);
+    //
+    //Core::Debug->MeasureEnd("print");
+
+    //coreRand rand1(123);
+    //coreRand rand2(321);
+    //
+    //std::swap(rand1, rand2);
+    //
+    //std::is_pod<coreVector3> test;
+    //if(test == test) std::swap(rand1, rand2);
+
+
+
+    //test.value;
 
     //g_pEnvironment->Activate();
     //g_pPostProcessing->SetSideOpacity(1.0f);

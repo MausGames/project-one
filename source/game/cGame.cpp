@@ -17,6 +17,7 @@ cGame::cGame(const coreBool& bCoop)noexcept
 , m_Interface           (bCoop ? 2u : 1u)
 , m_pMission            (NULL)
 , m_fTimeMission        (0.0f)
+, m_afTimeBoss          {}
 , m_iStatus             (0u)
 , m_bCoop               (bCoop)
 {
@@ -34,9 +35,6 @@ cGame::cGame(const coreBool& bCoop)noexcept
 
     // load first mission
     m_pMission = new cNoMission();
-
-    // reset boss times
-    std::memset(m_afTimeBoss, 0, sizeof(m_afTimeBoss));
 }
 
 

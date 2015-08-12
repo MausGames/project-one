@@ -10,6 +10,17 @@
 
 
 // ****************************************************************
+// constructor
+cShip::cShip()noexcept
+: m_iBaseColor (0u)
+, m_iMaxHealth (0)
+, m_iCurHealth (0)
+, m_fBlink     (0.0f)
+{
+}
+
+
+// ****************************************************************
 // render the ship (low-polygon only)
 void cShip::Render(const coreProgramPtr& pProgram)
 {

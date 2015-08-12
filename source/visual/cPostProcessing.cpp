@@ -103,7 +103,7 @@ void cPostProcessing::Recompile()
     m_pProgramDistorted.GetHandle()->Reload();
 
     // finish now
-    glFinish();
+    coreSync::Finish();
     Core::Manager::Resource->UpdateResources();
 
 #endif

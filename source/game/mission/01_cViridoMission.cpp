@@ -14,6 +14,7 @@
 cViridoMission::cViridoMission()noexcept
 : m_Ball         (VIRIDO_BALLS)
 , m_BallTrail    (VIRIDO_BALLS * VIRIDO_TRAILS)
+, m_apOwner      {}
 , m_iBounceState (0u)
 , m_bBounceReal  (false)
 , m_fOverlayTime (-(GAME_INTRO_DURATION + 4.5f))   //#  
@@ -83,9 +84,6 @@ cViridoMission::cViridoMission()noexcept
     }
 
     // 
-    std::memset(m_apOwner, 0, sizeof(m_apOwner));
-
-    // 
     m_Overlay.Construct   (MENU_FONT_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
     //m_Overlay.SetPosition (m_aHealthBar[0].GetPosition() + coreVector2(0.017f,0.035f));
     //m_Overlay.SetCenter   (m_aHealthBar[0].GetCenter());
@@ -116,32 +114,26 @@ cViridoMission::~cViridoMission()
 // setup the Virido mission
 void cViridoMission::__SetupOwn()
 {
-
-
+    // ################################################################
+    // 
     STAGE_MAIN
     {
         // 
-        coreSpline2 oSpline;
-        oSpline.AddNode(coreVector2(-1.5f, 0.2f) * FOREGROUND_AREA, coreVector2(1.0f,0.0f));
-        oSpline.AddNode(coreVector2( 1.5f,-0.4f) * FOREGROUND_AREA, coreVector2(1.0f,0.0f));
+        STAGE_ADD_PATH(pPath)
+        {
+            pPath->AddNode(coreVector2(-1.5f, 0.2f), coreVector2(1.0f,0.0f));
+            pPath->AddNode(coreVector2( 1.5f,-0.4f), coreVector2(1.0f,0.0f));
+        });
 
-
+        // 
         for(coreUintW i = 0u; i < 10u; ++i)
         {
             if(STAGE_SUB(I_TO_F(i)*0.3f + ((i >= 5u)*1.0f)))
             {
-                cEnemy& oEnemy = *g_pGame->GetEnemyManager()->AddEnemy<cScoutEnemy>();
-
-                oEnemy.Resurrect();
-                oEnemy.SetBaseColor((i/5u) ? coreVector3(51.0f/360.0f, 100.0f/100.0f, 85.0f/100.0f).HSVtoRGB() :
-                                             coreVector3(201.0f/360.0f, 74.0f/100.0f, 85.0f/100.0f).HSVtoRGB());
-                oEnemy.ChangeRoutine([oSpline, i](cEnemy* OUTPUT pEnemy)
+                STAGE_ADD_ENEMY(pEnemy, cScoutEnemy, (i/5u) ? COLOR_ENEMY_YELLOW : COLOR_ENEMY_BLUE)
                 {
-                    if(pEnemy->DefaultMovePath(oSpline, coreVector2((i/5u) ? -1.0f : 1.0f,1.0f), coreVector2(0.0f, 0.7f - 0.1f*I_TO_F(i%5u)) * FOREGROUND_AREA, pEnemy->GetLifeTime() * 35.0f))
-                    {
+                    if(pEnemy->DefaultMovePath(*pPath, coreVector2((i/5u) ? -1.0f : 1.0f,1.0f), coreVector2(0.0f, 0.7f - 0.1f*I_TO_F(i%5u)), pEnemy->GetLifeTime() * 0.85f))
                         pEnemy->Kill(false);
-                        return; // # remove dependency (remove function on init (EnemyManager), not on kill  
-                    }
                 });
             }
         }
@@ -150,32 +142,27 @@ void cViridoMission::__SetupOwn()
         STAGE_FINISH_AFTER(5.5f)
     });
 
-
+    // ################################################################
+    // 
     STAGE_MAIN
     {
         // 
-        coreSpline2 oSpline;
-        oSpline.AddNode(coreVector2(-0.8f, 1.5f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
-        oSpline.AddNode(coreVector2( 0.8f,-1.5f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
+        STAGE_ADD_PATH(pPath)
+        {
+            pPath->AddNode(coreVector2(-0.8f, 1.5f), coreVector2(0.0f,-1.0f));
+            pPath->AddNode(coreVector2( 0.8f,-1.5f), coreVector2(0.0f,-1.0f));
+        });
 
-
+        // 
         for(coreUintW i = 0u; i < 10u; ++i)
         {
             if(STAGE_SUB(I_TO_F(i)*0.3f + ((i >= 5u)*1.0f)))
             {
-                cEnemy& oEnemy = *g_pGame->GetEnemyManager()->AddEnemy<cScoutEnemy>();
-
-                oEnemy.Resurrect();
-                oEnemy.SetBaseColor((i/5u) ? coreVector3(51.0f/360.0f, 100.0f/100.0f, 85.0f/100.0f).HSVtoRGB() :
-                                             coreVector3(201.0f/360.0f, 74.0f/100.0f, 85.0f/100.0f).HSVtoRGB());
-                oEnemy.ChangeRoutine([oSpline, i](cEnemy* OUTPUT pEnemy)
+                STAGE_ADD_ENEMY(pEnemy, cScoutEnemy, (i/5u) ? COLOR_ENEMY_YELLOW : COLOR_ENEMY_BLUE)
                 {
                     const coreFloat fSide = (i/5u) ? -1.0f : 1.0f;
-                    if(pEnemy->DefaultMovePath(oSpline, coreVector2(fSide, 1.0f), coreVector2(0.1f*I_TO_F(i%5u-1u) * fSide, 0.0f) * FOREGROUND_AREA, pEnemy->GetLifeTime() * 40.0f))
-                    {
+                    if(pEnemy->DefaultMovePath(*pPath, coreVector2(fSide, 1.0f), coreVector2(0.1f*I_TO_F(i%5u-1u) * fSide, 0.0f), pEnemy->GetLifeTime()))
                         pEnemy->Kill(false);
-                        return;
-                    }
                 });
             }
         }
@@ -184,7 +171,8 @@ void cViridoMission::__SetupOwn()
         STAGE_FINISH_AFTER(5.5f)
     });
 
-
+    // ################################################################
+    // 
     STAGE_MAIN
     {
         // 
@@ -195,49 +183,44 @@ void cViridoMission::__SetupOwn()
         STAGE_FINISH_AFTER(1.0f)
     });
 
+    // ################################################################
+    // 
     STAGE_MAIN
     {
         const coreFloat fNewAlpha = CLAMP(1.0f - 0.35f * m_fStageTime, 0.0f, 1.0f);
         s_cast<cCloudBackground*>(g_pEnvironment->GetBackground())->SetOverlayAlpha(fNewAlpha);
 
-
         // 
         STAGE_FINISH_AFTER(4.0f)
     });
 
+    // ################################################################
+    // 
     STAGE_MAIN
     {
-        const coreFloat fNewAlpha = 0.33f + 0.67f*CLAMP(1.0f - m_fStageTime / 8.5f, 0.0f, 1.0f);
-        s_cast<cCloudBackground*>(g_pEnvironment->GetBackground())->SetCloudAlpha(fNewAlpha);
-
+        // 
+        STAGE_ADD_PATH(pPath1)
+        {
+            pPath1->AddNode(coreVector2(-0.6f, 1.5f), coreVector2(0.0f,-1.0f));
+            pPath1->AddNode(coreVector2(-0.1f,-0.1f), coreVector2(1.0f,-1.0f).Normalize());
+            pPath1->AddNode(coreVector2( 1.5f,-0.6f), coreVector2(1.0f, 0.0f));
+        });
+        STAGE_ADD_PATH(pPath2)
+        {
+            pPath2->AddNode(coreVector2(-0.6f, 1.5f).Rotated90().InvertX(), coreVector2(0.0f,-1.0f).Rotated90().InvertX());
+            pPath2->AddNode(coreVector2(-0.1f,-0.1f).Rotated90().InvertX(), coreVector2(1.0f,-1.0f).Rotated90().InvertX().Normalize());
+            pPath2->AddNode(coreVector2( 1.5f,-0.6f).Rotated90().InvertX(), coreVector2(1.0f, 0.0f).Rotated90().InvertX());
+        });
 
         // 
-        coreSpline2 oSpline;
-        oSpline.AddNode(coreVector2(-0.6f, 1.5f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
-        oSpline.AddNode(coreVector2(-0.1f,-0.1f) * FOREGROUND_AREA, coreVector2(1.0f,-1.0f).Normalize());
-        oSpline.AddNode(coreVector2( 1.5f,-0.6f) * FOREGROUND_AREA, coreVector2(1.0f, 0.0f));
-
-        coreSpline2 oSpline2;
-        oSpline2.AddNode(coreVector2(-0.6f, 1.5f).Rotated90().InvertX() * FOREGROUND_AREA, coreVector2(0.0f,-1.0f).Rotated90().InvertX());
-        oSpline2.AddNode(coreVector2(-0.1f,-0.1f).Rotated90().InvertX() * FOREGROUND_AREA, coreVector2(1.0f,-1.0f).Rotated90().InvertX().Normalize());
-        oSpline2.AddNode(coreVector2( 1.5f,-0.6f).Rotated90().InvertX() * FOREGROUND_AREA, coreVector2(1.0f, 0.0f).Rotated90().InvertX());
-
-
         for(coreUintW i = 0u; i < 12u; ++i)
         {
             if(STAGE_SUB(I_TO_F(i/3)*2.0f))
             {
-                cEnemy& oEnemy = *g_pGame->GetEnemyManager()->AddEnemy<cScoutEnemy>();
-
-                oEnemy.Resurrect();
-                oEnemy.SetBaseColor(coreVector3(0.0f/360.0f, 68.0f/100.0f, 90.0f/100.0f).HSVtoRGB());
-                oEnemy.ChangeRoutine([oSpline, oSpline2, i](cEnemy* OUTPUT pEnemy)
+                STAGE_ADD_ENEMY(pEnemy, cScoutEnemy, COLOR_ENEMY_RED)
                 {
-                    if(pEnemy->DefaultMovePath((i >= 6u) ? oSpline2 : oSpline, coreVector2(((i%6) >= 3u) ? -1.0f : 1.0f, 1.0f), coreVector2(I_TO_F((i%3u)-1u)*0.2f, ((i%3u) == 1u) ? -0.2f : 0.0f) * FOREGROUND_AREA, pEnemy->GetLifeTime() * 40.0f))
-                    {
+                    if(pEnemy->DefaultMovePath((i >= 6u) ? *pPath2 : *pPath1, coreVector2(((i%6) >= 3u) ? -1.0f : 1.0f, 1.0f), coreVector2(I_TO_F((i%3u)-1u)*0.2f, ((i%3u) == 1u) ? -0.2f : 0.0f), pEnemy->GetLifeTime()))
                         pEnemy->Kill(false);
-                        return;
-                    }
 
                     if(pEnemy->GetLifeTime() > 0.4f && pEnemy->DefaultShoot(10.0f, 2u + 4u*(i/6u))) // 10u
                     {
@@ -252,34 +235,28 @@ void cViridoMission::__SetupOwn()
         STAGE_FINISH_AFTER(8.5f)
     });
 
+    // ################################################################
+    // 
     STAGE_MAIN
     {
-        const coreFloat fNewAlpha = 0.33f*CLAMP(1.0f - m_fStageTime / 4.0f, 0.0f, 1.0f);
-        s_cast<cCloudBackground*>(g_pEnvironment->GetBackground())->SetCloudAlpha(fNewAlpha);
+        // 
+        STAGE_ADD_PATH(pPath)
+        {
+            pPath->AddNode(coreVector2(-1.5f,0.8f), coreVector2(1.0f,0.0f));
+            pPath->AddNode(coreVector2( 1.5f,0.8f), coreVector2(1.0f,0.0f));
+        });
 
         // 
-        coreSpline2 oSpline;
-        oSpline.AddNode(coreVector2(-1.5f,0.8f) * FOREGROUND_AREA, coreVector2(1.0f,0.0f));
-        oSpline.AddNode(coreVector2( 1.5f,0.8f) * FOREGROUND_AREA, coreVector2(1.0f,0.0f));
-
         for(coreUintW i = 0u; i < 6u; ++i)
         {
             if(STAGE_SUB(I_TO_F(i)*0.4f))
             {
-                cEnemy& oEnemy = *g_pGame->GetEnemyManager()->AddEnemy<cScoutEnemy>();
-
-                oEnemy.Resurrect();
-                oEnemy.SetBaseColor((i) ? coreVector3(51.0f/360.0f, 100.0f/100.0f, 85.0f/100.0f).HSVtoRGB() :
-                                          coreVector3(201.0f/360.0f, 74.0f/100.0f, 85.0f/100.0f).HSVtoRGB());
-                oEnemy.ChangeRoutine([oSpline, i](cEnemy* OUTPUT pEnemy)
+                STAGE_ADD_ENEMY(pEnemy, cScoutEnemy, (i) ? COLOR_ENEMY_YELLOW : COLOR_ENEMY_BLUE)
                 {
-                    if(pEnemy->DefaultMovePath(oSpline, coreVector2(1.0f,1.0f), coreVector2(0.0f,0.0f), pEnemy->GetLifeTime() * 40.0f))
-                    {
+                    if(pEnemy->DefaultMovePath(*pPath, coreVector2(1.0f,1.0f), coreVector2(0.0f,0.0f), pEnemy->GetLifeTime()))
                         pEnemy->Kill(false);
-                        return;
-                    }
 
-                    if(pEnemy->GetLifeTime() > 0.5f && pEnemy->DefaultShoot(8.0f, i ? 100u : 0u)) // 10u
+                    if(i && pEnemy->GetLifeTime() > 0.5f && pEnemy->DefaultShoot(8.0f, 100u))
                     {
                         const coreVector2 vDir = pEnemy->GetDirection().xy().Rotate90();
                         g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.5f, pEnemy, pEnemy->GetPosition().xy(),  vDir)->MakeYellow();
@@ -293,32 +270,28 @@ void cViridoMission::__SetupOwn()
         STAGE_FINISH_AFTER(4.0f)
     });
 
+    // ################################################################
+    // 
     STAGE_MAIN
     {
+        // 
+        STAGE_ADD_PATH(pPath)
+        {
+            pPath->AddNode(coreVector2( 1.5f,0.8f), coreVector2(-1.0f,0.0f));
+            pPath->AddNode(coreVector2(-1.5f,0.8f), coreVector2(-1.0f,0.0f));
+        });
 
         // 
-        coreSpline2 oSpline;
-        oSpline.AddNode(coreVector2( 1.5f,0.8f) * FOREGROUND_AREA, coreVector2(-1.0f,0.0f));
-        oSpline.AddNode(coreVector2(-1.5f,0.8f) * FOREGROUND_AREA, coreVector2(-1.0f,0.0f));
-
         for(coreUintW i = 0u; i < 6u; ++i)
         {
             if(STAGE_SUB(I_TO_F(i)*0.4f))
             {
-                cEnemy& oEnemy = *g_pGame->GetEnemyManager()->AddEnemy<cScoutEnemy>();
-
-                oEnemy.Resurrect();
-                oEnemy.SetBaseColor((!i) ? coreVector3(51.0f/360.0f, 100.0f/100.0f, 85.0f/100.0f).HSVtoRGB() :
-                                           coreVector3(201.0f/360.0f, 74.0f/100.0f, 85.0f/100.0f).HSVtoRGB());
-                oEnemy.ChangeRoutine([oSpline, i](cEnemy* OUTPUT pEnemy)
+                STAGE_ADD_ENEMY(pEnemy, cScoutEnemy, (!i) ? COLOR_ENEMY_YELLOW : COLOR_ENEMY_BLUE)
                 {
-                    if(pEnemy->DefaultMovePath(oSpline, coreVector2(1.0f,1.0f), coreVector2(0.0f,0.0f), pEnemy->GetLifeTime() * 40.0f))
-                    {
+                    if(pEnemy->DefaultMovePath(*pPath, coreVector2(1.0f,1.0f), coreVector2(0.0f,0.0f), pEnemy->GetLifeTime()))
                         pEnemy->Kill(false);
-                        return;
-                    }
 
-                    if(pEnemy->GetLifeTime() > 0.5f && pEnemy->DefaultShoot(8.0f, i ? 100u : 0u)) // 10u
+                    if(i && pEnemy->GetLifeTime() > 0.5f && pEnemy->DefaultShoot(8.0f, 100u))
                     {
                         const coreVector2 vDir = pEnemy->GetDirection().xy().Rotate90();
                         g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.5f, pEnemy, pEnemy->GetPosition().xy(),  vDir)->MakeYellow();
@@ -332,30 +305,20 @@ void cViridoMission::__SetupOwn()
         STAGE_FINISH_AFTER(3.5f)
     });
 
-    STAGE_MAIN
-    {
-        s_cast<cCloudBackground*>(g_pEnvironment->GetBackground())->ReduceClouds();
-
-
-        // 
-        STAGE_FINISH_NOW
-    });
-
-
+    // ################################################################
+    // 
     STAGE_MAIN
     {
         // 
-        m_Crossfield.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
-        STAGE_FINISH_NOW
-    });
+        if(STAGE_SUB(0.0f)) m_Crossfield.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
 
-    STAGE_MAIN
-    {
         // 
         if(CONTAINS_VALUE(m_Crossfield.GetStatus(), ENEMY_STATUS_DEAD))
             STAGE_FINISH_NOW
     });
 
+    // ################################################################
+    // 
     STAGE_MAIN
     {
         // 
@@ -365,6 +328,21 @@ void cViridoMission::__SetupOwn()
         STAGE_FINISH_AFTER(2.0f)
     });
 
+    // ################################################################
+    // 
+    STAGE_MAIN
+    {
+        // 
+        //const coreFloat fNewAlpha = 0.33f * CLAMP(1.0f - m_fStageTime / 4.0f, 0.0f, 1.0f);
+        //s_cast<cCloudBackground*>(g_pEnvironment->GetBackground())->SetCloudAlpha(fNewAlpha);
+        //s_cast<cCloudBackground*>(g_pEnvironment->GetBackground())->ReduceClouds();
+
+        // 
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // 
     STAGE_MAIN
     {
         // 
@@ -375,12 +353,15 @@ void cViridoMission::__SetupOwn()
             STAGE_FINISH_NOW
     });
 
+    // ################################################################
+    // 
     STAGE_MAIN
     {
         // 
         m_Overlay.SetText("Thank you for playing!");
         m_fOverlayTime = g_pGame->GetTimeMission();
 
+        // 
         g_pEnvironment->SetTargetDirection(coreVector2(0.0f,1.0f));
         g_pEnvironment->SetTargetSide     (coreVector2(0.0f,0.0f));
         g_pEnvironment->SetTargetSpeed    (2.0f);
@@ -389,6 +370,8 @@ void cViridoMission::__SetupOwn()
         STAGE_FINISH_AFTER(10000.0f)
     });
 
+    // ################################################################
+    // 
     //STAGE_MAIN
     //{
     //    if(STAGE_SUB(0.0f))

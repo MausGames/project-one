@@ -35,6 +35,7 @@ cEnvironment::cEnvironment()noexcept
     m_avDirection[1] = m_avDirection[0] = coreVector2(0.0f,1.0f);
     m_avSide     [1] = m_avSide     [0] = coreVector2(0.0f,0.0f);
     m_afSpeed    [1] = m_afSpeed    [0] = 2.0f;
+    m_afHeight   [1] = m_afHeight   [0] = 0.0f;
 
     // load first background
     m_pBackground = new cNoBackground();
@@ -106,6 +107,7 @@ void cEnvironment::Move()
     m_avDirection[0] = (m_avDirection[0] + (m_avDirection[1] - m_avDirection[0]) * Core::System->GetTime() *  8.0f).Normalize();
     m_avSide     [0] =  m_avSide     [0] + (m_avSide     [1] - m_avSide     [0]) * Core::System->GetTime() * 16.0f;
     m_afSpeed    [0] =  m_afSpeed    [0] + (m_afSpeed    [1] - m_afSpeed    [0]) * Core::System->GetTime() *  1.6f;
+    m_afHeight   [0] =  m_afHeight   [0] + (m_afHeight   [1] - m_afHeight   [0]) * Core::System->GetTime() *  1.6f;
 
     // calculate global fly offset
     m_fFlyOffset += Core::System->GetTime() * m_afSpeed[0];
@@ -117,7 +119,7 @@ void cEnvironment::Move()
     m_fSideOffset             = 0.65f * coreVector2::Dot(m_avDirection[0].Rotated90(), m_avSide[0]) * (vAbsDir.Max() - vAbsDir.Min());
 
     // calculate camera and light values
-    m_vCameraPos = coreVector3(m_fSideOffset, m_fFlyOffset * OUTDOOR_DETAIL, CAMERA_POSITION.z);
+    m_vCameraPos = coreVector3(m_fSideOffset, m_fFlyOffset * OUTDOOR_DETAIL, CAMERA_POSITION.z - m_afHeight[0]);
     m_vLightDir  = LIGHT_DIRECTION * coreMatrix3::Rotation(m_avDirection[0]);
 
     // move current background

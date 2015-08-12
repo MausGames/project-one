@@ -145,8 +145,10 @@ protected:
 class cCloudBackground final : public cGrassBackground
 {
 private:
-    coreObject2D m_Overlay;      // 
-    coreSoundPtr m_pWindSound;   // wind sound-effect
+    coreObject2D m_Overlay;       // 
+
+    coreSoundPtr m_pWindSound;    // wind sound-effect
+    coreFloat    m_fWindVolume;   // dedicated volume (to adjust with cloud density)
 
 
 public:

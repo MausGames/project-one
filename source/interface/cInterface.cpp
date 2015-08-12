@@ -65,7 +65,8 @@ void cInterface::sPlayerView::Construct(const coreUintW& iIndex)
 // ****************************************************************
 // constructor
 cInterface::cInterface(const coreUint8& iNumViews)noexcept
-: m_iNumViews    (iNumViews)
+: m_aView        {}
+, m_iNumViews    (iNumViews)
 , m_fBannerStart (-100.0f)
 , m_bBannerType  (false)
 , m_fAlphaAll    (0.0f)

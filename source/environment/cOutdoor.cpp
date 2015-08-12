@@ -46,6 +46,8 @@ cOutdoor::~cOutdoor()
 // render the outdoor-surface
 void cOutdoor::Render(const coreProgramPtr& pProgram)
 {
+    if(!this->IsEnabled(CORE_OBJECT_ENABLE_RENDER)) return;
+
     // check for model status
     if(!m_pModel.IsUsable()) return;
 
@@ -65,6 +67,8 @@ void cOutdoor::Render(const coreProgramPtr& pProgram)
 
 void cOutdoor::Render()
 {
+    if(!this->IsEnabled(CORE_OBJECT_ENABLE_RENDER)) return;
+
     // check for model status
     if(!m_pModel.IsUsable()) return;
 
@@ -171,12 +175,12 @@ void cOutdoor::LoadGeometry(const coreUint8& iAlgorithm, const coreFloat& fGrade
 {
     sVertex     aVertexData[OUTDOOR_TOTAL_VERTICES];
     coreUint16  aiIndexData[OUTDOOR_TOTAL_INDICES];
-    coreVector3 avOrtho1   [OUTDOOR_TOTAL_VERTICES];
-    coreVector3 avOrtho2   [OUTDOOR_TOTAL_VERTICES];
+    coreVector3 avOrtho1   [OUTDOOR_TOTAL_VERTICES]; std::memset(avOrtho1, 0, sizeof(avOrtho1));
+    coreVector3 avOrtho2   [OUTDOOR_TOTAL_VERTICES]; std::memset(avOrtho2, 0, sizeof(avOrtho2));
 
     // delete old data
     m_pModel->Unload();
-    for(coreUintW i = 0u; i < OUTDOOR_TOTAL_VERTICES; ++i) m_afHeight[i] = 0.0f;
+    std::memset(m_afHeight, 0, sizeof(m_afHeight));
 
     // save properties
     m_iAlgorithm = iAlgorithm;

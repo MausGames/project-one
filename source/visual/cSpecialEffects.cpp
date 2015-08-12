@@ -12,17 +12,18 @@
 // ****************************************************************
 // constructor
 cSpecialEffects::cSpecialEffects()noexcept
-: m_ParticleColor  (512u)
-, m_ParticleDark   (256u)
-, m_ParticleSmoke  (512u)
-, m_ParticleFire   (256u)
-, m_LightningList  (SPECIAL_LIGHTNINGS)
-, m_iCurLightning  (0u)
-, m_iCurBlast      (0u)
-, m_iCurRing       (0u)
-, m_iSoundGuard    (0u)
-, m_ShakeTimer     (coreTimer(1.0f, 30.0f, 0u))
-, m_fShakeStrength (0.0f)
+: m_ParticleColor    (512u)
+, m_ParticleDark     (256u)
+, m_ParticleSmoke    (512u)
+, m_ParticleFire     (256u)
+, m_apLightningOwner {}
+, m_LightningList    (SPECIAL_LIGHTNINGS)
+, m_iCurLightning    (0u)
+, m_iCurBlast        (0u)
+, m_iCurRing         (0u)
+, m_iSoundGuard      (0u)
+, m_ShakeTimer       (coreTimer(1.0f, 30.0f, 0u))
+, m_fShakeStrength   (0.0f)
 {
     // 
     m_ParticleColor.DefineProgram("effect_particle_color_program");
@@ -42,7 +43,6 @@ cSpecialEffects::cSpecialEffects()noexcept
         m_aLightning[i].DefineProgram("effect_lightning_program");
         m_aLightning[i].SetAlpha     (0.0f);
     }
-    std::memset(m_apLightningOwner, 0, sizeof(m_apLightningOwner));
     m_LightningList.DefineProgram("effect_lightning_inst_program");
 
     // 
@@ -328,6 +328,24 @@ void cSpecialEffects::CreateChargeDark(const coreVector3& vPosition, const coreF
         pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),       Core::Rand->Float(-PI, PI));
         pParticle->SetColor4Abs  (coreVector4(0.0f,0.0f,0.0f,1.0f), coreVector4(0.0f,0.0f,0.0f,0.0f));
         pParticle->SetSpeed      (1.7f * Core::Rand->Float(0.9f, 1.1f));
+    });
+}
+
+
+// ****************************************************************
+// 
+void cSpecialEffects::CreateTrailSmoke(const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat& fScale, const coreUintW& iNum)
+{
+    ASSERT(vDirection.IsNormalized())
+
+    // 
+    m_ParticleSmoke.GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
+    {
+        pParticle->SetPositionRel(vPosition, vDirection * fScale + coreVector3::Rand(-2.0f, 2.0f));
+        pParticle->SetScaleAbs   (4.0f,                              8.0f);
+        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),        Core::Rand->Float(-PI*0.1f, PI*0.1f));
+        pParticle->SetColor4Abs  (coreVector4(0.0f,0.0f,0.0f,1.0f),  coreVector4(0.0f,0.0f,0.0f,0.0f));
+        pParticle->SetSpeed      (0.7f);
     });
 }
 

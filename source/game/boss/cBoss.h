@@ -63,7 +63,7 @@ protected:
 
 public:
     cBoss()noexcept;
-    virtual ~cBoss() {}
+    virtual ~cBoss() {ASSERT(CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_DEAD))}
 
     DISABLE_COPY(cBoss)
     ENABLE_ID

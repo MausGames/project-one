@@ -77,8 +77,10 @@ cGameMenu::cGameMenu()noexcept
         m_aDemo[i].Construct  (MENU_FONT_SMALL, MENU_OUTLINE_SMALL, 0u);
         m_aDemo[i].SetPosition(coreVector2(0.0f, 0.1f - 0.02f*I_TO_F(i) - (i ? 0.01f : 0.0f)));
     }
-    m_aDemo[1].SetText("[WASD] + [Left Mouse Button]");
-    m_aDemo[2].SetText("[ESC] closes the application");
+    m_aDemo[1].SetText("[WASD] + [Left Mouse Button] to play");
+    m_aDemo[2].SetText("[ESC] to quit");
+
+
 
 
     m_StartButton.Construct    (MENU_BUTTON, MENU_FONT_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
@@ -107,6 +109,10 @@ cGameMenu::cGameMenu()noexcept
     m_ExitButton.SetSize      (coreVector2( 1.0f, 1.0f) * m_ConfigButton.GetSize().y);
     m_ExitButton.SetAlignment (coreVector2(-1.0f,-1.0f));
     m_ExitButton.GetCaption()->SetText(ICON_POWER_OFF);
+
+
+    m_ExtraButton.SetOverride(-1); 
+
 
     // bind menu objects
     this->BindObject(SURFACE_GAME_MISSION, &m_Background);

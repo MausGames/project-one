@@ -27,7 +27,7 @@ cVausBoss::cVausBoss()noexcept
     this->SetSize(coreVector3(2.5f,2.5f,2.5f));
 
     // configure the boss
-    this->Configure(10000, coreVector3(51.0f/360.0f, 100.0f/100.0f, 85.0f/100.0f).HSVtoRGB());
+    this->Configure(10000, COLOR_ENEMY_YELLOW);
 }
 
 
@@ -138,7 +138,7 @@ void cVausBoss::__MoveOwn()
     //
     //        const coreUintW A = (i/8u + (CONTAINS_BIT(m_iScoutOrder, i%8u) ? 1u : 0u)) & 0x01u;
     //
-    //        const coreVector2 vGridPos = coreVector2(-0.7f + 0.2f*I_TO_F(i%8u), 0.47f + 0.2f*I_TO_F(A)) * FOREGROUND_AREA;
+    //        const coreVector2 vGridPos = coreVector2(-0.7f + 0.2f*I_TO_F(i%8u), 0.47f + 0.2f*I_TO_F(A));
     //
     //        if(CONTAINS_VALUE(pScout->GetStatus(), ENEMY_STATUS_DEAD))
     //        {
@@ -146,7 +146,7 @@ void cVausBoss::__MoveOwn()
     //
     //            if(m_aiCounter[SCOUT_RESURRECTIONS] < 80)//40)
     //            {
-    //                pScout->Resurrect(vGridPos + coreVector2(0.0f, 3.0f*FOREGROUND_AREA.y), coreVector2(0.0f,-1.0f));
+    //                pScout->Resurrect(vGridPos * FOREGROUND_AREA + coreVector2(0.0f, 3.0f*FOREGROUND_AREA.y), coreVector2(0.0f,-1.0f));
     //                ++m_aiCounter[SCOUT_RESURRECTIONS];
     //            }
     //        }
@@ -188,7 +188,7 @@ void cVausBoss::__MoveOwn()
     //});
     
 
-    pWarrior->DefaultMoveSmooth(coreVector2(this->GetPosition().x, 0.93f * FOREGROUND_AREA.y), 2.0f, 20.0f);
+    pWarrior->DefaultMoveSmooth(coreVector2(this->GetPosition().x / FOREGROUND_AREA.x, 0.93f), 2.0f, 20.0f);
     pWarrior->SetPosition(coreVector3(this->GetPosition().x, pWarrior->GetPosition().yz()));
 
 

@@ -12,17 +12,15 @@
 // ****************************************************************
 // constructor
 cBoss::cBoss()noexcept
-: m_iPhase (0u)
-, m_iLevel (0u)
+: m_aiTimerLine {}
+, m_aiCounter   {}
+, m_avVector    {}
+, m_iPhase      (0u)
+, m_iLevel      (0u)
 {
     // 
     for(coreUintW i = 0u; i < BOSS_TIMERS; ++i)
         m_aTimer[i].Set(1.0f, 1.0f, 0u);
-
-    // 
-    std::memset(m_aiTimerLine, 0, sizeof(m_aiTimerLine));
-    std::memset(m_aiCounter,   0, sizeof(m_aiCounter));
-    std::memset(m_avVector,    0, sizeof(m_avVector));
 
     // 
     this->AddStatus(ENEMY_STATUS_BOSS);

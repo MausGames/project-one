@@ -110,6 +110,7 @@ void cEnemy::Resurrect(const coreVector2& vPosition, const coreVector2& vDirecti
     // 
     m_fLifeTime     = 0.0f;
     m_aiNumShots[1] = m_aiNumShots[0] = 0u;
+    m_nRoutine      = NULL;
 
     // 
     const coreBool bBoss = CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_BOSS);
@@ -132,9 +133,6 @@ void cEnemy::Kill(const coreBool& bAnimated)
     ADD_VALUE(m_iStatus, ENEMY_STATUS_DEAD)
 
     // 
-    m_nRoutine = NULL;
-
-    // 
     const coreBool bBoss = CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_BOSS);
     if(bBoss) g_pGame->GetEnemyManager()->UnbindEnemy(this);
 
@@ -155,19 +153,19 @@ void cEnemy::Kill(const coreBool& bAnimated)
 
 // ****************************************************************
 // 
-coreBool cEnemy::DefaultMovePath(const coreSpline2& oPath, const coreVector2& vFactor, const coreVector2& vOffset, const coreFloat& fDistance)
+coreBool cEnemy::DefaultMovePath(const coreSpline2& oRawPath, const coreVector2& vFactor, const coreVector2& vRawOffset, const coreFloat& fRawDistance)
 {
     // 
     coreVector2 vPosition;
     coreVector2 vDirection;
-    oPath.CalcPosDir(MIN(fDistance, oPath.GetTotalDistance()), &vPosition, &vDirection);
+    oRawPath.CalcPosDir(MIN(fRawDistance, oRawPath.GetTotalDistance()), &vPosition, &vDirection);
 
     // 
-    this->SetPosition (coreVector3((vPosition  * vFactor) + vOffset,   0.0f));
-    this->SetDirection(coreVector3((vDirection * vFactor).Normalize(), 0.0f));
+    this->SetPosition (coreVector3(((vPosition  * vFactor) + vRawOffset) * FOREGROUND_AREA, 0.0f));
+    this->SetDirection(coreVector3( (vDirection * vFactor).Normalize(),                     0.0f));
 
     // 
-    return (fDistance >= oPath.GetTotalDistance()) ? true : false;
+    return (fRawDistance >= oRawPath.GetTotalDistance()) ? true : false;
 }
 
 
@@ -196,12 +194,12 @@ coreBool cEnemy::DefaultMoveTarget(const coreVector2& vTarget, const coreFloat& 
 
 // ****************************************************************
 // 
-coreBool cEnemy::DefaultMoveSmooth(const coreVector2& vPosition, const coreFloat& fSpeedMove, const coreFloat& fClampMove)
+coreBool cEnemy::DefaultMoveSmooth(const coreVector2& vRawPosition, const coreFloat& fSpeedMove, const coreFloat& fClampMove)
 {
     ASSERT((fSpeedMove >= 0.0f) && (fClampMove >= 0.0f))
 
     // 
-    const coreVector2 vDiff = vPosition - this->GetPosition().xy();
+    const coreVector2 vDiff = vRawPosition * FOREGROUND_AREA - this->GetPosition().xy();
     const coreVector2 vAim  = vDiff.Normalized();
     const coreFloat   fLen  = MIN(vDiff.Length() * fSpeedMove, fClampMove);
 
@@ -547,7 +545,7 @@ cScoutEnemy::cScoutEnemy()noexcept
     this->DefineModelLow ("ship_enemy_scout_low.md3");
 
     // configure the enemy
-    this->Configure(10, coreVector3(201.0f/360.0f, 74.0f/100.0f, 85.0f/100.0f).HSVtoRGB());
+    this->Configure(10, COLOR_ENEMY_BLUE);
 }
 
 
@@ -560,7 +558,7 @@ cWarriorEnemy::cWarriorEnemy()noexcept
     this->DefineModelLow ("ship_enemy_warrior_low.md3");
 
     // configure the enemy
-    this->Configure(400, coreVector3(51.0f/360.0f, 100.0f/100.0f, 85.0f/100.0f).HSVtoRGB());
+    this->Configure(400, COLOR_ENEMY_YELLOW);
 }
 
 
@@ -574,7 +572,7 @@ cStarEnemy::cStarEnemy()noexcept
     this->DefineModelLow ("ship_enemy_star_low.md3");
 
     // configure the enemy
-    this->Configure(100, coreVector3(0.0f/360.0f, 68.0f/100.0f, 90.0f/100.0f).HSVtoRGB());
+    this->Configure(100, COLOR_ENEMY_RED);
 }
 
 
@@ -600,7 +598,7 @@ cArrowEnemy::cArrowEnemy()noexcept
     this->DefineModelLow ("ship_enemy_arrow_low.md3");
 
     // configure the enemy
-    this->Configure(100, coreVector3(34.0f/360.0f, 100.0f/100.0f, 100.0f/100.0f).HSVtoRGB());
+    this->Configure(100, COLOR_ENEMY_ORANGE);
 }
 
 
@@ -625,7 +623,7 @@ cMinerEnemy::cMinerEnemy()noexcept
     this->DefineModelLow ("ship_enemy_miner_low.md3");
 
     // configure the enemy
-    this->Configure(100, coreVector3(183.0f/360.0f, 70.0f/100.0f, 85.0f/100.0f).HSVtoRGB());
+    this->Configure(100, COLOR_ENEMY_CYAN);
 }
 
 
@@ -639,7 +637,7 @@ cFreezerEnemy::cFreezerEnemy()noexcept
     this->DefineModelLow ("ship_enemy_freezer_low.md3");
 
     // configure the enemy
-    this->Configure(100, coreVector3(208.0f/360.0f, 32.0f/100.0f, 90.0f/100.0f).HSVtoRGB());
+    this->Configure(100, COLOR_ENEMY_ICE);
 }
 
 
@@ -665,7 +663,7 @@ cCinderEnemy::cCinderEnemy()noexcept
     this->DefineModelLow ("ship_enemy_cinder_low.md3");
 
     // configure the enemy
-    this->Configure(100, coreVector3(0.0f/360.0f, 0.0f/100.0f, 60.0f/100.0f).HSVtoRGB());
+    this->Configure(100, COLOR_ENEMY_GREY);
 }
 
 

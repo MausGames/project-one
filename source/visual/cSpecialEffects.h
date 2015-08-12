@@ -12,37 +12,33 @@
 
 // TODO: glowing waves
 // TODO: particles should not overdraw outlines (at least color-particles)
-// TODO: make lightning owner with position-offset
+// TODO: make lightning owner-sticky with position-offset
 
 
 // ****************************************************************
 // special-effects definitions
-#define SPECIAL_LIGHTNINGS       (32u)             // 
-#define SPECIAL_BLASTS           (4u)              // number of energy-blasts
-#define SPECIAL_RINGS            (4u)              // number of energy-rings
-#define SPECIAL_SOUNDS           (8u)              // number of sound-effect files
+#define SPECIAL_LIGHTNINGS       (32u)     // number of lightning sprites
+#define SPECIAL_BLASTS           (4u)      // number of energy-blasts
+#define SPECIAL_RINGS            (4u)      // number of energy-rings
+#define SPECIAL_SOUNDS           (8u)      // number of sound-effect files
 
-#define SPECIAL_LIGHTNING_RESIZE (0.66f)           // 
-#define SPECIAL_LIGHTNING_CUTOUT (0.5f)            // 
+#define SPECIAL_LIGHTNING_RESIZE (0.66f)   // 
+#define SPECIAL_LIGHTNING_CUTOUT (0.5f)    // 
 
-#define SPECIAL_SPLASH_TINY      (25.0f),  (13u)   // 
-#define SPECIAL_SPLASH_SMALL     (50.0f),  (25u)   // 
-#define SPECIAL_SPLASH_BIG       (100.0f), (50u)   // 
-#define SPECIAL_BLOW_SMALL       (50.0f),  (25u)   // 
-#define SPECIAL_BLOW_BIG         (100.0f), (50u)   // 
-#define SPECIAL_CHARGE_BIG       (35.0f),  (40u)   // 
-
-#define SPECIAL_EXPLOSION_SMALL  (10.0f), (40u)    // 
-#define SPECIAL_EXPLOSION_BIG    (20.0f), (80u)    // 
-
-#define SPECIAL_LIGHTNING_SMALL  (11.0f)           // 
-#define SPECIAL_LIGHTNING_BIG    (25.0f)           // 
-
-#define SPECIAL_BLAST_SMALL      (2.0f), (3.5f)    // 
-#define SPECIAL_BLAST_BIG        (4.0f), (3.5f)    // 
-
-#define SPECIAL_SHAKE_SMALL      (0.6f)            // 
-#define SPECIAL_SHAKE_BIG        (1.2f)            // 
+#define SPECIAL_SPLASH_TINY      (25.0f), (13u)
+#define SPECIAL_SPLASH_SMALL     (50.0f), (25u)
+#define SPECIAL_SPLASH_BIG      (100.0f), (50u)
+#define SPECIAL_BLOW_SMALL       (50.0f), (25u)
+#define SPECIAL_BLOW_BIG        (100.0f), (50u)
+#define SPECIAL_CHARGE_BIG       (35.0f), (40u)
+#define SPECIAL_EXPLOSION_SMALL  (10.0f), (40u)
+#define SPECIAL_EXPLOSION_BIG    (20.0f), (80u)
+#define SPECIAL_LIGHTNING_SMALL  (11.0f)
+#define SPECIAL_LIGHTNING_BIG    (25.0f)
+#define SPECIAL_BLAST_SMALL       (2.0f), (3.5f)
+#define SPECIAL_BLAST_BIG         (4.0f), (3.5f)
+#define SPECIAL_SHAKE_SMALL       (0.6f)
+#define SPECIAL_SHAKE_BIG         (1.2f)
 
 enum eSoundEffect : coreUint16   // 0xAABBu -> AA sub-index, BB file-index
 {
@@ -105,6 +101,9 @@ public:
     // create whirling particle charge
     void CreateChargeColor(const coreVector3& vPosition, const coreFloat& fScale, const coreUintW& iNum, const coreVector3& vColor);
     void CreateChargeDark (const coreVector3& vPosition, const coreFloat& fScale, const coreUintW& iNum);
+
+    // 
+    void CreateTrailSmoke(const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat& fScale, const coreUintW& iNum);
 
     // 
     coreFloat CreateLightning(const coreVector2& vPosFrom, const coreVector2& vPosTo,     const coreFloat&   fWidth, const coreVector3& vColor, const coreVector2& vTexSizeFactor, const coreFloat& fTexOffset);

@@ -29,7 +29,7 @@ protected:
 
 
 protected:
-    constexpr_weak cShip()noexcept;
+    cShip()noexcept;
     ~cShip() {}
 
 
@@ -73,17 +73,6 @@ protected:
     // 
     void _UpdateBlink();
 };
-
-
-// ****************************************************************
-// constructor
-constexpr_weak cShip::cShip()noexcept
-: m_iBaseColor (0u)
-, m_iMaxHealth (0)
-, m_iCurHealth (0)
-, m_fBlink     (0.0f)
-{
-}
 
 
 #endif // _P1_GUARD_SHIP_H_

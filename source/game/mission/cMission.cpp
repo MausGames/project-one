@@ -12,13 +12,13 @@
 // ****************************************************************
 // constructor
 cMission::cMission()noexcept
-: m_pCurBoss         (NULL)
+: m_apBoss           {}
+, m_pCurBoss         (NULL)
 , m_iCurBossIndex    (MISSION_NO_BOSS)
+, m_iStageNum        (0u)
 , m_fStageTime       (0.0f)
 , m_fStageTimeBefore (0.0f)
 {
-    // reset boss pointers
-    std::memset(m_apBoss, 0, sizeof(m_apBoss));
 }
 
 
@@ -28,7 +28,8 @@ void cMission::Setup()
 {
     // 
     ASSERT(m_anStage.empty())
-    m_anStage.clear();
+    m_anStage    .clear();
+    m_aiStageLine.clear();
 
     // 
     this->__SetupOwn();
@@ -37,10 +38,13 @@ void cMission::Setup()
     std::reverse(m_anStage.begin(), m_anStage.end());
     STAGE_MAIN
     {
-        // 
+        // begin mission
         if(g_pGame->GetTimeMission() >= 0.0f)
             STAGE_FINISH_NOW
     });
+
+    // 
+    m_iStageNum = m_anStage.size();
 
 #if defined(_CORE_DEBUG_)
 
@@ -90,6 +94,7 @@ void cMission::MoveBefore()
             // TODO # end mission? 
         }
     }
+    ASSERT(m_anStage.size() == m_aiStageLine.size())
 
     // 
     this->__MoveOwnBefore();
@@ -97,6 +102,14 @@ void cMission::MoveBefore()
 
 void cMission::MoveAfter()
 {
+    FOR_EACH_DYN(it, m_apPath)
+    {
+        // 
+        if(it->unique() && (*m_apPath.get_key(it) < m_aiStageLine.back()))
+             DYN_REMOVE(it, m_apPath)
+        else DYN_KEEP  (it)
+    }
+
     // 
     this->__MoveOwnAfter();
 }

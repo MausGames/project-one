@@ -39,7 +39,7 @@ protected:
 
 public:
     cEnemy()noexcept;
-    virtual ~cEnemy() {ASSERT(CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_DEAD))}
+    virtual ~cEnemy() {}
 
     FRIEND_CLASS(cEnemyManager)
     ENABLE_COPY (cEnemy)
@@ -63,10 +63,10 @@ public:
     // 
     template <typename F> void ChangeRoutine(F&& nRoutine) {m_nRoutine = nRoutine;}
 
-    // 
-    coreBool DefaultMovePath     (const coreSpline2& oPath, const coreVector2& vFactor, const coreVector2& vOffset, const coreFloat& fDistance);
+    // (raw parameters are multiplied with FOREGROUND_AREA) 
+    coreBool DefaultMovePath     (const coreSpline2& oRawPath, const coreVector2& vFactor, const coreVector2& vRawOffset, const coreFloat& fRawDistance);
     coreBool DefaultMoveTarget   (const coreVector2& vTarget, const coreFloat& fSpeedMove, const coreFloat& fSpeedTurn);
-    coreBool DefaultMoveSmooth   (const coreVector2& vPosition, const coreFloat& fSpeedMove, const coreFloat& fClampMove);
+    coreBool DefaultMoveSmooth   (const coreVector2& vRawPosition, const coreFloat& fSpeedMove, const coreFloat& fClampMove);
     void     DefaultMoveLerp     (const coreVector2& vFromRawPos, const coreVector2& vToRawPos, const coreFloat& fTime);
     void     DefaultRotate       (const coreFloat& fAngle);
     coreBool DefaultRotateSmooth (const coreVector2& vDirection, const coreFloat& fSpeedTurn, const coreFloat& fClampTurn);

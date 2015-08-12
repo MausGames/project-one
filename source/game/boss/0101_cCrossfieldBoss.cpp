@@ -34,7 +34,7 @@ cCrossfieldBoss::cCrossfieldBoss()noexcept
     this->SetCollisionModifier(coreVector3(0.9f,0.9f,0.9f));
 
     // configure the boss
-    this->Configure(2800, coreVector3(0.0f/360.0f, 68.0f/100.0f, 90.0f/100.0f).HSVtoRGB());
+    this->Configure(2800, COLOR_ENEMY_RED);
 
     // create duplicate object
     m_Duplicate.DefineModel         ("ship_boss_crossfield_high.md3");

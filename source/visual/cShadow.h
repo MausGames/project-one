@@ -10,8 +10,6 @@
 #ifndef _P1_GUARD_SHADOW_H_
 #define _P1_GUARD_SHADOW_H_
 
-// TODO: check out shadow-volumes (would be overall superior in this use-case), in mockup: low-poly ship models have many artifacts (cuts), because optimized for outlining, but good performance and quality
-
 // NOTE: shadow map binds local objects (per frame buffer) and global objects (on all frame buffers, for transitions)
 // NOTE: all global objects are on the foreground
 
@@ -25,7 +23,7 @@
 #define SHADOW_DETAIL_Y           (0.016f)             // same for Y
 #define SHADOW_HEIGHT_FACTOR      (2.5f)               // height correction factor (to reduce shadow length)
 
-#define SHADOW_HANDLES            (3u)                 // number of handles for shader-programs with shadow maps
+#define SHADOW_HANDLES            (3u)                 // number of handles for shader-programs for shadow-receiving objects
 #define SHADOW_HANDLE_OUTDOOR     (0u)                 // outdoor-surface handle
 #define SHADOW_HANDLE_OBJECT      (1u)                 // single object handle
 #define SHADOW_HANDLE_OBJECT_INST (2u)                 // instanced object handle
@@ -44,7 +42,7 @@ private:
 
     static coreProgramPtr s_pProgramSingle;             // shader-program for single shadow-casting objects
     static coreProgramPtr s_pProgramInstanced;          // shader-program for instanced shadow-casting objects
-    static coreProgramPtr s_apHandle[SHADOW_HANDLES];   // handles for shader-programs with shadow maps
+    static coreProgramPtr s_apHandle[SHADOW_HANDLES];   // handles for shader-programs for shadow-receiving objects
 
     static coreMatrix4 s_amDrawShadowMatrix[2];         // matrices used for view transformation of depth values (0 = background, 1 = foreground)
     static coreMatrix4 s_mReadShadowMatrix;             // matrix with additional coordinate adjustment
@@ -72,7 +70,7 @@ public:
     // access global bind container
     static inline cBindContainerIn* GetGlobalContainer() {return &s_GlobalContainer;}
 
-    // recompile shader-programs with shadow maps
+    // recompile shader-programs for shadow-receiving objects
     static void Recompile();
 
     // 
@@ -89,7 +87,7 @@ private:
     // reset with the resource manager
     void __Reset(const coreResourceReset& bInit)override;
 
-    // 
+    // send transformation matrix to shader-program
     static void __SendTransform(const coreProgramPtr& pProgram, const coreMatrix4& mTransform);
 
     // render shadow-casting objects

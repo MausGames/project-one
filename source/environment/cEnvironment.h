@@ -12,6 +12,7 @@
 
 // TODO: render depth-quads or use scissor test (tested: works bad, no gain) on unused background areas (for transition!)
 // TODO: make "side" parameterized
+// TODO: use depth from water as own map for decals to reconstruct position for shadow-mapping, maybe add normal for lighting
 
 
 // ****************************************************************
@@ -29,6 +30,7 @@ private:
     coreVector2 m_avDirection[2];    // background direction (0 = current value, 1 = target value)
     coreVector2 m_avSide     [2];    // background position offset
     coreFloat   m_afSpeed    [2];    // movement speed
+    coreFloat   m_afHeight   [2];    // 
 
     coreFloat   m_fFlyOffset;        // global fly offset (directly accessed by background objects)
     coreFloat   m_fSideOffset;       // global side offset
@@ -64,11 +66,13 @@ public:
     inline void SetTargetDirection(const coreVector2& vDirection) {m_avDirection[1] = vDirection; ASSERT(vDirection.IsNormalized())}
     inline void SetTargetSide     (const coreVector2& vSide)      {m_avSide     [1] = vSide;}
     inline void SetTargetSpeed    (const coreFloat&   fSpeed)     {m_afSpeed    [1] = fSpeed;}
+    inline void SetTargetHeight   (const coreFloat&   fHeight)    {m_afHeight   [1] = fHeight;}
 
     // get current transformation properties
     inline const coreVector2& GetDirection()const {return m_avDirection[0];}
     inline const coreVector2& GetSide     ()const {return m_avSide     [0];}
     inline const coreFloat&   GetSpeed    ()const {return m_afSpeed    [0];}
+    inline const coreFloat&   GetHeight   ()const {return m_afHeight   [0];}
 
     // get offset values
     inline const coreFloat&   GetFlyOffset ()const {return m_fFlyOffset;}

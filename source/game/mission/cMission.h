@@ -19,10 +19,19 @@
 
 // ****************************************************************
 // stage management macros
-#define STAGE_MAIN            m_anStage.push_back([&]()                               // 
-#define STAGE_SUB(t)          ((m_fStageTimeBefore <= (t)) && ((t) < m_fStageTime))   // 
-#define STAGE_FINISH_NOW      {m_fStageTime = 0.0f; m_anStage.pop_back();}            //
-#define STAGE_FINISH_AFTER(t) {if(m_fStageTime >= (t)) STAGE_FINISH_NOW}              // 
+#define STAGE_MAIN            m_aiStageLine.push_back(__LINE__); m_anStage.push_back([this]()          // 
+#define STAGE_SUB(t)          ((m_fStageTimeBefore <= (t)) && ((t) < m_fStageTime))                    // 
+#define STAGE_FINISH_NOW      {m_fStageTime = 0.0f; m_aiStageLine.pop_back(); m_anStage.pop_back();}   // 
+#define STAGE_FINISH_AFTER(t) {if(m_fStageTime >= (t)) STAGE_FINISH_NOW}                               // 
+
+#define STAGE_ADD_PATH(n) \
+    auto n = this->_AddPath(__LINE__, [](coreSpline2* OUTPUT n)
+
+#define STAGE_ADD_ENEMY(n,t,c)                        \
+    t* n = g_pGame->GetEnemyManager()->AddEnemy<t>(); \
+    n->Resurrect();                                   \
+    n->SetBaseColor(c);                               \
+    n->ChangeRoutine([=](cEnemy* OUTPUT n)
 
 
 // ****************************************************************
@@ -38,16 +47,25 @@
 // mission interface
 class INTERFACE cMission
 {
+private:
+    using tStageFunc = std::function<void()>;
+    using tPathPtr   = std::shared_ptr<coreSpline2>;
+
+
 protected:
-    cBoss* m_apBoss[MISSION_BOSSES];                 // pointers to all available bosses
+    cBoss* m_apBoss[MISSION_BOSSES];             // pointers to all available bosses
 
-    cBoss*    m_pCurBoss;                            // pointer to currently active boss
-    coreUintW m_iCurBossIndex;                       // index of the active boss (or error-value)
+    cBoss*    m_pCurBoss;                        // pointer to currently active boss
+    coreUintW m_iCurBossIndex;                   // index of the active boss (or error-value)
 
-    std::vector<std::function<void()> > m_anStage;   // 
+    std::vector<tStageFunc> m_anStage;           // 
+    std::vector<coreUint16> m_aiStageLine;       // 
+    coreUint16 m_iStageNum;                      // 
 
-    coreFlow  m_fStageTime;                          // 
-    coreFloat m_fStageTimeBefore;                    // 
+    coreLookup<coreUint16, tPathPtr> m_apPath;   // 
+
+    coreFlow  m_fStageTime;                      // 
+    coreFloat m_fStageTimeBefore;                // 
 
 
 public:
@@ -75,6 +93,11 @@ public:
     inline cBoss*           GetBoss        (const coreUintW& iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_apBoss[iIndex];}
     inline cBoss*           GetCurBoss     ()const                        {return m_pCurBoss;}
     inline const coreUintW& GetCurBossIndex()const                        {return m_iCurBossIndex;}
+
+
+protected:
+    // 
+    template <typename F> const tPathPtr& _AddPath(const coreUint16& iIndex, F&& nInitFunc);
 
 
 private:
@@ -242,6 +265,24 @@ public:
     DISABLE_COPY(cAterMission)
     ASSIGN_ID(8, "Ater")
 };
+
+
+// ****************************************************************
+// 
+template <typename F> const cMission::tPathPtr& cMission::_AddPath(const coreUint16& iIndex, F&& nInitFunc)
+{
+    if(!m_apPath.count(iIndex))
+    {
+        // 
+        tPathPtr pNewPath = std::make_shared<coreSpline2>();
+        nInitFunc(pNewPath.get());
+
+        // 
+        m_apPath[iIndex] = std::move(pNewPath);
+    }
+
+    return m_apPath.at(iIndex);
+}
 
 
 #endif // _P1_GUARD_MISSION_H_

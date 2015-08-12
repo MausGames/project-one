@@ -238,6 +238,19 @@ cGrassBackground::~cGrassBackground()
 // move the grass background
 void cGrassBackground::__MoveOwn()
 {
+
+    //if(g_pGame)
+    //g_pGame->ForEachPlayer([](const cPlayer* pPlayer)
+    //{
+    //    const coreVector3& vPos = pPlayer->GetPosition ();
+    //    const coreVector3& vDir = pPlayer->GetDirection();
+    //    const coreVector3  vTan = coreVector3(vDir.xy().Rotate90(), 0.0f);
+    //
+    //    g_pSpecialEffects->CreateTrailSmoke(vPos - 5.0f*vDir, -vDir, g_pEnvironment->GetSpeed()*10.0f, 1u);
+    //    //g_pSpecialEffects->CreateTrailSmoke(vPos - 5.0f*vDir - 2.0f*vTan, -vDir, g_pEnvironment->GetSpeed()/0.7f, 1u);
+    //});
+
+
     // TODO # sound-volume per config value 
     // adjust volume of the nature sound-effect
     if(m_pNatureSound->EnableRef(this))
@@ -249,6 +262,7 @@ void cGrassBackground::__MoveOwn()
 // constructor
 cCloudBackground::cCloudBackground()noexcept
 : cGrassBackground (GRASS_CLOUDS_DENSITY)
+, m_fWindVolume    (1.0f)
 {
     // 
     m_Overlay.DefineTexture(0u, "environment_clouds_blue.png");
@@ -264,6 +278,9 @@ cCloudBackground::cCloudBackground()noexcept
     {
         m_pWindSound->PlayRelative(this, 0.0f, 1.0f, 0.0f, true);
     });
+
+
+    m_pOutdoor->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);  
 }
 
 
@@ -290,6 +307,9 @@ void cCloudBackground::SetCloudAlpha(const coreFloat& fAlpha)
         if(i % GRASS_CLOUDS_DENSITY)
             (*apCloud)[i]->SetAlpha((i % 2u) ? MAX(fAlpha*2.0f - 1.0f, 0.0f) : MIN(fAlpha*2.0f, 1.0f));
     }
+
+    // 
+    m_fWindVolume = fAlpha;
 }
 
 
@@ -355,8 +375,38 @@ void cCloudBackground::__MoveOwn()
 
     // 
     if(m_pWindSound->EnableRef(this))
-        m_pWindSound->SetVolume(MAX(g_pEnvironment->GetTransition().GetValue((g_pEnvironment->GetBackground() == this) ? CORE_TIMER_GET_NORMAL : CORE_TIMER_GET_REVERSED), 0.0f));
+        m_pWindSound->SetVolume(m_fWindVolume * MAX(g_pEnvironment->GetTransition().GetValue((g_pEnvironment->GetBackground() == this) ? CORE_TIMER_GET_NORMAL : CORE_TIMER_GET_REVERSED), 0.0f));
 
     // 
     cGrassBackground::__MoveOwn();
+
+    //if(g_pGame)
+    //g_pGame->ForEachPlayer([](const cPlayer* pPlayer)
+    //{
+    //    const coreVector3& vPos = pPlayer->GetPosition ();
+    //    const coreVector3& vDir = pPlayer->GetDirection();
+    //    const coreVector3  vTan = coreVector3(vDir.xy().Rotate90(), 0.0f);
+    //
+    //    g_pSpecialEffects->CreateTrailSmoke(vPos - 5.0f*vDir + 2.0f*vTan, -vDir, g_pEnvironment->GetSpeed()/0.7f, 1u);
+    //    g_pSpecialEffects->CreateTrailSmoke(vPos - 5.0f*vDir - 2.0f*vTan, -vDir, g_pEnvironment->GetSpeed()/0.7f, 1u);
+    //});
+
+
+    auto nControlObjectsFunc = [](std::vector<coreBatchList*>* OUTPUT papList)
+    {
+        FOR_EACH(it, *papList)
+        {
+            FOR_EACH(et, *(*it)->List())
+            {
+                coreObject3D* pObject = (*et);
+                pObject->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+            }
+
+            (*it)->MoveNormal();
+        }
+    };
+    nControlObjectsFunc(&m_apGroundObjectList);
+    nControlObjectsFunc(&m_apDecalObjectList);
+    //nControlObjectsFunc(&m_apAirObjectList);
+
 }

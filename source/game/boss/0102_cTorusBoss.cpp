@@ -30,7 +30,7 @@ cTorusBoss::cTorusBoss()noexcept
     this->SetCollisionModifier(coreVector3(0.8f,0.8f,1.0f));
 
     // configure the boss
-    this->Configure(2800, coreVector3(0.0f/360.0f, 0.0f/100.0f, 60.0f/100.0f).HSVtoRGB()); // 4000
+    this->Configure(2800, COLOR_ENEMY_GREY);
 
     // 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRay); ++i)

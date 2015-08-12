@@ -8,12 +8,12 @@
 //////////////////////////////////////////////////////
 #include "main.h"
 
-cBindContainerIn cShadow::s_GlobalContainer;          // = NULL;
-coreProgramPtr   cShadow::s_pProgramSingle               = NULL;
-coreProgramPtr   cShadow::s_pProgramInstanced            = NULL;
-coreProgramPtr   cShadow::s_apHandle[SHADOW_HANDLES]; // = NULL;
-coreMatrix4      cShadow::s_amDrawShadowMatrix[2];    // = coreMatrix4::Identity();
-coreMatrix4      cShadow::s_mReadShadowMatrix            = coreMatrix4::Identity();
+cBindContainerIn cShadow::s_GlobalContainer          = {};
+coreProgramPtr   cShadow::s_pProgramSingle           = NULL;
+coreProgramPtr   cShadow::s_pProgramInstanced        = NULL;
+coreProgramPtr   cShadow::s_apHandle[SHADOW_HANDLES] = {};
+coreMatrix4      cShadow::s_amDrawShadowMatrix[2]    = {coreMatrix4::Identity(), coreMatrix4::Identity()};
+coreMatrix4      cShadow::s_mReadShadowMatrix        =  coreMatrix4::Identity();
 
 
 // ****************************************************************
@@ -87,7 +87,7 @@ void cShadow::GlobalInit()
     s_pProgramSingle    = Core::Manager::Resource->Get<coreProgram>("effect_shadow_program");
     s_pProgramInstanced = Core::Manager::Resource->Get<coreProgram>("effect_shadow_inst_program");
 
-    // load shader-programs with shadow maps
+    // load shader-programs for shadow-receiving objects
     s_apHandle[SHADOW_HANDLE_OUTDOOR]     = Core::Manager::Resource->Get<coreProgram>("environment_outdoor_program");
     s_apHandle[SHADOW_HANDLE_OBJECT]      = Core::Manager::Resource->Get<coreProgram>("object_ground_program");
     s_apHandle[SHADOW_HANDLE_OBJECT_INST] = Core::Manager::Resource->Get<coreProgram>("object_ground_inst_program");
@@ -139,7 +139,7 @@ void cShadow::GlobalUpdate()
     // increase light direction height (to reduce shadow length)
     const coreVector3 vHighLight = (g_pEnvironment->GetLightDir() * coreVector3(1.0f, 1.0f, SHADOW_HEIGHT_FACTOR)).Normalize();
 
-    // 
+    // assemble camera matrix (viewed from light source)
     const coreMatrix4 mCamera = coreMatrix4::Camera(vHighLight * -SHADOW_VIEW_DISTANCE + coreVector3(g_pEnvironment->GetCameraPos().xy(), WATER_HEIGHT),
                                                     vHighLight, coreVector3(g_pEnvironment->GetDirection().InvertedX(), 0.0f));
 
@@ -151,7 +151,7 @@ void cShadow::GlobalUpdate()
 
 
 // ****************************************************************
-// recompile shader-programs with shadow maps
+// recompile shader-programs for shadow-receiving objects
 void cShadow::Recompile()
 {
     for(coreUintW i = 0u; i < SHADOW_HANDLES; ++i)
@@ -168,7 +168,7 @@ void cShadow::Recompile()
     }
 
     // finish now
-    glFinish();
+    coreSync::Finish();
     Core::Manager::Resource->UpdateResources();
 }
 
@@ -195,10 +195,9 @@ void cShadow::__Reset(const coreResourceReset& bInit)
 
 
 // ****************************************************************
-// 
+// send transformation matrix to shader-program
 void cShadow::__SendTransform(const coreProgramPtr& pProgram, const coreMatrix4& mTransform)
 {
-    // send transformation matrix to shader-program
     if(!pProgram.IsUsable()) return;
     if(!pProgram->Enable())  return;
     pProgram->SendUniform(SHADOW_SHADER_MATRIX, mTransform, false);

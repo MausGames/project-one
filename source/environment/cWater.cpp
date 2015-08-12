@@ -39,8 +39,7 @@ cWater::cWater()noexcept
     this->DefineProgram("environment_water_program");
 
     // set object properties
-    this->SetPosition(coreVector3(      0.0f,       0.0f, WATER_HEIGHT));
-    this->SetSize    (coreVector3(WATER_SIZE, WATER_SIZE,         1.0f));
+    this->SetSize(coreVector3(WATER_SIZE, WATER_SIZE, 1.0f));
 
     // remove default texture filter (not visible, better performance)
     m_apTexture[0].GetHandle()->OnLoadOnce([&]()
@@ -108,7 +107,7 @@ void cWater::UpdateReflection()
     const coreVector4 vOldLight  = Core::Graphics->GetLight(0u).vDirection;
 
     // flip camera upside-down and override light
-    Core::Graphics->SetCamera(-CAMERA_POSITION + coreVector3(0.0f, 0.0f, WATER_HEIGHT*2.0f), -CAMERA_DIRECTION, CAMERA_ORIENTATION);
+    Core::Graphics->SetCamera(-CAMERA_POSITION + coreVector3(0.0f, 0.0f, WATER_HEIGHT*2.0f + g_pEnvironment->GetHeight()), -CAMERA_DIRECTION, CAMERA_ORIENTATION);
     Core::Graphics->SetLight (0u, coreVector4(0.0f,0.0f,0.0f,0.0f), coreVector4(LIGHT_DIRECTION, 0.0f), coreVector4(0.0f,0.0f,0.0f,0.0f));
 
     // fill reflection frame buffer
@@ -149,7 +148,7 @@ void cWater::UpdateReflection()
 // update water depth map
 void cWater::UpdateDepth(cOutdoor* pOutdoor, const std::vector<coreBatchList*>& apGroundObjectList)
 {
-    if(pOutdoor)
+    if(pOutdoor && pOutdoor->IsEnabled(CORE_OBJECT_ENABLE_ALL))
     {
         // fill only depth component of refraction frame buffer
         m_BelowRefraction.StartDraw();
