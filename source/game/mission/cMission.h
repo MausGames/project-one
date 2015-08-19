@@ -97,7 +97,7 @@ public:
 
 protected:
     // 
-    template <typename F> const tPathPtr& _AddPath(const coreUint16& iIndex, F&& nInitFunc);
+    template <typename F> const tPathPtr& _AddPath(const coreUint16& iIndex, F&& nInitFunc);   // [](coreSpline2* OUTPUT pPath) -> void
 
 
 private:

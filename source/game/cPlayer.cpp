@@ -168,7 +168,7 @@ void cPlayer::Render()
     glEnable(GL_DEPTH_TEST);
 
     // 
-    this->_UpdateBlink();
+    this->_EnableBlink();
 
     // render the 3d-object
     coreObject3D::Render();
@@ -217,6 +217,9 @@ void cPlayer::Move()
         this->SetPosition   (coreVector3(vOffset + this->GetPosition().xy(), 0.0f));
         this->SetOrientation(coreVector3(CLAMP(vDiff.x, -0.6f, 0.6f), 0.0f, 1.0f).Normalize());
     }
+
+    // 
+    this->_UpdateBlink();
 
     // move the 3d-object
     coreObject3D::Move();
@@ -271,7 +274,7 @@ void cPlayer::Move()
         coreBool bGrace = false;
 
         // 
-        Core::Manager::Object->TestCollision(TYPE_BULLET_ENEMY, &m_Bubble, [&bGrace](const cBullet* pBullet, const coreBool& bFirst)
+        Core::Manager::Object->TestCollision(TYPE_BULLET_ENEMY, &m_Bubble, [&bGrace](const cBullet* pBullet, const coreBool& bFirstHit)
         {
             bGrace = true;
         });
@@ -444,7 +447,7 @@ void cPlayer::TransformDark(const coreUint8& iStatus)
         // 
         g_pDistortion    ->CreateWave      (this->GetPosition(), DISTORTION_WAVE_SMALL);
         g_pSpecialEffects->CreateSplashDark(this->GetPosition(), SPECIAL_SPLASH_SMALL);
-        g_pSpecialEffects->CreateBlast     (this->GetPosition(), SPECIAL_BLAST_SMALL, m_Bubble.GetColor3());
+        g_pSpecialEffects->CreateBlast     (this->GetPosition(), SPECIAL_BLAST_SMALL, coreVector3(1.0f,1.0f,1.0f));
 
         // 
         m_fDarkAnimation = 0.0f;
@@ -460,7 +463,7 @@ void cPlayer::TransformDark(const coreUint8& iStatus)
         // 
         g_pDistortion    ->CreateWave      (this->GetPosition(), DISTORTION_WAVE_BIG);
         g_pSpecialEffects->CreateSplashDark(this->GetPosition(), SPECIAL_SPLASH_BIG);
-        g_pSpecialEffects->CreateBlast     (this->GetPosition(), SPECIAL_BLAST_BIG, m_Bubble.GetColor3());
+        g_pSpecialEffects->CreateBlast     (this->GetPosition(), SPECIAL_BLAST_BIG, coreVector3(1.0f,1.0f,1.0f));
 
         // 
         g_pGame->GetBulletManagerEnemy()->ForEachBullet([&](cBullet* OUTPUT pBullet)

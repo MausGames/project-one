@@ -96,6 +96,7 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreShader> ("effect_energy_spheric.vert",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", SHADER_SPHERIC);
     Core::Manager::Resource->Load<coreShader> ("effect_energy_invert.vert",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", SHADER_INVERT);
     Core::Manager::Resource->Load<coreShader> ("effect_energy_direct.vert",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", SHADER_DIRECT);
+    Core::Manager::Resource->Load<coreShader> ("effect_energy_ring.vert",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", SHADER_RING);
     Core::Manager::Resource->Load<coreShader> ("effect_energy_bullet.vert",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", SHADER_BULLET);
     Core::Manager::Resource->Load<coreShader> ("effect_energy_bullet_spheric.vert",      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", SHADER_BULLET SHADER_SPHERIC);
     Core::Manager::Resource->Load<coreShader> ("effect_energy_bullet_invert.vert",       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", SHADER_BULLET SHADER_INVERT);
@@ -247,6 +248,11 @@ static void SetupResources()
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_direct_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("effect_energy_direct_inst.vert")
         ->AttachShader("effect_energy_inst.frag")
+        ->Finish();
+
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_ring_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_energy_ring.vert")
+        ->AttachShader("effect_energy.frag")
         ->Finish();
 
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_bullet_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
@@ -450,8 +456,9 @@ static void SetupResources()
         ->Finish();
 
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ship_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
-        ->AttachShader("object_inst.vert")
-        ->AttachShader("object_ship_inst.frag")
+        ->AttachShader ("object_inst.vert")
+        ->AttachShader ("object_ship_inst.frag")
+        ->BindAttribute("a_v1Blink", ENEMY_SHADER_ATTRIBUTE_BLINK)
         ->Finish();
 
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ship_glow_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())

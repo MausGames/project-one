@@ -33,7 +33,7 @@ void cForeground::Start()
     Core::Graphics->SetView  (g_vGameResolution, Core::Graphics->GetFOV(), Core::Graphics->GetNearClip(), Core::Graphics->GetFarClip());
 
     // adjust blending function (to correctly aggregate alpha values)
-    glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFuncSeparate(FOREGROUND_BLEND_DEFAULT, FOREGROUND_BLEND_ALPHA);
 
     // clear color buffer
     glClear(GL_COLOR_BUFFER_BIT);
@@ -65,7 +65,7 @@ void cForeground::End()
     Core::Graphics->SetView(Core::System->GetResolution(), Core::Graphics->GetFOV(), Core::Graphics->GetNearClip(), Core::Graphics->GetFarClip());
 
     // reset blending function
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(FOREGROUND_BLEND_DEFAULT);
 }
 
 

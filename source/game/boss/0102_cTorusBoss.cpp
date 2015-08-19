@@ -548,9 +548,9 @@ void cTorusBoss::__MoveOwn()
     }
 
     // 
-    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_OBJECT(1), [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pRay, const coreBool& bFirst)
+    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_OBJECT(1), [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pRay, const coreBool& bFirstHit)
     {
-        if(!bFirst) return;
+        if(!bFirstHit) return;
 
     });
 }

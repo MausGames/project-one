@@ -877,9 +877,9 @@ void cCrossfieldBoss::__MoveOwn()
     m_BoomerangTrail.MoveNormal();
 
     // 
-    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_OBJECT(0), [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBoomerang, const coreBool& bFirst)
+    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_OBJECT(0), [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBoomerang, const coreBool& bFirstHit)
     {
-        if(!bFirst) return;
+        if(!bFirstHit) return;
 
         // 
         pPlayer->TakeDamage((pBoomerang == &m_Duplicate) ? 10 : 5);

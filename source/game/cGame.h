@@ -76,7 +76,7 @@ public:
 
     // 
     cPlayer* RETURN_NONNULL FindPlayer(const coreVector2& vPosition);
-    template <typename F> void ForEachPlayer(F&& nFunction);
+    template <typename F> void ForEachPlayer(F&& nFunction);   // [](cPlayer* OUTPUT pPlayer) -> void
 
     // access game objects
     inline cPlayer*        GetPlayer             (const coreUintW& iIndex) {ASSERT(iIndex < GAME_PLAYERS) return &m_aPlayer[iIndex];}

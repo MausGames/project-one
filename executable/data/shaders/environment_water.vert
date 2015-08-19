@@ -24,11 +24,11 @@ void VertexMain()
 {
     // transform view direction and position
     vec4 v4NewPosition = vec4(coreObject3DTransformLow(), 1.0);
-    vec3 v3ViewDir     = (u_m4Camera   * v4NewPosition).xyz;
-    gl_Position        =  u_m4ViewProj * v4NewPosition;
+    gl_Position        = u_m4ViewProj * v4NewPosition;
 
-    // dot-3 transform lighting vectors (resolved)
-    v_v3ViewDir = normalize(vec3(-v3ViewDir.x, v3ViewDir.y, -v3ViewDir.z));
+    // transform lighting properties (resolved)
+    v_v3TangentPos = v4NewPosition.xyz * vec3(1.0,-1.0,1.0);
+    v_v3TangentCam = u_v3CamPosition   * vec3(1.0,-1.0,1.0);
 
     // calculate current mapping base
     vec2 vMapCoord = vec2(a_v2LowTexCoord.x * c_v1MapResolution,

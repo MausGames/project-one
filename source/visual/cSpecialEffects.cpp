@@ -60,9 +60,9 @@ cSpecialEffects::cSpecialEffects()noexcept
     {
         m_aRing[i].DefineModel  ("object_ring.md3");
         m_aRing[i].DefineTexture(0u, "effect_energy.png");
-        m_aRing[i].DefineProgram("effect_energy_invert_program");
+        m_aRing[i].DefineProgram("effect_energy_ring_program");
         m_aRing[i].SetAlpha     (0.0f);
-        m_aRing[i].SetTexSize   (coreVector2(12.0f,12.0f));
+        m_aRing[i].SetTexSize   (coreVector2(4.0f,8.0f) * 0.4f);
     }
 
     // 
@@ -98,36 +98,35 @@ void cSpecialEffects::Render()
         m_ParticleDark .Render();
         m_ParticleSmoke.Render();
 
-        // enable additive blending
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        // enable additive blending (keep alpha aggregation)
+        glBlendFuncSeparate(FOREGROUND_BLEND_SUM, FOREGROUND_BLEND_ALPHA);
         {
             // render fire particle system
             m_ParticleFire.Render();
 
-            // 
+            // render lightning sprites
             m_LightningList.Render();
         }
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glBlendFuncSeparate(FOREGROUND_BLEND_DEFAULT, FOREGROUND_BLEND_ALPHA);
 
-        // 
-        for(coreUintW i = 0u; i < SPECIAL_BLASTS; ++i)
+        // render all blast and ring objects
+        auto nRenderFunc = [](coreObject3D* OUTPUT pArray, const coreUintW& iSize)
         {
-            coreObject3D& oBlast = m_aBlast[i];
-            if(!oBlast.GetAlpha()) continue;
+            for(coreUintW i = 0u; i < iSize; ++i)
+            {
+                // check for visibility
+                coreObject3D& oObject = pArray[i];
+                if(!oObject.GetAlpha()) continue;
 
-            // 
-            oBlast.Render();
-        }
-
-        // 
-        for(coreUintW i = 0u; i < SPECIAL_RINGS; ++i)
-        {
-            coreObject3D& oRing = m_aRing[i];
-            if(!oRing.GetAlpha()) continue;
-
-            // 
-            oRing.Render();
-        }
+                // render the object
+                oObject.Render();
+            }
+        };
+        nRenderFunc(m_aBlast, SPECIAL_BLASTS);
+        glCullFace(GL_FRONT);
+        nRenderFunc(m_aRing,  SPECIAL_RINGS);   // # 1
+        glCullFace(GL_BACK);
+        nRenderFunc(m_aRing,  SPECIAL_RINGS);   // # 2
     }
     glDepthMask(true);
 }
@@ -161,7 +160,7 @@ void cSpecialEffects::Move()
     }
     m_LightningList.MoveNormal();
 
-    // 
+    // loop through all blast objects
     for(coreUintW i = 0u; i < SPECIAL_BLASTS; ++i)
     {
         coreObject3D& oBlast = m_aBlast[i];
@@ -172,12 +171,13 @@ void cSpecialEffects::Move()
         const coreFloat& fSpeed = oBlast.GetCollisionModifier().y;
 
         // 
-        oBlast.SetAlpha(MAX(oBlast.GetAlpha() - fSpeed * Core::System->GetTime(), 0.0f));
-        oBlast.SetSize (coreVector3(8.0f,8.0f,8.0f) * (fScale * (1.0f - oBlast.GetAlpha())));
+        oBlast.SetAlpha    (MAX(oBlast.GetAlpha() - fSpeed * Core::System->GetTime(), 0.0f));
+        oBlast.SetSize     (coreVector3(8.0f,8.0f,8.0f) * (fScale * (1.0f - oBlast.GetAlpha())));
+        oBlast.SetTexOffset(coreVector2(0.0f,0.1f) * oBlast.GetAlpha());
         oBlast.Move();
     }
 
-    // 
+    // loop through all ring objects
     for(coreUintW i = 0u; i < SPECIAL_RINGS; ++i)
     {
         coreObject3D& oRing = m_aRing[i];
@@ -186,10 +186,16 @@ void cSpecialEffects::Move()
         // 
         const coreFloat& fScale = oRing.GetCollisionModifier().x;
         const coreFloat& fSpeed = oRing.GetCollisionModifier().y;
+        const coreFloat& fTime  = oRing.GetCollisionModifier().z;
 
         // 
-        oRing.SetAlpha(MAX(oRing.GetAlpha() - fSpeed * Core::System->GetTime(), 0.0f));
-        oRing.SetSize (coreVector3(8.0f,8.0f,8.0f) * (fScale * (1.0f - oRing.GetAlpha())));
+        c_cast<coreFloat&>(fTime) = MAX(fTime - fSpeed * Core::System->GetTime(), 0.0f);
+        const coreFloat    fValue = 1.0f - std::pow(fTime, 6);
+
+        // 
+        oRing.SetAlpha    (MIN(fTime * fTime * 1.4f, 1.0f));
+        oRing.SetSize     (coreVector3(8.0f,12.0f,8.0f) * (fScale * fValue));
+        oRing.SetTexOffset(coreVector2(0.1f,0.2f) * fValue);
         oRing.Move();
     }
 
@@ -479,7 +485,7 @@ void cSpecialEffects::CreateBlast(const coreVector3& vPosition, const coreFloat&
 void cSpecialEffects::CreateRing(const coreVector3& vPosition, const coreVector3& vDirection, const coreVector3& vOrientation, const coreFloat& fScale, const coreFloat& fSpeed, const coreVector3& vColor)
 {
     // 
-    if(++m_iCurRing >= SPECIAL_BLASTS) m_iCurRing = 0u;
+    if(++m_iCurRing >= SPECIAL_RINGS) m_iCurRing = 0u;
     coreObject3D& oRing = m_aRing[m_iCurRing];
 
     // 
@@ -488,7 +494,7 @@ void cSpecialEffects::CreateRing(const coreVector3& vPosition, const coreVector3
     oRing.SetDirection        (vDirection);
     oRing.SetOrientation      (vOrientation);
     oRing.SetColor4           (coreVector4(vColor * 0.65f, 1.0f));
-    oRing.SetCollisionModifier(coreVector3(fScale, fSpeed, 0.0f));
+    oRing.SetCollisionModifier(coreVector3(fScale, fSpeed, 1.0f));
 }
 
 
@@ -544,7 +550,7 @@ void cSpecialEffects::MacroExplosionColorSmall(const coreVector3& vPosition, con
     // 
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_SMALL);
     this         ->CreateSplashColor(vPosition, SPECIAL_SPLASH_SMALL, vColor);
-    this         ->CreateBlast      (vPosition, SPECIAL_BLAST_SMALL,  LERP(coreVector3(0.5f,0.5f,0.5f), vColor, 0.5f));
+    this         ->CreateBlast      (vPosition, SPECIAL_BLAST_SMALL,  LERP(coreVector3(1.0f,1.0f,1.0f), vColor, 0.75f));
     this         ->PlaySound        (vPosition, 1.0f, SOUND_EXPLOSION_ENERGY_SMALL);
     this         ->ShakeScreen      (SPECIAL_SHAKE_SMALL);
 }
@@ -554,7 +560,7 @@ void cSpecialEffects::MacroExplosionColorBig(const coreVector3& vPosition, const
     // 
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_BIG);
     this         ->CreateSplashColor(vPosition, SPECIAL_SPLASH_BIG, vColor);
-    this         ->CreateBlast      (vPosition, SPECIAL_BLAST_BIG,  LERP(coreVector3(0.5f,0.5f,0.5f), vColor, 0.5f));
+    this         ->CreateBlast      (vPosition, SPECIAL_BLAST_BIG,  LERP(coreVector3(1.0f,1.0f,1.0f), vColor, 0.75f));
     this         ->PlaySound        (vPosition, 1.0f, SOUND_EXPLOSION_ENERGY_BIG);
     this         ->ShakeScreen      (SPECIAL_SHAKE_BIG);
 }
@@ -564,7 +570,7 @@ void cSpecialEffects::MacroExplosionDarkSmall(const coreVector3& vPosition)
     // 
     g_pDistortion->CreateWave      (vPosition, DISTORTION_WAVE_SMALL);
     this         ->CreateSplashDark(vPosition, SPECIAL_SPLASH_SMALL);
-    this         ->CreateBlast     (vPosition, SPECIAL_BLAST_SMALL, coreVector3(0.5f,0.5f,0.5f));
+    this         ->CreateBlast     (vPosition, SPECIAL_BLAST_SMALL, coreVector3(1.0f,1.0f,1.0f));
     this         ->PlaySound       (vPosition, 1.0f, SOUND_EXPLOSION_ENERGY_SMALL);
     this         ->ShakeScreen     (SPECIAL_SHAKE_SMALL);
 }
@@ -574,7 +580,7 @@ void cSpecialEffects::MacroExplosionDarkBig(const coreVector3& vPosition)
     // 
     g_pDistortion->CreateWave      (vPosition, DISTORTION_WAVE_BIG);
     this         ->CreateSplashDark(vPosition, SPECIAL_SPLASH_BIG);
-    this         ->CreateBlast     (vPosition, SPECIAL_BLAST_BIG, coreVector3(0.5f,0.5f,0.5f));
+    this         ->CreateBlast     (vPosition, SPECIAL_BLAST_BIG, coreVector3(1.0f,1.0f,1.0f));
     this         ->PlaySound       (vPosition, 1.0f, SOUND_EXPLOSION_ENERGY_BIG);
     this         ->ShakeScreen     (SPECIAL_SHAKE_BIG);
 }

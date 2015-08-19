@@ -19,7 +19,7 @@
 // special-effects definitions
 #define SPECIAL_LIGHTNINGS       (32u)     // number of lightning sprites
 #define SPECIAL_BLASTS           (4u)      // number of energy-blasts
-#define SPECIAL_RINGS            (4u)      // number of energy-rings
+#define SPECIAL_RINGS            (8u)      // number of energy-rings
 #define SPECIAL_SOUNDS           (8u)      // number of sound-effect files
 
 #define SPECIAL_LIGHTNING_RESIZE (0.66f)   // 
@@ -37,6 +37,8 @@
 #define SPECIAL_LIGHTNING_BIG    (25.0f)
 #define SPECIAL_BLAST_SMALL       (2.0f), (3.5f)
 #define SPECIAL_BLAST_BIG         (4.0f), (3.5f)
+#define SPECIAL_RING_SMALL        (1.5f), (1.8f)
+#define SPECIAL_RING_BIG          (3.0f), (1.8f)
 #define SPECIAL_SHAKE_SMALL       (0.6f)
 #define SPECIAL_SHAKE_BIG         (1.2f)
 
@@ -62,7 +64,7 @@ private:
     coreParticleSystem m_ParticleFire;                      // fire particle system
 
     coreObject3D  m_aLightning      [SPECIAL_LIGHTNINGS];   // 
-    coreObject3D* m_apLightningOwner[SPECIAL_LIGHTNINGS];   // 
+    coreObject3D* m_apLightningOwner[SPECIAL_LIGHTNINGS];   // owner of a lightning sprite (to move together)
     coreBatchList m_LightningList;                          // 
     coreUintW     m_iCurLightning;                          // 
 
@@ -73,10 +75,10 @@ private:
     coreUintW    m_iCurRing;                                // 
 
     coreSoundPtr m_apSound[SPECIAL_SOUNDS];                 // 
-    coreUint32   m_iSoundGuard;                             // 
+    coreUint32   m_iSoundGuard;                             // flag to prevent multiple same sound-effects within one frame
 
     coreTimer m_ShakeTimer;                                 // 
-    coreFloat m_fShakeStrength;                             // 
+    coreFloat m_fShakeStrength;                             // current shake strength (decreasing)
 
 
 public:
@@ -102,10 +104,10 @@ public:
     void CreateChargeColor(const coreVector3& vPosition, const coreFloat& fScale, const coreUintW& iNum, const coreVector3& vColor);
     void CreateChargeDark (const coreVector3& vPosition, const coreFloat& fScale, const coreUintW& iNum);
 
-    // 
+    // #### 
     void CreateTrailSmoke(const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat& fScale, const coreUintW& iNum);
 
-    // 
+    // #### 
     coreFloat CreateLightning(const coreVector2& vPosFrom, const coreVector2& vPosTo,     const coreFloat&   fWidth, const coreVector3& vColor, const coreVector2& vTexSizeFactor, const coreFloat& fTexOffset);
     void      CreateLightning(coreObject3D*      pOwner,   const coreVector2& vDirection, const coreVector2& vSize,  const coreVector3& vColor, const coreVector2& vTexSizeFactor, const coreFloat& fTexOffset);
 

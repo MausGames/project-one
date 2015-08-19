@@ -288,6 +288,7 @@ mat4 coreInvert(const in mat4 m)
         mat4 u_m4Perspective;
         mat4 u_m4Ortho;
         vec4 u_v4Resolution;
+        vec3 u_v3CamPosition;
     };
 
     // ambient uniforms
@@ -304,6 +305,7 @@ mat4 coreInvert(const in mat4 m)
     uniform mat4 u_m4Perspective;
     uniform mat4 u_m4Ortho;
     uniform vec4 u_v4Resolution;
+    uniform vec3 u_v3CamPosition;
 
     // ambient uniforms
     uniform coreLight u_aLight[CORE_NUM_LIGHTS];
@@ -351,8 +353,10 @@ uniform sampler2DShadow u_as2TextureShadow[CORE_NUM_TEXTURES_SHADOW];
         {
             vec4 v_v4VarColor;
             vec2 v_av2TexCoord[CORE_NUM_TEXTURES_2D];
+            vec4 v_av4LightPos[CORE_NUM_LIGHTS];
             vec4 v_av4LightDir[CORE_NUM_LIGHTS];
-            vec3 v_v3ViewDir;
+            vec3 v_v3TangentPos;
+            vec3 v_v3TangentCam;
         };
 
     #else
@@ -370,8 +374,10 @@ uniform sampler2DShadow u_as2TextureShadow[CORE_NUM_TEXTURES_SHADOW];
         // shader output
         varying vec4 v_v4VarColor;
         varying vec2 v_av2TexCoord[CORE_NUM_TEXTURES_2D];
+        varying vec4 v_av4LightPos[CORE_NUM_LIGHTS];
         varying vec4 v_av4LightDir[CORE_NUM_LIGHTS];
-        varying vec3 v_v3ViewDir;
+        varying vec3 v_v3TangentPos;
+        varying vec3 v_v3TangentCam;
 
     #endif
 
@@ -402,7 +408,7 @@ uniform sampler2DShadow u_as2TextureShadow[CORE_NUM_TEXTURES_SHADOW];
     #if defined(_CORE_OPTION_INSTANCING_)
         v_v4VarColor = a_v4DivColor;
     #endif
-
+    
         VertexMain();
     }
 
@@ -429,8 +435,10 @@ uniform sampler2DShadow u_as2TextureShadow[CORE_NUM_TEXTURES_SHADOW];
     {
         vec4 v_v4VarColor;
         vec2 v_av2TexCoord[CORE_NUM_TEXTURES_2D];
+        vec4 v_av4LightPos[CORE_NUM_LIGHTS];
         vec4 v_av4LightDir[CORE_NUM_LIGHTS];
-        vec3 v_v3ViewDir;
+        vec3 v_v3TangentPos;
+        vec3 v_v3TangentCam;
     } In[];
 
     // shader output
@@ -438,8 +446,10 @@ uniform sampler2DShadow u_as2TextureShadow[CORE_NUM_TEXTURES_SHADOW];
     {
         vec4 v_v4VarColor;
         vec2 v_av2TexCoord[CORE_NUM_TEXTURES_2D];
+        vec4 v_av4LightPos[CORE_NUM_LIGHTS];
         vec4 v_av4LightDir[CORE_NUM_LIGHTS];
-        vec3 v_v3ViewDir;
+        vec3 v_v3TangentPos;
+        vec3 v_v3TangentCam;
     } Out;
 
     // main function
@@ -462,8 +472,10 @@ uniform sampler2DShadow u_as2TextureShadow[CORE_NUM_TEXTURES_SHADOW];
         {
             vec4 v_v4VarColor;
             vec2 v_av2TexCoord[CORE_NUM_TEXTURES_2D];
+            vec4 v_av4LightPos[CORE_NUM_LIGHTS];
             vec4 v_av4LightDir[CORE_NUM_LIGHTS];
-            vec3 v_v3ViewDir;
+            vec3 v_v3TangentPos;
+            vec3 v_v3TangentCam;
         };
 
         // shader output
@@ -474,11 +486,16 @@ uniform sampler2DShadow u_as2TextureShadow[CORE_NUM_TEXTURES_SHADOW];
         // shader input
         varying vec4 v_v4VarColor;
         varying vec2 v_av2TexCoord[CORE_NUM_TEXTURES_2D];
+        varying vec4 v_av4LightPos[CORE_NUM_LIGHTS];
         varying vec4 v_av4LightDir[CORE_NUM_LIGHTS];
-        varying vec3 v_v3ViewDir;
+        varying vec3 v_v3TangentPos;
+        varying vec3 v_v3TangentCam;
 
     #endif
 
+    // pre-calculated view direction
+    vec3 v_v3ViewDir = v_v3TangentCam - v_v3TangentPos;
+    
     // remapped variables
     #if defined(_CORE_OPTION_INSTANCING_)
         #define u_v4Color (v_v4VarColor)
@@ -535,21 +552,33 @@ uniform sampler2DShadow u_as2TextureShadow[CORE_NUM_TEXTURES_SHADOW];
     vec2 coreObject2DTexCoord()    {return a_v2LowTexCoord * u_v2TexSize + u_v2TexOffset;}
     vec2 coreParticleTexCoord()    {return a_v2LowTexCoord;}
 
-    // dot-3 bump mapping initialization and transformation
-    vec3 g_n, g_t, g_b;
-    void coreDot3VertexInit(const in vec4 v4Rotation, const in vec3 v3Normal, const in vec4 v4Tangent)
+    // calculate tangent-space matrix
+    mat3 coreTangentSpaceMatrix(const in vec4 v4Rotation, const in vec3 v3Normal, const in vec4 v4Tangent)
     {
     #if defined(_CORE_OPTION_NO_ROTATION_)
-        g_n = v3Normal;
-        g_t = v4Tangent.xyz;
+        vec3 N = v3Normal;
+        vec3 T = v4Tangent.xyz;
     #else
-        g_n = coreQuatApply(v4Rotation, v3Normal);
-        g_t = coreQuatApply(v4Rotation, v4Tangent.xyz);
+        vec3 N = coreQuatApply(v4Rotation, v3Normal);
+        vec3 T = coreQuatApply(v4Rotation, v4Tangent.xyz);
     #endif
-        g_b = cross(g_n, g_t) * v4Tangent.w;
+        vec3 B = cross(N, T) * v4Tangent.w;
+        return coreTranspose(mat3(T, B, N));
     }
-    void coreDot3VertexInit()                            {coreDot3VertexInit(u_v4Rotation, a_v3RawNormal, a_v4RawTangent);}
-    vec3 coreDot3VertexTransform(const in vec3 v3Vector) {return normalize(vec3(dot(v3Vector, g_t), dot(v3Vector, g_b), dot(v3Vector, g_n)));}
+    mat3 coreTangentSpaceMatrix() {return coreTangentSpaceMatrix(u_v4Rotation, a_v3RawNormal, a_v4RawTangent);}
+    
+    // transform lighting properties into tangent-space
+    void coreLightingTransform(const in vec3 v3Position)
+    {
+        mat3 TBN = coreTangentSpaceMatrix();
+        for(int i = 0; i < CORE_NUM_LIGHTS; ++i)
+        {
+            v_av4LightPos[i] = vec4(TBN *  u_aLight[i].v4Position .xyz, u_aLight[i].v4Position .w);
+            v_av4LightDir[i] = vec4(TBN * -u_aLight[i].v4Direction.xyz, u_aLight[i].v4Direction.w);
+        }
+        v_v3TangentPos = TBN * v3Position;
+        v_v3TangentCam = TBN * u_v3CamPosition;
+    }
 
 #endif // _CORE_VERTEX_SHADER_
 

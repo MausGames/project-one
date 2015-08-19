@@ -42,10 +42,24 @@ void cEnemy::Configure(const coreInt32& iHealth, const coreVector3& vColor)
 
 
 // ****************************************************************
+// render the enemy
+void cEnemy::Render()
+{
+    if(CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_DEAD)) return;
+
+    // 
+    this->_EnableBlink();
+
+    // render the 3d-object
+    coreObject3D::Render();
+}
+
+
+// ****************************************************************
 // move the enemy
 void cEnemy::Move()
 {
-    ASSERT(!CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_DEAD))
+    if(CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_DEAD)) return;
 
     // 
     m_fLifeTime.Update(1.0f);
@@ -53,6 +67,9 @@ void cEnemy::Move()
     // call individual move routines
     this->__MoveOwn();
     if(m_nRoutine) m_nRoutine(this);
+
+    // 
+    this->_UpdateBlink();
 
     // move the 3d-object
     coreObject3D::Move();
@@ -362,33 +379,32 @@ void cEnemyManager::Render()
         if(!pEnemyActive->GetCurEnabled()) continue;
 
         // 
-        FOR_EACH(et, *pEnemyActive->List())
-            s_cast<cEnemy*>(*et)->_UpdateBlink();
-
-        FOR_EACH(et, *pEnemyActive->List())
-            (*et)->DefineModel(s_cast<cEnemy*>(*et)->GetModelHigh());
-
-        // render enemy set
-        //pEnemyActive->Render();
-        FOR_EACH(et, *pEnemyActive->List())
+        FOR_EACH(et, *pEnemyActive->List()) (*et)->DefineModel(s_cast<cShip*>(*et)->GetModelHigh());
         {
-            s_cast<cEnemy*>(*et)->_UpdateBlink();
-            (*et)->Render();
+            if(pEnemyActive->IsInstanced())
+            {
+                // 
+                pEnemyActive->UpdateCustom([](coreFloat* OUTPUT pData, const cShip* pObject)
+                {
+                    *pData = pObject->GetBlink();
+                });
+
+                // 
+                pEnemyActive->Render();
+            }
+            else
+            {
+                // 
+                FOR_EACH(et, *pEnemyActive->List())
+                    (*et)->Render();
+            }
         }
-
-        FOR_EACH(et, *pEnemyActive->List())
-            (*et)->DefineModel(s_cast<cEnemy*>(*et)->GetModelLow());
-
+        FOR_EACH(et, *pEnemyActive->List()) (*et)->DefineModel(s_cast<cShip*>(*et)->GetModelLow());
     }
 
     // 
     FOR_EACH(it, m_apAdditional)
-    {
-        cEnemy* pEnemy = (*it);
-
-        pEnemy->_UpdateBlink();
-        pEnemy->Render();
-    }
+        (*it)->Render();
 }
 
 void cEnemyManager::RenderWeak()

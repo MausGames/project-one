@@ -532,9 +532,9 @@ void cViridoMission::__MoveOwnAfter()
     }
 
     // 
-    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_OBJECT(2), [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBall, const coreBool& bFirst)
+    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_OBJECT(2), [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBall, const coreBool& bFirstHit)
     {
-        if(!bFirst) return;
+        if(!bFirstHit) return;
 
         // 
         pPlayer->TakeDamage(10);
@@ -549,7 +549,7 @@ void cViridoMission::__MoveOwnAfter()
     STATIC_ASSERT(VIRIDO_PADDLES <= sizeof(m_iBounceState)*8u)
 
     // 
-    Core::Manager::Object->TestCollision(TYPE_OBJECT(3), TYPE_OBJECT(2), [&](coreObject3D* OUTPUT pPaddle, coreObject3D* OUTPUT pBall, const coreBool& bFirst)
+    Core::Manager::Object->TestCollision(TYPE_OBJECT(3), TYPE_OBJECT(2), [&](coreObject3D* OUTPUT pPaddle, coreObject3D* OUTPUT pBall, const coreBool& bFirstHit)
     {
         // 
         if(coreVector2::Dot(pPaddle->GetDirection().xy(), pBall->GetDirection().xy()) >= 0.0f)
@@ -608,7 +608,7 @@ void cViridoMission::__MoveOwnAfter()
         const coreVector2 vOldBallPos = vBallPos - vBallDir * FOREGROUND_AREA * (VIRIDO_BALL_SPEED * Core::System->GetTime());
 
         // 
-        Core::Manager::Object->TestCollision(TYPE_ENEMY, &oBall, [&](cEnemy* OUTPUT pEnemy, const coreBool& bFirst)
+        Core::Manager::Object->TestCollision(TYPE_ENEMY, &oBall, [&](cEnemy* OUTPUT pEnemy, const coreBool& bFirstHit)
         {
             // 
             if(pEnemy->GetID() != cScoutEnemy::ID) return;

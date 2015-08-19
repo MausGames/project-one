@@ -336,9 +336,9 @@ coreBool cGame::__HandleIntro()
 // handle default object collisions
 void cGame::__HandleCollisions()
 {
-    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_ENEMY, [](cPlayer* OUTPUT pPlayer, cEnemy* OUTPUT pEnemy, const coreBool& bFirst)
+    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_ENEMY, [](cPlayer* OUTPUT pPlayer, cEnemy* OUTPUT pEnemy, const coreBool& bFirstHit)
     {
-        if(!bFirst) return;
+        if(!bFirstHit) return;
 
         // 
         pPlayer->TakeDamage(15);
@@ -348,14 +348,14 @@ void cGame::__HandleCollisions()
         g_pSpecialEffects->MacroExplosionPhysicalSmall(vCenter);
     });
 
-    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_BULLET_ENEMY, [](cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreBool& bFirst)
+    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_BULLET_ENEMY, [](cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreBool& bFirstHit)
     {
         // 
         pPlayer->TakeDamage(pBullet->GetDamage());
         pBullet->Deactivate(true);
     });
 
-    Core::Manager::Object->TestCollision(TYPE_ENEMY, TYPE_BULLET_PLAYER, [](cEnemy* OUTPUT pEnemy, cBullet* OUTPUT pBullet, const coreBool& bFirst)
+    Core::Manager::Object->TestCollision(TYPE_ENEMY, TYPE_BULLET_PLAYER, [](cEnemy* OUTPUT pEnemy, cBullet* OUTPUT pBullet, const coreBool& bFirstHit)
     {
         // 
         if((ABS(pEnemy->GetPosition().x) >= FOREGROUND_AREA.x * 1.1f) ||

@@ -45,5 +45,5 @@ void FragmentMain()
     //gl_FragColor = vec4(mix(v3Color, v3Grey, 0.1), 1.0);
     
     //vec3 v3GameBoy = mix(v3Environment + v3Glow, v4Foreground.rgb / max(v4Foreground.a, 0.001), v4Foreground.a);
-    //v3GameBoy = vec3(floor((dot(test, vec3(0.2126, 0.7152, 0.0722)) + 0.125) * 4.0) / 4.0);
+    //v3GameBoy = vec3(floor((dot(test, vec3(0.212671, 0.715160, 0.072169)) + 0.125) * 4.0) / 4.0);
 }

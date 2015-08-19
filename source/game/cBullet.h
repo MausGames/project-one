@@ -125,7 +125,7 @@ public:
     void ClearBullets(const coreBool& bAnimated);
 
     // 
-    template <typename F> void ForEachBullet(F&& nFunction);
+    template <typename F> void ForEachBullet(F&& nFunction);   // [](cBullet* OUTPUT pBullet) -> void
 };
 
 

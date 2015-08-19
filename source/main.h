@@ -101,6 +101,7 @@
 #define SHADER_SPHERIC      "#define _P1_SPHERIC_    (1) \n"   // decal, energy
 #define SHADER_INVERT       "#define _P1_INVERT_     (1) \n"   // energy
 #define SHADER_DIRECT       "#define _P1_DIRECT_     (1) \n"   // outline, energy, effect_distortion
+#define SHADER_RING         "#define _P1_RING_       (1) \n"   // energy
 
 // collision types
 #define TYPE_PLAYER         (1)

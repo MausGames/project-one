@@ -25,10 +25,8 @@ void VertexMain()
     // forward texture coordinates
     v_av2TexCoord[0] = a_v3RawPosition.xy * 0.04167;
 
-    // dot-3 transform lighting vectors
-    coreDot3VertexInit();
-    v_av4LightDir[0].xyz = coreDot3VertexTransform(-u_aLight[0].v4Direction.xyz);
-    v_v3ViewDir          = coreDot3VertexTransform((u_m4Camera * vec4(-a_v3RawPosition, 1.0)).xyz);
+    // transform lighting properties
+    coreLightingTransform(a_v3RawPosition);
 
     // calculate mix value relative to vertex height
     v_v1Mix = (a_v3RawPosition.z + 20.0)*0.2;

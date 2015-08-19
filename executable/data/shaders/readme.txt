@@ -33,12 +33,12 @@ vec2 coreObject3DTexCoordLow()
 vec2 coreObject2DTexCoord()
 vec2 coreParticleTexCoord()
 
-// dot-3 bump mapping initialization (with rotation quaternion)
-void coreDot3VertexInit(in vec4 v4Rotation, in vec3 v3Normal, in vec4 v4Tangent)
-void coreDot3VertexInit()
+// calculate tangent-space matrix (with rotation quaternion)
+mat3 coreTangentSpaceMatrix(in vec4 v4Rotation, in vec3 v3Normal, in vec4 v4Tangent)
+mat3 coreTangentSpaceMatrix()
 
-// dot-3 vector transformation
-vec3 coreDot3VertexTransform(in vec3)
+// transform lighting properties into tangent-space (default, vertex shader only)
+void coreLightingTransform(in vec3 v3Position)
 
 
 ## In ##
@@ -71,8 +71,10 @@ float a_v1DivValue       // animation value (from 1.0 to 0.0)
 
 vec4 v_v4VarColor                          // custom color value forward (don't use together with u_v4Color in fragment shader)
 vec2 v_av2TexCoord[CORE_NUM_TEXTURES_2D]   // predefined texture coordinate forward (to next shader stage)
-vec4 v_av4LightDir[CORE_NUM_LIGHTS]        // predefined light direction forward
-vec3 v_v3ViewDir                           // predefined view direction forward
+vec4 v_av4LightPos[CORE_NUM_LIGHTS]        // tangent-space light position forward
+vec4 v_av4LightDir[CORE_NUM_LIGHTS]        // tangent-space light direction forward
+vec3 v_v3TangentPos                        // tangent-space vertex position forward (used for view direction)
+vec3 v_v3TangentCam                        // tangent-space camera position forward (used for view direction)
 
 
 // ****************************************************************
@@ -83,8 +85,12 @@ vec3 v_v3ViewDir                           // predefined view direction forward
 
 vec4 v_v4VarColor
 vec2 v_av2TexCoord[CORE_NUM_TEXTURES_2D]
+vec4 v_av4LightPos[CORE_NUM_LIGHTS]
 vec4 v_av4LightDir[CORE_NUM_LIGHTS]
-vec3 v_v3ViewDir
+vec3 v_v3TangentPos
+vec3 v_v3TangentCam
+
+vec3 v_v3ViewDir       // pre-calculated view direction (not normalized)
 
 vec2 (u_v2TexSize)     // texture size   (not with particles or on instancing)
 vec2 (u_v2TexOffset)   // texture offset (not with particles or on instancing)
@@ -130,6 +136,7 @@ mat4 u_m4Camera        // camera matrix
 mat4 u_m4Perspective   // perspective projection matrix
 mat4 u_m4Ortho         // orthographic projection matrix
 vec4 u_v4Resolution    // current viewport resolution (xy = normal, zw = reciprocal)
+vec3 u_v3CamPosition   // camera position
 
 vec4 u_v4Color         // color value
 

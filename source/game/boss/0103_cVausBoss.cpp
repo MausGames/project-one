@@ -175,7 +175,7 @@ void cVausBoss::__MoveOwn()
     //});
 
 
-    //Core::Manager::Object->TestCollision(TYPE_PLAYER, this, [&](cPlayer* OUTPUT pPlayer, const coreBool& bFirst)
+    //Core::Manager::Object->TestCollision(TYPE_PLAYER, this, [&](cPlayer* OUTPUT pPlayer, const coreBool& bFirstHit)
     //{
     //    const coreVector2 vDiff = pPlayer->GetPosition().xy() - this->GetPosition().xy();
     //    const coreVector2 vSize = pPlayer->GetCollisionRange().xy() + this->GetCollisionRange().xy();

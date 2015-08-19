@@ -26,12 +26,11 @@ void VertexMain()
 
     // transform view direction and position
     vec4 v4NewPosition = vec4(coreObject3DTransformRaw(), 1.0);
-    vec3 v3ViewDir     = (u_m4Camera   * v4NewPosition).xyz;
-    gl_Position        =  u_m4ViewProj * v4NewPosition;
+    gl_Position        = u_m4ViewProj * v4NewPosition;
 
     // perspective view (for default shading)
-    v3ViewDir = normalize(-v3ViewDir);
-    
+    vec3 v3ViewDir = normalize(u_v3CamPosition - v4NewPosition.xyz);
+
 #endif
 
     // transform texture coordinates
@@ -39,7 +38,7 @@ void VertexMain()
 
     // calculate light and color intensity
     vec3  v3NewNormal = coreQuatApply(u_v4Rotation, a_v3RawNormal);
-    float v1Base      = dot(v3ViewDir, vec3(v3NewNormal.xy, abs(v3NewNormal.z)));
+    float v1Base      = dot(vec3(v3ViewDir.xy, abs(v3ViewDir.z)), vec3(v3NewNormal.xy, abs(v3NewNormal.z)));
 
 #if defined(_P1_SPHERIC_)
 
@@ -59,6 +58,11 @@ void VertexMain()
     
     // increase depth on the back to improve overlapping
     gl_Position.z += (1.0-a_v2RawTexCoord.y) * gl_Position.w;
+    
+#elif defined(_P1_RING_)
+
+    // special-case with centric interpolation on y
+    v_v1Strength = 3.5 * dot(normalize(a_v3RawPosition), a_v3RawNormal) * (1.0 - abs(a_v3RawNormal.y));
 
 #else
 

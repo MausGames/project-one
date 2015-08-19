@@ -266,6 +266,7 @@ static void LockFramerate()
 static void DebugGame()
 {
     // ########################## DEBUG ##########################
+
 #if defined(_CORE_MSVC_)
     #pragma warning(disable : 4189)
 #endif
@@ -299,8 +300,8 @@ static void DebugGame()
             const coreVector3 vPos = g_pGame->GetPlayer(0u)->GetPosition();
 
             g_pDistortion    ->CreateWave       (vPos, DISTORTION_WAVE_BIG);
-            g_pSpecialEffects->CreateSplashColor(vPos, SPECIAL_SPLASH_BIG, coreVector3(0.09f,0.387f,0.9f));
-            g_pSpecialEffects->CreateBlast      (vPos, SPECIAL_BLAST_BIG,  LERP(coreVector3(0.5f,0.5f,0.5f), coreVector3(0.09f,0.387f,0.9f), 0.5f));
+            g_pSpecialEffects->CreateSplashColor(vPos, SPECIAL_SPLASH_BIG, COLOR_ENERGY_BLUE);
+            g_pSpecialEffects->CreateBlast      (vPos, SPECIAL_BLAST_BIG,  LERP(coreVector3(1.0f,1.0f,1.0f), COLOR_ENERGY_BLUE, 0.75f));
 
             g_pSpecialEffects->PlaySound(vPos, 1.0f, SOUND_EXPLOSION_ENERGY_BIG);
         }
@@ -313,7 +314,7 @@ static void DebugGame()
 
             g_pDistortion    ->CreateWave      (vPos, DISTORTION_WAVE_SMALL);
             g_pSpecialEffects->CreateSplashDark(vPos, SPECIAL_SPLASH_SMALL);//, COLOR_RED_F);
-            g_pSpecialEffects->CreateBlast     (vPos, SPECIAL_BLAST_SMALL, coreVector3(0.5f,0.5f,0.5f));
+            g_pSpecialEffects->CreateBlast     (vPos, SPECIAL_BLAST_SMALL, coreVector3(1.0f,1.0f,1.0f));
         }
     }
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(F), CORE_INPUT_PRESS))
@@ -322,7 +323,7 @@ static void DebugGame()
         {
             const coreVector3 vPos = g_pGame->GetPlayer(0u)->GetPosition();
             g_pDistortion    ->CreateBurst    (vPos, coreVector2(1.0f,0.0f),      DISTORTION_BURST_BIG);
-            g_pSpecialEffects->CreateBlowColor(vPos, coreVector3(1.0f,0.0f,0.0f), SPECIAL_BLOW_BIG, coreVector3(0.09f,0.387f,0.9f));
+            g_pSpecialEffects->CreateBlowColor(vPos, coreVector3(1.0f,0.0f,0.0f), SPECIAL_BLOW_BIG, COLOR_ENERGY_BLUE);
         }
     }
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(V), CORE_INPUT_PRESS))
@@ -331,7 +332,7 @@ static void DebugGame()
         {
             const coreVector3 vPos = g_pGame->GetPlayer(0u)->GetPosition();
             g_pDistortion    ->CreateBurst    (vPos, coreVector2(1.0f,0.0f),      DISTORTION_BURST_SMALL);
-            g_pSpecialEffects->CreateBlowColor(vPos, coreVector3(1.0f,0.0f,0.0f), SPECIAL_BLOW_SMALL, coreVector3(0.09f,0.387f,0.9f));
+            g_pSpecialEffects->CreateBlowColor(vPos, coreVector3(1.0f,0.0f,0.0f), SPECIAL_BLOW_SMALL, COLOR_ENERGY_BLUE);
         }
     }
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(M), CORE_INPUT_PRESS))
@@ -347,7 +348,7 @@ static void DebugGame()
 
             //g_pSpecialEffects->MacroExplosionPhysicalBig(vPos);
 
-            g_pSpecialEffects->CreateRing(vPos, coreVector3(0.0f,0.0f,1.0f), coreVector3(0.0f,1.0f,0.0f), SPECIAL_BLAST_BIG, LERP(coreVector3(0.5f,0.5f,0.5f), coreVector3(0.09f,0.387f,0.9f), 0.5f));
+            g_pSpecialEffects->CreateRing(vPos, coreVector3(0.0f,1.0f,0.0f), coreVector3(0.0f,0.0f,1.0f), SPECIAL_RING_BIG, COLOR_ENERGY_YELLOW);
         }
     }
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(O), CORE_INPUT_PRESS))
@@ -483,5 +484,6 @@ static void DebugGame()
     //Core::Debug->MeasureStart("Log");
     //for(coreUintW i = 0u; i < 1000u; ++i) coreData::FileExists("data/license.txt");
     //Core::Debug->MeasureEnd("Log");
+
     // ########################## DEBUG ##########################
 }

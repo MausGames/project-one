@@ -16,6 +16,7 @@
 // ****************************************************************
 // enemy definitions
 #define ENEMY_SET_INIT_SIZE (8u)   // initial allocation size when creating a new enemy set
+#define ENEMY_SHADER_ATTRIBUTE_BLINK (CORE_SHADER_ATTRIBUTE_DIV_TEXPARAM_NUM + 1u)
 
 enum eEnemyStatus : coreUint8
 {
@@ -48,8 +49,9 @@ public:
     // configure the enemy
     void Configure(const coreInt32& iHealth, const coreVector3& vColor);
 
-    // move the enemy
-    void Move()override;
+    // render and move the enemy
+    void Render()override;
+    void Move  ()override;
 
     // reduce current health
     void TakeDamage(const coreInt32& iDamage, cPlayer* pAttacker);
@@ -61,7 +63,7 @@ public:
     void Kill     (const coreBool&    bAnimated);
 
     // 
-    template <typename F> void ChangeRoutine(F&& nRoutine) {m_nRoutine = nRoutine;}
+    template <typename F> void ChangeRoutine(F&& nRoutine) {m_nRoutine = nRoutine;}   // [](cEnemy* OUTPUT pEnemy) -> void
 
     // (raw parameters are multiplied with FOREGROUND_AREA) 
     coreBool DefaultMovePath     (const coreSpline2& oRawPath, const coreVector2& vFactor, const coreVector2& vRawOffset, const coreFloat& fRawDistance);
@@ -82,7 +84,7 @@ public:
 
 
 private:
-    // own routines for derived classes (render functions executed by game)
+    // own routines for derived classes (render functions executed by enemy manager)
     virtual void __ResurrectOwn   ()                          {}
     virtual void __KillOwn        (const coreBool& bAnimated) {}
     virtual void __RenderOwnWeak  ()                          {}
@@ -138,7 +140,7 @@ public:
 
     // 
     cEnemy* FindEnemy(const coreVector2& vPosition);
-    template <typename F> void ForEachEnemy(F&& nFunction);
+    template <typename F> void ForEachEnemy(F&& nFunction);   // [](cEnemy* OUTPUT pEnemy) -> void
 
     // 
     inline void BindEnemy  (cEnemy* pEnemy) {ASSERT(!m_apAdditional.count(pEnemy)) m_apAdditional.insert(pEnemy);}
@@ -273,6 +275,12 @@ template <typename T> cEnemyManager::sEnemySet<T>::sEnemySet()noexcept
 {
     // set shader-program
     oEnemyActive.DefineProgram("object_ship_inst_program");
+
+    // 
+    oEnemyActive.CreateCustom(sizeof(coreFloat), [](coreVertexBuffer* OUTPUT pBuffer)
+    {
+        pBuffer->DefineAttribute(ENEMY_SHADER_ATTRIBUTE_BLINK, 1u, GL_FLOAT, false, 0u);
+    });
 
     // add enemy set to global shadow and outline
     cShadow::GetGlobalContainer()->BindList(&oEnemyActive);

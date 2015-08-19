@@ -31,12 +31,12 @@ void FragmentMain()
 #endif
 
     // calculate dot-3 bump factor
-    vec3  v3MathLightDir = normalize(v_av4LightDir[0].xyz);
-    vec3  v3BumpNormal   = normalize(vec3(0.5,0.5,1.0) * 2.0 - 1.0);
+    vec3  v3MathLightDir = normalize(v_av4LightDir[1].xyz);
+    vec3  v3BumpNormal   = normalize(v_av4LightDir[3].xyz);
     float v1BumpFactor   = dot(v3MathLightDir, v3BumpNormal);
 
     // calculate dot-3 reflection factor
-    vec3  v3MathViewDir = normalize(v_v3ViewDir);
+    vec3  v3MathViewDir = normalize(v_av4LightDir[2].xyz);
     vec3  v3ReflNormal  = normalize((2.0 * v1BumpFactor) * v3BumpNormal - v3MathLightDir);
     float v1ReflFactor  = max(0.0, dot(v3MathViewDir, v3ReflNormal));
     
