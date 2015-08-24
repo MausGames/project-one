@@ -133,8 +133,8 @@ public:
     void MacroEruptionColorBig      (const coreVector3& vPosition, const coreVector2& vDirection, const coreVector3& vColor);
     void MacroEruptionDarkSmall     (const coreVector3& vPosition, const coreVector2& vDirection);
     void MacroEruptionDarkBig       (const coreVector3& vPosition, const coreVector2& vDirection);
-    void MacroEruptionPhysicalSmall (const coreVector3& vPosition, const coreVector2& vDirection);
-    void MacroEruptionPhysicalBig   (const coreVector3& vPosition, const coreVector2& vDirection);
+    void MacroEruptionPhysicalSmall (const coreVector3& vPosition, const coreVector2& vDirection) {}
+    void MacroEruptionPhysicalBig   (const coreVector3& vPosition, const coreVector2& vDirection) {}
 };
 
 

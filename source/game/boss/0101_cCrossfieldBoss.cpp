@@ -26,12 +26,12 @@ cCrossfieldBoss::cCrossfieldBoss()noexcept
 , m_fAnimation     (0.0f)
 {
     // load models
-    this->DefineModel   ("ship_boss_crossfield_high.md3");
-    this->DefineModelLow("ship_boss_crossfield_low.md3");
+    this->DefineModelHigh("ship_boss_crossfield_high.md3");
+    this->DefineModelLow ("ship_boss_crossfield_low.md3");
 
     // set object properties
     this->SetSize             (coreVector3(3.0f,3.0f,3.0f));
-    this->SetCollisionModifier(coreVector3(0.9f,0.9f,0.9f));
+    this->SetCollisionModifier(coreVector3(0.9f,0.9f,3.5f));
 
     // configure the boss
     this->Configure(2800, COLOR_ENEMY_RED);

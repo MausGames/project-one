@@ -24,7 +24,7 @@ void FragmentMain()
     vec3  v3BumpNormal1 = coreTexture2D(0, v_av2TexCoord[0].st).xyz;
     vec3  v3BumpNormal2 = coreTexture2D(0, v_av2TexCoord[1].st).xyz;
     float v1Depth       = coreTexture2D(3, v2ScreenCoord).r;
-
+    
     // calculate dot-3 bump factor
     vec3  v3MathLightDir = c_v3LightDir;
     vec3  v3BumpNormal   = (v3BumpNormal1 + v3BumpNormal2) * 2.0 - 2.0;
@@ -37,9 +37,9 @@ void FragmentMain()
 
     // calculate dot-3 reflection factor
     vec3  v3MathViewDir = normalize(v_v3ViewDir);
-    vec3  v3ReflNormal  = normalize((2.0 * v1BumpFactor) * v3BumpNormal - v3MathLightDir);
-    float v1ReflFactor  = max(0.0, dot(v3MathViewDir, v3ReflNormal));
-          v1ReflFactor  = 0.6 * pow(v1ReflFactor, 70.0);
+    vec3  v3ReflNormal  = normalize(v3MathLightDir + v3MathViewDir);
+    float v1ReflFactor  = max(0.0, dot(v3ReflNormal, v3BumpNormal));
+          v1ReflFactor  = 0.65 * pow(v1ReflFactor, 260.0);
 
     // adjust depth value
     v1Depth = smoothstep(0.64, 0.735, v1Depth) * 0.8 * (1.0 + v1ReflFactor) + v_v1Smooth;

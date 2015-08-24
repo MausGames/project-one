@@ -117,6 +117,9 @@
     <ClCompile Include="..\..\..\source\interface\menu\05_cExtraMenu.cpp">
       <Filter>interface\menu</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\visual\cBlur.cpp">
+      <Filter>visual</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\main.h" />
@@ -203,6 +206,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\source\interface\cCombatStats.h">
       <Filter>interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\visual\cBlur.h">
+      <Filter>visual</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

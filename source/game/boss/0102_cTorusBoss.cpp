@@ -22,8 +22,8 @@ cTorusBoss::cTorusBoss()noexcept
 : m_fAnimation (0.0f)
 {
     // load models
-    this->DefineModel   ("ship_boss_torus_high.md3");
-    this->DefineModelLow("ship_boss_torus_low.md3");
+    this->DefineModelHigh("ship_boss_torus_high.md3");
+    this->DefineModelLow ("ship_boss_torus_low.md3");
 
     // 
     this->SetSize             (coreVector3(1.7f,1.7f,1.7f));

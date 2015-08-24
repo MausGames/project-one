@@ -15,9 +15,9 @@
 // foreground definitions
 #define FOREGROUND_AREA (coreVector2(41.5f,41.5f))   // default range of the foreground plane (-0.5 to +0.5, needs to be adapted after camera height change)
 
-#define FOREGROUND_BLEND_DEFAULT GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA   // default blending mode  (A*x + (1-A)*y)
-#define FOREGROUND_BLEND_SUM     GL_SRC_ALPHA, GL_ONE                   // additive blending mode (A*x +       y)
-#define FOREGROUND_BLEND_ALPHA   GL_ONE,       GL_ONE_MINUS_SRC_ALPHA   // alpha aggregation      (  x + (1-A)*y)
+#define FOREGROUND_BLEND_DEFAULT (GL_SRC_ALPHA), (GL_ONE_MINUS_SRC_ALPHA)   // default blending mode  (A*x + (1-A)*y)
+#define FOREGROUND_BLEND_SUM     (GL_SRC_ALPHA), (GL_ONE)                   // additive blending mode (A*x +       y)
+#define FOREGROUND_BLEND_ALPHA   (GL_ONE),       (GL_ONE_MINUS_SRC_ALPHA)   // alpha aggregation      (  x + (1-A)*y)
 
 
 // ****************************************************************
@@ -38,14 +38,14 @@ public:
     void Start();
     void End();
 
-    // project world-position into screen-space
-    inline FUNC_PURE coreVector2 Project(const coreVector3& vPosition) {const coreVector4 A = coreVector4(vPosition, 1.0f) * m_mViewProj; return A.xy() * (RCP(A.w) * 0.5f);}
-
-    // clear the foreground
+    // clear frame buffer
     inline void Clear() {m_FrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);}
 
     // access frame buffer
     inline coreFrameBuffer* GetFrameBuffer() {return &m_FrameBuffer;}
+
+    // project world-position into screen-space
+    inline FUNC_PURE coreVector2 Project(const coreVector3& vPosition) {const coreVector4 A = coreVector4(vPosition, 1.0f) * m_mViewProj; return A.xy() * (RCP(A.w) * 0.5f);}
 
 
 private:

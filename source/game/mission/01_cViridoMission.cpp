@@ -187,8 +187,14 @@ void cViridoMission::__SetupOwn()
     // 
     STAGE_MAIN
     {
-        const coreFloat fNewAlpha = CLAMP(1.0f - 0.35f * m_fStageTime, 0.0f, 1.0f);
-        s_cast<cCloudBackground*>(g_pEnvironment->GetBackground())->SetOverlayAlpha(fNewAlpha);
+        if(g_pEnvironment->GetBackground()->GetID() == cCloudBackground::ID)
+        {
+            const coreFloat fNewAlpha = CLAMP(1.0f - 0.35f * m_fStageTime, 0.0f, 1.0f);
+            s_cast<cCloudBackground*>(g_pEnvironment->GetBackground())->SetOverlayAlpha(fNewAlpha);
+
+         
+            s_cast<cCloudBackground*>(g_pEnvironment->GetBackground())->SetCloudAlpha(fNewAlpha);
+        }
 
         // 
         STAGE_FINISH_AFTER(4.0f)
@@ -332,10 +338,13 @@ void cViridoMission::__SetupOwn()
     // 
     STAGE_MAIN
     {
-        // 
-        //const coreFloat fNewAlpha = 0.33f * CLAMP(1.0f - m_fStageTime / 4.0f, 0.0f, 1.0f);
-        //s_cast<cCloudBackground*>(g_pEnvironment->GetBackground())->SetCloudAlpha(fNewAlpha);
-        //s_cast<cCloudBackground*>(g_pEnvironment->GetBackground())->ReduceClouds();
+        if(g_pEnvironment->GetBackground()->GetID() == cCloudBackground::ID)
+        {
+            // 
+            //const coreFloat fNewAlpha = 0.33f * CLAMP(1.0f - m_fStageTime / 4.0f, 0.0f, 1.0f);
+            //s_cast<cCloudBackground*>(g_pEnvironment->GetBackground())->SetCloudAlpha(fNewAlpha);
+            //s_cast<cCloudBackground*>(g_pEnvironment->GetBackground())->ReduceClouds();
+        }
 
         // 
         STAGE_FINISH_NOW

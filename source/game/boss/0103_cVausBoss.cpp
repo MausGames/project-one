@@ -20,8 +20,8 @@ cVausBoss::cVausBoss()noexcept
 : m_iScoutOrder (0u)
 {
     // load models
-    this->DefineModel   ("ship_boss_vaus_high.md3");
-    this->DefineModelLow("ship_boss_vaus_low.md3");
+    this->DefineModelHigh("ship_boss_vaus_high.md3");
+    this->DefineModelLow ("ship_boss_vaus_low.md3");
 
     // 
     this->SetSize(coreVector3(2.5f,2.5f,2.5f));

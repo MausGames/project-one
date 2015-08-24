@@ -13,19 +13,16 @@
 
 //****************************************************************
 // glow definitions
-#define GLOW_SCALE_FACTOR (0.5f)   // resolution factor of the glow frame buffer
+#define GLOW_SCALE_FACTOR        (0.5f)   // resolution factor of the glow frame buffer
+#define GLOW_ATTENUATION_FACTOR (15.0f)   // 
 
 
 // ****************************************************************
 // glow-effect class
-class cGlow final : public cBindContainer, public coreResourceRelation
+class cGlow final : public cBindContainer
 {
 private:
-    coreFrameBuffer m_FrameBuffer;        // glow frame buffer (only texture, reduced resolution)
-
-    coreFrameBuffer m_aBlurStage   [2];   // blur frame buffers (stages for separate convolution, X and Y)
-    coreProgramPtr  m_apBlurProgram[2];   // shader-programs for each stage
-    coreObject2D    m_Transformer;        // object to draw into the next stage
+    cBlur m_Blur;   // blur aggregation object (glow frame buffer)
 
 
 public:
@@ -37,12 +34,7 @@ public:
     void Update();
 
     // access frame buffer
-    inline coreFrameBuffer* GetFrameBuffer() {return &m_FrameBuffer;}
-
-
-private:
-    // reset with the resource manager
-    void __Reset(const coreResourceReset& bInit)override;
+    inline coreFrameBuffer* GetFrameBuffer() {return m_Blur.GetFrameBuffer();}
 };
 
 

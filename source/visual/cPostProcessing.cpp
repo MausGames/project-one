@@ -46,7 +46,7 @@ void cPostProcessing::Apply()
     // switch back to default frame buffer (again)
     coreFrameBuffer::EndDraw();
 
-    // 
+    // select between distorted or simple shader-program
     if(g_pDistortion->IsActive()) this->DefineProgram(m_pProgramDistorted);
                              else this->DefineProgram(m_pProgramSimple);
 
@@ -75,7 +75,7 @@ void cPostProcessing::Apply()
     // invalidate all frame buffers
     g_pEnvironment->GetFrameBuffer()->GetColorTarget(0u).pTexture->Invalidate(0u);
     g_pForeground ->GetFrameBuffer()->GetColorTarget(0u).pTexture->Invalidate(0u);
-    g_pGlow       ->GetFrameBuffer()->GetColorTarget(0u).pTexture->Invalidate(0u);
+    // # not cGlow, because of incremental rendering
     g_pDistortion ->GetFrameBuffer()->GetColorTarget(0u).pTexture->Invalidate(0u);
     this->DefineTexture(POST_TEXTURE_UNIT_ENVIRONMENT, NULL);
     this->DefineTexture(POST_TEXTURE_UNIT_FOREGROUND,  NULL);

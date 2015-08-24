@@ -24,6 +24,12 @@
 #define STAGE_FINISH_NOW      {m_fStageTime = 0.0f; m_aiStageLine.pop_back(); m_anStage.pop_back();}   // 
 #define STAGE_FINISH_AFTER(t) {if(m_fStageTime >= (t)) STAGE_FINISH_NOW}                               // 
 
+#if defined(_CORE_DEBUG_)
+    #define STAGE_START_HERE  {m_aiStageLine.clear(); m_anStage.clear();}
+#else
+    #define STAGE_START_HERE
+#endif
+
 #define STAGE_ADD_PATH(n) \
     auto n = this->_AddPath(__LINE__, [](coreSpline2* OUTPUT n)
 

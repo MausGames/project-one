@@ -52,6 +52,7 @@
     <ClCompile Include="..\..\..\source\interface\menu\05_cExtraMenu.cpp" />
     <ClCompile Include="..\..\..\source\interface\menu\cMenu.cpp" />
     <ClCompile Include="..\..\..\source\main.cpp" />
+    <ClCompile Include="..\..\..\source\visual\cBlur.cpp" />
     <ClCompile Include="..\..\..\source\visual\cDistortion.cpp" />
     <ClCompile Include="..\..\..\source\visual\cForeground.cpp" />
     <ClCompile Include="..\..\..\source\visual\cGlow.cpp" />
@@ -83,6 +84,7 @@
     <ClInclude Include="..\..\..\source\interface\cTooltip.h" />
     <ClInclude Include="..\..\..\source\interface\menu\cMenu.h" />
     <ClInclude Include="..\..\..\source\main.h" />
+    <ClInclude Include="..\..\..\source\visual\cBlur.h" />
     <ClInclude Include="..\..\..\source\visual\cDistortion.h" />
     <ClInclude Include="..\..\..\source\visual\cForeground.h" />
     <ClInclude Include="..\..\..\source\visual\cGlow.h" />
