@@ -11,7 +11,7 @@
 #define _P1_GUARD_DISTORTION_H_
 
 
-//****************************************************************
+// ****************************************************************
 // distortion definitions
 #define DISTORTION_SCALE_FACTOR (0.5f)   // resolution factor of the distortion frame buffer
 #define DISTORTION_WAVES        (8u)     // number of distortion-waves

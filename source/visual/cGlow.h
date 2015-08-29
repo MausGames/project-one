@@ -11,10 +11,10 @@
 #define _P1_GUARD_GLOW_H_
 
 
-//****************************************************************
+// ****************************************************************
 // glow definitions
 #define GLOW_SCALE_FACTOR        (0.5f)   // resolution factor of the glow frame buffer
-#define GLOW_ATTENUATION_FACTOR (15.0f)   // 
+#define GLOW_ATTENUATION_FACTOR (19.0f)   // 
 
 
 // ****************************************************************

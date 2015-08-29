@@ -240,7 +240,7 @@ public:
     inline void ResetProperties() {this->SetSize(coreVector3(1.35f,1.55f,1.35f) * 1.05f); this->SetColor3(COLOR_ENERGY_ORANGE);}
 
     // change default color (orange)
-    inline cConeBullet* MakeYellow() {this->SetColor3(COLOR_ENERGY_YELLOW * 0.9f); return this;}
+    inline cConeBullet* MakeYellow() {this->SetColor3(COLOR_ENERGY_YELLOW * 0.8f); return this;}
     inline cConeBullet* MakeRed   () {return this;}
     inline cConeBullet* MakePurple() {return this;}
     inline cConeBullet* MakeBlue  () {return this;}

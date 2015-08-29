@@ -12,7 +12,7 @@
 // ****************************************************************
 // constructor
 cGlow::cGlow()noexcept
-: m_Blur (GLOW_SCALE_FACTOR, GLOW_ATTENUATION_FACTOR)
+: m_Blur (CORE_GL_SUPPORT(ARB_texture_float) ? CORE_TEXTURE_SPEC_RGB_16F : CORE_TEXTURE_SPEC_RGB, GLOW_SCALE_FACTOR, GLOW_ATTENUATION_FACTOR)
 {
 }
 
@@ -22,6 +22,7 @@ cGlow::cGlow()noexcept
 void cGlow::Update()
 {
     if(!g_CurConfig.Graphics.iGlow) return;
+    if(!Core::System->GetTime())    return;
 
     // create glow only with active game
     if(g_pGame)

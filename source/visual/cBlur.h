@@ -18,18 +18,17 @@
 class cBlur final : public coreResourceRelation
 {
 private:
-    coreFrameBuffer  m_aFrameBuffer [3];   // blur frame buffers (only texture, reduced resolution)
+    coreFrameBuffer m_aFrameBuffer[2];   // blur frame buffers (only texture, reduced resolution)
 
-    coreFrameBuffer* m_apBlurStage  [3];   // stage list (to change order dynamically)
-    coreProgramPtr   m_apBlurProgram[2];   // shader-programs for separate convolution (X and Y)
-    coreObject2D     m_Transformer;        // object to draw into the next stage
+    coreProgramPtr m_apConvProgram[2];   // shader-programs for separate convolution (X and Y)
+    coreObject2D   m_Transformer;        // object to draw into the next stage
 
-    coreFloat m_fScale;                    // resolution factor
-    coreFloat m_fAttenuation;              // 
+    coreFloat m_fScale;                  // resolution factor
+    coreFloat m_fAttenuation;            // 
 
 
 public:
-    cBlur(const coreFloat& fScale, const coreFloat& fAttenuation)noexcept;
+    cBlur(const coreTextureSpec& oTextureSpec, const coreFloat& fScale, const coreFloat& fAttenuation)noexcept;
 
     DISABLE_COPY(cBlur)
 
@@ -38,10 +37,10 @@ public:
     void End();
 
     // clear frame buffer
-    inline void Clear() {m_apBlurStage[2]->Clear(CORE_FRAMEBUFFER_TARGET_COLOR);}
+    inline void Clear() {m_aFrameBuffer[0].Clear(CORE_FRAMEBUFFER_TARGET_COLOR);}
 
     // access frame buffer
-    inline coreFrameBuffer* GetFrameBuffer() {return m_apBlurStage[2];}
+    inline coreFrameBuffer* GetFrameBuffer() {return &m_aFrameBuffer[0];}
 
 
 private:
