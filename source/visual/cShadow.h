@@ -18,7 +18,7 @@
 // shadow definitions
 #define SHADOW_VIEW_DISTANCE      (90.0f)              // distance from origin to light source
 #define SHADOW_CLIP_NEAR          (20.0f)              // near clipping plane
-#define SHADOW_CLIP_FAR           (140.0f)             // far clipping plane
+#define SHADOW_CLIP_FAR           (145.0f)             // far clipping plane
 #define SHADOW_DETAIL_X           (0.018f)             // view size of the shadow map (higher = sharper, but more artifacts)
 #define SHADOW_DETAIL_Y           (0.016f)             // same for Y
 #define SHADOW_HEIGHT_FACTOR      (2.5f)               // height correction factor (to reduce shadow length)

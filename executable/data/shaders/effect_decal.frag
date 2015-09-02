@@ -20,6 +20,7 @@ void FragmentMain()
     {
         v1Alpha *= v1Alpha;
         v1Alpha *= v1Alpha;
+        v1Alpha *= v1Alpha;
         v1Alpha  = 1.0 - v1Alpha;
         
         // draw color with alpha

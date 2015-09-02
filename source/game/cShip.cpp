@@ -110,7 +110,7 @@ void cShip::_UpdateBlink()
         m_fBlink = 0.0f;
 
     // 
-    m_fBlink = MAX(m_fBlink - 3.0f*Core::System->GetTime(), 0.0f);
+    m_fBlink = MAX(m_fBlink - 15.0f*Core::System->GetTime(), 0.0f);
 }
 
 
@@ -122,5 +122,5 @@ void cShip::_EnableBlink()
 
     // 
     this->GetProgram()->Enable();
-    this->GetProgram()->SendUniform("u_v1Blink", MIN(m_fBlink, 1.0f) * 0.8f);
+    this->GetProgram()->SendUniform("u_v1Blink", this->GetBlink());
 }

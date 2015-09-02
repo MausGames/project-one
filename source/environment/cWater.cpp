@@ -44,8 +44,11 @@ cWater::cWater()noexcept
     // remove default texture filter (not visible, better performance)
     m_apTexture[0].GetHandle()->OnLoadOnce([&]()
     {
-        glBindTexture(GL_TEXTURE_2D, m_apTexture[0]->GetTexture());
-        if(CORE_GL_SUPPORT(EXT_texture_filter_anisotropic)) glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 0.0f);
+        if(CORE_GL_SUPPORT(EXT_texture_filter_anisotropic))
+        {
+            glBindTexture(GL_TEXTURE_2D, m_apTexture[0]->GetTexture());
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 0.0f);
+        }
     });
 }
 
@@ -158,7 +161,7 @@ void cWater::UpdateDepth(cOutdoor* pOutdoor, const std::vector<coreBatchList*>& 
             {
                 const coreMatrix4 mViewProj = Core::Graphics->GetCamera() * Core::Graphics->GetPerspective();
 
-                // use shadow shaders for light-weight depth rendering
+                // use shadow shaders for lightweight depth rendering
                 cShadow::SendTransformInstanced(mViewProj);
                 cShadow::SendTransformSingle   (mViewProj);
 
@@ -186,4 +189,16 @@ void cWater::SetFlyOffset(const coreFloat& fFlyOffset)
 
     // move sky-plane texture
     m_Sky.SetTexOffset(coreVector2(0.0f, ((-8.0f * WATER_SKY_SIZE) / I_TO_F(OUTDOOR_HEIGHT)) * m_fFlyOffset));
+}
+
+
+// ****************************************************************
+// constructor
+cUnderWater::cUnderWater()noexcept
+{
+
+    // 
+    this->DefineTexture(0u, "environment_under_norm.png");
+    this->DefineProgram("environment_under_program");
+
 }

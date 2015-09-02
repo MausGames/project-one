@@ -26,44 +26,33 @@ cGrassBackground::cGrassBackground(const coreUint8& iCloudDensity)noexcept
     pList1 = new coreBatchList(GRASS_STONES_RESERVE);
     pList1->DefineProgram("object_ground_inst_program");
     {
-        for(coreUintW j = 0u; j < 2u; ++j)   // types
+        for(coreUintW i = 0u; i < GRASS_STONES_NUM; ++i)
         {
-            const coreUintW iStoneTries = j ? GRASS_STONES_2_NUM : GRASS_STONES_1_NUM;
-            const coreFloat fStoneSize  = j ? 2.0f               : 2.2f;
+            // calculate position and height
+            const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.45f, 0.45f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(GRASS_STONES_NUM)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
+            const coreFloat   fHeight   = m_pOutdoor->RetrieveHeight(vPosition);
 
-            // select position and height test function
-            std::function<coreFloat(const coreFloat&, const coreFloat&)> nTestFunc;
-            if(j) nTestFunc = [](const coreFloat& h, const coreFloat& y) {return (h > -23.0f && h < -18.0f && (F_TO_SI(y+160.0f) % 80 < 40));};
-             else nTestFunc = [](const coreFloat& h, const coreFloat& y) {return (h > -20.0f && h < -18.0f);};
-
-            for(coreUintW i = 0u; i < iStoneTries; ++i)
+            // test for valid values
+            if(fHeight > -23.0f && fHeight < -18.0f && (F_TO_SI(vPosition.y+160.0f) % 80 < 40))
             {
-                // calculate position and height
-                const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.45f, 0.45f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(iStoneTries)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
-                const coreFloat   fHeight   = m_pOutdoor->RetrieveHeight(vPosition);
-
-                // test for valid values
-                if(nTestFunc(fHeight, vPosition.y))
+                if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 25.0f))
                 {
-                    if(!j || !cBackground::_CheckIntersection(pList1, vPosition, 16.0f))
-                    {
-                        // load object resources
-                        coreObject3D* pObject = new coreObject3D();
-                        pObject->DefineModel  ("environment_stone_01.md3");
-                        pObject->DefineTexture(0u, "environment_stone_diff.png");
-                        pObject->DefineTexture(1u, "environment_stone_norm.png");
-                        pObject->DefineProgram("object_ground_program");
+                    // load object resources
+                    coreObject3D* pObject = new coreObject3D();
+                    pObject->DefineModel  ("environment_stone_01.md3");
+                    pObject->DefineTexture(0u, "environment_stone_diff.png");
+                    pObject->DefineTexture(1u, "environment_stone_norm.png");
+                    pObject->DefineProgram("object_ground_program");
 
-                        // set object properties
-                        pObject->SetPosition   (coreVector3(vPosition, fHeight+0.2f));
-                        pObject->SetSize       (coreVector3::Rand(0.85f,1.3f, 0.85f,1.3f, 0.85f,1.3f) * Core::Rand->Float(1.0f, 1.3f) * fStoneSize);
-                        pObject->SetDirection  (coreVector3::Rand());
-                        pObject->SetOrientation(coreVector3::Rand());
-                        pObject->SetColor3     (coreVector3(1.0f,1.0f,1.0f) * Core::Rand->Float(0.85f, 1.0f));
+                    // set object properties
+                    pObject->SetPosition   (coreVector3(vPosition, fHeight+0.2f));
+                    pObject->SetSize       (coreVector3::Rand(0.85f,1.3f, 0.85f,1.3f, 0.85f,1.3f) * Core::Rand->Float(2.0f, 2.6f));
+                    pObject->SetDirection  (coreVector3::Rand());
+                    pObject->SetOrientation(coreVector3::Rand());
+                    pObject->SetColor3     (coreVector3(1.0f,1.0f,1.0f) * Core::Rand->Float(0.85f, 1.0f));
 
-                        // add object to the list
-                        pList1->BindObject(pObject);
-                    }
+                    // add object to the list
+                    pList1->BindObject(pObject);
                 }
             }
         }
@@ -93,7 +82,7 @@ cGrassBackground::cGrassBackground(const coreUint8& iCloudDensity)noexcept
                 const coreFloat   fHeight   = m_pOutdoor->RetrieveHeight(vPosition);
 
                 // test for valid values
-                if(fHeight > -23.0f && fHeight < -18.0f && (F_TO_SI(vPosition.y+160.0f) % 80 < 40))
+                if(fHeight > -23.0f && fHeight < -18.0f && (F_TO_SI(vPosition.y+166.0f) % 80 < 40))
                 {
                     if(!cBackground::_CheckIntersectionQuick(pList1,                  vPosition, 25.0f) &&
                        !cBackground::_CheckIntersectionQuick(pList2,                  vPosition, 25.0f) &&
@@ -145,7 +134,7 @@ cGrassBackground::cGrassBackground(const coreUint8& iCloudDensity)noexcept
     {
         for(coreUintW i = GRASS_FLOWERS_NUM; i--; )
         {
-            for(coreUintW j = 0u; j < 15u; ++j)   // tries
+            for(coreUintW j = 0u; j < 20u; ++j)   // tries
             {
                 // calculate position and height
                 const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.45f, 0.45f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(GRASS_FLOWERS_NUM)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
@@ -164,7 +153,7 @@ cGrassBackground::cGrassBackground(const coreUint8& iCloudDensity)noexcept
 
                         // set object properties
                         pObject->SetPosition (coreVector3(vPosition, fHeight-0.8f));
-                        pObject->SetSize     (coreVector3(coreVector2(1.65f,1.65f) * Core::Rand->Float(9.0f, 10.0f), 1.0f));
+                        pObject->SetSize     (coreVector3(coreVector2(1.75f,1.75f) * Core::Rand->Float(9.0f, 10.0f), 1.0f));
                         pObject->SetDirection(coreVector3(coreVector2::Rand(), 0.0f));
                         pObject->SetTexOffset(coreVector2::Rand(0.0f,10.0f, 0.0f,10.0f));
 
@@ -221,6 +210,11 @@ cGrassBackground::cGrassBackground(const coreUint8& iCloudDensity)noexcept
     {
         m_pNatureSound->PlayRelative(this, 0.0f, 1.0f, 0.0f, true);
     });
+
+
+
+        //m_pOutdoor->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);  
+
 }
 
 
@@ -238,17 +232,22 @@ cGrassBackground::~cGrassBackground()
 // move the grass background
 void cGrassBackground::__MoveOwn()
 {
-
-    //if(g_pGame)
-    //g_pGame->ForEachPlayer([](const cPlayer* pPlayer)
-    //{
-    //    const coreVector3& vPos = pPlayer->GetPosition ();
-    //    const coreVector3& vDir = pPlayer->GetDirection();
-    //    const coreVector3  vTan = coreVector3(vDir.xy().Rotate90(), 0.0f);
+    //static coreUintW test = 0u;
     //
-    //    g_pSpecialEffects->CreateTrailSmoke(vPos - 5.0f*vDir, -vDir, g_pEnvironment->GetSpeed()*10.0f, 1u);
-    //    //g_pSpecialEffects->CreateTrailSmoke(vPos - 5.0f*vDir - 2.0f*vTan, -vDir, g_pEnvironment->GetSpeed()/0.7f, 1u);
-    //});
+    //if(g_pGame && (++test >= 2u))
+    //{
+    //    test = 0u;
+    //
+    //    g_pGame->ForEachPlayer([](const cPlayer* pPlayer)
+    //    {
+    //        const coreVector3& vPos = pPlayer->GetPosition ();
+    //        const coreVector3& vDir = pPlayer->GetDirection();
+    //        const coreVector3  vTan = coreVector3(vDir.xy().Rotate90(), 0.0f);
+    //
+    //        g_pSpecialEffects->CreateTrailSmoke(vPos - 5.0f*vDir, -vDir, g_pEnvironment->GetSpeed()*10.0f, 1u);
+    //        //g_pSpecialEffects->CreateTrailSmoke(vPos - 5.0f*vDir - 2.0f*vTan, -vDir, g_pEnvironment->GetSpeed()/0.7f, 1u);
+    //    });
+    //}
 
 
     // TODO # sound-volume per config value 

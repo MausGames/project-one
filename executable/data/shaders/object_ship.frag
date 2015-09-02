@@ -51,7 +51,7 @@ void FragmentMain()
 #else
  
     // calculate smooth blink color
-    vec3 v3Blink = vec3(v_v1Blink * (1.0 - 0.9*abs(dot(v3MathViewDir, v3BumpNormal))));
+    vec3 v3Blink = vec3(v_v1Blink * 0.7f * (1.0 - 0.8 * abs(dot(v3MathViewDir, v3BumpNormal))));
     
 #endif
 

@@ -287,6 +287,9 @@ static void DebugGame()
         g_pEnvironment->ChangeBackground(REF_ID(cGrassBackground::ID));
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2), CORE_INPUT_PRESS))
         g_pEnvironment->ChangeBackground(REF_ID(cCloudBackground::ID));
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(3), CORE_INPUT_PRESS))
+        g_pEnvironment->ChangeBackground(REF_ID(cSeaBackground::ID));
+
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS))
         Core::System->Quit();
 

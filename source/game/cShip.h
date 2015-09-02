@@ -59,8 +59,8 @@ public:
     inline       coreVector3   GetBaseColor   ()const {return coreVector4::UnpackUnorm4x8(m_iBaseColor).xyz();}
     inline const coreInt32&    GetMaxHealth   ()const {return m_iMaxHealth;}
     inline const coreInt32&    GetCurHealth   ()const {return m_iCurHealth;}
-    inline const coreFloat     GetCurHealthPct()const {return I_TO_F(m_iCurHealth) * RCP(I_TO_F(m_iMaxHealth));}
-    inline const coreFloat&    GetBlink       ()const {return m_fBlink;}
+    inline       coreFloat     GetCurHealthPct()const {return I_TO_F(m_iCurHealth) * RCP(I_TO_F(m_iMaxHealth));}
+    inline       coreFloat     GetBlink       ()const {return MIN(m_fBlink, 1.0f);}
 
 
 protected:

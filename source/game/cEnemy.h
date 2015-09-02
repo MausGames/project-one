@@ -15,7 +15,7 @@
 
 // ****************************************************************
 // enemy definitions
-#define ENEMY_SET_INIT_SIZE (8u)   // initial allocation size when creating a new enemy set
+#define ENEMY_SET_INIT_SIZE          (8u)   // initial allocation size when creating a new enemy set
 #define ENEMY_SHADER_ATTRIBUTE_BLINK (CORE_SHADER_ATTRIBUTE_DIV_TEXPARAM_NUM + 1u)
 
 enum eEnemyStatus : coreUint8

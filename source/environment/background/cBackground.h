@@ -15,6 +15,7 @@
 // TODO: clouds on grass background need no separate heap allocation! (beware of _FillInfinite and destructor delete)
 // TODO: added object gets shadow-shader
 // TODO: overlay on cloud background creates redundant overdraw
+// TODO: decals are not affected by shadow or underlying diffuse value (depth-only from water (centralize away) ? -> no shadow, maybe render both (color(shadow, no textures)+depth) single-sampled)
 
 
 // ****************************************************************
@@ -24,10 +25,9 @@
 
 // ****************************************************************
 // background distribution values
-#define GRASS_STONES_1_NUM    (512u)
-#define GRASS_STONES_2_NUM    (768u)
+#define GRASS_STONES_NUM      (1536u)
 #define GRASS_STONES_RESERVE  (256u)
-#define GRASS_REEDS_NUM       (2048u)
+#define GRASS_REEDS_NUM       (3072u)
 #define GRASS_REEDS_1_RESERVE (512u)
 #define GRASS_REEDS_2_RESERVE (128u)
 #define GRASS_FLOWERS_NUM     (2048u)

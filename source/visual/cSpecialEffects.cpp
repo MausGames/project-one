@@ -209,7 +209,7 @@ void cSpecialEffects::Move()
         m_fShakeStrength = MAX(m_fShakeStrength - 0.07f, 0.0f);
 
         // 
-        g_pPostProcessing->SetPosition(coreVector2::Rand() * m_fShakeStrength * 0.01f);
+        g_pPostProcessing->SetPosition(coreVector2::Rand(-0.3f,0.3f, -1.0f,1.0f).Normalize() * m_fShakeStrength * 0.01f);
         g_pPostProcessing->Move();
     }
 }

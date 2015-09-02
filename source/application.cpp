@@ -67,11 +67,14 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreTexture>("environment_flowers.png",                CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_flowers.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_dust_diff.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_dust_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_dust_norm.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_dust_norm.png", false);
+    Core::Manager::Resource->Load<coreTexture>("environment_earth_diff.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_earth_diff.png");
+    Core::Manager::Resource->Load<coreTexture>("environment_earth_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_earth_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_grass_diff.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_grass_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_grass_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_grass_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_reed.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_reed.png");
     Core::Manager::Resource->Load<coreTexture>("environment_stone_diff.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_stone_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_stone_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_stone_norm.png", false);
+    Core::Manager::Resource->Load<coreTexture>("environment_under_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_under_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_water_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_water_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("game_logo.png",                          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/game_logo.png");
     Core::Manager::Resource->Load<coreTexture>("maus_logo.png",                          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/maus_logo.png");
@@ -137,6 +140,8 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreShader> ("environment_clouds_inst.frag",           CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_clouds.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("environment_outdoor.vert",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_outdoor.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("environment_outdoor.frag",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_outdoor.frag");
+    Core::Manager::Resource->Load<coreShader> ("environment_under.vert",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_under.vert", CORE_SHADER_OPTION_NO_ROTATION);
+    Core::Manager::Resource->Load<coreShader> ("environment_under.frag",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_under.frag");
     Core::Manager::Resource->Load<coreShader> ("environment_water.vert",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_water.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("environment_water.frag",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_water.frag");
     Core::Manager::Resource->Load<coreShader> ("full.vert",                              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full.vert");
@@ -368,6 +373,11 @@ static void SetupResources()
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_outdoor_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("environment_outdoor.vert")
         ->AttachShader("environment_outdoor.frag")
+        ->Finish();
+
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_under_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("environment_under.vert")
+        ->AttachShader("environment_under.frag")
         ->Finish();
 
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_water_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())

@@ -68,24 +68,35 @@ private:
 
 
 // ****************************************************************
-// ice-surface class
-class cIce final : public cWater
+// underwater-surface class
+class cUnderWater final : public cWater
 {
 public:
-    cIce()noexcept {}
+    cUnderWater()noexcept;
 
-    DISABLE_COPY(cIce)
+    DISABLE_COPY(cUnderWater)
+};
+
+
+// ****************************************************************
+// ice-surface class
+class cIceWater final : public cWater
+{
+public:
+    cIceWater()noexcept {}
+
+    DISABLE_COPY(cIceWater)
 };
 
 
 // ****************************************************************
 // rain-surface class
-class cRain final : public cWater
+class cRainWater final : public cWater
 {
 public:
-    cRain()noexcept {}
+    cRainWater()noexcept {}
 
-    DISABLE_COPY(cRain)
+    DISABLE_COPY(cRainWater)
 };
 
 
