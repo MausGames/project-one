@@ -25,16 +25,27 @@
 
 // ****************************************************************
 // background distribution values
-#define GRASS_STONES_NUM      (1536u)
-#define GRASS_STONES_RESERVE  (256u)
-#define GRASS_REEDS_NUM       (3072u)
-#define GRASS_REEDS_1_RESERVE (512u)
-#define GRASS_REEDS_2_RESERVE (128u)
-#define GRASS_FLOWERS_NUM     (2048u)
-#define GRASS_FLOWERS_RESERVE (256u)
-#define GRASS_CLOUDS_NUM      (64u)
-#define GRASS_CLOUDS_RESERVE  (78u)   // # tested
-#define GRASS_CLOUDS_DENSITY  (10u)
+#define GRASS_STONE_NUM      (1536u)
+#define GRASS_STONE_RESERVE  (256u)
+#define GRASS_REED_NUM       (3072u)
+#define GRASS_REED_1_RESERVE (512u)
+#define GRASS_REED_2_RESERVE (128u)
+#define GRASS_FLOWER_NUM     (2048u)
+#define GRASS_FLOWER_RESERVE (1024u)
+#define GRASS_LEAF_NUM       (2048u)
+#define GRASS_LEAF_RESERVE   (1024u)
+#define GRASS_CLOUD_NUM      (64u)
+#define GRASS_CLOUD_RESERVE  (78u)   // # tested
+#define GRASS_CLOUD_DENSITY  (10u)
+
+#define SEA_STONE_NUM        (1536u)  
+#define SEA_STONE_RESERVE    (256u)  
+#define SEA_WEED_NUM         (1536u)  
+#define SEA_WEED_RESERVE     (256u)  
+#define SEA_ANIMAL_NUM       (1536u)  
+#define SEA_ANIMAL_1_RESERVE (256u)  
+#define SEA_ANIMAL_2_RESERVE (256u)  
+// bubbles ?    
 
 
 // ****************************************************************
@@ -125,6 +136,9 @@ class cGrassBackground : public cBackground
 private:
     coreSoundPtr m_pNatureSound;   // nature sound-effect
 
+    coreFlow  m_fLeafTime;         // 
+    coreUintW m_iLeafNum;          // 
+
 
 public:
     explicit cGrassBackground(const coreUint8& iCloudDensity = 1u)noexcept;
@@ -188,7 +202,7 @@ public:
 class cDesertBackground final : public cBackground
 {
 public:
-    cDesertBackground()noexcept {}
+    cDesertBackground()noexcept;
 
     DISABLE_COPY(cDesertBackground)
     ASSIGN_ID(3, "Desert")
@@ -200,7 +214,7 @@ public:
 class cSpaceBackground final : public cBackground
 {
 public:
-    cSpaceBackground()noexcept {}
+    cSpaceBackground()noexcept;
 
     DISABLE_COPY(cSpaceBackground)
     ASSIGN_ID(4, "Space")
@@ -212,7 +226,7 @@ public:
 class cVolcanoBackground final : public cBackground
 {
 public:
-    cVolcanoBackground()noexcept {}
+    cVolcanoBackground()noexcept;
 
     DISABLE_COPY(cVolcanoBackground)
     ASSIGN_ID(5, "Volcano")
@@ -224,7 +238,7 @@ public:
 class cSnowBackground final : public cBackground
 {
 public:
-    cSnowBackground()noexcept {}
+    cSnowBackground()noexcept;
 
     DISABLE_COPY(cSnowBackground)
     ASSIGN_ID(6, "Snow")
@@ -236,7 +250,7 @@ public:
 class cMossBackground final : public cBackground
 {
 public:
-    cMossBackground()noexcept {}
+    cMossBackground()noexcept;
 
     DISABLE_COPY(cMossBackground)
     ASSIGN_ID(7, "Moss")

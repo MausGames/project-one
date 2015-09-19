@@ -19,6 +19,8 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreModel>  ("bullet_wave.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_wave.md3");
     Core::Manager::Resource->Load<coreModel>  ("environment_reed_01.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_reed_01.md3");
     Core::Manager::Resource->Load<coreModel>  ("environment_reed_02.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_reed_02.md3");
+    Core::Manager::Resource->Load<coreModel>  ("environment_seashell.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_seashell.md3");
+    Core::Manager::Resource->Load<coreModel>  ("environment_starfish.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_starfish.md3");
     Core::Manager::Resource->Load<coreModel>  ("environment_stone_01.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_stone_01.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_boomerang.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boomerang.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_circle_02.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_circle_02.md3");
@@ -64,14 +66,22 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_low.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_low.png");
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_mid.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_mid.png");
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_high.png",            CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_high.png");
-    Core::Manager::Resource->Load<coreTexture>("environment_flowers.png",                CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_flowers.png", false);
+    Core::Manager::Resource->Load<coreTexture>("environment_flowers.png",                CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_flowers.png");
+    Core::Manager::Resource->Load<coreTexture>("environment_crack_diff.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_crack_diff.png");
+    Core::Manager::Resource->Load<coreTexture>("environment_crack_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_crack_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_dust_diff.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_dust_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_dust_norm.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_dust_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_earth_diff.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_earth_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_earth_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_earth_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_grass_diff.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_grass_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_grass_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_grass_norm.png", false);
+    Core::Manager::Resource->Load<coreTexture>("environment_lava_diff.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_lava_diff.png");
+    Core::Manager::Resource->Load<coreTexture>("environment_lava_norm.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_lava_norm.png", false);
+    Core::Manager::Resource->Load<coreTexture>("environment_leaf.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_leaf.png");
     Core::Manager::Resource->Load<coreTexture>("environment_reed.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_reed.png");
+    Core::Manager::Resource->Load<coreTexture>("environment_rock_diff.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_rock_diff.png");
+    Core::Manager::Resource->Load<coreTexture>("environment_rock_norm.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_rock_norm.png", false);
+    Core::Manager::Resource->Load<coreTexture>("environment_sea.png",                    CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_sea.png");
     Core::Manager::Resource->Load<coreTexture>("environment_stone_diff.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_stone_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_stone_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_stone_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_under_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_under_norm.png", false);
@@ -373,6 +383,7 @@ static void SetupResources()
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_outdoor_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("environment_outdoor.vert")
         ->AttachShader("environment_outdoor.frag")
+        ->BindAttribute("v_v1Height", CORE_SHADER_ATTRIBUTE_POSITION_NUM)
         ->Finish();
 
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_under_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())

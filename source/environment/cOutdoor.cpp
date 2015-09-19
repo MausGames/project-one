@@ -191,7 +191,7 @@ void cOutdoor::LoadGeometry(const coreUint8& iAlgorithm, const coreFloat& fGrade
     switch(iAlgorithm)
     {
     default: ASSERT(false)
-    case 1u: nAlgorithmFunc = [](const coreFloat& x, const coreFloat& y) {coreFloat r = -(COS((x - I_TO_F(OUTDOOR_WIDTH)*0.5f)*0.075f*PI)*5.0f);                                                                                        return r;}; break;
+    case 1u: nAlgorithmFunc = [](const coreFloat& x, const coreFloat& y) {coreFloat r = -(COS((x - I_TO_F(OUTDOOR_WIDTH)*0.5f)*0.075f*PI)*10.0f);                                                                                       return r;}; break;
     case 2u: nAlgorithmFunc = [](const coreFloat& x, const coreFloat& y) {coreFloat r =  (ABS(SIN(x*0.075f*PI)*8.0f + SIN(y*0.075f*PI)*8.0f) - 6.0f);                                                                                   return r;}; break;
     case 3u: nAlgorithmFunc = [](const coreFloat& x, const coreFloat& y) {coreFloat r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 13.0f);                                                      return r;}; break;
     case 4u: nAlgorithmFunc = [](const coreFloat& x, const coreFloat& y) {coreFloat r = -(ABS(SIN(y*0.150f*PI)*0.25f - 0.5f*(x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.150f*PI) - 0.0f; if(r <    0.0f) r = -1.0f; return r;}; break;
@@ -325,16 +325,16 @@ void cOutdoor::LoadGeometry(const coreUint8& iAlgorithm, const coreFloat& fGrade
     for(coreUintW i = 0u; i < OUTDOOR_TOTAL_VERTICES; ++i)
     {
         // convert specific vertex attributes
-        aPackedData[i].vPosition = aVertexData[i].vPosition;
+        aPackedData[i].fPosition = aVertexData[i].vPosition.z;
         aPackedData[i].iNormal   = nPackFunc(coreVector4(aVertexData[i].vNormal, 0.0f));
         aPackedData[i].iTangent  = nPackFunc(aVertexData[i].vTangent);
     }
 
     // create vertex buffer
     coreVertexBuffer* pBuffer = m_pModel->CreateVertexBuffer(OUTDOOR_TOTAL_VERTICES, sizeof(sVertexPacked), aPackedData, CORE_DATABUFFER_STORAGE_STATIC);
-    pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_POSITION_NUM, 3u, GL_FLOAT,    false, 0u);
-    pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_NORMAL_NUM,   4u, iNormFormat, false, 3u*sizeof(coreFloat));
-    pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_TANGENT_NUM,  4u, iNormFormat, false, 3u*sizeof(coreFloat) + 1u*sizeof(coreUint32));
+    pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_POSITION_NUM, 1u, GL_FLOAT,    false, 0u);
+    pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_NORMAL_NUM,   4u, iNormFormat, false, 1u*sizeof(coreFloat));
+    pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_TANGENT_NUM,  4u, iNormFormat, false, 1u*sizeof(coreFloat) + 1u*sizeof(coreUint32));
 
     // create index buffer
     m_pModel->CreateIndexBuffer(OUTDOOR_TOTAL_INDICES, sizeof(coreUint16), aiIndexData, CORE_DATABUFFER_STORAGE_STATIC);

@@ -42,14 +42,14 @@ cWater::cWater()noexcept
     this->SetSize(coreVector3(WATER_SIZE, WATER_SIZE, 1.0f));
 
     // remove default texture filter (not visible, better performance)
-    m_apTexture[0].GetHandle()->OnLoadOnce([&]()
+    if(CORE_GL_SUPPORT(EXT_texture_filter_anisotropic))
     {
-        if(CORE_GL_SUPPORT(EXT_texture_filter_anisotropic))
+        m_apTexture[0].GetHandle()->OnLoadOnce([=]()
         {
-            glBindTexture(GL_TEXTURE_2D, m_apTexture[0]->GetTexture());
+            glBindTexture  (GL_TEXTURE_2D, m_apTexture[0]->GetTexture());
             glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 0.0f);
-        }
-    });
+        });
+    }
 }
 
 
@@ -155,24 +155,23 @@ void cWater::UpdateDepth(cOutdoor* pOutdoor, const std::vector<coreBatchList*>& 
     {
         // fill only depth component of refraction frame buffer
         m_BelowRefraction.StartDraw();
+        m_BelowRefraction.Clear(CORE_FRAMEBUFFER_TARGET_DEPTH);
         {
-            glDepthFunc (GL_ALWAYS);   // better performance than depth-clear
             glDrawBuffer(GL_NONE);
             {
                 const coreMatrix4 mViewProj = Core::Graphics->GetCamera() * Core::Graphics->GetPerspective();
 
-                // use shadow shaders for lightweight depth rendering
-                cShadow::SendTransformInstanced(mViewProj);
-                cShadow::SendTransformSingle   (mViewProj);
-
                 // render the outdoor-surface
-                pOutdoor->Render(cShadow::GetProgramSingle());
+                pOutdoor->Render(pOutdoor->GetProgram());
 
-                // render all ground objects (after outdoor-surface, because of GL_ALWAYS)
+                // use shadow shaders for lightweight depth rendering
+                cShadow::SendTransformSingle   (mViewProj);
+                cShadow::SendTransformInstanced(mViewProj);
+
+                // render all ground objects
                 FOR_EACH(it, apGroundObjectList)
                     (*it)->Render(cShadow::GetProgramInstanced(), cShadow::GetProgramSingle());
             }
-            glDepthFunc (GL_LEQUAL);
             glDrawBuffer(GL_COLOR_ATTACHMENT0);
         }
     }
@@ -198,7 +197,7 @@ cUnderWater::cUnderWater()noexcept
 {
 
     // 
-    this->DefineTexture(0u, "environment_under_norm.png");
+    this->DefineTexture(1u, "environment_under_norm.png");
     this->DefineProgram("environment_under_program");
 
 }

@@ -33,6 +33,8 @@
 #define OUTDOOR_RANGE (OUTDOOR_WIDTH * (OUTDOOR_VIEW+1u))                        // vertices used in a draw call
 #define OUTDOOR_COUNT (OUTDOOR_BLOCKS_X * OUTDOOR_VIEW * OUTDOOR_PER_INDICES)    // indices to draw
 
+STATIC_ASSERT((OUTDOOR_WIDTH == OUTDOOR_VIEW) && (OUTDOOR_WIDTH % 2))
+
 
 // ****************************************************************
 // outdoor-surface class
@@ -50,9 +52,9 @@ private:
     // compressed vertex structure
     struct sVertexPacked
     {
-        coreVector3 vPosition;   // vertex position
-        coreUint32  iNormal;     // normal vector
-        coreUint32  iTangent;    // additional tangent vector
+        coreFloat  fPosition;   // vertex position (only height)
+        coreUint32 iNormal;     // normal vector
+        coreUint32 iTangent;    // additional tangent vector
     };
 
 

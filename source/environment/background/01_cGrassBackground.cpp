@@ -12,6 +12,7 @@
 // ****************************************************************
 // constructor
 cGrassBackground::cGrassBackground(const coreUint8& iCloudDensity)noexcept
+: m_fLeafTime (0.0f)
 {
     coreBatchList* pList1;
     coreBatchList* pList2;
@@ -23,13 +24,13 @@ cGrassBackground::cGrassBackground(const coreUint8& iCloudDensity)noexcept
     m_pWater = new cWater();
 
     // allocate stone list
-    pList1 = new coreBatchList(GRASS_STONES_RESERVE);
+    pList1 = new coreBatchList(GRASS_STONE_RESERVE);
     pList1->DefineProgram("object_ground_inst_program");
     {
-        for(coreUintW i = 0u; i < GRASS_STONES_NUM; ++i)
+        for(coreUintW i = 0u; i < GRASS_STONE_NUM; ++i)
         {
             // calculate position and height
-            const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.45f, 0.45f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(GRASS_STONES_NUM)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
+            const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.45f, 0.45f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(GRASS_STONE_NUM)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
             const coreFloat   fHeight   = m_pOutdoor->RetrieveHeight(vPosition);
 
             // test for valid values
@@ -67,18 +68,18 @@ cGrassBackground::cGrassBackground(const coreUint8& iCloudDensity)noexcept
     }
 
     // allocate reed lists
-    pList1 = new coreBatchList(GRASS_REEDS_1_RESERVE);
+    pList1 = new coreBatchList(GRASS_REED_1_RESERVE);
     pList1->DefineProgram("object_ground_inst_program");
 
-    pList2 = new coreBatchList(GRASS_REEDS_2_RESERVE);
+    pList2 = new coreBatchList(GRASS_REED_2_RESERVE);
     pList2->DefineProgram("object_ground_inst_program");
     {
-        for(coreUintW i = 0u; i < GRASS_REEDS_NUM; ++i)
+        for(coreUintW i = 0u; i < GRASS_REED_NUM; ++i)
         {
-            for(coreUintW j = 0u; j < 3u; ++j)   // tries
+            for(coreUintW j = 0u; j < 4u; ++j)   // tries
             {
                 // calculate position and height
-                const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.45f, 0.45f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(GRASS_REEDS_NUM)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
+                const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.45f, 0.45f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(GRASS_REED_NUM)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
                 const coreFloat   fHeight   = m_pOutdoor->RetrieveHeight(vPosition);
 
                 // test for valid values
@@ -103,7 +104,7 @@ cGrassBackground::cGrassBackground(const coreUint8& iCloudDensity)noexcept
                         pObject->SetSize       (coreVector3::Rand(1.3f,1.6f, 1.3f,1.6f, 1.3f,1.6f) * 2.0f);
                         pObject->SetDirection  (coreVector3(coreVector2::Rand(), 0.0f));
                         pObject->SetOrientation(coreVector3(0.0f,0.0f,1.0f));
-                        pObject->SetColor3     (coreVector3(1.0f, 1.0f * Core::Rand->Float(0.55f, 0.7f), 0.5f));
+                        pObject->SetColor3     (coreVector3(1.0f, 1.0f * Core::Rand->Float(0.55f, 0.65f), 0.5f));
 
                         // add object to the list
                         if(bType) pList1->BindObject(pObject);
@@ -129,33 +130,35 @@ cGrassBackground::cGrassBackground(const coreUint8& iCloudDensity)noexcept
     }
 
     // allocate flower list
-    pList1 = new coreBatchList(GRASS_FLOWERS_RESERVE);
-    pList1->DefineProgram("effect_decal_spheric_inst_program");
+    pList1 = new coreBatchList(GRASS_FLOWER_RESERVE);
+    pList1->DefineProgram("effect_decal_inst_program");
     {
-        for(coreUintW i = GRASS_FLOWERS_NUM; i--; )
+        for(coreUintW i = GRASS_FLOWER_NUM; i--; )
         {
             for(coreUintW j = 0u; j < 20u; ++j)   // tries
             {
                 // calculate position and height
-                const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.45f, 0.45f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(GRASS_FLOWERS_NUM)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
+                const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.45f, 0.45f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(GRASS_FLOWER_NUM)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
                 const coreFloat   fHeight   = m_pOutdoor->RetrieveHeight(vPosition);
 
                 // test for valid values
-                if(fHeight > -14.5f)
+                if(fHeight > -15.0f)
                 {
-                    if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 225.0f))
+                    if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 40.0f))
                     {
                         // load object resources
                         coreObject3D* pObject = new coreObject3D();
                         pObject->DefineModel  (Core::Manager::Object->GetLowModel());
                         pObject->DefineTexture(0u, "environment_flowers.png");
-                        pObject->DefineProgram("effect_decal_spheric_program");
+                        pObject->DefineProgram("effect_decal_program");
 
                         // set object properties
                         pObject->SetPosition (coreVector3(vPosition, fHeight-0.8f));
-                        pObject->SetSize     (coreVector3(coreVector2(1.75f,1.75f) * Core::Rand->Float(9.0f, 10.0f), 1.0f));
+                        pObject->SetSize     (coreVector3(coreVector2(0.9f,0.9f) * Core::Rand->Float(9.0f, 10.0f), 1.0f));
                         pObject->SetDirection(coreVector3(coreVector2::Rand(), 0.0f));
-                        pObject->SetTexOffset(coreVector2::Rand(0.0f,10.0f, 0.0f,10.0f));
+                        pObject->SetAlpha    (0.95f);
+                        pObject->SetTexSize  (coreVector2(0.5f,0.5f));
+                        pObject->SetTexOffset(coreVector2(Core::Rand->Bool() ? 0.5f : 0.0f, Core::Rand->Bool() ? 0.5f : 0.0f));
 
                         // add object to the list
                         pList1->BindObject(pObject);
@@ -171,14 +174,65 @@ cGrassBackground::cGrassBackground(const coreUint8& iCloudDensity)noexcept
         m_apDecalObjectList.push_back(pList1);
     }
 
+    // allocate leaf list
+    pList1 = new coreBatchList(GRASS_LEAF_RESERVE);
+    pList1->DefineProgram("effect_decal_inst_program");
+    {
+        for(coreUintW i = 0u; i < GRASS_LEAF_NUM; ++i)
+        {
+            for(coreUintW j = 0u; j < 20u; ++j)   // tries
+            {
+                // calculate position and height
+                const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.45f, 0.45f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(GRASS_LEAF_NUM)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
+                const coreFloat   fHeight   = Core::Rand->Float(10.0f, 30.0f);
+
+                // test for valid values
+                if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 700.0f))
+                {
+                    // load object resources
+                    coreObject3D* pObject = new coreObject3D();
+                    pObject->DefineModel  (Core::Manager::Object->GetLowModel());
+                    pObject->DefineTexture(0u, "environment_leaf.png");
+                    pObject->DefineProgram("effect_decal_program");
+
+                    // set object properties
+                    pObject->SetPosition(coreVector3(vPosition, fHeight));
+                    pObject->SetSize    (coreVector3(2.0f,0.0f,1.0f));
+                    pObject->SetTexSize (coreVector2(0.5f,0.85f));
+
+                    // add object to the list
+                    pList1->BindObject(pObject);
+                    break;
+                }
+            }
+        }
+
+        // 
+        coreSet<coreObject3D*>* papContent = pList1->List();
+        if(papContent->size() % 2u)
+        {
+            SAFE_DELETE(papContent->back())
+            papContent->pop_back();
+        }
+
+        // 
+        m_iLeafNum = papContent->size();
+        ASSERT(!(m_iLeafNum % 2u))
+
+        // post-process list and add it to the air
+        cBackground::_FillInfinite(pList1);
+        pList1->ShrinkToFit();
+        m_apAirObjectList.push_back(pList1);
+    }
+
     // allocate cloud list
-    pList1 = new coreBatchList(GRASS_CLOUDS_RESERVE * iCloudDensity);
+    pList1 = new coreBatchList(GRASS_CLOUD_RESERVE * iCloudDensity);
     pList1->DefineProgram("environment_clouds_inst_program");
     {
-        for(coreUintW i = 0u, ie = GRASS_CLOUDS_NUM * iCloudDensity; i < ie; ++i)
+        for(coreUintW i = 0u, ie = GRASS_CLOUD_NUM * iCloudDensity; i < ie; ++i)
         {
             // calculate position and height
-            const coreVector2 vPosition = coreVector2(Core::Rand->Float(0.3f) * (Core::Rand->Bool() ? 1.0f : -1.0f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(GRASS_CLOUDS_NUM * iCloudDensity)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
+            const coreVector2 vPosition = coreVector2(Core::Rand->Float(0.1f, 0.3f) * (Core::Rand->Bool() ? 1.0f : -1.0f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(GRASS_CLOUD_NUM * iCloudDensity)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
             const coreFloat   fHeight   = Core::Rand->Float(20.0f, 60.0f);
 
             // load object resources
@@ -200,21 +254,16 @@ cGrassBackground::cGrassBackground(const coreUint8& iCloudDensity)noexcept
 
         // post-process list and add it to the air
         cBackground::_FillInfinite(pList1);
-        ASSERT(pList1->GetCurCapacity() == GRASS_CLOUDS_RESERVE * iCloudDensity)
+        ASSERT(pList1->GetCurCapacity() == GRASS_CLOUD_RESERVE * iCloudDensity)
         m_apAirObjectList.push_back(pList1);
     }
 
     // load nature sound-effect
     m_pNatureSound = Core::Manager::Resource->Get<coreSound>("environment_nature.wav");
-    m_pNatureSound.GetHandle()->OnLoadOnce([&]()
+    m_pNatureSound.GetHandle()->OnLoadOnce([=]()
     {
         m_pNatureSound->PlayRelative(this, 0.0f, 1.0f, 0.0f, true);
     });
-
-
-
-        //m_pOutdoor->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);  
-
 }
 
 
@@ -232,35 +281,48 @@ cGrassBackground::~cGrassBackground()
 // move the grass background
 void cGrassBackground::__MoveOwn()
 {
-    //static coreUintW test = 0u;
-    //
-    //if(g_pGame && (++test >= 2u))
-    //{
-    //    test = 0u;
-    //
-    //    g_pGame->ForEachPlayer([](const cPlayer* pPlayer)
-    //    {
-    //        const coreVector3& vPos = pPlayer->GetPosition ();
-    //        const coreVector3& vDir = pPlayer->GetDirection();
-    //        const coreVector3  vTan = coreVector3(vDir.xy().Rotate90(), 0.0f);
-    //
-    //        g_pSpecialEffects->CreateTrailSmoke(vPos - 5.0f*vDir, -vDir, g_pEnvironment->GetSpeed()*10.0f, 1u);
-    //        //g_pSpecialEffects->CreateTrailSmoke(vPos - 5.0f*vDir - 2.0f*vTan, -vDir, g_pEnvironment->GetSpeed()/0.7f, 1u);
-    //    });
-    //}
+    // 
+    m_fLeafTime.Update(1.0f);
 
+    // 
+    coreBatchList* pList = m_apAirObjectList[0];
+    for(coreUintW i = 0, ie = pList->List()->size(); i < ie; ++i)
+    {
+        coreObject3D* pLeaf = (*pList->List())[i];
+        if(!pLeaf->IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue;
 
-    // TODO # sound-volume per config value 
+        // 
+        const coreFloat   fOffset = I_TO_F(i % m_iLeafNum);
+        const coreFloat   fTime   = m_fLeafTime * ((i % 2u) ? 1.0f : -1.0f) + fOffset;
+        const coreFloat   fPos    = SIN(fTime * 0.1f + fOffset) * (I_TO_F(OUTDOOR_WIDTH) * OUTDOOR_DETAIL * 0.2f);
+        const coreVector2 vDir    = coreVector2::Direction(fTime);
+
+        // 
+        pLeaf->SetPosition   (coreVector3(fPos, pLeaf->GetPosition().yz()));
+        pLeaf->SetDirection  (coreVector3(vDir, 0.0f));
+        pLeaf->SetOrientation(coreVector3(-vDir.x*vDir.y, vDir.x*vDir.x, vDir.y));
+
+        // get currently visible polygon side
+        const coreBool bSide = (coreVector3::Dot(Core::Graphics->GetCamPosition() - pLeaf->GetPosition(), pLeaf->GetOrientation()) >= 0.0f) ? true : false;
+
+        // simulate two-sided polygon (flip vertex-order and change texture)
+        pLeaf->SetSize     (coreVector3(pLeaf->GetSize().x, bSide ? 1.4f : -1.4f, pLeaf->GetSize().z));
+        pLeaf->SetTexOffset(coreVector2(bSide ? 0.5f : 0.0f, 0.15f));
+    }
+    pList->MoveNormal();
+
     // adjust volume of the nature sound-effect
     if(m_pNatureSound->EnableRef(this))
         m_pNatureSound->SetVolume(MAX(g_pEnvironment->GetTransition().GetValue((g_pEnvironment->GetBackground() == this) ? CORE_TIMER_GET_NORMAL : CORE_TIMER_GET_REVERSED), 0.0f));
+
+    // TODO: sound-volume per config value 
 }
 
 
 // ****************************************************************
 // constructor
 cCloudBackground::cCloudBackground()noexcept
-: cGrassBackground (GRASS_CLOUDS_DENSITY)
+: cGrassBackground (GRASS_CLOUD_DENSITY)
 , m_fWindVolume    (1.0f)
 {
     // 
@@ -273,7 +335,7 @@ cCloudBackground::cCloudBackground()noexcept
 
     // load wind sound-effect
     m_pWindSound = Core::Manager::Resource->Get<coreSound>("environment_wind.wav");
-    m_pWindSound.GetHandle()->OnLoadOnce([&]()
+    m_pWindSound.GetHandle()->OnLoadOnce([=]()
     {
         m_pWindSound->PlayRelative(this, 0.0f, 1.0f, 0.0f, true);
     });
@@ -303,7 +365,7 @@ void cCloudBackground::SetCloudAlpha(const coreFloat& fAlpha)
     // 
     for(coreUintW i = 0u, ie = apCloud->size(); i < ie; ++i)
     {
-        if(i % GRASS_CLOUDS_DENSITY)
+        if(i % GRASS_CLOUD_DENSITY)
             (*apCloud)[i]->SetAlpha((i % 2u) ? MAX(fAlpha*2.0f - 1.0f, 0.0f) : MIN(fAlpha*2.0f, 1.0f));
     }
 
@@ -330,12 +392,12 @@ void cCloudBackground::ReduceClouds()
     auto pAir    = this->GetAirObjectList()->front();
     auto apCloud = pAir->List();
 
-    ASSERT(GRASS_CLOUDS_NUM * GRASS_CLOUDS_DENSITY <= apCloud->size())
+    ASSERT(GRASS_CLOUD_NUM * GRASS_CLOUD_DENSITY <= apCloud->size())
 
     // 
     for(coreUintW i = 0u, ie = apCloud->size(); i < ie; ++i)
     {
-        if(i % GRASS_CLOUDS_DENSITY)
+        if(i % GRASS_CLOUD_DENSITY)
             SAFE_DELETE((*apCloud)[i]);
     }
 

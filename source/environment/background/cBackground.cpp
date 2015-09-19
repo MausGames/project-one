@@ -303,7 +303,7 @@ void cBackground::_FillInfinite(coreBatchList* OUTPUT pObjectList)
         coreObject3D* pOldObject = (*pObjectList->List())[i];
 
         // check for position at the start area
-        if(pOldObject->GetPosition().y < I_TO_F(OUTDOOR_VIEW) * OUTDOOR_DETAIL * 0.5f)
+        if(pOldObject->GetPosition().y < I_TO_F(OUTDOOR_VIEW/2) * OUTDOOR_DETAIL)
         {
             // copy object and move it to the end area
             coreObject3D* pNewObject = new coreObject3D(*pOldObject);
@@ -336,7 +336,7 @@ coreBool cBackground::_CheckIntersectionQuick(const coreBatchList* pObjectList, 
     auto et = pObjectList->List()->begin();
 
     // compare only with last few objects
-    for(coreUintW i = 5u; i-- && it != et; )
+    for(coreUintW i = 6u; i-- && it != et; )
     {
         // check for quadratic distance
         if(((*(--it))->GetPosition().xy() - vNewPos).LengthSq() < fDistanceSq)

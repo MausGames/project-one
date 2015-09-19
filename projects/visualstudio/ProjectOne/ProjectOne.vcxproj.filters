@@ -120,6 +120,21 @@
     <ClCompile Include="..\..\..\source\visual\cBlur.cpp">
       <Filter>visual</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\environment\background\03_cDesertBackground.cpp">
+      <Filter>environment\background</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\environment\background\04_cSpaceBackground.cpp">
+      <Filter>environment\background</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\environment\background\05_cVolcanoBackground.cpp">
+      <Filter>environment\background</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\environment\background\06_cSnowBackground.cpp">
+      <Filter>environment\background</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\environment\background\07_cMossBackground.cpp">
+      <Filter>environment\background</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\main.h" />

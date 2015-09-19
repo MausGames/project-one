@@ -22,6 +22,11 @@
     <ClCompile Include="..\..\..\source\application.cpp" />
     <ClCompile Include="..\..\..\source\environment\background\01_cGrassBackground.cpp" />
     <ClCompile Include="..\..\..\source\environment\background\02_cSeaBackground.cpp" />
+    <ClCompile Include="..\..\..\source\environment\background\03_cDesertBackground.cpp" />
+    <ClCompile Include="..\..\..\source\environment\background\04_cSpaceBackground.cpp" />
+    <ClCompile Include="..\..\..\source\environment\background\05_cVolcanoBackground.cpp" />
+    <ClCompile Include="..\..\..\source\environment\background\06_cSnowBackground.cpp" />
+    <ClCompile Include="..\..\..\source\environment\background\07_cMossBackground.cpp" />
     <ClCompile Include="..\..\..\source\environment\background\cBackground.cpp" />
     <ClCompile Include="..\..\..\source\environment\cEnvironment.cpp" />
     <ClCompile Include="..\..\..\source\environment\cOutdoor.cpp" />

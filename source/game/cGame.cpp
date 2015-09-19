@@ -208,7 +208,7 @@ void cGame::LoadMission(const coreInt32& iID)
             for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
             {
                 m_aPlayer[i].Kill(false);
-                m_aPlayer[i].Resurrect(coreVector2(20.0f * (I_TO_F(i) - 0.5f * I_TO_F(GAME_PLAYERS-1)), -100.0f));
+                m_aPlayer[i].Resurrect(coreVector2(20.0f * (I_TO_F(i) - 0.5f * I_TO_F(GAME_PLAYERS-1u)), -100.0f));
                 m_aPlayer[i].AddStatus(PLAYER_STATUS_NO_INPUT_ALL);
             }
         }
@@ -248,6 +248,7 @@ cPlayer* RETURN_NONNULL cGame::FindPlayer(const coreVector2& vPosition)
     cPlayer*  pPlayer = &m_aPlayer[0];
     coreFloat fLenSq  = 1.0e06f;
 
+    // TODO: use ForEachPlayer here ? 
     // 
     for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
     {

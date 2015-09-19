@@ -624,9 +624,9 @@ void cCrossfieldBoss::__MoveOwn()
             const coreFloat fOwnTime = LERPB(1.0f, 0.0f, 1.0f - fTime);
 
             // 
-            this->DefaultMoveLerp  (     m_avVector[0].xy(), 2.0f*m_avVector[0].xy().Normalize(), fOwnTime);
-            this->DefaultRotateLerp(     m_avVector[1].x,    4.0f*PI,                             fOwnTime);
-            this->SetOrientation   (LERP(m_avVector[2],      coreVector3(0.0f,0.0f,1.0f),         fOwnTime).Normalize());
+            this->DefaultMoveLerp  (     m_avVector[0].xy(), 2.0f*m_avVector[0].xy().Normalize(),            fOwnTime);
+            this->DefaultRotateLerp(     m_avVector[1].x,    4.0f*PI,                                        fOwnTime);
+            this->SetOrientation   (LERP(m_avVector[2],      coreVector3(0.0f, 0.0f, SIGN(m_avVector[2].z)), fOwnTime).Normalize());
 
             // 
             g_pEnvironment->SetTargetDirection(coreVector2::Direction(LERPS(m_avVector[1].y, 0.0f*PI, fTime*0.5f)));
@@ -648,6 +648,7 @@ void cCrossfieldBoss::__MoveOwn()
             // 
             this->DefaultMoveLerp  (coreVector2(0.0f,2.0f), coreVector2(0.0f,0.75f), fOwnTime);
             this->DefaultRotateLerp(0.0f*PI,                5.0f*PI,                 fOwnTime);
+            this->SetOrientation   (coreVector3(0.0f,0.0f,1.0f));
 
             // 
             g_pEnvironment->SetTargetDirection(coreVector2::Direction(LERPS(m_avVector[1].y, 0.0f*PI, fTime*0.5f + 0.5f)));

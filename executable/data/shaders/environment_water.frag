@@ -21,8 +21,8 @@ void FragmentMain()
     vec2 v2ScreenCoord = gl_FragCoord.xy * u_v4Resolution.zw;
 
     // lookup normal map (multiple times) and depth map
-    vec3  v3BumpNormal1 = coreTexture2D(0, v_av2TexCoord[0].st).xyz;
-    vec3  v3BumpNormal2 = coreTexture2D(0, v_av2TexCoord[1].st).xyz;
+    vec3  v3BumpNormal1 = coreTexture2D(0, v_av2TexCoord[0]).xyz;
+    vec3  v3BumpNormal2 = coreTexture2D(0, v_av2TexCoord[1]).xyz;
     float v1Depth       = coreTexture2D(3, v2ScreenCoord).r;
     
     // calculate dot-3 bump factor

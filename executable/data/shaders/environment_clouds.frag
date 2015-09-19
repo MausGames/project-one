@@ -16,7 +16,8 @@ void FragmentMain()
     // only draw visible area
     if(v1Alpha < 1.0)
     {
-        v1Alpha = 1.0 - v1Alpha;
+        v1Alpha *= v1Alpha;
+        v1Alpha  = 1.0 - v1Alpha;
     
         // draw as alpha map with decent highlights
         float v1Value = coreTexture2D(0, v_av2TexCoord[0]).r;

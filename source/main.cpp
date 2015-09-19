@@ -268,7 +268,7 @@ static void DebugGame()
     // ########################## DEBUG ##########################
 
 #if defined(_CORE_MSVC_)
-    #pragma warning(disable : 4189)
+    #pragma warning(disable : 4189 4702)
 #endif
 
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(K), CORE_INPUT_PRESS))
@@ -289,6 +289,16 @@ static void DebugGame()
         g_pEnvironment->ChangeBackground(REF_ID(cCloudBackground::ID));
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(3), CORE_INPUT_PRESS))
         g_pEnvironment->ChangeBackground(REF_ID(cSeaBackground::ID));
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(4), CORE_INPUT_PRESS))
+        g_pEnvironment->ChangeBackground(REF_ID(cDesertBackground::ID));
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(5), CORE_INPUT_PRESS))
+        g_pEnvironment->ChangeBackground(REF_ID(cSpaceBackground::ID));
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(6), CORE_INPUT_PRESS))
+        g_pEnvironment->ChangeBackground(REF_ID(cVolcanoBackground::ID));
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(7), CORE_INPUT_PRESS))
+        g_pEnvironment->ChangeBackground(REF_ID(cSnowBackground::ID));
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(8), CORE_INPUT_PRESS))
+        g_pEnvironment->ChangeBackground(REF_ID(cMossBackground::ID));
 
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS))
         Core::System->Quit();
