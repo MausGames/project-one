@@ -89,7 +89,7 @@ cSpecialEffects::cSpecialEffects()noexcept
 
 // ****************************************************************
 // render special-effects
-void cSpecialEffects::Render()
+void cSpecialEffects::Render(const coreBool& bForeground)
 {
     glDepthMask(false);
     {
@@ -99,7 +99,8 @@ void cSpecialEffects::Render()
         m_ParticleSmoke.Render();
 
         // enable additive blending (keep alpha aggregation)
-        glBlendFuncSeparate(FOREGROUND_BLEND_SUM, FOREGROUND_BLEND_ALPHA);
+        if(bForeground) glBlendFuncSeparate(FOREGROUND_BLEND_SUM, FOREGROUND_BLEND_ALPHA);
+                   else glBlendFunc        (FOREGROUND_BLEND_SUM);
         {
             // render fire particle system
             m_ParticleFire.Render();
@@ -107,7 +108,8 @@ void cSpecialEffects::Render()
             // render lightning sprites
             m_LightningList.Render();
         }
-        glBlendFuncSeparate(FOREGROUND_BLEND_DEFAULT, FOREGROUND_BLEND_ALPHA);
+        if(bForeground) glBlendFuncSeparate(FOREGROUND_BLEND_DEFAULT, FOREGROUND_BLEND_ALPHA);
+                   else glBlendFunc        (FOREGROUND_BLEND_DEFAULT);
 
         // render all blast and ring objects
         auto nRenderFunc = [](coreObject3D* OUTPUT pArray, const coreUintW& iSize)

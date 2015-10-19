@@ -93,15 +93,16 @@
 #define COLOR_ENEMY_ICE     (coreVector3(208.0f/360.0f,  32.0f/100.0f,  90.0f/100.0f).HSVtoRGB())
 
 // shader modifiers
-#define SHADER_SHADOW       "#define _P1_SHADOW_     (1) \n"   // outdoor, object_ground
-#define SHADER_GLOW         "#define _P1_GLOW_       (1) \n"   // post, object_ship
-#define SHADER_DISTORTION   "#define _P1_DISTORTION_ (1) \n"   // post
-#define SHADER_DARKNESS     "#define _P1_DARKNESS_   (1) \n"   // object_ship
-#define SHADER_BULLET       "#define _P1_BULLET_     (1) \n"   // energy
-#define SHADER_SPHERIC      "#define _P1_SPHERIC_    (1) \n"   // decal, energy
-#define SHADER_INVERT       "#define _P1_INVERT_     (1) \n"   // energy
-#define SHADER_DIRECT       "#define _P1_DIRECT_     (1) \n"   // outline, energy, effect_distortion
-#define SHADER_RING         "#define _P1_RING_       (1) \n"   // energy
+#define SHADER_SHADOW(x)    PRINT("#define _P1_SHADOW_ (%d) \n", x)   // outdoor, object_ground
+#define SHADER_GLOW         "#define _P1_GLOW_       (1) \n"          // post, object_ship
+#define SHADER_DISTORTION   "#define _P1_DISTORTION_ (1) \n"          // post
+#define SHADER_DARKNESS     "#define _P1_DARKNESS_   (1) \n"          // object_ship
+#define SHADER_BULLET       "#define _P1_BULLET_     (1) \n"          // energy
+#define SHADER_SPHERIC      "#define _P1_SPHERIC_    (1) \n"          // decal, energy
+#define SHADER_INVERT       "#define _P1_INVERT_     (1) \n"          // energy
+#define SHADER_DIRECT       "#define _P1_DIRECT_     (1) \n"          // outline, energy, effect_distortion
+#define SHADER_RING         "#define _P1_RING_       (1) \n"          // energy
+#define SHADER_WAVE         "#define _P1_WAVE_       (1) \n"          // object
 
 // collision types
 #define TYPE_PLAYER         (1)

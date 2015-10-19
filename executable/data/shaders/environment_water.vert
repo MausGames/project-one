@@ -22,7 +22,7 @@ varying float v_v1Smooth;   // height offset for smooth shores
 
 void VertexMain()
 {
-    // transform view direction and position
+    // transform position
     vec4 v4NewPosition = vec4(coreObject3DTransformLow(), 1.0);
     gl_Position        = u_m4ViewProj * v4NewPosition;
 

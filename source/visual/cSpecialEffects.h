@@ -87,7 +87,7 @@ public:
     DISABLE_COPY(cSpecialEffects)
 
     // render and move special-effects
-    void Render();
+    void Render(const coreBool& bForeground);
     void Move();
 
     // create centered particle splash

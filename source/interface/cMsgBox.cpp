@@ -12,10 +12,9 @@
 // ****************************************************************
 // constructor
 cMsgBox::cMsgBox()noexcept
-: m_vCurMouse   (coreVector2(0.0f,0.0f))
-, m_iCurTooltip ((Core::Rand->Int(MSGBOX_TOOLTIPS - 1u) << 4u) | Core::Rand->Int(MSGBOX_TOOLTIPS - 1u))
-, m_iType       (0u)
-, m_fFade       (0.0f)
+: m_vCurMouse (coreVector2(0.0f,0.0f))
+, m_fFade     (0.0f)
+, m_iType     (0u)
 {
     // 
     this->DefineProgram("default_2d_program");
@@ -97,7 +96,7 @@ void cMsgBox::Move()
 
     // 
     this->SetAlpha    (m_fFade * 0.5f);
-    this->SetTexOffset(coreVector2(0.0f, -0.04f * coreFloat(Core::System->GetTotalTime())));
+    this->SetTexOffset(coreVector2(0.0f, FRACT(coreFloat(-0.04 * Core::System->GetTotalTime()))));
 
     // 
     m_Box.SetAlpha(m_fFade);
@@ -120,12 +119,11 @@ void cMsgBox::Move()
         cMenu::UpdateButton(&m_Yes, m_Yes.IsFocused(), COLOR_MENU_GREEN);
 
         // 
-        //if(m_Yes.IsFocused()) {g_pMenu->GetTooltip()->ShowText(TOOLTIP_ONELINER, Core::Language->GetString(PRINT("OK_%u", 1u + (m_iCurTooltip & 0x0Fu))));}
         if(m_Yes.IsClicked()) {m_nCallback(MSGBOX_STATUS_OK); m_nCallback = NULL;}
     }
     else if(m_iType == MSGBOX_TYPE_QUESTION)
     {
-        const coreBool& bEsc = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS);
+        const coreBool bEsc = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS);
 
         // 
         m_Yes.Interact();
@@ -136,8 +134,6 @@ void cMsgBox::Move()
         cMenu::UpdateButton(&m_No,  m_No .IsFocused(), COLOR_MENU_RED);
 
         // 
-        //     if(m_Yes.IsFocused())         {g_pMenu->GetTooltip()->ShowText(TOOLTIP_ONELINER, Core::Language->GetString(PRINT("YES_%u", 1u + ((m_iCurTooltip & 0xF0u) >> 4u))));}
-        //else if(m_No .IsFocused())         {g_pMenu->GetTooltip()->ShowText(TOOLTIP_ONELINER, Core::Language->GetString(PRINT("NO_%u",  1u +  (m_iCurTooltip & 0x0Fu))));}
              if(m_Yes.IsClicked())         {m_nCallback(MSGBOX_STATUS_YES); m_nCallback = NULL;}
         else if(m_No .IsClicked() || bEsc) {m_nCallback(MSGBOX_STATUS_NO);  m_nCallback = NULL;}
     }

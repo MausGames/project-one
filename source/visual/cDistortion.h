@@ -10,8 +10,6 @@
 #ifndef _P1_GUARD_DISTORTION_H_
 #define _P1_GUARD_DISTORTION_H_
 
-// TODO: check for GL_R11F_G11F_B10F (GL_EXT_packed_float) in distortion and glow
-
 
 // ****************************************************************
 // distortion definitions

@@ -49,7 +49,6 @@ void CoreApp::Init()
 
     // load available music files
     g_MusicPlayer.AddMusicFolder("data/music", "*.ogg");
-    //g_MusicPlayer.Control()->Play();
 
     // create and init main components
     cShadow::GlobalInit();
@@ -127,7 +126,7 @@ void CoreApp::Render()
                 g_pGame->Render();
 
                 // render special-effects
-                g_pSpecialEffects->Render();
+                g_pSpecialEffects->Render(true);
             }
             g_pForeground->End();
         }
@@ -426,7 +425,7 @@ static void DebugGame()
 
 
 
-    coreVector4 v1 = coreVector4(0.0f, -1.0f, coreVector2::Rand());
+    coreVector4 v1 = coreVector4(0.0f, -1.0f, coreVector2::Rand() * coreVector2::Rand());
     coreUint64 un = v1.PackFloat4x16();
     coreVector4 v2 = coreVector4::UnpackFloat4x16(un);
 
@@ -441,9 +440,48 @@ static void DebugGame()
     coreVector2 bbb = coreVector2(std::numeric_limits<float>::signaling_NaN(), 1.0f);
     coreVector2 ccc = aaa + bbb;
 
-    coreUintW iSize2 = sizeof(CoreInput);
+    coreUintW iSize2 = sizeof(coreObject3D);
+    coreUintW iSize3 = sizeof(coreObject2D);
+    coreFloat t = (coreFloat)iSize2 / coreFloat(iSize2);
+    iSize2 = iSize3;
 
 
+    coreUint32 A_1 = v1.PackSnorm4x8();
+    coreUint32 B_1 = 0;//PACK(v1);
+
+    coreVector4 vUnpack1 = coreVector4::UnpackSnorm4x8(A_1);
+    coreVector4 vUnpack2 = coreVector4::UnpackSnorm4x8(B_1);
+
+    vUnpack1 = coreVector4(ABS(vUnpack1.x), ABS(vUnpack1.y), ABS(vUnpack1.z), ABS(vUnpack1.w)) - coreVector4(ABS(v1.x), ABS(v1.y), ABS(v1.z), ABS(v1.w));
+    vUnpack2 = coreVector4(ABS(vUnpack2.x), ABS(vUnpack2.y), ABS(vUnpack2.z), ABS(vUnpack2.w)) - coreVector4(ABS(v1.x), ABS(v1.y), ABS(v1.z), ABS(v1.w));
+    A_1 = B_1;
+
+    coreUint16 f1 = coreMath::Float32to16(0.0f);
+    coreFloat  f2 = coreMath::Float16to32(f1);
+    f2 = f2;
+
+
+
+    coreFloat f3 = Core::Rand->Float(100.0f);
+    coreFloat f4 = std::sin(f3);
+    coreFloat f6 = (std::fmod(f3 + PI*1.0f, 2.0f*PI) - PI*1.0f);
+    coreFloat f5 = f6 - (f6*f6*f6)/6.0f + (f6*f6*f6*f6*f6)/120.0f - (f6*f6*f6*f6*f6*f6*f6)/5040.0f;
+    f4 = Core::Rand->Float(10.0f);
+    f5 = Core::Rand->Float(10.0f);
+    f6 = MIN(f4, f5);
+    //Core::Log->Info("%f", f6);
+
+
+    coreUintW z1 = Core::Rand->Int(-1500, 1500);
+    coreUintW z2 = Core::Rand->Int(-1500, 1500);
+    coreUintW z3 = MAX(z1, z2);
+              z3 = MIN(z2, z1);
+              //z3 = 0;
+    //SET_BIT(z3, 40, true)
+    //z3 = z3;
+    //z3 = z1;
+
+    //Core::Log->Info("%d", z3);
     //Core::Debug->MeasureStart("snprintf");
     //
     //coreChar acString[256];

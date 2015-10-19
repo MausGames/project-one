@@ -9,37 +9,23 @@
 
 
 // constant values
-const float c_v1MapResolution = 0.42;    // normal map resolution
-const float c_v1WaterHeight   = -20.0;   // default water z-position
+const float c_v1MapResolution = 0.42;   // normal map resolution
 
 // shader uniforms
 uniform float u_v1Time;     // current animation value
 uniform float u_v1Offset;   // current y-position offset
 
-// shader output
-varying float v_v1Smooth;   // height offset for smooth shores
-
 
 void VertexMain()
 {
-    // transform view direction and position
-    vec4 v4NewPosition = vec4(coreObject3DTransformLow(), 1.0);
-    gl_Position        = u_m4ViewProj * v4NewPosition;
-
+    // transform position (with reduced depth)
+    gl_Position    = coreObject3DPositionLow();
     gl_Position.z -= 0.4 * gl_Position.w;
     
-    // transform lighting properties (resolved)
-    v_v3TangentPos = v4NewPosition.xyz * vec3(1.0,-1.0,1.0);
-    v_v3TangentCam = u_v3CamPosition   * vec3(1.0,-1.0,1.0);
-
     // calculate current mapping base
     vec2 vMapCoord = vec2(a_v2LowTexCoord.x * c_v1MapResolution,
                           a_v2LowTexCoord.y * c_v1MapResolution + u_v1Offset);
 
     // transform texture coordinates with different animation properties
     v_av2TexCoord[0] = (vMapCoord + (vec2( u_v1Time*0.5, -u_v1Time*0.5))) * 1.0;
-    v_av2TexCoord[1] = (vMapCoord + (vec2(-u_v1Time*0.1,  u_v1Time*0.1))) * 4.0;
-
-    // calculate height offset
-    v_v1Smooth = 0.042 * (u_v3Position.z - c_v1WaterHeight);
 }

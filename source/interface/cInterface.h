@@ -16,11 +16,12 @@
 #define INTERFACE_VIEWS               (PLAYERS)   // number of player views
 #define INTERFACE_BOSS_DELAY          (1.5f)      // 
 
-#define INTERFACE_BANNER_TYPE_BOSS    (false)     // boss banner type
-#define INTERFACE_BANNER_TYPE_MISSION (true)      // mission banner type
 #define INTERFACE_BANNER_SPEED        (4.0f)      // fade-in and fade-out speed
 #define INTERFACE_BANNER_DURATION     (3.0f)      // display duration (with fading)
 #define INTERFACE_BANNER_ANIMATION    (2.9f)      // animation duration
+
+#define INTERFACE_BANNER_TYPE_BOSS    (false)     // boss banner type
+#define INTERFACE_BANNER_TYPE_MISSION (true)      // mission banner type
 
 
 // ****************************************************************

@@ -35,13 +35,13 @@
 #define GRASS_LEAF_NUM       (2048u)
 #define GRASS_LEAF_RESERVE   (1024u)
 #define GRASS_CLOUD_NUM      (64u)
-#define GRASS_CLOUD_RESERVE  (78u)   // # tested
+#define GRASS_CLOUD_RESERVE  (76u)   // # tested
 #define GRASS_CLOUD_DENSITY  (10u)
 
 #define SEA_STONE_NUM        (1536u)  
 #define SEA_STONE_RESERVE    (256u)  
-#define SEA_WEED_NUM         (1536u)  
-#define SEA_WEED_RESERVE     (256u)  
+#define SEA_WEED_NUM         (3072u)  
+#define SEA_WEED_RESERVE     (512u)  
 #define SEA_ANIMAL_NUM       (1536u)  
 #define SEA_ANIMAL_1_RESERVE (256u)  
 #define SEA_ANIMAL_2_RESERVE (256u)  
@@ -189,11 +189,21 @@ private:
 // sea background class
 class cSeaBackground final : public cBackground
 {
+private:
+    coreFlow m_fWaveTime;   // 
+
+
 public:
     cSeaBackground()noexcept;
 
     DISABLE_COPY(cSeaBackground)
     ASSIGN_ID(2, "Sea")
+
+
+protected:
+    // execute own routines
+    void __RenderOwn()override;
+    void __MoveOwn  ()override;
 };
 
 

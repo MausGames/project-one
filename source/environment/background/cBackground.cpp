@@ -16,12 +16,12 @@ cBackground::cBackground()noexcept
 , m_pWater   (NULL)
 {
     // create background frame buffer
-    m_FrameBuffer.AttachTargetBuffer(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB);
-    m_FrameBuffer.AttachTargetBuffer(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH);
+    m_FrameBuffer.AttachTargetBuffer(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB8);
+    m_FrameBuffer.AttachTargetBuffer(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH16);
     m_FrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED);
 
     // create resolved texture
-    m_ResolvedTexture.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB);
+    m_ResolvedTexture.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB8);
     m_ResolvedTexture.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 }
 
@@ -39,6 +39,9 @@ cBackground::~cBackground()
             FOR_EACH(et, *(*it)->List()) SAFE_DELETE(*et)
             SAFE_DELETE(*it)
         }
+
+        // clear memory
+        papList->clear();
     };
     nRemoveObjectsFunc(&m_apGroundObjectList);
     nRemoveObjectsFunc(&m_apDecalObjectList);
@@ -46,10 +49,6 @@ cBackground::~cBackground()
 
     // remove all additional objects
     this->ClearObjects();
-
-    // clear memory
-    m_apGroundObjectList.clear();
-    m_apAirObjectList   .clear();
 
     // delete outdoor-surface object
     if(m_pOutdoor) m_pOutdoor->GetShadowMap()->ClearLists();
@@ -296,11 +295,17 @@ void cBackground::ClearObjects()
 // create infinite looking object list
 void cBackground::_FillInfinite(coreBatchList* OUTPUT pObjectList)
 {
-    // save current size and loop through all objects
-    const coreUintW iCurSize = pObjectList->List()->size();
-    for(coreUintW i = 0u; i < iCurSize; ++i)
+    coreSet<coreObject3D*>* pContent = pObjectList->List();
+
+    // 
+    ASSERT(pContent->size() >= 2u)
+    if((*pContent)[0]->GetPosition().y > (*pContent)[1]->GetPosition().y)
+        std::reverse(pContent->begin(), pContent->end());
+
+    // loop through all objects
+    for(coreUintW i = 0u, ie = pContent->size(); i < ie; ++i)
     {
-        coreObject3D* pOldObject = (*pObjectList->List())[i];
+        coreObject3D* pOldObject = (*pContent)[i];
 
         // check for position at the start area
         if(pOldObject->GetPosition().y < I_TO_F(OUTDOOR_VIEW/2) * OUTDOOR_DETAIL)
@@ -312,7 +317,11 @@ void cBackground::_FillInfinite(coreBatchList* OUTPUT pObjectList)
             // bind the new object
             pObjectList->BindObject(pNewObject);
         }
+        else break;
     }
+
+    // reduce memory consumption
+    pObjectList->ShrinkToFit();
 }
 
 

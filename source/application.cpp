@@ -22,6 +22,7 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreModel>  ("environment_seashell.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_seashell.md3");
     Core::Manager::Resource->Load<coreModel>  ("environment_starfish.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_starfish.md3");
     Core::Manager::Resource->Load<coreModel>  ("environment_stone_01.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_stone_01.md3");
+    Core::Manager::Resource->Load<coreModel>  ("environment_weed.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_weed.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_boomerang.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boomerang.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_circle_02.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_circle_02.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_circle_03.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_circle_03.md3");
@@ -55,13 +56,14 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreModel>  ("ship_player_atk_high.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_atk_high.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_player_atk_low.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_atk_low.md3");
 
-    Core::Manager::Resource->Load<coreTexture>("effect_energy.png",                      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_energy.png", false);
+    Core::Manager::Resource->Load<coreTexture>("effect_energy.png",                      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_energy.png");
     Core::Manager::Resource->Load<coreTexture>("effect_lightning.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_lightning.png");
     Core::Manager::Resource->Load<coreTexture>("effect_particle_32.png",                 CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_particle_32.png");
     Core::Manager::Resource->Load<coreTexture>("effect_particle_128.png",                CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_particle_128.png");
     Core::Manager::Resource->Load<coreTexture>("effect_soot.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_soot.png");
     Core::Manager::Resource->Load<coreTexture>("effect_wave.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_wave.png");
     Core::Manager::Resource->Load<coreTexture>("effect_wave_norm.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_wave_norm.png", false);
+    Core::Manager::Resource->Load<coreTexture>("environment_algae.png",                  CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_algae.png");
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_blue.png",            CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_blue.png");
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_low.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_low.png");
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_mid.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_mid.png");
@@ -81,10 +83,10 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreTexture>("environment_reed.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_reed.png");
     Core::Manager::Resource->Load<coreTexture>("environment_rock_diff.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_rock_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_rock_norm.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_rock_norm.png", false);
-    Core::Manager::Resource->Load<coreTexture>("environment_sea.png",                    CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_sea.png");
+    Core::Manager::Resource->Load<coreTexture>("environment_sea_diff.png",               CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_sea_diff.png");
+    Core::Manager::Resource->Load<coreTexture>("environment_sea_norm.png",               CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_sea_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_stone_diff.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_stone_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_stone_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_stone_norm.png", false);
-    Core::Manager::Resource->Load<coreTexture>("environment_under_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_under_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_water_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_water_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("game_logo.png",                          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/game_logo.png");
     Core::Manager::Resource->Load<coreTexture>("maus_logo.png",                          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/maus_logo.png");
@@ -171,12 +173,14 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreShader> ("menu_inner.frag",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_inner.frag");
     Core::Manager::Resource->Load<coreShader> ("menu_sharp.frag",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_sharp.frag");
     Core::Manager::Resource->Load<coreShader> ("object.vert",                            CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert");
-    Core::Manager::Resource->Load<coreShader> ("object_ground.frag",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ground.frag", SHADER_SHADOW);
+    Core::Manager::Resource->Load<coreShader> ("object_wave.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert", SHADER_WAVE);
+    Core::Manager::Resource->Load<coreShader> ("object_ground.frag",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ground.frag");
     Core::Manager::Resource->Load<coreShader> ("object_ship.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag");
     Core::Manager::Resource->Load<coreShader> ("object_ship_darkness.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", SHADER_DARKNESS);
     Core::Manager::Resource->Load<coreShader> ("object_ship_glow.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", SHADER_GLOW);
     Core::Manager::Resource->Load<coreShader> ("object_inst.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert", CORE_SHADER_OPTION_INSTANCING);
-    Core::Manager::Resource->Load<coreShader> ("object_ground_inst.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ground.frag", CORE_SHADER_OPTION_INSTANCING SHADER_SHADOW);
+    Core::Manager::Resource->Load<coreShader> ("object_wave_inst.vert",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert", CORE_SHADER_OPTION_INSTANCING SHADER_WAVE);
+    Core::Manager::Resource->Load<coreShader> ("object_ground_inst.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ground.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("object_ship_inst.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("object_ship_glow_inst.frag",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", CORE_SHADER_OPTION_INSTANCING SHADER_GLOW);
 
@@ -383,7 +387,7 @@ static void SetupResources()
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_outdoor_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("environment_outdoor.vert")
         ->AttachShader("environment_outdoor.frag")
-        ->BindAttribute("v_v1Height", CORE_SHADER_ATTRIBUTE_POSITION_NUM)
+        ->BindAttribute("a_v1Height", CORE_SHADER_ATTRIBUTE_POSITION_NUM)
         ->Finish();
 
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_under_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
@@ -456,6 +460,11 @@ static void SetupResources()
         ->AttachShader("object_ground.frag")
         ->Finish();
 
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_wave_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("object_wave.vert")
+        ->AttachShader("object_ground.frag")
+        ->Finish();
+
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ship_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("object.vert")
         ->AttachShader("object_ship.frag")
@@ -473,6 +482,11 @@ static void SetupResources()
 
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ground_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("object_inst.vert")
+        ->AttachShader("object_ground_inst.frag")
+        ->Finish();
+
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_wave_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("object_wave_inst.vert")
         ->AttachShader("object_ground_inst.frag")
         ->Finish();
 

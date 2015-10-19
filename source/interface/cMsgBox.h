@@ -17,7 +17,6 @@
 // ****************************************************************
 // message box definitions
 #define MSGBOX_IGNORE_MOUSE     (coreVector2(2.0f,2.0f))   // 
-#define MSGBOX_TOOLTIPS         (5u)                       // 
 
 #define MSGBOX_TYPE_INFORMATION (1u)                       // 
 #define MSGBOX_TYPE_QUESTION    (2u)                       // 
@@ -39,10 +38,9 @@ public:
 
     std::function<void (coreInt32)> m_nCallback;   // 
     coreVector2 m_vCurMouse;                       // 
-    coreUint8   m_iCurTooltip;                     // 
 
-    coreUint8 m_iType;                             // 
     coreFloat m_fFade;                             // 
+    coreUint8 m_iType;                             // 
 
 
 public:
@@ -101,11 +99,7 @@ template <typename F> void cMsgBox::__ShowMessage(const coreChar* pcText, F&& nC
     // 
     ASSERT(!m_nCallback)
     m_nCallback = nCallback;
-
-    // 
-    m_vCurMouse   = Core::Input->GetMousePosition();
-    m_iCurTooltip = (((((m_iCurTooltip & 0xF0u) >> 4u) + Core::Rand->Int(1u, MSGBOX_TOOLTIPS - 1u)) % MSGBOX_TOOLTIPS) << 4u) |
-                     (( (m_iCurTooltip & 0x0Fu)        + Core::Rand->Int(1u, MSGBOX_TOOLTIPS - 1u)) % MSGBOX_TOOLTIPS);
+    m_vCurMouse = Core::Input->GetMousePosition();
 }
 
 

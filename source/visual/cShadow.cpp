@@ -67,7 +67,7 @@ void cShadow::Reconfigure()
     if(m_iLevel)
     {
         // create shadow map frame buffer
-        m_FrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH);
+        m_FrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH16);
         m_FrameBuffer.Create(g_vGameResolution * ((m_iLevel == 1u) ? 1.0f : 1.7f), CORE_FRAMEBUFFER_CREATE_NORMAL);
 
         // enable depth value comparison
@@ -156,15 +156,16 @@ void cShadow::Recompile()
 {
     for(coreUintW i = 0u; i < SHADOW_HANDLES; ++i)
     {
-        const coreChar* pcConfig = PRINT("%s %s", g_CurConfig.Graphics.iShadow     ? SHADER_SHADOW                 : "",
-                                                  (i == SHADOW_HANDLE_OBJECT_INST) ? CORE_SHADER_OPTION_INSTANCING : "");
+        coreProgramPtr& pHandle  = s_apHandle[i];
+        const coreChar* pcConfig = PRINT("%s%s", (g_CurConfig.Graphics.iShadow)   ? SHADER_SHADOW(g_CurConfig.Graphics.iShadow) : "",
+                                                 (i == SHADOW_HANDLE_OBJECT_INST) ? CORE_SHADER_OPTION_INSTANCING               : "");
 
         // change configuration of related shaders
-        FOR_EACH(it, s_apHandle[i]->GetShader())
-            (*it)->SetCustomCode(pcConfig);
+        for(coreUintW j = 0u, je = pHandle->GetNumShaders(); j < je; ++j)
+            pHandle->GetShader(j)->SetCustomCode(pcConfig);
 
         // recompile and relink
-        s_apHandle[i].GetHandle()->Reload();
+        pHandle.GetHandle()->Reload();
     }
 
     // finish now

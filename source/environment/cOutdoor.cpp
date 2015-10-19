@@ -146,7 +146,7 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
         }
 
         // create final normal map
-        m_pNormalMap->Create(pSurface1->w, pSurface1->h, CORE_TEXTURE_SPEC_RGBA, CORE_TEXTURE_MODE_FILTER | CORE_TEXTURE_MODE_REPEAT);
+        m_pNormalMap->Create(pSurface1->w, pSurface1->h, CORE_TEXTURE_SPEC_RGBA8, CORE_TEXTURE_MODE_FILTER | CORE_TEXTURE_MODE_REPEAT);
         m_pNormalMap->Modify(0u, 0u, pSurface1->w, pSurface1->h, iSize, pOutput);
 
         // wait until texture-upload is finished
@@ -252,11 +252,11 @@ void cOutdoor::LoadGeometry(const coreUint8& iAlgorithm, const coreFloat& fGrade
             const coreUint16 iVertex = x + y*OUTDOOR_WIDTH;
 
             aiIndexData[iIndex+0u] = iVertex;
-            aiIndexData[iIndex+1u] = iVertex + 1u;
-            aiIndexData[iIndex+2u] = iVertex + 1u + OUTDOOR_WIDTH;
+            aiIndexData[iIndex+1u] = iVertex + 1u + OUTDOOR_WIDTH;
+            aiIndexData[iIndex+2u] = iVertex      + OUTDOOR_WIDTH;
             aiIndexData[iIndex+3u] = iVertex;
-            aiIndexData[iIndex+4u] = iVertex + 1u + OUTDOOR_WIDTH;
-            aiIndexData[iIndex+5u] = iVertex      + OUTDOOR_WIDTH;
+            aiIndexData[iIndex+4u] = iVertex + 1u;
+            aiIndexData[iIndex+5u] = iVertex + 1u + OUTDOOR_WIDTH;
 
             iIndex += 6u;
         }

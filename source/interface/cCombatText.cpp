@@ -125,7 +125,7 @@ void cCombatText::AddText(const coreChar* pcText, const coreVector3& vPosition, 
     ASSERT(pcText)
 
     // insert new text data
-    m_aData.push_back(sData(pcText, g_pForeground->Project(vPosition), vColor));
+    m_aData.emplace_back(pcText, g_pForeground->Project(vPosition), vColor);
 }
 
 

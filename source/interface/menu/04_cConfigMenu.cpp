@@ -107,7 +107,7 @@ cConfigMenu::cConfigMenu()noexcept
         m_aLine[i].SetTexOffset (coreVector2(I_TO_F(i)*0.1f, 0.0f));
     }
 
-    #define SET_SWITCHBOX(x,n,s)                                                 \
+    #define __SET_SWITCHBOX(x,n,s)                                               \
     {                                                                            \
         coreLabel& oLabel = m_aLabel[MENU_CONFIG_ ## n];                         \
         oLabel.SetTextLanguage("CONFIG_" ## #n);                                 \
@@ -119,21 +119,22 @@ cConfigMenu::cConfigMenu()noexcept
         x.GetCaption()->SetColor3(COLOR_MENU_WHITE);                             \
     }
     {
-        SET_SWITCHBOX(m_Resolution,    VIDEO_RESOLUTION,    0.3f)
-        SET_SWITCHBOX(m_DisplayMode,   VIDEO_DISPLAYMODE,   0.3f)
-        SET_SWITCHBOX(m_AntiAliasing,  VIDEO_ANTIALIASING,  0.2f)
-        SET_SWITCHBOX(m_TextureFilter, VIDEO_TEXTUREFILTER, 0.2f)
-        SET_SWITCHBOX(m_AssetQuality,  VIDEO_ASSETQUALITY,  0.2f)
-        SET_SWITCHBOX(m_ShadowQuality, VIDEO_SHADOWQUALITY, 0.2f)
-        SET_SWITCHBOX(m_OverallVolume, AUDIO_OVERALLVOLUME, 0.2f)
-        SET_SWITCHBOX(m_MusicVolume,   AUDIO_MUSICVOLUME,   0.2f)
-        SET_SWITCHBOX(m_EffectVolume,  AUDIO_EFFECTVOLUME,  0.2f)
-        SET_SWITCHBOX(m_AmbientSound,  AUDIO_AMBIENTSOUND,  0.2f)
-        SET_SWITCHBOX(m_Language,      GAME_LANGUAGE,       0.3f)
+        __SET_SWITCHBOX(m_Resolution,    VIDEO_RESOLUTION,    0.3f)
+        __SET_SWITCHBOX(m_DisplayMode,   VIDEO_DISPLAYMODE,   0.3f)
+        __SET_SWITCHBOX(m_AntiAliasing,  VIDEO_ANTIALIASING,  0.2f)
+        __SET_SWITCHBOX(m_TextureFilter, VIDEO_TEXTUREFILTER, 0.2f)
+        __SET_SWITCHBOX(m_AssetQuality,  VIDEO_ASSETQUALITY,  0.2f)
+        __SET_SWITCHBOX(m_ShadowQuality, VIDEO_SHADOWQUALITY, 0.2f)
+        __SET_SWITCHBOX(m_OverallVolume, AUDIO_OVERALLVOLUME, 0.2f)
+        __SET_SWITCHBOX(m_MusicVolume,   AUDIO_MUSICVOLUME,   0.2f)
+        __SET_SWITCHBOX(m_EffectVolume,  AUDIO_EFFECTVOLUME,  0.2f)
+        __SET_SWITCHBOX(m_AmbientSound,  AUDIO_AMBIENTSOUND,  0.2f)
+        __SET_SWITCHBOX(m_Language,      GAME_LANGUAGE,       0.3f)
 
-        m_Language.SetAutomatic(0.0f);
+        m_ShadowQuality.SetAutomatic(0.0f);
+        m_Language     .SetAutomatic(0.0f);
     }
-    #undef SET_SWITCHBOX
+    #undef __SET_SWITCHBOX
 
     // fill configuration entries
     const std::vector<coreVector2>& avResolutionList = Core::System->GetAvailableRes();
@@ -242,7 +243,7 @@ void cConfigMenu::Move()
             else if(m_ShadowQuality.GetCurIndex() == 2u) m_ShadowQuality.GetCaption()->SetColor3(COLOR_MENU_GREEN);
 
             // 
-            if(m_ShadowQuality.IsClickedArrow(CORE_INPUT_LEFT, CORE_INPUT_HOLD))
+            if(m_ShadowQuality.IsClickedArrow())
                 this->__UpdateShadowQuality();
         }
         break;

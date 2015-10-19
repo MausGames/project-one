@@ -12,7 +12,7 @@
 // ****************************************************************
 // constructor
 cGlow::cGlow()noexcept
-: m_Blur (CORE_GL_SUPPORT(ARB_texture_float) ? CORE_TEXTURE_SPEC_RGB_16F : CORE_TEXTURE_SPEC_RGB, GLOW_SCALE_FACTOR, GLOW_ATTENUATION_FACTOR)
+: m_Blur (CORE_GL_SUPPORT(EXT_packed_float) ? CORE_TEXTURE_SPEC_R11F_G11F_B10F : CORE_TEXTURE_SPEC_RGB8, GLOW_SCALE_FACTOR, GLOW_ATTENUATION_FACTOR)
 {
 }
 
@@ -38,7 +38,7 @@ void cGlow::Update()
                 (*it)->Render();
 
             // always draw special-effects
-            g_pSpecialEffects->Render();
+            g_pSpecialEffects->Render(false);
         }
         m_Blur.End();
     }

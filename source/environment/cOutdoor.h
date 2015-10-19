@@ -52,9 +52,9 @@ private:
     // compressed vertex structure
     struct sVertexPacked
     {
-        coreFloat  fPosition;   // vertex position (only height)
-        coreUint32 iNormal;     // normal vector
-        coreUint32 iTangent;    // additional tangent vector
+        coreFloat  fPosition;   // vertex position           (only height)
+        coreUint32 iNormal;     // normal vector             (Snorm210/Snorm4x8)
+        coreUint32 iTangent;    // additional tangent vector (Snorm210/Snorm4x8)
     };
 
 

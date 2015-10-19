@@ -41,7 +41,7 @@ cTooltip::cTooltip()noexcept
 void cTooltip::Render()
 {
     if(!m_bDisplay) return;
-    m_bDisplay = false;   // display once
+    m_bDisplay = false;   // # display once
 
     // render the background
     coreObject2D::Render();
@@ -104,7 +104,7 @@ void cTooltip::__ShowText(const coreFloat& fWidth, const coreChar* pcText)
 
         // 
         pcLineBegin = pcLineEnd = pcLineEnd + 1u;
-        fCurWidth -= fSkip;
+        fCurWidth  -= fSkip;
     };
 
     // traverse the whole string only once (no rewind)

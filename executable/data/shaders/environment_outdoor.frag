@@ -41,22 +41,31 @@ void FragmentMain()
         v3TexColor  = mix(v3FullColor1,    v3FullColor2,    v_v1Mix);
     }
 
-#if defined(_P1_SHADOW_)
+#if (_CORE_QUALITY_) == 0
 
-    // apply shadow mapping with depth value comparison
+    // ignore normal map
+    v2TexNormal = vec2(0.5);
+
+#endif
+
+#if (_P1_SHADOW_) == 1
+
+    // apply shadow mapping with single depth value comparison
     float v1Light = 1.0 - coreTextureShadow(0, v_v4ShadowCoord) * 0.5;
+    
+#elif (_P1_SHADOW_) >= 2
+
+    // apply shadow mapping with percentage closer filtering
+    float v1Light = (coreTextureShadow(0, v_v4ShadowCoord + vec4( 0.0,   0.001, 0.0, 0.0)) +
+                     coreTextureShadow(0, v_v4ShadowCoord + vec4( 0.0,  -0.001, 0.0, 0.0)) +
+                     coreTextureShadow(0, v_v4ShadowCoord + vec4( 0.001, 0.0,   0.0, 0.0)) +
+                     coreTextureShadow(0, v_v4ShadowCoord + vec4(-0.001, 0.0,   0.0, 0.0))) * 0.25;
+    v1Light = 1.0 - v1Light * 0.5;
 
 #else
 
     // ignore shadow map
     const float v1Light = 1.0;
-
-#endif
-
-#if (_CORE_QUALITY_) == 0
-
-    // ignore normal map
-    v2TexNormal = vec2(0.5);
 
 #endif
 

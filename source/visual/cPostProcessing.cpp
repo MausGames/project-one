@@ -90,9 +90,9 @@ void cPostProcessing::Recompile()
 {
 #if !defined(CONFIG_FORCE)
 
-    const coreChar* pcConfig1 =                g_CurConfig.Graphics.iGlow       ? SHADER_GLOW       : "";
-    const coreChar* pcConfig2 = PRINT("%s %s", g_CurConfig.Graphics.iGlow       ? SHADER_GLOW       : "",
-                                               g_CurConfig.Graphics.iDistortion ? SHADER_DISTORTION : "");
+    const coreChar* pcConfig1 =               g_CurConfig.Graphics.iGlow       ? SHADER_GLOW       : "";
+    const coreChar* pcConfig2 = PRINT("%s%s", g_CurConfig.Graphics.iGlow       ? SHADER_GLOW       : "",
+                                              g_CurConfig.Graphics.iDistortion ? SHADER_DISTORTION : "");
 
     // change configuration of post-processing shaders
     s_cast<coreShader*>(Core::Manager::Resource->Get<coreShader>("full_post.frag")          ->GetResource())->SetCustomCode(pcConfig1);

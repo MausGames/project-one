@@ -12,7 +12,7 @@
 // ****************************************************************
 // constructor
 cGrassBackground::cGrassBackground(const coreUint8& iCloudDensity)noexcept
-: m_fLeafTime (0.0f)
+: m_fLeafTime (Core::Rand->Float(10.0f))
 {
     coreBatchList* pList1;
     coreBatchList* pList2;
@@ -60,7 +60,6 @@ cGrassBackground::cGrassBackground(const coreUint8& iCloudDensity)noexcept
 
         // post-process list and add it to the ground
         cBackground::_FillInfinite(pList1);
-        pList1->ShrinkToFit();
         m_apGroundObjectList.push_back(pList1);
 
         // bind stone list to shadow map
@@ -83,7 +82,7 @@ cGrassBackground::cGrassBackground(const coreUint8& iCloudDensity)noexcept
                 const coreFloat   fHeight   = m_pOutdoor->RetrieveHeight(vPosition);
 
                 // test for valid values
-                if(fHeight > -23.0f && fHeight < -18.0f && (F_TO_SI(vPosition.y+166.0f) % 80 < 40))
+                if(fHeight > -23.0f && fHeight < -18.0f && (F_TO_SI(vPosition.y+176.0f) % 80 < 60))
                 {
                     if(!cBackground::_CheckIntersectionQuick(pList1,                  vPosition, 25.0f) &&
                        !cBackground::_CheckIntersectionQuick(pList2,                  vPosition, 25.0f) &&
@@ -101,10 +100,10 @@ cGrassBackground::cGrassBackground(const coreUint8& iCloudDensity)noexcept
 
                         // set object properties
                         pObject->SetPosition   (coreVector3(vPosition, fHeight-0.8f));
-                        pObject->SetSize       (coreVector3::Rand(1.3f,1.6f, 1.3f,1.6f, 1.3f,1.6f) * 2.0f);
+                        pObject->SetSize       (coreVector3::Rand(1.3f,1.6f, 1.3f,1.6f, 1.3f,1.6f) * 2.1f);
                         pObject->SetDirection  (coreVector3(coreVector2::Rand(), 0.0f));
                         pObject->SetOrientation(coreVector3(0.0f,0.0f,1.0f));
-                        pObject->SetColor3     (coreVector3(1.0f, 1.0f * Core::Rand->Float(0.55f, 0.65f), 0.5f));
+                        pObject->SetColor3     (coreVector3(1.0f, 1.0f * Core::Rand->Float(0.57f, 0.63f), 0.5f));
 
                         // add object to the list
                         if(bType) pList1->BindObject(pObject);
@@ -117,12 +116,10 @@ cGrassBackground::cGrassBackground(const coreUint8& iCloudDensity)noexcept
 
         // post-process lists and add them to the ground
         cBackground::_FillInfinite(pList1);
-        pList1->ShrinkToFit();
-        m_apGroundObjectList.push_back(pList1);
+        m_apGroundObjectList.insert(m_apGroundObjectList.begin(), pList1);
 
         cBackground::_FillInfinite(pList2);
-        pList2->ShrinkToFit();
-        m_apGroundObjectList.push_back(pList2);
+        m_apGroundObjectList.insert(m_apGroundObjectList.begin(), pList2);
 
         // bind reed lists to shadow map
         m_pOutdoor->GetShadowMap()->BindList(pList1);
@@ -154,9 +151,9 @@ cGrassBackground::cGrassBackground(const coreUint8& iCloudDensity)noexcept
 
                         // set object properties
                         pObject->SetPosition (coreVector3(vPosition, fHeight-0.8f));
-                        pObject->SetSize     (coreVector3(coreVector2(0.9f,0.9f) * Core::Rand->Float(9.0f, 10.0f), 1.0f));
+                        pObject->SetSize     (coreVector3(coreVector2(1.0f,1.0f) * Core::Rand->Float(9.0f, 10.0f), 1.0f));
                         pObject->SetDirection(coreVector3(coreVector2::Rand(), 0.0f));
-                        pObject->SetAlpha    (0.95f);
+                        pObject->SetAlpha    (0.98f);
                         pObject->SetTexSize  (coreVector2(0.5f,0.5f));
                         pObject->SetTexOffset(coreVector2(Core::Rand->Bool() ? 0.5f : 0.0f, Core::Rand->Bool() ? 0.5f : 0.0f));
 
@@ -170,7 +167,6 @@ cGrassBackground::cGrassBackground(const coreUint8& iCloudDensity)noexcept
 
         // post-process list and add it to the ground
         cBackground::_FillInfinite(pList1);
-        pList1->ShrinkToFit();
         m_apDecalObjectList.push_back(pList1);
     }
 
@@ -198,6 +194,7 @@ cGrassBackground::cGrassBackground(const coreUint8& iCloudDensity)noexcept
                     // set object properties
                     pObject->SetPosition(coreVector3(vPosition, fHeight));
                     pObject->SetSize    (coreVector3(2.0f,0.0f,1.0f));
+                    pObject->SetColor3  (coreVector3(1.0f * (0.8f + 0.2f * fHeight/30.0f), 1.0f, 1.0f));
                     pObject->SetTexSize (coreVector2(0.5f,0.85f));
 
                     // add object to the list
@@ -221,7 +218,6 @@ cGrassBackground::cGrassBackground(const coreUint8& iCloudDensity)noexcept
 
         // post-process list and add it to the air
         cBackground::_FillInfinite(pList1);
-        pList1->ShrinkToFit();
         m_apAirObjectList.push_back(pList1);
     }
 
@@ -303,7 +299,7 @@ void cGrassBackground::__MoveOwn()
         pLeaf->SetOrientation(coreVector3(-vDir.x*vDir.y, vDir.x*vDir.x, vDir.y));
 
         // get currently visible polygon side
-        const coreBool bSide = (coreVector3::Dot(Core::Graphics->GetCamPosition() - pLeaf->GetPosition(), pLeaf->GetOrientation()) >= 0.0f) ? true : false;
+        const coreBool bSide = (coreVector3::Dot(g_pEnvironment->GetCameraPos() - pLeaf->GetPosition(), pLeaf->GetOrientation()) >= 0.0f) ? true : false;
 
         // simulate two-sided polygon (flip vertex-order and change texture)
         pLeaf->SetSize     (coreVector3(pLeaf->GetSize().x, bSide ? 1.4f : -1.4f, pLeaf->GetSize().z));

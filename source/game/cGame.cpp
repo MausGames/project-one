@@ -14,7 +14,7 @@
 cGame::cGame(const coreBool& bCoop)noexcept
 : m_BulletManagerPlayer (TYPE_BULLET_PLAYER)
 , m_BulletManagerEnemy  (TYPE_BULLET_ENEMY)
-, m_Interface           (bCoop ? 2u : 1u)
+, m_Interface           (bCoop ? GAME_PLAYERS : 1u)
 , m_pMission            (NULL)
 , m_fTimeMission        (0.0f)
 , m_afTimeBoss          {}

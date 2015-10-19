@@ -16,8 +16,8 @@ cDistortion::cDistortion()noexcept
 , m_iCurBurst (0u)
 , m_bActive   (false)
 {
-    const coreTextureSpec oSpec = CORE_GL_SUPPORT(ARB_texture_float) ? (CORE_GL_SUPPORT(ARB_texture_rg) ? CORE_TEXTURE_SPEC_RG_16F : CORE_TEXTURE_SPEC_RGB_16F) :
-                                                                       (CORE_GL_SUPPORT(ARB_texture_rg) ? CORE_TEXTURE_SPEC_RG     : CORE_TEXTURE_SPEC_RGB);
+    const coreTextureSpec oSpec = CORE_GL_SUPPORT(ARB_texture_rg) ? (CORE_GL_SUPPORT(ARB_texture_float) ? CORE_TEXTURE_SPEC_RG16F          : CORE_TEXTURE_SPEC_RG8) :
+                                                                    (CORE_GL_SUPPORT(EXT_packed_float)  ? CORE_TEXTURE_SPEC_R11F_G11F_B10F : CORE_TEXTURE_SPEC_RGB8);
 
     // create distortion frame buffer
     m_FrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, oSpec);

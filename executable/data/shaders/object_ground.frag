@@ -17,23 +17,32 @@ void FragmentMain()
     // lookup textures
     vec3 v3TexNormal = coreTexture2D(1, v_av2TexCoord[0]).xyz;
     vec3 v3TexColor  = coreTexture2D(0, v_av2TexCoord[0]).rgb;
+    
+#if (_CORE_QUALITY_) == 0
 
-#if defined(_P1_SHADOW_)
+    // ignore normal map
+    v3TexNormal = vec3(0.5,0.5,1.0);
 
-    // apply shadow mapping with depth value comparison
+#endif
+
+#if (_P1_SHADOW_) == 1
+
+    // apply shadow mapping with single depth value comparison
     float v1Light = 1.0 - coreTextureShadow(0, v_v4ShadowCoord) * 0.5;
+    
+#elif (_P1_SHADOW_) >= 2
+
+    // apply shadow mapping with percentage closer filtering
+    float v1Light = (coreTextureShadow(0, v_v4ShadowCoord + vec4( 0.0,   0.001, 0.0, 0.0)) +
+                     coreTextureShadow(0, v_v4ShadowCoord + vec4( 0.0,  -0.001, 0.0, 0.0)) +
+                     coreTextureShadow(0, v_v4ShadowCoord + vec4( 0.001, 0.0,   0.0, 0.0)) +
+                     coreTextureShadow(0, v_v4ShadowCoord + vec4(-0.001, 0.0,   0.0, 0.0))) * 0.25;
+    v1Light = 1.0 - v1Light * 0.5;
 
 #else
 
     // ingore shadow map
     const float v1Light = 1.0;
-
-#endif
-
-#if (_CORE_QUALITY_) == 0
-
-    // ignore normal map
-    v3TexNormal = vec3(0.5,0.5,1.0);
 
 #endif
 
@@ -48,7 +57,7 @@ void FragmentMain()
     float v1ReflFactor  = max(0.0, dot(v3ReflNormal, v3BumpNormal));
 
     // calculate diffuse and specular value
-    vec3 v3Diffuse  = v3TexColor * (v1Light * (1.2 * max(0.0, v1BumpFactor) + 0.6));
+    vec3 v3Diffuse  = v3TexColor * (v1Light * (1.1 * max(0.0, v1BumpFactor) + 0.65));
     vec3 v3Specular = vec3(0.15 * pow(v1ReflFactor, 100.0));
 
     // draw final color

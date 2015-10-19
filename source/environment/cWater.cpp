@@ -16,12 +16,12 @@ cWater::cWater()noexcept
 , m_fFlyOffset (0.0f)
 {
     // create reflection and refraction buffers
-    m_AboveReflection.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB);
-    m_AboveReflection.AttachTargetBuffer (CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH);
+    m_AboveReflection.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB8);
+    m_AboveReflection.AttachTargetBuffer (CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH16);
     m_AboveReflection.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
-    m_BelowRefraction.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB);
-    m_BelowRefraction.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH);
+    m_BelowRefraction.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB8);
+    m_BelowRefraction.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH16);
     m_BelowRefraction.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     // create sky-plane object
@@ -195,9 +195,6 @@ void cWater::SetFlyOffset(const coreFloat& fFlyOffset)
 // constructor
 cUnderWater::cUnderWater()noexcept
 {
-
     // 
-    this->DefineTexture(1u, "environment_under_norm.png");
     this->DefineProgram("environment_under_program");
-
 }
