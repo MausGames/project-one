@@ -53,8 +53,8 @@ void cForeground::End()
     // explicitly invalidate color and depth buffer
     if(CORE_GL_SUPPORT(ARB_invalidate_subdata))
     {
-        constexpr_var GLenum aiAttachment[2] = {GL_COLOR, GL_DEPTH};
-        glInvalidateFramebuffer(GL_FRAMEBUFFER, 2, aiAttachment);
+        constexpr_var GLenum aiAttachment[] = {GL_COLOR, GL_DEPTH};
+        glInvalidateFramebuffer(GL_FRAMEBUFFER, ARRAY_SIZE(aiAttachment), aiAttachment);
     }
 
     // also clear color buffer on screen shake

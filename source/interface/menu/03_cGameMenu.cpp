@@ -20,69 +20,6 @@ cGameMenu::cGameMenu()noexcept
     m_Background.SetPosition  (coreVector2(0.0f,0.05f));
     m_Background.SetSize      (coreVector2(0.8f,0.8f));
 
-
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aTest); ++i) 
-    {
-        m_aTest[i].DefineTexture(0u, "menu_detail_03.png");
-        m_aTest[i].DefineTexture(1u, "menu_background_black.png");
-        m_aTest[i].DefineProgram("menu_inner_program");
-        m_aTest[i].SetPosition  (coreVector2(0.0f, 0.3f - I_TO_F(i)*0.16f*0.75f));
-        m_aTest[i].SetSize      (coreVector2(4.0f,0.8f * 0.65f) * 0.2f);
-        //m_aTest[i].SetTexSize   (coreVector2(1.0f,0.5f));
-         
-
-        m_aTest2[i].DefineTexture(0u, "menu_weapons.png");
-        m_aTest2[i].DefineProgram("default_2d_program");
-        m_aTest2[i].SetPosition  (coreVector2(-0.33f, m_aTest[i].GetPosition().y));
-        m_aTest2[i].SetSize      (coreVector2(1.0f,1.0f) * 0.065f);
-        m_aTest2[i].SetTexSize   (coreVector2(0.25f,0.5f));
-
-
-        m_aTest3[i].DefineTexture(0u, "menu_weapons.png");
-        m_aTest3[i].DefineProgram("default_2d_program");
-        m_aTest3[i].SetPosition  (coreVector2(-0.33f, m_aTest[i].GetPosition().y));
-        m_aTest3[i].SetSize      (coreVector2(1.0f,1.0f) * 0.065f + coreVector2(0.01f,0.01f));
-        m_aTest3[i].SetColor3    (coreVector3(0.0f,0.0f,0.0f));
-        m_aTest3[i].SetTexSize   (coreVector2(0.25f,0.5f));
-        m_aTest3[i].SetTexOffset (coreVector2(0.75f,0.5f));
-
-        m_aTest4[i].Construct   (MENU_FONT_BIG_4, MENU_OUTLINE_BIG, 0u);
-        m_aTest4[i].SetPosition (coreVector2(0.36f, m_aTest[i].GetPosition().y));
-        m_aTest4[i].SetAlignment(coreVector2(-1.0f,0.0f));
-    }
-    m_aTest2[0].SetColor3   (COLOR_MENU_YELLOW);
-    m_aTest2[1].SetColor3   (COLOR_MENU_PURPLE);
-    m_aTest2[2].SetColor3   (COLOR_MENU_GREEN);
-    m_aTest2[3].SetColor3   (COLOR_MENU_BLUE);
-    m_aTest2[4].SetColor3   (COLOR_MENU_RED);
-    m_aTest2[0].SetTexOffset(coreVector2(0.0f, 0.0f));
-    m_aTest2[1].SetTexOffset(coreVector2(0.25f,0.0f));
-    m_aTest2[2].SetTexOffset(coreVector2(0.5f, 0.0f));
-    m_aTest2[3].SetTexOffset(coreVector2(0.75f,0.0f));
-    m_aTest2[4].SetTexOffset(coreVector2(0.0f, 0.5f));
-
-    m_aTest4[0].SetColor3   (COLOR_MENU_YELLOW);
-    m_aTest4[1].SetColor3   (COLOR_MENU_PURPLE);
-    m_aTest4[2].SetColor3   (COLOR_MENU_GREEN);
-    m_aTest4[3].SetColor3   (COLOR_MENU_BLUE);
-    m_aTest4[4].SetColor3   (COLOR_MENU_RED);
-    m_aTest4[0].SetText("Ray");
-    m_aTest4[1].SetText("Pulse");
-    m_aTest4[2].SetText("Wave");
-    m_aTest4[3].SetText("Tesla");
-    m_aTest4[4].SetText("Antimatter");
-    
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aDemo); ++i) 
-    {
-        m_aDemo[i].Construct  (MENU_FONT_SMALL, MENU_OUTLINE_SMALL, 0u);
-        m_aDemo[i].SetPosition(coreVector2(0.0f, 0.1f - 0.02f*I_TO_F(i) - (i ? 0.01f : 0.0f)));
-    }
-    m_aDemo[1].SetText("[WASD] + [Left Mouse Button] to play");
-    m_aDemo[2].SetText("[ESC] to quit");
-
-
-
-
     m_StartButton.Construct    (MENU_BUTTON, MENU_FONT_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
     m_StartButton.DefineProgram("menu_border_program");
     m_StartButton.SetPosition  (coreVector2(0.0f,-0.28f));
@@ -110,17 +47,8 @@ cGameMenu::cGameMenu()noexcept
     m_ExitButton.SetAlignment (coreVector2(-1.0f,-1.0f));
     m_ExitButton.GetCaption()->SetText(ICON_POWER_OFF);
 
-
-    m_ExtraButton.SetOverride(-1); 
-
-
     // bind menu objects
     this->BindObject(SURFACE_GAME_MISSION, &m_Background);
-    //for(coreUintW i = 0u; i < ARRAY_SIZE(m_aTest);  ++i) this->BindObject(SURFACE_GAME_MISSION, &m_aTest[i]);
-    //for(coreUintW i = 0u; i < ARRAY_SIZE(m_aTest3); ++i) this->BindObject(SURFACE_GAME_MISSION, &m_aTest3[i]);
-    //for(coreUintW i = 0u; i < ARRAY_SIZE(m_aTest2); ++i) this->BindObject(SURFACE_GAME_MISSION, &m_aTest2[i]);
-    //for(coreUintW i = 0u; i < ARRAY_SIZE(m_aTest4); ++i) this->BindObject(SURFACE_GAME_MISSION, &m_aTest4[i]);
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aDemo); ++i) this->BindObject(SURFACE_GAME_MISSION, &m_aDemo[i]);
     this->BindObject(SURFACE_GAME_MISSION, &m_StartButton);
     this->BindObject(SURFACE_GAME_MISSION, &m_ConfigButton);
     this->BindObject(SURFACE_GAME_MISSION, &m_ExtraButton);
@@ -135,14 +63,6 @@ void cGameMenu::Move()
     // move the menu
     coreMenu::Move();
     m_iStatus = 0;
-
-
-    m_aTest4[0].SetAlpha(0.5f);
-    m_aTest4[1].SetAlpha(0.5f);
-    m_aTest4[2].SetAlpha(0.5f);
-    m_aTest4[3].SetAlpha(0.5f);
-    m_aTest4[4].SetAlpha(0.5f);
-
 
     // 
     switch(this->GetCurSurface())

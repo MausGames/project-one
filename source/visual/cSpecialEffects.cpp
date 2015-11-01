@@ -21,7 +21,7 @@ cSpecialEffects::cSpecialEffects()noexcept
 , m_iCurLightning    (0u)
 , m_iCurBlast        (0u)
 , m_iCurRing         (0u)
-, m_iSoundGuard      (0u)
+, m_iSoundGuard      (SOUND_FFFF)
 , m_ShakeTimer       (coreTimer(1.0f, 30.0f, 0u))
 , m_fShakeStrength   (0.0f)
 {
@@ -66,24 +66,22 @@ cSpecialEffects::cSpecialEffects()noexcept
     }
 
     // 
-    auto nLoadSoundFunc = [](coreSoundPtr* ppSoundArray, const eSoundEffect& iSoundIndex, const coreChar* pcName)
+    auto nLoadSoundFunc = [&](const eSoundEffect& iSoundIndex, const coreChar* pcName)
     {
-        coreSoundPtr& pSoundPtr = ppSoundArray[iSoundIndex & 0xFFu];
+        coreSoundPtr& pSoundPtr = m_apSound[iSoundIndex & 0xFFu];
 
         if(!pSoundPtr) pSoundPtr = Core::Manager::Resource->Get<coreSound>(pcName);
         ASSERT(!std::strcmp(pSoundPtr.GetHandle()->GetName(), pcName))
     };
-    nLoadSoundFunc(m_apSound, SOUND_EXPLOSION_ENERGY_SMALL,   "effect_explosion_energy.wav");
-    nLoadSoundFunc(m_apSound, SOUND_EXPLOSION_ENERGY_BIG,     "effect_explosion_energy.wav");
-    nLoadSoundFunc(m_apSound, SOUND_EXPLOSION_PHYSICAL_SMALL, "effect_explosion_physical.wav");
-    nLoadSoundFunc(m_apSound, SOUND_EXPLOSION_PHYSICAL_BIG,   "effect_explosion_physical.wav");
-    nLoadSoundFunc(m_apSound, SOUND_RUSH_SHORT,               "effect_rush.wav");
-    nLoadSoundFunc(m_apSound, SOUND_RUSH_LONG,                "effect_rush.wav");
+    nLoadSoundFunc(SOUND_EXPLOSION_ENERGY_SMALL,   "effect_explosion_energy.wav");
+    nLoadSoundFunc(SOUND_EXPLOSION_ENERGY_BIG,     "effect_explosion_energy.wav");
+    nLoadSoundFunc(SOUND_EXPLOSION_PHYSICAL_SMALL, "effect_explosion_physical.wav");
+    nLoadSoundFunc(SOUND_EXPLOSION_PHYSICAL_BIG,   "effect_explosion_physical.wav");
+    nLoadSoundFunc(SOUND_RUSH_SHORT,               "effect_rush.wav");
+    nLoadSoundFunc(SOUND_RUSH_LONG,                "effect_rush.wav");
 
     // 
     m_ShakeTimer.Play(CORE_TIMER_PLAY_RESET);
-
-    STATIC_ASSERT(SPECIAL_SOUNDS <= sizeof(m_iSoundGuard)*8u)
 }
 
 
@@ -100,7 +98,7 @@ void cSpecialEffects::Render(const coreBool& bForeground)
 
         // enable additive blending (keep alpha aggregation)
         if(bForeground) glBlendFuncSeparate(FOREGROUND_BLEND_SUM, FOREGROUND_BLEND_ALPHA);
-                   else glBlendFunc        (FOREGROUND_BLEND_SUM);
+        //           else glBlendFunc        (FOREGROUND_BLEND_SUM);
         {
             // render fire particle system
             m_ParticleFire.Render();
@@ -109,7 +107,7 @@ void cSpecialEffects::Render(const coreBool& bForeground)
             m_LightningList.Render();
         }
         if(bForeground) glBlendFuncSeparate(FOREGROUND_BLEND_DEFAULT, FOREGROUND_BLEND_ALPHA);
-                   else glBlendFunc        (FOREGROUND_BLEND_DEFAULT);
+        //           else glBlendFunc        (FOREGROUND_BLEND_DEFAULT);
 
         // render all blast and ring objects
         auto nRenderFunc = [](coreObject3D* OUTPUT pArray, const coreUintW& iSize)
@@ -150,15 +148,16 @@ void cSpecialEffects::Move()
         coreObject3D* pLightning = (*it);
 
         // 
-        coreObject3D* pOwner = m_apLightningOwner[pLightning - m_aLightning];
+        const coreObject3D* pOwner = m_apLightningOwner[pLightning - m_aLightning];
         if(pOwner) pLightning->SetPosition(pOwner->GetPosition());
 
         // 
-        pLightning->SetAlpha(pLightning->GetAlpha() - /*2.2f*/4.0f * Core::System->GetTime());
+        pLightning->SetAlpha(pLightning->GetAlpha() - 4.0f * Core::System->GetTime());
 
         // 
-        if(pLightning->GetAlpha() > 0.0f) DYN_KEEP  (it)
-                                     else DYN_REMOVE(it, *m_LightningList.List())
+        if(pLightning->GetAlpha() > 0.0f)
+             DYN_KEEP  (it)
+        else DYN_REMOVE(it, *m_LightningList.List())
     }
     m_LightningList.MoveNormal();
 
@@ -201,17 +200,17 @@ void cSpecialEffects::Move()
         oRing.Move();
     }
 
-    // 
-    m_iSoundGuard = 0u;
+    // reset sound-guard
+    m_iSoundGuard = SOUND_FFFF;
 
     // 
     if(m_fShakeStrength && m_ShakeTimer.Update(1.0f))
     {
-        // 
+        // decrease shake strength (# without delta-time)
         m_fShakeStrength = MAX(m_fShakeStrength - 0.07f, 0.0f);
 
         // 
-        g_pPostProcessing->SetPosition(coreVector2::Rand(-0.3f,0.3f, -1.0f,1.0f).Normalize() * m_fShakeStrength * 0.01f);
+        g_pPostProcessing->SetPosition(coreVector2::Rand(-0.3f,0.3f, -1.0f,1.0f).Normalize() * (m_fShakeStrength * 0.01f));
         g_pPostProcessing->Move();
     }
 }
@@ -342,24 +341,6 @@ void cSpecialEffects::CreateChargeDark(const coreVector3& vPosition, const coreF
 
 // ****************************************************************
 // 
-void cSpecialEffects::CreateTrailSmoke(const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat& fScale, const coreUintW& iNum)
-{
-    ASSERT(vDirection.IsNormalized())
-
-    // 
-    m_ParticleSmoke.GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
-    {
-        pParticle->SetPositionRel(vPosition, vDirection * fScale + coreVector3::Rand(-2.0f, 2.0f));
-        pParticle->SetScaleAbs   (4.0f,                              8.0f);
-        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),        Core::Rand->Float(-PI*0.1f, PI*0.1f));
-        pParticle->SetColor4Abs  (coreVector4(0.0f,0.0f,0.0f,1.0f),  coreVector4(0.0f,0.0f,0.0f,0.0f));
-        pParticle->SetSpeed      (0.7f);
-    });
-}
-
-
-// ****************************************************************
-// 
 coreFloat cSpecialEffects::CreateLightning(const coreVector2& vPosFrom, const coreVector2& vPosTo, const coreFloat& fWidth, const coreVector3& vColor, const coreVector2& vTexSizeFactor, const coreFloat& fTexOffset)
 {
     // 
@@ -367,101 +348,75 @@ coreFloat cSpecialEffects::CreateLightning(const coreVector2& vPosFrom, const co
     coreObject3D& oLightning = m_aLightning[m_iCurLightning];
 
     // 
-    m_apLightningOwner[m_iCurLightning] = NULL;
-
-
-
-
-    const coreVector2 vDiff =  vPosTo - vPosFrom;
-
-
-    //if(vDiff.LengthSq() < fWidth*fWidth*0.5f)
-    //{
-    //    const coreFloat fSide = (vDiff.x >= 0.0f) ? -1.0f : 1.0f;
-    //
-    //    const coreVector2 vEdgePos = vPosFrom + (fWidth * fSide * 0.8f) * vDiff.Rotated90().Normalize();
-    //
-    //    g_pSpecialEffects->CreateLightning(vPosFrom, vEdgePos, fWidth, vColor, coreVector2(-fSide,0.92f), 0.0f);
-    //    g_pSpecialEffects->CreateLightning(vEdgePos, vPosTo,   fWidth, vColor, coreVector2( fSide,0.97f), 0.53f);
-    //
-    //    return 1.0f;
-    //}
-
-
-
-    const coreVector2 vPos  = (vPosTo + vPosFrom) * 0.5f;
-    const coreVector2 vDir  = vDiff.Normalized();
-    const coreFloat   fLen  = vDiff.Length();
-
-    const coreVector2 vSize = coreVector2(fWidth, fLen);
-
-
-    coreFloat fTexLen = vSize.yx().AspectRatio() * SPECIAL_LIGHTNING_CUTOUT * SPECIAL_LIGHTNING_RESIZE;
-    if(fTexLen > 0.5f) fTexLen = std::round(fTexLen * 2.0f) * 0.5f;
-    else fTexLen = 0.5f;
-
+    const coreVector2 vDiff      =  vPosTo - vPosFrom;
+    const coreVector2 vPosition  = (vPosTo + vPosFrom) * 0.5f;
+    const coreVector2 vDirection = vDiff.Normalized();
+    const coreFloat   fLength    = vDiff.Length();
+    const coreVector2 vSize      = coreVector2(fWidth, fLength);
 
     // 
-    oLightning.SetPosition (coreVector3(vPos, 0.0f));
-    oLightning.SetSize     (coreVector3( vSize,      1.0f));
-    oLightning.SetDirection(coreVector3(-vDir, 0.0f));
-    oLightning.SetColor4   (coreVector4( vColor,     1.0f));
+    coreFloat fTexLen = vSize.yx().AspectRatio() * SPECIAL_LIGHTNING_CUTOUT * SPECIAL_LIGHTNING_RESIZE;
+              fTexLen = std::round(MAX(fTexLen, 0.5f) * 2.0f) * 0.5f;
 
-    if(vDiff.LengthSq() < fWidth*fWidth*0.5f)
+    // 
+    oLightning.SetPosition (coreVector3(vPosition,  0.0f));
+    oLightning.SetSize     (coreVector3(vSize,      1.0f));
+    oLightning.SetDirection(coreVector3(vDirection, 0.0f));
+    oLightning.SetColor4   (coreVector4(vColor,     1.0f));
+
+    if(fLength < fWidth*0.9f)
     {
-        oLightning.SetTexSize  (coreVector2( 0.5f, 0.25f) * vTexSizeFactor);
-        oLightning.SetTexOffset(coreVector2(0.125f - oLightning.GetTexSize().x * 0.5f, (oLightning.GetTexSize().y - 0.25f) * -0.5f));
+        fTexLen = 0.5f; 
+
+        // 
+        oLightning.SetTexSize  ( coreVector2(SPECIAL_LIGHTNING_CUTOUT, 0.25f) * vTexSizeFactor);
+        oLightning.SetTexOffset((coreVector2(0.25f,0.25f) - oLightning.GetTexSize()) * 0.5f);
     }
     else
     {
+        fTexLen = vSize.yx().AspectRatio() * SPECIAL_LIGHTNING_CUTOUT * SPECIAL_LIGHTNING_RESIZE; 
+        fTexLen = std::round(MAX(fTexLen, 0.5f) * 2.0f) * 0.5f; 
 
-    oLightning.SetTexSize  (coreVector2( SPECIAL_LIGHTNING_CUTOUT, fTexLen) * vTexSizeFactor);
-    oLightning.SetTexOffset(coreVector2((1.0f - oLightning.GetTexSize().x) * 0.5f, fTexOffset));
+        // 
+        oLightning.SetTexSize  (coreVector2(SPECIAL_LIGHTNING_CUTOUT, fTexLen) * vTexSizeFactor);
+        oLightning.SetTexOffset(coreVector2((1.0f - oLightning.GetTexSize().x) * 0.5f, fTexOffset));
     }
 
     // 
-    ASSERT(m_LightningList.List()->size() <= SPECIAL_LIGHTNINGS)
-    m_LightningList.BindObject(&oLightning);
+    WARN_IF(m_LightningList.List()->count(&oLightning)) {}
+       else m_LightningList.BindObject(&oLightning);
 
+    // 
+    m_apLightningOwner[m_iCurLightning] = NULL;
+
+    // 
     return fTexLen + fTexOffset;
 }
 
-void cSpecialEffects::CreateLightning(coreObject3D* pOwner, const coreVector2& vDirection, const coreVector2& vSize, const coreVector3& vColor, const coreVector2& vTexSizeFactor, const coreFloat& fTexOffset)
+void cSpecialEffects::CreateLightning(coreObject3D* pOwner, const coreVector2& vDirection, const coreFloat& fLength, const coreFloat& fWidth, const coreVector3& vColor, const coreVector2& vTexSizeFactor, const coreFloat& fTexOffset)
 {
-    //// 
-    //const coreFloat fNewOffset = this->CreateLightning(coreVector3(0.0f,0.0f,0.0f), vDirection, vSize, vColor, vTexSizeFactor, fTexOffset);
-    //
-    //// 
-    //m_apLightningOwner[m_iCurLightning] = pOwner;
-    //
-    //return fNewOffset;
-
-
-
-
     // 
     if(++m_iCurLightning >= SPECIAL_LIGHTNINGS) m_iCurLightning = 0u;
     coreObject3D& oLightning = m_aLightning[m_iCurLightning];
 
     // 
-    m_apLightningOwner[m_iCurLightning] = pOwner;
-
-
-
-    coreFloat fTexLen = vSize.yx().AspectRatio() * SPECIAL_LIGHTNING_CUTOUT * SPECIAL_LIGHTNING_RESIZE;
-
+    const coreVector2 vSize   = coreVector2(fWidth, fLength);
+    const coreFloat   fTexLen = vSize.yx().AspectRatio() * SPECIAL_LIGHTNING_CUTOUT * SPECIAL_LIGHTNING_RESIZE;
 
     // 
     oLightning.SetPosition (pOwner->GetPosition());
-    oLightning.SetSize     (coreVector3( vSize,      1.0f));
-    oLightning.SetDirection(coreVector3(-vDirection, 0.0f));
-    oLightning.SetColor4   (coreVector4( vColor,     1.0f));
-    oLightning.SetTexSize  (coreVector2( SPECIAL_LIGHTNING_CUTOUT, fTexLen) * vTexSizeFactor);
+    oLightning.SetSize     (coreVector3(vSize,      1.0f));
+    oLightning.SetDirection(coreVector3(vDirection, 0.0f));
+    oLightning.SetColor4   (coreVector4(vColor,     1.0f));
+    oLightning.SetTexSize  (coreVector2(SPECIAL_LIGHTNING_CUTOUT, fTexLen) * vTexSizeFactor);
     oLightning.SetTexOffset(coreVector2((1.0f - oLightning.GetTexSize().x) * 0.5f, fTexOffset));
 
     // 
-    ASSERT(m_LightningList.List()->size() <= SPECIAL_LIGHTNINGS)
-    m_LightningList.BindObject(&oLightning);
+    WARN_IF(m_LightningList.List()->count(&oLightning)) {}
+       else m_LightningList.BindObject(&oLightning);
+
+    // 
+    m_apLightningOwner[m_iCurLightning] = pOwner;
 }
 
 
@@ -504,14 +459,11 @@ void cSpecialEffects::CreateRing(const coreVector3& vPosition, const coreVector3
 // 
 void cSpecialEffects::PlaySound(const coreVector3& vPosition, const coreFloat& fVolume, const eSoundEffect& iSoundIndex)
 {
-    ASSERT(fVolume)
+    ASSERT(fVolume > 0.0f)
 
     // 
-    const coreUintW iFileIndex = iSoundIndex & 0xFFu;
-
-    // 
-    if(CONTAINS_BIT(m_iSoundGuard, iFileIndex)) return;
-    ADD_BIT(m_iSoundGuard, iFileIndex)
+    if(m_iSoundGuard == iSoundIndex) return;
+    m_iSoundGuard = iSoundIndex;
 
     // 
     coreFloat fBaseVolume, fBasePitch, fBasePitchRnd;
@@ -527,7 +479,7 @@ void cSpecialEffects::PlaySound(const coreVector3& vPosition, const coreFloat& f
     }
 
     // 
-    m_apSound[iFileIndex]->PlayPosition(NULL, fVolume * fBaseVolume, fBasePitch, fBasePitchRnd, false, vPosition);
+    m_apSound[iSoundIndex & 0xFFu]->PlayPosition(NULL, fVolume * fBaseVolume, fBasePitch, fBasePitchRnd, false, vPosition);
 }
 
 
@@ -538,10 +490,20 @@ void cSpecialEffects::ShakeScreen(const coreFloat& fStrength)
     // 
     m_fShakeStrength = fStrength;
 
-    // TODO # only with gamepads selected as active input device 
-    // 
-    for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
-        Core::Input->RumbleJoystick(i, fStrength, 300u);
+    if(g_pGame)
+    {
+        // loop through all active players
+        g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer)
+        {
+            // check for joystick/gamepad as input source
+            const coreUint8& iType = pPlayer->GetInput() - g_aInput;
+            if(iType >= INPUT_SETS_KEYBOARD)
+            {
+                // create rumble effect
+                Core::Input->RumbleJoystick(iType - INPUT_SETS_KEYBOARD, fStrength, 300u);
+            }
+        });
+    }
 }
 
 

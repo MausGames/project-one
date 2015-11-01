@@ -49,7 +49,8 @@ enum eSoundEffect : coreUint16   // 0xAABBu -> AA sub-index, BB file-index
     SOUND_EXPLOSION_PHYSICAL_SMALL = 0x0001u,
     SOUND_EXPLOSION_PHYSICAL_BIG   = 0x0101u,
     SOUND_RUSH_SHORT               = 0x0002u,
-    SOUND_RUSH_LONG                = 0x0102u
+    SOUND_RUSH_LONG                = 0x0102u,
+    SOUND_FFFF                     = 0xFFFFu
 };
 
 
@@ -75,7 +76,7 @@ private:
     coreUintW    m_iCurRing;                                // 
 
     coreSoundPtr m_apSound[SPECIAL_SOUNDS];                 // 
-    coreUint32   m_iSoundGuard;                             // flag to prevent multiple same sound-effects within one frame
+    eSoundEffect m_iSoundGuard;                             // last played sound-effect (to reduce multiple same sound-effects within one frame)
 
     coreTimer m_ShakeTimer;                                 // 
     coreFloat m_fShakeStrength;                             // current shake strength (decreasing)
@@ -104,12 +105,9 @@ public:
     void CreateChargeColor(const coreVector3& vPosition, const coreFloat& fScale, const coreUintW& iNum, const coreVector3& vColor);
     void CreateChargeDark (const coreVector3& vPosition, const coreFloat& fScale, const coreUintW& iNum);
 
-    // #### 
-    void CreateTrailSmoke(const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat& fScale, const coreUintW& iNum);
-
-    // #### 
-    coreFloat CreateLightning(const coreVector2& vPosFrom, const coreVector2& vPosTo,     const coreFloat&   fWidth, const coreVector3& vColor, const coreVector2& vTexSizeFactor, const coreFloat& fTexOffset);
-    void      CreateLightning(coreObject3D*      pOwner,   const coreVector2& vDirection, const coreVector2& vSize,  const coreVector3& vColor, const coreVector2& vTexSizeFactor, const coreFloat& fTexOffset);
+    // 
+    coreFloat CreateLightning(const coreVector2& vPosFrom, const coreVector2& vPosTo,                               const coreFloat& fWidth, const coreVector3& vColor, const coreVector2& vTexSizeFactor, const coreFloat& fTexOffset);
+    void      CreateLightning(coreObject3D*      pOwner,   const coreVector2& vDirection, const coreFloat& fLength, const coreFloat& fWidth, const coreVector3& vColor, const coreVector2& vTexSizeFactor, const coreFloat& fTexOffset);
 
     // 
     void CreateBlast(const coreVector3& vPosition,                                                                 const coreFloat& fScale, const coreFloat& fSpeed, const coreVector3& vColor);

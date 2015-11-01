@@ -63,7 +63,7 @@ void cPostProcessing::Apply()
         this->Render();
 
         // render side-objects
-        for(coreUintW i = 0u; i < 2u; ++i) m_aSideArea[i].Render();
+        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aSideArea); ++i) m_aSideArea[i].Render();
     }
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -72,10 +72,9 @@ void cPostProcessing::Apply()
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(PRINTSCREEN), CORE_INPUT_PRESS))
         m_Watermark.Render();
 
-    // invalidate all frame buffers
+    // invalidate all frame buffers (# not cGlow, because of incremental rendering)
     g_pEnvironment->GetFrameBuffer()->GetColorTarget(0u).pTexture->Invalidate(0u);
     g_pForeground ->GetFrameBuffer()->GetColorTarget(0u).pTexture->Invalidate(0u);
-    // # not cGlow, because of incremental rendering
     g_pDistortion ->GetFrameBuffer()->GetColorTarget(0u).pTexture->Invalidate(0u);
     this->DefineTexture(POST_TEXTURE_UNIT_ENVIRONMENT, NULL);
     this->DefineTexture(POST_TEXTURE_UNIT_FOREGROUND,  NULL);
@@ -118,7 +117,7 @@ void cPostProcessing::SetSideOpacity(const coreFloat& fValue)
     const coreVector3 vColor = coreVector3(1.0f,1.0f,1.0f) * CLAMP(fValue, 0.0f, 1.0f);
 
     // update all relevant side-objects
-    for(coreUintW i = 0u; i < 2u; ++i) m_aSideArea[i].SetColor3(vColor);
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aSideArea); ++i) m_aSideArea[i].SetColor3(vColor);
     m_Watermark.SetColor3(vColor * MENU_CONTRAST_WHITE);
 }
 
@@ -133,7 +132,7 @@ void cPostProcessing::__Reset(const coreResourceReset& bInit)
 
         // place objects left-right or top-down depending on window aspect ratio
         const coreVector2 vFlip = (vResolution.AspectRatio() < 1.0f) ? coreVector2(0.0f,1.0f) : coreVector2(1.0f,0.0f);
-        for(coreUintW i = 0u; i < 2u; ++i)
+        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aSideArea); ++i)
         {
             const coreFloat fSide = (i ? 1.0f : -1.0f);
 

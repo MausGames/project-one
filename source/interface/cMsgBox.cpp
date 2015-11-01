@@ -28,7 +28,7 @@ cMsgBox::cMsgBox()noexcept
     m_Box.DefineProgram("menu_border_program");
     m_Box.DefineTexture(0u, "menu_background_black.png");
     m_Box.SetPosition  (coreVector2(0.0f, 0.0f));
-    m_Box.SetSize      (coreVector2(0.45f,0.25f));
+    m_Box.SetSize      (coreVector2(0.55f,0.25f));
 
     // 
     m_Msg.Construct  (MENU_FONT_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);

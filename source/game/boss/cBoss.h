@@ -21,6 +21,18 @@
 
 
 // ****************************************************************
+// boss specific definitions
+#define CROSSFIELD_BOOMERANGS (4u)                                                 // 
+#define CROSSFIELD_TRAILS     (3u)                                                 // 
+#define CROSSFIELD_RAWS       (CROSSFIELD_BOOMERANGS * (CROSSFIELD_TRAILS + 1u))   // 
+
+#define TORUS_RAY_SIZE        (coreVector3(0.7f,50.0f,0.7f))   // 
+#define TORUS_RAY_TEXSIZE     (coreVector2(0.5f, 1.5f))        // 
+#define TORUS_RAY_OFFSET      (8.0f)                           // 
+#define TORUS_RAYWAVE_SIZE    (coreVector3(1.6f, 5.0f,1.3f))   // 
+
+
+// ****************************************************************
 // phase management macros
 #define PHASE_CONTROL_TIMER(a,b,c)  this->_PhaseTimer (a, __LINE__, b, c, [&](const coreFloat&  fTime, const coreFloat& fTimeBefore, const coreBool& __bEnd)   // 
 #define PHASE_CONTROL_TICKER(a,b,c) this->_PhaseTicker(a, __LINE__, b, c, [&](const coreUint16& iTick,                               const coreBool& __bEnd)   // 
@@ -32,18 +44,6 @@
 #define LERP_SMOOTH    (&LERPS<coreFloat>)
 #define LERP_BREAK     (&LERPB<coreFloat>)
 #define LERP_BREAK_REV ([](const coreFloat& x, const coreFloat& y, const coreFloat& s) {return LERPB(y, x, 1.0f-s);})
-
-
-// ****************************************************************
-// 
-#define CROSSFIELD_BOOMERANGS (4u)                                                 // 
-#define CROSSFIELD_TRAILS     (3u)                                                 // 
-#define CROSSFIELD_RAWS       (CROSSFIELD_BOOMERANGS * (CROSSFIELD_TRAILS + 1u))   // 
-
-#define TORUS_RAY_SIZE        (coreVector3(0.7f,50.0f,0.7f))   // 
-#define TORUS_RAY_TEXSIZE     (coreVector2(0.5f, 1.5f))        // 
-#define TORUS_RAY_OFFSET      (8.0f)                           // 
-#define TORUS_RAYWAVE_SIZE    (coreVector3(1.6f, 5.0f,1.3f))   // 
 
 
 // ****************************************************************

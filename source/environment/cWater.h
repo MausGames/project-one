@@ -18,9 +18,10 @@
 
 // ****************************************************************
 // water definitions
-#define WATER_HEIGHT   (-20.0f)   // default water-surface z-position
-#define WATER_SIZE     (200.0f)   // absolute size of the water-surface
-#define WATER_SKY_SIZE (3.0f)     // texture size of the sky-plane
+#define WATER_HEIGHT       (-20.0f)   // default water-surface z-position
+#define WATER_SIZE         (200.0f)   // absolute size of the water-surface
+#define WATER_SKY_SIZE     (3.0f)     // texture size of the sky-plane
+#define WATER_SCALE_FACTOR (0.5f)     // frame buffer resolution factor (reflection only)
 
 
 // ****************************************************************

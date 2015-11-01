@@ -25,7 +25,7 @@
 class cForeground final : public coreResourceRelation
 {
 private:
-    coreFrameBuffer m_FrameBuffer;   // foreground frame buffer (only texture, but in FBO for fast clear)
+    coreFrameBuffer m_FrameBuffer;   // foreground frame buffer (only texture, in FBO for fast clear)
     coreMatrix4     m_mViewProj;     // foreground view-projection matrix
 
 
@@ -45,7 +45,7 @@ public:
     inline coreFrameBuffer* GetFrameBuffer() {return &m_FrameBuffer;}
 
     // project world-position into screen-space
-    inline FUNC_PURE coreVector2 Project(const coreVector3& vPosition) {const coreVector4 A = coreVector4(vPosition, 1.0f) * m_mViewProj; return A.xy() * (RCP(A.w) * 0.5f);}
+    inline FUNC_PURE coreVector2 Project(const coreVector3& vPosition)const {const coreVector4 A = coreVector4(vPosition, 1.0f) * m_mViewProj; return A.xy() * (RCP(A.w) * 0.5f);}
 
 
 private:

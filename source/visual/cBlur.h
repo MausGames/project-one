@@ -10,8 +10,6 @@
 #ifndef _P1_GUARD_BLUR_H_
 #define _P1_GUARD_BLUR_H_
 
-// TODO: check if uniform-branching is better then two separate shader-programs
-
 
 // ****************************************************************
 // blur aggregation class
@@ -23,8 +21,8 @@ private:
     coreProgramPtr m_apConvProgram[2];   // shader-programs for separate convolution (X and Y)
     coreObject2D   m_Transformer;        // object to draw into the next stage
 
-    coreFloat m_fScale;                  // resolution factor
-    coreFloat m_fAttenuation;            // 
+    coreFloat m_fScale;                  // frame buffer resolution factor
+    coreFloat m_fAttenuation;            // blur shader attenuation
 
 
 public:

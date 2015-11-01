@@ -18,17 +18,21 @@
 
 
 // ****************************************************************
-// stage management macros
-#define STAGE_MAIN            m_aiStageLine.push_back(__LINE__); m_anStage.push_back([this]()          // 
-#define STAGE_SUB(t)          ((m_fStageTimeBefore <= (t)) && ((t) < m_fStageTime))                    // 
-#define STAGE_FINISH_NOW      {m_fStageTime = 0.0f; m_aiStageLine.pop_back(); m_anStage.pop_back();}   // 
-#define STAGE_FINISH_AFTER(t) {if(m_fStageTime >= (t)) STAGE_FINISH_NOW}                               // 
+// mission specific definitions
+#define VIRIDO_BALLS      (2u)                                    // 
+#define VIRIDO_TRAILS     (4u)                                    // 
+#define VIRIDO_RAWS       (VIRIDO_BALLS * (VIRIDO_TRAILS + 1u))   // 
+#define VIRIDO_PADDLES    (PLAYERS + 1u)                          // 
+#define VIRIDO_BALL_SPEED (1.5f)                                  // 
 
-#if defined(_CORE_DEBUG_)
-    #define STAGE_START_HERE  {m_aiStageLine.clear(); m_anStage.clear();}
-#else
-    #define STAGE_START_HERE
-#endif
+
+// ****************************************************************
+// stage management macros
+#define STAGE_MAIN            m_aiStageLine.push_back(__LINE__); m_anStage.push_back([this]()           // 
+#define STAGE_SUB(t)          ((m_fStageTimeBefore <= (t)) && ((t) < m_fStageTime))                     // 
+#define STAGE_FINISH_NOW      {m_fStageTime = 0.0f; m_aiStageLine.pop_back(); m_anStage.pop_back();}    // 
+#define STAGE_FINISH_AFTER(t) {if(m_fStageTime >= (t)) STAGE_FINISH_NOW}                                // 
+#define STAGE_START_HERE      {if(DEFINED(_CORE_DEBUG_)) {m_aiStageLine.clear(); m_anStage.clear();}}   // 
 
 #define STAGE_ADD_PATH(n) \
     auto n = this->_AddPath(__LINE__, [](coreSpline2* OUTPUT n)
@@ -38,15 +42,6 @@
     n->Resurrect();                                   \
     n->SetBaseColor(c);                               \
     n->ChangeRoutine([=](cEnemy* OUTPUT n)
-
-
-// ****************************************************************
-// 
-#define VIRIDO_BALLS      (2u)                                    // 
-#define VIRIDO_TRAILS     (4u)                                    // 
-#define VIRIDO_RAWS       (VIRIDO_BALLS * (VIRIDO_TRAILS + 1u))   // 
-#define VIRIDO_PADDLES    (PLAYERS + 1u)                          // 
-#define VIRIDO_BALL_SPEED (1.5f)                                  // 
 
 
 // ****************************************************************

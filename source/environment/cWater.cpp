@@ -18,7 +18,7 @@ cWater::cWater()noexcept
     // create reflection and refraction buffers
     m_AboveReflection.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB8);
     m_AboveReflection.AttachTargetBuffer (CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH16);
-    m_AboveReflection.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+    m_AboveReflection.Create(g_vGameResolution * WATER_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     m_BelowRefraction.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB8);
     m_BelowRefraction.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH16);
@@ -27,8 +27,8 @@ cWater::cWater()noexcept
     // create sky-plane object
     m_Sky.DefineTexture(0u, "environment_clouds_blue.png");
     m_Sky.DefineProgram("default_2d_program");
-    m_Sky.SetSize      (coreVector2(1.0f,1.0f) * SQRT(2.0f));
-    m_Sky.SetTexSize   (coreVector2(WATER_SKY_SIZE, WATER_SKY_SIZE));
+    m_Sky.SetSize      (coreVector2(WATER_SCALE_FACTOR, WATER_SCALE_FACTOR) * SQRT(2.0f));
+    m_Sky.SetTexSize   (coreVector2(WATER_SKY_SIZE,     WATER_SKY_SIZE));
 
     // load object resources
     this->DefineModel  (Core::Manager::Object->GetLowModel());

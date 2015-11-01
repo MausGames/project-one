@@ -19,37 +19,21 @@
 
 // ****************************************************************
 // menu definitions
-#define MENU_BUTTON        "menu_background_black.png", "menu_background_black.png"
-#define MENU_SWITCHBOX     "default_black.png", "default_black.png"
-#define MENU_FONT_SMALL    "ethnocentric.ttf", (13u)
-#define MENU_FONT_MEDIUM_2 "ethnocentric.ttf", (20u)
-#define MENU_FONT_MEDIUM_3 "ethnocentric.ttf", (30u)
-#define MENU_FONT_BIG_4    "ethnocentric.ttf", (40u)
-#define MENU_FONT_BIG_7    "ethnocentric.ttf", (70u)
-#define MENU_ICON_MEDIUM_2 "fontawesome.ttf",  (24u)
-#define MENU_OUTLINE_SMALL (1u)
-#define MENU_OUTLINE_BIG   (4u)
-
 #define MENU_LIGHT_ACTIVE   (1.0f)     // visible strength of active menu objects
 #define MENU_LIGHT_IDLE     (0.667f)   // visible strength of idle menu objects
 #define MENU_CONTRAST_WHITE (0.8f)     // white contrast value (to reduce eye strain)
 #define MENU_CONTRAST_BLACK (0.04f)    // black contrast value
 
-#define MENU_CONFIG_VIDEO_RESOLUTION    (0u)
-#define MENU_CONFIG_VIDEO_DISPLAYMODE   (1u)
-#define MENU_CONFIG_VIDEO_ANTIALIASING  (2u)
-#define MENU_CONFIG_VIDEO_TEXTUREFILTER (3u)
-#define MENU_CONFIG_VIDEO_ASSETQUALITY  (4u)
-#define MENU_CONFIG_VIDEO_SHADOWQUALITY (5u)
-#define MENU_CONFIG_VIDEO               (6u)
-#define MENU_CONFIG_AUDIO_OVERALLVOLUME (0u + MENU_CONFIG_VIDEO)
-#define MENU_CONFIG_AUDIO_MUSICVOLUME   (1u + MENU_CONFIG_VIDEO)
-#define MENU_CONFIG_AUDIO_EFFECTVOLUME  (2u + MENU_CONFIG_VIDEO)
-#define MENU_CONFIG_AUDIO_AMBIENTSOUND  (3u + MENU_CONFIG_VIDEO)
-#define MENU_CONFIG_AUDIO               (4u + MENU_CONFIG_VIDEO)
-#define MENU_CONFIG_INPUT               (0u +  MENU_CONFIG_AUDIO)
-#define MENU_CONFIG_GAME_LANGUAGE       (0u +   MENU_CONFIG_INPUT)
-#define MENU_CONFIG_MAX                 (1u +   MENU_CONFIG_INPUT)
+#define MENU_BUTTON         "menu_background_black.png", "menu_background_black.png"
+#define MENU_SWITCHBOX      "default_black.png", "default_black.png"
+#define MENU_FONT_SMALL     "ethnocentric.ttf", (13u)
+#define MENU_FONT_MEDIUM_2  "ethnocentric.ttf", (20u)
+#define MENU_FONT_MEDIUM_3  "ethnocentric.ttf", (30u)
+#define MENU_FONT_BIG_4     "ethnocentric.ttf", (40u)
+#define MENU_FONT_BIG_7     "ethnocentric.ttf", (70u)
+#define MENU_ICON_MEDIUM_2  "fontawesome.ttf",  (24u)
+#define MENU_OUTLINE_SMALL  (1u)
+#define MENU_OUTLINE_BIG    (4u)
 
 
 // ****************************************************************
@@ -79,13 +63,34 @@
 
 
 // ****************************************************************
+// configuration entry indices
+#define ENTRY_VIDEO_RESOLUTION    (0u)
+#define ENTRY_VIDEO_DISPLAYMODE   (1u)
+#define ENTRY_VIDEO_ANTIALIASING  (2u)
+#define ENTRY_VIDEO_TEXTUREFILTER (3u)
+#define ENTRY_VIDEO_ASSETQUALITY  (4u)
+#define ENTRY_VIDEO_SHADOWQUALITY (5u)
+#define ENTRY_VIDEO               (6u)
+
+#define ENTRY_AUDIO_OVERALLVOLUME (0u + ENTRY_VIDEO)
+#define ENTRY_AUDIO_MUSICVOLUME   (1u + ENTRY_VIDEO)
+#define ENTRY_AUDIO_EFFECTVOLUME  (2u + ENTRY_VIDEO)
+#define ENTRY_AUDIO_AMBIENTSOUND  (3u + ENTRY_VIDEO)
+#define ENTRY_AUDIO               (4u + ENTRY_VIDEO)
+
+#define ENTRY_INPUT               (0u + ENTRY_AUDIO)
+
+#define ENTRY_GAME_LANGUAGE       (0u + ENTRY_INPUT)
+#define ENTRY_MAX                 (1u + ENTRY_INPUT)
+
+
+// ****************************************************************
 // icon codes (UTF-8)
-#define ICON_POWER_OFF  "\xEF\x80\x91"
-#define ICON_CHECK      "\xEF\x80\x8C"
-#define ICON_TIMES      "\xEF\x80\x8D"
-#define ICON_CARET_UP   "\xEF\x83\x98"
-#define ICON_CHEVRON_UP "\xEF\x81\xB7"
-#define ICON_SHARE      "\xEF\x81\xA4"
+#define ICON_CHECK     "\xEF\x80\x8C"
+#define ICON_TIMES     "\xEF\x80\x8D"
+#define ICON_POWER_OFF "\xEF\x80\x91"
+#define ICON_SHARE     "\xEF\x81\xA4"
+#define ICON_CARET_UP  "\xEF\x83\x98"
 
 
 // ****************************************************************
@@ -145,15 +150,7 @@ class cGameMenu final : public coreMenu
 private:
     coreObject2D m_Background;   // 
 
-
-    coreObject2D m_aTest[5];      // 
-    coreObject2D m_aTest2[5];     // 
-    coreObject2D m_aTest3[5];     // 
-    coreLabel    m_aTest4[5];     // 
-    coreLabel m_aDemo[4];
-
     coreButton m_StartButton;    // start button
-
     coreButton m_ConfigButton;   // config button
     coreButton m_ExtraButton;    // extra button
     coreButton m_ExitButton;     // exit button
@@ -174,19 +171,19 @@ public:
 class cConfigMenu final : public coreMenu
 {
 private:
-    coreObject2D m_Background;                // 
+    coreObject2D m_Background;          // 
 
-    coreButton m_VideoTab;                    // 
-    coreButton m_AudioTab;                    // 
-    coreButton m_InputTab;                    // 
-    coreButton m_GameTab;                     // 
+    coreButton m_VideoTab;              // 
+    coreButton m_AudioTab;              // 
+    coreButton m_InputTab;              // 
+    coreButton m_GameTab;               // 
 
-    coreButton m_SaveButton;                  // save button
-    coreButton m_DiscardButton;               // discard button
-    coreButton m_BackButton;                  // back button
+    coreButton m_SaveButton;            // save button
+    coreButton m_DiscardButton;         // discard button
+    coreButton m_BackButton;            // back button
 
-    coreLabel    m_aLabel[MENU_CONFIG_MAX];   // 
-    coreObject2D m_aLine [MENU_CONFIG_MAX];   // 
+    coreLabel    m_aLabel[ENTRY_MAX];   // 
+    coreObject2D m_aLine [ENTRY_MAX];   // 
 
     coreSwitchBoxU8 m_Resolution;
     coreSwitchBoxU8 m_DisplayMode;

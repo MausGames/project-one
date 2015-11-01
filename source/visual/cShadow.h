@@ -16,18 +16,17 @@
 
 // ****************************************************************
 // shadow definitions
-#define SHADOW_VIEW_DISTANCE      (90.0f)              // distance from origin to light source
-#define SHADOW_CLIP_NEAR          (20.0f)              // near clipping plane
-#define SHADOW_CLIP_FAR           (145.0f)             // far clipping plane
-#define SHADOW_DETAIL_X           (0.018f)             // view size of the shadow map (higher = sharper, but more artifacts)
-#define SHADOW_DETAIL_Y           (0.016f)             // same for Y
-#define SHADOW_HEIGHT_FACTOR      (2.5f)               // height correction factor (to reduce shadow length)
+#define SHADOW_VIEW_DISTANCE      (90.0f)    // distance from origin to light source
+#define SHADOW_CLIP_NEAR          (20.0f)    // near clipping plane
+#define SHADOW_CLIP_FAR           (145.0f)   // far clipping plane
+#define SHADOW_RANGE_X            (56.0f)    // view range of the shadow map (smaller = sharper, but more artifacts)
+#define SHADOW_RANGE_Y            (62.0f)    // same for Y
+#define SHADOW_HEIGHT_FACTOR      (2.5f)     // height correction factor (to reduce shadow length)
 
-#define SHADOW_HANDLES            (3u)                 // number of handles for shader-programs for shadow-receiving objects
-#define SHADOW_HANDLE_OUTDOOR     (0u)                 // outdoor-surface handle
-#define SHADOW_HANDLE_OBJECT      (1u)                 // single object handle
-#define SHADOW_HANDLE_OBJECT_INST (2u)                 // instanced object handle
-#define SHADOW_SHADER_MATRIX      "u_m4ShadowMatrix"   // name of the shadow matrix uniform (transformation)
+#define SHADOW_HANDLE_OUTDOOR     (0u)       // outdoor-surface handle
+#define SHADOW_HANDLE_OBJECT      (1u)       // single object handle
+#define SHADOW_HANDLE_OBJECT_INST (2u)       // instanced object handle
+#define SHADOW_HANDLES            (3u)       // number of handles for shader-programs for shadow-receiving objects
 
 
 // ****************************************************************
@@ -67,18 +66,18 @@ public:
     static void GlobalExit();
     static void GlobalUpdate();
 
-    // access global bind container
-    static inline cBindContainerIn* GetGlobalContainer() {return &s_GlobalContainer;}
-
     // recompile shader-programs for shadow-receiving objects
     static void Recompile();
 
-    // 
-    static void EnableShadowRead(const coreUintW& iProgramHandle);
+    // send transformation matrix to shader-program
     static inline void SendTransformSingle   (const coreMatrix4& mTransform) {cShadow::__SendTransform(s_pProgramSingle,    mTransform);}
     static inline void SendTransformInstanced(const coreMatrix4& mTransform) {cShadow::__SendTransform(s_pProgramInstanced, mTransform);}
+    static void EnableShadowRead(const coreUintW& iHandleIndex);
 
-    // 
+    // access global bind container
+    static inline cBindContainerIn* GetGlobalContainer() {return &s_GlobalContainer;}
+
+    // get shader-programs for shadow-casting objects
     static inline const coreProgramPtr& GetProgramSingle   () {return s_pProgramSingle;}
     static inline const coreProgramPtr& GetProgramInstanced() {return s_pProgramInstanced;}
 

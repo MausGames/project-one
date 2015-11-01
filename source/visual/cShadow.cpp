@@ -114,27 +114,24 @@ void cShadow::GlobalUpdate()
 {
     if(!g_CurConfig.Graphics.iShadow) return;
 
-    // define orthographic projection
-    constexpr_var coreFloat A =          SHADOW_CLIP_FAR + SHADOW_CLIP_NEAR;
-    constexpr_var coreFloat I = -1.0f / (SHADOW_CLIP_FAR - SHADOW_CLIP_NEAR);
-    constexpr_var coreMatrix4 mOrtho = coreMatrix4(SHADOW_DETAIL_X,            0.0f,   0.0f, 0.0f,
-                                                              0.0f, SHADOW_DETAIL_Y,   0.0f, 0.0f,
-                                                              0.0f,            0.0f, 2.0f*I, 0.0f,
-                                                              0.0f,            0.0f,    A*I, 1.0f);
+    // create orthographic projection
+    const coreMatrix4 mOrtho = coreMatrix4::Ortho(-SHADOW_RANGE_X,   SHADOW_RANGE_X,
+                                                  -SHADOW_RANGE_Y,   SHADOW_RANGE_Y,
+                                                   SHADOW_CLIP_NEAR, SHADOW_CLIP_FAR);
 
-    // define additional coordinate adjustment
-    constexpr_var coreMatrix4 mNorm = coreMatrix4(0.5f, 0.0f, 0.0f, 0.0f,
-                                                  0.0f, 0.5f, 0.0f, 0.0f,
-                                                  0.0f, 0.0f, 0.5f, 0.0f,
-                                                  0.5f, 0.5f, 0.5f, 1.0f);
-
-    // assemble additional movement matrix for foreground objects
+    // create movement compensation for foreground objects
     const coreVector3& P = g_pEnvironment->GetCameraPos();
     const coreVector2& D = g_pEnvironment->GetDirection();
     const coreMatrix4 mMove = coreMatrix4( D.y,  D.x, 0.0f, 0.0f,
                                           -D.x,  D.y, 0.0f, 0.0f,
                                           0.0f, 0.0f, 1.0f, 0.0f,
                                            P.x,  P.y, 0.0f, 1.0f);
+
+    // create texture coordinate adjustment
+    constexpr_var coreMatrix4 mNorm = coreMatrix4(0.5f, 0.0f, 0.0f, 0.0f,
+                                                  0.0f, 0.5f, 0.0f, 0.0f,
+                                                  0.0f, 0.0f, 0.5f, 0.0f,
+                                                  0.5f, 0.5f, 0.5f, 1.0f);
 
     // increase light direction height (to reduce shadow length)
     const coreVector3 vHighLight = (g_pEnvironment->GetLightDir() * coreVector3(1.0f, 1.0f, SHADOW_HEIGHT_FACTOR)).Normalize();
@@ -176,13 +173,12 @@ void cShadow::Recompile()
 
 // ****************************************************************
 // enable shader-program and apply read shadow matrix
-void cShadow::EnableShadowRead(const coreUintW& iProgramHandle)
+void cShadow::EnableShadowRead(const coreUintW& iHandleIndex)
 {
     if(!g_CurConfig.Graphics.iShadow) return;
 
-    // send read shadow matrix to shader-program
-    ASSERT(iProgramHandle < ARRAY_SIZE(s_apHandle))
-    cShadow::__SendTransform(s_apHandle[iProgramHandle], s_mReadShadowMatrix);
+    ASSERT(iHandleIndex < ARRAY_SIZE(s_apHandle))
+    cShadow::__SendTransform(s_apHandle[iHandleIndex], s_mReadShadowMatrix);
 }
 
 
@@ -201,7 +197,7 @@ void cShadow::__SendTransform(const coreProgramPtr& pProgram, const coreMatrix4&
 {
     if(!pProgram.IsUsable()) return;
     if(!pProgram->Enable())  return;
-    pProgram->SendUniform(SHADOW_SHADER_MATRIX, mTransform, false);
+    pProgram->SendUniform("u_m4ShadowMatrix", mTransform, false);
 }
 
 
@@ -213,7 +209,7 @@ void cShadow::__RenderSingle(const coreMatrix4& mTransform, const std::vector<co
     if(!apObject.empty() || std::any_of(apList.begin(), apList.end(), [](const coreBatchList* pList) {return !pList->IsInstanced();}))
     {
         // send draw shadow matrix to single shader-program
-        cShadow::__SendTransform(s_pProgramSingle, mTransform);
+        cShadow::SendTransformSingle(mTransform);
 
         // render single objects
         FOR_EACH(it, apObject) (*it)->Render(s_pProgramSingle);
@@ -230,7 +226,7 @@ void cShadow::__RenderInstanced(const coreMatrix4& mTransform, const std::vector
     if(std::any_of(apList.begin(), apList.end(), [](const coreBatchList* pList) {return pList->IsInstanced();}))
     {
         // send draw shadow matrix to instanced shader-program
-        cShadow::__SendTransform(s_pProgramInstanced, mTransform);
+        cShadow::SendTransformInstanced(mTransform);
 
         // render lists with objects
         FOR_EACH(it, apList) {if((*it)->IsInstanced()) (*it)->Render(s_pProgramInstanced, NULL);}

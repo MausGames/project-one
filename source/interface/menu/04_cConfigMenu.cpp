@@ -81,13 +81,13 @@ cConfigMenu::cConfigMenu()noexcept
 
     // create configuration entries
     coreUint8 iOffset = 0u;
-    for(coreUintW i = 0u; i < MENU_CONFIG_MAX; ++i)
+    for(coreUintW i = 0u; i < ENTRY_MAX; ++i)
     {
-        if(i == MENU_CONFIG_VIDEO || i == MENU_CONFIG_AUDIO || i == MENU_CONFIG_INPUT) iOffset = 0u;
-        if(i == MENU_CONFIG_VIDEO_ANTIALIASING) ++iOffset;   // # new paragraph
-        if(i == MENU_CONFIG_VIDEO_ASSETQUALITY) ++iOffset;
-        if(i == MENU_CONFIG_AUDIO_MUSICVOLUME)  ++iOffset;
-        if(i == MENU_CONFIG_AUDIO_AMBIENTSOUND) ++iOffset;
+        if(i == ENTRY_VIDEO || i == ENTRY_AUDIO || i == ENTRY_INPUT) iOffset = 0u;
+        if(i == ENTRY_VIDEO_ANTIALIASING) ++iOffset;   // # new paragraph
+        if(i == ENTRY_VIDEO_ASSETQUALITY) ++iOffset;
+        if(i == ENTRY_AUDIO_MUSICVOLUME)  ++iOffset;
+        if(i == ENTRY_AUDIO_AMBIENTSOUND) ++iOffset;
 
         m_aLabel[i].Construct   (MENU_FONT_SMALL, MENU_OUTLINE_SMALL, 0u);
         m_aLabel[i].SetPosition (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.04f, -0.05f - 0.025f*I_TO_F(iOffset)));
@@ -97,7 +97,7 @@ cConfigMenu::cConfigMenu()noexcept
         iOffset += 2u;
     }
 
-    for(coreUintW i = 0u; i < MENU_CONFIG_MAX; ++i)
+    for(coreUintW i = 0u; i < ENTRY_MAX; ++i)
     {
         m_aLine[i].DefineTexture(0u, "menu_detail_03.png");
         m_aLine[i].DefineTexture(1u, "menu_background_black.png");
@@ -109,12 +109,12 @@ cConfigMenu::cConfigMenu()noexcept
 
     #define __SET_SWITCHBOX(x,n,s)                                               \
     {                                                                            \
-        coreLabel& oLabel = m_aLabel[MENU_CONFIG_ ## n];                         \
+        coreLabel& oLabel = m_aLabel[ENTRY_ ## n];                               \
         oLabel.SetTextLanguage("CONFIG_" ## #n);                                 \
                                                                                  \
         x.Construct   (MENU_SWITCHBOX, MENU_FONT_SMALL, MENU_OUTLINE_SMALL, 0u); \
         x.SetPosition (coreVector2(-1.00f,1.00f) * oLabel.GetPosition());        \
-        x.SetSize     (coreVector2(     s,0.03f));                               \
+        x.SetSize     (coreVector2(   (s),0.03f));                               \
         x.SetAlignment(coreVector2(-1.00f,0.00f));                               \
         x.GetCaption()->SetColor3(COLOR_MENU_WHITE);                             \
     }
@@ -185,14 +185,14 @@ cConfigMenu::cConfigMenu()noexcept
     }
 
     coreUintW iIndex;
-    for(iIndex = 0u; iIndex < MENU_CONFIG_VIDEO; ++iIndex) this->BindObject(SURFACE_CONFIG_VIDEO, &m_aLine [iIndex]);
-    for(;            iIndex < MENU_CONFIG_AUDIO; ++iIndex) this->BindObject(SURFACE_CONFIG_AUDIO, &m_aLine [iIndex]);
-    for(;            iIndex < MENU_CONFIG_INPUT; ++iIndex) this->BindObject(SURFACE_CONFIG_INPUT, &m_aLine [iIndex]);
-    for(;            iIndex < MENU_CONFIG_MAX;   ++iIndex) this->BindObject(SURFACE_CONFIG_GAME,  &m_aLine [iIndex]);
-    for(iIndex = 0u; iIndex < MENU_CONFIG_VIDEO; ++iIndex) this->BindObject(SURFACE_CONFIG_VIDEO, &m_aLabel[iIndex]);
-    for(;            iIndex < MENU_CONFIG_AUDIO; ++iIndex) this->BindObject(SURFACE_CONFIG_AUDIO, &m_aLabel[iIndex]);
-    for(;            iIndex < MENU_CONFIG_INPUT; ++iIndex) this->BindObject(SURFACE_CONFIG_INPUT, &m_aLabel[iIndex]);
-    for(;            iIndex < MENU_CONFIG_MAX;   ++iIndex) this->BindObject(SURFACE_CONFIG_GAME,  &m_aLabel[iIndex]);
+    for(iIndex = 0u; iIndex < ENTRY_VIDEO; ++iIndex) this->BindObject(SURFACE_CONFIG_VIDEO, &m_aLine [iIndex]);
+    for(;            iIndex < ENTRY_AUDIO; ++iIndex) this->BindObject(SURFACE_CONFIG_AUDIO, &m_aLine [iIndex]);
+    for(;            iIndex < ENTRY_INPUT; ++iIndex) this->BindObject(SURFACE_CONFIG_INPUT, &m_aLine [iIndex]);
+    for(;            iIndex < ENTRY_MAX;   ++iIndex) this->BindObject(SURFACE_CONFIG_GAME,  &m_aLine [iIndex]);
+    for(iIndex = 0u; iIndex < ENTRY_VIDEO; ++iIndex) this->BindObject(SURFACE_CONFIG_VIDEO, &m_aLabel[iIndex]);
+    for(;            iIndex < ENTRY_AUDIO; ++iIndex) this->BindObject(SURFACE_CONFIG_AUDIO, &m_aLabel[iIndex]);
+    for(;            iIndex < ENTRY_INPUT; ++iIndex) this->BindObject(SURFACE_CONFIG_INPUT, &m_aLabel[iIndex]);
+    for(;            iIndex < ENTRY_MAX;   ++iIndex) this->BindObject(SURFACE_CONFIG_GAME,  &m_aLabel[iIndex]);
 
     this->BindObject(SURFACE_CONFIG_VIDEO, &m_Resolution);
     this->BindObject(SURFACE_CONFIG_VIDEO, &m_DisplayMode);

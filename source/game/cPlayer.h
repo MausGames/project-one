@@ -108,6 +108,7 @@ public:
     inline void SetForce (const coreVector2& vForce)  {m_vForce  = vForce;}
 
     // get object properties
+    inline const cInput*      GetInput        ()const                        {return m_pInput;}
     inline const coreUint32&  GetScoreMission ()const                        {return m_iScoreMission;}
     inline const coreUint32&  GetScoreBoss    (const coreUintW& iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_aiScoreBoss[iIndex];}
     inline       coreFloat    GetCurCombo     ()const                        {return __PLAYER_COMBO(m_iComboValue[0]);}

@@ -16,10 +16,7 @@
 
 // ****************************************************************
 // configuration definitions
-#define CONFIG_GAME_TRANSPARENT    "Game",     "Transparent",                         (0)
-#define CONFIG_GAME_COMBAT_DAMAGE  "Game",     "CombatDamage",                        (1)
-#define CONFIG_GAME_COMBAT_CHAIN   "Game",     "CombatChain",                         (1)
-#define CONFIG_GAME_COMBAT_COMBO   "Game",     "CombatCombo",                         (1)
+#define CONFIG_FORCE   // # force specific settings (to increase fairness)
 
 #define CONFIG_GRAPHICS_SHADOW     "Graphics", "Shadow",                              (1)
 #define CONFIG_GRAPHICS_REFLECTION "Graphics", "Reflection",                          (1)
@@ -35,7 +32,10 @@
 #define CONFIG_INPUT_MOVE_UP(s)    "Input",    PRINT("S%u_MoveUp",    (s)),           (CORE_INPUT_KEY(W))
 #define CONFIG_INPUT_BUTTON(s,n)   "Input",    PRINT("S%u_Button%u",  (s), (n) + 1u), ((n) + coreUintW(CORE_INPUT_KEY(1)))
 
-#define CONFIG_FORCE   // force specific settings to increase fairness
+#define CONFIG_GAME_TRANSPARENT    "Game",     "Transparent",                         (0)
+#define CONFIG_GAME_COMBAT_DAMAGE  "Game",     "CombatDamage",                        (1)
+#define CONFIG_GAME_COMBAT_CHAIN   "Game",     "CombatChain",                         (1)
+#define CONFIG_GAME_COMBAT_COMBO   "Game",     "CombatCombo",                         (1)
 
 #define INPUT_TYPES         (PLAYERS)                                     // number of input set selections
 #define INPUT_BUTTONS       (4u)                                          // number of input buttons per set
@@ -51,19 +51,6 @@ STATIC_ASSERT(INPUT_BUTTONS <= sizeof(coreUint8)*8u)
 // configuration variables
 struct cConfig
 {
-    struct
-    {
-        coreUint8 iTransparent;   // transparent player bullets
-        struct
-        {
-            coreUint8 iDamage;    // show damage as combat text
-            coreUint8 iChain;     // show chain as combat text
-            coreUint8 iCombo;     // show combo as combat text
-        }
-        Combat;
-    }
-    Game;
-
     struct
     {
         coreUint8 iShadow;       // shadow level
@@ -93,6 +80,19 @@ struct cConfig
         aSet[INPUT_SETS];
     }
     Input;
+
+    struct
+    {
+        coreUint8 iTransparent;   // transparent player bullets
+        struct
+        {
+            coreUint8 iDamage;    // show damage as combat text
+            coreUint8 iChain;     // show chain as combat text
+            coreUint8 iCombo;     // show combo as combat text
+        }
+        Combat;
+    }
+    Game;
 };
 
 struct cInput

@@ -33,7 +33,7 @@ void cOutline::Exit()
 // apply outline-layer
 void cOutline::Apply()
 {
-    //glDepthMask(false);
+    glDepthMask(false);
     {
         // draw single objects
         FOR_EACH(it, this->GetObjectSet())
@@ -43,5 +43,5 @@ void cOutline::Apply()
         FOR_EACH(it, this->GetListSet())
             (*it)->Render(s_pProgramInstanced, s_pProgramSingle);
     }
-    //glDepthMask(true);
+    glDepthMask(true);
 }
