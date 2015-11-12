@@ -348,15 +348,11 @@ coreFloat cSpecialEffects::CreateLightning(const coreVector2& vPosFrom, const co
     coreObject3D& oLightning = m_aLightning[m_iCurLightning];
 
     // 
-    const coreVector2 vDiff      =  vPosTo - vPosFrom;
+    const coreVector2 vDiff      = (vPosTo - vPosFrom);
     const coreVector2 vPosition  = (vPosTo + vPosFrom) * 0.5f;
     const coreVector2 vDirection = vDiff.Normalized();
     const coreFloat   fLength    = vDiff.Length();
     const coreVector2 vSize      = coreVector2(fWidth, fLength);
-
-    // 
-    coreFloat fTexLen = vSize.yx().AspectRatio() * SPECIAL_LIGHTNING_CUTOUT * SPECIAL_LIGHTNING_RESIZE;
-              fTexLen = std::round(MAX(fTexLen, 0.5f) * 2.0f) * 0.5f;
 
     // 
     oLightning.SetPosition (coreVector3(vPosition,  0.0f));
@@ -364,18 +360,18 @@ coreFloat cSpecialEffects::CreateLightning(const coreVector2& vPosFrom, const co
     oLightning.SetDirection(coreVector3(vDirection, 0.0f));
     oLightning.SetColor4   (coreVector4(vColor,     1.0f));
 
+    coreFloat fTexLen = 0.0f;
     if(fLength < fWidth*0.9f)
     {
-        fTexLen = 0.5f; 
-
         // 
         oLightning.SetTexSize  ( coreVector2(SPECIAL_LIGHTNING_CUTOUT, 0.25f) * vTexSizeFactor);
         oLightning.SetTexOffset((coreVector2(0.25f,0.25f) - oLightning.GetTexSize()) * 0.5f);
     }
     else
     {
-        fTexLen = vSize.yx().AspectRatio() * SPECIAL_LIGHTNING_CUTOUT * SPECIAL_LIGHTNING_RESIZE; 
-        fTexLen = std::round(MAX(fTexLen, 0.5f) * 2.0f) * 0.5f; 
+        // 
+        fTexLen = vSize.yx().AspectRatio() * SPECIAL_LIGHTNING_CUTOUT * SPECIAL_LIGHTNING_RESIZE;
+        fTexLen = ROUND(MAX(fTexLen, 0.5f) * 2.0f) * 0.5f;
 
         // 
         oLightning.SetTexSize  (coreVector2(SPECIAL_LIGHTNING_CUTOUT, fTexLen) * vTexSizeFactor);

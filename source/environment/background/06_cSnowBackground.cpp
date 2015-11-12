@@ -14,8 +14,8 @@
 cSnowBackground::cSnowBackground()noexcept
 {
     // create outdoor-surface object
-    m_pOutdoor = new cOutdoor("dust", "crack", 1u, 4.0f);
+    m_pOutdoor = new cOutdoor("snow", "snow", 1u, 4.0f);
 
     // 
-    m_pWater = new cWater();
+    m_pWater = new cIceWater();
 }

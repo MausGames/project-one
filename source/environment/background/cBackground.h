@@ -235,11 +235,21 @@ public:
 // volcano background class
 class cVolcanoBackground final : public cBackground
 {
+private:
+    cLava m_Lava;   // 
+
+
 public:
     cVolcanoBackground()noexcept;
 
     DISABLE_COPY(cVolcanoBackground)
     ASSIGN_ID(5, "Volcano")
+
+
+protected:
+    // execute own routines
+    void __RenderOwn()override;
+    void __MoveOwn  ()override;
 };
 
 

@@ -85,6 +85,8 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreTexture>("environment_rock_norm.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_rock_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_sea_diff.png",               CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_sea_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_sea_norm.png",               CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_sea_norm.png", false);
+    Core::Manager::Resource->Load<coreTexture>("environment_snow_diff.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_snow_diff.png");
+    Core::Manager::Resource->Load<coreTexture>("environment_snow_norm.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_snow_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_stone_diff.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_stone_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_stone_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_stone_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_water_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_water_norm.png", false);
@@ -150,8 +152,13 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreShader> ("environment_clouds.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_clouds.frag");
     Core::Manager::Resource->Load<coreShader> ("environment_clouds_inst.vert",           CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_clouds.vert", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("environment_clouds_inst.frag",           CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_clouds.frag", CORE_SHADER_OPTION_INSTANCING);
+    Core::Manager::Resource->Load<coreShader> ("environment_ice.vert",                   CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_ice.vert", CORE_SHADER_OPTION_NO_ROTATION);
+    Core::Manager::Resource->Load<coreShader> ("environment_ice.frag",                   CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_ice.frag");
+    Core::Manager::Resource->Load<coreShader> ("environment_lava.vert",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_lava.vert", CORE_SHADER_OPTION_NO_ROTATION);
+    Core::Manager::Resource->Load<coreShader> ("environment_lava.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_lava.frag");
     Core::Manager::Resource->Load<coreShader> ("environment_outdoor.vert",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_outdoor.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("environment_outdoor.frag",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_outdoor.frag");
+    Core::Manager::Resource->Load<coreShader> ("environment_outdoor_glow.frag",          CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_outdoor.frag", SHADER_GLOW);
     Core::Manager::Resource->Load<coreShader> ("environment_under.vert",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_under.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("environment_under.frag",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_under.frag");
     Core::Manager::Resource->Load<coreShader> ("environment_water.vert",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_water.vert", CORE_SHADER_OPTION_NO_ROTATION);
@@ -384,9 +391,25 @@ static void SetupResources()
         ->AttachShader("environment_clouds_inst.frag")
         ->Finish();
 
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_ice_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("environment_ice.vert")
+        ->AttachShader("environment_ice.frag")
+        ->Finish();
+
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_lava_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("environment_lava.vert")
+        ->AttachShader("environment_lava.frag")
+        ->Finish();
+
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_outdoor_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("environment_outdoor.vert")
         ->AttachShader("environment_outdoor.frag")
+        ->BindAttribute("a_v1Height", CORE_SHADER_ATTRIBUTE_POSITION_NUM)
+        ->Finish();
+
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_outdoor_glow_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("environment_outdoor.vert")
+        ->AttachShader("environment_outdoor_glow.frag")
         ->BindAttribute("a_v1Height", CORE_SHADER_ATTRIBUTE_POSITION_NUM)
         ->Finish();
 

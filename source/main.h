@@ -94,7 +94,7 @@
 
 // shader modifiers
 #define SHADER_SHADOW(x)    PRINT("#define _P1_SHADOW_ (%d) \n", x)   // outdoor, object_ground
-#define SHADER_GLOW         "#define _P1_GLOW_       (1) \n"          // post, object_ship
+#define SHADER_GLOW         "#define _P1_GLOW_       (1) \n"          // post, outdoor, object_ship
 #define SHADER_DISTORTION   "#define _P1_DISTORTION_ (1) \n"          // post
 #define SHADER_DARKNESS     "#define _P1_DARKNESS_   (1) \n"          // object_ship
 #define SHADER_BULLET       "#define _P1_BULLET_     (1) \n"          // energy

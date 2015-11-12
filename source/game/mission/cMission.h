@@ -10,6 +10,8 @@
 #ifndef _P1_GUARD_MISSION_H_
 #define _P1_GUARD_MISSION_H_
 
+// TODO: remove STAGE_SUB (and PHASE_SUB) double-evaluation
+
 
 // ****************************************************************
 // mission definitions
@@ -34,7 +36,7 @@
 #define STAGE_FINISH_AFTER(t) {if(m_fStageTime >= (t)) STAGE_FINISH_NOW}                                // 
 #define STAGE_START_HERE      {if(DEFINED(_CORE_DEBUG_)) {m_aiStageLine.clear(); m_anStage.clear();}}   // 
 
-#define STAGE_ADD_PATH(n) \
+#define STAGE_ADD_PATH(n)                             \
     auto n = this->_AddPath(__LINE__, [](coreSpline2* OUTPUT n)
 
 #define STAGE_ADD_ENEMY(n,t,c)                        \

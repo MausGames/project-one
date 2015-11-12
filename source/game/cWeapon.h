@@ -15,7 +15,8 @@
 
 // ****************************************************************
 // weapon definitions
-#define WEAPON_MODES (2u)   // 
+#define WEAPON_MODES         (2u)   // 
+#define WEAPON_TESLA_TARGETS (3u)   // 
 
 
 // ****************************************************************
@@ -157,6 +158,8 @@ class cTeslaWeapon final : public cWeapon
 private:
     coreInt8  m_iShotType;        // 
     coreUint8 m_iStrikeType;      // 
+
+    coreFloat m_fCurOffset;
 
     coreSoundPtr m_pShootSound;   // shooting sound-effect 
 

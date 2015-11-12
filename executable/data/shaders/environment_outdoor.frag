@@ -65,10 +65,27 @@ void FragmentMain()
 #else
 
     // ignore shadow map
-    const float v1Light = 1.0;
+    float v1Light = 1.0;
 
 #endif
 
+#if defined(_P1_GLOW_)
+
+    // increase lower outdoor intensity (for volcano background)
+    float v1Max = min(1.0 - v_v1Mix, 1.0);
+    v1Light     = max(v1Max, v1Light);
+    
+    // 
+    const float v1Shine = 0.0;
+
+#else
+
+    // 
+    const float v1Max   = 0.0;
+    const float v1Shine = 1.0;
+    
+#endif
+    
     // calculate dot-3 bump factor
     vec3  v3MathLightDir = normalize(v_av4LightDir[0].xyz);
     vec3  v3BumpNormal   = coreUnpackNormalMapDeriv(v2TexNormal);
@@ -80,9 +97,9 @@ void FragmentMain()
     float v1ReflFactor  = max(0.0, dot(v3ReflNormal, v3BumpNormal));
 
     // calculate diffuse and specular value
-    vec3 v3Diffuse  = v3TexColor * (v1Light * (1.4 * max(0.0, v1BumpFactor) + 0.2));
+    vec3 v3Diffuse  = v3TexColor * (v1Light * (1.4 * max(v1Max, v1BumpFactor) + 0.2));
     vec3 v3Specular = vec3(0.15 * pow(v1ReflFactor, 100.0));
 
     // draw final color
-    gl_FragColor = vec4(v3Diffuse + v3Specular, 1.0);
+    gl_FragColor = vec4(v3Diffuse + v3Specular * v1Shine, 1.0);
 }

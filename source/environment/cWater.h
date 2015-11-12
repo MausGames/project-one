@@ -84,7 +84,7 @@ public:
 class cIceWater final : public cWater
 {
 public:
-    cIceWater()noexcept {}
+    cIceWater()noexcept;
 
     DISABLE_COPY(cIceWater)
 };
@@ -98,6 +98,32 @@ public:
     cRainWater()noexcept {}
 
     DISABLE_COPY(cRainWater)
+};
+
+
+// ****************************************************************
+// lava-surface class
+class cLava final : public coreObject3D
+{
+private:
+    coreFlow  m_fAnimation;   // lava animation value
+    coreFloat m_fFlyOffset;   // current fly offset
+
+
+public:
+    cLava()noexcept;
+
+    DISABLE_COPY(cLava)
+
+    // render and move the lava-surface
+    void Render()override;
+    void Move  ()override;
+
+    // set object properties
+    inline void SetFlyOffset(const coreFloat& fFlyOffset) {m_fFlyOffset = fFlyOffset;}
+
+    // get object properties
+    inline const coreFloat& GetFlyOffset()const {return m_fFlyOffset;}
 };
 
 

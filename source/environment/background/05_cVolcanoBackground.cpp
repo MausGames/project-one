@@ -15,7 +15,24 @@ cVolcanoBackground::cVolcanoBackground()noexcept
 {
     // create outdoor-surface object
     m_pOutdoor = new cOutdoor("rock", "lava", 7u, 4.0f);
+    //m_pOutdoor->DefineProgram("environment_outdoor_glow_program");
+}
 
+
+// ****************************************************************
+// 
+void cVolcanoBackground::__RenderOwn()
+{
     // 
-    m_pWater = new cWater();
+    m_Lava.Render();
+}
+
+
+// ****************************************************************
+// 
+void cVolcanoBackground::__MoveOwn()
+{
+    // 
+    m_Lava.SetFlyOffset(g_pEnvironment->GetFlyOffset());
+    m_Lava.Move();
 }

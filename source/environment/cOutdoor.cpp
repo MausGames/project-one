@@ -324,10 +324,12 @@ void cOutdoor::LoadGeometry(const coreUint8& iAlgorithm, const coreFloat& fGrade
     sVertexPacked aPackedData[OUTDOOR_TOTAL_VERTICES];
     for(coreUintW i = 0u; i < OUTDOOR_TOTAL_VERTICES; ++i)
     {
-        // convert specific vertex attributes
-        aPackedData[i].fPosition = aVertexData[i].vPosition.z;
-        aPackedData[i].iNormal   = nPackFunc(coreVector4(aVertexData[i].vNormal, 0.0f));
-        aPackedData[i].iTangent  = nPackFunc(aVertexData[i].vTangent);
+        const sVertex& oVertex = aVertexData[i];
+
+        // convert vertex attributes
+        aPackedData[i].fPosition = oVertex.vPosition.z;
+        aPackedData[i].iNormal   = nPackFunc(coreVector4(oVertex.vNormal, 0.0f));
+        aPackedData[i].iTangent  = nPackFunc(oVertex.vTangent);
     }
 
     // create vertex buffer

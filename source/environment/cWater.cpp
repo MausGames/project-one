@@ -198,3 +198,63 @@ cUnderWater::cUnderWater()noexcept
     // 
     this->DefineProgram("environment_under_program");
 }
+
+
+// ****************************************************************
+// constructor
+cIceWater::cIceWater()noexcept
+{
+    // 
+    this->DefineTexture(0u, "environment_crack_norm.png");
+    this->DefineProgram("environment_ice_program");
+    // TODO: don't change water-level over time
+}
+
+
+// ****************************************************************
+// constructor
+cLava::cLava()noexcept
+: m_fAnimation (0.0f)
+, m_fFlyOffset (0.0f)
+{
+    // load object resources
+    this->DefineModel  (Core::Manager::Object->GetLowModel());
+    this->DefineTexture(0u, "environment_lava_diff.png");
+    this->DefineTexture(1u, "environment_lava_norm.png");
+    this->DefineTexture(2u, "environment_water_norm.png");
+    this->DefineProgram("environment_lava_program");
+
+    // set object properties
+    this->SetSize(coreVector3(WATER_SIZE, WATER_SIZE, 1.0f));
+}
+
+
+// ****************************************************************
+// 
+void cLava::Render()
+{
+    if(!this->GetProgram().IsUsable()) return;
+
+    // update all lava uniforms
+    this->GetProgram()->Enable();
+    this->GetProgram()->SendUniform("u_v1Time",   m_fAnimation);
+    this->GetProgram()->SendUniform("u_v1Offset", m_fFlyOffset * -0.0125f);
+
+    // render the 3d-object
+    coreObject3D::Render();
+}
+
+
+// ****************************************************************
+// 
+void cLava::Move()
+{
+    // update animation value
+    m_fAnimation.Update(0.008f);
+
+    // 
+    this->SetPosition(coreVector3(0.0f, m_fFlyOffset * OUTDOOR_DETAIL, WATER_HEIGHT));
+
+    // move the 3d-object
+    coreObject3D::Move();
+}

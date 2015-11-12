@@ -387,7 +387,7 @@ void cTeslaBullet::__MoveOwn()
                     vDir = coreVector2(m_bLightningSide ? ABS(vDir.x) : -ABS(vDir.x), vDir.y);
 
         // 
-        g_pSpecialEffects->CreateLightning(this, vDir, coreVector2(SPECIAL_LIGHTNING_SMALL, 7.0f), coreVector3(1.0f,1.0f,1.0f), coreVector2(1.0f,1.0f), 0.0f);
+        g_pSpecialEffects->CreateLightning(this, vDir, 7.0f, SPECIAL_LIGHTNING_SMALL, coreVector3(1.0f,1.0f,1.0f), coreVector2(1.0f,1.0f), 0.0f);
     }
 }
 

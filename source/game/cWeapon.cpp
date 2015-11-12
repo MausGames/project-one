@@ -324,9 +324,10 @@ void cWaveWeapon::__RenderOverlayOwn()
 cTeslaWeapon::cTeslaWeapon()noexcept
 : m_iShotType   (0)
 , m_iStrikeType (0)
+, m_fCurOffset  (0.0f)
 {
     // set base fire-rate
-    m_CooldownTimer.SetSpeed(4.0f); // 6.0f
+    m_CooldownTimer.SetSpeed(4.0f); // 6.0f 
 
     // load shooting sound-effect
     m_pShootSound = Core::Manager::Resource->Get<coreSound>("bullet_tesla.wav");
@@ -339,147 +340,105 @@ void cTeslaWeapon::__TriggerOwn(const coreUint8& iMode)
 {
     if(iMode != 1u) return;
 
+    const coreObject3D* apStrikeEmitter[WEAPON_TESLA_TARGETS];
+    cEnemy*             apStrikeTarget [WEAPON_TESLA_TARGETS];
+    coreUintW           iNum = 0u;
 
+    std::vector<const coreObject3D*> apNode;
 
-
-
-    std::vector<coreObject3D*> pList;
-    pList.reserve(16u);
-
-    g_pGame->GetBulletManagerPlayer()->ForEachBullet([&](cBullet* OUTPUT pBullet)
+    // 
+    apNode.reserve(16u);
+    g_pGame->GetBulletManagerPlayer()->ForEachBullet([&](const cBullet* pBullet)
     {
         if((pBullet->GetID() == cTeslaBullet::ID) && (pBullet->GetOwner() == m_pOwner))
-            pList.push_back(pBullet);
+            apNode.push_back(pBullet);
     });
 
-    //pList.push_back(m_pOwner);
-    std::reverse(pList.begin(), pList.end());
-
-
-
-    
-    coreObject3D* aapStrikePair[3][2] = {NULL};   // # {target (enemy), emitter (player/bullet)}
-    const cBullet*      pLastBullet         =  NULL;
-
-    coreUint8 iNum = 0u;
-
-
-    static coreFloat fCurOffset = 0.0f;  
-
+    // 
+    apNode.push_back(m_pOwner);
+    std::reverse(apNode.begin(), apNode.end());
 
     // 
-    if(++m_iStrikeType > 3u) m_iStrikeType = 0u;
-
-
-    // 
-    auto nBulletLightningFunc = [&]()
+    FOR_EACH(it, apNode)
     {
-        
+        const coreObject3D* pObject = (*it);
 
-        const coreVector2 vTexOffset = coreVector2((m_iStrikeType & 0x02u) ? -1.0f : 1.0f, (m_iStrikeType & 0x01u) ? -1.0f : 1.0f);
-
-        const coreObject3D* pCurAnchor = m_pOwner;//pList.front();
-
-        FOR_EACH(it, pList)
-        {
-            const coreObject3D* pObject = (*it);
-
-            const coreVector2 vPosFrom = pCurAnchor->GetPosition().xy();
-            const coreVector2 vPosTo   = pObject   ->GetPosition().xy();
-
-            fCurOffset = g_pSpecialEffects->CreateLightning(vPosFrom, vPosTo, SPECIAL_LIGHTNING_BIG, coreVector3(1.0f,1.0f,1.0f), vTexOffset, fCurOffset);
-
-            if(pObject == pLastBullet) break;
-
-            pCurAnchor = pObject;
-        }
-    };
-
-
-    auto nEnemyLightningFunc = [&](coreObject3D* OUTPUT pTarget, const coreObject3D* pEmitter)
-    {
         // 
-
-
-        const coreVector2 vTexOffset = coreVector2((m_iStrikeType & 0x02u) ? -1.0f : 1.0f, (m_iStrikeType & 0x01u) ? -1.0f : 1.0f);
-
-        const coreVector2 vPosFrom = pEmitter->GetPosition().xy();
-        const coreVector2 vPosTo   = pTarget ->GetPosition().xy();
-
-        fCurOffset = g_pSpecialEffects->CreateLightning(vPosFrom, vPosTo, SPECIAL_LIGHTNING_BIG, coreVector3(1.0f,1.0f,1.0f), vTexOffset, fCurOffset);
-
-        //if(++m_iStrikeType > 3u) m_iStrikeType = 0u;
-        g_pSpecialEffects->MacroExplosionColorSmall(pTarget->GetPosition(), COLOR_ENERGY_BLUE);
-        //g_pDistortion->CreateWave       (pTarget->GetPosition(), DISTORTION_WAVE_TINY);
-        //g_pSpecialEffects->CreateSplashColor(pTarget->GetPosition(), SPECIAL_SPLASH_TINY, COLOR_ENERGY_BLUE);
-        //g_pSpecialEffects         ->ShakeScreen      (SPECIAL_SHAKE_SMALL);
-
-        
-        s_cast<cEnemy*>(pTarget)->TakeDamage(12, m_pOwner);
-    };
-
-
-    g_pGame->GetEnemyManager()->ForEachEnemy([&](cEnemy* OUTPUT pEnemy)
-    {
-        if(iNum == ARRAY_SIZE(aapStrikePair))
-            return;
-
-        if((pEnemy->GetPosition().xy() - m_pOwner->GetPosition().xy()).LengthSq() < 1600.0f)
-        {
-
-            aapStrikePair[iNum][0] = pEnemy;
-            aapStrikePair[iNum][1] = m_pOwner;
-            ++iNum;
-        }
-    });
-
-
-    FOR_EACH(it, pList)
-    {
-        coreObject3D* pObject = (*it);
-
         g_pGame->GetEnemyManager()->ForEachEnemy([&](cEnemy* OUTPUT pEnemy)
         {
-            if(iNum == ARRAY_SIZE(aapStrikePair))
+            // 
+            if(iNum == WEAPON_TESLA_TARGETS)
                 return;
 
-            for(coreUintW i = 0u; i < ARRAY_SIZE(aapStrikePair); ++i)
+            // 
+            for(coreUintW i = 0u; i < iNum; ++i)
             {
-                if(pEnemy == aapStrikePair[i][0])
+                if(pEnemy == apStrikeTarget[i])
                     return;
             }
 
+            // 
             if((pEnemy->GetPosition().xy() - pObject->GetPosition().xy()).LengthSq() < 1600.0f)
             {
-
-                aapStrikePair[iNum][0] = pEnemy;
-                aapStrikePair[iNum][1] = pObject;
+                apStrikeEmitter[iNum] = pObject;
+                apStrikeTarget [iNum] = pEnemy;
                 ++iNum;
-
-                pLastBullet = s_cast<cBullet*>(pObject);
             }
         });
+
+        // 
+        if(iNum == WEAPON_TESLA_TARGETS)
+            break;
     }
 
+    // 
+    if(iNum)
+    {
+        const coreObject3D* pLastEmitter = apStrikeEmitter[iNum-1u];
 
-    if(pLastBullet) nBulletLightningFunc();
-    for(coreUintW i = 0u; i < iNum; ++i)
-        nEnemyLightningFunc(aapStrikePair[i][0], aapStrikePair[i][1]);
+        // 
+        if(++m_iStrikeType > 3u) m_iStrikeType = 0u;
+        const coreVector2 vTexSizeFactor = coreVector2((m_iStrikeType & 0x02u) ? -1.0f : 1.0f,
+                                                       (m_iStrikeType & 0x01u) ? -1.0f : 1.0f);
 
-    //if(m_iLastStatus & 0x01u)  // TODO # 1 frame behind  
-        g_pSpecialEffects->CreateSplashColor(m_pOwner->GetPosition(), 5.0f, 3u, COLOR_ENERGY_BLUE);
-    //else
-    //{
-    //    g_pSpecialEffects->MacroExplosionColorSmall(m_pOwner->GetPosition(), COLOR_ENERGY_BLUE);
-    //
-    //    const coreVector2 vTexOffset = coreVector2((m_iStrikeType & 0x02u) ? -1.0f : 1.0f, (m_iStrikeType & 0x01u) ? -1.0f : 1.0f);
-    //
-    //    const coreVector2 vPos = m_pOwner->GetPosition().xy();
-    //    const coreVector2 vDir = coreVector2::Rand();
-    //
-    //    fCurOffset = g_pSpecialEffects->CreateLightning(vPos, vPos + 100.0f * vDir, SPECIAL_LIGHTNING_BIG, coreVector3(1.0f,1.0f,1.0f), vTexOffset, fCurOffset);
-    //    fCurOffset = g_pSpecialEffects->CreateLightning(vPos, vPos - 100.0f * vDir, SPECIAL_LIGHTNING_BIG, coreVector3(1.0f,1.0f,1.0f), vTexOffset, fCurOffset);
-    //}
+        // 
+        if(pLastEmitter != m_pOwner)
+        {
+            // 
+            for(coreUintW i = 0u, ie = (apNode.size() - 1u); i < ie; ++i)
+            {
+                const coreObject3D* pEmitter = apNode[i];
+                const coreObject3D* pTarget  = apNode[i+1u];
+
+                // 
+                const coreVector2 vPosFrom = pEmitter->GetPosition().xy();
+                const coreVector2 vPosTo   = pTarget ->GetPosition().xy();
+                m_fCurOffset = g_pSpecialEffects->CreateLightning(vPosFrom, vPosTo, SPECIAL_LIGHTNING_BIG, coreVector3(1.0f,1.0f,1.0f), vTexSizeFactor, m_fCurOffset);
+
+                // 
+                if(pLastEmitter == pTarget) break;
+            }
+        }
+
+        // 
+        for(coreUintW i = 0u; i < iNum; ++i)
+        {
+            const coreObject3D* pEmitter = apStrikeEmitter[i];
+            cEnemy*             pTarget  = apStrikeTarget [i];
+
+            // 
+            const coreVector2 vPosFrom = pEmitter->GetPosition().xy();
+            const coreVector2 vPosTo   = pTarget ->GetPosition().xy();
+            m_fCurOffset = g_pSpecialEffects->CreateLightning(vPosFrom, vPosTo, SPECIAL_LIGHTNING_BIG, coreVector3(1.0f,1.0f,1.0f), vTexSizeFactor, m_fCurOffset);
+
+            // 
+            pTarget->TakeDamage(12, m_pOwner);
+            g_pSpecialEffects->MacroExplosionColorSmall(pTarget->GetPosition(), COLOR_ENERGY_BLUE);
+        }
+    }
+
+    // 
+    g_pSpecialEffects->CreateSplashColor(m_pOwner->GetPosition(), 5.0f, 3u, COLOR_ENERGY_BLUE);
 }
 
 
