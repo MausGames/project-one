@@ -204,8 +204,8 @@ void cVausBoss::__MoveOwn()
             for(coreUintW i = 0u; i < 7u; ++i)
             {
                 const coreVector2 vDir = coreVector2::Direction(fAngle + 0.25f * I_TO_F(i - 3u));
-                auto* pBullet1 = g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.4f, this, vPos + vDir*5.0f, vDir);
-                auto* pBullet2 = g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.4f, this, vPos + vDir*2.5f, vDir);
+                auto* pBullet1 = g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.4f, this, vPos + vDir*5.0f, vDir)->MakeBlue();
+                auto* pBullet2 = g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.4f, this, vPos + vDir*2.5f, vDir)->MakeBlue();
 
                 if(j)
                 {

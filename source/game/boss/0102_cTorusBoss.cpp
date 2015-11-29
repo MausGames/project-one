@@ -131,14 +131,35 @@ void cTorusBoss::__KillOwn(const coreBool& bAnimated)
 
 // ****************************************************************
 // 
-void cTorusBoss::__RenderOwnStrong()
+void cTorusBoss::__RenderOwnAttack()
 {
-    // 
+    DEPTH_PUSH
+
     if(m_aiCounter[ATTACK_STATUS])
     {
         // 
         for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRay); ++i)
             m_aRay[i].Render();
+        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRay); ++i)
+            g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(&m_aRay[i]);
+
+        glDisable(GL_DEPTH_TEST);
+        {
+            // 
+            for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRayWave); ++i)
+                m_aRayWave[i].Render();
+        }
+        glEnable(GL_DEPTH_TEST);
+
+        // 
+        cEnemy::Render();
+
+        // 
+        m_Emitter.Render();
+
+        // 
+        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCircle); ++i)
+            m_aCircle[i].Render();
     }
     else
     {
@@ -149,38 +170,6 @@ void cTorusBoss::__RenderOwnStrong()
                 m_aCircle[i].Render();
         }
         glEnable(GL_DEPTH_TEST);
-    }
-}
-
-
-// ****************************************************************
-// 
-void cTorusBoss::__RenderOwnAfter()
-{
-    // 
-    if(m_aiCounter[ATTACK_STATUS])
-    {
-        glDisable(GL_DEPTH_TEST);
-        {
-            // 
-            for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRayWave); ++i)
-                m_aRayWave[i].Render();
-        }
-        glEnable(GL_DEPTH_TEST);
-
-        glDepthRange(GAME_DEPTH_STRONG - 0.002f);   // slight depth offset to prevent z-fighting
-        {
-            // 
-            m_Emitter.Render();
-
-            // 
-            for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCircle); ++i)
-                m_aCircle[i].Render();
-        }
-        glDepthRange(GAME_DEPTH_STRONG);
-
-        // 
-        cEnemy::Render();
     }
 }
 
@@ -277,7 +266,7 @@ void cTorusBoss::__MoveOwn()
             for(coreUintW i = 4u; i--; )
             {
                 const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(i) * 90.0f + fAngle));
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.2f, this, this->GetPosition().xy(), vDir);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.2f, this, this->GetPosition().xy(), vDir)->MakeBlue();
             }
 
             // 
@@ -482,10 +471,10 @@ void cTorusBoss::__MoveOwn()
             const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(i) * 36.0f));
 
             // 
-            g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.1f, this, this->GetPosition().xy(),  vDir);
-            g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.0f, this, this->GetPosition().xy(),  vDir);
-            g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.1f, this, this->GetPosition().xy(), -vDir);
-            g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.0f, this, this->GetPosition().xy(), -vDir);
+            g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.1f, this, this->GetPosition().xy(),  vDir)->MakeGreen();
+            g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.0f, this, this->GetPosition().xy(),  vDir)->MakeGreen();
+            g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.1f, this, this->GetPosition().xy(), -vDir)->MakeGreen();
+            g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.0f, this, this->GetPosition().xy(), -vDir)->MakeGreen();
         }
 
         // 
@@ -691,9 +680,6 @@ void cTorusBoss::__EnableRay(const coreUintW& iIndex)
     // 
     if(oRay.GetType()) return;
     oRay.ChangeType(TYPE_OBJECT(1));
-
-    // 
-    g_aaOutline[PRIO_STRONG][STYLE_FULL].BindObject(&oRay);
 }
 
 
@@ -707,9 +693,6 @@ void cTorusBoss::__DisableRay(const coreUintW& iIndex)
     // 
     if(!oRay.GetType()) return;
     oRay.ChangeType(0);
-
-    // 
-    g_aaOutline[PRIO_STRONG][STYLE_FULL].UnbindObject(&oRay);
 }
 
 

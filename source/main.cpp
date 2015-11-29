@@ -12,7 +12,7 @@ coreVector2      g_vGameResolution = coreVector2(0.0f,0.0f);
 coreVector2      g_vMenuCenter     = coreVector2(0.0f,0.0f);
 coreMusicPlayer  g_MusicPlayer     = {};
 
-cOutline         g_aaOutline[4][2] = {{{}}};
+cOutline*        g_pOutline        = NULL;
 cGlow*           g_pGlow           = NULL;
 cDistortion*     g_pDistortion     = NULL;
 cSpecialEffects* g_pSpecialEffects = NULL;
@@ -52,11 +52,7 @@ void CoreApp::Init()
 
     // create and init main components
     cShadow::GlobalInit();
-    for(coreUintW i = 0u; i < ARRAY_SIZE(g_aaOutline); ++i)
-    {
-        g_aaOutline[i][STYLE_FULL]  .Init(OUTLINE_SHADER_FULL);
-        g_aaOutline[i][STYLE_DIRECT].Init(OUTLINE_SHADER_DIRECT);
-    }
+    g_pOutline        = new cOutline();
     g_pGlow           = new cGlow();
     g_pDistortion     = new cDistortion();
     g_pSpecialEffects = new cSpecialEffects();
@@ -80,11 +76,7 @@ void CoreApp::Exit()
     SAFE_DELETE(g_pSpecialEffects)
     SAFE_DELETE(g_pDistortion)
     SAFE_DELETE(g_pGlow)
-    for(coreUintW i = 0u; i < ARRAY_SIZE(g_aaOutline); ++i)
-    {
-        g_aaOutline[i][STYLE_FULL]  .Exit();
-        g_aaOutline[i][STYLE_DIRECT].Exit();
-    }
+    SAFE_DELETE(g_pOutline)
     cShadow::GlobalExit();
 
     // remove all music files
@@ -282,22 +274,29 @@ static void DebugGame()
             g_pGame->LoadMission(REF_ID(cViridoMission::ID));
         }
     }
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS))
-        g_pEnvironment->ChangeBackground(REF_ID(cGrassBackground::ID));
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2), CORE_INPUT_PRESS))
-        g_pEnvironment->ChangeBackground(REF_ID(cCloudBackground::ID));
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(3), CORE_INPUT_PRESS))
-        g_pEnvironment->ChangeBackground(REF_ID(cSeaBackground::ID));
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(4), CORE_INPUT_PRESS))
-        g_pEnvironment->ChangeBackground(REF_ID(cDesertBackground::ID));
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(5), CORE_INPUT_PRESS))
-        g_pEnvironment->ChangeBackground(REF_ID(cSpaceBackground::ID));
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(6), CORE_INPUT_PRESS))
-        g_pEnvironment->ChangeBackground(REF_ID(cVolcanoBackground::ID));
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(7), CORE_INPUT_PRESS))
-        g_pEnvironment->ChangeBackground(REF_ID(cSnowBackground::ID));
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(8), CORE_INPUT_PRESS))
-        g_pEnvironment->ChangeBackground(REF_ID(cMossBackground::ID));
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(J), CORE_INPUT_PRESS))
+    {
+        g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f);
+    }
+    if(!Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LSHIFT), CORE_INPUT_HOLD))
+    {
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS))
+            g_pEnvironment->ChangeBackground(REF_ID(cGrassBackground::ID));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2), CORE_INPUT_PRESS))
+            g_pEnvironment->ChangeBackground(REF_ID(cCloudBackground::ID));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(3), CORE_INPUT_PRESS))
+            g_pEnvironment->ChangeBackground(REF_ID(cSeaBackground::ID));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(4), CORE_INPUT_PRESS))
+            g_pEnvironment->ChangeBackground(REF_ID(cDesertBackground::ID));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(5), CORE_INPUT_PRESS))
+            g_pEnvironment->ChangeBackground(REF_ID(cSpaceBackground::ID));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(6), CORE_INPUT_PRESS))
+            g_pEnvironment->ChangeBackground(REF_ID(cVolcanoBackground::ID));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(7), CORE_INPUT_PRESS))
+            g_pEnvironment->ChangeBackground(REF_ID(cSnowBackground::ID));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(8), CORE_INPUT_PRESS))
+            g_pEnvironment->ChangeBackground(REF_ID(cMossBackground::ID));
+    }
 
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS))
         Core::System->Quit();
@@ -381,10 +380,13 @@ static void DebugGame()
 
     if(g_pGame)
     {
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(7), CORE_INPUT_PRESS)) g_pGame->GetPlayer(0u)->EquipWeapon(0u, REF_ID(cRayWeapon  ::ID));
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(8), CORE_INPUT_PRESS)) g_pGame->GetPlayer(0u)->EquipWeapon(0u, REF_ID(cPulseWeapon::ID));
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(9), CORE_INPUT_PRESS)) g_pGame->GetPlayer(0u)->EquipWeapon(0u, REF_ID(cWaveWeapon ::ID));
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(0), CORE_INPUT_PRESS)) g_pGame->GetPlayer(0u)->EquipWeapon(0u, REF_ID(cTeslaWeapon::ID));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LSHIFT), CORE_INPUT_HOLD))
+        {
+            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS)) g_pGame->GetPlayer(0u)->EquipWeapon(0u, REF_ID(cRayWeapon  ::ID));
+            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2), CORE_INPUT_PRESS)) g_pGame->GetPlayer(0u)->EquipWeapon(0u, REF_ID(cPulseWeapon::ID));
+            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(3), CORE_INPUT_PRESS)) g_pGame->GetPlayer(0u)->EquipWeapon(0u, REF_ID(cWaveWeapon ::ID));
+            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(4), CORE_INPUT_PRESS)) g_pGame->GetPlayer(0u)->EquipWeapon(0u, REF_ID(cTeslaWeapon::ID));
+        }
     }
 
     static coreFloat TEST = 0.0f;
@@ -469,8 +471,10 @@ static void DebugGame()
     f4 = Core::Rand->Float(10.0f);
     f5 = Core::Rand->Float(10.0f);
     f6 = MIN(f4, f5);
+    f6 = (f4 != 0.0f) * (f4 * RSQRT(f4));
     //Core::Log->Info("%f", f6);
 
+    f5 = coreMath::Log<1024>(1024.0f*1024.0f);
 
     coreUintW z1 = Core::Rand->Int(-1500, 1500);
     coreUintW z2 = Core::Rand->Int(-1500, 1500);

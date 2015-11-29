@@ -181,6 +181,14 @@ void cEnvironment::ChangeBackground(const coreInt32& iID)
 
 
 // ****************************************************************
+// 
+coreFloat cEnvironment::RetrieveTransitionBlend(cBackground* pBackground)
+{
+    return MAX(m_Transition.GetValue((m_pBackground == pBackground) ? CORE_TIMER_GET_NORMAL : CORE_TIMER_GET_REVERSED), 0.0f);
+}
+
+
+// ****************************************************************
 // retrieve safe height value
 coreFloat cEnvironment::RetrieveSafeHeight(const coreVector2& vPosition)
 {

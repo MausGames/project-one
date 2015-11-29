@@ -27,12 +27,15 @@ cCombatStats::cCombatStats()noexcept
 // apply combat stats
 void cCombatStats::Apply()
 {
-    /*
-
+    // 
     g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer)
     {
+        // 
         for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
             pPlayer->GetWeapon(i)->RenderOverlay();
+    });
+
+    /*
 
         if(pPlayer->GetDarkTime())
         {
@@ -58,5 +61,4 @@ void cCombatStats::Apply()
     m_Circle.Render();
 
     */
-
 }

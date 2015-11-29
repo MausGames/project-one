@@ -79,7 +79,7 @@ public:
 class cRayWeapon final : public cWeapon
 {
 private:
-    coreSoundPtr m_pShootSound;    // shooting sound-effect 
+    coreSoundPtr m_pBulletSound;   // 
     coreSoundPtr m_pRocketSound;   // 
     coreSoundPtr m_pMineSound;     // 
 
@@ -103,10 +103,10 @@ private:
 class cPulseWeapon final : public cWeapon
 {
 private:
-    coreFloat m_fCharge;          // 
-    coreUint8 m_iCombo;           // 
+    coreFloat m_fCharge;           // 
+    coreUint8 m_iCombo;            // 
 
-    coreSoundPtr m_pShootSound;   // shooting sound-effect 
+    coreSoundPtr m_pBulletSound;   // 
 
 
 public:
@@ -128,11 +128,12 @@ private:
 class cWaveWeapon final : public cWeapon
 {
 private:
-    coreBool m_bSide;             // 
+    coreBool m_bSide;              // 
 
-    coreSoundPtr m_pShootSound;   // shooting sound-effect 
+    coreSoundPtr m_pBulletSound;   // 
+    coreSoundPtr m_pChangeSound;   // 
 
-    coreLabel m_Arrow;            // 
+    coreLabel m_Arrow;             // 
 
 
 public:
@@ -144,7 +145,6 @@ public:
 
 private:
     // execute own routines
-    void __UpdateOwn       (const coreUint8& iShootStatus)override;
     void __TriggerOwn      (const coreUint8& iMode)override;
     void __ShootOwn        ()override;
     void __RenderOverlayOwn()override;
@@ -156,12 +156,11 @@ private:
 class cTeslaWeapon final : public cWeapon
 {
 private:
-    coreInt8  m_iShotType;        // 
-    coreUint8 m_iStrikeType;      // 
+    coreInt8  m_iShotType;         // 
+    coreUint8 m_iStrikeType;       // 
+    coreFloat m_fStrikeOffset;     // 
 
-    coreFloat m_fCurOffset;
-
-    coreSoundPtr m_pShootSound;   // shooting sound-effect 
+    coreSoundPtr m_pBulletSound;   // 
 
 
 public:

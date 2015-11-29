@@ -92,7 +92,7 @@ void cWater::Move()
     // update animation value
     m_fAnimation.Update(0.008f);
 
-    // move water level up and down
+    // move water with camera (also water-level up and down)
     this->SetPosition(coreVector3(0.0f, m_fFlyOffset * OUTDOOR_DETAIL, WATER_HEIGHT + 0.4f * SIN(40.0f * m_fAnimation)));
 
     // move the 3d-object
@@ -230,7 +230,7 @@ cLava::cLava()noexcept
 
 
 // ****************************************************************
-// 
+// render the lava-surface
 void cLava::Render()
 {
     if(!this->GetProgram().IsUsable()) return;
@@ -246,13 +246,13 @@ void cLava::Render()
 
 
 // ****************************************************************
-// 
+// move the lava-surface
 void cLava::Move()
 {
     // update animation value
     m_fAnimation.Update(0.008f);
 
-    // 
+    // move lava with camera
     this->SetPosition(coreVector3(0.0f, m_fFlyOffset * OUTDOOR_DETAIL, WATER_HEIGHT));
 
     // move the 3d-object

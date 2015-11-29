@@ -15,7 +15,7 @@ cVolcanoBackground::cVolcanoBackground()noexcept
 {
     // create outdoor-surface object
     m_pOutdoor = new cOutdoor("rock", "lava", 7u, 4.0f);
-    //m_pOutdoor->DefineProgram("environment_outdoor_glow_program");
+    m_pOutdoor->LoadProgram(true);
 }
 
 

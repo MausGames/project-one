@@ -8,6 +8,8 @@
 //////////////////////////////////////////////////////
 #include "main.h"
 
+coreObject3D cMineBullet::s_Wave = {};
+
 
 // ****************************************************************
 // constructor
@@ -30,8 +32,10 @@ void cBullet::Move()
     this->__MoveOwn();
 
     // deactivate bullet when leaving the defined area
-    if((this->GetPosition().x < -FOREGROUND_AREA.x * BULLET_AREA_FACTOR) || (this->GetPosition().x > FOREGROUND_AREA.x * BULLET_AREA_FACTOR) ||
-       (this->GetPosition().y < -FOREGROUND_AREA.y * BULLET_AREA_FACTOR) || (this->GetPosition().y > FOREGROUND_AREA.y * BULLET_AREA_FACTOR))
+    if((this->GetPosition().x < -FOREGROUND_AREA.x * BULLET_AREA_FACTOR) ||
+       (this->GetPosition().x >  FOREGROUND_AREA.x * BULLET_AREA_FACTOR) ||
+       (this->GetPosition().y < -FOREGROUND_AREA.y * BULLET_AREA_FACTOR) ||
+       (this->GetPosition().y >  FOREGROUND_AREA.y * BULLET_AREA_FACTOR))
         this->Deactivate(false);
 
     // move the 3d-object
@@ -86,7 +90,6 @@ void cBullet::Deactivate(const coreBool& bAnimated)
 // constructor
 cBulletManager::sBulletSetGen::sBulletSetGen()noexcept
 : oBulletActive (BULLET_SET_INIT_SIZE)
-, bShadow       (false)
 {
 }
 
@@ -94,8 +97,7 @@ cBulletManager::sBulletSetGen::sBulletSetGen()noexcept
 // ****************************************************************
 // constructor
 cBulletManager::cBulletManager(const coreInt32& iType)noexcept
-: m_iType     ((iType))
-, m_iPriority ((iType == TYPE_BULLET_PLAYER) ? PRIO_PLAYER : PRIO_ENEMY)
+: m_iType (iType)
 {
 }
 
@@ -105,22 +107,11 @@ cBulletManager::cBulletManager(const coreInt32& iType)noexcept
 cBulletManager::~cBulletManager()
 {
     // 
-    g_aaOutline[m_iPriority][STYLE_FULL]  .ClearLists();
-    g_aaOutline[m_iPriority][STYLE_DIRECT].ClearLists();
+    m_Outline.ClearLists();
 
+    // 
     FOR_EACH(it, m_apBulletSet)
-    {
-        coreBatchList* pBulletActive = &(*it)->oBulletActive;
-
-        // remove bullet set from glow
-        g_pGlow->UnbindList(pBulletActive);
-
-        // 
-        if((*it)->bShadow) cShadow::GetGlobalContainer()->UnbindList(pBulletActive);
-
-        // delete bullet set
         SAFE_DELETE(*it)
-    }
 
     // clear memory
     m_apBulletSet.clear();
@@ -141,12 +132,15 @@ void cBulletManager::Render()
             s_cast<cBullet*>(*et)->__RenderOwnBefore();
 
         // render bullet set
-        (*it)->oBulletActive.Render();
+        pBulletActive->Render();
 
         // call individual subsequent render routines
         FOR_EACH(et, *pBulletActive->List())
             s_cast<cBullet*>(*et)->__RenderOwnAfter();
     }
+
+    // 
+    m_Outline.Apply();
 }
 
 
@@ -309,6 +303,15 @@ cConeBullet::cConeBullet()noexcept
 
 
 // ****************************************************************
+// 
+void cConeBullet::__ImpactOwn()
+{
+    // 
+    g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 5.0f, 3u, this->GetColor3());
+}
+
+
+// ****************************************************************
 // move the cone bullet
 void cConeBullet::__MoveOwn()
 {
@@ -332,6 +335,15 @@ cWaveBullet::cWaveBullet()noexcept
 
     // set object properties
     this->SetTexSize(coreVector2(0.1f,0.25f));
+}
+
+
+// ****************************************************************
+// 
+void cWaveBullet::__ImpactOwn()
+{
+    // 
+    g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 5.0f, 3u, this->GetColor3());
 }
 
 
@@ -404,12 +416,26 @@ cMineBullet::cMineBullet()noexcept
 
     // set object properties
     this->SetColor3(coreVector3(1.0f,0.0f,0.0f));
+}
 
 
+// ****************************************************************
+// 
+void cMineBullet::RoutineInit()
+{
+    // 
+    s_Wave.DefineModel  (Core::Manager::Object->GetLowModel());
+    s_Wave.DefineTexture(0u, "effect_wave.png");
+    s_Wave.DefineProgram("effect_decal_program");
+}
 
-    m_Wave.DefineModel  (Core::Manager::Object->GetLowModel()); 
-    m_Wave.DefineTexture(0u, "effect_wave.png"); 
-    m_Wave.DefineProgram("effect_decal_program"); 
+
+// ****************************************************************
+// 
+void cMineBullet::RoutineExit()
+{
+    // 
+    s_Wave.Undefine();
 }
 
 
@@ -427,15 +453,16 @@ void cMineBullet::__ImpactOwn()
 void cMineBullet::__RenderOwnBefore()
 {
     glDepthMask(false);
+    {
+        const coreFloat fValue = LERPB(0.0f, 1.0f, FRACT(m_fAnimation * 0.5f));
 
-    const coreFloat fValue = LERPB(0.0f, 1.0f, FRACT(m_fAnimation * 0.5f));  
-
-    m_Wave.SetPosition(this->GetPosition());    
-    m_Wave.SetSize    (coreVector3(coreVector2(15.0f,15.0f) * (0.25f+0.75f*fValue), 1.0f));   
-    m_Wave.SetAlpha(1.0f - fValue);
-    m_Wave.Move();   
-    m_Wave.Render();   
-
+        // 
+        s_Wave.SetPosition(this->GetPosition());
+        s_Wave.SetSize    (coreVector3(coreVector2(15.0f,15.0f) * (0.25f + 0.75f*fValue), 1.0f));
+        s_Wave.SetAlpha   (1.0f - fValue);
+        s_Wave.Move();
+        s_Wave.Render();
+    }
     glDepthMask(true);
 }
 
@@ -445,8 +472,7 @@ void cMineBullet::__RenderOwnBefore()
 void cMineBullet::__MoveOwn()
 {
     // 
-    //m_fSpeed = MAX(m_fSpeed - 2.0f * BULLET_SPEED_FACTOR * Core::System->GetTime(), 0.0f);  
-    m_fSpeed = MAX(m_fSpeed * (1.0f - 3.5f*Core::System->GetTime()), 0.0f);
+    m_fSpeed = MAX(m_fSpeed * (1.0f - 3.5f * Core::System->GetTime()), 0.0f);
 
     // fly around
     this->SetPosition(coreVector3(this->GetPosition().xy() + m_vFlyDir * (m_fSpeed * Core::System->GetTime()), 0.0f));
@@ -485,34 +511,27 @@ void cRocketBullet::__ImpactOwn()
 // move the rocket bullet
 void cRocketBullet::__MoveOwn()
 {
-
+    // 
     m_fSpeed += 2.0f * BULLET_SPEED_FACTOR * Core::System->GetTime();
     if(m_fSpeed > 300.0f) this->Deactivate(true);
-
 
     // fly around
     this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetDirection().xy() * (m_fSpeed * Core::System->GetTime()), 0.0f));
 
     // 
-    m_fAnimation.Update(10.0f);
-
-    g_pSpecialEffects->CreateSplashSmoke(this->GetPosition() - this->GetDirection() * 4.5f, 5.0f, 1u);
-
-   // static coreUint8 iHalf = 0u;
-   // if(++iHalf >= 3u) iHalf = 0u;
-   // if(!iHalf) g_pSpecialEffects->CreateSplashColor(this->GetPosition() - this->GetDirection() * 4.5f, 25.0f, 1u, coreVector3(0.5f,0.5f,0.5f));
-
-
-    /**/
     const cEnemy* pEnemy = g_pGame->GetEnemyManager()->FindEnemy(this->GetPosition().xy());
-
     if(pEnemy)
     {
         const coreVector2 vDiffNorm = (pEnemy->GetPosition().xy() - this->GetPosition().xy()).Normalize();
         const coreVector2 vNewDir   = (this->GetDirection().xy() + vDiffNorm * (0.05f * m_fSpeed * Core::System->GetTime())).Normalize();
-    
-        this->SetDirection(coreVector3(vNewDir, 0.0f));/**/
+
+        this->SetDirection(coreVector3(vNewDir, 0.0f));
     }
-    this->SetColor3   (coreVector3(0.0f, 0.6f + 0.4f * SIN(PI*m_fAnimation), 0.0f));
-    
+
+    // 
+    m_fAnimation.Update(10.0f);
+    this->SetColor3(coreVector3(0.0f, 0.6f + 0.4f * SIN(PI*m_fAnimation), 0.0f));
+
+    // 
+    if(Core::System->GetTime()) g_pSpecialEffects->CreateSplashSmoke(this->GetPosition() - this->GetDirection() * 4.5f, 5.0f, 1u);
 }

@@ -309,7 +309,7 @@ void cGrassBackground::__MoveOwn()
 
     // adjust volume of the nature sound-effect
     if(m_pNatureSound->EnableRef(this))
-        m_pNatureSound->SetVolume(MAX(g_pEnvironment->GetTransition().GetValue((g_pEnvironment->GetBackground() == this) ? CORE_TIMER_GET_NORMAL : CORE_TIMER_GET_REVERSED), 0.0f));
+        m_pNatureSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
 
     // TODO: sound-volume per config value 
 }
@@ -335,9 +335,6 @@ cCloudBackground::cCloudBackground()noexcept
     {
         m_pWindSound->PlayRelative(this, 0.0f, 1.0f, 0.0f, true);
     });
-
-
-    m_pOutdoor->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);  
 }
 
 
@@ -356,13 +353,13 @@ cCloudBackground::~cCloudBackground()
 void cCloudBackground::SetCloudAlpha(const coreFloat& fAlpha)
 {
     // 
-    auto apCloud = this->GetAirObjectList()->front()->List();
+    const coreSet<coreObject3D*>* papCloud = m_apAirObjectList[1]->List();
 
     // 
-    for(coreUintW i = 0u, ie = apCloud->size(); i < ie; ++i)
+    for(coreUintW i = 0u, ie = papCloud->size(); i < ie; ++i)
     {
         if(i % GRASS_CLOUD_DENSITY)
-            (*apCloud)[i]->SetAlpha((i % 2u) ? MAX(fAlpha*2.0f - 1.0f, 0.0f) : MIN(fAlpha*2.0f, 1.0f));
+            (*papCloud)[i]->SetAlpha((i % 2u) ? MAX(fAlpha*2.0f - 1.0f, 0.0f) : MIN(fAlpha*2.0f, 1.0f));
     }
 
     // 
@@ -385,23 +382,23 @@ void cCloudBackground::SetOverlayAlpha(const coreFloat& fAlpha)
 void cCloudBackground::ReduceClouds()
 {
     // 
-    auto pAir    = this->GetAirObjectList()->front();
-    auto apCloud = pAir->List();
+    coreBatchList*          pAir     = m_apAirObjectList[1];
+    coreSet<coreObject3D*>* papCloud = pAir->List();
 
-    ASSERT(GRASS_CLOUD_NUM * GRASS_CLOUD_DENSITY <= apCloud->size())
+    ASSERT(GRASS_CLOUD_NUM * GRASS_CLOUD_DENSITY <= papCloud->size())
 
     // 
-    for(coreUintW i = 0u, ie = apCloud->size(); i < ie; ++i)
+    for(coreUintW i = 0u, ie = papCloud->size(); i < ie; ++i)
     {
         if(i % GRASS_CLOUD_DENSITY)
-            SAFE_DELETE((*apCloud)[i]);
+            SAFE_DELETE((*papCloud)[i]);
     }
 
     // 
-    FOR_EACH_DYN(it, *apCloud)
+    FOR_EACH_DYN(it, *papCloud)
     {
         if(*it) DYN_KEEP  (it)
-           else DYN_REMOVE(it, *apCloud)
+           else DYN_REMOVE(it, *papCloud)
     }
 
     // 
@@ -428,42 +425,31 @@ void cCloudBackground::__RenderOwn()
 void cCloudBackground::__MoveOwn()
 {
     // 
-    m_Overlay.SetTexOffset(coreVector2(0.0f, m_Overlay.GetTexOffset().y - 0.65f/8.0f * Core::System->GetTime() * g_pEnvironment->GetSpeed()));
+    m_Overlay.SetTexOffset(coreVector2(0.0f, m_Overlay.GetTexOffset().y - 0.08f * Core::System->GetTime() * g_pEnvironment->GetSpeed()));
 
     // 
     if(m_pWindSound->EnableRef(this))
-        m_pWindSound->SetVolume(m_fWindVolume * MAX(g_pEnvironment->GetTransition().GetValue((g_pEnvironment->GetBackground() == this) ? CORE_TIMER_GET_NORMAL : CORE_TIMER_GET_REVERSED), 0.0f));
+        m_pWindSound->SetVolume(m_fWindVolume * g_pEnvironment->RetrieveTransitionBlend(this));
 
     // 
     cGrassBackground::__MoveOwn();
 
-    //if(g_pGame)
-    //g_pGame->ForEachPlayer([](const cPlayer* pPlayer)
-    //{
-    //    const coreVector3& vPos = pPlayer->GetPosition ();
-    //    const coreVector3& vDir = pPlayer->GetDirection();
-    //    const coreVector3  vTan = coreVector3(vDir.xy().Rotate90(), 0.0f);
-    //
-    //    g_pSpecialEffects->CreateTrailSmoke(vPos - 5.0f*vDir + 2.0f*vTan, -vDir, g_pEnvironment->GetSpeed()/0.7f, 1u);
-    //    g_pSpecialEffects->CreateTrailSmoke(vPos - 5.0f*vDir - 2.0f*vTan, -vDir, g_pEnvironment->GetSpeed()/0.7f, 1u);
-    //});
 
-
-    auto nControlObjectsFunc = [](std::vector<coreBatchList*>* OUTPUT papList)
+     
+    auto nControlObjectsFunc = [](coreBatchList* OUTPUT pList)
     {
-        FOR_EACH(it, *papList)
+        FOR_EACH(et, *pList->List())
         {
-            FOR_EACH(et, *(*it)->List())
-            {
-                coreObject3D* pObject = (*et);
-                pObject->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
-            }
-
-            (*it)->MoveNormal();
+            coreObject3D* pObject = (*et);
+            pObject->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
         }
-    };
-    nControlObjectsFunc(&m_apGroundObjectList);
-    nControlObjectsFunc(&m_apDecalObjectList);
-    //nControlObjectsFunc(&m_apAirObjectList);
 
+        pList->MoveNormal();
+    };
+    FOR_EACH(it, m_apGroundObjectList) nControlObjectsFunc(*it);
+    FOR_EACH(it, m_apDecalObjectList)  nControlObjectsFunc(*it);
+    nControlObjectsFunc(m_apAirObjectList[0]);
+
+    m_pOutdoor->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+     
 }

@@ -65,7 +65,7 @@ cSeaBackground::cSeaBackground()noexcept
         // bind stone list to shadow map
         m_pOutdoor->GetShadowMap()->BindList(pList1);
     }
-      // drehung und wellen-beweung   
+
     // allocate weed lists
     pList1 = new coreBatchList(SEA_WEED_RESERVE);
     pList1->DefineProgram("object_wave_inst_program");
@@ -79,7 +79,7 @@ cSeaBackground::cSeaBackground()noexcept
                 const coreFloat   fHeight   = m_pOutdoor->RetrieveHeight(vPosition);
 
                 // test for valid values
-                if(fHeight > -23.0f && fHeight < -18.0f)// && (F_TO_SI(vPosition.y+166.0f) % 80 < 40))
+                if(fHeight > -23.0f && fHeight < -18.0f)
                 {
                     if(!cBackground::_CheckIntersectionQuick(pList1,                  vPosition, 1.0f) &&
                        !cBackground::_CheckIntersection     (m_apGroundObjectList[0], vPosition, 9.0f))
@@ -210,18 +210,16 @@ cSeaBackground::cSeaBackground()noexcept
         m_pOutdoor->GetShadowMap()->BindList(pList2);
     }
 
-
-
-    // allocate leaf list
-    pList1 = new coreBatchList(GRASS_LEAF_RESERVE);
+    // allocate algae list
+    pList1 = new coreBatchList(SEA_ALGAE_RESERVE);
     pList1->DefineProgram("effect_decal_inst_program");
     {
-        for(coreUintW i = 0u; i < GRASS_LEAF_NUM; ++i)
+        for(coreUintW i = 0u; i < SEA_ALGAE_NUM; ++i)
         {
             for(coreUintW j = 0u; j < 20u; ++j)   // tries
             {
                 // calculate position and height
-                const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.45f, 0.45f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(GRASS_LEAF_NUM)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
+                const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.45f, 0.45f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(SEA_ALGAE_NUM)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
                 const coreFloat   fHeight   = Core::Rand->Float(10.0f, 30.0f);
 
                 // test for valid values
@@ -246,11 +244,10 @@ cSeaBackground::cSeaBackground()noexcept
             }
         }
 
-        // post-process list and add it to the air  
+        // post-process list and add it to the air
         cBackground::_FillInfinite(pList1);
         m_apDecalObjectList.push_back(pList1);
     }
-
 }
 
 
@@ -258,13 +255,16 @@ cSeaBackground::cSeaBackground()noexcept
 // render the sea background
 void cSeaBackground::__RenderOwn()
 {
-    coreProgramPtr pProgram = m_apGroundObjectList[1]->GetProgram();    
+    const coreBatchList*  pGround  = m_apGroundObjectList[1];
+    const coreProgramPtr& pProgram = pGround->IsInstanced() ? pGround->GetProgram() : pGround->List()->front()->GetProgram();
 
+    // enable the shader-program
     if(!pProgram.IsUsable()) return;
     if(!pProgram->Enable())  return;
 
+    // 
     pProgram->Enable();
-    pProgram->SendUniform("u_v1Time", m_fWaveTime * 1.4f);
+    pProgram->SendUniform("u_v1Time", m_fWaveTime);
 }
 
 
@@ -272,5 +272,6 @@ void cSeaBackground::__RenderOwn()
 // move the sea background
 void cSeaBackground::__MoveOwn()
 {
-    m_fWaveTime.Update(1.0f);
+    // 
+    m_fWaveTime.Update(1.4f);
 }

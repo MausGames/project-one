@@ -38,14 +38,16 @@
 #define GRASS_CLOUD_RESERVE  (76u)   // # tested
 #define GRASS_CLOUD_DENSITY  (10u)
 
-#define SEA_STONE_NUM        (1536u)  
-#define SEA_STONE_RESERVE    (256u)  
-#define SEA_WEED_NUM         (3072u)  
-#define SEA_WEED_RESERVE     (512u)  
-#define SEA_ANIMAL_NUM       (1536u)  
-#define SEA_ANIMAL_1_RESERVE (256u)  
-#define SEA_ANIMAL_2_RESERVE (256u)  
-// bubbles ?    
+#define SEA_STONE_NUM        (1536u)
+#define SEA_STONE_RESERVE    (256u)
+#define SEA_WEED_NUM         (3072u)
+#define SEA_WEED_RESERVE     (512u)
+#define SEA_ANIMAL_NUM       (1536u)
+#define SEA_ANIMAL_1_RESERVE (256u)
+#define SEA_ANIMAL_2_RESERVE (256u)
+#define SEA_ALGAE_NUM        (2048u)
+#define SEA_ALGAE_RESERVE    (1024u)
+// bubbles, water-sound ?    
 
 
 // ****************************************************************

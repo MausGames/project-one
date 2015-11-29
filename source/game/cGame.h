@@ -15,22 +15,27 @@
 
 // ****************************************************************
 // game definitions
-#define GAME_PLAYERS        (PLAYERS)        // default number of players
-#define GAME_INTRO_DELAY    (5.5f)           // 
-#define GAME_INTRO_DURATION (3.5f)           // 
-
-#define GAME_DEPTH_WEAK     (0.4f), (1.0f)   // 
-#define GAME_DEPTH_PLAYER   (0.2f), (1.0f)   // 
-#define GAME_DEPTH_STRONG   (0.0f), (0.7f)   // 
-#define GAME_DEPTH_ENEMY    (0.0f), (0.5f)   // 
+#define GAME_PLAYERS        (PLAYERS)   // default number of players
+#define GAME_INTRO_DELAY    (0.2f)      // 
+#define GAME_INTRO_DURATION (3.5f)      // 
 
 enum cGameStatus : coreUint8
 {
     GAME_STATUS_INTRO   = 0x01u,   // 
     GAME_STATUS_PLAY    = 0x02u,   // 
-    GAME_STATUS_OUTRO   = 0x03u,   // (# two bits) 
-    GAME_STATUS_LOADING = 0x04u    // 
+    GAME_STATUS_OUTRO   = 0x04u,   // 
+    GAME_STATUS_LOADING = 0x08u    // 
 };
+
+
+// ****************************************************************
+// 
+#define DEPTH_PUSH           {g_pGame->PushDepthLevel();}
+#define __DEPTH_LEVEL_UNDER  {glDepthRange(0.9f, 1.0f);}
+#define __DEPTH_LEVEL_SHIP   {glDepthRange(0.8f, 0.9f);}
+#define __DEPTH_LEVEL_ATTACK {m_iDepthLevel = 9u;}
+#define __DEPTH_LEVEL_OVER   {g_pGame->PushDepthLevel();}
+#define __DEPTH_RESET        {glDepthRange(0.0f, 1.0f);}
 
 
 // ****************************************************************
@@ -52,6 +57,8 @@ private:
 
     coreFlow m_fTimeMission;                 // total time in mission
     coreFlow m_afTimeBoss[MISSION_BOSSES];   // total time per boss battle
+
+    coreUint8 m_iDepthLevel;                 // 
 
     coreUint8 m_iStatus;                     // 
     coreBool  m_bCoop;                       // 
@@ -75,7 +82,11 @@ public:
     void RestartMission();
 
     // 
-    cPlayer* RETURN_NONNULL FindPlayer(const coreVector2& vPosition);
+    void PushDepthLevel();
+    void OffsetDepthLevel(const coreFloat& fOffset)const;
+
+    // 
+    cPlayer* FindPlayer(const coreVector2& vPosition);
     template <typename F> void ForEachPlayer(F&& nFunction);   // [](cPlayer* OUTPUT pPlayer) -> void
 
     // access game objects

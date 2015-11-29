@@ -10,8 +10,8 @@
 
 
 // ****************************************************************
-// init the outline-layer
-void cOutline::Init(const coreChar* pcProgramSingleName, const coreChar* pcProgramInstancedName)
+// 
+void cOutlineStyle::Construct(const coreChar* pcProgramSingleName, const coreChar* pcProgramInstancedName)
 {
     // load shader-programs for outlined objects
     s_pProgramSingle    = Core::Manager::Resource->Get<coreProgram>(pcProgramSingleName);
@@ -20,12 +20,42 @@ void cOutline::Init(const coreChar* pcProgramSingleName, const coreChar* pcProgr
 
 
 // ****************************************************************
-// exit the outline-layer
-void cOutline::Exit()
+// apply outline-style
+void cOutlineStyle::Apply()
 {
-    // unload shader-programs
-    s_pProgramSingle    = NULL;
-    s_pProgramInstanced = NULL;
+    // draw single objects
+    FOR_EACH(it, this->GetObjectSet())
+        (*it)->Render(s_pProgramSingle);
+
+    // draw lists with objects
+    FOR_EACH(it, this->GetListSet())
+        (*it)->Render(s_pProgramInstanced, s_pProgramSingle);
+}
+
+
+// ****************************************************************
+// apply outline-style immediately to single object
+void cOutlineStyle::ApplyObject(coreObject3D* pObject)const
+{
+    pObject->Render(s_pProgramSingle);
+}
+
+
+// ****************************************************************
+// apply outline-style immediately to list with objects
+void cOutlineStyle::ApplyList(coreBatchList* pList)const
+{
+    pList->Render(s_pProgramInstanced, s_pProgramSingle);
+}
+
+
+// ****************************************************************
+// constructor
+cOutline::cOutline()noexcept
+{
+    // 
+    m_aOutlineStyle[OUTLINE_STYLE_FULL]  .Construct("effect_outline_program",        "effect_outline_inst_program");
+    m_aOutlineStyle[OUTLINE_STYLE_DIRECT].Construct("effect_outline_direct_program", "effect_outline_direct_inst_program");
 }
 
 
@@ -33,15 +63,35 @@ void cOutline::Exit()
 // apply outline-layer
 void cOutline::Apply()
 {
-    glDepthMask(false);
+    // 
+    if(std::any_of(m_aOutlineStyle, m_aOutlineStyle + OUTLINE_STYLES, [](const cOutlineStyle& oOutlineStyle) {return !oOutlineStyle.IsEmpty();}))
     {
-        // draw single objects
-        FOR_EACH(it, this->GetObjectSet())
-            (*it)->Render(s_pProgramSingle);
-
-        // draw lists with objects
-        FOR_EACH(it, this->GetListSet())
-            (*it)->Render(s_pProgramInstanced, s_pProgramSingle);
+        glDepthMask(false);
+        {
+            // 
+            for(coreUintW i = 0u; i < OUTLINE_STYLES; ++i)
+                m_aOutlineStyle[i].Apply();
+        }
+        glDepthMask(true);
     }
-    glDepthMask(true);
+}
+
+
+// ****************************************************************
+// 
+void cOutline::ClearObjects()
+{
+    // 
+    for(coreUintW i = 0u; i < OUTLINE_STYLES; ++i)
+        m_aOutlineStyle[i].ClearObjects();
+}
+
+
+// ****************************************************************
+// 
+void cOutline::ClearLists()
+{
+    // 
+    for(coreUintW i = 0u; i < OUTLINE_STYLES; ++i)
+        m_aOutlineStyle[i].ClearLists();
 }

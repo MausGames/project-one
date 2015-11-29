@@ -107,8 +107,8 @@ private:
     // execute own routines
     void __ResurrectOwn   ()override;
     void __KillOwn        (const coreBool& bAnimated)override;
-    void __RenderOwnWeak  ()override;
-    void __RenderOwnStrong()override;
+    void __RenderOwnUnder ()override;
+    void __RenderOwnAttack()override;
     void __MoveOwn        ()override;
 
     // 
@@ -148,8 +148,7 @@ private:
     // execute own routines
     void __ResurrectOwn   ()override;
     void __KillOwn        (const coreBool& bAnimated)override;
-    void __RenderOwnStrong()override;
-    void __RenderOwnAfter ()override;
+    void __RenderOwnAttack()override;
     void __MoveOwn        ()override;
 
     // 

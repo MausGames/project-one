@@ -38,6 +38,9 @@ public:
     inline void UnbindList(coreBatchList* pList) {ASSERT( m_apList.count(pList)) m_apList.erase (pList);}
     inline void ClearLists()                     {m_apList.clear();}
 
+    // 
+    inline coreBool IsEmpty()const {return (m_apObject.empty() && m_apList.empty());}
+
     // get bound objects and lists
     inline const coreSet<coreObject3D*>&  GetObjectSet()const {return m_apObject;}
     inline const coreSet<coreBatchList*>& GetListSet  ()const {return m_apList;}

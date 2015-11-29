@@ -10,8 +10,6 @@
 #ifndef _P1_GUARD_OUTDOOR_H_
 #define _P1_GUARD_OUTDOOR_H_
 
-// TODO: use triangle-strip with primitive-restart ?
-
 
 // ****************************************************************
 // outdoor definitions
@@ -65,6 +63,7 @@ private:
     coreUint32 m_iIndexOffset;                      // current index offset
     coreFloat  m_fFlyOffset;                        // current fly offset
 
+    coreUint8 m_iHandleIndex;                       // 
     coreUint8 m_iAlgorithm;                         // geometry algorithm ID
     coreFloat m_fGrade;                             // randomness grade
 
@@ -83,6 +82,7 @@ public:
     void Render()override;
 
     // load outdoor resources
+    void LoadProgram (const coreBool& bGlow);
     void LoadTextures(const coreChar* pcTextureTop, const coreChar* pcTextureBottom);
     void LoadGeometry(const coreUint8& iAlgorithm, const coreFloat& fGrade);
 

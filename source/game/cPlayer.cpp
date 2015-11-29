@@ -187,20 +187,15 @@ void cPlayer::Move()
 
     if(!CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
     {
-        //if(CONTAINS_BIT(m_pInput->iButtonPress, 1u)) this->SetDirection(-this->GetDirection());
-
-
         // move the ship
         const coreFloat fSpeed = (!CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && CONTAINS_BIT(m_pInput->iButtonHold, 0u)) ? 20.0f : 50.0f;
-        //const coreFloat fSpeed = (!CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && (m_pInput->iButtonHold & BITLINE(PLAYER_WEAPONS*WEAPON_MODES))) ? 20.0f : 50.0f;
-         
         m_vNewPos += m_pInput->vMove * (Core::System->GetTime() * fSpeed);
 
         // 
         if(!m_vForce.IsNull())
         {
             m_vNewPos += m_vForce * Core::System->GetTime();
-            m_vForce  *= 1.0f - 3.0f*Core::System->GetTime();
+            m_vForce  *= 1.0f - 3.0f * Core::System->GetTime();
         }
 
         // restrict movement to the foreground area
@@ -231,18 +226,15 @@ void cPlayer::Move()
             this->TransferChain();
     }
 
-    // update the weapons (shooting and stuff)
+    // update all weapons (shooting and stuff)
     for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
     {
         const coreUint8 iShoot = (!CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT)) ? ((m_pInput->iButtonHold & (BITLINE(WEAPON_MODES) << (i*WEAPON_MODES))) >> (i*WEAPON_MODES)) : 0u;
         m_apWeapon[i]->Update(iShoot);
     }
 
-
-
-
     // 
-    if(CONTAINS_BIT(m_pInput->iButtonPress, PLAYER_WEAPONS*2u))
+    if(CONTAINS_BIT(m_pInput->iButtonPress, PLAYER_WEAPONS * WEAPON_MODES))
         this->TransformDark(CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_DARKNESS) ? PLAYER_DARK_OFF : PLAYER_DARK_ON);
 
     if(m_Bubble.IsEnabled(CORE_OBJECT_ENABLE_ALL))
@@ -266,8 +258,6 @@ void cPlayer::Move()
         m_Bubble.Move();
     }
 
-
-    // TODO # 
     // 
     if(m_fDarkTime)
     {
@@ -280,8 +270,8 @@ void cPlayer::Move()
         });
 
         // 
-        if((m_fDarkTime += (bGrace ? 0.25f : -0.5f)   *0.1f    * Core::System->GetTime()) <= 0.0f) this->TransformDark(PLAYER_DARK_RESET);
-        m_fDarkTime = CLAMP(m_fDarkTime, 0.0f, 1.0f);
+        m_fDarkTime = CLAMP(m_fDarkTime + (bGrace ? 0.025f : -0.05f) * Core::System->GetTime(), 0.0f, 1.0f);
+        if(!m_fDarkTime) this->TransformDark(PLAYER_DARK_RESET);
     }
 }
 
@@ -330,7 +320,8 @@ void cPlayer::Kill(const coreBool& bAnimated)
     ADD_VALUE(m_iStatus, PLAYER_STATUS_DEAD)
 
     // reset weapon shoot status
-    for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i) m_apWeapon[i]->Update(0u);
+    for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
+        m_apWeapon[i]->Update(0u);
 
     // 
     if(bAnimated) g_pSpecialEffects->MacroExplosionPhysicalBig(this->GetPosition());
@@ -360,11 +351,11 @@ void cPlayer::AddScore(const coreUint32& iValue, const coreBool& bModified)
 void cPlayer::AddCombo(const coreUint32& iValue)
 {
     const coreUint32 iOld = F_TO_UI(this->GetCurCombo());
-
-    // 
-    m_iComboValue[0] += iValue;
-    m_iComboValue[1]  = MAX(m_iComboValue[0], m_iComboValue[1]);
-
+    {
+        // 
+        m_iComboValue[0] += iValue;
+        m_iComboValue[1]  = MAX(m_iComboValue[0], m_iComboValue[1]);
+    }
     const coreUint32 iNew = F_TO_UI(this->GetCurCombo());
 
     // 
@@ -466,6 +457,9 @@ void cPlayer::TransformDark(const coreUint8& iStatus)
         g_pSpecialEffects->CreateBlast     (this->GetPosition(), SPECIAL_BLAST_BIG, coreVector3(1.0f,1.0f,1.0f));
 
         // 
+        m_fDarkTime = 0.0f;
+
+        // 
         g_pGame->GetBulletManagerEnemy()->ForEachBullet([&](cBullet* OUTPUT pBullet)
         {
             // 
@@ -513,7 +507,7 @@ void cPlayer::UpdateExhaust(const coreFloat& fStrength)
 {
     // 
     const coreFloat fLen  = fStrength * 40.0f;
-    const coreFloat fSize = 1.0f -  fStrength * 0.25f;
+    const coreFloat fSize = 1.0f - fStrength * 0.25f;
 
     // 
          if( fStrength && !m_Exhaust.IsEnabled(CORE_OBJECT_ENABLE_ALL)) g_pGlow->BindObject  (&m_Exhaust);
@@ -522,7 +516,7 @@ void cPlayer::UpdateExhaust(const coreFloat& fStrength)
     // 
     m_Exhaust.SetSize     (coreVector3(fSize, fLen, fSize) * 0.6f);
     m_Exhaust.SetTexOffset(coreVector2(0.0f, coreFloat(Core::System->GetTotalTime()) * 0.75f));
-    m_Exhaust.SetPosition (this->GetPosition() + coreVector3(0.0f, -(4.0f + m_Exhaust.GetSize().y), 0.0f));
+    m_Exhaust.SetPosition (coreVector3(0.0f, -(m_Exhaust.GetSize().y + 4.0f), 0.0f) + this->GetPosition());
     m_Exhaust.SetEnabled  (fStrength ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
     m_Exhaust.Move();
 }

@@ -87,9 +87,9 @@ private:
     // own routines for derived classes (render functions executed by enemy manager)
     virtual void __ResurrectOwn   ()                          {}
     virtual void __KillOwn        (const coreBool& bAnimated) {}
-    virtual void __RenderOwnWeak  ()                          {}
-    virtual void __RenderOwnStrong()                          {}
-    virtual void __RenderOwnAfter ()                          {}
+    virtual void __RenderOwnUnder ()                          {}
+    virtual void __RenderOwnAttack()                          {}
+    virtual void __RenderOwnOver  ()                          {}
     virtual void __MoveOwn        ()                          {}
 };
 
@@ -129,9 +129,9 @@ public:
 
     // render and move the enemy manager
     void Render      ();
-    void RenderWeak  ();
-    void RenderStrong();
-    void RenderAfter ();
+    void RenderUnder ();
+    void RenderAttack();
+    void RenderOver  ();
     void Move        ();
 
     // add and remove enemies
@@ -284,7 +284,7 @@ template <typename T> cEnemyManager::sEnemySet<T>::sEnemySet()noexcept
 
     // add enemy set to global shadow and outline
     cShadow::GetGlobalContainer()->BindList(&oEnemyActive);
-    g_aaOutline[PRIO_WEAK][STYLE_FULL].BindList(&oEnemyActive);
+    g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->BindList(&oEnemyActive);
 
     // set bullet pool to initial size
     aEnemyPool.resize(ENEMY_SET_INIT_SIZE);

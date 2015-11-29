@@ -54,11 +54,9 @@
 #define PLAYERS             (2u)
 #define FRAMERATE_VALUE     (60.0f)
 #define FRAMERATE_TIME      (1.0f / FRAMERATE_VALUE)
-
 #define CAMERA_POSITION     (coreVector3(0.0f, 0.0f, 110.0f))
 #define CAMERA_DIRECTION    (coreVector3(0.0f, 0.0f,  -1.0f))
 #define CAMERA_ORIENTATION  (coreVector3(0.0f, 1.0f,   0.0f))
-
 #define LIGHT_DIRECTION     (coreVector3(0.583953857f, -0.642349243f, -0.496360779f))
 
 // color values
@@ -91,6 +89,8 @@
 #define COLOR_ENEMY_BROWN   (brown)
 #define COLOR_ENEMY_GREY    (coreVector3(  0.0f/360.0f,   0.0f/100.0f,  60.0f/100.0f).HSVtoRGB())
 #define COLOR_ENEMY_ICE     (coreVector3(208.0f/360.0f,  32.0f/100.0f,  90.0f/100.0f).HSVtoRGB())
+#define COLOR_PLAYER_RED    (COLOR_ENEMY_RED)
+#define COLOR_PLAYER_BLUE   (COLOR_ENEMY_BLUE)
 
 // shader modifiers
 #define SHADER_SHADOW(x)    PRINT("#define _P1_SHADOW_ (%d) \n", x)   // outdoor, object_ground
@@ -110,14 +110,6 @@
 #define TYPE_BULLET_PLAYER  (11)
 #define TYPE_BULLET_ENEMY   (12)
 #define TYPE_OBJECT(x)      (100+x)
-
-// outline priorities and styles
-#define PRIO_WEAK           (0u)
-#define PRIO_STRONG         (2u)
-#define PRIO_PLAYER         (1u)
-#define PRIO_ENEMY          (3u)
-#define STYLE_FULL          (0u)
-#define STYLE_DIRECT        (1u)
 
 // sub-class and object ID macros
 #define ENABLE_ID                                              \
@@ -168,7 +160,7 @@ extern coreMusicPlayer  g_MusicPlayer;       // central music-player
 #include "visual/cForeground.h"
 #include "visual/cPostProcessing.h"
 
-extern cOutline         g_aaOutline[4][2];   // main outline-layer objects (priority, style)
+extern cOutline*        g_pOutline;          // main outline-layer object
 extern cGlow*           g_pGlow;             // main glow-effect object
 extern cDistortion*     g_pDistortion;       // main distortion-effect object
 extern cSpecialEffects* g_pSpecialEffects;   // main special-effects object

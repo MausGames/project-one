@@ -18,17 +18,18 @@ cGame::cGame(const coreBool& bCoop)noexcept
 , m_pMission            (NULL)
 , m_fTimeMission        (0.0f)
 , m_afTimeBoss          {}
+, m_iDepthLevel         (0u)
 , m_iStatus             (0u)
 , m_bCoop               (bCoop)
 {
     // configure first player
-    m_aPlayer[0].Configure  (PLAYER_SHIP_ATK, coreVector3(0.0f/360.0f, 68.0f/100.0f, 90.0f/100.0f).HSVtoRGB(), g_CurConfig.Input.aiType[0]);
+    m_aPlayer[0].Configure  (PLAYER_SHIP_ATK, COLOR_PLAYER_RED, g_CurConfig.Input.aiType[0]);
     m_aPlayer[0].EquipWeapon(0u, REF_ID(cRayWeapon::ID));
 
     if(m_bCoop)
     {
         // configure second player
-        m_aPlayer[1].Configure  (PLAYER_SHIP_DEF, coreVector3(201.0f/360.0f, 74.0f/100.0f, 85.0f/100.0f).HSVtoRGB(), g_CurConfig.Input.aiType[1]);
+        m_aPlayer[1].Configure  (PLAYER_SHIP_DEF, COLOR_PLAYER_BLUE, g_CurConfig.Input.aiType[1]);
         m_aPlayer[1].EquipWeapon(0u, REF_ID(cPulseWeapon::ID));
         STATIC_ASSERT(GAME_PLAYERS == 2u)
     }
@@ -56,63 +57,58 @@ cGame::~cGame()
 // render the game
 void cGame::Render()
 {
-    // render all players
-    for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
-        m_aPlayer[i].Render();
-
-    // render all enemies
-    m_EnemyManager.Render();
-
-    // move everything to the back (can be overdrawn)
-    glDepthRange(GAME_DEPTH_WEAK);
+    __DEPTH_LEVEL_SHIP   // # 1
     {
-        // 
-        m_EnemyManager.RenderWeak();
-        m_pMission   ->RenderWeak();
+        // render all players
+        for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+            m_aPlayer[i].Render();
 
-        // apply weak effect outline-layer
-        g_aaOutline[PRIO_WEAK][STYLE_FULL]  .Apply();
-        g_aaOutline[PRIO_WEAK][STYLE_DIRECT].Apply();
+        // render all enemies
+        m_EnemyManager.Render();
     }
-    glDepthRange(GAME_DEPTH_PLAYER);
+
+    __DEPTH_LEVEL_UNDER
     {
+        glDepthMask(false);
+        {
+            // 
+            m_EnemyManager.RenderUnder();
+            m_pMission   ->RenderUnder();
+        }
+        glDepthMask(true);
+
         // render low-priority bullet manager
         m_BulletManagerPlayer.Render();
-
-        // apply player-bullet outline-layer
-        g_aaOutline[PRIO_PLAYER][STYLE_FULL]  .Apply();
-        g_aaOutline[PRIO_PLAYER][STYLE_DIRECT].Apply();
     }
 
-    // move everything to the front (should always be visible to player)
-    glDepthRange(GAME_DEPTH_STRONG);
+    __DEPTH_LEVEL_SHIP   // # 2
     {
         // 
-        m_EnemyManager.RenderStrong();
-        m_pMission   ->RenderStrong();
-
-        // apply strong effect outline-layer
-        g_aaOutline[PRIO_STRONG][STYLE_FULL]  .Apply();
-        g_aaOutline[PRIO_STRONG][STYLE_DIRECT].Apply();
-
-        // 
-        m_EnemyManager.RenderAfter();
-        m_pMission   ->RenderAfter();
+        g_pOutline->Apply();
     }
-    glDepthRange(GAME_DEPTH_ENEMY);
+
+    __DEPTH_LEVEL_ATTACK
     {
+        // 
+        m_EnemyManager.RenderAttack();
+        m_pMission   ->RenderAttack();
+    }
+
+    __DEPTH_LEVEL_OVER
+    {
+        glDisable(GL_DEPTH_TEST);
+        {
+            // 
+            m_EnemyManager.RenderOver();
+            m_pMission   ->RenderOver();
+        }
+        glEnable(GL_DEPTH_TEST);
+
         // render high-priority bullet manager
-        glDepthFunc(GL_ALWAYS);
         m_BulletManagerEnemy.Render();
-        glDepthFunc(GL_LEQUAL);
-
-        // apply enemy-bullet outline-layer
-        g_aaOutline[PRIO_ENEMY][STYLE_FULL]  .Apply();
-        g_aaOutline[PRIO_ENEMY][STYLE_DIRECT].Apply();
     }
 
-    // reset depth range
-    glDepthRange(0.0f, 1.0f);
+    __DEPTH_RESET
 }
 
 
@@ -239,7 +235,31 @@ void cGame::RestartMission()
 
 // ****************************************************************
 // 
-cPlayer* RETURN_NONNULL cGame::FindPlayer(const coreVector2& vPosition)
+void cGame::PushDepthLevel()
+{
+    // 
+    m_iDepthLevel -= 1u;
+    ASSERT(m_iDepthLevel)
+
+    // 
+    glDepthRange(0.1f * I_TO_F(m_iDepthLevel - 1u),
+                 0.1f * I_TO_F(m_iDepthLevel));
+}
+
+
+// ****************************************************************
+// 
+void cGame::OffsetDepthLevel(const coreFloat& fOffset)const
+{
+    // 
+    glDepthRange(0.1f * I_TO_F(m_iDepthLevel - 1u),
+                 0.1f * I_TO_F(m_iDepthLevel) - fOffset);
+}
+
+
+// ****************************************************************
+// 
+cPlayer* cGame::FindPlayer(const coreVector2& vPosition)
 {
     // 
     if(!m_bCoop) return &m_aPlayer[0];
@@ -248,13 +268,9 @@ cPlayer* RETURN_NONNULL cGame::FindPlayer(const coreVector2& vPosition)
     cPlayer*  pPlayer = &m_aPlayer[0];
     coreFloat fLenSq  = 1.0e06f;
 
-    // TODO: use ForEachPlayer here ? 
     // 
-    for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+    this->ForEachPlayer([&](cPlayer* OUTPUT pCurPlayer)
     {
-        cPlayer* pCurPlayer = &m_aPlayer[i];
-        if(CONTAINS_VALUE(pCurPlayer->GetStatus(), PLAYER_STATUS_DEAD)) continue;
-
         // 
         const coreFloat fCurLenSq = (pCurPlayer->GetPosition().xy() - vPosition).LengthSq();
         if(fCurLenSq < fLenSq)
@@ -263,7 +279,7 @@ cPlayer* RETURN_NONNULL cGame::FindPlayer(const coreVector2& vPosition)
             pPlayer = pCurPlayer;
             fLenSq  = fCurLenSq;
         }
-    }
+    });
 
     // 
     ASSERT(pPlayer)
@@ -317,7 +333,7 @@ coreBool cGame::__HandleIntro()
                 {
                     g_pSpecialEffects->PlaySound      (oPlayer.GetPosition(), 1.0f, SOUND_RUSH_LONG);
                     g_pSpecialEffects->CreateBlowColor(oPlayer.GetPosition(), coreVector3(0.0f,1.0f,0.0f), SPECIAL_BLOW_SMALL, COLOR_FIRE_BLUE);
-                    g_MusicPlayer.Control()->Play();  
+                    g_MusicPlayer.Control()->Play();
                 }
 
                 // fly player animated into the game field

@@ -13,13 +13,14 @@
 
 // ****************************************************************
 // outline definitions
-#define OUTLINE_SHADER_FULL   "effect_outline_program",        "effect_outline_inst_program"          // shader-program names for full outlining
-#define OUTLINE_SHADER_DIRECT "effect_outline_direct_program", "effect_outline_direct_inst_program"   // shader-program names for directional interpolated outlining
+#define OUTLINE_STYLE_FULL   (0u)   // full outlining style
+#define OUTLINE_STYLE_DIRECT (1u)   // directional interpolated outlining style
+#define OUTLINE_STYLES       (2u)   // 
 
 
 // ****************************************************************
-// outline-layer class
-class cOutline final : public cBindContainer
+// outline-style class
+class cOutlineStyle final : public cBindContainer
 {
 private:
     coreProgramPtr s_pProgramSingle;      // shader-program for single outlined objects
@@ -27,16 +28,44 @@ private:
 
 
 public:
-    cOutline()noexcept {}
+    cOutlineStyle()noexcept {}
+
+    DISABLE_COPY(cOutlineStyle)
+
+    // 
+    void Construct(const coreChar* pcProgramSingleName, const coreChar* pcProgramInstancedName);
+
+    // apply outline-style
+    void Apply();
+
+    // apply outline-style immediately
+    void ApplyObject(coreObject3D*  pObject)const;
+    void ApplyList  (coreBatchList* pList)const;
+};
+
+
+// ****************************************************************
+// outline-layer class
+class cOutline final
+{
+private:
+    cOutlineStyle m_aOutlineStyle[OUTLINE_STYLES];   // 
+
+
+public:
+    cOutline()noexcept;
 
     DISABLE_COPY(cOutline)
 
-    // init and exit the outline-layer
-    void Init(const coreChar* pcProgramSingleName, const coreChar* pcProgramInstancedName);
-    void Exit();
-
     // apply outline-layer
     void Apply();
+
+    // 
+    void ClearObjects();
+    void ClearLists();
+
+    // 
+    inline cOutlineStyle* GetStyle(const coreUintW& iStyle) {ASSERT(iStyle < OUTLINE_STYLES) return &m_aOutlineStyle[iStyle];}
 };
 
 

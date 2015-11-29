@@ -58,9 +58,9 @@ private:
     coreFloat    m_fBannerStart;            // animation start time
     coreBool     m_bBannerType;             // animation type (boss, mission)
 
+    coreBool  m_bVisible;                   // visibility status
     coreFloat m_fAlphaAll;                  // overall alpha value (except for banner)
     coreFloat m_fAlphaBoss;                 // boss alpha value
-    coreBool  m_bVisible;                   // visibility status
 
 
 public:
@@ -83,9 +83,9 @@ public:
     void UpdateLayout();
 
     // set object properties
+    inline void SetVisible  (const coreBool&  bVisible) {m_bVisible   = bVisible;}
     inline void SetAlphaAll (const coreFloat& fAlpha)   {m_fAlphaAll  = fAlpha;}
     inline void SetAlphaBoss(const coreFloat& fAlpha)   {m_fAlphaBoss = fAlpha;}
-    inline void SetVisible  (const coreBool&  bVisible) {m_bVisible   = bVisible;}
 };
 
 

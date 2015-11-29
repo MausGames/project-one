@@ -24,9 +24,10 @@ void VertexMain()
     
 #else
 
-    // transform view direction and position
+    // transform view direction and position (with slight z-offset to reduce fighting)
     vec4 v4NewPosition = vec4(coreObject3DTransformRaw(), 1.0);
     gl_Position        = u_m4ViewProj * v4NewPosition;
+    gl_Position.z     -= 0.01 * gl_Position.w;
 
     // perspective view (for default shading)
     vec3 v3ViewDir = normalize(u_v3CamPosition - v4NewPosition.xyz);

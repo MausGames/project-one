@@ -110,7 +110,7 @@ cConfigMenu::cConfigMenu()noexcept
     #define __SET_SWITCHBOX(x,n,s)                                               \
     {                                                                            \
         coreLabel& oLabel = m_aLabel[ENTRY_ ## n];                               \
-        oLabel.SetTextLanguage("CONFIG_" ## #n);                                 \
+        oLabel.SetTextLanguage("CONFIG_" #n);                                    \
                                                                                  \
         x.Construct   (MENU_SWITCHBOX, MENU_FONT_SMALL, MENU_OUTLINE_SMALL, 0u); \
         x.SetPosition (coreVector2(-1.00f,1.00f) * oLabel.GetPosition());        \

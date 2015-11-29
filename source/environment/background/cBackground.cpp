@@ -296,9 +296,9 @@ void cBackground::ClearObjects()
 void cBackground::_FillInfinite(coreBatchList* OUTPUT pObjectList)
 {
     coreSet<coreObject3D*>* pContent = pObjectList->List();
+    WARN_IF(pContent->size() < 2u) return;
 
     // 
-    ASSERT(pContent->size() >= 2u)
     if((*pContent)[0]->GetPosition().y > (*pContent)[1]->GetPosition().y)
         std::reverse(pContent->begin(), pContent->end());
 

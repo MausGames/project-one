@@ -58,23 +58,9 @@ void cMission::Setup()
 
 // ****************************************************************
 // render the mission
-void cMission::RenderWeak()
-{
-    // 
-    this->__RenderOwnWeak();
-}
-
-void cMission::RenderStrong()
-{
-    // 
-    this->__RenderOwnStrong();
-}
-
-void cMission::RenderAfter()
-{
-    // 
-    this->__RenderOwnAfter();
-}
+void cMission::RenderUnder () {this->__RenderOwnUnder ();}
+void cMission::RenderAttack() {this->__RenderOwnAttack();}
+void cMission::RenderOver  () {this->__RenderOwnOver  ();}
 
 
 // ****************************************************************
@@ -91,7 +77,7 @@ void cMission::MoveBefore()
         m_anStage.back()();
         if(m_anStage.empty())
         {
-            // TODO # end mission? 
+            // TODO # end mission 
         }
     }
     ASSERT(m_anStage.size() == m_aiStageLine.size())

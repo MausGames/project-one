@@ -17,7 +17,6 @@ cViridoMission::cViridoMission()noexcept
 , m_apOwner      {}
 , m_iBounceState (0u)
 , m_bBounceReal  (false)
-, m_fOverlayTime (-(GAME_INTRO_DURATION + 4.5f))   //#  
 , m_fAnimation   (0.0f)
 {
     // 
@@ -58,7 +57,6 @@ cViridoMission::cViridoMission()noexcept
     }
 
     // 
-    g_aaOutline[PRIO_STRONG][STYLE_FULL].BindList(&m_Ball);
     g_pGlow->BindList(&m_Ball);
     g_pGlow->BindList(&m_BallTrail);
 
@@ -82,16 +80,6 @@ cViridoMission::cViridoMission()noexcept
         m_aPaddleSphere[i].DefineModel("object_sphere.md3");
         m_aPaddleSphere[i].SetSize    (bBoss ? coreVector3(30.0f,30.0f,30.0f) : coreVector3(15.0f,15.0f,15.0f));
     }
-
-    // 
-    m_Overlay.Construct   (MENU_FONT_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
-    //m_Overlay.SetPosition (m_aHealthBar[0].GetPosition() + coreVector2(0.017f,0.035f));
-    //m_Overlay.SetCenter   (m_aHealthBar[0].GetCenter());
-    //m_Overlay.SetAlignment(m_aHealthBar[0].GetAlignment());
-    //m_Overlay.SetColor3(COLOR_MENU_WHITE);
-    m_Overlay.SetAlpha(0.0f);
-    m_Overlay.SetText("A game by Martin Mauersics");
-    //m_Overlay.SetText("Project One");
 }
 
 
@@ -100,7 +88,6 @@ cViridoMission::cViridoMission()noexcept
 cViridoMission::~cViridoMission()
 {
     // 
-    g_aaOutline[PRIO_STRONG][STYLE_FULL].UnbindList(&m_Ball);
     g_pGlow->UnbindList(&m_Ball);
     g_pGlow->UnbindList(&m_BallTrail);
 
@@ -169,18 +156,6 @@ void cViridoMission::__SetupOwn()
 
         // 
         STAGE_FINISH_AFTER(5.5f)
-    });
-
-    // ################################################################
-    // 
-    STAGE_MAIN
-    {
-        // 
-        m_Overlay.SetText("Project One");
-        m_fOverlayTime = g_pGame->GetTimeMission();
-
-        // 
-        STAGE_FINISH_AFTER(1.0f)
     });
 
     // ################################################################
@@ -364,23 +339,6 @@ void cViridoMission::__SetupOwn()
 
     // ################################################################
     // 
-    STAGE_MAIN
-    {
-        // 
-        m_Overlay.SetText("Thank you for playing!");
-        m_fOverlayTime = g_pGame->GetTimeMission();
-
-        // 
-        g_pEnvironment->SetTargetDirection(coreVector2(0.0f,1.0f));
-        g_pEnvironment->SetTargetSide     (coreVector2(0.0f,0.0f));
-        g_pEnvironment->SetTargetSpeed    (2.0f);
-
-        // 
-        STAGE_FINISH_AFTER(10000.0f)
-    });
-
-    // ################################################################
-    // 
     //STAGE_MAIN
     //{
     //    if(STAGE_SUB(0.0f))
@@ -406,41 +364,30 @@ void cViridoMission::__SetupOwn()
 
 // ****************************************************************
 // 
-void cViridoMission::__RenderOwnWeak()
+void cViridoMission::__RenderOwnUnder()
 {
-    glDepthMask(false);
-    {
-        // 
-        m_BallTrail.Render();
-    }
-    glDepthMask(true);
+    // 
+    m_BallTrail.Render();
 }
 
 
 // ****************************************************************
 // 
-void cViridoMission::__RenderOwnStrong()
+void cViridoMission::__RenderOwnAttack()
 {
-    glDepthFunc(GL_ALWAYS);
-    {
-        // 
-        m_Ball.Render();
+    DEPTH_PUSH
 
-        // 
-        for(coreUintW i = 0u; i < VIRIDO_PADDLES; ++i)
-            m_aPaddle[i].Render();
-    }
-    glDepthFunc(GL_LEQUAL);
-}
+    // 
+    m_Ball.Render();
+    g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyList(&m_Ball);
 
+    DEPTH_PUSH
 
-// ****************************************************************
-// 
-void cViridoMission::__RenderOwnAfter()
-{
-    glDisable(GL_DEPTH_TEST);
-    m_Overlay.Render();
-    glEnable(GL_DEPTH_TEST);
+    // 
+    for(coreUintW i = 0u; i < VIRIDO_PADDLES; ++i)
+        m_aPaddle[i].Render();
+    for(coreUintW i = 0u; i < VIRIDO_PADDLES; ++i)
+        g_pOutline->GetStyle(OUTLINE_STYLE_DIRECT)->ApplyObject(&m_aPaddle[i]);
 }
 
 
@@ -450,13 +397,6 @@ void cViridoMission::__MoveOwnAfter()
 {
     // 
     m_fAnimation.Update(0.2f);
-
-
-    if(g_pGame->GetTimeMission() >= m_fOverlayTime && g_pGame->GetTimeMission() < (m_fOverlayTime + 6.5f))  
-         m_Overlay.SetAlpha(MIN(m_Overlay.GetAlpha() + 1.0f * Core::System->GetTime(), 1.0f));  
-    else m_Overlay.SetAlpha(MAX(m_Overlay.GetAlpha() - 1.0f * Core::System->GetTime(), 0.0f));  
-    m_Overlay.Move();  
-
 
     // 
     auto nEffectFunc = [](const coreVector2& vEffectPos)
@@ -730,7 +670,6 @@ void cViridoMission::EnablePaddle(const coreUintW& iIndex, cShip* pOwner)
     oPaddle.ChangeType(TYPE_OBJECT(3));
 
     // 
-    g_aaOutline[PRIO_STRONG][STYLE_DIRECT].BindObject(&oPaddle);
     g_pGlow->BindObject(&oPaddle);
     oPaddle.SetEnabled (CORE_OBJECT_ENABLE_ALL);
 }
@@ -748,7 +687,6 @@ void cViridoMission::DisablePaddle(const coreUintW& iIndex, const coreBool& bAni
     oPaddle.ChangeType(0);
 
     // 
-    g_aaOutline[PRIO_STRONG][STYLE_DIRECT].UnbindObject(&oPaddle);
     g_pGlow->UnbindObject(&oPaddle);
     oPaddle.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 }

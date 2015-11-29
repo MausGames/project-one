@@ -355,7 +355,7 @@ cEnemyManager::~cEnemyManager()
 
         // remove enemy set from global shadow and outline
         cShadow::GetGlobalContainer()->UnbindList(pEnemyActive);
-        g_aaOutline[PRIO_WEAK][STYLE_FULL].UnbindList(pEnemyActive);
+        g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->UnbindList(pEnemyActive);
 
         // delete enemy set
         SAFE_DELETE(*it)
@@ -407,7 +407,7 @@ void cEnemyManager::Render()
         (*it)->Render();
 }
 
-void cEnemyManager::RenderWeak()
+void cEnemyManager::RenderUnder()
 {
     // 
     FOR_EACH(it, m_apEnemySet)
@@ -416,15 +416,15 @@ void cEnemyManager::RenderWeak()
 
         // 
         FOR_EACH(et, *pEnemyActive->List())
-            s_cast<cEnemy*>(*et)->__RenderOwnWeak();
+            s_cast<cEnemy*>(*et)->__RenderOwnUnder();
     }
 
     // 
     FOR_EACH(it, m_apAdditional)
-        (*it)->__RenderOwnWeak();
+        (*it)->__RenderOwnUnder();
 }
 
-void cEnemyManager::RenderStrong()
+void cEnemyManager::RenderAttack()
 {
     // 
     FOR_EACH(it, m_apEnemySet)
@@ -433,15 +433,15 @@ void cEnemyManager::RenderStrong()
 
         // 
         FOR_EACH(et, *pEnemyActive->List())
-            s_cast<cEnemy*>(*et)->__RenderOwnStrong();
+            s_cast<cEnemy*>(*et)->__RenderOwnAttack();
     }
 
     // 
     FOR_EACH(it, m_apAdditional)
-        (*it)->__RenderOwnStrong();
+        (*it)->__RenderOwnAttack();
 }
 
-void cEnemyManager::RenderAfter()
+void cEnemyManager::RenderOver()
 {
     // 
     FOR_EACH(it, m_apEnemySet)
@@ -450,12 +450,12 @@ void cEnemyManager::RenderAfter()
 
         // 
         FOR_EACH(et, *pEnemyActive->List())
-            s_cast<cEnemy*>(*et)->__RenderOwnAfter();
+            s_cast<cEnemy*>(*et)->__RenderOwnOver();
     }
 
     // 
     FOR_EACH(it, m_apAdditional)
-        (*it)->__RenderOwnAfter();
+        (*it)->__RenderOwnOver();
 }
 
 
@@ -561,7 +561,7 @@ cScoutEnemy::cScoutEnemy()noexcept
     this->DefineModelLow ("ship_enemy_scout_low.md3");
 
     // configure the enemy
-    this->Configure(10, COLOR_ENEMY_BLUE);
+    this->Configure(10*5, COLOR_ENEMY_BLUE);
 }
 
 

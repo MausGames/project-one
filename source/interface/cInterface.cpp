@@ -65,13 +65,12 @@ void cInterface::sPlayerView::Construct(const coreUintW& iIndex)
 // ****************************************************************
 // constructor
 cInterface::cInterface(const coreUint8& iNumViews)noexcept
-: m_aView        {}
-, m_iNumViews    (iNumViews)
+: m_iNumViews    (iNumViews)
 , m_fBannerStart (-100.0f)
 , m_bBannerType  (false)
+, m_bVisible     (true)
 , m_fAlphaAll    (0.0f)
 , m_fAlphaBoss   (0.0f)
-, m_bVisible     (true)
 {
     ASSERT(m_iNumViews <= INTERFACE_VIEWS)
 

@@ -101,14 +101,14 @@ public:
     void UpdateExhaust(const coreFloat& fStrength);
 
     // 
-    inline cWeapon* GetWeapon(const coreUintW& iIndex) {ASSERT(iIndex < PLAYER_WEAPONS && m_apWeapon[iIndex]) return m_apWeapon[iIndex];}
+    inline cWeapon* GetWeapon(const coreUintW& iIndex) {ASSERT((iIndex < PLAYER_WEAPONS) && m_apWeapon[iIndex]) return m_apWeapon[iIndex];}
 
     // set object properties
     inline void SetNewPos(const coreVector2& vNewPos) {m_vNewPos = vNewPos;}
     inline void SetForce (const coreVector2& vForce)  {m_vForce  = vForce;}
 
     // get object properties
-    inline const cInput*      GetInput        ()const                        {return m_pInput;}
+    inline const cInput*      GetInput        ()const                        {ASSERT(m_pInput) return m_pInput;}
     inline const coreUint32&  GetScoreMission ()const                        {return m_iScoreMission;}
     inline const coreUint32&  GetScoreBoss    (const coreUintW& iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_aiScoreBoss[iIndex];}
     inline       coreFloat    GetCurCombo     ()const                        {return __PLAYER_COMBO(m_iComboValue[0]);}

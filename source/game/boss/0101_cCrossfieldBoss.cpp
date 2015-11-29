@@ -93,7 +93,6 @@ void cCrossfieldBoss::__ResurrectOwn()
         return;
 
     // 
-    g_aaOutline[PRIO_STRONG][STYLE_FULL].BindObject(&m_Duplicate);
     g_pGlow->BindObject(&m_Duplicate);
 
     // 
@@ -101,7 +100,6 @@ void cCrossfieldBoss::__ResurrectOwn()
         g_pGlow->BindObject(&m_aDuplicateTrail[i]);
 
     // 
-    g_aaOutline[PRIO_STRONG][STYLE_FULL].BindList(&m_Boomerang);
     g_pGlow->BindList(&m_Boomerang);
     g_pGlow->BindList(&m_BoomerangTrail);
 }
@@ -167,7 +165,6 @@ void cCrossfieldBoss::__KillOwn(const coreBool& bAnimated)
     }
 
     // 
-    g_aaOutline[PRIO_STRONG][STYLE_FULL].UnbindObject(&m_Duplicate);
     g_pGlow->UnbindObject(&m_Duplicate);
 
     // 
@@ -175,7 +172,6 @@ void cCrossfieldBoss::__KillOwn(const coreBool& bAnimated)
         g_pGlow->UnbindObject(&m_aDuplicateTrail[i]);
 
     // 
-    g_aaOutline[PRIO_STRONG][STYLE_FULL].UnbindList(&m_Boomerang);
     g_pGlow->UnbindList(&m_Boomerang);
     g_pGlow->UnbindList(&m_BoomerangTrail);
 }
@@ -183,34 +179,32 @@ void cCrossfieldBoss::__KillOwn(const coreBool& bAnimated)
 
 // ****************************************************************
 // 
-void cCrossfieldBoss::__RenderOwnWeak()
+void cCrossfieldBoss::__RenderOwnUnder()
 {
-    glDepthMask(false);
-    {
-        // 
-        for(coreUintW i = 0u; i < CROSSFIELD_TRAILS; ++i)
-            m_aDuplicateTrail[i].Render();
+    // 
+    for(coreUintW i = 0u; i < CROSSFIELD_TRAILS; ++i)
+        m_aDuplicateTrail[i].Render();
 
-        // 
-        m_BoomerangTrail.Render();
-    }
-    glDepthMask(true);
+    // 
+    m_BoomerangTrail.Render();
 }
 
 
 // ****************************************************************
 // 
-void cCrossfieldBoss::__RenderOwnStrong()
+void cCrossfieldBoss::__RenderOwnAttack()
 {
-    glDepthFunc(GL_ALWAYS);
-    {
-        // 
-        m_Duplicate.Render();
+    DEPTH_PUSH
 
-        // 
-        m_Boomerang.Render();
-    }
-    glDepthFunc(GL_LEQUAL);
+    // 
+    m_Duplicate.Render();
+    g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(&m_Duplicate);
+
+    DEPTH_PUSH
+
+    // 
+    m_Boomerang.Render();
+    g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyList(&m_Boomerang);
 }
 
 
@@ -303,17 +297,17 @@ void cCrossfieldBoss::__MoveOwn()
             {
                 // 
                 const coreVector2 vDir = coreVector2(0.0f, -SIGN(this->GetPosition().y));
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.5f, this, this->GetPosition().xy(), vDir);
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.4f, this, this->GetPosition().xy(), vDir);
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.3f, this, this->GetPosition().xy(), vDir);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.5f, this, this->GetPosition().xy(), vDir)->MakeGreen();
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.4f, this, this->GetPosition().xy(), vDir)->MakeGreen();
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.3f, this, this->GetPosition().xy(), vDir)->MakeGreen();
 
                 if(m_aiCounter[DUPLICATE_STATUS])
                 {
                     // 
                     const coreVector2 vDir2 = coreVector2(0.0f, -SIGN(m_Duplicate.GetPosition().y));
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.5f, this, m_Duplicate.GetPosition().xy(), vDir2);
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.4f, this, m_Duplicate.GetPosition().xy(), vDir2);
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.3f, this, m_Duplicate.GetPosition().xy(), vDir2);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.5f, this, m_Duplicate.GetPosition().xy(), vDir2)->MakeGreen();
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.4f, this, m_Duplicate.GetPosition().xy(), vDir2)->MakeGreen();
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.3f, this, m_Duplicate.GetPosition().xy(), vDir2)->MakeGreen();
                 }
             });
 
@@ -366,7 +360,7 @@ void cCrossfieldBoss::__MoveOwn()
             const coreVector2 vDir = (pPlayer->GetPosition().xy() - vPos).Normalize();
 
             // 
-            g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.3f, this, vPos, vDir)->MakeSmaller(1.2f);
+            g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.3f, this, vPos, vDir)->MakeOrange()->MakeSmaller(1.2f);
             g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 5.0f, 3u, COLOR_ENERGY_ORANGE);
         });
 
@@ -385,9 +379,9 @@ void cCrossfieldBoss::__MoveOwn()
                 const coreVector2 vDir = (this->GetDirection().xy() + vTan * (0.1f*fOffset)).Normalize();
 
                 // 
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.0f, this, vPos,             vDir);
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.0f, this, vPos + vDir*2.5f, vDir);
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.0f, this, vPos,             -this->GetDirection().xy());
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.0f, this, vPos,             vDir)                      ->MakeBlue();
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.0f, this, vPos + vDir*2.5f, vDir)                      ->MakeBlue();
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.0f, this, vPos,             -this->GetDirection().xy())->MakeBlue();
             }
         });
 
@@ -511,9 +505,9 @@ void cCrossfieldBoss::__MoveOwn()
             //
             //        // 
             //        const coreVector2 vDir = -this->GetPosition().xy().Normalize();
-            //        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.5f, this, this->GetPosition().xy(), vDir);
-            //        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.4f, this, this->GetPosition().xy(), vDir);
-            //        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.3f, this, this->GetPosition().xy(), vDir);
+            //        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.5f, this, this->GetPosition().xy(), vDir)->MakeGreen();
+            //        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.4f, this, this->GetPosition().xy(), vDir)->MakeGreen();
+            //        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.3f, this, this->GetPosition().xy(), vDir)->MakeGreen();
             //
             //});
               
@@ -699,8 +693,8 @@ void cCrossfieldBoss::__MoveOwn()
             if((iTick % iBack) < 10u)
             {
                 const coreVector2 vDir = coreVector2::Direction(PI * (1.0f + 0.07f * (I_TO_F(iTick % iBack) - 4.5f)) * (((iTick % iLoop) >= iBack) ? -1.0f : 1.0f));
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.0f, this, this->GetPosition().xy(),             vDir);
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.0f, this, this->GetPosition().xy() + vDir*2.5f, vDir);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.0f, this, this->GetPosition().xy(),             vDir)->MakeBlue();
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.0f, this, this->GetPosition().xy() + vDir*2.5f, vDir)->MakeBlue();
             }
 
             // 
@@ -745,10 +739,10 @@ void cCrossfieldBoss::__MoveOwn()
             PHASE_CONTROL_TICKER(0u, 0u, 3.5f)
             {
                 // 
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.25f, this, this->GetPosition().xy() + coreVector2(0.0f, 1.5f), coreVector2( 1.0f,0.0f));
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.35f, this, this->GetPosition().xy() + coreVector2(0.0f,-1.5f), coreVector2( 1.0f,0.0f));
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.25f, this, this->GetPosition().xy() + coreVector2(0.0f, 1.5f), coreVector2(-1.0f,0.0f));
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.35f, this, this->GetPosition().xy() + coreVector2(0.0f,-1.5f), coreVector2(-1.0f,0.0f));
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.25f, this, this->GetPosition().xy() + coreVector2(0.0f, 1.5f), coreVector2( 1.0f,0.0f))->MakeOrange();
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.35f, this, this->GetPosition().xy() + coreVector2(0.0f,-1.5f), coreVector2( 1.0f,0.0f))->MakeOrange();
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.25f, this, this->GetPosition().xy() + coreVector2(0.0f, 1.5f), coreVector2(-1.0f,0.0f))->MakeOrange();
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.35f, this, this->GetPosition().xy() + coreVector2(0.0f,-1.5f), coreVector2(-1.0f,0.0f))->MakeOrange();
             });
 
             // 

@@ -13,6 +13,7 @@
 // TODO: render depth-quads or use scissor test (tested: works bad, no gain) on unused background areas (for transition!)
 // TODO: make "side" parameterized
 // TODO: use depth from water as own map for decals to reconstruct position for shadow-mapping, maybe add normal for lighting
+// TODO: lava is not considered for RetrieveSafeHeight
 
 
 // ****************************************************************
@@ -55,6 +56,9 @@ public:
     inline cBackground*     GetBackground   ()const {ASSERT(m_pBackground) return m_pBackground;}
     inline cBackground*     GetOldBackground()const {return m_pOldBackground;}
     inline const coreTimer& GetTransition   ()const {return m_Transition;}
+
+    // 
+    coreFloat RetrieveTransitionBlend(cBackground* pBackground);
 
     // retrieve safe height value
     coreFloat RetrieveSafeHeight(const coreVector2& vPosition);

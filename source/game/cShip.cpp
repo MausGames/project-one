@@ -54,12 +54,13 @@ coreBool cShip::_TakeDamage(const coreInt32& iDamage)
         m_iCurHealth = 0;
 
     // 
-    this->SetColor3(LERP(coreVector3(0.5f,0.5f,0.5f), this->GetBaseColor(), 5.0f * MIN(I_TO_F(m_iCurHealth) / I_TO_F(m_iMaxHealth), 0.2f)));
+    this->SetColor3(LERP(coreVector3(0.5f,0.5f,0.5f), this->GetBaseColor(), 5.0f * MIN(this->GetCurHealthPct(), 0.2f)));
 
     // 
     if(iDamage) m_fBlink = 1.2f;
 
-    return !m_iCurHealth;
+    // 
+    return m_iCurHealth ? false : true;
 }
 
 
@@ -77,7 +78,7 @@ void cShip::_Resurrect(const coreBool& bSingle, const coreVector2& vPosition, co
     if(bSingle)
     {
         cShadow::GetGlobalContainer()->BindObject(this);
-        g_aaOutline[PRIO_WEAK][STYLE_FULL].BindObject(this);
+        g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->BindObject(this);
     }
 
     // enable collision
@@ -93,7 +94,7 @@ void cShip::_Kill(const coreBool& bSingle, const coreBool& bAnimated)
     if(bSingle)
     {
         cShadow::GetGlobalContainer()->UnbindObject(this);
-        g_aaOutline[PRIO_WEAK][STYLE_FULL].UnbindObject(this);
+        g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->UnbindObject(this);
     }
 
     // disable collision

@@ -18,6 +18,9 @@ cOutdoor::cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom
 , m_iAlgorithm    (0u)
 , m_fGrade        (0.0f)
 {
+    // load outdoor shader-program
+    this->LoadProgram(SHADOW_HANDLE_OUTDOOR);
+
     // load outdoor textures
     m_pNormalMap = Core::Manager::Resource->LoadNew<coreTexture>();
     this->LoadTextures(pcTextureTop, pcTextureBottom);
@@ -25,9 +28,6 @@ cOutdoor::cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom
     // load outdoor geometry
     m_pModel = Core::Manager::Resource->LoadNew<coreModel>();
     this->LoadGeometry(iAlgorithm, fGrade);
-
-    // load shader-program
-    this->DefineProgram("environment_outdoor_program");
 }
 
 
@@ -77,7 +77,7 @@ void cOutdoor::Render()
     if(!m_pProgram->Enable())  return;
 
     // send shadow matrix to shader-program
-    cShadow::EnableShadowRead(SHADOW_HANDLE_OUTDOOR);
+    cShadow::EnableShadowRead(m_iHandleIndex);
 
     // enable all active textures
     for(coreUintW i = 0u; i < CORE_TEXTURE_UNITS; ++i)
@@ -86,6 +86,15 @@ void cOutdoor::Render()
     // draw the model
     m_pModel->Enable();
     glDrawRangeElements(m_pModel->GetPrimitiveType(), m_iVertexOffset, m_iVertexOffset + OUTDOOR_RANGE, OUTDOOR_COUNT, m_pModel->GetIndexType(), I_TO_P(m_iIndexOffset));
+}
+
+
+// ****************************************************************
+// load outdoor shader-program
+void cOutdoor::LoadProgram(const coreBool& bGlow)
+{
+    m_iHandleIndex    = bGlow ? SHADOW_HANDLE_OUTDOOR_GLOW         : SHADOW_HANDLE_OUTDOOR;
+    this->DefineProgram(bGlow ? "environment_outdoor_glow_program" : "environment_outdoor_program");
 }
 
 
@@ -136,8 +145,8 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
             const coreFloat xz2 = x2 * z2 + 127.5f;
             const coreFloat yz2 = y2 * z2 + 127.5f;
 
-            ASSERT(xz1 <= 255.0f && yz1 <= 255.0f &&
-                   xz2 <= 255.0f && yz2 <= 255.0f)
+            ASSERT((xz1 <= 255.0f) && (yz1 <= 255.0f) &&
+                   (xz2 <= 255.0f) && (yz2 <= 255.0f))
 
             const coreByte aiPixel[4] = {coreByte(xz1), coreByte(yz1),
                                          coreByte(xz2), coreByte(yz2)};
@@ -358,7 +367,7 @@ coreFloat cOutdoor::RetrieveHeight(const coreVector2& vPosition)
     const coreUintW iI01 = iI00 + 1u;                                   // bottom right
     const coreUintW iI10 = iI00      + OUTDOOR_WIDTH;                   // top left
     const coreUintW iI11 = iI00 + 1u + OUTDOOR_WIDTH;                   // top right
-    ASSERT(iI00 < OUTDOOR_TOTAL_VERTICES && iI11 < OUTDOOR_TOTAL_VERTICES);
+    ASSERT((iI00 < OUTDOOR_TOTAL_VERTICES) && (iI11 < OUTDOOR_TOTAL_VERTICES))
 
     // retrieve height values of the corners
     const coreFloat& fH00 = m_afHeight[iI00];

@@ -13,6 +13,7 @@
 // TODO: glowing waves
 // TODO: particles should not overdraw outlines (at least color-particles)
 // TODO: make lightning owner-sticky with position-offset
+// TODO: implement pixel-fitting screen-shake ? (currently shaking creates a fullscreen-blur)
 
 
 // ****************************************************************

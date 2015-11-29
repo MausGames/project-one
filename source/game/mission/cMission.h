@@ -82,9 +82,9 @@ public:
     void Setup();
 
     // render and move the mission
-    void RenderWeak  ();
-    void RenderStrong();
-    void RenderAfter ();
+    void RenderUnder ();
+    void RenderAttack();
+    void RenderOver  ();
     void MoveBefore  ();
     void MoveAfter   ();
 
@@ -106,9 +106,9 @@ protected:
 private:
     // own routines for derived classes
     virtual void __SetupOwn       () {}
-    virtual void __RenderOwnWeak  () {}
-    virtual void __RenderOwnStrong() {}
-    virtual void __RenderOwnAfter () {}
+    virtual void __RenderOwnUnder () {}
+    virtual void __RenderOwnAttack() {}
+    virtual void __RenderOwnOver  () {}
     virtual void __MoveOwnBefore  () {}
     virtual void __MoveOwnAfter   () {}
 };
@@ -146,9 +146,6 @@ private:
     coreUint8 m_iBounceState;                       // 
     coreBool  m_bBounceReal;                        // 
 
-    coreLabel m_Overlay;                            //      
-    coreFloat m_fOverlayTime;                       //      
-
     coreFlow m_fAnimation;                          // animation value
 
 
@@ -179,9 +176,8 @@ public:
 private:
     // execute own routines
     void __SetupOwn       ()override;
-    void __RenderOwnWeak  ()override;
-    void __RenderOwnStrong()override;
-    void __RenderOwnAfter ()override;
+    void __RenderOwnUnder ()override;
+    void __RenderOwnAttack()override;
     void __MoveOwnAfter   ()override;
 };
 
