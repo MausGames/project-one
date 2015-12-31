@@ -400,7 +400,7 @@ void cConfigMenu::LoadValues()
     m_AmbientSound .SelectValue(g_CurConfig.Audio.iAmbient);
 
     // 
-    const coreLookupStr<std::string>& asLanguageList = cMenu::GetLanguageList();
+    const coreLookup<std::string, std::string>& asLanguageList = cMenu::GetLanguageList();
     m_Language.SelectIndex(std::find(asLanguageList.begin(), asLanguageList.end(), Core::Config->GetString(CORE_CONFIG_SYSTEM_LANGUAGE)) - asLanguageList.begin());
 
     // 
@@ -489,7 +489,7 @@ void cConfigMenu::__UpdateOverallVolume()
 void cConfigMenu::__UpdateLanguage()
 {
     // 
-    const coreLookupStr<std::string>& asLanguageList = cMenu::GetLanguageList();
+    const coreLookup<std::string, std::string>& asLanguageList = cMenu::GetLanguageList();
     Core::Language->Load(asLanguageList.at(m_Language.GetCurEntry().first->c_str()).c_str());
 
     // 

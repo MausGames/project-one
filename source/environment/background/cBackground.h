@@ -16,6 +16,7 @@
 // TODO: added object gets shadow-shader
 // TODO: overlay on cloud background creates redundant overdraw
 // TODO: decals are not affected by shadow or underlying diffuse value (depth-only from water (centralize away) ? -> no shadow, maybe render both (color(shadow, no textures)+depth) single-sampled)
+// TODO: expose pool-allocator for additional objects (AddList)
 
 
 // ****************************************************************
@@ -119,7 +120,7 @@ private:
 class cNoBackground final : public cBackground
 {
 public:
-    cNoBackground()noexcept {}
+    cNoBackground() = default;
 
     DISABLE_COPY(cNoBackground)
     ASSIGN_ID(0, "Nothing")

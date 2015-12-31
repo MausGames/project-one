@@ -11,6 +11,7 @@
 #define _P1_GUARD_GAME_H_
 
 // TODO: enemy bullet (and enemy?) cleanup on mission unload
+// TODO: dead-check on ForEachPlayer for non-coop ?
 
 
 // ****************************************************************
@@ -29,7 +30,7 @@ enum cGameStatus : coreUint8
 
 
 // ****************************************************************
-// 
+// depth-level management
 #define DEPTH_PUSH           {g_pGame->PushDepthLevel();}
 #define __DEPTH_LEVEL_UNDER  {glDepthRange(0.9f, 1.0f);}
 #define __DEPTH_LEVEL_SHIP   {glDepthRange(0.8f, 0.9f);}
@@ -123,11 +124,11 @@ template <typename F> void cGame::ForEachPlayer(F&& nFunction)
     // 
     for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
     {
-        cPlayer* pCurPlayer = &m_aPlayer[i];
-        if(CONTAINS_VALUE(pCurPlayer->GetStatus(), PLAYER_STATUS_DEAD)) continue;
+        cPlayer* pPlayer = &m_aPlayer[i];
+        if(CONTAINS_VALUE(pPlayer->GetStatus(), PLAYER_STATUS_DEAD)) continue;
 
         // 
-        nFunction(pCurPlayer);
+        nFunction(pPlayer);
     }
 }
 

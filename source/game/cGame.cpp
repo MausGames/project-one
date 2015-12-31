@@ -71,7 +71,7 @@ void cGame::Render()
     {
         glDepthMask(false);
         {
-            // 
+            // render underlying effects
             m_EnemyManager.RenderUnder();
             m_pMission   ->RenderUnder();
         }
@@ -83,13 +83,13 @@ void cGame::Render()
 
     __DEPTH_LEVEL_SHIP   // # 2
     {
-        // 
+        // apply deferred outline-layer
         g_pOutline->Apply();
     }
 
     __DEPTH_LEVEL_ATTACK
     {
-        // 
+        // render attacks and gameplay objects
         m_EnemyManager.RenderAttack();
         m_pMission   ->RenderAttack();
     }
@@ -98,11 +98,14 @@ void cGame::Render()
     {
         glDisable(GL_DEPTH_TEST);
         {
-            // 
+            // render overlying effects
             m_EnemyManager.RenderOver();
             m_pMission   ->RenderOver();
         }
         glEnable(GL_DEPTH_TEST);
+
+        // render special-effects
+        g_pSpecialEffects->Render(true);
 
         // render high-priority bullet manager
         m_BulletManagerEnemy.Render();
@@ -266,7 +269,7 @@ cPlayer* cGame::FindPlayer(const coreVector2& vPosition)
 
     // 
     cPlayer*  pPlayer = &m_aPlayer[0];
-    coreFloat fLenSq  = 1.0e06f;
+    coreFloat fLenSq  = FLT_MAX;
 
     // 
     this->ForEachPlayer([&](cPlayer* OUTPUT pCurPlayer)
@@ -281,7 +284,6 @@ cPlayer* cGame::FindPlayer(const coreVector2& vPosition)
         }
     });
 
-    // 
     ASSERT(pPlayer)
     return pPlayer;
 }

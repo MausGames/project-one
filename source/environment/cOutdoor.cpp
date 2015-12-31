@@ -18,16 +18,19 @@ cOutdoor::cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom
 , m_iAlgorithm    (0u)
 , m_fGrade        (0.0f)
 {
-    // load outdoor shader-program
-    this->LoadProgram(SHADOW_HANDLE_OUTDOOR);
+    // set object properties
+    this->SetPosition(coreVector3(0.0f,0.0f,0.0f));
+
+    // load outdoor geometry
+    m_pModel = Core::Manager::Resource->LoadNew<coreModel>();
+    this->LoadGeometry(iAlgorithm, fGrade);
 
     // load outdoor textures
     m_pNormalMap = Core::Manager::Resource->LoadNew<coreTexture>();
     this->LoadTextures(pcTextureTop, pcTextureBottom);
 
-    // load outdoor geometry
-    m_pModel = Core::Manager::Resource->LoadNew<coreModel>();
-    this->LoadGeometry(iAlgorithm, fGrade);
+    // load outdoor shader-program
+    this->LoadProgram(SHADOW_HANDLE_OUTDOOR);
 }
 
 
@@ -37,8 +40,8 @@ cOutdoor::~cOutdoor()
 {
     // free resources
     this->DefineTexture(2u, NULL);
-    Core::Manager::Resource->Free(&m_pNormalMap);
     Core::Manager::Resource->Free(&m_pModel);
+    Core::Manager::Resource->Free(&m_pNormalMap);
 }
 
 
@@ -86,95 +89,6 @@ void cOutdoor::Render()
     // draw the model
     m_pModel->Enable();
     glDrawRangeElements(m_pModel->GetPrimitiveType(), m_iVertexOffset, m_iVertexOffset + OUTDOOR_RANGE, OUTDOOR_COUNT, m_pModel->GetIndexType(), I_TO_P(m_iIndexOffset));
-}
-
-
-// ****************************************************************
-// load outdoor shader-program
-void cOutdoor::LoadProgram(const coreBool& bGlow)
-{
-    m_iHandleIndex    = bGlow ? SHADOW_HANDLE_OUTDOOR_GLOW         : SHADOW_HANDLE_OUTDOOR;
-    this->DefineProgram(bGlow ? "environment_outdoor_glow_program" : "environment_outdoor_program");
-}
-
-
-// ****************************************************************
-// load outdoor textures
-void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcTextureBottom)
-{
-    // load color textures
-    this->DefineTexture(0u, PRINT("environment_%s_diff.png", pcTextureTop));
-    this->DefineTexture(1u, PRINT("environment_%s_diff.png", pcTextureBottom));
-
-    // unbind normal map to prevent concurrency problems
-    this->DefineTexture(2u, NULL);
-
-    Core::Manager::Resource->AttachFunction([=]()
-    {
-        // delete old data
-        m_pNormalMap->Unload();
-
-        // retrieve normal map files
-        coreFile* pFile1 = Core::Manager::Resource->RetrieveFile(PRINT("data/textures/environment_%s_norm.png", pcTextureTop));
-        coreFile* pFile2 = Core::Manager::Resource->RetrieveFile(PRINT("data/textures/environment_%s_norm.png", pcTextureBottom));
-        WARN_IF(!pFile1 || !pFile2) return CORE_OK;
-
-        // decompress files to plain pixel data
-        SDL_Surface* pSurface1 = IMG_LoadTyped_RW(SDL_RWFromConstMem(pFile1->GetData(), pFile1->GetSize()), true, coreData::StrExtension(pFile1->GetPath()));
-        SDL_Surface* pSurface2 = IMG_LoadTyped_RW(SDL_RWFromConstMem(pFile2->GetData(), pFile2->GetSize()), true, coreData::StrExtension(pFile2->GetPath()));
-        WARN_IF((pSurface1->format->BitsPerPixel != 24u) || (pSurface2->format->BitsPerPixel != 24u)) return CORE_OK;
-
-        // allocate required memory
-        const coreUintW iSize = pSurface1->w * pSurface1->h * 4u;
-        coreByte* pOutput = new coreByte[iSize];
-        coreByte* pInput1 = s_cast<coreByte*>(pSurface1->pixels);
-        coreByte* pInput2 = s_cast<coreByte*>(pSurface2->pixels);
-
-        // merge XY components of both normal maps (divided by Z, partial-derivative)
-        for(coreUintW i = 0u, j = 0u; i < iSize; i += 4u, j += 3u)
-        {
-            const coreFloat x1 =          (coreFloat(*(pInput1 + j))      - 127.5f);
-            const coreFloat y1 =          (coreFloat(*(pInput1 + j + 1u)) - 127.5f);
-            const coreFloat z1 = 127.5f / (coreFloat(*(pInput1 + j + 2u)) - 127.5f);
-            const coreFloat x2 =          (coreFloat(*(pInput2 + j))      - 127.5f);
-            const coreFloat y2 =          (coreFloat(*(pInput2 + j + 1u)) - 127.5f);
-            const coreFloat z2 = 127.5f / (coreFloat(*(pInput2 + j + 2u)) - 127.5f);
-
-            const coreFloat xz1 = x1 * z1 + 127.5f;
-            const coreFloat yz1 = y1 * z1 + 127.5f;
-            const coreFloat xz2 = x2 * z2 + 127.5f;
-            const coreFloat yz2 = y2 * z2 + 127.5f;
-
-            ASSERT((xz1 <= 255.0f) && (yz1 <= 255.0f) &&
-                   (xz2 <= 255.0f) && (yz2 <= 255.0f))
-
-            const coreByte aiPixel[4] = {coreByte(xz1), coreByte(yz1),
-                                         coreByte(xz2), coreByte(yz2)};
-
-            std::memcpy(pOutput + i, aiPixel, 4u);
-        }
-
-        // create final normal map
-        m_pNormalMap->Create(pSurface1->w, pSurface1->h, CORE_TEXTURE_SPEC_RGBA8, CORE_TEXTURE_MODE_FILTER | CORE_TEXTURE_MODE_REPEAT);
-        m_pNormalMap->Modify(0u, 0u, pSurface1->w, pSurface1->h, iSize, pOutput);
-
-        // wait until texture-upload is finished
-        coreSync oSync;
-        oSync.Create();
-        oSync.Check(GL_TIMEOUT_IGNORED, CORE_SYNC_CHECK_FLUSHED);
-
-        // bind normal map safely
-        this->DefineTexture(2u, m_pNormalMap);
-
-        // free all temporary resources
-        SAFE_DELETE_ARRAY(pOutput)
-        SDL_FreeSurface(pSurface1);
-        SDL_FreeSurface(pSurface2);
-        pFile1->UnloadData();
-        pFile2->UnloadData();
-
-        return CORE_OK;
-    });
 }
 
 
@@ -350,7 +264,107 @@ void cOutdoor::LoadGeometry(const coreUint8& iAlgorithm, const coreFloat& fGrade
     // create index buffer
     m_pModel->CreateIndexBuffer(OUTDOOR_TOTAL_INDICES, sizeof(coreUint16), aiIndexData, CORE_DATABUFFER_STORAGE_STATIC);
 
-    Core::Log->Info("Outdoor-Surface loaded");
+    if(!CORE_GL_SUPPORT(ARB_uniform_buffer_object))
+    {
+        // 
+        coreInt32 aiVertexID[OUTDOOR_TOTAL_VERTICES];
+        for(coreUintW i = 0u; i < OUTDOOR_TOTAL_VERTICES; ++i) aiVertexID[i] = i;
+
+        // 
+        pBuffer = m_pModel->CreateVertexBuffer(OUTDOOR_TOTAL_VERTICES, sizeof(coreInt32), aiVertexID, CORE_DATABUFFER_STORAGE_STATIC);
+        pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_TEXCOORD_NUM, 1u, GL_INT, true, 0u);
+    }
+
+    Core::Log->Info(PRINT("Outdoor-Surface loaded (%d:%.0f)", iAlgorithm, fGrade));
+}
+
+
+// ****************************************************************
+// load outdoor textures
+void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcTextureBottom)
+{
+    // load color textures
+    this->DefineTexture(0u, PRINT("environment_%s_diff.png", pcTextureTop));
+    this->DefineTexture(1u, PRINT("environment_%s_diff.png", pcTextureBottom));
+
+    // unbind normal map to prevent concurrency problems
+    this->DefineTexture(2u, NULL);
+
+    Core::Manager::Resource->AttachFunction([=]()
+    {
+        // delete old data
+        m_pNormalMap->Unload();
+
+        // retrieve normal map files
+        coreFile* pFile1 = Core::Manager::Resource->RetrieveFile(PRINT("data/textures/environment_%s_norm.png", pcTextureTop));
+        coreFile* pFile2 = Core::Manager::Resource->RetrieveFile(PRINT("data/textures/environment_%s_norm.png", pcTextureBottom));
+        WARN_IF(!pFile1 || !pFile2) return CORE_OK;
+
+        // decompress files to plain pixel data
+        SDL_Surface* pSurface1 = IMG_LoadTyped_RW(SDL_RWFromConstMem(pFile1->GetData(), pFile1->GetSize()), true, coreData::StrExtension(pFile1->GetPath()));
+        SDL_Surface* pSurface2 = IMG_LoadTyped_RW(SDL_RWFromConstMem(pFile2->GetData(), pFile2->GetSize()), true, coreData::StrExtension(pFile2->GetPath()));
+        WARN_IF((pSurface1->format->BitsPerPixel != 24u) || (pSurface2->format->BitsPerPixel != 24u)) return CORE_OK;
+
+        // allocate required memory
+        const coreUintW iSize = pSurface1->w * pSurface1->h * 4u;
+        coreByte* pOutput = new coreByte[iSize];
+        coreByte* pInput1 = s_cast<coreByte*>(pSurface1->pixels);
+        coreByte* pInput2 = s_cast<coreByte*>(pSurface2->pixels);
+
+        // merge XY components of both normal maps (divided by Z, partial-derivative)
+        for(coreUintW i = 0u, j = 0u; i < iSize; i += 4u, j += 3u)
+        {
+            const coreFloat x1 =          (coreFloat(*(pInput1 + j))      - 127.5f);
+            const coreFloat y1 =          (coreFloat(*(pInput1 + j + 1u)) - 127.5f);
+            const coreFloat z1 = 127.5f / (coreFloat(*(pInput1 + j + 2u)) - 127.5f);
+            const coreFloat x2 =          (coreFloat(*(pInput2 + j))      - 127.5f);
+            const coreFloat y2 =          (coreFloat(*(pInput2 + j + 1u)) - 127.5f);
+            const coreFloat z2 = 127.5f / (coreFloat(*(pInput2 + j + 2u)) - 127.5f);
+
+            const coreFloat xz1 = x1 * z1 + 127.5f;
+            const coreFloat yz1 = y1 * z1 + 127.5f;
+            const coreFloat xz2 = x2 * z2 + 127.5f;
+            const coreFloat yz2 = y2 * z2 + 127.5f;
+
+            ASSERT((xz1 <= 255.0f) && (yz1 <= 255.0f) &&
+                   (xz2 <= 255.0f) && (yz2 <= 255.0f))
+
+            const coreByte aiPixel[4] = {coreByte(xz1), coreByte(yz1),
+                                         coreByte(xz2), coreByte(yz2)};
+
+            std::memcpy(pOutput + i, aiPixel, 4u);
+        }
+
+        // create final normal map
+        m_pNormalMap->Create(pSurface1->w, pSurface1->h, CORE_TEXTURE_SPEC_RGBA8, CORE_TEXTURE_MODE_FILTER | CORE_TEXTURE_MODE_REPEAT);
+        m_pNormalMap->Modify(0u, 0u, pSurface1->w, pSurface1->h, iSize, pOutput);
+
+        // wait until texture-upload is finished
+        coreSync oSync;
+        oSync.Create();
+        oSync.Check(GL_TIMEOUT_IGNORED, CORE_SYNC_CHECK_FLUSHED);
+
+        // bind normal map safely
+        this->DefineTexture(2u, m_pNormalMap);
+
+        // free all temporary resources
+        SAFE_DELETE_ARRAY(pOutput)
+        SDL_FreeSurface(pSurface1);
+        SDL_FreeSurface(pSurface2);
+        pFile1->UnloadData();
+        pFile2->UnloadData();
+
+        return CORE_OK;
+    });
+}
+
+
+// ****************************************************************
+// load outdoor shader-program
+void cOutdoor::LoadProgram(const coreBool& bGlow)
+{
+    m_iHandleIndex    = bGlow ? SHADOW_HANDLE_OUTDOOR_GLOW         : SHADOW_HANDLE_OUTDOOR;
+    this->DefineProgram(bGlow ? "environment_outdoor_glow_program" : "environment_outdoor_program");
 }
 
 

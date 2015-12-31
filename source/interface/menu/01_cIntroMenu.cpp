@@ -31,7 +31,7 @@ cIntroMenu::cIntroMenu()noexcept
     if(bSelectLanguage)
     {
         // 
-        const coreLookupStr<std::string>& asLanguageList = cMenu::GetLanguageList();
+        const coreLookup<std::string, std::string>& asLanguageList = cMenu::GetLanguageList();
 
         // 
         const coreFloat fOffset = I_TO_F(asLanguageList.size()) * 0.5f - 0.5f;
@@ -88,7 +88,7 @@ void cIntroMenu::Move()
         {
             if((*it)->IsClicked())
             {
-                const coreChar* pcPath = m_apLanguageButton.get_key(it)->c_str();
+                const coreChar* pcPath = m_apLanguageButton.get_string(it);
 
                 // 
                 Core::Language->Load(pcPath);

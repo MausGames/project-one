@@ -106,27 +106,33 @@ void cViridoMission::__SetupOwn()
     STAGE_MAIN
     {
         // 
-        STAGE_ADD_PATH(pPath)
+        //STAGE_ADD_PATH(pPath)
+        //{
+        //    pPath->AddNode(coreVector2(-1.5f, 0.2f), coreVector2(1.0f,0.0f));
+        //    pPath->AddNode(coreVector2( 1.5f,-0.4f), coreVector2(1.0f,0.0f));
+        //});
+
+        // 
+        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 5u)
         {
-            pPath->AddNode(coreVector2(-1.5f, 0.2f), coreVector2(1.0f,0.0f));
-            pPath->AddNode(coreVector2( 1.5f,-0.4f), coreVector2(1.0f,0.0f));
+            STAGE_SQUAD_INIT(pSquad1, Configure(50, COLOR_ENEMY_BLUE))
+            STAGE_SQUAD_INIT(pSquad1, Resurrect())
+        });
+        STAGE_ADD_SQUAD(pSquad2, cScoutEnemy, 5u)
+        {
+            STAGE_SQUAD_INIT(pSquad2, Configure(50, COLOR_ENEMY_RED))
+            STAGE_SQUAD_INIT(pSquad2, Resurrect())
         });
 
-        // 
-        for(coreUintW i = 0u; i < 10u; ++i)
+        pSquad1->ForEachEnemy([&](cEnemy* OUTPUT pEnemy, const coreUintW& i)
         {
-            if(STAGE_SUB(I_TO_F(i)*0.3f + ((i >= 5u)*1.0f)))
-            {
-                STAGE_ADD_ENEMY(pEnemy, cScoutEnemy, (i/5u) ? COLOR_ENEMY_YELLOW : COLOR_ENEMY_BLUE)
-                {
-                    if(pEnemy->DefaultMovePath(*pPath, coreVector2((i/5u) ? -1.0f : 1.0f,1.0f), coreVector2(0.0f, 0.7f - 0.1f*I_TO_F(i%5u)), pEnemy->GetLifeTime() * 0.85f))
-                        pEnemy->Kill(false);
-                });
-            }
-        }
+            pEnemy->DefaultMoveLerp(coreVector2(I_TO_F(i-2u) * 0.4f - 3.0f, 0.8f), coreVector2(I_TO_F(i-2u) * 0.4f, 0.8f), LERPS(0.0f, 1.0f, CLAMP(pEnemy->GetLifeTime()*0.5f - I_TO_F(i)*0.1f, 0.0f, 1.0f)));
+        });
 
-        // 
-        STAGE_FINISH_AFTER(5.5f)
+        pSquad2->ForEachEnemy([&](cEnemy* OUTPUT pEnemy, const coreUintW& i)
+        {
+            pEnemy->DefaultMoveLerp(-coreVector2(I_TO_F(i-2u) * 0.4f - 3.0f, 0.8f), -coreVector2(I_TO_F(i-2u) * 0.4f, 0.8f), LERPS(0.0f, 1.0f, CLAMP(pEnemy->GetLifeTime()*0.5f - I_TO_F(i)*0.1f, 0.0f, 1.0f)));
+        });
     });
 
     // ################################################################
@@ -134,24 +140,24 @@ void cViridoMission::__SetupOwn()
     STAGE_MAIN
     {
         // 
-        STAGE_ADD_PATH(pPath)
-        {
-            pPath->AddNode(coreVector2(-0.8f, 1.5f), coreVector2(0.0f,-1.0f));
-            pPath->AddNode(coreVector2( 0.8f,-1.5f), coreVector2(0.0f,-1.0f));
-        });
+        //STAGE_ADD_PATH(pPath)
+        //{
+        //    pPath->AddNode(coreVector2(-0.8f, 1.5f), coreVector2(0.0f,-1.0f));
+        //    pPath->AddNode(coreVector2( 0.8f,-1.5f), coreVector2(0.0f,-1.0f));
+        //});
 
         // 
         for(coreUintW i = 0u; i < 10u; ++i)
         {
-            if(STAGE_SUB(I_TO_F(i)*0.3f + ((i >= 5u)*1.0f)))
-            {
-                STAGE_ADD_ENEMY(pEnemy, cScoutEnemy, (i/5u) ? COLOR_ENEMY_YELLOW : COLOR_ENEMY_BLUE)
-                {
-                    const coreFloat fSide = (i/5u) ? -1.0f : 1.0f;
-                    if(pEnemy->DefaultMovePath(*pPath, coreVector2(fSide, 1.0f), coreVector2(0.1f*I_TO_F(i%5u-1u) * fSide, 0.0f), pEnemy->GetLifeTime()))
-                        pEnemy->Kill(false);
-                });
-            }
+            //if(STAGE_SUB(I_TO_F(i)*0.3f + ((i >= 5u)*1.0f)))
+            //{
+            //    STAGE_ADD_ENEMY(pEnemy, cScoutEnemy, (i/5u) ? COLOR_ENEMY_YELLOW : COLOR_ENEMY_BLUE)
+            //    {
+            //        const coreFloat fSide = (i/5u) ? -1.0f : 1.0f;
+            //        if(pEnemy->DefaultMovePath(*pPath, coreVector2(fSide, 1.0f), coreVector2(0.1f*I_TO_F(i%5u-1u) * fSide, 0.0f), pEnemy->GetLifeTime()))
+            //            pEnemy->Kill(false);
+            //    });
+            //}
         }
 
         // 
@@ -180,36 +186,36 @@ void cViridoMission::__SetupOwn()
     STAGE_MAIN
     {
         // 
-        STAGE_ADD_PATH(pPath1)
-        {
-            pPath1->AddNode(coreVector2(-0.6f, 1.5f), coreVector2(0.0f,-1.0f));
-            pPath1->AddNode(coreVector2(-0.1f,-0.1f), coreVector2(1.0f,-1.0f).Normalize());
-            pPath1->AddNode(coreVector2( 1.5f,-0.6f), coreVector2(1.0f, 0.0f));
-        });
-        STAGE_ADD_PATH(pPath2)
-        {
-            pPath2->AddNode(coreVector2(-0.6f, 1.5f).Rotated90().InvertX(), coreVector2(0.0f,-1.0f).Rotated90().InvertX());
-            pPath2->AddNode(coreVector2(-0.1f,-0.1f).Rotated90().InvertX(), coreVector2(1.0f,-1.0f).Rotated90().InvertX().Normalize());
-            pPath2->AddNode(coreVector2( 1.5f,-0.6f).Rotated90().InvertX(), coreVector2(1.0f, 0.0f).Rotated90().InvertX());
-        });
+        //STAGE_ADD_PATH(pPath1)
+        //{
+        //    pPath1->AddNode(coreVector2(-0.6f, 1.5f), coreVector2(0.0f,-1.0f));
+        //    pPath1->AddNode(coreVector2(-0.1f,-0.1f), coreVector2(1.0f,-1.0f).Normalize());
+        //    pPath1->AddNode(coreVector2( 1.5f,-0.6f), coreVector2(1.0f, 0.0f));
+        //});
+        //STAGE_ADD_PATH(pPath2)
+        //{
+        //    pPath2->AddNode(coreVector2(-0.6f, 1.5f).Rotated90().InvertX(), coreVector2(0.0f,-1.0f).Rotated90().InvertX());
+        //    pPath2->AddNode(coreVector2(-0.1f,-0.1f).Rotated90().InvertX(), coreVector2(1.0f,-1.0f).Rotated90().InvertX().Normalize());
+        //    pPath2->AddNode(coreVector2( 1.5f,-0.6f).Rotated90().InvertX(), coreVector2(1.0f, 0.0f).Rotated90().InvertX());
+        //});
 
         // 
         for(coreUintW i = 0u; i < 12u; ++i)
         {
-            if(STAGE_SUB(I_TO_F(i/3)*2.0f))
-            {
-                STAGE_ADD_ENEMY(pEnemy, cScoutEnemy, COLOR_ENEMY_RED)
-                {
-                    if(pEnemy->DefaultMovePath((i >= 6u) ? *pPath2 : *pPath1, coreVector2(((i%6) >= 3u) ? -1.0f : 1.0f, 1.0f), coreVector2(I_TO_F((i%3u)-1u)*0.2f, ((i%3u) == 1u) ? -0.2f : 0.0f), pEnemy->GetLifeTime()))
-                        pEnemy->Kill(false);
-
-                    if(pEnemy->GetLifeTime() > 0.4f && pEnemy->DefaultShoot(10.0f, 2u + 4u*(i/6u))) // 10u
-                    {
-                        const coreVector2 vDir = (g_pGame->FindPlayer(pEnemy->GetPosition().xy())->GetPosition().xy() - pEnemy->GetPosition().xy()).Normalize();
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 2.0f, pEnemy, pEnemy->GetPosition().xy(), vDir)->MakeOrange();
-                    }
-                });
-            }
+            //if(STAGE_SUB(I_TO_F(i/3)*2.0f))
+            //{
+            //    STAGE_ADD_ENEMY(pEnemy, cScoutEnemy, COLOR_ENEMY_RED)
+            //    {
+            //        if(pEnemy->DefaultMovePath((i >= 6u) ? *pPath2 : *pPath1, coreVector2(((i%6) >= 3u) ? -1.0f : 1.0f, 1.0f), coreVector2(I_TO_F((i%3u)-1u)*0.2f, ((i%3u) == 1u) ? -0.2f : 0.0f), pEnemy->GetLifeTime()))
+            //            pEnemy->Kill(false);
+            //
+            //        if(pEnemy->GetLifeTime() > 0.4f && pEnemy->DefaultShoot(10.0f, 2u + 4u*(i/6u))) // 10u
+            //        {
+            //            const coreVector2 vDir = (g_pGame->FindPlayer(pEnemy->GetPosition().xy())->GetPosition().xy() - pEnemy->GetPosition().xy()).Normalize();
+            //            g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 2.0f, pEnemy, pEnemy->GetPosition().xy(), vDir)->MakeOrange();
+            //        }
+            //    });
+            //}
         }
 
         // 
@@ -221,30 +227,30 @@ void cViridoMission::__SetupOwn()
     STAGE_MAIN
     {
         // 
-        STAGE_ADD_PATH(pPath)
-        {
-            pPath->AddNode(coreVector2(-1.5f,0.8f), coreVector2(1.0f,0.0f));
-            pPath->AddNode(coreVector2( 1.5f,0.8f), coreVector2(1.0f,0.0f));
-        });
+        //STAGE_ADD_PATH(pPath)
+        //{
+        //    pPath->AddNode(coreVector2(-1.5f,0.8f), coreVector2(1.0f,0.0f));
+        //    pPath->AddNode(coreVector2( 1.5f,0.8f), coreVector2(1.0f,0.0f));
+        //});
 
         // 
         for(coreUintW i = 0u; i < 6u; ++i)
         {
-            if(STAGE_SUB(I_TO_F(i)*0.4f))
-            {
-                STAGE_ADD_ENEMY(pEnemy, cScoutEnemy, (i) ? COLOR_ENEMY_YELLOW : COLOR_ENEMY_BLUE)
-                {
-                    if(pEnemy->DefaultMovePath(*pPath, coreVector2(1.0f,1.0f), coreVector2(0.0f,0.0f), pEnemy->GetLifeTime()))
-                        pEnemy->Kill(false);
-
-                    if(i && pEnemy->GetLifeTime() > 0.5f && pEnemy->DefaultShoot(8.0f, 100u))
-                    {
-                        const coreVector2 vDir = pEnemy->GetDirection().xy().Rotate90();
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.5f, pEnemy, pEnemy->GetPosition().xy(),  vDir)->MakeYellow();
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.5f, pEnemy, pEnemy->GetPosition().xy(), -vDir)->MakeYellow();
-                    }
-                });
-            }
+            //if(STAGE_SUB(I_TO_F(i)*0.4f))
+            //{
+            //    STAGE_ADD_ENEMY(pEnemy, cScoutEnemy, (i) ? COLOR_ENEMY_YELLOW : COLOR_ENEMY_BLUE)
+            //    {
+            //        if(pEnemy->DefaultMovePath(*pPath, coreVector2(1.0f,1.0f), coreVector2(0.0f,0.0f), pEnemy->GetLifeTime()))
+            //            pEnemy->Kill(false);
+            //
+            //        if(i && pEnemy->GetLifeTime() > 0.5f && pEnemy->DefaultShoot(8.0f, 100u))
+            //        {
+            //            const coreVector2 vDir = pEnemy->GetDirection().xy().Rotate90();
+            //            g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.5f, pEnemy, pEnemy->GetPosition().xy(),  vDir)->MakeYellow();
+            //            g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.5f, pEnemy, pEnemy->GetPosition().xy(), -vDir)->MakeYellow();
+            //        }
+            //    });
+            //}
         }
 
         // 
@@ -256,30 +262,30 @@ void cViridoMission::__SetupOwn()
     STAGE_MAIN
     {
         // 
-        STAGE_ADD_PATH(pPath)
-        {
-            pPath->AddNode(coreVector2( 1.5f,0.8f), coreVector2(-1.0f,0.0f));
-            pPath->AddNode(coreVector2(-1.5f,0.8f), coreVector2(-1.0f,0.0f));
-        });
+        //STAGE_ADD_PATH(pPath)
+        //{
+        //    pPath->AddNode(coreVector2( 1.5f,0.8f), coreVector2(-1.0f,0.0f));
+        //    pPath->AddNode(coreVector2(-1.5f,0.8f), coreVector2(-1.0f,0.0f));
+        //});
 
         // 
         for(coreUintW i = 0u; i < 6u; ++i)
         {
-            if(STAGE_SUB(I_TO_F(i)*0.4f))
-            {
-                STAGE_ADD_ENEMY(pEnemy, cScoutEnemy, (!i) ? COLOR_ENEMY_YELLOW : COLOR_ENEMY_BLUE)
-                {
-                    if(pEnemy->DefaultMovePath(*pPath, coreVector2(1.0f,1.0f), coreVector2(0.0f,0.0f), pEnemy->GetLifeTime()))
-                        pEnemy->Kill(false);
-
-                    if(i && pEnemy->GetLifeTime() > 0.5f && pEnemy->DefaultShoot(8.0f, 100u))
-                    {
-                        const coreVector2 vDir = pEnemy->GetDirection().xy().Rotate90();
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.5f, pEnemy, pEnemy->GetPosition().xy(),  vDir)->MakeYellow();
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.5f, pEnemy, pEnemy->GetPosition().xy(), -vDir)->MakeYellow();
-                    }
-                });
-            }
+            //if(STAGE_SUB(I_TO_F(i)*0.4f))
+            //{
+            //    STAGE_ADD_ENEMY(pEnemy, cScoutEnemy, (!i) ? COLOR_ENEMY_YELLOW : COLOR_ENEMY_BLUE)
+            //    {
+            //        if(pEnemy->DefaultMovePath(*pPath, coreVector2(1.0f,1.0f), coreVector2(0.0f,0.0f), pEnemy->GetLifeTime()))
+            //            pEnemy->Kill(false);
+            //
+            //        if(i && pEnemy->GetLifeTime() > 0.5f && pEnemy->DefaultShoot(8.0f, 100u))
+            //        {
+            //            const coreVector2 vDir = pEnemy->GetDirection().xy().Rotate90();
+            //            g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.5f, pEnemy, pEnemy->GetPosition().xy(),  vDir)->MakeYellow();
+            //            g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.5f, pEnemy, pEnemy->GetPosition().xy(), -vDir)->MakeYellow();
+            //        }
+            //    });
+            //}
         }
 
         // 
@@ -291,7 +297,7 @@ void cViridoMission::__SetupOwn()
     STAGE_MAIN
     {
         // 
-        if(STAGE_SUB(0.0f)) m_Crossfield.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
+        if(STAGE_TIME_INIT) m_Crossfield.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
 
         // 
         if(CONTAINS_VALUE(m_Crossfield.GetStatus(), ENEMY_STATUS_DEAD))
@@ -330,7 +336,7 @@ void cViridoMission::__SetupOwn()
     STAGE_MAIN
     {
         // 
-        if(STAGE_SUB(0.0f)) m_Torus.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
+        if(STAGE_TIME_INIT) m_Torus.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
 
         // 
         if(CONTAINS_VALUE(m_Torus.GetStatus(), ENEMY_STATUS_DEAD))
@@ -546,7 +552,7 @@ void cViridoMission::__MoveOwnAfter()
     if(!CONTAINS_VALUE(m_Vaus.GetStatus(), ENEMY_STATUS_DEAD))
     {
         cEnemy*   pCurEnemy = NULL;
-        coreFloat fCurLenSq = 1.0e06f;
+        coreFloat fCurLenSq = FLT_MAX;
 
         // (# only the first ball will be active in this mission stage) 
         coreObject3D& oBall = m_aBallRaw[0];
@@ -671,7 +677,7 @@ void cViridoMission::EnablePaddle(const coreUintW& iIndex, cShip* pOwner)
 
     // 
     g_pGlow->BindObject(&oPaddle);
-    oPaddle.SetEnabled (CORE_OBJECT_ENABLE_ALL);
+    oPaddle.SetEnabled(CORE_OBJECT_ENABLE_ALL);
 }
 
 

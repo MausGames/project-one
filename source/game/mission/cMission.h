@@ -10,8 +10,6 @@
 #ifndef _P1_GUARD_MISSION_H_
 #define _P1_GUARD_MISSION_H_
 
-// TODO: remove STAGE_SUB (and PHASE_SUB) double-evaluation
-
 
 // ****************************************************************
 // mission definitions
@@ -30,20 +28,24 @@
 
 // ****************************************************************
 // stage management macros
-#define STAGE_MAIN            m_aiStageLine.push_back(__LINE__); m_anStage.push_back([this]()           // 
-#define STAGE_SUB(t)          ((m_fStageTimeBefore <= (t)) && ((t) < m_fStageTime))                     // 
-#define STAGE_FINISH_NOW      {m_fStageTime = 0.0f; m_aiStageLine.pop_back(); m_anStage.pop_back();}    // 
-#define STAGE_FINISH_AFTER(t) {if(m_fStageTime >= (t)) STAGE_FINISH_NOW}                                // 
-#define STAGE_START_HERE      {if(DEFINED(_CORE_DEBUG_)) {m_aiStageLine.clear(); m_anStage.clear();}}   // 
+#define STAGE_MAIN              m_anStage[__LINE__] = ([this]()                    // 
 
-#define STAGE_ADD_PATH(n)                             \
-    auto n = this->_AddPath(__LINE__, [](coreSpline2* OUTPUT n)
+#define STAGE_TIME_POINT(t)     (InBetween(t, m_fStageTimeBefore, m_fStageTime))   // 
+#define STAGE_TIME_AFTER(t)     ((t) >= m_fStageTime)                              // 
+#define STAGE_TIME_BEFORE(t)    ((t) <  m_fStageTime)                              // 
+#define STAGE_TIME_BETWEEN(t,u) (InBetween(m_fStageTime, t, u))                    // 
+#define STAGE_TIME_INIT         (STAGE_TIME_POINT(0.0f))                           // 
 
-#define STAGE_ADD_ENEMY(n,t,c)                        \
-    t* n = g_pGame->GetEnemyManager()->AddEnemy<t>(); \
-    n->Resurrect();                                   \
-    n->SetBaseColor(c);                               \
-    n->ChangeRoutine([=](cEnemy* OUTPUT n)
+#define STAGE_FINISH_NOW      {this->SkipStage();}                                 // 
+#define STAGE_FINISH_AFTER(t) {if(m_fStageTime >= (t)) STAGE_FINISH_NOW}           // 
+
+#define STAGE_START_HERE      {if(DEFINED(_CORE_DEBUG_)) m_anStage.clear();}       // 
+
+#define STAGE_ADD_PATH(n)      auto n = this->_AddPath    (__LINE__,    [&](coreSpline2* OUTPUT n)
+#define STAGE_ADD_SQUAD(n,t,c) auto n = this->_AddSquad<t>(__LINE__, c, [&](cEnemySquad* OUTPUT n)
+
+#define STAGE_SQUAD_INIT(x,f) {x->ForEachEnemyAll([&](cEnemy* OUTPUT pEnemy, const coreUintW i) {pEnemy->f;});}
+
 
 
 // ****************************************************************
@@ -52,28 +54,29 @@ class INTERFACE cMission
 {
 private:
     using tStageFunc = std::function<void()>;
-    using tPathPtr   = std::shared_ptr<coreSpline2>;
+    using tPathPtr   = std::unique_ptr<coreSpline2>;
+    using tSquadPtr  = std::unique_ptr<cEnemySquad>;
 
 
 protected:
-    cBoss* m_apBoss[MISSION_BOSSES];             // pointers to all available bosses
+    cBoss* m_apBoss[MISSION_BOSSES];                // pointers to all available bosses
 
-    cBoss*    m_pCurBoss;                        // pointer to currently active boss
-    coreUintW m_iCurBossIndex;                   // index of the active boss (or error-value)
+    cBoss*    m_pCurBoss;                           // pointer to currently active boss
+    coreUintW m_iCurBossIndex;                      // index of the active boss (or error-value)
 
-    std::vector<tStageFunc> m_anStage;           // 
-    std::vector<coreUint16> m_aiStageLine;       // 
-    coreUint16 m_iStageNum;                      // 
+    coreLookup<coreUint16, tStageFunc> m_anStage;   // 
+    coreLookup<coreUint16, tPathPtr>   m_apPath;    // 
+    coreLookup<coreUint16, tSquadPtr>  m_apSquad;   // 
 
-    coreLookup<coreUint16, tPathPtr> m_apPath;   // 
+    coreUint16 m_iStageNum;                         // 
 
-    coreFlow  m_fStageTime;                      // 
-    coreFloat m_fStageTimeBefore;                // 
+    coreFlow  m_fStageTime;                         // 
+    coreFloat m_fStageTimeBefore;                   // 
 
 
 public:
     cMission()noexcept;
-    virtual ~cMission() {}
+    virtual ~cMission() = default;
 
     DISABLE_COPY(cMission)
     ENABLE_ID
@@ -88,6 +91,9 @@ public:
     void MoveBefore  ();
     void MoveAfter   ();
 
+    // 
+    inline void SkipStage() {m_fStageTime = 0.0f; m_anStage.pop_back();}
+
     // set active boss
     void SetCurBoss(const coreUintW& iIndex);
     void SetCurBoss(const cBoss*     pBoss);
@@ -100,7 +106,8 @@ public:
 
 protected:
     // 
-    template <typename F> const tPathPtr& _AddPath(const coreUint16& iIndex, F&& nInitFunc);   // [](coreSpline2* OUTPUT pPath) -> void
+    template             <typename F> coreSpline2* _AddPath (const coreUint16& iCodeLine,                        F&& nInitFunc);   // [](coreSpline2* OUTPUT pPath)  -> void
+    template <typename T, typename F> cEnemySquad* _AddSquad(const coreUint16& iCodeLine, const coreUint8& iNum, F&& nInitFunc);   // [](cEnemySquad* OUTPUT pSquad) -> void
 
 
 private:
@@ -119,7 +126,7 @@ private:
 class cNoMission final : public cMission
 {
 public:
-    cNoMission()noexcept {}
+    cNoMission() = default;
 
     DISABLE_COPY(cNoMission)
     ASSIGN_ID(0, "Nothing")
@@ -187,7 +194,7 @@ private:
 class cNevoMission final : public cMission
 {
 public:
-    cNevoMission()noexcept {}
+    cNevoMission() = default;
 
     DISABLE_COPY(cNevoMission)
     ASSIGN_ID(2, "Nevo")
@@ -199,7 +206,7 @@ public:
 class cHarenaMission final : public cMission
 {
 public:
-    cHarenaMission()noexcept {}
+    cHarenaMission() = default;
 
     DISABLE_COPY(cHarenaMission)
     ASSIGN_ID(3, "Harena")
@@ -211,7 +218,7 @@ public:
 class cRutilusMission final : public cMission
 {
 public:
-    cRutilusMission()noexcept {}
+    cRutilusMission() = default;
 
     DISABLE_COPY(cRutilusMission)
     ASSIGN_ID(4, "Rutilus")
@@ -223,7 +230,7 @@ public:
 class cGeluMission final : public cMission
 {
 public:
-    cGeluMission()noexcept {}
+    cGeluMission() = default;
 
     DISABLE_COPY(cGeluMission)
     ASSIGN_ID(5, "Gelu")
@@ -235,7 +242,7 @@ public:
 class cCalorMission final : public cMission
 {
 public:
-    cCalorMission()noexcept {}
+    cCalorMission() = default;
 
     DISABLE_COPY(cCalorMission)
     ASSIGN_ID(6, "Calor")
@@ -247,7 +254,7 @@ public:
 class cMuscusMission final : public cMission
 {
 public:
-    cMuscusMission()noexcept {}
+    cMuscusMission() = default;
 
     DISABLE_COPY(cMuscusMission)
     ASSIGN_ID(7, "Muscus")
@@ -259,7 +266,7 @@ public:
 class cAterMission final : public cMission
 {
 public:
-    cAterMission()noexcept {}
+    cAterMission() = default;
 
     DISABLE_COPY(cAterMission)
     ASSIGN_ID(8, "Ater")
@@ -268,19 +275,38 @@ public:
 
 // ****************************************************************
 // 
-template <typename F> const cMission::tPathPtr& cMission::_AddPath(const coreUint16& iIndex, F&& nInitFunc)
+template <typename F> coreSpline2* cMission::_AddPath(const coreUint16& iCodeLine, F&& nInitFunc)
 {
-    if(!m_apPath.count(iIndex))
+    if(!m_apPath.count(iCodeLine))
     {
         // 
-        tPathPtr pNewPath = std::make_shared<coreSpline2>();
+        tPathPtr pNewPath = std::make_unique<coreSpline2>();
         nInitFunc(pNewPath.get());
 
         // 
-        m_apPath[iIndex] = std::move(pNewPath);
+        m_apPath[iCodeLine] = std::move(pNewPath);
     }
 
-    return m_apPath.at(iIndex);
+    return m_apPath.at(iCodeLine).get();
+}
+
+
+// ****************************************************************
+// 
+template <typename T, typename F> cEnemySquad* cMission::_AddSquad(const coreUint16& iCodeLine, const coreUint8& iNum, F&& nInitFunc)
+{
+    if(!m_apSquad.count(iCodeLine))
+    {
+        // 
+        tSquadPtr pNewSquad = std::make_unique<cEnemySquad>();
+        pNewSquad->AllocateEnemies<T>(iNum);
+        nInitFunc(pNewSquad.get());
+
+        // 
+        m_apSquad[iCodeLine] = std::move(pNewSquad);
+    }
+
+    return m_apSquad.at(iCodeLine).get();
 }
 
 

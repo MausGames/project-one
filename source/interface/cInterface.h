@@ -39,7 +39,6 @@ private:
         coreObject2D m_ChainBar;          // chain bar
         coreLabel    m_ChainValue;        // chain value
 
-        sPlayerView()noexcept {}
         void Construct(const coreUintW& iIndex);
     };
 

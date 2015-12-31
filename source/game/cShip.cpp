@@ -17,6 +17,8 @@ cShip::cShip()noexcept
 , m_iCurHealth (0)
 , m_fBlink     (0.0f)
 {
+    // 
+    this->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 }
 
 
@@ -81,6 +83,9 @@ void cShip::_Resurrect(const coreBool& bSingle, const coreVector2& vPosition, co
         g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->BindObject(this);
     }
 
+    // 
+    this->SetEnabled(CORE_OBJECT_ENABLE_ALL);
+
     // enable collision
     this->ChangeType(iType);
 }
@@ -96,6 +101,9 @@ void cShip::_Kill(const coreBool& bSingle, const coreBool& bAnimated)
         cShadow::GetGlobalContainer()->UnbindObject(this);
         g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->UnbindObject(this);
     }
+
+    // 
+    this->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
     // disable collision
     this->ChangeType(0);

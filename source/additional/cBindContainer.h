@@ -21,7 +21,7 @@ private:
 
 
 protected:
-    cBindContainer()noexcept {}
+    cBindContainer() = default;
     inline ~cBindContainer();
 
 
@@ -52,7 +52,7 @@ public:
 class cBindContainerIn final : public cBindContainer
 {
 public:
-    cBindContainerIn()noexcept {}
+    cBindContainerIn() = default;
 
     ENABLE_COPY(cBindContainerIn)
 };

@@ -110,8 +110,7 @@ void cRayWeapon::__TriggerOwn(const coreUint8& iMode)
         const coreVector2 vSide1 =  vDir.Rotated45();
         const coreVector2 vSide2 = -vDir.Rotated135();
 
-
-
+        /*
         for(coreUintW i = 1u; i < 4u; ++i)
         {
             // 
@@ -122,8 +121,7 @@ void cRayWeapon::__TriggerOwn(const coreUint8& iMode)
 
         // 
         m_pMineSound->PlayPosition(NULL, 1.0f, 1.0f, 0.0f, false, m_pOwner->GetPosition());
-
-
+        */
 
         g_pGame->GetBulletManagerPlayer()->AddBullet<cRocketBullet>(12, 1.0f, m_pOwner, vPos + vSide1*4.0f, vSide1);
         g_pGame->GetBulletManagerPlayer()->AddBullet<cRocketBullet>(12, 1.0f, m_pOwner, vPos + vSide2*4.0f, vSide2);

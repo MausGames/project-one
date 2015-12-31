@@ -36,7 +36,7 @@
 // phase management macros
 #define PHASE_CONTROL_TIMER(a,b,c)  this->_PhaseTimer (a, __LINE__, b, c, [&](const coreFloat&  fTime, const coreFloat& fTimeBefore, const coreBool& __bEnd)   // 
 #define PHASE_CONTROL_TICKER(a,b,c) this->_PhaseTicker(a, __LINE__, b, c, [&](const coreUint16& iTick,                               const coreBool& __bEnd)   // 
-#define PHASE_SUB(t)                ((fTimeBefore <= (t)) && ((t) < fTime))                                                                                    // 
+#define PHASE_SUB(t)                (InBetween(t, fTimeBefore, fTime))                                                                                         // 
 #define PHASE_RESET(i)              {m_aTimer[i].Stop(); m_aiTimerLine[i] = 0u;}                                                                               // 
 #define PHASE_FINISHED              (__bEnd)                                                                                                                   // 
 
@@ -63,7 +63,7 @@ protected:
 
 public:
     cBoss()noexcept;
-    virtual ~cBoss() {ASSERT(CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_DEAD))}
+    virtual ~cBoss();
 
     DISABLE_COPY(cBoss)
     ENABLE_ID

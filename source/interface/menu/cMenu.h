@@ -273,7 +273,7 @@ public:
     inline cTooltip* GetTooltip() {return &m_Tooltip;}
 
     // default menu routines
-    static const coreLookupStr<std::string>& GetLanguageList();
+    static const coreLookup<std::string, std::string>& GetLanguageList();
     static void UpdateButton(coreButton* OUTPUT pButton, const coreBool& bFocused, const coreVector3& vFocusColor);
     static void UpdateButton(coreButton* OUTPUT pButton, const coreBool& bFocused);
     static void UpdateSwitchBox(coreSwitchBoxU8* OUTPUT pSwitchBox);

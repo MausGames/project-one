@@ -95,7 +95,7 @@ public:
 class cRainWater final : public cWater
 {
 public:
-    cRainWater()noexcept {}
+    cRainWater() = default;
 
     DISABLE_COPY(cRainWater)
 };

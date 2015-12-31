@@ -703,8 +703,8 @@ void cTorusBoss::__CreateOverdrive(const coreUintW& iIndex, const coreVector3& v
     ASSERT(iIndex < ARRAY_SIZE(m_aRay))
 
     // 
-    constexpr_var coreFloat fMin = 2.5f;
-    constexpr_var coreFloat fMax = 5.0f;
+    constexpr coreFloat fMin = 2.5f;
+    constexpr coreFloat fMax = 5.0f;
     coreVector3& vOldHit = m_avVector[iIndex];
 
     // 

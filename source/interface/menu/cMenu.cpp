@@ -170,10 +170,10 @@ void cMenu::Move()
 
 // ****************************************************************
 // 
-const coreLookupStr<std::string>& cMenu::GetLanguageList()
+const coreLookup<std::string, std::string>& cMenu::GetLanguageList()
 {
     // static language list (key = name, value = path)
-    static coreLookupStr<std::string> asLanguage;
+    static coreLookup<std::string, std::string> asLanguage;
 
     if(asLanguage.empty())
     {

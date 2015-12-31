@@ -31,8 +31,8 @@ protected:
 
 
 public:
-    constexpr_func cWeapon()noexcept;
-    virtual ~cWeapon() {}
+    CONSTEXPR cWeapon()noexcept;
+    virtual ~cWeapon() = default;
 
     DISABLE_COPY(cWeapon)
     ENABLE_ID
@@ -67,7 +67,7 @@ private:
 class cNoWeapon final : public cWeapon
 {
 public:
-    cNoWeapon()noexcept {}
+    cNoWeapon() = default;
 
     DISABLE_COPY(cNoWeapon)
     ASSIGN_ID(0, "Nothing")
@@ -182,7 +182,7 @@ private:
 class cAntiWeapon final : public cWeapon
 {
 public:
-    cAntiWeapon()noexcept {}
+    cAntiWeapon() = default;
 
     DISABLE_COPY(cAntiWeapon)
     ASSIGN_ID(5, "Antimatter")
@@ -191,7 +191,7 @@ public:
 
 // ****************************************************************
 // constructor
-constexpr_func cWeapon::cWeapon()noexcept
+CONSTEXPR cWeapon::cWeapon()noexcept
 : m_CooldownTimer (coreTimer(1.0f, 1.0f, 0u))
 , m_iLastStatus   (0u)
 , m_pOwner        (NULL)

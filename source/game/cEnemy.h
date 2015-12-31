@@ -10,20 +10,16 @@
 #ifndef _P1_GUARD_ENEMY_H_
 #define _P1_GUARD_ENEMY_H_
 
-// TODO: definitely add automatic enemy batching like the bullet manager! 
-
 
 // ****************************************************************
 // enemy definitions
-#define ENEMY_SET_INIT_SIZE          (8u)   // initial allocation size when creating a new enemy set
-#define ENEMY_SHADER_ATTRIBUTE_BLINK (CORE_SHADER_ATTRIBUTE_DIV_TEXPARAM_NUM + 1u)
+#define ENEMY_SET_INIT_SIZE (8u)     // initial allocation size when creating a new enemy set
 
 enum eEnemyStatus : coreUint8
 {
-    ENEMY_STATUS_DEAD   = 0x01u,   // completely removed from the game
-    ENEMY_STATUS_SILENT = 0x02u,   // not able to attack
-    ENEMY_STATUS_BOSS   = 0x04u,   // 
-    ENEMY_STATUS_READY  = 0x08u    // enemy is ready to be created
+    ENEMY_STATUS_DEAD     = 0x01u,   // completely removed from the game
+    ENEMY_STATUS_BOSS     = 0x02u,   // 
+    ENEMY_STATUS_ASSIGNED = 0x04u    // enemy is currently assigned to something
 };
 
 
@@ -32,15 +28,12 @@ enum eEnemyStatus : coreUint8
 class INTERFACE cEnemy : public cShip
 {
 protected:
-    coreFlow  m_fLifeTime;                     // 
-    coreUint8 m_aiNumShots[2];                 // (0 = value, 1 = helper) 
-
-    std::function<void(cEnemy*)> m_nRoutine;   // custom move routine
+    coreFlow m_fLifeTime;   // 
 
 
 public:
     cEnemy()noexcept;
-    virtual ~cEnemy() {}
+    virtual ~cEnemy() = default;
 
     FRIEND_CLASS(cEnemyManager)
     ENABLE_COPY (cEnemy)
@@ -49,9 +42,8 @@ public:
     // configure the enemy
     void Configure(const coreInt32& iHealth, const coreVector3& vColor);
 
-    // render and move the enemy
-    void Render()override;
-    void Move  ()override;
+    // move the enemy
+    void Move()override;
 
     // reduce current health
     void TakeDamage(const coreInt32& iDamage, cPlayer* pAttacker);
@@ -62,10 +54,7 @@ public:
     void Resurrect(const coreVector2& vPosition, const coreVector2& vDirection);
     void Kill     (const coreBool&    bAnimated);
 
-    // 
-    template <typename F> void ChangeRoutine(F&& nRoutine) {m_nRoutine = nRoutine;}   // [](cEnemy* OUTPUT pEnemy) -> void
-
-    // (raw parameters are multiplied with FOREGROUND_AREA) 
+    // transformation functions (raw parameters are multiplied with FOREGROUND_AREA)
     coreBool DefaultMovePath     (const coreSpline2& oRawPath, const coreVector2& vFactor, const coreVector2& vRawOffset, const coreFloat& fRawDistance);
     coreBool DefaultMoveTarget   (const coreVector2& vTarget, const coreFloat& fSpeedMove, const coreFloat& fSpeedTurn);
     coreBool DefaultMoveSmooth   (const coreVector2& vRawPosition, const coreFloat& fSpeedMove, const coreFloat& fClampMove);
@@ -76,11 +65,9 @@ public:
     void     DefaultOrientate    (const coreFloat& fAngle);
     void     DefaultOrientateLerp(const coreFloat& fFromAngle, const coreFloat& fToAngle, const coreFloat& fTime);
     void     DefaultMultiate     (const coreFloat& fAngle);
-    coreBool DefaultShoot        (const coreFloat& fFireRate, const coreUint8& iMaxShots);
 
     // get object properties
     inline const coreFloat& GetLifeTime()const {return m_fLifeTime;}
-    inline const coreUint8& GetNumShots()const {return m_aiNumShots[0];}
 
 
 private:
@@ -95,6 +82,33 @@ private:
 
 
 // ****************************************************************
+// enemy squad class
+class cEnemySquad final
+{
+private:
+    std::vector<cEnemy*> m_apEnemy;   // 
+
+
+public:
+    cEnemySquad() = default;
+    ~cEnemySquad();
+
+    FRIEND_CLASS(cEnemyManager)
+    ENABLE_COPY (cEnemySquad)
+
+    // 
+    template <typename T> void AllocateEnemies(const coreUint8& iNumEnemies);
+    void FreeEnemies();
+    void ClearEnemies(const coreBool& bAnimated);
+
+    // 
+    cEnemy* FindEnemy(const coreVector2& vPosition);
+    template <typename F> void ForEachEnemy   (F&& nFunction);   // [](cEnemy* OUTPUT pEnemy, const coreUintW& i) -> void
+    template <typename F> void ForEachEnemyAll(F&& nFunction);   // [](cEnemy* OUTPUT pEnemy, const coreUintW& i) -> void
+};
+
+
+// ****************************************************************
 // enemy manager class
 class cEnemyManager final
 {
@@ -103,16 +117,17 @@ private:
     struct INTERFACE sEnemySetGen
     {
         coreBatchList oEnemyActive;   // list with active enemies
+        coreUintW     iTopEnemy;      // 
 
         sEnemySetGen()noexcept;
-        virtual ~sEnemySetGen() {}
+        virtual ~sEnemySetGen() = default;
     };
     template <typename T> struct sEnemySet final : public sEnemySetGen
     {
-        std::vector<T> aEnemyPool;   // semi-dynamic container with all enemies
-        coreUintW      iCurEnemy;    // current enemy (next one to check)
+        std::vector<T*> apEnemyPool;   // semi-dynamic container with all enemies
 
         sEnemySet()noexcept;
+        ~sEnemySet();
     };
 
 
@@ -122,7 +137,7 @@ private:
 
 
 public:
-    cEnemyManager()noexcept;
+    cEnemyManager() = default;
     ~cEnemyManager();
 
     DISABLE_COPY(cEnemyManager)
@@ -135,12 +150,14 @@ public:
     void Move        ();
 
     // add and remove enemies
-    template <typename T> RETURN_RESTRICT T* AddEnemy();
+    template <typename T> RETURN_RESTRICT T* AllocateEnemy();
+    void FreeEnemy(cEnemy** OUTPUT ppEnemy);
     void ClearEnemies(const coreBool& bAnimated);
 
     // 
     cEnemy* FindEnemy(const coreVector2& vPosition);
-    template <typename F> void ForEachEnemy(F&& nFunction);   // [](cEnemy* OUTPUT pEnemy) -> void
+    template <typename F> void ForEachEnemy   (F&& nFunction);   // [](cEnemy* OUTPUT pEnemy) -> void
+    template <typename F> void ForEachEnemyAll(F&& nFunction);   // [](cEnemy* OUTPUT pEnemy) -> void
 
     // 
     inline void BindEnemy  (cEnemy* pEnemy) {ASSERT(!m_apAdditional.count(pEnemy)) m_apAdditional.insert(pEnemy);}
@@ -269,9 +286,49 @@ private:
 
 
 // ****************************************************************
+// 
+template <typename T> void cEnemySquad::AllocateEnemies(const coreUint8& iNumEnemies)
+{
+    ASSERT(m_apEnemy.empty())
+
+    // 
+    m_apEnemy.reserve(iNumEnemies);
+
+    // 
+    for(coreUintW i = iNumEnemies; i--; )
+    {
+        T* pEnemy = g_pGame->GetEnemyManager()->AllocateEnemy<T>();
+        m_apEnemy.push_back(pEnemy);
+    }
+}
+
+
+// ****************************************************************
+// 
+template <typename F> void cEnemySquad::ForEachEnemy(F&& nFunction)
+{
+    // 
+    for(coreUintW i = 0u, ie = m_apEnemy.size(); i < ie; ++i)
+    {
+        cEnemy* pEnemy = m_apEnemy[i];
+        if(CONTAINS_VALUE(pEnemy->GetStatus(), ENEMY_STATUS_DEAD)) continue;
+
+        // 
+        nFunction(pEnemy, i);
+    }
+}
+
+template <typename F> void cEnemySquad::ForEachEnemyAll(F&& nFunction)
+{
+    // 
+    for(coreUintW i = 0u, ie = m_apEnemy.size(); i < ie; ++i)
+        nFunction(m_apEnemy[i], i);
+}
+
+
+// ****************************************************************
 // constructor
 template <typename T> cEnemyManager::sEnemySet<T>::sEnemySet()noexcept
-: iCurEnemy (0u)
 {
     // set shader-program
     oEnemyActive.DefineProgram("object_ship_inst_program");
@@ -279,21 +336,38 @@ template <typename T> cEnemyManager::sEnemySet<T>::sEnemySet()noexcept
     // 
     oEnemyActive.CreateCustom(sizeof(coreFloat), [](coreVertexBuffer* OUTPUT pBuffer)
     {
-        pBuffer->DefineAttribute(ENEMY_SHADER_ATTRIBUTE_BLINK, 1u, GL_FLOAT, false, 0u);
+        pBuffer->DefineAttribute(SHIP_SHADER_ATTRIBUTE_BLINK, 1u, GL_FLOAT, false, 0u);
     });
 
     // add enemy set to global shadow and outline
     cShadow::GetGlobalContainer()->BindList(&oEnemyActive);
     g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->BindList(&oEnemyActive);
 
-    // set bullet pool to initial size
-    aEnemyPool.resize(ENEMY_SET_INIT_SIZE);
+    // set enemy pool to initial size
+    apEnemyPool.resize(ENEMY_SET_INIT_SIZE);
+}
+
+
+// ****************************************************************
+// destructor
+template <typename T> cEnemyManager::sEnemySet<T>::~sEnemySet()
+{
+    // 
+    FOR_EACH(it, apEnemyPool)
+        SAFE_DELETE(*it)
+
+    // remove enemy set from global shadow and outline
+    cShadow::GetGlobalContainer()->UnbindList(&oEnemyActive);
+    g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->UnbindList(&oEnemyActive);
+
+    // clear memory
+    apEnemyPool.clear();
 }
 
 
 // ****************************************************************
 // add enemy to the game
-template <typename T> RETURN_RESTRICT T* cEnemyManager::AddEnemy()
+template <typename T> RETURN_RESTRICT T* cEnemyManager::AllocateEnemy()
 {
     // get requested enemy set
     sEnemySet<T>* pSet;
@@ -306,20 +380,19 @@ template <typename T> RETURN_RESTRICT T* cEnemyManager::AddEnemy()
     else pSet = s_cast<sEnemySet<T>*>(m_apEnemySet[REF_ID(T::ID)]);
 
     // save current pool size
-    const coreUintW iSize = pSet->aEnemyPool.size();
+    const coreUintW iSize = pSet->apEnemyPool.size();
 
     // loop through all enemies
-    for(coreUintW i = iSize; i--; )
+    while(pSet->iTopEnemy < iSize)
     {
-        if(++pSet->iCurEnemy >= iSize) pSet->iCurEnemy = 0u;
-
         // check current enemy status
-        T* pEnemy = &pSet->aEnemyPool[pSet->iCurEnemy];
-        if(CONTAINS_VALUE(pEnemy->GetStatus(), ENEMY_STATUS_READY))
+        T*& pEnemy = pSet->apEnemyPool[pSet->iTopEnemy++];
+        if(!pEnemy) pEnemy = new T();
+        if(!CONTAINS_VALUE(pEnemy->GetStatus(), ENEMY_STATUS_ASSIGNED))
         {
-            // add to active list
+            // prepare enemy and add to active list
+            pEnemy->AddStatus(ENEMY_STATUS_ASSIGNED);
             pSet->oEnemyActive.BindObject(pEnemy);
-            pEnemy->RemoveStatus(ENEMY_STATUS_READY);
 
             return pEnemy;
         }
@@ -327,19 +400,10 @@ template <typename T> RETURN_RESTRICT T* cEnemyManager::AddEnemy()
 
     // increase list and pool size by 100%
     pSet->oEnemyActive.Reallocate(iSize * 2u);
-    pSet->aEnemyPool  .resize    (iSize * 2u);
-
-    // re-add all active enemies (addresses may have changed)
-    pSet->oEnemyActive.Clear();
-    FOR_EACH(it, pSet->aEnemyPool)
-    {
-        if(!CONTAINS_VALUE(it->GetStatus(), ENEMY_STATUS_DEAD))
-            pSet->oEnemyActive.BindObject(&(*it));
-    }
+    pSet->apEnemyPool .resize    (iSize * 2u);
 
     // execute again with first new enemy (overhead should be low, requested enemy set is cached)
-    pSet->iCurEnemy = iSize - 1u;
-    return this->AddEnemy<T>();
+    return this->AllocateEnemy<T>();
 }
 
 
@@ -356,6 +420,19 @@ template <typename F> void cEnemyManager::ForEachEnemy(F&& nFunction)
 
         // 
         nFunction(pEnemy);
+    }
+}
+
+template <typename F> void cEnemyManager::ForEachEnemyAll(F&& nFunction)
+{
+    // loop through all enemy sets
+    FOR_EACH(it, m_apEnemySet)
+    {
+        coreBatchList* pEnemyActive = &(*it)->oEnemyActive;
+
+        // 
+        FOR_EACH(et, *pEnemyActive->List())
+            nFunction(*et);
     }
 }
 

@@ -404,13 +404,15 @@ static void SetupResources()
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_outdoor_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("environment_outdoor.vert")
         ->AttachShader("environment_outdoor.frag")
-        ->BindAttribute("a_v1Height", CORE_SHADER_ATTRIBUTE_POSITION_NUM)
+        ->BindAttribute("a_v1Height",   CORE_SHADER_ATTRIBUTE_POSITION_NUM)
+        ->BindAttribute("a_i1VertexID", CORE_SHADER_ATTRIBUTE_TEXCOORD_NUM)
         ->Finish();
 
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_outdoor_glow_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("environment_outdoor.vert")
         ->AttachShader("environment_outdoor_glow.frag")
-        ->BindAttribute("a_v1Height", CORE_SHADER_ATTRIBUTE_POSITION_NUM)
+        ->BindAttribute("a_v1Height",   CORE_SHADER_ATTRIBUTE_POSITION_NUM)
+        ->BindAttribute("a_i1VertexID", CORE_SHADER_ATTRIBUTE_TEXCOORD_NUM)
         ->Finish();
 
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_under_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
@@ -516,7 +518,7 @@ static void SetupResources()
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ship_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader ("object_inst.vert")
         ->AttachShader ("object_ship_inst.frag")
-        ->BindAttribute("a_v1Blink", ENEMY_SHADER_ATTRIBUTE_BLINK)
+        ->BindAttribute("a_v1Blink", SHIP_SHADER_ATTRIBUTE_BLINK)
         ->Finish();
 
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ship_glow_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())

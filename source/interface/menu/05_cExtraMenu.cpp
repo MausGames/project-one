@@ -23,7 +23,7 @@ cExtraMenu::cExtraMenu()noexcept
     m_BackButton.Construct    (MENU_BUTTON, MENU_ICON_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
     m_BackButton.DefineProgram("menu_border_program");
     m_BackButton.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.5f,-0.5f) + coreVector2(0.0f,-0.02f));
-    m_BackButton.SetSize      (coreVector2( 0.07f, 0.07f)); // * m_SaveButton.GetSize().y);
+    m_BackButton.SetSize      (coreVector2( 0.07f, 0.07f)); // * m_SaveButton.GetSize().y); 
     m_BackButton.SetAlignment (coreVector2(-1.0f, -1.0f));
     m_BackButton.GetCaption()->SetText(ICON_SHARE);
 

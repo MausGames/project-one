@@ -129,10 +129,10 @@ void cShadow::GlobalUpdate()
                                            P.x,  P.y, 0.0f, 1.0f);
 
     // create texture coordinate adjustment
-    constexpr_var coreMatrix4 mNorm = coreMatrix4(0.5f, 0.0f, 0.0f, 0.0f,
-                                                  0.0f, 0.5f, 0.0f, 0.0f,
-                                                  0.0f, 0.0f, 0.5f, 0.0f,
-                                                  0.5f, 0.5f, 0.5f, 1.0f);
+    constexpr coreMatrix4 mNorm = coreMatrix4(0.5f, 0.0f, 0.0f, 0.0f,
+                                              0.0f, 0.5f, 0.0f, 0.0f,
+                                              0.0f, 0.0f, 0.5f, 0.0f,
+                                              0.5f, 0.5f, 0.5f, 1.0f);
 
     // increase light direction height (to reduce shadow length)
     const coreVector3 vHighLight = (g_pEnvironment->GetLightDir() * coreVector3(1.0f, 1.0f, SHADOW_HEIGHT_FACTOR)).Normalize();

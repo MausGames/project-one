@@ -14,6 +14,11 @@
 
 
 // ****************************************************************
+// ship definitions
+#define SHIP_SHADER_ATTRIBUTE_BLINK (CORE_SHADER_ATTRIBUTE_DIV_TEXPARAM_NUM + 1u)
+
+
+// ****************************************************************
 // ship interface
 class INTERFACE cShip : public coreObject3D
 {
@@ -30,17 +35,19 @@ protected:
 
 protected:
     cShip()noexcept;
-    ~cShip() {}
+    ~cShip() = default;
 
 
 public:
     ENABLE_COPY(cShip)
 
     // define the visual appearance
-    inline const coreModelPtr& DefineModelHigh(const coreModelPtr& pModel) {m_pModelHigh = pModel;                                          this->DefineModel(m_pModelHigh); return m_pModelLow;}
-    inline const coreModelPtr& DefineModelHigh(const coreChar*     pcName) {m_pModelHigh = Core::Manager::Resource->Get<coreModel>(pcName); this->DefineModel(m_pModelHigh); return m_pModelLow;}
-    inline const coreModelPtr& DefineModelLow (const coreModelPtr& pModel) {m_pModelLow  = pModel;                                          return m_pModelLow;}
-    inline const coreModelPtr& DefineModelLow (const coreChar*     pcName) {m_pModelLow  = Core::Manager::Resource->Get<coreModel>(pcName); return m_pModelLow;}
+    inline void DefineModelHigh(std::nullptr_t)               {m_pModelHigh = NULL;                                           this->DefineModel(m_pModelHigh);}
+    inline void DefineModelHigh(const coreModelPtr&   pModel) {m_pModelHigh = pModel;                                         this->DefineModel(m_pModelHigh);}
+    inline void DefineModelHigh(const coreHashString& sName)  {m_pModelHigh = Core::Manager::Resource->Get<coreModel>(sName); this->DefineModel(m_pModelHigh);}
+    inline void DefineModelLow (std::nullptr_t)               {m_pModelLow  = NULL;}
+    inline void DefineModelLow (const coreModelPtr&   pModel) {m_pModelLow  = pModel;}
+    inline void DefineModelLow (const coreHashString& sName)  {m_pModelLow  = Core::Manager::Resource->Get<coreModel>(sName);}
 
     // render the ship (low-polygon only)
     using coreObject3D::Render;

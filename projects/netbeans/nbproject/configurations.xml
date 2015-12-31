@@ -5,13 +5,17 @@
                    displayName="Source Files"
                    projectFiles="true">
       <logicalFolder name="additional" displayName="additional" projectFiles="true">
-        <itemPath>../../source/additional/cBindContainer.cpp</itemPath>
         <itemPath>../../source/additional/cBindContainer.h</itemPath>
       </logicalFolder>
       <logicalFolder name="environment" displayName="environment" projectFiles="true">
         <logicalFolder name="background" displayName="background" projectFiles="true">
           <itemPath>../../source/environment/background/01_cGrassBackground.cpp</itemPath>
           <itemPath>../../source/environment/background/02_cSeaBackground.cpp</itemPath>
+          <itemPath>../../source/environment/background/03_cDesertBackground.cpp</itemPath>
+          <itemPath>../../source/environment/background/04_cSpaceBackground.cpp</itemPath>
+          <itemPath>../../source/environment/background/05_cVolcanoBackground.cpp</itemPath>
+          <itemPath>../../source/environment/background/06_cSnowBackground.cpp</itemPath>
+          <itemPath>../../source/environment/background/07_cMossBackground.cpp</itemPath>
           <itemPath>../../source/environment/background/cBackground.cpp</itemPath>
           <itemPath>../../source/environment/background/cBackground.h</itemPath>
         </logicalFolder>
@@ -60,6 +64,7 @@
           <itemPath>../../source/interface/menu/02_cMainMenu.cpp</itemPath>
           <itemPath>../../source/interface/menu/03_cGameMenu.cpp</itemPath>
           <itemPath>../../source/interface/menu/04_cConfigMenu.cpp</itemPath>
+          <itemPath>../../source/interface/menu/05_cExtraMenu.cpp</itemPath>
           <itemPath>../../source/interface/menu/cMenu.cpp</itemPath>
           <itemPath>../../source/interface/menu/cMenu.h</itemPath>
         </logicalFolder>
@@ -75,6 +80,8 @@
         <itemPath>../../source/interface/cTooltip.h</itemPath>
       </logicalFolder>
       <logicalFolder name="visuals" displayName="visuals" projectFiles="true">
+        <itemPath>../../source/visual/cBlur.cpp</itemPath>
+        <itemPath>../../source/visual/cBlur.h</itemPath>
         <itemPath>../../source/visual/cDistortion.cpp</itemPath>
         <itemPath>../../source/visual/cDistortion.h</itemPath>
         <itemPath>../../source/visual/cForeground.cpp</itemPath>
@@ -141,7 +148,6 @@
           <additionalDep>../../../CoreEngine/output/windows/x86/libCoreEngine_mingw_debug.a</additionalDep>
           <linkerLibItems>
             <linkerOptionItem>-lMinGW32</linkerOptionItem>
-            <linkerLibLibItem>SDL2main</linkerLibLibItem>
             <linkerLibLibItem>CoreEngine_mingw_debug</linkerLibLibItem>
             <linkerLibLibItem>SDL2</linkerLibLibItem>
             <linkerLibLibItem>SDL2_ttf</linkerLibLibItem>
@@ -168,11 +174,6 @@
           </makeArtifact>
         </requiredProjects>
       </compileType>
-      <item path="../../source/additional/cBindContainer.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
       <item path="../../source/additional/cBindContainer.h"
             ex="false"
             tool="3"
@@ -186,6 +187,31 @@
             flavor2="0">
       </item>
       <item path="../../source/environment/background/02_cSeaBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/03_cDesertBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/04_cSpaceBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/05_cVolcanoBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/06_cSnowBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/07_cMossBackground.cpp"
             ex="false"
             tool="1"
             flavor2="0">
@@ -354,6 +380,11 @@
             tool="1"
             flavor2="0">
       </item>
+      <item path="../../source/interface/menu/05_cExtraMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
       <item path="../../source/interface/menu/cMenu.cpp"
             ex="false"
             tool="1"
@@ -367,6 +398,10 @@
       <item path="../../source/main.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../source/main.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cBlur.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visual/cBlur.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../source/visual/cDistortion.cpp"
             ex="false"
@@ -467,11 +502,6 @@
           </makeArtifact>
         </requiredProjects>
       </compileType>
-      <item path="../../source/additional/cBindContainer.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
       <item path="../../source/additional/cBindContainer.h"
             ex="false"
             tool="3"
@@ -485,6 +515,31 @@
             flavor2="0">
       </item>
       <item path="../../source/environment/background/02_cSeaBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/03_cDesertBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/04_cSpaceBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/05_cVolcanoBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/06_cSnowBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/07_cMossBackground.cpp"
             ex="false"
             tool="1"
             flavor2="0">
@@ -653,6 +708,11 @@
             tool="1"
             flavor2="0">
       </item>
+      <item path="../../source/interface/menu/05_cExtraMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
       <item path="../../source/interface/menu/cMenu.cpp"
             ex="false"
             tool="1"
@@ -666,6 +726,10 @@
       <item path="../../source/main.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../source/main.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cBlur.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visual/cBlur.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../source/visual/cDistortion.cpp"
             ex="false"
@@ -766,11 +830,6 @@
           </makeArtifact>
         </requiredProjects>
       </compileType>
-      <item path="../../source/additional/cBindContainer.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
       <item path="../../source/additional/cBindContainer.h"
             ex="false"
             tool="3"
@@ -784,6 +843,31 @@
             flavor2="0">
       </item>
       <item path="../../source/environment/background/02_cSeaBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/03_cDesertBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/04_cSpaceBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/05_cVolcanoBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/06_cSnowBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/07_cMossBackground.cpp"
             ex="false"
             tool="1"
             flavor2="0">
@@ -952,6 +1036,11 @@
             tool="1"
             flavor2="0">
       </item>
+      <item path="../../source/interface/menu/05_cExtraMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
       <item path="../../source/interface/menu/cMenu.cpp"
             ex="false"
             tool="1"
@@ -965,6 +1054,10 @@
       <item path="../../source/main.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../source/main.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cBlur.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visual/cBlur.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../source/visual/cDistortion.cpp"
             ex="false"
@@ -1051,7 +1144,6 @@
           <additionalDep>../../../CoreEngine/output/windows/x86/libCoreEngine_mingw.a</additionalDep>
           <linkerLibItems>
             <linkerOptionItem>-lMinGW32</linkerOptionItem>
-            <linkerLibLibItem>SDL2main</linkerLibLibItem>
             <linkerLibLibItem>CoreEngine_mingw</linkerLibLibItem>
             <linkerLibLibItem>SDL2</linkerLibLibItem>
             <linkerLibLibItem>SDL2_ttf</linkerLibLibItem>
@@ -1078,11 +1170,6 @@
           </makeArtifact>
         </requiredProjects>
       </compileType>
-      <item path="../../source/additional/cBindContainer.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
       <item path="../../source/additional/cBindContainer.h"
             ex="false"
             tool="3"
@@ -1096,6 +1183,31 @@
             flavor2="0">
       </item>
       <item path="../../source/environment/background/02_cSeaBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/03_cDesertBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/04_cSpaceBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/05_cVolcanoBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/06_cSnowBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/07_cMossBackground.cpp"
             ex="false"
             tool="1"
             flavor2="0">
@@ -1264,6 +1376,11 @@
             tool="1"
             flavor2="0">
       </item>
+      <item path="../../source/interface/menu/05_cExtraMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
       <item path="../../source/interface/menu/cMenu.cpp"
             ex="false"
             tool="1"
@@ -1277,6 +1394,10 @@
       <item path="../../source/main.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../source/main.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cBlur.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visual/cBlur.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../source/visual/cDistortion.cpp"
             ex="false"
@@ -1386,11 +1507,6 @@
           </makeArtifact>
         </requiredProjects>
       </compileType>
-      <item path="../../source/additional/cBindContainer.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
       <item path="../../source/additional/cBindContainer.h"
             ex="false"
             tool="3"
@@ -1404,6 +1520,31 @@
             flavor2="0">
       </item>
       <item path="../../source/environment/background/02_cSeaBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/03_cDesertBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/04_cSpaceBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/05_cVolcanoBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/06_cSnowBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/07_cMossBackground.cpp"
             ex="false"
             tool="1"
             flavor2="0">
@@ -1572,6 +1713,11 @@
             tool="1"
             flavor2="0">
       </item>
+      <item path="../../source/interface/menu/05_cExtraMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
       <item path="../../source/interface/menu/cMenu.cpp"
             ex="false"
             tool="1"
@@ -1585,6 +1731,10 @@
       <item path="../../source/main.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../source/main.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cBlur.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visual/cBlur.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../source/visual/cDistortion.cpp"
             ex="false"
@@ -1693,11 +1843,6 @@
           </makeArtifact>
         </requiredProjects>
       </compileType>
-      <item path="../../source/additional/cBindContainer.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
       <item path="../../source/additional/cBindContainer.h"
             ex="false"
             tool="3"
@@ -1711,6 +1856,31 @@
             flavor2="0">
       </item>
       <item path="../../source/environment/background/02_cSeaBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/03_cDesertBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/04_cSpaceBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/05_cVolcanoBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/06_cSnowBackground.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../source/environment/background/07_cMossBackground.cpp"
             ex="false"
             tool="1"
             flavor2="0">
@@ -1879,6 +2049,11 @@
             tool="1"
             flavor2="0">
       </item>
+      <item path="../../source/interface/menu/05_cExtraMenu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
       <item path="../../source/interface/menu/cMenu.cpp"
             ex="false"
             tool="1"
@@ -1892,6 +2067,10 @@
       <item path="../../source/main.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../source/main.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../source/visual/cBlur.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/visual/cBlur.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../source/visual/cDistortion.cpp"
             ex="false"

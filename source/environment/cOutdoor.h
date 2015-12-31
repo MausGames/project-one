@@ -82,9 +82,9 @@ public:
     void Render()override;
 
     // load outdoor resources
-    void LoadProgram (const coreBool& bGlow);
-    void LoadTextures(const coreChar* pcTextureTop, const coreChar* pcTextureBottom);
     void LoadGeometry(const coreUint8& iAlgorithm, const coreFloat& fGrade);
+    void LoadTextures(const coreChar* pcTextureTop, const coreChar* pcTextureBottom);
+    void LoadProgram (const coreBool& bGlow);
 
     // retrieve height value
     coreFloat   RetrieveHeight   (const coreVector2& vPosition);

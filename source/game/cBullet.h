@@ -22,8 +22,8 @@
 
 enum eBulletStatus : coreUint8
 {
-    BULLET_STATUS_READY  = 0x01u,     // bullet is ready to be created
-    BULLET_STATUS_ACTIVE = 0x02u      // bullet is currently flying around, doing stuff (no checking required, is managed)
+    BULLET_STATUS_READY  = 0x01u,      // bullet is ready to be created
+    BULLET_STATUS_ACTIVE = 0x02u       // bullet is currently flying around, doing stuff (no checking required, is managed)
 };
 
 
@@ -41,7 +41,7 @@ protected:
 
 public:
     cBullet()noexcept;
-    virtual ~cBullet() {}
+    virtual ~cBullet() = default;
 
     FRIEND_CLASS(cBulletManager)
     ENABLE_COPY (cBullet)
@@ -71,8 +71,8 @@ public:
     static inline coreBool        ConfigShadow              () {ASSERT(false) return false;}
 
     // 
-    static inline void RoutineInit() {}
-    static inline void RoutineExit() {}
+    static void GlobalInit() {}
+    static void GlobalExit() {}
 
 
 private:
@@ -93,14 +93,14 @@ private:
     struct INTERFACE sBulletSetGen
     {
         coreBatchList oBulletActive;   // list with active bullets
+        coreUintW     iCurBullet;      // current bullet (next one to check in pool)
 
         sBulletSetGen()noexcept;
-        virtual ~sBulletSetGen() {}
+        virtual ~sBulletSetGen() = default;
     };
     template <typename T> struct sBulletSet final : public sBulletSetGen
     {
         std::vector<T> aBulletPool;   // semi-dynamic container with all bullets
-        coreUintW      iCurBullet;    // current bullet (next one to check)
 
         explicit sBulletSet(cOutline* pOutline)noexcept;
         ~sBulletSet();
@@ -129,6 +129,7 @@ public:
     void ClearBullets(const coreBool& bAnimated);
 
     // 
+    cBullet* FindBullet(const coreVector2& vPosition);
     template <typename F> void ForEachBullet(F&& nFunction);   // [](cBullet* OUTPUT pBullet) -> void
 };
 
@@ -155,9 +156,9 @@ public:
     inline cRayBullet* MakeGreen () {return this;}
 
     // bullet configuration values
-    static inline const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
-    static inline coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_DIRECT;}
-    static inline coreBool        ConfigShadow              () {return false;}
+    static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
+    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_DIRECT;}
+    static constexpr coreBool        ConfigShadow              () {return false;}
 
 
 private:
@@ -188,9 +189,9 @@ public:
     inline cPulseBullet* MakeGreen () {return this;}
 
     // bullet configuration values
-    static inline const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
-    static inline coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_DIRECT;}
-    static inline coreBool        ConfigShadow              () {return false;}
+    static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
+    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_DIRECT;}
+    static constexpr coreBool        ConfigShadow              () {return false;}
 
 
 private:
@@ -221,9 +222,9 @@ public:
     inline cOrbBullet* MakeGreen () {this->SetColor3(COLOR_ENERGY_GREEN  * 0.8f); return this;}
 
     // bullet configuration values
-    static inline const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_inst_program";}
-    static inline coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_FULL;}
-    static inline coreBool        ConfigShadow              () {return false;}
+    static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_inst_program";}
+    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_FULL;}
+    static constexpr coreBool        ConfigShadow              () {return false;}
 
 
 private:
@@ -255,9 +256,9 @@ public:
     inline cConeBullet* MakeGreen () {return this;}
 
     // bullet configuration values
-    static inline const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_inst_program";}
-    static inline coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_DIRECT;}
-    static inline coreBool        ConfigShadow              () {return false;}
+    static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_inst_program";}
+    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_DIRECT;}
+    static constexpr coreBool        ConfigShadow              () {return false;}
 
 
 private:
@@ -289,9 +290,9 @@ public:
     inline cWaveBullet* MakeGreen () {this->SetColor3(COLOR_ENERGY_GREEN * 1.1f); return this;}
 
     // bullet configuration values
-    static inline const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
-    static inline coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_DIRECT;}
-    static inline coreBool        ConfigShadow              () {return false;}
+    static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
+    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_DIRECT;}
+    static constexpr coreBool        ConfigShadow              () {return false;}
 
 
 private:
@@ -328,9 +329,9 @@ public:
     inline cTeslaBullet* MakeGreen () {return this;}
 
     // bullet configuration values
-    static inline const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_spheric_inst_program";}
-    static inline coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_FULL;}
-    static inline coreBool        ConfigShadow              () {return false;}
+    static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_spheric_inst_program";}
+    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_FULL;}
+    static constexpr coreBool        ConfigShadow              () {return false;}
 
 
 private:
@@ -362,13 +363,13 @@ public:
     inline cMineBullet* SetFlyDir(const coreVector2& vFlyDir) {ASSERT(vFlyDir.IsNormalized()) m_vFlyDir = vFlyDir; return this;}
 
     // bullet configuration values
-    static inline const coreChar* ConfigProgramInstancedName() {return "object_ship_glow_inst_program";}
-    static inline coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_FULL;}
-    static inline coreBool        ConfigShadow              () {return true;}
+    static constexpr const coreChar* ConfigProgramInstancedName() {return "object_ship_glow_inst_program";}
+    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_FULL;}
+    static constexpr coreBool        ConfigShadow              () {return true;}
 
     // 
-    static void RoutineInit();
-    static void RoutineExit();
+    static void GlobalInit();
+    static void GlobalExit();
 
 
 private:
@@ -393,9 +394,9 @@ public:
     inline void ResetProperties() {this->SetSize(coreVector3(1.7f,1.7f,1.7f));}
 
     // bullet configuration values
-    static inline const coreChar* ConfigProgramInstancedName() {return "object_ship_glow_inst_program";}
-    static inline coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_FULL;}
-    static inline coreBool        ConfigShadow              () {return true;}
+    static constexpr const coreChar* ConfigProgramInstancedName() {return "object_ship_glow_inst_program";}
+    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_FULL;}
+    static constexpr coreBool        ConfigShadow              () {return true;}
 
 
 private:
@@ -408,20 +409,17 @@ private:
 // ****************************************************************
 // constructor
 template <typename T> cBulletManager::sBulletSet<T>::sBulletSet(cOutline* pOutline)noexcept
-: iCurBullet (0u)
 {
     // set shader-program
     oBulletActive.DefineProgram(T::ConfigProgramInstancedName());
 
     // 
-    T::RoutineInit();
+    T::GlobalInit();
 
-    // add bullet set to outline and glow
+    // add bullet set to global shadow, outline and glow
+    if(T::ConfigShadow()) cShadow::GetGlobalContainer()->BindList(&oBulletActive);
     pOutline->GetStyle(T::ConfigOutlineStyle())->BindList(&oBulletActive);
     g_pGlow->BindList(&oBulletActive);
-
-    // add bullet set to global shadow
-    if(T::ConfigShadow()) cShadow::GetGlobalContainer()->BindList(&oBulletActive);
 
     // set bullet pool to initial size
     aBulletPool.resize(BULLET_SET_INIT_SIZE);
@@ -433,13 +431,11 @@ template <typename T> cBulletManager::sBulletSet<T>::sBulletSet(cOutline* pOutli
 template <typename T> cBulletManager::sBulletSet<T>::~sBulletSet()
 {
     // 
-    T::RoutineExit();
+    T::GlobalExit();
 
-    // remove bullet set from glow
-    g_pGlow->UnbindList(&oBulletActive);
-
-    // remove bullet set from global shadow
+    // remove bullet set from global shadow and glow
     if(T::ConfigShadow()) cShadow::GetGlobalContainer()->UnbindList(&oBulletActive);
+    g_pGlow->UnbindList(&oBulletActive);
 
     // clear memory
     aBulletPool.clear();

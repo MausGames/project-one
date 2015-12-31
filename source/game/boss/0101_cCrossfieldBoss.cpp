@@ -684,8 +684,8 @@ void cCrossfieldBoss::__MoveOwn()
     else if(m_iPhase == 22u || m_iPhase == 34u)
     {
         const coreBool bSecond = (m_iPhase == 34u) ? true : false;
-        constexpr_var coreUint16 iBack = 22u;
-        constexpr_var coreUint16 iLoop = 40u;
+        constexpr coreUint16 iBack = 22u;
+        constexpr coreUint16 iLoop = 40u;
 
         PHASE_CONTROL_TICKER(0u, bSecond ? (2u * iLoop) : iLoop, bSecond ? 20.0f : 10.0f)
         {

@@ -28,17 +28,17 @@ private:
 
 
 public:
-    cOutlineStyle()noexcept {}
+    cOutlineStyle() = default;
 
     DISABLE_COPY(cOutlineStyle)
 
     // 
     void Construct(const coreChar* pcProgramSingleName, const coreChar* pcProgramInstancedName);
 
-    // apply outline-style
+    // apply deferred outline-style
     void Apply();
 
-    // apply outline-style immediately
+    // apply immediate outline-style
     void ApplyObject(coreObject3D*  pObject)const;
     void ApplyList  (coreBatchList* pList)const;
 };
@@ -57,7 +57,7 @@ public:
 
     DISABLE_COPY(cOutline)
 
-    // apply outline-layer
+    // apply deferred outline-layer
     void Apply();
 
     // 

@@ -20,7 +20,7 @@ void cOutlineStyle::Construct(const coreChar* pcProgramSingleName, const coreCha
 
 
 // ****************************************************************
-// apply outline-style
+// apply deferred outline-style
 void cOutlineStyle::Apply()
 {
     // draw single objects
@@ -34,7 +34,7 @@ void cOutlineStyle::Apply()
 
 
 // ****************************************************************
-// apply outline-style immediately to single object
+// apply immediate outline-style to single object
 void cOutlineStyle::ApplyObject(coreObject3D* pObject)const
 {
     pObject->Render(s_pProgramSingle);
@@ -42,7 +42,7 @@ void cOutlineStyle::ApplyObject(coreObject3D* pObject)const
 
 
 // ****************************************************************
-// apply outline-style immediately to list with objects
+// apply immediate outline-style to list with objects
 void cOutlineStyle::ApplyList(coreBatchList* pList)const
 {
     pList->Render(s_pProgramInstanced, s_pProgramSingle);
@@ -60,7 +60,7 @@ cOutline::cOutline()noexcept
 
 
 // ****************************************************************
-// apply outline-layer
+// apply deferred outline-layer
 void cOutline::Apply()
 {
     // 

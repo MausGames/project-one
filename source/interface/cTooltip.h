@@ -25,7 +25,7 @@
 #define TOOLTIP_MOUSE_OFFSET (coreVector2(0.03f,-0.03f))                  // position offset from mouse cursor (and for direction/alignment)
 
 #define TOOLTIP_PRINT(f,...) (this + __LINE__ * 100u), f, ##__VA_ARGS__   // specialized print-function for ShowText()
-#define TOOLTIP_ONELINER     (1000.0f)                                    // create tooltip without wrapping (infinite width)
+#define TOOLTIP_ONELINER     (FLT_MAX)                                    // create tooltip without wrapping (infinite width)
 
 
 // ****************************************************************

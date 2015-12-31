@@ -17,16 +17,21 @@ uniform mat4 u_m4ShadowMatrix;   // own shadow view-projection matrix (with coor
 
 // vertex attributes
 attribute float a_v1Height;      // vertex height (full position is deduced from the vertex-ID)
+attribute int   a_i1VertexID;    // 
 
 // shader output
 varying float v_v1Mix;           // mix value between both outdoor textures
 varying vec4  v_v4ShadowCoord;   // pixel coordinates viewed from the light source
 
+#if (__VERSION__) < 130
+    #define gl_VertexID a_i1VertexID
+#endif
+
 
 void VertexMain()
 {
     // calculate full vertex position
-    ivec2 i2Index       = ivec2(gl_VertexID % c_i1Size, gl_VertexID / c_i1Size);
+    ivec2 i2Index       = ivec2(coreMod(gl_VertexID, c_i1Size), gl_VertexID / c_i1Size);
     vec3  v3NewPosition = vec3(vec2(i2Index - ivec2(c_i1Size/2)) * c_v1Detail, a_v1Height);
     
     // transform position and shadow projection

@@ -12,7 +12,7 @@
 //*-------------------------------------------------------------------------------*//
 //| Project One v0.1.0a (http://www.maus-games.at)                                |//
 //*-------------------------------------------------------------------------------*//
-//| Copyright (c) 2010-2015 Martin Mauersics                                      |//
+//| Copyright (c) 2010-2016 Martin Mauersics                                      |//
 //|                                                                               |//
 //| This software is provided 'as-is', without any express or implied             |//
 //| warranty. In no event will the authors be held liable for any damages         |//
@@ -128,6 +128,12 @@ inline FUNC_CONST coreFloat AngleDiff(const coreFloat& x, const coreFloat& y)
     while(A < -PI) A += 2.0f*PI;
     while(A >  PI) A -= 2.0f*PI;
     return A;
+}
+
+// value range helper-function
+constexpr FUNC_CONST coreBool InBetween(const coreFloat& x, const coreFloat& a, const coreFloat& b)
+{
+    return ((a <= x) && (x < b));
 }
 
 extern void InitResolution(const coreVector2& vResolution);   // init resolution properties (1:1)

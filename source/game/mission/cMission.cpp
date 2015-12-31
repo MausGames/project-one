@@ -28,14 +28,13 @@ void cMission::Setup()
 {
     // 
     ASSERT(m_anStage.empty())
-    m_anStage    .clear();
-    m_aiStageLine.clear();
+    m_anStage.clear();
 
     // 
     this->__SetupOwn();
 
     // 
-    std::reverse(m_anStage.begin(), m_anStage.end());
+    m_anStage.reverse();
     STAGE_MAIN
     {
         // begin mission
@@ -80,7 +79,6 @@ void cMission::MoveBefore()
             // TODO # end mission 
         }
     }
-    ASSERT(m_anStage.size() == m_aiStageLine.size())
 
     // 
     this->__MoveOwnBefore();
@@ -88,12 +86,25 @@ void cMission::MoveBefore()
 
 void cMission::MoveAfter()
 {
-    FOR_EACH_DYN(it, m_apPath)
+    if(!m_anStage.empty())
     {
+        const coreUint16& iCurStageLine = m_anStage.get_keylist().back();
+
         // 
-        if(it->unique() && (*m_apPath.get_key(it) < m_aiStageLine.back()))
-             DYN_REMOVE(it, m_apPath)
-        else DYN_KEEP  (it)
+        FOR_EACH_DYN(it, m_apPath)
+        {
+            if((*m_apPath.get_key(it)) < iCurStageLine)
+                 DYN_REMOVE(it, m_apPath)
+            else DYN_KEEP  (it)
+        }
+
+        // 
+        FOR_EACH_DYN(it, m_apSquad)
+        {
+            if((*m_apSquad.get_key(it)) < iCurStageLine)
+                 DYN_REMOVE(it, m_apSquad)
+            else DYN_KEEP  (it)
+        }
     }
 
     // 

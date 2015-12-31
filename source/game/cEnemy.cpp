@@ -13,7 +13,6 @@
 // constructor
 cEnemy::cEnemy()noexcept
 : m_fLifeTime (0.0f)
-, m_nRoutine  (NULL)
 {
     // load object resources
     this->DefineTexture(0u, "ship_enemy.png");
@@ -24,8 +23,7 @@ cEnemy::cEnemy()noexcept
     this->SetOrientation(coreVector3(0.0f, 0.0f,1.0f));
 
     // set initial status
-    m_iStatus = ENEMY_STATUS_DEAD | ENEMY_STATUS_READY;
-    m_aiNumShots[1] = m_aiNumShots[0] = 0u;
+    m_iStatus = ENEMY_STATUS_DEAD;
 }
 
 
@@ -42,20 +40,6 @@ void cEnemy::Configure(const coreInt32& iHealth, const coreVector3& vColor)
 
 
 // ****************************************************************
-// render the enemy
-void cEnemy::Render()
-{
-    if(CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_DEAD)) return;
-
-    // 
-    this->_EnableBlink();
-
-    // render the 3d-object
-    coreObject3D::Render();
-}
-
-
-// ****************************************************************
 // move the enemy
 void cEnemy::Move()
 {
@@ -66,7 +50,6 @@ void cEnemy::Move()
 
     // call individual move routines
     this->__MoveOwn();
-    if(m_nRoutine) m_nRoutine(this);
 
     // 
     this->_UpdateBlink();
@@ -102,7 +85,7 @@ void cEnemy::TakeDamage(const coreInt32& iDamage, cPlayer* pAttacker)
 void cEnemy::Resurrect()
 {
     // 
-    this->Resurrect(coreVector2(1000.0f,1000.0f), coreVector2(0.0f,-1.0f));
+    this->Resurrect(coreVector2(FLT_MAX,FLT_MAX), coreVector2(0.0f,-1.0f));
 }
 
 void cEnemy::Resurrect(const coreSpline2& oPath, const coreVector2& vFactor, const coreVector2& vOffset)
@@ -125,13 +108,10 @@ void cEnemy::Resurrect(const coreVector2& vPosition, const coreVector2& vDirecti
     REMOVE_VALUE(m_iStatus, ENEMY_STATUS_DEAD)
 
     // 
-    m_fLifeTime     = 0.0f;
-    m_aiNumShots[1] = m_aiNumShots[0] = 0u;
-    m_nRoutine      = NULL;
+    const coreBool bBoss = CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_BOSS);
 
     // 
-    const coreBool bBoss = CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_BOSS);
-    if(bBoss) g_pGame->GetEnemyManager()->BindEnemy(this);
+    m_fLifeTime = 0.0f;
 
     // add ship to the game
     cShip::_Resurrect(bBoss, vPosition, vDirection, TYPE_ENEMY);
@@ -151,7 +131,6 @@ void cEnemy::Kill(const coreBool& bAnimated)
 
     // 
     const coreBool bBoss = CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_BOSS);
-    if(bBoss) g_pGame->GetEnemyManager()->UnbindEnemy(this);
 
     // 
     if(bAnimated)
@@ -256,6 +235,8 @@ coreBool cEnemy::DefaultRotateSmooth(const coreVector2& vDirection, const coreFl
 {
     ASSERT(vDirection.IsNormalized() && (fSpeedTurn >= 0.0f) && (fClampTurn >= 0.0f))
 
+    // TODO # 
+    ASSERT(false)
     return true;
 }
 
@@ -301,30 +282,59 @@ void cEnemy::DefaultMultiate(const coreFloat& fAngle)
 
 
 // ****************************************************************
-// 
-coreBool cEnemy::DefaultShoot(const coreFloat& fFireRate, const coreUint8& iMaxShots)
+// destructor
+cEnemySquad::~cEnemySquad()
 {
-    ASSERT(fFireRate <= FRAMERATE_VALUE)
+    // 
+    this->FreeEnemies();
+}
+
+
+// ****************************************************************
+// 
+void cEnemySquad::FreeEnemies()
+{
+    // 
+    FOR_EACH(it, m_apEnemy)
+        g_pGame->GetEnemyManager()->FreeEnemy(&(*it));
+
+    // clear memory
+    m_apEnemy.clear();
+}
+
+
+// ****************************************************************
+// 
+void cEnemySquad::ClearEnemies(const coreBool& bAnimated)
+{
+    // 
+    FOR_EACH(it, m_apEnemy)
+        (*it)->Kill(bAnimated);
+}
+
+
+// ****************************************************************
+// 
+cEnemy* cEnemySquad::FindEnemy(const coreVector2& vPosition)
+{
+    // 
+    cEnemy*   pEnemy = NULL;
+    coreFloat fLenSq = FLT_MAX;
 
     // 
-    if(!CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_SILENT))
+    this->ForEachEnemy([&](cEnemy* OUTPUT pCurEnemy, const coreUintW& i)
     {
         // 
-        if(m_aiNumShots[0] >= iMaxShots) return false;
-
-        // 
-        const coreUint8 iCurShots = F_TO_UI(m_fLifeTime * fFireRate) & 0xFFu;
-        if(m_aiNumShots[1] != iCurShots)
+        const coreFloat fCurLenSq = (pCurEnemy->GetPosition().xy() - vPosition).LengthSq();
+        if(fCurLenSq < fLenSq)
         {
-            m_aiNumShots[1] = iCurShots;
-
             // 
-            ++m_aiNumShots[0];
-            return true;
+            pEnemy = pCurEnemy;
+            fLenSq = fCurLenSq;
         }
-    }
+    });
 
-    return false;
+    return pEnemy;
 }
 
 
@@ -332,13 +342,7 @@ coreBool cEnemy::DefaultShoot(const coreFloat& fFireRate, const coreUint8& iMaxS
 // constructor
 cEnemyManager::sEnemySetGen::sEnemySetGen()noexcept
 : oEnemyActive (ENEMY_SET_INIT_SIZE)
-{
-}
-
-
-// ****************************************************************
-// constructor
-cEnemyManager::cEnemyManager()noexcept
+, iTopEnemy    (0u)
 {
 }
 
@@ -349,17 +353,9 @@ cEnemyManager::~cEnemyManager()
 {
     ASSERT(m_apAdditional.empty())
 
+    // 
     FOR_EACH(it, m_apEnemySet)
-    {
-        coreBatchList* pEnemyActive = &(*it)->oEnemyActive;
-
-        // remove enemy set from global shadow and outline
-        cShadow::GetGlobalContainer()->UnbindList(pEnemyActive);
-        g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->UnbindList(pEnemyActive);
-
-        // delete enemy set
         SAFE_DELETE(*it)
-    }
 
     // clear memory
     m_apEnemySet  .clear();
@@ -371,11 +367,20 @@ cEnemyManager::~cEnemyManager()
 // render the enemy manager
 void cEnemyManager::Render()
 {
+    // 
+    auto nRenderFunc = [](cEnemy* OUTPUT pEnemy)
+    {
+        if(CONTAINS_VALUE(pEnemy->GetStatus(), ENEMY_STATUS_DEAD))
+            return;
+
+        pEnemy->_EnableBlink();
+        pEnemy->Render();
+    };
+
     // loop through all enemy sets
     FOR_EACH(it, m_apEnemySet)
     {
         coreBatchList* pEnemyActive = &(*it)->oEnemyActive;
-
         if(!pEnemyActive->GetCurEnabled()) continue;
 
         // 
@@ -388,15 +393,13 @@ void cEnemyManager::Render()
                 {
                     *pData = pObject->GetBlink();
                 });
-
-                // 
                 pEnemyActive->Render();
             }
             else
             {
                 // 
                 FOR_EACH(et, *pEnemyActive->List())
-                    (*et)->Render();
+                    nRenderFunc(s_cast<cEnemy*>(*et));
             }
         }
         FOR_EACH(et, *pEnemyActive->List()) (*et)->DefineModel(s_cast<cShip*>(*et)->GetModelLow());
@@ -404,59 +407,40 @@ void cEnemyManager::Render()
 
     // 
     FOR_EACH(it, m_apAdditional)
-        (*it)->Render();
+        nRenderFunc(*it);
 }
 
-void cEnemyManager::RenderUnder()
-{
-    // 
-    FOR_EACH(it, m_apEnemySet)
-    {
-        coreBatchList* pEnemyActive = &(*it)->oEnemyActive;
+#define __RENDER_OWN(f)                                            \
+{                                                                  \
+    /* */                                                          \
+    auto nRenderFunc = [](cEnemy* OUTPUT pEnemy)                   \
+    {                                                              \
+        if(CONTAINS_VALUE(pEnemy->GetStatus(), ENEMY_STATUS_DEAD)) \
+            return;                                                \
+                                                                   \
+        pEnemy->f();                                               \
+    };                                                             \
+                                                                   \
+    /* loop through all enemy sets */                              \
+    FOR_EACH(it, m_apEnemySet)                                     \
+    {                                                              \
+        coreBatchList* pEnemyActive = &(*it)->oEnemyActive;        \
+                                                                   \
+        /* render all active enemies */                            \
+        FOR_EACH(et, *pEnemyActive->List())                        \
+            nRenderFunc(s_cast<cEnemy*>(*et));                     \
+    }                                                              \
+                                                                   \
+    /* render all additional enemies */                            \
+    FOR_EACH(it, m_apAdditional)                                   \
+        nRenderFunc(*it);                                          \
+}  
 
-        // 
-        FOR_EACH(et, *pEnemyActive->List())
-            s_cast<cEnemy*>(*et)->__RenderOwnUnder();
-    }
+void cEnemyManager::RenderUnder () {__RENDER_OWN(__RenderOwnUnder)}
+void cEnemyManager::RenderAttack() {__RENDER_OWN(__RenderOwnAttack)}
+void cEnemyManager::RenderOver  () {__RENDER_OWN(__RenderOwnOver)}
 
-    // 
-    FOR_EACH(it, m_apAdditional)
-        (*it)->__RenderOwnUnder();
-}
-
-void cEnemyManager::RenderAttack()
-{
-    // 
-    FOR_EACH(it, m_apEnemySet)
-    {
-        coreBatchList* pEnemyActive = &(*it)->oEnemyActive;
-
-        // 
-        FOR_EACH(et, *pEnemyActive->List())
-            s_cast<cEnemy*>(*et)->__RenderOwnAttack();
-    }
-
-    // 
-    FOR_EACH(it, m_apAdditional)
-        (*it)->__RenderOwnAttack();
-}
-
-void cEnemyManager::RenderOver()
-{
-    // 
-    FOR_EACH(it, m_apEnemySet)
-    {
-        coreBatchList* pEnemyActive = &(*it)->oEnemyActive;
-
-        // 
-        FOR_EACH(et, *pEnemyActive->List())
-            s_cast<cEnemy*>(*et)->__RenderOwnOver();
-    }
-
-    // 
-    FOR_EACH(it, m_apAdditional)
-        (*it)->__RenderOwnOver();
-}
+#undef __RENDER_OWN
 
 
 // ****************************************************************
@@ -468,29 +452,33 @@ void cEnemyManager::Move()
     {
         coreBatchList* pEnemyActive = &(*it)->oEnemyActive;
 
-        // loop through all enemies
-        FOR_EACH_DYN(et, *pEnemyActive->List())
-        {
-            coreObject3D* pEnemy = (*et);
-
-            // check current enemy status
-            if(CONTAINS_VALUE(pEnemy->GetStatus(), ENEMY_STATUS_DEAD))
-            {
-                // clean up enemy and make ready again
-                pEnemy->SetStatus(pEnemy->GetStatus() | ENEMY_STATUS_READY);
-                DYN_REMOVE(et, *pEnemyActive->List())
-            }
-            else DYN_KEEP(et)
-        }
-
-        // move the enemy set (after deletions)
+        // move the enemy set
         pEnemyActive->MoveNormal();
     }
 
     // 
-    auto apCopy = m_apAdditional;
-    FOR_EACH(it, apCopy)
+    FOR_EACH(it, m_apAdditional)
         (*it)->Move();
+}
+
+
+// ****************************************************************
+// 
+void cEnemyManager::FreeEnemy(cEnemy** OUTPUT ppEnemy)
+{
+    cEnemy*       pEnemy    = *ppEnemy;
+    sEnemySetGen* pEnemySet = m_apEnemySet[pEnemy->GetID()];
+
+    // 
+    pEnemy->Kill(false);
+    pEnemy->RemoveStatus(ENEMY_STATUS_ASSIGNED);
+    pEnemySet->oEnemyActive.UnbindObject(pEnemy);
+
+    // 
+    pEnemySet->iTopEnemy = 0u;
+
+    // 
+    *ppEnemy = NULL;
 }
 
 
@@ -503,7 +491,7 @@ void cEnemyManager::ClearEnemies(const coreBool& bAnimated)
     {
         coreBatchList* pEnemyActive = &(*it)->oEnemyActive;
 
-        // deactivate each active enemy
+        // deactivate all active enemies
         FOR_EACH(et, *pEnemyActive->List())
             s_cast<cEnemy*>(*et)->Kill(bAnimated);
 
@@ -511,14 +499,9 @@ void cEnemyManager::ClearEnemies(const coreBool& bAnimated)
         pEnemyActive->Clear();
     }
 
-    // 
-    auto apCopy = m_apAdditional;
-    FOR_EACH(it, apCopy)
+    // deactivate all additional enemies
+    FOR_EACH(it, m_apAdditional)
         (*it)->Kill(bAnimated);
-
-    // 
-    ASSERT(!m_apAdditional.size())
-    m_apAdditional.clear();
 }
 
 
@@ -528,15 +511,11 @@ cEnemy* cEnemyManager::FindEnemy(const coreVector2& vPosition)
 {
     // 
     cEnemy*   pEnemy = NULL;
-    coreFloat fLenSq = 1.0e06f;
+    coreFloat fLenSq = FLT_MAX;
 
     // 
-    const auto& oEnemyList = Core::Manager::Object->GetObjectList(TYPE_ENEMY);
-    FOR_EACH(it, oEnemyList)
+    this->ForEachEnemy([&](cEnemy* OUTPUT pCurEnemy)
     {
-        cEnemy* pCurEnemy = s_cast<cEnemy*>(*it);
-        if(!pCurEnemy) continue;
-
         // 
         const coreFloat fCurLenSq = (pCurEnemy->GetPosition().xy() - vPosition).LengthSq();
         if(fCurLenSq < fLenSq)
@@ -545,9 +524,8 @@ cEnemy* cEnemyManager::FindEnemy(const coreVector2& vPosition)
             pEnemy = pCurEnemy;
             fLenSq = fCurLenSq;
         }
-    }
+    });
 
-    // 
     return pEnemy;
 }
 
@@ -561,7 +539,7 @@ cScoutEnemy::cScoutEnemy()noexcept
     this->DefineModelLow ("ship_enemy_scout_low.md3");
 
     // configure the enemy
-    this->Configure(10*5, COLOR_ENEMY_BLUE);
+    this->Configure(100, COLOR_ENEMY_BLUE);
 }
 
 
@@ -574,7 +552,7 @@ cWarriorEnemy::cWarriorEnemy()noexcept
     this->DefineModelLow ("ship_enemy_warrior_low.md3");
 
     // configure the enemy
-    this->Configure(400, COLOR_ENEMY_YELLOW);
+    this->Configure(100, COLOR_ENEMY_YELLOW);
 }
 
 

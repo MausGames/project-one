@@ -90,6 +90,7 @@ void cBullet::Deactivate(const coreBool& bAnimated)
 // constructor
 cBulletManager::sBulletSetGen::sBulletSetGen()noexcept
 : oBulletActive (BULLET_SET_INIT_SIZE)
+, iCurBullet    (0u)
 {
 }
 
@@ -183,13 +184,38 @@ void cBulletManager::ClearBullets(const coreBool& bAnimated)
     {
         coreBatchList* pBulletActive = &(*it)->oBulletActive;
 
-        // deactivate each active bullet
+        // deactivate all active bullets
         FOR_EACH(et, *pBulletActive->List())
             s_cast<cBullet*>(*et)->Deactivate(bAnimated);
 
         // clear list
         pBulletActive->Clear();
     }
+}
+
+
+// ****************************************************************
+// 
+cBullet* cBulletManager::FindBullet(const coreVector2& vPosition)
+{
+    // 
+    cBullet*  pBullet = NULL;
+    coreFloat fLenSq  = FLT_MAX;
+
+    // 
+    this->ForEachBullet([&](cBullet* OUTPUT pCurBullet)
+    {
+        // 
+        const coreFloat fCurLenSq = (pCurBullet->GetPosition().xy() - vPosition).LengthSq();
+        if(fCurLenSq < fLenSq)
+        {
+            // 
+            pBullet = pCurBullet;
+            fLenSq  = fCurLenSq;
+        }
+    });
+
+    return pBullet;
 }
 
 
@@ -421,7 +447,7 @@ cMineBullet::cMineBullet()noexcept
 
 // ****************************************************************
 // 
-void cMineBullet::RoutineInit()
+void cMineBullet::GlobalInit()
 {
     // 
     s_Wave.DefineModel  (Core::Manager::Object->GetLowModel());
@@ -432,7 +458,7 @@ void cMineBullet::RoutineInit()
 
 // ****************************************************************
 // 
-void cMineBullet::RoutineExit()
+void cMineBullet::GlobalExit()
 {
     // 
     s_Wave.Undefine();

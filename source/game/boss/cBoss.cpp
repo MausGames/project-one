@@ -24,6 +24,21 @@ cBoss::cBoss()noexcept
 
     // 
     this->AddStatus(ENEMY_STATUS_BOSS);
+
+    // 
+    g_pGame->GetEnemyManager()->BindEnemy(this);
+}
+
+
+// ****************************************************************
+// destructor
+cBoss::~cBoss()
+{
+    // 
+    this->Kill(false);
+
+    // 
+    g_pGame->GetEnemyManager()->UnbindEnemy(this);
 }
 
 
