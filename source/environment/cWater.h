@@ -53,7 +53,7 @@ public:
     void UpdateDepth(cOutdoor* pOutdoor, const std::vector<coreBatchList*>& apGroundObjectList);
 
     // set object properties
-    void SetFlyOffset(const coreFloat& fFlyOffset);
+    void SetFlyOffset(const coreFloat fFlyOffset);
 
     // get object properties
     inline const coreFloat& GetFlyOffset ()const {return m_fFlyOffset;}
@@ -120,7 +120,7 @@ public:
     void Move  ()override;
 
     // set object properties
-    inline void SetFlyOffset(const coreFloat& fFlyOffset) {m_fFlyOffset = fFlyOffset;}
+    inline void SetFlyOffset(const coreFloat fFlyOffset) {m_fFlyOffset = fFlyOffset;}
 
     // get object properties
     inline const coreFloat& GetFlyOffset()const {return m_fFlyOffset;}

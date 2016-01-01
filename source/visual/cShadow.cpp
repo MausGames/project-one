@@ -175,7 +175,7 @@ void cShadow::Recompile()
 
 // ****************************************************************
 // enable shader-program and apply read shadow matrix
-void cShadow::EnableShadowRead(const coreUintW& iHandleIndex)
+void cShadow::EnableShadowRead(const coreUintW iHandleIndex)
 {
     if(!g_CurConfig.Graphics.iShadow) return;
 
@@ -186,7 +186,7 @@ void cShadow::EnableShadowRead(const coreUintW& iHandleIndex)
 
 // ****************************************************************
 // reset with the resource manager
-void cShadow::__Reset(const coreResourceReset& bInit)
+void cShadow::__Reset(const coreResourceReset bInit)
 {
     if(bInit) {m_iLevel = 0xFFu; this->Reconfigure();}
          else m_FrameBuffer.Delete();

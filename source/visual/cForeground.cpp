@@ -71,7 +71,7 @@ void cForeground::End()
 
 // ****************************************************************
 // reset with the resource manager
-void cForeground::__Reset(const coreResourceReset& bInit)
+void cForeground::__Reset(const coreResourceReset bInit)
 {
     if(bInit) m_FrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
          else m_FrameBuffer.Delete();

@@ -98,7 +98,7 @@ void cGameMenu::Move()
                 else if(m_ExitButton.IsClicked())
                 {
                     // 
-                    g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_EXIT_GAME"), [](const coreInt32& iStatus)
+                    g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_EXIT_GAME"), [](const coreInt32 iStatus)
                     {
                         if(iStatus == MSGBOX_STATUS_YES)
                             Core::System->Quit();

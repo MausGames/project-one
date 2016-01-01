@@ -107,7 +107,7 @@ void cCrossfieldBoss::__ResurrectOwn()
 
 // ****************************************************************
 // 
-void cCrossfieldBoss::__KillOwn(const coreBool& bAnimated)
+void cCrossfieldBoss::__KillOwn(const coreBool bAnimated)
 {
     // 
     g_pGame->GetBulletManagerEnemy()->ClearBullets(bAnimated);   
@@ -872,7 +872,7 @@ void cCrossfieldBoss::__MoveOwn()
     m_BoomerangTrail.MoveNormal();
 
     // 
-    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_OBJECT(0), [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBoomerang, const coreBool& bFirstHit)
+    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_OBJECT(0), [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBoomerang, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
 
@@ -888,7 +888,7 @@ void cCrossfieldBoss::__MoveOwn()
 
 // ****************************************************************
 // 
-coreVector2 cCrossfieldBoss::__RepeatPosition(const coreVector2& vPosition, const coreFloat& fThreshold, coreBool* OUTPUT pbChange)
+coreVector2 cCrossfieldBoss::__RepeatPosition(const coreVector2& vPosition, const coreFloat fThreshold, coreBool* OUTPUT pbChange)
 {
     const coreVector2 vThreshVec = fThreshold * FOREGROUND_AREA;
 
@@ -909,7 +909,7 @@ coreVector2 cCrossfieldBoss::__RepeatPosition(const coreVector2& vPosition, cons
 
 // ****************************************************************
 // 
-void cCrossfieldBoss::__EncodeDirection(const coreUintW& iIndex, const coreVector2& vDirection)
+void cCrossfieldBoss::__EncodeDirection(const coreUintW iIndex, const coreVector2& vDirection)
 {
     ASSERT(iIndex < CROSSFIELD_BOOMERANGS)
 
@@ -929,7 +929,7 @@ void cCrossfieldBoss::__EncodeDirection(const coreUintW& iIndex, const coreVecto
 
 // ****************************************************************
 // 
-coreVector2 cCrossfieldBoss::__DecodeDirection(const coreUintW& iIndex)
+coreVector2 cCrossfieldBoss::__DecodeDirection(const coreUintW iIndex)
 {
     ASSERT(iIndex < CROSSFIELD_BOOMERANGS)
 
@@ -944,7 +944,7 @@ coreVector2 cCrossfieldBoss::__DecodeDirection(const coreUintW& iIndex)
 
 // ****************************************************************
 // 
-void cCrossfieldBoss::__EnableBoomerang(const coreUintW& iIndex, const coreVector2& vPosition, const coreVector2& vDirection)
+void cCrossfieldBoss::__EnableBoomerang(const coreUintW iIndex, const coreVector2& vPosition, const coreVector2& vDirection)
 {
     // 
     ASSERT(iIndex < CROSSFIELD_BOOMERANGS)
@@ -975,7 +975,7 @@ void cCrossfieldBoss::__EnableBoomerang(const coreUintW& iIndex, const coreVecto
 
 // ****************************************************************
 // 
-void cCrossfieldBoss::__DisableBoomerang(const coreUintW& iIndex, const coreBool& bAnimated)
+void cCrossfieldBoss::__DisableBoomerang(const coreUintW iIndex, const coreBool bAnimated)
 {
     if(m_Boomerang.List()->empty()) return;
 

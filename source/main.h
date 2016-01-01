@@ -122,7 +122,7 @@
 #define REF_ID(i) (s_cast<coreInt32>(i))
 
 // angle difference helper-function
-inline FUNC_CONST coreFloat AngleDiff(const coreFloat& x, const coreFloat& y)
+inline FUNC_CONST coreFloat AngleDiff(const coreFloat x, const coreFloat y)
 {
     coreFloat A = (x - y);
     while(A < -PI) A += 2.0f*PI;
@@ -131,7 +131,7 @@ inline FUNC_CONST coreFloat AngleDiff(const coreFloat& x, const coreFloat& y)
 }
 
 // value range helper-function
-constexpr FUNC_CONST coreBool InBetween(const coreFloat& x, const coreFloat& a, const coreFloat& b)
+constexpr FUNC_CONST coreBool InBetween(const coreFloat x, const coreFloat a, const coreFloat b)
 {
     return ((a <= x) && (x < b));
 }

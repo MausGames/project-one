@@ -66,7 +66,7 @@ private:
 
 
 public:
-    explicit cGame(const coreBool& bCoop)noexcept;
+    explicit cGame(const coreBool bCoop)noexcept;
     ~cGame();
 
     DISABLE_COPY(cGame)
@@ -79,32 +79,32 @@ public:
     void RenderOverlay();
 
     // control active mission
-    void LoadMission(const coreInt32& iID);
+    void LoadMission(const coreInt32 iID);
     void RestartMission();
 
     // 
     void PushDepthLevel();
-    void OffsetDepthLevel(const coreFloat& fOffset)const;
+    void OffsetDepthLevel(const coreFloat fOffset)const;
 
     // 
     cPlayer* FindPlayer(const coreVector2& vPosition);
     template <typename F> void ForEachPlayer(F&& nFunction);   // [](cPlayer* OUTPUT pPlayer) -> void
 
     // access game objects
-    inline cPlayer*        GetPlayer             (const coreUintW& iIndex) {ASSERT(iIndex < GAME_PLAYERS) return &m_aPlayer[iIndex];}
-    inline cEnemyManager*  GetEnemyManager       ()                        {return &m_EnemyManager;}
-    inline cBulletManager* GetBulletManagerPlayer()                        {return &m_BulletManagerPlayer;}
-    inline cBulletManager* GetBulletManagerEnemy ()                        {return &m_BulletManagerEnemy;}
-    inline cCombatStats*   GetCombatStats        ()                        {return &m_CombatStats;}
-    inline cCombatText*    GetCombatText         ()                        {return &m_CombatText;}
-    inline cInterface*     GetInterface          ()                        {return &m_Interface;}
-    inline cMission*       GetMission            ()const                   {ASSERT(m_pMission) return m_pMission;}
+    inline cPlayer*        GetPlayer             (const coreUintW iIndex) {ASSERT(iIndex < GAME_PLAYERS) return &m_aPlayer[iIndex];}
+    inline cEnemyManager*  GetEnemyManager       ()                       {return &m_EnemyManager;}
+    inline cBulletManager* GetBulletManagerPlayer()                       {return &m_BulletManagerPlayer;}
+    inline cBulletManager* GetBulletManagerEnemy ()                       {return &m_BulletManagerEnemy;}
+    inline cCombatStats*   GetCombatStats        ()                       {return &m_CombatStats;}
+    inline cCombatText*    GetCombatText         ()                       {return &m_CombatText;}
+    inline cInterface*     GetInterface          ()                       {return &m_Interface;}
+    inline cMission*       GetMission            ()const                  {ASSERT(m_pMission) return m_pMission;}
 
     // get object properties
-    inline const coreFloat& GetTimeMission()const                        {return m_fTimeMission;}
-    inline const coreFloat& GetTimeBoss   (const coreUintW& iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_afTimeBoss[iIndex];}
-    inline const coreUint8& GetStatus     ()const                        {return m_iStatus;}
-    inline const coreBool&  GetCoop       ()const                        {return m_bCoop;}
+    inline const coreFloat& GetTimeMission()const                       {return m_fTimeMission;}
+    inline const coreFloat& GetTimeBoss   (const coreUintW iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_afTimeBoss[iIndex];}
+    inline const coreUint8& GetStatus     ()const                       {return m_iStatus;}
+    inline const coreBool&  GetCoop       ()const                       {return m_bCoop;}
 
 
 private:

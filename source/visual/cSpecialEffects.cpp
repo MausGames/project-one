@@ -66,7 +66,7 @@ cSpecialEffects::cSpecialEffects()noexcept
     }
 
     // 
-    auto nLoadSoundFunc = [&](const eSoundEffect& iSoundIndex, const coreChar* pcName)
+    auto nLoadSoundFunc = [&](const eSoundEffect iSoundIndex, const coreChar* pcName)
     {
         coreSoundPtr& pSoundPtr = m_apSound[iSoundIndex & 0xFFu];
 
@@ -87,7 +87,7 @@ cSpecialEffects::cSpecialEffects()noexcept
 
 // ****************************************************************
 // render special-effects
-void cSpecialEffects::Render(const coreBool& bForeground)
+void cSpecialEffects::Render(const coreBool bForeground)
 {
     glDepthMask(false);
     {
@@ -108,7 +108,7 @@ void cSpecialEffects::Render(const coreBool& bForeground)
         if(bForeground) glBlendFuncSeparate(FOREGROUND_BLEND_DEFAULT, FOREGROUND_BLEND_ALPHA);
 
         // render all blast and ring objects
-        auto nRenderFunc = [](coreObject3D* OUTPUT pArray, const coreUintW& iSize)
+        auto nRenderFunc = [](coreObject3D* OUTPUT pArray, const coreUintW iSize)
         {
             for(coreUintW i = 0u; i < iSize; ++i)
             {
@@ -216,7 +216,7 @@ void cSpecialEffects::Move()
 
 // ****************************************************************
 // create centered particle splash
-void cSpecialEffects::CreateSplashColor(const coreVector3& vPosition, const coreFloat& fScale, const coreUintW& iNum, const coreVector3& vColor)
+void cSpecialEffects::CreateSplashColor(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor)
 {
     // 
     m_ParticleColor.GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
@@ -229,7 +229,7 @@ void cSpecialEffects::CreateSplashColor(const coreVector3& vPosition, const core
     });
 }
 
-void cSpecialEffects::CreateSplashDark(const coreVector3& vPosition, const coreFloat& fScale, const coreUintW& iNum)
+void cSpecialEffects::CreateSplashDark(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum)
 {
     // 
     m_ParticleDark.GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
@@ -242,7 +242,7 @@ void cSpecialEffects::CreateSplashDark(const coreVector3& vPosition, const coreF
     });
 }
 
-void cSpecialEffects::CreateSplashSmoke(const coreVector3& vPosition, const coreFloat& fScale, const coreUintW& iNum)
+void cSpecialEffects::CreateSplashSmoke(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum)
 {
     // 
     m_ParticleSmoke.GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
@@ -255,7 +255,7 @@ void cSpecialEffects::CreateSplashSmoke(const coreVector3& vPosition, const core
     });
 }
 
-void cSpecialEffects::CreateSplashFire(const coreVector3& vPosition, const coreFloat& fScale, const coreUintW& iNum)
+void cSpecialEffects::CreateSplashFire(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum)
 {
     // 
     m_ParticleFire.GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
@@ -271,7 +271,7 @@ void cSpecialEffects::CreateSplashFire(const coreVector3& vPosition, const coreF
 
 // ****************************************************************
 // create directional particle blow
-void cSpecialEffects::CreateBlowColor(const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat& fScale, const coreUintW& iNum, const coreVector3& vColor)
+void cSpecialEffects::CreateBlowColor(const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor)
 {
     ASSERT(vDirection.IsNormalized())
 
@@ -286,7 +286,7 @@ void cSpecialEffects::CreateBlowColor(const coreVector3& vPosition, const coreVe
     });
 }
 
-void cSpecialEffects::CreateBlowDark(const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat& fScale, const coreUintW& iNum)
+void cSpecialEffects::CreateBlowDark(const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat fScale, const coreUintW iNum)
 {
     ASSERT(vDirection.IsNormalized())
 
@@ -304,7 +304,7 @@ void cSpecialEffects::CreateBlowDark(const coreVector3& vPosition, const coreVec
 
 // ****************************************************************
 // create whirling particle charge
-void cSpecialEffects::CreateChargeColor(const coreVector3& vPosition, const coreFloat& fScale, const coreUintW& iNum, const coreVector3& vColor)
+void cSpecialEffects::CreateChargeColor(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor)
 {
     // 
     m_ParticleDark.GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
@@ -320,7 +320,7 @@ void cSpecialEffects::CreateChargeColor(const coreVector3& vPosition, const core
     });
 }
 
-void cSpecialEffects::CreateChargeDark(const coreVector3& vPosition, const coreFloat& fScale, const coreUintW& iNum)
+void cSpecialEffects::CreateChargeDark(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum)
 {
     // 
     m_ParticleDark.GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
@@ -339,7 +339,7 @@ void cSpecialEffects::CreateChargeDark(const coreVector3& vPosition, const coreF
 
 // ****************************************************************
 // 
-coreFloat cSpecialEffects::CreateLightning(const coreVector2& vPosFrom, const coreVector2& vPosTo, const coreFloat& fWidth, const coreVector3& vColor, const coreVector2& vTexSizeFactor, const coreFloat& fTexOffset)
+coreFloat cSpecialEffects::CreateLightning(const coreVector2& vPosFrom, const coreVector2& vPosTo, const coreFloat fWidth, const coreVector3& vColor, const coreVector2& vTexSizeFactor, const coreFloat fTexOffset)
 {
     // 
     if(++m_iCurLightning >= SPECIAL_LIGHTNINGS) m_iCurLightning = 0u;
@@ -387,7 +387,7 @@ coreFloat cSpecialEffects::CreateLightning(const coreVector2& vPosFrom, const co
     return fTexLen + fTexOffset;
 }
 
-void cSpecialEffects::CreateLightning(coreObject3D* pOwner, const coreVector2& vDirection, const coreFloat& fLength, const coreFloat& fWidth, const coreVector3& vColor, const coreVector2& vTexSizeFactor, const coreFloat& fTexOffset)
+void cSpecialEffects::CreateLightning(coreObject3D* pOwner, const coreVector2& vDirection, const coreFloat fLength, const coreFloat fWidth, const coreVector3& vColor, const coreVector2& vTexSizeFactor, const coreFloat fTexOffset)
 {
     // 
     if(++m_iCurLightning >= SPECIAL_LIGHTNINGS) m_iCurLightning = 0u;
@@ -416,7 +416,7 @@ void cSpecialEffects::CreateLightning(coreObject3D* pOwner, const coreVector2& v
 
 // ****************************************************************
 // 
-void cSpecialEffects::CreateBlast(const coreVector3& vPosition, const coreFloat& fScale, const coreFloat& fSpeed, const coreVector3& vColor)
+void cSpecialEffects::CreateBlast(const coreVector3& vPosition, const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor)
 {
     // 
     if(++m_iCurBlast >= SPECIAL_BLASTS) m_iCurBlast = 0u;
@@ -433,7 +433,7 @@ void cSpecialEffects::CreateBlast(const coreVector3& vPosition, const coreFloat&
 
 // ****************************************************************
 // 
-void cSpecialEffects::CreateRing(const coreVector3& vPosition, const coreVector3& vDirection, const coreVector3& vOrientation, const coreFloat& fScale, const coreFloat& fSpeed, const coreVector3& vColor)
+void cSpecialEffects::CreateRing(const coreVector3& vPosition, const coreVector3& vDirection, const coreVector3& vOrientation, const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor)
 {
     // 
     if(++m_iCurRing >= SPECIAL_RINGS) m_iCurRing = 0u;
@@ -451,7 +451,7 @@ void cSpecialEffects::CreateRing(const coreVector3& vPosition, const coreVector3
 
 // ****************************************************************
 // 
-void cSpecialEffects::PlaySound(const coreVector3& vPosition, const coreFloat& fVolume, const eSoundEffect& iSoundIndex)
+void cSpecialEffects::PlaySound(const coreVector3& vPosition, const coreFloat fVolume, const eSoundEffect iSoundIndex)
 {
     ASSERT(fVolume > 0.0f)
 
@@ -479,7 +479,7 @@ void cSpecialEffects::PlaySound(const coreVector3& vPosition, const coreFloat& f
 
 // ****************************************************************
 // 
-void cSpecialEffects::ShakeScreen(const coreFloat& fStrength)
+void cSpecialEffects::ShakeScreen(const coreFloat fStrength)
 {
     // 
     m_fShakeStrength = fStrength;

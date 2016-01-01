@@ -29,7 +29,7 @@ cEnemy::cEnemy()noexcept
 
 // ****************************************************************
 // configure the enemy
-void cEnemy::Configure(const coreInt32& iHealth, const coreVector3& vColor)
+void cEnemy::Configure(const coreInt32 iHealth, const coreVector3& vColor)
 {
     // set maximum and current health value
     m_iMaxHealth = m_iCurHealth = iHealth;
@@ -61,7 +61,7 @@ void cEnemy::Move()
 
 // ****************************************************************
 // reduce current health
-void cEnemy::TakeDamage(const coreInt32& iDamage, cPlayer* pAttacker)
+void cEnemy::TakeDamage(const coreInt32 iDamage, cPlayer* pAttacker)
 {
     // 
     if(pAttacker)
@@ -123,7 +123,7 @@ void cEnemy::Resurrect(const coreVector2& vPosition, const coreVector2& vDirecti
 
 // ****************************************************************
 // remove enemy from the game
-void cEnemy::Kill(const coreBool& bAnimated)
+void cEnemy::Kill(const coreBool bAnimated)
 {
     // kill enemy
     if(CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_DEAD)) return;
@@ -149,7 +149,7 @@ void cEnemy::Kill(const coreBool& bAnimated)
 
 // ****************************************************************
 // 
-coreBool cEnemy::DefaultMovePath(const coreSpline2& oRawPath, const coreVector2& vFactor, const coreVector2& vRawOffset, const coreFloat& fRawDistance)
+coreBool cEnemy::DefaultMovePath(const coreSpline2& oRawPath, const coreVector2& vFactor, const coreVector2& vRawOffset, const coreFloat fRawDistance)
 {
     // 
     coreVector2 vPosition;
@@ -167,7 +167,7 @@ coreBool cEnemy::DefaultMovePath(const coreSpline2& oRawPath, const coreVector2&
 
 // ****************************************************************
 // 
-coreBool cEnemy::DefaultMoveTarget(const coreVector2& vTarget, const coreFloat& fSpeedMove, const coreFloat& fSpeedTurn)
+coreBool cEnemy::DefaultMoveTarget(const coreVector2& vTarget, const coreFloat fSpeedMove, const coreFloat fSpeedTurn)
 {
     ASSERT((fSpeedMove >= 0.0f) && (fSpeedTurn >= 0.0f))
 
@@ -190,7 +190,7 @@ coreBool cEnemy::DefaultMoveTarget(const coreVector2& vTarget, const coreFloat& 
 
 // ****************************************************************
 // 
-coreBool cEnemy::DefaultMoveSmooth(const coreVector2& vRawPosition, const coreFloat& fSpeedMove, const coreFloat& fClampMove)
+coreBool cEnemy::DefaultMoveSmooth(const coreVector2& vRawPosition, const coreFloat fSpeedMove, const coreFloat fClampMove)
 {
     ASSERT((fSpeedMove >= 0.0f) && (fClampMove >= 0.0f))
 
@@ -212,7 +212,7 @@ coreBool cEnemy::DefaultMoveSmooth(const coreVector2& vRawPosition, const coreFl
 
 // ****************************************************************
 // 
-void cEnemy::DefaultMoveLerp(const coreVector2& vFromRawPos, const coreVector2& vToRawPos, const coreFloat& fTime)
+void cEnemy::DefaultMoveLerp(const coreVector2& vFromRawPos, const coreVector2& vToRawPos, const coreFloat fTime)
 {
     // 
     this->SetPosition(coreVector3(LERP(vFromRawPos, vToRawPos, fTime) * FOREGROUND_AREA, 0.0f));
@@ -221,7 +221,7 @@ void cEnemy::DefaultMoveLerp(const coreVector2& vFromRawPos, const coreVector2& 
 
 // ****************************************************************
 // 
-void cEnemy::DefaultRotate(const coreFloat& fAngle)
+void cEnemy::DefaultRotate(const coreFloat fAngle)
 {
     // rotate around z-axis
     const coreVector2 vDir = coreVector2::Direction(fAngle);
@@ -231,7 +231,7 @@ void cEnemy::DefaultRotate(const coreFloat& fAngle)
 
 // ****************************************************************
 // 
-coreBool cEnemy::DefaultRotateSmooth(const coreVector2& vDirection, const coreFloat& fSpeedTurn, const coreFloat& fClampTurn)
+coreBool cEnemy::DefaultRotateSmooth(const coreVector2& vDirection, const coreFloat fSpeedTurn, const coreFloat fClampTurn)
 {
     ASSERT(vDirection.IsNormalized() && (fSpeedTurn >= 0.0f) && (fClampTurn >= 0.0f))
 
@@ -243,7 +243,7 @@ coreBool cEnemy::DefaultRotateSmooth(const coreVector2& vDirection, const coreFl
 
 // ****************************************************************
 // 
-void cEnemy::DefaultRotateLerp(const coreFloat& fFromAngle, const coreFloat& fToAngle, const coreFloat& fTime)
+void cEnemy::DefaultRotateLerp(const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime)
 {
     // rotate around z-axis
     this->DefaultRotate(LERP(fFromAngle, fToAngle, fTime));
@@ -252,7 +252,7 @@ void cEnemy::DefaultRotateLerp(const coreFloat& fFromAngle, const coreFloat& fTo
 
 // ****************************************************************
 // 
-void cEnemy::DefaultOrientate(const coreFloat& fAngle)
+void cEnemy::DefaultOrientate(const coreFloat fAngle)
 {
     // rotate around direction axis
     const coreVector3& vDir = this->GetDirection();
@@ -263,7 +263,7 @@ void cEnemy::DefaultOrientate(const coreFloat& fAngle)
 
 // ****************************************************************
 // 
-void cEnemy::DefaultOrientateLerp(const coreFloat& fFromAngle, const coreFloat& fToAngle, const coreFloat& fTime)
+void cEnemy::DefaultOrientateLerp(const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime)
 {
     // rotate around direction axis
     this->DefaultOrientate(LERP(fFromAngle, fToAngle, fTime));
@@ -272,7 +272,7 @@ void cEnemy::DefaultOrientateLerp(const coreFloat& fFromAngle, const coreFloat& 
 
 // ****************************************************************
 // 
-void cEnemy::DefaultMultiate(const coreFloat& fAngle)
+void cEnemy::DefaultMultiate(const coreFloat fAngle)
 {
     // rotate around the rotating direction axis
     const coreVector2 vDir = coreVector2::Direction(fAngle);
@@ -305,7 +305,7 @@ void cEnemySquad::FreeEnemies()
 
 // ****************************************************************
 // 
-void cEnemySquad::ClearEnemies(const coreBool& bAnimated)
+void cEnemySquad::ClearEnemies(const coreBool bAnimated)
 {
     // 
     FOR_EACH(it, m_apEnemy)
@@ -322,7 +322,7 @@ cEnemy* cEnemySquad::FindEnemy(const coreVector2& vPosition)
     coreFloat fLenSq = FLT_MAX;
 
     // 
-    this->ForEachEnemy([&](cEnemy* OUTPUT pCurEnemy, const coreUintW& i)
+    this->ForEachEnemy([&](cEnemy* OUTPUT pCurEnemy, const coreUintW i)
     {
         // 
         const coreFloat fCurLenSq = (pCurEnemy->GetPosition().xy() - vPosition).LengthSq();
@@ -484,7 +484,7 @@ void cEnemyManager::FreeEnemy(cEnemy** OUTPUT ppEnemy)
 
 // ****************************************************************
 // remove all enemies
-void cEnemyManager::ClearEnemies(const coreBool& bAnimated)
+void cEnemyManager::ClearEnemies(const coreBool bAnimated)
 {
     // loop trough all enemy sets
     FOR_EACH(it, m_apEnemySet)

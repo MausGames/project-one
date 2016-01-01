@@ -11,7 +11,7 @@
 
 // ****************************************************************
 // constructor
-cBlur::cBlur(const coreTextureSpec& oTextureSpec, const coreFloat& fScale, const coreFloat& fAttenuation)noexcept
+cBlur::cBlur(const coreTextureSpec& oTextureSpec, const coreFloat fScale, const coreFloat fAttenuation)noexcept
 : m_fScale       (fScale)
 , m_fAttenuation (fAttenuation)
 {
@@ -80,7 +80,7 @@ void cBlur::End()
 
 // ****************************************************************
 // reset with the resource manager
-void cBlur::__Reset(const coreResourceReset& bInit)
+void cBlur::__Reset(const coreResourceReset bInit)
 {
     if(bInit)
     {

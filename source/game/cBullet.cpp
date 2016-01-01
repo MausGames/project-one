@@ -45,7 +45,7 @@ void cBullet::Move()
 
 // ****************************************************************
 // prepare and start up bullet
-void cBullet::Activate(const coreInt32& iDamage, const coreFloat& fSpeed, cShip* pOwner, const coreVector2& vPosition, const coreVector2& vDirection, const coreInt32& iType)
+void cBullet::Activate(const coreInt32 iDamage, const coreFloat fSpeed, cShip* pOwner, const coreVector2& vPosition, const coreVector2& vDirection, const coreInt32 iType)
 {
     // activate bullet and remove readiness
     if(CONTAINS_VALUE(m_iStatus, BULLET_STATUS_ACTIVE)) return;
@@ -72,7 +72,7 @@ void cBullet::Activate(const coreInt32& iDamage, const coreFloat& fSpeed, cShip*
 
 // ****************************************************************
 // shut down bullet
-void cBullet::Deactivate(const coreBool& bAnimated)
+void cBullet::Deactivate(const coreBool bAnimated)
 {
     // deactivate bullet (will be cleaned up by bullet manager)
     if(!CONTAINS_VALUE(m_iStatus, BULLET_STATUS_ACTIVE)) return;
@@ -97,7 +97,7 @@ cBulletManager::sBulletSetGen::sBulletSetGen()noexcept
 
 // ****************************************************************
 // constructor
-cBulletManager::cBulletManager(const coreInt32& iType)noexcept
+cBulletManager::cBulletManager(const coreInt32 iType)noexcept
 : m_iType (iType)
 {
 }
@@ -177,7 +177,7 @@ void cBulletManager::Move()
 
 // ****************************************************************
 // remove all bullets
-void cBulletManager::ClearBullets(const coreBool& bAnimated)
+void cBulletManager::ClearBullets(const coreBool bAnimated)
 {
     // loop trough all bullet sets
     FOR_EACH(it, m_apBulletSet)

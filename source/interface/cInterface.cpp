@@ -11,7 +11,7 @@
 
 // ****************************************************************
 // construct player view
-void cInterface::sPlayerView::Construct(const coreUintW& iIndex)
+void cInterface::sPlayerView::Construct(const coreUintW iIndex)
 {
     // create view objects
     m_aHealthBar[0].DefineProgram("default_2d_program");
@@ -64,7 +64,7 @@ void cInterface::sPlayerView::Construct(const coreUintW& iIndex)
 
 // ****************************************************************
 // constructor
-cInterface::cInterface(const coreUint8& iNumViews)noexcept
+cInterface::cInterface(const coreUint8 iNumViews)noexcept
 : m_iNumViews    (iNumViews)
 , m_fBannerStart (-100.0f)
 , m_bBannerType  (false)

@@ -306,7 +306,7 @@ void cConfigMenu::Move()
             if(m_SaveButton.GetOverride() >= 0)
             {
                 // 
-                g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_SAVE"), [&](const coreInt32& iStatus)
+                g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_SAVE"), [&](const coreInt32 iStatus)
                 {
                     // 
                     if(iStatus == MSGBOX_STATUS_YES)

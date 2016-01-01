@@ -11,7 +11,7 @@
 
 // ****************************************************************
 // constructor
-cGame::cGame(const coreBool& bCoop)noexcept
+cGame::cGame(const coreBool bCoop)noexcept
 : m_BulletManagerPlayer (TYPE_BULLET_PLAYER)
 , m_BulletManagerEnemy  (TYPE_BULLET_ENEMY)
 , m_Interface           (bCoop ? GAME_PLAYERS : 1u)
@@ -166,7 +166,7 @@ void cGame::Move()
 
 // ****************************************************************
 // load new active mission
-void cGame::LoadMission(const coreInt32& iID)
+void cGame::LoadMission(const coreInt32 iID)
 {
     if(m_pMission) if(m_pMission->GetID() == iID) return;
 
@@ -252,7 +252,7 @@ void cGame::PushDepthLevel()
 
 // ****************************************************************
 // 
-void cGame::OffsetDepthLevel(const coreFloat& fOffset)const
+void cGame::OffsetDepthLevel(const coreFloat fOffset)const
 {
     // 
     glDepthRange(0.1f * I_TO_F(m_iDepthLevel - 1u),
@@ -355,7 +355,7 @@ coreBool cGame::__HandleIntro()
 // handle default object collisions
 void cGame::__HandleCollisions()
 {
-    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_ENEMY, [](cPlayer* OUTPUT pPlayer, cEnemy* OUTPUT pEnemy, const coreBool& bFirstHit)
+    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_ENEMY, [](cPlayer* OUTPUT pPlayer, cEnemy* OUTPUT pEnemy, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
 
@@ -367,14 +367,14 @@ void cGame::__HandleCollisions()
         g_pSpecialEffects->MacroExplosionPhysicalSmall(vCenter);
     });
 
-    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_BULLET_ENEMY, [](cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreBool& bFirstHit)
+    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_BULLET_ENEMY, [](cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreBool bFirstHit)
     {
         // 
         pPlayer->TakeDamage(pBullet->GetDamage());
         pBullet->Deactivate(true);
     });
 
-    Core::Manager::Object->TestCollision(TYPE_ENEMY, TYPE_BULLET_PLAYER, [](cEnemy* OUTPUT pEnemy, cBullet* OUTPUT pBullet, const coreBool& bFirstHit)
+    Core::Manager::Object->TestCollision(TYPE_ENEMY, TYPE_BULLET_PLAYER, [](cEnemy* OUTPUT pEnemy, cBullet* OUTPUT pBullet, const coreBool bFirstHit)
     {
         // 
         if((ABS(pEnemy->GetPosition().x) >= FOREGROUND_AREA.x * 1.1f) ||

@@ -95,19 +95,19 @@ public:
     inline void SkipStage() {m_fStageTime = 0.0f; m_anStage.pop_back();}
 
     // set active boss
-    void SetCurBoss(const coreUintW& iIndex);
-    void SetCurBoss(const cBoss*     pBoss);
+    void SetCurBoss(const coreUintW iIndex);
+    void SetCurBoss(const cBoss*    pBoss);
 
     // access mission objects
-    inline cBoss*           GetBoss        (const coreUintW& iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_apBoss[iIndex];}
-    inline cBoss*           GetCurBoss     ()const                        {return m_pCurBoss;}
-    inline const coreUintW& GetCurBossIndex()const                        {return m_iCurBossIndex;}
+    inline cBoss*           GetBoss        (const coreUintW iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_apBoss[iIndex];}
+    inline cBoss*           GetCurBoss     ()const                       {return m_pCurBoss;}
+    inline const coreUintW& GetCurBossIndex()const                       {return m_iCurBossIndex;}
 
 
 protected:
     // 
-    template             <typename F> coreSpline2* _AddPath (const coreUint16& iCodeLine,                        F&& nInitFunc);   // [](coreSpline2* OUTPUT pPath)  -> void
-    template <typename T, typename F> cEnemySquad* _AddSquad(const coreUint16& iCodeLine, const coreUint8& iNum, F&& nInitFunc);   // [](cEnemySquad* OUTPUT pSquad) -> void
+    template             <typename F> coreSpline2* _AddPath (const coreUint16 iCodeLine,                       F&& nInitFunc);   // [](coreSpline2* OUTPUT pPath)  -> void
+    template <typename T, typename F> cEnemySquad* _AddSquad(const coreUint16 iCodeLine, const coreUint8 iNum, F&& nInitFunc);   // [](cEnemySquad* OUTPUT pSquad) -> void
 
 
 private:
@@ -164,20 +164,20 @@ public:
     ASSIGN_ID(1, "Virido")
 
     // 
-    void EnableBall (const coreUintW& iIndex, const coreVector2& vPosition, const coreVector2& vDirection);
-    void DisableBall(const coreUintW& iIndex, const coreBool& bAnimated);
+    void EnableBall (const coreUintW iIndex, const coreVector2& vPosition, const coreVector2& vDirection);
+    void DisableBall(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    void EnablePaddle (const coreUintW& iIndex, cShip* pOwner);
-    void DisablePaddle(const coreUintW& iIndex, const coreBool& bAnimated);
+    void EnablePaddle (const coreUintW iIndex, cShip* pOwner);
+    void DisablePaddle(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    inline void     SetBounceReal (const coreBool&  bStatus)     {m_bBounceReal = bStatus;}
-    inline coreBool GetBounceState(const coreUintW& iIndex)const {ASSERT(iIndex < sizeof(m_iBounceState)*8u) return CONTAINS_BIT(m_iBounceState, iIndex);}
+    inline void     SetBounceReal (const coreBool  bStatus)     {m_bBounceReal = bStatus;}
+    inline coreBool GetBounceState(const coreUintW iIndex)const {ASSERT(iIndex < sizeof(m_iBounceState)*8u) return CONTAINS_BIT(m_iBounceState, iIndex);}
 
     // 
-    inline coreObject3D* GetBall  (const coreUintW& iIndex) {ASSERT(iIndex < VIRIDO_BALLS)   return &m_aBallRaw[iIndex * (VIRIDO_TRAILS + 1u)];}
-    inline coreObject3D* GetPaddle(const coreUintW& iIndex) {ASSERT(iIndex < VIRIDO_PADDLES) return &m_aPaddle [iIndex];}
+    inline coreObject3D* GetBall  (const coreUintW iIndex) {ASSERT(iIndex < VIRIDO_BALLS)   return &m_aBallRaw[iIndex * (VIRIDO_TRAILS + 1u)];}
+    inline coreObject3D* GetPaddle(const coreUintW iIndex) {ASSERT(iIndex < VIRIDO_PADDLES) return &m_aPaddle [iIndex];}
 
 
 private:
@@ -275,7 +275,7 @@ public:
 
 // ****************************************************************
 // 
-template <typename F> coreSpline2* cMission::_AddPath(const coreUint16& iCodeLine, F&& nInitFunc)
+template <typename F> coreSpline2* cMission::_AddPath(const coreUint16 iCodeLine, F&& nInitFunc)
 {
     if(!m_apPath.count(iCodeLine))
     {
@@ -293,7 +293,7 @@ template <typename F> coreSpline2* cMission::_AddPath(const coreUint16& iCodeLin
 
 // ****************************************************************
 // 
-template <typename T, typename F> cEnemySquad* cMission::_AddSquad(const coreUint16& iCodeLine, const coreUint8& iNum, F&& nInitFunc)
+template <typename T, typename F> cEnemySquad* cMission::_AddSquad(const coreUint16 iCodeLine, const coreUint8 iNum, F&& nInitFunc)
 {
     if(!m_apSquad.count(iCodeLine))
     {

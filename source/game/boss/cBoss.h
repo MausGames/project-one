@@ -34,16 +34,16 @@
 
 // ****************************************************************
 // phase management macros
-#define PHASE_CONTROL_TIMER(a,b,c)  this->_PhaseTimer (a, __LINE__, b, c, [&](const coreFloat&  fTime, const coreFloat& fTimeBefore, const coreBool& __bEnd)   // 
-#define PHASE_CONTROL_TICKER(a,b,c) this->_PhaseTicker(a, __LINE__, b, c, [&](const coreUint16& iTick,                               const coreBool& __bEnd)   // 
-#define PHASE_SUB(t)                (InBetween(t, fTimeBefore, fTime))                                                                                         // 
-#define PHASE_RESET(i)              {m_aTimer[i].Stop(); m_aiTimerLine[i] = 0u;}                                                                               // 
-#define PHASE_FINISHED              (__bEnd)                                                                                                                   // 
+#define PHASE_CONTROL_TIMER(a,b,c)  this->_PhaseTimer (a, __LINE__, b, c, [&](const coreFloat  fTime, const coreFloat fTimeBefore, const coreBool __bEnd)   // 
+#define PHASE_CONTROL_TICKER(a,b,c) this->_PhaseTicker(a, __LINE__, b, c, [&](const coreUint16 iTick,                              const coreBool __bEnd)   // 
+#define PHASE_SUB(t)                (InBetween(t, fTimeBefore, fTime))                                                                                      // 
+#define PHASE_RESET(i)              {m_aTimer[i].Stop(); m_aiTimerLine[i] = 0u;}                                                                            // 
+#define PHASE_FINISHED              (__bEnd)                                                                                                                // 
 
 #define LERP_LINEAR    (&LERP <coreFloat>)
 #define LERP_SMOOTH    (&LERPS<coreFloat>)
 #define LERP_BREAK     (&LERPB<coreFloat>)
-#define LERP_BREAK_REV ([](const coreFloat& x, const coreFloat& y, const coreFloat& s) {return LERPB(y, x, 1.0f-s);})
+#define LERP_BREAK_REV ([](const coreFloat x, const coreFloat y, const coreFloat s) {return LERPB(y, x, 1.0f-s);})
 
 
 // ****************************************************************
@@ -75,8 +75,8 @@ public:
 
 protected:
     // 
-    void _PhaseTimer (const coreUintW& iTimerIndex, const coreUint16 iCodeLine, const coreFloat&  fSpeed, const std::function<coreFloat(coreFloat, coreFloat, coreFloat)>&& nLerpFunc, const std::function<void(coreFloat, coreFloat, coreBool)>&& nUpdateFunc);
-    void _PhaseTicker(const coreUintW& iTimerIndex, const coreUint16 iCodeLine, const coreUint16& iTicks, const coreFloat& fRate,                                                      const std::function<void(coreUint16,           coreBool)>&& nUpdateFunc);
+    void _PhaseTimer (const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreFloat  fSpeed, const std::function<coreFloat(coreFloat, coreFloat, coreFloat)>&& nLerpFunc, const std::function<void(coreFloat, coreFloat, coreBool)>&& nUpdateFunc);
+    void _PhaseTicker(const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreUint16 iTicks, const coreFloat fRate,                                                       const std::function<void(coreUint16,           coreBool)>&& nUpdateFunc);
 };
 
 
@@ -106,17 +106,17 @@ public:
 private:
     // execute own routines
     void __ResurrectOwn   ()override;
-    void __KillOwn        (const coreBool& bAnimated)override;
+    void __KillOwn        (const coreBool bAnimated)override;
     void __RenderOwnUnder ()override;
     void __RenderOwnAttack()override;
     void __MoveOwn        ()override;
 
     // 
-    coreVector2 __RepeatPosition  (const coreVector2& vPosition, const coreFloat& fThreshold, coreBool* OUTPUT pbChange);
-    void        __EncodeDirection (const coreUintW& iIndex, const coreVector2& vDirection);
-    coreVector2 __DecodeDirection (const coreUintW& iIndex);
-    void        __EnableBoomerang (const coreUintW& iIndex, const coreVector2& vPosition, const coreVector2& vDirection);
-    void        __DisableBoomerang(const coreUintW& iIndex, const coreBool& bAnimated);
+    coreVector2 __RepeatPosition  (const coreVector2& vPosition, const coreFloat fThreshold, coreBool* OUTPUT pbChange);
+    void        __EncodeDirection (const coreUintW iIndex, const coreVector2& vDirection);
+    coreVector2 __DecodeDirection (const coreUintW iIndex);
+    void        __EnableBoomerang (const coreUintW iIndex, const coreVector2& vPosition, const coreVector2& vDirection);
+    void        __DisableBoomerang(const coreUintW iIndex, const coreBool bAnimated);
 };
 
 
@@ -147,16 +147,16 @@ public:
 private:
     // execute own routines
     void __ResurrectOwn   ()override;
-    void __KillOwn        (const coreBool& bAnimated)override;
+    void __KillOwn        (const coreBool bAnimated)override;
     void __RenderOwnAttack()override;
     void __MoveOwn        ()override;
 
     // 
-    coreVector3 __GetRotaDirection(const coreFloat& fBaseAngle);
-    void        __SetRotaAttack   (const coreInt16& iType, const coreBool& bAnimated);
-    void        __EnableRay       (const coreUintW& iIndex);
-    void        __DisableRay      (const coreUintW& iIndex);
-    void        __CreateOverdrive (const coreUintW& iIndex, const coreVector3& vIntersect, const coreFloat& fTime, const coreBool& bGround);
+    coreVector3 __GetRotaDirection(const coreFloat fBaseAngle);
+    void        __SetRotaAttack   (const coreInt16 iType, const coreBool bAnimated);
+    void        __EnableRay       (const coreUintW iIndex);
+    void        __DisableRay      (const coreUintW iIndex);
+    void        __CreateOverdrive (const coreUintW iIndex, const coreVector3& vIntersect, const coreFloat fTime, const coreBool bGround);
 };
 
 
@@ -178,7 +178,7 @@ public:
 private:
     // execute own routines
     void __ResurrectOwn()override;
-    void __KillOwn     (const coreBool& bAnimated)override;
+    void __KillOwn     (const coreBool bAnimated)override;
     void __MoveOwn     ()override;
 };
 

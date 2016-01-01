@@ -274,11 +274,11 @@ public:
 
     // default menu routines
     static const coreLookup<std::string, std::string>& GetLanguageList();
-    static void UpdateButton(coreButton* OUTPUT pButton, const coreBool& bFocused, const coreVector3& vFocusColor);
-    static void UpdateButton(coreButton* OUTPUT pButton, const coreBool& bFocused);
+    static void UpdateButton(coreButton* OUTPUT pButton, const coreBool bFocused, const coreVector3& vFocusColor);
+    static void UpdateButton(coreButton* OUTPUT pButton, const coreBool bFocused);
     static void UpdateSwitchBox(coreSwitchBoxU8* OUTPUT pSwitchBox);
-    static coreVector3 FUNC_CONST HealthColor(const coreFloat& fValue);
-    static coreVector3 FUNC_CONST ChainColor (const coreFloat& fValue);
+    static coreVector3 FUNC_CONST HealthColor(const coreFloat fValue);
+    static coreVector3 FUNC_CONST ChainColor (const coreFloat fValue);
 };
 
 

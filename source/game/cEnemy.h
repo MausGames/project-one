@@ -40,31 +40,31 @@ public:
     ENABLE_ID
 
     // configure the enemy
-    void Configure(const coreInt32& iHealth, const coreVector3& vColor);
+    void Configure(const coreInt32 iHealth, const coreVector3& vColor);
 
     // move the enemy
     void Move()override;
 
     // reduce current health
-    void TakeDamage(const coreInt32& iDamage, cPlayer* pAttacker);
+    void TakeDamage(const coreInt32 iDamage, cPlayer* pAttacker);
 
     // control life and death
     void Resurrect();
     void Resurrect(const coreSpline2& oPath,     const coreVector2& vFactor, const coreVector2& vOffset);
     void Resurrect(const coreVector2& vPosition, const coreVector2& vDirection);
-    void Kill     (const coreBool&    bAnimated);
+    void Kill     (const coreBool     bAnimated);
 
     // transformation functions (raw parameters are multiplied with FOREGROUND_AREA)
-    coreBool DefaultMovePath     (const coreSpline2& oRawPath, const coreVector2& vFactor, const coreVector2& vRawOffset, const coreFloat& fRawDistance);
-    coreBool DefaultMoveTarget   (const coreVector2& vTarget, const coreFloat& fSpeedMove, const coreFloat& fSpeedTurn);
-    coreBool DefaultMoveSmooth   (const coreVector2& vRawPosition, const coreFloat& fSpeedMove, const coreFloat& fClampMove);
-    void     DefaultMoveLerp     (const coreVector2& vFromRawPos, const coreVector2& vToRawPos, const coreFloat& fTime);
-    void     DefaultRotate       (const coreFloat& fAngle);
-    coreBool DefaultRotateSmooth (const coreVector2& vDirection, const coreFloat& fSpeedTurn, const coreFloat& fClampTurn);
-    void     DefaultRotateLerp   (const coreFloat& fFromAngle, const coreFloat& fToAngle, const coreFloat& fTime);
-    void     DefaultOrientate    (const coreFloat& fAngle);
-    void     DefaultOrientateLerp(const coreFloat& fFromAngle, const coreFloat& fToAngle, const coreFloat& fTime);
-    void     DefaultMultiate     (const coreFloat& fAngle);
+    coreBool DefaultMovePath     (const coreSpline2& oRawPath, const coreVector2& vFactor, const coreVector2& vRawOffset, const coreFloat fRawDistance);
+    coreBool DefaultMoveTarget   (const coreVector2& vTarget, const coreFloat fSpeedMove, const coreFloat fSpeedTurn);
+    coreBool DefaultMoveSmooth   (const coreVector2& vRawPosition, const coreFloat fSpeedMove, const coreFloat fClampMove);
+    void     DefaultMoveLerp     (const coreVector2& vFromRawPos, const coreVector2& vToRawPos, const coreFloat fTime);
+    void     DefaultRotate       (const coreFloat fAngle);
+    coreBool DefaultRotateSmooth (const coreVector2& vDirection, const coreFloat fSpeedTurn, const coreFloat fClampTurn);
+    void     DefaultRotateLerp   (const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime);
+    void     DefaultOrientate    (const coreFloat fAngle);
+    void     DefaultOrientateLerp(const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime);
+    void     DefaultMultiate     (const coreFloat fAngle);
 
     // get object properties
     inline const coreFloat& GetLifeTime()const {return m_fLifeTime;}
@@ -72,12 +72,12 @@ public:
 
 private:
     // own routines for derived classes (render functions executed by enemy manager)
-    virtual void __ResurrectOwn   ()                          {}
-    virtual void __KillOwn        (const coreBool& bAnimated) {}
-    virtual void __RenderOwnUnder ()                          {}
-    virtual void __RenderOwnAttack()                          {}
-    virtual void __RenderOwnOver  ()                          {}
-    virtual void __MoveOwn        ()                          {}
+    virtual void __ResurrectOwn   ()                         {}
+    virtual void __KillOwn        (const coreBool bAnimated) {}
+    virtual void __RenderOwnUnder ()                         {}
+    virtual void __RenderOwnAttack()                         {}
+    virtual void __RenderOwnOver  ()                         {}
+    virtual void __MoveOwn        ()                         {}
 };
 
 
@@ -97,14 +97,14 @@ public:
     ENABLE_COPY (cEnemySquad)
 
     // 
-    template <typename T> void AllocateEnemies(const coreUint8& iNumEnemies);
+    template <typename T> void AllocateEnemies(const coreUint8 iNumEnemies);
     void FreeEnemies();
-    void ClearEnemies(const coreBool& bAnimated);
+    void ClearEnemies(const coreBool bAnimated);
 
     // 
     cEnemy* FindEnemy(const coreVector2& vPosition);
-    template <typename F> void ForEachEnemy   (F&& nFunction);   // [](cEnemy* OUTPUT pEnemy, const coreUintW& i) -> void
-    template <typename F> void ForEachEnemyAll(F&& nFunction);   // [](cEnemy* OUTPUT pEnemy, const coreUintW& i) -> void
+    template <typename F> void ForEachEnemy   (F&& nFunction);   // [](cEnemy* OUTPUT pEnemy, const coreUintW i) -> void
+    template <typename F> void ForEachEnemyAll(F&& nFunction);   // [](cEnemy* OUTPUT pEnemy, const coreUintW i) -> void
 };
 
 
@@ -152,7 +152,7 @@ public:
     // add and remove enemies
     template <typename T> RETURN_RESTRICT T* AllocateEnemy();
     void FreeEnemy(cEnemy** OUTPUT ppEnemy);
-    void ClearEnemies(const coreBool& bAnimated);
+    void ClearEnemies(const coreBool bAnimated);
 
     // 
     cEnemy* FindEnemy(const coreVector2& vPosition);
@@ -287,7 +287,7 @@ private:
 
 // ****************************************************************
 // 
-template <typename T> void cEnemySquad::AllocateEnemies(const coreUint8& iNumEnemies)
+template <typename T> void cEnemySquad::AllocateEnemies(const coreUint8 iNumEnemies)
 {
     ASSERT(m_apEnemy.empty())
 

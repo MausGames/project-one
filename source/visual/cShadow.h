@@ -73,7 +73,7 @@ public:
     // send transformation matrix to shader-program
     static inline void SendTransformSingle   (const coreMatrix4& mTransform) {cShadow::__SendTransform(s_pProgramSingle,    mTransform);}
     static inline void SendTransformInstanced(const coreMatrix4& mTransform) {cShadow::__SendTransform(s_pProgramInstanced, mTransform);}
-    static void EnableShadowRead(const coreUintW& iHandleIndex);
+    static void EnableShadowRead(const coreUintW iHandleIndex);
 
     // access global bind container
     static inline cBindContainerIn* GetGlobalContainer() {return &s_GlobalContainer;}
@@ -85,7 +85,7 @@ public:
 
 private:
     // reset with the resource manager
-    void __Reset(const coreResourceReset& bInit)override;
+    void __Reset(const coreResourceReset bInit)override;
 
     // send transformation matrix to shader-program
     static void __SendTransform(const coreProgramPtr& pProgram, const coreMatrix4& mTransform);

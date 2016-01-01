@@ -103,7 +103,7 @@ void cTorusBoss::__ResurrectOwn()
 
 // ****************************************************************
 // 
-void cTorusBoss::__KillOwn(const coreBool& bAnimated)
+void cTorusBoss::__KillOwn(const coreBool bAnimated)
 {
     if(!m_aiCounter[BALL_STATUS])
     {
@@ -537,7 +537,7 @@ void cTorusBoss::__MoveOwn()
     }
 
     // 
-    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_OBJECT(1), [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pRay, const coreBool& bFirstHit)
+    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_OBJECT(1), [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pRay, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
 
@@ -547,7 +547,7 @@ void cTorusBoss::__MoveOwn()
 
 // ****************************************************************
 // 
-coreVector3 cTorusBoss::__GetRotaDirection(const coreFloat& fBaseAngle)
+coreVector3 cTorusBoss::__GetRotaDirection(const coreFloat fBaseAngle)
 {
     // 
     return m_vRotation.QuatApply(coreVector3(coreVector2::Direction(fBaseAngle), 0.0f)).Normalize();
@@ -556,7 +556,7 @@ coreVector3 cTorusBoss::__GetRotaDirection(const coreFloat& fBaseAngle)
 
 // ****************************************************************
 // 
-void cTorusBoss::__SetRotaAttack(const coreInt16& iType, const coreBool& bAnimated)
+void cTorusBoss::__SetRotaAttack(const coreInt16 iType, const coreBool bAnimated)
 {
     if(m_aiCounter[ATTACK_STATUS] == iType) return;
     m_aiCounter[ATTACK_STATUS] = iType;
@@ -672,7 +672,7 @@ void cTorusBoss::__SetRotaAttack(const coreInt16& iType, const coreBool& bAnimat
 
 // ****************************************************************
 // 
-void cTorusBoss::__EnableRay(const coreUintW& iIndex)
+void cTorusBoss::__EnableRay(const coreUintW iIndex)
 {
     ASSERT(iIndex < ARRAY_SIZE(m_aRay))
     coreObject3D& oRay = m_aRay[iIndex];
@@ -685,7 +685,7 @@ void cTorusBoss::__EnableRay(const coreUintW& iIndex)
 
 // ****************************************************************
 // 
-void cTorusBoss::__DisableRay(const coreUintW& iIndex)
+void cTorusBoss::__DisableRay(const coreUintW iIndex)
 {
     ASSERT(iIndex < ARRAY_SIZE(m_aRay))
     coreObject3D& oRay = m_aRay[iIndex];
@@ -698,7 +698,7 @@ void cTorusBoss::__DisableRay(const coreUintW& iIndex)
 
 // ****************************************************************
 // 
-void cTorusBoss::__CreateOverdrive(const coreUintW& iIndex, const coreVector3& vIntersect, const coreFloat& fTime, const coreBool& bGround)
+void cTorusBoss::__CreateOverdrive(const coreUintW iIndex, const coreVector3& vIntersect, const coreFloat fTime, const coreBool bGround)
 {
     ASSERT(iIndex < ARRAY_SIZE(m_aRay))
 

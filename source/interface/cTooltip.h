@@ -51,8 +51,8 @@ public:
     void Move  ()override;
 
     // 
-    template <typename... A> void ShowText(const coreFloat& fWidth, const void* pRef, const coreChar* pcFormat, A&&... vArgs);
-    inline void                   ShowText(const coreFloat& fWidth, const coreChar* pcText);
+    template <typename... A> void ShowText(const coreFloat fWidth, const void* pRef, const coreChar* pcFormat, A&&... vArgs);
+    inline void                   ShowText(const coreFloat fWidth, const coreChar* pcText);
 
     // force update on next display
     inline void Invalidate() {m_pLastRef = NULL;}
@@ -60,13 +60,13 @@ public:
 
 private:
     // 
-    void __ShowText(const coreFloat& fWidth, const coreChar* pcText);
+    void __ShowText(const coreFloat fWidth, const coreChar* pcText);
 };
 
 
 // ****************************************************************
 // 
-template <typename... A> void cTooltip::ShowText(const coreFloat& fWidth, const void* pRef, const coreChar* pcFormat, A&&... vArgs)
+template <typename... A> void cTooltip::ShowText(const coreFloat fWidth, const void* pRef, const coreChar* pcFormat, A&&... vArgs)
 {
     // show tooltip at current mouse position
     m_bDisplay = true;
@@ -80,7 +80,7 @@ template <typename... A> void cTooltip::ShowText(const coreFloat& fWidth, const 
     this->__ShowText(fWidth, PRINT(pcFormat, std::forward<A>(vArgs)...));
 }
 
-inline void cTooltip::ShowText(const coreFloat& fWidth, const coreChar* pcText)
+inline void cTooltip::ShowText(const coreFloat fWidth, const coreChar* pcText)
 {
     // forward copy of trivial string
     this->ShowText(fWidth, pcText, "%s", pcText);

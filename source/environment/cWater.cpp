@@ -181,7 +181,7 @@ void cWater::UpdateDepth(cOutdoor* pOutdoor, const std::vector<coreBatchList*>& 
 
 // ****************************************************************
 // set current fly offset
-void cWater::SetFlyOffset(const coreFloat& fFlyOffset)
+void cWater::SetFlyOffset(const coreFloat fFlyOffset)
 {
     // set new value
     m_fFlyOffset = fFlyOffset;

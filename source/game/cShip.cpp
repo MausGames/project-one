@@ -49,7 +49,7 @@ void cShip::Render(const coreProgramPtr& pProgram)
 
 // ****************************************************************
 // 
-coreBool cShip::_TakeDamage(const coreInt32& iDamage)
+coreBool cShip::_TakeDamage(const coreInt32 iDamage)
 {
     // 
     if((m_iCurHealth -= iDamage) <= 0)
@@ -68,7 +68,7 @@ coreBool cShip::_TakeDamage(const coreInt32& iDamage)
 
 // ****************************************************************
 // add ship to the game
-void cShip::_Resurrect(const coreBool& bSingle, const coreVector2& vPosition, const coreVector2& vDirection, const coreInt32& iType)
+void cShip::_Resurrect(const coreBool bSingle, const coreVector2& vPosition, const coreVector2& vDirection, const coreInt32 iType)
 {
     // reset ship properties
     m_iCurHealth = m_iMaxHealth;
@@ -93,7 +93,7 @@ void cShip::_Resurrect(const coreBool& bSingle, const coreVector2& vPosition, co
 
 // ****************************************************************
 // remove ship from the game
-void cShip::_Kill(const coreBool& bSingle, const coreBool& bAnimated)
+void cShip::_Kill(const coreBool bSingle, const coreBool bAnimated)
 {
     // remove ship from global shadow and outline
     if(bSingle)

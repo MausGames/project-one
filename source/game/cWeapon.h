@@ -38,7 +38,7 @@ public:
     ENABLE_ID
 
     // update the weapon
-    coreBool Update(const coreUint8& iShootStatus);
+    coreBool Update(const coreUint8 iShootStatus);
 
     // 
     void Render();
@@ -53,12 +53,12 @@ public:
 
 private:
     // own routines for derived classes
-    virtual void __UpdateOwn       (const coreUint8& iShootStatus) {}
-    virtual void __TriggerOwn      (const coreUint8& iMode)        {}
-    virtual void __ReleaseOwn      (const coreUint8& iMode)        {}
-    virtual void __ShootOwn        ()                              {}
-    virtual void __RenderOwn       ()                              {}
-    virtual void __RenderOverlayOwn()                              {}
+    virtual void __UpdateOwn       (const coreUint8 iShootStatus) {}
+    virtual void __TriggerOwn      (const coreUint8 iMode)        {}
+    virtual void __ReleaseOwn      (const coreUint8 iMode)        {}
+    virtual void __ShootOwn        ()                             {}
+    virtual void __RenderOwn       ()                             {}
+    virtual void __RenderOverlayOwn()                             {}
 };
 
 
@@ -93,7 +93,7 @@ public:
 
 private:
     // execute own routines
-    void __TriggerOwn(const coreUint8& iMode)override;
+    void __TriggerOwn(const coreUint8 iMode)override;
     void __ShootOwn  ()override;
 };
 
@@ -118,7 +118,7 @@ public:
 
 private:
     // execute own routines
-    void __UpdateOwn(const coreUint8& iShootStatus)override;
+    void __UpdateOwn(const coreUint8 iShootStatus)override;
     void __ShootOwn ()override;
 };
 
@@ -145,7 +145,7 @@ public:
 
 private:
     // execute own routines
-    void __TriggerOwn      (const coreUint8& iMode)override;
+    void __TriggerOwn      (const coreUint8 iMode)override;
     void __ShootOwn        ()override;
     void __RenderOverlayOwn()override;
 };
@@ -172,7 +172,7 @@ public:
 
 private:
     // execute own routines
-    void __TriggerOwn(const coreUint8& iMode)override;
+    void __TriggerOwn(const coreUint8 iMode)override;
     void __ShootOwn  ()override;
 };
 

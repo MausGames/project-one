@@ -51,14 +51,14 @@ public:
     void Move()override;
 
     // control status
-    void Activate  (const coreInt32& iDamage, const coreFloat& fSpeed, cShip* pOwner, const coreVector2& vPosition, const coreVector2& vDirection, const coreInt32& iType);
-    void Deactivate(const coreBool&  bAnimated);
+    void Activate  (const coreInt32 iDamage, const coreFloat fSpeed, cShip* pOwner, const coreVector2& vPosition, const coreVector2& vDirection, const coreInt32 iType);
+    void Deactivate(const coreBool  bAnimated);
 
     // 
-    inline cBullet* MakeSmaller(const coreFloat&   fFactor) {this->SetSize  (this->GetSize  () * fFactor); return this;}
+    inline cBullet* MakeSmaller(const coreFloat    fFactor) {this->SetSize  (this->GetSize  () * fFactor); return this;}
     inline cBullet* MakeSmaller(const coreVector3& vFactor) {this->SetSize  (this->GetSize  () * vFactor); return this;}
-    inline cBullet* MakeDarker (const coreFloat&   fFactor) {this->SetColor3(this->GetColor3() * fFactor); return this;}
-    inline cBullet* MakeLighter(const coreFloat&   fFactor) {this->SetAlpha (this->GetAlpha () * fFactor); return this;}
+    inline cBullet* MakeDarker (const coreFloat    fFactor) {this->SetColor3(this->GetColor3() * fFactor); return this;}
+    inline cBullet* MakeLighter(const coreFloat    fFactor) {this->SetAlpha (this->GetAlpha () * fFactor); return this;}
 
     // get object properties
     inline const coreInt32& GetDamage()const {return m_iDamage;}
@@ -115,7 +115,7 @@ private:
 
 
 public:
-    explicit cBulletManager(const coreInt32& iType)noexcept;
+    explicit cBulletManager(const coreInt32 iType)noexcept;
     ~cBulletManager();
 
     DISABLE_COPY(cBulletManager)
@@ -125,8 +125,8 @@ public:
     void Move();
 
     // add and remove bullets
-    template <typename T> RETURN_RESTRICT T* AddBullet(const coreInt32& iDamage, const coreFloat& fSpeed, cShip* pOwner, const coreVector2& vPosition, const coreVector2& vDirection);
-    void ClearBullets(const coreBool& bAnimated);
+    template <typename T> RETURN_RESTRICT T* AddBullet(const coreInt32 iDamage, const coreFloat fSpeed, cShip* pOwner, const coreVector2& vPosition, const coreVector2& vDirection);
+    void ClearBullets(const coreBool bAnimated);
 
     // 
     cBullet* FindBullet(const coreVector2& vPosition);
@@ -444,7 +444,7 @@ template <typename T> cBulletManager::sBulletSet<T>::~sBulletSet()
 
 // ****************************************************************
 // add bullet to the game
-template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt32& iDamage, const coreFloat& fSpeed, cShip* pOwner, const coreVector2& vPosition, const coreVector2& vDirection)
+template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt32 iDamage, const coreFloat fSpeed, cShip* pOwner, const coreVector2& vPosition, const coreVector2& vDirection)
 {
     // get requested bullet set
     sBulletSet<T>* pSet;

@@ -11,7 +11,7 @@
 
 // ****************************************************************
 // constructor
-cOutdoor::cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom, const coreUint8& iAlgorithm, const coreFloat& fGrade)noexcept
+cOutdoor::cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom, const coreUint8 iAlgorithm, const coreFloat fGrade)noexcept
 : m_iVertexOffset (0u)
 , m_iIndexOffset  (0u)
 , m_fFlyOffset    (0.0f)
@@ -94,7 +94,7 @@ void cOutdoor::Render()
 
 // ****************************************************************
 // load outdoor geometry
-void cOutdoor::LoadGeometry(const coreUint8& iAlgorithm, const coreFloat& fGrade)
+void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
 {
     sVertex     aVertexData[OUTDOOR_TOTAL_VERTICES];
     coreUint16  aiIndexData[OUTDOOR_TOTAL_INDICES];
@@ -114,14 +114,14 @@ void cOutdoor::LoadGeometry(const coreUint8& iAlgorithm, const coreFloat& fGrade
     switch(iAlgorithm)
     {
     default: ASSERT(false)
-    case 1u: nAlgorithmFunc = [](const coreFloat& x, const coreFloat& y) {coreFloat r = -(COS((x - I_TO_F(OUTDOOR_WIDTH)*0.5f)*0.075f*PI)*10.0f);                                                                                       return r;}; break;
-    case 2u: nAlgorithmFunc = [](const coreFloat& x, const coreFloat& y) {coreFloat r =  (ABS(SIN(x*0.075f*PI)*8.0f + SIN(y*0.075f*PI)*8.0f) - 6.0f);                                                                                   return r;}; break;
-    case 3u: nAlgorithmFunc = [](const coreFloat& x, const coreFloat& y) {coreFloat r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 13.0f);                                                      return r;}; break;
-    case 4u: nAlgorithmFunc = [](const coreFloat& x, const coreFloat& y) {coreFloat r = -(ABS(SIN(y*0.150f*PI)*0.25f - 0.5f*(x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.150f*PI) - 0.0f; if(r <    0.0f) r = -1.0f; return r;}; break;
-    case 5u: nAlgorithmFunc = [](const coreFloat& x, const coreFloat& y) {coreFloat r = -(ABS(SIN(y*0.075f*PI)*0.25f + 0.5f*(x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.075f*PI) - 1.5f; if(r < -100.0f) r = -1.0f; return r;}; break;
-    case 6u: nAlgorithmFunc = [](const coreFloat& x, const coreFloat& y) {coreFloat r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.150f*PI) - 1.0f;                            return r;}; break;
-    case 7u: nAlgorithmFunc = [](const coreFloat& x, const coreFloat& y) {coreFloat r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.075f*PI) + 3.0f;                            return r;}; break;
-    case 8u: nAlgorithmFunc = [](const coreFloat& x, const coreFloat& y) {coreFloat r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.075f*PI) + 1.0f;                            return r;}; break;
+    case 1u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r = -(COS((x - I_TO_F(OUTDOOR_WIDTH)*0.5f)*0.075f*PI)*10.0f);                                                                                       return r;}; break;
+    case 2u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(x*0.075f*PI)*8.0f + SIN(y*0.075f*PI)*8.0f) - 6.0f);                                                                                   return r;}; break;
+    case 3u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 13.0f);                                                      return r;}; break;
+    case 4u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r = -(ABS(SIN(y*0.150f*PI)*0.25f - 0.5f*(x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.150f*PI) - 0.0f; if(r <    0.0f) r = -1.0f; return r;}; break;
+    case 5u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r = -(ABS(SIN(y*0.075f*PI)*0.25f + 0.5f*(x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.075f*PI) - 1.5f; if(r < -100.0f) r = -1.0f; return r;}; break;
+    case 6u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.150f*PI) - 1.0f;                            return r;}; break;
+    case 7u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.075f*PI) + 3.0f;                            return r;}; break;
+    case 8u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.075f*PI) + 1.0f;                            return r;}; break;
     }
 
     // create vertices
@@ -361,7 +361,7 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
 
 // ****************************************************************
 // load outdoor shader-program
-void cOutdoor::LoadProgram(const coreBool& bGlow)
+void cOutdoor::LoadProgram(const coreBool bGlow)
 {
     m_iHandleIndex    = bGlow ? SHADOW_HANDLE_OUTDOOR_GLOW         : SHADOW_HANDLE_OUTDOOR;
     this->DefineProgram(bGlow ? "environment_outdoor_glow_program" : "environment_outdoor_program");
@@ -432,7 +432,7 @@ coreVector3 cOutdoor::RetrieveIntersect(const coreVector3& vRayPosition, const c
 
 // ****************************************************************
 // set current fly offset
-void cOutdoor::SetFlyOffset(const coreFloat& fFlyOffset)
+void cOutdoor::SetFlyOffset(const coreFloat fFlyOffset)
 {
     // set new value
     m_fFlyOffset = fFlyOffset;

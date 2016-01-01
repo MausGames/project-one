@@ -46,12 +46,12 @@ public:
     void Recompile();
 
     // set side-object opacity
-    void SetSideOpacity(const coreFloat& fValue);
+    void SetSideOpacity(const coreFloat fValue);
 
 
 private:
     // reset with the resource manager
-    void __Reset(const coreResourceReset& bInit)override;
+    void __Reset(const coreResourceReset bInit)override;
 };
 
 

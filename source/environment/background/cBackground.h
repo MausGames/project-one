@@ -83,9 +83,9 @@ public:
 
     // manage additional objects
     void AddObject   (coreObject3D* pObject, const coreVector3& vRelativePos);
-    void AddObject   (coreObject3D* pObject, const coreVector3& vRelativePos, const coreUint8& iListIndex);
-    void AddList     (const coreUint8& iListIndex, const coreUint32& iCapacity, const coreChar* pcProgramInstancedName);
-    void ShoveObjects(const coreFloat& fOffset);
+    void AddObject   (coreObject3D* pObject, const coreVector3& vRelativePos, const coreUint8 iListIndex);
+    void AddList     (const coreUint8 iListIndex, const coreUint32 iCapacity, const coreChar* pcProgramInstancedName);
+    void ShoveObjects(const coreFloat fOffset);
     void ClearObjects();
 
     // access frame buffer
@@ -104,8 +104,8 @@ protected:
     static void _FillInfinite(coreBatchList* OUTPUT pObjectList);
 
     // check for intersection with other objects
-    static coreBool _CheckIntersection     (const coreBatchList* pObjectList, const coreVector2& vNewPos, const coreFloat& fDistanceSq);
-    static coreBool _CheckIntersectionQuick(const coreBatchList* pObjectList, const coreVector2& vNewPos, const coreFloat& fDistanceSq);
+    static coreBool _CheckIntersection     (const coreBatchList* pObjectList, const coreVector2& vNewPos, const coreFloat fDistanceSq);
+    static coreBool _CheckIntersectionQuick(const coreBatchList* pObjectList, const coreVector2& vNewPos, const coreFloat fDistanceSq);
 
 
 private:
@@ -144,7 +144,7 @@ private:
 
 
 public:
-    explicit cGrassBackground(const coreUint8& iCloudDensity = 1u)noexcept;
+    explicit cGrassBackground(const coreUint8 iCloudDensity = 1u)noexcept;
     virtual ~cGrassBackground();
 
     DISABLE_COPY(cGrassBackground)
@@ -176,8 +176,8 @@ public:
     ASSIGN_ID(1, "Cloud")
 
     // 
-    void SetCloudAlpha  (const coreFloat& fAlpha);
-    void SetOverlayAlpha(const coreFloat& fAlpha);
+    void SetCloudAlpha  (const coreFloat fAlpha);
+    void SetOverlayAlpha(const coreFloat fAlpha);
     void ReduceClouds();
 
 

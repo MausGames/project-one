@@ -114,7 +114,7 @@ void cMission::MoveAfter()
 
 // ****************************************************************
 // set boss active
-void cMission::SetCurBoss(const coreUintW& iIndex)
+void cMission::SetCurBoss(const coreUintW iIndex)
 {
     // save pointer and index for direct access
     m_pCurBoss      = (iIndex < MISSION_BOSSES) ? m_apBoss[iIndex] : NULL;

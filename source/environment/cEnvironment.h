@@ -52,7 +52,7 @@ public:
     void Move();
 
     // control active background
-    void ChangeBackground(const coreInt32& iID);
+    void ChangeBackground(const coreInt32 iID);
     inline cBackground*     GetBackground   ()const {ASSERT(m_pBackground) return m_pBackground;}
     inline cBackground*     GetOldBackground()const {return m_pOldBackground;}
     inline const coreTimer& GetTransition   ()const {return m_Transition;}
@@ -69,8 +69,8 @@ public:
     // set target transformation properties
     inline void SetTargetDirection(const coreVector2& vDirection) {m_avDirection[1] = vDirection; ASSERT(vDirection.IsNormalized())}
     inline void SetTargetSide     (const coreVector2& vSide)      {m_avSide     [1] = vSide;}
-    inline void SetTargetSpeed    (const coreFloat&   fSpeed)     {m_afSpeed    [1] = fSpeed;}
-    inline void SetTargetHeight   (const coreFloat&   fHeight)    {m_afHeight   [1] = fHeight;}
+    inline void SetTargetSpeed    (const coreFloat    fSpeed)     {m_afSpeed    [1] = fSpeed;}
+    inline void SetTargetHeight   (const coreFloat    fHeight)    {m_afHeight   [1] = fHeight;}
 
     // get current transformation properties
     inline const coreVector2& GetDirection()const {return m_avDirection[0];}
@@ -90,7 +90,7 @@ public:
 
 private:
     // reset with the resource manager
-    void __Reset(const coreResourceReset& bInit)override;
+    void __Reset(const coreResourceReset bInit)override;
 };
 
 

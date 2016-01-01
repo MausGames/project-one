@@ -11,7 +11,7 @@
 
 // ****************************************************************
 // update the weapon
-coreBool cWeapon::Update(const coreUint8& iShootStatus)
+coreBool cWeapon::Update(const coreUint8 iShootStatus)
 {
     ASSERT(m_pOwner)
     STATIC_ASSERT(WEAPON_MODES <= sizeof(iShootStatus)*8u)
@@ -87,7 +87,7 @@ cRayWeapon::cRayWeapon()noexcept
 
 // ****************************************************************
 // 
-void cRayWeapon::__TriggerOwn(const coreUint8& iMode)
+void cRayWeapon::__TriggerOwn(const coreUint8 iMode)
 {
     if(iMode == 0u)
     {
@@ -168,7 +168,7 @@ cPulseWeapon::cPulseWeapon()noexcept
 
 // ****************************************************************
 // 
-void cPulseWeapon::__UpdateOwn(const coreUint8& iShootStatus)
+void cPulseWeapon::__UpdateOwn(const coreUint8 iShootStatus)
 {
     // 
     if(!CONTAINS_BIT(iShootStatus, 0u)) m_fCharge = MIN(m_fCharge + m_CooldownTimer.GetSpeed() * Core::System->GetTime(), 3.0f);
@@ -240,7 +240,7 @@ cWaveWeapon::cWaveWeapon()noexcept
 
 // ****************************************************************
 // 
-void cWaveWeapon::__TriggerOwn(const coreUint8& iMode)
+void cWaveWeapon::__TriggerOwn(const coreUint8 iMode)
 {
     if(iMode == 1u)
     {
@@ -306,7 +306,7 @@ cTeslaWeapon::cTeslaWeapon()noexcept
 
 // ****************************************************************
 // 
-void cTeslaWeapon::__TriggerOwn(const coreUint8& iMode)
+void cTeslaWeapon::__TriggerOwn(const coreUint8 iMode)
 {
     if(iMode != 1u) return;
 

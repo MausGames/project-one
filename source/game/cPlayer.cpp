@@ -88,7 +88,7 @@ cPlayer::~cPlayer()
 
 // ****************************************************************
 // configure the player
-void cPlayer::Configure(const coreUintW& iShipType, const coreVector3& vColor, const coreUintW& iInputIndex)
+void cPlayer::Configure(const coreUintW iShipType, const coreVector3& vColor, const coreUintW iInputIndex)
 {
     // select appearance type
     const coreChar* pcModelHigh;
@@ -121,7 +121,7 @@ void cPlayer::Configure(const coreUintW& iShipType, const coreVector3& vColor, c
 
 // ****************************************************************
 // equip new main weapon
-void cPlayer::EquipWeapon(const coreUintW& iIndex, const coreInt32& iID)
+void cPlayer::EquipWeapon(const coreUintW iIndex, const coreInt32 iID)
 {
     ASSERT(iIndex < PLAYER_WEAPONS)
     if(m_apWeapon[iIndex]) if(m_apWeapon[iIndex]->GetID() == iID) return;
@@ -264,7 +264,7 @@ void cPlayer::Move()
         coreBool bGrace = false;
 
         // 
-        Core::Manager::Object->TestCollision(TYPE_BULLET_ENEMY, &m_Bubble, [&bGrace](const cBullet* pBullet, const coreBool& bFirstHit)
+        Core::Manager::Object->TestCollision(TYPE_BULLET_ENEMY, &m_Bubble, [&bGrace](const cBullet* pBullet, const coreBool bFirstHit)
         {
             bGrace = true;
         });
@@ -278,7 +278,7 @@ void cPlayer::Move()
 
 // ****************************************************************
 // reduce current health
-void cPlayer::TakeDamage(const coreInt32& iDamage)
+void cPlayer::TakeDamage(const coreInt32 iDamage)
 {
     // 
     g_pGame->GetCombatText()->AddDamage(iDamage, this->GetPosition());
@@ -313,7 +313,7 @@ void cPlayer::Resurrect(const coreVector2& vPosition)
 
 // ****************************************************************
 // remove player from the game
-void cPlayer::Kill(const coreBool& bAnimated)
+void cPlayer::Kill(const coreBool bAnimated)
 {
     // kill player
     if(CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_DEAD)) return;
@@ -333,7 +333,7 @@ void cPlayer::Kill(const coreBool& bAnimated)
 
 // ****************************************************************
 // 
-void cPlayer::AddScore(const coreUint32& iValue, const coreBool& bModified)
+void cPlayer::AddScore(const coreUint32 iValue, const coreBool bModified)
 {
     const coreUint32 iFinalValue = bModified ? (iValue * this->GetCurCombo()) : iValue;
 
@@ -348,7 +348,7 @@ void cPlayer::AddScore(const coreUint32& iValue, const coreBool& bModified)
 
 // ****************************************************************
 // 
-void cPlayer::AddCombo(const coreUint32& iValue)
+void cPlayer::AddCombo(const coreUint32 iValue)
 {
     const coreUint32 iOld = F_TO_UI(this->GetCurCombo());
     {
@@ -362,7 +362,7 @@ void cPlayer::AddCombo(const coreUint32& iValue)
     if(iOld != iNew) g_pGame->GetCombatText()->AddCombo(iNew, this->GetPosition());
 }
 
-void cPlayer::AddCombo(const coreFloat& fModifier)
+void cPlayer::AddCombo(const coreFloat fModifier)
 {
     // TODO # 
 }
@@ -370,7 +370,7 @@ void cPlayer::AddCombo(const coreFloat& fModifier)
 
 // ****************************************************************
 // 
-void cPlayer::AddChain(const coreUint32& iValue)
+void cPlayer::AddChain(const coreUint32 iValue)
 {
     // 
     m_iChainValue[0] += iValue;
@@ -425,7 +425,7 @@ void cPlayer::ResetStats()
 
 // ****************************************************************
 // 
-void cPlayer::TransformDark(const coreUint8& iStatus)
+void cPlayer::TransformDark(const coreUint8 iStatus)
 {
     // 
     const coreBool bDark = CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_DARKNESS);
@@ -503,7 +503,7 @@ void cPlayer::DisableBubble()
 
 // ****************************************************************
 // 
-void cPlayer::UpdateExhaust(const coreFloat& fStrength)
+void cPlayer::UpdateExhaust(const coreFloat fStrength)
 {
     // 
     const coreFloat fLen  = fStrength * 40.0f;

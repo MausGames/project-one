@@ -89,36 +89,36 @@ public:
     DISABLE_COPY(cSpecialEffects)
 
     // render and move special-effects
-    void Render(const coreBool& bForeground);
+    void Render(const coreBool bForeground);
     void Move();
 
     // create centered particle splash
-    void CreateSplashColor(const coreVector3& vPosition, const coreFloat& fScale, const coreUintW& iNum, const coreVector3& vColor);
-    void CreateSplashDark (const coreVector3& vPosition, const coreFloat& fScale, const coreUintW& iNum);
-    void CreateSplashSmoke(const coreVector3& vPosition, const coreFloat& fScale, const coreUintW& iNum);
-    void CreateSplashFire (const coreVector3& vPosition, const coreFloat& fScale, const coreUintW& iNum);
+    void CreateSplashColor(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor);
+    void CreateSplashDark (const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum);
+    void CreateSplashSmoke(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum);
+    void CreateSplashFire (const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum);
 
     // create directional particle blow
-    void CreateBlowColor(const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat& fScale, const coreUintW& iNum, const coreVector3& vColor);
-    void CreateBlowDark (const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat& fScale, const coreUintW& iNum);
+    void CreateBlowColor(const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor);
+    void CreateBlowDark (const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat fScale, const coreUintW iNum);
 
     // create whirling particle charge
-    void CreateChargeColor(const coreVector3& vPosition, const coreFloat& fScale, const coreUintW& iNum, const coreVector3& vColor);
-    void CreateChargeDark (const coreVector3& vPosition, const coreFloat& fScale, const coreUintW& iNum);
+    void CreateChargeColor(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor);
+    void CreateChargeDark (const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum);
 
     // 
-    coreFloat CreateLightning(const coreVector2& vPosFrom, const coreVector2& vPosTo,                               const coreFloat& fWidth, const coreVector3& vColor, const coreVector2& vTexSizeFactor, const coreFloat& fTexOffset);
-    void      CreateLightning(coreObject3D*      pOwner,   const coreVector2& vDirection, const coreFloat& fLength, const coreFloat& fWidth, const coreVector3& vColor, const coreVector2& vTexSizeFactor, const coreFloat& fTexOffset);
+    coreFloat CreateLightning(const coreVector2& vPosFrom, const coreVector2& vPosTo,                              const coreFloat fWidth, const coreVector3& vColor, const coreVector2& vTexSizeFactor, const coreFloat fTexOffset);
+    void      CreateLightning(coreObject3D*      pOwner,   const coreVector2& vDirection, const coreFloat fLength, const coreFloat fWidth, const coreVector3& vColor, const coreVector2& vTexSizeFactor, const coreFloat fTexOffset);
 
     // 
-    void CreateBlast(const coreVector3& vPosition,                                                                 const coreFloat& fScale, const coreFloat& fSpeed, const coreVector3& vColor);
-    void CreateRing (const coreVector3& vPosition, const coreVector3& vDirection, const coreVector3& vOrientation, const coreFloat& fScale, const coreFloat& fSpeed, const coreVector3& vColor);
+    void CreateBlast(const coreVector3& vPosition,                                                                 const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor);
+    void CreateRing (const coreVector3& vPosition, const coreVector3& vDirection, const coreVector3& vOrientation, const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor);
 
     // 
-    void PlaySound(const coreVector3& vPosition, const coreFloat& fVolume, const eSoundEffect& iSoundIndex);
+    void PlaySound(const coreVector3& vPosition, const coreFloat fVolume, const eSoundEffect iSoundIndex);
 
     // 
-    void ShakeScreen(const coreFloat& fStrength);
+    void ShakeScreen(const coreFloat fStrength);
     inline const coreFloat& GetShakeStrength()const {return m_fShakeStrength;}
 
     // 
@@ -132,8 +132,8 @@ public:
     void MacroEruptionColorBig      (const coreVector3& vPosition, const coreVector2& vDirection, const coreVector3& vColor);
     void MacroEruptionDarkSmall     (const coreVector3& vPosition, const coreVector2& vDirection);
     void MacroEruptionDarkBig       (const coreVector3& vPosition, const coreVector2& vDirection);
-    void MacroEruptionPhysicalSmall (const coreVector3& vPosition, const coreVector2& vDirection) {}
-    void MacroEruptionPhysicalBig   (const coreVector3& vPosition, const coreVector2& vDirection) {}
+    void MacroEruptionPhysicalSmall (const coreVector3& vPosition, const coreVector2& vDirection) {ASSERT(false)}
+    void MacroEruptionPhysicalBig   (const coreVector3& vPosition, const coreVector2& vDirection) {ASSERT(false)}
 };
 
 

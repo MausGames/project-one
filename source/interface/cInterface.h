@@ -39,7 +39,7 @@ private:
         coreObject2D m_ChainBar;          // chain bar
         coreLabel    m_ChainValue;        // chain value
 
-        void Construct(const coreUintW& iIndex);
+        void Construct(const coreUintW iIndex);
     };
 
 
@@ -63,7 +63,7 @@ private:
 
 
 public:
-    explicit cInterface(const coreUint8& iNumViews)noexcept;
+    explicit cInterface(const coreUint8 iNumViews)noexcept;
 
     DISABLE_COPY(cInterface)
 
@@ -82,9 +82,9 @@ public:
     void UpdateLayout();
 
     // set object properties
-    inline void SetVisible  (const coreBool&  bVisible) {m_bVisible   = bVisible;}
-    inline void SetAlphaAll (const coreFloat& fAlpha)   {m_fAlphaAll  = fAlpha;}
-    inline void SetAlphaBoss(const coreFloat& fAlpha)   {m_fAlphaBoss = fAlpha;}
+    inline void SetVisible  (const coreBool  bVisible) {m_bVisible   = bVisible;}
+    inline void SetAlphaAll (const coreFloat fAlpha)   {m_fAlphaAll  = fAlpha;}
+    inline void SetAlphaBoss(const coreFloat fAlpha)   {m_fAlphaBoss = fAlpha;}
 };
 
 

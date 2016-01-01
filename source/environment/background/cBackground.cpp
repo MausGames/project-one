@@ -149,7 +149,7 @@ void cBackground::Move()
     }
 
     // control and move all persistent objects
-    auto nControlObjectsFunc = [](std::vector<coreBatchList*>* OUTPUT papList, const coreFloat& fRange)
+    auto nControlObjectsFunc = [](std::vector<coreBatchList*>* OUTPUT papList, const coreFloat fRange)
     {
         FOR_EACH(it, *papList)
         {
@@ -178,7 +178,7 @@ void cBackground::Move()
     nControlObjectsFunc(&m_apAirObjectList,    BACKGROUND_OBJECT_RANGE - 5.0f);
 
     // control all additional objects
-    auto nControlAddFunc = [](std::vector<coreObject3D*>* OUTPUT papObject, const coreFloat& fRange)
+    auto nControlAddFunc = [](std::vector<coreObject3D*>* OUTPUT papObject, const coreFloat fRange)
     {
         FOR_EACH_DYN(it, *papObject)
         {
@@ -215,7 +215,7 @@ void cBackground::AddObject(coreObject3D* pObject, const coreVector3& vRelativeP
     m_apAddObject.push_back(pObject);
 }
 
-void cBackground::AddObject(coreObject3D* pObject, const coreVector3& vRelativePos, const coreUint8& iListIndex)
+void cBackground::AddObject(coreObject3D* pObject, const coreVector3& vRelativePos, const coreUint8 iListIndex)
 {
     ASSERT(pObject)
 
@@ -232,7 +232,7 @@ void cBackground::AddObject(coreObject3D* pObject, const coreVector3& vRelativeP
 
 // ****************************************************************
 // pre-define an optimized list
-void cBackground::AddList(const coreUint8& iListIndex, const coreUint32& iCapacity, const coreChar* pcProgramInstancedName)
+void cBackground::AddList(const coreUint8 iListIndex, const coreUint32 iCapacity, const coreChar* pcProgramInstancedName)
 {
     // check for available pre-defined list
     coreBatchList* pList;
@@ -256,7 +256,7 @@ void cBackground::AddList(const coreUint8& iListIndex, const coreUint32& iCapaci
 
 // ****************************************************************
 // move additional objects (for infinite background)
-void cBackground::ShoveObjects(const coreFloat& fOffset)
+void cBackground::ShoveObjects(const coreFloat fOffset)
 {
     // update objects and lists
     auto nUpdatePosFunc = [&fOffset](std::vector<coreObject3D*>* OUTPUT papObject)
@@ -327,7 +327,7 @@ void cBackground::_FillInfinite(coreBatchList* OUTPUT pObjectList)
 
 // ****************************************************************
 // check for intersection with other objects
-coreBool cBackground::_CheckIntersection(const coreBatchList* pObjectList, const coreVector2& vNewPos, const coreFloat& fDistanceSq)
+coreBool cBackground::_CheckIntersection(const coreBatchList* pObjectList, const coreVector2& vNewPos, const coreFloat fDistanceSq)
 {
     // loop through all objects
     FOR_EACH(it, *pObjectList->List())
@@ -339,7 +339,7 @@ coreBool cBackground::_CheckIntersection(const coreBatchList* pObjectList, const
     return false;
 }
 
-coreBool cBackground::_CheckIntersectionQuick(const coreBatchList* pObjectList, const coreVector2& vNewPos, const coreFloat& fDistanceSq)
+coreBool cBackground::_CheckIntersectionQuick(const coreBatchList* pObjectList, const coreVector2& vNewPos, const coreFloat fDistanceSq)
 {
     auto it = pObjectList->List()->end();
     auto et = pObjectList->List()->begin();

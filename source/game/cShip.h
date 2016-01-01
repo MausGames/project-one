@@ -54,8 +54,8 @@ public:
     void Render(const coreProgramPtr& pProgram)override;
 
     // add or remove status values
-    inline void AddStatus   (const coreInt32& iStatus) {ADD_VALUE   (m_iStatus, iStatus)}
-    inline void RemoveStatus(const coreInt32& iStatus) {REMOVE_VALUE(m_iStatus, iStatus)}
+    inline void AddStatus   (const coreInt32 iStatus) {ADD_VALUE   (m_iStatus, iStatus)}
+    inline void RemoveStatus(const coreInt32 iStatus) {REMOVE_VALUE(m_iStatus, iStatus)}
 
     // set object properties
     inline void SetBaseColor(const coreVector3& vBaseColor) {m_iBaseColor = coreVector4(vBaseColor, 0.0f).PackUnorm4x8(); this->SetColor3(vBaseColor);}
@@ -72,11 +72,11 @@ public:
 
 protected:
     // 
-    coreBool _TakeDamage(const coreInt32& iDamage);
+    coreBool _TakeDamage(const coreInt32 iDamage);
 
     // 
-    void _Resurrect(const coreBool& bSingle, const coreVector2& vPosition, const coreVector2& vDirection, const coreInt32& iType);
-    void _Kill     (const coreBool& bSingle, const coreBool&    bAnimated);
+    void _Resurrect(const coreBool bSingle, const coreVector2& vPosition, const coreVector2& vDirection, const coreInt32 iType);
+    void _Kill     (const coreBool bSingle, const coreBool     bAnimated);
 
     // 
     void _UpdateBlink();

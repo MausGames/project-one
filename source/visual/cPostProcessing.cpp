@@ -111,7 +111,7 @@ void cPostProcessing::Recompile()
 
 // ****************************************************************
 // set side-object opacity
-void cPostProcessing::SetSideOpacity(const coreFloat& fValue)
+void cPostProcessing::SetSideOpacity(const coreFloat fValue)
 {
     // change color instead of transparency (blending is disabled)
     const coreVector3 vColor = coreVector3(1.0f,1.0f,1.0f) * CLAMP(fValue, 0.0f, 1.0f);
@@ -124,7 +124,7 @@ void cPostProcessing::SetSideOpacity(const coreFloat& fValue)
 
 // ****************************************************************
 // reset with the resource manager
-void cPostProcessing::__Reset(const coreResourceReset& bInit)
+void cPostProcessing::__Reset(const coreResourceReset bInit)
 {
     if(bInit)
     {

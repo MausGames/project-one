@@ -53,13 +53,13 @@ public:
     void Move  ()override;
 
     // 
-    template <typename F> void ShowInformation(const coreChar* pcText, F&& nCallback);   // [](const coreUintW& iMsgStatus) -> void
-    template <typename F> void ShowQuestion   (const coreChar* pcText, F&& nCallback);   // [](const coreUintW& iMsgStatus) -> void
+    template <typename F> void ShowInformation(const coreChar* pcText, F&& nCallback);   // [](const coreUintW iStatus) -> void
+    template <typename F> void ShowQuestion   (const coreChar* pcText, F&& nCallback);   // [](const coreUintW iStatus) -> void
 
 
 private:
     // 
-    template <typename F> void __ShowMessage(const coreChar* pcText, F&& nCallback);   // [](const coreUintW& iMsgStatus) -> void
+    template <typename F> void __ShowMessage(const coreChar* pcText, F&& nCallback);   // [](const coreUintW iStatus) -> void
 };
 
 

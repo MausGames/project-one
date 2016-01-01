@@ -11,7 +11,7 @@
 
 // ****************************************************************
 // constructor
-cGrassBackground::cGrassBackground(const coreUint8& iCloudDensity)noexcept
+cGrassBackground::cGrassBackground(const coreUint8 iCloudDensity)noexcept
 : m_fLeafTime (Core::Rand->Float(10.0f))
 {
     coreBatchList* pList1;
@@ -350,7 +350,7 @@ cCloudBackground::~cCloudBackground()
 
 // ****************************************************************
 // 
-void cCloudBackground::SetCloudAlpha(const coreFloat& fAlpha)
+void cCloudBackground::SetCloudAlpha(const coreFloat fAlpha)
 {
     // 
     const coreSet<coreObject3D*>* papCloud = m_apAirObjectList[1]->List();
@@ -369,7 +369,7 @@ void cCloudBackground::SetCloudAlpha(const coreFloat& fAlpha)
 
 // ****************************************************************
 // 
-void cCloudBackground::SetOverlayAlpha(const coreFloat& fAlpha)
+void cCloudBackground::SetOverlayAlpha(const coreFloat fAlpha)
 {
     // 
     m_Overlay.SetAlpha  (fAlpha);

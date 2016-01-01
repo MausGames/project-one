@@ -65,7 +65,7 @@ public:
     void ClearLists();
 
     // 
-    inline cOutlineStyle* GetStyle(const coreUintW& iStyle) {ASSERT(iStyle < OUTLINE_STYLES) return &m_aOutlineStyle[iStyle];}
+    inline cOutlineStyle* GetStyle(const coreUintW iStyle) {ASSERT(iStyle < OUTLINE_STYLES) return &m_aOutlineStyle[iStyle];}
 };
 
 

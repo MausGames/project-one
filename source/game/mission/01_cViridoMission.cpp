@@ -124,12 +124,12 @@ void cViridoMission::__SetupOwn()
             STAGE_SQUAD_INIT(pSquad2, Resurrect())
         });
 
-        pSquad1->ForEachEnemy([&](cEnemy* OUTPUT pEnemy, const coreUintW& i)
+        pSquad1->ForEachEnemy([&](cEnemy* OUTPUT pEnemy, const coreUintW i)
         {
             pEnemy->DefaultMoveLerp(coreVector2(I_TO_F(i-2u) * 0.4f - 3.0f, 0.8f), coreVector2(I_TO_F(i-2u) * 0.4f, 0.8f), LERPS(0.0f, 1.0f, CLAMP(pEnemy->GetLifeTime()*0.5f - I_TO_F(i)*0.1f, 0.0f, 1.0f)));
         });
 
-        pSquad2->ForEachEnemy([&](cEnemy* OUTPUT pEnemy, const coreUintW& i)
+        pSquad2->ForEachEnemy([&](cEnemy* OUTPUT pEnemy, const coreUintW i)
         {
             pEnemy->DefaultMoveLerp(-coreVector2(I_TO_F(i-2u) * 0.4f - 3.0f, 0.8f), -coreVector2(I_TO_F(i-2u) * 0.4f, 0.8f), LERPS(0.0f, 1.0f, CLAMP(pEnemy->GetLifeTime()*0.5f - I_TO_F(i)*0.1f, 0.0f, 1.0f)));
         });
@@ -487,7 +487,7 @@ void cViridoMission::__MoveOwnAfter()
     }
 
     // 
-    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_OBJECT(2), [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBall, const coreBool& bFirstHit)
+    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_OBJECT(2), [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBall, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
 
@@ -504,7 +504,7 @@ void cViridoMission::__MoveOwnAfter()
     STATIC_ASSERT(VIRIDO_PADDLES <= sizeof(m_iBounceState)*8u)
 
     // 
-    Core::Manager::Object->TestCollision(TYPE_OBJECT(3), TYPE_OBJECT(2), [&](coreObject3D* OUTPUT pPaddle, coreObject3D* OUTPUT pBall, const coreBool& bFirstHit)
+    Core::Manager::Object->TestCollision(TYPE_OBJECT(3), TYPE_OBJECT(2), [&](coreObject3D* OUTPUT pPaddle, coreObject3D* OUTPUT pBall, const coreBool bFirstHit)
     {
         // 
         if(coreVector2::Dot(pPaddle->GetDirection().xy(), pBall->GetDirection().xy()) >= 0.0f)
@@ -563,7 +563,7 @@ void cViridoMission::__MoveOwnAfter()
         const coreVector2 vOldBallPos = vBallPos - vBallDir * FOREGROUND_AREA * (VIRIDO_BALL_SPEED * Core::System->GetTime());
 
         // 
-        Core::Manager::Object->TestCollision(TYPE_ENEMY, &oBall, [&](cEnemy* OUTPUT pEnemy, const coreBool& bFirstHit)
+        Core::Manager::Object->TestCollision(TYPE_ENEMY, &oBall, [&](cEnemy* OUTPUT pEnemy, const coreBool bFirstHit)
         {
             // 
             if(pEnemy->GetID() != cScoutEnemy::ID) return;
@@ -606,7 +606,7 @@ void cViridoMission::__MoveOwnAfter()
 
 // ****************************************************************
 // 
-void cViridoMission::EnableBall(const coreUintW& iIndex, const coreVector2& vPosition, const coreVector2& vDirection)
+void cViridoMission::EnableBall(const coreUintW iIndex, const coreVector2& vPosition, const coreVector2& vDirection)
 {
     // 
     ASSERT(iIndex < VIRIDO_BALLS)
@@ -618,7 +618,7 @@ void cViridoMission::EnableBall(const coreUintW& iIndex, const coreVector2& vPos
     pBall->ChangeType(TYPE_OBJECT(2));
 
     // 
-    auto nInitFunc = [&](coreObject3D* OUTPUT pObject, const coreFloat& fAlpha)
+    auto nInitFunc = [&](coreObject3D* OUTPUT pObject, const coreFloat fAlpha)
     {
         pObject->SetPosition (coreVector3(vPosition,  0.0f));
         pObject->SetDirection(coreVector3(vDirection, 0.0f));
@@ -635,7 +635,7 @@ void cViridoMission::EnableBall(const coreUintW& iIndex, const coreVector2& vPos
 
 // ****************************************************************
 // 
-void cViridoMission::DisableBall(const coreUintW& iIndex, const coreBool& bAnimated)
+void cViridoMission::DisableBall(const coreUintW iIndex, const coreBool bAnimated)
 {
     if(m_Ball.List()->empty()) return;
 
@@ -663,7 +663,7 @@ void cViridoMission::DisableBall(const coreUintW& iIndex, const coreBool& bAnima
 
 // ****************************************************************
 // 
-void cViridoMission::EnablePaddle(const coreUintW& iIndex, cShip* pOwner)
+void cViridoMission::EnablePaddle(const coreUintW iIndex, cShip* pOwner)
 {
     ASSERT(iIndex < VIRIDO_PADDLES)
     coreObject3D& oPaddle = m_aPaddle[iIndex];
@@ -683,7 +683,7 @@ void cViridoMission::EnablePaddle(const coreUintW& iIndex, cShip* pOwner)
 
 // ****************************************************************
 // 
-void cViridoMission::DisablePaddle(const coreUintW& iIndex, const coreBool& bAnimated)
+void cViridoMission::DisablePaddle(const coreUintW iIndex, const coreBool bAnimated)
 {
     ASSERT(iIndex < VIRIDO_PADDLES)
     coreObject3D& oPaddle = m_aPaddle[iIndex];

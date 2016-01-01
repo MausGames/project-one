@@ -50,7 +50,7 @@ void cVausBoss::__ResurrectOwn()
 
 // ****************************************************************
 // 
-void cVausBoss::__KillOwn(const coreBool& bAnimated)
+void cVausBoss::__KillOwn(const coreBool bAnimated)
 {
     cViridoMission* pMission = s_cast<cViridoMission*>(g_pGame->GetMission());
 
@@ -175,7 +175,7 @@ void cVausBoss::__MoveOwn()
     //});
 
 
-    //Core::Manager::Object->TestCollision(TYPE_PLAYER, this, [&](cPlayer* OUTPUT pPlayer, const coreBool& bFirstHit)
+    //Core::Manager::Object->TestCollision(TYPE_PLAYER, this, [&](cPlayer* OUTPUT pPlayer, const coreBool bFirstHit)
     //{
     //    const coreVector2 vDiff = pPlayer->GetPosition().xy() - this->GetPosition().xy();
     //    const coreVector2 vSize = pPlayer->GetCollisionRange().xy() + this->GetCollisionRange().xy();

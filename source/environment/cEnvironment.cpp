@@ -141,7 +141,7 @@ void cEnvironment::Move()
 
 // ****************************************************************
 // change current background
-void cEnvironment::ChangeBackground(const coreInt32& iID)
+void cEnvironment::ChangeBackground(const coreInt32 iID)
 {
     if(m_pBackground) if(m_pBackground->GetID() == iID) return;
 
@@ -209,7 +209,7 @@ coreFloat cEnvironment::RetrieveSafeHeight(const coreVector2& vPosition)
 
 // ****************************************************************
 // reset with the resource manager
-void cEnvironment::__Reset(const coreResourceReset& bInit)
+void cEnvironment::__Reset(const coreResourceReset bInit)
 {
     if(bInit)
     {

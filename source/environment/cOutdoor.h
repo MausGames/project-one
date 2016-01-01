@@ -72,7 +72,7 @@ private:
 
 
 public:
-    cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom, const coreUint8& iAlgorithm, const coreFloat& fGrade)noexcept;
+    cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom, const coreUint8 iAlgorithm, const coreFloat fGrade)noexcept;
     ~cOutdoor();
 
     DISABLE_COPY(cOutdoor)
@@ -82,9 +82,9 @@ public:
     void Render()override;
 
     // load outdoor resources
-    void LoadGeometry(const coreUint8& iAlgorithm, const coreFloat& fGrade);
+    void LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade);
     void LoadTextures(const coreChar* pcTextureTop, const coreChar* pcTextureBottom);
-    void LoadProgram (const coreBool& bGlow);
+    void LoadProgram (const coreBool bGlow);
 
     // retrieve height value
     coreFloat   RetrieveHeight   (const coreVector2& vPosition);
@@ -94,7 +94,7 @@ public:
     inline cShadow* GetShadowMap() {return &m_ShadowMap;}
 
     // set object properties
-    void SetFlyOffset(const coreFloat& fFlyOffset);
+    void SetFlyOffset(const coreFloat fFlyOffset);
 
     // get object properties
     inline const coreUint32& GetVertexOffset()const {return m_iVertexOffset;}

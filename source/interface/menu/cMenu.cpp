@@ -192,7 +192,7 @@ const coreLookup<std::string, std::string>& cMenu::GetLanguageList()
 
 // ****************************************************************
 // default button update routine
-void cMenu::UpdateButton(coreButton* OUTPUT pButton, const coreBool& bFocused, const coreVector3& vFocusColor)
+void cMenu::UpdateButton(coreButton* OUTPUT pButton, const coreBool bFocused, const coreVector3& vFocusColor)
 {
     ASSERT(pButton)
 
@@ -208,7 +208,7 @@ void cMenu::UpdateButton(coreButton* OUTPUT pButton, const coreBool& bFocused, c
     if(pButton->GetOverride() < 0) pButton->SetAlpha(pButton->GetAlpha() * 0.5f);
 }
 
-void cMenu::UpdateButton(coreButton* OUTPUT pButton, const coreBool& bFocused)
+void cMenu::UpdateButton(coreButton* OUTPUT pButton, const coreBool bFocused)
 {
     // 
     cMenu::UpdateButton(pButton, bFocused, COLOR_MENU_WHITE);
@@ -221,7 +221,7 @@ void cMenu::UpdateSwitchBox(coreSwitchBoxU8* OUTPUT pSwitchBox)
 {
     ASSERT(pSwitchBox)
 
-    auto UpdateArrowFunc = [&](coreButton* OUTPUT pArrow, const coreUintW& iEntries)
+    auto UpdateArrowFunc = [&](coreButton* OUTPUT pArrow, const coreUintW iEntries)
     {
         const coreBool bEnd = (pSwitchBox->GetCurIndex() == iEntries);
 
@@ -242,7 +242,7 @@ void cMenu::UpdateSwitchBox(coreSwitchBoxU8* OUTPUT pSwitchBox)
 
 // ****************************************************************
 // 
-coreVector3 FUNC_CONST cMenu::HealthColor(const coreFloat& fValue)
+coreVector3 FUNC_CONST cMenu::HealthColor(const coreFloat fValue)
 {
     ASSERT(0.0f <= fValue && fValue <= 1.0f)
 
@@ -254,7 +254,7 @@ coreVector3 FUNC_CONST cMenu::HealthColor(const coreFloat& fValue)
 
 // ****************************************************************
 // 
-coreVector3 FUNC_CONST cMenu::ChainColor(const coreFloat& fValue)
+coreVector3 FUNC_CONST cMenu::ChainColor(const coreFloat fValue)
 {
     ASSERT(0.0f <= fValue && fValue <= 1.0f)
 
