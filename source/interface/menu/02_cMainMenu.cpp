@@ -38,7 +38,7 @@ cMainMenu::cMainMenu()noexcept
     m_aVersionInfo[0].SetPosition (coreVector2(0.0f, 0.03f));
     m_aVersionInfo[0].SetCenter   (coreVector2(0.0f,-0.5f) * g_vMenuCenter);
     m_aVersionInfo[0].SetAlignment(coreVector2(0.0f, 1.0f));
-    m_aVersionInfo[0].SetText     ("(c) 2010-2015 Martin Mauersics (@MausGames)");
+    m_aVersionInfo[0].SetText     ("(c) 2010-2016 Martin Mauersics (@MausGames)");
 
     m_aVersionInfo[1].Construct   (MENU_FONT_SMALL, MENU_OUTLINE_SMALL, 0u);
     m_aVersionInfo[1].SetPosition (m_aVersionInfo[0].GetPosition() + coreVector2(0.0f,-0.02f));
@@ -61,7 +61,7 @@ void cMainMenu::Move()
 {
     // move the menu
     coreMenu::Move();
-    m_iStatus = 0;
+    m_iStatus = MAX(m_iStatus - 100, 0);
 
     // 
     switch(this->GetCurSurface())

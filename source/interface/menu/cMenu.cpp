@@ -12,18 +12,29 @@
 // ****************************************************************
 // constructor
 cMenu::cMenu()noexcept
-: coreMenu (6u, SURFACE_INTRO)
+: coreMenu      (7u, SURFACE_INTRO)
+, m_iPauseFrame (0u)
 {
     // create intro and main menu
     m_pIntroMenu = new cIntroMenu();
     m_pMainMenu  = new cMainMenu();
 
+    // 
+    m_PauseLayer.DefineTexture(0u, "menu_background_black.png");
+    m_PauseLayer.DefineProgram("default_2d_program");
+    m_PauseLayer.SetSize      (coreVector2(1.0f,1.0f));
+    m_PauseLayer.SetColor4    (coreVector4(0.6f,0.6f,0.6f,0.0f));
+    m_PauseLayer.SetTexSize   (coreVector2(1.2f,1.2f));
+
     // bind menu objects
     this->BindObject(SURFACE_INTRO,  m_pIntroMenu);
     this->BindObject(SURFACE_MAIN,   m_pMainMenu);
     this->BindObject(SURFACE_GAME,   &m_GameMenu);
+    this->BindObject(SURFACE_CONFIG, &m_PauseLayer);
     this->BindObject(SURFACE_CONFIG, &m_ConfigMenu);
     this->BindObject(SURFACE_EXTRA,  &m_ExtraMenu);
+    this->BindObject(SURFACE_PAUSE,  &m_PauseLayer);
+    this->BindObject(SURFACE_PAUSE,  &m_PauseMenu);
 }
 
 
@@ -60,17 +71,29 @@ void cMenu::Move()
     // move the menu
     coreMenu::Move();
 
-    // control mouse with joystick
-    for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
-    {
-        Core::Input->ForwardDpadToStick(i);
-        Core::Input->UseMouseWithJoystick(i, 0u, 1u, 0.4f);
-    }
-
     // 
     switch(this->GetCurSurface())
     {
     case SURFACE_EMPTY:
+        {
+            if(g_pGame)
+            {
+                if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS) || Core::System->GetMinimized())
+                {
+                    // 
+                    this->ChangeSurface(SURFACE_PAUSE, 0.0f);
+                }
+                else if(CONTAINS_VALUE(g_pGame->GetStatus(), GAME_STATUS_OUTRO))
+                {
+                    // 
+                    this->ChangeSurface(SURFACE_GAME, 3.0f);
+
+                    // 
+                    ASSERT(g_pGame)
+                    SAFE_DELETE(g_pGame)
+                }
+            }
+        }
         break;
 
     case SURFACE_INTRO:
@@ -117,9 +140,6 @@ void cMenu::Move()
                 ASSERT(!g_pGame)
                 g_pGame = new cGame(false);
                 g_pGame->LoadMission(REF_ID(cViridoMission::ID));
-
-                // 
-                Core::Input->ShowCursor(false);
             }
             else if(m_GameMenu.GetStatus() == 2)
             {
@@ -142,8 +162,8 @@ void cMenu::Move()
         {
             if(m_ConfigMenu.GetStatus())
             {
-                // return to game menu
-                this->ChangeSurface(SURFACE_GAME, 3.0f);
+                // return to previous menu
+                this->ChangeSurface(this->GetOldSurface(), 3.0f);
             }
         }
         break;
@@ -152,8 +172,44 @@ void cMenu::Move()
         {
             if(m_ExtraMenu.GetStatus())
             {
-                // return to game menu
-                this->ChangeSurface(SURFACE_GAME, 3.0f);
+                // return to previous menu
+                this->ChangeSurface(this->GetOldSurface(), 3.0f);
+            }
+        }
+        break;
+
+    case SURFACE_PAUSE:
+        {
+            if((m_PauseMenu.GetStatus() == 1) || Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS))
+            {
+                // 
+                this->ChangeSurface(SURFACE_EMPTY, 0.0f);
+            }
+            else if(m_PauseMenu.GetStatus() == 2)
+            {
+                // switch to config menu
+                this->ChangeSurface(SURFACE_CONFIG, 3.0f);
+
+                // 
+                m_ConfigMenu.ChangeSurface(SURFACE_CONFIG_VIDEO, 0.0f);
+                m_ConfigMenu.LoadValues();
+            }
+            else if(m_PauseMenu.GetStatus() == 3)
+            {
+                // 
+                this->ChangeSurface(SURFACE_EMPTY, 0.0f);
+
+                // 
+                g_pGame->RestartMission();
+            }
+            else if(m_PauseMenu.GetStatus() == 4)
+            {
+                // 
+                this->ChangeSurface(SURFACE_GAME, 1.0f);
+
+                // 
+                ASSERT(g_pGame)
+                SAFE_DELETE(g_pGame)
             }
         }
         break;
@@ -164,7 +220,36 @@ void cMenu::Move()
     }
 
     // 
+    Core::Input->ShowCursor(this->GetCurSurface() != SURFACE_EMPTY);
+
+    // 
+    if((this->GetCurSurface() == SURFACE_PAUSE) || (this->GetOldSurface() == SURFACE_PAUSE))
+    {
+        m_PauseLayer.SetAlpha    (m_PauseLayer.GetAlpha() * 0.25f);
+        m_PauseLayer.SetTexOffset(coreVector2(0.0f, FRACT(coreFloat(-0.04 * Core::System->GetTotalTime()))));
+        m_PauseLayer.SetEnabled  (CORE_OBJECT_ENABLE_ALL);
+    }
+    else
+    {
+        m_PauseLayer.SetEnabled(CORE_OBJECT_ENABLE_MOVE);
+    }
+
+    // 
     m_Tooltip.Move();
+}
+
+
+// ****************************************************************
+// 
+coreBool cMenu::IsPaused()const
+{
+    return (this->GetCurSurface() != SURFACE_EMPTY) && g_pGame;
+}
+
+coreBool cMenu::IsPausedWithStep()
+{
+    if(!this->IsPaused()) this->InvokePauseStep();
+    return (m_iPauseFrame != Core::System->GetCurFrame());
 }
 
 
@@ -237,28 +322,4 @@ void cMenu::UpdateSwitchBox(coreSwitchBoxU8* OUTPUT pSwitchBox)
     // 
     UpdateArrowFunc(pSwitchBox->GetArrow(0u), 0u);
     UpdateArrowFunc(pSwitchBox->GetArrow(1u), pSwitchBox->GetNumEntries() - 1u);
-}
-
-
-// ****************************************************************
-// 
-coreVector3 FUNC_CONST cMenu::HealthColor(const coreFloat fValue)
-{
-    ASSERT(0.0f <= fValue && fValue <= 1.0f)
-
-    // 
-    if(fValue >= 0.5f) return LERP(COLOR_MENU_YELLOW, COLOR_MENU_GREEN,  fValue*2.0f - 1.0f);
-                       return LERP(COLOR_MENU_RED,    COLOR_MENU_YELLOW, fValue*2.0f);
-}
-
-
-// ****************************************************************
-// 
-coreVector3 FUNC_CONST cMenu::ChainColor(const coreFloat fValue)
-{
-    ASSERT(0.0f <= fValue && fValue <= 1.0f)
-
-    // 
-    if(fValue >= 0.5f) return LERP(COLOR_MENU_PURPLE, COLOR_MENU_BLUE,   fValue*2.0f - 1.0f);
-                       return LERP(COLOR_MENU_RED,    COLOR_MENU_PURPLE, fValue*2.0f);
 }

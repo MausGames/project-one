@@ -76,13 +76,6 @@ cPlayer::~cPlayer()
     // delete weapon objects
     for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
         SAFE_DELETE(m_apWeapon[i])
-
-    // 
-    this->TransformDark(PLAYER_DARK_RESET);
-
-    // 
-    this->DisableBubble();
-    this->UpdateExhaust(0.0f);
 }
 
 
@@ -322,6 +315,13 @@ void cPlayer::Kill(const coreBool bAnimated)
     // reset weapon shoot status
     for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
         m_apWeapon[i]->Update(0u);
+
+    // 
+    this->TransformDark(PLAYER_DARK_RESET);
+
+    // 
+    this->DisableBubble();
+    this->UpdateExhaust(0.0f);
 
     // 
     if(bAnimated) g_pSpecialEffects->MacroExplosionPhysicalBig(this->GetPosition());

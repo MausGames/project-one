@@ -62,7 +62,7 @@ void cGameMenu::Move()
 {
     // move the menu
     coreMenu::Move();
-    m_iStatus = 0;
+    m_iStatus = MAX(m_iStatus - 100, 0);
 
     // 
     switch(this->GetCurSurface())
@@ -98,9 +98,9 @@ void cGameMenu::Move()
                 else if(m_ExitButton.IsClicked())
                 {
                     // 
-                    g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_EXIT_GAME"), [](const coreInt32 iStatus)
+                    g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_EXIT_GAME"), [](const coreInt32 iAnswer)
                     {
-                        if(iStatus == MSGBOX_STATUS_YES)
+                        if(iAnswer == MSGBOX_ANSWER_YES)
                             Core::System->Quit();
                     });
                 }

@@ -23,8 +23,8 @@
 enum cGameStatus : coreUint8
 {
     GAME_STATUS_INTRO   = 0x01u,   // 
-    GAME_STATUS_PLAY    = 0x02u,   // 
-    GAME_STATUS_OUTRO   = 0x04u,   // 
+    GAME_STATUS_OUTRO   = 0x02u,   // 
+    GAME_STATUS_PLAY    = 0x04u,   // 
     GAME_STATUS_LOADING = 0x08u    // 
 };
 
@@ -88,7 +88,7 @@ public:
 
     // 
     cPlayer* FindPlayer(const coreVector2& vPosition);
-    template <typename F> void ForEachPlayer(F&& nFunction);   // [](cPlayer* OUTPUT pPlayer) -> void
+    template <typename F> void ForEachPlayer(F&& nFunction);   // [](cPlayer* OUTPUT pPlayer, const coreUintW i) -> void
 
     // access game objects
     inline cPlayer*        GetPlayer             (const coreUintW iIndex) {ASSERT(iIndex < GAME_PLAYERS) return &m_aPlayer[iIndex];}
@@ -110,6 +110,7 @@ public:
 private:
     // 
     coreBool __HandleIntro();
+    coreBool __HandleOutro();
     void     __HandleCollisions();
 };
 
@@ -119,7 +120,7 @@ private:
 template <typename F> void cGame::ForEachPlayer(F&& nFunction)
 {
     // 
-    if(!m_bCoop) {nFunction(&m_aPlayer[0]); return;}
+    if(!m_bCoop) {nFunction(&m_aPlayer[0], 0u); return;}
 
     // 
     for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
@@ -128,7 +129,7 @@ template <typename F> void cGame::ForEachPlayer(F&& nFunction)
         if(CONTAINS_VALUE(pPlayer->GetStatus(), PLAYER_STATUS_DEAD)) continue;
 
         // 
-        nFunction(pPlayer);
+        nFunction(pPlayer, i);
     }
 }
 

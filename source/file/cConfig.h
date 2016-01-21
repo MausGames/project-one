@@ -12,6 +12,7 @@
 
 // TODO: transfer to Core Engine
 // TODO: low quality settings affect also ship models
+// TODO: don't input-check for inactive players during game
 
 
 // ****************************************************************

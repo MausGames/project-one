@@ -91,41 +91,50 @@ void CoreApp::Exit()
 // render the application
 void CoreApp::Render()
 {
-    Core::Debug->MeasureStart("Update");
+    if(!g_pMenu->IsPausedWithStep())
     {
-        // update glow- and distortion-effect
-        g_pGlow      ->Update();
-        g_pDistortion->Update();
-
-        // update the shadow map class
-        cShadow::GlobalUpdate();
-    }
-    Core::Debug->MeasureEnd("Update");
-    Core::Debug->MeasureStart("Environment");
-    {
-        // render the environment
-        g_pEnvironment->Render();
-    }
-    Core::Debug->MeasureEnd("Environment");
-    Core::Debug->MeasureStart("Foreground");
-    {
-        if(g_pGame)
+        Core::Debug->MeasureStart("Update");
         {
-            // create foreground frame buffer
-            g_pForeground->Start();
+            if(!g_pMenu->IsPaused())
             {
-                // render the game
-                g_pGame->Render();
+                // update glow- and distortion-effect
+                g_pGlow      ->Update();
+                g_pDistortion->Update();
+
+                // update the shadow map class
+                cShadow::GlobalUpdate();
             }
-            g_pForeground->End();
         }
-        else
+        Core::Debug->MeasureEnd("Update");
+        Core::Debug->MeasureStart("Environment");
         {
-            // clear the foreground
-            g_pForeground->Clear();
+            // render the environment
+            g_pEnvironment->Render();
         }
+        Core::Debug->MeasureEnd("Environment");
+        Core::Debug->MeasureStart("Foreground");
+        {
+            if(g_pGame || g_pSpecialEffects->IsActive())
+            {
+                // create foreground frame buffer
+                g_pForeground->Start();
+                {
+                    // render the game
+                    if(g_pGame) g_pGame->Render();
+
+                    // render special-effects
+                    else g_pSpecialEffects->Render(true);
+                }
+                g_pForeground->End();
+            }
+            else
+            {
+                // clear the foreground
+                g_pForeground->Clear();
+            }
+        }
+        Core::Debug->MeasureEnd("Foreground");
     }
-    Core::Debug->MeasureEnd("Foreground");
     Core::Debug->MeasureStart("Post Processing");
     {
         // apply post-processing
@@ -160,13 +169,17 @@ void CoreApp::Move()
         // update input interface
         UpdateInput();
 
-        // move environment, menu and game
-        g_pEnvironment->Move();
-        g_pMenu       ->Move();
-        if(g_pGame) g_pGame->Move();
+        // move menu
+        g_pMenu->Move();
+        if(!g_pMenu->IsPaused())
+        {
+            // move environment and game
+            g_pEnvironment->Move();
+            if(g_pGame) g_pGame->Move();
 
-        // move special-effects
-        g_pSpecialEffects->Move();
+            // move special-effects
+            g_pSpecialEffects->Move();
+        }
 
         // update the music-player
         g_MusicPlayer.Update();
@@ -288,6 +301,9 @@ static void DebugGame()
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(6), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(REF_ID(cVolcanoBackground::ID));
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(7), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(REF_ID(cSnowBackground   ::ID));
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(8), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(REF_ID(cMossBackground   ::ID));
+
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS))
+            Core::System->Quit();
     }
 
     if(g_pGame)
@@ -301,9 +317,6 @@ static void DebugGame()
         }
     }
 
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS))
-        Core::System->Quit();
-
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(O), CORE_INPUT_PRESS))
     {
         if(g_pGame && g_pGame->GetMission()->GetCurBoss())
@@ -314,7 +327,10 @@ static void DebugGame()
 
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(P), CORE_INPUT_PRESS))
     {
-        if(g_pGame && g_pGame->GetMission())
+        if(g_pGame && g_pGame->GetMission() &&
+           CONTAINS_VALUE(g_pGame->GetMission()->GetBoss(0u)->GetStatus(), ENEMY_STATUS_DEAD) &&
+           CONTAINS_VALUE(g_pGame->GetMission()->GetBoss(1u)->GetStatus(), ENEMY_STATUS_DEAD) &&
+           CONTAINS_VALUE(g_pGame->GetMission()->GetBoss(2u)->GetStatus(), ENEMY_STATUS_DEAD))
         {
             g_pGame->GetMission()->SkipStage();
         }
@@ -330,22 +346,6 @@ static void DebugGame()
         fHeight -= 10.0f * Core::System->GetTime();
     }
     g_pEnvironment->SetTargetHeight(fHeight);
-
-/*
-    std::vector<cRayBullet> A;
-    A.resize(128u);
-
-    std::deque<cRayBullet> B;
-    B.resize(128u);
-
-    Core::Debug->MeasureStart("Vector");
-        A.resize(256u);
-    Core::Debug->MeasureEnd("Vector");
-
-    Core::Debug->MeasureStart("Deque");
-        B.resize(256u);
-    Core::Debug->MeasureEnd("Deque");
- */
 
     // ########################## DEBUG ##########################
 }

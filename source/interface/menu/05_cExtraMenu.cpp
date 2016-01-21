@@ -42,7 +42,7 @@ void cExtraMenu::Move()
 {
     // move the menu
     coreMenu::Move();
-    m_iStatus = 0;
+    m_iStatus = MAX(m_iStatus - 100, 0);
 
     // 
     switch(this->GetCurSurface())

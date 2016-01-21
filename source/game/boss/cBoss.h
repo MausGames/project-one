@@ -50,6 +50,12 @@
 // boss entity interface
 class INTERFACE cBoss : public cEnemy
 {
+private:
+    using tLerpFunc         = std::function<coreFloat(const coreFloat, const coreFloat, const coreFloat)>;
+    using tTimerUpdateFunc  = std::function<void(const coreFloat, const coreFloat, const coreBool)>;
+    using tTickerUpdateFunc = std::function<void(const coreUint16, const coreBool)>;
+
+
 protected:
     coreTimer  m_aTimer     [BOSS_TIMERS];    // 
     coreUint16 m_aiTimerLine[BOSS_TIMERS];    // 
@@ -75,8 +81,8 @@ public:
 
 protected:
     // 
-    void _PhaseTimer (const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreFloat  fSpeed, const std::function<coreFloat(coreFloat, coreFloat, coreFloat)>&& nLerpFunc, const std::function<void(coreFloat, coreFloat, coreBool)>&& nUpdateFunc);
-    void _PhaseTicker(const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreUint16 iTicks, const coreFloat fRate,                                                       const std::function<void(coreUint16,           coreBool)>&& nUpdateFunc);
+    void _PhaseTimer (const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreFloat  fSpeed, const tLerpFunc&& nLerpFunc, const tTimerUpdateFunc&&  nUpdateFunc);
+    void _PhaseTicker(const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreUint16 iTicks, const coreFloat fRate,       const tTickerUpdateFunc&& nUpdateFunc);
 };
 
 

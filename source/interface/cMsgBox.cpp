@@ -17,16 +17,16 @@ cMsgBox::cMsgBox()noexcept
 , m_iType     (0u)
 {
     // 
-    this->DefineProgram("default_2d_program");
     this->DefineTexture(0u, "menu_background_black.png");
+    this->DefineProgram("default_2d_program");
     this->SetSize      (coreVector2(1.0f,1.0f));
     this->SetColor4    (coreVector4(0.6f,0.6f,0.6f,0.0f));
     this->SetTexSize   (coreVector2(1.2f,1.2f));
     coreObject2D::Move();
 
     // 
-    m_Box.DefineProgram("menu_border_program");
     m_Box.DefineTexture(0u, "menu_background_black.png");
+    m_Box.DefineProgram("menu_border_program");
     m_Box.SetPosition  (coreVector2(0.0f, 0.0f));
     m_Box.SetSize      (coreVector2(0.55f,0.25f));
 
@@ -38,7 +38,7 @@ cMsgBox::cMsgBox()noexcept
     // 
     m_Yes.Construct    (MENU_BUTTON, MENU_ICON_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
     m_Yes.DefineProgram("menu_border_program");
-    m_Yes.SetPosition  (m_Box.GetPosition() + coreVector2(-0.1f,-0.05f));
+    m_Yes.SetPosition  (m_Box.GetPosition() + coreVector2(-0.085f,-0.05f));
     m_Yes.SetSize      (coreVector2(0.07f,0.07f));
     m_Yes.GetCaption()->SetText(ICON_CHECK);
 
@@ -119,7 +119,7 @@ void cMsgBox::Move()
         cMenu::UpdateButton(&m_Yes, m_Yes.IsFocused(), COLOR_MENU_GREEN);
 
         // 
-        if(m_Yes.IsClicked()) {m_nCallback(MSGBOX_STATUS_OK); m_nCallback = NULL;}
+        if(m_Yes.IsClicked()) {m_nCallback(MSGBOX_ANSWER_OK); m_nCallback = NULL;}
     }
     else if(m_iType == MSGBOX_TYPE_QUESTION)
     {
@@ -134,8 +134,8 @@ void cMsgBox::Move()
         cMenu::UpdateButton(&m_No,  m_No .IsFocused(), COLOR_MENU_RED);
 
         // 
-             if(m_Yes.IsClicked())         {m_nCallback(MSGBOX_STATUS_YES); m_nCallback = NULL;}
-        else if(m_No .IsClicked() || bEsc) {m_nCallback(MSGBOX_STATUS_NO);  m_nCallback = NULL;}
+             if(m_Yes.IsClicked())         {m_nCallback(MSGBOX_ANSWER_YES); m_nCallback = NULL;}
+        else if(m_No .IsClicked() || bEsc) {m_nCallback(MSGBOX_ANSWER_NO);  m_nCallback = NULL;}
     }
     else ASSERT(false)
 

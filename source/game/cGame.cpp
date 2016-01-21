@@ -44,12 +44,21 @@ cGame::cGame(const coreBool bCoop)noexcept
 cGame::~cGame()
 {
     // 
-    m_BulletManagerPlayer.ClearBullets(false);
-    m_BulletManagerEnemy .ClearBullets(false);
+    for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+        m_aPlayer[i].Kill(true);
+
+    // 
+    m_BulletManagerPlayer.ClearBullets(true);
+    m_BulletManagerEnemy .ClearBullets(true);
 
     // delete last mission
-    m_EnemyManager.ClearEnemies(false);
+    m_EnemyManager.ClearEnemies(true);
     SAFE_DELETE(m_pMission)
+
+    // 
+    g_pEnvironment->SetTargetDirection(coreVector2(0.0f,1.0f)); 
+    g_pEnvironment->SetTargetSide     (coreVector2(0.0f,0.0f)); 
+    g_pEnvironment->SetTargetSpeed    (2.0f); 
 }
 
 
@@ -132,8 +141,9 @@ void cGame::RenderOverlay()
 // move the game
 void cGame::Move()
 {
-    // handle intro animation
+    // handle intro and outro animation
     if(!this->__HandleIntro()) return;
+    if(!this->__HandleOutro()) return;
 
     // update total mission and boss time (if currently active)
     m_fTimeMission.Update(1.0f);
@@ -170,8 +180,12 @@ void cGame::LoadMission(const coreInt32 iID)
 {
     if(m_pMission) if(m_pMission->GetID() == iID) return;
 
+    // 
+    m_BulletManagerPlayer.ClearBullets(true);
+    m_BulletManagerEnemy .ClearBullets(true);
+
     // delete possible old mission
-    m_EnemyManager.ClearEnemies(false);
+    m_EnemyManager.ClearEnemies(true);
     SAFE_DELETE(m_pMission)
 
     // create new mission
@@ -187,10 +201,12 @@ void cGame::LoadMission(const coreInt32 iID)
     case cCalorMission  ::ID: m_pMission = new cCalorMission  (); break;
     case cMuscusMission ::ID: m_pMission = new cMuscusMission (); break;
     }
-    m_pMission->Setup();
 
     if(iID != cNoMission::ID)
     {
+        // 
+        m_pMission->Setup();
+
         // 
         m_Interface.ShowMission(m_pMission);
 
@@ -206,7 +222,7 @@ void cGame::LoadMission(const coreInt32 iID)
             // reset all available players
             for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
             {
-                m_aPlayer[i].Kill(false);
+                m_aPlayer[i].Kill(true);
                 m_aPlayer[i].Resurrect(coreVector2(20.0f * (I_TO_F(i) - 0.5f * I_TO_F(GAME_PLAYERS-1u)), -100.0f));
                 m_aPlayer[i].AddStatus(PLAYER_STATUS_NO_INPUT_ALL);
             }
@@ -214,7 +230,7 @@ void cGame::LoadMission(const coreInt32 iID)
         else
         {
             // reset only the first player
-            m_aPlayer[0].Kill(false);
+            m_aPlayer[0].Kill(true);
             m_aPlayer[0].Resurrect(coreVector2(0.0f,-100.0f));
             m_aPlayer[0].AddStatus(PLAYER_STATUS_NO_INPUT_ALL);
         }
@@ -226,13 +242,13 @@ void cGame::LoadMission(const coreInt32 iID)
 // restart current mission
 void cGame::RestartMission()
 {
-    // save mission ID
-    const coreInt32 iID = m_pMission->GetID();
-    ASSERT(iID != cNoMission::ID)
+    // save old mission
+    cMission* pOldMission = m_pMission;
+    m_pMission = NULL;
 
-    // delete mission and create it again
-    this->LoadMission(REF_ID(cNoMission::ID));
-    this->LoadMission(iID);
+    // 
+    this->LoadMission(pOldMission->GetID());
+    SAFE_DELETE(pOldMission)
 }
 
 
@@ -272,7 +288,7 @@ cPlayer* cGame::FindPlayer(const coreVector2& vPosition)
     coreFloat fLenSq  = FLT_MAX;
 
     // 
-    this->ForEachPlayer([&](cPlayer* OUTPUT pCurPlayer)
+    this->ForEachPlayer([&](cPlayer* OUTPUT pCurPlayer, const coreUintW i)
     {
         // 
         const coreFloat fCurLenSq = (pCurPlayer->GetPosition().xy() - vPosition).LengthSq();
@@ -320,31 +336,54 @@ coreBool cGame::__HandleIntro()
             oSpline.AddNode(coreVector2(  10.0f, 10.0f), coreVector2(-1.0f,-1.0f).Normalize());
             oSpline.AddNode(coreVector2( -30.0f,  0.0f), coreVector2(-1.0f, 0.0f));
 
-            for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+            this->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
             {
-                cPlayer& oPlayer = m_aPlayer[i];
-                if(CONTAINS_VALUE(oPlayer.GetStatus(), PLAYER_STATUS_DEAD)) continue;
-
                 // calculate new player position and rotation
                 const coreFloat   fTime = CLAMP((i ? 1.0f : 1.08f) + m_fTimeMission / GAME_INTRO_DURATION, 0.0f, 1.0f);
                 const coreVector2 vPos  = oSpline.CalcPosition  (LERPB(0.0f, oSpline.GetTotalDistance(), fTime));
                 const coreVector2 vDir  = coreVector2::Direction(LERPS(0.0f, 4.0f*PI,                    fTime));
 
                 // 
-                if((oPlayer.GetPosition().y < -FOREGROUND_AREA.y) && (vPos.x >= -FOREGROUND_AREA.y))
+                if((pPlayer->GetPosition().y < -FOREGROUND_AREA.y) && (vPos.x >= -FOREGROUND_AREA.y))
                 {
-                    g_pSpecialEffects->PlaySound      (oPlayer.GetPosition(), 1.0f, SOUND_RUSH_LONG);
-                    g_pSpecialEffects->CreateBlowColor(oPlayer.GetPosition(), coreVector3(0.0f,1.0f,0.0f), SPECIAL_BLOW_SMALL, COLOR_FIRE_BLUE);
+                    g_pSpecialEffects->PlaySound      (pPlayer->GetPosition(), 1.0f, SOUND_RUSH_LONG);
+                    g_pSpecialEffects->CreateBlowColor(pPlayer->GetPosition(), coreVector3(0.0f,1.0f,0.0f), SPECIAL_BLOW_SMALL, COLOR_FIRE_BLUE);
                     g_MusicPlayer.Control()->Play();
                 }
 
                 // fly player animated into the game field
-                oPlayer.SetPosition   (coreVector3(oPlayer.GetPosition().x, vPos));
-                oPlayer.SetNewPos     (coreVector2(oPlayer.GetPosition().xy()));
-                oPlayer.SetOrientation(coreVector3(vDir.x, 0.0f, vDir.y));
-                oPlayer.UpdateExhaust (LERPB(1.0f, 0.0f, fTime));
-            }
+                pPlayer->SetPosition   (coreVector3(pPlayer->GetPosition().x, vPos));
+                pPlayer->SetNewPos     (coreVector2(pPlayer->GetPosition().xy()));
+                pPlayer->SetOrientation(coreVector3(vDir.x, 0.0f, vDir.y));
+                pPlayer->UpdateExhaust (LERPB(1.0f, 0.0f, fTime));
+            });
         }
+    }
+
+    return true;
+}
+
+
+// ****************************************************************
+// handle outro animation
+coreBool cGame::__HandleOutro()
+{
+    if(CONTAINS_VALUE(m_iStatus, GAME_STATUS_PLAY))
+    {
+        // 
+        if(m_pMission->IsFinished())
+        {
+            REMOVE_VALUE(m_iStatus, GAME_STATUS_PLAY)
+            ADD_VALUE   (m_iStatus, GAME_STATUS_OUTRO)
+        }
+    }
+
+    if(CONTAINS_VALUE(m_iStatus, GAME_STATUS_OUTRO))
+    {
+
+
+
+        return false;
     }
 
     return true;

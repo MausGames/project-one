@@ -167,6 +167,12 @@ void SaveConfig()
 // update input interface
 void UpdateInput()
 {
+    for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
+    {
+        // forward d-pad input to stick input
+        Core::Input->ForwardDpadToStick(i);
+    }
+
     for(coreUintW i = 0u; i < INPUT_TYPES; ++i)
     {
         const coreUint8& iType = g_CurConfig.Input.aiType[i];
@@ -208,9 +214,6 @@ void UpdateInput()
         {
             const coreUintW iJoystickID = iType - INPUT_SETS_KEYBOARD;
 
-            // forward d-pad input to stick input
-            Core::Input->ForwardDpadToStick(iJoystickID);
-
             // map movement input
             oMap.vMove = Core::Input->GetJoystickRelative(iJoystickID);
 
@@ -221,6 +224,10 @@ void UpdateInput()
                 if(Core::Input->GetJoystickButton(iJoystickID, coreUint8(oSet.aiButton[j]), CORE_INPUT_RELEASE)) ADD_BIT(oMap.iButtonRelease, j);
                 if(Core::Input->GetJoystickButton(iJoystickID, coreUint8(oSet.aiButton[j]), CORE_INPUT_HOLD))    ADD_BIT(oMap.iButtonHold,    j);
             }
+
+            // 
+            if(CONTAINS_BIT(oMap.iButtonPress, INPUT_BUTTONS-1u))
+                Core::Input->SetKeyboardButton(CORE_INPUT_KEY(ESCAPE), true);
         }
 
         // normalize movement input

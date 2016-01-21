@@ -214,7 +214,7 @@ void cConfigMenu::Move()
 {
     // move the menu
     coreMenu::Move();
-    m_iStatus = MAX(m_iStatus - 100, 0);   // # to allow message box modifications
+    m_iStatus = MAX(m_iStatus - 100, 0);
 
     // 
          if(m_VideoTab.IsClicked()) this->ChangeSurface(SURFACE_CONFIG_VIDEO, 0.0f);
@@ -257,9 +257,9 @@ void cConfigMenu::Move()
             cMenu::UpdateSwitchBox(&m_AmbientSound);
 
             // 
-            m_OverallVolume.GetCaption()->SetColor3(cMenu::HealthColor(I_TO_F(m_OverallVolume.GetCurEntry().second) * 0.01f));
-            m_MusicVolume  .GetCaption()->SetColor3(cMenu::HealthColor(I_TO_F(m_MusicVolume  .GetCurEntry().second) * 0.01f));
-            m_EffectVolume .GetCaption()->SetColor3(cMenu::HealthColor(I_TO_F(m_EffectVolume .GetCurEntry().second) * 0.01f));
+            m_OverallVolume.GetCaption()->SetColor3(COLOR_HEALTH(I_TO_F(m_OverallVolume.GetCurEntry().second) * 0.01f));
+            m_MusicVolume  .GetCaption()->SetColor3(COLOR_HEALTH(I_TO_F(m_MusicVolume  .GetCurEntry().second) * 0.01f));
+            m_EffectVolume .GetCaption()->SetColor3(COLOR_HEALTH(I_TO_F(m_EffectVolume .GetCurEntry().second) * 0.01f));
 
             // 
             if(m_OverallVolume.IsClickedArrow(CORE_INPUT_LEFT, CORE_INPUT_HOLD))
@@ -306,10 +306,10 @@ void cConfigMenu::Move()
             if(m_SaveButton.GetOverride() >= 0)
             {
                 // 
-                g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_SAVE"), [&](const coreInt32 iStatus)
+                g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_SAVE"), [&](const coreInt32 iAnswer)
                 {
                     // 
-                    if(iStatus == MSGBOX_STATUS_YES)
+                    if(iAnswer == MSGBOX_ANSWER_YES)
                          this->SaveValues();
                     else this->LoadValues();
 
@@ -472,6 +472,9 @@ void cConfigMenu::__UpdateShadowQuality()
     // 
     g_pEnvironment->GetBackground()->GetOutdoor()->GetShadowMap()->Reconfigure();
     cShadow::Recompile();
+
+    // 
+    g_pMenu->InvokePauseStep();
 }
 
 

@@ -167,7 +167,7 @@ void cVausBoss::__MoveOwn()
 
 
 
-    //g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer)
+    //g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     //{
     //    const coreVector3& vCurPos = pPlayer->GetPosition();
     //    pPlayer->SetPosition(coreVector3(vCurPos.x, MAX(vCurPos.y, this->GetPosition().y + 9.5f), vCurPos.z));

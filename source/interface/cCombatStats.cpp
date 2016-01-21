@@ -28,11 +28,11 @@ cCombatStats::cCombatStats()noexcept
 void cCombatStats::Apply()
 {
     // 
-    g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer)
+    g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
         // 
-        for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
-            pPlayer->GetWeapon(i)->RenderOverlay();
+        for(coreUintW j = 0u; j < PLAYER_WEAPONS; ++j)
+            pPlayer->GetWeapon(j)->RenderOverlay();
     });
 
     /*

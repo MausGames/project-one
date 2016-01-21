@@ -83,8 +83,7 @@ void cOutdoor::Render()
     cShadow::EnableShadowRead(m_iHandleIndex);
 
     // enable all active textures
-    for(coreUintW i = 0u; i < CORE_TEXTURE_UNITS; ++i)
-        if(m_apTexture[i].IsUsable()) m_apTexture[i]->Enable(i);
+    coreTexture::EnableAll(m_apTexture);
 
     // draw the model
     m_pModel->Enable();
@@ -110,7 +109,7 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
     m_fGrade     = fGrade;
 
     // select algorithm function
-    std::function<coreFloat(const coreFloat&, const coreFloat&)> nAlgorithmFunc;
+    std::function<coreFloat(const coreFloat, const coreFloat)> nAlgorithmFunc;
     switch(iAlgorithm)
     {
     default: ASSERT(false)

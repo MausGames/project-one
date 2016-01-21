@@ -24,8 +24,8 @@ void cGlow::Update()
     if(!g_CurConfig.Graphics.iGlow) return;
     if(!Core::System->GetTime())    return;
 
-    // create glow only with active game
-    if(g_pGame)
+    // create glow only with active game or special-effects
+    if(g_pGame || g_pSpecialEffects->IsActive())
     {
         m_Blur.Start();
         {

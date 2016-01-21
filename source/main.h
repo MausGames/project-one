@@ -91,6 +91,8 @@
 #define COLOR_ENEMY_ICE     (coreVector3(208.0f/360.0f,  32.0f/100.0f,  90.0f/100.0f).HSVtoRGB())
 #define COLOR_PLAYER_RED    (COLOR_ENEMY_RED)
 #define COLOR_PLAYER_BLUE   (COLOR_ENEMY_BLUE)
+#define COLOR_HEALTH(x)     (TernaryLerp(COLOR_MENU_RED, COLOR_MENU_YELLOW, COLOR_MENU_GREEN, x))
+#define COLOR_CHAIN(x)      (TernaryLerp(COLOR_MENU_RED, COLOR_MENU_PURPLE, COLOR_MENU_BLUE,  x))
 
 // shader modifiers
 #define SHADER_SHADOW(x)    PRINT("#define _P1_SHADOW_ (%d) \n", x)   // outdoor, object_ground
@@ -134,6 +136,13 @@ inline FUNC_CONST coreFloat AngleDiff(const coreFloat x, const coreFloat y)
 constexpr FUNC_CONST coreBool InBetween(const coreFloat x, const coreFloat a, const coreFloat b)
 {
     return ((a <= x) && (x < b));
+}
+
+// ternary interpolation helper-function
+template <typename T> constexpr FUNC_CONST T TernaryLerp(const T& x, const T& y, const T& z, const coreFloat s)
+{
+    return (s >= 0.5f) ? LERP(y, z, s*2.0f - 1.0f) :
+                         LERP(x, y, s*2.0f);
 }
 
 extern void InitResolution(const coreVector2& vResolution);   // init resolution properties (1:1)

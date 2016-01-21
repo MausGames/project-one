@@ -31,7 +31,7 @@ protected:
 
 
 public:
-    CONSTEXPR cWeapon()noexcept;
+    constexpr cWeapon()noexcept;
     virtual ~cWeapon() = default;
 
     DISABLE_COPY(cWeapon)
@@ -191,7 +191,7 @@ public:
 
 // ****************************************************************
 // constructor
-CONSTEXPR cWeapon::cWeapon()noexcept
+constexpr cWeapon::cWeapon()noexcept
 : m_CooldownTimer (coreTimer(1.0f, 1.0f, 0u))
 , m_iLastStatus   (0u)
 , m_pOwner        (NULL)

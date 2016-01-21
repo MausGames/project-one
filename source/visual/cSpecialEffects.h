@@ -14,6 +14,7 @@
 // TODO: particles should not overdraw outlines (at least color-particles)
 // TODO: make lightning owner-sticky with position-offset
 // TODO: implement pixel-fitting screen-shake ? (currently shaking creates a fullscreen-blur)
+// TODO: don't invoke special-effects out of view (though consider effect-radius)
 
 
 // ****************************************************************
@@ -82,6 +83,8 @@ private:
     coreTimer m_ShakeTimer;                                 // 
     coreFloat m_fShakeStrength;                             // current shake strength (decreasing)
 
+    coreBool m_bActive;                                     // 
+
 
 public:
     cSpecialEffects()noexcept;
@@ -91,6 +94,9 @@ public:
     // render and move special-effects
     void Render(const coreBool bForeground);
     void Move();
+
+    // 
+    inline const coreBool& IsActive()const {return m_bActive;}
 
     // create centered particle splash
     void CreateSplashColor(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor);

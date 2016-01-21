@@ -135,6 +135,9 @@
     <ClCompile Include="..\..\..\source\environment\background\07_cMossBackground.cpp">
       <Filter>environment\background</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\interface\menu\06_cPauseMenu.cpp">
+      <Filter>interface\menu</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\main.h" />

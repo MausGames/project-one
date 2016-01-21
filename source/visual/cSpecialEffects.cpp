@@ -15,7 +15,7 @@ cSpecialEffects::cSpecialEffects()noexcept
 : m_ParticleColor    (512u)
 , m_ParticleDark     (256u)
 , m_ParticleSmoke    (512u)
-, m_ParticleFire     (256u)
+, m_ParticleFire     (512u)
 , m_apLightningOwner {}
 , m_LightningList    (SPECIAL_LIGHTNINGS)
 , m_iCurLightning    (0u)
@@ -24,6 +24,7 @@ cSpecialEffects::cSpecialEffects()noexcept
 , m_iSoundGuard      (SOUND_FFFF)
 , m_ShakeTimer       (coreTimer(1.0f, 30.0f, 0u))
 , m_fShakeStrength   (0.0f)
+, m_bActive          (false)
 {
     // 
     m_ParticleColor.DefineProgram("effect_particle_color_program");
@@ -89,44 +90,47 @@ cSpecialEffects::cSpecialEffects()noexcept
 // render special-effects
 void cSpecialEffects::Render(const coreBool bForeground)
 {
-    glDepthMask(false);
+    if(m_bActive)
     {
-        // render particle systems
-        m_ParticleColor.Render();
-        m_ParticleDark .Render();
-        m_ParticleSmoke.Render();
-
-        // enable additive blending (keep alpha aggregation)
-        if(bForeground) glBlendFuncSeparate(FOREGROUND_BLEND_SUM, FOREGROUND_BLEND_ALPHA);
+        glDepthMask(false);
         {
-            // render fire particle system
-            m_ParticleFire.Render();
+            // render particle systems
+            m_ParticleColor.Render();
+            m_ParticleDark .Render();
+            m_ParticleSmoke.Render();
 
-            // render lightning sprites
-            m_LightningList.Render();
-        }
-        if(bForeground) glBlendFuncSeparate(FOREGROUND_BLEND_DEFAULT, FOREGROUND_BLEND_ALPHA);
-
-        // render all blast and ring objects
-        auto nRenderFunc = [](coreObject3D* OUTPUT pArray, const coreUintW iSize)
-        {
-            for(coreUintW i = 0u; i < iSize; ++i)
+            // enable additive blending (keep alpha aggregation)
+            if(bForeground) glBlendFuncSeparate(FOREGROUND_BLEND_SUM, FOREGROUND_BLEND_ALPHA);
             {
-                // check for visibility
-                coreObject3D& oObject = pArray[i];
-                if(!oObject.GetAlpha()) continue;
+                // render fire particle system
+                m_ParticleFire.Render();
 
-                // render the object
-                oObject.Render();
+                // render lightning sprites
+                m_LightningList.Render();
             }
-        };
-        nRenderFunc(m_aBlast, SPECIAL_BLASTS);
-        glCullFace(GL_FRONT);
-        nRenderFunc(m_aRing,  SPECIAL_RINGS);   // # 1
-        glCullFace(GL_BACK);
-        nRenderFunc(m_aRing,  SPECIAL_RINGS);   // # 2
+            if(bForeground) glBlendFuncSeparate(FOREGROUND_BLEND_DEFAULT, FOREGROUND_BLEND_ALPHA);
+
+            // render all blast and ring objects
+            auto nRenderFunc = [](coreObject3D* OUTPUT pArray, const coreUintW iSize)
+            {
+                for(coreUintW i = 0u; i < iSize; ++i)
+                {
+                    // check for visibility
+                    coreObject3D& oObject = pArray[i];
+                    if(!oObject.GetAlpha()) continue;
+
+                    // render the object
+                    oObject.Render();
+                }
+            };
+            nRenderFunc(m_aBlast, SPECIAL_BLASTS);
+            glCullFace(GL_FRONT);
+            nRenderFunc(m_aRing,  SPECIAL_RINGS);   // # 1
+            glCullFace(GL_BACK);
+            nRenderFunc(m_aRing,  SPECIAL_RINGS);   // # 2
+        }
+        glDepthMask(true);
     }
-    glDepthMask(true);
 }
 
 
@@ -134,68 +138,79 @@ void cSpecialEffects::Render(const coreBool bForeground)
 // move special-effects
 void cSpecialEffects::Move()
 {
-    // move particle systems
-    m_ParticleColor.Move();
-    m_ParticleDark .Move();
-    m_ParticleSmoke.Move();
-    m_ParticleFire .Move();
-
     // 
-    FOR_EACH_DYN(it, *m_LightningList.List())
+    m_bActive = m_ParticleColor.GetNumActiveParticles() ||
+                m_ParticleDark .GetNumActiveParticles() ||
+                m_ParticleSmoke.GetNumActiveParticles() ||
+                m_ParticleFire .GetNumActiveParticles() ||
+                m_LightningList.GetCurEnabled()         ||
+                std::any_of(m_aBlast, m_aBlast + SPECIAL_BLASTS, [](const coreObject3D& oBlast) {return oBlast.GetAlpha() ? true : false;}) ||
+                std::any_of(m_aRing,  m_aRing  + SPECIAL_RINGS,  [](const coreObject3D& oRing)  {return oRing .GetAlpha() ? true : false;});
+    if(m_bActive)
     {
-        coreObject3D* pLightning = (*it);
+        // move particle systems
+        m_ParticleColor.Move();
+        m_ParticleDark .Move();
+        m_ParticleSmoke.Move();
+        m_ParticleFire .Move();
 
         // 
-        const coreObject3D* pOwner = m_apLightningOwner[pLightning - m_aLightning];
-        if(pOwner) pLightning->SetPosition(pOwner->GetPosition());
+        FOR_EACH_DYN(it, *m_LightningList.List())
+        {
+            coreObject3D* pLightning = (*it);
 
-        // 
-        pLightning->SetAlpha(pLightning->GetAlpha() - 4.0f * Core::System->GetTime());
+            // 
+            const coreObject3D* pOwner = m_apLightningOwner[pLightning - m_aLightning];
+            if(pOwner) pLightning->SetPosition(pOwner->GetPosition());
 
-        // 
-        if(pLightning->GetAlpha() > 0.0f)
-             DYN_KEEP  (it)
-        else DYN_REMOVE(it, *m_LightningList.List())
-    }
-    m_LightningList.MoveNormal();
+            // 
+            pLightning->SetAlpha(pLightning->GetAlpha() - 4.0f * Core::System->GetTime());
 
-    // loop through all blast objects
-    for(coreUintW i = 0u; i < SPECIAL_BLASTS; ++i)
-    {
-        coreObject3D& oBlast = m_aBlast[i];
-        if(!oBlast.GetAlpha()) continue;
+            // 
+            if(pLightning->GetAlpha() > 0.0f)
+                 DYN_KEEP  (it)
+            else DYN_REMOVE(it, *m_LightningList.List())
+        }
+        m_LightningList.MoveNormal();
 
-        // 
-        const coreFloat& fScale = oBlast.GetCollisionModifier().x;
-        const coreFloat& fSpeed = oBlast.GetCollisionModifier().y;
+        // loop through all blast objects
+        for(coreUintW i = 0u; i < SPECIAL_BLASTS; ++i)
+        {
+            coreObject3D& oBlast = m_aBlast[i];
+            if(!oBlast.GetAlpha()) continue;
 
-        // 
-        oBlast.SetAlpha    (MAX(oBlast.GetAlpha() - fSpeed * Core::System->GetTime(), 0.0f));
-        oBlast.SetSize     (coreVector3(8.0f,8.0f,8.0f) * (fScale * (1.0f - oBlast.GetAlpha())));
-        oBlast.SetTexOffset(coreVector2(0.0f,0.1f) * oBlast.GetAlpha());
-        oBlast.Move();
-    }
+            // 
+            const coreFloat& fScale = oBlast.GetCollisionModifier().x;
+            const coreFloat& fSpeed = oBlast.GetCollisionModifier().y;
 
-    // loop through all ring objects
-    for(coreUintW i = 0u; i < SPECIAL_RINGS; ++i)
-    {
-        coreObject3D& oRing = m_aRing[i];
-        if(!oRing.GetAlpha()) continue;
+            // 
+            oBlast.SetAlpha    (MAX(oBlast.GetAlpha() - fSpeed * Core::System->GetTime(), 0.0f));
+            oBlast.SetSize     (coreVector3(8.0f,8.0f,8.0f) * (fScale * (1.0f - oBlast.GetAlpha())));
+            oBlast.SetTexOffset(coreVector2(0.0f,0.1f) * oBlast.GetAlpha());
+            oBlast.Move();
+        }
 
-        // 
-        const coreFloat& fScale = oRing.GetCollisionModifier().x;
-        const coreFloat& fSpeed = oRing.GetCollisionModifier().y;
-        const coreFloat& fTime  = oRing.GetCollisionModifier().z;
+        // loop through all ring objects
+        for(coreUintW i = 0u; i < SPECIAL_RINGS; ++i)
+        {
+            coreObject3D& oRing = m_aRing[i];
+            if(!oRing.GetAlpha()) continue;
 
-        // 
-        c_cast<coreFloat&>(fTime) = MAX(fTime - fSpeed * Core::System->GetTime(), 0.0f);
-        const coreFloat fValue    = 1.0f - std::pow(fTime, 6);
+            // 
+            const coreFloat& fScale = oRing.GetCollisionModifier().x;
+            const coreFloat& fSpeed = oRing.GetCollisionModifier().y;
+            const coreFloat& fTime  = oRing.GetCollisionModifier().z;
 
-        // 
-        oRing.SetAlpha    (MIN(fTime * fTime * 1.4f, 1.0f));
-        oRing.SetSize     (coreVector3(8.0f,12.0f,8.0f) * (fScale * fValue));
-        oRing.SetTexOffset(coreVector2(0.1f,0.2f) * fValue);
-        oRing.Move();
+            // 
+            c_cast<coreFloat&>(fTime) = MAX(fTime - fSpeed * Core::System->GetTime(), 0.0f);
+            const coreFloat fValue    = 1.0f - std::pow(fTime, 6);
+
+            // 
+            oRing.SetAlpha    (MIN(fTime * fTime * 1.4f, 1.0f));
+            oRing.SetSize     (coreVector3(8.0f,12.0f,8.0f) * (fScale * fValue));
+            oRing.SetTexOffset(coreVector2(0.1f,0.2f) * fValue);
+            oRing.Move();
+        }
     }
 
     // reset sound-guard
@@ -487,7 +502,7 @@ void cSpecialEffects::ShakeScreen(const coreFloat fStrength)
     if(g_pGame)
     {
         // loop through all active players
-        g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer)
+        g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
         {
             // check for joystick/gamepad as input source
             const coreUint8& iType = pPlayer->GetInput() - g_aInput;

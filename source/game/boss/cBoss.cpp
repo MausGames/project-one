@@ -44,7 +44,7 @@ cBoss::~cBoss()
 
 // ****************************************************************
 // 
-void cBoss::_PhaseTimer(const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreFloat fSpeed, const std::function<coreFloat(coreFloat, coreFloat, coreFloat)>&& nLerpFunc, const std::function<void(coreFloat, coreFloat, coreBool)>&& nUpdateFunc)
+void cBoss::_PhaseTimer(const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreFloat fSpeed, const tLerpFunc&& nLerpFunc, const tTimerUpdateFunc&& nUpdateFunc)
 {
     // 
     ASSERT(iTimerIndex < BOSS_TIMERS)
@@ -78,7 +78,7 @@ void cBoss::_PhaseTimer(const coreUintW iTimerIndex, const coreUint16 iCodeLine,
 
 // ****************************************************************
 // 
-void cBoss::_PhaseTicker(const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreUint16 iTicks, const coreFloat fRate, const std::function<void(coreUint16, coreBool)>&& nUpdateFunc)
+void cBoss::_PhaseTicker(const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreUint16 iTicks, const coreFloat fRate, const tTickerUpdateFunc&& nUpdateFunc)
 {
     // 
     ASSERT(iTimerIndex < BOSS_TIMERS)

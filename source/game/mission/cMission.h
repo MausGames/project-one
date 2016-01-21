@@ -39,13 +39,10 @@
 #define STAGE_FINISH_NOW      {this->SkipStage();}                                 // 
 #define STAGE_FINISH_AFTER(t) {if(m_fStageTime >= (t)) STAGE_FINISH_NOW}           // 
 
-#define STAGE_START_HERE      {if(DEFINED(_CORE_DEBUG_)) m_anStage.clear();}       // 
-
 #define STAGE_ADD_PATH(n)      auto n = this->_AddPath    (__LINE__,    [&](coreSpline2* OUTPUT n)
 #define STAGE_ADD_SQUAD(n,t,c) auto n = this->_AddSquad<t>(__LINE__, c, [&](cEnemySquad* OUTPUT n)
 
 #define STAGE_SQUAD_INIT(x,f) {x->ForEachEnemyAll([&](cEnemy* OUTPUT pEnemy, const coreUintW i) {pEnemy->f;});}
-
 
 
 // ****************************************************************
@@ -92,7 +89,8 @@ public:
     void MoveAfter   ();
 
     // 
-    inline void SkipStage() {m_fStageTime = 0.0f; m_anStage.pop_back();}
+    inline void     SkipStage ()      {m_fStageTime = 0.0f; m_anStage.pop_back();}
+    inline coreBool IsFinished()const {return m_anStage.empty();}
 
     // set active boss
     void SetCurBoss(const coreUintW iIndex);

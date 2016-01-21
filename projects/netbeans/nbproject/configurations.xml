@@ -125,6 +125,18 @@
         <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
       <compileType>
+        <cTool>
+          <incDir>
+            <pElem>../../../CoreEngine/source</pElem>
+            <pElem>../../../CoreEngine/libraries/include</pElem>
+            <pElem>../../source</pElem>
+          </incDir>
+          <commandLine>-msse2 -std=c11</commandLine>
+          <preprocessorList>
+            <Elem>_DEBUG</Elem>
+          </preprocessorList>
+          <warningLevel>2</warningLevel>
+        </cTool>
         <ccTool>
           <commandlineTool>g++</commandlineTool>
           <incDir>
@@ -132,7 +144,7 @@
             <pElem>../../../CoreEngine/libraries/include</pElem>
             <pElem>../../source</pElem>
           </incDir>
-          <commandLine>-fno-exceptions -fno-rtti -msse4.1 -std=c++14</commandLine>
+          <commandLine>-fno-exceptions -fno-rtti -msse2 -std=c++14</commandLine>
           <preprocessorList>
             <Elem>_DEBUG</Elem>
           </preprocessorList>
@@ -457,13 +469,25 @@
         <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
       <compileType>
+        <cTool>
+          <incDir>
+            <pElem>../../../CoreEngine/source</pElem>
+            <pElem>../../../CoreEngine/libraries/include</pElem>
+            <pElem>../../source</pElem>
+          </incDir>
+          <commandLine>-msse2 -std=c11</commandLine>
+          <preprocessorList>
+            <Elem>_DEBUG</Elem>
+          </preprocessorList>
+          <warningLevel>2</warningLevel>
+        </cTool>
         <ccTool>
           <incDir>
             <pElem>../../../CoreEngine/source</pElem>
             <pElem>../../../CoreEngine/libraries/include</pElem>
             <pElem>../../source</pElem>
           </incDir>
-          <commandLine>-fno-exceptions -fno-rtti -msse4.1 -std=c++14</commandLine>
+          <commandLine>-fno-exceptions -fno-rtti -msse2 -std=c++14</commandLine>
           <preprocessorList>
             <Elem>_DEBUG</Elem>
           </preprocessorList>
@@ -785,13 +809,25 @@
         <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
       <compileType>
+        <cTool>
+          <incDir>
+            <pElem>../../../CoreEngine/source</pElem>
+            <pElem>../../../CoreEngine/libraries/include</pElem>
+            <pElem>../../source</pElem>
+          </incDir>
+          <commandLine>-msse2 -std=c11</commandLine>
+          <preprocessorList>
+            <Elem>_DEBUG</Elem>
+          </preprocessorList>
+          <warningLevel>2</warningLevel>
+        </cTool>
         <ccTool>
           <incDir>
             <pElem>../../../CoreEngine/source</pElem>
             <pElem>../../../CoreEngine/libraries/include</pElem>
             <pElem>../../source</pElem>
           </incDir>
-          <commandLine>-fno-exceptions -fno-rtti -msse4.1 -std=c++14</commandLine>
+          <commandLine>-fno-exceptions -fno-rtti -msse2 -std=c++14</commandLine>
           <preprocessorList>
             <Elem>_DEBUG</Elem>
           </preprocessorList>
@@ -1114,7 +1150,15 @@
       </toolsSet>
       <compileType>
         <cTool>
-          <developmentMode>5</developmentMode>
+          <developmentMode>6</developmentMode>
+          <stripSymbols>true</stripSymbols>
+          <incDir>
+            <pElem>../../../CoreEngine/source</pElem>
+            <pElem>../../../CoreEngine/libraries/include</pElem>
+            <pElem>../../source</pElem>
+          </incDir>
+          <commandLine>-msse2 -std=c11</commandLine>
+          <warningLevel>2</warningLevel>
         </cTool>
         <ccTool>
           <developmentMode>6</developmentMode>
@@ -1124,7 +1168,7 @@
             <pElem>../../../CoreEngine/libraries/include</pElem>
             <pElem>../../source</pElem>
           </incDir>
-          <commandLine>-fno-exceptions -fno-rtti -msse4.1 -std=c++14</commandLine>
+          <commandLine>-fno-exceptions -fno-rtti -msse2 -std=c++14</commandLine>
           <warningLevel>2</warningLevel>
         </ccTool>
         <fortranCompilerTool>
@@ -1454,7 +1498,15 @@
       </toolsSet>
       <compileType>
         <cTool>
-          <developmentMode>5</developmentMode>
+          <developmentMode>6</developmentMode>
+          <stripSymbols>true</stripSymbols>
+          <incDir>
+            <pElem>../../../CoreEngine/source</pElem>
+            <pElem>../../../CoreEngine/libraries/include</pElem>
+            <pElem>../../source</pElem>
+          </incDir>
+          <commandLine>-msse2 -std=c11</commandLine>
+          <warningLevel>2</warningLevel>
         </cTool>
         <ccTool>
           <developmentMode>6</developmentMode>
@@ -1464,7 +1516,7 @@
             <pElem>../../../CoreEngine/libraries/include</pElem>
             <pElem>../../source</pElem>
           </incDir>
-          <commandLine>-fno-exceptions -fno-rtti -msse4.1 -std=c++14</commandLine>
+          <commandLine>-fno-exceptions -fno-rtti -msse2 -std=c++14</commandLine>
           <warningLevel>2</warningLevel>
         </ccTool>
         <fortranCompilerTool>
@@ -1791,16 +1843,25 @@
       </toolsSet>
       <compileType>
         <cTool>
-          <developmentMode>5</developmentMode>
-        </cTool>
-        <ccTool>
           <developmentMode>6</developmentMode>
+          <stripSymbols>true</stripSymbols>
           <incDir>
             <pElem>../../../CoreEngine/source</pElem>
             <pElem>../../../CoreEngine/libraries/include</pElem>
             <pElem>../../source</pElem>
           </incDir>
-          <commandLine>-fno-exceptions -fno-rtti -msse4.1 -std=c++14</commandLine>
+          <commandLine>-msse2 -std=c11</commandLine>
+          <warningLevel>2</warningLevel>
+        </cTool>
+        <ccTool>
+          <developmentMode>6</developmentMode>
+          <stripSymbols>true</stripSymbols>
+          <incDir>
+            <pElem>../../../CoreEngine/source</pElem>
+            <pElem>../../../CoreEngine/libraries/include</pElem>
+            <pElem>../../source</pElem>
+          </incDir>
+          <commandLine>-fno-exceptions -fno-rtti -msse2 -std=c++14</commandLine>
           <warningLevel>2</warningLevel>
         </ccTool>
         <fortranCompilerTool>

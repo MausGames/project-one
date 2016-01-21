@@ -200,13 +200,13 @@ void cInterface::Move()
         oView.m_aHealthBar[1].SetTexOffset(coreVector2(i ? (1.0f-fPercent) : 0.0f, 0.0f));
 
         // set health bar color
-        const coreVector3 vColor = cMenu::HealthColor(fPercent);
+        const coreVector3 vColor = COLOR_HEALTH(fPercent);
         oView.m_aHealthBar[0].SetColor3(vColor * 0.2f);
         oView.m_aHealthBar[1].SetColor3(vColor * 0.9f);
 
         // set chain bar size and color
         oView.m_ChainBar.SetSize  (coreVector2(0.05f * MIN(pPlayer->GetChainCooldown()*1.1f, 1.0f), 0.005f));
-        oView.m_ChainBar.SetColor3(cMenu::ChainColor(pPlayer->GetChainCooldown()));
+        oView.m_ChainBar.SetColor3(COLOR_CHAIN(pPlayer->GetChainCooldown()));
 
         // display player values
         oView.m_aHealthValue[1].SetText(PRINT("%d / %d", pPlayer->GetCurHealth(), pPlayer->GetMaxHealth()));
@@ -247,7 +247,7 @@ void cInterface::Move()
         m_aBossHealthBar[1].SetTexSize (coreVector2(fPercent, 1.0f));
 
         // set health bar color
-        const coreVector3 vColor = cMenu::HealthColor(fPercent * 0.5f);
+        const coreVector3 vColor = COLOR_HEALTH(fPercent * 0.5f);
         m_aBossHealthBar[0].SetColor3(vColor * 0.2f);
         m_aBossHealthBar[1].SetColor3(vColor * 0.9f);
 

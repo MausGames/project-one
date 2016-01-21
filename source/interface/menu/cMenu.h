@@ -44,6 +44,7 @@
 #define SURFACE_GAME           (3u)
 #define SURFACE_CONFIG         (4u)
 #define SURFACE_EXTRA          (5u)
+#define SURFACE_PAUSE          (6u)
 
 #define SURFACE_INTRO_EMPTY    (0u)
 #define SURFACE_INTRO_LOGO     (1u)
@@ -60,6 +61,8 @@
 #define SURFACE_CONFIG_GAME    (3u)
 
 #define SURFACE_EXTRA_CREDITS  (0u)
+
+#define SURFACE_PAUSE_DEFAULT  (0u)
 
 
 // ****************************************************************
@@ -89,7 +92,9 @@
 #define ICON_CHECK     "\xEF\x80\x8C"
 #define ICON_TIMES     "\xEF\x80\x8D"
 #define ICON_POWER_OFF "\xEF\x80\x91"
+#define ICON_REFRESH   "\xEF\x80\xA1"
 #define ICON_SHARE     "\xEF\x81\xA4"
+#define ICON_COGS      "\xEF\x82\x85"
 #define ICON_CARET_UP  "\xEF\x83\x98"
 
 
@@ -243,19 +248,46 @@ public:
 
 
 // ****************************************************************
+// pause menu class
+class cPauseMenu final : public coreMenu
+{
+private:
+    coreButton m_ResumeButton;    // resume button
+    coreButton m_ConfigButton;    // config button
+    coreButton m_RestartButton;   // restart button
+    coreButton m_ExitButton;      // exit button
+
+    coreUint8 m_iSelected;        // current selected menu button
+
+
+public:
+    cPauseMenu()noexcept;
+
+    DISABLE_COPY(cPauseMenu)
+
+    // move the pause menu
+    void Move()override;
+};
+
+
+// ****************************************************************
 // master menu class
 class cMenu final : public coreMenu
 {
 private:
-    cIntroMenu* m_pIntroMenu;   // intro menu object (dynamically unloaded)
-    cMainMenu*  m_pMainMenu;    // main menu object (dynamically unloaded)
+    cIntroMenu* m_pIntroMenu;     // intro menu object (dynamically unloaded)
+    cMainMenu*  m_pMainMenu;      // main menu object (dynamically unloaded)
 
-    cGameMenu   m_GameMenu;     // game menu object
-    cConfigMenu m_ConfigMenu;   // config menu object
-    cExtraMenu  m_ExtraMenu;    // extra menu object
+    cGameMenu   m_GameMenu;       // game menu object
+    cConfigMenu m_ConfigMenu;     // config menu object
+    cExtraMenu  m_ExtraMenu;      // extra menu object
+    cPauseMenu  m_PauseMenu;      // pause menu object
 
-    cMsgBox  m_MsgBox;          // message box overlay
-    cTooltip m_Tooltip;         // tooltip overlay
+    cMsgBox  m_MsgBox;            // message box overlay
+    cTooltip m_Tooltip;           // tooltip overlay
+
+    coreObject2D m_PauseLayer;    // 
+    coreUint32   m_iPauseFrame;   // 
 
 
 public:
@@ -272,13 +304,18 @@ public:
     inline cMsgBox*  GetMsgBox () {return &m_MsgBox;}
     inline cTooltip* GetTooltip() {return &m_Tooltip;}
 
-    // default menu routines
+    // 
+    coreBool IsPaused()const;
+    coreBool IsPausedWithStep();
+    inline void InvokePauseStep() {m_iPauseFrame = Core::System->GetCurFrame();}
+
+    // 
     static const coreLookup<std::string, std::string>& GetLanguageList();
+
+    // menu helper routines
     static void UpdateButton(coreButton* OUTPUT pButton, const coreBool bFocused, const coreVector3& vFocusColor);
     static void UpdateButton(coreButton* OUTPUT pButton, const coreBool bFocused);
     static void UpdateSwitchBox(coreSwitchBoxU8* OUTPUT pSwitchBox);
-    static coreVector3 FUNC_CONST HealthColor(const coreFloat fValue);
-    static coreVector3 FUNC_CONST ChainColor (const coreFloat fValue);
 };
 
 

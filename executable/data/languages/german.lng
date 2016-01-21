@@ -8,6 +8,8 @@ $EXTRAS = Extras
 $SAVE = Speichern
 $DISCARD = Verwerfen
 $BACK = Zurück
+$RESUME = Fortsetzen
+$RESTART = Neu starten
 
 $CONFIG_VIDEO = Video
 $CONFIG_AUDIO = Audio
@@ -36,6 +38,7 @@ $DISPLAY_FULLSCREEN = Vollbild
 
 $QUESTION_EXIT_GAME = Spiel verlassen ?
 $QUESTION_SAVE = Änderungen speichern ?
+$QUESTION_RESTART = Neu starten ?
 
 $ARMOR = Armor
 $STAGE = Stage

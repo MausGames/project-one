@@ -73,9 +73,12 @@ void cPostProcessing::Apply()
         m_Watermark.Render();
 
     // invalidate all frame buffers (# not cGlow, because of incremental rendering)
-    g_pEnvironment->GetFrameBuffer()->GetColorTarget(0u).pTexture->Invalidate(0u);
-    g_pForeground ->GetFrameBuffer()->GetColorTarget(0u).pTexture->Invalidate(0u);
-    g_pDistortion ->GetFrameBuffer()->GetColorTarget(0u).pTexture->Invalidate(0u);
+    if(g_pMenu->IsPaused())
+    {
+        g_pEnvironment->GetFrameBuffer()->GetColorTarget(0u).pTexture->Invalidate(0u);
+        g_pForeground ->GetFrameBuffer()->GetColorTarget(0u).pTexture->Invalidate(0u);
+        g_pDistortion ->GetFrameBuffer()->GetColorTarget(0u).pTexture->Invalidate(0u);
+    }
     this->DefineTexture(POST_TEXTURE_UNIT_ENVIRONMENT, NULL);
     this->DefineTexture(POST_TEXTURE_UNIT_FOREGROUND,  NULL);
     this->DefineTexture(POST_TEXTURE_UNIT_GLOW,        NULL);

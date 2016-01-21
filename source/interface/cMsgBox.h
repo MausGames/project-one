@@ -11,7 +11,7 @@
 #define _P1_GUARD_MSGBOX_H_
 
 // TODO: transfer to Core Engine
-// TODO: fix controller support
+// TODO: fix controller support (mouse gets warped because of input-lock)
 
 
 // ****************************************************************
@@ -21,9 +21,9 @@
 #define MSGBOX_TYPE_INFORMATION (1u)                       // 
 #define MSGBOX_TYPE_QUESTION    (2u)                       // 
 
-#define MSGBOX_STATUS_OK        (1)                        // 
-#define MSGBOX_STATUS_YES       (1)                        // 
-#define MSGBOX_STATUS_NO        (2)                        // 
+#define MSGBOX_ANSWER_OK        (1)                        // 
+#define MSGBOX_ANSWER_YES       (1)                        // 
+#define MSGBOX_ANSWER_NO        (2)                        // 
 
 
 // ****************************************************************
@@ -31,16 +31,16 @@
 class cMsgBox final : public coreObject2D
 {
 public:
-    coreObject2D m_Box;                            // 
-    coreLabel    m_Msg;                            // 
-    coreButton   m_Yes;                            // 
-    coreButton   m_No;                             // 
+    coreObject2D m_Box;                           // 
+    coreLabel    m_Msg;                           // 
+    coreButton   m_Yes;                           // 
+    coreButton   m_No;                            // 
 
-    std::function<void (coreInt32)> m_nCallback;   // 
-    coreVector2 m_vCurMouse;                       // 
+    std::function<void(coreInt32)> m_nCallback;   // 
+    coreVector2 m_vCurMouse;                      // 
 
-    coreFloat m_fFade;                             // 
-    coreUint8 m_iType;                             // 
+    coreFloat m_fFade;                            // 
+    coreUint8 m_iType;                            // 
 
 
 public:
@@ -53,13 +53,13 @@ public:
     void Move  ()override;
 
     // 
-    template <typename F> void ShowInformation(const coreChar* pcText, F&& nCallback);   // [](const coreUintW iStatus) -> void
-    template <typename F> void ShowQuestion   (const coreChar* pcText, F&& nCallback);   // [](const coreUintW iStatus) -> void
+    template <typename F> void ShowInformation(const coreChar* pcText, F&& nCallback);   // [](const coreUintW iAnswer) -> void
+    template <typename F> void ShowQuestion   (const coreChar* pcText, F&& nCallback);   // [](const coreUintW iAnswer) -> void
 
 
 private:
     // 
-    template <typename F> void __ShowMessage(const coreChar* pcText, F&& nCallback);   // [](const coreUintW iStatus) -> void
+    template <typename F> void __ShowMessage(const coreChar* pcText, F&& nCallback);   // [](const coreUintW iAnswer) -> void
 };
 
 
