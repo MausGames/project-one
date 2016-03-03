@@ -27,6 +27,7 @@
     <ClCompile Include="..\..\..\source\environment\background\05_cVolcanoBackground.cpp" />
     <ClCompile Include="..\..\..\source\environment\background\06_cSnowBackground.cpp" />
     <ClCompile Include="..\..\..\source\environment\background\07_cMossBackground.cpp" />
+    <ClCompile Include="..\..\..\source\environment\background\99_cCloudBackground.cpp" />
     <ClCompile Include="..\..\..\source\environment\background\cBackground.cpp" />
     <ClCompile Include="..\..\..\source\environment\cEnvironment.cpp" />
     <ClCompile Include="..\..\..\source\environment\cOutdoor.cpp" />
@@ -36,14 +37,17 @@
     <ClCompile Include="..\..\..\source\game\boss\0101_cCrossfieldBoss.cpp" />
     <ClCompile Include="..\..\..\source\game\boss\0102_cTorusBoss.cpp" />
     <ClCompile Include="..\..\..\source\game\boss\0103_cVausBoss.cpp" />
+    <ClCompile Include="..\..\..\source\game\boss\9901_cProjectOneBoss.cpp" />
     <ClCompile Include="..\..\..\source\game\boss\cBoss.cpp" />
     <ClCompile Include="..\..\..\source\game\cBullet.cpp" />
     <ClCompile Include="..\..\..\source\game\cEnemy.cpp" />
     <ClCompile Include="..\..\..\source\game\cGame.cpp" />
+    <ClCompile Include="..\..\..\source\game\cTheater.cpp" />
     <ClCompile Include="..\..\..\source\game\cPlayer.cpp" />
     <ClCompile Include="..\..\..\source\game\cShip.cpp" />
     <ClCompile Include="..\..\..\source\game\cWeapon.cpp" />
     <ClCompile Include="..\..\..\source\game\mission\01_cViridoMission.cpp" />
+    <ClCompile Include="..\..\..\source\game\mission\99_cIntroMission.cpp" />
     <ClCompile Include="..\..\..\source\game\mission\cMission.cpp" />
     <ClCompile Include="..\..\..\source\interface\cCombatStats.cpp" />
     <ClCompile Include="..\..\..\source\interface\cCombatText.cpp" />
@@ -83,6 +87,7 @@
     <ClInclude Include="..\..\..\source\game\cShip.h" />
     <ClInclude Include="..\..\..\source\game\cWeapon.h" />
     <ClInclude Include="..\..\..\source\game\mission\cMission.h" />
+    <ClInclude Include="..\..\..\source\game\cTheater.h" />
     <ClInclude Include="..\..\..\source\interface\cCombatStats.h" />
     <ClInclude Include="..\..\..\source\interface\cCombatText.h" />
     <ClInclude Include="..\..\..\source\interface\cInterface.h" />

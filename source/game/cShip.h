@@ -35,7 +35,7 @@ protected:
 
 protected:
     cShip()noexcept;
-    ~cShip() = default;
+    ~cShip()override = default;
 
 
 public:

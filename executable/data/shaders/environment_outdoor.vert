@@ -9,19 +9,20 @@
 
 
 // constant values
-const int   c_i1Size   = 31;     // number of vertices per axis
-const float c_v1Detail = 6.0;    // size of a block
+const int   c_i1Size   = 31;       // number of vertices per axis
+const float c_v1Detail = 6.0;      // size of a block
 
 // shader uniforms
-uniform mat4 u_m4ShadowMatrix;   // own shadow view-projection matrix (with coordinate adjustment)
+uniform mat4 u_m4ShadowMatrix;     // own shadow view-projection matrix (with coordinate adjustment)
+uniform vec2 u_v2HeightModifier;   // 
 
 // vertex attributes
-attribute float a_v1Height;      // vertex height (full position is deduced from the vertex-ID)
-attribute int   a_i1VertexID;    // 
+attribute float a_v1Height;        // vertex height (full position is deduced from the vertex-ID)
+attribute int   a_i1VertexID;      // 
 
 // shader output
-varying float v_v1Mix;           // mix value between both outdoor textures
-varying vec4  v_v4ShadowCoord;   // pixel coordinates viewed from the light source
+varying float v_v1Mix;             // mix value between both outdoor textures
+varying vec4  v_v4ShadowCoord;     // pixel coordinates viewed from the light source
 
 #if (__VERSION__) < 130
     #define gl_VertexID a_i1VertexID
@@ -32,7 +33,7 @@ void VertexMain()
 {
     // calculate full vertex position
     ivec2 i2Index       = ivec2(coreMod(gl_VertexID, c_i1Size), gl_VertexID / c_i1Size);
-    vec3  v3NewPosition = vec3(vec2(i2Index - ivec2(c_i1Size/2)) * c_v1Detail, a_v1Height);
+    vec3  v3NewPosition = vec3(vec2(i2Index - ivec2(c_i1Size/2)) * c_v1Detail, a_v1Height * u_v2HeightModifier.y + u_v2HeightModifier.x);
     
     // transform position and shadow projection
     gl_Position     = u_m4ViewProj     * vec4(v3NewPosition, 1.0);
@@ -45,5 +46,5 @@ void VertexMain()
     coreLightingTransform(v3NewPosition);
 
     // calculate mix value relative to vertex height
-    v_v1Mix = (v3NewPosition.z + 20.0)*0.21;
+    v_v1Mix = (v3NewPosition.z + 20.0) * 0.21;
 }

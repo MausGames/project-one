@@ -48,7 +48,9 @@ public:
     inline void SetOwner(cPlayer* pOwner) {m_pOwner = pOwner;}
 
     // get object properties
-    inline cPlayer* GetOwner()const {return m_pOwner;}
+    inline  cPlayer*    GetOwner      ()const {return m_pOwner;}
+    virtual coreVector3 GetColorEnergy()const {return coreVector3(0.5f,0.5f,0.5f);}
+    virtual coreVector3 GetColorShip  ()const {return coreVector3(0.5f,0.5f,0.5f);}
 
 
 private:
@@ -90,6 +92,10 @@ public:
     DISABLE_COPY(cRayWeapon)
     ASSIGN_ID(1, "Laser Gun")
 
+    // get object properties
+    inline coreVector3 GetColorEnergy()const override {return COLOR_ENERGY_YELLOW;}
+    inline coreVector3 GetColorShip  ()const override {return COLOR_SHIP_YELLOW;}
+
 
 private:
     // execute own routines
@@ -114,6 +120,10 @@ public:
 
     DISABLE_COPY(cPulseWeapon)
     ASSIGN_ID(2, "Pulse Cannon")
+
+    // get object properties
+    inline coreVector3 GetColorEnergy()const override {return COLOR_ENERGY_PURPLE;}
+    inline coreVector3 GetColorShip  ()const override {return COLOR_SHIP_PURPLE;}
 
 
 private:
@@ -142,6 +152,10 @@ public:
     DISABLE_COPY(cWaveWeapon)
     ASSIGN_ID(3, "Wave Mortar")
 
+    // get object properties
+    inline coreVector3 GetColorEnergy()const override {return COLOR_ENERGY_GREEN;}
+    inline coreVector3 GetColorShip  ()const override {return COLOR_SHIP_GREEN;}
+
 
 private:
     // execute own routines
@@ -169,6 +183,10 @@ public:
     DISABLE_COPY(cTeslaWeapon)
     ASSIGN_ID(4, "Tesla Rifle")
 
+    // get object properties
+    inline coreVector3 GetColorEnergy()const override {return COLOR_ENERGY_BLUE;}
+    inline coreVector3 GetColorShip  ()const override {return COLOR_SHIP_BLUE;}
+
 
 private:
     // execute own routines
@@ -186,6 +204,10 @@ public:
 
     DISABLE_COPY(cAntiWeapon)
     ASSIGN_ID(5, "Antimatter")
+
+    // get object properties
+    inline coreVector3 GetColorEnergy()const override {return COLOR_ENERGY_RED;}
+    inline coreVector3 GetColorShip  ()const override {return COLOR_SHIP_RED;}
 };
 
 

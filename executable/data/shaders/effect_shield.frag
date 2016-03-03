@@ -8,9 +8,13 @@
 //////////////////////////////////////////////////////
 
 
+// shader input
+varying float v_v1Strength;   // 
+
+
 void FragmentMain()
 {
-    // draw texture with subtle white glow
-    vec4 v4Texture = coreTexture2D(0, v_av2TexCoord[0]);
-    gl_FragColor   = vec4(mix(vec3(1.0), v4Texture.rgb, v4Texture.a), v4Texture.a) * u_v4Color;
+    // 
+    float v1Value = coreTexture2D(0, v_av2TexCoord[0]).g;
+    gl_FragColor  = u_v4Color * (v_v1Strength * v1Value);
 }

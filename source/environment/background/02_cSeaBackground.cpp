@@ -14,6 +14,8 @@
 cSeaBackground::cSeaBackground()noexcept
 : m_fWaveTime (0.0f)
 {
+    // TODO: bubbles, water-sound ?    
+
     coreBatchList* pList1;
     coreBatchList* pList2;
 
@@ -209,7 +211,7 @@ cSeaBackground::cSeaBackground()noexcept
         m_pOutdoor->GetShadowMap()->BindList(pList1);
         m_pOutdoor->GetShadowMap()->BindList(pList2);
     }
-
+    /*
     // allocate algae list
     pList1 = new coreBatchList(SEA_ALGAE_RESERVE);
     pList1->DefineProgram("effect_decal_inst_program");
@@ -248,6 +250,7 @@ cSeaBackground::cSeaBackground()noexcept
         cBackground::_FillInfinite(pList1);
         m_apDecalObjectList.push_back(pList1);
     }
+    */
 }
 
 

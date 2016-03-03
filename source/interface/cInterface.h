@@ -10,6 +10,9 @@
 #ifndef _P1_GUARD_INTERFACE_H_
 #define _P1_GUARD_INTERFACE_H_
 
+// TODO: re-position everything after resolution-change
+// TODO: re-order rendering to reduce shader/texture changes
+
 
 // ****************************************************************
 // interface definitions
@@ -22,6 +25,9 @@
 
 #define INTERFACE_BANNER_TYPE_BOSS    (false)     // boss banner type
 #define INTERFACE_BANNER_TYPE_MISSION (true)      // mission banner type
+
+#define INTERFACE_STORY_SPEED         (1.0f)      // 
+#define INTERFACE_STORY_DURATION      (4.0f)      // 
 
 
 // ****************************************************************
@@ -57,6 +63,9 @@ private:
     coreFloat    m_fBannerStart;            // animation start time
     coreBool     m_bBannerType;             // animation type (boss, mission)
 
+    coreLabel m_aStoryText[2];              // 
+    coreFloat m_fStoryStart;                // 
+
     coreBool  m_bVisible;                   // visibility status
     coreFloat m_fAlphaAll;                  // overall alpha value (except for banner)
     coreFloat m_fAlphaBoss;                 // boss alpha value
@@ -77,6 +86,10 @@ public:
     void ShowMission(const coreChar* pcMain, const coreChar* pcSub);
     void ShowMission(const cMission* pMission);
     coreBool IsBannerActive()const;
+
+    // 
+    void ShowStory(const coreChar* pcRow1, const coreChar* pcRow2 = NULL);
+    coreBool IsStoryActive(const coreFloat fOffset)const;
 
     // 
     void UpdateLayout();

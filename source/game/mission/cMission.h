@@ -36,8 +36,8 @@
 #define STAGE_TIME_BETWEEN(t,u) (InBetween(m_fStageTime, t, u))                    // 
 #define STAGE_TIME_INIT         (STAGE_TIME_POINT(0.0f))                           // 
 
-#define STAGE_FINISH_NOW      {this->SkipStage();}                                 // 
-#define STAGE_FINISH_AFTER(t) {if(m_fStageTime >= (t)) STAGE_FINISH_NOW}           // 
+#define STAGE_FINISH_NOW        {this->SkipStage();}                               // 
+#define STAGE_FINISH_AFTER(t)   {if(m_fStageTime >= (t)) STAGE_FINISH_NOW}         // 
 
 #define STAGE_ADD_PATH(n)      auto n = this->_AddPath    (__LINE__,    [&](coreSpline2* OUTPUT n)
 #define STAGE_ADD_SQUAD(n,t,c) auto n = this->_AddSquad<t>(__LINE__, c, [&](cEnemySquad* OUTPUT n)
@@ -156,7 +156,7 @@ private:
 
 public:
     cViridoMission()noexcept;
-    ~cViridoMission();
+    ~cViridoMission()override;
 
     DISABLE_COPY(cViridoMission)
     ASSIGN_ID(1, "Virido")
@@ -268,6 +268,27 @@ public:
 
     DISABLE_COPY(cAterMission)
     ASSIGN_ID(8, "Ater")
+};
+
+
+// ****************************************************************
+// Intro mission class
+class cIntroMission final : public cMission
+{
+private:
+    cProjectOneBoss m_ProjectOne;   // 
+
+
+public:
+    cIntroMission()noexcept;
+
+    DISABLE_COPY(cIntroMission)
+    ASSIGN_ID(99, "Intro")
+
+
+private:
+    // execute own routines
+    void __SetupOwn()override;
 };
 
 

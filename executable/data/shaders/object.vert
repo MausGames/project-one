@@ -18,10 +18,10 @@ uniform float u_v1Time;
 attribute float a_v1Blink;        // 
 
 // shader output
-varying vec4 v_v4ShadowCoord;    // pixel coordinates viewed from the light source
-varying vec4 v_av4ShipLight;     // simplified light vector (w = base blink intensity (to highlight successful hits))
-varying vec3 v_av3ShipView;      // simplified view vector
-varying vec3 v_av3ShipNormal;    // simplified ship normal
+varying vec4 v_v4ShadowCoord;     // pixel coordinates viewed from the light source
+varying vec4 v_av4ShipLight;      // simplified light vector (w = base blink intensity (to highlight successful hits))
+varying vec3 v_av3ShipView;       // simplified view vector
+varying vec3 v_av3ShipNormal;     // simplified ship normal
 
 
 void VertexMain()

@@ -24,12 +24,7 @@ cViridoMission::cViridoMission()noexcept
     m_apBoss[1] = &m_Torus;
     m_apBoss[2] = &m_Vaus;
 
-    // 
-    g_pEnvironment->SetTargetDirection(coreVector2(0.0f,1.0f));
-    g_pEnvironment->SetTargetSide     (coreVector2(0.0f,0.0f));
-    g_pEnvironment->SetTargetSpeed    (8.0f);
-
-    // create boomerang lists
+    // create ball lists
     m_Ball     .DefineProgram("effect_energy_invert_inst_program");
     m_BallTrail.DefineProgram("effect_energy_invert_inst_program");
     {
@@ -67,7 +62,7 @@ cViridoMission::cViridoMission()noexcept
         const coreBool bBoss = i ? false : true;
 
         // 
-        m_aPaddle[i].DefineModel  ("object_paddle.md3");
+        m_aPaddle[i].DefineModel  ("object_boss_vaus_paddle.md3");
         m_aPaddle[i].DefineTexture(0u, "effect_energy.png");
         m_aPaddle[i].DefineProgram("effect_energy_bullet_direct_program");
         m_aPaddle[i].SetSize      (bBoss ? coreVector3(3.5f,2.5f,2.5f) : coreVector3(2.5f,2.5f,2.5f));
@@ -105,6 +100,49 @@ void cViridoMission::__SetupOwn()
     // 
     STAGE_MAIN
     {
+        if(STAGE_TIME_INIT)
+        {
+            g_pEnvironment->ChangeBackground(REF_ID(cNoBackground::ID), ENVIRONMENT_MIX_FADE, 1.0f);
+        }
+
+        STAGE_FINISH_AFTER(2.0f)
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN
+    {
+        if(STAGE_TIME_INIT)
+        {
+            g_pGame->GetInterface()->ShowStory("What do you dream ?");
+        }
+
+        if(!g_pGame->GetInterface()->IsStoryActive(1.5f))
+        {
+            g_pEnvironment->ChangeBackground(REF_ID(cCloudBackground::ID), ENVIRONMENT_MIX_CURTAIN, 1.0f, coreVector2(1.0f,0.0f));
+            g_pEnvironment->SetTargetSpeed    (8.0f);
+
+            g_pGame->StartIntro();
+
+            STAGE_FINISH_NOW
+        }
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN
+    {
+        if(CONTAINS_VALUE(g_pGame->GetStatus(), GAME_STATUS_PLAY))
+        {
+            STAGE_FINISH_NOW
+                
+        }
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN
+    {
         // 
         //STAGE_ADD_PATH(pPath)
         //{
@@ -115,12 +153,12 @@ void cViridoMission::__SetupOwn()
         // 
         STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 5u)
         {
-            STAGE_SQUAD_INIT(pSquad1, Configure(50, COLOR_ENEMY_BLUE))
+            STAGE_SQUAD_INIT(pSquad1, Configure(50, COLOR_SHIP_BLUE))
             STAGE_SQUAD_INIT(pSquad1, Resurrect())
         });
         STAGE_ADD_SQUAD(pSquad2, cScoutEnemy, 5u)
         {
-            STAGE_SQUAD_INIT(pSquad2, Configure(50, COLOR_ENEMY_RED))
+            STAGE_SQUAD_INIT(pSquad2, Configure(50, COLOR_SHIP_RED))
             STAGE_SQUAD_INIT(pSquad2, Resurrect())
         });
 
@@ -151,7 +189,7 @@ void cViridoMission::__SetupOwn()
         {
             //if(STAGE_SUB(I_TO_F(i)*0.3f + ((i >= 5u)*1.0f)))
             //{
-            //    STAGE_ADD_ENEMY(pEnemy, cScoutEnemy, (i/5u) ? COLOR_ENEMY_YELLOW : COLOR_ENEMY_BLUE)
+            //    STAGE_ADD_ENEMY(pEnemy, cScoutEnemy, (i/5u) ? COLOR_SHIP_YELLOW : COLOR_SHIP_BLUE)
             //    {
             //        const coreFloat fSide = (i/5u) ? -1.0f : 1.0f;
             //        if(pEnemy->DefaultMovePath(*pPath, coreVector2(fSide, 1.0f), coreVector2(0.1f*I_TO_F(i%5u-1u) * fSide, 0.0f), pEnemy->GetLifeTime()))
@@ -168,15 +206,6 @@ void cViridoMission::__SetupOwn()
     // 
     STAGE_MAIN
     {
-        if(g_pEnvironment->GetBackground()->GetID() == cCloudBackground::ID)
-        {
-            const coreFloat fNewAlpha = CLAMP(1.0f - 0.35f * m_fStageTime, 0.0f, 1.0f);
-            s_cast<cCloudBackground*>(g_pEnvironment->GetBackground())->SetOverlayAlpha(fNewAlpha);
-
-         
-            s_cast<cCloudBackground*>(g_pEnvironment->GetBackground())->SetCloudAlpha(fNewAlpha);
-        }
-
         // 
         STAGE_FINISH_AFTER(4.0f)
     });
@@ -204,7 +233,7 @@ void cViridoMission::__SetupOwn()
         {
             //if(STAGE_SUB(I_TO_F(i/3)*2.0f))
             //{
-            //    STAGE_ADD_ENEMY(pEnemy, cScoutEnemy, COLOR_ENEMY_RED)
+            //    STAGE_ADD_ENEMY(pEnemy, cScoutEnemy, COLOR_SHIP_RED)
             //    {
             //        if(pEnemy->DefaultMovePath((i >= 6u) ? *pPath2 : *pPath1, coreVector2(((i%6) >= 3u) ? -1.0f : 1.0f, 1.0f), coreVector2(I_TO_F((i%3u)-1u)*0.2f, ((i%3u) == 1u) ? -0.2f : 0.0f), pEnemy->GetLifeTime()))
             //            pEnemy->Kill(false);
@@ -238,7 +267,7 @@ void cViridoMission::__SetupOwn()
         {
             //if(STAGE_SUB(I_TO_F(i)*0.4f))
             //{
-            //    STAGE_ADD_ENEMY(pEnemy, cScoutEnemy, (i) ? COLOR_ENEMY_YELLOW : COLOR_ENEMY_BLUE)
+            //    STAGE_ADD_ENEMY(pEnemy, cScoutEnemy, (i) ? COLOR_SHIP_YELLOW : COLOR_SHIP_BLUE)
             //    {
             //        if(pEnemy->DefaultMovePath(*pPath, coreVector2(1.0f,1.0f), coreVector2(0.0f,0.0f), pEnemy->GetLifeTime()))
             //            pEnemy->Kill(false);
@@ -273,7 +302,7 @@ void cViridoMission::__SetupOwn()
         {
             //if(STAGE_SUB(I_TO_F(i)*0.4f))
             //{
-            //    STAGE_ADD_ENEMY(pEnemy, cScoutEnemy, (!i) ? COLOR_ENEMY_YELLOW : COLOR_ENEMY_BLUE)
+            //    STAGE_ADD_ENEMY(pEnemy, cScoutEnemy, (!i) ? COLOR_SHIP_YELLOW : COLOR_SHIP_BLUE)
             //    {
             //        if(pEnemy->DefaultMovePath(*pPath, coreVector2(1.0f,1.0f), coreVector2(0.0f,0.0f), pEnemy->GetLifeTime()))
             //            pEnemy->Kill(false);

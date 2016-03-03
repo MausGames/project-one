@@ -109,12 +109,13 @@ void cEnemy::Resurrect(const coreVector2& vPosition, const coreVector2& vDirecti
 
     // 
     const coreBool bBoss = CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_BOSS);
+    const coreBool bMute = CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_MUTE);
 
     // 
     m_fLifeTime = 0.0f;
 
     // add ship to the game
-    cShip::_Resurrect(bBoss, vPosition, vDirection, TYPE_ENEMY);
+    cShip::_Resurrect(bBoss || bMute, vPosition, vDirection, bMute ? 0 : TYPE_ENEMY);
 
     // 
     this->__ResurrectOwn();
@@ -131,6 +132,7 @@ void cEnemy::Kill(const coreBool bAnimated)
 
     // 
     const coreBool bBoss = CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_BOSS);
+    const coreBool bMute = CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_MUTE);
 
     // 
     if(bAnimated)
@@ -140,7 +142,7 @@ void cEnemy::Kill(const coreBool bAnimated)
     }
 
     // remove ship from the game
-    cShip::_Kill(bBoss, bAnimated);
+    cShip::_Kill(bBoss || bMute, bAnimated);
 
     // 
     this->__KillOwn(bAnimated);
@@ -539,7 +541,7 @@ cScoutEnemy::cScoutEnemy()noexcept
     this->DefineModelLow ("ship_enemy_scout_low.md3");
 
     // configure the enemy
-    this->Configure(100, COLOR_ENEMY_BLUE);
+    this->Configure(100, COLOR_SHIP_BLUE);
 }
 
 
@@ -552,7 +554,7 @@ cWarriorEnemy::cWarriorEnemy()noexcept
     this->DefineModelLow ("ship_enemy_warrior_low.md3");
 
     // configure the enemy
-    this->Configure(100, COLOR_ENEMY_YELLOW);
+    this->Configure(100, COLOR_SHIP_YELLOW);
 }
 
 
@@ -566,7 +568,7 @@ cStarEnemy::cStarEnemy()noexcept
     this->DefineModelLow ("ship_enemy_star_low.md3");
 
     // configure the enemy
-    this->Configure(100, COLOR_ENEMY_RED);
+    this->Configure(100, COLOR_SHIP_RED);
 }
 
 
@@ -592,7 +594,7 @@ cArrowEnemy::cArrowEnemy()noexcept
     this->DefineModelLow ("ship_enemy_arrow_low.md3");
 
     // configure the enemy
-    this->Configure(100, COLOR_ENEMY_ORANGE);
+    this->Configure(100, COLOR_SHIP_ORANGE);
 }
 
 
@@ -617,7 +619,7 @@ cMinerEnemy::cMinerEnemy()noexcept
     this->DefineModelLow ("ship_enemy_miner_low.md3");
 
     // configure the enemy
-    this->Configure(100, COLOR_ENEMY_CYAN);
+    this->Configure(100, COLOR_SHIP_CYAN);
 }
 
 
@@ -631,7 +633,7 @@ cFreezerEnemy::cFreezerEnemy()noexcept
     this->DefineModelLow ("ship_enemy_freezer_low.md3");
 
     // configure the enemy
-    this->Configure(100, COLOR_ENEMY_ICE);
+    this->Configure(100, COLOR_SHIP_ICE);
 }
 
 
@@ -657,7 +659,7 @@ cCinderEnemy::cCinderEnemy()noexcept
     this->DefineModelLow ("ship_enemy_cinder_low.md3");
 
     // configure the enemy
-    this->Configure(100, COLOR_ENEMY_GREY);
+    this->Configure(100, COLOR_SHIP_GREY);
 }
 
 

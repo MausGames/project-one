@@ -17,11 +17,12 @@ void FragmentMain()
     if(v1Alpha < 1.0)
     {
         v1Alpha *= v1Alpha;
-        v1Alpha  = 1.0 - v1Alpha;
-    
+        v1Alpha *= v1Alpha;
+
         // draw as alpha map with decent highlights
         float v1Value = coreTexture2D(0, v_av2TexCoord[0]).r;
-        gl_FragColor  = vec4(vec3((0.35 + 0.65 * v1Value) * u_v4Color.r) , v1Value * v1Alpha * u_v4Color.a);
+              v1Value = max(v1Value - v1Alpha, 0.0);
+        gl_FragColor  = vec4(vec3((0.3 + 0.7 * v1Value) * u_v4Color.r) , v1Value * u_v4Color.a);
     }
     else discard; // gl_FragColor = vec4(0.0);
 }

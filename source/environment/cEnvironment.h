@@ -17,33 +17,45 @@
 
 
 // ****************************************************************
+// environment definitions
+#define ENVIRONMENT_MIX_FADE    (0u)   // 
+#define ENVIRONMENT_MIX_WIPE    (1u)   // 
+#define ENVIRONMENT_MIX_CURTAIN (2u)   // 
+#define ENVIRONMENT_MIX_CIRCLE  (3u)   // 
+#define ENVIRONMENT_MIXES       (4u)   // 
+
+
+// ****************************************************************
 // environment class
 class cEnvironment final : public coreResourceRelation
 {
 private:
-    cBackground* m_pBackground;      // current background instance (should never be NULL)
-    cBackground* m_pOldBackground;   // previous background instance (may be NULL)
+    cBackground* m_pBackground;                          // current background instance (should never be NULL)
+    cBackground* m_pOldBackground;                       // previous background instance (may be NULL)
 
-    coreFrameBuffer m_FrameBuffer;   // environment frame buffer used for transition mixing (only texture)
-    coreObject2D    m_MixObject;     // fullscreen object for transition mixing
-    coreTimer       m_Transition;    // background-transition timer
+    coreFrameBuffer m_FrameBuffer;                       // environment frame buffer used for transition mixing
+    coreObject2D    m_MixObject;                         // fullscreen object for transition mixing
+    coreProgramPtr  m_apMixProgram[ENVIRONMENT_MIXES];   // 
 
-    coreVector2 m_avDirection[2];    // background direction (0 = current value, 1 = target value)
-    coreVector2 m_avSide     [2];    // background position offset
-    coreFloat   m_afSpeed    [2];    // movement speed
-    coreFloat   m_afHeight   [2];    // 
+    coreTimer   m_TransitionTime;                        // background-transition timer
+    coreVector2 m_vTransitionDir;                        // 
 
-    coreFloat   m_fFlyOffset;        // global fly offset (directly accessed by background objects)
-    coreFloat   m_fSideOffset;       // global side offset
-    coreVector3 m_vCameraPos;        // moved camera position
-    coreVector3 m_vLightDir;         // rotated light direction
+    coreVector2 m_avDirection[2];                        // background direction (0 = current value, 1 = target value)
+    coreVector2 m_avSide     [2];                        // background position offset
+    coreFloat   m_afSpeed    [2];                        // movement speed
+    coreFloat   m_afHeight   [2];                        // 
 
-    coreBool m_bActive;              // enables the environment (only for first background-transition on intro)
+    coreFloat   m_fFlyOffset;                            // global fly offset (directly accessed by background objects)
+    coreFloat   m_fSideOffset;                           // global side offset
+    coreVector3 m_vCameraPos;                            // moved camera position
+    coreVector3 m_vLightDir;                             // rotated light direction
+
+    coreBool m_bActive;                                  // enables the environment (only for first background-transition on intro)
 
 
 public:
     cEnvironment()noexcept;
-    ~cEnvironment();
+    ~cEnvironment()override;
 
     DISABLE_COPY(cEnvironment)
 
@@ -52,10 +64,9 @@ public:
     void Move();
 
     // control active background
-    void ChangeBackground(const coreInt32 iID);
-    inline cBackground*     GetBackground   ()const {ASSERT(m_pBackground) return m_pBackground;}
-    inline cBackground*     GetOldBackground()const {return m_pOldBackground;}
-    inline const coreTimer& GetTransition   ()const {return m_Transition;}
+    void ChangeBackground(const coreInt32 iID, const coreUintW iTransitionType, const coreFloat fTransitionSpeed, const coreVector2& vTransitionDir = coreVector2(0.0f,-1.0f));
+    inline cBackground* GetBackground   ()const {ASSERT(m_pBackground) return m_pBackground;}
+    inline cBackground* GetOldBackground()const {return m_pOldBackground;}
 
     // 
     coreFloat RetrieveTransitionBlend(cBackground* pBackground);
@@ -64,7 +75,7 @@ public:
     coreFloat RetrieveSafeHeight(const coreVector2& vPosition);
 
     // access frame buffer
-    inline coreFrameBuffer* GetFrameBuffer() {return m_Transition.GetStatus() ? &m_FrameBuffer : m_pBackground->GetResolvedTexture();}
+    inline coreFrameBuffer* GetFrameBuffer() {return m_TransitionTime.GetStatus() ? &m_FrameBuffer : m_pBackground->GetResolvedTexture();}
 
     // set target transformation properties
     inline void SetTargetDirection(const coreVector2& vDirection) {m_avDirection[1] = vDirection; ASSERT(vDirection.IsNormalized())}

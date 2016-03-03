@@ -67,13 +67,14 @@
 
 // ****************************************************************
 // configuration entry indices
-#define ENTRY_VIDEO_RESOLUTION    (0u)
-#define ENTRY_VIDEO_DISPLAYMODE   (1u)
-#define ENTRY_VIDEO_ANTIALIASING  (2u)
-#define ENTRY_VIDEO_TEXTUREFILTER (3u)
-#define ENTRY_VIDEO_ASSETQUALITY  (4u)
-#define ENTRY_VIDEO_SHADOWQUALITY (5u)
-#define ENTRY_VIDEO               (6u)
+#define ENTRY_VIDEO_DISPLAY       (0u)
+#define ENTRY_VIDEO_RESOLUTION    (1u)
+#define ENTRY_VIDEO_DISPLAYMODE   (2u)
+#define ENTRY_VIDEO_ANTIALIASING  (3u)
+#define ENTRY_VIDEO_TEXTUREFILTER (4u)
+#define ENTRY_VIDEO_ASSETQUALITY  (5u)
+#define ENTRY_VIDEO_SHADOWQUALITY (6u)
+#define ENTRY_VIDEO               (7u)
 
 #define ENTRY_AUDIO_OVERALLVOLUME (0u + ENTRY_VIDEO)
 #define ENTRY_AUDIO_MUSICVOLUME   (1u + ENTRY_VIDEO)
@@ -114,7 +115,7 @@ private:
 
 public:
     cIntroMenu()noexcept;
-    ~cIntroMenu();
+    ~cIntroMenu()override;
 
     DISABLE_COPY(cIntroMenu)
 
@@ -190,6 +191,7 @@ private:
     coreLabel    m_aLabel[ENTRY_MAX];   // 
     coreObject2D m_aLine [ENTRY_MAX];   // 
 
+    coreSwitchBoxU8 m_Display;
     coreSwitchBoxU8 m_Resolution;
     coreSwitchBoxU8 m_DisplayMode;
     coreSwitchBoxU8 m_AntiAliasing;
@@ -215,15 +217,19 @@ public:
 
     // 
     void CheckValues();
-    void LoadValues ();
-    void SaveValues ();
+    void LoadValues();
+    void SaveValues();
 
 
 private:
     // 
     void __UpdateShadowQuality();
     void __UpdateOverallVolume();
-    void __UpdateLanguage     ();
+    void __UpdateLanguage();
+
+    // 
+    void __LoadDisplays();
+    void __LoadResolutions(const coreUintW iDisplayIndex);
 };
 
 
@@ -292,7 +298,7 @@ private:
 
 public:
     cMenu()noexcept;
-    ~cMenu();
+    ~cMenu()override;
 
     DISABLE_COPY(cMenu)
 

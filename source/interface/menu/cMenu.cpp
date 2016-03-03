@@ -139,7 +139,7 @@ void cMenu::Move()
                 // 
                 ASSERT(!g_pGame)
                 g_pGame = new cGame(false);
-                g_pGame->LoadMission(REF_ID(cViridoMission::ID));
+                g_pGame->LoadMission(REF_ID(cIntroMission::ID));
             }
             else if(m_GameMenu.GetStatus() == 2)
             {

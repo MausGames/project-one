@@ -21,7 +21,7 @@
 #define WATER_HEIGHT       (-20.0f)   // default water-surface z-position
 #define WATER_SIZE         (200.0f)   // absolute size of the water-surface
 #define WATER_SKY_SIZE     (3.0f)     // texture size of the sky-plane
-#define WATER_SCALE_FACTOR (0.5f)     // frame buffer resolution factor (reflection only)
+#define WATER_SCALE_FACTOR (0.5f)     // frame buffer resolution factor (reflection and depth)
 
 
 // ****************************************************************
@@ -29,18 +29,19 @@
 class cWater : public coreObject3D
 {
 protected:
-    coreFlow  m_fAnimation;              // water animation value
-    coreFloat m_fFlyOffset;              // current fly offset
+    coreFlow  m_fAnimation;         // water animation value
+    coreFloat m_fFlyOffset;         // current fly offset
 
-    coreFrameBuffer m_AboveReflection;   // reflection frame buffer
-    coreFrameBuffer m_BelowRefraction;   // refraction frame buffer with geometric depth
+    coreFrameBuffer m_Reflection;   // reflection frame buffer (reduced resolution)
+    coreFrameBuffer m_Refraction;   // refraction frame buffer
+    coreFrameBuffer m_Depth;        // depth frame buffer (reduced resolution)
 
-    coreObject2D m_Sky;                  // sky-plane as reflection background
+    coreObject2D m_Sky;             // sky-plane as reflection background
 
 
 public:
     cWater()noexcept;
-    virtual ~cWater();
+    virtual ~cWater()override;
 
     DISABLE_COPY(cWater)
 
@@ -48,7 +49,7 @@ public:
     virtual void Render(coreFrameBuffer* pBackground);
     virtual void Move()override;
 
-    // update water reflection and depth map
+    // update water reflection and depth
     void UpdateReflection();
     void UpdateDepth(cOutdoor* pOutdoor, const std::vector<coreBatchList*>& apGroundObjectList);
 
@@ -57,8 +58,9 @@ public:
 
     // get object properties
     inline const coreFloat& GetFlyOffset ()const {return m_fFlyOffset;}
-    inline coreFrameBuffer* GetReflection()      {return &m_AboveReflection;}
-    inline coreFrameBuffer* GetRefraction()      {return &m_BelowRefraction;}
+    inline coreFrameBuffer* GetReflection()      {return &m_Reflection;}
+    inline coreFrameBuffer* GetRefraction()      {return &m_Refraction;}
+    inline coreFrameBuffer* GetDepth     ()      {return &m_Depth;}
 
 
 private:

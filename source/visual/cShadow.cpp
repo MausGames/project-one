@@ -39,12 +39,12 @@ void cShadow::Update()
         glEnable(GL_POLYGON_OFFSET_FILL);
         {
             // render all lists with shadow-casting objects
-            cShadow::__RenderInstanced(s_amDrawShadowMatrix[0], this->GetListSet());
-            cShadow::__RenderInstanced(s_amDrawShadowMatrix[1], s_GlobalContainer.GetListSet());
+            cShadow::RenderInstanced(s_amDrawShadowMatrix[0], this->GetListSet());
+            cShadow::RenderInstanced(s_amDrawShadowMatrix[1], s_GlobalContainer.GetListSet());
 
             // render all single shadow-casting objects
-            cShadow::__RenderSingle(s_amDrawShadowMatrix[0], this->GetListSet(),             this->GetObjectSet());
-            cShadow::__RenderSingle(s_amDrawShadowMatrix[1], s_GlobalContainer.GetListSet(), s_GlobalContainer.GetObjectSet());
+            cShadow::RenderSingle(s_amDrawShadowMatrix[0], this->GetListSet(),             this->GetObjectSet());
+            cShadow::RenderSingle(s_amDrawShadowMatrix[1], s_GlobalContainer.GetListSet(), s_GlobalContainer.GetObjectSet());
         }
         glDisable(GL_POLYGON_OFFSET_FILL);
     }
@@ -174,6 +174,46 @@ void cShadow::Recompile()
 
 
 // ****************************************************************
+// render single shadow-casting objects
+void cShadow::RenderSingle(const coreMatrix4& mTransform, const std::vector<coreBatchList*>& apList, const std::vector<coreObject3D*>& apObject)
+{
+    // only enable and update without instancing
+    if(!apObject.empty() || std::any_of(apList.begin(), apList.end(), [](const coreBatchList* pList) {return !pList->IsInstanced();}))
+    {
+        // send draw shadow matrix to single shader-program
+        cShadow::__SendTransform(s_pProgramSingle, mTransform);
+
+        // render single objects
+        FOR_EACH(it, apObject) (*it)->Render(s_pProgramSingle);
+        FOR_EACH(it, apList)   {if(!(*it)->IsInstanced()) (*it)->Render(NULL, s_pProgramSingle);}
+    }
+}
+
+void cShadow::RenderSingle(const coreMatrix4& mTransform, const std::vector<coreBatchList*>& apList)
+{
+    // 
+    const std::vector<coreObject3D*> apEmpty;
+    cShadow::RenderSingle(mTransform, apList, apEmpty);
+}
+
+
+// ****************************************************************
+// render lists with shadow-casting objects
+void cShadow::RenderInstanced(const coreMatrix4& mTransform, const std::vector<coreBatchList*>& apList)
+{
+    // only enable and update on instancing
+    if(std::any_of(apList.begin(), apList.end(), [](const coreBatchList* pList) {return pList->IsInstanced();}))
+    {
+        // send draw shadow matrix to instanced shader-program
+        cShadow::__SendTransform(s_pProgramInstanced, mTransform);
+
+        // render lists with objects
+        FOR_EACH(it, apList) {if((*it)->IsInstanced()) (*it)->Render(s_pProgramInstanced, NULL);}
+    }
+}
+
+
+// ****************************************************************
 // enable shader-program and apply read shadow matrix
 void cShadow::EnableShadowRead(const coreUintW iHandleIndex)
 {
@@ -200,37 +240,4 @@ void cShadow::__SendTransform(const coreProgramPtr& pProgram, const coreMatrix4&
     if(!pProgram.IsUsable()) return;
     if(!pProgram->Enable())  return;
     pProgram->SendUniform("u_m4ShadowMatrix", mTransform, false);
-}
-
-
-// ****************************************************************
-// render single shadow-casting objects
-void cShadow::__RenderSingle(const coreMatrix4& mTransform, const std::vector<coreBatchList*>& apList, const std::vector<coreObject3D*>& apObject)
-{
-    // only enable and update without instancing
-    if(!apObject.empty() || std::any_of(apList.begin(), apList.end(), [](const coreBatchList* pList) {return !pList->IsInstanced();}))
-    {
-        // send draw shadow matrix to single shader-program
-        cShadow::SendTransformSingle(mTransform);
-
-        // render single objects
-        FOR_EACH(it, apObject) (*it)->Render(s_pProgramSingle);
-        FOR_EACH(it, apList)   {if(!(*it)->IsInstanced()) (*it)->Render(NULL, s_pProgramSingle);}
-    }
-}
-
-
-// ****************************************************************
-// render lists with shadow-casting objects
-void cShadow::__RenderInstanced(const coreMatrix4& mTransform, const std::vector<coreBatchList*>& apList)
-{
-    // only enable and update on instancing
-    if(std::any_of(apList.begin(), apList.end(), [](const coreBatchList* pList) {return pList->IsInstanced();}))
-    {
-        // send draw shadow matrix to instanced shader-program
-        cShadow::SendTransformInstanced(mTransform);
-
-        // render lists with objects
-        FOR_EACH(it, apList) {if((*it)->IsInstanced()) (*it)->Render(s_pProgramInstanced, NULL);}
-    }
 }

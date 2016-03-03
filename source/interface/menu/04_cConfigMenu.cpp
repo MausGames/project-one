@@ -119,17 +119,18 @@ cConfigMenu::cConfigMenu()noexcept
         x.GetCaption()->SetColor3(COLOR_MENU_WHITE);                             \
     }
     {
-        __SET_SWITCHBOX(m_Resolution,    VIDEO_RESOLUTION,    0.3f)
-        __SET_SWITCHBOX(m_DisplayMode,   VIDEO_DISPLAYMODE,   0.3f)
-        __SET_SWITCHBOX(m_AntiAliasing,  VIDEO_ANTIALIASING,  0.2f)
-        __SET_SWITCHBOX(m_TextureFilter, VIDEO_TEXTUREFILTER, 0.2f)
-        __SET_SWITCHBOX(m_AssetQuality,  VIDEO_ASSETQUALITY,  0.2f)
-        __SET_SWITCHBOX(m_ShadowQuality, VIDEO_SHADOWQUALITY, 0.2f)
-        __SET_SWITCHBOX(m_OverallVolume, AUDIO_OVERALLVOLUME, 0.2f)
-        __SET_SWITCHBOX(m_MusicVolume,   AUDIO_MUSICVOLUME,   0.2f)
-        __SET_SWITCHBOX(m_EffectVolume,  AUDIO_EFFECTVOLUME,  0.2f)
-        __SET_SWITCHBOX(m_AmbientSound,  AUDIO_AMBIENTSOUND,  0.2f)
-        __SET_SWITCHBOX(m_Language,      GAME_LANGUAGE,       0.3f)
+        __SET_SWITCHBOX(m_Display,       VIDEO_DISPLAY,       0.26f)
+        __SET_SWITCHBOX(m_Resolution,    VIDEO_RESOLUTION,    0.26f)
+        __SET_SWITCHBOX(m_DisplayMode,   VIDEO_DISPLAYMODE,   0.26f)
+        __SET_SWITCHBOX(m_AntiAliasing,  VIDEO_ANTIALIASING,  0.26f)
+        __SET_SWITCHBOX(m_TextureFilter, VIDEO_TEXTUREFILTER, 0.26f)
+        __SET_SWITCHBOX(m_AssetQuality,  VIDEO_ASSETQUALITY,  0.26f)
+        __SET_SWITCHBOX(m_ShadowQuality, VIDEO_SHADOWQUALITY, 0.26f)
+        __SET_SWITCHBOX(m_OverallVolume, AUDIO_OVERALLVOLUME, 0.26f)
+        __SET_SWITCHBOX(m_MusicVolume,   AUDIO_MUSICVOLUME,   0.26f)
+        __SET_SWITCHBOX(m_EffectVolume,  AUDIO_EFFECTVOLUME,  0.26f)
+        __SET_SWITCHBOX(m_AmbientSound,  AUDIO_AMBIENTSOUND,  0.26f)
+        __SET_SWITCHBOX(m_Language,      GAME_LANGUAGE,       0.26f)
 
         m_ShadowQuality.SetAutomatic(0.0f);
         m_Language     .SetAutomatic(0.0f);
@@ -137,22 +138,18 @@ cConfigMenu::cConfigMenu()noexcept
     #undef __SET_SWITCHBOX
 
     // fill configuration entries
-    const std::vector<coreVector2>& avResolutionList = Core::System->GetAvailableRes();
-    const std::vector<std::string>& asLanguageList   = cMenu::GetLanguageList().get_keylist();
-
-    for(coreUintW i = avResolutionList.size(); i--; )
-        m_Resolution.AddEntry(PRINT("%.0f x %.0f", avResolutionList[i].x, avResolutionList[i].y), i);
+    const std::vector<std::string>& asLanguageList = cMenu::GetLanguageList().get_keylist();
 
     for(coreUintW i = 0u, ie = asLanguageList.size(); i < ie; i++)
         m_Language.AddEntry(asLanguageList[i].c_str(), i);
 
-    m_Resolution   .AddEntryLanguage("DISPLAY_DESKTOP", 0xFFu);
-    m_DisplayMode  .AddEntryLanguage("DISPLAY_WINDOW",     0u);
-    m_DisplayMode  .AddEntryLanguage("DISPLAY_FULLSCREEN", 1u);
+    m_DisplayMode  .AddEntryLanguage("DISPLAYMODE_WINDOW",     0u);
+    m_DisplayMode  .AddEntryLanguage("DISPLAYMODE_BORDERLESS", 1u);
+    m_DisplayMode  .AddEntryLanguage("DISPLAYMODE_FULLSCREEN", 2u);
     m_AntiAliasing .AddEntryLanguage("VALUE_OFF",  0u);
     m_TextureFilter.AddEntryLanguage("VALUE_OFF",  0u);
-    for(coreUintW i = 2u; i <=  8u; i <<= 1u) m_AntiAliasing .AddEntry(PRINT("x%u", i), i);
-    for(coreUintW i = 2u; i <= 16u; i <<= 1u) m_TextureFilter.AddEntry(PRINT("x%u", i), i);
+    for(coreUintW i = 2u; i <=  8u; i <<= 1u) m_AntiAliasing .AddEntry(PRINT("%ux", i), i);
+    for(coreUintW i = 2u; i <= 16u; i <<= 1u) m_TextureFilter.AddEntry(PRINT("%ux", i), i);
     m_AssetQuality .AddEntryLanguage("VALUE_LOW",  0u);
     m_AssetQuality .AddEntryLanguage("VALUE_HIGH", 1u);
     m_ShadowQuality.AddEntryLanguage("VALUE_OFF",  0u);
@@ -194,6 +191,7 @@ cConfigMenu::cConfigMenu()noexcept
     for(;            iIndex < ENTRY_INPUT; ++iIndex) this->BindObject(SURFACE_CONFIG_INPUT, &m_aLabel[iIndex]);
     for(;            iIndex < ENTRY_MAX;   ++iIndex) this->BindObject(SURFACE_CONFIG_GAME,  &m_aLabel[iIndex]);
 
+    this->BindObject(SURFACE_CONFIG_VIDEO, &m_Display);
     this->BindObject(SURFACE_CONFIG_VIDEO, &m_Resolution);
     this->BindObject(SURFACE_CONFIG_VIDEO, &m_DisplayMode);
     this->BindObject(SURFACE_CONFIG_VIDEO, &m_AntiAliasing);
@@ -228,6 +226,7 @@ void cConfigMenu::Move()
     case SURFACE_CONFIG_VIDEO:
         {
             // 
+            cMenu::UpdateSwitchBox(&m_Display);
             cMenu::UpdateSwitchBox(&m_Resolution);
             cMenu::UpdateSwitchBox(&m_DisplayMode);
             cMenu::UpdateSwitchBox(&m_AntiAliasing);
@@ -241,6 +240,10 @@ void cConfigMenu::Move()
                  if(m_ShadowQuality.GetCurIndex() == 0u) m_ShadowQuality.GetCaption()->SetColor3(COLOR_MENU_WHITE);
             else if(m_ShadowQuality.GetCurIndex() == 1u) m_ShadowQuality.GetCaption()->SetColor3(COLOR_MENU_YELLOW);
             else if(m_ShadowQuality.GetCurIndex() == 2u) m_ShadowQuality.GetCaption()->SetColor3(COLOR_MENU_GREEN);
+
+            // 
+            if(m_Display.IsClickedArrow())
+                this->__LoadResolutions(m_Display.GetCurEntry().second);
 
             // 
             if(m_ShadowQuality.IsClickedArrow())
@@ -349,11 +352,13 @@ void cConfigMenu::Move()
 // 
 void cConfigMenu::CheckValues()
 {
-    const coreUint8&  iCurValue      = m_Resolution.GetCurEntry().second;
-    const coreVector2 vCurResolution = (iCurValue == 0xFFu) ? coreVector2(0.0f,0.0f) : Core::System->GetAvailableRes()[iCurValue];
+    const coreUint8&   iCurDisplay    = m_Display   .GetCurEntry().second;
+    const coreUint8&   iCurValue      = m_Resolution.GetCurEntry().second;
+    const coreVector2& vCurResolution = Core::System->GetDisplayData(iCurDisplay).avAvailableRes[iCurValue];
 
     // 
     const coreBool bReset = (vCurResolution != coreVector2(I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH)), I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT)))) ||
+                            (m_Display      .GetCurEntry().second != Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY))                         ||
                             (m_DisplayMode  .GetCurEntry().second != Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN))                      ||
                             (m_AntiAliasing .GetCurEntry().second != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING))                  ||
                             (m_TextureFilter.GetCurEntry().second != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREFILTER))                 ||
@@ -381,12 +386,15 @@ void cConfigMenu::LoadValues()
 
     // 
     LoadConfig();
+    this->__LoadDisplays();
+    this->__LoadResolutions(Core::System->GetDisplayIndex());
 
     // 
     if(!m_Resolution.SelectText(PRINT("%d x %d", Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH), Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT))))
-        m_Resolution.SelectValue(0xFFu);
+        m_Resolution.SelectLast();
 
     // 
+    m_Display      .SelectValue(Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY));
     m_DisplayMode  .SelectValue(Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN));
     m_AntiAliasing .SelectValue(Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING));
     m_TextureFilter.SelectValue(Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREFILTER));
@@ -421,11 +429,13 @@ void cConfigMenu::LoadValues()
 // 
 void cConfigMenu::SaveValues()
 {
-    const coreUint8&  iCurValue      = m_Resolution.GetCurEntry().second;
-    const coreVector2 vCurResolution = (iCurValue == 0xFFu) ? coreVector2(0.0f,0.0f) : Core::System->GetAvailableRes()[iCurValue];
+    const coreUint8&   iCurDisplay    = m_Display   .GetCurEntry().second;
+    const coreUint8&   iCurValue      = m_Resolution.GetCurEntry().second;
+    const coreVector2& vCurResolution = Core::System->GetDisplayData(iCurDisplay).avAvailableRes[iCurValue];
 
     // 
     const coreBool bReset = (vCurResolution != coreVector2(I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH)), I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT)))) ||
+                            (m_Display      .GetCurEntry().second != Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY))        ||
                             (m_DisplayMode  .GetCurEntry().second != Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN))     ||
                             (m_AntiAliasing .GetCurEntry().second != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING)) ||
                             (m_TextureFilter.GetCurEntry().second != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREFILTER));
@@ -433,6 +443,7 @@ void cConfigMenu::SaveValues()
     // 
     Core::Config->SetInt(CORE_CONFIG_SYSTEM_WIDTH,           F_TO_SI(vCurResolution.x));
     Core::Config->SetInt(CORE_CONFIG_SYSTEM_HEIGHT,          F_TO_SI(vCurResolution.y));
+    Core::Config->SetInt(CORE_CONFIG_SYSTEM_DISPLAY,         m_Display      .GetCurEntry().second);
     Core::Config->SetInt(CORE_CONFIG_SYSTEM_FULLSCREEN,      m_DisplayMode  .GetCurEntry().second);
     Core::Config->SetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING,  m_AntiAliasing .GetCurEntry().second);
     Core::Config->SetInt(CORE_CONFIG_GRAPHICS_TEXTUREFILTER, m_TextureFilter.GetCurEntry().second);
@@ -455,9 +466,10 @@ void cConfigMenu::SaveValues()
     // 
     if(bReset)
     {
-        InitResolution((iCurValue == 0xFFu) ? Core::System->GetDesktopRes() : vCurResolution);
+        InitResolution(vCurResolution);
         Core::Reset();
         InitFramerate();
+        this->__LoadDisplays();
     }
 }
 
@@ -470,7 +482,8 @@ void cConfigMenu::__UpdateShadowQuality()
     g_CurConfig.Graphics.iShadow = m_ShadowQuality.GetCurEntry().second;
 
     // 
-    g_pEnvironment->GetBackground()->GetOutdoor()->GetShadowMap()->Reconfigure();
+    cOutdoor* pOutdoor = g_pEnvironment->GetBackground()->GetOutdoor();
+    if(pOutdoor) pOutdoor->GetShadowMap()->Reconfigure();
     cShadow::Recompile();
 
     // 
@@ -497,4 +510,46 @@ void cConfigMenu::__UpdateLanguage()
 
     // 
     g_pMenu->GetTooltip()->Invalidate();
+    if(Core::System->GetDisplayCount() > 2u) this->__LoadDisplays();
+}
+
+
+// ****************************************************************
+// 
+void cConfigMenu::__LoadDisplays()
+{
+    // 
+    const coreUintW iOldEntry = m_Display.GetCurIndex();
+    m_Display.ClearEntries();
+
+    // 
+    m_Display.AddEntryLanguage("DISPLAY_PRIMARY", 0u);
+    if(Core::System->GetDisplayCount() == 2u)
+    {
+        m_Display.AddEntryLanguage("DISPLAY_SECONDARY", 1u);
+    }
+    else
+    {
+        for(coreUintW i = 1u, ie = Core::System->GetDisplayCount(); i < ie; ++i)
+            m_Display.AddEntry(PRINT("%s %d", Core::Language->GetString("DISPLAY_SECONDARY"), i), i);
+    }
+
+    // 
+    m_Display.SelectIndex((iOldEntry < m_Display.GetNumEntries()) ? iOldEntry : 0u);
+}
+
+
+// ****************************************************************
+// 
+void cConfigMenu::__LoadResolutions(const coreUintW iDisplayIndex)
+{
+    // 
+    m_Resolution.ClearEntries();
+
+    // 
+    const std::vector<coreVector2>& avResolutionList = Core::System->GetDisplayData(iDisplayIndex).avAvailableRes;
+    for(coreUintW i = avResolutionList.size(); i--; ) m_Resolution.AddEntry(PRINT("%.0f x %.0f", avResolutionList[i].x, avResolutionList[i].y), i);
+
+    // 
+    m_Resolution.SelectLast();
 }

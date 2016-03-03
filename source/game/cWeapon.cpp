@@ -147,6 +147,14 @@ void cRayWeapon::__ShootOwn()
     g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(2, 5.0f, m_pOwner, vPos + vDir*6.0f + vTan*1.4f, vDir)->MakeYellow()->MakeLighter(fAlpha);
     g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(2, 5.0f, m_pOwner, vPos + vDir*6.0f - vTan*1.4f, vDir)->MakeYellow()->MakeLighter(fAlpha);
 
+    //static bool test = false;
+    //test = !test;
+    //if(test) return;
+    //g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(1, 5.0f, m_pOwner, vPos + vDir*4.0f + vTan*3.2f, (vDir + vTan*0.050f*1.5f).Normalize())->MakeYellow()->MakeSmaller(0.85f)->MakeLighter(fAlpha);
+    //g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(1, 5.0f, m_pOwner, vPos + vDir*4.0f - vTan*3.2f, (vDir - vTan*0.050f*1.5f).Normalize())->MakeYellow()->MakeSmaller(0.85f)->MakeLighter(fAlpha);
+    //g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(1, 5.0f, m_pOwner, vPos + vDir*2.0f + vTan*4.8f, (vDir + vTan*0.050f*3.0f).Normalize())->MakeYellow()->MakeSmaller(0.7f)->MakeLighter(fAlpha);
+    //g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(1, 5.0f, m_pOwner, vPos + vDir*2.0f - vTan*4.8f, (vDir - vTan*0.050f*3.0f).Normalize())->MakeYellow()->MakeSmaller(0.7f)->MakeLighter(fAlpha);
+
     // play bullet sound-effect
     m_pBulletSound->PlayPosition(NULL, 1.0f, 0.5f, 0.0f, false, m_pOwner->GetPosition());
 }

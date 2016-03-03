@@ -41,7 +41,7 @@ protected:
 
 public:
     cBullet()noexcept;
-    virtual ~cBullet() = default;
+    virtual ~cBullet()override = default;
 
     FRIEND_CLASS(cBulletManager)
     ENABLE_COPY (cBullet)
@@ -103,7 +103,7 @@ private:
         std::vector<T> aBulletPool;   // semi-dynamic container with all bullets
 
         explicit sBulletSet(cOutline* pOutline)noexcept;
-        ~sBulletSet();
+        ~sBulletSet()override;
     };
 
 

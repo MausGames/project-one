@@ -16,7 +16,7 @@
 class cBlur final : public coreResourceRelation
 {
 private:
-    coreFrameBuffer m_aFrameBuffer[2];   // blur frame buffers (only texture, reduced resolution)
+    coreFrameBuffer m_aFrameBuffer[2];   // blur frame buffers (reduced resolution)
 
     coreProgramPtr m_apConvProgram[2];   // shader-programs for separate convolution (X and Y)
     coreObject2D   m_Transformer;        // object to draw into the next stage

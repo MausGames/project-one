@@ -37,7 +37,6 @@
 #define GRASS_LEAF_RESERVE   (1024u)
 #define GRASS_CLOUD_NUM      (64u)
 #define GRASS_CLOUD_RESERVE  (76u)   // # tested
-#define GRASS_CLOUD_DENSITY  (10u)
 
 #define SEA_STONE_NUM        (1536u)
 #define SEA_STONE_RESERVE    (256u)
@@ -48,7 +47,9 @@
 #define SEA_ANIMAL_2_RESERVE (256u)
 #define SEA_ALGAE_NUM        (2048u)
 #define SEA_ALGAE_RESERVE    (1024u)
-// bubbles, water-sound ?    
+
+#define CLOUD_CLOUD_NUM      (576u)
+#define CLOUD_CLOUD_RESERVE  (684u)   // # tested
 
 
 // ****************************************************************
@@ -56,7 +57,7 @@
 class INTERFACE cBackground
 {
 protected:
-    coreFrameBuffer m_FrameBuffer;                         // background frame buffer (intern, multisampled)
+    coreFrameBuffer m_FrameBuffer;                         // background frame buffer (multisampled)
     coreFrameBuffer m_ResolvedTexture;                     // resolved texture
 
     cOutdoor* m_pOutdoor;                                  // outdoor-surface object (optional)
@@ -100,8 +101,9 @@ public:
 
 
 protected:
-    // create infinite looking object list
-    static void _FillInfinite(coreBatchList* OUTPUT pObjectList);
+    // 
+    static void _FillInfinite   (coreBatchList* OUTPUT pObjectList);
+    static void _SortBackToFront(coreBatchList* OUTPUT pObjectList);
 
     // check for intersection with other objects
     static coreBool _CheckIntersection     (const coreBatchList* pObjectList, const coreVector2& vNewPos, const coreFloat fDistanceSq);
@@ -134,7 +136,7 @@ private:
 
 // ****************************************************************
 // grass background class
-class cGrassBackground : public cBackground
+class cGrassBackground final : public cBackground
 {
 private:
     coreSoundPtr m_pNatureSound;   // nature sound-effect
@@ -144,47 +146,16 @@ private:
 
 
 public:
-    explicit cGrassBackground(const coreUint8 iCloudDensity = 1u)noexcept;
-    virtual ~cGrassBackground();
+    cGrassBackground()noexcept;
+    ~cGrassBackground()override;
 
     DISABLE_COPY(cGrassBackground)
-    ASSIGN_ID(11, "Grass")
+    ASSIGN_ID(1, "Grass")
 
 
 protected:
     // execute own routines
     void __MoveOwn()override;
-};
-
-
-// ****************************************************************
-// cloudy grass background class
-class cCloudBackground final : public cGrassBackground
-{
-private:
-    coreObject2D m_Overlay;       // 
-
-    coreSoundPtr m_pWindSound;    // wind sound-effect
-    coreFloat    m_fWindVolume;   // dedicated volume (to adjust with cloud density)
-
-
-public:
-    cCloudBackground()noexcept;
-    ~cCloudBackground();
-
-    DISABLE_COPY(cCloudBackground)
-    ASSIGN_ID(1, "Cloud")
-
-    // 
-    void SetCloudAlpha  (const coreFloat fAlpha);
-    void SetOverlayAlpha(const coreFloat fAlpha);
-    void ReduceClouds();
-
-
-private:
-    // execute own routines
-    void __RenderOwn()override;
-    void __MoveOwn  ()override;
 };
 
 
@@ -277,6 +248,32 @@ public:
 
     DISABLE_COPY(cMossBackground)
     ASSIGN_ID(7, "Moss")
+};
+
+
+// ****************************************************************
+// cloud background class
+class cCloudBackground final : public cBackground
+{
+private:
+    coreObject2D m_Overlay;      // 
+    coreFlow     m_fOffset;      // 
+
+    coreSoundPtr m_pWindSound;   // wind sound-effect
+
+
+public:
+    cCloudBackground()noexcept;
+    ~cCloudBackground()override;
+
+    DISABLE_COPY(cCloudBackground)
+    ASSIGN_ID(99, "Cloud")
+
+
+private:
+    // execute own routines
+    void __RenderOwn()override;
+    void __MoveOwn  ()override;
 };
 
 

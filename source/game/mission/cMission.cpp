@@ -38,7 +38,7 @@ void cMission::Setup()
     STAGE_MAIN
     {
         // begin mission
-        if(g_pGame->GetTimeMission() >= 0.0f)
+        if(g_pGame->GetTimeGame() >= 0.0f)
             STAGE_FINISH_NOW
     });
 

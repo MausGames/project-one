@@ -326,6 +326,21 @@ void cBackground::_FillInfinite(coreBatchList* OUTPUT pObjectList)
 
 
 // ****************************************************************
+// 
+void cBackground::_SortBackToFront(coreBatchList* OUTPUT pObjectList)
+{
+    coreSet<coreObject3D*>* pContent = pObjectList->List();
+    WARN_IF(pContent->size() < 2u) return;
+
+    // 
+    std::sort(pContent->begin(), pContent->end(), [](const coreObject3D* A, const coreObject3D* B)
+    {
+        return (A->GetPosition().z < B->GetPosition().z);
+    });
+}
+
+
+// ****************************************************************
 // check for intersection with other objects
 coreBool cBackground::_CheckIntersection(const coreBatchList* pObjectList, const coreVector2& vNewPos, const coreFloat fDistanceSq)
 {

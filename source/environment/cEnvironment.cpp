@@ -14,7 +14,8 @@
 cEnvironment::cEnvironment()noexcept
 : m_pBackground    (NULL)
 , m_pOldBackground (NULL)
-, m_Transition     (coreTimer(1.3f, 0.9f, 1u))
+, m_TransitionTime (coreTimer(1.3f, 0.0f, 1u))
+, m_vTransitionDir (coreVector2(0.0f,0.0f))
 , m_fFlyOffset     (0.0f)
 , m_fSideOffset    (0.0f)
 , m_vCameraPos     (CAMERA_POSITION)
@@ -26,20 +27,25 @@ cEnvironment::cEnvironment()noexcept
     m_FrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     // create mix object
-    m_MixObject.DefineProgram("full_transition_program");
     m_MixObject.DefineTexture(2u, "menu_background_black.png");
     m_MixObject.SetSize      (coreVector2(1.0f,1.0f));
     m_MixObject.Move();
 
+    // 
+    m_apMixProgram[ENVIRONMENT_MIX_FADE]    = Core::Manager::Resource->Get<coreProgram>("full_transition_fade_program");
+    m_apMixProgram[ENVIRONMENT_MIX_WIPE]    = Core::Manager::Resource->Get<coreProgram>("full_transition_wipe_program");
+    m_apMixProgram[ENVIRONMENT_MIX_CURTAIN] = Core::Manager::Resource->Get<coreProgram>("full_transition_curtain_program");
+    m_apMixProgram[ENVIRONMENT_MIX_CIRCLE]  = Core::Manager::Resource->Get<coreProgram>("full_transition_circle_program");
+
     // reset transformation properties
     m_avDirection[1] = m_avDirection[0] = coreVector2(0.0f,1.0f);
     m_avSide     [1] = m_avSide     [0] = coreVector2(0.0f,0.0f);
-    m_afSpeed    [1] = m_afSpeed    [0] = 2.0f;
+    m_afSpeed    [1] = m_afSpeed    [0] = 1.0f;
     m_afHeight   [1] = m_afHeight   [0] = 0.0f;
 
     // load first background
     m_pBackground = new cNoBackground();
-    this->ChangeBackground(MAX(Core::Config->GetInt("Game", "Background", 0), REF_ID(cCloudBackground::ID)));
+    this->ChangeBackground(Core::Config->GetInt("Game", "Background", REF_ID(cCloudBackground::ID)), ENVIRONMENT_MIX_CURTAIN, 0.75f, coreVector2(1.0f,0.0f));
 }
 
 
@@ -70,16 +76,17 @@ void cEnvironment::Render()
     // render current background
     m_pBackground->Render();
 
-    if(m_Transition.GetStatus())
+    if(m_TransitionTime.GetStatus())
     {
         if(m_MixObject.GetProgram().IsUsable())
         {
             // render old background
             m_pOldBackground->Render();
 
-            // set transition time
+            // set transition uniforms
             m_MixObject.GetProgram()->Enable();
-            m_MixObject.GetProgram()->SendUniform("u_v1Transition", m_Transition.GetValue(CORE_TIMER_GET_NORMAL));
+            m_MixObject.GetProgram()->SendUniform("u_v1TransitionTime", m_TransitionTime.GetValue(CORE_TIMER_GET_NORMAL));
+            m_MixObject.GetProgram()->SendUniform("u_v2TransitionDir",  m_vTransitionDir);
 
             glDisable(GL_DEPTH_TEST);
             glDisable(GL_BLEND);
@@ -106,8 +113,8 @@ void cEnvironment::Move()
     // update all transformation properties
     m_avDirection[0] = (m_avDirection[0] + (m_avDirection[1] - m_avDirection[0]) * (Core::System->GetTime() *  8.0f)).Normalize();
     m_avSide     [0] =  m_avSide     [0] + (m_avSide     [1] - m_avSide     [0]) * (Core::System->GetTime() * 16.0f);
-    m_afSpeed    [0] =  m_afSpeed    [0] + (m_afSpeed    [1] - m_afSpeed    [0]) * (Core::System->GetTime() *  1.6f);
-    m_afHeight   [0] =  m_afHeight   [0] + (m_afHeight   [1] - m_afHeight   [0]) * (Core::System->GetTime() *  1.6f);
+    m_afSpeed    [0] =  m_afSpeed    [0] + (m_afSpeed    [1] - m_afSpeed    [0]) * (Core::System->GetTime() *  1.0f);
+    m_afHeight   [0] =  m_afHeight   [0] + (m_afHeight   [1] - m_afHeight   [0]) * (Core::System->GetTime() *  2.0f);
 
     // calculate global fly offset
     m_fFlyOffset += Core::System->GetTime() * m_afSpeed[0];
@@ -125,10 +132,10 @@ void cEnvironment::Move()
     // move current background
     m_pBackground->Move();
 
-    if(m_Transition.GetStatus())
+    if(m_TransitionTime.GetStatus())
     {
         // update transition and move old background (do not update while new background is still loading)
-        if(!Core::Manager::Resource->IsLoading() && m_bActive && m_Transition.Update(1.0f))
+        if(!Core::Manager::Resource->IsLoading() && m_bActive && m_TransitionTime.Update(1.0f))
         {
             // delete old background
             m_MixObject.DefineTexture(0u, NULL);
@@ -141,7 +148,7 @@ void cEnvironment::Move()
 
 // ****************************************************************
 // change current background
-void cEnvironment::ChangeBackground(const coreInt32 iID)
+void cEnvironment::ChangeBackground(const coreInt32 iID, const coreUintW iTransitionType, const coreFloat fTransitionSpeed, const coreVector2& vTransitionDir)
 {
     if(m_pBackground) if(m_pBackground->GetID() == iID) return;
 
@@ -155,10 +162,10 @@ void cEnvironment::ChangeBackground(const coreInt32 iID)
     // create new background
     switch(iID)
     {
-    default: ASSERT(false)
+    default:
+    case cCloudBackground  ::ID: m_pBackground = new cCloudBackground  (); break;
     case cNoBackground     ::ID: m_pBackground = new cNoBackground     (); break;
     case cGrassBackground  ::ID: m_pBackground = new cGrassBackground  (); break;
-    case cCloudBackground  ::ID: m_pBackground = new cCloudBackground  (); break;
     case cSeaBackground    ::ID: m_pBackground = new cSeaBackground    (); break;
     case cDesertBackground ::ID: m_pBackground = new cDesertBackground (); break;
     case cSpaceBackground  ::ID: m_pBackground = new cSpaceBackground  (); break;
@@ -169,11 +176,16 @@ void cEnvironment::ChangeBackground(const coreInt32 iID)
 
     if(m_pOldBackground)
     {
-        // start transition
-        m_Transition.Play(CORE_TIMER_PLAY_RESET);
-        m_Transition.SetValue(-0.15f);
+        ASSERT((iTransitionType < ENVIRONMENT_MIXES) && fTransitionSpeed && vTransitionDir.IsNormalized())
 
-        // set transition textures
+        // start transition
+        m_TransitionTime.Play(CORE_TIMER_PLAY_RESET);
+        m_TransitionTime.SetValue(-0.15f);
+        m_TransitionTime.SetSpeed(0.9f * fTransitionSpeed);
+        m_vTransitionDir = vTransitionDir;
+
+        // set transition resources
+        m_MixObject.DefineProgram(m_apMixProgram[iTransitionType]);
         m_MixObject.DefineTexture(0u, m_pOldBackground->GetResolvedTexture()->GetColorTarget(0u).pTexture);
         m_MixObject.DefineTexture(1u, m_pBackground   ->GetResolvedTexture()->GetColorTarget(0u).pTexture);
     }
@@ -184,7 +196,7 @@ void cEnvironment::ChangeBackground(const coreInt32 iID)
 // 
 coreFloat cEnvironment::RetrieveTransitionBlend(cBackground* pBackground)
 {
-    return MAX(m_Transition.GetValue((m_pBackground == pBackground) ? CORE_TIMER_GET_NORMAL : CORE_TIMER_GET_REVERSED), 0.0f);
+    return MAX(m_TransitionTime.GetValue((m_pBackground == pBackground) ? CORE_TIMER_GET_NORMAL : CORE_TIMER_GET_REVERSED), 0.0f);
 }
 
 
@@ -217,7 +229,7 @@ void cEnvironment::__Reset(const coreResourceReset bInit)
 
         // re-create background with saved ID
         m_pBackground = NULL;
-        this->ChangeBackground(iID);
+        this->ChangeBackground(iID, ENVIRONMENT_MIX_FADE, 0.0f);
 
         // re-create environment frame buffer
         m_FrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
@@ -229,7 +241,7 @@ void cEnvironment::__Reset(const coreResourceReset bInit)
         // unbind textures and stop possible transition
         m_MixObject.DefineTexture(0u, NULL);
         m_MixObject.DefineTexture(1u, NULL);
-        m_Transition.Stop();
+        m_TransitionTime.Stop();
 
         // delete both backgrounds
         SAFE_DELETE(m_pOldBackground)

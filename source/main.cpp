@@ -8,6 +8,10 @@
 //////////////////////////////////////////////////////
 #include "main.h"
 
+#define ASSERT_ALL {ASSERT(g_pOutline)        ASSERT(g_pGlow)           ASSERT(g_pDistortion) \
+                    ASSERT(g_pSpecialEffects) ASSERT(g_pPostProcessing) ASSERT(g_pForeground) \
+                    ASSERT(g_pEnvironment)    ASSERT(g_pMenu)           ASSERT(g_pTheater)}
+
 coreVector2      g_vGameResolution = coreVector2(0.0f,0.0f);
 coreVector2      g_vMenuCenter     = coreVector2(0.0f,0.0f);
 coreMusicPlayer  g_MusicPlayer     = {};
@@ -21,6 +25,7 @@ cPostProcessing* g_pPostProcessing = NULL;
 cForeground*     g_pForeground     = NULL;
 cEnvironment*    g_pEnvironment    = NULL;
 cMenu*           g_pMenu           = NULL;
+cTheater*        g_pTheater        = NULL;
 cGame*           g_pGame           = NULL;
 
 static coreUint64 m_iOldPerfTime = 0u;      // last measured high-precision time value
@@ -60,6 +65,7 @@ void CoreApp::Init()
     g_pForeground     = new cForeground();
     g_pEnvironment    = new cEnvironment();
     g_pMenu           = new cMenu();
+    g_pTheater        = new cTheater();
 }
 
 
@@ -69,6 +75,7 @@ void CoreApp::Exit()
 {
     // delete and exit main components
     SAFE_DELETE(g_pGame)
+    SAFE_DELETE(g_pTheater)
     SAFE_DELETE(g_pMenu)
     SAFE_DELETE(g_pEnvironment)
     SAFE_DELETE(g_pForeground)
@@ -91,6 +98,8 @@ void CoreApp::Exit()
 // render the application
 void CoreApp::Render()
 {
+    ASSERT_ALL
+
     if(!g_pMenu->IsPausedWithStep())
     {
         Core::Debug->MeasureStart("Update");
@@ -114,16 +123,24 @@ void CoreApp::Render()
         Core::Debug->MeasureEnd("Environment");
         Core::Debug->MeasureStart("Foreground");
         {
-            if(g_pGame || g_pSpecialEffects->IsActive())
+            if(g_pGame || g_pTheater->IsActive() || g_pSpecialEffects->IsActive())
             {
                 // create foreground frame buffer
                 g_pForeground->Start();
                 {
+                    // render the theater
+                    g_pTheater->Render();
+
                     // render the game
                     if(g_pGame) g_pGame->Render();
+                    else
+                    {
+                        // apply deferred outline-layer
+                        g_pOutline->Apply();
 
-                    // render special-effects
-                    else g_pSpecialEffects->Render(true);
+                        // render special-effects
+                        g_pSpecialEffects->Render(true);
+                    }
                 }
                 g_pForeground->End();
             }
@@ -161,6 +178,8 @@ void CoreApp::Render()
 // move the application
 void CoreApp::Move()
 {
+    ASSERT_ALL
+
     // lock framerate and override elapsed time
     if(g_pGame) LockFramerate();
 
@@ -169,12 +188,13 @@ void CoreApp::Move()
         // update input interface
         UpdateInput();
 
-        // move menu
+        // move the menu
         g_pMenu->Move();
         if(!g_pMenu->IsPaused())
         {
-            // move environment and game
+            // move environment, theater and game
             g_pEnvironment->Move();
+            g_pTheater    ->Move();
             if(g_pGame) g_pGame->Move();
 
             // move special-effects
@@ -277,7 +297,8 @@ static void DebugGame()
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LALT), CORE_INPUT_HOLD))
         {
             #define __LOAD_GAME(x) {g_pGame = new cGame(false); g_pGame->LoadMission(REF_ID(x)); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f);}
-            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS)) __LOAD_GAME(cViridoMission::ID)
+            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS)) __LOAD_GAME(cIntroMission ::ID)
+            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2), CORE_INPUT_PRESS)) __LOAD_GAME(cViridoMission::ID)
         }
     }
 
@@ -293,14 +314,15 @@ static void DebugGame()
 
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LSHIFT), CORE_INPUT_HOLD))
     {
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(REF_ID(cGrassBackground  ::ID));
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(REF_ID(cCloudBackground  ::ID));
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(3), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(REF_ID(cSeaBackground    ::ID));
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(4), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(REF_ID(cDesertBackground ::ID));
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(5), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(REF_ID(cSpaceBackground  ::ID));
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(6), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(REF_ID(cVolcanoBackground::ID));
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(7), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(REF_ID(cSnowBackground   ::ID));
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(8), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(REF_ID(cMossBackground   ::ID));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(REF_ID(cNoBackground     ::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(REF_ID(cGrassBackground  ::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(3), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(REF_ID(cSeaBackground    ::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(4), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(REF_ID(cDesertBackground ::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(5), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(REF_ID(cSpaceBackground  ::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(6), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(REF_ID(cVolcanoBackground::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(7), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(REF_ID(cSnowBackground   ::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(8), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(REF_ID(cMossBackground   ::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(9), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(REF_ID(cCloudBackground  ::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
 
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS))
             Core::System->Quit();
@@ -346,6 +368,33 @@ static void DebugGame()
         fHeight -= 10.0f * Core::System->GetTime();
     }
     g_pEnvironment->SetTargetHeight(fHeight);
+
+    static coreFloat fHeight2 = 0.0f;
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(U), CORE_INPUT_HOLD))
+    {
+        fHeight2 += 10.0f * Core::System->GetTime();
+    }
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(I), CORE_INPUT_HOLD))
+    {
+        fHeight2 -= 10.0f * Core::System->GetTime();
+    }
+    if(fHeight2 && g_pEnvironment->GetBackground()->GetOutdoor()) g_pEnvironment->GetBackground()->GetOutdoor()->SetHeightOffset(fHeight2);
+
+    static coreFloat fHeight3 = 1.0f;
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(E), CORE_INPUT_HOLD))
+    {
+        fHeight3 += 0.1f * Core::System->GetTime();
+    }
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(R), CORE_INPUT_HOLD))
+    {
+        fHeight3 -= 0.1f * Core::System->GetTime();
+    }
+    if((fHeight3 != 1.0f) && g_pEnvironment->GetBackground()->GetOutdoor()) g_pEnvironment->GetBackground()->GetOutdoor()->SetHeightFactor(fHeight3);
+
+    Core::Debug->InspectValue("Height", fHeight2);
+
+    //g_pEnvironment->GetBackground()->GetOutdoor()->SetHeightOffset(-24.5f);
+    //g_pEnvironment->GetBackground()->GetOutdoor()->SetHeightFactor(0.0f);
 
     // ########################## DEBUG ##########################
 }

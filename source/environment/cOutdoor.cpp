@@ -15,6 +15,8 @@ cOutdoor::cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom
 : m_iVertexOffset (0u)
 , m_iIndexOffset  (0u)
 , m_fFlyOffset    (0.0f)
+, m_fHeightOffset (0.0f)
+, m_fHeightFactor (1.0f)
 , m_iAlgorithm    (0u)
 , m_fGrade        (0.0f)
 {
@@ -62,6 +64,7 @@ void cOutdoor::Render(const coreProgramPtr& pProgram)
     pProgram->SendUniform(CORE_SHADER_UNIFORM_3D_POSITION, coreVector3(0.0f,0.0f,0.0f));
     pProgram->SendUniform(CORE_SHADER_UNIFORM_3D_SIZE,     coreVector3(1.0f,1.0f,1.0f));
     pProgram->SendUniform(CORE_SHADER_UNIFORM_3D_ROTATION, coreVector4::QuatIdentity());
+    pProgram->SendUniform("u_v2HeightModifier",            coreVector2(m_fHeightOffset, m_fHeightFactor));
 
     // draw the model
     m_pModel->Enable();
@@ -79,8 +82,9 @@ void cOutdoor::Render()
     if(!m_pProgram.IsUsable()) return;
     if(!m_pProgram->Enable())  return;
 
-    // send shadow matrix to shader-program
+    // update all object uniforms
     cShadow::EnableShadowRead(m_iHandleIndex);
+    m_pProgram->SendUniform("u_v2HeightModifier", coreVector2(m_fHeightOffset, m_fHeightFactor));
 
     // enable all active textures
     coreTexture::EnableAll(m_apTexture);
@@ -274,7 +278,7 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
         pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_TEXCOORD_NUM, 1u, GL_INT, true, 0u);
     }
 
-    Core::Log->Info(PRINT("Outdoor-Surface loaded (%d:%.0f)", iAlgorithm, fGrade));
+    Core::Log->Info("Outdoor-Surface loaded (%d:%.0f)", iAlgorithm, fGrade);
 }
 
 
@@ -391,7 +395,7 @@ coreFloat cOutdoor::RetrieveHeight(const coreVector2& vPosition)
     // interpolate between all height values
     const coreFloat fFractX = FRACT(fX);
     const coreFloat fFractY = FRACT(fY);
-    return LERP(LERP(fH00, fH01, fFractX), LERP(fH10, fH11, fFractX), fFractY);
+    return LERP(LERP(fH00, fH01, fFractX), LERP(fH10, fH11, fFractX), fFractY) * m_fHeightFactor + m_fHeightOffset;
 }
 
 

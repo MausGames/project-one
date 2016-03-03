@@ -56,6 +56,7 @@ private:
 
     cMission* m_pMission;                    // active mission (should never be NULL)
 
+    coreFlow m_fTimeGame;                    // 
     coreFlow m_fTimeMission;                 // total time in mission
     coreFlow m_afTimeBoss[MISSION_BOSSES];   // total time per boss battle
 
@@ -83,6 +84,10 @@ public:
     void RestartMission();
 
     // 
+    inline void StartIntro() {ADD_VALUE(m_iStatus, GAME_STATUS_INTRO)}
+    inline void StartOutro() {ADD_VALUE(m_iStatus, GAME_STATUS_OUTRO) REMOVE_VALUE(m_iStatus, GAME_STATUS_PLAY)}
+
+    // 
     void PushDepthLevel();
     void OffsetDepthLevel(const coreFloat fOffset)const;
 
@@ -101,6 +106,7 @@ public:
     inline cMission*       GetMission            ()const                  {ASSERT(m_pMission) return m_pMission;}
 
     // get object properties
+    inline const coreFloat& GetTimeGame   ()const                       {return m_fTimeGame;}
     inline const coreFloat& GetTimeMission()const                       {return m_fTimeMission;}
     inline const coreFloat& GetTimeBoss   (const coreUintW iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_afTimeBoss[iIndex];}
     inline const coreUint8& GetStatus     ()const                       {return m_iStatus;}

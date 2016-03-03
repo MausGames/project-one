@@ -19,7 +19,8 @@ enum eEnemyStatus : coreUint8
 {
     ENEMY_STATUS_DEAD     = 0x01u,   // completely removed from the game
     ENEMY_STATUS_BOSS     = 0x02u,   // 
-    ENEMY_STATUS_ASSIGNED = 0x04u    // enemy is currently assigned to something
+    ENEMY_STATUS_MUTE     = 0x04u,   // 
+    ENEMY_STATUS_ASSIGNED = 0x08u    // enemy is currently assigned to something
 };
 
 
@@ -33,7 +34,7 @@ protected:
 
 public:
     cEnemy()noexcept;
-    virtual ~cEnemy() = default;
+    virtual ~cEnemy()override = default;
 
     FRIEND_CLASS(cEnemyManager)
     ENABLE_COPY (cEnemy)
@@ -127,7 +128,7 @@ private:
         std::vector<T*> apEnemyPool;   // semi-dynamic container with all enemies
 
         sEnemySet()noexcept;
-        ~sEnemySet();
+        ~sEnemySet()override;
     };
 
 

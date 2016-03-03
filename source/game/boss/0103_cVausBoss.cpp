@@ -27,7 +27,7 @@ cVausBoss::cVausBoss()noexcept
     this->SetSize(coreVector3(2.5f,2.5f,2.5f));
 
     // configure the boss
-    this->Configure(10000, COLOR_ENEMY_YELLOW);
+    this->Configure(10000, COLOR_SHIP_YELLOW);
 }
 
 

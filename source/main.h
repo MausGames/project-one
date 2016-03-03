@@ -41,6 +41,7 @@
 // TODO: create timer and int-value as tick-multiplier for sustained damage
 // TODO: remove magic numbers (regularly)
 // TODO: test framerate-lock for g-sync stuff
+// TODO: clean up shader modifiers
 
 
 // ****************************************************************
@@ -51,67 +52,66 @@
 
 // ****************************************************************
 // general definitions
-#define PLAYERS             (2u)
-#define FRAMERATE_VALUE     (60.0f)
-#define FRAMERATE_TIME      (1.0f / FRAMERATE_VALUE)
-#define CAMERA_POSITION     (coreVector3(0.0f, 0.0f, 110.0f))
-#define CAMERA_DIRECTION    (coreVector3(0.0f, 0.0f,  -1.0f))
-#define CAMERA_ORIENTATION  (coreVector3(0.0f, 1.0f,   0.0f))
-#define LIGHT_DIRECTION     (coreVector3(0.583953857f, -0.642349243f, -0.496360779f))
+#define PLAYERS              (2u)
+#define FRAMERATE_VALUE      (60.0f)
+#define FRAMERATE_TIME       (1.0f / FRAMERATE_VALUE)
+#define CAMERA_POSITION      (coreVector3(0.0f, 0.0f, 110.0f))
+#define CAMERA_DIRECTION     (coreVector3(0.0f, 0.0f,  -1.0f))
+#define CAMERA_ORIENTATION   (coreVector3(0.0f, 1.0f,   0.0f))
+#define LIGHT_DIRECTION      (coreVector3(0.583953857f, -0.642349243f, -0.496360779f))
 
 // color values
-#define COLOR_MENU_WHITE    (coreVector3(1.000f, 1.000f, 1.000f) * MENU_CONTRAST_WHITE)
-#define COLOR_MENU_BLACK    (coreVector3(1.000f, 1.000f, 1.000f) * MENU_CONTRAST_BLACK)
-#define COLOR_MENU_YELLOW   (coreVector3(1.000f, 0.824f, 0.392f))
-#define COLOR_MENU_ORANGE   (coreVector3(1.000f, 0.443f, 0.227f))
-#define COLOR_MENU_RED      (coreVector3(1.000f, 0.275f, 0.275f))
-#define COLOR_MENU_PURPLE   (coreVector3(0.710f, 0.333f, 1.000f))
-#define COLOR_MENU_BLUE     (coreVector3(0.102f, 0.702f, 1.000f))
-#define COLOR_MENU_GREEN    (coreVector3(0.118f, 0.745f, 0.353f))
-#define COLOR_MENU_BRONZE   (coreVector3(0.925f, 0.663f, 0.259f))
-#define COLOR_MENU_SILVER   (coreVector3(0.855f, 0.855f, 0.878f))
-#define COLOR_MENU_GOLD     (coreVector3(1.000f, 0.859f, 0.000f))
-#define COLOR_ENERGY_YELLOW (coreVector3(0.900f, 0.800f, 0.380f))
-#define COLOR_ENERGY_ORANGE (coreVector3(1.000f, 0.400f, 0.000f))
-#define COLOR_ENERGY_RED    (coreVector3(1.000f, 0.275f, 0.275f))
-#define COLOR_ENERGY_PURPLE (coreVector3(0.450f, 0.200f, 1.000f))
-#define COLOR_ENERGY_BLUE   (coreVector3(0.100f, 0.430f, 1.000f))
-#define COLOR_ENERGY_GREEN  (coreVector3(0.270f, 0.710f, 0.270f))
-#define COLOR_FIRE_ORANGE   (coreVector3(0.991f, 0.305f, 0.042f))
-#define COLOR_FIRE_BLUE     (coreVector3(0.306f, 0.527f, 1.000f))
-#define COLOR_ENEMY_YELLOW  (coreVector3( 51.0f/360.0f, 100.0f/100.0f,  85.0f/100.0f).HSVtoRGB())
-#define COLOR_ENEMY_ORANGE  (coreVector3( 34.0f/360.0f, 100.0f/100.0f, 100.0f/100.0f).HSVtoRGB())
-#define COLOR_ENEMY_RED     (coreVector3(  0.0f/360.0f,  68.0f/100.0f,  90.0f/100.0f).HSVtoRGB())
-#define COLOR_ENEMY_PURPLE  (purple)
-#define COLOR_ENEMY_BLUE    (coreVector3(201.0f/360.0f,  74.0f/100.0f,  85.0f/100.0f).HSVtoRGB())
-#define COLOR_ENEMY_CYAN    (coreVector3(183.0f/360.0f,  70.0f/100.0f,  85.0f/100.0f).HSVtoRGB())
-#define COLOR_ENEMY_GREEN   (green)
-#define COLOR_ENEMY_BROWN   (brown)
-#define COLOR_ENEMY_GREY    (coreVector3(  0.0f/360.0f,   0.0f/100.0f,  60.0f/100.0f).HSVtoRGB())
-#define COLOR_ENEMY_ICE     (coreVector3(208.0f/360.0f,  32.0f/100.0f,  90.0f/100.0f).HSVtoRGB())
-#define COLOR_PLAYER_RED    (COLOR_ENEMY_RED)
-#define COLOR_PLAYER_BLUE   (COLOR_ENEMY_BLUE)
-#define COLOR_HEALTH(x)     (TernaryLerp(COLOR_MENU_RED, COLOR_MENU_YELLOW, COLOR_MENU_GREEN, x))
-#define COLOR_CHAIN(x)      (TernaryLerp(COLOR_MENU_RED, COLOR_MENU_PURPLE, COLOR_MENU_BLUE,  x))
+#define COLOR_MENU_WHITE     (coreVector3(1.000f, 1.000f, 1.000f) * MENU_CONTRAST_WHITE)
+#define COLOR_MENU_BLACK     (coreVector3(1.000f, 1.000f, 1.000f) * MENU_CONTRAST_BLACK)
+#define COLOR_MENU_YELLOW    (coreVector3(1.000f, 0.824f, 0.392f))
+#define COLOR_MENU_ORANGE    (coreVector3(1.000f, 0.443f, 0.227f))
+#define COLOR_MENU_RED       (coreVector3(1.000f, 0.275f, 0.275f))
+#define COLOR_MENU_PURPLE    (coreVector3(0.710f, 0.333f, 1.000f))
+#define COLOR_MENU_BLUE      (coreVector3(0.102f, 0.702f, 1.000f))
+#define COLOR_MENU_GREEN     (coreVector3(0.118f, 0.745f, 0.353f))
+#define COLOR_MENU_BRONZE    (coreVector3(0.925f, 0.663f, 0.259f))
+#define COLOR_MENU_SILVER    (coreVector3(0.855f, 0.855f, 0.878f))
+#define COLOR_MENU_GOLD      (coreVector3(1.000f, 0.859f, 0.000f))
+#define COLOR_ENERGY_YELLOW  (coreVector3(0.900f, 0.800f, 0.380f))
+#define COLOR_ENERGY_ORANGE  (coreVector3(1.000f, 0.400f, 0.000f))
+#define COLOR_ENERGY_RED     (coreVector3(1.000f, 0.275f, 0.275f))
+#define COLOR_ENERGY_PURPLE  (coreVector3(0.450f, 0.200f, 1.000f))
+#define COLOR_ENERGY_BLUE    (coreVector3(0.100f, 0.430f, 1.000f))
+#define COLOR_ENERGY_GREEN   (coreVector3(0.270f, 0.710f, 0.270f))
+#define COLOR_FIRE_ORANGE    (coreVector3(0.991f, 0.305f, 0.042f))
+#define COLOR_FIRE_BLUE      (coreVector3(0.306f, 0.527f, 1.000f))
+#define COLOR_SHIP_YELLOW    (coreVector3( 50.0f/360.0f, 100.0f/100.0f,  85.0f/100.0f).HSVtoRGB())
+#define COLOR_SHIP_ORANGE    (coreVector3( 34.0f/360.0f, 100.0f/100.0f, 100.0f/100.0f).HSVtoRGB())
+#define COLOR_SHIP_RED       (coreVector3(  0.0f/360.0f,  68.0f/100.0f,  90.0f/100.0f).HSVtoRGB())
+#define COLOR_SHIP_PURPLE    (coreVector3(287.0f/360.0f,  55.0f/100.0f,  85.0f/100.0f).HSVtoRGB())
+#define COLOR_SHIP_BLUE      (coreVector3(201.0f/360.0f,  74.0f/100.0f,  85.0f/100.0f).HSVtoRGB())
+#define COLOR_SHIP_CYAN      (coreVector3(183.0f/360.0f,  70.0f/100.0f,  85.0f/100.0f).HSVtoRGB())
+#define COLOR_SHIP_GREEN     (coreVector3(118.0f/360.0f,  58.0f/100.0f,  70.0f/100.0f).HSVtoRGB())
+#define COLOR_SHIP_BROWN     (coreVector3( 40.0f/360.0f,  95.0f/100.0f,  70.0f/100.0f).HSVtoRGB())
+#define COLOR_SHIP_GREY      (coreVector3(  0.0f/360.0f,   0.0f/100.0f,  60.0f/100.0f).HSVtoRGB())
+#define COLOR_SHIP_ICE       (coreVector3(208.0f/360.0f,  32.0f/100.0f,  90.0f/100.0f).HSVtoRGB())
+#define COLOR_HEALTH(x)      (TernaryLerp(COLOR_MENU_RED, COLOR_MENU_YELLOW, COLOR_MENU_GREEN, x))
+#define COLOR_CHAIN(x)       (TernaryLerp(COLOR_MENU_RED, COLOR_MENU_PURPLE, COLOR_MENU_BLUE,  x))
 
 // shader modifiers
-#define SHADER_SHADOW(x)    PRINT("#define _P1_SHADOW_ (%d) \n", x)   // outdoor, object_ground
-#define SHADER_GLOW         "#define _P1_GLOW_       (1) \n"          // post, outdoor, object_ship
-#define SHADER_DISTORTION   "#define _P1_DISTORTION_ (1) \n"          // post
-#define SHADER_DARKNESS     "#define _P1_DARKNESS_   (1) \n"          // object_ship
-#define SHADER_BULLET       "#define _P1_BULLET_     (1) \n"          // energy
-#define SHADER_SPHERIC      "#define _P1_SPHERIC_    (1) \n"          // decal, energy
-#define SHADER_INVERT       "#define _P1_INVERT_     (1) \n"          // energy
-#define SHADER_DIRECT       "#define _P1_DIRECT_     (1) \n"          // outline, energy, effect_distortion
-#define SHADER_RING         "#define _P1_RING_       (1) \n"          // energy
-#define SHADER_WAVE         "#define _P1_WAVE_       (1) \n"          // object
+#define SHADER_TRANSITION(x) PRINT("#define _P1_TRANSITION_ (%d) \n", x)   // full_transition
+#define SHADER_SHADOW(x)     PRINT("#define _P1_SHADOW_     (%d) \n", x)   // outdoor, object_ground
+#define SHADER_GLOW          "#define _P1_GLOW_       (1) \n"              // post, outdoor, object_ship
+#define SHADER_DISTORTION    "#define _P1_DISTORTION_ (1) \n"              // post
+#define SHADER_DARKNESS      "#define _P1_DARKNESS_   (1) \n"              // object_ship
+#define SHADER_BULLET        "#define _P1_BULLET_     (1) \n"              // energy
+#define SHADER_SPHERIC       "#define _P1_SPHERIC_    (1) \n"              // decal, energy
+#define SHADER_INVERT        "#define _P1_INVERT_     (1) \n"              // energy
+#define SHADER_DIRECT        "#define _P1_DIRECT_     (1) \n"              // outline, energy, effect_distortion
+#define SHADER_RING          "#define _P1_RING_       (1) \n"              // energy
+#define SHADER_WAVE          "#define _P1_WAVE_       (1) \n"              // object
 
 // collision types
-#define TYPE_PLAYER         (1)
-#define TYPE_ENEMY          (2)
-#define TYPE_BULLET_PLAYER  (11)
-#define TYPE_BULLET_ENEMY   (12)
-#define TYPE_OBJECT(x)      (100+x)
+#define TYPE_PLAYER          (1)
+#define TYPE_ENEMY           (2)
+#define TYPE_BULLET_PLAYER   (11)
+#define TYPE_BULLET_ENEMY    (12)
+#define TYPE_OBJECT(x)       (100+x)
 
 // sub-class and object ID macros
 #define ENABLE_ID                                              \
@@ -198,11 +198,13 @@ extern cPostProcessing* g_pPostProcessing;   // main post-processing object
 #include "game/boss/cBoss.h"
 #include "game/mission/cMission.h"
 #include "game/cPlayer.h"
+#include "game/cTheater.h"
 #include "game/cGame.h"
 
 extern cForeground*     g_pForeground;       // main foreground object
 extern cEnvironment*    g_pEnvironment;      // main environment object
 extern cMenu*           g_pMenu;             // main menu object
+extern cTheater*        g_pTheater;          // main theater object
 extern cGame*           g_pGame;             // main game object
 
 

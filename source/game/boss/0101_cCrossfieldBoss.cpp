@@ -34,7 +34,7 @@ cCrossfieldBoss::cCrossfieldBoss()noexcept
     this->SetCollisionModifier(coreVector3(0.9f,0.9f,3.5f));
 
     // configure the boss
-    this->Configure(2800, COLOR_ENEMY_RED);
+    this->Configure(2800, COLOR_SHIP_RED);
 
     // create duplicate object
     m_Duplicate.DefineModel         ("ship_boss_crossfield_high.md3");
@@ -67,7 +67,7 @@ cCrossfieldBoss::cCrossfieldBoss()noexcept
 
             // load object resources
             coreObject3D* pBoomerang = &m_aBoomerangRaw[i];
-            pBoomerang->DefineModel  ("object_boomerang.md3");
+            pBoomerang->DefineModel  ("object_boss_crossfield_boomerang.md3");
             pBoomerang->DefineTexture(0u, "effect_energy.png");
             pBoomerang->DefineProgram("effect_energy_invert_program");
 
@@ -244,7 +244,7 @@ void cCrossfieldBoss::__MoveOwn()
     // 
     else if(m_iPhase == 1u)
     {
-        PHASE_CONTROL_TICKER(0u, 0u, 1.0f/0.0001f)  
+        PHASE_CONTROL_TICKER(0u, 0u, FLT_MAX)
         {
             ++m_iPhase;
         });

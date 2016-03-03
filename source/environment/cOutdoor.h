@@ -62,6 +62,8 @@ private:
     coreUint32 m_iVertexOffset;                     // current vertex offset
     coreUint32 m_iIndexOffset;                      // current index offset
     coreFloat  m_fFlyOffset;                        // current fly offset
+    coreFloat  m_fHeightOffset;                     // 
+    coreFloat  m_fHeightFactor;                     // 
 
     coreUint8 m_iHandleIndex;                       // 
     coreUint8 m_iAlgorithm;                         // geometry algorithm ID
@@ -73,7 +75,7 @@ private:
 
 public:
     cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom, const coreUint8 iAlgorithm, const coreFloat fGrade)noexcept;
-    ~cOutdoor();
+    ~cOutdoor()override;
 
     DISABLE_COPY(cOutdoor)
 
@@ -94,12 +96,16 @@ public:
     inline cShadow* GetShadowMap() {return &m_ShadowMap;}
 
     // set object properties
-    void SetFlyOffset(const coreFloat fFlyOffset);
+    void        SetFlyOffset   (const coreFloat fFlyOffset);
+    inline void SetHeightOffset(const coreFloat fHeightOffset) {m_fHeightOffset = fHeightOffset;}
+    inline void SetHeightFactor(const coreFloat fHeightFactor) {m_fHeightFactor = fHeightFactor;}
 
     // get object properties
     inline const coreUint32& GetVertexOffset()const {return m_iVertexOffset;}
     inline const coreUint32& GetIndexOffset ()const {return m_iIndexOffset;}
     inline const coreFloat&  GetFlyOffset   ()const {return m_fFlyOffset;}
+    inline const coreFloat&  GetHeightOffset()const {return m_fHeightOffset;}
+    inline const coreFloat&  GetHeightFactor()const {return m_fHeightFactor;}
 };
 
 

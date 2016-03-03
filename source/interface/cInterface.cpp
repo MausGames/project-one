@@ -66,9 +66,10 @@ void cInterface::sPlayerView::Construct(const coreUintW iIndex)
 // constructor
 cInterface::cInterface(const coreUint8 iNumViews)noexcept
 : m_iNumViews    (iNumViews)
-, m_fBannerStart (-100.0f)
+, m_fBannerStart (-FLT_MAX)
 , m_bBannerType  (false)
-, m_bVisible     (true)
+, m_fStoryStart  (-FLT_MAX)
+, m_bVisible     (false)
 , m_fAlphaAll    (0.0f)
 , m_fAlphaBoss   (0.0f)
 {
@@ -130,6 +131,9 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
     m_aBannerText[2].SetColor3(COLOR_MENU_WHITE * 0.75f);
     m_aBannerText[3].SetColor3(COLOR_MENU_WHITE);
 
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aStoryText); ++i)
+        m_aStoryText[i].Construct(MENU_FONT_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
+
     // 
     this->UpdateLayout();
 }
@@ -178,6 +182,13 @@ void cInterface::Render()
         m_aBannerText[1].Render();
         m_aBannerText[2].Render();
         m_aBannerText[3].Render();
+    }
+
+    if(this->IsStoryActive(0.0f))
+    {
+        // 
+        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aStoryText); ++i)
+            m_aStoryText[i].Render();
     }
 }
 
@@ -281,7 +292,7 @@ void cInterface::Move()
     }
 
     // check for active banner
-    const coreFloat fBanner = g_pGame->GetTimeMission() - m_fBannerStart;
+    const coreFloat fBanner = g_pGame->GetTimeGame() - m_fBannerStart;
     if((fBanner <= INTERFACE_BANNER_DURATION) && (fBanner >= 0.0f))
     {
         // calculate visibility and animation value
@@ -317,6 +328,21 @@ void cInterface::Move()
         m_aBannerText[3].Move();
     }
 
+    // 
+    const coreFloat fStory = g_pGame->GetTimeGame() - m_fStoryStart;
+    if((fStory <= INTERFACE_STORY_DURATION) && (fStory >= 0.0f))
+    {
+        // 
+        const coreFloat fVisibility = MIN(fStory, INTERFACE_STORY_DURATION - fStory, 1.0f / INTERFACE_STORY_SPEED) * INTERFACE_STORY_SPEED;
+
+        // 
+        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aStoryText); ++i)
+        {
+            m_aStoryText[i].SetAlpha(fVisibility);
+            m_aStoryText[i].Move();
+        }
+    }
+
     // smoothly toggle interface visibility (after forwarding, can be overloaded)
     if(m_bVisible)
          {if(m_fAlphaAll < 1.0f) m_fAlphaAll = MIN(m_fAlphaAll + Core::System->GetTime(), 1.0f);}
@@ -350,7 +376,7 @@ void cInterface::ShowBoss(const coreChar* pcMain, const coreChar* pcSub)
     m_aBannerText[3].SetAlpha(0.0f);
 
     // save animation properties
-    m_fBannerStart = g_pGame->GetTimeMission();
+    m_fBannerStart = g_pGame->GetTimeGame();
     m_bBannerType  = INTERFACE_BANNER_TYPE_BOSS;
     {
         // and realign objects as boss banner
@@ -396,7 +422,7 @@ void cInterface::ShowMission(const coreChar* pcMain, const coreChar* pcSub)
     m_aBannerText[3].SetAlpha(0.0f);
 
     // save animation properties
-    m_fBannerStart = -1.0f;
+    m_fBannerStart = g_pGame->GetTimeGame();
     m_bBannerType  = INTERFACE_BANNER_TYPE_MISSION;
     {
         // and realign objects as mission banner
@@ -420,7 +446,7 @@ void cInterface::ShowMission(const coreChar* pcMain, const coreChar* pcSub)
 void cInterface::ShowMission(const cMission* pMission)
 {
     // show default mission banner
-    //this->ShowMission(pMission->GetName(), PRINT("%s %d", Core::Language->GetString("STAGE"), pMission->GetID()));
+    this->ShowMission(pMission->GetName(), PRINT("%s %d", Core::Language->GetString("STAGE"), pMission->GetID()));
 }
 
 
@@ -428,8 +454,40 @@ void cInterface::ShowMission(const cMission* pMission)
 // check for active banner
 coreBool cInterface::IsBannerActive()const
 {
-    // compare with mission-time offset
-    return ((g_pGame->GetTimeMission() - m_fBannerStart) <= INTERFACE_BANNER_DURATION) ? true : false;
+    // compare with game-time offset
+    return ((g_pGame->GetTimeGame() - m_fBannerStart) <= INTERFACE_BANNER_DURATION) ? true : false;
+}
+
+
+// ****************************************************************
+// 
+void cInterface::ShowStory(const coreChar* pcRow1, const coreChar* pcRow2)
+{
+    const coreFloat fHeight = (pcRow2 ? 0.02f : 0.0f);
+
+    // 
+    m_aStoryText[0].SetText(pcRow1);
+    m_aStoryText[0].SetPosition(coreVector2(0.0f, fHeight));
+
+    if(pcRow2)
+    {
+        // 
+        m_aStoryText[1].SetText(pcRow2);
+        m_aStoryText[1].SetPosition(coreVector2(0.0f, -fHeight));
+    }
+
+    // 
+    m_fStoryStart = g_pGame->GetTimeGame();
+}
+
+
+// ****************************************************************
+// 
+coreBool cInterface::IsStoryActive(const coreFloat fOffset)const
+{
+    // 
+    ASSERT(fOffset < INTERFACE_STORY_DURATION)
+    return ((g_pGame->GetTimeGame() - m_fStoryStart) <= (INTERFACE_STORY_DURATION - fOffset)) ? true : false;
 }
 
 

@@ -30,7 +30,7 @@
 class cDistortion final : public coreResourceRelation
 {
 private:
-    coreFrameBuffer m_FrameBuffer;              // distortion frame buffer (only 2-channel texture, reduced resolution)
+    coreFrameBuffer m_FrameBuffer;              // distortion frame buffer (reduced resolution)
 
     coreObject2D m_aWave[DISTORTION_WAVES];     // 
     coreUintW    m_iCurWave;                    // 

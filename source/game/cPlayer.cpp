@@ -81,7 +81,7 @@ cPlayer::~cPlayer()
 
 // ****************************************************************
 // configure the player
-void cPlayer::Configure(const coreUintW iShipType, const coreVector3& vColor, const coreUintW iInputIndex)
+void cPlayer::Configure(const coreUintW iShipType, const coreUintW iInputIndex)
 {
     // select appearance type
     const coreChar* pcModelHigh;
@@ -101,9 +101,6 @@ void cPlayer::Configure(const coreUintW iShipType, const coreVector3& vColor, co
         // normalize collision size of different ship models
         this->SetCollisionModifier((coreVector3(1.0f,1.0f,1.0f) * PLAYER_COLLISION_SIZE) / this->GetModel()->GetBoundingRange());
     });
-
-    // save color value
-    this->SetBaseColor(vColor);
 
     // save input set
     WARN_IF(iInputIndex >= INPUT_SETS)
@@ -134,6 +131,15 @@ void cPlayer::EquipWeapon(const coreUintW iIndex, const coreInt32 iID)
     case cAntiWeapon ::ID: m_apWeapon[iIndex] = new cAntiWeapon (); break;
     }
     m_apWeapon[iIndex]->SetOwner(this);
+
+    // set associated color
+    this->SetBaseColor(m_apWeapon[iIndex]->GetColorShip());
+
+
+
+    m_Bubble.SetColor3(LERP(coreVector3(1.0f,1.0f,1.0f), m_apWeapon[iIndex]->GetColorEnergy(), 0.75f));
+    m_Bubble.SetColor3(m_apWeapon[iIndex]->GetColorEnergy() * ((iID%2) ? 0.5f : 0.6f));
+
 
 #if defined(_CORE_DEBUG_)
 
@@ -180,6 +186,19 @@ void cPlayer::Move()
 
     if(!CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
     {
+
+        if(m_pInput->iButtonPress & 0x04u)
+        {
+            this->EquipWeapon(0u, (m_apWeapon[0]->GetID() % cTeslaWeapon::ID) + 1u);
+
+            //g_pDistortion    ->CreateWave       (this->GetPosition(), DISTORTION_WAVE_SMALL);
+            //g_pSpecialEffects->CreateSplashColor(this->GetPosition(), SPECIAL_SPLASH_SMALL, m_apWeapon[0]->GetColorEnergy());
+            //g_pSpecialEffects->CreateBlast      (this->GetPosition(), SPECIAL_BLAST_SMALL, m_apWeapon[0]->GetColorEnergy());
+
+        }
+
+
+
         // move the ship
         const coreFloat fSpeed = (!CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && CONTAINS_BIT(m_pInput->iButtonHold, 0u)) ? 20.0f : 50.0f;
         m_vNewPos += m_pInput->vMove * (Core::System->GetTime() * fSpeed);
@@ -227,8 +246,8 @@ void cPlayer::Move()
     }
 
     // 
-    if(CONTAINS_BIT(m_pInput->iButtonPress, PLAYER_WEAPONS * WEAPON_MODES))
-        this->TransformDark(CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_DARKNESS) ? PLAYER_DARK_OFF : PLAYER_DARK_ON);
+    //if(CONTAINS_BIT(m_pInput->iButtonPress, PLAYER_WEAPONS * WEAPON_MODES))
+     //   this->TransformDark(CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_DARKNESS) ? PLAYER_DARK_OFF : PLAYER_DARK_ON);
 
     if(m_Bubble.IsEnabled(CORE_OBJECT_ENABLE_ALL))
     {
@@ -246,26 +265,26 @@ void cPlayer::Move()
 
         // 
         m_Bubble.SetPosition (this->GetPosition());
-        m_Bubble.SetSize     (coreVector3(1.25f,1.25f,1.25f) * m_Bubble.GetAlpha() * PLAYER_DARK_BUBBLE_SIZE);
+        m_Bubble.SetSize     (coreVector3(1.25f,1.25f,1.25f) * m_Bubble.GetAlpha() * PLAYER_DARK_BUBBLE_SIZE       / 1.25f*1.15f);
         m_Bubble.SetTexOffset(coreVector2(0.0f, m_fDarkAnimation * 0.1f));
         m_Bubble.Move();
     }
 
     // 
-    if(m_fDarkTime)
-    {
-        coreBool bGrace = false;
-
-        // 
-        Core::Manager::Object->TestCollision(TYPE_BULLET_ENEMY, &m_Bubble, [&bGrace](const cBullet* pBullet, const coreBool bFirstHit)
-        {
-            bGrace = true;
-        });
-
-        // 
-        m_fDarkTime = CLAMP(m_fDarkTime + (bGrace ? 0.025f : -0.05f) * Core::System->GetTime(), 0.0f, 1.0f);
-        if(!m_fDarkTime) this->TransformDark(PLAYER_DARK_RESET);
-    }
+    //if(m_fDarkTime)
+    //{
+    //    coreBool bGrace = false;
+    //
+    //    // 
+    //    Core::Manager::Object->TestCollision(TYPE_BULLET_ENEMY, &m_Bubble, [&bGrace](const cBullet* pBullet, const coreBool bFirstHit)
+    //    {
+    //        bGrace = true;
+    //    });
+    //
+    //    // 
+    //    m_fDarkTime = CLAMP(m_fDarkTime + (bGrace ? 0.025f : -0.05f) * Core::System->GetTime(), 0.0f, 1.0f);
+    //    if(!m_fDarkTime) this->TransformDark(PLAYER_DARK_RESET);
+    //}
 }
 
 
@@ -301,6 +320,9 @@ void cPlayer::Resurrect(const coreVector2& vPosition)
 
     // add ship to the game
     cShip::_Resurrect(true, vPosition, coreVector2(0.0f,1.0f), TYPE_PLAYER);
+
+
+    this->TransformDark(PLAYER_DARK_ON);
 }
 
 
@@ -473,7 +495,7 @@ void cPlayer::TransformDark(const coreUint8 iStatus)
     else REMOVE_VALUE(m_iStatus, PLAYER_STATUS_DARKNESS)
 
     // 
-    std::swap(m_pDarkProgram, m_pProgram);
+    //std::swap(m_pDarkProgram, m_pProgram);
 }
 
 

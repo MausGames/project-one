@@ -16,6 +16,7 @@ cGame::cGame(const coreBool bCoop)noexcept
 , m_BulletManagerEnemy  (TYPE_BULLET_ENEMY)
 , m_Interface           (bCoop ? GAME_PLAYERS : 1u)
 , m_pMission            (NULL)
+, m_fTimeGame           (0.0f)
 , m_fTimeMission        (0.0f)
 , m_afTimeBoss          {}
 , m_iDepthLevel         (0u)
@@ -23,14 +24,14 @@ cGame::cGame(const coreBool bCoop)noexcept
 , m_bCoop               (bCoop)
 {
     // configure first player
-    m_aPlayer[0].Configure  (PLAYER_SHIP_ATK, COLOR_PLAYER_RED, g_CurConfig.Input.aiType[0]);
+    m_aPlayer[0].Configure  (PLAYER_SHIP_ATK, g_CurConfig.Input.aiType[0]);
     m_aPlayer[0].EquipWeapon(0u, REF_ID(cRayWeapon::ID));
 
     if(m_bCoop)
     {
         // configure second player
-        m_aPlayer[1].Configure  (PLAYER_SHIP_DEF, COLOR_PLAYER_BLUE, g_CurConfig.Input.aiType[1]);
-        m_aPlayer[1].EquipWeapon(0u, REF_ID(cPulseWeapon::ID));
+        m_aPlayer[1].Configure  (PLAYER_SHIP_DEF, g_CurConfig.Input.aiType[1]);
+        m_aPlayer[1].EquipWeapon(0u, REF_ID(cRayWeapon::ID));
         STATIC_ASSERT(GAME_PLAYERS == 2u)
     }
 
@@ -145,9 +146,15 @@ void cGame::Move()
     if(!this->__HandleIntro()) return;
     if(!this->__HandleOutro()) return;
 
-    // update total mission and boss time (if currently active)
-    m_fTimeMission.Update(1.0f);
-    if(m_pMission->GetCurBoss()) m_afTimeBoss[m_pMission->GetCurBossIndex()].Update(1.0f);
+    // update total game time
+    m_fTimeGame.Update(1.0f);
+
+    if(CONTAINS_VALUE(m_iStatus, GAME_STATUS_PLAY) || CONTAINS_VALUE(m_iStatus, GAME_STATUS_INTRO))
+    {
+        // update total mission and boss time
+        m_fTimeMission.Update(1.0f);
+        if(m_pMission->GetCurBoss()) m_afTimeBoss[m_pMission->GetCurBossIndex()].Update(1.0f);
+    }
 
     // move the mission
     m_pMission->MoveBefore();
@@ -200,6 +207,7 @@ void cGame::LoadMission(const coreInt32 iID)
     case cGeluMission   ::ID: m_pMission = new cGeluMission   (); break;
     case cCalorMission  ::ID: m_pMission = new cCalorMission  (); break;
     case cMuscusMission ::ID: m_pMission = new cMuscusMission (); break;
+    case cIntroMission  ::ID: m_pMission = new cIntroMission  (); break;
     }
 
     if(iID != cNoMission::ID)
@@ -208,14 +216,12 @@ void cGame::LoadMission(const coreInt32 iID)
         m_pMission->Setup();
 
         // 
-        m_Interface.ShowMission(m_pMission);
-
-        // 
+        m_fTimeGame    = 0.0f;
         m_fTimeMission = -(GAME_INTRO_DURATION + GAME_INTRO_DELAY);
         for(coreUintW i = 0u; i < MISSION_BOSSES; ++i) m_afTimeBoss[i] = -INTERFACE_BANNER_DURATION;
 
         // set initial status
-        m_iStatus = GAME_STATUS_INTRO | GAME_STATUS_LOADING;
+        m_iStatus = GAME_STATUS_LOADING;
 
         if(m_bCoop)
         {
@@ -327,6 +333,9 @@ coreBool cGame::__HandleIntro()
             // re-enable player controls
             for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
                 m_aPlayer[i].RemoveStatus(PLAYER_STATUS_NO_INPUT_ALL);
+
+            // 
+            m_Interface.SetVisible(true);
         }
         else
         {
@@ -348,7 +357,6 @@ coreBool cGame::__HandleIntro()
                 {
                     g_pSpecialEffects->PlaySound      (pPlayer->GetPosition(), 1.0f, SOUND_RUSH_LONG);
                     g_pSpecialEffects->CreateBlowColor(pPlayer->GetPosition(), coreVector3(0.0f,1.0f,0.0f), SPECIAL_BLOW_SMALL, COLOR_FIRE_BLUE);
-                    g_MusicPlayer.Control()->Play();
                 }
 
                 // fly player animated into the game field
@@ -368,16 +376,6 @@ coreBool cGame::__HandleIntro()
 // handle outro animation
 coreBool cGame::__HandleOutro()
 {
-    if(CONTAINS_VALUE(m_iStatus, GAME_STATUS_PLAY))
-    {
-        // 
-        if(m_pMission->IsFinished())
-        {
-            REMOVE_VALUE(m_iStatus, GAME_STATUS_PLAY)
-            ADD_VALUE   (m_iStatus, GAME_STATUS_OUTRO)
-        }
-    }
-
     if(CONTAINS_VALUE(m_iStatus, GAME_STATUS_OUTRO))
     {
 

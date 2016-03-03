@@ -138,6 +138,18 @@
     <ClCompile Include="..\..\..\source\interface\menu\06_cPauseMenu.cpp">
       <Filter>interface\menu</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\game\cTheater.cpp">
+      <Filter>game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\environment\background\99_cCloudBackground.cpp">
+      <Filter>environment\background</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\game\mission\99_cIntroMission.cpp">
+      <Filter>game\mission</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\game\boss\9901_cProjectOneBoss.cpp">
+      <Filter>game\boss</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\main.h" />
@@ -227,6 +239,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\source\visual\cBlur.h">
       <Filter>visual</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\game\cTheater.h">
+      <Filter>game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

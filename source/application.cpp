@@ -17,16 +17,17 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreModel>  ("bullet_rocket.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_rocket.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_orb.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_orb.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_wave.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_wave.md3");
+    Core::Manager::Resource->Load<coreModel>  ("effect_shield.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/effect_shield.md3");
     Core::Manager::Resource->Load<coreModel>  ("environment_reed_01.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_reed_01.md3");
     Core::Manager::Resource->Load<coreModel>  ("environment_reed_02.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_reed_02.md3");
     Core::Manager::Resource->Load<coreModel>  ("environment_seashell.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_seashell.md3");
     Core::Manager::Resource->Load<coreModel>  ("environment_starfish.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_starfish.md3");
     Core::Manager::Resource->Load<coreModel>  ("environment_stone_01.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_stone_01.md3");
     Core::Manager::Resource->Load<coreModel>  ("environment_weed.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_weed.md3");
-    Core::Manager::Resource->Load<coreModel>  ("object_boomerang.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boomerang.md3");
-    Core::Manager::Resource->Load<coreModel>  ("object_circle_02.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_circle_02.md3");
-    Core::Manager::Resource->Load<coreModel>  ("object_circle_03.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_circle_03.md3");
-    Core::Manager::Resource->Load<coreModel>  ("object_paddle.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_paddle.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_boss_crossfield_boomerang.md3",   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_crossfield_boomerang.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_boss_torus_circle.md3",           CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_torus_circle.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_boss_torus_emitter.md3",          CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_torus_emitter.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_boss_vaus_paddle.md3",            CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_vaus_paddle.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_ring.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_ring.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_sphere.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_sphere.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_tube.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tube.md3");
@@ -55,11 +56,12 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreModel>  ("ship_player_def_low.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_def_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_player_atk_high.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_atk_high.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_player_atk_low.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_atk_low.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_projectone.md3",                    CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_projectone.md3");
 
     Core::Manager::Resource->Load<coreTexture>("effect_energy.png",                      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_energy.png");
     Core::Manager::Resource->Load<coreTexture>("effect_lightning.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_lightning.png");
-    Core::Manager::Resource->Load<coreTexture>("effect_particle_32.png",                 CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_particle_32.png");
-    Core::Manager::Resource->Load<coreTexture>("effect_particle_128.png",                CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_particle_128.png");
+    Core::Manager::Resource->Load<coreTexture>("effect_particle_32.png",                 CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_particle_32.png", false);
+    Core::Manager::Resource->Load<coreTexture>("effect_particle_128.png",                CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_particle_128.png", false);
     Core::Manager::Resource->Load<coreTexture>("effect_soot.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_soot.png");
     Core::Manager::Resource->Load<coreTexture>("effect_wave.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_wave.png");
     Core::Manager::Resource->Load<coreTexture>("effect_wave_norm.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_wave_norm.png", false);
@@ -148,6 +150,9 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreShader> ("effect_shadow.vert",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_shadow.vert");
     Core::Manager::Resource->Load<coreShader> ("effect_shadow.frag",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_shadow.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_shadow_inst.vert",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_shadow.vert", CORE_SHADER_OPTION_INSTANCING);
+    Core::Manager::Resource->Load<coreShader> ("effect_shield.vert",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_shield.vert");
+    Core::Manager::Resource->Load<coreShader> ("effect_shield.frag",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_shield.frag");
+    Core::Manager::Resource->Load<coreShader> ("effect_shield_inst.vert",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_shield.vert", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("environment_clouds.vert",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_clouds.vert");
     Core::Manager::Resource->Load<coreShader> ("environment_clouds.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_clouds.frag");
     Core::Manager::Resource->Load<coreShader> ("environment_clouds_inst.vert",           CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_clouds.vert", CORE_SHADER_OPTION_INSTANCING);
@@ -168,7 +173,10 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreShader> ("full_blur_2.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_blur_2.frag");
     Core::Manager::Resource->Load<coreShader> ("full_post.frag",                         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_post.frag", SHADER_GLOW);
     Core::Manager::Resource->Load<coreShader> ("full_post_distorted.frag",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_post.frag", SHADER_GLOW SHADER_DISTORTION);
-    Core::Manager::Resource->Load<coreShader> ("full_transition.frag",                   CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_transition.frag");
+    Core::Manager::Resource->Load<coreShader> ("full_transition_fade.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_transition.frag", SHADER_TRANSITION(0));
+    Core::Manager::Resource->Load<coreShader> ("full_transition_wipe.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_transition.frag", SHADER_TRANSITION(1));
+    Core::Manager::Resource->Load<coreShader> ("full_transition_curtain.frag",           CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_transition.frag", SHADER_TRANSITION(2));
+    Core::Manager::Resource->Load<coreShader> ("full_transition_circle.frag",            CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_transition.frag", SHADER_TRANSITION(3));
     Core::Manager::Resource->Load<coreShader> ("menu_animate.vert",                      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_animate.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("menu_animate.frag",                      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_animate.frag");
     Core::Manager::Resource->Load<coreShader> ("menu_border.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_border.vert", CORE_SHADER_OPTION_NO_ROTATION);
@@ -381,6 +389,16 @@ static void SetupResources()
         ->AttachShader("effect_shadow.frag")
         ->Finish();
 
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_shield_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_shield.vert")
+        ->AttachShader("effect_shield.frag")
+        ->Finish();
+
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_shield_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_shield_inst.vert")
+        ->AttachShader("effect_shield.frag")
+        ->Finish();
+
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_clouds_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("environment_clouds.vert")
         ->AttachShader("environment_clouds.frag")
@@ -445,9 +463,24 @@ static void SetupResources()
         ->AttachShader("full_post_distorted.frag")
         ->Finish();
 
-    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("full_transition_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("full_transition_fade_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("full.vert")
-        ->AttachShader("full_transition.frag")
+        ->AttachShader("full_transition_fade.frag")
+        ->Finish();
+
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("full_transition_wipe_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("full.vert")
+        ->AttachShader("full_transition_wipe.frag")
+        ->Finish();
+
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("full_transition_curtain_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("full.vert")
+        ->AttachShader("full_transition_curtain.frag")
+        ->Finish();
+
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("full_transition_circle_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("full.vert")
+        ->AttachShader("full_transition_circle.frag")
         ->Finish();
 
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_animate_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())

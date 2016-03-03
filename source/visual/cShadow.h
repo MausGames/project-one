@@ -35,7 +35,7 @@
 class cShadow final : public cBindContainer, public coreResourceRelation
 {
 private:
-    coreFrameBuffer m_FrameBuffer;                      // shadow map frame buffer (depth only)
+    coreFrameBuffer m_FrameBuffer;                      // shadow map frame buffer
     coreUint8 m_iLevel;                                 // current configuration level
 
     static cBindContainerIn s_GlobalContainer;          // global shadow-casting objects (in all frame buffers)
@@ -70,17 +70,16 @@ public:
     // recompile shader-programs for shadow-receiving objects
     static void Recompile();
 
-    // send transformation matrix to shader-program
-    static inline void SendTransformSingle   (const coreMatrix4& mTransform) {cShadow::__SendTransform(s_pProgramSingle,    mTransform);}
-    static inline void SendTransformInstanced(const coreMatrix4& mTransform) {cShadow::__SendTransform(s_pProgramInstanced, mTransform);}
+    // render shadow-casting objects
+    static void RenderSingle   (const coreMatrix4& mTransform, const std::vector<coreBatchList*>& apList, const std::vector<coreObject3D*>& apObject);
+    static void RenderSingle   (const coreMatrix4& mTransform, const std::vector<coreBatchList*>& apList);
+    static void RenderInstanced(const coreMatrix4& mTransform, const std::vector<coreBatchList*>& apList);
+
+    // enable shader-program and apply read shadow matrix
     static void EnableShadowRead(const coreUintW iHandleIndex);
 
     // access global bind container
     static inline cBindContainerIn* GetGlobalContainer() {return &s_GlobalContainer;}
-
-    // get shader-programs for shadow-casting objects
-    static inline const coreProgramPtr& GetProgramSingle   () {return s_pProgramSingle;}
-    static inline const coreProgramPtr& GetProgramInstanced() {return s_pProgramInstanced;}
 
 
 private:
@@ -89,10 +88,6 @@ private:
 
     // send transformation matrix to shader-program
     static void __SendTransform(const coreProgramPtr& pProgram, const coreMatrix4& mTransform);
-
-    // render shadow-casting objects
-    static void __RenderSingle   (const coreMatrix4& mTransform, const std::vector<coreBatchList*>& apList, const std::vector<coreObject3D*>& apObject);
-    static void __RenderInstanced(const coreMatrix4& mTransform, const std::vector<coreBatchList*>& apList);
 };
 
 

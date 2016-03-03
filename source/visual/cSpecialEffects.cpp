@@ -143,7 +143,7 @@ void cSpecialEffects::Move()
                 m_ParticleDark .GetNumActiveParticles() ||
                 m_ParticleSmoke.GetNumActiveParticles() ||
                 m_ParticleFire .GetNumActiveParticles() ||
-                m_LightningList.GetCurEnabled()         ||
+                m_LightningList.List()->size()          ||
                 std::any_of(m_aBlast, m_aBlast + SPECIAL_BLASTS, [](const coreObject3D& oBlast) {return oBlast.GetAlpha() ? true : false;}) ||
                 std::any_of(m_aRing,  m_aRing  + SPECIAL_RINGS,  [](const coreObject3D& oRing)  {return oRing .GetAlpha() ? true : false;});
     if(m_bActive)
@@ -276,7 +276,7 @@ void cSpecialEffects::CreateSplashFire(const coreVector3& vPosition, const coreF
     m_ParticleFire.GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
     {
         pParticle->SetPositionRel(vPosition+coreVector3::Rand(3.0f), coreVector3::Rand(-fScale, fScale));
-        pParticle->SetScaleAbs   (4.0f,                              12.0f);
+        pParticle->SetScaleAbs   (4.5f,                              11.5f);
         pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),        Core::Rand->Float(-PI*0.5f, PI*0.5f));
         pParticle->SetColor4Abs  (coreVector4(0.0f,0.0f,0.0f,1.0f),  coreVector4(0.0f,0.0f,0.0f,0.0f));
         pParticle->SetSpeed      (1.4f * Core::Rand->Float(0.9f, 1.1f));

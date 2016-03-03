@@ -30,7 +30,7 @@ cTorusBoss::cTorusBoss()noexcept
     this->SetCollisionModifier(coreVector3(0.8f,0.8f,1.0f));
 
     // configure the boss
-    this->Configure(2800, COLOR_ENEMY_GREY);
+    this->Configure(2800, COLOR_SHIP_GREY);
 
     // 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRay); ++i)
@@ -55,7 +55,7 @@ cTorusBoss::cTorusBoss()noexcept
     }
 
     // 
-    m_Emitter.DefineModel  ("object_circle_03.md3");
+    m_Emitter.DefineModel  ("object_boss_torus_emitter.md3");
     m_Emitter.DefineTexture(0u, "effect_energy.png");
     m_Emitter.DefineProgram("effect_energy_invert_program");
     m_Emitter.SetSize      (this->GetSize());
@@ -66,7 +66,7 @@ cTorusBoss::cTorusBoss()noexcept
     // 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCircle); ++i)
     {
-        m_aCircle[i].DefineModel  ("object_circle_02.md3");
+        m_aCircle[i].DefineModel  ("object_boss_torus_circle.md3");
         m_aCircle[i].DefineTexture(0u, "effect_energy.png");
         m_aCircle[i].DefineProgram("effect_energy_invert_program");
         m_aCircle[i].SetSize      (this->GetSize());

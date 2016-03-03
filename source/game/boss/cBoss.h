@@ -69,7 +69,7 @@ protected:
 
 public:
     cBoss()noexcept;
-    virtual ~cBoss();
+    virtual ~cBoss()override;
 
     DISABLE_COPY(cBoss)
     ENABLE_ID
@@ -179,6 +179,25 @@ public:
 
     DISABLE_COPY(cVausBoss)
     ASSIGN_ID(103, "Vaus")
+
+
+private:
+    // execute own routines
+    void __ResurrectOwn()override;
+    void __KillOwn     (const coreBool bAnimated)override;
+    void __MoveOwn     ()override;
+};
+
+
+// ****************************************************************
+// Project One boss class
+class cProjectOneBoss final : public cBoss
+{
+public:
+    cProjectOneBoss()noexcept;
+
+    DISABLE_COPY(cProjectOneBoss)
+    ASSIGN_ID(9901, "Project One")
 
 
 private:
