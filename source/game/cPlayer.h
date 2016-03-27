@@ -10,6 +10,8 @@
 #ifndef _P1_GUARD_PLAYER_H_
 #define _P1_GUARD_PLAYER_H_
 
+// TODO: add all weapons to player directly in class
+
 
 // ****************************************************************
 // player definitions
@@ -77,7 +79,7 @@ public:
     void Move  ()override;
 
     // reduce current health
-    void TakeDamage(const coreInt32 iDamage);
+    void TakeDamage(const coreInt32 iDamage, const coreUint8 iElement);
 
     // control life and death
     void Resurrect(const coreVector2& vPosition);

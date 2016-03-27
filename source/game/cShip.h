@@ -29,6 +29,7 @@ protected:
 
     coreInt32 m_iMaxHealth;      // maximum health value (armor)
     coreInt32 m_iCurHealth;      // current health value (armor)
+    coreInt32 m_iPreHealth;      // 
 
     coreFloat m_fBlink;          // blink intensity (to highlight successful hits)
 
@@ -53,11 +54,17 @@ public:
     using coreObject3D::Render;
     void Render(const coreProgramPtr& pProgram)override;
 
+    // 
+    inline bool ReachedHealth   (const coreInt32 iHealth)    {this->__ReachOnce(); return InBetween(iHealth,                                    m_iCurHealth, ABS(m_iPreHealth));}
+    inline bool ReachedHealthPct(const coreFloat fHealthPct) {this->__ReachOnce(); return InBetween(F_TO_SI(fHealthPct * I_TO_F(m_iMaxHealth)), m_iCurHealth, ABS(m_iPreHealth));}
+    inline bool ReachedDeath    ()                           {this->__ReachOnce(); return ((m_iCurHealth == 0) && (m_iPreHealth != 0));}
+
     // add or remove status values
     inline void AddStatus   (const coreInt32 iStatus) {ADD_VALUE   (m_iStatus, iStatus)}
     inline void RemoveStatus(const coreInt32 iStatus) {REMOVE_VALUE(m_iStatus, iStatus)}
 
     // set object properties
+    inline void SetMaxHealth(const coreInt32    iMaxHealth) {m_iMaxHealth = iMaxHealth;}
     inline void SetBaseColor(const coreVector3& vBaseColor) {m_iBaseColor = coreVector4(vBaseColor, 0.0f).PackUnorm4x8(); this->SetColor3(vBaseColor);}
 
     // get object properties
@@ -72,7 +79,7 @@ public:
 
 protected:
     // 
-    coreBool _TakeDamage(const coreInt32 iDamage);
+    coreBool _TakeDamage(const coreInt32 iDamage, const coreUint8 iElement);
 
     // 
     void _Resurrect(const coreBool bSingle, const coreVector2& vPosition, const coreVector2& vDirection, const coreInt32 iType);
@@ -81,6 +88,14 @@ protected:
     // 
     void _UpdateBlink();
     void _EnableBlink();
+
+    // 
+    void _UpdateAlways();
+
+
+private:
+    // 
+    inline void __ReachOnce() {if((m_iCurHealth == 0) && (m_iPreHealth > 0)) m_iPreHealth = -m_iPreHealth;}
 };
 
 

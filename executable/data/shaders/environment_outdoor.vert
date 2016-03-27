@@ -46,5 +46,5 @@ void VertexMain()
     coreLightingTransform(v3NewPosition);
 
     // calculate mix value relative to vertex height
-    v_v1Mix = (v3NewPosition.z + 20.0) * 0.21;
+    v_v1Mix = v3NewPosition.z * 0.21 + 4.2;
 }

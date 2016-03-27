@@ -17,6 +17,7 @@ cBullet::cBullet()noexcept
 : m_iDamage    (0)
 , m_fSpeed     (0.0f)
 , m_pOwner     (NULL)
+, m_iElement   (ELEMENT_NEUTRAL)
 , m_fAnimation (0.0f)
 {
     // set initial status

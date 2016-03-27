@@ -49,6 +49,7 @@ private:
     cEnemyManager  m_EnemyManager;           // enemy manager
     cBulletManager m_BulletManagerPlayer;    // low-priority bullet manager
     cBulletManager m_BulletManagerEnemy;     // high-priority bullet manager
+    cShieldManager m_ShieldManager;          // 
 
     cCombatStats m_CombatStats;              // combat stats overlay
     cCombatText  m_CombatText;               // combat text overlay
@@ -100,6 +101,7 @@ public:
     inline cEnemyManager*  GetEnemyManager       ()                       {return &m_EnemyManager;}
     inline cBulletManager* GetBulletManagerPlayer()                       {return &m_BulletManagerPlayer;}
     inline cBulletManager* GetBulletManagerEnemy ()                       {return &m_BulletManagerEnemy;}
+    inline cShieldManager* GetShieldManager      ()                       {return &m_ShieldManager;}
     inline cCombatStats*   GetCombatStats        ()                       {return &m_CombatStats;}
     inline cCombatText*    GetCombatText         ()                       {return &m_CombatText;}
     inline cInterface*     GetInterface          ()                       {return &m_Interface;}

@@ -308,7 +308,7 @@ void cBackground::_FillInfinite(coreBatchList* OUTPUT pObjectList)
         coreObject3D* pOldObject = (*pContent)[i];
 
         // check for position at the start area
-        if(pOldObject->GetPosition().y < I_TO_F(OUTDOOR_VIEW/2) * OUTDOOR_DETAIL)
+        if(pOldObject->GetPosition().y < I_TO_F(OUTDOOR_VIEW/2u) * OUTDOOR_DETAIL)
         {
             // copy object and move it to the end area
             coreObject3D* pNewObject = new coreObject3D(*pOldObject);

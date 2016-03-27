@@ -43,14 +43,14 @@ void FragmentMain()
 
     // adjust depth value
     v1Depth = smoothstep(0.64, 0.735, v1Depth) * 0.8 * (1.0 + v1ReflFactor) + v_v1Smooth;
-    v1Depth = max(v1Depth - (1.0 - smoothstep(0.3, 0.4, v1Depth)) * 0.5, 0.0);
+    v1Depth = max(v1Depth - (0.5 - 0.5 * smoothstep(0.3, 0.4, v1Depth)), 0.0);
 
     // lookup refraction texture
     vec3 v3Refraction = coreTexture2D(2, v2ScreenCoord + v2Distortion * v1Depth).rgb;
 
     // adjust reflection value
-    v3Reflection = mix(c_v3Blue, v3Reflection, max(0.0, dot(v3BumpNormal, v3MathViewDir)-0.3)) + vec3(v1ReflFactor);
+    v3Reflection = mix(c_v3Blue, v3Reflection, max(0.0, dot(v3BumpNormal, v3MathViewDir) - 0.3)) + vec3(v1ReflFactor);
 
     // draw final color
-    gl_FragColor = vec4(mix(v3Refraction, v3Reflection, v1Depth) * (0.85 + 0.2*v1BumpFactor), 1.0);
+    gl_FragColor = vec4(mix(v3Refraction, v3Reflection, v1Depth) * (0.85 + 0.2 * v1BumpFactor), 1.0);
 }

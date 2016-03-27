@@ -44,7 +44,7 @@ void VertexMain()
     v_av2TexCoord[0] = a_v2RawTexCoord;
     v_av2TexCoord[1] = coreObject3DTexCoordRaw();
     
-    // forward blink intensity
+    // select blink intensity
 #if defined(_CORE_OPTION_INSTANCING_)
     float v1Blink = a_v1Blink;
 #else

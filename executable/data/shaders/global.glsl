@@ -22,10 +22,13 @@
 #if defined(GL_ES)
     #extension GL_EXT_shadow_samplers : enable
 #else
-    #extension GL_ARB_uniform_buffer_object : enable
-    #extension GL_ARB_enhanced_layouts      : enable
-    #extension GL_ARB_shader_group_vote     : enable
-    #extension GL_AMD_shader_trinary_minmax : enable
+    #extension GL_AMD_shader_trinary_minmax    : enable
+    #extension GL_ARB_conservative_depth       : enable
+    #extension GL_ARB_enhanced_layouts         : enable
+    #extension GL_ARB_shader_group_vote        : enable
+    #extension GL_ARB_shader_image_load_store  : enable
+    #extension GL_ARB_shading_language_packing : enable
+    #extension GL_ARB_uniform_buffer_object    : enable
 #endif
 #pragma optimize(on)
 #pragma debug(off)
@@ -46,12 +49,17 @@
 
 // layout qualifiers
 #if defined(_CORE_FRAGMENT_SHADER_)
-    #if (__VERSION__) >= 420 || (defined(GL_ES) && (__VERSION__) >= 310)
+    #if defined(GL_ARB_shader_image_load_store) || (defined(GL_ES) && (__VERSION__) >= 310)
         layout(early_fragment_tests) in;
     #endif
+    #if defined(GL_ARB_conservative_depth)
+        layout(depth_unchanged) out float gl_FragDepth;
+    #endif
 #endif
-#if (__VERSION__) >= 440
-    #define std140 std140, align = 16
+#if defined(GL_ARB_enhanced_layouts)
+    #define align(x) layout(align = x)
+#else
+    #define align(x)
 #endif
 
 // compatibility adjustments
@@ -270,7 +278,7 @@ mat4 coreInvert(const in mat4 m)
 
     uint corePackUnorm4x8(const in vec4 x)
     {
-    #if (__VERSION__) >= 400
+    #if defined(GL_ARB_shading_language_packing)
         return packUnorm4x8(x);
     #else
         return (uint(x.a * 255.0) << 24) +
@@ -282,7 +290,7 @@ mat4 coreInvert(const in mat4 m)
 
     vec4 coreUnpackUnorm4x8(const in uint x)
     {
-    #if (__VERSION__) >= 400
+    #if defined(GL_ARB_shading_language_packing)
         return unpackUnorm4x8(x);
     #else
         return vec4(float( x        & 0xFFu),
@@ -304,18 +312,18 @@ mat4 coreInvert(const in mat4 m)
     // transformation uniforms
     layout(std140) uniform b_Transform
     {
-        mat4 u_m4ViewProj;
-        mat4 u_m4Camera;
-        mat4 u_m4Perspective;
-        mat4 u_m4Ortho;
-        vec4 u_v4Resolution;
-        vec3 u_v3CamPosition;
+        align(16) mat4 u_m4ViewProj;
+        align(16) mat4 u_m4Camera;
+        align(16) mat4 u_m4Perspective;
+        align(16) mat4 u_m4Ortho;
+        align(16) vec4 u_v4Resolution;
+        align(16) vec3 u_v3CamPosition;
     };
 
     // ambient uniforms
     layout(std140) uniform b_Ambient
     {
-        coreLight u_aLight[CORE_NUM_LIGHTS];
+        align(16) coreLight u_aLight[CORE_NUM_LIGHTS];
     };
 
 #else

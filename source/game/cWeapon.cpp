@@ -410,7 +410,7 @@ void cTeslaWeapon::__TriggerOwn(const coreUint8 iMode)
             m_fStrikeOffset = g_pSpecialEffects->CreateLightning(vPosFrom, vPosTo, SPECIAL_LIGHTNING_BIG, coreVector3(1.0f,1.0f,1.0f), vTexSizeFactor, m_fStrikeOffset);
 
             // 
-            pTarget->TakeDamage(12, m_pOwner);
+            pTarget->TakeDamage(12, ELEMENT_BLUE, m_pOwner);
             g_pSpecialEffects->MacroExplosionColorSmall(pTarget->GetPosition(), COLOR_ENERGY_BLUE);
         }
     }

@@ -51,6 +51,7 @@ public:
     inline  cPlayer*    GetOwner      ()const {return m_pOwner;}
     virtual coreVector3 GetColorEnergy()const {return coreVector3(0.5f,0.5f,0.5f);}
     virtual coreVector3 GetColorShip  ()const {return coreVector3(0.5f,0.5f,0.5f);}
+    virtual coreUint8   GetElement    ()const {return ELEMENT_NEUTRAL;}
 
 
 private:
@@ -95,6 +96,7 @@ public:
     // get object properties
     inline coreVector3 GetColorEnergy()const override {return COLOR_ENERGY_YELLOW;}
     inline coreVector3 GetColorShip  ()const override {return COLOR_SHIP_YELLOW;}
+    inline coreUint8   GetElement    ()const override {return ELEMENT_YELLOW;}
 
 
 private:
@@ -124,6 +126,7 @@ public:
     // get object properties
     inline coreVector3 GetColorEnergy()const override {return COLOR_ENERGY_PURPLE;}
     inline coreVector3 GetColorShip  ()const override {return COLOR_SHIP_PURPLE;}
+    inline coreUint8   GetElement    ()const override {return ELEMENT_PURPLE;}
 
 
 private:
@@ -155,6 +158,7 @@ public:
     // get object properties
     inline coreVector3 GetColorEnergy()const override {return COLOR_ENERGY_GREEN;}
     inline coreVector3 GetColorShip  ()const override {return COLOR_SHIP_GREEN;}
+    inline coreUint8   GetElement    ()const override {return ELEMENT_GREEN;}
 
 
 private:
@@ -186,6 +190,7 @@ public:
     // get object properties
     inline coreVector3 GetColorEnergy()const override {return COLOR_ENERGY_BLUE;}
     inline coreVector3 GetColorShip  ()const override {return COLOR_SHIP_BLUE;}
+    inline coreUint8   GetElement    ()const override {return ELEMENT_BLUE;}
 
 
 private:
@@ -208,6 +213,7 @@ public:
     // get object properties
     inline coreVector3 GetColorEnergy()const override {return COLOR_ENERGY_RED;}
     inline coreVector3 GetColorShip  ()const override {return COLOR_SHIP_RED;}
+    inline coreUint8   GetElement    ()const override {return ELEMENT_RED;}
 };
 
 

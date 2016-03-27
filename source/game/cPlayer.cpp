@@ -32,7 +32,7 @@ cPlayer::cPlayer()noexcept
 
     // set initial status
     m_iStatus = PLAYER_STATUS_DEAD;
-    m_iMaxHealth = m_iCurHealth = 100;
+    this->SetMaxHealth(100);
 
     // load first weapons
     for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
@@ -50,7 +50,7 @@ cPlayer::cPlayer()noexcept
     // 
     m_Bubble.DefineModel  ("object_sphere.md3");
     m_Bubble.DefineTexture(0u, "effect_energy.png");
-    m_Bubble.DefineProgram("effect_energy_spheric_program");
+    m_Bubble.DefineProgram("effect_energy_bullet_spheric_program");
     m_Bubble.SetColor4    (coreVector4(0.5f,0.5f,0.5f,0.0f));
     m_Bubble.SetTexSize   (coreVector2(5.0f,5.0f));
     m_Bubble.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
@@ -182,6 +182,8 @@ void cPlayer::Render()
 // move the player
 void cPlayer::Move()
 {
+    // 
+    this->_UpdateAlways();
     if(CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_DEAD)) return;
 
     if(!CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
@@ -290,7 +292,7 @@ void cPlayer::Move()
 
 // ****************************************************************
 // reduce current health
-void cPlayer::TakeDamage(const coreInt32 iDamage)
+void cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement)
 {
     // 
     g_pGame->GetCombatText()->AddDamage(iDamage, this->GetPosition());
@@ -300,7 +302,7 @@ void cPlayer::TakeDamage(const coreInt32 iDamage)
     this->ReduceCombo();
 
     // 
-    if(this->_TakeDamage(iDamage))
+    if(this->_TakeDamage(iDamage, iElement))
     {
         // TODO # 
     }

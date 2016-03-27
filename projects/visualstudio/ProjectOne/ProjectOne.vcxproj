@@ -42,6 +42,7 @@
     <ClCompile Include="..\..\..\source\game\cBullet.cpp" />
     <ClCompile Include="..\..\..\source\game\cEnemy.cpp" />
     <ClCompile Include="..\..\..\source\game\cGame.cpp" />
+    <ClCompile Include="..\..\..\source\game\cShield.cpp" />
     <ClCompile Include="..\..\..\source\game\cTheater.cpp" />
     <ClCompile Include="..\..\..\source\game\cPlayer.cpp" />
     <ClCompile Include="..\..\..\source\game\cShip.cpp" />
@@ -84,6 +85,7 @@
     <ClInclude Include="..\..\..\source\game\cEnemy.h" />
     <ClInclude Include="..\..\..\source\game\cGame.h" />
     <ClInclude Include="..\..\..\source\game\cPlayer.h" />
+    <ClInclude Include="..\..\..\source\game\cShield.h" />
     <ClInclude Include="..\..\..\source\game\cShip.h" />
     <ClInclude Include="..\..\..\source\game\cWeapon.h" />
     <ClInclude Include="..\..\..\source\game\mission\cMission.h" />

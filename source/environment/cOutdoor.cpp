@@ -113,7 +113,7 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
     m_fGrade     = fGrade;
 
     // select algorithm function
-    std::function<coreFloat(const coreFloat, const coreFloat)> nAlgorithmFunc;
+    coreFloat (*nAlgorithmFunc) (const coreFloat, const coreFloat);
     switch(iAlgorithm)
     {
     default: ASSERT(false)
@@ -153,7 +153,7 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
         m_afHeight[i] = fLevel;
 
         // set vertex position
-        aVertexData[i].vPosition = coreVector3(I_TO_F(x - OUTDOOR_WIDTH/2) * OUTDOOR_DETAIL, I_TO_F(y - OUTDOOR_VIEW/2) * OUTDOOR_DETAIL, fLevel);
+        aVertexData[i].vPosition = coreVector3(I_TO_F(x - OUTDOOR_WIDTH/2u) * OUTDOOR_DETAIL, I_TO_F(y - OUTDOOR_VIEW/2u) * OUTDOOR_DETAIL, fLevel);
     }
 
     // sync beginning and ending height to create an infinite looking grid when resetting the position
@@ -232,7 +232,7 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
     }
 
     GLuint iNormFormat;
-    std::function<coreUint32(const coreVector4&)> nPackFunc;
+    coreUint32 (*nPackFunc) (const coreVector4& vVector);
     if(CORE_GL_SUPPORT(ARB_vertex_type_2_10_10_10_rev))
     {
         // use high-precision packed format
@@ -376,8 +376,8 @@ void cOutdoor::LoadProgram(const coreBool bGlow)
 coreFloat cOutdoor::RetrieveHeight(const coreVector2& vPosition)
 {
     // convert real position to block position
-    const coreFloat fX = (vPosition.x-this->GetPosition().x) / OUTDOOR_DETAIL + I_TO_F(OUTDOOR_WIDTH/2);
-    const coreFloat fY = (vPosition.y-this->GetPosition().y) / OUTDOOR_DETAIL + I_TO_F(OUTDOOR_VIEW /2);
+    const coreFloat fX = (vPosition.x-this->GetPosition().x) / OUTDOOR_DETAIL + I_TO_F(OUTDOOR_WIDTH/2u);
+    const coreFloat fY = (vPosition.y-this->GetPosition().y) / OUTDOOR_DETAIL + I_TO_F(OUTDOOR_VIEW /2u);
 
     // retrieve all four corners of the block
     const coreUintW iI00 = F_TO_UI(fY) * OUTDOOR_WIDTH + F_TO_UI(fX);   // bottom left
@@ -412,8 +412,8 @@ coreVector3 cOutdoor::RetrieveIntersect(const coreVector3& vRayPosition, const c
         ASSERT(i)
 
         // check for boundaries
-        if(ABS(vOutput.x) > I_TO_F(OUTDOOR_WIDTH/2) * OUTDOOR_DETAIL ||
-           ABS(vOutput.y) > I_TO_F(OUTDOOR_VIEW /2) * OUTDOOR_DETAIL)
+        if(ABS(vOutput.x) > I_TO_F(OUTDOOR_WIDTH/2u) * OUTDOOR_DETAIL ||
+           ABS(vOutput.y) > I_TO_F(OUTDOOR_VIEW /2u) * OUTDOOR_DETAIL)
            break;
 
         // retrieve and check height at current position

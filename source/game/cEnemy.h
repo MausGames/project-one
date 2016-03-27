@@ -20,7 +20,8 @@ enum eEnemyStatus : coreUint8
     ENEMY_STATUS_DEAD     = 0x01u,   // completely removed from the game
     ENEMY_STATUS_BOSS     = 0x02u,   // 
     ENEMY_STATUS_MUTE     = 0x04u,   // 
-    ENEMY_STATUS_ASSIGNED = 0x08u    // enemy is currently assigned to something
+    ENEMY_STATUS_ASSIGNED = 0x08u,   // enemy is currently assigned to something
+    ENEMY_STATUS_SHIELDED = 0x10u    // 
 };
 
 
@@ -29,7 +30,8 @@ enum eEnemyStatus : coreUint8
 class INTERFACE cEnemy : public cShip
 {
 protected:
-    coreFlow m_fLifeTime;   // 
+    coreFlow  m_fLifeTime;         // 
+    coreFloat m_fLifeTimeBefore;   // 
 
 
 public:
@@ -41,22 +43,23 @@ public:
     ENABLE_ID
 
     // configure the enemy
-    void Configure(const coreInt32 iHealth, const coreVector3& vColor);
+    void Configure (const coreInt32 iHealth, const coreVector3& vColor);
+    void GiveShield(const coreUint8 iElement, const coreInt16 iHealth = 0);
 
     // move the enemy
     void Move()override;
 
     // reduce current health
-    void TakeDamage(const coreInt32 iDamage, cPlayer* pAttacker);
+    void TakeDamage(coreInt32 iDamage, const coreUint8 iElement, cPlayer* pAttacker);
 
     // control life and death
     void Resurrect();
-    void Resurrect(const coreSpline2& oPath,     const coreVector2& vFactor, const coreVector2& vOffset);
+    void Resurrect(const coreSpline2* pPath,     const coreVector2& vFactor, const coreVector2& vOffset);
     void Resurrect(const coreVector2& vPosition, const coreVector2& vDirection);
     void Kill     (const coreBool     bAnimated);
 
     // transformation functions (raw parameters are multiplied with FOREGROUND_AREA)
-    coreBool DefaultMovePath     (const coreSpline2& oRawPath, const coreVector2& vFactor, const coreVector2& vRawOffset, const coreFloat fRawDistance);
+    coreBool DefaultMovePath     (const coreSpline2* pRawPath, const coreVector2& vFactor, const coreVector2& vRawOffset, const coreFloat fRawDistance);
     coreBool DefaultMoveTarget   (const coreVector2& vTarget, const coreFloat fSpeedMove, const coreFloat fSpeedTurn);
     coreBool DefaultMoveSmooth   (const coreVector2& vRawPosition, const coreFloat fSpeedMove, const coreFloat fClampMove);
     void     DefaultMoveLerp     (const coreVector2& vFromRawPos, const coreVector2& vToRawPos, const coreFloat fTime);
@@ -68,7 +71,8 @@ public:
     void     DefaultMultiate     (const coreFloat fAngle);
 
     // get object properties
-    inline const coreFloat& GetLifeTime()const {return m_fLifeTime;}
+    inline const coreFloat& GetLifeTime      ()const {return m_fLifeTime;}
+    inline const coreFloat& GetLifeTimeBefore()const {return m_fLifeTimeBefore;}
 
 
 private:
@@ -106,6 +110,14 @@ public:
     cEnemy* FindEnemy(const coreVector2& vPosition);
     template <typename F> void ForEachEnemy   (F&& nFunction);   // [](cEnemy* OUTPUT pEnemy, const coreUintW i) -> void
     template <typename F> void ForEachEnemyAll(F&& nFunction);   // [](cEnemy* OUTPUT pEnemy, const coreUintW i) -> void
+
+    // 
+    inline cEnemy* GetEnemy(const coreUintW iIndex)const {ASSERT(iIndex < m_apEnemy.size()) return m_apEnemy[iIndex];}
+
+    // 
+    inline coreUintW GetNumEnemies     ()const {return m_apEnemy.size();}
+    inline coreUintW GetNumEnemiesAlive()const {return std::count_if(m_apEnemy.begin(), m_apEnemy.end(), [](const cEnemy* pEnemy) {return !CONTAINS_VALUE(pEnemy->GetStatus(), ENEMY_STATUS_DEAD);});}
+    inline coreBool  IsFinished        ()const {return std::none_of (m_apEnemy.begin(), m_apEnemy.end(), [](const cEnemy* pEnemy) {return !CONTAINS_VALUE(pEnemy->GetStatus(), ENEMY_STATUS_DEAD);});}
 };
 
 
@@ -159,6 +171,9 @@ public:
     cEnemy* FindEnemy(const coreVector2& vPosition);
     template <typename F> void ForEachEnemy   (F&& nFunction);   // [](cEnemy* OUTPUT pEnemy) -> void
     template <typename F> void ForEachEnemyAll(F&& nFunction);   // [](cEnemy* OUTPUT pEnemy) -> void
+
+    // 
+    template <typename T> void PrefetchEnemy();
 
     // 
     inline void BindEnemy  (cEnemy* pEnemy) {ASSERT(!m_apAdditional.count(pEnemy)) m_apAdditional.insert(pEnemy);}
@@ -312,7 +327,7 @@ template <typename F> void cEnemySquad::ForEachEnemy(F&& nFunction)
     for(coreUintW i = 0u, ie = m_apEnemy.size(); i < ie; ++i)
     {
         cEnemy* pEnemy = m_apEnemy[i];
-        if(CONTAINS_VALUE(pEnemy->GetStatus(), ENEMY_STATUS_DEAD)) continue;
+        if(CONTAINS_VALUE(pEnemy->GetStatus(), ENEMY_STATUS_DEAD) && !pEnemy->ReachedDeath()) continue;
 
         // 
         nFunction(pEnemy, i);
@@ -434,6 +449,22 @@ template <typename F> void cEnemyManager::ForEachEnemyAll(F&& nFunction)
         // 
         FOR_EACH(et, *pEnemyActive->List())
             nFunction(*et);
+    }
+}
+
+
+// ****************************************************************
+// 
+template <typename T> void cEnemyManager::PrefetchEnemy()
+{
+    if(!m_apEnemySet.count(REF_ID(T::ID)))
+    {
+        // 
+        sEnemySet<T>* pSet = new sEnemySet<T>();
+        pSet->apEnemyPool[0] = new T();
+
+        // 
+        m_apEnemySet[REF_ID(T::ID)] = pSet;
     }
 }
 

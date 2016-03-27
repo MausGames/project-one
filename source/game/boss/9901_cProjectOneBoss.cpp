@@ -17,30 +17,16 @@
 // constructor
 cProjectOneBoss::cProjectOneBoss()noexcept
 {
-    // load models
+    // load object resources
     this->DefineModelHigh("ship_projectone.md3");
     this->DefineModelLow ("ship_projectone.md3");
-
-
-    this->DefineTexture(0u, "ship_player.png");
-
+    this->DefineTexture  (0u, "ship_player.png");
 
     // 
     this->SetSize(coreVector3(1.2f,1.2f,1.2f));
 
     // configure the boss
     this->Configure(10000, COLOR_SHIP_GREY);
-
-
-    g_pGlow->BindObject(this);
-
-
-    this->DefineModelHigh("effect_shield.md3");
-    this->DefineModelLow ("effect_shield.md3");
-    this->DefineTexture  (0u, "effect_particle_128.png");
-    this->DefineProgram  ("effect_shield_program");
-    this->SetSize(coreVector3(5.0f,5.0f,5.0f));
-    this->SetBaseColor(COLOR_ENERGY_GREEN);
 }
 
 

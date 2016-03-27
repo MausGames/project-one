@@ -32,11 +32,11 @@ cSeaBackground::cSeaBackground()noexcept
         for(coreUintW i = 0u; i < SEA_STONE_NUM; ++i)
         {
             // calculate position and height
-            const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.45f, 0.45f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(SEA_STONE_NUM)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
+            const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, SEA_STONE_NUM);
             const coreFloat   fHeight   = m_pOutdoor->RetrieveHeight(vPosition);
 
             // test for valid values
-            if(fHeight > -23.0f && fHeight < -18.0f && (F_TO_SI(vPosition.y+160.0f) % 80 < 40))
+            if((fHeight > -23.0f) && (fHeight < -18.0f) && (F_TO_SI(vPosition.y+160.0f) % 80 < 40))
             {
                 if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 25.0f))
                 {
@@ -77,11 +77,11 @@ cSeaBackground::cSeaBackground()noexcept
             for(coreUintW j = 0u; j < 4u; ++j)   // tries
             {
                 // calculate position and height
-                const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.45f, 0.45f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(SEA_WEED_NUM)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
+                const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, SEA_WEED_NUM);
                 const coreFloat   fHeight   = m_pOutdoor->RetrieveHeight(vPosition);
 
                 // test for valid values
-                if(fHeight > -23.0f && fHeight < -18.0f)
+                if((fHeight > -23.0f) && (fHeight < -18.0f))
                 {
                     if(!cBackground::_CheckIntersectionQuick(pList1,                  vPosition, 1.0f) &&
                        !cBackground::_CheckIntersection     (m_apGroundObjectList[0], vPosition, 9.0f))
@@ -130,14 +130,14 @@ cSeaBackground::cSeaBackground()noexcept
             for(coreUintW j = 0u; j < 8u; ++j)   // tries
             {
                 // calculate position and height
-                const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.45f, 0.45f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(SEA_ANIMAL_NUM)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
+                const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, SEA_ANIMAL_NUM);
                 const coreFloat   fHeight   = m_pOutdoor->RetrieveHeight(vPosition);
 
                 const coreFloat   fHeight2   = m_pOutdoor->RetrieveHeight(coreVector2(vPosition.x,     vPosition.y+OUTDOOR_DETAIL));
                 const coreFloat   fHeight3   = m_pOutdoor->RetrieveHeight(coreVector2(vPosition.x, MAX(vPosition.y-OUTDOOR_DETAIL, I_TO_F(OUTDOOR_VIEW/2))));
 
                 // test for valid values
-                if((fHeight < fHeight2) && (fHeight3 < fHeight) && vPosition.x >= -30.0f && fHeight > -22.0f && fHeight < -16.0f && (F_TO_SI(vPosition.y+160.0f) % 80 < 40))
+                if((fHeight < fHeight2) && (fHeight3 < fHeight) && (vPosition.x >= -30.0f) && (fHeight > -22.0f) && (fHeight < -16.0f) && (F_TO_SI(vPosition.y+160.0f) % 80 < 40))
                 {
                     if(!cBackground::_CheckIntersectionQuick(pList1,                  vPosition, 25.0f) &&
                        !cBackground::_CheckIntersectionQuick(pList2,                  vPosition, 25.0f) &&
@@ -221,7 +221,7 @@ cSeaBackground::cSeaBackground()noexcept
             for(coreUintW j = 0u; j < 20u; ++j)   // tries
             {
                 // calculate position and height
-                const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.45f, 0.45f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(SEA_ALGAE_NUM)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
+                const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, SEA_ALGAE_NUM);
                 const coreFloat   fHeight   = Core::Rand->Float(10.0f, 30.0f);
 
                 // test for valid values

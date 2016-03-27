@@ -14,14 +14,16 @@
 // TODO: merge stone diff and norm textures (own shader ?)
 // TODO: clouds on grass background need no separate heap allocation! (beware of _FillInfinite and destructor delete)
 // TODO: added object gets shadow-shader
-// TODO: overlay on cloud background creates redundant overdraw
 // TODO: decals are not affected by shadow or underlying diffuse value (depth-only from water (centralize away) ? -> no shadow, maybe render both (color(shadow, no textures)+depth) single-sampled)
 // TODO: expose pool-allocator for additional objects (AddList)
+// TODO: no blitting on disabled anti-aliasing ( low-optimizations on other components)
 
 
 // ****************************************************************
 // background definitions
 #define BACKGROUND_OBJECT_RANGE (80.0f)   // default (+/-) Y-range where objects on ground are considered visible
+
+#define __BACKGROUND_SCANLINE(x,i,n) (coreVector2((x) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(n)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2u)) * OUTDOOR_DETAIL)
 
 
 // ****************************************************************

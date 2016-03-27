@@ -49,6 +49,9 @@ cGame::~cGame()
         m_aPlayer[i].Kill(true);
 
     // 
+    m_ShieldManager.ClearShields(true);
+
+    // 
     m_BulletManagerPlayer.ClearBullets(true);
     m_BulletManagerEnemy .ClearBullets(true);
 
@@ -84,6 +87,9 @@ void cGame::Render()
             // render underlying effects
             m_EnemyManager.RenderUnder();
             m_pMission   ->RenderUnder();
+
+            // 
+            m_ShieldManager.Render();
         }
         glDepthMask(true);
 
@@ -171,6 +177,9 @@ void cGame::Move()
     // move the bullet managers
     m_BulletManagerPlayer.Move();
     m_BulletManagerEnemy .Move();
+
+    // 
+    m_ShieldManager.Move();
 
     // handle default object collisions
     this->__HandleCollisions();
@@ -397,7 +406,7 @@ void cGame::__HandleCollisions()
         if(!bFirstHit) return;
 
         // 
-        pPlayer->TakeDamage(15);
+        pPlayer->TakeDamage(15, ELEMENT_NEUTRAL);
 
         // 
         const coreVector3 vCenter = coreVector3((pPlayer->GetPosition().xy() + pEnemy->GetPosition().xy()) * 0.5f, 0.0f);
@@ -407,7 +416,7 @@ void cGame::__HandleCollisions()
     Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_BULLET_ENEMY, [](cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreBool bFirstHit)
     {
         // 
-        pPlayer->TakeDamage(pBullet->GetDamage());
+        pPlayer->TakeDamage(pBullet->GetDamage(), pBullet->GetElement());
         pBullet->Deactivate(true);
     });
 
@@ -418,7 +427,7 @@ void cGame::__HandleCollisions()
            (ABS(pEnemy->GetPosition().y) >= FOREGROUND_AREA.y * 1.1f)) return;
 
         // 
-        pEnemy ->TakeDamage(pBullet->GetDamage(), s_cast<cPlayer*>(pBullet->GetOwner()));
+        pEnemy ->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), s_cast<cPlayer*>(pBullet->GetOwner()));
         pBullet->Deactivate(true);
     });
 }

@@ -153,6 +153,7 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreShader> ("effect_shield.vert",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_shield.vert");
     Core::Manager::Resource->Load<coreShader> ("effect_shield.frag",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_shield.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_shield_inst.vert",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_shield.vert", CORE_SHADER_OPTION_INSTANCING);
+    Core::Manager::Resource->Load<coreShader> ("effect_shield_inst.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_shield.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("environment_clouds.vert",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_clouds.vert");
     Core::Manager::Resource->Load<coreShader> ("environment_clouds.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_clouds.frag");
     Core::Manager::Resource->Load<coreShader> ("environment_clouds_inst.vert",           CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_clouds.vert", CORE_SHADER_OPTION_INSTANCING);
@@ -396,7 +397,7 @@ static void SetupResources()
 
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_shield_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("effect_shield_inst.vert")
-        ->AttachShader("effect_shield.frag")
+        ->AttachShader("effect_shield_inst.frag")
         ->Finish();
 
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_clouds_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())

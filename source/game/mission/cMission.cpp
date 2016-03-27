@@ -15,10 +15,29 @@ cMission::cMission()noexcept
 : m_apBoss           {}
 , m_pCurBoss         (NULL)
 , m_iCurBossIndex    (MISSION_NO_BOSS)
+, m_piInt            (NULL)
+, m_pfFloat          (NULL)
+, m_iIntSize         (0u)
+, m_iFloatSize       (0u)
 , m_iStageNum        (0u)
 , m_fStageTime       (0.0f)
 , m_fStageTimeBefore (0.0f)
 {
+}
+
+
+// ****************************************************************
+// destructor
+cMission::~cMission()
+{
+    // 
+    m_anStage.clear();
+    m_apPath .clear();
+    m_apSquad.clear();
+
+    // 
+    SAFE_DELETE_ARRAY(m_piInt)
+    SAFE_DELETE_ARRAY(m_pfFloat)
 }
 
 
@@ -109,6 +128,23 @@ void cMission::MoveAfter()
 
     // 
     this->__MoveOwnAfter();
+}
+
+
+// ****************************************************************
+// 
+void cMission::SkipStage()
+{
+    // 
+    m_fStageTime = 0.0f;
+    m_anStage.pop_back();
+
+    // 
+    std::memset(m_piInt,   0, sizeof(coreInt16) * m_iIntSize);
+    std::memset(m_pfFloat, 0, sizeof(coreFlow)  * m_iFloatSize);
+
+    // 
+    g_pGame->GetShieldManager()->ClearShields(true);
 }
 
 

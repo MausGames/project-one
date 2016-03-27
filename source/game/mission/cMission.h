@@ -28,21 +28,52 @@
 
 // ****************************************************************
 // stage management macros
-#define STAGE_MAIN              m_anStage[__LINE__] = ([this]()                    // 
+#define STAGE_CONFIG_INT(c)        {if(m_iIntSize)   SAFE_DELETE_ARRAY(m_piInt)   if(c) m_piInt   = new coreInt16[c]; m_iIntSize   = c;}
+#define STAGE_CONFIG_FLOAT(c)      {if(m_iFloatSize) SAFE_DELETE_ARRAY(m_pfFloat) if(c) m_pfFloat = new coreFlow [c]; m_iFloatSize = c;}
 
-#define STAGE_TIME_POINT(t)     (InBetween(t, m_fStageTimeBefore, m_fStageTime))   // 
-#define STAGE_TIME_AFTER(t)     ((t) >= m_fStageTime)                              // 
-#define STAGE_TIME_BEFORE(t)    ((t) <  m_fStageTime)                              // 
-#define STAGE_TIME_BETWEEN(t,u) (InBetween(m_fStageTime, t, u))                    // 
-#define STAGE_TIME_INIT         (STAGE_TIME_POINT(0.0f))                           // 
+#define STAGE_MAIN                 m_anStage[__LINE__] = ([this]()
+#define STAGE_START_HERE           m_anStage.clear(); STAGE_MAIN{g_pGame->StartIntro(); STAGE_FINISH_NOW});
 
-#define STAGE_FINISH_NOW        {this->SkipStage();}                               // 
-#define STAGE_FINISH_AFTER(t)   {if(m_fStageTime >= (t)) STAGE_FINISH_NOW}         // 
+#define STAGE_GET_START            coreUintW iIntIndex = 0u; coreUintW iFloatIndex = 0u;
+#define STAGE_GET_END              ASSERT((iIntIndex <= m_iIntSize) && (iFloatIndex <= m_iFloatSize))
+#define STAGE_GET_INT(n)           coreInt16&   n =                     (m_piInt   [iIntIndex]);   iIntIndex   += 1u;
+#define STAGE_GET_FLOAT(n)         coreFlow&    n =                     (m_pfFloat [iFloatIndex]); iFloatIndex += 1u;
+#define STAGE_GET_VEC2(n)          coreVector2& n = r_cast<coreVector2&>(m_pfFloat [iFloatIndex]); iFloatIndex += 2u;
+#define STAGE_GET_VEC3(n)          coreVector3& n = r_cast<coreVector3&>(m_pfFloat [iFloatIndex]); iFloatIndex += 3u;
+#define STAGE_GET_VEC4(n)          coreVector4& n = r_cast<coreVector4&>(m_pfFloat [iFloatIndex]); iFloatIndex += 4u;
+#define STAGE_GET_ARRAY_INT(n,c)   coreInt16*   n =                     (&m_piInt  [iIntIndex]);   iIntIndex   += 1u * (c);
+#define STAGE_GET_ARRAY_FLOAT(n,c) coreFlow*    n =                     (&m_pfFloat[iFloatIndex]); iFloatIndex += 1u * (c);
+#define STAGE_GET_ARRAY_VEC2(n,c)  coreVector2* n = r_cast<coreVector2*>(&m_pfFloat[iFloatIndex]); iFloatIndex += 2u * (c);
+#define STAGE_GET_ARRAY_VEC3(n,c)  coreVector3* n = r_cast<coreVector3*>(&m_pfFloat[iFloatIndex]); iFloatIndex += 3u * (c);
+#define STAGE_GET_ARRAY_VEC4(n,c)  coreVector4* n = r_cast<coreVector4*>(&m_pfFloat[iFloatIndex]); iFloatIndex += 4u * (c);
 
-#define STAGE_ADD_PATH(n)      auto n = this->_AddPath    (__LINE__,    [&](coreSpline2* OUTPUT n)
-#define STAGE_ADD_SQUAD(n,t,c) auto n = this->_AddSquad<t>(__LINE__, c, [&](cEnemySquad* OUTPUT n)
+#define STAGE_TIME_POINT(t)        (InBetween(t, m_fStageTimeBefore, m_fStageTime))
+#define STAGE_TIME_BEFORE(t)       (m_fStageTime <  (t))
+#define STAGE_TIME_AFTER(t)        (m_fStageTime >= (t))
+#define STAGE_TIME_BETWEEN(t,u)    (InBetween(m_fStageTime, t, u))
+#define STAGE_TIME_INIT            (STAGE_TIME_POINT(0.0f))
 
-#define STAGE_SQUAD_INIT(x,f) {x->ForEachEnemyAll([&](cEnemy* OUTPUT pEnemy, const coreUintW i) {pEnemy->f;});}
+
+#define FRAMERATE_ROUND(x) (I_TO_F(F_TO_UI((x) * FRAMERATE_VALUE)) / FRAMERATE_VALUE)
+
+#define STAGE_LIFETIME(e,f)          auto nLifeFunc = [&](const coreFloat fLifeTime) {return (f);}; coreFloat fLifeTime = nLifeFunc(e->GetLifeTime()); coreFloat fLifeTimeBefore = nLifeFunc(e->GetLifeTimeBefore()); const coreVector2 vPosBefore = e->GetPosition().xy();
+
+#define STAGE_LIFETIME_POINT(t)        (InBetween(t, fLifeTimeBefore, fLifeTime))
+#define STAGE_LIFETIME_BEFORE(t)       (fLifeTime <  (t))
+#define STAGE_LIFETIME_AFTER(t)        (fLifeTime >= (t))
+#define STAGE_LIFETIME_BETWEEN(t,u)    (InBetween(fLifeTime, FRAMERATE_ROUND(t), FRAMERATE_ROUND(u)))
+
+
+#define STAGE_BRANCH(x,a,b)        ([&](){if((x) < (a)) return true; (x) = std::fmod((x) - (a), (b)); return false;}())
+
+#define STAGE_FINISH_NOW           {this->SkipStage();}
+#define STAGE_FINISH_AFTER(t)      {if(m_fStageTime >= (t)) STAGE_FINISH_NOW}
+
+#define STAGE_ADD_PATH(n)          auto n = this->_AddPath    (__LINE__,    [&](coreSpline2* OUTPUT n)
+#define STAGE_ADD_SQUAD(n,t,c)     auto n = this->_AddSquad<t>(__LINE__, c, [&](cEnemySquad* OUTPUT n)
+
+#define STAGE_SQUAD_FOREACH(s,e,i)     s->ForEachEnemy   ([&](cEnemy* OUTPUT e, const coreUintW i)
+#define STAGE_SQUAD_FOREACH_ALL(s,e,i) s->ForEachEnemyAll([&](cEnemy* OUTPUT e, const coreUintW i)
 
 
 // ****************************************************************
@@ -50,30 +81,37 @@
 class INTERFACE cMission
 {
 private:
+    // 
     using tStageFunc = std::function<void()>;
     using tPathPtr   = std::unique_ptr<coreSpline2>;
     using tSquadPtr  = std::unique_ptr<cEnemySquad>;
 
 
 protected:
-    cBoss* m_apBoss[MISSION_BOSSES];                // pointers to all available bosses
+    cBoss* m_apBoss[MISSION_BOSSES];                  // pointers to all available bosses
 
-    cBoss*    m_pCurBoss;                           // pointer to currently active boss
-    coreUintW m_iCurBossIndex;                      // index of the active boss (or error-value)
+    cBoss*    m_pCurBoss;                             // pointer to currently active boss
+    coreUintW m_iCurBossIndex;                        // index of the active boss (or error-value)
 
-    coreLookup<coreUint16, tStageFunc> m_anStage;   // 
-    coreLookup<coreUint16, tPathPtr>   m_apPath;    // 
-    coreLookup<coreUint16, tSquadPtr>  m_apSquad;   // 
+    coreLookup<coreUint16, tStageFunc> m_anStage;     // 
+    coreLookup<coreUint16, tPathPtr>   m_apPath;      // 
+    coreLookup<coreUint16, tSquadPtr>  m_apSquad;     // 
 
-    coreUint16 m_iStageNum;                         // 
+    coreInt16* m_piInt;                               // 
+    coreFlow*  m_pfFloat;                             // 
 
-    coreFlow  m_fStageTime;                         // 
-    coreFloat m_fStageTimeBefore;                   // 
+    coreUint8 m_iIntSize;                             // 
+    coreUint8 m_iFloatSize;                           // 
+
+    coreUint16 m_iStageNum;                           // 
+
+    coreFlow  m_fStageTime;                           // 
+    coreFloat m_fStageTimeBefore;                     // 
 
 
 public:
     cMission()noexcept;
-    virtual ~cMission() = default;
+    virtual ~cMission();
 
     DISABLE_COPY(cMission)
     ENABLE_ID
@@ -89,7 +127,7 @@ public:
     void MoveAfter   ();
 
     // 
-    inline void     SkipStage ()      {m_fStageTime = 0.0f; m_anStage.pop_back();}
+    void            SkipStage ();
     inline coreBool IsFinished()const {return m_anStage.empty();}
 
     // set active boss

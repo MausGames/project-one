@@ -23,7 +23,7 @@ cCloudBackground::cCloudBackground()noexcept
         for(coreUintW i = 0u, ie = CLOUD_CLOUD_NUM; i < ie; ++i)
         {
             // calculate position and height
-            const coreVector2 vPosition = coreVector2(Core::Rand->Float(0.1f, 0.25f) * ((i % 2u) ? 1.0f : -1.0f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(CLOUD_CLOUD_NUM)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
+            const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(0.1f, 0.25f) * ((i % 2u) ? 1.0f : -1.0f), i, CLOUD_CLOUD_NUM);
             const coreFloat   fHeight   = Core::Rand->Float(20.0f, 60.0f);
 
             // load object resources

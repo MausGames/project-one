@@ -43,7 +43,7 @@
 #define LERP_LINEAR    (&LERP <coreFloat>)
 #define LERP_SMOOTH    (&LERPS<coreFloat>)
 #define LERP_BREAK     (&LERPB<coreFloat>)
-#define LERP_BREAK_REV ([](const coreFloat x, const coreFloat y, const coreFloat s) {return LERPB(y, x, 1.0f-s);})
+#define LERP_BREAK_REV ([](const coreFloat& x, const coreFloat& y, const coreFloat s) {return LERPB(y, x, 1.0f-s);})
 
 
 // ****************************************************************
@@ -51,7 +51,8 @@
 class INTERFACE cBoss : public cEnemy
 {
 private:
-    using tLerpFunc         = std::function<coreFloat(const coreFloat, const coreFloat, const coreFloat)>;
+    // 
+    using tLerpFunc         = coreFloat (*) (const coreFloat&, const coreFloat&, const coreFloat);
     using tTimerUpdateFunc  = std::function<void(const coreFloat, const coreFloat, const coreBool)>;
     using tTickerUpdateFunc = std::function<void(const coreUint16, const coreBool)>;
 

@@ -12,7 +12,8 @@
 // ****************************************************************
 // constructor
 cEnemy::cEnemy()noexcept
-: m_fLifeTime (0.0f)
+: m_fLifeTime       (0.0f)
+, m_fLifeTimeBefore (0.0f)
 {
     // load object resources
     this->DefineTexture(0u, "ship_enemy.png");
@@ -31,11 +32,18 @@ cEnemy::cEnemy()noexcept
 // configure the enemy
 void cEnemy::Configure(const coreInt32 iHealth, const coreVector3& vColor)
 {
-    // set maximum and current health value
-    m_iMaxHealth = m_iCurHealth = iHealth;
-
-    // save color value
+    // set health and color value
+    this->SetMaxHealth(iHealth);
     this->SetBaseColor(vColor);
+}
+
+
+// ****************************************************************
+// 
+void cEnemy::GiveShield(const coreUint8 iElement, const coreInt16 iHealth)
+{
+    // 
+    g_pGame->GetShieldManager()->BindEnemy(this, iElement, iHealth);
 }
 
 
@@ -43,9 +51,12 @@ void cEnemy::Configure(const coreInt32 iHealth, const coreVector3& vColor)
 // move the enemy
 void cEnemy::Move()
 {
+    // 
+    this->_UpdateAlways();
     if(CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_DEAD)) return;
 
     // 
+    m_fLifeTimeBefore = m_fLifeTime;
     m_fLifeTime.Update(1.0f);
 
     // call individual move routines
@@ -61,21 +72,26 @@ void cEnemy::Move()
 
 // ****************************************************************
 // reduce current health
-void cEnemy::TakeDamage(const coreInt32 iDamage, cPlayer* pAttacker)
+void cEnemy::TakeDamage(coreInt32 iDamage, const coreUint8 iElement, cPlayer* pAttacker)
 {
     // 
-    if(pAttacker)
-    {
-        pAttacker->AddCombo(1u);
-        pAttacker->AddChain(1u);   // TODO # clamp on health 
-    }
-
-    // 
-    if(this->_TakeDamage(iDamage))
+    g_pGame->GetShieldManager()->AbsorbDamage(this, &iDamage, iElement);
+    if(iDamage)
     {
         // 
-        this->Kill(true);
-        return;
+        if(pAttacker)
+        {
+            pAttacker->AddCombo(1u);
+            pAttacker->AddChain(1u);   // TODO # clamp on health 
+        }
+
+        // 
+        if(this->_TakeDamage(iDamage, iElement))
+        {
+            // 
+            this->Kill(true);
+            return;
+        }
     }
 }
 
@@ -88,14 +104,14 @@ void cEnemy::Resurrect()
     this->Resurrect(coreVector2(FLT_MAX,FLT_MAX), coreVector2(0.0f,-1.0f));
 }
 
-void cEnemy::Resurrect(const coreSpline2& oPath, const coreVector2& vFactor, const coreVector2& vOffset)
+void cEnemy::Resurrect(const coreSpline2* pPath, const coreVector2& vFactor, const coreVector2& vOffset)
 {
     ASSERT(CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_DEAD))
 
     // 
     coreVector2 vPosition;
     coreVector2 vDirection;
-    oPath.CalcPosDir(0.0f, &vPosition, &vDirection);
+    pPath->CalcPosDir(0.0f, &vPosition, &vDirection);
 
     // 
     this->Resurrect((vPosition * vFactor) + vOffset, (vDirection * vFactor).Normalize());
@@ -112,7 +128,8 @@ void cEnemy::Resurrect(const coreVector2& vPosition, const coreVector2& vDirecti
     const coreBool bMute = CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_MUTE);
 
     // 
-    m_fLifeTime = 0.0f;
+    m_fLifeTime       = 0.0f;
+    m_fLifeTimeBefore = 0.0f;
 
     // add ship to the game
     cShip::_Resurrect(bBoss || bMute, vPosition, vDirection, bMute ? 0 : TYPE_ENEMY);
@@ -135,6 +152,9 @@ void cEnemy::Kill(const coreBool bAnimated)
     const coreBool bMute = CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_MUTE);
 
     // 
+    g_pGame->GetShieldManager()->UnbindEnemy(this);
+
+    // 
     if(bAnimated)
     {
         if(bBoss) g_pSpecialEffects->MacroExplosionPhysicalBig  (this->GetPosition());
@@ -151,19 +171,19 @@ void cEnemy::Kill(const coreBool bAnimated)
 
 // ****************************************************************
 // 
-coreBool cEnemy::DefaultMovePath(const coreSpline2& oRawPath, const coreVector2& vFactor, const coreVector2& vRawOffset, const coreFloat fRawDistance)
+coreBool cEnemy::DefaultMovePath(const coreSpline2* pRawPath, const coreVector2& vFactor, const coreVector2& vRawOffset, const coreFloat fRawDistance)
 {
     // 
     coreVector2 vPosition;
     coreVector2 vDirection;
-    oRawPath.CalcPosDir(MIN(fRawDistance, oRawPath.GetTotalDistance()), &vPosition, &vDirection);
+    pRawPath->CalcPosDir(MAX(fRawDistance, 0.0f), &vPosition, &vDirection);
 
     // 
     this->SetPosition (coreVector3(((vPosition  * vFactor) + vRawOffset) * FOREGROUND_AREA, 0.0f));
     this->SetDirection(coreVector3( (vDirection * vFactor).Normalize(),                     0.0f));
 
     // 
-    return (fRawDistance >= oRawPath.GetTotalDistance()) ? true : false;
+    return (fRawDistance >= pRawPath->GetTotalDistance()) ? true : false;
 }
 
 
@@ -395,6 +415,8 @@ void cEnemyManager::Render()
                 {
                     *pData = pObject->GetBlink();
                 });
+
+                // 
                 pEnemyActive->Render();
             }
             else
@@ -436,7 +458,7 @@ void cEnemyManager::Render()
     /* render all additional enemies */                            \
     FOR_EACH(it, m_apAdditional)                                   \
         nRenderFunc(*it);                                          \
-}  
+} 
 
 void cEnemyManager::RenderUnder () {__RENDER_OWN(__RenderOwnUnder)}
 void cEnemyManager::RenderAttack() {__RENDER_OWN(__RenderOwnAttack)}
@@ -602,7 +624,7 @@ cArrowEnemy::cArrowEnemy()noexcept
 // move the arrow enemy
 void cArrowEnemy::__MoveOwn()
 {
-    // update rotation angle
+    // update rotation angle (opposed to freezer enemy)
     m_fAngle.Update(-3.0f);
 
     // rotate around direction axis

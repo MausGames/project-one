@@ -150,6 +150,9 @@
     <ClCompile Include="..\..\..\source\game\boss\9901_cProjectOneBoss.cpp">
       <Filter>game\boss</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\game\cShield.cpp">
+      <Filter>game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\main.h" />
@@ -241,6 +244,9 @@
       <Filter>visual</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\source\game\cTheater.h">
+      <Filter>game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\game\cShield.h">
       <Filter>game</Filter>
     </ClInclude>
   </ItemGroup>

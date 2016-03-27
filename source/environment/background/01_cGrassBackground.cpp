@@ -30,11 +30,11 @@ cGrassBackground::cGrassBackground()noexcept
         for(coreUintW i = 0u; i < GRASS_STONE_NUM; ++i)
         {
             // calculate position and height
-            const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.45f, 0.45f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(GRASS_STONE_NUM)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
+            const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, GRASS_STONE_NUM);
             const coreFloat   fHeight   = m_pOutdoor->RetrieveHeight(vPosition);
 
             // test for valid values
-            if(fHeight > -23.0f && fHeight < -18.0f && (F_TO_SI(vPosition.y+160.0f) % 80 < 40))
+            if((fHeight > -23.0f) && (fHeight < -18.0f) && (F_TO_SI(vPosition.y+160.0f) % 80 < 40))
             {
                 if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 25.0f))
                 {
@@ -78,18 +78,18 @@ cGrassBackground::cGrassBackground()noexcept
             for(coreUintW j = 0u; j < 4u; ++j)   // tries
             {
                 // calculate position and height
-                const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.45f, 0.45f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(GRASS_REED_NUM)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
+                const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, GRASS_REED_NUM);
                 const coreFloat   fHeight   = m_pOutdoor->RetrieveHeight(vPosition);
 
                 // test for valid values
-                if(fHeight > -23.0f && fHeight < -18.0f && (F_TO_SI(vPosition.y+176.0f) % 80 < 60))
+                if((fHeight > -23.0f) && (fHeight < -18.0f) && (F_TO_SI(vPosition.y+176.0f) % 80 < 60))
                 {
                     if(!cBackground::_CheckIntersectionQuick(pList1,                  vPosition, 25.0f) &&
                        !cBackground::_CheckIntersectionQuick(pList2,                  vPosition, 25.0f) &&
                        !cBackground::_CheckIntersection     (m_apGroundObjectList[0], vPosition, 25.0f))
                     {
                         // determine object type
-                        const coreBool bType = (Core::Rand->Int(3) || fHeight >= -20.0f) ? true : false;
+                        const coreBool bType = (Core::Rand->Int(3) || (fHeight >= -20.0f)) ? true : false;
 
                         // load object resources
                         coreObject3D* pObject = new coreObject3D();
@@ -135,7 +135,7 @@ cGrassBackground::cGrassBackground()noexcept
             for(coreUintW j = 0u; j < 20u; ++j)   // tries
             {
                 // calculate position and height
-                const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.45f, 0.45f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(GRASS_FLOWER_NUM)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
+                const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, GRASS_FLOWER_NUM);
                 const coreFloat   fHeight   = m_pOutdoor->RetrieveHeight(vPosition);
 
                 // test for valid values
@@ -179,7 +179,7 @@ cGrassBackground::cGrassBackground()noexcept
             for(coreUintW j = 0u; j < 20u; ++j)   // tries
             {
                 // calculate position and height
-                const coreVector2 vPosition = coreVector2(Core::Rand->Float(-0.45f, 0.45f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(GRASS_LEAF_NUM)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
+                const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, GRASS_LEAF_NUM);
                 const coreFloat   fHeight   = Core::Rand->Float(10.0f, 30.0f);
 
                 // test for valid values
@@ -228,7 +228,7 @@ cGrassBackground::cGrassBackground()noexcept
         for(coreUintW i = 0u, ie = GRASS_CLOUD_NUM; i < ie; ++i)
         {
             // calculate position and height
-            const coreVector2 vPosition = coreVector2(Core::Rand->Float(0.1f, 0.25f) * ((i % 2u) ? 1.0f : -1.0f) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(GRASS_CLOUD_NUM)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2)) * OUTDOOR_DETAIL;
+            const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(0.1f, 0.25f) * ((i % 2u) ? 1.0f : -1.0f), i, GRASS_CLOUD_NUM);
             const coreFloat   fHeight   = Core::Rand->Float(20.0f, 60.0f);
 
             // load object resources

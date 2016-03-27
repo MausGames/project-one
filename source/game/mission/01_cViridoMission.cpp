@@ -151,26 +151,26 @@ void cViridoMission::__SetupOwn()
         //});
 
         // 
-        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 5u)
-        {
-            STAGE_SQUAD_INIT(pSquad1, Configure(50, COLOR_SHIP_BLUE))
-            STAGE_SQUAD_INIT(pSquad1, Resurrect())
-        });
-        STAGE_ADD_SQUAD(pSquad2, cScoutEnemy, 5u)
-        {
-            STAGE_SQUAD_INIT(pSquad2, Configure(50, COLOR_SHIP_RED))
-            STAGE_SQUAD_INIT(pSquad2, Resurrect())
-        });
-
-        pSquad1->ForEachEnemy([&](cEnemy* OUTPUT pEnemy, const coreUintW i)
-        {
-            pEnemy->DefaultMoveLerp(coreVector2(I_TO_F(i-2u) * 0.4f - 3.0f, 0.8f), coreVector2(I_TO_F(i-2u) * 0.4f, 0.8f), LERPS(0.0f, 1.0f, CLAMP(pEnemy->GetLifeTime()*0.5f - I_TO_F(i)*0.1f, 0.0f, 1.0f)));
-        });
-
-        pSquad2->ForEachEnemy([&](cEnemy* OUTPUT pEnemy, const coreUintW i)
-        {
-            pEnemy->DefaultMoveLerp(-coreVector2(I_TO_F(i-2u) * 0.4f - 3.0f, 0.8f), -coreVector2(I_TO_F(i-2u) * 0.4f, 0.8f), LERPS(0.0f, 1.0f, CLAMP(pEnemy->GetLifeTime()*0.5f - I_TO_F(i)*0.1f, 0.0f, 1.0f)));
-        });
+        //STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 5u)
+        //{
+        //    STAGE_SQUAD_CALL(pSquad1, Configure(50, COLOR_SHIP_BLUE))
+        //    STAGE_SQUAD_CALL(pSquad1, Resurrect())
+        //});
+        //STAGE_ADD_SQUAD(pSquad2, cScoutEnemy, 5u)
+        //{
+        //    STAGE_SQUAD_CALL(pSquad2, Configure(50, COLOR_SHIP_RED))
+        //    STAGE_SQUAD_CALL(pSquad2, Resurrect())
+        //});
+        //
+        //pSquad1->ForEachEnemy([&](cEnemy* OUTPUT pEnemy, const coreUintW i)
+        //{
+        //    pEnemy->DefaultMoveLerp(coreVector2(I_TO_F(i-2u) * 0.4f - 3.0f, 0.8f), coreVector2(I_TO_F(i-2u) * 0.4f, 0.8f), LERPS(0.0f, 1.0f, CLAMP(pEnemy->GetLifeTime()*0.5f - I_TO_F(i)*0.1f, 0.0f, 1.0f)));
+        //});
+        //
+        //pSquad2->ForEachEnemy([&](cEnemy* OUTPUT pEnemy, const coreUintW i)
+        //{
+        //    pEnemy->DefaultMoveLerp(-coreVector2(I_TO_F(i-2u) * 0.4f - 3.0f, 0.8f), -coreVector2(I_TO_F(i-2u) * 0.4f, 0.8f), LERPS(0.0f, 1.0f, CLAMP(pEnemy->GetLifeTime()*0.5f - I_TO_F(i)*0.1f, 0.0f, 1.0f)));
+        //});
     });
 
     // ################################################################
@@ -521,7 +521,7 @@ void cViridoMission::__MoveOwnAfter()
         if(!bFirstHit) return;
 
         // 
-        pPlayer->TakeDamage(10);
+        pPlayer->TakeDamage(10, ELEMENT_GREEN);
 
         // 
         const coreVector3 vCenter = coreVector3((pPlayer->GetPosition().xy() + pBall->GetPosition().xy()) * 0.5f, 0.0f);

@@ -15,6 +15,7 @@ cShip::cShip()noexcept
 : m_iBaseColor (0u)
 , m_iMaxHealth (0)
 , m_iCurHealth (0)
+, m_iPreHealth (0)
 , m_fBlink     (0.0f)
 {
     // 
@@ -49,14 +50,14 @@ void cShip::Render(const coreProgramPtr& pProgram)
 
 // ****************************************************************
 // 
-coreBool cShip::_TakeDamage(const coreInt32 iDamage)
+coreBool cShip::_TakeDamage(const coreInt32 iDamage, const coreUint8 iElement)
 {
     // 
     if((m_iCurHealth -= iDamage) <= 0)
         m_iCurHealth = 0;
 
     // 
-    this->SetColor3(LERP(coreVector3(0.5f,0.5f,0.5f), this->GetBaseColor(), 5.0f * MIN(this->GetCurHealthPct(), 0.2f)));
+    this->SetColor3(LERP(coreVector3(0.5f,0.5f,0.5f), this->GetBaseColor(), 1.25f * MIN(this->GetCurHealthPct(), 0.8f)));
 
     // 
     if(iDamage) m_fBlink = 1.2f;
@@ -71,7 +72,7 @@ coreBool cShip::_TakeDamage(const coreInt32 iDamage)
 void cShip::_Resurrect(const coreBool bSingle, const coreVector2& vPosition, const coreVector2& vDirection, const coreInt32 iType)
 {
     // reset ship properties
-    m_iCurHealth = m_iMaxHealth;
+    m_iPreHealth = m_iCurHealth = m_iMaxHealth;
     this->SetPosition (coreVector3(vPosition,  0.0f));
     this->SetDirection(coreVector3(vDirection, 0.0f));
     this->SetColor3   (this->GetBaseColor());
@@ -132,4 +133,13 @@ void cShip::_EnableBlink()
     // 
     this->GetProgram()->Enable();
     this->GetProgram()->SendUniform("u_v1Blink", this->GetBlink());
+}
+
+
+// ****************************************************************
+// 
+void cShip::_UpdateAlways()
+{
+    // 
+    m_iPreHealth = (m_iCurHealth || (m_iPreHealth <= 0)) ? m_iCurHealth : -m_iPreHealth;
 }

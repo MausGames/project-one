@@ -111,7 +111,18 @@
 #define TYPE_ENEMY           (2)
 #define TYPE_BULLET_PLAYER   (11)
 #define TYPE_BULLET_ENEMY    (12)
-#define TYPE_OBJECT(x)       (100+x)
+#define TYPE_OBJECT(x)       (100 + (x))
+
+// attack elements
+#define ELEMENT_YELLOW       (0u)   // speed (ray) 
+#define ELEMENT_ORANGE       (1u)   // fire
+#define ELEMENT_RED          (2u)   // (antimatter) 
+#define ELEMENT_BLUE         (3u)   // homing (tesla) 
+#define ELEMENT_PURPLE       (4u)   // power (pulse) 
+#define ELEMENT_GREEN        (5u)   // (wave) 
+#define ELEMENT_NEUTRAL      (6u)   // 
+#define ELEMENT_LIGHT        (7u)   // 
+#define ELEMENT_DARK         (8u)   // 
 
 // sub-class and object ID macros
 #define ENABLE_ID                                              \
@@ -135,7 +146,7 @@ inline FUNC_CONST coreFloat AngleDiff(const coreFloat x, const coreFloat y)
 // value range helper-function
 constexpr FUNC_CONST coreBool InBetween(const coreFloat x, const coreFloat a, const coreFloat b)
 {
-    return ((a <= x) && (x < b));
+    return (a < b) ? ((a <= x) && (x < b)) : ((b <= x) && (x < a));
 }
 
 // ternary interpolation helper-function
@@ -195,6 +206,7 @@ extern cPostProcessing* g_pPostProcessing;   // main post-processing object
 #include "game/cWeapon.h"
 #include "game/cShip.h"
 #include "game/cEnemy.h"
+#include "game/cShield.h"
 #include "game/boss/cBoss.h"
 #include "game/mission/cMission.h"
 #include "game/cPlayer.h"

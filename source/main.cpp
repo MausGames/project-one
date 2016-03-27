@@ -343,7 +343,7 @@ static void DebugGame()
     {
         if(g_pGame && g_pGame->GetMission()->GetCurBoss())
         {
-            g_pGame->GetMission()->GetCurBoss()->TakeDamage(1000, NULL);
+            g_pGame->GetMission()->GetCurBoss()->TakeDamage(1000, ELEMENT_NEUTRAL, NULL);
         }
     }
 

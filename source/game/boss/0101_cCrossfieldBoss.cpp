@@ -877,7 +877,7 @@ void cCrossfieldBoss::__MoveOwn()
         if(!bFirstHit) return;
 
         // 
-        pPlayer->TakeDamage((pBoomerang == &m_Duplicate) ? 10 : 5);
+        pPlayer->TakeDamage((pBoomerang == &m_Duplicate) ? 10 : 5, ELEMENT_RED);
 
         // 
         const coreVector3 vCenter = coreVector3((pPlayer->GetPosition().xy() + pBoomerang->GetPosition().xy()) * 0.5f, 0.0f);
