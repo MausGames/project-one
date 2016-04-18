@@ -10,6 +10,19 @@
 
 void FragmentMain()
 {
+#if defined(_P1_LIGHT_)
+
+    // 
+    vec2  v2ScreenCoord = gl_FragCoord.xy * u_v4Resolution.zw;
+    float v1Light       = coreTexture2D(3, v2ScreenCoord).r + 0.04;
+    
+#else
+
+    // 
+    const float v1Light = 1.0;
+
+#endif
+
 #if defined(_P1_SPHERIC_)
 
     // calculate quartic distance from the center as alpha value
@@ -25,7 +38,7 @@ void FragmentMain()
         
         // draw color with alpha
         vec4 v4Texture = coreTexture2D(0, v_av2TexCoord[0]);
-        gl_FragColor   = vec4(v4Texture.rgb, v4Texture.a * v1Alpha) * u_v4Color;
+        gl_FragColor   = vec4(v4Texture.rgb * v1Light, v4Texture.a * v1Alpha) * u_v4Color;
     }
     else discard; // gl_FragColor = vec4(0.0);
 
@@ -33,7 +46,7 @@ void FragmentMain()
 
     // draw color with alpha
     vec4 v4Texture = coreTexture2D(0, v_av2TexCoord[0]);
-    gl_FragColor   = v4Texture * u_v4Color;
+    gl_FragColor   = vec4(v4Texture.rgb * v1Light, v4Texture.a) * u_v4Color;
 
 #endif
 }

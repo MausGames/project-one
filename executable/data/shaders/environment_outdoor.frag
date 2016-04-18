@@ -17,13 +17,13 @@ void FragmentMain()
 {
     vec2 v2TexNormal;
     vec3 v3TexColor;
-    if(v_v1Mix <= 0.001)   // # performance boost
+    if(v_v1Mix <= 0.0)   // # performance boost
     {
         // lookup only lower outdoor textures
         v2TexNormal = coreTexture2D(2, v_av2TexCoord[0]).zw;
         v3TexColor  = coreTexture2D(1, v_av2TexCoord[0]).rgb;
     }
-    else if(v_v1Mix >= 0.999)
+    else if(v_v1Mix >= 1.0)
     {
         // lookup only upper outdoor textures
         v2TexNormal = coreTexture2D(2, v_av2TexCoord[0]).xy;
@@ -41,14 +41,14 @@ void FragmentMain()
         v3TexColor  = mix(v3FullColor1,    v3FullColor2,    v_v1Mix);
     }
 
-#if (_CORE_QUALITY_) == 0
+#if (_CORE_QUALITY_) == 0 || defined(_P1_LIGHT_)
 
     // ignore normal map
     v2TexNormal = vec2(0.5);
 
 #endif
 
-#if (_P1_SHADOW_) == 1
+#if (_P1_SHADOW_) == 1 || defined(_P1_LIGHT_)
 
     // apply shadow mapping with single depth value comparison
     float v1Light = 1.0 - coreTextureShadow(0, v_v4ShadowCoord) * 0.5;
@@ -98,9 +98,18 @@ void FragmentMain()
     float v1ReflFactor  = max(0.0, dot(v3ReflNormal, v3BumpNormal));
 
     // calculate diffuse and specular value
-    vec3 v3Diffuse  = v3TexColor * (v1Light * (1.4 * max(v1Max, v1BumpFactor) + 0.2));
-    vec3 v3Specular = vec3(0.15 * pow(v1ReflFactor, 100.0));
+    float v1Diffuse  = v1Light * (1.4 * max(v1Max, v1BumpFactor) + 0.2);
+    float v1Specular = 0.15 * pow(v1ReflFactor, 100.0) * v1Shine;
 
+#if defined(_P1_LIGHT_)
+
+    // 
+    gl_FragColor = vec4(v1Diffuse + v1Specular, 1.0, 1.0, 1.0);
+
+#else
+    
     // draw final color
-    gl_FragColor = vec4(v3Diffuse + v3Specular * v1Shine, 1.0);
+    gl_FragColor = vec4(v3TexColor * v1Diffuse + v1Specular, 1.0);
+    
+#endif
 }

@@ -23,6 +23,10 @@ cOutdoor::cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom
     // set object properties
     this->SetPosition(coreVector3(0.0f,0.0f,0.0f));
 
+    // 
+    m_LightMap.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_GL_SUPPORT(ARB_texture_float) ? CORE_TEXTURE_SPEC_R16F : CORE_TEXTURE_SPEC_R8);
+    m_LightMap.Create(g_vGameResolution * OUTDOOR_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
+
     // load outdoor geometry
     m_pModel = Core::Manager::Resource->LoadNew<coreModel>();
     this->LoadGeometry(iAlgorithm, fGrade);
@@ -49,49 +53,33 @@ cOutdoor::~cOutdoor()
 
 // ****************************************************************
 // render the outdoor-surface
-void cOutdoor::Render(const coreProgramPtr& pProgram)
-{
-    if(!this->IsEnabled(CORE_OBJECT_ENABLE_RENDER)) return;
-
-    // check for model status
-    if(!m_pModel.IsUsable()) return;
-
-    // enable the shader-program
-    if(!pProgram.IsUsable()) return;
-    if(!pProgram->Enable())  return;
-
-    // update all object uniforms
-    pProgram->SendUniform(CORE_SHADER_UNIFORM_3D_POSITION, coreVector3(0.0f,0.0f,0.0f));
-    pProgram->SendUniform(CORE_SHADER_UNIFORM_3D_SIZE,     coreVector3(1.0f,1.0f,1.0f));
-    pProgram->SendUniform(CORE_SHADER_UNIFORM_3D_ROTATION, coreVector4::QuatIdentity());
-    pProgram->SendUniform("u_v2HeightModifier",            coreVector2(m_fHeightOffset, m_fHeightFactor));
-
-    // draw the model
-    m_pModel->Enable();
-    glDrawRangeElements(m_pModel->GetPrimitiveType(), m_iVertexOffset, m_iVertexOffset + OUTDOOR_RANGE, OUTDOOR_COUNT, m_pModel->GetIndexType(), I_TO_P(m_iIndexOffset));
-}
-
 void cOutdoor::Render()
 {
-    if(!this->IsEnabled(CORE_OBJECT_ENABLE_RENDER)) return;
+    // 
+    this->__Render(m_pDefaultProgram, [&]()
+    {
+        // 
+        cShadow::EnableShadowRead(m_iHandleIndex);
 
-    // check for model status
-    if(!m_pModel.IsUsable()) return;
+        // enable all active textures
+        coreTexture::EnableAll(m_apTexture);
+    });
+}
 
-    // enable the shader-program
-    if(!m_pProgram.IsUsable()) return;
-    if(!m_pProgram->Enable())  return;
+void cOutdoor::RenderLight()
+{
+    // 
+    this->__Render(m_pLightProgram, [&]()
+    {
+        // 
+        cShadow::EnableShadowRead(m_iHandleIndex + SHADOW_HANDLE_OUTDOOR_LIGHT);
+    });
+}
 
-    // update all object uniforms
-    cShadow::EnableShadowRead(m_iHandleIndex);
-    m_pProgram->SendUniform("u_v2HeightModifier", coreVector2(m_fHeightOffset, m_fHeightFactor));
-
-    // enable all active textures
-    coreTexture::EnableAll(m_apTexture);
-
-    // draw the model
-    m_pModel->Enable();
-    glDrawRangeElements(m_pModel->GetPrimitiveType(), m_iVertexOffset, m_iVertexOffset + OUTDOOR_RANGE, OUTDOOR_COUNT, m_pModel->GetIndexType(), I_TO_P(m_iIndexOffset));
+void cOutdoor::RenderDepth()
+{
+    // 
+    this->__Render(m_pLightProgram, [](){});
 }
 
 
@@ -366,8 +354,12 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
 // load outdoor shader-program
 void cOutdoor::LoadProgram(const coreBool bGlow)
 {
-    m_iHandleIndex    = bGlow ? SHADOW_HANDLE_OUTDOOR_GLOW         : SHADOW_HANDLE_OUTDOOR;
-    this->DefineProgram(bGlow ? "environment_outdoor_glow_program" : "environment_outdoor_program");
+    // 
+    m_iHandleIndex = bGlow ? SHADOW_HANDLE_OUTDOOR_GLOW : SHADOW_HANDLE_OUTDOOR;
+
+    // 
+    m_pDefaultProgram = Core::Manager::Resource->Get<coreProgram>(bGlow ? "environment_outdoor_glow_program"       : "environment_outdoor_program");
+    m_pLightProgram   = Core::Manager::Resource->Get<coreProgram>(bGlow ? "environment_outdoor_light_glow_program" : "environment_outdoor_light_program");
 }
 
 
@@ -430,6 +422,21 @@ coreVector3 cOutdoor::RetrieveIntersect(const coreVector3& vRayPosition, const c
     }
 
     return vOutput;
+}
+
+
+// ****************************************************************
+// 
+void cOutdoor::UpdateLightMap()
+{
+    // 
+    m_LightMap.StartDraw();
+    {
+        this->RenderLight();
+    }
+
+    // 
+    m_LightMap.GetColorTarget(0u).pTexture->Enable(3u);
 }
 
 

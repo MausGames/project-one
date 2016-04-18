@@ -16,6 +16,7 @@ cShip::cShip()noexcept
 , m_iMaxHealth (0)
 , m_iCurHealth (0)
 , m_iPreHealth (0)
+, m_vOldPos    (coreVector2(0.0f,0.0f))
 , m_fBlink     (0.0f)
 {
     // 
@@ -72,7 +73,9 @@ coreBool cShip::_TakeDamage(const coreInt32 iDamage, const coreUint8 iElement)
 void cShip::_Resurrect(const coreBool bSingle, const coreVector2& vPosition, const coreVector2& vDirection, const coreInt32 iType)
 {
     // reset ship properties
-    m_iPreHealth = m_iCurHealth = m_iMaxHealth;
+    m_iCurHealth = m_iMaxHealth;
+    m_iPreHealth = m_iMaxHealth;
+    m_vOldPos    = vPosition;
     this->SetPosition (coreVector3(vPosition,  0.0f));
     this->SetDirection(coreVector3(vDirection, 0.0f));
     this->SetColor3   (this->GetBaseColor());
@@ -142,4 +145,7 @@ void cShip::_UpdateAlways()
 {
     // 
     m_iPreHealth = (m_iCurHealth || (m_iPreHealth <= 0)) ? m_iCurHealth : -m_iPreHealth;
+
+    // 
+    m_vOldPos = this->GetPosition().xy();
 }

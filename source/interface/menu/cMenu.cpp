@@ -268,7 +268,7 @@ const coreLookup<std::string, std::string>& cMenu::GetLanguageList()
         if(asFile.empty()) Core::Log->Error("No language files found (data/languages/*.lng)");
 
         // 
-        FOR_EACH(it, asFile) asLanguage[coreLanguage(it->c_str()).GetString("LANGUAGE")] = std::move(*it);
+        FOR_EACH(it, asFile) asLanguage.emplace(coreLanguage(it->c_str()).GetString("LANGUAGE"), std::move(*it));
     }
 
     return asLanguage;

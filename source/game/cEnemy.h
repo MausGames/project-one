@@ -391,9 +391,9 @@ template <typename T> RETURN_RESTRICT T* cEnemyManager::AllocateEnemy()
     {
         // create new enemy set
         pSet = new sEnemySet<T>();
-        m_apEnemySet[REF_ID(T::ID)] = pSet;
+        m_apEnemySet.emplace(REF_ID(T::ID), pSet);
     }
-    else pSet = s_cast<sEnemySet<T>*>(m_apEnemySet[REF_ID(T::ID)]);
+    else pSet = s_cast<sEnemySet<T>*>(m_apEnemySet.at(REF_ID(T::ID)));
 
     // save current pool size
     const coreUintW iSize = pSet->apEnemyPool.size();
@@ -464,7 +464,7 @@ template <typename T> void cEnemyManager::PrefetchEnemy()
         pSet->apEnemyPool[0] = new T();
 
         // 
-        m_apEnemySet[REF_ID(T::ID)] = pSet;
+        m_apEnemySet.emplace(REF_ID(T::ID), pSet);
     }
 }
 

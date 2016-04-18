@@ -26,6 +26,15 @@ void cTheater::Render()
     // 
     FOR_EACH(it, m_aMute)
         it->pEnemy->Render();
+
+    if(!g_pGame)
+    {
+        // apply deferred outline-layer
+        g_pOutline->Apply();
+
+        // render special-effects
+        g_pSpecialEffects->Render(true);
+    }
 }
 
 

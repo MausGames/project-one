@@ -88,10 +88,12 @@ void cShadow::GlobalInit()
     s_pProgramInstanced = Core::Manager::Resource->Get<coreProgram>("effect_shadow_inst_program");
 
     // load shader-programs for shadow-receiving objects
-    s_apHandle[SHADOW_HANDLE_OUTDOOR]      = Core::Manager::Resource->Get<coreProgram>("environment_outdoor_program");
-    s_apHandle[SHADOW_HANDLE_OUTDOOR_GLOW] = Core::Manager::Resource->Get<coreProgram>("environment_outdoor_glow_program");
-    s_apHandle[SHADOW_HANDLE_OBJECT]       = Core::Manager::Resource->Get<coreProgram>("object_ground_program");
-    s_apHandle[SHADOW_HANDLE_OBJECT_INST]  = Core::Manager::Resource->Get<coreProgram>("object_ground_inst_program");
+    s_apHandle[SHADOW_HANDLE_OUTDOOR]            = Core::Manager::Resource->Get<coreProgram>("environment_outdoor_program");
+    s_apHandle[SHADOW_HANDLE_OUTDOOR_GLOW]       = Core::Manager::Resource->Get<coreProgram>("environment_outdoor_glow_program");
+    s_apHandle[SHADOW_HANDLE_OUTDOOR_LIGHT]      = Core::Manager::Resource->Get<coreProgram>("environment_outdoor_light_program");
+    s_apHandle[SHADOW_HANDLE_OUTDOOR_LIGHT_GLOW] = Core::Manager::Resource->Get<coreProgram>("environment_outdoor_light_glow_program");
+    s_apHandle[SHADOW_HANDLE_OBJECT]             = Core::Manager::Resource->Get<coreProgram>("object_ground_program");
+    s_apHandle[SHADOW_HANDLE_OBJECT_INST]        = Core::Manager::Resource->Get<coreProgram>("object_ground_inst_program");
 
     // adjust shader-programs
     cShadow::Recompile();
@@ -155,9 +157,10 @@ void cShadow::Recompile()
     for(coreUintW i = 0u; i < SHADOW_HANDLES; ++i)
     {
         coreProgramPtr& pHandle  = s_apHandle[i];
-        const coreChar* pcConfig = PRINT("%s%s%s", (g_CurConfig.Graphics.iShadow)    ? SHADER_SHADOW(g_CurConfig.Graphics.iShadow) : "",
-                                                   (i == SHADOW_HANDLE_OUTDOOR_GLOW) ? SHADER_GLOW                                 : "",
-                                                   (i == SHADOW_HANDLE_OBJECT_INST)  ? CORE_SHADER_OPTION_INSTANCING               : "");
+        const coreChar* pcConfig = PRINT("%s%s%s%s", (g_CurConfig.Graphics.iShadow)   ? PRINT(SHADER_SHADOW(%d), g_CurConfig.Graphics.iShadow)  : "",
+                                                     (i == SHADOW_HANDLE_OBJECT_INST) ? CORE_SHADER_OPTION_INSTANCING                           : "",
+                                                     (i == SHADOW_HANDLE_OUTDOOR_GLOW  || i == SHADOW_HANDLE_OUTDOOR_LIGHT_GLOW) ? SHADER_GLOW  : "",
+                                                     (i == SHADOW_HANDLE_OUTDOOR_LIGHT || i == SHADOW_HANDLE_OUTDOOR_LIGHT_GLOW) ? SHADER_LIGHT : "");
 
         // change configuration of related shaders
         for(coreUintW j = 0u, je = pHandle->GetNumShaders(); j < je; ++j)

@@ -10,13 +10,11 @@
 #ifndef _P1_GUARD_BACKGROUND_H_
 #define _P1_GUARD_BACKGROUND_H_
 
-// TODO: cache environment resources on loading (currently 100s of resource lookups)
 // TODO: merge stone diff and norm textures (own shader ?)
-// TODO: clouds on grass background need no separate heap allocation! (beware of _FillInfinite and destructor delete)
 // TODO: added object gets shadow-shader
-// TODO: decals are not affected by shadow or underlying diffuse value (depth-only from water (centralize away) ? -> no shadow, maybe render both (color(shadow, no textures)+depth) single-sampled)
 // TODO: expose pool-allocator for additional objects (AddList)
 // TODO: no blitting on disabled anti-aliasing ( low-optimizations on other components)
+// TODO: optimize density to never try to draw on 0.0f
 
 
 // ****************************************************************
@@ -90,6 +88,11 @@ public:
     void AddList     (const coreUint8 iListIndex, const coreUint32 iCapacity, const coreChar* pcProgramInstancedName);
     void ShoveObjects(const coreFloat fOffset);
     void ClearObjects();
+
+    // 
+    void SetGroundDensity(const coreUintW iIndex, const coreFloat fDensity);
+    void SetDecalDensity (const coreUintW iIndex, const coreFloat fDensity);
+    void SetAirDensity   (const coreUintW iIndex, const coreFloat fDensity);
 
     // access frame buffer
     inline coreFrameBuffer* GetResolvedTexture() {return &m_ResolvedTexture;}

@@ -20,17 +20,20 @@ cCloudBackground::cCloudBackground()noexcept
     pList1 = new coreBatchList(CLOUD_CLOUD_RESERVE);
     pList1->DefineProgram("environment_clouds_inst_program");
     {
+        // load object resources
+        coreObject3D oBase;
+        oBase.DefineModel  (Core::Manager::Object->GetLowModel());
+        oBase.DefineTexture(0u, "environment_clouds_mid.png");
+        oBase.DefineProgram("environment_clouds_program");
+
         for(coreUintW i = 0u, ie = CLOUD_CLOUD_NUM; i < ie; ++i)
         {
             // calculate position and height
             const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(0.1f, 0.25f) * ((i % 2u) ? 1.0f : -1.0f), i, CLOUD_CLOUD_NUM);
             const coreFloat   fHeight   = Core::Rand->Float(20.0f, 60.0f);
 
-            // load object resources
-            coreObject3D* pObject = new coreObject3D();
-            pObject->DefineModel  (Core::Manager::Object->GetLowModel());
-            pObject->DefineTexture(0u, "environment_clouds_mid.png");
-            pObject->DefineProgram("environment_clouds_program");
+            // create object
+            coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>(oBase);
 
             // set object properties
             pObject->SetPosition (coreVector3(vPosition, fHeight));

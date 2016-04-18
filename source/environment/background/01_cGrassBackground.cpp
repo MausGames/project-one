@@ -27,6 +27,13 @@ cGrassBackground::cGrassBackground()noexcept
     pList1 = new coreBatchList(GRASS_STONE_RESERVE);
     pList1->DefineProgram("object_ground_inst_program");
     {
+        // load object resources
+        coreObject3D oBase;
+        oBase.DefineModel  ("environment_stone_01.md3");
+        oBase.DefineTexture(0u, "environment_stone_diff.png");
+        oBase.DefineTexture(1u, "environment_stone_norm.png");
+        oBase.DefineProgram("object_ground_program");
+
         for(coreUintW i = 0u; i < GRASS_STONE_NUM; ++i)
         {
             // calculate position and height
@@ -38,12 +45,8 @@ cGrassBackground::cGrassBackground()noexcept
             {
                 if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 25.0f))
                 {
-                    // load object resources
-                    coreObject3D* pObject = new coreObject3D();
-                    pObject->DefineModel  ("environment_stone_01.md3");
-                    pObject->DefineTexture(0u, "environment_stone_diff.png");
-                    pObject->DefineTexture(1u, "environment_stone_norm.png");
-                    pObject->DefineProgram("object_ground_program");
+                    // create object
+                    coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>(oBase);
 
                     // set object properties
                     pObject->SetPosition   (coreVector3(vPosition, fHeight+0.2f));
@@ -73,9 +76,15 @@ cGrassBackground::cGrassBackground()noexcept
     pList2 = new coreBatchList(GRASS_REED_2_RESERVE);
     pList2->DefineProgram("object_ground_inst_program");
     {
+        // load object resources
+        coreObject3D oBase;
+        oBase.DefineTexture(0u, "environment_reed.png");
+        oBase.DefineTexture(1u, "environment_grass_norm.png");
+        oBase.DefineProgram("object_ground_program");
+
         for(coreUintW i = 0u; i < GRASS_REED_NUM; ++i)
         {
-            for(coreUintW j = 0u; j < 4u; ++j)   // tries
+            for(coreUintW j = 4u; j--; )   // tries
             {
                 // calculate position and height
                 const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, GRASS_REED_NUM);
@@ -91,12 +100,9 @@ cGrassBackground::cGrassBackground()noexcept
                         // determine object type
                         const coreBool bType = (Core::Rand->Int(3) || (fHeight >= -20.0f)) ? true : false;
 
-                        // load object resources
-                        coreObject3D* pObject = new coreObject3D();
-                        pObject->DefineModel  (bType ? "environment_reed_01.md3" : "environment_reed_02.md3");
-                        pObject->DefineTexture(0u, "environment_reed.png");
-                        pObject->DefineTexture(1u, "environment_grass_norm.png");
-                        pObject->DefineProgram("object_ground_program");
+                        // create object
+                        coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>(oBase);
+                        pObject->DefineModel(bType ? "environment_reed_01.md3" : "environment_reed_02.md3");
 
                         // set object properties
                         pObject->SetPosition   (coreVector3(vPosition, fHeight-0.8f));
@@ -128,11 +134,17 @@ cGrassBackground::cGrassBackground()noexcept
 
     // allocate flower list
     pList1 = new coreBatchList(GRASS_FLOWER_RESERVE);
-    pList1->DefineProgram("effect_decal_inst_program");
+    pList1->DefineProgram("effect_decal_light_inst_program");
     {
+        // load object resources
+        coreObject3D oBase;
+        oBase.DefineModel  (Core::Manager::Object->GetLowModel());
+        oBase.DefineTexture(0u, "environment_flowers.png");
+        oBase.DefineProgram("effect_decal_light_program");
+
         for(coreUintW i = GRASS_FLOWER_NUM; i--; )
         {
-            for(coreUintW j = 0u; j < 20u; ++j)   // tries
+            for(coreUintW j = 20u; j--; )   // tries
             {
                 // calculate position and height
                 const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, GRASS_FLOWER_NUM);
@@ -143,11 +155,8 @@ cGrassBackground::cGrassBackground()noexcept
                 {
                     if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 40.0f))
                     {
-                        // load object resources
-                        coreObject3D* pObject = new coreObject3D();
-                        pObject->DefineModel  (Core::Manager::Object->GetLowModel());
-                        pObject->DefineTexture(0u, "environment_flowers.png");
-                        pObject->DefineProgram("effect_decal_program");
+                        // create object
+                        coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>(oBase);
 
                         // set object properties
                         pObject->SetPosition (coreVector3(vPosition, fHeight-0.8f));
@@ -174,9 +183,15 @@ cGrassBackground::cGrassBackground()noexcept
     pList1 = new coreBatchList(GRASS_LEAF_RESERVE);
     pList1->DefineProgram("effect_decal_inst_program");
     {
+        // load object resources
+        coreObject3D oBase;
+        oBase.DefineModel  (Core::Manager::Object->GetLowModel());
+        oBase.DefineTexture(0u, "environment_leaf.png");
+        oBase.DefineProgram("effect_decal_program");
+
         for(coreUintW i = 0u; i < GRASS_LEAF_NUM; ++i)
         {
-            for(coreUintW j = 0u; j < 20u; ++j)   // tries
+            for(coreUintW j = 20u; j--; )   // tries
             {
                 // calculate position and height
                 const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, GRASS_LEAF_NUM);
@@ -185,11 +200,8 @@ cGrassBackground::cGrassBackground()noexcept
                 // test for valid values
                 if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 700.0f))
                 {
-                    // load object resources
-                    coreObject3D* pObject = new coreObject3D();
-                    pObject->DefineModel  (Core::Manager::Object->GetLowModel());
-                    pObject->DefineTexture(0u, "environment_leaf.png");
-                    pObject->DefineProgram("effect_decal_program");
+                    // create object
+                    coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>(oBase);
 
                     // set object properties
                     pObject->SetPosition(coreVector3(vPosition, fHeight));
@@ -208,7 +220,7 @@ cGrassBackground::cGrassBackground()noexcept
         coreSet<coreObject3D*>* papContent = pList1->List();
         if(papContent->size() % 2u)
         {
-            SAFE_DELETE(papContent->back())
+            Core::Manager::Memory->Delete(&papContent->back());
             papContent->pop_back();
         }
 
@@ -225,17 +237,20 @@ cGrassBackground::cGrassBackground()noexcept
     pList1 = new coreBatchList(GRASS_CLOUD_RESERVE);
     pList1->DefineProgram("environment_clouds_inst_program");
     {
+        // load object resources
+        coreObject3D oBase;
+        oBase.DefineModel  (Core::Manager::Object->GetLowModel());
+        oBase.DefineTexture(0u, "environment_clouds_mid.png");
+        oBase.DefineProgram("environment_clouds_program");
+
         for(coreUintW i = 0u, ie = GRASS_CLOUD_NUM; i < ie; ++i)
         {
             // calculate position and height
             const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(0.1f, 0.25f) * ((i % 2u) ? 1.0f : -1.0f), i, GRASS_CLOUD_NUM);
             const coreFloat   fHeight   = Core::Rand->Float(20.0f, 60.0f);
 
-            // load object resources
-            coreObject3D* pObject = new coreObject3D();
-            pObject->DefineModel  (Core::Manager::Object->GetLowModel());
-            pObject->DefineTexture(0u, "environment_clouds_mid.png");
-            pObject->DefineProgram("environment_clouds_program");
+            // create object
+            coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>(oBase);
 
             // set object properties
             pObject->SetPosition (coreVector3(vPosition, fHeight));

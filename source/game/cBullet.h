@@ -268,7 +268,7 @@ public:
     inline cConeBullet* MakeRed   () {return this;}
     inline cConeBullet* MakePurple() {return this;}
     inline cConeBullet* MakeBlue  () {return this;}
-    inline cConeBullet* MakeGreen () {return this;}
+    inline cConeBullet* MakeGreen () {this->_MakeGreen (1.0f); return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_inst_program";}
@@ -467,9 +467,9 @@ template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt
     {
         // create new bullet set
         pSet = new sBulletSet<T>(&m_Outline);
-        m_apBulletSet[REF_ID(T::ID)] = pSet;
+        m_apBulletSet.emplace(REF_ID(T::ID), pSet);
     }
-    else pSet = s_cast<sBulletSet<T>*>(m_apBulletSet[REF_ID(T::ID)]);
+    else pSet = s_cast<sBulletSet<T>*>(m_apBulletSet.at(REF_ID(T::ID)));
 
     // save current pool size
     const coreUintW iSize = pSet->aBulletPool.size();
@@ -534,7 +534,7 @@ template <typename T> void cBulletManager::PrefetchBullet()
     if(!m_apBulletSet.count(REF_ID(T::ID)))
     {
         // 
-        m_apBulletSet[REF_ID(T::ID)] = new sBulletSet<T>(&m_Outline);
+        m_apBulletSet.emplace(REF_ID(T::ID), new sBulletSet<T>(&m_Outline));
     }
 }
 

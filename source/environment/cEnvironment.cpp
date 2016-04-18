@@ -160,7 +160,7 @@ void cEnvironment::ChangeBackground(const coreInt32 iID, const coreUintW iTransi
     m_pOldBackground = m_pBackground;
 
     // create new background
-    switch(iID)
+    switch(ABS(iID))
     {
     default:
     case cCloudBackground  ::ID: m_pBackground = new cCloudBackground  (); break;
@@ -225,7 +225,7 @@ void cEnvironment::__Reset(const coreResourceReset bInit)
 {
     if(bInit)
     {
-        const coreInt32 iID = P_TO_I(m_pBackground);
+        const coreInt32 iID = P_TO_SI(m_pBackground);
 
         // re-create background with saved ID
         m_pBackground = NULL;

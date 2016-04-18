@@ -57,7 +57,7 @@ public:
     template <typename T> RETURN_RESTRICT T* AddMute(const coreVector3& vPosition, const coreVector2& vDirection);
 
     // 
-    inline coreBool IsActive()const {return m_aMute.empty() ? false : true;}
+    inline coreBool IsActive()const {return (!m_aMute.empty() || g_pSpecialEffects->IsActive());}
 };
 
 

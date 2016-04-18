@@ -29,6 +29,13 @@ cSeaBackground::cSeaBackground()noexcept
     pList1 = new coreBatchList(SEA_STONE_RESERVE);
     pList1->DefineProgram("object_ground_inst_program");
     {
+        // load object resources
+        coreObject3D oBase;
+        oBase.DefineModel  ("environment_stone_01.md3");
+        oBase.DefineTexture(0u, "environment_stone_diff.png");
+        oBase.DefineTexture(1u, "environment_stone_norm.png");
+        oBase.DefineProgram("object_ground_program");
+
         for(coreUintW i = 0u; i < SEA_STONE_NUM; ++i)
         {
             // calculate position and height
@@ -40,12 +47,8 @@ cSeaBackground::cSeaBackground()noexcept
             {
                 if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 25.0f))
                 {
-                    // load object resources
-                    coreObject3D* pObject = new coreObject3D();
-                    pObject->DefineModel  ("environment_stone_01.md3");
-                    pObject->DefineTexture(0u, "environment_stone_diff.png");
-                    pObject->DefineTexture(1u, "environment_stone_norm.png");
-                    pObject->DefineProgram("object_ground_program");
+                    // create object
+                    coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>(oBase);
 
                     // set object properties
                     pObject->SetPosition   (coreVector3(vPosition, fHeight+0.2f));
@@ -72,9 +75,16 @@ cSeaBackground::cSeaBackground()noexcept
     pList1 = new coreBatchList(SEA_WEED_RESERVE);
     pList1->DefineProgram("object_wave_inst_program");
     {
+        // load object resources
+        coreObject3D oBase;
+        oBase.DefineModel  ("environment_weed.md3"); 
+        oBase.DefineTexture(0u, "environment_reed.png"); 
+        oBase.DefineTexture(1u, "environment_grass_norm.png"); 
+        oBase.DefineProgram("object_wave_program"); 
+
         for(coreUintW i = 0u; i < SEA_WEED_NUM; ++i)
         {
-            for(coreUintW j = 0u; j < 4u; ++j)   // tries
+            for(coreUintW j = 4u; j--; )   // tries
             {
                 // calculate position and height
                 const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, SEA_WEED_NUM);
@@ -86,12 +96,8 @@ cSeaBackground::cSeaBackground()noexcept
                     if(!cBackground::_CheckIntersectionQuick(pList1,                  vPosition, 1.0f) &&
                        !cBackground::_CheckIntersection     (m_apGroundObjectList[0], vPosition, 9.0f))
                     {
-                        // load object resources
-                        coreObject3D* pObject = new coreObject3D();
-                        pObject->DefineModel  ("environment_weed.md3"); 
-                        pObject->DefineTexture(0u, "environment_reed.png"); 
-                        pObject->DefineTexture(1u, "environment_grass_norm.png"); 
-                        pObject->DefineProgram("object_wave_program"); 
+                        // create object
+                        coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>(oBase);
 
                         // set object properties
                         pObject->SetPosition   (coreVector3(vPosition, fHeight-0.8f));
@@ -125,9 +131,15 @@ cSeaBackground::cSeaBackground()noexcept
     pList2 = new coreBatchList(SEA_ANIMAL_2_RESERVE);
     pList2->DefineProgram("object_ground_inst_program");
     {
+        // load object resources
+        coreObject3D oBase;
+        oBase.DefineTexture(0u, "environment_sea_diff.png");
+        oBase.DefineTexture(1u, "environment_sea_norm.png");
+        oBase.DefineProgram("object_ground_program");
+
         for(coreUintW i = 0u; i < SEA_ANIMAL_NUM; ++i)
         {
-            for(coreUintW j = 0u; j < 8u; ++j)   // tries
+            for(coreUintW j = 8u; j--; )   // tries
             {
                 // calculate position and height
                 const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, SEA_ANIMAL_NUM);
@@ -169,12 +181,9 @@ cSeaBackground::cSeaBackground()noexcept
                         // determine object type
                         const coreBool bType = Core::Rand->Int(3) ? true : false;
 
-                        // load object resources
-                        coreObject3D* pObject = new coreObject3D();
-                        pObject->DefineModel  (bType ? "environment_seashell.md3" : "environment_starfish.md3");
-                        pObject->DefineTexture(0u, "environment_sea_diff.png");
-                        pObject->DefineTexture(1u, "environment_sea_norm.png");
-                        pObject->DefineProgram("object_ground_program");
+                        // create object
+                        coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>(oBase);
+                        pObject->DefineModel(bType ? "environment_seashell.md3" : "environment_starfish.md3");
                        
                         // set object properties
                         pObject->SetPosition   (coreVector3(vPosition, fHeight+0.9f));
@@ -216,9 +225,15 @@ cSeaBackground::cSeaBackground()noexcept
     pList1 = new coreBatchList(SEA_ALGAE_RESERVE);
     pList1->DefineProgram("effect_decal_inst_program");
     {
+        // load object resources
+        coreObject3D oBase;
+        oBase.DefineModel  (Core::Manager::Object->GetLowModel());
+        oBase.DefineTexture(0u, "environment_algae.png");
+        oBase.DefineProgram("effect_decal_program");
+
         for(coreUintW i = 0u; i < SEA_ALGAE_NUM; ++i)
         {
-            for(coreUintW j = 0u; j < 20u; ++j)   // tries
+            for(coreUintW j = 20u; j--; )   // tries
             {
                 // calculate position and height
                 const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, SEA_ALGAE_NUM);
@@ -227,11 +242,8 @@ cSeaBackground::cSeaBackground()noexcept
                 // test for valid values
                 if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 700.0f))
                 {
-                    // load object resources
-                    coreObject3D* pObject = new coreObject3D();
-                    pObject->DefineModel  (Core::Manager::Object->GetLowModel());
-                    pObject->DefineTexture(0u, "environment_algae.png");
-                    pObject->DefineProgram("effect_decal_program");
+                    // create object
+                    coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>(oBase);
 
                     // set object properties
                     pObject->SetPosition(coreVector3(vPosition, fHeight));

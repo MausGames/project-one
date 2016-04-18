@@ -123,7 +123,7 @@ void CoreApp::Render()
         Core::Debug->MeasureEnd("Environment");
         Core::Debug->MeasureStart("Foreground");
         {
-            if(g_pGame || g_pTheater->IsActive() || g_pSpecialEffects->IsActive())
+            if(g_pGame || g_pTheater->IsActive())
             {
                 // create foreground frame buffer
                 g_pForeground->Start();
@@ -133,14 +133,6 @@ void CoreApp::Render()
 
                     // render the game
                     if(g_pGame) g_pGame->Render();
-                    else
-                    {
-                        // apply deferred outline-layer
-                        g_pOutline->Apply();
-
-                        // render special-effects
-                        g_pSpecialEffects->Render(true);
-                    }
                 }
                 g_pForeground->End();
             }
@@ -314,15 +306,15 @@ static void DebugGame()
 
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LSHIFT), CORE_INPUT_HOLD))
     {
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(REF_ID(cNoBackground     ::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(REF_ID(cGrassBackground  ::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(3), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(REF_ID(cSeaBackground    ::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(4), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(REF_ID(cDesertBackground ::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(5), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(REF_ID(cSpaceBackground  ::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(6), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(REF_ID(cVolcanoBackground::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(7), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(REF_ID(cSnowBackground   ::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(8), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(REF_ID(cMossBackground   ::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(9), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(REF_ID(cCloudBackground  ::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-REF_ID(cNoBackground     ::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-REF_ID(cGrassBackground  ::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(3), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-REF_ID(cSeaBackground    ::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(4), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-REF_ID(cDesertBackground ::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(5), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-REF_ID(cSpaceBackground  ::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(6), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-REF_ID(cVolcanoBackground::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(7), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-REF_ID(cSnowBackground   ::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(8), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-REF_ID(cMossBackground   ::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(9), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-REF_ID(cCloudBackground  ::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
 
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS))
             Core::System->Quit();
@@ -359,11 +351,11 @@ static void DebugGame()
     }
 
     static coreFloat fHeight = 0.0f;
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(T), CORE_INPUT_HOLD))
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(E), CORE_INPUT_HOLD))
     {
         fHeight += 10.0f * Core::System->GetTime();
     }
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(Y), CORE_INPUT_HOLD))
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(R), CORE_INPUT_HOLD))
     {
         fHeight -= 10.0f * Core::System->GetTime();
     }
@@ -381,20 +373,38 @@ static void DebugGame()
     if(fHeight2 && g_pEnvironment->GetBackground()->GetOutdoor()) g_pEnvironment->GetBackground()->GetOutdoor()->SetHeightOffset(fHeight2);
 
     static coreFloat fHeight3 = 1.0f;
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(E), CORE_INPUT_HOLD))
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(T), CORE_INPUT_HOLD))
     {
         fHeight3 += 0.1f * Core::System->GetTime();
     }
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(R), CORE_INPUT_HOLD))
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(Y), CORE_INPUT_HOLD))
     {
         fHeight3 -= 0.1f * Core::System->GetTime();
     }
     if((fHeight3 != 1.0f) && g_pEnvironment->GetBackground()->GetOutdoor()) g_pEnvironment->GetBackground()->GetOutdoor()->SetHeightFactor(fHeight3);
 
-    Core::Debug->InspectValue("Height", fHeight2);
+    static coreFloat fFactor = 1.0f;
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(G), CORE_INPUT_HOLD))
+    {
+        fFactor = MIN(fFactor + 0.3f * Core::System->GetTime(), 1.0f);
+    }
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(H), CORE_INPUT_HOLD))
+    {
+        fFactor = MAX(fFactor - 0.3f * Core::System->GetTime(), 0.0f);
+    }
 
-    //g_pEnvironment->GetBackground()->GetOutdoor()->SetHeightOffset(-24.5f);
-    //g_pEnvironment->GetBackground()->GetOutdoor()->SetHeightFactor(0.0f);
+    if((fFactor != 1.0f) && !g_pEnvironment->GetBackground()->GetGroundObjectList()->empty())
+    {
+        g_pEnvironment->GetBackground()->SetGroundDensity(0u, fFactor);
+        g_pEnvironment->GetBackground()->SetGroundDensity(1u, fFactor);
+    }
+    Core::Debug->InspectValue("fFactor", fFactor);
+
+    //if(g_pEnvironment->GetBackground()->GetOutdoor())
+    //{
+    //    g_pEnvironment->GetBackground()->GetOutdoor()->SetHeightOffset(-24.5f);
+    //    g_pEnvironment->GetBackground()->GetOutdoor()->SetHeightFactor(0.0f);
+    //}
 
     // ########################## DEBUG ##########################
 }

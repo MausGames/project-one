@@ -48,7 +48,7 @@ cIntroMenu::cIntroMenu()noexcept
             this->BindObject(SURFACE_INTRO_LANGUAGE, pButton);
 
             // 
-            m_apLanguageButton[it->c_str()] = pButton;
+            m_apLanguageButton.emplace(it->c_str(), pButton);
         }
     }
 

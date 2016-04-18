@@ -11,6 +11,7 @@
 #define _P1_GUARD_SHIP_H_
 
 // TODO: change high-resolution models with pre-baked normal-maps or tessellation ?
+// TODO: reduce ship health and all damage values to 16-bit (also reorder for better packing if possible)
 
 
 // ****************************************************************
@@ -30,6 +31,8 @@ protected:
     coreInt32 m_iMaxHealth;      // maximum health value (armor)
     coreInt32 m_iCurHealth;      // current health value (armor)
     coreInt32 m_iPreHealth;      // 
+
+    coreVector2 m_vOldPos;       // 
 
     coreFloat m_fBlink;          // blink intensity (to highlight successful hits)
 
@@ -74,6 +77,7 @@ public:
     inline const coreInt32&    GetMaxHealth   ()const {return m_iMaxHealth;}
     inline const coreInt32&    GetCurHealth   ()const {return m_iCurHealth;}
     inline       coreFloat     GetCurHealthPct()const {return I_TO_F(m_iCurHealth) * RCP(I_TO_F(m_iMaxHealth));}
+    inline const coreVector2&  GetOldPos      ()const {return m_vOldPos;}
     inline       coreFloat     GetBlink       ()const {return MIN(m_fBlink, 1.0f);}
 
 

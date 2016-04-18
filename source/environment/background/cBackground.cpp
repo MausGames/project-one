@@ -36,7 +36,7 @@ cBackground::~cBackground()
         FOR_EACH(it, *papList)
         {
             // delete single objects within the list
-            FOR_EACH(et, *(*it)->List()) SAFE_DELETE(*et)
+            FOR_EACH(et, *(*it)->List()) Core::Manager::Memory->Delete(&(*et));
             SAFE_DELETE(*it)
         }
 
@@ -63,6 +63,9 @@ cBackground::~cBackground()
 // render the background
 void cBackground::Render()
 {
+    // update shadow map
+    if(m_pOutdoor) m_pOutdoor->GetShadowMap()->Update();
+
     if(m_pWater)
     {
         // update water reflection and depth map
@@ -70,8 +73,8 @@ void cBackground::Render()
         m_pWater->UpdateDepth(m_pOutdoor, m_apGroundObjectList);
     }
 
-    // update shadow map
-    if(m_pOutdoor) m_pOutdoor->GetShadowMap()->Update();
+    // update light map
+    if(m_pOutdoor) m_pOutdoor->UpdateLightMap();
 
     // fill background frame buffer
     m_FrameBuffer.StartDraw();
@@ -125,8 +128,12 @@ void cBackground::Render()
     m_FrameBuffer.Blit      (CORE_FRAMEBUFFER_TARGET_COLOR, &m_ResolvedTexture);
     m_FrameBuffer.Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR | CORE_FRAMEBUFFER_TARGET_DEPTH);
 
-    // invalidate shadow map
-    if(g_CurConfig.Graphics.iShadow && m_pOutdoor) m_pOutdoor->GetShadowMap()->GetFrameBuffer()->Invalidate(CORE_FRAMEBUFFER_TARGET_DEPTH);
+    if(m_pOutdoor)
+    {
+        // invalidate shadow and light map
+        if(g_CurConfig.Graphics.iShadow) m_pOutdoor->GetShadowMap()->GetFrameBuffer()->Invalidate(CORE_FRAMEBUFFER_TARGET_DEPTH);
+        m_pOutdoor->GetLightMap()->Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
+    }
 }
 
 
@@ -155,6 +162,9 @@ void cBackground::Move()
         {
             coreBool bUpdate = false;
 
+            // 
+            const coreFloat& fDensity = (*it)->List()->front()->GetCollisionModifier().x;
+
             // enable only objects in the current view
             FOR_EACH(et, *(*it)->List())
             {
@@ -162,9 +172,12 @@ void cBackground::Move()
 
                 // determine visibility and compare with current status
                 const coreBool bIsVisible = coreMath::InRange(pObject->GetPosition().y, g_pEnvironment->GetCameraPos().y, fRange);
-                if(bIsVisible != pObject->IsEnabled(CORE_OBJECT_ENABLE_ALL))
+                if(bIsVisible != pObject->IsEnabled(CORE_OBJECT_ENABLE_MOVE))
                 {
-                    pObject->SetEnabled(bIsVisible ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+                    // 
+                    const coreFloat fFract = FRACT(FMOD(pObject->GetPosition().y + I_TO_F(OUTDOOR_VIEW/2u) * OUTDOOR_DETAIL, I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL));
+                    pObject->SetEnabled(bIsVisible ? ((fFract < fDensity) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE) : CORE_OBJECT_ENABLE_NOTHING);
+
                     bUpdate = true;
                 }
             }
@@ -240,12 +253,12 @@ void cBackground::AddList(const coreUint8 iListIndex, const coreUint32 iCapacity
     {
         // create and save new list
         pList = new coreBatchList(iCapacity);
-        m_apAddList[iListIndex] = pList;
+        m_apAddList.emplace(iListIndex, pList);
     }
     else
     {
         // reallocate existing list
-        pList = m_apAddList[iListIndex];
+        pList = m_apAddList.at(iListIndex);
         pList->Reallocate(iCapacity);
     }
 
@@ -292,6 +305,24 @@ void cBackground::ClearObjects()
 
 
 // ****************************************************************
+// 
+#define __SET_DENSITY(x)                                                                    \
+{                                                                                           \
+    ASSERT((iIndex < (x).size()) && (0.0f <= fDensity) && (fDensity <= 1.0f))               \
+                                                                                            \
+    /*  */                                                                                  \
+    coreObject3D* pBase = (x)[iIndex]->List()->front();                                     \
+    pBase->SetCollisionModifier(coreVector3(fDensity, pBase->GetCollisionModifier().yz())); \
+} 
+
+void cBackground::SetGroundDensity(const coreUintW iIndex, const coreFloat fDensity) {__SET_DENSITY(m_apGroundObjectList)}
+void cBackground::SetDecalDensity (const coreUintW iIndex, const coreFloat fDensity) {__SET_DENSITY(m_apDecalObjectList)}
+void cBackground::SetAirDensity   (const coreUintW iIndex, const coreFloat fDensity) {__SET_DENSITY(m_apAirObjectList)}
+
+#undef __SET_DENSITY
+
+
+// ****************************************************************
 // create infinite looking object list
 void cBackground::_FillInfinite(coreBatchList* OUTPUT pObjectList)
 {
@@ -302,6 +333,9 @@ void cBackground::_FillInfinite(coreBatchList* OUTPUT pObjectList)
     if((*pContent)[0]->GetPosition().y > (*pContent)[1]->GetPosition().y)
         std::reverse(pContent->begin(), pContent->end());
 
+    // 
+    FOR_EACH(it, *pContent) (*it)->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
     // loop through all objects
     for(coreUintW i = 0u, ie = pContent->size(); i < ie; ++i)
     {
@@ -311,7 +345,7 @@ void cBackground::_FillInfinite(coreBatchList* OUTPUT pObjectList)
         if(pOldObject->GetPosition().y < I_TO_F(OUTDOOR_VIEW/2u) * OUTDOOR_DETAIL)
         {
             // copy object and move it to the end area
-            coreObject3D* pNewObject = new coreObject3D(*pOldObject);
+            coreObject3D* pNewObject = Core::Manager::Memory->New<coreObject3D>(*pOldObject);
             pNewObject->SetPosition(pNewObject->GetPosition() + coreVector3(0.0f, I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL, 0.0f));
 
             // bind the new object
@@ -360,7 +394,7 @@ coreBool cBackground::_CheckIntersectionQuick(const coreBatchList* pObjectList, 
     auto et = pObjectList->List()->begin();
 
     // compare only with last few objects
-    for(coreUintW i = 6u; i-- && it != et; )
+    for(coreUintW i = 6u; i-- && (it != et); )
     {
         // check for quadratic distance
         if(((*(--it))->GetPosition().xy() - vNewPos).LengthSq() < fDistanceSq)

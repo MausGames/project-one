@@ -203,7 +203,7 @@ void cSpecialEffects::Move()
 
             // 
             c_cast<coreFloat&>(fTime) = MAX(fTime - fSpeed * Core::System->GetTime(), 0.0f);
-            const coreFloat fValue    = 1.0f - std::pow(fTime, 6);
+            const coreFloat fValue    = 1.0f - POW(fTime, 6);
 
             // 
             oRing.SetAlpha    (MIN(fTime * fTime * 1.4f, 1.0f));

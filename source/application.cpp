@@ -105,9 +105,11 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreShader> ("effect_decal.vert",                      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.vert");
     Core::Manager::Resource->Load<coreShader> ("effect_decal.frag",                      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_decal_spheric.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", SHADER_SPHERIC);
+    Core::Manager::Resource->Load<coreShader> ("effect_decal_light.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", SHADER_LIGHT);
     Core::Manager::Resource->Load<coreShader> ("effect_decal_inst.vert",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.vert", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("effect_decal_inst.frag",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("effect_decal_spheric_inst.frag",         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", CORE_SHADER_OPTION_INSTANCING SHADER_SPHERIC);
+    Core::Manager::Resource->Load<coreShader> ("effect_decal_light_inst.frag",           CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", CORE_SHADER_OPTION_INSTANCING SHADER_LIGHT);
     Core::Manager::Resource->Load<coreShader> ("effect_distortion.vert",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_distortion.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("effect_distortion.frag",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_distortion.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_distortion_direct.frag",          CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_distortion.frag", SHADER_DIRECT);
@@ -165,6 +167,8 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreShader> ("environment_outdoor.vert",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_outdoor.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("environment_outdoor.frag",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_outdoor.frag");
     Core::Manager::Resource->Load<coreShader> ("environment_outdoor_glow.frag",          CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_outdoor.frag", SHADER_GLOW);
+    Core::Manager::Resource->Load<coreShader> ("environment_outdoor_light.frag",         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_outdoor.frag", SHADER_LIGHT);
+    Core::Manager::Resource->Load<coreShader> ("environment_outdoor_light_glow.frag",    CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_outdoor.frag", SHADER_LIGHT SHADER_GLOW);
     Core::Manager::Resource->Load<coreShader> ("environment_under.vert",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_under.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("environment_under.frag",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_under.frag");
     Core::Manager::Resource->Load<coreShader> ("environment_water.vert",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_water.vert", CORE_SHADER_OPTION_NO_ROTATION);
@@ -225,6 +229,11 @@ static void SetupResources()
         ->AttachShader("effect_decal_spheric.frag")
         ->Finish();
 
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_decal_light_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_decal.vert")
+        ->AttachShader("effect_decal_light.frag")
+        ->Finish();
+
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_decal_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("effect_decal_inst.vert")
         ->AttachShader("effect_decal_inst.frag")
@@ -233,6 +242,11 @@ static void SetupResources()
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_decal_spheric_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("effect_decal_inst.vert")
         ->AttachShader("effect_decal_spheric_inst.frag")
+        ->Finish();
+
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_decal_light_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_decal_inst.vert")
+        ->AttachShader("effect_decal_light_inst.frag")
         ->Finish();
 
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_distortion_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
@@ -430,6 +444,20 @@ static void SetupResources()
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_outdoor_glow_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("environment_outdoor.vert")
         ->AttachShader("environment_outdoor_glow.frag")
+        ->BindAttribute("a_v1Height",   CORE_SHADER_ATTRIBUTE_POSITION_NUM)
+        ->BindAttribute("a_i1VertexID", CORE_SHADER_ATTRIBUTE_TEXCOORD_NUM)
+        ->Finish();
+
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_outdoor_light_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("environment_outdoor.vert")
+        ->AttachShader("environment_outdoor_light.frag")
+        ->BindAttribute("a_v1Height",   CORE_SHADER_ATTRIBUTE_POSITION_NUM)
+        ->BindAttribute("a_i1VertexID", CORE_SHADER_ATTRIBUTE_TEXCOORD_NUM)
+        ->Finish();
+
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_outdoor_light_glow_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("environment_outdoor.vert")
+        ->AttachShader("environment_outdoor_light_glow.frag")
         ->BindAttribute("a_v1Height",   CORE_SHADER_ATTRIBUTE_POSITION_NUM)
         ->BindAttribute("a_i1VertexID", CORE_SHADER_ATTRIBUTE_TEXCOORD_NUM)
         ->Finish();

@@ -138,11 +138,16 @@ void cWater::UpdateReflection()
         glDepthFunc(GL_LEQUAL);
         glEnable   (GL_BLEND);
 
-        if(g_CurConfig.Graphics.iReflection && g_pGame)
+        if(g_CurConfig.Graphics.iReflection && (g_pGame || g_pTheater->IsActive()))
         {
-            // render the game
             glCullFace(GL_FRONT);
-            g_pGame->Render();
+            {
+                // render the theater
+                g_pTheater->Render();
+
+                // render the game
+                if(g_pGame) g_pGame->Render();
+            }
             glCullFace(GL_BACK);
         }
     }
@@ -167,7 +172,7 @@ void cWater::UpdateDepth(cOutdoor* pOutdoor, const std::vector<coreBatchList*>& 
             glDrawBuffer(GL_NONE);
             {
                 // render the outdoor-surface
-                pOutdoor->Render(pOutdoor->GetProgram());
+                pOutdoor->RenderDepth();
             }
             glDepthFunc (GL_LEQUAL);
             glDrawBuffer(GL_COLOR_ATTACHMENT0);
