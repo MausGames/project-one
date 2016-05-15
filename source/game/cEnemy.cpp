@@ -53,7 +53,7 @@ void cEnemy::Move()
 {
     // 
     this->_UpdateAlways();
-    if(CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_DEAD)) return;
+    if(CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_DEAD)) return;
 
     // 
     m_fLifeTimeBefore = m_fLifeTime;
@@ -106,7 +106,7 @@ void cEnemy::Resurrect()
 
 void cEnemy::Resurrect(const coreSpline2* pPath, const coreVector2& vFactor, const coreVector2& vOffset)
 {
-    ASSERT(CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_DEAD))
+    ASSERT(CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_DEAD))
 
     // 
     coreVector2 vPosition;
@@ -120,12 +120,12 @@ void cEnemy::Resurrect(const coreSpline2* pPath, const coreVector2& vFactor, con
 void cEnemy::Resurrect(const coreVector2& vPosition, const coreVector2& vDirection)
 {
     // resurrect enemy
-    if(!CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_DEAD)) return;
-    REMOVE_VALUE(m_iStatus, ENEMY_STATUS_DEAD)
+    if(!CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_DEAD)) return;
+    REMOVE_FLAG(m_iStatus, ENEMY_STATUS_DEAD)
 
     // 
-    const coreBool bBoss = CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_BOSS);
-    const coreBool bMute = CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_MUTE);
+    const coreBool bBoss = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_BOSS);
+    const coreBool bMute = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_MUTE);
 
     // 
     m_fLifeTime       = 0.0f;
@@ -144,18 +144,18 @@ void cEnemy::Resurrect(const coreVector2& vPosition, const coreVector2& vDirecti
 void cEnemy::Kill(const coreBool bAnimated)
 {
     // kill enemy
-    if(CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_DEAD)) return;
-    ADD_VALUE(m_iStatus, ENEMY_STATUS_DEAD)
+    if(CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_DEAD)) return;
+    ADD_FLAG(m_iStatus, ENEMY_STATUS_DEAD)
 
     // 
-    const coreBool bBoss = CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_BOSS);
-    const coreBool bMute = CONTAINS_VALUE(m_iStatus, ENEMY_STATUS_MUTE);
+    const coreBool bBoss = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_BOSS);
+    const coreBool bMute = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_MUTE);
 
     // 
     g_pGame->GetShieldManager()->UnbindEnemy(this);
 
     // 
-    if(bAnimated)
+    if(bAnimated && this->IsEnabled(CORE_OBJECT_ENABLE_RENDER))
     {
         if(bBoss) g_pSpecialEffects->MacroExplosionPhysicalBig  (this->GetPosition());
              else g_pSpecialEffects->MacroExplosionPhysicalSmall(this->GetPosition());
@@ -203,7 +203,7 @@ coreBool cEnemy::DefaultMoveTarget(const coreVector2& vTarget, const coreFloat f
 
     // 
     this->SetPosition (coreVector3(vPosition,  0.0f));
-    if(vDiff.LengthSq() < 0.1f) return true;
+    if(vDiff.LengthSq() < 0.5f) return true;
     this->SetDirection(coreVector3(vDirection, 0.0f));
 
     return false;
@@ -218,6 +218,7 @@ coreBool cEnemy::DefaultMoveSmooth(const coreVector2& vRawPosition, const coreFl
 
     // 
     const coreVector2 vDiff = vRawPosition * FOREGROUND_AREA - this->GetPosition().xy();
+    if(vDiff.IsNull()) return true;
     const coreVector2 vAim  = vDiff.Normalized();
     const coreFloat   fLen  = MIN(vDiff.Length() * fSpeedMove, fClampMove);
 
@@ -234,10 +235,32 @@ coreBool cEnemy::DefaultMoveSmooth(const coreVector2& vRawPosition, const coreFl
 
 // ****************************************************************
 // 
-void cEnemy::DefaultMoveLerp(const coreVector2& vFromRawPos, const coreVector2& vToRawPos, const coreFloat fTime)
+void cEnemy::DefaultMoveForward(const coreVector2& vDirection, const coreFloat fSpeedMove)
 {
     // 
+    const coreVector2 vPosition = this->GetPosition().xy() + vDirection * (fSpeedMove * Core::System->GetTime());
+
+    // 
+    this->SetPosition (coreVector3(vPosition,  0.0f));
+    this->SetDirection(coreVector3(vDirection, 0.0f));
+}
+
+
+// ****************************************************************
+// 
+void cEnemy::DefaultMoveLerp(const coreVector2& vFromRawPos, const coreVector2& vToRawPos, const coreFloat fTime)
+{
     this->SetPosition(coreVector3(LERP(vFromRawPos, vToRawPos, fTime) * FOREGROUND_AREA, 0.0f));
+}
+
+void cEnemy::DefaultMoveLerps(const coreVector2& vFromRawPos, const coreVector2& vToRawPos, const coreFloat fTime)
+{
+    this->SetPosition(coreVector3(LERPS(vFromRawPos, vToRawPos, fTime) * FOREGROUND_AREA, 0.0f));
+}
+
+void cEnemy::DefaultMoveLerpb(const coreVector2& vFromRawPos, const coreVector2& vToRawPos, const coreFloat fTime)
+{
+    this->SetPosition(coreVector3(LERPB(vFromRawPos, vToRawPos, fTime) * FOREGROUND_AREA, 0.0f));
 }
 
 
@@ -300,6 +323,21 @@ void cEnemy::DefaultMultiate(const coreFloat fAngle)
     const coreVector2 vDir = coreVector2::Direction(fAngle);
     this->SetDirection  (coreVector3(vDir, 0.0f));
     this->SetOrientation(coreVector3(-vDir.x*vDir.y, vDir.x*vDir.x, vDir.y));
+}
+
+
+// ****************************************************************
+// 
+coreVector2 cEnemy::AimAtPlayer()const
+{
+    // 
+    return this->AimAtPlayer(g_pGame->FindPlayer(this->GetPosition().xy()));
+}
+
+coreVector2 cEnemy::AimAtPlayer(const cPlayer* pPlayer)const
+{
+    // 
+    return (pPlayer->GetPosition().xy() - this->GetPosition().xy()).Normalize();
 }
 
 
@@ -392,7 +430,7 @@ void cEnemyManager::Render()
     // 
     auto nRenderFunc = [](cEnemy* OUTPUT pEnemy)
     {
-        if(CONTAINS_VALUE(pEnemy->GetStatus(), ENEMY_STATUS_DEAD))
+        if(CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD))
             return;
 
         pEnemy->_EnableBlink();
@@ -434,30 +472,30 @@ void cEnemyManager::Render()
         nRenderFunc(*it);
 }
 
-#define __RENDER_OWN(f)                                            \
-{                                                                  \
-    /* */                                                          \
-    auto nRenderFunc = [](cEnemy* OUTPUT pEnemy)                   \
-    {                                                              \
-        if(CONTAINS_VALUE(pEnemy->GetStatus(), ENEMY_STATUS_DEAD)) \
-            return;                                                \
-                                                                   \
-        pEnemy->f();                                               \
-    };                                                             \
-                                                                   \
-    /* loop through all enemy sets */                              \
-    FOR_EACH(it, m_apEnemySet)                                     \
-    {                                                              \
-        coreBatchList* pEnemyActive = &(*it)->oEnemyActive;        \
-                                                                   \
-        /* render all active enemies */                            \
-        FOR_EACH(et, *pEnemyActive->List())                        \
-            nRenderFunc(s_cast<cEnemy*>(*et));                     \
-    }                                                              \
-                                                                   \
-    /* render all additional enemies */                            \
-    FOR_EACH(it, m_apAdditional)                                   \
-        nRenderFunc(*it);                                          \
+#define __RENDER_OWN(f)                                           \
+{                                                                 \
+    /* */                                                         \
+    auto nRenderFunc = [](cEnemy* OUTPUT pEnemy)                  \
+    {                                                             \
+        if(CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD)) \
+            return;                                               \
+                                                                  \
+        pEnemy->f();                                              \
+    };                                                            \
+                                                                  \
+    /* loop through all enemy sets */                             \
+    FOR_EACH(it, m_apEnemySet)                                    \
+    {                                                             \
+        coreBatchList* pEnemyActive = &(*it)->oEnemyActive;       \
+                                                                  \
+        /* render all active enemies */                           \
+        FOR_EACH(et, *pEnemyActive->List())                       \
+            nRenderFunc(s_cast<cEnemy*>(*et));                    \
+    }                                                             \
+                                                                  \
+    /* render all additional enemies */                           \
+    FOR_EACH(it, m_apAdditional)                                  \
+        nRenderFunc(*it);                                         \
 } 
 
 void cEnemyManager::RenderUnder () {__RENDER_OWN(__RenderOwnUnder)}

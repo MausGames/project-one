@@ -38,10 +38,10 @@ cEnvironment::cEnvironment()noexcept
     m_apMixProgram[ENVIRONMENT_MIX_CIRCLE]  = Core::Manager::Resource->Get<coreProgram>("full_transition_circle_program");
 
     // reset transformation properties
-    m_avDirection[1] = m_avDirection[0] = coreVector2(0.0f,1.0f);
-    m_avSide     [1] = m_avSide     [0] = coreVector2(0.0f,0.0f);
-    m_afSpeed    [1] = m_afSpeed    [0] = 1.0f;
-    m_afHeight   [1] = m_afHeight   [0] = 0.0f;
+    m_avDirection[1] = m_avDirection[0] = ENVIRONMENT_DEFAULT_DIRECTION;
+    m_avSide     [1] = m_avSide     [0] = ENVIRONMENT_DEFAULT_SIDE;
+    m_afSpeed    [1] = m_afSpeed    [0] = ENVIRONMENT_DEFAULT_SPEED;
+    m_afHeight   [1] = m_afHeight   [0] = ENVIRONMENT_DEFAULT_HEIGHT;
 
     // load first background
     m_pBackground = new cNoBackground();

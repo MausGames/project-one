@@ -98,7 +98,15 @@ void cRayWeapon::__TriggerOwn(const coreUint8 iMode)
         const coreVector2 vPos = m_pOwner->GetPosition ().xy();
         const coreVector2 vDir = m_pOwner->GetDirection().xy();
 
-        g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(4, 5.0f, m_pOwner, vPos + vDir*6.0f, vDir)->MakeYellow()->MakeSmaller(1.3f)->MakeLighter(fAlpha);
+        // 4x damage
+        g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(8, 5.0f, m_pOwner, vPos + vDir*6.0f, vDir)->MakeYellow()->MakeSmaller(1.3f)->MakeLighter(fAlpha);
+
+
+        //const coreVector2 vTan = vDir.Rotated90();
+        //g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(1, 5.0f, m_pOwner, vPos + vDir*4.0f + vTan*2.2f, (vDir + vTan*0.02f).Normalize())->MakeYellow()->MakeLighter(fAlpha);
+        //g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(1, 5.0f, m_pOwner, vPos + vDir*4.0f - vTan*2.2f, (vDir - vTan*0.02f).Normalize())->MakeYellow()->MakeLighter(fAlpha);
+
+
 
         m_CooldownTimer.SetValue(-1.1f);
         m_CooldownTimer.Play(CORE_TIMER_PLAY_CURRENT);
@@ -147,6 +155,10 @@ void cRayWeapon::__ShootOwn()
     g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(2, 5.0f, m_pOwner, vPos + vDir*6.0f + vTan*1.4f, vDir)->MakeYellow()->MakeLighter(fAlpha);
     g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(2, 5.0f, m_pOwner, vPos + vDir*6.0f - vTan*1.4f, vDir)->MakeYellow()->MakeLighter(fAlpha);
 
+
+    //g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(1, 5.0f, m_pOwner, vPos + vDir*4.0f + vTan*3.2f, (vDir + vTan*0.02f).Normalize())->MakeYellow()->MakeSmaller(0.85f)->MakeLighter(fAlpha);
+    //g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(1, 5.0f, m_pOwner, vPos + vDir*4.0f - vTan*3.2f, (vDir - vTan*0.02f).Normalize())->MakeYellow()->MakeSmaller(0.85f)->MakeLighter(fAlpha);
+
     //static bool test = false;
     //test = !test;
     //if(test) return;
@@ -190,12 +202,17 @@ void cPulseWeapon::__ShootOwn()
     const coreFloat fAlpha = g_CurConfig.Game.iTransparent ? 0.5f : 1.0f;
 
     // 
-    m_CooldownTimer.SetSpeed(CONTAINS_VALUE(m_pOwner->GetStatus(), PLAYER_STATUS_DARKNESS) ? 4.5f : 3.0f);
+    m_CooldownTimer.SetSpeed(CONTAINS_FLAG(m_pOwner->GetStatus(), PLAYER_STATUS_DARKNESS) ? 4.5f : 3.0f);
 
     // 
     const coreVector2 vPos = m_pOwner->GetPosition ().xy();
     const coreVector2 vDir = m_pOwner->GetDirection().xy();
     const coreVector2 vTan = vDir.Rotated90();
+
+
+    const coreVector2 vDir1 = (vDir + vDir.Rotated90()).Normalize();
+    const coreVector2 vDir2 = (vDir - vDir.Rotated90()).Normalize();
+
 
     // 
     switch(F_TO_UI(m_fCharge))
@@ -215,7 +232,9 @@ void cPulseWeapon::__ShootOwn()
         break;
 
     default:
-        g_pGame->GetBulletManagerPlayer()->AddBullet<cPulseBullet>(12, 0.5f, m_pOwner, vPos + vDir*6.0f, vDir)->MakePurple()->MakeLighter(fAlpha);
+        //g_pGame->GetBulletManagerPlayer()->AddBullet<cPulseBullet>(12, 0.5f, m_pOwner, vPos + vDir*6.0f, vDir)->MakePurple()->MakeLighter(fAlpha);
+        g_pGame->GetBulletManagerPlayer()->AddBullet<cPulseBullet>(12, 0.5f, m_pOwner, vPos + vDir1*6.0f, vDir1)->MakePurple()->MakeLighter(fAlpha);
+        g_pGame->GetBulletManagerPlayer()->AddBullet<cPulseBullet>(12, 0.5f, m_pOwner, vPos + vDir2*6.0f, vDir2)->MakePurple()->MakeLighter(fAlpha);
         break;
     }
 
@@ -269,7 +288,7 @@ void cWaveWeapon::__ShootOwn()
     const coreVector2 vDir = m_bSide ? coreVector2(1.0f,0.0f) : coreVector2(0.0f,1.0f);
 
     // 
-    g_pGame->GetBulletManagerPlayer()->AddBullet<cWaveBullet>(4, 3.5f, m_pOwner, vPos + vDir*6.0f,  vDir)->MakeGreen()->MakeSmaller(1.8f)->MakeLighter(fAlpha);
+    //g_pGame->GetBulletManagerPlayer()->AddBullet<cWaveBullet>(4, 3.5f, m_pOwner, vPos + vDir*6.0f,  vDir)->MakeGreen()->MakeSmaller(1.8f)->MakeLighter(fAlpha);
     g_pGame->GetBulletManagerPlayer()->AddBullet<cWaveBullet>(4, 3.5f, m_pOwner, vPos - vDir*6.0f, -vDir)->MakeGreen()->MakeSmaller(1.8f)->MakeLighter(fAlpha);
 
     // play bullet sound-effect

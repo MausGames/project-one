@@ -24,13 +24,13 @@ cGame::cGame(const coreBool bCoop)noexcept
 , m_bCoop               (bCoop)
 {
     // configure first player
-    m_aPlayer[0].Configure  (PLAYER_SHIP_ATK, g_CurConfig.Input.aiType[0]);
+    m_aPlayer[0].Configure  (PLAYER_SHIP_ATK, COLOR_SHIP_RED, g_CurConfig.Input.aiType[0]);
     m_aPlayer[0].EquipWeapon(0u, REF_ID(cRayWeapon::ID));
 
     if(m_bCoop)
     {
         // configure second player
-        m_aPlayer[1].Configure  (PLAYER_SHIP_DEF, g_CurConfig.Input.aiType[1]);
+        m_aPlayer[1].Configure  (PLAYER_SHIP_DEF, COLOR_SHIP_BLUE, g_CurConfig.Input.aiType[1]);
         m_aPlayer[1].EquipWeapon(0u, REF_ID(cRayWeapon::ID));
         STATIC_ASSERT(GAME_PLAYERS == 2u)
     }
@@ -60,9 +60,9 @@ cGame::~cGame()
     SAFE_DELETE(m_pMission)
 
     // 
-    g_pEnvironment->SetTargetDirection(coreVector2(0.0f,1.0f)); 
-    g_pEnvironment->SetTargetSide     (coreVector2(0.0f,0.0f)); 
-    g_pEnvironment->SetTargetSpeed    (2.0f); 
+    g_pEnvironment->SetTargetDirection(ENVIRONMENT_DEFAULT_DIRECTION); 
+    g_pEnvironment->SetTargetSide     (ENVIRONMENT_DEFAULT_SIDE); 
+    g_pEnvironment->SetTargetSpeed    (ENVIRONMENT_DEFAULT_SPEED); 
 }
 
 
@@ -155,7 +155,7 @@ void cGame::Move()
     // update total game time
     m_fTimeGame.Update(1.0f);
 
-    if(CONTAINS_VALUE(m_iStatus, GAME_STATUS_PLAY) || CONTAINS_VALUE(m_iStatus, GAME_STATUS_INTRO))
+    if(CONTAINS_FLAG(m_iStatus, GAME_STATUS_PLAY) || CONTAINS_FLAG(m_iStatus, GAME_STATUS_INTRO))
     {
         // update total mission and boss time
         m_fTimeMission.Update(1.0f);
@@ -170,7 +170,7 @@ void cGame::Move()
             m_aPlayer[i].Move();
 
         // move all enemies
-        m_EnemyManager.Move();
+        if(!m_pMission->IsWaiting()) m_EnemyManager.Move();
     }
     m_pMission->MoveAfter();
 
@@ -183,6 +183,9 @@ void cGame::Move()
 
     // handle default object collisions
     this->__HandleCollisions();
+
+    // 
+    this->__HandleDefeat();
 
     // move all overlay objects
     m_CombatText.Move();
@@ -250,6 +253,15 @@ void cGame::LoadMission(const coreInt32 iID)
             m_aPlayer[0].AddStatus(PLAYER_STATUS_NO_INPUT_ALL);
         }
     }
+}
+
+
+// ****************************************************************
+// 
+void cGame::LoadNextMission()
+{
+    // 
+    this->LoadMission(m_pMission->GetID() + 1);
 }
 
 
@@ -324,20 +336,20 @@ cPlayer* cGame::FindPlayer(const coreVector2& vPosition)
 // handle intro animation
 coreBool cGame::__HandleIntro()
 {
-    if(CONTAINS_VALUE(m_iStatus, GAME_STATUS_LOADING))
+    if(CONTAINS_FLAG(m_iStatus, GAME_STATUS_LOADING))
     {
         // do not start while game resources are still loading
         if(Core::Manager::Resource->IsLoading()) return false;
-        REMOVE_VALUE(m_iStatus, GAME_STATUS_LOADING)
+        REMOVE_FLAG(m_iStatus, GAME_STATUS_LOADING)
     }
 
-    if(CONTAINS_VALUE(m_iStatus, GAME_STATUS_INTRO))
+    if(CONTAINS_FLAG(m_iStatus, GAME_STATUS_INTRO))
     {
         if(m_fTimeMission > 0.0f)
         {
             // end intro and start actual game
-            REMOVE_VALUE(m_iStatus, GAME_STATUS_INTRO)
-            ADD_VALUE   (m_iStatus, GAME_STATUS_PLAY)
+            REMOVE_FLAG(m_iStatus, GAME_STATUS_INTRO)
+            ADD_FLAG   (m_iStatus, GAME_STATUS_PLAY)
 
             // re-enable player controls
             for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
@@ -385,7 +397,7 @@ coreBool cGame::__HandleIntro()
 // handle outro animation
 coreBool cGame::__HandleOutro()
 {
-    if(CONTAINS_VALUE(m_iStatus, GAME_STATUS_OUTRO))
+    if(CONTAINS_FLAG(m_iStatus, GAME_STATUS_OUTRO))
     {
 
 
@@ -394,6 +406,31 @@ coreBool cGame::__HandleOutro()
     }
 
     return true;
+}
+
+
+// ****************************************************************
+// 
+void cGame::__HandleDefeat()
+{
+    // 
+    for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+    {
+        if(!CONTAINS_FLAG(m_aPlayer[i].GetStatus(), PLAYER_STATUS_DEAD))
+            return;
+    }
+
+
+
+    if(m_pMission->GetID() == cIntroMission::ID)
+    {
+        this->LoadMission(cViridoMission::ID);
+    }
+    else
+    {
+
+    }
+
 }
 
 
@@ -407,6 +444,7 @@ void cGame::__HandleCollisions()
 
         // 
         pPlayer->TakeDamage(15, ELEMENT_NEUTRAL);
+        pEnemy ->TakeDamage(50, ELEMENT_NEUTRAL, pPlayer);
 
         // 
         const coreVector3 vCenter = coreVector3((pPlayer->GetPosition().xy() + pEnemy->GetPosition().xy()) * 0.5f, 0.0f);

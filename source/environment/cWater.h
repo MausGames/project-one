@@ -14,6 +14,7 @@
 // TODO: water-surface clipping for refraction
 // TODO: flying creates strong/fast water ripples
 // TODO: alpha mapping water (no distortion) for very bad hardware
+// TODO: adjust lighting on ice and rainy water (environment direction), also "flat" attribute
 
 
 // ****************************************************************

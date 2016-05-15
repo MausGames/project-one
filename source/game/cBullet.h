@@ -481,7 +481,7 @@ template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt
 
         // check current bullet status
         T* pBullet = &pSet->aBulletPool[pSet->iCurBullet];
-        if(CONTAINS_VALUE(pBullet->GetStatus(), BULLET_STATUS_READY))
+        if(CONTAINS_FLAG(pBullet->GetStatus(), BULLET_STATUS_READY))
         {
             // prepare bullet and add to active list
             pBullet->Activate(iDamage, fSpeed, pOwner, vPosition, vDirection, m_iType);
@@ -500,7 +500,7 @@ template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt
     pSet->oBulletActive.Clear();
     FOR_EACH(it, pSet->aBulletPool)
     {
-        if(CONTAINS_VALUE(it->GetStatus(), BULLET_STATUS_ACTIVE))
+        if(CONTAINS_FLAG(it->GetStatus(), BULLET_STATUS_ACTIVE))
             pSet->oBulletActive.BindObject(&(*it));
     }
 

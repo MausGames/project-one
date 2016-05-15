@@ -105,7 +105,8 @@ void cViridoMission::__SetupOwn()
             g_pEnvironment->ChangeBackground(-REF_ID(cGrassBackground::ID), ENVIRONMENT_MIX_FADE, 1.0f);
             g_pEnvironment->GetBackground()->GetOutdoor()->SetHeightOffset(-24.5f);
             g_pEnvironment->GetBackground()->GetOutdoor()->SetHeightFactor(0.0f);
-
+            g_pEnvironment->GetBackground()->GetOutdoor()->SetHeightOffset(-13.83f);
+            g_pEnvironment->GetBackground()->GetOutdoor()->SetHeightFactor(0.4583f);
 
             g_pEnvironment->GetBackground()->SetGroundDensity(0u, 0.0f);
             g_pEnvironment->GetBackground()->SetGroundDensity(1u, 0.0f);
@@ -113,12 +114,12 @@ void cViridoMission::__SetupOwn()
             g_pEnvironment->GetBackground()->SetDecalDensity (0u, 0.0f);
             g_pEnvironment->GetBackground()->SetAirDensity   (0u, 0.0f);
 
-            g_pEnvironment->SetTargetSpeed  (8.0f);
+            g_pEnvironment->SetTargetSpeed  (5.0f);
 
             g_pGame->StartIntro();
         }
 
-        if(CONTAINS_VALUE(g_pGame->GetStatus(), GAME_STATUS_PLAY))
+        if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY))
         {
             STAGE_FINISH_NOW
         }
@@ -128,7 +129,34 @@ void cViridoMission::__SetupOwn()
     // 
     STAGE_MAIN
     {
+        STAGE_ADD_SQUAD(pSquad1, cStarEnemy, 6u)
+        {
+            STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
+            {
+                pEnemy->Configure(5, LERP(COLOR_SHIP_BLUE, COLOR_SHIP_GREEN, I_TO_F(i) / I_TO_F(pSquad1->GetNumEnemies() - 1u)));
+                pEnemy->Resurrect(coreVector2((i & 0x01u) ? -0.9f : 0.9f, 1.2f) * FOREGROUND_AREA);
+            });
+        });
 
+        STAGE_GET_START(0u, 12u)
+        STAGE_GET_VEC2_ARRAY(avDir, 6u)
+        STAGE_GET_END
+
+        STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
+        {
+            STAGE_LIFETIME(pEnemy, 0.7f, -0.1f * I_TO_F(i))
+
+            STAGE_REMOVE_AREA(pEnemy)
+
+            if(fLifeTime >= 0.0f)
+            {
+                if(avDir[i].IsNull()) avDir[i] = pEnemy->AimAtPlayer();
+
+                pEnemy->DefaultMoveForward(avDir[i], 30.0f);
+            }
+        });
+
+        STAGE_FINISH_CLEARED
     });
 
     // ################################################################
@@ -168,13 +196,14 @@ void cViridoMission::__SetupOwn()
 
     // ################################################################
     // 
+    STAGE_START_HERE
     STAGE_MAIN
     {
         // 
         if(STAGE_BEGINNING) m_Crossfield.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
 
         // 
-        if(CONTAINS_VALUE(m_Crossfield.GetStatus(), ENEMY_STATUS_DEAD))
+        if(CONTAINS_FLAG(m_Crossfield.GetStatus(), ENEMY_STATUS_DEAD))
             STAGE_FINISH_NOW
     });
 
@@ -213,7 +242,7 @@ void cViridoMission::__SetupOwn()
         if(STAGE_BEGINNING) m_Torus.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
 
         // 
-        if(CONTAINS_VALUE(m_Torus.GetStatus(), ENEMY_STATUS_DEAD))
+        if(CONTAINS_FLAG(m_Torus.GetStatus(), ENEMY_STATUS_DEAD))
             STAGE_FINISH_NOW
     });
 
@@ -423,7 +452,7 @@ void cViridoMission::__MoveOwnAfter()
     });
 
     // 
-    if(!CONTAINS_VALUE(m_Vaus.GetStatus(), ENEMY_STATUS_DEAD))
+    if(!CONTAINS_FLAG(m_Vaus.GetStatus(), ENEMY_STATUS_DEAD))
     {
         cEnemy*   pCurEnemy = NULL;
         coreFloat fCurLenSq = FLT_MAX;

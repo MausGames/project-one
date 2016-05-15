@@ -22,7 +22,7 @@ void FragmentMain()
         // draw as alpha map with decent highlights
         float v1Value = coreTexture2D(0, v_av2TexCoord[0]).r;
               v1Value = max(v1Value - v1Alpha, 0.0);
-        gl_FragColor  = vec4(vec3((0.3 + 0.7 * v1Value) * u_v4Color.r) , v1Value * u_v4Color.a);
+        gl_FragColor  = vec4(vec3((0.3 + 0.7 * v1Value) * u_v4Color.r), v1Value * u_v4Color.a);
     }
     else discard; // gl_FragColor = vec4(0.0);
 }

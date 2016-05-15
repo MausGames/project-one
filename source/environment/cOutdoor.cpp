@@ -94,7 +94,7 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
 
     // delete old data
     m_pModel->Unload();
-    std::memset(m_afHeight, 0, sizeof(m_afHeight));
+    std::memset(m_aiHeight, 0, sizeof(m_aiHeight));
 
     // save properties
     m_iAlgorithm = iAlgorithm;
@@ -138,7 +138,7 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
         fLevel += WATER_HEIGHT;
 
         // save height value
-        m_afHeight[i] = fLevel;
+        m_aiHeight[i] = coreMath::Float32to16(fLevel);
 
         // set vertex position
         aVertexData[i].vPosition = coreVector3(I_TO_F(x - OUTDOOR_WIDTH/2u) * OUTDOOR_DETAIL, I_TO_F(y - OUTDOOR_VIEW/2u) * OUTDOOR_DETAIL, fLevel);
@@ -153,7 +153,7 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
             const coreUintW t = f + OUTDOOR_HEIGHT * OUTDOOR_WIDTH;
 
             aVertexData[t].vPosition.z = aVertexData[f].vPosition.z;
-            m_afHeight [t]             = m_afHeight [f];
+            m_aiHeight [t]             = m_aiHeight [f];
         }
     }
 
@@ -379,10 +379,10 @@ coreFloat cOutdoor::RetrieveHeight(const coreVector2& vPosition)
     ASSERT((iI00 < OUTDOOR_TOTAL_VERTICES) && (iI11 < OUTDOOR_TOTAL_VERTICES))
 
     // retrieve height values of the corners
-    const coreFloat& fH00 = m_afHeight[iI00];
-    const coreFloat& fH01 = m_afHeight[iI01];
-    const coreFloat& fH10 = m_afHeight[iI10];
-    const coreFloat& fH11 = m_afHeight[iI11];
+    const coreFloat fH00 = coreMath::Float16to32(m_aiHeight[iI00]);
+    const coreFloat fH01 = coreMath::Float16to32(m_aiHeight[iI01]);
+    const coreFloat fH10 = coreMath::Float16to32(m_aiHeight[iI10]);
+    const coreFloat fH11 = coreMath::Float16to32(m_aiHeight[iI11]);
 
     // interpolate between all height values
     const coreFloat fFractX = FRACT(fX);
@@ -431,9 +431,7 @@ void cOutdoor::UpdateLightMap()
 {
     // 
     m_LightMap.StartDraw();
-    {
-        this->RenderLight();
-    }
+    this->RenderLight();
 
     // 
     m_LightMap.GetColorTarget(0u).pTexture->Enable(3u);

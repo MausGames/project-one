@@ -20,6 +20,7 @@ cMission::cMission()noexcept
 , m_iIntSize         (0u)
 , m_iFloatSize       (0u)
 , m_iStageNum        (0u)
+, m_fStageWait       (0.0f)
 , m_fStageTime       (0.0f)
 , m_fStageTimeBefore (0.0f)
 {
@@ -87,15 +88,25 @@ void cMission::MoveBefore()
 {
     if(!m_anStage.empty())
     {
-        // 
+        
+
+        if(m_fStageWait > 0.0f)
+        {
+            // 
+            m_fStageWait.Update(-1.0f);
+        }
+        else
+        {
+            // 
         m_fStageTimeBefore = m_fStageTime;
         m_fStageTime.Update(1.0f);
 
-        // 
-        m_anStage.back()();
-        if(m_anStage.empty())
-        {
+            // 
+            m_anStage.back()();
+            if(m_anStage.empty())
+            {
 
+            }
         }
     }
 
@@ -141,7 +152,7 @@ void cMission::SkipStage()
 
     // 
     std::memset(m_piInt,   0, sizeof(coreInt16) * m_iIntSize);
-    std::memset(m_pfFloat, 0, sizeof(coreFlow)  * m_iFloatSize);
+    std::memset(m_pfFloat, 0, sizeof(coreFloat) * m_iFloatSize);
 
     // 
     g_pGame->GetShieldManager()->ClearShields(true);
@@ -172,3 +183,16 @@ void cMission::SetCurBoss(const cBoss* pBoss)
 
     ASSERT(false)
 }
+
+
+// ****************************************************************
+// 
+#include "01_cViridoMission.cpp"
+#include "02_cNevoMission.cpp"
+#include "03_cHarenaMission.cpp"
+#include "04_cRutilusMission.cpp"
+#include "05_cGeluMission.cpp"
+#include "06_cCalorMission.cpp"
+#include "07_cMuscusMission.cpp"
+#include "08_cAterMission.cpp"
+#include "99_cIntroMission.cpp"

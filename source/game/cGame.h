@@ -82,11 +82,12 @@ public:
 
     // control active mission
     void LoadMission(const coreInt32 iID);
+    void LoadNextMission();
     void RestartMission();
 
     // 
-    inline void StartIntro() {ADD_VALUE(m_iStatus, GAME_STATUS_INTRO)}
-    inline void StartOutro() {ADD_VALUE(m_iStatus, GAME_STATUS_OUTRO) REMOVE_VALUE(m_iStatus, GAME_STATUS_PLAY)}
+    inline void StartIntro() {ADD_FLAG(m_iStatus, GAME_STATUS_INTRO)}
+    inline void StartOutro() {ADD_FLAG(m_iStatus, GAME_STATUS_OUTRO) REMOVE_FLAG(m_iStatus, GAME_STATUS_PLAY)}
 
     // 
     void PushDepthLevel();
@@ -119,6 +120,7 @@ private:
     // 
     coreBool __HandleIntro();
     coreBool __HandleOutro();
+    void     __HandleDefeat();
     void     __HandleCollisions();
 };
 
@@ -134,7 +136,7 @@ template <typename F> void cGame::ForEachPlayer(F&& nFunction)
     for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
     {
         cPlayer* pPlayer = &m_aPlayer[i];
-        if(CONTAINS_VALUE(pPlayer->GetStatus(), PLAYER_STATUS_DEAD)) continue;
+        if(CONTAINS_FLAG(pPlayer->GetStatus(), PLAYER_STATUS_DEAD)) continue;
 
         // 
         nFunction(pPlayer, i);

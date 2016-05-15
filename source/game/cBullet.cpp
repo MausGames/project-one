@@ -49,9 +49,9 @@ void cBullet::Move()
 void cBullet::Activate(const coreInt32 iDamage, const coreFloat fSpeed, cShip* pOwner, const coreVector2& vPosition, const coreVector2& vDirection, const coreInt32 iType)
 {
     // activate bullet and remove readiness
-    if(CONTAINS_VALUE(m_iStatus, BULLET_STATUS_ACTIVE)) return;
-    ADD_VALUE   (m_iStatus, BULLET_STATUS_ACTIVE)
-    REMOVE_VALUE(m_iStatus, BULLET_STATUS_READY)
+    if(CONTAINS_FLAG(m_iStatus, BULLET_STATUS_ACTIVE)) return;
+    ADD_FLAG   (m_iStatus, BULLET_STATUS_ACTIVE)
+    REMOVE_FLAG(m_iStatus, BULLET_STATUS_READY)
 
     // save damage, speed and owner
     m_iDamage = iDamage;
@@ -76,8 +76,8 @@ void cBullet::Activate(const coreInt32 iDamage, const coreFloat fSpeed, cShip* p
 void cBullet::Deactivate(const coreBool bAnimated)
 {
     // deactivate bullet (will be cleaned up by bullet manager)
-    if(!CONTAINS_VALUE(m_iStatus, BULLET_STATUS_ACTIVE)) return;
-    REMOVE_VALUE(m_iStatus, BULLET_STATUS_ACTIVE)
+    if(!CONTAINS_FLAG(m_iStatus, BULLET_STATUS_ACTIVE)) return;
+    REMOVE_FLAG(m_iStatus, BULLET_STATUS_ACTIVE)
 
     // 
     if(bAnimated) this->__ImpactOwn();
@@ -161,7 +161,7 @@ void cBulletManager::Move()
             coreObject3D* pBullet = (*et);
 
             // check current bullet status
-            if(!CONTAINS_VALUE(pBullet->GetStatus(), BULLET_STATUS_ACTIVE))
+            if(!CONTAINS_FLAG(pBullet->GetStatus(), BULLET_STATUS_ACTIVE))
             {
                 // clean up bullet and make ready again
                 pBullet->SetStatus(pBullet->GetStatus() | BULLET_STATUS_READY);
@@ -453,7 +453,7 @@ void cMineBullet::GlobalInit()
     // 
     s_Wave.DefineModel  (Core::Manager::Object->GetLowModel());
     s_Wave.DefineTexture(0u, "effect_wave.png");
-    s_Wave.DefineProgram("effect_decal_program");
+    s_Wave.DefineProgram("effect_decal_single_program");
 }
 
 

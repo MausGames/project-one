@@ -81,7 +81,7 @@ cPlayer::~cPlayer()
 
 // ****************************************************************
 // configure the player
-void cPlayer::Configure(const coreUintW iShipType, const coreUintW iInputIndex)
+void cPlayer::Configure(const coreUintW iShipType, const coreVector3& vColor, const coreUintW iInputIndex)
 {
     // select appearance type
     const coreChar* pcModelHigh;
@@ -101,6 +101,9 @@ void cPlayer::Configure(const coreUintW iShipType, const coreUintW iInputIndex)
         // normalize collision size of different ship models
         this->SetCollisionModifier((coreVector3(1.0f,1.0f,1.0f) * PLAYER_COLLISION_SIZE) / this->GetModel()->GetBoundingRange());
     });
+
+    // save color value
+    this->SetBaseColor(vColor);
 
     // save input set
     WARN_IF(iInputIndex >= INPUT_SETS)
@@ -132,15 +135,6 @@ void cPlayer::EquipWeapon(const coreUintW iIndex, const coreInt32 iID)
     }
     m_apWeapon[iIndex]->SetOwner(this);
 
-    // set associated color
-    this->SetBaseColor(m_apWeapon[iIndex]->GetColorShip());
-
-
-
-    m_Bubble.SetColor3(LERP(coreVector3(1.0f,1.0f,1.0f), m_apWeapon[iIndex]->GetColorEnergy(), 0.75f));
-    m_Bubble.SetColor3(m_apWeapon[iIndex]->GetColorEnergy() * ((iID%2) ? 0.5f : 0.6f));
-
-
 #if defined(_CORE_DEBUG_)
 
     // same weapon should not be equipped twice
@@ -156,7 +150,7 @@ void cPlayer::EquipWeapon(const coreUintW iIndex, const coreInt32 iID)
 // render the player
 void cPlayer::Render()
 {
-    if(CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_DEAD)) return;
+    if(CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD)) return;
 
     glDisable(GL_DEPTH_TEST);
     {
@@ -184,25 +178,31 @@ void cPlayer::Move()
 {
     // 
     this->_UpdateAlways();
-    if(CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_DEAD)) return;
+    if(CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD)) return;
 
-    if(!CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
+    //const coreUint8 iShoot = (m_pInput->iButtonHold
+    //                          || Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LSHIFT), CORE_INPUT_HOLD)
+    //                          || Core::Input->GetKeyboardButton(CORE_INPUT_KEY(SPACE), CORE_INPUT_HOLD)) ? 1 : 0;
+
+    if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
     {
 
-        if(m_pInput->iButtonPress & 0x04u)
+        if(m_pInput->iButtonPress & 0x02u)
         {
-            this->EquipWeapon(0u, (m_apWeapon[0]->GetID() % cTeslaWeapon::ID) + 1u);
+            // this->EquipWeapon(0u, (m_apWeapon[0]->GetID() % cTeslaWeapon::ID) + 1u);
 
             //g_pDistortion    ->CreateWave       (this->GetPosition(), DISTORTION_WAVE_SMALL);
             //g_pSpecialEffects->CreateSplashColor(this->GetPosition(), SPECIAL_SPLASH_SMALL, m_apWeapon[0]->GetColorEnergy());
             //g_pSpecialEffects->CreateBlast      (this->GetPosition(), SPECIAL_BLAST_SMALL, m_apWeapon[0]->GetColorEnergy());
 
+            //if(m_pInput->iButtonHold & 0x01u) this->EquipWeapon(0u, cRayWeapon::ID);
+            //else if(m_pInput->iButtonHold & 0x02u) this->EquipWeapon(0u, cPulseWeapon::ID);
+            //else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LSHIFT), CORE_INPUT_HOLD)) this->EquipWeapon(0u, cWaveWeapon::ID);
+            //else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(SPACE), CORE_INPUT_HOLD))  this->EquipWeapon(0u, cTeslaWeapon::ID);
         }
 
-
-
         // move the ship
-        const coreFloat fSpeed = (!CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && CONTAINS_BIT(m_pInput->iButtonHold, 0u)) ? 20.0f : 50.0f;
+        const coreFloat fSpeed = (!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && CONTAINS_BIT(m_pInput->iButtonHold, 0u)) ? 20.0f : 50.0f;
         m_vNewPos += m_pInput->vMove * (Core::System->GetTime() * fSpeed);
 
         // 
@@ -222,9 +222,45 @@ void cPlayer::Move()
         const coreVector2 vDiff   = m_vNewPos - this->GetPosition().xy();
         const coreVector2 vOffset = vDiff * (Core::System->GetTime() * 40.0f);
 
+
+        static coreFlow time = 0.0f;
+        static coreBool status = false;
+        static coreFloat side = 1.0f;
+        if(m_pInput->iButtonPress & 0x02u)
+        {
+            if(!status)
+            {
+                status = true;
+                side = (m_pInput->vMove.x <= 0.0) ? -1.0f : 1.0f;
+                this->ChangeType(0);
+            }
+        }
+        if(status)
+        {
+            time.Update(2.0f);
+            if(time >= 1.0f)
+            {
+                time = 0.0f;
+                status = false;
+                this->ChangeType(TYPE_PLAYER);
+            }
+        }
+
+        // geschosse beim austoßen erst vergrößern
+        // unterschiedliche waffen am start erlauben
+        // 
+
+
+        const coreMatrix2 mRota = coreMatrix3::Rotation(LERPS(0.0f, 2.0f*PI, time) * side).m12();
+        const coreVector2 vOri  = coreVector2(CLAMP(vDiff.x, -0.6f, 0.6f), 1.0f).Normalize() * mRota;
+
+
         // set new position and orientation
-        this->SetPosition   (coreVector3(vOffset + this->GetPosition().xy(), 0.0f));
-        this->SetOrientation(coreVector3(CLAMP(vDiff.x, -0.6f, 0.6f), 0.0f, 1.0f).Normalize());
+        
+        //this->SetPosition   (coreVector3(vOffset + this->GetPosition().xy(), 0.0f));
+        this->SetPosition   (coreVector3(m_vNewPos, 0.0f));
+        //this->SetOrientation(coreVector3(CLAMP(vDiff.x, -0.6f, 0.6f), 0.0f, 1.0f).Normalize());
+        this->SetOrientation(coreVector3(vOri.x, 0.0f, vOri.y));
     }
 
     // 
@@ -243,13 +279,13 @@ void cPlayer::Move()
     // update all weapons (shooting and stuff)
     for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
     {
-        const coreUint8 iShoot = (!CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT)) ? ((m_pInput->iButtonHold & (BITLINE(WEAPON_MODES) << (i*WEAPON_MODES))) >> (i*WEAPON_MODES)) : 0u;
+        const coreUint8 iShoot = (!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT)) ? ((m_pInput->iButtonHold & (BITLINE(WEAPON_MODES) << (i*WEAPON_MODES))) >> (i*WEAPON_MODES)) : 0u;
         m_apWeapon[i]->Update(iShoot);
     }
 
     // 
     //if(CONTAINS_BIT(m_pInput->iButtonPress, PLAYER_WEAPONS * WEAPON_MODES))
-     //   this->TransformDark(CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_DARKNESS) ? PLAYER_DARK_OFF : PLAYER_DARK_ON);
+     //   this->TransformDark(CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DARKNESS) ? PLAYER_DARK_OFF : PLAYER_DARK_ON);
 
     if(m_Bubble.IsEnabled(CORE_OBJECT_ENABLE_ALL))
     {
@@ -258,7 +294,7 @@ void cPlayer::Move()
         this->SetTexOffset(coreVector2(0.0f, m_fDarkAnimation * 0.25f));
 
         // 
-        if(CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_DARKNESS))
+        if(CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DARKNESS))
              m_Bubble.SetAlpha(MIN(m_Bubble.GetAlpha() + 4.0f*Core::System->GetTime(), 0.8f));
         else m_Bubble.SetAlpha(MAX(m_Bubble.GetAlpha() - 4.0f*Core::System->GetTime(), 0.0f));
 
@@ -303,9 +339,7 @@ void cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement)
 
     // 
     if(this->_TakeDamage(iDamage, iElement))
-    {
-        // TODO # 
-    }
+        this->Kill(true);
 }
 
 
@@ -314,17 +348,14 @@ void cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement)
 void cPlayer::Resurrect(const coreVector2& vPosition)
 {
     // resurrect player
-    if(!CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_DEAD)) return;
-    REMOVE_VALUE(m_iStatus, PLAYER_STATUS_DEAD)
+    if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD)) return;
+    REMOVE_FLAG(m_iStatus, PLAYER_STATUS_DEAD)
 
     // 
     m_vNewPos = vPosition;
 
     // add ship to the game
     cShip::_Resurrect(true, vPosition, coreVector2(0.0f,1.0f), TYPE_PLAYER);
-
-
-    this->TransformDark(PLAYER_DARK_ON);
 }
 
 
@@ -333,8 +364,8 @@ void cPlayer::Resurrect(const coreVector2& vPosition)
 void cPlayer::Kill(const coreBool bAnimated)
 {
     // kill player
-    if(CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_DEAD)) return;
-    ADD_VALUE(m_iStatus, PLAYER_STATUS_DEAD)
+    if(CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD)) return;
+    ADD_FLAG(m_iStatus, PLAYER_STATUS_DEAD)
 
     // reset weapon shoot status
     for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
@@ -452,12 +483,12 @@ void cPlayer::ResetStats()
 void cPlayer::TransformDark(const coreUint8 iStatus)
 {
     // 
-    const coreBool bDark = CONTAINS_VALUE(m_iStatus, PLAYER_STATUS_DARKNESS);
+    const coreBool bDark = CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DARKNESS);
     if(bDark == (!iStatus)) return;
 
     if(iStatus == PLAYER_DARK_ON)
     {
-        ADD_VALUE(m_iStatus, PLAYER_STATUS_DARKNESS)
+        ADD_FLAG(m_iStatus, PLAYER_STATUS_DARKNESS)
 
         // 
         g_pDistortion    ->CreateWave      (this->GetPosition(), DISTORTION_WAVE_SMALL);
@@ -473,7 +504,7 @@ void cPlayer::TransformDark(const coreUint8 iStatus)
     }
     else if(iStatus == PLAYER_DARK_OFF)
     {
-        REMOVE_VALUE(m_iStatus, PLAYER_STATUS_DARKNESS)
+        REMOVE_FLAG(m_iStatus, PLAYER_STATUS_DARKNESS)
 
         // 
         g_pDistortion    ->CreateWave      (this->GetPosition(), DISTORTION_WAVE_BIG);
@@ -494,10 +525,10 @@ void cPlayer::TransformDark(const coreUint8 iStatus)
             g_pSpecialEffects->CreateBlowColor(pBullet->GetPosition(), coreVector3(vDir, 0.0f), 60.0f, 2u, pBullet->GetColor3());
         });
     }
-    else REMOVE_VALUE(m_iStatus, PLAYER_STATUS_DARKNESS)
+    else REMOVE_FLAG(m_iStatus, PLAYER_STATUS_DARKNESS)
 
     // 
-    //std::swap(m_pDarkProgram, m_pProgram);
+    std::swap(m_pDarkProgram, m_pProgram);
 }
 
 

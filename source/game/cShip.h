@@ -63,8 +63,8 @@ public:
     inline bool ReachedDeath    ()                           {this->__ReachOnce(); return ((m_iCurHealth == 0) && (m_iPreHealth != 0));}
 
     // add or remove status values
-    inline void AddStatus   (const coreInt32 iStatus) {ADD_VALUE   (m_iStatus, iStatus)}
-    inline void RemoveStatus(const coreInt32 iStatus) {REMOVE_VALUE(m_iStatus, iStatus)}
+    inline void AddStatus   (const coreInt32 iStatus) {ADD_FLAG   (m_iStatus, iStatus)}
+    inline void RemoveStatus(const coreInt32 iStatus) {REMOVE_FLAG(m_iStatus, iStatus)}
 
     // set object properties
     inline void SetMaxHealth(const coreInt32    iMaxHealth) {m_iMaxHealth = iMaxHealth;}

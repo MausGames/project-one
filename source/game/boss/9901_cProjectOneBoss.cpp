@@ -57,7 +57,7 @@ void cProjectOneBoss::__MoveOwn()
         PHASE_CONTROL_TIMER(0u, 0.5f, LERP_BREAK)
         {
             // 
-            this->DefaultMoveLerp(coreVector2(0.0f,2.0f), coreVector2(0.0f,0.0f), fTime);
+            this->DefaultMoveLerp(coreVector2(0.0f,2.0f), coreVector2(0.0f,0.8f), fTime);
 
             // 
             if(PHASE_SUB(0.85f))
@@ -82,5 +82,52 @@ void cProjectOneBoss::__MoveOwn()
         });
     }
 
+    // ################################################################
+    // 
+    else if(m_iPhase == 10u)
+    {
+        PHASE_CONTROL_TIMER(0u, 1.0f, LERP_SMOOTH)
+        {
+            // 
+            this->DefaultMoveLerp     (coreVector2(0.0f,0.8f), coreVector2(-0.8f,0.8f), fTime);
+            this->DefaultOrientateLerp(0.0f*PI,                4.0f*PI,                 fTime);
 
+            // 
+            if(PHASE_FINISHED)
+                ++m_iPhase;
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 11u)
+    {
+        PHASE_CONTROL_TIMER(0u, 0.5f, LERP_SMOOTH)
+        {
+            // 
+            this->DefaultMoveLerp(coreVector2(-0.8f,0.8f), coreVector2(0.8f,0.8f), fTime);
+
+            // 
+            if(PHASE_FINISHED)
+                ++m_iPhase;
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 12u)
+    {
+        PHASE_CONTROL_TIMER(0u, 1.0f, LERP_SMOOTH)
+        {
+            // 
+            this->DefaultMoveLerp     (coreVector2(0.8f,0.8f), coreVector2(0.0f,0.8f), fTime);
+            this->DefaultOrientateLerp(0.0f*PI,                4.0f*PI,                fTime);
+
+            // 
+            if(PHASE_FINISHED)
+                m_iPhase = 10;
+        });
+    }
+
+    // startest mit rotation nach links, l‰dt strahl auf, schieﬂt strahl, sinusbewegung nach rechts bis ende
 }

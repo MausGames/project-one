@@ -119,7 +119,7 @@ void cVausBoss::__MoveOwn()
     //        for(coreUintW i = 0u; i < VIRIDO_SCOUTS; ++i)
     //        {
     //            cScoutEnemy* pScout = pMission->GetScout(i);
-    //            if(CONTAINS_VALUE(pScout->GetStatus(), ENEMY_STATUS_DEAD)) continue;
+    //            if(CONTAINS_FLAG(pScout->GetStatus(), ENEMY_STATUS_DEAD)) continue;
     //
     //            cPlayer* pPlayer = g_pGame->FindPlayer(pScout->GetPosition().xy());
     //
@@ -140,7 +140,7 @@ void cVausBoss::__MoveOwn()
     //
     //        const coreVector2 vGridPos = coreVector2(-0.7f + 0.2f*I_TO_F(i%8u), 0.47f + 0.2f*I_TO_F(A));
     //
-    //        if(CONTAINS_VALUE(pScout->GetStatus(), ENEMY_STATUS_DEAD))
+    //        if(CONTAINS_FLAG(pScout->GetStatus(), ENEMY_STATUS_DEAD))
     //        {
     //            if(!A) m_iScoutOrder ^= BIT(i%8u);
     //

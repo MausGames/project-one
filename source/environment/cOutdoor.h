@@ -59,24 +59,24 @@ private:
 
 
 private:
-    coreFloat m_afHeight[OUTDOOR_TOTAL_VERTICES];   // height data for height calculations
+    coreUint16 m_aiHeight[OUTDOOR_TOTAL_VERTICES];   // height data for height calculations (half-float)
 
-    coreUint32 m_iVertexOffset;                     // current vertex offset
-    coreUint32 m_iIndexOffset;                      // current index offset
-    coreFloat  m_fFlyOffset;                        // current fly offset
-    coreFloat  m_fHeightOffset;                     // 
-    coreFloat  m_fHeightFactor;                     // 
+    coreUint32 m_iVertexOffset;                      // current vertex offset
+    coreUint32 m_iIndexOffset;                       // current index offset
+    coreFloat  m_fFlyOffset;                         // current fly offset
+    coreFloat  m_fHeightOffset;                      // 
+    coreFloat  m_fHeightFactor;                      // 
 
-    coreUint8 m_iHandleIndex;                       // 
-    coreUint8 m_iAlgorithm;                         // geometry algorithm ID
-    coreFloat m_fGrade;                             // randomness grade
+    coreUint8 m_iHandleIndex;                        // 
+    coreUint8 m_iAlgorithm;                          // geometry algorithm ID
+    coreFloat m_fGrade;                              // randomness grade
 
-    cShadow         m_ShadowMap;                    // shadow map object
-    coreFrameBuffer m_LightMap;                     // 
+    cShadow         m_ShadowMap;                     // shadow map object
+    coreFrameBuffer m_LightMap;                      // 
 
-    coreTexturePtr m_pNormalMap;                    // normal map object
-    coreProgramPtr m_pDefaultProgram;               // 
-    coreProgramPtr m_pLightProgram;                 // 
+    coreTexturePtr m_pNormalMap;                     // normal map object
+    coreProgramPtr m_pDefaultProgram;                // 
+    coreProgramPtr m_pLightProgram;                  // 
 
 
 public:

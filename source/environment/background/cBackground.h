@@ -257,11 +257,24 @@ public:
 
 
 // ****************************************************************
+// dark background class
+class cDarkBackground final : public cBackground
+{
+public:
+    cDarkBackground()noexcept;
+
+    DISABLE_COPY(cDarkBackground)
+    ASSIGN_ID(8, "Dark")
+};
+
+
+// ****************************************************************
 // cloud background class
 class cCloudBackground final : public cBackground
 {
 private:
-    coreObject2D m_Overlay;      // 
+    coreObject2D m_Cover;        // 
+    coreObject3D m_aRain[4];     // 
     coreFlow     m_fOffset;      // 
 
     coreSoundPtr m_pWindSound;   // wind sound-effect

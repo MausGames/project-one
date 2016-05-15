@@ -41,7 +41,8 @@
 // TODO: create timer and int-value as tick-multiplier for sustained damage
 // TODO: remove magic numbers (regularly)
 // TODO: test framerate-lock for g-sync stuff
-// TODO: clean up shader modifiers
+// TODO: clean up shader modifiers and shaders
+// TODO: use single-channel texture where possible
 
 
 // ****************************************************************
@@ -98,6 +99,7 @@
 #define SHADER_SHADOW(x)     "#define _P1_SHADOW_     (" #x ") \n"   // outdoor, object_ground
 #define SHADER_GLOW          "#define _P1_GLOW_       (1) \n"        // post, outdoor, object_ship
 #define SHADER_DISTORTION    "#define _P1_DISTORTION_ (1) \n"        // post
+#define SHADER_SINGLE        "#define _P1_SINGLE_     (1) \n"        // decal
 #define SHADER_LIGHT         "#define _P1_LIGHT_      (1) \n"        // outdoor, decal
 #define SHADER_DARKNESS      "#define _P1_DARKNESS_   (1) \n"        // object_ship
 #define SHADER_BULLET        "#define _P1_BULLET_     (1) \n"        // energy
@@ -142,6 +144,12 @@ inline FUNC_CONST coreFloat AngleDiff(const coreFloat x, const coreFloat y)
     while(A < -PI) A += 2.0f*PI;
     while(A >  PI) A -= 2.0f*PI;
     return A;
+}
+
+// 
+inline FUNC_CONST coreFloat LerpBreakRev(const coreFloat& x, const coreFloat& y, const coreFloat s)
+{
+    return LERPB(y, x, 1.0f - s);
 }
 
 // value range helper-function

@@ -42,6 +42,12 @@ void FragmentMain()
     }
     else discard; // gl_FragColor = vec4(0.0);
 
+#elif defined(_P1_SINGLE_)
+
+    // draw only single channel
+    float v1Value = coreTexture2D(0, v_av2TexCoord[0]).r;
+    gl_FragColor  = vec4(u_v4Color.rgb * v1Light, u_v4Color.a * v1Value);
+
 #else
 
     // draw color with alpha

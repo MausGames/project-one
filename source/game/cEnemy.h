@@ -14,6 +14,7 @@
 // ****************************************************************
 // enemy definitions
 #define ENEMY_SET_INIT_SIZE (8u)     // initial allocation size when creating a new enemy set
+#define ENEMY_AREA_FACTOR   (1.2f)   // 
 
 enum eEnemyStatus : coreUint8
 {
@@ -55,20 +56,27 @@ public:
     // control life and death
     void Resurrect();
     void Resurrect(const coreSpline2* pPath,     const coreVector2& vFactor, const coreVector2& vOffset);
-    void Resurrect(const coreVector2& vPosition, const coreVector2& vDirection);
+    void Resurrect(const coreVector2& vPosition, const coreVector2& vDirection = coreVector2(0.0f,-1.0f));
     void Kill     (const coreBool     bAnimated);
 
     // transformation functions (raw parameters are multiplied with FOREGROUND_AREA)
     coreBool DefaultMovePath     (const coreSpline2* pRawPath, const coreVector2& vFactor, const coreVector2& vRawOffset, const coreFloat fRawDistance);
     coreBool DefaultMoveTarget   (const coreVector2& vTarget, const coreFloat fSpeedMove, const coreFloat fSpeedTurn);
     coreBool DefaultMoveSmooth   (const coreVector2& vRawPosition, const coreFloat fSpeedMove, const coreFloat fClampMove);
+    void     DefaultMoveForward  (const coreVector2& vDirection, const coreFloat fSpeedMove);
     void     DefaultMoveLerp     (const coreVector2& vFromRawPos, const coreVector2& vToRawPos, const coreFloat fTime);
+    void     DefaultMoveLerps    (const coreVector2& vFromRawPos, const coreVector2& vToRawPos, const coreFloat fTime);
+    void     DefaultMoveLerpb    (const coreVector2& vFromRawPos, const coreVector2& vToRawPos, const coreFloat fTime);
     void     DefaultRotate       (const coreFloat fAngle);
     coreBool DefaultRotateSmooth (const coreVector2& vDirection, const coreFloat fSpeedTurn, const coreFloat fClampTurn);
     void     DefaultRotateLerp   (const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime);
     void     DefaultOrientate    (const coreFloat fAngle);
     void     DefaultOrientateLerp(const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime);
     void     DefaultMultiate     (const coreFloat fAngle);
+
+    // 
+    coreVector2 AimAtPlayer()const;
+    coreVector2 AimAtPlayer(const cPlayer* pPlayer)const;
 
     // get object properties
     inline const coreFloat& GetLifeTime      ()const {return m_fLifeTime;}
@@ -116,8 +124,8 @@ public:
 
     // 
     inline coreUintW GetNumEnemies     ()const {return m_apEnemy.size();}
-    inline coreUintW GetNumEnemiesAlive()const {return std::count_if(m_apEnemy.begin(), m_apEnemy.end(), [](const cEnemy* pEnemy) {return !CONTAINS_VALUE(pEnemy->GetStatus(), ENEMY_STATUS_DEAD);});}
-    inline coreBool  IsFinished        ()const {return std::none_of (m_apEnemy.begin(), m_apEnemy.end(), [](const cEnemy* pEnemy) {return !CONTAINS_VALUE(pEnemy->GetStatus(), ENEMY_STATUS_DEAD);});}
+    inline coreUintW GetNumEnemiesAlive()const {return std::count_if(m_apEnemy.begin(), m_apEnemy.end(), [](const cEnemy* pEnemy) {return !CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD);});}
+    inline coreBool  IsFinished        ()const {return std::none_of (m_apEnemy.begin(), m_apEnemy.end(), [](const cEnemy* pEnemy) {return !CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD);});}
 };
 
 
@@ -327,7 +335,7 @@ template <typename F> void cEnemySquad::ForEachEnemy(F&& nFunction)
     for(coreUintW i = 0u, ie = m_apEnemy.size(); i < ie; ++i)
     {
         cEnemy* pEnemy = m_apEnemy[i];
-        if(CONTAINS_VALUE(pEnemy->GetStatus(), ENEMY_STATUS_DEAD) && !pEnemy->ReachedDeath()) continue;
+        if(CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD) && !pEnemy->ReachedDeath()) continue;
 
         // 
         nFunction(pEnemy, i);
@@ -404,7 +412,7 @@ template <typename T> RETURN_RESTRICT T* cEnemyManager::AllocateEnemy()
         // check current enemy status
         T*& pEnemy = pSet->apEnemyPool[pSet->iTopEnemy++];
         if(!pEnemy) pEnemy = new T();
-        if(!CONTAINS_VALUE(pEnemy->GetStatus(), ENEMY_STATUS_ASSIGNED))
+        if(!CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_ASSIGNED))
         {
             // prepare enemy and add to active list
             pEnemy->AddStatus(ENEMY_STATUS_ASSIGNED);

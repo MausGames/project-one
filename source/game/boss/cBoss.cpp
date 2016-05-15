@@ -106,3 +106,11 @@ void cBoss::_PhaseTicker(const coreUintW iTimerIndex, const coreUint16 iCodeLine
         nUpdateFunc(oTimer.GetCurLoops()-1u, !oTimer.GetStatus());
     }
 }
+
+
+// ****************************************************************
+// 
+#include "0101_cCrossfieldBoss.cpp"
+#include "0102_cTorusBoss.cpp"
+#include "0103_cVausBoss.cpp"
+#include "9901_cProjectOneBoss.cpp"

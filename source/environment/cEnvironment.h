@@ -24,6 +24,11 @@
 #define ENVIRONMENT_MIX_CIRCLE  (3u)   // 
 #define ENVIRONMENT_MIXES       (4u)   // 
 
+#define ENVIRONMENT_DEFAULT_DIRECTION (coreVector2(0.0f,1.0f))
+#define ENVIRONMENT_DEFAULT_SIDE      (coreVector2(0.0f,0.0f))
+#define ENVIRONMENT_DEFAULT_SPEED     (1.0f)
+#define ENVIRONMENT_DEFAULT_HEIGHT    (0.0f)
+
 
 // ****************************************************************
 // environment class

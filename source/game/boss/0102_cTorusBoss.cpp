@@ -75,7 +75,7 @@ cTorusBoss::cTorusBoss()noexcept
     }
 
     // 
-    g_pEnvironment->GetBackground()->AddList(0u, 128u, "effect_decal_inst_program");
+    g_pEnvironment->GetBackground()->AddList(0u, 128u, "effect_decal_single_inst_program");
 
     STATIC_ASSERT(ARRAY_SIZE(m_aRay) == ARRAY_SIZE(m_aRayWave))
 }
@@ -735,14 +735,15 @@ void cTorusBoss::__CreateOverdrive(const coreUintW iIndex, const coreVector3& vI
                     const coreVector2 vDecalDir  = vDiff.xy().Normalize();
 
                     // load object resources
-                    coreObject3D* pObject = new coreObject3D();
+                    coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>();
                     pObject->DefineModel  (Core::Manager::Object->GetLowModel());
                     pObject->DefineTexture(0u, "effect_soot.png");
-                    pObject->DefineProgram("effect_decal_program");
+                    pObject->DefineProgram("effect_decal_single_program");
 
                     // set object properties
                     pObject->SetSize     (coreVector3(bRotated ? vDecalSize.yx()       : vDecalSize, 1.0f));
                     pObject->SetDirection(coreVector3(bRotated ? vDecalDir.Rotated90() : vDecalDir,  0.0f));
+                    pObject->SetColor3   (coreVector3(0.0f,0.0f,0.0f));
 
                     // add object to the background
                     g_pEnvironment->GetBackground()->AddObject(pObject, vDecalPos, 0u);

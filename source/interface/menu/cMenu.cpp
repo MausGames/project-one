@@ -83,7 +83,7 @@ void cMenu::Move()
                     // 
                     this->ChangeSurface(SURFACE_PAUSE, 0.0f);
                 }
-                else if(CONTAINS_VALUE(g_pGame->GetStatus(), GAME_STATUS_OUTRO))
+                else if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_OUTRO))
                 {
                     // 
                     this->ChangeSurface(SURFACE_GAME, 3.0f);
@@ -323,3 +323,13 @@ void cMenu::UpdateSwitchBox(coreSwitchBoxU8* OUTPUT pSwitchBox)
     UpdateArrowFunc(pSwitchBox->GetArrow(0u), 0u);
     UpdateArrowFunc(pSwitchBox->GetArrow(1u), pSwitchBox->GetNumEntries() - 1u);
 }
+
+
+// ****************************************************************
+// 
+#include "01_cIntroMenu.cpp"
+#include "02_cMainMenu.cpp"
+#include "03_cGameMenu.cpp"
+#include "04_cConfigMenu.cpp"
+#include "05_cExtraMenu.cpp"
+#include "06_cPauseMenu.cpp"

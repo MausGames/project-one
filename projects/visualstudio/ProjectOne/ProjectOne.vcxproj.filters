@@ -153,6 +153,30 @@
     <ClCompile Include="..\..\..\source\game\cShield.cpp">
       <Filter>game</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\environment\background\08_cDarkBackground.cpp">
+      <Filter>environment\background</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\game\mission\02_cNevoMission.cpp">
+      <Filter>game\mission</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\game\mission\03_cHarenaMission.cpp">
+      <Filter>game\mission</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\game\mission\04_cRutilusMission.cpp">
+      <Filter>game\mission</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\game\mission\05_cGeluMission.cpp">
+      <Filter>game\mission</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\game\mission\06_cCalorMission.cpp">
+      <Filter>game\mission</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\game\mission\07_cMuscusMission.cpp">
+      <Filter>game\mission</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\game\mission\08_cAterMission.cpp">
+      <Filter>game\mission</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\main.h" />

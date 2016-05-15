@@ -68,7 +68,7 @@ void cShadow::Reconfigure()
     {
         // create shadow map frame buffer
         m_FrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH16);
-        m_FrameBuffer.Create(g_vGameResolution * ((m_iLevel == 1u) ? 1.0f : 1.7f), CORE_FRAMEBUFFER_CREATE_NORMAL);
+        m_FrameBuffer.Create(g_vGameResolution * ((m_iLevel == 1u) ? SHADOW_RES_LOW : SHADOW_RES_HIGH), CORE_FRAMEBUFFER_CREATE_NORMAL);
 
         // enable depth value comparison
         m_FrameBuffer.GetDepthTarget().pTexture->ShadowSampling(true);
@@ -139,8 +139,13 @@ void cShadow::GlobalUpdate()
     // increase light direction height (to reduce shadow length)
     const coreVector3 vHighLight = (g_pEnvironment->GetLightDir() * coreVector3(1.0f, 1.0f, SHADOW_HEIGHT_FACTOR)).Normalize();
 
+    // clamp camera movement to reduce flickering
+    const coreFloat   fClampFactor = g_vGameResolution.x * ((g_CurConfig.Graphics.iShadow == 1u) ? SHADOW_RES_LOW : SHADOW_RES_HIGH) * 0.007274395f;
+    const coreVector2 vClampPos    = coreVector2(FLOOR(g_pEnvironment->GetCameraPos().x * fClampFactor),
+                                                 FLOOR(g_pEnvironment->GetCameraPos().y * fClampFactor)) * RCP(fClampFactor);
+
     // assemble camera matrix (viewed from light source)
-    const coreMatrix4 mCamera = coreMatrix4::Camera(vHighLight * -SHADOW_VIEW_DISTANCE + coreVector3(g_pEnvironment->GetCameraPos().xy(), WATER_HEIGHT),
+    const coreMatrix4 mCamera = coreMatrix4::Camera(vHighLight * -SHADOW_VIEW_DISTANCE + coreVector3(vClampPos, WATER_HEIGHT),
                                                     vHighLight, coreVector3(g_pEnvironment->GetDirection().InvertedX(), 0.0f));
 
     // calculate full draw and read shadow matrices

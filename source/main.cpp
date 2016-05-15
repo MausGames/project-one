@@ -284,6 +284,7 @@ static void DebugGame()
     #pragma warning(disable : 4189 4702)
 #endif
 
+    // start game
     if(!g_pGame)
     {
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LALT), CORE_INPUT_HOLD))
@@ -294,16 +295,19 @@ static void DebugGame()
         }
     }
 
+    // end game
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(K), CORE_INPUT_PRESS))
     {
         SAFE_DELETE(g_pGame)
     }
 
+    // hide menu
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(J), CORE_INPUT_PRESS))
     {
         g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f);
     }
 
+    // load background
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LSHIFT), CORE_INPUT_HOLD))
     {
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-REF_ID(cNoBackground     ::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
@@ -320,6 +324,19 @@ static void DebugGame()
             Core::System->Quit();
     }
 
+    // set background movement
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_1),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2(-1.0f,-1.0f).Normalize());
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_2),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 0.0f,-1.0f).Normalize());
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_3),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 1.0f,-1.0f).Normalize());
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_4),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2(-1.0f, 0.0f).Normalize());
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_6),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 1.0f, 0.0f).Normalize());
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_7),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2(-1.0f, 1.0f).Normalize());
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_8),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 0.0f, 1.0f).Normalize());
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_9),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 1.0f, 1.0f).Normalize());
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_PLUS),  CORE_INPUT_PRESS)) g_pEnvironment->SetTargetSpeed((&g_pEnvironment->GetSpeed())[1] + 1.0f);
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_MINUS), CORE_INPUT_PRESS)) g_pEnvironment->SetTargetSpeed((&g_pEnvironment->GetSpeed())[1] - 1.0f);
+
+    // equip weapon
     if(g_pGame)
     {
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LCTRL), CORE_INPUT_HOLD))
@@ -331,6 +348,7 @@ static void DebugGame()
         }
     }
 
+    // damage boss
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(O), CORE_INPUT_PRESS))
     {
         if(g_pGame && g_pGame->GetMission()->GetCurBoss())
@@ -339,12 +357,13 @@ static void DebugGame()
         }
     }
 
+    // skip stage
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(P), CORE_INPUT_PRESS))
     {
         if(g_pGame && g_pGame->GetMission() &&
-           CONTAINS_VALUE(g_pGame->GetMission()->GetBoss(0u)->GetStatus(), ENEMY_STATUS_DEAD) &&
-           CONTAINS_VALUE(g_pGame->GetMission()->GetBoss(1u)->GetStatus(), ENEMY_STATUS_DEAD) &&
-           CONTAINS_VALUE(g_pGame->GetMission()->GetBoss(2u)->GetStatus(), ENEMY_STATUS_DEAD))
+           CONTAINS_FLAG(g_pGame->GetMission()->GetBoss(0u)->GetStatus(), ENEMY_STATUS_DEAD) &&
+           CONTAINS_FLAG(g_pGame->GetMission()->GetBoss(1u)->GetStatus(), ENEMY_STATUS_DEAD) &&
+           CONTAINS_FLAG(g_pGame->GetMission()->GetBoss(2u)->GetStatus(), ENEMY_STATUS_DEAD))
         {
             g_pGame->GetMission()->SkipStage();
         }
@@ -393,12 +412,12 @@ static void DebugGame()
         fFactor = MAX(fFactor - 0.3f * Core::System->GetTime(), 0.0f);
     }
 
-    if((fFactor != 1.0f) && !g_pEnvironment->GetBackground()->GetGroundObjectList()->empty())
-    {
-        g_pEnvironment->GetBackground()->SetGroundDensity(0u, fFactor);
-        g_pEnvironment->GetBackground()->SetGroundDensity(1u, fFactor);
-    }
-    Core::Debug->InspectValue("fFactor", fFactor);
+    //if((fFactor != 1.0f) && !g_pEnvironment->GetBackground()->GetGroundObjectList()->empty())
+    //{
+    //    g_pEnvironment->GetBackground()->SetGroundDensity(0u, fFactor);
+    //    g_pEnvironment->GetBackground()->SetGroundDensity(1u, fFactor);
+    //}
+    //Core::Debug->InspectValue("fFactor", fFactor);
 
     //if(g_pEnvironment->GetBackground()->GetOutdoor())
     //{

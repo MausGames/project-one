@@ -11,7 +11,7 @@
 // shader input
 varying vec4 v_av4ShipLight;     // simplified light vector (w = base blink intensity (to highlight successful hits))
 varying vec3 v_av3ShipView;      // simplified view vector
-varying vec3 v_av3ShipNormal;    // simplified ship normal
+varying vec3 v_av3ShipNormal;    // simplified normal vector
 
 
 void FragmentMain()
@@ -53,7 +53,7 @@ void FragmentMain()
 #else
  
     // calculate smooth blink color
-    vec3 v3Blink = vec3(v_av4ShipLight.w * 0.7 * (1.0 - 0.8 * abs(dot(v3MathViewDir, v3BumpNormal))));
+    vec3 v3Blink = vec3(v_av4ShipLight.w * (0.7 - 0.56 * abs(dot(v3MathViewDir, v3BumpNormal))));
     
 #endif
 

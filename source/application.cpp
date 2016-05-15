@@ -62,6 +62,7 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreTexture>("effect_lightning.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_lightning.png");
     Core::Manager::Resource->Load<coreTexture>("effect_particle_32.png",                 CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_particle_32.png", false);
     Core::Manager::Resource->Load<coreTexture>("effect_particle_128.png",                CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_particle_128.png", false);
+    Core::Manager::Resource->Load<coreTexture>("effect_rain.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_rain.png");
     Core::Manager::Resource->Load<coreTexture>("effect_soot.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_soot.png");
     Core::Manager::Resource->Load<coreTexture>("effect_wave.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_wave.png");
     Core::Manager::Resource->Load<coreTexture>("effect_wave_norm.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_wave_norm.png", false);
@@ -104,12 +105,16 @@ static void SetupResources()
 
     Core::Manager::Resource->Load<coreShader> ("effect_decal.vert",                      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.vert");
     Core::Manager::Resource->Load<coreShader> ("effect_decal.frag",                      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag");
+    Core::Manager::Resource->Load<coreShader> ("effect_decal_single.frag",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", SHADER_SINGLE);
     Core::Manager::Resource->Load<coreShader> ("effect_decal_spheric.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", SHADER_SPHERIC);
     Core::Manager::Resource->Load<coreShader> ("effect_decal_light.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", SHADER_LIGHT);
+    Core::Manager::Resource->Load<coreShader> ("effect_decal_light_single.frag",         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", SHADER_LIGHT SHADER_SINGLE);
     Core::Manager::Resource->Load<coreShader> ("effect_decal_inst.vert",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.vert", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("effect_decal_inst.frag",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", CORE_SHADER_OPTION_INSTANCING);
+    Core::Manager::Resource->Load<coreShader> ("effect_decal_single_inst.frag",          CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", CORE_SHADER_OPTION_INSTANCING SHADER_SINGLE);
     Core::Manager::Resource->Load<coreShader> ("effect_decal_spheric_inst.frag",         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", CORE_SHADER_OPTION_INSTANCING SHADER_SPHERIC);
     Core::Manager::Resource->Load<coreShader> ("effect_decal_light_inst.frag",           CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", CORE_SHADER_OPTION_INSTANCING SHADER_LIGHT);
+    Core::Manager::Resource->Load<coreShader> ("effect_decal_light_single_inst.frag",    CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", CORE_SHADER_OPTION_INSTANCING SHADER_LIGHT SHADER_SINGLE);
     Core::Manager::Resource->Load<coreShader> ("effect_distortion.vert",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_distortion.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("effect_distortion.frag",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_distortion.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_distortion_direct.frag",          CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_distortion.frag", SHADER_DIRECT);
@@ -224,6 +229,11 @@ static void SetupResources()
         ->AttachShader("effect_decal.frag")
         ->Finish();
 
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_decal_single_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_decal.vert")
+        ->AttachShader("effect_decal_single.frag")
+        ->Finish();
+
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_decal_spheric_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("effect_decal.vert")
         ->AttachShader("effect_decal_spheric.frag")
@@ -234,9 +244,19 @@ static void SetupResources()
         ->AttachShader("effect_decal_light.frag")
         ->Finish();
 
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_decal_light_single_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_decal.vert")
+        ->AttachShader("effect_decal_light_single.frag")
+        ->Finish();
+
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_decal_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("effect_decal_inst.vert")
         ->AttachShader("effect_decal_inst.frag")
+        ->Finish();
+
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_decal_single_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_decal_inst.vert")
+        ->AttachShader("effect_decal_single_inst.frag")
         ->Finish();
 
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_decal_spheric_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
@@ -247,6 +267,11 @@ static void SetupResources()
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_decal_light_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("effect_decal_inst.vert")
         ->AttachShader("effect_decal_light_inst.frag")
+        ->Finish();
+
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_decal_light_single_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_decal_inst.vert")
+        ->AttachShader("effect_decal_light_single_inst.frag")
         ->Finish();
 
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_distortion_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())

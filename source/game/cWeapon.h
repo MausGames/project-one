@@ -15,7 +15,7 @@
 
 // ****************************************************************
 // weapon definitions
-#define WEAPON_MODES         (2u)   // 
+#define WEAPON_MODES         (1u)   // 
 #define WEAPON_TESLA_TARGETS (3u)   // 
 
 

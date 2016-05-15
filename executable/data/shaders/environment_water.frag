@@ -9,11 +9,10 @@
 
 
 // constant values
-const vec3 c_v3Blue     = vec3(0.0, 0.43, 0.69);                           // default surface color
-const vec3 c_v3LightDir = vec3(-0.583953857, -0.642349243, 0.496360779);   // overridden light direction
+const vec3 c_v3Blue = vec3(0.0, 0.43, 0.69);   // default surface color
 
 // shader input
-varying float v_v1Smooth;   // height offset for smooth shores
+flat varying vec4 v_v4Lighting;   // lighting properties (xyz = light direction, w = height offset for smooth shores)
 
 
 void FragmentMain()
@@ -26,7 +25,7 @@ void FragmentMain()
     float v1Depth       = coreTexture2D(3, v2ScreenCoord).r;
     
     // calculate dot-3 bump factor
-    vec3  v3MathLightDir = c_v3LightDir;
+    vec3  v3MathLightDir = normalize(v_v4Lighting.xyz);
     vec3  v3BumpNormal   = (v3BumpNormal1 + v3BumpNormal2) * 2.0 - 2.0;
           v3BumpNormal   = normalize(vec3(v3BumpNormal.xy, v3BumpNormal.z / 2.0));
     float v1BumpFactor   = dot(v3MathLightDir, v3BumpNormal);
@@ -42,7 +41,7 @@ void FragmentMain()
           v1ReflFactor  = 0.65 * pow(v1ReflFactor, 260.0);
 
     // adjust depth value
-    v1Depth = smoothstep(0.64, 0.735, v1Depth) * 0.8 * (1.0 + v1ReflFactor) + v_v1Smooth;
+    v1Depth = smoothstep(0.64, 0.735, v1Depth) * 0.8 * (1.0 + v1ReflFactor) + v_v4Lighting.w;
     v1Depth = max(v1Depth - (0.5 - 0.5 * smoothstep(0.3, 0.4, v1Depth)), 0.0);
 
     // lookup refraction texture

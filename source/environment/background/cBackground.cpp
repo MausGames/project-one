@@ -63,9 +63,6 @@ cBackground::~cBackground()
 // render the background
 void cBackground::Render()
 {
-    // update shadow map
-    if(m_pOutdoor) m_pOutdoor->GetShadowMap()->Update();
-
     if(m_pWater)
     {
         // update water reflection and depth map
@@ -73,8 +70,12 @@ void cBackground::Render()
         m_pWater->UpdateDepth(m_pOutdoor, m_apGroundObjectList);
     }
 
-    // update light map
-    if(m_pOutdoor) m_pOutdoor->UpdateLightMap();
+    if(m_pOutdoor)
+    {
+        // update shadow and light map
+        m_pOutdoor->GetShadowMap()->Update();
+        m_pOutdoor->UpdateLightMap();
+    }
 
     // fill background frame buffer
     m_FrameBuffer.StartDraw();
@@ -171,7 +172,8 @@ void cBackground::Move()
                 coreObject3D* pObject = (*et);
 
                 // determine visibility and compare with current status
-                const coreBool bIsVisible = coreMath::InRange(pObject->GetPosition().y, g_pEnvironment->GetCameraPos().y, fRange);
+                const coreBool bIsVisible = coreMath::InRange(pObject->GetPosition().y, g_pEnvironment->GetCameraPos().y, fRange) &&
+                                            coreMath::InRange(pObject->GetPosition().x, 0.0f,                             fRange);
                 if(bIsVisible != pObject->IsEnabled(CORE_OBJECT_ENABLE_MOVE))
                 {
                     // 
@@ -200,7 +202,7 @@ void cBackground::Move()
             else
             {
                 // remove object when not visible anymore
-                SAFE_DELETE(*it)
+                Core::Manager::Memory->Delete(&(*it));
                 DYN_REMOVE(it, *papObject)
             }
         }
@@ -291,10 +293,10 @@ void cBackground::ShoveObjects(const coreFloat fOffset)
 void cBackground::ClearObjects()
 {
     // delete objects and lists
-    FOR_EACH(it, m_apAddObject) SAFE_DELETE(*it)
+    FOR_EACH(it, m_apAddObject) Core::Manager::Memory->Delete(&(*it));
     FOR_EACH(it, m_apAddList)
     {
-        FOR_EACH(et, *(*it)->List()) SAFE_DELETE(*et)
+        FOR_EACH(et, *(*it)->List()) Core::Manager::Memory->Delete(&(*et));
         SAFE_DELETE(*it)
     }
 
@@ -402,3 +404,16 @@ coreBool cBackground::_CheckIntersectionQuick(const coreBatchList* pObjectList, 
     }
     return false;
 }
+
+
+// ****************************************************************
+// 
+#include "01_cGrassBackground.cpp"
+#include "02_cSeaBackground.cpp"
+#include "03_cDesertBackground.cpp"
+#include "04_cSpaceBackground.cpp"
+#include "05_cVolcanoBackground.cpp"
+#include "06_cSnowBackground.cpp"
+#include "07_cMossBackground.cpp"
+#include "08_cDarkBackground.cpp"
+#include "99_cCloudBackground.cpp"

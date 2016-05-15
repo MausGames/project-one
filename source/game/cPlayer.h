@@ -71,7 +71,7 @@ public:
     ENABLE_COPY(cPlayer)
 
     // configure the player
-    void Configure  (const coreUintW iShipType, const coreUintW iInputIndex);
+    void Configure  (const coreUintW iShipType, const coreVector3& vColor, const coreUintW iInputIndex);
     void EquipWeapon(const coreUintW iIndex, const coreInt32 iID);
 
     // render and move the player
