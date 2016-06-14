@@ -94,15 +94,15 @@ public:
     ASSIGN_ID(1, "Laser Gun")
 
     // get object properties
-    inline coreVector3 GetColorEnergy()const override {return COLOR_ENERGY_YELLOW;}
-    inline coreVector3 GetColorShip  ()const override {return COLOR_SHIP_YELLOW;}
-    inline coreUint8   GetElement    ()const override {return ELEMENT_YELLOW;}
+    inline coreVector3 GetColorEnergy()const final {return COLOR_ENERGY_YELLOW;}
+    inline coreVector3 GetColorShip  ()const final {return COLOR_SHIP_YELLOW;}
+    inline coreUint8   GetElement    ()const final {return ELEMENT_YELLOW;}
 
 
 private:
     // execute own routines
-    void __TriggerOwn(const coreUint8 iMode)override;
-    void __ShootOwn  ()override;
+    void __TriggerOwn(const coreUint8 iMode)final;
+    void __ShootOwn  ()final;
 };
 
 
@@ -124,15 +124,15 @@ public:
     ASSIGN_ID(2, "Pulse Cannon")
 
     // get object properties
-    inline coreVector3 GetColorEnergy()const override {return COLOR_ENERGY_PURPLE;}
-    inline coreVector3 GetColorShip  ()const override {return COLOR_SHIP_PURPLE;}
-    inline coreUint8   GetElement    ()const override {return ELEMENT_PURPLE;}
+    inline coreVector3 GetColorEnergy()const final {return COLOR_ENERGY_PURPLE;}
+    inline coreVector3 GetColorShip  ()const final {return COLOR_SHIP_PURPLE;}
+    inline coreUint8   GetElement    ()const final {return ELEMENT_PURPLE;}
 
 
 private:
     // execute own routines
-    void __UpdateOwn(const coreUint8 iShootStatus)override;
-    void __ShootOwn ()override;
+    void __UpdateOwn(const coreUint8 iShootStatus)final;
+    void __ShootOwn ()final;
 };
 
 
@@ -156,16 +156,16 @@ public:
     ASSIGN_ID(3, "Wave Mortar")
 
     // get object properties
-    inline coreVector3 GetColorEnergy()const override {return COLOR_ENERGY_GREEN;}
-    inline coreVector3 GetColorShip  ()const override {return COLOR_SHIP_GREEN;}
-    inline coreUint8   GetElement    ()const override {return ELEMENT_GREEN;}
+    inline coreVector3 GetColorEnergy()const final {return COLOR_ENERGY_GREEN;}
+    inline coreVector3 GetColorShip  ()const final {return COLOR_SHIP_GREEN;}
+    inline coreUint8   GetElement    ()const final {return ELEMENT_GREEN;}
 
 
 private:
     // execute own routines
-    void __TriggerOwn      (const coreUint8 iMode)override;
-    void __ShootOwn        ()override;
-    void __RenderOverlayOwn()override;
+    void __TriggerOwn      (const coreUint8 iMode)final;
+    void __ShootOwn        ()final;
+    void __RenderOverlayOwn()final;
 };
 
 
@@ -188,14 +188,14 @@ public:
     ASSIGN_ID(4, "Tesla Rifle")
 
     // get object properties
-    inline coreVector3 GetColorEnergy()const override {return COLOR_ENERGY_BLUE;}
-    inline coreVector3 GetColorShip  ()const override {return COLOR_SHIP_BLUE;}
-    inline coreUint8   GetElement    ()const override {return ELEMENT_BLUE;}
+    inline coreVector3 GetColorEnergy()const final {return COLOR_ENERGY_BLUE;}
+    inline coreVector3 GetColorShip  ()const final {return COLOR_SHIP_BLUE;}
+    inline coreUint8   GetElement    ()const final {return ELEMENT_BLUE;}
 
 
 private:
     // execute own routines
-    void __TriggerOwn(const coreUint8 iMode)override;
+    void __TriggerOwn(const coreUint8 iMode)final;
     void __ShootOwn  ()override;
 };
 
@@ -211,9 +211,9 @@ public:
     ASSIGN_ID(5, "Antimatter")
 
     // get object properties
-    inline coreVector3 GetColorEnergy()const override {return COLOR_ENERGY_RED;}
-    inline coreVector3 GetColorShip  ()const override {return COLOR_SHIP_RED;}
-    inline coreUint8   GetElement    ()const override {return ELEMENT_RED;}
+    inline coreVector3 GetColorEnergy()const final {return COLOR_ENERGY_RED;}
+    inline coreVector3 GetColorShip  ()const final {return COLOR_SHIP_RED;}
+    inline coreUint8   GetElement    ()const final {return ELEMENT_RED;}
 };
 
 

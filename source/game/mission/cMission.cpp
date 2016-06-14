@@ -39,6 +39,11 @@ cMission::~cMission()
     // 
     SAFE_DELETE_ARRAY(m_piInt)
     SAFE_DELETE_ARRAY(m_pfFloat)
+
+    // 
+    g_pEnvironment->SetTargetDirection(ENVIRONMENT_DEFAULT_DIRECTION);
+    g_pEnvironment->SetTargetSide     (ENVIRONMENT_DEFAULT_SIDE);
+    g_pEnvironment->SetTargetSpeed    (ENVIRONMENT_DEFAULT_SPEED);
 }
 
 

@@ -49,7 +49,7 @@ public:
     ENABLE_ID
 
     // move the bullet
-    void Move()override;
+    void Move()final;
 
     // control status
     void Activate  (const coreInt32 iDamage, const coreFloat fSpeed, cShip* pOwner, const coreVector2& vPosition, const coreVector2& vDirection, const coreInt32 iType);
@@ -115,7 +115,7 @@ private:
         std::vector<T> aBulletPool;   // semi-dynamic container with all bullets
 
         explicit sBulletSet(cOutline* pOutline)noexcept;
-        ~sBulletSet()override;
+        ~sBulletSet()final;
     };
 
 
@@ -160,15 +160,15 @@ public:
     ASSIGN_ID(1, "Ray")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(2.5f,2.5f,2.5f));}
+    inline void ResetProperties() {this->SetSize(coreVector3(3.4f,3.4f,3.4f));}
 
     // change default color
-    inline cRayBullet* MakeYellow() {this->_MakeYellow(0.9f); return this;}
+    inline cRayBullet* MakeYellow() {this->_MakeYellow(1.0f); return this;}
     inline cRayBullet* MakeOrange() {this->_MakeOrange(1.0f); return this;}
-    inline cRayBullet* MakeRed   () {return this;}
+    inline cRayBullet* MakeRed   () {this->_MakeRed   (1.0f); return this;}
     inline cRayBullet* MakePurple() {this->_MakePurple(1.0f); return this;}
-    inline cRayBullet* MakeBlue  () {return this;}
-    inline cRayBullet* MakeGreen () {return this;}
+    inline cRayBullet* MakeBlue  () {this->_MakeBlue  (1.0f); return this;}
+    inline cRayBullet* MakeGreen () {this->_MakeGreen (1.0f); return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
@@ -178,7 +178,7 @@ public:
 
 private:
     // execute own routines
-    void __MoveOwn()override;
+    void __MoveOwn()final;
 };
 
 
@@ -211,7 +211,7 @@ public:
 
 private:
     // execute own routines
-    void __MoveOwn()override;
+    void __MoveOwn()final;
 };
 
 
@@ -244,8 +244,8 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn()override;
-    void __MoveOwn  ()override;
+    void __ImpactOwn()final;
+    void __MoveOwn  ()final;
 };
 
 
@@ -278,8 +278,8 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn()override;
-    void __MoveOwn  ()override;
+    void __ImpactOwn()final;
+    void __MoveOwn  ()final;
 };
 
 
@@ -312,8 +312,8 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn()override;
-    void __MoveOwn  ()override;
+    void __ImpactOwn()final;
+    void __MoveOwn  ()final;
 };
 
 
@@ -351,7 +351,7 @@ public:
 
 private:
     // execute own routines
-    void __MoveOwn()override;
+    void __MoveOwn()final;
 };
 
 
@@ -389,9 +389,9 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn      ()override;
-    void __RenderOwnBefore()override;
-    void __MoveOwn        ()override;
+    void __ImpactOwn      ()final;
+    void __RenderOwnBefore()final;
+    void __MoveOwn        ()final;
 };
 
 
@@ -416,8 +416,8 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn()override;
-    void __MoveOwn  ()override;
+    void __ImpactOwn()final;
+    void __MoveOwn  ()final;
 };
 
 
@@ -463,13 +463,13 @@ template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt
 {
     // get requested bullet set
     sBulletSet<T>* pSet;
-    if(!m_apBulletSet.count(REF_ID(T::ID)))
+    if(!m_apBulletSet.count(T::ID))
     {
         // create new bullet set
         pSet = new sBulletSet<T>(&m_Outline);
-        m_apBulletSet.emplace(REF_ID(T::ID), pSet);
+        m_apBulletSet.emplace(T::ID, pSet);
     }
-    else pSet = s_cast<sBulletSet<T>*>(m_apBulletSet.at(REF_ID(T::ID)));
+    else pSet = s_cast<sBulletSet<T>*>(m_apBulletSet.at(T::ID));
 
     // save current pool size
     const coreUintW iSize = pSet->aBulletPool.size();
@@ -531,10 +531,10 @@ template <typename F> void cBulletManager::ForEachBullet(F&& nFunction)
 // 
 template <typename T> void cBulletManager::PrefetchBullet()
 {
-    if(!m_apBulletSet.count(REF_ID(T::ID)))
+    if(!m_apBulletSet.count(T::ID))
     {
         // 
-        m_apBulletSet.emplace(REF_ID(T::ID), new sBulletSet<T>(&m_Outline));
+        m_apBulletSet.emplace(T::ID, new sBulletSet<T>(&m_Outline));
     }
 }
 

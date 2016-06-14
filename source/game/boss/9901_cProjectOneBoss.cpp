@@ -60,7 +60,7 @@ void cProjectOneBoss::__MoveOwn()
             this->DefaultMoveLerp(coreVector2(0.0f,2.0f), coreVector2(0.0f,0.8f), fTime);
 
             // 
-            if(PHASE_SUB(0.85f))
+            if(PHASE_TIME_POINT(0.85f))
             {
                 g_pGame->GetMission()->SetCurBoss(this);
                 g_pGame->GetInterface()->ShowBoss(this);
@@ -76,7 +76,7 @@ void cProjectOneBoss::__MoveOwn()
     // 
     else if(m_iPhase == 1u)
     {
-        PHASE_CONTROL_TICKER(0u, 0u, 2.0f)
+        PHASE_CONTROL_PAUSE(0u, 2.0f)
         {
             m_iPhase = 10u;
         });

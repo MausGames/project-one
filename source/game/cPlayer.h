@@ -66,7 +66,7 @@ private:
 
 public:
     cPlayer()noexcept;
-    ~cPlayer()override;
+    ~cPlayer()final;
 
     ENABLE_COPY(cPlayer)
 
@@ -75,8 +75,8 @@ public:
     void EquipWeapon(const coreUintW iIndex, const coreInt32 iID);
 
     // render and move the player
-    void Render()override;
-    void Move  ()override;
+    void Render()final;
+    void Move  ()final;
 
     // reduce current health
     void TakeDamage(const coreInt32 iDamage, const coreUint8 iElement);

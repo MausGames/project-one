@@ -15,6 +15,7 @@ cViridoMission::cViridoMission()noexcept
 : m_Ball         (VIRIDO_BALLS)
 , m_BallTrail    (VIRIDO_BALLS * VIRIDO_TRAILS)
 , m_apOwner      {}
+, m_iStickyState (0u)
 , m_iBounceState (0u)
 , m_bBounceReal  (false)
 , m_fAnimation   (0.0f)
@@ -102,7 +103,7 @@ void cViridoMission::__SetupOwn()
     {
         if(STAGE_BEGINNING)
         {
-            g_pEnvironment->ChangeBackground(-REF_ID(cGrassBackground::ID), ENVIRONMENT_MIX_FADE, 1.0f);
+            g_pEnvironment->ChangeBackground(-cGrassBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);
             g_pEnvironment->GetBackground()->GetOutdoor()->SetHeightOffset(-24.5f);
             g_pEnvironment->GetBackground()->GetOutdoor()->SetHeightFactor(0.0f);
             g_pEnvironment->GetBackground()->GetOutdoor()->SetHeightOffset(-13.83f);
@@ -115,6 +116,8 @@ void cViridoMission::__SetupOwn()
             g_pEnvironment->GetBackground()->SetAirDensity   (0u, 0.0f);
 
             g_pEnvironment->SetTargetSpeed  (5.0f);
+
+            g_pGame->GetInterface()->ShowMission(this);
 
             g_pGame->StartIntro();
         }
@@ -148,7 +151,7 @@ void cViridoMission::__SetupOwn()
 
             STAGE_REMOVE_AREA(pEnemy)
 
-            if(fLifeTime >= 0.0f)
+            if(STAGE_LIFETIME_AFTER(0.0f))
             {
                 if(avDir[i].IsNull()) avDir[i] = pEnemy->AimAtPlayer();
 
@@ -196,7 +199,6 @@ void cViridoMission::__SetupOwn()
 
     // ################################################################
     // 
-    STAGE_START_HERE
     STAGE_MAIN
     {
         // 
@@ -248,26 +250,34 @@ void cViridoMission::__SetupOwn()
 
     // ################################################################
     // 
-    //STAGE_MAIN
-    //{
-    //    if(STAGE_SUB(0.0f))
-    //    {
-    //        // 
-    //        for(coreUintW i = 0u; i < VIRIDO_SCOUTS; ++i)
-    //            m_aScout[i].SetCollisionModifier(coreVector3(1.2f,1.2f,1.5f)); // TODO # make quadratic! 
-    //
-    //
-    //        m_Warrior.SetSize(m_Warrior.GetSize() * 1.2f);
-    //
-    //
-    //        // 
-    //        m_Vaus.Resurrect(coreVector2(0.0f,-2.0f) * FOREGROUND_AREA, coreVector2(0.0f,1.0f));
-    //    }
-    //
-    //    // 
-    //    if(g_pGame->GetEnemyList()->empty())
-    //        STAGE_FINISH_NOW
-    //});
+    STAGE_START_HERE
+    STAGE_MAIN
+    {
+        UNUSED STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 16u) 
+        {
+            STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
+            {
+                pEnemy->Configure(5, COLOR_SHIP_BLUE);
+            });
+        });
+
+        if(STAGE_BEGINNING)
+        {
+            // 
+            //for(coreUintW i = 0u; i < VIRIDO_SCOUTS; ++i)
+            //    m_aScout[i].SetCollisionModifier(coreVector3(1.2f,1.2f,1.5f)); // TODO # make quadratic!  
+            //
+            //
+            //m_Warrior.SetSize(m_Warrior.GetSize() * 1.2f);
+
+            // 
+            m_Vaus.Resurrect(coreVector2(0.0f,-2.0f) * FOREGROUND_AREA, coreVector2(0.0f,1.0f));
+        }
+
+        // 
+        if(CONTAINS_FLAG(m_Vaus.GetStatus(), ENEMY_STATUS_DEAD))
+            STAGE_FINISH_NOW
+    });
 }
 
 
@@ -390,6 +400,80 @@ void cViridoMission::__MoveOwnAfter()
     }
 
     // 
+    m_iBounceState = 0u;
+    STATIC_ASSERT(VIRIDO_PADDLES <= sizeof(m_iBounceState)*8u)
+
+    // 
+    if(!CONTAINS_BIT(m_iStickyState, 1u))
+    {
+        // 
+        Core::Manager::Object->TestCollision(TYPE_OBJECT(3), TYPE_OBJECT(2), [&](coreObject3D* OUTPUT pPaddle, coreObject3D* OUTPUT pBall, const coreBool bFirstHit)
+        {
+            // 
+            if(coreVector2::Dot(pPaddle->GetDirection().xy(), pBall->GetDirection().xy()) >= 0.0f)
+                return;
+
+            // 
+            for(coreUintW i = 0u; i < VIRIDO_PADDLES; ++i)
+            {
+                if(pPaddle == &m_aPaddle[i])
+                {
+                    const coreObject3D& oPaddleSphere = m_aPaddleSphere[i];
+
+                    // 
+                    if(coreObjectManager::TestCollision(&oPaddleSphere, pBall))
+                    {
+                        const coreVector2 vBallPos   = pBall  ->GetPosition ().xy();
+                        const coreVector2 vBallDir   = pBall  ->GetDirection().xy();
+                        const coreVector2 vPaddleDir = pPaddle->GetDirection().xy();
+
+                        if(m_bBounceReal)
+                        {
+                            // 
+                            coreVector2 vNewDir = coreVector2::Reflect(vBallDir, (vBallPos - oPaddleSphere.GetPosition().xy()).Normalize());
+                            if(ABS(vPaddleDir.x) > ABS(vPaddleDir.y)) vNewDir.x = MAX(ABS(vNewDir.x), 0.35f) * vPaddleDir.x;
+                                                                 else vNewDir.y = MAX(ABS(vNewDir.y), 0.35f) * vPaddleDir.y;
+
+                            // 
+                            pBall->SetDirection(coreVector3(vNewDir.Normalized(), 0.0f));
+                        }
+                        else
+                        {
+                            // 
+                            coreVector2 vNewDir = vBallDir;
+                            if(ABS(vPaddleDir.x) > ABS(vPaddleDir.y)) vNewDir.x = ABS(vNewDir.x) * vPaddleDir.x;
+                                                                 else vNewDir.y = ABS(vNewDir.y) * vPaddleDir.y;
+
+                            // 
+                            pBall->SetDirection(coreVector3(vNewDir, 0.0f));
+                        }
+
+                        // 
+                        ADD_BIT(m_iBounceState, i)
+                        if(m_iStickyState) ADD_BIT(m_iStickyState, 1u)
+
+                        // 
+                        nEffectFunc(vBallPos + vBallDir * pBall->GetSize().x);
+                    }
+                    break;
+                }
+            }
+        });
+    }
+
+    // 
+    if(CONTAINS_BIT(m_iStickyState, 1u))
+    {
+        // only between first ball and first paddle
+        coreObject3D& oBall   = m_aBallRaw[0];
+        coreObject3D& oPaddle = m_aPaddle [0];
+
+        // 
+        oBall.SetPosition(oPaddle.GetPosition() + oPaddle.GetDirection() * (oPaddle.GetCollisionRange().y * 2.0f - 0.3f));
+        oBall.Move();
+    }
+
+    // 
     Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_OBJECT(2), [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBall, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
@@ -403,61 +487,12 @@ void cViridoMission::__MoveOwnAfter()
     });
 
     // 
-    m_iBounceState = 0u;
-    STATIC_ASSERT(VIRIDO_PADDLES <= sizeof(m_iBounceState)*8u)
-
-    // 
-    Core::Manager::Object->TestCollision(TYPE_OBJECT(3), TYPE_OBJECT(2), [&](coreObject3D* OUTPUT pPaddle, coreObject3D* OUTPUT pBall, const coreBool bFirstHit)
-    {
-        // 
-        if(coreVector2::Dot(pPaddle->GetDirection().xy(), pBall->GetDirection().xy()) >= 0.0f)
-            return;
-
-        // 
-        for(coreUintW i = 0u; i < VIRIDO_PADDLES; ++i)
-        {
-            if(pPaddle == &m_aPaddle[i])
-            {
-                const coreObject3D& oPaddleSphere = m_aPaddleSphere[i];
-
-                // 
-                if(coreObjectManager::TestCollision(&oPaddleSphere, pBall))
-                {
-                    const coreVector2 vBallPos = pBall->GetPosition ().xy();
-                    const coreVector2 vBallDir = pBall->GetDirection().xy();
-
-                    if(m_bBounceReal)
-                    {
-                        // 
-                        coreVector2 vNewDir = coreVector2::Reflect(vBallDir, (vBallPos - oPaddleSphere.GetPosition().xy()).Normalize());
-                        vNewDir.y = MAX(ABS(vNewDir.y), 0.35f) * pPaddle->GetDirection().y;
-                        pBall->SetDirection(coreVector3(vNewDir.Normalized(), 0.0f));
-                    }
-                    else
-                    {
-                        // 
-                        const coreVector2 vNewDir = coreVector2(vBallDir.x, ABS(vBallDir.y) * SIGN(pPaddle->GetDirection().y));
-                        pBall->SetDirection(coreVector3(vNewDir, 0.0f));
-                    }
-
-                    // 
-                    ADD_BIT(m_iBounceState, i)
-
-                    // 
-                    nEffectFunc(vBallPos + vBallDir * pBall->GetSize().x);
-                }
-                break;
-            }
-        }
-    });
-
-    // 
     if(!CONTAINS_FLAG(m_Vaus.GetStatus(), ENEMY_STATUS_DEAD))
     {
         cEnemy*   pCurEnemy = NULL;
         coreFloat fCurLenSq = FLT_MAX;
 
-        // (# only the first ball will be active in this mission stage) 
+        // only first ball will be active in this mission stage
         coreObject3D& oBall = m_aBallRaw[0];
 
         // 

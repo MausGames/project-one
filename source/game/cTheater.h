@@ -26,7 +26,7 @@ class cTheater final
 {
 private:
     // 
-    struct sMute
+    struct sMute final
     {
         cEnemy*     pEnemy;       // 
         coreVector2 vDirection;   // 
@@ -86,7 +86,7 @@ template <typename T> RETURN_RESTRICT T* cTheater::AddMute(const coreVector3& vP
 {
     // 
     T* pEnemy = new T();
-    pEnemy->AddStatus  (ENEMY_STATUS_MUTE);
+    pEnemy->AddStatus  (ENEMY_STATUS_SINGLE);
     pEnemy->Resurrect  (vPosition.xy(), vDirection);
     pEnemy->SetPosition(vPosition);
 

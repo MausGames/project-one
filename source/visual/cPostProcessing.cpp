@@ -16,6 +16,7 @@ cPostProcessing::cPostProcessing()noexcept
     // load post-processing shader-programs
     m_pProgramSimple    = Core::Manager::Resource->Get<coreProgram>("full_post_program");
     m_pProgramDistorted = Core::Manager::Resource->Get<coreProgram>("full_post_distorted_program");
+    m_pProgramDebug     = Core::Manager::Resource->Get<coreProgram>("full_post_debug_program");
     this->Recompile();
 
     // set object properties
@@ -36,6 +37,10 @@ cPostProcessing::cPostProcessing()noexcept
 
     // reset side-object opacity
     this->SetSideOpacity(0.0f);
+
+    // 
+    this->SetSaturation(1.0f);
+    this->SetValue     (1.0f);
 }
 
 
@@ -43,12 +48,15 @@ cPostProcessing::cPostProcessing()noexcept
 // apply post-processing
 void cPostProcessing::Apply()
 {
+    const coreBool bScreenshot = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(PRINTSCREEN), CORE_INPUT_PRESS);
+
     // switch back to default frame buffer (again)
     coreFrameBuffer::EndDraw();
 
-    // select between distorted or simple shader-program
-    if(g_pDistortion->IsActive()) this->DefineProgram(m_pProgramDistorted);
-                             else this->DefineProgram(m_pProgramSimple);
+    // select between debug, distorted or simple shader-program
+    if(Core::Debug->IsEnabled() && !bScreenshot) this->DefineProgram(m_pProgramDebug);
+              else if(g_pDistortion->IsActive()) this->DefineProgram(m_pProgramDistorted);
+                                            else this->DefineProgram(m_pProgramSimple);
 
     // bind all required frame buffers
     this->DefineTexture(POST_TEXTURE_UNIT_ENVIRONMENT, g_pEnvironment->GetFrameBuffer()->GetColorTarget(0u).pTexture);
@@ -69,15 +77,13 @@ void cPostProcessing::Apply()
     glEnable(GL_BLEND);
 
     // render watermark
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(PRINTSCREEN), CORE_INPUT_PRESS))
-        m_Watermark.Render();
+    if(bScreenshot) m_Watermark.Render();
 
-    // invalidate all frame buffers (# not cGlow, because of incremental rendering)
-    if(g_pMenu->IsPaused())
+    // invalidate all frame buffers (# not cGlow and cDistortion, because of incremental rendering and pause)
+    if(!g_pMenu->IsPaused())
     {
         g_pEnvironment->GetFrameBuffer()->GetColorTarget(0u).pTexture->Invalidate(0u);
         g_pForeground ->GetFrameBuffer()->GetColorTarget(0u).pTexture->Invalidate(0u);
-        g_pDistortion ->GetFrameBuffer()->GetColorTarget(0u).pTexture->Invalidate(0u);
     }
     this->DefineTexture(POST_TEXTURE_UNIT_ENVIRONMENT, NULL);
     this->DefineTexture(POST_TEXTURE_UNIT_FOREGROUND,  NULL);
@@ -93,16 +99,18 @@ void cPostProcessing::Recompile()
 #if !defined(CONFIG_FORCE)
 
     const coreChar* pcConfig1 =               g_CurConfig.Graphics.iGlow       ? SHADER_GLOW       : "";
-    const coreChar* pcConfig2 = PRINT("%s%s", g_CurConfig.Graphics.iGlow       ? SHADER_GLOW       : "",
-                                              g_CurConfig.Graphics.iDistortion ? SHADER_DISTORTION : "");
+    const coreChar* pcConfig2 = PRINT("%s%s", g_CurConfig.Graphics.iDistortion ? SHADER_DISTORTION : "", pcConfig1);
+    const coreChar* pcConfig3 = PRINT("%s%s",                                    SHADER_DEBUG,           pcConfig2);
 
     // change configuration of post-processing shaders
     s_cast<coreShader*>(Core::Manager::Resource->Get<coreShader>("full_post.frag")          ->GetResource())->SetCustomCode(pcConfig1);
     s_cast<coreShader*>(Core::Manager::Resource->Get<coreShader>("full_post_distorted.frag")->GetResource())->SetCustomCode(pcConfig2);
+    s_cast<coreShader*>(Core::Manager::Resource->Get<coreShader>("full_post_debug.frag")    ->GetResource())->SetCustomCode(pcConfig3);
 
     // recompile and relink
     m_pProgramSimple   .GetHandle()->Reload();
     m_pProgramDistorted.GetHandle()->Reload();
+    m_pProgramDebug    .GetHandle()->Reload();
 
     // finish now
     coreSync::Finish();

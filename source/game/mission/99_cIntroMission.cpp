@@ -39,7 +39,7 @@ void cIntroMission::__SetupOwn()
     {
         if(STAGE_BEGINNING)
         {
-            g_pEnvironment->ChangeBackground(REF_ID(cNoBackground::ID), ENVIRONMENT_MIX_FADE, 1.0f);
+            g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);
         }
 
         STAGE_FINISH_AFTER(1.5f)
@@ -56,7 +56,7 @@ void cIntroMission::__SetupOwn()
 
         //if(!g_pGame->GetInterface()->IsStoryActive(2.5f))
 
-            g_pEnvironment->ChangeBackground(REF_ID(cCloudBackground::ID), ENVIRONMENT_MIX_CURTAIN, 1.0f, coreVector2(1.0f,0.0f));
+            g_pEnvironment->ChangeBackground(cCloudBackground::ID, ENVIRONMENT_MIX_CURTAIN, 1.0f, coreVector2(1.0f,0.0f));
             g_pEnvironment->SetTargetSpeed  (5.0f);
 
          //   g_pPostProcessing->SetSaturation(0.0f);
@@ -91,7 +91,7 @@ void cIntroMission::__SetupOwn()
         {
             STAGE_LIFETIME(pEnemy, 0.9f, -0.2f * I_TO_F(i))
 
-            STAGE_REMOVE(pEnemy, pPath1->GetTotalDistance())
+            STAGE_REMOVE_LIFETIME(pEnemy, pPath1->GetTotalDistance())
 
             const coreVector2 vFactor = coreVector2((i & 0x02u) ? -1.0f : 1.0f, -1.0f);
             const coreVector2 vOffset = coreVector2((i & 0x01u) ? -0.1f : 0.1f,  0.0f);
@@ -126,7 +126,7 @@ void cIntroMission::__SetupOwn()
         {
             STAGE_LIFETIME(pEnemy, 0.75f, -0.2f * I_TO_F(i))
 
-            STAGE_REMOVE(pEnemy, pPath1->GetTotalDistance())
+            STAGE_REMOVE_LIFETIME(pEnemy, pPath1->GetTotalDistance())
 
             const coreVector2 vFactor = coreVector2(1.0f,1.0f);
             const coreVector2 vOffset = coreVector2(0.025f * I_TO_F(MIN(i + 8u, pSquad1->GetNumEnemies() - 1u - i + 4u)) * ((i & 0x04u) ? -1.0f : 1.0f), 0.0f);
@@ -186,7 +186,7 @@ void cIntroMission::__SetupOwn()
 
             //STAGE_DELAY_ADD(fStop, 5.0f)
             {
-                STAGE_REMOVE(pEnemy, pPath1->GetTotalDistance())
+                STAGE_REMOVE_LIFETIME(pEnemy, pPath1->GetTotalDistance())
 
                 const coreVector2 vFactor = coreVector2(1.0f,1.0f);
                 const coreVector2 vOffset = coreVector2(i ? -0.5f : 0.5f, 0.0f);
@@ -215,7 +215,7 @@ void cIntroMission::__SetupOwn()
         {
             STAGE_LIFETIME(pEnemy, 0.75f, -0.2f * I_TO_F(i) - 1.5f)
 
-            STAGE_REMOVE(pEnemy, pPath2->GetTotalDistance())
+            STAGE_REMOVE_LIFETIME(pEnemy, pPath2->GetTotalDistance())
 
             const coreVector2 vFactor = coreVector2(1.0f,1.0f);
             const coreVector2 vOffset = coreVector2((i & 0x01u) ? -0.15f : 0.15f, 0.0f);
@@ -251,7 +251,7 @@ void cIntroMission::__SetupOwn()
         {
             STAGE_LIFETIME(pEnemy, 0.6f, -0.1f * I_TO_F(i))
 
-            STAGE_REMOVE(pEnemy, pPath1->GetTotalDistance())
+            STAGE_REMOVE_LIFETIME(pEnemy, pPath1->GetTotalDistance())
 
             const coreVector2 vFactor = coreVector2(1.0f,1.0f);
             const coreVector2 vOffset = coreVector2((-0.1f * I_TO_F(i % 4u) - 0.1f + ((i >= 8u && i < 12) ? 0.2f : 0.0f)) * (((i / 4u) & 0x01u) ? -1.2f : 1.2f), 0.0f);
@@ -294,7 +294,7 @@ void cIntroMission::__SetupOwn()
         {
             STAGE_LIFETIME(pEnemy, 0.75f, -0.4f * I_TO_F(i >> 1u) + ((i & 0x01u) ? -0.15f : 0.0f))
 
-            STAGE_REMOVE(pEnemy, pPath1->GetTotalDistance())
+            STAGE_REMOVE_LIFETIME(pEnemy, pPath1->GetTotalDistance())
 
             coreFloat x = (aiLane[i >> 1u] * 0.667f - 1.0f) * 0.5f;
             if(i & 0x01u) x += SIGN(x) * -0.1f;
@@ -333,7 +333,7 @@ void cIntroMission::__SetupOwn()
         {
             STAGE_LIFETIME(pEnemy, 0.8f, -0.2f * I_TO_F(i))
 
-            STAGE_REMOVE(pEnemy, pPath1->GetTotalDistance())
+            STAGE_REMOVE_LIFETIME(pEnemy, pPath1->GetTotalDistance())
 
             const coreVector2 vFactor = coreVector2(((i > 5u) & 0x01u) ? -1.0f : 1.0f, 1.0f);
             const coreVector2 vOffset = coreVector2(0.0f, -0.1f * I_TO_F(i & 0x03u));

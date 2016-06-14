@@ -41,7 +41,7 @@
 // TODO: create timer and int-value as tick-multiplier for sustained damage
 // TODO: remove magic numbers (regularly)
 // TODO: test framerate-lock for g-sync stuff
-// TODO: clean up shader modifiers and shaders
+// TODO: clean up shader modifiers and shaders, also try to look at unused uniforms, varyings and attributes (shadow-matrix is used in ship-shader !?)
 // TODO: use single-channel texture where possible
 
 
@@ -73,7 +73,7 @@
 #define COLOR_MENU_BRONZE    (coreVector3(0.925f, 0.663f, 0.259f))
 #define COLOR_MENU_SILVER    (coreVector3(0.855f, 0.855f, 0.878f))
 #define COLOR_MENU_GOLD      (coreVector3(1.000f, 0.859f, 0.000f))
-#define COLOR_ENERGY_YELLOW  (coreVector3(0.900f, 0.800f, 0.380f))
+#define COLOR_ENERGY_YELLOW  (coreVector3(0.950f, 0.800f, 0.280f)) // (coreVector3(0.900f, 0.800f, 0.380f))
 #define COLOR_ENERGY_ORANGE  (coreVector3(1.000f, 0.400f, 0.000f))
 #define COLOR_ENERGY_RED     (coreVector3(1.000f, 0.275f, 0.275f))
 #define COLOR_ENERGY_PURPLE  (coreVector3(0.450f, 0.200f, 1.000f))
@@ -99,6 +99,7 @@
 #define SHADER_SHADOW(x)     "#define _P1_SHADOW_     (" #x ") \n"   // outdoor, object_ground
 #define SHADER_GLOW          "#define _P1_GLOW_       (1) \n"        // post, outdoor, object_ship
 #define SHADER_DISTORTION    "#define _P1_DISTORTION_ (1) \n"        // post
+#define SHADER_DEBUG         "#define _P1_DEBUG_      (1) \n"        // post
 #define SHADER_SINGLE        "#define _P1_SINGLE_     (1) \n"        // decal
 #define SHADER_LIGHT         "#define _P1_LIGHT_      (1) \n"        // outdoor, decal
 #define SHADER_DARKNESS      "#define _P1_DARKNESS_   (1) \n"        // object_ship
@@ -128,14 +129,13 @@
 #define ELEMENT_DARK         (8u)   // 
 
 // sub-class and object ID macros
-#define ENABLE_ID                                              \
-    virtual const coreInt32 GetID  ()const = 0;                \
+#define ENABLE_ID                                           \
+    virtual const coreInt32 GetID  ()const = 0;             \
     virtual const coreChar* GetName()const = 0;
-#define ASSIGN_ID(i,n)                                         \
-    static const coreInt32 ID = i;                             \
-    inline const coreInt32 GetID  ()const override {return i;} \
-    inline const coreChar* GetName()const override {return n;}
-#define REF_ID(i) (s_cast<coreInt32>(i))
+#define ASSIGN_ID(i,n)                                      \
+    static const coreInt32 ID = i;                          \
+    inline const coreInt32 GetID  ()const final {return i;} \
+    inline const coreChar* GetName()const final {return n;}
 
 // angle difference helper-function
 inline FUNC_CONST coreFloat AngleDiff(const coreFloat x, const coreFloat y)
@@ -147,7 +147,7 @@ inline FUNC_CONST coreFloat AngleDiff(const coreFloat x, const coreFloat y)
 }
 
 // 
-inline FUNC_CONST coreFloat LerpBreakRev(const coreFloat& x, const coreFloat& y, const coreFloat s)
+inline FUNC_CONST coreFloat LerpBreakRev(const coreFloat x, const coreFloat y, const coreFloat s)
 {
     return LERPB(y, x, 1.0f - s);
 }

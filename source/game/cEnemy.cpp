@@ -124,15 +124,15 @@ void cEnemy::Resurrect(const coreVector2& vPosition, const coreVector2& vDirecti
     REMOVE_FLAG(m_iStatus, ENEMY_STATUS_DEAD)
 
     // 
-    const coreBool bBoss = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_BOSS);
-    const coreBool bMute = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_MUTE);
+    const coreBool bBoss   = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_BOSS);
+    const coreBool bSingle = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_SINGLE);
 
     // 
     m_fLifeTime       = 0.0f;
     m_fLifeTimeBefore = 0.0f;
 
     // add ship to the game
-    cShip::_Resurrect(bBoss || bMute, vPosition, vDirection, bMute ? 0 : TYPE_ENEMY);
+    cShip::_Resurrect(bSingle, vPosition, vDirection, (!bBoss && bSingle) ? 0 : TYPE_ENEMY);
 
     // 
     this->__ResurrectOwn();
@@ -148,11 +148,14 @@ void cEnemy::Kill(const coreBool bAnimated)
     ADD_FLAG(m_iStatus, ENEMY_STATUS_DEAD)
 
     // 
-    const coreBool bBoss = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_BOSS);
-    const coreBool bMute = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_MUTE);
+    const coreBool bBoss   = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_BOSS);
+    const coreBool bSingle = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_SINGLE);
 
     // 
     g_pGame->GetShieldManager()->UnbindEnemy(this);
+
+    // 
+    if(bBoss) g_pGame->GetBulletManagerEnemy()->ClearBullets(bAnimated);
 
     // 
     if(bAnimated && this->IsEnabled(CORE_OBJECT_ENABLE_RENDER))
@@ -162,7 +165,7 @@ void cEnemy::Kill(const coreBool bAnimated)
     }
 
     // remove ship from the game
-    cShip::_Kill(bBoss || bMute, bAnimated);
+    cShip::_Kill(bSingle, bAnimated);
 
     // 
     this->__KillOwn(bAnimated);
@@ -732,4 +735,28 @@ void cCinderEnemy::__MoveOwn()
 
     // rotate around the rotating direction axis
     this->DefaultMultiate(m_fAngle);
+}
+
+
+// ****************************************************************
+// constructor
+cCustomEnemy::cCustomEnemy()noexcept
+{
+    // 
+    this->AddStatus(ENEMY_STATUS_SINGLE);
+
+    // 
+    g_pGame->GetEnemyManager()->BindEnemy(this);
+}
+
+
+// ****************************************************************
+// destructor
+cCustomEnemy::~cCustomEnemy()
+{
+    // 
+    this->Kill(false);
+
+    // 
+    g_pGame->GetEnemyManager()->UnbindEnemy(this);
 }

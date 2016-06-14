@@ -36,7 +36,7 @@ class cInterface final
 {
 private:
     // player view structure
-    struct sPlayerView
+    struct sPlayerView final
     {
         coreObject2D m_aHealthBar  [2];   // player health bar   (0 = background, 1 = foreground)
         coreLabel    m_aHealthValue[2];   // player health value (0 = armor text, 1 = actual value)

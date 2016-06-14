@@ -47,8 +47,8 @@ public:
     DISABLE_COPY(cWater)
 
     // render and move the water-surface
-    virtual void Render(coreFrameBuffer* pBackground);
-    virtual void Move()override;
+    void Render(coreFrameBuffer* pBackground);
+    void Move()final;
 
     // update water reflection and depth
     void UpdateReflection();
@@ -66,8 +66,8 @@ public:
 
 private:
     // hide default render functions
-    inline void Render(const coreProgramPtr& pProgram)override {ASSERT(false)}
-    inline void Render()override                               {ASSERT(false)}
+    inline void Render(const coreProgramPtr& pProgram)final {ASSERT(false)}
+    inline void Render()final                               {ASSERT(false)}
 };
 
 
@@ -119,8 +119,8 @@ public:
     DISABLE_COPY(cLava)
 
     // render and move the lava-surface
-    void Render()override;
-    void Move  ()override;
+    void Render()final;
+    void Move  ()final;
 
     // set object properties
     inline void SetFlyOffset(const coreFloat fFlyOffset) {m_fFlyOffset = fFlyOffset;}

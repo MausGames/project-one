@@ -206,7 +206,7 @@ cGrassBackground::cGrassBackground()noexcept
                     // set object properties
                     pObject->SetPosition(coreVector3(vPosition, fHeight));
                     pObject->SetSize    (coreVector3(2.1f,0.0f,1.0f));
-                    pObject->SetColor3  (coreVector3(1.0f * (0.8f + 0.2f * fHeight/30.0f), 1.0f, 1.0f));
+                    pObject->SetColor3  (coreVector3(1.0f,1.0f,1.0f) * (0.8f + 0.2f * fHeight/30.0f));
                     pObject->SetTexSize (coreVector2(0.5f,0.85f));
 
                     // add object to the list

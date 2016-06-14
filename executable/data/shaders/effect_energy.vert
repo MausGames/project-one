@@ -19,27 +19,26 @@ void VertexMain()
     // transform position (and make flat)
     gl_Position = u_m4ViewProj * vec4(coreObject3DTransform(vec3(a_v3RawPosition.xy, 0.0)), 1.0);
 
-    // orthographic view (for uniform shading)
-    const vec3 v3ViewDir = vec3(0.0,0.0,1.0);
+    // calculate light and color intensity
+    vec3  v3NewNormal = coreQuatApply(u_v4Rotation, a_v3RawNormal);
+    float v1Base      = abs(v3NewNormal.z);
     
 #else
 
-    // transform view direction and position (with slight z-offset to reduce fighting)
+    // transform position (with slight z-offset to reduce fighting)
     vec4 v4NewPosition = vec4(coreObject3DTransformRaw(), 1.0);
     gl_Position        = u_m4ViewProj * v4NewPosition;
     gl_Position.z     -= 0.01 * gl_Position.w;
 
-    // perspective view (for default shading)
-    vec3 v3ViewDir = normalize(u_v3CamPosition - v4NewPosition.xyz);
+    // calculate light and color intensity
+    vec3  v3ViewDir   = normalize(u_v3CamPosition - v4NewPosition.xyz);
+    vec3  v3NewNormal = coreQuatApply(u_v4Rotation, a_v3RawNormal);
+    float v1Base      = dot(vec3(v3ViewDir.xy, abs(v3ViewDir.z)), vec3(v3NewNormal.xy, abs(v3NewNormal.z)));
 
 #endif
 
     // transform texture coordinates
     v_av2TexCoord[0] = coreObject3DTexCoordRaw();
-
-    // calculate light and color intensity
-    vec3  v3NewNormal = coreQuatApply(u_v4Rotation, a_v3RawNormal);
-    float v1Base      = dot(vec3(v3ViewDir.xy, abs(v3ViewDir.z)), vec3(v3NewNormal.xy, abs(v3NewNormal.z)));
 
 #if defined(_P1_SPHERIC_)
 

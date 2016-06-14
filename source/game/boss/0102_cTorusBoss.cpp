@@ -118,9 +118,6 @@ void cTorusBoss::__KillOwn(const coreBool bAnimated)
     }
 
     // 
-    g_pGame->GetBulletManagerEnemy()->ClearBullets(bAnimated);   
-
-    // 
     this->__SetRotaAttack(0, bAnimated);
 
     // 
@@ -194,7 +191,7 @@ void cTorusBoss::__MoveOwn()
             this->DefaultMoveLerp(coreVector2(0.0f,2.0f), coreVector2(0.0f,0.75f), fTime);
 
             // 
-            if(PHASE_SUB(0.85f))
+            if(PHASE_TIME_POINT(0.85f))
             {
                 g_pGame->GetMission()->SetCurBoss(this);
                 g_pGame->GetInterface()->ShowBoss(this);
@@ -210,7 +207,7 @@ void cTorusBoss::__MoveOwn()
     // 
     else if(m_iPhase == 1u)
     {
-        PHASE_CONTROL_TICKER(0u, 0u, 2.0f)
+        PHASE_CONTROL_PAUSE(0u, 2.0f)
         {
             m_iPhase = 10u;
         });
@@ -263,11 +260,11 @@ void cTorusBoss::__MoveOwn()
             const coreFloat fAngle = I_TO_F(iTick) * (m_aiCounter[ROTATION_DIRECTION] ? 12.0f : -12.0f);
 
             // 
-            for(coreUintW i = 4u; i--; )
-            {
-                const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(i) * 90.0f + fAngle));
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.2f, this, this->GetPosition().xy(), vDir)->MakeBlue();
-            }
+            //for(coreUintW i = 4u; i--; )
+            //{
+            //    const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(i) * 90.0f + fAngle));
+            //    g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.2f, this, this->GetPosition().xy(), vDir)->MakeBlue();
+            //}
 
             // 
             g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 5.0f, 1u, COLOR_ENERGY_BLUE);
@@ -289,7 +286,7 @@ void cTorusBoss::__MoveOwn()
     // 
     else if(m_iPhase == 30u)
     {
-        PHASE_CONTROL_TICKER(0u, 0u, 1.0f)
+        PHASE_CONTROL_PAUSE(0u, 1.0f)
         {
             ++m_iPhase;
 
@@ -354,7 +351,7 @@ void cTorusBoss::__MoveOwn()
     // 
     else if(m_iPhase == 33u)
     {
-        PHASE_CONTROL_TICKER(0u, 0u, 1.0f/4.0f)
+        PHASE_CONTROL_PAUSE(0u, 1.0f/4.0f)
         {
             ++m_iPhase;
         });
@@ -425,12 +422,12 @@ void cTorusBoss::__MoveOwn()
     // 
     else if(m_iPhase == 35u)
     {
-        PHASE_CONTROL_TICKER(0u, 0u, 1.0f/4.0f)
+        PHASE_CONTROL_PAUSE(0u, 1.0f/4.0f)
         {
             m_iPhase = (m_aiCounter[BALL_STATUS] < coreInt16(VIRIDO_BALLS)) ? 40u : 14u;
 
             // 
-            this->__SetRotaAttack(0, true);
+            //this->__SetRotaAttack(0, true);
         });
     }
 
@@ -438,7 +435,7 @@ void cTorusBoss::__MoveOwn()
     // 
     else if(m_iPhase == 40u)
     {
-        PHASE_CONTROL_TICKER(0u, 0u, 1.0f)
+        PHASE_CONTROL_PAUSE(0u, 1.0f)
         {
             ++m_iPhase;
 
@@ -455,7 +452,7 @@ void cTorusBoss::__MoveOwn()
     // 
     else if(m_iPhase == 41u)
     {
-        PHASE_CONTROL_TICKER(0u, 0u, 1.0f)
+        PHASE_CONTROL_PAUSE(0u, 1.0f)
         {
             m_iPhase = 14u;
         });

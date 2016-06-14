@@ -289,7 +289,7 @@ static void DebugGame()
     {
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LALT), CORE_INPUT_HOLD))
         {
-            #define __LOAD_GAME(x) {g_pGame = new cGame(false); g_pGame->LoadMission(REF_ID(x)); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f);}
+            #define __LOAD_GAME(x) {g_pGame = new cGame(false); g_pGame->LoadMission(x); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f);}
             if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS)) __LOAD_GAME(cIntroMission ::ID)
             if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2), CORE_INPUT_PRESS)) __LOAD_GAME(cViridoMission::ID)
         }
@@ -310,15 +310,15 @@ static void DebugGame()
     // load background
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LSHIFT), CORE_INPUT_HOLD))
     {
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-REF_ID(cNoBackground     ::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-REF_ID(cGrassBackground  ::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(3), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-REF_ID(cSeaBackground    ::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(4), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-REF_ID(cDesertBackground ::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(5), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-REF_ID(cSpaceBackground  ::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(6), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-REF_ID(cVolcanoBackground::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(7), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-REF_ID(cSnowBackground   ::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(8), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-REF_ID(cMossBackground   ::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(9), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-REF_ID(cCloudBackground  ::ID), ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-cNoBackground     ::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-cGrassBackground  ::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(3), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-cSeaBackground    ::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(4), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-cDesertBackground ::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(5), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-cSpaceBackground  ::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(6), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-cVolcanoBackground::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(7), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-cSnowBackground   ::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(8), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-cMossBackground   ::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(9), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-cCloudBackground  ::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
 
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS))
             Core::System->Quit();
@@ -341,10 +341,10 @@ static void DebugGame()
     {
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LCTRL), CORE_INPUT_HOLD))
         {
-            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS)) g_pGame->GetPlayer(0u)->EquipWeapon(0u, REF_ID(cRayWeapon  ::ID));
-            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2), CORE_INPUT_PRESS)) g_pGame->GetPlayer(0u)->EquipWeapon(0u, REF_ID(cPulseWeapon::ID));
-            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(3), CORE_INPUT_PRESS)) g_pGame->GetPlayer(0u)->EquipWeapon(0u, REF_ID(cWaveWeapon ::ID));
-            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(4), CORE_INPUT_PRESS)) g_pGame->GetPlayer(0u)->EquipWeapon(0u, REF_ID(cTeslaWeapon::ID));
+            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS)) g_pGame->GetPlayer(0u)->EquipWeapon(0u, cRayWeapon  ::ID);
+            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2), CORE_INPUT_PRESS)) g_pGame->GetPlayer(0u)->EquipWeapon(0u, cPulseWeapon::ID);
+            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(3), CORE_INPUT_PRESS)) g_pGame->GetPlayer(0u)->EquipWeapon(0u, cWaveWeapon ::ID);
+            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(4), CORE_INPUT_PRESS)) g_pGame->GetPlayer(0u)->EquipWeapon(0u, cTeslaWeapon::ID);
         }
     }
 
@@ -410,6 +410,20 @@ static void DebugGame()
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(H), CORE_INPUT_HOLD))
     {
         fFactor = MAX(fFactor - 0.3f * Core::System->GetTime(), 0.0f);
+    }
+
+    static coreBool bInvincible = true;
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(Q), CORE_INPUT_PRESS))
+    {
+        bInvincible = !bInvincible;
+    }
+    if(bInvincible && g_pGame)
+    {
+        g_pGame->ForEachPlayer([](cPlayer* OUTPUT pPlayer, const coreUintW i)
+        {
+            const coreInt32 iHeal = pPlayer->GetCurHealth() - pPlayer->GetMaxHealth();
+            if(iHeal) pPlayer->TakeDamage(iHeal, ELEMENT_NEUTRAL);
+        });
     }
 
     //if((fFactor != 1.0f) && !g_pEnvironment->GetBackground()->GetGroundObjectList()->empty())

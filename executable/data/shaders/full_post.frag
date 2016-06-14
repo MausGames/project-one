@@ -36,10 +36,33 @@ void FragmentMain()
 #endif
 
     // draw blend between all textures (glow only on environment for high contrast)
-    vec3 v3Blend = mix(v3Environment + v3Glow, v4Foreground.rgb / max(v4Foreground.a, 0.001), v4Foreground.a);
+    vec3 v3Blend = mix(v3Environment * u_v4Color.g + v3Glow, v4Foreground.rgb / max(v4Foreground.a, 0.001), v4Foreground.a);
     
     // 
     vec3 v3Color = pow(v3Blend, vec3(1.05));
     vec3 v3Gray  = vec3(dot(v3Color, vec3(0.212671, 0.715160, 0.072169)));
-    gl_FragColor = vec4(mix(v3Color, v3Gray, 0.06), 1.0);
+    gl_FragColor = vec4(mix(v3Color, v3Gray, u_v4Color.r), 1.0);
+    
+    //if(v3Gray.r != 0.0)
+    //{
+    //    vec3 v3Sepia = vec3(dot(v3Color, vec3(0.299, 0.587, 0.114))) + vec3(0.191, -0.054, -0.221);
+    //    gl_FragColor = vec4(mix(v3Color, v3Sepia, u_v4Color.r), 1.0);
+    //    
+    //    //gl_FragColor = vec4(mix(v3Color, v3Gray, 0.7), 1.0);
+    //}
+    //gl_FragColor = vec4(mix(v3Color, v3Gray, step(6.0, dot(v3Color, vec3(1.0, 10.0, 10.0)))), 1.0);
+   
+#if defined(_P1_DEBUG_)
+
+    #define DEBUG_LINE(a,v,p) if((v_av2TexCoord[0].a > (v-0.001)) && (v_av2TexCoord[0].a < (v+0.001))) gl_FragColor.rgb = mix(vec3(0.0,1.0,0.0), gl_FragColor.rgb, p);
+
+         DEBUG_LINE(x, 0.25,  0.6) else DEBUG_LINE(y, 0.25,  0.6)
+    else DEBUG_LINE(x, 0.50,  0.6) else DEBUG_LINE(y, 0.50,  0.6)
+    else DEBUG_LINE(x, 0.75,  0.6) else DEBUG_LINE(y, 0.75,  0.6)
+    else DEBUG_LINE(x, 0.125, 0.8) else DEBUG_LINE(y, 0.125, 0.8)
+    else DEBUG_LINE(x, 0.375, 0.8) else DEBUG_LINE(y, 0.375, 0.8)
+    else DEBUG_LINE(x, 0.625, 0.8) else DEBUG_LINE(y, 0.625, 0.8)
+    else DEBUG_LINE(x, 0.875, 0.8) else DEBUG_LINE(y, 0.875, 0.8)
+
+#endif
 }

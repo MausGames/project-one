@@ -50,7 +50,7 @@ STATIC_ASSERT(INPUT_BUTTONS <= sizeof(coreUint8)*8u)
 
 // ****************************************************************
 // configuration variables
-struct cConfig
+struct cConfig final
 {
     struct
     {
@@ -96,7 +96,7 @@ struct cConfig
     Game;
 };
 
-struct cInput
+struct cInput final
 {
     coreVector2 vMove;            // movement input
     coreUint8   iButtonPress;     // button press (bitfields)

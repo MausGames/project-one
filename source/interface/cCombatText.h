@@ -22,7 +22,7 @@ class cCombatText final
 {
 private:
     // text data structure
-    struct sData
+    struct sData final
     {
         std::string sText;       // text to display
         coreVector2 vPosition;   // screen position (center)
@@ -53,9 +53,9 @@ public:
 
     // add new combat text
     void        AddText  (const coreChar*  pcText, const coreVector3& vPosition, const coreVector3& vColor);
-    inline void AddDamage(const coreInt32  iValue, const coreVector3& vPosition) {if(g_CurConfig.Game.Combat.iDamage) this->AddText(PRINT("%u",  iValue), vPosition, COLOR_MENU_RED);}
-    inline void AddChain (const coreUint32 iValue, const coreVector3& vPosition) {if(g_CurConfig.Game.Combat.iChain)  this->AddText(PRINT("+%u", iValue), vPosition, COLOR_MENU_BLUE);}
-    inline void AddCombo (const coreUint32 iValue, const coreVector3& vPosition) {if(g_CurConfig.Game.Combat.iCombo)  this->AddText(PRINT("x%u", iValue), vPosition, COLOR_MENU_PURPLE);}
+    inline void AddDamage(const coreInt32  iValue, const coreVector3& vPosition) {if(g_CurConfig.Game.Combat.iDamage && iValue) this->AddText(PRINT("%d",  iValue), vPosition, COLOR_MENU_RED);}
+    inline void AddChain (const coreUint32 iValue, const coreVector3& vPosition) {if(g_CurConfig.Game.Combat.iChain  && iValue) this->AddText(PRINT("+%u", iValue), vPosition, COLOR_MENU_BLUE);}
+    inline void AddCombo (const coreUint32 iValue, const coreVector3& vPosition) {if(g_CurConfig.Game.Combat.iCombo  && iValue) this->AddText(PRINT("x%u", iValue), vPosition, COLOR_MENU_PURPLE);}
 
      // reset all active label objects
     void Reset();

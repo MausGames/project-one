@@ -25,13 +25,13 @@ cGame::cGame(const coreBool bCoop)noexcept
 {
     // configure first player
     m_aPlayer[0].Configure  (PLAYER_SHIP_ATK, COLOR_SHIP_RED, g_CurConfig.Input.aiType[0]);
-    m_aPlayer[0].EquipWeapon(0u, REF_ID(cRayWeapon::ID));
+    m_aPlayer[0].EquipWeapon(0u, cRayWeapon::ID);
 
     if(m_bCoop)
     {
         // configure second player
         m_aPlayer[1].Configure  (PLAYER_SHIP_DEF, COLOR_SHIP_BLUE, g_CurConfig.Input.aiType[1]);
-        m_aPlayer[1].EquipWeapon(0u, REF_ID(cRayWeapon::ID));
+        m_aPlayer[1].EquipWeapon(0u, cRayWeapon::ID);
         STATIC_ASSERT(GAME_PLAYERS == 2u)
     }
 
@@ -44,25 +44,24 @@ cGame::cGame(const coreBool bCoop)noexcept
 // destructor
 cGame::~cGame()
 {
+    constexpr coreBool bAnimated = !DEFINED(_CORE_DEBUG_);
+
     // 
     for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
-        m_aPlayer[i].Kill(true);
+        m_aPlayer[i].Kill(bAnimated);
 
     // 
-    m_ShieldManager.ClearShields(true);
+    m_EnemyManager.ClearEnemies(bAnimated);
 
     // 
-    m_BulletManagerPlayer.ClearBullets(true);
-    m_BulletManagerEnemy .ClearBullets(true);
+    m_BulletManagerPlayer.ClearBullets(bAnimated);
+    m_BulletManagerEnemy .ClearBullets(bAnimated);
+
+    // 
+    m_ShieldManager.ClearShields(bAnimated);
 
     // delete last mission
-    m_EnemyManager.ClearEnemies(true);
     SAFE_DELETE(m_pMission)
-
-    // 
-    g_pEnvironment->SetTargetDirection(ENVIRONMENT_DEFAULT_DIRECTION); 
-    g_pEnvironment->SetTargetSide     (ENVIRONMENT_DEFAULT_SIDE); 
-    g_pEnvironment->SetTargetSpeed    (ENVIRONMENT_DEFAULT_SPEED); 
 }
 
 

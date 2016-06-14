@@ -112,9 +112,11 @@ struct coreLight
 #if defined(GL_AMD_shader_trinary_minmax)
     #define coreMin3(a,b,c) (min3(a, b, c))
     #define coreMax3(a,b,c) (max3(a, b, c))
+    #define coreMed3(a,b,c) (mid3(a, b, c))
 #else
     #define coreMin3(a,b,c) (min(a, min(b, c)))
     #define coreMax3(a,b,c) (max(a, max(b, c)))
+    #define coreMed3(a,b,c) (max(min(max(a, b), c), min(a, b)))
 #endif
 
 // modulo operator

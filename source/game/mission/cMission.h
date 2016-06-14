@@ -24,11 +24,11 @@
 
 // ****************************************************************
 // mission specific definitions
-#define VIRIDO_BALLS      (2u)                                    // 
-#define VIRIDO_TRAILS     (4u)                                    // 
-#define VIRIDO_RAWS       (VIRIDO_BALLS * (VIRIDO_TRAILS + 1u))   // 
-#define VIRIDO_PADDLES    (PLAYERS + 1u)                          // 
-#define VIRIDO_BALL_SPEED (1.5f)                                  // 
+#define VIRIDO_BALLS      (2u)                                               // 
+#define VIRIDO_TRAILS     (4u)                                               // 
+#define VIRIDO_RAWS       (VIRIDO_BALLS * (VIRIDO_TRAILS + 1u))              // 
+#define VIRIDO_PADDLES    (PLAYERS + 1u)                                     // 
+#define VIRIDO_BALL_SPEED (CONTAINS_BIT(m_iStickyState, 1u) ? 0.0f : 1.5f)   // 
 
 
 // ****************************************************************
@@ -45,14 +45,6 @@
 
 #define STAGE_ADD_PATH(n)               auto n = this->_AddPath    (__LINE__,      [this](coreSpline2* OUTPUT n)
 #define STAGE_ADD_SQUAD(n,t,c)          auto n = this->_AddSquad<t>(__LINE__, (c), [this](cEnemySquad* OUTPUT n)
-
-#define STAGE_REMOVE(e,t)               {if(fLifeTime >= (t)) {(e)->Kill(false); return;}}
-#define STAGE_REMOVE_AREA(e)                                              \
-    if(((e)->GetPosition().x < -FOREGROUND_AREA.x * ENEMY_AREA_FACTOR) || \
-       ((e)->GetPosition().x >  FOREGROUND_AREA.x * ENEMY_AREA_FACTOR) || \
-       ((e)->GetPosition().y < -FOREGROUND_AREA.y * ENEMY_AREA_FACTOR) || \
-       ((e)->GetPosition().y >  FOREGROUND_AREA.y * ENEMY_AREA_FACTOR))   \
-       {(e)->Kill(false); return;}
 
 #define STAGE_FOREACH_PLAYER(e,i)       g_pGame->ForEachPlayer([&](cPlayer* OUTPUT e, const coreUintW i)
 #define STAGE_FOREACH_ENEMY(s,e,i)      (s)->ForEachEnemy     ([&](cEnemy*  OUTPUT e, const coreUintW i)
@@ -86,13 +78,21 @@
     coreBool        UNUSED bEnablePosition = ((e)->GetLifeTime() != 0.0f);                        \
     if(!CONTAINS_FLAG(e->GetStatus(), ENEMY_STATUS_DEAD)) e->SetEnabled((fLifeTime >= 0.0f) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE);
 
-#define STAGE_DELAY_ADD(t,u)            {const coreFloat fDelay = CLAMP(fLifeTime - (t), 0.0f, (u)); fLifeTime -= fDelay; fLifeTimeDelay += fDelay;}
-#define STAGE_DELAY_RESET               {fLifeTime += fLifeTimeDelay; fLifeTimeDelay = 0.0f;}
-
 #define __STAGE_ROUND(x)                (I_TO_F(F_TO_UI((x) * FRAMERATE_VALUE * RCP(fLifeSpeed))) / (FRAMERATE_VALUE * RCP(fLifeSpeed)))
 #define STAGE_BRANCH(x,y)               ((fLifeTime < (x)) || [&](){const coreFloat fRound = /*__STAGE_ROUND*/(y); fLifeTime = FMOD(fLifeTime - (x), fRound); fLifeTimeBefore = FMOD(fLifeTimeBefore - (x), fRound); bEnablePosition &= (fLifeTime >= fLifeTimeBefore); return false;}())
 #define STAGE_TICK(c)                   (!(F_TO_UI(fLifeTime * FRAMERATE_VALUE * RCP(fLifeSpeed)) % (c)))
 #define STAGE_WAIT(t)                   {m_fStageWait = (t);}
+
+#define STAGE_DELAY_ADD(t,u)            {const coreFloat fDelay = CLAMP(fLifeTime - (t), 0.0f, (u)); fLifeTime -= fDelay; fLifeTimeDelay += fDelay;}
+#define STAGE_DELAY_RESET               {fLifeTime += fLifeTimeDelay; fLifeTimeDelay = 0.0f;}
+
+#define STAGE_REMOVE_LIFETIME(e,t)      {if(fLifeTime >= (t)) {(e)->Kill(false); return;}}
+#define STAGE_REMOVE_AREA(e)                                              \
+    if(((e)->GetPosition().x < -FOREGROUND_AREA.x * ENEMY_AREA_FACTOR) || \
+       ((e)->GetPosition().x >  FOREGROUND_AREA.x * ENEMY_AREA_FACTOR) || \
+       ((e)->GetPosition().y < -FOREGROUND_AREA.y * ENEMY_AREA_FACTOR) || \
+       ((e)->GetPosition().y >  FOREGROUND_AREA.y * ENEMY_AREA_FACTOR))   \
+       {(e)->Kill(false); return;}
 
 #define STAGE_TIME_POINT(t)             (InBetween((t), m_fStageTimeBefore, m_fStageTime))
 #define STAGE_TIME_BEFORE(t)            (m_fStageTime <  (t))
@@ -188,6 +188,7 @@ public:
     inline cBoss*           GetBoss        (const coreUintW iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_apBoss[iIndex];}
     inline cBoss*           GetCurBoss     ()const                       {return m_pCurBoss;}
     inline const coreUintW& GetCurBossIndex()const                       {return m_iCurBossIndex;}
+    inline cEnemySquad*     GetEnemySquad  (const coreUintW iIndex)const {ASSERT(iIndex < m_apSquad.size()) return m_apSquad.get_valuelist()[iIndex].get();}
 
 
 protected:
@@ -236,6 +237,7 @@ private:
     coreObject3D m_aPaddleSphere[VIRIDO_PADDLES];   // 
     cShip*       m_apOwner      [VIRIDO_PADDLES];   // 
 
+    coreUint8 m_iStickyState;                       // (only between first ball and first paddle) 
     coreUint8 m_iBounceState;                       // 
     coreBool  m_bBounceReal;                        // 
 
@@ -244,7 +246,7 @@ private:
 
 public:
     cViridoMission()noexcept;
-    ~cViridoMission()override;
+    ~cViridoMission()final;
 
     DISABLE_COPY(cViridoMission)
     ASSIGN_ID(1, "Virido")
@@ -258,6 +260,11 @@ public:
     void DisablePaddle(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
+    inline void     MakeSticky    ()                              {ADD_BIT(m_iStickyState, 0u)}
+    inline void     UnmakeSticky  (const coreVector2& vDirection) {m_iStickyState = 0; m_aBallRaw[0].SetDirection(coreVector3(vDirection, 0.0f));}
+    inline coreBool GetStickyState()const                         {return CONTAINS_BIT(m_iStickyState, 1u);}
+
+    // 
     inline void     SetBounceReal (const coreBool  bStatus)     {m_bBounceReal = bStatus;}
     inline coreBool GetBounceState(const coreUintW iIndex)const {ASSERT(iIndex < sizeof(m_iBounceState)*8u) return CONTAINS_BIT(m_iBounceState, iIndex);}
 
@@ -268,10 +275,10 @@ public:
 
 private:
     // execute own routines
-    void __SetupOwn       ()override;
-    void __RenderOwnUnder ()override;
-    void __RenderOwnAttack()override;
-    void __MoveOwnAfter   ()override;
+    void __SetupOwn       ()final;
+    void __RenderOwnUnder ()final;
+    void __RenderOwnAttack()final;
+    void __MoveOwnAfter   ()final;
 };
 
 
@@ -369,7 +376,7 @@ private:
 
 public:
     cIntroMission()noexcept;
-    ~cIntroMission()override;
+    ~cIntroMission()final;
 
     DISABLE_COPY(cIntroMission)
     ASSIGN_ID(99, "Intro")
@@ -377,8 +384,8 @@ public:
 
 private:
     // execute own routines
-    void __SetupOwn     ()override;
-    void __MoveOwnBefore()override;
+    void __SetupOwn     ()final;
+    void __MoveOwnBefore()final;
 };
 
 

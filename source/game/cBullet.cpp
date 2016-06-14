@@ -59,7 +59,7 @@ void cBullet::Activate(const coreInt32 iDamage, const coreFloat fSpeed, cShip* p
     m_pOwner  = pOwner;
 
     // reset animation value
-    m_fAnimation = Core::Rand->Float(1.0f);
+    m_fAnimation = 0.09f;
 
     // reset bullet properties
     this->SetPosition (coreVector3(vPosition,  0.0f));
@@ -231,7 +231,7 @@ cRayBullet::cRayBullet()noexcept
 
     // set object properties
     this->SetCollisionModifier(coreVector3(1.0f,0.333f,1.0f));   // model with offset
-    this->SetTexSize          (coreVector2(0.4f,0.2f));
+    this->SetTexSize          (coreVector2(0.4f,0.2f) * 0.7f);
 }
 
 
@@ -244,7 +244,7 @@ void cRayBullet::__MoveOwn()
 
     // update texture animation
     m_fAnimation.Update(0.4f);
-    this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
+    this->SetTexOffset(coreVector2(0.35f, m_fAnimation));
 }
 
 

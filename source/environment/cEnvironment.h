@@ -60,7 +60,7 @@ private:
 
 public:
     cEnvironment()noexcept;
-    ~cEnvironment()override;
+    ~cEnvironment()final;
 
     DISABLE_COPY(cEnvironment)
 
@@ -106,7 +106,7 @@ public:
 
 private:
     // reset with the resource manager
-    void __Reset(const coreResourceReset bInit)override;
+    void __Reset(const coreResourceReset bInit)final;
 };
 
 

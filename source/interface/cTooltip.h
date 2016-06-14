@@ -47,8 +47,8 @@ public:
     DISABLE_COPY(cTooltip)
 
     // render and move the tooltip
-    void Render()override;
-    void Move  ()override;
+    void Render()final;
+    void Move  ()final;
 
     // 
     template <typename... A> void ShowText(const coreFloat fWidth, const void* pRef, const coreChar* pcFormat, A&&... vArgs);

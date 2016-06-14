@@ -110,9 +110,6 @@ void cCrossfieldBoss::__ResurrectOwn()
 void cCrossfieldBoss::__KillOwn(const coreBool bAnimated)
 {
     // 
-    g_pGame->GetBulletManagerEnemy()->ClearBullets(bAnimated);   
-
-    // 
     for(coreUintW i = 0u; i < CROSSFIELD_BOOMERANGS; ++i)
         this->__DisableBoomerang(i, bAnimated);
 
@@ -244,7 +241,7 @@ void cCrossfieldBoss::__MoveOwn()
     // 
     else if(m_iPhase == 1u)
     {
-        PHASE_CONTROL_TICKER(0u, 0u, FLT_MAX)
+        PHASE_CONTROL_PAUSE(0u, FLT_MAX)
         {
             ++m_iPhase;
         });
@@ -257,11 +254,11 @@ void cCrossfieldBoss::__MoveOwn()
         PHASE_CONTROL_TIMER(0u, 0.5f, LERP_BREAK)
         {
             // 
-            this->DefaultMoveLerp  (coreVector2(0.0f,2.0f), coreVector2(0.0f,0.75f), fTime);
-            this->DefaultRotateLerp(0.0f*PI,                5.0f*PI,                 fTime);
+            this->DefaultMoveLerp  (coreVector2(0.0f,2.0f), coreVector2(0.0f,0.9f), fTime);
+            this->DefaultRotateLerp(0.0f*PI,                5.0f*PI,                fTime);
 
             // 
-            if(PHASE_SUB(0.85f))
+            if(PHASE_TIME_POINT(0.85f))
             {
                 g_pGame->GetMission()->SetCurBoss(this);
                 g_pGame->GetInterface()->ShowBoss(this);
@@ -277,7 +274,7 @@ void cCrossfieldBoss::__MoveOwn()
     // 
     else if(m_iPhase == 3u)
     {
-        PHASE_CONTROL_TICKER(0u, 0u, 2.0f)
+        PHASE_CONTROL_PAUSE(0u, 2.0f)
         {
             m_iPhase = 10u;
         });
@@ -312,15 +309,15 @@ void cCrossfieldBoss::__MoveOwn()
             });
 
             // 
-            this->DefaultMoveLerp(coreVector2(bSecond ? (fSideSign *  4.5f) : 0.0f, 0.75f),
-                                  coreVector2(           fSideSign * -4.5f,         0.75f), fTime);
+            this->DefaultMoveLerp(coreVector2(bSecond ? (fSideSign *  4.5f) : 0.0f, 0.9f),
+                                  coreVector2(           fSideSign * -4.5f,         0.9f), fTime);
             this->DefaultRotateLerp(1.0f*PI, 11.0f*PI, fSideTime);
 
             // 
             if(m_aiCounter[DUPLICATE_STATUS] == 1)
             {
                 // 
-                if(PHASE_SUB(0.5f)) m_aiCounter[DUPLICATE_STATUS] = 2;
+                if(PHASE_TIME_POINT(0.5f)) m_aiCounter[DUPLICATE_STATUS] = 2;
             }
             if(m_aiCounter[DUPLICATE_STATUS])
             {
@@ -345,6 +342,16 @@ void cCrossfieldBoss::__MoveOwn()
     // 
     else if(m_iPhase == 11u || m_iPhase == 14u)
     {
+        {
+            ++m_iPhase;
+            PHASE_RESET(0u)
+            PHASE_RESET(1u)
+            PHASE_RESET(2u)
+
+            // 
+            m_aiCounter[CURRENT_SIDE] = 1 - m_aiCounter[CURRENT_SIDE];
+        }
+        /*
         const coreBool bSecond = (m_iPhase == 14u) ? true : false;
 
         // 
@@ -385,12 +392,12 @@ void cCrossfieldBoss::__MoveOwn()
             }
         });
 
-        PHASE_CONTROL_TIMER(2u, 1.0f/6.0f, LERP_SMOOTH)
+        PHASE_CONTROL_TIMER(2u, 1.0f/4.0f, LERP_SMOOTH)
         {
             const coreFloat fSideTime = m_aiCounter[CURRENT_SIDE] ? fTime : (1.0f - fTime);
 
             // 
-            this->DefaultOrientateLerp(0.0f*PI, 14.0f*PI, fSideTime);
+            this->DefaultOrientateLerp(0.0f*PI, 8.0f*PI, fSideTime);
 
             // 
             if(PHASE_FINISHED)
@@ -404,16 +411,18 @@ void cCrossfieldBoss::__MoveOwn()
                 m_aiCounter[CURRENT_SIDE] = 1 - m_aiCounter[CURRENT_SIDE];
             }
         });
+        */
     }
 
     // ################################################################
     // 
     else if(m_iPhase == 12u || m_iPhase == 15u)
     {
-        PHASE_CONTROL_TICKER(0u, 0u, (m_iPhase == 12u) ? 2.0f : 0.75f)
-        {
-            ++m_iPhase;
-        });
+        ++m_iPhase;
+        //PHASE_CONTROL_TICKER(0u, 0u, (m_iPhase == 12u) ? 2.0f : 0.75f)
+        //{
+        //    ++m_iPhase;
+        //});
     }
 
     // ################################################################
@@ -427,8 +436,8 @@ void cCrossfieldBoss::__MoveOwn()
             const coreFloat fSideSign = m_aiCounter[CURRENT_SIDE] ? -1.0f    :  1.0f;
 
             // 
-            this->DefaultMoveLerp  (coreVector2(fSideSign * 0.5f, 0.75f), coreVector2(fSideSign * 0.5f, -1.5f), fOwnTime);
-            this->DefaultRotateLerp(1.0f*PI,                              5.0f*PI,                              fSideTime);
+            this->DefaultMoveLerp  (coreVector2(fSideSign * 0.5f, 0.9f), coreVector2(fSideSign * 0.5f, -1.5f), fOwnTime);
+            this->DefaultRotateLerp(1.0f*PI,                             5.0f*PI,                              fSideTime);
 
             // 
             if(m_aiCounter[DUPLICATE_STATUS])
@@ -449,8 +458,8 @@ void cCrossfieldBoss::__MoveOwn()
             const coreFloat fSideTime = m_aiCounter[CURRENT_SIDE] ? fTime : (1.0f - fTime);
 
             // 
-            this->DefaultMoveLerp  (coreVector2(0.0f,2.0f), coreVector2(0.0f,0.75f), fTime);
-            this->DefaultRotateLerp(1.0f*PI,                5.0f*PI,                 fSideTime);
+            this->DefaultMoveLerp  (coreVector2(0.0f,2.0f), coreVector2(0.0f,0.9f), fTime);
+            this->DefaultRotateLerp(1.0f*PI,                5.0f*PI,                fSideTime);
 
             // 
             if(PHASE_FINISHED)
@@ -462,7 +471,7 @@ void cCrossfieldBoss::__MoveOwn()
     // 
     else if(m_iPhase == 20u)
     {
-        PHASE_CONTROL_TICKER(0u, 0u, 1.0f)
+        PHASE_CONTROL_PAUSE(0u, 1.0f)
         {
             ++m_iPhase;
         });
@@ -495,7 +504,7 @@ void cCrossfieldBoss::__MoveOwn()
             const coreFloat fSideSign = m_aiCounter[CURRENT_SIDE] ? -1.0f : 1.0f;
 
             // 
-            this->SetPosition      (coreVector3(coreVector2::Direction(LERP(0.0f*PI, fSideSign * -4.0f*PI, fTime)) * FOREGROUND_AREA * 0.75f, 0.0f));
+            this->SetPosition      (coreVector3(coreVector2::Direction(LERP(0.0f*PI, fSideSign * -4.0f*PI, fTime)) * FOREGROUND_AREA * 0.9f, 0.0f));
             this->DefaultRotateLerp(1.0f*PI, fSideSign * 21.0f*PI, fTime);
 
 
@@ -566,7 +575,7 @@ void cCrossfieldBoss::__MoveOwn()
     // 
     else if(m_iPhase == 25u)
     {
-        PHASE_CONTROL_TICKER(0u, 0u, 2.2f/2.0f)
+        PHASE_CONTROL_PAUSE(0u, 2.2f/2.0f)
         {
             m_iPhase = 10u;
         });
@@ -576,7 +585,7 @@ void cCrossfieldBoss::__MoveOwn()
     // 
     else if(m_iPhase == 26u)
     {
-        PHASE_CONTROL_TICKER(0u, 0u, FRAMERATE_VALUE)
+        PHASE_CONTROL_PAUSE(0u, FLT_MAX)
         {
             ++m_iPhase;
 
@@ -640,8 +649,8 @@ void cCrossfieldBoss::__MoveOwn()
             const coreFloat fOwnTime = LERPB(0.0f, 1.0f, fTime);
 
             // 
-            this->DefaultMoveLerp  (coreVector2(0.0f,2.0f), coreVector2(0.0f,0.75f), fOwnTime);
-            this->DefaultRotateLerp(0.0f*PI,                5.0f*PI,                 fOwnTime);
+            this->DefaultMoveLerp  (coreVector2(0.0f,2.0f), coreVector2(0.0f,0.9f), fOwnTime);
+            this->DefaultRotateLerp(0.0f*PI,                5.0f*PI,                fOwnTime);
             this->SetOrientation   (coreVector3(0.0f,0.0f,1.0f));
 
             // 
@@ -657,7 +666,7 @@ void cCrossfieldBoss::__MoveOwn()
     // 
     else if(m_iPhase == 32u)
     {
-        PHASE_CONTROL_TICKER(0u, 0u, 2.0f)
+        PHASE_CONTROL_PAUSE(0u, 2.0f)
         {
             ++m_iPhase;
         });
@@ -712,8 +721,8 @@ void cCrossfieldBoss::__MoveOwn()
             const coreFloat fOwnTime = LERPB(1.0f, 0.0f, 1.0f - fTime);
 
             // 
-            this->DefaultMoveLerp  (coreVector2(0.0f,0.75f), coreVector2(0.0f,-1.5f), fOwnTime);
-            this->DefaultRotateLerp(1.0f*PI,                 5.0f*PI,                 fOwnTime);
+            this->DefaultMoveLerp  (coreVector2(0.0f,0.9f), coreVector2(0.0f,-1.5f), fOwnTime);
+            this->DefaultRotateLerp(1.0f*PI,                5.0f*PI,                 fOwnTime);
 
             // 
             g_pEnvironment->SetTargetDirection(coreVector2::Direction(LERPS(0.0f*PI, 1.0f*PI, fTime)));

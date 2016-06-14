@@ -15,6 +15,7 @@
 // TODO: menue-riss bei start oder seitlicher fade-out, ausserdem bei start im main-menue animation und explosion des logos oder riss in mitte
 // TODO: move mouse to buttons on joystick-input
 // TODO: real-time sound-configuration
+// TODO: don't load full language file for just reading the name string
 
 
 // ****************************************************************
@@ -115,12 +116,12 @@ private:
 
 public:
     cIntroMenu()noexcept;
-    ~cIntroMenu()override;
+    ~cIntroMenu()final;
 
     DISABLE_COPY(cIntroMenu)
 
     // move the intro menu
-    void Move()override;
+    void Move()final;
 };
 
 
@@ -145,7 +146,7 @@ public:
     DISABLE_COPY(cMainMenu)
 
     // move the main menu
-    void Move()override;
+    void Move()final;
 };
 
 
@@ -168,7 +169,7 @@ public:
     DISABLE_COPY(cGameMenu)
 
     // move the game menu
-    void Move()override;
+    void Move()final;
 };
 
 
@@ -213,7 +214,7 @@ public:
     DISABLE_COPY(cConfigMenu)
 
     // move the config menu
-    void Move()override;
+    void Move()final;
 
     // 
     void CheckValues();
@@ -249,7 +250,7 @@ public:
     DISABLE_COPY(cExtraMenu)
 
     // move the extra menu
-    void Move()override;
+    void Move()final;
 };
 
 
@@ -272,7 +273,7 @@ public:
     DISABLE_COPY(cPauseMenu)
 
     // move the pause menu
-    void Move()override;
+    void Move()final;
 };
 
 
@@ -298,13 +299,13 @@ private:
 
 public:
     cMenu()noexcept;
-    ~cMenu()override;
+    ~cMenu()final;
 
     DISABLE_COPY(cMenu)
 
     // render and move the menu
-    void Render()override;
-    void Move  ()override;
+    void Render()final;
+    void Move  ()final;
 
     // access special menu overlays
     inline cMsgBox*  GetMsgBox () {return &m_MsgBox;}

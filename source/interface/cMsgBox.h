@@ -49,8 +49,8 @@ public:
     DISABLE_COPY(cMsgBox)
 
     // render and move the message box
-    void Render()override;
-    void Move  ()override;
+    void Render()final;
+    void Move  ()final;
 
     // 
     template <typename F> void ShowInformation(const coreChar* pcText, F&& nCallback);   // [](const coreUintW iAnswer) -> void

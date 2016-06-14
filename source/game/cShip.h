@@ -55,7 +55,7 @@ public:
 
     // render the ship (low-polygon only)
     using coreObject3D::Render;
-    void Render(const coreProgramPtr& pProgram)override;
+    void Render(const coreProgramPtr& pProgram)final;
 
     // 
     inline bool ReachedHealth   (const coreInt32 iHealth)    {this->__ReachOnce(); return InBetween(iHealth,                                    m_iCurHealth, ABS(m_iPreHealth));}

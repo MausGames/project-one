@@ -223,16 +223,21 @@ void cPlayer::Move()
         const coreVector2 vOffset = vDiff * (Core::System->GetTime() * 40.0f);
 
 
+        static coreFlow cooldown = 0.0f;
         static coreFlow time = 0.0f;
         static coreBool status = false;
         static coreFloat side = 1.0f;
         if(m_pInput->iButtonPress & 0x02u)
         {
-            if(!status)
+            if(!status && cooldown <= 0.0f)
             {
                 status = true;
                 side = (m_pInput->vMove.x <= 0.0) ? -1.0f : 1.0f;
                 this->ChangeType(0);
+
+                this->EnableBubble();
+                m_Bubble.SetAlpha(0.8f);
+                //g_pSpecialEffects->CreateRing(this->GetPosition(), this->GetDirection(), this->GetOrientation(), SPECIAL_RING_SMALL, COLOR_ENERGY_BLUE);
             }
         }
         if(status)
@@ -240,15 +245,22 @@ void cPlayer::Move()
             time.Update(2.0f);
             if(time >= 1.0f)
             {
+                cooldown = 1.0f;
                 time = 0.0f;
                 status = false;
                 this->ChangeType(TYPE_PLAYER);
+
+                m_Bubble.SetAlpha(0.6f);
             }
         }
-
-        // geschosse beim austoßen erst vergrößern
-        // unterschiedliche waffen am start erlauben
-        // 
+        if(cooldown > 0.0f)
+        {
+            cooldown.Update(-4.0f);
+            if(cooldown <= 0.0f)
+            {
+                this->DisableBubble();
+            }
+        }
 
 
         const coreMatrix2 mRota = coreMatrix3::Rotation(LERPS(0.0f, 2.0f*PI, time) * side).m12();
@@ -256,7 +268,7 @@ void cPlayer::Move()
 
 
         // set new position and orientation
-        
+
         //this->SetPosition   (coreVector3(vOffset + this->GetPosition().xy(), 0.0f));
         this->SetPosition   (coreVector3(m_vNewPos, 0.0f));
         //this->SetOrientation(coreVector3(CLAMP(vDiff.x, -0.6f, 0.6f), 0.0f, 1.0f).Normalize());
@@ -294,9 +306,9 @@ void cPlayer::Move()
         this->SetTexOffset(coreVector2(0.0f, m_fDarkAnimation * 0.25f));
 
         // 
-        if(CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DARKNESS))
-             m_Bubble.SetAlpha(MIN(m_Bubble.GetAlpha() + 4.0f*Core::System->GetTime(), 0.8f));
-        else m_Bubble.SetAlpha(MAX(m_Bubble.GetAlpha() - 4.0f*Core::System->GetTime(), 0.0f));
+       // if(CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DARKNESS))
+       //      m_Bubble.SetAlpha(MIN(m_Bubble.GetAlpha() + 4.0f*Core::System->GetTime(), 0.8f));
+       // else m_Bubble.SetAlpha(MAX(m_Bubble.GetAlpha() - 4.0f*Core::System->GetTime(), 0.0f));
 
         // 
         if(!m_Bubble.GetAlpha()) this->DisableBubble();
@@ -330,12 +342,15 @@ void cPlayer::Move()
 // reduce current health
 void cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement)
 {
-    // 
-    g_pGame->GetCombatText()->AddDamage(iDamage, this->GetPosition());
+    if(iDamage > 0)
+    {
+        // 
+        //g_pGame->GetCombatText()->AddDamage(iDamage, this->GetPosition());   
 
-    // 
-    this->TransferChain();
-    this->ReduceCombo();
+        // 
+        this->TransferChain();
+        this->ReduceCombo();
+    }
 
     // 
     if(this->_TakeDamage(iDamage, iElement))

@@ -10,7 +10,7 @@
 #ifndef _P1_GUARD_BOSS_H_
 #define _P1_GUARD_BOSS_H_
 
-// TODO: boomerangs of Crossfield may generate double-hits because of rotating box collision (when moving away from it)
+// TODO: boomerangs of Crossfield may generate double-hits because of rotating box collision (when moving away from it), bitfield with reset (player-num)
 
 
 // ****************************************************************
@@ -31,14 +31,23 @@
 #define TORUS_RAY_OFFSET      (8.0f)                           // 
 #define TORUS_RAYWAVE_SIZE    (coreVector3(1.6f, 5.0f,1.3f))   // 
 
+#define VAUS_SCOUTS           (DEFINED(_CORE_DEBUG_) ? 20 : 80)   // 
+
 
 // ****************************************************************
 // phase management macros
-#define PHASE_CONTROL_TIMER(a,b,c)  this->_PhaseTimer (a, __LINE__, b, c, [&](const coreFloat  fTime, const coreFloat fTimeBefore, const coreBool __bEnd)   // 
-#define PHASE_CONTROL_TICKER(a,b,c) this->_PhaseTicker(a, __LINE__, b, c, [&](const coreUint16 iTick,                              const coreBool __bEnd)   // 
-#define PHASE_SUB(t)                (InBetween(t, fTimeBefore, fTime))                                                                                      // 
-#define PHASE_RESET(i)              {m_aTimer[i].Stop(); m_aiTimerLine[i] = 0u;}                                                                            // 
-#define PHASE_FINISHED              (__bEnd)                                                                                                                // 
+#define PHASE_CONTROL_TIMER(a,b,c)  this->_PhaseTimer (a, __LINE__, b, c, [&](const coreFloat  fTime, const coreFloat fTimeBefore, const coreBool __bEnd)
+#define PHASE_CONTROL_TICKER(a,b,c) this->_PhaseTicker(a, __LINE__, b, c, [&](const coreUint16 iTick,                              const coreBool __bEnd)
+#define PHASE_CONTROL_PAUSE(a,b)    PHASE_CONTROL_TICKER(a, 1u, b)
+
+#define PHASE_TIME_POINT(t)         (InBetween((t), fTimeBefore, fTime))
+#define PHASE_TIME_BEFORE(t)        (fTime <  (t))
+#define PHASE_TIME_AFTER(t)         (fTime >= (t))
+#define PHASE_TIME_BETWEEN(t,u)     (InBetween(fTime, (t), (u)))
+#define PHASE_BEGINNING             (PHASE_TIME_POINT(0.0f))
+
+#define PHASE_RESET(i)              {m_aTimer[i].Stop(); m_aiTimerLine[i] = 0u;}
+#define PHASE_FINISHED              (__bEnd)
 
 #define LERP_LINEAR    (&LERP <coreFloat>)
 #define LERP_SMOOTH    (&LERPS<coreFloat>)
@@ -50,13 +59,6 @@
 // boss entity interface
 class INTERFACE cBoss : public cEnemy
 {
-private:
-    // 
-    using tLerpFunc         = coreFloat (*) (const coreFloat&, const coreFloat&, const coreFloat);
-    using tTimerUpdateFunc  = std::function<void(const coreFloat, const coreFloat, const coreBool)>;
-    using tTickerUpdateFunc = std::function<void(const coreUint16, const coreBool)>;
-
-
 protected:
     coreTimer  m_aTimer     [BOSS_TIMERS];    // 
     coreUint16 m_aiTimerLine[BOSS_TIMERS];    // 
@@ -82,8 +84,8 @@ public:
 
 protected:
     // 
-    void _PhaseTimer (const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreFloat  fSpeed, const tLerpFunc&& nLerpFunc, const tTimerUpdateFunc&&  nUpdateFunc);
-    void _PhaseTicker(const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreUint16 iTicks, const coreFloat fRate,       const tTickerUpdateFunc&& nUpdateFunc);
+    template <typename F, typename G> void _PhaseTimer (const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreFloat  fSpeed, G&& nLerpFunc,         F&& nUpdateFunc);   // [](const coreFloat fTime, const coreFloat fTimeBefore, const coreBool __bEnd) -> void, [](const coreFloat x, const coreFloat y, const coreFloat s) -> coreFloat
+    template <typename F>             void _PhaseTicker(const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreUint16 iTicks, const coreFloat fRate, F&& nUpdateFunc);   // [](const coreUint16 iTick, const coreBool __bEnd) -> void
 };
 
 
@@ -112,11 +114,11 @@ public:
 
 private:
     // execute own routines
-    void __ResurrectOwn   ()override;
-    void __KillOwn        (const coreBool bAnimated)override;
-    void __RenderOwnUnder ()override;
-    void __RenderOwnAttack()override;
-    void __MoveOwn        ()override;
+    void __ResurrectOwn   ()final;
+    void __KillOwn        (const coreBool bAnimated)final;
+    void __RenderOwnUnder ()final;
+    void __RenderOwnAttack()final;
+    void __MoveOwn        ()final;
 
     // 
     coreVector2 __RepeatPosition  (const coreVector2& vPosition, const coreFloat fThreshold, coreBool* OUTPUT pbChange);
@@ -148,15 +150,15 @@ public:
     ASSIGN_ID(102, "Torus")
 
     // 
-    void Render()override;
+    void Render()final;
 
 
 private:
     // execute own routines
-    void __ResurrectOwn   ()override;
-    void __KillOwn        (const coreBool bAnimated)override;
-    void __RenderOwnAttack()override;
-    void __MoveOwn        ()override;
+    void __ResurrectOwn   ()final;
+    void __KillOwn        (const coreBool bAnimated)final;
+    void __RenderOwnAttack()final;
+    void __MoveOwn        ()final;
 
     // 
     coreVector3 __GetRotaDirection(const coreFloat fBaseAngle);
@@ -172,7 +174,8 @@ private:
 class cVausBoss final : public cBoss
 {
 private:
-    coreUint8 m_iScoutOrder;   // 
+    cCustomEnemy m_aCompanion[2];   // 
+    coreUint8    m_iScoutOrder;     // 
 
 
 public:
@@ -184,9 +187,10 @@ public:
 
 private:
     // execute own routines
-    void __ResurrectOwn()override;
-    void __KillOwn     (const coreBool bAnimated)override;
-    void __MoveOwn     ()override;
+    void __ResurrectOwn   ()final;
+    void __KillOwn        (const coreBool bAnimated)final;
+    void __RenderOwnAttack()final;
+    void __MoveOwn        ()final;
 };
 
 
@@ -203,10 +207,87 @@ public:
 
 private:
     // execute own routines
-    void __ResurrectOwn()override;
-    void __KillOwn     (const coreBool bAnimated)override;
-    void __MoveOwn     ()override;
+    void __ResurrectOwn()final;
+    void __KillOwn     (const coreBool bAnimated)final;
+    void __MoveOwn     ()final;
 };
+
+
+#if !defined(_CORE_X64_)
+    #pragma warning(push)
+    #pragma warning(disable : 4738)
+#endif
+
+
+// ****************************************************************
+// 
+template <typename F, typename G> void cBoss::_PhaseTimer(const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreFloat fSpeed, G&& nLerpFunc, F&& nUpdateFunc)
+{
+    // 
+    ASSERT(iTimerIndex < BOSS_TIMERS)
+    coreTimer&  oTimer     = m_aTimer     [iTimerIndex];
+    coreUint16& iTimerLine = m_aiTimerLine[iTimerIndex];
+
+    // 
+    if(iTimerLine != iCodeLine)
+    {
+        iTimerLine = iCodeLine;
+
+        // 
+        oTimer.SetMaxLoops(1u);
+        oTimer.Play(CORE_TIMER_PLAY_RESET);
+
+        // 
+        nUpdateFunc(0.0f, 0.0f, false);
+    }
+    else
+    {
+        // 
+        const coreFloat fTimeBefore = nLerpFunc(0.0f, 1.0f, oTimer.GetValue(CORE_TIMER_GET_NORMAL));
+        oTimer.Update(fSpeed);
+        const coreFloat fTime       = nLerpFunc(0.0f, 1.0f, oTimer.GetValue(CORE_TIMER_GET_NORMAL));
+
+        // 
+        nUpdateFunc(fTime, fTimeBefore, !oTimer.GetStatus());
+    }
+}
+
+
+// ****************************************************************
+// 
+template <typename F> void cBoss::_PhaseTicker(const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreUint16 iTicks, const coreFloat fRate, F&& nUpdateFunc)
+{
+    // 
+    ASSERT(iTimerIndex < BOSS_TIMERS)
+    coreTimer&  oTimer     = m_aTimer     [iTimerIndex];
+    coreUint16& iTimerLine = m_aiTimerLine[iTimerIndex];
+
+    // 
+    if(iTimerLine != iCodeLine)
+    {
+        iTimerLine = iCodeLine;
+
+        // 
+        oTimer.SetMaxLoops(0u);
+        oTimer.Play(CORE_TIMER_PLAY_RESET);
+    }
+
+    // 
+    if(oTimer.Update(fRate))
+    {
+        // 
+        if((oTimer.GetCurLoops() >= iTicks) && iTicks)
+            oTimer.Pause();
+
+        // 
+        nUpdateFunc(oTimer.GetCurLoops()-1u, !oTimer.GetStatus());
+    }
+}
+
+
+#if !defined(_CORE_X64_)
+    #pragma warning(pop)
+#endif
 
 
 #endif // _P1_GUARD_BOSS_H_

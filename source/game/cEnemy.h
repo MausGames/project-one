@@ -20,9 +20,9 @@ enum eEnemyStatus : coreUint8
 {
     ENEMY_STATUS_DEAD     = 0x01u,   // completely removed from the game
     ENEMY_STATUS_BOSS     = 0x02u,   // 
-    ENEMY_STATUS_MUTE     = 0x04u,   // 
-    ENEMY_STATUS_ASSIGNED = 0x08u,   // enemy is currently assigned to something
-    ENEMY_STATUS_SHIELDED = 0x10u    // 
+    ENEMY_STATUS_SINGLE   = 0x04u,   // 
+    ENEMY_STATUS_ASSIGNED = 0x10u,   // enemy is currently assigned to something
+    ENEMY_STATUS_SHIELDED = 0x20u    // 
 };
 
 
@@ -48,7 +48,7 @@ public:
     void GiveShield(const coreUint8 iElement, const coreInt16 iHealth = 0);
 
     // move the enemy
-    void Move()override;
+    void Move()final;
 
     // reduce current health
     void TakeDamage(coreInt32 iDamage, const coreUint8 iElement, cPlayer* pAttacker);
@@ -148,7 +148,7 @@ private:
         std::vector<T*> apEnemyPool;   // semi-dynamic container with all enemies
 
         sEnemySet()noexcept;
-        ~sEnemySet()override;
+        ~sEnemySet()final;
     };
 
 
@@ -230,7 +230,7 @@ public:
 
 private:
     // execute own routines
-    void __MoveOwn()override;
+    void __MoveOwn()final;
 };
 
 
@@ -251,7 +251,7 @@ public:
 
 private:
     // execute own routines
-    void __MoveOwn()override;
+    void __MoveOwn()final;
 };
 
 
@@ -284,7 +284,7 @@ public:
 
 private:
     // execute own routines
-    void __MoveOwn()override;
+    void __MoveOwn()final;
 };
 
 
@@ -305,7 +305,20 @@ public:
 
 private:
     // execute own routines
-    void __MoveOwn()override;
+    void __MoveOwn()final;
+};
+
+
+// ****************************************************************
+// custom enemy class
+class cCustomEnemy final : public cEnemy
+{
+public:
+    cCustomEnemy()noexcept;
+    ~cCustomEnemy()final;
+
+    ENABLE_COPY(cCustomEnemy)
+    ASSIGN_ID(666, "Custom")
 };
 
 
@@ -354,6 +367,8 @@ template <typename F> void cEnemySquad::ForEachEnemyAll(F&& nFunction)
 // constructor
 template <typename T> cEnemyManager::sEnemySet<T>::sEnemySet()noexcept
 {
+    STATIC_ASSERT(T::ID != cCustomEnemy::ID)
+
     // set shader-program
     oEnemyActive.DefineProgram("object_ship_inst_program");
 
@@ -395,13 +410,13 @@ template <typename T> RETURN_RESTRICT T* cEnemyManager::AllocateEnemy()
 {
     // get requested enemy set
     sEnemySet<T>* pSet;
-    if(!m_apEnemySet.count(REF_ID(T::ID)))
+    if(!m_apEnemySet.count(T::ID))
     {
         // create new enemy set
         pSet = new sEnemySet<T>();
-        m_apEnemySet.emplace(REF_ID(T::ID), pSet);
+        m_apEnemySet.emplace(T::ID, pSet);
     }
-    else pSet = s_cast<sEnemySet<T>*>(m_apEnemySet.at(REF_ID(T::ID)));
+    else pSet = s_cast<sEnemySet<T>*>(m_apEnemySet.at(T::ID));
 
     // save current pool size
     const coreUintW iSize = pSet->apEnemyPool.size();
@@ -465,14 +480,14 @@ template <typename F> void cEnemyManager::ForEachEnemyAll(F&& nFunction)
 // 
 template <typename T> void cEnemyManager::PrefetchEnemy()
 {
-    if(!m_apEnemySet.count(REF_ID(T::ID)))
+    if(!m_apEnemySet.count(T::ID))
     {
         // 
         sEnemySet<T>* pSet = new sEnemySet<T>();
         pSet->apEnemyPool[0] = new T();
 
         // 
-        m_apEnemySet.emplace(REF_ID(T::ID), pSet);
+        m_apEnemySet.emplace(T::ID, pSet);
     }
 }
 

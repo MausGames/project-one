@@ -24,6 +24,7 @@ cBoss::cBoss()noexcept
 
     // 
     this->AddStatus(ENEMY_STATUS_BOSS);
+    this->AddStatus(ENEMY_STATUS_SINGLE);
 
     // 
     g_pGame->GetEnemyManager()->BindEnemy(this);
@@ -39,72 +40,6 @@ cBoss::~cBoss()
 
     // 
     g_pGame->GetEnemyManager()->UnbindEnemy(this);
-}
-
-
-// ****************************************************************
-// 
-void cBoss::_PhaseTimer(const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreFloat fSpeed, const tLerpFunc&& nLerpFunc, const tTimerUpdateFunc&& nUpdateFunc)
-{
-    // 
-    ASSERT(iTimerIndex < BOSS_TIMERS)
-    coreTimer&  oTimer     = m_aTimer     [iTimerIndex];
-    coreUint16& iTimerLine = m_aiTimerLine[iTimerIndex];
-
-    // 
-    if(iTimerLine != iCodeLine)
-    {
-        iTimerLine = iCodeLine;
-
-        // 
-        oTimer.SetMaxLoops(1u);
-        oTimer.Play(CORE_TIMER_PLAY_RESET);
-
-        // 
-        nUpdateFunc(0.0f, 0.0f, false);
-    }
-    else
-    {
-        // 
-        const coreFloat fTimeBefore = nLerpFunc(0.0f, 1.0f, oTimer.GetValue(CORE_TIMER_GET_NORMAL));
-        oTimer.Update(fSpeed);
-        const coreFloat fTime       = nLerpFunc(0.0f, 1.0f, oTimer.GetValue(CORE_TIMER_GET_NORMAL));
-
-        // 
-        nUpdateFunc(fTime, fTimeBefore, !oTimer.GetStatus());
-    }
-}
-
-
-// ****************************************************************
-// 
-void cBoss::_PhaseTicker(const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreUint16 iTicks, const coreFloat fRate, const tTickerUpdateFunc&& nUpdateFunc)
-{
-    // 
-    ASSERT(iTimerIndex < BOSS_TIMERS)
-    coreTimer&  oTimer     = m_aTimer     [iTimerIndex];
-    coreUint16& iTimerLine = m_aiTimerLine[iTimerIndex];
-
-    // 
-    if(iTimerLine != iCodeLine)
-    {
-        iTimerLine = iCodeLine;
-
-        // 
-        oTimer.SetMaxLoops(0u);
-        oTimer.Play(CORE_TIMER_PLAY_RESET);
-    }
-
-    // 
-    if(oTimer.Update(fRate))
-    {
-        // 
-        if((oTimer.GetCurLoops() >= iTicks) && iTicks)
-            oTimer.Pause();
-
-        // 
-        nUpdateFunc(oTimer.GetCurLoops()-1u, !oTimer.GetStatus());
-    }
 }
 
 

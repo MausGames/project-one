@@ -135,7 +135,7 @@ public:
 
 private:
     // execute own routines
-    inline void __RenderOwn()override {m_FrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);}
+    inline void __RenderOwn()final {m_FrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);}
 };
 
 
@@ -152,7 +152,7 @@ private:
 
 public:
     cGrassBackground()noexcept;
-    ~cGrassBackground()override;
+    ~cGrassBackground()final;
 
     DISABLE_COPY(cGrassBackground)
     ASSIGN_ID(1, "Grass")
@@ -160,7 +160,7 @@ public:
 
 protected:
     // execute own routines
-    void __MoveOwn()override;
+    void __MoveOwn()final;
 };
 
 
@@ -181,8 +181,8 @@ public:
 
 protected:
     // execute own routines
-    void __RenderOwn()override;
-    void __MoveOwn  ()override;
+    void __RenderOwn()final;
+    void __MoveOwn  ()final;
 };
 
 
@@ -227,8 +227,8 @@ public:
 
 protected:
     // execute own routines
-    void __RenderOwn()override;
-    void __MoveOwn  ()override;
+    void __RenderOwn()final;
+    void __MoveOwn  ()final;
 };
 
 
@@ -282,7 +282,7 @@ private:
 
 public:
     cCloudBackground()noexcept;
-    ~cCloudBackground()override;
+    ~cCloudBackground()final;
 
     DISABLE_COPY(cCloudBackground)
     ASSIGN_ID(99, "Cloud")
@@ -290,8 +290,8 @@ public:
 
 private:
     // execute own routines
-    void __RenderOwn()override;
-    void __MoveOwn  ()override;
+    void __RenderOwn()final;
+    void __MoveOwn  ()final;
 };
 
 

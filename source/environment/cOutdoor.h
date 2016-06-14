@@ -42,7 +42,7 @@ class cOutdoor final : public coreObject3D
 {
 private:
     // vertex structure
-    struct sVertex
+    struct sVertex final
     {
         coreVector3 vPosition;   // vertex position
         coreVector3 vNormal;     // normal vector
@@ -50,7 +50,7 @@ private:
     };
 
     // compressed vertex structure
-    struct sVertexPacked
+    struct sVertexPacked final
     {
         coreFloat  fPosition;   // vertex position           (only height)
         coreUint32 iNormal;     // normal vector             (Snorm210/Snorm4x8)
@@ -81,12 +81,12 @@ private:
 
 public:
     cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom, const coreUint8 iAlgorithm, const coreFloat fGrade)noexcept;
-    ~cOutdoor()override;
+    ~cOutdoor()final;
 
     DISABLE_COPY(cOutdoor)
 
     // render the outdoor-surface
-    void Render()override;
+    void Render()final;
     void RenderLight();
     void RenderDepth();
 

@@ -183,6 +183,7 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreShader> ("full_blur_2.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_blur_2.frag");
     Core::Manager::Resource->Load<coreShader> ("full_post.frag",                         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_post.frag", SHADER_GLOW);
     Core::Manager::Resource->Load<coreShader> ("full_post_distorted.frag",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_post.frag", SHADER_GLOW SHADER_DISTORTION);
+    Core::Manager::Resource->Load<coreShader> ("full_post_debug.frag",                   CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_post.frag", SHADER_GLOW SHADER_DISTORTION SHADER_DEBUG);
     Core::Manager::Resource->Load<coreShader> ("full_transition_fade.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_transition.frag", SHADER_TRANSITION(0));
     Core::Manager::Resource->Load<coreShader> ("full_transition_wipe.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_transition.frag", SHADER_TRANSITION(1));
     Core::Manager::Resource->Load<coreShader> ("full_transition_curtain.frag",           CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_transition.frag", SHADER_TRANSITION(2));
@@ -515,6 +516,11 @@ static void SetupResources()
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("full_post_distorted_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("full.vert")
         ->AttachShader("full_post_distorted.frag")
+        ->Finish();
+
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("full_post_debug_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("full.vert")
+        ->AttachShader("full_post_debug.frag")
         ->Finish();
 
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("full_transition_fade_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())

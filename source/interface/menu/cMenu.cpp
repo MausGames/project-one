@@ -82,6 +82,9 @@ void cMenu::Move()
                 {
                     // 
                     this->ChangeSurface(SURFACE_PAUSE, 0.0f);
+
+                    // 
+                    this->InvokePauseStep();
                 }
                 else if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_OUTRO))
                 {
@@ -139,7 +142,7 @@ void cMenu::Move()
                 // 
                 ASSERT(!g_pGame)
                 g_pGame = new cGame(false);
-                g_pGame->LoadMission(REF_ID(cIntroMission::ID));
+                g_pGame->LoadMission(cIntroMission::ID);
             }
             else if(m_GameMenu.GetStatus() == 2)
             {
@@ -257,7 +260,7 @@ coreBool cMenu::IsPausedWithStep()
 // 
 const coreLookup<std::string, std::string>& cMenu::GetLanguageList()
 {
-    // static language list (key = name, value = path)
+    // static language list <name, path>
     static coreLookup<std::string, std::string> asLanguage;
 
     if(asLanguage.empty())
