@@ -24,11 +24,11 @@
 
 // ****************************************************************
 // mission specific definitions
-#define VIRIDO_BALLS      (2u)                                               // 
-#define VIRIDO_TRAILS     (4u)                                               // 
-#define VIRIDO_RAWS       (VIRIDO_BALLS * (VIRIDO_TRAILS + 1u))              // 
-#define VIRIDO_PADDLES    (PLAYERS + 1u)                                     // 
-#define VIRIDO_BALL_SPEED (CONTAINS_BIT(m_iStickyState, 1u) ? 0.0f : 1.5f)   // 
+#define VIRIDO_BALLS      (2u)                                    // 
+#define VIRIDO_TRAILS     (4u)                                    // 
+#define VIRIDO_RAWS       (VIRIDO_BALLS * (VIRIDO_TRAILS + 1u))   // 
+#define VIRIDO_PADDLES    (PLAYERS + 1u)                          // 
+#define VIRIDO_BALL_SPEED (1.5f)                                  // 
 
 
 // ****************************************************************
@@ -265,8 +265,8 @@ public:
     inline coreBool GetStickyState()const                         {return CONTAINS_BIT(m_iStickyState, 1u);}
 
     // 
-    inline void     SetBounceReal (const coreBool  bStatus)     {m_bBounceReal = bStatus;}
-    inline coreBool GetBounceState(const coreUintW iIndex)const {ASSERT(iIndex < sizeof(m_iBounceState)*8u) return CONTAINS_BIT(m_iBounceState, iIndex);}
+    inline void      SetBounceReal (const coreBool bStatus) {m_bBounceReal = bStatus;}
+    inline coreUint8 GetBounceState()const                  {return m_iBounceState;}
 
     // 
     inline coreObject3D* GetBall  (const coreUintW iIndex) {ASSERT(iIndex < VIRIDO_BALLS)   return &m_aBallRaw[iIndex * (VIRIDO_TRAILS + 1u)];}
@@ -278,7 +278,11 @@ private:
     void __SetupOwn       ()final;
     void __RenderOwnUnder ()final;
     void __RenderOwnAttack()final;
+    void __MoveOwnBefore  ()final;
     void __MoveOwnAfter   ()final;
+
+    // 
+    static void __BounceEffect(const coreVector2& vEffectPos);
 };
 
 
@@ -286,11 +290,22 @@ private:
 // Nevo mission class
 class cNevoMission final : public cMission
 {
+private:
+    cUnknown0201Boss m_Unknown0201;   // 
+    cUnknown0201Boss m_Unknown0202;   // 
+    cUnknown0201Boss m_Unknown0203;   // 
+
+
 public:
-    cNevoMission() = default;
+    cNevoMission()noexcept;
 
     DISABLE_COPY(cNevoMission)
     ASSIGN_ID(2, "Nevo")
+
+
+private:
+    // execute own routines
+    void __SetupOwn()final;
 };
 
 
@@ -298,11 +313,22 @@ public:
 // Harena mission class
 class cHarenaMission final : public cMission
 {
+private:
+    cUnknown0301Boss m_Unknown0301;   // 
+    cUnknown0301Boss m_Unknown0302;   // 
+    cUnknown0301Boss m_Unknown0303;   // 
+
+
 public:
-    cHarenaMission() = default;
+    cHarenaMission()noexcept;
 
     DISABLE_COPY(cHarenaMission)
     ASSIGN_ID(3, "Harena")
+
+
+private:
+    // execute own routines
+    void __SetupOwn()final;
 };
 
 
@@ -310,11 +336,22 @@ public:
 // Rutilus mission class
 class cRutilusMission final : public cMission
 {
+private:
+    cUnknown0401Boss m_Unknown0401;   // 
+    cUnknown0401Boss m_Unknown0402;   // 
+    cUnknown0401Boss m_Unknown0403;   // 
+
+
 public:
-    cRutilusMission() = default;
+    cRutilusMission()noexcept;
 
     DISABLE_COPY(cRutilusMission)
     ASSIGN_ID(4, "Rutilus")
+
+
+private:
+    // execute own routines
+    void __SetupOwn()final;
 };
 
 
@@ -322,11 +359,22 @@ public:
 // Gelu mission class
 class cGeluMission final : public cMission
 {
+private:
+    cUnknown0501Boss m_Unknown0501;   // 
+    cUnknown0501Boss m_Unknown0502;   // 
+    cUnknown0501Boss m_Unknown0503;   // 
+
+
 public:
-    cGeluMission() = default;
+    cGeluMission()noexcept;
 
     DISABLE_COPY(cGeluMission)
     ASSIGN_ID(5, "Gelu")
+
+
+private:
+    // execute own routines
+    void __SetupOwn()final;
 };
 
 
@@ -334,11 +382,22 @@ public:
 // Calor mission class
 class cCalorMission final : public cMission
 {
+private:
+    cUnknown0601Boss m_Unknown0601;   // 
+    cUnknown0601Boss m_Unknown0602;   // 
+    cUnknown0601Boss m_Unknown0603;   // 
+
+
 public:
-    cCalorMission() = default;
+    cCalorMission()noexcept;
 
     DISABLE_COPY(cCalorMission)
     ASSIGN_ID(6, "Calor")
+
+
+private:
+    // execute own routines
+    void __SetupOwn()final;
 };
 
 
@@ -346,11 +405,22 @@ public:
 // Muscus mission class
 class cMuscusMission final : public cMission
 {
+private:
+    cUnknown0701Boss m_Unknown0701;   // 
+    cUnknown0701Boss m_Unknown0702;   // 
+    cUnknown0701Boss m_Unknown0703;   // 
+
+
 public:
-    cMuscusMission() = default;
+    cMuscusMission()noexcept;
 
     DISABLE_COPY(cMuscusMission)
     ASSIGN_ID(7, "Muscus")
+
+
+private:
+    // execute own routines
+    void __SetupOwn()final;
 };
 
 

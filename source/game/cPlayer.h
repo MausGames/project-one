@@ -11,6 +11,7 @@
 #define _P1_GUARD_PLAYER_H_
 
 // TODO: add all weapons to player directly in class
+// TODO: collision adjustment was not executed once
 
 
 // ****************************************************************
@@ -43,25 +44,24 @@ enum ePlayerStatus : coreUint8
 class cPlayer final : public cShip
 {
 private:
-    cWeapon* m_apWeapon[PLAYER_WEAPONS];        // main weapon objects (bullet factories, should never be NULL)
-    cInput*  m_pInput;                          // pointer to associated input set (should never be NULL)
+    cWeapon* m_apWeapon[PLAYER_WEAPONS];                     // main weapon objects (bullet factories, should never be NULL)
+    cInput*  m_pInput;                                       // pointer to associated input set (should never be NULL)
 
-    coreUint32 m_iScoreMission;                 // 
-    coreUint32 m_aiScoreBoss[MISSION_BOSSES];   // 
+    coreVector2 m_vForce;                                    // 
 
-    coreUint32 m_iComboValue[2];                // absolute values for combo calculations (0 = current value, 1 = max value) 
-    coreUint32 m_iChainValue[2];                // 
-    coreFloat  m_fChainCooldown;                // 
+    coreProtect<coreUint32> m_iScoreMission;                 // 
+    coreProtect<coreUint32> m_aiScoreBoss[MISSION_BOSSES];   // 
 
-    coreProgramPtr m_pDarkProgram;              // 
-    coreFlow       m_fDarkAnimation;            // 
-    coreFloat      m_fDarkTime;                 // 
+    coreProtect<coreUint32> m_iComboValue[2];                // absolute values for combo calculations (0 = current value, 1 = max value) 
+    coreProtect<coreUint32> m_iChainValue[2];                // 
+    coreProtect<coreFloat>  m_fChainCooldown;                // 
 
-    coreVector2 m_vNewPos;                      // new position for smooth movement and animation
-    coreVector2 m_vForce;                       // 
+    coreProgramPtr m_pDarkProgram;                           // 
+    coreFlow       m_fDarkAnimation;                         // 
+    coreFloat      m_fDarkTime;                              // 
 
-    coreObject3D m_Bubble;                      // 
-    coreObject3D m_Exhaust;                     // 
+    coreObject3D m_Bubble;                                   // 
+    coreObject3D m_Exhaust;                                  // 
 
 
 public:
@@ -106,21 +106,19 @@ public:
     inline cWeapon* GetWeapon(const coreUintW iIndex) {ASSERT((iIndex < PLAYER_WEAPONS) && m_apWeapon[iIndex]) return m_apWeapon[iIndex];}
 
     // set object properties
-    inline void SetNewPos(const coreVector2& vNewPos) {m_vNewPos = vNewPos;}
-    inline void SetForce (const coreVector2& vForce)  {m_vForce  = vForce;}
+    inline void SetForce(const coreVector2& vForce) {m_vForce = vForce;}
 
     // get object properties
     inline const cInput*      GetInput        ()const                       {ASSERT(m_pInput) return m_pInput;}
-    inline const coreUint32&  GetScoreMission ()const                       {return m_iScoreMission;}
-    inline const coreUint32&  GetScoreBoss    (const coreUintW iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_aiScoreBoss[iIndex];}
+    inline const coreVector2& GetForce        ()const                       {return m_vForce;}
+    inline       coreUint32   GetScoreMission ()const                       {return m_iScoreMission;}
+    inline       coreUint32   GetScoreBoss    (const coreUintW iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_aiScoreBoss[iIndex];}
     inline       coreFloat    GetCurCombo     ()const                       {return __PLAYER_COMBO(m_iComboValue[0]);}
     inline       coreFloat    GetMaxCombo     ()const                       {return __PLAYER_COMBO(m_iComboValue[1]);}
-    inline const coreUint32&  GetCurChain     ()const                       {return m_iChainValue[0];}
-    inline const coreUint32&  GetMaxChain     ()const                       {return m_iChainValue[1];}
-    inline const coreFloat&   GetChainCooldown()const                       {return m_fChainCooldown;}
+    inline       coreUint32   GetCurChain     ()const                       {return m_iChainValue[0];}
+    inline       coreUint32   GetMaxChain     ()const                       {return m_iChainValue[1];}
+    inline       coreFloat    GetChainCooldown()const                       {return m_fChainCooldown;}
     inline const coreFloat&   GetDarkTime     ()const                       {return m_fDarkTime;}
-    inline const coreVector2& GetNewPos       ()const                       {return m_vNewPos;}
-    inline const coreVector2& GetForce        ()const                       {return m_vForce;}
 };
 
 

@@ -11,6 +11,9 @@
 #define _P1_GUARD_BOSS_H_
 
 // TODO: boomerangs of Crossfield may generate double-hits because of rotating box collision (when moving away from it), bitfield with reset (player-num)
+// TODO: remove warning 4738
+// TODO: boss0101, both boss and duplicate should have own trace
+// TODO: boss0101, correct outline sides
 
 
 // ****************************************************************
@@ -25,13 +28,17 @@
 #define CROSSFIELD_BOOMERANGS (4u)                                                 // 
 #define CROSSFIELD_TRAILS     (3u)                                                 // 
 #define CROSSFIELD_RAWS       (CROSSFIELD_BOOMERANGS * (CROSSFIELD_TRAILS + 1u))   // 
+#define CROSSFIELD_WIDTH      (0.667f)                                             // 
+#define CROSSFIELD_HEIGHT     (0.8f)                                               // 
 
 #define TORUS_RAY_SIZE        (coreVector3(0.7f,50.0f,0.7f))   // 
 #define TORUS_RAY_TEXSIZE     (coreVector2(0.5f, 1.5f))        // 
 #define TORUS_RAY_OFFSET      (8.0f)                           // 
 #define TORUS_RAYWAVE_SIZE    (coreVector3(1.6f, 5.0f,1.3f))   // 
 
-#define VAUS_SCOUTS           (DEFINED(_CORE_DEBUG_) ? 20 : 80)   // 
+#define VAUS_SCOUTS_TOTAL     (DEFINED(_CORE_DEBUG_) ? 16 : 80)   // 
+#define VAUS_SCOUTS_X         (8u)                                // 
+#define VAUS_SCOUTS_Y         (2u)                                // 
 
 
 // ****************************************************************
@@ -187,10 +194,318 @@ public:
 
 private:
     // execute own routines
-    void __ResurrectOwn   ()final;
-    void __KillOwn        (const coreBool bAnimated)final;
-    void __RenderOwnAttack()final;
-    void __MoveOwn        ()final;
+    void __ResurrectOwn()final;
+    void __KillOwn     (const coreBool bAnimated)final;
+    void __MoveOwn     ()final;
+
+    // 
+    coreBool __ExecuteCompanionAttack(const coreUintW iType, const coreFloat fTime);
+};
+
+
+// ****************************************************************
+// 
+class cUnknown0201Boss final : public cBoss
+{
+public:
+    cUnknown0201Boss()noexcept;
+
+    DISABLE_COPY(cUnknown0201Boss)
+    ASSIGN_ID(201, "Unknown0201")
+
+
+private:
+    // execute own routines
+    void __MoveOwn()final;
+};
+
+
+// ****************************************************************
+// 
+class cUnknown0202Boss final : public cBoss
+{
+public:
+    cUnknown0202Boss()noexcept;
+
+    DISABLE_COPY(cUnknown0202Boss)
+    ASSIGN_ID(202, "Unknown0202")
+
+
+private:
+    // execute own routines
+    void __MoveOwn()final;
+};
+
+
+// ****************************************************************
+// 
+class cLeviathanBoss final : public cBoss
+{
+public:
+    cLeviathanBoss()noexcept;
+
+    DISABLE_COPY(cLeviathanBoss)
+    ASSIGN_ID(203, "Leviathan")
+
+
+private:
+    // execute own routines
+    void __MoveOwn()final;
+};
+
+
+// ****************************************************************
+// 
+class cUnknown0301Boss final : public cBoss
+{
+public:
+    cUnknown0301Boss()noexcept;
+
+    DISABLE_COPY(cUnknown0301Boss)
+    ASSIGN_ID(301, "Unknown0301")
+
+
+private:
+    // execute own routines
+    void __MoveOwn()final;
+};
+
+
+// ****************************************************************
+// 
+class cTigerBoss final : public cBoss
+{
+public:
+    cTigerBoss()noexcept;
+
+    DISABLE_COPY(cTigerBoss)
+    ASSIGN_ID(302, "Tiger MK-III")
+
+
+private:
+    // execute own routines
+    void __MoveOwn()final;
+};
+
+
+// ****************************************************************
+// 
+class cUnknown0303Boss final : public cBoss
+{
+public:
+    cUnknown0303Boss()noexcept;
+
+    DISABLE_COPY(cUnknown0303Boss)
+    ASSIGN_ID(303, "Unknown0303")
+
+
+private:
+    // execute own routines
+    void __MoveOwn()final;
+};
+
+
+// ****************************************************************
+// 
+class cUnknown0401Boss final : public cBoss
+{
+public:
+    cUnknown0401Boss()noexcept;
+
+    DISABLE_COPY(cUnknown0401Boss)
+    ASSIGN_ID(401, "Unknown0401")
+
+
+private:
+    // execute own routines
+    void __MoveOwn()final;
+};
+
+
+// ****************************************************************
+// 
+class cUnknown0402Boss final : public cBoss
+{
+public:
+    cUnknown0402Boss()noexcept;
+
+    DISABLE_COPY(cUnknown0402Boss)
+    ASSIGN_ID(402, "Unknown0402")
+
+
+private:
+    // execute own routines
+    void __MoveOwn()final;
+};
+
+
+// ****************************************************************
+// 
+class cUnknown0403Boss final : public cBoss
+{
+public:
+    cUnknown0403Boss()noexcept;
+
+    DISABLE_COPY(cUnknown0403Boss)
+    ASSIGN_ID(403, "Unknown0403")
+
+
+private:
+    // execute own routines
+    void __MoveOwn()final;
+};
+
+
+// ****************************************************************
+// 
+class cUnknown0501Boss final : public cBoss
+{
+public:
+    cUnknown0501Boss()noexcept;
+
+    DISABLE_COPY(cUnknown0501Boss)
+    ASSIGN_ID(501, "Unknown0501")
+
+
+private:
+    // execute own routines
+    void __MoveOwn()final;
+};
+
+
+// ****************************************************************
+// 
+class cPhalarisBoss final : public cBoss
+{
+public:
+    cPhalarisBoss()noexcept;
+
+    DISABLE_COPY(cPhalarisBoss)
+    ASSIGN_ID(502, "Phalaris")
+
+
+private:
+    // execute own routines
+    void __MoveOwn()final;
+};
+
+
+// ****************************************************************
+// 
+class cCholBoss final : public cBoss
+{
+public:
+    cCholBoss()noexcept;
+
+    DISABLE_COPY(cCholBoss)
+    ASSIGN_ID(503, "Chol")
+
+
+private:
+    // execute own routines
+    void __MoveOwn()final;
+};
+
+
+// ****************************************************************
+// 
+class cUnknown0601Boss final : public cBoss
+{
+public:
+    cUnknown0601Boss()noexcept;
+
+    DISABLE_COPY(cUnknown0601Boss)
+    ASSIGN_ID(601, "Unknown0601")
+
+
+private:
+    // execute own routines
+    void __MoveOwn()final;
+};
+
+
+// ****************************************************************
+// 
+class cShelobBoss final : public cBoss
+{
+public:
+    cShelobBoss()noexcept;
+
+    DISABLE_COPY(cShelobBoss)
+    ASSIGN_ID(602, "Shelob")
+
+
+private:
+    // execute own routines
+    void __MoveOwn()final;
+};
+
+
+// ****************************************************************
+// 
+class cUnknown0603Boss final : public cBoss
+{
+public:
+    cUnknown0603Boss()noexcept;
+
+    DISABLE_COPY(cUnknown0603Boss)
+    ASSIGN_ID(603, "Unknown0603")
+
+
+private:
+    // execute own routines
+    void __MoveOwn()final;
+};
+
+
+// ****************************************************************
+// 
+class cUnknown0701Boss final : public cBoss
+{
+public:
+    cUnknown0701Boss()noexcept;
+
+    DISABLE_COPY(cUnknown0701Boss)
+    ASSIGN_ID(701, "Unknown0701")
+
+
+private:
+    // execute own routines
+    void __MoveOwn()final;
+};
+
+
+// ****************************************************************
+// 
+class cUnknown0702Boss final : public cBoss
+{
+public:
+    cUnknown0702Boss()noexcept;
+
+    DISABLE_COPY(cUnknown0702Boss)
+    ASSIGN_ID(702, "Unknown0702")
+
+
+private:
+    // execute own routines
+    void __MoveOwn()final;
+};
+
+
+// ****************************************************************
+// 
+class cUnknown0703Boss final : public cBoss
+{
+public:
+    cUnknown0703Boss()noexcept;
+
+    DISABLE_COPY(cUnknown0703Boss)
+    ASSIGN_ID(703, "Unknown0703")
+
+
+private:
+    // execute own routines
+    void __MoveOwn()final;
 };
 
 
@@ -236,20 +551,15 @@ template <typename F, typename G> void cBoss::_PhaseTimer(const coreUintW iTimer
         // 
         oTimer.SetMaxLoops(1u);
         oTimer.Play(CORE_TIMER_PLAY_RESET);
-
-        // 
-        nUpdateFunc(0.0f, 0.0f, false);
     }
-    else
-    {
-        // 
-        const coreFloat fTimeBefore = nLerpFunc(0.0f, 1.0f, oTimer.GetValue(CORE_TIMER_GET_NORMAL));
-        oTimer.Update(fSpeed);
-        const coreFloat fTime       = nLerpFunc(0.0f, 1.0f, oTimer.GetValue(CORE_TIMER_GET_NORMAL));
 
-        // 
-        nUpdateFunc(fTime, fTimeBefore, !oTimer.GetStatus());
-    }
+    // 
+    const coreFloat fTimeBefore = nLerpFunc(0.0f, 1.0f, oTimer.GetValue(CORE_TIMER_GET_NORMAL));
+    oTimer.Update(fSpeed);
+    const coreFloat fTime       = nLerpFunc(0.0f, 1.0f, oTimer.GetValue(CORE_TIMER_GET_NORMAL));
+
+    // 
+    nUpdateFunc(fTime, fTimeBefore, !oTimer.GetStatus());
 }
 
 

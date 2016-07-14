@@ -22,7 +22,7 @@ cProjectOneBoss::cProjectOneBoss()noexcept
     this->DefineModelLow ("ship_projectone.md3");
     this->DefineTexture  (0u, "ship_player.png");
 
-    // 
+    // set object properties
     this->SetSize(coreVector3(1.2f,1.2f,1.2f));
 
     // configure the boss

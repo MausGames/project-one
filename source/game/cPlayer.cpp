@@ -13,12 +13,10 @@
 // constructor
 cPlayer::cPlayer()noexcept
 : m_pInput         (&g_aInput[0])
-, m_iScoreMission  (0u)
+, m_vForce         (coreVector2(0.0f,0.0f))
 , m_fChainCooldown (0.0f)
 , m_fDarkAnimation (0.0f)
 , m_fDarkTime      (0.0f)
-, m_vNewPos        (coreVector2(0.0f,0.0f))
-, m_vForce         (coreVector2(0.0f,0.0f))
 {
     // load object resources
     this->DefineTexture(0u, "ship_player.png");
@@ -203,24 +201,24 @@ void cPlayer::Move()
 
         // move the ship
         const coreFloat fSpeed = (!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && CONTAINS_BIT(m_pInput->iButtonHold, 0u)) ? 20.0f : 50.0f;
-        m_vNewPos += m_pInput->vMove * (Core::System->GetTime() * fSpeed);
+        coreVector2 vNewPos = this->GetPosition().xy() + m_pInput->vMove * (Core::System->GetTime() * fSpeed);
 
         // 
         if(!m_vForce.IsNull())
         {
-            m_vNewPos += m_vForce * Core::System->GetTime();
-            m_vForce  *= 1.0f - 3.0f * Core::System->GetTime();
+            vNewPos  += m_vForce * Core::System->GetTime();
+            m_vForce *= 1.0f - 3.0f * Core::System->GetTime();
         }
 
         // restrict movement to the foreground area
-             if(m_vNewPos.x < -FOREGROUND_AREA.x) m_vNewPos.x = -FOREGROUND_AREA.x;
-        else if(m_vNewPos.x >  FOREGROUND_AREA.x) m_vNewPos.x =  FOREGROUND_AREA.x;
-             if(m_vNewPos.y < -FOREGROUND_AREA.y) m_vNewPos.y = -FOREGROUND_AREA.y;
-        else if(m_vNewPos.y >  FOREGROUND_AREA.y) m_vNewPos.y =  FOREGROUND_AREA.y;
+             if(vNewPos.x < -FOREGROUND_AREA.x) vNewPos.x = -FOREGROUND_AREA.x;
+        else if(vNewPos.x >  FOREGROUND_AREA.x) vNewPos.x =  FOREGROUND_AREA.x;
+             if(vNewPos.y < -FOREGROUND_AREA.y) vNewPos.y = -FOREGROUND_AREA.y;
+        else if(vNewPos.y >  FOREGROUND_AREA.y) vNewPos.y =  FOREGROUND_AREA.y;
 
         // calculate smooth position-offset
-        const coreVector2 vDiff   = m_vNewPos - this->GetPosition().xy();
-        const coreVector2 vOffset = vDiff * (Core::System->GetTime() * 40.0f);
+        const coreVector2 vDiff   = vNewPos - this->GetPosition().xy();
+        //const coreVector2 vOffset = vDiff * (Core::System->GetTime() * 40.0f);
 
 
         static coreFlow cooldown = 0.0f;
@@ -270,7 +268,7 @@ void cPlayer::Move()
         // set new position and orientation
 
         //this->SetPosition   (coreVector3(vOffset + this->GetPosition().xy(), 0.0f));
-        this->SetPosition   (coreVector3(m_vNewPos, 0.0f));
+        this->SetPosition   (coreVector3(vNewPos, 0.0f));
         //this->SetOrientation(coreVector3(CLAMP(vDiff.x, -0.6f, 0.6f), 0.0f, 1.0f).Normalize());
         this->SetOrientation(coreVector3(vOri.x, 0.0f, vOri.y));
     }
@@ -367,7 +365,7 @@ void cPlayer::Resurrect(const coreVector2& vPosition)
     REMOVE_FLAG(m_iStatus, PLAYER_STATUS_DEAD)
 
     // 
-    m_vNewPos = vPosition;
+    this->SetPosition(coreVector3(vPosition, 0.0f));
 
     // add ship to the game
     cShip::_Resurrect(true, vPosition, coreVector2(0.0f,1.0f), TYPE_PLAYER);
@@ -484,7 +482,7 @@ void cPlayer::ResetStats()
 {
     // 
     m_iScoreMission = 0u;
-    std::memset(m_aiScoreBoss, 0, sizeof(m_aiScoreBoss));
+    for(coreUintW i = 0u; i < MISSION_BOSSES; ++i) m_aiScoreBoss[i] = 0u;
 
     // 
     m_iComboValue[1] = m_iComboValue[0] = 0u;

@@ -12,6 +12,7 @@
 // ****************************************************************
 // constructor
 cPostProcessing::cPostProcessing()noexcept
+: m_bDebugMode (false)
 {
     // load post-processing shader-programs
     m_pProgramSimple    = Core::Manager::Resource->Get<coreProgram>("full_post_program");
@@ -54,9 +55,9 @@ void cPostProcessing::Apply()
     coreFrameBuffer::EndDraw();
 
     // select between debug, distorted or simple shader-program
-    if(Core::Debug->IsEnabled() && !bScreenshot) this->DefineProgram(m_pProgramDebug);
-              else if(g_pDistortion->IsActive()) this->DefineProgram(m_pProgramDistorted);
-                                            else this->DefineProgram(m_pProgramSimple);
+                      if(m_bDebugMode) this->DefineProgram(m_pProgramDebug);
+    else if(g_pDistortion->IsActive()) this->DefineProgram(m_pProgramDistorted);
+                                  else this->DefineProgram(m_pProgramSimple);
 
     // bind all required frame buffers
     this->DefineTexture(POST_TEXTURE_UNIT_ENVIRONMENT, g_pEnvironment->GetFrameBuffer()->GetColorTarget(0u).pTexture);

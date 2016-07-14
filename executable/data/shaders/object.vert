@@ -26,19 +26,27 @@ varying vec3 v_av3ShipNormal;     // simplified normal vector
 
 void VertexMain()
 {
-
-    vec3 v3WavePos = a_v3RawPosition;
 #if defined(_P1_WAVE_) 
-    v3WavePos.y += 0.12 * sin(v3WavePos.z*2.0 + u_v3Position.y * 0.3125 * PI - u_v1Time) * min(v3WavePos.z, 1.0);
+
+    // 
+    vec3 v3WavePos    = a_v3RawPosition;
+         v3WavePos.y += 0.12 * sin(v3WavePos.z * 2.0 + u_v3Position.y * 0.3125 * PI - u_v1Time) * min(v3WavePos.z, 1.0);
+
+    // 
+    vec4 v4NewPosition  = vec4(coreObject3DTransform(v3WavePos), 1.0);
+    vec4 v4NewPosition2 = vec4(coreObject3DTransformRaw(),       1.0);
+    
+#else
+
+    // 
+    vec4 v4NewPosition  = vec4(coreObject3DTransformRaw(), 1.0);
+    vec4 v4NewPosition2 = v4NewPosition;
+    
 #endif 
 
     // transform position and shadow projection
-    vec4 v4NewPosition = vec4(coreObject3DTransform(v3WavePos), 1.0);
-    
-    vec4 v4NewPosition2 = vec4(coreObject3DTransformRaw(), 1.0);
-    
-    gl_Position        = u_m4ViewProj     * v4NewPosition;
-    v_v4ShadowCoord    = u_m4ShadowMatrix * v4NewPosition2;
+    gl_Position     = u_m4ViewProj     * v4NewPosition;
+    v_v4ShadowCoord = u_m4ShadowMatrix * v4NewPosition2;
     
     // forward texture coordinates
     v_av2TexCoord[0] = a_v2RawTexCoord;

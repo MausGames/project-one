@@ -44,27 +44,27 @@ enum cGameStatus : coreUint8
 class cGame final
 {
 private:
-    cPlayer m_aPlayer[GAME_PLAYERS];         // player objects
+    cPlayer m_aPlayer[GAME_PLAYERS];                      // player objects
 
-    cEnemyManager  m_EnemyManager;           // enemy manager
-    cBulletManager m_BulletManagerPlayer;    // low-priority bullet manager
-    cBulletManager m_BulletManagerEnemy;     // high-priority bullet manager
-    cShieldManager m_ShieldManager;          // 
+    cEnemyManager  m_EnemyManager;                        // enemy manager
+    cBulletManager m_BulletManagerPlayer;                 // low-priority bullet manager
+    cBulletManager m_BulletManagerEnemy;                  // high-priority bullet manager
+    cShieldManager m_ShieldManager;                       // 
 
-    cCombatStats m_CombatStats;              // combat stats overlay
-    cCombatText  m_CombatText;               // combat text overlay
-    cInterface   m_Interface;                // interface overlay
+    cCombatStats m_CombatStats;                           // combat stats overlay
+    cCombatText  m_CombatText;                            // combat text overlay
+    cInterface   m_Interface;                             // interface overlay
 
-    cMission* m_pMission;                    // active mission (should never be NULL)
+    cMission* m_pMission;                                 // active mission (should never be NULL)
 
-    coreFlow m_fTimeGame;                    // 
-    coreFlow m_fTimeMission;                 // total time in mission
-    coreFlow m_afTimeBoss[MISSION_BOSSES];   // total time per boss battle
+    coreProtect<coreFlow> m_fTimeGame;                    // 
+    coreProtect<coreFlow> m_fTimeMission;                 // total time in mission
+    coreProtect<coreFlow> m_afTimeBoss[MISSION_BOSSES];   // total time per boss battle
 
-    coreUint8 m_iDepthLevel;                 // 
+    coreUint8 m_iDepthLevel;                              // 
 
-    coreUint8 m_iStatus;                     // 
-    coreBool  m_bCoop;                       // 
+    coreUint8 m_iStatus;                                  // 
+    coreBool  m_bCoop;                                    // 
 
 
 public:
@@ -109,9 +109,9 @@ public:
     inline cMission*       GetMission            ()const                  {ASSERT(m_pMission) return m_pMission;}
 
     // get object properties
-    inline const coreFloat& GetTimeGame   ()const                       {return m_fTimeGame;}
-    inline const coreFloat& GetTimeMission()const                       {return m_fTimeMission;}
-    inline const coreFloat& GetTimeBoss   (const coreUintW iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_afTimeBoss[iIndex];}
+    inline       coreFloat  GetTimeGame   ()const                       {return m_fTimeGame;}
+    inline       coreFloat  GetTimeMission()const                       {return m_fTimeMission;}
+    inline       coreFloat  GetTimeBoss   (const coreUintW iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_afTimeBoss[iIndex];}
     inline const coreUint8& GetStatus     ()const                       {return m_iStatus;}
     inline const coreBool&  GetCoop       ()const                       {return m_bCoop;}
 

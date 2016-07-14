@@ -340,7 +340,7 @@ coreVector2 cEnemy::AimAtPlayer()const
 coreVector2 cEnemy::AimAtPlayer(const cPlayer* pPlayer)const
 {
     // 
-    return (pPlayer->GetPosition().xy() - this->GetPosition().xy()).Normalize();
+    return (pPlayer->GetPosition().xy() - this->GetPosition().xy());
 }
 
 

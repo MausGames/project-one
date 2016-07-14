@@ -41,8 +41,9 @@
 // TODO: create timer and int-value as tick-multiplier for sustained damage
 // TODO: remove magic numbers (regularly)
 // TODO: test framerate-lock for g-sync stuff
-// TODO: clean up shader modifiers and shaders, also try to look at unused uniforms, varyings and attributes (shadow-matrix is used in ship-shader !?)
+// TODO: clean up shader modifiers and shaders, also try to look at unused uniforms, varyings and attributes (shadow-matrix is used in ship-shader !?), and reduce passing data across shader stages
 // TODO: use single-channel texture where possible
+// TODO: pre-calc HSVtoRGB
 
 
 // ****************************************************************
@@ -75,7 +76,7 @@
 #define COLOR_MENU_GOLD      (coreVector3(1.000f, 0.859f, 0.000f))
 #define COLOR_ENERGY_YELLOW  (coreVector3(0.950f, 0.800f, 0.280f)) // (coreVector3(0.900f, 0.800f, 0.380f))
 #define COLOR_ENERGY_ORANGE  (coreVector3(1.000f, 0.400f, 0.000f))
-#define COLOR_ENERGY_RED     (coreVector3(1.000f, 0.275f, 0.275f))
+#define COLOR_ENERGY_RED     (coreVector3(1.000f, 0.290f, 0.290f))
 #define COLOR_ENERGY_PURPLE  (coreVector3(0.450f, 0.200f, 1.000f))
 #define COLOR_ENERGY_BLUE    (coreVector3(0.100f, 0.430f, 1.000f))
 #define COLOR_ENERGY_GREEN   (coreVector3(0.270f, 0.710f, 0.270f))

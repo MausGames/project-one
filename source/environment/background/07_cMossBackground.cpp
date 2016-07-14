@@ -17,5 +17,5 @@ cMossBackground::cMossBackground()noexcept
     m_pOutdoor = new cOutdoor("dust", "crack", 5u, 4.5f);
 
     // 
-    m_pWater = new cWater();
+    m_pWater = new cRainWater();
 }

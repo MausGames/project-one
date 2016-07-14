@@ -24,17 +24,17 @@
 class INTERFACE cShip : public coreObject3D
 {
 protected:
-    coreModelPtr m_pModelHigh;   // high-polygon model objects (used for default shading)
-    coreModelPtr m_pModelLow;    // low-polygon model object (used for shadow, outline)
-    coreUint32   m_iBaseColor;   // packed base color for interpolations
+    coreModelPtr m_pModelHigh;                // high-polygon model objects (used for default shading)
+    coreModelPtr m_pModelLow;                 // low-polygon model object (used for shadow, outline)
+    coreUint32   m_iBaseColor;                // packed base color for interpolations
 
-    coreInt32 m_iMaxHealth;      // maximum health value (armor)
-    coreInt32 m_iCurHealth;      // current health value (armor)
-    coreInt32 m_iPreHealth;      // 
+    coreProtect<coreInt32> m_iMaxHealth;      // maximum health value (armor)
+    coreProtect<coreInt32> m_iCurHealth;      // current health value (armor)
+    coreProtect<coreInt32> m_iPreHealth;      // 
 
-    coreVector2 m_vOldPos;       // 
+    coreVector2 m_vOldPos;                    // 
 
-    coreFloat m_fBlink;          // blink intensity (to highlight successful hits)
+    coreFloat m_fBlink;                       // blink intensity (to highlight successful hits)
 
 
 protected:
@@ -74,8 +74,8 @@ public:
     inline const coreModelPtr& GetModelHigh   ()const {return m_pModelHigh;}
     inline const coreModelPtr& GetModelLow    ()const {return m_pModelLow;}
     inline       coreVector3   GetBaseColor   ()const {return coreVector4::UnpackUnorm4x8(m_iBaseColor).xyz();}
-    inline const coreInt32&    GetMaxHealth   ()const {return m_iMaxHealth;}
-    inline const coreInt32&    GetCurHealth   ()const {return m_iCurHealth;}
+    inline       coreInt32     GetMaxHealth   ()const {return m_iMaxHealth;}
+    inline       coreInt32     GetCurHealth   ()const {return m_iCurHealth;}
     inline       coreFloat     GetCurHealthPct()const {return I_TO_F(m_iCurHealth) * RCP(I_TO_F(m_iMaxHealth));}
     inline const coreVector2&  GetOldPos      ()const {return m_vOldPos;}
     inline       coreFloat     GetBlink       ()const {return MIN(m_fBlink, 1.0f);}

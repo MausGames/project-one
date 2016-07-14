@@ -30,7 +30,7 @@ cCrossfieldBoss::cCrossfieldBoss()noexcept
     this->DefineModelLow ("ship_boss_crossfield_low.md3");
 
     // set object properties
-    this->SetSize             (coreVector3(3.0f,3.0f,3.0f));
+    this->SetSize             (coreVector3(3.0f,3.0f,3.0f) * 1.1f);
     this->SetCollisionModifier(coreVector3(0.9f,0.9f,3.5f));
 
     // configure the boss
@@ -72,7 +72,7 @@ cCrossfieldBoss::cCrossfieldBoss()noexcept
             pBoomerang->DefineProgram("effect_energy_invert_program");
 
             // set object properties
-            pBoomerang->SetSize   (coreVector3(1.4f,1.4f,1.4f));
+            pBoomerang->SetSize   (coreVector3(1.4f,1.4f,1.4f) * 1.1f);
             pBoomerang->SetColor3 (COLOR_ENERGY_RED * (iType ? (0.15 + 0.15f * I_TO_F(iType)) : 0.8f));
             pBoomerang->SetTexSize(coreVector2(1.5f,1.5f));
             pBoomerang->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
@@ -118,17 +118,17 @@ void cCrossfieldBoss::__KillOwn(const coreBool bAnimated)
     {
         m_aiCounter[RESURRECT_STATUS]= 1;
 
-        // 
-        this->DefineProgram(m_Duplicate.GetProgram());
-        this->DefineTexture(0u, m_Duplicate.GetTexture(0u));
-        this->SetColor3    (m_Duplicate.GetColor3());
-        this->ChangeType   (TYPE_OBJECT(0));
-        if(m_aiCounter[DUPLICATE_STATUS] != 0)
-        {
-            this->SetPosition   (m_Duplicate.GetPosition   ());
-            this->SetDirection  (m_Duplicate.GetDirection  ());
-            this->SetOrientation(m_Duplicate.GetOrientation());
-        }
+        // swap boss object with duplicate object
+        //this->DefineProgram(m_Duplicate.GetProgram());
+        //this->DefineTexture(0u, m_Duplicate.GetTexture(0u));
+        //this->SetColor3    (m_Duplicate.GetColor3());
+        //this->ChangeType   (TYPE_OBJECT(0));
+        //if(m_aiCounter[DUPLICATE_STATUS] != 0)
+        //{
+        //    this->SetPosition   (m_Duplicate.GetPosition   ());
+        //    this->SetDirection  (m_Duplicate.GetDirection  ());
+        //    this->SetOrientation(m_Duplicate.GetOrientation());
+        //}
 
         // 
         m_avVector[0].xy (this->GetPosition   ().xy() / FOREGROUND_AREA);
@@ -228,8 +228,8 @@ void cCrossfieldBoss::__MoveOwn()
         PHASE_CONTROL_TIMER(0u, 0.44f, LERP_LINEAR)
         {
             // 
-            this->DefaultMoveLerp  (coreVector2(0.667f,2.0f), coreVector2(0.667f,-2.0f), fTime);
-            this->DefaultRotateLerp(0.0f*PI,                  7.0f*PI,                   fTime);
+            this->DefaultMoveLerp  (coreVector2(CROSSFIELD_WIDTH, 2.0f), coreVector2(CROSSFIELD_WIDTH, -2.0f), fTime);
+            this->DefaultRotateLerp(0.0f*PI,                             7.0f*PI,                              fTime);
 
             // 
             if(PHASE_FINISHED)
@@ -254,8 +254,8 @@ void cCrossfieldBoss::__MoveOwn()
         PHASE_CONTROL_TIMER(0u, 0.5f, LERP_BREAK)
         {
             // 
-            this->DefaultMoveLerp  (coreVector2(0.0f,2.0f), coreVector2(0.0f,0.9f), fTime);
-            this->DefaultRotateLerp(0.0f*PI,                5.0f*PI,                fTime);
+            this->DefaultMoveLerp  (coreVector2(0.0f,2.0f), coreVector2(0.0f, CROSSFIELD_HEIGHT), fTime);
+            this->DefaultRotateLerp(0.0f*PI,                5.0f*PI,                              fTime);
 
             // 
             if(PHASE_TIME_POINT(0.85f))
@@ -298,6 +298,10 @@ void cCrossfieldBoss::__MoveOwn()
                 g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.4f, this, this->GetPosition().xy(), vDir)->MakeGreen();
                 g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.3f, this, this->GetPosition().xy(), vDir)->MakeGreen();
 
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.5f, this, this->GetPosition().xy(), -vDir)->MakeGreen();
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.4f, this, this->GetPosition().xy(), -vDir)->MakeGreen();
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.3f, this, this->GetPosition().xy(), -vDir)->MakeGreen();
+
                 if(m_aiCounter[DUPLICATE_STATUS])
                 {
                     // 
@@ -305,24 +309,23 @@ void cCrossfieldBoss::__MoveOwn()
                     g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.5f, this, m_Duplicate.GetPosition().xy(), vDir2)->MakeGreen();
                     g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.4f, this, m_Duplicate.GetPosition().xy(), vDir2)->MakeGreen();
                     g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.3f, this, m_Duplicate.GetPosition().xy(), vDir2)->MakeGreen();
+                
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.5f, this, m_Duplicate.GetPosition().xy(), -vDir2)->MakeGreen();
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.4f, this, m_Duplicate.GetPosition().xy(), -vDir2)->MakeGreen();
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.3f, this, m_Duplicate.GetPosition().xy(), -vDir2)->MakeGreen();
                 }
             });
 
             // 
-            this->DefaultMoveLerp(coreVector2(bSecond ? (fSideSign *  4.5f) : 0.0f, 0.9f),
-                                  coreVector2(           fSideSign * -4.5f,         0.9f), fTime);
-            this->DefaultRotateLerp(1.0f*PI, 11.0f*PI, fSideTime);
+            this->DefaultMoveLerp(coreVector2(bSecond ? (fSideSign *  4.5f) : 0.0f, CROSSFIELD_HEIGHT),
+                                  coreVector2(           fSideSign * -4.5f,         CROSSFIELD_HEIGHT), fTime);
+            this->DefaultRotateLerp(1.0f*PI, bSecond ? (15.0f*PI) : (11.0f*PI), fSideTime);
 
             // 
-            if(m_aiCounter[DUPLICATE_STATUS] == 1)
-            {
-                // 
-                if(PHASE_TIME_POINT(0.5f)) m_aiCounter[DUPLICATE_STATUS] = 2;
-            }
             if(m_aiCounter[DUPLICATE_STATUS])
             {
                 // 
-                g_pEnvironment->SetTargetDirection(coreVector2::Direction(fSideSign * (bSecond ? -2.5f*PI : -2.0f*PI) * fTime));
+                g_pEnvironment->SetTargetDirection(coreVector2::Direction(fSideSign * -2.0f*PI * fTime));
 
                 // 
                 if(bSecond && (ABS(this->GetPosition().x) < 2.0f*FOREGROUND_AREA.x))
@@ -343,65 +346,6 @@ void cCrossfieldBoss::__MoveOwn()
     else if(m_iPhase == 11u || m_iPhase == 14u)
     {
         {
-            ++m_iPhase;
-            PHASE_RESET(0u)
-            PHASE_RESET(1u)
-            PHASE_RESET(2u)
-
-            // 
-            m_aiCounter[CURRENT_SIDE] = 1 - m_aiCounter[CURRENT_SIDE];
-        }
-        /*
-        const coreBool bSecond = (m_iPhase == 14u) ? true : false;
-
-        // 
-        const coreVector2 vDiff  = pPlayer->GetPosition().xy() - this->GetPosition().xy();
-        const coreFloat   fSpeed = ((ABS(vDiff.x) > ABS(vDiff.y)) ? 6.0f : 1.0f) * ((bSecond ? 1.0f : 0.0f) + (m_aiCounter[DUPLICATE_STATUS] ? 1.0f : 0.0f));
-
-        PHASE_CONTROL_TICKER(0u, 0u, fSpeed)
-        {
-            const coreObject3D* pOwner = (!bSecond || iTick % 2u) ? pBase : this;
-
-            // 
-            const coreVector2 vPos =  pOwner ->GetPosition().xy();
-            const coreVector2 vDir = (pPlayer->GetPosition().xy() - vPos).Normalize();
-
-            // 
-            g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.3f, this, vPos, vDir)->MakeOrange()->MakeSmaller(1.2f);
-            g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 5.0f, 3u, COLOR_ENERGY_ORANGE);
-        });
-
-        PHASE_CONTROL_TICKER(1u, 0u, 2.0f)
-        {
-            // 
-            const coreVector2 vTan = this->GetDirection().xy().Rotate90() * ((iTick % 2u) ? -1.0f : 1.0f);
-
-            // 
-            for(coreUintW i = 6u - MIN(iTick + 1u, 6u); i < 6u; ++i)
-            {
-                const coreFloat fOffset = I_TO_F(i - 1u);
-
-                // 
-                const coreVector2 vPos =  this->GetPosition ().xy() + vTan * (2.0f*fOffset + 2.0f) - this->GetDirection().xy() * (2.0f*fOffset);
-                const coreVector2 vDir = (this->GetDirection().xy() + vTan * (0.1f*fOffset)).Normalize();
-
-                // 
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.0f, this, vPos,             vDir)                      ->MakeBlue();
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.0f, this, vPos + vDir*2.5f, vDir)                      ->MakeBlue();
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.0f, this, vPos,             -this->GetDirection().xy())->MakeBlue();
-            }
-        });
-
-        PHASE_CONTROL_TIMER(2u, 1.0f/4.0f, LERP_SMOOTH)
-        {
-            const coreFloat fSideTime = m_aiCounter[CURRENT_SIDE] ? fTime : (1.0f - fTime);
-
-            // 
-            this->DefaultOrientateLerp(0.0f*PI, 8.0f*PI, fSideTime);
-
-            // 
-            if(PHASE_FINISHED)
-            {
                 ++m_iPhase;
                 PHASE_RESET(0u)
                 PHASE_RESET(1u)
@@ -410,15 +354,71 @@ void cCrossfieldBoss::__MoveOwn()
                 // 
                 m_aiCounter[CURRENT_SIDE] = 1 - m_aiCounter[CURRENT_SIDE];
             }
-        });
-        */
+        //const coreBool bSecond = (m_iPhase == 14u) ? true : false;
+        //
+        //// 
+        //const coreVector2 vDiff  = pPlayer->GetPosition().xy() - this->GetPosition().xy();
+        //const coreFloat   fSpeed = ((ABS(vDiff.x) > ABS(vDiff.y)) ? 1.0f/*6.0f*/ : 1.0f) * ((bSecond ? 1.0f : 0.0f) + (m_aiCounter[DUPLICATE_STATUS] ? 1.0f : 0.0f));
+        //
+        //PHASE_CONTROL_TICKER(0u, 0u, fSpeed)
+        //{
+        //    const coreObject3D* pOwner = (!bSecond || iTick % 2u) ? pBase : this;
+        //
+        //    // 
+        //    const coreVector2 vPos =  pOwner ->GetPosition().xy();
+        //    const coreVector2 vDir = (pPlayer->GetPosition().xy() - vPos).Normalize();
+        //
+        //    // 
+        //    g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.3f, this, vPos, vDir)->MakeOrange()->MakeSmaller(1.2f);
+        //    g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 5.0f, 3u, COLOR_ENERGY_ORANGE);
+        //});
+        //
+        //PHASE_CONTROL_TICKER(1u, 0u, 2.0f)
+        //{
+        //    // 
+        //    const coreVector2 vTan = this->GetDirection().xy().Rotate90() * ((iTick % 2u) ? -1.0f : 1.0f);
+        //
+        //    // 
+        //    for(coreUintW i = 0u/*6u - MIN(iTick + 1u, 6u)*/; i < 6u; ++i)
+        //    {
+        //        const coreFloat fOffset = I_TO_F(i - 1u);
+        //
+        //        // 
+        //        const coreVector2 vPos =  this->GetPosition ().xy() + vTan * (2.0f*fOffset + 2.0f) - this->GetDirection().xy() * (2.0f*fOffset);
+        //        const coreVector2 vDir = (this->GetDirection().xy() + vTan * (0.1f*fOffset)).Normalize();
+        //
+        //        // 
+        //        g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.0f, this, vPos,             vDir)                      ->MakeBlue();
+        //        g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.0f, this, vPos + vDir*2.5f, vDir)                      ->MakeBlue();
+        //        g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.0f, this, vPos,             -this->GetDirection().xy())->MakeBlue();
+        //    }
+        //});
+        //
+        //PHASE_CONTROL_TIMER(2u, 1.0f/2.0f, LERP_SMOOTH)
+        //{
+        //    const coreFloat fSideTime = m_aiCounter[CURRENT_SIDE] ? fTime : (1.0f - fTime);
+        //
+        //    // 
+        //    this->DefaultOrientateLerp(0.0f*PI, 4.0f*PI, fSideTime);
+        //
+        //    // 
+        //    if(PHASE_FINISHED)
+        //    {
+        //        ++m_iPhase;
+        //        PHASE_RESET(0u)
+        //        PHASE_RESET(1u)
+        //        PHASE_RESET(2u)
+        //
+        //        // 
+        //        m_aiCounter[CURRENT_SIDE] = 1 - m_aiCounter[CURRENT_SIDE];
+        //    }
+        //});
     }
 
     // ################################################################
     // 
     else if(m_iPhase == 12u || m_iPhase == 15u)
-    {
-        ++m_iPhase;
+    {++m_iPhase; 
         //PHASE_CONTROL_TICKER(0u, 0u, (m_iPhase == 12u) ? 2.0f : 0.75f)
         //{
         //    ++m_iPhase;
@@ -436,12 +436,8 @@ void cCrossfieldBoss::__MoveOwn()
             const coreFloat fSideSign = m_aiCounter[CURRENT_SIDE] ? -1.0f    :  1.0f;
 
             // 
-            this->DefaultMoveLerp  (coreVector2(fSideSign * 0.5f, 0.9f), coreVector2(fSideSign * 0.5f, -1.5f), fOwnTime);
-            this->DefaultRotateLerp(1.0f*PI,                             5.0f*PI,                              fSideTime);
-
-            // 
-            if(m_aiCounter[DUPLICATE_STATUS])
-                g_pEnvironment->SetTargetDirection(coreVector2::Direction(LERPS(fSideSign * 0.5f*PI, 0.0f, fTime)));
+            this->DefaultMoveLerp  (coreVector2(fSideSign * 0.5f, CROSSFIELD_HEIGHT), coreVector2(fSideSign * 0.5f, -1.5f), fOwnTime);
+            this->DefaultRotateLerp(1.0f*PI,                                          5.0f*PI,                              fSideTime);
 
             // 
             if(PHASE_FINISHED)
@@ -458,8 +454,8 @@ void cCrossfieldBoss::__MoveOwn()
             const coreFloat fSideTime = m_aiCounter[CURRENT_SIDE] ? fTime : (1.0f - fTime);
 
             // 
-            this->DefaultMoveLerp  (coreVector2(0.0f,2.0f), coreVector2(0.0f,0.9f), fTime);
-            this->DefaultRotateLerp(1.0f*PI,                5.0f*PI,                fSideTime);
+            this->DefaultMoveLerp  (coreVector2(0.0f,2.0f), coreVector2(0.0f, CROSSFIELD_HEIGHT), fTime);
+            this->DefaultRotateLerp(1.0f*PI,                5.0f*PI,                              fSideTime);
 
             // 
             if(PHASE_FINISHED)
@@ -504,30 +500,13 @@ void cCrossfieldBoss::__MoveOwn()
             const coreFloat fSideSign = m_aiCounter[CURRENT_SIDE] ? -1.0f : 1.0f;
 
             // 
-            this->SetPosition      (coreVector3(coreVector2::Direction(LERP(0.0f*PI, fSideSign * -4.0f*PI, fTime)) * FOREGROUND_AREA * 0.9f, 0.0f));
+            this->SetPosition      (coreVector3(coreVector2::Direction(LERP(0.0f*PI, fSideSign * -4.0f*PI, fTime)) * FOREGROUND_AREA * CROSSFIELD_HEIGHT, 0.0f));
             this->DefaultRotateLerp(1.0f*PI, fSideSign * 21.0f*PI, fTime);
-
-
-              
-            //PHASE_CONTROL_TICKER(1u, 0u, (2.0f + 4.0f * SIN(fTime*PI)) * 0.2f)   // increase shoot-speed with movement-speed
-            //{
-            //
-            //        // 
-            //        const coreVector2 vDir = -this->GetPosition().xy().Normalize();
-            //        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.5f, this, this->GetPosition().xy(), vDir)->MakeGreen();
-            //        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.4f, this, this->GetPosition().xy(), vDir)->MakeGreen();
-            //        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.3f, this, this->GetPosition().xy(), vDir)->MakeGreen();
-            //
-            //});
-              
-
 
             // 
             if(PHASE_FINISHED)
             {
                 ++m_iPhase;
-                //PHASE_RESET(0u)            
-                //PHASE_RESET(1u)            
 
                 // 
                 m_aiCounter[BOOMERANG_TARGET] = 1;
@@ -594,9 +573,12 @@ void cCrossfieldBoss::__MoveOwn()
             m_aiCounter[DUPLICATE_STATUS] = 1;
 
             // 
-            m_Duplicate.SetAlpha  (0.0f);
-            m_Duplicate.SetEnabled(CORE_OBJECT_ENABLE_ALL);
-            m_Duplicate.ChangeType(TYPE_OBJECT(0));
+            m_Duplicate.SetPosition   (this->GetPosition   ());
+            m_Duplicate.SetDirection  (this->GetDirection  ());
+            m_Duplicate.SetOrientation(this->GetOrientation());
+            m_Duplicate.SetAlpha      (0.0f);
+            m_Duplicate.SetEnabled    (CORE_OBJECT_ENABLE_ALL);
+            m_Duplicate.ChangeType    (TYPE_OBJECT(0));
 
             // 
             g_pSpecialEffects->MacroExplosionColorBig(this->GetPosition(), COLOR_ENERGY_RED);
@@ -614,7 +596,28 @@ void cCrossfieldBoss::__MoveOwn()
 
             // 
             if(PHASE_FINISHED)
+                ++m_iPhase;
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 28u)
+    {
+        PHASE_CONTROL_TIMER(0u, 1.0f/2.0f, LERP_SMOOTH)
+        {
+            // 
+            m_Duplicate.SetPosition (coreVector3(coreVector2::Direction(LERP(0.0f*PI, -1.0f*PI, fTime)) * FOREGROUND_AREA * CROSSFIELD_HEIGHT, 0.0f));
+            m_Duplicate.SetDirection(coreVector3(coreVector2::Direction(LERP(1.0f*PI,  4.0f*PI, fTime)), 0.0f));
+
+            // 
+            if(PHASE_FINISHED)
+            {
                 m_iPhase = 10u;
+
+                // 
+                m_aiCounter[DUPLICATE_STATUS] = 2;
+            }
         });
     }
 
@@ -649,8 +652,8 @@ void cCrossfieldBoss::__MoveOwn()
             const coreFloat fOwnTime = LERPB(0.0f, 1.0f, fTime);
 
             // 
-            this->DefaultMoveLerp  (coreVector2(0.0f,2.0f), coreVector2(0.0f,0.9f), fOwnTime);
-            this->DefaultRotateLerp(0.0f*PI,                5.0f*PI,                fOwnTime);
+            this->DefaultMoveLerp  (coreVector2(0.0f,2.0f), coreVector2(0.0f,0.75f), fOwnTime);
+            this->DefaultRotateLerp(0.0f*PI,                5.0f*PI,                 fOwnTime);
             this->SetOrientation   (coreVector3(0.0f,0.0f,1.0f));
 
             // 
@@ -678,6 +681,8 @@ void cCrossfieldBoss::__MoveOwn()
     {
         PHASE_CONTROL_TICKER(0u, 6u, m_Boomerang.GetCurEnabled() ? (2.2f/1.0f) : FRAMERATE_VALUE)
         {
+            // TODO: charge   
+
             // 
             if(iTick < CROSSFIELD_BOOMERANGS)
                 this->__EnableBoomerang(iTick, this->GetPosition().xy(), coreVector2(0.0f,-1.0f));
@@ -716,13 +721,13 @@ void cCrossfieldBoss::__MoveOwn()
     // 
     else if(m_iPhase == 35u)
     {
-        PHASE_CONTROL_TIMER(0u, 1.0f/2.13f, LERP_LINEAR)
+        PHASE_CONTROL_TIMER(0u, 1.0f/2.15f, LERP_LINEAR)
         {
             const coreFloat fOwnTime = LERPB(1.0f, 0.0f, 1.0f - fTime);
 
             // 
-            this->DefaultMoveLerp  (coreVector2(0.0f,0.9f), coreVector2(0.0f,-1.5f), fOwnTime);
-            this->DefaultRotateLerp(1.0f*PI,                5.0f*PI,                 fOwnTime);
+            this->DefaultMoveLerp  (coreVector2(0.0f,0.75f), coreVector2(0.0f,-1.5f), fOwnTime);
+            this->DefaultRotateLerp(1.0f*PI,                 5.0f*PI,                 fOwnTime);
 
             // 
             g_pEnvironment->SetTargetDirection(coreVector2::Direction(LERPS(0.0f*PI, 1.0f*PI, fTime)));
@@ -743,7 +748,7 @@ void cCrossfieldBoss::__MoveOwn()
     // 
     else if(m_iPhase == 36u)
     {
-        PHASE_CONTROL_TIMER(1u, 0.9f/2.0f, LERP_LINEAR)
+        PHASE_CONTROL_TIMER(1u, 0.8936f/2.0f, LERP_LINEAR)
         {
             PHASE_CONTROL_TICKER(0u, 0u, 3.5f)
             {
@@ -783,14 +788,7 @@ void cCrossfieldBoss::__MoveOwn()
     if(m_aiCounter[RESURRECT_STATUS]) this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
 
     // 
-    if(m_aiCounter[DUPLICATE_STATUS] == 1)
-    {
-        // 
-        m_Duplicate.SetPosition   ( this->GetPosition   ().InvertedX());
-        m_Duplicate.SetDirection  ( this->GetDirection  ().InvertedX());
-        m_Duplicate.SetOrientation(-this->GetOrientation());
-    }
-    else if(m_aiCounter[DUPLICATE_STATUS] == 2)
+    if(m_aiCounter[DUPLICATE_STATUS] == 2)
     {
         // 
         m_Duplicate.SetPosition   (-this->GetPosition   ());
@@ -998,7 +996,7 @@ void cCrossfieldBoss::__DisableBoomerang(const coreUintW iIndex, const coreBool 
     pBoomerang->ChangeType(0);
 
     // 
-    auto nExitFunc = [&](coreObject3D* OUTPUT pObject)
+    auto nExitFunc = [](coreObject3D* OUTPUT pObject)
     {
         pObject->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     };

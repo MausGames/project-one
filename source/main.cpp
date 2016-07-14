@@ -289,9 +289,16 @@ static void DebugGame()
     {
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LALT), CORE_INPUT_HOLD))
         {
-            #define __LOAD_GAME(x) {g_pGame = new cGame(false); g_pGame->LoadMission(x); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f);}
-            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS)) __LOAD_GAME(cIntroMission ::ID)
-            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2), CORE_INPUT_PRESS)) __LOAD_GAME(cViridoMission::ID)
+            #define __LOAD_GAME(x) {g_pGame = new cGame(false); g_pGame->LoadMission(x); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f); g_pEnvironment->SetTargetSpeed(6.0f);}
+            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS)) __LOAD_GAME(cIntroMission  ::ID)
+            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2), CORE_INPUT_PRESS)) __LOAD_GAME(cViridoMission ::ID)
+            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(3), CORE_INPUT_PRESS)) __LOAD_GAME(cNevoMission   ::ID)
+            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(4), CORE_INPUT_PRESS)) __LOAD_GAME(cHarenaMission ::ID)
+            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(5), CORE_INPUT_PRESS)) __LOAD_GAME(cRutilusMission::ID)
+            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(6), CORE_INPUT_PRESS)) __LOAD_GAME(cGeluMission   ::ID)
+            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(7), CORE_INPUT_PRESS)) __LOAD_GAME(cCalorMission  ::ID)
+            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(8), CORE_INPUT_PRESS)) __LOAD_GAME(cMuscusMission ::ID)
+            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(9), CORE_INPUT_PRESS)) __LOAD_GAME(cAterMission   ::ID)
         }
     }
 
@@ -310,7 +317,7 @@ static void DebugGame()
     // load background
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LSHIFT), CORE_INPUT_HOLD))
     {
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-cNoBackground     ::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-cCloudBackground  ::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-cGrassBackground  ::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(3), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-cSeaBackground    ::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(4), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-cDesertBackground ::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
@@ -318,23 +325,27 @@ static void DebugGame()
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(6), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-cVolcanoBackground::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(7), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-cSnowBackground   ::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(8), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-cMossBackground   ::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(9), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-cCloudBackground  ::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(9), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-cDarkBackground   ::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(0), CORE_INPUT_PRESS)) g_pEnvironment->ChangeBackground(-cNoBackground     ::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
 
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS))
             Core::System->Quit();
     }
 
     // set background movement
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_1),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2(-1.0f,-1.0f).Normalize());
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_2),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 0.0f,-1.0f).Normalize());
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_3),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 1.0f,-1.0f).Normalize());
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_4),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2(-1.0f, 0.0f).Normalize());
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_6),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 1.0f, 0.0f).Normalize());
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_7),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2(-1.0f, 1.0f).Normalize());
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_8),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 0.0f, 1.0f).Normalize());
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_9),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 1.0f, 1.0f).Normalize());
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_PLUS),  CORE_INPUT_PRESS)) g_pEnvironment->SetTargetSpeed((&g_pEnvironment->GetSpeed())[1] + 1.0f);
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_MINUS), CORE_INPUT_PRESS)) g_pEnvironment->SetTargetSpeed((&g_pEnvironment->GetSpeed())[1] - 1.0f);
+    if(!Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_PERIOD), CORE_INPUT_HOLD))
+    {
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_1),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2(-1.0f,-1.0f).Normalize());
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_2),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 0.0f,-1.0f).Normalize());
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_3),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 1.0f,-1.0f).Normalize());
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_4),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2(-1.0f, 0.0f).Normalize());
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_6),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 1.0f, 0.0f).Normalize());
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_7),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2(-1.0f, 1.0f).Normalize());
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_8),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 0.0f, 1.0f).Normalize());
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_9),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 1.0f, 1.0f).Normalize());
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_PLUS),  CORE_INPUT_PRESS)) g_pEnvironment->SetTargetSpeed((&g_pEnvironment->GetSpeed())[1] + 1.0f);
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_MINUS), CORE_INPUT_PRESS)) g_pEnvironment->SetTargetSpeed((&g_pEnvironment->GetSpeed())[1] - 1.0f);
+    }
 
     // equip weapon
     if(g_pGame)
@@ -366,6 +377,24 @@ static void DebugGame()
            CONTAINS_FLAG(g_pGame->GetMission()->GetBoss(2u)->GetStatus(), ENEMY_STATUS_DEAD))
         {
             g_pGame->GetMission()->SkipStage();
+        }
+    }
+
+    // load boss
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_PERIOD), CORE_INPUT_HOLD))
+    {
+        static std::string sCode;
+        for(coreUintW i = 0u; i < 10u; ++i)
+        {
+            if(Core::Input->GetKeyboardButton(coreInputKey(CORE_INPUT_KEY(KP_1) + i), CORE_INPUT_PRESS))
+                sCode += coreChar('0' + ((i+1u) % 10u));
+        }
+
+        if(sCode.size() >= 4u)
+        {
+
+
+            sCode.clear();
         }
     }
 
@@ -424,6 +453,12 @@ static void DebugGame()
             const coreInt32 iHeal = pPlayer->GetCurHealth() - pPlayer->GetMaxHealth();
             if(iHeal) pPlayer->TakeDamage(iHeal, ELEMENT_NEUTRAL);
         });
+    }
+
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(F), CORE_INPUT_PRESS))
+    {
+        static coreBool bDebugMode = false;
+        g_pPostProcessing->SetDebugMode(bDebugMode = !bDebugMode);
     }
 
     //if((fFactor != 1.0f) && !g_pEnvironment->GetBackground()->GetGroundObjectList()->empty())

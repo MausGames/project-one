@@ -25,7 +25,7 @@ cTorusBoss::cTorusBoss()noexcept
     this->DefineModelHigh("ship_boss_torus_high.md3");
     this->DefineModelLow ("ship_boss_torus_low.md3");
 
-    // 
+    // set object properties
     this->SetSize             (coreVector3(1.7f,1.7f,1.7f));
     this->SetCollisionModifier(coreVector3(0.8f,0.8f,1.0f));
 
@@ -207,9 +207,14 @@ void cTorusBoss::__MoveOwn()
     // 
     else if(m_iPhase == 1u)
     {
-        PHASE_CONTROL_PAUSE(0u, 2.0f)
+        PHASE_CONTROL_TIMER(0u, 0.6f, LERP_SMOOTH)
         {
-            m_iPhase = 10u;
+            // 
+            this->DefaultMoveLerp(coreVector2(0.0f,0.75f), coreVector2(0.0f,0.0f), fTime);
+
+            // 
+            if(PHASE_FINISHED)
+                m_iPhase = 40u;
         });
     }
 
@@ -260,11 +265,11 @@ void cTorusBoss::__MoveOwn()
             const coreFloat fAngle = I_TO_F(iTick) * (m_aiCounter[ROTATION_DIRECTION] ? 12.0f : -12.0f);
 
             // 
-            //for(coreUintW i = 4u; i--; )
-            //{
-            //    const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(i) * 90.0f + fAngle));
-            //    g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.2f, this, this->GetPosition().xy(), vDir)->MakeBlue();
-            //}
+            for(coreUintW i = 4u; i--; )
+            {
+                const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(i) * 90.0f + fAngle));
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.2f, this, this->GetPosition().xy(), vDir)->MakeBlue();
+            }
 
             // 
             g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 5.0f, 1u, COLOR_ENERGY_BLUE);
@@ -427,7 +432,7 @@ void cTorusBoss::__MoveOwn()
             m_iPhase = (m_aiCounter[BALL_STATUS] < coreInt16(VIRIDO_BALLS)) ? 40u : 14u;
 
             // 
-            //this->__SetRotaAttack(0, true);
+            this->__SetRotaAttack(0, true);
         });
     }
 

@@ -381,7 +381,6 @@ coreBool cGame::__HandleIntro()
 
                 // fly player animated into the game field
                 pPlayer->SetPosition   (coreVector3(pPlayer->GetPosition().x, vPos));
-                pPlayer->SetNewPos     (coreVector2(pPlayer->GetPosition().xy()));
                 pPlayer->SetOrientation(coreVector3(vDir.x, 0.0f, vDir.y));
                 pPlayer->UpdateExhaust (LERPB(1.0f, 0.0f, fTime));
             });

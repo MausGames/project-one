@@ -226,7 +226,7 @@ public:
     ASSIGN_ID(3, "Orb")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(1.6f,1.6f,1.6f));}
+    inline void ResetProperties() {this->SetSize(coreVector3(1.6f,1.6f,1.6f) * 1.1f);}
 
     // change default color
     inline cOrbBullet* MakeYellow() {return this;}
@@ -294,12 +294,12 @@ public:
     ASSIGN_ID(5, "Wave")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(1.5f,1.5f,1.5f) * 1.25f);}
+    inline void ResetProperties() {this->SetSize(coreVector3(1.5f,1.5f,1.5f) * 1.3f);}
 
     // change default color
     inline cWaveBullet* MakeYellow() {return this;}
     inline cWaveBullet* MakeOrange() {return this;}
-    inline cWaveBullet* MakeRed   () {return this;}
+    inline cWaveBullet* MakeRed   () {this->_MakeRed  (1.0f); return this;}
     inline cWaveBullet* MakePurple() {return this;}
     inline cWaveBullet* MakeBlue  () {return this;}
     inline cWaveBullet* MakeGreen () {this->_MakeGreen(1.1f); return this;}
