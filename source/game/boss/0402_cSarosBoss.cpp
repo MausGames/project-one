@@ -15,7 +15,7 @@
 
 // ****************************************************************
 // constructor
-cUnknown0701Boss::cUnknown0701Boss()noexcept
+cSarosBoss::cSarosBoss()noexcept
 {
     // load models
     this->DefineModelHigh("ship_projectone.md3"); 
@@ -32,7 +32,7 @@ cUnknown0701Boss::cUnknown0701Boss()noexcept
 
 // ****************************************************************
 // 
-void cUnknown0701Boss::__MoveOwn()
+void cSarosBoss::__MoveOwn()
 {
 
 }

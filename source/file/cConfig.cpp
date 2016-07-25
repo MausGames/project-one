@@ -217,6 +217,14 @@ void UpdateInput()
             // map movement input
             oMap.vMove = Core::Input->GetJoystickRelative(iJoystickID);
 
+            // 
+            if(!oMap.vMove.IsNull())
+            {
+                const coreFloat fOldAngle = oMap.vMove.Angle();
+                const coreFloat fNewAngle = ROUND(fOldAngle / (0.25f*PI)) * (0.25f*PI);
+                oMap.vMove = coreVector2::Direction(fNewAngle);
+            }
+
             // map button input
             for(coreUintW j = 0u; j < INPUT_BUTTONS; ++j)
             {

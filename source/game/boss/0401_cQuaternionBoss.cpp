@@ -15,7 +15,7 @@
 
 // ****************************************************************
 // constructor
-cUnknown0202Boss::cUnknown0202Boss()noexcept
+cQuaternionBoss::cQuaternionBoss()noexcept
 {
     // load models
     this->DefineModelHigh("ship_projectone.md3"); 
@@ -32,7 +32,7 @@ cUnknown0202Boss::cUnknown0202Boss()noexcept
 
 // ****************************************************************
 // 
-void cUnknown0202Boss::__MoveOwn()
+void cQuaternionBoss::__MoveOwn()
 {
 
 }

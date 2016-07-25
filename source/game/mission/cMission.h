@@ -225,9 +225,9 @@ public:
 class cViridoMission final : public cMission
 {
 private:
-    cCrossfieldBoss m_Crossfield;                   // 
-    cTorusBoss      m_Torus;                        // 
-    cVausBoss       m_Vaus;                         // 
+    cDharukBoss m_Dharuk;                           // 
+    cTorusBoss  m_Torus;                            // 
+    cVausBoss   m_Vaus;                             // 
 
     coreBatchList m_Ball;                           // 
     coreBatchList m_BallTrail;                      // 
@@ -291,9 +291,9 @@ private:
 class cNevoMission final : public cMission
 {
 private:
-    cUnknown0201Boss m_Unknown0201;   // 
-    cUnknown0201Boss m_Unknown0202;   // 
-    cUnknown0201Boss m_Unknown0203;   // 
+    cNautilusBoss  m_Nautilus;    // 
+    cAmemasuBoss   m_Amemasu;     // 
+    cLeviathanBoss m_Leviathan;   // 
 
 
 public:
@@ -314,9 +314,9 @@ private:
 class cHarenaMission final : public cMission
 {
 private:
-    cUnknown0301Boss m_Unknown0301;   // 
-    cUnknown0301Boss m_Unknown0302;   // 
-    cUnknown0301Boss m_Unknown0303;   // 
+    cUrticaBoss  m_Urtica;    // 
+    cTigerBoss   m_Tiger;     // 
+    cLuciferBoss m_Lucifer;   // 
 
 
 public:
@@ -337,9 +337,9 @@ private:
 class cRutilusMission final : public cMission
 {
 private:
-    cUnknown0401Boss m_Unknown0401;   // 
-    cUnknown0401Boss m_Unknown0402;   // 
-    cUnknown0401Boss m_Unknown0403;   // 
+    cQuaternionBoss m_Quaternion;   // 
+    cSarosBoss      m_Saros;        // 
+    cMessierBoss    m_Messier;      // 
 
 
 public:
@@ -360,9 +360,9 @@ private:
 class cGeluMission final : public cMission
 {
 private:
-    cUnknown0501Boss m_Unknown0501;   // 
-    cUnknown0501Boss m_Unknown0502;   // 
-    cUnknown0501Boss m_Unknown0503;   // 
+    cTartarusBoss m_Tartarus;   // 
+    cPhalarisBoss m_Phalaris;   // 
+    cCholBoss     m_Chol;       // 
 
 
 public:
@@ -383,9 +383,9 @@ private:
 class cCalorMission final : public cMission
 {
 private:
-    cUnknown0601Boss m_Unknown0601;   // 
-    cUnknown0601Boss m_Unknown0602;   // 
-    cUnknown0601Boss m_Unknown0603;   // 
+    cFenrirBoss m_Fenrir;   // 
+    cShelobBoss m_Shelob;   // 
+    cZerothBoss m_Zeroth;   // 
 
 
 public:
@@ -406,9 +406,9 @@ private:
 class cMuscusMission final : public cMission
 {
 private:
-    cUnknown0701Boss m_Unknown0701;   // 
-    cUnknown0701Boss m_Unknown0702;   // 
-    cUnknown0701Boss m_Unknown0703;   // 
+    cOrlacBoss   m_Orlac;     // 
+    cGemingaBoss m_Geminga;   // 
+    cNagualBoss  m_Nagual;    // 
 
 
 public:

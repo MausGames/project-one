@@ -40,16 +40,18 @@
 
 // TODO: create timer and int-value as tick-multiplier for sustained damage
 // TODO: remove magic numbers (regularly)
-// TODO: test framerate-lock for g-sync stuff
+// TODO: test framerate-lock for g-sync stuff, also test for 144hz displays if render x144 but move x60 is better
 // TODO: clean up shader modifiers and shaders, also try to look at unused uniforms, varyings and attributes (shadow-matrix is used in ship-shader !?), and reduce passing data across shader stages
 // TODO: use single-channel texture where possible
 // TODO: pre-calc HSVtoRGB
+// TODO: menu optimization by caching into framebuffer (general class for leaderboard, options, etc.)
+// TODO: protect main
 
 
 // ****************************************************************
 // engine header
 #include "Core.h"
-#include <deque>
+//STATIC_ASSERT(!DEFINED(_CORE_SSE_))
 
 
 // ****************************************************************
@@ -192,6 +194,8 @@ extern coreMusicPlayer  g_MusicPlayer;       // central music-player
 
 #include "additional/cBindContainer.h"
 #include "file/cConfig.h"
+#include "file/cReplay.h"
+#include "file/cSave.h"
 #include "visual/cShadow.h"
 #include "visual/cOutline.h"
 #include "visual/cBlur.h"
@@ -216,6 +220,7 @@ extern cPostProcessing* g_pPostProcessing;   // main post-processing object
 #include "interface/cInterface.h"
 #include "interface/cMsgBox.h"
 #include "interface/cTooltip.h"
+#include "interface/cLeaderboard.h"
 #include "interface/menu/cMenu.h"
 #include "game/cBullet.h"
 #include "game/cWeapon.h"

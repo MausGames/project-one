@@ -14,9 +14,9 @@
 cGeluMission::cGeluMission()noexcept
 {
     // 
-    m_apBoss[0] = &m_Unknown0501;
-    m_apBoss[1] = &m_Unknown0502;
-    m_apBoss[2] = &m_Unknown0503;
+    m_apBoss[0] = &m_Tartarus;
+    m_apBoss[1] = &m_Phalaris;
+    m_apBoss[2] = &m_Chol;
 }
 
 
@@ -45,10 +45,10 @@ void cGeluMission::__SetupOwn()
     STAGE_MAIN
     {
         // 
-        if(STAGE_BEGINNING) m_Unknown0501.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
+        if(STAGE_BEGINNING) m_Tartarus.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
 
         // 
-        if(CONTAINS_FLAG(m_Unknown0501.GetStatus(), ENEMY_STATUS_DEAD))
+        if(CONTAINS_FLAG(m_Tartarus.GetStatus(), ENEMY_STATUS_DEAD))
             STAGE_FINISH_NOW
     });
 
@@ -57,10 +57,10 @@ void cGeluMission::__SetupOwn()
     STAGE_MAIN
     {
         // 
-        if(STAGE_BEGINNING) m_Unknown0502.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
+        if(STAGE_BEGINNING) m_Phalaris.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
 
         // 
-        if(CONTAINS_FLAG(m_Unknown0502.GetStatus(), ENEMY_STATUS_DEAD))
+        if(CONTAINS_FLAG(m_Phalaris.GetStatus(), ENEMY_STATUS_DEAD))
             STAGE_FINISH_NOW
     });
 
@@ -69,10 +69,10 @@ void cGeluMission::__SetupOwn()
     STAGE_MAIN
     {
         // 
-        if(STAGE_BEGINNING) m_Unknown0503.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
+        if(STAGE_BEGINNING) m_Chol.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
 
         // 
-        if(CONTAINS_FLAG(m_Unknown0503.GetStatus(), ENEMY_STATUS_DEAD))
+        if(CONTAINS_FLAG(m_Chol.GetStatus(), ENEMY_STATUS_DEAD))
             STAGE_FINISH_NOW
     });
 }

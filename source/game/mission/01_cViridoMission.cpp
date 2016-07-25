@@ -21,7 +21,7 @@ cViridoMission::cViridoMission()noexcept
 , m_fAnimation   (0.0f)
 {
     // 
-    m_apBoss[0] = &m_Crossfield;
+    m_apBoss[0] = &m_Dharuk;
     m_apBoss[1] = &m_Torus;
     m_apBoss[2] = &m_Vaus;
 
@@ -295,10 +295,10 @@ void cViridoMission::__SetupOwn()
     STAGE_MAIN
     {
         // 
-        if(STAGE_BEGINNING) m_Crossfield.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
+        if(STAGE_BEGINNING) m_Dharuk.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
 
         // 
-        if(CONTAINS_FLAG(m_Crossfield.GetStatus(), ENEMY_STATUS_DEAD))
+        if(CONTAINS_FLAG(m_Dharuk.GetStatus(), ENEMY_STATUS_DEAD))
             STAGE_FINISH_NOW
     });
 

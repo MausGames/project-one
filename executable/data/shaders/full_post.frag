@@ -40,7 +40,7 @@ void FragmentMain()
     
     // 
     vec3 v3Color = pow(v3Blend, vec3(1.05));
-    vec3 v3Gray  = vec3(dot(v3Color, vec3(0.212671, 0.715160, 0.072169)));
+    vec3 v3Gray  = vec3(coreLuminance(v3Color));
     gl_FragColor = vec4(mix(v3Color, v3Gray, u_v4Color.r), 1.0);
     
     //if(v3Gray.r != 0.0)

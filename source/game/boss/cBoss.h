@@ -10,7 +10,7 @@
 #ifndef _P1_GUARD_BOSS_H_
 #define _P1_GUARD_BOSS_H_
 
-// TODO: boomerangs of Crossfield may generate double-hits because of rotating box collision (when moving away from it), bitfield with reset (player-num)
+// TODO: boomerangs of Dharuk may generate double-hits because of rotating box collision (when moving away from it), bitfield with reset (player-num)
 // TODO: remove warning 4738
 // TODO: boss0101, both boss and duplicate should have own trace
 // TODO: boss0101, correct outline sides
@@ -25,20 +25,20 @@
 
 // ****************************************************************
 // boss specific definitions
-#define CROSSFIELD_BOOMERANGS (4u)                                                 // 
-#define CROSSFIELD_TRAILS     (3u)                                                 // 
-#define CROSSFIELD_RAWS       (CROSSFIELD_BOOMERANGS * (CROSSFIELD_TRAILS + 1u))   // 
-#define CROSSFIELD_WIDTH      (0.667f)                                             // 
-#define CROSSFIELD_HEIGHT     (0.8f)                                               // 
+#define DHARUK_BOOMERANGS  (4u)                                         // 
+#define DHARUK_TRAILS      (3u)                                         // 
+#define DHARUK_RAWS        (DHARUK_BOOMERANGS * (DHARUK_TRAILS + 1u))   // 
+#define DHARUK_WIDTH       (0.667f)                                     // 
+#define DHARUK_HEIGHT      (0.8f)                                       // 
 
-#define TORUS_RAY_SIZE        (coreVector3(0.7f,50.0f,0.7f))   // 
-#define TORUS_RAY_TEXSIZE     (coreVector2(0.5f, 1.5f))        // 
-#define TORUS_RAY_OFFSET      (8.0f)                           // 
-#define TORUS_RAYWAVE_SIZE    (coreVector3(1.6f, 5.0f,1.3f))   // 
+#define TORUS_RAY_SIZE     (coreVector3(0.7f,50.0f,0.7f))   // 
+#define TORUS_RAY_TEXSIZE  (coreVector2(0.5f, 1.5f))        // 
+#define TORUS_RAY_OFFSET   (8.0f)                           // 
+#define TORUS_RAYWAVE_SIZE (coreVector3(1.6f, 5.0f,1.3f))   // 
 
-#define VAUS_SCOUTS_TOTAL     (DEFINED(_CORE_DEBUG_) ? 16 : 80)   // 
-#define VAUS_SCOUTS_X         (8u)                                // 
-#define VAUS_SCOUTS_Y         (2u)                                // 
+#define VAUS_SCOUTS_TOTAL  (DEFINED(_CORE_DEBUG_) ? 16 : 80)   // 
+#define VAUS_SCOUTS_X      (8u)                                // 
+#define VAUS_SCOUTS_Y      (2u)                                // 
 
 
 // ****************************************************************
@@ -97,26 +97,26 @@ protected:
 
 
 // ****************************************************************
-// Crossfield boss class
-class cCrossfieldBoss final : public cBoss
+// Dharuk boss class
+class cDharukBoss final : public cBoss
 {
 private:
-    coreObject3D m_Duplicate;                            // 
-    coreObject3D m_aDuplicateTrail[CROSSFIELD_TRAILS];   // 
+    coreObject3D m_Duplicate;                        // 
+    coreObject3D m_aDuplicateTrail[DHARUK_TRAILS];   // 
 
-    coreBatchList m_Boomerang;                           // 
-    coreBatchList m_BoomerangTrail;                      // 
-    coreObject3D  m_aBoomerangRaw[CROSSFIELD_RAWS];      // 
+    coreBatchList m_Boomerang;                       // 
+    coreBatchList m_BoomerangTrail;                  // 
+    coreObject3D  m_aBoomerangRaw[DHARUK_RAWS];      // 
 
-    coreUint8 m_iPackedDir;                              // 
-    coreFlow  m_fAnimation;                              // animation value
+    coreUint8 m_iPackedDir;                          // 
+    coreFlow  m_fAnimation;                          // animation value
 
 
 public:
-    cCrossfieldBoss()noexcept;
+    cDharukBoss()noexcept;
 
-    DISABLE_COPY(cCrossfieldBoss)
-    ASSIGN_ID(101, "Crossfield")
+    DISABLE_COPY(cDharukBoss)
+    ASSIGN_ID(101, "Dharuk")
 
 
 private:
@@ -205,13 +205,13 @@ private:
 
 // ****************************************************************
 // 
-class cUnknown0201Boss final : public cBoss
+class cNautilusBoss final : public cBoss
 {
 public:
-    cUnknown0201Boss()noexcept;
+    cNautilusBoss()noexcept;
 
-    DISABLE_COPY(cUnknown0201Boss)
-    ASSIGN_ID(201, "Unknown0201")
+    DISABLE_COPY(cNautilusBoss)
+    ASSIGN_ID(201, "Nautilus")
 
 
 private:
@@ -222,13 +222,13 @@ private:
 
 // ****************************************************************
 // 
-class cUnknown0202Boss final : public cBoss
+class cAmemasuBoss final : public cBoss
 {
 public:
-    cUnknown0202Boss()noexcept;
+    cAmemasuBoss()noexcept;
 
-    DISABLE_COPY(cUnknown0202Boss)
-    ASSIGN_ID(202, "Unknown0202")
+    DISABLE_COPY(cAmemasuBoss)
+    ASSIGN_ID(202, "Amemasu")
 
 
 private:
@@ -256,13 +256,13 @@ private:
 
 // ****************************************************************
 // 
-class cUnknown0301Boss final : public cBoss
+class cUrticaBoss final : public cBoss
 {
 public:
-    cUnknown0301Boss()noexcept;
+    cUrticaBoss()noexcept;
 
-    DISABLE_COPY(cUnknown0301Boss)
-    ASSIGN_ID(301, "Unknown0301")
+    DISABLE_COPY(cUrticaBoss)
+    ASSIGN_ID(301, "Urtica")
 
 
 private:
@@ -290,13 +290,13 @@ private:
 
 // ****************************************************************
 // 
-class cUnknown0303Boss final : public cBoss
+class cLuciferBoss final : public cBoss
 {
 public:
-    cUnknown0303Boss()noexcept;
+    cLuciferBoss()noexcept;
 
-    DISABLE_COPY(cUnknown0303Boss)
-    ASSIGN_ID(303, "Unknown0303")
+    DISABLE_COPY(cLuciferBoss)
+    ASSIGN_ID(303, "Lucifer")
 
 
 private:
@@ -307,13 +307,13 @@ private:
 
 // ****************************************************************
 // 
-class cUnknown0401Boss final : public cBoss
+class cQuaternionBoss final : public cBoss
 {
 public:
-    cUnknown0401Boss()noexcept;
+    cQuaternionBoss()noexcept;
 
-    DISABLE_COPY(cUnknown0401Boss)
-    ASSIGN_ID(401, "Unknown0401")
+    DISABLE_COPY(cQuaternionBoss)
+    ASSIGN_ID(401, "Quaternion")
 
 
 private:
@@ -324,13 +324,13 @@ private:
 
 // ****************************************************************
 // 
-class cUnknown0402Boss final : public cBoss
+class cSarosBoss final : public cBoss
 {
 public:
-    cUnknown0402Boss()noexcept;
+    cSarosBoss()noexcept;
 
-    DISABLE_COPY(cUnknown0402Boss)
-    ASSIGN_ID(402, "Unknown0402")
+    DISABLE_COPY(cSarosBoss)
+    ASSIGN_ID(402, "Saros")
 
 
 private:
@@ -341,13 +341,13 @@ private:
 
 // ****************************************************************
 // 
-class cUnknown0403Boss final : public cBoss
+class cMessierBoss final : public cBoss
 {
 public:
-    cUnknown0403Boss()noexcept;
+    cMessierBoss()noexcept;
 
-    DISABLE_COPY(cUnknown0403Boss)
-    ASSIGN_ID(403, "Unknown0403")
+    DISABLE_COPY(cMessierBoss)
+    ASSIGN_ID(403, "Messier 87")
 
 
 private:
@@ -358,13 +358,13 @@ private:
 
 // ****************************************************************
 // 
-class cUnknown0501Boss final : public cBoss
+class cTartarusBoss final : public cBoss
 {
 public:
-    cUnknown0501Boss()noexcept;
+    cTartarusBoss()noexcept;
 
-    DISABLE_COPY(cUnknown0501Boss)
-    ASSIGN_ID(501, "Unknown0501")
+    DISABLE_COPY(cTartarusBoss)
+    ASSIGN_ID(501, "Tartarus")
 
 
 private:
@@ -409,13 +409,13 @@ private:
 
 // ****************************************************************
 // 
-class cUnknown0601Boss final : public cBoss
+class cFenrirBoss final : public cBoss
 {
 public:
-    cUnknown0601Boss()noexcept;
+    cFenrirBoss()noexcept;
 
-    DISABLE_COPY(cUnknown0601Boss)
-    ASSIGN_ID(601, "Unknown0601")
+    DISABLE_COPY(cFenrirBoss)
+    ASSIGN_ID(601, "Fenrir")
 
 
 private:
@@ -443,13 +443,13 @@ private:
 
 // ****************************************************************
 // 
-class cUnknown0603Boss final : public cBoss
+class cZerothBoss final : public cBoss
 {
 public:
-    cUnknown0603Boss()noexcept;
+    cZerothBoss()noexcept;
 
-    DISABLE_COPY(cUnknown0603Boss)
-    ASSIGN_ID(603, "Unknown0603")
+    DISABLE_COPY(cZerothBoss)
+    ASSIGN_ID(603, "?")
 
 
 private:
@@ -460,13 +460,13 @@ private:
 
 // ****************************************************************
 // 
-class cUnknown0701Boss final : public cBoss
+class cOrlacBoss final : public cBoss
 {
 public:
-    cUnknown0701Boss()noexcept;
+    cOrlacBoss()noexcept;
 
-    DISABLE_COPY(cUnknown0701Boss)
-    ASSIGN_ID(701, "Unknown0701")
+    DISABLE_COPY(cOrlacBoss)
+    ASSIGN_ID(701, "Orlac")
 
 
 private:
@@ -477,13 +477,13 @@ private:
 
 // ****************************************************************
 // 
-class cUnknown0702Boss final : public cBoss
+class cGemingaBoss final : public cBoss
 {
 public:
-    cUnknown0702Boss()noexcept;
+    cGemingaBoss()noexcept;
 
-    DISABLE_COPY(cUnknown0702Boss)
-    ASSIGN_ID(702, "Unknown0702")
+    DISABLE_COPY(cGemingaBoss)
+    ASSIGN_ID(702, "Geminga")
 
 
 private:
@@ -494,13 +494,13 @@ private:
 
 // ****************************************************************
 // 
-class cUnknown0703Boss final : public cBoss
+class cNagualBoss final : public cBoss
 {
 public:
-    cUnknown0703Boss()noexcept;
+    cNagualBoss()noexcept;
 
-    DISABLE_COPY(cUnknown0703Boss)
-    ASSIGN_ID(703, "Unknown0703")
+    DISABLE_COPY(cNagualBoss)
+    ASSIGN_ID(703, "Nagual")
 
 
 private:
@@ -528,7 +528,7 @@ private:
 };
 
 
-#if !defined(_CORE_X64_)
+#if defined(_CORE_MSVC_) && !defined(_CORE_X64_)
     #pragma warning(push)
     #pragma warning(disable : 4738)
 #endif
@@ -595,7 +595,7 @@ template <typename F> void cBoss::_PhaseTicker(const coreUintW iTimerIndex, cons
 }
 
 
-#if !defined(_CORE_X64_)
+#if defined(_CORE_MSVC_) && !defined(_CORE_X64_)
     #pragma warning(pop)
 #endif
 

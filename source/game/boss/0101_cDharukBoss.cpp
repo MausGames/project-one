@@ -19,15 +19,15 @@
 
 // ****************************************************************
 // constructor
-cCrossfieldBoss::cCrossfieldBoss()noexcept
-: m_Boomerang      (CROSSFIELD_BOOMERANGS)
-, m_BoomerangTrail (CROSSFIELD_BOOMERANGS * CROSSFIELD_TRAILS)
+cDharukBoss::cDharukBoss()noexcept
+: m_Boomerang      (DHARUK_BOOMERANGS)
+, m_BoomerangTrail (DHARUK_BOOMERANGS * DHARUK_TRAILS)
 , m_iPackedDir     (0u)
 , m_fAnimation     (0.0f)
 {
     // load models
-    this->DefineModelHigh("ship_boss_crossfield_high.md3");
-    this->DefineModelLow ("ship_boss_crossfield_low.md3");
+    this->DefineModelHigh("ship_boss_dharuk_high.md3");
+    this->DefineModelLow ("ship_boss_dharuk_low.md3");
 
     // set object properties
     this->SetSize             (coreVector3(3.0f,3.0f,3.0f) * 1.1f);
@@ -37,7 +37,7 @@ cCrossfieldBoss::cCrossfieldBoss()noexcept
     this->Configure(2800, COLOR_SHIP_RED);
 
     // create duplicate object
-    m_Duplicate.DefineModel         ("ship_boss_crossfield_high.md3");
+    m_Duplicate.DefineModel         ("ship_boss_dharuk_high.md3");
     m_Duplicate.DefineTexture       (0u, "effect_energy.png");
     m_Duplicate.DefineProgram       ("effect_energy_invert_program");
     m_Duplicate.SetSize             (this->GetSize());
@@ -46,9 +46,9 @@ cCrossfieldBoss::cCrossfieldBoss()noexcept
     m_Duplicate.SetEnabled          (CORE_OBJECT_ENABLE_NOTHING);
 
     // create duplicate trail objects
-    for(coreUintW i = 0u; i < CROSSFIELD_TRAILS; ++i)
+    for(coreUintW i = 0u; i < DHARUK_TRAILS; ++i)
     {
-        m_aDuplicateTrail[i].DefineModel  ("ship_boss_crossfield_low.md3");
+        m_aDuplicateTrail[i].DefineModel  ("ship_boss_dharuk_low.md3");
         m_aDuplicateTrail[i].DefineTexture(0u, "effect_energy.png");
         m_aDuplicateTrail[i].DefineProgram("effect_energy_invert_program");
         m_aDuplicateTrail[i].SetSize      (this->GetSize());
@@ -60,14 +60,14 @@ cCrossfieldBoss::cCrossfieldBoss()noexcept
     m_Boomerang     .DefineProgram("effect_energy_invert_inst_program");
     m_BoomerangTrail.DefineProgram("effect_energy_invert_inst_program");
     {
-        for(coreUintW i = 0u; i < CROSSFIELD_RAWS; ++i)
+        for(coreUintW i = 0u; i < DHARUK_RAWS; ++i)
         {
             // determine object type
-            const coreUintW iType = i % (CROSSFIELD_TRAILS + 1u);
+            const coreUintW iType = i % (DHARUK_TRAILS + 1u);
 
             // load object resources
             coreObject3D* pBoomerang = &m_aBoomerangRaw[i];
-            pBoomerang->DefineModel  ("object_boss_crossfield_boomerang.md3");
+            pBoomerang->DefineModel  ("object_boss_dharuk_boomerang.md3");
             pBoomerang->DefineTexture(0u, "effect_energy.png");
             pBoomerang->DefineProgram("effect_energy_invert_program");
 
@@ -87,7 +87,7 @@ cCrossfieldBoss::cCrossfieldBoss()noexcept
 
 // ****************************************************************
 // 
-void cCrossfieldBoss::__ResurrectOwn()
+void cDharukBoss::__ResurrectOwn()
 {
     if(m_aiCounter[RESURRECT_STATUS] != 0)
         return;
@@ -96,7 +96,7 @@ void cCrossfieldBoss::__ResurrectOwn()
     g_pGlow->BindObject(&m_Duplicate);
 
     // 
-    for(coreUintW i = 0u; i < CROSSFIELD_TRAILS; ++i)
+    for(coreUintW i = 0u; i < DHARUK_TRAILS; ++i)
         g_pGlow->BindObject(&m_aDuplicateTrail[i]);
 
     // 
@@ -107,10 +107,10 @@ void cCrossfieldBoss::__ResurrectOwn()
 
 // ****************************************************************
 // 
-void cCrossfieldBoss::__KillOwn(const coreBool bAnimated)
+void cDharukBoss::__KillOwn(const coreBool bAnimated)
 {
     // 
-    for(coreUintW i = 0u; i < CROSSFIELD_BOOMERANGS; ++i)
+    for(coreUintW i = 0u; i < DHARUK_BOOMERANGS; ++i)
         this->__DisableBoomerang(i, bAnimated);
 
     // 
@@ -165,7 +165,7 @@ void cCrossfieldBoss::__KillOwn(const coreBool bAnimated)
     g_pGlow->UnbindObject(&m_Duplicate);
 
     // 
-    for(coreUintW i = 0u; i < CROSSFIELD_TRAILS; ++i)
+    for(coreUintW i = 0u; i < DHARUK_TRAILS; ++i)
         g_pGlow->UnbindObject(&m_aDuplicateTrail[i]);
 
     // 
@@ -176,10 +176,10 @@ void cCrossfieldBoss::__KillOwn(const coreBool bAnimated)
 
 // ****************************************************************
 // 
-void cCrossfieldBoss::__RenderOwnUnder()
+void cDharukBoss::__RenderOwnUnder()
 {
     // 
-    for(coreUintW i = 0u; i < CROSSFIELD_TRAILS; ++i)
+    for(coreUintW i = 0u; i < DHARUK_TRAILS; ++i)
         m_aDuplicateTrail[i].Render();
 
     // 
@@ -189,7 +189,7 @@ void cCrossfieldBoss::__RenderOwnUnder()
 
 // ****************************************************************
 // 
-void cCrossfieldBoss::__RenderOwnAttack()
+void cDharukBoss::__RenderOwnAttack()
 {
     DEPTH_PUSH
 
@@ -207,7 +207,7 @@ void cCrossfieldBoss::__RenderOwnAttack()
 
 // ****************************************************************
 // 
-void cCrossfieldBoss::__MoveOwn()
+void cDharukBoss::__MoveOwn()
 {
     // 
     cPlayer* pPlayer = g_pGame->FindPlayer(this->GetPosition().xy());
@@ -228,8 +228,8 @@ void cCrossfieldBoss::__MoveOwn()
         PHASE_CONTROL_TIMER(0u, 0.44f, LERP_LINEAR)
         {
             // 
-            this->DefaultMoveLerp  (coreVector2(CROSSFIELD_WIDTH, 2.0f), coreVector2(CROSSFIELD_WIDTH, -2.0f), fTime);
-            this->DefaultRotateLerp(0.0f*PI,                             7.0f*PI,                              fTime);
+            this->DefaultMoveLerp  (coreVector2(DHARUK_WIDTH, 2.0f), coreVector2(DHARUK_WIDTH, -2.0f), fTime);
+            this->DefaultRotateLerp(0.0f*PI,                         7.0f*PI,                          fTime);
 
             // 
             if(PHASE_FINISHED)
@@ -254,8 +254,8 @@ void cCrossfieldBoss::__MoveOwn()
         PHASE_CONTROL_TIMER(0u, 0.5f, LERP_BREAK)
         {
             // 
-            this->DefaultMoveLerp  (coreVector2(0.0f,2.0f), coreVector2(0.0f, CROSSFIELD_HEIGHT), fTime);
-            this->DefaultRotateLerp(0.0f*PI,                5.0f*PI,                              fTime);
+            this->DefaultMoveLerp  (coreVector2(0.0f,2.0f), coreVector2(0.0f, DHARUK_HEIGHT), fTime);
+            this->DefaultRotateLerp(0.0f*PI,                5.0f*PI,                          fTime);
 
             // 
             if(PHASE_TIME_POINT(0.85f))
@@ -317,8 +317,8 @@ void cCrossfieldBoss::__MoveOwn()
             });
 
             // 
-            this->DefaultMoveLerp(coreVector2(bSecond ? (fSideSign *  4.5f) : 0.0f, CROSSFIELD_HEIGHT),
-                                  coreVector2(           fSideSign * -4.5f,         CROSSFIELD_HEIGHT), fTime);
+            this->DefaultMoveLerp(coreVector2(bSecond ? (fSideSign *  4.5f) : 0.0f, DHARUK_HEIGHT),
+                                  coreVector2(           fSideSign * -4.5f,         DHARUK_HEIGHT), fTime);
             this->DefaultRotateLerp(1.0f*PI, bSecond ? (15.0f*PI) : (11.0f*PI), fSideTime);
 
             // 
@@ -436,8 +436,8 @@ void cCrossfieldBoss::__MoveOwn()
             const coreFloat fSideSign = m_aiCounter[CURRENT_SIDE] ? -1.0f    :  1.0f;
 
             // 
-            this->DefaultMoveLerp  (coreVector2(fSideSign * 0.5f, CROSSFIELD_HEIGHT), coreVector2(fSideSign * 0.5f, -1.5f), fOwnTime);
-            this->DefaultRotateLerp(1.0f*PI,                                          5.0f*PI,                              fSideTime);
+            this->DefaultMoveLerp  (coreVector2(fSideSign * 0.5f, DHARUK_HEIGHT), coreVector2(fSideSign * 0.5f, -1.5f), fOwnTime);
+            this->DefaultRotateLerp(1.0f*PI,                                      5.0f*PI,                              fSideTime);
 
             // 
             if(PHASE_FINISHED)
@@ -454,8 +454,8 @@ void cCrossfieldBoss::__MoveOwn()
             const coreFloat fSideTime = m_aiCounter[CURRENT_SIDE] ? fTime : (1.0f - fTime);
 
             // 
-            this->DefaultMoveLerp  (coreVector2(0.0f,2.0f), coreVector2(0.0f, CROSSFIELD_HEIGHT), fTime);
-            this->DefaultRotateLerp(1.0f*PI,                5.0f*PI,                              fSideTime);
+            this->DefaultMoveLerp  (coreVector2(0.0f,2.0f), coreVector2(0.0f, DHARUK_HEIGHT), fTime);
+            this->DefaultRotateLerp(1.0f*PI,                5.0f*PI,                          fSideTime);
 
             // 
             if(PHASE_FINISHED)
@@ -482,7 +482,7 @@ void cCrossfieldBoss::__MoveOwn()
             const coreFloat fSideSign = m_aiCounter[CURRENT_SIDE] ? -1.0f : 1.0f;
 
             // 
-            if(iTick < CROSSFIELD_BOOMERANGS)
+            if(iTick < DHARUK_BOOMERANGS)
                 this->__EnableBoomerang(iTick, this->GetPosition().xy(), coreVector2((iTick % 2u) ? fSideSign : -fSideSign, 0.0f));
 
             // 
@@ -500,7 +500,7 @@ void cCrossfieldBoss::__MoveOwn()
             const coreFloat fSideSign = m_aiCounter[CURRENT_SIDE] ? -1.0f : 1.0f;
 
             // 
-            this->SetPosition      (coreVector3(coreVector2::Direction(LERP(0.0f*PI, fSideSign * -4.0f*PI, fTime)) * FOREGROUND_AREA * CROSSFIELD_HEIGHT, 0.0f));
+            this->SetPosition      (coreVector3(coreVector2::Direction(LERP(0.0f*PI, fSideSign * -4.0f*PI, fTime)) * FOREGROUND_AREA * DHARUK_HEIGHT, 0.0f));
             this->DefaultRotateLerp(1.0f*PI, fSideSign * 21.0f*PI, fTime);
 
             // 
@@ -523,7 +523,7 @@ void cCrossfieldBoss::__MoveOwn()
             coreBool bDisabled = true;
 
             // 
-            for(coreUintW i = 0u; i < CROSSFIELD_BOOMERANGS; ++i)
+            for(coreUintW i = 0u; i < DHARUK_BOOMERANGS; ++i)
             {
                 coreObject3D* pBoomerang = (*m_Boomerang.List())[i];
                 if(!pBoomerang->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
@@ -607,7 +607,7 @@ void cCrossfieldBoss::__MoveOwn()
         PHASE_CONTROL_TIMER(0u, 1.0f/2.0f, LERP_SMOOTH)
         {
             // 
-            m_Duplicate.SetPosition (coreVector3(coreVector2::Direction(LERP(0.0f*PI, -1.0f*PI, fTime)) * FOREGROUND_AREA * CROSSFIELD_HEIGHT, 0.0f));
+            m_Duplicate.SetPosition (coreVector3(coreVector2::Direction(LERP(0.0f*PI, -1.0f*PI, fTime)) * FOREGROUND_AREA * DHARUK_HEIGHT, 0.0f));
             m_Duplicate.SetDirection(coreVector3(coreVector2::Direction(LERP(1.0f*PI,  4.0f*PI, fTime)), 0.0f));
 
             // 
@@ -684,7 +684,7 @@ void cCrossfieldBoss::__MoveOwn()
             // TODO: charge   
 
             // 
-            if(iTick < CROSSFIELD_BOOMERANGS)
+            if(iTick < DHARUK_BOOMERANGS)
                 this->__EnableBoomerang(iTick, this->GetPosition().xy(), coreVector2(0.0f,-1.0f));
 
             // 
@@ -811,12 +811,12 @@ void cCrossfieldBoss::__MoveOwn()
         const coreFloat   fOffsetAngle  = AngleDiff(fCurBaseAngle, fOldBaseAngle) * fRcpTime * 0.055f;
         const coreFloat   fOffsetOri    = AngleDiff(fCurBaseOri,   fOldBaseOri)   * fRcpTime * 0.06f;
 
-        for(coreUintW i = 0u; i < CROSSFIELD_TRAILS; ++i)
+        for(coreUintW i = 0u; i < DHARUK_TRAILS; ++i)
         {
             // 
-            const coreVector2 vNewPos =                        vCurBasePos   - vOffsetPos   * I_TO_F(CROSSFIELD_TRAILS-i);
-            const coreVector2 vNewDir = coreVector2::Direction(fCurBaseAngle - fOffsetAngle * I_TO_F(CROSSFIELD_TRAILS-i));
-            const coreVector2 vNewOri = coreVector2::Direction(fCurBaseOri   - fOffsetOri   * I_TO_F(CROSSFIELD_TRAILS-i));
+            const coreVector2 vNewPos =                        vCurBasePos   - vOffsetPos   * I_TO_F(DHARUK_TRAILS-i);
+            const coreVector2 vNewDir = coreVector2::Direction(fCurBaseAngle - fOffsetAngle * I_TO_F(DHARUK_TRAILS-i));
+            const coreVector2 vNewOri = coreVector2::Direction(fCurBaseOri   - fOffsetOri   * I_TO_F(DHARUK_TRAILS-i));
 
             // 
             m_aDuplicateTrail[i].SetPosition   (coreVector3(vNewPos,   0.0f));
@@ -828,7 +828,7 @@ void cCrossfieldBoss::__MoveOwn()
     }
 
     // 
-    for(coreUintW i = 0u; i < CROSSFIELD_BOOMERANGS; ++i)
+    for(coreUintW i = 0u; i < DHARUK_BOOMERANGS; ++i)
     {
         coreObject3D* pBoomerang = (*m_Boomerang.List())[i];
         if(!pBoomerang->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
@@ -858,12 +858,12 @@ void cCrossfieldBoss::__MoveOwn()
         pBoomerang->SetAlpha    (MIN(pBoomerang->GetAlpha() + 10.0f * Core::System->GetTime(), 1.0f));
         pBoomerang->SetTexOffset(coreVector2(0.0f, m_fAnimation));
 
-        for(coreUintW j = 0u; j < CROSSFIELD_TRAILS; ++j)
+        for(coreUintW j = 0u; j < DHARUK_TRAILS; ++j)
         {
-            coreObject3D* pTrail = (*m_BoomerangTrail.List())[i*CROSSFIELD_TRAILS + j];
+            coreObject3D* pTrail = (*m_BoomerangTrail.List())[i*DHARUK_TRAILS + j];
 
             // 
-            const coreVector2 vNewPos2 = pBoomerang->GetPosition().xy() - vFly * FOREGROUND_AREA * (0.06f * I_TO_F(CROSSFIELD_TRAILS - j));
+            const coreVector2 vNewPos2 = pBoomerang->GetPosition().xy() - vFly * FOREGROUND_AREA * (0.06f * I_TO_F(DHARUK_TRAILS - j));
             const coreVector2 vNewDir2 = coreVector2::Direction((1.0f/16.0f) * PI * (vNewPos2.x + vNewPos2.y) * (vFly.x + vFly.y));
 
             // 
@@ -895,7 +895,7 @@ void cCrossfieldBoss::__MoveOwn()
 
 // ****************************************************************
 // 
-coreVector2 cCrossfieldBoss::__RepeatPosition(const coreVector2& vPosition, const coreFloat fThreshold, coreBool* OUTPUT pbChange)
+coreVector2 cDharukBoss::__RepeatPosition(const coreVector2& vPosition, const coreFloat fThreshold, coreBool* OUTPUT pbChange)
 {
     const coreVector2 vThreshVec = fThreshold * FOREGROUND_AREA;
 
@@ -916,9 +916,9 @@ coreVector2 cCrossfieldBoss::__RepeatPosition(const coreVector2& vPosition, cons
 
 // ****************************************************************
 // 
-void cCrossfieldBoss::__EncodeDirection(const coreUintW iIndex, const coreVector2& vDirection)
+void cDharukBoss::__EncodeDirection(const coreUintW iIndex, const coreVector2& vDirection)
 {
-    ASSERT(iIndex < CROSSFIELD_BOOMERANGS)
+    ASSERT(iIndex < DHARUK_BOOMERANGS)
 
     // 
     if(vDirection.x + vDirection.y > 0.0f)
@@ -930,15 +930,15 @@ void cCrossfieldBoss::__EncodeDirection(const coreUintW iIndex, const coreVector
          ADD_BIT   (m_iPackedDir, 1u + 2u*iIndex)
     else REMOVE_BIT(m_iPackedDir, 1u + 2u*iIndex);
 
-    STATIC_ASSERT(CROSSFIELD_BOOMERANGS*2u <= sizeof(m_iPackedDir)*8u)
+    STATIC_ASSERT(DHARUK_BOOMERANGS*2u <= sizeof(m_iPackedDir)*8u)
 }
 
 
 // ****************************************************************
 // 
-coreVector2 cCrossfieldBoss::__DecodeDirection(const coreUintW iIndex)
+coreVector2 cDharukBoss::__DecodeDirection(const coreUintW iIndex)
 {
-    ASSERT(iIndex < CROSSFIELD_BOOMERANGS)
+    ASSERT(iIndex < DHARUK_BOOMERANGS)
 
     // 
     const coreFloat P = CONTAINS_BIT(m_iPackedDir, 0u + 2u*iIndex) ? 1.0f : -1.0f;
@@ -951,12 +951,12 @@ coreVector2 cCrossfieldBoss::__DecodeDirection(const coreUintW iIndex)
 
 // ****************************************************************
 // 
-void cCrossfieldBoss::__EnableBoomerang(const coreUintW iIndex, const coreVector2& vPosition, const coreVector2& vDirection)
+void cDharukBoss::__EnableBoomerang(const coreUintW iIndex, const coreVector2& vPosition, const coreVector2& vDirection)
 {
     // 
-    ASSERT(iIndex < CROSSFIELD_BOOMERANGS)
+    ASSERT(iIndex < DHARUK_BOOMERANGS)
     coreObject3D* pBoomerang = (*m_Boomerang     .List())[iIndex];
-    coreObject3D* pTrail     = (*m_BoomerangTrail.List())[iIndex*CROSSFIELD_TRAILS];
+    coreObject3D* pTrail     = (*m_BoomerangTrail.List())[iIndex*DHARUK_TRAILS];
 
     // 
     if(pBoomerang->GetType()) return;
@@ -973,7 +973,7 @@ void cCrossfieldBoss::__EnableBoomerang(const coreUintW iIndex, const coreVector
         pObject->SetEnabled (CORE_OBJECT_ENABLE_ALL);
     };
     nInitFunc(pBoomerang);
-    for(coreUintW i = 0u; i < CROSSFIELD_TRAILS; ++i) nInitFunc(pTrail + i);
+    for(coreUintW i = 0u; i < DHARUK_TRAILS; ++i) nInitFunc(pTrail + i);
 
     // 
     g_pSpecialEffects->MacroEruptionColorSmall(coreVector3(vPosition, 0.0f), vDirection, COLOR_ENERGY_RED);
@@ -982,14 +982,14 @@ void cCrossfieldBoss::__EnableBoomerang(const coreUintW iIndex, const coreVector
 
 // ****************************************************************
 // 
-void cCrossfieldBoss::__DisableBoomerang(const coreUintW iIndex, const coreBool bAnimated)
+void cDharukBoss::__DisableBoomerang(const coreUintW iIndex, const coreBool bAnimated)
 {
     if(m_Boomerang.List()->empty()) return;
 
     // 
-    ASSERT(iIndex < CROSSFIELD_BOOMERANGS)
+    ASSERT(iIndex < DHARUK_BOOMERANGS)
     coreObject3D* pBoomerang = (*m_Boomerang     .List())[iIndex];
-    coreObject3D* pTrail     = (*m_BoomerangTrail.List())[iIndex*CROSSFIELD_TRAILS];
+    coreObject3D* pTrail     = (*m_BoomerangTrail.List())[iIndex*DHARUK_TRAILS];
 
     // 
     if(!pBoomerang->GetType()) return;
@@ -1001,7 +1001,7 @@ void cCrossfieldBoss::__DisableBoomerang(const coreUintW iIndex, const coreBool 
         pObject->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     };
     nExitFunc(pBoomerang);
-    for(coreUintW i = 0u; i < CROSSFIELD_TRAILS; ++i) nExitFunc(pTrail + i);
+    for(coreUintW i = 0u; i < DHARUK_TRAILS; ++i) nExitFunc(pTrail + i);
 
     // 
     if(bAnimated) g_pSpecialEffects->MacroExplosionColorSmall(pBoomerang->GetPosition(), COLOR_ENERGY_RED);

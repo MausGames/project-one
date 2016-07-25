@@ -7,22 +7,36 @@
 //*------------------------------------------------*//
 //////////////////////////////////////////////////////
 #pragma once
-#ifndef _P1_GUARD_SAVE_H_
-#define _P1_GUARD_SAVE_H_
+#ifndef _P1_GUARD_LEADERBOARD_H_
+#define _P1_GUARD_LEADERBOARD_H_
 
 
 // ****************************************************************
 // 
-#define SAVE_FILE_MAGIC   (coreUint32('P1SV'))   // 
-#define SAVE_FILE_VERSION (0x00000001u)          // 
+#define LEADERBOARD_ENTRIES     (10u)   // 
+#define LEADERBOARD_NAME_LENGTH (32u)   // 
 
 
 // ****************************************************************
 // 
-class cSave final
+class cLeaderboard final : public coreObject2D
 {
+private:
+    coreObject2D m_aLine [LEADERBOARD_ENTRIES];   // 
+    coreLabel    m_aRank [LEADERBOARD_ENTRIES];   // 
+    coreLabel    m_aName [LEADERBOARD_ENTRIES];   // 
+    coreLabel    m_aScore[LEADERBOARD_ENTRIES];   // 
 
+
+public:
+    cLeaderboard()noexcept;
+
+    DISABLE_COPY(cLeaderboard)
+
+    // 
+    void Render()final;
+    void Move  ()final;
 };
 
 
-#endif // _P1_GUARD_SAVE_H_
+#endif // _P1_GUARD_LEADERBOARD_H_

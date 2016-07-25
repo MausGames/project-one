@@ -15,7 +15,7 @@
 
 // ****************************************************************
 // constructor
-cUnknown0501Boss::cUnknown0501Boss()noexcept
+cAmemasuBoss::cAmemasuBoss()noexcept
 {
     // load models
     this->DefineModelHigh("ship_projectone.md3"); 
@@ -32,7 +32,7 @@ cUnknown0501Boss::cUnknown0501Boss()noexcept
 
 // ****************************************************************
 // 
-void cUnknown0501Boss::__MoveOwn()
+void cAmemasuBoss::__MoveOwn()
 {
 
 }

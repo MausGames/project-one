@@ -15,7 +15,7 @@
 
 // ****************************************************************
 // constructor
-cUnknown0603Boss::cUnknown0603Boss()noexcept
+cOrlacBoss::cOrlacBoss()noexcept
 {
     // load models
     this->DefineModelHigh("ship_projectone.md3"); 
@@ -32,7 +32,7 @@ cUnknown0603Boss::cUnknown0603Boss()noexcept
 
 // ****************************************************************
 // 
-void cUnknown0603Boss::__MoveOwn()
+void cOrlacBoss::__MoveOwn()
 {
 
 }

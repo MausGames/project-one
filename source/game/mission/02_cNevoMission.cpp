@@ -14,9 +14,9 @@
 cNevoMission::cNevoMission()noexcept
 {
     // 
-    m_apBoss[0] = &m_Unknown0201;
-    m_apBoss[1] = &m_Unknown0202;
-    m_apBoss[2] = &m_Unknown0203;
+    m_apBoss[0] = &m_Nautilus;
+    m_apBoss[1] = &m_Amemasu;
+    m_apBoss[2] = &m_Leviathan;
 }
 
 
@@ -45,10 +45,10 @@ void cNevoMission::__SetupOwn()
     STAGE_MAIN
     {
         // 
-        if(STAGE_BEGINNING) m_Unknown0201.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
+        if(STAGE_BEGINNING) m_Nautilus.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
 
         // 
-        if(CONTAINS_FLAG(m_Unknown0201.GetStatus(), ENEMY_STATUS_DEAD))
+        if(CONTAINS_FLAG(m_Nautilus.GetStatus(), ENEMY_STATUS_DEAD))
             STAGE_FINISH_NOW
     });
 
@@ -57,10 +57,10 @@ void cNevoMission::__SetupOwn()
     STAGE_MAIN
     {
         // 
-        if(STAGE_BEGINNING) m_Unknown0202.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
+        if(STAGE_BEGINNING) m_Amemasu.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
 
         // 
-        if(CONTAINS_FLAG(m_Unknown0202.GetStatus(), ENEMY_STATUS_DEAD))
+        if(CONTAINS_FLAG(m_Amemasu.GetStatus(), ENEMY_STATUS_DEAD))
             STAGE_FINISH_NOW
     });
 
@@ -69,10 +69,10 @@ void cNevoMission::__SetupOwn()
     STAGE_MAIN
     {
         // 
-        if(STAGE_BEGINNING) m_Unknown0203.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
+        if(STAGE_BEGINNING) m_Leviathan.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
 
         // 
-        if(CONTAINS_FLAG(m_Unknown0203.GetStatus(), ENEMY_STATUS_DEAD))
+        if(CONTAINS_FLAG(m_Leviathan.GetStatus(), ENEMY_STATUS_DEAD))
             STAGE_FINISH_NOW
     });
 }

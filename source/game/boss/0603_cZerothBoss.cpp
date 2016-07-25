@@ -15,7 +15,7 @@
 
 // ****************************************************************
 // constructor
-cUnknown0401Boss::cUnknown0401Boss()noexcept
+cZerothBoss::cZerothBoss()noexcept
 {
     // load models
     this->DefineModelHigh("ship_projectone.md3"); 
@@ -32,7 +32,7 @@ cUnknown0401Boss::cUnknown0401Boss()noexcept
 
 // ****************************************************************
 // 
-void cUnknown0401Boss::__MoveOwn()
+void cZerothBoss::__MoveOwn()
 {
 
 }

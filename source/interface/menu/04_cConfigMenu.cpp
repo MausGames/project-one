@@ -66,7 +66,7 @@ cConfigMenu::cConfigMenu()noexcept
 
     m_DiscardButton.Construct    (MENU_BUTTON, MENU_FONT_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
     m_DiscardButton.DefineProgram("menu_border_program");
-    m_DiscardButton.SetPosition  (m_SaveButton.GetPosition() + coreVector2(m_SaveButton.GetSize().x + 0.02f,0.0f));
+    m_DiscardButton.SetPosition  (m_SaveButton.GetPosition() + coreVector2(m_SaveButton.GetSize().x + 0.02f, 0.0f));
     m_DiscardButton.SetSize      (m_SaveButton.GetSize());
     m_DiscardButton.SetAlignment (m_SaveButton.GetAlignment());
     m_DiscardButton.SetOverride  (-1);

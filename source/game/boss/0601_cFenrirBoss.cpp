@@ -15,7 +15,7 @@
 
 // ****************************************************************
 // constructor
-cUnknown0403Boss::cUnknown0403Boss()noexcept
+cFenrirBoss::cFenrirBoss()noexcept
 {
     // load models
     this->DefineModelHigh("ship_projectone.md3"); 
@@ -32,7 +32,7 @@ cUnknown0403Boss::cUnknown0403Boss()noexcept
 
 // ****************************************************************
 // 
-void cUnknown0403Boss::__MoveOwn()
+void cFenrirBoss::__MoveOwn()
 {
 
 }

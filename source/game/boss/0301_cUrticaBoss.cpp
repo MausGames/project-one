@@ -15,7 +15,7 @@
 
 // ****************************************************************
 // constructor
-cUnknown0402Boss::cUnknown0402Boss()noexcept
+cUrticaBoss::cUrticaBoss()noexcept
 {
     // load models
     this->DefineModelHigh("ship_projectone.md3"); 
@@ -32,7 +32,7 @@ cUnknown0402Boss::cUnknown0402Boss()noexcept
 
 // ****************************************************************
 // 
-void cUnknown0402Boss::__MoveOwn()
+void cUrticaBoss::__MoveOwn()
 {
 
 }

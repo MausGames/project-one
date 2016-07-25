@@ -39,7 +39,7 @@ private:
 
     coreUintW m_iCurLabel;                // current label object
 
-    std::deque<sData> m_aData;            // text data deque
+    std::list<sData> m_aData;             // text data list
 
 
 public:
