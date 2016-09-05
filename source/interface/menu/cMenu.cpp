@@ -261,28 +261,23 @@ coreBool cMenu::IsPausedWithStep()
 const coreLookup<std::string, std::string>& cMenu::GetLanguageList()
 {
     // static language list <name, path>
-    static coreLookup<std::string, std::string> asLanguage;
+    static coreLookup<std::string, std::string> s_asLanguage;
 
-    if(asLanguage.empty())
+    if(s_asLanguage.empty())
     {
         // 
-        std::vector<std::string> asFile;
-        coreData::ScanFolder("data/languages", "*.lng", &asFile);
-        if(asFile.empty()) Core::Log->Error("No language files found (data/languages/*.lng)");
+        coreLanguage::GetAvailableLanguages(&s_asLanguage);
 
 #if defined(_CORE_DEBUG_)
 
         // 
-        const std::string& sRandFile = asFile[std::time(NULL) % asFile.size()];
+        const std::string& sRandFile = s_asLanguage.get_valuelist()[std::time(NULL) % s_asLanguage.size()];
         Core::Language->Load(sRandFile.c_str());
 
 #endif
-
-        // 
-        FOR_EACH(it, asFile) asLanguage.emplace(coreLanguage(it->c_str()).GetString("LANGUAGE"), std::move(*it));
     }
 
-    return asLanguage;
+    return s_asLanguage;
 }
 
 

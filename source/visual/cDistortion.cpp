@@ -54,7 +54,7 @@ void cDistortion::Update()
     }
 
     // 
-    glClearColor(0.5f, 0.5f, 0.0f, 0.0f);
+    glClearColor(0.5f, 0.5f, 0.5f, 0.5f);
 
     // create distortion only with active objects
     m_bActive = std::any_of(m_aWave,  m_aWave  + DISTORTION_WAVES,  [](const coreObject2D& oWave)  {return oWave .GetAlpha() ? true : false;}) ||

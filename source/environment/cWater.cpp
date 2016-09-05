@@ -33,7 +33,7 @@ cWater::cWater()noexcept
     // create sky-plane object
     m_Sky.DefineTexture(0u, "environment_clouds_blue.png");
     m_Sky.DefineProgram("default_2d_program");
-    m_Sky.SetSize      (coreVector2(WATER_SCALE_FACTOR, WATER_SCALE_FACTOR) * SQRT(2.0f));
+    m_Sky.SetSize      (coreVector2(WATER_SCALE_FACTOR, WATER_SCALE_FACTOR) * SQRT2);
     m_Sky.SetTexSize   (coreVector2(WATER_SKY_SIZE,     WATER_SKY_SIZE));
 
     // load object resources
@@ -111,6 +111,9 @@ void cWater::Move()
 // update water reflection map
 void cWater::UpdateReflection()
 {
+    // 
+    this->__UpdateOwn();
+
     // save current camera and light properties
     const coreVector3 vOldCamPos = Core::Graphics->GetCamPosition();
     const coreVector3 vOldCamOri = Core::Graphics->GetCamOrientation();
@@ -210,7 +213,144 @@ cIceWater::cIceWater()noexcept
     // 
     this->DefineTexture(0u, "environment_crack_norm.png");
     this->DefineProgram("environment_ice_program");
-    // TODO: don't change water-level over time
+}
+
+
+// ****************************************************************
+// 
+void cIceWater::__UpdateOwn()
+{
+    //  (# small update-value remains) 
+    m_fAnimation = 0.0f;
+}
+
+
+// ****************************************************************
+// constructor
+cRainWater::cRainWater()noexcept
+: m_DropList   (RAIN_DROPS)
+, m_iCurDrop   (0u)
+, m_fFallDelay (0.0f)
+{
+    const coreTextureSpec oSpec = CORE_GL_SUPPORT(ARB_texture_float) ? CORE_TEXTURE_SPEC_RGBA16F : CORE_TEXTURE_SPEC_RGBA8;
+    const coreFloat fResolution = Core::Config->GetInt(CORE_CONFIG_GRAPHICS_QUALITY) ? 512.0f : 256.0f;   // TODO: realtime ? 
+
+    // 
+    m_WaveMap.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, oSpec);
+    m_WaveMap.Create(coreVector2(fResolution, fResolution), CORE_FRAMEBUFFER_CREATE_NORMAL);
+
+    // 
+    glBindTexture  (GL_TEXTURE_2D, m_WaveMap.GetColorTarget(0u).pTexture->GetTexture());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    // 
+    m_WaveInjection.SetSize(m_WaveMap.GetResolution() / g_vGameResolution);
+    m_WaveInjection.DefineTexture(0u, "environment_water_rain.png");
+    m_WaveInjection.DefineProgram("default_2d_program");
+    m_WaveInjection.Move();
+
+    // 
+    m_DropList.DefineProgram("effect_distortion_object3d_inst_program");
+    for(coreUintW i = 0u; i < RAIN_DROPS; ++i)
+    {
+        coreObject3D* pDrop = &m_aDrop[i];
+
+        // 
+        pDrop->DefineModel  (Core::Manager::Object->GetLowModel());
+        pDrop->DefineTexture(0u, "effect_wave_norm.png");
+        pDrop->DefineProgram("effect_distortion_object3d_program");
+        pDrop->SetAlpha     (0.0f);
+
+        // 
+        m_DropList.BindObject(pDrop);
+    }
+
+    // 
+    m_Sky.DefineProgram("menu_grey_program");
+
+    // 
+    this->DefineTexture(0u, m_WaveMap.GetColorTarget(0u).pTexture);
+    this->DefineProgram("environment_rain_program");
+}
+
+
+// ****************************************************************
+// destructor
+cRainWater::~cRainWater()
+{
+    // explicitly undefine to detach textures
+    this->Undefine();
+}
+
+
+// ****************************************************************
+// 
+void cRainWater::__UpdateOwn()
+{
+    // 
+    const coreFloat& fMapSize = m_WaveMap.GetResolution().x;
+
+    // 
+    m_fFallDelay.Update(RAIN_DROP_SPEED * I_TO_F(RAIN_DROPS));
+    if(m_fFallDelay >= 1.0f)
+    {
+        m_fFallDelay -= 1.0f;
+
+        // 
+        if(++m_iCurDrop >= RAIN_DROPS) m_iCurDrop = 0u;
+        coreObject3D& oDrop = m_aDrop[m_iCurDrop];
+
+        // 
+        oDrop.SetPosition(coreVector3(coreVector2::Rand(-0.5f,0.5f, -0.5f,0.5f) * ((1.0f - RAIN_DROP_WIDTH) * fMapSize), 0.0f));
+        oDrop.SetAlpha   (1.0f);
+    }
+
+    glDisable(GL_DEPTH_TEST);
+    {
+        // 
+        m_WaveMap.StartDraw();
+        {
+            // 
+            if(m_WaveInjection.GetTexture(0u).IsUsable() &&
+               m_WaveInjection.GetProgram()  .IsUsable())
+            {
+                glDisable(GL_BLEND);
+                {
+                    // 
+                    m_WaveInjection.Render();
+                    m_WaveInjection.Undefine();
+                }
+                glEnable(GL_BLEND);
+            }
+
+            // 
+            glColorMask (true, true, false, false);
+            glClearColor(0.5f, 0.5f, 0.5f, 0.5f);
+            {
+                // 
+                m_WaveMap.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);
+
+                // 
+                for(coreUintW i = 0u; i < RAIN_DROPS; ++i)
+                {
+                    coreObject3D& oDrop = m_aDrop[i];
+                    if(!oDrop.GetAlpha()) continue;
+
+                    // 
+                    oDrop.SetSize (coreVector3(1.0f,1.0f,1.0f) * (RAIN_DROP_WIDTH * fMapSize * (1.0f - oDrop.GetAlpha())));
+                    oDrop.SetAlpha(MAX(oDrop.GetAlpha() - RAIN_DROP_SPEED * Core::System->GetTime(), 0.0f));
+                }
+
+                // 
+                m_DropList.MoveNormal();
+                m_DropList.Render();
+            }
+            glColorMask (true, true, true, true);
+            glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        }
+    }
+    glEnable(GL_DEPTH_TEST);
 }
 
 

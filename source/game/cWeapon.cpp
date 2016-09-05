@@ -159,7 +159,7 @@ void cRayWeapon::__ShootOwn()
     //g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(1, 5.0f, m_pOwner, vPos + vDir*4.0f + vTan*3.2f, (vDir + vTan*0.02f).Normalize())->MakeYellow()->MakeSmaller(0.85f)->MakeLighter(fAlpha);
     //g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(1, 5.0f, m_pOwner, vPos + vDir*4.0f - vTan*3.2f, (vDir - vTan*0.02f).Normalize())->MakeYellow()->MakeSmaller(0.85f)->MakeLighter(fAlpha);
 
-    //static bool test = false;
+    //static coreBool test = false;
     //test = !test;
     //if(test) return;
     //g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(1, 5.0f, m_pOwner, vPos + vDir*4.0f + vTan*3.2f, (vDir + vTan*0.050f*1.5f).Normalize())->MakeYellow()->MakeSmaller(0.85f)->MakeLighter(fAlpha);

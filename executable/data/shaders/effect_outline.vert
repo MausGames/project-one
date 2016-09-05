@@ -24,11 +24,11 @@ void VertexMain()
 
     // calculate interpolated outline intensity
     v_v1Strength = a_v2RawTexCoord.y * 2.0 - 1.0;
-    
+
 #else
-    
+
     // increase depth to draw behind base object
     gl_Position.z += 0.4 * gl_Position.w;
-    
+
 #endif
 }

@@ -42,6 +42,7 @@
 // TODO: remove magic numbers (regularly)
 // TODO: test framerate-lock for g-sync stuff, also test for 144hz displays if render x144 but move x60 is better
 // TODO: clean up shader modifiers and shaders, also try to look at unused uniforms, varyings and attributes (shadow-matrix is used in ship-shader !?), and reduce passing data across shader stages
+// TODO: implement static/coherent branching interface instead of many shader-permutations ? (maybe only in situations with frequent switching)
 // TODO: use single-channel texture where possible
 // TODO: pre-calc HSVtoRGB
 // TODO: menu optimization by caching into framebuffer (general class for leaderboard, options, etc.)
@@ -103,6 +104,7 @@
 #define SHADER_GLOW          "#define _P1_GLOW_       (1) \n"        // post, outdoor, object_ship
 #define SHADER_DISTORTION    "#define _P1_DISTORTION_ (1) \n"        // post
 #define SHADER_DEBUG         "#define _P1_DEBUG_      (1) \n"        // post
+#define SHADER_OBJECT3D      "#define _P1_OBJECT3D_   (1) \n"        // distortion
 #define SHADER_SINGLE        "#define _P1_SINGLE_     (1) \n"        // decal
 #define SHADER_LIGHT         "#define _P1_LIGHT_      (1) \n"        // outdoor, decal
 #define SHADER_DARKNESS      "#define _P1_DARKNESS_   (1) \n"        // object_ship
@@ -147,6 +149,14 @@ inline FUNC_CONST coreFloat AngleDiff(const coreFloat x, const coreFloat y)
     while(A < -PI) A += 2.0f*PI;
     while(A >  PI) A -= 2.0f*PI;
     return A;
+}
+
+// 
+inline FUNC_CONST coreFloat LerpSmoothRev(const coreFloat x, const coreFloat y, const coreFloat s)
+{
+    return (s >= 0.5f) ? LERP(y, (x + y) / 2.0f, SIN(s*PI)) :
+                         LERP(x, (x + y) / 2.0f, SIN(s*PI));
+    // TODO   
 }
 
 // 
@@ -196,6 +206,7 @@ extern coreMusicPlayer  g_MusicPlayer;       // central music-player
 #include "file/cConfig.h"
 #include "file/cReplay.h"
 #include "file/cSave.h"
+#include "file/cValidate.h"
 #include "visual/cShadow.h"
 #include "visual/cOutline.h"
 #include "visual/cBlur.h"
@@ -205,6 +216,7 @@ extern coreMusicPlayer  g_MusicPlayer;       // central music-player
 #include "visual/cForeground.h"
 #include "visual/cPostProcessing.h"
 
+extern cReplay*         g_pReplay;           // 
 extern cOutline*        g_pOutline;          // main outline-layer object
 extern cGlow*           g_pGlow;             // main glow-effect object
 extern cDistortion*     g_pDistortion;       // main distortion-effect object

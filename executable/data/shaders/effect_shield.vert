@@ -21,14 +21,14 @@ void VertexMain()
 
     // forward texture coordinates
     v_av2TexCoord[0] = a_v2RawTexCoord;
-    
+
     // forward blink intensity
     v_v1Blink = u_v2TexOffset.y;
-    
+
     // 
     vec3 v3ViewDir   = normalize(u_v3CamPosition - v4NewPosition.xyz);
     vec3 v3NewNormal = coreQuatApply(u_v4Rotation, a_v3RawNormal);
-    
+
     // calculate light and color intensity
     float v1Base = dot(vec3(v3ViewDir.xy, abs(v3ViewDir.z)), vec3(v3NewNormal.xy, abs(v3NewNormal.z)));
     v_v1Strength = 3.0 - 2.7 * v1Base;

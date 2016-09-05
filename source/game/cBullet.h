@@ -11,7 +11,8 @@
 #define _P1_GUARD_BULLET_H_
 
 // TODO: pre-allocate bullets (at least for player) at the beginning to improve resource loading
-// TODO: check for overlapping bullets and place one of them on another depth plane
+// TODO: check for overlapping bullets and place one of them on another depth plane (to prevent z-fighting and "half" bullets)
+// TODO: remove thick outlined bullets at the sides, because bullets are flat, outlining is 3d, make own shader-variant
 
 
 // ****************************************************************

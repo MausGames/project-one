@@ -45,10 +45,11 @@ class cPlayer final : public cShip
 {
 private:
     cWeapon* m_apWeapon[PLAYER_WEAPONS];                     // main weapon objects (bullet factories, should never be NULL)
-    cInput*  m_pInput;                                       // pointer to associated input set (should never be NULL)
+    sInput*  m_pInput;                                       // pointer to associated input set (should never be NULL)
 
     coreVector2 m_vForce;                                    // 
 
+    // TODO: score total ?    
     coreProtect<coreUint32> m_iScoreMission;                 // 
     coreProtect<coreUint32> m_aiScoreBoss[MISSION_BOSSES];   // 
 
@@ -106,10 +107,11 @@ public:
     inline cWeapon* GetWeapon(const coreUintW iIndex) {ASSERT((iIndex < PLAYER_WEAPONS) && m_apWeapon[iIndex]) return m_apWeapon[iIndex];}
 
     // set object properties
+    inline void SetInput(sInput* OUTPUT     pInput) {m_pInput = pInput;}
     inline void SetForce(const coreVector2& vForce) {m_vForce = vForce;}
 
     // get object properties
-    inline const cInput*      GetInput        ()const                       {ASSERT(m_pInput) return m_pInput;}
+    inline const sInput*      GetInput        ()const                       {ASSERT(m_pInput) return m_pInput;}
     inline const coreVector2& GetForce        ()const                       {return m_vForce;}
     inline       coreUint32   GetScoreMission ()const                       {return m_iScoreMission;}
     inline       coreUint32   GetScoreBoss    (const coreUintW iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_aiScoreBoss[iIndex];}

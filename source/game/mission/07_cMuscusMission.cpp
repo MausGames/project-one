@@ -44,35 +44,20 @@ void cMuscusMission::__SetupOwn()
     // 
     STAGE_MAIN
     {
-        // 
-        if(STAGE_BEGINNING) m_Orlac.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
-
-        // 
-        if(CONTAINS_FLAG(m_Orlac.GetStatus(), ENEMY_STATUS_DEAD))
-            STAGE_FINISH_NOW
+        STAGE_BOSS(m_Orlac, coreVector2(0.0f,2.0f), coreVector2(0.0f,-1.0f))
     });
 
     // ################################################################
     // 
     STAGE_MAIN
     {
-        // 
-        if(STAGE_BEGINNING) m_Geminga.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
-
-        // 
-        if(CONTAINS_FLAG(m_Geminga.GetStatus(), ENEMY_STATUS_DEAD))
-            STAGE_FINISH_NOW
+        STAGE_BOSS(m_Geminga, coreVector2(0.0f,2.0f), coreVector2(0.0f,-1.0f))
     });
 
     // ################################################################
     // 
     STAGE_MAIN
     {
-        // 
-        if(STAGE_BEGINNING) m_Nagual.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
-
-        // 
-        if(CONTAINS_FLAG(m_Nagual.GetStatus(), ENEMY_STATUS_DEAD))
-            STAGE_FINISH_NOW
+        STAGE_BOSS(m_Nagual, coreVector2(0.0f,2.0f), coreVector2(0.0f,-1.0f))
     });
 }

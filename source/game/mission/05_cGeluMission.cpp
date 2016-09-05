@@ -44,35 +44,20 @@ void cGeluMission::__SetupOwn()
     // 
     STAGE_MAIN
     {
-        // 
-        if(STAGE_BEGINNING) m_Tartarus.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
-
-        // 
-        if(CONTAINS_FLAG(m_Tartarus.GetStatus(), ENEMY_STATUS_DEAD))
-            STAGE_FINISH_NOW
+        STAGE_BOSS(m_Tartarus, coreVector2(0.0f,2.0f), coreVector2(0.0f,-1.0f))
     });
 
     // ################################################################
     // 
     STAGE_MAIN
     {
-        // 
-        if(STAGE_BEGINNING) m_Phalaris.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
-
-        // 
-        if(CONTAINS_FLAG(m_Phalaris.GetStatus(), ENEMY_STATUS_DEAD))
-            STAGE_FINISH_NOW
+        STAGE_BOSS(m_Phalaris, coreVector2(0.0f,2.0f), coreVector2(0.0f,-1.0f))
     });
 
     // ################################################################
     // 
     STAGE_MAIN
     {
-        // 
-        if(STAGE_BEGINNING) m_Chol.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
-
-        // 
-        if(CONTAINS_FLAG(m_Chol.GetStatus(), ENEMY_STATUS_DEAD))
-            STAGE_FINISH_NOW
+        STAGE_BOSS(m_Chol, coreVector2(0.0f,2.0f), coreVector2(0.0f,-1.0f))
     });
 }

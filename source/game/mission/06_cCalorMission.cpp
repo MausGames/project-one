@@ -44,35 +44,20 @@ void cCalorMission::__SetupOwn()
     // 
     STAGE_MAIN
     {
-        // 
-        if(STAGE_BEGINNING) m_Fenrir.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
-
-        // 
-        if(CONTAINS_FLAG(m_Fenrir.GetStatus(), ENEMY_STATUS_DEAD))
-            STAGE_FINISH_NOW
+        STAGE_BOSS(m_Fenrir, coreVector2(0.0f,2.0f), coreVector2(0.0f,-1.0f))
     });
 
     // ################################################################
     // 
     STAGE_MAIN
     {
-        // 
-        if(STAGE_BEGINNING) m_Shelob.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
-
-        // 
-        if(CONTAINS_FLAG(m_Shelob.GetStatus(), ENEMY_STATUS_DEAD))
-            STAGE_FINISH_NOW
+        STAGE_BOSS(m_Shelob, coreVector2(0.0f,2.0f), coreVector2(0.0f,-1.0f))
     });
 
     // ################################################################
     // 
     STAGE_MAIN
     {
-        // 
-        if(STAGE_BEGINNING) m_Zeroth.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
-
-        // 
-        if(CONTAINS_FLAG(m_Zeroth.GetStatus(), ENEMY_STATUS_DEAD))
-            STAGE_FINISH_NOW
+        STAGE_BOSS(m_Zeroth, coreVector2(0.0f,2.0f), coreVector2(0.0f,-1.0f))
     });
 }

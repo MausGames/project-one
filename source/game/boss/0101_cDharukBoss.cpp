@@ -604,11 +604,15 @@ void cDharukBoss::__MoveOwn()
     // 
     else if(m_iPhase == 28u)
     {
-        PHASE_CONTROL_TIMER(0u, 1.0f/2.0f, LERP_SMOOTH)
+        PHASE_CONTROL_TIMER(0u, 1.0f/6.0f, LERP_SMOOTH)
         {
             // 
-            m_Duplicate.SetPosition (coreVector3(coreVector2::Direction(LERP(0.0f*PI, -1.0f*PI, fTime)) * FOREGROUND_AREA * DHARUK_HEIGHT, 0.0f));
-            m_Duplicate.SetDirection(coreVector3(coreVector2::Direction(LERP(1.0f*PI,  4.0f*PI, fTime)), 0.0f));
+            this->SetPosition (coreVector3(coreVector2::Direction(LERP(0.0f*PI, -2.0f*PI, fTime)) * FOREGROUND_AREA * DHARUK_HEIGHT, 0.0f));
+            this->SetDirection(coreVector3(coreVector2::Direction(LERP(1.0f*PI,  7.0f*PI, fTime)), 0.0f));
+
+            // 
+            m_Duplicate.SetPosition (coreVector3(coreVector2::Direction(LERP(0.0f*PI, -3.0f*PI, fTime)) * FOREGROUND_AREA * DHARUK_HEIGHT, 0.0f));
+            m_Duplicate.SetDirection(coreVector3(coreVector2::Direction(LERP(1.0f*PI, 10.0f*PI, fTime)), 0.0f));
 
             // 
             if(PHASE_FINISHED)

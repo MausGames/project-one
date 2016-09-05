@@ -20,7 +20,7 @@
 // boss definitions
 #define BOSS_TIMERS   (4u)   // 
 #define BOSS_COUNTERS (8u)   // 
-#define BOSS_VECTORS  (4u)   // 
+#define BOSS_VECTORS  (6u)   // 
 
 
 // ****************************************************************
@@ -32,13 +32,14 @@
 #define DHARUK_HEIGHT      (0.8f)                                       // 
 
 #define TORUS_RAY_SIZE     (coreVector3(0.7f,50.0f,0.7f))   // 
-#define TORUS_RAY_TEXSIZE  (coreVector2(0.5f, 1.5f))        // 
+#define TORUS_RAY_TEXSIZE  (coreVector2(0.5f,1.5f))         // 
 #define TORUS_RAY_OFFSET   (8.0f)                           // 
-#define TORUS_RAYWAVE_SIZE (coreVector3(1.6f, 5.0f,1.3f))   // 
+#define TORUS_RAYWAVE_SIZE (coreVector3(1.6f,5.0f,1.3f))    // 
 
 #define VAUS_SCOUTS_TOTAL  (DEFINED(_CORE_DEBUG_) ? 16 : 80)   // 
 #define VAUS_SCOUTS_X      (8u)                                // 
 #define VAUS_SCOUTS_Y      (2u)                                // 
+#define VAUS_SHOTS         (10u)                               // 
 
 
 // ****************************************************************
@@ -56,10 +57,11 @@
 #define PHASE_RESET(i)              {m_aTimer[i].Stop(); m_aiTimerLine[i] = 0u;}
 #define PHASE_FINISHED              (__bEnd)
 
-#define LERP_LINEAR    (&LERP <coreFloat>)
-#define LERP_SMOOTH    (&LERPS<coreFloat>)
-#define LERP_BREAK     (&LERPB<coreFloat>)
-#define LERP_BREAK_REV (&LerpBreakRev)
+#define LERP_LINEAR                 (&LERP <coreFloat>)
+#define LERP_SMOOTH                 (&LERPS<coreFloat>)
+#define LERP_SMOOTH_REV             (&LerpSmoothRev)
+#define LERP_BREAK                  (&LERPB<coreFloat>)
+#define LERP_BREAK_REV              (&LerpBreakRev)
 
 
 // ****************************************************************
@@ -181,6 +183,8 @@ private:
 class cVausBoss final : public cBoss
 {
 private:
+    coreObject3D m_aRay[3];         // 
+
     cCustomEnemy m_aCompanion[2];   // 
     coreUint8    m_iScoutOrder;     // 
 
@@ -194,9 +198,10 @@ public:
 
 private:
     // execute own routines
-    void __ResurrectOwn()final;
-    void __KillOwn     (const coreBool bAnimated)final;
-    void __MoveOwn     ()final;
+    void __ResurrectOwn   ()final;
+    void __KillOwn        (const coreBool bAnimated)final;
+    void __RenderOwnAttack()final;
+    void __MoveOwn        ()final;
 
     // 
     coreBool __ExecuteCompanionAttack(const coreUintW iType, const coreFloat fTime);

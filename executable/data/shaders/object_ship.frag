@@ -18,13 +18,13 @@ void FragmentMain()
 {
     // lookup texture (rgb = base-color, a = highlight-modifier)
     vec4 v4TexColor = coreTexture2D(0, v_av2TexCoord[0]);
- 
+
 #if defined(_P1_DARKNESS_)
 
     // use detail texture as highlight
     float v1TexDetail = coreTexture2D(1, v_av2TexCoord[1]).r;
     vec3  v3Highlight = vec3(v1TexDetail * 7.0 + 0.1);
-    
+
 #else
 
     // use color as highlight
@@ -46,15 +46,15 @@ void FragmentMain()
     
     // make highlighted area glowing
     v1BumpFactor += v4TexColor.a * 0.5;
-    
+
     // ignore blink color
     const vec3 v3Blink = vec3(0.0);
-    
+
 #else
- 
+
     // calculate smooth blink color
     vec3 v3Blink = vec3(v_av4ShipLight.w * (0.7 - 0.56 * abs(dot(v3MathViewDir, v3BumpNormal))));
-    
+
 #endif
 
     // calculate diffuse and specular value

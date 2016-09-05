@@ -15,7 +15,7 @@ void FragmentMain()
     // 
     vec2  v2ScreenCoord = gl_FragCoord.xy * u_v4Resolution.zw;
     float v1Light       = coreTexture2D(3, v2ScreenCoord).r + 0.04;
-    
+
 #else
 
     // 
@@ -35,7 +35,7 @@ void FragmentMain()
         v1Alpha *= v1Alpha;
         v1Alpha *= v1Alpha;
         v1Alpha  = 1.0 - v1Alpha;
-        
+
         // draw color with alpha
         vec4 v4Texture = coreTexture2D(0, v_av2TexCoord[0]);
         gl_FragColor   = vec4(v4Texture.rgb * v1Light, v4Texture.a * v1Alpha) * u_v4Color;

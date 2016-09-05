@@ -17,7 +17,7 @@ void FragmentMain()
     // lookup textures
     vec3 v3TexNormal = coreTexture2D(1, v_av2TexCoord[0]).xyz;
     vec3 v3TexColor  = coreTexture2D(0, v_av2TexCoord[0]).rgb;
-    
+
 #if (_CORE_QUALITY_) == 0
 
     // ignore normal map
@@ -29,7 +29,7 @@ void FragmentMain()
 
     // apply shadow mapping with single depth value comparison
     float v1Light = 1.0 - coreTextureShadow(0, v_v4ShadowCoord) * 0.5;
-    
+
 #elif (_P1_SHADOW_) >= 2
 
     // apply shadow mapping with percentage closer filtering

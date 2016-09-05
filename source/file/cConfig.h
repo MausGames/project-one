@@ -50,7 +50,7 @@ STATIC_ASSERT(INPUT_BUTTONS <= sizeof(coreUint8)*8u)
 
 // ****************************************************************
 // configuration variables
-struct cConfig final
+struct sConfig final
 {
     struct
     {
@@ -96,7 +96,7 @@ struct cConfig final
     Game;
 };
 
-struct cInput final
+struct sInput final
 {
     coreVector2 vMove;            // movement input
     coreUint8   iButtonPress;     // button press (bitfields)
@@ -104,9 +104,9 @@ struct cInput final
     coreUint8   iButtonHold;      // button hold
 };
 
-extern cConfig g_CurConfig;            // current and active configuration structure
-extern cConfig g_OldConfig;            // handle for old values
-extern cInput  g_aInput[INPUT_SETS];   // mapped input values (ready for direct use)
+extern sConfig g_CurConfig;            // current and active configuration structure
+extern sConfig g_OldConfig;            // handle for old values
+extern sInput  g_aInput[INPUT_SETS];   // mapped input values (ready for direct use)
 
 
 // ****************************************************************

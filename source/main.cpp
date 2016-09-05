@@ -16,6 +16,7 @@ coreVector2      g_vGameResolution = coreVector2(0.0f,0.0f);
 coreVector2      g_vMenuCenter     = coreVector2(0.0f,0.0f);
 coreMusicPlayer  g_MusicPlayer     = {};
 
+cReplay*         g_pReplay         = NULL;
 cOutline*        g_pOutline        = NULL;
 cGlow*           g_pGlow           = NULL;
 cDistortion*     g_pDistortion     = NULL;
@@ -57,6 +58,7 @@ void CoreApp::Init()
 
     // create and init main components
     cShadow::GlobalInit();
+    g_pReplay         = new cReplay();
     g_pOutline        = new cOutline();
     g_pGlow           = new cGlow();
     g_pDistortion     = new cDistortion();
@@ -84,6 +86,7 @@ void CoreApp::Exit()
     SAFE_DELETE(g_pDistortion)
     SAFE_DELETE(g_pGlow)
     SAFE_DELETE(g_pOutline)
+    SAFE_DELETE(g_pReplay)
     cShadow::GlobalExit();
 
     // remove all music files
@@ -184,6 +187,9 @@ void CoreApp::Move()
         g_pMenu->Move();
         if(!g_pMenu->IsPaused())
         {
+            // 
+            g_pReplay->Update();
+
             // move environment, theater and game
             g_pEnvironment->Move();
             g_pTheater    ->Move();
@@ -383,70 +389,70 @@ static void DebugGame()
     // load boss
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_PERIOD), CORE_INPUT_HOLD))
     {
-        static std::string sCode;
+        static std::string s_sCode;
         for(coreUintW i = 0u; i < 10u; ++i)
         {
             if(Core::Input->GetKeyboardButton(coreInputKey(CORE_INPUT_KEY(KP_1) + i), CORE_INPUT_PRESS))
-                sCode += coreChar('0' + ((i+1u) % 10u));
+                s_sCode += coreChar('0' + ((i+1u) % 10u));
         }
 
-        if(sCode.size() >= 4u)
+        if(s_sCode.size() >= 4u)
         {
 
 
-            sCode.clear();
+            s_sCode.clear();
         }
     }
 
-    static coreFloat fHeight = 0.0f;
+    static coreFloat s_fHeight = 0.0f;
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(E), CORE_INPUT_HOLD))
     {
-        fHeight += 10.0f * Core::System->GetTime();
+        s_fHeight += 10.0f * Core::System->GetTime();
     }
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(R), CORE_INPUT_HOLD))
     {
-        fHeight -= 10.0f * Core::System->GetTime();
+        s_fHeight -= 10.0f * Core::System->GetTime();
     }
-    g_pEnvironment->SetTargetHeight(fHeight);
+    g_pEnvironment->SetTargetHeight(s_fHeight);
 
-    static coreFloat fHeight2 = 0.0f;
+    static coreFloat s_fHeight2 = 0.0f;
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(U), CORE_INPUT_HOLD))
     {
-        fHeight2 += 10.0f * Core::System->GetTime();
+        s_fHeight2 += 10.0f * Core::System->GetTime();
     }
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(I), CORE_INPUT_HOLD))
     {
-        fHeight2 -= 10.0f * Core::System->GetTime();
+        s_fHeight2 -= 10.0f * Core::System->GetTime();
     }
-    if(fHeight2 && g_pEnvironment->GetBackground()->GetOutdoor()) g_pEnvironment->GetBackground()->GetOutdoor()->SetHeightOffset(fHeight2);
+    if(s_fHeight2 && g_pEnvironment->GetBackground()->GetOutdoor()) g_pEnvironment->GetBackground()->GetOutdoor()->SetHeightOffset(s_fHeight2);
 
-    static coreFloat fHeight3 = 1.0f;
+    static coreFloat s_fHeight3 = 1.0f;
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(T), CORE_INPUT_HOLD))
     {
-        fHeight3 += 0.1f * Core::System->GetTime();
+        s_fHeight3 += 0.1f * Core::System->GetTime();
     }
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(Y), CORE_INPUT_HOLD))
     {
-        fHeight3 -= 0.1f * Core::System->GetTime();
+        s_fHeight3 -= 0.1f * Core::System->GetTime();
     }
-    if((fHeight3 != 1.0f) && g_pEnvironment->GetBackground()->GetOutdoor()) g_pEnvironment->GetBackground()->GetOutdoor()->SetHeightFactor(fHeight3);
+    if((s_fHeight3 != 1.0f) && g_pEnvironment->GetBackground()->GetOutdoor()) g_pEnvironment->GetBackground()->GetOutdoor()->SetHeightFactor(s_fHeight3);
 
-    static coreFloat fFactor = 1.0f;
+    static coreFloat s_fFactor = 1.0f;
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(G), CORE_INPUT_HOLD))
     {
-        fFactor = MIN(fFactor + 0.3f * Core::System->GetTime(), 1.0f);
+        s_fFactor = MIN(s_fFactor + 0.3f * Core::System->GetTime(), 1.0f);
     }
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(H), CORE_INPUT_HOLD))
     {
-        fFactor = MAX(fFactor - 0.3f * Core::System->GetTime(), 0.0f);
+        s_fFactor = MAX(s_fFactor - 0.3f * Core::System->GetTime(), 0.0f);
     }
 
-    static coreBool bInvincible = true;
+    static coreBool s_bInvincible = true;
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(Q), CORE_INPUT_PRESS))
     {
-        bInvincible = !bInvincible;
+        s_bInvincible = !s_bInvincible;
     }
-    if(bInvincible && g_pGame)
+    if(s_bInvincible && g_pGame)
     {
         g_pGame->ForEachPlayer([](cPlayer* OUTPUT pPlayer, const coreUintW i)
         {
@@ -457,8 +463,8 @@ static void DebugGame()
 
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(F), CORE_INPUT_PRESS))
     {
-        static coreBool bDebugMode = false;
-        g_pPostProcessing->SetDebugMode(bDebugMode = !bDebugMode);
+        static coreBool s_bDebugMode = false;
+        g_pPostProcessing->SetDebugMode(s_bDebugMode = !s_bDebugMode);
     }
 
     //if((fFactor != 1.0f) && !g_pEnvironment->GetBackground()->GetGroundObjectList()->empty())

@@ -198,15 +198,15 @@ cGrassBackground::cGrassBackground()noexcept
                 const coreFloat   fHeight   = Core::Rand->Float(10.0f, 30.0f);
 
                 // test for valid values
-                if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 700.0f))
+                if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 680.0f))
                 {
                     // create object
                     coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>(oBase);
 
                     // set object properties
                     pObject->SetPosition(coreVector3(vPosition, fHeight));
-                    pObject->SetSize    (coreVector3(2.2f,0.0f,1.0f));
-                    pObject->SetColor3  (coreVector3(1.0f,1.0f,1.0f) * (0.8f + 0.2f * fHeight/30.0f));
+                    pObject->SetSize    (coreVector3(2.3f,0.0f,1.0f));
+                    pObject->SetColor3  (coreVector3(1.0f,1.0f,1.0f) * (0.75f + 0.2f * fHeight/30.0f));
                     pObject->SetTexSize (coreVector2(0.5f,0.85f));
 
                     // add object to the list
@@ -243,7 +243,7 @@ cGrassBackground::cGrassBackground()noexcept
         oBase.DefineTexture(0u, "environment_clouds_mid.png");
         oBase.DefineProgram("environment_clouds_program");
 
-        for(coreUintW i = 0u, ie = GRASS_CLOUD_NUM; i < ie; ++i)
+        for(coreUintW i = 0u; i < GRASS_CLOUD_NUM; ++i)
         {
             // calculate position and height
             const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(0.1f, 0.25f) * ((i % 2u) ? 1.0f : -1.0f), i, GRASS_CLOUD_NUM);
@@ -319,7 +319,7 @@ void cGrassBackground::__MoveOwn()
         const coreBool bSide = (coreVector3::Dot(g_pEnvironment->GetCameraPos() - pLeaf->GetPosition(), pLeaf->GetOrientation()) >= 0.0f) ? true : false;
 
         // simulate two-sided polygon (flip vertex-order and change texture)
-        pLeaf->SetSize     (coreVector3(pLeaf->GetSize().x, pLeaf->GetSize().x * (bSide ? 0.733f : -0.733f), pLeaf->GetSize().z));
+        pLeaf->SetSize     (coreVector3(pLeaf->GetSize().x, pLeaf->GetSize().x * (bSide ? 0.7f : -0.7f), pLeaf->GetSize().z));
         pLeaf->SetTexOffset(coreVector2(bSide ? 0.5f : 0.0f, 0.15f));
     }
     pList->MoveNormal();

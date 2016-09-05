@@ -44,35 +44,20 @@ void cHarenaMission::__SetupOwn()
     // 
     STAGE_MAIN
     {
-        // 
-        if(STAGE_BEGINNING) m_Urtica.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
-
-        // 
-        if(CONTAINS_FLAG(m_Urtica.GetStatus(), ENEMY_STATUS_DEAD))
-            STAGE_FINISH_NOW
+        STAGE_BOSS(m_Urtica, coreVector2(0.0f,2.0f), coreVector2(0.0f,-1.0f))
     });
 
     // ################################################################
     // 
     STAGE_MAIN
     {
-        // 
-        if(STAGE_BEGINNING) m_Tiger.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
-
-        // 
-        if(CONTAINS_FLAG(m_Tiger.GetStatus(), ENEMY_STATUS_DEAD))
-            STAGE_FINISH_NOW
+        STAGE_BOSS(m_Tiger, coreVector2(0.0f,2.0f), coreVector2(0.0f,-1.0f))
     });
 
     // ################################################################
     // 
     STAGE_MAIN
     {
-        // 
-        if(STAGE_BEGINNING) m_Lucifer.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
-
-        // 
-        if(CONTAINS_FLAG(m_Lucifer.GetStatus(), ENEMY_STATUS_DEAD))
-            STAGE_FINISH_NOW
+        STAGE_BOSS(m_Lucifer, coreVector2(0.0f,2.0f), coreVector2(0.0f,-1.0f))
     });
 }

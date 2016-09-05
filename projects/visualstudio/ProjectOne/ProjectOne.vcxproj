@@ -337,6 +337,7 @@
     <ClInclude Include="..\..\..\source\environment\cOutdoor.h" />
     <ClInclude Include="..\..\..\source\environment\cWater.h" />
     <ClInclude Include="..\..\..\source\file\cConfig.h" />
+    <ClInclude Include="..\..\..\source\file\cValidate.h" />
     <ClInclude Include="..\..\..\source\file\cReplay.h" />
     <ClInclude Include="..\..\..\source\file\cSave.h" />
     <ClInclude Include="..\..\..\source\game\boss\cBoss.h" />
@@ -365,6 +366,77 @@
     <ClInclude Include="..\..\..\source\visual\cPostProcessing.h" />
     <ClInclude Include="..\..\..\source\visual\cShadow.h" />
     <ClInclude Include="..\..\..\source\visual\cSpecialEffects.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\executable\data\languages\english.lng" />
+    <None Include="..\..\..\executable\data\languages\german.lng" />
+    <None Include="..\..\..\executable\data\languages\japanese.lng" />
+    <None Include="..\..\..\executable\data\shaders\custom.glsl" />
+    <None Include="..\..\..\executable\data\shaders\default_2d.frag" />
+    <None Include="..\..\..\executable\data\shaders\default_2d.vert" />
+    <None Include="..\..\..\executable\data\shaders\default_3d.frag" />
+    <None Include="..\..\..\executable\data\shaders\default_3d_low.vert" />
+    <None Include="..\..\..\executable\data\shaders\default_3d_raw.vert" />
+    <None Include="..\..\..\executable\data\shaders\default_label.vert" />
+    <None Include="..\..\..\executable\data\shaders\default_label_sharp.frag" />
+    <None Include="..\..\..\executable\data\shaders\default_label_smooth.frag" />
+    <None Include="..\..\..\executable\data\shaders\default_particle.frag" />
+    <None Include="..\..\..\executable\data\shaders\default_particle.vert" />
+    <None Include="..\..\..\executable\data\shaders\effect_decal.frag" />
+    <None Include="..\..\..\executable\data\shaders\effect_decal.vert" />
+    <None Include="..\..\..\executable\data\shaders\effect_distortion.frag" />
+    <None Include="..\..\..\executable\data\shaders\effect_distortion.vert" />
+    <None Include="..\..\..\executable\data\shaders\effect_energy.frag" />
+    <None Include="..\..\..\executable\data\shaders\effect_energy.vert" />
+    <None Include="..\..\..\executable\data\shaders\effect_lightning.frag" />
+    <None Include="..\..\..\executable\data\shaders\effect_lightning.vert" />
+    <None Include="..\..\..\executable\data\shaders\effect_outline.frag" />
+    <None Include="..\..\..\executable\data\shaders\effect_outline.vert" />
+    <None Include="..\..\..\executable\data\shaders\effect_particle.vert" />
+    <None Include="..\..\..\executable\data\shaders\effect_particle_color.frag" />
+    <None Include="..\..\..\executable\data\shaders\effect_particle_dark.frag" />
+    <None Include="..\..\..\executable\data\shaders\effect_particle_fire.frag" />
+    <None Include="..\..\..\executable\data\shaders\effect_particle_smoke.frag" />
+    <None Include="..\..\..\executable\data\shaders\effect_shadow.frag" />
+    <None Include="..\..\..\executable\data\shaders\effect_shadow.vert" />
+    <None Include="..\..\..\executable\data\shaders\effect_shield.frag" />
+    <None Include="..\..\..\executable\data\shaders\effect_shield.vert" />
+    <None Include="..\..\..\executable\data\shaders\environment_clouds.frag" />
+    <None Include="..\..\..\executable\data\shaders\environment_clouds.vert" />
+    <None Include="..\..\..\executable\data\shaders\environment_ice.frag" />
+    <None Include="..\..\..\executable\data\shaders\environment_ice.vert" />
+    <None Include="..\..\..\executable\data\shaders\environment_lava.frag" />
+    <None Include="..\..\..\executable\data\shaders\environment_lava.vert" />
+    <None Include="..\..\..\executable\data\shaders\environment_outdoor.frag" />
+    <None Include="..\..\..\executable\data\shaders\environment_outdoor.vert" />
+    <None Include="..\..\..\executable\data\shaders\environment_rain.frag" />
+    <None Include="..\..\..\executable\data\shaders\environment_rain.vert" />
+    <None Include="..\..\..\executable\data\shaders\environment_under.frag" />
+    <None Include="..\..\..\executable\data\shaders\environment_under.vert" />
+    <None Include="..\..\..\executable\data\shaders\environment_water.frag" />
+    <None Include="..\..\..\executable\data\shaders\environment_water.vert" />
+    <None Include="..\..\..\executable\data\shaders\full.vert" />
+    <None Include="..\..\..\executable\data\shaders\full_blur_1.frag" />
+    <None Include="..\..\..\executable\data\shaders\full_blur_2.frag" />
+    <None Include="..\..\..\executable\data\shaders\full_post.frag" />
+    <None Include="..\..\..\executable\data\shaders\full_transition.frag" />
+    <None Include="..\..\..\executable\data\shaders\global.glsl" />
+    <None Include="..\..\..\executable\data\shaders\menu_animate.frag" />
+    <None Include="..\..\..\executable\data\shaders\menu_animate.vert" />
+    <None Include="..\..\..\executable\data\shaders\menu_border.frag" />
+    <None Include="..\..\..\executable\data\shaders\menu_border.vert" />
+    <None Include="..\..\..\executable\data\shaders\menu_circle.frag" />
+    <None Include="..\..\..\executable\data\shaders\menu_circle.vert" />
+    <None Include="..\..\..\executable\data\shaders\menu_grey.frag" />
+    <None Include="..\..\..\executable\data\shaders\menu_inner.frag" />
+    <None Include="..\..\..\executable\data\shaders\menu_inner.vert" />
+    <None Include="..\..\..\executable\data\shaders\menu_sharp.frag" />
+    <None Include="..\..\..\executable\data\shaders\object.vert" />
+    <None Include="..\..\..\executable\data\shaders\object_ground.frag" />
+    <None Include="..\..\..\executable\data\shaders\object_ship.frag" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\..\executable\data\shaders\readme.txt" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{323E13E4-2099-4F61-B4D4-BC1612D1B6B0}</ProjectGuid>
@@ -459,7 +531,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <IgnoreSpecificDefaultLibraries>msvcrt.lib</IgnoreSpecificDefaultLibraries>
-      <AdditionalOptions>CoreEngine_msvc_debug.lib SDL2.lib SDL2_ttf.lib SDL2_image.lib OpenGL32.lib GLew32mx.lib OpenAL32.lib LibOGG.lib LibVorbis.lib LibVorbisFile.lib zlib.lib %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>CoreEngine_msvc_debug.lib SDL2.lib SDL2_ttf.lib SDL2_image.lib OpenGL32.lib GLew32.lib OpenAL32.lib LibOGG.lib LibVorbis.lib LibVorbisFile.lib zlib.lib %(AdditionalOptions)</AdditionalOptions>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
     </Link>
@@ -484,7 +556,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <IgnoreSpecificDefaultLibraries>msvcrt.lib</IgnoreSpecificDefaultLibraries>
-      <AdditionalOptions>CoreEngine_msvc_debug.lib SDL2.lib SDL2_ttf.lib SDL2_image.lib OpenGL32.lib GLew32mx.lib OpenAL32.lib LibOGG.lib LibVorbis.lib LibVorbisFile.lib zlib.lib notelemetry.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>CoreEngine_msvc_debug.lib SDL2.lib SDL2_ttf.lib SDL2_image.lib OpenGL32.lib GLew32.lib OpenAL32.lib LibOGG.lib LibVorbis.lib LibVorbisFile.lib zlib.lib notelemetry.obj %(AdditionalOptions)</AdditionalOptions>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
     </Link>
@@ -516,7 +588,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
-      <AdditionalOptions>CoreEngine_msvc.lib SDL2.lib SDL2_ttf.lib SDL2_image.lib OpenGL32.lib GLew32mx.lib OpenAL32.lib LibOGG.lib LibVorbis.lib LibVorbisFile.lib zlib.lib %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>CoreEngine_msvc.lib SDL2.lib SDL2_ttf.lib SDL2_image.lib OpenGL32.lib GLew32.lib OpenAL32.lib LibOGG.lib LibVorbis.lib LibVorbisFile.lib zlib.lib %(AdditionalOptions)</AdditionalOptions>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <OptimizeReferences>true</OptimizeReferences>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
@@ -557,7 +629,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
-      <AdditionalOptions>CoreEngine_msvc.lib SDL2.lib SDL2_ttf.lib SDL2_image.lib OpenGL32.lib GLew32mx.lib OpenAL32.lib LibOGG.lib LibVorbis.lib LibVorbisFile.lib zlib.lib notelemetry.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>CoreEngine_msvc.lib SDL2.lib SDL2_ttf.lib SDL2_image.lib OpenGL32.lib GLew32.lib OpenAL32.lib LibOGG.lib LibVorbis.lib LibVorbisFile.lib zlib.lib notelemetry.obj %(AdditionalOptions)</AdditionalOptions>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

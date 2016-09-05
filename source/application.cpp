@@ -63,6 +63,7 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreTexture>("effect_particle_32.png",                 CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_particle_32.png", false);
     Core::Manager::Resource->Load<coreTexture>("effect_particle_128.png",                CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_particle_128.png", false);
     Core::Manager::Resource->Load<coreTexture>("effect_rain.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_rain.png");
+    Core::Manager::Resource->Load<coreTexture>("effect_sand.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_sand.png");
     Core::Manager::Resource->Load<coreTexture>("effect_soot.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_soot.png");
     Core::Manager::Resource->Load<coreTexture>("effect_wave.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_wave.png");
     Core::Manager::Resource->Load<coreTexture>("effect_wave_norm.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_wave_norm.png", false);
@@ -83,6 +84,8 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreTexture>("environment_lava_diff.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_lava_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_lava_norm.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_lava_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_leaf.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_leaf.png");
+    Core::Manager::Resource->Load<coreTexture>("environment_moss_diff.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_moss_diff.png");
+    Core::Manager::Resource->Load<coreTexture>("environment_moss_norm.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_moss_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_reed.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_reed.png");
     Core::Manager::Resource->Load<coreTexture>("environment_rock_diff.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_rock_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_rock_norm.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_rock_norm.png", false);
@@ -93,6 +96,7 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreTexture>("environment_stone_diff.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_stone_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_stone_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_stone_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_water_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_water_norm.png", false);
+    Core::Manager::Resource->Load<coreTexture>("environment_water_rain.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_water_rain.png", false);
     Core::Manager::Resource->Load<coreTexture>("game_logo.png",                          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/game_logo.png");
     Core::Manager::Resource->Load<coreTexture>("maus_logo.png",                          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/maus_logo.png");
     Core::Manager::Resource->Load<coreTexture>("menu_background_black.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_background_black.png");
@@ -118,6 +122,9 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreShader> ("effect_distortion.vert",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_distortion.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("effect_distortion.frag",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_distortion.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_distortion_direct.frag",          CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_distortion.frag", SHADER_DIRECT);
+    Core::Manager::Resource->Load<coreShader> ("effect_distortion_object3d.vert",        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_distortion.vert", CORE_SHADER_OPTION_NO_ROTATION SHADER_OBJECT3D);
+    Core::Manager::Resource->Load<coreShader> ("effect_distortion_object3d_inst.vert",   CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_distortion.vert", CORE_SHADER_OPTION_INSTANCING CORE_SHADER_OPTION_NO_ROTATION SHADER_OBJECT3D);
+    Core::Manager::Resource->Load<coreShader> ("effect_distortion_object3d_inst.frag",   CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_distortion.frag", CORE_SHADER_OPTION_INSTANCING SHADER_OBJECT3D);
     Core::Manager::Resource->Load<coreShader> ("effect_energy.vert",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert");
     Core::Manager::Resource->Load<coreShader> ("effect_energy_spheric.vert",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", SHADER_SPHERIC);
     Core::Manager::Resource->Load<coreShader> ("effect_energy_invert.vert",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", SHADER_INVERT);
@@ -174,6 +181,8 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreShader> ("environment_outdoor_glow.frag",          CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_outdoor.frag", SHADER_GLOW);
     Core::Manager::Resource->Load<coreShader> ("environment_outdoor_light.frag",         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_outdoor.frag", SHADER_LIGHT);
     Core::Manager::Resource->Load<coreShader> ("environment_outdoor_light_glow.frag",    CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_outdoor.frag", SHADER_LIGHT SHADER_GLOW);
+    Core::Manager::Resource->Load<coreShader> ("environment_rain.vert",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_rain.vert", CORE_SHADER_OPTION_NO_ROTATION);
+    Core::Manager::Resource->Load<coreShader> ("environment_rain.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_rain.frag");
     Core::Manager::Resource->Load<coreShader> ("environment_under.vert",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_under.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("environment_under.frag",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_under.frag");
     Core::Manager::Resource->Load<coreShader> ("environment_water.vert",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_water.vert", CORE_SHADER_OPTION_NO_ROTATION);
@@ -283,6 +292,16 @@ static void SetupResources()
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_distortion_direct_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("effect_distortion.vert")
         ->AttachShader("effect_distortion_direct.frag")
+        ->Finish();
+
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_distortion_object3d_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_distortion_object3d.vert")
+        ->AttachShader("effect_distortion.frag")
+        ->Finish();
+
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_distortion_object3d_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_distortion_object3d_inst.vert")
+        ->AttachShader("effect_distortion_object3d_inst.frag")
         ->Finish();
 
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
@@ -486,6 +505,11 @@ static void SetupResources()
         ->AttachShader("environment_outdoor_light_glow.frag")
         ->BindAttribute("a_v1Height",   CORE_SHADER_ATTRIBUTE_POSITION_NUM)
         ->BindAttribute("a_i1VertexID", CORE_SHADER_ATTRIBUTE_TEXCOORD_NUM)
+        ->Finish();
+
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_rain_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("environment_rain.vert")
+        ->AttachShader("environment_rain.frag")
         ->Finish();
 
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_under_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())

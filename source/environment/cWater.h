@@ -24,6 +24,10 @@
 #define WATER_SKY_SIZE     (3.0f)     // texture size of the sky-plane
 #define WATER_SCALE_FACTOR (0.5f)     // frame buffer resolution factor (reflection and depth)
 
+#define RAIN_DROPS         (20u)       // 
+#define RAIN_DROP_SPEED    (1.15f)     // 
+#define RAIN_DROP_WIDTH    (0.2f)      // 
+
 
 // ****************************************************************
 // water-surface class
@@ -65,6 +69,9 @@ public:
 
 
 private:
+    // 
+    virtual void __UpdateOwn() {}
+
     // hide default render functions
     inline void Render(const coreProgramPtr& pProgram)final {ASSERT(false)}
     inline void Render()final                               {ASSERT(false)}
@@ -90,6 +97,11 @@ public:
     cIceWater()noexcept;
 
     DISABLE_COPY(cIceWater)
+
+
+private:
+    // 
+    void __UpdateOwn()final;
 };
 
 
@@ -97,10 +109,27 @@ public:
 // rain-surface class
 class cRainWater final : public cWater
 {
+private:
+    coreFrameBuffer m_WaveMap;           // 
+    coreObject2D    m_WaveInjection;     // 
+
+    coreObject3D  m_aDrop[RAIN_DROPS];   // 
+    coreBatchList m_DropList;            // 
+    coreUintW     m_iCurDrop;            // 
+
+    coreFlow m_fFallDelay;               // 
+
+
 public:
-    cRainWater() = default;
+    cRainWater()noexcept;
+    ~cRainWater()final;
 
     DISABLE_COPY(cRainWater)
+
+
+private:
+    // 
+    void __UpdateOwn()final;
 };
 
 

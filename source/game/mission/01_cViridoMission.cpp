@@ -15,9 +15,9 @@ cViridoMission::cViridoMission()noexcept
 : m_Ball         (VIRIDO_BALLS)
 , m_BallTrail    (VIRIDO_BALLS * VIRIDO_TRAILS)
 , m_apOwner      {}
+, m_iRealState   (0u)
 , m_iStickyState (0u)
 , m_iBounceState (0u)
-, m_bBounceReal  (false)
 , m_fAnimation   (0.0f)
 {
     // 
@@ -198,6 +198,7 @@ void cViridoMission::__SetupOwn()
         if(STAGE_BEGINNING)
         {
             g_pEnvironment->ChangeBackground(-cGrassBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);
+
             g_pEnvironment->GetBackground()->GetOutdoor()->SetHeightOffset(-24.5f);
             g_pEnvironment->GetBackground()->GetOutdoor()->SetHeightFactor(0.0f);
             g_pEnvironment->GetBackground()->GetOutdoor()->SetHeightOffset(-13.83f);
@@ -209,10 +210,9 @@ void cViridoMission::__SetupOwn()
             g_pEnvironment->GetBackground()->SetDecalDensity (0u, 0.0f);
             g_pEnvironment->GetBackground()->SetAirDensity   (0u, 0.0f);
 
-            g_pEnvironment->SetTargetSpeed  (5.0f);
+            g_pEnvironment->SetTargetSpeed(5.0f);
 
             g_pGame->GetInterface()->ShowMission(this);
-
             g_pGame->StartIntro();
         }
 
@@ -224,92 +224,15 @@ void cViridoMission::__SetupOwn()
     // 
     STAGE_MAIN
     {
-        STAGE_ADD_SQUAD(pSquad1, cStarEnemy, 6u)
-        {
-            STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
-            {
-                pEnemy->Configure(5, LERP(COLOR_SHIP_BLUE, COLOR_SHIP_GREEN, I_TO_F(i) / I_TO_F(pSquad1->GetNumEnemies() - 1u)));
-                pEnemy->Resurrect(coreVector2((i & 0x01u) ? -0.9f : 0.9f, 1.2f) * FOREGROUND_AREA);
-            });
-        });
-
-        STAGE_GET_START(0u, 12u)
-        STAGE_GET_VEC2_ARRAY(avDir, 6u)
-        STAGE_GET_END
-
-        STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
-        {
-            STAGE_LIFETIME(pEnemy, 0.7f, -0.1f * I_TO_F(i))
-
-            STAGE_REMOVE_AREA(pEnemy)
-
-            if(STAGE_LIFETIME_AFTER(0.0f))
-            {
-                if(avDir[i].IsNull()) avDir[i] = pEnemy->AimAtPlayer().Normalize();
-
-                pEnemy->DefaultMoveForward(avDir[i], 30.0f);
-            }
-        });
-
-        STAGE_FINISH_CLEARED
+        STAGE_BOSS(m_Dharuk, coreVector2(0.0f,2.0f), coreVector2(0.0f,-1.0f))
     });
 
     // ################################################################
     // 
     STAGE_MAIN
     {
-
-    });
-
-    // ################################################################
-    // 
-    STAGE_MAIN
-    {
-
-    });
-
-    // ################################################################
-    // 
-    STAGE_MAIN
-    {
-
-    });
-
-    // ################################################################
-    // 
-    STAGE_MAIN
-    {
-
-    });
-
-    // ################################################################
-    // 
-    STAGE_MAIN
-    {
-
-    });
-
-    // ################################################################
-    // 
-    STAGE_START_HERE
-    STAGE_MAIN
-    {
-        // 
-        if(STAGE_BEGINNING) m_Dharuk.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
-
-        // 
-        if(CONTAINS_FLAG(m_Dharuk.GetStatus(), ENEMY_STATUS_DEAD))
-            STAGE_FINISH_NOW
-    });
-
-    // ################################################################
-    // 
-    STAGE_MAIN
-    {
-        // 
         g_pEnvironment->SetTargetDirection(coreVector2::Direction(LERPS(-1.0f*PI, 0.0f*PI, m_fStageTime*0.5f)));
 
-        // 
         STAGE_FINISH_AFTER(2.0f)
     });
 
@@ -317,28 +240,7 @@ void cViridoMission::__SetupOwn()
     // 
     STAGE_MAIN
     {
-        if(g_pEnvironment->GetBackground()->GetID() == cCloudBackground::ID)
-        {
-            // 
-            //const coreFloat fNewAlpha = 0.33f * CLAMP(1.0f - m_fStageTime / 4.0f, 0.0f, 1.0f);
-            //s_cast<cCloudBackground*>(g_pEnvironment->GetBackground())->SetCloudAlpha(fNewAlpha);
-            //s_cast<cCloudBackground*>(g_pEnvironment->GetBackground())->ReduceClouds();
-        }
-
-        // 
-        STAGE_FINISH_NOW
-    });
-
-    // ################################################################
-    // 
-    STAGE_MAIN
-    {
-        // 
-        if(STAGE_BEGINNING) m_Torus.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
-
-        // 
-        if(CONTAINS_FLAG(m_Torus.GetStatus(), ENEMY_STATUS_DEAD))
-            STAGE_FINISH_NOW
+        STAGE_BOSS(m_Torus, coreVector2(0.0f,2.0f), coreVector2(0.0f,-1.0f))
     });
 
     // ################################################################
@@ -354,12 +256,7 @@ void cViridoMission::__SetupOwn()
             });
         });
 
-        // 
-        if(STAGE_BEGINNING) m_Vaus.Resurrect(coreVector2(0.0f,-2.0f) * FOREGROUND_AREA, coreVector2(0.0f,1.0f));
-
-        // 
-        if(CONTAINS_FLAG(m_Vaus.GetStatus(), ENEMY_STATUS_DEAD))
-            STAGE_FINISH_NOW
+        STAGE_BOSS(m_Vaus, coreVector2(0.0f,-2.0f), coreVector2(0.0f,1.0f))
     });
 }
 
@@ -509,12 +406,12 @@ void cViridoMission::__MoveOwnAfter()
                         const coreVector2 vBallDir   = pBall  ->GetDirection().xy();
                         const coreVector2 vPaddleDir = pPaddle->GetDirection().xy();
 
-                        if(m_bBounceReal)
+                        if(CONTAINS_BIT(m_iRealState, i))
                         {
                             // 
                             coreVector2 vNewDir = coreVector2::Reflect(vBallDir, (vBallPos - oPaddleSphere.GetPosition().xy()).Normalize());
-                            if(ABS(vPaddleDir.x) > ABS(vPaddleDir.y)) vNewDir.x = MAX(ABS(vNewDir.x), 0.35f) * vPaddleDir.x;
-                                                                 else vNewDir.y = MAX(ABS(vNewDir.y), 0.35f) * vPaddleDir.y;
+                            if(ABS(vPaddleDir.x) > ABS(vPaddleDir.y)) vNewDir.x = MAX(ABS(vNewDir.x), 0.75f) * vPaddleDir.x;
+                                                                 else vNewDir.y = MAX(ABS(vNewDir.y), 0.75f) * vPaddleDir.y;
 
                             // 
                             pBall->SetDirection(coreVector3(vNewDir.Normalized(), 0.0f));

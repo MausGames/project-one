@@ -18,17 +18,17 @@ void FragmentMain()
     vec2 v2Distortion1 = coreTexture2D(2, v_av2TexCoord[0]).xy;
     vec2 v2Distortion2 = coreTexture2D(2, v_av2TexCoord[1]).xy;
     vec2 v2Distortion  = (v2Distortion1 + v2Distortion2) * 2.0 - 2.0;
-   
+
     // 
     vec2 v2FinalCoord = v_av2TexCoord[2] + v2Distortion * 0.05;
     vec3 v3TexNormal  = coreTexture2D(1, v2FinalCoord).xyz;
     vec3 v3TexColor   = coreTexture2D(0, v2FinalCoord).rgb;
-    
+
     // calculate dot-3 bump factor
     vec3  v3MathLightDir = c_v3LightDir;
     vec3  v3BumpNormal   = normalize(v3TexNormal * 2.0 - 1.0);
     float v1BumpFactor   = dot(v3MathLightDir, v3BumpNormal);
-    
+
     // calculate diffuse value
     vec3 v3Diffuse  = v3TexColor * (1.1 * max(0.0, v1BumpFactor) + 0.7);
 

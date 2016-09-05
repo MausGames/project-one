@@ -8,14 +8,14 @@
 //////////////////////////////////////////////////////
 #include "main.h"
 
-cConfig g_CurConfig          = {};
-cConfig g_OldConfig          = {};
-cInput  g_aInput[INPUT_SETS] = {{}};
+sConfig g_CurConfig          = {};
+sConfig g_OldConfig          = {};
+sInput  g_aInput[INPUT_SETS] = {{}};
 
 
 // ****************************************************************
 // check configuration for valid values
-static void CheckConfig(cConfig* pConfig)
+static void CheckConfig(sConfig* pConfig)
 {
 #if defined(CONFIG_FORCE)
 
@@ -177,7 +177,7 @@ void UpdateInput()
     {
         const coreUint8& iType = g_CurConfig.Input.aiType[i];
         const auto&      oSet  = g_CurConfig.Input.aSet[iType];
-        cInput&          oMap  = g_aInput[iType];
+        sInput&          oMap  = g_aInput[iType];
 
         // reset mapped input values
         std::memset(&oMap, 0, sizeof(oMap));

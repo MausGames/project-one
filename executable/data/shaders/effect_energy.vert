@@ -22,7 +22,7 @@ void VertexMain()
     // calculate light and color intensity
     vec3  v3NewNormal = coreQuatApply(u_v4Rotation, a_v3RawNormal);
     float v1Base      = abs(v3NewNormal.z);
-    
+
 #else
 
     // transform position (with slight z-offset to reduce fighting)
@@ -44,7 +44,7 @@ void VertexMain()
 
     // spheric bubble-like
     v_v1Strength = (1.1 - v1Base) * 3.5;
-    
+
 #elif defined(_P1_INVERT_)
 
     // solid, stronger on the outside
@@ -55,10 +55,10 @@ void VertexMain()
     // directional interpolated
     v1Base       =  1.0 - v1Base * a_v2RawTexCoord.y;
     v_v1Strength = (0.9 - v1Base) * 3.5;
-    
+
     // increase depth on the back to improve overlapping
     gl_Position.z += (1.0-a_v2RawTexCoord.y) * gl_Position.w;
-    
+
 #elif defined(_P1_RING_)
 
     // special-case with centric interpolation on y

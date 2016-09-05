@@ -23,7 +23,7 @@ void FragmentMain()
     vec3  v3BumpNormal1 = coreTexture2D(0, v_av2TexCoord[0]).xyz;
     vec3  v3BumpNormal2 = coreTexture2D(0, v_av2TexCoord[1]).xyz;
     float v1Depth       = coreTexture2D(3, v2ScreenCoord).r;
-    
+
     // calculate dot-3 bump factor
     vec3  v3MathLightDir = normalize(v_v4Lighting.xyz);
     vec3  v3BumpNormal   = (v3BumpNormal1 + v3BumpNormal2) * 2.0 - 2.0;

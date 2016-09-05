@@ -18,7 +18,7 @@ void FragmentMain()
 
     // evaluate shader per sample
     gl_SampleID;
-    
+
 #endif
 
     // lookup detail value and map between -1.0 and +1.0

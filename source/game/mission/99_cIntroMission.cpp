@@ -348,12 +348,7 @@ void cIntroMission::__SetupOwn()
     // 
     STAGE_MAIN
     {
-        // 
-        if(STAGE_BEGINNING) m_ProjectOne.Resurrect(coreVector2(0.0f,2.0f) * FOREGROUND_AREA, coreVector2(0.0f,-1.0f));
-
-        // 
-        if(CONTAINS_FLAG(m_ProjectOne.GetStatus(), ENEMY_STATUS_DEAD))
-            STAGE_FINISH_NOW
+        STAGE_BOSS(m_ProjectOne, coreVector2(0.0f,2.0f), coreVector2(0.0f,-1.0f))
     });
 }
 

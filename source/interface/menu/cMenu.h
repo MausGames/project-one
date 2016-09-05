@@ -155,12 +155,16 @@ public:
 class cGameMenu final : public coreMenu
 {
 private:
-    coreObject2D m_Background;   // 
+    coreObject2D m_Background;        // 
 
-    coreButton m_StartButton;    // start button
-    coreButton m_ConfigButton;   // config button
-    coreButton m_ExtraButton;    // extra button
-    coreButton m_ExitButton;     // exit button
+    coreButton m_StartButton;         // start button
+    coreButton m_LeaderboardButton;   // leaderboard button
+    coreButton m_ReplayButton;        // replay button
+    coreButton m_ConfigButton;        // config button
+    coreButton m_ExtraButton;         // extra button
+    coreButton m_ExitButton;          // exit button
+
+    cLeaderboard m_Leaderboard;       // 
 
 
 public:

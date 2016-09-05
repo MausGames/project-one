@@ -25,7 +25,7 @@ void VertexMain()
     gl_Position      = coreObject2DPosition();
     v_av2TexCoord[0] = a_v2LowTexCoord * vec2(v2Size.x / v2Size.y * 0.25, 1.0);
     v_av2TexCoord[1] = (a_v2LowTexCoord * v2Size + v2Offset) * 2.0;
-    
+
     // calculate border properties
     v_v2Interior = vec2(a_v2LowTexCoord.x, 1.0 - a_v2LowTexCoord.x);
     v_v2Border   = vec2(0.0168, 0.008) / v2Size.x * (min(v1Aspect, 1.0) * 1.333);

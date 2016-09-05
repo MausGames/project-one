@@ -26,7 +26,7 @@ varying vec3 v_av3ShipNormal;     // simplified normal vector
 
 void VertexMain()
 {
-#if defined(_P1_WAVE_) 
+#if defined(_P1_WAVE_)
 
     // 
     vec3 v3WavePos    = a_v3RawPosition;
@@ -35,23 +35,23 @@ void VertexMain()
     // 
     vec4 v4NewPosition  = vec4(coreObject3DTransform(v3WavePos), 1.0);
     vec4 v4NewPosition2 = vec4(coreObject3DTransformRaw(),       1.0);
-    
+
 #else
 
     // 
     vec4 v4NewPosition  = vec4(coreObject3DTransformRaw(), 1.0);
     vec4 v4NewPosition2 = v4NewPosition;
-    
-#endif 
+
+#endif
 
     // transform position and shadow projection
     gl_Position     = u_m4ViewProj     * v4NewPosition;
     v_v4ShadowCoord = u_m4ShadowMatrix * v4NewPosition2;
-    
+
     // forward texture coordinates
     v_av2TexCoord[0] = a_v2RawTexCoord;
     v_av2TexCoord[1] = coreObject3DTexCoordRaw();
-    
+
     // select blink intensity
 #if defined(_CORE_OPTION_INSTANCING_)
     float v1Blink = a_v1Blink;
@@ -61,7 +61,7 @@ void VertexMain()
 
     // transform lighting properties
     coreLightingTransform(v4NewPosition.xyz);
-    
+
     // 
     v_av4ShipLight  = vec4(-u_aLight[0].v4Direction.xyz, v1Blink);
     v_av3ShipView   = normalize(u_v3CamPosition - v4NewPosition.xyz);

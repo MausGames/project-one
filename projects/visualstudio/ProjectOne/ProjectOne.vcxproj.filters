@@ -339,6 +339,9 @@
     <ClInclude Include="..\..\..\source\file\cReplay.h">
       <Filter>file</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\source\file\cValidate.h">
+      <Filter>file</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="environment">
@@ -371,5 +374,219 @@
     <Filter Include="environment\background">
       <UniqueIdentifier>{c509ba18-b93f-49da-8dcc-2fcba6b09c3d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="_data">
+      <UniqueIdentifier>{c909c6a8-0e5d-4d46-a6b7-0a34b9fe3ee1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_data\languages">
+      <UniqueIdentifier>{1661bdf9-2710-49eb-a752-7d50ddfed78b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_data\shaders">
+      <UniqueIdentifier>{e3bbc2c3-f6c4-41c0-9650-36d1c80b246b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\executable\data\shaders\default_3d_raw.vert">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\default_label.vert">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\default_label_sharp.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\default_label_smooth.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\default_particle.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\default_particle.vert">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\effect_decal.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\effect_decal.vert">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\effect_distortion.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\effect_distortion.vert">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\effect_energy.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\effect_energy.vert">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\effect_lightning.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\effect_lightning.vert">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\effect_outline.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\effect_outline.vert">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\effect_particle.vert">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\effect_particle_color.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\effect_particle_dark.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\effect_particle_fire.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\effect_particle_smoke.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\effect_shadow.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\effect_shadow.vert">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\effect_shield.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\effect_shield.vert">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\environment_clouds.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\environment_clouds.vert">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\environment_ice.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\environment_ice.vert">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\environment_lava.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\environment_lava.vert">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\environment_outdoor.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\environment_outdoor.vert">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\environment_rain.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\environment_rain.vert">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\environment_under.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\environment_under.vert">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\environment_water.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\environment_water.vert">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\full.vert">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\full_blur_1.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\full_blur_2.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\full_post.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\full_transition.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\global.glsl">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\menu_animate.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\menu_animate.vert">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\menu_border.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\menu_border.vert">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\menu_circle.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\menu_circle.vert">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\menu_grey.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\menu_inner.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\menu_inner.vert">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\menu_sharp.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\object.vert">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\object_ground.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\object_ship.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\custom.glsl">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\default_2d.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\default_2d.vert">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\default_3d.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\default_3d_low.vert">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\languages\english.lng">
+      <Filter>_data\languages</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\languages\german.lng">
+      <Filter>_data\languages</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\languages\japanese.lng">
+      <Filter>_data\languages</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\..\executable\data\shaders\readme.txt">
+      <Filter>_data\shaders</Filter>
+    </Text>
   </ItemGroup>
 </Project>

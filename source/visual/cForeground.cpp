@@ -45,10 +45,7 @@ void cForeground::Start()
 void cForeground::End()
 {
     // copy default frame buffer to texture (faster than dedicated multisampled FBO, but only once)
-    const coreTexturePtr& pTexture = m_FrameBuffer.GetColorTarget(0u).pTexture;
-    pTexture->CopyFrameBuffer(0u, 0u, 0u, 0u,
-                              F_TO_UI(m_FrameBuffer.GetResolution().x),
-                              F_TO_UI(m_FrameBuffer.GetResolution().y));
+    m_FrameBuffer.GetColorTarget(0u).pTexture->CopyFrameBuffer();
 
     // explicitly invalidate color and depth buffer
     if(CORE_GL_SUPPORT(ARB_invalidate_subdata))

@@ -15,6 +15,8 @@
 // TODO: expose pool-allocator for additional objects (AddList)
 // TODO: no blitting on disabled anti-aliasing ( low-optimizations on other components)
 // TODO: optimize density to never try to draw on 0.0f
+// TODO: make grass leafs same color as other plants
+// TODO: make wind-sound (sand) depend on speed
 
 
 // ****************************************************************
@@ -47,6 +49,14 @@
 #define SEA_ANIMAL_2_RESERVE (256u)
 #define SEA_ALGAE_NUM        (2048u)
 #define SEA_ALGAE_RESERVE    (1024u)
+
+#define DESERT_STONE_NUM     (1536u)
+#define DESERT_STONE_RESERVE (256u)
+#define DESERT_SAND_NUM      (3u)
+
+#define MOSS_RAIN_NUM        (6u)
+#define MOSS_CLOUD_NUM       (64u)
+#define MOSS_CLOUD_RESERVE   (76u)   // # tested
 
 #define CLOUD_CLOUD_NUM      (576u)
 #define CLOUD_CLOUD_RESERVE  (684u)   // # tested
@@ -190,11 +200,21 @@ protected:
 // desert background class
 class cDesertBackground final : public cBackground
 {
+private:
+    coreSoundPtr m_pWindSound;   // wind sound-effect
+
+
 public:
     cDesertBackground()noexcept;
+    ~cDesertBackground()final;
 
     DISABLE_COPY(cDesertBackground)
     ASSIGN_ID(3, "Desert")
+
+
+private:
+    // execute own routines
+    void __MoveOwn()final;
 };
 
 
@@ -253,6 +273,11 @@ public:
 
     DISABLE_COPY(cMossBackground)
     ASSIGN_ID(7, "Moss")
+
+
+private:
+    // execute own routines
+    void __MoveOwn()final;
 };
 
 
@@ -274,7 +299,6 @@ class cCloudBackground final : public cBackground
 {
 private:
     coreObject2D m_Cover;        // 
-    coreObject3D m_aRain[4];     // 
     coreFlow     m_fOffset;      // 
 
     coreSoundPtr m_pWindSound;   // wind sound-effect

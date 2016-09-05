@@ -17,22 +17,25 @@ void FragmentMain()
 {
     vec2 v2TexNormal;
     vec3 v3TexColor;
+
+    // always lookup full normal map (less register pressure)
+    vec4 v4FullNormal = coreTexture2D(2, v_av2TexCoord[0]);
+
     if(v_v1Mix <= 0.0)   // # performance boost
     {
         // lookup only lower outdoor textures
-        v2TexNormal = coreTexture2D(2, v_av2TexCoord[0]).zw;
+        v2TexNormal = v4FullNormal.zw;
         v3TexColor  = coreTexture2D(1, v_av2TexCoord[0]).rgb;
     }
     else if(v_v1Mix >= 1.0)
     {
         // lookup only upper outdoor textures
-        v2TexNormal = coreTexture2D(2, v_av2TexCoord[0]).xy;
+        v2TexNormal = v4FullNormal.xy;
         v3TexColor  = coreTexture2D(0, v_av2TexCoord[0]).rgb;
     }
     else
     {
         // lookup all outdoor textures
-        vec4 v4FullNormal = coreTexture2D(2, v_av2TexCoord[0]);
         vec3 v3FullColor1 = coreTexture2D(1, v_av2TexCoord[0]).rgb;
         vec3 v3FullColor2 = coreTexture2D(0, v_av2TexCoord[0]).rgb;
 
@@ -52,7 +55,7 @@ void FragmentMain()
 
     // apply shadow mapping with single depth value comparison
     float v1Light = 1.0 - coreTextureShadow(0, v_v4ShadowCoord) * 0.5;
-    
+
 #elif (_P1_SHADOW_) >= 2
 
     // apply shadow mapping with percentage closer filtering
@@ -75,7 +78,7 @@ void FragmentMain()
     // increase lower outdoor intensity (for volcano background)
     float v1Max = min(1.0 - v_v1Mix, 1.0);
     v1Light     = max(v1Max, v1Light);
-    
+
     // 
     const float v1Shine = 0.0;
 
@@ -84,9 +87,9 @@ void FragmentMain()
     // 
     const float v1Max   = 0.0;
     const float v1Shine = 1.0;
-    
+
 #endif
-    
+
     // calculate dot-3 bump factor
     vec3  v3MathLightDir = normalize(v_av4LightDir[0].xyz);
     vec3  v3BumpNormal   = coreUnpackNormalMapDeriv(v2TexNormal);
@@ -107,9 +110,9 @@ void FragmentMain()
     gl_FragColor = vec4(v1Diffuse + v1Specular, 1.0, 1.0, 1.0);
 
 #else
-    
+
     // draw final color
     gl_FragColor = vec4(v3TexColor * v1Diffuse + v1Specular, 1.0);
-    
+
 #endif
 }

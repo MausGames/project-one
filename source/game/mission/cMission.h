@@ -37,11 +37,13 @@
 #define STAGE_MAIN_WAIT(t)              STAGE_MAIN{STAGE_FINISH_AFTER(1.0f)});
 #define STAGE_START_HERE                m_anStage.clear(); STAGE_MAIN{g_pGame->StartIntro(); if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY)) STAGE_FINISH_NOW});
 
-#define STAGE_CLEARED                   (std::all_of(m_apSquad.begin(), m_apSquad.end(), [](const tSquadPtr& pSquad) {return pSquad->IsFinished();}))
+#define STAGE_CLEARED                   (std::all_of(m_apSquad.begin(), m_apSquad.end(), [](const uSquadPtr& pSquad) {return pSquad->IsFinished();}))
 
 #define STAGE_FINISH_NOW                {this->SkipStage();}
 #define STAGE_FINISH_CLEARED            {if(STAGE_CLEARED)       STAGE_FINISH_NOW}
 #define STAGE_FINISH_AFTER(t)           {if(m_fStageTime >= (t)) STAGE_FINISH_NOW}
+
+#define STAGE_BOSS(e,p,d)               {if(STAGE_BEGINNING) (e).Resurrect((p) * FOREGROUND_AREA, (d)); if(CONTAINS_FLAG((e).GetStatus(), ENEMY_STATUS_DEAD)) STAGE_FINISH_NOW}
 
 #define STAGE_ADD_PATH(n)               auto n = this->_AddPath    (__LINE__,      [this](coreSpline2* OUTPUT n)
 #define STAGE_ADD_SQUAD(n,t,c)          auto n = this->_AddSquad<t>(__LINE__, (c), [this](cEnemySquad* OUTPUT n)
@@ -132,9 +134,9 @@ class INTERFACE cMission
 {
 protected:
     // 
-    using tStageFunc = std::function<void()>;
-    using tPathPtr   = std::unique_ptr<coreSpline2>;
-    using tSquadPtr  = std::unique_ptr<cEnemySquad>;
+    using uStageFunc = std::function<void()>;
+    using uPathPtr   = std::unique_ptr<coreSpline2>;
+    using uSquadPtr  = std::unique_ptr<cEnemySquad>;
 
 
 protected:
@@ -143,9 +145,9 @@ protected:
     cBoss*    m_pCurBoss;                             // pointer to currently active boss
     coreUintW m_iCurBossIndex;                        // index of the active boss (or error-value)
 
-    coreLookup<coreUint16, tStageFunc> m_anStage;     // 
-    coreLookup<coreUint16, tPathPtr>   m_apPath;      // 
-    coreLookup<coreUint16, tSquadPtr>  m_apSquad;     // 
+    coreLookup<coreUint16, uStageFunc> m_anStage;     // 
+    coreLookup<coreUint16, uPathPtr>   m_apPath;      // 
+    coreLookup<coreUint16, uSquadPtr>  m_apSquad;     // 
 
     coreInt16* m_piInt;                               // 
     coreFloat* m_pfFloat;                             // 
@@ -237,9 +239,9 @@ private:
     coreObject3D m_aPaddleSphere[VIRIDO_PADDLES];   // 
     cShip*       m_apOwner      [VIRIDO_PADDLES];   // 
 
+    coreUint8 m_iRealState;                         // 
     coreUint8 m_iStickyState;                       // (only between first ball and first paddle) 
     coreUint8 m_iBounceState;                       // 
-    coreBool  m_bBounceReal;                        // 
 
     coreFlow m_fAnimation;                          // animation value
 
@@ -260,13 +262,12 @@ public:
     void DisablePaddle(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    inline void     MakeSticky    ()                              {ADD_BIT(m_iStickyState, 0u)}
-    inline void     UnmakeSticky  (const coreVector2& vDirection) {m_iStickyState = 0; m_aBallRaw[0].SetDirection(coreVector3(vDirection, 0.0f));}
-    inline coreBool GetStickyState()const                         {return CONTAINS_BIT(m_iStickyState, 1u);}
-
-    // 
-    inline void      SetBounceReal (const coreBool bStatus) {m_bBounceReal = bStatus;}
-    inline coreUint8 GetBounceState()const                  {return m_iBounceState;}
+    inline void      MakeReal      (const coreUintW iIndex)        {ADD_BIT(m_iRealState, iIndex)}
+    inline void      MakeSticky    ()                              {ADD_BIT(m_iStickyState, 0u)}
+    inline void      UnmakeSticky  (const coreVector2& vDirection) {m_iStickyState = 0; m_aBallRaw[0].SetDirection(coreVector3(vDirection, 0.0f));}
+    inline coreUint8 GetRealState  ()const                         {return m_iRealState;}
+    inline coreBool  GetStickyState()const                         {return CONTAINS_BIT(m_iStickyState, 1u);}
+    inline coreUint8 GetBounceState()const                         {return m_iBounceState;}
 
     // 
     inline coreObject3D* GetBall  (const coreUintW iIndex) {ASSERT(iIndex < VIRIDO_BALLS)   return &m_aBallRaw[iIndex * (VIRIDO_TRAILS + 1u)];}
@@ -466,7 +467,7 @@ template <typename F> coreSpline2* cMission::_AddPath(const coreUint16 iCodeLine
     if(!m_apPath.count(iCodeLine))
     {
         // 
-        tPathPtr pNewPath = std::make_unique<coreSpline2>();
+        uPathPtr pNewPath = std::make_unique<coreSpline2>();
         nInitFunc(pNewPath.get());
 
         // 
@@ -484,7 +485,7 @@ template <typename T, typename F> cEnemySquad* cMission::_AddSquad(const coreUin
     if(!m_apSquad.count(iCodeLine))
     {
         // 
-        tSquadPtr pNewSquad = std::make_unique<cEnemySquad>();
+        uSquadPtr pNewSquad = std::make_unique<cEnemySquad>();
         pNewSquad->AllocateEnemies<T>(iNum);
         nInitFunc(pNewSquad.get());
 
