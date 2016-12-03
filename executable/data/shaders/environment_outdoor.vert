@@ -9,42 +9,77 @@
 
 
 // constant values
-const int   c_i1Size   = 31;       // number of vertices per axis
-const float c_v1Detail = 6.0;      // size of a block
+const int   c_i1Size   = 31;     // number of vertices per axis
+const float c_v1Detail = 6.0;    // size of a block
 
 // shader uniforms
-uniform mat4 u_m4ShadowMatrix;     // own shadow view-projection matrix (with coordinate adjustment)
-uniform vec2 u_v2HeightModifier;   // 
+uniform mat4 u_m4ShadowMatrix;   // own shadow view-projection matrix (with coordinate adjustment)
+uniform vec4 u_v4LerpData1;      // 
+uniform vec3 u_v3LerpData2;      // 
 
 // vertex attributes
-attribute float a_v1Height;        // vertex height (full position is deduced from the vertex-ID)
-attribute int   a_i1VertexID;      // 
+attribute float a_v1Height;      // vertex height (full position is deduced from the vertex-ID)
+attribute vec2  a_v2Position;    // 
 
 // shader output
-varying float v_v1Mix;             // mix value between both outdoor textures
-varying vec4  v_v4ShadowCoord;     // pixel coordinates viewed from the light source
+varying float v_v1Mix;           // mix value between both outdoor textures
+varying vec4  v_v4ShadowCoord;   // pixel coordinates viewed from the light source
 
-#if (__VERSION__) < 130
-    #define gl_VertexID a_i1VertexID
-#endif
 
+void LerpLightingTransform(const in vec3 v3Position, const in float v1Lerp)
+{
+    // 
+    vec3 v3LerpNormal  = normalize(mix(vec3(0.0, 0.0, 1.0), a_v3RawNormal,      v1Lerp));
+    vec3 v3LerpTangent = normalize(mix(vec3(1.0, 0.0, 0.0), a_v4RawTangent.xyz, v1Lerp));
+
+    // 
+    mat3 TBN = coreTangentSpaceMatrix(u_v4Rotation, v3LerpNormal, vec4(v3LerpTangent, a_v4RawTangent.w));
+
+    // 
+    v_av4LightDir[0] = vec4(TBN * -u_aLight[0].v4Direction.xyz, u_aLight[0].v4Direction.w);
+    v_v3TangentPos   = TBN * v3Position;
+    v_v3TangentCam   = TBN * u_v3CamPosition;
+}
 
 void VertexMain()
 {
-    // calculate full vertex position
-    ivec2 i2Index       = ivec2(coreMod(gl_VertexID, c_i1Size), gl_VertexID / c_i1Size);
-    vec3  v3NewPosition = vec3(vec2(i2Index - ivec2(c_i1Size/2)) * c_v1Detail, a_v1Height * u_v2HeightModifier.y + u_v2HeightModifier.x);
-    
-    // transform position and shadow projection
-    gl_Position     = u_m4ViewProj     * vec4(v3NewPosition, 1.0);
-    v_v4ShadowCoord = u_m4ShadowMatrix * vec4(v3NewPosition, 1.0);
-    
-    // forward texture coordinates
-    v_av2TexCoord[0] = v3NewPosition.xy * 0.04167;
+#if defined(GL_EXT_gpu_shader4)  
 
-    // transform lighting properties
-    coreLightingTransform(v3NewPosition);
+    // calculate vertex-position from vertex-ID
+    ivec2 i2Index  = ivec2(coreMod(gl_VertexID, c_i1Size), gl_VertexID / c_i1Size);
+    vec2  v2Vertex = vec2(i2Index - ivec2(c_i1Size / 2)) * c_v1Detail;
+
+#else
+
+    // use vertex-position buffer (as fallback)
+    vec2 v2Vertex = a_v2Position;
+
+#endif
+
+    vec2 v2MulAdd;
+
+    // 
+    float v1Lerp = floor((v2Vertex.y - u_v3CamPosition.y) / c_v1Detail) / float(c_i1Size) + 0.5;
+    if(v1Lerp <= u_v3LerpData2.z)
+    {
+        v2MulAdd = mix(u_v4LerpData1.xy, u_v3LerpData2.xy, v1Lerp / u_v3LerpData2.z);
+    }
+    else
+    {
+        v2MulAdd = mix(u_v3LerpData2.xy, u_v4LerpData1.zw, (v1Lerp - u_v3LerpData2.z) / (1.0 - u_v3LerpData2.z));
+    }
+
+    // transform position and shadow projection
+    vec4 v4NewPosition = vec4(v2Vertex, a_v1Height * v2MulAdd.x + v2MulAdd.y, 1.0);
+    gl_Position        = u_m4ViewProj     * v4NewPosition;
+    v_v4ShadowCoord    = u_m4ShadowMatrix * v4NewPosition;
+
+    // forward texture coordinates
+    v_av2TexCoord[0] = v4NewPosition.xy * 0.04167;
+
+    // transform lighting properties (with interpolation)
+    LerpLightingTransform(v4NewPosition.xyz, v2MulAdd.x);
 
     // calculate mix value relative to vertex height
-    v_v1Mix = v3NewPosition.z * 0.21 + 4.2;
+    v_v1Mix = v4NewPosition.z * 0.21 + 4.2;
 }

@@ -63,8 +63,7 @@ void cMission::Setup()
     STAGE_MAIN
     {
         // begin mission
-        if(g_pGame->GetTimeGame() >= 0.0f)
-            STAGE_FINISH_NOW
+        STAGE_FINISH_NOW
     });
 
     // 
@@ -93,8 +92,6 @@ void cMission::MoveBefore()
 {
     if(!m_anStage.empty())
     {
-        
-
         if(m_fStageWait > 0.0f)
         {
             // 
@@ -103,8 +100,8 @@ void cMission::MoveBefore()
         else
         {
             // 
-        m_fStageTimeBefore = m_fStageTime;
-        m_fStageTime.Update(1.0f);
+            m_fStageTimeBefore = m_fStageTime;
+            m_fStageTime.Update(1.0f);
 
             // 
             m_anStage.back()();

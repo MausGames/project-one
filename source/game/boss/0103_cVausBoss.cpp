@@ -139,7 +139,7 @@ void cVausBoss::__MoveOwn()
             });
         }
 
-        g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+        g_pGame->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
         {
             pPlayer->SetPosition(coreVector3(pPlayer->GetPosition().x, MAX(pPlayer->GetPosition().y, this->GetPosition().y + 9.5f), pPlayer->GetPosition().z));
         });
@@ -324,7 +324,7 @@ void cVausBoss::__MoveOwn()
         case 1: fSpeed = 1.0f/6.0f; 
             {
                 const coreFloat y = (pBall->GetPosition().x <= 0.0f) ? 1.211f : 1.212f;
-                const coreVector2 vDir = pBall->GetDirection().xy().Sign() * coreVector2(1.0f,y).Normalize();
+                const coreVector2 vDir = pBall->GetDirection().xy().Processed(SIGN) * coreVector2(1.0f, y).Normalize();
                 pBall->SetDirection(coreVector3(vDir, 0.0f));
             }
 
@@ -586,7 +586,7 @@ void cVausBoss::__MoveOwn()
                               else pSquad->GetEnemy(iIndex)->Resurrect(coreVector2(-2.0f,0.2f) * FOREGROUND_AREA, coreVector2( 1.0f,0.0f));
             });
 
-            pSquad->ForEachEnemy([&](cEnemy* OUTPUT pEnemy, const coreUintW i)
+            pSquad->ForEachEnemy([](cEnemy* OUTPUT pEnemy, const coreUintW i)
             {
                 const coreVector2 vTarget = (i & 0x01u) ? coreVector2(-2.0f,0.0f) : coreVector2( 2.0f,0.2f);
                 if(pEnemy->DefaultMoveSmooth(vTarget, 3.0f, 30.0f))
@@ -710,7 +710,7 @@ void cVausBoss::__MoveOwn()
         });
 
         // 
-        pSquad->ForEachEnemyAll([&](cEnemy* OUTPUT pEnemy, const coreUintW i) // TODO don't calculate if all dead (m_iPhase < 10u) 
+        pSquad->ForEachEnemyAll([this](cEnemy* OUTPUT pEnemy, const coreUintW i) // TODO don't calculate if all dead (m_iPhase < 10u) 
         {
             const coreUintW x = i % VAUS_SCOUTS_X;
             const coreUintW y = i / VAUS_SCOUTS_X;
@@ -807,7 +807,7 @@ void cVausBoss::__MoveOwn()
             oCurRay.SetSize     (coreVector3(1.2f, fSize, 1.2f));
             oCurRay.SetDirection(coreVector3(pPaddle->GetDirection().xy(), 0.0f));
             //m_Ray.SetAlpha();
-            oCurRay.SetTexOffset(coreVector2(0.4f,0.3f) * -coreFloat(Core::System->GetTotalTime()));  
+            oCurRay.SetTexOffset(coreVector2(0.4f,0.3f) * -coreFloat(Core::System->GetTotalTime()));   // TODO: fract   
             oCurRay.Move();
         }
     }

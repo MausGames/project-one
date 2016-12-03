@@ -1,7 +1,21 @@
 $LANGUAGE = 日本語
+$FONT = keifont.ttf
+
 $START_GAME = プレイゲーム
 $EXIT_GAME = ゲーム終了
 $CREDITS = クレジット
 $BACK = リターン
 $ARMOR = 鎧
 $STAGE = Not correctly translated, please don't mind
+
+$VALUE_OFF = クレジット
+$VALUE_ON = クレジット
+$VALUE_LOW = クレジット
+$VALUE_HIGH = クレジット
+$DISPLAY_PRIMARY = クレジット
+$DISPLAY_SECONDARY = クレジット
+$DISPLAYMODE_WINDOW = プレイゲーム
+$DISPLAYMODE_BORDERLESS = プレイゲーム
+$DISPLAYMODE_FULLSCREEN = プレイゲーム
+
+$BOSS_TITLE_0101 = ゲーム終了クレジット

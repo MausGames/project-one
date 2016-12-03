@@ -49,7 +49,7 @@ private:
 
     coreVector2 m_vForce;                                    // 
 
-    // TODO: score total ?    
+    // TODO: score game ?    
     coreProtect<coreUint32> m_iScoreMission;                 // 
     coreProtect<coreUint32> m_aiScoreBoss[MISSION_BOSSES];   // 
 

@@ -10,6 +10,8 @@
 #ifndef _P1_GUARD_OUTDOOR_H_
 #define _P1_GUARD_OUTDOOR_H_
 
+// TODO: definitions for algorithms (background names ?)
+
 
 // ****************************************************************
 // outdoor definitions
@@ -20,20 +22,20 @@
 #define OUTDOOR_HEIGHT         (160u)                                                     // vertices per column
 #define OUTDOOR_HEIGHT_FULL    (OUTDOOR_HEIGHT + OUTDOOR_VIEW)                            // with double vertices
 
-#define OUTDOOR_BLOCKS_X       (OUTDOOR_WIDTH-1u)                                         // blocks per row
-#define OUTDOOR_BLOCKS_Y       (OUTDOOR_HEIGHT_FULL-1u)                                   // blocks per column
+#define OUTDOOR_BLOCKS_X       (OUTDOOR_WIDTH - 1u)                                       // blocks per row
+#define OUTDOOR_BLOCKS_Y       (OUTDOOR_HEIGHT_FULL - 1u)                                 // blocks per column
 #define OUTDOOR_BLOCKS         (OUTDOOR_BLOCKS_X * OUTDOOR_BLOCKS_Y)                      // number of all blocks
 
 #define OUTDOOR_PER_INDICES    (6u)                                                       // indices per block
 #define OUTDOOR_TOTAL_VERTICES (OUTDOOR_WIDTH * OUTDOOR_HEIGHT_FULL)                      // total number of vertices
 #define OUTDOOR_TOTAL_INDICES  (OUTDOOR_PER_INDICES * OUTDOOR_BLOCKS)                     // total number of indices
 
-#define OUTDOOR_RANGE          (OUTDOOR_WIDTH * (OUTDOOR_VIEW+1u))                        // vertices used in a draw call
+#define OUTDOOR_RANGE          (OUTDOOR_WIDTH * (OUTDOOR_VIEW + 1u))                      // vertices used in a draw call
 #define OUTDOOR_COUNT          (OUTDOOR_BLOCKS_X * OUTDOOR_VIEW * OUTDOOR_PER_INDICES)    // indices to draw
 
 #define OUTDOOR_SCALE_FACTOR   (0.5f)                                                     // frame buffer resolution factor
 
-STATIC_ASSERT((OUTDOOR_WIDTH == OUTDOOR_VIEW) && (OUTDOOR_WIDTH % 2))
+STATIC_ASSERT((OUTDOOR_WIDTH == OUTDOOR_VIEW) && (OUTDOOR_WIDTH % 2u))
 
 
 // ****************************************************************
@@ -50,12 +52,14 @@ private:
     };
 
     // compressed vertex structure
+    #pragma pack(push, 4)
     struct sVertexPacked final
     {
-        coreFloat  fPosition;   // vertex position           (only height)
-        coreUint32 iNormal;     // normal vector             (Snorm210/Snorm4x8)
-        coreUint32 iTangent;    // additional tangent vector (Snorm210/Snorm4x8)
+        coreFloat  fHeight;    // vertex height
+        coreUint32 iNormal;    // normal vector             (Snorm210/Snorm4x8)
+        coreUint32 iTangent;   // additional tangent vector (Snorm210/Snorm4x8)
     };
+    #pragma pack(pop)
 
 
 private:
@@ -64,8 +68,6 @@ private:
     coreUint32 m_iVertexOffset;                      // current vertex offset
     coreUint32 m_iIndexOffset;                       // current index offset
     coreFloat  m_fFlyOffset;                         // current fly offset
-    coreFloat  m_fHeightOffset;                      // 
-    coreFloat  m_fHeightFactor;                      // 
 
     coreUint8 m_iHandleIndex;                        // 
     coreUint8 m_iAlgorithm;                          // geometry algorithm ID
@@ -77,6 +79,11 @@ private:
     coreTexturePtr m_pNormalMap;                     // normal map object
     coreProgramPtr m_pDefaultProgram;                // 
     coreProgramPtr m_pLightProgram;                  // 
+
+    coreFloat  m_afLerpMul  [2];                     // (old, new) 
+    coreFloat  m_afLerpAdd  [2];                     // (old, new) 
+    coreUint16 m_aiLerpRange[2];                     // (current, target) 
+    coreFloat  m_afLerpData [7];                     // (from mul, from add, to mul, to add, mid mul, mid add, mid pos) 
 
 
 public:
@@ -95,9 +102,18 @@ public:
     void LoadTextures(const coreChar* pcTextureTop, const coreChar* pcTextureBottom);
     void LoadProgram (const coreBool bGlow);
 
-    // retrieve height value
-    coreFloat   RetrieveHeight   (const coreVector2& vPosition);
-    coreVector3 RetrieveIntersect(const coreVector3& vRayPosition, const coreVector3& vRayDirection);
+    // retrieve geometric data
+    coreFloat   RetrieveHeight    (const coreVector2& vPosition)const;
+    coreFloat   RetrieveBackHeight(const coreVector2& vPosition)const;
+    coreVector3 RetrieveNormal    (const coreVector2& vPosition)const;
+    coreVector3 RetrieveBackNormal(const coreVector2& vPosition)const;
+    coreVector3 RetrieveIntersect (const coreVector3& vRayPosition, const coreVector3& vRayDirection)const;
+
+    // 
+    void        LerpHeight    (const coreFloat fMul, const coreFloat fAdd, const coreUint16 iRange = 0u);
+    void        LerpHeightNow (const coreFloat fMul, const coreFloat fAdd);
+    coreVector2 CalcLerpVector(const coreFloat fPositionY)const;
+    inline coreBool IsLerping()const {return (m_aiLerpRange[0] != m_aiLerpRange[1]);}
 
     // access shadow and light map object
     inline cShadow*         GetShadowMap() {return &m_ShadowMap;}
@@ -105,16 +121,12 @@ public:
     void UpdateLightMap();
 
     // set object properties
-    void        SetFlyOffset   (const coreFloat fFlyOffset);
-    inline void SetHeightOffset(const coreFloat fHeightOffset) {m_fHeightOffset = fHeightOffset;}
-    inline void SetHeightFactor(const coreFloat fHeightFactor) {m_fHeightFactor = fHeightFactor;}
+    void SetFlyOffset(const coreFloat fFlyOffset);
 
     // get object properties
     inline const coreUint32& GetVertexOffset()const {return m_iVertexOffset;}
     inline const coreUint32& GetIndexOffset ()const {return m_iIndexOffset;}
     inline const coreFloat&  GetFlyOffset   ()const {return m_fFlyOffset;}
-    inline const coreFloat&  GetHeightOffset()const {return m_fHeightOffset;}
-    inline const coreFloat&  GetHeightFactor()const {return m_fHeightFactor;}
 
 
 private:
@@ -137,7 +149,8 @@ template <typename F> void cOutdoor::__Render(const coreProgramPtr& pProgram, F&
     if(!pProgram->Enable())  return;
 
     // update all object uniforms
-    pProgram->SendUniform("u_v2HeightModifier", coreVector2(m_fHeightOffset, m_fHeightFactor));
+    pProgram->SendUniform("u_v4LerpData1", r_cast<coreVector4&>(m_afLerpData[0]));
+    pProgram->SendUniform("u_v3LerpData2", r_cast<coreVector3&>(m_afLerpData[4]));
 
     // 
     nFunction();

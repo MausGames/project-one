@@ -37,8 +37,9 @@ cMossBackground::cMossBackground()noexcept
             coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>(oBase);
 
             // set object properties
-            pObject->SetSize (coreVector3(1.0f,1.0f,1.0f) * SQRT2 * 80.0f);
-            pObject->SetAlpha(0.6f);
+            pObject->SetPosition(coreVector3(0.0f,0.0f,0.0f));
+            pObject->SetSize    (coreVector3(1.0f,1.0f,1.0f) * SQRT2 * 80.0f);
+            pObject->SetAlpha   (0.6f);
 
             // add object to the list
             pList1->BindObject(pObject);
@@ -71,7 +72,7 @@ cMossBackground::cMossBackground()noexcept
             pObject->SetPosition (coreVector3(vPosition, fHeight));
             pObject->SetSize     (coreVector3(coreVector2(2.4f,2.4f) * Core::Rand->Float(15.0f, 21.0f), 1.0f));
             pObject->SetDirection(coreVector3(coreVector2::Rand(), 0.0f));
-            pObject->SetColor4   (coreVector4(1.0f * (0.8f + 0.2f * fHeight/60.0f), 1.0f, 1.0f, 0.85f));
+            pObject->SetColor4   (coreVector4(0.8f + 0.2f * fHeight/60.0f, 1.0f, 1.0f, 0.85f));
             pObject->SetTexOffset(coreVector2::Rand(0.0f,10.0f, 0.0f,10.0f));
 
             // add object to the list
@@ -79,7 +80,7 @@ cMossBackground::cMossBackground()noexcept
         }
 
         // post-process list and add it to the air
-        cBackground::_FillInfinite   (pList1);
+        cBackground::_FillInfinite   (pList1, MOSS_CLOUD_RESERVE);
         cBackground::_SortBackToFront(pList1);
         m_apAirObjectList.push_back(pList1);
 
@@ -93,9 +94,8 @@ cMossBackground::cMossBackground()noexcept
 void cMossBackground::__MoveOwn()
 {
     // 
-    coreBatchList*      pList       = m_apAirObjectList[0];
-    const coreObject3D* pBase       = (*pList->List()) [0];
-    const coreVector2   vBaseOffset = coreVector2(FRACT(pBase->GetTexOffset().x), FRACT(pBase->GetTexOffset().y));
+    coreBatchList*      pList = m_apAirObjectList[0];
+    const coreObject3D* pBase = (*pList->List()) [0];
 
     // 
     const coreFloat   fStrength  = 1.0f;
@@ -104,7 +104,7 @@ void cMossBackground::__MoveOwn()
     const coreFloat   fLength    = 1.0f - 0.04f * g_pEnvironment->GetSpeed();
     const coreVector2 vMove      = vDirection * (-0.35f * g_pEnvironment->GetSpeed());
     const coreVector2 vTexSize   = coreVector2(1.0f, fLength) * (6.0f * fStrength);
-    const coreVector2 vTexOffset = vBaseOffset + (coreVector2(0.0f,-1.2f) + vMove) * coreVector2(1.0f, fLength) * (Core::System->GetTime() * fStrength);
+    const coreVector2 vTexOffset = pBase->GetTexOffset() + (coreVector2(0.0f,-1.2f) + vMove) * coreVector2(1.0f, fLength) * (Core::System->GetTime() * fStrength);
 
     // 
     for(coreUintW i = 0; i < MOSS_RAIN_NUM; ++i)
@@ -113,8 +113,8 @@ void cMossBackground::__MoveOwn()
 
         pRain->SetPosition (coreVector3(vPosition,  15.0f * I_TO_F(i)));
         pRain->SetDirection(coreVector3(vDirection, 0.0f));
-        pRain->SetTexSize  (vTexSize);
-        pRain->SetTexOffset(vTexOffset + coreVector2(0.56f,0.36f) * I_TO_F(i));
+        pRain->SetTexSize  ((vTexSize));
+        pRain->SetTexOffset((vTexOffset + coreVector2(0.56f,0.36f) * I_TO_F(i*i)).Process(FRACT));
     }
     pList->MoveNormal();
 }

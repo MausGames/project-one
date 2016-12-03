@@ -67,7 +67,7 @@ cSpecialEffects::cSpecialEffects()noexcept
     }
 
     // 
-    auto nLoadSoundFunc = [&](const eSoundEffect iSoundIndex, const coreChar* pcName)
+    auto nLoadSoundFunc = [this](const eSoundEffect iSoundIndex, const coreChar* pcName)
     {
         coreSoundPtr& pSoundPtr = m_apSound[iSoundIndex & 0xFFu];
 
@@ -265,7 +265,7 @@ void cSpecialEffects::CreateSplashSmoke(const coreVector3& vPosition, const core
         pParticle->SetPositionRel(vPosition+coreVector3::Rand(1.0f), coreVector3::Rand(-fScale, fScale));
         pParticle->SetScaleAbs   (3.0f,                              12.5f);
         pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),        Core::Rand->Float(-PI*0.1f, PI*0.1f));
-        pParticle->SetColor4Abs  (coreVector4(0.0f,0.0f,0.0f,1.0f),  coreVector4(0.0f,0.0f,0.0f,0.0f));
+        pParticle->SetColor4Abs  (coreVector4(1.0f,1.0f,1.0f,1.0f),  coreVector4(1.0f,1.0f,1.0f,0.0f));
         pParticle->SetSpeed      (0.7f * Core::Rand->Float(0.9f, 1.1f));
     });
 }
@@ -505,8 +505,8 @@ void cSpecialEffects::ShakeScreen(const coreFloat fStrength)
         g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
         {
             // check for joystick/gamepad as input source
-            const coreUint8& iType = pPlayer->GetInput() - g_aInput;
-            if(iType >= INPUT_SETS_KEYBOARD)
+            const coreUintW iType = P_TO_UI(pPlayer->GetInput() - g_aInput);
+            if((iType >= INPUT_SETS_KEYBOARD) && (iType < INPUT_SETS))
             {
                 // create rumble effect
                 Core::Input->RumbleJoystick(iType - INPUT_SETS_KEYBOARD, fStrength, 300u);

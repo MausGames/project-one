@@ -19,24 +19,24 @@
 // configuration definitions
 #define CONFIG_FORCE   // # force specific settings (to increase fairness)
 
-#define CONFIG_GRAPHICS_SHADOW     "Graphics", "Shadow",                              (1)
-#define CONFIG_GRAPHICS_REFLECTION "Graphics", "Reflection",                          (1)
-#define CONFIG_GRAPHICS_GLOW       "Graphics", "Glow",                                (1)
-#define CONFIG_GRAPHICS_DISTORTION "Graphics", "Distortion",                          (1)
+#define CONFIG_GRAPHICS_SHADOW     "Graphics", "Shadow",                               (1)
+#define CONFIG_GRAPHICS_REFLECTION "Graphics", "Reflection",                           (1)
+#define CONFIG_GRAPHICS_GLOW       "Graphics", "Glow",                                 (1)
+#define CONFIG_GRAPHICS_DISTORTION "Graphics", "Distortion",                           (1)
 
-#define CONFIG_AUDIO_AMBIENT       "Audio",    "Ambient",                             (1)
+#define CONFIG_AUDIO_AMBIENT       "Audio",    "Ambient",                              (1)
 
-#define CONFIG_INPUT_TYPE(p)       "Input",    PRINT("P%u_Type",      (p)),           (p)
-#define CONFIG_INPUT_MOVE_LEFT(s)  "Input",    PRINT("S%u_MoveLeft",  (s)),           (CORE_INPUT_KEY(A))
-#define CONFIG_INPUT_MOVE_RIGHT(s) "Input",    PRINT("S%u_MoveRight", (s)),           (CORE_INPUT_KEY(D))
-#define CONFIG_INPUT_MOVE_DOWN(s)  "Input",    PRINT("S%u_MoveDown",  (s)),           (CORE_INPUT_KEY(S))
-#define CONFIG_INPUT_MOVE_UP(s)    "Input",    PRINT("S%u_MoveUp",    (s)),           (CORE_INPUT_KEY(W))
-#define CONFIG_INPUT_BUTTON(s,n)   "Input",    PRINT("S%u_Button%u",  (s), (n) + 1u), ((n) + coreUintW(CORE_INPUT_KEY(1)))
+#define CONFIG_INPUT_TYPE(p)       "Input",    PRINT("P%zu_Type",      (p)),           (p)
+#define CONFIG_INPUT_MOVE_LEFT(s)  "Input",    PRINT("S%zu_MoveLeft",  (s)),           (CORE_INPUT_KEY(A))
+#define CONFIG_INPUT_MOVE_RIGHT(s) "Input",    PRINT("S%zu_MoveRight", (s)),           (CORE_INPUT_KEY(D))
+#define CONFIG_INPUT_MOVE_DOWN(s)  "Input",    PRINT("S%zu_MoveDown",  (s)),           (CORE_INPUT_KEY(S))
+#define CONFIG_INPUT_MOVE_UP(s)    "Input",    PRINT("S%zu_MoveUp",    (s)),           (CORE_INPUT_KEY(W))
+#define CONFIG_INPUT_BUTTON(s,n)   "Input",    PRINT("S%zu_Button%zu", (s), (n) + 1u), ((n) + coreUintW(CORE_INPUT_KEY(1)))
 
-#define CONFIG_GAME_TRANSPARENT    "Game",     "Transparent",                         (0)
-#define CONFIG_GAME_COMBAT_DAMAGE  "Game",     "CombatDamage",                        (1)
-#define CONFIG_GAME_COMBAT_CHAIN   "Game",     "CombatChain",                         (1)
-#define CONFIG_GAME_COMBAT_COMBO   "Game",     "CombatCombo",                         (1)
+#define CONFIG_GAME_TRANSPARENT    "Game",     "Transparent",                          (0)
+#define CONFIG_GAME_COMBAT_DAMAGE  "Game",     "CombatDamage",                         (1)
+#define CONFIG_GAME_COMBAT_CHAIN   "Game",     "CombatChain",                          (1)
+#define CONFIG_GAME_COMBAT_COMBO   "Game",     "CombatCombo",                          (1)
 
 #define INPUT_TYPES         (PLAYERS)                                     // number of input set selections
 #define INPUT_BUTTONS       (4u)                                          // number of input buttons per set

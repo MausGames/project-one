@@ -94,7 +94,7 @@ void cPlayer::Configure(const coreUintW iShipType, const coreVector3& vColor, co
     // load models
     this->DefineModelHigh(pcModelHigh);
     this->DefineModelLow (pcModelLow);
-    this->GetModel().GetHandle()->OnLoadOnce([&]()
+    this->GetModel().GetHandle()->OnLoadOnce([this]()
     {
         // normalize collision size of different ship models
         this->SetCollisionModifier((coreVector3(1.0f,1.0f,1.0f) * PLAYER_COLLISION_SIZE) / this->GetModel()->GetBoundingRange());
@@ -300,7 +300,7 @@ void cPlayer::Move()
     if(m_Bubble.IsEnabled(CORE_OBJECT_ENABLE_ALL))
     {
         // 
-        m_fDarkAnimation.Update(-1.0f);
+        m_fDarkAnimation.UpdateMod(-1.0f, 20.0f);
         this->SetTexOffset(coreVector2(0.0f, m_fDarkAnimation * 0.25f));
 
         // 
@@ -324,7 +324,7 @@ void cPlayer::Move()
     //    coreBool bGrace = false;
     //
     //    // 
-    //    Core::Manager::Object->TestCollision(TYPE_BULLET_ENEMY, &m_Bubble, [&bGrace](const cBullet* pBullet, const coreBool bFirstHit)
+    //    Core::Manager::Object->TestCollision(TYPE_BULLET_ENEMY, &m_Bubble, [&](const cBullet* pBullet, const coreBool bFirstHit)
     //    {
     //        bGrace = true;
     //    });
@@ -528,7 +528,7 @@ void cPlayer::TransformDark(const coreUint8 iStatus)
         m_fDarkTime = 0.0f;
 
         // 
-        g_pGame->GetBulletManagerEnemy()->ForEachBullet([&](cBullet* OUTPUT pBullet)
+        g_pGame->GetBulletManagerEnemy()->ForEachBullet([this](cBullet* OUTPUT pBullet)
         {
             // 
             pBullet->Deactivate(false);

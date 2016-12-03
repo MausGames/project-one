@@ -38,7 +38,7 @@ cGrassBackground::cGrassBackground()noexcept
         {
             // calculate position and height
             const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, GRASS_STONE_NUM);
-            const coreFloat   fHeight   = m_pOutdoor->RetrieveHeight(vPosition);
+            const coreFloat   fHeight   = m_pOutdoor->RetrieveBackHeight(vPosition);
 
             // test for valid values
             if((fHeight > -23.0f) && (fHeight < -18.0f) && (F_TO_SI(vPosition.y+160.0f) % 80 < 40))
@@ -49,7 +49,7 @@ cGrassBackground::cGrassBackground()noexcept
                     coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>(oBase);
 
                     // set object properties
-                    pObject->SetPosition   (coreVector3(vPosition, fHeight+0.2f));
+                    pObject->SetPosition   (coreVector3(vPosition, 0.0f));
                     pObject->SetSize       (coreVector3::Rand(0.85f,1.3f, 0.85f,1.3f, 0.85f,1.3f) * Core::Rand->Float(2.0f, 2.6f));
                     pObject->SetDirection  (coreVector3::Rand());
                     pObject->SetOrientation(coreVector3::Rand());
@@ -61,8 +61,11 @@ cGrassBackground::cGrassBackground()noexcept
             }
         }
 
+        // 
+        this->_StoreHeight(pList1, 0.2f);
+
         // post-process list and add it to the ground
-        cBackground::_FillInfinite(pList1);
+        cBackground::_FillInfinite(pList1, GRASS_STONE_RESERVE);
         m_apGroundObjectList.push_back(pList1);
 
         // bind stone list to shadow map
@@ -88,7 +91,7 @@ cGrassBackground::cGrassBackground()noexcept
             {
                 // calculate position and height
                 const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, GRASS_REED_NUM);
-                const coreFloat   fHeight   = m_pOutdoor->RetrieveHeight(vPosition);
+                const coreFloat   fHeight   = m_pOutdoor->RetrieveBackHeight(vPosition);
 
                 // test for valid values
                 if((fHeight > -23.0f) && (fHeight < -18.0f) && (F_TO_SI(vPosition.y+176.0f) % 80 < 60))
@@ -105,11 +108,10 @@ cGrassBackground::cGrassBackground()noexcept
                         pObject->DefineModel(bType ? "environment_reed_01.md3" : "environment_reed_02.md3");
 
                         // set object properties
-                        pObject->SetPosition   (coreVector3(vPosition, fHeight-0.8f));
-                        pObject->SetSize       (coreVector3::Rand(1.3f,1.6f, 1.3f,1.6f, 1.3f,1.6f) * 2.1f);
-                        pObject->SetDirection  (coreVector3(coreVector2::Rand(), 0.0f));
-                        pObject->SetOrientation(coreVector3(0.0f,0.0f,1.0f));
-                        pObject->SetColor3     (coreVector3(1.0f, 1.0f * Core::Rand->Float(0.57f, 0.63f), 0.5f));
+                        pObject->SetPosition (coreVector3(vPosition, 0.0f));
+                        pObject->SetSize     (coreVector3::Rand(1.3f,1.6f, 1.3f,1.6f, 1.3f,1.6f) * 2.1f);
+                        pObject->SetDirection(coreVector3(coreVector2::Rand(), 0.0f));
+                        pObject->SetColor3   (coreVector3(1.0f, 1.0f * Core::Rand->Float(0.57f, 0.63f), 0.5f));
 
                         // add object to the list
                         if(bType) pList1->BindObject(pObject);
@@ -120,11 +122,15 @@ cGrassBackground::cGrassBackground()noexcept
             }
         }
 
+        // 
+        this->_StoreHeight(pList1, -0.8f);
+        this->_StoreHeight(pList2, -0.8f);
+
         // post-process lists and add them to the ground
-        cBackground::_FillInfinite(pList1);
+        cBackground::_FillInfinite(pList1, GRASS_REED_1_RESERVE);
         m_apGroundObjectList.insert(m_apGroundObjectList.begin(), pList1);
 
-        cBackground::_FillInfinite(pList2);
+        cBackground::_FillInfinite(pList2, GRASS_REED_2_RESERVE);
         m_apGroundObjectList.insert(m_apGroundObjectList.begin(), pList2);
 
         // bind reed lists to shadow map
@@ -148,7 +154,7 @@ cGrassBackground::cGrassBackground()noexcept
             {
                 // calculate position and height
                 const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, GRASS_FLOWER_NUM);
-                const coreFloat   fHeight   = m_pOutdoor->RetrieveHeight(vPosition);
+                const coreFloat   fHeight   = m_pOutdoor->RetrieveBackHeight(vPosition);
 
                 // test for valid values
                 if(fHeight > -15.0f)
@@ -159,7 +165,7 @@ cGrassBackground::cGrassBackground()noexcept
                         coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>(oBase);
 
                         // set object properties
-                        pObject->SetPosition (coreVector3(vPosition, fHeight-0.8f));
+                        pObject->SetPosition (coreVector3(vPosition, 0.0f));
                         pObject->SetSize     (coreVector3(coreVector2(1.0f,1.0f) * Core::Rand->Float(9.0f, 10.0f), 1.0f));
                         pObject->SetDirection(coreVector3(coreVector2::Rand(), 0.0f));
                         pObject->SetAlpha    (0.98f);
@@ -174,8 +180,11 @@ cGrassBackground::cGrassBackground()noexcept
             }
         }
 
+        // 
+        this->_StoreHeight(pList1, -0.8f);
+
         // post-process list and add it to the ground
-        cBackground::_FillInfinite(pList1);
+        cBackground::_FillInfinite(pList1, GRASS_FLOWER_RESERVE);
         m_apDecalObjectList.push_back(pList1);
     }
 
@@ -229,7 +238,7 @@ cGrassBackground::cGrassBackground()noexcept
         ASSERT(!(m_iLeafNum % 2u))
 
         // post-process list and add it to the air
-        cBackground::_FillInfinite(pList1);
+        cBackground::_FillInfinite(pList1, GRASS_LEAF_RESERVE);
         m_apAirObjectList.push_back(pList1);
     }
 
@@ -256,7 +265,7 @@ cGrassBackground::cGrassBackground()noexcept
             pObject->SetPosition (coreVector3(vPosition, fHeight));
             pObject->SetSize     (coreVector3(coreVector2(2.4f,2.4f) * Core::Rand->Float(15.0f, 21.0f), 1.0f));
             pObject->SetDirection(coreVector3(coreVector2::Rand(), 0.0f));
-            pObject->SetColor4   (coreVector4(1.0f * (0.8f + 0.2f * fHeight/60.0f), 1.0f, 1.0f, 0.85f));
+            pObject->SetColor4   (coreVector4(0.8f + 0.2f * fHeight/60.0f, 1.0f, 1.0f, 0.85f));
             pObject->SetTexOffset(coreVector2::Rand(0.0f,10.0f, 0.0f,10.0f));
 
             // add object to the list
@@ -264,7 +273,7 @@ cGrassBackground::cGrassBackground()noexcept
         }
 
         // post-process list and add it to the air
-        cBackground::_FillInfinite   (pList1);
+        cBackground::_FillInfinite   (pList1, GRASS_CLOUD_RESERVE);
         cBackground::_SortBackToFront(pList1);
         m_apAirObjectList.push_back(pList1);
 

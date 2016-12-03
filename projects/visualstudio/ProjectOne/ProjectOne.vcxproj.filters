@@ -189,9 +189,6 @@
     <ClCompile Include="..\..\..\source\game\boss\0502_cPhalarisBoss.cpp">
       <Filter>game\boss</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\interface\cLeaderboard.cpp">
-      <Filter>interface</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\source\file\cReplay.cpp">
       <Filter>file</Filter>
     </ClCompile>
@@ -236,6 +233,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\source\game\boss\0703_cNagualBoss.cpp">
       <Filter>game\boss</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\interface\menu\08_cReplayMenu.cpp">
+      <Filter>interface\menu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\interface\menu\07_cScoreMenu.cpp">
+      <Filter>interface\menu</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -332,9 +335,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\source\game\cShield.h">
       <Filter>game</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\source\interface\cLeaderboard.h">
-      <Filter>interface</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\source\file\cReplay.h">
       <Filter>file</Filter>

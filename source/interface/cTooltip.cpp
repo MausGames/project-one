@@ -29,7 +29,7 @@ cTooltip::cTooltip()noexcept
     // create text lines
     for(coreUintW i = 0u; i < TOOLTIP_LINES; ++i)
     {
-        m_aLine[i].Construct   (MENU_FONT_SMALL, TOOLTIP_OUTLINE_SIZE, 0u);
+        m_aLine[i].Construct   (MENU_FONT_DYNAMIC_1, TOOLTIP_OUTLINE_SIZE, 0u);
         m_aLine[i].SetAlignment(coreVector2(1.0f,-1.0f));
         m_aLine[i].SetColor3   (COLOR_MENU_WHITE);
     }

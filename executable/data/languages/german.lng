@@ -1,4 +1,6 @@
 $LANGUAGE = Deutsch
+$FONT = ethnocentric.ttf
+
 $START_GAME = Spielen
 $EXIT_GAME = Beenden
 $CREDITS = Credits

@@ -16,7 +16,7 @@ cReplay::cReplay()noexcept
 , m_aKeyFrame      {}
 , m_aaStreamPacket {{}}
 , m_aInput         {{}}
-, m_iFirstFrame    (0u)
+, m_iCurFrame      (0u)
 , m_aiCurPacket    {}
 , m_iStatus        (REPLAY_STATUS_DISABLED)
 {
@@ -42,8 +42,8 @@ void cReplay::StartRecording()
     ASSERT(m_Header.iStreamCount <= REPLAY_STREAMS)
 
     // 
-    m_iFirstFrame = Core::System->GetCurFrame();
-    m_iStatus     = REPLAY_STATUS_RECORDING;
+    m_iCurFrame = 0u;
+    m_iStatus   = REPLAY_STATUS_RECORDING;
 }
 
 
@@ -61,8 +61,8 @@ void cReplay::StartPlayback()
     }
 
     // 
-    m_iFirstFrame = Core::System->GetCurFrame();
-    m_iStatus     = REPLAY_STATUS_PLAYBACK;
+    m_iCurFrame = 0u;
+    m_iStatus   = REPLAY_STATUS_PLAYBACK;
 }
 
 
@@ -95,21 +95,26 @@ void cReplay::End()
 // 
 void cReplay::Update()
 {
-    ASSERT((m_iStatus == REPLAY_STATUS_DISABLED) || (g_pGame && CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_LOADING)))
+    if(!g_pGame) return;
+
+    // 
+    if((g_pGame->GetTimeMission() < 0.0f) || !CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY)) return;
+    ++m_iCurFrame;
 
     if(m_iStatus == REPLAY_STATUS_RECORDING)
     {
-        auto nNewPacketFunc = [&](const coreUintW iIndex, const coreUint32 iType, const coreUint32 iValue)
+        auto nNewPacketFunc = [this](const coreUintW iIndex, const coreUint32 iType, const coreUint32 iValue)
         {
             // 
-            m_aaStreamPacket[iIndex].emplace_back();
-            sStreamPacket& oNewPacket = m_aaStreamPacket[iIndex].back();
-
-            // 
-            oNewPacket.iFrame    = Core::System->GetCurFrame() - m_iFirstFrame;
+            sStreamPacket oNewPacket;
+            oNewPacket.iFrame    = m_iCurFrame;
             oNewPacket.iType     = iType;
             oNewPacket.iValue    = iValue;
             oNewPacket.iReserved = 0u;
+
+            // 
+            ASSERT(m_aaStreamPacket[iIndex].empty() || std::memcmp(&m_aaStreamPacket[iIndex].back(), &oNewPacket, sizeof(sStreamPacket)))
+            m_aaStreamPacket[iIndex].push_back(oNewPacket);
         };
 
         for(coreUintW i = 0u; i < m_Header.iStreamCount; ++i)
@@ -133,9 +138,6 @@ void cReplay::Update()
     }
     else if(m_iStatus == REPLAY_STATUS_PLAYBACK)
     {
-        // 
-        const coreUint32 iCurRelFrame = Core::System->GetCurFrame() - m_iFirstFrame;
-
         for(coreUintW i = 0u; i < m_Header.iStreamCount; ++i)
         {
             sInput& oCurInput = m_aInput[i];
@@ -147,7 +149,7 @@ void cReplay::Update()
             for(coreUintW j = m_aiCurPacket[i], je = m_aaStreamPacket[i].size(); j < je; ++j)
             {
                 const sStreamPacket& oPacket = m_aaStreamPacket[i][j];
-                if(oPacket.iFrame == iCurRelFrame)
+                if(oPacket.iFrame == m_iCurFrame)
                 {
                     // 
                     switch(oPacket.iType)
@@ -226,9 +228,10 @@ void cReplay::SaveFile(const coreChar* pcName)
     sHeader* pHeaderData = new sHeader(m_Header);
 
     // 
-    coreByte*  pBodyData;
-    coreUint32 iBodySize;
+    coreByte*  pBodyData = NULL;
+    coreUint32 iBodySize = 0;
     this->__GetBodyData(&pBodyData, &iBodySize);
+    ASSERT(pBodyData && iBodySize)
 
     // 
     coreFile* pHeader = new coreFile("header", r_cast<coreByte*>(pHeaderData), sizeof(sHeader));
@@ -267,6 +270,8 @@ void cReplay::Clear()
 // 
 void cReplay::LoadInfoList(std::vector<uInfo>* OUTPUT paInfoList)
 {
+    ASSERT(paInfoList)
+
     // 
     std::vector<std::string> asFile;
     coreData::ScanFolder(REPLAY_FILE_FOLDER, "*." REPLAY_FILE_EXTENSION, &asFile);
@@ -345,7 +350,7 @@ void cReplay::__GetBodyData(coreByte** OUTPUT ppData, coreUint32* OUTPUT piSize)
     }
 
     // 
-    coreData::DecompressDeflate(pPlainData, iPlainSize, ppData, piSize);
+    coreData::CompressDeflate(pPlainData, iPlainSize, ppData, piSize);
 
     // 
     SAFE_DELETE_ARRAY(pPlainData)
@@ -362,7 +367,7 @@ coreUint32 cReplay::__CalculateExecutableHash()
     if(!s_iExecutableHash)
     {
         coreFile oExecutable(coreData::AppPath());
-        s_iExecutableHash = coreHashRunCRC32(oExecutable.GetData(), oExecutable.GetSize());
+        s_iExecutableHash = coreHashCRC32(oExecutable.GetData(), oExecutable.GetSize());
     }
 
     return s_iExecutableHash;
@@ -376,10 +381,10 @@ coreUint32 cReplay::__CalculateReplayHash()const
     coreUint32 iReplayHash = 0u;
 
     // 
-    iReplayHash ^= coreHashRunCRC32(r_cast<const coreByte*>(m_aKeyFrame.data()), sizeof(sKeyFrame) * m_aKeyFrame.size());
+    iReplayHash ^= coreHashCRC32(r_cast<const coreByte*>(m_aKeyFrame.data()), sizeof(sKeyFrame) * m_aKeyFrame.size());
     for(coreUintW i = 0u; i < REPLAY_STREAMS; ++i)
     {
-        iReplayHash ^= coreHashRunCRC32(r_cast<const coreByte*>(m_aaStreamPacket[i].data()), sizeof(sStreamPacket) * m_aaStreamPacket[i].size());
+        iReplayHash ^= coreHashCRC32(r_cast<const coreByte*>(m_aaStreamPacket[i].data()), sizeof(sStreamPacket) * m_aaStreamPacket[i].size());
     }
 
     return iReplayHash;

@@ -64,6 +64,7 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreTexture>("effect_particle_128.png",                CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_particle_128.png", false);
     Core::Manager::Resource->Load<coreTexture>("effect_rain.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_rain.png");
     Core::Manager::Resource->Load<coreTexture>("effect_sand.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_sand.png");
+    Core::Manager::Resource->Load<coreTexture>("effect_snow.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_snow.png");
     Core::Manager::Resource->Load<coreTexture>("effect_soot.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_soot.png");
     Core::Manager::Resource->Load<coreTexture>("effect_wave.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_wave.png");
     Core::Manager::Resource->Load<coreTexture>("effect_wave_norm.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_wave_norm.png", false);
@@ -173,7 +174,7 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreShader> ("environment_clouds_inst.vert",           CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_clouds.vert", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("environment_clouds_inst.frag",           CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_clouds.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("environment_ice.vert",                   CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_ice.vert", CORE_SHADER_OPTION_NO_ROTATION);
-    Core::Manager::Resource->Load<coreShader> ("environment_ice.frag",                   CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_ice.frag");
+    Core::Manager::Resource->Load<coreShader> ("environment_ice.frag",                   CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_ice.frag", CORE_SHADER_OPTION_NO_EARLY_DEPTH);
     Core::Manager::Resource->Load<coreShader> ("environment_lava.vert",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_lava.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("environment_lava.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_lava.frag");
     Core::Manager::Resource->Load<coreShader> ("environment_outdoor.vert",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_outdoor.vert", CORE_SHADER_OPTION_NO_ROTATION);
@@ -231,8 +232,20 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreSound>  ("environment_nature.wav",                 CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_nature.wav");
     Core::Manager::Resource->Load<coreSound>  ("environment_wind.wav",                   CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_wind.wav");
 
-    Core::Manager::Resource->Load<coreFont>   ("ethnocentric.ttf",                       CORE_RESOURCE_UPDATE_AUTO,   "data/fonts/ethnocentric.ttf");
-    Core::Manager::Resource->Load<coreFont>   ("fontawesome.ttf",                        CORE_RESOURCE_UPDATE_AUTO,   "data/fonts/fontawesome.ttf");
+    std::vector<std::string> asPath;
+    coreData::ScanFolder("data/fonts", "*.ttf", &asPath);
+
+    FOR_EACH(it, asPath)   // # config for default font is ignored, because it was already loaded
+    {
+        coreConfig oConfig(PRINT("%s.ini", it->c_str()));
+        const coreUint8 iHinting = oConfig.GetInt ("Config", "Hinting", TTF_HINTING_NORMAL);
+        const coreBool  bKerning = oConfig.GetBool("Config", "Kerning", true);
+
+        Core::Manager::Resource->Load<coreFont>(coreData::StrFilename(it->c_str()), CORE_RESOURCE_UPDATE_AUTO, it->c_str(), iHinting, bKerning);
+    }
+
+    const coreChar* pcInit = Core::Language->HasString("FONT") ? Core::Language->GetString("FONT") : "ethnocentric.ttf";
+    Core::Manager::Resource->AssignProxy(Core::Manager::Resource->LoadProxy("dynamic_font"), pcInit);
 
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_decal_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("effect_decal.vert")
@@ -483,28 +496,28 @@ static void SetupResources()
         ->AttachShader("environment_outdoor.vert")
         ->AttachShader("environment_outdoor.frag")
         ->BindAttribute("a_v1Height",   CORE_SHADER_ATTRIBUTE_POSITION_NUM)
-        ->BindAttribute("a_i1VertexID", CORE_SHADER_ATTRIBUTE_TEXCOORD_NUM)
+        ->BindAttribute("a_v2Position", CORE_SHADER_ATTRIBUTE_TEXCOORD_NUM)
         ->Finish();
 
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_outdoor_glow_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("environment_outdoor.vert")
         ->AttachShader("environment_outdoor_glow.frag")
         ->BindAttribute("a_v1Height",   CORE_SHADER_ATTRIBUTE_POSITION_NUM)
-        ->BindAttribute("a_i1VertexID", CORE_SHADER_ATTRIBUTE_TEXCOORD_NUM)
+        ->BindAttribute("a_v2Position", CORE_SHADER_ATTRIBUTE_TEXCOORD_NUM)
         ->Finish();
 
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_outdoor_light_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("environment_outdoor.vert")
         ->AttachShader("environment_outdoor_light.frag")
         ->BindAttribute("a_v1Height",   CORE_SHADER_ATTRIBUTE_POSITION_NUM)
-        ->BindAttribute("a_i1VertexID", CORE_SHADER_ATTRIBUTE_TEXCOORD_NUM)
+        ->BindAttribute("a_v2Position", CORE_SHADER_ATTRIBUTE_TEXCOORD_NUM)
         ->Finish();
 
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_outdoor_light_glow_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("environment_outdoor.vert")
         ->AttachShader("environment_outdoor_light_glow.frag")
         ->BindAttribute("a_v1Height",   CORE_SHADER_ATTRIBUTE_POSITION_NUM)
-        ->BindAttribute("a_i1VertexID", CORE_SHADER_ATTRIBUTE_TEXCOORD_NUM)
+        ->BindAttribute("a_v2Position", CORE_SHADER_ATTRIBUTE_TEXCOORD_NUM)
         ->Finish();
 
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_rain_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())

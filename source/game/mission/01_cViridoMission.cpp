@@ -138,7 +138,7 @@ void cViridoMission::DisableBall(const coreUintW iIndex, const coreBool bAnimate
     pBall->ChangeType(0);
 
     // 
-    auto nExitFunc = [&](coreObject3D* OUTPUT pObject)
+    auto nExitFunc = [](coreObject3D* OUTPUT pObject)
     {
         pObject->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     };
@@ -199,11 +199,7 @@ void cViridoMission::__SetupOwn()
         {
             g_pEnvironment->ChangeBackground(-cGrassBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);
 
-            g_pEnvironment->GetBackground()->GetOutdoor()->SetHeightOffset(-24.5f);
-            g_pEnvironment->GetBackground()->GetOutdoor()->SetHeightFactor(0.0f);
-            g_pEnvironment->GetBackground()->GetOutdoor()->SetHeightOffset(-13.83f);
-            g_pEnvironment->GetBackground()->GetOutdoor()->SetHeightFactor(0.4583f);
-
+            g_pEnvironment->GetBackground()->GetOutdoor()->LerpHeightNow(0.4583f, -13.83f);
             g_pEnvironment->GetBackground()->SetGroundDensity(0u, 0.0f);
             g_pEnvironment->GetBackground()->SetGroundDensity(1u, 0.0f);
             g_pEnvironment->GetBackground()->SetGroundDensity(2u, 0.0f);
@@ -295,7 +291,7 @@ void cViridoMission::__RenderOwnAttack()
 void cViridoMission::__MoveOwnBefore()
 {
     // 
-    m_fAnimation.Update(0.2f);
+    m_fAnimation.UpdateMod(0.2f, 10.0f);
 
     // 
     for(coreUintW i = 0u; i < VIRIDO_BALLS; ++i)
@@ -386,7 +382,7 @@ void cViridoMission::__MoveOwnAfter()
     if(!CONTAINS_BIT(m_iStickyState, 1u))
     {
         // 
-        Core::Manager::Object->TestCollision(TYPE_OBJECT(3), TYPE_OBJECT(2), [&](coreObject3D* OUTPUT pPaddle, coreObject3D* OUTPUT pBall, const coreBool bFirstHit)
+        Core::Manager::Object->TestCollision(TYPE_OBJECT(3), TYPE_OBJECT(2), [this](coreObject3D* OUTPUT pPaddle, coreObject3D* OUTPUT pBall, const coreBool bFirstHit)
         {
             // 
             if(coreVector2::Dot(pPaddle->GetDirection().xy(), pBall->GetDirection().xy()) >= 0.0f)
@@ -453,7 +449,7 @@ void cViridoMission::__MoveOwnAfter()
     }
 
     // 
-    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_OBJECT(2), [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBall, const coreBool bFirstHit)
+    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_OBJECT(2), [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBall, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
 

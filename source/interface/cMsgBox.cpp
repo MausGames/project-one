@@ -31,19 +31,19 @@ cMsgBox::cMsgBox()noexcept
     m_Box.SetSize      (coreVector2(0.55f,0.25f));
 
     // 
-    m_Msg.Construct  (MENU_FONT_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
+    m_Msg.Construct  (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL, 0u);
     m_Msg.SetPosition(m_Box.GetPosition() + coreVector2(0.0f,0.045f));
     m_Msg.SetColor3  (COLOR_MENU_WHITE);
 
     // 
-    m_Yes.Construct    (MENU_BUTTON, MENU_ICON_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
+    m_Yes.Construct    (MENU_BUTTON, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL, 0u);
     m_Yes.DefineProgram("menu_border_program");
     m_Yes.SetPosition  (m_Box.GetPosition() + coreVector2(-0.085f,-0.05f));
     m_Yes.SetSize      (coreVector2(0.07f,0.07f));
     m_Yes.GetCaption()->SetText(ICON_CHECK);
 
     // 
-    m_No.Construct    (MENU_BUTTON, MENU_ICON_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
+    m_No.Construct    (MENU_BUTTON, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL, 0u);
     m_No.DefineProgram("menu_border_program");
     m_No.SetPosition  (m_Yes.GetPosition().InvertedX());
     m_No.SetSize      (m_Yes.GetSize());
@@ -123,7 +123,9 @@ void cMsgBox::Move()
     }
     else if(m_iType == MSGBOX_TYPE_QUESTION)
     {
+        // 
         const coreBool bEsc = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS);
+        Core::Input->ClearKeyboardButton(CORE_INPUT_KEY(ESCAPE));
 
         // 
         m_Yes.Interact();

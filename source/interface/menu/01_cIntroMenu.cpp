@@ -37,8 +37,12 @@ cIntroMenu::cIntroMenu()noexcept
         const coreFloat fOffset = I_TO_F(asLanguageList.size()) * 0.5f - 0.5f;
         FOR_EACH(it, asLanguageList)
         {
+            // 
+            std::string sFont;
+            if(!coreLanguage::FindString(it->c_str(), "FONT", &sFont)) sFont = "ethnocentric.ttf";
+
             // create new language button
-            coreButton* pButton = new coreButton(MENU_BUTTON, MENU_FONT_MEDIUM_3, MENU_OUTLINE_SMALL, 0u);
+            coreButton* pButton = new coreButton(MENU_BUTTON, coreData::StrFilename(sFont.c_str()), 30u, MENU_OUTLINE_SMALL, 0u);
             pButton->DefineProgram("menu_border_program");
             pButton->SetPosition  (coreVector2(0.0f, 0.15f * (fOffset - I_TO_F(m_apLanguageButton.size()))));
             pButton->SetSize      (coreVector2(0.3f, 0.07f) * 1.5f);
@@ -94,6 +98,9 @@ void cIntroMenu::Move()
                 Core::Language->Load(pcPath);
                 Core::Config->SetString(CORE_CONFIG_SYSTEM_LANGUAGE, pcPath);
                 Core::Config->Save();
+
+                // 
+                cMenu::UpdateLanguageFont();
 
                 // 
                 this->ChangeSurface(SURFACE_INTRO_EMPTY, 1.0f);

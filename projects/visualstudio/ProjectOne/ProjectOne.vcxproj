@@ -280,7 +280,6 @@
     <ClCompile Include="..\..\..\source\interface\cCombatStats.cpp" />
     <ClCompile Include="..\..\..\source\interface\cCombatText.cpp" />
     <ClCompile Include="..\..\..\source\interface\cInterface.cpp" />
-    <ClCompile Include="..\..\..\source\interface\cLeaderboard.cpp" />
     <ClCompile Include="..\..\..\source\interface\cMsgBox.cpp" />
     <ClCompile Include="..\..\..\source\interface\cTooltip.cpp" />
     <ClCompile Include="..\..\..\source\interface\menu\01_cIntroMenu.cpp">
@@ -314,6 +313,18 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\source\interface\menu\06_cPauseMenu.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\interface\menu\07_cScoreMenu.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\interface\menu\08_cReplayMenu.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -353,7 +364,6 @@
     <ClInclude Include="..\..\..\source\interface\cCombatStats.h" />
     <ClInclude Include="..\..\..\source\interface\cCombatText.h" />
     <ClInclude Include="..\..\..\source\interface\cInterface.h" />
-    <ClInclude Include="..\..\..\source\interface\cLeaderboard.h" />
     <ClInclude Include="..\..\..\source\interface\cMsgBox.h" />
     <ClInclude Include="..\..\..\source\interface\cTooltip.h" />
     <ClInclude Include="..\..\..\source\interface\menu\cMenu.h" />

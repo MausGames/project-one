@@ -15,13 +15,16 @@ cOutdoor::cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom
 : m_iVertexOffset (0u)
 , m_iIndexOffset  (0u)
 , m_fFlyOffset    (0.0f)
-, m_fHeightOffset (0.0f)
-, m_fHeightFactor (1.0f)
 , m_iAlgorithm    (0u)
 , m_fGrade        (0.0f)
+, m_afLerpMul     {}
+, m_afLerpAdd     {}
+, m_aiLerpRange   {}
+, m_afLerpData    {}
 {
     // set object properties
     this->SetPosition(coreVector3(0.0f,0.0f,0.0f));
+    this->LerpHeightNow(1.0f, 0.0f);
 
     // 
     m_LightMap.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_GL_SUPPORT(ARB_texture_float) ? CORE_TEXTURE_SPEC_R16F : CORE_TEXTURE_SPEC_R8);
@@ -56,7 +59,7 @@ cOutdoor::~cOutdoor()
 void cOutdoor::Render()
 {
     // 
-    this->__Render(m_pDefaultProgram, [&]()
+    this->__Render(m_pDefaultProgram, [this]()
     {
         // 
         cShadow::EnableShadowRead(m_iHandleIndex);
@@ -69,7 +72,7 @@ void cOutdoor::Render()
 void cOutdoor::RenderLight()
 {
     // 
-    this->__Render(m_pLightProgram, [&]()
+    this->__Render(m_pLightProgram, [this]()
     {
         // 
         cShadow::EnableShadowRead(m_iHandleIndex + SHADOW_HANDLE_OUTDOOR_LIGHT);
@@ -105,14 +108,14 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
     switch(iAlgorithm)
     {
     default: ASSERT(false)
-    case 1u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r = -(COS((x - I_TO_F(OUTDOOR_WIDTH)*0.5f)*0.075f*PI)*10.0f);                                                                                       return r;}; break;
-    case 2u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(x*0.075f*PI)*8.0f + SIN(y*0.075f*PI)*8.0f) - 6.0f);                                                                                   return r;}; break;
-    case 3u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 13.0f);                                                      return r;}; break;
-    case 4u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r = -(ABS(SIN(y*0.150f*PI)*0.25f - 0.5f*(x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.150f*PI) - 0.0f; if(r <    0.0f) r = -1.0f; return r;}; break;
-    case 5u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(y*0.075f*PI)*0.25f + 0.5f*(x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.075f*PI) - 1.5f; if(r < -100.0f) r = -1.0f; return r;}; break;
-    case 6u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.150f*PI) - 1.0f;                            return r;}; break;
-    case 7u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.075f*PI) + 3.0f;                            return r;}; break;
-    case 8u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(y*0.075f*PI)*0.25f -      (x/I_TO_F(OUTDOOR_WIDTH) - 0.5f)*4.0f)*20.0f - 10.0f) * SIN(y*0.075f*PI) + 1.0f;                            return r;}; break;
+    case 1u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r = -(COS((x - I_TO_F(OUTDOOR_WIDTH / 2u)) * 0.087f*PI) * 10.0f);                                                                                      return r;}; break;
+    case 2u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(y*0.075f*PI) + SIN(x*0.075f*PI)) * 8.0f - 6.0f);                                                                                         return r;}; break;
+    case 3u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(y*0.075f*PI) * 0.25f - (x / I_TO_F(OUTDOOR_WIDTH) - 0.5f) * 4.0f) * 20.0f - 13.0f);                                                      return r;}; break;
+    case 4u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r = -(ABS(SIN(y*0.150f*PI) * 0.25f - (x / I_TO_F(OUTDOOR_WIDTH) - 0.5f) * 2.0f) * 20.0f - 10.0f) * SIN(y*0.150f*PI) - 0.0f; if(r <    0.0f) r = -1.0f; return r;}; break;
+    case 5u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(y*0.075f*PI) * 0.25f + (x / I_TO_F(OUTDOOR_WIDTH) - 0.5f) * 2.0f) * 20.0f - 10.0f) * SIN(y*0.075f*PI) - 1.5f; if(r < -100.0f) r = -1.0f; return r;}; break;
+    case 6u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(y*0.075f*PI) * 0.25f - (x / I_TO_F(OUTDOOR_WIDTH) - 0.5f) * 4.0f) * 20.0f - 10.0f) * SIN(y*0.150f*PI) - 1.0f;                            return r;}; break;
+    case 7u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(y*0.075f*PI) * 0.25f - (x / I_TO_F(OUTDOOR_WIDTH) - 0.5f) * 4.0f) * 20.0f - 10.0f) * SIN(y*0.075f*PI) + 3.0f;                            return r;}; break;
+    case 8u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(y*0.075f*PI) * 0.25f - (x / I_TO_F(OUTDOOR_WIDTH) - 0.5f) * 4.0f) * 20.0f - 10.0f) * SIN(y*0.075f*PI) + 1.0f;                            return r;}; break;
     }
 
     // create vertices
@@ -141,7 +144,7 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
         m_aiHeight[i] = coreMath::Float32to16(fLevel);
 
         // set vertex position
-        aVertexData[i].vPosition = coreVector3(I_TO_F(x - OUTDOOR_WIDTH/2u) * OUTDOOR_DETAIL, I_TO_F(y - OUTDOOR_VIEW/2u) * OUTDOOR_DETAIL, fLevel);
+        aVertexData[i].vPosition = coreVector3(I_TO_F(x - OUTDOOR_WIDTH / 2u) * OUTDOOR_DETAIL, I_TO_F(y - OUTDOOR_VIEW / 2u) * OUTDOOR_DETAIL, fLevel);
     }
 
     // sync beginning and ending height to create an infinite looking grid when resetting the position
@@ -241,9 +244,9 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
         const sVertex& oVertex = aVertexData[i];
 
         // convert vertex attributes
-        aPackedData[i].fPosition = oVertex.vPosition.z;
-        aPackedData[i].iNormal   = nPackFunc(coreVector4(oVertex.vNormal, 0.0f));
-        aPackedData[i].iTangent  = nPackFunc(oVertex.vTangent);
+        aPackedData[i].fHeight  = oVertex.vPosition.z;
+        aPackedData[i].iNormal  = nPackFunc(coreVector4(oVertex.vNormal, 0.0f));
+        aPackedData[i].iTangent = nPackFunc(oVertex.vTangent);
     }
 
     // create vertex buffer
@@ -255,15 +258,15 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
     // create index buffer
     m_pModel->CreateIndexBuffer(OUTDOOR_TOTAL_INDICES, sizeof(coreUint16), aiIndexData, CORE_DATABUFFER_STORAGE_STATIC);
 
-    if(!CORE_GL_SUPPORT(ARB_uniform_buffer_object))
+    if(!CORE_GL_SUPPORT(EXT_gpu_shader4))
     {
         // 
-        coreInt32 aiVertexID[OUTDOOR_TOTAL_VERTICES];
-        for(coreUintW i = 0u; i < OUTDOOR_TOTAL_VERTICES; ++i) aiVertexID[i] = i;
+        coreVector2 avPosition[OUTDOOR_TOTAL_VERTICES];
+        for(coreUintW i = 0u; i < OUTDOOR_TOTAL_VERTICES; ++i) avPosition[i] = aVertexData[i].vPosition.xy();
 
         // 
-        pBuffer = m_pModel->CreateVertexBuffer(OUTDOOR_TOTAL_VERTICES, sizeof(coreInt32), aiVertexID, CORE_DATABUFFER_STORAGE_STATIC);
-        pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_TEXCOORD_NUM, 1u, GL_INT, true, 0u);
+        pBuffer = m_pModel->CreateVertexBuffer(OUTDOOR_TOTAL_VERTICES, sizeof(coreVector2), avPosition, CORE_DATABUFFER_STORAGE_STATIC);
+        pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_TEXCOORD_NUM, 2u, GL_FLOAT, false, 0u);
     }
 
     Core::Log->Info("Outdoor-Surface loaded (%d:%.0f)", iAlgorithm, fGrade);
@@ -365,11 +368,17 @@ void cOutdoor::LoadProgram(const coreBool bGlow)
 
 // ****************************************************************
 // retrieve height value
-coreFloat cOutdoor::RetrieveHeight(const coreVector2& vPosition)
+coreFloat cOutdoor::RetrieveHeight(const coreVector2& vPosition)const
+{
+    // 
+    return this->RetrieveBackHeight(vPosition - this->GetPosition().xy());
+}
+
+coreFloat cOutdoor::RetrieveBackHeight(const coreVector2& vPosition)const
 {
     // convert real position to block position
-    const coreFloat fX = (vPosition.x-this->GetPosition().x) / OUTDOOR_DETAIL + I_TO_F(OUTDOOR_WIDTH/2u);
-    const coreFloat fY = (vPosition.y-this->GetPosition().y) / OUTDOOR_DETAIL + I_TO_F(OUTDOOR_VIEW /2u);
+    const coreFloat fX = vPosition.x / OUTDOOR_DETAIL + I_TO_F(OUTDOOR_WIDTH / 2u);
+    const coreFloat fY = vPosition.y / OUTDOOR_DETAIL + I_TO_F(OUTDOOR_VIEW  / 2u);
 
     // retrieve all four corners of the block
     const coreUintW iI00 = F_TO_UI(fY) * OUTDOOR_WIDTH + F_TO_UI(fX);   // bottom left
@@ -387,13 +396,41 @@ coreFloat cOutdoor::RetrieveHeight(const coreVector2& vPosition)
     // interpolate between all height values
     const coreFloat fFractX = FRACT(fX);
     const coreFloat fFractY = FRACT(fY);
-    return LERP(LERP(fH00, fH01, fFractX), LERP(fH10, fH11, fFractX), fFractY) * m_fHeightFactor + m_fHeightOffset;
+    const coreFloat fHeight = LERP(LERP(fH00, fH01, fFractX), LERP(fH10, fH11, fFractX), fFractY);
+
+    // 
+    const coreVector2 vLerp = this->CalcLerpVector(vPosition.y);
+    return fHeight * vLerp.x + vLerp.y;
+}
+
+
+// ****************************************************************
+// 
+coreVector3 cOutdoor::RetrieveNormal(const coreVector2& vPosition)const
+{
+    // 
+    return this->RetrieveBackNormal(vPosition - this->GetPosition().xy());
+}
+
+coreVector3 cOutdoor::RetrieveBackNormal(const coreVector2& vPosition)const
+{
+    constexpr coreFloat fWidth = OUTDOOR_DETAIL * 0.35f;
+
+    // 
+    const coreFloat A = this->RetrieveBackHeight(vPosition + coreVector2(0.0f, fWidth));
+    const coreFloat B = this->RetrieveBackHeight(vPosition + coreVector2(fWidth, 0.0f));
+    const coreFloat C = this->RetrieveBackHeight(vPosition - coreVector2(0.0f, fWidth));
+    const coreFloat D = this->RetrieveBackHeight(vPosition - coreVector2(fWidth, 0.0f));
+
+    // 
+    return coreVector3::Cross(coreVector3(fWidth * -2.0f, 0.0f, D - B).Normalize(),
+                              coreVector3(0.0f, fWidth * -2.0f, C - A).Normalize()).Normalize();
 }
 
 
 // ****************************************************************
 // retrieve ray intersection point
-coreVector3 cOutdoor::RetrieveIntersect(const coreVector3& vRayPosition, const coreVector3& vRayDirection)
+coreVector3 cOutdoor::RetrieveIntersect(const coreVector3& vRayPosition, const coreVector3& vRayDirection)const
 {
     ASSERT(vRayDirection.z < 0.0f)
     coreVector3 vOutput = vRayPosition;
@@ -404,8 +441,8 @@ coreVector3 cOutdoor::RetrieveIntersect(const coreVector3& vRayPosition, const c
         ASSERT(i)
 
         // check for boundaries
-        if(ABS(vOutput.x) > I_TO_F(OUTDOOR_WIDTH/2u) * OUTDOOR_DETAIL ||
-           ABS(vOutput.y) > I_TO_F(OUTDOOR_VIEW /2u) * OUTDOOR_DETAIL)
+        if(ABS(vOutput.x) > I_TO_F(OUTDOOR_WIDTH / 2u) * OUTDOOR_DETAIL ||
+           ABS(vOutput.y) > I_TO_F(OUTDOOR_VIEW  / 2u) * OUTDOOR_DETAIL)
            break;
 
         // retrieve and check height at current position
@@ -427,6 +464,67 @@ coreVector3 cOutdoor::RetrieveIntersect(const coreVector3& vRayPosition, const c
 
 // ****************************************************************
 // 
+void cOutdoor::LerpHeight(const coreFloat fMul, const coreFloat fAdd, const coreUint16 iRange)
+{
+    ASSERT(!this->IsLerping())
+
+    // 
+    m_afLerpMul  [0] = m_afLerpMul[1];
+    m_afLerpAdd  [0] = m_afLerpAdd[1];
+    m_aiLerpRange[0] = 0u;
+
+    // 
+    m_afLerpMul  [1] = fMul;
+    m_afLerpAdd  [1] = fAdd;
+    m_aiLerpRange[1] = iRange + 2u * OUTDOOR_VIEW;
+}
+
+
+// ****************************************************************
+// 
+void cOutdoor::LerpHeightNow(const coreFloat fMul, const coreFloat fAdd)
+{
+    ASSERT(!this->IsLerping())
+
+    // 
+    m_afLerpMul  [0] = m_afLerpMul  [1] = fMul;
+    m_afLerpAdd  [0] = m_afLerpAdd  [1] = fAdd;
+    m_aiLerpRange[0] = m_aiLerpRange[1] = 0u;
+
+    // 
+    m_afLerpData[0] = m_afLerpData[2] = m_afLerpData[4] = fMul;
+    m_afLerpData[1] = m_afLerpData[3] = m_afLerpData[5] = fAdd;
+    m_afLerpData[6] = CORE_MATH_PRECISION;
+}
+
+
+// ****************************************************************
+// 
+coreVector2 cOutdoor::CalcLerpVector(const coreFloat fPositionY)const
+{
+    if(this->IsLerping())
+    {
+        // 
+        const coreFloat fLerp = (fPositionY + this->GetPosition().y) / (OUTDOOR_DETAIL * I_TO_F(OUTDOOR_VIEW)) + 0.5f;
+        if(fLerp <= m_afLerpData[6])
+        {
+            return LERP(r_cast<const coreVector2&>(m_afLerpData[0]), r_cast<const coreVector2&>(m_afLerpData[4]), fLerp * RCP(m_afLerpData[6]));
+        }
+        else
+        {
+            return LERP(r_cast<const coreVector2&>(m_afLerpData[4]), r_cast<const coreVector2&>(m_afLerpData[2]), (fLerp - m_afLerpData[6]) * RCP(1.0f - m_afLerpData[6]));
+        }
+    }
+    else
+    {
+        // 
+        return r_cast<const coreVector2&>(m_afLerpData[0]);
+    }
+}
+
+
+// ****************************************************************
+// 
 void cOutdoor::UpdateLightMap()
 {
     // 
@@ -442,12 +540,50 @@ void cOutdoor::UpdateLightMap()
 // set current fly offset
 void cOutdoor::SetFlyOffset(const coreFloat fFlyOffset)
 {
+    if(this->IsLerping() && (F_TO_UI(m_fFlyOffset) != F_TO_UI(fFlyOffset)))
+    {
+        coreUint16& A = m_aiLerpRange[0];   // current
+        coreUint16& B = m_aiLerpRange[1];   // target
+
+        // 
+        ++A;
+
+        // 
+        const coreBool bBegin = ((A)     < OUTDOOR_VIEW);
+        const coreBool bEnd   = ((B - A) < OUTDOOR_VIEW);
+
+        // 
+        const coreFloat fDist = RCP(I_TO_F(B - OUTDOOR_VIEW));
+        const coreFloat fFrom = bBegin ? 0.0f : (I_TO_F(A - OUTDOOR_VIEW) * fDist);
+        const coreFloat fTo   = bEnd   ? 1.0f : (I_TO_F(A)                * fDist);
+
+        // 
+        m_afLerpData[0] = LERP(m_afLerpMul[0], m_afLerpMul[1], fFrom);
+        m_afLerpData[1] = LERP(m_afLerpAdd[0], m_afLerpAdd[1], fFrom);
+        m_afLerpData[2] = LERP(m_afLerpMul[0], m_afLerpMul[1], fTo);
+        m_afLerpData[3] = LERP(m_afLerpAdd[0], m_afLerpAdd[1], fTo);
+        m_afLerpData[4] = bBegin ? m_afLerpData[0] : m_afLerpData[2];
+        m_afLerpData[5] = bBegin ? m_afLerpData[1] : m_afLerpData[3];
+        m_afLerpData[6] = bBegin ? (1.0f - (I_TO_F(A) / I_TO_F(OUTDOOR_VIEW))) : (bEnd ? (I_TO_F(B - A) / I_TO_F(OUTDOOR_VIEW)) : 1.0f);
+
+        // 
+        m_afLerpData[6] = CLAMP(m_afLerpData[6], CORE_MATH_PRECISION, 1.0f - CORE_MATH_PRECISION);
+
+        // 
+        if((m_fFlyOffset > fFlyOffset) && ((m_fFlyOffset - fFlyOffset) < I_TO_F(OUTDOOR_VIEW)))
+        {
+            std::swap(m_afLerpData[0], m_afLerpData[2]);
+            std::swap(m_afLerpData[1], m_afLerpData[3]);
+            m_afLerpData[6] = 1.0f - m_afLerpData[6];
+        }
+    }
+
     // set new value
     m_fFlyOffset = fFlyOffset;
     ASSERT(F_TO_UI(m_fFlyOffset) < OUTDOOR_HEIGHT)
 
     // set position (XY only used in height-calculations)
-    this->SetPosition(coreVector3(0.0f, m_fFlyOffset * -OUTDOOR_DETAIL, 0.0f));
+    this->SetPosition(coreVector3(0.0f, m_fFlyOffset * -OUTDOOR_DETAIL, 0.0f)); // TODO: side    
 
     // calculate vertex and index offset
     m_iVertexOffset = F_TO_UI(m_fFlyOffset) * OUTDOOR_WIDTH;

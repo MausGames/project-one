@@ -34,7 +34,7 @@ cCombatText::cCombatText()noexcept
 {
     // create label objects
     for(coreUintW i = 0u; i < COMBAT_LABELS; ++i)
-        m_aLabel[i].Construct(MENU_FONT_MEDIUM_2, MENU_OUTLINE_SMALL, 16u);
+        m_aLabel[i].Construct(MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL, 16u);
 }
 
 

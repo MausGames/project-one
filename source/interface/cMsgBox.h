@@ -12,6 +12,7 @@
 
 // TODO: transfer to Core Engine
 // TODO: fix controller support (mouse gets warped because of input-lock)
+// TODO: X character is off some pixels (font problem)
 
 
 // ****************************************************************

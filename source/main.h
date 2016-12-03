@@ -232,7 +232,6 @@ extern cPostProcessing* g_pPostProcessing;   // main post-processing object
 #include "interface/cInterface.h"
 #include "interface/cMsgBox.h"
 #include "interface/cTooltip.h"
-#include "interface/cLeaderboard.h"
 #include "interface/menu/cMenu.h"
 #include "game/cBullet.h"
 #include "game/cWeapon.h"

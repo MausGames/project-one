@@ -33,7 +33,7 @@ cDesertBackground::cDesertBackground()noexcept
         {
             // calculate position and height
             const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, DESERT_STONE_NUM);
-            const coreFloat   fHeight   = m_pOutdoor->RetrieveHeight(vPosition);
+            const coreFloat   fHeight   = m_pOutdoor->RetrieveBackHeight(vPosition);
 
             // test for valid values
             if((fHeight > -23.0f) && (fHeight < -18.0f) && (F_TO_SI(vPosition.y+160.0f) % 80 < 40))
@@ -44,7 +44,7 @@ cDesertBackground::cDesertBackground()noexcept
                     coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>(oBase);
 
                     // set object properties
-                    pObject->SetPosition   (coreVector3(vPosition, fHeight+0.2f));
+                    pObject->SetPosition   (coreVector3(vPosition, 0.0f));
                     pObject->SetSize       (coreVector3::Rand(0.85f,1.3f, 0.85f,1.3f, 0.85f,1.3f) * Core::Rand->Float(2.0f, 2.6f));
                     pObject->SetDirection  (coreVector3::Rand());
                     pObject->SetOrientation(coreVector3::Rand());
@@ -56,8 +56,11 @@ cDesertBackground::cDesertBackground()noexcept
             }
         }
 
+        // 
+        this->_StoreHeight(pList1, 0.2f);
+
         // post-process list and add it to the ground
-        cBackground::_FillInfinite(pList1);
+        cBackground::_FillInfinite(pList1, DESERT_STONE_RESERVE);
         m_apGroundObjectList.push_back(pList1);
 
         // bind stone list to shadow map
@@ -80,8 +83,9 @@ cDesertBackground::cDesertBackground()noexcept
             coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>(oBase);
 
             // set object properties
-            pObject->SetSize  (coreVector3(1.0f,1.0f,1.0f) * SQRT2 * 80.0f);
-            pObject->SetColor3(coreVector3(200.0f/255.0f, 186.0f/255.0f, 156.0f/255.0f));
+            pObject->SetPosition(coreVector3(0.0f,0.0f,0.0f));
+            pObject->SetSize    (coreVector3(1.0f,1.0f,1.0f) * SQRT2 * 80.0f);
+            pObject->SetColor3  (coreVector3(200.0f/255.0f, 186.0f/255.0f, 156.0f/255.0f));
 
             // add object to the list
             pList1->BindObject(pObject);
@@ -115,9 +119,8 @@ cDesertBackground::~cDesertBackground()
 void cDesertBackground::__MoveOwn()
 {
     // 
-    coreBatchList*      pList       = m_apAirObjectList[0];
-    const coreObject3D* pBase       = (*pList->List()) [0];
-    const coreVector2   vBaseOffset = coreVector2(FRACT(pBase->GetTexOffset().x), FRACT(pBase->GetTexOffset().y));
+    coreBatchList*      pList = m_apAirObjectList[0];
+    const coreObject3D* pBase = (*pList->List()) [0];
 
     // 
     const coreFloat   fStrength  = 0.5f;
@@ -125,17 +128,17 @@ void cDesertBackground::__MoveOwn()
     const coreVector2 vDirection = coreVector2(-1.0f,1.0f).Normalize();
     const coreVector2 vMove      = vDirection * (-0.35f * g_pEnvironment->GetSpeed());
     const coreVector2 vTexSize   = coreVector2(1.0f,1.0f) * (4.5f * fStrength);
-    const coreVector2 vTexOffset = vBaseOffset + (coreVector2(0.0f,-1.2f) + vMove) * coreVector2(1.0f,1.0f) * (Core::System->GetTime() * fStrength);
+    const coreVector2 vTexOffset = pBase->GetTexOffset() + (coreVector2(0.0f,-1.2f) + vMove) * coreVector2(1.0f,1.0f) * (Core::System->GetTime() * fStrength);
 
     // 
     for(coreUintW i = 0; i < DESERT_SAND_NUM; ++i)
     {
-        coreObject3D* pRain = (*pList->List())[i];
+        coreObject3D* pSand = (*pList->List())[i];
 
-        pRain->SetPosition (coreVector3(vPosition,  10.0f + 10.0f * I_TO_F(i)));
-        pRain->SetDirection(coreVector3(vDirection, 0.0f));
-        pRain->SetTexSize  (vTexSize);
-        pRain->SetTexOffset(vTexOffset + coreVector2(0.3f,0.3f) * I_TO_F(i));
+        pSand->SetPosition (coreVector3(vPosition,  10.0f + 10.0f * I_TO_F(i)));
+        pSand->SetDirection(coreVector3(vDirection, 0.0f));
+        pSand->SetTexSize  ((vTexSize));
+        pSand->SetTexOffset((vTexOffset + coreVector2(0.3f,0.3f) * I_TO_F(i)).Process(FRACT));
     }
     pList->MoveNormal();
 

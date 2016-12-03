@@ -219,7 +219,7 @@ void cDharukBoss::__MoveOwn()
     const coreFloat     fOldBaseOri   = pBase->GetOrientation().xz().Angle();   // # no y
 
     // 
-    m_fAnimation.Update(0.2f);
+    m_fAnimation.UpdateMod(0.2f, 10.0f);
 
     // ################################################################
     // intro side rush
@@ -850,7 +850,8 @@ void cDharukBoss::__MoveOwn()
         {
             // 
             const coreVector2 vTarget = (m_aiCounter[BOOMERANG_TARGET]) ? this->GetPosition().xy() : pPlayer->GetPosition().xy();
-            vNewPos = vNewPos * vFly.Abs() + vTarget * vFly.Abs().yx();
+            const coreVector2 vFlyAbs = vFly.Processed(ABS);
+            vNewPos = vNewPos * vFlyAbs + vTarget * vFlyAbs.yx();
 
             // 
             g_pSpecialEffects->CreateBlowColor(coreVector3(vNewPos, 0.0f), coreVector3(vFly, 0.0f), SPECIAL_BLOW_SMALL, COLOR_ENERGY_RED);
@@ -883,7 +884,7 @@ void cDharukBoss::__MoveOwn()
     m_BoomerangTrail.MoveNormal();
 
     // 
-    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_OBJECT(0), [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBoomerang, const coreBool bFirstHit)
+    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_OBJECT(0), [this](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBoomerang, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
 

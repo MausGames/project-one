@@ -14,52 +14,74 @@
 // TODO: added object gets shadow-shader
 // TODO: expose pool-allocator for additional objects (AddList)
 // TODO: no blitting on disabled anti-aliasing ( low-optimizations on other components)
-// TODO: optimize density to never try to draw on 0.0f
+// TODO: optimize density to never try to draw on 0.0f 
 // TODO: make grass leafs same color as other plants
 // TODO: make wind-sound (sand) depend on speed
+// TODO: check if alL _RESERVES are correct
+// TODO: reduce object-buffer sizes, not all are drawn at once anyway, also allocate only once
+// TODO: positions in separate list (when iterating through lambda)
+// TODO: use single "environment shader" instead of multi-texturing (rain, snow, sand)
 
 
 // ****************************************************************
 // background definitions
-#define BACKGROUND_OBJECT_RANGE (80.0f)   // default (+/-) Y-range where objects on ground are considered visible
+#define BACKGROUND_OBJECT_RANGE (95.0f)   // default (+/-) Y-range where objects on ground are considered visible
 
-#define __BACKGROUND_SCANLINE(x,i,n) (coreVector2((x) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i)/I_TO_F(n)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW/2u)) * OUTDOOR_DETAIL)
+#define __BACKGROUND_SCANLINE(x,i,n) (coreVector2((x) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i) / I_TO_F(n)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW / 2u)) * OUTDOOR_DETAIL)
 
 
 // ****************************************************************
 // background distribution values
-#define GRASS_STONE_NUM      (1536u)
-#define GRASS_STONE_RESERVE  (256u)
-#define GRASS_REED_NUM       (3072u)
-#define GRASS_REED_1_RESERVE (512u)
-#define GRASS_REED_2_RESERVE (128u)
-#define GRASS_FLOWER_NUM     (2048u)
-#define GRASS_FLOWER_RESERVE (1024u)
-#define GRASS_LEAF_NUM       (2048u)
-#define GRASS_LEAF_RESERVE   (1024u)
-#define GRASS_CLOUD_NUM      (64u)
-#define GRASS_CLOUD_RESERVE  (76u)   // # tested
+#define GRASS_STONE_NUM       (1536u)
+#define GRASS_STONE_RESERVE   (256u)
+#define GRASS_REED_NUM        (3072u)
+#define GRASS_REED_1_RESERVE  (769u)
+#define GRASS_REED_2_RESERVE  (256u)
+#define GRASS_FLOWER_NUM      (2048u)
+#define GRASS_FLOWER_RESERVE  (1024u)
+#define GRASS_LEAF_NUM        (2048u)
+#define GRASS_LEAF_RESERVE    (1024u)
+#define GRASS_CLOUD_NUM       (64u)
+#define GRASS_CLOUD_RESERVE   (76u)   // # tested
 
-#define SEA_STONE_NUM        (1536u)
-#define SEA_STONE_RESERVE    (256u)
-#define SEA_WEED_NUM         (3072u)
-#define SEA_WEED_RESERVE     (512u)
-#define SEA_ANIMAL_NUM       (1536u)
-#define SEA_ANIMAL_1_RESERVE (256u)
-#define SEA_ANIMAL_2_RESERVE (256u)
-#define SEA_ALGAE_NUM        (2048u)
-#define SEA_ALGAE_RESERVE    (1024u)
+#define SEA_STONE_NUM         (1536u)
+#define SEA_STONE_RESERVE     (256u)
+#define SEA_WEED_NUM          (3072u)
+#define SEA_WEED_RESERVE      (3072u)
+#define SEA_ANIMAL_NUM        (1536u)
+#define SEA_ANIMAL_1_RESERVE  (256u)
+#define SEA_ANIMAL_2_RESERVE  (256u)
+#define SEA_ALGAE_NUM         (2048u)
+#define SEA_ALGAE_RESERVE     (1024u)
 
-#define DESERT_STONE_NUM     (1536u)
-#define DESERT_STONE_RESERVE (256u)
-#define DESERT_SAND_NUM      (3u)
+#define DESERT_STONE_NUM      (1536u)
+#define DESERT_STONE_RESERVE  (256u)
+#define DESERT_SAND_NUM       (3u)
 
-#define MOSS_RAIN_NUM        (6u)
-#define MOSS_CLOUD_NUM       (64u)
-#define MOSS_CLOUD_RESERVE   (76u)   // # tested
+#define SPACE_METEOR_NUM      (1536u)
+#define SPACE_METEOR_RESERVE  (1824u)   // # tested 
 
-#define CLOUD_CLOUD_NUM      (576u)
-#define CLOUD_CLOUD_RESERVE  (684u)   // # tested
+#define VOLCANO_SMOKE_NUM     (512u)
+#define VOLCANO_SMOKE_RESERVE (128u)
+#define VOLCANO_SPARK_NUM     (2048u)
+#define VOLCANO_SPARK_RESERVE (1024u)
+
+#define SNOW_STONE_NUM        (1536u)
+#define SNOW_STONE_RESERVE    (256u)
+#define SNOW_REED_NUM         (3072u)
+#define SNOW_REED_RESERVE     (769u)
+#define SNOW_SNOW_NUM         (9u)
+#define SNOW_CLOUD_NUM        (128u)
+#define SNOW_CLOUD_RESERVE    (152u)   // # tested
+
+#define MOSS_RAIN_NUM         (6u)
+#define MOSS_CLOUD_NUM        (64u)
+#define MOSS_CLOUD_RESERVE    (76u)   // # tested
+
+#define DARK_
+
+#define CLOUD_CLOUD_NUM       (576u)
+#define CLOUD_CLOUD_RESERVE   (684u)   // # tested
 
 
 // ****************************************************************
@@ -79,6 +101,9 @@ protected:
 
     std::vector<coreObject3D*>            m_apAddObject;   // temporary additional objects
     coreLookup<coreUint8, coreBatchList*> m_apAddList;     // optimized lists for temporary additional objects
+
+    coreLookup<const coreBatchList*, std::vector<coreUint16>> m_aaiBaseHeight;   // 
+    coreLookup<const coreBatchList*, std::vector<coreUint32>> m_aaiBaseNormal;   // 
 
 
 public:
@@ -117,7 +142,12 @@ public:
 
 protected:
     // 
-    static void _FillInfinite   (coreBatchList* OUTPUT pObjectList);
+    void _StoreHeight    (const coreBatchList* pObjectList, const coreFloat fHeight);
+    void _StoreHeightList(const coreBatchList* pObjectList);
+    void _StoreNormalList(const coreBatchList* pObjectList);
+
+    // 
+    static void _FillInfinite   (coreBatchList* OUTPUT pObjectList, const coreUintW iReserve);
     static void _SortBackToFront(coreBatchList* OUTPUT pObjectList);
 
     // check for intersection with other objects
@@ -261,6 +291,11 @@ public:
 
     DISABLE_COPY(cSnowBackground)
     ASSIGN_ID(6, "Snow")
+
+
+private:
+    // execute own routines
+    void __MoveOwn()final;
 };
 
 

@@ -8,9 +8,10 @@
 //////////////////////////////////////////////////////
 #include "main.h"
 
-#define ASSERT_ALL {ASSERT(g_pOutline)        ASSERT(g_pGlow)           ASSERT(g_pDistortion) \
-                    ASSERT(g_pSpecialEffects) ASSERT(g_pPostProcessing) ASSERT(g_pForeground) \
-                    ASSERT(g_pEnvironment)    ASSERT(g_pMenu)           ASSERT(g_pTheater)}
+#define ASSERT_ALL {ASSERT(g_pReplay)     ASSERT(g_pOutline)        ASSERT(g_pGlow)           \
+                    ASSERT(g_pDistortion) ASSERT(g_pSpecialEffects) ASSERT(g_pPostProcessing) \
+                    ASSERT(g_pForeground) ASSERT(g_pEnvironment)    ASSERT(g_pMenu)           \
+                    ASSERT(g_pTheater)}
 
 coreVector2      g_vGameResolution = coreVector2(0.0f,0.0f);
 coreVector2      g_vMenuCenter     = coreVector2(0.0f,0.0f);
@@ -341,16 +342,18 @@ static void DebugGame()
     // set background movement
     if(!Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_PERIOD), CORE_INPUT_HOLD))
     {
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_1),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2(-1.0f,-1.0f).Normalize());
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_2),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 0.0f,-1.0f).Normalize());
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_3),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 1.0f,-1.0f).Normalize());
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_4),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2(-1.0f, 0.0f).Normalize());
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_6),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 1.0f, 0.0f).Normalize());
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_7),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2(-1.0f, 1.0f).Normalize());
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_8),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 0.0f, 1.0f).Normalize());
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_9),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 1.0f, 1.0f).Normalize());
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_PLUS),  CORE_INPUT_PRESS)) g_pEnvironment->SetTargetSpeed((&g_pEnvironment->GetSpeed())[1] + 1.0f);
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_MINUS), CORE_INPUT_PRESS)) g_pEnvironment->SetTargetSpeed((&g_pEnvironment->GetSpeed())[1] - 1.0f);
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_1),        CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2(-1.0f,-1.0f).Normalize());
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_2),        CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 0.0f,-1.0f).Normalize());
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_3),        CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 1.0f,-1.0f).Normalize());
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_4),        CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2(-1.0f, 0.0f).Normalize());
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_6),        CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 1.0f, 0.0f).Normalize());
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_7),        CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2(-1.0f, 1.0f).Normalize());
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_8),        CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 0.0f, 1.0f).Normalize());
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_9),        CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 1.0f, 1.0f).Normalize());
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_PLUS),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetSpeed((&g_pEnvironment->GetSpeed())[1] + 1.0f);
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_MINUS),    CORE_INPUT_PRESS)) g_pEnvironment->SetTargetSpeed((&g_pEnvironment->GetSpeed())[1] - 1.0f);
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_DIVIDE),   CORE_INPUT_PRESS)) g_pEnvironment->SetTargetSide ((&g_pEnvironment->GetSide ())[1] - coreVector2(2.0f,0.0f));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_MULTIPLY), CORE_INPUT_PRESS)) g_pEnvironment->SetTargetSide ((&g_pEnvironment->GetSide ())[1] + coreVector2(2.0f,0.0f));
     }
 
     // equip weapon
@@ -407,45 +410,13 @@ static void DebugGame()
     static coreFloat s_fHeight = 0.0f;
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(E), CORE_INPUT_HOLD))
     {
-        s_fHeight += 10.0f * Core::System->GetTime();
+        s_fHeight += 15.0f * Core::System->GetTime();
     }
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(R), CORE_INPUT_HOLD))
     {
-        s_fHeight -= 10.0f * Core::System->GetTime();
+        s_fHeight -= 15.0f * Core::System->GetTime();
     }
     g_pEnvironment->SetTargetHeight(s_fHeight);
-
-    static coreFloat s_fHeight2 = 0.0f;
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(U), CORE_INPUT_HOLD))
-    {
-        s_fHeight2 += 10.0f * Core::System->GetTime();
-    }
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(I), CORE_INPUT_HOLD))
-    {
-        s_fHeight2 -= 10.0f * Core::System->GetTime();
-    }
-    if(s_fHeight2 && g_pEnvironment->GetBackground()->GetOutdoor()) g_pEnvironment->GetBackground()->GetOutdoor()->SetHeightOffset(s_fHeight2);
-
-    static coreFloat s_fHeight3 = 1.0f;
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(T), CORE_INPUT_HOLD))
-    {
-        s_fHeight3 += 0.1f * Core::System->GetTime();
-    }
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(Y), CORE_INPUT_HOLD))
-    {
-        s_fHeight3 -= 0.1f * Core::System->GetTime();
-    }
-    if((s_fHeight3 != 1.0f) && g_pEnvironment->GetBackground()->GetOutdoor()) g_pEnvironment->GetBackground()->GetOutdoor()->SetHeightFactor(s_fHeight3);
-
-    static coreFloat s_fFactor = 1.0f;
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(G), CORE_INPUT_HOLD))
-    {
-        s_fFactor = MIN(s_fFactor + 0.3f * Core::System->GetTime(), 1.0f);
-    }
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(H), CORE_INPUT_HOLD))
-    {
-        s_fFactor = MAX(s_fFactor - 0.3f * Core::System->GetTime(), 0.0f);
-    }
 
     static coreBool s_bInvincible = true;
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(Q), CORE_INPUT_PRESS))
@@ -467,18 +438,14 @@ static void DebugGame()
         g_pPostProcessing->SetDebugMode(s_bDebugMode = !s_bDebugMode);
     }
 
-    //if((fFactor != 1.0f) && !g_pEnvironment->GetBackground()->GetGroundObjectList()->empty())
-    //{
-    //    g_pEnvironment->GetBackground()->SetGroundDensity(0u, fFactor);
-    //    g_pEnvironment->GetBackground()->SetGroundDensity(1u, fFactor);
-    //}
-    //Core::Debug->InspectValue("fFactor", fFactor);
-
-    //if(g_pEnvironment->GetBackground()->GetOutdoor())
-    //{
-    //    g_pEnvironment->GetBackground()->GetOutdoor()->SetHeightOffset(-24.5f);
-    //    g_pEnvironment->GetBackground()->GetOutdoor()->SetHeightFactor(0.0f);
-    //}
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(M), CORE_INPUT_PRESS))
+    {
+        g_pEnvironment->GetBackground()->GetOutdoor()->LerpHeight(1.0f, 0.0f);
+    }
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(N), CORE_INPUT_PRESS))
+    {
+        g_pEnvironment->GetBackground()->GetOutdoor()->LerpHeight(0.0f, -25.0f);
+    }
 
     // ########################## DEBUG ##########################
 }

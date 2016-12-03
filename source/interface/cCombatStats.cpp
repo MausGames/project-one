@@ -28,7 +28,7 @@ cCombatStats::cCombatStats()noexcept
 void cCombatStats::Apply()
 {
     // 
-    g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    g_pGame->ForEachPlayer([](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
         // 
         for(coreUintW j = 0u; j < PLAYER_WEAPONS; ++j)

@@ -24,5 +24,5 @@ void FragmentMain()
               v1Value = max(v1Value - v1Alpha, 0.0);
         gl_FragColor  = vec4(vec3((0.3 + 0.7 * v1Value) * u_v4Color.r), v1Value * u_v4Color.a);
     }
-    else discard; // gl_FragColor = vec4(0.0);
+    else gl_FragColor = vec4(0.0);
 }

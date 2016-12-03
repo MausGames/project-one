@@ -30,6 +30,10 @@ cBackground::cBackground()noexcept
 // destructor
 cBackground::~cBackground()
 {
+    // 
+    m_aaiBaseHeight.clear();
+    m_aaiBaseNormal.clear();
+
     // remove all persistent objects
     auto nRemoveObjectsFunc = [](std::vector<coreBatchList*>* OUTPUT papList)
     {
@@ -157,14 +161,16 @@ void cBackground::Move()
     }
 
     // control and move all persistent objects
-    auto nControlObjectsFunc = [](std::vector<coreBatchList*>* OUTPUT papList, const coreFloat fRange)
+    auto nControlObjectsFunc = [this](std::vector<coreBatchList*>* OUTPUT papList, const coreFloat fRange, const coreMatrix2& mRota)
     {
         FOR_EACH(it, *papList)
         {
             coreBool bUpdate = false;
 
             // 
-            const coreFloat& fDensity = (*it)->List()->front()->GetCollisionModifier().x;
+            const coreFloat&               fDensity      = (*it)->List()->front()->GetCollisionModifier().x;
+            const std::vector<coreUint16>* paiBaseHeight = m_aaiBaseHeight.count(*it) ? &m_aaiBaseHeight.at(*it) : NULL;
+            const std::vector<coreUint32>* paiBaseNormal = m_aaiBaseNormal.count(*it) ? &m_aaiBaseNormal.at(*it) : NULL;
 
             // enable only objects in the current view
             FOR_EACH(et, *(*it)->List())
@@ -172,14 +178,38 @@ void cBackground::Move()
                 coreObject3D* pObject = (*et);
 
                 // determine visibility and compare with current status
-                const coreBool bIsVisible = coreMath::InRange(pObject->GetPosition().y, g_pEnvironment->GetCameraPos().y, fRange) &&
-                                            coreMath::InRange(pObject->GetPosition().x, 0.0f,                             fRange);
+                const coreVector2 vScreenPos = (pObject->GetPosition().xy() - g_pEnvironment->GetCameraPos().xy()) * mRota;
+                const coreBool    bIsVisible = ((ABS(vScreenPos.x) + ABS(vScreenPos.y)) < fRange);
                 if(bIsVisible != pObject->IsEnabled(CORE_OBJECT_ENABLE_MOVE))
                 {
                     // 
-                    const coreFloat fFract = FRACT(FMOD(pObject->GetPosition().y + I_TO_F(OUTDOOR_VIEW/2u) * OUTDOOR_DETAIL, I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL));
+                    const coreFloat fFract = FRACT(FMOD(pObject->GetPosition().y + I_TO_F(OUTDOOR_VIEW / 2u) * OUTDOOR_DETAIL, I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL));
                     pObject->SetEnabled(bIsVisible ? ((fFract < fDensity) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE) : CORE_OBJECT_ENABLE_NOTHING);
 
+                    // recalculate properties when becoming visible
+                    if(pObject->IsEnabled(CORE_OBJECT_ENABLE_ALL))
+                    {
+                        const coreUintW iIndex = et - (*it)->List()->begin();
+
+                        // retrieve height and add offset
+                        if(paiBaseHeight)
+                        {
+                            const coreFloat fOffset = coreMath::Float16to32((*paiBaseHeight)[iIndex % paiBaseHeight->size()]);
+                            const coreFloat fHeight = m_pOutdoor->RetrieveBackHeight(pObject->GetPosition().xy());
+                            pObject->SetPosition(coreVector3(pObject->GetPosition().xy(), fHeight + fOffset));
+                        }
+
+                        // unpack normal and interpolate
+                        if(paiBaseNormal)
+                        {
+                            const coreVector2 vPacked = coreVector2::UnpackFloat2x16((*paiBaseNormal)[iIndex % paiBaseNormal->size()]);
+                            const coreVector3 vNormal = coreVector3(vPacked, SQRT(1.0f - vPacked.LengthSq()));
+                            const coreVector2 vLerp   = m_pOutdoor->CalcLerpVector(pObject->GetPosition().y);
+                            pObject->SetDirection(LERP(coreVector3(0.0f,0.0f,1.0f), vNormal, vLerp.x).Normalize());
+                        }
+                    }
+
+                    // 
                     bUpdate = true;
                 }
             }
@@ -188,9 +218,10 @@ void cBackground::Move()
             if(bUpdate) (*it)->MoveNormal();
         }
     };
-    nControlObjectsFunc(&m_apGroundObjectList, BACKGROUND_OBJECT_RANGE);
-    nControlObjectsFunc(&m_apDecalObjectList,  BACKGROUND_OBJECT_RANGE);
-    nControlObjectsFunc(&m_apAirObjectList,    BACKGROUND_OBJECT_RANGE - 5.0f);
+    const coreMatrix2 mRota = coreMatrix3::Rotation(g_pEnvironment->GetDirection().InvertedX().Rotate45()).m12();
+    nControlObjectsFunc(&m_apGroundObjectList, BACKGROUND_OBJECT_RANGE,         mRota);
+    nControlObjectsFunc(&m_apDecalObjectList,  BACKGROUND_OBJECT_RANGE,         mRota);
+    nControlObjectsFunc(&m_apAirObjectList,    BACKGROUND_OBJECT_RANGE - 11.0f, mRota);
 
     // control all additional objects
     auto nControlAddFunc = [](std::vector<coreObject3D*>* OUTPUT papObject, const coreFloat fRange)
@@ -207,8 +238,8 @@ void cBackground::Move()
             }
         }
     };
-    nControlAddFunc(&m_apAddObject, BACKGROUND_OBJECT_RANGE);
-    FOR_EACH(it, m_apAddList) nControlAddFunc((*it)->List(), BACKGROUND_OBJECT_RANGE);
+    nControlAddFunc(&m_apAddObject, BACKGROUND_OBJECT_RANGE - 9.0f);
+    FOR_EACH(it, m_apAddList) nControlAddFunc((*it)->List(), BACKGROUND_OBJECT_RANGE - 9.0f);
 
     // move all additional objects
     FOR_EACH(it, m_apAddObject) (*it)->Move();
@@ -274,7 +305,7 @@ void cBackground::AddList(const coreUint8 iListIndex, const coreUint32 iCapacity
 void cBackground::ShoveObjects(const coreFloat fOffset)
 {
     // update objects and lists
-    auto nUpdatePosFunc = [&fOffset](std::vector<coreObject3D*>* OUTPUT papObject)
+    auto nUpdatePosFunc = [&](std::vector<coreObject3D*>* OUTPUT papObject)
     {
         FOR_EACH(it, *papObject)
         {
@@ -325,8 +356,45 @@ void cBackground::SetAirDensity   (const coreUintW iIndex, const coreFloat fDens
 
 
 // ****************************************************************
+// 
+void cBackground::_StoreHeight(const coreBatchList* pObjectList, const coreFloat fHeight)
+{
+    // 
+    m_aaiBaseHeight[pObjectList].push_back(coreMath::Float32to16(fHeight));
+}
+
+void cBackground::_StoreHeightList(const coreBatchList* pObjectList)
+{
+    ASSERT(pObjectList->List()->back()->GetPosition().y < (I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL))
+
+    // 
+    std::vector<coreUint16>& oNew = m_aaiBaseHeight[pObjectList];
+    oNew.reserve(pObjectList->List()->size());
+
+    // 
+    FOR_EACH(it, *pObjectList->List()) oNew.push_back(coreMath::Float32to16((*it)->GetPosition().z));
+}
+
+// ****************************************************************
+// 
+void cBackground::_StoreNormalList(const coreBatchList* pObjectList)
+{
+    ASSERT(pObjectList->List()->back()->GetPosition().y < (I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL))
+
+    // 
+    std::vector<coreUint32>& oNew = m_aaiBaseNormal[pObjectList];
+    oNew.reserve(pObjectList->List()->size());
+
+    // 
+    FOR_EACH(it, *pObjectList->List()) oNew.push_back((*it)->GetDirection().xy().PackFloat2x16());
+
+    // TODO: may needs change later, what is normal, direction or orientation or both (store quaternion? (already available)) 
+}
+
+
+// ****************************************************************
 // create infinite looking object list
-void cBackground::_FillInfinite(coreBatchList* OUTPUT pObjectList)
+void cBackground::_FillInfinite(coreBatchList* OUTPUT pObjectList, const coreUintW iReserve)
 {
     coreSet<coreObject3D*>* pContent = pObjectList->List();
     WARN_IF(pContent->size() < 2u) return;
@@ -344,7 +412,7 @@ void cBackground::_FillInfinite(coreBatchList* OUTPUT pObjectList)
         coreObject3D* pOldObject = (*pContent)[i];
 
         // check for position at the start area
-        if(pOldObject->GetPosition().y < I_TO_F(OUTDOOR_VIEW/2u) * OUTDOOR_DETAIL)
+        if(pOldObject->GetPosition().y < I_TO_F(OUTDOOR_VIEW / 2u) * OUTDOOR_DETAIL)
         {
             // copy object and move it to the end area
             coreObject3D* pNewObject = Core::Manager::Memory->New<coreObject3D>(*pOldObject);
@@ -357,6 +425,8 @@ void cBackground::_FillInfinite(coreBatchList* OUTPUT pObjectList)
     }
 
     // reduce memory consumption
+    ASSERT(pObjectList->GetCurCapacity() <= iReserve)
+    ASSERT(pObjectList->GetCurCapacity() >= iReserve / 2u)
     pObjectList->ShrinkToFit();
 }
 

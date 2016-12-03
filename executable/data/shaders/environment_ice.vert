@@ -16,23 +16,27 @@ const float c_v1WaterHeight   = -20.0;   // default water z-position
 uniform float u_v1Offset;   // current y-position offset
 
 // shader output
-varying float v_v1Smooth;   // height offset for smooth shores
+flat varying vec4 v_v4Lighting;   // lighting properties (xyz = light direction, w = height offset for smooth shores)
 
 
 void VertexMain()
 {
-    // transform position
-    vec4 v4NewPosition = vec4(coreObject3DTransformLow(), 1.0);
-    gl_Position        = u_m4ViewProj * v4NewPosition;
+    // transform position (with slight z-offset to draw over water)
+    gl_Position    = coreObject3DPositionLow();
+    gl_Position.z -= 0.01 * gl_Position.w;
 
-    // transform lighting properties (resolved)
-    v_v3TangentPos = v4NewPosition.xyz * vec3(1.0,-1.0,1.0);
-    v_v3TangentCam = u_v3CamPosition   * vec3(1.0,-1.0,1.0);
+    // extract rotation from camera matrix
+    mat3 m3Rotation = coreMat4to3(u_m4Camera);
 
-    // transform texture coordinates 
+    // transform lighting properties (resolved, with rotation for ray-tracing)
+    v_v3TangentPos   = (m3Rotation * vec3(a_v2LowPosition, 0.0) * u_v3Size + u_v3Position) * vec3( 1.0,-1.0, 1.0);
+    v_v3TangentCam   = u_v3CamPosition                                                     * vec3( 1.0,-1.0, 1.0);
+    v_v4Lighting.xyz = (m3Rotation * u_aLight[0].v4Direction.xyz)                          * vec3(-1.0, 1.0,-1.0);
+
+    // transform texture coordinates
     v_av2TexCoord[0] = vec2(a_v2LowTexCoord.x * c_v1MapResolution,
                             a_v2LowTexCoord.y * c_v1MapResolution + u_v1Offset) * 8.0;
 
     // calculate height offset
-    v_v1Smooth = 0.042 * (u_v3Position.z - c_v1WaterHeight);
+    v_v4Lighting.w = 0.042 * (u_v3Position.z - c_v1WaterHeight);
 }

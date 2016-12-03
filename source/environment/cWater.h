@@ -14,7 +14,9 @@
 // TODO: water-surface clipping for refraction
 // TODO: flying creates strong/fast water ripples
 // TODO: alpha mapping water (no distortion) for very bad hardware
-// TODO: adjust lighting on ice and rainy water (environment direction), also "flat" attribute
+// TODO: specular contribution should be reduced by shadow (object shadow and environment darkening)
+// TODO: rainwater-resolution: realtime in options-menu ?
+// TODO: remove sqrt in rainy shader (pre-processing like in outdoor)
 
 
 // ****************************************************************
@@ -24,9 +26,9 @@
 #define WATER_SKY_SIZE     (3.0f)     // texture size of the sky-plane
 #define WATER_SCALE_FACTOR (0.5f)     // frame buffer resolution factor (reflection and depth)
 
-#define RAIN_DROPS         (20u)       // 
-#define RAIN_DROP_SPEED    (1.15f)     // 
-#define RAIN_DROP_WIDTH    (0.2f)      // 
+#define RAIN_DROPS         (20u)      // 
+#define RAIN_DROP_SPEED    (1.15f)    // 
+#define RAIN_DROP_WIDTH    (0.2f)     // 
 
 
 // ****************************************************************
@@ -69,7 +71,9 @@ public:
 
 
 private:
-    // 
+    // own routines for derived classes
+    virtual void __RenderOwn() {}
+    virtual void __MoveOwn  () {}
     virtual void __UpdateOwn() {}
 
     // hide default render functions
@@ -93,6 +97,10 @@ public:
 // ice-surface class
 class cIceWater final : public cWater
 {
+private:
+    coreObject3D m_Ice;   // 
+
+
 public:
     cIceWater()noexcept;
 
@@ -101,7 +109,8 @@ public:
 
 private:
     // 
-    void __UpdateOwn()final;
+    void __RenderOwn()final;
+    void __MoveOwn  ()final;
 };
 
 

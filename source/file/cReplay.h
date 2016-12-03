@@ -14,6 +14,8 @@
 // TODO: replay-player with play, pause, speed up slow down, time-bar dragging, stage and boss markers auf bar, seitliche liste wie bei speedrun
 // TODO: frame must start with 0, offset from keyframe ?
 // TODO: track pause, with own event-stream ?
+// TODO: get central timestamp (server ?)
+// TODO: uInfo loadfile
 
 
 // ****************************************************************
@@ -24,6 +26,8 @@
 #define REPLAY_FILE_EXTENSION   "p1rp"                 // 
 #define REPLAY_FILE_MAGIC       (coreUint32('P1RP'))   // 
 #define REPLAY_FILE_VERSION     (0x00000001u)          // 
+
+#define REPLAY_NAME_LENTH       (64u)
 
 #define REPLAY_TYPE_MOVE        (0u)   // 
 #define REPLAY_TYPE_PRESS       (1u)   // 
@@ -44,7 +48,7 @@ public:
     {
         coreUint32 iMagic;                               // 
         coreUint32 iVersion;                             // 
-        coreChar   acName[64];                           // 
+        coreChar   acName[REPLAY_NAME_LENTH];            // 
 
         coreUint32 iExecutableHash;                      // 
         coreUint32 iReplayHash;                          // 
@@ -68,13 +72,17 @@ public:
         coreUint32 iKeyFrameSize;                        // 
         coreUint32 aiStreamPacketSize[REPLAY_STREAMS];   // 
     };
+    // TODO: define length constants 
 
     // 
     struct sKeyFrame final
     {
-        coreUint32 iFrame;        // 
         coreUint16 iIdentifier;   // 
+
+        coreUint32 iFrame;        // (not read, but set through identifier) 
         coreUint64 iTimestamp;    // 
+
+        // other information 
     };
 
     // 
@@ -100,7 +108,7 @@ private:
 
     sInput m_aInput[REPLAY_STREAMS];                               // 
 
-    coreUint32 m_iFirstFrame;                                      // 
+    coreUint32 m_iCurFrame;                                        // 
     coreUint32 m_aiCurPacket[REPLAY_STREAMS];                      // 
     coreUint8  m_iStatus;                                          // 
 

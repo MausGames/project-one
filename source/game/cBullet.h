@@ -13,6 +13,7 @@
 // TODO: pre-allocate bullets (at least for player) at the beginning to improve resource loading
 // TODO: check for overlapping bullets and place one of them on another depth plane (to prevent z-fighting and "half" bullets)
 // TODO: remove thick outlined bullets at the sides, because bullets are flat, outlining is 3d, make own shader-variant
+// TODO: use prefetch with more precise numbers (also in enemy-manager)
 
 
 // ****************************************************************
@@ -54,7 +55,8 @@ public:
 
     // control status
     void Activate  (const coreInt32 iDamage, const coreFloat fSpeed, cShip* pOwner, const coreVector2& vPosition, const coreVector2& vDirection, const coreInt32 iType);
-    void Deactivate(const coreBool  bAnimated);
+    void Deactivate(const coreBool bAnimated, const coreVector2& vImpact);
+    void Deactivate(const coreBool bAnimated);
 
     // 
     inline cBullet* MakeSmaller(const coreFloat    fFactor) {this->SetSize  (this->GetSize  () * fFactor); return this;}
@@ -90,10 +92,10 @@ protected:
 
 private:
     // own routines for derived classes (render functions executed by manager)
-    virtual void __ImpactOwn      () {}
-    virtual void __RenderOwnBefore() {}
-    virtual void __RenderOwnAfter () {}
-    virtual void __MoveOwn        () {}
+    virtual void __ImpactOwn      (const coreVector2& vImpact) {}
+    virtual void __RenderOwnBefore()                           {}
+    virtual void __RenderOwnAfter ()                           {}
+    virtual void __MoveOwn        ()                           {}
 };
 
 
@@ -179,7 +181,8 @@ public:
 
 private:
     // execute own routines
-    void __MoveOwn()final;
+    void __ImpactOwn(const coreVector2& vImpact)final;
+    void __MoveOwn  ()final;
 };
 
 
@@ -245,7 +248,7 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn()final;
+    void __ImpactOwn(const coreVector2& vImpact)final;
     void __MoveOwn  ()final;
 };
 
@@ -279,7 +282,7 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn()final;
+    void __ImpactOwn(const coreVector2& vImpact)final;
     void __MoveOwn  ()final;
 };
 
@@ -313,7 +316,7 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn()final;
+    void __ImpactOwn(const coreVector2& vImpact)final;
     void __MoveOwn  ()final;
 };
 
@@ -390,7 +393,7 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn      ()final;
+    void __ImpactOwn      (const coreVector2& vImpact)final;
     void __RenderOwnBefore()final;
     void __MoveOwn        ()final;
 };
@@ -417,7 +420,7 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn()final;
+    void __ImpactOwn(const coreVector2& vImpact)final;
     void __MoveOwn  ()final;
 };
 

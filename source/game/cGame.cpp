@@ -344,7 +344,7 @@ coreBool cGame::__HandleIntro()
 
     if(CONTAINS_FLAG(m_iStatus, GAME_STATUS_INTRO))
     {
-        if(m_fTimeMission > 0.0f)
+        if(m_fTimeMission >= 0.0f)
         {
             // end intro and start actual game
             REMOVE_FLAG(m_iStatus, GAME_STATUS_INTRO)
@@ -361,7 +361,7 @@ coreBool cGame::__HandleIntro()
         {
             // create spline for intro animation (YZ)
             coreSpline2 oSpline;
-            oSpline.AddNode(coreVector2(-140.0f,-10.0f), coreVector2( 1.0f, 0.0f));
+            oSpline.AddNode(coreVector2(-140.0f,-10.0f), coreVector2( 1.0f, 0.0f)); // TODO: optimize to static 
             oSpline.AddNode(coreVector2(  10.0f, 10.0f), coreVector2(-1.0f,-1.0f).Normalize());
             oSpline.AddNode(coreVector2( -30.0f,  0.0f), coreVector2(-1.0f, 0.0f));
 
@@ -427,7 +427,7 @@ void cGame::__HandleDefeat()
     else
     {
 
-    }
+    }  
 
 }
 
@@ -445,15 +445,18 @@ void cGame::__HandleCollisions()
         pEnemy ->TakeDamage(50, ELEMENT_NEUTRAL, pPlayer);
 
         // 
-        const coreVector3 vCenter = coreVector3((pPlayer->GetPosition().xy() + pEnemy->GetPosition().xy()) * 0.5f, 0.0f);
-        g_pSpecialEffects->MacroExplosionPhysicalSmall(vCenter);
+        const coreVector2 vCenter = (pPlayer->GetPosition().xy() + pEnemy->GetPosition().xy()) * 0.5f;
+        g_pSpecialEffects->MacroExplosionPhysicalSmall(coreVector3(vCenter, 0.0f));
     });
 
     Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_BULLET_ENEMY, [](cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreBool bFirstHit)
     {
         // 
         pPlayer->TakeDamage(pBullet->GetDamage(), pBullet->GetElement());
-        pBullet->Deactivate(true);
+
+        // 
+        const coreVector2 vCenter = (pPlayer->GetPosition().xy() + pBullet->GetPosition().xy()) * 0.5f;
+        pBullet->Deactivate(true, vCenter);
     });
 
     Core::Manager::Object->TestCollision(TYPE_ENEMY, TYPE_BULLET_PLAYER, [](cEnemy* OUTPUT pEnemy, cBullet* OUTPUT pBullet, const coreBool bFirstHit)
@@ -463,7 +466,10 @@ void cGame::__HandleCollisions()
            (ABS(pEnemy->GetPosition().y) >= FOREGROUND_AREA.y * 1.1f)) return;
 
         // 
-        pEnemy ->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), s_cast<cPlayer*>(pBullet->GetOwner()));
-        pBullet->Deactivate(true);
+        pEnemy->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), s_cast<cPlayer*>(pBullet->GetOwner()));
+
+        // 
+        const coreVector2 vCenter = (pEnemy->GetPosition().xy() + pBullet->GetPosition().xy()) * 0.5f;
+        pBullet->Deactivate(true, vCenter);
     });
 }

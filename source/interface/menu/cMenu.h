@@ -15,26 +15,38 @@
 // TODO: menue-riss bei start oder seitlicher fade-out, ausserdem bei start im main-menue animation und explosion des logos oder riss in mitte
 // TODO: move mouse to buttons on joystick-input
 // TODO: real-time sound-configuration
-// TODO: don't load full language file for just reading the name string
+// TODO: score-menu names and all name-inputs MUST support all languages (japanese (keifont), russian (default), arabic (default), ...)
+// TODO: score-menu names must be sanitized
+// TODO: unload fonts currently not used (e.g. from score-menu)
 
 
 // ****************************************************************
 // menu definitions
-#define MENU_LIGHT_ACTIVE   (1.0f)     // visible strength of active menu objects
-#define MENU_LIGHT_IDLE     (0.667f)   // visible strength of idle menu objects
-#define MENU_CONTRAST_WHITE (0.8f)     // white contrast value (to reduce eye strain)
-#define MENU_CONTRAST_BLACK (0.04f)    // black contrast value
+#define MENU_LIGHT_ACTIVE      (1.0f)     // visible strength of active menu objects
+#define MENU_LIGHT_IDLE        (0.667f)   // visible strength of idle menu objects
+#define MENU_CONTRAST_WHITE    (0.8f)     // white contrast value (to reduce eye strain)
+#define MENU_CONTRAST_BLACK    (0.04f)    // black contrast value
 
-#define MENU_BUTTON         "menu_background_black.png", "menu_background_black.png"
-#define MENU_SWITCHBOX      "default_black.png", "default_black.png"
-#define MENU_FONT_SMALL     "ethnocentric.ttf", (13u)
-#define MENU_FONT_MEDIUM_2  "ethnocentric.ttf", (20u)
-#define MENU_FONT_MEDIUM_3  "ethnocentric.ttf", (30u)
-#define MENU_FONT_BIG_4     "ethnocentric.ttf", (40u)
-#define MENU_FONT_BIG_7     "ethnocentric.ttf", (70u)
-#define MENU_ICON_MEDIUM_2  "fontawesome.ttf",  (24u)
-#define MENU_OUTLINE_SMALL  (1u)
-#define MENU_OUTLINE_BIG    (4u)
+#define MENU_SCORE_ENTRIES     (10u)
+#define MENU_SCORE_NAME_LENGTH (32u)
+#define MENU_REPLAY_ENTRIES    (5u)
+#define MENU_REPLAY_NAME_LENTH (REPLAY_NAME_LENTH)
+
+#define MENU_BUTTON            "menu_background_black.png", "menu_background_black.png"
+#define MENU_SWITCHBOX         "default_black.png", "default_black.png"
+#define MENU_FONT_DYNAMIC_1    "dynamic_font",     (13u)
+#define MENU_FONT_DYNAMIC_2    "dynamic_font",     (20u)
+#define MENU_FONT_DYNAMIC_3    "dynamic_font",     (30u)
+#define MENU_FONT_DYNAMIC_4    "dynamic_font",     (40u)
+#define MENU_FONT_DYNAMIC_5    "dynamic_font",     (70u)
+#define MENU_FONT_STANDARD_1   "ethnocentric.ttf", (13u)
+#define MENU_FONT_STANDARD_2   "ethnocentric.ttf", (20u)
+#define MENU_FONT_STANDARD_3   "ethnocentric.ttf", (30u)
+#define MENU_FONT_STANDARD_4   "ethnocentric.ttf", (40u)
+#define MENU_FONT_STANDARD_5   "ethnocentric.ttf", (70u)
+#define MENU_FONT_ICON_1       "fontawesome.ttf",  (24u)
+#define MENU_OUTLINE_SMALL     (1u)
+#define MENU_OUTLINE_BIG       (4u)
 
 
 // ****************************************************************
@@ -46,6 +58,8 @@
 #define SURFACE_CONFIG         (4u)
 #define SURFACE_EXTRA          (5u)
 #define SURFACE_PAUSE          (6u)
+#define SURFACE_SCORE          (7u)
+#define SURFACE_REPLAY         (8u)
 
 #define SURFACE_INTRO_EMPTY    (0u)
 #define SURFACE_INTRO_LOGO     (1u)
@@ -64,6 +78,10 @@
 #define SURFACE_EXTRA_CREDITS  (0u)
 
 #define SURFACE_PAUSE_DEFAULT  (0u)
+
+#define SURFACE_SCORE_DEFAULT  (0u)
+
+#define SURFACE_REPLAY_DEFAULT (0u)
 
 
 // ****************************************************************
@@ -155,16 +173,14 @@ public:
 class cGameMenu final : public coreMenu
 {
 private:
-    coreObject2D m_Background;        // 
+    coreObject2D m_Background;   // 
 
-    coreButton m_StartButton;         // start button
-    coreButton m_LeaderboardButton;   // leaderboard button
-    coreButton m_ReplayButton;        // replay button
-    coreButton m_ConfigButton;        // config button
-    coreButton m_ExtraButton;         // extra button
-    coreButton m_ExitButton;          // exit button
-
-    cLeaderboard m_Leaderboard;       // 
+    coreButton m_StartButton;    // start button
+    coreButton m_ConfigButton;   // config button
+    coreButton m_ExtraButton;    // extra button
+    coreButton m_ScoreButton;    // score button
+    coreButton m_ReplayButton;   // replay button
+    coreButton m_ExitButton;     // exit button
 
 
 public:
@@ -282,6 +298,60 @@ public:
 
 
 // ****************************************************************
+// score menu class
+class cScoreMenu final : public coreMenu
+{
+private:
+    coreObject2D m_Background;                   // 
+
+    coreButton m_BackButton;                     // back button
+
+    coreObject2D m_aLine [MENU_SCORE_ENTRIES];   // 
+    coreLabel    m_aRank [MENU_SCORE_ENTRIES];   // 
+    coreLabel    m_aName [MENU_SCORE_ENTRIES];   // 
+    coreLabel    m_aScore[MENU_SCORE_ENTRIES];   // 
+
+
+public:
+    cScoreMenu()noexcept;
+
+    DISABLE_COPY(cScoreMenu)
+
+    // move the score menu
+    void Move()final;
+};
+
+
+// ****************************************************************
+// replay menu class
+class cReplayMenu final : public coreMenu
+{
+private:
+    coreObject2D m_Background;                   // 
+
+    coreButton m_BackButton;                     // back button
+
+    coreObject2D m_aLine[MENU_REPLAY_ENTRIES];   // 
+    coreLabel    m_aName[MENU_REPLAY_ENTRIES];   // 
+    coreLabel    m_aTime[MENU_REPLAY_ENTRIES];   // 
+
+    std::vector<cReplay::uInfo> m_aInfoList;     // 
+
+
+public:
+    cReplayMenu()noexcept;
+
+    DISABLE_COPY(cReplayMenu)
+
+    // move the replay menu
+    void Move()final;
+
+    // 
+    void LoadReplays();
+};
+
+
+// ****************************************************************
 // master menu class
 class cMenu final : public coreMenu
 {
@@ -293,6 +363,8 @@ private:
     cConfigMenu m_ConfigMenu;     // config menu object
     cExtraMenu  m_ExtraMenu;      // extra menu object
     cPauseMenu  m_PauseMenu;      // pause menu object
+    cScoreMenu  m_ScoreMenu;      // score menu object
+    cReplayMenu m_ReplayMenu;     // replay menu object
 
     cMsgBox  m_MsgBox;            // message box overlay
     cTooltip m_Tooltip;           // tooltip overlay
@@ -321,6 +393,7 @@ public:
     inline void InvokePauseStep() {m_iPauseFrame = Core::System->GetCurFrame();}
 
     // 
+    static void UpdateLanguageFont();
     static const coreLookup<std::string, std::string>& GetLanguageList();
 
     // menu helper routines

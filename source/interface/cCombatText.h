@@ -10,6 +10,9 @@
 #ifndef _P1_GUARD_COMBATTEXT_H_
 #define _P1_GUARD_COMBATTEXT_H_
 
+// TODO: maybe get rid of the smooth text-overlap resolve
+// TODO: allow localized text with standard numbers
+
 
 // ****************************************************************
 // combat text definitions

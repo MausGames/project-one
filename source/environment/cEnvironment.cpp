@@ -122,7 +122,7 @@ void cEnvironment::Move()
     while(m_fFlyOffset >= I_TO_F(OUTDOOR_HEIGHT)) {m_fFlyOffset -= I_TO_F(OUTDOOR_HEIGHT); m_pBackground->ShoveObjects(-I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL); if(m_pOldBackground) m_pOldBackground->ShoveObjects(-I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL);}
 
     // calculate global side offset (only perpendicular to flight direction, never on diagonal camera (smooth with max-min))
-    const coreVector2 vAbsDir = m_avDirection[0].Abs();
+    const coreVector2 vAbsDir = m_avDirection[0].Processed(ABS);
     m_fSideOffset             = 0.65f * coreVector2::Dot(m_avDirection[0].Rotated90(), m_avSide[0]) * (vAbsDir.Max() - vAbsDir.Min());
 
     // calculate camera and light values
@@ -172,6 +172,7 @@ void cEnvironment::ChangeBackground(const coreInt32 iID, const coreUintW iTransi
     case cVolcanoBackground::ID: m_pBackground = new cVolcanoBackground(); break;
     case cSnowBackground   ::ID: m_pBackground = new cSnowBackground   (); break;
     case cMossBackground   ::ID: m_pBackground = new cMossBackground   (); break;
+    case cDarkBackground   ::ID: m_pBackground = new cDarkBackground   (); break;
     }
 
     if(m_pOldBackground)
@@ -205,14 +206,14 @@ coreFloat cEnvironment::RetrieveTransitionBlend(cBackground* pBackground)
 coreFloat cEnvironment::RetrieveSafeHeight(const coreVector2& vPosition)
 {
     // check for available outdoor-surface
-    cOutdoor* pOutdoor = m_pBackground->GetOutdoor();
+    const cOutdoor* pOutdoor = m_pBackground->GetOutdoor();
     if(!pOutdoor) return 0.0f;
 
     // retrieve height value
     const coreFloat fHeight = pOutdoor->RetrieveHeight(vPosition);
 
     // check for available water-surface
-    cWater* pWater = m_pBackground->GetWater();
+    const cWater* pWater = m_pBackground->GetWater();
     if(pWater) return MAX(fHeight, WATER_HEIGHT);
 
     return fHeight;

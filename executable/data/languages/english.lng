@@ -1,9 +1,13 @@
 $LANGUAGE = English
+$FONT = ethnocentric.ttf
+
 $START_GAME = Play Game
 $EXIT_GAME = Exit Game
 $CREDITS = Credits
 $SETTINGS = Settings
 $EXTRAS = Extras
+$LEADERBOARD = Leaderboard
+$REPLAY = Replay
 
 $SAVE = Save
 $DISCARD = Discard
@@ -43,7 +47,7 @@ $QUESTION_SAVE = Save changes ?
 $ARMOR = Armor
 $STAGE = Stage
 
-$BOSS_TITLE_0101 = Spirit Hunter
+$BOSS_TITLE_0101 = The Dreamhunter
 $BOSS_TITLE_0102 = Gate of Destruction
 $BOSS_TITLE_0103 = The Last Survivor
 $BOSS_TITLE_0201 = #

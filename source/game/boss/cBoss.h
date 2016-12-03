@@ -150,6 +150,7 @@ private:
     coreObject3D m_aCircle[2];    // 
 
     coreFlow m_fAnimation;        // animation value
+    coreFlow m_fRotation;         // 
 
 
 public:

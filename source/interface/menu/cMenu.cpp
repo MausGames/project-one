@@ -12,7 +12,7 @@
 // ****************************************************************
 // constructor
 cMenu::cMenu()noexcept
-: coreMenu      (7u, SURFACE_INTRO)
+: coreMenu      (9u, SURFACE_INTRO)
 , m_iPauseFrame (0u)
 {
     // create intro and main menu
@@ -35,6 +35,8 @@ cMenu::cMenu()noexcept
     this->BindObject(SURFACE_EXTRA,  &m_ExtraMenu);
     this->BindObject(SURFACE_PAUSE,  &m_PauseLayer);
     this->BindObject(SURFACE_PAUSE,  &m_PauseMenu);
+    this->BindObject(SURFACE_SCORE,  &m_ScoreMenu);
+    this->BindObject(SURFACE_REPLAY, &m_ReplayMenu);
 }
 
 
@@ -158,6 +160,19 @@ void cMenu::Move()
                 // switch to extra menu
                 this->ChangeSurface(SURFACE_EXTRA, 3.0f);
             }
+            else if(m_GameMenu.GetStatus() == 4)
+            {
+                // switch to score menu
+                this->ChangeSurface(SURFACE_SCORE, 3.0f);
+            }
+            else if(m_GameMenu.GetStatus() == 5)
+            {
+                // switch to replay menu
+                this->ChangeSurface(SURFACE_REPLAY, 3.0f);
+
+                // 
+                m_ReplayMenu.LoadReplays();
+            }
         }
         break;
 
@@ -183,7 +198,7 @@ void cMenu::Move()
 
     case SURFACE_PAUSE:
         {
-            if((m_PauseMenu.GetStatus() == 1) || Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS))
+            if(m_PauseMenu.GetStatus() == 1)
             {
                 // 
                 this->ChangeSurface(SURFACE_EMPTY, 0.0f);
@@ -214,6 +229,32 @@ void cMenu::Move()
                 ASSERT(g_pGame)
                 SAFE_DELETE(g_pGame)
             }
+        }
+        break;
+
+    case SURFACE_SCORE:
+        {
+            if(m_ScoreMenu.GetStatus())
+            {
+                // return to previous menu
+                this->ChangeSurface(this->GetOldSurface(), 3.0f);
+            }
+        }
+        break;
+
+    case SURFACE_REPLAY:
+        {
+            if(m_ReplayMenu.GetStatus() == 1)
+            {
+
+
+            }
+            else if(m_ReplayMenu.GetStatus() == 2)
+            {
+                // return to previous menu
+                this->ChangeSurface(this->GetOldSurface(), 3.0f);
+            }
+
         }
         break;
 
@@ -258,6 +299,20 @@ coreBool cMenu::IsPausedWithStep()
 
 // ****************************************************************
 // 
+void cMenu::UpdateLanguageFont()
+{
+    // 
+    const coreChar* pcName = Core::Language->HasString("FONT") ? Core::Language->GetString("FONT") : "ethnocentric.ttf";
+    Core::Manager::Resource->AssignProxy("dynamic_font", pcName);
+
+    // 
+    Core::Manager::Resource->UpdateResources();
+    Core::Manager::Resource->UpdateFunctions();
+}
+
+
+// ****************************************************************
+// 
 const coreLookup<std::string, std::string>& cMenu::GetLanguageList()
 {
     // static language list <name, path>
@@ -273,6 +328,9 @@ const coreLookup<std::string, std::string>& cMenu::GetLanguageList()
         // 
         const std::string& sRandFile = s_asLanguage.get_valuelist()[std::time(NULL) % s_asLanguage.size()];
         Core::Language->Load(sRandFile.c_str());
+
+        // 
+        cMenu::UpdateLanguageFont();
 
 #endif
     }
@@ -312,9 +370,9 @@ void cMenu::UpdateSwitchBox(coreSwitchBoxU8* OUTPUT pSwitchBox)
 {
     ASSERT(pSwitchBox)
 
-    auto UpdateArrowFunc = [&](coreButton* OUTPUT pArrow, const coreUintW iEntries)
+    auto UpdateArrowFunc = [&](coreButton* OUTPUT pArrow, const coreUintW iEndIndex)
     {
-        const coreBool bEnd = (pSwitchBox->GetCurIndex() == iEntries);
+        const coreBool bEnd = (pSwitchBox->GetCurIndex() == iEndIndex);
 
         // 
         const coreFloat fAlpha = bEnd ? 0.25f           : (pArrow->IsFocused() ? 1.0f              : 0.75f);
@@ -326,8 +384,8 @@ void cMenu::UpdateSwitchBox(coreSwitchBoxU8* OUTPUT pSwitchBox)
     };
 
     // 
-    UpdateArrowFunc(pSwitchBox->GetArrow(0u), 0u);
-    UpdateArrowFunc(pSwitchBox->GetArrow(1u), pSwitchBox->GetNumEntries() - 1u);
+    UpdateArrowFunc(pSwitchBox->GetArrow(0u), pSwitchBox->GetEndless() ? ~0u : 0u);
+    UpdateArrowFunc(pSwitchBox->GetArrow(1u), pSwitchBox->GetEndless() ? ~0u : (pSwitchBox->GetNumEntries() - 1u));
 }
 
 
@@ -339,3 +397,5 @@ void cMenu::UpdateSwitchBox(coreSwitchBoxU8* OUTPUT pSwitchBox)
 #include "04_cConfigMenu.cpp"
 #include "05_cExtraMenu.cpp"
 #include "06_cPauseMenu.cpp"
+#include "07_cScoreMenu.cpp"
+#include "08_cReplayMenu.cpp"

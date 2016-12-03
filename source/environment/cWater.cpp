@@ -77,6 +77,9 @@ void cWater::Render(coreFrameBuffer* pBackground)
     // blit current background color into own refraction buffer
     pBackground->Blit(CORE_FRAMEBUFFER_TARGET_COLOR, &m_Refraction);
 
+    // 
+    this->__RenderOwn();
+
     // update all water uniforms
     this->GetProgram()->Enable();
     this->GetProgram()->SendUniform("u_v1Time",   m_fAnimation);
@@ -101,6 +104,9 @@ void cWater::Move()
 
     // move water with camera (also water-level up and down)
     this->SetPosition(coreVector3(0.0f, m_fFlyOffset * OUTDOOR_DETAIL, WATER_HEIGHT + 0.4f * SIN(80.0f * m_fAnimation)));
+
+    // 
+    this->__MoveOwn();
 
     // move the 3d-object
     coreObject3D::Move();
@@ -211,17 +217,37 @@ cUnderWater::cUnderWater()noexcept
 cIceWater::cIceWater()noexcept
 {
     // 
-    this->DefineTexture(0u, "environment_crack_norm.png");
-    this->DefineProgram("environment_ice_program");
+    m_Ice = (*this);
+
+    // 
+    m_Ice.DefineTexture(0u, "environment_water_norm.png");
+    m_Ice.DefineProgram("environment_ice_program");
+
 }
 
 
 // ****************************************************************
 // 
-void cIceWater::__UpdateOwn()
+void cIceWater::__RenderOwn()
 {
-    //  (# small update-value remains) 
-    m_fAnimation = 0.0f;
+    if(!m_Ice.GetProgram().IsUsable()) return;
+
+    // 
+    m_Ice.GetProgram()->Enable();
+    m_Ice.GetProgram()->SendUniform("u_v1Offset", m_fFlyOffset * -0.0125f);
+
+    // 
+    m_Ice.Render();
+}
+
+
+// ****************************************************************
+// 
+void cIceWater::__MoveOwn()
+{
+    // 
+    m_Ice.SetPosition(coreVector3(0.0f, m_fFlyOffset * OUTDOOR_DETAIL, WATER_HEIGHT));
+    m_Ice.Move();
 }
 
 
@@ -233,7 +259,7 @@ cRainWater::cRainWater()noexcept
 , m_fFallDelay (0.0f)
 {
     const coreTextureSpec oSpec = CORE_GL_SUPPORT(ARB_texture_float) ? CORE_TEXTURE_SPEC_RGBA16F : CORE_TEXTURE_SPEC_RGBA8;
-    const coreFloat fResolution = Core::Config->GetInt(CORE_CONFIG_GRAPHICS_QUALITY) ? 512.0f : 256.0f;   // TODO: realtime ? 
+    const coreFloat fResolution = Core::Config->GetInt(CORE_CONFIG_GRAPHICS_QUALITY) ? 512.0f : 256.0f;
 
     // 
     m_WaveMap.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, oSpec);

@@ -20,7 +20,7 @@ cConfigMenu::cConfigMenu()noexcept
     m_Background.SetPosition  (coreVector2(0.0f,0.0f));
     m_Background.SetSize      (coreVector2(0.8f,0.55f));
 
-    m_VideoTab.Construct    (MENU_BUTTON, MENU_FONT_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
+    m_VideoTab.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL, 0u);
     m_VideoTab.DefineProgram("menu_border_program");
     m_VideoTab.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.115f,-0.012f));
     m_VideoTab.SetSize      (coreVector2(0.17f,0.07f));
@@ -29,7 +29,7 @@ cConfigMenu::cConfigMenu()noexcept
     m_VideoTab.SetTexOffset (m_VideoTab.GetSize()*coreVector2(-0.5f,-1.0f) + coreVector2(0.115f,0.012f));
     m_VideoTab.GetCaption()->SetTextLanguage("CONFIG_VIDEO");
 
-    m_AudioTab.Construct    (MENU_BUTTON, MENU_FONT_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
+    m_AudioTab.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL, 0u);
     m_AudioTab.DefineProgram("menu_border_program");
     m_AudioTab.SetPosition  (m_VideoTab.GetPosition() * coreVector2(1.0f/3.0f,1.0f));
     m_AudioTab.SetSize      (m_VideoTab.GetSize());
@@ -38,7 +38,7 @@ cConfigMenu::cConfigMenu()noexcept
     m_AudioTab.SetTexOffset (m_VideoTab.GetTexOffset() + coreVector2(m_AudioTab.GetPosition().x - m_VideoTab.GetPosition().x, 0.0));
     m_AudioTab.GetCaption()->SetTextLanguage("CONFIG_AUDIO");
 
-    m_InputTab.Construct    (MENU_BUTTON, MENU_FONT_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
+    m_InputTab.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL, 0u);
     m_InputTab.DefineProgram("menu_border_program");
     m_InputTab.SetPosition  (m_VideoTab.GetPosition() * coreVector2(-1.0f/3.0f,1.0f));
     m_InputTab.SetSize      (m_VideoTab.GetSize());
@@ -47,7 +47,7 @@ cConfigMenu::cConfigMenu()noexcept
     m_InputTab.SetTexOffset (m_VideoTab.GetTexOffset() + coreVector2(m_InputTab.GetPosition().x - m_VideoTab.GetPosition().x, 0.0));
     m_InputTab.GetCaption()->SetTextLanguage("CONFIG_INPUT");
 
-    m_GameTab.Construct    (MENU_BUTTON, MENU_FONT_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
+    m_GameTab.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL, 0u);
     m_GameTab.DefineProgram("menu_border_program");
     m_GameTab.SetPosition  (m_VideoTab.GetPosition() * coreVector2(-1.0f,1.0f));
     m_GameTab.SetSize      (m_VideoTab.GetSize());
@@ -56,7 +56,7 @@ cConfigMenu::cConfigMenu()noexcept
     m_GameTab.SetTexOffset (m_VideoTab.GetTexOffset() + coreVector2(m_GameTab.GetPosition().x - m_VideoTab.GetPosition().x, 0.0));
     m_GameTab.GetCaption()->SetTextLanguage("CONFIG_GAME");
 
-    m_SaveButton.Construct    (MENU_BUTTON, MENU_FONT_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
+    m_SaveButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL, 0u);
     m_SaveButton.DefineProgram("menu_border_program");
     m_SaveButton.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,-0.5f) + coreVector2(0.0f,-0.02f));
     m_SaveButton.SetSize      (coreVector2(0.3f,0.07f));
@@ -64,7 +64,7 @@ cConfigMenu::cConfigMenu()noexcept
     m_SaveButton.SetOverride  (-1);   // # used in LoadValues()
     m_SaveButton.GetCaption()->SetTextLanguage("SAVE");
 
-    m_DiscardButton.Construct    (MENU_BUTTON, MENU_FONT_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
+    m_DiscardButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL, 0u);
     m_DiscardButton.DefineProgram("menu_border_program");
     m_DiscardButton.SetPosition  (m_SaveButton.GetPosition() + coreVector2(m_SaveButton.GetSize().x + 0.02f, 0.0f));
     m_DiscardButton.SetSize      (m_SaveButton.GetSize());
@@ -72,7 +72,7 @@ cConfigMenu::cConfigMenu()noexcept
     m_DiscardButton.SetOverride  (-1);
     m_DiscardButton.GetCaption()->SetTextLanguage("DISCARD");
 
-    m_BackButton.Construct    (MENU_BUTTON, MENU_ICON_MEDIUM_2, MENU_OUTLINE_SMALL, 0u);
+    m_BackButton.Construct    (MENU_BUTTON, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL, 0u);
     m_BackButton.DefineProgram("menu_border_program");
     m_BackButton.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.5f,-0.5f) + coreVector2(0.0f,-0.02f));
     m_BackButton.SetSize      (coreVector2( 1.0f, 1.0f) * m_SaveButton.GetSize().y);
@@ -89,7 +89,7 @@ cConfigMenu::cConfigMenu()noexcept
         if(i == ENTRY_AUDIO_MUSICVOLUME)  ++iOffset;
         if(i == ENTRY_AUDIO_AMBIENTSOUND) ++iOffset;
 
-        m_aLabel[i].Construct   (MENU_FONT_SMALL, MENU_OUTLINE_SMALL, 0u);
+        m_aLabel[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL, 0u);
         m_aLabel[i].SetPosition (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.04f, -0.05f - 0.025f*I_TO_F(iOffset)));
         m_aLabel[i].SetAlignment(coreVector2(1.0f,0.0f));
         m_aLabel[i].SetColor3   (COLOR_MENU_WHITE);
@@ -107,16 +107,17 @@ cConfigMenu::cConfigMenu()noexcept
         m_aLine[i].SetTexOffset (coreVector2(I_TO_F(i)*0.1f, 0.0f));
     }
 
-    #define __SET_SWITCHBOX(x,n,s)                                               \
-    {                                                                            \
-        coreLabel& oLabel = m_aLabel[ENTRY_ ## n];                               \
-        oLabel.SetTextLanguage("CONFIG_" #n);                                    \
-                                                                                 \
-        x.Construct   (MENU_SWITCHBOX, MENU_FONT_SMALL, MENU_OUTLINE_SMALL, 0u); \
-        x.SetPosition (coreVector2(-1.00f,1.00f) * oLabel.GetPosition());        \
-        x.SetSize     (coreVector2(   (s),0.03f));                               \
-        x.SetAlignment(coreVector2(-1.00f,0.00f));                               \
-        x.GetCaption()->SetColor3(COLOR_MENU_WHITE);                             \
+    #define __SET_SWITCHBOX(x,n,s)                                                   \
+    {                                                                                \
+        coreLabel& oLabel = m_aLabel[ENTRY_ ## n];                                   \
+        oLabel.SetTextLanguage("CONFIG_" #n);                                        \
+                                                                                     \
+        x.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL, 0u); \
+        x.SetPosition (coreVector2(-1.00f,1.00f) * oLabel.GetPosition());            \
+        x.SetSize     (coreVector2(   (s),0.03f));                                   \
+        x.SetAlignment(coreVector2(-1.00f,0.00f));                                   \
+        x.GetCaption()->SetColor3     (COLOR_MENU_WHITE);                            \
+        x.GetCaption()->ChangeLanguage(Core::Language);                              \
     }
     {
         __SET_SWITCHBOX(m_Display,       VIDEO_DISPLAY,       0.26f)
@@ -134,6 +135,7 @@ cConfigMenu::cConfigMenu()noexcept
 
         m_ShadowQuality.SetAutomatic(0.0f);
         m_Language     .SetAutomatic(0.0f);
+        m_Language     .SetEndless(true);
     }
     #undef __SET_SWITCHBOX
 
@@ -148,16 +150,16 @@ cConfigMenu::cConfigMenu()noexcept
     m_DisplayMode  .AddEntryLanguage("DISPLAYMODE_FULLSCREEN", 2u);
     m_AntiAliasing .AddEntryLanguage("VALUE_OFF",  0u);
     m_TextureFilter.AddEntryLanguage("VALUE_OFF",  0u);
-    for(coreUintW i = 2u; i <=  8u; i <<= 1u) m_AntiAliasing .AddEntry(PRINT("%ux", i), i);
-    for(coreUintW i = 2u; i <= 16u; i <<= 1u) m_TextureFilter.AddEntry(PRINT("%ux", i), i);
+    for(coreUintW i = 2u; i <=  8u; i <<= 1u) m_AntiAliasing .AddEntry(PRINT("%zux", i), i);
+    for(coreUintW i = 2u; i <= 16u; i <<= 1u) m_TextureFilter.AddEntry(PRINT("%zux", i), i);
     m_AssetQuality .AddEntryLanguage("VALUE_LOW",  0u);
     m_AssetQuality .AddEntryLanguage("VALUE_HIGH", 1u);
     m_ShadowQuality.AddEntryLanguage("VALUE_OFF",  0u);
     m_ShadowQuality.AddEntryLanguage("VALUE_LOW",  1u);
     m_ShadowQuality.AddEntryLanguage("VALUE_HIGH", 2u);
-    for(coreUintW i = 0u; i <= 100u; i += 10u) m_OverallVolume.AddEntry(PRINT("%u%%", i), i);
-    for(coreUintW i = 0u; i <= 100u; i += 10u) m_MusicVolume  .AddEntry(PRINT("%u%%", i), i);
-    for(coreUintW i = 0u; i <= 100u; i += 10u) m_EffectVolume .AddEntry(PRINT("%u%%", i), i);
+    for(coreUintW i = 0u; i <= 100u; i += 10u) m_OverallVolume.AddEntry(PRINT("%zu%%", i), i);
+    for(coreUintW i = 0u; i <= 100u; i += 10u) m_MusicVolume  .AddEntry(PRINT("%zu%%", i), i);
+    for(coreUintW i = 0u; i <= 100u; i += 10u) m_EffectVolume .AddEntry(PRINT("%zu%%", i), i);
     m_AmbientSound .AddEntryLanguage("VALUE_OFF",  0u);
     m_AmbientSound .AddEntryLanguage("VALUE_ON",   1u);
 
@@ -304,12 +306,12 @@ void cConfigMenu::Move()
             // 
             this->LoadValues();
         }
-        else if(m_BackButton.IsClicked())
+        else if(m_BackButton.IsClicked() || Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS))
         {
             if(m_SaveButton.GetOverride() >= 0)
             {
                 // 
-                g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_SAVE"), [&](const coreInt32 iAnswer)
+                g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_SAVE"), [this](const coreInt32 iAnswer)
                 {
                     // 
                     if(iAnswer == MSGBOX_ANSWER_YES)
@@ -509,6 +511,9 @@ void cConfigMenu::__UpdateLanguage()
     Core::Language->Load(asLanguageList.at(m_Language.GetCurEntry().first->c_str()).c_str());
 
     // 
+    cMenu::UpdateLanguageFont();
+
+    // 
     g_pMenu->GetTooltip()->Invalidate();
     if(Core::System->GetDisplayCount() > 2u) this->__LoadDisplays();
 }
@@ -531,7 +536,7 @@ void cConfigMenu::__LoadDisplays()
     else
     {
         for(coreUintW i = 1u, ie = Core::System->GetDisplayCount(); i < ie; ++i)
-            m_Display.AddEntry(PRINT("%s %d", Core::Language->GetString("DISPLAY_SECONDARY"), i), i);
+            m_Display.AddEntry(PRINT("%s %zu", Core::Language->GetString("DISPLAY_SECONDARY"), i), i);
     }
 
     // 

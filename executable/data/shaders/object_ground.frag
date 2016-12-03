@@ -33,11 +33,12 @@ void FragmentMain()
 #elif (_P1_SHADOW_) >= 2
 
     // apply shadow mapping with percentage closer filtering
-    float v1Light = (coreTextureShadow(0, v_v4ShadowCoord)                                    +
-                     coreTextureShadow(0, v_v4ShadowCoord + vec4( 0.0,     0.0012, 0.0, 0.0)) +
-                     coreTextureShadow(0, v_v4ShadowCoord + vec4( 0.0,    -0.0012, 0.0, 0.0)) +
-                     coreTextureShadow(0, v_v4ShadowCoord + vec4( 0.0012, 0.0,     0.0, 0.0)) +
-                     coreTextureShadow(0, v_v4ShadowCoord + vec4(-0.0012, 0.0,     0.0, 0.0))) * 0.2;
+    const float A = 0.0012;
+    float v1Light = (coreTextureShadow(0, v_v4ShadowCoord)                            +
+                     coreTextureShadow(0, v_v4ShadowCoord + vec4(0.0,   A, 0.0, 0.0)) +
+                     coreTextureShadow(0, v_v4ShadowCoord + vec4(0.0,  -A, 0.0, 0.0)) +
+                     coreTextureShadow(0, v_v4ShadowCoord + vec4( A,  0.0, 0.0, 0.0)) +
+                     coreTextureShadow(0, v_v4ShadowCoord + vec4(-A,  0.0, 0.0, 0.0))) * 0.2;
     v1Light = 1.0 - v1Light * 0.5;
 
 #else

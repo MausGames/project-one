@@ -20,6 +20,7 @@
 // constructor
 cTorusBoss::cTorusBoss()noexcept
 : m_fAnimation (0.0f)
+, m_fRotation  (0.0f)
 {
     // load models
     this->DefineModelHigh("ship_boss_torus_high.md3");
@@ -105,16 +106,18 @@ void cTorusBoss::__ResurrectOwn()
 // 
 void cTorusBoss::__KillOwn(const coreBool bAnimated)
 {
+    cViridoMission* pMission = s_cast<cViridoMission*>(g_pGame->GetMission());
+
     if(!m_aiCounter[BALL_STATUS])
     {
         // 
-        s_cast<cViridoMission*>(g_pGame->GetMission())->EnableBall(0u, coreVector2(0.0f,0.0f), coreVector2(-0.5f,1.0f).Normalize());
+        pMission->EnableBall(0u, coreVector2(0.0f,0.0f), coreVector2(-0.5f,1.0f).Normalize());
     }
     else
     {
         // 
         for(coreUintW i = 1u, ie = m_aiCounter[BALL_STATUS]; i < ie; ++i)
-            s_cast<cViridoMission*>(g_pGame->GetMission())->DisableBall(i, true);
+            pMission->DisableBall(i, true);
     }
 
     // 
@@ -179,7 +182,8 @@ void cTorusBoss::__MoveOwn()
     coreVector2 vNewOri = coreVector2(0.0f, m_aiCounter[ROTATION_DIRECTION] ? -1.0f : 1.0f);
 
     // 
-    m_fAnimation.Update(-1.0f);
+    m_fAnimation.UpdateMod(-1.0f, 10.0f);
+    m_fRotation .UpdateMod(-1.2f, 2.0f*PI);
 
     // ################################################################
     // 
@@ -484,7 +488,7 @@ void cTorusBoss::__MoveOwn()
     });
 
     // 
-    const coreVector2 vNewDir = coreVector2::Direction(m_fAnimation * 1.2f);
+    const coreVector2 vNewDir = coreVector2::Direction(m_fRotation);
     this->SetDirection  (coreVector3(vNewDir.x, -vNewOri.y*vNewDir.y, vNewOri.x*vNewDir.y));
     this->SetOrientation(coreVector3(0.0f,       vNewOri.x,           vNewOri.y));
 
@@ -539,7 +543,7 @@ void cTorusBoss::__MoveOwn()
     }
 
     // 
-    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_OBJECT(1), [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pRay, const coreBool bFirstHit)
+    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_OBJECT(1), [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pRay, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
 

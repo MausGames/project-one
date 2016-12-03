@@ -58,7 +58,7 @@ void cBullet::Activate(const coreInt32 iDamage, const coreFloat fSpeed, cShip* p
     m_fSpeed  = fSpeed * BULLET_SPEED_FACTOR;
     m_pOwner  = pOwner;
 
-    // reset animation value
+    // reset animation value (also prevents low precision)
     m_fAnimation = 0.09f;
 
     // reset bullet properties
@@ -73,17 +73,23 @@ void cBullet::Activate(const coreInt32 iDamage, const coreFloat fSpeed, cShip* p
 
 // ****************************************************************
 // shut down bullet
-void cBullet::Deactivate(const coreBool bAnimated)
+void cBullet::Deactivate(const coreBool bAnimated, const coreVector2& vImpact)
 {
     // deactivate bullet (will be cleaned up by bullet manager)
     if(!CONTAINS_FLAG(m_iStatus, BULLET_STATUS_ACTIVE)) return;
     REMOVE_FLAG(m_iStatus, BULLET_STATUS_ACTIVE)
 
     // 
-    if(bAnimated) this->__ImpactOwn();
+    if(bAnimated) this->__ImpactOwn(vImpact);
 
     // disable collision
     this->ChangeType(0);
+}
+
+void cBullet::Deactivate(const coreBool bAnimated)
+{
+    // 
+    this->Deactivate(bAnimated, this->GetPosition().xy());
 }
 
 
@@ -236,6 +242,16 @@ cRayBullet::cRayBullet()noexcept
 
 
 // ****************************************************************
+// 
+void cRayBullet::__ImpactOwn(const coreVector2& vImpact)
+{
+    // 
+    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f),                        25.0f, 1u, this->GetColor3());
+    g_pSpecialEffects->CreateBlowColor  (coreVector3(vImpact, 0.0f), -this->GetDirection(), 25.0f, 1u, this->GetColor3());
+}
+
+
+// ****************************************************************
 // move the ray bullet
 void cRayBullet::__MoveOwn()
 {
@@ -295,10 +311,10 @@ cOrbBullet::cOrbBullet()noexcept
 
 // ****************************************************************
 // 
-void cOrbBullet::__ImpactOwn()
+void cOrbBullet::__ImpactOwn(const coreVector2& vImpact)
 {
     // 
-    g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 5.0f, 3u, this->GetColor3());
+    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
 }
 
 
@@ -331,10 +347,10 @@ cConeBullet::cConeBullet()noexcept
 
 // ****************************************************************
 // 
-void cConeBullet::__ImpactOwn()
+void cConeBullet::__ImpactOwn(const coreVector2& vImpact)
 {
     // 
-    g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 5.0f, 3u, this->GetColor3());
+    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
 }
 
 
@@ -367,10 +383,10 @@ cWaveBullet::cWaveBullet()noexcept
 
 // ****************************************************************
 // 
-void cWaveBullet::__ImpactOwn()
+void cWaveBullet::__ImpactOwn(const coreVector2& vImpact)
 {
     // 
-    g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 5.0f, 3u, this->GetColor3());
+    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
 }
 
 
@@ -468,7 +484,7 @@ void cMineBullet::GlobalExit()
 
 // ****************************************************************
 // 
-void cMineBullet::__ImpactOwn()
+void cMineBullet::__ImpactOwn(const coreVector2& vImpact)
 {
     // 
     g_pSpecialEffects->MacroExplosionPhysicalSmall(this->GetPosition());
@@ -527,7 +543,7 @@ cRocketBullet::cRocketBullet()noexcept
 
 // ****************************************************************
 // 
-void cRocketBullet::__ImpactOwn()
+void cRocketBullet::__ImpactOwn(const coreVector2& vImpact)
 {
     // 
     g_pSpecialEffects->MacroExplosionPhysicalSmall(this->GetPosition());
