@@ -32,9 +32,12 @@ cWater::cWater()noexcept
 
     // create sky-plane object
     m_Sky.DefineTexture(0u, "environment_clouds_blue.png");
-    m_Sky.DefineProgram("default_2d_program");
     m_Sky.SetSize      (coreVector2(WATER_SCALE_FACTOR, WATER_SCALE_FACTOR) * SQRT2);
     m_Sky.SetTexSize   (coreVector2(WATER_SKY_SIZE,     WATER_SKY_SIZE));
+
+    // 
+    m_apSkyProgram[0] = Core::Manager::Resource->Get<coreProgram>("default_2d_program");
+    m_apSkyProgram[1] = Core::Manager::Resource->Get<coreProgram>("environment_vignette_program");
 
     // load object resources
     this->DefineModel  (Core::Manager::Object->GetLowModel());
@@ -142,7 +145,7 @@ void cWater::UpdateReflection()
             m_Sky.SetDirection(vOldCamOri.xy());
             m_Sky.SetTexOffset(coreVector2(vOldCamPos.x * 0.007f * WATER_SKY_SIZE, m_Sky.GetTexOffset().y));
             m_Sky.Move();
-            m_Sky.Render();
+            m_Sky.Render(m_apSkyProgram[0]);
         }
         glDepthFunc(GL_LEQUAL);
         glEnable   (GL_BLEND);
@@ -158,6 +161,13 @@ void cWater::UpdateReflection()
                 if(g_pGame) g_pGame->Render();
             }
             glCullFace(GL_BACK);
+
+            glDisable(GL_DEPTH_TEST);
+            {
+                // 
+                m_Sky.Render(m_apSkyProgram[1]);
+            }
+            glEnable(GL_DEPTH_TEST);
         }
     }
 
@@ -222,7 +232,6 @@ cIceWater::cIceWater()noexcept
     // 
     m_Ice.DefineTexture(0u, "environment_water_norm.png");
     m_Ice.DefineProgram("environment_ice_program");
-
 }
 
 
@@ -293,7 +302,8 @@ cRainWater::cRainWater()noexcept
     }
 
     // 
-    m_Sky.DefineProgram("menu_grey_program");
+    m_apSkyProgram[0] = Core::Manager::Resource->Get<coreProgram>("menu_grey_program");
+    m_apSkyProgram[1] = Core::Manager::Resource->Get<coreProgram>("environment_vignette_grey_program");
 
     // 
     this->DefineTexture(0u, m_WaveMap.GetColorTarget(0u).pTexture);

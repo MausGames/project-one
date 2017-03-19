@@ -48,7 +48,7 @@ cSeaBackground::cSeaBackground()noexcept
                 if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 25.0f))
                 {
                     // create object
-                    coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>(oBase);
+                    coreObject3D* pObject = CUSTOM_NEW(s_MemoryPool, coreObject3D, oBase);
 
                     // set object properties
                     pObject->SetPosition   (coreVector3(vPosition, 0.0f));
@@ -100,13 +100,13 @@ cSeaBackground::cSeaBackground()noexcept
                        !cBackground::_CheckIntersection     (m_apGroundObjectList[0], vPosition, 9.0f))
                     {
                         // create object
-                        coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>(oBase);
+                        coreObject3D* pObject = CUSTOM_NEW(s_MemoryPool, coreObject3D, oBase);
 
                         // set object properties
                         pObject->SetPosition   (coreVector3(vPosition, 0.0f));
                         pObject->SetSize       (coreVector3::Rand(0.7f,1.6f, 0.7f,1.6f, 0.7f,1.6f) * 4.0f);
-                        pObject->SetDirection  (coreVector3(coreVector2::Rand().Process(ABS) * coreVector2(-1.0f,1.0f), 0.0f));
-                        pObject->SetOrientation(coreVector3(coreVector2::Rand(-0.1f,0.1f, -0.1f,0.1f), 1.0f).Normalize());
+                        pObject->SetDirection  (coreVector3(coreVector2::Rand().Processed(ABS) * coreVector2(-1.0f,1.0f), 0.0f));
+                        pObject->SetOrientation(coreVector3(coreVector2::Rand(-0.1f,0.1f, -0.1f,0.1f), 1.0f).Normalized());
                         pObject->SetColor3     (coreVector3(0.5f, Core::Rand->Float(0.55f, 0.65f) * (Core::Rand->Bool() ? 0.75f : 1.0f), 1.0f));
 
                         // add object to the list
@@ -162,14 +162,14 @@ cSeaBackground::cSeaBackground()noexcept
                     {
                         // 
                         const coreVector3 vDirection   = m_pOutdoor->RetrieveBackNormal(vPosition);
-                        const coreVector3 vTangent     = coreVector3::Cross(vDirection, -CAMERA_DIRECTION).Normalize();
-                        const coreVector3 vOrientation = coreVector3::Cross(vDirection, vTangent).Normalize();
+                        const coreVector3 vTangent     = coreVector3::Cross(vDirection, -CAMERA_DIRECTION).Normalized();
+                        const coreVector3 vOrientation = coreVector3::Cross(vDirection, vTangent);
 
                         // determine object type
                         const coreBool bType = Core::Rand->Int(3) ? true : false;
 
                         // create object
-                        coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>(oBase);
+                        coreObject3D* pObject = CUSTOM_NEW(s_MemoryPool, coreObject3D, oBase);
                         pObject->DefineModel(bType ? "environment_seashell.md3" : "environment_starfish.md3");
 
                         // set object properties
@@ -227,7 +227,7 @@ cSeaBackground::cSeaBackground()noexcept
                 if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 700.0f))
                 {
                     // create object
-                    coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>(oBase);
+                    coreObject3D* pObject = CUSTOM_NEW(s_MemoryPool, coreObject3D, oBase);
 
                     // set object properties
                     pObject->SetPosition(coreVector3(vPosition, fHeight));

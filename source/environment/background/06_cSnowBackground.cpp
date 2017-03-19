@@ -44,7 +44,7 @@ cSnowBackground::cSnowBackground()noexcept
                 if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 25.0f))
                 {
                     // create object
-                    coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>(oBase);
+                    coreObject3D* pObject = CUSTOM_NEW(s_MemoryPool, coreObject3D, oBase);
 
                     // set object properties
                     pObject->SetPosition   (coreVector3(vPosition, 0.0f));
@@ -96,7 +96,7 @@ cSnowBackground::cSnowBackground()noexcept
                        !cBackground::_CheckIntersection     (m_apGroundObjectList[0], vPosition, 25.0f))
                     {
                         // create object
-                        coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>(oBase);
+                        coreObject3D* pObject = CUSTOM_NEW(s_MemoryPool, coreObject3D, oBase);
 
                         // set object properties
                         pObject->SetPosition (coreVector3(vPosition, 0.0f));
@@ -136,7 +136,7 @@ cSnowBackground::cSnowBackground()noexcept
         for(coreUintW i = 0u; i < SNOW_SNOW_NUM; ++i)
         {
             // create object
-            coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>(oBase);
+            coreObject3D* pObject = CUSTOM_NEW(s_MemoryPool, coreObject3D, oBase);
 
             // set object properties
             pObject->SetPosition(coreVector3(0.0f,0.0f,0.0f));
@@ -168,7 +168,7 @@ cSnowBackground::cSnowBackground()noexcept
             const coreFloat   fHeight   = Core::Rand->Float(20.0f, 60.0f);
 
             // create object
-            coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>(oBase);
+            coreObject3D* pObject = CUSTOM_NEW(s_MemoryPool, coreObject3D, oBase);
 
             // set object properties
             pObject->SetPosition (coreVector3(vPosition, fHeight));
@@ -202,21 +202,21 @@ void cSnowBackground::__MoveOwn()
     // 
     const coreFloat   fStrength  = 0.9f;
     const coreVector2 vPosition  = g_pEnvironment->GetCameraPos().xy();
-    const coreVector2 vDirection = coreVector2(-1.0f, g_pEnvironment->GetSpeed()).Normalize();
+    const coreVector2 vDirection = coreVector2(-1.0f, g_pEnvironment->GetSpeed()).Normalized();
     const coreFloat   fLength    = 1.0f - 0.04f * g_pEnvironment->GetSpeed();
     const coreVector2 vMove      = vDirection * (-0.35f * g_pEnvironment->GetSpeed());
     const coreVector2 vTexSize   = coreVector2(1.0f, fLength) * (6.0f * fStrength);
     const coreVector2 vTexOffset = pBase->GetTexOffset() + (coreVector2(0.0f,-1.2f) + vMove) * coreVector2(1.0f, fLength) * (Core::System->GetTime() * fStrength);
 
     // 
-    for(coreUintW i = 0; i < SNOW_SNOW_NUM; ++i)
+    for(coreUintW i = 0u; i < SNOW_SNOW_NUM; ++i)
     {
         coreObject3D* pSnow = (*pList->List())[i];
 
         pSnow->SetPosition (coreVector3(vPosition,  10.0f * I_TO_F(i)));
         pSnow->SetDirection(coreVector3(vDirection, 0.0f));
         pSnow->SetTexSize  ((vTexSize));
-        pSnow->SetTexOffset((vTexOffset + coreVector2(0.56f,0.36f) * I_TO_F(i*i)).Process(FRACT));
+        pSnow->SetTexOffset((vTexOffset + coreVector2(0.56f,0.36f) * I_TO_F(i*i)).Processed(FRACT));
     }
     pList->MoveNormal();
 

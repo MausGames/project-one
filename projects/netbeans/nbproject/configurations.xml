@@ -16,6 +16,8 @@
           <itemPath>../../source/environment/background/05_cVolcanoBackground.cpp</itemPath>
           <itemPath>../../source/environment/background/06_cSnowBackground.cpp</itemPath>
           <itemPath>../../source/environment/background/07_cMossBackground.cpp</itemPath>
+          <itemPath>../../source/environment/background/08_cDarkBackground.cpp</itemPath>
+          <itemPath>../../source/environment/background/99_cCloudBackground.cpp</itemPath>
           <itemPath>../../source/environment/background/cBackground.cpp</itemPath>
           <itemPath>../../source/environment/background/cBackground.h</itemPath>
         </logicalFolder>
@@ -26,22 +28,52 @@
         <itemPath>../../source/environment/cWater.cpp</itemPath>
         <itemPath>../../source/environment/cWater.h</itemPath>
       </logicalFolder>
-      <logicalFolder name="files" displayName="files" projectFiles="true">
+      <logicalFolder name="file" displayName="file" projectFiles="true">
         <itemPath>../../source/file/cConfig.cpp</itemPath>
         <itemPath>../../source/file/cConfig.h</itemPath>
+        <itemPath>../../source/file/cReplay.cpp</itemPath>
+        <itemPath>../../source/file/cReplay.h</itemPath>
         <itemPath>../../source/file/cSave.cpp</itemPath>
         <itemPath>../../source/file/cSave.h</itemPath>
+        <itemPath>../../source/file/cValidate.h</itemPath>
       </logicalFolder>
       <logicalFolder name="game" displayName="game" projectFiles="true">
         <logicalFolder name="boss" displayName="boss" projectFiles="true">
-          <itemPath>../../source/game/boss/0101_cCrossfieldBoss.cpp</itemPath>
+          <itemPath>../../source/game/boss/0101_cDharukBoss.cpp</itemPath>
           <itemPath>../../source/game/boss/0102_cTorusBoss.cpp</itemPath>
           <itemPath>../../source/game/boss/0103_cVausBoss.cpp</itemPath>
+          <itemPath>../../source/game/boss/0201_cNautilusBoss.cpp</itemPath>
+          <itemPath>../../source/game/boss/0202_cAmemasuBoss.cpp</itemPath>
+          <itemPath>../../source/game/boss/0203_cLeviathanBoss.cpp</itemPath>
+          <itemPath>../../source/game/boss/0301_cUrticaBoss.cpp</itemPath>
+          <itemPath>../../source/game/boss/0302_cTigerBoss.cpp</itemPath>
+          <itemPath>../../source/game/boss/0303_cLuciferBoss.cpp</itemPath>
+          <itemPath>../../source/game/boss/0401_cQuaternionBoss.cpp</itemPath>
+          <itemPath>../../source/game/boss/0402_cSarosBoss.cpp</itemPath>
+          <itemPath>../../source/game/boss/0403_cMessierBoss.cpp</itemPath>
+          <itemPath>../../source/game/boss/0501_cTartarusBoss.cpp</itemPath>
+          <itemPath>../../source/game/boss/0502_cPhalarisBoss.cpp</itemPath>
+          <itemPath>../../source/game/boss/0503_cCholBoss.cpp</itemPath>
+          <itemPath>../../source/game/boss/0601_cFenrirBoss.cpp</itemPath>
+          <itemPath>../../source/game/boss/0602_cShelobBoss.cpp</itemPath>
+          <itemPath>../../source/game/boss/0603_cZerothBoss.cpp</itemPath>
+          <itemPath>../../source/game/boss/0701_cOrlacBoss.cpp</itemPath>
+          <itemPath>../../source/game/boss/0702_cGemingaBoss.cpp</itemPath>
+          <itemPath>../../source/game/boss/0703_cNagualBoss.cpp</itemPath>
+          <itemPath>../../source/game/boss/9901_cProjectOneBoss.cpp</itemPath>
           <itemPath>../../source/game/boss/cBoss.cpp</itemPath>
           <itemPath>../../source/game/boss/cBoss.h</itemPath>
         </logicalFolder>
         <logicalFolder name="mission" displayName="mission" projectFiles="true">
           <itemPath>../../source/game/mission/01_cViridoMission.cpp</itemPath>
+          <itemPath>../../source/game/mission/02_cNevoMission.cpp</itemPath>
+          <itemPath>../../source/game/mission/03_cHarenaMission.cpp</itemPath>
+          <itemPath>../../source/game/mission/04_cRutilusMission.cpp</itemPath>
+          <itemPath>../../source/game/mission/05_cGeluMission.cpp</itemPath>
+          <itemPath>../../source/game/mission/06_cCalorMission.cpp</itemPath>
+          <itemPath>../../source/game/mission/07_cMuscusMission.cpp</itemPath>
+          <itemPath>../../source/game/mission/08_cAterMission.cpp</itemPath>
+          <itemPath>../../source/game/mission/99_cIntroMission.cpp</itemPath>
           <itemPath>../../source/game/mission/cMission.cpp</itemPath>
           <itemPath>../../source/game/mission/cMission.h</itemPath>
         </logicalFolder>
@@ -53,8 +85,12 @@
         <itemPath>../../source/game/cGame.h</itemPath>
         <itemPath>../../source/game/cPlayer.cpp</itemPath>
         <itemPath>../../source/game/cPlayer.h</itemPath>
+        <itemPath>../../source/game/cShield.cpp</itemPath>
+        <itemPath>../../source/game/cShield.h</itemPath>
         <itemPath>../../source/game/cShip.cpp</itemPath>
         <itemPath>../../source/game/cShip.h</itemPath>
+        <itemPath>../../source/game/cTheater.cpp</itemPath>
+        <itemPath>../../source/game/cTheater.h</itemPath>
         <itemPath>../../source/game/cWeapon.cpp</itemPath>
         <itemPath>../../source/game/cWeapon.h</itemPath>
       </logicalFolder>
@@ -65,6 +101,9 @@
           <itemPath>../../source/interface/menu/03_cGameMenu.cpp</itemPath>
           <itemPath>../../source/interface/menu/04_cConfigMenu.cpp</itemPath>
           <itemPath>../../source/interface/menu/05_cExtraMenu.cpp</itemPath>
+          <itemPath>../../source/interface/menu/06_cPauseMenu.cpp</itemPath>
+          <itemPath>../../source/interface/menu/07_cScoreMenu.cpp</itemPath>
+          <itemPath>../../source/interface/menu/08_cReplayMenu.cpp</itemPath>
           <itemPath>../../source/interface/menu/cMenu.cpp</itemPath>
           <itemPath>../../source/interface/menu/cMenu.h</itemPath>
         </logicalFolder>
@@ -79,7 +118,7 @@
         <itemPath>../../source/interface/cTooltip.cpp</itemPath>
         <itemPath>../../source/interface/cTooltip.h</itemPath>
       </logicalFolder>
-      <logicalFolder name="visuals" displayName="visuals" projectFiles="true">
+      <logicalFolder name="visual" displayName="visual" projectFiles="true">
         <itemPath>../../source/visual/cBlur.cpp</itemPath>
         <itemPath>../../source/visual/cBlur.h</itemPath>
         <itemPath>../../source/visual/cDistortion.cpp</itemPath>
@@ -131,7 +170,7 @@
             <pElem>../../../CoreEngine/libraries/include</pElem>
             <pElem>../../source</pElem>
           </incDir>
-          <commandLine>-msse2 -std=c11</commandLine>
+          <commandLine>-std=c11</commandLine>
           <preprocessorList>
             <Elem>_DEBUG</Elem>
           </preprocessorList>
@@ -144,7 +183,7 @@
             <pElem>../../../CoreEngine/libraries/include</pElem>
             <pElem>../../source</pElem>
           </incDir>
-          <commandLine>-fno-exceptions -fno-rtti -msse2 -std=c++14</commandLine>
+          <commandLine>-std=c++14 -fno-rtti</commandLine>
           <preprocessorList>
             <Elem>_DEBUG</Elem>
           </preprocessorList>
@@ -165,11 +204,13 @@
             <linkerLibLibItem>SDL2_ttf</linkerLibLibItem>
             <linkerLibLibItem>SDL2_image</linkerLibLibItem>
             <linkerLibLibItem>OpenGL32</linkerLibLibItem>
-            <linkerLibLibItem>glew32mx</linkerLibLibItem>
+            <linkerLibLibItem>glew32</linkerLibLibItem>
             <linkerLibLibItem>OpenAL32</linkerLibLibItem>
             <linkerLibLibItem>ogg</linkerLibLibItem>
             <linkerLibLibItem>vorbis</linkerLibLibItem>
             <linkerLibLibItem>vorbisfile</linkerLibLibItem>
+            <linkerLibLibItem>zlib</linkerLibLibItem>
+            <linkerLibLibItem>psapi</linkerLibLibItem>
           </linkerLibItems>
           <commandLine>-mwindows</commandLine>
         </linkerTool>
@@ -192,41 +233,6 @@
             flavor2="0">
       </item>
       <item path="../../source/application.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../source/environment/background/01_cGrassBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/02_cSeaBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/03_cDesertBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/04_cSpaceBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/05_cVolcanoBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/06_cSnowBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/07_cMossBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
       </item>
       <item path="../../source/environment/background/cBackground.cpp"
             ex="false"
@@ -269,24 +275,15 @@
       </item>
       <item path="../../source/file/cConfig.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../../source/file/cReplay.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/file/cReplay.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../../source/file/cSave.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../source/file/cSave.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../../source/game/boss/0101_cCrossfieldBoss.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/game/boss/0102_cTorusBoss.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/game/boss/0103_cVausBoss.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
+      <item path="../../source/file/cValidate.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../source/game/boss/cBoss.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -308,18 +305,21 @@
       </item>
       <item path="../../source/game/cPlayer.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../../source/game/cShield.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/game/cShield.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../../source/game/cShip.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../source/game/cShip.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../../source/game/cTheater.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/game/cTheater.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../../source/game/cWeapon.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../source/game/cWeapon.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/game/mission/01_cViridoMission.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
       </item>
       <item path="../../source/game/mission/cMission.cpp"
             ex="false"
@@ -371,31 +371,6 @@
             flavor2="0">
       </item>
       <item path="../../source/interface/cTooltip.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/interface/menu/01_cIntroMenu.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/interface/menu/02_cMainMenu.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/interface/menu/03_cGameMenu.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/interface/menu/04_cConfigMenu.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/interface/menu/05_cExtraMenu.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
       </item>
       <item path="../../source/interface/menu/cMenu.cpp"
             ex="false"
@@ -475,7 +450,7 @@
             <pElem>../../../CoreEngine/libraries/include</pElem>
             <pElem>../../source</pElem>
           </incDir>
-          <commandLine>-msse2 -std=c11</commandLine>
+          <commandLine>-std=c11 -msse2</commandLine>
           <preprocessorList>
             <Elem>_DEBUG</Elem>
           </preprocessorList>
@@ -487,7 +462,7 @@
             <pElem>../../../CoreEngine/libraries/include</pElem>
             <pElem>../../source</pElem>
           </incDir>
-          <commandLine>-fno-exceptions -fno-rtti -msse2 -std=c++14</commandLine>
+          <commandLine>-std=c++14 -msse2 -fno-rtti</commandLine>
           <preprocessorList>
             <Elem>_DEBUG</Elem>
           </preprocessorList>
@@ -506,11 +481,12 @@
             <linkerLibLibItem>SDL2</linkerLibLibItem>
             <linkerLibLibItem>SDL2_image</linkerLibLibItem>
             <linkerLibLibItem>SDL2_ttf</linkerLibLibItem>
-            <linkerLibLibItem>GLEWmx</linkerLibLibItem>
+            <linkerLibLibItem>GLEW</linkerLibLibItem>
             <linkerLibLibItem>openal</linkerLibLibItem>
             <linkerLibLibItem>ogg</linkerLibLibItem>
             <linkerLibLibItem>vorbis</linkerLibLibItem>
             <linkerLibLibItem>vorbisfile</linkerLibLibItem>
+            <linkerLibLibItem>zlib</linkerLibLibItem>
           </linkerLibItems>
         </linkerTool>
         <requiredProjects>
@@ -532,41 +508,6 @@
             flavor2="0">
       </item>
       <item path="../../source/application.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../source/environment/background/01_cGrassBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/02_cSeaBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/03_cDesertBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/04_cSpaceBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/05_cVolcanoBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/06_cSnowBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/07_cMossBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
       </item>
       <item path="../../source/environment/background/cBackground.cpp"
             ex="false"
@@ -609,24 +550,15 @@
       </item>
       <item path="../../source/file/cConfig.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../../source/file/cReplay.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/file/cReplay.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../../source/file/cSave.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../source/file/cSave.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../../source/game/boss/0101_cCrossfieldBoss.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/game/boss/0102_cTorusBoss.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/game/boss/0103_cVausBoss.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
+      <item path="../../source/file/cValidate.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../source/game/boss/cBoss.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -648,18 +580,21 @@
       </item>
       <item path="../../source/game/cPlayer.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../../source/game/cShield.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/game/cShield.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../../source/game/cShip.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../source/game/cShip.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../../source/game/cTheater.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/game/cTheater.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../../source/game/cWeapon.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../source/game/cWeapon.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/game/mission/01_cViridoMission.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
       </item>
       <item path="../../source/game/mission/cMission.cpp"
             ex="false"
@@ -711,31 +646,6 @@
             flavor2="0">
       </item>
       <item path="../../source/interface/cTooltip.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/interface/menu/01_cIntroMenu.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/interface/menu/02_cMainMenu.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/interface/menu/03_cGameMenu.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/interface/menu/04_cConfigMenu.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/interface/menu/05_cExtraMenu.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
       </item>
       <item path="../../source/interface/menu/cMenu.cpp"
             ex="false"
@@ -815,7 +725,7 @@
             <pElem>../../../CoreEngine/libraries/include</pElem>
             <pElem>../../source</pElem>
           </incDir>
-          <commandLine>-msse2 -std=c11</commandLine>
+          <commandLine>-std=c11 -msse2</commandLine>
           <preprocessorList>
             <Elem>_DEBUG</Elem>
           </preprocessorList>
@@ -827,7 +737,7 @@
             <pElem>../../../CoreEngine/libraries/include</pElem>
             <pElem>../../source</pElem>
           </incDir>
-          <commandLine>-fno-exceptions -fno-rtti -msse2 -std=c++14</commandLine>
+          <commandLine>-std=c++14 -msse2 -fno-rtti</commandLine>
           <preprocessorList>
             <Elem>_DEBUG</Elem>
           </preprocessorList>
@@ -846,11 +756,12 @@
             <linkerLibLibItem>SDL2</linkerLibLibItem>
             <linkerLibLibItem>SDL2_image</linkerLibLibItem>
             <linkerLibLibItem>SDL2_ttf</linkerLibLibItem>
-            <linkerLibLibItem>GLEWmx</linkerLibLibItem>
+            <linkerLibLibItem>GLEW</linkerLibLibItem>
             <linkerLibLibItem>openal</linkerLibLibItem>
             <linkerLibLibItem>ogg</linkerLibLibItem>
             <linkerLibLibItem>vorbis</linkerLibLibItem>
             <linkerLibLibItem>vorbisfile</linkerLibLibItem>
+            <linkerLibLibItem>zlib</linkerLibLibItem>
           </linkerLibItems>
         </linkerTool>
         <requiredProjects>
@@ -872,41 +783,6 @@
             flavor2="0">
       </item>
       <item path="../../source/application.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../source/environment/background/01_cGrassBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/02_cSeaBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/03_cDesertBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/04_cSpaceBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/05_cVolcanoBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/06_cSnowBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/07_cMossBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
       </item>
       <item path="../../source/environment/background/cBackground.cpp"
             ex="false"
@@ -949,24 +825,15 @@
       </item>
       <item path="../../source/file/cConfig.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../../source/file/cReplay.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/file/cReplay.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../../source/file/cSave.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../source/file/cSave.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../../source/game/boss/0101_cCrossfieldBoss.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/game/boss/0102_cTorusBoss.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/game/boss/0103_cVausBoss.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
+      <item path="../../source/file/cValidate.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../source/game/boss/cBoss.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -988,18 +855,21 @@
       </item>
       <item path="../../source/game/cPlayer.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../../source/game/cShield.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/game/cShield.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../../source/game/cShip.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../source/game/cShip.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../../source/game/cTheater.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/game/cTheater.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../../source/game/cWeapon.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../source/game/cWeapon.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/game/mission/01_cViridoMission.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
       </item>
       <item path="../../source/game/mission/cMission.cpp"
             ex="false"
@@ -1051,31 +921,6 @@
             flavor2="0">
       </item>
       <item path="../../source/interface/cTooltip.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/interface/menu/01_cIntroMenu.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/interface/menu/02_cMainMenu.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/interface/menu/03_cGameMenu.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/interface/menu/04_cConfigMenu.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/interface/menu/05_cExtraMenu.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
       </item>
       <item path="../../source/interface/menu/cMenu.cpp"
             ex="false"
@@ -1157,7 +1002,7 @@
             <pElem>../../../CoreEngine/libraries/include</pElem>
             <pElem>../../source</pElem>
           </incDir>
-          <commandLine>-msse2 -std=c11</commandLine>
+          <commandLine>-std=c11</commandLine>
           <warningLevel>2</warningLevel>
         </cTool>
         <ccTool>
@@ -1168,7 +1013,7 @@
             <pElem>../../../CoreEngine/libraries/include</pElem>
             <pElem>../../source</pElem>
           </incDir>
-          <commandLine>-fno-exceptions -fno-rtti -msse2 -std=c++14</commandLine>
+          <commandLine>-std=c++14 -fno-rtti -fno-exceptions</commandLine>
           <warningLevel>2</warningLevel>
         </ccTool>
         <fortranCompilerTool>
@@ -1193,11 +1038,13 @@
             <linkerLibLibItem>SDL2_ttf</linkerLibLibItem>
             <linkerLibLibItem>SDL2_image</linkerLibLibItem>
             <linkerLibLibItem>OpenGL32</linkerLibLibItem>
-            <linkerLibLibItem>glew32mx</linkerLibLibItem>
+            <linkerLibLibItem>glew32</linkerLibLibItem>
             <linkerLibLibItem>OpenAL32</linkerLibLibItem>
             <linkerLibLibItem>ogg</linkerLibLibItem>
             <linkerLibLibItem>vorbis</linkerLibLibItem>
             <linkerLibLibItem>vorbisfile</linkerLibLibItem>
+            <linkerLibLibItem>zlib</linkerLibLibItem>
+            <linkerLibLibItem>psapi</linkerLibLibItem>
           </linkerLibItems>
           <commandLine>-static-libgcc -static-libstdc++ -mwindows</commandLine>
         </linkerTool>
@@ -1220,41 +1067,6 @@
             flavor2="0">
       </item>
       <item path="../../source/application.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../source/environment/background/01_cGrassBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/02_cSeaBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/03_cDesertBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/04_cSpaceBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/05_cVolcanoBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/06_cSnowBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/07_cMossBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
       </item>
       <item path="../../source/environment/background/cBackground.cpp"
             ex="false"
@@ -1297,24 +1109,15 @@
       </item>
       <item path="../../source/file/cConfig.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../../source/file/cReplay.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/file/cReplay.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../../source/file/cSave.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../source/file/cSave.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../../source/game/boss/0101_cCrossfieldBoss.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/game/boss/0102_cTorusBoss.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/game/boss/0103_cVausBoss.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
+      <item path="../../source/file/cValidate.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../source/game/boss/cBoss.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -1336,18 +1139,21 @@
       </item>
       <item path="../../source/game/cPlayer.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../../source/game/cShield.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/game/cShield.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../../source/game/cShip.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../source/game/cShip.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../../source/game/cTheater.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/game/cTheater.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../../source/game/cWeapon.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../source/game/cWeapon.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/game/mission/01_cViridoMission.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
       </item>
       <item path="../../source/game/mission/cMission.cpp"
             ex="false"
@@ -1399,31 +1205,6 @@
             flavor2="0">
       </item>
       <item path="../../source/interface/cTooltip.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/interface/menu/01_cIntroMenu.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/interface/menu/02_cMainMenu.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/interface/menu/03_cGameMenu.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/interface/menu/04_cConfigMenu.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/interface/menu/05_cExtraMenu.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
       </item>
       <item path="../../source/interface/menu/cMenu.cpp"
             ex="false"
@@ -1505,7 +1286,7 @@
             <pElem>../../../CoreEngine/libraries/include</pElem>
             <pElem>../../source</pElem>
           </incDir>
-          <commandLine>-msse2 -std=c11</commandLine>
+          <commandLine>-std=c11 -msse2</commandLine>
           <warningLevel>2</warningLevel>
         </cTool>
         <ccTool>
@@ -1516,7 +1297,7 @@
             <pElem>../../../CoreEngine/libraries/include</pElem>
             <pElem>../../source</pElem>
           </incDir>
-          <commandLine>-fno-exceptions -fno-rtti -msse2 -std=c++14</commandLine>
+          <commandLine>-std=c++14 -msse2 -fno-rtti -fno-exceptions</commandLine>
           <warningLevel>2</warningLevel>
         </ccTool>
         <fortranCompilerTool>
@@ -1539,11 +1320,12 @@
             <linkerLibLibItem>SDL2</linkerLibLibItem>
             <linkerLibLibItem>SDL2_ttf</linkerLibLibItem>
             <linkerLibLibItem>SDL2_image</linkerLibLibItem>
-            <linkerLibLibItem>GLEWmx</linkerLibLibItem>
+            <linkerLibLibItem>GLEW</linkerLibLibItem>
             <linkerLibLibItem>openal</linkerLibLibItem>
             <linkerLibLibItem>ogg</linkerLibLibItem>
             <linkerLibLibItem>vorbis</linkerLibLibItem>
             <linkerLibLibItem>vorbisfile</linkerLibLibItem>
+            <linkerLibLibItem>zlib</linkerLibLibItem>
           </linkerLibItems>
         </linkerTool>
         <requiredProjects>
@@ -1565,41 +1347,6 @@
             flavor2="0">
       </item>
       <item path="../../source/application.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../source/environment/background/01_cGrassBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/02_cSeaBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/03_cDesertBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/04_cSpaceBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/05_cVolcanoBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/06_cSnowBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/07_cMossBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
       </item>
       <item path="../../source/environment/background/cBackground.cpp"
             ex="false"
@@ -1642,24 +1389,15 @@
       </item>
       <item path="../../source/file/cConfig.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../../source/file/cReplay.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/file/cReplay.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../../source/file/cSave.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../source/file/cSave.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../../source/game/boss/0101_cCrossfieldBoss.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/game/boss/0102_cTorusBoss.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/game/boss/0103_cVausBoss.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
+      <item path="../../source/file/cValidate.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../source/game/boss/cBoss.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -1681,18 +1419,21 @@
       </item>
       <item path="../../source/game/cPlayer.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../../source/game/cShield.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/game/cShield.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../../source/game/cShip.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../source/game/cShip.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../../source/game/cTheater.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/game/cTheater.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../../source/game/cWeapon.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../source/game/cWeapon.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/game/mission/01_cViridoMission.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
       </item>
       <item path="../../source/game/mission/cMission.cpp"
             ex="false"
@@ -1744,31 +1485,6 @@
             flavor2="0">
       </item>
       <item path="../../source/interface/cTooltip.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/interface/menu/01_cIntroMenu.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/interface/menu/02_cMainMenu.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/interface/menu/03_cGameMenu.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/interface/menu/04_cConfigMenu.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/interface/menu/05_cExtraMenu.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
       </item>
       <item path="../../source/interface/menu/cMenu.cpp"
             ex="false"
@@ -1850,7 +1566,7 @@
             <pElem>../../../CoreEngine/libraries/include</pElem>
             <pElem>../../source</pElem>
           </incDir>
-          <commandLine>-msse2 -std=c11</commandLine>
+          <commandLine>-std=c11 -msse2</commandLine>
           <warningLevel>2</warningLevel>
         </cTool>
         <ccTool>
@@ -1861,7 +1577,7 @@
             <pElem>../../../CoreEngine/libraries/include</pElem>
             <pElem>../../source</pElem>
           </incDir>
-          <commandLine>-fno-exceptions -fno-rtti -msse2 -std=c++14</commandLine>
+          <commandLine>-std=c++14 -msse2 -fno-rtti -fno-exceptions</commandLine>
           <warningLevel>2</warningLevel>
         </ccTool>
         <fortranCompilerTool>
@@ -1884,11 +1600,12 @@
             <linkerLibLibItem>SDL2</linkerLibLibItem>
             <linkerLibLibItem>SDL2_ttf</linkerLibLibItem>
             <linkerLibLibItem>SDL2_image</linkerLibLibItem>
-            <linkerLibLibItem>GLEWmx</linkerLibLibItem>
+            <linkerLibLibItem>GLEW</linkerLibLibItem>
             <linkerLibLibItem>openal</linkerLibLibItem>
             <linkerLibLibItem>ogg</linkerLibLibItem>
             <linkerLibLibItem>vorbis</linkerLibLibItem>
             <linkerLibLibItem>vorbisfile</linkerLibLibItem>
+            <linkerLibLibItem>zlib</linkerLibLibItem>
           </linkerLibItems>
         </linkerTool>
         <requiredProjects>
@@ -1910,41 +1627,6 @@
             flavor2="0">
       </item>
       <item path="../../source/application.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../source/environment/background/01_cGrassBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/02_cSeaBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/03_cDesertBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/04_cSpaceBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/05_cVolcanoBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/06_cSnowBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/environment/background/07_cMossBackground.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
       </item>
       <item path="../../source/environment/background/cBackground.cpp"
             ex="false"
@@ -1987,24 +1669,15 @@
       </item>
       <item path="../../source/file/cConfig.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../../source/file/cReplay.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/file/cReplay.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../../source/file/cSave.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../source/file/cSave.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../../source/game/boss/0101_cCrossfieldBoss.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/game/boss/0102_cTorusBoss.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/game/boss/0103_cVausBoss.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
+      <item path="../../source/file/cValidate.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../source/game/boss/cBoss.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -2026,18 +1699,21 @@
       </item>
       <item path="../../source/game/cPlayer.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../../source/game/cShield.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/game/cShield.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../../source/game/cShip.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../source/game/cShip.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../../source/game/cTheater.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../source/game/cTheater.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../../source/game/cWeapon.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../source/game/cWeapon.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/game/mission/01_cViridoMission.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
       </item>
       <item path="../../source/game/mission/cMission.cpp"
             ex="false"
@@ -2089,31 +1765,6 @@
             flavor2="0">
       </item>
       <item path="../../source/interface/cTooltip.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../source/interface/menu/01_cIntroMenu.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/interface/menu/02_cMainMenu.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/interface/menu/03_cGameMenu.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/interface/menu/04_cConfigMenu.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../source/interface/menu/05_cExtraMenu.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
       </item>
       <item path="../../source/interface/menu/cMenu.cpp"
             ex="false"

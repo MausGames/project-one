@@ -15,7 +15,7 @@ varying float v_v1Time;   // current animation time (from 0.0 to 1.0)
 void FragmentMain()
 {
     // interpolate texture flipped over time
-    float v1Value = mix(coreTexture2D(0, v_av2TexCoord[0]).r, 
+    float v1Value = mix(coreTexture2D(0, v_av2TexCoord[0]).r,
                         coreTexture2D(0, v_av2TexCoord[1]).r, min(v_v1Time * 3.0, 1.0)) * 1.2 * smoothstep(0.0, 0.3, u_v4Color.a);
 
     // draw as orange alpha map

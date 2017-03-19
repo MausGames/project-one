@@ -41,7 +41,7 @@ cDesertBackground::cDesertBackground()noexcept
                 if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 25.0f))
                 {
                     // create object
-                    coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>(oBase);
+                    coreObject3D* pObject = CUSTOM_NEW(s_MemoryPool, coreObject3D, oBase);
 
                     // set object properties
                     pObject->SetPosition   (coreVector3(vPosition, 0.0f));
@@ -80,7 +80,7 @@ cDesertBackground::cDesertBackground()noexcept
         for(coreUintW i = 0u; i < DESERT_SAND_NUM; ++i)
         {
             // create object
-            coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>(oBase);
+            coreObject3D* pObject = CUSTOM_NEW(s_MemoryPool, coreObject3D, oBase);
 
             // set object properties
             pObject->SetPosition(coreVector3(0.0f,0.0f,0.0f));
@@ -125,20 +125,20 @@ void cDesertBackground::__MoveOwn()
     // 
     const coreFloat   fStrength  = 0.5f;
     const coreVector2 vPosition  = g_pEnvironment->GetCameraPos().xy();
-    const coreVector2 vDirection = coreVector2(-1.0f,1.0f).Normalize();
+    const coreVector2 vDirection = coreVector2(-1.0f,1.0f).Normalized();
     const coreVector2 vMove      = vDirection * (-0.35f * g_pEnvironment->GetSpeed());
     const coreVector2 vTexSize   = coreVector2(1.0f,1.0f) * (4.5f * fStrength);
     const coreVector2 vTexOffset = pBase->GetTexOffset() + (coreVector2(0.0f,-1.2f) + vMove) * coreVector2(1.0f,1.0f) * (Core::System->GetTime() * fStrength);
 
     // 
-    for(coreUintW i = 0; i < DESERT_SAND_NUM; ++i)
+    for(coreUintW i = 0u; i < DESERT_SAND_NUM; ++i)
     {
         coreObject3D* pSand = (*pList->List())[i];
 
         pSand->SetPosition (coreVector3(vPosition,  10.0f + 10.0f * I_TO_F(i)));
         pSand->SetDirection(coreVector3(vDirection, 0.0f));
         pSand->SetTexSize  ((vTexSize));
-        pSand->SetTexOffset((vTexOffset + coreVector2(0.3f,0.3f) * I_TO_F(i)).Process(FRACT));
+        pSand->SetTexOffset((vTexOffset + coreVector2(0.3f,0.3f) * I_TO_F(i)).Processed(FRACT));
     }
     pList->MoveNormal();
 

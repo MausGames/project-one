@@ -11,7 +11,6 @@
 #define _P1_GUARD_BOSS_H_
 
 // TODO: boomerangs of Dharuk may generate double-hits because of rotating box collision (when moving away from it), bitfield with reset (player-num)
-// TODO: remove warning 4738
 // TODO: boss0101, both boss and duplicate should have own trace
 // TODO: boss0101, correct outline sides
 
@@ -534,12 +533,6 @@ private:
 };
 
 
-#if defined(_CORE_MSVC_) && !defined(_CORE_X64_)
-    #pragma warning(push)
-    #pragma warning(disable : 4738)
-#endif
-
-
 // ****************************************************************
 // 
 template <typename F, typename G> void cBoss::_PhaseTimer(const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreFloat fSpeed, G&& nLerpFunc, F&& nUpdateFunc)
@@ -599,11 +592,6 @@ template <typename F> void cBoss::_PhaseTicker(const coreUintW iTimerIndex, cons
         nUpdateFunc(oTimer.GetCurLoops()-1u, !oTimer.GetStatus());
     }
 }
-
-
-#if defined(_CORE_MSVC_) && !defined(_CORE_X64_)
-    #pragma warning(pop)
-#endif
 
 
 #endif // _P1_GUARD_BOSS_H_

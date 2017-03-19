@@ -239,6 +239,6 @@ void UpdateInput()
         }
 
         // normalize movement input
-        if(!oMap.vMove.IsNull()) oMap.vMove.Normalize();
+        if(!oMap.vMove.IsNull()) oMap.vMove = oMap.vMove.Normalized();
     }
 }

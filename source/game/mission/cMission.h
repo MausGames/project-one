@@ -52,11 +52,11 @@
 #define STAGE_FOREACH_ENEMY(s,e,i)      (s)->ForEachEnemy     ([&](cEnemy*  OUTPUT e, const coreUintW i)
 #define STAGE_FOREACH_ENEMY_ALL(s,e,i)  (s)->ForEachEnemyAll  ([&](cEnemy*  OUTPUT e, const coreUintW i)
 
-#define __STAGE_GET_INT(c)              {if((c) > m_iIntSize)   {SAFE_DELETE_ARRAY(m_piInt)   m_piInt   = new coreInt16[c]; m_iIntSize   = (c); std::memset(m_piInt,   0, sizeof(coreInt16) * m_iIntSize);}}   const coreUintW UNUSED iNewIntSize   = (c);
-#define __STAGE_GET_FLOAT(c)            {if((c) > m_iFloatSize) {SAFE_DELETE_ARRAY(m_pfFloat) m_pfFloat = new coreFloat[c]; m_iFloatSize = (c); std::memset(m_pfFloat, 0, sizeof(coreFloat) * m_iFloatSize);}} const coreUintW UNUSED iNewFloatSize = (c);
+#define __STAGE_GET_INT(c)              {if((c) > m_iIntSize)   {SAFE_DELETE_ARRAY(m_piInt)   m_iIntSize   = (c); m_piInt   = ZERO_NEW(coreInt16, m_iIntSize);}}   UNUSED constexpr coreUintW iNewIntSize   = (c);
+#define __STAGE_GET_FLOAT(c)            {if((c) > m_iFloatSize) {SAFE_DELETE_ARRAY(m_pfFloat) m_iFloatSize = (c); m_pfFloat = ZERO_NEW(coreFloat, m_iFloatSize);}} UNUSED constexpr coreUintW iNewFloatSize = (c);
 #define __STAGE_GET_CHECK               {ASSERT((iIntIndex <= iNewIntSize) && (iFloatIndex <= iNewFloatSize))}
 #define STAGE_GET_END                   {ASSERT((iIntIndex == iNewIntSize) && (iFloatIndex == iNewFloatSize))}
-#define STAGE_GET_START(i,f)            coreUintW UNUSED iIntIndex = 0u; coreUintW UNUSED iFloatIndex = 0u; __STAGE_GET_INT(i) __STAGE_GET_FLOAT(f)
+#define STAGE_GET_START(i,f)            UNUSED coreUintW iIntIndex = 0u; UNUSED coreUintW iFloatIndex = 0u; __STAGE_GET_INT(i) __STAGE_GET_FLOAT(f)
 #define STAGE_GET_INT(n,...)            coreInt16&   n =                     (m_piInt   [iIntIndex]);   iIntIndex   += 1u;       __STAGE_GET_CHECK {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 #define STAGE_GET_FLOAT(n,...)          coreFloat&   n =                     (m_pfFloat [iFloatIndex]); iFloatIndex += 1u;       __STAGE_GET_CHECK {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 #define STAGE_GET_VEC2(n,...)           coreVector2& n = r_cast<coreVector2&>(m_pfFloat [iFloatIndex]); iFloatIndex += 2u;       __STAGE_GET_CHECK {if(STAGE_BEGINNING) {__VA_ARGS__;}}
@@ -69,18 +69,18 @@
 #define STAGE_GET_VEC4_ARRAY(n,c,...)   coreVector4* n = r_cast<coreVector4*>(&m_pfFloat[iFloatIndex]); iFloatIndex += 4u * (c); __STAGE_GET_CHECK {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 
 #define STAGE_LIFETIME(e,m,a)                                                                     \
-    const coreFloat UNUSED fLifeSpeed      = (m);                                                 \
-    const coreFloat UNUSED fLifeOffset     = (a);                                                 \
-    coreFloat       UNUSED fLifeTime       = (e)->GetLifeTime()       * fLifeSpeed + fLifeOffset; \
-    coreFloat       UNUSED fLifeTimeBefore = (e)->GetLifeTimeBefore() * fLifeSpeed + fLifeOffset; \
-    coreFloat       UNUSED fLifeTimeDelay  = 0.0f;                                                \
-    coreFloat       UNUSED fLifeTimePoint  = 0.0f;                                                \
-    coreFloat       UNUSED fHealthPctPoint = 0.0f;                                                \
-    coreVector2     UNUSED vPositionPoint  = coreVector2(0.0f,0.0f);                              \
-    coreBool        UNUSED bEnablePosition = ((e)->GetLifeTime() != 0.0f);                        \
+    UNUSED const coreFloat fLifeSpeed      = (m);                                                 \
+    UNUSED const coreFloat fLifeOffset     = (a);                                                 \
+    UNUSED coreFloat       fLifeTime       = (e)->GetLifeTime()       * fLifeSpeed + fLifeOffset; \
+    UNUSED coreFloat       fLifeTimeBefore = (e)->GetLifeTimeBefore() * fLifeSpeed + fLifeOffset; \
+    UNUSED coreFloat       fLifeTimeDelay  = 0.0f;                                                \
+    UNUSED coreFloat       fLifeTimePoint  = 0.0f;                                                \
+    UNUSED coreFloat       fHealthPctPoint = 0.0f;                                                \
+    UNUSED coreVector2     vPositionPoint  = coreVector2(0.0f,0.0f);                              \
+    UNUSED coreBool        bEnablePosition = ((e)->GetLifeTime() != 0.0f);                        \
     if(!CONTAINS_FLAG(e->GetStatus(), ENEMY_STATUS_DEAD)) e->SetEnabled((fLifeTime >= 0.0f) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE);
 
-#define __STAGE_ROUND(x)                (I_TO_F(F_TO_UI((x) * FRAMERATE_VALUE * RCP(fLifeSpeed))) / (FRAMERATE_VALUE * RCP(fLifeSpeed)))
+#define __STAGE_ROUND(x)                (I_TO_F(F_TO_UI((x) * FRAMERATE_VALUE * RCP(fLifeSpeed))) / FRAMERATE_VALUE * fLifeSpeed)
 #define STAGE_BRANCH(x,y)               ((fLifeTime < (x)) || [&](){const coreFloat fRound = /*__STAGE_ROUND*/(y); fLifeTime = FMOD(fLifeTime - (x), fRound); fLifeTimeBefore = FMOD(fLifeTimeBefore - (x), fRound); bEnablePosition &= (fLifeTime >= fLifeTimeBefore); return false;}())
 #define STAGE_TICK(c)                   (!(F_TO_UI(fLifeTime * FRAMERATE_VALUE * RCP(fLifeSpeed)) % (c)))
 #define STAGE_WAIT(t)                   {m_fStageWait = (t);}
@@ -113,19 +113,19 @@
 #define STAGE_HEALTHPCT_BETWEEN(e,t,u)  (InBetween((e)->GetCurHealthPct(), (t), (u)))
 #define STAGE_DIED(e)                   ((e)->ReachedDeath())
 
-#define STAGE_POSITION_POINT(e,t,v)     (bEnablePosition && InBetweenExt((t), (e)->GetOldPos(). ## v, (e)->GetPosition(). ## v) && [&](){vPositionPoint = (e)->GetPosition().xy(); vPositionPoint. ## v = (t); return true;}())
-#define STAGE_POSITION_BEFORE(e,t,v)    ((e)->GetPosition(). ## v <  (t))
-#define STAGE_POSITION_AFTER(e,t,v)     ((e)->GetPosition(). ## v >= (t))
-#define STAGE_POSITION_BETWEEN(e,t,u,v) (InBetweenExt((e)->GetPosition(). ## v, (t), (u)))
-#define STAGE_FLYPAST(e,f,v)                                \
-    ((e)->GetPosition(). ## v < (f)->GetPosition(). ## v) ^ \
-    ((e)->GetPosition(). ## v < (f)->GetOldPos  (). ## v) | \
-    ((e)->GetOldPos  (). ## v < (f)->GetPosition(). ## v) ^ \
-    ((e)->GetOldPos  (). ## v < (f)->GetOldPos  (). ## v) | \
-    ((f)->GetPosition(). ## v < (e)->GetPosition(). ## v) ^ \
-    ((f)->GetPosition(). ## v < (e)->GetOldPos  (). ## v) | \
-    ((f)->GetOldPos  (). ## v < (e)->GetPosition(). ## v) ^ \
-    ((f)->GetOldPos  (). ## v < (e)->GetOldPos  (). ## v)
+#define STAGE_POSITION_POINT(e,t,v)     (bEnablePosition && InBetweenExt((t), (e)->GetOldPos(). v, (e)->GetPosition(). v) && [&](){vPositionPoint = (e)->GetPosition().xy(); vPositionPoint. v = (t); return true;}())
+#define STAGE_POSITION_BEFORE(e,t,v)    ((e)->GetPosition(). v <  (t))
+#define STAGE_POSITION_AFTER(e,t,v)     ((e)->GetPosition(). v >= (t))
+#define STAGE_POSITION_BETWEEN(e,t,u,v) (InBetweenExt((e)->GetPosition(). v, (t), (u)))
+#define STAGE_FLYPAST(e,f,v)                          \
+    ((e)->GetPosition(). v < (f)->GetPosition(). v) ^ \
+    ((e)->GetPosition(). v < (f)->GetOldPos  (). v) | \
+    ((e)->GetOldPos  (). v < (f)->GetPosition(). v) ^ \
+    ((e)->GetOldPos  (). v < (f)->GetOldPos  (). v) | \
+    ((f)->GetPosition(). v < (e)->GetPosition(). v) ^ \
+    ((f)->GetPosition(). v < (e)->GetOldPos  (). v) | \
+    ((f)->GetOldPos  (). v < (e)->GetPosition(). v) ^ \
+    ((f)->GetOldPos  (). v < (e)->GetOldPos  (). v)
 
 
 // ****************************************************************

@@ -111,7 +111,7 @@ void cEnvironment::Render()
 void cEnvironment::Move()
 {
     // update all transformation properties
-    m_avDirection[0] = (m_avDirection[0] + (m_avDirection[1] - m_avDirection[0]) * (Core::System->GetTime() *  8.0f)).Normalize();
+    m_avDirection[0] = (m_avDirection[0] + (m_avDirection[1] - m_avDirection[0]) * (Core::System->GetTime() *  8.0f)).Normalized();
     m_avSide     [0] =  m_avSide     [0] + (m_avSide     [1] - m_avSide     [0]) * (Core::System->GetTime() * 16.0f);
     m_afSpeed    [0] =  m_afSpeed    [0] + (m_afSpeed    [1] - m_afSpeed    [0]) * (Core::System->GetTime() *  1.0f);
     m_afHeight   [0] =  m_afHeight   [0] + (m_afHeight   [1] - m_afHeight   [0]) * (Core::System->GetTime() *  2.0f);
@@ -135,7 +135,8 @@ void cEnvironment::Move()
     if(m_TransitionTime.GetStatus())
     {
         // update transition and move old background (do not update while new background is still loading)
-        if(!Core::Manager::Resource->IsLoading() && m_bActive && m_TransitionTime.Update(1.0f))
+        if(m_bActive && (!Core::Manager::Resource->IsLoading() || (m_TransitionTime.GetValue(CORE_TIMER_GET_NORMAL) > 0.0f)) &&
+           m_TransitionTime.Update(1.0f))
         {
             // delete old background
             m_MixObject.DefineTexture(0u, NULL);
@@ -163,7 +164,6 @@ void cEnvironment::ChangeBackground(const coreInt32 iID, const coreUintW iTransi
     switch(ABS(iID))
     {
     default:
-    case cCloudBackground  ::ID: m_pBackground = new cCloudBackground  (); break;
     case cNoBackground     ::ID: m_pBackground = new cNoBackground     (); break;
     case cGrassBackground  ::ID: m_pBackground = new cGrassBackground  (); break;
     case cSeaBackground    ::ID: m_pBackground = new cSeaBackground    (); break;
@@ -173,6 +173,7 @@ void cEnvironment::ChangeBackground(const coreInt32 iID, const coreUintW iTransi
     case cSnowBackground   ::ID: m_pBackground = new cSnowBackground   (); break;
     case cMossBackground   ::ID: m_pBackground = new cMossBackground   (); break;
     case cDarkBackground   ::ID: m_pBackground = new cDarkBackground   (); break;
+    case cCloudBackground  ::ID: m_pBackground = new cCloudBackground  (); break;
     }
 
     if(m_pOldBackground)

@@ -46,7 +46,7 @@ cGrassBackground::cGrassBackground()noexcept
                 if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 25.0f))
                 {
                     // create object
-                    coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>(oBase);
+                    coreObject3D* pObject = CUSTOM_NEW(s_MemoryPool, coreObject3D, oBase);
 
                     // set object properties
                     pObject->SetPosition   (coreVector3(vPosition, 0.0f));
@@ -104,7 +104,7 @@ cGrassBackground::cGrassBackground()noexcept
                         const coreBool bType = (Core::Rand->Int(3) || (fHeight >= -20.0f)) ? true : false;
 
                         // create object
-                        coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>(oBase);
+                        coreObject3D* pObject = CUSTOM_NEW(s_MemoryPool, coreObject3D, oBase);
                         pObject->DefineModel(bType ? "environment_reed_01.md3" : "environment_reed_02.md3");
 
                         // set object properties
@@ -162,7 +162,7 @@ cGrassBackground::cGrassBackground()noexcept
                     if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 40.0f))
                     {
                         // create object
-                        coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>(oBase);
+                        coreObject3D* pObject = CUSTOM_NEW(s_MemoryPool, coreObject3D, oBase);
 
                         // set object properties
                         pObject->SetPosition (coreVector3(vPosition, 0.0f));
@@ -200,7 +200,7 @@ cGrassBackground::cGrassBackground()noexcept
 
         for(coreUintW i = 0u; i < GRASS_LEAF_NUM; ++i)
         {
-            for(coreUintW j = 20u; j--; )   // tries
+            for(coreUintW j = 10u; j--; )   // tries
             {
                 // calculate position and height
                 const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, GRASS_LEAF_NUM);
@@ -210,7 +210,7 @@ cGrassBackground::cGrassBackground()noexcept
                 if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 680.0f))
                 {
                     // create object
-                    coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>(oBase);
+                    coreObject3D* pObject = CUSTOM_NEW(s_MemoryPool, coreObject3D, oBase);
 
                     // set object properties
                     pObject->SetPosition(coreVector3(vPosition, fHeight));
@@ -229,7 +229,7 @@ cGrassBackground::cGrassBackground()noexcept
         coreSet<coreObject3D*>* papContent = pList1->List();
         if(papContent->size() % 2u)
         {
-            Core::Manager::Memory->Delete(&papContent->back());
+            CUSTOM_DELETE(s_MemoryPool, coreObject3D, papContent->back())
             papContent->pop_back();
         }
 
@@ -259,7 +259,7 @@ cGrassBackground::cGrassBackground()noexcept
             const coreFloat   fHeight   = Core::Rand->Float(20.0f, 60.0f);
 
             // create object
-            coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>(oBase);
+            coreObject3D* pObject = CUSTOM_NEW(s_MemoryPool, coreObject3D, oBase);
 
             // set object properties
             pObject->SetPosition (coreVector3(vPosition, fHeight));
@@ -308,13 +308,13 @@ void cGrassBackground::__MoveOwn()
 
     // 
     coreBatchList* pList = m_apAirObjectList[0];
-    for(coreUintW i = 0, ie = pList->List()->size(); i < ie; ++i)
+    for(coreUintW i = 0u, ie = pList->List()->size(); i < ie; ++i)
     {
         coreObject3D* pLeaf = (*pList->List())[i];
         if(!pLeaf->IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue;
 
         // 
-        const coreFloat   fOffset = I_TO_F(i % m_iLeafNum);
+        const coreFloat   fOffset = I_TO_F((i*i) % m_iLeafNum);
         const coreFloat   fTime   = m_fLeafTime * ((i % 2u) ? 1.0f : -1.0f) + fOffset;
         const coreFloat   fPos    = SIN(fTime * 0.1f + fOffset) * (I_TO_F(OUTDOOR_WIDTH) * OUTDOOR_DETAIL * 0.2f);
         const coreVector2 vDir    = coreVector2::Direction(fTime);

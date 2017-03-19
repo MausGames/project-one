@@ -90,10 +90,10 @@ void cOutdoor::RenderDepth()
 // load outdoor geometry
 void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
 {
-    sVertex     aVertexData[OUTDOOR_TOTAL_VERTICES];
-    coreUint16  aiIndexData[OUTDOOR_TOTAL_INDICES];
-    coreVector3 avOrtho1   [OUTDOOR_TOTAL_VERTICES]; std::memset(avOrtho1, 0, sizeof(avOrtho1));
-    coreVector3 avOrtho2   [OUTDOOR_TOTAL_VERTICES]; std::memset(avOrtho2, 0, sizeof(avOrtho2));
+    BIG_STATIC sVertex     aVertexData[OUTDOOR_TOTAL_VERTICES];
+    BIG_STATIC coreUint16  aiIndexData[OUTDOOR_TOTAL_INDICES];
+    BIG_STATIC coreVector3 avOrtho1   [OUTDOOR_TOTAL_VERTICES]; std::memset(avOrtho1, 0, sizeof(avOrtho1));
+    BIG_STATIC coreVector3 avOrtho2   [OUTDOOR_TOTAL_VERTICES]; std::memset(avOrtho2, 0, sizeof(avOrtho2));
 
     // delete old data
     m_pModel->Unload();
@@ -141,7 +141,7 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
         fLevel += WATER_HEIGHT;
 
         // save height value
-        m_aiHeight[i] = coreMath::Float32to16(fLevel);
+        m_aiHeight[i] = coreMath::Float32To16(fLevel);
 
         // set vertex position
         aVertexData[i].vPosition = coreVector3(I_TO_F(x - OUTDOOR_WIDTH / 2u) * OUTDOOR_DETAIL, I_TO_F(y - OUTDOOR_VIEW / 2u) * OUTDOOR_DETAIL, fLevel);
@@ -190,8 +190,8 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
         const coreUintW iDown  = MAX(y-1, 0)                               *OUTDOOR_WIDTH + x;
         const coreUintW iUp    = MIN(y+1, coreInt32(OUTDOOR_HEIGHT_FULL)-1)*OUTDOOR_WIDTH + x;
 
-        aVertexData[i].vNormal = coreVector3::Cross((aVertexData[iLeft].vPosition - aVertexData[iRight].vPosition).Normalize(),
-                                                    (aVertexData[iDown].vPosition - aVertexData[iUp   ].vPosition).Normalize());
+        aVertexData[i].vNormal = coreVector3::Cross((aVertexData[iLeft].vPosition - aVertexData[iRight].vPosition).Normalized(),
+                                                    (aVertexData[iDown].vPosition - aVertexData[iUp   ].vPosition).Normalized());
     }
 
     // calculate tangents
@@ -218,7 +218,7 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
     for(coreUintW i = 0u; i < OUTDOOR_TOTAL_VERTICES; ++i)
     {
         // finish the Gram-Schmidt process to calculate the tangent vector and bitangent sign (w)
-        aVertexData[i].vTangent = coreVector4((avOrtho1[i] - aVertexData[i].vNormal * coreVector3::Dot(aVertexData[i].vNormal, avOrtho1[i])).Normalize(),
+        aVertexData[i].vTangent = coreVector4((avOrtho1[i] - aVertexData[i].vNormal * coreVector3::Dot(aVertexData[i].vNormal, avOrtho1[i])).Normalized(),
                                               SIGN(coreVector3::Dot(coreVector3::Cross(aVertexData[i].vNormal, avOrtho1[i]), avOrtho2[i])));
     }
 
@@ -238,7 +238,7 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
     }
 
     // reduce total vertex size
-    sVertexPacked aPackedData[OUTDOOR_TOTAL_VERTICES];
+    BIG_STATIC sVertexPacked aPackedData[OUTDOOR_TOTAL_VERTICES];
     for(coreUintW i = 0u; i < OUTDOOR_TOTAL_VERTICES; ++i)
     {
         const sVertex& oVertex = aVertexData[i];
@@ -308,12 +308,12 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
         // merge XY components of both normal maps (divided by Z, partial-derivative)
         for(coreUintW i = 0u, j = 0u; i < iSize; i += 4u, j += 3u)
         {
-            const coreFloat x1 =          (coreFloat(*(pInput1 + j))      - 127.5f);
-            const coreFloat y1 =          (coreFloat(*(pInput1 + j + 1u)) - 127.5f);
-            const coreFloat z1 = 127.5f / (coreFloat(*(pInput1 + j + 2u)) - 127.5f);
-            const coreFloat x2 =          (coreFloat(*(pInput2 + j))      - 127.5f);
-            const coreFloat y2 =          (coreFloat(*(pInput2 + j + 1u)) - 127.5f);
-            const coreFloat z2 = 127.5f / (coreFloat(*(pInput2 + j + 2u)) - 127.5f);
+            const coreFloat x1 =             (coreFloat(*(pInput1 + j))      - 127.5f);
+            const coreFloat y1 =             (coreFloat(*(pInput1 + j + 1u)) - 127.5f);
+            const coreFloat z1 = 127.5f * RCP(coreFloat(*(pInput1 + j + 2u)) - 127.5f);
+            const coreFloat x2 =             (coreFloat(*(pInput2 + j))      - 127.5f);
+            const coreFloat y2 =             (coreFloat(*(pInput2 + j + 1u)) - 127.5f);
+            const coreFloat z2 = 127.5f * RCP(coreFloat(*(pInput2 + j + 2u)) - 127.5f);
 
             const coreFloat xz1 = x1 * z1 + 127.5f;
             const coreFloat yz1 = y1 * z1 + 127.5f;
@@ -388,10 +388,10 @@ coreFloat cOutdoor::RetrieveBackHeight(const coreVector2& vPosition)const
     ASSERT((iI00 < OUTDOOR_TOTAL_VERTICES) && (iI11 < OUTDOOR_TOTAL_VERTICES))
 
     // retrieve height values of the corners
-    const coreFloat fH00 = coreMath::Float16to32(m_aiHeight[iI00]);
-    const coreFloat fH01 = coreMath::Float16to32(m_aiHeight[iI01]);
-    const coreFloat fH10 = coreMath::Float16to32(m_aiHeight[iI10]);
-    const coreFloat fH11 = coreMath::Float16to32(m_aiHeight[iI11]);
+    const coreFloat fH00 = coreMath::Float16To32(m_aiHeight[iI00]);
+    const coreFloat fH01 = coreMath::Float16To32(m_aiHeight[iI01]);
+    const coreFloat fH10 = coreMath::Float16To32(m_aiHeight[iI10]);
+    const coreFloat fH11 = coreMath::Float16To32(m_aiHeight[iI11]);
 
     // interpolate between all height values
     const coreFloat fFractX = FRACT(fX);
@@ -423,8 +423,8 @@ coreVector3 cOutdoor::RetrieveBackNormal(const coreVector2& vPosition)const
     const coreFloat D = this->RetrieveBackHeight(vPosition - coreVector2(fWidth, 0.0f));
 
     // 
-    return coreVector3::Cross(coreVector3(fWidth * -2.0f, 0.0f, D - B).Normalize(),
-                              coreVector3(0.0f, fWidth * -2.0f, C - A).Normalize()).Normalize();
+    return coreVector3::Cross(coreVector3(fWidth * -2.0f, 0.0f, D - B).Normalized(),
+                              coreVector3(0.0f, fWidth * -2.0f, C - A).Normalized()).Normalized();
 }
 
 

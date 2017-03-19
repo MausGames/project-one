@@ -156,6 +156,10 @@ void cBulletManager::Render()
 // move the bullet manager
 void cBulletManager::Move()
 {
+    coreVector2 vPrevPos    = coreVector2(0.0f,0.0f);
+    coreFloat   fPrevRadius = 0.0f;
+    coreFloat   fDepth      = 0.0f;
+
     // loop through all bullet sets
     FOR_EACH(it, m_apBulletSet)
     {
@@ -173,7 +177,22 @@ void cBulletManager::Move()
                 pBullet->SetStatus(pBullet->GetStatus() | BULLET_STATUS_READY);
                 DYN_REMOVE(et, *pBulletActive->List())
             }
-            else DYN_KEEP(et)
+            else
+            {
+                // calculate properties between current and previous bullet
+                const coreFloat fLengthSq   = (vPrevPos    - pBullet->GetPosition().xy()).LengthSq();
+                const coreFloat fFullRadius = (fPrevRadius + pBullet->GetCollisionRadius());
+                vPrevPos    = pBullet->GetPosition().xy();
+                fPrevRadius = pBullet->GetCollisionRadius();
+
+                // increase depth (half if not near each other)
+                fDepth += BULLET_DEPTH_FACTOR * ((fLengthSq < POW2(fFullRadius)) ? 1.0f : 0.5f);
+
+                // 
+                pBullet->SetSize             (coreVector3(pBullet->GetSize             ().xy(),     fDepth));
+                pBullet->SetCollisionModifier(coreVector3(pBullet->GetCollisionModifier().xy(), RCP(fDepth)));
+                DYN_KEEP(et)
+            }
         }
 
         // move the bullet set (after deletions)
@@ -565,8 +584,8 @@ void cRocketBullet::__MoveOwn()
     const cEnemy* pEnemy = g_pGame->GetEnemyManager()->FindEnemy(this->GetPosition().xy());
     if(pEnemy)
     {
-        const coreVector2 vDiffNorm = (pEnemy->GetPosition().xy() - this->GetPosition().xy()).Normalize();
-        const coreVector2 vNewDir   = (this->GetDirection().xy() + vDiffNorm * (0.05f * m_fSpeed * Core::System->GetTime())).Normalize();
+        const coreVector2 vDiffNorm = (pEnemy->GetPosition().xy() - this->GetPosition().xy()).Normalized();
+        const coreVector2 vNewDir   = (this->GetDirection().xy() + vDiffNorm * (0.05f * m_fSpeed * Core::System->GetTime())).Normalized();
 
         this->SetDirection(coreVector3(vNewDir, 0.0f));
     }

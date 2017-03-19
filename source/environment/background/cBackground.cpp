@@ -8,6 +8,8 @@
 //////////////////////////////////////////////////////
 #include "main.h"
 
+coreMemoryPool cBackground::s_MemoryPool = coreMemoryPool(sizeof(coreObject3D), 256u);
+
 
 // ****************************************************************
 // constructor
@@ -40,7 +42,7 @@ cBackground::~cBackground()
         FOR_EACH(it, *papList)
         {
             // delete single objects within the list
-            FOR_EACH(et, *(*it)->List()) Core::Manager::Memory->Delete(&(*et));
+            FOR_EACH(et, *(*it)->List()) CUSTOM_DELETE(s_MemoryPool, coreObject3D, *et)
             SAFE_DELETE(*it)
         }
 
@@ -194,7 +196,7 @@ void cBackground::Move()
                         // retrieve height and add offset
                         if(paiBaseHeight)
                         {
-                            const coreFloat fOffset = coreMath::Float16to32((*paiBaseHeight)[iIndex % paiBaseHeight->size()]);
+                            const coreFloat fOffset = coreMath::Float16To32((*paiBaseHeight)[iIndex % paiBaseHeight->size()]);
                             const coreFloat fHeight = m_pOutdoor->RetrieveBackHeight(pObject->GetPosition().xy());
                             pObject->SetPosition(coreVector3(pObject->GetPosition().xy(), fHeight + fOffset));
                         }
@@ -205,7 +207,7 @@ void cBackground::Move()
                             const coreVector2 vPacked = coreVector2::UnpackFloat2x16((*paiBaseNormal)[iIndex % paiBaseNormal->size()]);
                             const coreVector3 vNormal = coreVector3(vPacked, SQRT(1.0f - vPacked.LengthSq()));
                             const coreVector2 vLerp   = m_pOutdoor->CalcLerpVector(pObject->GetPosition().y);
-                            pObject->SetDirection(LERP(coreVector3(0.0f,0.0f,1.0f), vNormal, vLerp.x).Normalize());
+                            pObject->SetDirection(LERP(coreVector3(0.0f,0.0f,1.0f), vNormal, vLerp.x).Normalized());
                         }
                     }
 
@@ -218,7 +220,7 @@ void cBackground::Move()
             if(bUpdate) (*it)->MoveNormal();
         }
     };
-    const coreMatrix2 mRota = coreMatrix3::Rotation(g_pEnvironment->GetDirection().InvertedX().Rotate45()).m12();
+    const coreMatrix2 mRota = coreMatrix3::Rotation(g_pEnvironment->GetDirection().InvertedX().Rotated45()).m12();
     nControlObjectsFunc(&m_apGroundObjectList, BACKGROUND_OBJECT_RANGE,         mRota);
     nControlObjectsFunc(&m_apDecalObjectList,  BACKGROUND_OBJECT_RANGE,         mRota);
     nControlObjectsFunc(&m_apAirObjectList,    BACKGROUND_OBJECT_RANGE - 11.0f, mRota);
@@ -233,7 +235,7 @@ void cBackground::Move()
             else
             {
                 // remove object when not visible anymore
-                Core::Manager::Memory->Delete(&(*it));
+                MANAGED_DELETE(coreObject3D, *it)
                 DYN_REMOVE(it, *papObject)
             }
         }
@@ -324,10 +326,10 @@ void cBackground::ShoveObjects(const coreFloat fOffset)
 void cBackground::ClearObjects()
 {
     // delete objects and lists
-    FOR_EACH(it, m_apAddObject) Core::Manager::Memory->Delete(&(*it));
+    FOR_EACH(it, m_apAddObject) MANAGED_DELETE(coreObject3D, *it)
     FOR_EACH(it, m_apAddList)
     {
-        FOR_EACH(et, *(*it)->List()) Core::Manager::Memory->Delete(&(*et));
+        FOR_EACH(et, *(*it)->List()) MANAGED_DELETE(coreObject3D, *et)
         SAFE_DELETE(*it)
     }
 
@@ -360,7 +362,7 @@ void cBackground::SetAirDensity   (const coreUintW iIndex, const coreFloat fDens
 void cBackground::_StoreHeight(const coreBatchList* pObjectList, const coreFloat fHeight)
 {
     // 
-    m_aaiBaseHeight[pObjectList].push_back(coreMath::Float32to16(fHeight));
+    m_aaiBaseHeight[pObjectList].push_back(coreMath::Float32To16(fHeight));
 }
 
 void cBackground::_StoreHeightList(const coreBatchList* pObjectList)
@@ -372,7 +374,7 @@ void cBackground::_StoreHeightList(const coreBatchList* pObjectList)
     oNew.reserve(pObjectList->List()->size());
 
     // 
-    FOR_EACH(it, *pObjectList->List()) oNew.push_back(coreMath::Float32to16((*it)->GetPosition().z));
+    FOR_EACH(it, *pObjectList->List()) oNew.push_back(coreMath::Float32To16((*it)->GetPosition().z));
 }
 
 // ****************************************************************
@@ -415,7 +417,7 @@ void cBackground::_FillInfinite(coreBatchList* OUTPUT pObjectList, const coreUin
         if(pOldObject->GetPosition().y < I_TO_F(OUTDOOR_VIEW / 2u) * OUTDOOR_DETAIL)
         {
             // copy object and move it to the end area
-            coreObject3D* pNewObject = Core::Manager::Memory->New<coreObject3D>(*pOldObject);
+            coreObject3D* pNewObject = CUSTOM_NEW(s_MemoryPool, coreObject3D, *pOldObject);
             pNewObject->SetPosition(pNewObject->GetPosition() + coreVector3(0.0f, I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL, 0.0f));
 
             // bind the new object

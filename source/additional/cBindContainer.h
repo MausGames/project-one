@@ -13,7 +13,7 @@
 
 // ****************************************************************
 // bind container interface
-class INTERFACE cBindContainer
+class INTERFACE cBindContainerIn
 {
 private:
     coreSet<coreObject3D*>  m_apObject;   // bound objects
@@ -21,12 +21,12 @@ private:
 
 
 protected:
-    cBindContainer() = default;
-    inline ~cBindContainer();
+    cBindContainerIn() = default;
+    inline ~cBindContainerIn();
 
 
 public:
-    ENABLE_COPY(cBindContainer)
+    ENABLE_COPY(cBindContainerIn)
 
     // manage objects
     inline void BindObject  (coreObject3D* pObject) {ASSERT(!m_apObject.count(pObject)) m_apObject.insert(pObject);}
@@ -49,18 +49,18 @@ public:
 
 // ****************************************************************
 // stand-alone bind container class
-class cBindContainerIn final : public cBindContainer
+class cBindContainer final : public cBindContainerIn
 {
 public:
-    cBindContainerIn() = default;
+    cBindContainer() = default;
 
-    ENABLE_COPY(cBindContainerIn)
+    ENABLE_COPY(cBindContainer)
 };
 
 
 // ****************************************************************
 // destructor
-inline cBindContainer::~cBindContainer()
+inline cBindContainerIn::~cBindContainerIn()
 {
     ASSERT(m_apObject.empty() && m_apList.empty())
 

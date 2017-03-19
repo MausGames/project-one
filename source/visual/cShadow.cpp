@@ -8,12 +8,12 @@
 //////////////////////////////////////////////////////
 #include "main.h"
 
-cBindContainerIn cShadow::s_GlobalContainer          = {};
-coreProgramPtr   cShadow::s_pProgramSingle           = NULL;
-coreProgramPtr   cShadow::s_pProgramInstanced        = NULL;
-coreProgramPtr   cShadow::s_apHandle[SHADOW_HANDLES] = {};
-coreMatrix4      cShadow::s_amDrawShadowMatrix[2]    = {coreMatrix4::Identity(), coreMatrix4::Identity()};
-coreMatrix4      cShadow::s_mReadShadowMatrix        =  coreMatrix4::Identity();
+cBindContainer cShadow::s_GlobalContainer          = {};
+coreProgramPtr cShadow::s_pProgramSingle           = NULL;
+coreProgramPtr cShadow::s_pProgramInstanced        = NULL;
+coreProgramPtr cShadow::s_apHandle[SHADOW_HANDLES] = {};
+coreMatrix4    cShadow::s_amDrawShadowMatrix[2]    = {coreMatrix4::Identity(), coreMatrix4::Identity()};
+coreMatrix4    cShadow::s_mReadShadowMatrix        =  coreMatrix4::Identity();
 
 
 // ****************************************************************
@@ -137,12 +137,11 @@ void cShadow::GlobalUpdate()
                                               0.5f, 0.5f, 0.5f, 1.0f);
 
     // increase light direction height (to reduce shadow length)
-    const coreVector3 vHighLight = (g_pEnvironment->GetLightDir() * coreVector3(1.0f, 1.0f, SHADOW_HEIGHT_FACTOR)).Normalize();
+    const coreVector3 vHighLight = (g_pEnvironment->GetLightDir() * coreVector3(1.0f, 1.0f, SHADOW_HEIGHT_FACTOR)).Normalized();
 
-    // clamp camera movement to reduce flickering
+    // clamp camera movement (to reduce flickering)
     const coreFloat   fClampFactor = g_vGameResolution.x * ((g_CurConfig.Graphics.iShadow == 1u) ? SHADOW_RES_LOW : SHADOW_RES_HIGH) * 0.007274395f;
-    const coreVector2 vClampPos    = coreVector2(FLOOR(g_pEnvironment->GetCameraPos().x * fClampFactor),
-                                                 FLOOR(g_pEnvironment->GetCameraPos().y * fClampFactor)) * RCP(fClampFactor);
+    const coreVector2 vClampPos    = (g_pEnvironment->GetCameraPos().xy() * fClampFactor).Processed(FLOOR) * RCP(fClampFactor);
 
     // assemble camera matrix (viewed from light source)
     const coreMatrix4 mCamera = coreMatrix4::Camera(vHighLight * -SHADOW_VIEW_DISTANCE + coreVector3(vClampPos, WATER_HEIGHT),

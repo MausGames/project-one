@@ -25,11 +25,16 @@
     #extension GL_AMD_shader_trinary_minmax    : enable
     #extension GL_ARB_conservative_depth       : enable
     #extension GL_ARB_enhanced_layouts         : enable
+    #extension GL_ARB_sample_shading           : enable
     #extension GL_ARB_shader_group_vote        : enable
     #extension GL_ARB_shader_image_load_store  : enable
     #extension GL_ARB_shading_language_packing : enable
     #extension GL_ARB_uniform_buffer_object    : enable
     #extension GL_EXT_gpu_shader4              : enable
+#endif
+#if (__VERSION__) < 130
+    #undef GL_ARB_conservative_depth
+    #undef GL_ARB_shader_image_load_store
 #endif
 #pragma optimize(on)
 #pragma debug(off)
@@ -50,11 +55,11 @@
 
 // layout qualifiers
 #if defined(_CORE_FRAGMENT_SHADER_) && !defined(_CORE_OPTION_NO_EARLY_DEPTH_)
-    #if (defined(GL_ARB_shader_image_load_store) && (__VERSION__) >= 130) || (defined(GL_ES) && (__VERSION__) >= 310)
-        layout(early_fragment_tests) in;
-    #endif
     #if defined(GL_ARB_conservative_depth)
         layout(depth_unchanged) out float gl_FragDepth;
+    #endif
+    #if defined(GL_ARB_shader_image_load_store) || (defined(GL_ES) && (__VERSION__) >= 310)
+        layout(early_fragment_tests) in;
     #endif
 #endif
 #if defined(GL_ARB_enhanced_layouts)
@@ -107,13 +112,11 @@ struct coreLight
     vec4 v4Value;
 };
 
-// condition across group of shader invocations
-#if defined(GL_ARB_shader_group_vote)
-    #define coreAnyInvocation(x)  (anyInvocationARB (x))
-    #define coreAllInvocations(x) (allInvocationsARB(x))
+// evaluate shader per sample
+#if defined(GL_ARB_sample_shading)
+    #define CORE_SAMPLE_SHADING {gl_SampleID;}
 #else
-    #define coreAnyInvocation(x)  (x)
-    #define coreAllInvocations(x) (x)
+    #define CORE_SAMPLE_SHADING
 #endif
 
 // trinary min and max
@@ -124,21 +127,23 @@ struct coreLight
 #else
     #define coreMin3(a,b,c) (min(a, min(b, c)))
     #define coreMax3(a,b,c) (max(a, max(b, c)))
-    #define coreMed3(a,b,c) (max(min(max(a, b), c), min(a, b)))   // multi evaluation
+    float coreMed3(const in float a, const in float b, const in float c) {return max(min(max(a, b), c), min(a, b));}
+    vec2  coreMed3(const in vec2  a, const in vec2  b, const in vec2  c) {return max(min(max(a, b), c), min(a, b));}
+    vec3  coreMed3(const in vec3  a, const in vec3  b, const in vec3  c) {return max(min(max(a, b), c), min(a, b));}
+    vec4  coreMed3(const in vec4  a, const in vec4  b, const in vec4  c) {return max(min(max(a, b), c), min(a, b));}
 #endif
 
-// modulo operator
-int coreMod(const in int a, const in int b)
-{
-#if defined(GL_EXT_gpu_shader4)
-    return (a % b);
+// condition across group of shader invocations
+#if defined(GL_ARB_shader_group_vote)
+    #define coreAnyInvocation(x)  (anyInvocationARB (x))
+    #define coreAllInvocations(x) (allInvocationsARB(x))
 #else
-    return (a - (a / b) * b);
+    #define coreAnyInvocation(x)  (x)
+    #define coreAllInvocations(x) (x)
 #endif
-}
 
 // color convert
-vec3 coreRGBtoHSV(const in vec3 v3RGB)
+vec3 coreRgbToHsv(const in vec3 v3RGB)
 {
     float R = v3RGB.r;
     float G = v3RGB.g;
@@ -155,7 +160,7 @@ vec3 coreRGBtoHSV(const in vec3 v3RGB)
     if(G == v) return vec3((2.0 + (B - R) / d) / 6.0, s, v);
                return vec3((4.0 + (R - G) / d) / 6.0, s, v);
 }
-vec3 coreHSVtoRGB(const in vec3 v3HSV)
+vec3 coreHsvToRgb(const in vec3 v3HSV)
 {
     float H = v3HSV.x * 6.0;
     float S = v3HSV.y;
@@ -174,37 +179,37 @@ vec3 coreHSVtoRGB(const in vec3 v3HSV)
     if(h == 5.0) return vec3(V,     p,     V - t);
                  return vec3(V,     p + t, p);
 }
-vec3 coreRGBtoYIQ(const in vec3 v3RGB)
+vec3 coreRgbToYiq(const in vec3 v3RGB)
 {
     return mat3(0.299,  0.587,  0.114,
                 0.596, -0.275, -0.321,
                 0.212, -0.523,  0.311) * v3RGB;
 }
-vec3 coreYIQtoRGB(const in vec3 v3YIQ)
+vec3 coreYiqToRgb(const in vec3 v3YIQ)
 {
     return mat3(1.000,  0.956,  0.620,
                 1.000, -0.272, -0.647,
                 1.000, -1.108,  1.705) * v3YIQ;
 }
-vec3 coreRGBtoYUV(const in vec3 v3RGB)
+vec3 coreRgbToYuv(const in vec3 v3RGB)
 {
     return mat3( 0.21260,  0.71520,  0.07220,
                 -0.09991, -0.33609,  0.43600,
                  0.61500, -0.55861, -0.05639) * v3RGB;
 }
-vec3 coreYUVtoRGB(const in vec3 v3YUV)
+vec3 coreYuvToRgb(const in vec3 v3YUV)
 {
     return mat3(1.00000,  0.00000,  1.28033,
                 1.00000, -0.21482, -0.38059,
                 1.00000,  2.12798,  0.00000) * v3YUV;
 }
-vec3 coreRGBtoYCbCr(const in vec3 v3RGB)
+vec3 coreRgbToYcbcr(const in vec3 v3RGB)
 {
     return mat3( 0.299000,  0.587000,  0.114000,
                 -0.168736, -0.331264,  0.500000,
                  0.500000, -0.418688, -0.081312) * v3RGB + vec3(0.0, 0.5, 0.5);
 }
-vec3 coreYCbCrtoRGB(const in vec3 v3YCbCr)
+vec3 coreYcbcrToRgb(const in vec3 v3YCbCr)
 {
     return mat3(1.00000,  0.00000,  1.40200,
                 1.00000, -0.34414, -0.71414,
@@ -322,7 +327,7 @@ mat4 coreInvert(const in mat4 m)
     #define coreMat4to3(m) mat3(m[0].xyz, m[1].xyz, m[2].xyz)
     #define coreMat3to2(m) mat2(m[0].xy,  m[1].xy)
 #endif
-#define coreMat4to2(m) coreMat4to3(m)
+#define coreMat4to2(m) coreMat3to2(m)
 
 // value pack and unpack
 #if defined(GL_EXT_gpu_shader4)

@@ -21,6 +21,7 @@
 // TODO: reduce object-buffer sizes, not all are drawn at once anyway, also allocate only once
 // TODO: positions in separate list (when iterating through lambda)
 // TODO: use single "environment shader" instead of multi-texturing (rain, snow, sand)
+// TODO: provide own memory pool for temporary additional objects
 
 
 // ****************************************************************
@@ -104,6 +105,8 @@ protected:
 
     coreLookup<const coreBatchList*, std::vector<coreUint16>> m_aaiBaseHeight;   // 
     coreLookup<const coreBatchList*, std::vector<coreUint32>> m_aaiBaseNormal;   // 
+
+    static coreMemoryPool s_MemoryPool;                    // 
 
 
 public:

@@ -150,12 +150,16 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreShader> ("effect_lightning_inst.vert",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_lightning.vert", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("effect_lightning_inst.frag",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_lightning.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("effect_outline.vert",                    CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.vert");
+    Core::Manager::Resource->Load<coreShader> ("effect_outline_bullet.vert",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.vert", SHADER_BULLET);
     Core::Manager::Resource->Load<coreShader> ("effect_outline.frag",                    CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_outline_direct.vert",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.vert", SHADER_DIRECT);
+    Core::Manager::Resource->Load<coreShader> ("effect_outline_bullet_direct.vert",      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.vert", SHADER_BULLET SHADER_DIRECT);
     Core::Manager::Resource->Load<coreShader> ("effect_outline_direct.frag",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.frag", SHADER_DIRECT);
     Core::Manager::Resource->Load<coreShader> ("effect_outline_inst.vert",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.vert", CORE_SHADER_OPTION_INSTANCING);
+    Core::Manager::Resource->Load<coreShader> ("effect_outline_bullet_inst.vert",        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.vert", CORE_SHADER_OPTION_INSTANCING SHADER_BULLET);
     Core::Manager::Resource->Load<coreShader> ("effect_outline_inst.frag",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("effect_outline_direct_inst.vert",        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.vert", CORE_SHADER_OPTION_INSTANCING SHADER_DIRECT);
+    Core::Manager::Resource->Load<coreShader> ("effect_outline_bullet_direct_inst.vert", CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.vert", CORE_SHADER_OPTION_INSTANCING SHADER_BULLET SHADER_DIRECT);
     Core::Manager::Resource->Load<coreShader> ("effect_outline_direct_inst.frag",        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.frag", CORE_SHADER_OPTION_INSTANCING SHADER_DIRECT);
     Core::Manager::Resource->Load<coreShader> ("effect_particle.vert",                   CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_particle.vert", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("effect_particle_color.frag",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_particle_color.frag", CORE_SHADER_OPTION_INSTANCING);
@@ -186,6 +190,8 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreShader> ("environment_rain.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_rain.frag");
     Core::Manager::Resource->Load<coreShader> ("environment_under.vert",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_under.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("environment_under.frag",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_under.frag");
+    Core::Manager::Resource->Load<coreShader> ("environment_vignette.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_vignette.frag");
+    Core::Manager::Resource->Load<coreShader> ("environment_vignette_grey.frag",         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_vignette.frag", SHADER_GREY);
     Core::Manager::Resource->Load<coreShader> ("environment_water.vert",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_water.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("environment_water.frag",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_water.frag");
     Core::Manager::Resource->Load<coreShader> ("full.vert",                              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full.vert");
@@ -322,19 +328,9 @@ static void SetupResources()
         ->AttachShader("effect_energy.frag")
         ->Finish();
 
-    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
-        ->AttachShader("effect_energy_inst.vert")
-        ->AttachShader("effect_energy_inst.frag")
-        ->Finish();
-
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_spheric_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("effect_energy_spheric.vert")
         ->AttachShader("effect_energy.frag")
-        ->Finish();
-
-    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_spheric_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
-        ->AttachShader("effect_energy_spheric_inst.vert")
-        ->AttachShader("effect_energy_inst.frag")
         ->Finish();
 
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_invert_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
@@ -342,19 +338,9 @@ static void SetupResources()
         ->AttachShader("effect_energy.frag")
         ->Finish();
 
-    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_invert_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
-        ->AttachShader("effect_energy_invert_inst.vert")
-        ->AttachShader("effect_energy_inst.frag")
-        ->Finish();
-
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_direct_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("effect_energy_direct.vert")
         ->AttachShader("effect_energy.frag")
-        ->Finish();
-
-    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_direct_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
-        ->AttachShader("effect_energy_direct_inst.vert")
-        ->AttachShader("effect_energy_inst.frag")
         ->Finish();
 
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_ring_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
@@ -367,19 +353,9 @@ static void SetupResources()
         ->AttachShader("effect_energy.frag")
         ->Finish();
 
-    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_bullet_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
-        ->AttachShader("effect_energy_bullet_inst.vert")
-        ->AttachShader("effect_energy_inst.frag")
-        ->Finish();
-
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_bullet_spheric_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("effect_energy_bullet_spheric.vert")
         ->AttachShader("effect_energy.frag")
-        ->Finish();
-
-    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_bullet_spheric_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
-        ->AttachShader("effect_energy_bullet_spheric_inst.vert")
-        ->AttachShader("effect_energy_inst.frag")
         ->Finish();
 
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_bullet_invert_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
@@ -387,14 +363,44 @@ static void SetupResources()
         ->AttachShader("effect_energy.frag")
         ->Finish();
 
-    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_bullet_invert_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
-        ->AttachShader("effect_energy_bullet_invert_inst.vert")
-        ->AttachShader("effect_energy_inst.frag")
-        ->Finish();
-
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_bullet_direct_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("effect_energy_bullet_direct.vert")
         ->AttachShader("effect_energy.frag")
+        ->Finish();
+
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_energy_inst.vert")
+        ->AttachShader("effect_energy_inst.frag")
+        ->Finish();
+
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_spheric_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_energy_spheric_inst.vert")
+        ->AttachShader("effect_energy_inst.frag")
+        ->Finish();
+
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_invert_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_energy_invert_inst.vert")
+        ->AttachShader("effect_energy_inst.frag")
+        ->Finish();
+
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_direct_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_energy_direct_inst.vert")
+        ->AttachShader("effect_energy_inst.frag")
+        ->Finish();
+
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_bullet_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_energy_bullet_inst.vert")
+        ->AttachShader("effect_energy_inst.frag")
+        ->Finish();
+
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_bullet_spheric_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_energy_bullet_spheric_inst.vert")
+        ->AttachShader("effect_energy_inst.frag")
+        ->Finish();
+
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_bullet_invert_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_energy_bullet_invert_inst.vert")
+        ->AttachShader("effect_energy_inst.frag")
         ->Finish();
 
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_bullet_direct_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
@@ -417,9 +423,9 @@ static void SetupResources()
         ->AttachShader("effect_outline.frag")
         ->Finish();
 
-    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_outline_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
-        ->AttachShader("effect_outline_inst.vert")
-        ->AttachShader("effect_outline_inst.frag")
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_outline_bullet_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_outline_bullet.vert")
+        ->AttachShader("effect_outline.frag")
         ->Finish();
 
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_outline_direct_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
@@ -427,8 +433,28 @@ static void SetupResources()
         ->AttachShader("effect_outline_direct.frag")
         ->Finish();
 
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_outline_bullet_direct_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_outline_bullet_direct.vert")
+        ->AttachShader("effect_outline_direct.frag")
+        ->Finish();
+
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_outline_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_outline_inst.vert")
+        ->AttachShader("effect_outline_inst.frag")
+        ->Finish();
+
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_outline_bullet_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_outline_bullet_inst.vert")
+        ->AttachShader("effect_outline_inst.frag")
+        ->Finish();
+
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_outline_direct_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("effect_outline_direct_inst.vert")
+        ->AttachShader("effect_outline_direct_inst.frag")
+        ->Finish();
+
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_outline_bullet_direct_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("effect_outline_bullet_direct_inst.vert")
         ->AttachShader("effect_outline_direct_inst.frag")
         ->Finish();
 
@@ -528,6 +554,16 @@ static void SetupResources()
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_under_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
         ->AttachShader("environment_under.vert")
         ->AttachShader("environment_under.frag")
+        ->Finish();
+
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_vignette_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("default_2d.vert")
+        ->AttachShader("environment_vignette.frag")
+        ->Finish();
+
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_vignette_grey_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())
+        ->AttachShader("default_2d.vert")
+        ->AttachShader("environment_vignette_grey.frag")
         ->Finish();
 
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_water_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetResource())

@@ -54,8 +54,10 @@ void cOutlineStyle::ApplyList(coreBatchList* pList)const
 cOutline::cOutline()noexcept
 {
     // 
-    m_aOutlineStyle[OUTLINE_STYLE_FULL]  .Construct("effect_outline_program",        "effect_outline_inst_program");
-    m_aOutlineStyle[OUTLINE_STYLE_DIRECT].Construct("effect_outline_direct_program", "effect_outline_direct_inst_program");
+    m_aOutlineStyle[OUTLINE_STYLE_FULL]         .Construct("effect_outline_program",               "effect_outline_inst_program");
+    m_aOutlineStyle[OUTLINE_STYLE_DIRECT]       .Construct("effect_outline_direct_program",        "effect_outline_direct_inst_program");
+    m_aOutlineStyle[OUTLINE_STYLE_BULLET_FULL]  .Construct("effect_outline_bullet_program",        "effect_outline_bullet_inst_program");
+    m_aOutlineStyle[OUTLINE_STYLE_BULLET_DIRECT].Construct("effect_outline_bullet_direct_program", "effect_outline_bullet_direct_inst_program");
 }
 
 

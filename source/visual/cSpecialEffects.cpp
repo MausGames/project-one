@@ -203,7 +203,7 @@ void cSpecialEffects::Move()
 
             // 
             c_cast<coreFloat&>(fTime) = MAX(fTime - fSpeed * Core::System->GetTime(), 0.0f);
-            const coreFloat fValue    = 1.0f - POW(fTime, 6);
+            const coreFloat fValue    = 1.0f - POW(fTime, 6.0f);
 
             // 
             oRing.SetAlpha    (MIN(fTime * fTime * 1.4f, 1.0f));
@@ -223,7 +223,7 @@ void cSpecialEffects::Move()
         m_fShakeStrength = MAX(m_fShakeStrength - 0.07f, 0.0f);
 
         // 
-        g_pPostProcessing->SetPosition(coreVector2::Rand(-0.3f,0.3f, -1.0f,1.0f).Normalize() * (m_fShakeStrength * 0.01f));
+        g_pPostProcessing->SetPosition(coreVector2::Rand(-0.3f,0.3f, -1.0f,1.0f).Normalized() * (m_fShakeStrength * 0.01f));
         g_pPostProcessing->Move();
     }
 }

@@ -362,7 +362,7 @@ coreBool cGame::__HandleIntro()
             // create spline for intro animation (YZ)
             coreSpline2 oSpline;
             oSpline.AddNode(coreVector2(-140.0f,-10.0f), coreVector2( 1.0f, 0.0f)); // TODO: optimize to static 
-            oSpline.AddNode(coreVector2(  10.0f, 10.0f), coreVector2(-1.0f,-1.0f).Normalize());
+            oSpline.AddNode(coreVector2(  10.0f, 10.0f), coreVector2(-1.0f,-1.0f).Normalized());
             oSpline.AddNode(coreVector2( -30.0f,  0.0f), coreVector2(-1.0f, 0.0f));
 
             this->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)

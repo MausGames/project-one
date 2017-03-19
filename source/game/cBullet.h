@@ -11,8 +11,6 @@
 #define _P1_GUARD_BULLET_H_
 
 // TODO: pre-allocate bullets (at least for player) at the beginning to improve resource loading
-// TODO: check for overlapping bullets and place one of them on another depth plane (to prevent z-fighting and "half" bullets)
-// TODO: remove thick outlined bullets at the sides, because bullets are flat, outlining is 3d, make own shader-variant
 // TODO: use prefetch with more precise numbers (also in enemy-manager)
 
 
@@ -21,6 +19,7 @@
 #define BULLET_SET_INIT_SIZE (16u)     // initial allocation size when creating a new bullet set
 #define BULLET_AREA_FACTOR   (1.2f)    // size factor for foreground area where the bullet remains active
 #define BULLET_SPEED_FACTOR  (30.0f)   // 
+#define BULLET_DEPTH_FACTOR  (0.8f)    // 
 
 enum eBulletStatus : coreUint8
 {
@@ -163,7 +162,7 @@ public:
     ASSIGN_ID(1, "Ray")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(3.4f,3.4f,3.4f));}
+    inline void ResetProperties() {this->SetSize(coreVector3(3.7f,3.7f,3.7f));}
 
     // change default color
     inline cRayBullet* MakeYellow() {this->_MakeYellow(1.0f); return this;}
@@ -175,7 +174,7 @@ public:
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
-    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_DIRECT;}
+    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_DIRECT;}
     static constexpr coreBool        ConfigShadow              () {return false;}
 
 
@@ -209,7 +208,7 @@ public:
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
-    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_DIRECT;}
+    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_DIRECT;}
     static constexpr coreBool        ConfigShadow              () {return false;}
 
 
@@ -242,7 +241,7 @@ public:
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_inst_program";}
-    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_FULL;}
+    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_FULL;}
     static constexpr coreBool        ConfigShadow              () {return false;}
 
 
@@ -276,7 +275,7 @@ public:
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_inst_program";}
-    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_DIRECT;}
+    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_DIRECT;}
     static constexpr coreBool        ConfigShadow              () {return false;}
 
 
@@ -310,7 +309,7 @@ public:
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
-    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_DIRECT;}
+    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_DIRECT;}
     static constexpr coreBool        ConfigShadow              () {return false;}
 
 
@@ -349,7 +348,7 @@ public:
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_spheric_inst_program";}
-    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_FULL;}
+    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_FULL;}
     static constexpr coreBool        ConfigShadow              () {return false;}
 
 

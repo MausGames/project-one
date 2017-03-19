@@ -583,6 +583,9 @@
     <None Include="..\..\..\executable\data\languages\japanese.lng">
       <Filter>_data\languages</Filter>
     </None>
+    <None Include="..\..\..\executable\data\shaders\environment_vignette.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\..\executable\data\shaders\readme.txt">

@@ -17,7 +17,11 @@ void VertexMain()
 #if defined(_P1_BULLET_)
 
     // transform position (and make flat)
-    gl_Position = u_m4ViewProj * vec4(coreObject3DTransform(vec3(a_v3RawPosition.xy, 0.0)), 1.0);
+    vec4 v4NewPosition = vec4(coreObject3DTransformRaw(), 1.0) * vec4(1.0, 1.0, 0.0, 1.0);
+    gl_Position = u_m4ViewProj * v4NewPosition;
+    
+    // 
+    gl_Position.z -= (u_v3Size.z * 0.001) * gl_Position.w;
 
     // calculate light and color intensity
     vec3  v3NewNormal = coreQuatApply(u_v4Rotation, a_v3RawNormal);
@@ -25,10 +29,12 @@ void VertexMain()
 
 #else
 
-    // transform position (with slight z-offset to reduce fighting)
+    // transform position
     vec4 v4NewPosition = vec4(coreObject3DTransformRaw(), 1.0);
     gl_Position        = u_m4ViewProj * v4NewPosition;
-    gl_Position.z     -= 0.01 * gl_Position.w;
+    
+    // add slight z-offset to reduce fighting
+    gl_Position.z -= 0.01 * gl_Position.w;
 
     // calculate light and color intensity
     vec3  v3ViewDir   = normalize(u_v3CamPosition - v4NewPosition.xyz);
@@ -55,9 +61,6 @@ void VertexMain()
     // directional interpolated
     v1Base       =  1.0 - v1Base * a_v2RawTexCoord.y;
     v_v1Strength = (0.9 - v1Base) * 3.5;
-
-    // increase depth on the back to improve overlapping
-    gl_Position.z += (1.0-a_v2RawTexCoord.y) * gl_Position.w;
 
 #elif defined(_P1_RING_)
 

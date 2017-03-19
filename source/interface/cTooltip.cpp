@@ -78,6 +78,13 @@ void cTooltip::__ShowText(const coreFloat fWidth, const coreChar* pcText)
     const coreUint8    iHeight = CORE_LABEL_HEIGHT_RELATIVE(m_aLine[0].GetHeight());
     const coreFloat    fFactor = CORE_LABEL_SIZE_FACTOR;
 
+    // 
+    if(!pFont.IsUsable())
+    {
+        this->Invalidate();
+        return;
+    }
+
     // prepare cursor and line pointers
     coreChar* pcCursor    = c_cast<coreChar*>(pcText);
     coreChar* pcLineBegin = pcCursor;
@@ -96,7 +103,7 @@ void cTooltip::__ShowText(const coreFloat fWidth, const coreChar* pcText)
     auto nWriteLineFunc = [&]()
     {
         // terminate the string
-        *pcLineEnd = '\0';
+        (*pcLineEnd) = '\0';
 
         // save text and width
         m_aLine[m_iNumLines++].SetText(pcLineBegin);
@@ -108,10 +115,10 @@ void cTooltip::__ShowText(const coreFloat fWidth, const coreChar* pcText)
     };
 
     // traverse the whole string only once (no rewind)
-    for(; *pcCursor; ++pcCursor)
+    for(; (*pcCursor); ++pcCursor)
     {
         // check for newline characters
-        if(*pcCursor == '\n')
+        if((*pcCursor) == '\n')
         {
             pcLineEnd  = pcCursor;
             fLineWidth = fCurWidth;
@@ -127,7 +134,7 @@ void cTooltip::__ShowText(const coreFloat fWidth, const coreChar* pcText)
             const coreFloat fAdvance = I_TO_F(iAdvance) * fFactor;
 
             // check for whitespace character (valid line-end)
-            if(*pcCursor == ' ')
+            if((*pcCursor) == ' ')
             {
                 pcLineEnd  = pcCursor;
                 fLineWidth = fCurWidth;

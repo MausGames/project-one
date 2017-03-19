@@ -134,12 +134,12 @@ void cShieldManager::AbsorbDamage(cEnemy* pEnemy, coreInt32* OUTPUT piDamage, co
                 if(m_aiElement[i] == iElement)
                 {
                     // 
-                    m_aiHealth[i] -= *piDamage;
+                    m_aiHealth[i] -= (*piDamage);
                 }
                 else
                 {
                     // 
-                    *piDamage = 0;
+                    (*piDamage) = 0;
                 }
             }
             return;

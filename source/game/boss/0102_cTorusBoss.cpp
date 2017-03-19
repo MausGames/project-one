@@ -111,7 +111,7 @@ void cTorusBoss::__KillOwn(const coreBool bAnimated)
     if(!m_aiCounter[BALL_STATUS])
     {
         // 
-        pMission->EnableBall(0u, coreVector2(0.0f,0.0f), coreVector2(-0.5f,1.0f).Normalize());
+        pMission->EnableBall(0u, coreVector2(0.0f,0.0f), coreVector2(-0.5f,1.0f).Normalized());
     }
     else
     {
@@ -449,7 +449,7 @@ void cTorusBoss::__MoveOwn()
             ++m_iPhase;
 
             // 
-            const coreVector2 vDir = (m_aiCounter[BALL_STATUS] ? coreVector2(1.0f,0.5f) : coreVector2(-0.5f,1.0f)).Normalize();
+            const coreVector2 vDir = (m_aiCounter[BALL_STATUS] ? coreVector2(1.0f,0.5f) : coreVector2(-0.5f,1.0f)).Normalized();
             s_cast<cViridoMission*>(g_pGame->GetMission())->EnableBall(m_aiCounter[BALL_STATUS], this->GetPosition().xy(), vDir);
 
             // 
@@ -556,7 +556,7 @@ void cTorusBoss::__MoveOwn()
 coreVector3 cTorusBoss::__GetRotaDirection(const coreFloat fBaseAngle)
 {
     // 
-    return m_vRotation.QuatApply(coreVector3(coreVector2::Direction(fBaseAngle), 0.0f)).Normalize();
+    return m_vRotation.QuatApply(coreVector3(coreVector2::Direction(fBaseAngle), 0.0f)).Normalized();
 }
 
 
@@ -738,7 +738,7 @@ void cTorusBoss::__CreateOverdrive(const coreUintW iIndex, const coreVector3& vI
                 {
                     const coreBool    bRotated   = Core::Rand->Bool();
                     const coreVector2 vDecalSize = coreVector2(Core::Rand->Float(5.0f, 6.5f), MIN(fLen, fMax)*1.8f);
-                    const coreVector2 vDecalDir  = vDiff.xy().Normalize();
+                    const coreVector2 vDecalDir  = vDiff.xy().Normalized();
 
                     // load object resources
                     coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>();

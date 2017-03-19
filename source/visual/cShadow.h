@@ -36,13 +36,13 @@
 
 // ****************************************************************
 // shadow map class
-class cShadow final : public cBindContainer, public coreResourceRelation
+class cShadow final : public cBindContainerIn, public coreResourceRelation
 {
 private:
     coreFrameBuffer m_FrameBuffer;                      // shadow map frame buffer
     coreUint8 m_iLevel;                                 // current configuration level
 
-    static cBindContainerIn s_GlobalContainer;          // global shadow-casting objects (in all frame buffers)
+    static cBindContainer s_GlobalContainer;            // global shadow-casting objects (in all frame buffers)
 
     static coreProgramPtr s_pProgramSingle;             // shader-program for single shadow-casting objects
     static coreProgramPtr s_pProgramInstanced;          // shader-program for instanced shadow-casting objects
@@ -83,7 +83,7 @@ public:
     static void EnableShadowRead(const coreUintW iHandleIndex);
 
     // access global bind container
-    static inline cBindContainerIn* GetGlobalContainer() {return &s_GlobalContainer;}
+    static inline cBindContainer* GetGlobalContainer() {return &s_GlobalContainer;}
 
 
 private:

@@ -38,12 +38,12 @@ private:
     // player view structure
     struct sPlayerView final
     {
-        coreObject2D m_aHealthBar  [2];   // player health bar   (0 = background, 1 = foreground)
-        coreLabel    m_aHealthValue[2];   // player health value (0 = armor text, 1 = actual value)
-        coreLabel    m_Score;             // score label
-        coreLabel    m_Combo;             // combo label
-        coreObject2D m_ChainBar;          // chain bar
-        coreLabel    m_ChainValue;        // chain value
+        coreObject2D aHealthBar  [2];   // player health bar   (0 = background, 1 = foreground)
+        coreLabel    aHealthValue[2];   // player health value (0 = armor text, 1 = actual value)
+        coreLabel    oScore;            // score label
+        coreLabel    oCombo;            // combo label
+        coreObject2D oChainBar;         // chain bar
+        coreLabel    oChainValue;       // chain value
 
         void Construct(const coreUintW iIndex);
     };

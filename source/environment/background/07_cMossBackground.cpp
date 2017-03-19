@@ -34,7 +34,7 @@ cMossBackground::cMossBackground()noexcept
         for(coreUintW i = 0u; i < MOSS_RAIN_NUM; ++i)
         {
             // create object
-            coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>(oBase);
+            coreObject3D* pObject = CUSTOM_NEW(s_MemoryPool, coreObject3D, oBase);
 
             // set object properties
             pObject->SetPosition(coreVector3(0.0f,0.0f,0.0f));
@@ -66,7 +66,7 @@ cMossBackground::cMossBackground()noexcept
             const coreFloat   fHeight   = Core::Rand->Float(20.0f, 60.0f);
 
             // create object
-            coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>(oBase);
+            coreObject3D* pObject = CUSTOM_NEW(s_MemoryPool, coreObject3D, oBase);
 
             // set object properties
             pObject->SetPosition (coreVector3(vPosition, fHeight));
@@ -100,21 +100,21 @@ void cMossBackground::__MoveOwn()
     // 
     const coreFloat   fStrength  = 1.0f;
     const coreVector2 vPosition  = g_pEnvironment->GetCameraPos().xy();
-    const coreVector2 vDirection = coreVector2(-1.0f, g_pEnvironment->GetSpeed()).Normalize();
+    const coreVector2 vDirection = coreVector2(-1.0f, g_pEnvironment->GetSpeed()).Normalized();
     const coreFloat   fLength    = 1.0f - 0.04f * g_pEnvironment->GetSpeed();
     const coreVector2 vMove      = vDirection * (-0.35f * g_pEnvironment->GetSpeed());
     const coreVector2 vTexSize   = coreVector2(1.0f, fLength) * (6.0f * fStrength);
     const coreVector2 vTexOffset = pBase->GetTexOffset() + (coreVector2(0.0f,-1.2f) + vMove) * coreVector2(1.0f, fLength) * (Core::System->GetTime() * fStrength);
 
     // 
-    for(coreUintW i = 0; i < MOSS_RAIN_NUM; ++i)
+    for(coreUintW i = 0u; i < MOSS_RAIN_NUM; ++i)
     {
         coreObject3D* pRain = (*pList->List())[i];
 
         pRain->SetPosition (coreVector3(vPosition,  15.0f * I_TO_F(i)));
         pRain->SetDirection(coreVector3(vDirection, 0.0f));
         pRain->SetTexSize  ((vTexSize));
-        pRain->SetTexOffset((vTexOffset + coreVector2(0.56f,0.36f) * I_TO_F(i*i)).Process(FRACT));
+        pRain->SetTexOffset((vTexOffset + coreVector2(0.56f,0.36f) * I_TO_F(i*i)).Processed(FRACT));
     }
     pList->MoveNormal();
 }

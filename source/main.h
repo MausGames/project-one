@@ -12,7 +12,7 @@
 //*-------------------------------------------------------------------------------*//
 //| Project One v0.1.0a (http://www.maus-games.at)                                |//
 //*-------------------------------------------------------------------------------*//
-//| Copyright (c) 2010-2016 Martin Mauersics                                      |//
+//| Copyright (c) 2010-2017 Martin Mauersics                                      |//
 //|                                                                               |//
 //| This software is provided 'as-is', without any express or implied             |//
 //| warranty. In no event will the authors be held liable for any damages         |//
@@ -41,12 +41,13 @@
 // TODO: create timer and int-value as tick-multiplier for sustained damage
 // TODO: remove magic numbers (regularly)
 // TODO: test framerate-lock for g-sync stuff, also test for 144hz displays if render x144 but move x60 is better
-// TODO: clean up shader modifiers and shaders, also try to look at unused uniforms, varyings and attributes (shadow-matrix is used in ship-shader !?), and reduce passing data across shader stages
+// TODO: clean up shader modifiers and shaders, also try to look at unused uniforms, varyings and attributes (shadow-matrix is used in ship-shader !? a_v1Blink used in ground-shader but only when instancing), and reduce passing data across shader stages
 // TODO: implement static/coherent branching interface instead of many shader-permutations ? (maybe only in situations with frequent switching)
 // TODO: use single-channel texture where possible
 // TODO: pre-calc HSVtoRGB
 // TODO: menu optimization by caching into framebuffer (general class for leaderboard, options, etc.)
-// TODO: protect main
+// TODO: protect main (LockFramerate)
+// TODO: check all shaders if alpha is required
 
 
 // ****************************************************************
@@ -85,16 +86,16 @@
 #define COLOR_ENERGY_GREEN   (coreVector3(0.270f, 0.710f, 0.270f))
 #define COLOR_FIRE_ORANGE    (coreVector3(0.991f, 0.305f, 0.042f))
 #define COLOR_FIRE_BLUE      (coreVector3(0.306f, 0.527f, 1.000f))
-#define COLOR_SHIP_YELLOW    (coreVector3( 50.0f/360.0f, 100.0f/100.0f,  85.0f/100.0f).HSVtoRGB())
-#define COLOR_SHIP_ORANGE    (coreVector3( 34.0f/360.0f, 100.0f/100.0f, 100.0f/100.0f).HSVtoRGB())
-#define COLOR_SHIP_RED       (coreVector3(  0.0f/360.0f,  68.0f/100.0f,  90.0f/100.0f).HSVtoRGB())
-#define COLOR_SHIP_PURPLE    (coreVector3(287.0f/360.0f,  55.0f/100.0f,  85.0f/100.0f).HSVtoRGB())
-#define COLOR_SHIP_BLUE      (coreVector3(201.0f/360.0f,  74.0f/100.0f,  85.0f/100.0f).HSVtoRGB())
-#define COLOR_SHIP_CYAN      (coreVector3(183.0f/360.0f,  70.0f/100.0f,  85.0f/100.0f).HSVtoRGB())
-#define COLOR_SHIP_GREEN     (coreVector3(118.0f/360.0f,  58.0f/100.0f,  70.0f/100.0f).HSVtoRGB())
-#define COLOR_SHIP_BROWN     (coreVector3( 40.0f/360.0f,  95.0f/100.0f,  70.0f/100.0f).HSVtoRGB())
-#define COLOR_SHIP_GREY      (coreVector3(  0.0f/360.0f,   0.0f/100.0f,  60.0f/100.0f).HSVtoRGB())
-#define COLOR_SHIP_ICE       (coreVector3(208.0f/360.0f,  32.0f/100.0f,  90.0f/100.0f).HSVtoRGB())
+#define COLOR_SHIP_YELLOW    (coreVector3( 50.0f/360.0f, 100.0f/100.0f,  85.0f/100.0f).HsvToRgb())
+#define COLOR_SHIP_ORANGE    (coreVector3( 34.0f/360.0f, 100.0f/100.0f, 100.0f/100.0f).HsvToRgb())
+#define COLOR_SHIP_RED       (coreVector3(  0.0f/360.0f,  68.0f/100.0f,  90.0f/100.0f).HsvToRgb())
+#define COLOR_SHIP_PURPLE    (coreVector3(287.0f/360.0f,  55.0f/100.0f,  85.0f/100.0f).HsvToRgb())
+#define COLOR_SHIP_BLUE      (coreVector3(201.0f/360.0f,  74.0f/100.0f,  85.0f/100.0f).HsvToRgb())
+#define COLOR_SHIP_CYAN      (coreVector3(183.0f/360.0f,  70.0f/100.0f,  85.0f/100.0f).HsvToRgb())
+#define COLOR_SHIP_GREEN     (coreVector3(118.0f/360.0f,  58.0f/100.0f,  70.0f/100.0f).HsvToRgb())
+#define COLOR_SHIP_BROWN     (coreVector3( 40.0f/360.0f,  95.0f/100.0f,  70.0f/100.0f).HsvToRgb())
+#define COLOR_SHIP_GREY      (coreVector3(  0.0f/360.0f,   0.0f/100.0f,  60.0f/100.0f).HsvToRgb())
+#define COLOR_SHIP_ICE       (coreVector3(208.0f/360.0f,  32.0f/100.0f,  90.0f/100.0f).HsvToRgb())
 #define COLOR_HEALTH(x)      (TernaryLerp(COLOR_MENU_RED, COLOR_MENU_YELLOW, COLOR_MENU_GREEN, x))
 #define COLOR_CHAIN(x)       (TernaryLerp(COLOR_MENU_RED, COLOR_MENU_PURPLE, COLOR_MENU_BLUE,  x))
 
@@ -111,9 +112,10 @@
 #define SHADER_BULLET        "#define _P1_BULLET_     (1) \n"        // energy
 #define SHADER_SPHERIC       "#define _P1_SPHERIC_    (1) \n"        // decal, energy
 #define SHADER_INVERT        "#define _P1_INVERT_     (1) \n"        // energy
-#define SHADER_DIRECT        "#define _P1_DIRECT_     (1) \n"        // outline, energy, effect_distortion
+#define SHADER_DIRECT        "#define _P1_DIRECT_     (1) \n"        // outline, energy, distortion
 #define SHADER_RING          "#define _P1_RING_       (1) \n"        // energy
 #define SHADER_WAVE          "#define _P1_WAVE_       (1) \n"        // object
+#define SHADER_GREY          "#define _P1_GREY_       (1) \n"        // vignette
 
 // collision types
 #define TYPE_PLAYER          (1)
@@ -154,9 +156,10 @@ inline FUNC_CONST coreFloat AngleDiff(const coreFloat x, const coreFloat y)
 // 
 inline FUNC_CONST coreFloat LerpSmoothRev(const coreFloat x, const coreFloat y, const coreFloat s)
 {
+    // TODO 
+    ASSERT(false)
     return (s >= 0.5f) ? LERP(y, (x + y) / 2.0f, SIN(s*PI)) :
                          LERP(x, (x + y) / 2.0f, SIN(s*PI));
-    // TODO   
 }
 
 // 

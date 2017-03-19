@@ -138,7 +138,8 @@ void cPlayer::EquipWeapon(const coreUintW iIndex, const coreInt32 iID)
     // same weapon should not be equipped twice
     for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
         for(coreUintW j = i+1u; j < PLAYER_WEAPONS; ++j)
-            ASSERT(m_apWeapon[i]->GetID() != m_apWeapon[j]->GetID())
+            ASSERT((m_apWeapon[i]->GetID() != m_apWeapon[j]->GetID()) ||
+                   (m_apWeapon[i]->GetID() == cNoWeapon::ID))
 
 #endif
 }
@@ -262,7 +263,7 @@ void cPlayer::Move()
 
 
         const coreMatrix2 mRota = coreMatrix3::Rotation(LERPS(0.0f, 2.0f*PI, time) * side).m12();
-        const coreVector2 vOri  = coreVector2(CLAMP(vDiff.x, -0.6f, 0.6f), 1.0f).Normalize() * mRota;
+        const coreVector2 vOri  = coreVector2(CLAMP(vDiff.x, -0.6f, 0.6f), 1.0f).Normalized() * mRota;
 
 
         // set new position and orientation
@@ -534,7 +535,7 @@ void cPlayer::TransformDark(const coreUint8 iStatus)
             pBullet->Deactivate(false);
 
             // 
-            const coreVector2 vDir = (pBullet->GetPosition().xy() - this->GetPosition().xy()).Normalize();
+            const coreVector2 vDir = (pBullet->GetPosition().xy() - this->GetPosition().xy()).Normalized();
             g_pSpecialEffects->CreateBlowColor(pBullet->GetPosition(), coreVector3(vDir, 0.0f), 60.0f, 2u, pBullet->GetColor3());
         });
     }

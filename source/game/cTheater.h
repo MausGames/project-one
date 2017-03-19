@@ -15,7 +15,7 @@
 
 // ****************************************************************
 // 
-#define THEATER_AREA_FACTOR (1.8f)   // 
+#define THEATER_AREA_FACTOR (1.6f)   // 
 #define THEATER_SPAWN_TIME  (8.0f)   // 
 #define THEATER_SPAWN_RAND  (3.5f)   // 
 
@@ -32,7 +32,7 @@ private:
         coreVector2 vDirection;   // 
 
         constexpr sMute(cEnemy* pEnemy, const coreVector2& vDirection)noexcept;
-        inline ~sMute();
+        void Destruct();
     };
 
 
@@ -46,6 +46,7 @@ private:
 
 public:
     cTheater()noexcept;
+    ~cTheater();
 
     DISABLE_COPY(cTheater)
 
@@ -67,16 +68,6 @@ constexpr cTheater::sMute::sMute(cEnemy* pEnemy, const coreVector2& vDirection)n
 : pEnemy     (pEnemy)
 , vDirection (vDirection)
 {
-}
-
-
-// ****************************************************************
-// 
-inline cTheater::sMute::~sMute()
-{
-    // 
-    pEnemy->Kill(false);
-    SAFE_DELETE(pEnemy)
 }
 
 

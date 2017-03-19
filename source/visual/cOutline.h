@@ -10,17 +10,22 @@
 #ifndef _P1_GUARD_OUTLINE_H_
 #define _P1_GUARD_OUTLINE_H_
 
+// TODO: check that bullet-styles are only used by objects with bullet-shaders
+// TODO: bullets on top of each other have their outline multiplied
+
 
 // ****************************************************************
 // outline definitions
-#define OUTLINE_STYLE_FULL   (0u)   // full outlining style
-#define OUTLINE_STYLE_DIRECT (1u)   // directional interpolated outlining style
-#define OUTLINE_STYLES       (2u)   // 
+#define OUTLINE_STYLE_FULL          (0u)   // full outlining style
+#define OUTLINE_STYLE_DIRECT        (1u)   // directional interpolated outlining style
+#define OUTLINE_STYLE_BULLET_FULL   (2u)   // 
+#define OUTLINE_STYLE_BULLET_DIRECT (3u)   // 
+#define OUTLINE_STYLES              (4u)   // 
 
 
 // ****************************************************************
 // outline-style class
-class cOutlineStyle final : public cBindContainer
+class cOutlineStyle final : public cBindContainerIn
 {
 private:
     coreProgramPtr s_pProgramSingle;      // shader-program for single outlined objects

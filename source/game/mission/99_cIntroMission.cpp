@@ -170,7 +170,7 @@ void cIntroMission::__SetupOwn()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
-                pEnemy->Configure(5, LERP(COLOR_SHIP_YELLOW, COLOR_SHIP_RED, I_TO_F(i) / I_TO_F(pSquad2->GetNumEnemies() - 1u)));
+                pEnemy->Configure(5, LERP(COLOR_SHIP_YELLOW, COLOR_SHIP_RED, I_TO_F(i) * RCP(I_TO_F(pSquad2->GetNumEnemies() - 1u))));
                 pEnemy->Resurrect();
             });
         });
@@ -277,7 +277,7 @@ void cIntroMission::__SetupOwn()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->Configure(4, LERP(COLOR_SHIP_YELLOW, COLOR_SHIP_RED, I_TO_F(i) / I_TO_F(pSquad1->GetNumEnemies() - 1u)));
+                pEnemy->Configure(4, LERP(COLOR_SHIP_YELLOW, COLOR_SHIP_RED, I_TO_F(i) * RCP(I_TO_F(pSquad1->GetNumEnemies() - 1u))));
                 pEnemy->Resurrect();
             });
         });
@@ -315,7 +315,7 @@ void cIntroMission::__SetupOwn()
         STAGE_ADD_PATH(pPath1)
         {
             pPath1->AddNode(coreVector2(-1.2f, 1.0f), coreVector2(1.0f, 0.0f));
-            pPath1->AddNode(coreVector2( 0.0f, 0.3f), coreVector2(1.0f,-1.0f).Normalize() * 2.0f);
+            pPath1->AddNode(coreVector2( 0.0f, 0.3f), coreVector2(1.0f,-1.0f).Normalized() * 2.0f);
             pPath1->AddNode(coreVector2( 1.2f,-0.4f), coreVector2(1.0f, 0.0f));
             pPath1->Refine();
         });
@@ -324,7 +324,7 @@ void cIntroMission::__SetupOwn()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
-                pEnemy->Configure(4, LERP(COLOR_SHIP_YELLOW, COLOR_SHIP_RED, I_TO_F(i) / I_TO_F(pSquad1->GetNumEnemies() - 1u)));
+                pEnemy->Configure(4, LERP(COLOR_SHIP_YELLOW, COLOR_SHIP_RED, I_TO_F(i) * RCP(I_TO_F(pSquad1->GetNumEnemies() - 1u))));
                 pEnemy->Resurrect();
             });
         });

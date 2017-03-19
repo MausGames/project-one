@@ -66,7 +66,7 @@ void cVausBoss::__ResurrectOwn()
     cViridoMission* pMission = s_cast<cViridoMission*>(g_pGame->GetMission());
 
     // 
-    pMission->EnableBall  (0u, coreVector2(0.0f,0.0f), coreVector2(-0.5f,1.0f).Normalize());
+    pMission->EnableBall  (0u, coreVector2(0.0f,0.0f), coreVector2(-0.5f,1.0f).Normalized());
     pMission->EnablePaddle(0u, this);
 }
 
@@ -298,13 +298,13 @@ void cVausBoss::__MoveOwn()
             switch(m_aiCounter[SUB_PHASE] % 3)
             {
             default: ASSERT(false)
-            case 2: vBallDir = coreVector2(-1.0f, -3.675f).Normalize(); break;
-            case 1: vBallDir = coreVector2(-1.0f, -1.212f).Normalize(); break;
-            case 0: vBallDir = coreVector2(-2.45f,-1.0f)  .Normalize(); break;
+            case 2: vBallDir = coreVector2(-1.0f, -3.675f).Normalized(); break;
+            case 1: vBallDir = coreVector2(-1.0f, -1.212f).Normalized(); break;
+            case 0: vBallDir = coreVector2(-2.45f,-1.0f)  .Normalized(); break;
             }
 
             // 
-            if(m_aiCounter[SUB_PHASE] % 2) vBallDir.InvertX();
+            if(m_aiCounter[SUB_PHASE] % 2) vBallDir = vBallDir.InvertedX();
 
             // 
             pMission->UnmakeSticky(vBallDir);
@@ -324,7 +324,7 @@ void cVausBoss::__MoveOwn()
         case 1: fSpeed = 1.0f/6.0f; 
             {
                 const coreFloat y = (pBall->GetPosition().x <= 0.0f) ? 1.211f : 1.212f;
-                const coreVector2 vDir = pBall->GetDirection().xy().Processed(SIGN) * coreVector2(1.0f, y).Normalize();
+                const coreVector2 vDir = pBall->GetDirection().xy().Processed(SIGN) * coreVector2(1.0f, y).Normalized();
                 pBall->SetDirection(coreVector3(vDir, 0.0f));
             }
 
@@ -502,7 +502,7 @@ void cVausBoss::__MoveOwn()
         {
             ++m_iPhase;
 
-            pMission->UnmakeSticky(coreVector2(1.0f,-1.0f).Normalize());
+            pMission->UnmakeSticky(coreVector2(1.0f,-1.0f).Normalized());
         }
     }
 
@@ -517,9 +517,9 @@ void cVausBoss::__MoveOwn()
     // 
     else if(m_iPhase == 40u)
     {
-        const coreFloat fDiff  = 0.2f;
-        const coreFloat fFirst = 0.8f;
-        const coreFloat fMax   = 0.6f;
+        constexpr coreFloat fDiff  = 0.2f;
+        constexpr coreFloat fFirst = 0.8f;
+        constexpr coreFloat fMax   = 0.6f;
         PHASE_CONTROL_TIMER(0u, 1.0f/2.0f, LERP_LINEAR)
         {
             const coreFloat fBallPosY = pBall->GetPosition().y / FOREGROUND_AREA.y;
@@ -568,7 +568,7 @@ void cVausBoss::__MoveOwn()
                 m_aCompanion[1].Kill(true);
 
                 m_aiCounter[IGNORE_BALL] = 0;
-                pMission->UnmakeSticky(coreVector2(1.0f,-1.0f).Normalize());
+                pMission->UnmakeSticky(coreVector2(1.0f,-1.0f).Normalized());
             }
         });
     }
@@ -703,7 +703,7 @@ void cVausBoss::__MoveOwn()
             pSquad->ForEachEnemy([](cEnemy* OUTPUT pEnemy, const coreUintW i)
             {
                 const coreVector2 vPos = pEnemy->GetPosition().xy();
-                const coreVector2 vDir = pEnemy->AimAtPlayer().Normalize();
+                const coreVector2 vDir = pEnemy->AimAtPlayer().Normalized();
 
                 g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.4f, pEnemy, vPos, vDir)->MakeOrange();
             });

@@ -110,20 +110,19 @@ vec2 (u_v2TexOffset)   // texture offset
 
 ## Functions ##
 
-bool  coreAnyInvocation       (in bool)            // condition across group of shader invocations
-bool  coreAllInvocations      (in bool)
 T     coreMin3                (in T, in T, in T)   // trinary minimum
 T     coreMax3                (in T, in T, in T)   // trinary maximum
 T     coreMed3                (in T, in T, in T)   // trinary median
-int   coreMod                 (in int, in int)     // modulo operator
-vec3  coreRGBtoHSV            (in vec3)            // RGB to HSV conversion
-vec3  coreHSVtoRGB            (in vec3)            // HSV to RGB conversion
-vec3  coreRGBtoYIQ            (in vec3)            // RGB to YIQ conversion   (BT.601, NTSC)
-vec3  coreYIQtoRGB            (in vec3)            // YIQ to RGB conversion   (BT.601, NTSC)
-vec3  coreRGBtoYUV            (in vec3)            // RGB to YUV conversion   (BT.709)
-vec3  coreYUVtoRGB            (in vec3)            // YUV to RGB conversion   (BT.709)
-vec3  coreRGBtoYCbCr          (in vec3)            // RGB to YCbCr conversion (BT.601, JPEG)
-vec3  coreYCbCrtoRGB          (in vec3)            // YCbCr to RGB conversion (BT.601, JPEG)
+bool  coreAnyInvocation       (in bool)            // condition across group of shader invocations
+bool  coreAllInvocations      (in bool)
+vec3  coreRgbToHsv            (in vec3)            // RGB to HSV conversion
+vec3  coreHsvToRgb            (in vec3)            // HSV to RGB conversion
+vec3  coreRgbToYiq            (in vec3)            // RGB to YIQ conversion   (BT.601, NTSC)
+vec3  coreYiqToRgb            (in vec3)            // YIQ to RGB conversion   (BT.601, NTSC)
+vec3  coreRgbToYuv            (in vec3)            // RGB to YUV conversion   (BT.709)
+vec3  coreYuvToRgb            (in vec3)            // YUV to RGB conversion   (BT.709)
+vec3  coreRgbToYcbcr          (in vec3)            // RGB to YCbCr conversion (BT.601, JPEG)
+vec3  coreYcbcrToRgb          (in vec3)            // YCbCr to RGB conversion (BT.601, JPEG)
 float coreLuminance           (in vec3)            // luminance value         (BT.709)
 float coreLengthSq            (in vec2)            // vector square length
 float coreLengthSq            (in vec3)
@@ -144,6 +143,8 @@ vec4  coreUnpackUnorm4x8      (in uint)            // value unpack (1x 32bit uin
 
 vec4  coreTexture2D    (in int v1Unit, in vec2 v2TexCoord)    // normal texture lookup
 float coreTextureShadow(in int v1Unit, in vec4 v4ProjCoord)   // PCF depth-compare for shadow textures
+
+CORE_SAMPLE_SHADING   // evaluate shader per sample (just place it somewhere in FragmentMain)
 
 #define PI    (3.1415926535897932384626433832795)
 #define EU    (2.7182818284590452353602874713527)

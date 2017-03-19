@@ -18,13 +18,6 @@ cCombatText::sData::sData(const coreChar* pcText, const coreVector2& vPosition, 
 {
 }
 
-cCombatText::sData::sData(sData&& m)noexcept
-: sText     (std::move(m.sText))
-, vPosition (m.vPosition)
-, iColor    (m.iColor)
-{
-}
-
 
 // ****************************************************************
 // constructor

@@ -634,9 +634,9 @@ void cDharukBoss::__MoveOwn()
             const coreFloat fOwnTime = LERPB(1.0f, 0.0f, 1.0f - fTime);
 
             // 
-            this->DefaultMoveLerp  (     m_avVector[0].xy(), 2.0f*m_avVector[0].xy().Normalize(),            fOwnTime);
+            this->DefaultMoveLerp  (     m_avVector[0].xy(), 2.0f*m_avVector[0].xy().Normalized(),           fOwnTime);
             this->DefaultRotateLerp(     m_avVector[1].x,    4.0f*PI,                                        fOwnTime);
-            this->SetOrientation   (LERP(m_avVector[2],      coreVector3(0.0f, 0.0f, SIGN(m_avVector[2].z)), fOwnTime).Normalize());
+            this->SetOrientation   (LERP(m_avVector[2],      coreVector3(0.0f, 0.0f, SIGN(m_avVector[2].z)), fOwnTime).Normalized());
 
             // 
             g_pEnvironment->SetTargetDirection(coreVector2::Direction(LERPS(m_avVector[1].y, 0.0f*PI, fTime*0.5f)));

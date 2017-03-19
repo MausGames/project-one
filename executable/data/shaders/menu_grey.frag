@@ -12,5 +12,5 @@ void FragmentMain()
 {
     // draw texture with grey-scale filter
     vec3 v3Color = coreTexture2D(0, v_av2TexCoord[0]).rgb;
-    gl_FragColor = vec4(vec3(dot(v3Color, vec3(0.2126, 0.7152, 0.0722))) * u_v4Color.rgb, u_v4Color.a);
+    gl_FragColor = vec4(vec3(coreLuminance(v3Color)) * u_v4Color.rgb, u_v4Color.a);
 }

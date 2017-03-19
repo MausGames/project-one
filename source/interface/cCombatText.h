@@ -32,7 +32,6 @@ private:
         coreUint32  iColor;      // packed RGBA color-value
 
         sData(const coreChar* pcText, const coreVector2& vPosition, const coreVector3& vColor)noexcept;
-        sData(sData&& m)noexcept;
     };
 
 

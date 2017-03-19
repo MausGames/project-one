@@ -282,7 +282,7 @@ void cViridoMission::__RenderOwnAttack()
     for(coreUintW i = 0u; i < VIRIDO_PADDLES; ++i)
         m_aPaddle[i].Render();
     for(coreUintW i = 0u; i < VIRIDO_PADDLES; ++i)
-        g_pOutline->GetStyle(OUTLINE_STYLE_DIRECT)->ApplyObject(&m_aPaddle[i]);
+        g_pOutline->GetStyle(OUTLINE_STYLE_BULLET_DIRECT)->ApplyObject(&m_aPaddle[i]);
 }
 
 
@@ -405,7 +405,7 @@ void cViridoMission::__MoveOwnAfter()
                         if(CONTAINS_BIT(m_iRealState, i))
                         {
                             // 
-                            coreVector2 vNewDir = coreVector2::Reflect(vBallDir, (vBallPos - oPaddleSphere.GetPosition().xy()).Normalize());
+                            coreVector2 vNewDir = coreVector2::Reflect(vBallDir, (vBallPos - oPaddleSphere.GetPosition().xy()).Normalized());
                             if(ABS(vPaddleDir.x) > ABS(vPaddleDir.y)) vNewDir.x = MAX(ABS(vNewDir.x), 0.75f) * vPaddleDir.x;
                                                                  else vNewDir.y = MAX(ABS(vNewDir.y), 0.75f) * vPaddleDir.y;
 

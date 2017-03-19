@@ -114,7 +114,7 @@ void cEnemy::Resurrect(const coreSpline2* pPath, const coreVector2& vFactor, con
     pPath->CalcPosDir(0.0f, &vPosition, &vDirection);
 
     // 
-    this->Resurrect((vPosition * vFactor) + vOffset, (vDirection * vFactor).Normalize());
+    this->Resurrect((vPosition * vFactor) + vOffset, (vDirection * vFactor).Normalized());
 }
 
 void cEnemy::Resurrect(const coreVector2& vPosition, const coreVector2& vDirection)
@@ -183,7 +183,7 @@ coreBool cEnemy::DefaultMovePath(const coreSpline2* pRawPath, const coreVector2&
 
     // 
     this->SetPosition (coreVector3(((vPosition  * vFactor) + vRawOffset) * FOREGROUND_AREA, 0.0f));
-    this->SetDirection(coreVector3( (vDirection * vFactor).Normalize(),                     0.0f));
+    this->SetDirection(coreVector3( (vDirection * vFactor).Normalized(),                    0.0f));
 
     // 
     return (fRawDistance >= pRawPath->GetTotalDistance()) ? true : false;
@@ -201,7 +201,7 @@ coreBool cEnemy::DefaultMoveTarget(const coreVector2& vTarget, const coreFloat f
     const coreVector2 vAim  = vDiff.Normalized();
 
     // 
-    const coreVector2 vDirection = (this->GetDirection().xy() + vAim       * (fSpeedTurn * Core::System->GetTime())).Normalize();
+    const coreVector2 vDirection = (this->GetDirection().xy() + vAim       * (fSpeedTurn * Core::System->GetTime())).Normalized();
     const coreVector2 vPosition  =  this->GetPosition ().xy() + vDirection * (fSpeedMove * Core::System->GetTime());
 
     // 
@@ -454,7 +454,7 @@ void cEnemyManager::Render()
                 // 
                 pEnemyActive->UpdateCustom([](coreFloat* OUTPUT pData, const cShip* pObject)
                 {
-                    *pData = pObject->GetBlink();
+                    (*pData) = pObject->GetBlink();
                 });
 
                 // 
@@ -531,7 +531,7 @@ void cEnemyManager::Move()
 // 
 void cEnemyManager::FreeEnemy(cEnemy** OUTPUT ppEnemy)
 {
-    cEnemy*       pEnemy    = *ppEnemy;
+    cEnemy*       pEnemy    = (*ppEnemy);
     sEnemySetGen* pEnemySet = m_apEnemySet[pEnemy->GetID()];
 
     // 
@@ -543,7 +543,7 @@ void cEnemyManager::FreeEnemy(cEnemy** OUTPUT ppEnemy)
     pEnemySet->iTopEnemy = 0u;
 
     // 
-    *ppEnemy = NULL;
+    (*ppEnemy) = NULL;
 }
 
 

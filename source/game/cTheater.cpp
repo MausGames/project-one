@@ -9,6 +9,17 @@
 #include "main.h"
 
 
+
+// ****************************************************************
+// 
+void cTheater::sMute::Destruct()
+{
+    // 
+    pEnemy->Kill(false);
+    SAFE_DELETE(pEnemy)
+}
+
+
 // ****************************************************************
 // constructor
 cTheater::cTheater()noexcept
@@ -16,6 +27,19 @@ cTheater::cTheater()noexcept
 , m_iCurType    (0u)
 , m_bCurSide    (false)
 {
+}
+
+
+// ****************************************************************
+// destructor
+cTheater::~cTheater()
+{
+    // 
+    FOR_EACH(it, m_aMute)
+        it->Destruct();
+
+    // 
+    m_aMute.clear();
 }
 
 
@@ -91,6 +115,7 @@ void cTheater::Move()
            (pEnemy->GetPosition().y < -FOREGROUND_AREA.y * THEATER_AREA_FACTOR) ||
            (pEnemy->GetPosition().y >  FOREGROUND_AREA.y * THEATER_AREA_FACTOR))
         {
+            it->Destruct();
             DYN_REMOVE(it, m_aMute)
         }
         else

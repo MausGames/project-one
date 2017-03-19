@@ -12,11 +12,13 @@
 
 // TODO: reduce reflection-framebuffer without reflection enabled
 // TODO: water-surface clipping for refraction
-// TODO: flying creates strong/fast water ripples
+// TODO: flying should create strong/fast water ripples
 // TODO: alpha mapping water (no distortion) for very bad hardware
 // TODO: specular contribution should be reduced by shadow (object shadow and environment darkening)
 // TODO: rainwater-resolution: realtime in options-menu ?
 // TODO: remove sqrt in rainy shader (pre-processing like in outdoor)
+// TODO: underwater may render reflection (not required)
+// TODO: glBindTexture has to reset internal texture-cache
 
 
 // ****************************************************************
@@ -36,14 +38,15 @@
 class cWater : public coreObject3D
 {
 protected:
-    coreFlow  m_fAnimation;         // water animation value
-    coreFloat m_fFlyOffset;         // current fly offset
+    coreFlow  m_fAnimation;             // water animation value
+    coreFloat m_fFlyOffset;             // current fly offset
 
-    coreFrameBuffer m_Reflection;   // reflection frame buffer (reduced resolution)
-    coreFrameBuffer m_Refraction;   // refraction frame buffer
-    coreFrameBuffer m_Depth;        // depth frame buffer (reduced resolution)
+    coreFrameBuffer m_Reflection;       // reflection frame buffer (reduced resolution)
+    coreFrameBuffer m_Refraction;       // refraction frame buffer
+    coreFrameBuffer m_Depth;            // depth frame buffer (reduced resolution)
 
-    coreObject2D m_Sky;             // sky-plane as reflection background
+    coreObject2D   m_Sky;               // sky-plane as reflection background
+    coreProgramPtr m_apSkyProgram[2];   // 
 
 
 public:

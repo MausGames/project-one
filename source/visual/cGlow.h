@@ -19,7 +19,7 @@
 
 // ****************************************************************
 // glow-effect class
-class cGlow final : public cBindContainer
+class cGlow final : public cBindContainerIn
 {
 private:
     cBlur m_Blur;   // blur aggregation object (glow frame buffer)

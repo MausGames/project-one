@@ -54,9 +54,8 @@ void cBlur::End()
         // forward to second blur stage (X convolution)
         m_aFrameBuffer[1].StartDraw();
         {
-            m_Transformer.DefineProgram(m_apConvProgram[0]);
             m_Transformer.DefineTexture(0u, m_aFrameBuffer[0].GetColorTarget(0u).pTexture);
-            m_Transformer.Render();
+            m_Transformer.Render(m_apConvProgram[0]);
         }
 
         // invalidate first blur stage
@@ -65,9 +64,8 @@ void cBlur::End()
         // forward to final blur stage (Y convolution)
         m_aFrameBuffer[0].StartDraw();
         {
-            m_Transformer.DefineProgram(m_apConvProgram[1]);
             m_Transformer.DefineTexture(0u, m_aFrameBuffer[1].GetColorTarget(0u).pTexture);
-            m_Transformer.Render();
+            m_Transformer.Render(m_apConvProgram[1]);
         }
 
         // invalidate second blur stage

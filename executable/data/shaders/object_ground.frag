@@ -63,5 +63,5 @@ void FragmentMain()
     vec3 v3Specular = vec3(0.15 * pow(v1ReflFactor, 100.0));
 
     // draw final color
-    gl_FragColor = vec4((v3Diffuse + v3Specular) * u_v4Color.rgb, u_v4Color.a);
+    gl_FragColor = vec4((v3Diffuse + v3Specular) * u_v4Color.rgb, 1.0);
 }

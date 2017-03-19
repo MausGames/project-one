@@ -33,7 +33,7 @@ cCloudBackground::cCloudBackground()noexcept
             const coreFloat   fHeight   = Core::Rand->Float(20.0f, 60.0f);
 
             // create object
-            coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>(oBase);
+            coreObject3D* pObject = CUSTOM_NEW(s_MemoryPool, coreObject3D, oBase);
 
             // set object properties
             pObject->SetPosition (coreVector3(vPosition, fHeight));
