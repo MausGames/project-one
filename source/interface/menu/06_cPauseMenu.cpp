@@ -28,14 +28,14 @@ cPauseMenu::cPauseMenu()noexcept
     m_ConfigButton.SetSize      (m_ResumeButton.GetSize());
     m_ConfigButton.GetCaption()->SetTextLanguage("SETTINGS");
 
-    m_RestartButton.Construct    (MENU_BUTTON, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL, 0u);
+    m_RestartButton.Construct    (MENU_BUTTON, MENU_FONT_ICON_2, MENU_OUTLINE_SMALL, 0u);
     m_RestartButton.DefineProgram("menu_border_program");
     m_RestartButton.SetPosition  (m_ResumeButton.GetPosition() + m_ResumeButton.GetSize()*coreVector2(-0.5f,0.0f) + coreVector2(0.03f,-0.18f));
     m_RestartButton.SetSize      (coreVector2(1.0f,1.0f) * m_ResumeButton.GetSize().y);
     m_RestartButton.SetAlignment (coreVector2(1.0f,0.0f));
     m_RestartButton.GetCaption()->SetText(ICON_REFRESH);
 
-    m_ExitButton.Construct    (MENU_BUTTON, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL, 0u);
+    m_ExitButton.Construct    (MENU_BUTTON, MENU_FONT_ICON_2, MENU_OUTLINE_SMALL, 0u);
     m_ExitButton.DefineProgram("menu_border_program");
     m_ExitButton.SetPosition  (m_ResumeButton.GetPosition() + m_ResumeButton.GetSize()*coreVector2(0.5f,0.0f) + coreVector2(-0.03f,-0.18f));
     m_ExitButton.SetSize      (coreVector2( 1.0f,1.0f) * m_ResumeButton.GetSize().y);
@@ -81,7 +81,7 @@ void cPauseMenu::Move()
 
             if(this->GetAlpha() >= 1.0f)
             {
-                if(m_ResumeButton.IsClicked() || Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS))
+                if(m_ResumeButton.IsClicked() || g_MenuInput.bCancel)
                 {
                     // 
                     m_iStatus = 1;

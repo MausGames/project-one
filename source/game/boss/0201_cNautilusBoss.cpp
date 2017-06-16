@@ -14,6 +14,10 @@
 
 
 // ****************************************************************
+// vector identifier
+
+
+// ****************************************************************
 // constructor
 cNautilusBoss::cNautilusBoss()noexcept
 {
@@ -22,8 +26,7 @@ cNautilusBoss::cNautilusBoss()noexcept
     this->DefineModelLow ("ship_projectone.md3"); 
 
     // set object properties
-    this->SetSize             (coreVector3(1.0f,1.0f,1.0f)); 
-    this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f)); 
+    this->SetSize(coreVector3(1.5f,1.5f,1.5f)); 
 
     // configure the boss
     this->Configure(10000, COLOR_SHIP_GREY); 

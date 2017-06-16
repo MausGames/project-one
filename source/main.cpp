@@ -425,8 +425,11 @@ static void DebugGame()
     }
     if(s_bInvincible && g_pGame)
     {
-        g_pGame->ForEachPlayer([](cPlayer* OUTPUT pPlayer, const coreUintW i)
+        g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
         {
+            if(CONTAINS_FLAG(pPlayer->GetStatus(), PLAYER_STATUS_DEAD))
+                pPlayer->Resurrect(pPlayer->GetPosition().xy());
+
             const coreInt32 iHeal = pPlayer->GetCurHealth() - pPlayer->GetMaxHealth();
             if(iHeal) pPlayer->TakeDamage(iHeal, ELEMENT_NEUTRAL);
         });
@@ -438,13 +441,16 @@ static void DebugGame()
         g_pPostProcessing->SetDebugMode(s_bDebugMode = !s_bDebugMode);
     }
 
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(M), CORE_INPUT_PRESS))
+    if(g_pEnvironment->GetBackground()->GetOutdoor())
     {
-        g_pEnvironment->GetBackground()->GetOutdoor()->LerpHeight(1.0f, 0.0f);
-    }
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(N), CORE_INPUT_PRESS))
-    {
-        g_pEnvironment->GetBackground()->GetOutdoor()->LerpHeight(0.0f, -25.0f);
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(M), CORE_INPUT_PRESS))
+        {
+            g_pEnvironment->GetBackground()->GetOutdoor()->LerpHeight(1.0f, 0.0f);
+        }
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(N), CORE_INPUT_PRESS))
+        {
+            g_pEnvironment->GetBackground()->GetOutdoor()->LerpHeight(0.0f, -25.0f);
+        }
     }
 
     // ########################## DEBUG ##########################

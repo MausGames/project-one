@@ -24,14 +24,19 @@ cGame::cGame(const coreBool bCoop)noexcept
 , m_bCoop               (bCoop)
 {
     // configure first player
-    m_aPlayer[0].Configure  (PLAYER_SHIP_ATK, COLOR_SHIP_RED, g_CurConfig.Input.aiType[0]);
+    m_aPlayer[0].Configure  (PLAYER_SHIP_ATK, COLOR_SHIP_RED);
     m_aPlayer[0].EquipWeapon(0u, cRayWeapon::ID);
 
     if(m_bCoop)
     {
         // configure second player
-        m_aPlayer[1].Configure  (PLAYER_SHIP_DEF, COLOR_SHIP_BLUE, g_CurConfig.Input.aiType[1]);
+        m_aPlayer[1].Configure  (PLAYER_SHIP_DEF, COLOR_SHIP_BLUE);
         m_aPlayer[1].EquipWeapon(0u, cRayWeapon::ID);
+
+        // 
+        m_aPlayer[0].SetInput(&g_aGameInput[0]);
+        m_aPlayer[0].SetInput(&g_aGameInput[1]);
+
         STATIC_ASSERT(GAME_PLAYERS == 2u)
     }
 
@@ -360,17 +365,21 @@ coreBool cGame::__HandleIntro()
         else
         {
             // create spline for intro animation (YZ)
-            coreSpline2 oSpline;
-            oSpline.AddNode(coreVector2(-140.0f,-10.0f), coreVector2( 1.0f, 0.0f)); // TODO: optimize to static 
-            oSpline.AddNode(coreVector2(  10.0f, 10.0f), coreVector2(-1.0f,-1.0f).Normalized());
-            oSpline.AddNode(coreVector2( -30.0f,  0.0f), coreVector2(-1.0f, 0.0f));
+            static coreSpline2 s_Spline;
+            if(!s_Spline.GetNumNodes())
+            {
+                s_Spline.AddNode(coreVector2(-140.0f,-10.0f), coreVector2( 1.0f, 0.0f));
+                s_Spline.AddNode(coreVector2(  10.0f, 10.0f), coreVector2(-1.0f,-1.0f).Normalized());
+                s_Spline.AddNode(coreVector2( -30.0f,  0.0f), coreVector2(-1.0f, 0.0f));
+                s_Spline.Refine();
+            }
 
             this->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
             {
                 // calculate new player position and rotation
                 const coreFloat   fTime = CLAMP((i ? 1.0f : 1.08f) + m_fTimeMission / GAME_INTRO_DURATION, 0.0f, 1.0f);
-                const coreVector2 vPos  = oSpline.CalcPosition  (LERPB(0.0f, oSpline.GetTotalDistance(), fTime));
-                const coreVector2 vDir  = coreVector2::Direction(LERPS(0.0f, 4.0f*PI,                    fTime));
+                const coreVector2 vPos  = s_Spline.CalcPosition (LERPB(0.0f, s_Spline.GetTotalDistance(), fTime));
+                const coreVector2 vDir  = coreVector2::Direction(LERPS(0.0f, 4.0f*PI,                     fTime));
 
                 // 
                 if((pPlayer->GetPosition().y < -FOREGROUND_AREA.y) && (vPos.x >= -FOREGROUND_AREA.y))
@@ -436,7 +445,14 @@ void cGame::__HandleDefeat()
 // handle default object collisions
 void cGame::__HandleCollisions()
 {
-    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_ENEMY, [](cPlayer* OUTPUT pPlayer, cEnemy* OUTPUT pEnemy, const coreBool bFirstHit)
+    // 
+    m_EnemyManager.ForEachEnemy([](cEnemy* OUTPUT pEnemy)
+    {
+        pEnemy->ActivateModelLowOnly();
+    });
+
+    // 
+    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_ENEMY, [](cPlayer* OUTPUT pPlayer, cEnemy* OUTPUT pEnemy, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
 
@@ -445,31 +461,35 @@ void cGame::__HandleCollisions()
         pEnemy ->TakeDamage(50, ELEMENT_NEUTRAL, pPlayer);
 
         // 
-        const coreVector2 vCenter = (pPlayer->GetPosition().xy() + pEnemy->GetPosition().xy()) * 0.5f;
-        g_pSpecialEffects->MacroExplosionPhysicalSmall(coreVector3(vCenter, 0.0f));
+        g_pSpecialEffects->MacroExplosionPhysicalSmall(vIntersection);
     });
 
-    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_BULLET_ENEMY, [](cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreBool bFirstHit)
+    // 
+    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_BULLET_ENEMY, [](cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         // 
         pPlayer->TakeDamage(pBullet->GetDamage(), pBullet->GetElement());
-
-        // 
-        const coreVector2 vCenter = (pPlayer->GetPosition().xy() + pBullet->GetPosition().xy()) * 0.5f;
-        pBullet->Deactivate(true, vCenter);
+        pBullet->Deactivate(true, vIntersection.xy());
     });
 
-    Core::Manager::Object->TestCollision(TYPE_ENEMY, TYPE_BULLET_PLAYER, [](cEnemy* OUTPUT pEnemy, cBullet* OUTPUT pBullet, const coreBool bFirstHit)
+    // 
+    Core::Manager::Object->TestCollision(TYPE_ENEMY, TYPE_BULLET_PLAYER, [](cEnemy* OUTPUT pEnemy, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         // 
         if((ABS(pEnemy->GetPosition().x) >= FOREGROUND_AREA.x * 1.1f) ||
            (ABS(pEnemy->GetPosition().y) >= FOREGROUND_AREA.y * 1.1f)) return;
 
         // 
-        pEnemy->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), s_cast<cPlayer*>(pBullet->GetOwner()));
+        pEnemy ->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), s_cast<cPlayer*>(pBullet->GetOwner()));
+        pBullet->Deactivate(true, vIntersection.xy());
 
         // 
-        const coreVector2 vCenter = (pEnemy->GetPosition().xy() + pBullet->GetPosition().xy()) * 0.5f;
-        pBullet->Deactivate(true, vCenter);
+        g_pSpecialEffects->RumblePlayer(s_cast<cPlayer*>(pBullet->GetOwner()), SPECIAL_RUMBLE_DEFAULT);
+    });
+
+    // 
+    m_EnemyManager.ForEachEnemy([](cEnemy* OUTPUT pEnemy)
+    {
+        pEnemy->ActivateModelDefault();
     });
 }

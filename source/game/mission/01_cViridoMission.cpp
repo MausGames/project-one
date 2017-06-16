@@ -63,13 +63,13 @@ cViridoMission::cViridoMission()noexcept
         const coreBool bBoss = i ? false : true;
 
         // 
-        m_aPaddle[i].DefineModel  ("object_boss_vaus_paddle.md3");
-        m_aPaddle[i].DefineTexture(0u, "effect_energy.png");
-        m_aPaddle[i].DefineProgram("effect_energy_bullet_direct_program");
-        m_aPaddle[i].SetSize      (bBoss ? coreVector3(3.5f,2.5f,2.5f) : coreVector3(2.5f,2.5f,2.5f));
-        m_aPaddle[i].SetColor3    (bBoss ? COLOR_ENERGY_BLUE           : COLOR_ENERGY_RED);
-        m_aPaddle[i].SetTexSize   (coreVector2(1.2f,0.25f) * 0.5f);
-        m_aPaddle[i].SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+        m_aPaddle[i].DefineModel         ("object_boss_vaus_paddle.md3");
+        m_aPaddle[i].DefineTexture       (0u, "effect_energy.png");
+        m_aPaddle[i].DefineProgram       ("effect_energy_bullet_direct_program");
+        m_aPaddle[i].SetSize             (bBoss ? coreVector3(3.5f,2.5f,2.5f) : coreVector3(2.5f,2.5f,2.5f));
+        m_aPaddle[i].SetColor3           (bBoss ? COLOR_ENERGY_BLUE           : COLOR_ENERGY_RED);
+        m_aPaddle[i].SetTexSize          (coreVector2(1.2f,0.25f) * 0.5f);
+        m_aPaddle[i].SetEnabled          (CORE_OBJECT_ENABLE_NOTHING);
         m_aPaddle[i].SetCollisionModifier(coreVector3(0.6f,1.0f,1.0f));
 
         // 
@@ -248,7 +248,6 @@ void cViridoMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->Configure(5, COLOR_SHIP_BLUE);
-                pEnemy->SetCollisionModifier(coreVector3(1.1f,1.1f,1.5f));
             });
         });
 
@@ -382,7 +381,7 @@ void cViridoMission::__MoveOwnAfter()
     if(!CONTAINS_BIT(m_iStickyState, 1u))
     {
         // 
-        Core::Manager::Object->TestCollision(TYPE_OBJECT(3), TYPE_OBJECT(2), [this](coreObject3D* OUTPUT pPaddle, coreObject3D* OUTPUT pBall, const coreBool bFirstHit)
+        Core::Manager::Object->TestCollision(TYPE_OBJECT(3), TYPE_OBJECT(2), [this](coreObject3D* OUTPUT pPaddle, coreObject3D* OUTPUT pBall, const coreVector3& vIntersection, const coreBool bFirstHit)
         {
             // 
             if(coreVector2::Dot(pPaddle->GetDirection().xy(), pBall->GetDirection().xy()) >= 0.0f)
@@ -396,7 +395,8 @@ void cViridoMission::__MoveOwnAfter()
                     const coreObject3D& oPaddleSphere = m_aPaddleSphere[i];
 
                     // 
-                    if(coreObjectManager::TestCollision(&oPaddleSphere, pBall))
+                    coreVector3 vDummy;
+                    if(coreObjectManager::TestCollision(&oPaddleSphere, pBall, &vDummy))
                     {
                         const coreVector2 vBallPos   = pBall  ->GetPosition ().xy();
                         const coreVector2 vBallDir   = pBall  ->GetDirection().xy();
@@ -449,7 +449,7 @@ void cViridoMission::__MoveOwnAfter()
     }
 
     // 
-    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_OBJECT(2), [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBall, const coreBool bFirstHit)
+    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_OBJECT(2), [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBall, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
 
@@ -457,8 +457,7 @@ void cViridoMission::__MoveOwnAfter()
         pPlayer->TakeDamage(10, ELEMENT_GREEN);
 
         // 
-        const coreVector3 vCenter = coreVector3((pPlayer->GetPosition().xy() + pBall->GetPosition().xy()) * 0.5f, 0.0f);
-        g_pSpecialEffects->MacroExplosionColorSmall(vCenter, COLOR_ENERGY_GREEN);
+        g_pSpecialEffects->MacroExplosionColorSmall(vIntersection, COLOR_ENERGY_GREEN);
     });
 
     // 
@@ -476,7 +475,7 @@ void cViridoMission::__MoveOwnAfter()
         const coreVector2 vOldBallPos = vBallPos - vBallDir * FOREGROUND_AREA * (CONTAINS_BIT(m_iStickyState, 1u) ? 0.0f : VIRIDO_BALL_SPEED * Core::System->GetTime());
 
         // 
-        Core::Manager::Object->TestCollision(TYPE_ENEMY, &oBall, [&](cEnemy* OUTPUT pEnemy, const coreBool bFirstHit)
+        Core::Manager::Object->TestCollision(TYPE_ENEMY, &oBall, [&](cEnemy* OUTPUT pEnemy, const coreVector3& vIntersection, const coreBool bFirstHit)
         {
             // 
             if(pEnemy->GetID() != cScoutEnemy::ID) return;

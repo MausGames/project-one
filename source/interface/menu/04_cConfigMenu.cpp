@@ -18,7 +18,7 @@ cConfigMenu::cConfigMenu()noexcept
     m_Background.DefineTexture(0u, "menu_background_black.png");
     m_Background.DefineProgram("menu_border_program");
     m_Background.SetPosition  (coreVector2(0.0f,0.0f));
-    m_Background.SetSize      (coreVector2(0.8f,0.55f));
+    m_Background.SetSize      (coreVector2(0.8f,0.65f));
 
     m_VideoTab.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL, 0u);
     m_VideoTab.DefineProgram("menu_border_program");
@@ -72,7 +72,7 @@ cConfigMenu::cConfigMenu()noexcept
     m_DiscardButton.SetOverride  (-1);
     m_DiscardButton.GetCaption()->SetTextLanguage("DISCARD");
 
-    m_BackButton.Construct    (MENU_BUTTON, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL, 0u);
+    m_BackButton.Construct    (MENU_BUTTON, MENU_FONT_ICON_2, MENU_OUTLINE_SMALL, 0u);
     m_BackButton.DefineProgram("menu_border_program");
     m_BackButton.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.5f,-0.5f) + coreVector2(0.0f,-0.02f));
     m_BackButton.SetSize      (coreVector2( 1.0f, 1.0f) * m_SaveButton.GetSize().y);
@@ -88,6 +88,8 @@ cConfigMenu::cConfigMenu()noexcept
         if(i == ENTRY_VIDEO_ASSETQUALITY) ++iOffset;
         if(i == ENTRY_AUDIO_MUSICVOLUME)  ++iOffset;
         if(i == ENTRY_AUDIO_AMBIENTSOUND) ++iOffset;
+        if(i == ENTRY_INPUT_MOVEUP)       ++iOffset;
+        if(i == ENTRY_INPUT_ACTION1)      ++iOffset;
 
         m_aLabel[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL, 0u);
         m_aLabel[i].SetPosition (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.04f, -0.05f - 0.025f*I_TO_F(iOffset)));
@@ -104,10 +106,21 @@ cConfigMenu::cConfigMenu()noexcept
         m_aLine[i].DefineProgram("menu_inner_program");
         m_aLine[i].SetPosition  (coreVector2(0.0f, m_aLabel[i].GetPosition().y));
         m_aLine[i].SetSize      (coreVector2(m_Background.GetSize().x, 0.05f));
-        m_aLine[i].SetTexOffset (coreVector2(I_TO_F(i)*0.1f, 0.0f));
+        m_aLine[i].SetTexOffset (coreVector2(I_TO_F(i)*0.09f, 0.0f));
     }
 
-    #define __SET_SWITCHBOX(x,n,s)                                                   \
+    for(coreUintW i = 0u; i < INPUT_KEYS_MOVE; ++i)
+    {
+        m_aArrow[i].Construct  (MENU_FONT_ICON_1, MENU_OUTLINE_SMALL, 0u);
+        m_aArrow[i].SetPosition(m_aLabel[ENTRY_INPUT_MOVEUP + i].GetPosition() + coreVector2(0.21f,0.0f));
+        m_aArrow[i].SetColor3  (COLOR_MENU_WHITE * MENU_LIGHT_IDLE);
+    }
+    m_aArrow[0].SetText(ICON_ARROW_UP);
+    m_aArrow[1].SetText(ICON_ARROW_LEFT);
+    m_aArrow[2].SetText(ICON_ARROW_DOWN);
+    m_aArrow[3].SetText(ICON_ARROW_RIGHT);
+
+    #define __SET_OPTION(x,n,s)                                                      \
     {                                                                                \
         coreLabel& oLabel = m_aLabel[ENTRY_ ## n];                                   \
         oLabel.SetTextLanguage("CONFIG_" #n);                                        \
@@ -120,24 +133,70 @@ cConfigMenu::cConfigMenu()noexcept
         x.GetCaption()->ChangeLanguage(Core::Language);                              \
     }
     {
-        __SET_SWITCHBOX(m_Display,       VIDEO_DISPLAY,       0.26f)
-        __SET_SWITCHBOX(m_Resolution,    VIDEO_RESOLUTION,    0.26f)
-        __SET_SWITCHBOX(m_DisplayMode,   VIDEO_DISPLAYMODE,   0.26f)
-        __SET_SWITCHBOX(m_AntiAliasing,  VIDEO_ANTIALIASING,  0.26f)
-        __SET_SWITCHBOX(m_TextureFilter, VIDEO_TEXTUREFILTER, 0.26f)
-        __SET_SWITCHBOX(m_AssetQuality,  VIDEO_ASSETQUALITY,  0.26f)
-        __SET_SWITCHBOX(m_ShadowQuality, VIDEO_SHADOWQUALITY, 0.26f)
-        __SET_SWITCHBOX(m_OverallVolume, AUDIO_OVERALLVOLUME, 0.26f)
-        __SET_SWITCHBOX(m_MusicVolume,   AUDIO_MUSICVOLUME,   0.26f)
-        __SET_SWITCHBOX(m_EffectVolume,  AUDIO_EFFECTVOLUME,  0.26f)
-        __SET_SWITCHBOX(m_AmbientSound,  AUDIO_AMBIENTSOUND,  0.26f)
-        __SET_SWITCHBOX(m_Language,      GAME_LANGUAGE,       0.26f)
+        __SET_OPTION(m_Display,       VIDEO_DISPLAY,       0.26f)
+        __SET_OPTION(m_Resolution,    VIDEO_RESOLUTION,    0.26f)
+        __SET_OPTION(m_DisplayMode,   VIDEO_DISPLAYMODE,   0.26f)
+        __SET_OPTION(m_AntiAliasing,  VIDEO_ANTIALIASING,  0.26f)
+        __SET_OPTION(m_TextureFilter, VIDEO_TEXTUREFILTER, 0.26f)
+        __SET_OPTION(m_AssetQuality,  VIDEO_ASSETQUALITY,  0.26f)
+        __SET_OPTION(m_ShadowQuality, VIDEO_SHADOWQUALITY, 0.26f)
+        __SET_OPTION(m_OverallVolume, AUDIO_OVERALLVOLUME, 0.26f)
+        __SET_OPTION(m_MusicVolume,   AUDIO_MUSICVOLUME,   0.26f)
+        __SET_OPTION(m_EffectVolume,  AUDIO_EFFECTVOLUME,  0.26f)
+        __SET_OPTION(m_AmbientSound,  AUDIO_AMBIENTSOUND,  0.26f)
+        __SET_OPTION(m_Language,      GAME_LANGUAGE,       0.26f)
 
+        m_Display      .SetAutomatic(0.0f);   // # because of realtime-update
         m_ShadowQuality.SetAutomatic(0.0f);
         m_Language     .SetAutomatic(0.0f);
+        m_AmbientSound .SetEndless(true);
         m_Language     .SetEndless(true);
     }
-    #undef __SET_SWITCHBOX
+    #undef __SET_OPTION
+
+    #define __SET_INPUT(x,n,s)                                                                   \
+    {                                                                                            \
+        coreLabel& oLabel = m_aLabel[ENTRY_ ## n];                                               \
+        oLabel.SetTextLanguage("CONFIG_" #n);                                                    \
+                                                                                                 \
+        m_aInput[i].x.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL, 0u); \
+        m_aInput[i].x.SetPosition (coreVector2(-1.00f,1.00f) * oLabel.GetPosition() - vOffset);  \
+        m_aInput[i].x.SetSize     (coreVector2(   (s),0.03f));                                   \
+        m_aInput[i].x.SetAlignment(coreVector2(-1.00f,0.00f));                                   \
+        m_aInput[i].x.GetCaption()->SetColor3     (COLOR_MENU_WHITE);                            \
+        m_aInput[i].x.GetCaption()->ChangeLanguage(Core::Language);                              \
+    }
+    {
+        for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i)
+        {
+            const coreVector2 vOffset = coreVector2(0.25f * I_TO_F(MENU_CONFIG_INPUTS - i - 1u), 0.0f);
+
+            __SET_INPUT(oType,      INPUT_TYPE,      0.22f)
+            __SET_INPUT(oRumble,    INPUT_RUMBLE,    0.22f)
+            __SET_INPUT(oMoveUp,    INPUT_MOVEUP,    0.22f)
+            __SET_INPUT(oMoveLeft,  INPUT_MOVELEFT,  0.22f)
+            __SET_INPUT(oMoveDown,  INPUT_MOVEDOWN,  0.22f)
+            __SET_INPUT(oMoveRight, INPUT_MOVERIGHT, 0.22f)
+            __SET_INPUT(aAction[0], INPUT_ACTION1,   0.22f)
+            __SET_INPUT(aAction[1], INPUT_ACTION2,   0.22f)
+            __SET_INPUT(aAction[2], INPUT_ACTION3,   0.22f)
+            __SET_INPUT(aAction[3], INPUT_ACTION4,   0.22f)
+
+            m_aInput[i].oType  .SetAutomatic(0.0f);   // # because of realtime-update
+            m_aInput[i].oType  .SetEndless(true);
+            m_aInput[i].oRumble.SetEndless(true);
+        }
+    }
+    #undef __SET_INPUT
+
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i)
+    {
+        const coreButton& oLast = this->__RetrieveInputButton(i, INPUT_KEYS - 1u);
+
+        m_aInput[i].oHeader.Construct  (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL, 0u);
+        m_aInput[i].oHeader.SetPosition(oLast.GetPosition() - coreVector2(oLast.GetSize().x * 0.5f, 0.05f));
+        m_aInput[i].oHeader.SetColor3  (COLOR_MENU_WHITE);
+    }
 
     // fill configuration entries
     const std::vector<std::string>& asLanguageList = cMenu::GetLanguageList().get_keylist();
@@ -162,9 +221,11 @@ cConfigMenu::cConfigMenu()noexcept
     for(coreUintW i = 0u; i <= 100u; i += 10u) m_EffectVolume .AddEntry(PRINT("%zu%%", i), i);
     m_AmbientSound .AddEntryLanguage("VALUE_OFF",  0u);
     m_AmbientSound .AddEntryLanguage("VALUE_ON",   1u);
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oRumble.AddEntryLanguage("VALUE_OFF", 0u);
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oRumble.AddEntryLanguage("VALUE_ON", 10u);
 
     // bind menu objects
-    for(coreUintW i = 0u; i < this->GetNumSurfaces(); ++i)
+    for(coreUintW i = 0u, ie = this->GetNumSurfaces(); i < ie; ++i)
     {
         if(i != SURFACE_CONFIG_VIDEO) this->BindObject(i, &m_VideoTab);
         if(i != SURFACE_CONFIG_AUDIO) this->BindObject(i, &m_AudioTab);
@@ -205,6 +266,16 @@ cConfigMenu::cConfigMenu()noexcept
     this->BindObject(SURFACE_CONFIG_AUDIO, &m_EffectVolume);
     this->BindObject(SURFACE_CONFIG_AUDIO, &m_AmbientSound);
     this->BindObject(SURFACE_CONFIG_GAME,  &m_Language);
+
+    for(coreUintW i = 0u; i < INPUT_KEYS_MOVE;    ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aArrow[i]);
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aInput[i].oHeader);
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aInput[i].oType);
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aInput[i].oRumble);
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i)
+    {
+        for(coreUintW j = 0u; j < INPUT_KEYS; ++j)
+            this->BindObject(SURFACE_CONFIG_INPUT, &this->__RetrieveInputButton(i, j));
+    }
 }
 
 
@@ -228,6 +299,14 @@ void cConfigMenu::Move()
     case SURFACE_CONFIG_VIDEO:
         {
             // 
+            if(m_Display.IsClickedArrow())
+                this->__LoadResolutions(m_Display.GetCurEntry().tValue);
+
+            // 
+            if(m_ShadowQuality.IsClickedArrow())
+                this->__UpdateShadowQuality();
+
+            // 
             cMenu::UpdateSwitchBox(&m_Display);
             cMenu::UpdateSwitchBox(&m_Resolution);
             cMenu::UpdateSwitchBox(&m_DisplayMode);
@@ -242,19 +321,15 @@ void cConfigMenu::Move()
                  if(m_ShadowQuality.GetCurIndex() == 0u) m_ShadowQuality.GetCaption()->SetColor3(COLOR_MENU_WHITE);
             else if(m_ShadowQuality.GetCurIndex() == 1u) m_ShadowQuality.GetCaption()->SetColor3(COLOR_MENU_YELLOW);
             else if(m_ShadowQuality.GetCurIndex() == 2u) m_ShadowQuality.GetCaption()->SetColor3(COLOR_MENU_GREEN);
-
-            // 
-            if(m_Display.IsClickedArrow())
-                this->__LoadResolutions(m_Display.GetCurEntry().second);
-
-            // 
-            if(m_ShadowQuality.IsClickedArrow())
-                this->__UpdateShadowQuality();
         }
         break;
 
     case SURFACE_CONFIG_AUDIO:
         {
+            // 
+            if(m_OverallVolume.IsClickedArrow(CORE_INPUT_LEFT, CORE_INPUT_HOLD))
+                this->__UpdateOverallVolume();
+
             // 
             cMenu::UpdateSwitchBox(&m_OverallVolume);
             cMenu::UpdateSwitchBox(&m_MusicVolume);
@@ -262,30 +337,127 @@ void cConfigMenu::Move()
             cMenu::UpdateSwitchBox(&m_AmbientSound);
 
             // 
-            m_OverallVolume.GetCaption()->SetColor3(COLOR_HEALTH(I_TO_F(m_OverallVolume.GetCurEntry().second) * 0.01f));
-            m_MusicVolume  .GetCaption()->SetColor3(COLOR_HEALTH(I_TO_F(m_MusicVolume  .GetCurEntry().second) * 0.01f));
-            m_EffectVolume .GetCaption()->SetColor3(COLOR_HEALTH(I_TO_F(m_EffectVolume .GetCurEntry().second) * 0.01f));
-
-            // 
-            if(m_OverallVolume.IsClickedArrow(CORE_INPUT_LEFT, CORE_INPUT_HOLD))
-                this->__UpdateOverallVolume();
+            m_OverallVolume.GetCaption()->SetColor3(COLOR_HEALTH(I_TO_F(m_OverallVolume.GetCurEntry().tValue) * 0.01f));
+            m_MusicVolume  .GetCaption()->SetColor3(COLOR_HEALTH(I_TO_F(m_MusicVolume  .GetCurEntry().tValue) * 0.01f));
+            m_EffectVolume .GetCaption()->SetColor3(COLOR_HEALTH(I_TO_F(m_EffectVolume .GetCurEntry().tValue) * 0.01f));
         }
         break;
 
     case SURFACE_CONFIG_INPUT:
         {
+            for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i)
+            {
+                sPlayerInput& oInput = m_aInput[i];
 
+                // 
+                if(oInput.oType.IsClickedArrow())
+                {
+                    for(coreUintW j = 0u, je = oInput.oType.GetNumEntries(); j < je; ++j)
+                    {
+                        coreBool bSkip = false;
+
+                        // skip joystick/gamepad input sets without available device
+                        if((oInput.oType.GetCurEntry().tValue >= INPUT_SETS_KEYBOARD) && (oInput.oType.GetCurEntry().tValue - INPUT_SETS_KEYBOARD >= Core::Input->GetJoystickNum()))
+                            bSkip = true;
+
+                        // skip already assigned input sets
+                        for(coreUintW k = 0u; k < MENU_CONFIG_INPUTS; ++k)
+                        {
+                            if(g_CurConfig.Input.aiType[k] == oInput.oType.GetCurEntry().tValue)
+                            {
+                                bSkip = true;
+                                break;
+                            }
+                        }
+
+                        // 
+                        if(bSkip)
+                        {
+                                 if(oInput.oType.GetArrow(0u)->IsClicked()) oInput.oType.Previous();
+                            else if(oInput.oType.GetArrow(1u)->IsClicked()) oInput.oType.Next();
+                        }
+                        else break;
+                    }
+
+                    // 
+                    g_CurConfig.Input.aiType[i] = oInput.oType.GetCurEntry().tValue;
+                    this->__LoadInputs();
+                }
+
+                // 
+                cMenu::UpdateSwitchBox(&oInput.oType);
+                cMenu::UpdateSwitchBox(&oInput.oRumble);
+
+                for(coreUintW j = 0u; j < INPUT_KEYS; ++j)
+                {
+                    coreButton& oButton   = this->__RetrieveInputButton  (i, j);
+                    coreInt16&  iCurValue = this->__RetrieveInputCurValue(i, j);
+
+                    // 
+                    cMenu::UpdateButton(&oButton, oButton.IsFocused());
+                    oButton.SetAlpha(oButton.GetAlpha() * (oButton.IsFocused() ? 1.0f : 0.75f));
+
+                    if(oButton.IsClicked())
+                    {
+                        const coreChar*  pcText = PRINT("%s [%s]", Core::Language->GetString("QUESTION_MAPPING"), m_aLabel[ENTRY_INPUT_MOVEUP + j].GetText());
+                        const coreUint8& iType  = oInput.oType.GetCurEntry().tValue;
+
+                        // 
+                        g_pMenu->GetMsgBox()->ShowMapping(pcText, iType, [&](const coreInt32 iAnswer, const coreInt16 iKey)
+                        {
+                            if(iAnswer != MSGBOX_ANSWER_KEY) return;
+
+                            // check if new key is already assigned somewhere else
+                            for(coreUintW k = 0u; k < INPUT_SETS; ++k)
+                            {
+                                for(coreUintW m = 0u; m < INPUT_KEYS; ++m)
+                                {
+                                    coreInt16& iOtherCurValue = this->__RetrieveInputDirValue(k, m);
+
+                                    // find same value and same input set type
+                                    if((iOtherCurValue == iKey) && ((k < INPUT_SETS_KEYBOARD) == (iType < INPUT_SETS_KEYBOARD)) && (&iOtherCurValue != &iCurValue))
+                                    {
+                                        // replace with old key
+                                        iOtherCurValue = iCurValue;
+
+                                        // update related button if currently visible
+                                        for(coreUintW n = 0u; n < MENU_CONFIG_INPUTS; ++n)
+                                        {
+                                            if(g_CurConfig.Input.aiType[n] == k)
+                                            {
+                                                coreButton& oOtherButton = this->__RetrieveInputButton(n, m);
+                                                oOtherButton.GetCaption()->SetText(cConfigMenu::__PrintKey(k, iOtherCurValue));
+                                                break;
+                                            }
+                                        }
+
+                                        // leave all loops
+                                        k = INPUT_SETS; m = INPUT_KEYS;
+                                    }
+                                }
+                            }
+
+                            // 
+                            iCurValue = iKey;
+                            oButton.GetCaption()->SetText(cConfigMenu::__PrintKey(iType, iCurValue));
+
+                            // 
+                            this->CheckValues();
+                        });
+                    }
+                }
+            }
         }
         break;
 
     case SURFACE_CONFIG_GAME:
         {
             // 
-            cMenu::UpdateSwitchBox(&m_Language);
-
-            // 
             if(m_Language.IsClickedArrow())
                 this->__UpdateLanguage();
+
+            // 
+            cMenu::UpdateSwitchBox(&m_Language);
         }
         break;
 
@@ -306,7 +478,7 @@ void cConfigMenu::Move()
             // 
             this->LoadValues();
         }
-        else if(m_BackButton.IsClicked() || Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS))
+        else if(m_BackButton.IsClicked() || g_MenuInput.bCancel)
         {
             if(m_SaveButton.GetOverride() >= 0)
             {
@@ -331,7 +503,7 @@ void cConfigMenu::Move()
     }
 
     // 
-    if(Core::Input->GetMouseButton(CORE_INPUT_LEFT, CORE_INPUT_HOLD))
+    if(Core::Input->GetAnyButton(CORE_INPUT_HOLD))
         this->CheckValues();
 
     // 
@@ -354,23 +526,24 @@ void cConfigMenu::Move()
 // 
 void cConfigMenu::CheckValues()
 {
-    const coreUint8&   iCurDisplay    = m_Display   .GetCurEntry().second;
-    const coreUint8&   iCurValue      = m_Resolution.GetCurEntry().second;
+    const coreUint8&   iCurDisplay    = m_Display   .GetCurEntry().tValue;
+    const coreUint8&   iCurValue      = m_Resolution.GetCurEntry().tValue;
     const coreVector2& vCurResolution = Core::System->GetDisplayData(iCurDisplay).avAvailableRes[iCurValue];
 
     // 
     const coreBool bReset = (vCurResolution != coreVector2(I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH)), I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT)))) ||
-                            (m_Display      .GetCurEntry().second != Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY))                         ||
-                            (m_DisplayMode  .GetCurEntry().second != Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN))                      ||
-                            (m_AntiAliasing .GetCurEntry().second != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING))                  ||
-                            (m_TextureFilter.GetCurEntry().second != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREFILTER))                 ||
-                            (m_AssetQuality .GetCurEntry().second != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_QUALITY))                       ||
-                            (m_ShadowQuality.GetCurEntry().second != g_OldConfig.Graphics.iShadow)                                             ||
-                            (m_OverallVolume.GetCurEntry().second != F_TO_UI(Core::Config->GetFloat(CORE_CONFIG_AUDIO_GLOBALVOLUME) * 100.0f)) ||
-                            (m_MusicVolume  .GetCurEntry().second != F_TO_UI(Core::Config->GetFloat(CORE_CONFIG_AUDIO_MUSICVOLUME)  * 100.0f)) ||
-                            (m_EffectVolume .GetCurEntry().second != F_TO_UI(Core::Config->GetFloat(CORE_CONFIG_AUDIO_SOUNDVOLUME)  * 100.0f)) ||
-                            (m_AmbientSound .GetCurEntry().second != g_OldConfig.Audio.iAmbient)                                               ||
-                            (std::strcmp(Core::Language->GetPath(), Core::Config->GetString(CORE_CONFIG_SYSTEM_LANGUAGE)));
+                            (m_Display      .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY))                         ||
+                            (m_DisplayMode  .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN))                      ||
+                            (m_AntiAliasing .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING))                  ||
+                            (m_TextureFilter.GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREFILTER))                 ||
+                            (m_AssetQuality .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_QUALITY))                       ||
+                            (m_ShadowQuality.GetCurEntry().tValue != g_OldConfig.Graphics.iShadow)                                             ||
+                            (m_OverallVolume.GetCurEntry().tValue != F_TO_UI(Core::Config->GetFloat(CORE_CONFIG_AUDIO_GLOBALVOLUME) * 100.0f)) ||
+                            (m_MusicVolume  .GetCurEntry().tValue != F_TO_UI(Core::Config->GetFloat(CORE_CONFIG_AUDIO_MUSICVOLUME)  * 100.0f)) ||
+                            (m_EffectVolume .GetCurEntry().tValue != F_TO_UI(Core::Config->GetFloat(CORE_CONFIG_AUDIO_SOUNDVOLUME)  * 100.0f)) ||
+                            (m_AmbientSound .GetCurEntry().tValue != g_OldConfig.Audio.iAmbient)                                               ||
+                            (std::strcmp(Core::Language->GetPath(), Core::Config->GetString(CORE_CONFIG_SYSTEM_LANGUAGE)))                     ||
+                            (std::memcmp(&g_CurConfig.Input, &g_OldConfig.Input, sizeof(sConfig::Input)));
 
     // 
     m_SaveButton   .SetOverride(bReset ? 0 : -1);
@@ -390,6 +563,7 @@ void cConfigMenu::LoadValues()
     LoadConfig();
     this->__LoadDisplays();
     this->__LoadResolutions(Core::System->GetDisplayIndex());
+    this->__LoadInputs();
 
     // 
     if(!m_Resolution.SelectText(PRINT("%d x %d", Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH), Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT))))
@@ -414,6 +588,13 @@ void cConfigMenu::LoadValues()
     m_Language.SelectIndex(std::find(asLanguageList.begin(), asLanguageList.end(), Core::Config->GetString(CORE_CONFIG_SYSTEM_LANGUAGE)) - asLanguageList.begin());
 
     // 
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i)
+    {
+        m_aInput[i].oType  .SelectValue(g_CurConfig.Input.aiType  [i]);
+        m_aInput[i].oRumble.SelectValue(g_CurConfig.Input.aiRumble[i]);
+    }
+
+    // 
     if(m_SaveButton.GetOverride() >= 0)
     {
         if(iShadowQualityIndex != m_ShadowQuality.GetCurIndex()) this->__UpdateShadowQuality();
@@ -431,47 +612,58 @@ void cConfigMenu::LoadValues()
 // 
 void cConfigMenu::SaveValues()
 {
-    const coreUint8&   iCurDisplay    = m_Display   .GetCurEntry().second;
-    const coreUint8&   iCurValue      = m_Resolution.GetCurEntry().second;
+    const coreUint8&   iCurDisplay    = m_Display   .GetCurEntry().tValue;
+    const coreUint8&   iCurValue      = m_Resolution.GetCurEntry().tValue;
     const coreVector2& vCurResolution = Core::System->GetDisplayData(iCurDisplay).avAvailableRes[iCurValue];
 
     // 
     const coreBool bReset = (vCurResolution != coreVector2(I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH)), I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT)))) ||
-                            (m_Display      .GetCurEntry().second != Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY))        ||
-                            (m_DisplayMode  .GetCurEntry().second != Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN))     ||
-                            (m_AntiAliasing .GetCurEntry().second != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING)) ||
-                            (m_TextureFilter.GetCurEntry().second != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREFILTER));
+                            (m_Display      .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY))        ||
+                            (m_DisplayMode  .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN))     ||
+                            (m_AntiAliasing .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING)) ||
+                            (m_TextureFilter.GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREFILTER));
 
     // 
     Core::Config->SetInt(CORE_CONFIG_SYSTEM_WIDTH,           F_TO_SI(vCurResolution.x));
     Core::Config->SetInt(CORE_CONFIG_SYSTEM_HEIGHT,          F_TO_SI(vCurResolution.y));
-    Core::Config->SetInt(CORE_CONFIG_SYSTEM_DISPLAY,         m_Display      .GetCurEntry().second);
-    Core::Config->SetInt(CORE_CONFIG_SYSTEM_FULLSCREEN,      m_DisplayMode  .GetCurEntry().second);
-    Core::Config->SetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING,  m_AntiAliasing .GetCurEntry().second);
-    Core::Config->SetInt(CORE_CONFIG_GRAPHICS_TEXTUREFILTER, m_TextureFilter.GetCurEntry().second);
-    Core::Config->SetInt(CORE_CONFIG_GRAPHICS_QUALITY,       m_AssetQuality .GetCurEntry().second);
-    g_CurConfig.Graphics.iShadow = m_ShadowQuality.GetCurEntry().second;
+    Core::Config->SetInt(CORE_CONFIG_SYSTEM_DISPLAY,         m_Display      .GetCurEntry().tValue);
+    Core::Config->SetInt(CORE_CONFIG_SYSTEM_FULLSCREEN,      m_DisplayMode  .GetCurEntry().tValue);
+    Core::Config->SetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING,  m_AntiAliasing .GetCurEntry().tValue);
+    Core::Config->SetInt(CORE_CONFIG_GRAPHICS_TEXTUREFILTER, m_TextureFilter.GetCurEntry().tValue);
+    Core::Config->SetInt(CORE_CONFIG_GRAPHICS_QUALITY,       m_AssetQuality .GetCurEntry().tValue);
+    g_CurConfig.Graphics.iShadow = m_ShadowQuality.GetCurEntry().tValue;
 
     // 
-    Core::Config->SetFloat(CORE_CONFIG_AUDIO_GLOBALVOLUME, I_TO_F(m_OverallVolume.GetCurEntry().second) * 0.01f);
-    Core::Config->SetFloat(CORE_CONFIG_AUDIO_MUSICVOLUME,  I_TO_F(m_MusicVolume  .GetCurEntry().second) * 0.01f);
-    Core::Config->SetFloat(CORE_CONFIG_AUDIO_SOUNDVOLUME,  I_TO_F(m_EffectVolume .GetCurEntry().second) * 0.01f);
-    g_CurConfig.Audio.iAmbient = m_AmbientSound.GetCurEntry().second;
+    Core::Config->SetFloat(CORE_CONFIG_AUDIO_GLOBALVOLUME, I_TO_F(m_OverallVolume.GetCurEntry().tValue) * 0.01f);
+    Core::Config->SetFloat(CORE_CONFIG_AUDIO_MUSICVOLUME,  I_TO_F(m_MusicVolume  .GetCurEntry().tValue) * 0.01f);
+    Core::Config->SetFloat(CORE_CONFIG_AUDIO_SOUNDVOLUME,  I_TO_F(m_EffectVolume .GetCurEntry().tValue) * 0.01f);
+    g_CurConfig.Audio.iAmbient = m_AmbientSound.GetCurEntry().tValue;
 
     // 
     Core::Config->SetString(CORE_CONFIG_SYSTEM_LANGUAGE, Core::Language->GetPath());
 
     // 
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i)
+    {
+        g_CurConfig.Input.aiType  [i] = m_aInput[i].oType  .GetCurEntry().tValue;
+        g_CurConfig.Input.aiRumble[i] = m_aInput[i].oRumble.GetCurEntry().tValue;
+    }
+
+    // 
     SaveConfig();
     this->CheckValues();
 
-    // 
     if(bReset)
     {
+        // 
         InitResolution(vCurResolution);
         Core::Reset();
         InitFramerate();
+
+        // 
         this->__LoadDisplays();
+        this->__LoadResolutions(Core::System->GetDisplayIndex());
+        this->__LoadInputs();
     }
 }
 
@@ -481,7 +673,7 @@ void cConfigMenu::SaveValues()
 void cConfigMenu::__UpdateShadowQuality()
 {
     // 
-    g_CurConfig.Graphics.iShadow = m_ShadowQuality.GetCurEntry().second;
+    g_CurConfig.Graphics.iShadow = m_ShadowQuality.GetCurEntry().tValue;
 
     // 
     cOutdoor* pOutdoor = g_pEnvironment->GetBackground()->GetOutdoor();
@@ -498,7 +690,7 @@ void cConfigMenu::__UpdateShadowQuality()
 void cConfigMenu::__UpdateOverallVolume()
 {
     // 
-    Core::Audio->SetVolume(I_TO_F(m_OverallVolume.GetCurEntry().second) * 0.01f);
+    Core::Audio->SetVolume(I_TO_F(m_OverallVolume.GetCurEntry().tValue) * 0.01f);
 }
 
 
@@ -508,14 +700,15 @@ void cConfigMenu::__UpdateLanguage()
 {
     // 
     const coreLookup<std::string, std::string>& asLanguageList = cMenu::GetLanguageList();
-    Core::Language->Load(asLanguageList.at(m_Language.GetCurEntry().first->c_str()).c_str());
+    Core::Language->Load(asLanguageList.at(m_Language.GetCurEntry().psText->c_str()).c_str());
 
     // 
     cMenu::UpdateLanguageFont();
 
-    // 
+    // invalidate unbound language-strings
     g_pMenu->GetTooltip()->Invalidate();
-    if(Core::System->GetDisplayCount() > 2u) this->__LoadDisplays();
+    this->__LoadDisplays();
+    this->__LoadInputs();
 }
 
 
@@ -549,6 +742,7 @@ void cConfigMenu::__LoadDisplays()
 void cConfigMenu::__LoadResolutions(const coreUintW iDisplayIndex)
 {
     // 
+    const std::string sOldEntry = (*m_Display.GetCurEntry().psText);
     m_Resolution.ClearEntries();
 
     // 
@@ -556,5 +750,67 @@ void cConfigMenu::__LoadResolutions(const coreUintW iDisplayIndex)
     for(coreUintW i = avResolutionList.size(); i--; ) m_Resolution.AddEntry(PRINT("%.0f x %.0f", avResolutionList[i].x, avResolutionList[i].y), i);
 
     // 
-    m_Resolution.SelectLast();
+    if(!m_Resolution.SelectText(sOldEntry.c_str())) m_Resolution.SelectLast();
+}
+
+
+// ****************************************************************
+// 
+void cConfigMenu::__LoadInputs()
+{
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i)
+    {
+        sPlayerInput& oInput = m_aInput[i];
+
+        // 
+        const coreUintW iOldEntry = oInput.oType.GetCurIndex();
+        oInput.oType.ClearEntries();
+
+        // 
+        oInput.oHeader.SetText(PRINT("%s %zu", Core::Language->GetString("PLAYER"), i + 1u));
+        for(coreUintW j = 0u; j < INPUT_SETS_KEYBOARD; ++j) oInput.oType.AddEntry(PRINT("%s %zu", Core::Language->GetString("INPUT_KEYBOARD"), j + 1u), j + 0u);
+        for(coreUintW j = 0u; j < INPUT_SETS_JOYSTICK; ++j) oInput.oType.AddEntry(PRINT("%s %zu", Core::Language->GetString("INPUT_JOYSTICK"), j + 1u), j + INPUT_SETS_KEYBOARD);
+
+        // 
+        oInput.oType.SelectIndex((iOldEntry < oInput.oType.GetNumEntries()) ? iOldEntry : 0u);
+
+        // 
+        for(coreUintW j = 0u; j < INPUT_KEYS; ++j)
+        {
+            coreButton& oButton   = this->__RetrieveInputButton  (i, j);
+            coreInt16&  iCurValue = this->__RetrieveInputCurValue(i, j);
+
+            oButton.GetCaption()->SetText(cConfigMenu::__PrintKey(g_CurConfig.Input.aiType[i], iCurValue));
+        }
+
+        // 
+        auto nLockFunc = [](const coreBool bLock, coreButton* OUTPUT pButton, const coreChar* pcText)
+        {
+            pButton->SetOverride(bLock ? -1 : 0);
+            if(bLock) pButton->GetCaption()->SetText(pcText);
+        };
+
+        // 
+        const coreBool bKeyboard = (g_CurConfig.Input.aiType[i] < INPUT_SETS_KEYBOARD);
+        nLockFunc(!bKeyboard, &oInput.oMoveUp,                         SDL_GetKeyName(CORE_INPUT_CHAR(UP)));
+        nLockFunc(!bKeyboard, &oInput.oMoveLeft,                       SDL_GetKeyName(CORE_INPUT_CHAR(LEFT)));
+        nLockFunc(!bKeyboard, &oInput.oMoveDown,                       SDL_GetKeyName(CORE_INPUT_CHAR(DOWN)));
+        nLockFunc(!bKeyboard, &oInput.oMoveRight,                      SDL_GetKeyName(CORE_INPUT_CHAR(RIGHT)));
+        nLockFunc( bKeyboard, &oInput.aAction[INPUT_KEYS_ACTION - 1u], SDL_GetKeyName(CORE_INPUT_CHAR(ESCAPE)));
+    }
+}
+
+
+// ****************************************************************
+// convert input key to readable string
+const coreChar* cConfigMenu::__PrintKey(const coreUint8 iType, const coreInt16 iKey)
+{
+    if(iType < INPUT_SETS_KEYBOARD)   // # keyboard and mouse
+    {
+        return (iKey <= 0) ? PRINT("M %d", -iKey) : SDL_GetKeyName(SDL_GetKeyFromScancode(SDL_Scancode(iKey)));
+    }
+    else   // # joystick/gamepad
+    {
+        return PRINT("J %d", iKey);
+    }
 }

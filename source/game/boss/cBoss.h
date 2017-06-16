@@ -10,57 +10,68 @@
 #ifndef _P1_GUARD_BOSS_H_
 #define _P1_GUARD_BOSS_H_
 
-// TODO: boomerangs of Dharuk may generate double-hits because of rotating box collision (when moving away from it), bitfield with reset (player-num)
-// TODO: boss0101, both boss and duplicate should have own trace
-// TODO: boss0101, correct outline sides
+// TODO: boss0101, boomerangs may generate double-hits because of rotating box collision (when moving away from it), bitfield with reset (player-num)
+// TODO: boss0101, energy direction in front-part of main-model should be inverted
+// TODO: boss0101, something should grow when small boomerangs begin to create the duplicate
+// TODO: boss0101, disable shadow for duplicate
+// TODO: boss0101, definition for 1.5f (and related multiplications)
+// TODO: boss0102, add slight explosion where rays hit the screen
+// TODO: boss0102, separate emitters to three objects, to make them blue
 
 
 // ****************************************************************
 // boss definitions
 #define BOSS_TIMERS   (4u)   // 
 #define BOSS_COUNTERS (8u)   // 
-#define BOSS_VECTORS  (6u)   // 
+#define BOSS_VECTORS  (8u)   // 
 
 
 // ****************************************************************
 // boss specific definitions
-#define DHARUK_BOOMERANGS  (4u)                                         // 
-#define DHARUK_TRAILS      (3u)                                         // 
-#define DHARUK_RAWS        (DHARUK_BOOMERANGS * (DHARUK_TRAILS + 1u))   // 
-#define DHARUK_WIDTH       (0.667f)                                     // 
-#define DHARUK_HEIGHT      (0.8f)                                       // 
+#define DHARUK_TRAILS          (3u)                                         // 
+#define DHARUK_DUPLICATE_RAWS  (2u * DHARUK_TRAILS)                         // 
+#define DHARUK_BOOMERANGS      (4u)                                         // 
+#define DHARUK_BOOMERANGS_RAWS (DHARUK_BOOMERANGS * (DHARUK_TRAILS + 1u))   // 
+#define DHARUK_WIDTH           (0.667f)                                     // 
+#define DHARUK_HEIGHT          (0.8f)                                       // 
 
-#define TORUS_RAY_SIZE     (coreVector3(0.7f,50.0f,0.7f))   // 
-#define TORUS_RAY_TEXSIZE  (coreVector2(0.5f,1.5f))         // 
-#define TORUS_RAY_OFFSET   (8.0f)                           // 
-#define TORUS_RAYWAVE_SIZE (coreVector3(1.6f,5.0f,1.3f))    // 
+#define TORUS_RAY_SIZE         (coreVector3(0.7f,50.0f,0.7f))   // 
+#define TORUS_RAY_TEXSIZE      (coreVector2(0.5f,1.5f))         // 
+#define TORUS_RAY_OFFSET       (8.0f)                           // 
+#define TORUS_RAYWAVE_SIZE     (coreVector3(1.6f,5.0f,1.3f))    // 
 
-#define VAUS_SCOUTS_TOTAL  (DEFINED(_CORE_DEBUG_) ? 16 : 80)   // 
-#define VAUS_SCOUTS_X      (8u)                                // 
-#define VAUS_SCOUTS_Y      (2u)                                // 
-#define VAUS_SHOTS         (10u)                               // 
+#define VAUS_SCOUTS_TOTAL      (DEFINED(_CORE_DEBUG_) ? 16 : 80)   // 
+#define VAUS_SCOUTS_X          (8u)                                // 
+#define VAUS_SCOUTS_Y          (2u)                                // 
+#define VAUS_SHOTS             (10u)                               // 
 
 
 // ****************************************************************
 // phase management macros
-#define PHASE_CONTROL_TIMER(a,b,c)  this->_PhaseTimer (a, __LINE__, b, c, [&](const coreFloat  fTime, const coreFloat fTimeBefore, const coreBool __bEnd)
-#define PHASE_CONTROL_TICKER(a,b,c) this->_PhaseTicker(a, __LINE__, b, c, [&](const coreUint16 iTick,                              const coreBool __bEnd)
-#define PHASE_CONTROL_PAUSE(a,b)    PHASE_CONTROL_TICKER(a, 1u, b)
+#define PHASE_CONTROL_TIMER(a,b,c)      this->_PhaseTimer (a, __LINE__, b, c, [&](const coreFloat  fTime, const coreFloat fTimeBefore, const coreBool __bEnd)
+#define PHASE_CONTROL_TICKER(a,b,c)     this->_PhaseTicker(a, __LINE__, b, c, [&](const coreUint16 iTick,                              const coreBool __bEnd)
+#define PHASE_CONTROL_PAUSE(a,b)        PHASE_CONTROL_TICKER(a, 1u, b)
 
-#define PHASE_TIME_POINT(t)         (InBetween((t), fTimeBefore, fTime))
-#define PHASE_TIME_BEFORE(t)        (fTime <  (t))
-#define PHASE_TIME_AFTER(t)         (fTime >= (t))
-#define PHASE_TIME_BETWEEN(t,u)     (InBetween(fTime, (t), (u)))
-#define PHASE_BEGINNING             (PHASE_TIME_POINT(0.0f))
+#define PHASE_TIME_POINT(t)             (InBetween((t), fTimeBefore, fTime))
+#define PHASE_TIME_BEFORE(t)            (fTime <  (t))
+#define PHASE_TIME_AFTER(t)             (fTime >= (t))
+#define PHASE_TIME_BETWEEN(t,u)         (InBetween(fTime, (t), (u)))
+#define PHASE_BEGINNING                 (PHASE_TIME_POINT(0.0f))
 
-#define PHASE_RESET(i)              {m_aTimer[i].Stop(); m_aiTimerLine[i] = 0u;}
-#define PHASE_FINISHED              (__bEnd)
+#define PHASE_POSITION_POINT(e,t,v)     (InBetweenExt((t), (e)->GetOldPos().v, (e)->GetPosition().v) && [&](){s_vPositionPoint = (e)->GetPosition().xy(); s_vPositionPoint.v = (t); return true;}())
+#define PHASE_POSITION_BEFORE(e,t,v)    (STAGE_POSITION_BEFORE (e, t, v))
+#define PHASE_POSITION_AFTER(e,t,v)     (STAGE_POSITION_AFTER  (e, t, v))
+#define PHASE_POSITION_BETWEEN(e,t,u,v) (STAGE_POSITION_BETWEEN(e, t, u, v))
+#define PHASE_FLYPAST(e,f,v)            (STAGE_FLYPAST         (e, f, v))
 
-#define LERP_LINEAR                 (&LERP <coreFloat>)
-#define LERP_SMOOTH                 (&LERPS<coreFloat>)
-#define LERP_SMOOTH_REV             (&LerpSmoothRev)
-#define LERP_BREAK                  (&LERPB<coreFloat>)
-#define LERP_BREAK_REV              (&LerpBreakRev)
+#define PHASE_RESET(i)                  {m_aTimer[i].Stop(); m_aiTimerLine[i] = 0u;}
+#define PHASE_FINISHED                  (__bEnd)
+
+#define LERP_LINEAR                     (&LERP <coreFloat>)
+#define LERP_SMOOTH                     (&LERPS<coreFloat>)
+#define LERP_SMOOTH_REV                 (&LerpSmoothRev)
+#define LERP_BREAK                      (&LERPB<coreFloat>)
+#define LERP_BREAK_REV                  (&LerpBreakRev)
 
 
 // ****************************************************************
@@ -76,6 +87,8 @@ protected:
 
     coreUint8 m_iPhase;                       // 
     coreUint8 m_iLevel;                       // 
+
+    static coreVector2 s_vPositionPoint;      // 
 
 
 public:
@@ -102,15 +115,16 @@ protected:
 class cDharukBoss final : public cBoss
 {
 private:
-    coreObject3D m_Duplicate;                        // 
-    coreObject3D m_aDuplicateTrail[DHARUK_TRAILS];   // 
+    cCustomEnemy  m_Duplicate;                               // 
+    coreBatchList m_DuplicateTrail;                          // 
+    coreObject3D  m_aDuplicateRaw[DHARUK_DUPLICATE_RAWS];    // 
 
-    coreBatchList m_Boomerang;                       // 
-    coreBatchList m_BoomerangTrail;                  // 
-    coreObject3D  m_aBoomerangRaw[DHARUK_RAWS];      // 
+    coreBatchList m_Boomerang;                               // 
+    coreBatchList m_BoomerangTrail;                          // 
+    coreObject3D  m_aBoomerangRaw[DHARUK_BOOMERANGS_RAWS];   // 
 
-    coreUint8 m_iPackedDir;                          // 
-    coreFlow  m_fAnimation;                          // animation value
+    coreUint8 m_iPackedDir;                                  // 
+    coreFlow  m_fAnimation;                                  // animation value
 
 
 public:
@@ -130,8 +144,11 @@ private:
 
     // 
     coreVector2 __RepeatPosition  (const coreVector2& vPosition, const coreFloat fThreshold, coreBool* OUTPUT pbChange);
+    coreVector2 __RepeatPosition  (const coreVector2& vPosition, const coreFloat fThreshold);
     void        __EncodeDirection (const coreUintW iIndex, const coreVector2& vDirection);
     coreVector2 __DecodeDirection (const coreUintW iIndex);
+    void        __EnableDuplicate ();
+    void        __DisableDuplicate(const coreBool bAnimated);
     void        __EnableBoomerang (const coreUintW iIndex, const coreVector2& vPosition, const coreVector2& vDirection);
     void        __DisableBoomerang(const coreUintW iIndex, const coreBool bAnimated);
 };

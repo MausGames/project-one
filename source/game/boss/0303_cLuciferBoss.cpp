@@ -14,6 +14,10 @@
 
 
 // ****************************************************************
+// vector identifier
+
+
+// ****************************************************************
 // constructor
 cLuciferBoss::cLuciferBoss()noexcept
 {
@@ -22,8 +26,7 @@ cLuciferBoss::cLuciferBoss()noexcept
     this->DefineModelLow ("ship_projectone.md3"); 
 
     // set object properties
-    this->SetSize             (coreVector3(1.0f,1.0f,1.0f)); 
-    this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f)); 
+    this->SetSize(coreVector3(1.0f,1.0f,1.0f)); 
 
     // configure the boss
     this->Configure(10000, COLOR_SHIP_GREY); 

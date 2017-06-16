@@ -282,7 +282,7 @@ cGrassBackground::cGrassBackground()noexcept
 
     // load nature sound-effect
     m_pNatureSound = Core::Manager::Resource->Get<coreSound>("environment_nature.wav");
-    m_pNatureSound.GetHandle()->OnLoadOnce([this, pResource = m_pNatureSound]()
+    m_pNatureSound.OnUsableOnce([this, pResource = m_pNatureSound]()
     {
         pResource->PlayRelative(this, 0.0f, 1.0f, 0.0f, true);
     });

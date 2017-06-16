@@ -58,17 +58,23 @@ public:
     void Render(const coreProgramPtr& pProgram)final;
 
     // 
-    inline coreBool ReachedHealth   (const coreInt32 iHealth)    {this->__ReachOnce(); return InBetween(iHealth,                                    m_iCurHealth, ABS(m_iPreHealth));}
-    inline coreBool ReachedHealthPct(const coreFloat fHealthPct) {this->__ReachOnce(); return InBetween(F_TO_SI(fHealthPct * I_TO_F(m_iMaxHealth)), m_iCurHealth, ABS(m_iPreHealth));}
-    inline coreBool ReachedDeath    ()                           {this->__ReachOnce(); return ((m_iCurHealth == 0) && (m_iPreHealth != 0));}
+    inline void ActivateModelDefault() {this->DefineModel(m_pModelHigh);}
+    inline void ActivateModelLowOnly() {this->DefineModel(m_pModelLow);}
+
+    // 
+    inline coreBool ReachedHealth   (const coreInt32 iHealth)    {return InBetween(iHealth,                                    m_iCurHealth, m_iPreHealth);}
+    inline coreBool ReachedHealthPct(const coreFloat fHealthPct) {return InBetween(F_TO_SI(fHealthPct * I_TO_F(m_iMaxHealth)), m_iCurHealth, m_iPreHealth);}
+    inline coreBool ReachedDeath    ()                           {return ((m_iCurHealth == 0) && (m_iPreHealth != 0));}
 
     // add or remove status values
     inline void AddStatus   (const coreInt32 iStatus) {ADD_FLAG   (m_iStatus, iStatus)}
     inline void RemoveStatus(const coreInt32 iStatus) {REMOVE_FLAG(m_iStatus, iStatus)}
 
     // set object properties
-    inline void SetMaxHealth(const coreInt32    iMaxHealth) {m_iMaxHealth = iMaxHealth;}
-    inline void SetBaseColor(const coreVector3& vBaseColor) {m_iBaseColor = coreVector4(vBaseColor, 0.0f).PackUnorm4x8(); this->SetColor3(vBaseColor);}
+    inline void SetBaseColor   (const coreVector3& vBaseColor)    {m_iBaseColor = coreVector4(vBaseColor, 0.0f).PackUnorm4x8(); this->SetColor3(vBaseColor);}
+    inline void SetMaxHealth   (const coreInt32    iMaxHealth)    {m_iMaxHealth = iMaxHealth;}
+    inline void SetCurHealth   (const coreInt32    iCurHealth)    {m_iCurHealth = iCurHealth;}
+    inline void GetCurHealthPct(const coreFloat    fCurHealthPct) {m_iCurHealth = F_TO_SI(fCurHealthPct * I_TO_F(m_iMaxHealth)); ASSERT((fCurHealthPct > 0.0f) && (fCurHealthPct <= 1.0f))}
 
     // get object properties
     inline const coreModelPtr& GetModelHigh   ()const {return m_pModelHigh;}
@@ -95,11 +101,6 @@ protected:
 
     // 
     void _UpdateAlways();
-
-
-private:
-    // 
-    inline void __ReachOnce() {if((m_iCurHealth == 0) && (m_iPreHealth > 0)) m_iPreHealth = -m_iPreHealth;}
 };
 
 

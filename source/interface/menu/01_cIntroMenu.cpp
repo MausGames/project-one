@@ -115,7 +115,7 @@ void cIntroMenu::Move()
     else
     {
         // 
-        if(m_IntroTimer.Update(1.0f) || Core::Input->GetKeyboardChar() || Core::Input->GetMouseButton(CORE_INPUT_LEFT, CORE_INPUT_PRESS))
+        if(m_IntroTimer.Update(1.0f) || Core::Input->GetAnyButton(CORE_INPUT_PRESS))
         {
             // 
             m_iStatus = 1;

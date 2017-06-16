@@ -94,10 +94,14 @@ public:
         coreUint32 iReserved : 4;    // 
     };
     STATIC_ASSERT(sizeof(sStreamPacket) == 4u)
-    STATIC_ASSERT(INPUT_BUTTONS         <= 4u)
+    STATIC_ASSERT(INPUT_KEYS_ACTION     <= 4u)
 
     // 
-    using uInfo = std::pair<std::string, sHeader>;
+    struct sInfo final
+    {
+        std::string sPath;     // 
+        sHeader     oHeader;   // 
+    };
 
 
 private:
@@ -106,7 +110,7 @@ private:
     std::vector<sKeyFrame>     m_aKeyFrame;                        // 
     std::vector<sStreamPacket> m_aaStreamPacket[REPLAY_STREAMS];   // 
 
-    sInput m_aInput[REPLAY_STREAMS];                               // 
+    sGameInput m_aInput[REPLAY_STREAMS];                           // 
 
     coreUint32 m_iCurFrame;                                        // 
     coreUint32 m_aiCurPacket[REPLAY_STREAMS];                      // 
@@ -132,7 +136,7 @@ public:
     void     Clear();
 
     // 
-    static void LoadInfoList(std::vector<uInfo>* OUTPUT paInfoList);
+    static void LoadInfoList(std::vector<sInfo>* OUTPUT paInfoList);
 
     // 
     inline const sHeader&   GetHeader()const {return m_Header;}

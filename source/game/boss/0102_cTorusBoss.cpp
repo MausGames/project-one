@@ -17,6 +17,11 @@
 
 
 // ****************************************************************
+// vector identifier
+#define OVERDRIVE_HIT (0u)
+
+
+// ****************************************************************
 // constructor
 cTorusBoss::cTorusBoss()noexcept
 : m_fAnimation (0.0f)
@@ -27,8 +32,7 @@ cTorusBoss::cTorusBoss()noexcept
     this->DefineModelLow ("ship_boss_torus_low.md3");
 
     // set object properties
-    this->SetSize             (coreVector3(1.7f,1.7f,1.7f));
-    this->SetCollisionModifier(coreVector3(0.8f,0.8f,1.0f));
+    this->SetSize(coreVector3(1.7f,1.7f,1.7f));
 
     // configure the boss
     this->Configure(2800, COLOR_SHIP_GREY);
@@ -74,9 +78,6 @@ cTorusBoss::cTorusBoss()noexcept
         m_aCircle[i].SetColor3    (COLOR_ENERGY_GREEN * 0.8f);
         m_aCircle[i].SetTexSize   (coreVector2(1.25f,1.25f));
     }
-
-    // 
-    g_pEnvironment->GetBackground()->AddList(0u, 128u, "effect_decal_single_inst_program");
 
     STATIC_ASSERT(ARRAY_SIZE(m_aRay) == ARRAY_SIZE(m_aRayWave))
 }
@@ -126,6 +127,9 @@ void cTorusBoss::__KillOwn(const coreBool bAnimated)
     // 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCircle); ++i)
         g_pGlow->UnbindObject(&m_aCircle[i]);
+
+    // 
+    pMission->SetCurBoss(MISSION_NO_BOSS);
 }
 
 
@@ -191,17 +195,16 @@ void cTorusBoss::__MoveOwn()
     {
         PHASE_CONTROL_TIMER(0u, 0.5f, LERP_BREAK)
         {
-            // 
             this->DefaultMoveLerp(coreVector2(0.0f,2.0f), coreVector2(0.0f,0.75f), fTime);
 
-            // 
             if(PHASE_TIME_POINT(0.85f))
             {
                 g_pGame->GetMission()->SetCurBoss(this);
                 g_pGame->GetInterface()->ShowBoss(this);
+
+                g_pEnvironment->GetBackground()->AddList(0u, 128u, "effect_decal_single_inst_program");
             }
 
-            // 
             if(PHASE_FINISHED && !g_pGame->GetInterface()->IsBannerActive())
                 ++m_iPhase;
         });
@@ -213,10 +216,8 @@ void cTorusBoss::__MoveOwn()
     {
         PHASE_CONTROL_TIMER(0u, 0.6f, LERP_SMOOTH)
         {
-            // 
             this->DefaultMoveLerp(coreVector2(0.0f,0.75f), coreVector2(0.0f,0.0f), fTime);
 
-            // 
             if(PHASE_FINISHED)
                 m_iPhase = 40u;
         });
@@ -254,7 +255,6 @@ void cTorusBoss::__MoveOwn()
                 g_pEnvironment->SetTargetDirection(coreVector2::Direction(LERP(fAngFrom, fAngTo, fTime)));
             }
 
-            // 
             if(PHASE_FINISHED)
                 m_iPhase += 10u;
         });
@@ -268,17 +268,14 @@ void cTorusBoss::__MoveOwn()
         {
             const coreFloat fAngle = I_TO_F(iTick) * (m_aiCounter[ROTATION_DIRECTION] ? 12.0f : -12.0f);
 
-            // 
             for(coreUintW i = 4u; i--; )
             {
                 const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(i) * 90.0f + fAngle));
                 g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.2f, this, this->GetPosition().xy(), vDir)->MakeBlue();
             }
 
-            // 
             g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 5.0f, 1u, COLOR_ENERGY_BLUE);
 
-            // 
             if(PHASE_FINISHED)
             {
                 switch(m_iPhase)
@@ -299,7 +296,6 @@ void cTorusBoss::__MoveOwn()
         {
             ++m_iPhase;
 
-            // 
             this->__SetRotaAttack(1, true);
             this->SetPosition(coreVector3(0.0f,0.0f,0.0f));
         });
@@ -313,22 +309,18 @@ void cTorusBoss::__MoveOwn()
         {
             const coreFloat fAlpha = 0.6f * (1.0f-fTime);
 
-            // 
             for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRay); ++i)
             {
                 m_aRay    [i].SetAlpha(fAlpha);
                 m_aRayWave[i].SetAlpha(fAlpha);
             }
 
-            // 
             m_Emitter.SetAlpha(fTime);
 
-            // 
             if(PHASE_FINISHED)
             {
                 ++m_iPhase;
 
-                // 
                 this->__SetRotaAttack(2, true);
             }
         });
@@ -343,14 +335,12 @@ void cTorusBoss::__MoveOwn()
             const coreFloat& fLength = fTime;
             const coreFloat  fWidth  = 1.0f + (1.0f-fTime);
 
-            // 
             for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRay); ++i)
             {
                 m_aRay    [i].SetSize(TORUS_RAY_SIZE     * coreVector3(fWidth, fLength, fWidth));
                 m_aRayWave[i].SetSize(TORUS_RAYWAVE_SIZE * coreVector3(fWidth, fLength, fWidth));
             }
 
-            // 
             if(PHASE_FINISHED)
                 ++m_iPhase;
         });
@@ -372,10 +362,8 @@ void cTorusBoss::__MoveOwn()
     {
         PHASE_CONTROL_TIMER(0u, 1.0f/12.0f, LERP_SMOOTH)
         {
-            // 
             vNewOri = coreVector2::Direction(PI * fTime + (m_aiCounter[ROTATION_DIRECTION] ? PI : 0.0f));
 
-            // 
             cOutdoor* pOutdoor = g_pEnvironment->GetBackground()->GetOutdoor();
             if(pOutdoor)
             {
@@ -384,44 +372,35 @@ void cTorusBoss::__MoveOwn()
                     coreObject3D& oRay = m_aRay[i];
                     WARN_IF(!oRay.IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue;
 
-                    // 
                     const coreVector3& vRayDir   = oRay.GetDirection();
                     const coreVector3  vRayStart = oRay.GetPosition () - oRay.GetSize().y * vRayDir;
                     coreFloat          fRayLen   = TORUS_RAY_SIZE.y;
 
-                    // 
                     if(vRayDir.z < -0.15f)
                     {
-                        // 
                         const coreVector3 vIntersect = pOutdoor->RetrieveIntersect(vRayStart, vRayDir);
                         this->__CreateOverdrive(i, vIntersect, fTime, true);
 
-                        // 
                         fRayLen = (vIntersect - vRayStart).Length() * 0.5f;
                     }
                     else if(vRayDir.z > 0.48f)
                     {
-                        // 
                         fRayLen = TORUS_RAY_SIZE.y * (1.0f - (vRayDir.z-0.48f));
 
-                        // 
                         const coreVector3 vIntersect = vRayStart + vRayDir * (fRayLen * 2.0f);
                         this->__CreateOverdrive(i, vIntersect, fTime, false);
                     }
-                    else m_avVector[i] = coreVector3(0.0f,0.0f,0.0f);
+                    else m_avVector[OVERDRIVE_HIT + i] = coreVector3(0.0f,0.0f,0.0f);
 
-                    // 
                     oRay.SetSize   (coreVector3(TORUS_RAY_SIZE.x, fRayLen, TORUS_RAY_SIZE.z));
                     oRay.SetTexSize(coreVector2(TORUS_RAY_TEXSIZE.x, TORUS_RAY_TEXSIZE.y * (fRayLen / TORUS_RAY_SIZE.y)));
                 }
             }
 
-            // 
             if(PHASE_FINISHED)
             {
                 ++m_iPhase;
 
-                // 
                 m_aiCounter[ROTATION_DIRECTION] = 1 - m_aiCounter[ROTATION_DIRECTION];
             }
         });
@@ -435,7 +414,6 @@ void cTorusBoss::__MoveOwn()
         {
             m_iPhase = (m_aiCounter[BALL_STATUS] < coreInt16(VIRIDO_BALLS)) ? 40u : 14u;
 
-            // 
             this->__SetRotaAttack(0, true);
         });
     }
@@ -448,11 +426,9 @@ void cTorusBoss::__MoveOwn()
         {
             ++m_iPhase;
 
-            // 
             const coreVector2 vDir = (m_aiCounter[BALL_STATUS] ? coreVector2(1.0f,0.5f) : coreVector2(-0.5f,1.0f)).Normalized();
             s_cast<cViridoMission*>(g_pGame->GetMission())->EnableBall(m_aiCounter[BALL_STATUS], this->GetPosition().xy(), vDir);
 
-            // 
             ++m_aiCounter[BALL_STATUS];
         });
     }
@@ -468,10 +444,11 @@ void cTorusBoss::__MoveOwn()
     }
 
     // ################################################################
+    // ################################################################
 
+    // constantly shoot into all directions
     PHASE_CONTROL_TICKER(2u, 0u, 0.5f)
     {
-        // 
         for(coreUintW i = 5u; i--; )
         {
             const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(i) * 36.0f));
@@ -500,14 +477,19 @@ void cTorusBoss::__MoveOwn()
     {
         for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRay); ++i)
         {
+            const coreVector3 vDir   = this->__GetRotaDirection(DEG_TO_RAD(I_TO_F(i) * 120.0f));
+            coreVector3       vColor = coreMath::InRange(vDir.z, 0.0f, 0.15f) ? (COLOR_ENERGY_YELLOW * (0.8f)) :
+                                                                                (COLOR_ENERGY_BLUE   * (0.8f - 0.4f * ABS(vDir.z)));
+
             // 
-            const coreVector3 vDir = this->__GetRotaDirection(DEG_TO_RAD(I_TO_F(i) * 120.0f));
+            vColor = LERP(m_aRay[i].GetColor3(), vColor, 0.3f);
+            STATIC_ASSERT(FRAMERATE_VALUE == 60.0f)
 
             // 
             m_aRay[i].SetPosition   (this->GetPosition() + vDir * (m_aRay[i].GetSize().y + TORUS_RAY_OFFSET));
             m_aRay[i].SetDirection  (vDir);
             m_aRay[i].SetOrientation(this->GetOrientation());
-            m_aRay[i].SetColor3     (COLOR_ENERGY_YELLOW * (0.8f - 0.2f * ABS(vDir.z)));
+            m_aRay[i].SetColor3     (vColor);
             m_aRay[i].SetTexOffset  (coreVector2(0.4f,0.3f) * m_fAnimation);
             m_aRay[i].Move();
 
@@ -515,6 +497,7 @@ void cTorusBoss::__MoveOwn()
             m_aRayWave[i].SetPosition   (this->GetPosition() + vDir * (m_aRayWave[i].GetSize().y + TORUS_RAY_OFFSET));
             m_aRayWave[i].SetDirection  (-vDir);
             m_aRayWave[i].SetOrientation(this->GetOrientation());
+            m_aRayWave[i].SetColor3     (vColor);
             m_aRayWave[i].SetTexOffset  (coreVector2(-0.3f,-0.6f) * m_fAnimation);
             m_aRayWave[i].Move();
         }
@@ -543,7 +526,7 @@ void cTorusBoss::__MoveOwn()
     }
 
     // 
-    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_OBJECT(1), [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pRay, const coreBool bFirstHit)
+    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_OBJECT(1), [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pRay, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
 
@@ -711,7 +694,7 @@ void cTorusBoss::__CreateOverdrive(const coreUintW iIndex, const coreVector3& vI
     // 
     constexpr coreFloat fMin = 2.5f;
     constexpr coreFloat fMax = 5.0f;
-    coreVector3& vOldHit = m_avVector[iIndex];
+    coreVector3& vOldHit = m_avVector[OVERDRIVE_HIT + iIndex];
 
     // 
     if(vOldHit.IsNull()) vOldHit = vIntersect;
@@ -728,20 +711,20 @@ void cTorusBoss::__CreateOverdrive(const coreUintW iIndex, const coreVector3& vI
         {
             // 
             const coreVector3 vNewHit   = (fLen > fMax) ? LERP(vOldHit, vIntersect, fMax*RCP(fLen)) : vIntersect;
-            const coreVector3 vDecalPos = (vOldHit + vNewHit) * 0.5f;
+            const coreVector2 vOnScreen = g_pForeground->Project(vNewHit);
 
             // 
-            if(ABS(vDecalPos.x) < BACKGROUND_OBJECT_RANGE &&
-               ABS(vDecalPos.y) < BACKGROUND_OBJECT_RANGE)
+            if((ABS(vOnScreen.x) < 0.55f) && (ABS(vOnScreen.y) < 0.55f))
             {
                 if(bGround)
                 {
                     const coreBool    bRotated   = Core::Rand->Bool();
+                    const coreVector3 vDecalPos  = (vOldHit + vNewHit) * 0.5f;
                     const coreVector2 vDecalSize = coreVector2(Core::Rand->Float(5.0f, 6.5f), MIN(fLen, fMax)*1.8f);
                     const coreVector2 vDecalDir  = vDiff.xy().Normalized();
 
                     // load object resources
-                    coreObject3D* pObject = Core::Manager::Memory->New<coreObject3D>();
+                    coreObject3D* pObject = MANAGED_NEW(coreObject3D);
                     pObject->DefineModel  (Core::Manager::Object->GetLowModel());
                     pObject->DefineTexture(0u, "effect_soot.png");
                     pObject->DefineProgram("effect_decal_single_program");
@@ -756,8 +739,8 @@ void cTorusBoss::__CreateOverdrive(const coreUintW iIndex, const coreVector3& vI
                 }
 
                 // 
-                g_pSpecialEffects->CreateSplashFire (vNewHit,  5.0f, 2u);
-                g_pSpecialEffects->CreateSplashColor(vNewHit, 25.0f, 2u, COLOR_FIRE_ORANGE);
+                g_pSpecialEffects->CreateSplashFire (vNewHit,  5.0f, bGround ? 3u : 6u);
+                g_pSpecialEffects->CreateSplashColor(vNewHit, 25.0f, bGround ? 2u : 4u, COLOR_FIRE_ORANGE);
             }
 
             // 

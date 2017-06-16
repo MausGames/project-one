@@ -49,8 +49,6 @@ cPostProcessing::cPostProcessing()noexcept
 // apply post-processing
 void cPostProcessing::Apply()
 {
-    const coreBool bScreenshot = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(PRINTSCREEN), CORE_INPUT_PRESS);
-
     // switch back to default frame buffer (again)
     coreFrameBuffer::EndDraw();
 
@@ -78,7 +76,8 @@ void cPostProcessing::Apply()
     glEnable(GL_BLEND);
 
     // render watermark
-    if(bScreenshot) m_Watermark.Render();
+    if(g_MenuInput.bScreenshot)
+        m_Watermark.Render();
 
     // invalidate all frame buffers (# not cGlow and cDistortion, because of incremental rendering and pause)
     if(!g_pMenu->IsPaused())

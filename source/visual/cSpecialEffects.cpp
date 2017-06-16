@@ -494,25 +494,42 @@ void cSpecialEffects::PlaySound(const coreVector3& vPosition, const coreFloat fV
 
 // ****************************************************************
 // 
+void cSpecialEffects::RumblePlayer(const cPlayer* pPlayer, const coreFloat fStrength, const coreUint32 iLength)
+{
+    ASSERT(g_pGame)
+
+    // loop through all active players
+    g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pCurPlayer, const coreUintW i)
+    {
+        if((pPlayer != pCurPlayer) && (pPlayer != NULL)) return;
+
+        const coreUint8&  iRumble     = g_CurConfig.Input.aiRumble[i];
+        const coreUintW   iJoystickID = g_CurConfig.Input.aiType  [i] - INPUT_SETS_KEYBOARD;
+        const sGameInput* pCurInput   = pCurPlayer->GetInput();
+
+        // check for valid configuration
+        if(iRumble && (iJoystickID < Core::Input->GetJoystickNum()))
+        {
+            // check for valid input set
+            if((pCurInput == &g_TotalInput) || (P_TO_UI(pCurInput - g_aGameInput) < INPUT_SETS))
+            {
+                // create rumble effect
+                Core::Input->RumbleJoystick(iJoystickID, fStrength * (I_TO_F(iRumble) * 0.1f), iLength);
+            }
+        }
+    });
+}
+
+
+// ****************************************************************
+// 
 void cSpecialEffects::ShakeScreen(const coreFloat fStrength)
 {
     // 
     m_fShakeStrength = fStrength;
 
-    if(g_pGame)
-    {
-        // loop through all active players
-        g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
-        {
-            // check for joystick/gamepad as input source
-            const coreUintW iType = P_TO_UI(pPlayer->GetInput() - g_aInput);
-            if((iType >= INPUT_SETS_KEYBOARD) && (iType < INPUT_SETS))
-            {
-                // create rumble effect
-                Core::Input->RumbleJoystick(iType - INPUT_SETS_KEYBOARD, fStrength, 300u);
-            }
-        });
-    }
+    // 
+    this->RumblePlayer(NULL, fStrength * 0.5f, 250u);
 }
 
 

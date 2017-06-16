@@ -11,16 +11,6 @@
 
 // ****************************************************************
 // constructor
-cCombatText::sData::sData(const coreChar* pcText, const coreVector2& vPosition, const coreVector3& vColor)noexcept
-: sText     (pcText)
-, vPosition (vPosition)
-, iColor    (coreVector4(vColor, 1.0f).PackUnorm4x8())
-{
-}
-
-
-// ****************************************************************
-// constructor
 cCombatText::cCombatText()noexcept
 : m_afTimer   {}
 , m_iCurLabel (0u)
@@ -117,8 +107,14 @@ void cCombatText::AddText(const coreChar* pcText, const coreVector3& vPosition, 
 {
     ASSERT(pcText)
 
-    // insert new text data
-    m_aData.emplace_back(pcText, g_pForeground->Project(vPosition), vColor);
+    // create new text data
+    sData oNewData;
+    oNewData.sText     = pcText;
+    oNewData.vPosition = g_pForeground->Project(vPosition);
+    oNewData.iColor    = coreVector4(vColor, 1.0f).PackUnorm4x8();
+
+    // add data to the list
+    m_aData.push_back(std::move(oNewData));
 }
 
 

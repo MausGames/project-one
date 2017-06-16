@@ -30,9 +30,6 @@ private:
     {
         cEnemy*     pEnemy;       // 
         coreVector2 vDirection;   // 
-
-        constexpr sMute(cEnemy* pEnemy, const coreVector2& vDirection)noexcept;
-        void Destruct();
     };
 
 
@@ -56,19 +53,16 @@ public:
 
     // 
     template <typename T> RETURN_RESTRICT T* AddMute(const coreVector3& vPosition, const coreVector2& vDirection);
+    void ClearMutes(const coreBool bAnimated);
 
     // 
     inline coreBool IsActive()const {return (!m_aMute.empty() || g_pSpecialEffects->IsActive());}
+
+
+private:
+    // 
+    void __KillMute(sMute* OUTPUT pMute, const coreBool bAnimated);
 };
-
-
-// ****************************************************************
-// 
-constexpr cTheater::sMute::sMute(cEnemy* pEnemy, const coreVector2& vDirection)noexcept
-: pEnemy     (pEnemy)
-, vDirection (vDirection)
-{
-}
 
 
 // ****************************************************************
@@ -79,10 +73,15 @@ template <typename T> RETURN_RESTRICT T* cTheater::AddMute(const coreVector3& vP
     T* pEnemy = new T();
     pEnemy->AddStatus  (ENEMY_STATUS_SINGLE);
     pEnemy->Resurrect  (vPosition.xy(), vDirection);
-    pEnemy->SetPosition(vPosition);
+    pEnemy->SetPosition(vPosition);   // # to override height
 
     // 
-    m_aMute.emplace_back(pEnemy, vDirection);
+    sMute oMute;
+    oMute.pEnemy     = pEnemy;
+    oMute.vDirection = vDirection;
+
+    // 
+    m_aMute.push_back(oMute);
 
     return pEnemy;
 }

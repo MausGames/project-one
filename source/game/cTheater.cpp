@@ -9,17 +9,6 @@
 #include "main.h"
 
 
-
-// ****************************************************************
-// 
-void cTheater::sMute::Destruct()
-{
-    // 
-    pEnemy->Kill(false);
-    SAFE_DELETE(pEnemy)
-}
-
-
 // ****************************************************************
 // constructor
 cTheater::cTheater()noexcept
@@ -35,11 +24,7 @@ cTheater::cTheater()noexcept
 cTheater::~cTheater()
 {
     // 
-    FOR_EACH(it, m_aMute)
-        it->Destruct();
-
-    // 
-    m_aMute.clear();
+    this->ClearMutes(false);
 }
 
 
@@ -102,7 +87,7 @@ void cTheater::Move()
     // 
     FOR_EACH_DYN(it, m_aMute)
     {
-        cEnemy*            pEnemy = it->pEnemy;;
+        cEnemy*            pEnemy = it->pEnemy;
         const coreVector3& vPos   = pEnemy->GetPosition();
         const coreVector2& vDir   = it->vDirection;
 
@@ -115,7 +100,7 @@ void cTheater::Move()
            (pEnemy->GetPosition().y < -FOREGROUND_AREA.y * THEATER_AREA_FACTOR) ||
            (pEnemy->GetPosition().y >  FOREGROUND_AREA.y * THEATER_AREA_FACTOR))
         {
-            it->Destruct();
+            this->__KillMute(&(*it), false);
             DYN_REMOVE(it, m_aMute)
         }
         else
@@ -124,4 +109,29 @@ void cTheater::Move()
             DYN_KEEP(it)
         }
     }
+}
+
+
+// ****************************************************************
+// 
+void cTheater::ClearMutes(const coreBool bAnimated)
+{
+    // 
+    FOR_EACH(it, m_aMute)
+        this->__KillMute(&(*it), bAnimated);
+
+    // 
+    m_aMute.clear();
+}
+
+
+// ****************************************************************
+// 
+void cTheater::__KillMute(sMute* OUTPUT pMute, const coreBool bAnimated)
+{
+    cEnemy* pEnemy = pMute->pEnemy;
+
+    // 
+    pEnemy->Kill(bAnimated);
+    SAFE_DELETE(pEnemy)
 }

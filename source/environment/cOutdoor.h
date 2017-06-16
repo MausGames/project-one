@@ -11,6 +11,8 @@
 #define _P1_GUARD_OUTDOOR_H_
 
 // TODO: definitions for algorithms (background names ?)
+// TODO: add F16C SSE to RetrieveBackHeight
+// TODO: check out jcgt_Duff2017Basis to inline tangent calculations into shader (less bandwidth, but more ALU + reg ?)
 
 
 // ****************************************************************
@@ -59,6 +61,7 @@ private:
         coreUint32 iNormal;    // normal vector             (Snorm210/Snorm4x8)
         coreUint32 iTangent;   // additional tangent vector (Snorm210/Snorm4x8)
     };
+    STATIC_ASSERT(sizeof(sVertexPacked) == 12u)
     #pragma pack(pop)
 
 

@@ -72,7 +72,7 @@ void cEnemy::Move()
 
 // ****************************************************************
 // reduce current health
-void cEnemy::TakeDamage(coreInt32 iDamage, const coreUint8 iElement, cPlayer* pAttacker)
+coreBool cEnemy::TakeDamage(coreInt32 iDamage, const coreUint8 iElement, cPlayer* pAttacker)
 {
     // 
     g_pGame->GetShieldManager()->AbsorbDamage(this, &iDamage, iElement);
@@ -90,9 +90,11 @@ void cEnemy::TakeDamage(coreInt32 iDamage, const coreUint8 iElement, cPlayer* pA
         {
             // 
             this->Kill(true);
-            return;
+            return true;
         }
     }
+
+    return false;
 }
 
 
@@ -411,6 +413,15 @@ cEnemyManager::sEnemySetGen::sEnemySetGen()noexcept
 
 
 // ****************************************************************
+// constructor
+cEnemyManager::cEnemyManager()noexcept
+{
+    // 
+    Core::Manager::Object->TestCollision(TYPE_ENEMY, [](coreObject3D*, coreObject3D*, coreVector3, coreBool) {});
+}
+
+
+// ****************************************************************
 // destructor
 cEnemyManager::~cEnemyManager()
 {
@@ -430,16 +441,6 @@ cEnemyManager::~cEnemyManager()
 // render the enemy manager
 void cEnemyManager::Render()
 {
-    // 
-    auto nRenderFunc = [](cEnemy* OUTPUT pEnemy)
-    {
-        if(CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD))
-            return;
-
-        pEnemy->_EnableBlink();
-        pEnemy->Render();
-    };
-
     // loop through all enemy sets
     FOR_EACH(it, m_apEnemySet)
     {
@@ -447,32 +448,30 @@ void cEnemyManager::Render()
         if(!pEnemyActive->GetCurEnabled()) continue;
 
         // 
-        FOR_EACH(et, *pEnemyActive->List()) (*et)->DefineModel(s_cast<cShip*>(*et)->GetModelHigh());
+        FOR_EACH(et, *pEnemyActive->List()) s_cast<cEnemy*>(*et)->ActivateModelDefault();
         {
-            if(pEnemyActive->IsInstanced())
+            // 
+            pEnemyActive->RenderCustom([](coreFloat* OUTPUT pData, const cEnemy* pObject)
             {
-                // 
-                pEnemyActive->UpdateCustom([](coreFloat* OUTPUT pData, const cShip* pObject)
-                {
-                    (*pData) = pObject->GetBlink();
-                });
-
-                // 
-                pEnemyActive->Render();
-            }
-            else
+                (*pData) = pObject->GetBlink();
+            },
+            [](cEnemy* OUTPUT pObject)
             {
-                // 
-                FOR_EACH(et, *pEnemyActive->List())
-                    nRenderFunc(s_cast<cEnemy*>(*et));
-            }
+                pObject->_EnableBlink();
+            });
         }
-        FOR_EACH(et, *pEnemyActive->List()) (*et)->DefineModel(s_cast<cShip*>(*et)->GetModelLow());
+        FOR_EACH(et, *pEnemyActive->List()) s_cast<cEnemy*>(*et)->ActivateModelLowOnly();
     }
 
-    // 
+    // render all additional enemies
     FOR_EACH(it, m_apAdditional)
-        nRenderFunc(*it);
+    {
+        if(CONTAINS_FLAG((*it)->GetStatus(), ENEMY_STATUS_DEAD))
+            continue;
+
+        (*it)->_EnableBlink();
+        (*it)->Render();
+    }
 }
 
 #define __RENDER_OWN(f)                                           \

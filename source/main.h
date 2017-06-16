@@ -44,14 +44,13 @@
 // TODO: clean up shader modifiers and shaders, also try to look at unused uniforms, varyings and attributes (shadow-matrix is used in ship-shader !? a_v1Blink used in ground-shader but only when instancing), and reduce passing data across shader stages
 // TODO: implement static/coherent branching interface instead of many shader-permutations ? (maybe only in situations with frequent switching)
 // TODO: use single-channel texture where possible
-// TODO: pre-calc HSVtoRGB
 // TODO: menu optimization by caching into framebuffer (general class for leaderboard, options, etc.)
 // TODO: protect main (LockFramerate)
 // TODO: check all shaders if alpha is required
 
 
 // ****************************************************************
-// engine header
+// engine headers
 #include "Core.h"
 //STATIC_ASSERT(!DEFINED(_CORE_SSE_))
 
@@ -200,7 +199,7 @@ class cMission;
 
 
 // ****************************************************************
-// game header files
+// game headers
 extern coreVector2      g_vGameResolution;   // pre-calculated 1:1 resolution
 extern coreVector2      g_vMenuCenter;       // pre-calculated menu center modifier
 extern coreMusicPlayer  g_MusicPlayer;       // central music-player

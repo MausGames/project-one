@@ -15,6 +15,7 @@
 // TODO: use depth from water as own map for decals to reconstruct position for shadow-mapping, maybe add normal for lighting
 // TODO: lava is not considered for RetrieveSafeHeight
 // TODO: currently after changing the background there is no Background::Move before the first Render
+// TODO: separate culling between normal rendering an shadow, to improve efficiency
 
 
 // ****************************************************************

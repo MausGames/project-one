@@ -32,6 +32,10 @@ cMission::cMission()noexcept
 cMission::~cMission()
 {
     // 
+    FOR_EACH(it, m_apPath)  SAFE_DELETE(*it)
+    FOR_EACH(it, m_apSquad) SAFE_DELETE(*it)
+
+    // 
     m_anStage.clear();
     m_apPath .clear();
     m_apSquad.clear();
@@ -126,16 +130,22 @@ void cMission::MoveAfter()
         FOR_EACH_DYN(it, m_apPath)
         {
             if((*m_apPath.get_key(it)) < iCurStageLine)
-                 DYN_REMOVE(it, m_apPath)
-            else DYN_KEEP  (it)
+            {
+                SAFE_DELETE(*it)
+                DYN_REMOVE(it, m_apPath)
+            }
+            else DYN_KEEP(it)
         }
 
         // 
         FOR_EACH_DYN(it, m_apSquad)
         {
             if((*m_apSquad.get_key(it)) < iCurStageLine)
-                 DYN_REMOVE(it, m_apSquad)
-            else DYN_KEEP  (it)
+            {
+                SAFE_DELETE(*it)
+                DYN_REMOVE(it, m_apSquad)
+            }
+            else DYN_KEEP(it)
         }
     }
 

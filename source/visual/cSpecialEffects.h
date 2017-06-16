@@ -15,6 +15,7 @@
 // TODO: make lightning owner-sticky with position-offset
 // TODO: implement pixel-fitting screen-shake ? (currently shaking creates a fullscreen-blur)
 // TODO: don't invoke special-effects out of view (though consider effect-radius)
+// TODO: adjust rumble to be not toooo strong (and not be annoying)
 
 
 // ****************************************************************
@@ -41,6 +42,7 @@
 #define SPECIAL_BLAST_BIG         (4.0f), (3.5f)
 #define SPECIAL_RING_SMALL        (1.5f), (1.8f)
 #define SPECIAL_RING_BIG          (3.0f), (1.8f)
+#define SPECIAL_RUMBLE_DEFAULT    (0.4f), (120u)
 #define SPECIAL_SHAKE_SMALL       (0.6f)
 #define SPECIAL_SHAKE_BIG         (1.2f)
 
@@ -122,6 +124,9 @@ public:
 
     // 
     void PlaySound(const coreVector3& vPosition, const coreFloat fVolume, const eSoundEffect iSoundIndex);
+
+    // 
+    void RumblePlayer(const cPlayer* pPlayer, const coreFloat fStrength, const coreUint32 iLength);
 
     // 
     void ShakeScreen(const coreFloat fStrength);

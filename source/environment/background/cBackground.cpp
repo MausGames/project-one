@@ -204,8 +204,7 @@ void cBackground::Move()
                         // unpack normal and interpolate
                         if(paiBaseNormal)
                         {
-                            const coreVector2 vPacked = coreVector2::UnpackFloat2x16((*paiBaseNormal)[iIndex % paiBaseNormal->size()]);
-                            const coreVector3 vNormal = coreVector3(vPacked, SQRT(1.0f - vPacked.LengthSq()));
+                            const coreVector3 vNormal = coreVector3::UnpackSnorm011((*paiBaseNormal)[iIndex % paiBaseNormal->size()]);
                             const coreVector2 vLerp   = m_pOutdoor->CalcLerpVector(pObject->GetPosition().y);
                             pObject->SetDirection(LERP(coreVector3(0.0f,0.0f,1.0f), vNormal, vLerp.x).Normalized());
                         }
@@ -388,7 +387,7 @@ void cBackground::_StoreNormalList(const coreBatchList* pObjectList)
     oNew.reserve(pObjectList->List()->size());
 
     // 
-    FOR_EACH(it, *pObjectList->List()) oNew.push_back((*it)->GetDirection().xy().PackFloat2x16());
+    FOR_EACH(it, *pObjectList->List()) oNew.push_back((*it)->GetDirection().PackSnorm011());
 
     // TODO: may needs change later, what is normal, direction or orientation or both (store quaternion? (already available)) 
 }

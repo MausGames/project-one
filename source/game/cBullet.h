@@ -12,6 +12,7 @@
 
 // TODO: pre-allocate bullets (at least for player) at the beginning to improve resource loading
 // TODO: use prefetch with more precise numbers (also in enemy-manager)
+// TODO: align bullet memory ? (also check other possible locations (e.g. enemies))
 
 
 // ****************************************************************

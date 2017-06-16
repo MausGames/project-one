@@ -18,6 +18,10 @@
 // TODO: score-menu names and all name-inputs MUST support all languages (japanese (keifont), russian (default), arabic (default), ...)
 // TODO: score-menu names must be sanitized
 // TODO: unload fonts currently not used (e.g. from score-menu)
+// TODO: options menu: ask if values should be discarded, ask if want to exit instead of saving
+// TODO: rumble when changing rumble-option
+// TODO: display unattached joysticks and joystick names somehow
+// TODO: highlight which joystick is which input set
 
 
 // ****************************************************************
@@ -27,6 +31,7 @@
 #define MENU_CONTRAST_WHITE    (0.8f)     // white contrast value (to reduce eye strain)
 #define MENU_CONTRAST_BLACK    (0.04f)    // black contrast value
 
+#define MENU_CONFIG_INPUTS     (PLAYERS)
 #define MENU_SCORE_ENTRIES     (10u)
 #define MENU_SCORE_NAME_LENGTH (32u)
 #define MENU_REPLAY_ENTRIES    (5u)
@@ -44,7 +49,9 @@
 #define MENU_FONT_STANDARD_3   "ethnocentric.ttf", (30u)
 #define MENU_FONT_STANDARD_4   "ethnocentric.ttf", (40u)
 #define MENU_FONT_STANDARD_5   "ethnocentric.ttf", (70u)
-#define MENU_FONT_ICON_1       "fontawesome.ttf",  (24u)
+#define MENU_FONT_ICON_1       "fontawesome.ttf",  (20u)
+#define MENU_FONT_ICON_2       "fontawesome.ttf",  (24u)
+#define MENU_FONT_ICON_3       "fontawesome.ttf",  (40u)
 #define MENU_OUTLINE_SMALL     (1u)
 #define MENU_OUTLINE_BIG       (4u)
 
@@ -95,27 +102,44 @@
 #define ENTRY_VIDEO_SHADOWQUALITY (6u)
 #define ENTRY_VIDEO               (7u)
 
-#define ENTRY_AUDIO_OVERALLVOLUME (0u + ENTRY_VIDEO)
-#define ENTRY_AUDIO_MUSICVOLUME   (1u + ENTRY_VIDEO)
-#define ENTRY_AUDIO_EFFECTVOLUME  (2u + ENTRY_VIDEO)
-#define ENTRY_AUDIO_AMBIENTSOUND  (3u + ENTRY_VIDEO)
-#define ENTRY_AUDIO               (4u + ENTRY_VIDEO)
+#define ENTRY_AUDIO_OVERALLVOLUME (0u  + ENTRY_VIDEO)
+#define ENTRY_AUDIO_MUSICVOLUME   (1u  + ENTRY_VIDEO)
+#define ENTRY_AUDIO_EFFECTVOLUME  (2u  + ENTRY_VIDEO)
+#define ENTRY_AUDIO_AMBIENTSOUND  (3u  + ENTRY_VIDEO)
+#define ENTRY_AUDIO               (4u  + ENTRY_VIDEO)
 
-#define ENTRY_INPUT               (0u + ENTRY_AUDIO)
+#define ENTRY_INPUT_TYPE          (0u  + ENTRY_AUDIO)
+#define ENTRY_INPUT_RUMBLE        (1u  + ENTRY_AUDIO)
+#define ENTRY_INPUT_MOVEUP        (2u  + ENTRY_AUDIO)
+#define ENTRY_INPUT_MOVELEFT      (3u  + ENTRY_AUDIO)
+#define ENTRY_INPUT_MOVEDOWN      (4u  + ENTRY_AUDIO)
+#define ENTRY_INPUT_MOVERIGHT     (5u  + ENTRY_AUDIO)
+#define ENTRY_INPUT_ACTION1       (6u  + ENTRY_AUDIO)
+#define ENTRY_INPUT_ACTION2       (7u  + ENTRY_AUDIO)
+#define ENTRY_INPUT_ACTION3       (8u  + ENTRY_AUDIO)
+#define ENTRY_INPUT_ACTION4       (9u  + ENTRY_AUDIO)
+#define ENTRY_INPUT               (10u + ENTRY_AUDIO)
 
-#define ENTRY_GAME_LANGUAGE       (0u + ENTRY_INPUT)
-#define ENTRY_MAX                 (1u + ENTRY_INPUT)
+#define ENTRY_GAME_LANGUAGE       (0u  + ENTRY_INPUT)
+#define ENTRY_MAX                 (1u  + ENTRY_INPUT)
 
 
 // ****************************************************************
 // icon codes (UTF-8)
-#define ICON_CHECK     "\xEF\x80\x8C"
-#define ICON_TIMES     "\xEF\x80\x8D"
-#define ICON_POWER_OFF "\xEF\x80\x91"
-#define ICON_REFRESH   "\xEF\x80\xA1"
-#define ICON_SHARE     "\xEF\x81\xA4"
-#define ICON_COGS      "\xEF\x82\x85"
-#define ICON_CARET_UP  "\xEF\x83\x98"
+#define ICON_CHECK       u8"\uF00C"
+#define ICON_TIMES       u8"\uF00D"
+#define ICON_POWER_OFF   u8"\uF011"
+#define ICON_REFRESH     u8"\uF021"
+#define ICON_ARROW_LEFT  u8"\uF060"
+#define ICON_ARROW_RIGHT u8"\uF061"
+#define ICON_ARROW_UP    u8"\uF062"
+#define ICON_ARROW_DOWN  u8"\uF063"
+#define ICON_SHARE       u8"\uF064"
+#define ICON_COGS        u8"\uF085"
+#define ICON_CARET_DOWN  u8"\uF0D7"
+#define ICON_CARET_UP    u8"\uF0D8"
+#define ICON_CARET_LEFT  u8"\uF0D9"
+#define ICON_CARET_RIGHT u8"\uF0DA"
 
 
 // ****************************************************************
@@ -198,19 +222,35 @@ public:
 class cConfigMenu final : public coreMenu
 {
 private:
-    coreObject2D m_Background;          // 
+    // 
+    struct sPlayerInput final
+    {
+        coreLabel       oHeader;
+        coreSwitchBoxU8 oType;
+        coreSwitchBoxU8 oRumble;
+        coreButton      oMoveUp;
+        coreButton      oMoveLeft;
+        coreButton      oMoveDown;
+        coreButton      oMoveRight;
+        coreButton      aAction[INPUT_KEYS_ACTION];
+    };
 
-    coreButton m_VideoTab;              // 
-    coreButton m_AudioTab;              // 
-    coreButton m_InputTab;              // 
-    coreButton m_GameTab;               // 
 
-    coreButton m_SaveButton;            // save button
-    coreButton m_DiscardButton;         // discard button
-    coreButton m_BackButton;            // back button
+private:
+    coreObject2D m_Background;                // 
 
-    coreLabel    m_aLabel[ENTRY_MAX];   // 
-    coreObject2D m_aLine [ENTRY_MAX];   // 
+    coreButton m_VideoTab;                    // 
+    coreButton m_AudioTab;                    // 
+    coreButton m_InputTab;                    // 
+    coreButton m_GameTab;                     // 
+
+    coreButton m_SaveButton;                  // save button
+    coreButton m_DiscardButton;               // discard button
+    coreButton m_BackButton;                  // back button
+
+    coreLabel    m_aLabel[ENTRY_MAX];         // 
+    coreObject2D m_aLine [ENTRY_MAX];         // 
+    coreLabel    m_aArrow[INPUT_KEYS_MOVE];   // 
 
     coreSwitchBoxU8 m_Display;
     coreSwitchBoxU8 m_Resolution;
@@ -219,13 +259,12 @@ private:
     coreSwitchBoxU8 m_TextureFilter;
     coreSwitchBoxU8 m_AssetQuality;
     coreSwitchBoxU8 m_ShadowQuality;
-
     coreSwitchBoxU8 m_OverallVolume;
     coreSwitchBoxU8 m_MusicVolume;
     coreSwitchBoxU8 m_EffectVolume;
     coreSwitchBoxU8 m_AmbientSound;
-
     coreSwitchBoxU8 m_Language;
+    sPlayerInput    m_aInput[MENU_CONFIG_INPUTS];
 
 
 public:
@@ -251,6 +290,15 @@ private:
     // 
     void __LoadDisplays();
     void __LoadResolutions(const coreUintW iDisplayIndex);
+    void __LoadInputs();
+
+    // 
+    inline coreButton& __RetrieveInputButton  (const coreUintW iPlayerIndex, const coreUintW iKeyIndex) {ASSERT((iPlayerIndex < MENU_CONFIG_INPUTS) && (iKeyIndex < INPUT_KEYS)) return *((&m_aInput[iPlayerIndex].oMoveUp)                                         + iKeyIndex);}
+    inline coreInt16&  __RetrieveInputCurValue(const coreUintW iPlayerIndex, const coreUintW iKeyIndex) {ASSERT((iPlayerIndex < INPUT_TYPES)        && (iKeyIndex < INPUT_KEYS)) return *((&g_CurConfig.Input.aSet[g_CurConfig.Input.aiType[iPlayerIndex]].iMoveUp) + iKeyIndex);}
+    inline coreInt16&  __RetrieveInputDirValue(const coreUintW iType,        const coreUintW iKeyIndex) {ASSERT((iType        < INPUT_SETS)         && (iKeyIndex < INPUT_KEYS)) return *((&g_CurConfig.Input.aSet[iType].iMoveUp)                                  + iKeyIndex);}
+
+    // convert input key to readable string
+    static const coreChar* __PrintKey(const coreUint8 iType, const coreInt16 iKey);
 };
 
 
@@ -335,7 +383,7 @@ private:
     coreLabel    m_aName[MENU_REPLAY_ENTRIES];   // 
     coreLabel    m_aTime[MENU_REPLAY_ENTRIES];   // 
 
-    std::vector<cReplay::uInfo> m_aInfoList;     // 
+    std::vector<cReplay::sInfo> m_aInfoList;     // 
 
 
 public:

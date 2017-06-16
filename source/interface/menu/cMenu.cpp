@@ -80,7 +80,7 @@ void cMenu::Move()
         {
             if(g_pGame)
             {
-                if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS) || Core::System->GetMinimized())
+                if(g_MenuInput.bPause || Core::System->GetMinimized())
                 {
                     // 
                     this->ChangeSurface(SURFACE_PAUSE, 0.0f);
@@ -382,6 +382,9 @@ void cMenu::UpdateSwitchBox(coreSwitchBoxU8* OUTPUT pSwitchBox)
         pArrow              ->SetAlpha (pSwitchBox->GetAlpha() * fAlpha);
         pArrow->GetCaption()->SetColor3(COLOR_MENU_WHITE       * fLight);
     };
+
+    // 
+    if(pSwitchBox->GetOverride() < 0) pSwitchBox->SetAlpha(pSwitchBox->GetAlpha() * 0.5f);
 
     // 
     UpdateArrowFunc(pSwitchBox->GetArrow(0u), pSwitchBox->GetEndless() ? ~0u : 0u);

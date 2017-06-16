@@ -20,7 +20,7 @@ cReplayMenu::cReplayMenu()noexcept
     m_Background.SetPosition  (coreVector2(0.0f,0.0f));
     m_Background.SetSize      (coreVector2(0.8f,0.55f));
 
-    m_BackButton.Construct    (MENU_BUTTON, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL, 0u);
+    m_BackButton.Construct    (MENU_BUTTON, MENU_FONT_ICON_2, MENU_OUTLINE_SMALL, 0u);
     m_BackButton.DefineProgram("menu_border_program");
     m_BackButton.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.5f,-0.5f) + coreVector2(0.0f,-0.02f));
     m_BackButton.SetSize      (coreVector2( 0.07f, 0.07f)); // * m_SaveButton.GetSize().y); 
@@ -83,7 +83,7 @@ void cReplayMenu::Move()
                 {
                     if(i < m_aInfoList.size())
                     {
-                        g_pReplay->LoadFile(m_aInfoList[i].first.c_str(), false);
+                        g_pReplay->LoadFile(m_aInfoList[i].sPath.c_str(), false);
                         m_iStatus = 1;
 
                         break;
@@ -103,7 +103,7 @@ void cReplayMenu::Move()
 
     if(this->GetAlpha() >= 1.0f)
     {
-        if(m_BackButton.IsClicked() || Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS))
+        if(m_BackButton.IsClicked() || g_MenuInput.bCancel)
         {
             // 
             m_iStatus = 2;
@@ -129,7 +129,7 @@ void cReplayMenu::LoadReplays()
     // 
     for(coreUintW i = 0u, ie = MIN(m_aInfoList.size(), MENU_REPLAY_ENTRIES); i < ie; ++i)
     {
-        const cReplay::sHeader& oHeader = m_aInfoList[i].second;
+        const cReplay::sHeader& oHeader = m_aInfoList[i].oHeader;
 
         m_aName[i].SetText(oHeader.acName);
         m_aTime[i].SetText(coreData::TimeString(TIMEMAP_GM(oHeader.iEndTimestamp - oHeader.iStartTimestamp)));

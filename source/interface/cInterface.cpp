@@ -310,7 +310,7 @@ void cInterface::Move()
         m_BannerBar.SetTexOffset(coreVector2(1.0f,1.0f) * (fAnimation * 0.05f));
 
         // animate banner text
-        const coreFloat fTextOffset = (fAnimation + 3.0f) * 0.01f;
+        const coreFloat fTextOffset = (fAnimation + 2.0f) * 0.012f;
         m_aBannerText[0].SetPosition(m_bBannerType ? coreVector2(-0.0155f,  fTextOffset) : coreVector2( fTextOffset,  0.019f));
         m_aBannerText[1].SetPosition(m_bBannerType ? coreVector2( 0.0155f, -fTextOffset) : coreVector2(-fTextOffset, -0.012f));
 

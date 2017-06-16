@@ -11,7 +11,6 @@
 #define _P1_GUARD_GAME_H_
 
 // TODO: enemy bullet (and enemy?) cleanup on mission unload
-// TODO: dead-check on ForEachPlayer for non-coop ?
 
 
 // ****************************************************************
@@ -95,7 +94,8 @@ public:
 
     // 
     cPlayer* FindPlayer(const coreVector2& vPosition);
-    template <typename F> void ForEachPlayer(F&& nFunction);   // [](cPlayer* OUTPUT pPlayer, const coreUintW i) -> void
+    template <typename F> void ForEachPlayer   (F&& nFunction);   // [](cPlayer* OUTPUT pPlayer, const coreUintW i) -> void
+    template <typename F> void ForEachPlayerAll(F&& nFunction);   // [](cPlayer* OUTPUT pPlayer, const coreUintW i) -> void
 
     // access game objects
     inline cPlayer*        GetPlayer             (const coreUintW iIndex) {ASSERT(iIndex < GAME_PLAYERS) return &m_aPlayer[iIndex];}
@@ -130,16 +130,26 @@ private:
 template <typename F> void cGame::ForEachPlayer(F&& nFunction)
 {
     // 
-    if(!m_bCoop) {nFunction(&m_aPlayer[0], 0u); return;}
-
-    // 
-    for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+    for(coreUintW i = 0u, ie = (m_bCoop ? GAME_PLAYERS : 1u); i < ie; ++i)
     {
         cPlayer* pPlayer = &m_aPlayer[i];
         if(CONTAINS_FLAG(pPlayer->GetStatus(), PLAYER_STATUS_DEAD)) continue;
 
         // 
         nFunction(pPlayer, i);
+    }
+}
+
+
+// ****************************************************************
+// 
+template <typename F> void cGame::ForEachPlayerAll(F&& nFunction)
+{
+    // 
+    for(coreUintW i = 0u, ie = (m_bCoop ? GAME_PLAYERS : 1u); i < ie; ++i)
+    {
+        // 
+        nFunction(&m_aPlayer[i], i);
     }
 }
 

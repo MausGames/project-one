@@ -51,12 +51,12 @@ public:
     void Move()final;
 
     // reduce current health
-    void TakeDamage(coreInt32 iDamage, const coreUint8 iElement, cPlayer* pAttacker);
+    coreBool TakeDamage(coreInt32 iDamage, const coreUint8 iElement, cPlayer* pAttacker);
 
     // control life and death
     void Resurrect();
     void Resurrect(const coreSpline2* pPath,     const coreVector2& vFactor, const coreVector2& vOffset);
-    void Resurrect(const coreVector2& vPosition, const coreVector2& vDirection = coreVector2(0.0f,-1.0f));
+    void Resurrect(const coreVector2& vPosition, const coreVector2& vDirection);
     void Kill     (const coreBool     bAnimated);
 
     // transformation functions (raw parameters are multiplied with FOREGROUND_AREA)
@@ -158,7 +158,7 @@ private:
 
 
 public:
-    cEnemyManager() = default;
+    cEnemyManager()noexcept;
     ~cEnemyManager();
 
     DISABLE_COPY(cEnemyManager)

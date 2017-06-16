@@ -119,7 +119,7 @@ void cReplay::Update()
 
         for(coreUintW i = 0u; i < m_Header.iStreamCount; ++i)
         {
-            const sInput* pNewInput = g_pGame->GetPlayer(i)->GetInput();
+            const sGameInput* pNewInput = g_pGame->GetPlayer(i)->GetInput();
 
             // 
             if(!coreMath::InRange(pNewInput->vMove.x, m_aInput[i].vMove.x, CORE_MATH_PRECISION) ||
@@ -129,8 +129,8 @@ void cReplay::Update()
             }
 
             // 
-            if(pNewInput->iButtonPress)   nNewPacketFunc(i, REPLAY_TYPE_PRESS,   pNewInput->iButtonPress);
-            if(pNewInput->iButtonRelease) nNewPacketFunc(i, REPLAY_TYPE_RELEASE, pNewInput->iButtonRelease);
+            if(pNewInput->iActionPress)   nNewPacketFunc(i, REPLAY_TYPE_PRESS,   pNewInput->iActionPress);
+            if(pNewInput->iActionRelease) nNewPacketFunc(i, REPLAY_TYPE_RELEASE, pNewInput->iActionRelease);
 
             // 
             m_aInput[i] = (*pNewInput);
@@ -140,11 +140,11 @@ void cReplay::Update()
     {
         for(coreUintW i = 0u; i < m_Header.iStreamCount; ++i)
         {
-            sInput& oCurInput = m_aInput[i];
+            sGameInput& oCurInput = m_aInput[i];
 
             // 
-            oCurInput.iButtonPress   = 0u;
-            oCurInput.iButtonRelease = 0u;
+            oCurInput.iActionPress   = 0u;
+            oCurInput.iActionRelease = 0u;
 
             for(coreUintW j = m_aiCurPacket[i], je = m_aaStreamPacket[i].size(); j < je; ++j)
             {
@@ -159,13 +159,13 @@ void cReplay::Update()
                         break;
 
                     case REPLAY_TYPE_PRESS:
-                        oCurInput.iButtonPress = oPacket.iValue;
-                        oCurInput.iButtonHold |= oPacket.iValue;
+                        oCurInput.iActionPress = oPacket.iValue;
+                        oCurInput.iActionHold |= oPacket.iValue;
                         break;
 
                     case REPLAY_TYPE_RELEASE:
-                        oCurInput.iButtonRelease =  oPacket.iValue;
-                        oCurInput.iButtonHold   &= ~oPacket.iValue;
+                        oCurInput.iActionRelease =  oPacket.iValue;
+                        oCurInput.iActionHold   &= ~oPacket.iValue;
                         break;
 
                     default: ASSERT(false)
@@ -268,7 +268,7 @@ void cReplay::Clear()
 
 // ****************************************************************
 // 
-void cReplay::LoadInfoList(std::vector<uInfo>* OUTPUT paInfoList)
+void cReplay::LoadInfoList(std::vector<sInfo>* OUTPUT paInfoList)
 {
     ASSERT(paInfoList)
 
@@ -282,11 +282,16 @@ void cReplay::LoadInfoList(std::vector<uInfo>* OUTPUT paInfoList)
     FOR_EACH(it, asFile)
     {
         // 
-        cReplay oNewReplay;
-        oNewReplay.LoadFile(it->c_str(), true);
+        cReplay oReplay;
+        oReplay.LoadFile(it->c_str(), true);
 
         // 
-        paInfoList->emplace_back(std::move(*it), oNewReplay.m_Header);
+        sInfo oInfo;
+        oInfo.sPath   = std::move(*it);
+        oInfo.oHeader = oReplay.m_Header;
+
+        // 
+        paInfoList->push_back(std::move(oInfo));
     }
 }
 

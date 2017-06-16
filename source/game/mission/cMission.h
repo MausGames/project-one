@@ -14,6 +14,8 @@
 // TODO: add visible debug-spline
 // TODO: prevent multiple calculations in script-commands (because of macro variables)
 // TODO: init-value for get-variables
+// TODO: assertion for "active boss should be alive"
+// TODO: check for multiple evaluations in macros
 
 
 // ****************************************************************
@@ -27,7 +29,7 @@
 #define VIRIDO_BALLS      (2u)                                    // 
 #define VIRIDO_TRAILS     (4u)                                    // 
 #define VIRIDO_RAWS       (VIRIDO_BALLS * (VIRIDO_TRAILS + 1u))   // 
-#define VIRIDO_PADDLES    (PLAYERS + 1u)                          // 
+#define VIRIDO_PADDLES    (3u)                                    // 
 #define VIRIDO_BALL_SPEED (1.5f)                                  // 
 
 
@@ -37,7 +39,7 @@
 #define STAGE_MAIN_WAIT(t)              STAGE_MAIN{STAGE_FINISH_AFTER(1.0f)});
 #define STAGE_START_HERE                m_anStage.clear(); STAGE_MAIN{g_pGame->StartIntro(); if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY)) STAGE_FINISH_NOW});
 
-#define STAGE_CLEARED                   (std::all_of(m_apSquad.begin(), m_apSquad.end(), [](const uSquadPtr& pSquad) {return pSquad->IsFinished();}))
+#define STAGE_CLEARED                   (std::all_of(m_apSquad.begin(), m_apSquad.end(), [](const cEnemySquad* pSquad) {return pSquad->IsFinished();}))
 
 #define STAGE_FINISH_NOW                {this->SkipStage();}
 #define STAGE_FINISH_CLEARED            {if(STAGE_CLEARED)       STAGE_FINISH_NOW}
@@ -48,9 +50,10 @@
 #define STAGE_ADD_PATH(n)               auto n = this->_AddPath    (__LINE__,      [this](coreSpline2* OUTPUT n)
 #define STAGE_ADD_SQUAD(n,t,c)          auto n = this->_AddSquad<t>(__LINE__, (c), [this](cEnemySquad* OUTPUT n)
 
-#define STAGE_FOREACH_PLAYER(e,i)       g_pGame->ForEachPlayer([&](cPlayer* OUTPUT e, const coreUintW i)
-#define STAGE_FOREACH_ENEMY(s,e,i)      (s)->ForEachEnemy     ([&](cEnemy*  OUTPUT e, const coreUintW i)
-#define STAGE_FOREACH_ENEMY_ALL(s,e,i)  (s)->ForEachEnemyAll  ([&](cEnemy*  OUTPUT e, const coreUintW i)
+#define STAGE_FOREACH_PLAYER(e,i)       g_pGame->ForEachPlayer   ([&](cPlayer* OUTPUT e, const coreUintW i)
+#define STAGE_FOREACH_PLAYER_ALL(e,i)   g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT e, const coreUintW i)
+#define STAGE_FOREACH_ENEMY(s,e,i)      (s)->ForEachEnemy        ([&](cEnemy*  OUTPUT e, const coreUintW i)
+#define STAGE_FOREACH_ENEMY_ALL(s,e,i)  (s)->ForEachEnemyAll     ([&](cEnemy*  OUTPUT e, const coreUintW i)
 
 #define __STAGE_GET_INT(c)              {if((c) > m_iIntSize)   {SAFE_DELETE_ARRAY(m_piInt)   m_iIntSize   = (c); m_piInt   = ZERO_NEW(coreInt16, m_iIntSize);}}   UNUSED constexpr coreUintW iNewIntSize   = (c);
 #define __STAGE_GET_FLOAT(c)            {if((c) > m_iFloatSize) {SAFE_DELETE_ARRAY(m_pfFloat) m_iFloatSize = (c); m_pfFloat = ZERO_NEW(coreFloat, m_iFloatSize);}} UNUSED constexpr coreUintW iNewFloatSize = (c);
@@ -133,31 +136,24 @@
 class INTERFACE cMission
 {
 protected:
-    // 
-    using uStageFunc = std::function<void()>;
-    using uPathPtr   = std::unique_ptr<coreSpline2>;
-    using uSquadPtr  = std::unique_ptr<cEnemySquad>;
+    cBoss* m_apBoss[MISSION_BOSSES];                           // pointers to all available bosses
 
+    cBoss*    m_pCurBoss;                                      // pointer to currently active boss
+    coreUintW m_iCurBossIndex;                                 // index of the active boss (or error-value)
 
-protected:
-    cBoss* m_apBoss[MISSION_BOSSES];                  // pointers to all available bosses
+    coreLookup<coreUint16, std::function<void()>> m_anStage;   // 
+    coreLookup<coreUint16, coreSpline2*>          m_apPath;    // 
+    coreLookup<coreUint16, cEnemySquad*>          m_apSquad;   // 
 
-    cBoss*    m_pCurBoss;                             // pointer to currently active boss
-    coreUintW m_iCurBossIndex;                        // index of the active boss (or error-value)
+    coreInt16* m_piInt;                                        // 
+    coreFloat* m_pfFloat;                                      // 
+    coreUint8  m_iIntSize;                                     // 
+    coreUint8  m_iFloatSize;                                   // 
 
-    coreLookup<coreUint16, uStageFunc> m_anStage;     // 
-    coreLookup<coreUint16, uPathPtr>   m_apPath;      // 
-    coreLookup<coreUint16, uSquadPtr>  m_apSquad;     // 
-
-    coreInt16* m_piInt;                               // 
-    coreFloat* m_pfFloat;                             // 
-    coreUint8  m_iIntSize;                            // 
-    coreUint8  m_iFloatSize;                          // 
-
-    coreUint16 m_iStageNum;                           // 
-    coreFlow   m_fStageWait;                          // 
-    coreFlow   m_fStageTime;                          // 
-    coreFloat  m_fStageTimeBefore;                    // 
+    coreUint16 m_iStageNum;                                    // 
+    coreFlow   m_fStageWait;                                   // 
+    coreFlow   m_fStageTime;                                   // 
+    coreFloat  m_fStageTimeBefore;                             // 
 
 
 public:
@@ -190,7 +186,7 @@ public:
     inline cBoss*           GetBoss        (const coreUintW iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_apBoss[iIndex];}
     inline cBoss*           GetCurBoss     ()const                       {return m_pCurBoss;}
     inline const coreUintW& GetCurBossIndex()const                       {return m_iCurBossIndex;}
-    inline cEnemySquad*     GetEnemySquad  (const coreUintW iIndex)const {ASSERT(iIndex < m_apSquad.size()) return m_apSquad.get_valuelist()[iIndex].get();}
+    inline cEnemySquad*     GetEnemySquad  (const coreUintW iIndex)const {ASSERT(iIndex < m_apSquad.size()) return m_apSquad.get_valuelist()[iIndex];}
 
 
 protected:
@@ -467,14 +463,14 @@ template <typename F> coreSpline2* cMission::_AddPath(const coreUint16 iCodeLine
     if(!m_apPath.count(iCodeLine))
     {
         // 
-        uPathPtr pNewPath = std::make_unique<coreSpline2>();
-        nInitFunc(pNewPath.get());
+        coreSpline2* pNewPath = new coreSpline2();
+        nInitFunc(pNewPath);
 
         // 
-        m_apPath.emplace(iCodeLine, std::move(pNewPath));
+        m_apPath.emplace(iCodeLine, pNewPath);
     }
 
-    return m_apPath.at(iCodeLine).get();
+    return m_apPath.at(iCodeLine);
 }
 
 
@@ -485,15 +481,15 @@ template <typename T, typename F> cEnemySquad* cMission::_AddSquad(const coreUin
     if(!m_apSquad.count(iCodeLine))
     {
         // 
-        uSquadPtr pNewSquad = std::make_unique<cEnemySquad>();
+        cEnemySquad* pNewSquad = new cEnemySquad();
         pNewSquad->AllocateEnemies<T>(iNum);
-        nInitFunc(pNewSquad.get());
+        nInitFunc(pNewSquad);
 
         // 
-        m_apSquad.emplace(iCodeLine, std::move(pNewSquad));
+        m_apSquad.emplace(iCodeLine, pNewSquad);
     }
 
-    return m_apSquad.at(iCodeLine).get();
+    return m_apSquad.at(iCodeLine);
 }
 
 

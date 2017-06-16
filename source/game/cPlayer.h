@@ -45,11 +45,11 @@ class cPlayer final : public cShip
 {
 private:
     cWeapon* m_apWeapon[PLAYER_WEAPONS];                     // main weapon objects (bullet factories, should never be NULL)
-    sInput*  m_pInput;                                       // pointer to associated input set (should never be NULL)
 
-    coreVector2 m_vForce;                                    // 
+    const sGameInput* m_pInput;                              // pointer to associated input set (should never be NULL)
+    coreVector2       m_vForce;                              // 
 
-    // TODO: score game ?    
+    coreProtect<coreUint32> m_iScoreGame;                    // 
     coreProtect<coreUint32> m_iScoreMission;                 // 
     coreProtect<coreUint32> m_aiScoreBoss[MISSION_BOSSES];   // 
 
@@ -72,7 +72,7 @@ public:
     ENABLE_COPY(cPlayer)
 
     // configure the player
-    void Configure  (const coreUintW iShipType, const coreVector3& vColor, const coreUintW iInputIndex);
+    void Configure  (const coreUintW iShipType, const coreVector3& vColor);
     void EquipWeapon(const coreUintW iIndex, const coreInt32 iID);
 
     // render and move the player
@@ -80,7 +80,7 @@ public:
     void Move  ()final;
 
     // reduce current health
-    void TakeDamage(const coreInt32 iDamage, const coreUint8 iElement);
+    coreBool TakeDamage(const coreInt32 iDamage, const coreUint8 iElement);
 
     // control life and death
     void Resurrect(const coreVector2& vPosition);
@@ -107,12 +107,13 @@ public:
     inline cWeapon* GetWeapon(const coreUintW iIndex) {ASSERT((iIndex < PLAYER_WEAPONS) && m_apWeapon[iIndex]) return m_apWeapon[iIndex];}
 
     // set object properties
-    inline void SetInput(sInput* OUTPUT     pInput) {m_pInput = pInput;}
+    inline void SetInput(const sGameInput*  pInput) {m_pInput = pInput;}
     inline void SetForce(const coreVector2& vForce) {m_vForce = vForce;}
 
     // get object properties
-    inline const sInput*      GetInput        ()const                       {ASSERT(m_pInput) return m_pInput;}
+    inline const sGameInput*  GetInput        ()const                       {ASSERT(m_pInput) return m_pInput;}
     inline const coreVector2& GetForce        ()const                       {return m_vForce;}
+    inline       coreUint32   GetScoreGame    ()const                       {return m_iScoreGame;}
     inline       coreUint32   GetScoreMission ()const                       {return m_iScoreMission;}
     inline       coreUint32   GetScoreBoss    (const coreUintW iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_aiScoreBoss[iIndex];}
     inline       coreFloat    GetCurCombo     ()const                       {return __PLAYER_COMBO(m_iComboValue[0]);}

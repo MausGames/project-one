@@ -31,6 +31,7 @@ void cShip::Render(const coreProgramPtr& pProgram)
     if(!this->IsEnabled(CORE_OBJECT_ENABLE_RENDER)) return;
 
     // check for model status
+    ASSERT(m_pModelLow.GetHandle())
     if(!m_pModelLow.IsUsable()) return;
 
     // enable the shader-program
@@ -72,6 +73,8 @@ coreBool cShip::_TakeDamage(const coreInt32 iDamage, const coreUint8 iElement)
 // add ship to the game
 void cShip::_Resurrect(const coreBool bSingle, const coreVector2& vPosition, const coreVector2& vDirection, const coreInt32 iType)
 {
+    ASSERT(m_iMaxHealth > 0)
+
     // reset ship properties
     m_iCurHealth = m_iMaxHealth;
     m_iPreHealth = m_iMaxHealth;
@@ -91,7 +94,7 @@ void cShip::_Resurrect(const coreBool bSingle, const coreVector2& vPosition, con
     this->SetEnabled(CORE_OBJECT_ENABLE_ALL);
 
     // enable collision
-    this->ChangeType(iType);
+    if(iType) this->ChangeType(iType);
 }
 
 
@@ -119,7 +122,7 @@ void cShip::_Kill(const coreBool bSingle, const coreBool bAnimated)
 void cShip::_UpdateBlink()
 {
     // 
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(PRINTSCREEN), CORE_INPUT_PRESS))
+    if(g_MenuInput.bScreenshot)
         m_fBlink = 0.0f;
 
     // 
@@ -144,7 +147,7 @@ void cShip::_EnableBlink()
 void cShip::_UpdateAlways()
 {
     // 
-    m_iPreHealth = (m_iCurHealth || (m_iPreHealth <= 0)) ? m_iCurHealth : -m_iPreHealth;
+    m_iPreHealth = m_iCurHealth;
 
     // 
     m_vOldPos = this->GetPosition().xy();

@@ -43,7 +43,7 @@ void FragmentMain()
     float v1ReflFactor  = max(0.0, dot(v3ReflNormal, v3BumpNormal));
 
 #if defined(_P1_GLOW_)
-    
+
     // make highlighted area glowing
     v1BumpFactor += v4TexColor.a * 0.5;
 

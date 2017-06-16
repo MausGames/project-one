@@ -107,6 +107,8 @@ cBulletManager::sBulletSetGen::sBulletSetGen()noexcept
 cBulletManager::cBulletManager(const coreInt32 iType)noexcept
 : m_iType (iType)
 {
+    // 
+    Core::Manager::Object->TestCollision(m_iType, [](coreObject3D*, coreObject3D*, coreVector3, coreBool) {});
 }
 
 
@@ -255,8 +257,8 @@ cRayBullet::cRayBullet()noexcept
     this->DefineProgram("effect_energy_bullet_direct_program");
 
     // set object properties
-    this->SetCollisionModifier(coreVector3(1.0f,0.333f,1.0f));   // model with offset
     this->SetTexSize          (coreVector2(0.4f,0.2f) * 0.7f);
+    this->SetCollisionModifier(coreVector3(1.0f,0.333f,1.0f));   // model with offset
 }
 
 
@@ -293,8 +295,8 @@ cPulseBullet::cPulseBullet()noexcept
     this->DefineProgram("effect_energy_bullet_direct_program");
 
     // set object properties
-    this->SetCollisionModifier(coreVector3(1.0f,0.333f,1.0f));   // model with offset
     this->SetTexSize          (coreVector2(0.4f,0.2f));
+    this->SetCollisionModifier(coreVector3(1.0f,0.333f,1.0f));   // model with offset
 }
 
 

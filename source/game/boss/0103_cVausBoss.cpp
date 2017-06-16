@@ -18,6 +18,10 @@
 
 
 // ****************************************************************
+// vector identifier
+
+
+// ****************************************************************
 // constructor
 cVausBoss::cVausBoss()noexcept
 : m_iScoutOrder (0u)
@@ -80,6 +84,9 @@ void cVausBoss::__KillOwn(const coreBool bAnimated)
     // 
     for(coreUintW i = 0u; i < VIRIDO_PADDLES; ++i)
         pMission->DisablePaddle(i, bAnimated);
+
+    // 
+    pMission->SetCurBoss(MISSION_NO_BOSS);
 }
 
 
@@ -129,11 +136,9 @@ void cVausBoss::__MoveOwn()
         {
             PHASE_CONTROL_TIMER(0u, 0.25f, LERP_BREAK)
             {
-                // 
                 const coreFloat fCur = this->GetPosition().x / FOREGROUND_AREA.x;
                 this->DefaultMoveLerp(coreVector2(fCur, -2.0f), coreVector2(fCur, -0.95f), fTime);
 
-                // 
                 if(PHASE_FINISHED)
                     ++m_iPhase;
             });
@@ -151,10 +156,8 @@ void cVausBoss::__MoveOwn()
     {
         if(pSquad->IsFinished())
         {
-            // 
             pMission->MakeSticky();
 
-            // 
             if(pMission->GetStickyState())
                 ++m_iPhase;
         }
@@ -167,7 +170,6 @@ void cVausBoss::__MoveOwn()
         constexpr coreFloat fSpeed = 0.85f;
         PHASE_CONTROL_TIMER(0u, fSpeed, LERP_BREAK)
         {
-            // 
             if(m_aiCounter[IGNORE_BALL] == 0)
             {
                 m_aiCounter[IGNORE_BALL] = 1;
@@ -176,26 +178,21 @@ void cVausBoss::__MoveOwn()
                 m_avVector[0].z = pBall->GetDirection().x;
             }
 
-            // 
             if((m_avVector[0].z * pBall->GetDirection().x) <= 0.0f)
             {
                 m_avVector[0].xy(2.0f * (this->GetPosition().xy() / FOREGROUND_AREA) - m_avVector[0].xy());
                 m_avVector[0].z = pBall->GetDirection().x;
             }
 
-            // 
             const coreFloat fDrop   = (FRAMERATE_TIME * fSpeed) * RCP(LERPB(0.0f, 1.0f, (FRAMERATE_TIME * fSpeed))) * 0.5f / fSpeed;
             const coreFloat fNewPos = m_avVector[0].x + pBall->GetDirection().x * VIRIDO_BALL_SPEED * fDrop;
 
-            // 
             this->DefaultMoveLerp(m_avVector[0].xy(), coreVector2(fNewPos, -0.95f), fTime);
 
-            // 
             if(PHASE_FINISHED)
             {
                 ++m_iPhase;
 
-                // 
                 m_avVector[0].xy(this->GetPosition().xy() / FOREGROUND_AREA);
             }
         });
@@ -209,11 +206,9 @@ void cVausBoss::__MoveOwn()
         {
             ++m_iPhase;
 
-            // 
             m_aCompanion[0].Resurrect(coreVector2(-1.8f * FOREGROUND_AREA.x, 0.0f), coreVector2( 1.0f,0.0f));
             m_aCompanion[1].Resurrect(coreVector2( 1.8f * FOREGROUND_AREA.x, 0.0f), coreVector2(-1.0f,0.0f));
 
-            // 
             pMission->EnablePaddle(1u, &m_aCompanion[0]);
             pMission->EnablePaddle(2u, &m_aCompanion[1]);
         });
@@ -227,22 +222,18 @@ void cVausBoss::__MoveOwn()
     {
         PHASE_CONTROL_TIMER(0u, 1.0f/2.5f, LERP_SMOOTH)
         {
-            // 
             this->DefaultMoveLerp  (m_avVector[0].xy(), coreVector2(0.0f,0.95f), fTime);
             this->DefaultRotateLerp(0.0f*PI,            3.0f*PI,                 fTime);
 
-            // 
             m_aCompanion[0].DefaultMoveLerp(coreVector2(-1.8f,-0.6f), coreVector2(-0.95f,-0.6f), fTime);
             m_aCompanion[1].DefaultMoveLerp(coreVector2( 1.8f,-0.6f), coreVector2( 0.95f,-0.6f), fTime);
 
-            // 
             if(PHASE_TIME_POINT(0.35f))
             {
                 g_pGame->GetMission()->SetCurBoss(this);
                 g_pGame->GetInterface()->ShowBoss(this);
             }
 
-            // 
             if(PHASE_FINISHED)
                 ++m_iPhase;
         });
@@ -256,13 +247,11 @@ void cVausBoss::__MoveOwn()
         {
             const coreFloat fBallPosY = pBall->GetPosition().y / FOREGROUND_AREA.y;
 
-            // 
             m_aCompanion[0].DefaultMoveLerp  (coreVector2(-0.95f,-0.6f), coreVector2(-0.95f, fBallPosY), fTime);
             m_aCompanion[1].DefaultMoveLerp  (coreVector2( 0.95f,-0.6f), coreVector2( 0.95f, fBallPosY), fTime);
             m_aCompanion[0].DefaultRotateLerp(-0.5f*PI,                   1.5f*PI,                       fTime);
             m_aCompanion[1].DefaultRotateLerp( 0.5f*PI,                  -1.5f*PI,                       fTime);
 
-            // 
             if(PHASE_FINISHED)
                 m_iPhase = 10u;
         });
@@ -276,7 +265,6 @@ void cVausBoss::__MoveOwn()
         {
             // TODO: charge 
 
-            // 
             if(PHASE_FINISHED)
                 ++m_iPhase;
         });
@@ -290,10 +278,8 @@ void cVausBoss::__MoveOwn()
         {
             ++m_iPhase;
 
-            // 
             m_aiCounter[IGNORE_BALL] = 0;
 
-            // 
             coreVector2 vBallDir;
             switch(m_aiCounter[SUB_PHASE] % 3)
             {
@@ -303,10 +289,8 @@ void cVausBoss::__MoveOwn()
             case 0: vBallDir = coreVector2(-2.45f,-1.0f)  .Normalized(); break;
             }
 
-            // 
             if(m_aiCounter[SUB_PHASE] % 2) vBallDir = vBallDir.InvertedX();
 
-            // 
             pMission->UnmakeSticky(vBallDir);
         });
     }
@@ -315,7 +299,6 @@ void cVausBoss::__MoveOwn()
     // 
     else if(m_iPhase == 12u)
     {
-        // 
         coreFloat fSpeed;
         switch(m_aiCounter[SUB_PHASE] % 3)
         {
@@ -332,13 +315,11 @@ void cVausBoss::__MoveOwn()
         case 0: fSpeed = 1.0f/6.0f; break;
         }
 
-        // 
         PHASE_CONTROL_PAUSE(0u, fSpeed)
         {
             pMission->MakeSticky();
         });
 
-        // 
         if(pMission->GetStickyState())
         {
             ++m_iPhase;
@@ -357,10 +338,8 @@ void cVausBoss::__MoveOwn()
             this->SetPosition(coreVector3(coreVector2(0.0f,0.95f) * FOREGROUND_AREA, 0.0f)); 
             m_aiCounter[IGNORE_BALL] = 1; 
 
-            //// 
             //m_aiCounter[IGNORE_BALL] = 1;
             //
-            //// 
             //this->SetPosition(coreVector3(coreVector2(0.0f,0.95f) * FOREGROUND_AREA, 0.0f));
         }
     }
@@ -427,7 +406,6 @@ void cVausBoss::__MoveOwn()
 
             //if(m_aiCounter[LASER_SHOT])
             //{
-            //    // 
             //    cEnemy* pEnemy = &m_aCompanion[m_aiCounter[LASER_SHOT]-1u];
             //    pEnemy->DefaultMoveLerp(m_avVector[0].xy(), coreVector2(m_avVector[0].x, m_avVector[3].y), fTime);
             m_aCompanion[0].DefaultMoveLerp(m_avVector[1].xy(), coreVector2(m_avVector[1].x, m_avVector[3 + iSide].y), fTime);
@@ -435,7 +413,6 @@ void cVausBoss::__MoveOwn()
             //}
             //else
             //{
-                // 
                 this->DefaultMoveLerp(m_avVector[0].xy(), coreVector2(m_avVector[4].x, m_avVector[0].y), fTime);
             //}
 
@@ -443,7 +420,6 @@ void cVausBoss::__MoveOwn()
             m_aRay[1].SetAlpha(1.0f - fTime);
             m_aRay[2].SetAlpha(1.0f - fTime);
 
-            // 
             if(PHASE_FINISHED)
             {
                 m_iPhase = 21u;
@@ -464,14 +440,11 @@ void cVausBoss::__MoveOwn()
         {
             const coreFloat fBallPosY = pBall->GetPosition().y / FOREGROUND_AREA.y;
 
-            // 
             this->DefaultMoveLerp(m_avVector[0].xy(), coreVector2(0.0f, m_avVector[0].y), fTime);
 
-            // 
             m_aCompanion[0].DefaultMoveLerp(m_avVector[1].xy(), coreVector2(m_avVector[1].x, fBallPosY), fTime);
             m_aCompanion[1].DefaultMoveLerp(m_avVector[2].xy(), coreVector2(m_avVector[2].x, fBallPosY), fTime);
 
-            // 
             if(PHASE_FINISHED)
             {
                 m_iPhase = 11u;
@@ -527,7 +500,6 @@ void cVausBoss::__MoveOwn()
             const coreFloat fTime1 = LERPB(0.0f, 1.4f, MIN(fTime / fFirst, 1.0f) * fMax);
             const coreFloat fTime2 = LERPB(0.0f, 1.4f, MAX((fTime - fDiff) / (1.0f - fDiff), 0.0f) * fMax);
 
-            // 
             m_aCompanion[0].DefaultMoveLerp  (coreVector2(-0.95f, fBallPosY), coreVector2(-0.5f,0.2f), fTime1);
             m_aCompanion[1].DefaultMoveLerp  (coreVector2( 0.95f, fBallPosY), coreVector2( 0.5f,0.2f), fTime2);
             m_aCompanion[0].DefaultRotateLerp(-0.5f*PI,                       -1.2f*PI,                fTime1);
@@ -550,7 +522,6 @@ void cVausBoss::__MoveOwn()
                 pMission->EnablePaddle(1u, g_pGame->GetPlayer(0u)); 
             }
 
-            // 
             if(PHASE_FINISHED)
             {
                 ++m_iPhase;
@@ -596,7 +567,7 @@ void cVausBoss::__MoveOwn()
     }
 
     // ################################################################
-
+    // ################################################################
 
 
 
@@ -721,7 +692,6 @@ void cVausBoss::__MoveOwn()
             if(CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD))
             {
                 if(!bFront) TOGGLE_BIT(m_iScoutOrder, x)
-                STATIC_ASSERT(VAUS_SCOUTS_X <= sizeof(m_iScoutOrder)*8u)
 
                 if(m_aiCounter[SCOUT_RESURRECTIONS] < VAUS_SCOUTS_TOTAL)
                 {
@@ -731,6 +701,8 @@ void cVausBoss::__MoveOwn()
             }
 
             pEnemy->DefaultMoveSmooth(vGridPos, 3.0f, 30.0f);
+
+            STATIC_ASSERT(VAUS_SCOUTS_X <= sizeof(m_iScoutOrder)*8u)
         });
     }
 

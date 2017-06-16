@@ -52,7 +52,7 @@ cGameMenu::cGameMenu()noexcept
     m_ReplayButton.SetSize      (m_StartButton.GetSize());
     m_ReplayButton.GetCaption()->SetTextLanguage("REPLAY");
 
-    m_ExitButton.Construct    (MENU_BUTTON, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL, 0u);
+    m_ExitButton.Construct    (MENU_BUTTON, MENU_FONT_ICON_2, MENU_OUTLINE_SMALL, 0u);
     m_ExitButton.DefineProgram("menu_border_program");
     m_ExitButton.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.5f,-0.5f) + coreVector2(0.0f,-0.02f));
     m_ExitButton.SetSize      (coreVector2( 1.0f, 1.0f) * m_ConfigButton.GetSize().y);

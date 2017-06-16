@@ -53,7 +53,7 @@ cWater::cWater()noexcept
     // remove default texture filter (not visible, better performance)
     if(CORE_GL_SUPPORT(EXT_texture_filter_anisotropic))
     {
-        m_apTexture[0].GetHandle()->OnLoadOnce([pResource = m_apTexture[0]]()
+        m_apTexture[0].OnUsableOnce([pResource = m_apTexture[0]]()
         {
             glBindTexture  (GL_TEXTURE_2D, pResource->GetTexture());
             glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1.0f);

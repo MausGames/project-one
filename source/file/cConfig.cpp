@@ -8,9 +8,11 @@
 //////////////////////////////////////////////////////
 #include "main.h"
 
-sConfig g_CurConfig          = {};
-sConfig g_OldConfig          = {};
-sInput  g_aInput[INPUT_SETS] = {{}};
+sConfig    g_CurConfig               = {};
+sConfig    g_OldConfig               = {};
+sGameInput g_aGameInput[INPUT_TYPES] = {{}};
+sGameInput g_TotalInput              = {};
+sMenuInput g_MenuInput               = {};
 
 
 // ****************************************************************
@@ -31,21 +33,21 @@ static void CheckConfig(sConfig* pConfig)
         pConfig->Input.aiType[i] = CLAMP(pConfig->Input.aiType[i], 0u, INPUT_SETS-1u);
 
     // loop trough input sets
-    for(coreUintW i = 0u; i < INPUT_SETS;  ++i)
+    for(coreUintW i = 0u; i < INPUT_SETS; ++i)
     {
         const coreInt16 iFrom = (i < INPUT_SETS_KEYBOARD) ? -coreInt16(CORE_INPUT_BUTTONS_MOUSE   -1) : 0;
         const coreInt16 iTo   = (i < INPUT_SETS_KEYBOARD) ?  coreInt16(CORE_INPUT_BUTTONS_KEYBOARD-1) : coreInt16(CORE_INPUT_BUTTONS_JOYSTICK-1);
         auto&           oSet  = pConfig->Input.aSet[i];
 
         // clamp movement keys
-        oSet.iMoveLeft  = CLAMP(oSet.iMoveLeft,  iFrom, iTo);
-        oSet.iMoveRight = CLAMP(oSet.iMoveRight, iFrom, iTo);
-        oSet.iMoveDown  = CLAMP(oSet.iMoveDown,  iFrom, iTo);
         oSet.iMoveUp    = CLAMP(oSet.iMoveUp,    iFrom, iTo);
+        oSet.iMoveLeft  = CLAMP(oSet.iMoveLeft,  iFrom, iTo);
+        oSet.iMoveDown  = CLAMP(oSet.iMoveDown,  iFrom, iTo);
+        oSet.iMoveRight = CLAMP(oSet.iMoveRight, iFrom, iTo);
 
-        // clamp input buttons
-        for(coreUintW j = 0u; j < INPUT_BUTTONS; ++j)
-            oSet.aiButton[j] = CLAMP(oSet.aiButton[j], iFrom, iTo);
+        // clamp action keys
+        for(coreUintW j = 0u; j < INPUT_KEYS_ACTION; ++j)
+            oSet.aiAction[j] = CLAMP(oSet.aiAction[j], iFrom, iTo);
     }
 
     // check for input sets with more than one selection
@@ -72,9 +74,11 @@ static void CheckConfig(sConfig* pConfig)
 void LoadConfig()
 {
     // reset memory
-    std::memset(&g_CurConfig, 0, sizeof(g_CurConfig));
-    std::memset(&g_OldConfig, 0, sizeof(g_OldConfig));
-    std::memset(&g_aInput,    0, sizeof(g_aInput));
+    std::memset(&g_CurConfig,  0, sizeof(g_CurConfig));
+    std::memset(&g_OldConfig,  0, sizeof(g_OldConfig));
+    std::memset(&g_aGameInput, 0, sizeof(g_aGameInput));
+    std::memset(&g_TotalInput, 0, sizeof(g_TotalInput));
+    std::memset(&g_MenuInput,  0, sizeof(g_MenuInput));
 
     // load configuration file
     Core::Config->Load();
@@ -97,17 +101,18 @@ void LoadConfig()
     // read input values
     for(coreUintW i = 0u; i < INPUT_TYPES; ++i)
     {
-        g_OldConfig.Input.aiType[i] = Core::Config->GetInt(CONFIG_INPUT_TYPE(i));
+        g_OldConfig.Input.aiType  [i] = Core::Config->GetInt(CONFIG_INPUT_TYPE  (i));
+        g_OldConfig.Input.aiRumble[i] = Core::Config->GetInt(CONFIG_INPUT_RUMBLE(i));
     }
     for(coreUintW i = 0u; i < INPUT_SETS;  ++i)
     {
-        g_OldConfig.Input.aSet[i].iMoveLeft  = Core::Config->GetInt(CONFIG_INPUT_MOVE_LEFT (i));
-        g_OldConfig.Input.aSet[i].iMoveRight = Core::Config->GetInt(CONFIG_INPUT_MOVE_RIGHT(i));
-        g_OldConfig.Input.aSet[i].iMoveDown  = Core::Config->GetInt(CONFIG_INPUT_MOVE_DOWN (i));
         g_OldConfig.Input.aSet[i].iMoveUp    = Core::Config->GetInt(CONFIG_INPUT_MOVE_UP   (i));
-        for(coreUintW j = 0u; j < INPUT_BUTTONS; ++j)
+        g_OldConfig.Input.aSet[i].iMoveLeft  = Core::Config->GetInt(CONFIG_INPUT_MOVE_LEFT (i));
+        g_OldConfig.Input.aSet[i].iMoveDown  = Core::Config->GetInt(CONFIG_INPUT_MOVE_DOWN (i));
+        g_OldConfig.Input.aSet[i].iMoveRight = Core::Config->GetInt(CONFIG_INPUT_MOVE_RIGHT(i));
+        for(coreUintW j = 0u; j < INPUT_KEYS_ACTION; ++j)
         {
-            g_OldConfig.Input.aSet[i].aiButton[j] = Core::Config->GetInt(CONFIG_INPUT_BUTTON(i, j));
+            g_OldConfig.Input.aSet[i].aiAction[j] = Core::Config->GetInt(CONFIG_INPUT_ACTION(i, j));
         }
     }
 
@@ -144,17 +149,18 @@ void SaveConfig()
     // write input values
     for(coreUintW i = 0u; i < INPUT_TYPES; ++i)
     {
-        Core::Config->SetInt(CONFIG_INPUT_TYPE(i), g_OldConfig.Input.aiType[i]);
+        Core::Config->SetInt(CONFIG_INPUT_TYPE  (i), g_OldConfig.Input.aiType  [i]);
+        Core::Config->SetInt(CONFIG_INPUT_RUMBLE(i), g_OldConfig.Input.aiRumble[i]);
     }
     for(coreUintW i = 0u; i < INPUT_SETS;  ++i)
     {
-        Core::Config->SetInt(CONFIG_INPUT_MOVE_LEFT (i), g_OldConfig.Input.aSet[i].iMoveLeft);
-        Core::Config->SetInt(CONFIG_INPUT_MOVE_RIGHT(i), g_OldConfig.Input.aSet[i].iMoveRight);
-        Core::Config->SetInt(CONFIG_INPUT_MOVE_DOWN (i), g_OldConfig.Input.aSet[i].iMoveDown);
         Core::Config->SetInt(CONFIG_INPUT_MOVE_UP   (i), g_OldConfig.Input.aSet[i].iMoveUp);
-        for(coreUintW j = 0u; j < INPUT_BUTTONS; ++j)
+        Core::Config->SetInt(CONFIG_INPUT_MOVE_LEFT (i), g_OldConfig.Input.aSet[i].iMoveLeft);
+        Core::Config->SetInt(CONFIG_INPUT_MOVE_DOWN (i), g_OldConfig.Input.aSet[i].iMoveDown);
+        Core::Config->SetInt(CONFIG_INPUT_MOVE_RIGHT(i), g_OldConfig.Input.aSet[i].iMoveRight);
+        for(coreUintW j = 0u; j < INPUT_KEYS_ACTION; ++j)
         {
-            Core::Config->SetInt(CONFIG_INPUT_BUTTON(i, j), g_OldConfig.Input.aSet[i].aiButton[j]);
+            Core::Config->SetInt(CONFIG_INPUT_ACTION(i, j), g_OldConfig.Input.aSet[i].aiAction[j]);
         }
     }
 
@@ -167,57 +173,52 @@ void SaveConfig()
 // update input interface
 void UpdateInput()
 {
+    // forward d-pad input to stick input
     for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
-    {
-        // forward d-pad input to stick input
         Core::Input->ForwardDpadToStick(i);
-    }
 
-    for(coreUintW i = 0u; i < INPUT_TYPES; ++i)
+    // reset mapped input values
+    std::memset(&g_aGameInput, 0, sizeof(g_aGameInput));
+    std::memset(&g_TotalInput, 0, sizeof(g_TotalInput));
+    std::memset(&g_MenuInput,  0, sizeof(g_MenuInput));
+
+    // loop trough input sets
+    for(coreUintW i = 0u; i < INPUT_SETS; ++i)
     {
-        const coreUint8& iType = g_CurConfig.Input.aiType[i];
-        const auto&      oSet  = g_CurConfig.Input.aSet[iType];
-        sInput&          oMap  = g_aInput[iType];
+        const auto& oSet = g_CurConfig.Input.aSet[i];
+        sGameInput  oMap = {};
 
-        // reset mapped input values
-        std::memset(&oMap, 0, sizeof(oMap));
-
-        // check for input source type
-        if(iType < INPUT_SETS_KEYBOARD)   // # keyboard and mouse
+        if(i < INPUT_SETS_KEYBOARD)   // # keyboard and mouse
         {
-            // map movement input
-                 if(Core::Input->GetKeyboardButton(coreInputKey(oSet.iMoveLeft),  CORE_INPUT_HOLD)) oMap.vMove.x = -1.0f;
-            else if(Core::Input->GetKeyboardButton(coreInputKey(oSet.iMoveRight), CORE_INPUT_HOLD)) oMap.vMove.x =  1.0f;
-                 if(Core::Input->GetKeyboardButton(coreInputKey(oSet.iMoveDown),  CORE_INPUT_HOLD)) oMap.vMove.y = -1.0f;
-            else if(Core::Input->GetKeyboardButton(coreInputKey(oSet.iMoveUp),    CORE_INPUT_HOLD)) oMap.vMove.y =  1.0f;
-
-            // map button input
-            for(coreUintW j = 0u; j < INPUT_BUTTONS; ++j)
+            // check key depending on its value
+            auto nCheckKeyFunc = [](const coreInt16 iKey, const coreInputType iType)
             {
-                if(oSet.aiButton[j] <= 0)
-                {
-                    // check for mouse buttons
-                    if(Core::Input->GetMouseButton(coreUint8(-oSet.aiButton[j]), CORE_INPUT_PRESS))   ADD_BIT(oMap.iButtonPress,   j);
-                    if(Core::Input->GetMouseButton(coreUint8(-oSet.aiButton[j]), CORE_INPUT_RELEASE)) ADD_BIT(oMap.iButtonRelease, j);
-                    if(Core::Input->GetMouseButton(coreUint8(-oSet.aiButton[j]), CORE_INPUT_HOLD))    ADD_BIT(oMap.iButtonHold,    j);
-                }
-                else
-                {
-                    // check for keyboard buttons
-                    if(Core::Input->GetKeyboardButton(coreInputKey(oSet.aiButton[j]), CORE_INPUT_PRESS))   ADD_BIT(oMap.iButtonPress,   j);
-                    if(Core::Input->GetKeyboardButton(coreInputKey(oSet.aiButton[j]), CORE_INPUT_RELEASE)) ADD_BIT(oMap.iButtonRelease, j);
-                    if(Core::Input->GetKeyboardButton(coreInputKey(oSet.aiButton[j]), CORE_INPUT_HOLD))    ADD_BIT(oMap.iButtonHold,    j);
-                }
+                if(iKey <= 0) return Core::Input->GetMouseButton   (coreUint8   (-iKey), iType);
+                         else return Core::Input->GetKeyboardButton(coreInputKey( iKey), iType);
+            };
+
+            // map movement input
+                 if(nCheckKeyFunc(oSet.iMoveLeft,  CORE_INPUT_HOLD)) oMap.vMove.x = -1.0f;
+            else if(nCheckKeyFunc(oSet.iMoveRight, CORE_INPUT_HOLD)) oMap.vMove.x =  1.0f;
+                 if(nCheckKeyFunc(oSet.iMoveDown,  CORE_INPUT_HOLD)) oMap.vMove.y = -1.0f;
+            else if(nCheckKeyFunc(oSet.iMoveUp,    CORE_INPUT_HOLD)) oMap.vMove.y =  1.0f;
+
+            // map action input
+            for(coreUintW j = 0u; j < INPUT_KEYS_ACTION; ++j)
+            {
+                if(nCheckKeyFunc(oSet.aiAction[j], CORE_INPUT_PRESS))   ADD_BIT(oMap.iActionPress,   j);
+                if(nCheckKeyFunc(oSet.aiAction[j], CORE_INPUT_RELEASE)) ADD_BIT(oMap.iActionRelease, j);
+                if(nCheckKeyFunc(oSet.aiAction[j], CORE_INPUT_HOLD))    ADD_BIT(oMap.iActionHold,    j);
             }
         }
         else   // # joystick/gamepad
         {
-            const coreUintW iJoystickID = iType - INPUT_SETS_KEYBOARD;
+            const coreUintW iJoystickID = i - INPUT_SETS_KEYBOARD;
 
             // map movement input
             oMap.vMove = Core::Input->GetJoystickRelative(iJoystickID);
 
-            // 
+            // restrict movement input to the 8 base directions
             if(!oMap.vMove.IsNull())
             {
                 const coreFloat fOldAngle = oMap.vMove.Angle();
@@ -225,20 +226,60 @@ void UpdateInput()
                 oMap.vMove = coreVector2::Direction(fNewAngle);
             }
 
-            // map button input
-            for(coreUintW j = 0u; j < INPUT_BUTTONS; ++j)
+            // map action input
+            for(coreUintW j = 0u; j < INPUT_KEYS_ACTION; ++j)
             {
-                if(Core::Input->GetJoystickButton(iJoystickID, coreUint8(oSet.aiButton[j]), CORE_INPUT_PRESS))   ADD_BIT(oMap.iButtonPress,   j);
-                if(Core::Input->GetJoystickButton(iJoystickID, coreUint8(oSet.aiButton[j]), CORE_INPUT_RELEASE)) ADD_BIT(oMap.iButtonRelease, j);
-                if(Core::Input->GetJoystickButton(iJoystickID, coreUint8(oSet.aiButton[j]), CORE_INPUT_HOLD))    ADD_BIT(oMap.iButtonHold,    j);
+                if(Core::Input->GetJoystickButton(iJoystickID, coreUint8(oSet.aiAction[j]), CORE_INPUT_PRESS))   ADD_BIT(oMap.iActionPress,   j);
+                if(Core::Input->GetJoystickButton(iJoystickID, coreUint8(oSet.aiAction[j]), CORE_INPUT_RELEASE)) ADD_BIT(oMap.iActionRelease, j);
+                if(Core::Input->GetJoystickButton(iJoystickID, coreUint8(oSet.aiAction[j]), CORE_INPUT_HOLD))    ADD_BIT(oMap.iActionHold,    j);
             }
-
-            // 
-            if(CONTAINS_BIT(oMap.iButtonPress, INPUT_BUTTONS-1u))
-                Core::Input->SetKeyboardButton(CORE_INPUT_KEY(ESCAPE), true);
         }
 
         // normalize movement input
         if(!oMap.vMove.IsNull()) oMap.vMove = oMap.vMove.Normalized();
+
+        // 
+        for(coreUintW j = 0u; j < INPUT_TYPES; ++j)
+        {
+            if(g_CurConfig.Input.aiType[j] == i)
+            {
+                g_aGameInput[j] = oMap;
+                break;
+            }
+        }
+
+        // 
+        if(g_TotalInput.vMove.IsNull()) g_TotalInput.vMove = oMap.vMove;   // use first valid movement input
+        g_TotalInput.iActionPress   |= oMap.iActionPress;
+        g_TotalInput.iActionRelease |= oMap.iActionRelease;
+        g_TotalInput.iActionHold    |= oMap.iActionHold;
+
+        // 
+        if(i >= INPUT_SETS_KEYBOARD)
+        {
+            if(CONTAINS_BIT(oMap.iActionPress, 0u)) g_MenuInput.bAccept = true;
+            if(CONTAINS_BIT(oMap.iActionPress, 1u)) g_MenuInput.bCancel = true;
+            if(CONTAINS_BIT(oMap.iActionPress, 3u)) g_MenuInput.bPause  = true;
+        }
     }
+
+    // 
+         if(!coreMath::InRange(g_TotalInput.vMove.x, 0.0f, CORE_MATH_PRECISION)) g_MenuInput.iMove = (g_TotalInput.vMove.x > 0.0f) ? 4u : 2u;
+    else if(!coreMath::InRange(g_TotalInput.vMove.y, 0.0f, CORE_MATH_PRECISION)) g_MenuInput.iMove = (g_TotalInput.vMove.y > 0.0f) ? 1u : 3u;
+
+    // 
+    else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(UP),    CORE_INPUT_HOLD)) g_MenuInput.iMove = 1u;
+    else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LEFT),  CORE_INPUT_HOLD)) g_MenuInput.iMove = 2u;
+    else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(DOWN),  CORE_INPUT_HOLD)) g_MenuInput.iMove = 3u;
+    else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(RIGHT), CORE_INPUT_HOLD)) g_MenuInput.iMove = 4u;
+
+    // 
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(RETURN),      CORE_INPUT_PRESS) ||
+       Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_ENTER),    CORE_INPUT_PRESS) ||
+       Core::Input->GetKeyboardButton(CORE_INPUT_KEY(SPACE),       CORE_INPUT_PRESS)) g_MenuInput.bAccept     = true;
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE),      CORE_INPUT_PRESS) ||
+       Core::Input->GetKeyboardButton(CORE_INPUT_KEY(BACKSPACE),   CORE_INPUT_PRESS) ||
+       Core::Input->GetMouseButton   (CORE_INPUT_RIGHT,            CORE_INPUT_PRESS)) g_MenuInput.bCancel     = true;
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE),      CORE_INPUT_PRESS)) g_MenuInput.bPause      = true;
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(PRINTSCREEN), CORE_INPUT_PRESS)) g_MenuInput.bScreenshot = true;
 }
