@@ -75,9 +75,6 @@
     <ClCompile Include="..\..\..\source\interface\cMsgBox.cpp">
       <Filter>interface</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\interface\menu\02_cMainMenu.cpp">
-      <Filter>interface\menu</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\source\interface\menu\01_cIntroMenu.cpp">
       <Filter>interface\menu</Filter>
     </ClCompile>
@@ -105,15 +102,6 @@
     <ClCompile Include="..\..\..\source\interface\cCombatStats.cpp">
       <Filter>interface</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\interface\menu\03_cGameMenu.cpp">
-      <Filter>interface\menu</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\source\interface\menu\04_cConfigMenu.cpp">
-      <Filter>interface\menu</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\source\interface\menu\05_cExtraMenu.cpp">
-      <Filter>interface\menu</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\source\visual\cBlur.cpp">
       <Filter>visual</Filter>
     </ClCompile>
@@ -131,9 +119,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\source\environment\background\07_cMossBackground.cpp">
       <Filter>environment\background</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\source\interface\menu\06_cPauseMenu.cpp">
-      <Filter>interface\menu</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\game\cTheater.cpp">
       <Filter>game</Filter>
@@ -234,10 +219,31 @@
     <ClCompile Include="..\..\..\source\game\boss\0703_cNagualBoss.cpp">
       <Filter>game\boss</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\interface\menu\08_cReplayMenu.cpp">
+    <ClCompile Include="..\..\..\source\interface\menu\02_cTitleMenu.cpp">
       <Filter>interface\menu</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\interface\menu\07_cScoreMenu.cpp">
+    <ClCompile Include="..\..\..\source\interface\menu\05_cScoreMenu.cpp">
+      <Filter>interface\menu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\interface\menu\06_cReplayMenu.cpp">
+      <Filter>interface\menu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\interface\menu\07_cConfigMenu.cpp">
+      <Filter>interface\menu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\interface\menu\08_cExtraMenu.cpp">
+      <Filter>interface\menu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\interface\menu\09_cPauseMenu.cpp">
+      <Filter>interface\menu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\interface\menu\03_cMainMenu.cpp">
+      <Filter>interface\menu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\interface\menu\04_cGameMenu.cpp">
+      <Filter>interface\menu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\interface\menu\10_cSummaryMenu.cpp">
       <Filter>interface\menu</Filter>
     </ClCompile>
   </ItemGroup>

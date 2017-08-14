@@ -89,7 +89,7 @@ void cTorusBoss::Render()
 {
     // 
     if(!m_aiCounter[ATTACK_STATUS])
-        cEnemy::Render();
+        this->cEnemy::Render();
 }
 
 
@@ -118,7 +118,7 @@ void cTorusBoss::__KillOwn(const coreBool bAnimated)
     {
         // 
         for(coreUintW i = 1u, ie = m_aiCounter[BALL_STATUS]; i < ie; ++i)
-            pMission->DisableBall(i, true);
+            pMission->DisableBall(i, bAnimated);
     }
 
     // 
@@ -156,7 +156,7 @@ void cTorusBoss::__RenderOwnAttack()
         glEnable(GL_DEPTH_TEST);
 
         // 
-        cEnemy::Render();
+        this->cEnemy::Render();
 
         // 
         m_Emitter.Render();
@@ -470,7 +470,7 @@ void cTorusBoss::__MoveOwn()
     this->SetOrientation(coreVector3(0.0f,       vNewOri.x,           vNewOri.y));
 
     // pre-calculate rotation quaternion
-    coreObject3D::Move();
+    this->coreObject3D::Move();
 
     // 
     if(m_aiCounter[ATTACK_STATUS])

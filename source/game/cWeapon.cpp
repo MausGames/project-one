@@ -259,7 +259,7 @@ cWaveWeapon::cWaveWeapon()noexcept
     m_pChangeSound = Core::Manager::Resource->Get<coreSound>("bullet_wave.wav");
 
     // 
-    m_Arrow.Construct(MENU_FONT_ICON_2, MENU_OUTLINE_SMALL, 0u);
+    m_Arrow.Construct(MENU_FONT_ICON_2, MENU_OUTLINE_SMALL);
     m_Arrow.SetColor4(coreVector4(COLOR_ENERGY_GREEN, 0.8f));
     m_Arrow.SetText  (ICON_CARET_UP);
 }

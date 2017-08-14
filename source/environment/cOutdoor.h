@@ -134,7 +134,7 @@ public:
 
 private:
     // 
-    template <typename F> void __Render(const coreProgramPtr& pProgram, F&& nFunction);   // [](){} -> void
+    template <typename F> void __Render(const coreProgramPtr& pProgram, F&& nFunction);   // []() -> void
 };
 
 

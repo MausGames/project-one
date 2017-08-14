@@ -29,7 +29,7 @@ cTooltip::cTooltip()noexcept
     // create text lines
     for(coreUintW i = 0u; i < TOOLTIP_LINES; ++i)
     {
-        m_aLine[i].Construct   (MENU_FONT_DYNAMIC_1, TOOLTIP_OUTLINE_SIZE, 0u);
+        m_aLine[i].Construct   (MENU_FONT_DYNAMIC_1, TOOLTIP_OUTLINE_SIZE);
         m_aLine[i].SetAlignment(coreVector2(1.0f,-1.0f));
         m_aLine[i].SetColor3   (COLOR_MENU_WHITE);
     }
@@ -44,7 +44,7 @@ void cTooltip::Render()
     m_bDisplay = false;   // # display once
 
     // render the background
-    coreObject2D::Render();
+    this->coreObject2D::Render();
 
     // render all active text lines
     for(coreUintW i = 0u; i < m_iNumLines; ++i)
@@ -59,7 +59,7 @@ void cTooltip::Move()
     if(!m_bDisplay) return;
 
     // move the background
-    coreObject2D::Move();
+    this->coreObject2D::Move();
 
     // move all active text lines
     for(coreUintW i = 0u; i < m_iNumLines; ++i)

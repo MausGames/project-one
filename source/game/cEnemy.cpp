@@ -52,21 +52,23 @@ void cEnemy::GiveShield(const coreUint8 iElement, const coreInt16 iHealth)
 void cEnemy::Move()
 {
     // 
-    this->_UpdateAlways();
-    if(CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_DEAD)) return;
+    this->_UpdateAlwaysBefore();
+
+    if(!CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_DEAD))
+    {
+        // 
+        m_fLifeTimeBefore = m_fLifeTime;
+        m_fLifeTime.Update(1.0f);
+
+        // call individual move routines
+        this->__MoveOwn();
+
+        // move the 3d-object
+        this->coreObject3D::Move();
+    }
 
     // 
-    m_fLifeTimeBefore = m_fLifeTime;
-    m_fLifeTime.Update(1.0f);
-
-    // call individual move routines
-    this->__MoveOwn();
-
-    // 
-    this->_UpdateBlink();
-
-    // move the 3d-object
-    coreObject3D::Move();
+    this->_UpdateAlwaysAfter();
 }
 
 
@@ -134,7 +136,7 @@ void cEnemy::Resurrect(const coreVector2& vPosition, const coreVector2& vDirecti
     m_fLifeTimeBefore = 0.0f;
 
     // add ship to the game
-    cShip::_Resurrect(bSingle, vPosition, vDirection, (!bBoss && bSingle) ? 0 : TYPE_ENEMY);
+    this->_Resurrect(bSingle, vPosition, vDirection, (!bBoss && bSingle) ? 0 : TYPE_ENEMY);
 
     // 
     this->__ResurrectOwn();
@@ -167,7 +169,7 @@ void cEnemy::Kill(const coreBool bAnimated)
     }
 
     // remove ship from the game
-    cShip::_Kill(bSingle, bAnimated);
+    this->_Kill(bSingle, bAnimated);
 
     // 
     this->__KillOwn(bAnimated);

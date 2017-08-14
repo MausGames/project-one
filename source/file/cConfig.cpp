@@ -219,12 +219,7 @@ void UpdateInput()
             oMap.vMove = Core::Input->GetJoystickRelative(iJoystickID);
 
             // restrict movement input to the 8 base directions
-            if(!oMap.vMove.IsNull())
-            {
-                const coreFloat fOldAngle = oMap.vMove.Angle();
-                const coreFloat fNewAngle = ROUND(fOldAngle / (0.25f*PI)) * (0.25f*PI);
-                oMap.vMove = coreVector2::Direction(fNewAngle);
-            }
+            if(!oMap.vMove.IsNull()) oMap.vMove = UnpackDirection(PackDirection(oMap.vMove));
 
             // map action input
             for(coreUintW j = 0u; j < INPUT_KEYS_ACTION; ++j)

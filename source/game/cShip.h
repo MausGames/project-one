@@ -12,6 +12,7 @@
 
 // TODO: change high-resolution models with pre-baked normal-maps or tessellation ?
 // TODO: reduce ship health and all damage values to 16-bit (also reorder for better packing if possible)
+// TODO: do not create explosions if ship is far outside of view-port (just ships or in general special-effects ?)
 
 
 // ****************************************************************
@@ -96,11 +97,11 @@ protected:
     void _Kill     (const coreBool bSingle, const coreBool     bAnimated);
 
     // 
-    void _UpdateBlink();
     void _EnableBlink();
 
     // 
-    void _UpdateAlways();
+    void _UpdateAlwaysBefore();
+    void _UpdateAlwaysAfter();
 };
 
 

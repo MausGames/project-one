@@ -28,7 +28,7 @@ cPostProcessing::cPostProcessing()noexcept
     this->__Reset(CORE_RESOURCE_RESET_INIT);
 
     // create watermark
-    m_Watermark.Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL, 0u);
+    m_Watermark.Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
     m_Watermark.SetPosition (coreVector2(-0.01f, 0.015f));
     m_Watermark.SetDirection(coreVector2( 1.0f,  0.0f));
     m_Watermark.SetCenter   (coreVector2( 0.5f, -0.5f));

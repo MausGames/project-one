@@ -8,8 +8,11 @@
 //////////////////////////////////////////////////////
 
 
-// constant values
-const vec2 c_v2DetailResolution = vec2(4.0,0.8) * 0.6;   // inlined detail-texture resolution
+// shader uniforms
+uniform vec4 u_v4Scale;       // 
+
+// shader output
+varying vec3 v_v3AnimCoord;   // 
 
 
 void VertexMain()
@@ -18,10 +21,11 @@ void VertexMain()
     gl_Position = coreObject2DPosition();
 
     // calculate basic texture coordinates (with alpha-value as fixed modifier)
-    vec2 vNewTexCoord = a_v2LowTexCoord * u_v2TexSize - vec2(u_v4Color.a, 0.0);
+    vec2 v2NewTexCoord = a_v2LowTexCoord * u_v2TexSize - vec2(u_v4Color.a, 0.0);
 
     // animate final texture coordinates into 3 different directions
-    v_av2TexCoord[0]  = vNewTexCoord                        + vec2(u_v2TexOffset.x, 0.0);
-    v_av2TexCoord[1]  = vNewTexCoord                        - vec2(u_v2TexOffset.x, 0.0);
-    v_av2TexCoord[2]  = vNewTexCoord * c_v2DetailResolution - vec2(0.0, u_v2TexOffset.y);
+    v_av2TexCoord[0] = v2NewTexCoord * u_v4Scale.zw - vec2(0.0, u_v2TexOffset.y);
+    v_v3AnimCoord    = vec3(v2NewTexCoord.x + u_v2TexOffset.x,
+                            v2NewTexCoord.x - u_v2TexOffset.x,
+                            v2NewTexCoord.y);
 }

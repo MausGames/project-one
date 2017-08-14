@@ -204,7 +204,7 @@ cGrassBackground::cGrassBackground()noexcept
             {
                 // calculate position and height
                 const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, GRASS_LEAF_NUM);
-                const coreFloat   fHeight   = Core::Rand->Float(10.0f, 30.0f);
+                const coreFloat   fHeight   = Core::Rand->Float(10.0f, 40.0f);
 
                 // test for valid values
                 if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 680.0f))
@@ -215,7 +215,7 @@ cGrassBackground::cGrassBackground()noexcept
                     // set object properties
                     pObject->SetPosition(coreVector3(vPosition, fHeight));
                     pObject->SetSize    (coreVector3(2.3f,0.0f,1.0f));
-                    pObject->SetColor3  (coreVector3(1.0f,1.0f,1.0f) * (0.75f + 0.2f * fHeight/30.0f));
+                    pObject->SetColor3  (coreVector3(1.0f,1.0f,1.0f) * (0.75f + 0.2f * fHeight/40.0f));
                     pObject->SetTexSize (coreVector2(0.5f,0.85f));
 
                     // add object to the list

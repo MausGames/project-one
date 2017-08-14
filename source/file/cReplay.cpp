@@ -105,6 +105,8 @@ void cReplay::Update()
     {
         auto nNewPacketFunc = [this](const coreUintW iIndex, const coreUint32 iType, const coreUint32 iValue)
         {
+            ASSERT((m_iCurFrame < BITLINE(22u)) && (iType < BITLINE(2u)) && (iValue < BITLINE(4u)))
+
             // 
             sStreamPacket oNewPacket;
             oNewPacket.iFrame    = m_iCurFrame;
@@ -125,7 +127,7 @@ void cReplay::Update()
             if(!coreMath::InRange(pNewInput->vMove.x, m_aInput[i].vMove.x, CORE_MATH_PRECISION) ||
                !coreMath::InRange(pNewInput->vMove.y, m_aInput[i].vMove.y, CORE_MATH_PRECISION))
             {
-                nNewPacketFunc(i, REPLAY_TYPE_MOVE, pNewInput->vMove.IsNull() ? 8u : (F_TO_UI(ROUND(pNewInput->vMove.Angle() / (0.25f*PI))) & 0x07u));
+                nNewPacketFunc(i, REPLAY_TYPE_MOVE, PackDirection(pNewInput->vMove));
             }
 
             // 
@@ -155,7 +157,7 @@ void cReplay::Update()
                     switch(oPacket.iType)
                     {
                     case REPLAY_TYPE_MOVE:
-                        oCurInput.vMove = (oPacket.iValue == 8u) ? coreVector2(0.0f,0.0f) : coreVector2::Direction(I_TO_F(oPacket.iValue) * (0.25f*PI));
+                        oCurInput.vMove = UnpackDirection(oPacket.iValue);
                         break;
 
                     case REPLAY_TYPE_PRESS:
@@ -241,7 +243,7 @@ void cReplay::SaveFile(const coreChar* pcName)
     coreArchive oArchive;
     oArchive.AddFile(pHeader);
     oArchive.AddFile(pBody);
-    oArchive.Save(PRINT(REPLAY_FILE_FOLDER "/%s_%s." REPLAY_FILE_EXTENSION, pcName, coreData::DateTimePrint("%Y%m%d_%H%M%S")));
+    oArchive.Save(PRINT(REPLAY_FILE_FOLDER "/replay_%s_%s." REPLAY_FILE_EXTENSION, coreData::DateTimePrint("%Y%m%d_%H%M%S"), pcName));
 }
 
 

@@ -23,7 +23,7 @@ cMsgBox::cMsgBox()noexcept
     this->SetSize      (coreVector2(1.0f,1.0f));
     this->SetColor4    (coreVector4(0.6f,0.6f,0.6f,0.0f));
     this->SetTexSize   (coreVector2(1.2f,1.2f));
-    coreObject2D::Move();
+    this->coreObject2D::Move();
 
     // 
     m_Box.DefineTexture(0u, "menu_background_black.png");
@@ -31,18 +31,18 @@ cMsgBox::cMsgBox()noexcept
     m_Box.SetPosition  (coreVector2(0.0f,0.0f));
 
     // 
-    m_Msg.Construct  (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL, 0u);
+    m_Msg.Construct  (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_Msg.SetPosition(m_Box.GetPosition() + coreVector2(0.0f,0.045f));
     m_Msg.SetColor3  (COLOR_MENU_WHITE);
 
     // 
-    m_Yes.Construct    (MENU_BUTTON, MENU_FONT_ICON_2, MENU_OUTLINE_SMALL, 0u);
+    m_Yes.Construct    (MENU_BUTTON, MENU_FONT_ICON_2, MENU_OUTLINE_SMALL);
     m_Yes.DefineProgram("menu_border_program");
     m_Yes.SetSize      (coreVector2(0.07f,0.07f));
     m_Yes.GetCaption()->SetText(ICON_CHECK);
 
     // 
-    m_No.Construct    (MENU_BUTTON, MENU_FONT_ICON_2, MENU_OUTLINE_SMALL, 0u);
+    m_No.Construct    (MENU_BUTTON, MENU_FONT_ICON_2, MENU_OUTLINE_SMALL);
     m_No.DefineProgram("menu_border_program");
     m_No.SetSize      (m_Yes.GetSize());
     m_No.GetCaption()->SetText(ICON_TIMES);
@@ -56,7 +56,7 @@ void cMsgBox::Render()
     if(!m_fFade) return;
 
     // 
-    coreObject2D::Render();
+    this->coreObject2D::Render();
 
     // 
     m_Box.Render();
@@ -81,7 +81,7 @@ void cMsgBox::Move()
         m_vCurMouse = Core::Input->GetMousePosition();
     else Core::Input->SetMousePosition(m_vCurMouse);
 
-    // 
+    // only allow escape-button to cancel mapping
     if(m_iMsgType == MSGBOX_TYPE_MAPPING)
         g_MenuInput.bCancel = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS);
 
@@ -154,9 +154,7 @@ void cMsgBox::Move()
 
     // 
     Core::Input->SetMousePosition(MSGBOX_IGNORE_MOUSE);
-    Core::Input->ClearKeyboardButtonAll();
-    Core::Input->ClearMouseButtonAll();
-    for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i) Core::Input->ClearJoystickButtonAll(i);
+    Core::Input->ClearButtonAll();
 
     // 
     std::memset(&g_MenuInput, 0, sizeof(g_MenuInput));

@@ -47,12 +47,20 @@
 // TODO: menu optimization by caching into framebuffer (general class for leaderboard, options, etc.)
 // TODO: protect main (LockFramerate)
 // TODO: check all shaders if alpha is required
+// TODO: full initializer lists everywhere
+// TODO: clean mixing shader defines (x >= y) and (defined(x)) checks (also in engine)
+// TODO: check for 16-bit shader usage
+// TODO: program enable has to be checked (if(x.Enable()){}) everywhere
 
 
 // ****************************************************************
 // engine headers
 #include "Core.h"
 //STATIC_ASSERT(!DEFINED(_CORE_SSE_))
+
+#if defined(_CORE_DEBUG_)
+    #define _P1_DEBUG_RANDOM_ (1)
+#endif
 
 
 // ****************************************************************
@@ -118,7 +126,8 @@
 
 // collision types
 #define TYPE_PLAYER          (1)
-#define TYPE_ENEMY           (2)
+#define TYPE_PLAYER_ROLL     (2)
+#define TYPE_ENEMY           (3)
 #define TYPE_BULLET_PLAYER   (11)
 #define TYPE_BULLET_ENEMY    (12)
 #define TYPE_OBJECT(x)       (100 + (x))
@@ -144,7 +153,7 @@
     inline const coreChar* GetName()const final {return n;}
 
 // angle difference helper-function
-inline FUNC_CONST coreFloat AngleDiff(const coreFloat x, const coreFloat y)
+constexpr FUNC_CONST coreFloat AngleDiff(const coreFloat x, const coreFloat y)
 {
     coreFloat A = (x - y);
     while(A < -PI) A += 2.0f*PI;
@@ -160,14 +169,12 @@ inline FUNC_CONST coreFloat LerpSmoothRev(const coreFloat x, const coreFloat y, 
     return (s >= 0.5f) ? LERP(y, (x + y) / 2.0f, SIN(s*PI)) :
                          LERP(x, (x + y) / 2.0f, SIN(s*PI));
 }
-
-// 
 inline FUNC_CONST coreFloat LerpBreakRev(const coreFloat x, const coreFloat y, const coreFloat s)
 {
     return LERPB(y, x, 1.0f - s);
 }
 
-// value range helper-function
+// value range helper-functions
 template <typename T, typename S, typename R> constexpr FUNC_CONST coreBool InBetween(const T& x, const S& a, const R& b)
 {
     return (a <= x) && (x < b);
@@ -183,6 +190,28 @@ template <typename T, typename S, typename R> constexpr FUNC_CONST T TernaryLerp
 {
     return (s >= 0.5f) ? LERP(y, z, s*2.0f - 1.0f) :
                          LERP(x, y, s*2.0f);
+}
+
+// direction restriction and packing helper-functions
+inline FUNC_CONST coreUint8 PackDirection(const coreVector2& vDirection)
+{
+    return vDirection.IsNull() ? 8u : (F_TO_UI(ROUND(vDirection.Angle() / (0.25f*PI))) & 0x07u);
+}
+inline FUNC_CONST coreVector2 UnpackDirection(const coreUint8 iPack)
+{
+    switch(iPack)
+    {
+    default: ASSERT(false);
+    case 0u: return coreVector2( 0.0f, 1.0f);
+    case 1u: return coreVector2(-1.0f, 1.0f) * (1.0f/SQRT2);
+    case 2u: return coreVector2(-1.0f, 0.0f);
+    case 3u: return coreVector2(-1.0f,-1.0f) * (1.0f/SQRT2);
+    case 4u: return coreVector2( 0.0f,-1.0f);
+    case 5u: return coreVector2( 1.0f,-1.0f) * (1.0f/SQRT2);
+    case 6u: return coreVector2( 1.0f, 0.0f);
+    case 7u: return coreVector2( 1.0f, 1.0f) * (1.0f/SQRT2);
+    case 8u: return coreVector2( 0.0f, 0.0f);
+    }
 }
 
 extern void InitResolution(const coreVector2& vResolution);   // init resolution properties (1:1)

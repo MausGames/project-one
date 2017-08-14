@@ -14,9 +14,10 @@
 cPlayer::cPlayer()noexcept
 : m_pInput         (&g_TotalInput)
 , m_vForce         (coreVector2(0.0f,0.0f))
+, m_fRollTime      (0.0f)
+, m_iRollDir       (PLAYER_NO_ROLL)
 , m_fChainCooldown (0.0f)
-, m_fDarkAnimation (0.0f)
-, m_fDarkTime      (0.0f)
+, m_fAnimation     (0.0f)
 {
     // load object resources
     this->DefineTexture(0u, "ship_player.png");
@@ -44,6 +45,14 @@ cPlayer::cPlayer()noexcept
 
     // 
     m_pDarkProgram = Core::Manager::Resource->Get<coreProgram>("object_ship_darkness_program");
+
+    // 
+    m_Wind.DefineModel  ("object_sphere.md3");
+    m_Wind.DefineTexture(0u, "effect_energy.png");
+    m_Wind.DefineProgram("effect_energy_direct_program");
+    m_Wind.SetColor4    (coreVector4(COLOR_ENERGY_BLUE * 1.6f, 0.0f));
+    m_Wind.SetTexSize   (coreVector2(1.0f,5.0f));
+    m_Wind.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 
     // 
     m_Bubble.DefineModel  ("object_sphere.md3");
@@ -144,25 +153,33 @@ void cPlayer::EquipWeapon(const coreUintW iIndex, const coreInt32 iID)
 // render the player
 void cPlayer::Render()
 {
-    if(CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD)) return;
-
-    glDisable(GL_DEPTH_TEST);
+    if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
     {
+        glDisable(GL_DEPTH_TEST);
+        {
+            // 
+            m_Bubble .Render();
+            m_Exhaust.Render();
+        }
+        glEnable(GL_DEPTH_TEST);
+
         // 
-        m_Bubble .Render();
-        m_Exhaust.Render();
+        this->_EnableBlink();
+
+        // render the 3d-object
+        this->coreObject3D::Render();
+
+        // 
+        for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
+            m_apWeapon[i]->Render();
+
+        // 
+        if(m_Wind.IsEnabled(CORE_OBJECT_ENABLE_RENDER))
+        {
+            g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(this);
+            m_Wind.Render();
+        }
     }
-    glEnable(GL_DEPTH_TEST);
-
-    // 
-    this->_EnableBlink();
-
-    // render the 3d-object
-    coreObject3D::Render();
-
-    // 
-    for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
-        m_apWeapon[i]->Render();
 }
 
 
@@ -171,146 +188,125 @@ void cPlayer::Render()
 void cPlayer::Move()
 {
     // 
-    this->_UpdateAlways();
-    if(CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD)) return;
+    this->_UpdateAlwaysBefore();
 
-    if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
+    if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
     {
-        // move the ship
-        const coreFloat fSpeed = (!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && CONTAINS_BIT(m_pInput->iActionHold, 0u)) ? 20.0f : 50.0f;
-        coreVector2 vNewPos = this->GetPosition().xy() + m_pInput->vMove * (Core::System->GetTime() * fSpeed);
-
-        // 
-        if(!m_vForce.IsNull())
+        if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_ROLL))
         {
-            vNewPos  += m_vForce * Core::System->GetTime();
-            m_vForce *= 1.0f - 3.0f * Core::System->GetTime();
+            // 
+            if(CONTAINS_BIT(m_pInput->iActionPress, PLAYER_WEAPONS * WEAPON_MODES))
+                if(m_fRollTime <= 0.0f) this->StartRolling(m_pInput->vMove);
         }
 
-        // restrict movement to the foreground area
-             if(vNewPos.x < -FOREGROUND_AREA.x) vNewPos.x = -FOREGROUND_AREA.x;
-        else if(vNewPos.x >  FOREGROUND_AREA.x) vNewPos.x =  FOREGROUND_AREA.x;
-             if(vNewPos.y < -FOREGROUND_AREA.y) vNewPos.y = -FOREGROUND_AREA.y;
-        else if(vNewPos.y >  FOREGROUND_AREA.y) vNewPos.y =  FOREGROUND_AREA.y;
+        // 
+        if(m_fRollTime >= 1.0f) this->EndRolling();
 
-        // calculate smooth position-offset
-        const coreVector2 vDiff   = vNewPos - this->GetPosition().xy();
-        //const coreVector2 vOffset = vDiff * (Core::System->GetTime() * 40.0f);
+        // 
+        m_fRollTime.Update(this->IsRolling() ? PLAYER_ROLL_SPEED : -PLAYER_ROLL_COOLDOWN);
+        m_fRollTime = CLAMP(m_fRollTime, 0.0f, 1.0f);
 
+        if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
+        {
+            // 
+            coreVector2 vNewPos = this->GetPosition().xy();
+            if(this->IsRolling())
+            {
+                // roll the ship
+                const coreFloat fSpeed = 50.0f + 80.0f * SIN(PI * m_fRollTime);
+                vNewPos += UnpackDirection(m_iRollDir) * (Core::System->GetTime() * fSpeed);
+            }
+            else
+            {
+                // move the ship
+                const coreFloat fSpeed = (!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && CONTAINS_BIT(m_pInput->iActionHold, 0u)) ? 20.0f : 50.0f;
+                vNewPos += m_pInput->vMove * (Core::System->GetTime() * fSpeed);
+            }
 
-        UNUSED static coreFlow  cooldown = 0.0f;
-        UNUSED static coreFlow  time = 0.0f;
-        UNUSED static coreBool  status = false;
-        UNUSED static coreFloat side = 1.0f;
-        ////if(m_pInput->iActionPress & 0x02u)
-        //if(CONTAINS_BIT(m_pInput->iActionPress, PLAYER_WEAPONS * WEAPON_MODES))
-        //{
-        //    if(!status && cooldown <= 0.0f)
-        //    {
-        //        status = true;
-        //        side = (m_pInput->vMove.x <= 0.0) ? -1.0f : 1.0f;
-        //        this->ChangeType(0);
-        //
-        //            //this->EnableBubble();
-        //            //m_Bubble.SetAlpha(0.8f);
-        //        //g_pSpecialEffects->CreateRing(this->GetPosition(), this->GetDirection(), this->GetOrientation(), SPECIAL_RING_SMALL, COLOR_ENERGY_BLUE);
-        //    }
-        //}
-        //if(status)
-        //{
-        //    time.Update(2.0f);
-        //    if(time >= 1.0f)
-        //    {
-        //        cooldown = 1.0f;
-        //        time = 0.0f;
-        //        status = false;
-        //        this->ChangeType(TYPE_PLAYER);
-        //
-        //            //m_Bubble.SetAlpha(0.6f);
-        //    }
-        //}
-        //if(cooldown > 0.0f)
-        //{
-        //    cooldown.Update(-4.0f);
-        //    if(cooldown <= 0.0f)
-        //    {
-        //            //this->DisableBubble();
-        //    }
-        //}
+            // apply external forces
+            if(!m_vForce.IsNull())
+            {
+                vNewPos  += m_vForce * Core::System->GetTime();
+                m_vForce *= 1.0f - 3.0f * Core::System->GetTime();
+            }
 
+            // restrict movement to the foreground area
+                 if(vNewPos.x < -FOREGROUND_AREA.x) vNewPos.x = -FOREGROUND_AREA.x;
+            else if(vNewPos.x >  FOREGROUND_AREA.x) vNewPos.x =  FOREGROUND_AREA.x;
+                 if(vNewPos.y < -FOREGROUND_AREA.y) vNewPos.y = -FOREGROUND_AREA.y;
+            else if(vNewPos.y >  FOREGROUND_AREA.y) vNewPos.y =  FOREGROUND_AREA.y;
 
-        const coreMatrix2 mRota = coreMatrix3::Rotation(LERPS(0.0f, 2.0f*PI, time) * side).m12();
-        const coreVector2 vOri  = coreVector2(CLAMP(vDiff.x, -0.6f, 0.6f), 1.0f).Normalized() * mRota;
+            // 
+            const coreVector2 vDiff = vNewPos - this->GetPosition().xy();
+            coreVector2 vOri = coreVector2(CLAMP(vDiff.x, -0.6f, 0.6f), 1.0f).Normalized();
 
+            // 
+            if(this->IsRolling())
+            {
+                const coreFloat fAngle = LERPS(0.0f, 2.0f*PI, m_fRollTime);
+                vOri *= coreMatrix3::Rotation(fAngle * ((UnpackDirection(m_iRollDir).x <= 0.0) ? -1.0f : 1.0f)).m12();
+            }
 
-        // set new position and orientation
+            // set new position and orientation
+            this->SetPosition   (coreVector3(vNewPos, 0.0f));
+            this->SetOrientation(coreVector3(vOri.x, 0.0f, vOri.y));
+        }
 
-        //this->SetPosition   (coreVector3(vOffset + this->GetPosition().xy(), 0.0f));
-        this->SetPosition   (coreVector3(vNewPos, 0.0f));
-        //this->SetOrientation(coreVector3(CLAMP(vDiff.x, -0.6f, 0.6f), 0.0f, 1.0f).Normalize());
-        this->SetOrientation(coreVector3(vOri.x, 0.0f, vOri.y));
+        // move the 3d-object
+        this->coreObject3D::Move();
+
+        // update all weapons (shooting and stuff)
+        for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
+        {
+            const coreUint8 iShoot = (!this->IsRolling() && !CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT)) ? ((m_pInput->iActionHold & (BITLINE(WEAPON_MODES) << (i*WEAPON_MODES))) >> (i*WEAPON_MODES)) : 0u;
+            m_apWeapon[i]->Update(iShoot);
+        }
+
+        // 
+        if(m_fChainCooldown)
+        {
+            if(!(m_fChainCooldown = MAX(m_fChainCooldown - Core::System->GetTime(), 0.0f)))
+                this->TransferChain();
+        }
+
+        // 
+        m_fAnimation.UpdateMod(1.0f, 20.0f);
+
+        if(m_Wind.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
+        {
+            // 
+            m_Wind.SetAlpha((m_Wind.GetAlpha() < 0.0f) ? 0.5f : COS((0.5f*PI) * m_fRollTime));
+
+            // 
+            m_Wind.SetPosition (this->GetPosition());
+            m_Wind.SetSize     (coreVector3(1.0f,1.08f,1.0f) * PLAYER_WIND_SIZE);
+            m_Wind.SetTexOffset(coreVector2(0.0f, m_fAnimation * ((UnpackDirection(m_iRollDir).x <= 0.0) ? -0.4f : 0.4f)));
+            m_Wind.Move();
+        }
+
+        if(m_Bubble.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
+        {
+            // 
+            this->SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.25f));
+
+            // 
+            if(CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DARKNESS))
+                 m_Bubble.SetAlpha(MIN(m_Bubble.GetAlpha() + 4.0f*Core::System->GetTime(), 0.8f));
+            else m_Bubble.SetAlpha(MAX(m_Bubble.GetAlpha() - 4.0f*Core::System->GetTime(), 0.0f));
+
+            // 
+            if(!m_Bubble.GetAlpha()) this->DisableBubble();
+
+            // 
+            m_Bubble.SetPosition (this->GetPosition());
+            m_Bubble.SetSize     (coreVector3(1.0f,1.0f,1.0f) * PLAYER_BUBBLE_SIZE * m_Bubble.GetAlpha());
+            m_Bubble.SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.1f));
+            m_Bubble.Move();
+        }
     }
 
     // 
-    this->_UpdateBlink();
-
-    // move the 3d-object
-    coreObject3D::Move();
-
-    // 
-    if(m_fChainCooldown)
-    {
-        if(!(m_fChainCooldown = MAX(m_fChainCooldown - Core::System->GetTime(), 0.0f)))
-            this->TransferChain();
-    }
-
-    // update all weapons (shooting and stuff)
-    for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
-    {
-        const coreUint8 iShoot = (!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT)) ? ((m_pInput->iActionHold & (BITLINE(WEAPON_MODES) << (i*WEAPON_MODES))) >> (i*WEAPON_MODES)) : 0u;
-        m_apWeapon[i]->Update(iShoot);
-    }
-
-    // 
-    if(CONTAINS_BIT(m_pInput->iActionPress, PLAYER_WEAPONS * WEAPON_MODES))
-        this->TransformDark(CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DARKNESS) ? PLAYER_DARK_OFF : PLAYER_DARK_ON);
-
-    if(m_Bubble.IsEnabled(CORE_OBJECT_ENABLE_ALL))
-    {
-        // 
-        m_fDarkAnimation.UpdateMod(-1.0f, 20.0f);
-        this->SetTexOffset(coreVector2(0.0f, m_fDarkAnimation * 0.25f));
-
-        // 
-        if(CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DARKNESS))
-             m_Bubble.SetAlpha(MIN(m_Bubble.GetAlpha() + 4.0f*Core::System->GetTime(), 0.8f));
-        else m_Bubble.SetAlpha(MAX(m_Bubble.GetAlpha() - 4.0f*Core::System->GetTime(), 0.0f));
-
-        // 
-        if(!m_Bubble.GetAlpha()) this->DisableBubble();
-
-        // 
-        m_Bubble.SetPosition (this->GetPosition());
-        m_Bubble.SetSize     (coreVector3(1.25f,1.25f,1.25f) * m_Bubble.GetAlpha() * PLAYER_DARK_BUBBLE_SIZE       / 1.25f*1.15f);
-        m_Bubble.SetTexOffset(coreVector2(0.0f, m_fDarkAnimation * 0.1f));
-        m_Bubble.Move();
-    }
-
-    // 
-    //if(m_fDarkTime)
-    //{
-    //    coreBool bGrace = false;
-    //
-    //    // 
-    //    Core::Manager::Object->TestCollision(TYPE_BULLET_ENEMY, &m_Bubble, [&](const cBullet* pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
-    //    {
-    //        bGrace = true;
-    //    });
-    //
-    //    // 
-    //    m_fDarkTime = CLAMP(m_fDarkTime + (bGrace ? 0.025f : -0.05f) * Core::System->GetTime(), 0.0f, 1.0f);
-    //    if(!m_fDarkTime) this->TransformDark(PLAYER_DARK_RESET);
-    //}
+    this->_UpdateAlwaysAfter();
 }
 
 
@@ -351,7 +347,7 @@ void cPlayer::Resurrect(const coreVector2& vPosition)
     this->SetPosition(coreVector3(vPosition, 0.0f));
 
     // add ship to the game
-    cShip::_Resurrect(true, vPosition, coreVector2(0.0f,1.0f), TYPE_PLAYER);
+    this->_Resurrect(true, vPosition, coreVector2(0.0f,1.0f), TYPE_PLAYER);
 }
 
 
@@ -368,9 +364,11 @@ void cPlayer::Kill(const coreBool bAnimated)
         m_apWeapon[i]->Update(0u);
 
     // 
+    this->EndRolling();
     this->TransformDark(PLAYER_DARK_RESET);
 
     // 
+    this->DisableWind();
     this->DisableBubble();
     this->UpdateExhaust(0.0f);
 
@@ -378,7 +376,7 @@ void cPlayer::Kill(const coreBool bAnimated)
     if(bAnimated) g_pSpecialEffects->MacroExplosionPhysicalBig(this->GetPosition());
 
     // remove ship from the game
-    cShip::_Kill(true, bAnimated);
+    this->_Kill(true, bAnimated);
 }
 
 
@@ -478,6 +476,38 @@ void cPlayer::ResetStats()
 
 // ****************************************************************
 // 
+void cPlayer::StartRolling(const coreVector2& vDirection)
+{
+    WARN_IF(this->IsRolling()) return;
+
+    // 
+    m_fRollTime = 0.0f;
+    m_iRollDir  = PackDirection(vDirection);
+
+    // 
+    this->ChangeType(TYPE_PLAYER_ROLL);
+    this->EnableWind();
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::EndRolling()
+{
+    if(!this->IsRolling()) return;
+
+    // 
+    m_fRollTime = 1.0f;
+    m_iRollDir  = PLAYER_NO_ROLL;
+
+    // 
+    this->ChangeType(TYPE_PLAYER);
+    this->DisableWind();
+}
+
+
+// ****************************************************************
+// 
 void cPlayer::TransformDark(const coreUint8 iStatus)
 {
     // 
@@ -494,10 +524,6 @@ void cPlayer::TransformDark(const coreUint8 iStatus)
         g_pSpecialEffects->CreateBlast     (this->GetPosition(), SPECIAL_BLAST_SMALL, coreVector3(1.0f,1.0f,1.0f));
 
         // 
-        m_fDarkAnimation = 0.0f;
-        m_fDarkTime      = 1.0f;
-
-        // 
         this->EnableBubble();
     }
     else if(iStatus == PLAYER_DARK_OFF)
@@ -508,25 +534,38 @@ void cPlayer::TransformDark(const coreUint8 iStatus)
         g_pDistortion    ->CreateWave      (this->GetPosition(), DISTORTION_WAVE_BIG);
         g_pSpecialEffects->CreateSplashDark(this->GetPosition(), SPECIAL_SPLASH_BIG);
         g_pSpecialEffects->CreateBlast     (this->GetPosition(), SPECIAL_BLAST_BIG, coreVector3(1.0f,1.0f,1.0f));
-
-        // 
-        m_fDarkTime = 0.0f;
-
-        // 
-        g_pGame->GetBulletManagerEnemy()->ForEachBullet([this](cBullet* OUTPUT pBullet)
-        {
-            // 
-            pBullet->Deactivate(false);
-
-            // 
-            const coreVector2 vDir = (pBullet->GetPosition().xy() - this->GetPosition().xy()).Normalized();
-            g_pSpecialEffects->CreateBlowColor(pBullet->GetPosition(), coreVector3(vDir, 0.0f), 60.0f, 2u, pBullet->GetColor3());
-        });
     }
     else REMOVE_FLAG(m_iStatus, PLAYER_STATUS_DARKNESS)
 
     // 
     std::swap(m_pDarkProgram, m_pProgram);
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::EnableWind()
+{
+    WARN_IF(m_Wind.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    m_Wind.SetAlpha(-1.0f);
+
+    // 
+    m_Wind.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    g_pGlow->BindObject(&m_Wind);
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::DisableWind()
+{
+    if(!m_Wind.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    m_Wind.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    g_pGlow->UnbindObject(&m_Wind);
 }
 
 

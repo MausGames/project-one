@@ -89,7 +89,7 @@ void cIntroMission::__SetupOwn()
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
-            STAGE_LIFETIME(pEnemy, 0.9f, -0.2f * I_TO_F(i))
+            STAGE_LIFETIME(pEnemy, 0.9f, 0.2f * I_TO_F(i))
 
             STAGE_REMOVE_LIFETIME(pEnemy, pPath1->GetTotalDistance())
 
@@ -124,7 +124,7 @@ void cIntroMission::__SetupOwn()
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
-            STAGE_LIFETIME(pEnemy, 0.75f, -0.2f * I_TO_F(i))
+            STAGE_LIFETIME(pEnemy, 0.75f, 0.2f * I_TO_F(i))
 
             STAGE_REMOVE_LIFETIME(pEnemy, pPath1->GetTotalDistance())
 
@@ -213,7 +213,7 @@ void cIntroMission::__SetupOwn()
 
         STAGE_FOREACH_ENEMY(pSquad2, pEnemy, i)
         {
-            STAGE_LIFETIME(pEnemy, 0.75f, -0.2f * I_TO_F(i) - 1.5f)
+            STAGE_LIFETIME(pEnemy, 0.75f, 0.2f * I_TO_F(i) + 1.5f)
 
             STAGE_REMOVE_LIFETIME(pEnemy, pPath2->GetTotalDistance())
 
@@ -249,7 +249,7 @@ void cIntroMission::__SetupOwn()
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
-            STAGE_LIFETIME(pEnemy, 0.6f, -0.1f * I_TO_F(i))
+            STAGE_LIFETIME(pEnemy, 0.6f, 0.1f * I_TO_F(i))
 
             STAGE_REMOVE_LIFETIME(pEnemy, pPath1->GetTotalDistance())
 
@@ -292,7 +292,7 @@ void cIntroMission::__SetupOwn()
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
-            STAGE_LIFETIME(pEnemy, 0.75f, -0.4f * I_TO_F(i >> 1u) + ((i & 0x01u) ? -0.15f : 0.0f))
+            STAGE_LIFETIME(pEnemy, 0.75f, 0.4f * I_TO_F(i >> 1u) + ((i & 0x01u) ? 0.15f : 0.0f))
 
             STAGE_REMOVE_LIFETIME(pEnemy, pPath1->GetTotalDistance())
 
@@ -331,7 +331,7 @@ void cIntroMission::__SetupOwn()
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
-            STAGE_LIFETIME(pEnemy, 0.8f, -0.2f * I_TO_F(i))
+            STAGE_LIFETIME(pEnemy, 0.8f, 0.2f * I_TO_F(i))
 
             STAGE_REMOVE_LIFETIME(pEnemy, pPath1->GetTotalDistance())
 

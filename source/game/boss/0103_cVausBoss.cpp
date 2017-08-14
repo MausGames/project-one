@@ -82,6 +82,9 @@ void cVausBoss::__KillOwn(const coreBool bAnimated)
     cViridoMission* pMission = s_cast<cViridoMission*>(g_pGame->GetMission());
 
     // 
+    pMission->DisableBall(0u, bAnimated);
+
+    // 
     for(coreUintW i = 0u; i < VIRIDO_PADDLES; ++i)
         pMission->DisablePaddle(i, bAnimated);
 
@@ -94,8 +97,8 @@ void cVausBoss::__KillOwn(const coreBool bAnimated)
 // 
 void cVausBoss::__RenderOwnAttack()
 {
-    if(m_aRay[1].IsEnabled(CORE_OBJECT_ENABLE_ALL) ||
-       m_aRay[2].IsEnabled(CORE_OBJECT_ENABLE_ALL))
+    if(m_aRay[1].IsEnabled(CORE_OBJECT_ENABLE_RENDER) ||
+       m_aRay[2].IsEnabled(CORE_OBJECT_ENABLE_RENDER))
     {
         DEPTH_PUSH
 
@@ -106,7 +109,7 @@ void cVausBoss::__RenderOwnAttack()
         g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(&m_aRay[2]);
     }
 
-    if(m_aRay[0].IsEnabled(CORE_OBJECT_ENABLE_ALL))
+    if(m_aRay[0].IsEnabled(CORE_OBJECT_ENABLE_RENDER))
     {
         DEPTH_PUSH
 
@@ -769,7 +772,7 @@ void cVausBoss::__MoveOwn()
     {
         coreObject3D& oCurRay = m_aRay[i];
 
-        if(oCurRay.IsEnabled(CORE_OBJECT_ENABLE_ALL))
+        if(oCurRay.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
         {
             const coreFloat fSize = 50.0f;
 

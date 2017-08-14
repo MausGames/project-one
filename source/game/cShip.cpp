@@ -119,19 +119,6 @@ void cShip::_Kill(const coreBool bSingle, const coreBool bAnimated)
 
 // ****************************************************************
 // 
-void cShip::_UpdateBlink()
-{
-    // 
-    if(g_MenuInput.bScreenshot)
-        m_fBlink = 0.0f;
-
-    // 
-    m_fBlink = MAX(m_fBlink - 15.0f*Core::System->GetTime(), 0.0f);
-}
-
-
-// ****************************************************************
-// 
 void cShip::_EnableBlink()
 {
     if(!this->GetProgram().IsUsable()) return;
@@ -144,11 +131,24 @@ void cShip::_EnableBlink()
 
 // ****************************************************************
 // 
-void cShip::_UpdateAlways()
+void cShip::_UpdateAlwaysBefore()
+{
+    // 
+    m_vOldPos = this->GetPosition().xy();
+}
+
+
+// ****************************************************************
+// 
+void cShip::_UpdateAlwaysAfter()
 {
     // 
     m_iPreHealth = m_iCurHealth;
 
     // 
-    m_vOldPos = this->GetPosition().xy();
+    if(g_MenuInput.bScreenshot)
+        m_fBlink = 0.0f;
+
+    // 
+    m_fBlink = MAX(m_fBlink - 15.0f*Core::System->GetTime(), 0.0f);
 }

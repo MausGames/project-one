@@ -88,7 +88,7 @@ public:
     coreBool IsBannerActive()const;
 
     // 
-    void ShowStory(const coreChar* pcRow1, const coreChar* pcRow2 = NULL);
+    void ShowStory(const coreChar* pcRow1, const coreChar* pcRow2 = "");
     coreBool IsStoryActive(const coreFloat fOffset)const;
 
     // 

@@ -20,7 +20,7 @@ cConfigMenu::cConfigMenu()noexcept
     m_Background.SetPosition  (coreVector2(0.0f,0.0f));
     m_Background.SetSize      (coreVector2(0.8f,0.65f));
 
-    m_VideoTab.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL, 0u);
+    m_VideoTab.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_VideoTab.DefineProgram("menu_border_program");
     m_VideoTab.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.115f,-0.012f));
     m_VideoTab.SetSize      (coreVector2(0.17f,0.07f));
@@ -29,7 +29,7 @@ cConfigMenu::cConfigMenu()noexcept
     m_VideoTab.SetTexOffset (m_VideoTab.GetSize()*coreVector2(-0.5f,-1.0f) + coreVector2(0.115f,0.012f));
     m_VideoTab.GetCaption()->SetTextLanguage("CONFIG_VIDEO");
 
-    m_AudioTab.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL, 0u);
+    m_AudioTab.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_AudioTab.DefineProgram("menu_border_program");
     m_AudioTab.SetPosition  (m_VideoTab.GetPosition() * coreVector2(1.0f/3.0f,1.0f));
     m_AudioTab.SetSize      (m_VideoTab.GetSize());
@@ -38,7 +38,7 @@ cConfigMenu::cConfigMenu()noexcept
     m_AudioTab.SetTexOffset (m_VideoTab.GetTexOffset() + coreVector2(m_AudioTab.GetPosition().x - m_VideoTab.GetPosition().x, 0.0));
     m_AudioTab.GetCaption()->SetTextLanguage("CONFIG_AUDIO");
 
-    m_InputTab.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL, 0u);
+    m_InputTab.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_InputTab.DefineProgram("menu_border_program");
     m_InputTab.SetPosition  (m_VideoTab.GetPosition() * coreVector2(-1.0f/3.0f,1.0f));
     m_InputTab.SetSize      (m_VideoTab.GetSize());
@@ -47,7 +47,7 @@ cConfigMenu::cConfigMenu()noexcept
     m_InputTab.SetTexOffset (m_VideoTab.GetTexOffset() + coreVector2(m_InputTab.GetPosition().x - m_VideoTab.GetPosition().x, 0.0));
     m_InputTab.GetCaption()->SetTextLanguage("CONFIG_INPUT");
 
-    m_GameTab.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL, 0u);
+    m_GameTab.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_GameTab.DefineProgram("menu_border_program");
     m_GameTab.SetPosition  (m_VideoTab.GetPosition() * coreVector2(-1.0f,1.0f));
     m_GameTab.SetSize      (m_VideoTab.GetSize());
@@ -56,7 +56,7 @@ cConfigMenu::cConfigMenu()noexcept
     m_GameTab.SetTexOffset (m_VideoTab.GetTexOffset() + coreVector2(m_GameTab.GetPosition().x - m_VideoTab.GetPosition().x, 0.0));
     m_GameTab.GetCaption()->SetTextLanguage("CONFIG_GAME");
 
-    m_SaveButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL, 0u);
+    m_SaveButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_SaveButton.DefineProgram("menu_border_program");
     m_SaveButton.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,-0.5f) + coreVector2(0.0f,-0.02f));
     m_SaveButton.SetSize      (coreVector2(0.3f,0.07f));
@@ -64,7 +64,7 @@ cConfigMenu::cConfigMenu()noexcept
     m_SaveButton.SetOverride  (-1);   // # used in LoadValues()
     m_SaveButton.GetCaption()->SetTextLanguage("SAVE");
 
-    m_DiscardButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL, 0u);
+    m_DiscardButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_DiscardButton.DefineProgram("menu_border_program");
     m_DiscardButton.SetPosition  (m_SaveButton.GetPosition() + coreVector2(m_SaveButton.GetSize().x + 0.02f, 0.0f));
     m_DiscardButton.SetSize      (m_SaveButton.GetSize());
@@ -72,7 +72,7 @@ cConfigMenu::cConfigMenu()noexcept
     m_DiscardButton.SetOverride  (-1);
     m_DiscardButton.GetCaption()->SetTextLanguage("DISCARD");
 
-    m_BackButton.Construct    (MENU_BUTTON, MENU_FONT_ICON_2, MENU_OUTLINE_SMALL, 0u);
+    m_BackButton.Construct    (MENU_BUTTON, MENU_FONT_ICON_2, MENU_OUTLINE_SMALL);
     m_BackButton.DefineProgram("menu_border_program");
     m_BackButton.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.5f,-0.5f) + coreVector2(0.0f,-0.02f));
     m_BackButton.SetSize      (coreVector2( 1.0f, 1.0f) * m_SaveButton.GetSize().y);
@@ -91,7 +91,7 @@ cConfigMenu::cConfigMenu()noexcept
         if(i == ENTRY_INPUT_MOVEUP)       ++iOffset;
         if(i == ENTRY_INPUT_ACTION1)      ++iOffset;
 
-        m_aLabel[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL, 0u);
+        m_aLabel[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
         m_aLabel[i].SetPosition (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.04f, -0.05f - 0.025f*I_TO_F(iOffset)));
         m_aLabel[i].SetAlignment(coreVector2(1.0f,0.0f));
         m_aLabel[i].SetColor3   (COLOR_MENU_WHITE);
@@ -111,7 +111,7 @@ cConfigMenu::cConfigMenu()noexcept
 
     for(coreUintW i = 0u; i < INPUT_KEYS_MOVE; ++i)
     {
-        m_aArrow[i].Construct  (MENU_FONT_ICON_1, MENU_OUTLINE_SMALL, 0u);
+        m_aArrow[i].Construct  (MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
         m_aArrow[i].SetPosition(m_aLabel[ENTRY_INPUT_MOVEUP + i].GetPosition() + coreVector2(0.21f,0.0f));
         m_aArrow[i].SetColor3  (COLOR_MENU_WHITE * MENU_LIGHT_IDLE);
     }
@@ -120,17 +120,17 @@ cConfigMenu::cConfigMenu()noexcept
     m_aArrow[2].SetText(ICON_ARROW_DOWN);
     m_aArrow[3].SetText(ICON_ARROW_RIGHT);
 
-    #define __SET_OPTION(x,n,s)                                                      \
-    {                                                                                \
-        coreLabel& oLabel = m_aLabel[ENTRY_ ## n];                                   \
-        oLabel.SetTextLanguage("CONFIG_" #n);                                        \
-                                                                                     \
-        x.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL, 0u); \
-        x.SetPosition (coreVector2(-1.00f,1.00f) * oLabel.GetPosition());            \
-        x.SetSize     (coreVector2(   (s),0.03f));                                   \
-        x.SetAlignment(coreVector2(-1.00f,0.00f));                                   \
-        x.GetCaption()->SetColor3     (COLOR_MENU_WHITE);                            \
-        x.GetCaption()->ChangeLanguage(Core::Language);                              \
+    #define __SET_OPTION(x,n,s)                                                  \
+    {                                                                            \
+        coreLabel& oLabel = m_aLabel[ENTRY_ ## n];                               \
+        oLabel.SetTextLanguage("CONFIG_" #n);                                    \
+                                                                                 \
+        x.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL); \
+        x.SetPosition (coreVector2(-1.00f,1.00f) * oLabel.GetPosition());        \
+        x.SetSize     (coreVector2(   (s),0.03f));                               \
+        x.SetAlignment(coreVector2(-1.00f,0.00f));                               \
+        x.GetCaption()->SetColor3     (COLOR_MENU_WHITE);                        \
+        x.GetCaption()->ChangeLanguage(Core::Language);                          \
     }
     {
         __SET_OPTION(m_Display,       VIDEO_DISPLAY,       0.26f)
@@ -154,17 +154,17 @@ cConfigMenu::cConfigMenu()noexcept
     }
     #undef __SET_OPTION
 
-    #define __SET_INPUT(x,n,s)                                                                   \
-    {                                                                                            \
-        coreLabel& oLabel = m_aLabel[ENTRY_ ## n];                                               \
-        oLabel.SetTextLanguage("CONFIG_" #n);                                                    \
-                                                                                                 \
-        m_aInput[i].x.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL, 0u); \
-        m_aInput[i].x.SetPosition (coreVector2(-1.00f,1.00f) * oLabel.GetPosition() - vOffset);  \
-        m_aInput[i].x.SetSize     (coreVector2(   (s),0.03f));                                   \
-        m_aInput[i].x.SetAlignment(coreVector2(-1.00f,0.00f));                                   \
-        m_aInput[i].x.GetCaption()->SetColor3     (COLOR_MENU_WHITE);                            \
-        m_aInput[i].x.GetCaption()->ChangeLanguage(Core::Language);                              \
+    #define __SET_INPUT(x,n,s)                                                                  \
+    {                                                                                           \
+        coreLabel& oLabel = m_aLabel[ENTRY_ ## n];                                              \
+        oLabel.SetTextLanguage("CONFIG_" #n);                                                   \
+                                                                                                \
+        m_aInput[i].x.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);    \
+        m_aInput[i].x.SetPosition (coreVector2(-1.00f,1.00f) * oLabel.GetPosition() - vOffset); \
+        m_aInput[i].x.SetSize     (coreVector2(   (s),0.03f));                                  \
+        m_aInput[i].x.SetAlignment(coreVector2(-1.00f,0.00f));                                  \
+        m_aInput[i].x.GetCaption()->SetColor3     (COLOR_MENU_WHITE);                           \
+        m_aInput[i].x.GetCaption()->ChangeLanguage(Core::Language);                             \
     }
     {
         for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i)
@@ -193,7 +193,7 @@ cConfigMenu::cConfigMenu()noexcept
     {
         const coreButton& oLast = this->__RetrieveInputButton(i, INPUT_KEYS - 1u);
 
-        m_aInput[i].oHeader.Construct  (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL, 0u);
+        m_aInput[i].oHeader.Construct  (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
         m_aInput[i].oHeader.SetPosition(oLast.GetPosition() - coreVector2(oLast.GetSize().x * 0.5f, 0.05f));
         m_aInput[i].oHeader.SetColor3  (COLOR_MENU_WHITE);
     }
@@ -284,7 +284,7 @@ cConfigMenu::cConfigMenu()noexcept
 void cConfigMenu::Move()
 {
     // move the menu
-    coreMenu::Move();
+    this->coreMenu::Move();
     m_iStatus = MAX(m_iStatus - 100, 0);
 
     // 
@@ -363,7 +363,7 @@ void cConfigMenu::Move()
                         // skip already assigned input sets
                         for(coreUintW k = 0u; k < MENU_CONFIG_INPUTS; ++k)
                         {
-                            if(g_CurConfig.Input.aiType[k] == oInput.oType.GetCurEntry().tValue)
+                            if((g_CurConfig.Input.aiType[k] == oInput.oType.GetCurEntry().tValue) && (k != i))
                             {
                                 bSkip = true;
                                 break;
@@ -742,7 +742,7 @@ void cConfigMenu::__LoadDisplays()
 void cConfigMenu::__LoadResolutions(const coreUintW iDisplayIndex)
 {
     // 
-    const std::string sOldEntry = (*m_Display.GetCurEntry().psText);
+    const std::string sOldEntry = m_Resolution.GetNumEntries() ? (*m_Resolution.GetCurEntry().psText) : "";
     m_Resolution.ClearEntries();
 
     // 

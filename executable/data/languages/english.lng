@@ -3,11 +3,12 @@ $FONT = ethnocentric.ttf
 
 $START_GAME = Play Game
 $EXIT_GAME = Exit Game
-$CREDITS = Credits
+
+$LEADERBOARDS = Leaderboards
+$REPLAYS = Replays
 $SETTINGS = Settings
 $EXTRAS = Extras
-$LEADERBOARD = Leaderboard
-$REPLAY = Replay
+$CREDITS = Credits
 
 $SAVE = Save
 $DISCARD = Discard
@@ -41,6 +42,17 @@ $CONFIG_INPUT_ACTION3 = Dark Mode
 $CONFIG_INPUT_ACTION4 = Pause
 $CONFIG_GAME_LANGUAGE = Language
 
+$GAME_MODE = Game Mode
+$GAME_DIFFICULTY = Difficulty
+$GAME_PLAYERS = Players
+
+$GAME_MODE_STANDARD = Standard
+$GAME_MODE_TRAINING = Training
+$GAME_DIFFICULTY_EASY = Easy
+$GAME_DIFFICULTY_ORIGNAL = Original
+$GAME_PLAYERS_SOLO = Solo
+$GAME_PLAYERS_COOP = Coop
+
 $VALUE_OFF = Off
 $VALUE_ON = On
 $VALUE_LOW = Low
@@ -61,6 +73,8 @@ $INPUT_JOYSTICK = Gamepad
 $PLAYER = Player
 $ARMOR = Armor
 $STAGE = Stage
+
+$SUMMARY_TOTAL = Total
 
 $BOSS_TITLE_0101 = The Dreamhunter
 $BOSS_TITLE_0102 = Gate of Destruction

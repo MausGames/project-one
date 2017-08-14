@@ -12,7 +12,7 @@
 
 // TODO: language and main menu control with keyboard+joystick, cursor gets invisible on these inputs, in game menu only cursor
 // TODO: short YES-no questions: Exit Game ? Return to Menu ?
-// TODO: menue-riss bei start oder seitlicher fade-out, ausserdem bei start im main-menue animation und explosion des logos oder riss in mitte
+// TODO: menue-riss bei start oder seitlicher fade-out, ausserdem bei start im title-menue animation und explosion des logos oder riss in mitte
 // TODO: move mouse to buttons on joystick-input
 // TODO: real-time sound-configuration
 // TODO: score-menu names and all name-inputs MUST support all languages (japanese (keifont), russian (default), arabic (default), ...)
@@ -26,69 +26,74 @@
 
 // ****************************************************************
 // menu definitions
-#define MENU_LIGHT_ACTIVE      (1.0f)     // visible strength of active menu objects
-#define MENU_LIGHT_IDLE        (0.667f)   // visible strength of idle menu objects
-#define MENU_CONTRAST_WHITE    (0.8f)     // white contrast value (to reduce eye strain)
-#define MENU_CONTRAST_BLACK    (0.04f)    // black contrast value
+#define MENU_LIGHT_ACTIVE    (1.0f)     // visible strength of active menu objects
+#define MENU_LIGHT_IDLE      (0.667f)   // visible strength of idle menu objects
+#define MENU_CONTRAST_WHITE  (0.8f)     // white contrast value (to reduce eye strain)
+#define MENU_CONTRAST_BLACK  (0.04f)    // black contrast value
 
-#define MENU_CONFIG_INPUTS     (PLAYERS)
-#define MENU_SCORE_ENTRIES     (10u)
-#define MENU_SCORE_NAME_LENGTH (32u)
-#define MENU_REPLAY_ENTRIES    (5u)
-#define MENU_REPLAY_NAME_LENTH (REPLAY_NAME_LENTH)
+#define MENU_CONFIG_INPUTS   (PLAYERS)
+#define MENU_SCORE_ENTRIES   (10u)
+#define MENU_REPLAY_ENTRIES  (5u)
+#define MENU_SUMMARY_ENTRIES (3u)
+#define MENU_SUMMARY_PARTS   (PLAYERS)
 
-#define MENU_BUTTON            "menu_background_black.png", "menu_background_black.png"
-#define MENU_SWITCHBOX         "default_black.png", "default_black.png"
-#define MENU_FONT_DYNAMIC_1    "dynamic_font",     (13u)
-#define MENU_FONT_DYNAMIC_2    "dynamic_font",     (20u)
-#define MENU_FONT_DYNAMIC_3    "dynamic_font",     (30u)
-#define MENU_FONT_DYNAMIC_4    "dynamic_font",     (40u)
-#define MENU_FONT_DYNAMIC_5    "dynamic_font",     (70u)
-#define MENU_FONT_STANDARD_1   "ethnocentric.ttf", (13u)
-#define MENU_FONT_STANDARD_2   "ethnocentric.ttf", (20u)
-#define MENU_FONT_STANDARD_3   "ethnocentric.ttf", (30u)
-#define MENU_FONT_STANDARD_4   "ethnocentric.ttf", (40u)
-#define MENU_FONT_STANDARD_5   "ethnocentric.ttf", (70u)
-#define MENU_FONT_ICON_1       "fontawesome.ttf",  (20u)
-#define MENU_FONT_ICON_2       "fontawesome.ttf",  (24u)
-#define MENU_FONT_ICON_3       "fontawesome.ttf",  (40u)
-#define MENU_OUTLINE_SMALL     (1u)
-#define MENU_OUTLINE_BIG       (4u)
+#define MENU_BUTTON          "menu_background_black.png", "menu_background_black.png"
+#define MENU_SWITCHBOX       "default_black.png", "default_black.png"
+#define MENU_FONT_DYNAMIC_1  "dynamic_font",     (13u)
+#define MENU_FONT_DYNAMIC_2  "dynamic_font",     (20u)
+#define MENU_FONT_DYNAMIC_3  "dynamic_font",     (30u)
+#define MENU_FONT_DYNAMIC_4  "dynamic_font",     (40u)
+#define MENU_FONT_DYNAMIC_5  "dynamic_font",     (70u)
+#define MENU_FONT_STANDARD_1 "ethnocentric.ttf", (13u)
+#define MENU_FONT_STANDARD_2 "ethnocentric.ttf", (20u)
+#define MENU_FONT_STANDARD_3 "ethnocentric.ttf", (30u)
+#define MENU_FONT_STANDARD_4 "ethnocentric.ttf", (40u)
+#define MENU_FONT_STANDARD_5 "ethnocentric.ttf", (70u)
+#define MENU_FONT_ICON_1     "fontawesome.ttf",  (20u)
+#define MENU_FONT_ICON_2     "fontawesome.ttf",  (24u)
+#define MENU_FONT_ICON_3     "fontawesome.ttf",  (40u)
+#define MENU_OUTLINE_SMALL   (1u)
+#define MENU_OUTLINE_BIG     (4u)
 
 
 // ****************************************************************
 // menu surface numbers
-#define SURFACE_EMPTY          (0u)
-#define SURFACE_INTRO          (1u)
-#define SURFACE_MAIN           (2u)
-#define SURFACE_GAME           (3u)
-#define SURFACE_CONFIG         (4u)
-#define SURFACE_EXTRA          (5u)
-#define SURFACE_PAUSE          (6u)
-#define SURFACE_SCORE          (7u)
-#define SURFACE_REPLAY         (8u)
+#define SURFACE_EMPTY           (0u)
+#define SURFACE_INTRO           (1u)
+#define SURFACE_TITLE           (2u)
+#define SURFACE_MAIN            (3u)
+#define SURFACE_GAME            (4u)
+#define SURFACE_SCORE           (5u)
+#define SURFACE_REPLAY          (6u)
+#define SURFACE_CONFIG          (7u)
+#define SURFACE_EXTRA           (8u)
+#define SURFACE_PAUSE           (9u)
+#define SURFACE_SUMMARY         (10u)
 
-#define SURFACE_INTRO_EMPTY    (0u)
-#define SURFACE_INTRO_LOGO     (1u)
-#define SURFACE_INTRO_LANGUAGE (2u)
+#define SURFACE_INTRO_EMPTY     (0u)
+#define SURFACE_INTRO_LOGO      (1u)
+#define SURFACE_INTRO_LANGUAGE  (2u)
 
-#define SURFACE_MAIN_DEFAULT   (0u)
+#define SURFACE_TITLE_DEFAULT   (0u)
 
-#define SURFACE_GAME_MISSION   (0u)
-#define SURFACE_GAME_TROPHY    (1u)
+#define SURFACE_MAIN_DEFAULT    (0u)
 
-#define SURFACE_CONFIG_VIDEO   (0u)
-#define SURFACE_CONFIG_AUDIO   (1u)
-#define SURFACE_CONFIG_INPUT   (2u)
-#define SURFACE_CONFIG_GAME    (3u)
+#define SURFACE_GAME_DEFAULT    (0u)
 
-#define SURFACE_EXTRA_CREDITS  (0u)
+#define SURFACE_SCORE_DEFAULT   (0u)
 
-#define SURFACE_PAUSE_DEFAULT  (0u)
+#define SURFACE_REPLAY_DEFAULT  (0u)
 
-#define SURFACE_SCORE_DEFAULT  (0u)
+#define SURFACE_CONFIG_VIDEO    (0u)
+#define SURFACE_CONFIG_AUDIO    (1u)
+#define SURFACE_CONFIG_INPUT    (2u)
+#define SURFACE_CONFIG_GAME     (3u)
 
-#define SURFACE_REPLAY_DEFAULT (0u)
+#define SURFACE_EXTRA_DEFAULT   (0u)
+
+#define SURFACE_PAUSE_DEFAULT   (0u)
+
+#define SURFACE_SUMMARY_DEFAULT (0u)
 
 
 // ****************************************************************
@@ -168,8 +173,8 @@ public:
 
 
 // ****************************************************************
-// main menu class
-class cMainMenu final : public coreMenu
+// title menu class
+class cTitleMenu final : public coreMenu
 {
 private:
     coreObject2D m_GameLogo;       // game logo
@@ -180,6 +185,31 @@ private:
     coreLabel m_aVersionInfo[2];   // hard-coded version info strings
 
     coreUint8 m_iSelected;         // current selected menu button
+
+
+public:
+    cTitleMenu()noexcept;
+
+    DISABLE_COPY(cTitleMenu)
+
+    // move the title menu
+    void Move()final;
+};
+
+
+// ****************************************************************
+// main menu class
+class cMainMenu final : public coreMenu
+{
+private:
+    coreButton m_StartButton;    // start button
+    coreButton m_ScoreButton;    // score button
+    coreButton m_ReplayButton;   // replay button
+    coreButton m_ConfigButton;   // config button
+    coreButton m_ExtraButton;    // extra button
+    coreButton m_ExitButton;     // exit button
+
+    coreUint8 m_iSelected;       // current selected menu button
 
 
 public:
@@ -197,14 +227,17 @@ public:
 class cGameMenu final : public coreMenu
 {
 private:
-    coreObject2D m_Background;   // 
+    coreObject2D m_Background;      // 
 
-    coreButton m_StartButton;    // start button
-    coreButton m_ConfigButton;   // config button
-    coreButton m_ExtraButton;    // extra button
-    coreButton m_ScoreButton;    // score button
-    coreButton m_ReplayButton;   // replay button
-    coreButton m_ExitButton;     // exit button
+    coreButton m_StartButton;       // start button
+    coreButton m_BackButton;        // back button
+
+    coreLabel    m_aLabel[3];       // 
+    coreObject2D m_aLine [3];       // 
+
+    coreSwitchBoxU8 m_Mode;         // 
+    coreSwitchBoxU8 m_Difficulty;   // 
+    coreSwitchBoxU8 m_Players;      // 
 
 
 public:
@@ -214,6 +247,60 @@ public:
 
     // move the game menu
     void Move()final;
+};
+
+
+// ****************************************************************
+// score menu class
+class cScoreMenu final : public coreMenu
+{
+private:
+    coreObject2D m_Background;                   // 
+
+    coreButton m_BackButton;                     // back button
+
+    coreObject2D m_aLine [MENU_SCORE_ENTRIES];   // 
+    coreLabel    m_aRank [MENU_SCORE_ENTRIES];   // 
+    coreLabel    m_aName [MENU_SCORE_ENTRIES];   // 
+    coreLabel    m_aScore[MENU_SCORE_ENTRIES];   // 
+
+
+public:
+    cScoreMenu()noexcept;
+
+    DISABLE_COPY(cScoreMenu)
+
+    // move the score menu
+    void Move()final;
+};
+
+
+// ****************************************************************
+// replay menu class
+class cReplayMenu final : public coreMenu
+{
+private:
+    coreObject2D m_Background;                   // 
+
+    coreButton m_BackButton;                     // back button
+
+    coreObject2D m_aLine[MENU_REPLAY_ENTRIES];   // 
+    coreLabel    m_aName[MENU_REPLAY_ENTRIES];   // 
+    coreLabel    m_aTime[MENU_REPLAY_ENTRIES];   // 
+
+    std::vector<cReplay::sInfo> m_aInfoList;     // 
+
+
+public:
+    cReplayMenu()noexcept;
+
+    DISABLE_COPY(cReplayMenu)
+
+    // move the replay menu
+    void Move()final;
+
+    // 
+    void LoadReplays();
 };
 
 
@@ -346,56 +433,37 @@ public:
 
 
 // ****************************************************************
-// score menu class
-class cScoreMenu final : public coreMenu
+// summary menu class
+class cSummaryMenu final : public coreMenu
 {
 private:
-    coreObject2D m_Background;                   // 
+    coreObject2D m_Background;                                      // 
 
-    coreButton m_BackButton;                     // back button
+    coreLabel m_aTitle[MENU_SUMMARY_ENTRIES];                       // 
+    coreLabel m_aValue[MENU_SUMMARY_ENTRIES];                       // 
+    coreLabel m_aaPart[MENU_SUMMARY_ENTRIES][MENU_SUMMARY_PARTS];   // 
 
-    coreObject2D m_aLine [MENU_SCORE_ENTRIES];   // 
-    coreLabel    m_aRank [MENU_SCORE_ENTRIES];   // 
-    coreLabel    m_aName [MENU_SCORE_ENTRIES];   // 
-    coreLabel    m_aScore[MENU_SCORE_ENTRIES];   // 
+    coreLabel m_TotalTitle;                                         // 
+    coreLabel m_TotalValue;                                         // 
+    coreLabel m_aTotalPart[MENU_SUMMARY_PARTS];                     // 
+
+    coreUint32 m_iFinalScore;                                       // (just for display) 
+    coreFlow   m_fIntroTimer;                                       // 
+    coreFlow   m_fOutroTimer;                                       // 
+    coreUint8  m_iSkipped;                                          // 
 
 
 public:
-    cScoreMenu()noexcept;
+    cSummaryMenu()noexcept;
 
-    DISABLE_COPY(cScoreMenu)
+    DISABLE_COPY(cSummaryMenu)
 
-    // move the score menu
-    void Move()final;
-};
-
-
-// ****************************************************************
-// replay menu class
-class cReplayMenu final : public coreMenu
-{
-private:
-    coreObject2D m_Background;                   // 
-
-    coreButton m_BackButton;                     // back button
-
-    coreObject2D m_aLine[MENU_REPLAY_ENTRIES];   // 
-    coreLabel    m_aName[MENU_REPLAY_ENTRIES];   // 
-    coreLabel    m_aTime[MENU_REPLAY_ENTRIES];   // 
-
-    std::vector<cReplay::sInfo> m_aInfoList;     // 
-
-
-public:
-    cReplayMenu()noexcept;
-
-    DISABLE_COPY(cReplayMenu)
-
-    // move the replay menu
-    void Move()final;
+    // render and move the summary menu
+    void Render()final;
+    void Move  ()final;
 
     // 
-    void LoadReplays();
+    void ShowSummary();
 };
 
 
@@ -405,14 +473,16 @@ class cMenu final : public coreMenu
 {
 private:
     cIntroMenu* m_pIntroMenu;     // intro menu object (dynamically unloaded)
-    cMainMenu*  m_pMainMenu;      // main menu object (dynamically unloaded)
+    cTitleMenu* m_pTitleMenu;     // title menu object (dynamically unloaded)
 
-    cGameMenu   m_GameMenu;       // game menu object
-    cConfigMenu m_ConfigMenu;     // config menu object
-    cExtraMenu  m_ExtraMenu;      // extra menu object
-    cPauseMenu  m_PauseMenu;      // pause menu object
-    cScoreMenu  m_ScoreMenu;      // score menu object
-    cReplayMenu m_ReplayMenu;     // replay menu object
+    cMainMenu    m_MainMenu;      // main menu object
+    cGameMenu    m_GameMenu;      // game menu object
+    cScoreMenu   m_ScoreMenu;     // score menu object
+    cReplayMenu  m_ReplayMenu;    // replay menu object
+    cConfigMenu  m_ConfigMenu;    // config menu object
+    cExtraMenu   m_ExtraMenu;     // extra menu object
+    cPauseMenu   m_PauseMenu;     // pause menu object
+    cSummaryMenu m_SummaryMenu;   // summary menu object
 
     cMsgBox  m_MsgBox;            // message box overlay
     cTooltip m_Tooltip;           // tooltip overlay
@@ -448,6 +518,7 @@ public:
     static void UpdateButton(coreButton* OUTPUT pButton, const coreBool bFocused, const coreVector3& vFocusColor);
     static void UpdateButton(coreButton* OUTPUT pButton, const coreBool bFocused);
     static void UpdateSwitchBox(coreSwitchBoxU8* OUTPUT pSwitchBox);
+    static void UpdateAnimateProgram(coreObject2D* OUTPUT pObject);
 };
 
 

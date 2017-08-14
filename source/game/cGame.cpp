@@ -16,6 +16,7 @@ cGame::cGame(const coreBool bCoop)noexcept
 , m_BulletManagerEnemy  (TYPE_BULLET_ENEMY)
 , m_Interface           (bCoop ? GAME_PLAYERS : 1u)
 , m_pMission            (NULL)
+, m_fTimeInOut          (0.0f)
 , m_fTimeGame           (0.0f)
 , m_fTimeMission        (0.0f)
 , m_afTimeBoss          {}
@@ -39,6 +40,14 @@ cGame::cGame(const coreBool bCoop)noexcept
 
         STATIC_ASSERT(GAME_PLAYERS == 2u)
     }
+
+#if defined(_P1_DEBUG_RANDOM_)
+
+    // 
+    if(!m_bCoop && (CORE_RAND_RUNTIME & 0x01u))
+        m_aPlayer[0].Configure(PLAYER_SHIP_DEF, COLOR_SHIP_BLUE);
+
+#endif
 
     // load first mission
     m_pMission = new cNoMission();
@@ -159,7 +168,7 @@ void cGame::Move()
     // update total game time
     m_fTimeGame.Update(1.0f);
 
-    if(CONTAINS_FLAG(m_iStatus, GAME_STATUS_PLAY) || CONTAINS_FLAG(m_iStatus, GAME_STATUS_INTRO))
+    if(CONTAINS_FLAG(m_iStatus, GAME_STATUS_PLAY))
     {
         // update total mission and boss time
         m_fTimeMission.Update(1.0f);
@@ -232,8 +241,7 @@ void cGame::LoadMission(const coreInt32 iID)
         m_pMission->Setup();
 
         // 
-        m_fTimeGame    = 0.0f;
-        m_fTimeMission = -(GAME_INTRO_DURATION + GAME_INTRO_DELAY);
+        m_fTimeMission = 0.0f;
         for(coreUintW i = 0u; i < MISSION_BOSSES; ++i) m_afTimeBoss[i] = -INTERFACE_BANNER_DURATION;
 
         // set initial status
@@ -244,7 +252,7 @@ void cGame::LoadMission(const coreInt32 iID)
             // reset all available players
             for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
             {
-                m_aPlayer[i].Kill(true);
+                m_aPlayer[i].Kill(false);
                 m_aPlayer[i].Resurrect(coreVector2(20.0f * (I_TO_F(i) - 0.5f * I_TO_F(GAME_PLAYERS-1u)), -100.0f));
                 m_aPlayer[i].AddStatus(PLAYER_STATUS_NO_INPUT_ALL);
             }
@@ -252,7 +260,7 @@ void cGame::LoadMission(const coreInt32 iID)
         else
         {
             // reset only the first player
-            m_aPlayer[0].Kill(true);
+            m_aPlayer[0].Kill(false);
             m_aPlayer[0].Resurrect(coreVector2(0.0f,-100.0f));
             m_aPlayer[0].AddStatus(PLAYER_STATUS_NO_INPUT_ALL);
         }
@@ -280,6 +288,43 @@ void cGame::RestartMission()
     // 
     this->LoadMission(pOldMission->GetID());
     SAFE_DELETE(pOldMission)
+}
+
+
+// ****************************************************************
+// 
+void cGame::StartIntro()
+{
+    ASSERT(!CONTAINS_FLAG(m_iStatus, GAME_STATUS_PLAY))
+    ASSERT(!CONTAINS_FLAG(m_iStatus, GAME_STATUS_OUTRO))
+
+    // 
+    ADD_FLAG(m_iStatus, GAME_STATUS_INTRO)
+
+    // 
+    m_fTimeInOut = -GAME_INTRO_DELAY;
+}
+
+
+// ****************************************************************
+// 
+void cGame::StartOutro()
+{
+    ASSERT(!CONTAINS_FLAG(m_iStatus, GAME_STATUS_INTRO))
+
+    // 
+    REMOVE_FLAG(m_iStatus, GAME_STATUS_PLAY)
+    ADD_FLAG   (m_iStatus, GAME_STATUS_OUTRO)
+
+    // 
+    m_fTimeInOut = 0.0f;
+
+    // 
+    for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+        m_aPlayer[i].AddStatus(PLAYER_STATUS_NO_INPUT_ALL);
+
+    // 
+    m_Interface.SetVisible(false);
 }
 
 
@@ -349,8 +394,13 @@ coreBool cGame::__HandleIntro()
 
     if(CONTAINS_FLAG(m_iStatus, GAME_STATUS_INTRO))
     {
-        if(m_fTimeMission >= 0.0f)
+        // 
+        m_fTimeInOut.Update(1.0f);
+
+        if(m_fTimeInOut >= GAME_INTRO_DURATION)
         {
+            ASSERT(!CONTAINS_FLAG(m_iStatus, GAME_STATUS_OUTRO))
+
             // end intro and start actual game
             REMOVE_FLAG(m_iStatus, GAME_STATUS_INTRO)
             ADD_FLAG   (m_iStatus, GAME_STATUS_PLAY)
@@ -377,7 +427,7 @@ coreBool cGame::__HandleIntro()
             this->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
             {
                 // calculate new player position and rotation
-                const coreFloat   fTime = CLAMP((i ? 1.0f : 1.08f) + m_fTimeMission / GAME_INTRO_DURATION, 0.0f, 1.0f);
+                const coreFloat   fTime = CLAMP((i ? 0.0f : 0.08f) + m_fTimeInOut / GAME_INTRO_DURATION, 0.0f, 1.0f);
                 const coreVector2 vPos  = s_Spline.CalcPosition (LERPB(0.0f, s_Spline.GetTotalDistance(), fTime));
                 const coreVector2 vDir  = coreVector2::Direction(LERPS(0.0f, 4.0f*PI,                     fTime));
 
@@ -406,10 +456,21 @@ coreBool cGame::__HandleOutro()
 {
     if(CONTAINS_FLAG(m_iStatus, GAME_STATUS_OUTRO))
     {
+        // 
+        m_fTimeInOut.Update(1.0f);
 
+        this->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+        {
+            // calculate new player position and rotation
+            const coreFloat   fTime = MAX((i ? -0.16f : 0.0f) + m_fTimeInOut, 0.0f);
+            const coreFloat   fPos  = MIN(pPlayer->GetPosition().y + 90.0f * fTime * Core::System->GetTime(), 1000.0f);
+            const coreVector2 vDir  = coreVector2::Direction(LERPS(0.0f, 2.0f*PI, 0.6f * fTime));
 
-
-        return false;
+            // fly player animated out of the game field
+            pPlayer->SetPosition   (coreVector3(pPlayer->GetPosition().x, fPos, pPlayer->GetPosition().z));
+            pPlayer->SetOrientation(coreVector3(vDir.x, 0.0f, vDir.y));
+            pPlayer->UpdateExhaust ((fTime < 0.2f) ? LERPB(0.0f, 0.7f, fTime / 0.2f) : LERPB(0.7f, 0.3f, fTime - 0.2f));
+        });
     }
 
     return true;
@@ -476,8 +537,8 @@ void cGame::__HandleCollisions()
     Core::Manager::Object->TestCollision(TYPE_ENEMY, TYPE_BULLET_PLAYER, [](cEnemy* OUTPUT pEnemy, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         // 
-        if((ABS(pEnemy->GetPosition().x) >= FOREGROUND_AREA.x * 1.1f) ||
-           (ABS(pEnemy->GetPosition().y) >= FOREGROUND_AREA.y * 1.1f)) return;
+        if((ABS(vIntersection.x) >= FOREGROUND_AREA.x * 1.1f) ||
+           (ABS(vIntersection.y) >= FOREGROUND_AREA.y * 1.1f)) return;
 
         // 
         pEnemy ->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), s_cast<cPlayer*>(pBullet->GetOwner()));

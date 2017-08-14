@@ -221,7 +221,7 @@ cSeaBackground::cSeaBackground()noexcept
             {
                 // calculate position and height
                 const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, SEA_ALGAE_NUM);
-                const coreFloat   fHeight   = Core::Rand->Float(10.0f, 30.0f);
+                const coreFloat   fHeight   = Core::Rand->Float(10.0f, 40.0f);
 
                 // test for valid values
                 if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 700.0f))

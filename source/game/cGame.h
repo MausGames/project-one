@@ -56,6 +56,7 @@ private:
 
     cMission* m_pMission;                                 // active mission (should never be NULL)
 
+    coreFlow              m_fTimeInOut;                   // 
     coreProtect<coreFlow> m_fTimeGame;                    // 
     coreProtect<coreFlow> m_fTimeMission;                 // total time in mission
     coreProtect<coreFlow> m_afTimeBoss[MISSION_BOSSES];   // total time per boss battle
@@ -85,8 +86,8 @@ public:
     void RestartMission();
 
     // 
-    inline void StartIntro() {ADD_FLAG(m_iStatus, GAME_STATUS_INTRO)}
-    inline void StartOutro() {ADD_FLAG(m_iStatus, GAME_STATUS_OUTRO) REMOVE_FLAG(m_iStatus, GAME_STATUS_PLAY)}
+    void StartIntro();
+    void StartOutro();
 
     // 
     void PushDepthLevel();

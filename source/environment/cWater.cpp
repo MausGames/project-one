@@ -89,7 +89,7 @@ void cWater::Render(coreFrameBuffer* pBackground)
     this->GetProgram()->SendUniform("u_v1Offset", m_fFlyOffset * -0.0125f);
 
     // render the 3d-object
-    coreObject3D::Render();
+    this->coreObject3D::Render();
 
     // invalidate all frame buffer objects
     m_Reflection.Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR | CORE_FRAMEBUFFER_TARGET_DEPTH);
@@ -112,7 +112,7 @@ void cWater::Move()
     this->__MoveOwn();
 
     // move the 3d-object
-    coreObject3D::Move();
+    this->coreObject3D::Move();
 }
 
 
@@ -420,7 +420,7 @@ void cLava::Render()
     this->GetProgram()->SendUniform("u_v1Offset", m_fFlyOffset * -0.0125f);
 
     // render the 3d-object
-    coreObject3D::Render();
+    this->coreObject3D::Render();
 }
 
 
@@ -435,5 +435,5 @@ void cLava::Move()
     this->SetPosition(coreVector3(0.0f, m_fFlyOffset * OUTDOOR_DETAIL, WATER_HEIGHT));
 
     // move the 3d-object
-    coreObject3D::Move();
+    this->coreObject3D::Move();
 }

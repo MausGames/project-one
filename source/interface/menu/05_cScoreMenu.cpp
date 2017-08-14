@@ -20,7 +20,7 @@ cScoreMenu::cScoreMenu()noexcept
     m_Background.SetPosition  (coreVector2(0.0f,0.0f));
     m_Background.SetSize      (coreVector2(0.8f,0.55f));
 
-    m_BackButton.Construct    (MENU_BUTTON, MENU_FONT_ICON_2, MENU_OUTLINE_SMALL, 0u);
+    m_BackButton.Construct    (MENU_BUTTON, MENU_FONT_ICON_2, MENU_OUTLINE_SMALL);
     m_BackButton.DefineProgram("menu_border_program");
     m_BackButton.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.5f,-0.5f) + coreVector2(0.0f,-0.02f));
     m_BackButton.SetSize      (coreVector2( 0.07f, 0.07f)); // * m_SaveButton.GetSize().y); 
@@ -30,19 +30,19 @@ cScoreMenu::cScoreMenu()noexcept
     // create score entries
     for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i)
     {
-        m_aRank[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL, 4u);
+        m_aRank[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
         m_aRank[i].SetPosition (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.04f, -0.05f - 0.05f*I_TO_F(i)));
         m_aRank[i].SetAlignment(coreVector2(1.0f,0.0f));   
         m_aRank[i].SetColor3   (COLOR_MENU_WHITE);
         m_aRank[i].SetText     (PRINT("%zu", i + 1u));
 
-        m_aName[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL, MENU_SCORE_NAME_LENGTH);
+        m_aName[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
         m_aName[i].SetPosition (coreVector2(0.05f,0.0f) + m_aRank[i].GetPosition());   
         m_aName[i].SetAlignment(coreVector2(1.0f, 0.0f));
         m_aName[i].SetColor3   (COLOR_MENU_WHITE);
         m_aName[i].SetText     ("Horst");
 
-        m_aScore[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL, 8u);
+        m_aScore[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
         m_aScore[i].SetPosition (coreVector2(-1.0f,1.0f) * m_aRank[i].GetPosition());
         m_aScore[i].SetAlignment(coreVector2(-1.0f,0.0f));
         m_aScore[i].SetColor3   (COLOR_MENU_WHITE);
@@ -53,7 +53,7 @@ cScoreMenu::cScoreMenu()noexcept
         m_aLine[i].DefineProgram("menu_inner_program");
         m_aLine[i].SetPosition  (coreVector2(0.0f, m_aRank[i].GetPosition().y));
         m_aLine[i].SetSize      (coreVector2(m_Background.GetSize().x, 0.05f));
-        m_aLine[i].SetTexOffset (coreVector2(I_TO_F(i)*0.1f, 0.0f));
+        m_aLine[i].SetTexOffset (coreVector2(I_TO_F(i)*0.09f, 0.0f));
 
 
         // 
@@ -86,7 +86,7 @@ cScoreMenu::cScoreMenu()noexcept
 void cScoreMenu::Move()
 {
     // move the menu
-    coreMenu::Move();
+    this->coreMenu::Move();
     m_iStatus = MAX(m_iStatus - 100, 0);
 
     // 

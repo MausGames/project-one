@@ -40,7 +40,7 @@ void cBullet::Move()
         this->Deactivate(false);
 
     // move the 3d-object
-    coreObject3D::Move();
+    this->coreObject3D::Move();
 }
 
 

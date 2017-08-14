@@ -453,5 +453,8 @@ static void DebugGame()
         }
     }
 
+    if(SDL_GL_GetSwapInterval())
+        SDL_Delay(1u);
+
     // ########################## DEBUG ##########################
 }

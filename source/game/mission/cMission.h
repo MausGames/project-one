@@ -37,7 +37,7 @@
 // stage management macros
 #define STAGE_MAIN                      m_anStage.emplace(__LINE__, [this]()
 #define STAGE_MAIN_WAIT(t)              STAGE_MAIN{STAGE_FINISH_AFTER(1.0f)});
-#define STAGE_START_HERE                m_anStage.clear(); STAGE_MAIN{g_pGame->StartIntro(); if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY)) STAGE_FINISH_NOW});
+#define STAGE_START_HERE                m_anStage.clear(); STAGE_MAIN{if(STAGE_BEGINNING) g_pGame->StartIntro(); if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY)) STAGE_FINISH_NOW});
 
 #define STAGE_CLEARED                   (std::all_of(m_apSquad.begin(), m_apSquad.end(), [](const cEnemySquad* pSquad) {return pSquad->IsFinished();}))
 
@@ -74,8 +74,8 @@
 #define STAGE_LIFETIME(e,m,a)                                                                     \
     UNUSED const coreFloat fLifeSpeed      = (m);                                                 \
     UNUSED const coreFloat fLifeOffset     = (a);                                                 \
-    UNUSED coreFloat       fLifeTime       = (e)->GetLifeTime()       * fLifeSpeed + fLifeOffset; \
-    UNUSED coreFloat       fLifeTimeBefore = (e)->GetLifeTimeBefore() * fLifeSpeed + fLifeOffset; \
+    UNUSED coreFloat       fLifeTime       = (e)->GetLifeTime()       * fLifeSpeed - fLifeOffset; \
+    UNUSED coreFloat       fLifeTimeBefore = (e)->GetLifeTimeBefore() * fLifeSpeed - fLifeOffset; \
     UNUSED coreFloat       fLifeTimeDelay  = 0.0f;                                                \
     UNUSED coreFloat       fLifeTimePoint  = 0.0f;                                                \
     UNUSED coreFloat       fHealthPctPoint = 0.0f;                                                \
@@ -120,14 +120,14 @@
 #define STAGE_POSITION_BEFORE(e,t,v)    ((e)->GetPosition(). v <  (t))
 #define STAGE_POSITION_AFTER(e,t,v)     ((e)->GetPosition(). v >= (t))
 #define STAGE_POSITION_BETWEEN(e,t,u,v) (InBetweenExt((e)->GetPosition(). v, (t), (u)))
-#define STAGE_FLYPAST(e,f,v)                          \
-    ((e)->GetPosition(). v < (f)->GetPosition(). v) ^ \
-    ((e)->GetPosition(). v < (f)->GetOldPos  (). v) | \
-    ((e)->GetOldPos  (). v < (f)->GetPosition(). v) ^ \
-    ((e)->GetOldPos  (). v < (f)->GetOldPos  (). v) | \
-    ((f)->GetPosition(). v < (e)->GetPosition(). v) ^ \
-    ((f)->GetPosition(). v < (e)->GetOldPos  (). v) | \
-    ((f)->GetOldPos  (). v < (e)->GetPosition(). v) ^ \
+#define STAGE_FLYPAST(e,f,v)                           \
+    ((e)->GetPosition(). v < (f)->GetPosition(). v) ^  \
+    ((e)->GetPosition(). v < (f)->GetOldPos  (). v) || \
+    ((e)->GetOldPos  (). v < (f)->GetPosition(). v) ^  \
+    ((e)->GetOldPos  (). v < (f)->GetOldPos  (). v) || \
+    ((f)->GetPosition(). v < (e)->GetPosition(). v) ^  \
+    ((f)->GetPosition(). v < (e)->GetOldPos  (). v) || \
+    ((f)->GetOldPos  (). v < (e)->GetPosition(). v) ^  \
     ((f)->GetOldPos  (). v < (e)->GetOldPos  (). v)
 
 

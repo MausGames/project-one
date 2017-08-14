@@ -42,7 +42,7 @@ cIntroMenu::cIntroMenu()noexcept
             if(!coreLanguage::FindString(it->c_str(), "FONT", &sFont)) sFont = "ethnocentric.ttf";
 
             // create new language button
-            coreButton* pButton = new coreButton(MENU_BUTTON, coreData::StrFilename(sFont.c_str()), 30u, MENU_OUTLINE_SMALL, 0u);
+            coreButton* pButton = new coreButton(MENU_BUTTON, coreData::StrFilename(sFont.c_str()), 30u, MENU_OUTLINE_SMALL);
             pButton->DefineProgram("menu_border_program");
             pButton->SetPosition  (coreVector2(0.0f, 0.15f * (fOffset - I_TO_F(m_apLanguageButton.size()))));
             pButton->SetSize      (coreVector2(0.3f, 0.07f) * 1.5f);
@@ -77,7 +77,7 @@ cIntroMenu::~cIntroMenu()
 void cIntroMenu::Move()
 {
     // move the menu
-    coreMenu::Move();
+    this->coreMenu::Move();
     m_iStatus = MAX(m_iStatus - 100, 0);
 
     // 

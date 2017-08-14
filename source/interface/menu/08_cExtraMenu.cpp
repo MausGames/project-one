@@ -12,7 +12,7 @@
 // ****************************************************************
 // constructor
 cExtraMenu::cExtraMenu()noexcept
-: coreMenu (1u, SURFACE_EXTRA_CREDITS)
+: coreMenu (1u, SURFACE_EXTRA_DEFAULT)
 {
     // create menu objects
     m_Background.DefineTexture(0u, "menu_background_black.png");
@@ -20,7 +20,7 @@ cExtraMenu::cExtraMenu()noexcept
     m_Background.SetPosition  (coreVector2(0.0f,0.0f));
     m_Background.SetSize      (coreVector2(0.8f,0.55f));
 
-    m_BackButton.Construct    (MENU_BUTTON, MENU_FONT_ICON_2, MENU_OUTLINE_SMALL, 0u);
+    m_BackButton.Construct    (MENU_BUTTON, MENU_FONT_ICON_2, MENU_OUTLINE_SMALL);
     m_BackButton.DefineProgram("menu_border_program");
     m_BackButton.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.5f,-0.5f) + coreVector2(0.0f,-0.02f));
     m_BackButton.SetSize      (coreVector2( 0.07f, 0.07f)); // * m_SaveButton.GetSize().y); 
@@ -41,13 +41,13 @@ cExtraMenu::cExtraMenu()noexcept
 void cExtraMenu::Move()
 {
     // move the menu
-    coreMenu::Move();
+    this->coreMenu::Move();
     m_iStatus = MAX(m_iStatus - 100, 0);
 
     // 
     switch(this->GetCurSurface())
     {
-    case SURFACE_EXTRA_CREDITS:
+    case SURFACE_EXTRA_DEFAULT:
         {
 
         }

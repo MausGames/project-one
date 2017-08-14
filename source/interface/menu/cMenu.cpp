@@ -12,12 +12,12 @@
 // ****************************************************************
 // constructor
 cMenu::cMenu()noexcept
-: coreMenu      (9u, SURFACE_INTRO)
+: coreMenu      (11u, SURFACE_INTRO)
 , m_iPauseFrame (0u)
 {
-    // create intro and main menu
+    // create intro and title menu
     m_pIntroMenu = new cIntroMenu();
-    m_pMainMenu  = new cMainMenu();
+    m_pTitleMenu = new cTitleMenu();
 
     // 
     m_PauseLayer.DefineTexture(0u, "menu_background_black.png");
@@ -27,16 +27,18 @@ cMenu::cMenu()noexcept
     m_PauseLayer.SetTexSize   (coreVector2(1.2f,1.2f));
 
     // bind menu objects
-    this->BindObject(SURFACE_INTRO,  m_pIntroMenu);
-    this->BindObject(SURFACE_MAIN,   m_pMainMenu);
-    this->BindObject(SURFACE_GAME,   &m_GameMenu);
-    this->BindObject(SURFACE_CONFIG, &m_PauseLayer);
-    this->BindObject(SURFACE_CONFIG, &m_ConfigMenu);
-    this->BindObject(SURFACE_EXTRA,  &m_ExtraMenu);
-    this->BindObject(SURFACE_PAUSE,  &m_PauseLayer);
-    this->BindObject(SURFACE_PAUSE,  &m_PauseMenu);
-    this->BindObject(SURFACE_SCORE,  &m_ScoreMenu);
-    this->BindObject(SURFACE_REPLAY, &m_ReplayMenu);
+    this->BindObject(SURFACE_INTRO,   m_pIntroMenu);
+    this->BindObject(SURFACE_TITLE,   m_pTitleMenu);
+    this->BindObject(SURFACE_MAIN,    &m_MainMenu);
+    this->BindObject(SURFACE_GAME,    &m_GameMenu);
+    this->BindObject(SURFACE_SCORE,   &m_ScoreMenu);
+    this->BindObject(SURFACE_REPLAY,  &m_ReplayMenu);
+    this->BindObject(SURFACE_CONFIG,  &m_PauseLayer);
+    this->BindObject(SURFACE_CONFIG,  &m_ConfigMenu);
+    this->BindObject(SURFACE_EXTRA,   &m_ExtraMenu);
+    this->BindObject(SURFACE_PAUSE,   &m_PauseLayer);
+    this->BindObject(SURFACE_PAUSE,   &m_PauseMenu);
+    this->BindObject(SURFACE_SUMMARY, &m_SummaryMenu);
 }
 
 
@@ -44,9 +46,9 @@ cMenu::cMenu()noexcept
 // destructor
 cMenu::~cMenu()
 {
-    // delete intro and main menu
+    // delete intro and title menu
     SAFE_DELETE(m_pIntroMenu)
-    SAFE_DELETE(m_pMainMenu)
+    SAFE_DELETE(m_pTitleMenu)
 }
 
 
@@ -55,7 +57,7 @@ cMenu::~cMenu()
 void cMenu::Render()
 {
     // 
-    coreMenu::Render();
+    this->coreMenu::Render();
 
     // 
     m_MsgBox .Render();
@@ -71,7 +73,7 @@ void cMenu::Move()
     m_MsgBox.Move();
 
     // move the menu
-    coreMenu::Move();
+    this->coreMenu::Move();
 
     // 
     switch(this->GetCurSurface())
@@ -91,11 +93,10 @@ void cMenu::Move()
                 else if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_OUTRO))
                 {
                     // 
-                    this->ChangeSurface(SURFACE_GAME, 3.0f);
+                    this->ChangeSurface(SURFACE_SUMMARY, 3.0f);
 
                     // 
-                    ASSERT(g_pGame)
-                    SAFE_DELETE(g_pGame)
+                    m_SummaryMenu.ShowSummary();
                 }
             }
         }
@@ -105,31 +106,68 @@ void cMenu::Move()
         {
             if(m_pIntroMenu->GetStatus())
             {
-                // switch to main menu
-                this->ChangeSurface(SURFACE_MAIN, 1.0f);
+                // switch to title menu
+                this->ChangeSurface(SURFACE_TITLE, 1.0f);
             }
         }
         break;
 
-    case SURFACE_MAIN:
+    case SURFACE_TITLE:
         {
-            if(m_pMainMenu->GetStatus())
+            if(m_pTitleMenu->GetStatus())
             {
-                // switch to game menu
-                this->ChangeSurface(SURFACE_GAME, 1.0f);
+                // switch to main menu
+                this->ChangeSurface(SURFACE_MAIN, 3.0f);
 
                 // unload expendable menu resources
                 Core::Manager::Resource->AttachFunction([this]()
                 {
                     if(!this->GetTransition().GetStatus())
                     {
-                        // delete intro and main menu
+                        // delete intro and title menu
                         SAFE_DELETE(m_pIntroMenu)
-                        SAFE_DELETE(m_pMainMenu)
+                        SAFE_DELETE(m_pTitleMenu)
                         return CORE_OK;
                     }
                     return CORE_BUSY;
                 });
+            }
+        }
+        break;
+
+    case SURFACE_MAIN:
+        {
+            if(m_MainMenu.GetStatus() == 1)
+            {
+                // switch to game menu
+                this->ChangeSurface(SURFACE_GAME, 3.0f);
+            }
+            else if(m_MainMenu.GetStatus() == 2)
+            {
+                // switch to score menu
+                this->ChangeSurface(SURFACE_SCORE, 3.0f);
+            }
+            else if(m_MainMenu.GetStatus() == 3)
+            {
+                // switch to replay menu
+                this->ChangeSurface(SURFACE_REPLAY, 3.0f);
+
+                // 
+                m_ReplayMenu.LoadReplays();
+            }
+            else if(m_MainMenu.GetStatus() == 4)
+            {
+                // switch to config menu
+                this->ChangeSurface(SURFACE_CONFIG, 3.0f);
+
+                // 
+                m_ConfigMenu.ChangeSurface(SURFACE_CONFIG_VIDEO, 0.0f);
+                m_ConfigMenu.LoadValues();
+            }
+            else if(m_MainMenu.GetStatus() == 5)
+            {
+                // switch to extra menu
+                this->ChangeSurface(SURFACE_EXTRA, 3.0f);
             }
         }
         break;
@@ -145,34 +183,40 @@ void cMenu::Move()
                 ASSERT(!g_pGame)
                 g_pGame = new cGame(false);
                 g_pGame->LoadMission(cIntroMission::ID);
+
             }
             else if(m_GameMenu.GetStatus() == 2)
             {
-                // switch to config menu
-                this->ChangeSurface(SURFACE_CONFIG, 3.0f);
+                // return to previous menu
+                this->ChangeSurface(this->GetOldSurface(), 3.0f);
+            }
+        }
+        break;
+
+    case SURFACE_SCORE:
+        {
+            if(m_ScoreMenu.GetStatus())
+            {
+                // return to previous menu
+                this->ChangeSurface(this->GetOldSurface(), 3.0f);
+            }
+        }
+        break;
+
+    case SURFACE_REPLAY:
+        {
+            if(m_ReplayMenu.GetStatus() == 1)
+            {
+
 
                 // 
-                m_ConfigMenu.ChangeSurface(SURFACE_CONFIG_VIDEO, 0.0f);
-                m_ConfigMenu.LoadValues();
             }
-            else if(m_GameMenu.GetStatus() == 3)
+            else if(m_ReplayMenu.GetStatus() == 2)
             {
-                // switch to extra menu
-                this->ChangeSurface(SURFACE_EXTRA, 3.0f);
+                // return to previous menu
+                this->ChangeSurface(this->GetOldSurface(), 3.0f);
             }
-            else if(m_GameMenu.GetStatus() == 4)
-            {
-                // switch to score menu
-                this->ChangeSurface(SURFACE_SCORE, 3.0f);
-            }
-            else if(m_GameMenu.GetStatus() == 5)
-            {
-                // switch to replay menu
-                this->ChangeSurface(SURFACE_REPLAY, 3.0f);
 
-                // 
-                m_ReplayMenu.LoadReplays();
-            }
         }
         break;
 
@@ -223,38 +267,26 @@ void cMenu::Move()
             else if(m_PauseMenu.GetStatus() == 4)
             {
                 // 
-                this->ChangeSurface(SURFACE_GAME, 1.0f);
+                this->ChangeSurface(SURFACE_MAIN, 1.0f);
 
                 // 
                 ASSERT(g_pGame)
                 SAFE_DELETE(g_pGame)
+
             }
         }
         break;
 
-    case SURFACE_SCORE:
+    case SURFACE_SUMMARY:
         {
-            if(m_ScoreMenu.GetStatus())
+            if(m_SummaryMenu.GetStatus())
             {
-                // return to previous menu
-                this->ChangeSurface(this->GetOldSurface(), 3.0f);
+                // 
+                this->ChangeSurface(SURFACE_EMPTY, 3.0f);
+
+                // 
+                g_pGame->LoadNextMission();
             }
-        }
-        break;
-
-    case SURFACE_REPLAY:
-        {
-            if(m_ReplayMenu.GetStatus() == 1)
-            {
-
-
-            }
-            else if(m_ReplayMenu.GetStatus() == 2)
-            {
-                // return to previous menu
-                this->ChangeSurface(this->GetOldSurface(), 3.0f);
-            }
-
         }
         break;
 
@@ -264,7 +296,8 @@ void cMenu::Move()
     }
 
     // 
-    Core::Input->ShowCursor(this->GetCurSurface() != SURFACE_EMPTY);
+    Core::Input->ShowCursor((this->GetCurSurface() != SURFACE_EMPTY) &&
+                            (this->GetCurSurface() != SURFACE_SUMMARY));
 
     // 
     if((this->GetCurSurface() == SURFACE_PAUSE) || (this->GetOldSurface() == SURFACE_PAUSE))
@@ -287,7 +320,8 @@ void cMenu::Move()
 // 
 coreBool cMenu::IsPaused()const
 {
-    return (this->GetCurSurface() != SURFACE_EMPTY) && g_pGame;
+    return (this->GetCurSurface() != SURFACE_EMPTY)   &&
+           (this->GetCurSurface() != SURFACE_SUMMARY) && g_pGame;
 }
 
 coreBool cMenu::IsPausedWithStep()
@@ -323,10 +357,10 @@ const coreLookup<std::string, std::string>& cMenu::GetLanguageList()
         // 
         coreLanguage::GetAvailableLanguages(&s_asLanguage);
 
-#if defined(_CORE_DEBUG_)
+#if defined(_P1_DEBUG_RANDOM_)
 
         // 
-        const std::string& sRandFile = s_asLanguage.get_valuelist()[std::time(NULL) % s_asLanguage.size()];
+        const std::string& sRandFile = s_asLanguage.get_valuelist()[CORE_RAND_RUNTIME % s_asLanguage.size()];
         Core::Language->Load(sRandFile.c_str());
 
         // 
@@ -394,11 +428,32 @@ void cMenu::UpdateSwitchBox(coreSwitchBoxU8* OUTPUT pSwitchBox)
 
 // ****************************************************************
 // 
+void cMenu::UpdateAnimateProgram(coreObject2D* OUTPUT pObject)
+{
+    ASSERT(pObject)
+
+    // 
+    if(!pObject->GetProgram().IsUsable()) return;
+    if(!pObject->GetProgram()->Enable())  return;
+
+    // 
+    const coreFloat fSize = 2.0f * pObject->GetSize().y * Core::System->GetResolution().yx().AspectRatio();
+    const coreFloat fLerp = ((fSize - 0.4f) / fSize) * 0.5f;
+
+    // 
+    pObject->GetProgram()->SendUniform("u_v4Scale", coreVector4(0.5f - fLerp, 0.5f + fLerp, 2.4f, fSize));
+}
+
+
+// ****************************************************************
+// 
 #include "01_cIntroMenu.cpp"
-#include "02_cMainMenu.cpp"
-#include "03_cGameMenu.cpp"
-#include "04_cConfigMenu.cpp"
-#include "05_cExtraMenu.cpp"
-#include "06_cPauseMenu.cpp"
-#include "07_cScoreMenu.cpp"
-#include "08_cReplayMenu.cpp"
+#include "02_cTitleMenu.cpp"
+#include "03_cMainMenu.cpp"
+#include "04_cGameMenu.cpp"
+#include "05_cScoreMenu.cpp"
+#include "06_cReplayMenu.cpp"
+#include "07_cConfigMenu.cpp"
+#include "08_cExtraMenu.cpp"
+#include "09_cPauseMenu.cpp"
+#include "10_cSummaryMenu.cpp"

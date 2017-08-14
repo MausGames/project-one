@@ -111,7 +111,8 @@ void cMission::MoveBefore()
             m_anStage.back()();
             if(m_anStage.empty())
             {
-
+                // 
+                g_pGame->StartOutro();
             }
         }
     }
