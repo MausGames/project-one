@@ -129,9 +129,6 @@
     <ClCompile Include="..\..\..\source\game\mission\99_cIntroMission.cpp">
       <Filter>game\mission</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\game\boss\9901_cProjectOneBoss.cpp">
-      <Filter>game\boss</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\source\game\cShield.cpp">
       <Filter>game</Filter>
     </ClCompile>
@@ -246,6 +243,12 @@
     <ClCompile Include="..\..\..\source\interface\menu\10_cSummaryMenu.cpp">
       <Filter>interface\menu</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\game\boss\0801_cProjectOneBoss.cpp">
+      <Filter>game\boss</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\game\boss\0802_cEigengrauBoss.cpp">
+      <Filter>game\boss</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\main.h" />
@@ -347,6 +350,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\source\file\cValidate.h">
       <Filter>file</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\additional\cRotaCache.h">
+      <Filter>additional</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

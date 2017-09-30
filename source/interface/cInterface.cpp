@@ -308,7 +308,7 @@ void cInterface::Move()
         m_BannerBar.SetAlpha    ( bLeftRight ? fVisibility :  1.0f);
 
         // animate banner bar
-        m_BannerBar.SetSize     (coreVector2(fVisibility, 1.0f) * coreVector2(1.0f, m_bBannerType ? 0.23f : 0.2f));
+        m_BannerBar.SetSize     (coreVector2(fVisibility, 1.0f) * coreVector2(1.0f, m_bBannerType ? 0.23f : 0.21f));
         m_BannerBar.SetTexSize  (coreVector2(fVisibility, 1.0f));
         m_BannerBar.SetTexOffset(coreVector2(1.0f,1.0f) * (fAnimation * 0.05f));
 

@@ -138,7 +138,7 @@ void cBackground::Render()
     if(m_pOutdoor)
     {
         // invalidate shadow and light map
-        if(g_CurConfig.Graphics.iShadow) m_pOutdoor->GetShadowMap()->GetFrameBuffer()->Invalidate(CORE_FRAMEBUFFER_TARGET_DEPTH);
+        if(g_CurConfig.Graphics.iShadow) m_pOutdoor->GetShadowMap()->GetFrameBuffer()->Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR | CORE_FRAMEBUFFER_TARGET_DEPTH);
         m_pOutdoor->GetLightMap()->Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
     }
 }
@@ -165,6 +165,9 @@ void cBackground::Move()
     // control and move all persistent objects
     auto nControlObjectsFunc = [this](std::vector<coreBatchList*>* OUTPUT papList, const coreFloat fRange, const coreMatrix2& mRota)
     {
+        // cache current camera position (to improve performance)
+        const coreVector2 vCameraPos = g_pEnvironment->GetCameraPos().xy();
+
         FOR_EACH(it, *papList)
         {
             coreBool bUpdate = false;
@@ -180,7 +183,7 @@ void cBackground::Move()
                 coreObject3D* pObject = (*et);
 
                 // determine visibility and compare with current status
-                const coreVector2 vScreenPos = (pObject->GetPosition().xy() - g_pEnvironment->GetCameraPos().xy()) * mRota;
+                const coreVector2 vScreenPos = (pObject->GetPosition().xy() - vCameraPos) * mRota;
                 const coreBool    bIsVisible = ((ABS(vScreenPos.x) + ABS(vScreenPos.y)) < fRange);
                 if(bIsVisible != pObject->IsEnabled(CORE_OBJECT_ENABLE_MOVE))
                 {
@@ -360,12 +363,15 @@ void cBackground::SetAirDensity   (const coreUintW iIndex, const coreFloat fDens
 // 
 void cBackground::_StoreHeight(const coreBatchList* pObjectList, const coreFloat fHeight)
 {
+    ASSERT(!m_aaiBaseHeight.count(pObjectList))
+
     // 
     m_aaiBaseHeight[pObjectList].push_back(coreMath::Float32To16(fHeight));
 }
 
 void cBackground::_StoreHeightList(const coreBatchList* pObjectList)
 {
+    ASSERT(!m_aaiBaseHeight.count(pObjectList))
     ASSERT(pObjectList->List()->back()->GetPosition().y < (I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL))
 
     // 
@@ -380,6 +386,7 @@ void cBackground::_StoreHeightList(const coreBatchList* pObjectList)
 // 
 void cBackground::_StoreNormalList(const coreBatchList* pObjectList)
 {
+    ASSERT(!m_aaiBaseNormal.count(pObjectList))
     ASSERT(pObjectList->List()->back()->GetPosition().y < (I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL))
 
     // 
@@ -410,7 +417,7 @@ void cBackground::_FillInfinite(coreBatchList* OUTPUT pObjectList, const coreUin
     // loop through all objects
     for(coreUintW i = 0u, ie = pContent->size(); i < ie; ++i)
     {
-        coreObject3D* pOldObject = (*pContent)[i];
+        const coreObject3D* pOldObject = (*pContent)[i];
 
         // check for position at the start area
         if(pOldObject->GetPosition().y < I_TO_F(OUTDOOR_VIEW / 2u) * OUTDOOR_DETAIL)
@@ -449,7 +456,7 @@ void cBackground::_SortBackToFront(coreBatchList* OUTPUT pObjectList)
 
 // ****************************************************************
 // check for intersection with other objects
-coreBool cBackground::_CheckIntersection(const coreBatchList* pObjectList, const coreVector2& vNewPos, const coreFloat fDistanceSq)
+FUNC_PURE coreBool cBackground::_CheckIntersection(const coreBatchList* pObjectList, const coreVector2& vNewPos, const coreFloat fDistanceSq)
 {
     // loop through all objects
     FOR_EACH(it, *pObjectList->List())
@@ -461,7 +468,7 @@ coreBool cBackground::_CheckIntersection(const coreBatchList* pObjectList, const
     return false;
 }
 
-coreBool cBackground::_CheckIntersectionQuick(const coreBatchList* pObjectList, const coreVector2& vNewPos, const coreFloat fDistanceSq)
+FUNC_PURE coreBool cBackground::_CheckIntersectionQuick(const coreBatchList* pObjectList, const coreVector2& vNewPos, const coreFloat fDistanceSq)
 {
     auto it = pObjectList->List()->end();
     auto et = pObjectList->List()->begin();

@@ -24,7 +24,7 @@ class cSave final
 {
 
 
-    friend FUNC_NOALIAS coreBool ValidateSave(cSave* OUTPUT pSave);
+    friend coreBool ValidateSave(cSave* OUTPUT pSave);
 };
 
 

@@ -153,7 +153,7 @@ private:
     coreUint32        __CalculateReplayHash()const;
 
     // 
-    friend FUNC_NOALIAS coreBool ValidateReplay(cReplay* OUTPUT pReplay);
+    friend coreBool ValidateReplay(cReplay* OUTPUT pReplay);
 };
 
 

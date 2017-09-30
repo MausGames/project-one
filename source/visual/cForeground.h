@@ -45,7 +45,7 @@ public:
     inline coreFrameBuffer* GetFrameBuffer() {return &m_FrameBuffer;}
 
     // project world-position into screen-space
-    inline FUNC_PURE coreVector2 Project(const coreVector3& vPosition)const {const coreVector4 A = coreVector4(vPosition, 1.0f) * m_mViewProj; return A.xy() * (RCP(A.w) * 0.5f);}
+    inline FUNC_LOCAL coreVector2 Project(const coreVector3& vPosition)const {const coreVector4 A = coreVector4(vPosition, 1.0f) * m_mViewProj; return A.xy() * (RCP(A.w) * 0.5f);}
 
 
 private:

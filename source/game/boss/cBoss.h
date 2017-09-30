@@ -539,7 +539,7 @@ public:
     cProjectOneBoss()noexcept;
 
     DISABLE_COPY(cProjectOneBoss)
-    ASSIGN_ID(9901, "Project One")
+    ASSIGN_ID(801, "Project One")
 
 
 private:
@@ -547,6 +547,23 @@ private:
     void __ResurrectOwn()final;
     void __KillOwn     (const coreBool bAnimated)final;
     void __MoveOwn     ()final;
+};
+
+
+// ****************************************************************
+// 
+class cEigengrauBoss final : public cBoss
+{
+public:
+    cEigengrauBoss()noexcept;
+
+    DISABLE_COPY(cEigengrauBoss)
+    ASSIGN_ID(802, "Eigengrau")
+
+
+private:
+    // execute own routines
+    void __MoveOwn()final;
 };
 
 

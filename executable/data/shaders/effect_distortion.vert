@@ -20,5 +20,5 @@ void VertexMain()
     // transform texture coordinates and extract burst-direction
     v_av2TexCoord[0] = a_v2LowTexCoord;
     v_av2TexCoord[1] = a_v2LowTexCoord * 2.0 - 1.0;
-    v_av2TexCoord[2] = normalize(u_v4Color.gb * vec2(1.0,-1.0));
+    v_av2TexCoord[2] = normalize(u_v4Color.gb * vec2(1.0, -1.0));
 }

@@ -13,6 +13,8 @@
 // TODO: pre-allocate bullets (at least for player) at the beginning to improve resource loading
 // TODO: use prefetch with more precise numbers (also in enemy-manager)
 // TODO: align bullet memory ? (also check other possible locations (e.g. enemies))
+// TODO: change bullet-id lookup into array-index (also enemies ?)
+// TODO: remove tons of template instantiations (also enemies ?)
 
 
 // ****************************************************************
@@ -34,12 +36,14 @@ enum eBulletStatus : coreUint8
 class INTERFACE cBullet : public coreObject3D
 {
 protected:
-    coreInt32 m_iDamage;      // damage value
-    coreFloat m_fSpeed;       // 
-    cShip*    m_pOwner;       // associated owner of the bullet
+    coreInt32 m_iDamage;             // damage value
+    coreFloat m_fSpeed;              // 
+    cShip*    m_pOwner;              // associated owner of the bullet
 
-    coreUint8 m_iElement;     // 
-    coreFlow  m_fAnimation;   // animation value
+    coreUint8 m_iElement;            // 
+    coreFlow  m_fAnimation;          // animation value
+
+    static cRotaCache s_RotaCache;   // 
 
 
 public:
@@ -163,7 +167,7 @@ public:
     ASSIGN_ID(1, "Ray")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(3.7f,3.7f,3.7f));}
+    inline void ResetProperties() {this->SetSize(coreVector3(3.7f,3.7f,3.7f)); m_fAnimation = 0.09f;}
 
     // change default color
     inline cRayBullet* MakeYellow() {this->_MakeYellow(1.0f); return this;}
@@ -197,15 +201,15 @@ public:
     ASSIGN_ID(2, "Pulse")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(2.5f,2.5f,2.5f) * 1.3f);}
+    inline void ResetProperties() {this->SetSize(coreVector3(2.5f,2.5f,2.5f) * 1.3f); m_fAnimation = 0.09f;}
 
     // change default color
-    inline cPulseBullet* MakeYellow() {return this;}
-    inline cPulseBullet* MakeOrange() {return this;}
-    inline cPulseBullet* MakeRed   () {return this;}
+    inline cPulseBullet* MakeYellow() {ASSERT(false) return this;}
+    inline cPulseBullet* MakeOrange() {ASSERT(false) return this;}
+    inline cPulseBullet* MakeRed   () {ASSERT(false) return this;}
     inline cPulseBullet* MakePurple() {this->_MakePurple(1.0f); return this;}
-    inline cPulseBullet* MakeBlue  () {return this;}
-    inline cPulseBullet* MakeGreen () {return this;}
+    inline cPulseBullet* MakeBlue  () {ASSERT(false) return this;}
+    inline cPulseBullet* MakeGreen () {ASSERT(false) return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
@@ -230,10 +234,10 @@ public:
     ASSIGN_ID(3, "Orb")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(1.6f,1.6f,1.6f) * 1.1f);}
+    inline void ResetProperties() {this->SetSize(coreVector3(1.6f,1.6f,1.6f) * 1.1f); m_fAnimation = 0.0f;}
 
     // change default color
-    inline cOrbBullet* MakeYellow() {return this;}
+    inline cOrbBullet* MakeYellow() {ASSERT(false) return this;}
     inline cOrbBullet* MakeOrange() {this->_MakeOrange(0.9f); return this;}
     inline cOrbBullet* MakeRed   () {this->_MakeRed   (0.9f); return this;}
     inline cOrbBullet* MakePurple() {this->_MakePurple(0.9f); return this;}
@@ -264,14 +268,14 @@ public:
     ASSIGN_ID(4, "Cone")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(1.35f,1.55f,1.35f) * 1.05f);}
+    inline void ResetProperties() {this->SetSize(coreVector3(1.35f,1.55f,1.35f) * 1.05f); m_fAnimation = 0.09f;}
 
     // change default color
     inline cConeBullet* MakeYellow() {this->_MakeYellow(0.8f); return this;}
     inline cConeBullet* MakeOrange() {this->_MakeOrange(1.0f); return this;}
-    inline cConeBullet* MakeRed   () {return this;}
-    inline cConeBullet* MakePurple() {return this;}
-    inline cConeBullet* MakeBlue  () {return this;}
+    inline cConeBullet* MakeRed   () {ASSERT(false) return this;}
+    inline cConeBullet* MakePurple() {ASSERT(false) return this;}
+    inline cConeBullet* MakeBlue  () {ASSERT(false) return this;}
     inline cConeBullet* MakeGreen () {this->_MakeGreen (1.0f); return this;}
 
     // bullet configuration values
@@ -298,14 +302,14 @@ public:
     ASSIGN_ID(5, "Wave")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(1.5f,1.5f,1.5f) * 1.3f);}
+    inline void ResetProperties() {this->SetSize(coreVector3(1.5f,1.5f,1.5f) * 1.3f); m_fAnimation = 0.09f;}
 
     // change default color
-    inline cWaveBullet* MakeYellow() {return this;}
-    inline cWaveBullet* MakeOrange() {return this;}
+    inline cWaveBullet* MakeYellow() {ASSERT(false) return this;}
+    inline cWaveBullet* MakeOrange() {ASSERT(false) return this;}
     inline cWaveBullet* MakeRed   () {this->_MakeRed  (1.0f); return this;}
-    inline cWaveBullet* MakePurple() {return this;}
-    inline cWaveBullet* MakeBlue  () {return this;}
+    inline cWaveBullet* MakePurple() {ASSERT(false) return this;}
+    inline cWaveBullet* MakeBlue  () {ASSERT(false) return this;}
     inline cWaveBullet* MakeGreen () {this->_MakeGreen(1.1f); return this;}
 
     // bullet configuration values
@@ -337,15 +341,15 @@ public:
     ASSIGN_ID(6, "Tesla")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(2.5f,2.5f,2.5f)); m_fLightningTime = 1.0f;}
+    inline void ResetProperties() {this->SetSize(coreVector3(2.5f,2.5f,2.5f)); m_fAnimation = 0.09f; m_fLightningTime = 1.0f;}
 
     // change default color
-    inline cTeslaBullet* MakeYellow() {return this;}
-    inline cTeslaBullet* MakeOrange() {return this;}
-    inline cTeslaBullet* MakeRed   () {return this;}
-    inline cTeslaBullet* MakePurple() {return this;}
-    inline cTeslaBullet* MakeBlue  () {this->_MakeBlue(0.9f); return this;}
-    inline cTeslaBullet* MakeGreen () {return this;}
+    inline cTeslaBullet* MakeYellow() {ASSERT(false) return this;}
+    inline cTeslaBullet* MakeOrange() {ASSERT(false) return this;}
+    inline cTeslaBullet* MakeRed   () {ASSERT(false) return this;}
+    inline cTeslaBullet* MakePurple() {ASSERT(false) return this;}
+    inline cTeslaBullet* MakeBlue  () {this->_MakeBlue  (0.9f); return this;}
+    inline cTeslaBullet* MakeGreen () {ASSERT(false) return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_spheric_inst_program";}
@@ -376,10 +380,7 @@ public:
     ASSIGN_ID(7, "Mine")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(2.0f,2.0f,2.0f)); m_vFlyDir = coreVector2(0.0f,0.0f);}
-
-    // 
-    inline cMineBullet* SetFlyDir(const coreVector2& vFlyDir) {ASSERT(vFlyDir.IsNormalized()) m_vFlyDir = vFlyDir; return this;}
+    inline void ResetProperties() {this->SetSize(coreVector3(2.0f,2.0f,2.0f)); m_fAnimation = 0.0f; m_vFlyDir = this->GetDirection().xy();}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "object_ship_glow_inst_program";}
@@ -410,12 +411,122 @@ public:
     ASSIGN_ID(8, "Rocket")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(1.7f,1.7f,1.7f));}
+    inline void ResetProperties() {this->SetSize(coreVector3(1.7f,1.7f,1.7f)); m_fAnimation = 0.0f;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "object_ship_glow_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_FULL;}
     static constexpr coreBool        ConfigShadow              () {return true;}
+
+
+private:
+    // execute own routines
+    void __ImpactOwn(const coreVector2& vImpact)final;
+    void __MoveOwn  ()final;
+};
+
+
+// ****************************************************************
+// spear bullet class
+class cSpearBullet final : public cBullet
+{
+public:
+    cSpearBullet()noexcept;
+
+    ENABLE_COPY(cSpearBullet)
+    ASSIGN_ID(9, "Spear")
+
+    // reset base properties
+    inline void ResetProperties() {this->SetSize(coreVector3(1.45f,1.55f,1.45f) * 2.1f); m_fAnimation = 0.15f;}
+
+    // change default color
+    inline cSpearBullet* MakeYellow() {this->_MakeYellow(1.0f); return this;}
+    inline cSpearBullet* MakeOrange() {ASSERT(false) return this;}
+    inline cSpearBullet* MakeRed   () {ASSERT(false) return this;}
+    inline cSpearBullet* MakePurple() {ASSERT(false) return this;}
+    inline cSpearBullet* MakeBlue  () {ASSERT(false) return this;}
+    inline cSpearBullet* MakeGreen () {ASSERT(false) return this;}
+
+    // bullet configuration values
+    static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
+    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_DIRECT;}
+    static constexpr coreBool        ConfigShadow              () {return false;}
+
+
+private:
+    // execute own routines
+    void __ImpactOwn(const coreVector2& vImpact)final;
+    void __MoveOwn  ()final;
+};
+
+
+// ****************************************************************
+// quad bullet class
+class cQuadBullet final : public cBullet
+{
+private:
+    coreVector2 m_vFlyDir;   // 
+
+
+public:
+    cQuadBullet()noexcept;
+
+    ENABLE_COPY(cQuadBullet)
+    ASSIGN_ID(10, "Quad")
+
+    // reset base properties
+    inline void ResetProperties() {this->SetSize(coreVector3(1.5f,1.5f,1.5f)); m_fAnimation = 0.0f; m_vFlyDir = this->GetDirection().xy();}
+
+    // change default color
+    inline cQuadBullet* MakeYellow() {ASSERT(false) return this;}
+    inline cQuadBullet* MakeOrange() {ASSERT(false) return this;}
+    inline cQuadBullet* MakeRed   () {this->_MakeRed   (1.0f); return this;}
+    inline cQuadBullet* MakePurple() {this->_MakePurple(1.0f); return this;}
+    inline cQuadBullet* MakeBlue  () {ASSERT(false) return this;}
+    inline cQuadBullet* MakeGreen () {ASSERT(false) return this;}
+
+    // bullet configuration values
+    static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
+    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_FULL;}
+    static constexpr coreBool        ConfigShadow              () {return false;}
+
+
+private:
+    // execute own routines
+    void __ImpactOwn(const coreVector2& vImpact)final;
+    void __MoveOwn  ()final;
+};
+
+
+// ****************************************************************
+// flip bullet class
+class cFlipBullet final : public cBullet
+{
+private:
+    coreVector2 m_vFlyDir;   // 
+
+
+public:
+    cFlipBullet()noexcept;
+
+    ENABLE_COPY(cFlipBullet)
+    ASSIGN_ID(11, "Flip")
+
+    // reset base properties
+    inline void ResetProperties() {this->SetSize(coreVector3(2.6f,2.0f,2.6f)); m_fAnimation = 0.0f; m_vFlyDir = this->GetDirection().xy();}
+
+    // change default color
+    inline cFlipBullet* MakeYellow() {ASSERT(false) return this;}
+    inline cFlipBullet* MakeOrange() {ASSERT(false) return this;}
+    inline cFlipBullet* MakeRed   () {ASSERT(false) return this;}
+    inline cFlipBullet* MakePurple() {this->_MakePurple(1.0f); return this;}
+    inline cFlipBullet* MakeBlue  () {ASSERT(false) return this;}
+    inline cFlipBullet* MakeGreen () {ASSERT(false) return this;}
+
+    // bullet configuration values
+    static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_inst_program";}
+    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_FULL;}
+    static constexpr coreBool        ConfigShadow              () {return false;}
 
 
 private:

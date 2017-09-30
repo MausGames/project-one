@@ -106,16 +106,16 @@ public:
     void LoadProgram (const coreBool bGlow);
 
     // retrieve geometric data
-    coreFloat   RetrieveHeight    (const coreVector2& vPosition)const;
-    coreFloat   RetrieveBackHeight(const coreVector2& vPosition)const;
-    coreVector3 RetrieveNormal    (const coreVector2& vPosition)const;
-    coreVector3 RetrieveBackNormal(const coreVector2& vPosition)const;
-    coreVector3 RetrieveIntersect (const coreVector3& vRayPosition, const coreVector3& vRayDirection)const;
+    FUNC_PURE coreFloat   RetrieveHeight    (const coreVector2& vPosition)const;
+    FUNC_PURE coreFloat   RetrieveBackHeight(const coreVector2& vPosition)const;
+    FUNC_PURE coreVector3 RetrieveNormal    (const coreVector2& vPosition)const;
+    FUNC_PURE coreVector3 RetrieveBackNormal(const coreVector2& vPosition)const;
+    FUNC_PURE coreVector3 RetrieveIntersect (const coreVector3& vRayPosition, const coreVector3& vRayDirection)const;
 
     // 
-    void        LerpHeight    (const coreFloat fMul, const coreFloat fAdd, const coreUint16 iRange = 0u);
-    void        LerpHeightNow (const coreFloat fMul, const coreFloat fAdd);
-    coreVector2 CalcLerpVector(const coreFloat fPositionY)const;
+    void                   LerpHeight    (const coreFloat fMul, const coreFloat fAdd, const coreUint16 iRange = 0u);
+    void                   LerpHeightNow (const coreFloat fMul, const coreFloat fAdd);
+    FUNC_LOCAL coreVector2 CalcLerpVector(const coreFloat fPositionY)const;
     inline coreBool IsLerping()const {return (m_aiLerpRange[0] != m_aiLerpRange[1]);}
 
     // access shadow and light map object
@@ -134,7 +134,7 @@ public:
 
 private:
     // 
-    template <typename F> void __Render(const coreProgramPtr& pProgram, F&& nFunction);   // []() -> void
+    template <typename F> void __Render(const coreProgramPtr& pProgram, F&& nFunction);   // [](void) -> void
 };
 
 

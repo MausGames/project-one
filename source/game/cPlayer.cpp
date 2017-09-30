@@ -244,7 +244,7 @@ void cPlayer::Move()
             if(this->IsRolling())
             {
                 const coreFloat fAngle = LERPS(0.0f, 2.0f*PI, m_fRollTime);
-                vOri *= coreMatrix3::Rotation(fAngle * ((UnpackDirection(m_iRollDir).x <= 0.0) ? -1.0f : 1.0f)).m12();
+                vOri *= coreMatrix3::Rotation(fAngle * ((m_iRollDir & 0x04u) ? 1.0f : -1.0f)).m12();
             }
 
             // set new position and orientation
@@ -280,7 +280,7 @@ void cPlayer::Move()
             // 
             m_Wind.SetPosition (this->GetPosition());
             m_Wind.SetSize     (coreVector3(1.0f,1.08f,1.0f) * PLAYER_WIND_SIZE);
-            m_Wind.SetTexOffset(coreVector2(0.0f, m_fAnimation * ((UnpackDirection(m_iRollDir).x <= 0.0) ? -0.4f : 0.4f)));
+            m_Wind.SetTexOffset(coreVector2(0.0f, m_fAnimation * ((m_iRollDir & 0x04u) ? 0.4f : -0.4f)));
             m_Wind.Move();
         }
 

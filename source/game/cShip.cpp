@@ -31,7 +31,7 @@ void cShip::Render(const coreProgramPtr& pProgram)
     if(!this->IsEnabled(CORE_OBJECT_ENABLE_RENDER)) return;
 
     // check for model status
-    ASSERT(m_pModelLow.GetHandle())
+    ASSERT(m_pModelLow)
     if(!m_pModelLow.IsUsable()) return;
 
     // enable the shader-program
@@ -39,10 +39,11 @@ void cShip::Render(const coreProgramPtr& pProgram)
     if(!pProgram->Enable())  return;
 
     // update all object uniforms
-    pProgram->SendUniform(CORE_SHADER_UNIFORM_3D_POSITION, this->GetPosition());
-    pProgram->SendUniform(CORE_SHADER_UNIFORM_3D_SIZE,     this->GetSize());
-    pProgram->SendUniform(CORE_SHADER_UNIFORM_3D_ROTATION, m_vRotation);
-    pProgram->SendUniform(CORE_SHADER_UNIFORM_COLOR,       m_vColor);   // # alpha
+    coreProgram* pLocal = pProgram.GetResource();
+    pLocal->SendUniform(CORE_SHADER_UNIFORM_3D_POSITION, this->GetPosition());
+    pLocal->SendUniform(CORE_SHADER_UNIFORM_3D_SIZE,     this->GetSize());
+    pLocal->SendUniform(CORE_SHADER_UNIFORM_3D_ROTATION, m_vRotation);
+    pLocal->SendUniform(CORE_SHADER_UNIFORM_COLOR,       m_vColor);   // # alpha
 
     // draw the model
     m_pModelLow->Enable();

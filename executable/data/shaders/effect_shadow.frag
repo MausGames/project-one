@@ -10,6 +10,6 @@
 
 void FragmentMain()
 {
-    // draw plain black (color-writing is disabled anyway)
-    gl_FragColor = vec4(0.0);
+    // draw plain white
+    gl_FragColor = vec4(1.0);
 }

@@ -27,9 +27,9 @@ void VertexMain()
     gl_Position        = u_m4ViewProj * v4NewPosition;
 
     // transform lighting properties (resolved)
-    v_v3TangentPos   = v4NewPosition.xyz           * vec3( 1.0,-1.0, 1.0);
-    v_v3TangentCam   = u_v3CamPosition             * vec3( 1.0,-1.0, 1.0);
-    v_v4Lighting.xyz = u_aLight[0].v4Direction.xyz * vec3(-1.0, 1.0,-1.0);
+    v_v3TangentPos   = v4NewPosition.xyz           * vec3( 1.0, -1.0,  1.0);
+    v_v3TangentCam   = u_v3CamPosition             * vec3( 1.0, -1.0,  1.0);
+    v_v4Lighting.xyz = u_aLight[0].v4Direction.xyz * vec3(-1.0,  1.0, -1.0);
 
     // calculate current mapping base
     vec2 v2MapCoord = vec2(a_v2LowTexCoord.x * c_v1MapResolution,
@@ -38,8 +38,8 @@ void VertexMain()
     // transform texture coordinates with different animation properties
     v_av2TexCoord[0] = (v2MapCoord) * 8.0;
     v_av2TexCoord[1] = (v2MapCoord) * 12.0;
-    v_av2TexCoord[2] = (v2MapCoord + u_v1Time * vec2( 0.5,-0.5) * 1.5) * 2.0;
-    v_av2TexCoord[3] = (v2MapCoord + u_v1Time * vec2(-0.1, 0.1) * 1.5) * 4.0;
+    v_av2TexCoord[2] = (v2MapCoord + u_v1Time * vec2( 0.5, -0.5) * 1.5) * 2.0;
+    v_av2TexCoord[3] = (v2MapCoord + u_v1Time * vec2(-0.1,  0.1) * 1.5) * 4.0;
 
     // calculate height offset
     v_v4Lighting.w = 0.042 * (u_v3Position.z - c_v1WaterHeight);

@@ -76,10 +76,10 @@ public:
     inline cBackground* GetOldBackground()const {return m_pOldBackground;}
 
     // 
-    coreFloat RetrieveTransitionBlend(cBackground* pBackground);
+    FUNC_LOCAL coreFloat RetrieveTransitionBlend(const cBackground* pBackground)const;
 
     // retrieve safe height value
-    coreFloat RetrieveSafeHeight(const coreVector2& vPosition);
+    FUNC_PURE coreFloat RetrieveSafeHeight(const coreVector2& vPosition)const;
 
     // access frame buffer
     inline coreFrameBuffer* GetFrameBuffer() {return m_TransitionTime.GetStatus() ? &m_FrameBuffer : m_pBackground->GetResolvedTexture();}

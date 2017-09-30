@@ -25,6 +25,7 @@ attribute vec2  a_v2Position;      //
 // shader output
 varying float v_v1Mix;             // mix value between both outdoor textures
 varying vec4  v_v4ShadowCoord;     // pixel coordinates viewed from the light source
+varying vec2  v_v2Border;          // 
 
 
 void LerpLightingTransform(const in vec3 v3Position, const in float v1Lerp)
@@ -77,6 +78,10 @@ void VertexMain()
 
     // forward texture coordinates
     v_av2TexCoord[0] = v4NewPosition.xy * 0.04167;
+
+    // 
+    v_v2Border = coreMat4to2(u_m4Camera) * (v4NewPosition.xy - u_v3CamPosition.xy) - v4NewPosition.z * vec2(-0.5, 0.5);
+    v_v2Border = v_v2Border * vec2(-1.0, 1.0) * 0.132 - 5.5;
 
     // transform lighting properties (with interpolation)
     LerpLightingTransform(v4NewPosition.xyz, v2MulAdd.x);

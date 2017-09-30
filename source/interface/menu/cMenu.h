@@ -98,7 +98,7 @@
 
 // ****************************************************************
 // configuration entry indices
-#define ENTRY_VIDEO_DISPLAY       (0u)
+#define ENTRY_VIDEO_MONITOR       (0u)
 #define ENTRY_VIDEO_RESOLUTION    (1u)
 #define ENTRY_VIDEO_DISPLAYMODE   (2u)
 #define ENTRY_VIDEO_ANTIALIASING  (3u)
@@ -152,13 +152,13 @@
 class cIntroMenu final : public coreMenu
 {
 private:
-    coreObject2D m_MausLogo;                         // Maus logo
+    coreObject2D m_MausLogo;                                   // Maus logo
 
-    coreTimer m_IntroTimer;                          // intro animation timer
-    coreUint8 m_iIntroStatus;                        // current intro animation status
+    coreTimer m_IntroTimer;                                    // intro animation timer
+    coreUint8 m_iIntroStatus;                                  // current intro animation status
 
-    coreLookupStr<coreButton*> m_apLanguageButton;   // list with buttons for valid language files
-    coreUint8 m_iSelected;                           // current selected language button
+    coreLookup<std::string, coreButton*> m_apLanguageButton;   // list with buttons for valid language files
+    coreUint8 m_iSelected;                                     // current selected language button
 
 
 public:
@@ -339,7 +339,7 @@ private:
     coreObject2D m_aLine [ENTRY_MAX];         // 
     coreLabel    m_aArrow[INPUT_KEYS_MOVE];   // 
 
-    coreSwitchBoxU8 m_Display;
+    coreSwitchBoxU8 m_Monitor;
     coreSwitchBoxU8 m_Resolution;
     coreSwitchBoxU8 m_DisplayMode;
     coreSwitchBoxU8 m_AntiAliasing;
@@ -375,8 +375,8 @@ private:
     void __UpdateLanguage();
 
     // 
-    void __LoadDisplays();
-    void __LoadResolutions(const coreUintW iDisplayIndex);
+    void __LoadMonitors();
+    void __LoadResolutions(const coreUintW iMonitorIndex);
     void __LoadInputs();
 
     // 

@@ -50,9 +50,9 @@ cVausBoss::cVausBoss()noexcept
     // 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCompanion); ++i)
     {
-        m_aCompanion[i].DefineModelHigh("ship_boss_vaus_high.md3");
-        m_aCompanion[i].DefineModelLow ("ship_boss_vaus_low.md3");
-        m_aCompanion[i].SetSize        (coreVector3(2.0f,2.0f,2.0f));
+        m_aCompanion[i].DefineModelHigh("object_boss_vaus_companion_high.md3");
+        m_aCompanion[i].DefineModelLow ("object_boss_vaus_companion_low.md3");
+        m_aCompanion[i].SetSize        (coreVector3(2.2f,2.2f,2.2f));
 
         m_aCompanion[i].Configure(1, COLOR_SHIP_YELLOW);
 
@@ -287,9 +287,9 @@ void cVausBoss::__MoveOwn()
             switch(m_aiCounter[SUB_PHASE] % 3)
             {
             default: ASSERT(false)
-            case 2: vBallDir = coreVector2(-1.0f, -3.675f).Normalized(); break;
-            case 1: vBallDir = coreVector2(-1.0f, -1.212f).Normalized(); break;
-            case 0: vBallDir = coreVector2(-2.45f,-1.0f)  .Normalized(); break;
+            case 2: vBallDir = coreVector2(-1.0f, -3.543f).Normalized(); break;
+            case 1: vBallDir = coreVector2(-1.0f, -1.18f) .Normalized(); break;
+            case 0: vBallDir = coreVector2(-2.54f,-1.0f)  .Normalized(); break;
             }
 
             if(m_aiCounter[SUB_PHASE] % 2) vBallDir = vBallDir.InvertedX();
@@ -307,14 +307,7 @@ void cVausBoss::__MoveOwn()
         {
         default: ASSERT(false)
         case 2: fSpeed = 1.0f/7.0f; break;
-        case 1: fSpeed = 1.0f/6.0f; 
-            {
-                const coreFloat y = (pBall->GetPosition().x <= 0.0f) ? 1.211f : 1.212f;
-                const coreVector2 vDir = pBall->GetDirection().xy().Processed(SIGN) * coreVector2(1.0f, y).Normalized();
-                pBall->SetDirection(coreVector3(vDir, 0.0f));
-            }
-
-            break;
+        case 1: fSpeed = 1.0f/6.0f; break;
         case 0: fSpeed = 1.0f/6.0f; break;
         }
 
@@ -562,7 +555,7 @@ void cVausBoss::__MoveOwn()
 
             pSquad->ForEachEnemy([](cEnemy* OUTPUT pEnemy, const coreUintW i)
             {
-                const coreVector2 vTarget = (i & 0x01u) ? coreVector2(-2.0f,0.0f) : coreVector2( 2.0f,0.2f);
+                const coreVector2 vTarget = (i & 0x01u) ? coreVector2(-2.0f,0.0f) : coreVector2(2.0f,0.2f);
                 if(pEnemy->DefaultMoveSmooth(vTarget, 3.0f, 30.0f))
                     pEnemy->Kill(false);
             });

@@ -36,8 +36,8 @@
 // ****************************************************************
 // stage management macros
 #define STAGE_MAIN                      m_anStage.emplace(__LINE__, [this]()
-#define STAGE_MAIN_WAIT(t)              STAGE_MAIN{STAGE_FINISH_AFTER(1.0f)});
-#define STAGE_START_HERE                m_anStage.clear(); STAGE_MAIN{if(STAGE_BEGINNING) g_pGame->StartIntro(); if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY)) STAGE_FINISH_NOW});
+#define STAGE_MAIN_WAIT(t)              STAGE_MAIN {STAGE_FINISH_AFTER(1.0f)});
+#define STAGE_START_HERE                m_anStage.clear(); STAGE_MAIN {if(STAGE_BEGINNING) g_pGame->StartIntro(); if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY)) STAGE_FINISH_NOW});
 
 #define STAGE_CLEARED                   (std::all_of(m_apSquad.begin(), m_apSquad.end(), [](const cEnemySquad* pSquad) {return pSquad->IsFinished();}))
 
@@ -425,11 +425,21 @@ private:
 // Ater mission class
 class cAterMission final : public cMission
 {
+private:
+    cProjectOneBoss m_ProjectOne;   // 
+    cEigengrauBoss  m_Eigengrau;    // 
+
+
 public:
-    cAterMission() = default;
+    cAterMission()noexcept;
 
     DISABLE_COPY(cAterMission)
     ASSIGN_ID(8, "Ater")
+
+
+private:
+    // execute own routines
+    void __SetupOwn()final;
 };
 
 

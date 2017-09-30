@@ -360,7 +360,7 @@ void cViridoMission::__MoveOwnAfter()
         const cShip* pOwner = m_apOwner[i];
         if(pOwner)
         {
-            oPaddle.SetPosition (coreVector3(pOwner->GetPosition ().xy() + pOwner->GetDirection().xy() * (bBoss ? 3.0f : 4.0f), 0.0f));
+            oPaddle.SetPosition (coreVector3(pOwner->GetPosition ().xy() + pOwner->GetDirection().xy() * 3.0f, 0.0f));
             oPaddle.SetDirection(coreVector3(pOwner->GetDirection().xy(), 0.0f));
         }
 

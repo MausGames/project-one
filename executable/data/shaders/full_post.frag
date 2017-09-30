@@ -19,7 +19,7 @@ void FragmentMain()
 
     // move texture coordinates
     if(any(bvec4(lessThan(v2Distortion, vec2(127.4/255.0)), greaterThan(v2Distortion, vec2(127.6/255.0)))))
-        v2TexCoord += (v2Distortion * 2.0 - 1.0) * vec2(-0.5,0.5);
+        v2TexCoord += (v2Distortion * 2.0 - 1.0) * vec2(-0.5, 0.5);
 
 #endif
 
@@ -57,7 +57,7 @@ void FragmentMain()
 
 #if defined(_P1_DEBUG_)
 
-    #define DEBUG_LINE(a,v,p) if((v_av2TexCoord[0].a > (v-0.001)) && (v_av2TexCoord[0].a < (v+0.001))) gl_FragColor.rgb = mix(vec3(0.0,1.0,0.0), gl_FragColor.rgb, p);
+    #define DEBUG_LINE(a,v,p) if((v_av2TexCoord[0].a > (v - 0.001)) && (v_av2TexCoord[0].a < (v + 0.001))) gl_FragColor.rgb = mix(vec3(0.0, 1.0, 0.0), gl_FragColor.rgb, p);
 
          DEBUG_LINE(x, 0.25,  0.6) else DEBUG_LINE(y, 0.25,  0.6)
     else DEBUG_LINE(x, 0.50,  0.6) else DEBUG_LINE(y, 0.50,  0.6)

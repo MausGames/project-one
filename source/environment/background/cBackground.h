@@ -154,8 +154,8 @@ protected:
     static void _SortBackToFront(coreBatchList* OUTPUT pObjectList);
 
     // check for intersection with other objects
-    static coreBool _CheckIntersection     (const coreBatchList* pObjectList, const coreVector2& vNewPos, const coreFloat fDistanceSq);
-    static coreBool _CheckIntersectionQuick(const coreBatchList* pObjectList, const coreVector2& vNewPos, const coreFloat fDistanceSq);
+    static FUNC_PURE coreBool _CheckIntersection     (const coreBatchList* pObjectList, const coreVector2& vNewPos, const coreFloat fDistanceSq);
+    static FUNC_PURE coreBool _CheckIntersectionQuick(const coreBatchList* pObjectList, const coreVector2& vNewPos, const coreFloat fDistanceSq);
 
 
 private:

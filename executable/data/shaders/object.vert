@@ -19,6 +19,7 @@ attribute float a_v1Blink;        //
 
 // shader output
 varying vec4 v_v4ShadowCoord;     // pixel coordinates viewed from the light source
+varying vec2 v_v2Border;          // 
 varying vec4 v_av4ShipLight;      // simplified light vector (w = base blink intensity (to highlight successful hits))
 varying vec3 v_av3ShipView;       // simplified view vector
 varying vec3 v_av3ShipNormal;     // simplified normal vector
@@ -51,6 +52,10 @@ void VertexMain()
     // forward texture coordinates
     v_av2TexCoord[0] = a_v2RawTexCoord;
     v_av2TexCoord[1] = coreObject3DTexCoordRaw();
+
+    // 
+    v_v2Border = coreMat4to2(u_m4Camera) * (v4NewPosition.xy - u_v3CamPosition.xy) - v4NewPosition.z * vec2(-0.5, 0.5);
+    v_v2Border = v_v2Border * vec2(-1.0, 1.0) * 0.132 - 5.5;
 
     // select blink intensity
 #if defined(_CORE_OPTION_INSTANCING_)

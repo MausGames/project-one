@@ -54,6 +54,7 @@ void cDistortion::Update()
     }
 
     // 
+    if(!CORE_GL_SUPPORT(ARB_texture_rg)) glColorMask(true, true, false, false);
     glClearColor(0.5f, 0.5f, 0.5f, 0.5f);
 
     // create distortion only with active objects
@@ -107,6 +108,7 @@ void cDistortion::Update()
     else m_FrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);
 
     // 
+    if(!CORE_GL_SUPPORT(ARB_texture_rg)) glColorMask(true, true, true, true);
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 }
 

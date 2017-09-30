@@ -374,7 +374,7 @@ coreUint32 cReplay::__CalculateExecutableHash()
     if(!s_iExecutableHash)
     {
         coreFile oExecutable(coreData::AppPath());
-        s_iExecutableHash = coreHashCRC32(oExecutable.GetData(), oExecutable.GetSize());
+        s_iExecutableHash = coreHashMurmur2(oExecutable.GetData(), oExecutable.GetSize());
     }
 
     return s_iExecutableHash;
@@ -388,10 +388,10 @@ coreUint32 cReplay::__CalculateReplayHash()const
     coreUint32 iReplayHash = 0u;
 
     // 
-    iReplayHash ^= coreHashCRC32(r_cast<const coreByte*>(m_aKeyFrame.data()), sizeof(sKeyFrame) * m_aKeyFrame.size());
+    iReplayHash ^= coreHashMurmur2(r_cast<const coreByte*>(m_aKeyFrame.data()), sizeof(sKeyFrame) * m_aKeyFrame.size());
     for(coreUintW i = 0u; i < REPLAY_STREAMS; ++i)
     {
-        iReplayHash ^= coreHashCRC32(r_cast<const coreByte*>(m_aaStreamPacket[i].data()), sizeof(sStreamPacket) * m_aaStreamPacket[i].size());
+        iReplayHash ^= coreHashMurmur2(r_cast<const coreByte*>(m_aaStreamPacket[i].data()), sizeof(sStreamPacket) * m_aaStreamPacket[i].size());
     }
 
     return iReplayHash;

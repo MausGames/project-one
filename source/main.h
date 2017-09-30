@@ -175,25 +175,25 @@ inline FUNC_CONST coreFloat LerpBreakRev(const coreFloat x, const coreFloat y, c
 }
 
 // value range helper-functions
-template <typename T, typename S, typename R> constexpr FUNC_CONST coreBool InBetween(const T& x, const S& a, const R& b)
+template <typename T, typename S, typename R> constexpr FUNC_LOCAL coreBool InBetween(const T& x, const S& a, const R& b)
 {
     return (a <= x) && (x < b);
 }
-template <typename T, typename S, typename R> constexpr FUNC_CONST coreInt32 InBetweenExt(const T& x, const S& a, const R& b)
+template <typename T, typename S, typename R> constexpr FUNC_LOCAL coreInt32 InBetweenExt(const T& x, const S& a, const R& b)
 {
     return (a <= b) ? (((a <= x) && (x < b)) ?  1 : 0) :
                       (((b <= x) && (x < a)) ? -1 : 0);
 }
 
 // ternary interpolation helper-function
-template <typename T, typename S, typename R> constexpr FUNC_CONST T TernaryLerp(const T& x, const S& y, const R& z, const coreFloat s)
+template <typename T, typename S, typename R> constexpr FUNC_LOCAL T TernaryLerp(const T& x, const S& y, const R& z, const coreFloat s)
 {
     return (s >= 0.5f) ? LERP(y, z, s*2.0f - 1.0f) :
                          LERP(x, y, s*2.0f);
 }
 
 // direction restriction and packing helper-functions
-inline FUNC_CONST coreUint8 PackDirection(const coreVector2& vDirection)
+inline FUNC_LOCAL coreUint8 PackDirection(const coreVector2& vDirection)
 {
     return vDirection.IsNull() ? 8u : (F_TO_UI(ROUND(vDirection.Angle() / (0.25f*PI))) & 0x07u);
 }
@@ -234,6 +234,7 @@ extern coreVector2      g_vMenuCenter;       // pre-calculated menu center modif
 extern coreMusicPlayer  g_MusicPlayer;       // central music-player
 
 #include "additional/cBindContainer.h"
+#include "additional/cRotaCache.h"
 #include "file/cConfig.h"
 #include "file/cReplay.h"
 #include "file/cSave.h"

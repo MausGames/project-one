@@ -123,8 +123,8 @@ void cRayWeapon::__TriggerOwn(const coreUint8 iMode)
         {
             // 
             const coreVector2 vDir2 = coreVector2::Direction(0.25f * PI * I_TO_F(i));
-            g_pGame->GetBulletManagerPlayer()->AddBullet<cMineBullet>(12, 1.0f, m_pOwner, vPos,  vDir2)->SetFlyDir( vDir2);
-            g_pGame->GetBulletManagerPlayer()->AddBullet<cMineBullet>(12, 1.0f, m_pOwner, vPos, -vDir2)->SetFlyDir(-vDir2);
+            g_pGame->GetBulletManagerPlayer()->AddBullet<cMineBullet>(12, 1.0f, m_pOwner, vPos,  vDir2);
+            g_pGame->GetBulletManagerPlayer()->AddBullet<cMineBullet>(12, 1.0f, m_pOwner, vPos, -vDir2);
         }
 
         // 

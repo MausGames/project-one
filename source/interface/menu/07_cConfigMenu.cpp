@@ -133,7 +133,7 @@ cConfigMenu::cConfigMenu()noexcept
         x.GetCaption()->ChangeLanguage(Core::Language);                          \
     }
     {
-        __SET_OPTION(m_Display,       VIDEO_DISPLAY,       0.26f)
+        __SET_OPTION(m_Monitor,       VIDEO_MONITOR,       0.26f)
         __SET_OPTION(m_Resolution,    VIDEO_RESOLUTION,    0.26f)
         __SET_OPTION(m_DisplayMode,   VIDEO_DISPLAYMODE,   0.26f)
         __SET_OPTION(m_AntiAliasing,  VIDEO_ANTIALIASING,  0.26f)
@@ -146,7 +146,7 @@ cConfigMenu::cConfigMenu()noexcept
         __SET_OPTION(m_AmbientSound,  AUDIO_AMBIENTSOUND,  0.26f)
         __SET_OPTION(m_Language,      GAME_LANGUAGE,       0.26f)
 
-        m_Display      .SetAutomatic(0.0f);   // # because of realtime-update
+        m_Monitor      .SetAutomatic(0.0f);   // # because of realtime-update
         m_ShadowQuality.SetAutomatic(0.0f);
         m_Language     .SetAutomatic(0.0f);
         m_AmbientSound .SetEndless(true);
@@ -254,7 +254,7 @@ cConfigMenu::cConfigMenu()noexcept
     for(;            iIndex < ENTRY_INPUT; ++iIndex) this->BindObject(SURFACE_CONFIG_INPUT, &m_aLabel[iIndex]);
     for(;            iIndex < ENTRY_MAX;   ++iIndex) this->BindObject(SURFACE_CONFIG_GAME,  &m_aLabel[iIndex]);
 
-    this->BindObject(SURFACE_CONFIG_VIDEO, &m_Display);
+    this->BindObject(SURFACE_CONFIG_VIDEO, &m_Monitor);
     this->BindObject(SURFACE_CONFIG_VIDEO, &m_Resolution);
     this->BindObject(SURFACE_CONFIG_VIDEO, &m_DisplayMode);
     this->BindObject(SURFACE_CONFIG_VIDEO, &m_AntiAliasing);
@@ -299,15 +299,15 @@ void cConfigMenu::Move()
     case SURFACE_CONFIG_VIDEO:
         {
             // 
-            if(m_Display.IsClickedArrow())
-                this->__LoadResolutions(m_Display.GetCurEntry().tValue);
+            if(m_Monitor.IsClickedArrow())
+                this->__LoadResolutions(m_Monitor.GetCurEntry().tValue);
 
             // 
             if(m_ShadowQuality.IsClickedArrow())
                 this->__UpdateShadowQuality();
 
             // 
-            cMenu::UpdateSwitchBox(&m_Display);
+            cMenu::UpdateSwitchBox(&m_Monitor);
             cMenu::UpdateSwitchBox(&m_Resolution);
             cMenu::UpdateSwitchBox(&m_DisplayMode);
             cMenu::UpdateSwitchBox(&m_AntiAliasing);
@@ -526,13 +526,13 @@ void cConfigMenu::Move()
 // 
 void cConfigMenu::CheckValues()
 {
-    const coreUint8&   iCurDisplay    = m_Display   .GetCurEntry().tValue;
+    const coreUint8&   iCurMonitor    = m_Monitor   .GetCurEntry().tValue;
     const coreUint8&   iCurValue      = m_Resolution.GetCurEntry().tValue;
-    const coreVector2& vCurResolution = Core::System->GetDisplayData(iCurDisplay).avAvailableRes[iCurValue];
+    const coreVector2& vCurResolution = Core::System->GetDisplayData(iCurMonitor).avAvailableRes[iCurValue];
 
     // 
     const coreBool bReset = (vCurResolution != coreVector2(I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH)), I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT)))) ||
-                            (m_Display      .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY))                         ||
+                            (m_Monitor      .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY))                         ||
                             (m_DisplayMode  .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN))                      ||
                             (m_AntiAliasing .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING))                  ||
                             (m_TextureFilter.GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREFILTER))                 ||
@@ -561,7 +561,7 @@ void cConfigMenu::LoadValues()
 
     // 
     LoadConfig();
-    this->__LoadDisplays();
+    this->__LoadMonitors();
     this->__LoadResolutions(Core::System->GetDisplayIndex());
     this->__LoadInputs();
 
@@ -570,7 +570,7 @@ void cConfigMenu::LoadValues()
         m_Resolution.SelectLast();
 
     // 
-    m_Display      .SelectValue(Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY));
+    m_Monitor      .SelectValue(Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY));
     m_DisplayMode  .SelectValue(Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN));
     m_AntiAliasing .SelectValue(Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING));
     m_TextureFilter.SelectValue(Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREFILTER));
@@ -612,13 +612,13 @@ void cConfigMenu::LoadValues()
 // 
 void cConfigMenu::SaveValues()
 {
-    const coreUint8&   iCurDisplay    = m_Display   .GetCurEntry().tValue;
+    const coreUint8&   iCurMonitor    = m_Monitor   .GetCurEntry().tValue;
     const coreUint8&   iCurValue      = m_Resolution.GetCurEntry().tValue;
-    const coreVector2& vCurResolution = Core::System->GetDisplayData(iCurDisplay).avAvailableRes[iCurValue];
+    const coreVector2& vCurResolution = Core::System->GetDisplayData(iCurMonitor).avAvailableRes[iCurValue];
 
     // 
     const coreBool bReset = (vCurResolution != coreVector2(I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH)), I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT)))) ||
-                            (m_Display      .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY))        ||
+                            (m_Monitor      .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY))        ||
                             (m_DisplayMode  .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN))     ||
                             (m_AntiAliasing .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING)) ||
                             (m_TextureFilter.GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREFILTER));
@@ -626,7 +626,7 @@ void cConfigMenu::SaveValues()
     // 
     Core::Config->SetInt(CORE_CONFIG_SYSTEM_WIDTH,           F_TO_SI(vCurResolution.x));
     Core::Config->SetInt(CORE_CONFIG_SYSTEM_HEIGHT,          F_TO_SI(vCurResolution.y));
-    Core::Config->SetInt(CORE_CONFIG_SYSTEM_DISPLAY,         m_Display      .GetCurEntry().tValue);
+    Core::Config->SetInt(CORE_CONFIG_SYSTEM_DISPLAY,         m_Monitor      .GetCurEntry().tValue);
     Core::Config->SetInt(CORE_CONFIG_SYSTEM_FULLSCREEN,      m_DisplayMode  .GetCurEntry().tValue);
     Core::Config->SetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING,  m_AntiAliasing .GetCurEntry().tValue);
     Core::Config->SetInt(CORE_CONFIG_GRAPHICS_TEXTUREFILTER, m_TextureFilter.GetCurEntry().tValue);
@@ -661,7 +661,7 @@ void cConfigMenu::SaveValues()
         InitFramerate();
 
         // 
-        this->__LoadDisplays();
+        this->__LoadMonitors();
         this->__LoadResolutions(Core::System->GetDisplayIndex());
         this->__LoadInputs();
     }
@@ -707,46 +707,46 @@ void cConfigMenu::__UpdateLanguage()
 
     // invalidate unbound language-strings
     g_pMenu->GetTooltip()->Invalidate();
-    this->__LoadDisplays();
+    this->__LoadMonitors();
     this->__LoadInputs();
 }
 
 
 // ****************************************************************
 // 
-void cConfigMenu::__LoadDisplays()
+void cConfigMenu::__LoadMonitors()
 {
     // 
-    const coreUintW iOldEntry = m_Display.GetCurIndex();
-    m_Display.ClearEntries();
+    const coreUintW iOldEntry = m_Monitor.GetCurIndex();
+    m_Monitor.ClearEntries();
 
     // 
-    m_Display.AddEntryLanguage("DISPLAY_PRIMARY", 0u);
+    m_Monitor.AddEntryLanguage("MONITOR_PRIMARY", 0u);
     if(Core::System->GetDisplayCount() == 2u)
     {
-        m_Display.AddEntryLanguage("DISPLAY_SECONDARY", 1u);
+        m_Monitor.AddEntryLanguage("MONITOR_SECONDARY", 1u);
     }
     else
     {
         for(coreUintW i = 1u, ie = Core::System->GetDisplayCount(); i < ie; ++i)
-            m_Display.AddEntry(PRINT("%s %zu", Core::Language->GetString("DISPLAY_SECONDARY"), i), i);
+            m_Monitor.AddEntry(PRINT("%s %zu", Core::Language->GetString("MONITOR_SECONDARY"), i), i);
     }
 
     // 
-    m_Display.SelectIndex((iOldEntry < m_Display.GetNumEntries()) ? iOldEntry : 0u);
+    m_Monitor.SelectIndex((iOldEntry < m_Monitor.GetNumEntries()) ? iOldEntry : 0u);
 }
 
 
 // ****************************************************************
 // 
-void cConfigMenu::__LoadResolutions(const coreUintW iDisplayIndex)
+void cConfigMenu::__LoadResolutions(const coreUintW iMonitorIndex)
 {
     // 
     const std::string sOldEntry = m_Resolution.GetNumEntries() ? (*m_Resolution.GetCurEntry().psText) : "";
     m_Resolution.ClearEntries();
 
     // 
-    const std::vector<coreVector2>& avResolutionList = Core::System->GetDisplayData(iDisplayIndex).avAvailableRes;
+    const std::vector<coreVector2>& avResolutionList = Core::System->GetDisplayData(iMonitorIndex).avAvailableRes;
     for(coreUintW i = avResolutionList.size(); i--; ) m_Resolution.AddEntry(PRINT("%.0f x %.0f", avResolutionList[i].x, avResolutionList[i].y), i);
 
     // 

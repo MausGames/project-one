@@ -22,12 +22,16 @@ cOutdoor::cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom
 , m_aiLerpRange   {}
 , m_afLerpData    {}
 {
+    const coreTextureSpec oSpec = CORE_GL_SUPPORT(ARB_texture_rg)    ?
+                                 (CORE_GL_SUPPORT(ARB_texture_float) ? CORE_TEXTURE_SPEC_R16F           : CORE_TEXTURE_SPEC_R8) :
+                                 (CORE_GL_SUPPORT(EXT_packed_float)  ? CORE_TEXTURE_SPEC_R11F_G11F_B10F : CORE_TEXTURE_SPEC_RGB8);
+
     // set object properties
     this->SetPosition(coreVector3(0.0f,0.0f,0.0f));
     this->LerpHeightNow(1.0f, 0.0f);
 
     // 
-    m_LightMap.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_GL_SUPPORT(ARB_texture_float) ? CORE_TEXTURE_SPEC_R16F : CORE_TEXTURE_SPEC_R8);
+    m_LightMap.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, oSpec);
     m_LightMap.Create(g_vGameResolution * OUTDOOR_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     // load outdoor geometry
@@ -67,6 +71,9 @@ void cOutdoor::Render()
         // enable all active textures
         coreTexture::EnableAll(m_apTexture);
     });
+
+    // enable light map
+    m_LightMap.GetColorTarget(0u).pTexture->Enable(3u);
 }
 
 void cOutdoor::RenderLight()
@@ -261,7 +268,7 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
     if(!CORE_GL_SUPPORT(EXT_gpu_shader4))
     {
         // 
-        coreVector2 avPosition[OUTDOOR_TOTAL_VERTICES];
+        BIG_STATIC coreVector2 avPosition[OUTDOOR_TOTAL_VERTICES];
         for(coreUintW i = 0u; i < OUTDOOR_TOTAL_VERTICES; ++i) avPosition[i] = aVertexData[i].vPosition.xy();
 
         // 
@@ -333,13 +340,9 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
         m_pNormalMap->Create(pSurface1->w, pSurface1->h, CORE_TEXTURE_SPEC_RGBA8, CORE_TEXTURE_MODE_FILTER | CORE_TEXTURE_MODE_REPEAT);
         m_pNormalMap->Modify(0u, 0u, pSurface1->w, pSurface1->h, iSize, pOutput);
 
-        // wait until texture-upload is finished
+        // create sync object
         coreSync oSync;
         oSync.Create();
-        oSync.Check(GL_TIMEOUT_IGNORED, CORE_SYNC_CHECK_FLUSHED);
-
-        // bind normal map safely
-        this->DefineTexture(2u, m_pNormalMap);
 
         // free all temporary resources
         SAFE_DELETE_ARRAY(pOutput)
@@ -347,6 +350,12 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
         SDL_FreeSurface(pSurface2);
         pFile1->UnloadData();
         pFile2->UnloadData();
+
+        // wait until texture-upload is finished
+        oSync.Check(GL_TIMEOUT_IGNORED, CORE_SYNC_CHECK_FLUSHED);
+
+        // bind normal map safely
+        this->DefineTexture(2u, m_pNormalMap);
 
         return CORE_OK;
     });
@@ -368,13 +377,13 @@ void cOutdoor::LoadProgram(const coreBool bGlow)
 
 // ****************************************************************
 // retrieve height value
-coreFloat cOutdoor::RetrieveHeight(const coreVector2& vPosition)const
+FUNC_PURE coreFloat cOutdoor::RetrieveHeight(const coreVector2& vPosition)const
 {
     // 
     return this->RetrieveBackHeight(vPosition - this->GetPosition().xy());
 }
 
-coreFloat cOutdoor::RetrieveBackHeight(const coreVector2& vPosition)const
+FUNC_PURE coreFloat cOutdoor::RetrieveBackHeight(const coreVector2& vPosition)const
 {
     // convert real position to block position
     const coreFloat fX = vPosition.x / OUTDOOR_DETAIL + I_TO_F(OUTDOOR_WIDTH / 2u);
@@ -406,13 +415,13 @@ coreFloat cOutdoor::RetrieveBackHeight(const coreVector2& vPosition)const
 
 // ****************************************************************
 // 
-coreVector3 cOutdoor::RetrieveNormal(const coreVector2& vPosition)const
+FUNC_PURE coreVector3 cOutdoor::RetrieveNormal(const coreVector2& vPosition)const
 {
     // 
     return this->RetrieveBackNormal(vPosition - this->GetPosition().xy());
 }
 
-coreVector3 cOutdoor::RetrieveBackNormal(const coreVector2& vPosition)const
+FUNC_PURE coreVector3 cOutdoor::RetrieveBackNormal(const coreVector2& vPosition)const
 {
     constexpr coreFloat fWidth = OUTDOOR_DETAIL * 0.35f;
 
@@ -430,7 +439,7 @@ coreVector3 cOutdoor::RetrieveBackNormal(const coreVector2& vPosition)const
 
 // ****************************************************************
 // retrieve ray intersection point
-coreVector3 cOutdoor::RetrieveIntersect(const coreVector3& vRayPosition, const coreVector3& vRayDirection)const
+FUNC_PURE coreVector3 cOutdoor::RetrieveIntersect(const coreVector3& vRayPosition, const coreVector3& vRayDirection)const
 {
     ASSERT(vRayDirection.z < 0.0f)
     coreVector3 vOutput = vRayPosition;
@@ -500,7 +509,7 @@ void cOutdoor::LerpHeightNow(const coreFloat fMul, const coreFloat fAdd)
 
 // ****************************************************************
 // 
-coreVector2 cOutdoor::CalcLerpVector(const coreFloat fPositionY)const
+FUNC_LOCAL coreVector2 cOutdoor::CalcLerpVector(const coreFloat fPositionY)const
 {
     if(this->IsLerping())
     {
@@ -528,11 +537,14 @@ coreVector2 cOutdoor::CalcLerpVector(const coreFloat fPositionY)const
 void cOutdoor::UpdateLightMap()
 {
     // 
+    if(!CORE_GL_SUPPORT(ARB_texture_rg)) glColorMask(true, false, false, false);
+
+    // 
     m_LightMap.StartDraw();
     this->RenderLight();
 
     // 
-    m_LightMap.GetColorTarget(0u).pTexture->Enable(3u);
+    if(!CORE_GL_SUPPORT(ARB_texture_rg)) glColorMask(true, true, true, true);
 }
 
 

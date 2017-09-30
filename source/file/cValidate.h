@@ -13,8 +13,8 @@
 
 // ****************************************************************
 // validation disabled
-inline FUNC_NOALIAS coreBool ValidateReplay(cReplay* OUTPUT pReplay) {return true;}
-inline FUNC_NOALIAS coreBool ValidateSave  (cSave*   OUTPUT pSave)   {return true;}
+inline coreBool ValidateReplay(cReplay* OUTPUT pReplay) {return true;}
+inline coreBool ValidateSave  (cSave*   OUTPUT pSave)   {return true;}
 
 
 #endif // _P1_GUARD_VALIDATE_H_

@@ -49,16 +49,6 @@ cWater::cWater()noexcept
 
     // set object properties
     this->SetSize(coreVector3(WATER_SIZE, WATER_SIZE, 1.0f));
-
-    // remove default texture filter (not visible, better performance)
-    if(CORE_GL_SUPPORT(EXT_texture_filter_anisotropic))
-    {
-        m_apTexture[0].OnUsableOnce([pResource = m_apTexture[0]]()
-        {
-            glBindTexture  (GL_TEXTURE_2D, pResource->GetTexture());
-            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1.0f);
-        });
-    }
 }
 
 
@@ -275,7 +265,7 @@ cRainWater::cRainWater()noexcept
     m_WaveMap.Create(coreVector2(fResolution, fResolution), CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     // 
-    glBindTexture  (GL_TEXTURE_2D, m_WaveMap.GetColorTarget(0u).pTexture->GetTexture());
+    glBindTexture  (GL_TEXTURE_2D, m_WaveMap.GetColorTarget(0u).pTexture->GetIdentifier());
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 

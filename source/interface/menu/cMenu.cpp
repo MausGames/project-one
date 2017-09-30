@@ -433,12 +433,15 @@ void cMenu::UpdateAnimateProgram(coreObject2D* OUTPUT pObject)
     ASSERT(pObject)
 
     // 
+    if(coreMath::InRange(pObject->GetSize().y, 0.0f, CORE_MATH_PRECISION)) return;
+
+    // 
     if(!pObject->GetProgram().IsUsable()) return;
     if(!pObject->GetProgram()->Enable())  return;
 
     // 
     const coreFloat fSize = 2.0f * pObject->GetSize().y * Core::System->GetResolution().yx().AspectRatio();
-    const coreFloat fLerp = ((fSize - 0.4f) / fSize) * 0.5f;
+    const coreFloat fLerp = ((fSize - 0.4f) * RCP(fSize)) * 0.5f;
 
     // 
     pObject->GetProgram()->SendUniform("u_v4Scale", coreVector4(0.5f - fLerp, 0.5f + fLerp, 2.4f, fSize));

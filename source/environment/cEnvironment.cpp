@@ -196,7 +196,7 @@ void cEnvironment::ChangeBackground(const coreInt32 iID, const coreUintW iTransi
 
 // ****************************************************************
 // 
-coreFloat cEnvironment::RetrieveTransitionBlend(cBackground* pBackground)
+FUNC_LOCAL coreFloat cEnvironment::RetrieveTransitionBlend(const cBackground* pBackground)const
 {
     return MAX(m_TransitionTime.GetValue((m_pBackground == pBackground) ? CORE_TIMER_GET_NORMAL : CORE_TIMER_GET_REVERSED), 0.0f);
 }
@@ -204,7 +204,7 @@ coreFloat cEnvironment::RetrieveTransitionBlend(cBackground* pBackground)
 
 // ****************************************************************
 // retrieve safe height value
-coreFloat cEnvironment::RetrieveSafeHeight(const coreVector2& vPosition)
+FUNC_PURE coreFloat cEnvironment::RetrieveSafeHeight(const coreVector2& vPosition)const
 {
     // check for available outdoor-surface
     const cOutdoor* pOutdoor = m_pBackground->GetOutdoor();

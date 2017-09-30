@@ -32,25 +32,50 @@ void cShadow::Update()
 {
     if(!m_iLevel) return;
 
+    // 
+    if(!CORE_GL_SUPPORT(ARB_texture_rg)) glColorMask(true, false, false, false);
+
     // fill the shadow map
     m_FrameBuffer.StartDraw();
-    m_FrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_DEPTH);
+    m_FrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR | CORE_FRAMEBUFFER_TARGET_DEPTH);
     {
         glEnable(GL_POLYGON_OFFSET_FILL);
         {
-            // render all lists with shadow-casting objects
-            cShadow::RenderInstanced(s_amDrawShadowMatrix[0], this->GetListSet());
-            cShadow::RenderInstanced(s_amDrawShadowMatrix[1], s_GlobalContainer.GetListSet());
+            glDrawBuffer(GL_NONE);
+            {
+                // render all shadow-casting objects (from the background)
+                cShadow::RenderInstanced(s_amDrawShadowMatrix[0], this->GetListSet());
+                cShadow::RenderSingle   (s_amDrawShadowMatrix[0], this->GetListSet(), this->GetObjectSet());
+            }
+            glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
-            // render all single shadow-casting objects
-            cShadow::RenderSingle(s_amDrawShadowMatrix[0], this->GetListSet(),             this->GetObjectSet());
-            cShadow::RenderSingle(s_amDrawShadowMatrix[1], s_GlobalContainer.GetListSet(), s_GlobalContainer.GetObjectSet());
+            if(!s_GlobalContainer.GetListSet().empty() || !s_GlobalContainer.GetObjectSet().empty())
+            {
+                glDisable(GL_DEPTH_TEST);
+                {
+                    // render all shadow-casting objects (from the foreground)
+                    cShadow::RenderSingle   (s_amDrawShadowMatrix[1], s_GlobalContainer.GetListSet(), s_GlobalContainer.GetObjectSet());
+                    cShadow::RenderInstanced(s_amDrawShadowMatrix[1], s_GlobalContainer.GetListSet());
+
+                    // reduce current view frustum
+                    Core::Graphics->SetView(m_FrameBuffer.GetResolution() * SHADOW_TEST_FACTOR, m_FrameBuffer.GetFOV(), m_FrameBuffer.GetNearClip(), m_FrameBuffer.GetFarClip());
+
+                    // render low-resolution test area (for improved shading performance)
+                    cShadow::RenderInstanced(s_amDrawShadowMatrix[1], s_GlobalContainer.GetListSet());
+                    cShadow::RenderSingle   (s_amDrawShadowMatrix[1], s_GlobalContainer.GetListSet(), s_GlobalContainer.GetObjectSet());
+                }
+                glEnable(GL_DEPTH_TEST);
+            }
         }
         glDisable(GL_POLYGON_OFFSET_FILL);
     }
 
+    // 
+    if(!CORE_GL_SUPPORT(ARB_texture_rg)) glColorMask(true, true, true, true);
+
     // enable shadow map
-    m_FrameBuffer.GetDepthTarget().pTexture->Enable(CORE_TEXTURE_SHADOW + 0u);
+    m_FrameBuffer.GetColorTarget(0u).pTexture->Enable(3u);
+    m_FrameBuffer.GetDepthTarget()  .pTexture->Enable(CORE_TEXTURE_SHADOW + 0u);
 }
 
 
@@ -66,7 +91,10 @@ void cShadow::Reconfigure()
 
     if(m_iLevel)
     {
+        const coreTextureSpec oSpec = CORE_GL_SUPPORT(ARB_texture_rg) ? CORE_TEXTURE_SPEC_R8 : CORE_TEXTURE_SPEC_RGB8;
+
         // create shadow map frame buffer
+        m_FrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, oSpec);
         m_FrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH16);
         m_FrameBuffer.Create(g_vGameResolution * ((m_iLevel == 1u) ? SHADOW_RES_LOW : SHADOW_RES_HIGH), CORE_FRAMEBUFFER_CREATE_NORMAL);
 
@@ -161,7 +189,7 @@ void cShadow::Recompile()
     for(coreUintW i = 0u; i < SHADOW_HANDLES; ++i)
     {
         coreProgramPtr& pHandle  = s_apHandle[i];
-        const coreChar* pcConfig = PRINT("%s%s%s%s", (g_CurConfig.Graphics.iShadow)   ? PRINT(SHADER_SHADOW(%d), g_CurConfig.Graphics.iShadow)  : "",
+        const coreChar* pcConfig = PRINT("%s%s%s%s", PRINT(SHADER_SHADOW(%d), g_CurConfig.Graphics.iShadow),
                                                      (i == SHADOW_HANDLE_OBJECT_INST) ? CORE_SHADER_OPTION_INSTANCING                           : "",
                                                      (i == SHADOW_HANDLE_OUTDOOR_GLOW  || i == SHADOW_HANDLE_OUTDOOR_LIGHT_GLOW) ? SHADER_GLOW  : "",
                                                      (i == SHADOW_HANDLE_OUTDOOR_LIGHT || i == SHADOW_HANDLE_OUTDOOR_LIGHT_GLOW) ? SHADER_LIGHT : "");

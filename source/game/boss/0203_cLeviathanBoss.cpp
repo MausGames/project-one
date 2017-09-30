@@ -22,14 +22,14 @@
 cLeviathanBoss::cLeviathanBoss()noexcept
 {
     // load models
-    this->DefineModelHigh("ship_projectone.md3"); 
-    this->DefineModelLow ("ship_projectone.md3"); 
+    this->DefineModelHigh("ship_boss_leviathan_head_high.md3");
+    this->DefineModelLow ("ship_boss_leviathan_head_low.md3");
 
     // set object properties
     this->SetSize(coreVector3(1.5f,1.5f,1.5f)); 
 
     // configure the boss
-    this->Configure(10000, COLOR_SHIP_GREY); 
+    this->Configure(3000, COLOR_SHIP_BLUE); 
 }
 
 

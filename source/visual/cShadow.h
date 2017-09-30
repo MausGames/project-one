@@ -22,6 +22,7 @@
 #define SHADOW_RANGE_X       (56.0f)    // view range of the shadow map (smaller = sharper, but more artifacts)
 #define SHADOW_RANGE_Y       (62.0f)    // same for Y
 #define SHADOW_HEIGHT_FACTOR (2.5f)     // height correction factor (to reduce shadow length)
+#define SHADOW_TEST_FACTOR   (0.2f)     // 
 #define SHADOW_RES_LOW       (1.0f)     // 
 #define SHADOW_RES_HIGH      (1.5f)     // 
 

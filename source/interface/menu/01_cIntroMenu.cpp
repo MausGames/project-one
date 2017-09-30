@@ -52,7 +52,7 @@ cIntroMenu::cIntroMenu()noexcept
             this->BindObject(SURFACE_INTRO_LANGUAGE, pButton);
 
             // 
-            m_apLanguageButton.emplace(it->c_str(), pButton);
+            m_apLanguageButton.emplace((*it), pButton);
         }
     }
 
@@ -92,7 +92,7 @@ void cIntroMenu::Move()
         {
             if((*it)->IsClicked())
             {
-                const coreChar* pcPath = m_apLanguageButton.get_string(it);
+                const coreChar* pcPath = m_apLanguageButton.get_key(it)->c_str();
 
                 // 
                 Core::Language->Load(pcPath);
