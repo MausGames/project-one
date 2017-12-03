@@ -51,6 +51,9 @@
 // TODO: clean mixing shader defines (x >= y) and (defined(x)) checks (also in engine)
 // TODO: check for 16-bit shader usage
 // TODO: program enable has to be checked (if(x.Enable()){}) everywhere
+// TODO: check if "if(!CORE_GL_SUPPORT(ARB_texture_rg)) glColorMask(true, true, false, false);" reduces or improves performance on related hardware
+// TODO: change some 0.5 FB factors from 0.5 to 0.4 if CORE_GL_SUPPORT(ARB_texture_rg) not available ?
+// TODO: unify "forward" and "transform" comments in shaders
 
 
 // ****************************************************************
@@ -85,7 +88,8 @@
 #define COLOR_MENU_BRONZE    (coreVector3(0.925f, 0.663f, 0.259f))
 #define COLOR_MENU_SILVER    (coreVector3(0.855f, 0.855f, 0.878f))
 #define COLOR_MENU_GOLD      (coreVector3(1.000f, 0.859f, 0.000f))
-#define COLOR_ENERGY_YELLOW  (coreVector3(0.950f, 0.800f, 0.280f)) // (coreVector3(0.900f, 0.800f, 0.380f))
+#define COLOR_ENERGY_WHITE   (coreVector3(1.000f, 1.000f, 1.000f))
+#define COLOR_ENERGY_YELLOW  (coreVector3(0.950f, 0.800f, 0.280f))
 #define COLOR_ENERGY_ORANGE  (coreVector3(1.000f, 0.400f, 0.000f))
 #define COLOR_ENERGY_RED     (coreVector3(1.000f, 0.290f, 0.290f))
 #define COLOR_ENERGY_PURPLE  (coreVector3(0.450f, 0.200f, 1.000f))
@@ -109,11 +113,12 @@
 // shader modifiers
 #define SHADER_TRANSITION(x) "#define _P1_TRANSITION_ (" #x ") \n"   // full_transition
 #define SHADER_SHADOW(x)     "#define _P1_SHADOW_     (" #x ") \n"   // outdoor, object_ground
+#define SHADER_OVERLAYS(x)   "#define _P1_OVERLAYS_   (" #x ") \n"   // weather
 #define SHADER_GLOW          "#define _P1_GLOW_       (1) \n"        // post, outdoor, object_ship
 #define SHADER_DISTORTION    "#define _P1_DISTORTION_ (1) \n"        // post
 #define SHADER_DEBUG         "#define _P1_DEBUG_      (1) \n"        // post
 #define SHADER_OBJECT3D      "#define _P1_OBJECT3D_   (1) \n"        // distortion
-#define SHADER_SINGLE        "#define _P1_SINGLE_     (1) \n"        // decal
+#define SHADER_SINGLE        "#define _P1_SINGLE_     (1) \n"        // decal, weather
 #define SHADER_LIGHT         "#define _P1_LIGHT_      (1) \n"        // outdoor, decal
 #define SHADER_DARKNESS      "#define _P1_DARKNESS_   (1) \n"        // object_ship
 #define SHADER_BULLET        "#define _P1_BULLET_     (1) \n"        // energy
@@ -133,22 +138,24 @@
 #define TYPE_OBJECT(x)       (100 + (x))
 
 // attack elements
-#define ELEMENT_YELLOW       (0u)   // speed (ray) 
-#define ELEMENT_ORANGE       (1u)   // fire
-#define ELEMENT_RED          (2u)   // (antimatter) 
-#define ELEMENT_BLUE         (3u)   // homing (tesla) 
-#define ELEMENT_PURPLE       (4u)   // power (pulse) 
-#define ELEMENT_GREEN        (5u)   // (wave) 
-#define ELEMENT_NEUTRAL      (6u)   // 
-#define ELEMENT_LIGHT        (7u)   // 
-#define ELEMENT_DARK         (8u)   // 
+#define ELEMENT_WHITE        (0u)   // 
+#define ELEMENT_YELLOW       (1u)   // speed (ray) 
+#define ELEMENT_ORANGE       (2u)   // fire
+#define ELEMENT_RED          (3u)   // (antimatter) 
+#define ELEMENT_BLUE         (4u)   // homing (tesla) 
+#define ELEMENT_PURPLE       (5u)   // power (pulse) 
+#define ELEMENT_GREEN        (6u)   // (wave) 
+#define ELEMENT_NEUTRAL      (7u)   // 
+#define ELEMENT_LIGHT        (8u)   // 
+#define ELEMENT_DARK         (9u)   // 
 
 // sub-class and object ID macros
 #define ENABLE_ID                                           \
     virtual const coreInt32 GetID  ()const = 0;             \
     virtual const coreChar* GetName()const = 0;
 #define ASSIGN_ID(i,n)                                      \
-    static const coreInt32 ID = i;                          \
+    static constexpr const coreInt32 ID   = i;              \
+    static constexpr const coreChar* Name = n;              \
     inline const coreInt32 GetID  ()const final {return i;} \
     inline const coreChar* GetName()const final {return n;}
 
@@ -159,6 +166,12 @@ constexpr FUNC_CONST coreFloat AngleDiff(const coreFloat x, const coreFloat y)
     while(A < -PI) A += 2.0f*PI;
     while(A >  PI) A -= 2.0f*PI;
     return A;
+}
+
+// 
+inline FUNC_CONST coreFloat SmoothTowards(const coreFloat fLength, const coreFloat fRadius)
+{
+    return MIN(fLength, fRadius) * RCP(fRadius);
 }
 
 // 
@@ -188,8 +201,8 @@ template <typename T, typename S, typename R> constexpr FUNC_LOCAL coreInt32 InB
 // ternary interpolation helper-function
 template <typename T, typename S, typename R> constexpr FUNC_LOCAL T TernaryLerp(const T& x, const S& y, const R& z, const coreFloat s)
 {
-    return (s >= 0.5f) ? LERP(y, z, s*2.0f - 1.0f) :
-                         LERP(x, y, s*2.0f);
+    return (s >= 0.5f) ? LERP(y, z, s * 2.0f - 1.0f) :
+                         LERP(x, y, s * 2.0f);
 }
 
 // direction restriction and packing helper-functions
@@ -244,6 +257,7 @@ extern coreMusicPlayer  g_MusicPlayer;       // central music-player
 #include "visual/cBlur.h"
 #include "visual/cGlow.h"
 #include "visual/cDistortion.h"
+#include "visual/cHeadlight.h"
 #include "visual/cSpecialEffects.h"
 #include "visual/cForeground.h"
 #include "visual/cPostProcessing.h"

@@ -21,7 +21,7 @@ cGrassBackground::cGrassBackground()noexcept
     m_pOutdoor = new cOutdoor("grass", "dust", 2u, 4.0f);
 
     // create water-surface object
-    m_pWater = new cWater();
+    m_pWater = new cWater("environment_clouds_blue.png");
 
     // allocate stone list
     pList1 = new coreBatchList(GRASS_STONE_RESERVE);
@@ -46,7 +46,7 @@ cGrassBackground::cGrassBackground()noexcept
                 if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 25.0f))
                 {
                     // create object
-                    coreObject3D* pObject = CUSTOM_NEW(s_MemoryPool, coreObject3D, oBase);
+                    coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
 
                     // set object properties
                     pObject->SetPosition   (coreVector3(vPosition, 0.0f));
@@ -101,10 +101,10 @@ cGrassBackground::cGrassBackground()noexcept
                        !cBackground::_CheckIntersection     (m_apGroundObjectList[0], vPosition, 25.0f))
                     {
                         // determine object type
-                        const coreBool bType = (Core::Rand->Int(3) || (fHeight >= -20.0f)) ? true : false;
+                        const coreBool bType = (Core::Rand->Bool(0.75f) || (fHeight >= -20.0f)) ? true : false;
 
                         // create object
-                        coreObject3D* pObject = CUSTOM_NEW(s_MemoryPool, coreObject3D, oBase);
+                        coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
                         pObject->DefineModel(bType ? "environment_reed_01.md3" : "environment_reed_02.md3");
 
                         // set object properties
@@ -144,7 +144,7 @@ cGrassBackground::cGrassBackground()noexcept
     {
         // load object resources
         coreObject3D oBase;
-        oBase.DefineModel  (Core::Manager::Object->GetLowModel());
+        oBase.DefineModel  (Core::Manager::Object->GetLowQuad());
         oBase.DefineTexture(0u, "environment_flowers.png");
         oBase.DefineProgram("effect_decal_light_program");
 
@@ -162,7 +162,7 @@ cGrassBackground::cGrassBackground()noexcept
                     if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 40.0f))
                     {
                         // create object
-                        coreObject3D* pObject = CUSTOM_NEW(s_MemoryPool, coreObject3D, oBase);
+                        coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
 
                         // set object properties
                         pObject->SetPosition (coreVector3(vPosition, 0.0f));
@@ -194,7 +194,7 @@ cGrassBackground::cGrassBackground()noexcept
     {
         // load object resources
         coreObject3D oBase;
-        oBase.DefineModel  (Core::Manager::Object->GetLowModel());
+        oBase.DefineModel  (Core::Manager::Object->GetLowQuad());
         oBase.DefineTexture(0u, "environment_leaf.png");
         oBase.DefineProgram("effect_decal_program");
 
@@ -210,7 +210,7 @@ cGrassBackground::cGrassBackground()noexcept
                 if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 680.0f))
                 {
                     // create object
-                    coreObject3D* pObject = CUSTOM_NEW(s_MemoryPool, coreObject3D, oBase);
+                    coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
 
                     // set object properties
                     pObject->SetPosition(coreVector3(vPosition, fHeight));
@@ -229,7 +229,7 @@ cGrassBackground::cGrassBackground()noexcept
         coreSet<coreObject3D*>* papContent = pList1->List();
         if(papContent->size() % 2u)
         {
-            CUSTOM_DELETE(s_MemoryPool, coreObject3D, papContent->back())
+            POOLED_DELETE(s_MemoryPool, coreObject3D, papContent->back())
             papContent->pop_back();
         }
 
@@ -248,7 +248,7 @@ cGrassBackground::cGrassBackground()noexcept
     {
         // load object resources
         coreObject3D oBase;
-        oBase.DefineModel  (Core::Manager::Object->GetLowModel());
+        oBase.DefineModel  (Core::Manager::Object->GetLowQuad());
         oBase.DefineTexture(0u, "environment_clouds_mid.png");
         oBase.DefineProgram("environment_clouds_program");
 
@@ -259,13 +259,13 @@ cGrassBackground::cGrassBackground()noexcept
             const coreFloat   fHeight   = Core::Rand->Float(20.0f, 60.0f);
 
             // create object
-            coreObject3D* pObject = CUSTOM_NEW(s_MemoryPool, coreObject3D, oBase);
+            coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
 
             // set object properties
             pObject->SetPosition (coreVector3(vPosition, fHeight));
             pObject->SetSize     (coreVector3(coreVector2(2.4f,2.4f) * Core::Rand->Float(15.0f, 21.0f), 1.0f));
             pObject->SetDirection(coreVector3(coreVector2::Rand(), 0.0f));
-            pObject->SetColor4   (coreVector4(0.8f + 0.2f * fHeight/60.0f, 1.0f, 1.0f, 0.85f));
+            pObject->SetColor4   (coreVector4(coreVector3(1.0f,1.0f,1.0f) * (0.8f + 0.2f * fHeight/60.0f), 0.85f));
             pObject->SetTexOffset(coreVector2::Rand(0.0f,10.0f, 0.0f,10.0f));
 
             // add object to the list

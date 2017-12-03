@@ -478,8 +478,8 @@ void cTorusBoss::__MoveOwn()
         for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRay); ++i)
         {
             const coreVector3 vDir   = this->__GetRotaDirection(DEG_TO_RAD(I_TO_F(i) * 120.0f));
-            coreVector3       vColor = coreMath::InRange(vDir.z, 0.0f, 0.15f) ? (COLOR_ENERGY_YELLOW * (0.8f)) :
-                                                                                (COLOR_ENERGY_BLUE   * (0.8f - 0.4f * ABS(vDir.z)));
+            coreVector3       vColor = coreMath::IsNear(vDir.z, 0.0f, 0.15f) ? (COLOR_ENERGY_YELLOW * (0.8f)) :
+                                                                               (COLOR_ENERGY_BLUE   * (0.8f - 0.4f * ABS(vDir.z)));
 
             // 
             vColor = LERP(m_aRay[i].GetColor3(), vColor, 0.3f);
@@ -725,7 +725,7 @@ void cTorusBoss::__CreateOverdrive(const coreUintW iIndex, const coreVector3& vI
 
                     // load object resources
                     coreObject3D* pObject = MANAGED_NEW(coreObject3D);
-                    pObject->DefineModel  (Core::Manager::Object->GetLowModel());
+                    pObject->DefineModel  (Core::Manager::Object->GetLowQuad());
                     pObject->DefineTexture(0u, "effect_soot.png");
                     pObject->DefineProgram("effect_decal_single_program");
 

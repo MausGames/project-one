@@ -11,7 +11,7 @@
 
 // ****************************************************************
 // constructor
-cWater::cWater()noexcept
+cWater::cWater(const coreChar* pcSkyTexture)noexcept
 : m_fAnimation (0.0f)
 , m_fFlyOffset (0.0f)
 {
@@ -31,7 +31,7 @@ cWater::cWater()noexcept
     m_Depth.Create(vWaterResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     // create sky-plane object
-    m_Sky.DefineTexture(0u, "environment_clouds_blue.png");
+    m_Sky.DefineTexture(0u, pcSkyTexture);
     m_Sky.SetSize      (coreVector2(WATER_SCALE_FACTOR, WATER_SCALE_FACTOR) * SQRT2);
     m_Sky.SetTexSize   (coreVector2(WATER_SKY_SIZE,     WATER_SKY_SIZE));
 
@@ -40,7 +40,7 @@ cWater::cWater()noexcept
     m_apSkyProgram[1] = Core::Manager::Resource->Get<coreProgram>("environment_vignette_program");
 
     // load object resources
-    this->DefineModel  (Core::Manager::Object->GetLowModel());
+    this->DefineModel  (Core::Manager::Object->GetLowTriangle());
     this->DefineTexture(0u, "environment_water_norm.png");
     this->DefineTexture(1u, m_Reflection.GetColorTarget(0u).pTexture);
     this->DefineTexture(2u, m_Refraction.GetColorTarget(0u).pTexture);
@@ -206,6 +206,7 @@ void cWater::SetFlyOffset(const coreFloat fFlyOffset)
 // ****************************************************************
 // constructor
 cUnderWater::cUnderWater()noexcept
+: cWater (NULL)
 {
     // 
     this->DefineProgram("environment_under_program");
@@ -214,7 +215,8 @@ cUnderWater::cUnderWater()noexcept
 
 // ****************************************************************
 // constructor
-cIceWater::cIceWater()noexcept
+cIceWater::cIceWater(const coreChar* pcSkyTexture)noexcept
+: cWater (pcSkyTexture)
 {
     // 
     m_Ice = (*this);
@@ -252,17 +254,17 @@ void cIceWater::__MoveOwn()
 
 // ****************************************************************
 // constructor
-cRainWater::cRainWater()noexcept
-: m_DropList   (RAIN_DROPS)
+cRainWater::cRainWater(const coreChar* pcSkyTexture)noexcept
+: cWater       (pcSkyTexture)
+, m_DropList   (RAIN_DROPS)
 , m_iCurDrop   (0u)
 , m_fFallDelay (0.0f)
 {
-    const coreTextureSpec oSpec = CORE_GL_SUPPORT(ARB_texture_float) ? CORE_TEXTURE_SPEC_RGBA16F : CORE_TEXTURE_SPEC_RGBA8;
-    const coreFloat fResolution = Core::Config->GetInt(CORE_CONFIG_GRAPHICS_QUALITY) ? 512.0f : 256.0f;
+    const coreVector2 vRes = coreVector2(1.0f,1.0f) * (Core::Config->GetInt(CORE_CONFIG_GRAPHICS_QUALITY) ? RAIN_WAVE_RES_HIGH : RAIN_WAVE_RES_LOW);
 
     // 
-    m_WaveMap.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, oSpec);
-    m_WaveMap.Create(coreVector2(fResolution, fResolution), CORE_FRAMEBUFFER_CREATE_NORMAL);
+    m_WaveMap.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGBA16);
+    m_WaveMap.Create(vRes, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     // 
     glBindTexture  (GL_TEXTURE_2D, m_WaveMap.GetColorTarget(0u).pTexture->GetIdentifier());
@@ -282,7 +284,7 @@ cRainWater::cRainWater()noexcept
         coreObject3D* pDrop = &m_aDrop[i];
 
         // 
-        pDrop->DefineModel  (Core::Manager::Object->GetLowModel());
+        pDrop->DefineModel  (Core::Manager::Object->GetLowQuad());
         pDrop->DefineTexture(0u, "effect_wave_norm.png");
         pDrop->DefineProgram("effect_distortion_object3d_program");
         pDrop->SetAlpha     (0.0f);
@@ -387,7 +389,7 @@ cLava::cLava()noexcept
 , m_fFlyOffset (0.0f)
 {
     // load object resources
-    this->DefineModel  (Core::Manager::Object->GetLowModel());
+    this->DefineModel  (Core::Manager::Object->GetLowTriangle());
     this->DefineTexture(0u, "environment_lava_diff.png");
     this->DefineTexture(1u, "environment_lava_norm.png");
     this->DefineTexture(2u, "environment_water_norm.png");

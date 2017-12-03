@@ -35,15 +35,19 @@
 #define DHARUK_WIDTH           (0.667f)                                     // 
 #define DHARUK_HEIGHT          (0.8f)                                       // 
 
-#define TORUS_RAY_SIZE         (coreVector3(0.7f,50.0f,0.7f))   // 
-#define TORUS_RAY_TEXSIZE      (coreVector2(0.5f,1.5f))         // 
-#define TORUS_RAY_OFFSET       (8.0f)                           // 
-#define TORUS_RAYWAVE_SIZE     (coreVector3(1.6f,5.0f,1.3f))    // 
+#define TORUS_RAY_SIZE         (coreVector3(0.7f,50.0f,0.7f))               // 
+#define TORUS_RAY_TEXSIZE      (coreVector2(0.5f,1.5f))                     // 
+#define TORUS_RAY_OFFSET       (8.0f)                                       // 
+#define TORUS_RAYWAVE_SIZE     (coreVector3(1.6f,5.0f,1.3f))                // 
 
-#define VAUS_SCOUTS_TOTAL      (DEFINED(_CORE_DEBUG_) ? 16 : 80)   // 
-#define VAUS_SCOUTS_X          (8u)                                // 
-#define VAUS_SCOUTS_Y          (2u)                                // 
-#define VAUS_SHOTS             (10u)                               // 
+#define VAUS_SCOUTS_TOTAL      (DEFINED(_CORE_DEBUG_) ? 16 : 80)            // 
+#define VAUS_SCOUTS_X          (8u)                                         // 
+#define VAUS_SCOUTS_Y          (2u)                                         // 
+#define VAUS_SHOTS             (10u)                                        // 
+
+#define NAUTILUS_ATTACH_DIST   (-10.0f)                                     // 
+
+#define LEVIATHAN_PARTS        (5u)                                         // 
 
 
 // ****************************************************************
@@ -229,6 +233,10 @@ private:
 // 
 class cNautilusBoss final : public cBoss
 {
+private:
+    coreFlow m_fAnimation;   // animation value
+
+
 public:
     cNautilusBoss()noexcept;
 
@@ -238,7 +246,13 @@ public:
 
 private:
     // execute own routines
-    void __MoveOwn()final;
+    void __ResurrectOwn()final;
+    void __KillOwn     (const coreBool bAnimated)final;
+    void __MoveOwn     ()final;
+
+    // 
+    void        __StorePosition();
+    coreVector2 __LoadPosition ()const;
 };
 
 
@@ -246,6 +260,12 @@ private:
 // 
 class cAmemasuBoss final : public cBoss
 {
+private:
+    coreSpline2 m_ChangePath;           // 
+
+    coreTexturePtr m_apStomachTex[4];   // 
+
+
 public:
     cAmemasuBoss()noexcept;
 
@@ -263,6 +283,13 @@ private:
 // 
 class cLeviathanBoss final : public cBoss
 {
+private:
+    cCustomEnemy m_aBody[3];   // 
+    cCustomEnemy m_Tail;       // 
+
+    coreFlow m_fAnimation;     // animation value
+
+
 public:
     cLeviathanBoss()noexcept;
 
@@ -273,6 +300,12 @@ public:
 private:
     // execute own routines
     void __MoveOwn()final;
+
+    // 
+    static FUNC_NOALIAS void __CalcCurvePosDir(const coreVector3& vAxis, const coreFloat fAngle, const coreVector3& vScale, coreVector3* OUTPUT vPosition, coreVector3* OUTPUT vDirection);
+
+    // 
+    cEnemy* __GetPart(const coreUintW iIndex);
 };
 
 

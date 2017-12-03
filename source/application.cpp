@@ -8,8 +8,20 @@
 
 
 // ****************************************************************
-// setup all defined resources
-static void SetupResources()
+// project settings
+const coreChar* const CoreApp::Settings::Name                       = "Project One";
+const coreChar* const CoreApp::Settings::IconPath                   = "data/textures/game_icon.png";
+const coreChar* const CoreApp::Settings::CursorPath                 = "data/textures/default_cursor.png";
+const coreUint8       CoreApp::Settings::RenderBuffer::DepthSize    = 16u;
+const coreUint8       CoreApp::Settings::RenderBuffer::StencilSize  = 0u;
+const coreBool        CoreApp::Settings::RenderBuffer::AlphaChannel = true;
+const coreBool        CoreApp::Settings::RenderBuffer::DoubleBuffer = true;
+const coreBool        CoreApp::Settings::RenderBuffer::StereoRender = false;
+
+
+// ****************************************************************
+// setup the application
+void CoreApp::Setup()
 {
     Core::Manager::Resource->Load<coreModel>  ("bullet_cone.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_cone.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_mine.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_mine.md3", false);
@@ -44,6 +56,8 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_leviathan_head_low.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_leviathan_head_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_leviathan_tail_high.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_leviathan_tail_high.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_leviathan_tail_low.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_leviathan_tail_low.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_nautilus_high.md3",            CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_nautilus_high.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_nautilus_low.md3",             CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_nautilus_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_torus_high.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_torus_high.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_torus_low.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_torus_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_vaus_high.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_vaus_high.md3", false);
@@ -69,6 +83,8 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreModel>  ("ship_projectone.md3",                    CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_projectone.md3");
 
     Core::Manager::Resource->Load<coreTexture>("effect_energy.png",                      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_energy.png");
+    Core::Manager::Resource->Load<coreTexture>("effect_headlight_point.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_headlight_point.png");
+    Core::Manager::Resource->Load<coreTexture>("effect_headlight_spot.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_headlight_spot.png");
     Core::Manager::Resource->Load<coreTexture>("effect_lightning.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_lightning.png");
     Core::Manager::Resource->Load<coreTexture>("effect_particle_32.png",                 CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_particle_32.png", false);
     Core::Manager::Resource->Load<coreTexture>("effect_particle_128.png",                CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_particle_128.png", false);
@@ -95,6 +111,8 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreTexture>("environment_lava_diff.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_lava_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_lava_norm.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_lava_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_leaf.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_leaf.png");
+    Core::Manager::Resource->Load<coreTexture>("environment_mars_diff.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_mars_diff.png");
+    Core::Manager::Resource->Load<coreTexture>("environment_mars_norm.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_mars_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_moss_diff.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_moss_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_moss_norm.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_moss_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_reed.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_reed.png");
@@ -155,6 +173,8 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreShader> ("effect_energy_bullet_invert_inst.vert",  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", CORE_SHADER_OPTION_INSTANCING SHADER_BULLET SHADER_INVERT);
     Core::Manager::Resource->Load<coreShader> ("effect_energy_bullet_direct_inst.vert",  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", CORE_SHADER_OPTION_INSTANCING SHADER_BULLET SHADER_DIRECT);
     Core::Manager::Resource->Load<coreShader> ("effect_energy_inst.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.frag", CORE_SHADER_OPTION_INSTANCING);
+    Core::Manager::Resource->Load<coreShader> ("effect_headlight.vert",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_headlight.vert", CORE_SHADER_OPTION_NO_ROTATION);
+    Core::Manager::Resource->Load<coreShader> ("effect_headlight.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_headlight.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_lightning.vert",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_lightning.vert");
     Core::Manager::Resource->Load<coreShader> ("effect_lightning.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_lightning.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_lightning_inst.vert",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_lightning.vert", CORE_SHADER_OPTION_INSTANCING);
@@ -183,6 +203,12 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreShader> ("effect_shield.frag",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_shield.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_shield_inst.vert",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_shield.vert", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("effect_shield_inst.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_shield.frag", CORE_SHADER_OPTION_INSTANCING);
+    Core::Manager::Resource->Load<coreShader> ("effect_weather_rain.vert",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_weather.vert", PRINT(SHADER_OVERLAYS(%d) SHADER_SINGLE, MOSS_RAIN_NUM));
+    Core::Manager::Resource->Load<coreShader> ("effect_weather_rain.frag",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_weather.frag", PRINT(SHADER_OVERLAYS(%d) SHADER_SINGLE, MOSS_RAIN_NUM));
+    Core::Manager::Resource->Load<coreShader> ("effect_weather_sand.vert",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_weather.vert", PRINT(SHADER_OVERLAYS(%d) SHADER_SINGLE, DESERT_SAND_NUM));
+    Core::Manager::Resource->Load<coreShader> ("effect_weather_sand.frag",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_weather.frag", PRINT(SHADER_OVERLAYS(%d) SHADER_SINGLE, DESERT_SAND_NUM));
+    Core::Manager::Resource->Load<coreShader> ("effect_weather_snow.vert",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_weather.vert", PRINT(SHADER_OVERLAYS(%d) SHADER_SINGLE, SNOW_SNOW_NUM));
+    Core::Manager::Resource->Load<coreShader> ("effect_weather_snow.frag",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_weather.frag", PRINT(SHADER_OVERLAYS(%d) SHADER_SINGLE, SNOW_SNOW_NUM));
     Core::Manager::Resource->Load<coreShader> ("environment_clouds.vert",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_clouds.vert");
     Core::Manager::Resource->Load<coreShader> ("environment_clouds.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_clouds.frag");
     Core::Manager::Resource->Load<coreShader> ("environment_clouds_inst.vert",           CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_clouds.vert", CORE_SHADER_OPTION_INSTANCING);
@@ -205,8 +231,8 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreShader> ("environment_water.vert",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_water.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("environment_water.frag",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_water.frag");
     Core::Manager::Resource->Load<coreShader> ("full.vert",                              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full.vert");
-    Core::Manager::Resource->Load<coreShader> ("full_blur_1.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_blur_1.frag");
-    Core::Manager::Resource->Load<coreShader> ("full_blur_2.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_blur_2.frag");
+    Core::Manager::Resource->Load<coreShader> ("full_blur_1x.frag",                      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_blur_1x.frag");
+    Core::Manager::Resource->Load<coreShader> ("full_blur_2y.frag",                      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_blur_2y.frag");
     Core::Manager::Resource->Load<coreShader> ("full_post.frag",                         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_post.frag", SHADER_GLOW);
     Core::Manager::Resource->Load<coreShader> ("full_post_distorted.frag",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_post.frag", SHADER_GLOW SHADER_DISTORTION);
     Core::Manager::Resource->Load<coreShader> ("full_post_debug.frag",                   CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_post.frag", SHADER_GLOW SHADER_DISTORTION SHADER_DEBUG);
@@ -245,7 +271,13 @@ static void SetupResources()
     Core::Manager::Resource->Load<coreSound>  ("effect_explosion_physical.wav",          CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/effect_explosion_physical.wav");
     Core::Manager::Resource->Load<coreSound>  ("effect_launch.wav",                      CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/effect_launch.wav");
     Core::Manager::Resource->Load<coreSound>  ("effect_rush.wav",                        CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/effect_rush.wav");
+    Core::Manager::Resource->Load<coreSound>  ("environment_lava.wav",                   CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_lava.wav");
     Core::Manager::Resource->Load<coreSound>  ("environment_nature.wav",                 CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_nature.wav");
+    Core::Manager::Resource->Load<coreSound>  ("environment_rain.wav",                   CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_rain.wav");
+    Core::Manager::Resource->Load<coreSound>  ("environment_thunder_01.wav",             CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_thunder_01.wav");
+    Core::Manager::Resource->Load<coreSound>  ("environment_thunder_02.wav",             CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_thunder_02.wav");
+    Core::Manager::Resource->Load<coreSound>  ("environment_thunder_03.wav",             CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_thunder_03.wav");
+    Core::Manager::Resource->Load<coreSound>  ("environment_under.wav",                  CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_under.wav");
     Core::Manager::Resource->Load<coreSound>  ("environment_wind.wav",                   CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_wind.wav");
 
     std::vector<std::string> asPath;
@@ -418,6 +450,11 @@ static void SetupResources()
         ->AttachShader("effect_energy_inst.frag")
         ->Finish();
 
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_headlight_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("effect_headlight.vert")
+        ->AttachShader("effect_headlight.frag")
+        ->Finish();
+
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_lightning_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("effect_lightning.vert")
         ->AttachShader("effect_lightning.frag")
@@ -508,6 +545,21 @@ static void SetupResources()
         ->AttachShader("effect_shield_inst.frag")
         ->Finish();
 
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_weather_rain_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("effect_weather_rain.vert")
+        ->AttachShader("effect_weather_rain.frag")
+        ->Finish();
+
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_weather_sand_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("effect_weather_sand.vert")
+        ->AttachShader("effect_weather_sand.frag")
+        ->Finish();
+
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_weather_snow_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("effect_weather_snow.vert")
+        ->AttachShader("effect_weather_snow.frag")
+        ->Finish();
+
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_clouds_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("environment_clouds.vert")
         ->AttachShader("environment_clouds.frag")
@@ -581,14 +633,14 @@ static void SetupResources()
         ->AttachShader("environment_water.frag")
         ->Finish();
 
-    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("full_blur_1_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("full_blur_1x_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("full.vert")
-        ->AttachShader("full_blur_1.frag")
+        ->AttachShader("full_blur_1x.frag")
         ->Finish();
 
-    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("full_blur_2_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+    s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("full_blur_2y_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("full.vert")
-        ->AttachShader("full_blur_2.frag")
+        ->AttachShader("full_blur_2y.frag")
         ->Finish();
 
     s_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("full_post_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
@@ -701,36 +753,4 @@ static void SetupResources()
         ->AttachShader("object_inst.vert")
         ->AttachShader("object_ship_glow_inst.frag")
         ->Finish();
-}
-
-
-// ****************************************************************
-// setup all defined designs
-static void SetupDesigns()
-{
-
-}
-
-
-// ****************************************************************
-// setup the application
-void CoreApp::Setup()
-{
-    // set window title and icon
-    Core::System->SetWindowTitle("Project One");
-    Core::System->SetWindowIcon("data/textures/game_icon.png");
-
-    // set view frustum
-    Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 50.0f, 500.0f);
-
-    // set cursor
-#if defined(_CORE_LINUX_)
-    Core::Input->DefineCursor("data/textures/default_cursor_low.png");
-#else
-    Core::Input->DefineCursor("data/textures/default_cursor.png");
-#endif
-
-    // setup resources and designs
-    SetupResources();
-    SetupDesigns();
 }

@@ -20,8 +20,11 @@
 // TODO: check if alL _RESERVES are correct
 // TODO: reduce object-buffer sizes, not all are drawn at once anyway, also allocate only once
 // TODO: positions in separate list (when iterating through lambda)
-// TODO: use single "environment shader" instead of multi-texturing (rain, snow, sand)
 // TODO: provide own memory pool for temporary additional objects
+// TODO: all environment sound effects should fade in transition
+// TODO: popping artifacts with shadow in sea-background (configurable view-range ? per list ? auto per height ?)
+// TODO: calls to pList->MoveNormal(); may be redundant
+// TODO: remove texture-sampling from lightning effect in moss
 
 
 // ****************************************************************
@@ -36,12 +39,12 @@
 #define GRASS_STONE_NUM       (1536u)
 #define GRASS_STONE_RESERVE   (256u)
 #define GRASS_REED_NUM        (3072u)
-#define GRASS_REED_1_RESERVE  (769u)
+#define GRASS_REED_1_RESERVE  (1024u)
 #define GRASS_REED_2_RESERVE  (256u)
 #define GRASS_FLOWER_NUM      (2048u)
 #define GRASS_FLOWER_RESERVE  (1024u)
 #define GRASS_LEAF_NUM        (2048u)
-#define GRASS_LEAF_RESERVE    (1024u)
+#define GRASS_LEAF_RESERVE    (512u)
 #define GRASS_CLOUD_NUM       (64u)
 #define GRASS_CLOUD_RESERVE   (76u)   // # tested
 
@@ -50,28 +53,28 @@
 #define SEA_WEED_NUM          (3072u)
 #define SEA_WEED_RESERVE      (3072u)
 #define SEA_ANIMAL_NUM        (1536u)
-#define SEA_ANIMAL_1_RESERVE  (256u)
-#define SEA_ANIMAL_2_RESERVE  (256u)
+#define SEA_ANIMAL_1_RESERVE  (192u)
+#define SEA_ANIMAL_2_RESERVE  (64u)
 #define SEA_ALGAE_NUM         (2048u)
-#define SEA_ALGAE_RESERVE     (1024u)
+#define SEA_ALGAE_RESERVE     (512u)
 
 #define DESERT_STONE_NUM      (1536u)
-#define DESERT_STONE_RESERVE  (256u)
-#define DESERT_SAND_NUM       (3u)
+#define DESERT_STONE_RESERVE  (192u)
+#define DESERT_SAND_NUM       (7u)
 
 #define SPACE_METEOR_NUM      (1536u)
 #define SPACE_METEOR_RESERVE  (1824u)   // # tested 
 
 #define VOLCANO_SMOKE_NUM     (512u)
-#define VOLCANO_SMOKE_RESERVE (128u)
+#define VOLCANO_SMOKE_RESERVE (64u)
 #define VOLCANO_SPARK_NUM     (2048u)
 #define VOLCANO_SPARK_RESERVE (1024u)
 
 #define SNOW_STONE_NUM        (1536u)
-#define SNOW_STONE_RESERVE    (256u)
+#define SNOW_STONE_RESERVE    (128u)
 #define SNOW_REED_NUM         (3072u)
 #define SNOW_REED_RESERVE     (769u)
-#define SNOW_SNOW_NUM         (9u)
+#define SNOW_SNOW_NUM         (12u)
 #define SNOW_CLOUD_NUM        (128u)
 #define SNOW_CLOUD_RESERVE    (152u)   // # tested
 
@@ -80,6 +83,9 @@
 #define MOSS_CLOUD_RESERVE    (76u)   // # tested
 
 #define DARK_
+
+#define STOMACH_CLOUD_NUM     (256u)
+#define STOMACH_CLOUD_RESERVE (304u)   // # tested
 
 #define CLOUD_CLOUD_NUM       (576u)
 #define CLOUD_CLOUD_RESERVE   (684u)   // # tested
@@ -162,6 +168,7 @@ private:
     // own routines for derived classes
     virtual void __RenderOwn() {}
     virtual void __MoveOwn  () {}
+    virtual void __UpdateOwn() {}
 };
 
 
@@ -187,10 +194,10 @@ private:
 class cGrassBackground final : public cBackground
 {
 private:
-    coreSoundPtr m_pNatureSound;   // nature sound-effect
-
     coreFlow  m_fLeafTime;         // 
     coreUintW m_iLeafNum;          // 
+
+    coreSoundPtr m_pNatureSound;   // nature sound-effect
 
 
 public:
@@ -212,11 +219,14 @@ protected:
 class cSeaBackground final : public cBackground
 {
 private:
-    coreFlow m_fWaveTime;   // 
+    coreFlow m_fWaveTime;         // 
+
+    coreSoundPtr m_pUnderSound;   // 
 
 
 public:
     cSeaBackground()noexcept;
+    ~cSeaBackground()final;
 
     DISABLE_COPY(cSeaBackground)
     ASSIGN_ID(2, "Sea")
@@ -234,7 +244,11 @@ protected:
 class cDesertBackground final : public cBackground
 {
 private:
-    coreSoundPtr m_pWindSound;   // wind sound-effect
+    coreObject2D m_Sand;             // 
+    coreVector2  m_vSandDirection;   // 
+    coreFlow     m_fSandWave;        // 
+
+    coreSoundPtr m_pWindSound;       // wind sound-effect
 
 
 public:
@@ -244,10 +258,14 @@ public:
     DISABLE_COPY(cDesertBackground)
     ASSIGN_ID(3, "Desert")
 
+    // 
+    inline void SetSandDirection(const coreVector2& vDirection) {m_vSandDirection = vDirection; ASSERT(vDirection.IsNormalized())}
+
 
 private:
     // execute own routines
-    void __MoveOwn()final;
+    void __RenderOwn()final;
+    void __MoveOwn  ()final;
 };
 
 
@@ -289,16 +307,26 @@ protected:
 // snow background class
 class cSnowBackground final : public cBackground
 {
+private:
+    coreObject2D m_Snow;             // 
+    coreVector2  m_vSnowDirection;   // 
+    coreFlow     m_fSnowWave;        // 
+
+
 public:
     cSnowBackground()noexcept;
 
     DISABLE_COPY(cSnowBackground)
     ASSIGN_ID(6, "Snow")
 
+    // 
+    inline void SetSnowDirection(const coreVector2& vDirection) {m_vSnowDirection = vDirection; ASSERT(vDirection.IsNormalized())}
+
 
 private:
     // execute own routines
-    void __MoveOwn()final;
+    void __RenderOwn()final;
+    void __MoveOwn  ()final;
 };
 
 
@@ -306,16 +334,36 @@ private:
 // moss background class
 class cMossBackground final : public cBackground
 {
+private:
+    coreObject2D m_Rain;              // 
+    coreVector2  m_vRainDirection;    // 
+
+    coreObject2D m_Lightning;         // 
+    coreFlow     m_fLightningDelay;   // 
+    coreTimer    m_LightningTicker;   // 
+
+    coreSoundPtr m_apThunder[3];      // 
+    coreFlow     m_fThunderDelay;     // 
+    coreUint8    m_iThunderIndex;     // 
+
+    coreSoundPtr m_pRainSound;        // 
+
+
 public:
     cMossBackground()noexcept;
+    ~cMossBackground()final;
 
     DISABLE_COPY(cMossBackground)
     ASSIGN_ID(7, "Moss")
 
+    // 
+    inline void SetRainDirection(const coreVector2& vDirection) {m_vRainDirection = vDirection; ASSERT(vDirection.IsNormalized())}
+
 
 private:
     // execute own routines
-    void __MoveOwn()final;
+    void __RenderOwn()final;
+    void __MoveOwn  ()final;
 };
 
 
@@ -328,6 +376,51 @@ public:
 
     DISABLE_COPY(cDarkBackground)
     ASSIGN_ID(8, "Dark")
+};
+
+
+// ****************************************************************
+// 
+class cStomachBackground final : public cBackground
+{
+private:
+    cHeadlight m_Headlight;   // 
+
+
+public:
+    cStomachBackground()noexcept;
+
+    DISABLE_COPY(cStomachBackground)
+    ASSIGN_ID(51, "Stomach")
+
+
+private:
+    // execute own routines
+    void __RenderOwn()final;
+    void __MoveOwn  ()final;
+    void __UpdateOwn()final;
+};
+
+
+// ****************************************************************
+// 
+class cCaveBackground final : public cBackground
+{
+private:
+    cHeadlight m_Headlight;   // 
+
+
+public:
+    cCaveBackground()noexcept;
+
+    DISABLE_COPY(cCaveBackground)
+    ASSIGN_ID(52, "Cave")
+
+
+private:
+    // execute own routines
+    void __RenderOwn()final;
+    void __UpdateOwn()final;
 };
 
 

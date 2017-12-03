@@ -139,7 +139,6 @@ void cIntroMission::__SetupOwn()
 
     // ################################################################
     // 
-    STAGE_START_HERE
     STAGE_MAIN
     {
         STAGE_ADD_PATH(pPath1)

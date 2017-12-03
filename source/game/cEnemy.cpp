@@ -324,12 +324,42 @@ void cEnemy::DefaultOrientateLerp(const coreFloat fFromAngle, const coreFloat fT
 
 // ****************************************************************
 // 
+void cEnemy::DefaultAxiate(const coreFloat fAngle)
+{
+    // 
+    const coreVector3& vDir  = this->GetDirection();
+    const coreVector3  vOri  = coreMath::IsNear(ABS(vDir.z), 1.0f) ? coreVector3(0.0f,1.0f,0.0f) : coreVector3(0.0f,0.0f,1.0f);
+    const coreMatrix3  mRota = coreMatrix4::RotationAxis(fAngle, vDir).m123();
+    this->SetOrientation(vOri * mRota);
+}
+
+
+// ****************************************************************
+// 
+void cEnemy::DefaultAxiateLerp(const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime)
+{
+    // 
+    this->DefaultAxiate(LERP(fFromAngle, fToAngle, fTime));
+}
+
+
+// ****************************************************************
+// 
 void cEnemy::DefaultMultiate(const coreFloat fAngle)
 {
     // rotate around the rotating direction axis
     const coreVector2 vDir = coreVector2::Direction(fAngle);
     this->SetDirection  (coreVector3(vDir, 0.0f));
     this->SetOrientation(coreVector3(-vDir.x*vDir.y, vDir.x*vDir.x, vDir.y));
+}
+
+
+// ****************************************************************
+// 
+void cEnemy::DefaultMultiateLerp(const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime)
+{
+    // 
+    this->DefaultMultiate(LERP(fFromAngle, fToAngle, fTime));
 }
 
 

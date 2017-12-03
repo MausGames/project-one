@@ -14,7 +14,8 @@ void VertexMain()
     gl_Position = coreObject2DPosition();
 
     // forward simplified texture coordinates
-    vec2 vNewTexCoord = a_v3RawPosition.xy + vec2(0.5);
-    v_av2TexCoord[0]  = vNewTexCoord;
-    v_av2TexCoord[1]  = vNewTexCoord * 3.0;   // for transition
+    vec2 v2BaseCoord = a_v3RawPosition.xy + vec2(0.5);
+    v_av2TexCoord[0] = v2BaseCoord;
+    v_av2TexCoord[1] = v2BaseCoord * 3.0;         // for transition
+    v_av2TexCoord[2] = v2BaseCoord * 2.0 - 1.0;   // for transition
 }

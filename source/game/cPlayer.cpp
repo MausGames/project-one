@@ -231,10 +231,10 @@ void cPlayer::Move()
             }
 
             // restrict movement to the foreground area
-                 if(vNewPos.x < -FOREGROUND_AREA.x) vNewPos.x = -FOREGROUND_AREA.x;
-            else if(vNewPos.x >  FOREGROUND_AREA.x) vNewPos.x =  FOREGROUND_AREA.x;
-                 if(vNewPos.y < -FOREGROUND_AREA.y) vNewPos.y = -FOREGROUND_AREA.y;
-            else if(vNewPos.y >  FOREGROUND_AREA.y) vNewPos.y =  FOREGROUND_AREA.y;
+                 if(vNewPos.x < -FOREGROUND_AREA.x) {vNewPos.x = -FOREGROUND_AREA.x; m_vForce.x =  ABS(m_vForce.x);}
+            else if(vNewPos.x >  FOREGROUND_AREA.x) {vNewPos.x =  FOREGROUND_AREA.x; m_vForce.x = -ABS(m_vForce.x);}
+                 if(vNewPos.y < -FOREGROUND_AREA.y) {vNewPos.y = -FOREGROUND_AREA.y; m_vForce.y =  ABS(m_vForce.y);}
+            else if(vNewPos.y >  FOREGROUND_AREA.y) {vNewPos.y =  FOREGROUND_AREA.y; m_vForce.y = -ABS(m_vForce.y);}
 
             // 
             const coreVector2 vDiff = vNewPos - this->GetPosition().xy();
@@ -521,7 +521,7 @@ void cPlayer::TransformDark(const coreUint8 iStatus)
         // 
         g_pDistortion    ->CreateWave      (this->GetPosition(), DISTORTION_WAVE_SMALL);
         g_pSpecialEffects->CreateSplashDark(this->GetPosition(), SPECIAL_SPLASH_SMALL);
-        g_pSpecialEffects->CreateBlast     (this->GetPosition(), SPECIAL_BLAST_SMALL, coreVector3(1.0f,1.0f,1.0f));
+        g_pSpecialEffects->CreateBlast     (this->GetPosition(), SPECIAL_BLAST_SMALL, COLOR_ENERGY_WHITE);
 
         // 
         this->EnableBubble();
@@ -533,7 +533,7 @@ void cPlayer::TransformDark(const coreUint8 iStatus)
         // 
         g_pDistortion    ->CreateWave      (this->GetPosition(), DISTORTION_WAVE_BIG);
         g_pSpecialEffects->CreateSplashDark(this->GetPosition(), SPECIAL_SPLASH_BIG);
-        g_pSpecialEffects->CreateBlast     (this->GetPosition(), SPECIAL_BLAST_BIG, coreVector3(1.0f,1.0f,1.0f));
+        g_pSpecialEffects->CreateBlast     (this->GetPosition(), SPECIAL_BLAST_BIG, COLOR_ENERGY_WHITE);
     }
     else REMOVE_FLAG(m_iStatus, PLAYER_STATUS_DARKNESS)
 

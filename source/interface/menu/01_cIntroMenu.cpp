@@ -96,7 +96,7 @@ void cIntroMenu::Move()
 
                 // 
                 Core::Language->Load(pcPath);
-                Core::Config->SetString(CORE_CONFIG_SYSTEM_LANGUAGE, pcPath);
+                Core::Config->SetString(CORE_CONFIG_BASE_LANGUAGE, pcPath);
                 Core::Config->Save();
 
                 // 

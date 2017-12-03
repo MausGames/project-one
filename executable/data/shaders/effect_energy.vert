@@ -19,7 +19,7 @@ void VertexMain()
     // transform position (and make flat)
     vec4 v4NewPosition = vec4(coreObject3DTransformRaw(), 1.0) * vec4(1.0, 1.0, 0.0, 1.0);
     gl_Position = u_m4ViewProj * v4NewPosition;
-    
+
     // 
     gl_Position.z -= (u_v3Size.z * 0.001) * gl_Position.w;
 
@@ -32,7 +32,7 @@ void VertexMain()
     // transform position
     vec4 v4NewPosition = vec4(coreObject3DTransformRaw(), 1.0);
     gl_Position        = u_m4ViewProj * v4NewPosition;
-    
+
     // add slight z-offset to reduce fighting
     gl_Position.z -= 0.01 * gl_Position.w;
 

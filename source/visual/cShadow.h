@@ -10,6 +10,8 @@
 #ifndef _P1_GUARD_SHADOW_H_
 #define _P1_GUARD_SHADOW_H_
 
+// TODO: change projection to perfectly fit the screen
+
 // NOTE: shadow map binds local objects (per frame buffer) and global objects (on all frame buffers, for transitions)
 // NOTE: all global objects are on the foreground
 

@@ -24,7 +24,7 @@ void FragmentMain()
 
     // 
     vec2  v2AbsDir  = abs(u_v2TransitionDir);
-    float v1ProjPos = dot(v_av2TexCoord[0] * 2.0 - 1.0, u_v2TransitionDir) / (v2AbsDir.x + v2AbsDir.y);
+    float v1ProjPos = dot(v_av2TexCoord[2], u_v2TransitionDir) / (v2AbsDir.x + v2AbsDir.y);
 
 #if (_P1_TRANSITION_) == 1
 
@@ -41,7 +41,7 @@ void FragmentMain()
 #elif (_P1_TRANSITION_) == 3
 
     // calculate circle effect
-    float v1Rev = coreLengthSq(abs(v_av2TexCoord[0] * 2.0 - 1.0) / 1.4142);
+    float v1Rev = coreLengthSq(v_av2TexCoord[2] / SQRT2);
     float v1Mix = smoothstep(-0.1, 0.1, u_v1TransitionTime - v1Rev + v1Offset * 0.05);
 
 #else

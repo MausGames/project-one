@@ -86,6 +86,7 @@
 #define __STAGE_ROUND(x)                (I_TO_F(F_TO_UI((x) * FRAMERATE_VALUE * RCP(fLifeSpeed))) / FRAMERATE_VALUE * fLifeSpeed)
 #define STAGE_BRANCH(x,y)               ((fLifeTime < (x)) || [&](){const coreFloat fRound = /*__STAGE_ROUND*/(y); fLifeTime = FMOD(fLifeTime - (x), fRound); fLifeTimeBefore = FMOD(fLifeTimeBefore - (x), fRound); bEnablePosition &= (fLifeTime >= fLifeTimeBefore); return false;}())
 #define STAGE_TICK(c)                   (!(F_TO_UI(fLifeTime * FRAMERATE_VALUE * RCP(fLifeSpeed)) % (c)))
+#define STAGE_TICK_COUNTED(c,x,y)       (STAGE_TICK(c) && [&](){const coreBool bResult = ((x) < s_cast<std::remove_reference<decltype(x)>::type>(y)); if(bResult) ++(x); return bResult;}())
 #define STAGE_WAIT(t)                   {m_fStageWait = (t);}
 
 #define STAGE_DELAY_ADD(t,u)            {const coreFloat fDelay = CLAMP(fLifeTime - (t), 0.0f, (u)); fLifeTime -= fDelay; fLifeTimeDelay += fDelay;}
@@ -292,6 +293,10 @@ private:
     cAmemasuBoss   m_Amemasu;     // 
     cLeviathanBoss m_Leviathan;   // 
 
+    coreObject3D m_Container;     // 
+    coreVector2  m_vForce;        // 
+    coreVector2  m_vImpact;       // 
+
 
 public:
     cNevoMission()noexcept;
@@ -299,10 +304,20 @@ public:
     DISABLE_COPY(cNevoMission)
     ASSIGN_ID(2, "Nevo")
 
+    // 
+    inline void SetContainerForce(const coreVector2& vForce) {m_vForce = vForce;}
+    inline const coreVector2& GetContainerForce ()const      {return m_vForce;}
+    inline const coreVector2& GetContainerImpact()const      {return m_vImpact;}
+
+    // 
+    inline coreObject3D* GetContainer() {return &m_Container;}
+
 
 private:
     // execute own routines
-    void __SetupOwn()final;
+    void __SetupOwn       ()final;
+    void __RenderOwnAttack()final;
+    void __MoveOwnAfter   ()final;
 };
 
 

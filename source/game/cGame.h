@@ -11,6 +11,7 @@
 #define _P1_GUARD_GAME_H_
 
 // TODO: enemy bullet (and enemy?) cleanup on mission unload
+// TODO: use uint for game-times ?
 
 
 // ****************************************************************

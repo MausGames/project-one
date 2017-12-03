@@ -204,13 +204,17 @@ cConfigMenu::cConfigMenu()noexcept
     for(coreUintW i = 0u, ie = asLanguageList.size(); i < ie; i++)
         m_Language.AddEntry(asLanguageList[i].c_str(), i);
 
+    const coreUint8& iMaxSamples    = Core::Graphics->GetMaxSamples();
+    const coreUint8& iMaxAnisotropy = Core::Graphics->GetMaxAnisotropy();
+
     m_DisplayMode  .AddEntryLanguage("DISPLAYMODE_WINDOW",     0u);
     m_DisplayMode  .AddEntryLanguage("DISPLAYMODE_BORDERLESS", 1u);
     m_DisplayMode  .AddEntryLanguage("DISPLAYMODE_FULLSCREEN", 2u);
     m_AntiAliasing .AddEntryLanguage("VALUE_OFF",  0u);
     m_TextureFilter.AddEntryLanguage("VALUE_OFF",  0u);
-    for(coreUintW i = 2u; i <=  8u; i <<= 1u) m_AntiAliasing .AddEntry(PRINT("%zux", i), i);
-    for(coreUintW i = 2u; i <= 16u; i <<= 1u) m_TextureFilter.AddEntry(PRINT("%zux", i), i);
+    for(coreUintW i = 2u, ie = iMaxSamples;    i <= ie; i <<= 1u) m_AntiAliasing .AddEntry(PRINT("%zux", i), i);
+    for(coreUintW i = 2u, ie = iMaxAnisotropy; i <= ie; i <<= 1u) m_TextureFilter.AddEntry(PRINT("%zux", i), i);
+    if(m_AntiAliasing.GetEntry(m_AntiAliasing.GetNumEntries() - 1u).tValue != iMaxSamples) m_AntiAliasing.AddEntry(PRINT("%ux", iMaxSamples), iMaxSamples);   // possible 6x
     m_AssetQuality .AddEntryLanguage("VALUE_LOW",  0u);
     m_AssetQuality .AddEntryLanguage("VALUE_HIGH", 1u);
     m_ShadowQuality.AddEntryLanguage("VALUE_OFF",  0u);
@@ -542,7 +546,7 @@ void cConfigMenu::CheckValues()
                             (m_MusicVolume  .GetCurEntry().tValue != F_TO_UI(Core::Config->GetFloat(CORE_CONFIG_AUDIO_MUSICVOLUME)  * 100.0f)) ||
                             (m_EffectVolume .GetCurEntry().tValue != F_TO_UI(Core::Config->GetFloat(CORE_CONFIG_AUDIO_SOUNDVOLUME)  * 100.0f)) ||
                             (m_AmbientSound .GetCurEntry().tValue != g_OldConfig.Audio.iAmbient)                                               ||
-                            (std::strcmp(Core::Language->GetPath(), Core::Config->GetString(CORE_CONFIG_SYSTEM_LANGUAGE)))                     ||
+                            (std::strcmp(Core::Language->GetPath(), Core::Config->GetString(CORE_CONFIG_BASE_LANGUAGE)))                       ||
                             (std::memcmp(&g_CurConfig.Input, &g_OldConfig.Input, sizeof(sConfig::Input)));
 
     // 
@@ -585,7 +589,7 @@ void cConfigMenu::LoadValues()
 
     // 
     const coreLookup<std::string, std::string>& asLanguageList = cMenu::GetLanguageList();
-    m_Language.SelectIndex(std::find(asLanguageList.begin(), asLanguageList.end(), Core::Config->GetString(CORE_CONFIG_SYSTEM_LANGUAGE)) - asLanguageList.begin());
+    m_Language.SelectIndex(std::find(asLanguageList.begin(), asLanguageList.end(), Core::Config->GetString(CORE_CONFIG_BASE_LANGUAGE)) - asLanguageList.begin());
 
     // 
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i)
@@ -640,7 +644,7 @@ void cConfigMenu::SaveValues()
     g_CurConfig.Audio.iAmbient = m_AmbientSound.GetCurEntry().tValue;
 
     // 
-    Core::Config->SetString(CORE_CONFIG_SYSTEM_LANGUAGE, Core::Language->GetPath());
+    Core::Config->SetString(CORE_CONFIG_BASE_LANGUAGE, Core::Language->GetPath());
 
     // 
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i)

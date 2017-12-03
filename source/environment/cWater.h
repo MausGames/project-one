@@ -19,6 +19,8 @@
 // TODO: remove sqrt in rainy shader (pre-processing like in outdoor)
 // TODO: underwater may render reflection (not required)
 // TODO: glBindTexture has to reset internal texture-cache
+// TODO: rainwater has mipmapping disabled (provide at least a couple of levels)
+// TODO: draw reflected ships only with low resolution models
 
 
 // ****************************************************************
@@ -31,6 +33,8 @@
 #define RAIN_DROPS         (20u)      // 
 #define RAIN_DROP_SPEED    (1.15f)    // 
 #define RAIN_DROP_WIDTH    (0.2f)     // 
+#define RAIN_WAVE_RES_LOW  (256.0f)   // 
+#define RAIN_WAVE_RES_HIGH (512.0f)   // 
 
 
 // ****************************************************************
@@ -50,7 +54,7 @@ protected:
 
 
 public:
-    cWater()noexcept;
+    cWater(const coreChar* pcSkyTexture)noexcept;
     virtual ~cWater()override;
 
     DISABLE_COPY(cWater)
@@ -105,7 +109,7 @@ private:
 
 
 public:
-    cIceWater()noexcept;
+    cIceWater(const coreChar* pcSkyTexture)noexcept;
 
     DISABLE_COPY(cIceWater)
 
@@ -133,7 +137,7 @@ private:
 
 
 public:
-    cRainWater()noexcept;
+    cRainWater(const coreChar* pcSkyTexture)noexcept;
     ~cRainWater()final;
 
     DISABLE_COPY(cRainWater)

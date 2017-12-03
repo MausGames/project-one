@@ -92,11 +92,12 @@ void cShadow::Reconfigure()
     if(m_iLevel)
     {
         const coreTextureSpec oSpec = CORE_GL_SUPPORT(ARB_texture_rg) ? CORE_TEXTURE_SPEC_R8 : CORE_TEXTURE_SPEC_RGB8;
+        const coreVector2     vRes  = g_vGameResolution * ((m_iLevel == 1u) ? SHADOW_RES_LOW : SHADOW_RES_HIGH);
 
         // create shadow map frame buffer
         m_FrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, oSpec);
         m_FrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH16);
-        m_FrameBuffer.Create(g_vGameResolution * ((m_iLevel == 1u) ? SHADOW_RES_LOW : SHADOW_RES_HIGH), CORE_FRAMEBUFFER_CREATE_NORMAL);
+        m_FrameBuffer.Create(vRes, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
         // enable depth value comparison
         m_FrameBuffer.GetDepthTarget().pTexture->ShadowSampling(true);

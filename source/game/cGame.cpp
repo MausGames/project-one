@@ -24,6 +24,15 @@ cGame::cGame(const coreBool bCoop)noexcept
 , m_iStatus             (0u)
 , m_bCoop               (bCoop)
 {
+#if defined(_P1_DEBUG_RANDOM_)
+
+    // 
+    if(!m_bCoop && (CORE_RAND_RUNTIME & 0x01u))
+        m_aPlayer[0].Configure(PLAYER_SHIP_DEF, COLOR_SHIP_BLUE);
+    else
+
+#endif
+
     // configure first player
     m_aPlayer[0].Configure  (PLAYER_SHIP_ATK, COLOR_SHIP_RED);
     m_aPlayer[0].EquipWeapon(0u, cRayWeapon::ID);
@@ -36,18 +45,10 @@ cGame::cGame(const coreBool bCoop)noexcept
 
         // 
         m_aPlayer[0].SetInput(&g_aGameInput[0]);
-        m_aPlayer[0].SetInput(&g_aGameInput[1]);
+        m_aPlayer[1].SetInput(&g_aGameInput[1]);
 
         STATIC_ASSERT(GAME_PLAYERS == 2u)
     }
-
-#if defined(_P1_DEBUG_RANDOM_)
-
-    // 
-    if(!m_bCoop && (CORE_RAND_RUNTIME & 0x01u))
-        m_aPlayer[0].Configure(PLAYER_SHIP_DEF, COLOR_SHIP_BLUE);
-
-#endif
 
     // load first mission
     m_pMission = new cNoMission();
@@ -265,6 +266,8 @@ void cGame::LoadMission(const coreInt32 iID)
             m_aPlayer[0].AddStatus(PLAYER_STATUS_NO_INPUT_ALL);
         }
     }
+
+    Core::Log->Info("Mission (%s) created", m_pMission->GetName());
 }
 
 

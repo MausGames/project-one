@@ -15,6 +15,7 @@
 // TODO: align bullet memory ? (also check other possible locations (e.g. enemies))
 // TODO: change bullet-id lookup into array-index (also enemies ?)
 // TODO: remove tons of template instantiations (also enemies ?)
+// TODO: add memory pool object for bullets ?
 
 
 // ****************************************************************
@@ -86,6 +87,7 @@ public:
 
 protected:
     // change default color
+    inline void _MakeWhite (const coreFloat fFactor) {m_iElement = ELEMENT_WHITE;  this->SetColor3(COLOR_ENERGY_WHITE  * fFactor);}
     inline void _MakeYellow(const coreFloat fFactor) {m_iElement = ELEMENT_YELLOW; this->SetColor3(COLOR_ENERGY_YELLOW * fFactor);}
     inline void _MakeOrange(const coreFloat fFactor) {m_iElement = ELEMENT_ORANGE; this->SetColor3(COLOR_ENERGY_ORANGE * fFactor);}
     inline void _MakeRed   (const coreFloat fFactor) {m_iElement = ELEMENT_RED;    this->SetColor3(COLOR_ENERGY_RED    * fFactor);}
@@ -170,6 +172,7 @@ public:
     inline void ResetProperties() {this->SetSize(coreVector3(3.7f,3.7f,3.7f)); m_fAnimation = 0.09f;}
 
     // change default color
+    inline cRayBullet* MakeWhite () {this->_MakeWhite (0.7f); return this;}
     inline cRayBullet* MakeYellow() {this->_MakeYellow(1.0f); return this;}
     inline cRayBullet* MakeOrange() {this->_MakeOrange(1.0f); return this;}
     inline cRayBullet* MakeRed   () {this->_MakeRed   (1.0f); return this;}
@@ -204,12 +207,13 @@ public:
     inline void ResetProperties() {this->SetSize(coreVector3(2.5f,2.5f,2.5f) * 1.3f); m_fAnimation = 0.09f;}
 
     // change default color
-    inline cPulseBullet* MakeYellow() {ASSERT(false) return this;}
-    inline cPulseBullet* MakeOrange() {ASSERT(false) return this;}
-    inline cPulseBullet* MakeRed   () {ASSERT(false) return this;}
+    inline cPulseBullet* MakeWhite () {ASSERT(false)            return this;}
+    inline cPulseBullet* MakeYellow() {ASSERT(false)            return this;}
+    inline cPulseBullet* MakeOrange() {ASSERT(false)            return this;}
+    inline cPulseBullet* MakeRed   () {ASSERT(false)            return this;}
     inline cPulseBullet* MakePurple() {this->_MakePurple(1.0f); return this;}
-    inline cPulseBullet* MakeBlue  () {ASSERT(false) return this;}
-    inline cPulseBullet* MakeGreen () {ASSERT(false) return this;}
+    inline cPulseBullet* MakeBlue  () {ASSERT(false)            return this;}
+    inline cPulseBullet* MakeGreen () {ASSERT(false)            return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
@@ -237,7 +241,8 @@ public:
     inline void ResetProperties() {this->SetSize(coreVector3(1.6f,1.6f,1.6f) * 1.1f); m_fAnimation = 0.0f;}
 
     // change default color
-    inline cOrbBullet* MakeYellow() {ASSERT(false) return this;}
+    inline cOrbBullet* MakeWhite () {ASSERT(false)            return this;}
+    inline cOrbBullet* MakeYellow() {ASSERT(false)            return this;}
     inline cOrbBullet* MakeOrange() {this->_MakeOrange(0.9f); return this;}
     inline cOrbBullet* MakeRed   () {this->_MakeRed   (0.9f); return this;}
     inline cOrbBullet* MakePurple() {this->_MakePurple(0.9f); return this;}
@@ -271,11 +276,12 @@ public:
     inline void ResetProperties() {this->SetSize(coreVector3(1.35f,1.55f,1.35f) * 1.05f); m_fAnimation = 0.09f;}
 
     // change default color
+    inline cConeBullet* MakeWhite () {ASSERT(false)            return this;}
     inline cConeBullet* MakeYellow() {this->_MakeYellow(0.8f); return this;}
     inline cConeBullet* MakeOrange() {this->_MakeOrange(1.0f); return this;}
-    inline cConeBullet* MakeRed   () {ASSERT(false) return this;}
-    inline cConeBullet* MakePurple() {ASSERT(false) return this;}
-    inline cConeBullet* MakeBlue  () {ASSERT(false) return this;}
+    inline cConeBullet* MakeRed   () {ASSERT(false)            return this;}
+    inline cConeBullet* MakePurple() {ASSERT(false)            return this;}
+    inline cConeBullet* MakeBlue  () {ASSERT(false)            return this;}
     inline cConeBullet* MakeGreen () {this->_MakeGreen (1.0f); return this;}
 
     // bullet configuration values
@@ -305,12 +311,13 @@ public:
     inline void ResetProperties() {this->SetSize(coreVector3(1.5f,1.5f,1.5f) * 1.3f); m_fAnimation = 0.09f;}
 
     // change default color
-    inline cWaveBullet* MakeYellow() {ASSERT(false) return this;}
-    inline cWaveBullet* MakeOrange() {ASSERT(false) return this;}
-    inline cWaveBullet* MakeRed   () {this->_MakeRed  (1.0f); return this;}
-    inline cWaveBullet* MakePurple() {ASSERT(false) return this;}
-    inline cWaveBullet* MakeBlue  () {ASSERT(false) return this;}
-    inline cWaveBullet* MakeGreen () {this->_MakeGreen(1.1f); return this;}
+    inline cWaveBullet* MakeWhite () {ASSERT(false)            return this;}
+    inline cWaveBullet* MakeYellow() {ASSERT(false)            return this;}
+    inline cWaveBullet* MakeOrange() {ASSERT(false)            return this;}
+    inline cWaveBullet* MakeRed   () {this->_MakeRed   (1.0f); return this;}
+    inline cWaveBullet* MakePurple() {ASSERT(false)            return this;}
+    inline cWaveBullet* MakeBlue  () {ASSERT(false)            return this;}
+    inline cWaveBullet* MakeGreen () {this->_MakeGreen (1.1f); return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
@@ -344,12 +351,13 @@ public:
     inline void ResetProperties() {this->SetSize(coreVector3(2.5f,2.5f,2.5f)); m_fAnimation = 0.09f; m_fLightningTime = 1.0f;}
 
     // change default color
-    inline cTeslaBullet* MakeYellow() {ASSERT(false) return this;}
-    inline cTeslaBullet* MakeOrange() {ASSERT(false) return this;}
-    inline cTeslaBullet* MakeRed   () {ASSERT(false) return this;}
-    inline cTeslaBullet* MakePurple() {ASSERT(false) return this;}
+    inline cTeslaBullet* MakeWhite () {ASSERT(false)            return this;}
+    inline cTeslaBullet* MakeYellow() {ASSERT(false)            return this;}
+    inline cTeslaBullet* MakeOrange() {ASSERT(false)            return this;}
+    inline cTeslaBullet* MakeRed   () {ASSERT(false)            return this;}
+    inline cTeslaBullet* MakePurple() {ASSERT(false)            return this;}
     inline cTeslaBullet* MakeBlue  () {this->_MakeBlue  (0.9f); return this;}
-    inline cTeslaBullet* MakeGreen () {ASSERT(false) return this;}
+    inline cTeslaBullet* MakeGreen () {ASSERT(false)            return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_spheric_inst_program";}
@@ -440,12 +448,13 @@ public:
     inline void ResetProperties() {this->SetSize(coreVector3(1.45f,1.55f,1.45f) * 2.1f); m_fAnimation = 0.15f;}
 
     // change default color
+    inline cSpearBullet* MakeWhite () {ASSERT(false)            return this;}
     inline cSpearBullet* MakeYellow() {this->_MakeYellow(1.0f); return this;}
-    inline cSpearBullet* MakeOrange() {ASSERT(false) return this;}
-    inline cSpearBullet* MakeRed   () {ASSERT(false) return this;}
-    inline cSpearBullet* MakePurple() {ASSERT(false) return this;}
-    inline cSpearBullet* MakeBlue  () {ASSERT(false) return this;}
-    inline cSpearBullet* MakeGreen () {ASSERT(false) return this;}
+    inline cSpearBullet* MakeOrange() {ASSERT(false)            return this;}
+    inline cSpearBullet* MakeRed   () {ASSERT(false)            return this;}
+    inline cSpearBullet* MakePurple() {ASSERT(false)            return this;}
+    inline cSpearBullet* MakeBlue  () {ASSERT(false)            return this;}
+    inline cSpearBullet* MakeGreen () {ASSERT(false)            return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
@@ -478,12 +487,13 @@ public:
     inline void ResetProperties() {this->SetSize(coreVector3(1.5f,1.5f,1.5f)); m_fAnimation = 0.0f; m_vFlyDir = this->GetDirection().xy();}
 
     // change default color
-    inline cQuadBullet* MakeYellow() {ASSERT(false) return this;}
-    inline cQuadBullet* MakeOrange() {ASSERT(false) return this;}
+    inline cQuadBullet* MakeWhite () {ASSERT(false)            return this;}
+    inline cQuadBullet* MakeYellow() {ASSERT(false)            return this;}
+    inline cQuadBullet* MakeOrange() {ASSERT(false)            return this;}
     inline cQuadBullet* MakeRed   () {this->_MakeRed   (1.0f); return this;}
     inline cQuadBullet* MakePurple() {this->_MakePurple(1.0f); return this;}
-    inline cQuadBullet* MakeBlue  () {ASSERT(false) return this;}
-    inline cQuadBullet* MakeGreen () {ASSERT(false) return this;}
+    inline cQuadBullet* MakeBlue  () {ASSERT(false)            return this;}
+    inline cQuadBullet* MakeGreen () {ASSERT(false)            return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
@@ -516,12 +526,13 @@ public:
     inline void ResetProperties() {this->SetSize(coreVector3(2.6f,2.0f,2.6f)); m_fAnimation = 0.0f; m_vFlyDir = this->GetDirection().xy();}
 
     // change default color
-    inline cFlipBullet* MakeYellow() {ASSERT(false) return this;}
-    inline cFlipBullet* MakeOrange() {ASSERT(false) return this;}
-    inline cFlipBullet* MakeRed   () {ASSERT(false) return this;}
+    inline cFlipBullet* MakeWhite () {ASSERT(false)            return this;}
+    inline cFlipBullet* MakeYellow() {ASSERT(false)            return this;}
+    inline cFlipBullet* MakeOrange() {ASSERT(false)            return this;}
+    inline cFlipBullet* MakeRed   () {ASSERT(false)            return this;}
     inline cFlipBullet* MakePurple() {this->_MakePurple(1.0f); return this;}
-    inline cFlipBullet* MakeBlue  () {ASSERT(false) return this;}
-    inline cFlipBullet* MakeGreen () {ASSERT(false) return this;}
+    inline cFlipBullet* MakeBlue  () {ASSERT(false)            return this;}
+    inline cFlipBullet* MakeGreen () {ASSERT(false)            return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_inst_program";}
@@ -583,41 +594,45 @@ template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt
         // create new bullet set
         pSet = new sBulletSet<T>(&m_Outline);
         m_apBulletSet.emplace(T::ID, pSet);
+
+        Core::Log->Info("Bullet Set (%s) created", T::Name);
     }
     else pSet = s_cast<sBulletSet<T>*>(m_apBulletSet.at(T::ID));
 
-    // save current pool size
+    // save and check current pool size
     const coreUintW iSize = pSet->aBulletPool.size();
-
-    // loop through all bullets
-    for(coreUintW i = iSize; i--; )
+    if(pSet->oBulletActive.List()->size() < iSize)
     {
-        if(++pSet->iCurBullet >= iSize) pSet->iCurBullet = 0u;
-
-        // check current bullet status
-        T* pBullet = &pSet->aBulletPool[pSet->iCurBullet];
-        if(CONTAINS_FLAG(pBullet->GetStatus(), BULLET_STATUS_READY))
+        // loop through all bullets
+        for(coreUintW i = iSize; i--; )
         {
-            // prepare bullet and add to active list
-            pBullet->Activate(iDamage, fSpeed, pOwner, vPosition, vDirection, m_iType);
-            pBullet->ResetProperties();
-            pSet->oBulletActive.BindObject(pBullet);
+            if(++pSet->iCurBullet >= iSize) pSet->iCurBullet = 0u;
 
-            return pBullet;
+            // check current bullet status
+            T* pBullet = &pSet->aBulletPool[pSet->iCurBullet];
+            if(CONTAINS_FLAG(pBullet->GetStatus(), BULLET_STATUS_READY))
+            {
+                // prepare bullet and add to active list
+                pBullet->Activate(iDamage, fSpeed, pOwner, vPosition, vDirection, m_iType);
+                pBullet->ResetProperties();
+                pSet->oBulletActive.BindObject(pBullet);
+
+                return pBullet;
+            }
         }
     }
+
+    const coreUintW iBefore = P_TO_UI(pSet->aBulletPool.data());
 
     // increase list and pool size by 100%
     pSet->oBulletActive.Reallocate(iSize * 2u);
     pSet->aBulletPool  .resize    (iSize * 2u);
 
-    // re-add all active bullets (addresses may have changed)
-    pSet->oBulletActive.Clear();
-    FOR_EACH(it, pSet->aBulletPool)
-    {
-        if(CONTAINS_FLAG(it->GetStatus(), BULLET_STATUS_ACTIVE))
-            pSet->oBulletActive.BindObject(&(*it));
-    }
+    const coreUintW iAfter = P_TO_UI(pSet->aBulletPool.data());
+
+    // fix addresses for all active bullets
+    FOR_EACH(it, *pSet->oBulletActive.List())
+        (*it) = r_cast<coreObject3D*>(I_TO_P(P_TO_UI(*it) - iBefore + iAfter));
 
     // execute again with first new bullet (overhead should be low, requested bullet set is cached)
     pSet->iCurBullet = iSize - 1u;
@@ -650,6 +665,8 @@ template <typename T> void cBulletManager::PrefetchBullet()
     {
         // 
         m_apBulletSet.emplace(T::ID, new sBulletSet<T>(&m_Outline));
+
+        Core::Log->Info("Bullet Set (%s) prefetched", T::Name);
     }
 }
 

@@ -12,7 +12,7 @@
 // ****************************************************************
 // constructor
 cSpecialEffects::cSpecialEffects()noexcept
-: m_ParticleColor    (512u)
+: m_ParticleColor    (1024u)
 , m_ParticleDark     (256u)
 , m_ParticleSmoke    (512u)
 , m_ParticleFire     (512u)
@@ -39,7 +39,7 @@ cSpecialEffects::cSpecialEffects()noexcept
     // 
     for(coreUintW i = 0u; i < SPECIAL_LIGHTNINGS; ++i)
     {
-        m_aLightning[i].DefineModel  (Core::Manager::Object->GetLowModel());
+        m_aLightning[i].DefineModel  (Core::Manager::Object->GetLowQuad());
         m_aLightning[i].DefineTexture(0u, "effect_lightning.png");
         m_aLightning[i].DefineProgram("effect_lightning_program");
         m_aLightning[i].SetAlpha     (0.0f);
@@ -560,7 +560,7 @@ void cSpecialEffects::MacroExplosionDarkSmall(const coreVector3& vPosition)
     // 
     g_pDistortion->CreateWave      (vPosition, DISTORTION_WAVE_SMALL);
     this         ->CreateSplashDark(vPosition, SPECIAL_SPLASH_SMALL);
-    this         ->CreateBlast     (vPosition, SPECIAL_BLAST_SMALL, coreVector3(1.0f,1.0f,1.0f));
+    this         ->CreateBlast     (vPosition, SPECIAL_BLAST_SMALL, COLOR_ENERGY_WHITE);
     this         ->PlaySound       (vPosition, 1.0f, SOUND_EXPLOSION_ENERGY_SMALL);
     this         ->ShakeScreen     (SPECIAL_SHAKE_SMALL);
 }
@@ -570,7 +570,7 @@ void cSpecialEffects::MacroExplosionDarkBig(const coreVector3& vPosition)
     // 
     g_pDistortion->CreateWave      (vPosition, DISTORTION_WAVE_BIG);
     this         ->CreateSplashDark(vPosition, SPECIAL_SPLASH_BIG);
-    this         ->CreateBlast     (vPosition, SPECIAL_BLAST_BIG, coreVector3(1.0f,1.0f,1.0f));
+    this         ->CreateBlast     (vPosition, SPECIAL_BLAST_BIG, COLOR_ENERGY_WHITE);
     this         ->PlaySound       (vPosition, 1.0f, SOUND_EXPLOSION_ENERGY_BIG);
     this         ->ShakeScreen     (SPECIAL_SHAKE_BIG);
 }

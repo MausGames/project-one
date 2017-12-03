@@ -64,7 +64,7 @@ void cMission::Setup()
 
     // 
     m_anStage.reverse();
-    STAGE_MAIN
+    m_anStage.emplace(0u, [this]()
     {
         // begin mission
         STAGE_FINISH_NOW

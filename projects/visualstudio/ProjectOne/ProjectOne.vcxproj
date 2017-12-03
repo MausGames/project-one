@@ -68,6 +68,18 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\environment\background\51_cStomachBackground.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\environment\background\52_cCaveBackground.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\source\environment\background\99_cCloudBackground.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -349,11 +361,17 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\source\interface\menu\cMenu.cpp" />
-    <ClCompile Include="..\..\..\source\main.cpp" />
+    <ClCompile Include="..\..\..\source\main.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\..\..\source\visual\cBlur.cpp" />
     <ClCompile Include="..\..\..\source\visual\cDistortion.cpp" />
     <ClCompile Include="..\..\..\source\visual\cForeground.cpp" />
     <ClCompile Include="..\..\..\source\visual\cGlow.cpp" />
+    <ClCompile Include="..\..\..\source\visual\cHeadlight.cpp" />
     <ClCompile Include="..\..\..\source\visual\cOutline.cpp" />
     <ClCompile Include="..\..\..\source\visual\cPostProcessing.cpp" />
     <ClCompile Include="..\..\..\source\visual\cShadow.cpp" />
@@ -391,6 +409,7 @@
     <ClInclude Include="..\..\..\source\visual\cDistortion.h" />
     <ClInclude Include="..\..\..\source\visual\cForeground.h" />
     <ClInclude Include="..\..\..\source\visual\cGlow.h" />
+    <ClInclude Include="..\..\..\source\visual\cHeadlight.h" />
     <ClInclude Include="..\..\..\source\visual\cOutline.h" />
     <ClInclude Include="..\..\..\source\visual\cPostProcessing.h" />
     <ClInclude Include="..\..\..\source\visual\cShadow.h" />
@@ -417,6 +436,8 @@
     <None Include="..\..\..\executable\data\shaders\effect_distortion.vert" />
     <None Include="..\..\..\executable\data\shaders\effect_energy.frag" />
     <None Include="..\..\..\executable\data\shaders\effect_energy.vert" />
+    <None Include="..\..\..\executable\data\shaders\effect_headlight.frag" />
+    <None Include="..\..\..\executable\data\shaders\effect_headlight.vert" />
     <None Include="..\..\..\executable\data\shaders\effect_lightning.frag" />
     <None Include="..\..\..\executable\data\shaders\effect_lightning.vert" />
     <None Include="..\..\..\executable\data\shaders\effect_outline.frag" />
@@ -426,6 +447,8 @@
     <None Include="..\..\..\executable\data\shaders\effect_particle_dark.frag" />
     <None Include="..\..\..\executable\data\shaders\effect_particle_fire.frag" />
     <None Include="..\..\..\executable\data\shaders\effect_particle_smoke.frag" />
+    <None Include="..\..\..\executable\data\shaders\effect_weather.frag" />
+    <None Include="..\..\..\executable\data\shaders\effect_weather.vert" />
     <None Include="..\..\..\executable\data\shaders\environment_vignette.frag" />
     <None Include="..\..\..\executable\data\shaders\effect_shadow.frag" />
     <None Include="..\..\..\executable\data\shaders\effect_shadow.vert" />
@@ -558,6 +581,8 @@
       <SmallerTypeCheck>true</SmallerTypeCheck>
       <BasicRuntimeChecks>UninitializedLocalUsageCheck</BasicRuntimeChecks>
       <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>main.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -587,6 +612,8 @@
       <MinimalRebuild>false</MinimalRebuild>
       <SmallerTypeCheck>true</SmallerTypeCheck>
       <BasicRuntimeChecks>UninitializedLocalUsageCheck</BasicRuntimeChecks>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>main.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -623,6 +650,8 @@
       <ExceptionHandling>false</ExceptionHandling>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>main.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -665,6 +694,8 @@
       <StringPooling>true</StringPooling>
       <ExceptionHandling>false</ExceptionHandling>
       <BufferSecurityCheck>false</BufferSecurityCheck>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>main.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

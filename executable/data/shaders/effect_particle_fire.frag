@@ -9,7 +9,7 @@
 
 
 // shader input
-varying float v_v1Time;   // current animation time (from 0.0 to 1.0)
+flat varying float v_v1Time;   // current animation time (from 0.0 to 1.0)
 
 
 void FragmentMain()

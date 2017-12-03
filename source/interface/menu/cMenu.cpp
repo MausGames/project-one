@@ -433,7 +433,7 @@ void cMenu::UpdateAnimateProgram(coreObject2D* OUTPUT pObject)
     ASSERT(pObject)
 
     // 
-    if(coreMath::InRange(pObject->GetSize().y, 0.0f, CORE_MATH_PRECISION)) return;
+    if(coreMath::IsNear(pObject->GetSize().y, 0.0f)) return;
 
     // 
     if(!pObject->GetProgram().IsUsable()) return;

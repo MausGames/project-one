@@ -259,8 +259,8 @@ void UpdateInput()
     }
 
     // 
-         if(!coreMath::InRange(g_TotalInput.vMove.x, 0.0f, CORE_MATH_PRECISION)) g_MenuInput.iMove = (g_TotalInput.vMove.x > 0.0f) ? 4u : 2u;
-    else if(!coreMath::InRange(g_TotalInput.vMove.y, 0.0f, CORE_MATH_PRECISION)) g_MenuInput.iMove = (g_TotalInput.vMove.y > 0.0f) ? 1u : 3u;
+         if(!coreMath::IsNear(g_TotalInput.vMove.x, 0.0f)) g_MenuInput.iMove = (g_TotalInput.vMove.x > 0.0f) ? 4u : 2u;
+    else if(!coreMath::IsNear(g_TotalInput.vMove.y, 0.0f)) g_MenuInput.iMove = (g_TotalInput.vMove.y > 0.0f) ? 1u : 3u;
 
     // 
     else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(UP),    CORE_INPUT_HOLD)) g_MenuInput.iMove = 1u;

@@ -11,7 +11,7 @@
 #define _P1_GUARD_CONFIG_H_
 
 // TODO: transfer to Core Engine
-// TODO: low quality settings affect also ship models
+// TODO: should low quality option also affect ship models ?
 // TODO: don't input-check for inactive players during game
 // TODO: default input should differ between keyboard and joystick, and between sets
 // TODO: SDL_JoystickCurrentPowerLevel

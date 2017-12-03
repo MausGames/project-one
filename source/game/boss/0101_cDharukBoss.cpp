@@ -430,7 +430,7 @@ void cDharukBoss::__MoveOwn()
                 const coreVector2 vBossPos = m_aiCounter[DUPLICATE_STATUS] ? this->GetPosition().xy() : this->GetPosition().xy().InvertedY();
                 const coreVector2 vDiff    = vBossPos - pBoomerang->GetPosition().xy();
 
-                if(coreMath::InRange(vDiff, coreVector2(0.0f,0.0f), coreVector2(1.0f, CORE_MATH_PRECISION)))
+                if(coreMath::IsNear(vDiff, coreVector2(0.0f,0.0f), coreVector2(1.0f, CORE_MATH_PRECISION)))
                     this->__DisableBoomerang(i, true);
             }
 
@@ -649,7 +649,7 @@ void cDharukBoss::__EncodeDirection(const coreUintW iIndex, const coreVector2& v
     else REMOVE_BIT(m_iPackedDir, 0u + 2u*iIndex);
 
     // 
-    if(coreMath::InRange(vDirection.y, 0.0f, CORE_MATH_PRECISION))
+    if(coreMath::IsNear(vDirection.y, 0.0f))
          ADD_BIT   (m_iPackedDir, 1u + 2u*iIndex)
     else REMOVE_BIT(m_iPackedDir, 1u + 2u*iIndex);
 

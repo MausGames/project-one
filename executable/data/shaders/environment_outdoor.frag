@@ -137,7 +137,7 @@ void FragmentMain()
 #if defined(_P1_LIGHT_)
 
     // 
-    gl_FragColor = vec4(v1Diffuse + v1Specular, 1.0, 1.0, 1.0);
+    gl_FragColor = vec4((v1Diffuse + v1Specular) * (1.0f / 1.75), 1.0, 1.0, 1.0);
 
 #else
 

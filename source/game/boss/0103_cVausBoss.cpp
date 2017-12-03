@@ -53,10 +53,7 @@ cVausBoss::cVausBoss()noexcept
         m_aCompanion[i].DefineModelHigh("object_boss_vaus_companion_high.md3");
         m_aCompanion[i].DefineModelLow ("object_boss_vaus_companion_low.md3");
         m_aCompanion[i].SetSize        (coreVector3(2.2f,2.2f,2.2f));
-
-        m_aCompanion[i].Configure(1, COLOR_SHIP_YELLOW);
-
-        m_aCompanion[i].SetPosition(coreVector3(0.0f,0.0f,0.0f));
+        m_aCompanion[i].Configure      (1, COLOR_SHIP_YELLOW);
     }
 
     // TODO: companions must rotate sometimes (after bounce ?)

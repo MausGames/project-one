@@ -12,11 +12,11 @@ void FragmentMain()
 {
     // 
     vec2 v2ScreenCoord = gl_FragCoord.xy * u_v4Resolution.zw;
-         v2ScreenCoord = abs(v2ScreenCoord * 2.0 - 1.0);
+         v2ScreenCoord = abs(v2ScreenCoord - 0.5);
 
     // 
     vec3  v3Color = coreTexture2D(0, v_av2TexCoord[0]).rgb;
-    float v1Alpha = clamp(max(v2ScreenCoord.x, v2ScreenCoord.y) * 6.0 - 3.7, 0.0, 1.0);
+    float v1Alpha = clamp(max(v2ScreenCoord.x, v2ScreenCoord.y) * 12.0 - 3.7, 0.0, 1.0);
 
     //if(v1Alpha == 1.0)
     //{

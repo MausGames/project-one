@@ -44,6 +44,8 @@ void cReplay::StartRecording()
     // 
     m_iCurFrame = 0u;
     m_iStatus   = REPLAY_STATUS_RECORDING;
+
+    Core::Log->Info("Replay recording started");
 }
 
 
@@ -63,6 +65,8 @@ void cReplay::StartPlayback()
     // 
     m_iCurFrame = 0u;
     m_iStatus   = REPLAY_STATUS_PLAYBACK;
+
+    Core::Log->Info("Replay playback started");
 }
 
 
@@ -88,6 +92,8 @@ void cReplay::End()
 
     // 
     m_iStatus = REPLAY_STATUS_DISABLED;
+
+    Core::Log->Info("Replay ended");
 }
 
 
@@ -124,8 +130,8 @@ void cReplay::Update()
             const sGameInput* pNewInput = g_pGame->GetPlayer(i)->GetInput();
 
             // 
-            if(!coreMath::InRange(pNewInput->vMove.x, m_aInput[i].vMove.x, CORE_MATH_PRECISION) ||
-               !coreMath::InRange(pNewInput->vMove.y, m_aInput[i].vMove.y, CORE_MATH_PRECISION))
+            if(!coreMath::IsNear(pNewInput->vMove.x, m_aInput[i].vMove.x) ||
+               !coreMath::IsNear(pNewInput->vMove.y, m_aInput[i].vMove.y))
             {
                 nNewPacketFunc(i, REPLAY_TYPE_MOVE, PackDirection(pNewInput->vMove));
             }

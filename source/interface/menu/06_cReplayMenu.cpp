@@ -138,10 +138,10 @@ void cReplayMenu::LoadReplays()
     // 
     for(coreUintW i = 0u; i < MENU_REPLAY_ENTRIES; ++i)
     {
-        const coreObjectEnable bEnabled = (i < m_aInfoList.size()) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING;
+        const coreObjectEnable iEnabled = (i < m_aInfoList.size()) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING;
 
-        m_aLine[i].SetEnabled(bEnabled);
-        m_aName[i].SetEnabled(bEnabled);
-        m_aTime[i].SetEnabled(bEnabled);
+        m_aLine[i].SetEnabled(iEnabled);
+        m_aName[i].SetEnabled(iEnabled);
+        m_aTime[i].SetEnabled(iEnabled);
     }
 }

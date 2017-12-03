@@ -265,8 +265,16 @@ cRayBullet::cRayBullet()noexcept
 void cRayBullet::__ImpactOwn(const coreVector2& vImpact)
 {
     // 
-    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f),                        25.0f, 1u, this->GetColor3());
-    g_pSpecialEffects->CreateBlowColor  (coreVector3(vImpact, 0.0f), -this->GetDirection(), 25.0f, 1u, this->GetColor3());
+    if(m_iElement == ELEMENT_WHITE)
+    {
+        g_pSpecialEffects->CreateSplashDark(coreVector3(vImpact, 0.0f),                        50.0f, 1u);
+        g_pSpecialEffects->CreateBlowDark  (coreVector3(vImpact, 0.0f), -this->GetDirection(), 50.0f, 1u);
+    }
+    else
+    {
+        g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f),                        50.0f, 1u, this->GetColor3());
+        g_pSpecialEffects->CreateBlowColor  (coreVector3(vImpact, 0.0f), -this->GetDirection(), 50.0f, 1u, this->GetColor3());
+    }
 }
 
 
@@ -486,7 +494,7 @@ cMineBullet::cMineBullet()noexcept
 void cMineBullet::GlobalInit()
 {
     // 
-    s_Wave.DefineModel  (Core::Manager::Object->GetLowModel());
+    s_Wave.DefineModel  (Core::Manager::Object->GetLowQuad());
     s_Wave.DefineTexture(0u, "effect_wave.png");
     s_Wave.DefineProgram("effect_decal_single_program");
 }

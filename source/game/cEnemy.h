@@ -72,7 +72,10 @@ public:
     void     DefaultRotateLerp   (const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime);
     void     DefaultOrientate    (const coreFloat fAngle);
     void     DefaultOrientateLerp(const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime);
+    void     DefaultAxiate       (const coreFloat fAngle);
+    void     DefaultAxiateLerp   (const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime);
     void     DefaultMultiate     (const coreFloat fAngle);
+    void     DefaultMultiateLerp (const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime);
 
     // 
     coreVector2 AimAtPlayer()const;
@@ -415,6 +418,8 @@ template <typename T> RETURN_RESTRICT T* cEnemyManager::AllocateEnemy()
         // create new enemy set
         pSet = new sEnemySet<T>();
         m_apEnemySet.emplace(T::ID, pSet);
+
+        Core::Log->Info("Enemy Set (%s) created", T::Name);
     }
     else pSet = s_cast<sEnemySet<T>*>(m_apEnemySet.at(T::ID));
 
@@ -488,6 +493,8 @@ template <typename T> void cEnemyManager::PrefetchEnemy()
 
         // 
         m_apEnemySet.emplace(T::ID, pSet);
+
+        Core::Log->Info("Enemy Set (%s) prefetched", T::Name);
     }
 }
 

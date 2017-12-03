@@ -10,8 +10,9 @@
 
 void FragmentMain()
 {
+    // don't use discard; 
     //if(dot(v_av2TexCoord[0], u_v2TexOffset) > 0.0 &&
-    //   dot(v_av2TexCoord[0].yx, vec2(1.0,0.0)) > 0.0) discard;
+    //   dot(v_av2TexCoord[0].yx, vec2(1.0, 0.0)) > 0.0) discard;
 
     //float v1Detail = coreTexture2D(0, v_av2TexCoord[1]).r * 16.0 - 1.0;
     //v1Detail = (v1Detail + 1.0) * 0.25;

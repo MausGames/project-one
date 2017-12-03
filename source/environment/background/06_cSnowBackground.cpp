@@ -12,6 +12,8 @@
 // ****************************************************************
 // constructor
 cSnowBackground::cSnowBackground()noexcept
+: m_vSnowDirection (coreVector2(0.0f,1.0f))
+, m_fSnowWave      (0.0f)
 {
     coreBatchList* pList1;
 
@@ -19,7 +21,7 @@ cSnowBackground::cSnowBackground()noexcept
     m_pOutdoor = new cOutdoor("snow", "snow", 1u, 4.0f);
 
     // 
-    m_pWater = new cIceWater();
+    m_pWater = new cIceWater("environment_clouds_blue.png");
 
     // allocate stone list
     pList1 = new coreBatchList(SNOW_STONE_RESERVE);
@@ -44,7 +46,7 @@ cSnowBackground::cSnowBackground()noexcept
                 if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 25.0f))
                 {
                     // create object
-                    coreObject3D* pObject = CUSTOM_NEW(s_MemoryPool, coreObject3D, oBase);
+                    coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
 
                     // set object properties
                     pObject->SetPosition   (coreVector3(vPosition, 0.0f));
@@ -96,7 +98,7 @@ cSnowBackground::cSnowBackground()noexcept
                        !cBackground::_CheckIntersection     (m_apGroundObjectList[0], vPosition, 25.0f))
                     {
                         // create object
-                        coreObject3D* pObject = CUSTOM_NEW(s_MemoryPool, coreObject3D, oBase);
+                        coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
 
                         // set object properties
                         pObject->SetPosition (coreVector3(vPosition, 0.0f));
@@ -123,58 +125,30 @@ cSnowBackground::cSnowBackground()noexcept
         m_pOutdoor->GetShadowMap()->BindList(pList1);
     }
 
-    // allocate snow list
-    pList1 = new coreBatchList(SNOW_SNOW_NUM);
-    pList1->DefineProgram("effect_decal_single_inst_program");
-    {
-        // load object resources
-        coreObject3D oBase;
-        oBase.DefineModel  (Core::Manager::Object->GetLowModel());
-        oBase.DefineTexture(0u, "effect_snow.png");
-        oBase.DefineProgram("effect_decal_single_program");
-
-        for(coreUintW i = 0u; i < SNOW_SNOW_NUM; ++i)
-        {
-            // create object
-            coreObject3D* pObject = CUSTOM_NEW(s_MemoryPool, coreObject3D, oBase);
-
-            // set object properties
-            pObject->SetPosition(coreVector3(0.0f,0.0f,0.0f));
-            pObject->SetSize    (coreVector3(1.0f,1.0f,1.0f) * SQRT2 * 80.0f);
-            pObject->SetAlpha   (0.9f);
-
-            // add object to the list
-            pList1->BindObject(pObject);
-        }
-
-        // post-process list and add it to the air
-        m_apAirObjectList.push_back(pList1);
-    }
-
     // allocate cloud list
     pList1 = new coreBatchList(SNOW_CLOUD_RESERVE);
     pList1->DefineProgram("environment_clouds_inst_program");
     {
         // load object resources
         coreObject3D oBase;
-        oBase.DefineModel  (Core::Manager::Object->GetLowModel());
+        oBase.DefineModel  (Core::Manager::Object->GetLowQuad());
         oBase.DefineTexture(0u, "environment_clouds_high.png");
         oBase.DefineProgram("environment_clouds_program");
 
         for(coreUintW i = 0u; i < SNOW_CLOUD_NUM; ++i)
         {
             // calculate position and height
-            const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(0.35f) * ((i % 2u) ? 1.0f : -1.0f), i, SNOW_CLOUD_NUM);
+            const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(0.1f, 0.25f) * ((i % 2u) ? 1.0f : -1.0f), i, SNOW_CLOUD_NUM);
             const coreFloat   fHeight   = Core::Rand->Float(20.0f, 60.0f);
 
             // create object
-            coreObject3D* pObject = CUSTOM_NEW(s_MemoryPool, coreObject3D, oBase);
+            coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
 
             // set object properties
             pObject->SetPosition (coreVector3(vPosition, fHeight));
             pObject->SetSize     (coreVector3(coreVector2(2.4f,2.4f) * Core::Rand->Float(15.0f, 21.0f), 1.0f));
             pObject->SetDirection(coreVector3(coreVector2::Rand(), 0.0f));
-            pObject->SetColor4   (coreVector4(0.8f + 0.2f * fHeight/60.0f, 1.0f, 1.0f, 0.45f));
+            pObject->SetColor4   (coreVector4(coreVector3(1.0f,1.0f,1.0f) * (0.8f + 0.2f * fHeight/60.0f), 0.45f));
             pObject->SetTexOffset(coreVector2::Rand(0.0f,10.0f, 0.0f,10.0f));
 
             // add object to the list
@@ -188,6 +162,37 @@ cSnowBackground::cSnowBackground()noexcept
 
         ASSERT(pList1->GetCurCapacity() == SNOW_CLOUD_RESERVE)
     }
+
+    // 
+    m_Snow.DefineTexture(0u, "effect_snow.png");
+    m_Snow.DefineProgram("effect_weather_snow_program");
+    m_Snow.SetPosition  (coreVector2(0.0f,0.0f));
+    m_Snow.SetSize      (coreVector2(1.0f,1.0f) * SQRT2);
+    m_Snow.SetAlpha     (0.9f);
+}
+
+
+// ****************************************************************
+// render the snow background
+void cSnowBackground::__RenderOwn()
+{
+    // enable the shader-program
+    if(!m_Snow.GetProgram().IsUsable()) return;
+    if(!m_Snow.GetProgram()->Enable())  return;
+
+    // 
+    for(coreUintW i = 0u; i < SNOW_SNOW_NUM; ++i)
+    {
+        const coreVector2 vNewTexOffset = m_Snow.GetTexOffset() + coreVector2(0.56f,0.36f) * I_TO_F(i*i) + coreVector2(0.13f * SIN(m_fSnowWave * (0.125f*PI) + I_TO_F(i*i)), 0.0f);
+        const coreFloat   fNewScale     = 0.9f - 0.07f * I_TO_F(i);
+
+        m_Snow.GetProgram()->SendUniform(PRINT("u_av3OverlayTransform[%zu]", i), coreVector3(vNewTexOffset.Processed(FRACT), fNewScale));
+    }
+
+    // 
+    glDisable(GL_DEPTH_TEST);
+    m_Snow.Render();
+    glEnable(GL_DEPTH_TEST);
 }
 
 
@@ -196,29 +201,18 @@ cSnowBackground::cSnowBackground()noexcept
 void cSnowBackground::__MoveOwn()
 {
     // 
-    coreBatchList*      pList = m_apAirObjectList[0];
-    const coreObject3D* pBase = (*pList->List()) [0];
+    const coreVector2 vMove      = m_vSnowDirection * (-0.35f * g_pEnvironment->GetSpeed());
+    const coreVector2 vTexSize   = coreVector2(1.0f,1.0f) * 5.4f;
+    const coreVector2 vTexOffset = m_Snow.GetTexOffset() + (coreVector2(0.0f,0.0f) + vMove) * (0.9f * Core::System->GetTime());
 
     // 
-    const coreFloat   fStrength  = 0.9f;
-    const coreVector2 vPosition  = g_pEnvironment->GetCameraPos().xy();
-    const coreVector2 vDirection = coreVector2(-1.0f, g_pEnvironment->GetSpeed()).Normalized();
-    const coreFloat   fLength    = 1.0f - 0.04f * g_pEnvironment->GetSpeed();
-    const coreVector2 vMove      = vDirection * (-0.35f * g_pEnvironment->GetSpeed());
-    const coreVector2 vTexSize   = coreVector2(1.0f, fLength) * (6.0f * fStrength);
-    const coreVector2 vTexOffset = pBase->GetTexOffset() + (coreVector2(0.0f,-1.2f) + vMove) * coreVector2(1.0f, fLength) * (Core::System->GetTime() * fStrength);
+    m_Snow.SetDirection((m_vSnowDirection.InvertedX() * coreMatrix3::Rotation(g_pEnvironment->GetDirection()).m12()).Normalized());
+    m_Snow.SetTexSize  (vTexSize);
+    m_Snow.SetTexOffset(vTexOffset.Processed(FRACT));
+    m_Snow.Move();
 
     // 
-    for(coreUintW i = 0u; i < SNOW_SNOW_NUM; ++i)
-    {
-        coreObject3D* pSnow = (*pList->List())[i];
+    m_fSnowWave.UpdateMod(SQRT(MAX(ABS(g_pEnvironment->GetSpeed()), 1.0f)), 16.0f);
 
-        pSnow->SetPosition (coreVector3(vPosition,  10.0f * I_TO_F(i)));
-        pSnow->SetDirection(coreVector3(vDirection, 0.0f));
-        pSnow->SetTexSize  ((vTexSize));
-        pSnow->SetTexOffset((vTexOffset + coreVector2(0.56f,0.36f) * I_TO_F(i*i)).Processed(FRACT));
-    }
-    pList->MoveNormal();
-
-    // TODO: make snow waving a bit, improve snow texture to little flakes (broken quads) 
+    // TODO: improve snow texture to little flakes (broken quads) 
 }

@@ -11,8 +11,7 @@
 // shader uniforms
 uniform mat4  u_m4ShadowMatrix;   // own shadow view-projection matrix (with coordinate adjustment)
 uniform float u_v1Blink;          // 
-
-uniform float u_v1Time;
+uniform float u_v1Time;           // 
 
 // vertex attributes
 attribute float a_v1Blink;        // 
@@ -61,7 +60,7 @@ void VertexMain()
 #if defined(_CORE_OPTION_INSTANCING_)
     float v1Blink = a_v1Blink;
 #else
-    float v1Blink = u_v1Blink;
+    float v1Blink = u_v1Blink;   // TODO: put into fragment shader 
 #endif
 
     // transform lighting properties

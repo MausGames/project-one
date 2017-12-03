@@ -43,6 +43,9 @@ void CoreApp::Init()
     // set camera to default values
     Core::Graphics->SetCamera(CAMERA_POSITION, CAMERA_DIRECTION, CAMERA_ORIENTATION);
 
+    // set view frustum to default values
+    Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 50.0f, 500.0f);
+
     // set listener to default values
     Core::Audio->SetListener(coreVector3(0.0f,0.0f,10.0f), coreVector3(0.0f,0.0f,0.0f),
                              coreVector3(0.0f,0.0f,-1.0f), coreVector3(0.0f,1.0f,0.0f));
@@ -240,6 +243,8 @@ void InitFramerate()
         // check again and enable hard-lock on error
         if(oMode.refresh_rate != F_TO_SI(FRAMERATE_VALUE))
             m_bHardLock = true;
+
+        Core::Log->Warning("Framerate manually overridden (%s)", m_bHardLock ? "hard" : "soft");
     }
 }
 
@@ -443,9 +448,13 @@ static void DebugGame()
 
     if(g_pEnvironment->GetBackground()->GetOutdoor())
     {
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(M), CORE_INPUT_PRESS))
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(COMMA), CORE_INPUT_PRESS))
         {
             g_pEnvironment->GetBackground()->GetOutdoor()->LerpHeight(1.0f, 0.0f);
+        }
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(M), CORE_INPUT_PRESS))
+        {
+            g_pEnvironment->GetBackground()->GetOutdoor()->LerpHeight(0.0f, -15.0f);
         }
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(N), CORE_INPUT_PRESS))
         {

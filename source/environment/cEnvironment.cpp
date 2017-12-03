@@ -173,6 +173,8 @@ void cEnvironment::ChangeBackground(const coreInt32 iID, const coreUintW iTransi
     case cSnowBackground   ::ID: m_pBackground = new cSnowBackground   (); break;
     case cMossBackground   ::ID: m_pBackground = new cMossBackground   (); break;
     case cDarkBackground   ::ID: m_pBackground = new cDarkBackground   (); break;
+    case cStomachBackground::ID: m_pBackground = new cStomachBackground(); break;
+    case cCaveBackground   ::ID: m_pBackground = new cCaveBackground   (); break;
     case cCloudBackground  ::ID: m_pBackground = new cCloudBackground  (); break;
     }
 
@@ -191,6 +193,8 @@ void cEnvironment::ChangeBackground(const coreInt32 iID, const coreUintW iTransi
         m_MixObject.DefineTexture(0u, m_pOldBackground->GetResolvedTexture()->GetColorTarget(0u).pTexture);
         m_MixObject.DefineTexture(1u, m_pBackground   ->GetResolvedTexture()->GetColorTarget(0u).pTexture);
     }
+
+    Core::Log->Info("Background (%s) created", m_pBackground->GetName());
 }
 
 

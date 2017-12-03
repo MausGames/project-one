@@ -25,8 +25,8 @@ cBlur::cBlur(const coreTextureSpec& oTextureSpec, const coreFloat fScale, const 
     }
 
     // load shader-programs for separate convolution
-    m_apConvProgram[0] = Core::Manager::Resource->Get<coreProgram>("full_blur_1_program");
-    m_apConvProgram[1] = Core::Manager::Resource->Get<coreProgram>("full_blur_2_program");
+    m_apConvProgram[0] = Core::Manager::Resource->Get<coreProgram>("full_blur_1x_program");
+    m_apConvProgram[1] = Core::Manager::Resource->Get<coreProgram>("full_blur_2y_program");
 
     // create transformer object
     m_Transformer.SetSize (coreVector2(1.0f,1.0f) * m_fScale);

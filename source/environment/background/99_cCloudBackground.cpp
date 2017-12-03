@@ -22,7 +22,7 @@ cCloudBackground::cCloudBackground()noexcept
     {
         // load object resources
         coreObject3D oBase;
-        oBase.DefineModel  (Core::Manager::Object->GetLowModel());
+        oBase.DefineModel  (Core::Manager::Object->GetLowQuad());
         oBase.DefineTexture(0u, "environment_clouds_mid.png");
         oBase.DefineProgram("environment_clouds_program");
 
@@ -33,13 +33,13 @@ cCloudBackground::cCloudBackground()noexcept
             const coreFloat   fHeight   = Core::Rand->Float(20.0f, 60.0f);
 
             // create object
-            coreObject3D* pObject = CUSTOM_NEW(s_MemoryPool, coreObject3D, oBase);
+            coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
 
             // set object properties
             pObject->SetPosition (coreVector3(vPosition, fHeight));
             pObject->SetSize     (coreVector3(coreVector2(2.4f,2.4f) * Core::Rand->Float(15.0f, 21.0f), 1.0f));
             pObject->SetDirection(coreVector3(coreVector2::Rand(), 0.0f));
-            pObject->SetColor4   (coreVector4(0.8f + 0.2f * fHeight/60.0f, 1.0f, 1.0f, 0.85f));
+            pObject->SetColor4   (coreVector4(coreVector3(1.0f,1.0f,1.0f) * (0.8f + 0.2f * fHeight/60.0f), 0.85f));
             pObject->SetTexOffset(coreVector2::Rand(0.0f,10.0f, 0.0f,10.0f));
 
             // add object to the list

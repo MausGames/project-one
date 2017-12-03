@@ -22,9 +22,7 @@ cOutdoor::cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom
 , m_aiLerpRange   {}
 , m_afLerpData    {}
 {
-    const coreTextureSpec oSpec = CORE_GL_SUPPORT(ARB_texture_rg)    ?
-                                 (CORE_GL_SUPPORT(ARB_texture_float) ? CORE_TEXTURE_SPEC_R16F           : CORE_TEXTURE_SPEC_R8) :
-                                 (CORE_GL_SUPPORT(EXT_packed_float)  ? CORE_TEXTURE_SPEC_R11F_G11F_B10F : CORE_TEXTURE_SPEC_RGB8);
+    const coreTextureSpec oSpec = CORE_GL_SUPPORT(ARB_texture_rg) ? CORE_TEXTURE_SPEC_R8 : CORE_TEXTURE_SPEC_RGB8;
 
     // set object properties
     this->SetPosition(coreVector3(0.0f,0.0f,0.0f));
@@ -115,14 +113,15 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
     switch(iAlgorithm)
     {
     default: ASSERT(false)
-    case 1u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r = -(COS((x - I_TO_F(OUTDOOR_WIDTH / 2u)) * 0.087f*PI) * 10.0f);                                                                                      return r;}; break;
-    case 2u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(y*0.075f*PI) + SIN(x*0.075f*PI)) * 8.0f - 6.0f);                                                                                         return r;}; break;
-    case 3u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(y*0.075f*PI) * 0.25f - (x / I_TO_F(OUTDOOR_WIDTH) - 0.5f) * 4.0f) * 20.0f - 13.0f);                                                      return r;}; break;
-    case 4u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r = -(ABS(SIN(y*0.150f*PI) * 0.25f - (x / I_TO_F(OUTDOOR_WIDTH) - 0.5f) * 2.0f) * 20.0f - 10.0f) * SIN(y*0.150f*PI) - 0.0f; if(r <    0.0f) r = -1.0f; return r;}; break;
-    case 5u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(y*0.075f*PI) * 0.25f + (x / I_TO_F(OUTDOOR_WIDTH) - 0.5f) * 2.0f) * 20.0f - 10.0f) * SIN(y*0.075f*PI) - 1.5f; if(r < -100.0f) r = -1.0f; return r;}; break;
-    case 6u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(y*0.075f*PI) * 0.25f - (x / I_TO_F(OUTDOOR_WIDTH) - 0.5f) * 4.0f) * 20.0f - 10.0f) * SIN(y*0.150f*PI) - 1.0f;                            return r;}; break;
-    case 7u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(y*0.075f*PI) * 0.25f - (x / I_TO_F(OUTDOOR_WIDTH) - 0.5f) * 4.0f) * 20.0f - 10.0f) * SIN(y*0.075f*PI) + 3.0f;                            return r;}; break;
-    case 8u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(y*0.075f*PI) * 0.25f - (x / I_TO_F(OUTDOOR_WIDTH) - 0.5f) * 4.0f) * 20.0f - 10.0f) * SIN(y*0.075f*PI) + 1.0f;                            return r;}; break;
+    case 1u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r = -(COS((x - I_TO_F(OUTDOOR_WIDTH / 2u)) * 0.087f*PI) * 10.0f);                                                                                              return r;}; break;
+    case 2u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(y*0.075f*PI) + SIN(x*0.075f*PI)) * 8.0f - 6.0f);                                                                                                 return r;}; break;
+    case 3u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(y*0.075f*PI) * 0.25f - ((x+0.5f) / I_TO_F(OUTDOOR_WIDTH) - 0.5f) * 4.0f) * 20.0f - 13.0f);                                                       return r;}; break;
+    case 4u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r = -(ABS(SIN(y*0.150f*PI) * 0.25f - ((x+0.0f) / I_TO_F(OUTDOOR_WIDTH) - 0.5f) * 2.0f) * 20.0f - 10.0f) * SIN(y*0.150f *PI) - 0.0f; if(r <    0.0f) r = -1.0f; return r;}; break;
+    case 5u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(y*0.075f*PI) * 0.25f + ((x+0.0f) / I_TO_F(OUTDOOR_WIDTH) - 0.5f) * 2.0f) * 20.0f - 10.0f) * SIN(y*0.075f *PI) - 1.5f; if(r < -100.0f) r = -1.0f; return r;}; break;
+    case 6u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(y*0.075f*PI) * 0.25f - ((x+0.0f) / I_TO_F(OUTDOOR_WIDTH) - 0.5f) * 4.0f) * 20.0f - 10.0f) * SIN(y*0.150f *PI) - 1.0f;                            return r;}; break;
+    case 7u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(y*0.075f*PI) * 0.25f - ((x+0.0f) / I_TO_F(OUTDOOR_WIDTH) - 0.5f) * 4.0f) * 20.0f - 10.0f) * SIN(y*0.075f *PI) + 3.0f;                            return r;}; break;
+    case 8u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r =  (ABS(SIN(y*0.075f*PI) * 0.25f - ((x+0.0f) / I_TO_F(OUTDOOR_WIDTH) - 0.5f) * 4.0f) * 20.0f - 10.0f) * SIN(y*0.0375f*PI) - 1.0f;                            return r;}; break;
+    case 9u: nAlgorithmFunc = [](const coreFloat x, const coreFloat y) {coreFloat r = -(COS((x - I_TO_F(OUTDOOR_WIDTH / 2u)) * 0.087f*PI) * 10.0f + SIN(y*0.087f*PI) * 10.0f) + 7.0f;                                                            return r;}; break;
     }
 
     // create vertices
@@ -138,7 +137,7 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
             // add randomness to the level and smooth out water-intersection-area
             coreFloat fSmoothLevel;
             do {fSmoothLevel = CLAMP(fLevel, -fGrade*1.5f, fGrade*1.5f) + Core::Rand->Float(-0.5f, 0.5f)*fGrade;}
-            while(coreMath::InRange(fSmoothLevel, 0.0f, fGrade*0.25f));
+            while(coreMath::IsNear(fSmoothLevel, 0.0f, fGrade*0.25f));
 
             // forward smooth level
             fLevel = fSmoothLevel;
@@ -276,7 +275,7 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
         pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_TEXCOORD_NUM, 2u, GL_FLOAT, false, 0u);
     }
 
-    Core::Log->Info("Outdoor-Surface loaded (%d:%.0f)", iAlgorithm, fGrade);
+    Core::Log->Info("Outdoor-Surface (%d:%.0f) loaded", iAlgorithm, fGrade);
 }
 
 

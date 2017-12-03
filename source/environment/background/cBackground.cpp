@@ -42,7 +42,7 @@ cBackground::~cBackground()
         FOR_EACH(it, *papList)
         {
             // delete single objects within the list
-            FOR_EACH(et, *(*it)->List()) CUSTOM_DELETE(s_MemoryPool, coreObject3D, *et)
+            FOR_EACH(et, *(*it)->List()) POOLED_DELETE(s_MemoryPool, coreObject3D, *et)
             SAFE_DELETE(*it)
         }
 
@@ -83,6 +83,9 @@ void cBackground::Render()
         m_pOutdoor->UpdateLightMap();
     }
 
+    // 
+    this->__UpdateOwn();
+
     // fill background frame buffer
     m_FrameBuffer.StartDraw();
     m_FrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR | CORE_FRAMEBUFFER_TARGET_DEPTH);   // color-clear improves performance
@@ -119,9 +122,6 @@ void cBackground::Render()
         }
         glEnable(GL_BLEND);
 
-        // call individual render routine
-        this->__RenderOwn();
-
         glDisable(GL_DEPTH_TEST);
         {
             // render all air objects
@@ -129,6 +129,9 @@ void cBackground::Render()
                 (*it)->Render();
         }
         glEnable(GL_DEPTH_TEST);
+
+        // call individual render routine
+        this->__RenderOwn();
     }
 
     // resolve frame buffer to texture
@@ -170,6 +173,8 @@ void cBackground::Move()
 
         FOR_EACH(it, *papList)
         {
+            WARN_IF((*it)->List()->empty()) continue;
+
             coreBool bUpdate = false;
 
             // 
@@ -233,7 +238,7 @@ void cBackground::Move()
         FOR_EACH_DYN(it, *papObject)
         {
             // keep object while in current view
-            if(coreMath::InRange((*it)->GetPosition().y, g_pEnvironment->GetCameraPos().y, fRange)) DYN_KEEP(it)
+            if(coreMath::IsNear((*it)->GetPosition().y, g_pEnvironment->GetCameraPos().y, fRange)) DYN_KEEP(it)
             else
             {
                 // remove object when not visible anymore
@@ -423,7 +428,7 @@ void cBackground::_FillInfinite(coreBatchList* OUTPUT pObjectList, const coreUin
         if(pOldObject->GetPosition().y < I_TO_F(OUTDOOR_VIEW / 2u) * OUTDOOR_DETAIL)
         {
             // copy object and move it to the end area
-            coreObject3D* pNewObject = CUSTOM_NEW(s_MemoryPool, coreObject3D, *pOldObject);
+            coreObject3D* pNewObject = POOLED_NEW(s_MemoryPool, coreObject3D, *pOldObject);
             pNewObject->SetPosition(pNewObject->GetPosition() + coreVector3(0.0f, I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL, 0.0f));
 
             // bind the new object
@@ -433,8 +438,8 @@ void cBackground::_FillInfinite(coreBatchList* OUTPUT pObjectList, const coreUin
     }
 
     // reduce memory consumption
-    ASSERT(pObjectList->GetCurCapacity() <= iReserve)
-    ASSERT(pObjectList->GetCurCapacity() >= iReserve / 2u)
+    ASSERT(pObjectList->List()->size() <= iReserve)
+    ASSERT(pObjectList->List()->size() >= iReserve * 2u / 5u)
     pObjectList->ShrinkToFit();
 }
 
@@ -494,4 +499,6 @@ FUNC_PURE coreBool cBackground::_CheckIntersectionQuick(const coreBatchList* pOb
 #include "06_cSnowBackground.cpp"
 #include "07_cMossBackground.cpp"
 #include "08_cDarkBackground.cpp"
+#include "51_cStomachBackground.cpp"
+#include "52_cCaveBackground.cpp"
 #include "99_cCloudBackground.cpp"

@@ -14,7 +14,7 @@
 cSeaBackground::cSeaBackground()noexcept
 : m_fWaveTime (0.0f)
 {
-    // TODO: bubbles, water-sound ?    
+    // TODO: bubbles ?    
 
     coreBatchList* pList1;
     coreBatchList* pList2;
@@ -48,7 +48,7 @@ cSeaBackground::cSeaBackground()noexcept
                 if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 25.0f))
                 {
                     // create object
-                    coreObject3D* pObject = CUSTOM_NEW(s_MemoryPool, coreObject3D, oBase);
+                    coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
 
                     // set object properties
                     pObject->SetPosition   (coreVector3(vPosition, 0.0f));
@@ -100,7 +100,7 @@ cSeaBackground::cSeaBackground()noexcept
                        !cBackground::_CheckIntersection     (m_apGroundObjectList[0], vPosition, 9.0f))
                     {
                         // create object
-                        coreObject3D* pObject = CUSTOM_NEW(s_MemoryPool, coreObject3D, oBase);
+                        coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
 
                         // set object properties
                         pObject->SetPosition   (coreVector3(vPosition, 0.0f));
@@ -166,10 +166,10 @@ cSeaBackground::cSeaBackground()noexcept
                         const coreVector3 vOrientation = coreVector3::Cross(vDirection, vTangent);
 
                         // determine object type
-                        const coreBool bType = Core::Rand->Int(3) ? true : false;
+                        const coreBool bType = Core::Rand->Bool(0.75f) ? true : false;
 
                         // create object
-                        coreObject3D* pObject = CUSTOM_NEW(s_MemoryPool, coreObject3D, oBase);
+                        coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
                         pObject->DefineModel(bType ? "environment_seashell.md3" : "environment_starfish.md3");
 
                         // set object properties
@@ -205,13 +205,14 @@ cSeaBackground::cSeaBackground()noexcept
         m_pOutdoor->GetShadowMap()->BindList(pList2);
     }
 
+    /*
     // allocate algae list
     pList1 = new coreBatchList(SEA_ALGAE_RESERVE);
     pList1->DefineProgram("effect_decal_inst_program");
     {
         // load object resources
         coreObject3D oBase;
-        oBase.DefineModel  (Core::Manager::Object->GetLowModel());
+        oBase.DefineModel  (Core::Manager::Object->GetLowQuad());
         oBase.DefineTexture(0u, "environment_algae.png");
         oBase.DefineProgram("effect_decal_program");
 
@@ -227,7 +228,7 @@ cSeaBackground::cSeaBackground()noexcept
                 if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 700.0f))
                 {
                     // create object
-                    coreObject3D* pObject = CUSTOM_NEW(s_MemoryPool, coreObject3D, oBase);
+                    coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
 
                     // set object properties
                     pObject->SetPosition(coreVector3(vPosition, fHeight));
@@ -246,6 +247,24 @@ cSeaBackground::cSeaBackground()noexcept
         cBackground::_FillInfinite(pList1, SEA_ALGAE_RESERVE);
         m_apDecalObjectList.push_back(pList1);
     }
+    */
+
+    // 
+    m_pUnderSound = Core::Manager::Resource->Get<coreSound>("environment_under.wav");
+    m_pUnderSound.OnUsableOnce([this, pResource = m_pUnderSound]()
+    {
+        pResource->PlayRelative(this, 0.0f, 1.0f, 0.0f, true);
+    });
+}
+
+
+// ****************************************************************
+// destructor
+cSeaBackground::~cSeaBackground()
+{
+    // 
+    if(m_pUnderSound->EnableRef(this))
+        m_pUnderSound->Stop();
 }
 
 
@@ -263,6 +282,10 @@ void cSeaBackground::__RenderOwn()
     // 
     pProgram->Enable();
     pProgram->SendUniform("u_v1Time", m_fWaveTime);
+
+    // 
+    if(m_pUnderSound->EnableRef(this))
+        m_pUnderSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
 
     // TODO: this here is rendered after the water, therefore the shader is updated too late and affects each other on transition  
 }

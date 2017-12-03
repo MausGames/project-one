@@ -18,7 +18,7 @@ void FragmentMain()
     vec2 v2Distortion = coreTexture2D(3, v_av2TexCoord[0]).rg;   // # low-res
 
     // move texture coordinates
-    if(any(bvec4(lessThan(v2Distortion, vec2(127.4/255.0)), greaterThan(v2Distortion, vec2(127.6/255.0)))))
+    if(any(bvec4(lessThan(v2Distortion, vec2(127.35/255.0)), greaterThan(v2Distortion, vec2(127.65/255.0)))))
         v2TexCoord += (v2Distortion * 2.0 - 1.0) * vec2(-0.5, 0.5);
 
 #endif
@@ -34,6 +34,9 @@ void FragmentMain()
     v3Glow = vec3(0.0);
 
 #endif
+
+    //v3Environment.rgb = vec3(1.0 - coreLuminance(v3Environment.rgb));
+    //v3Environment.rgb = mix(v3Environment.rgb, vec3(coreLuminance(v3Environment.rgb)), u_v4Color.r);
 
     // (vignetting) 
     float v1Intensity = 1.0 - 0.33 * coreLengthSq(v_av2TexCoord[0] - vec2(0.5));
@@ -54,6 +57,8 @@ void FragmentMain()
     //    //gl_FragColor = vec4(mix(v3Color, v3Gray, 0.7), 1.0);
     //}
     //gl_FragColor = vec4(mix(v3Color, v3Gray, step(6.0, dot(v3Color, vec3(1.0, 10.0, 10.0)))), 1.0);
+
+    //gl_FragColor = vec4(vec3(1.0 - v3Gray.x), 1.0);
 
 #if defined(_P1_DEBUG_)
 
