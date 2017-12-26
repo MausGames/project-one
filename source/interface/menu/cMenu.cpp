@@ -181,9 +181,11 @@ void cMenu::Move()
 
                 // 
                 ASSERT(!g_pGame)
-                g_pGame = new cGame(false);
-                g_pGame->LoadMission(cIntroMission::ID);
+                g_pGame = new cGame(m_GameMenu.GetSelectedDifficulty(), (m_GameMenu.GetSelectedPlayers() > 1u) ? true : false, GAME_MISSION_LIST_DEFAULT);
+                g_pGame->LoadNextMission();
 
+                // 
+                g_pReplay->StartRecording();
             }
             else if(m_GameMenu.GetStatus() == 2)
             {
@@ -207,16 +209,18 @@ void cMenu::Move()
         {
             if(m_ReplayMenu.GetStatus() == 1)
             {
-
+                // 
+                this->ChangeSurface(SURFACE_EMPTY, 1.0f);
 
                 // 
+                g_pReplay->CreateGame();
+                g_pReplay->StartPlayback();
             }
             else if(m_ReplayMenu.GetStatus() == 2)
             {
                 // return to previous menu
                 this->ChangeSurface(this->GetOldSurface(), 3.0f);
             }
-
         }
         break;
 
@@ -270,9 +274,19 @@ void cMenu::Move()
                 this->ChangeSurface(SURFACE_MAIN, 1.0f);
 
                 // 
+                if(g_pReplay->GetStatus() == REPLAY_STATUS_RECORDING)
+                {
+                    g_pReplay->EndRecording();
+                    g_pReplay->SaveFile(PRINT("Debug Replay %s", coreData::DateTimePrint("%Y-%m-%d %H:%M:%S")));
+                }
+                else if(g_pReplay->GetStatus() == REPLAY_STATUS_PLAYBACK)
+                {
+                    g_pReplay->EndPlayback();
+                }
+
+                // 
                 ASSERT(g_pGame)
                 SAFE_DELETE(g_pGame)
-
             }
         }
         break;

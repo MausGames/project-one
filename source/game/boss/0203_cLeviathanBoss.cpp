@@ -63,7 +63,7 @@ void cLeviathanBoss::__MoveOwn()
         {
             if(PHASE_TIME_POINT(0.85f))
             {
-                g_pGame->GetMission()->SetCurBoss(this);
+                g_pGame->GetCurMission()->ActivateBoss(this);
                 g_pGame->GetInterface()->ShowBoss(this);
 
                 for(coreUintW i = 1u; i < LEVIATHAN_PARTS; ++i)

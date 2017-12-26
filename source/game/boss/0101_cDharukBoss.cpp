@@ -133,7 +133,7 @@ void cDharukBoss::__KillOwn(const coreBool bAnimated)
     g_pGlow->UnbindList  (&m_BoomerangTrail);
 
     // 
-    g_pGame->GetMission()->SetCurBoss(MISSION_NO_BOSS);
+    g_pGame->GetCurMission()->DeactivateBoss();
 
     [](void){{}},[]()->void{}();
 }
@@ -208,7 +208,7 @@ void cDharukBoss::__MoveOwn()
 
             if(PHASE_TIME_POINT(0.85f))
             {
-                g_pGame->GetMission()->SetCurBoss(this);
+                g_pGame->GetCurMission()->ActivateBoss(this);
                 g_pGame->GetInterface()->ShowBoss(this);
             }
 

@@ -12,12 +12,12 @@
 // ****************************************************************
 // constructor
 cPlayer::cPlayer()noexcept
-: m_pInput         (&g_TotalInput)
-, m_vForce         (coreVector2(0.0f,0.0f))
-, m_fRollTime      (0.0f)
-, m_iRollDir       (PLAYER_NO_ROLL)
-, m_fChainCooldown (0.0f)
-, m_fAnimation     (0.0f)
+: m_apWeapon   {}
+, m_pInput     (&g_TotalInput)
+, m_vForce     (coreVector2(0.0f,0.0f))
+, m_fRollTime  (0.0f)
+, m_iRollDir   (PLAYER_NO_ROLL)
+, m_fAnimation (0.0f)
 {
     // load object resources
     this->DefineTexture(0u, "ship_player.png");
@@ -31,7 +31,7 @@ cPlayer::cPlayer()noexcept
 
     // set initial status
     m_iStatus = PLAYER_STATUS_DEAD;
-    this->SetMaxHealth(100);
+    this->SetMaxHealth(1);
 
     // load first weapons
     for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
@@ -40,11 +40,12 @@ cPlayer::cPlayer()noexcept
         m_apWeapon[i]->SetOwner(this);
     }
 
-    // reset scoring stats
-    this->ResetStats();
+    // 
+    m_ScoreTable.SetOwner(this);
 
     // 
     m_pDarkProgram = Core::Manager::Resource->Get<coreProgram>("object_ship_darkness_program");
+    std::swap(m_pDarkProgram, m_pProgram);
 
     // 
     m_Wind.DefineModel  ("object_sphere.md3");
@@ -263,14 +264,11 @@ void cPlayer::Move()
         }
 
         // 
-        if(m_fChainCooldown)
-        {
-            if(!(m_fChainCooldown = MAX(m_fChainCooldown - Core::System->GetTime(), 0.0f)))
-                this->TransferChain();
-        }
+        m_ScoreTable.Update();
 
         // 
         m_fAnimation.UpdateMod(1.0f, 20.0f);
+        this->SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.25f));
 
         if(m_Wind.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
         {
@@ -286,9 +284,6 @@ void cPlayer::Move()
 
         if(m_Bubble.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
         {
-            // 
-            this->SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.25f));
-
             // 
             if(CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DARKNESS))
                  m_Bubble.SetAlpha(MIN(m_Bubble.GetAlpha() + 4.0f*Core::System->GetTime(), 0.8f));
@@ -320,8 +315,8 @@ coreBool cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement)
         //g_pGame->GetCombatText()->AddDamage(iDamage, this->GetPosition());   
 
         // 
-        this->TransferChain();
-        this->ReduceCombo();
+        m_ScoreTable.TransferChain();
+        m_ScoreTable.ReduceCombo();
     }
 
     // 
@@ -377,100 +372,6 @@ void cPlayer::Kill(const coreBool bAnimated)
 
     // remove ship from the game
     this->_Kill(true, bAnimated);
-}
-
-
-// ****************************************************************
-// 
-void cPlayer::AddScore(const coreUint32 iValue, const coreBool bModified)
-{
-    const coreUint32 iFinalValue = bModified ? (iValue * this->GetCurCombo()) : iValue;
-
-    // 
-    m_iScoreGame    += iFinalValue;
-    m_iScoreMission += iFinalValue;
-
-    // 
-    if(g_pGame->GetMission()->GetCurBoss())
-        m_aiScoreBoss[g_pGame->GetMission()->GetCurBossIndex()] += iFinalValue;
-}
-
-
-// ****************************************************************
-// 
-void cPlayer::AddCombo(const coreUint32 iValue)
-{
-    const coreUint32 iOld = F_TO_UI(this->GetCurCombo());
-    {
-        // 
-        m_iComboValue[0] += iValue;
-        m_iComboValue[1]  = MAX(m_iComboValue[0], m_iComboValue[1]);
-    }
-    const coreUint32 iNew = F_TO_UI(this->GetCurCombo());
-
-    // 
-    if(iOld != iNew) g_pGame->GetCombatText()->AddCombo(iNew, this->GetPosition());
-}
-
-void cPlayer::AddCombo(const coreFloat fModifier)
-{
-    // TODO # 
-}
-
-
-// ****************************************************************
-// 
-void cPlayer::AddChain(const coreUint32 iValue)
-{
-    // 
-    m_iChainValue[0] += iValue;
-    m_iChainValue[1]  = MAX(m_iChainValue[0], m_iChainValue[1]);
-
-    // 
-    m_fChainCooldown = 1.0f;
-}
-
-
-// ****************************************************************
-// 
-void cPlayer::ReduceCombo()
-{
-    // TODO # 
-}
-
-
-// ****************************************************************
-// 
-void cPlayer::TransferChain()
-{
-    if(m_iChainValue[0])
-    {
-        // 
-        g_pGame->GetCombatText()->AddChain(m_iChainValue[0], this->GetPosition());
-
-        // 
-        this->AddScore(m_iChainValue[0], true);
-        m_iChainValue[0] = 0u;
-
-        // 
-        m_fChainCooldown = 0.0f;
-    }
-}
-
-
-// ****************************************************************
-// reset scoring stats
-void cPlayer::ResetStats()
-{
-    // 
-    m_iScoreGame    = 0u;
-    m_iScoreMission = 0u;
-    for(coreUintW i = 0u; i < MISSION_BOSSES; ++i) m_aiScoreBoss[i] = 0u;
-
-    // 
-    m_iComboValue[1] = m_iComboValue[0] = 0u;
-    m_iChainValue[1] = m_iChainValue[0] = 0u;
-    m_fChainCooldown = 0.0f;
 }
 
 

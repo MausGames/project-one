@@ -58,6 +58,22 @@ public:
     using coreObject3D::Render;
     void Render(const coreProgramPtr& pProgram)final;
 
+    // transformation functions (raw parameters are multiplied with FOREGROUND_AREA)
+    coreBool DefaultMovePath     (const coreSpline2* pRawPath, const coreVector2& vFactor, const coreVector2& vRawOffset, const coreFloat fDistance);
+    coreBool DefaultMoveTarget   (const coreVector2& vTarget, const coreFloat fSpeedMove, const coreFloat fSpeedTurn);
+    coreBool DefaultMoveSmooth   (const coreVector2& vRawPosition, const coreFloat fSpeedMove, const coreFloat fDistThreshold);
+    void     DefaultMoveForward  (const coreVector2& vDirection, const coreFloat fSpeedMove);
+    void     DefaultMoveLerp     (const coreVector2& vFromRawPos, const coreVector2& vToRawPos, const coreFloat fTime);
+    void     DefaultRotate       (const coreFloat fAngle);
+    coreBool DefaultRotateSmooth (const coreVector2& vDirection, const coreFloat fSpeedTurn, const coreFloat fDistThreshold);
+    void     DefaultRotateLerp   (const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime);
+    void     DefaultOrientate    (const coreFloat fAngle);
+    void     DefaultOrientateLerp(const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime);
+    void     DefaultAxiate       (const coreFloat fAngle);
+    void     DefaultAxiateLerp   (const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime);
+    void     DefaultMultiate     (const coreFloat fAngle);
+    void     DefaultMultiateLerp (const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime);
+
     // 
     inline void ActivateModelDefault() {this->DefineModel(m_pModelHigh);}
     inline void ActivateModelLowOnly() {this->DefineModel(m_pModelLow);}

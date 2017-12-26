@@ -189,7 +189,7 @@ void cSummaryMenu::Move()
 void cSummaryMenu::ShowSummary()
 {
     ASSERT(g_pGame)
-    const cMission* pMission = g_pGame->GetMission();
+    const cMission* pMission = g_pGame->GetCurMission();
 
     // 
     m_iFinalScore = 0u;
@@ -214,7 +214,7 @@ void cSummaryMenu::ShowSummary()
             // 
             for(coreUintW j = 0u; j < MENU_SUMMARY_PARTS; ++j)
             {
-                const coreUint32 iPart = g_pGame->GetPlayer(j)->GetScoreBoss(i);
+                const coreUint32 iPart = g_pGame->GetPlayer(j)->GetScoreTable()->GetScoreBoss(g_pGame->GetCurMissionIndex(), i);
 
                 // 
                 iSum += iPart;
@@ -231,7 +231,7 @@ void cSummaryMenu::ShowSummary()
         // 
         for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES; ++i)
         {
-            const coreUint32 iSum = g_pGame->GetPlayer(0u)->GetScoreBoss(i);
+            const coreUint32 iSum = g_pGame->GetPlayer(0u)->GetScoreTable()->GetScoreBoss(g_pGame->GetCurMissionIndex(), i);
 
             // 
             m_iFinalScore += iSum;

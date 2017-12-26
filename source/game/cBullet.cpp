@@ -221,31 +221,6 @@ void cBulletManager::ClearBullets(const coreBool bAnimated)
 
 
 // ****************************************************************
-// 
-cBullet* cBulletManager::FindBullet(const coreVector2& vPosition)
-{
-    // 
-    cBullet*  pBullet = NULL;
-    coreFloat fLenSq  = FLT_MAX;
-
-    // 
-    this->ForEachBullet([&](cBullet* OUTPUT pCurBullet)
-    {
-        // 
-        const coreFloat fCurLenSq = (pCurBullet->GetPosition().xy() - vPosition).LengthSq();
-        if(fCurLenSq < fLenSq)
-        {
-            // 
-            pBullet = pCurBullet;
-            fLenSq  = fCurLenSq;
-        }
-    });
-
-    return pBullet;
-}
-
-
-// ****************************************************************
 // constructor
 cRayBullet::cRayBullet()noexcept
 {

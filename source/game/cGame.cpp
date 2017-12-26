@@ -11,19 +11,22 @@
 
 // ****************************************************************
 // constructor
-cGame::cGame(const coreBool bCoop)noexcept
+cGame::cGame(const coreUint8 iDifficulty, const coreBool bCoop, const coreInt32* piMissionList, const coreUintW iNumMissions)noexcept
 : m_BulletManagerPlayer (TYPE_BULLET_PLAYER)
 , m_BulletManagerEnemy  (TYPE_BULLET_ENEMY)
 , m_Interface           (bCoop ? GAME_PLAYERS : 1u)
-, m_pMission            (NULL)
+, m_piMissionList       (piMissionList)
+, m_iNumMissions        (iNumMissions)
+, m_pCurMission         (NULL)
+, m_iCurMissionIndex    (coreUintW(-1))
 , m_fTimeInOut          (0.0f)
-, m_fTimeGame           (0.0f)
-, m_fTimeMission        (0.0f)
-, m_afTimeBoss          {}
 , m_iDepthLevel         (0u)
 , m_iStatus             (0u)
+, m_iDifficulty         (iDifficulty)
 , m_bCoop               (bCoop)
 {
+    ASSERT(m_piMissionList && (m_iNumMissions <= MISSIONS))
+
 #if defined(_P1_DEBUG_RANDOM_)
 
     // 
@@ -51,7 +54,7 @@ cGame::cGame(const coreBool bCoop)noexcept
     }
 
     // load first mission
-    m_pMission = new cNoMission();
+    m_pCurMission = new cNoMission();
 }
 
 
@@ -76,7 +79,7 @@ cGame::~cGame()
     m_ShieldManager.ClearShields(bAnimated);
 
     // delete last mission
-    SAFE_DELETE(m_pMission)
+    SAFE_DELETE(m_pCurMission)
 }
 
 
@@ -100,7 +103,7 @@ void cGame::Render()
         {
             // render underlying effects
             m_EnemyManager.RenderUnder();
-            m_pMission   ->RenderUnder();
+            m_pCurMission->RenderUnder();
 
             // 
             m_ShieldManager.Render();
@@ -121,7 +124,7 @@ void cGame::Render()
     {
         // render attacks and gameplay objects
         m_EnemyManager.RenderAttack();
-        m_pMission   ->RenderAttack();
+        m_pCurMission->RenderAttack();
     }
 
     __DEPTH_LEVEL_OVER
@@ -130,7 +133,7 @@ void cGame::Render()
         {
             // render overlying effects
             m_EnemyManager.RenderOver();
-            m_pMission   ->RenderOver();
+            m_pCurMission->RenderOver();
         }
         glEnable(GL_DEPTH_TEST);
 
@@ -166,27 +169,20 @@ void cGame::Move()
     if(!this->__HandleIntro()) return;
     if(!this->__HandleOutro()) return;
 
-    // update total game time
-    m_fTimeGame.Update(1.0f);
-
-    if(CONTAINS_FLAG(m_iStatus, GAME_STATUS_PLAY))
-    {
-        // update total mission and boss time
-        m_fTimeMission.Update(1.0f);
-        if(m_pMission->GetCurBoss()) m_afTimeBoss[m_pMission->GetCurBossIndex()].Update(1.0f);
-    }
+    // 
+    m_TimeTable.Update();
 
     // move the mission
-    m_pMission->MoveBefore();
+    m_pCurMission->MoveBefore();
     {
         // move all players
         for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
             m_aPlayer[i].Move();
 
         // move all enemies
-        if(!m_pMission->IsWaiting()) m_EnemyManager.Move();
+        if(!m_pCurMission->IsWaiting()) m_EnemyManager.Move();
     }
-    m_pMission->MoveAfter();
+    m_pCurMission->MoveAfter();
 
     // move the bullet managers
     m_BulletManagerPlayer.Move();
@@ -209,9 +205,9 @@ void cGame::Move()
 
 // ****************************************************************
 // load new active mission
-void cGame::LoadMission(const coreInt32 iID)
+void cGame::LoadMissionID(const coreInt32 iID)
 {
-    if(m_pMission) if(m_pMission->GetID() == iID) return;
+    if(m_pCurMission) if(m_pCurMission->GetID() == iID) return;
 
     // 
     m_BulletManagerPlayer.ClearBullets(true);
@@ -219,31 +215,31 @@ void cGame::LoadMission(const coreInt32 iID)
 
     // delete possible old mission
     m_EnemyManager.ClearEnemies(true);
-    SAFE_DELETE(m_pMission)
+    SAFE_DELETE(m_pCurMission)
 
     // create new mission
     switch(iID)
     {
     default: ASSERT(false)
-    case cNoMission     ::ID: m_pMission = new cNoMission     (); break;
-    case cViridoMission ::ID: m_pMission = new cViridoMission (); break;
-    case cNevoMission   ::ID: m_pMission = new cNevoMission   (); break;
-    case cHarenaMission ::ID: m_pMission = new cHarenaMission (); break;
-    case cRutilusMission::ID: m_pMission = new cRutilusMission(); break;
-    case cGeluMission   ::ID: m_pMission = new cGeluMission   (); break;
-    case cCalorMission  ::ID: m_pMission = new cCalorMission  (); break;
-    case cMuscusMission ::ID: m_pMission = new cMuscusMission (); break;
-    case cIntroMission  ::ID: m_pMission = new cIntroMission  (); break;
+    case cNoMission     ::ID: m_pCurMission = new cNoMission     (); break;
+    case cViridoMission ::ID: m_pCurMission = new cViridoMission (); break;
+    case cNevoMission   ::ID: m_pCurMission = new cNevoMission   (); break;
+    case cHarenaMission ::ID: m_pCurMission = new cHarenaMission (); break;
+    case cRutilusMission::ID: m_pCurMission = new cRutilusMission(); break;
+    case cGeluMission   ::ID: m_pCurMission = new cGeluMission   (); break;
+    case cCalorMission  ::ID: m_pCurMission = new cCalorMission  (); break;
+    case cMuscusMission ::ID: m_pCurMission = new cMuscusMission (); break;
+    case cIntroMission  ::ID: m_pCurMission = new cIntroMission  (); break;
     }
+
+    // 
+    m_iCurMissionIndex = std::find(m_piMissionList, m_piMissionList + m_iNumMissions, iID) - m_piMissionList;
+    ASSERT(m_iCurMissionIndex < m_iNumMissions)
 
     if(iID != cNoMission::ID)
     {
         // 
-        m_pMission->Setup();
-
-        // 
-        m_fTimeMission = 0.0f;
-        for(coreUintW i = 0u; i < MISSION_BOSSES; ++i) m_afTimeBoss[i] = -INTERFACE_BANNER_DURATION;
+        m_pCurMission->Setup();
 
         // set initial status
         m_iStatus = GAME_STATUS_LOADING;
@@ -267,7 +263,16 @@ void cGame::LoadMission(const coreInt32 iID)
         }
     }
 
-    Core::Log->Info("Mission (%s) created", m_pMission->GetName());
+    Core::Log->Info("Mission (%s) created", m_pCurMission->GetName());
+}
+
+
+// ****************************************************************
+// 
+void cGame::LoadMissionIndex(const coreUintW iIndex)
+{
+    ASSERT(iIndex < m_iNumMissions)
+    this->LoadMissionID(m_piMissionList[iIndex]);
 }
 
 
@@ -275,21 +280,28 @@ void cGame::LoadMission(const coreInt32 iID)
 // 
 void cGame::LoadNextMission()
 {
-    // 
-    this->LoadMission(m_pMission->GetID() + 1);
+    if(m_iCurMissionIndex == m_iNumMissions - 1u)
+    {
+        // TODO
+    }
+    else
+    {
+        // 
+        this->LoadMissionIndex(m_iCurMissionIndex + 1u);
+    }
 }
 
 
 // ****************************************************************
-// restart current mission
+// restart currently active mission
 void cGame::RestartMission()
 {
-    // save old mission
-    cMission* pOldMission = m_pMission;
-    m_pMission = NULL;
+    // hold old mission (to keep resources valid)
+    cMission* pOldMission = m_pCurMission;
+    m_pCurMission = NULL;
 
     // 
-    this->LoadMission(pOldMission->GetID());
+    this->LoadMissionID(pOldMission->GetID());
     SAFE_DELETE(pOldMission)
 }
 
@@ -328,6 +340,9 @@ void cGame::StartOutro()
 
     // 
     m_Interface.SetVisible(false);
+
+    // 
+    g_pReplay->ApplyKeyFrame(REPLAY_KEYFRAME_MISSION_END(m_pCurMission->GetID()));
 }
 
 
@@ -414,6 +429,9 @@ coreBool cGame::__HandleIntro()
 
             // 
             m_Interface.SetVisible(true);
+
+            // 
+            g_pReplay->ApplyKeyFrame(REPLAY_KEYFRAME_MISSION_START(m_pCurMission->GetID()));
         }
         else
         {
@@ -491,17 +509,7 @@ void cGame::__HandleDefeat()
             return;
     }
 
-
-
-    if(m_pMission->GetID() == cIntroMission::ID)
-    {
-        this->LoadMission(cViridoMission::ID);
-    }
-    else
-    {
-
-    }  
-
+    // TODO
 }
 
 

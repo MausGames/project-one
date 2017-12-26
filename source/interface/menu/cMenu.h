@@ -247,6 +247,11 @@ public:
 
     // move the game menu
     void Move()final;
+
+    // 
+    inline const coreUint8& GetSelectedMode      ()const {return m_Mode      .GetCurEntry().tValue;}
+    inline const coreUint8& GetSelectedDifficulty()const {return m_Difficulty.GetCurEntry().tValue;}
+    inline const coreUint8& GetSelectedPlayers   ()const {return m_Players   .GetCurEntry().tValue;}
 };
 
 

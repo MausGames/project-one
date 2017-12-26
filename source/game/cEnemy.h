@@ -59,24 +59,6 @@ public:
     void Resurrect(const coreVector2& vPosition, const coreVector2& vDirection);
     void Kill     (const coreBool     bAnimated);
 
-    // transformation functions (raw parameters are multiplied with FOREGROUND_AREA)
-    coreBool DefaultMovePath     (const coreSpline2* pRawPath, const coreVector2& vFactor, const coreVector2& vRawOffset, const coreFloat fRawDistance);
-    coreBool DefaultMoveTarget   (const coreVector2& vTarget, const coreFloat fSpeedMove, const coreFloat fSpeedTurn);
-    coreBool DefaultMoveSmooth   (const coreVector2& vRawPosition, const coreFloat fSpeedMove, const coreFloat fClampMove);
-    void     DefaultMoveForward  (const coreVector2& vDirection, const coreFloat fSpeedMove);
-    void     DefaultMoveLerp     (const coreVector2& vFromRawPos, const coreVector2& vToRawPos, const coreFloat fTime);
-    void     DefaultMoveLerps    (const coreVector2& vFromRawPos, const coreVector2& vToRawPos, const coreFloat fTime);
-    void     DefaultMoveLerpb    (const coreVector2& vFromRawPos, const coreVector2& vToRawPos, const coreFloat fTime);
-    void     DefaultRotate       (const coreFloat fAngle);
-    coreBool DefaultRotateSmooth (const coreVector2& vDirection, const coreFloat fSpeedTurn, const coreFloat fClampTurn);
-    void     DefaultRotateLerp   (const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime);
-    void     DefaultOrientate    (const coreFloat fAngle);
-    void     DefaultOrientateLerp(const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime);
-    void     DefaultAxiate       (const coreFloat fAngle);
-    void     DefaultAxiateLerp   (const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime);
-    void     DefaultMultiate     (const coreFloat fAngle);
-    void     DefaultMultiateLerp (const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime);
-
     // 
     coreVector2 AimAtPlayer()const;
     coreVector2 AimAtPlayer(const cPlayer* pPlayer)const;
@@ -456,7 +438,7 @@ template <typename T> RETURN_RESTRICT T* cEnemyManager::AllocateEnemy()
 template <typename F> void cEnemyManager::ForEachEnemy(F&& nFunction)
 {
     // 
-    const auto& oEnemyList = Core::Manager::Object->GetObjectList(TYPE_ENEMY);
+    const std::vector<coreObject3D*>& oEnemyList = Core::Manager::Object->GetObjectList(TYPE_ENEMY);
     FOR_EACH(it, oEnemyList)
     {
         cEnemy* pEnemy = s_cast<cEnemy*>(*it);

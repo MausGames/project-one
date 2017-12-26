@@ -69,6 +69,8 @@
 // ****************************************************************
 // general definitions
 #define PLAYERS              (2u)
+#define MISSIONS             (10u)
+#define BOSSES               (3u)
 #define FRAMERATE_VALUE      (60.0f)
 #define FRAMERATE_TIME       (1.0f / FRAMERATE_VALUE)
 #define CAMERA_POSITION      (coreVector3(0.0f, 0.0f, 110.0f))
@@ -159,74 +161,6 @@
     inline const coreInt32 GetID  ()const final {return i;} \
     inline const coreChar* GetName()const final {return n;}
 
-// angle difference helper-function
-constexpr FUNC_CONST coreFloat AngleDiff(const coreFloat x, const coreFloat y)
-{
-    coreFloat A = (x - y);
-    while(A < -PI) A += 2.0f*PI;
-    while(A >  PI) A -= 2.0f*PI;
-    return A;
-}
-
-// 
-inline FUNC_CONST coreFloat SmoothTowards(const coreFloat fLength, const coreFloat fRadius)
-{
-    return MIN(fLength, fRadius) * RCP(fRadius);
-}
-
-// 
-inline FUNC_CONST coreFloat LerpSmoothRev(const coreFloat x, const coreFloat y, const coreFloat s)
-{
-    // TODO 
-    ASSERT(false)
-    return (s >= 0.5f) ? LERP(y, (x + y) / 2.0f, SIN(s*PI)) :
-                         LERP(x, (x + y) / 2.0f, SIN(s*PI));
-}
-inline FUNC_CONST coreFloat LerpBreakRev(const coreFloat x, const coreFloat y, const coreFloat s)
-{
-    return LERPB(y, x, 1.0f - s);
-}
-
-// value range helper-functions
-template <typename T, typename S, typename R> constexpr FUNC_LOCAL coreBool InBetween(const T& x, const S& a, const R& b)
-{
-    return (a <= x) && (x < b);
-}
-template <typename T, typename S, typename R> constexpr FUNC_LOCAL coreInt32 InBetweenExt(const T& x, const S& a, const R& b)
-{
-    return (a <= b) ? (((a <= x) && (x < b)) ?  1 : 0) :
-                      (((b <= x) && (x < a)) ? -1 : 0);
-}
-
-// ternary interpolation helper-function
-template <typename T, typename S, typename R> constexpr FUNC_LOCAL T TernaryLerp(const T& x, const S& y, const R& z, const coreFloat s)
-{
-    return (s >= 0.5f) ? LERP(y, z, s * 2.0f - 1.0f) :
-                         LERP(x, y, s * 2.0f);
-}
-
-// direction restriction and packing helper-functions
-inline FUNC_LOCAL coreUint8 PackDirection(const coreVector2& vDirection)
-{
-    return vDirection.IsNull() ? 8u : (F_TO_UI(ROUND(vDirection.Angle() / (0.25f*PI))) & 0x07u);
-}
-inline FUNC_CONST coreVector2 UnpackDirection(const coreUint8 iPack)
-{
-    switch(iPack)
-    {
-    default: ASSERT(false);
-    case 0u: return coreVector2( 0.0f, 1.0f);
-    case 1u: return coreVector2(-1.0f, 1.0f) * (1.0f/SQRT2);
-    case 2u: return coreVector2(-1.0f, 0.0f);
-    case 3u: return coreVector2(-1.0f,-1.0f) * (1.0f/SQRT2);
-    case 4u: return coreVector2( 0.0f,-1.0f);
-    case 5u: return coreVector2( 1.0f,-1.0f) * (1.0f/SQRT2);
-    case 6u: return coreVector2( 1.0f, 0.0f);
-    case 7u: return coreVector2( 1.0f, 1.0f) * (1.0f/SQRT2);
-    case 8u: return coreVector2( 0.0f, 0.0f);
-    }
-}
-
 extern void InitResolution(const coreVector2& vResolution);   // init resolution properties (1:1)
 extern void InitFramerate();                                  // init framerate properties (lock)
 
@@ -246,6 +180,7 @@ extern coreVector2      g_vGameResolution;   // pre-calculated 1:1 resolution
 extern coreVector2      g_vMenuCenter;       // pre-calculated menu center modifier
 extern coreMusicPlayer  g_MusicPlayer;       // central music-player
 
+#include "additional/cUtilities.h"
 #include "additional/cBindContainer.h"
 #include "additional/cRotaCache.h"
 #include "file/cConfig.h"
@@ -279,6 +214,7 @@ extern cPostProcessing* g_pPostProcessing;   // main post-processing object
 #include "interface/cMsgBox.h"
 #include "interface/cTooltip.h"
 #include "interface/menu/cMenu.h"
+#include "game/cTable.h"
 #include "game/cBullet.h"
 #include "game/cWeapon.h"
 #include "game/cShip.h"

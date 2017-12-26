@@ -25,6 +25,7 @@
 // TODO: popping artifacts with shadow in sea-background (configurable view-range ? per list ? auto per height ?)
 // TODO: calls to pList->MoveNormal(); may be redundant
 // TODO: remove texture-sampling from lightning effect in moss
+// TODO: stomach should not create all vertices
 
 
 // ****************************************************************

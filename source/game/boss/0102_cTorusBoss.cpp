@@ -107,7 +107,7 @@ void cTorusBoss::__ResurrectOwn()
 // 
 void cTorusBoss::__KillOwn(const coreBool bAnimated)
 {
-    cViridoMission* pMission = s_cast<cViridoMission*>(g_pGame->GetMission());
+    cViridoMission* pMission = s_cast<cViridoMission*>(g_pGame->GetCurMission());
 
     if(!m_aiCounter[BALL_STATUS])
     {
@@ -129,7 +129,7 @@ void cTorusBoss::__KillOwn(const coreBool bAnimated)
         g_pGlow->UnbindObject(&m_aCircle[i]);
 
     // 
-    pMission->SetCurBoss(MISSION_NO_BOSS);
+    pMission->DeactivateBoss();
 }
 
 
@@ -199,7 +199,7 @@ void cTorusBoss::__MoveOwn()
 
             if(PHASE_TIME_POINT(0.85f))
             {
-                g_pGame->GetMission()->SetCurBoss(this);
+                g_pGame->GetCurMission()->ActivateBoss(this);
                 g_pGame->GetInterface()->ShowBoss(this);
 
                 g_pEnvironment->GetBackground()->AddList(0u, 128u, "effect_decal_single_inst_program");
@@ -427,7 +427,7 @@ void cTorusBoss::__MoveOwn()
             ++m_iPhase;
 
             const coreVector2 vDir = (m_aiCounter[BALL_STATUS] ? coreVector2(1.0f,0.5f) : coreVector2(-0.5f,1.0f)).Normalized();
-            s_cast<cViridoMission*>(g_pGame->GetMission())->EnableBall(m_aiCounter[BALL_STATUS], this->GetPosition().xy(), vDir);
+            s_cast<cViridoMission*>(g_pGame->GetCurMission())->EnableBall(m_aiCounter[BALL_STATUS], this->GetPosition().xy(), vDir);
 
             ++m_aiCounter[BALL_STATUS];
         });

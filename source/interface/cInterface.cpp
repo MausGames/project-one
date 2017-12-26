@@ -205,6 +205,7 @@ void cInterface::Move()
     {
         sPlayerView& oView   = m_aView[i];
         cPlayer*     pPlayer = g_pGame->GetPlayer(i);
+        cScoreTable* pTable  = pPlayer->GetScoreTable();
 
         // set health bar size
         const coreFloat fPercent = pPlayer->GetCurHealthPct();
@@ -219,14 +220,14 @@ void cInterface::Move()
         oView.aHealthBar[1].SetColor3(vColor * 0.9f);
 
         // set chain bar size and color
-        oView.oChainBar.SetSize  (coreVector2(0.05f * MIN(pPlayer->GetChainCooldown()*1.1f, 1.0f), 0.005f));
-        oView.oChainBar.SetColor3(COLOR_CHAIN(pPlayer->GetChainCooldown()));
+        oView.oChainBar.SetSize  (coreVector2(0.05f * MIN(pTable->GetChainCooldown()*1.1f, 1.0f), 0.005f));
+        oView.oChainBar.SetColor3(COLOR_CHAIN(pTable->GetChainCooldown()));
 
         // display player values
         oView.aHealthValue[1].SetText(PRINT("%d / %d", pPlayer->GetCurHealth(), pPlayer->GetMaxHealth()));
-        oView.oScore         .SetText(PRINT("%07d",    pPlayer->GetScoreMission()));
-        oView.oCombo         .SetText(PRINT("x%.1f",   pPlayer->GetCurCombo()));
-        oView.oChainValue    .SetText(pPlayer->GetCurChain() ? PRINT("+%d", pPlayer->GetCurChain()) : "");
+        oView.oScore         .SetText(PRINT("%07d",    pTable->GetScoreMission(g_pGame->GetCurMissionIndex())));
+        oView.oCombo         .SetText(PRINT("x%.1f",   pTable->GetCurCombo()));
+        oView.oChainValue    .SetText(pTable->GetCurChain() ? PRINT("+%d", pTable->GetCurChain()) : "");
 
         // set player transparency
         oView.aHealthBar[0]  .SetAlpha(m_fAlphaAll);
@@ -250,7 +251,7 @@ void cInterface::Move()
     }
 
     // check for active boss
-    cBoss* pBoss = g_pGame->GetMission()->GetCurBoss();
+    const cBoss* pBoss = g_pGame->GetCurMission()->GetCurBoss();
     if(pBoss)
     {
         // set health bar size
@@ -270,7 +271,7 @@ void cInterface::Move()
         m_aBossHealthValue[1].SetText(PRINT("%d / %d",  pBoss->GetCurHealth(), pBoss->GetMaxHealth()));
 
         // display boss time
-        const coreFloat fTimeBoss = MAX(g_pGame->GetTimeBoss(g_pGame->GetMission()->GetCurBossIndex()), 0.0f);
+        const coreFloat fTimeBoss = MAX(g_pGame->GetTimeTable()->GetTimeBoss(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurBossIndex()), 0.0f);
         m_aBossTime[0].SetText(PRINT("%.0f.", FLOOR(      fTimeBoss)));
         m_aBossTime[1].SetText(PRINT("%.0f",  FLOOR(FRACT(fTimeBoss)*10.0f)));
 
@@ -295,7 +296,7 @@ void cInterface::Move()
     }
 
     // check for active banner
-    const coreFloat fBanner = g_pGame->GetTimeGame() - m_fBannerStart;
+    const coreFloat fBanner = g_pGame->GetTimeTable()->GetTimeTotal() - m_fBannerStart;
     if((fBanner <= INTERFACE_BANNER_DURATION) && (fBanner >= 0.0f))
     {
         // calculate visibility and animation value
@@ -332,7 +333,7 @@ void cInterface::Move()
     }
 
     // 
-    const coreFloat fStory = g_pGame->GetTimeGame() - m_fStoryStart;
+    const coreFloat fStory = g_pGame->GetTimeTable()->GetTimeTotal() - m_fStoryStart;
     if((fStory <= INTERFACE_STORY_DURATION) && (fStory >= 0.0f))
     {
         // 
@@ -379,7 +380,7 @@ void cInterface::ShowBoss(const coreChar* pcMain, const coreChar* pcSub)
     m_aBannerText[3].SetAlpha(0.0f);
 
     // save animation properties
-    m_fBannerStart = g_pGame->GetTimeGame();
+    m_fBannerStart = g_pGame->GetTimeTable()->GetTimeTotal();
     m_bBannerType  = INTERFACE_BANNER_TYPE_BOSS;
     {
         // and realign objects as boss banner
@@ -425,7 +426,7 @@ void cInterface::ShowMission(const coreChar* pcMain, const coreChar* pcSub)
     m_aBannerText[3].SetAlpha(0.0f);
 
     // save animation properties
-    m_fBannerStart = g_pGame->GetTimeGame();
+    m_fBannerStart = g_pGame->GetTimeTable()->GetTimeTotal();
     m_bBannerType  = INTERFACE_BANNER_TYPE_MISSION;
     {
         // and realign objects as mission banner
@@ -458,7 +459,7 @@ void cInterface::ShowMission(const cMission* pMission)
 coreBool cInterface::IsBannerActive()const
 {
     // compare with game-time offset
-    return ((g_pGame->GetTimeGame() - m_fBannerStart) <= INTERFACE_BANNER_DURATION) ? true : false;
+    return ((g_pGame->GetTimeTable()->GetTimeTotal() - m_fBannerStart) <= INTERFACE_BANNER_DURATION) ? true : false;
 }
 
 
@@ -478,7 +479,7 @@ void cInterface::ShowStory(const coreChar* pcRow1, const coreChar* pcRow2)
     m_aStoryText[1].SetPosition(coreVector2(0.0f, -fHeight));
 
     // 
-    m_fStoryStart = g_pGame->GetTimeGame();
+    m_fStoryStart = g_pGame->GetTimeTable()->GetTimeTotal();
 }
 
 
@@ -488,7 +489,7 @@ coreBool cInterface::IsStoryActive(const coreFloat fOffset)const
 {
     // 
     ASSERT(fOffset < INTERFACE_STORY_DURATION)
-    return ((g_pGame->GetTimeGame() - m_fStoryStart) <= (INTERFACE_STORY_DURATION - fOffset)) ? true : false;
+    return ((g_pGame->GetTimeTable()->GetTimeTotal() - m_fStoryStart) <= (INTERFACE_STORY_DURATION - fOffset)) ? true : false;
 }
 
 

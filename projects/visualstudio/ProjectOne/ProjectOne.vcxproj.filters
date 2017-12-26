@@ -258,6 +258,9 @@
     <ClCompile Include="..\..\..\source\environment\background\52_cCaveBackground.cpp">
       <Filter>environment\background</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\game\cTable.cpp">
+      <Filter>game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\main.h" />
@@ -365,6 +368,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\source\visual\cHeadlight.h">
       <Filter>visual</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\additional\cUtilities.h">
+      <Filter>additional</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\game\cTable.h">
+      <Filter>game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

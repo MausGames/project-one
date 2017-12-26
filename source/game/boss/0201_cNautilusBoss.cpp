@@ -58,7 +58,7 @@ void cNautilusBoss::__KillOwn(const coreBool bAnimated)
 // 
 void cNautilusBoss::__MoveOwn()
 {
-    cNevoMission* pMission   = s_cast<cNevoMission*>(g_pGame->GetMission());
+    cNevoMission* pMission   = s_cast<cNevoMission*>(g_pGame->GetCurMission());
     coreObject3D* pContainer = pMission->GetContainer();
 
     // ################################################################
@@ -71,7 +71,7 @@ void cNautilusBoss::__MoveOwn()
 
             if(PHASE_TIME_POINT(0.85f))
             {
-                g_pGame->GetMission()->SetCurBoss(this);
+                g_pGame->GetCurMission()->ActivateBoss(this);
                 g_pGame->GetInterface()->ShowBoss(this);
             }
 
@@ -108,8 +108,8 @@ void cNautilusBoss::__MoveOwn()
     {
         PHASE_CONTROL_TIMER(0u, 0.1f, LERP_LINEAR)
         {
-            if(PHASE_TIME_BEFORE(0.5f)) this->DefaultMoveLerps(this->__LoadPosition(), coreVector2(0.0f,0.0f),  (fTime)      * 2.0f);
-                                   else this->DefaultMoveLerps(coreVector2(0.0f,0.0f), coreVector2(0.0f,0.75f), (fTime-0.5f) * 2.0f);
+            if(PHASE_TIME_BEFORE(0.5f)) this->DefaultMoveLerp(this->__LoadPosition(), coreVector2(0.0f,0.0f),  LERPS(0.0f, 1.0f, (fTime)      * 2.0f));
+                                   else this->DefaultMoveLerp(coreVector2(0.0f,0.0f), coreVector2(0.0f,0.75f), LERPS(0.0f, 1.0f, (fTime-0.5f) * 2.0f));
 
             this->DefaultRotateLerp(0.0f*PI, 31.0f*PI, LERPS(0.0f, 1.0f, fTime));
 

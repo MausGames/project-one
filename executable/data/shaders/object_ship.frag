@@ -23,7 +23,7 @@ void FragmentMain()
 
     // use detail texture as highlight
     float v1TexDetail = coreTexture2D(1, v_av2TexCoord[1]).r;
-    vec3  v3Highlight = vec3(v1TexDetail * 10.0);
+    vec3  v3Highlight = vec3(v1TexDetail * 8.0);
 
 #else
 

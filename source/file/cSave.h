@@ -15,6 +15,7 @@
 
 // ****************************************************************
 // 
+#define SAVE_FILE_FOLDER    "saves"                // 
 #define SAVE_FILE_EXTENSION "p1sv"                 // 
 #define SAVE_FILE_MAGIC     (coreUint32('P1SV'))   // 
 #define SAVE_FILE_VERSION   (0x00000001u)          // 

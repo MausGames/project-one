@@ -66,7 +66,7 @@ void cProjectOneBoss::__MoveOwn()
             // 
             if(PHASE_TIME_POINT(0.85f))
             {
-                g_pGame->GetMission()->SetCurBoss(this);
+                g_pGame->GetCurMission()->ActivateBoss(this);
                 g_pGame->GetInterface()->ShowBoss(this);
             }
 

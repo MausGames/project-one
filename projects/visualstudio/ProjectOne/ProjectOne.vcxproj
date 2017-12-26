@@ -235,6 +235,7 @@
     <ClCompile Include="..\..\..\source\game\cBullet.cpp" />
     <ClCompile Include="..\..\..\source\game\cEnemy.cpp" />
     <ClCompile Include="..\..\..\source\game\cGame.cpp" />
+    <ClCompile Include="..\..\..\source\game\cTable.cpp" />
     <ClCompile Include="..\..\..\source\game\cShield.cpp" />
     <ClCompile Include="..\..\..\source\game\cTheater.cpp" />
     <ClCompile Include="..\..\..\source\game\cPlayer.cpp" />
@@ -380,6 +381,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\source\additional\cBindContainer.h" />
     <ClInclude Include="..\..\..\source\additional\cRotaCache.h" />
+    <ClInclude Include="..\..\..\source\additional\cUtilities.h" />
     <ClInclude Include="..\..\..\source\environment\background\cBackground.h" />
     <ClInclude Include="..\..\..\source\environment\cEnvironment.h" />
     <ClInclude Include="..\..\..\source\environment\cOutdoor.h" />
@@ -393,6 +395,7 @@
     <ClInclude Include="..\..\..\source\game\cEnemy.h" />
     <ClInclude Include="..\..\..\source\game\cGame.h" />
     <ClInclude Include="..\..\..\source\game\cPlayer.h" />
+    <ClInclude Include="..\..\..\source\game\cTable.h" />
     <ClInclude Include="..\..\..\source\game\cShield.h" />
     <ClInclude Include="..\..\..\source\game\cShip.h" />
     <ClInclude Include="..\..\..\source\game\cWeapon.h" />

@@ -150,8 +150,10 @@ public:
     void ClearBullets(const coreBool bAnimated);
 
     // 
-    cBullet* FindBullet(const coreVector2& vPosition);
-    template <typename F> void ForEachBullet(F&& nFunction);   // [](cBullet* OUTPUT pBullet) -> void
+    cBullet*                 FindBullet     (const coreVector2& vPosition);
+    template <typename T> T* FindBulletTyped(const coreVector2& vPosition);
+    template <typename F> void             ForEachBullet     (F&& nFunction);   // [](cBullet* OUTPUT pBullet) -> void
+    template <typename T, typename F> void ForEachBulletTyped(F&& nFunction);   // [](T*       OUTPUT pBullet) -> void
 
     // 
     template <typename T> void PrefetchBullet();
@@ -640,12 +642,63 @@ template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt
 }
 
 
+
+// ****************************************************************
+// 
+cBullet* cBulletManager::FindBullet(const coreVector2& vPosition)
+{
+    // 
+    cBullet*  pBullet = NULL;
+    coreFloat fLenSq  = FLT_MAX;
+
+    // 
+    this->ForEachBullet([&](cBullet* OUTPUT pCurBullet)
+    {
+        // 
+        const coreFloat fCurLenSq = (pCurBullet->GetPosition().xy() - vPosition).LengthSq();
+        if(fCurLenSq < fLenSq)
+        {
+            // 
+            pBullet = pCurBullet;
+            fLenSq  = fCurLenSq;
+        }
+    });
+
+    return pBullet;
+}
+
+
+// ****************************************************************
+// 
+template <typename T> T* cBulletManager::FindBulletTyped(const coreVector2& vPosition)
+{
+    // 
+    T*        pBullet = NULL;
+    coreFloat fLenSq  = FLT_MAX;
+
+    // 
+    this->ForEachBulletTyped<T>([&](T* OUTPUT pCurBullet)
+    {
+        // 
+        const coreFloat fCurLenSq = (pCurBullet->GetPosition().xy() - vPosition).LengthSq();
+        if(fCurLenSq < fLenSq)
+        {
+            // 
+            pBullet = pCurBullet;
+            fLenSq  = fCurLenSq;
+        }
+    });
+
+    return pBullet;
+}
+
+
 // ****************************************************************
 // 
 template <typename F> void cBulletManager::ForEachBullet(F&& nFunction)
 {
     // 
-    const auto& oBulletList = Core::Manager::Object->GetObjectList(m_iType);
+    const std::vector<coreObject3D*>& oBulletList = Core::Manager::Object->GetObjectList(m_iType);
     FOR_EACH(it, oBulletList)
     {
         cBullet* pBullet = s_cast<cBullet*>(*it);
@@ -653,6 +706,26 @@ template <typename F> void cBulletManager::ForEachBullet(F&& nFunction)
 
         // 
         nFunction(pBullet);
+    }
+}
+
+
+// ****************************************************************
+// 
+template <typename T, typename F> void cBulletManager::ForEachBulletTyped(F&& nFunction)
+{
+    if(m_apBulletSet.count(T::ID))
+    {
+        // 
+        const coreBatchList& oBulletActive = m_apBulletSet.at(T::ID)->oBulletActive;
+        FOR_EACH(it, *oBulletActive.List())
+        {
+            T* pBullet = s_cast<T*>(*it);
+            if(!CONTAINS_FLAG(pBullet->GetStatus(), BULLET_STATUS_ACTIVE)) continue;
+
+            // 
+            nFunction(pBullet);
+        }
     }
 }
 

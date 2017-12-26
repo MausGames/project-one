@@ -53,6 +53,196 @@ void cShip::Render(const coreProgramPtr& pProgram)
 
 // ****************************************************************
 // 
+coreBool cShip::DefaultMovePath(const coreSpline2* pRawPath, const coreVector2& vFactor, const coreVector2& vRawOffset, const coreFloat fDistance)
+{
+    // 
+    coreVector2 vPosition;
+    coreVector2 vDirection;
+    pRawPath->CalcPosDir(MAX(fDistance, 0.0f), &vPosition, &vDirection);
+
+    // 
+    this->SetPosition (coreVector3(((vPosition  * vFactor) + vRawOffset) * FOREGROUND_AREA, 0.0f));
+    this->SetDirection(coreVector3( (vDirection * vFactor).Normalized(),                    0.0f));
+
+    // 
+    return (fDistance >= pRawPath->GetTotalDistance()) ? true : false;
+}
+
+
+// ****************************************************************
+// 
+coreBool cShip::DefaultMoveTarget(const coreVector2& vTarget, const coreFloat fSpeedMove, const coreFloat fSpeedTurn)
+{
+    ASSERT((fSpeedMove >= 0.0f) && (fSpeedTurn >= 0.0f))
+
+    // 
+    const coreVector2 vDiff = vTarget - this->GetPosition().xy();
+    if(vDiff.IsNull()) return true;
+
+    // 
+    const coreVector2 vAim = vDiff.Normalized();
+    const coreVector2 vDir = (this->GetDirection().xy() + vAim * (fSpeedTurn * Core::System->GetTime())).Normalized();
+    const coreVector2 vPos =  this->GetPosition ().xy() + vDir * (fSpeedMove * Core::System->GetTime());
+
+    // 
+    this->SetPosition (coreVector3(vPos, 0.0f));
+    this->SetDirection(coreVector3(vDir, 0.0f));
+
+    // 
+    return (vDiff.LengthSq() < 0.5f) ? true : false;
+}
+
+
+// ****************************************************************
+// 
+coreBool cShip::DefaultMoveSmooth(const coreVector2& vRawPosition, const coreFloat fSpeedMove, const coreFloat fDistThreshold)
+{
+    ASSERT((fSpeedMove >= 0.0f) && (fDistThreshold >= 0.0f))
+
+    // 
+    const coreVector2 vDiff = vRawPosition * FOREGROUND_AREA - this->GetPosition().xy();
+    if(vDiff.IsNull()) return true;
+
+    // 
+    const coreVector2 vAim = vDiff.Normalized();
+    const coreFloat   fLen = SmoothTowards(vDiff.Length(), fDistThreshold);
+    const coreVector2 vPos = this->GetPosition().xy() + vAim * (fLen * fSpeedMove * Core::System->GetTime());
+
+    // 
+    this->SetPosition(coreVector3(vPos, 0.0f));
+
+    // 
+    return (fLen < 0.1f) ? true : false;
+}
+
+
+// ****************************************************************
+// 
+void cShip::DefaultMoveForward(const coreVector2& vDirection, const coreFloat fSpeedMove)
+{
+    // 
+    const coreVector2 vPosition = this->GetPosition().xy() + vDirection * (fSpeedMove * Core::System->GetTime());
+
+    // 
+    this->SetPosition (coreVector3(vPosition,  0.0f));
+    this->SetDirection(coreVector3(vDirection, 0.0f));
+}
+
+
+// ****************************************************************
+// 
+void cShip::DefaultMoveLerp(const coreVector2& vFromRawPos, const coreVector2& vToRawPos, const coreFloat fTime)
+{
+    // 
+    this->SetPosition(coreVector3(LERP(vFromRawPos, vToRawPos, fTime) * FOREGROUND_AREA, 0.0f));
+}
+
+
+// ****************************************************************
+// 
+void cShip::DefaultRotate(const coreFloat fAngle)
+{
+    // rotate around z-axis
+    const coreVector2 vDir = coreVector2::Direction(fAngle);
+    this->SetDirection(coreVector3(vDir, 0.0f));
+}
+
+
+// ****************************************************************
+// 
+coreBool cShip::DefaultRotateSmooth(const coreVector2& vDirection, const coreFloat fSpeedTurn, const coreFloat fDistThreshold)
+{
+    ASSERT(vDirection.IsNormalized() && (fSpeedTurn >= 0.0f) && (fDistThreshold >= 0.0f))
+
+    // 
+    const coreVector2 vDiff = vDirection - this->GetDirection().xy();
+    if(vDiff.IsNull()) return true;
+
+    // 
+    const coreVector2 vAim = vDiff.Normalized();
+    const coreFloat   fLen = SmoothTowards(vDiff.Length(), fDistThreshold);
+    const coreVector2 vDir = (this->GetDirection().xy() + vAim * (fLen * fSpeedTurn * Core::System->GetTime())).Normalized();
+
+    // 
+    this->SetDirection(coreVector3(vDir, 0.0f));
+
+    // 
+    return (fLen < 0.1f) ? true : false;
+}
+
+
+// ****************************************************************
+// 
+void cShip::DefaultRotateLerp(const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime)
+{
+    // rotate around z-axis
+    this->DefaultRotate(LERP(fFromAngle, fToAngle, fTime));
+}
+
+
+// ****************************************************************
+// 
+void cShip::DefaultOrientate(const coreFloat fAngle)
+{
+    // rotate around direction axis
+    const coreVector3& vDir = this->GetDirection();
+    const coreVector2  vOri = coreVector2::Direction(fAngle);
+    this->SetOrientation(coreVector3(-vOri.x*vDir.y, vOri.x*vDir.x, vOri.y));
+}
+
+
+// ****************************************************************
+// 
+void cShip::DefaultOrientateLerp(const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime)
+{
+    // rotate around direction axis
+    this->DefaultOrientate(LERP(fFromAngle, fToAngle, fTime));
+}
+
+
+// ****************************************************************
+// 
+void cShip::DefaultAxiate(const coreFloat fAngle)
+{
+    // 
+    const coreVector3& vDir  = this->GetDirection();
+    const coreVector3  vOri  = coreMath::IsNear(ABS(vDir.z), 1.0f) ? coreVector3(0.0f,1.0f,0.0f) : coreVector3(0.0f,0.0f,1.0f);
+    const coreMatrix3  mRota = coreMatrix4::RotationAxis(fAngle, vDir).m123();
+    this->SetOrientation(vOri * mRota);
+}
+
+
+// ****************************************************************
+// 
+void cShip::DefaultAxiateLerp(const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime)
+{
+    // 
+    this->DefaultAxiate(LERP(fFromAngle, fToAngle, fTime));
+}
+
+
+// ****************************************************************
+// 
+void cShip::DefaultMultiate(const coreFloat fAngle)
+{
+    // rotate around the rotating direction axis
+    const coreVector2 vDir = coreVector2::Direction(fAngle);
+    this->SetDirection  (coreVector3(vDir, 0.0f));
+    this->SetOrientation(coreVector3(-vDir.x*vDir.y, vDir.x*vDir.x, vDir.y));
+}
+
+
+// ****************************************************************
+// 
+void cShip::DefaultMultiateLerp(const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime)
+{
+    // 
+    this->DefaultMultiate(LERP(fFromAngle, fToAngle, fTime));
+}
+
+
+// ****************************************************************
+// 
 coreBool cShip::_TakeDamage(const coreInt32 iDamage, const coreUint8 iElement)
 {
     // 

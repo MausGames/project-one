@@ -324,9 +324,9 @@ void cTeslaWeapon::__TriggerOwn(const coreUint8 iMode)
 
     // 
     apNode.reserve(16u);
-    g_pGame->GetBulletManagerPlayer()->ForEachBullet([&](const cBullet* pBullet)
+    g_pGame->GetBulletManagerPlayer()->ForEachBulletTyped<cTeslaBullet>([&](const cTeslaBullet* pBullet)
     {
-        if((pBullet->GetID() == cTeslaBullet::ID) && (pBullet->GetOwner() == m_pOwner))
+        if(pBullet->GetOwner() == m_pOwner)
             apNode.push_back(pBullet);
     });
 

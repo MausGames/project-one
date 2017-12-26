@@ -301,7 +301,7 @@ static void DebugGame()
     {
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LALT), CORE_INPUT_HOLD))
         {
-            #define __LOAD_GAME(x) {g_pGame = new cGame(false); g_pGame->LoadMission(x); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f); g_pEnvironment->SetTargetSpeed(6.0f);}
+            #define __LOAD_GAME(x) {g_pGame = new cGame(0u, false, GAME_MISSION_LIST_DEFAULT); g_pGame->LoadMissionID(x); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f);}
             if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS)) __LOAD_GAME(cIntroMission  ::ID)
             if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2), CORE_INPUT_PRESS)) __LOAD_GAME(cViridoMission ::ID)
             if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(3), CORE_INPUT_PRESS)) __LOAD_GAME(cNevoMission   ::ID)
@@ -376,21 +376,21 @@ static void DebugGame()
     // damage boss
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(O), CORE_INPUT_PRESS))
     {
-        if(g_pGame && g_pGame->GetMission()->GetCurBoss())
+        if(g_pGame && g_pGame->GetCurMission()->GetCurBoss())
         {
-            g_pGame->GetMission()->GetCurBoss()->TakeDamage(1000, ELEMENT_NEUTRAL, NULL);
+            g_pGame->GetCurMission()->GetCurBoss()->TakeDamage(1000, ELEMENT_NEUTRAL, NULL);
         }
     }
 
     // skip stage
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(P), CORE_INPUT_PRESS))
     {
-        if(g_pGame && g_pGame->GetMission() &&
-           CONTAINS_FLAG(g_pGame->GetMission()->GetBoss(0u)->GetStatus(), ENEMY_STATUS_DEAD) &&
-           CONTAINS_FLAG(g_pGame->GetMission()->GetBoss(1u)->GetStatus(), ENEMY_STATUS_DEAD) &&
-           CONTAINS_FLAG(g_pGame->GetMission()->GetBoss(2u)->GetStatus(), ENEMY_STATUS_DEAD))
+        if(g_pGame && g_pGame->GetCurMission() &&
+           CONTAINS_FLAG(g_pGame->GetCurMission()->GetBoss(0u)->GetStatus(), ENEMY_STATUS_DEAD) &&
+           CONTAINS_FLAG(g_pGame->GetCurMission()->GetBoss(1u)->GetStatus(), ENEMY_STATUS_DEAD) &&
+           CONTAINS_FLAG(g_pGame->GetCurMission()->GetBoss(2u)->GetStatus(), ENEMY_STATUS_DEAD))
         {
-            g_pGame->GetMission()->SkipStage();
+            g_pGame->GetCurMission()->SkipStage();
         }
     }
 

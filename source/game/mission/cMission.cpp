@@ -173,28 +173,29 @@ void cMission::SkipStage()
 
 
 // ****************************************************************
-// set boss active
-void cMission::SetCurBoss(const coreUintW iIndex)
-{
-    // save pointer and index for direct access
-    m_pCurBoss      = (iIndex < MISSION_BOSSES) ? m_apBoss[iIndex] : NULL;
-    m_iCurBossIndex = (iIndex < MISSION_BOSSES) ? iIndex           : MISSION_NO_BOSS;
-}
-
-void cMission::SetCurBoss(const cBoss* pBoss)
+// 
+void cMission::ActivateBoss(const cBoss* pBoss)
 {
     // 
     for(coreUintW i = 0u; i < MISSION_BOSSES; ++i)
     {
         if(pBoss == m_apBoss[i])
         {
-            // 
-            this->SetCurBoss(i);
+            // save pointer and index for direct access
+            m_pCurBoss      = m_apBoss[i];
+            m_iCurBossIndex = i;
             return;
         }
     }
 
     ASSERT(false)
+}
+
+void cMission::DeactivateBoss()
+{
+    // 
+    m_pCurBoss      = NULL;
+    m_iCurBossIndex = MISSION_NO_BOSS;
 }
 
 

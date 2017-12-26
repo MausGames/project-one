@@ -20,8 +20,8 @@
 
 // ****************************************************************
 // mission definitions
-#define MISSION_BOSSES  (3u)      // default number of bosses per mission
-#define MISSION_NO_BOSS (0xFFu)   // no boss currently active (error-value)
+#define MISSION_BOSSES  (BOSSES)   // default number of bosses per mission
+#define MISSION_NO_BOSS (0xFFu)    // no boss currently active (error-value)
 
 
 // ****************************************************************
@@ -179,9 +179,9 @@ public:
     inline coreBool IsWaiting ()const {return m_fStageWait > 0.0f;}
     inline coreBool IsFinished()const {return m_anStage.empty();}
 
-    // set active boss
-    void SetCurBoss(const coreUintW iIndex);
-    void SetCurBoss(const cBoss*    pBoss);
+    // 
+    void ActivateBoss  (const cBoss* pBoss);
+    void DeactivateBoss();
 
     // access mission objects
     inline cBoss*           GetBoss        (const coreUintW iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_apBoss[iIndex];}

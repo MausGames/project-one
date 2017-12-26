@@ -64,7 +64,7 @@ cVausBoss::cVausBoss()noexcept
 // 
 void cVausBoss::__ResurrectOwn()
 {
-    cViridoMission* pMission = s_cast<cViridoMission*>(g_pGame->GetMission());
+    cViridoMission* pMission = s_cast<cViridoMission*>(g_pGame->GetCurMission());
 
     // 
     pMission->EnableBall  (0u, coreVector2(0.0f,0.0f), coreVector2(-0.5f,1.0f).Normalized());
@@ -76,7 +76,7 @@ void cVausBoss::__ResurrectOwn()
 // 
 void cVausBoss::__KillOwn(const coreBool bAnimated)
 {
-    cViridoMission* pMission = s_cast<cViridoMission*>(g_pGame->GetMission());
+    cViridoMission* pMission = s_cast<cViridoMission*>(g_pGame->GetCurMission());
 
     // 
     pMission->DisableBall(0u, bAnimated);
@@ -86,7 +86,7 @@ void cVausBoss::__KillOwn(const coreBool bAnimated)
         pMission->DisablePaddle(i, bAnimated);
 
     // 
-    pMission->SetCurBoss(MISSION_NO_BOSS);
+    pMission->DeactivateBoss();
 }
 
 
@@ -121,7 +121,7 @@ void cVausBoss::__RenderOwnAttack()
 // 
 void cVausBoss::__MoveOwn()
 {
-    cViridoMission* pMission = s_cast<cViridoMission*>(g_pGame->GetMission());
+    cViridoMission* pMission = s_cast<cViridoMission*>(g_pGame->GetCurMission());
     coreObject3D*   pBall    = pMission->GetBall(0u);
     cEnemySquad*    pSquad   = pMission->GetEnemySquad(0u);
 
@@ -230,7 +230,7 @@ void cVausBoss::__MoveOwn()
 
             if(PHASE_TIME_POINT(0.35f))
             {
-                g_pGame->GetMission()->SetCurBoss(this);
+                g_pGame->GetCurMission()->ActivateBoss(this);
                 g_pGame->GetInterface()->ShowBoss(this);
             }
 
@@ -708,7 +708,7 @@ void cVausBoss::__MoveOwn()
     }
 
     // 
-    if(g_pGame->GetMission()->GetCurBoss() == this)
+    if(g_pGame->GetCurMission()->GetCurBoss() == this)
     {
         if(pMission->GetBounceState())
         {
@@ -792,7 +792,7 @@ coreBool cVausBoss::__ExecuteCompanionAttack(const coreUintW iType, const coreFl
     //if((iType == 1u) && ((m_aiCounter[SUB_PHASE] % 3) == 1))
     //    return true;
 
-    cViridoMission* pMission  = s_cast<cViridoMission*>(g_pGame->GetMission());
+    cViridoMission* pMission  = s_cast<cViridoMission*>(g_pGame->GetCurMission());
     coreObject3D*   pBall     = pMission->GetBall(0u);
     const coreFloat fBallPosY = pBall->GetPosition().y / FOREGROUND_AREA.y;
 
