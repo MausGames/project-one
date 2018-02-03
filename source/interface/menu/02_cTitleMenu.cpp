@@ -38,7 +38,7 @@ cTitleMenu::cTitleMenu()noexcept
     m_aVersionInfo[0].SetPosition (coreVector2(0.0f, 0.03f));
     m_aVersionInfo[0].SetCenter   (coreVector2(0.0f,-0.5f) * g_vMenuCenter);
     m_aVersionInfo[0].SetAlignment(coreVector2(0.0f, 1.0f));
-    m_aVersionInfo[0].SetText     ("(c) 2010-2017 Martin Mauersics (@MausGames)");
+    m_aVersionInfo[0].SetText     ("(c) 2010-2018 Martin Mauersics (@MausGames)");
 
     m_aVersionInfo[1].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
     m_aVersionInfo[1].SetPosition (m_aVersionInfo[0].GetPosition() + coreVector2(0.0f,-0.02f));

@@ -10,6 +10,8 @@
 #ifndef _P1_GUARD_ENEMY_H_
 #define _P1_GUARD_ENEMY_H_
 
+// TODO: disable texture filtering for enemy texture (only mip, + default black and white)
+
 
 // ****************************************************************
 // enemy definitions

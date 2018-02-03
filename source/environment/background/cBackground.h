@@ -167,9 +167,10 @@ protected:
 
 private:
     // own routines for derived classes
-    virtual void __RenderOwn() {}
-    virtual void __MoveOwn  () {}
-    virtual void __UpdateOwn() {}
+    virtual void __RenderOwnBefore() {}
+    virtual void __RenderOwnAfter () {}
+    virtual void __MoveOwn        () {}
+    virtual void __UpdateOwn      () {}
 };
 
 
@@ -186,7 +187,7 @@ public:
 
 private:
     // execute own routines
-    inline void __RenderOwn()final {m_FrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);}
+    inline void __RenderOwnAfter()final {m_FrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);}
 };
 
 
@@ -235,8 +236,8 @@ public:
 
 protected:
     // execute own routines
-    void __RenderOwn()final;
     void __MoveOwn  ()final;
+    void __UpdateOwn()final;
 };
 
 
@@ -265,8 +266,8 @@ public:
 
 private:
     // execute own routines
-    void __RenderOwn()final;
-    void __MoveOwn  ()final;
+    void __RenderOwnAfter()final;
+    void __MoveOwn       ()final;
 };
 
 
@@ -299,8 +300,8 @@ public:
 
 protected:
     // execute own routines
-    void __RenderOwn()final;
-    void __MoveOwn  ()final;
+    void __RenderOwnBefore()final;
+    void __MoveOwn        ()final;
 };
 
 
@@ -326,8 +327,8 @@ public:
 
 private:
     // execute own routines
-    void __RenderOwn()final;
-    void __MoveOwn  ()final;
+    void __RenderOwnAfter()final;
+    void __MoveOwn       ()final;
 };
 
 
@@ -363,8 +364,8 @@ public:
 
 private:
     // execute own routines
-    void __RenderOwn()final;
-    void __MoveOwn  ()final;
+    void __RenderOwnAfter()final;
+    void __MoveOwn       ()final;
 };
 
 
@@ -397,9 +398,9 @@ public:
 
 private:
     // execute own routines
-    void __RenderOwn()final;
-    void __MoveOwn  ()final;
-    void __UpdateOwn()final;
+    void __RenderOwnAfter()final;
+    void __MoveOwn       ()final;
+    void __UpdateOwn     ()final;
 };
 
 
@@ -420,8 +421,8 @@ public:
 
 private:
     // execute own routines
-    void __RenderOwn()final;
-    void __UpdateOwn()final;
+    void __RenderOwnAfter()final;
+    void __UpdateOwn     ()final;
 };
 
 
@@ -446,8 +447,8 @@ public:
 
 private:
     // execute own routines
-    void __RenderOwn()final;
-    void __MoveOwn  ()final;
+    void __RenderOwnBefore()final;
+    void __MoveOwn        ()final;
 };
 
 

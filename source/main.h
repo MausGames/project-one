@@ -12,7 +12,7 @@
 //*-------------------------------------------------------------------------------*//
 //| Project One v0.1.0a (http://www.maus-games.at)                                |//
 //*-------------------------------------------------------------------------------*//
-//| Copyright (c) 2010-2017 Martin Mauersics                                      |//
+//| Copyright (c) 2010-2018 Martin Mauersics                                      |//
 //|                                                                               |//
 //| This software is provided 'as-is', without any express or implied             |//
 //| warranty. In no event will the authors be held liable for any damages         |//
@@ -54,12 +54,16 @@
 // TODO: check if "if(!CORE_GL_SUPPORT(ARB_texture_rg)) glColorMask(true, true, false, false);" reduces or improves performance on related hardware
 // TODO: change some 0.5 FB factors from 0.5 to 0.4 if CORE_GL_SUPPORT(ARB_texture_rg) not available ?
 // TODO: unify "forward" and "transform" comments in shaders
+// TODO: add own coreRand for various random things which may affect feeling (screen shake), and reset on boss-start
 
 
 // ****************************************************************
 // engine headers
 #include "Core.h"
-//STATIC_ASSERT(!DEFINED(_CORE_SSE_))
+
+#if defined(_CORE_SSE_) && !defined(_CORE_DEBUG_)
+    #pragma message("Warning: Precision reduced!")
+#endif
 
 #if defined(_CORE_DEBUG_)
     #define _P1_DEBUG_RANDOM_ (1)
@@ -137,6 +141,7 @@
 #define TYPE_ENEMY           (3)
 #define TYPE_BULLET_PLAYER   (11)
 #define TYPE_BULLET_ENEMY    (12)
+#define TYPE_CHROMA          (21)
 #define TYPE_OBJECT(x)       (100 + (x))
 
 // attack elements
@@ -162,7 +167,7 @@
     inline const coreChar* GetName()const final {return n;}
 
 extern void InitResolution(const coreVector2& vResolution);   // init resolution properties (1:1)
-extern void InitFramerate();                                  // init framerate properties (lock)
+extern void InitFramerate();                                  // init frame rate properties (lock)
 
 
 // ****************************************************************
@@ -176,9 +181,9 @@ class cMission;
 
 // ****************************************************************
 // game headers
-extern coreVector2      g_vGameResolution;   // pre-calculated 1:1 resolution
-extern coreVector2      g_vMenuCenter;       // pre-calculated menu center modifier
-extern coreMusicPlayer  g_MusicPlayer;       // central music-player
+extern coreVector2     g_vGameResolution;   // pre-calculated 1:1 resolution
+extern coreVector2     g_vMenuCenter;       // pre-calculated menu center modifier
+extern coreMusicPlayer g_MusicPlayer;       // central music-player
 
 #include "additional/cUtilities.h"
 #include "additional/cBindContainer.h"
@@ -197,12 +202,12 @@ extern coreMusicPlayer  g_MusicPlayer;       // central music-player
 #include "visual/cForeground.h"
 #include "visual/cPostProcessing.h"
 
-extern cReplay*         g_pReplay;           // 
-extern cOutline*        g_pOutline;          // main outline-layer object
-extern cGlow*           g_pGlow;             // main glow-effect object
-extern cDistortion*     g_pDistortion;       // main distortion-effect object
-extern cSpecialEffects* g_pSpecialEffects;   // main special-effects object
-extern cPostProcessing* g_pPostProcessing;   // main post-processing object
+extern cReplay*         const g_pReplay;           // 
+extern cOutline*        const g_pOutline;          // main outline-layer object
+extern cGlow*           const g_pGlow;             // main glow-effect object
+extern cDistortion*     const g_pDistortion;       // main distortion-effect object
+extern cSpecialEffects* const g_pSpecialEffects;   // main special-effects object
+extern cPostProcessing* const g_pPostProcessing;   // main post-processing object
 
 #include "environment/cOutdoor.h"
 #include "environment/cWater.h"
@@ -219,6 +224,7 @@ extern cPostProcessing* g_pPostProcessing;   // main post-processing object
 #include "game/cWeapon.h"
 #include "game/cShip.h"
 #include "game/cEnemy.h"
+#include "game/cChroma.h"
 #include "game/cShield.h"
 #include "game/boss/cBoss.h"
 #include "game/mission/cMission.h"
@@ -226,11 +232,11 @@ extern cPostProcessing* g_pPostProcessing;   // main post-processing object
 #include "game/cTheater.h"
 #include "game/cGame.h"
 
-extern cForeground*     g_pForeground;       // main foreground object
-extern cEnvironment*    g_pEnvironment;      // main environment object
-extern cMenu*           g_pMenu;             // main menu object
-extern cTheater*        g_pTheater;          // main theater object
-extern cGame*           g_pGame;             // main game object
+extern cForeground*  const g_pForeground;    // main foreground object
+extern cEnvironment* const g_pEnvironment;   // main environment object
+extern cMenu*        const g_pMenu;          // main menu object
+extern cTheater*     const g_pTheater;       // main theater object
+extern cGame*              g_pGame;          // main game object
 
 
 #endif // _P1_GUARD_MAIN_H_

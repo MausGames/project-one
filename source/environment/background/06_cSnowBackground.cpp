@@ -173,8 +173,8 @@ cSnowBackground::cSnowBackground()noexcept
 
 
 // ****************************************************************
-// render the snow background
-void cSnowBackground::__RenderOwn()
+// 
+void cSnowBackground::__RenderOwnAfter()
 {
     // enable the shader-program
     if(!m_Snow.GetProgram().IsUsable()) return;

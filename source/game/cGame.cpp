@@ -76,6 +76,9 @@ cGame::~cGame()
     m_BulletManagerEnemy .ClearBullets(bAnimated);
 
     // 
+    m_ChromaManager.ClearChromas(bAnimated);
+
+    // 
     m_ShieldManager.ClearShields(bAnimated);
 
     // delete last mission
@@ -118,6 +121,9 @@ void cGame::Render()
     {
         // apply deferred outline-layer
         g_pOutline->Apply();
+
+        // 
+        m_ChromaManager.Render();
     }
 
     __DEPTH_LEVEL_ATTACK
@@ -189,6 +195,9 @@ void cGame::Move()
     m_BulletManagerEnemy .Move();
 
     // 
+    m_ChromaManager.Move();
+
+    // 
     m_ShieldManager.Move();
 
     // handle default object collisions
@@ -212,6 +221,9 @@ void cGame::LoadMissionID(const coreInt32 iID)
     // 
     m_BulletManagerPlayer.ClearBullets(true);
     m_BulletManagerEnemy .ClearBullets(true);
+
+    // 
+    m_ChromaManager.ClearChromas(true);
 
     // delete possible old mission
     m_EnemyManager.ClearEnemies(true);
@@ -557,6 +569,13 @@ void cGame::__HandleCollisions()
 
         // 
         g_pSpecialEffects->RumblePlayer(s_cast<cPlayer*>(pBullet->GetOwner()), SPECIAL_RUMBLE_DEFAULT);
+    });
+
+    // 
+    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_CHROMA, [](cPlayer* OUTPUT pPlayer, cChromaBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
+    {
+        // 
+        pBullet->Deactivate(true, vIntersection.xy());
     });
 
     // 

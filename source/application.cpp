@@ -30,6 +30,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("bullet_quad.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_quad.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("bullet_rocket.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_rocket.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_spear.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_spear.md3");
+    Core::Manager::Resource->Load<coreModel>  ("bullet_triangle.md3",                    CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_triangle.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_wave.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_wave.md3");
     Core::Manager::Resource->Load<coreModel>  ("effect_shield.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/effect_shield.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("environment_reed_01.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_reed_01.md3", false);
@@ -48,6 +49,10 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("object_sphere.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_sphere.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("object_tube.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tube.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("object_tube_closed.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tube_closed.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_bottom_high.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_bottom_high.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_bottom_low.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_bottom_low.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_top_high.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_top_high.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_top_low.md3",          CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_top_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_dharuk_high.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_dharuk_high.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_dharuk_low.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_dharuk_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_leviathan_body_high.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_leviathan_body_high.md3", false);
@@ -56,8 +61,10 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_leviathan_head_low.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_leviathan_head_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_leviathan_tail_high.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_leviathan_tail_high.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_leviathan_tail_low.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_leviathan_tail_low.md3");
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_nautilus_high.md3",            CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_nautilus_high.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_nautilus_low.md3",             CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_nautilus_low.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_nautilus_body_high.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_nautilus_body_high.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_nautilus_body_low.md3",        CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_nautilus_body_low.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_nautilus_claw_high.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_nautilus_claw_high.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_nautilus_claw_low.md3",        CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_nautilus_claw_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_torus_high.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_torus_high.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_torus_low.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_torus_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_vaus_high.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_vaus_high.md3", false);

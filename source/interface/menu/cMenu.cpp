@@ -282,6 +282,7 @@ void cMenu::Move()
                 else if(g_pReplay->GetStatus() == REPLAY_STATUS_PLAYBACK)
                 {
                     g_pReplay->EndPlayback();
+                    g_pReplay->Clear();
                 }
 
                 // 

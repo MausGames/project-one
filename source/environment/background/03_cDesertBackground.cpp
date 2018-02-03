@@ -97,7 +97,7 @@ cDesertBackground::~cDesertBackground()
 
 // ****************************************************************
 // 
-void cDesertBackground::__RenderOwn()
+void cDesertBackground::__RenderOwnAfter()
 {
     // enable the shader-program
     if(!m_Sand.GetProgram().IsUsable()) return;

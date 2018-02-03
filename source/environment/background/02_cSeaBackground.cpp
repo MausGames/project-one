@@ -269,8 +269,8 @@ cSeaBackground::~cSeaBackground()
 
 
 // ****************************************************************
-// render the sea background
-void cSeaBackground::__RenderOwn()
+// 
+void cSeaBackground::__UpdateOwn()
 {
     const coreBatchList*  pGround  = m_apGroundObjectList[0];
     const coreProgramPtr& pProgram = pGround->IsInstanced() ? pGround->GetProgram() : pGround->List()->front()->GetProgram();
@@ -282,12 +282,6 @@ void cSeaBackground::__RenderOwn()
     // 
     pProgram->Enable();
     pProgram->SendUniform("u_v1Time", m_fWaveTime);
-
-    // 
-    if(m_pUnderSound->EnableRef(this))
-        m_pUnderSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
-
-    // TODO: this here is rendered after the water, therefore the shader is updated too late and affects each other on transition  
 }
 
 
@@ -297,4 +291,8 @@ void cSeaBackground::__MoveOwn()
 {
     // 
     m_fWaveTime.Update(1.4f);
+
+    // 
+    if(m_pUnderSound->EnableRef(this))
+        m_pUnderSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
 }

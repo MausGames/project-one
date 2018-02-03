@@ -8,32 +8,26 @@
 //////////////////////////////////////////////////////
 #include "main.h"
 
-#define ASSERT_ALL {ASSERT(g_pReplay)     ASSERT(g_pOutline)        ASSERT(g_pGlow)           \
-                    ASSERT(g_pDistortion) ASSERT(g_pSpecialEffects) ASSERT(g_pPostProcessing) \
-                    ASSERT(g_pForeground) ASSERT(g_pEnvironment)    ASSERT(g_pMenu)           \
-                    ASSERT(g_pTheater)}
+coreVector2     g_vGameResolution = coreVector2(0.0f,0.0f);
+coreVector2     g_vMenuCenter     = coreVector2(0.0f,0.0f);
+coreMusicPlayer g_MusicPlayer     = {};
 
-coreVector2      g_vGameResolution = coreVector2(0.0f,0.0f);
-coreVector2      g_vMenuCenter     = coreVector2(0.0f,0.0f);
-coreMusicPlayer  g_MusicPlayer     = {};
+STATIC_MEMORY(cReplay,         g_pReplay)
+STATIC_MEMORY(cOutline,        g_pOutline)
+STATIC_MEMORY(cGlow,           g_pGlow)
+STATIC_MEMORY(cDistortion,     g_pDistortion)
+STATIC_MEMORY(cSpecialEffects, g_pSpecialEffects)
+STATIC_MEMORY(cPostProcessing, g_pPostProcessing)
+STATIC_MEMORY(cForeground,     g_pForeground)
+STATIC_MEMORY(cEnvironment,    g_pEnvironment)
+STATIC_MEMORY(cMenu,           g_pMenu)
+STATIC_MEMORY(cTheater,        g_pTheater)
 
-cReplay*         g_pReplay         = NULL;
-cOutline*        g_pOutline        = NULL;
-cGlow*           g_pGlow           = NULL;
-cDistortion*     g_pDistortion     = NULL;
-cSpecialEffects* g_pSpecialEffects = NULL;
-cPostProcessing* g_pPostProcessing = NULL;
+cGame* g_pGame = NULL;
 
-cForeground*     g_pForeground     = NULL;
-cEnvironment*    g_pEnvironment    = NULL;
-cMenu*           g_pMenu           = NULL;
-cTheater*        g_pTheater        = NULL;
-cGame*           g_pGame           = NULL;
-
-static coreUint64 m_iOldPerfTime = 0u;      // last measured high-precision time value
-static coreBool   m_bHardLock    = false;   // status to force framerate with busy-waiting
-static void LockFramerate();                // lock framerate and override elapsed time
-static void DebugGame();                    // debug and test game separately
+static coreUint64 m_iOldPerfTime = 0u;   // last measured high-precision time value
+static void LockFramerate();             // lock frame rate and override frame time
+static void DebugGame();                 // debug and test game
 
 
 // ****************************************************************
@@ -62,16 +56,16 @@ void CoreApp::Init()
 
     // create and init main components
     cShadow::GlobalInit();
-    g_pReplay         = new cReplay();
-    g_pOutline        = new cOutline();
-    g_pGlow           = new cGlow();
-    g_pDistortion     = new cDistortion();
-    g_pSpecialEffects = new cSpecialEffects();
-    g_pPostProcessing = new cPostProcessing();
-    g_pForeground     = new cForeground();
-    g_pEnvironment    = new cEnvironment();
-    g_pMenu           = new cMenu();
-    g_pTheater        = new cTheater();
+    STATIC_NEW(g_pReplay);
+    STATIC_NEW(g_pOutline);
+    STATIC_NEW(g_pGlow);
+    STATIC_NEW(g_pDistortion);
+    STATIC_NEW(g_pSpecialEffects);
+    STATIC_NEW(g_pPostProcessing);
+    STATIC_NEW(g_pForeground);
+    STATIC_NEW(g_pEnvironment);
+    STATIC_NEW(g_pMenu);
+    STATIC_NEW(g_pTheater);
 }
 
 
@@ -79,21 +73,23 @@ void CoreApp::Init()
 // exit the application
 void CoreApp::Exit()
 {
-    // delete and exit main components
+    // 
     SAFE_DELETE(g_pGame)
-    SAFE_DELETE(g_pTheater)
-    SAFE_DELETE(g_pMenu)
-    SAFE_DELETE(g_pEnvironment)
-    SAFE_DELETE(g_pForeground)
-    SAFE_DELETE(g_pPostProcessing)
-    SAFE_DELETE(g_pSpecialEffects)
-    SAFE_DELETE(g_pDistortion)
-    SAFE_DELETE(g_pGlow)
-    SAFE_DELETE(g_pOutline)
-    SAFE_DELETE(g_pReplay)
+
+    // delete and exit main components
+    STATIC_DELETE(g_pTheater)
+    STATIC_DELETE(g_pMenu)
+    STATIC_DELETE(g_pEnvironment)
+    STATIC_DELETE(g_pForeground)
+    STATIC_DELETE(g_pPostProcessing)
+    STATIC_DELETE(g_pSpecialEffects)
+    STATIC_DELETE(g_pDistortion)
+    STATIC_DELETE(g_pGlow)
+    STATIC_DELETE(g_pOutline)
+    STATIC_DELETE(g_pReplay)
     cShadow::GlobalExit();
 
-    // remove all music files
+    // unload music files
     g_MusicPlayer.ClearMusic();
 
     // save configuration
@@ -105,8 +101,6 @@ void CoreApp::Exit()
 // render the application
 void CoreApp::Render()
 {
-    ASSERT_ALL
-
     if(!g_pMenu->IsPausedWithStep())
     {
         Core::Debug->MeasureStart("Update");
@@ -177,9 +171,7 @@ void CoreApp::Render()
 // move the application
 void CoreApp::Move()
 {
-    ASSERT_ALL
-
-    // lock framerate and override elapsed time
+    // lock frame rate and override frame time
     if(g_pGame) LockFramerate();
 
     Core::Debug->MeasureStart("Move");
@@ -208,7 +200,7 @@ void CoreApp::Move()
     }
     Core::Debug->MeasureEnd("Move");
 
-    // debug and test game separately
+    // debug and test game
     if(Core::Debug->IsEnabled()) DebugGame();
 }
 
@@ -224,38 +216,39 @@ void InitResolution(const coreVector2& vResolution)
 
 
 // ****************************************************************
-// init framerate properties
+// init frame rate properties
 void InitFramerate()
 {
-    SDL_Window* pWindow = Core::System->GetWindow();
-
-    // get current display mode
-    SDL_DisplayMode oMode;
-    SDL_GetWindowDisplayMode(pWindow, &oMode);
-
-    if(oMode.refresh_rate != F_TO_SI(FRAMERATE_VALUE))
+    if(!Core::Debug->IsEnabled())
     {
-        // try to override framerate manually
-        oMode.refresh_rate = F_TO_SI(FRAMERATE_VALUE);
-        SDL_SetWindowDisplayMode(pWindow, &oMode);
+        SDL_Window* pWindow = Core::System->GetWindow();
+
+        // get current display mode
+        SDL_DisplayMode oMode;
         SDL_GetWindowDisplayMode(pWindow, &oMode);
 
-        // check again and enable hard-lock on error
+        // check for valid refresh rate
         if(oMode.refresh_rate != F_TO_SI(FRAMERATE_VALUE))
-            m_bHardLock = true;
+        {
+            // try to override refresh rate
+            oMode.refresh_rate = F_TO_SI(FRAMERATE_VALUE);
+            SDL_SetWindowDisplayMode(pWindow, &oMode);
+            SDL_GetWindowDisplayMode(pWindow, &oMode);
 
-        Core::Log->Warning("Framerate manually overridden (%s)", m_bHardLock ? "hard" : "soft");
+            Core::Log->Warning("Refresh rate overridden (%d)", oMode.refresh_rate);
+        }
+
+        // force vertical synchronization
+        if(SDL_GL_SetSwapInterval(-1)) SDL_GL_SetSwapInterval(1);
     }
 }
 
 
 // ****************************************************************
-// lock framerate and override elapsed time
+// lock frame rate and override frame time
 static void LockFramerate()
 {
-#if (1)
-
-    if(m_bHardLock)
+    if(!Core::Debug->IsEnabled())
     {
         coreUint64 iNewPerfTime;
         coreFloat  fDifference;
@@ -279,23 +272,15 @@ static void LockFramerate()
         m_iOldPerfTime = iNewPerfTime;
     }
 
-    // override elapsed time
+    // override frame time
     if(Core::System->GetTime()) c_cast<coreFloat&>(Core::System->GetTime()) = FRAMERATE_TIME;
-
-#endif
 }
 
 
 // ****************************************************************
-// debug and test game separately
+// debug and test game
 static void DebugGame()
 {
-    // ########################## DEBUG ##########################
-
-#if defined(_CORE_MSVC_)
-    #pragma warning(disable : 4189 4702)
-#endif
-
     // start game
     if(!g_pGame)
     {
@@ -323,7 +308,16 @@ static void DebugGame()
     // hide menu
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(J), CORE_INPUT_PRESS))
     {
-        g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f);
+        static coreUint8 s_iOldSurface = SURFACE_EMPTY;
+        if(g_pMenu->GetCurSurface() == SURFACE_EMPTY)
+        {
+            g_pMenu->ChangeSurface(s_iOldSurface, 0.0f);
+        }
+        else
+        {
+            s_iOldSurface = g_pMenu->GetCurSurface();
+            g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f);
+        }
     }
 
     // load background
@@ -357,8 +351,22 @@ static void DebugGame()
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_9),        CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 1.0f, 1.0f).Normalized());
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_PLUS),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetSpeed((&g_pEnvironment->GetSpeed())[1] + 1.0f);
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_MINUS),    CORE_INPUT_PRESS)) g_pEnvironment->SetTargetSpeed((&g_pEnvironment->GetSpeed())[1] - 1.0f);
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_DIVIDE),   CORE_INPUT_PRESS)) g_pEnvironment->SetTargetSide ((&g_pEnvironment->GetSide ())[1] - coreVector2(2.0f,0.0f));
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_MULTIPLY), CORE_INPUT_PRESS)) g_pEnvironment->SetTargetSide ((&g_pEnvironment->GetSide ())[1] + coreVector2(2.0f,0.0f));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_DIVIDE),   CORE_INPUT_HOLD))  g_pEnvironment->SetTargetSide ((&g_pEnvironment->GetSide ())[1] - coreVector2(30.0f * Core::System->GetTime(), 0.0f));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_MULTIPLY), CORE_INPUT_HOLD))  g_pEnvironment->SetTargetSide ((&g_pEnvironment->GetSide ())[1] + coreVector2(30.0f * Core::System->GetTime(), 0.0f));
+    }
+
+    // set background height
+    static coreFloat s_fHeight = 0.0f;
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(E), CORE_INPUT_HOLD)) s_fHeight += 15.0f * Core::System->GetTime();
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(R), CORE_INPUT_HOLD)) s_fHeight -= 15.0f * Core::System->GetTime();
+    g_pEnvironment->SetTargetHeight(s_fHeight);
+
+    // set background interpolation
+    if(g_pEnvironment->GetBackground()->GetOutdoor())
+    {
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(COMMA), CORE_INPUT_PRESS)) g_pEnvironment->GetBackground()->GetOutdoor()->LerpHeight(1.0f,   0.0f);
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(M),     CORE_INPUT_PRESS)) g_pEnvironment->GetBackground()->GetOutdoor()->LerpHeight(0.0f, -15.0f);
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(N),     CORE_INPUT_PRESS)) g_pEnvironment->GetBackground()->GetOutdoor()->LerpHeight(0.0f, -25.0f);
     }
 
     // equip weapon
@@ -373,6 +381,28 @@ static void DebugGame()
         }
     }
 
+    // turn player
+    if(g_pGame)
+    {
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(UP),    CORE_INPUT_PRESS)) g_pGame->GetPlayer(0u)->SetDirection(coreVector3( 0.0f, 1.0f,0.0f));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LEFT),  CORE_INPUT_PRESS)) g_pGame->GetPlayer(0u)->SetDirection(coreVector3(-1.0f, 0.0f,0.0f));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(DOWN),  CORE_INPUT_PRESS)) g_pGame->GetPlayer(0u)->SetDirection(coreVector3( 0.0f,-1.0f,0.0f));
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(RIGHT), CORE_INPUT_PRESS)) g_pGame->GetPlayer(0u)->SetDirection(coreVector3( 1.0f, 0.0f,0.0f));
+    }
+
+    // toggle invincibility
+    if(g_pGame)
+    {
+        static coreBool s_bInvincible = true;
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(Q), CORE_INPUT_PRESS)) s_bInvincible = !s_bInvincible;
+
+        g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
+        {
+            pPlayer->SetMaxHealth(s_bInvincible ? 10000 : 1);
+            pPlayer->SetCurHealth(s_bInvincible ? 10000 : 1);
+        });
+    }
+
     // damage boss
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(O), CORE_INPUT_PRESS))
     {
@@ -385,7 +415,7 @@ static void DebugGame()
     // skip stage
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(P), CORE_INPUT_PRESS))
     {
-        if(g_pGame && g_pGame->GetCurMission() &&
+        if(g_pGame &&
            CONTAINS_FLAG(g_pGame->GetCurMission()->GetBoss(0u)->GetStatus(), ENEMY_STATUS_DEAD) &&
            CONTAINS_FLAG(g_pGame->GetCurMission()->GetBoss(1u)->GetStatus(), ENEMY_STATUS_DEAD) &&
            CONTAINS_FLAG(g_pGame->GetCurMission()->GetBoss(2u)->GetStatus(), ENEMY_STATUS_DEAD))
@@ -401,69 +431,27 @@ static void DebugGame()
         for(coreUintW i = 0u; i < 10u; ++i)
         {
             if(Core::Input->GetKeyboardButton(coreInputKey(CORE_INPUT_KEY(KP_1) + i), CORE_INPUT_PRESS))
+            {
                 s_sCode += coreChar('0' + ((i+1u) % 10u));
+                Core::Debug->InspectValue("Boss Code", s_sCode.c_str());
+            }
         }
 
         if(s_sCode.size() >= 4u)
         {
-
-
+            // TODO 
             s_sCode.clear();
         }
     }
 
-    static coreFloat s_fHeight = 0.0f;
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(E), CORE_INPUT_HOLD))
-    {
-        s_fHeight += 15.0f * Core::System->GetTime();
-    }
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(R), CORE_INPUT_HOLD))
-    {
-        s_fHeight -= 15.0f * Core::System->GetTime();
-    }
-    g_pEnvironment->SetTargetHeight(s_fHeight);
-
-    static coreBool s_bInvincible = true;
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(Q), CORE_INPUT_PRESS))
-    {
-        s_bInvincible = !s_bInvincible;
-    }
-    if(s_bInvincible && g_pGame)
-    {
-        g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
-        {
-            if(CONTAINS_FLAG(pPlayer->GetStatus(), PLAYER_STATUS_DEAD))
-                pPlayer->Resurrect(pPlayer->GetPosition().xy());
-
-            const coreInt32 iHeal = pPlayer->GetCurHealth() - pPlayer->GetMaxHealth();
-            if(iHeal) pPlayer->TakeDamage(iHeal, ELEMENT_NEUTRAL);
-        });
-    }
-
+    // show raster
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(F), CORE_INPUT_PRESS))
     {
         static coreBool s_bDebugMode = false;
         g_pPostProcessing->SetDebugMode(s_bDebugMode = !s_bDebugMode);
     }
 
-    if(g_pEnvironment->GetBackground()->GetOutdoor())
-    {
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(COMMA), CORE_INPUT_PRESS))
-        {
-            g_pEnvironment->GetBackground()->GetOutdoor()->LerpHeight(1.0f, 0.0f);
-        }
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(M), CORE_INPUT_PRESS))
-        {
-            g_pEnvironment->GetBackground()->GetOutdoor()->LerpHeight(0.0f, -15.0f);
-        }
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(N), CORE_INPUT_PRESS))
-        {
-            g_pEnvironment->GetBackground()->GetOutdoor()->LerpHeight(0.0f, -25.0f);
-        }
-    }
-
+    // keep noise low
     if(SDL_GL_GetSwapInterval())
         SDL_Delay(1u);
-
-    // ########################## DEBUG ##########################
 }

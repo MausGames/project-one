@@ -63,7 +63,7 @@ cStomachBackground::cStomachBackground()noexcept
 
 // ****************************************************************
 // 
-void cStomachBackground::__RenderOwn()
+void cStomachBackground::__RenderOwnAfter()
 {
     // 
     glDisable(GL_DEPTH_TEST);

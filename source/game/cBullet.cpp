@@ -620,11 +620,11 @@ void cSpearBullet::__MoveOwn()
 
 // ****************************************************************
 // constructor
-cQuadBullet::cQuadBullet()noexcept
+cTriangleBullet::cTriangleBullet()noexcept
 : m_vFlyDir (coreVector2(0.0f,0.0f))
 {
     // load object resources
-    this->DefineModel  ("bullet_quad.md3");
+    this->DefineModel  ("bullet_triangle.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_direct_program");
 
@@ -635,7 +635,7 @@ cQuadBullet::cQuadBullet()noexcept
 
 // ****************************************************************
 // 
-void cQuadBullet::__ImpactOwn(const coreVector2& vImpact)
+void cTriangleBullet::__ImpactOwn(const coreVector2& vImpact)
 {
     // 
     g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
@@ -643,8 +643,8 @@ void cQuadBullet::__ImpactOwn(const coreVector2& vImpact)
 
 
 // ****************************************************************
-// move the quad bullet
-void cQuadBullet::__MoveOwn()
+// move the triangle bullet
+void cTriangleBullet::__MoveOwn()
 {
     // fly around
     this->SetPosition(coreVector3(this->GetPosition().xy() + m_vFlyDir * (m_fSpeed * Core::System->GetTime()), 0.0f));
@@ -690,5 +690,43 @@ void cFlipBullet::__MoveOwn()
     // 
     m_fAnimation.Update(-0.2f);
     this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation * 50.0f), 0.0f));
+    this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
+}
+
+
+// ****************************************************************
+// constructor
+cChromaBullet::cChromaBullet()noexcept
+: m_vFlyDir (coreVector2(0.0f,0.0f))
+{
+    // load object resources
+    this->DefineModel  ("bullet_quad.md3");
+    this->DefineTexture(0u, "effect_energy.png");
+    this->DefineProgram("effect_energy_bullet_direct_program");
+
+    // set object properties
+    this->SetTexSize(coreVector2(0.5f,0.2f));
+}
+
+
+// ****************************************************************
+// 
+void cChromaBullet::__ImpactOwn(const coreVector2& vImpact)
+{
+    // 
+    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
+}
+
+
+// ****************************************************************
+// 
+void cChromaBullet::__MoveOwn()
+{
+    // fly around
+    this->SetPosition(coreVector3(this->GetPosition().xy() + m_vFlyDir * (m_fSpeed * Core::System->GetTime()), 0.0f));
+
+    // 
+    m_fAnimation.Update(0.2f);
+    this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation * 10.0f), 0.0f));
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
 }

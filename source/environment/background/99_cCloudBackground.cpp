@@ -81,8 +81,8 @@ cCloudBackground::~cCloudBackground()
 
 
 // ****************************************************************
-// render the cloud background
-void cCloudBackground::__RenderOwn()
+// 
+void cCloudBackground::__RenderOwnBefore()
 {
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);

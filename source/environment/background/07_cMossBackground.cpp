@@ -105,7 +105,7 @@ cMossBackground::~cMossBackground()
 
 // ****************************************************************
 // 
-void cMossBackground::__RenderOwn()
+void cMossBackground::__RenderOwnAfter()
 {
     // enable the shader-program
     if(!m_Rain.GetProgram().IsUsable()) return;

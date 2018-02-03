@@ -234,7 +234,9 @@ private:
 class cNautilusBoss final : public cBoss
 {
 private:
-    coreFlow m_fAnimation;   // animation value
+    cCustomEnemy m_aClaw[2];   //
+
+    coreFlow m_fAnimation;     // animation value
 
 
 public:
@@ -261,6 +263,11 @@ private:
 class cAmemasuBoss final : public cBoss
 {
 private:
+    cCustomEnemy m_Top;                 // 
+    cCustomEnemy m_Bottom;              // 
+
+    coreFloat m_fMouthAngle;            // 
+
     coreSpline2 m_ChangePath;           // 
 
     coreTexturePtr m_apStomachTex[4];   // 
@@ -275,7 +282,9 @@ public:
 
 private:
     // execute own routines
-    void __MoveOwn()final;
+    void __ResurrectOwn()final;
+    void __KillOwn     (const coreBool bAnimated)final;
+    void __MoveOwn     ()final;
 };
 
 

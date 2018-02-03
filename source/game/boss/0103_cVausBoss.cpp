@@ -553,7 +553,7 @@ void cVausBoss::__MoveOwn()
             pSquad->ForEachEnemy([](cEnemy* OUTPUT pEnemy, const coreUintW i)
             {
                 const coreVector2 vTarget = (i & 0x01u) ? coreVector2(-2.0f,0.0f) : coreVector2(2.0f,0.2f);
-                if(pEnemy->DefaultMoveSmooth(vTarget, 3.0f, 30.0f))
+                if(pEnemy->DefaultMoveSmooth(vTarget, 30.0f, 10.0f))
                     pEnemy->Kill(false);
             });
         }
@@ -693,7 +693,7 @@ void cVausBoss::__MoveOwn()
                 }
             }
 
-            pEnemy->DefaultMoveSmooth(vGridPos, 3.0f, 30.0f);
+            pEnemy->DefaultMoveSmooth(vGridPos, 30.0f, 10.0f);
 
             STATIC_ASSERT(VAUS_SCOUTS_X <= sizeof(m_iScoutOrder)*8u)
         });
@@ -754,7 +754,7 @@ void cVausBoss::__MoveOwn()
             }
         });
 
-        this->DefaultMoveSmooth(coreVector2(0.0f, 0.95f - 0.95f * (fLimit1 - this->GetCurHealthPct()) * RCP(fLimit1)), 10.0f, 100.0f);
+        this->DefaultMoveSmooth(coreVector2(0.0f, 0.95f - 0.95f * (fLimit1 - this->GetCurHealthPct()) * RCP(fLimit1)), 100.0f, 10.0f);
     }
 
 

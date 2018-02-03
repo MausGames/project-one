@@ -19,7 +19,7 @@ cCaveBackground::cCaveBackground()noexcept
 
 // ****************************************************************
 // 
-void cCaveBackground::__RenderOwn()
+void cCaveBackground::__RenderOwnAfter()
 {
     // 
     glDisable(GL_DEPTH_TEST);

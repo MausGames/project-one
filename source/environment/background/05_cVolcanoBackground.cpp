@@ -21,7 +21,7 @@ cVolcanoBackground::cVolcanoBackground()noexcept
 
 // ****************************************************************
 // 
-void cVolcanoBackground::__RenderOwn()
+void cVolcanoBackground::__RenderOwnBefore()
 {
     // 
     m_Lava.Render();

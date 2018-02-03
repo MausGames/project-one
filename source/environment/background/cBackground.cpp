@@ -42,7 +42,7 @@ cBackground::~cBackground()
         FOR_EACH(it, *papList)
         {
             // delete single objects within the list
-            FOR_EACH(et, *(*it)->List()) POOLED_DELETE(s_MemoryPool, coreObject3D, *et)
+            FOR_EACH(et, *(*it)->List()) POOLED_DELETE(s_MemoryPool, *et)
             SAFE_DELETE(*it)
         }
 
@@ -122,6 +122,9 @@ void cBackground::Render()
         }
         glEnable(GL_BLEND);
 
+        // call individual render routine (before air)
+        this->__RenderOwnBefore();
+
         glDisable(GL_DEPTH_TEST);
         {
             // render all air objects
@@ -130,8 +133,8 @@ void cBackground::Render()
         }
         glEnable(GL_DEPTH_TEST);
 
-        // call individual render routine
-        this->__RenderOwn();
+        // call individual render routine (after air)
+        this->__RenderOwnAfter();
     }
 
     // resolve frame buffer to texture
@@ -242,7 +245,7 @@ void cBackground::Move()
             else
             {
                 // remove object when not visible anymore
-                MANAGED_DELETE(coreObject3D, *it)
+                MANAGED_DELETE(*it)
                 DYN_REMOVE(it, *papObject)
             }
         }
@@ -333,10 +336,10 @@ void cBackground::ShoveObjects(const coreFloat fOffset)
 void cBackground::ClearObjects()
 {
     // delete objects and lists
-    FOR_EACH(it, m_apAddObject) MANAGED_DELETE(coreObject3D, *it)
+    FOR_EACH(it, m_apAddObject) MANAGED_DELETE(*it)
     FOR_EACH(it, m_apAddList)
     {
-        FOR_EACH(et, *(*it)->List()) MANAGED_DELETE(coreObject3D, *et)
+        FOR_EACH(et, *(*it)->List()) MANAGED_DELETE(*et)
         SAFE_DELETE(*it)
     }
 

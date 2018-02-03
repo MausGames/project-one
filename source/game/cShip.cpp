@@ -206,7 +206,7 @@ void cShip::DefaultAxiate(const coreFloat fAngle)
 {
     // 
     const coreVector3& vDir  = this->GetDirection();
-    const coreVector3  vOri  = coreMath::IsNear(ABS(vDir.z), 1.0f) ? coreVector3(0.0f,1.0f,0.0f) : coreVector3(0.0f,0.0f,1.0f);
+    const coreVector3  vOri  = coreVector3::Cross(vDir, coreVector3::Cross(vDir, coreVector3(0.0f,0.0f,1.0f)).Normalized());
     const coreMatrix3  mRota = coreMatrix4::RotationAxis(fAngle, vDir).m123();
     this->SetOrientation(vOri * mRota);
 }

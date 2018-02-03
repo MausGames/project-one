@@ -10,7 +10,7 @@
 #ifndef _P1_GUARD_WEAPON_H_
 #define _P1_GUARD_WEAPON_H_
 
-// TODO: weapons may have to share their cooldown, otherwise you can cheat (not relevant on single-weapon setup)
+// TODO: weapons may have to share their cooldown (not relevant on single-weapon setup)
 
 
 // ****************************************************************

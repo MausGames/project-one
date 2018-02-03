@@ -9,7 +9,7 @@
 
 
 void FragmentMain()
-{
+{/* atan without const value, does not link on recent Nvidia driver (but compiles ...)
     // don't use discard; 
     //if(dot(v_av2TexCoord[0], u_v2TexOffset) > 0.0 &&
     //   dot(v_av2TexCoord[0].yx, vec2(1.0, 0.0)) > 0.0) discard;
@@ -27,7 +27,7 @@ void FragmentMain()
     vec3  v3Color;
     float v1Alpha;
 
-    if(u_v2TexOffset.x < 0.5*PI + (atan(-v_av2TexCoord[0].y / v_av2TexCoord[0].x) + ((v_av2TexCoord[0].x < 0.0) ? PI*0.0 : PI*1.0))) 
+    if(u_v2TexOffset.x < 0.5*PI + (atan(-v_av2TexCoord[0].y, v_av2TexCoord[0].x) + ((v_av2TexCoord[0].x < 0.0) ? PI*0.0 : PI*1.0))) 
     {
         v3Color = u_v4Color.rgb * 0.2;
         v1Alpha = smoothstep(0.62, 0.7, v1Value) * (1.0 - smoothstep(0.88, 0.98, v1Value));
@@ -43,4 +43,6 @@ void FragmentMain()
 
     // draw texture with subtle white glow
     gl_FragColor = vec4(v3Color * v1Alpha, v1Alpha * u_v4Color.a);
+*/
+    gl_FragColor = vec4(0.0);
 }

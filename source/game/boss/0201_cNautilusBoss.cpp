@@ -26,14 +26,23 @@ cNautilusBoss::cNautilusBoss()noexcept
 : m_fAnimation (0.0f)
 {
     // load models
-    this->DefineModelHigh("ship_boss_nautilus_high.md3");
-    this->DefineModelLow ("ship_boss_nautilus_low.md3");
+    this->DefineModelHigh("ship_boss_nautilus_body_high.md3");
+    this->DefineModelLow ("ship_boss_nautilus_body_low.md3");
 
     // set object properties
-    this->SetSize(coreVector3(1.5f,1.5f,1.5f));
+    this->SetSize(coreVector3(2.0f,2.0f,2.0f));
 
     // configure the boss
     this->Configure(3000, COLOR_SHIP_PURPLE);
+
+    // 
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aClaw); ++i)
+    {
+        m_aClaw[i].DefineModelHigh("ship_boss_nautilus_claw_high.md3");
+        m_aClaw[i].DefineModelLow ("ship_boss_nautilus_claw_low.md3");
+        m_aClaw[i].SetSize        (coreVector3(2.0f,2.0f,2.0f));
+        m_aClaw[i].Configure      (1, COLOR_SHIP_PURPLE);
+    }
 }
 
 
@@ -41,6 +50,10 @@ cNautilusBoss::cNautilusBoss()noexcept
 // 
 void cNautilusBoss::__ResurrectOwn()
 {
+    // 
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aClaw); ++i)
+        m_aClaw[i].Resurrect();
+
     // 
     m_aiCounter[CONTAINER_ATTACHED] = 1;
 }
@@ -50,7 +63,9 @@ void cNautilusBoss::__ResurrectOwn()
 // 
 void cNautilusBoss::__KillOwn(const coreBool bAnimated)
 {
-
+    // 
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aClaw); ++i)
+        m_aClaw[i].Kill(bAnimated);
 }
 
 
@@ -141,9 +156,9 @@ void cNautilusBoss::__MoveOwn()
                 const coreVector2 vDir = this->GetDirection().xy();
                 const coreVector2 vPos = this->GetPosition ().xy() + vDir * 5.0f;
 
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, 1.6f, this, vPos,                                         vDir)->MakeRed()->MakeSmaller(1.2f);
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, 1.6f, this, vPos - vDir * 3.0f + coreVector2( 3.0f,0.0f), vDir)->MakeRed()->MakeSmaller(1.2f);
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, 1.6f, this, vPos - vDir * 3.0f + coreVector2(-3.0f,0.0f), vDir)->MakeRed()->MakeSmaller(1.2f);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, 1.6f, this, vPos,                                         vDir)->MakeRed()->MakeSmaller(1.2f);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, 1.6f, this, vPos - vDir * 3.0f + coreVector2( 3.0f,0.0f), vDir)->MakeRed()->MakeSmaller(1.2f);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, 1.6f, this, vPos - vDir * 3.0f + coreVector2(-3.0f,0.0f), vDir)->MakeRed()->MakeSmaller(1.2f);
             });
 
             if(PHASE_FINISHED)
@@ -255,6 +270,17 @@ void cNautilusBoss::__MoveOwn()
         // 
         g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), SPECIAL_SPLASH_BIG, COLOR_ENERGY_BLUE);
         g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_BIG);
+    }
+
+    // 
+    const coreMatrix3 mRota = coreMatrix4::RotationAxis(0.11f * SIN(4.0f * coreFloat(Core::System->GetTotalTime())), this->GetOrientation()).m123();
+
+    // 
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aClaw); ++i)
+    {
+        m_aClaw[i].SetPosition   (this->GetPosition   ());
+        m_aClaw[i].SetDirection  (this->GetDirection  () * (i ? mRota : mRota.Transposed()));
+        m_aClaw[i].SetOrientation(this->GetOrientation() * (i ? -1.0f : 1.0f));
     }
 }
 

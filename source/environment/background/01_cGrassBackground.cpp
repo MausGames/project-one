@@ -229,7 +229,7 @@ cGrassBackground::cGrassBackground()noexcept
         coreSet<coreObject3D*>* papContent = pList1->List();
         if(papContent->size() % 2u)
         {
-            POOLED_DELETE(s_MemoryPool, coreObject3D, papContent->back())
+            POOLED_DELETE(s_MemoryPool, papContent->back())
             papContent->pop_back();
         }
 

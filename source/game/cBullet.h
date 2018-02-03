@@ -16,6 +16,7 @@
 // TODO: change bullet-id lookup into array-index (also enemies ?)
 // TODO: remove tons of template instantiations (also enemies ?)
 // TODO: add memory pool object for bullets ?
+// TODO: make ray bullet smoother geometrically (front round)
 
 
 // ****************************************************************
@@ -87,13 +88,13 @@ public:
 
 protected:
     // change default color
-    inline void _MakeWhite (const coreFloat fFactor) {m_iElement = ELEMENT_WHITE;  this->SetColor3(COLOR_ENERGY_WHITE  * fFactor);}
-    inline void _MakeYellow(const coreFloat fFactor) {m_iElement = ELEMENT_YELLOW; this->SetColor3(COLOR_ENERGY_YELLOW * fFactor);}
-    inline void _MakeOrange(const coreFloat fFactor) {m_iElement = ELEMENT_ORANGE; this->SetColor3(COLOR_ENERGY_ORANGE * fFactor);}
-    inline void _MakeRed   (const coreFloat fFactor) {m_iElement = ELEMENT_RED;    this->SetColor3(COLOR_ENERGY_RED    * fFactor);}
-    inline void _MakePurple(const coreFloat fFactor) {m_iElement = ELEMENT_PURPLE; this->SetColor3(COLOR_ENERGY_PURPLE * fFactor);}
-    inline void _MakeBlue  (const coreFloat fFactor) {m_iElement = ELEMENT_BLUE;   this->SetColor3(COLOR_ENERGY_BLUE   * fFactor);}
-    inline void _MakeGreen (const coreFloat fFactor) {m_iElement = ELEMENT_GREEN;  this->SetColor3(COLOR_ENERGY_GREEN  * fFactor);}
+    inline void _MakeWhite (const coreFloat fFactor) {m_iElement = ELEMENT_WHITE;  this->__SetColorRand(COLOR_ENERGY_WHITE  * fFactor);}
+    inline void _MakeYellow(const coreFloat fFactor) {m_iElement = ELEMENT_YELLOW; this->__SetColorRand(COLOR_ENERGY_YELLOW * fFactor);}
+    inline void _MakeOrange(const coreFloat fFactor) {m_iElement = ELEMENT_ORANGE; this->__SetColorRand(COLOR_ENERGY_ORANGE * fFactor);}
+    inline void _MakeRed   (const coreFloat fFactor) {m_iElement = ELEMENT_RED;    this->__SetColorRand(COLOR_ENERGY_RED    * fFactor);}
+    inline void _MakePurple(const coreFloat fFactor) {m_iElement = ELEMENT_PURPLE; this->__SetColorRand(COLOR_ENERGY_PURPLE * fFactor);}
+    inline void _MakeBlue  (const coreFloat fFactor) {m_iElement = ELEMENT_BLUE;   this->__SetColorRand(COLOR_ENERGY_BLUE   * fFactor);}
+    inline void _MakeGreen (const coreFloat fFactor) {m_iElement = ELEMENT_GREEN;  this->__SetColorRand(COLOR_ENERGY_GREEN  * fFactor);}
 
 
 private:
@@ -102,6 +103,9 @@ private:
     virtual void __RenderOwnBefore()                           {}
     virtual void __RenderOwnAfter ()                           {}
     virtual void __MoveOwn        ()                           {}
+
+    // 
+    inline void __SetColorRand(const coreVector3& vColor) {this->SetColor3(vColor * Core::Rand->Float(0.8f, 1.0f));}
 };
 
 
@@ -472,30 +476,30 @@ private:
 
 
 // ****************************************************************
-// quad bullet class
-class cQuadBullet final : public cBullet
+// triangle bullet class
+class cTriangleBullet final : public cBullet
 {
 private:
     coreVector2 m_vFlyDir;   // 
 
 
 public:
-    cQuadBullet()noexcept;
+    cTriangleBullet()noexcept;
 
-    ENABLE_COPY(cQuadBullet)
-    ASSIGN_ID(10, "Quad")
+    ENABLE_COPY(cTriangleBullet)
+    ASSIGN_ID(10, "Tri")
 
     // reset base properties
     inline void ResetProperties() {this->SetSize(coreVector3(1.5f,1.5f,1.5f)); m_fAnimation = 0.0f; m_vFlyDir = this->GetDirection().xy();}
 
     // change default color
-    inline cQuadBullet* MakeWhite () {ASSERT(false)            return this;}
-    inline cQuadBullet* MakeYellow() {ASSERT(false)            return this;}
-    inline cQuadBullet* MakeOrange() {ASSERT(false)            return this;}
-    inline cQuadBullet* MakeRed   () {this->_MakeRed   (1.0f); return this;}
-    inline cQuadBullet* MakePurple() {this->_MakePurple(1.0f); return this;}
-    inline cQuadBullet* MakeBlue  () {ASSERT(false)            return this;}
-    inline cQuadBullet* MakeGreen () {ASSERT(false)            return this;}
+    inline cTriangleBullet* MakeWhite () {ASSERT(false)            return this;}
+    inline cTriangleBullet* MakeYellow() {ASSERT(false)            return this;}
+    inline cTriangleBullet* MakeOrange() {ASSERT(false)            return this;}
+    inline cTriangleBullet* MakeRed   () {this->_MakeRed   (1.0f); return this;}
+    inline cTriangleBullet* MakePurple() {this->_MakePurple(1.0f); return this;}
+    inline cTriangleBullet* MakeBlue  () {ASSERT(false)            return this;}
+    inline cTriangleBullet* MakeGreen () {ASSERT(false)            return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
@@ -538,6 +542,36 @@ public:
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_inst_program";}
+    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_FULL;}
+    static constexpr coreBool        ConfigShadow              () {return false;}
+
+
+private:
+    // execute own routines
+    void __ImpactOwn(const coreVector2& vImpact)final;
+    void __MoveOwn  ()final;
+};
+
+
+// ****************************************************************
+// 
+class cChromaBullet final : public cBullet
+{
+private:
+    coreVector2 m_vFlyDir;   // 
+
+
+public:
+    cChromaBullet()noexcept;
+
+    ENABLE_COPY(cChromaBullet)
+    ASSIGN_ID(12, "Chroma")
+
+    // reset base properties
+    inline void ResetProperties() {this->SetSize(coreVector3(1.0f,1.0f,1.0f)); m_fAnimation = 0.0f; m_vFlyDir = this->GetDirection().xy();}
+
+    // bullet configuration values
+    static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_FULL;}
     static constexpr coreBool        ConfigShadow              () {return false;}
 
