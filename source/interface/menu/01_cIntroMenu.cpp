@@ -104,6 +104,7 @@ void cIntroMenu::Move()
 
                 // 
                 this->ChangeSurface(SURFACE_INTRO_EMPTY, 1.0f);
+                break;
             }
         }
     }

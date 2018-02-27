@@ -13,7 +13,7 @@
 // TODO: boss0101, boomerangs may generate double-hits because of rotating box collision (when moving away from it), bitfield with reset (player-num)
 // TODO: boss0101, energy direction in front-part of main-model should be inverted
 // TODO: boss0101, something should grow when small boomerangs begin to create the duplicate
-// TODO: boss0101, disable shadow for duplicate
+// TODO: boss0101, shadow and type rebinding for duplicate
 // TODO: boss0101, definition for 1.5f (and related multiplications)
 // TODO: boss0102, add slight explosion where rays hit the screen
 // TODO: boss0102, separate emitters to three objects, to make them blue
@@ -108,6 +108,10 @@ public:
 
 
 protected:
+    // 
+    void _StartBoss();
+    void _EndBoss(const coreBool bAnimated);
+
     // 
     template <typename F, typename G> void _PhaseTimer (const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreFloat  fSpeed, G&& nLerpFunc,         F&& nUpdateFunc);   // [](const coreFloat fTime, const coreFloat fTimeBefore, const coreBool __bEnd) -> void, [](const coreFloat x, const coreFloat y, const coreFloat s) -> coreFloat
     template <typename F>             void _PhaseTicker(const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreUint16 iTicks, const coreFloat fRate, F&& nUpdateFunc);   // [](const coreUint16 iTick, const coreBool __bEnd) -> void
@@ -235,6 +239,8 @@ class cNautilusBoss final : public cBoss
 {
 private:
     cCustomEnemy m_aClaw[2];   //
+
+    coreFloat m_fClawAngle;    // 
 
     coreFlow m_fAnimation;     // animation value
 

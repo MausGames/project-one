@@ -196,7 +196,7 @@ public:
 private:
     // execute own routines
     void __TriggerOwn(const coreUint8 iMode)final;
-    void __ShootOwn  ()override;
+    void __ShootOwn  ()final;
 };
 
 

@@ -58,7 +58,7 @@ coreBool cShip::DefaultMovePath(const coreSpline2* pRawPath, const coreVector2& 
     // 
     coreVector2 vPosition;
     coreVector2 vDirection;
-    pRawPath->CalcPosDir(MAX(fDistance, 0.0f), &vPosition, &vDirection);
+    pRawPath->CalcPosDir(CLAMP(fDistance, 0.0f, pRawPath->GetTotalDistance()), &vPosition, &vDirection);
 
     // 
     this->SetPosition (coreVector3(((vPosition  * vFactor) + vRawOffset) * FOREGROUND_AREA, 0.0f));
@@ -243,17 +243,14 @@ void cShip::DefaultMultiateLerp(const coreFloat fFromAngle, const coreFloat fToA
 
 // ****************************************************************
 // 
-coreBool cShip::_TakeDamage(const coreInt32 iDamage, const coreUint8 iElement)
+coreBool cShip::_TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact)
 {
     // 
-    if((m_iCurHealth -= iDamage) <= 0)
-        m_iCurHealth = 0;
+    m_iCurHealth = CLAMP(m_iCurHealth - iDamage, 0, m_iMaxHealth);
 
     // 
-    this->SetColor3(LERP(coreVector3(0.5f,0.5f,0.5f), this->GetBaseColor(), 1.25f * MIN(this->GetCurHealthPct(), 0.8f)));
-
-    // 
-    if(iDamage) m_fBlink = 1.2f;
+    this->RefreshColor(this->GetCurHealthPct());
+    if(iDamage) this->InvokeBlink();
 
     // 
     return m_iCurHealth ? false : true;

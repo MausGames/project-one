@@ -149,6 +149,9 @@ cTimeTable::cTimeTable()noexcept
 // 
 void cTimeTable::Update()
 {
+    // 
+    m_fTimeEvent.Update(1.0f);
+
     if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY))
     {
         // update total and mission time
@@ -166,7 +169,8 @@ void cTimeTable::Update()
 void cTimeTable::Reset()
 {
     // (# no memset) 
-    m_fTimeTotal = 0u;
-    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) m_afTimeMission[j] = 0u;
+    m_fTimeEvent = 0.0f;
+    m_fTimeTotal = 0.0f;
+    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) m_afTimeMission[j] = 0.0f;
     for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) for(coreUintW i = 0u; i < TABLE_BOSSES; ++i) m_aafTimeBoss[j][i] = -INTERFACE_BANNER_DURATION;
 }

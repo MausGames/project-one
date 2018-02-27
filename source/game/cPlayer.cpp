@@ -59,7 +59,7 @@ cPlayer::cPlayer()noexcept
     m_Bubble.DefineModel  ("object_sphere.md3");
     m_Bubble.DefineTexture(0u, "effect_energy.png");
     m_Bubble.DefineProgram("effect_energy_bullet_spheric_program");
-    m_Bubble.SetColor4    (coreVector4(0.5f,0.5f,0.5f,0.0f));
+    m_Bubble.SetColor4    (coreVector4(COLOR_ENERGY_WHITE * 0.5f, 0.0f));
     m_Bubble.SetTexSize   (coreVector2(5.0f,5.0f));
     m_Bubble.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 
@@ -307,20 +307,17 @@ void cPlayer::Move()
 
 // ****************************************************************
 // reduce current health
-coreBool cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement)
+coreBool cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact)
 {
+    // 
     if(iDamage > 0)
     {
-        // 
-        //g_pGame->GetCombatText()->AddDamage(iDamage, this->GetPosition());   
-
-        // 
         m_ScoreTable.TransferChain();
         m_ScoreTable.ReduceCombo();
     }
 
     // 
-    if(this->_TakeDamage(iDamage, iElement))
+    if(this->_TakeDamage(iDamage, iElement, vImpact))
     {
         this->Kill(true);
         return true;
@@ -337,9 +334,6 @@ void cPlayer::Resurrect(const coreVector2& vPosition)
     // resurrect player
     if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD)) return;
     REMOVE_FLAG(m_iStatus, PLAYER_STATUS_DEAD)
-
-    // 
-    this->SetPosition(coreVector3(vPosition, 0.0f));
 
     // add ship to the game
     this->_Resurrect(true, vPosition, coreVector2(0.0f,1.0f), TYPE_PLAYER);

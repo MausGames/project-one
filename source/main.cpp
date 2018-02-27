@@ -266,6 +266,13 @@ static void LockFramerate()
             // sleep (once) to reduce overhead
             const coreUint32 iSleep = MAX(F_TO_UI((FRAMERATE_TIME - fDifference) * 1000.0f), 1u) - 1u;
             if(iSleep) SDL_Delay(iSleep);
+
+        #if defined(_CORE_SSE_)
+
+            // processor level spinning
+            else _mm_pause();
+
+        #endif
         }
 
         // save last high-precision time value
@@ -408,7 +415,7 @@ static void DebugGame()
     {
         if(g_pGame && g_pGame->GetCurMission()->GetCurBoss())
         {
-            g_pGame->GetCurMission()->GetCurBoss()->TakeDamage(1000, ELEMENT_NEUTRAL, NULL);
+            g_pGame->GetCurMission()->GetCurBoss()->TakeDamage(1000, ELEMENT_NEUTRAL, coreVector2(0.0f,0.0f), NULL);
         }
     }
 

@@ -35,11 +35,11 @@
 enum ePlayerStatus : coreUint8
 {
     PLAYER_STATUS_DEAD           = 0x01u,   // completely removed from the game
-    PLAYER_STATUS_NO_INPUT_MOVE  = 0x02u,   // disable player movement (user controls only)
-    PLAYER_STATUS_NO_INPUT_SHOOT = 0x04u,   // disable player weapons
-    PLAYER_STATUS_NO_INPUT_ROLL  = 0x08u,   // 
-    PLAYER_STATUS_NO_INPUT_ALL   = PLAYER_STATUS_NO_INPUT_MOVE | PLAYER_STATUS_NO_INPUT_SHOOT | PLAYER_STATUS_NO_INPUT_ROLL,
-    PLAYER_STATUS_DARKNESS       = 0x10u    // 
+    PLAYER_STATUS_DARKNESS       = 0x02u,   // 
+    PLAYER_STATUS_NO_INPUT_MOVE  = 0x04u,   // disable player movement (user controls only)
+    PLAYER_STATUS_NO_INPUT_SHOOT = 0x08u,   // disable player weapons
+    PLAYER_STATUS_NO_INPUT_ROLL  = 0x10u,   // 
+    PLAYER_STATUS_NO_INPUT_ALL   = PLAYER_STATUS_NO_INPUT_MOVE | PLAYER_STATUS_NO_INPUT_SHOOT | PLAYER_STATUS_NO_INPUT_ROLL
 };
 
 
@@ -81,7 +81,7 @@ public:
     void Move  ()final;
 
     // reduce current health
-    coreBool TakeDamage(const coreInt32 iDamage, const coreUint8 iElement);
+    coreBool TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact);
 
     // control life and death
     void Resurrect(const coreVector2& vPosition);

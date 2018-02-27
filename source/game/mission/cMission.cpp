@@ -43,11 +43,6 @@ cMission::~cMission()
     // 
     SAFE_DELETE_ARRAY(m_piInt)
     SAFE_DELETE_ARRAY(m_pfFloat)
-
-    // 
-    g_pEnvironment->SetTargetDirection(ENVIRONMENT_DEFAULT_DIRECTION);
-    g_pEnvironment->SetTargetSide     (ENVIRONMENT_DEFAULT_SIDE);
-    g_pEnvironment->SetTargetSpeed    (ENVIRONMENT_DEFAULT_SPEED);
 }
 
 
@@ -123,33 +118,6 @@ void cMission::MoveBefore()
 
 void cMission::MoveAfter()
 {
-    if(!m_anStage.empty())
-    {
-        const coreUint16& iCurStageLine = m_anStage.get_keylist().back();
-
-        // 
-        FOR_EACH_DYN(it, m_apPath)
-        {
-            if((*m_apPath.get_key(it)) < iCurStageLine)
-            {
-                SAFE_DELETE(*it)
-                DYN_REMOVE(it, m_apPath)
-            }
-            else DYN_KEEP(it)
-        }
-
-        // 
-        FOR_EACH_DYN(it, m_apSquad)
-        {
-            if((*m_apSquad.get_key(it)) < iCurStageLine)
-            {
-                SAFE_DELETE(*it)
-                DYN_REMOVE(it, m_apSquad)
-            }
-            else DYN_KEEP(it)
-        }
-    }
-
     // 
     this->__MoveOwnAfter();
 }
@@ -162,6 +130,14 @@ void cMission::SkipStage()
     // 
     m_fStageTime = 0.0f;
     m_anStage.pop_back();
+
+    // 
+    FOR_EACH(it, m_apPath)  SAFE_DELETE(*it)
+    FOR_EACH(it, m_apSquad) SAFE_DELETE(*it)
+
+    // 
+    m_apPath .clear();
+    m_apSquad.clear();
 
     // 
     std::memset(m_piInt,   0, sizeof(coreInt16) * m_iIntSize);

@@ -25,6 +25,7 @@ cNevoMission::cNevoMission()noexcept
     m_Container.DefineTexture(0u, "default_white.png");
     m_Container.DefineProgram("object_ship_program");
     m_Container.SetSize      (coreVector3(1.0f,1.0f,1.0f) * 5.0f);
+    m_Container.SetColor3    (coreVector3(1.0f,1.0f,1.0f) * 0.5f);
 }
 
 

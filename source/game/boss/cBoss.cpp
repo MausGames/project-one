@@ -47,6 +47,26 @@ cBoss::~cBoss()
 
 // ****************************************************************
 // 
+void cBoss::_StartBoss()
+{
+    // 
+    g_pGame->GetCurMission()->ActivateBoss(this);
+    g_pGame->GetInterface()->ShowBoss(this);
+}
+
+
+// ****************************************************************
+// 
+void cBoss::_EndBoss(const coreBool bAnimated)
+{
+    // 
+    g_pGame->GetCurMission()->DeactivateBoss();
+    g_pGame->GetBulletManagerEnemy()->ClearBullets(bAnimated);
+}
+
+
+// ****************************************************************
+// 
 #include "0101_cDharukBoss.cpp"
 #include "0102_cTorusBoss.cpp"
 #include "0103_cVausBoss.cpp"

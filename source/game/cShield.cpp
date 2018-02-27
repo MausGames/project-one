@@ -122,6 +122,7 @@ void cShieldManager::Move()
 void cShieldManager::AbsorbDamage(cEnemy* pEnemy, coreInt32* OUTPUT piDamage, const coreUint8 iElement)
 {
     if(!CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_SHIELDED)) return;
+    if((*piDamage) <= 0) return;
 
     // 
     for(coreUintW i = 0u; i < SHIELD_SHIELDS; ++i)
@@ -146,7 +147,6 @@ void cShieldManager::AbsorbDamage(cEnemy* pEnemy, coreInt32* OUTPUT piDamage, co
         }
     }
 
-    // 
     ASSERT(false)
 }
 
@@ -226,6 +226,5 @@ void cShieldManager::UnbindEnemy(cEnemy* pEnemy)
         }
     }
 
-    // 
     ASSERT(false)
 }

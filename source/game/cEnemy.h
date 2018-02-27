@@ -11,20 +11,25 @@
 #define _P1_GUARD_ENEMY_H_
 
 // TODO: disable texture filtering for enemy texture (only mip, + default black and white)
+// TODO: manager: Find, ForEach, ForEachAll -> typed 
 
 
 // ****************************************************************
 // enemy definitions
-#define ENEMY_SET_INIT_SIZE (8u)     // initial allocation size when creating a new enemy set
-#define ENEMY_AREA_FACTOR   (1.2f)   // 
+#define ENEMY_SET_INIT    (8u)      // initial size when creating a new enemy set
+#define ENEMY_SET_COUNT   (8u)      // 
+#define ENEMY_AREA_FACTOR (1.2f)    // 
+#define ENEMY_SIZE_FACTOR (1.05f)   // 
 
 enum eEnemyStatus : coreUint8
 {
-    ENEMY_STATUS_DEAD     = 0x01u,   // completely removed from the game
-    ENEMY_STATUS_BOSS     = 0x02u,   // 
-    ENEMY_STATUS_SINGLE   = 0x04u,   // 
-    ENEMY_STATUS_ASSIGNED = 0x10u,   // enemy is currently assigned to something
-    ENEMY_STATUS_SHIELDED = 0x20u    // 
+    ENEMY_STATUS_DEAD        = 0x01u,   // completely removed from the game
+    ENEMY_STATUS_ASSIGNED    = 0x02u,   // enemy is currently assigned to something
+    ENEMY_STATUS_BOSS        = 0x04u,   // 
+    ENEMY_STATUS_SINGLE      = 0x08u,   // 
+    ENEMY_STATUS_CHILD       = 0x10u,   // 
+    ENEMY_STATUS_SHIELDED    = 0x20u,   // 
+    ENEMY_STATUS_INVINCIBLE  = 0x40u    // 
 };
 
 
@@ -35,6 +40,8 @@ class INTERFACE cEnemy : public cShip
 protected:
     coreFlow  m_fLifeTime;         // 
     coreFloat m_fLifeTimeBefore;   // 
+
+    coreSet<cEnemy*> m_apMember;   // 
 
 
 public:
@@ -49,11 +56,12 @@ public:
     void Configure (const coreInt32 iHealth, const coreVector3& vColor);
     void GiveShield(const coreUint8 iElement, const coreInt16 iHealth = 0);
 
-    // move the enemy
-    void Move()final;
+    // render and move the enemy
+    virtual void Render()override;
+    void         Move  ()final;
 
     // reduce current health
-    coreBool TakeDamage(coreInt32 iDamage, const coreUint8 iElement, cPlayer* pAttacker);
+    coreBool TakeDamage(coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact, cPlayer* pAttacker);
 
     // control life and death
     void Resurrect();
@@ -62,12 +70,22 @@ public:
     void Kill     (const coreBool     bAnimated);
 
     // 
-    coreVector2 AimAtPlayer()const;
-    coreVector2 AimAtPlayer(const cPlayer* pPlayer)const;
+    inline coreBool IsParent()const {return !CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_CHILD) && !m_apMember.empty();}
+    inline coreBool IsChild ()const {return  CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_CHILD) && !m_apMember.empty();}
+
+    // 
+    cPlayer*    NearestPlayer()const;
+    coreVector2 AimAtPlayer  ()const;
+    coreVector2 AimAtPlayer  (const cPlayer* pPlayer)const;
 
     // get object properties
     inline const coreFloat& GetLifeTime      ()const {return m_fLifeTime;}
     inline const coreFloat& GetLifeTimeBefore()const {return m_fLifeTimeBefore;}
+
+
+protected:
+    // 
+    void _SetParent(cEnemy* OUTPUT pParent);
 
 
 private:
@@ -140,8 +158,8 @@ private:
 
 
 private:
-    coreLookup<coreInt32, sEnemySetGen*> m_apEnemySet;   // enemy sets (each for a different inherited enemy class)
-    coreSet<cEnemy*> m_apAdditional;                     // pointers to additional enemies
+    sEnemySetGen*    m_apEnemySet[ENEMY_SET_COUNT];   // enemy sets (each for a different inherited enemy class)
+    coreSet<cEnemy*> m_apAdditional;                  // pointers to additional enemies
 
 
 public:
@@ -306,6 +324,9 @@ public:
 
     ENABLE_COPY(cCustomEnemy)
     ASSIGN_ID(666, "Custom")
+
+    // 
+    inline void SetParent(cEnemy* OUTPUT pParent) {this->_SetParent(pParent);}
 };
 
 
@@ -370,7 +391,8 @@ template <typename T> cEnemyManager::sEnemySet<T>::sEnemySet()noexcept
     g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->BindList(&oEnemyActive);
 
     // set enemy pool to initial size
-    apEnemyPool.resize(ENEMY_SET_INIT_SIZE);
+    apEnemyPool.resize(ENEMY_SET_INIT);
+    apEnemyPool[0] = new T();   // already request resources
 }
 
 
@@ -396,16 +418,8 @@ template <typename T> cEnemyManager::sEnemySet<T>::~sEnemySet()
 template <typename T> RETURN_RESTRICT T* cEnemyManager::AllocateEnemy()
 {
     // get requested enemy set
-    sEnemySet<T>* pSet;
-    if(!m_apEnemySet.count(T::ID))
-    {
-        // create new enemy set
-        pSet = new sEnemySet<T>();
-        m_apEnemySet.emplace(T::ID, pSet);
-
-        Core::Log->Info("Enemy Set (%s) created", T::Name);
-    }
-    else pSet = s_cast<sEnemySet<T>*>(m_apEnemySet.at(T::ID));
+    this->PrefetchEnemy<T>();
+    sEnemySet<T>* pSet = s_cast<sEnemySet<T>*>(m_apEnemySet[T::ID]);
 
     // save current pool size
     const coreUintW iSize = pSet->apEnemyPool.size();
@@ -430,7 +444,7 @@ template <typename T> RETURN_RESTRICT T* cEnemyManager::AllocateEnemy()
     pSet->oEnemyActive.Reallocate(iSize * 2u);
     pSet->apEnemyPool .resize    (iSize * 2u);
 
-    // execute again with first new enemy (overhead should be low, requested enemy set is cached)
+    // execute again with first new enemy
     return this->AllocateEnemy<T>();
 }
 
@@ -454,13 +468,14 @@ template <typename F> void cEnemyManager::ForEachEnemy(F&& nFunction)
 template <typename F> void cEnemyManager::ForEachEnemyAll(F&& nFunction)
 {
     // loop through all enemy sets
-    FOR_EACH(it, m_apEnemySet)
+    for(coreUintW i = 0u; i < ENEMY_SET_COUNT; ++i)
     {
-        coreBatchList* pEnemyActive = &(*it)->oEnemyActive;
+        if(!m_apEnemySet[i]) continue;
+        coreBatchList* pEnemyActive = &m_apEnemySet[i]->oEnemyActive;
 
         // 
-        FOR_EACH(et, *pEnemyActive->List())
-            nFunction(*et);
+        FOR_EACH(it, *pEnemyActive->List())
+            nFunction(*it);
     }
 }
 
@@ -469,16 +484,14 @@ template <typename F> void cEnemyManager::ForEachEnemyAll(F&& nFunction)
 // 
 template <typename T> void cEnemyManager::PrefetchEnemy()
 {
-    if(!m_apEnemySet.count(T::ID))
+    STATIC_ASSERT(T::ID < ENEMY_SET_COUNT)
+
+    if(!m_apEnemySet[T::ID])
     {
-        // 
-        sEnemySet<T>* pSet = new sEnemySet<T>();
-        pSet->apEnemyPool[0] = new T();
+        // create new enemy set
+        m_apEnemySet[T::ID] = new sEnemySet<T>();
 
-        // 
-        m_apEnemySet.emplace(T::ID, pSet);
-
-        Core::Log->Info("Enemy Set (%s) prefetched", T::Name);
+        Core::Log->Info("Enemy Set (%s) created", T::Name);
     }
 }
 

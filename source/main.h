@@ -55,6 +55,8 @@
 // TODO: change some 0.5 FB factors from 0.5 to 0.4 if CORE_GL_SUPPORT(ARB_texture_rg) not available ?
 // TODO: unify "forward" and "transform" comments in shaders
 // TODO: add own coreRand for various random things which may affect feeling (screen shake), and reset on boss-start
+// TODO: somehow make g_pGame also static (but beware of pointer==null checks)
+// TODO: check issues with all the F&& functions (especially in boss.h and mission.h), also check Core, use force_inline on small functions
 
 
 // ****************************************************************
@@ -100,6 +102,7 @@
 #define COLOR_ENERGY_RED     (coreVector3(1.000f, 0.290f, 0.290f))
 #define COLOR_ENERGY_PURPLE  (coreVector3(0.450f, 0.200f, 1.000f))
 #define COLOR_ENERGY_BLUE    (coreVector3(0.100f, 0.430f, 1.000f))
+#define COLOR_ENERGY_CYAN    (coreVector3(0.184f, 0.569f, 0.635f))
 #define COLOR_ENERGY_GREEN   (coreVector3(0.270f, 0.710f, 0.270f))
 #define COLOR_FIRE_ORANGE    (coreVector3(0.991f, 0.305f, 0.042f))
 #define COLOR_FIRE_BLUE      (coreVector3(0.306f, 0.527f, 1.000f))
@@ -145,16 +148,17 @@
 #define TYPE_OBJECT(x)       (100 + (x))
 
 // attack elements
-#define ELEMENT_WHITE        (0u)   // 
-#define ELEMENT_YELLOW       (1u)   // speed (ray) 
-#define ELEMENT_ORANGE       (2u)   // fire
-#define ELEMENT_RED          (3u)   // (antimatter) 
-#define ELEMENT_BLUE         (4u)   // homing (tesla) 
-#define ELEMENT_PURPLE       (5u)   // power (pulse) 
-#define ELEMENT_GREEN        (6u)   // (wave) 
-#define ELEMENT_NEUTRAL      (7u)   // 
-#define ELEMENT_LIGHT        (8u)   // 
-#define ELEMENT_DARK         (9u)   // 
+#define ELEMENT_WHITE        (0u)    // 
+#define ELEMENT_YELLOW       (1u)    // speed (ray) 
+#define ELEMENT_ORANGE       (2u)    // fire
+#define ELEMENT_RED          (3u)    // (antimatter) 
+#define ELEMENT_PURPLE       (4u)    // power (pulse) 
+#define ELEMENT_BLUE         (5u)    // homing (tesla) 
+#define ELEMENT_CYAN         (6u)    // 
+#define ELEMENT_GREEN        (7u)    // (wave) 
+#define ELEMENT_NEUTRAL      (8u)    // 
+#define ELEMENT_LIGHT        (9u)    // 
+#define ELEMENT_DARK         (10u)   // 
 
 // sub-class and object ID macros
 #define ENABLE_ID                                           \

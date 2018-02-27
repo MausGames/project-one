@@ -199,15 +199,6 @@ void cViridoMission::__SetupOwn()
         {
             g_pEnvironment->ChangeBackground(-cGrassBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);
 
-            g_pEnvironment->GetBackground()->GetOutdoor()->LerpHeightNow(0.4583f, -13.83f);
-            g_pEnvironment->GetBackground()->SetGroundDensity(0u, 0.0f);
-            g_pEnvironment->GetBackground()->SetGroundDensity(1u, 0.0f);
-            g_pEnvironment->GetBackground()->SetGroundDensity(2u, 0.0f);
-            g_pEnvironment->GetBackground()->SetDecalDensity (0u, 0.0f);
-            g_pEnvironment->GetBackground()->SetAirDensity   (0u, 0.0f);
-
-            g_pEnvironment->SetTargetSpeed(5.0f);
-
             g_pGame->GetInterface()->ShowMission(this);
             g_pGame->StartIntro();
         }
@@ -227,15 +218,6 @@ void cViridoMission::__SetupOwn()
     // 
     STAGE_MAIN
     {
-        g_pEnvironment->SetTargetDirection(coreVector2::Direction(LERPS(-1.0f*PI, 0.0f*PI, m_fStageTime*0.5f)));
-
-        STAGE_FINISH_AFTER(2.0f)
-    });
-
-    // ################################################################
-    // 
-    STAGE_MAIN
-    {
         STAGE_BOSS(m_Torus, coreVector2(0.0f,2.0f), coreVector2(0.0f,-1.0f))
     });
 
@@ -243,15 +225,7 @@ void cViridoMission::__SetupOwn()
     // 
     STAGE_MAIN
     {
-        UNUSED STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, VAUS_SCOUTS_X * VAUS_SCOUTS_Y)
-        {
-            STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
-            {
-                pEnemy->Configure(5, COLOR_SHIP_BLUE);
-            });
-        });
-
-        STAGE_BOSS(m_Vaus, coreVector2(0.0f,-2.0f), coreVector2(0.0f,1.0f))
+        STAGE_BOSS(m_Vaus, coreVector2(0.0f,2.0f), coreVector2(0.0f,-1.0f))
     });
 }
 
@@ -454,7 +428,7 @@ void cViridoMission::__MoveOwnAfter()
         if(!bFirstHit) return;
 
         // 
-        pPlayer->TakeDamage(10, ELEMENT_GREEN);
+        pPlayer->TakeDamage(10, ELEMENT_GREEN, vIntersection.xy());
 
         // 
         g_pSpecialEffects->MacroExplosionColorSmall(vIntersection, COLOR_ENERGY_GREEN);

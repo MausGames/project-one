@@ -88,8 +88,8 @@
 #define STOMACH_CLOUD_NUM     (256u)
 #define STOMACH_CLOUD_RESERVE (304u)   // # tested
 
-#define CLOUD_CLOUD_NUM       (576u)
-#define CLOUD_CLOUD_RESERVE   (684u)   // # tested
+#define CLOUD_CLOUD_NUM       (1024u)
+#define CLOUD_CLOUD_RESERVE   (1216u)   // # tested
 
 
 // ****************************************************************

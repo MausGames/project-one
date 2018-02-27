@@ -39,7 +39,7 @@ cCloudBackground::cCloudBackground()noexcept
             pObject->SetPosition (coreVector3(vPosition, fHeight));
             pObject->SetSize     (coreVector3(coreVector2(2.4f,2.4f) * Core::Rand->Float(15.0f, 21.0f), 1.0f));
             pObject->SetDirection(coreVector3(coreVector2::Rand(), 0.0f));
-            pObject->SetColor4   (coreVector4(coreVector3(1.0f,1.0f,1.0f) * (0.8f + 0.2f * fHeight/60.0f), 0.85f));
+            pObject->SetColor4   (coreVector4(coreVector3(1.0f,1.0f,1.0f) * MIN(0.0f + 1.0f * fHeight/50.0f, 1.0f), 0.85f));
             pObject->SetTexOffset(coreVector2::Rand(0.0f,10.0f, 0.0f,10.0f));
 
             // add object to the list
@@ -104,7 +104,7 @@ void cCloudBackground::__MoveOwn()
 
     // 
     m_Cover.SetDirection(g_pEnvironment->GetDirection().InvertedX());
-    m_Cover.SetTexOffset(coreVector2(0.0f, FRACT(m_fOffset)));
+    m_Cover.SetTexOffset(coreVector2(0.005f * g_pEnvironment->GetSideOffset(), FRACT(m_fOffset)));
     m_Cover.Move();
 
     // 

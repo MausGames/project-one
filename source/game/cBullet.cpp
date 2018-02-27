@@ -94,7 +94,7 @@ void cBullet::Deactivate(const coreBool bAnimated)
 // ****************************************************************
 // constructor
 cBulletManager::sBulletSetGen::sBulletSetGen()noexcept
-: oBulletActive (BULLET_SET_INIT_SIZE)
+: oBulletActive (BULLET_SET_INIT)
 , iCurBullet    (0u)
 {
 }
@@ -103,7 +103,8 @@ cBulletManager::sBulletSetGen::sBulletSetGen()noexcept
 // ****************************************************************
 // constructor
 cBulletManager::cBulletManager(const coreInt32 iType)noexcept
-: m_iType (iType)
+: m_apBulletSet {}
+, m_iType       (iType)
 {
     // 
     Core::Manager::Object->TestCollision(m_iType, [](coreObject3D*, coreObject3D*, coreVector3, coreBool) {});
@@ -118,11 +119,8 @@ cBulletManager::~cBulletManager()
     m_Outline.ClearLists();
 
     // 
-    FOR_EACH(it, m_apBulletSet)
-        SAFE_DELETE(*it)
-
-    // clear memory
-    m_apBulletSet.clear();
+    for(coreUintW i = 0u; i < BULLET_SET_COUNT; ++i)
+        SAFE_DELETE(m_apBulletSet[i])
 }
 
 
@@ -131,20 +129,21 @@ cBulletManager::~cBulletManager()
 void cBulletManager::Render()
 {
     // loop through all bullet sets
-    FOR_EACH(it, m_apBulletSet)
+    for(coreUintW i = 0u; i < BULLET_SET_COUNT; ++i)
     {
-        coreBatchList* pBulletActive = &(*it)->oBulletActive;
+        if(!m_apBulletSet[i]) continue;
+        coreBatchList* pBulletActive = &m_apBulletSet[i]->oBulletActive;
 
         // call individual preceding render routines
-        FOR_EACH(et, *pBulletActive->List())
-            s_cast<cBullet*>(*et)->__RenderOwnBefore();
+        FOR_EACH(it, *pBulletActive->List())
+            s_cast<cBullet*>(*it)->__RenderOwnBefore();
 
         // render bullet set
         pBulletActive->Render();
 
         // call individual subsequent render routines
-        FOR_EACH(et, *pBulletActive->List())
-            s_cast<cBullet*>(*et)->__RenderOwnAfter();
+        FOR_EACH(it, *pBulletActive->List())
+            s_cast<cBullet*>(*it)->__RenderOwnAfter();
     }
 
     // 
@@ -161,21 +160,22 @@ void cBulletManager::Move()
     coreFloat   fDepth      = 0.0f;
 
     // loop through all bullet sets
-    FOR_EACH(it, m_apBulletSet)
+    for(coreUintW i = 0u; i < BULLET_SET_COUNT; ++i)
     {
-        coreBatchList* pBulletActive = &(*it)->oBulletActive;
+        if(!m_apBulletSet[i]) continue;
+        coreBatchList* pBulletActive = &m_apBulletSet[i]->oBulletActive;
 
         // loop through all bullets
-        FOR_EACH_DYN(et, *pBulletActive->List())
+        FOR_EACH_DYN(it, *pBulletActive->List())
         {
-            coreObject3D* pBullet = (*et);
+            coreObject3D* pBullet = (*it);
 
             // check current bullet status
             if(!CONTAINS_FLAG(pBullet->GetStatus(), BULLET_STATUS_ACTIVE))
             {
                 // clean up bullet and make ready again
                 pBullet->SetStatus(pBullet->GetStatus() | BULLET_STATUS_READY);
-                DYN_REMOVE(et, *pBulletActive->List())
+                DYN_REMOVE(it, *pBulletActive->List())
             }
             else
             {
@@ -191,7 +191,7 @@ void cBulletManager::Move()
                 // 
                 pBullet->SetSize             (coreVector3(pBullet->GetSize             ().xy(),     fDepth));
                 pBullet->SetCollisionModifier(coreVector3(pBullet->GetCollisionModifier().xy(), RCP(fDepth)));
-                DYN_KEEP(et)
+                DYN_KEEP(it)
             }
         }
 
@@ -206,16 +206,14 @@ void cBulletManager::Move()
 void cBulletManager::ClearBullets(const coreBool bAnimated)
 {
     // loop trough all bullet sets
-    FOR_EACH(it, m_apBulletSet)
+    for(coreUintW i = 0u; i < BULLET_SET_COUNT; ++i)
     {
-        coreBatchList* pBulletActive = &(*it)->oBulletActive;
+        if(!m_apBulletSet[i]) continue;
+        coreBatchList* pBulletActive = &m_apBulletSet[i]->oBulletActive;
 
         // deactivate all active bullets
-        FOR_EACH(et, *pBulletActive->List())
-            s_cast<cBullet*>(*et)->Deactivate(bAnimated);
-
-        // clear list
-        pBulletActive->Clear();
+        FOR_EACH(it, *pBulletActive->List())
+            s_cast<cBullet*>(*it)->Deactivate(bAnimated);
     }
 }
 

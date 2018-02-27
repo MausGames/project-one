@@ -79,6 +79,10 @@ public:
     inline void ActivateModelLowOnly() {this->DefineModel(m_pModelLow);}
 
     // 
+    inline void RefreshColor(const coreFloat& fFactor) {this->SetColor3(LERP(coreVector3(0.5f,0.5f,0.5f), this->GetBaseColor(), 1.25f * CLAMP(fFactor, 0.0f, 0.8f)));}
+    inline void InvokeBlink ()                         {m_fBlink = 1.2f;}
+
+    // 
     inline coreBool ReachedHealth   (const coreInt32 iHealth)    {return InBetween(iHealth,                                    m_iCurHealth, m_iPreHealth);}
     inline coreBool ReachedHealthPct(const coreFloat fHealthPct) {return InBetween(F_TO_SI(fHealthPct * I_TO_F(m_iMaxHealth)), m_iCurHealth, m_iPreHealth);}
     inline coreBool ReachedDeath    ()                           {return ((m_iCurHealth == 0) && (m_iPreHealth != 0));}
@@ -91,7 +95,7 @@ public:
     inline void SetBaseColor   (const coreVector3& vBaseColor)    {m_iBaseColor = coreVector4(vBaseColor, 0.0f).PackUnorm4x8(); this->SetColor3(vBaseColor);}
     inline void SetMaxHealth   (const coreInt32    iMaxHealth)    {m_iMaxHealth = iMaxHealth;}
     inline void SetCurHealth   (const coreInt32    iCurHealth)    {m_iCurHealth = iCurHealth;}
-    inline void GetCurHealthPct(const coreFloat    fCurHealthPct) {m_iCurHealth = F_TO_SI(fCurHealthPct * I_TO_F(m_iMaxHealth)); ASSERT((fCurHealthPct > 0.0f) && (fCurHealthPct <= 1.0f))}
+    inline void SetCurHealthPct(const coreFloat    fCurHealthPct) {m_iCurHealth = F_TO_SI(fCurHealthPct * I_TO_F(m_iMaxHealth)); ASSERT((fCurHealthPct > 0.0f) && (fCurHealthPct <= 1.0f))}
 
     // get object properties
     inline const coreModelPtr& GetModelHigh   ()const {return m_pModelHigh;}
@@ -100,13 +104,15 @@ public:
     inline       coreInt32     GetMaxHealth   ()const {return m_iMaxHealth;}
     inline       coreInt32     GetCurHealth   ()const {return m_iCurHealth;}
     inline       coreFloat     GetCurHealthPct()const {return I_TO_F(m_iCurHealth) * RCP(I_TO_F(m_iMaxHealth));}
+    inline       coreInt32     GetPreHealth   ()const {return m_iPreHealth;}
+    inline       coreFloat     GetPreHealthPct()const {return I_TO_F(m_iPreHealth) * RCP(I_TO_F(m_iMaxHealth));}
     inline const coreVector2&  GetOldPos      ()const {return m_vOldPos;}
     inline       coreFloat     GetBlink       ()const {return MIN(m_fBlink, 1.0f);}
 
 
 protected:
     // 
-    coreBool _TakeDamage(const coreInt32 iDamage, const coreUint8 iElement);
+    coreBool _TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact);
 
     // 
     void _Resurrect(const coreBool bSingle, const coreVector2& vPosition, const coreVector2& vDirection, const coreInt32 iType);

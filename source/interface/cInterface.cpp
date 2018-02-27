@@ -296,7 +296,7 @@ void cInterface::Move()
     }
 
     // check for active banner
-    const coreFloat fBanner = g_pGame->GetTimeTable()->GetTimeTotal() - m_fBannerStart;
+    const coreFloat fBanner = g_pGame->GetTimeTable()->GetTimeEvent() - m_fBannerStart;
     if((fBanner <= INTERFACE_BANNER_DURATION) && (fBanner >= 0.0f))
     {
         // calculate visibility and animation value
@@ -333,7 +333,7 @@ void cInterface::Move()
     }
 
     // 
-    const coreFloat fStory = g_pGame->GetTimeTable()->GetTimeTotal() - m_fStoryStart;
+    const coreFloat fStory = g_pGame->GetTimeTable()->GetTimeEvent() - m_fStoryStart;
     if((fStory <= INTERFACE_STORY_DURATION) && (fStory >= 0.0f))
     {
         // 
@@ -380,7 +380,7 @@ void cInterface::ShowBoss(const coreChar* pcMain, const coreChar* pcSub)
     m_aBannerText[3].SetAlpha(0.0f);
 
     // save animation properties
-    m_fBannerStart = g_pGame->GetTimeTable()->GetTimeTotal();
+    m_fBannerStart = g_pGame->GetTimeTable()->GetTimeEvent();
     m_bBannerType  = INTERFACE_BANNER_TYPE_BOSS;
     {
         // and realign objects as boss banner
@@ -426,7 +426,7 @@ void cInterface::ShowMission(const coreChar* pcMain, const coreChar* pcSub)
     m_aBannerText[3].SetAlpha(0.0f);
 
     // save animation properties
-    m_fBannerStart = g_pGame->GetTimeTable()->GetTimeTotal();
+    m_fBannerStart = g_pGame->GetTimeTable()->GetTimeEvent();
     m_bBannerType  = INTERFACE_BANNER_TYPE_MISSION;
     {
         // and realign objects as mission banner
@@ -459,7 +459,7 @@ void cInterface::ShowMission(const cMission* pMission)
 coreBool cInterface::IsBannerActive()const
 {
     // compare with game-time offset
-    return ((g_pGame->GetTimeTable()->GetTimeTotal() - m_fBannerStart) <= INTERFACE_BANNER_DURATION) ? true : false;
+    return ((g_pGame->GetTimeTable()->GetTimeEvent() - m_fBannerStart) <= INTERFACE_BANNER_DURATION) ? true : false;
 }
 
 
@@ -479,7 +479,7 @@ void cInterface::ShowStory(const coreChar* pcRow1, const coreChar* pcRow2)
     m_aStoryText[1].SetPosition(coreVector2(0.0f, -fHeight));
 
     // 
-    m_fStoryStart = g_pGame->GetTimeTable()->GetTimeTotal();
+    m_fStoryStart = g_pGame->GetTimeTable()->GetTimeEvent();
 }
 
 
@@ -489,7 +489,7 @@ coreBool cInterface::IsStoryActive(const coreFloat fOffset)const
 {
     // 
     ASSERT(fOffset < INTERFACE_STORY_DURATION)
-    return ((g_pGame->GetTimeTable()->GetTimeTotal() - m_fStoryStart) <= (INTERFACE_STORY_DURATION - fOffset)) ? true : false;
+    return ((g_pGame->GetTimeTable()->GetTimeEvent() - m_fStoryStart) <= (INTERFACE_STORY_DURATION - fOffset)) ? true : false;
 }
 
 

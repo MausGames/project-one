@@ -13,15 +13,17 @@
 // TODO: pre-allocate bullets (at least for player) at the beginning to improve resource loading
 // TODO: use prefetch with more precise numbers (also in enemy-manager)
 // TODO: align bullet memory ? (also check other possible locations (e.g. enemies))
-// TODO: change bullet-id lookup into array-index (also enemies ?)
 // TODO: remove tons of template instantiations (also enemies ?)
 // TODO: add memory pool object for bullets ?
 // TODO: make ray bullet smoother geometrically (front round)
+// TODO: sort bullet classes (color, enemy<>player, normal<>special), improve array indexing and caching
+// TODO: shift spear-bullet collision like ray-bullet
 
 
 // ****************************************************************
 // bullet definitions
-#define BULLET_SET_INIT_SIZE (16u)     // initial allocation size when creating a new bullet set
+#define BULLET_SET_INIT      (16u)     // initial size when creating a new bullet set
+#define BULLET_SET_COUNT     (16u)     // 
 #define BULLET_AREA_FACTOR   (1.2f)    // size factor for foreground area where the bullet remains active
 #define BULLET_SPEED_FACTOR  (30.0f)   // 
 #define BULLET_DEPTH_FACTOR  (0.8f)    // 
@@ -65,10 +67,8 @@ public:
     void Deactivate(const coreBool bAnimated);
 
     // 
-    inline cBullet* MakeSmaller(const coreFloat    fFactor) {this->SetSize  (this->GetSize  () * fFactor); return this;}
-    inline cBullet* MakeSmaller(const coreVector3& vFactor) {this->SetSize  (this->GetSize  () * vFactor); return this;}
-    inline cBullet* MakeDarker (const coreFloat    fFactor) {this->SetColor3(this->GetColor3() * fFactor); return this;}
-    inline cBullet* MakeLighter(const coreFloat    fFactor) {this->SetAlpha (this->GetAlpha () * fFactor); return this;}
+    inline cBullet* ChangeSize (const coreFloat fFactor) {this->SetSize (this->GetSize () * fFactor); return this;}
+    inline cBullet* ChangeAlpha(const coreFloat fFactor) {this->SetAlpha(this->GetAlpha() * fFactor); return this;}
 
     // get object properties
     inline const coreInt32& GetDamage ()const {return m_iDamage;}
@@ -94,6 +94,7 @@ protected:
     inline void _MakeRed   (const coreFloat fFactor) {m_iElement = ELEMENT_RED;    this->__SetColorRand(COLOR_ENERGY_RED    * fFactor);}
     inline void _MakePurple(const coreFloat fFactor) {m_iElement = ELEMENT_PURPLE; this->__SetColorRand(COLOR_ENERGY_PURPLE * fFactor);}
     inline void _MakeBlue  (const coreFloat fFactor) {m_iElement = ELEMENT_BLUE;   this->__SetColorRand(COLOR_ENERGY_BLUE   * fFactor);}
+    inline void _MakeCyan  (const coreFloat fFactor) {m_iElement = ELEMENT_CYAN;   this->__SetColorRand(COLOR_ENERGY_CYAN   * fFactor);}
     inline void _MakeGreen (const coreFloat fFactor) {m_iElement = ELEMENT_GREEN;  this->__SetColorRand(COLOR_ENERGY_GREEN  * fFactor);}
 
 
@@ -133,10 +134,10 @@ private:
 
 
 private:
-    coreLookup<coreInt32, sBulletSetGen*> m_apBulletSet;   // bullet sets (each for a different inherited bullet class)
+    sBulletSetGen* m_apBulletSet[BULLET_SET_COUNT];   // bullet sets (each for a different inherited bullet class)
 
-    cOutline  m_Outline;                                   // 
-    coreInt32 m_iType;                                     // 
+    cOutline  m_Outline;                              // 
+    coreInt32 m_iType;                                // 
 
 
 public:
@@ -184,6 +185,7 @@ public:
     inline cRayBullet* MakeRed   () {this->_MakeRed   (1.0f); return this;}
     inline cRayBullet* MakePurple() {this->_MakePurple(1.0f); return this;}
     inline cRayBullet* MakeBlue  () {this->_MakeBlue  (1.0f); return this;}
+    inline cRayBullet* MakeCyan  () {ASSERT(false)            return this;}
     inline cRayBullet* MakeGreen () {this->_MakeGreen (1.0f); return this;}
 
     // bullet configuration values
@@ -219,6 +221,7 @@ public:
     inline cPulseBullet* MakeRed   () {ASSERT(false)            return this;}
     inline cPulseBullet* MakePurple() {this->_MakePurple(1.0f); return this;}
     inline cPulseBullet* MakeBlue  () {ASSERT(false)            return this;}
+    inline cPulseBullet* MakeCyan  () {ASSERT(false)            return this;}
     inline cPulseBullet* MakeGreen () {ASSERT(false)            return this;}
 
     // bullet configuration values
@@ -253,6 +256,7 @@ public:
     inline cOrbBullet* MakeRed   () {this->_MakeRed   (0.9f); return this;}
     inline cOrbBullet* MakePurple() {this->_MakePurple(0.9f); return this;}
     inline cOrbBullet* MakeBlue  () {this->_MakeBlue  (0.9f); return this;}
+    inline cOrbBullet* MakeCyan  () {ASSERT(false)            return this;}
     inline cOrbBullet* MakeGreen () {this->_MakeGreen (0.8f); return this;}
 
     // bullet configuration values
@@ -288,6 +292,7 @@ public:
     inline cConeBullet* MakeRed   () {ASSERT(false)            return this;}
     inline cConeBullet* MakePurple() {ASSERT(false)            return this;}
     inline cConeBullet* MakeBlue  () {ASSERT(false)            return this;}
+    inline cConeBullet* MakeCyan  () {ASSERT(false)            return this;}
     inline cConeBullet* MakeGreen () {this->_MakeGreen (1.0f); return this;}
 
     // bullet configuration values
@@ -323,6 +328,7 @@ public:
     inline cWaveBullet* MakeRed   () {this->_MakeRed   (1.0f); return this;}
     inline cWaveBullet* MakePurple() {ASSERT(false)            return this;}
     inline cWaveBullet* MakeBlue  () {ASSERT(false)            return this;}
+    inline cWaveBullet* MakeCyan  () {ASSERT(false)            return this;}
     inline cWaveBullet* MakeGreen () {this->_MakeGreen (1.1f); return this;}
 
     // bullet configuration values
@@ -363,6 +369,7 @@ public:
     inline cTeslaBullet* MakeRed   () {ASSERT(false)            return this;}
     inline cTeslaBullet* MakePurple() {ASSERT(false)            return this;}
     inline cTeslaBullet* MakeBlue  () {this->_MakeBlue  (0.9f); return this;}
+    inline cTeslaBullet* MakeCyan  () {ASSERT(false)            return this;}
     inline cTeslaBullet* MakeGreen () {ASSERT(false)            return this;}
 
     // bullet configuration values
@@ -460,6 +467,7 @@ public:
     inline cSpearBullet* MakeRed   () {ASSERT(false)            return this;}
     inline cSpearBullet* MakePurple() {ASSERT(false)            return this;}
     inline cSpearBullet* MakeBlue  () {ASSERT(false)            return this;}
+    inline cSpearBullet* MakeCyan  () {ASSERT(false)            return this;}
     inline cSpearBullet* MakeGreen () {ASSERT(false)            return this;}
 
     // bullet configuration values
@@ -487,7 +495,7 @@ public:
     cTriangleBullet()noexcept;
 
     ENABLE_COPY(cTriangleBullet)
-    ASSIGN_ID(10, "Tri")
+    ASSIGN_ID(10, "Triangle")
 
     // reset base properties
     inline void ResetProperties() {this->SetSize(coreVector3(1.5f,1.5f,1.5f)); m_fAnimation = 0.0f; m_vFlyDir = this->GetDirection().xy();}
@@ -499,6 +507,7 @@ public:
     inline cTriangleBullet* MakeRed   () {this->_MakeRed   (1.0f); return this;}
     inline cTriangleBullet* MakePurple() {this->_MakePurple(1.0f); return this;}
     inline cTriangleBullet* MakeBlue  () {ASSERT(false)            return this;}
+    inline cTriangleBullet* MakeCyan  () {ASSERT(false)            return this;}
     inline cTriangleBullet* MakeGreen () {ASSERT(false)            return this;}
 
     // bullet configuration values
@@ -538,6 +547,7 @@ public:
     inline cFlipBullet* MakeRed   () {ASSERT(false)            return this;}
     inline cFlipBullet* MakePurple() {this->_MakePurple(1.0f); return this;}
     inline cFlipBullet* MakeBlue  () {ASSERT(false)            return this;}
+    inline cFlipBullet* MakeCyan  () {ASSERT(false)            return this;}
     inline cFlipBullet* MakeGreen () {ASSERT(false)            return this;}
 
     // bullet configuration values
@@ -593,13 +603,15 @@ template <typename T> cBulletManager::sBulletSet<T>::sBulletSet(cOutline* pOutli
     // 
     T::GlobalInit();
 
-    // add bullet set to global shadow, outline and glow
+    // add bullet set to global shadow and glow
     if(T::ConfigShadow()) cShadow::GetGlobalContainer()->BindList(&oBulletActive);
-    pOutline->GetStyle(T::ConfigOutlineStyle())->BindList(&oBulletActive);
     g_pGlow->BindList(&oBulletActive);
 
+    // add bullet set to outline (will be cleared entirely)
+    pOutline->GetStyle(T::ConfigOutlineStyle())->BindList(&oBulletActive);
+
     // set bullet pool to initial size
-    aBulletPool.resize(BULLET_SET_INIT_SIZE);
+    aBulletPool.resize(BULLET_SET_INIT);
 }
 
 
@@ -624,16 +636,8 @@ template <typename T> cBulletManager::sBulletSet<T>::~sBulletSet()
 template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt32 iDamage, const coreFloat fSpeed, cShip* pOwner, const coreVector2& vPosition, const coreVector2& vDirection)
 {
     // get requested bullet set
-    sBulletSet<T>* pSet;
-    if(!m_apBulletSet.count(T::ID))
-    {
-        // create new bullet set
-        pSet = new sBulletSet<T>(&m_Outline);
-        m_apBulletSet.emplace(T::ID, pSet);
-
-        Core::Log->Info("Bullet Set (%s) created", T::Name);
-    }
-    else pSet = s_cast<sBulletSet<T>*>(m_apBulletSet.at(T::ID));
+    this->PrefetchBullet<T>();
+    sBulletSet<T>* pSet = s_cast<sBulletSet<T>*>(m_apBulletSet[T::ID]);
 
     // save and check current pool size
     const coreUintW iSize = pSet->aBulletPool.size();
@@ -670,7 +674,7 @@ template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt
     FOR_EACH(it, *pSet->oBulletActive.List())
         (*it) = r_cast<coreObject3D*>(I_TO_P(P_TO_UI(*it) - iBefore + iAfter));
 
-    // execute again with first new bullet (overhead should be low, requested bullet set is cached)
+    // execute again with first new bullet
     pSet->iCurBullet = iSize - 1u;
     return this->AddBullet<T>(iDamage, fSpeed, pOwner, vPosition, vDirection);
 }
@@ -748,10 +752,12 @@ template <typename F> void cBulletManager::ForEachBullet(F&& nFunction)
 // 
 template <typename T, typename F> void cBulletManager::ForEachBulletTyped(F&& nFunction)
 {
-    if(m_apBulletSet.count(T::ID))
+    STATIC_ASSERT(T::ID < BULLET_SET_COUNT)
+
+    if(m_apBulletSet[T::ID])
     {
         // 
-        const coreBatchList& oBulletActive = m_apBulletSet.at(T::ID)->oBulletActive;
+        const coreBatchList& oBulletActive = m_apBulletSet[T::ID]->oBulletActive;
         FOR_EACH(it, *oBulletActive.List())
         {
             T* pBullet = s_cast<T*>(*it);
@@ -768,12 +774,14 @@ template <typename T, typename F> void cBulletManager::ForEachBulletTyped(F&& nF
 // 
 template <typename T> void cBulletManager::PrefetchBullet()
 {
-    if(!m_apBulletSet.count(T::ID))
-    {
-        // 
-        m_apBulletSet.emplace(T::ID, new sBulletSet<T>(&m_Outline));
+    STATIC_ASSERT(T::ID < BULLET_SET_COUNT)
 
-        Core::Log->Info("Bullet Set (%s) prefetched", T::Name);
+    if(!m_apBulletSet[T::ID])
+    {
+        // create new bullet set
+        m_apBulletSet[T::ID] = new sBulletSet<T>(&m_Outline);
+
+        Core::Log->Info("Bullet Set (%s) created", T::Name);
     }
 }
 

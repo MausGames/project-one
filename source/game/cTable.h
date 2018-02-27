@@ -77,9 +77,11 @@ public:
 class cTimeTable final
 {
 private:
+    coreProtect<coreFlow> m_fTimeEvent;                                    // 
+
     coreProtect<coreFlow> m_fTimeTotal;                                    // 
-    coreProtect<coreFlow> m_afTimeMission[TABLE_MISSIONS];                 // total time per mission
-    coreProtect<coreFlow> m_aafTimeBoss  [TABLE_MISSIONS][TABLE_BOSSES];   // total time per boss battle
+    coreProtect<coreFlow> m_afTimeMission[TABLE_MISSIONS];                 // total time per mission 
+    coreProtect<coreFlow> m_aafTimeBoss  [TABLE_MISSIONS][TABLE_BOSSES];   // total time per boss battle 
 
 
 public:
@@ -94,6 +96,7 @@ public:
     void Reset();
 
     // 
+    inline coreFloat GetTimeEvent  ()const                                                          {return m_fTimeEvent;}
     inline coreFloat GetTimeTotal  ()const                                                          {return m_fTimeTotal;}
     inline coreFloat GetTimeMission(const coreUintW iMissionIndex)const                             {ASSERT(iMissionIndex < TABLE_MISSIONS)                              return m_afTimeMission[iMissionIndex];}
     inline coreFloat GetTimeBoss   (const coreUintW iMissionIndex, const coreUintW iBossIndex)const {ASSERT(iMissionIndex < TABLE_MISSIONS && iBossIndex < TABLE_BOSSES) return m_aafTimeBoss  [iMissionIndex][iBossIndex];}

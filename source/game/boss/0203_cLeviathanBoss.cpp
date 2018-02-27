@@ -22,7 +22,7 @@
 // ****************************************************************
 // constructor
 cLeviathanBoss::cLeviathanBoss()noexcept
-: m_fAnimation (0.0f)
+: m_fAnimation (-1.0f)
 {
     // load models
     this->DefineModelHigh("ship_boss_leviathan_head_high.md3");
@@ -40,14 +40,14 @@ cLeviathanBoss::cLeviathanBoss()noexcept
         m_aBody[i].DefineModelHigh("ship_boss_leviathan_body_high.md3");
         m_aBody[i].DefineModelLow ("ship_boss_leviathan_body_low.md3");
         m_aBody[i].SetSize        (coreVector3(1.7f,1.7f,1.7f));
-        m_aBody[i].Configure      (1, COLOR_SHIP_BLUE);
+        m_aBody[i].Configure      (500, COLOR_SHIP_BLUE);
     }
 
     // 
     m_Tail.DefineModelHigh("ship_boss_leviathan_tail_high.md3");
     m_Tail.DefineModelLow ("ship_boss_leviathan_tail_low.md3");
     m_Tail.SetSize        (coreVector3(1.7f,1.7f,1.7f));
-    m_Tail.Configure      (1, COLOR_SHIP_BLUE);
+    m_Tail.Configure      (500, COLOR_SHIP_BLUE);
 }
 
 
@@ -55,29 +55,6 @@ cLeviathanBoss::cLeviathanBoss()noexcept
 // 
 void cLeviathanBoss::__MoveOwn()
 {
-    // ################################################################
-    // 
-    if(m_iPhase == 0u)
-    {
-        PHASE_CONTROL_TIMER(0u, 0.5f, LERP_BREAK)
-        {
-            if(PHASE_TIME_POINT(0.85f))
-            {
-                g_pGame->GetCurMission()->ActivateBoss(this);
-                g_pGame->GetInterface()->ShowBoss(this);
-
-                for(coreUintW i = 1u; i < LEVIATHAN_PARTS; ++i)
-                {
-                    cEnemy* pPart = this->__GetPart(i);
-                    pPart->Resurrect(coreVector2(10.0f,10.0f), coreVector2(0.0f,1.0f));
-                }
-            }
-
-            if(PHASE_FINISHED && !g_pGame->GetInterface()->IsBannerActive())
-                ++m_iPhase;
-        });
-    }
-
     // ################################################################
     // ################################################################
 

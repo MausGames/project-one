@@ -83,6 +83,11 @@ cGame::~cGame()
 
     // delete last mission
     SAFE_DELETE(m_pCurMission)
+
+    // 
+    g_pEnvironment->SetTargetDirection(ENVIRONMENT_DEFAULT_DIRECTION);
+    g_pEnvironment->SetTargetSide     (ENVIRONMENT_DEFAULT_SIDE);
+    g_pEnvironment->SetTargetSpeed    (ENVIRONMENT_DEFAULT_SPEED);
 }
 
 
@@ -541,8 +546,8 @@ void cGame::__HandleCollisions()
         if(!bFirstHit) return;
 
         // 
-        pPlayer->TakeDamage(15, ELEMENT_NEUTRAL);
-        pEnemy ->TakeDamage(50, ELEMENT_NEUTRAL, pPlayer);
+        pPlayer->TakeDamage(15, ELEMENT_NEUTRAL, vIntersection.xy());
+        pEnemy ->TakeDamage(50, ELEMENT_NEUTRAL, vIntersection.xy(), pPlayer);
 
         // 
         g_pSpecialEffects->MacroExplosionPhysicalSmall(vIntersection);
@@ -552,7 +557,7 @@ void cGame::__HandleCollisions()
     Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_BULLET_ENEMY, [](cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         // 
-        pPlayer->TakeDamage(pBullet->GetDamage(), pBullet->GetElement());
+        pPlayer->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy());
         pBullet->Deactivate(true, vIntersection.xy());
     });
 
@@ -564,7 +569,7 @@ void cGame::__HandleCollisions()
            (ABS(vIntersection.y) >= FOREGROUND_AREA.y * 1.1f)) return;
 
         // 
-        pEnemy ->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), s_cast<cPlayer*>(pBullet->GetOwner()));
+        pEnemy ->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), s_cast<cPlayer*>(pBullet->GetOwner()));
         pBullet->Deactivate(true, vIntersection.xy());
 
         // 
