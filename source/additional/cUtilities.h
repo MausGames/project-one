@@ -34,10 +34,8 @@ inline FUNC_CONST coreFloat SmoothTowards(const coreFloat fLength, const coreFlo
 // 
 inline FUNC_CONST coreFloat LerpSmoothRev(const coreFloat x, const coreFloat y, const coreFloat s)
 {
-    // TODO 
-    ASSERT(false)
-    return (s >= 0.5f) ? LERP(y, (x + y) / 2.0f, SIN(s*PI)) :
-                         LERP(x, (x + y) / 2.0f, SIN(s*PI));
+    return (s >= 0.5f) ? LERPB(y, (x + y) * 0.5f, 2.0f - s * 2.0f) :
+                         LERPB(x, (x + y) * 0.5f,        s * 2.0f);
 }
 
 inline FUNC_CONST coreFloat LerpBreakRev(const coreFloat x, const coreFloat y, const coreFloat s)

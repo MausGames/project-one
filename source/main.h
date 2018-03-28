@@ -51,12 +51,13 @@
 // TODO: clean mixing shader defines (x >= y) and (defined(x)) checks (also in engine)
 // TODO: check for 16-bit shader usage
 // TODO: program enable has to be checked (if(x.Enable()){}) everywhere
-// TODO: check if "if(!CORE_GL_SUPPORT(ARB_texture_rg)) glColorMask(true, true, false, false);" reduces or improves performance on related hardware
+// TODO: check if "if(!CORE_GL_SUPPORT(ARB_texture_rg)) glColorMask(true, true, false, false);" reduces or improves performance on related hardware, it is recommended to remove it for compression purposes, but always test to be sure
 // TODO: change some 0.5 FB factors from 0.5 to 0.4 if CORE_GL_SUPPORT(ARB_texture_rg) not available ?
 // TODO: unify "forward" and "transform" comments in shaders
 // TODO: add own coreRand for various random things which may affect feeling (screen shake), and reset on boss-start
 // TODO: somehow make g_pGame also static (but beware of pointer==null checks)
 // TODO: check issues with all the F&& functions (especially in boss.h and mission.h), also check Core, use force_inline on small functions
+// TODO: RETURN_NONNULL to everything which should never be null
 
 
 // ****************************************************************
@@ -145,6 +146,7 @@
 #define TYPE_BULLET_PLAYER   (11)
 #define TYPE_BULLET_ENEMY    (12)
 #define TYPE_CHROMA          (21)
+#define TYPE_ITEM            (22)
 #define TYPE_OBJECT(x)       (100 + (x))
 
 // attack elements
@@ -229,6 +231,7 @@ extern cPostProcessing* const g_pPostProcessing;   // main post-processing objec
 #include "game/cShip.h"
 #include "game/cEnemy.h"
 #include "game/cChroma.h"
+#include "game/cItem.h"
 #include "game/cShield.h"
 #include "game/boss/cBoss.h"
 #include "game/mission/cMission.h"

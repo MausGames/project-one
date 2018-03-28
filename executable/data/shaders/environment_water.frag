@@ -12,7 +12,7 @@
 const vec3 c_v3Blue = vec3(0.0, 0.43, 0.69);   // default surface color
 
 // shader input
-flat varying vec4 v_v4Lighting;   // lighting properties (xyz = light direction, w = height offset for smooth shores)
+flat varying vec4 v_v4Lighting;                // lighting properties (xyz = light direction, w = height offset for smooth shores)
 
 
 void FragmentMain()

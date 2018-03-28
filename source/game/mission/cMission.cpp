@@ -41,8 +41,8 @@ cMission::~cMission()
     m_apSquad.clear();
 
     // 
-    SAFE_DELETE_ARRAY(m_piInt)
-    SAFE_DELETE_ARRAY(m_pfFloat)
+    ZERO_DELETE(m_piInt)
+    ZERO_DELETE(m_pfFloat)
 }
 
 

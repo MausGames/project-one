@@ -15,6 +15,7 @@
 #define CURRENT_SIDE      (1u)
 #define CURRENT_ITERATION (2u)
 #define BOOMERANG_TARGET  (3u)
+#define FLIP_SAVE         (4u)
 
 
 // ****************************************************************
@@ -47,7 +48,8 @@ cDharukBoss::cDharukBoss()noexcept
     m_Duplicate.DefineTexture  (0u, "effect_energy.png");
     m_Duplicate.DefineProgram  ("effect_energy_invert_program");
     m_Duplicate.SetSize        (this->GetSize());
-    m_Duplicate.Configure      (1, COLOR_ENERGY_RED * 0.8f);
+    m_Duplicate.Configure      (500, COLOR_ENERGY_RED * 0.8f);
+    m_Duplicate.AddStatus      (ENEMY_STATUS_IMMORTAL);
 
     // create duplicate trail list
     m_DuplicateTrail.DefineProgram("effect_energy_invert_inst_program");
@@ -185,7 +187,13 @@ void cDharukBoss::__MoveOwn()
     m_Duplicate.SetDirection  (-this->GetDirection  ());
     m_Duplicate.SetOrientation( this->GetOrientation().InvertedX());
     m_Duplicate.SetTexOffset  (coreVector2(0.0f, m_fAnimation));
-    m_Duplicate.coreObject3D::Move();   // # for own collision handling
+
+    // 
+    if(m_Duplicate.ReachedDeath())
+    {
+        g_pGame->GetItemManager()->AddItem<cFragmentItem>(m_Duplicate.GetPosition().xy());
+        this->__DisableDuplicate(true);
+    }
 
     // 
     if(Core::System->GetTime())
@@ -238,7 +246,7 @@ void cDharukBoss::__MoveOwn()
         if(bChange)
         {
             // 
-            const coreVector2 vBossPos   = m_aiCounter[DUPLICATE_STATUS] ? this->GetPosition().xy() : this->GetPosition().xy().InvertedY();
+            const coreVector2 vBossPos   = m_aiCounter[CURRENT_ITERATION] ? this->GetPosition().xy() : this->GetPosition().xy().InvertedY();
             const coreVector2 vPlayerPos = this->NearestPlayer()->GetPosition().xy();
 
             // 
@@ -277,24 +285,16 @@ void cDharukBoss::__MoveOwn()
     m_BoomerangTrail.MoveNormal();
 
     // 
-    m_Duplicate.ActivateModelLowOnly();
-
-    // 
-    auto nPlayerBoomerangFunc = [this](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBoomerang, const coreVector3& vIntersection, const coreBool bFirstHit)
+    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_OBJECT(0), [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBoomerang, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
 
         // 
-        pPlayer->TakeDamage((pBoomerang == &m_Duplicate) ? 10 : 5, ELEMENT_RED, vIntersection.xy());
+        pPlayer->TakeDamage(5, ELEMENT_RED, vIntersection.xy());
 
         // 
         g_pSpecialEffects->MacroExplosionColorSmall(vIntersection, COLOR_ENERGY_RED);
-    };
-    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_OBJECT(0), nPlayerBoomerangFunc);
-    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_OBJECT(4), nPlayerBoomerangFunc);
-
-    // 
-    m_Duplicate.ActivateModelDefault();
+    });
 }
 
 
@@ -369,8 +369,7 @@ void cDharukBoss::__EnableDuplicate()
     m_aiCounter[DUPLICATE_STATUS] = 1;
 
     // 
-    m_Duplicate.Resurrect ();
-    m_Duplicate.ChangeType(TYPE_OBJECT(4));
+    m_Duplicate.Resurrect();
 
     // 
     cShadow::GetGlobalContainer()->UnbindObject(&m_Duplicate);

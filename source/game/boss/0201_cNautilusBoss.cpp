@@ -18,7 +18,6 @@
 
 // ****************************************************************
 // vector identifier
-#define STORED_POSITION (0u)
 
 
 // ****************************************************************
@@ -53,6 +52,9 @@ cNautilusBoss::cNautilusBoss()noexcept
 // 
 void cNautilusBoss::__ResurrectOwn()
 {
+    // 
+    s_cast<cNevoMission*>(g_pGame->GetCurMission())->EnableContainer(coreVector2(0.0f,0.0f));
+
     // 
     m_aiCounter[CONTAINER_ATTACHED] = 1;
 }
@@ -128,19 +130,4 @@ void cNautilusBoss::__MoveOwn()
     }
 }
 
-
-// ****************************************************************
-// 
-void cNautilusBoss::__StorePosition()
-{
-    m_avVector[STORED_POSITION].xy(this->GetPosition().xy() / FOREGROUND_AREA);
-}
-
-
-// ****************************************************************
-// 
-coreVector2 cNautilusBoss::__LoadPosition()const
-{
-    return m_avVector[STORED_POSITION].xy();
-}
 

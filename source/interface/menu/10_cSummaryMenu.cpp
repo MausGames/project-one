@@ -218,12 +218,12 @@ void cSummaryMenu::ShowSummary()
 
                 // 
                 iSum += iPart;
-                m_aaPart[i][j].SetText(PRINT("%07d", iPart));
+                m_aaPart[i][j].SetText(PRINT("%07u", iPart));
             }
 
             // 
             m_iFinalScore += iSum;
-            m_aValue[i].SetText(PRINT("%07d", iSum));
+            m_aValue[i].SetText(PRINT("%07u", iSum));
         }
     }
     else
@@ -235,7 +235,7 @@ void cSummaryMenu::ShowSummary()
 
             // 
             m_iFinalScore += iSum;
-            m_aValue[i].SetText(PRINT("%07d", iSum));
+            m_aValue[i].SetText(PRINT("%07u", iSum));
         }
     }
 

@@ -50,6 +50,7 @@ static constexpr coreInt32 __GAME_MISSION_LIST_DEFAULT[] =
 // ****************************************************************
 // depth-level management
 #define DEPTH_PUSH           {g_pGame->PushDepthLevel();}
+#define DEPTH_PUSH_IGNORE    {}
 #define __DEPTH_LEVEL_UNDER  {glDepthRange(0.9f, 1.0f);}
 #define __DEPTH_LEVEL_SHIP   {glDepthRange(0.8f, 0.9f);}
 #define __DEPTH_LEVEL_ATTACK {m_iDepthLevel = 9u;}
@@ -68,6 +69,7 @@ private:
     cBulletManager m_BulletManagerPlayer;   // low-priority bullet manager
     cBulletManager m_BulletManagerEnemy;    // high-priority bullet manager
     cChromaManager m_ChromaManager;         // 
+    cItemManager   m_ItemManager;           // 
     cShieldManager m_ShieldManager;         // 
 
     cCombatStats m_CombatStats;             // combat stats overlay
@@ -128,6 +130,7 @@ public:
     inline cBulletManager*  GetBulletManagerPlayer()                       {return &m_BulletManagerPlayer;}
     inline cBulletManager*  GetBulletManagerEnemy ()                       {return &m_BulletManagerEnemy;}
     inline cChromaManager*  GetChromaManager      ()                       {return &m_ChromaManager;}
+    inline cItemManager*    GetItemManager        ()                       {return &m_ItemManager;}
     inline cShieldManager*  GetShieldManager      ()                       {return &m_ShieldManager;}
     inline cCombatStats*    GetCombatStats        ()                       {return &m_CombatStats;}
     inline cCombatText*     GetCombatText         ()                       {return &m_CombatText;}

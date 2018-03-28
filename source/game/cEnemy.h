@@ -29,7 +29,8 @@ enum eEnemyStatus : coreUint8
     ENEMY_STATUS_SINGLE      = 0x08u,   // 
     ENEMY_STATUS_CHILD       = 0x10u,   // 
     ENEMY_STATUS_SHIELDED    = 0x20u,   // 
-    ENEMY_STATUS_INVINCIBLE  = 0x40u    // 
+    ENEMY_STATUS_INVINCIBLE  = 0x40u,   // 
+    ENEMY_STATUS_IMMORTAL    = 0x80u    // 
 };
 
 
@@ -89,7 +90,7 @@ protected:
 
 
 private:
-    // own routines for derived classes (render functions executed by enemy manager)
+    // own routines for derived classes (render functions executed by manager)
     virtual void __ResurrectOwn   ()                         {}
     virtual void __KillOwn        (const coreBool bAnimated) {}
     virtual void __RenderOwnUnder ()                         {}

@@ -307,7 +307,7 @@ void cReplay::SaveFile(const coreChar* pcName)
     ASSERT(m_iStatus == REPLAY_STATUS_DISABLED)
 
     // 
-    std::snprintf(m_Header.acName, ARRAY_SIZE(m_Header.acName), "%s", pcName);
+    coreData::StrCopy(pcName, m_Header.acName, ARRAY_SIZE(m_Header.acName));
     sHeader* pHeaderData = new sHeader(m_Header);
 
     // 

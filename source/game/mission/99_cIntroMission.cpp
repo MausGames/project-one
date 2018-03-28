@@ -46,6 +46,9 @@ void cIntroMission::__SetupOwn()
     {
         STAGE_BOSS(m_ProjectOne, coreVector2(0.0f,2.0f), coreVector2(0.0f,-1.0f))
     });
+
+    // ################################################################
+    // ################################################################
 }
 
 
@@ -53,10 +56,4 @@ void cIntroMission::__SetupOwn()
 // 
 void cIntroMission::__MoveOwnBefore()
 {
-    if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY) || CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_INTRO))
-    {
-  //      g_pPostProcessing->SetSaturation(CLAMP((g_pGame->GetTimeMission() - 4.5f) * 0.25f, 0.0f, 1.0f));      // 6.0f
-       // g_pPostProcessing->SetSaturation(CLAMP((g_pGame->GetTimeMission() - 4.5f) * 0.1f, 0.0f, 1.0f));      // 6.0f
-        // add shadow blocks    
-    }
 }

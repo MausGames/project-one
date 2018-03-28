@@ -9,8 +9,8 @@
 
 
 // shader output
-varying vec4 v_v4Interior;   // raw object coordinates (xy = normal, zw = inverse)
-varying vec4 v_v4Border;     // border distance values (xy = inner, zw = outer)
+varying      vec4 v_v4Interior;   // raw object coordinates (xy = normal, zw = inverse)
+flat varying vec4 v_v4Border;     // border distance values (xy = inner, zw = outer)
 
 
 void VertexMain()

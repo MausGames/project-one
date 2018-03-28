@@ -225,9 +225,9 @@ void cInterface::Move()
 
         // display player values
         oView.aHealthValue[1].SetText(PRINT("%d / %d", pPlayer->GetCurHealth(), pPlayer->GetMaxHealth()));
-        oView.oScore         .SetText(PRINT("%07d",    pTable->GetScoreMission(g_pGame->GetCurMissionIndex())));
+        oView.oScore         .SetText(PRINT("%07u",    pTable->GetScoreMission(g_pGame->GetCurMissionIndex())));
         oView.oCombo         .SetText(PRINT("x%.1f",   pTable->GetCurCombo()));
-        oView.oChainValue    .SetText(pTable->GetCurChain() ? PRINT("+%d", pTable->GetCurChain()) : "");
+        oView.oChainValue    .SetText(pTable->GetCurChain() ? PRINT("+%u", pTable->GetCurChain()) : "");
 
         // set player transparency
         oView.aHealthBar[0]  .SetAlpha(m_fAlphaAll);

@@ -9,8 +9,8 @@
 
 
 // shader output
-varying float v_v1Strength;   // 
-varying float v_v1Blink;      // 
+varying      float v_v1Strength;   // 
+flat varying float v_v1Blink;      // 
 
 
 void VertexMain()

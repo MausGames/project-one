@@ -9,12 +9,12 @@
 
 
 // constant values
-const float c_v1White = 0.8;    // white contrast value (to reduce eye strain)
-const float c_v1Black = 0.04;   // black contrast value
+const float c_v1White = 0.8;      // white contrast value (to reduce eye strain)
+const float c_v1Black = 0.04;     // black contrast value
 
 // shader input
-varying vec4 v_v4Interior;   // raw object coordinates (xy = normal, zw = inverse)
-varying vec4 v_v4Border;     // border distance values (xy = inner, zw = outer)
+varying      vec4 v_v4Interior;   // raw object coordinates (xy = normal, zw = inverse)
+flat varying vec4 v_v4Border;     // border distance values (xy = inner, zw = outer)
 
 
 void FragmentMain()

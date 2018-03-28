@@ -114,7 +114,9 @@ coreBool cEnemy::TakeDamage(coreInt32 iDamage, const coreUint8 iElement, const c
             // 
             if(this->_TakeDamage(iDamage, iElement, vImpact))
             {
-                this->Kill(true);
+                if(!CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_IMMORTAL))
+                    this->Kill(true);
+
                 return true;
             }
 

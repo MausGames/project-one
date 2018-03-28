@@ -293,7 +293,9 @@ static void DebugGame()
     {
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LALT), CORE_INPUT_HOLD))
         {
-            #define __LOAD_GAME(x) {g_pGame = new cGame(0u, false, GAME_MISSION_LIST_DEFAULT); g_pGame->LoadMissionID(x); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f);}
+            const coreUint8 iDifficulty = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(X), CORE_INPUT_HOLD) ? 0u : 1u;
+
+            #define __LOAD_GAME(x) {g_pGame = new cGame(iDifficulty, false, GAME_MISSION_LIST_DEFAULT); g_pGame->LoadMissionID(x); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f);}
             if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS)) __LOAD_GAME(cIntroMission  ::ID)
             if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2), CORE_INPUT_PRESS)) __LOAD_GAME(cViridoMission ::ID)
             if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(3), CORE_INPUT_PRESS)) __LOAD_GAME(cNevoMission   ::ID)
@@ -364,8 +366,8 @@ static void DebugGame()
 
     // set background height
     static coreFloat s_fHeight = 0.0f;
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(E), CORE_INPUT_HOLD)) s_fHeight += 15.0f * Core::System->GetTime();
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(R), CORE_INPUT_HOLD)) s_fHeight -= 15.0f * Core::System->GetTime();
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(R), CORE_INPUT_HOLD)) s_fHeight += 15.0f * Core::System->GetTime();
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(T), CORE_INPUT_HOLD)) s_fHeight -= 15.0f * Core::System->GetTime();
     g_pEnvironment->SetTargetHeight(s_fHeight);
 
     // set background interpolation
@@ -401,7 +403,7 @@ static void DebugGame()
     if(g_pGame)
     {
         static coreBool s_bInvincible = true;
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(Q), CORE_INPUT_PRESS)) s_bInvincible = !s_bInvincible;
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(Z), CORE_INPUT_PRESS)) s_bInvincible = !s_bInvincible;
 
         g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
         {

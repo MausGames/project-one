@@ -79,6 +79,9 @@ cGame::~cGame()
     m_ChromaManager.ClearChromas(bAnimated);
 
     // 
+    m_ItemManager.ClearItems(bAnimated);
+
+    // 
     m_ShieldManager.ClearShields(bAnimated);
 
     // delete last mission
@@ -129,6 +132,9 @@ void cGame::Render()
 
         // 
         m_ChromaManager.Render();
+
+        // 
+        m_ItemManager.Render();
     }
 
     __DEPTH_LEVEL_ATTACK
@@ -203,6 +209,9 @@ void cGame::Move()
     m_ChromaManager.Move();
 
     // 
+    m_ItemManager.Move();
+
+    // 
     m_ShieldManager.Move();
 
     // handle default object collisions
@@ -229,6 +238,9 @@ void cGame::LoadMissionID(const coreInt32 iID)
 
     // 
     m_ChromaManager.ClearChromas(true);
+
+    // 
+    m_ItemManager.ClearItems(true);
 
     // delete possible old mission
     m_EnemyManager.ClearEnemies(true);
@@ -581,6 +593,13 @@ void cGame::__HandleCollisions()
     {
         // 
         pBullet->Deactivate(true, vIntersection.xy());
+    });
+
+    // 
+    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_ITEM, [](cPlayer* OUTPUT pPlayer, cItem* OUTPUT pItem, const coreVector3& vIntersection, const coreBool bFirstHit)
+    {
+        // 
+        pItem->Collect(pPlayer);
     });
 
     // 

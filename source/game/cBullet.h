@@ -319,7 +319,7 @@ public:
     ASSIGN_ID(5, "Wave")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(1.5f,1.5f,1.5f) * 1.3f); m_fAnimation = 0.09f;}
+    inline void ResetProperties() {this->SetSize(coreVector3(1.5f,1.5f,1.5f) * 1.3f); m_fAnimation = 0.2f;}
 
     // change default color
     inline cWaveBullet* MakeWhite () {ASSERT(false)            return this;}
@@ -564,6 +564,46 @@ private:
 
 
 // ****************************************************************
+// quad bullet class
+class cQuadBullet final : public cBullet
+{
+private:
+    coreVector2 m_vFlyDir;   // 
+
+
+public:
+    cQuadBullet()noexcept;
+
+    ENABLE_COPY(cQuadBullet)
+    ASSIGN_ID(12, "Quad")
+
+    // reset base properties
+    inline void ResetProperties() {this->SetSize(coreVector3(1.5f,1.5f,1.5f)); m_fAnimation = 0.0f; m_vFlyDir = this->GetDirection().xy();}
+
+    // change default color
+    inline cQuadBullet* MakeWhite () {ASSERT(false)            return this;}
+    inline cQuadBullet* MakeYellow() {ASSERT(false)            return this;}
+    inline cQuadBullet* MakeOrange() {ASSERT(false)            return this;}
+    inline cQuadBullet* MakeRed   () {this->_MakeRed   (1.0f); return this;}
+    inline cQuadBullet* MakePurple() {this->_MakePurple(1.0f); return this;}
+    inline cQuadBullet* MakeBlue  () {ASSERT(false)            return this;}
+    inline cQuadBullet* MakeCyan  () {this->_MakeCyan  (1.0f); return this;}
+    inline cQuadBullet* MakeGreen () {ASSERT(false)            return this;}
+
+    // bullet configuration values
+    static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
+    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_FULL;}
+    static constexpr coreBool        ConfigShadow              () {return false;}
+
+
+private:
+    // execute own routines
+    void __ImpactOwn(const coreVector2& vImpact)final;
+    void __MoveOwn  ()final;
+};
+
+
+// ****************************************************************
 // 
 class cChromaBullet final : public cBullet
 {
@@ -575,7 +615,7 @@ public:
     cChromaBullet()noexcept;
 
     ENABLE_COPY(cChromaBullet)
-    ASSIGN_ID(12, "Chroma")
+    ASSIGN_ID(13, "Chroma")
 
     // reset base properties
     inline void ResetProperties() {this->SetSize(coreVector3(1.0f,1.0f,1.0f)); m_fAnimation = 0.0f; m_vFlyDir = this->GetDirection().xy();}

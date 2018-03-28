@@ -20,7 +20,7 @@ const float c_v1ThreshTrace  = 0.6962;   //
 const float c_v1MaxHeight    = 20.0;     // 
 
 // shader input
-flat varying vec4 v_v4Lighting;   // lighting properties (xyz = light direction, w = height offset for smooth shores)
+flat varying vec4 v_v4Lighting;          // lighting properties (xyz = light direction, w = height offset for smooth shores)
 
 
 float GetReflFactor(const in vec3 v3ReflNormal, in vec3 v3BumpNormal)

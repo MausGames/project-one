@@ -190,7 +190,7 @@ void cShadow::Recompile()
     for(coreUintW i = 0u; i < SHADOW_HANDLES; ++i)
     {
         coreProgramPtr& pHandle  = s_apHandle[i];
-        const coreChar* pcConfig = PRINT("%s%s%s%s", PRINT(SHADER_SHADOW(%d), g_CurConfig.Graphics.iShadow),
+        const coreChar* pcConfig = PRINT("%s%s%s%s", PRINT(SHADER_SHADOW(%u), g_CurConfig.Graphics.iShadow),
                                                      (i == SHADOW_HANDLE_OBJECT_INST) ? CORE_SHADER_OPTION_INSTANCING                           : "",
                                                      (i == SHADOW_HANDLE_OUTDOOR_GLOW  || i == SHADOW_HANDLE_OUTDOOR_LIGHT_GLOW) ? SHADER_GLOW  : "",
                                                      (i == SHADOW_HANDLE_OUTDOOR_LIGHT || i == SHADOW_HANDLE_OUTDOOR_LIGHT_GLOW) ? SHADER_LIGHT : "");

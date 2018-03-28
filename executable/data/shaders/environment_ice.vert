@@ -13,10 +13,10 @@ const float c_v1MapResolution = 0.42;    // normal map resolution
 const float c_v1WaterHeight   = -20.0;   // default water z-position
 
 // shader uniforms
-uniform float u_v1Offset;   // current y-position offset
+uniform float u_v1Offset;                // current y-position offset
 
 // shader output
-flat varying vec4 v_v4Lighting;   // lighting properties (xyz = light direction, w = height offset for smooth shores)
+flat varying vec4 v_v4Lighting;          // lighting properties (xyz = light direction, w = height offset for smooth shores)
 
 
 void VertexMain()

@@ -55,8 +55,8 @@
 #define STAGE_FOREACH_ENEMY(s,e,i)      (s)->ForEachEnemy        ([&](cEnemy*  OUTPUT e, const coreUintW i)
 #define STAGE_FOREACH_ENEMY_ALL(s,e,i)  (s)->ForEachEnemyAll     ([&](cEnemy*  OUTPUT e, const coreUintW i)
 
-#define __STAGE_GET_INT(c)              {if((c) > m_iIntSize)   {SAFE_DELETE_ARRAY(m_piInt)   m_iIntSize   = (c); m_piInt   = ZERO_NEW(coreInt16, m_iIntSize);}}   UNUSED constexpr coreUintW iNewIntSize   = (c);
-#define __STAGE_GET_FLOAT(c)            {if((c) > m_iFloatSize) {SAFE_DELETE_ARRAY(m_pfFloat) m_iFloatSize = (c); m_pfFloat = ZERO_NEW(coreFloat, m_iFloatSize);}} UNUSED constexpr coreUintW iNewFloatSize = (c);
+#define __STAGE_GET_INT(c)              {if((c) > m_iIntSize)   {ZERO_DELETE(m_piInt)   m_iIntSize   = (c); m_piInt   = ZERO_NEW(coreInt16, m_iIntSize);}}   UNUSED constexpr coreUintW iNewIntSize   = (c);
+#define __STAGE_GET_FLOAT(c)            {if((c) > m_iFloatSize) {ZERO_DELETE(m_pfFloat) m_iFloatSize = (c); m_pfFloat = ZERO_NEW(coreFloat, m_iFloatSize);}} UNUSED constexpr coreUintW iNewFloatSize = (c);
 #define __STAGE_GET_CHECK               {ASSERT((iIntIndex <= iNewIntSize) && (iFloatIndex <= iNewFloatSize))}
 #define STAGE_GET_END                   {ASSERT((iIntIndex == iNewIntSize) && (iFloatIndex == iNewFloatSize))}
 #define STAGE_GET_START(i,f)            UNUSED coreUintW iIntIndex = 0u; UNUSED coreUintW iFloatIndex = 0u; __STAGE_GET_INT(i) __STAGE_GET_FLOAT(f)
@@ -302,6 +302,10 @@ public:
 
     DISABLE_COPY(cNevoMission)
     ASSIGN_ID(2, "Nevo")
+
+    // 
+    void EnableContainer (const coreVector2& vPosition);
+    void DisableContainer(const coreBool bAnimated);
 
     // 
     inline void SetContainerForce(const coreVector2& vForce) {m_vForce = vForce;}

@@ -236,6 +236,7 @@
     <ClCompile Include="..\..\..\source\game\cChroma.cpp" />
     <ClCompile Include="..\..\..\source\game\cEnemy.cpp" />
     <ClCompile Include="..\..\..\source\game\cGame.cpp" />
+    <ClCompile Include="..\..\..\source\game\cItem.cpp" />
     <ClCompile Include="..\..\..\source\game\cTable.cpp" />
     <ClCompile Include="..\..\..\source\game\cShield.cpp" />
     <ClCompile Include="..\..\..\source\game\cTheater.cpp" />
@@ -396,6 +397,7 @@
     <ClInclude Include="..\..\..\source\game\cChroma.h" />
     <ClInclude Include="..\..\..\source\game\cEnemy.h" />
     <ClInclude Include="..\..\..\source\game\cGame.h" />
+    <ClInclude Include="..\..\..\source\game\cItem.h" />
     <ClInclude Include="..\..\..\source\game\cPlayer.h" />
     <ClInclude Include="..\..\..\source\game\cTable.h" />
     <ClInclude Include="..\..\..\source\game\cShield.h" />
@@ -474,8 +476,8 @@
     <None Include="..\..\..\executable\data\shaders\environment_water.frag" />
     <None Include="..\..\..\executable\data\shaders\environment_water.vert" />
     <None Include="..\..\..\executable\data\shaders\full.vert" />
-    <None Include="..\..\..\executable\data\shaders\full_blur_1.frag" />
-    <None Include="..\..\..\executable\data\shaders\full_blur_2.frag" />
+    <None Include="..\..\..\executable\data\shaders\full_blur_1x.frag" />
+    <None Include="..\..\..\executable\data\shaders\full_blur_2y.frag" />
     <None Include="..\..\..\executable\data\shaders\full_post.frag" />
     <None Include="..\..\..\executable\data\shaders\full_transition.frag" />
     <None Include="..\..\..\executable\data\shaders\global.glsl" />
@@ -644,7 +646,7 @@
       <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalOptions>/Zc:strictStrings /Zc:referenceBinding /Gw /Qfast_transcendentals /Qpar-report:1 /Qvec-report:1 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Zc:strictStrings /Zc:referenceBinding /Gw /GA /Qfast_transcendentals /Qpar-report:1 /Qvec-report:1 %(AdditionalOptions)</AdditionalOptions>
       <Optimization>MaxSpeed</Optimization>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -689,7 +691,7 @@
       <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalOptions>/Zc:strictStrings /Zc:referenceBinding /Gw /Qfast_transcendentals /Qpar-report:1 /Qvec-report:1 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Zc:strictStrings /Zc:referenceBinding /Gw /GA /Qfast_transcendentals /Qpar-report:1 /Qvec-report:1 %(AdditionalOptions)</AdditionalOptions>
       <Optimization>MaxSpeed</Optimization>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <IntrinsicFunctions>true</IntrinsicFunctions>

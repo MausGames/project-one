@@ -32,7 +32,7 @@
 #define DHARUK_DUPLICATE_RAWS  (2u * DHARUK_TRAILS)                         // 
 #define DHARUK_BOOMERANGS      (4u)                                         // 
 #define DHARUK_BOOMERANGS_RAWS (DHARUK_BOOMERANGS * (DHARUK_TRAILS + 1u))   // 
-#define DHARUK_WIDTH           (0.667f)                                     // 
+#define DHARUK_WIDTH           (0.5f)                                       // 
 #define DHARUK_HEIGHT          (0.8f)                                       // 
 
 #define TORUS_RAY_SIZE         (coreVector3(0.7f,50.0f,0.7f))               // 
@@ -68,6 +68,8 @@
 #define PHASE_POSITION_BETWEEN(e,t,u,v) (STAGE_POSITION_BETWEEN(e, t, u, v))
 #define PHASE_FLYPAST(e,f,v)            (STAGE_FLYPAST         (e, f, v))
 
+#define PHASE_CHANGE_TO(i)              {this->ChangePhase(i);}
+#define PHASE_CHANGE_INC                {this->ChangePhase(m_iPhase + 1u);}
 #define PHASE_RESET(i)                  {m_aTimer[i].Stop(); m_aiTimerLine[i] = 0u;}
 #define PHASE_FINISHED                  (__bEnd)
 
@@ -89,6 +91,10 @@ protected:
     coreInt16   m_aiCounter[BOSS_COUNTERS];   // 
     coreVector3 m_avVector [BOSS_VECTORS];    // 
 
+    coreVector2 m_vLastPosition;              // 
+    coreFloat   m_fLastDirAngle;              // 
+    coreFloat   m_fLastOriAngle;              // 
+
     coreUint8 m_iPhase;                       // 
     coreUint8 m_iLevel;                       // 
 
@@ -101,6 +107,9 @@ public:
 
     DISABLE_COPY(cBoss)
     ENABLE_ID
+
+    // 
+    void ChangePhase(const coreUint8 iPhase);
 
     // 
     inline const coreUint8& GetPhase()const {return m_iPhase;}
@@ -257,10 +266,6 @@ private:
     void __ResurrectOwn()final;
     void __KillOwn     (const coreBool bAnimated)final;
     void __MoveOwn     ()final;
-
-    // 
-    void        __StorePosition();
-    coreVector2 __LoadPosition ()const;
 };
 
 

@@ -88,6 +88,10 @@ cViridoMission::~cViridoMission()
     g_pGlow->UnbindList(&m_BallTrail);
 
     // 
+    for(coreUintW i = 0u; i < VIRIDO_BALLS; ++i)
+        this->DisableBall(i, false);
+
+    // 
     for(coreUintW i = 0u; i < VIRIDO_PADDLES; ++i)
         this->DisablePaddle(i, false);
 }
@@ -227,6 +231,9 @@ void cViridoMission::__SetupOwn()
     {
         STAGE_BOSS(m_Vaus, coreVector2(0.0f,2.0f), coreVector2(0.0f,-1.0f))
     });
+
+    // ################################################################
+    // ################################################################
 }
 
 
@@ -362,50 +369,44 @@ void cViridoMission::__MoveOwnAfter()
                 return;
 
             // 
-            for(coreUintW i = 0u; i < VIRIDO_PADDLES; ++i)
+            const coreUintW     iIndex        = pPaddle - m_aPaddle;
+            const coreObject3D& oPaddleSphere = m_aPaddleSphere[iIndex];
+
+            // 
+            coreVector3 vDummy;
+            if(coreObjectManager::TestCollision(&oPaddleSphere, pBall, &vDummy))
             {
-                if(pPaddle == &m_aPaddle[i])
+                const coreVector2 vBallPos   = pBall  ->GetPosition ().xy();
+                const coreVector2 vBallDir   = pBall  ->GetDirection().xy();
+                const coreVector2 vPaddleDir = pPaddle->GetDirection().xy();
+
+                if(CONTAINS_BIT(m_iRealState, iIndex))
                 {
-                    const coreObject3D& oPaddleSphere = m_aPaddleSphere[i];
+                    // 
+                    coreVector2 vNewDir = coreVector2::Reflect(vBallDir, (vBallPos - oPaddleSphere.GetPosition().xy()).Normalized());
+                    if(ABS(vPaddleDir.x) > ABS(vPaddleDir.y)) vNewDir.x = MAX(ABS(vNewDir.x), 0.75f) * vPaddleDir.x;
+                                                         else vNewDir.y = MAX(ABS(vNewDir.y), 0.75f) * vPaddleDir.y;
 
                     // 
-                    coreVector3 vDummy;
-                    if(coreObjectManager::TestCollision(&oPaddleSphere, pBall, &vDummy))
-                    {
-                        const coreVector2 vBallPos   = pBall  ->GetPosition ().xy();
-                        const coreVector2 vBallDir   = pBall  ->GetDirection().xy();
-                        const coreVector2 vPaddleDir = pPaddle->GetDirection().xy();
-
-                        if(CONTAINS_BIT(m_iRealState, i))
-                        {
-                            // 
-                            coreVector2 vNewDir = coreVector2::Reflect(vBallDir, (vBallPos - oPaddleSphere.GetPosition().xy()).Normalized());
-                            if(ABS(vPaddleDir.x) > ABS(vPaddleDir.y)) vNewDir.x = MAX(ABS(vNewDir.x), 0.75f) * vPaddleDir.x;
-                                                                 else vNewDir.y = MAX(ABS(vNewDir.y), 0.75f) * vPaddleDir.y;
-
-                            // 
-                            pBall->SetDirection(coreVector3(vNewDir.Normalized(), 0.0f));
-                        }
-                        else
-                        {
-                            // 
-                            coreVector2 vNewDir = vBallDir;
-                            if(ABS(vPaddleDir.x) > ABS(vPaddleDir.y)) vNewDir.x = ABS(vNewDir.x) * vPaddleDir.x;
-                                                                 else vNewDir.y = ABS(vNewDir.y) * vPaddleDir.y;
-
-                            // 
-                            pBall->SetDirection(coreVector3(vNewDir, 0.0f));
-                        }
-
-                        // 
-                        ADD_BIT(m_iBounceState, i)
-                        if(m_iStickyState) ADD_BIT(m_iStickyState, 1u)
-
-                        // 
-                        cViridoMission::__BounceEffect(vBallPos + vBallDir * pBall->GetSize().x);
-                    }
-                    break;
+                    pBall->SetDirection(coreVector3(vNewDir.Normalized(), 0.0f));
                 }
+                else
+                {
+                    // 
+                    coreVector2 vNewDir = vBallDir;
+                    if(ABS(vPaddleDir.x) > ABS(vPaddleDir.y)) vNewDir.x = ABS(vNewDir.x) * vPaddleDir.x;
+                                                         else vNewDir.y = ABS(vNewDir.y) * vPaddleDir.y;
+
+                    // 
+                    pBall->SetDirection(coreVector3(vNewDir, 0.0f));
+                }
+
+                // 
+                ADD_BIT(m_iBounceState, iIndex)
+                if(m_iStickyState) ADD_BIT(m_iStickyState, 1u)
+
+                // 
+                cViridoMission::__BounceEffect(vBallPos + vBallDir * pBall->GetSize().x);
             }
         });
     }
@@ -432,6 +433,13 @@ void cViridoMission::__MoveOwnAfter()
 
         // 
         g_pSpecialEffects->MacroExplosionColorSmall(vIntersection, COLOR_ENERGY_GREEN);
+    });
+
+    // 
+    Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, TYPE_OBJECT(2), [](cBullet* OUTPUT pBullet, coreObject3D* OUTPUT pBall, const coreVector3& vIntersection, const coreBool bFirstHit)
+    {
+        // 
+        pBullet->Deactivate(true, vIntersection.xy());
     });
 
     // 

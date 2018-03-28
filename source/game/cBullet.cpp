@@ -377,7 +377,7 @@ cWaveBullet::cWaveBullet()noexcept
     this->DefineProgram("effect_energy_bullet_direct_program");
 
     // set object properties
-    this->SetTexSize(coreVector2(0.1f,0.25f));
+    this->SetTexSize(coreVector2(1.1f,0.25f) * 0.2f);
 }
 
 
@@ -398,8 +398,8 @@ void cWaveBullet::__MoveOwn()
     this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetDirection().xy() * (m_fSpeed * Core::System->GetTime()), 0.0f));
 
     // update texture animation
-    m_fAnimation.Update(0.15f);
-    this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
+    m_fAnimation.Update(0.06f);
+    this->SetTexOffset(coreVector2(0.3f, m_fAnimation));
 }
 
 
@@ -688,6 +688,44 @@ void cFlipBullet::__MoveOwn()
     // 
     m_fAnimation.Update(-0.2f);
     this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation * 50.0f), 0.0f));
+    this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
+}
+
+
+// ****************************************************************
+// constructor
+cQuadBullet::cQuadBullet()noexcept
+: m_vFlyDir (coreVector2(0.0f,0.0f))
+{
+    // load object resources
+    this->DefineModel  ("bullet_quad.md3");
+    this->DefineTexture(0u, "effect_energy.png");
+    this->DefineProgram("effect_energy_bullet_direct_program");
+
+    // set object properties
+    this->SetTexSize(coreVector2(0.5f,0.2f));
+}
+
+
+// ****************************************************************
+// 
+void cQuadBullet::__ImpactOwn(const coreVector2& vImpact)
+{
+    // 
+    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
+}
+
+
+// ****************************************************************
+// move the quad bullet
+void cQuadBullet::__MoveOwn()
+{
+    // fly around
+    this->SetPosition(coreVector3(this->GetPosition().xy() + m_vFlyDir * (m_fSpeed * Core::System->GetTime()), 0.0f));
+
+    // 
+    m_fAnimation.Update(0.2f);
+    this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation * 10.0f), 0.0f));
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
 }
 
