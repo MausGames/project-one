@@ -8,6 +8,12 @@
 //////////////////////////////////////////////////////
 
 
+// shader uniforms
+uniform float u_v1Depth;      // 
+
+// vertex attributes
+attribute float a_v1Depth;    // 
+
 // shader output
 varying float v_v1Strength;   // outline intensity
 
@@ -17,14 +23,25 @@ void VertexMain()
     // transform position normal-resized
     vec4 v4NewPosition = vec4(coreQuatApply(u_v4Rotation, (a_v3RawPosition * u_v3Size) + (a_v3RawNormal * 0.31)) + u_v3Position, 1.0);
 
-#if defined(_P1_BULLET_)
+#if defined(_P1_FLAT_)
 
     // (and make flat) 
     v4NewPosition *= vec4(1.0, 1.0, 0.0, 1.0);
     gl_Position    = u_m4ViewProj * v4NewPosition;
 
     // 
-    gl_Position.z -= (u_v3Size.z * 0.001 - 0.0005) * gl_Position.w;
+#if defined(_P1_BULLET_)
+    #if defined(_CORE_OPTION_INSTANCING_)
+        float v1Depth = a_v1Depth;
+    #else
+        float v1Depth = u_v1Depth;
+    #endif
+#else
+    const float v1Depth = 0.0;
+#endif
+
+    // 
+    gl_Position.z -= (v1Depth * 0.001 - 0.0005) * gl_Position.w;
 
 #else
 

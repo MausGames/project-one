@@ -12,25 +12,28 @@
 
 // TODO: merge stone diff and norm textures (own shader ?)
 // TODO: added object gets shadow-shader
-// TODO: expose pool-allocator for additional objects (AddList)
-// TODO: no blitting on disabled anti-aliasing ( low-optimizations on other components)
+// TODO: no blitting on disabled anti-aliasing (low-optimizations on other components)
 // TODO: optimize density to never try to draw on 0.0f 
 // TODO: make grass leafs same color as other plants
 // TODO: make wind-sound (sand) depend on speed
 // TODO: check if alL _RESERVES are correct
 // TODO: reduce object-buffer sizes, not all are drawn at once anyway, also allocate only once
 // TODO: positions in separate list (when iterating through lambda)
-// TODO: provide own memory pool for temporary additional objects
+// TODO: provide own memory pool for temporary additional objects (remove MANAGED_)
+// TODO: expose pool-allocator for additional objects (AddList)
 // TODO: all environment sound effects should fade in transition
 // TODO: popping artifacts with shadow in sea-background (configurable view-range ? per list ? auto per height ?)
 // TODO: calls to pList->MoveNormal(); may be redundant
 // TODO: remove texture-sampling from lightning effect in moss
 // TODO: stomach should not create all vertices
+// TODO: EnableShadowRead only if appropriate ground objects would be rendered (IsInstanced)
 
 
 // ****************************************************************
 // background definitions
-#define BACKGROUND_OBJECT_RANGE (95.0f)   // default (+/-) Y-range where objects on ground are considered visible
+#define BACKGROUND_OBJECT_RANGE (95.0f)            // default (+/-) Y-range where objects on ground are considered visible
+
+#define BACKGROUND_LIST_KEY (CORE_MEMORY_SHARED)   // 
 
 #define __BACKGROUND_SCANLINE(x,i,n) (coreVector2((x) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i) / I_TO_F(n)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW / 2u)) * OUTDOOR_DETAIL)
 
@@ -97,23 +100,23 @@
 class INTERFACE cBackground
 {
 protected:
-    coreFrameBuffer m_FrameBuffer;                         // background frame buffer (multisampled)
-    coreFrameBuffer m_ResolvedTexture;                     // resolved texture
+    coreFrameBuffer m_FrameBuffer;                      // background frame buffer (multisampled)
+    coreFrameBuffer m_ResolvedTexture;                  // resolved texture
 
-    cOutdoor* m_pOutdoor;                                  // outdoor-surface object (optional)
-    cWater*   m_pWater;                                    // water-surface object (optional)
+    cOutdoor* m_pOutdoor;                               // outdoor-surface object (optional)
+    cWater*   m_pWater;                                 // water-surface object (optional)
 
-    std::vector<coreBatchList*> m_apGroundObjectList;      // persistent objects connected to the ground
-    std::vector<coreBatchList*> m_apDecalObjectList;       // persistent transparent objects connected to the ground
-    std::vector<coreBatchList*> m_apAirObjectList;         // persistent objects floating in the air
+    std::vector<coreBatchList*> m_apGroundObjectList;   // persistent objects connected to the ground
+    std::vector<coreBatchList*> m_apDecalObjectList;    // persistent transparent objects connected to the ground
+    std::vector<coreBatchList*> m_apAirObjectList;      // persistent objects floating in the air
 
-    std::vector<coreObject3D*>            m_apAddObject;   // temporary additional objects
-    coreLookup<coreUint8, coreBatchList*> m_apAddList;     // optimized lists for temporary additional objects
+    std::vector<coreObject3D*>    m_apAddObject;        // temporary additional objects
+    coreLookupStr<coreBatchList*> m_apAddList;          // optimized lists for temporary additional objects
 
     coreLookup<const coreBatchList*, std::vector<coreUint16>> m_aaiBaseHeight;   // 
     coreLookup<const coreBatchList*, std::vector<coreUint32>> m_aaiBaseNormal;   // 
 
-    static coreMemoryPool s_MemoryPool;                    // 
+    static coreMemoryPool s_MemoryPool;                 // 
 
 
 public:
@@ -129,8 +132,7 @@ public:
 
     // manage additional objects
     void AddObject   (coreObject3D* pObject, const coreVector3& vRelativePos);
-    void AddObject   (coreObject3D* pObject, const coreVector3& vRelativePos, const coreUint8 iListIndex);
-    void AddList     (const coreUint8 iListIndex, const coreUint32 iCapacity, const coreChar* pcProgramInstancedName);
+    void AddObject   (coreObject3D* pObject, const coreVector3& vRelativePos, const coreUint32 iCapacity, const coreHashString& sProgramInstancedName, const coreHashString& sListKey);
     void ShoveObjects(const coreFloat fOffset);
     void ClearObjects();
 

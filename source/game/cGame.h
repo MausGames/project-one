@@ -21,7 +21,7 @@
 #define GAME_INTRO_DELAY    (0.2f)      // 
 #define GAME_INTRO_DURATION (3.5f)      // 
 
-enum cGameStatus : coreUint8
+enum eGameStatus : coreUint8
 {
     GAME_STATUS_INTRO   = 0x01u,   // 
     GAME_STATUS_OUTRO   = 0x02u,   // 

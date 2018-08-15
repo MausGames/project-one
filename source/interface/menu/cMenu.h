@@ -22,6 +22,7 @@
 // TODO: rumble when changing rumble-option
 // TODO: display unattached joysticks and joystick names somehow
 // TODO: highlight which joystick is which input set
+// TODO: fix all g_vMenuCenter usages when changing aspect ratio
 
 
 // ****************************************************************

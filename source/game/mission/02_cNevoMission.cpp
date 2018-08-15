@@ -55,7 +55,7 @@ void cNevoMission::DisableContainer(const coreBool bAnimated)
     m_Container.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
     // 
-    if(bAnimated) g_pSpecialEffects->MacroExplosionPhysicalBig(m_Container.GetPosition());
+    if(bAnimated) g_pSpecialEffects->MacroExplosionPhysicalDarkBig(m_Container.GetPosition());
 }
 
 

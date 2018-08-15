@@ -200,8 +200,8 @@ void cEnemy::Kill(const coreBool bAnimated)
     // 
     if(bAnimated && this->IsEnabled(CORE_OBJECT_ENABLE_RENDER))
     {
-        if(bBoss) g_pSpecialEffects->MacroExplosionPhysicalBig  (this->GetPosition());
-             else g_pSpecialEffects->MacroExplosionPhysicalSmall(this->GetPosition());
+        if(bBoss) g_pSpecialEffects->MacroExplosionPhysicalDarkBig  (this->GetPosition());
+             else g_pSpecialEffects->MacroExplosionPhysicalDarkSmall(this->GetPosition());
     }
 
     // remove ship from the game
@@ -371,19 +371,12 @@ void cEnemyManager::Render()
         if(!pEnemyActive->GetCurEnabled()) continue;
 
         // 
-        FOR_EACH(it, *pEnemyActive->List()) s_cast<cEnemy*>(*it)->ActivateModelDefault();
+        FOR_EACH(it, *pEnemyActive->List()) d_cast<cEnemy*>(*it)->ActivateModelDefault();
         {
             // 
-            pEnemyActive->RenderCustom([](coreFloat* OUTPUT pData, const cEnemy* pObject)
-            {
-                (*pData) = pObject->GetBlink();
-            },
-            [](cEnemy* OUTPUT pObject)
-            {
-                pObject->_EnableBlink();
-            });
+            pEnemyActive->Render();
         }
-        FOR_EACH(it, *pEnemyActive->List()) s_cast<cEnemy*>(*it)->ActivateModelLowOnly();
+        FOR_EACH(it, *pEnemyActive->List()) d_cast<cEnemy*>(*it)->ActivateModelLowOnly();
     }
 
     // render all additional enemies
@@ -399,7 +392,7 @@ void cEnemyManager::Render()
 #define __RENDER_OWN(f)                                               \
 {                                                                     \
     /* */                                                             \
-    auto nRenderFunc = [](cEnemy* OUTPUT pEnemy)                      \
+    const auto nRenderFunc = [](cEnemy* OUTPUT pEnemy)                \
     {                                                                 \
         if(CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD))     \
             return;                                                   \
@@ -415,7 +408,7 @@ void cEnemyManager::Render()
                                                                       \
         /* render all active enemies */                               \
         FOR_EACH(it, *pEnemyActive->List())                           \
-            nRenderFunc(s_cast<cEnemy*>(*it));                        \
+            nRenderFunc(d_cast<cEnemy*>(*it));                        \
     }                                                                 \
                                                                       \
     /* render all additional enemies */                               \
@@ -484,7 +477,7 @@ void cEnemyManager::ClearEnemies(const coreBool bAnimated)
 
         // deactivate all active enemies
         FOR_EACH(it, *pEnemyActive->List())
-            s_cast<cEnemy*>(*it)->Kill(bAnimated);
+            d_cast<cEnemy*>(*it)->Kill(bAnimated);
     }
 
     // deactivate all additional enemies

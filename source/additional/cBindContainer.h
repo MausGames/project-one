@@ -52,7 +52,7 @@ public:
 class cBindContainer final : public cBindContainerIn
 {
 public:
-    cBindContainer() = default;
+    cBindContainer() {}   // = default;
 
     ENABLE_COPY(cBindContainer)
 };

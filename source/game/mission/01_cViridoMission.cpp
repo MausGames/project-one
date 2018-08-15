@@ -29,7 +29,7 @@ cViridoMission::cViridoMission()noexcept
     m_Ball     .DefineProgram("effect_energy_invert_inst_program");
     m_BallTrail.DefineProgram("effect_energy_invert_inst_program");
     {
-        for(coreUintW i = 0u; i < VIRIDO_RAWS; ++i)
+        for(coreUintW i = 0u; i < VIRIDO_BALLS_RAWS; ++i)
         {
             // determine object type
             const coreUintW iType = i % (VIRIDO_TRAILS + 1u);
@@ -63,9 +63,9 @@ cViridoMission::cViridoMission()noexcept
         const coreBool bBoss = i ? false : true;
 
         // 
-        m_aPaddle[i].DefineModel         ("object_boss_vaus_paddle.md3");
+        m_aPaddle[i].DefineModel         ("object_paddle.md3");
         m_aPaddle[i].DefineTexture       (0u, "effect_energy.png");
-        m_aPaddle[i].DefineProgram       ("effect_energy_bullet_direct_program");
+        m_aPaddle[i].DefineProgram       ("effect_energy_flat_direct_program");
         m_aPaddle[i].SetSize             (bBoss ? coreVector3(3.5f,2.5f,2.5f) : coreVector3(2.5f,2.5f,2.5f));
         m_aPaddle[i].SetColor3           (bBoss ? COLOR_ENERGY_BLUE           : COLOR_ENERGY_RED);
         m_aPaddle[i].SetTexSize          (coreVector2(1.2f,0.25f) * 0.5f);
@@ -111,7 +111,7 @@ void cViridoMission::EnableBall(const coreUintW iIndex, const coreVector2& vPosi
     pBall->ChangeType(TYPE_OBJECT(2));
 
     // 
-    auto nInitFunc = [&](coreObject3D* OUTPUT pObject, const coreFloat fAlpha)
+    const auto nInitFunc = [&](coreObject3D* OUTPUT pObject, const coreFloat fAlpha)
     {
         pObject->SetPosition (coreVector3(vPosition,  0.0f));
         pObject->SetDirection(coreVector3(vDirection, 0.0f));
@@ -130,8 +130,6 @@ void cViridoMission::EnableBall(const coreUintW iIndex, const coreVector2& vPosi
 // 
 void cViridoMission::DisableBall(const coreUintW iIndex, const coreBool bAnimated)
 {
-    if(m_Ball.List()->empty()) return;
-
     // 
     ASSERT(iIndex < VIRIDO_BALLS)
     coreObject3D* pBall  = (*m_Ball     .List())[iIndex];
@@ -142,7 +140,7 @@ void cViridoMission::DisableBall(const coreUintW iIndex, const coreBool bAnimate
     pBall->ChangeType(0);
 
     // 
-    auto nExitFunc = [](coreObject3D* OUTPUT pObject)
+    const auto nExitFunc = [](coreObject3D* OUTPUT pObject)
     {
         pObject->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     };
@@ -262,7 +260,7 @@ void cViridoMission::__RenderOwnAttack()
     for(coreUintW i = 0u; i < VIRIDO_PADDLES; ++i)
         m_aPaddle[i].Render();
     for(coreUintW i = 0u; i < VIRIDO_PADDLES; ++i)
-        g_pOutline->GetStyle(OUTLINE_STYLE_BULLET_DIRECT)->ApplyObject(&m_aPaddle[i]);
+        g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_DIRECT)->ApplyObject(&m_aPaddle[i]);
 }
 
 
@@ -283,7 +281,7 @@ void cViridoMission::__MoveOwnBefore()
 
         // 
         coreVector2       vNewDir = pBall->GetDirection().xy();
-        const coreVector2 vNewPos = pBall->GetPosition ().xy() + vNewDir * FOREGROUND_AREA * (CONTAINS_BIT(m_iStickyState, 1u) ? 0.0f : VIRIDO_BALL_SPEED * Core::System->GetTime());
+        const coreVector2 vNewPos = pBall->GetPosition ().xy() + vNewDir * FOREGROUND_AREA * (CONTAINS_BIT(m_iStickyState, 1u) ? 0.0f : (VIRIDO_BALL_SPEED * Core::System->GetTime()));
 
         // restrict movement to the foreground area
              if((vNewPos.x < -FOREGROUND_AREA.x) && (vNewDir.x < 0.0f)) {cViridoMission::__BounceEffect(vNewPos + coreVector2(-vSize.x, 0.0f)); vNewDir.x =  ABS(vNewDir.x); ADD_BIT(m_iBounceState, 7u)}

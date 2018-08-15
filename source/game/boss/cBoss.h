@@ -62,7 +62,7 @@
 #define PHASE_TIME_BETWEEN(t,u)         (InBetween(fTime, (t), (u)))
 #define PHASE_BEGINNING                 (PHASE_TIME_POINT(0.0f))
 
-#define PHASE_POSITION_POINT(e,t,v)     (InBetweenExt((t), (e)->GetOldPos().v, (e)->GetPosition().v) && [&](){s_vPositionPoint = (e)->GetPosition().xy(); s_vPositionPoint.v = (t); return true;}())
+#define PHASE_POSITION_POINT(e,t,v)     (InBetweenExt((t), (e)->GetOldPos().v, (e)->GetPosition().v) && [&]() {s_vPositionPoint = (e)->GetPosition().xy(); s_vPositionPoint.v = (t); return true;}())
 #define PHASE_POSITION_BEFORE(e,t,v)    (STAGE_POSITION_BEFORE (e, t, v))
 #define PHASE_POSITION_AFTER(e,t,v)     (STAGE_POSITION_AFTER  (e, t, v))
 #define PHASE_POSITION_BETWEEN(e,t,u,v) (STAGE_POSITION_BETWEEN(e, t, u, v))
@@ -110,6 +110,12 @@ public:
 
     // 
     void ChangePhase(const coreUint8 iPhase);
+
+    // 
+    void StorePosition(const coreVector2& vPos);
+    void StorePosition();
+    void StoreRotation(const coreVector3& vDir, const coreVector3& vOri);
+    void StoreRotation();
 
     // 
     inline const coreUint8& GetPhase()const {return m_iPhase;}

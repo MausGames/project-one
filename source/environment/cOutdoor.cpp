@@ -275,7 +275,7 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
         pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_TEXCOORD_NUM, 2u, GL_FLOAT, false, 0u);
     }
 
-    Core::Log->Info("Outdoor-Surface (%d:%.0f) loaded", iAlgorithm, fGrade);
+    Core::Log->Info("Outdoor-Surface (%u, %.1f) loaded", iAlgorithm, fGrade);
 }
 
 
@@ -454,7 +454,7 @@ FUNC_PURE coreVector3 cOutdoor::RetrieveIntersect(const coreVector3& vRayPositio
            break;
 
         // retrieve and check height at current position
-        const coreFloat& fCurHeight = this->RetrieveHeight(vOutput.xy());
+        const coreFloat fCurHeight = this->RetrieveHeight(vOutput.xy());
         if(fCurHeight > vOutput.z)
         {
             // intersection found, step back to improve precision

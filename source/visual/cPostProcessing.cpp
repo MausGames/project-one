@@ -103,9 +103,9 @@ void cPostProcessing::Recompile()
     const coreChar* pcConfig3 = PRINT("%s%s",                                    SHADER_DEBUG,           pcConfig2);
 
     // change configuration of post-processing shaders
-    s_cast<coreShader*>(Core::Manager::Resource->Get<coreShader>("full_post.frag")          ->GetRawResource())->SetCustomCode(pcConfig1);
-    s_cast<coreShader*>(Core::Manager::Resource->Get<coreShader>("full_post_distorted.frag")->GetRawResource())->SetCustomCode(pcConfig2);
-    s_cast<coreShader*>(Core::Manager::Resource->Get<coreShader>("full_post_debug.frag")    ->GetRawResource())->SetCustomCode(pcConfig3);
+    d_cast<coreShader*>(Core::Manager::Resource->Get<coreShader>("full_post.frag")          ->GetRawResource())->SetCustomCode(pcConfig1);
+    d_cast<coreShader*>(Core::Manager::Resource->Get<coreShader>("full_post_distorted.frag")->GetRawResource())->SetCustomCode(pcConfig2);
+    d_cast<coreShader*>(Core::Manager::Resource->Get<coreShader>("full_post_debug.frag")    ->GetRawResource())->SetCustomCode(pcConfig3);
 
     // recompile and relink
     m_pProgramSimple   .GetHandle()->Reload();
@@ -113,8 +113,11 @@ void cPostProcessing::Recompile()
     m_pProgramDebug    .GetHandle()->Reload();
 
     // finish now
-    coreSync::Finish();
-    Core::Manager::Resource->UpdateResources();
+    if(Core::System->GetCurFrame())
+    {
+        coreSync::Finish();
+        Core::Manager::Resource->UpdateResources();
+    }
 
 #endif
 }

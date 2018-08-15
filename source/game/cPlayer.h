@@ -70,7 +70,7 @@ public:
     cPlayer()noexcept;
     ~cPlayer()final;
 
-    ENABLE_COPY(cPlayer)
+    DISABLE_COPY(cPlayer)
 
     // configure the player
     void Configure  (const coreUintW iShipType, const coreVector3& vColor);

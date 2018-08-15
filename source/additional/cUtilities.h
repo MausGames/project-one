@@ -12,6 +12,25 @@
 
 
 // ****************************************************************
+// 
+#if defined(_CORE_MSVC_)
+    #define UNITY_BUILD __pragma(warning(disable : 4005))
+#else
+    #define UNITY_BUILD _Pragma("GCC diagnostic ignored \"-Wno-macro-redefined\"")
+#endif
+
+// sub-class type information macros
+#define ENABLE_ID                                           \
+    virtual       coreInt32 GetID  ()const = 0;             \
+    virtual const coreChar* GetName()const = 0;
+#define ASSIGN_ID(i,n)                                      \
+    static constexpr const coreInt32 ID   = i;              \
+    static constexpr const coreChar* Name = n;              \
+    inline       coreInt32 GetID  ()const final {return i;} \
+    inline const coreChar* GetName()const final {return n;}
+
+
+// ****************************************************************
 // angle difference helper-function
 constexpr FUNC_CONST coreFloat AngleDiff(const coreFloat x, const coreFloat y)
 {

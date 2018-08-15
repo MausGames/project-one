@@ -46,7 +46,7 @@ cDharukBoss::cDharukBoss()noexcept
     m_Duplicate.DefineModelHigh("ship_boss_dharuk_high.md3");
     m_Duplicate.DefineModelLow ("ship_boss_dharuk_low.md3");
     m_Duplicate.DefineTexture  (0u, "effect_energy.png");
-    m_Duplicate.DefineProgram  ("effect_energy_invert_program");
+    m_Duplicate.DefineProgram  ("effect_energy_ship_invert_program");
     m_Duplicate.SetSize        (this->GetSize());
     m_Duplicate.Configure      (500, COLOR_ENERGY_RED * 0.8f);
     m_Duplicate.AddStatus      (ENEMY_STATUS_IMMORTAL);
@@ -67,7 +67,7 @@ cDharukBoss::cDharukBoss()noexcept
 
             // set object properties
             pDuplicate->SetSize   (this->GetSize());
-            pDuplicate->SetColor3 (COLOR_ENERGY_RED * (0.15 + 0.15f * I_TO_F(iType)));
+            pDuplicate->SetColor3 (COLOR_ENERGY_RED * (0.15f + 0.15f * I_TO_F(iType)));
             pDuplicate->SetAlpha  (0.15f + 0.2f * I_TO_F(iType));
             pDuplicate->SetEnabled((i < DHARUK_TRAILS) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
 
@@ -93,7 +93,7 @@ cDharukBoss::cDharukBoss()noexcept
 
             // set object properties
             pBoomerang->SetSize   (coreVector3(1.4f,1.4f,1.4f) * 1.1f);
-            pBoomerang->SetColor3 (COLOR_ENERGY_RED * (iType ? (0.15 + 0.15f * I_TO_F(iType)) : 0.8f));
+            pBoomerang->SetColor3 (COLOR_ENERGY_RED * (iType ? (0.15f + 0.15f * I_TO_F(iType)) : 0.8f));
             pBoomerang->SetTexSize(coreVector2(1.5f,1.5f));
             pBoomerang->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
@@ -136,8 +136,6 @@ void cDharukBoss::__KillOwn(const coreBool bAnimated)
 
     // 
     this->_EndBoss(bAnimated);
-
-    [](void){{}},[]()->void{}();
 }
 
 
@@ -432,7 +430,7 @@ void cDharukBoss::__EnableBoomerang(const coreUintW iIndex, const coreVector2& v
     this->__EncodeDirection(iIndex, vDirection);
 
     // 
-    auto nInitFunc = [&](coreObject3D* OUTPUT pObject)
+    const auto nInitFunc = [&](coreObject3D* OUTPUT pObject)
     {
         pObject->SetPosition(coreVector3(vPosition, 0.0f));
         pObject->SetAlpha   (0.0f);
@@ -450,8 +448,6 @@ void cDharukBoss::__EnableBoomerang(const coreUintW iIndex, const coreVector2& v
 // 
 void cDharukBoss::__DisableBoomerang(const coreUintW iIndex, const coreBool bAnimated)
 {
-    if(m_Boomerang.List()->empty()) return;
-
     // 
     ASSERT(iIndex < DHARUK_BOOMERANGS)
     coreObject3D* pBoomerang = (*m_Boomerang     .List())[iIndex];
@@ -462,7 +458,7 @@ void cDharukBoss::__DisableBoomerang(const coreUintW iIndex, const coreBool bAni
     pBoomerang->ChangeType(0);
 
     // 
-    auto nExitFunc = [](coreObject3D* OUTPUT pObject)
+    const auto nExitFunc = [](coreObject3D* OUTPUT pObject)
     {
         pObject->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     };

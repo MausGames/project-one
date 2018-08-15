@@ -27,6 +27,7 @@ cGame* g_pGame = NULL;
 
 static coreUint64 m_iOldPerfTime = 0u;   // last measured high-precision time value
 static void LockFramerate();             // lock frame rate and override frame time
+static void ReshapeGame();               // reshape and resize game
 static void DebugGame();                 // debug and test game
 
 
@@ -171,6 +172,9 @@ void CoreApp::Render()
 // move the application
 void CoreApp::Move()
 {
+    // reshape and resize game
+    if(Core::System->GetWinSizeChanged()) ReshapeGame();
+
     // lock frame rate and override frame time
     if(g_pGame) LockFramerate();
 
@@ -186,9 +190,13 @@ void CoreApp::Move()
             // 
             g_pReplay->Update();
 
-            // move environment, theater and game
+            // move the environment
             g_pEnvironment->Move();
-            g_pTheater    ->Move();
+
+            // move the theater
+            g_pTheater->Move();
+
+            // move the game
             if(g_pGame) g_pGame->Move();
 
             // move special-effects
@@ -224,7 +232,7 @@ void InitFramerate()
         SDL_Window* pWindow = Core::System->GetWindow();
 
         // get current display mode
-        SDL_DisplayMode oMode;
+        SDL_DisplayMode oMode = {};
         SDL_GetWindowDisplayMode(pWindow, &oMode);
 
         // check for valid refresh rate
@@ -254,7 +262,7 @@ static void LockFramerate()
         coreFloat  fDifference;
 
         // measure and calculate current frame time
-        auto nMeasureFunc = [&]()
+        const auto nMeasureFunc = [&]()
         {
             iNewPerfTime = SDL_GetPerformanceCounter();
             fDifference  = coreFloat(coreDouble(iNewPerfTime - m_iOldPerfTime) * Core::System->GetPerfFrequency());
@@ -281,6 +289,19 @@ static void LockFramerate()
 
     // override frame time
     if(Core::System->GetTime()) c_cast<coreFloat&>(Core::System->GetTime()) = FRAMERATE_TIME;
+}
+
+
+// ****************************************************************
+// reshape and resize game
+static void ReshapeGame()
+{
+    // update system properties
+    InitResolution(Core::System->GetResolution());
+    InitFramerate();
+
+    // reshape engine
+    Core::Reshape();
 }
 
 

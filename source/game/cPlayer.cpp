@@ -58,7 +58,7 @@ cPlayer::cPlayer()noexcept
     // 
     m_Bubble.DefineModel  ("object_sphere.md3");
     m_Bubble.DefineTexture(0u, "effect_energy.png");
-    m_Bubble.DefineProgram("effect_energy_bullet_spheric_program");
+    m_Bubble.DefineProgram("effect_energy_flat_spheric_program");
     m_Bubble.SetColor4    (coreVector4(COLOR_ENERGY_WHITE * 0.5f, 0.0f));
     m_Bubble.SetTexSize   (coreVector2(5.0f,5.0f));
     m_Bubble.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
@@ -362,7 +362,7 @@ void cPlayer::Kill(const coreBool bAnimated)
     this->UpdateExhaust(0.0f);
 
     // 
-    if(bAnimated) g_pSpecialEffects->MacroExplosionPhysicalBig(this->GetPosition());
+    if(bAnimated) g_pSpecialEffects->MacroExplosionPhysicalDarkBig(this->GetPosition());
 
     // remove ship from the game
     this->_Kill(true, bAnimated);

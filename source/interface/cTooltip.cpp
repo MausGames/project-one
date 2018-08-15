@@ -100,7 +100,7 @@ void cTooltip::__ShowText(const coreFloat fWidth, const coreChar* pcText)
     m_iNumLines = 0u;
 
     // save current line and continue processing
-    auto nWriteLineFunc = [&]()
+    const auto nWriteLineFunc = [&]()
     {
         // terminate the string
         (*pcLineEnd) = '\0';

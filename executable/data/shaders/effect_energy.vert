@@ -8,24 +8,43 @@
 //////////////////////////////////////////////////////
 
 
+// shader uniforms
+uniform float u_v1Depth;         // 
+
+// vertex attributes
+attribute float a_v1Depth;       // 
+
 // shader output
-varying float v_v1Strength;   // light and color intensity
+varying float v_v1Strength;      // light and color intensity
+varying vec3  v_av3ShipView;     // simplified view vector
+varying vec3  v_av3ShipNormal;   // simplified normal vector
 
 
 void VertexMain()
 {
-#if defined(_P1_BULLET_)
+#if defined(_P1_FLAT_)
 
     // transform position (and make flat)
     vec4 v4NewPosition = vec4(coreObject3DTransformRaw(), 1.0) * vec4(1.0, 1.0, 0.0, 1.0);
     gl_Position = u_m4ViewProj * v4NewPosition;
 
-    // 
-    gl_Position.z -= (u_v3Size.z * 0.001) * gl_Position.w;
-
     // calculate light and color intensity
     vec3  v3NewNormal = coreQuatApply(u_v4Rotation, a_v3RawNormal);
     float v1Base      = abs(v3NewNormal.z);
+
+    // 
+#if defined(_P1_BULLET_)
+    #if defined(_CORE_OPTION_INSTANCING_)
+        float v1Depth = a_v1Depth;
+    #else
+        float v1Depth = u_v1Depth;
+    #endif
+#else
+    const float v1Depth = 0.0;
+#endif
+
+    // 
+    gl_Position.z -= (v1Depth * 0.001) * gl_Position.w;
 
 #else
 
@@ -33,13 +52,13 @@ void VertexMain()
     vec4 v4NewPosition = vec4(coreObject3DTransformRaw(), 1.0);
     gl_Position        = u_m4ViewProj * v4NewPosition;
 
-    // add slight z-offset to reduce fighting
-    gl_Position.z -= 0.01 * gl_Position.w;
-
     // calculate light and color intensity
     vec3  v3ViewDir   = normalize(u_v3CamPosition - v4NewPosition.xyz);
     vec3  v3NewNormal = coreQuatApply(u_v4Rotation, a_v3RawNormal);
     float v1Base      = dot(vec3(v3ViewDir.xy, abs(v3ViewDir.z)), vec3(v3NewNormal.xy, abs(v3NewNormal.z)));
+
+    // add slight z-offset to reduce fighting
+    gl_Position.z -= 0.01 * gl_Position.w;
 
 #endif
 
@@ -74,4 +93,8 @@ void VertexMain()
     v_v1Strength = (0.8 - v1Base) * 3.5;
 
 #endif
+
+    // 
+    v_av3ShipView   = normalize(u_v3CamPosition - v4NewPosition.xyz);
+    v_av3ShipNormal = coreQuatApply(u_v4Rotation, a_v3RawNormal);
 }

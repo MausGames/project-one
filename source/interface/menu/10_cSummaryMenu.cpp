@@ -139,7 +139,7 @@ void cSummaryMenu::Move()
                 const coreFloat fBlendOut = 1.0f - m_fOutroTimer * INTERFACE_BANNER_SPEED;
 
                 // 
-                auto nBlendFunc = [&](coreLabel* OUTPUT pTitle, coreLabel* OUTPUT pValue, const coreFloat fThreshold)
+                const auto nBlendFunc = [&](coreLabel* OUTPUT pTitle, coreLabel* OUTPUT pValue, const coreFloat fThreshold)
                 {
                     const coreObjectEnable iEnable = (fBlendIn >= fThreshold) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING;
 

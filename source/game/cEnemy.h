@@ -385,6 +385,14 @@ template <typename T> cEnemyManager::sEnemySet<T>::sEnemySet()noexcept
     oEnemyActive.CreateCustom(sizeof(coreFloat), [](coreVertexBuffer* OUTPUT pBuffer)
     {
         pBuffer->DefineAttribute(SHIP_SHADER_ATTRIBUTE_BLINK, 1u, GL_FLOAT, false, 0u);
+    },
+    [](coreFloat* OUTPUT pData, const cEnemy* pEnemy)
+    {
+        (*pData) = pEnemy->GetBlink();
+    },
+    [](const coreProgramPtr& pProgram, const cEnemy* pEnemy)
+    {
+        pEnemy->_EnableBlink(pProgram);
     });
 
     // add enemy set to global shadow and outline
@@ -420,7 +428,7 @@ template <typename T> RETURN_RESTRICT T* cEnemyManager::AllocateEnemy()
 {
     // get requested enemy set
     this->PrefetchEnemy<T>();
-    sEnemySet<T>* pSet = s_cast<sEnemySet<T>*>(m_apEnemySet[T::ID]);
+    sEnemySet<T>* pSet = d_cast<sEnemySet<T>*>(m_apEnemySet[T::ID]);
 
     // save current pool size
     const coreUintW iSize = pSet->apEnemyPool.size();
@@ -458,7 +466,7 @@ template <typename F> void cEnemyManager::ForEachEnemy(F&& nFunction)
     const std::vector<coreObject3D*>& oEnemyList = Core::Manager::Object->GetObjectList(TYPE_ENEMY);
     FOR_EACH(it, oEnemyList)
     {
-        cEnemy* pEnemy = s_cast<cEnemy*>(*it);
+        cEnemy* pEnemy = d_cast<cEnemy*>(*it);
         if(!pEnemy) continue;
 
         // 

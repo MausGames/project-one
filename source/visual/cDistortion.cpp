@@ -73,8 +73,8 @@ void cDistortion::Update()
                     if(!oWave.GetAlpha()) continue;
 
                     // 
-                    const coreFloat& fScale = oWave.GetColor4().x;
-                    const coreFloat& fSpeed = oWave.GetColor4().y;
+                    const coreFloat fScale = oWave.GetColor4().x;
+                    const coreFloat fSpeed = oWave.GetColor4().y;
 
                     // 
                     oWave.SetAlpha(MAX(oWave.GetAlpha() - fSpeed * Core::System->GetTime(), 0.0f));
@@ -90,8 +90,8 @@ void cDistortion::Update()
                     if(!oBurst.GetAlpha()) continue;
 
                     // 
-                    const coreFloat& fScale = oBurst.GetColor4().x;
-                    const coreFloat  fSpeed = oBurst.GetColor4().yz().LengthSq();
+                    const coreFloat fScale = oBurst.GetColor4().x;
+                    const coreFloat fSpeed = oBurst.GetColor4().yz().LengthSq();
 
                     // 
                     oBurst.SetAlpha(MAX(oBurst.GetAlpha() - fSpeed * Core::System->GetTime(), 0.0f));
@@ -120,7 +120,7 @@ void cDistortion::CreateWave(const coreVector3& vPosition, const coreFloat fScal
     coreObject2D& oWave = m_aWave[m_iCurWave];
 
     // 
-    oWave.SetPosition(g_pForeground->Project(vPosition) * DISTORTION_SCALE_FACTOR);
+    oWave.SetPosition(g_pForeground->Project2D(vPosition) * DISTORTION_SCALE_FACTOR);
     oWave.SetColor4  (coreVector4(fScale, fSpeed, 0.0f, 1.0f));
 }
 
@@ -136,7 +136,7 @@ void cDistortion::CreateBurst(const coreVector3& vPosition, const coreVector2& v
     coreObject2D& oBurst = m_aBurst[m_iCurBurst];
 
     // 
-    oBurst.SetPosition(g_pForeground->Project(vPosition) * DISTORTION_SCALE_FACTOR);
+    oBurst.SetPosition(g_pForeground->Project2D(vPosition) * DISTORTION_SCALE_FACTOR);
     oBurst.SetColor4  (coreVector4(fScale, vDirection * SQRT(fSpeed), 1.0f));
 }
 

@@ -15,7 +15,7 @@ cSpecialEffects::cSpecialEffects()noexcept
 : m_ParticleColor    (1024u)
 , m_ParticleDark     (256u)
 , m_ParticleSmoke    (512u)
-, m_ParticleFire     (512u)
+, m_ParticleFire     (1024u)
 , m_apLightningOwner {}
 , m_LightningList    (SPECIAL_LIGHTNINGS)
 , m_iCurLightning    (0u)
@@ -67,7 +67,7 @@ cSpecialEffects::cSpecialEffects()noexcept
     }
 
     // 
-    auto nLoadSoundFunc = [this](const eSoundEffect iSoundIndex, const coreChar* pcName)
+    const auto nLoadSoundFunc = [this](const eSoundEffect iSoundIndex, const coreChar* pcName)
     {
         coreSoundPtr& pSoundPtr = m_apSound[iSoundIndex & 0xFFu];
 
@@ -111,7 +111,7 @@ void cSpecialEffects::Render(const coreBool bForeground)
             if(bForeground) glBlendFuncSeparate(FOREGROUND_BLEND_DEFAULT, FOREGROUND_BLEND_ALPHA);
 
             // render all blast and ring objects
-            auto nRenderFunc = [](coreObject3D* OUTPUT pArray, const coreUintW iSize)
+            const auto nRenderFunc = [](coreObject3D* OUTPUT pArray, const coreUintW iSize)
             {
                 for(coreUintW i = 0u; i < iSize; ++i)
                 {
@@ -180,8 +180,8 @@ void cSpecialEffects::Move()
             if(!oBlast.GetAlpha()) continue;
 
             // 
-            const coreFloat& fScale = oBlast.GetCollisionModifier().x;
-            const coreFloat& fSpeed = oBlast.GetCollisionModifier().y;
+            const coreFloat fScale = oBlast.GetCollisionModifier().x;
+            const coreFloat fSpeed = oBlast.GetCollisionModifier().y;
 
             // 
             oBlast.SetAlpha    (MAX(oBlast.GetAlpha() - fSpeed * Core::System->GetTime(), 0.0f));
@@ -197,9 +197,9 @@ void cSpecialEffects::Move()
             if(!oRing.GetAlpha()) continue;
 
             // 
-            const coreFloat& fScale = oRing.GetCollisionModifier().x;
-            const coreFloat& fSpeed = oRing.GetCollisionModifier().y;
-            const coreFloat& fTime  = oRing.GetCollisionModifier().z;
+            const coreFloat fScale = oRing.GetCollisionModifier().x;
+            const coreFloat fSpeed = oRing.GetCollisionModifier().y;
+            const coreFloat fTime  = oRing.GetCollisionModifier().z;
 
             // 
             c_cast<coreFloat&>(fTime) = MAX(fTime - fSpeed * Core::System->GetTime(), 0.0f);
@@ -270,7 +270,7 @@ void cSpecialEffects::CreateSplashSmoke(const coreVector3& vPosition, const core
     });
 }
 
-void cSpecialEffects::CreateSplashFire(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum)
+void cSpecialEffects::CreateSplashFire(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor)
 {
     // 
     m_ParticleFire.GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
@@ -278,7 +278,7 @@ void cSpecialEffects::CreateSplashFire(const coreVector3& vPosition, const coreF
         pParticle->SetPositionRel(vPosition+coreVector3::Rand(3.0f), coreVector3::Rand(-fScale, fScale));
         pParticle->SetScaleAbs   (4.5f,                              11.5f);
         pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),        Core::Rand->Float(-PI*0.5f, PI*0.5f));
-        pParticle->SetColor4Abs  (coreVector4(0.0f,0.0f,0.0f,1.0f),  coreVector4(0.0f,0.0f,0.0f,0.0f));
+        pParticle->SetColor4Abs  (coreVector4(vColor*0.926f, 1.0f),  coreVector4(vColor*0.926f, 0.0f));
         pParticle->SetSpeed      (1.4f * Core::Rand->Float(0.9f, 1.1f));
     });
 }
@@ -503,7 +503,7 @@ void cSpecialEffects::RumblePlayer(const cPlayer* pPlayer, const coreFloat fStre
     {
         if((pPlayer != pCurPlayer) && (pPlayer != NULL)) return;
 
-        const coreUint8&  iRumble     = g_CurConfig.Input.aiRumble[i];
+        const coreUint8   iRumble     = g_CurConfig.Input.aiRumble[i];
         const coreUintW   iJoystickID = g_CurConfig.Input.aiType  [i] - INPUT_SETS_KEYBOARD;
         const sGameInput* pCurInput   = pCurPlayer->GetInput();
 
@@ -575,22 +575,42 @@ void cSpecialEffects::MacroExplosionDarkBig(const coreVector3& vPosition)
     this         ->ShakeScreen     (SPECIAL_SHAKE_BIG);
 }
 
-void cSpecialEffects::MacroExplosionPhysicalSmall(const coreVector3& vPosition)
+void cSpecialEffects::MacroExplosionPhysicalColorSmall(const coreVector3& vPosition, const coreVector3& vColor)
 {
     // 
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_SMALL);
-    this         ->CreateSplashColor(vPosition, SPECIAL_SPLASH_SMALL, COLOR_FIRE_ORANGE);
-    this         ->CreateSplashFire (vPosition, SPECIAL_EXPLOSION_SMALL);
+    this         ->CreateSplashColor(vPosition, SPECIAL_SPLASH_SMALL,    vColor);
+    this         ->CreateSplashFire (vPosition, SPECIAL_EXPLOSION_SMALL, vColor);
     this         ->PlaySound        (vPosition, 1.0f, SOUND_EXPLOSION_PHYSICAL_SMALL);
     this         ->ShakeScreen      (SPECIAL_SHAKE_SMALL);
 }
 
-void cSpecialEffects::MacroExplosionPhysicalBig(const coreVector3& vPosition)
+void cSpecialEffects::MacroExplosionPhysicalColorBig(const coreVector3& vPosition, const coreVector3& vColor)
 {
     // 
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_BIG);
-    this         ->CreateSplashColor(vPosition, SPECIAL_SPLASH_BIG, COLOR_FIRE_ORANGE);
-    this         ->CreateSplashFire (vPosition, SPECIAL_EXPLOSION_BIG);
+    this         ->CreateSplashColor(vPosition, SPECIAL_SPLASH_BIG,    vColor);
+    this         ->CreateSplashFire (vPosition, SPECIAL_EXPLOSION_BIG, vColor);
+    this         ->PlaySound        (vPosition, 1.0f, SOUND_EXPLOSION_PHYSICAL_BIG);
+    this         ->ShakeScreen      (SPECIAL_SHAKE_BIG);
+}
+
+void cSpecialEffects::MacroExplosionPhysicalDarkSmall(const coreVector3& vPosition)
+{
+    // 
+    g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_SMALL);
+    this         ->CreateSplashDark (vPosition, SPECIAL_SPLASH_SMALL);
+    this         ->CreateSplashFire (vPosition, SPECIAL_EXPLOSION_SMALL, coreVector3(0.22f,0.22f,0.22f));
+    this         ->PlaySound        (vPosition, 1.0f, SOUND_EXPLOSION_PHYSICAL_SMALL);
+    this         ->ShakeScreen      (SPECIAL_SHAKE_SMALL);
+}
+
+void cSpecialEffects::MacroExplosionPhysicalDarkBig(const coreVector3& vPosition)
+{
+    // 
+    g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_BIG);
+    this         ->CreateSplashDark (vPosition, SPECIAL_SPLASH_BIG);
+    this         ->CreateSplashFire (vPosition, SPECIAL_EXPLOSION_BIG, coreVector3(0.22f,0.22f,0.22f));
     this         ->PlaySound        (vPosition, 1.0f, SOUND_EXPLOSION_PHYSICAL_BIG);
     this         ->ShakeScreen      (SPECIAL_SHAKE_BIG);
 }

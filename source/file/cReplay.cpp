@@ -182,7 +182,7 @@ void cReplay::Update()
 
     if(m_iStatus == REPLAY_STATUS_RECORDING)
     {
-        auto nNewPacketFunc = [this](const coreUintW iIndex, const coreUint32 iType, const coreUint32 iValue)
+        const auto nNewPacketFunc = [this](const coreUintW iIndex, const coreUint32 iType, const coreUint32 iValue)
         {
             ASSERT((m_iCurFrame <= BITLINE(22u)) && (iType <= BITLINE(2u)) && (iValue <= BITLINE(4u)))
 

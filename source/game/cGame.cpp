@@ -562,7 +562,7 @@ void cGame::__HandleCollisions()
         pEnemy ->TakeDamage(50, ELEMENT_NEUTRAL, vIntersection.xy(), pPlayer);
 
         // 
-        g_pSpecialEffects->MacroExplosionPhysicalSmall(vIntersection);
+        g_pSpecialEffects->MacroExplosionPhysicalDarkSmall(vIntersection);
     });
 
     // 

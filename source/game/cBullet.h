@@ -14,10 +14,11 @@
 // TODO: use prefetch with more precise numbers (also in enemy-manager)
 // TODO: align bullet memory ? (also check other possible locations (e.g. enemies))
 // TODO: remove tons of template instantiations (also enemies ?)
-// TODO: add memory pool object for bullets ?
+// TODO: add memory pool object for bullets ? also for enemy
 // TODO: make ray bullet smoother geometrically (front round)
 // TODO: sort bullet classes (color, enemy<>player, normal<>special), improve array indexing and caching
 // TODO: shift spear-bullet collision like ray-bullet
+// TODO: spear-bullet has a blocky outline, increase detail
 
 
 // ****************************************************************
@@ -27,6 +28,8 @@
 #define BULLET_AREA_FACTOR   (1.2f)    // size factor for foreground area where the bullet remains active
 #define BULLET_SPEED_FACTOR  (30.0f)   // 
 #define BULLET_DEPTH_FACTOR  (0.8f)    // 
+
+#define BULLET_SHADER_ATTRIBUTE_DEPTH (CORE_SHADER_ATTRIBUTE_DIV_TEXPARAM_NUM + 1u)
 
 enum eBulletStatus : coreUint8
 {
@@ -44,8 +47,10 @@ protected:
     coreFloat m_fSpeed;              // 
     cShip*    m_pOwner;              // associated owner of the bullet
 
-    coreUint8 m_iElement;            // 
+    coreFloat m_fDepth;              // 
     coreFlow  m_fAnimation;          // animation value
+
+    coreUint8 m_iElement;            // 
 
     static cRotaCache s_RotaCache;   // 
 
@@ -96,6 +101,10 @@ protected:
     inline void _MakeBlue  (const coreFloat fFactor) {m_iElement = ELEMENT_BLUE;   this->__SetColorRand(COLOR_ENERGY_BLUE   * fFactor);}
     inline void _MakeCyan  (const coreFloat fFactor) {m_iElement = ELEMENT_CYAN;   this->__SetColorRand(COLOR_ENERGY_CYAN   * fFactor);}
     inline void _MakeGreen (const coreFloat fFactor) {m_iElement = ELEMENT_GREEN;  this->__SetColorRand(COLOR_ENERGY_GREEN  * fFactor);}
+
+    // 
+    void _EnableDepth(const coreProgramPtr& pProgram)const;
+    void _EnableDepth()const;
 
 
 private:
@@ -155,7 +164,7 @@ public:
     void ClearBullets(const coreBool bAnimated);
 
     // 
-    cBullet*                 FindBullet     (const coreVector2& vPosition);
+    inline cBullet*          FindBullet     (const coreVector2& vPosition);
     template <typename T> T* FindBulletTyped(const coreVector2& vPosition);
     template <typename F> void             ForEachBullet     (F&& nFunction);   // [](cBullet* OUTPUT pBullet) -> void
     template <typename T, typename F> void ForEachBulletTyped(F&& nFunction);   // [](T*       OUTPUT pBullet) -> void
@@ -176,7 +185,7 @@ public:
     ASSIGN_ID(1, "Ray")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(3.7f,3.7f,3.7f)); m_fAnimation = 0.09f;}
+    inline void ResetProperties() {this->MakeWhite(); this->SetSize(coreVector3(3.7f,3.7f,3.7f) * 0.5f); m_fAnimation = 0.09f;}
 
     // change default color
     inline cRayBullet* MakeWhite () {this->_MakeWhite (0.7f); return this;}
@@ -212,7 +221,7 @@ public:
     ASSIGN_ID(2, "Pulse")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(2.5f,2.5f,2.5f) * 1.3f); m_fAnimation = 0.09f;}
+    inline void ResetProperties() {this->MakePurple(); this->SetSize(coreVector3(2.5f,2.5f,2.5f) * 1.3f); m_fAnimation = 0.09f;}
 
     // change default color
     inline cPulseBullet* MakeWhite () {ASSERT(false)            return this;}
@@ -247,7 +256,7 @@ public:
     ASSIGN_ID(3, "Orb")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(1.6f,1.6f,1.6f) * 1.1f); m_fAnimation = 0.0f;}
+    inline void ResetProperties() {this->MakeBlue(); this->SetSize(coreVector3(1.6f,1.6f,1.6f) * 1.1f); m_fAnimation = 0.0f;}
 
     // change default color
     inline cOrbBullet* MakeWhite () {ASSERT(false)            return this;}
@@ -283,7 +292,7 @@ public:
     ASSIGN_ID(4, "Cone")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(1.35f,1.55f,1.35f) * 1.05f); m_fAnimation = 0.09f;}
+    inline void ResetProperties() {this->MakeOrange(); this->SetSize(coreVector3(1.35f,1.55f,1.35f) * 1.05f); m_fAnimation = 0.09f;}
 
     // change default color
     inline cConeBullet* MakeWhite () {ASSERT(false)            return this;}
@@ -319,7 +328,7 @@ public:
     ASSIGN_ID(5, "Wave")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(1.5f,1.5f,1.5f) * 1.3f); m_fAnimation = 0.2f;}
+    inline void ResetProperties() {this->MakeGreen(); this->SetSize(coreVector3(1.5f,1.5f,1.5f) * 1.3f); m_fAnimation = 0.2f;}
 
     // change default color
     inline cWaveBullet* MakeWhite () {ASSERT(false)            return this;}
@@ -360,7 +369,7 @@ public:
     ASSIGN_ID(6, "Tesla")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(2.5f,2.5f,2.5f)); m_fAnimation = 0.09f; m_fLightningTime = 1.0f;}
+    inline void ResetProperties() {this->MakeBlue(); this->SetSize(coreVector3(2.5f,2.5f,2.5f)); m_fAnimation = 0.09f; m_fLightningTime = 1.0f;}
 
     // change default color
     inline cTeslaBullet* MakeWhite () {ASSERT(false)            return this;}
@@ -458,7 +467,7 @@ public:
     ASSIGN_ID(9, "Spear")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(1.45f,1.55f,1.45f) * 2.1f); m_fAnimation = 0.15f;}
+    inline void ResetProperties() {this->MakeYellow(); this->SetSize(coreVector3(1.45f,1.55f,1.45f) * 2.1f); m_fAnimation = 0.15f;}
 
     // change default color
     inline cSpearBullet* MakeWhite () {ASSERT(false)            return this;}
@@ -498,7 +507,7 @@ public:
     ASSIGN_ID(10, "Triangle")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(1.5f,1.5f,1.5f)); m_fAnimation = 0.0f; m_vFlyDir = this->GetDirection().xy();}
+    inline void ResetProperties() {this->MakeRed(); this->SetSize(coreVector3(1.5f,1.5f,1.5f)); m_fAnimation = 0.0f; m_vFlyDir = this->GetDirection().xy();}
 
     // change default color
     inline cTriangleBullet* MakeWhite () {ASSERT(false)            return this;}
@@ -538,7 +547,7 @@ public:
     ASSIGN_ID(11, "Flip")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(2.6f,2.0f,2.6f)); m_fAnimation = 0.0f; m_vFlyDir = this->GetDirection().xy();}
+    inline void ResetProperties() {this->MakePurple(); this->SetSize(coreVector3(2.6f,2.0f,2.6f)); m_fAnimation = 0.0f; m_vFlyDir = this->GetDirection().xy();}
 
     // change default color
     inline cFlipBullet* MakeWhite () {ASSERT(false)            return this;}
@@ -578,7 +587,7 @@ public:
     ASSIGN_ID(12, "Quad")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(1.5f,1.5f,1.5f)); m_fAnimation = 0.0f; m_vFlyDir = this->GetDirection().xy();}
+    inline void ResetProperties() {this->MakeCyan(); this->SetSize(coreVector3(1.5f,1.5f,1.5f)); m_fAnimation = 0.0f; m_vFlyDir = this->GetDirection().xy();}
 
     // change default color
     inline cQuadBullet* MakeWhite () {ASSERT(false)            return this;}
@@ -641,6 +650,20 @@ template <typename T> cBulletManager::sBulletSet<T>::sBulletSet(cOutline* pOutli
     oBulletActive.DefineProgram(T::ConfigProgramInstancedName());
 
     // 
+    oBulletActive.CreateCustom(sizeof(coreFloat), [](coreVertexBuffer* OUTPUT pBuffer)
+    {
+        pBuffer->DefineAttribute(BULLET_SHADER_ATTRIBUTE_DEPTH, 1u, GL_FLOAT, false, 0u);
+    },
+    [](coreFloat* OUTPUT pData, const cBullet* pBullet)
+    {
+        (*pData) = pBullet->m_fDepth;
+    },
+    [](const coreProgramPtr& pProgram, const cBullet* pBullet)
+    {
+        pBullet->_EnableDepth(pProgram);
+    });
+
+    // 
     T::GlobalInit();
 
     // add bullet set to global shadow and glow
@@ -677,7 +700,7 @@ template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt
 {
     // get requested bullet set
     this->PrefetchBullet<T>();
-    sBulletSet<T>* pSet = s_cast<sBulletSet<T>*>(m_apBulletSet[T::ID]);
+    sBulletSet<T>* pSet = d_cast<sBulletSet<T>*>(m_apBulletSet[T::ID]);
 
     // save and check current pool size
     const coreUintW iSize = pSet->aBulletPool.size();
@@ -712,7 +735,7 @@ template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt
 
     // fix addresses for all active bullets
     FOR_EACH(it, *pSet->oBulletActive.List())
-        (*it) = r_cast<coreObject3D*>(I_TO_P(P_TO_UI(*it) - iBefore + iAfter));
+        (*it) = s_cast<coreObject3D*>(I_TO_P(P_TO_UI(*it) - iBefore + iAfter));
 
     // execute again with first new bullet
     pSet->iCurBullet = iSize - 1u;
@@ -723,7 +746,7 @@ template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt
 
 // ****************************************************************
 // 
-cBullet* cBulletManager::FindBullet(const coreVector2& vPosition)
+inline cBullet* cBulletManager::FindBullet(const coreVector2& vPosition)
 {
     // 
     cBullet*  pBullet = NULL;
@@ -779,7 +802,7 @@ template <typename F> void cBulletManager::ForEachBullet(F&& nFunction)
     const std::vector<coreObject3D*>& oBulletList = Core::Manager::Object->GetObjectList(m_iType);
     FOR_EACH(it, oBulletList)
     {
-        cBullet* pBullet = s_cast<cBullet*>(*it);
+        cBullet* pBullet = d_cast<cBullet*>(*it);
         if(!pBullet) continue;
 
         // 
@@ -800,7 +823,7 @@ template <typename T, typename F> void cBulletManager::ForEachBulletTyped(F&& nF
         const coreBatchList& oBulletActive = m_apBulletSet[T::ID]->oBulletActive;
         FOR_EACH(it, *oBulletActive.List())
         {
-            T* pBullet = s_cast<T*>(*it);
+            T* pBullet = d_cast<T*>(*it);
             if(!CONTAINS_FLAG(pBullet->GetStatus(), BULLET_STATUS_ACTIVE)) continue;
 
             // 

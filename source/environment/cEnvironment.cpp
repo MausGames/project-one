@@ -102,6 +102,7 @@ void cEnvironment::Render()
             m_pOldBackground->GetResolvedTexture()->GetColorTarget(0u).pTexture->Invalidate(0u);
             m_pBackground   ->GetResolvedTexture()->GetColorTarget(0u).pTexture->Invalidate(0u);
         }
+        else m_FrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);
     }
 }
 
@@ -163,7 +164,7 @@ void cEnvironment::ChangeBackground(const coreInt32 iID, const coreUintW iTransi
     // create new background
     switch(ABS(iID))
     {
-    default:
+    default: WARN_IF(true) {}
     case cNoBackground     ::ID: m_pBackground = new cNoBackground     (); break;
     case cGrassBackground  ::ID: m_pBackground = new cGrassBackground  (); break;
     case cSeaBackground    ::ID: m_pBackground = new cSeaBackground    (); break;
@@ -257,6 +258,6 @@ void cEnvironment::__Reset(const coreResourceReset bInit)
         m_FrameBuffer.Delete();
 
         // save background ID
-        m_pBackground = r_cast<cBackground*>(I_TO_P(iID));
+        m_pBackground = s_cast<cBackground*>(I_TO_P(iID));
     }
 }

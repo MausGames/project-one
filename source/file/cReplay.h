@@ -17,6 +17,7 @@
 // TODO: get central timestamp (server ?)
 // TODO: uInfo loadfile
 // TODO: replay and save files strings have to run an explicit '\0' check, use get and set function with max value (both read and write)
+// TODO: manual bitpacking, as this is written to file
 
 
 // ****************************************************************

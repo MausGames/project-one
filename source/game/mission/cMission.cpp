@@ -177,6 +177,7 @@ void cMission::DeactivateBoss()
 
 // ****************************************************************
 // 
+UNITY_BUILD
 #include "01_cViridoMission.cpp"
 #include "02_cNevoMission.cpp"
 #include "03_cHarenaMission.cpp"

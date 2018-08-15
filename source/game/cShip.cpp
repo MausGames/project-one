@@ -307,13 +307,19 @@ void cShip::_Kill(const coreBool bSingle, const coreBool bAnimated)
 
 // ****************************************************************
 // 
-void cShip::_EnableBlink()
+void cShip::_EnableBlink(const coreProgramPtr& pProgram)const
 {
-    if(!this->GetProgram().IsUsable()) return;
+    if(!pProgram.IsUsable()) return;
 
     // 
-    this->GetProgram()->Enable();
-    this->GetProgram()->SendUniform("u_v1Blink", this->GetBlink());
+    pProgram->Enable();
+    pProgram->SendUniform("u_v1Blink", this->GetBlink());
+}
+
+void cShip::_EnableBlink()const
+{
+    // 
+    this->_EnableBlink(this->GetProgram());
 }
 
 

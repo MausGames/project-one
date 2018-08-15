@@ -56,8 +56,10 @@
 // TODO: unify "forward" and "transform" comments in shaders
 // TODO: add own coreRand for various random things which may affect feeling (screen shake), and reset on boss-start
 // TODO: somehow make g_pGame also static (but beware of pointer==null checks)
-// TODO: check issues with all the F&& functions (especially in boss.h and mission.h), also check Core, use force_inline on small functions
+// TODO: check issues with all the F&& functions (especially in boss.h and mission.h), also check Core engine, use force_inline on small functions
 // TODO: RETURN_NONNULL to everything which should never be null
+// TODO: check all vert shader for CORE_SHADER_OPTION_NO_ROTATION
+// TODO: control flow guard and buffer security check
 
 
 // ****************************************************************
@@ -99,7 +101,7 @@
 #define COLOR_MENU_GOLD      (coreVector3(1.000f, 0.859f, 0.000f))
 #define COLOR_ENERGY_WHITE   (coreVector3(1.000f, 1.000f, 1.000f))
 #define COLOR_ENERGY_YELLOW  (coreVector3(0.950f, 0.800f, 0.280f))
-#define COLOR_ENERGY_ORANGE  (coreVector3(1.000f, 0.400f, 0.000f))
+#define COLOR_ENERGY_ORANGE  (coreVector3(1.000f, 0.420f, 0.000f))
 #define COLOR_ENERGY_RED     (coreVector3(1.000f, 0.290f, 0.290f))
 #define COLOR_ENERGY_PURPLE  (coreVector3(0.450f, 0.200f, 1.000f))
 #define COLOR_ENERGY_BLUE    (coreVector3(0.100f, 0.430f, 1.000f))
@@ -131,7 +133,9 @@
 #define SHADER_SINGLE        "#define _P1_SINGLE_     (1) \n"        // decal, weather
 #define SHADER_LIGHT         "#define _P1_LIGHT_      (1) \n"        // outdoor, decal
 #define SHADER_DARKNESS      "#define _P1_DARKNESS_   (1) \n"        // object_ship
-#define SHADER_BULLET        "#define _P1_BULLET_     (1) \n"        // energy
+#define SHADER_SHIP          "#define _P1_SHIP_       (1) \n"        // energy (TODO: object_ship)
+#define SHADER_FLAT          "#define _P1_FLAT_       (1) \n"        // outline, energy
+#define SHADER_BULLET        "#define _P1_BULLET_     (1) \n"        // outline, energy
 #define SHADER_SPHERIC       "#define _P1_SPHERIC_    (1) \n"        // decal, energy
 #define SHADER_INVERT        "#define _P1_INVERT_     (1) \n"        // energy
 #define SHADER_DIRECT        "#define _P1_DIRECT_     (1) \n"        // outline, energy, distortion
@@ -162,15 +166,6 @@
 #define ELEMENT_LIGHT        (9u)    // 
 #define ELEMENT_DARK         (10u)   // 
 
-// sub-class and object ID macros
-#define ENABLE_ID                                           \
-    virtual const coreInt32 GetID  ()const = 0;             \
-    virtual const coreChar* GetName()const = 0;
-#define ASSIGN_ID(i,n)                                      \
-    static constexpr const coreInt32 ID   = i;              \
-    static constexpr const coreChar* Name = n;              \
-    inline const coreInt32 GetID  ()const final {return i;} \
-    inline const coreChar* GetName()const final {return n;}
 
 extern void InitResolution(const coreVector2& vResolution);   // init resolution properties (1:1)
 extern void InitFramerate();                                  // init frame rate properties (lock)

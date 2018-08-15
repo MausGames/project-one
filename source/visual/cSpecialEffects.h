@@ -104,7 +104,7 @@ public:
     void CreateSplashColor(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor);
     void CreateSplashDark (const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum);
     void CreateSplashSmoke(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum);
-    void CreateSplashFire (const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum);
+    void CreateSplashFire (const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor);
 
     // create directional particle blow
     void CreateBlowColor(const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor);
@@ -133,18 +133,18 @@ public:
     inline const coreFloat& GetShakeStrength()const {return m_fShakeStrength;}
 
     // 
-    void MacroExplosionColorSmall   (const coreVector3& vPosition, const coreVector3& vColor);
-    void MacroExplosionColorBig     (const coreVector3& vPosition, const coreVector3& vColor);
-    void MacroExplosionDarkSmall    (const coreVector3& vPosition);
-    void MacroExplosionDarkBig      (const coreVector3& vPosition);
-    void MacroExplosionPhysicalSmall(const coreVector3& vPosition);
-    void MacroExplosionPhysicalBig  (const coreVector3& vPosition);
-    void MacroEruptionColorSmall    (const coreVector3& vPosition, const coreVector2& vDirection, const coreVector3& vColor);
-    void MacroEruptionColorBig      (const coreVector3& vPosition, const coreVector2& vDirection, const coreVector3& vColor);
-    void MacroEruptionDarkSmall     (const coreVector3& vPosition, const coreVector2& vDirection);
-    void MacroEruptionDarkBig       (const coreVector3& vPosition, const coreVector2& vDirection);
-    void MacroEruptionPhysicalSmall (const coreVector3& vPosition, const coreVector2& vDirection) {ASSERT(false)}
-    void MacroEruptionPhysicalBig   (const coreVector3& vPosition, const coreVector2& vDirection) {ASSERT(false)}
+    void MacroExplosionColorSmall        (const coreVector3& vPosition, const coreVector3& vColor);
+    void MacroExplosionColorBig          (const coreVector3& vPosition, const coreVector3& vColor);
+    void MacroExplosionDarkSmall         (const coreVector3& vPosition);
+    void MacroExplosionDarkBig           (const coreVector3& vPosition);
+    void MacroExplosionPhysicalColorSmall(const coreVector3& vPosition, const coreVector3& vColor);
+    void MacroExplosionPhysicalColorBig  (const coreVector3& vPosition, const coreVector3& vColor);
+    void MacroExplosionPhysicalDarkSmall (const coreVector3& vPosition);
+    void MacroExplosionPhysicalDarkBig   (const coreVector3& vPosition);
+    void MacroEruptionColorSmall         (const coreVector3& vPosition, const coreVector2& vDirection, const coreVector3& vColor);
+    void MacroEruptionColorBig           (const coreVector3& vPosition, const coreVector2& vDirection, const coreVector3& vColor);
+    void MacroEruptionDarkSmall          (const coreVector3& vPosition, const coreVector2& vDirection);
+    void MacroEruptionDarkBig            (const coreVector3& vPosition, const coreVector2& vDirection);
 };
 
 

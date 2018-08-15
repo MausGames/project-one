@@ -37,7 +37,7 @@ cBackground::~cBackground()
     m_aaiBaseNormal.clear();
 
     // remove all persistent objects
-    auto nRemoveObjectsFunc = [](std::vector<coreBatchList*>* OUTPUT papList)
+    const auto nRemoveObjectsFunc = [](std::vector<coreBatchList*>* OUTPUT papList)
     {
         FOR_EACH(it, *papList)
         {
@@ -169,7 +169,7 @@ void cBackground::Move()
     }
 
     // control and move all persistent objects
-    auto nControlObjectsFunc = [this](std::vector<coreBatchList*>* OUTPUT papList, const coreFloat fRange, const coreMatrix2& mRota)
+    const auto nControlObjectsFunc = [this](std::vector<coreBatchList*>* OUTPUT papList, const coreFloat fRange, const coreMatrix2& mRota)
     {
         // cache current camera position (to improve performance)
         const coreVector2 vCameraPos = g_pEnvironment->GetCameraPos().xy();
@@ -236,7 +236,7 @@ void cBackground::Move()
     nControlObjectsFunc(&m_apAirObjectList,    BACKGROUND_OBJECT_RANGE - 11.0f, mRota);
 
     // control all additional objects
-    auto nControlAddFunc = [](std::vector<coreObject3D*>* OUTPUT papObject, const coreFloat fRange)
+    const auto nControlAddFunc = [](std::vector<coreObject3D*>* OUTPUT papObject, const coreFloat fRange)
     {
         FOR_EACH_DYN(it, *papObject)
         {
@@ -273,42 +273,24 @@ void cBackground::AddObject(coreObject3D* pObject, const coreVector3& vRelativeP
     m_apAddObject.push_back(pObject);
 }
 
-void cBackground::AddObject(coreObject3D* pObject, const coreVector3& vRelativePos, const coreUint8 iListIndex)
+void cBackground::AddObject(coreObject3D* pObject, const coreVector3& vRelativePos, const coreUint32 iCapacity, const coreHashString& sProgramInstancedName, const coreHashString& sListKey)
 {
     ASSERT(pObject)
 
-    // check for available pre-defined list (use fallback on error)
-    WARN_IF(!m_apAddList.count(iListIndex)) this->AddObject(pObject, vRelativePos);
-    else
+    // check for available optimized list
+    if(!m_apAddList.count(sListKey))
     {
-        // set position and add object to optimized list
-        pObject->SetPosition(vRelativePos + coreVector3(g_pEnvironment->GetCameraPos().xy(), 0.0f));
-        m_apAddList.at(iListIndex)->BindObject(pObject);
-    }
-}
+        // create new list
+        coreBatchList* pList = new coreBatchList(iCapacity);
+        pList->DefineProgram(sProgramInstancedName);
 
-
-// ****************************************************************
-// pre-define an optimized list
-void cBackground::AddList(const coreUint8 iListIndex, const coreUint32 iCapacity, const coreChar* pcProgramInstancedName)
-{
-    // check for available pre-defined list
-    coreBatchList* pList;
-    if(!m_apAddList.count(iListIndex))
-    {
-        // create and save new list
-        pList = new coreBatchList(iCapacity);
-        m_apAddList.emplace(iListIndex, pList);
-    }
-    else
-    {
-        // reallocate existing list
-        pList = m_apAddList.at(iListIndex);
-        pList->Reallocate(iCapacity);
+        // save new list
+        m_apAddList.emplace(sListKey, pList);
     }
 
-    // load shader-program
-    pList->DefineProgram(pcProgramInstancedName);
+    // set position and add object to optimized list
+    pObject->SetPosition(vRelativePos + coreVector3(g_pEnvironment->GetCameraPos().xy(), 0.0f));
+    m_apAddList.at(sListKey)->BindObject(pObject);
 }
 
 
@@ -317,7 +299,7 @@ void cBackground::AddList(const coreUint8 iListIndex, const coreUint32 iCapacity
 void cBackground::ShoveObjects(const coreFloat fOffset)
 {
     // update objects and lists
-    auto nUpdatePosFunc = [&](std::vector<coreObject3D*>* OUTPUT papObject)
+    const auto nUpdatePosFunc = [&](std::vector<coreObject3D*>* OUTPUT papObject)
     {
         FOR_EACH(it, *papObject)
         {
@@ -494,6 +476,7 @@ FUNC_PURE coreBool cBackground::_CheckIntersectionQuick(const coreBatchList* pOb
 
 // ****************************************************************
 // 
+UNITY_BUILD
 #include "01_cGrassBackground.cpp"
 #include "02_cSeaBackground.cpp"
 #include "03_cDesertBackground.cpp"

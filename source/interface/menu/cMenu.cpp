@@ -82,7 +82,7 @@ void cMenu::Move()
         {
             if(g_pGame)
             {
-                if(g_MenuInput.bPause || Core::System->GetMinimized())
+                if(g_MenuInput.bPause || Core::System->GetWinFocusLost())
                 {
                     // 
                     this->ChangeSurface(SURFACE_PAUSE, 0.0f);
@@ -419,7 +419,7 @@ void cMenu::UpdateSwitchBox(coreSwitchBoxU8* OUTPUT pSwitchBox)
 {
     ASSERT(pSwitchBox)
 
-    auto UpdateArrowFunc = [&](coreButton* OUTPUT pArrow, const coreUintW iEndIndex)
+    const auto UpdateArrowFunc = [&](coreButton* OUTPUT pArrow, const coreUintW iEndIndex)
     {
         const coreBool bEnd = (pSwitchBox->GetCurIndex() == iEndIndex);
 
@@ -465,6 +465,7 @@ void cMenu::UpdateAnimateProgram(coreObject2D* OUTPUT pObject)
 
 // ****************************************************************
 // 
+UNITY_BUILD
 #include "01_cIntroMenu.cpp"
 #include "02_cTitleMenu.cpp"
 #include "03_cMainMenu.cpp"

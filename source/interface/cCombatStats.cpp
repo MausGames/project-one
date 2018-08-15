@@ -40,7 +40,7 @@ void cCombatStats::Apply()
         if(pPlayer->GetDarkTime())
         {
             m_Bar.SetPosition(coreVector2(0.0f,-0.04f));
-            m_Bar.SetCenter  (g_pForeground->Project(pPlayer->GetPosition()) * g_vMenuCenter);
+            m_Bar.SetCenter  (g_pForeground->Project2D(pPlayer->GetPosition()) * g_vMenuCenter);
             m_Bar.SetSize    (coreVector2(0.08f * pPlayer->GetDarkTime(),0.01f));
             m_Bar.SetColor4  (coreVector4(0.1f,0.1f,0.1f,0.7f));
             m_Bar.Move();
@@ -53,7 +53,7 @@ void cCombatStats::Apply()
     const coreVector3 vColor = (fValue < 0.25f) ? COLOR_MENU_RED : COLOR_MENU_YELLOW;
 
     m_Circle.SetPosition (coreVector2(0.0f,-0.04f));
-    m_Circle.SetCenter   (g_pForeground->Project(coreVector3(0.0f,0.0f,0.0f)) * g_vMenuCenter);
+    m_Circle.SetCenter   (g_pForeground->Project2D(coreVector3(0.0f,0.0f,0.0f)) * g_vMenuCenter);
     m_Circle.SetSize     (coreVector2(0.1f,0.1f));
     m_Circle.SetColor4   (coreVector4(vColor * 0.9f, 0.8f));
     m_Circle.SetTexOffset(coreVector2(2.0f*PI*fValue, 0.0f));
