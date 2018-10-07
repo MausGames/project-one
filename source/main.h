@@ -60,6 +60,9 @@
 // TODO: RETURN_NONNULL to everything which should never be null
 // TODO: check all vert shader for CORE_SHADER_OPTION_NO_ROTATION
 // TODO: control flow guard and buffer security check
+// TODO: _CORE_SSE_ try to just remove the coreMath low-precision functions
+// TODO: reduce number of shader-lights with static_assert
+// TODO: check if hole in object_sphere causes reflection issues, also check if other objects have a hole
 
 
 // ****************************************************************
@@ -138,34 +141,47 @@
 #define SHADER_BULLET        "#define _P1_BULLET_     (1) \n"        // outline, energy
 #define SHADER_SPHERIC       "#define _P1_SPHERIC_    (1) \n"        // decal, energy
 #define SHADER_INVERT        "#define _P1_INVERT_     (1) \n"        // energy
-#define SHADER_DIRECT        "#define _P1_DIRECT_     (1) \n"        // outline, energy, distortion
+#define SHADER_DIRECT        "#define _P1_DIRECT_     (1) \n"        // outline, energy, distortion, menu_border
 #define SHADER_RING          "#define _P1_RING_       (1) \n"        // energy
 #define SHADER_WAVE          "#define _P1_WAVE_       (1) \n"        // object
 #define SHADER_GREY          "#define _P1_GREY_       (1) \n"        // vignette
 
 // collision types
-#define TYPE_PLAYER          (1)
-#define TYPE_PLAYER_ROLL     (2)
-#define TYPE_ENEMY           (3)
-#define TYPE_BULLET_PLAYER   (11)
-#define TYPE_BULLET_ENEMY    (12)
-#define TYPE_CHROMA          (21)
-#define TYPE_ITEM            (22)
-#define TYPE_OBJECT(x)       (100 + (x))
+enum eType : coreInt32
+{
+    TYPE_PLAYER = 1,
+    TYPE_PLAYER_ROLL,
+    TYPE_ENEMY,
+
+    TYPE_BULLET_PLAYER,
+    TYPE_BULLET_ENEMY,
+
+    TYPE_CHROMA,
+    TYPE_ITEM,
+
+    TYPE_VIRIDO_BALL,
+    TYPE_VIRIDO_PADDLE,
+    TYPE_NEVO_CONTAINER,
+    TYPE_DHARUK_BOOMERANG,
+    TYPE_TORUS_TURRET,
+    TYPE_LEVIATHAN_RAY
+};
 
 // attack elements
-#define ELEMENT_WHITE        (0u)    // 
-#define ELEMENT_YELLOW       (1u)    // speed (ray) 
-#define ELEMENT_ORANGE       (2u)    // fire
-#define ELEMENT_RED          (3u)    // (antimatter) 
-#define ELEMENT_PURPLE       (4u)    // power (pulse) 
-#define ELEMENT_BLUE         (5u)    // homing (tesla) 
-#define ELEMENT_CYAN         (6u)    // 
-#define ELEMENT_GREEN        (7u)    // (wave) 
-#define ELEMENT_NEUTRAL      (8u)    // 
-#define ELEMENT_LIGHT        (9u)    // 
-#define ELEMENT_DARK         (10u)   // 
-
+enum eElement : coreUint8
+{
+    ELEMENT_WHITE = 1u,   // 
+    ELEMENT_YELLOW,       // speed (ray) 
+    ELEMENT_ORANGE,       // fire
+    ELEMENT_RED,          // (antimatter) 
+    ELEMENT_PURPLE,       // power (pulse) 
+    ELEMENT_BLUE,         // homing (tesla) 
+    ELEMENT_CYAN,         // 
+    ELEMENT_GREEN,        // (wave) 
+    ELEMENT_NEUTRAL,      // 
+    ELEMENT_LIGHT,        // 
+    ELEMENT_DARK          // 
+};
 
 extern void InitResolution(const coreVector2& vResolution);   // init resolution properties (1:1)
 extern void InitFramerate();                                  // init frame rate properties (lock)
@@ -184,6 +200,7 @@ class cMission;
 // game headers
 extern coreVector2     g_vGameResolution;   // pre-calculated 1:1 resolution
 extern coreVector2     g_vMenuCenter;       // pre-calculated menu center modifier
+extern coreBool        g_bDebugOutput;      // 
 extern coreMusicPlayer g_MusicPlayer;       // central music-player
 
 #include "additional/cUtilities.h"

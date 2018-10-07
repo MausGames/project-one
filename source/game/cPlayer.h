@@ -11,14 +11,16 @@
 #define _P1_GUARD_PLAYER_H_
 
 // TODO: add all weapons to player directly in class
-// TODO: collision adjustment was not executed once
 // TODO: all parts of player-rendering should be batched for coop
+// TODO: check which operations have to be done outside of dead-check
+// TODO: add in-game hint for roll-cooldown end
+// TODO: render wind later to prevent depth/overdraw issues
 
 
 // ****************************************************************
 // player definitions
 #define PLAYER_WEAPONS        (1u)     // number of weapons a player can carry
-#define PLAYER_COLLISION_SIZE (0.2f)   // 
+#define PLAYER_COLLISION_MIN  (0.5f)   // 
 #define PLAYER_WIND_SIZE      (4.5f)   // 
 #define PLAYER_BUBBLE_SIZE    (6.0f)   // 
 #define PLAYER_ROLL_SPEED     (3.3f)   // 
@@ -39,7 +41,8 @@ enum ePlayerStatus : coreUint8
     PLAYER_STATUS_NO_INPUT_MOVE  = 0x04u,   // disable player movement (user controls only)
     PLAYER_STATUS_NO_INPUT_SHOOT = 0x08u,   // disable player weapons
     PLAYER_STATUS_NO_INPUT_ROLL  = 0x10u,   // 
-    PLAYER_STATUS_NO_INPUT_ALL   = PLAYER_STATUS_NO_INPUT_MOVE | PLAYER_STATUS_NO_INPUT_SHOOT | PLAYER_STATUS_NO_INPUT_ROLL
+    PLAYER_STATUS_NO_INPUT_TURN  = 0x20u,   // 
+    PLAYER_STATUS_NO_INPUT_ALL   = PLAYER_STATUS_NO_INPUT_MOVE | PLAYER_STATUS_NO_INPUT_SHOOT | PLAYER_STATUS_NO_INPUT_ROLL | PLAYER_STATUS_NO_INPUT_TURN
 };
 
 
@@ -48,22 +51,25 @@ enum ePlayerStatus : coreUint8
 class cPlayer final : public cShip
 {
 private:
-    cWeapon* m_apWeapon[PLAYER_WEAPONS];   // main weapon objects (bullet factories, should never be NULL)
+    cWeapon* m_apWeapon[PLAYER_WEAPONS];                        // main weapon objects (bullet factories, should never be NULL)
 
-    const sGameInput* m_pInput;            // pointer to associated input set (should never be NULL)
+    const sGameInput* m_pInput;                                 // pointer to associated input set (should never be NULL)
 
-    coreVector2 m_vForce;                  // 
-    coreFlow    m_fRollTime;               // 
-    coreUint8   m_iRollDir;                // 
+    coreVector2 m_vForce;                                       // 
+    coreFlow    m_fRollTime;                                    // 
+    coreUint8   m_iRollDir;                                     // 
 
-    cScoreTable m_ScoreTable;              // 
+    cScoreTable m_ScoreTable;                                   // 
 
-    coreProgramPtr m_pDarkProgram;         // 
-    coreFlow       m_fAnimation;           // 
+    coreProgramPtr m_pDarkProgram;                              // 
+    coreFlow       m_fAnimation;                                // 
 
-    coreObject3D m_Wind;                   // 
-    coreObject3D m_Bubble;                 // 
-    coreObject3D m_Exhaust;                // 
+    coreObject3D m_Dot;                                         // 
+    coreObject3D m_Wind;                                        // 
+    coreObject3D m_Bubble;                                      // 
+    coreObject3D m_Exhaust;                                     // 
+
+    coreLookup<const coreObject3D*, coreUint32> m_aCollision;   // 
 
 
 public:
@@ -96,7 +102,7 @@ public:
     void TransformDark(const coreUint8 iStatus);
 
     // 
-    void EnableWind   ();
+    void EnableWind   (const coreVector2& vDirection);
     void DisableWind  ();
     void EnableBubble ();
     void DisableBubble();
@@ -113,7 +119,51 @@ public:
     // get object properties
     inline const sGameInput*  GetInput()const {ASSERT(m_pInput) return m_pInput;}
     inline const coreVector2& GetForce()const {return m_vForce;}
+
+    // 
+    template <typename F> static void TestCollision(const coreInt32 iType,        F&& nCallback);   // [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit) -> void
+    template <typename F> static void TestCollision(coreObject3D* OUTPUT pObject, F&& nCallback);   // [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit) -> void
+
+
+private:
+    // 
+    coreBool __TestCollisionPrecise(const coreObject3D* pObject, coreVector3* OUTPUT pvIntersection, coreBool* OUTPUT pbFirstHit);
+    coreBool __NewCollision        (const coreObject3D* pObject);
+    void     __UpdateCollisions    ();
 };
+
+
+// ****************************************************************
+// 
+template <typename F> void cPlayer::TestCollision(const coreInt32 iType, F&& nCallback)
+{
+    // 
+    Core::Manager::Object->TestCollision(TYPE_PLAYER, iType, [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit)
+    {
+        // 
+        coreVector3 vNewIntersection;
+        coreBool    bNewFirstHit;
+        if(pPlayer->__TestCollisionPrecise(pObject, &vNewIntersection, &bNewFirstHit))
+        {
+            nCallback(pPlayer, d_cast<typename TRAIT_ARG_TYPE(F, 1u)>(pObject), vNewIntersection, bNewFirstHit);
+        }
+    });
+}
+
+template <typename F> void cPlayer::TestCollision(coreObject3D* OUTPUT pObject, F&& nCallback)
+{
+    // 
+    Core::Manager::Object->TestCollision(TYPE_PLAYER, pObject, [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit)
+    {
+        // 
+        coreVector3 vNewIntersection;
+        coreBool    bNewFirstHit;
+        if(pPlayer->__TestCollisionPrecise(pObject, &vNewIntersection, &bNewFirstHit))
+        {
+            nCallback(pPlayer, d_cast<typename TRAIT_ARG_TYPE(F, 1u)>(pObject), vNewIntersection, bNewFirstHit);
+        }
+    });
+}
 
 
 #endif // _P1_GUARD_PLAYER_H_

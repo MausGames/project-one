@@ -108,7 +108,7 @@ void cViridoMission::EnableBall(const coreUintW iIndex, const coreVector2& vPosi
 
     // 
     if(pBall->GetType()) return;
-    pBall->ChangeType(TYPE_OBJECT(2));
+    pBall->ChangeType(TYPE_VIRIDO_BALL);
 
     // 
     const auto nInitFunc = [&](coreObject3D* OUTPUT pObject, const coreFloat fAlpha)
@@ -154,7 +154,7 @@ void cViridoMission::DisableBall(const coreUintW iIndex, const coreBool bAnimate
 
 // ****************************************************************
 // 
-void cViridoMission::EnablePaddle(const coreUintW iIndex, cShip* pOwner)
+void cViridoMission::EnablePaddle(const coreUintW iIndex, const cShip* pOwner)
 {
     ASSERT(iIndex < VIRIDO_PADDLES)
     coreObject3D& oPaddle = m_aPaddle[iIndex];
@@ -164,7 +164,7 @@ void cViridoMission::EnablePaddle(const coreUintW iIndex, cShip* pOwner)
 
     // 
     if(oPaddle.GetType()) return;
-    oPaddle.ChangeType(TYPE_OBJECT(3));
+    oPaddle.ChangeType(TYPE_VIRIDO_PADDLE);
 
     // 
     g_pGlow->BindObject(&oPaddle);
@@ -360,7 +360,7 @@ void cViridoMission::__MoveOwnAfter()
     if(!CONTAINS_BIT(m_iStickyState, 1u))
     {
         // 
-        Core::Manager::Object->TestCollision(TYPE_OBJECT(3), TYPE_OBJECT(2), [this](coreObject3D* OUTPUT pPaddle, coreObject3D* OUTPUT pBall, const coreVector3& vIntersection, const coreBool bFirstHit)
+        Core::Manager::Object->TestCollision(TYPE_VIRIDO_PADDLE, TYPE_VIRIDO_BALL, [this](coreObject3D* OUTPUT pPaddle, coreObject3D* OUTPUT pBall, const coreVector3& vIntersection, const coreBool bFirstHit)
         {
             // 
             if(coreVector2::Dot(pPaddle->GetDirection().xy(), pBall->GetDirection().xy()) >= 0.0f)
@@ -382,8 +382,8 @@ void cViridoMission::__MoveOwnAfter()
                 {
                     // 
                     coreVector2 vNewDir = coreVector2::Reflect(vBallDir, (vBallPos - oPaddleSphere.GetPosition().xy()).Normalized());
-                    if(ABS(vPaddleDir.x) > ABS(vPaddleDir.y)) vNewDir.x = MAX(ABS(vNewDir.x), 0.75f) * vPaddleDir.x;
-                                                         else vNewDir.y = MAX(ABS(vNewDir.y), 0.75f) * vPaddleDir.y;
+                    if(IsHorizontal(vPaddleDir)) vNewDir.x = MAX(ABS(vNewDir.x), 0.75f) * vPaddleDir.x;
+                                            else vNewDir.y = MAX(ABS(vNewDir.y), 0.75f) * vPaddleDir.y;
 
                     // 
                     pBall->SetDirection(coreVector3(vNewDir.Normalized(), 0.0f));
@@ -392,8 +392,8 @@ void cViridoMission::__MoveOwnAfter()
                 {
                     // 
                     coreVector2 vNewDir = vBallDir;
-                    if(ABS(vPaddleDir.x) > ABS(vPaddleDir.y)) vNewDir.x = ABS(vNewDir.x) * vPaddleDir.x;
-                                                         else vNewDir.y = ABS(vNewDir.y) * vPaddleDir.y;
+                    if(IsHorizontal(vPaddleDir)) vNewDir.x = ABS(vNewDir.x) * vPaddleDir.x;
+                                            else vNewDir.y = ABS(vNewDir.y) * vPaddleDir.y;
 
                     // 
                     pBall->SetDirection(coreVector3(vNewDir, 0.0f));
@@ -422,7 +422,7 @@ void cViridoMission::__MoveOwnAfter()
     }
 
     // 
-    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_OBJECT(2), [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBall, const coreVector3& vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(TYPE_VIRIDO_BALL, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBall, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
 
@@ -434,7 +434,7 @@ void cViridoMission::__MoveOwnAfter()
     });
 
     // 
-    Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, TYPE_OBJECT(2), [](cBullet* OUTPUT pBullet, coreObject3D* OUTPUT pBall, const coreVector3& vIntersection, const coreBool bFirstHit)
+    Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, TYPE_VIRIDO_BALL, [](cBullet* OUTPUT pBullet, coreObject3D* OUTPUT pBall, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         // 
         pBullet->Deactivate(true, vIntersection.xy());
@@ -452,10 +452,10 @@ void cViridoMission::__MoveOwnAfter()
         // 
         const coreVector2 vBallPos    = oBall.GetPosition ().xy();
         const coreVector2 vBallDir    = oBall.GetDirection().xy();
-        const coreVector2 vOldBallPos = vBallPos - vBallDir * FOREGROUND_AREA * (CONTAINS_BIT(m_iStickyState, 1u) ? 0.0f : VIRIDO_BALL_SPEED * Core::System->GetTime());
+        const coreVector2 vOldBallPos = vBallPos - vBallDir * FOREGROUND_AREA * (CONTAINS_BIT(m_iStickyState, 1u) ? 0.0f : (VIRIDO_BALL_SPEED * Core::System->GetTime()));
 
         // 
-        Core::Manager::Object->TestCollision(TYPE_ENEMY, &oBall, [&](cEnemy* OUTPUT pEnemy, const coreVector3& vIntersection, const coreBool bFirstHit)
+        Core::Manager::Object->TestCollision(TYPE_ENEMY, &oBall, [&](cEnemy* OUTPUT pEnemy, coreObject3D* OUTPUT pBall, const coreVector3& vIntersection, const coreBool bFirstHit)
         {
             // 
             if(pEnemy->GetID() != cScoutEnemy::ID) return;
@@ -475,12 +475,12 @@ void cViridoMission::__MoveOwnAfter()
 
             // 
             coreUintW iAxis = 0u;
-            if(ABS(vDiff.x) > ABS(vDiff.y)) iAxis = ((vDiff.x * vBallDir.x) >= 0.0f) ? 1u : 0u;
-                                       else iAxis = ((vDiff.y * vBallDir.y) >= 0.0f) ? 0u : 1u;
+            if(IsHorizontal(vDiff)) iAxis = ((vDiff.x * vBallDir.x) >= 0.0f) ? 1u : 0u;
+                               else iAxis = ((vDiff.y * vBallDir.y) >= 0.0f) ? 0u : 1u;
 
             // 
             coreVector2 vNewDir = vBallDir;
-            vNewDir.arr[iAxis] = ABS(vBallDir.arr[iAxis]) * SIGN(vDiff.arr[iAxis]);
+            vNewDir.arr(iAxis) = ABS(vBallDir.arr(iAxis)) * SIGN(vDiff.arr(iAxis));
 
             // 
             oBall.SetPosition (coreVector3(vBallPos + vDiff * (3.0f * Core::System->GetTime()), 0.0f));

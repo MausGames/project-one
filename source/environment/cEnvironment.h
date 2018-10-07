@@ -13,7 +13,6 @@
 // TODO: render depth-quads or use scissor test (tested: works bad, no gain) on unused background areas (for transition!)
 // TODO: make "side" parameterized
 // TODO: use depth from water as own map for decals to reconstruct position for shadow-mapping, maybe add normal for lighting
-// TODO: lava is not considered for RetrieveSafeHeight
 // TODO: currently after changing the background there is no Background::Move before the first Render
 // TODO: separate culling between normal rendering an shadow, to improve efficiency (though this would update instancing buffer again ?)
 
@@ -79,7 +78,7 @@ public:
     FUNC_LOCAL coreFloat RetrieveTransitionBlend(const cBackground* pBackground)const;
 
     // retrieve safe height value
-    FUNC_PURE coreFloat RetrieveSafeHeight(const coreVector2& vPosition)const;
+    FUNC_PURE coreFloat RetrieveSafeHeight(const coreVector2& vPosition, const coreFloat fFallback = WATER_HEIGHT)const;
 
     // access frame buffer
     inline coreFrameBuffer* GetFrameBuffer() {return m_TransitionTime.GetStatus() ? &m_FrameBuffer : m_pBackground->GetResolvedTexture();}

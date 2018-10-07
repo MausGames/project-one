@@ -107,11 +107,11 @@ public:
     {
         coreUint32 iFrame    : 22;   // (up to 19.4 hours with 60 FPS) 
         coreUint32 iType     : 2;    // 
-        coreUint32 iValue    : 4;    // 
-        coreUint32 iReserved : 4;    // 
+        coreUint32 iValue    : 5;    // 
+        coreUint32 iReserved : 3;    // 
     };
     STATIC_ASSERT(sizeof(sStreamPacket) == 4u)
-    STATIC_ASSERT(INPUT_KEYS_ACTION     <= 4u)
+    STATIC_ASSERT(INPUT_KEYS_ACTION     <= 5u)
 
     // 
     struct sInfo final

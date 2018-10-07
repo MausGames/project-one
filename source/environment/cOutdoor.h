@@ -88,6 +88,8 @@ private:
     coreUint16 m_aiLerpRange[2];                     // (current, target) 
     coreFloat  m_afLerpData [7];                     // (from mul, from add, to mul, to add, mid mul, mid add, mid pos) 
 
+    coreSync m_Sync;                                 // sync object for asynchronous texture loading
+
 
 public:
     cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom, const coreUint8 iAlgorithm, const coreFloat fGrade)noexcept;

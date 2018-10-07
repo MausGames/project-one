@@ -27,7 +27,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("bullet_mine.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_mine.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("bullet_ray.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_ray.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_orb.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_orb.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("bullet_quad.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_quad.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("bullet_quad.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_quad.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_rocket.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_rocket.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_spear.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_spear.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_triangle.md3",                    CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_triangle.md3");
@@ -43,13 +43,14 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("object_boss_torus_circle.md3",           CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_torus_circle.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("object_boss_torus_emitter.md3",          CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_torus_emitter.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("object_boss_vaus_companion_high.md3",    CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_vaus_companion_high.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("object_boss_vaus_companion_low.md3",     CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_vaus_companion_low.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("object_cube.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_cube.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("object_boss_vaus_companion_low.md3",     CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_vaus_companion_low.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_dot.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_dot.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_cube.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_cube.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_paddle.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_paddle.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("object_ring.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_ring.md3");
-    Core::Manager::Resource->Load<coreModel>  ("object_sphere.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_sphere.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("object_tube.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tube.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("object_tube_closed.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tube_closed.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("object_sphere.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_sphere.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_tube.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tube.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_tube_closed.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tube_closed.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_bottom_high.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_bottom_high.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_bottom_low.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_bottom_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_top_high.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_top_high.md3", false);
@@ -251,7 +252,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("environment_vignette_grey.frag",         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_vignette.frag", SHADER_GREY);
     Core::Manager::Resource->Load<coreShader> ("environment_water.vert",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_water.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("environment_water.frag",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/environment_water.frag");
-    Core::Manager::Resource->Load<coreShader> ("full.vert",                              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full.vert");
+    Core::Manager::Resource->Load<coreShader> ("full.vert",                              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("full_blur_1x.frag",                      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_blur_1x.frag");
     Core::Manager::Resource->Load<coreShader> ("full_blur_2y.frag",                      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_blur_2y.frag");
     Core::Manager::Resource->Load<coreShader> ("full_post.frag",                         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_post.frag", SHADER_GLOW);
@@ -261,14 +262,15 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("full_transition_wipe.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_transition.frag", SHADER_TRANSITION(1));
     Core::Manager::Resource->Load<coreShader> ("full_transition_curtain.frag",           CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_transition.frag", SHADER_TRANSITION(2));
     Core::Manager::Resource->Load<coreShader> ("full_transition_circle.frag",            CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/full_transition.frag", SHADER_TRANSITION(3));
-    Core::Manager::Resource->Load<coreShader> ("menu_animate.vert",                      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_animate.vert", CORE_SHADER_OPTION_NO_ROTATION);
+    Core::Manager::Resource->Load<coreShader> ("menu_animate.vert",                      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_animate.vert");
     Core::Manager::Resource->Load<coreShader> ("menu_animate.frag",                      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_animate.frag");
-    Core::Manager::Resource->Load<coreShader> ("menu_border.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_border.vert", CORE_SHADER_OPTION_NO_ROTATION);
+    Core::Manager::Resource->Load<coreShader> ("menu_border.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_border.vert");
     Core::Manager::Resource->Load<coreShader> ("menu_border.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_border.frag");
+    Core::Manager::Resource->Load<coreShader> ("menu_border_direct.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_border.frag", SHADER_DIRECT);
     Core::Manager::Resource->Load<coreShader> ("menu_circle.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_circle.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("menu_circle.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_circle.frag");
     Core::Manager::Resource->Load<coreShader> ("menu_grey.frag",                         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_grey.frag");
-    Core::Manager::Resource->Load<coreShader> ("menu_inner.vert",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_inner.vert");
+    Core::Manager::Resource->Load<coreShader> ("menu_inner.vert",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_inner.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("menu_inner.frag",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_inner.frag");
     Core::Manager::Resource->Load<coreShader> ("menu_sharp.frag",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_sharp.frag");
     Core::Manager::Resource->Load<coreShader> ("object.vert",                            CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert");
@@ -303,6 +305,7 @@ void CoreApp::Setup()
 
     std::vector<std::string> asPath;
     coreData::ScanFolder("data/fonts", "*.ttf", &asPath);
+    coreData::ScanFolder("data/fonts", "*.otf", &asPath);
 
     FOR_EACH(it, asPath)   // # config for default font is ignored, because it was already loaded
     {
@@ -778,6 +781,11 @@ void CoreApp::Setup()
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_border_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("menu_border.vert")
         ->AttachShader("menu_border.frag")
+        ->Finish();
+
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_border_direct_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("menu_border.vert")
+        ->AttachShader("menu_border_direct.frag")
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_circle_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())

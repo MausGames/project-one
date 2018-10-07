@@ -129,9 +129,10 @@ public:
     inline cEnemy* GetEnemy(const coreUintW iIndex)const {ASSERT(iIndex < m_apEnemy.size()) return m_apEnemy[iIndex];}
 
     // 
-    inline coreUintW GetNumEnemies     ()const {return m_apEnemy.size();}
-    inline coreUintW GetNumEnemiesAlive()const {return std::count_if(m_apEnemy.begin(), m_apEnemy.end(), [](const cEnemy* pEnemy) {return !CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD);});}
-    inline coreBool  IsFinished        ()const {return std::none_of (m_apEnemy.begin(), m_apEnemy.end(), [](const cEnemy* pEnemy) {return !CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD);});}
+    inline coreUintW GetNumEnemies        ()const {return m_apEnemy.size();}
+    inline coreUintW GetNumEnemiesAlive   ()const {return std::count_if(m_apEnemy.begin(), m_apEnemy.end(), [](const cEnemy* pEnemy) {return !CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD);});}
+    inline coreFloat GetNumEnemiesAlivePct()const {return I_TO_F(this->GetNumEnemiesAlive()) * RCP(I_TO_F(this->GetNumEnemies()));}
+    inline coreBool  IsFinished           ()const {return std::none_of (m_apEnemy.begin(), m_apEnemy.end(), [](const cEnemy* pEnemy) {return !CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD);});}
 };
 
 

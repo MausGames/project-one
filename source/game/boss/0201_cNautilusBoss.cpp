@@ -52,8 +52,12 @@ cNautilusBoss::cNautilusBoss()noexcept
 // 
 void cNautilusBoss::__ResurrectOwn()
 {
+    cNevoMission* pMission = d_cast<cNevoMission*>(g_pGame->GetCurMission());
+
     // 
-    s_cast<cNevoMission*>(g_pGame->GetCurMission())->EnableContainer(coreVector2(0.0f,0.0f));
+    pMission->EnableContainer     (coreVector2(1000.0f,1000.0f));
+    pMission->SetContainerClamp   (false);
+    pMission->SetContainerOverdraw(true);
 
     // 
     m_aiCounter[CONTAINER_ATTACHED] = 1;
@@ -73,7 +77,7 @@ void cNautilusBoss::__KillOwn(const coreBool bAnimated)
 // 
 void cNautilusBoss::__MoveOwn()
 {
-    cNevoMission* pMission   = s_cast<cNevoMission*>(g_pGame->GetCurMission());
+    cNevoMission* pMission   = d_cast<cNevoMission*>(g_pGame->GetCurMission());
     coreObject3D* pContainer = pMission->GetContainer();
 
     // ################################################################
@@ -109,8 +113,8 @@ void cNautilusBoss::__MoveOwn()
             const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(i) * 9.0f));
 
             // 
-            g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 0.7f, this, vImpact,  vDir)->MakeBlue()->ChangeSize(1.3f);
-            g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 0.7f, this, vImpact, -vDir)->MakeBlue()->ChangeSize(1.3f);
+            g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 0.7f, this, vImpact,  vDir)->ChangeSize(1.3f);
+            g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 0.7f, this, vImpact, -vDir)->ChangeSize(1.3f);
         }
 
         // 
@@ -129,5 +133,3 @@ void cNautilusBoss::__MoveOwn()
         m_aClaw[i].SetOrientation(this->GetOrientation() * (i ? -1.0f : 1.0f));
     }
 }
-
-

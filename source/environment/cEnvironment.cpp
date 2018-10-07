@@ -209,20 +209,14 @@ FUNC_LOCAL coreFloat cEnvironment::RetrieveTransitionBlend(const cBackground* pB
 
 // ****************************************************************
 // retrieve safe height value
-FUNC_PURE coreFloat cEnvironment::RetrieveSafeHeight(const coreVector2& vPosition)const
+FUNC_PURE coreFloat cEnvironment::RetrieveSafeHeight(const coreVector2& vPosition, const coreFloat fFallback)const
 {
     // check for available outdoor-surface
     const cOutdoor* pOutdoor = m_pBackground->GetOutdoor();
-    if(!pOutdoor) return 0.0f;
+    if(!pOutdoor) return fFallback;
 
     // retrieve height value
-    const coreFloat fHeight = pOutdoor->RetrieveHeight(vPosition);
-
-    // check for available water-surface
-    const cWater* pWater = m_pBackground->GetWater();
-    if(pWater) return MAX(fHeight, WATER_HEIGHT);
-
-    return fHeight;
+    return pOutdoor->RetrieveHeight(vPosition);
 }
 
 

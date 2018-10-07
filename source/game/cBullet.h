@@ -19,6 +19,7 @@
 // TODO: sort bullet classes (color, enemy<>player, normal<>special), improve array indexing and caching
 // TODO: shift spear-bullet collision like ray-bullet
 // TODO: spear-bullet has a blocky outline, increase detail
+// TODO: bullet -> to POD-type with single parent object
 
 
 // ****************************************************************

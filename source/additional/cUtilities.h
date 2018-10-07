@@ -95,6 +95,9 @@ inline FUNC_LOCAL coreUint8 PackDirection(const coreVector2& vDirection)
 
 inline FUNC_CONST coreVector2 UnpackDirection(const coreUint8 iPack)
 {
+    // 1 0 7
+    // 2 8 6
+    // 3 4 5
     switch(iPack)
     {
     default: ASSERT(false)
@@ -108,6 +111,27 @@ inline FUNC_CONST coreVector2 UnpackDirection(const coreUint8 iPack)
     case 7u: return coreVector2( 1.0f, 1.0f) * (1.0f/SQRT2);
     case 8u: return coreVector2( 0.0f, 0.0f);
     }
+}
+
+
+// ****************************************************************
+// 
+inline FUNC_LOCAL coreBool IsHorizontal(const coreVector2& v)
+{
+    ASSERT(!v.IsNull())
+    return ABS(v.x) > ABS(v.y);
+}
+
+inline FUNC_LOCAL coreVector2 AlongCross(const coreVector2& v)
+{
+    ASSERT(!v.IsNull())
+    return IsHorizontal(v) ? coreVector2(SIGN(v.x), 0.0f) : coreVector2(0.0f, SIGN(v.y));
+}
+
+inline FUNC_LOCAL coreVector2 AlongStar(const coreVector2& v)
+{
+    ASSERT(!v.IsNull())
+    return UnpackDirection(PackDirection(v));
 }
 
 

@@ -233,7 +233,7 @@ private:
 
     coreObject3D m_aPaddle      [VIRIDO_PADDLES];   // 
     coreObject3D m_aPaddleSphere[VIRIDO_PADDLES];   // 
-    cShip*       m_apOwner      [VIRIDO_PADDLES];   // 
+    const cShip* m_apOwner      [VIRIDO_PADDLES];   // 
 
     coreUint8 m_iRealState;                         // 
     coreUint8 m_iStickyState;                       // (only between first ball and first paddle) 
@@ -254,16 +254,16 @@ public:
     void DisableBall(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    void EnablePaddle (const coreUintW iIndex, cShip* pOwner);
+    void EnablePaddle (const coreUintW iIndex, const cShip* pOwner);
     void DisablePaddle(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    inline void      MakeReal      (const coreUintW iIndex)        {ADD_BIT(m_iRealState, iIndex)}
-    inline void      MakeSticky    ()                              {ADD_BIT(m_iStickyState, 0u)}
-    inline void      UnmakeSticky  (const coreVector2& vDirection) {m_iStickyState = 0; m_aBallRaw[0].SetDirection(coreVector3(vDirection, 0.0f));}
-    inline coreUint8 GetRealState  ()const                         {return m_iRealState;}
-    inline coreBool  GetStickyState()const                         {return CONTAINS_BIT(m_iStickyState, 1u);}
-    inline coreUint8 GetBounceState()const                         {return m_iBounceState;}
+    inline void             MakeReal      (const coreUintW iIndex)        {ADD_BIT(m_iRealState, iIndex)}
+    inline void             MakeSticky    ()                              {ADD_BIT(m_iStickyState, 0u)}
+    inline void             UnmakeSticky  (const coreVector2& vDirection) {m_iStickyState = 0; m_aBallRaw[0].SetDirection(coreVector3(vDirection, 0.0f));}
+    inline const coreUint8& GetRealState  ()const                         {return m_iRealState;}
+    inline coreBool         GetStickyState()const                         {return CONTAINS_BIT(m_iStickyState, 1u);}
+    inline const coreUint8& GetBounceState()const                         {return m_iBounceState;}
 
     // 
     inline coreObject3D* GetBall  (const coreUintW iIndex) {ASSERT(iIndex < VIRIDO_BALLS)   return &m_aBallRaw[iIndex * (VIRIDO_TRAILS + 1u)];}
@@ -295,6 +295,8 @@ private:
     coreObject3D m_Container;     // 
     coreVector2  m_vForce;        // 
     coreVector2  m_vImpact;       // 
+    coreBool     m_bClamp;        // 
+    coreBool     m_bOverdraw;     // 
 
 
 public:
@@ -308,9 +310,11 @@ public:
     void DisableContainer(const coreBool bAnimated);
 
     // 
-    inline void SetContainerForce(const coreVector2& vForce) {m_vForce = vForce;}
-    inline const coreVector2& GetContainerForce ()const      {return m_vForce;}
-    inline const coreVector2& GetContainerImpact()const      {return m_vImpact;}
+    inline void               SetContainerForce   (const coreVector2& vForce)    {m_vForce    = vForce;}
+    inline void               SetContainerClamp   (const coreBool     bClamp)    {m_bClamp    = bClamp;}
+    inline void               SetContainerOverdraw(const coreBool     bOverdraw) {m_bOverdraw = bOverdraw;}
+    inline const coreVector2& GetContainerForce   ()const                        {return m_vForce;}
+    inline const coreVector2& GetContainerImpact  ()const                        {return m_vImpact;}
 
     // 
     inline coreObject3D* GetContainer() {return &m_Container;}

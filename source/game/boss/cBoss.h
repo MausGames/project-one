@@ -28,26 +28,35 @@
 
 // ****************************************************************
 // boss specific definitions
-#define DHARUK_TRAILS          (3u)                                         // 
-#define DHARUK_DUPLICATE_RAWS  (2u * DHARUK_TRAILS)                         // 
-#define DHARUK_BOOMERANGS      (4u)                                         // 
-#define DHARUK_BOOMERANGS_RAWS (DHARUK_BOOMERANGS * (DHARUK_TRAILS + 1u))   // 
-#define DHARUK_WIDTH           (0.5f)                                       // 
-#define DHARUK_HEIGHT          (0.8f)                                       // 
+#define DHARUK_TRAILS             (3u)                                         // 
+#define DHARUK_DUPLICATE_RAWS     (2u * DHARUK_TRAILS)                         // 
+#define DHARUK_BOOMERANGS         (4u)                                         // 
+#define DHARUK_BOOMERANGS_RAWS    (DHARUK_BOOMERANGS * (DHARUK_TRAILS + 1u))   // 
+#define DHARUK_WIDTH              (0.5f)                                       // 
+#define DHARUK_HEIGHT             (0.8f)                                       // 
 
-#define TORUS_RAY_SIZE         (coreVector3(0.7f,50.0f,0.7f))               // 
-#define TORUS_RAY_TEXSIZE      (coreVector2(0.5f,1.5f))                     // 
-#define TORUS_RAY_OFFSET       (8.0f)                                       // 
-#define TORUS_RAYWAVE_SIZE     (coreVector3(1.6f,5.0f,1.3f))                // 
+#define TORUS_TURRETS             (5u)                                         // 
+#define TORUS_TURRETS_RAW         (2u * TORUS_TURRETS)                         // 
 
-#define VAUS_SCOUTS_TOTAL      (DEFINED(_CORE_DEBUG_) ? 16 : 80)            // 
-#define VAUS_SCOUTS_X          (8u)                                         // 
-#define VAUS_SCOUTS_Y          (2u)                                         // 
-#define VAUS_SHOTS             (10u)                                        // 
+#define VAUS_SCOUTS_TOTAL         (DEFINED(_CORE_DEBUG_) ? 16 : 80)            //  
+#define VAUS_SCOUTS_X             (8u)                                         //  
+#define VAUS_SCOUTS_Y             (2u)                                         //  
+#define VAUS_SHOTS                (10u)                                        //  
 
-#define NAUTILUS_ATTACH_DIST   (-10.0f)                                     // 
+#define NAUTILUS_ATTACH_DIST      (-10.0f)                                     // 
 
-#define LEVIATHAN_PARTS        (5u)                                         // 
+#define LEVIATHAN_PARTS           (5u)                                         // 
+#define LEVIATHAN_PARTS_BODIES    (LEVIATHAN_PARTS - 2u)                       // 
+#define LEVIATHAN_RAYS            (LEVIATHAN_PARTS)                            // 
+#define LEVIATHAN_RAYS_RAWS       (2u * LEVIATHAN_RAYS)                        // 
+#define LEVIATHAN_RADIUS_OUTER    (FOREGROUND_AREA.x * 0.8f)                   // 
+#define LEVIATHAN_RADIUS_INNER    (8.6f)                                       // 
+#define LEVIATHAN_RAY_OFFSET(i)   ((i) ? 3.0f : 4.0f)                          // 
+#define LEVIATHAN_RAY_HEIGHT      (0.1f)                                       // 
+#define LEVIATHAN_RAY_SIZE        (coreVector3(0.7f,50.0f,0.7f))               // 
+#define LEVIATHAN_RAY_TEXSIZE     (coreVector2(0.5f,1.5f))                     // 
+#define LEVIATHAN_RAYWAVE_SIZE    (coreVector3(1.6f,5.0f,1.3f))                // 
+#define LEVIATHAN_RAYWAVE_TEXSIZE (coreVector2(0.5f,0.5f))                     // 
 
 
 // ****************************************************************
@@ -166,14 +175,18 @@ private:
     void __MoveOwn        ()final;
 
     // 
-    coreVector2 __RepeatPosition  (const coreVector2& vPosition, const coreFloat fThreshold, coreBool* OUTPUT pbChange);
-    coreVector2 __RepeatPosition  (const coreVector2& vPosition, const coreFloat fThreshold);
-    void        __EncodeDirection (const coreUintW iIndex, const coreVector2& vDirection);
-    coreVector2 __DecodeDirection (const coreUintW iIndex);
-    void        __EnableDuplicate ();
-    void        __DisableDuplicate(const coreBool bAnimated);
-    void        __EnableBoomerang (const coreUintW iIndex, const coreVector2& vPosition, const coreVector2& vDirection);
-    void        __DisableBoomerang(const coreUintW iIndex, const coreBool bAnimated);
+    void __EnableDuplicate ();
+    void __DisableDuplicate(const coreBool bAnimated);
+
+    // 
+    void __EnableBoomerang (const coreUintW iIndex, const coreVector2& vPosition, const coreVector2& vDirection);
+    void __DisableBoomerang(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    coreVector2 __RepeatPosition (const coreVector2& vPosition, const coreFloat fThreshold, coreBool* OUTPUT pbChange);
+    coreVector2 __RepeatPosition (const coreVector2& vPosition, const coreFloat fThreshold);
+    void        __EncodeDirection(const coreUintW iIndex, const coreVector2& vDirection);
+    coreVector2 __DecodeDirection(const coreUintW iIndex);
 };
 
 
@@ -182,14 +195,16 @@ private:
 class cTorusBoss final : public cBoss
 {
 private:
-    coreObject3D m_aRay    [3];   // 
-    coreObject3D m_aRayWave[3];   // 
+    coreObject3D m_Emitter;                          // 
+    coreObject3D m_aCircle[2];                       // 
 
-    coreObject3D m_Emitter;       // 
-    coreObject3D m_aCircle[2];    // 
+    coreBatchList m_Turret;                          // 
+    coreBatchList m_TurretHull;                      // 
+    coreObject3D  m_aTurretRaw[TORUS_TURRETS_RAW];   // 
 
-    coreFlow m_fAnimation;        // animation value
-    coreFlow m_fRotation;         // 
+    coreFlow m_fAnimation;                           // animation value
+    coreFlow m_fRotation;                            // 
+    coreFlow m_fTurretion;                           // 
 
 
 public:
@@ -198,23 +213,21 @@ public:
     DISABLE_COPY(cTorusBoss)
     ASSIGN_ID(102, "Torus")
 
-    // 
-    void Render()final;
-
 
 private:
     // execute own routines
     void __ResurrectOwn   ()final;
     void __KillOwn        (const coreBool bAnimated)final;
+    void __RenderOwnUnder ()final;
     void __RenderOwnAttack()final;
     void __MoveOwn        ()final;
 
     // 
-    coreVector3 __GetRotaDirection(const coreFloat fBaseAngle);
-    void        __SetRotaAttack   (const coreInt16 iType, const coreBool bAnimated);
-    void        __EnableRay       (const coreUintW iIndex);
-    void        __DisableRay      (const coreUintW iIndex);
-    void        __CreateOverdrive (const coreUintW iIndex, const coreVector3& vIntersect, const coreFloat fTime, const coreBool bGround);
+    void __EnableTurret (const coreUintW iIndex, const coreVector2& vPosition);
+    void __DisableTurret(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    FUNC_LOCAL coreVector3 __GetRotaDirection(const coreFloat fBaseAngle);
 };
 
 
@@ -223,8 +236,6 @@ private:
 class cVausBoss final : public cBoss
 {
 private:
-    coreObject3D m_aRay[3];         // 
-
     cCustomEnemy m_aCompanion[2];   // 
     coreUint8    m_iScoutOrder;     // 
 
@@ -244,7 +255,7 @@ private:
     void __MoveOwn        ()final;
 
     // 
-    coreBool __ExecuteCompanionAttack(const coreUintW iType, const coreFloat fTime);
+    void __UpdateBreakout();
 };
 
 
@@ -310,10 +321,18 @@ private:
 class cLeviathanBoss final : public cBoss
 {
 private:
-    cCustomEnemy m_aBody[3];   // 
-    cCustomEnemy m_Tail;       // 
+    cCustomEnemy m_Head;                            // 
+    cCustomEnemy m_aBody[LEVIATHAN_PARTS_BODIES];   // 
+    cCustomEnemy m_Tail;                            // 
 
-    coreFlow m_fAnimation;     // animation value
+    coreBatchList m_Ray;                            // 
+    coreBatchList m_RayWave;                        // 
+    coreObject3D  m_aRayRaw[LEVIATHAN_RAYS_RAWS];   // 
+
+    coreUint8 m_iRayActive;                         // 
+
+    coreFlow m_fAnimation;                          // animation value
+    coreFlow m_fMovement;                           // 
 
 
 public:
@@ -325,13 +344,24 @@ public:
 
 private:
     // execute own routines
-    void __MoveOwn()final;
+    void __ResurrectOwn   ()final;
+    void __KillOwn        (const coreBool bAnimated)final;
+    void __RenderOwnAttack()final;
+    void __MoveOwn        ()final;
 
     // 
-    static FUNC_NOALIAS void __CalcCurvePosDir(const coreVector3& vAxis, const coreFloat fAngle, const coreVector3& vScale, coreVector3* OUTPUT vPosition, coreVector3* OUTPUT vDirection);
+    void __SetRotaAttack  (const coreInt16 iType, const coreBool bAnimated);
+    void __EnableRay      (const coreUintW iIndex);
+    void __DisableRay     (const coreUintW iIndex);
+    void __CreateOverdrive(const coreUintW iIndex, const coreVector3& vIntersect, const coreFloat fTime, const coreBool bGround);
 
     // 
-    cEnemy* __GetPart(const coreUintW iIndex);
+    static FUNC_NOALIAS void      __CalcCurvePosDir(const coreVector3& vAxis, const coreFloat fAngle, const coreVector3& vScale, coreVector3* OUTPUT vPosition, coreVector3* OUTPUT vDirection);
+    static FUNC_CONST   coreFloat __CalcAngle      (const coreFloat fDistance, const coreFloat fRadius);
+
+    // 
+    cEnemy*                     __GetPart        (const coreUintW iIndex);
+    static FUNC_CONST coreFloat __GetPartDistance(const coreUintW iIndex);
 };
 
 

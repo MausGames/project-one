@@ -283,7 +283,7 @@ void cDharukBoss::__MoveOwn()
     m_BoomerangTrail.MoveNormal();
 
     // 
-    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_OBJECT(0), [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBoomerang, const coreVector3& vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(TYPE_DHARUK_BOOMERANG, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBoomerang, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
 
@@ -293,68 +293,6 @@ void cDharukBoss::__MoveOwn()
         // 
         g_pSpecialEffects->MacroExplosionColorSmall(vIntersection, COLOR_ENERGY_RED);
     });
-}
-
-
-// ****************************************************************
-// 
-coreVector2 cDharukBoss::__RepeatPosition(const coreVector2& vPosition, const coreFloat fThreshold, coreBool* OUTPUT pbChange)
-{
-    const coreVector2 vThreshVec = fThreshold * FOREGROUND_AREA;
-
-    // 
-    coreVector2 vRepeatPos = vPosition;
-    while(vRepeatPos.x < -vThreshVec.x) vRepeatPos.x += 2.0f * vThreshVec.x;
-    while(vRepeatPos.x >  vThreshVec.x) vRepeatPos.x -= 2.0f * vThreshVec.x;
-    while(vRepeatPos.y < -vThreshVec.y) vRepeatPos.y += 2.0f * vThreshVec.y;
-    while(vRepeatPos.y >  vThreshVec.y) vRepeatPos.y -= 2.0f * vThreshVec.y;
-
-    // 
-    ASSERT(pbChange)
-    (*pbChange) = (vRepeatPos.x != vPosition.x) || (vRepeatPos.y != vPosition.y);
-
-    return vRepeatPos;
-}
-
-coreVector2 cDharukBoss::__RepeatPosition(const coreVector2& vPosition, const coreFloat fThreshold)
-{
-    coreBool bChange;
-    return this->__RepeatPosition(vPosition, fThreshold, &bChange);
-}
-
-
-// ****************************************************************
-// 
-void cDharukBoss::__EncodeDirection(const coreUintW iIndex, const coreVector2& vDirection)
-{
-    ASSERT(iIndex < DHARUK_BOOMERANGS)
-
-    // 
-    if(vDirection.x + vDirection.y > 0.0f)
-         ADD_BIT   (m_iPackedDir, 0u + 2u*iIndex)
-    else REMOVE_BIT(m_iPackedDir, 0u + 2u*iIndex);
-
-    // 
-    if(coreMath::IsNear(vDirection.y, 0.0f))
-         ADD_BIT   (m_iPackedDir, 1u + 2u*iIndex)
-    else REMOVE_BIT(m_iPackedDir, 1u + 2u*iIndex);
-
-    STATIC_ASSERT(DHARUK_BOOMERANGS*2u <= sizeof(m_iPackedDir)*8u)
-}
-
-
-// ****************************************************************
-// 
-coreVector2 cDharukBoss::__DecodeDirection(const coreUintW iIndex)
-{
-    ASSERT(iIndex < DHARUK_BOOMERANGS)
-
-    // 
-    const coreFloat P = CONTAINS_BIT(m_iPackedDir, 0u + 2u*iIndex) ? 1.0f : -1.0f;
-    const coreBool  X = CONTAINS_BIT(m_iPackedDir, 1u + 2u*iIndex) ? true : false;
-
-    // 
-    return coreVector2((X) ? P : 0.0f, (!X) ? P : 0.0f);
 }
 
 
@@ -424,7 +362,7 @@ void cDharukBoss::__EnableBoomerang(const coreUintW iIndex, const coreVector2& v
 
     // 
     if(pBoomerang->GetType()) return;
-    pBoomerang->ChangeType(TYPE_OBJECT(0));
+    pBoomerang->ChangeType(TYPE_DHARUK_BOOMERANG);
 
     // 
     this->__EncodeDirection(iIndex, vDirection);
@@ -467,4 +405,66 @@ void cDharukBoss::__DisableBoomerang(const coreUintW iIndex, const coreBool bAni
 
     // 
     if(bAnimated) g_pSpecialEffects->MacroExplosionColorSmall(pBoomerang->GetPosition(), COLOR_ENERGY_RED);
+}
+
+
+// ****************************************************************
+// 
+coreVector2 cDharukBoss::__RepeatPosition(const coreVector2& vPosition, const coreFloat fThreshold, coreBool* OUTPUT pbChange)
+{
+    const coreVector2 vThreshVec = fThreshold * FOREGROUND_AREA;
+
+    // 
+    coreVector2 vRepeatPos = vPosition;
+    while(vRepeatPos.x < -vThreshVec.x) vRepeatPos.x += 2.0f * vThreshVec.x;
+    while(vRepeatPos.x >  vThreshVec.x) vRepeatPos.x -= 2.0f * vThreshVec.x;
+    while(vRepeatPos.y < -vThreshVec.y) vRepeatPos.y += 2.0f * vThreshVec.y;
+    while(vRepeatPos.y >  vThreshVec.y) vRepeatPos.y -= 2.0f * vThreshVec.y;
+
+    // 
+    ASSERT(pbChange)
+    (*pbChange) = (vRepeatPos.x != vPosition.x) || (vRepeatPos.y != vPosition.y);
+
+    return vRepeatPos;
+}
+
+coreVector2 cDharukBoss::__RepeatPosition(const coreVector2& vPosition, const coreFloat fThreshold)
+{
+    coreBool bChange;
+    return this->__RepeatPosition(vPosition, fThreshold, &bChange);
+}
+
+
+// ****************************************************************
+// 
+void cDharukBoss::__EncodeDirection(const coreUintW iIndex, const coreVector2& vDirection)
+{
+    ASSERT(iIndex < DHARUK_BOOMERANGS)
+
+    // 
+    if(vDirection.x + vDirection.y > 0.0f)
+         ADD_BIT   (m_iPackedDir, 0u + 2u*iIndex)
+    else REMOVE_BIT(m_iPackedDir, 0u + 2u*iIndex);
+
+    // 
+    if(coreMath::IsNear(vDirection.y, 0.0f))
+         ADD_BIT   (m_iPackedDir, 1u + 2u*iIndex)
+    else REMOVE_BIT(m_iPackedDir, 1u + 2u*iIndex);
+
+    STATIC_ASSERT(DHARUK_BOOMERANGS*2u <= sizeof(m_iPackedDir)*8u)
+}
+
+
+// ****************************************************************
+// 
+coreVector2 cDharukBoss::__DecodeDirection(const coreUintW iIndex)
+{
+    ASSERT(iIndex < DHARUK_BOOMERANGS)
+
+    // 
+    const coreFloat P = CONTAINS_BIT(m_iPackedDir, 0u + 2u*iIndex) ? 1.0f : -1.0f;
+    const coreBool  X = CONTAINS_BIT(m_iPackedDir, 1u + 2u*iIndex) ? true : false;
+
+    // 
+    return coreVector2((X) ? P : 0.0f, (!X) ? P : 0.0f);
 }

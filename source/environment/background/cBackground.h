@@ -50,7 +50,7 @@
 #define GRASS_LEAF_NUM        (2048u)
 #define GRASS_LEAF_RESERVE    (512u)
 #define GRASS_CLOUD_NUM       (64u)
-#define GRASS_CLOUD_RESERVE   (76u)   // # tested
+#define GRASS_CLOUD_RESERVE   (76u)   // # exact
 
 #define SEA_STONE_NUM         (1536u)
 #define SEA_STONE_RESERVE     (256u)
@@ -67,7 +67,7 @@
 #define DESERT_SAND_NUM       (7u)
 
 #define SPACE_METEOR_NUM      (1536u)
-#define SPACE_METEOR_RESERVE  (1824u)   // # tested 
+#define SPACE_METEOR_RESERVE  (1824u)   // # exact 
 
 #define VOLCANO_SMOKE_NUM     (512u)
 #define VOLCANO_SMOKE_RESERVE (64u)
@@ -80,19 +80,19 @@
 #define SNOW_REED_RESERVE     (769u)
 #define SNOW_SNOW_NUM         (12u)
 #define SNOW_CLOUD_NUM        (128u)
-#define SNOW_CLOUD_RESERVE    (152u)   // # tested
+#define SNOW_CLOUD_RESERVE    (152u)   // # exact
 
 #define MOSS_RAIN_NUM         (6u)
 #define MOSS_CLOUD_NUM        (64u)
-#define MOSS_CLOUD_RESERVE    (76u)   // # tested
+#define MOSS_CLOUD_RESERVE    (76u)   // # exact
 
 #define DARK_
 
 #define STOMACH_CLOUD_NUM     (256u)
-#define STOMACH_CLOUD_RESERVE (304u)   // # tested
+#define STOMACH_CLOUD_RESERVE (304u)   // # exact
 
 #define CLOUD_CLOUD_NUM       (1024u)
-#define CLOUD_CLOUD_RESERVE   (1216u)   // # tested
+#define CLOUD_CLOUD_RESERVE   (1216u)   // # exact
 
 
 // ****************************************************************

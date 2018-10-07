@@ -22,11 +22,11 @@ cConfigMenu::cConfigMenu()noexcept
 
     m_VideoTab.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_VideoTab.DefineProgram("menu_border_program");
-    m_VideoTab.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.115f,-0.012f));
+    m_VideoTab.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.115f,-0.0115f));
     m_VideoTab.SetSize      (coreVector2(0.17f,0.07f));
     m_VideoTab.SetAlignment (coreVector2(0.0f, 1.0f));
     m_VideoTab.SetTexSize   (coreVector2(1.0f,-1.0f));
-    m_VideoTab.SetTexOffset (m_VideoTab.GetSize()*coreVector2(-0.5f,-1.0f) + coreVector2(0.115f,0.012f));
+    m_VideoTab.SetTexOffset (m_VideoTab.GetSize()*coreVector2(-0.5f,-1.0f) + coreVector2(0.115f,0.0115f));
     m_VideoTab.GetCaption()->SetTextLanguage("CONFIG_VIDEO");
 
     m_AudioTab.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
@@ -109,7 +109,7 @@ cConfigMenu::cConfigMenu()noexcept
         m_aLine[i].SetTexOffset (coreVector2(I_TO_F(i)*0.09f, 0.0f));
     }
 
-    for(coreUintW i = 0u; i < INPUT_KEYS_MOVE; ++i)
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aArrow); ++i)
     {
         m_aArrow[i].Construct  (MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
         m_aArrow[i].SetPosition(m_aLabel[ENTRY_INPUT_MOVEUP + i].GetPosition() + coreVector2(0.21f,0.0f));
@@ -181,6 +181,7 @@ cConfigMenu::cConfigMenu()noexcept
             __SET_INPUT(aAction[1], INPUT_ACTION2,   0.22f)
             __SET_INPUT(aAction[2], INPUT_ACTION3,   0.22f)
             __SET_INPUT(aAction[3], INPUT_ACTION4,   0.22f)
+            __SET_INPUT(aAction[4], INPUT_ACTION5,   0.22f)
 
             m_aInput[i].oType  .SetAutomatic(0.0f);   // # because of realtime-update
             m_aInput[i].oType  .SetEndless(true);
@@ -217,7 +218,6 @@ cConfigMenu::cConfigMenu()noexcept
     if(m_AntiAliasing.GetEntry(m_AntiAliasing.GetNumEntries() - 1u).tValue != iMaxSamples) m_AntiAliasing.AddEntry(PRINT("%ux", iMaxSamples), iMaxSamples);   // possible 6x
     m_AssetQuality .AddEntryLanguage("VALUE_LOW",  0u);
     m_AssetQuality .AddEntryLanguage("VALUE_HIGH", 1u);
-    m_ShadowQuality.AddEntryLanguage("VALUE_OFF",  0u);
     m_ShadowQuality.AddEntryLanguage("VALUE_LOW",  1u);
     m_ShadowQuality.AddEntryLanguage("VALUE_HIGH", 2u);
     for(coreUintW i = 0u; i <= 100u; i += 10u) m_OverallVolume.AddEntry(PRINT("%zu%%", i), i);
@@ -271,11 +271,11 @@ cConfigMenu::cConfigMenu()noexcept
     this->BindObject(SURFACE_CONFIG_AUDIO, &m_AmbientSound);
     this->BindObject(SURFACE_CONFIG_GAME,  &m_Language);
 
-    for(coreUintW i = 0u; i < INPUT_KEYS_MOVE;    ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aArrow[i]);
-    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aInput[i].oHeader);
-    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aInput[i].oType);
-    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aInput[i].oRumble);
-    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i)
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aArrow); ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aArrow[i]);
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;   ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aInput[i].oHeader);
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;   ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aInput[i].oType);
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;   ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aInput[i].oRumble);
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;   ++i)
     {
         for(coreUintW j = 0u; j < INPUT_KEYS; ++j)
             this->BindObject(SURFACE_CONFIG_INPUT, &this->__RetrieveInputButton(i, j));
@@ -320,11 +320,10 @@ void cConfigMenu::Move()
             cMenu::UpdateSwitchBox(&m_ShadowQuality);
 
             // 
-                 if(m_AssetQuality .GetCurIndex() == 0u) m_AssetQuality .GetCaption()->SetColor3(COLOR_MENU_YELLOW);
-            else if(m_AssetQuality .GetCurIndex() == 1u) m_AssetQuality .GetCaption()->SetColor3(COLOR_MENU_GREEN);
-                 if(m_ShadowQuality.GetCurIndex() == 0u) m_ShadowQuality.GetCaption()->SetColor3(COLOR_MENU_WHITE);
-            else if(m_ShadowQuality.GetCurIndex() == 1u) m_ShadowQuality.GetCaption()->SetColor3(COLOR_MENU_YELLOW);
-            else if(m_ShadowQuality.GetCurIndex() == 2u) m_ShadowQuality.GetCaption()->SetColor3(COLOR_MENU_GREEN);
+                 if(m_AssetQuality .GetCurEntry().tValue == 0u) m_AssetQuality .GetCaption()->SetColor3(COLOR_MENU_YELLOW);
+            else if(m_AssetQuality .GetCurEntry().tValue == 1u) m_AssetQuality .GetCaption()->SetColor3(COLOR_MENU_GREEN);
+                 if(m_ShadowQuality.GetCurEntry().tValue == 1u) m_ShadowQuality.GetCaption()->SetColor3(COLOR_MENU_YELLOW);
+            else if(m_ShadowQuality.GetCurEntry().tValue == 2u) m_ShadowQuality.GetCaption()->SetColor3(COLOR_MENU_GREEN);
         }
         break;
 

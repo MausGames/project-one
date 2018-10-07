@@ -9,26 +9,37 @@
 
 
 // constant values
-const float c_v1White = 0.8;      // white contrast value (to reduce eye strain)
-const float c_v1Black = 0.04;     // black contrast value
+const float c_v1White = 0.8;       // white contrast value (to reduce eye strain)
+const float c_v1Black = 0.04;      // black contrast value
 
 // shader input
-varying      vec4 v_v4Interior;   // raw object coordinates (xy = normal, zw = inverse)
-flat varying vec4 v_v4Border;     // border distance values (xy = inner, zw = outer)
+varying      vec4  v_v4Interior;   // raw object coordinates (xy = normal, zw = inverse)
+flat varying vec4  v_v4Border;     // border distance values (xy = inner, zw = outer)
+varying      float v_v1Factor;     // 
 
 
 void FragmentMain()
 {
     // compare object coordinates with border values
-    if(all(bvec2(any(lessThan   (v_v4Interior, v_v4Border.xyxy)),
-                 all(greaterThan(v_v4Interior, v_v4Border.zwzw)))))
+    if(any(lessThan   (v_v4Interior, v_v4Border.xyxy)) &&
+       all(greaterThan(v_v4Interior, v_v4Border.zwzw)))
     {
         // draw plain border
         gl_FragColor = vec4(vec3(c_v1White), 1.0) * u_v4Color;
     }
     else
     {
-        // draw interior
-        gl_FragColor = vec4(coreTexture2D(0, v_av2TexCoord[0]).rgb + vec3(c_v1Black), 1.0) * u_v4Color;
+        // 
+    #if defined(_P1_DIRECT_)
+        float fFactor = max(v_v1Factor, 0.0);
+    #else
+        const float fFactor = 1.0;
+    #endif
+
+        // lookup texture
+        vec3 v3Detail = coreTexture2D(0, v_av2TexCoord[0]).rgb;
+
+        // draw interior with detail map
+        gl_FragColor = vec4((v3Detail + vec3(c_v1Black)) * fFactor, 1.0) * u_v4Color;
     }
 }

@@ -12,8 +12,10 @@
 // ****************************************************************
 // constructor
 cNevoMission::cNevoMission()noexcept
-: m_vForce  (coreVector2(0.0f,0.0f))
-, m_vImpact (coreVector2(0.0f,0.0f))
+: m_vForce    (coreVector2(0.0f,0.0f))
+, m_vImpact   (coreVector2(0.0f,0.0f))
+, m_bClamp    (false)
+, m_bOverdraw (false)
 {
     // 
     m_apBoss[0] = &m_Nautilus;
@@ -23,11 +25,12 @@ cNevoMission::cNevoMission()noexcept
     // 
     m_Container.DefineModel  ("object_sphere.md3");
     m_Container.DefineTexture(0u, "default_white.png");
-    m_Container.DefineProgram("object_ship_program");
+    m_Container.DefineProgram("object_ship_glow_program");
     m_Container.SetSize      (coreVector3(1.0f,1.0f,1.0f) * 5.0f);
     m_Container.SetColor3    (coreVector3(1.0f,1.0f,1.0f) * 0.5f);
     m_Container.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 }
+
 
 // ****************************************************************
 // 
@@ -35,11 +38,15 @@ void cNevoMission::EnableContainer(const coreVector2& vPosition)
 {
     // 
     if(m_Container.GetType()) return;
-    m_Container.ChangeType(TYPE_OBJECT(4));
+    m_Container.ChangeType(TYPE_NEVO_CONTAINER);
 
     // 
     m_Container.SetPosition(coreVector3(vPosition, 0.0f));
     m_Container.SetEnabled (CORE_OBJECT_ENABLE_ALL);
+
+    // 
+    m_bClamp    = false;
+    m_bOverdraw = false;
 }
 
 
@@ -109,7 +116,9 @@ void cNevoMission::__SetupOwn()
 // 
 void cNevoMission::__RenderOwnAttack()
 {
-    DEPTH_PUSH_IGNORE
+    // 
+    if(m_bOverdraw) DEPTH_PUSH
+               else DEPTH_PUSH_IGNORE
 
     // 
     m_Container.Render();
@@ -135,14 +144,31 @@ void cNevoMission::__MoveOwnAfter()
         // 
         m_vImpact = coreVector2(0.0f,0.0f);
 
-        // 
-             if(vNewPos.x < -FOREGROUND_AREA.x) {vNewPos.x = -FOREGROUND_AREA.x; if(m_vForce.x < 0.0f) m_vImpact = coreVector2(-FOREGROUND_AREA.x * 1.1f, m_Container.GetPosition().y); m_vForce.x =  ABS(m_vForce.x);}
-        else if(vNewPos.x >  FOREGROUND_AREA.x) {vNewPos.x =  FOREGROUND_AREA.x; if(m_vForce.x > 0.0f) m_vImpact = coreVector2( FOREGROUND_AREA.x * 1.1f, m_Container.GetPosition().y); m_vForce.x = -ABS(m_vForce.x);}
-             if(vNewPos.y < -FOREGROUND_AREA.y) {vNewPos.y = -FOREGROUND_AREA.y; if(m_vForce.y < 0.0f) m_vImpact = coreVector2(m_Container.GetPosition().x, -FOREGROUND_AREA.y * 1.1f); m_vForce.y =  ABS(m_vForce.y);}
-        else if(vNewPos.y >  FOREGROUND_AREA.y) {vNewPos.y =  FOREGROUND_AREA.y; if(m_vForce.y > 0.0f) m_vImpact = coreVector2(m_Container.GetPosition().x,  FOREGROUND_AREA.y * 1.1f); m_vForce.y = -ABS(m_vForce.y);}
+        if(m_bClamp)
+        {
+            // 
+                 if(vNewPos.x < -FOREGROUND_AREA.x) {vNewPos.x = -FOREGROUND_AREA.x; if(m_vForce.x < 0.0f) m_vImpact = coreVector2(-FOREGROUND_AREA.x * 1.1f, m_Container.GetPosition().y); m_vForce.x =  ABS(m_vForce.x);}
+            else if(vNewPos.x >  FOREGROUND_AREA.x) {vNewPos.x =  FOREGROUND_AREA.x; if(m_vForce.x > 0.0f) m_vImpact = coreVector2( FOREGROUND_AREA.x * 1.1f, m_Container.GetPosition().y); m_vForce.x = -ABS(m_vForce.x);}
+                 if(vNewPos.y < -FOREGROUND_AREA.y) {vNewPos.y = -FOREGROUND_AREA.y; if(m_vForce.y < 0.0f) m_vImpact = coreVector2(m_Container.GetPosition().x, -FOREGROUND_AREA.y * 1.1f); m_vForce.y =  ABS(m_vForce.y);}
+            else if(vNewPos.y >  FOREGROUND_AREA.y) {vNewPos.y =  FOREGROUND_AREA.y; if(m_vForce.y > 0.0f) m_vImpact = coreVector2(m_Container.GetPosition().x,  FOREGROUND_AREA.y * 1.1f); m_vForce.y = -ABS(m_vForce.y);}
+        }
 
         // 
-        m_Container.SetPosition(coreVector3(vNewPos, 0.0f));
+        m_Container.SetPosition(coreVector3(vNewPos, m_Container.GetPosition().z));
         m_Container.Move();
+
+        // 
+        cPlayer::TestCollision(&m_Container, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pContainer, const coreVector3& vIntersection, const coreBool bFirstHit)
+        {
+            // 
+            pPlayer->TakeDamage(15, ELEMENT_NEUTRAL, vIntersection.xy());
+        });
+
+        // 
+        Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, &m_Container, [](cBullet* OUTPUT pBullet, coreObject3D* OUTPUT pContainer, const coreVector3& vIntersection, const coreBool bFirstHit)
+        {
+            // 
+            pBullet->Deactivate(true, vIntersection.xy());
+        });
     }
 }

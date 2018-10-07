@@ -41,7 +41,7 @@ cOutdoor::cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom
     this->LoadTextures(pcTextureTop, pcTextureBottom);
 
     // load outdoor shader-program
-    this->LoadProgram(SHADOW_HANDLE_OUTDOOR);
+    this->LoadProgram(false);
 }
 
 
@@ -232,13 +232,13 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
     coreUint32 (*nPackFunc) (const coreVector4& vVector);
     if(CORE_GL_SUPPORT(ARB_vertex_type_2_10_10_10_rev))
     {
-        // use high-precision packed format
+        // use high-quality packed format
         iNormFormat = GL_INT_2_10_10_10_REV;
         nPackFunc   = [](const coreVector4& vVector) {return vVector.PackSnorm210();};
     }
     else
     {
-        // use low-precision byte format
+        // use low-quality byte format
         iNormFormat = GL_BYTE;
         nPackFunc   = [](const coreVector4& vVector) {return vVector.PackSnorm4x8();};
     }
@@ -275,7 +275,7 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
         pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_TEXCOORD_NUM, 2u, GL_FLOAT, false, 0u);
     }
 
-    Core::Log->Info("Outdoor-Surface (%u, %.1f) loaded", iAlgorithm, fGrade);
+    Core::Log->Info("Outdoor-Geometry (%u, %.1f) loaded", iAlgorithm, fGrade);
 }
 
 
@@ -290,20 +290,28 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
     // unbind normal map to prevent concurrency problems
     this->DefineTexture(2u, NULL);
 
+    // delete sync object
+    m_Sync.Delete();
+
     Core::Manager::Resource->AttachFunction([=]()
     {
+        // check for sync object status
+        const coreStatus iCheck = m_Sync.Check(0u, CORE_SYNC_CHECK_FLUSHED);
+        if(iCheck == CORE_OK) this->DefineTexture(2u, m_pNormalMap);
+        if(iCheck >= CORE_OK) return iCheck;
+
         // delete old data
         m_pNormalMap->Unload();
 
         // retrieve normal map files
-        coreFile* pFile1 = Core::Manager::Resource->RetrieveFile(PRINT("data/textures/environment_%s_norm.png", pcTextureTop));
-        coreFile* pFile2 = Core::Manager::Resource->RetrieveFile(PRINT("data/textures/environment_%s_norm.png", pcTextureBottom));
-        WARN_IF(!pFile1 || !pFile2) return CORE_OK;
+        coreFileScope pFile1 = Core::Manager::Resource->RetrieveFile(PRINT("data/textures/environment_%s_norm.png", pcTextureTop));
+        coreFileScope pFile2 = Core::Manager::Resource->RetrieveFile(PRINT("data/textures/environment_%s_norm.png", pcTextureBottom));
 
         // decompress files to plain pixel data
-        SDL_Surface* pSurface1 = IMG_LoadTyped_RW(SDL_RWFromConstMem(pFile1->GetData(), pFile1->GetSize()), true, coreData::StrExtension(pFile1->GetPath()));
-        SDL_Surface* pSurface2 = IMG_LoadTyped_RW(SDL_RWFromConstMem(pFile2->GetData(), pFile2->GetSize()), true, coreData::StrExtension(pFile2->GetPath()));
-        WARN_IF((pSurface1->format->BitsPerPixel != 24u) || (pSurface2->format->BitsPerPixel != 24u)) return CORE_OK;
+        coreSurfaceScope pSurface1 = IMG_LoadTyped_RW(SDL_RWFromConstMem(pFile1->GetData(), pFile1->GetSize()), true, coreData::StrExtension(pFile1->GetPath()));
+        coreSurfaceScope pSurface2 = IMG_LoadTyped_RW(SDL_RWFromConstMem(pFile2->GetData(), pFile2->GetSize()), true, coreData::StrExtension(pFile2->GetPath()));
+        WARN_IF(!pSurface1 || (pSurface1->format->BitsPerPixel != 24u)) return CORE_OK;
+        WARN_IF(!pSurface2 || (pSurface2->format->BitsPerPixel != 24u)) return CORE_OK;
 
         // allocate required memory
         const coreUintW iSize = pSurface1->w * pSurface1->h * 4u;
@@ -329,34 +337,21 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
             ASSERT((xz1 <= 255.0f) && (yz1 <= 255.0f) &&
                    (xz2 <= 255.0f) && (yz2 <= 255.0f))
 
-            const coreByte aiPixel[4] = {coreByte(xz1), coreByte(yz1),
-                                         coreByte(xz2), coreByte(yz2)};
+            const coreByte aPixel[] = {coreByte(xz1), coreByte(yz1),
+                                       coreByte(xz2), coreByte(yz2)};
 
-            std::memcpy(pOutput + i, aiPixel, 4u);
+            std::memcpy(pOutput + i, aPixel, sizeof(aPixel));
         }
 
         // create final normal map
         m_pNormalMap->Create(pSurface1->w, pSurface1->h, CORE_TEXTURE_SPEC_RGBA8, CORE_TEXTURE_MODE_FILTER | CORE_TEXTURE_MODE_REPEAT);
         m_pNormalMap->Modify(0u, 0u, pSurface1->w, pSurface1->h, iSize, pOutput);
 
-        // create sync object
-        coreSync oSync;
-        oSync.Create();
-
-        // free all temporary resources
+        // free required memory
         SAFE_DELETE_ARRAY(pOutput)
-        SDL_FreeSurface(pSurface1);
-        SDL_FreeSurface(pSurface2);
-        pFile1->UnloadData();
-        pFile2->UnloadData();
 
-        // wait until texture-upload is finished
-        oSync.Check(GL_TIMEOUT_IGNORED, CORE_SYNC_CHECK_FLUSHED);
-
-        // bind normal map safely
-        this->DefineTexture(2u, m_pNormalMap);
-
-        return CORE_OK;
+        Core::Log->Info("Outdoor-Textures (%s, %s) loaded", pcTextureTop, pcTextureBottom);
+        return m_Sync.Create() ? CORE_BUSY : CORE_OK;
     });
 }
 

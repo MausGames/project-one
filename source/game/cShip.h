@@ -86,6 +86,7 @@ public:
     inline coreBool ReachedHealth   (const coreInt32 iHealth)const    {return InBetween(iHealth,                                    m_iCurHealth, m_iPreHealth);}
     inline coreBool ReachedHealthPct(const coreFloat fHealthPct)const {return InBetween(F_TO_SI(fHealthPct * I_TO_F(m_iMaxHealth)), m_iCurHealth, m_iPreHealth);}
     inline coreBool ReachedDeath    ()const                           {return ((m_iCurHealth == 0) && (m_iPreHealth != 0));}
+    inline coreBool WasTeleporting  ()const                           {return ((m_vOldPos - this->GetPosition().xy()).LengthSq() > (0.125f * FOREGROUND_AREA.x * FOREGROUND_AREA.y));}
 
     // add or remove status values
     inline void AddStatus   (const coreInt32 iStatus) {ADD_FLAG   (m_iStatus, iStatus)}
