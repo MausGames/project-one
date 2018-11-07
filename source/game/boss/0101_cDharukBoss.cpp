@@ -1,11 +1,11 @@
-//////////////////////////////////////////////////////
-//*------------------------------------------------*//
-//| Part of Project One (http://www.maus-games.at) |//
-//*------------------------------------------------*//
-//| Released under the zlib License                |//
-//| More information available in the readme file  |//
-//*------------------------------------------------*//
-//////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+//*-------------------------------------------------*//
+//| Part of Project One (https://www.maus-games.at) |//
+//*-------------------------------------------------*//
+//| Released under the zlib License                 |//
+//| More information available in the readme file   |//
+//*-------------------------------------------------*//
+///////////////////////////////////////////////////////
 #include "main.h"
 
 
@@ -49,7 +49,7 @@ cDharukBoss::cDharukBoss()noexcept
     m_Duplicate.DefineProgram  ("effect_energy_ship_invert_program");
     m_Duplicate.SetSize        (this->GetSize());
     m_Duplicate.Configure      (500, COLOR_ENERGY_RED * 0.8f);
-    m_Duplicate.AddStatus      (ENEMY_STATUS_IMMORTAL);
+    m_Duplicate.AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_IMMORTAL);
 
     // create duplicate trail list
     m_DuplicateTrail.DefineProgram("effect_energy_invert_inst_program");
@@ -110,10 +110,9 @@ cDharukBoss::cDharukBoss()noexcept
 void cDharukBoss::__ResurrectOwn()
 {
     // 
-    g_pGlow->BindObject(&m_Duplicate);
-    g_pGlow->BindList  (&m_DuplicateTrail);
-    g_pGlow->BindList  (&m_Boomerang);
-    g_pGlow->BindList  (&m_BoomerangTrail);
+    g_pGlow->BindList(&m_DuplicateTrail);
+    g_pGlow->BindList(&m_Boomerang);
+    g_pGlow->BindList(&m_BoomerangTrail);
 }
 
 
@@ -129,10 +128,9 @@ void cDharukBoss::__KillOwn(const coreBool bAnimated)
         this->__DisableBoomerang(i, bAnimated);
 
     // 
-    g_pGlow->UnbindObject(&m_Duplicate);
-    g_pGlow->UnbindList  (&m_DuplicateTrail);
-    g_pGlow->UnbindList  (&m_Boomerang);
-    g_pGlow->UnbindList  (&m_BoomerangTrail);
+    g_pGlow->UnbindList(&m_DuplicateTrail);
+    g_pGlow->UnbindList(&m_Boomerang);
+    g_pGlow->UnbindList(&m_BoomerangTrail);
 
     // 
     this->_EndBoss(bAnimated);
@@ -308,9 +306,6 @@ void cDharukBoss::__EnableDuplicate()
     m_Duplicate.Resurrect();
 
     // 
-    cShadow::GetGlobalContainer()->UnbindObject(&m_Duplicate);
-
-    // 
     m_Duplicate.SetPosition   (-this->GetPosition   ());
     m_Duplicate.SetDirection  (-this->GetDirection  ());
     m_Duplicate.SetOrientation( this->GetOrientation().InvertedX());
@@ -319,7 +314,7 @@ void cDharukBoss::__EnableDuplicate()
     // 
     for(coreUintW i = DHARUK_TRAILS; i < DHARUK_DUPLICATE_RAWS; ++i)
     {
-        m_aDuplicateRaw[i].SetAlpha(0.0f);
+        m_aDuplicateRaw[i].SetAlpha  (0.0f);
         m_aDuplicateRaw[i].SetEnabled(CORE_OBJECT_ENABLE_ALL);
     }
 
@@ -335,9 +330,6 @@ void cDharukBoss::__DisableDuplicate(const coreBool bAnimated)
     // 
     if(m_aiCounter[DUPLICATE_STATUS] == 0) return;
     m_aiCounter[DUPLICATE_STATUS] = 0;
-
-    // 
-    cShadow::GetGlobalContainer()->BindObject(&m_Duplicate);
 
     // 
     m_Duplicate.Kill(false);

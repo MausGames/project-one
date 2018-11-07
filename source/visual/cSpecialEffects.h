@@ -1,11 +1,11 @@
-//////////////////////////////////////////////////////
-//*------------------------------------------------*//
-//| Part of Project One (http://www.maus-games.at) |//
-//*------------------------------------------------*//
-//| Released under the zlib License                |//
-//| More information available in the readme file  |//
-//*------------------------------------------------*//
-//////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+//*-------------------------------------------------*//
+//| Part of Project One (https://www.maus-games.at) |//
+//*-------------------------------------------------*//
+//| Released under the zlib License                 |//
+//| More information available in the readme file   |//
+//*-------------------------------------------------*//
+///////////////////////////////////////////////////////
 #pragma once
 #ifndef _P1_GUARD_SPECIALEFFECTS_H_
 #define _P1_GUARD_SPECIALEFFECTS_H_
@@ -33,7 +33,8 @@
 #define SPECIAL_SPLASH_BIG      (100.0f), (50u)
 #define SPECIAL_BLOW_SMALL       (50.0f), (25u)
 #define SPECIAL_BLOW_BIG        (100.0f), (50u)
-#define SPECIAL_CHARGE_BIG       (35.0f), (40u)
+#define SPECIAL_CHARGE_BIG       (50.0f), (50u)
+#define SPECIAL_WHIRL_BIG        (35.0f), (40u)
 #define SPECIAL_EXPLOSION_SMALL  (10.0f), (40u)
 #define SPECIAL_EXPLOSION_BIG    (20.0f), (80u)
 #define SPECIAL_LIGHTNING_SMALL  (11.0f)
@@ -110,9 +111,13 @@ public:
     void CreateBlowColor(const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor);
     void CreateBlowDark (const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat fScale, const coreUintW iNum);
 
-    // create whirling particle charge
+    // 
     void CreateChargeColor(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor);
     void CreateChargeDark (const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum);
+
+    // 
+    void CreateWhirlColor(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor);
+    void CreateWhirlDark (const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum);
 
     // 
     coreFloat CreateLightning(const coreVector2& vPosFrom, const coreVector2& vPosTo,                              const coreFloat fWidth, const coreVector3& vColor, const coreVector2& vTexSizeFactor, const coreFloat fTexOffset);

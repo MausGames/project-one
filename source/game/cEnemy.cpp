@@ -1,11 +1,11 @@
-//////////////////////////////////////////////////////
-//*------------------------------------------------*//
-//| Part of Project One (http://www.maus-games.at) |//
-//*------------------------------------------------*//
-//| Released under the zlib License                |//
-//| More information available in the readme file  |//
-//*------------------------------------------------*//
-//////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+//*-------------------------------------------------*//
+//| Part of Project One (https://www.maus-games.at) |//
+//*-------------------------------------------------*//
+//| Released under the zlib License                 |//
+//| More information available in the readme file   |//
+//*-------------------------------------------------*//
+///////////////////////////////////////////////////////
 #include "main.h"
 
 
@@ -166,13 +166,28 @@ void cEnemy::Resurrect(const coreVector2& vPosition, const coreVector2& vDirecti
     // 
     const coreBool bBoss   = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_BOSS);
     const coreBool bSingle = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_SINGLE);
+    const coreBool bEnergy = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_ENERGY);
+    ASSERT(!bEnergy || (bEnergy && bSingle))
 
     // 
     m_fLifeTime       = 0.0f;
     m_fLifeTimeBefore = 0.0f;
 
+    if(bEnergy)
+    {
+        // add ship to glow and outline
+        g_pGlow->BindObject(this);
+        g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->BindObject(this);
+    }
+    else if(bSingle)
+    {
+        // add ship to global shadow and outline
+        cShadow::GetGlobalContainer()->BindObject(this);
+        g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->BindObject(this);
+    }
+
     // add ship to the game
-    this->_Resurrect(bSingle, vPosition, vDirection, TYPE_ENEMY);
+    this->_Resurrect(vPosition, vDirection, TYPE_ENEMY);
 
     // 
     this->__ResurrectOwn();
@@ -193,6 +208,8 @@ void cEnemy::Kill(const coreBool bAnimated)
     // 
     const coreBool bBoss   = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_BOSS);
     const coreBool bSingle = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_SINGLE);
+    const coreBool bEnergy = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_ENERGY);
+    ASSERT(!bEnergy || (bEnergy && bSingle))
 
     // 
     g_pGame->GetShieldManager()->UnbindEnemy(this);
@@ -204,8 +221,21 @@ void cEnemy::Kill(const coreBool bAnimated)
              else g_pSpecialEffects->MacroExplosionPhysicalDarkSmall(this->GetPosition());
     }
 
+    if(bEnergy)
+    {
+        // remove ship from glow and outline
+        g_pGlow->UnbindObject(this);
+        g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->UnbindObject(this);
+    }
+    else if(bSingle)
+    {
+        // remove ship from global shadow and outline
+        cShadow::GetGlobalContainer()->UnbindObject(this);
+        g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->UnbindObject(this);
+    }
+
     // remove ship from the game
-    this->_Kill(bSingle, bAnimated);
+    this->_Kill(bAnimated);
 
     // 
     this->__KillOwn(bAnimated);

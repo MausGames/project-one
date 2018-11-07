@@ -1,11 +1,11 @@
-//////////////////////////////////////////////////////
-//*------------------------------------------------*//
-//| Part of Project One (http://www.maus-games.at) |//
-//*------------------------------------------------*//
-//| Released under the zlib License                |//
-//| More information available in the readme file  |//
-//*------------------------------------------------*//
-//////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+//*-------------------------------------------------*//
+//| Part of Project One (https://www.maus-games.at) |//
+//*-------------------------------------------------*//
+//| Released under the zlib License                 |//
+//| More information available in the readme file   |//
+//*-------------------------------------------------*//
+///////////////////////////////////////////////////////
 #include "main.h"
 
 
@@ -52,7 +52,7 @@ cLeviathanBoss::cLeviathanBoss()noexcept
     m_Head.AddStatus      (ENEMY_STATUS_IMMORTAL);
 
     // 
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aBody); ++i)
+    for(coreUintW i = 0u; i < LEVIATHAN_PARTS_BODIES; ++i)
     {
         m_aBody[i].DefineModelHigh("ship_boss_leviathan_body_high.md3");
         m_aBody[i].DefineModelLow ("ship_boss_leviathan_body_low.md3");
@@ -252,7 +252,7 @@ void cLeviathanBoss::__MoveOwn()
     // create fire-effect at the screen border 
     if(m_aiCounter[ATTACK_STATUS] == 2)
     {
-        PHASE_CONTROL_TICKER(3u, 0u, 30.0f)
+        PHASE_CONTROL_TICKER(3u, 0u, 30.0f, LERP_LINEAR)
         {
             for(coreUintW i = 0u, ie = m_iRayActive; i < ie; ++i)
             {

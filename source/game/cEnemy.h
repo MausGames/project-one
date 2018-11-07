@@ -1,11 +1,11 @@
-//////////////////////////////////////////////////////
-//*------------------------------------------------*//
-//| Part of Project One (http://www.maus-games.at) |//
-//*------------------------------------------------*//
-//| Released under the zlib License                |//
-//| More information available in the readme file  |//
-//*------------------------------------------------*//
-//////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+//*-------------------------------------------------*//
+//| Part of Project One (https://www.maus-games.at) |//
+//*-------------------------------------------------*//
+//| Released under the zlib License                 |//
+//| More information available in the readme file   |//
+//*-------------------------------------------------*//
+///////////////////////////////////////////////////////
 #pragma once
 #ifndef _P1_GUARD_ENEMY_H_
 #define _P1_GUARD_ENEMY_H_
@@ -21,16 +21,17 @@
 #define ENEMY_AREA_FACTOR (1.2f)    // 
 #define ENEMY_SIZE_FACTOR (1.05f)   // 
 
-enum eEnemyStatus : coreUint8
+enum eEnemyStatus : coreUint16
 {
-    ENEMY_STATUS_DEAD        = 0x01u,   // completely removed from the game
-    ENEMY_STATUS_ASSIGNED    = 0x02u,   // enemy is currently assigned to something
-    ENEMY_STATUS_BOSS        = 0x04u,   // 
-    ENEMY_STATUS_SINGLE      = 0x08u,   // 
-    ENEMY_STATUS_CHILD       = 0x10u,   // 
-    ENEMY_STATUS_SHIELDED    = 0x20u,   // 
-    ENEMY_STATUS_INVINCIBLE  = 0x40u,   // 
-    ENEMY_STATUS_IMMORTAL    = 0x80u    // 
+    ENEMY_STATUS_DEAD        = 0x0001u,   // completely removed from the game
+    ENEMY_STATUS_ASSIGNED    = 0x0002u,   // enemy is currently assigned to something
+    ENEMY_STATUS_BOSS        = 0x0004u,   // 
+    ENEMY_STATUS_SINGLE      = 0x0008u,   // 
+    ENEMY_STATUS_ENERGY      = 0x0010u,   // 
+    ENEMY_STATUS_CHILD       = 0x0020u,   // 
+    ENEMY_STATUS_SHIELDED    = 0x0040u,   // 
+    ENEMY_STATUS_INVINCIBLE  = 0x0080u,   // 
+    ENEMY_STATUS_IMMORTAL    = 0x0100u    // 
 };
 
 

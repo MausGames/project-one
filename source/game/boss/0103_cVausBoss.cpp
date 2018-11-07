@@ -1,11 +1,11 @@
-//////////////////////////////////////////////////////
-//*------------------------------------------------*//
-//| Part of Project One (http://www.maus-games.at) |//
-//*------------------------------------------------*//
-//| Released under the zlib License                |//
-//| More information available in the readme file  |//
-//*------------------------------------------------*//
-//////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+//*-------------------------------------------------*//
+//| Part of Project One (https://www.maus-games.at) |//
+//*-------------------------------------------------*//
+//| Released under the zlib License                 |//
+//| More information available in the readme file   |//
+//*-------------------------------------------------*//
+///////////////////////////////////////////////////////
 #include "main.h"
 
 
@@ -143,7 +143,7 @@ void cVausBoss::__MoveOwn()
     if(pMission->GetRealState())
     {
         // 
-        PHASE_CONTROL_TICKER(3u, 0u, 12.0f)
+        PHASE_CONTROL_TICKER(3u, 0u, 12.0f, LERP_LINEAR)
         {
             if((iTick % 12u) < 4u)
             {

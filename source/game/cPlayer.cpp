@@ -1,11 +1,11 @@
-//////////////////////////////////////////////////////
-//*------------------------------------------------*//
-//| Part of Project One (http://www.maus-games.at) |//
-//*------------------------------------------------*//
-//| Released under the zlib License                |//
-//| More information available in the readme file  |//
-//*------------------------------------------------*//
-//////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+//*-------------------------------------------------*//
+//| Part of Project One (https://www.maus-games.at) |//
+//*-------------------------------------------------*//
+//| Released under the zlib License                 |//
+//| More information available in the readme file   |//
+//*-------------------------------------------------*//
+///////////////////////////////////////////////////////
 #include "main.h"
 
 
@@ -286,8 +286,7 @@ void cPlayer::Move()
         // normalize collision size
         if(this->GetModel().IsUsable())
         {
-            const coreVector2 vMove   = this->GetPosition().xy() - m_vOldPos;
-            const coreFloat   fRadius = MAX(vMove.Length(), PLAYER_COLLISION_MIN);
+            const coreFloat fRadius = MAX(this->GetMove().Length(), PLAYER_COLLISION_MIN);
             this->SetCollisionModifier((coreVector3(1.0f,1.0f,1.0f) * fRadius) / this->GetModel()->GetBoundingRange());
         }
 
@@ -379,8 +378,12 @@ void cPlayer::Resurrect(const coreVector2& vPosition)
     if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD)) return;
     REMOVE_FLAG(m_iStatus, PLAYER_STATUS_DEAD)
 
+    // add ship to global shadow and outline
+    cShadow::GetGlobalContainer()->BindObject(this);
+    g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->BindObject(this);
+
     // add ship to the game
-    this->_Resurrect(true, vPosition, coreVector2(0.0f,1.0f), TYPE_PLAYER);
+    this->_Resurrect(vPosition, coreVector2(0.0f,1.0f), TYPE_PLAYER);
 }
 
 
@@ -406,10 +409,17 @@ void cPlayer::Kill(const coreBool bAnimated)
     this->UpdateExhaust(0.0f);
 
     // 
-    if(bAnimated) g_pSpecialEffects->MacroExplosionPhysicalDarkBig(this->GetPosition());
+    if(bAnimated && this->IsEnabled(CORE_OBJECT_ENABLE_RENDER))
+    {
+        g_pSpecialEffects->MacroExplosionPhysicalDarkBig(this->GetPosition());
+    }
+
+    // remove ship from global shadow and outline
+    cShadow::GetGlobalContainer()->UnbindObject(this);
+    g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->UnbindObject(this);
 
     // remove ship from the game
-    this->_Kill(true, bAnimated);
+    this->_Kill(bAnimated);
 }
 
 
@@ -573,7 +583,7 @@ coreBool cPlayer::__TestCollisionPrecise(const coreObject3D* pObject, coreVector
     }
 
     // 
-    const coreVector2 vMove = this->GetPosition().xy() - m_vOldPos;
+    const coreVector2 vMove = this->GetMove();
     if(vMove.IsNull())
     {
         // 

@@ -1,11 +1,11 @@
-//////////////////////////////////////////////////////
-//*------------------------------------------------*//
-//| Part of Project One (http://www.maus-games.at) |//
-//*------------------------------------------------*//
-//| Released under the zlib License                |//
-//| More information available in the readme file  |//
-//*------------------------------------------------*//
-//////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+//*-------------------------------------------------*//
+//| Part of Project One (https://www.maus-games.at) |//
+//*-------------------------------------------------*//
+//| Released under the zlib License                 |//
+//| More information available in the readme file   |//
+//*-------------------------------------------------*//
+///////////////////////////////////////////////////////
 #pragma once
 #ifndef _P1_GUARD_BOSS_H_
 #define _P1_GUARD_BOSS_H_
@@ -21,7 +21,7 @@
 
 // ****************************************************************
 // boss definitions
-#define BOSS_TIMERS   (4u)   // 
+#define BOSS_TIMERS   (6u)   // 
 #define BOSS_COUNTERS (8u)   // 
 #define BOSS_VECTORS  (8u)   // 
 
@@ -35,8 +35,11 @@
 #define DHARUK_WIDTH              (0.5f)                                       // 
 #define DHARUK_HEIGHT             (0.8f)                                       // 
 
-#define TORUS_TURRETS             (5u)                                         // 
-#define TORUS_TURRETS_RAW         (2u * TORUS_TURRETS)                         // 
+#define TORUS_TURRETS             (4u)                                         // 
+#define TORUS_GUNNERS             (4u)                                         // 
+#define TORUS_BOSS_ROTATION       (1.2f)                                       // 
+#define TORUS_TURRET_SPEED        (-0.2f)                                      // 
+#define TORUS_GUNNER_SPEED        (0.2f)                                       // 
 
 #define VAUS_SCOUTS_TOTAL         (DEFINED(_CORE_DEBUG_) ? 16 : 80)            //  
 #define VAUS_SCOUTS_X             (8u)                                         //  
@@ -61,9 +64,9 @@
 
 // ****************************************************************
 // phase management macros
-#define PHASE_CONTROL_TIMER(a,b,c)      this->_PhaseTimer (a, __LINE__, b, c, [&](const coreFloat  fTime, const coreFloat fTimeBefore, const coreBool __bEnd)
-#define PHASE_CONTROL_TICKER(a,b,c)     this->_PhaseTicker(a, __LINE__, b, c, [&](const coreUint16 iTick,                              const coreBool __bEnd)
-#define PHASE_CONTROL_PAUSE(a,b)        PHASE_CONTROL_TICKER(a, 1u, b)
+#define PHASE_CONTROL_TIMER(a,b,c)      this->_PhaseTimer (a, __LINE__, b, c,    [&](const coreFloat  fTime, const coreFloat fTimeBefore, const coreBool __bEnd)
+#define PHASE_CONTROL_TICKER(a,b,c,d)   this->_PhaseTicker(a, __LINE__, b, c, d, [&](const coreUint16 iTick,                              const coreBool __bEnd)
+#define PHASE_CONTROL_PAUSE(a,b)        PHASE_CONTROL_TICKER(a, 1u, b, LERP_LINEAR)
 
 #define PHASE_TIME_POINT(t)             (InBetween((t), fTimeBefore, fTime))
 #define PHASE_TIME_BEFORE(t)            (fTime <  (t))
@@ -137,8 +140,8 @@ protected:
     void _EndBoss(const coreBool bAnimated);
 
     // 
-    template <typename F, typename G> void _PhaseTimer (const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreFloat  fSpeed, G&& nLerpFunc,         F&& nUpdateFunc);   // [](const coreFloat fTime, const coreFloat fTimeBefore, const coreBool __bEnd) -> void, [](const coreFloat x, const coreFloat y, const coreFloat s) -> coreFloat
-    template <typename F>             void _PhaseTicker(const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreUint16 iTicks, const coreFloat fRate, F&& nUpdateFunc);   // [](const coreUint16 iTick, const coreBool __bEnd) -> void
+    template <typename F, typename G> void _PhaseTimer (const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreFloat  fSpeed,                        G&& nLerpFunc, F&& nUpdateFunc);   // [](const coreFloat x, const coreFloat y, const coreFloat s) -> coreFloat, [](const coreFloat  fTime, const coreFloat fTimeBefore, const coreBool __bEnd) -> void
+    template <typename F, typename G> void _PhaseTicker(const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreUint16 iTicks, const coreFloat fRate, G&& nLerpFunc, F&& nUpdateFunc);   // [](const coreFloat x, const coreFloat y, const coreFloat s) -> coreFloat, [](const coreUint16 iTick,                              const coreBool __bEnd) -> void
 };
 
 
@@ -197,14 +200,23 @@ class cTorusBoss final : public cBoss
 private:
     coreObject3D m_Emitter;                          // 
     coreObject3D m_aCircle[2];                       // 
+    coreObject3D m_Summon;                           // 
 
-    coreBatchList m_Turret;                          // 
+    cCustomEnemy  m_aTurret[TORUS_TURRETS];          // 
     coreBatchList m_TurretHull;                      // 
-    coreObject3D  m_aTurretRaw[TORUS_TURRETS_RAW];   // 
+    coreObject3D  m_aTurretHullRaw[TORUS_TURRETS];   // 
+
+    cCustomEnemy  m_aGunner[TORUS_GUNNERS];          // 
+    coreBatchList m_GunnerHull;                      // 
+    coreObject3D  m_aGunnerHullRaw[TORUS_GUNNERS];   // 
 
     coreFlow m_fAnimation;                           // animation value
-    coreFlow m_fRotation;                            // 
-    coreFlow m_fTurretion;                           // 
+    coreFlow m_fRotationBoss;                        // 
+    coreFlow m_fRotationObject;                      // 
+
+    coreUint8 m_iTurretActive;                       // 
+    coreUint8 m_iGunnerActive;                       // 
+    coreUint8 m_iGunnerMove;                         // 
 
 
 public:
@@ -223,11 +235,16 @@ private:
     void __MoveOwn        ()final;
 
     // 
+    void __EnableSummon (const coreVector2& vPosition, const coreVector3& vColor);
+    void __DisableSummon();
+
+    // 
     void __EnableTurret (const coreUintW iIndex, const coreVector2& vPosition);
     void __DisableTurret(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    FUNC_LOCAL coreVector3 __GetRotaDirection(const coreFloat fBaseAngle);
+    void __EnableGunner (const coreUintW iIndex, const coreVector2& vPosition);
+    void __DisableGunner(const coreUintW iIndex, const coreBool bAnimated);
 };
 
 
@@ -678,16 +695,16 @@ template <typename F, typename G> void cBoss::_PhaseTimer(const coreUintW iTimer
     // 
     const coreFloat fTimeBefore = nLerpFunc(0.0f, 1.0f, oTimer.GetValue(CORE_TIMER_GET_NORMAL));
     oTimer.Update(fSpeed);
-    const coreFloat fTime       = nLerpFunc(0.0f, 1.0f, oTimer.GetValue(CORE_TIMER_GET_NORMAL));
+    const coreFloat fTimeAfter  = nLerpFunc(0.0f, 1.0f, oTimer.GetValue(CORE_TIMER_GET_NORMAL));
 
     // 
-    nUpdateFunc(fTime, fTimeBefore, !oTimer.GetStatus());
+    nUpdateFunc(fTimeAfter, fTimeBefore, !oTimer.GetStatus());
 }
 
 
 // ****************************************************************
 // 
-template <typename F> void cBoss::_PhaseTicker(const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreUint16 iTicks, const coreFloat fRate, F&& nUpdateFunc)
+template <typename F, typename G> void cBoss::_PhaseTicker(const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreUint16 iTicks, const coreFloat fRate, G&& nLerpFunc, F&& nUpdateFunc)
 {
     // 
     ASSERT(iTimerIndex < BOSS_TIMERS)
@@ -700,19 +717,26 @@ template <typename F> void cBoss::_PhaseTicker(const coreUintW iTimerIndex, cons
         iTimerLine = iCodeLine;
 
         // 
-        oTimer.SetMaxLoops(0u);
+        oTimer.SetMaxLoops(iTicks ? 1u : 0u);
         oTimer.Play(CORE_TIMER_PLAY_RESET);
     }
 
-    // 
-    if(oTimer.Update(fRate))
+    if(iTicks)
     {
         // 
-        if((oTimer.GetCurLoops() >= iTicks) && iTicks)
-            oTimer.Pause();
+        const coreUint16 iTicksBefore = F_TO_UI(nLerpFunc(0.0f, 1.0f, oTimer.GetValue(CORE_TIMER_GET_NORMAL)) * I_TO_F(iTicks));
+        oTimer.Update(fRate * RCP(I_TO_F(iTicks)));
+        const coreUint16 iTicksAfter  = F_TO_UI(nLerpFunc(0.0f, 1.0f, oTimer.GetValue(CORE_TIMER_GET_NORMAL)) * I_TO_F(iTicks));
 
         // 
-        nUpdateFunc(oTimer.GetCurLoops()-1u, !oTimer.GetStatus());
+        if(iTicksBefore != iTicksAfter) nUpdateFunc(iTicksAfter - 1u, (iTicksAfter == iTicks));
+    }
+    else
+    {
+        ASSERT(s_cast<void*>(nLerpFunc) == s_cast<void*>(LERP_LINEAR))
+
+        // 
+        if(oTimer.Update(fRate)) nUpdateFunc(oTimer.GetCurLoops() - 1u, false);
     }
 }
 
