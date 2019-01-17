@@ -47,13 +47,17 @@ void FragmentMain()
     // make highlighted area glowing
     v1BumpFactor += v4TexColor.a * 0.5;
 
-    // ignore blink color
-    const vec3 v3Blink = vec3(0.0);
+#endif
 
-#else
+#if defined(_P1_BLINK_)
 
     // calculate smooth blink color
     vec3 v3Blink = vec3(v_av4ShipLight.w * (0.7 - 0.56 * abs(dot(v3MathViewDir, v3BumpNormal))));
+
+#else
+
+    // ignore blink color
+    const vec3 v3Blink = vec3(0.0);
 
 #endif
 

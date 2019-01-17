@@ -13,8 +13,10 @@
 // constructor
 cTheater::cTheater()noexcept
 : m_fSpawnTimer (0.0f)
-, m_iCurType    (0u)
+, m_iSpawnCount (0u)
+, m_fCurRow     (0.0f)
 , m_bCurSide    (false)
+, m_iCurType    (0u)
 {
 }
 
@@ -58,15 +60,32 @@ void cTheater::Move()
         m_fSpawnTimer.Update(1.0f);
         if(m_fSpawnTimer >= THEATER_SPAWN_TIME)
         {
-            m_fSpawnTimer -= THEATER_SPAWN_TIME - Core::Rand->Float(THEATER_SPAWN_RAND);
+            // 
+            if(m_iSpawnCount == 0)
+            {
+                m_fCurRow  = Core::Rand->Float(-0.8f,0.8f);
+                m_bCurSide = !m_bCurSide;
+            }
+
+            // 
+            if(++m_iSpawnCount >= THEATER_SPAWN_COUNT + Core::Rand->Int(THEATER_SPAWN_COUNT_RAND))
+            {
+                m_fSpawnTimer -= THEATER_SPAWN_TIME - Core::Rand->Float(THEATER_SPAWN_TIME_RAND);
+                m_iSpawnCount  = 0;
+            }
+            else
+            {
+                m_fSpawnTimer -= Core::Rand->Float(0.26f,0.36f);
+            }
 
             // 
             m_iCurType = (m_iCurType - 1u + Core::Rand->Int(1,6)) % 7u + 1u;
-            m_bCurSide = !m_bCurSide;
 
             // 
-            const coreVector3 vPos = coreVector3(Core::Rand->Float(0.2f,0.9f) * (m_bCurSide ? 1.0f : -1.0f) * FOREGROUND_AREA.x, 0.95f * THEATER_AREA_FACTOR * FOREGROUND_AREA.y, 0.0f);
-            const coreVector2 vDir = coreVector2(0.0f,-1.0f);
+            const coreFloat   fSide = m_bCurSide ? -1.0f : 1.0f;
+            const coreFloat   fRow  = m_fCurRow + Core::Rand->Float(-0.2f,0.2f);
+            const coreVector3 vPos  = coreVector3(fSide * -0.95f * THEATER_AREA_FACTOR * FOREGROUND_AREA.x, fRow * FOREGROUND_AREA.y, 0.0f);
+            const coreVector2 vDir  = coreVector2(fSide, 0.0f);
 
             // 
             switch(m_iCurType)
@@ -85,6 +104,10 @@ void cTheater::Move()
     else m_fSpawnTimer = 0.0f;
 
     // 
+    const coreBool    bInteract = (Core::Input->GetLastMouse() != CORE_INPUT_INVALID_MOUSE);
+    const coreVector2 vMousePos = (Core::Input->GetMousePosition() * Core::System->GetResolution() / g_vGameResolution) * (FOREGROUND_AREA * 2.2f);
+
+    // 
     FOR_EACH_DYN(it, m_aMute)
     {
         cEnemy*            pEnemy = it->pEnemy;
@@ -92,15 +115,20 @@ void cTheater::Move()
         const coreVector2& vDir   = it->vDirection;
 
         // 
-        pEnemy->SetPosition(coreVector3(vPos.xy() + vDir * (45.0f * Core::System->GetTime()), vPos.z));
+        pEnemy->SetPosition(coreVector3(vPos.xy() + vDir * (35.0f * Core::System->GetTime()), vPos.z));
 
         // 
-        if((pEnemy->GetPosition().x < -FOREGROUND_AREA.x * THEATER_AREA_FACTOR) ||
-           (pEnemy->GetPosition().x >  FOREGROUND_AREA.x * THEATER_AREA_FACTOR) ||
-           (pEnemy->GetPosition().y < -FOREGROUND_AREA.y * THEATER_AREA_FACTOR) ||
-           (pEnemy->GetPosition().y >  FOREGROUND_AREA.y * THEATER_AREA_FACTOR))
+        if((vPos.x < -FOREGROUND_AREA.x * THEATER_AREA_FACTOR) ||
+           (vPos.x >  FOREGROUND_AREA.x * THEATER_AREA_FACTOR) ||
+           (vPos.y < -FOREGROUND_AREA.y * THEATER_AREA_FACTOR) ||
+           (vPos.y >  FOREGROUND_AREA.y * THEATER_AREA_FACTOR))
         {
             this->__KillMute(&(*it), false);
+            DYN_REMOVE(it, m_aMute)
+        }
+        else if(bInteract && ((vMousePos - vPos.xy()).LengthSq() < POW2(pEnemy->GetCollisionRadius() * 1.1f)))
+        {
+            this->__KillMute(&(*it), true);
             DYN_REMOVE(it, m_aMute)
         }
         else

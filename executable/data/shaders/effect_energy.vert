@@ -95,6 +95,6 @@ void VertexMain()
 #endif
 
     // 
-    v_av3ShipView   = normalize(u_v3CamPosition - v4NewPosition.xyz);
+    v_av3ShipView   = u_v3CamPosition - v4NewPosition.xyz;   // # no normalization
     v_av3ShipNormal = coreQuatApply(u_v4Rotation, a_v3RawNormal);
 }

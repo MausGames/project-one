@@ -10,6 +10,8 @@
 #ifndef _P1_GUARD_ROTACACHE_H_
 #define _P1_GUARD_ROTACACHE_H_
 
+// TODO: wrap angle
+
 
 // ****************************************************************
 // rotation cache class

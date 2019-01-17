@@ -10,6 +10,8 @@
 #ifndef _P1_GUARD_FOREGROUND_H_
 #define _P1_GUARD_FOREGROUND_H_
 
+// TODO: #define FOREGROUND_AREA_FULL (FOREGROUND_AREA * 1.1f)
+
 
 // ****************************************************************
 // foreground definitions

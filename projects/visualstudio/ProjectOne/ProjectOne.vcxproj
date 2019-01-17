@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\source\additional\cLodObject.cpp" />
     <ClCompile Include="..\..\..\source\application.cpp" />
     <ClCompile Include="..\..\..\source\environment\background\01_cGrassBackground.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -379,9 +380,11 @@
     <ClCompile Include="..\..\..\source\visual\cPostProcessing.cpp" />
     <ClCompile Include="..\..\..\source\visual\cShadow.cpp" />
     <ClCompile Include="..\..\..\source\visual\cSpecialEffects.cpp" />
+    <ClCompile Include="..\..\..\source\visual\cWindscreen.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\additional\cBindContainer.h" />
+    <ClInclude Include="..\..\..\source\additional\cLodObject.h" />
     <ClInclude Include="..\..\..\source\additional\cRotaCache.h" />
     <ClInclude Include="..\..\..\source\additional\cUtilities.h" />
     <ClInclude Include="..\..\..\source\environment\background\cBackground.h" />
@@ -421,6 +424,7 @@
     <ClInclude Include="..\..\..\source\visual\cPostProcessing.h" />
     <ClInclude Include="..\..\..\source\visual\cShadow.h" />
     <ClInclude Include="..\..\..\source\visual\cSpecialEffects.h" />
+    <ClInclude Include="..\..\..\source\visual\cWindscreen.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\executable\data\languages\english.lng" />
@@ -449,6 +453,8 @@
     <None Include="..\..\..\executable\data\shaders\effect_lightning.vert" />
     <None Include="..\..\..\executable\data\shaders\effect_outline.frag" />
     <None Include="..\..\..\executable\data\shaders\effect_outline.vert" />
+    <None Include="..\..\..\executable\data\shaders\effect_ink.frag" />
+    <None Include="..\..\..\executable\data\shaders\effect_ink.vert" />
     <None Include="..\..\..\executable\data\shaders\effect_particle.vert" />
     <None Include="..\..\..\executable\data\shaders\effect_particle_color.frag" />
     <None Include="..\..\..\executable\data\shaders\effect_particle_dark.frag" />

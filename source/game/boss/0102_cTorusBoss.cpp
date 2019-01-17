@@ -77,7 +77,7 @@ cTorusBoss::cTorusBoss()noexcept
         m_aTurret[i].DefineModelHigh("object_cube.md3");
         m_aTurret[i].DefineModelLow ("object_cube.md3");
         m_aTurret[i].DefineTexture  (0u, "effect_energy.png");
-        m_aTurret[i].DefineProgram  ("effect_energy_ship_invert_program");
+        m_aTurret[i].DefineProgram  ("effect_energy_blink_invert_program");
         m_aTurret[i].SetSize        (coreVector3(1.0f,1.0f,1.0f) * 2.85f);
         m_aTurret[i].SetTexSize     (coreVector2(0.8f,0.3f));
         m_aTurret[i].Configure      (100, COLOR_ENERGY_CYAN * 0.7f);
@@ -112,7 +112,7 @@ cTorusBoss::cTorusBoss()noexcept
         m_aGunner[i].DefineModelHigh("object_tetra.md3");
         m_aGunner[i].DefineModelLow ("object_tetra.md3");
         m_aGunner[i].DefineTexture  (0u, "effect_energy.png");
-        m_aGunner[i].DefineProgram  ("effect_energy_ship_invert_program");
+        m_aGunner[i].DefineProgram  ("effect_energy_blink_invert_program");
         m_aGunner[i].SetSize        (coreVector3(1.0f,1.0f,1.0f) * 5.0f);
         m_aGunner[i].SetTexSize     (coreVector2(0.8f,0.3f));
         m_aGunner[i].Configure      (100, COLOR_ENERGY_RED * 0.8f);

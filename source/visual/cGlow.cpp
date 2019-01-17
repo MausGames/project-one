@@ -31,7 +31,7 @@ void cGlow::Update()
         {
             // draw single objects
             FOR_EACH(it, this->GetObjectSet())
-                (*it)->Render((*it)->GetProgram());   // # draw low-polygon ships
+                (*it)->Render((*it)->GetProgram());   // # draw low-polygon models
 
             // draw lists with objects
             FOR_EACH(it, this->GetListSet())

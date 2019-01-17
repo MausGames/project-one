@@ -9,7 +9,7 @@
 
 
 // layout qualifiers
-#if defined(GL_ARB_conservative_depth)
+#if defined(GL_AMD_conservative_depth) || defined(GL_ARB_conservative_depth) || defined(GL_EXT_conservative_depth)
     layout(depth_unchanged) out float gl_FragDepth;
 #endif
 

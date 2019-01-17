@@ -28,11 +28,12 @@
 // ****************************************************************
 // constructor
 cLeviathanBoss::cLeviathanBoss()noexcept
-: m_Ray        (LEVIATHAN_RAYS_RAWS)
-, m_RayWave    (LEVIATHAN_RAYS_RAWS)
-, m_iRayActive (0u)
-, m_fAnimation (0.0f)
-, m_fMovement  (-3.5f)
+: m_Ray         (LEVIATHAN_RAYS_RAWS)
+, m_RayWave     (LEVIATHAN_RAYS_RAWS)
+, m_iRayActive  (0u)
+, m_iDecalState (0u)
+, m_fAnimation  (0.0f)
+, m_fMovement   (-3.5f)
 {
     // load models
     this->DefineModelHigh(Core::Manager::Object->GetLowQuad());
@@ -326,7 +327,7 @@ void cLeviathanBoss::__MoveOwn()
             }
 
             // 
-            g_pSpecialEffects->CreateSplashSmoke(coreVector3(vPos.xy(), fHeight), 30.0f, 30u);
+            g_pSpecialEffects->CreateSplashSmoke(coreVector3(vPos.xy(), fHeight), 30.0f, 30u, coreVector3(1.0f,1.0f,1.0f));
             g_pSpecialEffects->CreateSplashColor(coreVector3(vPos.xy(), fHeight), 50.0f, 15u, COLOR_ENERGY_WHITE);
         }
     }
@@ -507,27 +508,33 @@ void cLeviathanBoss::__CreateOverdrive(const coreUintW iIndex, const coreVector3
             // 
             if((ABS(vOnScreen.x) < 0.55f) && (ABS(vOnScreen.y) < 0.55f))
             {
-                if(bGround)
-                {
-                    const coreBool    bRotated   = Core::Rand->Bool();
-                    const coreVector3 vDecalPos  = (vOldHit + vNewHit) * 0.5f;
-                    const coreVector2 vDecalSize = coreVector2(Core::Rand->Float(5.0f, 6.5f), MIN(fLen, fMax)*1.8f);
-                    const coreVector2 vDecalDir  = vDiff.xy().Normalized();
+                STATIC_ASSERT(sizeof(m_iDecalState)*8u >= LEVIATHAN_RAYS*2u)
 
-                    // load object resources
-                    coreObject3D* pObject = MANAGED_NEW(coreObject3D);
-                    pObject->DefineModel  (Core::Manager::Object->GetLowQuad());
-                    pObject->DefineTexture(0u, "effect_soot.png");
-                    pObject->DefineProgram("effect_decal_single_program");
+                // 
+                if(CONTAINS_BIT(m_iDecalState, iIndex * 2u)) TOGGLE_BIT(m_iDecalState, iIndex * 2u + 1u)
+                TOGGLE_BIT(m_iDecalState, iIndex * 2u)
 
-                    // set object properties
-                    pObject->SetSize     (coreVector3(bRotated ? vDecalSize.yx()       : vDecalSize, 1.0f));
-                    pObject->SetDirection(coreVector3(bRotated ? vDecalDir.Rotated90() : vDecalDir,  0.0f));
-                    pObject->SetColor3   (coreVector3(0.0f,0.0f,0.0f));
+                // 
+                const coreBool    bRotated   = CONTAINS_BIT(m_iDecalState, iIndex * 2u);
+                const coreBool    bFlipped   = CONTAINS_BIT(m_iDecalState, iIndex * 2u + 1u);
+                const coreVector3 vDecalPos  = (vOldHit + vNewHit) * 0.5f;
+                const coreVector2 vDecalSize = coreVector2(Core::Rand->Float(5.0f, 6.5f), MIN(fLen, fMax)*1.8f);
+                const coreVector2 vDecalDir  = vDiff.xy().Normalized();
 
-                    // add object to the background
-                    g_pEnvironment->GetBackground()->AddObject(pObject, vDecalPos, 128u, "effect_decal_single_inst_program", BACKGROUND_LIST_KEY);
-                }
+                // load object resources
+                coreObject3D* pObject = MANAGED_NEW(coreObject3D);
+                pObject->DefineModel  (Core::Manager::Object->GetLowQuad());
+                pObject->DefineTexture(0u, "effect_soot.png");
+                pObject->DefineProgram("effect_decal_single_program");
+
+                // set object properties
+                pObject->SetSize     (coreVector3((bRotated ? vDecalSize.yx()       : vDecalSize),                            1.0f));
+                pObject->SetDirection(coreVector3((bRotated ? vDecalDir.Rotated90() : vDecalDir) * (bFlipped ? -1.0f : 1.0f), 0.0f));
+                pObject->SetColor3   (coreVector3(0.0f,0.0f,0.0f));
+
+                // add object to background or windscreen
+                if(bGround) g_pEnvironment->GetBackground()->AddObject(pObject, vDecalPos,       128u, "effect_decal_single_inst_program", LIST_KEY);
+                       else g_pWindscreen                  ->AddObject(pObject, vDecalPos, 3.0f, 128u, "effect_decal_single_inst_program", LIST_KEY);
 
                 // 
                 g_pSpecialEffects->CreateSplashFire (vNewHit,  5.0f, bGround ? 3u : 6u, COLOR_FIRE_ORANGE);

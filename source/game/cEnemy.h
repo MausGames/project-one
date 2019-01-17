@@ -12,6 +12,7 @@
 
 // TODO: disable texture filtering for enemy texture (only mip, + default black and white)
 // TODO: manager: Find, ForEach, ForEachAll -> typed 
+// TODO: implement own enemy-types for custom-enemies which would require instancing
 
 
 // ****************************************************************
@@ -381,7 +382,7 @@ template <typename T> cEnemyManager::sEnemySet<T>::sEnemySet()noexcept
     STATIC_ASSERT(T::ID != cCustomEnemy::ID)
 
     // set shader-program
-    oEnemyActive.DefineProgram("object_ship_inst_program");
+    oEnemyActive.DefineProgram("object_ship_blink_inst_program");
 
     // 
     oEnemyActive.CreateCustom(sizeof(coreFloat), [](coreVertexBuffer* OUTPUT pBuffer)

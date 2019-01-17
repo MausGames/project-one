@@ -233,6 +233,9 @@ void cGame::LoadMissionID(const coreInt32 iID)
     if(m_pCurMission) if(m_pCurMission->GetID() == iID) return;
 
     // 
+    m_EnemyManager.ClearEnemies(true);
+
+    // 
     m_BulletManagerPlayer.ClearBullets(true);
     m_BulletManagerEnemy .ClearBullets(true);
 
@@ -243,7 +246,6 @@ void cGame::LoadMissionID(const coreInt32 iID)
     m_ItemManager.ClearItems(true);
 
     // delete possible old mission
-    m_EnemyManager.ClearEnemies(true);
     SAFE_DELETE(m_pCurMission)
 
     // create new mission
@@ -576,10 +578,6 @@ void cGame::__HandleCollisions()
     // 
     Core::Manager::Object->TestCollision(TYPE_ENEMY, TYPE_BULLET_PLAYER, [](cEnemy* OUTPUT pEnemy, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
-        // 
-        if((ABS(vIntersection.x) >= FOREGROUND_AREA.x * 1.1f) ||
-           (ABS(vIntersection.y) >= FOREGROUND_AREA.y * 1.1f)) return;
-
         // 
         pEnemy ->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner()));
         pBullet->Deactivate(true, vIntersection.xy());

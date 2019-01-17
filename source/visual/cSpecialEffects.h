@@ -104,7 +104,7 @@ public:
     // create centered particle splash
     void CreateSplashColor(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor);
     void CreateSplashDark (const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum);
-    void CreateSplashSmoke(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum);
+    void CreateSplashSmoke(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor);
     void CreateSplashFire (const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor);
 
     // create directional particle blow

@@ -296,6 +296,8 @@ coreBool cReplay::LoadFile(const coreChar* pcPath, const coreBool bOnlyHeader)
 
     // 
     if(!bOnlyHeader) this->__SetBodyData(pBody->GetData(), pBody->GetSize());
+
+    Core::Log->Info("Replay (%s) loaded", pcPath);
     return true;
 }
 
@@ -325,6 +327,8 @@ void cReplay::SaveFile(const coreChar* pcName)
     oArchive.AddFile(pHeader);
     oArchive.AddFile(pBody);
     oArchive.Save(PRINT(REPLAY_FILE_FOLDER "/replay_%s." REPLAY_FILE_EXTENSION, coreData::DateTimePrint("%Y%m%d_%H%M%S")));
+
+    Core::Log->Info("Replay (%s) saved", oArchive.GetPath());
 }
 
 

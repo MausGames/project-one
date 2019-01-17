@@ -167,8 +167,8 @@ void cViridoMission::EnablePaddle(const coreUintW iIndex, const cShip* pOwner)
     oPaddle.ChangeType(TYPE_VIRIDO_PADDLE);
 
     // 
-    g_pGlow->BindObject(&oPaddle);
     oPaddle.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    g_pGlow->BindObject(&oPaddle);
 }
 
 
@@ -184,8 +184,8 @@ void cViridoMission::DisablePaddle(const coreUintW iIndex, const coreBool bAnima
     oPaddle.ChangeType(0);
 
     // 
-    g_pGlow->UnbindObject(&oPaddle);
     oPaddle.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    g_pGlow->UnbindObject(&oPaddle);
 }
 
 

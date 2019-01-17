@@ -19,12 +19,12 @@
 
 // ****************************************************************
 // player definitions
-#define PLAYER_WEAPONS        (1u)     // number of weapons a player can carry
-#define PLAYER_COLLISION_MIN  (0.5f)   // 
-#define PLAYER_WIND_SIZE      (4.5f)   // 
-#define PLAYER_BUBBLE_SIZE    (6.0f)   // 
-#define PLAYER_ROLL_SPEED     (3.3f)   // 
-#define PLAYER_ROLL_COOLDOWN  (4.0f)   // 
+#define PLAYER_WEAPONS        (1u)           // number of weapons a player can carry
+#define PLAYER_COLLISION_MIN  (0.5f)         // 
+#define PLAYER_WIND_SIZE      (4.5f)         // 
+#define PLAYER_BUBBLE_SIZE    (6.0f)         // 
+#define PLAYER_ROLL_SPEED     (10.0f/3.0f)   // 
+#define PLAYER_ROLL_COOLDOWN  (60.0f)        // (60 is fastest cooldown, ship is vulnerable for a single frame) 
 
 #define PLAYER_SHIP_ATK   (0u)   // 
 #define PLAYER_SHIP_DEF   (1u)   // 
@@ -121,8 +121,8 @@ public:
     inline const coreVector2& GetForce()const {return m_vForce;}
 
     // 
-    template <typename F> static void TestCollision(const coreInt32 iType,        F&& nCallback);   // [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit) -> void
-    template <typename F> static void TestCollision(coreObject3D* OUTPUT pObject, F&& nCallback);   // [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit) -> void
+    template <typename F> static FORCE_INLINE void TestCollision(const coreInt32 iType,        F&& nCallback);   // [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit) -> void
+    template <typename F> static FORCE_INLINE void TestCollision(coreObject3D* OUTPUT pObject, F&& nCallback);   // [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit) -> void
 
 
 private:
@@ -135,7 +135,7 @@ private:
 
 // ****************************************************************
 // 
-template <typename F> void cPlayer::TestCollision(const coreInt32 iType, F&& nCallback)
+template <typename F> FORCE_INLINE void cPlayer::TestCollision(const coreInt32 iType, F&& nCallback)
 {
     // 
     Core::Manager::Object->TestCollision(TYPE_PLAYER, iType, [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit)
@@ -150,7 +150,7 @@ template <typename F> void cPlayer::TestCollision(const coreInt32 iType, F&& nCa
     });
 }
 
-template <typename F> void cPlayer::TestCollision(coreObject3D* OUTPUT pObject, F&& nCallback)
+template <typename F> FORCE_INLINE void cPlayer::TestCollision(coreObject3D* OUTPUT pObject, F&& nCallback)
 {
     // 
     Core::Manager::Object->TestCollision(TYPE_PLAYER, pObject, [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit)

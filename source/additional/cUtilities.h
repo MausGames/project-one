@@ -10,6 +10,8 @@
 #ifndef _P1_GUARD_UTILITIES_H_
 #define _P1_GUARD_UTILITIES_H_
 
+// TODO: optimize AlongStar
+
 
 // ****************************************************************
 // 
@@ -29,6 +31,8 @@
     inline       coreInt32 GetID  ()const final {return i;} \
     inline const coreChar* GetName()const final {return n;}
 
+// 
+#define LIST_KEY (CORE_MEMORY_SHARED)
 
 // ****************************************************************
 // angle difference helper-function

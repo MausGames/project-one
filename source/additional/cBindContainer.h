@@ -62,7 +62,7 @@ public:
 // destructor
 inline cBindContainerIn::~cBindContainerIn()
 {
-    ASSERT(m_apObject.empty() && m_apList.empty())
+    ASSERT(this->IsEmpty())
 
     // remove all remaining objects and lists
     this->ClearObjects();

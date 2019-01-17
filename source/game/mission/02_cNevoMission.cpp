@@ -23,12 +23,22 @@ cNevoMission::cNevoMission()noexcept
     m_apBoss[2] = &m_Leviathan;
 
     // 
-    m_Container.DefineModel  ("object_sphere.md3");
-    m_Container.DefineTexture(0u, "default_white.png");
-    m_Container.DefineProgram("object_ship_glow_program");
-    m_Container.SetSize      (coreVector3(1.0f,1.0f,1.0f) * 5.0f);
-    m_Container.SetColor3    (coreVector3(1.0f,1.0f,1.0f) * 0.5f);
-    m_Container.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+    m_Container.DefineModelHigh("object_container_high.md3");
+    m_Container.DefineModelLow ("object_container_low.md3");
+    m_Container.DefineTexture  (0u, "ship_enemy.png");
+    m_Container.DefineProgram  ("object_ship_program");
+    m_Container.SetSize        (coreVector3(1.0f,1.0f,1.0f) * 5.0f);
+    m_Container.SetColor3      (COLOR_SHIP_GREY);
+    m_Container.SetEnabled     (CORE_OBJECT_ENABLE_NOTHING);
+}
+
+
+// ****************************************************************
+// destructor
+cNevoMission::~cNevoMission()
+{
+    // 
+    this->DisableContainer(false);
 }
 
 
@@ -42,7 +52,10 @@ void cNevoMission::EnableContainer(const coreVector2& vPosition)
 
     // 
     m_Container.SetPosition(coreVector3(vPosition, 0.0f));
-    m_Container.SetEnabled (CORE_OBJECT_ENABLE_ALL);
+
+    // 
+    m_Container.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    cShadow::GetGlobalContainer()->BindObject(&m_Container);
 
     // 
     m_bClamp    = false;
@@ -60,6 +73,7 @@ void cNevoMission::DisableContainer(const coreBool bAnimated)
 
     // 
     m_Container.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    cShadow::GetGlobalContainer()->UnbindObject(&m_Container);
 
     // 
     if(bAnimated) g_pSpecialEffects->MacroExplosionPhysicalDarkBig(m_Container.GetPosition());
@@ -138,7 +152,7 @@ void cNevoMission::__MoveOwnAfter()
         if(!m_vForce.IsNull())
         {
             vNewPos  += m_vForce * Core::System->GetTime();
-            m_vForce *= 1.0f - 3.0f * Core::System->GetTime();
+            m_vForce *= 1.0f - 2.5f * Core::System->GetTime();
         }
 
         // 
@@ -158,17 +172,27 @@ void cNevoMission::__MoveOwnAfter()
         m_Container.Move();
 
         // 
-        cPlayer::TestCollision(&m_Container, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pContainer, const coreVector3& vIntersection, const coreBool bFirstHit)
+        m_Container.ActivateModelLowOnly();
         {
             // 
-            pPlayer->TakeDamage(15, ELEMENT_NEUTRAL, vIntersection.xy());
-        });
+            cPlayer::TestCollision(&m_Container, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pContainer, const coreVector3& vIntersection, const coreBool bFirstHit)
+            {
+                if(!bFirstHit) return;
 
-        // 
-        Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, &m_Container, [](cBullet* OUTPUT pBullet, coreObject3D* OUTPUT pContainer, const coreVector3& vIntersection, const coreBool bFirstHit)
-        {
+                // 
+                pPlayer->TakeDamage(15, ELEMENT_NEUTRAL, vIntersection.xy());
+
+                // 
+                g_pSpecialEffects->MacroExplosionPhysicalDarkSmall(vIntersection);
+            });
+
             // 
-            pBullet->Deactivate(true, vIntersection.xy());
-        });
+            Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, &m_Container, [](cBullet* OUTPUT pBullet, coreObject3D* OUTPUT pContainer, const coreVector3& vIntersection, const coreBool bFirstHit)
+            {
+                // 
+                pBullet->Deactivate(true, vIntersection.xy());
+            });
+        }
+        m_Container.ActivateModelDefault();
     }
 }

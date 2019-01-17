@@ -47,6 +47,8 @@
 #define VAUS_SHOTS                (10u)                                        //  
 
 #define NAUTILUS_ATTACH_DIST      (-10.0f)                                     // 
+#define NAUTILUS_INK_TIME         (10.0f)                                      // 
+#define NAUTILUS_INK_SPEED        (1.65f)                                      // 
 
 #define LEVIATHAN_PARTS           (5u)                                         // 
 #define LEVIATHAN_PARTS_BODIES    (LEVIATHAN_PARTS - 2u)                       // 
@@ -281,11 +283,15 @@ private:
 class cNautilusBoss final : public cBoss
 {
 private:
-    cCustomEnemy m_aClaw[2];   //
+    cCustomEnemy m_aClaw[2];        //
+    coreFloat    m_fClawAngle;      // 
 
-    coreFloat m_fClawAngle;    // 
+    coreObject3D m_InkBullet;       // 
+    coreVector2  m_vInkTarget;      // 
+    coreFlow     m_afInkAlpha[2];   // 
 
-    coreFlow m_fAnimation;     // animation value
+    coreFlow m_fAnimation;          // animation value
+    coreFlow m_fMovement;           // 
 
 
 public:
@@ -297,9 +303,18 @@ public:
 
 private:
     // execute own routines
-    void __ResurrectOwn()final;
-    void __KillOwn     (const coreBool bAnimated)final;
-    void __MoveOwn     ()final;
+    void __ResurrectOwn   ()final;
+    void __KillOwn        (const coreBool bAnimated)final;
+    void __RenderOwnAttack()final;
+    void __RenderOwnOver  ()final;
+    void __MoveOwn        ()final;
+
+    // 
+    void __CreateInk(const coreUintW iIndex, const coreVector2& vPosition);
+
+    // 
+    void __EnableBullet (const coreVector2& vStart, const coreVector2& vEnd);
+    void __DisableBullet(const coreBool bAnimated);
 };
 
 
@@ -346,7 +361,8 @@ private:
     coreBatchList m_RayWave;                        // 
     coreObject3D  m_aRayRaw[LEVIATHAN_RAYS_RAWS];   // 
 
-    coreUint8 m_iRayActive;                         // 
+    coreUint8  m_iRayActive;                        // 
+    coreUint16 m_iDecalState;                       // 
 
     coreFlow m_fAnimation;                          // animation value
     coreFlow m_fMovement;                           // 

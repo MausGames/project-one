@@ -44,11 +44,14 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("object_boss_torus_emitter.md3",          CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_torus_emitter.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("object_boss_vaus_companion_high.md3",    CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_vaus_companion_high.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("object_boss_vaus_companion_low.md3",     CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_vaus_companion_low.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_container_high.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_container_high.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("object_container_low.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_container_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_dot.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_dot.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_cube.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_cube.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_paddle.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_paddle.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("object_ring.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_ring.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_sphere.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_sphere.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_tetra.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tetra.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_tube.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tube.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_tube_closed.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tube_closed.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_bottom_high.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_bottom_high.md3", false);
@@ -177,7 +180,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("effect_energy_bullet_invert.vert",       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", SHADER_FLAT SHADER_BULLET SHADER_INVERT);
     Core::Manager::Resource->Load<coreShader> ("effect_energy_bullet_direct.vert",       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", SHADER_FLAT SHADER_BULLET SHADER_DIRECT);
     Core::Manager::Resource->Load<coreShader> ("effect_energy.frag",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.frag");
-    Core::Manager::Resource->Load<coreShader> ("effect_energy_ship.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.frag", SHADER_SHIP);
+    Core::Manager::Resource->Load<coreShader> ("effect_energy_blink.frag",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.frag", SHADER_BLINK);
     Core::Manager::Resource->Load<coreShader> ("effect_energy_inst.vert",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("effect_energy_spheric_inst.vert",        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", CORE_SHADER_OPTION_INSTANCING SHADER_SPHERIC);
     Core::Manager::Resource->Load<coreShader> ("effect_energy_invert_inst.vert",         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", CORE_SHADER_OPTION_INSTANCING SHADER_INVERT);
@@ -193,6 +196,9 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("effect_energy_inst.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("effect_headlight.vert",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_headlight.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("effect_headlight.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_headlight.frag");
+    Core::Manager::Resource->Load<coreShader> ("effect_ink.vert",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_ink.vert", CORE_SHADER_OPTION_NO_ROTATION);
+    Core::Manager::Resource->Load<coreShader> ("effect_ink_point.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_ink.frag", PRINT(SHADER_SAMPLES(%u), WINDSCREEN_INK_SAMPLES_POINT));
+    Core::Manager::Resource->Load<coreShader> ("effect_ink_line.frag",                   CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_ink.frag", PRINT(SHADER_SAMPLES(%u) SHADER_LINE, WINDSCREEN_INK_SAMPLES_LINE/2u));
     Core::Manager::Resource->Load<coreShader> ("effect_lightning.vert",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_lightning.vert");
     Core::Manager::Resource->Load<coreShader> ("effect_lightning.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_lightning.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_lightning_inst.vert",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_lightning.vert", CORE_SHADER_OPTION_INSTANCING);
@@ -277,13 +283,14 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("object_wave.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert", SHADER_WAVE);
     Core::Manager::Resource->Load<coreShader> ("object_ground.frag",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ground.frag");
     Core::Manager::Resource->Load<coreShader> ("object_ship.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag");
-    Core::Manager::Resource->Load<coreShader> ("object_ship_darkness.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", SHADER_DARKNESS);
     Core::Manager::Resource->Load<coreShader> ("object_ship_glow.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", SHADER_GLOW);
+    Core::Manager::Resource->Load<coreShader> ("object_ship_blink.frag",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", SHADER_BLINK);
+    Core::Manager::Resource->Load<coreShader> ("object_ship_darkness.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", SHADER_BLINK SHADER_DARKNESS);
     Core::Manager::Resource->Load<coreShader> ("object_inst.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("object_wave_inst.vert",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert", CORE_SHADER_OPTION_INSTANCING SHADER_WAVE);
     Core::Manager::Resource->Load<coreShader> ("object_ground_inst.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ground.frag", CORE_SHADER_OPTION_INSTANCING);
-    Core::Manager::Resource->Load<coreShader> ("object_ship_inst.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("object_ship_glow_inst.frag",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", CORE_SHADER_OPTION_INSTANCING SHADER_GLOW);
+    Core::Manager::Resource->Load<coreShader> ("object_ship_blink_inst.frag",            CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", CORE_SHADER_OPTION_INSTANCING SHADER_BLINK);
 
     Core::Manager::Resource->Load<coreSound>  ("bullet_mine.wav",                        CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/bullet_mine.wav");
     Core::Manager::Resource->Load<coreSound>  ("bullet_pulse.wav",                       CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/bullet_pulse.wav");
@@ -454,9 +461,9 @@ void CoreApp::Setup()
         ->AttachShader("effect_energy.frag")
         ->Finish();
 
-    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_ship_invert_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_blink_invert_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("effect_energy_invert.vert")
-        ->AttachShader("effect_energy_ship.frag")
+        ->AttachShader("effect_energy_blink.frag")
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
@@ -526,6 +533,16 @@ void CoreApp::Setup()
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_headlight_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("effect_headlight.vert")
         ->AttachShader("effect_headlight.frag")
+        ->Finish();
+
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_ink_point_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("effect_ink.vert")
+        ->AttachShader("effect_ink_point.frag")
+        ->Finish();
+
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_ink_line_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("effect_ink.vert")
+        ->AttachShader("effect_ink_line.frag")
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_lightning_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
@@ -823,14 +840,19 @@ void CoreApp::Setup()
         ->AttachShader("object_ship.frag")
         ->Finish();
 
-    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ship_darkness_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
-        ->AttachShader("object.vert")
-        ->AttachShader("object_ship_darkness.frag")
-        ->Finish();
-
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ship_glow_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("object.vert")
         ->AttachShader("object_ship_glow.frag")
+        ->Finish();
+
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ship_blink_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("object.vert")
+        ->AttachShader("object_ship_blink.frag")
+        ->Finish();
+
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ship_darkness_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("object.vert")
+        ->AttachShader("object_ship_darkness.frag")
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ground_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
@@ -843,14 +865,14 @@ void CoreApp::Setup()
         ->AttachShader("object_ground_inst.frag")
         ->Finish();
 
-    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ship_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
-        ->AttachShader ("object_inst.vert")
-        ->AttachShader ("object_ship_inst.frag")
-        ->BindAttribute("a_v1Blink", SHIP_SHADER_ATTRIBUTE_BLINK)
-        ->Finish();
-
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ship_glow_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("object_inst.vert")
         ->AttachShader("object_ship_glow_inst.frag")
+        ->Finish();
+
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ship_blink_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader ("object_inst.vert")
+        ->AttachShader ("object_ship_blink_inst.frag")
+        ->BindAttribute("a_v1Blink", SHIP_SHADER_ATTRIBUTE_BLINK)
         ->Finish();
 }

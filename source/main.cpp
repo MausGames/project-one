@@ -17,6 +17,7 @@ STATIC_MEMORY(cReplay,         g_pReplay)
 STATIC_MEMORY(cOutline,        g_pOutline)
 STATIC_MEMORY(cGlow,           g_pGlow)
 STATIC_MEMORY(cDistortion,     g_pDistortion)
+STATIC_MEMORY(cWindscreen,     g_pWindscreen)
 STATIC_MEMORY(cSpecialEffects, g_pSpecialEffects)
 STATIC_MEMORY(cPostProcessing, g_pPostProcessing)
 STATIC_MEMORY(cForeground,     g_pForeground)
@@ -58,16 +59,17 @@ void CoreApp::Init()
 
     // create and init main components
     cShadow::GlobalInit();
-    STATIC_NEW(g_pReplay);
-    STATIC_NEW(g_pOutline);
-    STATIC_NEW(g_pGlow);
-    STATIC_NEW(g_pDistortion);
-    STATIC_NEW(g_pSpecialEffects);
-    STATIC_NEW(g_pPostProcessing);
-    STATIC_NEW(g_pForeground);
-    STATIC_NEW(g_pEnvironment);
-    STATIC_NEW(g_pMenu);
-    STATIC_NEW(g_pTheater);
+    STATIC_NEW(g_pReplay)
+    STATIC_NEW(g_pOutline)
+    STATIC_NEW(g_pGlow)
+    STATIC_NEW(g_pDistortion)
+    STATIC_NEW(g_pWindscreen)
+    STATIC_NEW(g_pSpecialEffects)
+    STATIC_NEW(g_pPostProcessing)
+    STATIC_NEW(g_pForeground)
+    STATIC_NEW(g_pEnvironment)
+    STATIC_NEW(g_pMenu)
+    STATIC_NEW(g_pTheater)
 }
 
 
@@ -85,6 +87,7 @@ void CoreApp::Exit()
     STATIC_DELETE(g_pForeground)
     STATIC_DELETE(g_pPostProcessing)
     STATIC_DELETE(g_pSpecialEffects)
+    STATIC_DELETE(g_pWindscreen)
     STATIC_DELETE(g_pDistortion)
     STATIC_DELETE(g_pGlow)
     STATIC_DELETE(g_pOutline)
@@ -126,7 +129,7 @@ void CoreApp::Render()
         Core::Debug->MeasureEnd("Environment");
         Core::Debug->MeasureStart("Foreground");
         {
-            if(g_pGame || g_pTheater->IsActive())
+            if(g_pGame || g_pTheater->IsActive() || g_pWindscreen->IsActive())
             {
                 // create foreground frame buffer
                 g_pForeground->Start();
@@ -136,6 +139,9 @@ void CoreApp::Render()
 
                     // render the game
                     if(g_pGame) g_pGame->Render();
+
+                    // 
+                    g_pWindscreen->Render();
                 }
                 g_pForeground->End();
             }
@@ -199,6 +205,9 @@ void CoreApp::Move()
 
             // move the game
             if(g_pGame) g_pGame->Move();
+
+            // 
+            g_pWindscreen->Move();
 
             // move special-effects
             g_pSpecialEffects->Move();

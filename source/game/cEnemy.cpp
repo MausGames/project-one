@@ -17,7 +17,7 @@ cEnemy::cEnemy()noexcept
 {
     // load object resources
     this->DefineTexture(0u, "ship_enemy.png");
-    this->DefineProgram("object_ship_program");
+    this->DefineProgram("object_ship_blink_program");
 
     // set object properties
     this->SetSize       (coreVector3(1.0f, 1.0f,1.0f) * ENEMY_SIZE_FACTOR);

@@ -101,6 +101,7 @@ void cSpecialEffects::Render(const coreBool bForeground)
 
             // enable additive blending (keep alpha aggregation)
             if(bForeground) glBlendFuncSeparate(FOREGROUND_BLEND_SUM, FOREGROUND_BLEND_ALPHA);
+                       else glBlendFunc        (FOREGROUND_BLEND_SUM);
             {
                 // render fire particle system
                 m_ParticleFire.Render();
@@ -109,6 +110,7 @@ void cSpecialEffects::Render(const coreBool bForeground)
                 m_LightningList.Render();
             }
             if(bForeground) glBlendFuncSeparate(FOREGROUND_BLEND_DEFAULT, FOREGROUND_BLEND_ALPHA);
+                       else glBlendFunc        (FOREGROUND_BLEND_DEFAULT);
 
             // render all blast and ring objects
             const auto nRenderFunc = [](coreObject3D* OUTPUT pArray, const coreUintW iSize)
@@ -257,7 +259,7 @@ void cSpecialEffects::CreateSplashDark(const coreVector3& vPosition, const coreF
     });
 }
 
-void cSpecialEffects::CreateSplashSmoke(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum)
+void cSpecialEffects::CreateSplashSmoke(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor)
 {
     // 
     m_ParticleSmoke.GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
@@ -265,7 +267,7 @@ void cSpecialEffects::CreateSplashSmoke(const coreVector3& vPosition, const core
         pParticle->SetPositionRel(vPosition + coreVector3::Rand(1.0f), coreVector3::Rand(-fScale, fScale));
         pParticle->SetScaleAbs   (3.0f,                                12.5f);
         pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),          Core::Rand->Float(-PI*0.1f, PI*0.1f));
-        pParticle->SetColor4Abs  (coreVector4(1.0f,1.0f,1.0f,1.0f),    coreVector4(1.0f,1.0f,1.0f,0.0f));
+        pParticle->SetColor4Abs  (coreVector4(vColor, 1.0f),           coreVector4(vColor, 0.0f));
         pParticle->SetSpeed      (0.7f * Core::Rand->Float(0.9f, 1.1f));
     });
 }
@@ -525,7 +527,7 @@ void cSpecialEffects::PlaySound(const coreVector3& vPosition, const coreFloat fV
 // 
 void cSpecialEffects::RumblePlayer(const cPlayer* pPlayer, const coreFloat fStrength, const coreUint32 iLength)
 {
-    ASSERT(g_pGame)
+    if(!g_pGame) return;
 
     // loop through all active players
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pCurPlayer, const coreUintW i)

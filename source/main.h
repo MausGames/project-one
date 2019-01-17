@@ -63,6 +63,9 @@
 // TODO: _CORE_SSE_ try to just remove the coreMath low-precision functions
 // TODO: reduce number of shader-lights with static_assert
 // TODO: check if hole in object_sphere causes reflection issues, also check if other objects have a hole
+// TODO: on bosses and missions: don't move or render or test objects outside their phases (e.g. boomerangs)
+// TODO: make sure everything with at least 5 copies uses batch-lists
+// TODO: change SendUniform(PRINT("u_av3OverlayTransform[%zu]", i) to cached hashstrings like in coreShader
 
 
 // ****************************************************************
@@ -129,6 +132,7 @@
 #define SHADER_TRANSITION(x) "#define _P1_TRANSITION_ (" #x ") \n"   // full_transition
 #define SHADER_SHADOW(x)     "#define _P1_SHADOW_     (" #x ") \n"   // outdoor, object_ground
 #define SHADER_OVERLAYS(x)   "#define _P1_OVERLAYS_   (" #x ") \n"   // weather
+#define SHADER_SAMPLES(x)    "#define _P1_SAMPLES_    (" #x ") \n"   // ink
 #define SHADER_GLOW          "#define _P1_GLOW_       (1) \n"        // post, outdoor, object_ship
 #define SHADER_DISTORTION    "#define _P1_DISTORTION_ (1) \n"        // post
 #define SHADER_DEBUG         "#define _P1_DEBUG_      (1) \n"        // post
@@ -136,7 +140,7 @@
 #define SHADER_SINGLE        "#define _P1_SINGLE_     (1) \n"        // decal, weather
 #define SHADER_LIGHT         "#define _P1_LIGHT_      (1) \n"        // outdoor, decal
 #define SHADER_DARKNESS      "#define _P1_DARKNESS_   (1) \n"        // object_ship
-#define SHADER_SHIP          "#define _P1_SHIP_       (1) \n"        // energy (TODO: object_ship)
+#define SHADER_BLINK         "#define _P1_BLINK_      (1) \n"        // energy, object_ship
 #define SHADER_FLAT          "#define _P1_FLAT_       (1) \n"        // outline, energy
 #define SHADER_BULLET        "#define _P1_BULLET_     (1) \n"        // outline, energy
 #define SHADER_SPHERIC       "#define _P1_SPHERIC_    (1) \n"        // decal, energy
@@ -145,6 +149,7 @@
 #define SHADER_RING          "#define _P1_RING_       (1) \n"        // energy
 #define SHADER_WAVE          "#define _P1_WAVE_       (1) \n"        // object
 #define SHADER_GREY          "#define _P1_GREY_       (1) \n"        // vignette
+#define SHADER_LINE          "#define _P1_LINE_       (1) \n"        // ink
 
 // collision types
 enum eType : coreInt32
@@ -162,8 +167,8 @@ enum eType : coreInt32
     TYPE_VIRIDO_BALL,
     TYPE_VIRIDO_PADDLE,
     TYPE_NEVO_CONTAINER,
+
     TYPE_DHARUK_BOOMERANG,
-    TYPE_TORUS_TURRET,
     TYPE_LEVIATHAN_RAY
 };
 
@@ -206,6 +211,7 @@ extern coreMusicPlayer g_MusicPlayer;       // central music-player
 #include "additional/cUtilities.h"
 #include "additional/cBindContainer.h"
 #include "additional/cRotaCache.h"
+#include "additional/cLodObject.h"
 #include "file/cConfig.h"
 #include "file/cReplay.h"
 #include "file/cSave.h"
@@ -216,6 +222,7 @@ extern coreMusicPlayer g_MusicPlayer;       // central music-player
 #include "visual/cGlow.h"
 #include "visual/cDistortion.h"
 #include "visual/cHeadlight.h"
+#include "visual/cWindscreen.h"
 #include "visual/cSpecialEffects.h"
 #include "visual/cForeground.h"
 #include "visual/cPostProcessing.h"
@@ -224,6 +231,7 @@ extern cReplay*         const g_pReplay;           //
 extern cOutline*        const g_pOutline;          // main outline-layer object
 extern cGlow*           const g_pGlow;             // main glow-effect object
 extern cDistortion*     const g_pDistortion;       // main distortion-effect object
+extern cWindscreen*     const g_pWindscreen;       // 
 extern cSpecialEffects* const g_pSpecialEffects;   // main special-effects object
 extern cPostProcessing* const g_pPostProcessing;   // main post-processing object
 

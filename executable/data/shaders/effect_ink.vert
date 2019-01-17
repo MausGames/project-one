@@ -8,17 +8,19 @@
 ///////////////////////////////////////////////////////
 
 
+// shader uniforms
+uniform vec4 u_v4Position;   // 
+
 // shader output
-flat varying float v_v1Time;   // current simulation time (from 0.0 to 1.0)
+varying vec4 v_v4Diff;       // 
 
 
 void VertexMain()
 {
     // transform position and texture coordinates
-    gl_Position      = coreParticlePosition();
-    v_av2TexCoord[0] = coreParticleTexCoord();
-    v_av2TexCoord[1] = vec2(1.0) - v_av2TexCoord[0];
+    gl_Position      = coreObject2DPosition();
+    v_av2TexCoord[0] = coreObject2DTexCoord();
 
-    // calculate current simulation time
-    v_v1Time = 1.0 - a_v1DivValue;
+    // 
+    v_v4Diff = a_v3RawPosition.xyxy - u_v4Position;
 }

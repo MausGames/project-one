@@ -26,7 +26,7 @@ void FragmentMain()
 
 #endif
 
-#if defined(_P1_SHIP_)
+#if defined(_P1_BLINK_)
 
     // 
     vec3 v3MathViewDir = normalize(v_av3ShipView);

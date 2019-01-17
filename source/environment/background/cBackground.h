@@ -31,9 +31,7 @@
 
 // ****************************************************************
 // background definitions
-#define BACKGROUND_OBJECT_RANGE (95.0f)            // default (+/-) Y-range where objects on ground are considered visible
-
-#define BACKGROUND_LIST_KEY (CORE_MEMORY_SHARED)   // 
+#define BACKGROUND_OBJECT_RANGE (95.0f)   // default (+/-) Y-range where objects on ground are considered visible
 
 #define __BACKGROUND_SCANLINE(x,i,n) (coreVector2((x) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i) / I_TO_F(n)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW / 2u)) * OUTDOOR_DETAIL)
 

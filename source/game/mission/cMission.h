@@ -292,15 +292,16 @@ private:
     cAmemasuBoss   m_Amemasu;     // 
     cLeviathanBoss m_Leviathan;   // 
 
-    coreObject3D m_Container;     // 
-    coreVector2  m_vForce;        // 
-    coreVector2  m_vImpact;       // 
-    coreBool     m_bClamp;        // 
-    coreBool     m_bOverdraw;     // 
+    cLodObject  m_Container;      // 
+    coreVector2 m_vForce;         // 
+    coreVector2 m_vImpact;        // 
+    coreBool    m_bClamp;         // 
+    coreBool    m_bOverdraw;      // 
 
 
 public:
     cNevoMission()noexcept;
+    ~cNevoMission();
 
     DISABLE_COPY(cNevoMission)
     ASSIGN_ID(2, "Nevo")
@@ -317,7 +318,7 @@ public:
     inline const coreVector2& GetContainerImpact  ()const                        {return m_vImpact;}
 
     // 
-    inline coreObject3D* GetContainer() {return &m_Container;}
+    inline cLodObject* GetContainer() {return &m_Container;}
 
 
 private:
