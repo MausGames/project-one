@@ -55,7 +55,7 @@
 // TODO: change some 0.5 FB factors from 0.5 to 0.4 if CORE_GL_SUPPORT(ARB_texture_rg) not available ?
 // TODO: unify "forward" and "transform" comments in shaders
 // TODO: add own coreRand for various random things which may affect feeling (screen shake), and reset on boss-start
-// TODO: somehow make g_pGame also static (but beware of pointer==null checks)
+// TODO: somehow make g_pGame also static (but beware of pointer==null checks, replace them with check-function)
 // TODO: check issues with all the F&& functions (especially in boss.h and mission.h), also check Core engine, use force_inline on small functions
 // TODO: RETURN_NONNULL to everything which should never be null
 // TODO: check all vert shader for CORE_SHADER_OPTION_NO_ROTATION
@@ -66,18 +66,28 @@
 // TODO: on bosses and missions: don't move or render or test objects outside their phases (e.g. boomerangs)
 // TODO: make sure everything with at least 5 copies uses batch-lists
 // TODO: change SendUniform(PRINT("u_av3OverlayTransform[%zu]", i) to cached hashstrings like in coreShader
+// TODO: replace / with RCP where possible
+// TODO: "pro" shortcut for types (e.g. proEnemy, proGame), dr too
+// TODO: remove game_icon.png from resource-index if not required anymore
 
 
 // ****************************************************************
 // engine headers
 #include "Core.h"
 
-#if defined(_CORE_SSE_) && !defined(_CORE_DEBUG_)
-    #pragma message("Warning: Precision reduced!")
-#endif
+#define _P1_DEBUG_INPUT_ (1)
+//#define _P1_DEBUG_RANDOM_ (1)
 
-#if defined(_CORE_DEBUG_)
-    #define _P1_DEBUG_RANDOM_ (1)
+#if !defined(_CORE_DEBUG_)
+    #if defined(_CORE_SSE_)
+        #pragma message("Warning: Precision reduced!")
+    #endif
+    #if defined(_P1_DEBUG_INPUT_)
+        #pragma message("Warning: Debug input enabled!")
+    #endif
+    #if defined(_P1_DEBUG_RANDOM_)
+        #pragma message("Warning: Debug randomization enabled!")
+    #endif
 #endif
 
 
@@ -86,6 +96,8 @@
 #define PLAYERS              (2u)
 #define MISSIONS             (10u)
 #define BOSSES               (3u)
+#define LIVES                (5u)
+#define CONTINUES            (3u)
 #define FRAMERATE_VALUE      (60.0f)
 #define FRAMERATE_TIME       (1.0f / FRAMERATE_VALUE)
 #define CAMERA_POSITION      (coreVector3(0.0f, 0.0f, 110.0f))
@@ -156,6 +168,7 @@ enum eType : coreInt32
 {
     TYPE_PLAYER = 1,
     TYPE_PLAYER_ROLL,
+    TYPE_PLAYER_FEEL,
     TYPE_ENEMY,
 
     TYPE_BULLET_PLAYER,
@@ -183,9 +196,7 @@ enum eElement : coreUint8
     ELEMENT_BLUE,         // homing (tesla) 
     ELEMENT_CYAN,         // 
     ELEMENT_GREEN,        // (wave) 
-    ELEMENT_NEUTRAL,      // 
-    ELEMENT_LIGHT,        // 
-    ELEMENT_DARK          // 
+    ELEMENT_NEUTRAL       // 
 };
 
 extern void InitResolution(const coreVector2& vResolution);   // init resolution properties (1:1)

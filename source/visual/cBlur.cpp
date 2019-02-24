@@ -78,9 +78,9 @@ void cBlur::End()
 
 // ****************************************************************
 // reset with the resource manager
-void cBlur::__Reset(const coreResourceReset bInit)
+void cBlur::__Reset(const coreResourceReset eInit)
 {
-    if(bInit)
+    if(eInit)
     {
         const coreVector2 vBlurResolution = g_vGameResolution * m_fScale;
 

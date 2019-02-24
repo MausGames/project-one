@@ -120,7 +120,7 @@ void cDharukBoss::__ResurrectOwn()
 void cDharukBoss::__KillOwn(const coreBool bAnimated)
 {
     // 
-    this->__DisableDuplicate(true);
+    this->__DisableDuplicate(bAnimated);
 
     // 
     for(coreUintW i = 0u; i < DHARUK_BOOMERANGS; ++i)

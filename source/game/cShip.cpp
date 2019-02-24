@@ -15,8 +15,8 @@ cShip::cShip()noexcept
 : m_iMaxHealth (0)
 , m_iCurHealth (0)
 , m_iPreHealth (0)
-, m_iBaseColor (0u)
 , m_vOldPos    (coreVector2(0.0f,0.0f))
+, m_iBaseColor (0u)
 , m_fBlink     (0.0f)
 {
     // 
@@ -216,14 +216,24 @@ void cShip::DefaultMultiateLerp(const coreFloat fFromAngle, const coreFloat fToA
 
 // ****************************************************************
 // 
+void cShip::SetBaseColor(const coreVector3& vColor, const coreBool bInverted)
+{
+    // 
+    m_iBaseColor = coreVector4(vColor, 0.0f).PackUnorm4x8();
+    if(bInverted) ADD_BIT(m_iBaseColor, SHIP_INVERTED_BIT)
+
+    // 
+    this->SetColor3(vColor);
+    if(m_iCurHealth) this->RefreshColor();
+}
+
+
+// ****************************************************************
+// 
 coreBool cShip::_TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact)
 {
     // 
     m_iCurHealth = CLAMP(m_iCurHealth - iDamage, 0, m_iMaxHealth);
-
-    // 
-    this->RefreshColor(this->GetCurHealthPct());
-    if(iDamage) this->InvokeBlink();
 
     // 
     return m_iCurHealth ? false : true;
@@ -242,7 +252,7 @@ void cShip::_Resurrect(const coreVector2& vPosition, const coreVector2& vDirecti
     m_vOldPos    = vPosition;
     this->SetPosition (coreVector3(vPosition,  0.0f));
     this->SetDirection(coreVector3(vDirection, 0.0f));
-    this->SetColor3   (this->GetBaseColor());
+    this->RefreshColor(1.0f);
 
     // 
     this->SetEnabled(CORE_OBJECT_ENABLE_ALL);
@@ -299,9 +309,6 @@ void cShip::_UpdateAlwaysAfter()
     m_iPreHealth = m_iCurHealth;
 
     // 
-    if(g_MenuInput.bScreenshot)
-        m_fBlink = 0.0f;
-
-    // 
+    if(g_MenuInput.bScreenshot) m_fBlink = 0.0f;
     m_fBlink = MAX(m_fBlink - 15.0f*Core::System->GetTime(), 0.0f);
 }

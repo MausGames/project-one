@@ -21,7 +21,7 @@ cSpecialEffects::cSpecialEffects()noexcept
 , m_iCurLightning    (0u)
 , m_iCurBlast        (0u)
 , m_iCurRing         (0u)
-, m_iSoundGuard      (SOUND_FFFF)
+, m_eSoundGuard      (SOUND_FFFF)
 , m_ShakeTimer       (coreTimer(1.0f, 30.0f, 0u))
 , m_fShakeStrength   (0.0f)
 , m_bActive          (false)
@@ -67,9 +67,9 @@ cSpecialEffects::cSpecialEffects()noexcept
     }
 
     // 
-    const auto nLoadSoundFunc = [this](const eSoundEffect iSoundIndex, const coreChar* pcName)
+    const auto nLoadSoundFunc = [this](const eSoundEffect eSoundIndex, const coreChar* pcName)
     {
-        coreSoundPtr& pSoundPtr = m_apSound[iSoundIndex & 0xFFu];
+        coreSoundPtr& pSoundPtr = m_apSound[eSoundIndex & 0xFFu];
 
         if(!pSoundPtr) pSoundPtr = Core::Manager::Resource->Get<coreSound>(pcName);
         ASSERT(!std::strcmp(pSoundPtr.GetHandle()->GetName(), pcName))
@@ -216,7 +216,7 @@ void cSpecialEffects::Move()
     }
 
     // reset sound-guard
-    m_iSoundGuard = SOUND_FFFF;
+    m_eSoundGuard = SOUND_FFFF;
 
     // 
     if(m_fShakeStrength && m_ShakeTimer.Update(1.0f))
@@ -497,17 +497,17 @@ void cSpecialEffects::CreateRing(const coreVector3& vPosition, const coreVector3
 
 // ****************************************************************
 // 
-void cSpecialEffects::PlaySound(const coreVector3& vPosition, const coreFloat fVolume, const eSoundEffect iSoundIndex)
+void cSpecialEffects::PlaySound(const coreVector3& vPosition, const coreFloat fVolume, const eSoundEffect eSoundIndex)
 {
     ASSERT(fVolume > 0.0f)
 
     // 
-    if(m_iSoundGuard == iSoundIndex) return;
-    m_iSoundGuard = iSoundIndex;
+    if(m_eSoundGuard == eSoundIndex) return;
+    m_eSoundGuard = eSoundIndex;
 
     // 
     coreFloat fBaseVolume, fBasePitch, fBasePitchRnd;
-    switch(iSoundIndex)
+    switch(eSoundIndex)
     {
     default: ASSERT(false)
     case SOUND_EXPLOSION_ENERGY_SMALL:   fBaseVolume = 1.0f; fBasePitch = 1.5f; fBasePitchRnd = 0.1f; break;
@@ -519,7 +519,7 @@ void cSpecialEffects::PlaySound(const coreVector3& vPosition, const coreFloat fV
     }
 
     // 
-    m_apSound[iSoundIndex & 0xFFu]->PlayPosition(NULL, fVolume * fBaseVolume, fBasePitch, fBasePitchRnd, false, vPosition);
+    m_apSound[eSoundIndex & 0xFFu]->PlayPosition(NULL, fVolume * fBaseVolume, fBasePitch, fBasePitchRnd, false, vPosition);
 }
 
 

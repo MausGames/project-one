@@ -17,6 +17,7 @@
 // TODO: boss0101, definition for 1.5f (and related multiplications)
 // TODO: boss0102, add slight explosion where rays hit the screen
 // TODO: boss0102, separate emitters to three objects, to make them blue
+// TODO: boss0103, remove small hitch when finishing rotation in the middle shortly before beginning laser-phase
 
 
 // ****************************************************************
@@ -55,7 +56,7 @@
 #define LEVIATHAN_RAYS            (LEVIATHAN_PARTS)                            // 
 #define LEVIATHAN_RAYS_RAWS       (2u * LEVIATHAN_RAYS)                        // 
 #define LEVIATHAN_RADIUS_OUTER    (FOREGROUND_AREA.x * 0.8f)                   // 
-#define LEVIATHAN_RADIUS_INNER    (8.6f)                                       // 
+#define LEVIATHAN_RADIUS_INNER    (9.0f)                                       // 
 #define LEVIATHAN_RAY_OFFSET(i)   ((i) ? 3.0f : 4.0f)                          // 
 #define LEVIATHAN_RAY_HEIGHT      (0.1f)                                       // 
 #define LEVIATHAN_RAY_SIZE        (coreVector3(0.7f,50.0f,0.7f))               // 
@@ -103,7 +104,7 @@ protected:
     coreUint16 m_aiTimerLine[BOSS_TIMERS];    // 
 
     coreInt16   m_aiCounter[BOSS_COUNTERS];   // 
-    coreVector3 m_avVector [BOSS_VECTORS];    // 
+    coreVector4 m_avVector [BOSS_VECTORS];    // 
 
     coreVector2 m_vLastPosition;              // 
     coreFloat   m_fLastDirAngle;              // 
@@ -361,7 +362,7 @@ private:
     coreBatchList m_RayWave;                        // 
     coreObject3D  m_aRayRaw[LEVIATHAN_RAYS_RAWS];   // 
 
-    coreUint8  m_iRayActive;                        // 
+    coreFlow   m_afRayTime[LEVIATHAN_RAYS];         // 
     coreUint16 m_iDecalState;                       // 
 
     coreFlow m_fAnimation;                          // animation value
@@ -383,10 +384,13 @@ private:
     void __MoveOwn        ()final;
 
     // 
-    void __SetRotaAttack  (const coreInt16 iType, const coreBool bAnimated);
     void __EnableRay      (const coreUintW iIndex);
-    void __DisableRay     (const coreUintW iIndex);
+    void __DisableRay     (const coreUintW iIndex, const coreBool bAnimated);
     void __CreateOverdrive(const coreUintW iIndex, const coreVector3& vIntersect, const coreFloat fTime, const coreBool bGround);
+
+    // 
+    void __UpdateHealth();
+    void __RefreshHealth();
 
     // 
     static FUNC_NOALIAS void      __CalcCurvePosDir(const coreVector3& vAxis, const coreFloat fAngle, const coreVector3& vScale, coreVector3* OUTPUT vPosition, coreVector3* OUTPUT vDirection);

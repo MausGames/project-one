@@ -16,7 +16,7 @@ cSummaryMenu::cSummaryMenu()noexcept
 , m_iFinalScore (0u)
 , m_fIntroTimer (0.0f)
 , m_fOutroTimer (0.0f)
-, m_iSkipped    (0u)
+, m_iState      (SUMMARY_INTRO)
 {
     // create menu objects
     m_Background.DefineTexture(0u, "menu_detail_03.png");
@@ -107,45 +107,45 @@ void cSummaryMenu::Move()
     case SURFACE_SUMMARY_DEFAULT:
         {
             // 
-            constexpr coreFloat fFull     = (1.0f / INTERFACE_BANNER_SPEED);
             constexpr coreFloat fSpinFrom = (0.5f + 0.4f * I_TO_F(MENU_SUMMARY_ENTRIES));
             constexpr coreFloat fSpinTo   = fSpinFrom + 1.0f;
 
             // 
             m_fIntroTimer.Update(1.0f);
-            if((m_fIntroTimer >= fFull) && (Core::Input->GetAnyButton(CORE_INPUT_PRESS)))
+            if((m_fIntroTimer >= INTERFACE_BANNER_SPEED_REV) && Core::Input->GetAnyButton(CORE_INPUT_PRESS))
             {
                 // 
-                     if(m_iSkipped    >= 1u)      m_iSkipped = 3u;   // leave summary
-                else if(m_fIntroTimer >= fSpinTo) m_iSkipped = 3u;
-                else if(m_fIntroTimer <  fSpinTo) m_iSkipped = 1u;   // skip blend-in
+                     if(m_iState      >= SUMMARY_SKIPPED) m_iState = SUMMARY_OUTRO;     // leave summary
+                else if(m_fIntroTimer >= fSpinTo)         m_iState = SUMMARY_OUTRO;
+                else if(m_fIntroTimer <  fSpinTo)         m_iState = SUMMARY_SKIPPED;   // skip blend-in
             }
 
             // 
-            if(m_iSkipped == 3u) m_fOutroTimer.Update(1.0f);
-            if(m_fOutroTimer >= fFull)
+            if(m_iState == SUMMARY_OUTRO) m_fOutroTimer.Update(1.0f);
+            if(m_fOutroTimer >= INTERFACE_BANNER_SPEED_REV)
             {
                 // 
                 m_iStatus = 1;
             }
 
-            if(m_iSkipped != 2u)
+            if(m_iState != SUMMARY_WAIT)
             {
                 // 
-                if((m_fIntroTimer >= fSpinTo) && (m_iSkipped < 2u)) m_iSkipped = 2u;
+                if((m_fIntroTimer >= INTERFACE_BANNER_ANIMATION) && (m_iState < SUMMARY_WAIT)) m_iState = SUMMARY_WAIT;
+                STATIC_ASSERT(INTERFACE_BANNER_ANIMATION >= fSpinTo)
 
                 // 
-                const coreFloat fBlendIn  = m_iSkipped ? fSpinTo : m_fIntroTimer;
+                const coreFloat fBlendIn  = m_iState ? fSpinTo : m_fIntroTimer;
                 const coreFloat fBlendOut = 1.0f - m_fOutroTimer * INTERFACE_BANNER_SPEED;
 
                 // 
                 const auto nBlendFunc = [&](coreLabel* OUTPUT pTitle, coreLabel* OUTPUT pValue, const coreFloat fThreshold)
                 {
-                    const coreObjectEnable iEnable = (fBlendIn >= fThreshold) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING;
+                    const coreObjectEnable eEnabled = (fBlendIn >= fThreshold) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING;
 
                     // blend-in
-                    pTitle->SetEnabled(iEnable);
-                    pValue->SetEnabled(iEnable);
+                    pTitle->SetEnabled(eEnabled);
+                    pValue->SetEnabled(eEnabled);
 
                     // blend-out
                     pTitle->SetAlpha(fBlendOut);
@@ -158,7 +158,7 @@ void cSummaryMenu::Move()
                 m_TotalValue.SetText(PRINT("%07.0f", I_TO_F(m_iFinalScore) * CLAMP(fBlendIn - fSpinFrom, 0.0f, 1.0f)));
 
                 // calculate visibility and animation value
-                const coreFloat fVisibility = MIN(m_fIntroTimer, fFull - m_fOutroTimer) * INTERFACE_BANNER_SPEED;
+                const coreFloat fVisibility = MIN(m_fIntroTimer, INTERFACE_BANNER_SPEED_REV - m_fOutroTimer) * INTERFACE_BANNER_SPEED;
                 const coreFloat fAnimation  = LERPB(0.0f, INTERFACE_BANNER_ANIMATION, MIN(m_fIntroTimer / INTERFACE_BANNER_ANIMATION, 1.0f));
 
                 // slash background across screen (# direction can be swapped, also alpha value is used as texture coordinate correction)
@@ -189,20 +189,19 @@ void cSummaryMenu::Move()
 void cSummaryMenu::ShowSummary()
 {
     ASSERT(g_pGame)
-    const cMission* pMission = g_pGame->GetCurMission();
 
     // 
     m_iFinalScore = 0u;
     m_fIntroTimer = 0.0f;
     m_fOutroTimer = 0.0f;
-    m_iSkipped    = 0u;
+    m_iState      = SUMMARY_INTRO;
 
     // 
     m_Background.SetSize(coreVector2(0.0f,0.0f));
 
     // 
     for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES; ++i)
-        m_aTitle[i].SetText(pMission->GetBoss(i)->GetName());
+        m_aTitle[i].SetText(g_pGame->GetCurMission()->GetBoss(i)->GetName());
 
     if(g_pGame->GetCoop())
     {

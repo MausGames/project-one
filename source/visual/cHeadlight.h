@@ -74,7 +74,7 @@ public:
 
 private:
     // reset with the resource manager
-    void __Reset(const coreResourceReset bInit)final;
+    void __Reset(const coreResourceReset eInit)final;
 };
 
 

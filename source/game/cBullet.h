@@ -186,7 +186,7 @@ public:
     ASSIGN_ID(1, "Ray")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeWhite(); this->SetSize(coreVector3(3.7f,3.7f,3.7f) * 0.5f); m_fAnimation = 0.09f;}
+    inline void ResetProperties() {this->MakeYellow(); this->SetSize(coreVector3(3.7f,3.7f,3.7f) * 0.5f); m_fAnimation = 0.09f;}
 
     // change default color
     inline cRayBullet* MakeWhite () {this->_MakeWhite (0.7f); return this;}

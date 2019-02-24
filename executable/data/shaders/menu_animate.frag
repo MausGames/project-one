@@ -27,5 +27,5 @@ void FragmentMain()
     vec3 v3Detail = coreTexture2D(1, v_av2TexCoord[0]).rgb;
 
     // draw shape with detail map and subtle white glow
-    gl_FragColor = vec4(mix(vec3(1.0), v4Shape.rgb + v3Detail, v4Shape.a), v4Shape.a * 0.9);
+    gl_FragColor = vec4(mix(vec3(1.0), v4Shape.rgb + v3Detail * 1.1, v4Shape.a), v4Shape.a * 0.9);
 }

@@ -12,6 +12,7 @@
 
 // TODO: don't update shader uniforms on single fullscreen objects (postprocessing, transition, glow, etc.)
 // TODO: remove watermark
+// TODO: support box mode (4 sides), for scaling
 
 
 // ****************************************************************
@@ -46,6 +47,9 @@ public:
     // recompile post-processing shader-programs
     void Recompile();
 
+    // 
+    void UpdateLayout();
+
     // set side-object opacity
     void SetSideOpacity(const coreFloat fValue);
 
@@ -56,7 +60,7 @@ public:
 
 private:
     // reset with the resource manager
-    void __Reset(const coreResourceReset bInit)final;
+    void __Reset(const coreResourceReset eInit)final;
 };
 
 

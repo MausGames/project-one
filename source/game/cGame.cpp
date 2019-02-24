@@ -20,6 +20,7 @@ cGame::cGame(const coreUint8 iDifficulty, const coreBool bCoop, const coreInt32*
 , m_pCurMission         (NULL)
 , m_iCurMissionIndex    (coreUintW(-1))
 , m_fTimeInOut          (0.0f)
+, m_iContinues          (GAME_CONTINUES)
 , m_iDepthLevel         (0u)
 , m_iStatus             (0u)
 , m_iDifficulty         (iDifficulty)
@@ -184,7 +185,8 @@ void cGame::Move()
             m_aPlayer[i].Move();
 
         // move all enemies
-        if(!m_pCurMission->IsWaiting()) m_EnemyManager.Move();
+        if(!m_pCurMission->IsWaiting())
+            m_EnemyManager.Move();
     }
     m_pCurMission->MoveAfter();
 
@@ -274,24 +276,6 @@ void cGame::LoadMissionID(const coreInt32 iID)
 
         // set initial status
         m_iStatus = GAME_STATUS_LOADING;
-
-        if(m_bCoop)
-        {
-            // reset all available players
-            for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
-            {
-                m_aPlayer[i].Kill(false);
-                m_aPlayer[i].Resurrect(coreVector2(20.0f * (I_TO_F(i) - 0.5f * I_TO_F(GAME_PLAYERS-1u)), -100.0f));
-                m_aPlayer[i].AddStatus(PLAYER_STATUS_NO_INPUT_ALL);
-            }
-        }
-        else
-        {
-            // reset only the first player
-            m_aPlayer[0].Kill(false);
-            m_aPlayer[0].Resurrect(coreVector2(0.0f,-100.0f));
-            m_aPlayer[0].AddStatus(PLAYER_STATUS_NO_INPUT_ALL);
-        }
     }
 
     Core::Log->Info("Mission (%s) created", m_pCurMission->GetName());
@@ -349,6 +333,24 @@ void cGame::StartIntro()
 
     // 
     m_fTimeInOut = -GAME_INTRO_DELAY;
+
+    if(m_bCoop)
+    {
+        // reset all available players
+        for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+        {
+            m_aPlayer[i].Kill(false);
+            m_aPlayer[i].Resurrect(coreVector2(20.0f * (I_TO_F(i) - 0.5f * I_TO_F(GAME_PLAYERS-1u)), -100.0f));
+            m_aPlayer[i].AddStatus(PLAYER_STATUS_NO_INPUT_ALL);
+        }
+    }
+    else
+    {
+        // reset only the first player
+        m_aPlayer[0].Kill(false);
+        m_aPlayer[0].Resurrect(coreVector2(0.0f,-100.0f));
+        m_aPlayer[0].AddStatus(PLAYER_STATUS_NO_INPUT_ALL);
+    }
 }
 
 
@@ -374,6 +376,26 @@ void cGame::StartOutro()
 
     // 
     g_pReplay->ApplyKeyFrame(REPLAY_KEYFRAME_MISSION_END(m_pCurMission->GetID()));
+}
+
+
+// ****************************************************************
+// 
+void cGame::UseContinue()
+{
+    ASSERT(CONTAINS_FLAG(m_iStatus, GAME_STATUS_DEFEATED))
+
+    // 
+    REMOVE_FLAG(m_iStatus, GAME_STATUS_DEFEATED)
+    this->StartIntro();
+
+    // 
+    for(coreUintW i = 0u, ie = (m_bCoop ? GAME_PLAYERS : 1u); i < ie; ++i)
+        m_aPlayer[i].StartFeeling(PLAYER_FEEL_TIME_CONTINUE, 2u);
+
+    // 
+    ASSERT(m_iContinues)
+    m_iContinues -= 1u;
 }
 
 
@@ -533,14 +555,31 @@ coreBool cGame::__HandleOutro()
 // 
 void cGame::__HandleDefeat()
 {
-    // 
-    for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+    if(CONTAINS_FLAG(m_iStatus, GAME_STATUS_PLAY))
     {
-        if(!CONTAINS_FLAG(m_aPlayer[i].GetStatus(), PLAYER_STATUS_DEAD))
-            return;
-    }
+        coreBool  bDefeated = true;
+        coreFloat fFeelTime = 0.0f;
 
-    // TODO
+        // 
+        for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+        {
+            const cPlayer& oPlayer = m_aPlayer[i];
+
+            // 
+            bDefeated = bDefeated && CONTAINS_FLAG(oPlayer.GetStatus(), PLAYER_STATUS_DEAD);
+            fFeelTime = MAX(fFeelTime, oPlayer.GetFeelTime());
+        }
+
+        // 
+        g_pPostProcessing->SetSaturation(bDefeated ? 0.0f : (1.0f - MIN(fFeelTime, 1.0f)));
+
+        if(bDefeated)
+        {
+            // 
+            REMOVE_FLAG(m_iStatus, GAME_STATUS_PLAY)
+            ADD_FLAG   (m_iStatus, GAME_STATUS_DEFEATED)
+        }
+    }
 }
 
 

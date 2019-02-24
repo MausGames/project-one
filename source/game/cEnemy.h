@@ -10,9 +10,10 @@
 #ifndef _P1_GUARD_ENEMY_H_
 #define _P1_GUARD_ENEMY_H_
 
-// TODO: disable texture filtering for enemy texture (only mip, + default black and white)
+// TODO: disable texture filtering for enemy texture (NEAREST, also default_black and default_white)
 // TODO: manager: Find, ForEach, ForEachAll -> typed 
 // TODO: implement own enemy-types for custom-enemies which would require instancing
+// TODO: virtual void Render()override; -> final
 
 
 // ****************************************************************
@@ -56,7 +57,7 @@ public:
     ENABLE_ID
 
     // configure the enemy
-    void Configure (const coreInt32 iHealth, const coreVector3& vColor);
+    void Configure (const coreInt32 iHealth, const coreVector3& vColor, const coreBool bInverted = false);
     void GiveShield(const coreUint8 iElement, const coreInt16 iHealth = 0);
 
     // render and move the enemy

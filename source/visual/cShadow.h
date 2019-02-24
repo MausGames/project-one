@@ -91,7 +91,7 @@ public:
 
 private:
     // reset with the resource manager
-    void __Reset(const coreResourceReset bInit)final;
+    void __Reset(const coreResourceReset eInit)final;
 
     // send transformation matrix to shader-program
     static void __SendTransform(const coreProgramPtr& pProgram, const coreMatrix4& mTransform);

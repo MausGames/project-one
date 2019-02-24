@@ -12,7 +12,7 @@
 // ****************************************************************
 // constructor
 cMenu::cMenu()noexcept
-: coreMenu      (11u, SURFACE_INTRO)
+: coreMenu      (SURFACE_MAX, SURFACE_INTRO)
 , m_iPauseFrame (0u)
 {
     // create intro and title menu
@@ -39,6 +39,7 @@ cMenu::cMenu()noexcept
     this->BindObject(SURFACE_PAUSE,   &m_PauseLayer);
     this->BindObject(SURFACE_PAUSE,   &m_PauseMenu);
     this->BindObject(SURFACE_SUMMARY, &m_SummaryMenu);
+    this->BindObject(SURFACE_DEFEAT,  &m_DefeatMenu);
 }
 
 
@@ -97,6 +98,15 @@ void cMenu::Move()
 
                     // 
                     m_SummaryMenu.ShowSummary();
+                }
+                else if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_DEFEATED))
+                {
+                    // 
+                    this->ChangeSurface(SURFACE_DEFEAT, 3.0f);
+
+                    // 
+                    if(g_pGame->GetContinues()) m_DefeatMenu.ShowContinue();
+                                           else m_DefeatMenu.ShowGameOver();
                 }
             }
         }
@@ -180,12 +190,7 @@ void cMenu::Move()
                 this->ChangeSurface(SURFACE_EMPTY, 1.0f);
 
                 // 
-                ASSERT(!g_pGame)
-                g_pGame = new cGame(m_GameMenu.GetSelectedDifficulty(), (m_GameMenu.GetSelectedPlayers() > 1u) ? true : false, GAME_MISSION_LIST_DEFAULT);
-                g_pGame->LoadNextMission();
-
-                // 
-                g_pReplay->StartRecording();
+                this->__StartGame();
             }
             else if(m_GameMenu.GetStatus() == 2)
             {
@@ -274,20 +279,7 @@ void cMenu::Move()
                 this->ChangeSurface(SURFACE_MAIN, 1.0f);
 
                 // 
-                if(g_pReplay->GetStatus() == REPLAY_STATUS_RECORDING)
-                {
-                    g_pReplay->EndRecording();
-                    g_pReplay->SaveFile(PRINT("Debug Replay %s", coreData::DateTimePrint("%Y-%m-%d %H:%M:%S")));
-                }
-                else if(g_pReplay->GetStatus() == REPLAY_STATUS_PLAYBACK)
-                {
-                    g_pReplay->EndPlayback();
-                    g_pReplay->Clear();
-                }
-
-                // 
-                ASSERT(g_pGame)
-                SAFE_DELETE(g_pGame)
+                this->__EndGame();
             }
         }
         break;
@@ -305,14 +297,36 @@ void cMenu::Move()
         }
         break;
 
+    case SURFACE_DEFEAT:
+        {
+            if(m_DefeatMenu.GetStatus() == 1)
+            {
+                // 
+                this->ChangeSurface(SURFACE_EMPTY, 1.0f);
+
+                // 
+                g_pGame->UseContinue();
+            }
+            else if(m_DefeatMenu.GetStatus() == 2)
+            {
+                // 
+                this->ChangeSurface(SURFACE_MAIN, 1.0f);
+
+                // 
+                this->__EndGame();
+            }
+        }
+        break;
+
     default:
         ASSERT(false)
         break;
     }
 
     // 
-    Core::Input->ShowCursor((this->GetCurSurface() != SURFACE_EMPTY) &&
-                            (this->GetCurSurface() != SURFACE_SUMMARY));
+    Core::Input->ShowCursor((this->GetCurSurface() != SURFACE_EMPTY)   &&
+                            (this->GetCurSurface() != SURFACE_SUMMARY) &&
+                            (this->GetCurSurface() != SURFACE_DEFEAT));
 
     // 
     if((this->GetCurSurface() == SURFACE_PAUSE) || (this->GetOldSurface() == SURFACE_PAUSE))
@@ -455,11 +469,47 @@ void cMenu::UpdateAnimateProgram(coreObject2D* OUTPUT pObject)
     if(!pObject->GetProgram()->Enable())  return;
 
     // 
-    const coreFloat fSize = 2.0f * pObject->GetSize().y * Core::System->GetResolution().yx().AspectRatio();
+    const coreFloat fSize = 2.0f * pObject->GetSize().y;
     const coreFloat fLerp = ((fSize - 0.4f) * RCP(fSize)) * 0.5f;
 
     // 
-    pObject->GetProgram()->SendUniform("u_v4Scale", coreVector4(0.5f - fLerp, 0.5f + fLerp, 2.4f, fSize));
+    pObject->GetProgram()->SendUniform("u_v4Scale", coreVector4(0.5f - fLerp, 0.5f + fLerp, 2.0f, fSize));
+}
+
+
+// ****************************************************************
+// 
+void cMenu::__StartGame()
+{
+    // 
+    ASSERT(!g_pGame)
+    g_pGame = new cGame(m_GameMenu.GetSelectedDifficulty(), (m_GameMenu.GetSelectedPlayers() > 1u) ? true : false, GAME_MISSION_LIST_DEFAULT);
+    g_pGame->LoadNextMission();
+
+    // 
+    g_pReplay->StartRecording();
+}
+
+
+// ****************************************************************
+// 
+void cMenu::__EndGame()
+{
+    // 
+    if(g_pReplay->GetStatus() == REPLAY_STATUS_RECORDING)
+    {
+        g_pReplay->EndRecording();
+        g_pReplay->SaveFile(PRINT("Debug Replay %s", coreData::DateTimePrint("%Y-%m-%d %H:%M:%S")));
+    }
+    else if(g_pReplay->GetStatus() == REPLAY_STATUS_PLAYBACK)
+    {
+        g_pReplay->EndPlayback();
+        g_pReplay->Clear();
+    }
+
+    // 
+    ASSERT(g_pGame)
+    SAFE_DELETE(g_pGame)
 }
 
 
@@ -476,3 +526,4 @@ UNITY_BUILD
 #include "08_cExtraMenu.cpp"
 #include "09_cPauseMenu.cpp"
 #include "10_cSummaryMenu.cpp"
+#include "11_cDefeatMenu.cpp"

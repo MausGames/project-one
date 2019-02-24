@@ -25,7 +25,7 @@ void VertexMain()
 #if defined(_P1_FLAT_)
 
     // transform position (and make flat)
-    vec4 v4NewPosition = vec4(coreObject3DTransformRaw(), 1.0) * vec4(1.0, 1.0, 0.0, 1.0);
+    vec4 v4NewPosition = vec4(coreObject3DTransform(a_v3RawPosition * vec3(1.0, 1.0, 0.0)), 1.0);
     gl_Position = u_m4ViewProj * v4NewPosition;
 
     // calculate light and color intensity

@@ -57,8 +57,8 @@ void cForeground::End()
         glInvalidateFramebuffer(GL_FRAMEBUFFER, ARRAY_SIZE(aiAttachment), aiAttachment);
     }
 
-    // also clear color buffer on screen shake
-    if(g_pSpecialEffects->GetShakeStrength())
+    // also clear color buffer on screen shake or scaling
+    if(g_pSpecialEffects->GetShakeStrength() || (g_CurConfig.Game.iGameScale < 100u))
         glClear(GL_COLOR_BUFFER_BIT);
 
     // reset view
@@ -71,9 +71,9 @@ void cForeground::End()
 
 // ****************************************************************
 // reset with the resource manager
-void cForeground::__Reset(const coreResourceReset bInit)
+void cForeground::__Reset(const coreResourceReset eInit)
 {
-    if(bInit) {m_FrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL); this->__CalculateViewProj();}
+    if(eInit) {m_FrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL); this->__CalculateViewProj();}
          else {m_FrameBuffer.Delete();}
 }
 

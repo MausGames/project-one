@@ -37,10 +37,11 @@
 #define CONFIG_INPUT_MOVE_RIGHT(s) "Input",    PRINT("S%zu_MoveRight", (s)),           (CORE_INPUT_KEY(D))
 #define CONFIG_INPUT_ACTION(s,n)   "Input",    PRINT("S%zu_Action%zu", (s), (n) + 1u), ((n) + coreUintW(CORE_INPUT_KEY(1)))
 
-#define CONFIG_GAME_TRANSPARENT    "Game",     "Transparent",                          (0)
-#define CONFIG_GAME_COMBAT_DAMAGE  "Game",     "CombatDamage",                         (1)
-#define CONFIG_GAME_COMBAT_CHAIN   "Game",     "CombatChain",                          (1)
-#define CONFIG_GAME_COMBAT_COMBO   "Game",     "CombatCombo",                          (1)
+#define CONFIG_GAME_GAME_ROTATION  "Game",     "GameRotation",                         (0)
+#define CONFIG_GAME_GAME_SCALE     "Game",     "GameScale",                            (100)
+#define CONFIG_GAME_HUD_ROTATION   "Game",     "HudRotation",                          (0)
+#define CONFIG_GAME_HUD_SCALE      "Game",     "HudScale",                             (100)
+#define CONFIG_GAME_HUD_TYPE       "Game",     "HudType",                              (0)
 
 #define INPUT_TYPES         (PLAYERS)                                     // number of input set selections
 #define INPUT_KEYS_MOVE     (4u)                                          // number of move keys per set (left, right, down, up)
@@ -91,14 +92,11 @@ struct sConfig final
 
     struct
     {
-        coreUint8 iTransparent;   // transparent player bullets
-        struct
-        {
-            coreUint8 iDamage;    // show damage as combat text
-            coreUint8 iChain;     // show chain as combat text
-            coreUint8 iCombo;     // show combo as combat text
-        }
-        Combat;
+        coreUint8 iGameRotation;   // 
+        coreUint8 iGameScale;      // 
+        coreUint8 iHudRotation;    // 
+        coreUint8 iHudScale;       // 
+        coreUint8 iHudType;        // 
     }
     Game;
 };

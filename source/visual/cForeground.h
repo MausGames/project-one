@@ -11,6 +11,8 @@
 #define _P1_GUARD_FOREGROUND_H_
 
 // TODO: #define FOREGROUND_AREA_FULL (FOREGROUND_AREA * 1.1f)
+// TODO: FOREGROUND_AREA_REV without RCP
+// TODO: switch back to multisampled framebuffer, to improve quality on Nvidia GPUs
 
 
 // ****************************************************************
@@ -53,7 +55,7 @@ public:
 
 private:
     // reset with the resource manager
-    void __Reset(const coreResourceReset bInit)final;
+    void __Reset(const coreResourceReset eInit)final;
 
     // 
     void __CalculateViewProj();

@@ -21,6 +21,7 @@
 // TODO: glBindTexture has to reset internal texture-cache
 // TODO: rainwater has mipmapping disabled (provide at least a couple of levels)
 // TODO: draw reflected ships only with low resolution models
+// TODO: remove stretched edges, especially on under
 
 
 // ****************************************************************

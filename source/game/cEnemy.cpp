@@ -31,11 +31,11 @@ cEnemy::cEnemy()noexcept
 
 // ****************************************************************
 // configure the enemy
-void cEnemy::Configure(const coreInt32 iHealth, const coreVector3& vColor)
+void cEnemy::Configure(const coreInt32 iHealth, const coreVector3& vColor, const coreBool bInverted)
 {
-    // set health and color value
+    // set health and color
     this->SetMaxHealth(iHealth);
-    this->SetBaseColor(vColor);
+    this->SetBaseColor(vColor, bInverted);
 }
 
 
@@ -44,6 +44,7 @@ void cEnemy::Configure(const coreInt32 iHealth, const coreVector3& vColor)
 void cEnemy::GiveShield(const coreUint8 iElement, const coreInt16 iHealth)
 {
     // 
+    ASSERT(g_pGame)
     g_pGame->GetShieldManager()->BindEnemy(this, iElement, iHealth);
 }
 
@@ -99,8 +100,8 @@ coreBool cEnemy::TakeDamage(coreInt32 iDamage, const coreUint8 iElement, const c
     if(!CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_INVINCIBLE))
     {
         // 
-        g_pGame->GetShieldManager()->AbsorbDamage(this, &iDamage, iElement);
-        if(iDamage)
+        if(g_pGame) g_pGame->GetShieldManager()->AbsorbDamage(this, &iDamage, iElement);
+        if(iDamage > 0)
         {
             // 
             if(pAttacker)
@@ -112,13 +113,11 @@ coreBool cEnemy::TakeDamage(coreInt32 iDamage, const coreUint8 iElement, const c
             }
 
             // 
-            if(this->_TakeDamage(iDamage, iElement, vImpact))
-            {
-                if(!CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_IMMORTAL))
-                    this->Kill(true);
+            const coreBool bReachedDeath = this->_TakeDamage(iDamage, iElement, vImpact);
 
-                return true;
-            }
+            // 
+            this->RefreshColor();
+            this->InvokeBlink();
 
             // 
             if(this->IsParent())
@@ -128,6 +127,15 @@ coreBool cEnemy::TakeDamage(coreInt32 iDamage, const coreUint8 iElement, const c
                     (*it)->RefreshColor(this->GetCurHealthPct());
                     (*it)->InvokeBlink();
                 }
+            }
+
+            // 
+            if(bReachedDeath)
+            {
+                if(!CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_IMMORTAL))
+                    this->Kill(true);
+
+                return true;
             }
         }
     }
@@ -164,7 +172,6 @@ void cEnemy::Resurrect(const coreVector2& vPosition, const coreVector2& vDirecti
     REMOVE_FLAG(m_iStatus, ENEMY_STATUS_DEAD)
 
     // 
-    const coreBool bBoss   = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_BOSS);
     const coreBool bSingle = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_SINGLE);
     const coreBool bEnergy = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_ENERGY);
     ASSERT(!bEnergy || (bEnergy && bSingle))
@@ -206,19 +213,26 @@ void cEnemy::Kill(const coreBool bAnimated)
     ADD_FLAG(m_iStatus, ENEMY_STATUS_DEAD)
 
     // 
-    const coreBool bBoss   = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_BOSS);
     const coreBool bSingle = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_SINGLE);
     const coreBool bEnergy = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_ENERGY);
     ASSERT(!bEnergy || (bEnergy && bSingle))
 
     // 
-    g_pGame->GetShieldManager()->UnbindEnemy(this);
+    if(g_pGame) g_pGame->GetShieldManager()->UnbindEnemy(this);
 
     // 
     if(bAnimated && this->IsEnabled(CORE_OBJECT_ENABLE_RENDER))
     {
-        if(bBoss) g_pSpecialEffects->MacroExplosionPhysicalDarkBig  (this->GetPosition());
-             else g_pSpecialEffects->MacroExplosionPhysicalDarkSmall(this->GetPosition());
+        // 
+        if(CONTAINS_BIT(m_iBaseColor, SHIP_INVERTED_BIT))
+        {
+            const coreVector3 vColor = (g_pEnvironment->GetBackground()->GetID() == cSnowBackground::ID) ? COLOR_FIRE_BLUE : COLOR_FIRE_ORANGE;
+            g_pSpecialEffects->MacroExplosionPhysicalColorSmall(this->GetPosition(), vColor);
+        }
+        else
+        {
+            g_pSpecialEffects->MacroExplosionPhysicalDarkSmall(this->GetPosition());
+        }
     }
 
     if(bEnergy)
@@ -249,6 +263,8 @@ void cEnemy::Kill(const coreBool bAnimated)
 // 
 cPlayer* cEnemy::NearestPlayer()const
 {
+    // 
+    ASSERT(g_pGame)
     return g_pGame->FindPlayer(this->GetPosition().xy());
 }
 
@@ -309,6 +325,8 @@ cEnemySquad::~cEnemySquad()
 // 
 void cEnemySquad::FreeEnemies()
 {
+    ASSERT(g_pGame)
+
     // 
     FOR_EACH(it, m_apEnemy)
         g_pGame->GetEnemyManager()->FreeEnemy(&(*it));

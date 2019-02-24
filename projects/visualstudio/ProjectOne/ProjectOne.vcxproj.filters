@@ -273,6 +273,9 @@
     <ClCompile Include="..\..\..\source\additional\cLodObject.cpp">
       <Filter>additional</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\interface\menu\11_cDefeatMenu.cpp">
+      <Filter>interface\menu</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\main.h" />

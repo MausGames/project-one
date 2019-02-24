@@ -160,6 +160,7 @@ void cTheater::__KillMute(sMute* OUTPUT pMute, const coreBool bAnimated)
     cEnemy* pEnemy = pMute->pEnemy;
 
     // 
+    pEnemy->BaseColor(coreVector3(0.0f,0.0f,0.0f), true);
     pEnemy->Kill(bAnimated);
     SAFE_DELETE(pEnemy)
 }

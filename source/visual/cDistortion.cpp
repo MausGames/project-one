@@ -143,8 +143,8 @@ void cDistortion::CreateBurst(const coreVector3& vPosition, const coreVector2& v
 
 // ****************************************************************
 // reset with the resource manager
-void cDistortion::__Reset(const coreResourceReset bInit)
+void cDistortion::__Reset(const coreResourceReset eInit)
 {
-    if(bInit) m_FrameBuffer.Create(g_vGameResolution * DISTORTION_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
+    if(eInit) m_FrameBuffer.Create(g_vGameResolution * DISTORTION_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
          else m_FrameBuffer.Delete();
 }

@@ -265,9 +265,9 @@ void cShadow::EnableShadowRead(const coreUintW iHandleIndex)
 
 // ****************************************************************
 // reset with the resource manager
-void cShadow::__Reset(const coreResourceReset bInit)
+void cShadow::__Reset(const coreResourceReset eInit)
 {
-    if(bInit) {m_iLevel = 0xFFu; this->Reconfigure();}
+    if(eInit) {m_iLevel = 0xFFu; this->Reconfigure();}
          else {m_FrameBuffer.Delete();}
 }
 

@@ -319,6 +319,8 @@ static void ReshapeGame()
 // debug and test game
 static void DebugGame()
 {
+#if defined(_P1_DEBUG_INPUT_)
+
     // start game
     if(!g_pGame)
     {
@@ -422,26 +424,28 @@ static void DebugGame()
         }
     }
 
-    // turn player
-    if(g_pGame)
-    {
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(UP),    CORE_INPUT_PRESS)) g_pGame->GetPlayer(0u)->SetDirection(coreVector3( 0.0f, 1.0f,0.0f));
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LEFT),  CORE_INPUT_PRESS)) g_pGame->GetPlayer(0u)->SetDirection(coreVector3(-1.0f, 0.0f,0.0f));
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(DOWN),  CORE_INPUT_PRESS)) g_pGame->GetPlayer(0u)->SetDirection(coreVector3( 0.0f,-1.0f,0.0f));
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(RIGHT), CORE_INPUT_PRESS)) g_pGame->GetPlayer(0u)->SetDirection(coreVector3( 1.0f, 0.0f,0.0f));
-    }
-
     // toggle invincibility
     if(g_pGame)
     {
-        static coreBool s_bInvincible = true;
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(Z), CORE_INPUT_PRESS)) s_bInvincible = !s_bInvincible;
-
-        g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
+        static coreBool s_bInvincible = false;
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(Z), CORE_INPUT_PRESS))
         {
-            pPlayer->SetMaxHealth(s_bInvincible ? 10000 : 1);
-            pPlayer->SetCurHealth(s_bInvincible ? 10000 : 1);
-        });
+            s_bInvincible = !s_bInvincible;
+            g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
+            {
+                pPlayer->SetMaxHealth(PLAYER_LIVES);
+                pPlayer->SetCurHealth(PLAYER_LIVES);
+            });
+        }
+
+        if(s_bInvincible)
+        {
+            g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
+            {
+                pPlayer->SetMaxHealth(100);
+                pPlayer->SetCurHealth(100);
+            });
+        }
     }
 
     // damage boss
@@ -490,6 +494,8 @@ static void DebugGame()
     {
         g_bDebugOutput = !g_bDebugOutput;
     }
+
+#endif
 
     // keep noise low
     if(SDL_GL_GetSwapInterval())

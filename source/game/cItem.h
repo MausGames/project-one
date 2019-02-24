@@ -10,6 +10,8 @@
 #ifndef _P1_GUARD_ITEM_H_
 #define _P1_GUARD_ITEM_H_
 
+// TODO: items should be collectible in invincibility states (roll, feel)
+
 
 // ****************************************************************
 // item definitions

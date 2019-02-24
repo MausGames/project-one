@@ -17,16 +17,18 @@
 
 // ****************************************************************
 // game definitions
-#define GAME_PLAYERS        (PLAYERS)   // default number of players
-#define GAME_INTRO_DELAY    (0.2f)      // 
-#define GAME_INTRO_DURATION (3.5f)      // 
+#define GAME_PLAYERS        (PLAYERS)     // default number of players
+#define GAME_CONTINUES      (CONTINUES)   // 
+#define GAME_INTRO_DELAY    (0.2f)        // 
+#define GAME_INTRO_DURATION (3.5f)        // 
 
 enum eGameStatus : coreUint8
 {
-    GAME_STATUS_INTRO   = 0x01u,   // 
-    GAME_STATUS_OUTRO   = 0x02u,   // 
-    GAME_STATUS_PLAY    = 0x04u,   // 
-    GAME_STATUS_LOADING = 0x08u    // 
+    GAME_STATUS_INTRO    = 0x01u,   // 
+    GAME_STATUS_OUTRO    = 0x02u,   // 
+    GAME_STATUS_PLAY     = 0x04u,   // 
+    GAME_STATUS_LOADING  = 0x08u,   // 
+    GAME_STATUS_DEFEATED = 0x10u    // 
 };
 
 
@@ -85,6 +87,8 @@ private:
     cTimeTable m_TimeTable;                 // 
     coreFlow   m_fTimeInOut;                // 
 
+    coreProtect<coreUint8> m_iContinues;    // 
+
     coreUint8 m_iDepthLevel;                // 
 
     coreUint8 m_iStatus;                    // 
@@ -116,6 +120,9 @@ public:
     void StartOutro();
 
     // 
+    void UseContinue();
+
+    // 
     void PushDepthLevel();
     void OffsetDepthLevel(const coreFloat fOffset)const;
 
@@ -142,6 +149,7 @@ public:
     // get object properties
     inline const coreInt32* GetMissionList()const {return m_piMissionList;}
     inline const coreUintW& GetNumMissions()const {return m_iNumMissions;}
+    inline       coreUint8  GetContinues  ()const {return m_iContinues;}
     inline const coreUint8& GetStatus     ()const {return m_iStatus;}
     inline const coreUint8& GetDifficulty ()const {return m_iDifficulty;}
     inline const coreBool&  GetCoop       ()const {return m_bCoop;}

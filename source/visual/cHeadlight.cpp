@@ -175,8 +175,8 @@ void cHeadlight::DrawPoint(const coreObject3D* pObject)
 
 // ****************************************************************
 // reset with the resource manager
-void cHeadlight::__Reset(const coreResourceReset bInit)
+void cHeadlight::__Reset(const coreResourceReset eInit)
 {
-    if(bInit) m_FrameBuffer.Create(g_vGameResolution * HEADLIGHT_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
+    if(eInit) m_FrameBuffer.Create(g_vGameResolution * HEADLIGHT_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
          else m_FrameBuffer.Delete();
 }

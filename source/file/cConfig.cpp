@@ -84,10 +84,11 @@ void LoadConfig()
     Core::Config->Load(true);
 
     // read game values
-    g_OldConfig.Game.iTransparent    = Core::Config->GetInt(CONFIG_GAME_TRANSPARENT);
-    g_OldConfig.Game.Combat.iDamage  = Core::Config->GetInt(CONFIG_GAME_COMBAT_DAMAGE);
-    g_OldConfig.Game.Combat.iChain   = Core::Config->GetInt(CONFIG_GAME_COMBAT_CHAIN);
-    g_OldConfig.Game.Combat.iCombo   = Core::Config->GetInt(CONFIG_GAME_COMBAT_COMBO);
+    g_OldConfig.Game.iGameRotation   = Core::Config->GetInt(CONFIG_GAME_GAME_ROTATION);
+    g_OldConfig.Game.iGameScale      = Core::Config->GetInt(CONFIG_GAME_GAME_SCALE);
+    g_OldConfig.Game.iHudRotation    = Core::Config->GetInt(CONFIG_GAME_HUD_ROTATION);
+    g_OldConfig.Game.iHudScale       = Core::Config->GetInt(CONFIG_GAME_HUD_SCALE);
+    g_OldConfig.Game.iHudType        = Core::Config->GetInt(CONFIG_GAME_HUD_TYPE);
 
     // read graphics values
     g_OldConfig.Graphics.iShadow     = Core::Config->GetInt(CONFIG_GRAPHICS_SHADOW);
@@ -132,10 +133,11 @@ void SaveConfig()
     g_OldConfig = g_CurConfig;
 
     // write game values
-    Core::Config->SetInt(CONFIG_GAME_TRANSPARENT,    g_OldConfig.Game.iTransparent);
-    Core::Config->SetInt(CONFIG_GAME_COMBAT_DAMAGE,  g_OldConfig.Game.Combat.iDamage);
-    Core::Config->SetInt(CONFIG_GAME_COMBAT_CHAIN,   g_OldConfig.Game.Combat.iChain);
-    Core::Config->SetInt(CONFIG_GAME_COMBAT_COMBO,   g_OldConfig.Game.Combat.iCombo);
+    Core::Config->SetInt(CONFIG_GAME_GAME_ROTATION,  g_OldConfig.Game.iGameRotation);
+    Core::Config->SetInt(CONFIG_GAME_GAME_SCALE,     g_OldConfig.Game.iGameScale);
+    Core::Config->SetInt(CONFIG_GAME_HUD_ROTATION,   g_OldConfig.Game.iHudRotation);
+    Core::Config->SetInt(CONFIG_GAME_HUD_SCALE,      g_OldConfig.Game.iHudScale);
+    Core::Config->SetInt(CONFIG_GAME_HUD_TYPE,       g_OldConfig.Game.iHudType);
 
     // write graphics values
     Core::Config->SetInt(CONFIG_GRAPHICS_SHADOW,     g_OldConfig.Graphics.iShadow);
@@ -191,10 +193,10 @@ void UpdateInput()
         if(i < INPUT_SETS_KEYBOARD)   // # keyboard and mouse
         {
             // check key depending on its value
-            const auto nCheckKeyFunc = [](const coreInt16 iKey, const coreInputType iType)
+            const auto nCheckKeyFunc = [](const coreInt16 iKey, const coreInputType eType)
             {
-                if(iKey <= 0) return Core::Input->GetMouseButton   (coreUint8   (-iKey), iType);
-                         else return Core::Input->GetKeyboardButton(coreInputKey( iKey), iType);
+                if(iKey <= 0) return Core::Input->GetMouseButton   (coreUint8   (-iKey), eType);
+                         else return Core::Input->GetKeyboardButton(coreInputKey( iKey), eType);
             };
 
             // map movement input
@@ -230,8 +232,18 @@ void UpdateInput()
             }
         }
 
-        // normalize movement input
-        if(!oMap.vMove.IsNull()) oMap.vMove = oMap.vMove.Normalized();
+        if(!oMap.vMove.IsNull())
+        {
+            // 
+            const coreVector2& vGame  = g_pPostProcessing->GetDirection();
+            const coreVector2  vHud   = coreVector2(0.0f,1.0f).InvertedX(); 
+            const coreVector2  vFinal = vGame.x * vHud.Rotated90() + vGame.y * vHud;
+            ASSERT(vFinal.IsNormalized())
+
+            // 
+            oMap.vMove = oMap.vMove.x * vFinal.Rotated90() + oMap.vMove.y * vFinal;
+            oMap.vMove = oMap.vMove.Normalized();
+        }
 
         // 
         for(coreUintW j = 0u; j < INPUT_TYPES; ++j)

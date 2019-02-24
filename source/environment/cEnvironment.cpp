@@ -222,9 +222,9 @@ FUNC_PURE coreFloat cEnvironment::RetrieveSafeHeight(const coreVector2& vPositio
 
 // ****************************************************************
 // reset with the resource manager
-void cEnvironment::__Reset(const coreResourceReset bInit)
+void cEnvironment::__Reset(const coreResourceReset eInit)
 {
-    if(bInit)
+    if(eInit)
     {
         const coreInt32 iID = P_TO_SI(m_pBackground);
 

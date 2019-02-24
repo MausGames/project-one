@@ -15,14 +15,15 @@ cPlayer::cPlayer()noexcept
 : m_apWeapon   {}
 , m_pInput     (&g_TotalInput)
 , m_vForce     (coreVector2(0.0f,0.0f))
+, m_fFeelTime  (PLAYER_NO_FEEL)
 , m_fRollTime  (0.0f)
+, m_iFeelType  (0u)
 , m_iRollDir   (PLAYER_NO_ROLL)
 , m_fAnimation (0.0f)
 {
     // load object resources
     this->DefineTexture(0u, "ship_player.png");
     this->DefineTexture(1u, "menu_background_black.png");
-    this->DefineProgram("object_ship_blink_program");
 
     // set object properties
     this->SetDirection        (coreVector3(0.0f,1.0f,0.0f));
@@ -32,7 +33,7 @@ cPlayer::cPlayer()noexcept
 
     // set initial status
     m_iStatus = PLAYER_STATUS_DEAD;
-    this->SetMaxHealth(1);
+    this->SetMaxHealth(PLAYER_LIVES);
 
     // load first weapons
     for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
@@ -45,8 +46,9 @@ cPlayer::cPlayer()noexcept
     m_ScoreTable.SetOwner(this);
 
     // 
-    m_pDarkProgram = Core::Manager::Resource->Get<coreProgram>("object_ship_darkness_program");
-    std::swap(m_pDarkProgram, m_pProgram);
+    m_pNormalProgram = Core::Manager::Resource->Get<coreProgram>("object_ship_program");
+    m_pDarkProgram   = Core::Manager::Resource->Get<coreProgram>("object_ship_darkness_program");
+    this->ActivateDarkShading();
 
     // 
     m_Dot.DefineModel  ("object_dot.md3");
@@ -114,7 +116,7 @@ void cPlayer::Configure(const coreUintW iShipType, const coreVector3& vColor)
     this->DefineModelHigh(pcModelHigh);
     this->DefineModelLow (pcModelLow);
 
-    // save color value
+    // save color
     this->SetBaseColor(vColor);
 }
 
@@ -167,9 +169,6 @@ void cPlayer::Render()
             m_Exhaust.Render();
         }
         glEnable(GL_DEPTH_TEST);
-
-        // 
-        this->_EnableBlink();
 
         // render the 3d-object
         this->coreObject3D::Render();
@@ -243,8 +242,8 @@ void cPlayer::Move()
             if(this->IsRolling())
             {
                 // roll the ship
-                const coreFloat fSpeed = 50.0f + 80.0f * SIN(PI * m_fRollTime);
-                vNewPos += UnpackDirection(m_iRollDir) * (Core::System->GetTime() * fSpeed);
+                const coreFloat fSpeed = 50.0f + LERPB(25.0f, 0.0f, m_fRollTime);
+                vNewPos += m_pInput->vMove * (Core::System->GetTime() * fSpeed);
             }
             else
             {
@@ -273,7 +272,7 @@ void cPlayer::Move()
             // 
             if(this->IsRolling())
             {
-                const coreFloat fAngle = LERPS(0.0f, 2.0f*PI, m_fRollTime);
+                const coreFloat fAngle = LERPB(0.0f, 4.0f*PI, m_fRollTime);
                 const coreFloat fSide  = -SIGN(coreVector2::Dot(-this->GetDirection().xy().Rotated90(), UnpackDirection(m_iRollDir)));
                 vOri *= coreMatrix4::RotationAxis(fAngle * fSide, this->GetDirection()).m123();
             }
@@ -322,12 +321,14 @@ void cPlayer::Move()
         if(m_Bubble.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
         {
             // 
-            if(CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DARKNESS))
-                 m_Bubble.SetAlpha(MIN(m_Bubble.GetAlpha() + 4.0f*Core::System->GetTime(), 0.8f));
-            else m_Bubble.SetAlpha(MAX(m_Bubble.GetAlpha() - 4.0f*Core::System->GetTime(), 0.0f));
+            m_fFeelTime.Update(-1.0f);
 
             // 
-            if(!m_Bubble.GetAlpha()) this->DisableBubble();
+            if(m_fFeelTime > 0.0f) m_Bubble.SetAlpha(MIN(m_Bubble.GetAlpha() + 4.0f*Core::System->GetTime(), 0.8f));
+                              else m_Bubble.SetAlpha(MAX(m_Bubble.GetAlpha() - 4.0f*Core::System->GetTime(), 0.0f));
+
+            // 
+            if(!m_Bubble.GetAlpha()) this->EndFeeling();
 
             // 
             m_Bubble.SetPosition (this->GetPosition());
@@ -355,15 +356,28 @@ coreBool cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, 
     // 
     if(iDamage > 0)
     {
+        // 
         m_ScoreTable.TransferChain();
         m_ScoreTable.ReduceCombo();
-    }
 
-    // 
-    if(this->_TakeDamage(iDamage, iElement, vImpact))
-    {
-        this->Kill(true);
-        return true;
+        // 
+        if(g_pGame) g_pGame->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
+        {
+            if(pPlayer != this) pPlayer->StartFeeling(PLAYER_FEEL_TIME, 1u);
+        });
+
+        // 
+        if(this->_TakeDamage(1, iElement, vImpact))
+        {
+            this->Kill(true);
+            return true;
+        }
+
+        // 
+        if(!this->IsDarkShading()) this->RefreshColor();
+
+        // 
+        this->StartFeeling(PLAYER_FEEL_TIME, 0u);
     }
 
     return false;
@@ -401,7 +415,7 @@ void cPlayer::Kill(const coreBool bAnimated)
 
     // 
     this->EndRolling();
-    this->TransformDark(PLAYER_DARK_RESET);
+    this->EndFeeling();
 
     // 
     this->DisableWind();
@@ -410,9 +424,7 @@ void cPlayer::Kill(const coreBool bAnimated)
 
     // 
     if(bAnimated && this->IsEnabled(CORE_OBJECT_ENABLE_RENDER))
-    {
         g_pSpecialEffects->MacroExplosionPhysicalDarkBig(this->GetPosition());
-    }
 
     // remove ship from global shadow and outline
     cShadow::GetGlobalContainer()->UnbindObject(this);
@@ -450,44 +462,44 @@ void cPlayer::EndRolling()
     m_iRollDir  = PLAYER_NO_ROLL;
 
     // 
-    this->ChangeType(TYPE_PLAYER);
+    this->ChangeType(this->IsFeeling() ? TYPE_PLAYER_FEEL : TYPE_PLAYER);
     this->DisableWind();
 }
 
 
 // ****************************************************************
 // 
-void cPlayer::TransformDark(const coreUint8 iStatus)
+void cPlayer::StartFeeling(const coreFloat fTime, const coreUint8 iType)
 {
-    // 
-    const coreBool bDark = CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DARKNESS);
-    if(bDark == (!iStatus)) return;
-
-    if(iStatus == PLAYER_DARK_ON)
-    {
-        ADD_FLAG(m_iStatus, PLAYER_STATUS_DARKNESS)
-
-        // 
-        g_pDistortion    ->CreateWave      (this->GetPosition(), DISTORTION_WAVE_SMALL);
-        g_pSpecialEffects->CreateSplashDark(this->GetPosition(), SPECIAL_SPLASH_SMALL);
-        g_pSpecialEffects->CreateBlast     (this->GetPosition(), SPECIAL_BLAST_SMALL, COLOR_ENERGY_WHITE);
-
-        // 
-        this->EnableBubble();
-    }
-    else if(iStatus == PLAYER_DARK_OFF)
-    {
-        REMOVE_FLAG(m_iStatus, PLAYER_STATUS_DARKNESS)
-
-        // 
-        g_pDistortion    ->CreateWave      (this->GetPosition(), DISTORTION_WAVE_BIG);
-        g_pSpecialEffects->CreateSplashDark(this->GetPosition(), SPECIAL_SPLASH_BIG);
-        g_pSpecialEffects->CreateBlast     (this->GetPosition(), SPECIAL_BLAST_BIG, COLOR_ENERGY_WHITE);
-    }
-    else REMOVE_FLAG(m_iStatus, PLAYER_STATUS_DARKNESS)
+    WARN_IF(this->IsFeeling()) return;
 
     // 
-    std::swap(m_pDarkProgram, m_pProgram);
+    m_fFeelTime = fTime;
+    m_iFeelType = iType;
+
+    // 
+    this->ChangeType(TYPE_PLAYER_FEEL);
+    this->EnableBubble();
+
+    // 
+         if(iType == 0u) g_pSpecialEffects->MacroExplosionDarkBig  (this->GetPosition());
+    else if(iType == 1u) g_pSpecialEffects->MacroExplosionDarkSmall(this->GetPosition());
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::EndFeeling()
+{
+    if(!this->IsFeeling()) return;
+
+    // 
+    m_fFeelTime = PLAYER_NO_FEEL;
+    m_iFeelType = 0u;
+
+    // 
+    this->ChangeType(this->IsRolling() ? TYPE_PLAYER_ROLL : TYPE_PLAYER);
+    this->DisableBubble();
 }
 
 
