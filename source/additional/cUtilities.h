@@ -91,6 +91,14 @@ template <typename T, typename S, typename R> constexpr FUNC_LOCAL T TernaryLerp
 
 
 // ****************************************************************
+// 
+inline coreFloat FUNC_PURE FrictionFactor(const coreFloat fStrength)
+{
+    return POW(1.0f - fStrength * (1.0f / FRAMERATE_VALUE), Core::System->GetTime() * FRAMERATE_VALUE);
+}
+
+
+// ****************************************************************
 // direction restriction and packing helper-functions
 inline FUNC_LOCAL coreUint8 PackDirection(const coreVector2& vDirection)
 {
@@ -115,6 +123,27 @@ inline FUNC_CONST coreVector2 UnpackDirection(const coreUint8 iPack)
     case 7u: return coreVector2( 1.0f, 1.0f) * (1.0f/SQRT2);
     case 8u: return coreVector2( 0.0f, 0.0f);
     }
+}
+
+
+// ****************************************************************
+// 
+inline FUNC_CONST coreVector2 StepRotated45(const coreUint8 iStep)
+{
+    ASSERT(iStep < 8u)
+    return UnpackDirection(iStep);
+}
+
+inline FUNC_CONST coreVector2 StepRotated90(const coreUint8 iStep)
+{
+    ASSERT(iStep < 4u)
+    return UnpackDirection(iStep * 2u);
+}
+
+inline FUNC_CONST coreVector2 StepRotated90X(const coreUint8 iStep)
+{
+    ASSERT(iStep < 4u)
+    return UnpackDirection(iStep * 2u + 1u);
 }
 
 

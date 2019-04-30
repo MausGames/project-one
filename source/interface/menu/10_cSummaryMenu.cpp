@@ -188,7 +188,7 @@ void cSummaryMenu::Move()
 // 
 void cSummaryMenu::ShowSummary()
 {
-    ASSERT(g_pGame)
+    ASSERT(STATIC_ISVALID(g_pGame))
 
     // 
     m_iFinalScore = 0u;

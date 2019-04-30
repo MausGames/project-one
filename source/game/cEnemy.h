@@ -124,7 +124,8 @@ public:
     void ClearEnemies(const coreBool bAnimated);
 
     // 
-    cEnemy* FindEnemy(const coreVector2& vPosition);
+    cEnemy* FindEnemy   (const coreVector2& vPosition);
+    cEnemy* FindEnemyRev(const coreVector2& vPosition);
     template <typename F> void ForEachEnemy   (F&& nFunction);   // [](cEnemy* OUTPUT pEnemy, const coreUintW i) -> void
     template <typename F> void ForEachEnemyAll(F&& nFunction);   // [](cEnemy* OUTPUT pEnemy, const coreUintW i) -> void
 
@@ -186,7 +187,8 @@ public:
     void ClearEnemies(const coreBool bAnimated);
 
     // 
-    cEnemy* FindEnemy(const coreVector2& vPosition);
+    cEnemy* FindEnemy   (const coreVector2& vPosition);
+    cEnemy* FindEnemyRev(const coreVector2& vPosition);
     template <typename F> void ForEachEnemy   (F&& nFunction);   // [](cEnemy* OUTPUT pEnemy) -> void
     template <typename F> void ForEachEnemyAll(F&& nFunction);   // [](cEnemy* OUTPUT pEnemy) -> void
 
@@ -196,6 +198,9 @@ public:
     // 
     inline void BindEnemy  (cEnemy* pEnemy) {ASSERT(!m_apAdditional.count(pEnemy)) m_apAdditional.insert(pEnemy);}
     inline void UnbindEnemy(cEnemy* pEnemy) {ASSERT( m_apAdditional.count(pEnemy)) m_apAdditional.erase (pEnemy);}
+
+    // 
+    inline coreUintW GetNumEnemiesAlive   ()const {return Core::Manager::Object->GetObjectList(TYPE_ENEMY).size();}
 };
 
 

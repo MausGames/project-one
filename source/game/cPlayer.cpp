@@ -157,6 +157,19 @@ void cPlayer::EquipWeapon(const coreUintW iIndex, const coreInt32 iID)
 
 
 // ****************************************************************
+// 
+void cPlayer::GiveShield()
+{
+    ASSERT( CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
+    ASSERT(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED))
+
+    // 
+    ADD_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED)
+    this->SetMaxHealth(PLAYER_SHIELD);
+}
+
+
+// ****************************************************************
 // render the player
 void cPlayer::Render()
 {
@@ -248,7 +261,7 @@ void cPlayer::Move()
             else
             {
                 // move the ship
-                const coreFloat fSpeed = (!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && CONTAINS_BIT(m_pInput->iActionHold, 0u)) ? 20.0f : 50.0f;
+                const coreFloat fSpeed = CONTAINS_BIT(m_pInput->iActionHold, 0u) ? 20.0f : 50.0f;
                 vNewPos += m_pInput->vMove * (Core::System->GetTime() * fSpeed);
             }
 
@@ -256,7 +269,7 @@ void cPlayer::Move()
             if(!m_vForce.IsNull())
             {
                 vNewPos  += m_vForce * Core::System->GetTime();
-                m_vForce *= 1.0f - 3.0f * Core::System->GetTime();
+                m_vForce *= FrictionFactor(3.0f);
             }
 
             // restrict movement to the foreground area
@@ -295,7 +308,7 @@ void cPlayer::Move()
         // update all weapons (shooting and stuff)
         for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
         {
-            const coreUint8 iShoot = (!this->IsRolling() && !CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT)) ? ((m_pInput->iActionHold & (BITLINE(WEAPON_MODES) << (i*WEAPON_MODES))) >> (i*WEAPON_MODES)) : 0u;
+            const coreUint8 iShoot = (!this->IsRolling() && !CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_PACIFIST) && !CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT)) ? ((m_pInput->iActionHold & (BITLINE(WEAPON_MODES) << (i*WEAPON_MODES))) >> (i*WEAPON_MODES)) : 0u;
             m_apWeapon[i]->Update(iShoot);
         }
 
@@ -361,7 +374,7 @@ coreBool cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, 
         m_ScoreTable.ReduceCombo();
 
         // 
-        if(g_pGame) g_pGame->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
+        if(STATIC_ISVALID(g_pGame)) g_pGame->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
         {
             if(pPlayer != this) pPlayer->StartFeeling(PLAYER_FEEL_TIME, 1u);
         });
@@ -572,8 +585,9 @@ void cPlayer::UpdateExhaust(const coreFloat fStrength)
 
     // 
     m_Exhaust.SetSize     (coreVector3(fSize, fLen, fSize) * 0.6f);
-    m_Exhaust.SetTexOffset(coreVector2(0.0f, coreFloat(Core::System->GetTotalTime()) * 0.75f));
-    m_Exhaust.SetPosition (coreVector3(0.0f, -(m_Exhaust.GetSize().y + 4.0f), 0.0f) + this->GetPosition());
+    m_Exhaust.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.75f));
+    m_Exhaust.SetPosition (this->GetPosition () - this->GetDirection() * (m_Exhaust.GetSize().y + 4.0f));
+    m_Exhaust.SetDirection(this->GetDirection());
     m_Exhaust.SetEnabled  (fStrength ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
     m_Exhaust.Move();
 }

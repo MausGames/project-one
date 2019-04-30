@@ -21,7 +21,9 @@
 // ****************************************************************
 // mission definitions
 #define MISSION_BOSSES  (BOSSES)   // default number of bosses per mission
+#define MISSION_WAVES   (WAVES)    // 
 #define MISSION_NO_BOSS (0xFFu)    // no boss currently active (error-value)
+#define MISSION_NO_WAVE (0xFFu)    // 
 
 
 // ****************************************************************
@@ -46,6 +48,7 @@
 #define STAGE_FINISH_AFTER(t)           {if(m_fStageTime >= (t)) STAGE_FINISH_NOW}
 
 #define STAGE_BOSS(e,p,d)               {if(STAGE_BEGINNING) (e).Resurrect((p) * FOREGROUND_AREA, (d)); if(CONTAINS_FLAG((e).GetStatus(), ENEMY_STATUS_DEAD)) STAGE_FINISH_NOW}
+#define STAGE_WAVE                      {if(STAGE_BEGINNING) this->ActivateWave(); if(STAGE_CLEARED) {this->DeactivateWave(); STAGE_FINISH_NOW}}
 
 #define STAGE_ADD_PATH(n)               const auto n = this->_AddPath    (__LINE__,      [](coreSpline2* OUTPUT n)
 #define STAGE_ADD_SQUAD(n,t,c)          const auto n = this->_AddSquad<t>(__LINE__, (c), [](cEnemySquad* OUTPUT n)
@@ -61,11 +64,13 @@
 #define STAGE_GET_END                   {ASSERT((iIntIndex == iNewIntSize) && (iFloatIndex == iNewFloatSize))}
 #define STAGE_GET_START(i,f)            UNUSED coreUintW iIntIndex = 0u; UNUSED coreUintW iFloatIndex = 0u; __STAGE_GET_INT(i) __STAGE_GET_FLOAT(f)
 #define STAGE_GET_INT(n,...)            coreInt16&   n =                     (m_piInt   [iIntIndex]);   iIntIndex   += 1u;       __STAGE_GET_CHECK {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_UINT(n,...)           coreUint16&  n = r_cast<coreUint16&> (m_piInt   [iIntIndex]);   iIntIndex   += 1u;       __STAGE_GET_CHECK {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 #define STAGE_GET_FLOAT(n,...)          coreFloat&   n =                     (m_pfFloat [iFloatIndex]); iFloatIndex += 1u;       __STAGE_GET_CHECK {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 #define STAGE_GET_VEC2(n,...)           coreVector2& n = r_cast<coreVector2&>(m_pfFloat [iFloatIndex]); iFloatIndex += 2u;       __STAGE_GET_CHECK {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 #define STAGE_GET_VEC3(n,...)           coreVector3& n = r_cast<coreVector3&>(m_pfFloat [iFloatIndex]); iFloatIndex += 3u;       __STAGE_GET_CHECK {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 #define STAGE_GET_VEC4(n,...)           coreVector4& n = r_cast<coreVector4&>(m_pfFloat [iFloatIndex]); iFloatIndex += 4u;       __STAGE_GET_CHECK {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 #define STAGE_GET_INT_ARRAY(n,c,...)    coreInt16*   n =                     (&m_piInt  [iIntIndex]);   iIntIndex   += 1u * (c); __STAGE_GET_CHECK {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_UINT_ARRAY(n,c,...)   coreUint16*  n = r_cast<coreUint16*> (&m_piInt  [iIntIndex]);   iIntIndex   += 1u * (c); __STAGE_GET_CHECK {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 #define STAGE_GET_FLOAT_ARRAY(n,c,...)  coreFloat*   n =                     (&m_pfFloat[iFloatIndex]); iFloatIndex += 1u * (c); __STAGE_GET_CHECK {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 #define STAGE_GET_VEC2_ARRAY(n,c,...)   coreVector2* n = r_cast<coreVector2*>(&m_pfFloat[iFloatIndex]); iFloatIndex += 2u * (c); __STAGE_GET_CHECK {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 #define STAGE_GET_VEC3_ARRAY(n,c,...)   coreVector3* n = r_cast<coreVector3*>(&m_pfFloat[iFloatIndex]); iFloatIndex += 3u * (c); __STAGE_GET_CHECK {if(STAGE_BEGINNING) {__VA_ARGS__;}}
@@ -141,6 +146,9 @@ protected:
     cBoss*    m_pCurBoss;                                      // pointer to currently active boss
     coreUintW m_iCurBossIndex;                                 // index of the active boss (or error-value)
 
+    coreUintW m_iCurWaveCount;                                 // 
+    coreUintW m_iCurWaveIndex;                                 // 
+
     coreLookup<coreUint16, std::function<void()>> m_anStage;   // 
     coreLookup<coreUint16, coreSpline2*>          m_apPath;    // 
     coreLookup<coreUint16, cEnemySquad*>          m_apSquad;   // 
@@ -182,10 +190,15 @@ public:
     void ActivateBoss  (const cBoss* pBoss);
     void DeactivateBoss();
 
+    // 
+    void ActivateWave  ();
+    void DeactivateWave();
+
     // access mission objects
     inline cBoss*           GetBoss        (const coreUintW iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_apBoss[iIndex];}
     inline cBoss*           GetCurBoss     ()const                       {return m_pCurBoss;}
     inline const coreUintW& GetCurBossIndex()const                       {return m_iCurBossIndex;}
+    inline const coreUintW& GetCurWaveIndex()const                       {return m_iCurWaveIndex;}
     inline cEnemySquad*     GetEnemySquad  (const coreUintW iIndex)const {ASSERT(iIndex < m_apSquad.size()) return m_apSquad.get_valuelist()[iIndex];}
 
 

@@ -81,7 +81,7 @@ void cMenu::Move()
     {
     case SURFACE_EMPTY:
         {
-            if(g_pGame)
+            if(STATIC_ISVALID(g_pGame))
             {
                 if(g_MenuInput.bPause || Core::System->GetWinFocusLost())
                 {
@@ -350,7 +350,7 @@ void cMenu::Move()
 coreBool cMenu::IsPaused()const
 {
     return (this->GetCurSurface() != SURFACE_EMPTY)   &&
-           (this->GetCurSurface() != SURFACE_SUMMARY) && g_pGame;
+           (this->GetCurSurface() != SURFACE_SUMMARY) && STATIC_ISVALID(g_pGame);
 }
 
 coreBool cMenu::IsPausedWithStep()
@@ -482,8 +482,8 @@ void cMenu::UpdateAnimateProgram(coreObject2D* OUTPUT pObject)
 void cMenu::__StartGame()
 {
     // 
-    ASSERT(!g_pGame)
-    g_pGame = new cGame(m_GameMenu.GetSelectedDifficulty(), (m_GameMenu.GetSelectedPlayers() > 1u) ? true : false, GAME_MISSION_LIST_DEFAULT);
+    ASSERT(!STATIC_ISVALID(g_pGame))
+    STATIC_NEW(g_pGame, m_GameMenu.GetSelectedDifficulty(), (m_GameMenu.GetSelectedPlayers() > 1u) ? true : false, GAME_MISSION_LIST_DEFAULT)
     g_pGame->LoadNextMission();
 
     // 
@@ -508,8 +508,8 @@ void cMenu::__EndGame()
     }
 
     // 
-    ASSERT(g_pGame)
-    SAFE_DELETE(g_pGame)
+    ASSERT(STATIC_ISVALID(g_pGame))
+    STATIC_DELETE(g_pGame)
 }
 
 

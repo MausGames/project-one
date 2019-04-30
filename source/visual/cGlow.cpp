@@ -24,20 +24,20 @@ void cGlow::Update()
     if(!g_CurConfig.Graphics.iGlow) return;
     if(!Core::System->GetTime())    return;
 
-    // create glow only with active game or special-effects
-    if(g_pGame || g_pSpecialEffects->IsActive())
+    // create glow only with active foreground
+    if(STATIC_ISVALID(g_pGame) || g_pTheater->IsActive())
     {
         m_Blur.Start();
         {
-            // draw single objects
+            // render single objects
             FOR_EACH(it, this->GetObjectSet())
-                (*it)->Render((*it)->GetProgram());   // # draw low-polygon models
+                (*it)->Render((*it)->GetProgram());   // # use low-polygon models
 
-            // draw lists with objects
+            // render lists with objects
             FOR_EACH(it, this->GetListSet())
                 (*it)->Render();
 
-            // always draw special-effects
+            // always render special-effects
             g_pSpecialEffects->Render(false);
         }
         m_Blur.End();

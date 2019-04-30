@@ -874,6 +874,6 @@ void CoreApp::Setup()
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ship_blink_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader ("object_inst.vert")
         ->AttachShader ("object_ship_blink_inst.frag")
-        ->BindAttribute("a_v1Blink", ENEMY_SHADER_ATTRIBUTE_BLINK)
+        ->BindAttribute("a_v1Blink", SHIP_SHADER_ATTRIBUTE_BLINK)
         ->Finish();
 }

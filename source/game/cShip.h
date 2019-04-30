@@ -34,7 +34,7 @@ protected:
     coreVector2 m_vOldPos;                 // 
 
     coreUint32 m_iBaseColor;               // packed base color for interpolations
-    coreFloat  m_fBlink;                   // blink intensity (to highlight successful hits)
+    coreFlow   m_fBlink;                   // blink intensity (to highlight successful hits)
 
 
 protected:

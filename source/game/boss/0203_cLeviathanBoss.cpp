@@ -388,7 +388,7 @@ void cLeviathanBoss::__MoveOwn()
 
     // 
     m_avVector[CONTAINER_DATA].z += m_avVector[CONTAINER_DATA].y * Core::System->GetTime();
-    m_avVector[CONTAINER_DATA].y *= 1.0f - 0.25f * Core::System->GetTime();
+    m_avVector[CONTAINER_DATA].y *= FrictionFactor(0.25f);
     pContainer->SetDirection(coreVector3(coreVector2::Direction(m_avVector[CONTAINER_DATA].z), 0.0f));
 
     // 

@@ -258,13 +258,11 @@ void cRayBullet::__ImpactOwn(const coreVector2& vImpact)
     // 
     if(m_iElement == ELEMENT_WHITE)
     {
-        g_pSpecialEffects->CreateSplashDark(coreVector3(vImpact, 0.0f),                        50.0f, 1u);
-        g_pSpecialEffects->CreateBlowDark  (coreVector3(vImpact, 0.0f), -this->GetDirection(), 50.0f, 1u);
+        g_pSpecialEffects->CreateSplashDark(coreVector3(vImpact, 0.0f), 5.0f, 1u);
     }
     else
     {
-        g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f),                        50.0f, 1u, this->GetColor3());
-        g_pSpecialEffects->CreateBlowColor  (coreVector3(vImpact, 0.0f), -this->GetDirection(), 50.0f, 1u, this->GetColor3());
+        g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 1u, this->GetColor3());
     }
 }
 
@@ -533,7 +531,7 @@ void cMineBullet::__RenderOwnBefore()
 void cMineBullet::__MoveOwn()
 {
     // 
-    m_fSpeed = MAX(m_fSpeed * (1.0f - 3.5f * Core::System->GetTime()), 0.0f);
+    m_fSpeed = MAX(m_fSpeed * FrictionFactor(3.5f), 0.0f);
 
     // fly around
     this->SetPosition(coreVector3(this->GetPosition().xy() + m_vFlyDir * (m_fSpeed * Core::System->GetTime()), 0.0f));

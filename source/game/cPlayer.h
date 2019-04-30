@@ -15,19 +15,21 @@
 // TODO: check which operations have to be done outside of dead-check
 // TODO: add in-game hint for roll-cooldown end ((just) acoustic)
 // TODO: render wind later to prevent depth/overdraw issues
+// TODO: correct reverse-tracking when hitting the walls (position correction) ? only for 45degree, also on other code locations ?
 
 
 // ****************************************************************
 // player definitions
-#define PLAYER_WEAPONS            (1u)      // number of weapons a player can carry
-#define PLAYER_LIVES              (LIVES)   // 
-#define PLAYER_COLLISION_MIN      (0.5f)    // 
-#define PLAYER_WIND_SIZE          (4.5f)    // 
-#define PLAYER_BUBBLE_SIZE        (6.0f)    // 
-#define PLAYER_ROLL_SPEED         (1.0f)    // 
-#define PLAYER_ROLL_COOLDOWN      (60.0f)   // (60 is fastest cooldown, ship is vulnerable for a single frame) 
-#define PLAYER_FEEL_TIME          (3.0f)    // 
-#define PLAYER_FEEL_TIME_CONTINUE (5.0f)    // 
+#define PLAYER_WEAPONS            (1u)       // number of weapons a player can carry
+#define PLAYER_LIVES              (LIVES)    // 
+#define PLAYER_SHIELD             (SHIELD)   // 
+#define PLAYER_COLLISION_MIN      (0.5f)     // 
+#define PLAYER_WIND_SIZE          (4.5f)     // 
+#define PLAYER_BUBBLE_SIZE        (6.0f)     // 
+#define PLAYER_ROLL_SPEED         (1.0f)     // 
+#define PLAYER_ROLL_COOLDOWN      (60.0f)    // (60 is fastest cooldown, ship is vulnerable for a single frame) 
+#define PLAYER_FEEL_TIME          (3.0f)     // 
+#define PLAYER_FEEL_TIME_CONTINUE (5.0f)     // 
 
 #define PLAYER_SHIP_ATK (0u)        // 
 #define PLAYER_SHIP_DEF (1u)        // 
@@ -37,10 +39,12 @@
 enum ePlayerStatus : coreUint8
 {
     PLAYER_STATUS_DEAD           = 0x01u,   // completely removed from the game
-    PLAYER_STATUS_NO_INPUT_MOVE  = 0x02u,   // disable player movement (user controls only)
-    PLAYER_STATUS_NO_INPUT_SHOOT = 0x04u,   // disable player weapons
-    PLAYER_STATUS_NO_INPUT_ROLL  = 0x08u,   // 
-    PLAYER_STATUS_NO_INPUT_TURN  = 0x10u,   // 
+    PLAYER_STATUS_PACIFIST       = 0x02u,   // 
+    PLAYER_STATUS_SHIELDED       = 0x04u,   // 
+    PLAYER_STATUS_NO_INPUT_MOVE  = 0x08u,   // disable player movement (user controls only)
+    PLAYER_STATUS_NO_INPUT_SHOOT = 0x10u,   // disable player weapons
+    PLAYER_STATUS_NO_INPUT_ROLL  = 0x20u,   // 
+    PLAYER_STATUS_NO_INPUT_TURN  = 0x40u,   // 
     PLAYER_STATUS_NO_INPUT_ALL   = PLAYER_STATUS_NO_INPUT_MOVE | PLAYER_STATUS_NO_INPUT_SHOOT | PLAYER_STATUS_NO_INPUT_ROLL | PLAYER_STATUS_NO_INPUT_TURN
 };
 
@@ -83,6 +87,7 @@ public:
     // configure the player
     void Configure  (const coreUintW iShipType, const coreVector3& vColor);
     void EquipWeapon(const coreUintW iIndex, const coreInt32 iID);
+    void GiveShield ();
 
     // render and move the player
     void Render()final;

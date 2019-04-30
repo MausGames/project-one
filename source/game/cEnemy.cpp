@@ -44,7 +44,7 @@ void cEnemy::Configure(const coreInt32 iHealth, const coreVector3& vColor, const
 void cEnemy::GiveShield(const coreUint8 iElement, const coreInt16 iHealth)
 {
     // 
-    ASSERT(g_pGame)
+    ASSERT(STATIC_ISVALID(g_pGame))
     g_pGame->GetShieldManager()->BindEnemy(this, iElement, iHealth);
 }
 
@@ -100,7 +100,11 @@ coreBool cEnemy::TakeDamage(coreInt32 iDamage, const coreUint8 iElement, const c
     if(!CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_INVINCIBLE))
     {
         // 
-        if(g_pGame) g_pGame->GetShieldManager()->AbsorbDamage(this, &iDamage, iElement);
+        const coreInt32 iPower = (pAttacker && (STATIC_ISVALID(g_pGame) && g_pGame->GetCoop())) ? 1 : GAME_PLAYERS;
+        iDamage *= iPower;
+
+        // 
+        if(STATIC_ISVALID(g_pGame)) g_pGame->GetShieldManager()->AbsorbDamage(this, &iDamage, iElement);
         if(iDamage > 0)
         {
             // 
@@ -218,7 +222,7 @@ void cEnemy::Kill(const coreBool bAnimated)
     ASSERT(!bEnergy || (bEnergy && bSingle))
 
     // 
-    if(g_pGame) g_pGame->GetShieldManager()->UnbindEnemy(this);
+    if(STATIC_ISVALID(g_pGame)) g_pGame->GetShieldManager()->UnbindEnemy(this);
 
     // 
     if(bAnimated && this->IsEnabled(CORE_OBJECT_ENABLE_RENDER))
@@ -264,7 +268,7 @@ void cEnemy::Kill(const coreBool bAnimated)
 cPlayer* cEnemy::NearestPlayer()const
 {
     // 
-    ASSERT(g_pGame)
+    ASSERT(STATIC_ISVALID(g_pGame))
     return g_pGame->FindPlayer(this->GetPosition().xy());
 }
 
@@ -325,7 +329,7 @@ cEnemySquad::~cEnemySquad()
 // 
 void cEnemySquad::FreeEnemies()
 {
-    ASSERT(g_pGame)
+    ASSERT(STATIC_ISVALID(g_pGame))
 
     // 
     FOR_EACH(it, m_apEnemy)
@@ -360,6 +364,31 @@ cEnemy* cEnemySquad::FindEnemy(const coreVector2& vPosition)
         // 
         const coreFloat fCurLenSq = (pCurEnemy->GetPosition().xy() - vPosition).LengthSq();
         if(fCurLenSq < fLenSq)
+        {
+            // 
+            pEnemy = pCurEnemy;
+            fLenSq = fCurLenSq;
+        }
+    });
+
+    return pEnemy;
+}
+
+
+// ****************************************************************
+// 
+cEnemy* cEnemySquad::FindEnemyRev(const coreVector2& vPosition)
+{
+    // 
+    cEnemy*   pEnemy = NULL;
+    coreFloat fLenSq = 0.0f;
+
+    // 
+    this->ForEachEnemy([&](cEnemy* OUTPUT pCurEnemy, const coreUintW i)
+    {
+        // 
+        const coreFloat fCurLenSq = (pCurEnemy->GetPosition().xy() - vPosition).LengthSq();
+        if(fCurLenSq > fLenSq)
         {
             // 
             pEnemy = pCurEnemy;
@@ -548,6 +577,31 @@ cEnemy* cEnemyManager::FindEnemy(const coreVector2& vPosition)
         // 
         const coreFloat fCurLenSq = (pCurEnemy->GetPosition().xy() - vPosition).LengthSq();
         if(fCurLenSq < fLenSq)
+        {
+            // 
+            pEnemy = pCurEnemy;
+            fLenSq = fCurLenSq;
+        }
+    });
+
+    return pEnemy;
+}
+
+
+// ****************************************************************
+// 
+cEnemy* cEnemyManager::FindEnemyRev(const coreVector2& vPosition)
+{
+    // 
+    cEnemy*   pEnemy = NULL;
+    coreFloat fLenSq = 0.0f;
+
+    // 
+    this->ForEachEnemy([&](cEnemy* OUTPUT pCurEnemy)
+    {
+        // 
+        const coreFloat fCurLenSq = (pCurEnemy->GetPosition().xy() - vPosition).LengthSq();
+        if(fCurLenSq > fLenSq)
         {
             // 
             pEnemy = pCurEnemy;

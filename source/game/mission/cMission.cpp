@@ -15,6 +15,8 @@ cMission::cMission()noexcept
 : m_apBoss           {}
 , m_pCurBoss         (NULL)
 , m_iCurBossIndex    (MISSION_NO_BOSS)
+, m_iCurWaveCount    (0u)
+, m_iCurWaveIndex    (MISSION_NO_WAVE)
 , m_piInt            (NULL)
 , m_pfFloat          (NULL)
 , m_iIntSize         (0u)
@@ -58,12 +60,8 @@ void cMission::Setup()
     this->__SetupOwn();
 
     // 
+    ASSERT(!m_anStage.empty())
     m_anStage.reverse();
-    m_anStage.emplace(0u, [this]()
-    {
-        // begin mission
-        STAGE_FINISH_NOW
-    });
 
     // 
     m_iStageNum = m_anStage.size();
@@ -172,6 +170,22 @@ void cMission::DeactivateBoss()
     // 
     m_pCurBoss      = NULL;
     m_iCurBossIndex = MISSION_NO_BOSS;
+}
+
+
+// ****************************************************************
+// 
+void cMission::ActivateWave()
+{
+    // 
+    ASSERT(m_iCurWaveCount < MISSION_WAVES)
+    m_iCurWaveIndex = m_iCurWaveCount++;
+}
+
+void cMission::DeactivateWave()
+{
+    // 
+    m_iCurWaveIndex = MISSION_NO_WAVE;
 }
 
 

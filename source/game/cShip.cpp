@@ -310,5 +310,5 @@ void cShip::_UpdateAlwaysAfter()
 
     // 
     if(g_MenuInput.bScreenshot) m_fBlink = 0.0f;
-    m_fBlink = MAX(m_fBlink - 15.0f*Core::System->GetTime(), 0.0f);
+    m_fBlink.UpdateMax(-15.0f, 0.0f);
 }

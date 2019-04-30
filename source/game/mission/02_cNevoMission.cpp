@@ -152,7 +152,7 @@ void cNevoMission::__MoveOwnAfter()
         if(!m_vForce.IsNull())
         {
             vNewPos  += m_vForce * Core::System->GetTime();
-            m_vForce *= 1.0f - 2.5f * Core::System->GetTime();
+            m_vForce *= FrictionFactor(2.5f);
         }
 
         // 

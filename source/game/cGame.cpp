@@ -21,6 +21,8 @@ cGame::cGame(const coreUint8 iDifficulty, const coreBool bCoop, const coreInt32*
 , m_iCurMissionIndex    (coreUintW(-1))
 , m_fTimeInOut          (0.0f)
 , m_iContinues          (GAME_CONTINUES)
+, m_fPacifistDamage     (0.0f)
+, m_bPacifist           (false)
 , m_iDepthLevel         (0u)
 , m_iStatus             (0u)
 , m_iDifficulty         (iDifficulty)
@@ -40,12 +42,14 @@ cGame::cGame(const coreUint8 iDifficulty, const coreBool bCoop, const coreInt32*
     // configure first player
     m_aPlayer[0].Configure  (PLAYER_SHIP_ATK, COLOR_SHIP_RED);
     m_aPlayer[0].EquipWeapon(0u, cRayWeapon::ID);
+    if(!m_iDifficulty) m_aPlayer[0].GiveShield();
 
     if(m_bCoop)
     {
         // configure second player
         m_aPlayer[1].Configure  (PLAYER_SHIP_DEF, COLOR_SHIP_BLUE);
         m_aPlayer[1].EquipWeapon(0u, cRayWeapon::ID);
+        if(!m_iDifficulty) m_aPlayer[1].GiveShield();
 
         // 
         m_aPlayer[0].SetInput(&g_aGameInput[0]);
@@ -53,6 +57,10 @@ cGame::cGame(const coreUint8 iDifficulty, const coreBool bCoop, const coreInt32*
 
         STATIC_ASSERT(GAME_PLAYERS == 2u)
     }
+
+    // 
+    m_Interface.UpdateLayout();
+    m_Interface.UpdateEnabled();
 
     // load first mission
     m_pCurMission = new cNoMission();
@@ -87,6 +95,9 @@ cGame::~cGame()
 
     // delete last mission
     SAFE_DELETE(m_pCurMission)
+
+    // 
+    g_pPostProcessing->SetSaturation(1.0f);
 
     // 
     g_pEnvironment->SetTargetDirection(ENVIRONMENT_DEFAULT_DIRECTION);
@@ -176,6 +187,9 @@ void cGame::Move()
 
     // 
     m_TimeTable.Update();
+
+    // 
+    this->__HandlePacifist();
 
     // move the mission
     m_pCurMission->MoveBefore();
@@ -271,7 +285,7 @@ void cGame::LoadMissionID(const coreInt32 iID)
 
     if(iID != cNoMission::ID)
     {
-        // 
+        // setup the mission
         m_pCurMission->Setup();
 
         // set initial status
@@ -401,6 +415,20 @@ void cGame::UseContinue()
 
 // ****************************************************************
 // 
+void cGame::ActivatePacifist()
+{
+    // 
+    ASSERT(!m_bPacifist)
+    m_bPacifist = true;
+
+    // 
+    for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+        m_aPlayer[i].AddStatus(PLAYER_STATUS_PACIFIST);
+}
+
+
+// ****************************************************************
+// 
 void cGame::PushDepthLevel()
 {
     // 
@@ -492,6 +520,7 @@ coreBool cGame::__HandleIntro()
             static coreSpline2 s_Spline;
             if(!s_Spline.GetNumNodes())
             {
+                s_Spline.Reserve(3u);
                 s_Spline.AddNode(coreVector2(-140.0f,-10.0f), coreVector2( 1.0f, 0.0f));
                 s_Spline.AddNode(coreVector2(  10.0f, 10.0f), coreVector2(-1.0f,-1.0f).Normalized());
                 s_Spline.AddNode(coreVector2( -30.0f,  0.0f), coreVector2(-1.0f, 0.0f));
@@ -502,8 +531,8 @@ coreBool cGame::__HandleIntro()
             {
                 // calculate new player position and rotation
                 const coreFloat   fTime = CLAMP((i ? 0.0f : 0.08f) + m_fTimeInOut / GAME_INTRO_DURATION, 0.0f, 1.0f);
-                const coreVector2 vPos  = s_Spline.CalcPosition (LERPB(0.0f, s_Spline.GetTotalDistance(), fTime));
-                const coreVector2 vDir  = coreVector2::Direction(LERPS(0.0f, 4.0f*PI,                     fTime));
+                const coreVector2 vPos  = s_Spline.CalcPositionLerp(LERPB(0.0f, 1.0f,    fTime));
+                const coreVector2 vDir  = coreVector2::Direction   (LERPS(0.0f, 4.0f*PI, fTime));
 
                 // 
                 if((pPlayer->GetPosition().y < -FOREGROUND_AREA.y) && (vPos.x >= -FOREGROUND_AREA.y))
@@ -533,7 +562,7 @@ coreBool cGame::__HandleOutro()
         // 
         m_fTimeInOut.Update(1.0f);
 
-        this->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+        this->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
         {
             // calculate new player position and rotation
             const coreFloat   fTime = MAX((i ? -0.16f : 0.0f) + m_fTimeInOut, 0.0f);
@@ -584,6 +613,44 @@ void cGame::__HandleDefeat()
 
 
 // ****************************************************************
+// 
+void cGame::__HandlePacifist()
+{
+    if(!m_bPacifist) return;
+
+    // 
+    const coreUintW iNumEnemies = m_EnemyManager.GetNumEnemiesAlive();
+    if(iNumEnemies)
+    {
+        // 
+        this->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
+        {
+            if(!pPlayer->IsRolling()) m_fPacifistDamage.Update(GAME_PACIFIST_DAMAGE / I_TO_F(m_bCoop ? GAME_PLAYERS : 1u));
+        });
+
+        // 
+        if((m_fPacifistDamage >= GAME_PACIFIST_DAMAGE) && (F_TO_UI(m_fPacifistDamage) >= iNumEnemies))
+        {
+            // 
+            const coreInt32 iDamage = F_TO_UI(m_fPacifistDamage) / iNumEnemies;
+            m_fPacifistDamage -= I_TO_F(iDamage * iNumEnemies);
+
+            // 
+            m_EnemyManager.ForEachEnemy([&](cEnemy* OUTPUT pEnemy)
+            {
+                pEnemy->TakeDamage(iDamage, ELEMENT_NEUTRAL, pEnemy->GetPosition().xy(), NULL);
+            });
+        }
+    }
+    else
+    {
+        // 
+        m_fPacifistDamage = 0.0f;
+    }
+}
+
+
+// ****************************************************************
 // handle default object collisions
 void cGame::__HandleCollisions()
 {
@@ -600,7 +667,7 @@ void cGame::__HandleCollisions()
 
         // 
         pPlayer->TakeDamage(15, ELEMENT_NEUTRAL, vIntersection.xy());
-        pEnemy ->TakeDamage(50, ELEMENT_NEUTRAL, vIntersection.xy(), pPlayer);
+        pEnemy ->TakeDamage(25, ELEMENT_NEUTRAL, vIntersection.xy(), pPlayer);
 
         // 
         g_pSpecialEffects->MacroExplosionPhysicalDarkSmall(vIntersection);

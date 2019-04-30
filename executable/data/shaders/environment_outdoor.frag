@@ -22,6 +22,14 @@ void FragmentMain()
     vec2 v2TexNormal;
     vec3 v3TexColor;
 
+#if defined(_P1_LIGHT_)
+
+    // ignore textures
+    v2TexNormal = vec2(0.5);
+    v3TexColor  = vec3(0.0);
+
+#else
+
     // always lookup full normal map (less register pressure)
     vec4 v4FullNormal = coreTexture2D(2, v_av2TexCoord[0]);
 
@@ -47,11 +55,6 @@ void FragmentMain()
         v2TexNormal = mix(v4FullNormal.zw, v4FullNormal.xy, v_v1Mix);
         v3TexColor  = mix(v3FullColor1,    v3FullColor2,    v_v1Mix);
     }
-
-#if (_CORE_QUALITY_) == 0 || defined(_P1_LIGHT_)
-
-    // ignore normal map
-    v2TexNormal = vec2(0.5);
 
 #endif
 

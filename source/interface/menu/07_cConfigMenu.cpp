@@ -91,6 +91,7 @@ cConfigMenu::cConfigMenu()noexcept
         if(i == ENTRY_INPUT_MOVEUP)        ++iOffset;
         if(i == ENTRY_INPUT_ACTION1)       ++iOffset;
         if(i == ENTRY_GAME_GAMEROTATION)   ++iOffset;
+        if(i == ENTRY_GAME_HUDROTATION)    ++iOffset;
 
         m_aLabel[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
         m_aLabel[i].SetPosition (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.04f, -0.05f - 0.025f*I_TO_F(iOffset)));
@@ -794,7 +795,7 @@ void cConfigMenu::__UpdateInterface()
     g_pPostProcessing->UpdateLayout();
     g_pPostProcessing->Move();
 
-    if(g_pGame)
+    if(STATIC_ISVALID(g_pGame))
     {
         // 
         g_pGame->GetInterface()->UpdateLayout();

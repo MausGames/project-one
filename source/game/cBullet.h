@@ -172,6 +172,10 @@ public:
 
     // 
     template <typename T> void PrefetchBullet();
+
+    // 
+    inline coreUintW                       GetNumBullets     ()const {return Core::Manager::Object->GetObjectList(m_iType).size();}
+    template <typename T> inline coreUintW GetNumBulletsTyped()const {return m_apBulletSet[T::ID] ? m_apBulletSet[T::ID]->oBulletActive.List()->size() : 0u;}
 };
 
 
@@ -225,7 +229,7 @@ public:
     inline void ResetProperties() {this->MakePurple(); this->SetSize(coreVector3(2.5f,2.5f,2.5f) * 1.3f); m_fAnimation = 0.09f;}
 
     // change default color
-    inline cPulseBullet* MakeWhite () {ASSERT(false)            return this;}
+    inline cPulseBullet* MakeWhite () {this->_MakeWhite (0.7f); return this;}
     inline cPulseBullet* MakeYellow() {ASSERT(false)            return this;}
     inline cPulseBullet* MakeOrange() {ASSERT(false)            return this;}
     inline cPulseBullet* MakeRed   () {ASSERT(false)            return this;}
@@ -332,7 +336,7 @@ public:
     inline void ResetProperties() {this->MakeGreen(); this->SetSize(coreVector3(1.5f,1.5f,1.5f) * 1.3f); m_fAnimation = 0.2f;}
 
     // change default color
-    inline cWaveBullet* MakeWhite () {ASSERT(false)            return this;}
+    inline cWaveBullet* MakeWhite () {this->_MakeWhite (0.7f); return this;}
     inline cWaveBullet* MakeYellow() {ASSERT(false)            return this;}
     inline cWaveBullet* MakeOrange() {ASSERT(false)            return this;}
     inline cWaveBullet* MakeRed   () {this->_MakeRed   (1.0f); return this;}
@@ -373,7 +377,7 @@ public:
     inline void ResetProperties() {this->MakeBlue(); this->SetSize(coreVector3(2.5f,2.5f,2.5f)); m_fAnimation = 0.09f; m_fLightningTime = 1.0f;}
 
     // change default color
-    inline cTeslaBullet* MakeWhite () {ASSERT(false)            return this;}
+    inline cTeslaBullet* MakeWhite () {this->_MakeWhite (0.7f); return this;}
     inline cTeslaBullet* MakeYellow() {ASSERT(false)            return this;}
     inline cTeslaBullet* MakeOrange() {ASSERT(false)            return this;}
     inline cTeslaBullet* MakeRed   () {ASSERT(false)            return this;}

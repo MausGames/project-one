@@ -34,11 +34,11 @@ private:
     std::vector<coreObject3D*>    m_apAddObject;   // temporary additional objects
     coreLookupStr<coreBatchList*> m_apAddList;     // optimized lists for temporary additional objects
 
-    coreObject2D m_Ink;                            // 
-    coreFlow     m_fInkAnimation;                  // 
-    coreFloat    m_fInkDelay;                      // 
-    coreVector4  m_vInkPosition;                   // 
-    coreVector2  m_vInkAlpha;                      // 
+    coreFullscreen m_Ink;                          // 
+    coreFlow       m_fInkAnimation;                // 
+    coreFloat      m_fInkDelay;                    // 
+    coreVector4    m_vInkPosition;                 // 
+    coreVector2    m_vInkAlpha;                    // 
 
     bool m_bActive;                                // 
 

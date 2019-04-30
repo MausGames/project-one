@@ -50,7 +50,7 @@ protected:
     coreFrameBuffer m_Refraction;       // refraction frame buffer
     coreFrameBuffer m_Depth;            // depth frame buffer (reduced resolution)
 
-    coreObject2D   m_Sky;               // sky-plane as reflection background
+    coreFullscreen m_Sky;               // sky-plane as reflection background
     coreProgramPtr m_apSkyProgram[2];   // 
 
 
@@ -128,7 +128,7 @@ class cRainWater final : public cWater
 {
 private:
     coreFrameBuffer m_WaveMap;           // 
-    coreObject2D    m_WaveInjection;     // 
+    coreFullscreen  m_WaveInjection;     // 
 
     coreObject3D  m_aDrop[RAIN_DROPS];   // 
     coreBatchList m_DropList;            // 

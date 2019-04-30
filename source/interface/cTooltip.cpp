@@ -75,7 +75,7 @@ void cTooltip::Move()
 void cTooltip::__ShowText(const coreFloat fWidth, const coreChar* pcText)
 {
     const coreFontPtr& pFont   = m_aLine[0].GetFont();
-    const coreUint8    iHeight = CORE_LABEL_HEIGHT_RELATIVE(m_aLine[0].GetHeight());
+    const coreUint16   iHeight = CORE_LABEL_HEIGHT_RELATIVE(m_aLine[0].GetHeight());
     const coreFloat    fFactor = CORE_LABEL_SIZE_FACTOR;
 
     // 

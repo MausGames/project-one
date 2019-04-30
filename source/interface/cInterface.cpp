@@ -24,6 +24,22 @@ void cInterface::sPlayerView::Construct(const coreUintW iIndex)
         aLife[i].SetAlignment (coreVector2(1.0f,1.0f) * vSide);
     }
 
+    aShieldBar[0].DefineTexture(0u, "menu_detail_01.png");
+    aShieldBar[0].DefineProgram("default_2d_program");
+    aShieldBar[0].SetPosition  (coreVector2(0.0f,0.005f) * vSide);
+    aShieldBar[0].SetSize      (coreVector2(3.5f,0.4f) * 0.07f);
+    aShieldBar[0].SetAlignment (coreVector2(1.0f,1.0f) * vSide);
+
+    aShieldBar[1].DefineTexture(0u, "menu_detail_01.png");
+    aShieldBar[1].DefineProgram("default_2d_program");
+    aShieldBar[1].SetPosition  (aShieldBar[0].GetPosition() + coreVector2(0.01f,0.01f) * 0.5f * vSide);
+    aShieldBar[1].SetSize      (aShieldBar[0].GetSize()     - coreVector2(0.01f,0.01f));
+    aShieldBar[1].SetAlignment (aShieldBar[0].GetAlignment());
+
+    oShieldValue.Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+    oShieldValue.SetPosition (aShieldBar[0].GetPosition() + coreVector2(0.035f, 0.01f) * vSide);
+    oShieldValue.SetAlignment(coreVector2(1.0f,1.0f) * vSide);
+
     oScoreTotal.Construct   (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
     oScoreTotal.SetPosition (coreVector2(0.01f,0.0f) * vSide);
     oScoreTotal.SetAlignment(coreVector2(1.0f,-1.0f) * vSide);
@@ -33,21 +49,22 @@ void cInterface::sPlayerView::Construct(const coreUintW iIndex)
     oScoreMission.SetAlignment(oScoreTotal.GetAlignment());
 
     // 
-    fLifeSpin = I_TO_F(INTERFACE_LIVES);
+    fSpin = 0.0f;
 }
 
 
 // ****************************************************************
 // constructor
 cInterface::cInterface(const coreUint8 iNumViews)noexcept
-: m_iNumViews       (iNumViews)
-, m_fBossHealthSpin (0.0f)
-, m_fBannerStart    (-FLT_MAX)
-, m_bBannerType     (false)
-, m_fStoryStart     (-FLT_MAX)
-, m_bVisible        (false)
-, m_fAlphaAll       (0.0f)
-, m_fAlphaBoss      (0.0f)
+: m_iNumViews    (iNumViews)
+, m_fBossSpin    (0.0f)
+, m_fBannerStart (-FLT_MAX)
+, m_bBannerType  (false)
+, m_fStoryStart  (-FLT_MAX)
+, m_fAnimation   (0.0f)
+, m_bVisible     (false)
+, m_fAlphaAll    (0.0f)
+, m_fAlphaBoss   (0.0f)
 {
     ASSERT((m_iNumViews > 0) && (m_iNumViews <= INTERFACE_VIEWS))
 
@@ -80,17 +97,17 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
     m_aBossTime[1].SetPosition (m_aBossTime[0].GetPosition());
     m_aBossTime[1].SetAlignment(coreVector2(1.0f,-1.0f));
 
-    m_StageName.Construct   (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
-    m_StageName.SetPosition (m_aBossHealthBar[0].GetPosition());
-    m_StageName.SetAlignment(m_aBossHealthBar[0].GetAlignment());
+    m_WaveName.Construct   (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
+    m_WaveName.SetPosition (m_aBossHealthBar[0].GetPosition());
+    m_WaveName.SetAlignment(m_aBossHealthBar[0].GetAlignment());
 
-    m_aStageTime[0].Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
-    m_aStageTime[0].SetPosition (coreVector2( 0.0f,-0.002f));
-    m_aStageTime[0].SetAlignment(coreVector2(-1.0f,-1.0f));
+    m_aWaveTime[0].Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+    m_aWaveTime[0].SetPosition (coreVector2( 0.0f,-0.002f));
+    m_aWaveTime[0].SetAlignment(coreVector2(-1.0f,-1.0f));
 
-    m_aStageTime[1].Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
-    m_aStageTime[1].SetPosition (m_aStageTime[0].GetPosition());
-    m_aStageTime[1].SetAlignment(coreVector2(1.0f,-1.0f));
+    m_aWaveTime[1].Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+    m_aWaveTime[1].SetPosition (m_aWaveTime[0].GetPosition());
+    m_aWaveTime[1].SetAlignment(coreVector2(1.0f,-1.0f));
 
     m_BannerBar.DefineTexture(0u, "menu_detail_03.png");
     m_BannerBar.DefineTexture(1u, "menu_background_black.png");
@@ -106,9 +123,6 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
 
     m_aStoryText[0].Construct(MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
     m_aStoryText[1].Construct(MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
-
-    // 
-    this->UpdateLayout();
 }
 
 
@@ -122,6 +136,8 @@ void cInterface::Render()
         {
             // render player images
             for(coreUintW j = 0u; j < INTERFACE_LIVES; ++j) m_aView[i].aLife[j].Render();
+            m_aView[i].aShieldBar[0].Render();
+            m_aView[i].aShieldBar[1].Render();
         }
 
         if(m_fAlphaBoss)
@@ -134,6 +150,7 @@ void cInterface::Render()
         for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i)
         {
             // render player labels
+            m_aView[i].oShieldValue .Render();
             m_aView[i].oScoreTotal  .Render();
             m_aView[i].oScoreMission.Render();
         }
@@ -148,10 +165,10 @@ void cInterface::Render()
 
         if(m_fAlphaBoss != 1.0f)
         {
-            // render stage labels
-            m_StageName    .Render();
-            m_aStageTime[0].Render();
-            m_aStageTime[1].Render();
+            // render wave labels
+            m_WaveName    .Render();
+            m_aWaveTime[0].Render();
+            m_aWaveTime[1].Render();
         }
     }
 
@@ -181,48 +198,82 @@ void cInterface::Render()
 // move the interface
 void cInterface::Move()
 {
+    // 
+    m_fAnimation.UpdateMod(6.0f*PI, 2.0f*PI);
+    const coreFloat fDanger = 1.0f + 0.8f * (1.0f + 0.5f * SIN(m_fAnimation));
+
     // loop through all player views
     for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i)
     {
         sPlayerView& oView   = m_aView[i];
         cPlayer*     pPlayer = g_pGame->GetPlayer(i);
-        cScoreTable* pTable  = pPlayer->GetScoreTable();
 
-        // 
-        const coreFloat fCurHealth = I_TO_F(pPlayer->GetCurHealth());
-             if(fCurHealth > oView.fLifeSpin) oView.fLifeSpin = MIN(oView.fLifeSpin + Core::System->GetTime() * 8.0f, fCurHealth);
-        else if(fCurHealth < oView.fLifeSpin) oView.fLifeSpin = MAX(oView.fLifeSpin - Core::System->GetTime() * 8.0f, fCurHealth);
-
-        // 
-        for(coreUintW j = 0u; j < INTERFACE_LIVES; ++j)
+        if(CONTAINS_FLAG(pPlayer->GetStatus(), PLAYER_STATUS_SHIELDED))
         {
             // 
-            const coreVector2 vSide = coreVector2(i ? -1.0f : 1.0f, 1.0f);
-            const coreVector2 vPos  = coreVector2(0.007f + I_TO_F(j) * 0.04f, 0.005f);
-            const coreVector2 vSize = coreVector2(1.0f,1.0f) * 0.045f;
+            if(m_fAlphaAll) oView.fSpin.UpdateMin(1.0f, 1.0f);
+                       else oView.fSpin = 0.0f;
+
+            // set shield bar size
+            const coreFloat fPercent = pPlayer->GetCurHealthPct() * oView.fSpin;
+            const coreFloat fWidth   = oView.aShieldBar[0].GetSize().x - 0.01f;
+            oView.aShieldBar[1].SetSize     (coreVector2(fPercent * fWidth, oView.aShieldBar[1].GetSize().y));
+            oView.aShieldBar[1].SetTexSize  (coreVector2(fPercent, 1.0f));
+            oView.aShieldBar[1].SetTexOffset(coreVector2(i ? (1.0f-fPercent) : 0.0f, 0.0f));
+
+            // set shield bar color
+            const coreVector3 vColor = COLOR_MENU_BLUE * ((fPercent <= 0.2f) ? fDanger : 1.0f);
+            oView.aShieldBar[0].SetColor3(vColor * 0.2f);
+            oView.aShieldBar[1].SetColor3(vColor * 0.9f);
+
+            // display shield value
+            oView.oShieldValue.SetText(PRINT("%.0f", I_TO_F(pPlayer->GetCurHealth()) * oView.fSpin));
+        }
+        else
+        {
+            // 
+            const coreFloat fCurHealth = I_TO_F(pPlayer->GetCurHealth());
+                 if(!m_fAlphaAll)             oView.fSpin = 0.0f;
+            else if(fCurHealth > oView.fSpin) oView.fSpin.UpdateMin( 8.0f, fCurHealth);
+            else if(fCurHealth < oView.fSpin) oView.fSpin.UpdateMax(-8.0f, fCurHealth);
 
             // 
-            const coreFloat   fSpin    = CLAMP(oView.fLifeSpin - I_TO_F(j), 0.0f, 1.0f);
-            const coreVector2 vNewSize = vSize * (1.5f - 0.5f * fSpin);
-            const coreVector2 vNewPos  = vPos + 0.5f * (vSize - vNewSize);
+            for(coreUintW j = 0u; j < INTERFACE_LIVES; ++j)
+            {
+                // 
+                const coreVector2 vSide = coreVector2(i ? -1.0f : 1.0f, 1.0f);
+                const coreVector2 vPos  = coreVector2(0.007f + I_TO_F(j) * 0.04f, 0.005f);
+                const coreVector2 vSize = coreVector2(1.0f,1.0f) * 0.045f;
 
-            // 
-            oView.aLife[j].SetPosition(vNewPos * vSide);
-            oView.aLife[j].SetSize    (vNewSize);
-            oView.aLife[j].SetAlpha   (m_fAlphaAll * fSpin);
-            oView.aLife[j].SetEnabled (fSpin ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
-            oView.aLife[j].Move();
+                // 
+                const coreFloat   fCurSpin = CLAMP(oView.fSpin - I_TO_F(j), 0.0f, 1.0f);
+                const coreVector2 vNewSize = vSize * (1.5f - 0.5f * fCurSpin);
+                const coreVector2 vNewPos  = vPos + 0.5f * (vSize - vNewSize);
+
+                // 
+                oView.aLife[j].SetPosition(vNewPos * vSide);
+                oView.aLife[j].SetSize    (vNewSize);
+                oView.aLife[j].SetAlpha   (m_fAlphaAll * fCurSpin);
+                oView.aLife[j].SetEnabled (fCurSpin ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+                oView.aLife[j].Move();
+            }
         }
 
         // display score
-        oView.oScoreTotal  .SetText(PRINT("%07u", pTable->GetScoreTotal()));
-        oView.oScoreMission.SetText(PRINT("%07u", pTable->GetScoreMission(g_pGame->GetCurMissionIndex())));
+        oView.oScoreTotal  .SetText(PRINT("%07u", pPlayer->GetScoreTable()->GetScoreTotal()));
+        oView.oScoreMission.SetText(PRINT("%07u", pPlayer->GetScoreTable()->GetScoreMission(g_pGame->GetCurMissionIndex())));
 
         // set player transparency
+        oView.aShieldBar[0].SetAlpha(m_fAlphaAll);
+        oView.aShieldBar[1].SetAlpha(m_fAlphaAll);
+        oView.oShieldValue .SetAlpha(m_fAlphaAll);
         oView.oScoreTotal  .SetAlpha(m_fAlphaAll);
         oView.oScoreMission.SetAlpha(m_fAlphaAll);
 
         // move player
+        oView.oShieldValue .Move();
+        oView.aShieldBar[0].Move();
+        oView.aShieldBar[1].Move();
         oView.oScoreTotal  .Move();
         oView.oScoreMission.Move();
     }
@@ -232,18 +283,18 @@ void cInterface::Move()
     if(pBoss)
     {
         // 
-        if(m_fAlphaBoss) m_fBossHealthSpin.Update(1.0f / (INTERFACE_BANNER_DURATION - INTERFACE_BOSS_DELAY));
-                    else m_fBossHealthSpin = 0.0f;
+        if(m_fAlphaBoss) m_fBossSpin.UpdateMin(1.0f / (INTERFACE_BANNER_DURATION - INTERFACE_BOSS_DELAY), 1.0f);
+                    else m_fBossSpin = 0.0f;
 
         // set health bar size
-        const coreFloat fPercent = pBoss->GetCurHealthPct() * MIN(m_fBossHealthSpin, 1.0f);
+        const coreFloat fPercent = pBoss->GetCurHealthPct() * m_fBossSpin;
         const coreFloat fWidth   = m_aBossHealthBar[0].GetSize().x - 0.01f;
         m_aBossHealthBar[1].SetPosition(coreVector2(fWidth * (fPercent-1.0f) * 0.5f, m_aBossHealthBar[1].GetPosition().y));
         m_aBossHealthBar[1].SetSize    (coreVector2(fWidth *  fPercent,              m_aBossHealthBar[1].GetSize    ().y));
         m_aBossHealthBar[1].SetTexSize (coreVector2(fPercent, 1.0f));
 
         // set health bar color
-        const coreVector3 vColor = COLOR_HEALTH(fPercent);
+        const coreVector3 vColor = COLOR_HEALTH(fPercent) * ((fPercent <= 0.2f) ? fDanger : 1.0f);
         m_aBossHealthBar[0].SetColor3(vColor * 0.2f);
         m_aBossHealthBar[1].SetColor3(vColor * 0.9f);
 
@@ -252,21 +303,21 @@ void cInterface::Move()
     }
 
     // display time
-    const coreFloat fTime = pBoss ? MAX(g_pGame->GetTimeTable()->GetTimeBoss(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurBossIndex()), 0.0f) : 0.0f;
-    m_aBossTime [0].SetText(PRINT("%.0f.", FLOOR(      fTime)));
-    m_aBossTime [1].SetText(PRINT("%.0f",  FLOOR(FRACT(fTime)*10.0f)));
-    m_aStageTime[0].SetText(m_aBossTime[0].GetText());
-    m_aStageTime[1].SetText(m_aBossTime[1].GetText());
+    const coreFloat fTime = MAX(g_pGame->GetTimeTable()->GetTimeBossWave(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurBossIndex(), g_pGame->GetCurMission()->GetCurWaveIndex()), 0.0f);
+    m_aBossTime[0].SetText(PRINT("%.0f.", FLOOR(      fTime)));
+    m_aBossTime[1].SetText(PRINT("%.0f",  FLOOR(FRACT(fTime)*10.0f)));
+    m_aWaveTime[0].SetText(m_aBossTime[0].GetText());
+    m_aWaveTime[1].SetText(m_aBossTime[1].GetText());
 
     // adjust time position (# only required if alignment is centered)
-    (m_fAlphaBoss ? m_aBossTime[0] : m_aStageTime[0]).RetrieveDesiredSize([this](const coreVector2& vSize)
+    (m_fAlphaBoss ? m_aBossTime[0] : m_aWaveTime[0]).RetrieveDesiredSize([this](const coreVector2& vSize)
     {
         const coreFloat fPos = (vSize.x - 0.022f) * 0.5f;
         const coreFloat fOff = m_BossHealthValue.GetPosition().x;
-        m_aBossTime [0].SetPosition(coreVector2(fPos - fOff,          m_aBossTime [0].GetPosition().y));
-        m_aBossTime [1].SetPosition(coreVector2(fPos - fOff - 0.002f, m_aBossTime [1].GetPosition().y));
-        m_aStageTime[0].SetPosition(coreVector2(fPos,                 m_aStageTime[0].GetPosition().y));
-        m_aStageTime[1].SetPosition(coreVector2(fPos        - 0.002f, m_aStageTime[1].GetPosition().y));
+        m_aBossTime[0].SetPosition(coreVector2(fPos - fOff,          m_aBossTime[0].GetPosition().y));
+        m_aBossTime[1].SetPosition(coreVector2(fPos - fOff - 0.002f, m_aBossTime[1].GetPosition().y));
+        m_aWaveTime[0].SetPosition(coreVector2(fPos,                 m_aWaveTime[0].GetPosition().y));
+        m_aWaveTime[1].SetPosition(coreVector2(fPos        - 0.002f, m_aWaveTime[1].GetPosition().y));
     });
 
     // set boss transparency
@@ -284,16 +335,16 @@ void cInterface::Move()
     m_aBossTime[0]     .Move();
     m_aBossTime[1]     .Move();
 
-    // set stage transparency
-    const coreFloat fAlphaStageFull = m_fAlphaAll * (1.0f - m_fAlphaBoss);
-    m_StageName    .SetAlpha(fAlphaStageFull);
-    m_aStageTime[0].SetAlpha(fAlphaStageFull);
-    m_aStageTime[1].SetAlpha(fAlphaStageFull);
+    // set wave transparency
+    const coreFloat fAlphaWaveFull = m_fAlphaAll * (1.0f - m_fAlphaBoss);
+    m_WaveName    .SetAlpha(fAlphaWaveFull);
+    m_aWaveTime[0].SetAlpha(fAlphaWaveFull);
+    m_aWaveTime[1].SetAlpha(fAlphaWaveFull);
 
-    // move stage
-    m_StageName    .Move();
-    m_aStageTime[0].Move();
-    m_aStageTime[1].Move();
+    // move wave
+    m_WaveName    .Move();
+    m_aWaveTime[0].Move();
+    m_aWaveTime[1].Move();
 
     // check for active banner
     const coreFloat fBanner = g_pGame->GetTimeTable()->GetTimeEvent() - m_fBannerStart;
@@ -350,13 +401,13 @@ void cInterface::Move()
 
     // smoothly toggle interface visibility (after forwarding, to allow overriding)
     if(m_bVisible)
-         {if(m_fAlphaAll < 1.0f) m_fAlphaAll = MIN(m_fAlphaAll + Core::System->GetTime() * 2.0f, 1.0f);}
-    else {if(m_fAlphaAll > 0.0f) m_fAlphaAll = MAX(m_fAlphaAll - Core::System->GetTime() * 2.0f, 0.0f);}
+         {if(m_fAlphaAll < 1.0f) m_fAlphaAll.UpdateMin( 2.0f, 1.0f);}
+    else {if(m_fAlphaAll > 0.0f) m_fAlphaAll.UpdateMax(-2.0f, 0.0f);}
 
     // smoothly toggle boss data visibility
     if(pBoss && (m_bBannerType == INTERFACE_BANNER_TYPE_BOSS) && (fBanner >= INTERFACE_BOSS_DELAY))
-         {if(m_fAlphaBoss < 1.0f) m_fAlphaBoss = MIN(m_fAlphaBoss + Core::System->GetTime() * 2.0f, 1.0f);}
-    else {if(m_fAlphaBoss > 0.0f) m_fAlphaBoss = MAX(m_fAlphaBoss - Core::System->GetTime() * 2.0f, 0.0f);}
+         {if(m_fAlphaBoss < 1.0f) m_fAlphaBoss.UpdateMin( 2.0f, 1.0f);}
+    else {if(m_fAlphaBoss > 0.0f) m_fAlphaBoss.UpdateMax(-2.0f, 0.0f);}
 }
 
 
@@ -510,8 +561,11 @@ void cInterface::UpdateLayout()
 
         // 
         for(coreUintW j = 0u; j < INTERFACE_LIVES; ++j) oView.aLife[j].SetCenter(vBottom + vSide);
-        oView.oScoreTotal  .SetCenter(vTop + vSide);
-        oView.oScoreMission.SetCenter(vTop + vSide);
+        oView.aShieldBar[0].SetCenter(vBottom + vSide);
+        oView.aShieldBar[1].SetCenter(vBottom + vSide);
+        oView.oShieldValue .SetCenter(vBottom + vSide);
+        oView.oScoreTotal  .SetCenter(vTop    + vSide);
+        oView.oScoreMission.SetCenter(vTop    + vSide);
     }
 
     // 
@@ -522,7 +576,37 @@ void cInterface::UpdateLayout()
     m_aBossTime[1]     .SetCenter(vTop);
 
     // 
-    m_StageName    .SetCenter(vTop);
-    m_aStageTime[0].SetCenter(vTop);
-    m_aStageTime[1].SetCenter(vTop);
+    m_WaveName    .SetCenter(vTop);
+    m_aWaveTime[0].SetCenter(vTop);
+    m_aWaveTime[1].SetCenter(vTop);
+}
+
+
+// ****************************************************************
+// 
+void cInterface::UpdateEnabled()
+{
+    // loop through all player views
+    for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i)
+    {
+        sPlayerView& oView   = m_aView[i];
+        cPlayer*     pPlayer = g_pGame->GetPlayer(i);
+
+        if(CONTAINS_FLAG(pPlayer->GetStatus(), PLAYER_STATUS_SHIELDED))
+        {
+            // 
+            for(coreUintW j = 0u; j < INTERFACE_LIVES; ++j) oView.aLife[j].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+            oView.aShieldBar[0].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+            oView.aShieldBar[1].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+            oView.oShieldValue .SetEnabled(CORE_OBJECT_ENABLE_ALL);
+        }
+        else
+        {
+            // 
+            for(coreUintW j = 0u; j < INTERFACE_LIVES; ++j) oView.aLife[j].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+            oView.aShieldBar[0].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+            oView.aShieldBar[1].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+            oView.oShieldValue .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        }
+    }
 }

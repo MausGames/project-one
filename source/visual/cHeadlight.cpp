@@ -49,7 +49,7 @@ cHeadlight::~cHeadlight()
 void cHeadlight::Render()
 {
     // 
-    this->coreObject2D::Render();
+    this->coreFullscreen::Render();
 
     // 
     m_FrameBuffer.Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
@@ -111,7 +111,7 @@ void cHeadlight::Update()
 // 
 void cHeadlight::UpdateDefault()
 {
-    if(g_pGame)
+    if(STATIC_ISVALID(g_pGame))
     {
         // 
         g_pGame->ForEachPlayer([this](const cPlayer* pPlayer, const coreUintW i)

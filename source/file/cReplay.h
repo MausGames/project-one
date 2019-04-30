@@ -31,6 +31,7 @@
 #define REPLAY_STREAMS          (PLAYERS)              // 
 #define REPLAY_MISSIONS         (MISSIONS)             // 
 #define REPLAY_BOSSES           (BOSSES)               // 
+#define REPLAY_WAVES            (WAVES)                // 
 
 #define REPLAY_TYPE_MOVE        (0u)                   // 
 #define REPLAY_TYPE_PRESS       (1u)                   // 
@@ -45,6 +46,7 @@
 #define REPLAY_KEYFRAME_MISSION_END(x)   ((x) + 40100u)
 #define REPLAY_KEYFRAME_BOSS_START(x)    ((x) + 50000u)
 #define REPLAY_KEYFRAME_BOSS_END(x)      ((x) + 60000u)
+// TODO: WAVE ? 
 
 
 // ****************************************************************
@@ -68,10 +70,12 @@ public:
         coreUint8  iGameMode;                                                           // 
         coreUint8  iGameDifficulty;                                                     // 
         coreUint8  iGamePlayers;                                                        // 
+        coreUint8  iPacifist;                                                           // 
 
         coreUint8  iNumStreams;                                                         // 
         coreUint8  iNumMissions;                                                        // 
         coreUint8  iNumBosses;                                                          // 
+        coreUint8  iNumWaves;                                                           // 
 
         coreInt32  aiMissionList[REPLAY_MISSIONS];                                      // 
 
@@ -81,14 +85,17 @@ public:
         coreFloat  fTimeTotal;                                                          // 
         coreFloat  afTimeMission[REPLAY_MISSIONS];                                      // 
         coreFloat  aafTimeBoss  [REPLAY_MISSIONS][REPLAY_BOSSES];                       // 
+        coreFloat  aafTimeWave  [REPLAY_MISSIONS][REPLAY_WAVES];                        // 
 
         coreUint32 aiScoreTotal   [REPLAY_STREAMS];                                     // 
         coreUint32 aaiScoreMission[REPLAY_STREAMS][REPLAY_MISSIONS];                    // 
         coreUint32 aaaiScoreBoss  [REPLAY_STREAMS][REPLAY_MISSIONS][REPLAY_BOSSES];     // 
+        coreUint32 aaaiScoreWave  [REPLAY_STREAMS][REPLAY_MISSIONS][REPLAY_WAVES];      // 
 
         coreUint32 aiActionsTotal   [REPLAY_STREAMS];                                   // 
         coreUint32 aaiActionsMission[REPLAY_STREAMS][REPLAY_MISSIONS];                  // 
         coreUint32 aaaiActionsBoss  [REPLAY_STREAMS][REPLAY_MISSIONS][REPLAY_BOSSES];   // 
+        coreUint32 aaaiActionsWave  [REPLAY_STREAMS][REPLAY_MISSIONS][REPLAY_WAVES];    // 
 
         coreUint32 iPostMagic;                                                          // 
     };

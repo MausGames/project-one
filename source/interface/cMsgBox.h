@@ -30,7 +30,7 @@
 
 // ****************************************************************
 // message box class
-class cMsgBox final : public coreObject2D
+class cMsgBox final : public coreFullscreen
 {
 public:
     coreObject2D m_Box;                                      // 
@@ -41,7 +41,7 @@ public:
     std::function<void(coreInt32, coreInt32)> m_nCallback;   // 
     coreVector2 m_vCurMouse;                                 // 
 
-    coreFloat m_fFade;                                       // 
+    coreFlow  m_fFade;                                       // 
     coreUint8 m_iMsgType;                                    // 
     coreUint8 m_iInputType;                                  // 
 

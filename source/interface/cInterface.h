@@ -40,9 +40,11 @@ private:
     struct sPlayerView final
     {
         coreObject2D aLife[INTERFACE_LIVES];   // player lives
-        coreFloat    fLifeSpin;                // 
+        coreObject2D aShieldBar[2];            // player shield bar (0 = background, 1 = foreground)
+        coreLabel    oShieldValue;             // player shield value
         coreLabel    oScoreTotal;              // total score
         coreLabel    oScoreMission;            // mission score
+        coreFlow     fSpin;                    // 
 
         void Construct(const coreUintW iIndex);
     };
@@ -54,11 +56,11 @@ private:
 
     coreObject2D m_aBossHealthBar[2];       // boss health bar (0 = background, 1 = foreground)
     coreLabel    m_BossHealthValue;         // boss health value
-    coreFlow     m_fBossHealthSpin;         // 
     coreLabel    m_aBossTime[2];            // boss time (0 = seconds, 1 = deci-seconds)
+    coreFlow     m_fBossSpin;               // 
 
-    coreLabel m_StageName;                  // stage name
-    coreLabel m_aStageTime[2];              // stage time (0 = seconds, 1 = deci-seconds)
+    coreLabel m_WaveName;                   // wave name
+    coreLabel m_aWaveTime[2];               // wave time (0 = seconds, 1 = deci-seconds)
 
     coreObject2D m_BannerBar;               // banner background
     coreLabel    m_aBannerText[4];          // banner labels
@@ -68,9 +70,11 @@ private:
     coreLabel m_aStoryText[2];              // 
     coreFloat m_fStoryStart;                // 
 
-    coreBool  m_bVisible;                   // visibility status
-    coreFloat m_fAlphaAll;                  // overall alpha value (except for banner)
-    coreFloat m_fAlphaBoss;                 // boss alpha value
+    coreFlow m_fAnimation;                  // 
+
+    coreBool m_bVisible;                    // visibility status
+    coreFlow m_fAlphaAll;                   // overall alpha value (except for banner)
+    coreFlow m_fAlphaBoss;                  // boss alpha value
 
 
 public:
@@ -95,6 +99,7 @@ public:
 
     // 
     void UpdateLayout();
+    void UpdateEnabled();
 
     // set object properties
     inline void SetVisible  (const coreBool  bVisible) {m_bVisible   = bVisible;}

@@ -21,13 +21,12 @@ varying float v_v1Strength;   // outline intensity
 void VertexMain()
 {
     // transform position normal-resized
-    vec4 v4NewPosition = vec4(coreQuatApply(u_v4Rotation, (a_v3RawPosition * u_v3Size) + (a_v3RawNormal * 0.31)) + u_v3Position, 1.0);
+    vec3 v3BasePosition = coreQuatApply(u_v4Rotation, (a_v3RawPosition * u_v3Size) + (a_v3RawNormal * 0.31));
 
 #if defined(_P1_FLAT_)
 
     // (and make flat) 
-    v4NewPosition *= vec4(1.0, 1.0, 0.0, 1.0);
-    gl_Position    = u_m4ViewProj * v4NewPosition;
+    gl_Position = u_m4ViewProj * vec4(v3BasePosition * vec3(1.0, 1.0, 0.0) + u_v3Position, 1.0);
 
     // 
 #if defined(_P1_BULLET_)
@@ -46,7 +45,7 @@ void VertexMain()
 #else
 
     // 
-    gl_Position = u_m4ViewProj * v4NewPosition;
+    gl_Position = u_m4ViewProj * vec4(v3BasePosition + u_v3Position, 1.0);
 
     // increase depth to draw behind base object  
     gl_Position.z += 0.4 * gl_Position.w;

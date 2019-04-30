@@ -13,14 +13,17 @@
 // TODO: enemy bullet (and enemy?) cleanup on mission unload
 // TODO: use uint for game-times ?
 // TODO: check for duplicate IDs in mission-lists ? LoadMissionID may behave wrong
+// TODO: show pacifist damage in interface, pulsing and filling up, also show that weapons are disabled
+// TODO: maybe spawn players in flight direction, mission start and continue ?
 
 
 // ****************************************************************
 // game definitions
-#define GAME_PLAYERS        (PLAYERS)     // default number of players
-#define GAME_CONTINUES      (CONTINUES)   // 
-#define GAME_INTRO_DELAY    (0.2f)        // 
-#define GAME_INTRO_DURATION (3.5f)        // 
+#define GAME_PLAYERS         (PLAYERS)     // default number of players
+#define GAME_CONTINUES       (CONTINUES)   // 
+#define GAME_INTRO_DELAY     (0.2f)        // 
+#define GAME_INTRO_DURATION  (3.5f)        // 
+#define GAME_PACIFIST_DAMAGE (30.0f)       // 
 
 enum eGameStatus : coreUint8
 {
@@ -89,6 +92,9 @@ private:
 
     coreProtect<coreUint8> m_iContinues;    // 
 
+    coreFlow m_fPacifistDamage;             // 
+    coreBool m_bPacifist;                   // 
+
     coreUint8 m_iDepthLevel;                // 
 
     coreUint8 m_iStatus;                    // 
@@ -123,6 +129,9 @@ public:
     void UseContinue();
 
     // 
+    void ActivatePacifist();
+
+    // 
     void PushDepthLevel();
     void OffsetDepthLevel(const coreFloat fOffset)const;
 
@@ -150,6 +159,7 @@ public:
     inline const coreInt32* GetMissionList()const {return m_piMissionList;}
     inline const coreUintW& GetNumMissions()const {return m_iNumMissions;}
     inline       coreUint8  GetContinues  ()const {return m_iContinues;}
+    inline const coreBool&  GetPacifist   ()const {return m_bPacifist;}
     inline const coreUint8& GetStatus     ()const {return m_iStatus;}
     inline const coreUint8& GetDifficulty ()const {return m_iDifficulty;}
     inline const coreBool&  GetCoop       ()const {return m_bCoop;}
@@ -160,6 +170,7 @@ private:
     coreBool __HandleIntro();
     coreBool __HandleOutro();
     void     __HandleDefeat();
+    void     __HandlePacifist();
     void     __HandleCollisions();
 };
 

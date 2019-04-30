@@ -21,7 +21,7 @@
 
 // ****************************************************************
 // 
-class cHeadlight final : public coreObject2D, public coreResourceRelation
+class cHeadlight final : public coreFullscreen, public coreResourceRelation
 {
 private:
     // 

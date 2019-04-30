@@ -88,11 +88,14 @@
 #define PHASE_RESET(i)                  {m_aTimer[i].Stop(); m_aiTimerLine[i] = 0u;}
 #define PHASE_FINISHED                  (__bEnd)
 
-#define LERP_LINEAR                     (&LERP <coreFloat>)
-#define LERP_SMOOTH                     (&LERPS<coreFloat>)
-#define LERP_SMOOTH_REV                 (&LerpSmoothRev)
-#define LERP_BREAK                      (&LERPB<coreFloat>)
-#define LERP_BREAK_REV                  (&LerpBreakRev)
+
+// ****************************************************************
+// 
+#define LERP_LINEAR     (&LERP <coreFloat>)
+#define LERP_SMOOTH     (&LERPS<coreFloat>)
+#define LERP_SMOOTH_REV (&LerpSmoothRev)
+#define LERP_BREAK      (&LERPB<coreFloat>)
+#define LERP_BREAK_REV  (&LerpBreakRev)
 
 
 // ****************************************************************

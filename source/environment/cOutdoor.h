@@ -14,7 +14,7 @@
 // TODO: add F16C SSE to RetrieveBackHeight
 // TODO: check out jcgt_Duff2017Basis to inline tangent calculations into shader (less bandwidth, but more ALU + reg ?)
 // TODO: outdoor parameters are reset on engine-reset !!!    
-// TODO: fix file getting unloaded while others are reading (in reource-manager)
+// TODO: fix file getting unloaded while others are reading (in reource-manager), maybe make copies of the file
 // TODO: get max height of outdoor model and use for first step in RetrieveIntersect
 
 

@@ -199,9 +199,9 @@ void cSpecialEffects::Move()
             if(!oRing.GetAlpha()) continue;
 
             // 
-            const coreFloat fScale = oRing.GetCollisionModifier().x;
-            const coreFloat fSpeed = oRing.GetCollisionModifier().y;
-            const coreFloat fTime  = oRing.GetCollisionModifier().z;
+            const coreFloat  fScale = oRing.GetCollisionModifier().x;
+            const coreFloat  fSpeed = oRing.GetCollisionModifier().y;
+            const coreFloat& fTime  = oRing.GetCollisionModifier().z;
 
             // 
             c_cast<coreFloat&>(fTime) = MAX(fTime - fSpeed * Core::System->GetTime(), 0.0f);
@@ -527,7 +527,7 @@ void cSpecialEffects::PlaySound(const coreVector3& vPosition, const coreFloat fV
 // 
 void cSpecialEffects::RumblePlayer(const cPlayer* pPlayer, const coreFloat fStrength, const coreUint32 iLength)
 {
-    if(!g_pGame) return;
+    if(!STATIC_ISVALID(g_pGame)) return;
 
     // loop through all active players
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pCurPlayer, const coreUintW i)

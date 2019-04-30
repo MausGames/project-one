@@ -25,8 +25,9 @@ void VertexMain()
 #if defined(_P1_FLAT_)
 
     // transform position (and make flat)
-    vec4 v4NewPosition = vec4(coreObject3DTransform(a_v3RawPosition * vec3(1.0, 1.0, 0.0)), 1.0);
-    gl_Position = u_m4ViewProj * v4NewPosition;
+    vec3 v3BasePosition = coreQuatApply(u_v4Rotation, a_v3RawPosition * u_v3Size);
+    vec4 v4NewPosition  = vec4(v3BasePosition * vec3(1.0, 1.0, 0.0) + u_v3Position, 1.0);
+    gl_Position         = u_m4ViewProj * v4NewPosition;
 
     // calculate light and color intensity
     vec3  v3NewNormal = coreQuatApply(u_v4Rotation, a_v3RawNormal);

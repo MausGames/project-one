@@ -74,12 +74,12 @@ cGameMenu::cGameMenu()noexcept
     m_Players.GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
     // fill setup entries
-    m_Mode      .AddEntryLanguage("GAME_MODE_STANDARD",      0u);
-    m_Mode      .AddEntryLanguage("GAME_MODE_TRAINING",      1u);
-    m_Difficulty.AddEntryLanguage("GAME_DIFFICULTY_EASY",    0u);
-    m_Difficulty.AddEntryLanguage("GAME_DIFFICULTY_ORIGNAL", 1u);
-    m_Players   .AddEntryLanguage("GAME_PLAYERS_SOLO",       1u);
-    m_Players   .AddEntryLanguage("GAME_PLAYERS_COOP",       2u);
+    m_Mode      .AddEntryLanguage("GAME_MODE_STANDARD",     0u);
+    m_Mode      .AddEntryLanguage("GAME_MODE_TRAINING",     1u);
+    m_Difficulty.AddEntryLanguage("GAME_DIFFICULTY_EASY",   0u);
+    m_Difficulty.AddEntryLanguage("GAME_DIFFICULTY_NORMAL", 1u);
+    m_Players   .AddEntryLanguage("GAME_PLAYERS_SOLO",      1u);
+    m_Players   .AddEntryLanguage("GAME_PLAYERS_COOP",      2u);
 
     // bind menu objects
     this->BindObject(SURFACE_GAME_DEFAULT, &m_Background);

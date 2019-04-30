@@ -117,7 +117,7 @@ private:
 class cPulseWeapon final : public cWeapon
 {
 private:
-    coreFloat m_fCharge;           // 
+    coreFlow  m_fCharge;           // 
     coreUint8 m_iCombo;            // 
 
     coreSoundPtr m_pBulletSound;   // 

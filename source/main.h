@@ -55,7 +55,6 @@
 // TODO: change some 0.5 FB factors from 0.5 to 0.4 if CORE_GL_SUPPORT(ARB_texture_rg) not available ?
 // TODO: unify "forward" and "transform" comments in shaders
 // TODO: add own coreRand for various random things which may affect feeling (screen shake), and reset on boss-start
-// TODO: somehow make g_pGame also static (but beware of pointer==null checks, replace them with check-function)
 // TODO: check issues with all the F&& functions (especially in boss.h and mission.h), also check Core engine, use force_inline on small functions
 // TODO: RETURN_NONNULL to everything which should never be null
 // TODO: check all vert shader for CORE_SHADER_OPTION_NO_ROTATION
@@ -94,10 +93,12 @@
 // ****************************************************************
 // general definitions
 #define PLAYERS              (2u)
-#define MISSIONS             (10u)
+#define MISSIONS             (9u + 1u)
 #define BOSSES               (3u)
+#define WAVES                (15u + 3u)
 #define LIVES                (5u)
 #define CONTINUES            (3u)
+#define SHIELD               (100u)
 #define FRAMERATE_VALUE      (60.0f)
 #define FRAMERATE_TIME       (1.0f / FRAMERATE_VALUE)
 #define CAMERA_POSITION      (coreVector3(0.0f, 0.0f, 110.0f))
@@ -274,7 +275,7 @@ extern cForeground*  const g_pForeground;    // main foreground object
 extern cEnvironment* const g_pEnvironment;   // main environment object
 extern cMenu*        const g_pMenu;          // main menu object
 extern cTheater*     const g_pTheater;       // main theater object
-extern cGame*              g_pGame;          // main game object
+extern cGame*        const g_pGame;          // main game object
 
 
 #endif // _P1_GUARD_MAIN_H_

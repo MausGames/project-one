@@ -95,7 +95,7 @@ void cDefeatMenu::Move()
                 else if(Core::Input->GetAnyButton(CORE_INPUT_PRESS))
                 {
                     // 
-                    m_fCountdown -= FMOD(m_fCountdown, 1.0f) - CORE_MATH_PRECISION;
+                    m_fCountdown -= FRACT(m_fCountdown) - CORE_MATH_PRECISION;
                 }
             }
 
@@ -127,13 +127,14 @@ void cDefeatMenu::Move()
                 if(m_fBurst >= 1.0f) m_iState = DEFEAT_OUTRO;
 
                 // 
-                const coreUint8 iContinues = g_pGame ? g_pGame->GetContinues() : 0u;
+                const coreUint8 iContinues = STATIC_ISVALID(g_pGame) ? g_pGame->GetContinues() : 0u;
                 if(iContinues)
                 {
                     // 
                     static coreSpline2 s_Spline;
                     if(!s_Spline.GetNumNodes())
                     {
+                        s_Spline.Reserve(3u);
                         s_Spline.AddNode(coreVector2(-0.05f, 0.0f),  coreVector2(0.0f,-1.0f));
                         s_Spline.AddNode(coreVector2( 0.0f, -0.05f), coreVector2(1.0f, 0.0f));
                         s_Spline.AddNode(coreVector2( 0.05f, 0.8f),  coreVector2(0.0f, 1.0f));
@@ -143,7 +144,7 @@ void cDefeatMenu::Move()
                     // 
                     coreObject2D&       oTarget = m_ContinueImage[iContinues - 1u];
                     const coreObject2D& oSource = m_ContinueImage[iContinues % MENU_DEFEAT_CONTINUES];
-                    oTarget.SetPosition(coreVector2(oTarget.GetPosition().x, oSource.GetPosition().y + s_Spline.CalcPosition(LERPB(s_Spline.GetTotalDistance(), 0.0f, MAX(1.0f - m_fBurst, 0.0f))).y));
+                    oTarget.SetPosition(coreVector2(oTarget.GetPosition().x, oSource.GetPosition().y + s_Spline.CalcPositionLerp(LERPB(1.0f, 0.0f, MAX(1.0f - m_fBurst, 0.0f))).y));
 
                     STATIC_ASSERT(MENU_DEFEAT_CONTINUES > 1u)
                 }
@@ -159,7 +160,7 @@ void cDefeatMenu::Move()
             {
                 // 
                 m_iState = DEFEAT_OUTRO;
-                if(g_pGame) g_pGame->GetInterface()->SetVisible(false);
+                if(STATIC_ISVALID(g_pGame)) g_pGame->GetInterface()->SetVisible(false);
             }
 
             // 
@@ -215,7 +216,7 @@ void cDefeatMenu::Move()
 // 
 void cDefeatMenu::ShowContinue()
 {
-    ASSERT(g_pGame)
+    ASSERT(STATIC_ISVALID(g_pGame))
 
     // 
     m_fCountdown  = 11.0f;
@@ -250,7 +251,7 @@ void cDefeatMenu::ShowContinue()
 // 
 void cDefeatMenu::ShowGameOver()
 {
-    ASSERT(g_pGame)
+    ASSERT(STATIC_ISVALID(g_pGame))
 
     // 
     m_fCountdown  = 0.0f;
