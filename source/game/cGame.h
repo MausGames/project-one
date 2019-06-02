@@ -23,7 +23,7 @@
 #define GAME_CONTINUES       (CONTINUES)   // 
 #define GAME_INTRO_DELAY     (0.2f)        // 
 #define GAME_INTRO_DURATION  (3.5f)        // 
-#define GAME_PACIFIST_DAMAGE (30.0f)       // 
+#define GAME_PACIFIST_DAMAGE (20.0f)       // 
 
 enum eGameStatus : coreUint8
 {

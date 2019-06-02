@@ -561,7 +561,7 @@ void cLeviathanBoss::__CreateOverdrive(const coreUintW iIndex, const coreVector3
                 pObject->SetColor3   (coreVector3(0.0f,0.0f,0.0f));
 
                 // add object to background or windscreen
-                if(bGround) g_pEnvironment->GetBackground()->AddObject(pObject, vDecalPos,       128u, "effect_decal_single_inst_program", LIST_KEY);
+                if(bGround) g_pEnvironment->GetBackground()->AddDecal (pObject, vDecalPos,       128u, "effect_decal_single_inst_program", LIST_KEY);
                        else g_pWindscreen                  ->AddObject(pObject, vDecalPos, 3.0f, 128u, "effect_decal_single_inst_program", LIST_KEY);
 
                 // 

@@ -91,13 +91,13 @@ void cTheater::Move()
             switch(m_iCurType)
             {
             default: ASSERT(false)
-            case cScoutEnemy  ::ID: this->AddMute<cScoutEnemy>  (vPos, vDir); break;
-            case cWarriorEnemy::ID: this->AddMute<cWarriorEnemy>(vPos, vDir); break;
-            case cStarEnemy   ::ID: this->AddMute<cStarEnemy>   (vPos, vDir); break;
-            case cArrowEnemy  ::ID: this->AddMute<cArrowEnemy>  (vPos, vDir); break;
-            case cMinerEnemy  ::ID: this->AddMute<cMinerEnemy>  (vPos, vDir); break;
-            case cFreezerEnemy::ID: this->AddMute<cFreezerEnemy>(vPos, vDir); break;
-            case cCinderEnemy ::ID: this->AddMute<cCinderEnemy> (vPos, vDir); break;
+            case cScoutEnemy  ::ID: this->AddMute<cScoutEnemy>  (vPos, vDir, COLOR_SHIP_BLUE);   break;
+            case cWarriorEnemy::ID: this->AddMute<cWarriorEnemy>(vPos, vDir, COLOR_SHIP_YELLOW); break;
+            case cStarEnemy   ::ID: this->AddMute<cStarEnemy>   (vPos, vDir, COLOR_SHIP_RED);    break;
+            case cArrowEnemy  ::ID: this->AddMute<cArrowEnemy>  (vPos, vDir, COLOR_SHIP_ORANGE); break;
+            case cMinerEnemy  ::ID: this->AddMute<cMinerEnemy>  (vPos, vDir, COLOR_SHIP_CYAN);   break;
+            case cFreezerEnemy::ID: this->AddMute<cFreezerEnemy>(vPos, vDir, COLOR_SHIP_ICE);    break;
+            case cCinderEnemy ::ID: this->AddMute<cCinderEnemy> (vPos, vDir, COLOR_SHIP_GREY);   break;
             }
         }
     }
@@ -105,7 +105,7 @@ void cTheater::Move()
 
     // 
     const coreBool    bInteract = (Core::Input->GetLastMouse() != CORE_INPUT_INVALID_MOUSE);
-    const coreVector2 vMousePos = (Core::Input->GetMousePosition() * Core::System->GetResolution() / g_vGameResolution) * (FOREGROUND_AREA * 2.2f);
+    const coreVector2 vMousePos = MapToAxis((Core::Input->GetMousePosition() * Core::System->GetResolution() / g_vGameResolution) * (FOREGROUND_AREA * 2.2f), g_pPostProcessing->GetDirection());
 
     // 
     FOR_EACH_DYN(it, m_aMute)

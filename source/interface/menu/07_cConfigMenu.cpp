@@ -434,8 +434,8 @@ void cConfigMenu::Move()
 
                     if(oButton.IsClicked())
                     {
-                        const coreChar* pcText = PRINT("%s [%s]", Core::Language->GetString("QUESTION_MAPPING"), m_aLabel[ENTRY_INPUT_MOVEUP + j].GetText());
-                        const coreUint8 iType  = oInput.oType.GetCurEntry().tValue;
+                        const coreChar*  pcText = PRINT("%s [%s]", Core::Language->GetString("QUESTION_MAPPING"), m_aLabel[ENTRY_INPUT_MOVEUP + j].GetText());
+                        const coreUint8& iType  = oInput.oType.GetCurEntry().tValue;   // # referenced in lambda
 
                         // 
                         g_pMenu->GetMsgBox()->ShowMapping(pcText, iType, [&](const coreInt32 iAnswer, const coreInt16 iKey)

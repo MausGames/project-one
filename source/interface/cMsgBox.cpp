@@ -23,7 +23,7 @@ cMsgBox::cMsgBox()noexcept
     this->SetSize      (coreVector2(1.0f,1.0f));
     this->SetColor4    (coreVector4(0.6f,0.6f,0.6f,0.0f));
     this->SetTexSize   (coreVector2(1.2f,1.2f));
-    this->coreFullscreen::Move();
+    this->coreObject2D::Move();
 
     // 
     m_Box.DefineTexture(0u, "menu_background_black.png");
@@ -56,7 +56,7 @@ void cMsgBox::Render()
     if(!m_fFade) return;
 
     // 
-    this->coreFullscreen::Render();
+    this->coreObject2D::Render();
 
     // 
     m_Box.Render();

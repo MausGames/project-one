@@ -237,11 +237,11 @@ void UpdateInput()
             // 
             const coreVector2& vGame  = g_pPostProcessing->GetDirection();
             const coreVector2  vHud   = coreVector2(0.0f,1.0f).InvertedX(); 
-            const coreVector2  vFinal = vGame.x * vHud.Rotated90() + vGame.y * vHud;
+            const coreVector2  vFinal = MapToAxis(vGame, vHud);
             ASSERT(vFinal.IsNormalized())
 
             // 
-            oMap.vMove = oMap.vMove.x * vFinal.Rotated90() + oMap.vMove.y * vFinal;
+            oMap.vMove = MapToAxis(oMap.vMove, vFinal);
             oMap.vMove = oMap.vMove.Normalized();
         }
 

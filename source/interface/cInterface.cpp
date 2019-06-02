@@ -56,15 +56,16 @@ void cInterface::sPlayerView::Construct(const coreUintW iIndex)
 // ****************************************************************
 // constructor
 cInterface::cInterface(const coreUint8 iNumViews)noexcept
-: m_iNumViews    (iNumViews)
-, m_fBossSpin    (0.0f)
-, m_fBannerStart (-FLT_MAX)
-, m_bBannerType  (false)
-, m_fStoryStart  (-FLT_MAX)
-, m_fAnimation   (0.0f)
-, m_bVisible     (false)
-, m_fAlphaAll    (0.0f)
-, m_fAlphaBoss   (0.0f)
+: m_iNumViews       (iNumViews)
+, m_fBossSpin       (0.0f)
+, m_fBannerStart    (-FLT_MAX)
+, m_fBannerDuration (0.0f)
+, m_iBannerType     (0u)
+, m_fStoryStart     (-FLT_MAX)
+, m_fAnimation      (0.0f)
+, m_bVisible        (false)
+, m_fAlphaAll       (0.0f)
+, m_fAlphaBoss      (0.0f)
 {
     ASSERT((m_iNumViews > 0) && (m_iNumViews <= INTERFACE_VIEWS))
 
@@ -116,10 +117,6 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
     m_aBannerText[0].Construct(MENU_FONT_STANDARD_5, MENU_OUTLINE_SMALL);
     m_aBannerText[1].Construct(MENU_FONT_STANDARD_5, MENU_OUTLINE_SMALL);
     m_aBannerText[2].Construct(MENU_FONT_DYNAMIC_2,  MENU_OUTLINE_SMALL);
-    m_aBannerText[0].SetColor3(COLOR_MENU_WHITE * 0.75f);
-    m_aBannerText[1].SetColor3(COLOR_MENU_WHITE * 0.75f);
-    m_aBannerText[2].SetColor3(COLOR_MENU_WHITE * 0.75f);
-    m_aBannerText[3].SetColor3(COLOR_MENU_WHITE);
 
     m_aStoryText[0].Construct(MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
     m_aStoryText[1].Construct(MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
@@ -283,7 +280,7 @@ void cInterface::Move()
     if(pBoss)
     {
         // 
-        if(m_fAlphaBoss) m_fBossSpin.UpdateMin(1.0f / (INTERFACE_BANNER_DURATION - INTERFACE_BOSS_DELAY), 1.0f);
+        if(m_fAlphaBoss) m_fBossSpin.UpdateMin(1.0f / (INTERFACE_BANNER_DURATION_BOSS - INTERFACE_BOSS_DELAY), 1.0f);
                     else m_fBossSpin = 0.0f;
 
         // set health bar size
@@ -348,30 +345,30 @@ void cInterface::Move()
 
     // check for active banner
     const coreFloat fBanner = g_pGame->GetTimeTable()->GetTimeEvent() - m_fBannerStart;
-    if((fBanner <= INTERFACE_BANNER_DURATION) && (fBanner >= 0.0f))
+    if((fBanner <= m_fBannerDuration) && (fBanner >= 0.0f))
     {
         // calculate visibility and animation value
-        const coreFloat fVisibility = MIN(fBanner, INTERFACE_BANNER_DURATION - fBanner, INTERFACE_BANNER_SPEED_REV) * INTERFACE_BANNER_SPEED;
-        const coreFloat fAnimation  = LERPB(0.0f, INTERFACE_BANNER_ANIMATION, fBanner / INTERFACE_BANNER_ANIMATION);
+        const coreFloat fVisibility = MIN(fBanner, m_fBannerDuration - fBanner, INTERFACE_BANNER_SPEED_REV) * INTERFACE_BANNER_SPEED;
+        const coreFloat fAnimation  = LERPB(0.0f, 1.0f, fBanner / INTERFACE_BANNER_ANIMATION) * INTERFACE_BANNER_ANIMATION;
 
         // slash banner bar across screen (# direction can be swapped, also alpha value is used as texture coordinate correction)
-        const coreBool bLeftRight = (fBanner < (INTERFACE_BANNER_DURATION * 0.5f)) ? false : true;
+        const coreBool bLeftRight = (fBanner < (m_fBannerDuration * 0.5f)) ? false : true;
         m_BannerBar.SetPosition ((bLeftRight ?        0.5f : -0.5f) * (1.0f-fVisibility) * m_BannerBar.GetDirection().yx());
         m_BannerBar.SetAlpha    ( bLeftRight ? fVisibility :  1.0f);
 
         // animate banner bar
-        m_BannerBar.SetSize     (coreVector2(fVisibility, 1.0f) * coreVector2(1.0f, m_bBannerType ? 0.23f : 0.21f));
+        m_BannerBar.SetSize     (coreVector2(fVisibility, 1.0f) * coreVector2(1.0f, (m_iBannerType == INTERFACE_BANNER_TYPE_MISSION) ? 0.23f : 0.21f));
         m_BannerBar.SetTexSize  (coreVector2(fVisibility, 1.0f));
         m_BannerBar.SetTexOffset(coreVector2(1.0f,1.0f) * (fAnimation * 0.05f));
 
         // animate banner text
         const coreFloat fTextOffset = (fAnimation + 2.0f) * 0.012f;
-        m_aBannerText[0].SetPosition(m_bBannerType ? coreVector2(-0.0155f,  fTextOffset) : coreVector2( fTextOffset,  0.019f));
-        m_aBannerText[1].SetPosition(m_bBannerType ? coreVector2( 0.0155f, -fTextOffset) : coreVector2(-fTextOffset, -0.012f));
+        m_aBannerText[0].SetPosition((m_iBannerType == INTERFACE_BANNER_TYPE_MISSION) ? coreVector2(-0.0155f,  fTextOffset) : coreVector2( fTextOffset,  0.019f));
+        m_aBannerText[1].SetPosition((m_iBannerType == INTERFACE_BANNER_TYPE_MISSION) ? coreVector2( 0.0155f, -fTextOffset) : coreVector2(-fTextOffset, -0.012f));
 
         // set banner transparency
-        m_aBannerText[0].SetAlpha(fVisibility * 0.2f);
-        m_aBannerText[1].SetAlpha(fVisibility * 0.2f);
+        m_aBannerText[0].SetAlpha(fVisibility * ((m_iBannerType == INTERFACE_BANNER_TYPE_SCORE) ? 0.4f : 0.2f));
+        m_aBannerText[1].SetAlpha(fVisibility * ((m_iBannerType == INTERFACE_BANNER_TYPE_SCORE) ? 0.4f : 0.2f));
         m_aBannerText[2].SetAlpha(fVisibility);
         m_aBannerText[3].SetAlpha(fVisibility);
 
@@ -405,7 +402,7 @@ void cInterface::Move()
     else {if(m_fAlphaAll > 0.0f) m_fAlphaAll.UpdateMax(-2.0f, 0.0f);}
 
     // smoothly toggle boss data visibility
-    if(pBoss && (m_bBannerType == INTERFACE_BANNER_TYPE_BOSS) && (fBanner >= INTERFACE_BOSS_DELAY))
+    if(pBoss && (m_iBannerType == INTERFACE_BANNER_TYPE_BOSS) && (fBanner >= INTERFACE_BOSS_DELAY))
          {if(m_fAlphaBoss < 1.0f) m_fAlphaBoss.UpdateMin( 2.0f, 1.0f);}
     else {if(m_fAlphaBoss > 0.0f) m_fAlphaBoss.UpdateMax(-2.0f, 0.0f);}
 }
@@ -415,24 +412,22 @@ void cInterface::Move()
 // show boss banner
 void cInterface::ShowBoss(const coreChar* pcMain, const coreChar* pcSub)
 {
+    // 
+    this->__PrepareBanner();
+
     // set banner text
     m_aBannerText[0].SetText(pcMain);
     m_aBannerText[1].SetText(pcMain);
     m_aBannerText[2].SetText(pcSub);
     m_aBannerText[3].SetText(pcMain);
 
-    // hide banner initially (to prevent flickering)
-    m_BannerBar     .SetSize (coreVector2(0.0f,0.0f));
-    m_aBannerText[0].SetAlpha(0.0f);
-    m_aBannerText[1].SetAlpha(0.0f);
-    m_aBannerText[2].SetAlpha(0.0f);
-    m_aBannerText[3].SetAlpha(0.0f);
-
     // save animation properties
-    m_fBannerStart = g_pGame->GetTimeTable()->GetTimeEvent();
-    m_bBannerType  = INTERFACE_BANNER_TYPE_BOSS;
+    m_fBannerStart    = g_pGame->GetTimeTable()->GetTimeEvent();
+    m_fBannerDuration = INTERFACE_BANNER_DURATION_BOSS;
+    m_iBannerType     = INTERFACE_BANNER_TYPE_BOSS;
+
     {
-        // and realign objects as boss banner
+        // realign objects as boss banner
         m_aBannerText[3].Construct(MENU_FONT_STANDARD_4, MENU_OUTLINE_SMALL);
 
         m_aBannerText[2].SetPosition(coreVector2(0.0f, 0.027f));
@@ -447,6 +442,13 @@ void cInterface::ShowBoss(const coreChar* pcMain, const coreChar* pcSub)
         m_aBannerText[1].SetCenter(m_BannerBar.GetCenter());
         m_aBannerText[2].SetCenter(m_BannerBar.GetCenter());
         m_aBannerText[3].SetCenter(m_BannerBar.GetCenter());
+
+        m_aBannerText[0].SetColor3(COLOR_MENU_WHITE * 0.75f);
+        m_aBannerText[1].SetColor3(COLOR_MENU_WHITE * 0.75f);
+        m_aBannerText[2].SetColor3(COLOR_MENU_WHITE * 0.75f);
+        m_aBannerText[3].SetColor3(COLOR_MENU_WHITE);
+
+        m_BannerBar     .SetEnabled(CORE_OBJECT_ENABLE_ALL);
     }
 }
 
@@ -461,24 +463,22 @@ void cInterface::ShowBoss(const cBoss* pBoss)
 // show mission banner
 void cInterface::ShowMission(const coreChar* pcMain, const coreChar* pcSub)
 {
+    // 
+    this->__PrepareBanner();
+
     // set banner text
     m_aBannerText[0].SetText(pcMain);
     m_aBannerText[1].SetText(pcMain);
     m_aBannerText[2].SetText(pcSub);
     m_aBannerText[3].SetText(pcMain);
 
-    // hide banner initially (to prevent flickering)
-    m_BannerBar     .SetSize (coreVector2(0.0f,0.0f));
-    m_aBannerText[0].SetAlpha(0.0f);
-    m_aBannerText[1].SetAlpha(0.0f);
-    m_aBannerText[2].SetAlpha(0.0f);
-    m_aBannerText[3].SetAlpha(0.0f);
-
     // save animation properties
-    m_fBannerStart = g_pGame->GetTimeTable()->GetTimeEvent();
-    m_bBannerType  = INTERFACE_BANNER_TYPE_MISSION;
+    m_fBannerStart    = g_pGame->GetTimeTable()->GetTimeEvent();
+    m_fBannerDuration = INTERFACE_BANNER_DURATION_MISSION;
+    m_iBannerType     = INTERFACE_BANNER_TYPE_MISSION;
+
     {
-        // and realign objects as mission banner
+        // realign objects as mission banner
         m_aBannerText[3].Construct(MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
 
         m_aBannerText[2].SetPosition(coreVector2(0.0f, 0.025f));
@@ -493,6 +493,13 @@ void cInterface::ShowMission(const coreChar* pcMain, const coreChar* pcSub)
         m_aBannerText[1].SetCenter(m_aBannerText[0].GetCenter());
         m_aBannerText[2].SetCenter(m_aBannerText[0].GetCenter());
         m_aBannerText[3].SetCenter(m_aBannerText[0].GetCenter());
+
+        m_aBannerText[0].SetColor3(COLOR_MENU_WHITE * 0.75f);
+        m_aBannerText[1].SetColor3(COLOR_MENU_WHITE * 0.75f);
+        m_aBannerText[2].SetColor3(COLOR_MENU_WHITE * 0.75f);
+        m_aBannerText[3].SetColor3(COLOR_MENU_WHITE);
+
+        m_BannerBar     .SetEnabled(CORE_OBJECT_ENABLE_ALL);
     }
 }
 
@@ -502,13 +509,63 @@ void cInterface::ShowMission(const cMission* pMission)
     this->ShowMission(pMission->GetName(), PRINT("%s %d", Core::Language->GetString("STAGE"), pMission->GetID()));
 }
 
+// ****************************************************************
+// 
+void cInterface::ShowScore(const coreChar* pcMain, const coreChar* pcSub)
+{
+    // 
+    this->__PrepareBanner();
+
+    // set banner text
+    m_aBannerText[0].SetText(pcMain);
+    m_aBannerText[1].SetText(pcMain);
+    m_aBannerText[2].SetText(pcMain);
+    m_aBannerText[3].SetText(pcSub);
+
+    // save animation properties
+    m_fBannerStart    = g_pGame->GetTimeTable()->GetTimeEvent();
+    m_fBannerDuration = INTERFACE_BANNER_DURATION_SCORE;
+    m_iBannerType     = INTERFACE_BANNER_TYPE_SCORE;
+
+    {
+        // realign objects as score banner
+        m_aBannerText[3].Construct(MENU_FONT_STANDARD_4, MENU_OUTLINE_SMALL);
+
+        m_aBannerText[2].SetPosition(coreVector2(0.0f, 0.027f));
+        m_aBannerText[3].SetPosition(coreVector2(0.0f,-0.012f));
+
+        m_BannerBar     .SetDirection(coreVector2(0.0f,1.0f));
+        m_aBannerText[0].SetDirection(m_BannerBar.GetDirection());
+        m_aBannerText[1].SetDirection(m_BannerBar.GetDirection());
+
+        m_BannerBar     .SetCenter(coreVector2(0.0f,0.1f) * g_vMenuCenter);
+        m_aBannerText[0].SetCenter(m_BannerBar.GetCenter());
+        m_aBannerText[1].SetCenter(m_BannerBar.GetCenter());
+        m_aBannerText[2].SetCenter(m_BannerBar.GetCenter());
+        m_aBannerText[3].SetCenter(m_BannerBar.GetCenter());
+
+        m_aBannerText[0].SetColor3(coreVector3(1.0f,1.0f,1.0f) * 0.75f);
+        m_aBannerText[1].SetColor3(coreVector3(1.0f,1.0f,1.0f) * 0.75f);
+        m_aBannerText[2].SetColor3(coreVector3(1.0f,1.0f,1.0f) * 0.75f);
+        m_aBannerText[3].SetColor3(coreVector3(1.0f,1.0f,1.0f));
+
+        m_BannerBar     .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    }
+}
+
+void cInterface::ShowScore(const coreUint32 iScore)
+{
+    // show default score banner
+    this->ShowScore(iScore ? Core::Language->GetString("SCORE_BONUS") : Core::Language->GetString("SCORE_NOBONUS"), iScore ? PRINT("%u", iScore) : Core::Language->GetString("SCORE_NOBONUS"));
+}
+
 
 // ****************************************************************
 // check for active banner
 coreBool cInterface::IsBannerActive()const
 {
     // compare with game-time offset
-    return ((g_pGame->GetTimeTable()->GetTimeEvent() - m_fBannerStart) <= INTERFACE_BANNER_DURATION) ? true : false;
+    return ((g_pGame->GetTimeTable()->GetTimeEvent() - m_fBannerStart) <= m_fBannerDuration) ? true : false;
 }
 
 
@@ -609,4 +666,17 @@ void cInterface::UpdateEnabled()
             oView.oShieldValue .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
         }
     }
+}
+
+
+// ****************************************************************
+// 
+void cInterface::__PrepareBanner()
+{
+    // hide banner initially (to prevent flickering)
+    m_BannerBar     .SetSize (coreVector2(0.0f,0.0f));
+    m_aBannerText[0].SetAlpha(0.0f);
+    m_aBannerText[1].SetAlpha(0.0f);
+    m_aBannerText[2].SetAlpha(0.0f);
+    m_aBannerText[3].SetAlpha(0.0f);
 }

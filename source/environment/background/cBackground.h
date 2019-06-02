@@ -19,8 +19,8 @@
 // TODO: check if alL _RESERVES are correct
 // TODO: reduce object-buffer sizes, not all are drawn at once anyway, also allocate only once
 // TODO: positions in separate list (when iterating through lambda)
-// TODO: provide own memory pool for temporary additional objects (remove MANAGED_)
-// TODO: expose pool-allocator for additional objects (AddList)
+// TODO: provide own memory pool for temporary additional objects (remove MANAGED_), also WindScreen
+// TODO: expose pool-allocator for additional objects (AddList), also WindScreen
 // TODO: all environment sound effects should fade in transition
 // TODO: popping artifacts with shadow in sea-background (configurable view-range ? per list ? auto per height ?)
 // TODO: calls to pList->MoveNormal(); may be redundant
@@ -31,7 +31,8 @@
 
 // ****************************************************************
 // background definitions
-#define BACKGROUND_OBJECT_RANGE (95.0f)   // default (+/-) Y-range where objects on ground are considered visible
+#define BACKGROUND_OBJECT_RANGE  (95.0f)   // default Y-range where objects on ground are considered visible (+/-)
+#define BACKGROUND_ADD_EXTENSION (3.0f)    // multiplier with Y-range where temporary additional objects are kept alive
 
 #define __BACKGROUND_SCANLINE(x,i,n) (coreVector2((x) * I_TO_F(OUTDOOR_WIDTH), (I_TO_F(i) / I_TO_F(n)) * I_TO_F(OUTDOOR_HEIGHT) - I_TO_F(OUTDOOR_VIEW / 2u)) * OUTDOOR_DETAIL)
 
@@ -108,8 +109,9 @@ protected:
     std::vector<coreBatchList*> m_apDecalObjectList;    // persistent transparent objects connected to the ground
     std::vector<coreBatchList*> m_apAirObjectList;      // persistent objects floating in the air
 
-    std::vector<coreObject3D*>    m_apAddObject;        // temporary additional objects
-    coreLookupStr<coreBatchList*> m_apAddList;          // optimized lists for temporary additional objects
+    coreLookupStr<coreBatchList*> m_apGroundAddList;    // temporary objects connected to the ground
+    coreLookupStr<coreBatchList*> m_apDecalAddList;     // temporary transparent objects connected to the ground
+    coreLookupStr<coreBatchList*> m_apAirAddList;       // temporary objects floating in the air
 
     coreLookup<const coreBatchList*, std::vector<coreUint16>> m_aaiBaseHeight;   // 
     coreLookup<const coreBatchList*, std::vector<coreUint32>> m_aaiBaseNormal;   // 
@@ -128,11 +130,12 @@ public:
     void Render();
     void Move();
 
-    // manage additional objects
-    void AddObject   (coreObject3D* pObject, const coreVector3& vRelativePos);
-    void AddObject   (coreObject3D* pObject, const coreVector3& vRelativePos, const coreUint32 iCapacity, const coreHashString& sProgramInstancedName, const coreHashString& sListKey);
-    void ShoveObjects(const coreFloat fOffset);
-    void ClearObjects();
+    // manage temporary objects
+    void AddGround(coreObject3D* pObject, const coreVector3& vRelativePos, const coreUint32 iCapacity, const coreHashString& sProgramInstancedName, const coreHashString& sListKey);
+    void AddDecal (coreObject3D* pObject, const coreVector3& vRelativePos, const coreUint32 iCapacity, const coreHashString& sProgramInstancedName, const coreHashString& sListKey);
+    void AddAir   (coreObject3D* pObject, const coreVector3& vRelativePos, const coreUint32 iCapacity, const coreHashString& sProgramInstancedName, const coreHashString& sListKey);
+    void ShoveAdds(const coreFloat fOffset);
+    void ClearAdds();
 
     // 
     void SetGroundDensity(const coreUintW iIndex, const coreFloat fDensity);
@@ -143,11 +146,8 @@ public:
     inline coreFrameBuffer* GetResolvedTexture() {return &m_ResolvedTexture;}
 
     // access background components
-    inline cOutdoor*                    GetOutdoor         ()const {return m_pOutdoor;}
-    inline cWater*                      GetWater           ()const {return m_pWater;}
-    inline std::vector<coreBatchList*>* GetGroundObjectList()      {return &m_apGroundObjectList;}
-    inline std::vector<coreBatchList*>* GetDecalObjectList ()      {return &m_apDecalObjectList;}
-    inline std::vector<coreBatchList*>* GetAirObjectList   ()      {return &m_apAirObjectList;}
+    inline cOutdoor* GetOutdoor()const {return m_pOutdoor;}
+    inline cWater*   GetWater  ()const {return m_pWater;}
 
 
 protected:

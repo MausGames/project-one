@@ -153,7 +153,7 @@ coreBool cEnemy::TakeDamage(coreInt32 iDamage, const coreUint8 iElement, const c
 void cEnemy::Resurrect()
 {
     // 
-    this->Resurrect(coreVector2(FLT_MAX,FLT_MAX), coreVector2(0.0f,-1.0f));
+    this->Resurrect(this->GetPosition().xy(), this->GetDirection().xy());
 }
 
 void cEnemy::Resurrect(const coreSpline2* pPath, const coreVector2& vFactor, const coreVector2& vOffset)
@@ -204,7 +204,7 @@ void cEnemy::Resurrect(const coreVector2& vPosition, const coreVector2& vDirecti
     this->__ResurrectOwn();
 
     // 
-    if(this->IsParent()) FOR_EACH(it, m_apMember) (*it)->Resurrect(vPosition, vDirection);
+    if(this->IsParent()) FOR_EACH(it, m_apMember) (*it)->Resurrect();
 }
 
 
@@ -352,7 +352,7 @@ void cEnemySquad::ClearEnemies(const coreBool bAnimated)
 
 // ****************************************************************
 // 
-cEnemy* cEnemySquad::FindEnemy(const coreVector2& vPosition)
+cEnemy* cEnemySquad::FindEnemy(const coreVector2& vPosition)const
 {
     // 
     cEnemy*   pEnemy = NULL;
@@ -377,7 +377,7 @@ cEnemy* cEnemySquad::FindEnemy(const coreVector2& vPosition)
 
 // ****************************************************************
 // 
-cEnemy* cEnemySquad::FindEnemyRev(const coreVector2& vPosition)
+cEnemy* cEnemySquad::FindEnemyRev(const coreVector2& vPosition)const
 {
     // 
     cEnemy*   pEnemy = NULL;
@@ -438,6 +438,15 @@ cEnemyManager::~cEnemyManager()
 // render the enemy manager
 void cEnemyManager::Render()
 {
+    // render all additional enemies
+    FOR_EACH(it, m_apAdditional)
+    {
+        if(CONTAINS_FLAG((*it)->GetStatus(), ENEMY_STATUS_DEAD))
+            continue;
+
+        (*it)->Render();
+    }
+
     // loop through all enemy sets
     for(coreUintW i = 0u; i < ENEMY_SET_COUNT; ++i)
     {
@@ -450,19 +459,10 @@ void cEnemyManager::Render()
         // 
         FOR_EACH(it, *pEnemyActive->List()) d_cast<cEnemy*>(*it)->ActivateModelDefault();
         {
-            // 
+            // render all active enemies
             pEnemyActive->Render();
         }
         FOR_EACH(it, *pEnemyActive->List()) d_cast<cEnemy*>(*it)->ActivateModelLowOnly();
-    }
-
-    // render all additional enemies
-    FOR_EACH(it, m_apAdditional)
-    {
-        if(CONTAINS_FLAG((*it)->GetStatus(), ENEMY_STATUS_DEAD))
-            continue;
-
-        (*it)->Render();
     }
 }
 
@@ -477,6 +477,10 @@ void cEnemyManager::Render()
         pEnemy->f();                                                  \
     };                                                                \
                                                                       \
+    /* render all additional enemies */                               \
+    FOR_EACH(it, m_apAdditional)                                      \
+        nRenderFunc(*it);                                             \
+                                                                      \
     /* loop through all enemy sets */                                 \
     for(coreUintW i = 0u; i < ENEMY_SET_COUNT; ++i)                   \
     {                                                                 \
@@ -487,10 +491,6 @@ void cEnemyManager::Render()
         FOR_EACH(it, *pEnemyActive->List())                           \
             nRenderFunc(d_cast<cEnemy*>(*it));                        \
     }                                                                 \
-                                                                      \
-    /* render all additional enemies */                               \
-    FOR_EACH(it, m_apAdditional)                                      \
-        nRenderFunc(*it);                                             \
 } 
 
 void cEnemyManager::RenderUnder () {__RENDER_OWN(__RenderOwnUnder)}
@@ -504,6 +504,10 @@ void cEnemyManager::RenderOver  () {__RENDER_OWN(__RenderOwnOver)}
 // move the enemy manager
 void cEnemyManager::Move()
 {
+    // move all additional enemies (# bosses need to move before other enemies)
+    FOR_EACH(it, m_apAdditional)
+        (*it)->Move();
+
     // loop through all enemy sets
     for(coreUintW i = 0u; i < ENEMY_SET_COUNT; ++i)
     {
@@ -515,8 +519,6 @@ void cEnemyManager::Move()
     }
 
     // 
-    FOR_EACH(it, m_apAdditional)
-        (*it)->Move();
 }
 
 
@@ -565,7 +567,7 @@ void cEnemyManager::ClearEnemies(const coreBool bAnimated)
 
 // ****************************************************************
 // 
-cEnemy* cEnemyManager::FindEnemy(const coreVector2& vPosition)
+cEnemy* cEnemyManager::FindEnemy(const coreVector2& vPosition)const
 {
     // 
     cEnemy*   pEnemy = NULL;
@@ -590,7 +592,7 @@ cEnemy* cEnemyManager::FindEnemy(const coreVector2& vPosition)
 
 // ****************************************************************
 // 
-cEnemy* cEnemyManager::FindEnemyRev(const coreVector2& vPosition)
+cEnemy* cEnemyManager::FindEnemyRev(const coreVector2& vPosition)const
 {
     // 
     cEnemy*   pEnemy = NULL;
@@ -620,9 +622,6 @@ cScoutEnemy::cScoutEnemy()noexcept
     // load models
     this->DefineModelHigh("ship_enemy_scout_high.md3");
     this->DefineModelLow ("ship_enemy_scout_low.md3");
-
-    // configure the enemy
-    this->Configure(100, COLOR_SHIP_BLUE);
 }
 
 
@@ -633,9 +632,6 @@ cWarriorEnemy::cWarriorEnemy()noexcept
     // load models
     this->DefineModelHigh("ship_enemy_warrior_high.md3");
     this->DefineModelLow ("ship_enemy_warrior_low.md3");
-
-    // configure the enemy
-    this->Configure(100, COLOR_SHIP_YELLOW);
 }
 
 
@@ -647,9 +643,6 @@ cStarEnemy::cStarEnemy()noexcept
     // load models
     this->DefineModelHigh("ship_enemy_star_high.md3");
     this->DefineModelLow ("ship_enemy_star_low.md3");
-
-    // configure the enemy
-    this->Configure(100, COLOR_SHIP_RED);
 }
 
 
@@ -673,9 +666,6 @@ cArrowEnemy::cArrowEnemy()noexcept
     // load models
     this->DefineModelHigh("ship_enemy_arrow_high.md3");
     this->DefineModelLow ("ship_enemy_arrow_low.md3");
-
-    // configure the enemy
-    this->Configure(100, COLOR_SHIP_ORANGE);
 }
 
 
@@ -698,9 +688,6 @@ cMinerEnemy::cMinerEnemy()noexcept
     // load models
     this->DefineModelHigh("ship_enemy_miner_high.md3");
     this->DefineModelLow ("ship_enemy_miner_low.md3");
-
-    // configure the enemy
-    this->Configure(100, COLOR_SHIP_CYAN);
 }
 
 
@@ -712,9 +699,6 @@ cFreezerEnemy::cFreezerEnemy()noexcept
     // load models
     this->DefineModelHigh("ship_enemy_freezer_high.md3");
     this->DefineModelLow ("ship_enemy_freezer_low.md3");
-
-    // configure the enemy
-    this->Configure(100, COLOR_SHIP_ICE);
 }
 
 
@@ -738,9 +722,6 @@ cCinderEnemy::cCinderEnemy()noexcept
     // load models
     this->DefineModelHigh("ship_enemy_cinder_high.md3");
     this->DefineModelLow ("ship_enemy_cinder_low.md3");
-
-    // configure the enemy
-    this->Configure(100, COLOR_SHIP_GREY);
 }
 
 

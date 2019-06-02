@@ -71,7 +71,7 @@ cGame::cGame(const coreUint8 iDifficulty, const coreBool bCoop, const coreInt32*
 // destructor
 cGame::~cGame()
 {
-    constexpr coreBool bAnimated = !DEFINED(_CORE_DEBUG_);
+    constexpr coreBool bAnimated = !DEFINED(_CORE_DEBUG_);   // prevent assertions when force-quitting
 
     // 
     for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
@@ -199,8 +199,7 @@ void cGame::Move()
             m_aPlayer[i].Move();
 
         // move all enemies
-        if(!m_pCurMission->IsWaiting())
-            m_EnemyManager.Move();
+        m_EnemyManager.Move();
     }
     m_pCurMission->MoveAfter();
 

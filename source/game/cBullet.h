@@ -18,7 +18,6 @@
 // TODO: make ray bullet smoother geometrically (front round)
 // TODO: sort bullet classes (color, enemy<>player, normal<>special), improve array indexing and caching
 // TODO: shift spear-bullet collision like ray-bullet
-// TODO: spear-bullet has a blocky outline, increase detail
 // TODO: bullet -> to POD-type with single parent object
 
 
@@ -53,6 +52,9 @@ protected:
 
     coreUint8 m_iElement;            // 
 
+    coreFlow    m_fFlyTime;          // 
+    coreVector2 m_vFlyDir;           // 
+
     static cRotaCache s_RotaCache;   // 
 
 
@@ -77,10 +79,12 @@ public:
     inline cBullet* ChangeAlpha(const coreFloat fFactor) {this->SetAlpha(this->GetAlpha() * fFactor); return this;}
 
     // get object properties
-    inline const coreInt32& GetDamage ()const {return m_iDamage;}
-    inline const coreFloat& GetSpeed  ()const {return m_fSpeed;}
-    inline       cShip*     GetOwner  ()const {return m_pOwner;}
-    inline const coreUint8& GetElement()const {return m_iElement;}
+    inline const coreInt32&   GetDamage ()const {return m_iDamage;}
+    inline const coreFloat&   GetSpeed  ()const {return m_fSpeed;}
+    inline       cShip*       GetOwner  ()const {return m_pOwner;}
+    inline const coreUint8&   GetElement()const {return m_iElement;}
+    inline const coreFloat&   GetFlyTime()const {return m_fFlyTime;}
+    inline const coreVector2& GetFlyDir ()const {return m_vFlyDir;}
 
     // bullet configuration values
     static inline const coreChar* ConfigProgramInstancedName() {ASSERT(false) return "";}
@@ -165,17 +169,17 @@ public:
     void ClearBullets(const coreBool bAnimated);
 
     // 
-    inline cBullet*          FindBullet     (const coreVector2& vPosition);
-    template <typename T> T* FindBulletTyped(const coreVector2& vPosition);
-    template <typename F> void             ForEachBullet     (F&& nFunction);   // [](cBullet* OUTPUT pBullet) -> void
-    template <typename T, typename F> void ForEachBulletTyped(F&& nFunction);   // [](T*       OUTPUT pBullet) -> void
+    inline cBullet*          FindBullet     (const coreVector2& vPosition)const;
+    template <typename T> T* FindBulletTyped(const coreVector2& vPosition)const;
+    template <typename F> void             ForEachBullet     (F&& nFunction)const;   // [](cBullet* OUTPUT pBullet) -> void
+    template <typename T, typename F> void ForEachBulletTyped(F&& nFunction)const;   // [](T*       OUTPUT pBullet) -> void
 
     // 
     template <typename T> void PrefetchBullet();
 
     // 
-    inline coreUintW                       GetNumBullets     ()const {return Core::Manager::Object->GetObjectList(m_iType).size();}
-    template <typename T> inline coreUintW GetNumBulletsTyped()const {return m_apBulletSet[T::ID] ? m_apBulletSet[T::ID]->oBulletActive.List()->size() : 0u;}
+    inline coreUintW                       GetNumBullets     ()const {coreUintW iNum = 0u; this->ForEachBullet        ([&](void*) {++iNum;}); return iNum;}
+    template <typename T> inline coreUintW GetNumBulletsTyped()const {coreUintW iNum = 0u; this->ForEachBulletTyped<T>([&](void*) {++iNum;}); return iNum;}
 };
 
 
@@ -300,7 +304,7 @@ public:
     inline void ResetProperties() {this->MakeOrange(); this->SetSize(coreVector3(1.35f,1.55f,1.35f) * 1.05f); m_fAnimation = 0.09f;}
 
     // change default color
-    inline cConeBullet* MakeWhite () {ASSERT(false)            return this;}
+    inline cConeBullet* MakeWhite () {this->_MakeWhite (0.6f); return this;}
     inline cConeBullet* MakeYellow() {this->_MakeYellow(0.8f); return this;}
     inline cConeBullet* MakeOrange() {this->_MakeOrange(1.0f); return this;}
     inline cConeBullet* MakeRed   () {ASSERT(false)            return this;}
@@ -403,8 +407,6 @@ private:
 class cMineBullet final : public cBullet
 {
 private:
-    coreVector2 m_vFlyDir;        // 
-
     static coreObject3D s_Wave;   // 
 
 
@@ -415,7 +417,7 @@ public:
     ASSIGN_ID(7, "Mine")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(2.0f,2.0f,2.0f)); m_fAnimation = 0.0f; m_vFlyDir = this->GetDirection().xy();}
+    inline void ResetProperties() {this->SetSize(coreVector3(2.0f,2.0f,2.0f)); m_fAnimation = 0.0f;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "object_ship_glow_inst_program";}
@@ -501,10 +503,6 @@ private:
 // triangle bullet class
 class cTriangleBullet final : public cBullet
 {
-private:
-    coreVector2 m_vFlyDir;   // 
-
-
 public:
     cTriangleBullet()noexcept;
 
@@ -512,7 +510,7 @@ public:
     ASSIGN_ID(10, "Triangle")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeRed(); this->SetSize(coreVector3(1.5f,1.5f,1.5f)); m_fAnimation = 0.0f; m_vFlyDir = this->GetDirection().xy();}
+    inline void ResetProperties() {this->MakeRed(); this->SetSize(coreVector3(1.5f,1.5f,1.5f)); m_fAnimation = 0.0f;}
 
     // change default color
     inline cTriangleBullet* MakeWhite () {ASSERT(false)            return this;}
@@ -541,10 +539,6 @@ private:
 // flip bullet class
 class cFlipBullet final : public cBullet
 {
-private:
-    coreVector2 m_vFlyDir;   // 
-
-
 public:
     cFlipBullet()noexcept;
 
@@ -552,7 +546,7 @@ public:
     ASSIGN_ID(11, "Flip")
 
     // reset base properties
-    inline void ResetProperties() {this->MakePurple(); this->SetSize(coreVector3(2.6f,2.0f,2.6f)); m_fAnimation = 0.0f; m_vFlyDir = this->GetDirection().xy();}
+    inline void ResetProperties() {this->MakePurple(); this->SetSize(coreVector3(2.6f,2.0f,2.6f)); m_fAnimation = 0.0f;}
 
     // change default color
     inline cFlipBullet* MakeWhite () {ASSERT(false)            return this;}
@@ -581,10 +575,6 @@ private:
 // quad bullet class
 class cQuadBullet final : public cBullet
 {
-private:
-    coreVector2 m_vFlyDir;   // 
-
-
 public:
     cQuadBullet()noexcept;
 
@@ -592,7 +582,7 @@ public:
     ASSIGN_ID(12, "Quad")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeCyan(); this->SetSize(coreVector3(1.5f,1.5f,1.5f)); m_fAnimation = 0.0f; m_vFlyDir = this->GetDirection().xy();}
+    inline void ResetProperties() {this->MakeCyan(); this->SetSize(coreVector3(1.5f,1.5f,1.5f)); m_fAnimation = 0.0f;}
 
     // change default color
     inline cQuadBullet* MakeWhite () {ASSERT(false)            return this;}
@@ -621,10 +611,6 @@ private:
 // 
 class cChromaBullet final : public cBullet
 {
-private:
-    coreVector2 m_vFlyDir;   // 
-
-
 public:
     cChromaBullet()noexcept;
 
@@ -632,7 +618,7 @@ public:
     ASSIGN_ID(13, "Chroma")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(1.0f,1.0f,1.0f)); m_fAnimation = 0.0f; m_vFlyDir = this->GetDirection().xy();}
+    inline void ResetProperties() {this->SetSize(coreVector3(1.0f,1.0f,1.0f)); m_fAnimation = 0.0f;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
@@ -751,7 +737,7 @@ template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt
 
 // ****************************************************************
 // 
-inline cBullet* cBulletManager::FindBullet(const coreVector2& vPosition)
+inline cBullet* cBulletManager::FindBullet(const coreVector2& vPosition)const
 {
     // 
     cBullet*  pBullet = NULL;
@@ -776,7 +762,7 @@ inline cBullet* cBulletManager::FindBullet(const coreVector2& vPosition)
 
 // ****************************************************************
 // 
-template <typename T> T* cBulletManager::FindBulletTyped(const coreVector2& vPosition)
+template <typename T> T* cBulletManager::FindBulletTyped(const coreVector2& vPosition)const
 {
     // 
     T*        pBullet = NULL;
@@ -801,7 +787,7 @@ template <typename T> T* cBulletManager::FindBulletTyped(const coreVector2& vPos
 
 // ****************************************************************
 // 
-template <typename F> void cBulletManager::ForEachBullet(F&& nFunction)
+template <typename F> void cBulletManager::ForEachBullet(F&& nFunction)const
 {
     // 
     const std::vector<coreObject3D*>& oBulletList = Core::Manager::Object->GetObjectList(m_iType);
@@ -818,7 +804,7 @@ template <typename F> void cBulletManager::ForEachBullet(F&& nFunction)
 
 // ****************************************************************
 // 
-template <typename T, typename F> void cBulletManager::ForEachBulletTyped(F&& nFunction)
+template <typename T, typename F> void cBulletManager::ForEachBulletTyped(F&& nFunction)const
 {
     STATIC_ASSERT(T::ID < BULLET_SET_COUNT)
 

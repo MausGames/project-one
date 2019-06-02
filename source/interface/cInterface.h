@@ -11,24 +11,28 @@
 #define _P1_GUARD_INTERFACE_H_
 
 // TODO: re-position everything after resolution-change (also menu)
+// TODO: realtime language update (other locations as well ?)
 
 
 // ****************************************************************
 // interface definitions
-#define INTERFACE_VIEWS               (PLAYERS)                         // number of player views
-#define INTERFACE_LIVES               (LIVES)                           // 
-#define INTERFACE_BOSS_DELAY          (1.5f)                            // 
+#define INTERFACE_VIEWS                   (PLAYERS)                         // number of player views
+#define INTERFACE_LIVES                   (LIVES)                           // 
+#define INTERFACE_BOSS_DELAY              (1.5f)                            // 
 
-#define INTERFACE_BANNER_SPEED        (4.0f)                            // fade-in and fade-out speed
-#define INTERFACE_BANNER_SPEED_REV    (1.0f / INTERFACE_BANNER_SPEED)   // 
-#define INTERFACE_BANNER_DURATION     (3.0f)                            // display duration (with fading)
-#define INTERFACE_BANNER_ANIMATION    (2.9f)                            // animation duration
+#define INTERFACE_BANNER_SPEED            (4.0f)                            // fade-in and fade-out speed
+#define INTERFACE_BANNER_SPEED_REV        (1.0f / INTERFACE_BANNER_SPEED)   // 
+#define INTERFACE_BANNER_ANIMATION        (2.9f)                            // animation duration
+#define INTERFACE_BANNER_DURATION_BOSS    (3.0f)                            // display duration (with fading)  
+#define INTERFACE_BANNER_DURATION_MISSION (3.0f)                            // 
+#define INTERFACE_BANNER_DURATION_SCORE   (2.0f)                            // 
 
-#define INTERFACE_BANNER_TYPE_BOSS    (false)                           // boss banner type
-#define INTERFACE_BANNER_TYPE_MISSION (true)                            // mission banner type
+#define INTERFACE_BANNER_TYPE_BOSS        (0u)                              // boss banner type
+#define INTERFACE_BANNER_TYPE_MISSION     (1u)                              // mission banner type
+#define INTERFACE_BANNER_TYPE_SCORE       (2u)                              // 
 
-#define INTERFACE_STORY_SPEED         (1.0f)                            // 
-#define INTERFACE_STORY_DURATION      (4.0f)                            // 
+#define INTERFACE_STORY_SPEED             (1.0f)                            // 
+#define INTERFACE_STORY_DURATION          (4.0f)                            // 
 
 
 // ****************************************************************
@@ -65,7 +69,8 @@ private:
     coreObject2D m_BannerBar;               // banner background
     coreLabel    m_aBannerText[4];          // banner labels
     coreFloat    m_fBannerStart;            // animation start time
-    coreBool     m_bBannerType;             // animation type (boss, mission)
+    coreFloat    m_fBannerDuration;         // 
+    coreUint8    m_iBannerType;             // animation type (boss, mission, score)
 
     coreLabel m_aStoryText[2];              // 
     coreFloat m_fStoryStart;                // 
@@ -87,10 +92,12 @@ public:
     void Move();
 
     // control banner animation
-    void ShowBoss   (const coreChar* pcMain, const coreChar* pcSub);
-    void ShowBoss   (const cBoss*    pBoss);
-    void ShowMission(const coreChar* pcMain, const coreChar* pcSub);
-    void ShowMission(const cMission* pMission);
+    void ShowBoss   (const coreChar*  pcMain, const coreChar* pcSub);
+    void ShowBoss   (const cBoss*     pBoss);
+    void ShowMission(const coreChar*  pcMain, const coreChar* pcSub);
+    void ShowMission(const cMission*  pMission);
+    void ShowScore  (const coreChar*  pcMain, const coreChar* pcSub);
+    void ShowScore  (const coreUint32 iScore);
     coreBool IsBannerActive()const;
 
     // 
@@ -105,6 +112,11 @@ public:
     inline void SetVisible  (const coreBool  bVisible) {m_bVisible   = bVisible;}
     inline void SetAlphaAll (const coreFloat fAlpha)   {m_fAlphaAll  = fAlpha;}
     inline void SetAlphaBoss(const coreFloat fAlpha)   {m_fAlphaBoss = fAlpha;}
+
+
+private:
+    // 
+    void __PrepareBanner();
 };
 
 

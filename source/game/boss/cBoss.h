@@ -77,7 +77,7 @@
 #define PHASE_TIME_BETWEEN(t,u)         (InBetween(fTime, (t), (u)))
 #define PHASE_BEGINNING                 (PHASE_TIME_POINT(0.0f))
 
-#define PHASE_POSITION_POINT(e,t,v)     (InBetweenExt((t), (e)->GetOldPos().v, (e)->GetPosition().v) && [&]() {s_vPositionPoint = (e)->GetPosition().xy(); s_vPositionPoint.v = (t); return true;}())
+#define PHASE_POSITION_POINT(e,t,v)     (STAGE_POSITION_POINT  (e, t, v))
 #define PHASE_POSITION_BEFORE(e,t,v)    (STAGE_POSITION_BEFORE (e, t, v))
 #define PHASE_POSITION_AFTER(e,t,v)     (STAGE_POSITION_AFTER  (e, t, v))
 #define PHASE_POSITION_BETWEEN(e,t,u,v) (STAGE_POSITION_BETWEEN(e, t, u, v))
@@ -757,6 +757,7 @@ template <typename F, typename G> void cBoss::_PhaseTicker(const coreUintW iTime
     else
     {
         ASSERT(s_cast<void*>(nLerpFunc) == s_cast<void*>(LERP_LINEAR))
+        ASSERT(fRate <= FRAMERATE_VALUE)
 
         // 
         if(oTimer.Update(fRate)) nUpdateFunc(oTimer.GetCurLoops() - 1u, false);

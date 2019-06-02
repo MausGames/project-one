@@ -538,7 +538,8 @@ void cTorusBoss::__EnableTurret(const coreUintW iIndex, const coreVector2& vPosi
     ADD_BIT(m_iTurretActive, iIndex)
 
     // 
-    pTurret->SetPosition(coreVector3(vPosition, 0.0f));
+    pTurret->SetPosition (coreVector3(vPosition, 0.0f));
+    pTurret->SetDirection(coreVector3(0.0f,-1.0f,0.0f));
 
     // 
     pHull->SetPosition(coreVector3(vPosition, 0.0f));
@@ -595,7 +596,8 @@ void cTorusBoss::__EnableGunner(const coreUintW iIndex, const coreVector2& vPosi
     SET_BIT(m_iGunnerMove, iIndex, (iIndex < 2u));
 
     // 
-    pGunner->SetPosition(coreVector3(vPosition, 0.0f));
+    pGunner->SetPosition (coreVector3(vPosition, 0.0f));
+    pGunner->SetDirection(coreVector3(0.0f,-1.0f,0.0f));
 
     // 
     pHull->SetPosition(coreVector3(vPosition, 0.0f));
