@@ -114,8 +114,8 @@ void cLeviathanBoss::__ResurrectOwn()
     {
         cEnemy* pPart = this->__GetPart(i);
 
-        pPart->Resurrect(coreVector2(0.0f, -2.0f * FOREGROUND_AREA.y), coreVector2(0.0f,1.0f));
-        pPart->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        pPart->Resurrect();
+        pPart->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);   // # after resurrection
     }
 
     // 
@@ -343,8 +343,7 @@ void cLeviathanBoss::__MoveOwn()
             const coreVector2 vProjectedPos = g_pForeground->Project3D(vPos);
 
             // 
-            if((ABS(vProjectedPos.x) < FOREGROUND_AREA.x * 1.1f) &&
-               (ABS(vProjectedPos.y) < FOREGROUND_AREA.y * 1.1f))
+            if(g_pForeground->IsVisiblePoint(vProjectedPos))
             {
                 // 
                 if(pPart == &m_Head)

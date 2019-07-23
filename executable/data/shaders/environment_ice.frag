@@ -30,7 +30,7 @@ float GetReflFactor(const in vec3 v3ReflNormal, in vec3 v3BumpNormal)
 
     // calculate dot-3 reflection factor
     float v1ReflFactor = max(0.0, dot(v3ReflNormal, v3BumpNormal));
-          v1ReflFactor = 0.8 * pow(v1ReflFactor, 500.0);
+          v1ReflFactor = 0.75 * min(coreGGX(v1ReflFactor, 0.005), 1.0);
 
     return v1ReflFactor;
 }

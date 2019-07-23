@@ -447,7 +447,7 @@ public:
     cLuciferBoss()noexcept;
 
     DISABLE_COPY(cLuciferBoss)
-    ASSIGN_ID(303, "Lucifer")
+    ASSIGN_ID(303, "L.U.C.I.F.E.R.")
 
 
 private:
@@ -600,7 +600,7 @@ public:
     cZerothBoss()noexcept;
 
     DISABLE_COPY(cZerothBoss)
-    ASSIGN_ID(603, "?")
+    ASSIGN_ID(603, "???")
 
 
 private:

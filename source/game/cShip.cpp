@@ -230,35 +230,31 @@ void cShip::SetBaseColor(const coreVector3& vColor, const coreBool bInverted)
 
 // ****************************************************************
 // 
-coreBool cShip::_TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact)
+coreInt32 cShip::_TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact)
 {
     // 
-    m_iCurHealth = CLAMP(m_iCurHealth - iDamage, 0, m_iMaxHealth);
+    const coreInt32 iClamped = CLAMP(iDamage, m_iCurHealth - m_iMaxHealth, m_iCurHealth);
+    m_iCurHealth -= iClamped;
 
     // 
-    return m_iCurHealth ? false : true;
+    return iClamped;
 }
 
 
 // ****************************************************************
 // add ship to the game
-void cShip::_Resurrect(const coreVector2& vPosition, const coreVector2& vDirection, const coreInt32 iType)
+void cShip::_Resurrect()
 {
     ASSERT(m_iMaxHealth > 0)
 
     // reset ship properties
     m_iCurHealth = m_iMaxHealth;
     m_iPreHealth = m_iMaxHealth;
-    m_vOldPos    = vPosition;
-    this->SetPosition (coreVector3(vPosition,  0.0f));
-    this->SetDirection(coreVector3(vDirection, 0.0f));
+    m_vOldPos    = coreVector2(1000.0f,1000.0f);
     this->RefreshColor(1.0f);
 
     // 
     this->SetEnabled(CORE_OBJECT_ENABLE_ALL);
-
-    // enable collision
-    if(iType) this->ChangeType(iType);
 }
 
 
@@ -268,9 +264,6 @@ void cShip::_Kill(const coreBool bAnimated)
 {
     // 
     this->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
-
-    // disable collision
-    this->ChangeType(0);
 }
 
 

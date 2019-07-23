@@ -44,7 +44,7 @@ void cIntroMission::__SetupOwn()
     // 
     STAGE_MAIN
     {
-        STAGE_BOSS(m_ProjectOne, coreVector2(0.0f,2.0f), coreVector2(0.0f,-1.0f))
+        STAGE_BOSS(m_ProjectOne)
     });
 
     // ################################################################

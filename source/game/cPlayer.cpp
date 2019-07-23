@@ -12,14 +12,17 @@
 // ****************************************************************
 // constructor
 cPlayer::cPlayer()noexcept
-: m_apWeapon   {}
-, m_pInput     (&g_TotalInput)
-, m_vForce     (coreVector2(0.0f,0.0f))
-, m_fFeelTime  (PLAYER_NO_FEEL)
-, m_fRollTime  (0.0f)
-, m_iFeelType  (0u)
-, m_iRollDir   (PLAYER_NO_ROLL)
-, m_fAnimation (0.0f)
+: m_apWeapon        {}
+, m_pInput          (&g_TotalInput)
+, m_vForce          (coreVector2(0.0f,0.0f))
+, m_fRollTime       (0.0f)
+, m_fFeelTime       (PLAYER_NO_FEEL)
+, m_iRollDir        (PLAYER_NO_ROLL)
+, m_iFeelType       (0u)
+, m_fInterrupt      (0.0f)
+, m_fLightningTime  (0.0f)
+, m_fLightningAngle (0.0f)
+, m_fAnimation      (0.0f)
 {
     // load object resources
     this->DefineTexture(0u, "ship_player.png");
@@ -33,6 +36,8 @@ cPlayer::cPlayer()noexcept
 
     // set initial status
     m_iStatus = PLAYER_STATUS_DEAD;
+
+    // 
     this->SetMaxHealth(PLAYER_LIVES);
 
     // load first weapons
@@ -236,7 +241,7 @@ void cPlayer::Move()
         if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_ROLL))
         {
             // 
-            if(CONTAINS_BIT(m_pInput->iActionPress, PLAYER_WEAPONS * WEAPON_MODES))
+            if(CONTAINS_BIT(m_pInput->iActionPress, PLAYER_WEAPONS * WEAPON_MODES) && !m_fInterrupt)
                 if(m_fRollTime <= 0.0f) this->StartRolling(m_pInput->vMove);
         }
 
@@ -269,7 +274,7 @@ void cPlayer::Move()
             if(!m_vForce.IsNull())
             {
                 vNewPos  += m_vForce * Core::System->GetTime();
-                m_vForce *= FrictionFactor(3.0f);
+                m_vForce *= FrictionFactor(8.0f);
             }
 
             // restrict movement to the foreground area
@@ -308,7 +313,7 @@ void cPlayer::Move()
         // update all weapons (shooting and stuff)
         for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
         {
-            const coreUint8 iShoot = (!this->IsRolling() && !CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_PACIFIST) && !CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT)) ? ((m_pInput->iActionHold & (BITLINE(WEAPON_MODES) << (i*WEAPON_MODES))) >> (i*WEAPON_MODES)) : 0u;
+            const coreUint8 iShoot = (!this->IsRolling() && !CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_PACIFIST) && !CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && !m_fInterrupt) ? ((m_pInput->iActionHold & (BITLINE(WEAPON_MODES) << (i*WEAPON_MODES))) >> (i*WEAPON_MODES)) : 0u;
             m_apWeapon[i]->Update(iShoot);
         }
 
@@ -349,6 +354,25 @@ void cPlayer::Move()
             m_Bubble.SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.1f));
             m_Bubble.Move();
         }
+
+        // 
+        m_fInterrupt.UpdateMax(-1.0f, 0.0f);
+        if(m_fInterrupt)
+        {
+            // 
+            m_fLightningTime.Update(10.0f);
+            if(m_fLightningTime >= 1.0f)
+            {
+                m_fLightningTime -= 1.0f;
+
+                // 
+                m_fLightningAngle = FMOD(m_fLightningAngle + DEG_TO_RAD(145.0f), DEG_TO_RAD(360.0f));
+                const coreVector2 vDir = coreVector2::Direction(m_fLightningAngle);
+
+                // 
+                g_pSpecialEffects->CreateLightning(this, vDir, 7.0f, SPECIAL_LIGHTNING_SMALL, coreVector3(1.0f,1.0f,1.0f), coreVector2(1.0f,1.0f), 0.0f);
+            }
+        }
     }
 
     // 
@@ -364,7 +388,7 @@ void cPlayer::Move()
 
 // ****************************************************************
 // reduce current health
-coreBool cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact)
+coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact)
 {
     // 
     if(iDamage > 0)
@@ -380,26 +404,31 @@ coreBool cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, 
         });
 
         // 
-        if(this->_TakeDamage(1, iElement, vImpact))
+        const coreInt32 iTaken = this->_TakeDamage(1, iElement, vImpact);
+        if(m_iCurHealth)
         {
+            // 
+            if(!this->IsDarkShading()) this->RefreshColor();
+
+            // 
+            this->StartFeeling(PLAYER_FEEL_TIME, 0u);
+        }
+        else
+        {
+            // 
             this->Kill(true);
-            return true;
         }
 
-        // 
-        if(!this->IsDarkShading()) this->RefreshColor();
-
-        // 
-        this->StartFeeling(PLAYER_FEEL_TIME, 0u);
+        return iTaken;
     }
 
-    return false;
+    return 0;
 }
 
 
 // ****************************************************************
 // add player to the game
-void cPlayer::Resurrect(const coreVector2& vPosition)
+void cPlayer::Resurrect()
 {
     // resurrect player
     if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD)) return;
@@ -409,8 +438,11 @@ void cPlayer::Resurrect(const coreVector2& vPosition)
     cShadow::GetGlobalContainer()->BindObject(this);
     g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->BindObject(this);
 
+    // enable collision
+    this->ChangeType(TYPE_PLAYER);
+
     // add ship to the game
-    this->_Resurrect(vPosition, coreVector2(0.0f,1.0f), TYPE_PLAYER);
+    this->_Resurrect();
 }
 
 
@@ -436,12 +468,20 @@ void cPlayer::Kill(const coreBool bAnimated)
     this->UpdateExhaust(0.0f);
 
     // 
+    m_fInterrupt      = 0.0f;
+    m_fLightningTime  = 0.0f;
+    m_fLightningAngle = 0.0f;
+
+    // 
     if(bAnimated && this->IsEnabled(CORE_OBJECT_ENABLE_RENDER))
         g_pSpecialEffects->MacroExplosionPhysicalDarkBig(this->GetPosition());
 
     // remove ship from global shadow and outline
     cShadow::GetGlobalContainer()->UnbindObject(this);
     g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->UnbindObject(this);
+
+    // disable collision
+    this->ChangeType(0);
 
     // remove ship from the game
     this->_Kill(bAnimated);

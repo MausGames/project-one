@@ -14,6 +14,7 @@
 // TODO: add visible debug-spline
 // TODO: prevent multiple calculations in script-commands (because of macro variables), also boss
 // TODO: assertion for "active boss should be alive"
+// TODO: STAGE_FLYPAST with dot-product or simpler per-axis
 
 
 // ****************************************************************
@@ -41,10 +42,10 @@
 
 #define STAGE_FINISH_NOW                {this->SkipStage();}
 #define STAGE_FINISH_AFTER(t)           {if(m_fStageTime >= (t)) STAGE_FINISH_NOW}
-#define STAGE_BOSS(e,p,d)               {if(STAGE_BEGINNING) (e).Resurrect((p) * FOREGROUND_AREA, (d)); if(CONTAINS_FLAG((e).GetStatus(), ENEMY_STATUS_DEAD)) STAGE_FINISH_NOW}
+#define STAGE_BOSS(e)                   {if(STAGE_BEGINNING) (e).Resurrect(); if(CONTAINS_FLAG((e).GetStatus(), ENEMY_STATUS_DEAD)) STAGE_FINISH_NOW}
 #define STAGE_WAVE                      {if(STAGE_BEGINNING) this->ActivateWave(); if(STAGE_CLEARED) {this->DeactivateWave(); STAGE_FINISH_NOW}}
 
-#define STAGE_RESSURECT(s,f,t)          {STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i) {if((coreInt32(i) >= coreInt32(f)) && (coreInt32(i) <= coreInt32(t))) pEnemy->Resurrect();});}
+#define STAGE_RESSURECT(s,f,t)          {STAGE_FOREACH_ENEMY_ALL(s, pEnemy, i) {if((coreInt32(i) >= coreInt32(f)) && (coreInt32(i) <= coreInt32(t))) pEnemy->Resurrect();});}
 #define STAGE_CLEARED                   (std::all_of(m_apSquad.begin(), m_apSquad.end(), [](const cEnemySquad* pSquad) {return pSquad->IsFinished();}))
 
 #define STAGE_ADD_PATH(n)               const auto n = this->_AddPath    (__LINE__,      [](coreSpline2* OUTPUT n)
@@ -74,8 +75,7 @@
     UNUSED const coreFloat fLifeSpeed      = (m);                                                 \
     UNUSED const coreFloat fLifeOffset     = (a);                                                 \
     UNUSED coreFloat       fLifeTime       = (e)->GetLifeTime()       * fLifeSpeed - fLifeOffset; \
-    UNUSED coreFloat       fLifeTimeBefore = (e)->GetLifeTimeBefore() * fLifeSpeed - fLifeOffset; \
-    if(!CONTAINS_FLAG(e->GetStatus(), ENEMY_STATUS_DEAD)) e->SetEnabled((fLifeTime >= 0.0f) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE);
+    UNUSED coreFloat       fLifeTimeBefore = (e)->GetLifeTimeBefore() * fLifeSpeed - fLifeOffset;
 
 #define STAGE_BRANCH(x,y)               ((fLifeTime < (x)) || [&]() {fLifeTime = FMOD(fLifeTime - (x), (y)); fLifeTimeBefore = FMOD(fLifeTimeBefore - (x), (y)); if(fLifeTimeBefore > fLifeTime) fLifeTimeBefore -= (y); return false;}())
 #define STAGE_REPEAT(x)                 {if(STAGE_BRANCH(x, x)) {}}
@@ -105,7 +105,7 @@
 #define STAGE_POSITION_BEFORE(e,t,v)    ((e)->GetPosition().v <  (t))
 #define STAGE_POSITION_AFTER(e,t,v)     ((e)->GetPosition().v >= (t))
 #define STAGE_POSITION_BETWEEN(e,t,u,v) (InBetweenExt((e)->GetPosition().v, (t), (u)))
-#define STAGE_FLYPAST(e,f,v)                           \
+#define STAGE_FLYPAST(e,f,v)                         \
     ((e)->GetPosition().v < (f)->GetPosition().v) ^  \
     ((e)->GetPosition().v < (f)->GetOldPos  ().v) || \
     ((e)->GetOldPos  ().v < (f)->GetPosition().v) ^  \

@@ -301,10 +301,13 @@ void cInterface::Move()
 
     // display time
     const coreFloat fTime = MAX(g_pGame->GetTimeTable()->GetTimeBossWave(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurBossIndex(), g_pGame->GetCurMission()->GetCurWaveIndex()), 0.0f);
-    m_aBossTime[0].SetText(PRINT("%.0f.", FLOOR(      fTime)));
-    m_aBossTime[1].SetText(PRINT("%.0f",  FLOOR(FRACT(fTime)*10.0f)));
-    m_aWaveTime[0].SetText(m_aBossTime[0].GetText());
-    m_aWaveTime[1].SetText(m_aBossTime[1].GetText());
+    if(fTime)
+    {
+        m_aBossTime[0].SetText(PRINT("%.0f.", FLOOR(      fTime)));
+        m_aBossTime[1].SetText(PRINT("%.0f",  FLOOR(FRACT(fTime)*10.0f)));
+        m_aWaveTime[0].SetText(m_aBossTime[0].GetText());
+        m_aWaveTime[1].SetText(m_aBossTime[1].GetText());
+    }
 
     // adjust time position (# only required if alignment is centered)
     (m_fAlphaBoss ? m_aBossTime[0] : m_aWaveTime[0]).RetrieveDesiredSize([this](const coreVector2& vSize)

@@ -20,7 +20,6 @@
 // enemy definitions
 #define ENEMY_SET_INIT    (8u)      // initial size when creating a new enemy set
 #define ENEMY_SET_COUNT   (8u)      // 
-#define ENEMY_AREA_FACTOR (1.2f)    // 
 #define ENEMY_SIZE_FACTOR (1.05f)   // 
 
 enum eEnemyStatus : coreUint16
@@ -65,13 +64,14 @@ public:
     void         Move  ()final;
 
     // reduce current health
-    coreBool TakeDamage(coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact, cPlayer* pAttacker);
+    coreInt32 TakeDamage(coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact, cPlayer* pAttacker);
 
     // control life and death
     void Resurrect();
-    void Resurrect(const coreSpline2* pPath,     const coreVector2& vFactor, const coreVector2& vOffset);
-    void Resurrect(const coreVector2& vPosition, const coreVector2& vDirection);
-    void Kill     (const coreBool     bAnimated);
+    void Kill     (const coreBool bAnimated);
+
+    // reset base properties
+    void ResetProperties();
 
     // 
     inline coreBool IsParent()const {return !CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_CHILD) && !m_apMember.empty();}
@@ -453,6 +453,7 @@ template <typename T> RETURN_RESTRICT T* cEnemyManager::AllocateEnemy()
         if(!CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_ASSIGNED))
         {
             // prepare enemy and add to active list
+            pEnemy->ResetProperties();
             pEnemy->AddStatus(ENEMY_STATUS_ASSIGNED);
             pSet->oEnemyActive.BindObject(pEnemy);
 

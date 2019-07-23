@@ -52,6 +52,10 @@ public:
     inline FUNC_LOCAL coreVector2 Project3D(const coreVector3& vPosition)const {return vPosition.xy() * (CAMERA_POSITION.z * RCP(CAMERA_POSITION.z - vPosition.z));}
     inline FUNC_LOCAL coreVector2 Project2D(const coreVector3& vPosition)const {const coreVector4 A = coreVector4(vPosition, 1.0f) * m_mViewProj; return A.xy() * (RCP(A.w) * 0.5f);}
 
+    // 
+    coreBool IsVisiblePoint (const coreVector2& vPosition, const coreFloat fFactor = 1.1f)const;
+    coreBool IsVisibleObject(const coreObject3D* pObject)const;
+
 
 private:
     // reset with the resource manager

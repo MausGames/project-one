@@ -98,11 +98,11 @@ public:
 
 protected:
     // 
-    coreBool _TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact);
+    coreInt32 _TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact);
 
     // 
-    void _Resurrect(const coreVector2& vPosition, const coreVector2& vDirection, const coreInt32 iType);
-    void _Kill     (const coreBool     bAnimated);
+    void _Resurrect();
+    void _Kill     (const coreBool bAnimated);
 
     // 
     void _EnableBlink(const coreProgramPtr& pProgram)const;

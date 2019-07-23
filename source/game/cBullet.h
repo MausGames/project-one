@@ -23,11 +23,10 @@
 
 // ****************************************************************
 // bullet definitions
-#define BULLET_SET_INIT      (16u)     // initial size when creating a new bullet set
-#define BULLET_SET_COUNT     (16u)     // 
-#define BULLET_AREA_FACTOR   (1.2f)    // size factor for foreground area where the bullet remains active
-#define BULLET_SPEED_FACTOR  (30.0f)   // 
-#define BULLET_DEPTH_FACTOR  (0.8f)    // 
+#define BULLET_SET_INIT     (16u)     // initial size when creating a new bullet set
+#define BULLET_SET_COUNT    (16u)     // 
+#define BULLET_SPEED_FACTOR (30.0f)   // 
+#define BULLET_DEPTH_FACTOR (0.8f)    // 
 
 #define BULLET_SHADER_ATTRIBUTE_DEPTH (CORE_SHADER_ATTRIBUTE_DIV_TEXPARAM_NUM + 1u)
 
@@ -73,6 +72,10 @@ public:
     void Activate  (const coreInt32 iDamage, const coreFloat fSpeed, cShip* pOwner, const coreVector2& vPosition, const coreVector2& vDirection, const coreInt32 iType);
     void Deactivate(const coreBool bAnimated, const coreVector2& vImpact);
     void Deactivate(const coreBool bAnimated);
+
+    // 
+    void Reflect(const coreObject3D* pObject);
+    void Reflect(const coreVector2&  vNormal);
 
     // 
     inline cBullet* ChangeSize (const coreFloat fFactor) {this->SetSize (this->GetSize () * fFactor); return this;}
@@ -477,7 +480,7 @@ public:
     inline void ResetProperties() {this->MakeYellow(); this->SetSize(coreVector3(1.45f,1.55f,1.45f) * 2.1f); m_fAnimation = 0.15f;}
 
     // change default color
-    inline cSpearBullet* MakeWhite () {ASSERT(false)            return this;}
+    inline cSpearBullet* MakeWhite () {this->_MakeWhite (0.8f); return this;}
     inline cSpearBullet* MakeYellow() {this->_MakeYellow(1.0f); return this;}
     inline cSpearBullet* MakeOrange() {ASSERT(false)            return this;}
     inline cSpearBullet* MakeRed   () {ASSERT(false)            return this;}

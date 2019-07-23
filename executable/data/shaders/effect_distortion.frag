@@ -23,7 +23,13 @@ void FragmentMain()
 
 #endif
 
-    // draw distortion map (only two channels)
-    vec2 v2Distortion = coreTexture2D(0, v_av2TexCoord[0]).rg;
-    gl_FragColor      = vec4(v2Distortion, 0.0, u_v4Color.a * v1Alpha);
+    // 
+    vec2 v2Texture = coreTexture2D(0, v_av2TexCoord[0]).rg * 2.0 - 1.0;
+
+    // 
+    vec2  v2Direction = normalize(v2Texture) * 0.5 + 0.5;
+    float v1Length    = length   (v2Texture);
+
+    // draw distortion (only two channels)
+    gl_FragColor = vec4(v2Direction, 0.0, u_v4Color.a * v1Length * v1Alpha);
 }

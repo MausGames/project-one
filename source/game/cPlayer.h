@@ -20,21 +20,24 @@
 
 // ****************************************************************
 // player definitions
-#define PLAYER_WEAPONS            (1u)       // number of weapons a player can carry
-#define PLAYER_LIVES              (LIVES)    // 
-#define PLAYER_SHIELD             (SHIELD)   // 
-#define PLAYER_COLLISION_MIN      (0.5f)     // 
-#define PLAYER_WIND_SIZE          (4.5f)     // 
-#define PLAYER_BUBBLE_SIZE        (6.0f)     // 
-#define PLAYER_ROLL_SPEED         (1.0f)     // 
-#define PLAYER_ROLL_COOLDOWN      (60.0f)    // (60 is fastest cooldown, ship is vulnerable for a single frame) 
-#define PLAYER_FEEL_TIME          (3.0f)     // 
-#define PLAYER_FEEL_TIME_CONTINUE (5.0f)     // 
+#define PLAYER_WEAPONS            (1u)                // number of weapons a player can carry
+#define PLAYER_LIVES              (LIVES)             // 
+#define PLAYER_SHIELD             (SHIELD)            // 
+#define PLAYER_COLLISION_MIN      (0.5f)              // 
+#define PLAYER_WIND_SIZE          (4.5f)              // 
+#define PLAYER_BUBBLE_SIZE        (6.0f)              // 
+#define PLAYER_ROLL_SPEED         (1.0f)              // 
+#define PLAYER_ROLL_COOLDOWN      (FRAMERATE_VALUE)   // (ship is vulnerable for a single frame) 
+#define PLAYER_FEEL_TIME          (3.0f)              // 
+#define PLAYER_FEEL_TIME_CONTINUE (5.0f)              // 
+#define PLAYER_INTERRUPT          (3.0f)              // 
 
 #define PLAYER_SHIP_ATK (0u)        // 
 #define PLAYER_SHIP_DEF (1u)        // 
 #define PLAYER_NO_ROLL  (0xFFu)     // 
 #define PLAYER_NO_FEEL  (-100.0f)   // 
+
+STATIC_ASSERT(PLAYER_INTERRUPT > (1.0f / PLAYER_ROLL_SPEED))
 
 enum ePlayerStatus : coreUint8
 {
@@ -59,10 +62,14 @@ private:
     const sGameInput* m_pInput;                                 // pointer to associated input set (should never be NULL)
 
     coreVector2 m_vForce;                                       // 
-    coreFlow    m_fFeelTime;                                    // 
     coreFlow    m_fRollTime;                                    // 
-    coreUint8   m_iFeelType;                                    // 
+    coreFlow    m_fFeelTime;                                    // 
     coreUint8   m_iRollDir;                                     // 
+    coreUint8   m_iFeelType;                                    // 
+
+    coreFlow  m_fInterrupt;                                     // 
+    coreFlow  m_fLightningTime;                                 // 
+    coreFloat m_fLightningAngle;                                // 
 
     cScoreTable m_ScoreTable;                                   // 
 
@@ -94,11 +101,11 @@ public:
     void Move  ()final;
 
     // reduce current health
-    coreBool TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact);
+    coreInt32 TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact);
 
     // control life and death
-    void Resurrect(const coreVector2& vPosition);
-    void Kill     (const coreBool     bAnimated);
+    void Resurrect();
+    void Kill     (const coreBool bAnimated);
 
     // 
     void StartRolling(const coreVector2& vDirection);
@@ -127,8 +134,9 @@ public:
     inline cScoreTable* GetScoreTable()                            {return &m_ScoreTable;}
 
     // set object properties
-    inline void SetInput(const sGameInput*  pInput) {m_pInput = pInput;}
-    inline void SetForce(const coreVector2& vForce) {m_vForce = vForce;}
+    inline void SetInput    (const sGameInput*  pInput)     {m_pInput     = pInput;}
+    inline void SetForce    (const coreVector2& vForce)     {m_vForce     = vForce;}
+    inline void SetInterrupt(const coreFloat    fInterrupt) {m_fInterrupt = fInterrupt;}
 
     // get object properties
     inline const sGameInput*  GetInput   ()const {ASSERT(m_pInput) return m_pInput;}

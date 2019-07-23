@@ -135,7 +135,7 @@ void FragmentMain()
 
     // calculate diffuse and specular value
     float v1Diffuse  = v1Light * (1.4 * max(v1Max, v1BumpFactor) + 0.2);
-    float v1Specular = 0.15 * pow(v1ReflFactor, 100.0) * v1Shine;
+    float v1Specular = 0.1 * min(coreGGX(v1ReflFactor, 0.09), 1.0) * v1Shine;
 
 #if defined(_P1_LIGHT_)
 

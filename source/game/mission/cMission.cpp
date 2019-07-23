@@ -102,7 +102,7 @@ void cMission::MoveBefore()
             if(m_anStage.empty())
             {
                 // 
-                g_pGame->StartOutro();
+                g_pGame->StartOutro(0u);
             }
         }
     }

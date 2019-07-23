@@ -24,6 +24,9 @@ cBullet::cBullet()noexcept
 , m_fFlyTime   (0.0f)
 , m_vFlyDir    (coreVector2(0.0f,0.0f))
 {
+    // 
+    this->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
     // set initial status
     m_iStatus = BULLET_STATUS_READY;
 }
@@ -40,10 +43,7 @@ void cBullet::Move()
     this->__MoveOwn();
 
     // deactivate bullet when leaving the defined area
-    if(((this->GetPosition().x < -FOREGROUND_AREA.x * BULLET_AREA_FACTOR) ||
-        (this->GetPosition().x >  FOREGROUND_AREA.x * BULLET_AREA_FACTOR) ||
-        (this->GetPosition().y < -FOREGROUND_AREA.y * BULLET_AREA_FACTOR) ||
-        (this->GetPosition().y >  FOREGROUND_AREA.y * BULLET_AREA_FACTOR)) && (m_fFlyTime >= 1.0f))
+    if((m_fFlyTime >= 0.5f) && !g_pForeground->IsVisibleObject(this))
         this->Deactivate(false);
 
     // move the 3d-object
@@ -74,6 +74,9 @@ void cBullet::Activate(const coreInt32 iDamage, const coreFloat fSpeed, cShip* p
     this->SetDirection(coreVector3(vDirection, 0.0f));
     this->SetAlpha    (1.0f);
 
+    // 
+    this->SetEnabled(CORE_OBJECT_ENABLE_ALL);
+
     // enable collision
     this->ChangeType(iType);
 }
@@ -90,6 +93,9 @@ void cBullet::Deactivate(const coreBool bAnimated, const coreVector2& vImpact)
     // 
     if(bAnimated) this->__ImpactOwn(vImpact);
 
+    // 
+    this->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
     // disable collision
     this->ChangeType(0);
 }
@@ -98,6 +104,22 @@ void cBullet::Deactivate(const coreBool bAnimated)
 {
     // 
     this->Deactivate(bAnimated, this->GetPosition().xy());
+}
+
+
+// ****************************************************************
+// 
+void cBullet::Reflect(const coreObject3D* pObject)
+{
+    // 
+    this->Reflect((this->GetPosition().xy() - pObject->GetPosition().xy()).Normalized());
+}
+
+void cBullet::Reflect(const coreVector2& vNormal)
+{
+    // 
+    ASSERT(vNormal.IsNormalized())
+    m_vFlyDir = coreVector2::Reflect(m_vFlyDir, vNormal);
 }
 
 

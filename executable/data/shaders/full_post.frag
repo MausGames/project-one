@@ -42,12 +42,12 @@ void FragmentMain()
     float v1Intensity = 1.0 - 0.33 * coreLengthSq(v_av2TexCoord[0] - vec2(0.5));
 
     // draw blend between all textures (glow only on environment for high contrast)
-    vec3 v3Blend = mix(v3Environment * (u_v4Color.g * v1Intensity) + v3Glow, v4Foreground.rgb / max(v4Foreground.a, 0.001), v4Foreground.a);
+    vec3 v3Blend = mix(v3Environment * v1Intensity + v3Glow, v4Foreground.rgb / max(v4Foreground.a, 0.001), v4Foreground.a);
 
     // 
     vec3 v3Color = pow(v3Blend, vec3(1.05));
     vec3 v3Gray  = vec3(coreLuminance(v3Color));
-    gl_FragColor = vec4(mix(v3Color, v3Gray, u_v4Color.r), 1.0);
+    gl_FragColor = vec4(mix(v3Color, v3Gray, u_v4Color.r) * u_v4Color.g, 1.0);
 
     //if(v3Gray.r != 0.0)
     //{

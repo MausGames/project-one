@@ -83,15 +83,7 @@ void cMenu::Move()
         {
             if(STATIC_ISVALID(g_pGame))
             {
-                if(g_MenuInput.bPause || Core::System->GetWinFocusLost())
-                {
-                    // 
-                    this->ChangeSurface(SURFACE_PAUSE, 0.0f);
-
-                    // 
-                    this->InvokePauseStep();
-                }
-                else if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_OUTRO))
+                if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_OUTRO))
                 {
                     // 
                     this->ChangeSurface(SURFACE_SUMMARY, 3.0f);
@@ -107,6 +99,14 @@ void cMenu::Move()
                     // 
                     if(g_pGame->GetContinues()) m_DefeatMenu.ShowContinue();
                                            else m_DefeatMenu.ShowGameOver();
+                }
+                else if(g_MenuInput.bPause || Core::System->GetWinFocusLost())
+                {
+                    // 
+                    this->ChangeSurface(SURFACE_PAUSE, 0.0f);
+
+                    // 
+                    this->InvokePauseStep();
                 }
             }
         }

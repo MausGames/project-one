@@ -420,6 +420,9 @@ void cConfigMenu::Move()
                 }
 
                 // 
+                if(oInput.oRumble.IsClickedArrow()) g_CurConfig.Input.aiRumble[i] = oInput.oRumble.GetCurEntry().tValue;
+
+                // 
                 cMenu::UpdateSwitchBox(&oInput.oType);
                 cMenu::UpdateSwitchBox(&oInput.oRumble);
 
@@ -889,6 +892,9 @@ void cConfigMenu::__LoadInputs()
         nLockFunc(!bKeyboard, &oInput.oMoveDown,                       SDL_GetKeyName(CORE_INPUT_CHAR(DOWN)));
         nLockFunc(!bKeyboard, &oInput.oMoveRight,                      SDL_GetKeyName(CORE_INPUT_CHAR(RIGHT)));
         nLockFunc( bKeyboard, &oInput.aAction[INPUT_KEYS_ACTION - 1u], SDL_GetKeyName(CORE_INPUT_CHAR(ESCAPE)));
+
+        // 
+        oInput.oRumble.SetOverride(bKeyboard ? -1 : 0);
     }
 }
 

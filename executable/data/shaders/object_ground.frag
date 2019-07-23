@@ -82,7 +82,7 @@ void FragmentMain()
 
     // calculate diffuse and specular value
     vec3 v3Diffuse  = v3TexColor * (v1Light * (1.1 * max(0.0, v1BumpFactor) + 0.65));
-    vec3 v3Specular = vec3(0.15 * pow(v1ReflFactor, 100.0));
+    vec3 v3Specular = vec3(0.1 * min(coreGGX(v1ReflFactor, 0.09), 1.0));
 
     // draw final color
     gl_FragColor = vec4((v3Diffuse + v3Specular) * u_v4Color.rgb, 1.0);

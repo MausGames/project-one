@@ -45,7 +45,7 @@ void FragmentMain()
     vec3  v3MathViewDir = normalize(v_v3ViewDir);
     vec3  v3ReflNormal  = normalize(v3MathLightDir + v3MathViewDir);
     float v1ReflFactor  = max(0.0, dot(v3ReflNormal, v3BumpNormal));
-          v1ReflFactor  = 0.45 * pow(v1ReflFactor, 260.0);
+          v1ReflFactor  = 0.4 * min(coreGGX(v1ReflFactor, 0.008), 1.0);
 
     // adjust depth value
     v1Depth = smoothstep(0.64, 0.735, v1Depth) * 0.8 * (1.0 + v1ReflFactor) + v_v4Lighting.w;

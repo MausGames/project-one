@@ -24,6 +24,7 @@ cGame::cGame(const coreUint8 iDifficulty, const coreBool bCoop, const coreInt32*
 , m_fPacifistDamage     (0.0f)
 , m_bPacifist           (false)
 , m_iDepthLevel         (0u)
+, m_iOutroType          (0u)
 , m_iStatus             (0u)
 , m_iDifficulty         (iDifficulty)
 , m_bCoop               (bCoop)
@@ -71,30 +72,14 @@ cGame::cGame(const coreUint8 iDifficulty, const coreBool bCoop, const coreInt32*
 // destructor
 cGame::~cGame()
 {
-    constexpr coreBool bAnimated = !DEFINED(_CORE_DEBUG_);   // prevent assertions when force-quitting
-
     // 
-    for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
-        m_aPlayer[i].Kill(bAnimated);
-
-    // 
-    m_EnemyManager.ClearEnemies(bAnimated);
-
-    // 
-    m_BulletManagerPlayer.ClearBullets(bAnimated);
-    m_BulletManagerEnemy .ClearBullets(bAnimated);
-
-    // 
-    m_ChromaManager.ClearChromas(bAnimated);
-
-    // 
-    m_ItemManager.ClearItems(bAnimated);
-
-    // 
-    m_ShieldManager.ClearShields(bAnimated);
+    this->__ClearAll(!DEFINED(_CORE_DEBUG_));   // # prevent assertions when force-quitting
 
     // delete last mission
     SAFE_DELETE(m_pCurMission)
+
+    // 
+    g_pWindscreen->ClearAdds(true);
 
     // 
     g_pPostProcessing->SetSaturation(1.0f);
@@ -248,17 +233,7 @@ void cGame::LoadMissionID(const coreInt32 iID)
     if(m_pCurMission) if(m_pCurMission->GetID() == iID) return;
 
     // 
-    m_EnemyManager.ClearEnemies(true);
-
-    // 
-    m_BulletManagerPlayer.ClearBullets(true);
-    m_BulletManagerEnemy .ClearBullets(true);
-
-    // 
-    m_ChromaManager.ClearChromas(true);
-
-    // 
-    m_ItemManager.ClearItems(true);
+    this->__ClearAll(false);
 
     // delete possible old mission
     SAFE_DELETE(m_pCurMission)
@@ -347,29 +322,19 @@ void cGame::StartIntro()
     // 
     m_fTimeInOut = -GAME_INTRO_DELAY;
 
-    if(m_bCoop)
+    // 
+    for(coreUintW i = 0u, ie = (m_bCoop ? GAME_PLAYERS : 1u); i < ie; ++i)
     {
-        // reset all available players
-        for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
-        {
-            m_aPlayer[i].Kill(false);
-            m_aPlayer[i].Resurrect(coreVector2(20.0f * (I_TO_F(i) - 0.5f * I_TO_F(GAME_PLAYERS-1u)), -100.0f));
-            m_aPlayer[i].AddStatus(PLAYER_STATUS_NO_INPUT_ALL);
-        }
-    }
-    else
-    {
-        // reset only the first player
-        m_aPlayer[0].Kill(false);
-        m_aPlayer[0].Resurrect(coreVector2(0.0f,-100.0f));
-        m_aPlayer[0].AddStatus(PLAYER_STATUS_NO_INPUT_ALL);
+        m_aPlayer[i].Kill(false);
+        m_aPlayer[i].Resurrect();
+        m_aPlayer[i].AddStatus(PLAYER_STATUS_NO_INPUT_ALL);
     }
 }
 
 
 // ****************************************************************
 // 
-void cGame::StartOutro()
+void cGame::StartOutro(const coreUint8 iType)
 {
     ASSERT(!CONTAINS_FLAG(m_iStatus, GAME_STATUS_INTRO))
 
@@ -379,6 +344,7 @@ void cGame::StartOutro()
 
     // 
     m_fTimeInOut = 0.0f;
+    m_iOutroType = iType;
 
     // 
     for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
@@ -529,6 +495,7 @@ coreBool cGame::__HandleIntro()
             this->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
             {
                 // calculate new player position and rotation
+                const coreFloat   fSide = m_bCoop ? (20.0f * (I_TO_F(i) - 0.5f * I_TO_F(GAME_PLAYERS-1u))) : 0.0f;
                 const coreFloat   fTime = CLAMP((i ? 0.0f : 0.08f) + m_fTimeInOut / GAME_INTRO_DURATION, 0.0f, 1.0f);
                 const coreVector2 vPos  = s_Spline.CalcPositionLerp(LERPB(0.0f, 1.0f,    fTime));
                 const coreVector2 vDir  = coreVector2::Direction   (LERPS(0.0f, 4.0f*PI, fTime));
@@ -541,7 +508,8 @@ coreBool cGame::__HandleIntro()
                 }
 
                 // fly player animated into the game field
-                pPlayer->SetPosition   (coreVector3(pPlayer->GetPosition().x, vPos));
+                pPlayer->SetPosition   (coreVector3(fSide, vPos));
+                pPlayer->SetDirection  (coreVector3(0.0f,1.0f,0.0f));
                 pPlayer->SetOrientation(coreVector3(vDir.x, 0.0f, vDir.y));
                 pPlayer->UpdateExhaust (LERPB(1.0f, 0.0f, fTime));
             });
@@ -570,6 +538,7 @@ coreBool cGame::__HandleOutro()
 
             // fly player animated out of the game field
             pPlayer->SetPosition   (coreVector3(pPlayer->GetPosition().x, fPos, pPlayer->GetPosition().z));
+            pPlayer->SetDirection  (coreVector3(0.0f,1.0f,0.0f));
             pPlayer->SetOrientation(coreVector3(vDir.x, 0.0f, vDir.y));
             pPlayer->UpdateExhaust ((fTime < 0.2f) ? LERPB(0.0f, 0.7f, fTime / 0.2f) : LERPB(0.7f, 0.3f, fTime - 0.2f));
         });
@@ -603,9 +572,17 @@ void cGame::__HandleDefeat()
 
         if(bDefeated)
         {
-            // 
-            REMOVE_FLAG(m_iStatus, GAME_STATUS_PLAY)
-            ADD_FLAG   (m_iStatus, GAME_STATUS_DEFEATED)
+            if(m_pCurMission->GetID() == cIntroMission::ID)
+            {
+                // 
+                this->StartOutro(1u);
+            }
+            else
+            {
+                // 
+                REMOVE_FLAG(m_iStatus, GAME_STATUS_PLAY)
+                ADD_FLAG   (m_iStatus, GAME_STATUS_DEFEATED)
+            }
         }
     }
 }
@@ -665,11 +642,13 @@ void cGame::__HandleCollisions()
         if(!bFirstHit) return;
 
         // 
-        pPlayer->TakeDamage(15, ELEMENT_NEUTRAL, vIntersection.xy());
-        pEnemy ->TakeDamage(25, ELEMENT_NEUTRAL, vIntersection.xy(), pPlayer);
+        const coreVector2 vDir = (pPlayer->GetPosition().xy() - pEnemy->GetPosition().xy()).Normalized();
+        pPlayer->SetForce    (vDir * 100.0f);
+        pPlayer->SetInterrupt(PLAYER_INTERRUPT);
 
         // 
-        g_pSpecialEffects->MacroExplosionPhysicalDarkSmall(vIntersection);
+        g_pSpecialEffects->CreateSplashColor(pPlayer->GetPosition(), 50.0f, 10u, coreVector3(1.0f,1.0f,1.0f));
+        g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
     });
 
     // 
@@ -683,12 +662,25 @@ void cGame::__HandleCollisions()
     // 
     Core::Manager::Object->TestCollision(TYPE_ENEMY, TYPE_BULLET_PLAYER, [](cEnemy* OUTPUT pEnemy, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
-        // 
-        pEnemy ->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner()));
-        pBullet->Deactivate(true, vIntersection.xy());
+        if(!bFirstHit) return;
 
         // 
-        g_pSpecialEffects->RumblePlayer(d_cast<cPlayer*>(pBullet->GetOwner()), SPECIAL_RUMBLE_DEFAULT);
+        if(!g_pForeground->IsVisiblePoint(vIntersection.xy())) return;
+
+        // 
+        if(pEnemy->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner())))
+        {
+            // 
+            pBullet->Deactivate(true, vIntersection.xy());
+
+            // 
+            g_pSpecialEffects->RumblePlayer(d_cast<cPlayer*>(pBullet->GetOwner()), SPECIAL_RUMBLE_DEFAULT);
+        }
+        else
+        {
+            // 
+            pBullet->Reflect(pEnemy);
+        }
     });
 
     // 
@@ -710,4 +702,22 @@ void cGame::__HandleCollisions()
     {
         pEnemy->ActivateModelDefault();
     });
+}
+
+
+// ****************************************************************
+// 
+void cGame::__ClearAll(const coreBool bAnimated)
+{
+    // 
+    for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+        m_aPlayer[i].Kill(bAnimated);
+
+    // 
+    m_EnemyManager       .ClearEnemies(bAnimated);
+    m_BulletManagerPlayer.ClearBullets(bAnimated);
+    m_BulletManagerEnemy .ClearBullets(bAnimated);
+    m_ChromaManager      .ClearChromas(bAnimated);
+    m_ItemManager        .ClearItems  (bAnimated);
+    m_ShieldManager      .ClearShields(bAnimated);
 }

@@ -70,6 +70,30 @@ void cForeground::End()
 
 
 // ****************************************************************
+// 
+coreBool cForeground::IsVisiblePoint(const coreVector2& vPosition, const coreFloat fFactor)const
+{
+    // 
+    return ((ABS(vPosition.x) < FOREGROUND_AREA.x * fFactor) &&
+            (ABS(vPosition.y) < FOREGROUND_AREA.y * fFactor));
+}
+
+
+// ****************************************************************
+// 
+coreBool cForeground::IsVisibleObject(const coreObject3D* pObject)const
+{
+    // 
+    const coreVector2 vProjectedPos = this->Project3D(pObject->GetPosition());
+    const coreFloat   fRange        = pObject->GetModel().IsUsable() ? (pObject->GetModel()->GetBoundingRange() * pObject->GetSize()).Max() : 0.0f;
+
+    // 
+    return ((ABS(vProjectedPos.x) < FOREGROUND_AREA.x * 1.1f + fRange) &&
+            (ABS(vProjectedPos.y) < FOREGROUND_AREA.y * 1.1f + fRange));
+}
+
+
+// ****************************************************************
 // reset with the resource manager
 void cForeground::__Reset(const coreResourceReset eInit)
 {

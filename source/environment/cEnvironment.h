@@ -16,6 +16,7 @@
 // TODO: currently after changing the background there is no Background::Move before the first Render
 // TODO: separate culling between normal rendering an shadow, to improve efficiency (though this would update instancing buffer again ?)
 // TODO: transition is reset when resizing window
+// TODO: different background than cNoBackground on invalid ID (error background ?)
 
 
 // ****************************************************************

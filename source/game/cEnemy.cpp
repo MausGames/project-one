@@ -20,9 +20,7 @@ cEnemy::cEnemy()noexcept
     this->DefineProgram("object_ship_blink_program");
 
     // set object properties
-    this->SetSize       (coreVector3(1.0f, 1.0f,1.0f) * ENEMY_SIZE_FACTOR);
-    this->SetDirection  (coreVector3(0.0f,-1.0f,0.0f));
-    this->SetOrientation(coreVector3(0.0f, 0.0f,1.0f));
+    this->ResetProperties();
 
     // set initial status
     m_iStatus = ENEMY_STATUS_DEAD;
@@ -82,6 +80,17 @@ void cEnemy::Move()
 
         // move the 3d-object
         this->coreObject3D::Move();
+
+        // 
+        if(g_pForeground->IsVisibleObject(this))
+        {
+            this->SetEnabled(CORE_OBJECT_ENABLE_ALL);
+            this->ChangeType(TYPE_ENEMY);   // # makes it available in cEnemyManager::ForEachEnemy
+        }
+        else
+        {
+            this->SetEnabled(CORE_OBJECT_ENABLE_MOVE);
+        }
     }
 
     // 
@@ -91,9 +100,9 @@ void cEnemy::Move()
 
 // ****************************************************************
 // reduce current health
-coreBool cEnemy::TakeDamage(coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact, cPlayer* pAttacker)
+coreInt32 cEnemy::TakeDamage(coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact, cPlayer* pAttacker)
 {
-    // 
+    // forward to parent
     if(this->IsChild()) return m_apMember.front()->TakeDamage(iDamage, iElement, vImpact, pAttacker);
 
     // 
@@ -117,59 +126,41 @@ coreBool cEnemy::TakeDamage(coreInt32 iDamage, const coreUint8 iElement, const c
             }
 
             // 
-            const coreBool bReachedDeath = this->_TakeDamage(iDamage, iElement, vImpact);
-
-            // 
-            this->RefreshColor();
-            this->InvokeBlink();
-
-            // 
-            if(this->IsParent())
+            const coreInt32 iTaken = this->_TakeDamage(iDamage, iElement, vImpact);
+            if(m_iCurHealth)
             {
-                FOR_EACH(it, m_apMember)
+                // 
+                this->RefreshColor();
+                this->InvokeBlink();
+
+                // 
+                if(this->IsParent())
                 {
-                    (*it)->RefreshColor(this->GetCurHealthPct());
-                    (*it)->InvokeBlink();
+                    FOR_EACH(it, m_apMember)
+                    {
+                        (*it)->RefreshColor(this->GetCurHealthPct());
+                        (*it)->InvokeBlink();
+                    }
                 }
             }
-
-            // 
-            if(bReachedDeath)
+            else
             {
+                // 
                 if(!CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_IMMORTAL))
                     this->Kill(true);
-
-                return true;
             }
+
+            return iTaken;
         }
     }
 
-    return false;
+    return 0;
 }
 
 
 // ****************************************************************
 // add enemy to the game
 void cEnemy::Resurrect()
-{
-    // 
-    this->Resurrect(this->GetPosition().xy(), this->GetDirection().xy());
-}
-
-void cEnemy::Resurrect(const coreSpline2* pPath, const coreVector2& vFactor, const coreVector2& vOffset)
-{
-    ASSERT(CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_DEAD))
-
-    // 
-    coreVector2 vPosition;
-    coreVector2 vDirection;
-    pPath->CalcPosDir(0.0f, &vPosition, &vDirection);
-
-    // 
-    this->Resurrect((vPosition * vFactor) + vOffset, (vDirection * vFactor).Normalized());
-}
-
-void cEnemy::Resurrect(const coreVector2& vPosition, const coreVector2& vDirection)
 {
     // resurrect enemy
     if(!CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_DEAD)) return;
@@ -198,7 +189,7 @@ void cEnemy::Resurrect(const coreVector2& vPosition, const coreVector2& vDirecti
     }
 
     // add ship to the game
-    this->_Resurrect(vPosition, vDirection, TYPE_ENEMY);
+    this->_Resurrect();
 
     // 
     this->__ResurrectOwn();
@@ -252,6 +243,9 @@ void cEnemy::Kill(const coreBool bAnimated)
         g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->UnbindObject(this);
     }
 
+    // disable collision
+    this->ChangeType(0);
+
     // remove ship from the game
     this->_Kill(bAnimated);
 
@@ -260,6 +254,17 @@ void cEnemy::Kill(const coreBool bAnimated)
 
     // 
     if(this->IsParent()) FOR_EACH(it, m_apMember) (*it)->Kill(false);   // # never animate
+}
+
+
+// ****************************************************************
+//  reset base properties
+void cEnemy::ResetProperties()
+{
+    this->SetPosition   (coreVector3(FLT_MAX,FLT_MAX,0.0f));
+    this->SetSize       (coreVector3(1.0f, 1.0f,1.0f) * ENEMY_SIZE_FACTOR);
+    this->SetDirection  (coreVector3(0.0f,-1.0f,0.0f));
+    this->SetOrientation(coreVector3(0.0f, 0.0f,1.0f));
 }
 
 
