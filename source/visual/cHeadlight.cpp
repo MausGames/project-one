@@ -116,17 +116,8 @@ void cHeadlight::UpdateDefault()
         // 
         g_pGame->ForEachPlayer([this](const cPlayer* pPlayer, const coreUintW i)
         {
-            this->DrawSpot(pPlayer->GetPosition() + 49.0f * pPlayer->GetDirection(), coreVector2(100.0f,100.0f), pPlayer->GetDirection().xy());
-        });
-
-        // 
-        g_pGame->ForEachPlayer([this](const cPlayer* pPlayer, const coreUintW i)
-        {
+            this->DrawSpot (pPlayer->GetPosition() + 49.0f * pPlayer->GetDirection(), coreVector2(100.0f,100.0f), pPlayer->GetDirection().xy());
             this->DrawPoint(pPlayer);
-        });
-        g_pGame->GetEnemyManager()->ForEachEnemy([this](const cEnemy* pEnemy)
-        {
-            this->DrawPoint(pEnemy);
         });
     }
 

@@ -52,7 +52,7 @@
 // TODO: check for 16-bit shader usage
 // TODO: program enable has to be checked (if(x.Enable()){}) everywhere
 // TODO: check if "if(!CORE_GL_SUPPORT(ARB_texture_rg)) glColorMask(true, true, false, false);" reduces or improves performance on related hardware, it is recommended to remove it for compression purposes, but always test to be sure
-// TODO: change some 0.5 FB factors from 0.5 to 0.4 if CORE_GL_SUPPORT(ARB_texture_rg) not available ?
+// TODO: change 0.5 FB factors from 0.5 to 0.4 (-36% pixel) if CORE_GL_SUPPORT(ARB_texture_rg) not available ?
 // TODO: unify "forward" and "transform" comments in shaders
 // TODO: add own coreRand for various random things which may affect feeling (screen shake), and reset on boss-start
 // TODO: check issues with all the F&& functions (especially in boss.h and mission.h), also check Core engine, use force_inline on small functions
@@ -190,15 +190,15 @@ enum eType : coreInt32
 // attack elements
 enum eElement : coreUint8
 {
-    ELEMENT_WHITE = 1u,   // 
-    ELEMENT_YELLOW,       // speed (ray) 
-    ELEMENT_ORANGE,       // fire
-    ELEMENT_RED,          // (antimatter) 
-    ELEMENT_PURPLE,       // power (pulse) 
-    ELEMENT_BLUE,         // homing (tesla) 
-    ELEMENT_CYAN,         // 
-    ELEMENT_GREEN,        // (wave) 
-    ELEMENT_NEUTRAL       // 
+    ELEMENT_WHITE = 1u,
+    ELEMENT_YELLOW,
+    ELEMENT_ORANGE,
+    ELEMENT_RED,
+    ELEMENT_PURPLE,
+    ELEMENT_BLUE,
+    ELEMENT_CYAN,
+    ELEMENT_GREEN,
+    ELEMENT_NEUTRAL
 };
 
 extern void InitResolution(const coreVector2& vResolution);   // init resolution properties (1:1)
@@ -269,13 +269,11 @@ extern cPostProcessing* const g_pPostProcessing;   // main post-processing objec
 #include "game/boss/cBoss.h"
 #include "game/mission/cMission.h"
 #include "game/cPlayer.h"
-#include "game/cTheater.h"
 #include "game/cGame.h"
 
 extern cForeground*  const g_pForeground;    // main foreground object
 extern cEnvironment* const g_pEnvironment;   // main environment object
 extern cMenu*        const g_pMenu;          // main menu object
-extern cTheater*     const g_pTheater;       // main theater object
 extern cGame*        const g_pGame;          // main game object
 
 

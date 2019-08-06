@@ -120,9 +120,6 @@
     <ClCompile Include="..\..\..\source\environment\background\07_cMossBackground.cpp">
       <Filter>environment\background</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\game\cTheater.cpp">
-      <Filter>game</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\source\environment\background\99_cCloudBackground.cpp">
       <Filter>environment\background</Filter>
     </ClCompile>
@@ -365,9 +362,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\source\visual\cBlur.h">
       <Filter>visual</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\source\game\cTheater.h">
-      <Filter>game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\source\game\cShield.h">
       <Filter>game</Filter>

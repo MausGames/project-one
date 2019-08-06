@@ -363,7 +363,7 @@ void cViridoMission::__MoveOwnAfter()
         Core::Manager::Object->TestCollision(TYPE_VIRIDO_PADDLE, TYPE_VIRIDO_BALL, [this](coreObject3D* OUTPUT pPaddle, coreObject3D* OUTPUT pBall, const coreVector3& vIntersection, const coreBool bFirstHit)
         {
             // 
-            if(coreVector2::Dot(pPaddle->GetDirection().xy(), pBall->GetDirection().xy()) >= 0.0f)
+            if(!bFirstHit || (coreVector2::Dot(pPaddle->GetDirection().xy(), pBall->GetDirection().xy()) >= 0.0f))
                 return;
 
             // 
@@ -371,8 +371,8 @@ void cViridoMission::__MoveOwnAfter()
             const coreObject3D& oPaddleSphere = m_aPaddleSphere[iIndex];
 
             // 
-            coreVector3 vDummy;
-            if(coreObjectManager::TestCollision(&oPaddleSphere, pBall, &vDummy))
+            coreVector3 vImpact;
+            if(coreObjectManager::TestCollision(&oPaddleSphere, pBall, &vImpact))
             {
                 const coreVector2 vBallPos   = pBall  ->GetPosition ().xy();
                 const coreVector2 vBallDir   = pBall  ->GetDirection().xy();
@@ -404,7 +404,7 @@ void cViridoMission::__MoveOwnAfter()
                 if(m_iStickyState) ADD_BIT(m_iStickyState, 1u)
 
                 // 
-                cViridoMission::__BounceEffect(vBallPos + vBallDir * pBall->GetSize().x);
+                cViridoMission::__BounceEffect(vImpact.xy());
             }
         });
     }
@@ -445,8 +445,9 @@ void cViridoMission::__MoveOwnAfter()
     // 
     if(!CONTAINS_FLAG(m_Vaus.GetStatus(), ENEMY_STATUS_DEAD))
     {
-        cEnemy*   pCurEnemy = NULL;
-        coreFloat fCurLenSq = FLT_MAX;
+        cEnemy*     pCurEnemy  = NULL;
+        coreFloat   fCurLenSq  = FLT_MAX;
+        coreVector2 vCurImpact = coreVector2(FLT_MAX,FLT_MAX);
 
         // only first ball will be active in this mission stage
         coreObject3D& oBall = m_aBallRaw[0];
@@ -460,14 +461,15 @@ void cViridoMission::__MoveOwnAfter()
         Core::Manager::Object->TestCollision(TYPE_ENEMY, &oBall, [&](cEnemy* OUTPUT pEnemy, coreObject3D* OUTPUT pBall, const coreVector3& vIntersection, const coreBool bFirstHit)
         {
             // 
-            if(pEnemy->GetID() != cScoutEnemy::ID) return;
+            if(!bFirstHit || (pEnemy->GetID() != cCinderEnemy::ID)) return;
 
             // 
             const coreFloat fNewLenSq = (pEnemy->GetPosition().xy() - vOldBallPos).LengthSq();
             if(fNewLenSq < fCurLenSq)
             {
-                pCurEnemy = pEnemy;
-                fCurLenSq = fNewLenSq;
+                pCurEnemy  = pEnemy;
+                fCurLenSq  = fNewLenSq;
+                vCurImpact = vIntersection.xy();
             }
         });
 
@@ -492,7 +494,7 @@ void cViridoMission::__MoveOwnAfter()
             pCurEnemy->Kill(true);
 
             // 
-            cViridoMission::__BounceEffect(vBallPos + vBallDir * oBall.GetSize().x);
+            cViridoMission::__BounceEffect(vCurImpact);
         }
     }
 }

@@ -208,7 +208,7 @@ void cDefeatMenu::Move()
     }
 
     // 
-    g_pPostProcessing->SetSaturation(MIN(m_fOutroTimer, 1.0f));
+    g_pPostProcessing->SetSaturationAll(MIN(m_fOutroTimer, 1.0f));
 }
 
 

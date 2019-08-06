@@ -12,7 +12,7 @@
 // ****************************************************************
 // constructor
 cSummaryMenu::cSummaryMenu()noexcept
-: coreMenu      (1u, SURFACE_SUMMARY_DEFAULT)
+: coreMenu      (2u, SURFACE_SUMMARY_NORMAL)
 , m_iFinalScore (0u)
 , m_fIntroTimer (0.0f)
 , m_fOutroTimer (0.0f)
@@ -66,17 +66,17 @@ cSummaryMenu::cSummaryMenu()noexcept
     }
 
     // bind menu objects
-    this->BindObject(SURFACE_SUMMARY_DEFAULT, &m_Background);
+    this->BindObject(SURFACE_SUMMARY_NORMAL, &m_Background);
 
-    for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES; ++i) this->BindObject(SURFACE_SUMMARY_DEFAULT, &m_aTitle[i]);
-    this->BindObject(SURFACE_SUMMARY_DEFAULT, &m_TotalTitle);
-    for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES; ++i) this->BindObject(SURFACE_SUMMARY_DEFAULT, &m_aValue[i]);
-    this->BindObject(SURFACE_SUMMARY_DEFAULT, &m_TotalValue);
+    for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES; ++i) this->BindObject(SURFACE_SUMMARY_NORMAL, &m_aTitle[i]);
+    this->BindObject(SURFACE_SUMMARY_NORMAL, &m_TotalTitle);
+    for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES; ++i) this->BindObject(SURFACE_SUMMARY_NORMAL, &m_aValue[i]);
+    this->BindObject(SURFACE_SUMMARY_NORMAL, &m_TotalValue);
 
     for(coreUintW j = 0u; j < MENU_SUMMARY_PARTS; ++j)
     {
-        for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES; ++i) this->BindObject(SURFACE_SUMMARY_DEFAULT, &m_aaPart[i][j]);
-        this->BindObject(SURFACE_SUMMARY_DEFAULT, &m_aTotalPart[j]);
+        for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES; ++i) this->BindObject(SURFACE_SUMMARY_NORMAL, &m_aaPart[i][j]);
+        this->BindObject(SURFACE_SUMMARY_NORMAL, &m_aTotalPart[j]);
     }
 }
 
@@ -104,7 +104,7 @@ void cSummaryMenu::Move()
     // 
     switch(this->GetCurSurface())
     {
-    case SURFACE_SUMMARY_DEFAULT:
+    case SURFACE_SUMMARY_NORMAL:
         {
             // 
             constexpr coreFloat fSpinFrom = (0.5f + 0.4f * I_TO_F(MENU_SUMMARY_ENTRIES));
@@ -177,6 +177,38 @@ void cSummaryMenu::Move()
         }
         break;
 
+    case SURFACE_SUMMARY_BEGIN:
+        {
+            // 
+            m_fIntroTimer.Update(1.0f);
+
+            if(m_iState == SUMMARY_INTRO)
+            {
+                // 
+                g_pPostProcessing->SetValueAll(CLAMP(4.0f - m_fIntroTimer, 0.0f, 1.0f));
+
+                if(m_fIntroTimer >= 5.0f)
+                {
+                    // 
+                    m_iStatus = 1;
+
+                    // 
+                    m_iState = SUMMARY_OUTRO;
+
+                    // 
+                    g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 0.0f);
+
+                    // 
+                    g_pPostProcessing->SetSaturationAll(1.0f);
+                    g_pPostProcessing->SetValueAll     (1.0f);
+
+                    // prevent flickering (# render function)
+                    g_pGlow->Clear();
+                }
+            }
+        }
+        break;
+
     default:
         ASSERT(false)
         break;
@@ -186,7 +218,7 @@ void cSummaryMenu::Move()
 
 // ****************************************************************
 // 
-void cSummaryMenu::ShowSummary()
+void cSummaryMenu::ShowNormal()
 {
     ASSERT(STATIC_ISVALID(g_pGame))
 
@@ -239,5 +271,22 @@ void cSummaryMenu::ShowSummary()
     }
 
     // 
-    this->ChangeSurface(SURFACE_SUMMARY_DEFAULT, 0.0f);
+    this->ChangeSurface(SURFACE_SUMMARY_NORMAL, 0.0f);
+}
+
+
+// ****************************************************************
+// 
+void cSummaryMenu::ShowBegin()
+{
+    ASSERT(STATIC_ISVALID(g_pGame))
+
+    // 
+    m_iFinalScore = 0u;
+    m_fIntroTimer = 0.0f;
+    m_fOutroTimer = 0.0f;
+    m_iState      = SUMMARY_INTRO;
+
+    // 
+    this->ChangeSurface(SURFACE_SUMMARY_BEGIN, 0.0f);
 }

@@ -12,7 +12,6 @@
 
 // TODO: #define FOREGROUND_AREA_FULL (FOREGROUND_AREA * 1.1f)
 // TODO: FOREGROUND_AREA_REV without RCP
-// TODO: switch back to multisampled framebuffer, to improve quality on Nvidia GPUs
 
 
 // ****************************************************************
@@ -29,8 +28,11 @@
 class cForeground final : public coreResourceRelation
 {
 private:
-    coreFrameBuffer m_FrameBuffer;   // foreground frame buffer (only texture, in FBO for fast clear)
-    coreMatrix4     m_mViewProj;     // foreground view-projection matrix
+    coreFrameBuffer m_FrameBuffer;       // foreground frame buffer (multisampled)
+    coreFrameBuffer m_ResolvedTexture;   // resolved texture
+
+    coreMatrix4 m_mViewProj;             // foreground view-projection matrix
+    coreBool    m_bTarget;               // 
 
 
 public:
@@ -43,10 +45,13 @@ public:
     void End();
 
     // clear frame buffer
-    inline void Clear() {m_FrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);}
+    inline void Clear() {m_ResolvedTexture.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);}
 
     // access frame buffer
-    inline coreFrameBuffer* GetFrameBuffer() {return &m_FrameBuffer;}
+    inline coreFrameBuffer* GetFrameBuffer() {return &m_ResolvedTexture;}
+
+    // 
+    inline const coreBool& IsTarget()const {return m_bTarget;}
 
     // project world-position into screen-space
     inline FUNC_LOCAL coreVector2 Project3D(const coreVector3& vPosition)const {return vPosition.xy() * (CAMERA_POSITION.z * RCP(CAMERA_POSITION.z - vPosition.z));}

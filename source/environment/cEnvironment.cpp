@@ -104,6 +104,10 @@ void cEnvironment::Render()
         }
         else m_FrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);
     }
+
+    // 
+    Core::Graphics->SetCamera(CAMERA_POSITION, CAMERA_DIRECTION, CAMERA_ORIENTATION);
+    Core::Graphics->SetLight (0u, coreVector4(0.0f,0.0f,0.0f,0.0f), coreVector4(LIGHT_DIRECTION, 0.0f), coreVector4(0.0f,0.0f,0.0f,0.0f));
 }
 
 

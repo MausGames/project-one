@@ -56,6 +56,13 @@ cGame::cGame(const coreUint8 iDifficulty, const coreBool bCoop, const coreInt32*
         m_aPlayer[0].SetInput(&g_aGameInput[0]);
         m_aPlayer[1].SetInput(&g_aGameInput[1]);
 
+        // 
+        m_aPlayer[0].SetArea(coreVector4(-FOREGROUND_AREA, FOREGROUND_AREA * coreVector2(-0.1f,1.0f)));
+        m_aPlayer[1].SetArea(coreVector4(-FOREGROUND_AREA * coreVector2(-0.1f,1.0f), FOREGROUND_AREA));
+
+        // 
+        g_pPostProcessing->SetSplitScreen(true);
+
         STATIC_ASSERT(GAME_PLAYERS == 2u)
     }
 
@@ -82,7 +89,8 @@ cGame::~cGame()
     g_pWindscreen->ClearAdds(true);
 
     // 
-    g_pPostProcessing->SetSaturation(1.0f);
+    g_pPostProcessing->SetSaturationAll(1.0f);
+    g_pPostProcessing->SetSplitScreen  (false);
 
     // 
     g_pEnvironment->SetTargetDirection(ENVIRONMENT_DEFAULT_DIRECTION);
@@ -554,8 +562,7 @@ void cGame::__HandleDefeat()
 {
     if(CONTAINS_FLAG(m_iStatus, GAME_STATUS_PLAY))
     {
-        coreBool  bDefeated = true;
-        coreFloat fFeelTime = 0.0f;
+        coreBool bAllDefeated = true;
 
         // 
         for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
@@ -563,14 +570,14 @@ void cGame::__HandleDefeat()
             const cPlayer& oPlayer = m_aPlayer[i];
 
             // 
-            bDefeated = bDefeated && CONTAINS_FLAG(oPlayer.GetStatus(), PLAYER_STATUS_DEAD);
-            fFeelTime = MAX(fFeelTime, oPlayer.GetFeelTime());
+            const coreBool bDefeated = CONTAINS_FLAG(oPlayer.GetStatus(), PLAYER_STATUS_DEAD);
+            bAllDefeated = bAllDefeated && bDefeated;
+
+            // 
+            g_pPostProcessing->SetSaturation(i, bDefeated ? 0.0f : CLAMP(1.0f - oPlayer.GetFeelTime(), 0.0f, 1.0f));
         }
 
-        // 
-        g_pPostProcessing->SetSaturation(bDefeated ? 0.0f : (1.0f - MIN(fFeelTime, 1.0f)));
-
-        if(bDefeated)
+        if(bAllDefeated)
         {
             if(m_pCurMission->GetID() == cIntroMission::ID)
             {

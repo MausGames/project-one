@@ -14,6 +14,7 @@
 cPlayer::cPlayer()noexcept
 : m_apWeapon        {}
 , m_pInput          (&g_TotalInput)
+, m_vArea           (coreVector4(-FOREGROUND_AREA, FOREGROUND_AREA))
 , m_vForce          (coreVector2(0.0f,0.0f))
 , m_fRollTime       (0.0f)
 , m_fFeelTime       (PLAYER_NO_FEEL)
@@ -278,10 +279,10 @@ void cPlayer::Move()
             }
 
             // restrict movement to the foreground area
-                 if(vNewPos.x < -FOREGROUND_AREA.x) {vNewPos.x = -FOREGROUND_AREA.x; m_vForce.x =  ABS(m_vForce.x);}
-            else if(vNewPos.x >  FOREGROUND_AREA.x) {vNewPos.x =  FOREGROUND_AREA.x; m_vForce.x = -ABS(m_vForce.x);}
-                 if(vNewPos.y < -FOREGROUND_AREA.y) {vNewPos.y = -FOREGROUND_AREA.y; m_vForce.y =  ABS(m_vForce.y);}
-            else if(vNewPos.y >  FOREGROUND_AREA.y) {vNewPos.y =  FOREGROUND_AREA.y; m_vForce.y = -ABS(m_vForce.y);}
+                 if(vNewPos.x < m_vArea.x) {vNewPos.x = m_vArea.x; m_vForce.x =  ABS(m_vForce.x);}
+            else if(vNewPos.x > m_vArea.z) {vNewPos.x = m_vArea.z; m_vForce.x = -ABS(m_vForce.x);}
+                 if(vNewPos.y < m_vArea.y) {vNewPos.y = m_vArea.y; m_vForce.y =  ABS(m_vForce.y);}
+            else if(vNewPos.y > m_vArea.w) {vNewPos.y = m_vArea.w; m_vForce.y = -ABS(m_vForce.y);}
 
             // 
             const coreVector2 vDiff = vNewPos - this->GetPosition().xy();
@@ -396,12 +397,6 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
         // 
         m_ScoreTable.TransferChain();
         m_ScoreTable.ReduceCombo();
-
-        // 
-        if(STATIC_ISVALID(g_pGame)) g_pGame->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
-        {
-            if(pPlayer != this) pPlayer->StartFeeling(PLAYER_FEEL_TIME, 1u);
-        });
 
         // 
         const coreInt32 iTaken = this->_TakeDamage(1, iElement, vImpact);

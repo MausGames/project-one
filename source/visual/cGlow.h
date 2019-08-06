@@ -10,6 +10,9 @@
 #ifndef _P1_GUARD_GLOW_H_
 #define _P1_GUARD_GLOW_H_
 
+// TODO: glow is cleared abruptly when getting inactive, should afterglow instead
+// TODO: remove exposed clear function (location where this is called should use a different way)
+
 
 // ****************************************************************
 // glow definitions
@@ -22,7 +25,9 @@
 class cGlow final : public cBindContainerIn
 {
 private:
-    cBlur m_Blur;   // blur aggregation object (glow frame buffer)
+    cBlur m_Blur;         // blur aggregation object (glow frame buffer)
+
+    coreBool m_bActive;   // 
 
 
 public:
@@ -33,8 +38,14 @@ public:
     // update the glow-effect
     void Update();
 
+    // clear frame buffer
+    inline void Clear() {m_Blur.Clear();}
+
     // access frame buffer
     inline coreFrameBuffer* GetFrameBuffer() {return m_Blur.GetFrameBuffer();}
+
+    // 
+    inline const coreBool& IsActive()const {return m_bActive;}
 };
 
 

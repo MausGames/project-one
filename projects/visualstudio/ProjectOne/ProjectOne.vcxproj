@@ -240,7 +240,6 @@
     <ClCompile Include="..\..\..\source\game\cItem.cpp" />
     <ClCompile Include="..\..\..\source\game\cTable.cpp" />
     <ClCompile Include="..\..\..\source\game\cShield.cpp" />
-    <ClCompile Include="..\..\..\source\game\cTheater.cpp" />
     <ClCompile Include="..\..\..\source\game\cPlayer.cpp" />
     <ClCompile Include="..\..\..\source\game\cShip.cpp" />
     <ClCompile Include="..\..\..\source\game\cWeapon.cpp" />
@@ -413,7 +412,6 @@
     <ClInclude Include="..\..\..\source\game\cShip.h" />
     <ClInclude Include="..\..\..\source\game\cWeapon.h" />
     <ClInclude Include="..\..\..\source\game\mission\cMission.h" />
-    <ClInclude Include="..\..\..\source\game\cTheater.h" />
     <ClInclude Include="..\..\..\source\interface\cCombatStats.h" />
     <ClInclude Include="..\..\..\source\interface\cCombatText.h" />
     <ClInclude Include="..\..\..\source\interface\cInterface.h" />

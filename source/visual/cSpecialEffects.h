@@ -16,13 +16,14 @@
 // TODO: implement pixel-fitting screen-shake ? (currently shaking creates a fullscreen-blur)
 // TODO: don't invoke special-effects out of view (though consider effect-radius)
 // TODO: adjust rumble to be not toooo strong (and not be annoying)
+// TODO: remove object_ring.md3 if not required anymore (+file)
+// TODO: remove effect_energy_ring_program if not required anymore (+file)
 
 
 // ****************************************************************
 // special-effects definitions
 #define SPECIAL_LIGHTNINGS       (32u)     // number of lightning sprites
-#define SPECIAL_BLASTS           (4u)      // number of energy-blasts
-#define SPECIAL_RINGS            (8u)      // number of energy-rings
+#define SPECIAL_BLASTS           (8u)      // number of energy-blasts
 #define SPECIAL_SOUNDS           (8u)      // number of sound-effect files
 
 #define SPECIAL_LIGHTNING_RESIZE (0.66f)   // 
@@ -41,8 +42,6 @@
 #define SPECIAL_LIGHTNING_BIG    (27.0f)
 #define SPECIAL_BLAST_SMALL       (2.0f), (3.5f)
 #define SPECIAL_BLAST_BIG         (4.0f), (3.5f)
-#define SPECIAL_RING_SMALL        (1.5f), (1.8f)
-#define SPECIAL_RING_BIG          (3.0f), (1.8f)
 #define SPECIAL_RUMBLE_DEFAULT    (0.4f), (120u)
 #define SPECIAL_SHAKE_SMALL       (0.6f)
 #define SPECIAL_SHAKE_BIG         (1.2f)
@@ -75,10 +74,8 @@ private:
     coreUintW     m_iCurLightning;                          // 
 
     coreObject3D m_aBlast[SPECIAL_BLASTS];                  // 
+    coreModelPtr m_apBlastModel[3];                         // 
     coreUintW    m_iCurBlast;                               // 
-
-    coreObject3D m_aRing[SPECIAL_RINGS];                    // 
-    coreUintW    m_iCurRing;                                // 
 
     coreSoundPtr m_apSound[SPECIAL_SOUNDS];                 // 
     eSoundEffect m_eSoundGuard;                             // last played sound-effect (to reduce multiple same sound-effects within one frame)
@@ -95,7 +92,7 @@ public:
     DISABLE_COPY(cSpecialEffects)
 
     // render and move special-effects
-    void Render(const coreBool bForeground);
+    void Render();
     void Move();
 
     // 
@@ -124,8 +121,9 @@ public:
     void      CreateLightning(coreObject3D*      pOwner,   const coreVector2& vDirection, const coreFloat fLength, const coreFloat fWidth, const coreVector3& vColor, const coreVector2& vTexSizeFactor, const coreFloat fTexOffset);
 
     // 
-    void CreateBlast(const coreVector3& vPosition,                                                                 const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor);
-    void CreateRing (const coreVector3& vPosition, const coreVector3& vDirection, const coreVector3& vOrientation, const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor);
+    void CreateBlastSphere  (const coreVector3& vPosition,                                const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor);
+    void CreateBlastQuad    (const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor);
+    void CreateBlastTriangle(const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor);
 
     // 
     void PlaySound(const coreVector3& vPosition, const coreFloat fVolume, const eSoundEffect eSoundIndex);

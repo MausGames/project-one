@@ -626,6 +626,14 @@ void cInterface::UpdateLayout()
         oView.oShieldValue .SetCenter(vBottom + vSide);
         oView.oScoreTotal  .SetCenter(vTop    + vSide);
         oView.oScoreMission.SetCenter(vTop    + vSide);
+
+        // 
+        for(coreUintW j = 0u; j < INTERFACE_LIVES; ++j) oView.aLife[j].Move();
+        oView.aShieldBar[0].Move();
+        oView.aShieldBar[1].Move();
+        oView.oShieldValue .Move();
+        oView.oScoreTotal  .Move();
+        oView.oScoreMission.Move();
     }
 
     // 
@@ -636,9 +644,21 @@ void cInterface::UpdateLayout()
     m_aBossTime[1]     .SetCenter(vTop);
 
     // 
+    m_aBossHealthBar[0].Move();
+    m_aBossHealthBar[1].Move();
+    m_BossHealthValue  .Move();
+    m_aBossTime[0]     .Move();
+    m_aBossTime[1]     .Move();
+
+    // 
     m_WaveName    .SetCenter(vTop);
     m_aWaveTime[0].SetCenter(vTop);
     m_aWaveTime[1].SetCenter(vTop);
+
+    // 
+    m_WaveName    .Move();
+    m_aWaveTime[0].Move();
+    m_aWaveTime[1].Move();
 }
 
 

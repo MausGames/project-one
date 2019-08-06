@@ -60,6 +60,7 @@ private:
     cWeapon* m_apWeapon[PLAYER_WEAPONS];                        // main weapon objects (bullet factories, should never be NULL)
 
     const sGameInput* m_pInput;                                 // pointer to associated input set (should never be NULL)
+    coreVector4       m_vArea;                                  // 
 
     coreVector2 m_vForce;                                       // 
     coreFlow    m_fRollTime;                                    // 
@@ -135,6 +136,7 @@ public:
 
     // set object properties
     inline void SetInput    (const sGameInput*  pInput)     {m_pInput     = pInput;}
+    inline void SetArea     (const coreVector4& vArea)      {m_vArea      = vArea; ASSERT(vArea.xy() < vArea.zw())}
     inline void SetForce    (const coreVector2& vForce)     {m_vForce     = vForce;}
     inline void SetInterrupt(const coreFloat    fInterrupt) {m_fInterrupt = fInterrupt;}
 

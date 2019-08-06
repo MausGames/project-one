@@ -100,7 +100,8 @@
 
 #define SURFACE_PAUSE_DEFAULT   (0u)
 
-#define SURFACE_SUMMARY_DEFAULT (0u)
+#define SURFACE_SUMMARY_NORMAL  (0u)
+#define SURFACE_SUMMARY_BEGIN   (1u)
 
 #define SURFACE_DEFEAT_CONTINUE (0u)
 #define SURFACE_DEFEAT_GAMEOVER (1u)
@@ -509,7 +510,8 @@ public:
     void Move  ()final;
 
     // 
-    void ShowSummary();
+    void ShowNormal();
+    void ShowBegin();
 };
 
 

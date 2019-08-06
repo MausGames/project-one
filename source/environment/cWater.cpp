@@ -93,7 +93,7 @@ void cWater::Render(coreFrameBuffer* pBackground)
 void cWater::Move()
 {
     // update animation value
-    m_fAnimation.Update(0.008f);
+    m_fAnimation.UpdateMod(0.008f, 100.0f);
 
     // move water with camera (also water-level up and down)
     this->SetPosition(coreVector3(0.0f, m_fFlyOffset * OUTDOOR_DETAIL, WATER_HEIGHT + 0.4f * SIN(80.0f * m_fAnimation)));
@@ -133,22 +133,27 @@ void cWater::UpdateReflection()
         {
             // move and render the sky-plane
             m_Sky.SetDirection(vOldCamOri.xy());
-            m_Sky.SetTexOffset(coreVector2(vOldCamPos.x * 0.007f * WATER_SKY_SIZE, m_Sky.GetTexOffset().y));
+            m_Sky.SetTexOffset(coreVector2(vOldCamPos.x * (0.008f * WATER_SKY_SIZE), m_fFlyOffset * (-0.05f * WATER_SKY_SIZE)));
             m_Sky.Move();
             m_Sky.Render(m_apSkyProgram[0]);
         }
         glDepthFunc(GL_LEQUAL);
         glEnable   (GL_BLEND);
 
-        if(g_CurConfig.Graphics.iReflection && (STATIC_ISVALID(g_pGame) || g_pTheater->IsActive()))
+        if(g_CurConfig.Graphics.iReflection && (STATIC_ISVALID(g_pGame) || g_pSpecialEffects->IsActive()))
         {
             glCullFace(GL_FRONT);
             {
-                // render the theater
-                g_pTheater->Render();
-
-                // render the game
-                if(STATIC_ISVALID(g_pGame)) g_pGame->Render();
+                if(STATIC_ISVALID(g_pGame))
+                {
+                    // render the game
+                    g_pGame->Render();
+                }
+                else
+                {
+                    // render special-effects
+                    g_pSpecialEffects->Render();
+                }
             }
             glCullFace(GL_BACK);
 
@@ -188,18 +193,6 @@ void cWater::UpdateDepth(cOutdoor* pOutdoor, const std::vector<coreBatchList*>& 
         }
     }
     else m_Depth.Clear(CORE_FRAMEBUFFER_TARGET_DEPTH);
-}
-
-
-// ****************************************************************
-// set current fly offset
-void cWater::SetFlyOffset(const coreFloat fFlyOffset)
-{
-    // set new value
-    m_fFlyOffset = fFlyOffset;
-
-    // move sky-plane texture
-    m_Sky.SetTexOffset(coreVector2(0.0f, ((-8.0f * WATER_SKY_SIZE) / I_TO_F(OUTDOOR_HEIGHT)) * m_fFlyOffset));
 }
 
 
@@ -421,7 +414,7 @@ void cLava::Render()
 void cLava::Move()
 {
     // update animation value
-    m_fAnimation.Update(0.008f);
+    m_fAnimation.UpdateMod(0.008f, 100.0f);
 
     // move lava with camera
     this->SetPosition(coreVector3(0.0f, m_fFlyOffset * OUTDOOR_DETAIL, WATER_HEIGHT));

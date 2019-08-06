@@ -22,5 +22,5 @@ void VertexMain()
     v_av2TexCoord[0] = coreObject2DTexCoord();
 
     // 
-    v_v4Diff = a_v3RawPosition.xyxy - u_v4Position;
+    v_v4Diff = a_v2LowPosition.xyxy - u_v4Position;
 }

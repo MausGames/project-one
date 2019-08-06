@@ -374,7 +374,8 @@ void cOutdoor::LoadProgram(const coreBool bGlow)
 FUNC_PURE coreFloat cOutdoor::RetrieveHeight(const coreVector2& vPosition)const
 {
     // 
-    return this->RetrieveBackHeight(vPosition - this->GetPosition().xy());
+    const coreMatrix2 mRota = coreMatrix3::Rotation(this->GetDirection().xy()).m12();
+    return this->RetrieveBackHeight(vPosition * mRota - this->GetPosition().xy());
 }
 
 FUNC_PURE coreFloat cOutdoor::RetrieveBackHeight(const coreVector2& vPosition)const
@@ -382,6 +383,7 @@ FUNC_PURE coreFloat cOutdoor::RetrieveBackHeight(const coreVector2& vPosition)co
     // convert real position to block position
     const coreFloat fX = vPosition.x / OUTDOOR_DETAIL + I_TO_F(OUTDOOR_WIDTH / 2u);
     const coreFloat fY = vPosition.y / OUTDOOR_DETAIL + I_TO_F(OUTDOOR_VIEW  / 2u);
+    ASSERT((F_TO_UI(fX) < OUTDOOR_WIDTH) && (F_TO_UI(fY) < OUTDOOR_HEIGHT_FULL))
 
     // retrieve all four corners of the block
     const coreUintW iI00 = F_TO_UI(fY) * OUTDOOR_WIDTH + F_TO_UI(fX);   // bottom left
@@ -412,7 +414,8 @@ FUNC_PURE coreFloat cOutdoor::RetrieveBackHeight(const coreVector2& vPosition)co
 FUNC_PURE coreVector3 cOutdoor::RetrieveNormal(const coreVector2& vPosition)const
 {
     // 
-    return this->RetrieveBackNormal(vPosition - this->GetPosition().xy());
+    const coreMatrix2 mRota = coreMatrix3::Rotation(this->GetDirection().xy()).m12();
+    return this->RetrieveBackNormal(vPosition * mRota - this->GetPosition().xy());
 }
 
 FUNC_PURE coreVector3 cOutdoor::RetrieveBackNormal(const coreVector2& vPosition)const
@@ -588,10 +591,17 @@ void cOutdoor::SetFlyOffset(const coreFloat fFlyOffset)
     m_fFlyOffset = fFlyOffset;
     ASSERT(F_TO_UI(m_fFlyOffset) < OUTDOOR_HEIGHT)
 
-    // set position (XY only used in height-calculations)
-    this->SetPosition(coreVector3(0.0f, m_fFlyOffset * -OUTDOOR_DETAIL, 0.0f)); // TODO: side    
-
     // calculate vertex and index offset
     m_iVertexOffset = F_TO_UI(m_fFlyOffset) * OUTDOOR_WIDTH;
     m_iIndexOffset  = F_TO_UI(m_fFlyOffset) * OUTDOOR_BLOCKS_X * OUTDOOR_PER_INDICES * sizeof(coreUint16);
+}
+
+
+// ****************************************************************
+// 
+void cOutdoor::SetTransform(const coreFloat fFlyOffset, const coreFloat fSideOffset, const coreVector2& vDirection)
+{
+    // (only used for height-calculations, not for shading) 
+    this->SetPosition (coreVector3(-fSideOffset, fFlyOffset * -OUTDOOR_DETAIL, 0.0f));
+    this->SetDirection(coreVector3( vDirection,                                0.0f));
 }

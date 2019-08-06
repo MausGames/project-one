@@ -34,6 +34,7 @@
 // 
 #define LIST_KEY (CORE_MEMORY_SHARED)
 
+
 // ****************************************************************
 // angle difference helper-function
 constexpr FUNC_CONST coreFloat AngleDiff(const coreFloat x, const coreFloat y)
@@ -171,7 +172,7 @@ inline FUNC_LOCAL coreVector2 AlongStar(const coreVector2& v)
 
 // ****************************************************************
 // 
-inline FUNC_LOCAL coreVector2 MapToAxis(const coreVector2& vVector, const coreVector2 vAxis)
+inline FUNC_LOCAL coreVector2 MapToAxis(const coreVector2& vVector, const coreVector2& vAxis)
 {
     return (vVector.x * vAxis.Rotated90()) +
            (vVector.y * vAxis);
