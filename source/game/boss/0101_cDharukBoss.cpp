@@ -280,7 +280,7 @@ void cDharukBoss::__MoveOwn()
     m_BoomerangTrail.MoveNormal();
 
     // 
-    cPlayer::TestCollision(TYPE_DHARUK_BOOMERANG, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBoomerang, const coreVector3& vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_DHARUK_BOOMERANG, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBoomerang, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
 
@@ -352,7 +352,7 @@ void cDharukBoss::__EnableBoomerang(const coreUintW iIndex, const coreVector2& v
     coreObject3D* pTrail     = (*m_BoomerangTrail.List())[iIndex*DHARUK_TRAILS];
 
     // 
-    if(pBoomerang->GetType()) return;
+    WARN_IF(pBoomerang->GetType()) return;
     pBoomerang->ChangeType(TYPE_DHARUK_BOOMERANG);
 
     // 

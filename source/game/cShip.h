@@ -82,7 +82,7 @@ public:
     // set object properties
     inline void SetMaxHealth   (const coreInt32 iMaxHealth)    {m_iMaxHealth = iMaxHealth;}
     inline void SetCurHealth   (const coreInt32 iCurHealth)    {m_iCurHealth = iCurHealth;}
-    inline void SetCurHealthPct(const coreFloat fCurHealthPct) {m_iCurHealth = F_TO_SI(fCurHealthPct * I_TO_F(m_iMaxHealth)); ASSERT((fCurHealthPct > 0.0f) && (fCurHealthPct <= 1.0f))}
+    inline void SetCurHealthPct(const coreFloat fCurHealthPct) {m_iCurHealth = F_TO_SI(fCurHealthPct * I_TO_F(m_iMaxHealth)); ASSERT((fCurHealthPct >= 0.0f) && (fCurHealthPct <= 1.0f))}
 
     // get object properties
     inline       coreInt32    GetMaxHealth   ()const {return m_iMaxHealth;}

@@ -81,7 +81,7 @@ void cPauseMenu::Move()
 
             if(this->GetAlpha() >= 1.0f)
             {
-                if(m_ResumeButton.IsClicked() || g_MenuInput.bCancel)
+                if(m_ResumeButton.IsClicked() || g_MenuInput.bPause)
                 {
                     // 
                     m_iStatus = 1;

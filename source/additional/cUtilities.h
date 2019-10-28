@@ -40,8 +40,8 @@
 constexpr FUNC_CONST coreFloat AngleDiff(const coreFloat x, const coreFloat y)
 {
     coreFloat A = (x - y);
-    while(A < -PI) A += 2.0f*PI;
-    while(A >  PI) A -= 2.0f*PI;
+    while(A <  -PI) A += 2.0f*PI;
+    while(A >=  PI) A -= 2.0f*PI;
     return A;
 }
 
@@ -160,12 +160,24 @@ inline FUNC_LOCAL coreBool IsHorizontal(const coreVector2& v)
 inline FUNC_LOCAL coreVector2 AlongCross(const coreVector2& v)
 {
     ASSERT(!v.IsNull())
-    return IsHorizontal(v) ? coreVector2(SIGN(v.x), 0.0f) : coreVector2(0.0f, SIGN(v.y));
+    return IsHorizontal(v) ? coreVector2(v.x, 0.0f) : coreVector2(0.0f, v.y);
 }
 
 inline FUNC_LOCAL coreVector2 AlongStar(const coreVector2& v)
 {
     ASSERT(!v.IsNull())
+    return UnpackDirection(PackDirection(v)) * v.Length();
+}
+
+inline FUNC_LOCAL coreVector2 AlongCrossNormal(const coreVector2& v)
+{
+    ASSERT(v.IsNormalized())
+    return IsHorizontal(v) ? coreVector2(SIGN(v.x), 0.0f) : coreVector2(0.0f, SIGN(v.y));
+}
+
+inline FUNC_LOCAL coreVector2 AlongStarNormal(const coreVector2& v)
+{
+    ASSERT(v.IsNormalized())
     return UnpackDirection(PackDirection(v));
 }
 

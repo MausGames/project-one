@@ -438,6 +438,18 @@ static void DebugGame()
         }
     }
 
+    // damage enemies
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(I), CORE_INPUT_PRESS))
+    {
+        if(STATIC_ISVALID(g_pGame))
+        {
+            g_pGame->GetEnemyManager()->ForEachEnemy([](cEnemy* OUTPUT pEnemy)
+            {
+                pEnemy->TakeDamage(10, ELEMENT_NEUTRAL, coreVector2(0.0f,0.0f), NULL);
+            });
+        }
+    }
+
     // damage boss
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(O), CORE_INPUT_PRESS))
     {

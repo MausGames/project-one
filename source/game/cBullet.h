@@ -271,7 +271,7 @@ public:
     inline void ResetProperties() {this->MakeBlue(); this->SetSize(coreVector3(1.6f,1.6f,1.6f) * 1.1f); m_fAnimation = 0.0f;}
 
     // change default color
-    inline cOrbBullet* MakeWhite () {ASSERT(false)            return this;}
+    inline cOrbBullet* MakeWhite () {this->_MakeWhite (0.6f); return this;}
     inline cOrbBullet* MakeYellow() {ASSERT(false)            return this;}
     inline cOrbBullet* MakeOrange() {this->_MakeOrange(0.9f); return this;}
     inline cOrbBullet* MakeRed   () {this->_MakeRed   (0.9f); return this;}
@@ -304,7 +304,7 @@ public:
     ASSIGN_ID(4, "Cone")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeOrange(); this->SetSize(coreVector3(1.35f,1.55f,1.35f) * 1.05f); m_fAnimation = 0.09f;}
+    inline void ResetProperties() {this->MakeOrange(); this->SetSize(coreVector3(1.35f,1.55f,1.35f) * 1.05f); m_fAnimation = 0.3f;}
 
     // change default color
     inline cConeBullet* MakeWhite () {this->_MakeWhite (0.6f); return this;}
@@ -552,7 +552,7 @@ public:
     inline void ResetProperties() {this->MakePurple(); this->SetSize(coreVector3(2.6f,2.0f,2.6f)); m_fAnimation = 0.0f;}
 
     // change default color
-    inline cFlipBullet* MakeWhite () {ASSERT(false)            return this;}
+    inline cFlipBullet* MakeWhite () {this->_MakeWhite (0.6f); return this;}
     inline cFlipBullet* MakeYellow() {ASSERT(false)            return this;}
     inline cFlipBullet* MakeOrange() {ASSERT(false)            return this;}
     inline cFlipBullet* MakeRed   () {ASSERT(false)            return this;}

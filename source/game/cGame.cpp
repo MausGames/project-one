@@ -160,7 +160,7 @@ void cGame::Render()
         glEnable(GL_DEPTH_TEST);
 
         // render special-effects
-        g_pSpecialEffects->Render(true);
+        g_pSpecialEffects->Render();
 
         // render high-priority bullet manager
         m_BulletManagerEnemy.Render();
@@ -294,6 +294,7 @@ void cGame::LoadNextMission()
     if(m_iCurMissionIndex == m_iNumMissions - 1u)
     {
         // TODO
+        ASSERT(false)
     }
     else
     {
@@ -644,7 +645,7 @@ void cGame::__HandleCollisions()
     });
 
     // 
-    cPlayer::TestCollision(TYPE_ENEMY, [](cPlayer* OUTPUT pPlayer, cEnemy* OUTPUT pEnemy, const coreVector3& vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_ENEMY, [](cPlayer* OUTPUT pPlayer, cEnemy* OUTPUT pEnemy, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
 
@@ -659,7 +660,7 @@ void cGame::__HandleCollisions()
     });
 
     // 
-    cPlayer::TestCollision(TYPE_BULLET_ENEMY, [](cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_BULLET_ENEMY, [](cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         // 
         pPlayer->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy());
@@ -691,14 +692,14 @@ void cGame::__HandleCollisions()
     });
 
     // 
-    cPlayer::TestCollision(TYPE_CHROMA, [](cPlayer* OUTPUT pPlayer, cChromaBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(PLAYER_TEST_ALL, TYPE_CHROMA, [](cPlayer* OUTPUT pPlayer, cChromaBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         // 
         pBullet->Deactivate(true, vIntersection.xy());
     });
 
     // 
-    cPlayer::TestCollision(TYPE_ITEM, [](cPlayer* OUTPUT pPlayer, cItem* OUTPUT pItem, const coreVector3& vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(PLAYER_TEST_ALL, TYPE_ITEM, [](cPlayer* OUTPUT pPlayer, cItem* OUTPUT pItem, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         // 
         pItem->Collect(pPlayer);

@@ -127,7 +127,8 @@ coreInt32 cEnemy::TakeDamage(coreInt32 iDamage, const coreUint8 iElement, const 
 
             // 
             const coreInt32 iTaken = this->_TakeDamage(iDamage, iElement, vImpact);
-            if(m_iCurHealth)
+
+            if(iTaken)
             {
                 // 
                 this->RefreshColor();
@@ -143,7 +144,8 @@ coreInt32 cEnemy::TakeDamage(coreInt32 iDamage, const coreUint8 iElement, const 
                     }
                 }
             }
-            else
+
+            if(!m_iCurHealth)
             {
                 // 
                 if(!CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_IMMORTAL))

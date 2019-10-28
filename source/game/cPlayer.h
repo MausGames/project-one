@@ -51,6 +51,15 @@ enum ePlayerStatus : coreUint8
     PLAYER_STATUS_NO_INPUT_ALL   = PLAYER_STATUS_NO_INPUT_MOVE | PLAYER_STATUS_NO_INPUT_SHOOT | PLAYER_STATUS_NO_INPUT_ROLL | PLAYER_STATUS_NO_INPUT_TURN
 };
 
+enum ePlayerTest : coreUint8
+{
+    PLAYER_TEST_NORMAL = 0x01u,   // 
+    PLAYER_TEST_ROLL   = 0x02u,   // 
+    PLAYER_TEST_FEEL   = 0x04u,   // 
+    PLAYER_TEST_ALL    = PLAYER_TEST_NORMAL | PLAYER_TEST_ROLL | PLAYER_TEST_FEEL
+};
+ENABLE_BITWISE(ePlayerTest)
+
 
 // ****************************************************************
 // player entity class
@@ -146,8 +155,8 @@ public:
     inline       coreFloat    GetFeelTime()const {return (m_iFeelType <= 1u) ? m_fFeelTime : 0.0f;}
 
     // 
-    template <typename F> static FORCE_INLINE void TestCollision(const coreInt32 iType,        F&& nCallback);   // [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit) -> void
-    template <typename F> static FORCE_INLINE void TestCollision(coreObject3D* OUTPUT pObject, F&& nCallback);   // [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit) -> void
+    template <typename F> static FORCE_INLINE void TestCollision(const ePlayerTest eTest, const coreInt32 iType,        F&& nCallback);   // [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit) -> void
+    template <typename F> static FORCE_INLINE void TestCollision(const ePlayerTest eTest, coreObject3D* OUTPUT pObject, F&& nCallback);   // [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit) -> void
 
 
 private:
@@ -160,32 +169,40 @@ private:
 
 // ****************************************************************
 // 
-template <typename F> FORCE_INLINE void cPlayer::TestCollision(const coreInt32 iType, F&& nCallback)
+template <typename F> FORCE_INLINE void cPlayer::TestCollision(const ePlayerTest eTest, const coreInt32 iType, F&& nCallback)
 {
     // 
     Core::Manager::Object->TestCollision(TYPE_PLAYER, iType, [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         // 
-        coreVector3 vNewIntersection;
-        coreBool    bNewFirstHit;
-        if(pPlayer->__TestCollisionPrecise(pObject, &vNewIntersection, &bNewFirstHit))
+        if(pPlayer->IsRolling() ? CONTAINS_FLAG(eTest, PLAYER_TEST_ROLL) : (pPlayer->IsFeeling() ? CONTAINS_FLAG(eTest, PLAYER_TEST_FEEL) : CONTAINS_FLAG(eTest, PLAYER_TEST_NORMAL)))
         {
-            nCallback(pPlayer, d_cast<typename TRAIT_ARG_TYPE(F, 1u)>(pObject), vNewIntersection, bNewFirstHit);
+            // 
+            coreVector3 vNewIntersection;
+            coreBool    bNewFirstHit;
+            if(pPlayer->__TestCollisionPrecise(pObject, &vNewIntersection, &bNewFirstHit))
+            {
+                nCallback(pPlayer, d_cast<typename TRAIT_ARG_TYPE(F, 1u)>(pObject), vNewIntersection, bNewFirstHit);
+            }
         }
     });
 }
 
-template <typename F> FORCE_INLINE void cPlayer::TestCollision(coreObject3D* OUTPUT pObject, F&& nCallback)
+template <typename F> FORCE_INLINE void cPlayer::TestCollision(const ePlayerTest eTest, coreObject3D* OUTPUT pObject, F&& nCallback)
 {
     // 
     Core::Manager::Object->TestCollision(TYPE_PLAYER, pObject, [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         // 
-        coreVector3 vNewIntersection;
-        coreBool    bNewFirstHit;
-        if(pPlayer->__TestCollisionPrecise(pObject, &vNewIntersection, &bNewFirstHit))
+        if(pPlayer->IsRolling() ? CONTAINS_FLAG(eTest, PLAYER_TEST_ROLL) : (pPlayer->IsFeeling() ? CONTAINS_FLAG(eTest, PLAYER_TEST_FEEL) : CONTAINS_FLAG(eTest, PLAYER_TEST_NORMAL)))
         {
-            nCallback(pPlayer, d_cast<typename TRAIT_ARG_TYPE(F, 1u)>(pObject), vNewIntersection, bNewFirstHit);
+            // 
+            coreVector3 vNewIntersection;
+            coreBool    bNewFirstHit;
+            if(pPlayer->__TestCollisionPrecise(pObject, &vNewIntersection, &bNewFirstHit))
+            {
+                nCallback(pPlayer, d_cast<typename TRAIT_ARG_TYPE(F, 1u)>(pObject), vNewIntersection, bNewFirstHit);
+            }
         }
     });
 }

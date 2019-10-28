@@ -497,7 +497,7 @@ private:
     coreFlow   m_fIntroTimer;                                       // 
     coreFlow   m_fOutroTimer;                                       // 
 
-    eSummaryState m_iState;                                         // 
+    eSummaryState m_eState;                                         // 
 
 
 public:
@@ -544,7 +544,7 @@ private:
     coreFlow m_fIntroTimer;                                // 
     coreFlow m_fOutroTimer;                                // 
 
-    eDefeatState m_iState;                                 // 
+    eDefeatState m_eState;                                 // 
 
 
 public:

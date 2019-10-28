@@ -17,7 +17,7 @@ cDefeatMenu::cDefeatMenu()noexcept
 , m_fBurst      (0.0f)
 , m_fIntroTimer (0.0f)
 , m_fOutroTimer (0.0f)
-, m_iState      (DEFEAT_INTRO)
+, m_eState      (DEFEAT_INTRO)
 {
     // create menu objects
     m_Background.DefineTexture(0u, "menu_detail_03.png");
@@ -90,7 +90,7 @@ void cDefeatMenu::Move()
                 if(CONTAINS_BIT(g_TotalInput.iActionPress, 0u))
                 {
                     // 
-                    if(m_iState < DEFEAT_BURST) m_iState = DEFEAT_BURST;
+                    if(m_eState < DEFEAT_BURST) m_eState = DEFEAT_BURST;
                 }
                 else if(Core::Input->GetAnyButton(CORE_INPUT_PRESS))
                 {
@@ -100,14 +100,14 @@ void cDefeatMenu::Move()
             }
 
             // 
-            if(m_iState == DEFEAT_OUTRO) m_fOutroTimer.Update(1.0f);
+            if(m_eState == DEFEAT_OUTRO) m_fOutroTimer.Update(1.0f);
             if(m_fOutroTimer >= INTERFACE_BANNER_SPEED_REV)
             {
                 // 
                 m_iStatus = 1;
             }
 
-            if(m_iState < DEFEAT_BURST)
+            if(m_eState < DEFEAT_BURST)
             {
                 // 
                 m_fCountdown.Update(-0.5f);
@@ -124,7 +124,7 @@ void cDefeatMenu::Move()
             {
                 // 
                 m_fBurst.Update(0.7f);
-                if(m_fBurst >= 1.0f) m_iState = DEFEAT_OUTRO;
+                if(m_fBurst >= 1.0f) m_eState = DEFEAT_OUTRO;
 
                 // 
                 const coreUint8 iContinues = STATIC_ISVALID(g_pGame) ? g_pGame->GetContinues() : 0u;
@@ -159,12 +159,12 @@ void cDefeatMenu::Move()
             if((m_fIntroTimer >= INTERFACE_BANNER_SPEED_REV) && Core::Input->GetAnyButton(CORE_INPUT_PRESS))
             {
                 // 
-                m_iState = DEFEAT_OUTRO;
+                m_eState = DEFEAT_OUTRO;
                 if(STATIC_ISVALID(g_pGame)) g_pGame->GetInterface()->SetVisible(false);
             }
 
             // 
-            if(m_iState == DEFEAT_OUTRO) m_fOutroTimer.Update(1.0f);
+            if(m_eState == DEFEAT_OUTRO) m_fOutroTimer.Update(1.0f);
             if(m_fOutroTimer >= INTERFACE_BANNER_SPEED_REV + MENU_DEFEAT_DELAY_OUTRO)
             {
                 // 
@@ -178,10 +178,10 @@ void cDefeatMenu::Move()
         break;
     }
 
-    if(m_iState != DEFEAT_WAIT)
+    if(m_eState != DEFEAT_WAIT)
     {
         // 
-        if((m_fIntroTimer >= INTERFACE_BANNER_ANIMATION) && (m_iState < DEFEAT_WAIT)) m_iState = DEFEAT_WAIT;
+        if((m_fIntroTimer >= INTERFACE_BANNER_ANIMATION) && (m_eState < DEFEAT_WAIT)) m_eState = DEFEAT_WAIT;
 
         // calculate visibility and animation value
         const coreFloat fVisibility = MIN(m_fIntroTimer, INTERFACE_BANNER_SPEED_REV - m_fOutroTimer) * INTERFACE_BANNER_SPEED;
@@ -223,7 +223,7 @@ void cDefeatMenu::ShowContinue()
     m_fBurst      = 0.0f;
     m_fIntroTimer = 0.0f;
     m_fOutroTimer = 0.0f;
-    m_iState      = DEFEAT_INTRO;
+    m_eState      = DEFEAT_INTRO;
 
     // 
     m_Background.SetSize(coreVector2(0.0f,0.0f));
@@ -258,7 +258,7 @@ void cDefeatMenu::ShowGameOver()
     m_fBurst      = 0.0f;
     m_fIntroTimer = -MENU_DEFEAT_DELAY_INTRO;
     m_fOutroTimer = 0.0f;
-    m_iState      = DEFEAT_INTRO;
+    m_eState      = DEFEAT_INTRO;
 
     // 
     m_Background.SetSize(coreVector2(0.0f,0.0f));

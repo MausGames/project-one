@@ -169,8 +169,6 @@
 enum eType : coreInt32
 {
     TYPE_PLAYER = 1,
-    TYPE_PLAYER_ROLL,
-    TYPE_PLAYER_FEEL,
     TYPE_ENEMY,
 
     TYPE_BULLET_PLAYER,
@@ -181,6 +179,7 @@ enum eType : coreInt32
 
     TYPE_VIRIDO_BALL,
     TYPE_VIRIDO_PADDLE,
+    TYPE_VIRIDO_BARRIER,
     TYPE_NEVO_CONTAINER,
 
     TYPE_DHARUK_BOOMERANG,
@@ -257,6 +256,7 @@ extern cPostProcessing* const g_pPostProcessing;   // main post-processing objec
 #include "interface/cInterface.h"
 #include "interface/cMsgBox.h"
 #include "interface/cTooltip.h"
+#include "interface/cWorldMap.h"
 #include "interface/menu/cMenu.h"
 #include "game/cTable.h"
 #include "game/cBullet.h"

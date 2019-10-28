@@ -16,7 +16,7 @@ cSummaryMenu::cSummaryMenu()noexcept
 , m_iFinalScore (0u)
 , m_fIntroTimer (0.0f)
 , m_fOutroTimer (0.0f)
-, m_iState      (SUMMARY_INTRO)
+, m_eState      (SUMMARY_INTRO)
 {
     // create menu objects
     m_Background.DefineTexture(0u, "menu_detail_03.png");
@@ -115,27 +115,27 @@ void cSummaryMenu::Move()
             if((m_fIntroTimer >= INTERFACE_BANNER_SPEED_REV) && Core::Input->GetAnyButton(CORE_INPUT_PRESS))
             {
                 // 
-                     if(m_iState      >= SUMMARY_SKIPPED) m_iState = SUMMARY_OUTRO;     // leave summary
-                else if(m_fIntroTimer >= fSpinTo)         m_iState = SUMMARY_OUTRO;
-                else if(m_fIntroTimer <  fSpinTo)         m_iState = SUMMARY_SKIPPED;   // skip blend-in
+                     if(m_eState      >= SUMMARY_SKIPPED) m_eState = SUMMARY_OUTRO;     // leave summary
+                else if(m_fIntroTimer >= fSpinTo)         m_eState = SUMMARY_OUTRO;
+                else if(m_fIntroTimer <  fSpinTo)         m_eState = SUMMARY_SKIPPED;   // skip blend-in
             }
 
             // 
-            if(m_iState == SUMMARY_OUTRO) m_fOutroTimer.Update(1.0f);
+            if(m_eState == SUMMARY_OUTRO) m_fOutroTimer.Update(1.0f);
             if(m_fOutroTimer >= INTERFACE_BANNER_SPEED_REV)
             {
                 // 
                 m_iStatus = 1;
             }
 
-            if(m_iState != SUMMARY_WAIT)
+            if(m_eState != SUMMARY_WAIT)
             {
                 // 
-                if((m_fIntroTimer >= INTERFACE_BANNER_ANIMATION) && (m_iState < SUMMARY_WAIT)) m_iState = SUMMARY_WAIT;
+                if((m_fIntroTimer >= INTERFACE_BANNER_ANIMATION) && (m_eState < SUMMARY_WAIT)) m_eState = SUMMARY_WAIT;
                 STATIC_ASSERT(INTERFACE_BANNER_ANIMATION >= fSpinTo)
 
                 // 
-                const coreFloat fBlendIn  = m_iState ? fSpinTo : m_fIntroTimer;
+                const coreFloat fBlendIn  = m_eState ? fSpinTo : m_fIntroTimer;
                 const coreFloat fBlendOut = 1.0f - m_fOutroTimer * INTERFACE_BANNER_SPEED;
 
                 // 
@@ -182,7 +182,7 @@ void cSummaryMenu::Move()
             // 
             m_fIntroTimer.Update(1.0f);
 
-            if(m_iState == SUMMARY_INTRO)
+            if(m_eState == SUMMARY_INTRO)
             {
                 // 
                 g_pPostProcessing->SetValueAll(CLAMP(4.0f - m_fIntroTimer, 0.0f, 1.0f));
@@ -193,7 +193,7 @@ void cSummaryMenu::Move()
                     m_iStatus = 1;
 
                     // 
-                    m_iState = SUMMARY_OUTRO;
+                    m_eState = SUMMARY_OUTRO;
 
                     // 
                     g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 0.0f);
@@ -226,7 +226,7 @@ void cSummaryMenu::ShowNormal()
     m_iFinalScore = 0u;
     m_fIntroTimer = 0.0f;
     m_fOutroTimer = 0.0f;
-    m_iState      = SUMMARY_INTRO;
+    m_eState      = SUMMARY_INTRO;
 
     // 
     m_Background.SetSize(coreVector2(0.0f,0.0f));
@@ -285,7 +285,7 @@ void cSummaryMenu::ShowBegin()
     m_iFinalScore = 0u;
     m_fIntroTimer = 0.0f;
     m_fOutroTimer = 0.0f;
-    m_iState      = SUMMARY_INTRO;
+    m_eState      = SUMMARY_INTRO;
 
     // 
     this->ChangeSurface(SURFACE_SUMMARY_BEGIN, 0.0f);

@@ -175,7 +175,7 @@ void cNevoMission::__MoveOwnAfter()
         m_Container.ActivateModelLowOnly();
         {
             // 
-            cPlayer::TestCollision(&m_Container, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pContainer, const coreVector3& vIntersection, const coreBool bFirstHit)
+            cPlayer::TestCollision(PLAYER_TEST_NORMAL | PLAYER_TEST_FEEL, &m_Container, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pContainer, const coreVector3& vIntersection, const coreBool bFirstHit)
             {
                 if(!bFirstHit) return;
 

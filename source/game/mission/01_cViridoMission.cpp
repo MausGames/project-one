@@ -12,13 +12,16 @@
 // ****************************************************************
 // constructor
 cViridoMission::cViridoMission()noexcept
-: m_Ball         (VIRIDO_BALLS)
-, m_BallTrail    (VIRIDO_BALLS * VIRIDO_TRAILS)
-, m_apOwner      {}
-, m_iRealState   (0u)
-, m_iStickyState (0u)
-, m_iBounceState (0u)
-, m_fAnimation   (0.0f)
+: m_Ball           (VIRIDO_BALLS)
+, m_BallTrail      (VIRIDO_BALLS * VIRIDO_TRAILS)
+, m_apPaddleOwner  {}
+, m_Barrier        (VIRIDO_BARRIERS)
+, m_apBarrierOwner {}
+, m_aiBarrierDir   {}
+, m_iRealState     (0u)
+, m_iStickyState   (0u)
+, m_iBounceState   (0u)
+, m_fAnimation     (0.0f)
 {
     // 
     m_apBoss[0] = &m_Dharuk;
@@ -53,10 +56,6 @@ cViridoMission::cViridoMission()noexcept
     }
 
     // 
-    g_pGlow->BindList(&m_Ball);
-    g_pGlow->BindList(&m_BallTrail);
-
-    // 
     for(coreUintW i = 0u; i < VIRIDO_PADDLES; ++i)
     {
         // 
@@ -68,6 +67,7 @@ cViridoMission::cViridoMission()noexcept
         m_aPaddle[i].DefineProgram       ("effect_energy_flat_direct_program");
         m_aPaddle[i].SetSize             (bBoss ? coreVector3(3.5f,2.5f,2.5f) : coreVector3(2.5f,2.5f,2.5f));
         m_aPaddle[i].SetColor3           (bBoss ? COLOR_ENERGY_BLUE           : COLOR_ENERGY_RED);
+        m_aPaddle[i].SetAlpha            (0.0f);
         m_aPaddle[i].SetTexSize          (coreVector2(1.2f,0.25f) * 0.5f);
         m_aPaddle[i].SetEnabled          (CORE_OBJECT_ENABLE_NOTHING);
         m_aPaddle[i].SetCollisionModifier(coreVector3(0.6f,1.0f,1.0f));
@@ -76,6 +76,34 @@ cViridoMission::cViridoMission()noexcept
         m_aPaddleSphere[i].DefineModel("object_sphere.md3");
         m_aPaddleSphere[i].SetSize    (bBoss ? coreVector3(30.0f,30.0f,30.0f) : coreVector3(15.0f,15.0f,15.0f));
     }
+
+    // 
+    m_Barrier.DefineProgram("effect_energy_flat_direct_inst_program");
+    {
+        for(coreUintW i = 0u; i < VIRIDO_BARRIERS_RAWS; ++i)
+        {
+            // load object resources
+            coreObject3D* pBarrier = &m_aBarrierRaw[i];
+            pBarrier->DefineModel  ("object_barrier.md3");
+            pBarrier->DefineTexture(0u, "effect_energy.png");
+            pBarrier->DefineProgram("effect_energy_flat_direct_program");
+
+            // set object properties
+            pBarrier->SetSize   (coreVector3(7.5f,2.5f,2.5f));
+            pBarrier->SetColor3 (COLOR_ENERGY_BLUE);
+            pBarrier->SetAlpha  (0.0f);
+            pBarrier->SetTexSize(coreVector2(1.2f,0.25f) * 0.5f);
+            pBarrier->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
+            // add object to the list
+            m_Barrier.BindObject(pBarrier);
+        }
+    }
+
+    // 
+    g_pGlow->BindList(&m_Ball);
+    g_pGlow->BindList(&m_BallTrail);
+    g_pGlow->BindList(&m_Barrier);
 }
 
 
@@ -86,6 +114,7 @@ cViridoMission::~cViridoMission()
     // 
     g_pGlow->UnbindList(&m_Ball);
     g_pGlow->UnbindList(&m_BallTrail);
+    g_pGlow->UnbindList(&m_Barrier);
 
     // 
     for(coreUintW i = 0u; i < VIRIDO_BALLS; ++i)
@@ -94,6 +123,10 @@ cViridoMission::~cViridoMission()
     // 
     for(coreUintW i = 0u; i < VIRIDO_PADDLES; ++i)
         this->DisablePaddle(i, false);
+
+    // 
+    for(coreUintW i = 0u; i < VIRIDO_BARRIERS; ++i)
+        this->DisableBarrier(i, false);
 }
 
 
@@ -107,7 +140,7 @@ void cViridoMission::EnableBall(const coreUintW iIndex, const coreVector2& vPosi
     coreObject3D* pTrail = (*m_BallTrail.List())[iIndex*VIRIDO_TRAILS];
 
     // 
-    if(pBall->GetType()) return;
+    WARN_IF(pBall->GetType()) return;
     pBall->ChangeType(TYPE_VIRIDO_BALL);
 
     // 
@@ -160,13 +193,15 @@ void cViridoMission::EnablePaddle(const coreUintW iIndex, const cShip* pOwner)
     coreObject3D& oPaddle = m_aPaddle[iIndex];
 
     // 
-    m_apOwner[iIndex] = pOwner;
-
-    // 
-    if(oPaddle.GetType()) return;
+    WARN_IF(oPaddle.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
     oPaddle.ChangeType(TYPE_VIRIDO_PADDLE);
 
     // 
+    ASSERT(pOwner)
+    m_apPaddleOwner[iIndex] = pOwner;
+
+    // 
+    oPaddle.SetAlpha  (0.0f);
     oPaddle.SetEnabled(CORE_OBJECT_ENABLE_ALL);
     g_pGlow->BindObject(&oPaddle);
 }
@@ -180,12 +215,59 @@ void cViridoMission::DisablePaddle(const coreUintW iIndex, const coreBool bAnima
     coreObject3D& oPaddle = m_aPaddle[iIndex];
 
     // 
-    if(!oPaddle.GetType()) return;
+    if(!oPaddle.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
     oPaddle.ChangeType(0);
 
     // 
-    oPaddle.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
-    g_pGlow->UnbindObject(&oPaddle);
+    m_apPaddleOwner[iIndex] = NULL;
+
+    // 
+    if(!bAnimated)
+    {
+        oPaddle.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        g_pGlow->UnbindObject(&oPaddle);
+    }
+}
+
+
+// ****************************************************************
+// 
+void cViridoMission::EnableBarrier(const coreUintW iIndex, const cShip* pOwner, const coreVector2& vDirection)
+{
+    ASSERT(iIndex < VIRIDO_BARRIERS)
+    coreObject3D& oBarrier = m_aBarrierRaw[iIndex];
+
+    // 
+    WARN_IF(oBarrier.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    oBarrier.ChangeType(TYPE_VIRIDO_BARRIER);
+
+    // 
+    ASSERT(pOwner)
+    m_apBarrierOwner[iIndex] = pOwner;
+    m_aiBarrierDir  [iIndex] = PackDirection(vDirection);
+
+    // 
+    oBarrier.SetAlpha  (0.0f);
+    oBarrier.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+}
+
+
+// ****************************************************************
+// 
+void cViridoMission::DisableBarrier(const coreUintW iIndex, const coreBool bAnimated)
+{
+    ASSERT(iIndex < VIRIDO_BARRIERS)
+    coreObject3D& oBarrier = m_aBarrierRaw[iIndex];
+
+    // 
+    if(!oBarrier.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    oBarrier.ChangeType(0);
+
+    // 
+    m_apBarrierOwner[iIndex] = NULL;
+
+    // 
+    if(!bAnimated) oBarrier.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 }
 
 
@@ -261,6 +343,10 @@ void cViridoMission::__RenderOwnAttack()
         m_aPaddle[i].Render();
     for(coreUintW i = 0u; i < VIRIDO_PADDLES; ++i)
         g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_DIRECT)->ApplyObject(&m_aPaddle[i]);
+
+    // 
+    m_Barrier.Render();
+    g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_DIRECT)->ApplyList(&m_Barrier);
 }
 
 
@@ -336,12 +422,21 @@ void cViridoMission::__MoveOwnAfter()
         const coreBool bBoss = i ? false : true;
 
         // 
-        const cShip* pOwner = m_apOwner[i];
+        const cShip* pOwner = m_apPaddleOwner[i];
         if(pOwner)
         {
-            oPaddle.SetPosition (coreVector3(pOwner->GetPosition ().xy() + pOwner->GetDirection().xy() * 3.0f, 0.0f));
-            oPaddle.SetDirection(coreVector3(pOwner->GetDirection().xy(), 0.0f));
+            const coreVector2 vDir = pOwner->GetDirection().xy();
+
+            oPaddle.SetPosition (coreVector3(pOwner->GetPosition().xy() + vDir * 3.0f, 0.0f));
+            oPaddle.SetDirection(coreVector3(vDir, 0.0f));
         }
+
+        // 
+        if(pOwner) oPaddle.SetAlpha(MIN(oPaddle.GetAlpha() + 5.0f*Core::System->GetTime(), 1.0f));
+              else oPaddle.SetAlpha(MAX(oPaddle.GetAlpha() - 5.0f*Core::System->GetTime(), 0.0f));
+
+        // 
+        if(!oPaddle.GetAlpha()) this->DisablePaddle(i, false);
 
         // 
         oPaddle.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.5f));
@@ -351,6 +446,36 @@ void cViridoMission::__MoveOwnAfter()
         oPaddleSphere.SetPosition(coreVector3(oPaddle.GetPosition().xy() - oPaddle.GetDirection().xy() * (bBoss ? 27.0f : 12.0f), 0.0f));
         oPaddleSphere.Move();
     }
+
+    // 
+    for(coreUintW i = 0u; i < VIRIDO_BARRIERS; ++i)
+    {
+        coreObject3D& oBarrier = m_aBarrierRaw[i];
+        if(!oBarrier.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+        // 
+        const cShip* pOwner = m_apBarrierOwner[i];
+        if(pOwner)
+        {
+            const coreVector2 vDir = UnpackDirection(m_aiBarrierDir[i]);
+
+            oBarrier.SetPosition (coreVector3(pOwner->GetPosition().xy() + vDir * 7.0f, 0.0f));
+            oBarrier.SetDirection(coreVector3(vDir, 0.0f));
+        }
+
+        // 
+        if(pOwner) oBarrier.SetAlpha(MIN(oBarrier.GetAlpha() + 5.0f*Core::System->GetTime(), 1.0f));
+              else oBarrier.SetAlpha(MAX(oBarrier.GetAlpha() - 5.0f*Core::System->GetTime(), 0.0f));
+
+        // 
+        if(!oBarrier.GetAlpha()) this->DisableBarrier(i, false);
+
+        // 
+        oBarrier.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.5f));
+    }
+
+    // 
+    m_Barrier.MoveNormal();
 
     // 
     m_iBounceState = 0u;
@@ -372,7 +497,7 @@ void cViridoMission::__MoveOwnAfter()
 
             // 
             coreVector3 vImpact;
-            if(coreObjectManager::TestCollision(&oPaddleSphere, pBall, &vImpact))
+            if(Core::Manager::Object->TestCollision(&oPaddleSphere, pBall, &vImpact))
             {
                 const coreVector2 vBallPos   = pBall  ->GetPosition ().xy();
                 const coreVector2 vBallDir   = pBall  ->GetDirection().xy();
@@ -422,7 +547,7 @@ void cViridoMission::__MoveOwnAfter()
     }
 
     // 
-    cPlayer::TestCollision(TYPE_VIRIDO_BALL, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBall, const coreVector3& vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_VIRIDO_BALL, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBall, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
 
@@ -440,6 +565,26 @@ void cViridoMission::__MoveOwnAfter()
 
         // 
         pBullet->Reflect(pBall);
+    });
+
+    // 
+    cPlayer::TestCollision(PLAYER_TEST_NORMAL | PLAYER_TEST_FEEL, TYPE_VIRIDO_BARRIER, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBarrier, const coreVector3& vIntersection, const coreBool bFirstHit)
+    {
+        if(!bFirstHit) return;
+
+        // 
+        pPlayer->SetForce(pBarrier->GetDirection().xy() * 100.0f);
+
+        // 
+        g_pSpecialEffects->CreateSplashColor(vIntersection, 5.0f, 3u, COLOR_ENERGY_BLUE);
+    });
+
+    // 
+    Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, TYPE_VIRIDO_BARRIER, [](cBullet* OUTPUT pBullet, coreObject3D* OUTPUT pBarrier, const coreVector3& vIntersection, const coreBool bFirstHit)
+    {
+        if(!bFirstHit) return;
+
+        // 
     });
 
     // 

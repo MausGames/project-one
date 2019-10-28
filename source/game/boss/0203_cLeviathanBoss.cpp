@@ -306,7 +306,7 @@ void cLeviathanBoss::__MoveOwn()
         });
 
         // 
-        cPlayer::TestCollision(TYPE_LEVIATHAN_RAY, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pRay, const coreVector3& vIntersection, const coreBool bFirstHit)
+        cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_LEVIATHAN_RAY, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pRay, const coreVector3& vIntersection, const coreBool bFirstHit)
         {
             if(!bFirstHit) return;
 
@@ -444,7 +444,7 @@ void cLeviathanBoss::__EnableRay(const coreUintW iIndex)
     coreObject3D* pWave = (*m_RayWave.List())[iIndex];
 
     // 
-    if(pRay->IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    WARN_IF(pRay->IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
 
     // 
     m_afRayTime[iIndex] = 0.0f;

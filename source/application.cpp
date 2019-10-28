@@ -39,6 +39,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("environment_starfish.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_starfish.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("environment_stone_01.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_stone_01.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("environment_weed.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_weed.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("object_barrier.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_barrier.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_boss_dharuk_boomerang.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_dharuk_boomerang.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_boss_torus_circle.md3",           CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_torus_circle.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("object_boss_torus_emitter.md3",          CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_torus_emitter.md3", false);
@@ -46,8 +47,8 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("object_boss_vaus_companion_low.md3",     CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_vaus_companion_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_container_high.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_container_high.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("object_container_low.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_container_low.md3");
-    Core::Manager::Resource->Load<coreModel>  ("object_dot.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_dot.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_cube.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_cube.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_dot.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_dot.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_paddle.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_paddle.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("object_quad.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_quad.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_ring.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_ring.md3", false);
@@ -147,6 +148,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("menu_detail_01.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_detail_01.png");
     Core::Manager::Resource->Load<coreTexture>("menu_detail_02.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_detail_02.png");
     Core::Manager::Resource->Load<coreTexture>("menu_detail_03.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_detail_03.png");
+    Core::Manager::Resource->Load<coreTexture>("menu_mission.png",                       CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_mission.png", false);
     Core::Manager::Resource->Load<coreTexture>("menu_weapons.png",                       CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_weapons.png");
     Core::Manager::Resource->Load<coreTexture>("ship_enemy.png",                         CORE_RESOURCE_UPDATE_AUTO,   "data/textures/ship_enemy.png");
     Core::Manager::Resource->Load<coreTexture>("ship_player.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/ship_player.png");
