@@ -49,6 +49,7 @@ cPlayer::cPlayer()noexcept
     }
 
     // 
+    m_DataTable .SetOwner(this);
     m_ScoreTable.SetOwner(this);
 
     // 
@@ -116,6 +117,7 @@ void cPlayer::Configure(const coreUintW iShipType, const coreVector3& vColor)
     default: ASSERT(false)
     case PLAYER_SHIP_ATK: pcModelHigh = "ship_player_atk_high.md3"; pcModelLow = "ship_player_atk_low.md3"; break;
     case PLAYER_SHIP_DEF: pcModelHigh = "ship_player_def_high.md3"; pcModelLow = "ship_player_def_low.md3"; break;
+    case PLAYER_SHIP_P1:  pcModelHigh = "ship_projectone.md3";      pcModelLow = "ship_projectone.md3";     break;
     }
 
     // load models
@@ -377,6 +379,7 @@ void cPlayer::Move()
     }
 
     // 
+    m_DataTable .Update();
     m_ScoreTable.Update();
 
     // 

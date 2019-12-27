@@ -162,7 +162,7 @@ void cTooltip::__ShowText(const coreFloat fWidth, const coreChar* pcText)
 
     // save last text and width
     m_aLine[m_iNumLines++].SetText(pcLineBegin);
-    fMaxWidth = MAX(fMaxWidth, fCurWidth) + I_TO_F(2u * TOOLTIP_OUTLINE_SIZE) * fFactor;
+    fMaxWidth = MAX(fMaxWidth, fCurWidth);
 
     // set background size
     this->SetSize(coreVector2(fMaxWidth, TOOLTIP_LINE_HEIGHT * I_TO_F(m_iNumLines)) + TOOLTIP_BORDER_SIZE);

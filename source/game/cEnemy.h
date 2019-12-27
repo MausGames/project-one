@@ -130,7 +130,8 @@ public:
     template <typename F> void ForEachEnemyAll(F&& nFunction)const;   // [](cEnemy* OUTPUT pEnemy, const coreUintW i) -> void
 
     // 
-    inline cEnemy* GetEnemy(const coreUintW iIndex)const {ASSERT(iIndex < m_apEnemy.size()) return m_apEnemy[iIndex];}
+    inline cEnemy*   GetEnemy(const coreUintW iIndex)const {ASSERT(iIndex < m_apEnemy.size()) return m_apEnemy[iIndex];}
+    inline coreUintW GetIndex(const cEnemy*   pEnemy)const {const coreUintW iIndex = std::find(m_apEnemy.begin(), m_apEnemy.end(), pEnemy) - m_apEnemy.begin(); ASSERT(iIndex < m_apEnemy.size()) return iIndex;}
 
     // 
     inline coreUintW GetNumEnemies        ()const {return m_apEnemy.size();}
@@ -336,6 +337,40 @@ public:
 
     // 
     inline void SetParent(cEnemy* OUTPUT pParent) {this->_SetParent(pParent);}
+};
+
+
+// ****************************************************************
+// repair enemy class
+class cRepairEnemy final : public cEnemy
+{
+private:
+    cPlayer* m_pPlayer;         // 
+
+    coreVector2 m_vDirection;   // 
+    coreFlow    m_fAnimation;   // 
+
+    coreObject3D m_Bubble;      // 
+
+
+public:
+    cRepairEnemy()noexcept;
+    ~cRepairEnemy()final;
+
+    ENABLE_COPY(cRepairEnemy)
+    ASSIGN_ID(1337, "Repair")
+
+    // 
+    void AssignPlayer(cPlayer* pPlayer);
+
+    // 
+    inline cPlayer* GetPlayer()const {return m_pPlayer;}
+
+
+private:
+    // execute own routines
+    void __RenderOwnUnder()final;
+    void __MoveOwn       ()final;
 };
 
 

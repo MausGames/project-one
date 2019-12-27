@@ -56,7 +56,7 @@
 // TODO: unify "forward" and "transform" comments in shaders
 // TODO: add own coreRand for various random things which may affect feeling (screen shake), and reset on boss-start
 // TODO: check issues with all the F&& functions (especially in boss.h and mission.h), also check Core engine, use force_inline on small functions
-// TODO: RETURN_NONNULL to everything which should never be null
+// TODO: RETURN_NONNULL to everything which should never be null (and other attributes, both FUNC and RETURN)
 // TODO: check all vert shader for CORE_SHADER_OPTION_NO_ROTATION
 // TODO: control flow guard and buffer security check
 // TODO: _CORE_SSE_ try to just remove the coreMath low-precision functions
@@ -68,7 +68,10 @@
 // TODO: replace / with RCP where possible
 // TODO: "pro" shortcut for types (e.g. proEnemy, proGame), dr too
 // TODO: remove game_icon.png from resource-index if not required anymore
-// TODO: scissor out center when rendering fullscreen effects (e.g. water vignetting)
+// TODO: brown bullet, directional
+// TODO: ENABLE_BITWISE when ?
+// TODO: remove multisampling for 2d, though may cause artifacts if the objects are fully shaded and moved
+// TODO: transition shader only needs alpha for menu, but not for background -> create permutations
 
 
 // ****************************************************************
@@ -96,7 +99,8 @@
 #define PLAYERS              (2u)
 #define MISSIONS             (9u + 1u)
 #define BOSSES               (3u)
-#define WAVES                (15u + 3u)
+#define WAVES                (15u)
+#define SEGMENTS             (BOSSES + WAVES)
 #define LIVES                (5u)
 #define CONTINUES            (3u)
 #define SHIELD               (100u)
@@ -200,6 +204,23 @@ enum eElement : coreUint8
     ELEMENT_NEUTRAL
 };
 
+// 
+enum eMedal : coreUint8
+{
+    MEDAL_NONE = 0u,
+    MEDAL_BRONZE,
+    MEDAL_SILVER,
+    MEDAL_GOLD,
+    MEDAL_PLATINUM,
+    MEDAL_DARK,
+    MEDAL_MAX,
+
+    MEDAL_TYPE_WAVE = 0u,
+    MEDAL_TYPE_BOSS,
+    MEDAL_TYPE_MISSION,
+    MEDAL_TYPE_MAX
+};
+
 extern void InitResolution(const coreVector2& vResolution);   // init resolution properties (1:1)
 extern void InitFramerate();                                  // init frame rate properties (lock)
 
@@ -240,6 +261,7 @@ extern coreMusicPlayer g_MusicPlayer;       // central music-player
 #include "visual/cPostProcessing.h"
 
 extern cReplay*         const g_pReplay;           // 
+extern cSave*           const g_pSave;             // 
 extern cOutline*        const g_pOutline;          // main outline-layer object
 extern cGlow*           const g_pGlow;             // main glow-effect object
 extern cDistortion*     const g_pDistortion;       // main distortion-effect object

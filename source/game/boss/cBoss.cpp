@@ -95,9 +95,6 @@ void cBoss::_StartBoss()
 {
     // 
     g_pGame->GetCurMission()->ActivateBoss(this);
-
-    // 
-    g_pGame->GetInterface()->ShowBoss(this);
 }
 
 
@@ -107,10 +104,6 @@ void cBoss::_EndBoss(const coreBool bAnimated)
 {
     // 
     g_pGame->GetCurMission()->DeactivateBoss();
-
-    // 
-    g_pGame->GetBulletManagerEnemy()->ClearBullets(bAnimated);
-    g_pGame->GetItemManager()->LoseItems();
 }
 
 

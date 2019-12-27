@@ -19,8 +19,8 @@ void FragmentMain()
     float v1Offset = coreTexture2D(2, v_av2TexCoord[2]).r * 16.0 - 1.0;
 
     // lookup color textures
-    vec3 v3TexColorOld = coreTexture2D(0, v_av2TexCoord[0]).rgb;
-    vec3 v3TexColorNew = coreTexture2D(1, v_av2TexCoord[0]).rgb;
+    vec4 v4TexColorOld = coreTexture2D(0, v_av2TexCoord[0]);
+    vec4 v4TexColorNew = coreTexture2D(1, v_av2TexCoord[0]);
 
     // 
     vec2  v2AbsDir  = abs(u_v2TransitionDir);
@@ -52,5 +52,5 @@ void FragmentMain()
 #endif
 
     // interpolate smooth between both colors
-    gl_FragColor = vec4(mix(v3TexColorOld, v3TexColorNew, v1Mix), 1.0);
+    gl_FragColor = mix(v4TexColorOld, v4TexColorNew, v1Mix);
 }

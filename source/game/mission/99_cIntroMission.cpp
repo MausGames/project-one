@@ -15,8 +15,6 @@ cIntroMission::cIntroMission()noexcept
 {
     // 
     m_apBoss[0] = &m_ProjectOne;
-    m_apBoss[1] = &m_ProjectOne;
-    m_apBoss[2] = &m_ProjectOne;
 }
 
 
@@ -44,7 +42,7 @@ void cIntroMission::__SetupOwn()
     // 
     STAGE_MAIN
     {
-        STAGE_BOSS(m_ProjectOne)
+        STAGE_BOSS(m_ProjectOne, {1.0f, 2.0f, 3.0, 4.0f})
     });
 
     // ################################################################

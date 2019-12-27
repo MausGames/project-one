@@ -12,6 +12,7 @@
 
 // TODO: #define FOREGROUND_AREA_FULL (FOREGROUND_AREA * 1.1f)
 // TODO: FOREGROUND_AREA_REV without RCP
+// TODO: IsVisibleObject takes the max axis, but what if the diagonal is visible
 
 
 // ****************************************************************

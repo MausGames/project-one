@@ -167,6 +167,9 @@ struct coreLight
 #if defined(GL_ARB_shader_group_vote)
     #define coreAnyInvocation(x)  (anyInvocationARB (x))
     #define coreAllInvocations(x) (allInvocationsARB(x))
+#elif defined(GL_NV_gpu_shader5)
+    #define coreAnyInvocation(x)  (anyThreadNV (x))
+    #define coreAllInvocations(x) (allThreadsNV(x))
 #else
     #define coreAnyInvocation(x)  (x)
     #define coreAllInvocations(x) (x)

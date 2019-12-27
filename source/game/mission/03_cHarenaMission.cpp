@@ -44,21 +44,21 @@ void cHarenaMission::__SetupOwn()
     // 
     STAGE_MAIN
     {
-        STAGE_BOSS(m_Urtica)
+        STAGE_BOSS(m_Urtica, {60.0f, 120.0f, 180.0, 240.0f})
     });
 
     // ################################################################
     // 
     STAGE_MAIN
     {
-        STAGE_BOSS(m_Tiger)
+        STAGE_BOSS(m_Tiger, {60.0f, 120.0f, 180.0, 240.0f})
     });
 
     // ################################################################
     // 
     STAGE_MAIN
     {
-        STAGE_BOSS(m_Lucifer)
+        STAGE_BOSS(m_Lucifer, {60.0f, 120.0f, 180.0, 240.0f})
     });
 
     // ################################################################

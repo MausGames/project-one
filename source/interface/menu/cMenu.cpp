@@ -12,8 +12,11 @@
 // ****************************************************************
 // constructor
 cMenu::cMenu()noexcept
-: coreMenu      (SURFACE_MAX, SURFACE_INTRO)
-, m_iPauseFrame (0u)
+: coreMenu           (SURFACE_MAX, SURFACE_INTRO)
+, m_iPauseFrame      (0u)
+, m_TransitionTime   (coreTimer(1.3f, 0.0f, 1u))
+, m_iTransitionState (0u)
+, m_pTransitionMenu  (NULL)
 {
     // create intro and title menu
     m_pIntroMenu = new cIntroMenu();
@@ -28,18 +31,46 @@ cMenu::cMenu()noexcept
 
     // bind menu objects
     this->BindObject(SURFACE_INTRO,   m_pIntroMenu);
+    this->BindObject(SURFACE_TITLE,   m_pIntroMenu);
     this->BindObject(SURFACE_TITLE,   m_pTitleMenu);
     this->BindObject(SURFACE_MAIN,    &m_MainMenu);
     this->BindObject(SURFACE_GAME,    &m_GameMenu);
     this->BindObject(SURFACE_SCORE,   &m_ScoreMenu);
     this->BindObject(SURFACE_REPLAY,  &m_ReplayMenu);
+    this->BindObject(SURFACE_EXTRA,   &m_ExtraMenu);
     this->BindObject(SURFACE_CONFIG,  &m_PauseLayer);
     this->BindObject(SURFACE_CONFIG,  &m_ConfigMenu);
-    this->BindObject(SURFACE_EXTRA,   &m_ExtraMenu);
     this->BindObject(SURFACE_PAUSE,   &m_PauseLayer);
     this->BindObject(SURFACE_PAUSE,   &m_PauseMenu);
     this->BindObject(SURFACE_SUMMARY, &m_SummaryMenu);
     this->BindObject(SURFACE_DEFEAT,  &m_DefeatMenu);
+
+    // 
+    m_aFrameBuffer[0].AttachTargetBuffer(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGBA8);
+    m_aFrameBuffer[0].Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED);
+
+    // 
+    m_aFrameBuffer[1].AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGBA8);
+    m_aFrameBuffer[1].Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+    m_aFrameBuffer[2].AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGBA8);
+    m_aFrameBuffer[2].Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+
+    // create mix object
+    m_MixObject.DefineTexture(0u, m_aFrameBuffer[2].GetColorTarget(0u).pTexture);
+    m_MixObject.DefineTexture(1u, m_aFrameBuffer[1].GetColorTarget(0u).pTexture);
+    m_MixObject.DefineTexture(2u, "menu_background_black.png");
+    m_MixObject.DefineProgram("full_transition_wipe_program");
+    m_MixObject.SetSize      (coreVector2(1.0f,1.0f));
+    m_MixObject.Move();
+
+    // 
+    if(g_pSave->GetHeader().oProgress.bFirstPlay)
+    {
+        m_pIntroMenu->ActivateFirstPlay();
+        m_pTitleMenu->ActivateFirstPlay();
+        m_MainMenu   .ActivateFirstPlay();
+        m_GameMenu   .ActivateFirstPlay();
+    }
 }
 
 
@@ -50,6 +81,9 @@ cMenu::~cMenu()
     // delete intro and title menu
     SAFE_DELETE(m_pIntroMenu)
     SAFE_DELETE(m_pTitleMenu)
+
+    // explicitly undefine to detach textures
+    m_MixObject.Undefine();
 }
 
 
@@ -57,8 +91,49 @@ cMenu::~cMenu()
 // render the menu
 void cMenu::Render()
 {
-    // 
-    this->coreMenu::Render();
+    if(m_TransitionTime.GetStatus())
+    {
+        if((m_iTransitionState == 2u) || ((m_iTransitionState == 1u) && !m_pTransitionMenu->GetTransition().GetStatus()))
+        {
+            // 
+            m_aFrameBuffer[0].StartDraw();
+            m_aFrameBuffer[0].Clear(CORE_FRAMEBUFFER_TARGET_COLOR);
+            {
+                glBlendFuncSeparate(FOREGROUND_BLEND_DEFAULT, FOREGROUND_BLEND_ALPHA);
+                {
+                    // 
+                    this->coreMenu::Render();
+                }
+                glBlendFunc(FOREGROUND_BLEND_DEFAULT);
+            }
+
+            // resolve frame buffer to texture
+            m_aFrameBuffer[0].Blit      (CORE_FRAMEBUFFER_TARGET_COLOR, &m_aFrameBuffer[m_iTransitionState]);
+            m_aFrameBuffer[0].Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
+
+            // 
+            coreFrameBuffer::EndDraw();
+
+            // 
+            m_iTransitionState -= 1u;
+        }
+
+        if(m_MixObject.GetProgram().IsUsable())
+        {
+            // set transition uniforms
+            m_MixObject.GetProgram()->Enable();
+            m_MixObject.GetProgram()->SendUniform("u_v1TransitionTime", m_TransitionTime.GetValue(CORE_TIMER_GET_NORMAL));
+            m_MixObject.GetProgram()->SendUniform("u_v2TransitionDir",  coreVector2(1.0f,0.0f));
+
+            glBlendFunc(FOREGROUND_BLEND_ALPHA);
+            {
+                // 
+                m_MixObject.Render();
+            }
+            glBlendFunc(FOREGROUND_BLEND_DEFAULT);
+        }
+    }
+    else this->coreMenu::Render();
 
     // 
     m_MsgBox .Render();
@@ -70,6 +145,13 @@ void cMenu::Render()
 // move the menu
 void cMenu::Move()
 {
+    // 
+    m_TransitionTime.Update(1.0f);
+
+    // 
+    if(m_TransitionTime.GetStatus() && (this->GetCurSurface() != SURFACE_INTRO))
+        Core::Input->ClearButtonAll();
+
     // 
     m_MsgBox.Move();
 
@@ -118,7 +200,7 @@ void cMenu::Move()
             if(m_pIntroMenu->GetStatus())
             {
                 // switch to title menu
-                this->ChangeSurface(SURFACE_TITLE, 1.0f);
+                this->ShiftSurface(this, SURFACE_TITLE, 0.75f);
             }
         }
         break;
@@ -128,12 +210,12 @@ void cMenu::Move()
             if(m_pTitleMenu->GetStatus())
             {
                 // switch to main menu
-                this->ChangeSurface(SURFACE_MAIN, 3.0f);
+                this->ShiftSurface(this, SURFACE_MAIN, 2.0f);
 
                 // unload expendable menu resources
                 Core::Manager::Resource->AttachFunction([this]()
                 {
-                    if(!this->GetTransition().GetStatus())
+                    if(!this->GetTransition().GetStatus() && (this->GetCurSurface() == SURFACE_MAIN))
                     {
                         // delete intro and title menu
                         SAFE_DELETE(m_pIntroMenu)
@@ -151,34 +233,38 @@ void cMenu::Move()
             if(m_MainMenu.GetStatus() == 1)
             {
                 // switch to game menu
-                this->ChangeSurface(SURFACE_GAME, 3.0f);
+                this->ShiftSurface(this, SURFACE_GAME, 3.0f);
+
+                // 
+                m_GameMenu.ChangeSurface(g_pSave->GetHeader()->bFirstPlay ? SURFACE_GAME_ARMORY : SURFACE_GAME_STANDARD, 0.0f);
+                m_GameMenu.LoadValues();
             }
             else if(m_MainMenu.GetStatus() == 2)
             {
                 // switch to score menu
-                this->ChangeSurface(SURFACE_SCORE, 3.0f);
+                this->ShiftSurface(this, SURFACE_SCORE, 3.0f);
             }
             else if(m_MainMenu.GetStatus() == 3)
             {
                 // switch to replay menu
-                this->ChangeSurface(SURFACE_REPLAY, 3.0f);
+                this->ShiftSurface(this, SURFACE_REPLAY, 3.0f);
 
                 // 
                 m_ReplayMenu.LoadReplays();
             }
             else if(m_MainMenu.GetStatus() == 4)
             {
+                // switch to extra menu
+                this->ShiftSurface(this, SURFACE_EXTRA, 3.0f);
+            }
+            else if(m_MainMenu.GetStatus() == 5)
+            {
                 // switch to config menu
-                this->ChangeSurface(SURFACE_CONFIG, 3.0f);
+                this->ShiftSurface(this, SURFACE_CONFIG, 3.0f);
 
                 // 
                 m_ConfigMenu.ChangeSurface(SURFACE_CONFIG_VIDEO, 0.0f);
                 m_ConfigMenu.LoadValues();
-            }
-            else if(m_MainMenu.GetStatus() == 5)
-            {
-                // switch to extra menu
-                this->ChangeSurface(SURFACE_EXTRA, 3.0f);
             }
         }
         break;
@@ -188,7 +274,7 @@ void cMenu::Move()
             if(m_GameMenu.GetStatus() == 1)
             {
                 // 
-                this->ChangeSurface(SURFACE_EMPTY, 1.0f);
+                this->ShiftSurface(this, SURFACE_EMPTY, 1.0f);
 
                 // 
                 this->__StartGame();
@@ -196,7 +282,7 @@ void cMenu::Move()
             else if(m_GameMenu.GetStatus() == 2)
             {
                 // return to previous menu
-                this->ChangeSurface(this->GetOldSurface(), 3.0f);
+                this->ShiftSurface(this, this->GetOldSurface(), 3.0f);
             }
         }
         break;
@@ -206,7 +292,7 @@ void cMenu::Move()
             if(m_ScoreMenu.GetStatus())
             {
                 // return to previous menu
-                this->ChangeSurface(this->GetOldSurface(), 3.0f);
+                this->ShiftSurface(this, this->GetOldSurface(), 3.0f);
             }
         }
         break;
@@ -216,7 +302,7 @@ void cMenu::Move()
             if(m_ReplayMenu.GetStatus() == 1)
             {
                 // 
-                this->ChangeSurface(SURFACE_EMPTY, 1.0f);
+                this->ShiftSurface(this, SURFACE_EMPTY, 1.0f);
 
                 // 
                 g_pReplay->CreateGame();
@@ -225,17 +311,7 @@ void cMenu::Move()
             else if(m_ReplayMenu.GetStatus() == 2)
             {
                 // return to previous menu
-                this->ChangeSurface(this->GetOldSurface(), 3.0f);
-            }
-        }
-        break;
-
-    case SURFACE_CONFIG:
-        {
-            if(m_ConfigMenu.GetStatus())
-            {
-                // return to previous menu
-                this->ChangeSurface(this->GetOldSurface(), 3.0f);
+                this->ShiftSurface(this, this->GetOldSurface(), 3.0f);
             }
         }
         break;
@@ -245,7 +321,17 @@ void cMenu::Move()
             if(m_ExtraMenu.GetStatus())
             {
                 // return to previous menu
-                this->ChangeSurface(this->GetOldSurface(), 3.0f);
+                this->ShiftSurface(this, this->GetOldSurface(), 3.0f);
+            }
+        }
+        break;
+
+    case SURFACE_CONFIG:
+        {
+            if(m_ConfigMenu.GetStatus())
+            {
+                // return to previous menu
+                this->ShiftSurface(this, this->GetOldSurface(), 3.0f);
             }
         }
         break;
@@ -260,7 +346,7 @@ void cMenu::Move()
             else if(m_PauseMenu.GetStatus() == 2)
             {
                 // switch to config menu
-                this->ChangeSurface(SURFACE_CONFIG, 3.0f);
+                this->ShiftSurface(this, SURFACE_CONFIG, 3.0f);
 
                 // 
                 m_ConfigMenu.ChangeSurface(SURFACE_CONFIG_VIDEO, 0.0f);
@@ -269,15 +355,7 @@ void cMenu::Move()
             else if(m_PauseMenu.GetStatus() == 3)
             {
                 // 
-                this->ChangeSurface(SURFACE_EMPTY, 0.0f);
-
-                // 
-                g_pGame->RestartMission();
-            }
-            else if(m_PauseMenu.GetStatus() == 4)
-            {
-                // 
-                this->ChangeSurface(SURFACE_MAIN, 1.0f);
+                this->ShiftSurface(this, SURFACE_MAIN, 1.0f);
 
                 // 
                 this->__EndGame();
@@ -363,10 +441,37 @@ coreBool cMenu::IsPausedWithStep()
 
 // ****************************************************************
 // 
+void cMenu::ShiftSurface(coreMenu* OUTPUT pMenu, const coreUint8 iNewSurface, const coreFloat fSpeed)
+{
+    ASSERT(pMenu)
+
+    if(!fSpeed)
+    {
+        // 
+        pMenu->ChangeSurface(iNewSurface, 0.0f);
+        return;
+    }
+
+    if(pMenu->ChangeSurface(iNewSurface, 1.0e06f))
+    {
+        // 
+        m_TransitionTime.Play(CORE_TIMER_PLAY_RESET);
+        m_TransitionTime.SetValue(-0.15f);
+        m_TransitionTime.SetSpeed(0.9f * fSpeed);
+
+        // 
+        m_iTransitionState = 2u;
+        m_pTransitionMenu  = pMenu;
+    }
+}
+
+
+// ****************************************************************
+// 
 void cMenu::UpdateLanguageFont()
 {
     // 
-    const coreChar* pcName = Core::Language->HasString("FONT") ? Core::Language->GetString("FONT") : "ethnocentric.ttf";
+    const coreChar* pcName = Core::Language->HasString("FONT") ? Core::Language->GetString("FONT") : MENU_FONT_DEFAULT;
     Core::Manager::Resource->AssignProxy("dynamic_font", pcName);
 
     // 
@@ -419,12 +524,6 @@ void cMenu::UpdateButton(coreButton* OUTPUT pButton, const coreBool bFocused, co
 
     // 
     if(pButton->GetOverride() < 0) pButton->SetAlpha(pButton->GetAlpha() * 0.5f);
-}
-
-void cMenu::UpdateButton(coreButton* OUTPUT pButton, const coreBool bFocused)
-{
-    // 
-    cMenu::UpdateButton(pButton, bFocused, COLOR_MENU_WHITE);
 }
 
 
@@ -480,11 +579,55 @@ void cMenu::UpdateAnimateProgram(coreObject2D* OUTPUT pObject)
 
 // ****************************************************************
 // 
+void cMenu::ApplyMedalTexture(coreObject2D* OUTPUT pObject, const coreUint8 iMedal, const coreUint8 iMedalType)
+{
+    ASSERT(pObject && (iMedal < MEDAL_MAX) && (iMedalType < MEDAL_TYPE_MAX))
+
+    // 
+    const coreUint8 iIndex = (iMedal - MEDAL_BRONZE) + iMedalType * MEDAL_DARK;
+    pObject->SetTexOffset(coreVector2(I_TO_F(iIndex % 4u), I_TO_F(iIndex / 4u)) * 0.25f);
+
+    // 
+    pObject->SetEnabled((iMedal != MEDAL_NONE) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+}
+
+
+// ****************************************************************
+// reset with the resource manager
+void cMenu::__Reset(const coreResourceReset eInit)
+{
+    if(eInit)
+    {
+        // 
+        m_aFrameBuffer[0].Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED);
+        m_aFrameBuffer[1].Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+        m_aFrameBuffer[2].Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+
+        // 
+        m_MixObject.DefineTexture(0u, m_aFrameBuffer[2].GetColorTarget(0u).pTexture);
+        m_MixObject.DefineTexture(1u, m_aFrameBuffer[1].GetColorTarget(0u).pTexture);
+    }
+    else
+    {
+        // unbind textures and stop possible transition
+        m_MixObject.DefineTexture(0u, NULL);
+        m_MixObject.DefineTexture(1u, NULL);
+        m_TransitionTime.Stop();
+
+        // 
+        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aFrameBuffer); ++i)
+            m_aFrameBuffer[i].Delete();
+    }
+}
+
+
+// ****************************************************************
+// 
 void cMenu::__StartGame()
 {
     // 
     ASSERT(!STATIC_ISVALID(g_pGame))
-    STATIC_NEW(g_pGame, m_GameMenu.GetSelectedDifficulty(), (m_GameMenu.GetSelectedPlayers() > 1u) ? true : false, GAME_MISSION_LIST_MAIN)
+    STATIC_NEW(g_pGame, 0xFFu, (m_GameMenu.GetSelectedPlayers() > 1u) ? true : false, GAME_MISSION_LIST_MAIN)
     g_pGame->LoadNextMission();
 
     // 
@@ -500,7 +643,7 @@ void cMenu::__EndGame()
     if(g_pReplay->GetStatus() == REPLAY_STATUS_RECORDING)
     {
         g_pReplay->EndRecording();
-        g_pReplay->SaveFile(PRINT("Debug Replay %s", coreData::DateTimePrint("%Y-%m-%d %H:%M:%S")));
+        g_pReplay->SaveFile(coreData::DateTimePrint("Debug Replay %Y-%m-%d %H:%M:%S"));
     }
     else if(g_pReplay->GetStatus() == REPLAY_STATUS_PLAYBACK)
     {
@@ -511,6 +654,15 @@ void cMenu::__EndGame()
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
     STATIC_DELETE(g_pGame)
+
+    // 
+    if(g_pSave->GetHeader().oProgress.bFirstPlay)
+    {
+        g_pSave->EditProgress()->bFirstPlay = false;
+
+        m_MainMenu.DeactivateFirstPlay();
+        m_GameMenu.DeactivateFirstPlay();
+    }
 }
 
 
@@ -523,8 +675,8 @@ UNITY_BUILD
 #include "04_cGameMenu.cpp"
 #include "05_cScoreMenu.cpp"
 #include "06_cReplayMenu.cpp"
-#include "07_cConfigMenu.cpp"
-#include "08_cExtraMenu.cpp"
+#include "07_cExtraMenu.cpp"
+#include "08_cConfigMenu.cpp"
 #include "09_cPauseMenu.cpp"
 #include "10_cSummaryMenu.cpp"
 #include "11_cDefeatMenu.cpp"

@@ -104,21 +104,21 @@ void cNevoMission::__SetupOwn()
     // 
     STAGE_MAIN
     {
-        STAGE_BOSS(m_Nautilus)
+        STAGE_BOSS(m_Nautilus, {60.0f, 120.0f, 180.0, 240.0f})
     });
 
     // ################################################################
     // 
     STAGE_MAIN
     {
-        STAGE_BOSS(m_Amemasu)
+        STAGE_BOSS(m_Amemasu, {60.0f, 120.0f, 180.0, 240.0f})
     });
 
     // ################################################################
     // 
     STAGE_MAIN
     {
-        STAGE_BOSS(m_Leviathan)
+        STAGE_BOSS(m_Leviathan, {60.0f, 120.0f, 180.0, 240.0f})
     });
 
     // ################################################################

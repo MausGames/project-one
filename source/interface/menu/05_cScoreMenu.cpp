@@ -12,7 +12,7 @@
 // ****************************************************************
 // constructor
 cScoreMenu::cScoreMenu()noexcept
-: coreMenu (1u, SURFACE_SCORE_DEFAULT)
+: coreMenu (SURFACE_SCORE_MAX, SURFACE_SCORE_DEFAULT)
 {
     // create menu objects
     m_Background.DefineTexture(0u, "menu_background_black.png");
@@ -32,12 +32,12 @@ cScoreMenu::cScoreMenu()noexcept
     {
         m_aRank[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
         m_aRank[i].SetPosition (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.04f, -0.05f - 0.05f*I_TO_F(i)));
-        m_aRank[i].SetAlignment(coreVector2(1.0f,0.0f));   
+        m_aRank[i].SetAlignment(coreVector2(1.0f,0.0f));
         m_aRank[i].SetColor3   (COLOR_MENU_WHITE);
         m_aRank[i].SetText     (PRINT("%zu", i + 1u));
 
         m_aName[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
-        m_aName[i].SetPosition (coreVector2(0.05f,0.0f) + m_aRank[i].GetPosition());   
+        m_aName[i].SetPosition (coreVector2(0.05f,0.0f) + m_aRank[i].GetPosition());
         m_aName[i].SetAlignment(coreVector2(1.0f, 0.0f));
         m_aName[i].SetColor3   (COLOR_MENU_WHITE);
         m_aName[i].SetText     ("Horst");
@@ -54,21 +54,10 @@ cScoreMenu::cScoreMenu()noexcept
         m_aLine[i].SetPosition  (coreVector2(0.0f, m_aRank[i].GetPosition().y));
         m_aLine[i].SetSize      (coreVector2(m_Background.GetSize().x, 0.05f));
         m_aLine[i].SetTexOffset (coreVector2(I_TO_F(i)*0.09f, 0.0f));
-
-
-        // 
-        //m_aRank[i].SetPosition (vPos + coreVector2(vSize.x * -0.44f, fHeight));   
-
-        // 
-        //m_aName[i].SetPosition (m_aRank[i].GetPosition() + coreVector2(0.05f,0.0f));   
-
-        // 
-        //m_aScore[i].SetPosition (vPos + coreVector2(vSize.x * 0.45f, fHeight));   
-
     }
 
     // bind menu objects
-    for(coreUintW i = 0u; i < this->GetNumSurfaces(); ++i) // TODO 
+    for(coreUintW i = 0u; i < SURFACE_SCORE_MAX; ++i)
     {
         this->BindObject(i, &m_Background);
         this->BindObject(i, &m_BackButton);
@@ -103,13 +92,10 @@ void cScoreMenu::Move()
         break;
     }
 
-    if(this->GetAlpha() >= 1.0f)
+    if(m_BackButton.IsClicked() || g_MenuInput.bCancel)
     {
-        if(m_BackButton.IsClicked() || g_MenuInput.bCancel)
-        {
-            // 
-            m_iStatus = 1;
-        }
+        // 
+        m_iStatus = 1;
     }
 
     // 

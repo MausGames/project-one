@@ -12,13 +12,13 @@
 // ****************************************************************
 // constructor
 cConfigMenu::cConfigMenu()noexcept
-: coreMenu (4u, SURFACE_CONFIG_VIDEO)
+: coreMenu (SURFACE_CONFIG_MAX, SURFACE_CONFIG_VIDEO)
 {
     // create menu objects
     m_Background.DefineTexture(0u, "menu_background_black.png");
     m_Background.DefineProgram("menu_border_program");
     m_Background.SetPosition  (coreVector2(0.0f,0.0f));
-    m_Background.SetSize      (coreVector2(0.8f,0.65f));
+    m_Background.SetSize      (coreVector2(0.8f,0.7f));
 
     m_VideoTab.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_VideoTab.DefineProgram("menu_border_program");
@@ -121,6 +121,8 @@ cConfigMenu::cConfigMenu()noexcept
     m_aArrow[1].SetText(ICON_ARROW_LEFT);
     m_aArrow[2].SetText(ICON_ARROW_DOWN);
     m_aArrow[3].SetText(ICON_ARROW_RIGHT);
+    m_aArrow[6].SetText(ICON_UNDO_ALT);
+    m_aArrow[7].SetText(ICON_REDO_ALT);
 
     #define __SET_OPTION(x,n,s)                                                  \
     {                                                                            \
@@ -147,6 +149,7 @@ cConfigMenu::cConfigMenu()noexcept
         __SET_OPTION(m_EffectVolume,  AUDIO_EFFECTVOLUME,  0.26f)
         __SET_OPTION(m_AmbientSound,  AUDIO_AMBIENTSOUND,  0.26f)
         __SET_OPTION(m_Language,      GAME_LANGUAGE,       0.26f)
+        __SET_OPTION(m_TextSize,      GAME_TEXTSIZE,       0.26f)
         __SET_OPTION(m_GameRotation,  GAME_GAMEROTATION,   0.26f)
         __SET_OPTION(m_GameScale,     GAME_GAMESCALE,      0.26f)
         __SET_OPTION(m_HudRotation,   GAME_HUDROTATION,    0.26f)
@@ -156,6 +159,7 @@ cConfigMenu::cConfigMenu()noexcept
         m_Monitor      .SetAutomatic(0.0f);   // # because of realtime-update
         m_ShadowQuality.SetAutomatic(0.0f);
         m_Language     .SetAutomatic(0.0f);
+        m_TextSize     .SetAutomatic(0.0f);
         m_GameRotation .SetAutomatic(0.0f);
         m_GameScale    .SetAutomatic(0.0f);
         m_HudRotation  .SetAutomatic(0.0f);
@@ -214,6 +218,12 @@ cConfigMenu::cConfigMenu()noexcept
         m_aInput[i].oHeader.SetColor3  (COLOR_MENU_WHITE);
     }
 
+    m_SwapInput.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+    m_SwapInput.SetPosition(LERP(m_aInput[0].oHeader.GetPosition(), m_aInput[1].oHeader.GetPosition(), 0.5f));
+    m_SwapInput.SetSize    (coreVector2(0.03f,0.03f));
+    m_SwapInput.GetCaption()->SetText("<>");
+    STATIC_ASSERT(MENU_CONFIG_INPUTS == 2u)
+
     // fill configuration entries
     const std::vector<std::string>& asLanguageList = cMenu::GetLanguageList().get_keylist();
 
@@ -242,6 +252,7 @@ cConfigMenu::cConfigMenu()noexcept
     m_AmbientSound .AddEntryLanguage("VALUE_ON",               1u);
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oRumble.AddEntryLanguage("VALUE_OFF", 0u);
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oRumble.AddEntryLanguage("VALUE_ON", 10u);
+    for(coreUintW i = 0u; i <= 2u; i += 1u) m_TextSize.AddEntry(PRINT("+%zu", i), i);
     m_GameRotation .AddEntryLanguage("VALUE_OFF",              0u);
     m_GameRotation .AddEntryLanguage("HUDROTATION_LEFT",       1u);
     m_GameRotation .AddEntryLanguage("HUDROTATION_UPSIDE",     2u);
@@ -256,7 +267,7 @@ cConfigMenu::cConfigMenu()noexcept
     m_HudType      .AddEntryLanguage("HUDTYPE_INSIDE",         1u);
 
     // bind menu objects
-    for(coreUintW i = 0u, ie = this->GetNumSurfaces(); i < ie; ++i)
+    for(coreUintW i = 0u; i < SURFACE_CONFIG_MAX; ++i)
     {
         if(i != SURFACE_CONFIG_VIDEO) this->BindObject(i, &m_VideoTab);
         if(i != SURFACE_CONFIG_AUDIO) this->BindObject(i, &m_AudioTab);
@@ -297,6 +308,7 @@ cConfigMenu::cConfigMenu()noexcept
     this->BindObject(SURFACE_CONFIG_AUDIO, &m_EffectVolume);
     this->BindObject(SURFACE_CONFIG_AUDIO, &m_AmbientSound);
     this->BindObject(SURFACE_CONFIG_GAME,  &m_Language);
+    this->BindObject(SURFACE_CONFIG_GAME,  &m_TextSize);
     this->BindObject(SURFACE_CONFIG_GAME,  &m_GameRotation);
     this->BindObject(SURFACE_CONFIG_GAME,  &m_GameScale);
     this->BindObject(SURFACE_CONFIG_GAME,  &m_HudRotation);
@@ -312,6 +324,7 @@ cConfigMenu::cConfigMenu()noexcept
         for(coreUintW j = 0u; j < INPUT_KEYS; ++j)
             this->BindObject(SURFACE_CONFIG_INPUT, &this->__RetrieveInputButton(i, j));
     }
+    this->BindObject(SURFACE_CONFIG_INPUT, &m_SwapInput);
 }
 
 
@@ -337,6 +350,13 @@ void cConfigMenu::Move()
             // 
             if(m_Monitor.IsClickedArrow())
                 this->__LoadResolutions(m_Monitor.GetCurEntry().tValue);
+
+            // 
+            if(m_Resolution.IsClickedArrow())
+            {
+                if(m_Resolution.GetEntry(m_Resolution.GetNumEntries() - 1u).tValue == 0xFFu)
+                    m_Resolution.DeleteEntry(m_Resolution.GetNumEntries() - 1u);
+            }
 
             // 
             if(m_ShadowQuality.IsClickedArrow())
@@ -380,6 +400,21 @@ void cConfigMenu::Move()
 
     case SURFACE_CONFIG_INPUT:
         {
+            // 
+            if(m_SwapInput.IsClicked())
+            {
+                // 
+                std::swap(g_CurConfig.Input.aiType[0], g_CurConfig.Input.aiType[1]);
+                for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oType.SelectValue(g_CurConfig.Input.aiType[i]);
+
+                // 
+                this->__LoadInputs();
+            }
+            STATIC_ASSERT(MENU_CONFIG_INPUTS == 2u)
+
+            // 
+            cMenu::UpdateButton(&m_SwapInput, m_SwapInput.IsFocused());
+
             for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i)
             {
                 sPlayerInput& oInput = m_aInput[i];
@@ -431,10 +466,6 @@ void cConfigMenu::Move()
                     coreButton& oButton   = this->__RetrieveInputButton  (i, j);
                     coreInt16&  iCurValue = this->__RetrieveInputCurValue(i, j);
 
-                    // 
-                    cMenu::UpdateButton(&oButton, oButton.IsFocused());
-                    oButton.SetAlpha(oButton.GetAlpha() * (oButton.IsFocused() ? 1.0f : 0.75f));
-
                     if(oButton.IsClicked())
                     {
                         const coreChar*  pcText = PRINT("%s [%s]", Core::Language->GetString("QUESTION_MAPPING"), m_aLabel[ENTRY_INPUT_MOVEUP + j].GetText());
@@ -483,6 +514,10 @@ void cConfigMenu::Move()
                             this->CheckValues();
                         });
                     }
+
+                    // 
+                    cMenu::UpdateButton(&oButton, oButton.IsFocused());
+                    oButton.SetAlpha(oButton.GetAlpha() * (oButton.IsFocused() ? 1.0f : 0.75f));
                 }
             }
         }
@@ -495,6 +530,10 @@ void cConfigMenu::Move()
                 this->__UpdateLanguage();
 
             // 
+            if(m_TextSize.IsClickedArrow())
+                {}
+
+            // 
             if(m_GameRotation.IsClickedArrow() ||
                m_GameScale   .IsClickedArrow() ||
                m_HudRotation .IsClickedArrow() ||
@@ -504,6 +543,7 @@ void cConfigMenu::Move()
 
             // 
             cMenu::UpdateSwitchBox(&m_Language);
+            cMenu::UpdateSwitchBox(&m_TextSize);
             cMenu::UpdateSwitchBox(&m_GameRotation);
             cMenu::UpdateSwitchBox(&m_GameScale);
             cMenu::UpdateSwitchBox(&m_HudRotation);
@@ -517,43 +557,40 @@ void cConfigMenu::Move()
         break;
     }
 
-    if(this->GetAlpha() >= 1.0f)
+    if(m_SaveButton.IsClicked())
     {
-        if(m_SaveButton.IsClicked())
+        // 
+        this->SaveValues();
+    }
+    else if(m_DiscardButton.IsClicked())
+    {
+        // 
+        this->LoadValues();
+    }
+    else if(m_BackButton.IsClicked() || g_MenuInput.bCancel)
+    {
+        if(m_SaveButton.GetOverride() >= 0)
         {
             // 
-            this->SaveValues();
-        }
-        else if(m_DiscardButton.IsClicked())
-        {
-            // 
-            this->LoadValues();
-        }
-        else if(m_BackButton.IsClicked() || g_MenuInput.bCancel)
-        {
-            if(m_SaveButton.GetOverride() >= 0)
+            g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_SAVE"), [this](const coreInt32 iAnswer)
             {
                 // 
-                g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_SAVE"), [this](const coreInt32 iAnswer)
-                {
-                    // 
-                    if(iAnswer == MSGBOX_ANSWER_YES)
-                         this->SaveValues();
-                    else this->LoadValues();
+                if(iAnswer == MSGBOX_ANSWER_YES)
+                     this->SaveValues();
+                else this->LoadValues();
 
-                    // 
-                    m_iStatus = 101;
-                });
-            }
-            else
-            {
                 // 
-                m_iStatus = 1;
-            }
+                m_iStatus = 101;
+            });
+        }
+        else
+        {
+            // 
+            m_iStatus = 1;
         }
     }
 
-    // 
+    // (# after interaction, before visual update) 
     if(Core::Input->GetAnyButton(CORE_INPUT_HOLD) || Core::System->GetWinPosChanged() || Core::System->GetWinSizeChanged())
         this->CheckValues();
 
@@ -594,6 +631,7 @@ void cConfigMenu::CheckValues()
                            (m_EffectVolume .GetCurEntry().tValue != F_TO_UI(Core::Config->GetFloat(CORE_CONFIG_AUDIO_SOUNDVOLUME)  * 100.0f)) ||
                            (m_AmbientSound .GetCurEntry().tValue != g_OldConfig.Audio.iAmbient)                                               ||
                            (std::strcmp(Core::Language->GetPath(), Core::Config->GetString(CORE_CONFIG_BASE_LANGUAGE)))                       ||
+                           (m_TextSize     .GetCurEntry().tValue != g_OldConfig.Game.iTextSize)                                               ||
                            (m_GameRotation .GetCurEntry().tValue != g_OldConfig.Game.iGameRotation)                                           ||
                            (m_GameScale    .GetCurEntry().tValue != g_OldConfig.Game.iGameScale)                                              ||
                            (m_HudRotation  .GetCurEntry().tValue != g_OldConfig.Game.iHudRotation)                                            ||
@@ -645,6 +683,7 @@ void cConfigMenu::LoadValues()
     // 
     const std::vector<std::string>& asLanguageList = cMenu::GetLanguageList().get_valuelist();
     m_Language    .SelectIndex(std::find(asLanguageList.begin(), asLanguageList.end(), Core::Config->GetString(CORE_CONFIG_BASE_LANGUAGE)) - asLanguageList.begin());
+    m_TextSize    .SelectValue(g_CurConfig.Game.iTextSize);
     m_GameRotation.SelectValue(g_CurConfig.Game.iGameRotation);
     m_GameScale   .SelectValue(g_CurConfig.Game.iGameScale);
     m_HudRotation .SelectValue(g_CurConfig.Game.iHudRotation);
@@ -664,6 +703,7 @@ void cConfigMenu::LoadValues()
         if(iShadowQualityIndex != m_ShadowQuality.GetCurIndex()) this->__UpdateShadowQuality();
         if(iOverallVolumeIndex != m_OverallVolume.GetCurIndex()) this->__UpdateOverallVolume();
         if(iLanguageIndex      != m_Language     .GetCurIndex()) this->__UpdateLanguage();
+        // TODO m_TextSize
         this->__UpdateInterface();
     }
 

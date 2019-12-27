@@ -11,7 +11,6 @@
 #define _P1_GUARD_GAME_H_
 
 // TODO: enemy bullet (and enemy?) cleanup on mission unload
-// TODO: use uint for game-times ?
 // TODO: check for duplicate IDs in mission-lists ? LoadMissionID may behave wrong
 // TODO: show pacifist damage in interface, pulsing and filling up, also show that weapons are disabled
 // TODO: maybe spawn players in flight direction, mission start and continue ?
@@ -90,6 +89,8 @@ private:
     cCombatText  m_CombatText;              // combat text overlay
     cInterface   m_Interface;               // interface overlay
 
+    cRepairEnemy* m_pRepairEnemy;           // 
+
     const coreInt32* m_piMissionList;       // 
     coreUintW        m_iNumMissions;        // 
 
@@ -99,7 +100,7 @@ private:
     cTimeTable m_TimeTable;                 // 
     coreFlow   m_fTimeInOut;                // 
 
-    coreProtect<coreUint8> m_iContinues;    // 
+    coreUint8 m_iContinues;                 // 
 
     coreFlow m_fPacifistDamage;             // 
     coreBool m_bPacifist;                   // 
@@ -146,7 +147,7 @@ public:
     void OffsetDepthLevel(const coreFloat fOffset)const;
 
     // 
-    cPlayer* FindPlayer(const coreVector2& vPosition);
+    RETURN_NONNULL cPlayer* FindPlayer(const coreVector2& vPosition);
     template <typename F> void ForEachPlayer   (F&& nFunction);   // [](cPlayer* OUTPUT pPlayer, const coreUintW i) -> void
     template <typename F> void ForEachPlayerAll(F&& nFunction);   // [](cPlayer* OUTPUT pPlayer, const coreUintW i) -> void
 
@@ -168,12 +169,18 @@ public:
     // get object properties
     inline const coreInt32* GetMissionList()const {return m_piMissionList;}
     inline const coreUintW& GetNumMissions()const {return m_iNumMissions;}
-    inline       coreUint8  GetContinues  ()const {return m_iContinues;}
+    inline const coreUint8& GetContinues  ()const {return m_iContinues;}
     inline const coreBool&  GetPacifist   ()const {return m_bPacifist;}
     inline const coreUint8& GetOutroType  ()const {return m_iOutroType;}
     inline const coreUint8& GetStatus     ()const {return m_iStatus;}
     inline const coreUint8& GetDifficulty ()const {return m_iDifficulty;}
     inline const coreBool&  GetCoop       ()const {return m_bCoop;}
+
+    // 
+    static coreUint8  CalcMedal       (const coreFloat fTime, const coreUint32 iDamageTaken, const coreFloat* pfMedalGoal);
+    static coreUint32 CalcBonusTime   (const coreFloat fTime);
+    static coreUint32 CalcBonusMedal  (const coreUint8 iMedal);
+    static coreUint32 CalcBonusSurvive(const coreUint32 iDamageTaken, const coreBool bWasDead);
 
 
 private:

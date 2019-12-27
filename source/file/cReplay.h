@@ -17,7 +17,9 @@
 // TODO: get central timestamp (server ?)
 // TODO: uInfo loadfile
 // TODO: replay and save files strings have to run an explicit '\0' check, use get and set function with max value (both read and write)
-// TODO: manual bitpacking, as this is written to file
+// TODO: current frame is reset on engine-reset ?
+// TODO: add detailed death-stats, to make analyzing problematic situations easier
+// TODO: frame-count in stream-packet can be compressed further by using delta-frames or/and injecting wrap-around packets
 
 
 // ****************************************************************
@@ -27,19 +29,18 @@
 #define REPLAY_FILE_MAGIC       (coreUint32('P1RP'))   // 
 #define REPLAY_FILE_VERSION     (0x00000001u)          // 
 
-#define REPLAY_NAME_LENTH       (128u)                 // 
-#define REPLAY_STREAMS          (PLAYERS)              // 
-#define REPLAY_MISSIONS         (MISSIONS)             // 
-#define REPLAY_BOSSES           (BOSSES)               // 
-#define REPLAY_WAVES            (WAVES)                // 
+#define REPLAY_NAME_LENTH       (128u)                   // 
+#define REPLAY_PLAYERS          (PLAYERS)                // 
+#define REPLAY_MISSIONS         (MISSIONS)               // 
+#define REPLAY_SEGMENTS         (SEGMENTS)               // 
 
-#define REPLAY_TYPE_MOVE        (0u)                   // 
-#define REPLAY_TYPE_PRESS       (1u)                   // 
-#define REPLAY_TYPE_RELEASE     (2u)                   // 
+#define REPLAY_TYPE_MOVE        (0u)                     // 
+#define REPLAY_TYPE_PRESS       (1u)                     // 
+#define REPLAY_TYPE_RELEASE     (2u)                     // 
 
-#define REPLAY_STATUS_DISABLED  (0u)                   // 
-#define REPLAY_STATUS_RECORDING (1u)                   // 
-#define REPLAY_STATUS_PLAYBACK  (2u)                   // 
+#define REPLAY_STATUS_DISABLED  (0u)                     // 
+#define REPLAY_STATUS_RECORDING (1u)                     // 
+#define REPLAY_STATUS_PLAYBACK  (2u)                     // 
 
 #define REPLAY_KEYFRAME_REGULAR(x)       ((x))
 #define REPLAY_KEYFRAME_MISSION_START(x) ((x) + 40000u)
@@ -57,46 +58,45 @@ public:
     // 
     struct sHeader final
     {
-        coreUint32 iMagic;                                                              // 
-        coreUint32 iVersion;                                                            // 
-        coreChar   acName[REPLAY_NAME_LENTH];                                           // 
+        coreUint32 iMagic;                                                                 // 
+        coreUint32 iVersion;                                                               // 
 
-        coreUint32 iExecutableHash;                                                     // 
-        coreUint32 iReplayHash;                                                         // 
+        coreChar   acName[REPLAY_NAME_LENTH];                                              // 
+        coreUint64 iStartTimestamp;                                                        // 
+        coreUint64 iEndTimestamp;                                                          // 
 
-        coreUint64 iStartTimestamp;                                                     // 
-        coreUint64 iEndTimestamp;                                                       // 
+        coreUint32 iExecutableHash;                                                        // 
+        coreUint32 iReplayHash;                                                            // 
+        coreUint32 iBodySize;
 
-        coreUint8  iGameMode;                                                           // 
-        coreUint8  iGameDifficulty;                                                     // 
-        coreUint8  iGamePlayers;                                                        // 
-        coreUint8  iPacifist;                                                           // 
+        coreUint8  iGameMode;                                                              // 
+        coreUint8  iGameDifficulty;                                                        // 
+        coreUint8  iGamePlayers;                                                           // 
+        coreUint8  iPacifist;                                                              // 
 
-        coreUint8  iNumStreams;                                                         // 
-        coreUint8  iNumMissions;                                                        // 
-        coreUint8  iNumBosses;                                                          // 
-        coreUint8  iNumWaves;                                                           // 
+        coreUint8  iNumPlayers;                                                            // 
+        coreUint8  iNumMissions;                                                           // 
+        coreUint8  iNumSegments;                                                           // 
+        coreUint8  iNumWaves;                                                              // 
 
-        coreInt32  aiMissionList[REPLAY_MISSIONS];                                      // 
+        coreInt32  aiMissionList[REPLAY_MISSIONS];                                         // 
 
-        coreUint32 iKeyFrameCount;                                                      // 
-        coreUint32 aiStreamPacketCount[REPLAY_STREAMS];                                 // 
+        coreUint32 iKeyFrameCount;                                                         // 
+        coreUint32 aiStreamPacketCount[REPLAY_PLAYERS];                                    // 
 
-        coreFloat  fTimeTotal;                                                          // 
-        coreFloat  afTimeMission[REPLAY_MISSIONS];                                      // 
-        coreFloat  aafTimeBoss  [REPLAY_MISSIONS][REPLAY_BOSSES];                       // 
-        coreFloat  aafTimeWave  [REPLAY_MISSIONS][REPLAY_WAVES];                        // 
+        coreUint32 iTimeTotal;                                                             // 
+        coreUint32 aiTimeMission [REPLAY_MISSIONS];                                        // 
+        coreUint32 aaiTimeSegment[REPLAY_MISSIONS][REPLAY_SEGMENTS];                       // 
 
-        coreUint32 aiScoreTotal   [REPLAY_STREAMS];                                     // 
-        coreUint32 aaiScoreMission[REPLAY_STREAMS][REPLAY_MISSIONS];                    // 
-        coreUint32 aaaiScoreBoss  [REPLAY_STREAMS][REPLAY_MISSIONS][REPLAY_BOSSES];     // 
-        coreUint32 aaaiScoreWave  [REPLAY_STREAMS][REPLAY_MISSIONS][REPLAY_WAVES];      // 
+        coreUint32 aiScoreTotal    [REPLAY_PLAYERS];                                       // 
+        coreUint32 aaiScoreMission [REPLAY_PLAYERS][REPLAY_MISSIONS];                      // 
+        coreUint32 aaaiScoreSegment[REPLAY_PLAYERS][REPLAY_MISSIONS][REPLAY_SEGMENTS];     // 
 
-        coreUint32 aiActionsTotal   [REPLAY_STREAMS];                                   // 
-        coreUint32 aaiActionsMission[REPLAY_STREAMS][REPLAY_MISSIONS];                  // 
-        coreUint32 aaaiActionsBoss  [REPLAY_STREAMS][REPLAY_MISSIONS][REPLAY_BOSSES];   // 
-        coreUint32 aaaiActionsWave  [REPLAY_STREAMS][REPLAY_MISSIONS][REPLAY_WAVES];    // 
+        coreUint32 aiActionsTotal    [REPLAY_PLAYERS];                                     // 
+        coreUint32 aaiActionsMission [REPLAY_PLAYERS][REPLAY_MISSIONS];                    // 
+        coreUint32 aaaiActionsSegment[REPLAY_PLAYERS][REPLAY_MISSIONS][REPLAY_SEGMENTS];   // 
 
+        coreUint64 iChecksum;                                                              // 
     };
 
     // 
@@ -111,13 +111,14 @@ public:
     // 
     struct sStreamPacket final
     {
-        coreUint32 iFrame    : 22;   // (up to 19.4 hours with 60 FPS) 
-        coreUint32 iType     : 2;    // 
-        coreUint32 iValue    : 5;    // 
-        coreUint32 iReserved : 3;    // 
+        coreUint32 iData;   // 
     };
-    STATIC_ASSERT(sizeof(sStreamPacket) == 4u)
-    STATIC_ASSERT(INPUT_KEYS_ACTION     <= 5u)
+    struct sStreamPacketRaw final
+    {
+        coreUint32 iFrame;   // (up to 19.4 hours with 60 FPS) 
+        coreUint8  iType;    // 
+        coreUint8  iValue;   // 
+    };
 
     // 
     struct sInfo final
@@ -131,12 +132,12 @@ private:
     sHeader m_Header;                                              // 
 
     std::vector<sKeyFrame>     m_aKeyFrame;                        // 
-    std::vector<sStreamPacket> m_aaStreamPacket[REPLAY_STREAMS];   // 
+    std::vector<sStreamPacket> m_aaStreamPacket[REPLAY_PLAYERS];   // 
 
-    sGameInput m_aInput[REPLAY_STREAMS];                           // 
+    sGameInput m_aInput[REPLAY_PLAYERS];                           // 
 
     coreUint32 m_iCurFrame;                                        // 
-    coreUint32 m_aiCurPacket[REPLAY_STREAMS];                      // 
+    coreUint32 m_aiCurPacket[REPLAY_PLAYERS];                      // 
     coreUint8  m_iStatus;                                          // 
 
 
@@ -166,11 +167,11 @@ public:
     void     Clear();
 
     // 
-    static void LoadInfoList(std::vector<sInfo>* OUTPUT paInfoList);
-
-    // 
     inline const sHeader&   GetHeader()const {return m_Header;}
     inline const coreUint8& GetStatus()const {return m_iStatus;}
+
+    // 
+    static void LoadInfoList(std::vector<sInfo>* OUTPUT paInfoList);
 
 
 private:
@@ -185,6 +186,13 @@ private:
     // 
     inline coreBool __CanStartRecording()const {return !m_Header.iReplayHash &&  m_aaStreamPacket[0].empty();}
     inline coreBool __CanStartPlayback ()const {return  m_Header.iReplayHash && !m_aaStreamPacket[0].empty();}
+
+    // 
+    static sStreamPacket    __Pack  (const sStreamPacketRaw& oPacket);
+    static sStreamPacketRaw __Unpack(const sStreamPacket&    oPacket);
+
+    // 
+    static coreUint64 __GenerateChecksum(const sHeader& oHeader);
 
     // 
     friend coreBool ValidateReplay(cReplay* OUTPUT pReplay);

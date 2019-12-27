@@ -37,7 +37,7 @@ cWorldMap::cWorldMap()noexcept
         m_aPinDot[i].DefineTexture(0u, "menu_mission.png");
         m_aPinDot[i].DefineProgram("default_2d_program");
         m_aPinDot[i].SetSize      (WORLDMAP_PIN_SIZE * 1.25f);
-        m_aPinDot[i].SetTexSize   (coreVector2(0.25f,0.25f));
+        m_aPinDot[i].SetTexSize   (coreVector2(0.25f, 0.25f));
         m_aPinDot[i].SetTexOffset (coreVector2(0.125f,0.625f));
     }
 
@@ -132,6 +132,7 @@ void cWorldMap::Move()
     m_Cursor.Move();
 }
 
+
 // ****************************************************************
 // 
 void cWorldMap::Arrange()
@@ -170,5 +171,24 @@ void cWorldMap::Arrange()
 
         vOldPos = vNewPos;
     }
+    STATIC_ASSERT(WORLDMAP_PINS > WORLDMAP_LINES)
+}
+
+
+// ****************************************************************
+// 
+void cWorldMap::EnablePin(const coreUintW iIndex, const coreBool bEnable)
+{
+    ASSERT(iIndex < WORLDMAP_PINS)
+
+    const coreObjectEnable eEnabled = bEnable ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING;
+
+    // 
+    m_aPin   [iIndex].SetEnabled(eEnabled);
+    m_aPinDot[iIndex].SetEnabled(eEnabled);
+
+    // 
+    if(iIndex > 0u)             m_aLine[iIndex - 1u].SetEnabled((m_aPin[iIndex - 1u].IsEnabled(CORE_OBJECT_ENABLE_ALL) && bEnable) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+    if(iIndex < WORLDMAP_LINES) m_aLine[iIndex]     .SetEnabled((m_aPin[iIndex + 1u].IsEnabled(CORE_OBJECT_ENABLE_ALL) && bEnable) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
     STATIC_ASSERT(WORLDMAP_PINS > WORLDMAP_LINES)
 }

@@ -15,6 +15,7 @@ cGame::cGame(const coreUint8 iDifficulty, const coreBool bCoop, const coreInt32*
 : m_BulletManagerPlayer (TYPE_BULLET_PLAYER)
 , m_BulletManagerEnemy  (TYPE_BULLET_ENEMY)
 , m_Interface           (bCoop ? GAME_PLAYERS : 1u)
+, m_pRepairEnemy        (NULL)
 , m_piMissionList       (piMissionList)
 , m_iNumMissions        (iNumMissions)
 , m_pCurMission         (NULL)
@@ -331,12 +332,16 @@ void cGame::StartIntro()
     // 
     m_fTimeInOut = -GAME_INTRO_DELAY;
 
-    // 
     for(coreUintW i = 0u, ie = (m_bCoop ? GAME_PLAYERS : 1u); i < ie; ++i)
     {
+        // 
         m_aPlayer[i].Kill(false);
         m_aPlayer[i].Resurrect();
         m_aPlayer[i].AddStatus(PLAYER_STATUS_NO_INPUT_ALL);
+
+        // 
+        const coreFloat fSide = m_bCoop ? (20.0f * (I_TO_F(i) - 0.5f * I_TO_F(GAME_PLAYERS-1u))) : 0.0f;
+        m_aPlayer[i].SetPosition(coreVector3(fSide, -140.0f, 0.0f));
     }
 }
 
@@ -427,7 +432,7 @@ void cGame::OffsetDepthLevel(const coreFloat fOffset)const
 
 // ****************************************************************
 // 
-cPlayer* cGame::FindPlayer(const coreVector2& vPosition)
+RETURN_NONNULL cPlayer* cGame::FindPlayer(const coreVector2& vPosition)
 {
     // 
     if(!m_bCoop) return &m_aPlayer[0];
@@ -451,6 +456,79 @@ cPlayer* cGame::FindPlayer(const coreVector2& vPosition)
 
     ASSERT(pPlayer)
     return pPlayer;
+}
+
+
+// ****************************************************************
+// 
+coreUint8 cGame::CalcMedal(const coreFloat fTime, const coreUint32 iDamageTaken, const coreFloat* pfMedalGoal)
+{
+    ASSERT(pfMedalGoal && (pfMedalGoal[0] < pfMedalGoal[1]) && (pfMedalGoal[1] < pfMedalGoal[2]) && (pfMedalGoal[2] < pfMedalGoal[3]))
+
+    // 
+    coreUint8 iMedal;
+         if(fTime <= pfMedalGoal[0]) iMedal = MEDAL_DARK;
+    else if(fTime <= pfMedalGoal[1]) iMedal = MEDAL_PLATINUM;
+    else if(fTime <= pfMedalGoal[2]) iMedal = MEDAL_GOLD;
+    else if(fTime <= pfMedalGoal[3]) iMedal = MEDAL_SILVER;
+    else                             iMedal = MEDAL_BRONZE;
+
+    // 
+    iMedal -= MIN(iDamageTaken, coreUint32(iMedal - MEDAL_BRONZE));
+
+    return iMedal;
+}
+
+
+// ****************************************************************
+// 
+coreUint32 cGame::CalcBonusTime(const coreFloat fTime)
+{
+    // 
+    return F_TO_UI(LERP(20000.0f, 100.0f, MIN(fTime * (1.0f/60.0f), 1.0f)));
+}
+
+
+// ****************************************************************
+// 
+coreUint32 cGame::CalcBonusMedal(const coreUint8 iMedal)
+{
+    // 
+    switch(iMedal)
+    {
+    default: ASSERT(false)
+    case MEDAL_DARK:     return 10000u;
+    case MEDAL_PLATINUM: return  5000u;
+    case MEDAL_GOLD:     return  3000u;
+    case MEDAL_SILVER:   return  2000u;
+    case MEDAL_BRONZE:   return  1000u;
+    case MEDAL_NONE:     return     0u;
+    }
+}
+
+
+// ****************************************************************
+// 
+coreUint32 cGame::CalcBonusSurvive(const coreUint32 iDamageTaken, const coreBool bWasDead)
+{
+    // 
+    if(!bWasDead)
+    {
+        // 
+        switch(iDamageTaken)
+        {
+        case 0u: return 200000u;
+        case 1u: return 100000u;
+        case 2u: return  50000u;
+        case 3u: return  30000u;
+        case 4u: return  20000u;
+        default: return  10000u - MIN(50u * (iDamageTaken - LIVES), 9999u);
+        }
+
+        STATIC_ASSERT(LIVES == 5u)
+    }
+
+    return 0u;
 }
 
 
@@ -504,7 +582,6 @@ coreBool cGame::__HandleIntro()
             this->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
             {
                 // calculate new player position and rotation
-                const coreFloat   fSide = m_bCoop ? (20.0f * (I_TO_F(i) - 0.5f * I_TO_F(GAME_PLAYERS-1u))) : 0.0f;
                 const coreFloat   fTime = CLAMP((i ? 0.0f : 0.08f) + m_fTimeInOut / GAME_INTRO_DURATION, 0.0f, 1.0f);
                 const coreVector2 vPos  = s_Spline.CalcPositionLerp(LERPB(0.0f, 1.0f,    fTime));
                 const coreVector2 vDir  = coreVector2::Direction   (LERPS(0.0f, 4.0f*PI, fTime));
@@ -517,7 +594,7 @@ coreBool cGame::__HandleIntro()
                 }
 
                 // fly player animated into the game field
-                pPlayer->SetPosition   (coreVector3(fSide, vPos));
+                pPlayer->SetPosition   (coreVector3(pPlayer->GetPosition().x, vPos));
                 pPlayer->SetDirection  (coreVector3(0.0f,1.0f,0.0f));
                 pPlayer->SetOrientation(coreVector3(vDir.x, 0.0f, vDir.y));
                 pPlayer->UpdateExhaust (LERPB(1.0f, 0.0f, fTime));
@@ -568,14 +645,22 @@ void cGame::__HandleDefeat()
         // 
         for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
         {
-            const cPlayer& oPlayer = m_aPlayer[i];
+            cPlayer* pPlayer = &m_aPlayer[i];
 
             // 
-            const coreBool bDefeated = CONTAINS_FLAG(oPlayer.GetStatus(), PLAYER_STATUS_DEAD);
+            const coreBool bDefeated = CONTAINS_FLAG(pPlayer->GetStatus(), PLAYER_STATUS_DEAD);
             bAllDefeated = bAllDefeated && bDefeated;
 
             // 
-            g_pPostProcessing->SetSaturation(i, bDefeated ? 0.0f : CLAMP(1.0f - oPlayer.GetFeelTime(), 0.0f, 1.0f));
+            g_pPostProcessing->SetSaturation(i, bDefeated ? 0.0f : CLAMP(1.0f - pPlayer->GetFeelTime(), 0.0f, 1.0f));
+
+            if(bDefeated && m_bCoop && !m_pRepairEnemy)
+            {
+                // 
+                m_pRepairEnemy = new cRepairEnemy();
+                m_pRepairEnemy->AssignPlayer(pPlayer);
+                m_pRepairEnemy->Resurrect();
+            }
         }
 
         if(bAllDefeated)
@@ -591,6 +676,29 @@ void cGame::__HandleDefeat()
                 REMOVE_FLAG(m_iStatus, GAME_STATUS_PLAY)
                 ADD_FLAG   (m_iStatus, GAME_STATUS_DEFEATED)
             }
+
+            if(m_pRepairEnemy)
+            {
+                // 
+                g_pSpecialEffects->CreateSplashDark(m_pRepairEnemy->GetPosition(), SPECIAL_SPLASH_TINY);
+                SAFE_DELETE(m_pRepairEnemy)
+            }
+        }
+
+        if(m_pRepairEnemy && m_pRepairEnemy->ReachedDeath())
+        {
+            cPlayer* pPlayer = m_pRepairEnemy->GetPlayer();
+
+            // 
+            pPlayer->Resurrect();
+
+            // 
+            pPlayer->SetPosition    (m_pRepairEnemy->GetPosition());
+            pPlayer->SetCurHealthPct(I_TO_F(1u) / I_TO_F(PLAYER_LIVES));
+            pPlayer->StartFeeling   (PLAYER_FEEL_TIME, 0u);
+
+            // 
+            SAFE_DELETE(m_pRepairEnemy)
         }
     }
 }
@@ -728,4 +836,11 @@ void cGame::__ClearAll(const coreBool bAnimated)
     m_ChromaManager      .ClearChromas(bAnimated);
     m_ItemManager        .ClearItems  (bAnimated);
     m_ShieldManager      .ClearShields(bAnimated);
+
+    // 
+    if(m_pRepairEnemy)
+    {
+        if(bAnimated) g_pSpecialEffects->MacroExplosionDarkSmall(m_pRepairEnemy->GetPosition());
+        SAFE_DELETE(m_pRepairEnemy)
+    }
 }

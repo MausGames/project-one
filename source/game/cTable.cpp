@@ -11,6 +11,141 @@
 
 // ****************************************************************
 // constructor
+cDataTable::cDataTable()noexcept
+: m_pOwner (NULL)
+{
+    // 
+    this->Reset();
+}
+
+
+// ****************************************************************
+// 
+void cDataTable::Update()
+{
+}
+
+
+// ****************************************************************
+// 
+void cDataTable::Reset()
+{
+    // 
+    std::memset(&m_CounterTotal,     0, sizeof(m_CounterTotal));
+    std::memset(&m_aCounterMission,  0, sizeof(m_aCounterMission));
+    std::memset(&m_aaCounterSegment, 0, sizeof(m_aaCounterSegment));
+
+    // 
+    std::memset(&m_aiMedalMission,  0, sizeof(m_aiMedalMission));
+    std::memset(&m_aaiMedalSegment, 0, sizeof(m_aaiMedalSegment));
+
+    // 
+    std::memset(&m_aiFragment, 0, sizeof(m_aiFragment));
+}
+
+
+// ****************************************************************
+// 
+cDataTable::sCounter* cDataTable::EditCounterTotal()
+{
+    // 
+    return &m_CounterTotal;
+}
+
+cDataTable::sCounter* cDataTable::EditCounterMission(const coreUintW iMissionIndex)
+{
+    // 
+    ASSERT(iMissionIndex < TABLE_MISSIONS)
+    return &m_aCounterMission[iMissionIndex];
+}
+
+cDataTable::sCounter* cDataTable::EditCounterMission()
+{
+    // 
+    ASSERT(STATIC_ISVALID(g_pGame))
+    return this->EditCounterMission(g_pGame->GetCurMissionIndex());
+}
+
+cDataTable::sCounter* cDataTable::EditCounterSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
+{
+    // 
+    if(iSegmentIndex != MISSION_NO_SEGMENT)
+    {
+        ASSERT(iMissionIndex < TABLE_MISSIONS)
+        ASSERT(iSegmentIndex < TABLE_SEGMENTS)
+        return &m_aaCounterSegment[iMissionIndex][iSegmentIndex];
+    }
+
+    // 
+    static sCounter s_CounterDummy;
+    return &s_CounterDummy;
+}
+
+cDataTable::sCounter* cDataTable::EditCounterSegment()
+{
+    // 
+    ASSERT(STATIC_ISVALID(g_pGame))
+    return this->EditCounterSegment(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
+}
+
+
+// ****************************************************************
+// 
+void cDataTable::GiveMedalMission(const coreUint8 iMedal, const coreUintW iMissionIndex)
+{
+    // 
+    ASSERT(iMedal        < MEDAL_MAX)
+    ASSERT(iMissionIndex < TABLE_MISSIONS)
+    m_aiMedalMission[iMissionIndex] = iMedal;
+}
+
+void cDataTable::GiveMedalMission(const coreUint8 iMedal)
+{
+    // 
+    ASSERT(STATIC_ISVALID(g_pGame))
+    this->GiveMedalMission(iMedal, g_pGame->GetCurMissionIndex());
+}
+
+void cDataTable::GiveMedalSegment(const coreUint8 iMedal, const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
+{
+    // 
+    if(iSegmentIndex != MISSION_NO_SEGMENT)
+    {
+        ASSERT(iMedal        < MEDAL_MAX)
+        ASSERT(iMissionIndex < TABLE_MISSIONS)
+        ASSERT(iSegmentIndex < TABLE_SEGMENTS)
+        m_aaiMedalSegment[iMissionIndex][iSegmentIndex] = iMedal;
+    }
+}
+
+void cDataTable::GiveMedalSegment(const coreUint8 iMedal)
+{
+    // 
+    ASSERT(STATIC_ISVALID(g_pGame))
+    this->GiveMedalSegment(iMedal, g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
+}
+
+
+// ****************************************************************
+// 
+void cDataTable::GiveFragment(const coreUintW iMissionIndex, const coreUintW iBossIndex)
+{
+    // 
+    ASSERT(iMissionIndex < TABLE_MISSIONS)
+    ASSERT(iBossIndex    < TABLE_BOSSES)
+    ADD_BIT(m_aiFragment[iMissionIndex], iBossIndex)
+}
+
+void cDataTable::GiveFragment()
+{
+    // 
+    ASSERT(STATIC_ISVALID(g_pGame))
+    this->GiveFragment(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurBossIndex());
+}
+
+
+// ****************************************************************
+// constructor
 cScoreTable::cScoreTable()noexcept
 : m_pOwner (NULL)
 {
@@ -39,8 +174,7 @@ void cScoreTable::Reset()
     // reset all score values (# no memset)
     m_iScoreTotal = 0u;
     for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) m_aiScoreMission[j] = 0u;
-    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) for(coreUintW i = 0u; i < TABLE_BOSSES; ++i) m_aaiScoreBoss[j][i] = 0u;
-    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) for(coreUintW i = 0u; i < TABLE_WAVES;  ++i) m_aaiScoreWave[j][i] = 0u;
+    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) for(coreUintW i = 0u; i < TABLE_SEGMENTS; ++i) m_aaiScoreSegment[j][i] = 0u;
 
     // reset combo and chain values (# no memset)
     m_aiComboValue[1] = m_aiComboValue[0] = 0u;
@@ -51,7 +185,7 @@ void cScoreTable::Reset()
 
 // ****************************************************************
 // 
-void cScoreTable::AddScore(const coreUint32 iValue, const coreBool bModified, const coreUintW iMissionIndex, const coreUintW iBossIndex, const coreUintW iWaveIndex)
+void cScoreTable::AddScore(const coreUint32 iValue, const coreBool bModified, const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
 {
     const coreUint32 iFinalValue = bModified ? (iValue * this->GetCurCombo()) : iValue;
 
@@ -61,26 +195,18 @@ void cScoreTable::AddScore(const coreUint32 iValue, const coreBool bModified, co
     m_aiScoreMission[iMissionIndex] += iFinalValue;
 
     // 
-    if(iBossIndex != MISSION_NO_BOSS)
+    if(iSegmentIndex != MISSION_NO_SEGMENT)
     {
-        ASSERT(iBossIndex < TABLE_BOSSES)
-        m_aaiScoreBoss[iMissionIndex][iBossIndex] += iFinalValue;
-    }
-
-    // 
-    if(iWaveIndex != MISSION_NO_WAVE)
-    {
-        ASSERT(iWaveIndex < TABLE_WAVES)
-        m_aaiScoreWave[iMissionIndex][iWaveIndex] += iFinalValue;
+        ASSERT(iSegmentIndex < TABLE_SEGMENTS)
+        m_aaiScoreSegment[iMissionIndex][iSegmentIndex] += iFinalValue;
     }
 }
 
 void cScoreTable::AddScore(const coreUint32 iValue, const coreBool bModified)
 {
-    ASSERT(STATIC_ISVALID(g_pGame))
-
     // 
-    this->AddScore(iValue, bModified, g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurBossIndex(), g_pGame->GetCurMission()->GetCurWaveIndex());
+    ASSERT(STATIC_ISVALID(g_pGame))
+    this->AddScore(iValue, bModified, g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
 }
 
 
@@ -148,31 +274,27 @@ void cTimeTable::Update()
     ASSERT(STATIC_ISVALID(g_pGame))
 
     // 
-    m_fTimeEvent.Update(1.0f);
+    if(!Core::System->GetTime()) return;
+    ASSERT(Core::System->GetTime() == FRAMERATE_TIME)
+
+    // 
+    m_iTimeEvent += 1u;
 
     if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY))
     {
         const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
-        const coreUintW iBossIndex    = g_pGame->GetCurMission()->GetCurBossIndex();
-        const coreUintW iWaveIndex    = g_pGame->GetCurMission()->GetCurWaveIndex();
+        const coreUintW iSegmentIndex = g_pGame->GetCurMission()->GetCurSegmentIndex();
 
         // update total and mission time
         ASSERT(iMissionIndex < TABLE_MISSIONS)
-        m_fTimeTotal                  .Update(1.0f);
-        m_afTimeMission[iMissionIndex].Update(1.0f);
+        m_iTimeTotal                   += 1u;
+        m_aiTimeMission[iMissionIndex] += 1u;
 
-        // update boss time
-        if(iBossIndex != MISSION_NO_BOSS)
+        // update segment time
+        if(iSegmentIndex != MISSION_NO_SEGMENT)
         {
-            ASSERT(iBossIndex < TABLE_BOSSES)
-            m_aafTimeBoss[iMissionIndex][iBossIndex].Update(1.0f);
-        }
-
-        // update wave time
-        if(iWaveIndex != MISSION_NO_WAVE)
-        {
-            ASSERT(iWaveIndex < TABLE_WAVES)
-            m_aafTimeWave[iMissionIndex][iWaveIndex].Update(1.0f);
+            ASSERT(iSegmentIndex < TABLE_SEGMENTS)
+            m_aaiTimeSegment[iMissionIndex][iSegmentIndex] += 1u;
         }
     }
 }
@@ -183,20 +305,24 @@ void cTimeTable::Update()
 void cTimeTable::Reset()
 {
     // reset all time values (# no memset)
-    m_fTimeEvent = 0.0f;
-    m_fTimeTotal = 0.0f;
-    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) m_afTimeMission[j] = 0.0f;
-    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) for(coreUintW i = 0u; i < TABLE_BOSSES; ++i) m_aafTimeBoss[j][i] = -INTERFACE_BANNER_DURATION_BOSS;
-    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) for(coreUintW i = 0u; i < TABLE_WAVES;  ++i) m_aafTimeWave[j][i] = 0.0f;
+    m_iTimeEvent = 0u;
+    m_iTimeTotal = 0u;
+    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) m_aiTimeMission[j] = 0u;
+    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) for(coreUintW i = 0u; i < TABLE_SEGMENTS; ++i) m_aaiTimeSegment[j][i] = MISSION_SEGMENT_IS_BOSS(i) ? F_TO_UI(-INTERFACE_BANNER_DURATION_BOSS * FRAMERATE_VALUE) : 0u;
 }
 
 
 // ****************************************************************
 // 
-coreFloat cTimeTable::GetTimeBossWave(const coreUintW iMissionIndex, const coreUintW iBossIndex, const coreUintW iWaveIndex)const
+coreFloat cTimeTable::GetTimeSegmentSafe(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const
 {
     // 
-    if(iBossIndex != MISSION_NO_BOSS) return this->GetTimeBoss(iMissionIndex, iBossIndex);
-    if(iWaveIndex != MISSION_NO_WAVE) return this->GetTimeWave(iMissionIndex, iWaveIndex);
-    return 0.0f;
+    return (iSegmentIndex != MISSION_NO_SEGMENT) ? MAX(this->GetTimeSegment(iMissionIndex, iSegmentIndex), 0.0f) : 0.0f;
+}
+
+coreFloat cTimeTable::GetTimeSegmentSafe()const
+{
+    // 
+    ASSERT(STATIC_ISVALID(g_pGame))
+    return this->GetTimeSegmentSafe(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
 }

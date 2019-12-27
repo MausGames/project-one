@@ -50,6 +50,9 @@ public:
     void Arrange();
 
     // 
+    void EnablePin(const coreUintW iIndex, const coreBool bEnable);
+
+    // 
     inline coreBool         GetSelectionState()const {return m_aPin[m_iNewPin].IsClicked();}
     inline const coreUint8& GetSelectionIndex()const {return m_iNewPin;}
 };

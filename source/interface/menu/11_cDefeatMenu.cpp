@@ -12,7 +12,7 @@
 // ****************************************************************
 // constructor
 cDefeatMenu::cDefeatMenu()noexcept
-: coreMenu      (2u, SURFACE_DEFEAT_CONTINUE)
+: coreMenu      (SURFACE_DEFEAT_MAX, SURFACE_DEFEAT_CONTINUE)
 , m_fCountdown  (0.0f)
 , m_fBurst      (0.0f)
 , m_fIntroTimer (0.0f)
@@ -85,7 +85,7 @@ void cDefeatMenu::Move()
         {
             // 
             m_fIntroTimer.Update(1.0f);
-            if(m_fIntroTimer >= INTERFACE_BANNER_SPEED_REV)
+            if(m_fIntroTimer >= MENU_DEFEAT_BANNER_SPEED_REV)
             {
                 if(CONTAINS_BIT(g_TotalInput.iActionPress, 0u))
                 {
@@ -101,7 +101,7 @@ void cDefeatMenu::Move()
 
             // 
             if(m_eState == DEFEAT_OUTRO) m_fOutroTimer.Update(1.0f);
-            if(m_fOutroTimer >= INTERFACE_BANNER_SPEED_REV)
+            if(m_fOutroTimer >= MENU_DEFEAT_BANNER_SPEED_REV)
             {
                 // 
                 m_iStatus = 1;
@@ -156,7 +156,7 @@ void cDefeatMenu::Move()
         {
             // 
             m_fIntroTimer.Update(1.0f);
-            if((m_fIntroTimer >= INTERFACE_BANNER_SPEED_REV) && Core::Input->GetAnyButton(CORE_INPUT_PRESS))
+            if((m_fIntroTimer >= MENU_DEFEAT_BANNER_SPEED_REV) && Core::Input->GetAnyButton(CORE_INPUT_PRESS))
             {
                 // 
                 m_eState = DEFEAT_OUTRO;
@@ -165,7 +165,7 @@ void cDefeatMenu::Move()
 
             // 
             if(m_eState == DEFEAT_OUTRO) m_fOutroTimer.Update(1.0f);
-            if(m_fOutroTimer >= INTERFACE_BANNER_SPEED_REV + MENU_DEFEAT_DELAY_OUTRO)
+            if(m_fOutroTimer >= MENU_DEFEAT_BANNER_SPEED_REV + MENU_DEFEAT_DELAY_OUTRO)
             {
                 // 
                 m_iStatus = 2;
@@ -181,11 +181,11 @@ void cDefeatMenu::Move()
     if(m_eState != DEFEAT_WAIT)
     {
         // 
-        if((m_fIntroTimer >= INTERFACE_BANNER_ANIMATION) && (m_eState < DEFEAT_WAIT)) m_eState = DEFEAT_WAIT;
+        if((m_fIntroTimer >= MENU_DEFEAT_BANNER_ANIMATION) && (m_eState < DEFEAT_WAIT)) m_eState = DEFEAT_WAIT;
 
         // calculate visibility and animation value
-        const coreFloat fVisibility = MIN(m_fIntroTimer, INTERFACE_BANNER_SPEED_REV - m_fOutroTimer) * INTERFACE_BANNER_SPEED;
-        const coreFloat fAnimation  = LERPB(0.0f, 1.0f, MIN(m_fIntroTimer / INTERFACE_BANNER_ANIMATION, 1.0f)) * INTERFACE_BANNER_ANIMATION;
+        const coreFloat fVisibility = MIN(m_fIntroTimer, MENU_DEFEAT_BANNER_SPEED_REV - m_fOutroTimer) * MENU_DEFEAT_BANNER_SPEED;
+        const coreFloat fAnimation  = LERPB(0.0f, 1.0f, MIN(m_fIntroTimer / MENU_DEFEAT_BANNER_ANIMATION, 1.0f)) * MENU_DEFEAT_BANNER_ANIMATION;
 
         // slash background across screen (# direction can be swapped, also alpha value is used as texture coordinate correction)
         const coreBool bLeftRight = m_fOutroTimer ? true : false;

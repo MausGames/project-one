@@ -1,14 +1,17 @@
 $LANGUAGE = English
 $FONT = ethnocentric.ttf
 
+$WELCOME = A Game by Martin Mauersics
+$PROMPT = Press Button
+
 $START_GAME = Play Game
 $EXIT_GAME = Exit Game
 
 $LEADERBOARDS = Leaderboards
 $REPLAYS = Replays
-$SETTINGS = Settings
 $EXTRAS = Extras
-$CREDITS = Credits
+$SETTINGS = Settings
+$UNKNOWN = ?????
 
 $SAVE = Save
 $DISCARD = Discard
@@ -44,6 +47,7 @@ $CONFIG_INPUT_ACTION3 = Turn Left
 $CONFIG_INPUT_ACTION4 = Turn Right
 $CONFIG_INPUT_ACTION5 = Pause
 $CONFIG_GAME_LANGUAGE = Language
+$CONFIG_GAME_TEXTSIZE = Text Size
 $CONFIG_GAME_GAMEROTATION = Game Rotation
 $CONFIG_GAME_GAMESCALE = Game Scale
 $CONFIG_GAME_HUDROTATION = HUD Rotation
@@ -56,8 +60,8 @@ $GAME_PLAYERS = Players
 
 $GAME_MODE_STANDARD = Standard
 $GAME_MODE_TRAINING = Training
-$GAME_DIFFICULTY_EASY = Relaxed
-$GAME_DIFFICULTY_NORMAL = Original
+$GAME_DIFFICULTY_EASY = Easy
+$GAME_DIFFICULTY_NORMAL = Normal
 $GAME_PLAYERS_SOLO = Alone
 $GAME_PLAYERS_COOP = Together
 
@@ -87,12 +91,24 @@ $INPUT_KEYBOARD = Keyboard
 $INPUT_JOYSTICK = Gamepad
 
 $PLAYER = Player
-$STAGE = Stage
+$MISSION = Stage
 $BOSS = Boss
 $WAVE = Wave
 
-$SCORE_BONUS = Bonus
-$SCORE_NOBONUS = No Bonus
+$GAME_HEADER_DIRECTORY = Select Stage
+$GAME_HEADER_ARMORY = Select Equipment
+
+$GAME_WEAPON = Weapon
+$GAME_SUPPORT = Support
+
+$GAME_WEAPON_NOTHING = Nothing
+$GAME_WEAPON_RAY = Laser
+$GAME_SUPPORT_NOTHING = Nothing
+$GAME_SUPPORT_SHIELD = Shield
+
+$SCORE_BONUS = Time Bonus
+$BONUS_MEDAL = Medal Bonus
+$BONUS_SURVIVE = Survive Bonus
 
 $SUMMARY_TOTAL = Total
 

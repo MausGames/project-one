@@ -22,12 +22,14 @@ cMission::cMission()noexcept
 , m_iCurBossIndex    (MISSION_NO_BOSS)
 , m_iCurWaveCount    (0u)
 , m_iCurWaveIndex    (MISSION_NO_WAVE)
+, m_iCurSegmentIndex (MISSION_NO_SEGMENT)
 , m_piData           (NULL)
 , m_iDataSize        (0u)
 , m_iStageNum        (0u)
 , m_fStageTime       (0.0f)
 , m_fStageTimeBefore (0.0f)
 , m_iStageSub        (0u)
+, m_pfMedalGoal      (NULL)
 {
 }
 
@@ -67,14 +69,6 @@ void cMission::Setup()
 
     // 
     m_iStageNum = m_anStage.size();
-
-#if defined(_CORE_DEBUG_)
-
-    // 
-    for(coreUintW i = 0u; i < MISSION_BOSSES; ++i)
-        ASSERT(m_apBoss[i])
-
-#endif
 }
 
 
@@ -95,15 +89,14 @@ void cMission::MoveBefore()
         m_fStageTimeBefore = m_fStageTime;
         m_fStageTime.Update(1.0f);
 
+        // 
         if(m_fStageTime > 0.0f)
         {
             // 
             m_anStage.back()();
-            if(m_anStage.empty())
-            {
-                // 
-                g_pGame->StartOutro(0u);
-            }
+
+            // 
+            if(m_anStage.empty()) g_pGame->StartOutro(0u);
         }
     }
 
@@ -123,10 +116,13 @@ void cMission::MoveAfter()
 void cMission::SkipStage()
 {
     // 
+    m_anStage.pop_back();
+
+    // 
     m_fStageTime       = -MISSION_STAGE_DELAY;
     m_fStageTimeBefore = -MISSION_STAGE_DELAY;
     m_iStageSub        = 0u;
-    m_anStage.pop_back();
+    m_pfMedalGoal      = NULL;
 
     // 
     FOR_EACH(it, m_apPath)  SAFE_DELETE(*it)
@@ -139,8 +135,6 @@ void cMission::SkipStage()
     // 
     std::memset(m_piData, 0, sizeof(coreUint32) * m_iDataSize);
 
-    // 
-    g_pGame->GetShieldManager()->ClearShields(true);
 }
 
 
@@ -148,42 +142,114 @@ void cMission::SkipStage()
 // 
 void cMission::ActivateBoss(const cBoss* pBoss)
 {
-    // 
-    for(coreUintW i = 0u; i < MISSION_BOSSES; ++i)
-    {
-        if(pBoss == m_apBoss[i])
-        {
-            // save pointer and index for direct access
-            m_pCurBoss      = m_apBoss[i];
-            m_iCurBossIndex = i;
-            return;
-        }
-    }
+    ASSERT(m_iCurSegmentIndex == MISSION_NO_SEGMENT)
 
-    ASSERT(false)
+    // 
+    const coreUintW iIndex = std::find(m_apBoss, m_apBoss + MISSION_BOSSES, pBoss) - m_apBoss;
+    ASSERT(iIndex < MISSION_BOSSES)
+
+    // 
+    m_pCurBoss         = m_apBoss[iIndex];
+    m_iCurBossIndex    = iIndex;
+    m_iCurSegmentIndex = MISSION_BOSS_TO_SEGMENT(m_iCurBossIndex);
+
+    // 
+    g_pGame->GetInterface()->ShowBoss(m_pCurBoss);
 }
 
 void cMission::DeactivateBoss()
 {
+    ASSERT(m_iCurSegmentIndex != MISSION_NO_SEGMENT)
+
     // 
-    m_pCurBoss      = NULL;
-    m_iCurBossIndex = MISSION_NO_BOSS;
+    this->__CloseSegment();
+
+    // 
+    m_pCurBoss         = NULL;
+    m_iCurBossIndex    = MISSION_NO_BOSS;
+    m_iCurSegmentIndex = MISSION_NO_SEGMENT;
 }
 
 
 // ****************************************************************
 // 
-void cMission::ActivateWave()
+void cMission::ActivateWave(const coreChar* pcName)
 {
+    ASSERT(m_iCurSegmentIndex == MISSION_NO_SEGMENT)
+
     // 
     ASSERT(m_iCurWaveCount < MISSION_WAVES)
-    m_iCurWaveIndex = m_iCurWaveCount++;
+    m_iCurWaveIndex    = m_iCurWaveCount++;
+    m_iCurSegmentIndex = MISSION_WAVE_TO_SEGMENT(m_iCurWaveIndex);
+
+    // 
+    g_pGame->GetInterface()->ShowWave(pcName);
 }
 
 void cMission::DeactivateWave()
 {
+    ASSERT(m_iCurSegmentIndex != MISSION_NO_SEGMENT)
+
     // 
-    m_iCurWaveIndex = MISSION_NO_WAVE;
+    this->__CloseSegment();
+
+    // 
+    m_iCurWaveIndex    = MISSION_NO_WAVE;
+    m_iCurSegmentIndex = MISSION_NO_SEGMENT;
+}
+
+
+// ****************************************************************
+// 
+void cMission::__CloseSegment()
+{
+    ASSERT(m_iCurSegmentIndex != MISSION_NO_SEGMENT)
+
+    // 
+    g_pGame->GetBulletManagerEnemy()->ClearBullets(true);
+    g_pGame->GetChromaManager     ()->ClearChromas(true);
+    g_pGame->GetItemManager       ()->LoseItems();
+    g_pGame->GetShieldManager     ()->ClearShields(true);
+
+    // 
+    const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
+
+    // 
+    const coreFloat  fTime  = g_pGame->GetTimeTable()->GetTimeSegmentSafe();
+    const coreUint32 iBonus = cGame::CalcBonusTime(fTime);
+
+    // 
+    coreUint8  aiMedal[GAME_PLAYERS] = {};
+    coreUint32 aiPower[GAME_PLAYERS] = {};
+    g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    {
+        const coreUint32 iDamageTaken = pPlayer->GetDataTable()->GetCounterSegment(iMissionIndex, m_iCurSegmentIndex).iDamageTaken;
+
+        // 
+        aiMedal[i] = cGame::CalcMedal(fTime, iDamageTaken, m_pfMedalGoal);
+        aiPower[i] = pPlayer->GetScoreTable()->GetScoreSegment(iMissionIndex, m_iCurSegmentIndex) + aiMedal[i] * 1000000u;
+
+        // 
+        pPlayer->GetScoreTable()->AddScore(iBonus, false);
+    });
+
+    if(g_pGame->GetCoop())
+    {
+        // give medal to the better player (or both on draw)
+        if(aiPower[0] >= aiPower[1]) g_pGame->GetPlayer(0u)->GetDataTable()->GiveMedalSegment(aiMedal[0]);
+        if(aiPower[1] >= aiPower[0]) g_pGame->GetPlayer(1u)->GetDataTable()->GiveMedalSegment(aiMedal[1]);
+        STATIC_ASSERT(GAME_PLAYERS == 2u)
+    }
+    else
+    {
+        // give medal to the only player
+        g_pGame->GetPlayer(0u)->GetDataTable()->GiveMedalSegment(aiMedal[0]);
+    }
+
+    // 
+    const coreUint8 iShowMedal     = MAX(aiMedal[0], aiMedal[1]);
+    const coreUint8 iShowMedalType = MISSION_SEGMENT_IS_BOSS(m_iCurSegmentIndex) ? MEDAL_TYPE_BOSS : MEDAL_TYPE_WAVE;
+    g_pGame->GetInterface()->ShowScore(iBonus, iShowMedal, iShowMedalType);
 }
 
 

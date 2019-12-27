@@ -14,6 +14,7 @@ coreBool        g_bDebugOutput    = false;
 coreMusicPlayer g_MusicPlayer     = {};
 
 STATIC_MEMORY(cReplay,         g_pReplay)
+STATIC_MEMORY(cSave,           g_pSave)
 STATIC_MEMORY(cOutline,        g_pOutline)
 STATIC_MEMORY(cGlow,           g_pGlow)
 STATIC_MEMORY(cDistortion,     g_pDistortion)
@@ -58,6 +59,7 @@ void CoreApp::Init()
     // create and init main components
     cShadow::GlobalInit();
     STATIC_NEW(g_pReplay)
+    STATIC_NEW(g_pSave)
     STATIC_NEW(g_pOutline)
     STATIC_NEW(g_pGlow)
     STATIC_NEW(g_pDistortion)
@@ -87,6 +89,7 @@ void CoreApp::Exit()
     STATIC_DELETE(g_pDistortion)
     STATIC_DELETE(g_pGlow)
     STATIC_DELETE(g_pOutline)
+    STATIC_DELETE(g_pSave)
     STATIC_DELETE(g_pReplay)
     cShadow::GlobalExit();
 
@@ -445,7 +448,7 @@ static void DebugGame()
         {
             g_pGame->GetEnemyManager()->ForEachEnemy([](cEnemy* OUTPUT pEnemy)
             {
-                pEnemy->TakeDamage(10, ELEMENT_NEUTRAL, coreVector2(0.0f,0.0f), NULL);
+                pEnemy->TakeDamage(CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_BOSS) ? 500 : 10, ELEMENT_NEUTRAL, coreVector2(0.0f,0.0f), NULL);
             });
         }
     }

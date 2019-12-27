@@ -44,21 +44,21 @@ void cRutilusMission::__SetupOwn()
     // 
     STAGE_MAIN
     {
-        STAGE_BOSS(m_Quaternion)
+        STAGE_BOSS(m_Quaternion, {60.0f, 120.0f, 180.0, 240.0f})
     });
 
     // ################################################################
     // 
     STAGE_MAIN
     {
-        STAGE_BOSS(m_Saros)
+        STAGE_BOSS(m_Saros, {60.0f, 120.0f, 180.0, 240.0f})
     });
 
     // ################################################################
     // 
     STAGE_MAIN
     {
-        STAGE_BOSS(m_Messier)
+        STAGE_BOSS(m_Messier, {60.0f, 120.0f, 180.0, 240.0f})
     });
 
     // ################################################################

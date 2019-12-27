@@ -44,21 +44,21 @@ void cGeluMission::__SetupOwn()
     // 
     STAGE_MAIN
     {
-        STAGE_BOSS(m_Tartarus)
+        STAGE_BOSS(m_Tartarus, {60.0f, 120.0f, 180.0, 240.0f})
     });
 
     // ################################################################
     // 
     STAGE_MAIN
     {
-        STAGE_BOSS(m_Phalaris)
+        STAGE_BOSS(m_Phalaris, {60.0f, 120.0f, 180.0, 240.0f})
     });
 
     // ################################################################
     // 
     STAGE_MAIN
     {
-        STAGE_BOSS(m_Chol)
+        STAGE_BOSS(m_Chol, {60.0f, 120.0f, 180.0, 240.0f})
     });
 
     // ################################################################
