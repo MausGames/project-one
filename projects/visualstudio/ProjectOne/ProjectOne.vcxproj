@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -298,7 +298,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\source\game\mission\cMission.cpp" />
-    <ClCompile Include="..\..\..\source\interface\cCombatStats.cpp" />
     <ClCompile Include="..\..\..\source\interface\cCombatText.cpp" />
     <ClCompile Include="..\..\..\source\interface\cInterface.cpp" />
     <ClCompile Include="..\..\..\source\interface\cMsgBox.cpp" />
@@ -413,7 +412,6 @@
     <ClInclude Include="..\..\..\source\game\cShip.h" />
     <ClInclude Include="..\..\..\source\game\cWeapon.h" />
     <ClInclude Include="..\..\..\source\game\mission\cMission.h" />
-    <ClInclude Include="..\..\..\source\interface\cCombatStats.h" />
     <ClInclude Include="..\..\..\source\interface\cCombatText.h" />
     <ClInclude Include="..\..\..\source\interface\cInterface.h" />
     <ClInclude Include="..\..\..\source\interface\cMsgBox.h" />
@@ -497,8 +495,6 @@
     <None Include="..\..\..\executable\data\shaders\menu_animate.vert" />
     <None Include="..\..\..\executable\data\shaders\menu_border.frag" />
     <None Include="..\..\..\executable\data\shaders\menu_border.vert" />
-    <None Include="..\..\..\executable\data\shaders\menu_circle.frag" />
-    <None Include="..\..\..\executable\data\shaders\menu_circle.vert" />
     <None Include="..\..\..\executable\data\shaders\menu_grey.frag" />
     <None Include="..\..\..\executable\data\shaders\menu_inner.frag" />
     <None Include="..\..\..\executable\data\shaders\menu_inner.vert" />

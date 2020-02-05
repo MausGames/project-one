@@ -85,9 +85,8 @@ private:
     cItemManager   m_ItemManager;           // 
     cShieldManager m_ShieldManager;         // 
 
-    cCombatStats m_CombatStats;             // combat stats overlay
-    cCombatText  m_CombatText;              // combat text overlay
-    cInterface   m_Interface;               // interface overlay
+    cCombatText m_CombatText;               // combat text overlay
+    cInterface  m_Interface;                // interface overlay
 
     cRepairEnemy* m_pRepairEnemy;           // 
 
@@ -159,7 +158,6 @@ public:
     inline cChromaManager*  GetChromaManager      ()                       {return &m_ChromaManager;}
     inline cItemManager*    GetItemManager        ()                       {return &m_ItemManager;}
     inline cShieldManager*  GetShieldManager      ()                       {return &m_ShieldManager;}
-    inline cCombatStats*    GetCombatStats        ()                       {return &m_CombatStats;}
     inline cCombatText*     GetCombatText         ()                       {return &m_CombatText;}
     inline cInterface*      GetInterface          ()                       {return &m_Interface;}
     inline cMission*        GetCurMission         ()const                  {ASSERT(m_pCurMission) return m_pCurMission;}

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="..\..\..\source\application.cpp" />
@@ -98,9 +98,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\source\game\boss\0103_cVausBoss.cpp">
       <Filter>game\boss</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\source\interface\cCombatStats.cpp">
-      <Filter>interface</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\visual\cBlur.cpp">
       <Filter>visual</Filter>
@@ -361,9 +358,6 @@
     <ClInclude Include="..\..\..\source\environment\background\cBackground.h">
       <Filter>environment\background</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\source\interface\cCombatStats.h">
-      <Filter>interface</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\source\visual\cBlur.h">
       <Filter>visual</Filter>
     </ClInclude>
@@ -579,12 +573,6 @@
       <Filter>_data\shaders</Filter>
     </None>
     <None Include="..\..\..\executable\data\shaders\menu_border.vert">
-      <Filter>_data\shaders</Filter>
-    </None>
-    <None Include="..\..\..\executable\data\shaders\menu_circle.frag">
-      <Filter>_data\shaders</Filter>
-    </None>
-    <None Include="..\..\..\executable\data\shaders\menu_circle.vert">
       <Filter>_data\shaders</Filter>
     </None>
     <None Include="..\..\..\executable\data\shaders\menu_grey.frag">

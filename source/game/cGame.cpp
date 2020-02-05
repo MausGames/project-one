@@ -226,9 +226,6 @@ void cGame::Move()
 // render the overlay separately
 void cGame::RenderOverlay()
 {
-    // apply combat stats
-    m_CombatStats.Apply();
-
     // render combat text and interface
     m_CombatText.Render();
     m_Interface .Render();
