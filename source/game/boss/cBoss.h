@@ -756,7 +756,7 @@ template <typename F, typename G> void cBoss::_PhaseTicker(const coreUintW iTime
     }
     else
     {
-        ASSERT(s_cast<void*>(nLerpFunc) == s_cast<void*>(LERP_LINEAR))
+        ASSERT(r_cast<void*>(nLerpFunc) == r_cast<void*>(LERP_LINEAR))
         ASSERT(fRate <= FRAMERATE_VALUE)
 
         // 

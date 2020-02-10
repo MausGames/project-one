@@ -157,7 +157,7 @@ public:
     inline const coreVector4& GetArea     ()const {return m_vArea;}
     inline const coreVector2& GetForce    ()const {return m_vForce;}
     inline const coreFloat&   GetInterrupt()const {return m_fInterrupt;}
-    inline       coreFloat    GetFeelTime ()const {return (m_iFeelType <= 1u) ? m_fFeelTime : 0.0f;}
+    inline       coreFloat    GetFeelTime ()const {return (m_iFeelType <= 1u) ? m_fFeelTime.ToFloat() : 0.0f;}
 
     // 
     template <typename F> static FORCE_INLINE void TestCollision(const ePlayerTest eTest, const coreInt32 iType,        F&& nCallback);   // [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit) -> void

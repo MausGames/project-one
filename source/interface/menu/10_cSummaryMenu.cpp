@@ -196,7 +196,7 @@ void cSummaryMenu::Move()
                 STATIC_ASSERT(MENU_SUMMARY_BANNER_ANIMATION >= fSpinTo)
 
                 // 
-                const coreFloat fBlendIn  = m_eState ? fSpinTo : m_fIntroTimer;
+                const coreFloat fBlendIn  = m_eState ? fSpinTo : m_fIntroTimer.ToFloat();
                 const coreFloat fBlendOut = 1.0f - m_fOutroTimer * MENU_SUMMARY_BANNER_SPEED;
 
                 // 

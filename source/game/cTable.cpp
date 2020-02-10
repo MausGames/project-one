@@ -238,7 +238,7 @@ void cScoreTable::AddChain(const coreUint32 iValue)
 void cScoreTable::ReduceCombo()
 {
     // 
-    m_aiComboValue[0] *= 0.5f;
+    m_aiComboValue[0] /= 2u;
 }
 
 

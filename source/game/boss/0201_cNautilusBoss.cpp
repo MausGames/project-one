@@ -75,7 +75,7 @@ void cNautilusBoss::__ResurrectOwn()
     pMission->SetContainerOverdraw(true);
 
     // 
-    g_pWindscreen->EnableInk(0u);
+    g_pWindscreen->EnableInk(false);
 
     // 
     m_aiCounter[CONTAINER_ATTACHED] = 1;

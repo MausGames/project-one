@@ -324,90 +324,6 @@ void cEnemy::_SetParent(cEnemy* OUTPUT pParent)
 
 
 // ****************************************************************
-// destructor
-cEnemySquad::~cEnemySquad()
-{
-    // 
-    this->FreeEnemies();
-}
-
-
-// ****************************************************************
-// 
-void cEnemySquad::FreeEnemies()
-{
-    ASSERT(STATIC_ISVALID(g_pGame))
-
-    // 
-    FOR_EACH(it, m_apEnemy)
-        g_pGame->GetEnemyManager()->FreeEnemy(&(*it));
-
-    // clear memory
-    m_apEnemy.clear();
-}
-
-
-// ****************************************************************
-// 
-void cEnemySquad::ClearEnemies(const coreBool bAnimated)
-{
-    // 
-    FOR_EACH(it, m_apEnemy)
-        (*it)->Kill(bAnimated);
-}
-
-
-// ****************************************************************
-// 
-cEnemy* cEnemySquad::FindEnemy(const coreVector2& vPosition)const
-{
-    // 
-    cEnemy*   pEnemy = NULL;
-    coreFloat fLenSq = FLT_MAX;
-
-    // 
-    this->ForEachEnemy([&](cEnemy* OUTPUT pCurEnemy, const coreUintW i)
-    {
-        // 
-        const coreFloat fCurLenSq = (pCurEnemy->GetPosition().xy() - vPosition).LengthSq();
-        if(fCurLenSq < fLenSq)
-        {
-            // 
-            pEnemy = pCurEnemy;
-            fLenSq = fCurLenSq;
-        }
-    });
-
-    return pEnemy;
-}
-
-
-// ****************************************************************
-// 
-cEnemy* cEnemySquad::FindEnemyRev(const coreVector2& vPosition)const
-{
-    // 
-    cEnemy*   pEnemy = NULL;
-    coreFloat fLenSq = 0.0f;
-
-    // 
-    this->ForEachEnemy([&](cEnemy* OUTPUT pCurEnemy, const coreUintW i)
-    {
-        // 
-        const coreFloat fCurLenSq = (pCurEnemy->GetPosition().xy() - vPosition).LengthSq();
-        if(fCurLenSq > fLenSq)
-        {
-            // 
-            pEnemy = pCurEnemy;
-            fLenSq = fCurLenSq;
-        }
-    });
-
-    return pEnemy;
-}
-
-
-// ****************************************************************
 // constructor
 cEnemyManager::sEnemySetGen::sEnemySetGen()noexcept
 : oEnemyActive (ENEMY_SET_INIT)
@@ -619,6 +535,97 @@ cEnemy* cEnemyManager::FindEnemyRev(const coreVector2& vPosition)const
     });
 
     return pEnemy;
+}
+
+
+// ****************************************************************
+// destructor
+cEnemySquad::~cEnemySquad()
+{
+    // 
+    this->FreeEnemies();
+}
+
+
+// ****************************************************************
+// 
+void cEnemySquad::FreeEnemies()
+{
+    // 
+    FOR_EACH(it, m_apEnemy)
+        cEnemySquad::__GetDefaultEnemyManager()->FreeEnemy(&(*it));
+
+    // clear memory
+    m_apEnemy.clear();
+}
+
+
+// ****************************************************************
+// 
+void cEnemySquad::ClearEnemies(const coreBool bAnimated)
+{
+    // 
+    FOR_EACH(it, m_apEnemy)
+        (*it)->Kill(bAnimated);
+}
+
+
+// ****************************************************************
+// 
+cEnemy* cEnemySquad::FindEnemy(const coreVector2& vPosition)const
+{
+    // 
+    cEnemy*   pEnemy = NULL;
+    coreFloat fLenSq = FLT_MAX;
+
+    // 
+    this->ForEachEnemy([&](cEnemy* OUTPUT pCurEnemy, const coreUintW i)
+    {
+        // 
+        const coreFloat fCurLenSq = (pCurEnemy->GetPosition().xy() - vPosition).LengthSq();
+        if(fCurLenSq < fLenSq)
+        {
+            // 
+            pEnemy = pCurEnemy;
+            fLenSq = fCurLenSq;
+        }
+    });
+
+    return pEnemy;
+}
+
+
+// ****************************************************************
+// 
+cEnemy* cEnemySquad::FindEnemyRev(const coreVector2& vPosition)const
+{
+    // 
+    cEnemy*   pEnemy = NULL;
+    coreFloat fLenSq = 0.0f;
+
+    // 
+    this->ForEachEnemy([&](cEnemy* OUTPUT pCurEnemy, const coreUintW i)
+    {
+        // 
+        const coreFloat fCurLenSq = (pCurEnemy->GetPosition().xy() - vPosition).LengthSq();
+        if(fCurLenSq > fLenSq)
+        {
+            // 
+            pEnemy = pCurEnemy;
+            fLenSq = fCurLenSq;
+        }
+    });
+
+    return pEnemy;
+}
+
+
+// ****************************************************************
+// 
+cEnemyManager* cEnemySquad::__GetDefaultEnemyManager()
+{
+    ASSERT(STATIC_ISVALID(g_pGame))
+    return g_pGame->GetEnemyManager();
 }
 
 

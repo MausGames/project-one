@@ -326,7 +326,7 @@ private:
 
 public:
     cNevoMission()noexcept;
-    ~cNevoMission();
+    ~cNevoMission()final;
 
     DISABLE_COPY(cNevoMission)
     ASSIGN_ID(2, "Nevo")
