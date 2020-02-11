@@ -110,7 +110,10 @@ $SCORE_BONUS = Time Bonus
 $BONUS_MEDAL = Medal Bonus
 $BONUS_SURVIVE = Survive Bonus
 
-$SUMMARY_TOTAL = Total
+$SUMMARY_TOTAL = Stage Total
+$FINISH_TOTAL = Final Score
+
+$THANK_YOU = Thank you for playing!
 
 $BOSS_TITLE_0101 = The Endless Dreamer
 $BOSS_TITLE_0102 = The Gate of Creation

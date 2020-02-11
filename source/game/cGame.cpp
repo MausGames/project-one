@@ -289,15 +289,17 @@ void cGame::LoadMissionIndex(const coreUintW iIndex)
 // 
 void cGame::LoadNextMission()
 {
-    if(m_iCurMissionIndex == m_iNumMissions - 1u)
+    // 
+    this->LoadMissionIndex(m_iCurMissionIndex + 1u);
+
+    // 
+    if(m_pCurMission->GetID() == cNoMission::ID)
     {
-        // TODO
-        ASSERT(false)
-    }
-    else
-    {
+        ASSERT(CONTAINS_FLAG(m_iStatus, GAME_STATUS_OUTRO))
+
         // 
-        this->LoadMissionIndex(m_iCurMissionIndex + 1u);
+        REMOVE_FLAG(m_iStatus, GAME_STATUS_OUTRO)
+        ADD_FLAG   (m_iStatus, GAME_STATUS_FINISHED)
     }
 }
 

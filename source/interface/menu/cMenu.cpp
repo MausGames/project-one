@@ -44,6 +44,7 @@ cMenu::cMenu()noexcept
     this->BindObject(SURFACE_PAUSE,   &m_PauseMenu);
     this->BindObject(SURFACE_SUMMARY, &m_SummaryMenu);
     this->BindObject(SURFACE_DEFEAT,  &m_DefeatMenu);
+    this->BindObject(SURFACE_FINISH,  &m_FinishMenu);
 
     // 
     m_aFrameBuffer[0].AttachTargetBuffer(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGBA8);
@@ -168,7 +169,7 @@ void cMenu::Move()
                 if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_OUTRO))
                 {
                     // 
-                    this->ChangeSurface(SURFACE_SUMMARY, 3.0f);
+                    this->ChangeSurface(SURFACE_SUMMARY, 0.0f);
 
                     // 
                     if(g_pGame->GetOutroType()) m_SummaryMenu.ShowBegin();
@@ -177,11 +178,19 @@ void cMenu::Move()
                 else if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_DEFEATED))
                 {
                     // 
-                    this->ChangeSurface(SURFACE_DEFEAT, 3.0f);
+                    this->ChangeSurface(SURFACE_DEFEAT, 0.0f);
 
                     // 
                     if(g_pGame->GetContinues()) m_DefeatMenu.ShowContinue();
                                            else m_DefeatMenu.ShowGameOver();
+                }
+                else if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_FINISHED))
+                {
+                    // 
+                    this->ChangeSurface(SURFACE_FINISH, 0.0f);
+
+                    // 
+                    m_FinishMenu.ShowThankYou();
                 }
                 else if(g_MenuInput.bPause || Core::System->GetWinFocusLost())
                 {
@@ -368,7 +377,7 @@ void cMenu::Move()
             if(m_SummaryMenu.GetStatus())
             {
                 // 
-                this->ChangeSurface(SURFACE_EMPTY, 3.0f);
+                this->ChangeSurface(SURFACE_EMPTY, 0.0f);
 
                 // 
                 g_pGame->LoadNextMission();
@@ -381,7 +390,7 @@ void cMenu::Move()
             if(m_DefeatMenu.GetStatus() == 1)
             {
                 // 
-                this->ChangeSurface(SURFACE_EMPTY, 1.0f);
+                this->ChangeSurface(SURFACE_EMPTY, 0.0f);
 
                 // 
                 g_pGame->UseContinue();
@@ -389,7 +398,20 @@ void cMenu::Move()
             else if(m_DefeatMenu.GetStatus() == 2)
             {
                 // 
-                this->ChangeSurface(SURFACE_MAIN, 1.0f);
+                this->ShiftSurface(this, SURFACE_MAIN, 1.0f);
+
+                // 
+                this->__EndGame();
+            }
+        }
+        break;
+
+    case SURFACE_FINISH:
+        {
+            if(m_FinishMenu.GetStatus())
+            {
+                // 
+                this->ShiftSurface(this, SURFACE_MAIN, 1.0f);
 
                 // 
                 this->__EndGame();
@@ -405,7 +427,8 @@ void cMenu::Move()
     // 
     Core::Input->ShowCursor((this->GetCurSurface() != SURFACE_EMPTY)   &&
                             (this->GetCurSurface() != SURFACE_SUMMARY) &&
-                            (this->GetCurSurface() != SURFACE_DEFEAT));
+                            (this->GetCurSurface() != SURFACE_DEFEAT)  &&
+                            (this->GetCurSurface() != SURFACE_FINISH));
 
     // 
     if((this->GetCurSurface() == SURFACE_PAUSE) || (this->GetOldSurface() == SURFACE_PAUSE))
@@ -429,7 +452,8 @@ void cMenu::Move()
 coreBool cMenu::IsPaused()const
 {
     return (this->GetCurSurface() != SURFACE_EMPTY)   &&
-           (this->GetCurSurface() != SURFACE_SUMMARY) && STATIC_ISVALID(g_pGame);
+           (this->GetCurSurface() != SURFACE_SUMMARY) &&
+           (this->GetCurSurface() != SURFACE_FINISH)  && STATIC_ISVALID(g_pGame);
 }
 
 coreBool cMenu::IsPausedWithStep()
@@ -680,3 +704,4 @@ UNITY_BUILD
 #include "09_cPauseMenu.cpp"
 #include "10_cSummaryMenu.cpp"
 #include "11_cDefeatMenu.cpp"
+#include "12_cFinishMenu.cpp"

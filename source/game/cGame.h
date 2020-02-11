@@ -31,7 +31,8 @@ enum eGameStatus : coreUint8
     GAME_STATUS_OUTRO    = 0x02u,   // 
     GAME_STATUS_PLAY     = 0x04u,   // 
     GAME_STATUS_LOADING  = 0x08u,   // 
-    GAME_STATUS_DEFEATED = 0x10u    // 
+    GAME_STATUS_DEFEATED = 0x10u,   // 
+    GAME_STATUS_FINISHED = 0x20u    // 
 };
 
 
@@ -47,13 +48,15 @@ static constexpr coreInt32 __GAME_MISSION_LIST_DEFAULT[] =
     cGeluMission   ::ID,
     cCalorMission  ::ID,
     cMuscusMission ::ID,
-    cAterMission   ::ID
+    cAterMission   ::ID,
+    cNoMission     ::ID
 };
 
 static constexpr coreInt32 __GAME_MISSION_LIST_MAIN[] =
 {
     cIntroMission ::ID,
-    cViridoMission::ID
+    cViridoMission::ID,
+    cNoMission    ::ID
 };
 
 #define GAME_MISSION_LIST_DEFAULT (__GAME_MISSION_LIST_DEFAULT), ARRAY_SIZE(__GAME_MISSION_LIST_DEFAULT)

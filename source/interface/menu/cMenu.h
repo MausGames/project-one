@@ -52,6 +52,11 @@
 #define MENU_DEFEAT_BANNER_SPEED      (4.0f)
 #define MENU_DEFEAT_BANNER_SPEED_REV  (1.0f / MENU_DEFEAT_BANNER_SPEED)
 #define MENU_DEFEAT_BANNER_ANIMATION  (2.9f)
+#define MENU_FINISH_DELAY_INTRO       (1.0f)
+#define MENU_FINISH_PARTS             (PLAYERS)
+#define MENU_FINISH_BANNER_SPEED      (4.0f)
+#define MENU_FINISH_BANNER_SPEED_REV  (1.0f / MENU_FINISH_BANNER_SPEED)
+#define MENU_FINISH_BANNER_ANIMATION  (2.9f)
 
 #define MENU_BUTTON             "menu_background_black.png", "menu_background_black.png"
 #define MENU_SWITCHBOX          "default_black.png", "default_black.png"
@@ -89,6 +94,7 @@ enum eSurface : coreUint8
     SURFACE_PAUSE,
     SURFACE_SUMMARY,
     SURFACE_DEFEAT,
+    SURFACE_FINISH,
     SURFACE_MAX,
 
     SURFACE_INTRO_EMPTY = 0u,
@@ -134,7 +140,10 @@ enum eSurface : coreUint8
 
     SURFACE_DEFEAT_CONTINUE = 0u,
     SURFACE_DEFEAT_GAMEOVER,
-    SURFACE_DEFEAT_MAX
+    SURFACE_DEFEAT_MAX,
+
+    SURFACE_FINISH_DEFAULT = 0u,
+    SURFACE_FINISH_MAX
 };
 
 
@@ -647,6 +656,49 @@ public:
 
 
 // ****************************************************************
+// finish menu class
+class cFinishMenu final : public coreMenu
+{
+private:
+    // 
+    enum eFinishState : coreUint8
+    {
+        FINISH_INTRO = 0u,
+        FINISH_WAIT  = 1u,
+        FINISH_OUTRO = 2u
+    };
+
+
+private:
+    coreObject2D m_Background;                   // 
+
+    coreLabel m_ThankYouText;                    // 
+
+    coreLabel m_TotalName;                       // 
+    coreLabel m_TotalValue;                      // 
+    coreLabel m_aTotalPart[MENU_FINISH_PARTS];   // 
+
+    coreFlow m_fIntroTimer;                      // 
+    coreFlow m_fOutroTimer;                      // 
+
+    eFinishState m_eState;                       // 
+
+
+public:
+    cFinishMenu()noexcept;
+
+    DISABLE_COPY(cFinishMenu)
+
+    // render and move the finish menu
+    void Render()final;
+    void Move  ()final;
+
+    // 
+    void ShowThankYou();
+};
+
+
+// ****************************************************************
 // master menu class
 class cMenu final : public coreMenu, public coreResourceRelation
 {
@@ -663,6 +715,7 @@ private:
     cPauseMenu   m_PauseMenu;            // pause menu object
     cSummaryMenu m_SummaryMenu;          // summary menu object
     cDefeatMenu  m_DefeatMenu;           // defeat menu object
+    cFinishMenu  m_FinishMenu;           // finish menu object
 
     cMsgBox  m_MsgBox;                   // message box overlay
     cTooltip m_Tooltip;                  // tooltip overlay
