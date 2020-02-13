@@ -31,6 +31,7 @@
 
 #define CONFIG_INPUT_TYPE(p)       "Input",    PRINT("P%zu_Type",      (p)),           (p)
 #define CONFIG_INPUT_RUMBLE(p)     "Input",    PRINT("P%zu_Rumble",    (p)),           (0)
+#define CONFIG_INPUT_FIRE_MODE(p)  "Input",    PRINT("P%zu_FireMode",  (p)),           (0)
 #define CONFIG_INPUT_MOVE_UP(s)    "Input",    PRINT("S%zu_MoveUp",    (s)),           (CORE_INPUT_KEY(W))
 #define CONFIG_INPUT_MOVE_LEFT(s)  "Input",    PRINT("S%zu_MoveLeft",  (s)),           (CORE_INPUT_KEY(A))
 #define CONFIG_INPUT_MOVE_DOWN(s)  "Input",    PRINT("S%zu_MoveDown",  (s)),           (CORE_INPUT_KEY(S))
@@ -77,8 +78,9 @@ struct sConfig final
 
     struct
     {
-        coreUint8 aiType  [INPUT_TYPES];             // selected input set (each element should have a different value)
-        coreUint8 aiRumble[INPUT_TYPES];             // 
+        coreUint8 aiType    [INPUT_TYPES];           // selected input set (each element should have a different value)
+        coreUint8 aiRumble  [INPUT_TYPES];           // 
+        coreUint8 aiFireMode[INPUT_TYPES];           // 
         struct
         {
             coreInt16 iMoveUp;                       // key for moving up (ignored on joystick/gamepad)

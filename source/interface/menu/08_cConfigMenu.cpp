@@ -192,6 +192,7 @@ cConfigMenu::cConfigMenu()noexcept
 
             __SET_INPUT(oType,      INPUT_TYPE,      0.22f)
             __SET_INPUT(oRumble,    INPUT_RUMBLE,    0.22f)
+            __SET_INPUT(oFireMode,  INPUT_FIREMODE,  0.22f)
             __SET_INPUT(oMoveUp,    INPUT_MOVEUP,    0.22f)
             __SET_INPUT(oMoveLeft,  INPUT_MOVELEFT,  0.22f)
             __SET_INPUT(oMoveDown,  INPUT_MOVEDOWN,  0.22f)
@@ -250,8 +251,11 @@ cConfigMenu::cConfigMenu()noexcept
     for(coreUintW i = 0u; i <= 100u; i += 10u) m_EffectVolume .AddEntry(PRINT("%zu%%", i), i);
     m_AmbientSound .AddEntryLanguage("VALUE_OFF",              0u);
     m_AmbientSound .AddEntryLanguage("VALUE_ON",               1u);
-    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oRumble.AddEntryLanguage("VALUE_OFF", 0u);
-    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oRumble.AddEntryLanguage("VALUE_ON", 10u);
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oRumble  .AddEntryLanguage("VALUE_OFF",       0u);
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oRumble  .AddEntryLanguage("VALUE_ON",        10u);
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oFireMode.AddEntryLanguage("FIREMODE_NORMAL", 0u);
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oFireMode.AddEntryLanguage("FIREMODE_INVERT", 1u);
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oFireMode.AddEntryLanguage("FIREMODE_TOGGLE", 2u);
     for(coreUintW i = 0u; i <= 2u; i += 1u) m_TextSize.AddEntry(PRINT("+%zu", i), i);
     m_GameRotation .AddEntryLanguage("VALUE_OFF",              0u);
     m_GameRotation .AddEntryLanguage("HUDROTATION_LEFT",       1u);
@@ -319,6 +323,7 @@ cConfigMenu::cConfigMenu()noexcept
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;   ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aInput[i].oHeader);
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;   ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aInput[i].oType);
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;   ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aInput[i].oRumble);
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;   ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aInput[i].oFireMode);
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;   ++i)
     {
         for(coreUintW j = 0u; j < INPUT_KEYS; ++j)
@@ -455,11 +460,13 @@ void cConfigMenu::Move()
                 }
 
                 // 
-                if(oInput.oRumble.IsClickedArrow()) g_CurConfig.Input.aiRumble[i] = oInput.oRumble.GetCurEntry().tValue;
+                if(oInput.oRumble  .IsClickedArrow()) g_CurConfig.Input.aiRumble  [i] = oInput.oRumble  .GetCurEntry().tValue;
+                if(oInput.oFireMode.IsClickedArrow()) g_CurConfig.Input.aiFireMode[i] = oInput.oFireMode.GetCurEntry().tValue;
 
                 // 
                 cMenu::UpdateSwitchBox(&oInput.oType);
                 cMenu::UpdateSwitchBox(&oInput.oRumble);
+                cMenu::UpdateSwitchBox(&oInput.oFireMode);
 
                 for(coreUintW j = 0u; j < INPUT_KEYS; ++j)
                 {
@@ -693,8 +700,9 @@ void cConfigMenu::LoadValues()
     // 
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i)
     {
-        m_aInput[i].oType  .SelectValue(g_CurConfig.Input.aiType  [i]);
-        m_aInput[i].oRumble.SelectValue(g_CurConfig.Input.aiRumble[i]);
+        m_aInput[i].oType    .SelectValue(g_CurConfig.Input.aiType    [i]);
+        m_aInput[i].oRumble  .SelectValue(g_CurConfig.Input.aiRumble  [i]);
+        m_aInput[i].oFireMode.SelectValue(g_CurConfig.Input.aiFireMode[i]);
     }
 
     // 
@@ -756,8 +764,9 @@ void cConfigMenu::SaveValues()
     // 
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i)
     {
-        g_CurConfig.Input.aiType  [i] = m_aInput[i].oType  .GetCurEntry().tValue;
-        g_CurConfig.Input.aiRumble[i] = m_aInput[i].oRumble.GetCurEntry().tValue;
+        g_CurConfig.Input.aiType    [i] = m_aInput[i].oType    .GetCurEntry().tValue;
+        g_CurConfig.Input.aiRumble  [i] = m_aInput[i].oRumble  .GetCurEntry().tValue;
+        g_CurConfig.Input.aiFireMode[i] = m_aInput[i].oFireMode.GetCurEntry().tValue;
     }
 
     // 

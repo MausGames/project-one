@@ -168,6 +168,7 @@ enum eEntry : coreUint8
 
     ENTRY_INPUT_TYPE = ENTRY_AUDIO,
     ENTRY_INPUT_RUMBLE,
+    ENTRY_INPUT_FIREMODE,
     ENTRY_INPUT_MOVEUP,
     ENTRY_INPUT_MOVELEFT,
     ENTRY_INPUT_MOVEDOWN,
@@ -440,6 +441,7 @@ private:
         coreLabel       oHeader;
         coreSwitchBoxU8 oType;
         coreSwitchBoxU8 oRumble;
+        coreSwitchBoxU8 oFireMode;
         coreButton      oMoveUp;
         coreButton      oMoveLeft;
         coreButton      oMoveDown;
