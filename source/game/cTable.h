@@ -20,7 +20,7 @@
 #define TABLE_SEGMENTS (SEGMENTS)   // 
 
 #define __TABLE_SCORE_COMBO(x)  (LERP(50.0f, 1.0f, RCP(1.0f + I_TO_F(x) * 0.0002f)))
-#define __TABLE_TIME_CONVERT(x) (I_TO_F(x) * FRAMERATE_TIME)
+#define __TABLE_TIME_CONVERT(x) (I_TO_F(x) * m_fFrameTime)
 
 
 // ****************************************************************
@@ -158,6 +158,8 @@ private:
     coreProtect<coreUint32> m_iTimeTotal;                                       // 
     coreProtect<coreUint32> m_aiTimeMission [TABLE_MISSIONS];                   // total time per mission 
     coreProtect<coreUint32> m_aaiTimeSegment[TABLE_MISSIONS][TABLE_SEGMENTS];   // 
+
+    coreFloat m_fFrameTime;                                                     // 
 
 
 public:

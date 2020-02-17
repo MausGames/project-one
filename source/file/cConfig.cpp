@@ -89,9 +89,12 @@ void LoadConfig()
     g_OldConfig.Game.iTextSize       = Core::Config->GetInt(CONFIG_GAME_TEXT_SIZE);
     g_OldConfig.Game.iGameRotation   = Core::Config->GetInt(CONFIG_GAME_GAME_ROTATION);
     g_OldConfig.Game.iGameScale      = Core::Config->GetInt(CONFIG_GAME_GAME_SCALE);
+    g_OldConfig.Game.iGameSpeed      = Core::Config->GetInt(CONFIG_GAME_GAME_SPEED);
     g_OldConfig.Game.iHudRotation    = Core::Config->GetInt(CONFIG_GAME_HUD_ROTATION);
     g_OldConfig.Game.iHudScale       = Core::Config->GetInt(CONFIG_GAME_HUD_SCALE);
     g_OldConfig.Game.iHudType        = Core::Config->GetInt(CONFIG_GAME_HUD_TYPE);
+    g_OldConfig.Game.iUpdateFreq     = Core::Config->GetInt(CONFIG_GAME_UPDATE_FREQ);
+    g_OldConfig.Game.iMirrorMode     = Core::Config->GetInt(CONFIG_GAME_MIRROR_MODE);
 
     // read graphics values
     g_OldConfig.Graphics.iShadow     = Core::Config->GetInt(CONFIG_GRAPHICS_SHADOW);
@@ -140,9 +143,12 @@ void SaveConfig()
     Core::Config->SetInt(CONFIG_GAME_TEXT_SIZE,      g_OldConfig.Game.iTextSize);
     Core::Config->SetInt(CONFIG_GAME_GAME_ROTATION,  g_OldConfig.Game.iGameRotation);
     Core::Config->SetInt(CONFIG_GAME_GAME_SCALE,     g_OldConfig.Game.iGameScale);
+    Core::Config->SetInt(CONFIG_GAME_GAME_SPEED,     g_OldConfig.Game.iGameSpeed);
     Core::Config->SetInt(CONFIG_GAME_HUD_ROTATION,   g_OldConfig.Game.iHudRotation);
     Core::Config->SetInt(CONFIG_GAME_HUD_SCALE,      g_OldConfig.Game.iHudScale);
     Core::Config->SetInt(CONFIG_GAME_HUD_TYPE,       g_OldConfig.Game.iHudType);
+    Core::Config->SetInt(CONFIG_GAME_UPDATE_FREQ,    g_OldConfig.Game.iUpdateFreq);
+    Core::Config->SetInt(CONFIG_GAME_MIRROR_MODE,    g_OldConfig.Game.iMirrorMode);
 
     // write graphics values
     Core::Config->SetInt(CONFIG_GRAPHICS_SHADOW,     g_OldConfig.Graphics.iShadow);
@@ -227,7 +233,7 @@ void UpdateInput()
             oMap.vMove = Core::Input->GetJoystickRelativeL(iJoystickID);
 
             // restrict movement input to the 8 base directions
-            if(!oMap.vMove.IsNull()) oMap.vMove = AlongStarNormal(oMap.vMove.Normalized());
+            if(!oMap.vMove.IsNull()) oMap.vMove = AlongStarNormal(oMap.vMove.NormalizedUnsafe());
 
             // map action input
             for(coreUintW j = 0u; j < INPUT_KEYS_ACTION; ++j)
@@ -248,7 +254,10 @@ void UpdateInput()
 
             // 
             oMap.vMove = MapToAxis(oMap.vMove, vFinal);
-            oMap.vMove = oMap.vMove.Normalized();
+            oMap.vMove = oMap.vMove.NormalizedUnsafe();
+
+            // 
+            if(g_pPostProcessing->GetSize().x < 0.0f) oMap.vMove = oMap.vMove.InvertedX();
         }
 
         // 

@@ -41,9 +41,12 @@
 #define CONFIG_GAME_TEXT_SIZE      "Game",     "TextSize",                             (0)
 #define CONFIG_GAME_GAME_ROTATION  "Game",     "GameRotation",                         (0)
 #define CONFIG_GAME_GAME_SCALE     "Game",     "GameScale",                            (100)
+#define CONFIG_GAME_GAME_SPEED     "Game",     "GameSpeed",                            (100)
 #define CONFIG_GAME_HUD_ROTATION   "Game",     "HudRotation",                          (0)
 #define CONFIG_GAME_HUD_SCALE      "Game",     "HudScale",                             (100)
 #define CONFIG_GAME_HUD_TYPE       "Game",     "HudType",                              (0)
+#define CONFIG_GAME_UPDATE_FREQ    "Game",     "UpdateFreq",                           (60)
+#define CONFIG_GAME_MIRROR_MODE    "Game",     "MirrorMode",                           (0)
 
 #define INPUT_TYPES         (PLAYERS)                                     // number of input set selections
 #define INPUT_KEYS_MOVE     (4u)                                          // number of move keys per set (left, right, down, up)
@@ -98,9 +101,12 @@ struct sConfig final
         coreUint8 iTextSize;       // 
         coreUint8 iGameRotation;   // 
         coreUint8 iGameScale;      // 
+        coreUint8 iGameSpeed;      // 
         coreUint8 iHudRotation;    // 
         coreUint8 iHudScale;       // 
         coreUint8 iHudType;        // 
+        coreUint8 iUpdateFreq;     // 
+        coreUint8 iMirrorMode;     // 
     }
     Game;
 };

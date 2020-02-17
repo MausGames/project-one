@@ -228,9 +228,8 @@ void cLeviathanBoss::__MoveOwn()
         const coreVector3& vDir  = pPart->GetDirection();
 
         // 
-        const coreVector3 vColor = LERP(pRay->GetColor3(), coreMath::IsNear(vDir.z, 0.0f, LEVIATHAN_RAY_HEIGHT) ? (COLOR_ENERGY_YELLOW * 0.8f) : (COLOR_ENERGY_BLUE * (0.8f - 0.4f * ABS(vDir.z))), 0.3f);
+        const coreVector3 vColor = LERP(coreMath::IsNear(vDir.z, 0.0f, LEVIATHAN_RAY_HEIGHT) ? (COLOR_ENERGY_YELLOW * 0.8f) : (COLOR_ENERGY_BLUE * (0.8f - 0.4f * ABS(vDir.z))), pRay->GetColor3(), FrictionFactor(18.0f));
         const coreFloat   fAlpha = (fNewTime < 1.0f) ? (0.6f * (1.0f - fNewTime)) : 1.0f;
-        STATIC_ASSERT(FRAMERATE_VALUE == 60.0f)
 
         if(!bOverdrive)
         {

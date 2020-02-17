@@ -184,9 +184,12 @@ enum eEntry : coreUint8
     ENTRY_GAME_TEXTSIZE,
     ENTRY_GAME_GAMEROTATION,
     ENTRY_GAME_GAMESCALE,
+    ENTRY_GAME_GAMESPEED,
     ENTRY_GAME_HUDROTATION,
     ENTRY_GAME_HUDSCALE,
     ENTRY_GAME_HUDTYPE,
+    ENTRY_GAME_UPDATEFREQ,
+    ENTRY_GAME_MIRRORMODE,
     ENTRY_MAX
 };
 
@@ -478,11 +481,15 @@ private:
     coreSwitchBoxU8 m_EffectVolume;
     coreSwitchBoxU8 m_AmbientSound;
     coreSwitchBoxU8 m_Language;
+    coreSwitchBoxU8 m_TextSize;
     coreSwitchBoxU8 m_GameRotation;
     coreSwitchBoxU8 m_GameScale;
+    coreSwitchBoxU8 m_GameSpeed;
     coreSwitchBoxU8 m_HudRotation;
     coreSwitchBoxU8 m_HudScale;
     coreSwitchBoxU8 m_HudType;
+    coreSwitchBoxU8 m_UpdateFreq;
+    coreSwitchBoxU8 m_MirrorMode;
 
     sPlayerInput m_aInput[MENU_CONFIG_INPUTS];
     coreButton   m_SwapInput;

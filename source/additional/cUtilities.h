@@ -96,7 +96,7 @@ template <typename T, typename S, typename R> constexpr FUNC_LOCAL T TernaryLerp
 // 
 inline coreFloat FUNC_PURE FrictionFactor(const coreFloat fStrength)
 {
-    return POW(1.0f - fStrength * (1.0f / FRAMERATE_VALUE), Core::System->GetTime() * FRAMERATE_VALUE);
+    return POW(1.0f - fStrength * (1.0f / FRAMERATE_MIN), Core::System->GetTime() * FRAMERATE_MIN);
 }
 
 

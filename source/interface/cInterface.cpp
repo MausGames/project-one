@@ -1,4 +1,4 @@
-﻿///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
@@ -131,6 +131,10 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
 // render the interface
 void cInterface::Render()
 {
+    // 
+    const coreMatrix4 mOldOrtho = Core::Graphics->GetOrtho();
+    if(g_pPostProcessing->GetSize().x < 0.0f) c_cast<coreMatrix4&>(Core::Graphics->GetOrtho()) = coreMatrix4::Scaling(coreVector3(-1.0f,1.0f,1.0f)) * mOldOrtho;
+
     if(m_fAlphaAll)
     {
         for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i)
@@ -195,6 +199,9 @@ void cInterface::Render()
         m_aStoryText[0].Render();
         m_aStoryText[1].Render();
     }
+
+    // 
+    if(g_pPostProcessing->GetSize().x < 0.0f) c_cast<coreMatrix4&>(Core::Graphics->GetOrtho()) = mOldOrtho;
 }
 
 

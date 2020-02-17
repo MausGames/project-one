@@ -26,10 +26,13 @@ STATIC_MEMORY(cEnvironment,    g_pEnvironment)
 STATIC_MEMORY(cMenu,           g_pMenu)
 STATIC_MEMORY(cGame,           g_pGame)
 
-static coreUint64 m_iOldPerfTime = 0u;   // last measured high-precision time value
-static void LockFramerate();             // lock frame rate and override frame time
-static void ReshapeGame();               // reshape and resize game
-static void DebugGame();                 // debug and test game
+static coreUint64 m_iOldPerfTime  = 0u;    // last measured high-precision time value
+static coreDouble m_dLogicalTime  = 0.0;   // logical frame time (simulation rate)
+static coreDouble m_dPhysicalTime = 0.0;   // physical frame time (display rate)
+
+static void LockFramerate();               // lock frame rate and override frame time
+static void ReshapeGame();                 // reshape and resize game
+static void DebugGame();                   // debug and test game
 
 
 // ****************************************************************
@@ -46,15 +49,15 @@ void CoreApp::Init()
     Core::Audio->SetListener(coreVector3(0.0f,0.0f,10.0f), coreVector3(0.0f,0.0f,0.0f),
                              coreVector3(0.0f,0.0f,-1.0f), coreVector3(0.0f,1.0f,0.0f));
 
-    // init system properties
-    InitResolution(Core::System->GetResolution());
-    InitFramerate();
-
     // load configuration
     LoadConfig();
 
     // load available music files
     g_MusicPlayer.AddMusicFolder("data/music", "*.ogg");
+
+    // init system properties
+    InitResolution(Core::System->GetResolution());
+    InitFramerate();
 
     // create and init main components
     cShadow::GlobalInit();
@@ -188,7 +191,7 @@ void CoreApp::Move()
     if(Core::System->GetWinSizeChanged()) ReshapeGame();
 
     // lock frame rate and override frame time
-    if(STATIC_ISVALID(g_pGame)) LockFramerate();
+    LockFramerate();
 
     Core::Debug->MeasureStart("Move");
     {
@@ -242,27 +245,25 @@ void InitResolution(const coreVector2& vResolution)
 // init frame rate properties
 void InitFramerate()
 {
-    if(!Core::Debug->IsEnabled())
-    {
-        SDL_Window* pWindow = Core::System->GetWindow();
+    // calculate logical and physical frame time
+    if(!STATIC_ISVALID(g_pGame)) m_dLogicalTime  = (1.0   / coreDouble(CLAMP(g_CurConfig.Game.iUpdateFreq, FRAMERATE_MIN, FRAMERATE_MAX)));
+                                 m_dPhysicalTime = (100.0 / coreDouble(MAX  (g_CurConfig.Game.iGameSpeed,  1u))) * m_dLogicalTime;
 
+    if(Core::Config->GetBool(CORE_CONFIG_SYSTEM_VSYNC))
+    {
         // get current display mode
         SDL_DisplayMode oMode = {};
-        SDL_GetWindowDisplayMode(pWindow, &oMode);
+        SDL_GetWindowDisplayMode(Core::System->GetWindow(), &oMode);
 
-        // check for valid refresh rate
-        if(oMode.refresh_rate != F_TO_SI(FRAMERATE_VALUE))
+        // override vertical synchronization
+        if(oMode.refresh_rate == F_TO_SI(1.0 / m_dPhysicalTime))
         {
-            // try to override refresh rate
-            oMode.refresh_rate = F_TO_SI(FRAMERATE_VALUE);
-            SDL_SetWindowDisplayMode(pWindow, &oMode);
-            SDL_GetWindowDisplayMode(pWindow, &oMode);
-
-            Core::Log->Warning("Refresh rate overridden (%d)", oMode.refresh_rate);
+            if(SDL_GL_SetSwapInterval(-1)) SDL_GL_SetSwapInterval(1);
         }
-
-        // force vertical synchronization
-        if(SDL_GL_SetSwapInterval(-1)) SDL_GL_SetSwapInterval(1);
+        else
+        {
+            SDL_GL_SetSwapInterval(0);
+        }
     }
 }
 
@@ -274,20 +275,20 @@ static void LockFramerate()
     if(!Core::Debug->IsEnabled())
     {
         coreUint64 iNewPerfTime;
-        coreFloat  fDifference;
+        coreDouble dDifference;
 
         // measure and calculate current frame time
         const auto nMeasureFunc = [&]()
         {
             iNewPerfTime = SDL_GetPerformanceCounter();
-            fDifference  = coreFloat(coreDouble(iNewPerfTime - m_iOldPerfTime) * Core::System->GetPerfFrequency());
+            dDifference  = coreDouble(iNewPerfTime - m_iOldPerfTime) * Core::System->GetPerfFrequency();
         };
 
         // spin as long as frame time is too low
-        for(nMeasureFunc(); fDifference < FRAMERATE_TIME; nMeasureFunc())
+        for(nMeasureFunc(); dDifference < m_dPhysicalTime; nMeasureFunc())
         {
             // sleep (once) to reduce overhead
-            const coreUint32 iSleep = MAX(F_TO_UI((FRAMERATE_TIME - fDifference) * 1000.0f), 1u) - 1u;
+            const coreUint32 iSleep = F_TO_UI((m_dPhysicalTime - dDifference) * 1000.0);
             if(iSleep) SDL_Delay(iSleep);
 
         #if defined(_CORE_SSE_)
@@ -303,7 +304,7 @@ static void LockFramerate()
     }
 
     // override frame time
-    if(Core::System->GetTime()) c_cast<coreFloat&>(Core::System->GetTime()) = FRAMERATE_TIME;
+    if(Core::System->GetTime()) c_cast<coreFloat&>(Core::System->GetTime()) = coreFloat(m_dLogicalTime);
 }
 
 

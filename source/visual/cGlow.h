@@ -16,8 +16,8 @@
 
 // ****************************************************************
 // glow definitions
-#define GLOW_SCALE_FACTOR        (0.5f)   // frame buffer resolution factor
-#define GLOW_ATTENUATION_FACTOR (26.0f)   // blur shader attenuation (higher value = weaker glow)
+#define GLOW_SCALE_FACTOR       (0.5f)    // frame buffer resolution factor
+#define GLOW_ATTENUATION_FACTOR (0.43f)   // blur shader attenuation (higher value = weaker glow)
 
 
 // ****************************************************************

@@ -261,6 +261,7 @@ void cScoreTable::TransferChain()
 // ****************************************************************
 // constructor
 cTimeTable::cTimeTable()noexcept
+: m_fFrameTime (Core::System->GetTime())
 {
     // 
     this->Reset();
@@ -275,7 +276,7 @@ void cTimeTable::Update()
 
     // 
     if(!Core::System->GetTime()) return;
-    ASSERT(Core::System->GetTime() == FRAMERATE_TIME)
+    ASSERT(Core::System->GetTime() == m_fFrameTime)
 
     // 
     m_iTimeEvent += 1u;
@@ -308,7 +309,7 @@ void cTimeTable::Reset()
     m_iTimeEvent = 0u;
     m_iTimeTotal = 0u;
     for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) m_aiTimeMission[j] = 0u;
-    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) for(coreUintW i = 0u; i < TABLE_SEGMENTS; ++i) m_aaiTimeSegment[j][i] = MISSION_SEGMENT_IS_BOSS(i) ? F_TO_UI(-INTERFACE_BANNER_DURATION_BOSS * FRAMERATE_VALUE) : 0u;
+    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) for(coreUintW i = 0u; i < TABLE_SEGMENTS; ++i) m_aaiTimeSegment[j][i] = MISSION_SEGMENT_IS_BOSS(i) ? F_TO_UI(-INTERFACE_BANNER_DURATION_BOSS * RCP(m_fFrameTime)) : 0u;
 }
 
 

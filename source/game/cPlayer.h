@@ -20,17 +20,17 @@
 
 // ****************************************************************
 // player definitions
-#define PLAYER_WEAPONS            (1u)                // number of weapons a player can carry
-#define PLAYER_LIVES              (LIVES)             // 
-#define PLAYER_SHIELD             (SHIELD)            // 
-#define PLAYER_COLLISION_MIN      (0.5f)              // 
-#define PLAYER_WIND_SIZE          (4.5f)              // 
-#define PLAYER_BUBBLE_SIZE        (6.0f)              // 
-#define PLAYER_ROLL_SPEED         (1.0f)              // 
-#define PLAYER_ROLL_COOLDOWN      (FRAMERATE_VALUE)   // (ship is vulnerable for a single frame) 
-#define PLAYER_FEEL_TIME          (3.0f)              // 
-#define PLAYER_FEEL_TIME_CONTINUE (5.0f)              // 
-#define PLAYER_INTERRUPT          (3.0f)              // 
+#define PLAYER_WEAPONS            (1u)              // number of weapons a player can carry
+#define PLAYER_LIVES              (LIVES)           // 
+#define PLAYER_SHIELD             (SHIELD)          // 
+#define PLAYER_COLLISION_MIN      (0.3f)            // 
+#define PLAYER_WIND_SIZE          (4.5f)            // 
+#define PLAYER_BUBBLE_SIZE        (6.0f)            // 
+#define PLAYER_ROLL_SPEED         (1.0f)            // 
+#define PLAYER_ROLL_COOLDOWN      (FRAMERATE_MAX)   // (ship is vulnerable for a single frame) 
+#define PLAYER_FEEL_TIME          (3.0f)            // 
+#define PLAYER_FEEL_TIME_CONTINUE (5.0f)            // 
+#define PLAYER_INTERRUPT          (3.0f)            // 
 
 #define PLAYER_SHIP_ATK (0u)        // 
 #define PLAYER_SHIP_DEF (1u)        // 
