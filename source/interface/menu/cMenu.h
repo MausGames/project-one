@@ -494,6 +494,9 @@ private:
     sPlayerInput m_aInput[MENU_CONFIG_INPUTS];
     coreButton   m_SwapInput;
 
+    coreUintW                          m_iCurMonitorIndex;
+    coreLookup<coreUintW, std::string> m_asCurResolution;
+
 
 public:
     cConfigMenu()noexcept;

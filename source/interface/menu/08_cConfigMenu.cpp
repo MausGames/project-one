@@ -12,7 +12,8 @@
 // ****************************************************************
 // constructor
 cConfigMenu::cConfigMenu()noexcept
-: coreMenu (SURFACE_CONFIG_MAX, SURFACE_CONFIG_VIDEO)
+: coreMenu           (SURFACE_CONFIG_MAX, SURFACE_CONFIG_VIDEO)
+, m_iCurMonitorIndex (Core::System->GetDisplayIndex())
 {
     // create menu objects
     m_Background.DefineTexture(0u, "menu_background_black.png");
@@ -919,7 +920,7 @@ void cConfigMenu::__LoadMonitors()
 void cConfigMenu::__LoadResolutions(const coreUintW iMonitorIndex)
 {
     // 
-    const std::string sOldEntry = m_Resolution.GetNumEntries() ? (*m_Resolution.GetCurEntry().psText) : "";
+    m_asCurResolution[m_iCurMonitorIndex] = m_Resolution.GetNumEntries() ? std::move(*m_Resolution.GetCurEntry().psText) : "";
     m_Resolution.ClearEntries();
 
     // 
@@ -927,7 +928,10 @@ void cConfigMenu::__LoadResolutions(const coreUintW iMonitorIndex)
     for(coreUintW i = avResolutionList.size(); i--; ) m_Resolution.AddEntry(PRINT("%.0f x %.0f", avResolutionList[i].x, avResolutionList[i].y), i);
 
     // 
-    if(!m_Resolution.SelectText(sOldEntry.c_str())) m_Resolution.SelectLast();
+    if(!m_Resolution.SelectText(m_asCurResolution[iMonitorIndex].c_str())) m_Resolution.SelectLast();
+
+    // 
+    m_iCurMonitorIndex = iMonitorIndex;
 }
 
 
