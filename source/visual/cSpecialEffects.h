@@ -43,6 +43,7 @@
 #define SPECIAL_BLAST_SMALL       (2.0f), (3.5f)
 #define SPECIAL_BLAST_BIG         (4.0f), (3.5f)
 #define SPECIAL_RUMBLE_DEFAULT    (0.4f), (120u)
+#define SPECIAL_SHAKE_TINY        (0.4f)
 #define SPECIAL_SHAKE_SMALL       (0.6f)
 #define SPECIAL_SHAKE_BIG         (1.2f)
 
@@ -82,6 +83,7 @@ private:
 
     coreTimer m_ShakeTimer;                                 // 
     coreFloat m_fShakeStrength;                             // current shake strength (decreasing)
+    coreUint8 m_iShakeCount;                                // 
 
     coreBool m_bActive;                                     // 
 
@@ -129,7 +131,7 @@ public:
     void PlaySound(const coreVector3& vPosition, const coreFloat fVolume, const eSoundEffect eSoundIndex);
 
     // 
-    void RumblePlayer(const cPlayer* pPlayer, const coreFloat fStrength, const coreUint32 iLength);
+    void RumblePlayer(const cPlayer* pPlayer, const coreFloat fStrength, const coreUint32 iLengthMs);
 
     // 
     void ShakeScreen(const coreFloat fStrength);

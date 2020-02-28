@@ -23,6 +23,7 @@ cSpecialEffects::cSpecialEffects()noexcept
 , m_eSoundGuard      (SOUND_FFFF)
 , m_ShakeTimer       (coreTimer(1.0f, 30.0f, 0u))
 , m_fShakeStrength   (0.0f)
+, m_iShakeCount      (0u)
 , m_bActive          (false)
 {
     // 
@@ -186,12 +187,12 @@ void cSpecialEffects::Move()
     // 
     if(m_fShakeStrength && m_ShakeTimer.Update(1.0f))
     {
-        // decrease shake strength (# without delta-time)
-        m_fShakeStrength = MAX(m_fShakeStrength - 0.07f, 0.0f);
+        // update shake animation
+        m_fShakeStrength = MAX(m_fShakeStrength - 0.07f, 0.0f);   // # without delta-time
+        m_iShakeCount    = m_iShakeCount + 1u;
 
         // 
-        const coreVector2 vShakeDir = (coreVector2(0.0f,1.0f).InvertedX() * 0.7f + 0.3f).Processed(ABS);   // TODO 
-        g_pPostProcessing->SetPosition(coreVector2::Rand(-vShakeDir.x, vShakeDir.x, -vShakeDir.y, vShakeDir.y).Normalized() * (m_fShakeStrength * 0.01f));
+        g_pPostProcessing->SetPosition(g_vHudDirection.InvertedX() * (m_fShakeStrength * 0.01f * ((m_iShakeCount & 0x01u) ? 1.0f : -1.0f)));
     }
 }
 
@@ -578,8 +579,9 @@ void cSpecialEffects::PlaySound(const coreVector3& vPosition, const coreFloat fV
 
 // ****************************************************************
 // 
-void cSpecialEffects::RumblePlayer(const cPlayer* pPlayer, const coreFloat fStrength, const coreUint32 iLength)
+void cSpecialEffects::RumblePlayer(const cPlayer* pPlayer, const coreFloat fStrength, const coreUint32 iLengthMs)
 {
+    ASSERT(fStrength && iLengthMs)
     if(!STATIC_ISVALID(g_pGame)) return;
 
     // loop through all active players
@@ -598,7 +600,7 @@ void cSpecialEffects::RumblePlayer(const cPlayer* pPlayer, const coreFloat fStre
             if((pCurInput == &g_TotalInput) || (P_TO_UI(pCurInput - g_aGameInput) < INPUT_SETS))
             {
                 // create rumble effect
-                Core::Input->RumbleJoystick(iJoystickID, fStrength * (I_TO_F(iRumble) * 0.1f), iLength);
+                Core::Input->RumbleJoystick(iJoystickID, CLAMP(fStrength * I_TO_F(iRumble) * 0.1f, 0.0f, 1.0f), iLengthMs);
             }
         }
     });
@@ -609,11 +611,15 @@ void cSpecialEffects::RumblePlayer(const cPlayer* pPlayer, const coreFloat fStre
 // 
 void cSpecialEffects::ShakeScreen(const coreFloat fStrength)
 {
-    // 
-    m_fShakeStrength = fStrength;
+    if(m_fShakeStrength < fStrength)
+    {
+        // 
+        m_fShakeStrength = fStrength;
+        m_iShakeCount    = 0u;
 
-    // 
-    this->RumblePlayer(NULL, fStrength * 0.5f, 250u);
+        // 
+        this->RumblePlayer(NULL, fStrength * 0.5f, 250u);
+    }
 }
 
 
