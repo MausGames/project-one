@@ -19,7 +19,7 @@ void FragmentMain()
 
     // move texture coordinates
     if(any(bvec4(lessThan(v2Distortion, vec2(127.35/255.0)), greaterThan(v2Distortion, vec2(127.65/255.0)))))
-        v2TexCoord += (v2Distortion * 2.0 - 1.0) * vec2(-0.5, 0.5);
+        v2TexCoord += (v2Distortion * 2.0 - 1.0) * vec2(-0.4, 0.4);
 
 #endif
 

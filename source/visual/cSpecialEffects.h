@@ -18,6 +18,7 @@
 // TODO: adjust rumble to be not toooo strong (and not be annoying)
 // TODO: remove object_ring.md3 if not required anymore (+file)
 // TODO: remove effect_energy_ring_program if not required anymore (+file)
+// TODO: think about merging *Color and *Dark functions, as they are mostly identical
 
 
 // ****************************************************************
@@ -85,6 +86,8 @@ private:
     coreFloat m_fShakeStrength;                             // current shake strength (decreasing)
     coreUint8 m_iShakeCount;                                // 
 
+    coreUint8 m_iBreakupCount;                              // 
+
     coreBool m_bActive;                                     // 
 
 
@@ -119,6 +122,10 @@ public:
     void CreateWhirlDark (const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum);
 
     // 
+    void CreateBreakupColor(const cLodObject* pObject, const coreFloat fScale, const coreUintW iStep, const coreVector3& vColor);
+    void CreateBreakupDark (const cLodObject* pObject, const coreFloat fScale, const coreUintW iStep);
+
+    // 
     coreFloat CreateLightning(const coreVector2& vPosFrom, const coreVector2& vPosTo,                              const coreFloat fWidth, const coreVector3& vColor, const coreVector2& vTexSizeFactor, const coreFloat fTexOffset);
     void      CreateLightning(coreObject3D*      pOwner,   const coreVector2& vDirection, const coreFloat fLength, const coreFloat fWidth, const coreVector3& vColor, const coreVector2& vTexSizeFactor, const coreFloat fTexOffset);
 
@@ -150,6 +157,12 @@ public:
     void MacroEruptionColorBig           (const coreVector3& vPosition, const coreVector2& vDirection, const coreVector3& vColor);
     void MacroEruptionDarkSmall          (const coreVector3& vPosition, const coreVector2& vDirection);
     void MacroEruptionDarkBig            (const coreVector3& vPosition, const coreVector2& vDirection);
+    void MacroDestructionColor           (const cLodObject*  pObject,   const coreVector3& vColor);
+    void MacroDestructionDark            (const cLodObject*  pObject);
+
+
+private:
+    coreVector2 __GetBreakupSide();
 };
 
 

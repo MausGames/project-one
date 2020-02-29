@@ -24,6 +24,7 @@ cSpecialEffects::cSpecialEffects()noexcept
 , m_ShakeTimer       (coreTimer(1.0f, 30.0f, 0u))
 , m_fShakeStrength   (0.0f)
 , m_iShakeCount      (0u)
+, m_iBreakupCount    (0u)
 , m_bActive          (false)
 {
     // 
@@ -213,7 +214,7 @@ void cSpecialEffects::CreateSplashColor(const coreVector3& vPosition, const core
 
         pParticle->SetPositionRel(vPosition + vDir,           vDir * Core::Rand->Float(fScale));
         pParticle->SetScaleAbs   (3.5f,                       1.0f);
-        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI), Core::Rand->Float(-PI, PI));
+        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI), PI);
         pParticle->SetColor4Abs  (coreVector4(vColor, 1.0f),  coreVector4(vColor, 0.0f));
         pParticle->SetSpeed      (1.5f * Core::Rand->Float(0.7f, 1.3f));
     });
@@ -233,7 +234,7 @@ void cSpecialEffects::CreateSplashDark(const coreVector3& vPosition, const coreF
 
         pParticle->SetPositionRel(vPosition + vDir,                 vDir * Core::Rand->Float(fScale));
         pParticle->SetScaleAbs   (3.5f,                             1.0f);
-        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),       Core::Rand->Float(-PI, PI));
+        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),       PI);
         pParticle->SetColor4Abs  (coreVector4(0.0f,0.0f,0.0f,1.0f), coreVector4(0.0f,0.0f,0.0f,0.0f));
         pParticle->SetSpeed      (1.5f * Core::Rand->Float(0.7f, 1.3f));
     });
@@ -253,7 +254,7 @@ void cSpecialEffects::CreateSplashSmoke(const coreVector3& vPosition, const core
 
         pParticle->SetPositionRel(vPosition + vDir,           vDir * Core::Rand->Float(fScale));
         pParticle->SetScaleAbs   (3.0f,                       12.5f);
-        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI), Core::Rand->Float(-PI*0.1f, PI*0.1f));
+        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI), PI*0.1f);
         pParticle->SetColor4Abs  (coreVector4(vColor, 1.0f),  coreVector4(vColor, 0.0f));
         pParticle->SetSpeed      (0.7f * Core::Rand->Float(0.9f, 1.1f));
     });
@@ -273,7 +274,7 @@ void cSpecialEffects::CreateSplashFire(const coreVector3& vPosition, const coreF
 
         pParticle->SetPositionRel(vPosition + vDir,                 vDir * Core::Rand->Float(fScale));
         pParticle->SetScaleAbs   (4.5f,                             11.5f);
-        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),       Core::Rand->Float(-PI*0.5f, PI*0.5f));
+        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),       PI*0.5f);
         pParticle->SetColor4Abs  (coreVector4(vColor*0.926f, 1.0f), coreVector4(vColor*0.926f, 0.0f));
         pParticle->SetSpeed      (1.4f * Core::Rand->Float(0.9f, 1.1f));
     });
@@ -298,7 +299,7 @@ void cSpecialEffects::CreateBlowColor(const coreVector3& vPosition, const coreVe
 
         pParticle->SetPositionRel(vPosition + vDir,           vDir * (Core::Rand->Float(fScale) * 0.25f) + vDirection * (Core::Rand->Float(fScale) * 0.75f));
         pParticle->SetScaleAbs   (3.5f,                       1.0f);
-        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI), Core::Rand->Float(-PI, PI));
+        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI), PI);
         pParticle->SetColor4Abs  (coreVector4(vColor, 1.0f),  coreVector4(vColor, 0.0f));
         pParticle->SetSpeed      (1.5f * Core::Rand->Float(0.7f, 1.3f));
     });
@@ -320,7 +321,7 @@ void cSpecialEffects::CreateBlowDark(const coreVector3& vPosition, const coreVec
 
         pParticle->SetPositionRel(vPosition + vDir,                 vDir * (Core::Rand->Float(fScale) * 0.25f) + vDirection * (Core::Rand->Float(fScale) * 0.75f));
         pParticle->SetScaleAbs   (3.5f,                             1.0f);
-        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),       Core::Rand->Float(-PI, PI));
+        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),       PI);
         pParticle->SetColor4Abs  (coreVector4(0.0f,0.0f,0.0f,1.0f), coreVector4(0.0f,0.0f,0.0f,0.0f));
         pParticle->SetSpeed      (1.5f * Core::Rand->Float(0.7f, 1.3f));
     });
@@ -343,7 +344,7 @@ void cSpecialEffects::CreateChargeColor(const coreVector3& vPosition, const core
 
         pParticle->SetPositionAbs(vPosition + vDir * Core::Rand->Float(fScale), vPosition + vDir);
         pParticle->SetScaleAbs   (3.5f,                                         1.0f);
-        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),                   Core::Rand->Float(-PI, PI));
+        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),                   PI);
         pParticle->SetColor4Abs  (coreVector4(vColor, 1.0f),                    coreVector4(vColor, 0.0f));
         pParticle->SetSpeed      (1.5f * Core::Rand->Float(0.7f, 1.3f));
     });
@@ -363,7 +364,7 @@ void cSpecialEffects::CreateChargeDark(const coreVector3& vPosition, const coreF
 
         pParticle->SetPositionAbs(vPosition + vDir * Core::Rand->Float(fScale), vPosition + vDir);
         pParticle->SetScaleAbs   (3.5f,                                         1.0f);
-        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),                   Core::Rand->Float(-PI, PI));
+        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),                   PI);
         pParticle->SetColor4Abs  (coreVector4(0.0f,0.0f,0.0f,1.0f),             coreVector4(0.0f,0.0f,0.0f,0.0f));
         pParticle->SetSpeed      (1.5f * Core::Rand->Float(0.7f, 1.3f));
     });
@@ -385,10 +386,10 @@ void cSpecialEffects::CreateWhirlColor(const coreVector3& vPosition, const coreF
         const coreVector3 vDir  = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i++)), 0.0f);
         const coreFloat   fRand = Core::Rand->Float(fScale);
 
-        pParticle->SetPositionAbs(vPosition + vDir * fRand,         vPosition + vDir * (fScale-fRand));
-        pParticle->SetScaleAbs   (3.5f,                             1.0f);
-        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),       Core::Rand->Float(-PI, PI));
-        pParticle->SetColor4Abs  (coreVector4(vColor, 1.0f),        coreVector4(vColor, 0.0f));
+        pParticle->SetPositionAbs(vPosition + vDir * fRand,   vPosition + vDir * (fScale-fRand));
+        pParticle->SetScaleAbs   (3.5f,                       1.0f);
+        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI), PI);
+        pParticle->SetColor4Abs  (coreVector4(vColor, 1.0f),  coreVector4(vColor, 0.0f));
         pParticle->SetSpeed      (1.7f * Core::Rand->Float(0.9f, 1.1f));
     });
 }
@@ -408,9 +409,76 @@ void cSpecialEffects::CreateWhirlDark(const coreVector3& vPosition, const coreFl
 
         pParticle->SetPositionAbs(vPosition + vDir * fRand,         vPosition + vDir * (fScale-fRand));
         pParticle->SetScaleAbs   (3.5f,                             1.0f);
-        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),       Core::Rand->Float(-PI, PI));
+        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),       PI);
         pParticle->SetColor4Abs  (coreVector4(0.0f,0.0f,0.0f,1.0f), coreVector4(0.0f,0.0f,0.0f,0.0f));
         pParticle->SetSpeed      (1.7f * Core::Rand->Float(0.9f, 1.1f));
+    });
+}
+
+
+// ****************************************************************
+// 
+void cSpecialEffects::CreateBreakupColor(const cLodObject* pObject, const coreFloat fScale, const coreUintW iStep, const coreVector3& vColor)
+{
+    ASSERT(pObject)
+
+    // 
+    const coreModel*   pModel           = pObject->GetModelLow().GetResource();
+    const coreVector3* pvVertexPosition = pModel->GetVertexPosition();
+    ASSERT(pvVertexPosition)
+
+    // 
+    const coreVector3 vPosition = pObject->GetPosition();
+    const coreVector3 vSize     = pObject->GetSize();
+    const coreVector4 vRotation = pObject->GetRotation();
+    const coreVector2 vCenter   = vRotation.QuatApply(pModel->GetWeightedCenter() * vSize).xy();
+    const coreVector2 vSide     = this->__GetBreakupSide();
+
+    // 
+    coreUintW i = 0u;
+    m_ParticleColor.GetDefaultEffect()->CreateParticle(pModel->GetNumVertices() / iStep, [&](coreParticle* OUTPUT pParticle)
+    {
+        const coreVector3 vVertex = vRotation.QuatApply(pvVertexPosition[i] * vSize);
+        const coreVector3 vDir    = coreVector3(vSide * SIGN(coreVector2::Dot(vVertex.xy() - vCenter, vSide)), 0.0f);
+        i += iStep;
+
+        pParticle->SetPositionRel(vPosition + vVertex,        vDir * Core::Rand->Float(fScale));
+        pParticle->SetScaleAbs   (3.5f,                       1.0f);
+        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI), PI);
+        pParticle->SetColor4Abs  (coreVector4(vColor, 1.0f),  coreVector4(vColor, 0.0f));
+        pParticle->SetSpeed      (1.5f * Core::Rand->Float(0.7f, 1.3f));
+    });
+}
+
+void cSpecialEffects::CreateBreakupDark(const cLodObject* pObject, const coreFloat fScale, const coreUintW iStep)
+{
+    ASSERT(pObject)
+
+    // 
+    const coreModel*   pModel           = pObject->GetModelLow().GetResource();
+    const coreVector3* pvVertexPosition = pModel->GetVertexPosition();
+    ASSERT(pvVertexPosition)
+
+    // 
+    const coreVector3 vPosition = pObject->GetPosition();
+    const coreVector3 vSize     = pObject->GetSize();
+    const coreVector4 vRotation = pObject->GetRotation();
+    const coreVector2 vCenter   = vRotation.QuatApply(pModel->GetWeightedCenter() * vSize).xy();
+    const coreVector2 vSide     = this->__GetBreakupSide();
+
+    // 
+    coreUintW i = 0u;
+    m_ParticleDark.GetDefaultEffect()->CreateParticle(pModel->GetNumVertices() / iStep, [&](coreParticle* OUTPUT pParticle)
+    {
+        const coreVector3 vVertex = vRotation.QuatApply(pvVertexPosition[i] * vSize);
+        const coreVector3 vDir    = coreVector3(vSide * SIGN(coreVector2::Dot(vVertex.xy() - vCenter, vSide)), 0.0f);
+        i += iStep;
+
+        pParticle->SetPositionRel(vPosition + vVertex,              vDir * Core::Rand->Float(fScale));
+        pParticle->SetScaleAbs   (3.5f,                             1.0f);
+        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),       PI);
+        pParticle->SetColor4Abs  (coreVector4(0.0f,0.0f,0.0f,1.0f), coreVector4(0.0f,0.0f,0.0f,0.0f));
+        pParticle->SetSpeed      (1.5f * Core::Rand->Float(0.7f, 1.3f));
     });
 }
 
@@ -735,4 +803,49 @@ void cSpecialEffects::MacroEruptionDarkBig(const coreVector3& vPosition, const c
     g_pDistortion->CreateBurst   (vPosition,             vDirection,        DISTORTION_BURST_BIG);
     this         ->CreateBlowDark(vPosition, coreVector3(vDirection, 0.0f), SPECIAL_BLOW_BIG);
     this         ->PlaySound     (vPosition, 1.0f, SOUND_EXPLOSION_ENERGY_BIG);
+}
+
+
+// ****************************************************************
+// 
+void cSpecialEffects::MacroDestructionColor(const cLodObject* pObject, const coreVector3& vColor)
+{
+    ASSERT(pObject)
+
+    // 
+    const coreVector3 vPosition = pObject->GetPosition();
+    const coreFloat   fPower    = SQRT(MAX(pObject->GetCollisionRadius() / 3.0f - 0.4f, 1.0f));
+
+    // 
+    g_pDistortion->CreateWave        (vPosition, 2.5f  * fPower, 3.0f);
+    this         ->CreateBreakupColor(pObject,   52.0f * fPower, F_TO_UI(32.0f * RCP(fPower)), vColor);
+    this         ->CreateSplashFire  (vPosition, 5.0f  * fPower, F_TO_UI(7.0f  *    (fPower)), vColor);
+    this         ->PlaySound         (vPosition, 1.0f, SOUND_EXPLOSION_PHYSICAL_SMALL);
+    this         ->ShakeScreen       (SPECIAL_SHAKE_TINY * fPower);
+}
+
+void cSpecialEffects::MacroDestructionDark(const cLodObject* pObject)
+{
+    ASSERT(pObject)
+
+    // 
+    const coreVector3 vPosition = pObject->GetPosition();
+    const coreFloat   fPower    = SQRT(MAX(pObject->GetCollisionRadius() / 3.0f - 0.4f, 1.0f));
+
+    // (# more particles than color) 
+    g_pDistortion->CreateWave       (vPosition, 2.5f  * fPower, 3.0f);
+    this         ->CreateBreakupDark(pObject,   52.0f * fPower, F_TO_UI(30.0f * RCP(fPower)));
+    this         ->CreateSplashFire (vPosition, 5.0f  * fPower, F_TO_UI(14.0f *    (fPower)), coreVector3(0.22f,0.22f,0.22f));
+    this         ->PlaySound        (vPosition, 1.0f, SOUND_EXPLOSION_PHYSICAL_SMALL);
+    this         ->ShakeScreen      (SPECIAL_SHAKE_TINY * fPower);
+}
+
+
+// ****************************************************************
+// 
+coreVector2 cSpecialEffects::__GetBreakupSide()
+{
+    // 
+    if(++m_iBreakupCount >= 12u) m_iBreakupCount = 0u;
+    return coreVector2::Direction(0.25f*PI * (I_TO_F(m_iBreakupCount) + 0.5f));
 }
