@@ -18,6 +18,11 @@ cViridoMission::cViridoMission()noexcept
 , m_Barrier        (VIRIDO_BARRIERS)
 , m_apBarrierOwner {}
 , m_aiBarrierDir   {}
+, m_Laser          (VIRIDO_LASERS)
+, m_LaserWave      (VIRIDO_LASERS)
+, m_apLaserOwner   {}
+, m_Shadow         (VIRIDO_SHADOWS)
+, m_apShadowOwner  {}
 , m_iRealState     (0u)
 , m_iStickyState   (0u)
 , m_iBounceState   (0u)
@@ -67,7 +72,6 @@ cViridoMission::cViridoMission()noexcept
         m_aPaddle[i].DefineProgram       ("effect_energy_flat_direct_program");
         m_aPaddle[i].SetSize             (bBoss ? coreVector3(3.5f,2.5f,2.5f) : coreVector3(2.5f,2.5f,2.5f));
         m_aPaddle[i].SetColor3           (bBoss ? COLOR_ENERGY_BLUE           : COLOR_ENERGY_RED);
-        m_aPaddle[i].SetAlpha            (0.0f);
         m_aPaddle[i].SetTexSize          (coreVector2(1.2f,0.25f) * 0.5f);
         m_aPaddle[i].SetEnabled          (CORE_OBJECT_ENABLE_NOTHING);
         m_aPaddle[i].SetCollisionModifier(coreVector3(0.6f,1.0f,1.0f));
@@ -91,7 +95,6 @@ cViridoMission::cViridoMission()noexcept
             // set object properties
             pBarrier->SetSize   (coreVector3(7.5f,2.5f,2.5f));
             pBarrier->SetColor3 (COLOR_ENERGY_BLUE);
-            pBarrier->SetAlpha  (0.0f);
             pBarrier->SetTexSize(coreVector2(1.2f,0.25f) * 0.5f);
             pBarrier->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
@@ -101,9 +104,57 @@ cViridoMission::cViridoMission()noexcept
     }
 
     // 
+    m_Laser    .DefineProgram("effect_energy_flat_inst_program");
+    m_LaserWave.DefineProgram("effect_energy_flat_inst_program");
+    {
+        for(coreUintW i = 0u; i < VIRIDO_LASERS_RAWS; ++i)
+        {
+            // determine object type
+            const coreUintW iType = i % 2u;
+
+            // load object resources
+            coreObject3D* pLaser = &m_aLaserRaw[i];
+            pLaser->DefineModel  ("object_tube.md3");
+            pLaser->DefineTexture(0u, "effect_energy.png");
+            pLaser->DefineProgram("effect_energy_flat_program");
+
+            // set object properties
+            pLaser->SetSize   (coreVector3(0.55f,160.0f,0.55f));
+            pLaser->SetColor3 (COLOR_ENERGY_PURPLE * (iType ? 0.7f : 1.0f));
+            pLaser->SetTexSize(coreVector2(0.5f,40.0f));
+            pLaser->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
+            // add object to the list
+            if(iType) m_LaserWave.BindObject(pLaser);
+                 else m_Laser    .BindObject(pLaser);
+        }
+    }
+
+    // 
+    m_Shadow.DefineProgram("effect_decal_single_inst_program");
+    {
+        for(coreUintW i = 0u; i < VIRIDO_SHADOWS_RAWS; ++i)
+        {
+            // load object resources
+            coreObject3D* pShadow = &m_aShadowRaw[i];
+            pShadow->DefineModel  (Core::Manager::Object->GetLowQuad());
+            pShadow->DefineTexture(0u, "effect_wave.png");
+            pShadow->DefineProgram("effect_decal_single_program");
+
+            // set object properties
+            pShadow->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
+            // add object to the list
+            m_Shadow.BindObject(pShadow);
+        }
+    }
+
+    // 
     g_pGlow->BindList(&m_Ball);
     g_pGlow->BindList(&m_BallTrail);
     g_pGlow->BindList(&m_Barrier);
+    g_pGlow->BindList(&m_Laser);
+    g_pGlow->BindList(&m_LaserWave);
 }
 
 
@@ -115,18 +166,15 @@ cViridoMission::~cViridoMission()
     g_pGlow->UnbindList(&m_Ball);
     g_pGlow->UnbindList(&m_BallTrail);
     g_pGlow->UnbindList(&m_Barrier);
+    g_pGlow->UnbindList(&m_Laser);
+    g_pGlow->UnbindList(&m_LaserWave);
 
     // 
-    for(coreUintW i = 0u; i < VIRIDO_BALLS; ++i)
-        this->DisableBall(i, false);
-
-    // 
-    for(coreUintW i = 0u; i < VIRIDO_PADDLES; ++i)
-        this->DisablePaddle(i, false);
-
-    // 
-    for(coreUintW i = 0u; i < VIRIDO_BARRIERS; ++i)
-        this->DisableBarrier(i, false);
+    for(coreUintW i = 0u; i < VIRIDO_BALLS;    ++i) this->DisableBall   (i, false);
+    for(coreUintW i = 0u; i < VIRIDO_PADDLES;  ++i) this->DisablePaddle (i, false);
+    for(coreUintW i = 0u; i < VIRIDO_BARRIERS; ++i) this->DisableBarrier(i, false);
+    for(coreUintW i = 0u; i < VIRIDO_LASERS;   ++i) this->DisableLaser  (i, false);
+    for(coreUintW i = 0u; i < VIRIDO_SHADOWS;  ++i) this->DisableShadow (i, false);
 }
 
 
@@ -272,48 +320,88 @@ void cViridoMission::DisableBarrier(const coreUintW iIndex, const coreBool bAnim
 
 
 // ****************************************************************
-// setup the Virido mission
-void cViridoMission::__SetupOwn()
+// 
+void cViridoMission::EnableLaser(const coreUintW iIndex, const cShip* pOwner)
 {
-    // ################################################################
+    ASSERT(iIndex < VIRIDO_LASERS)
+    coreObject3D* pLaser = (*m_Laser    .List())[iIndex];
+    coreObject3D* pWave  = (*m_LaserWave.List())[iIndex];
+
     // 
-    STAGE_MAIN
-    {
-        if(STAGE_BEGINNING)
-        {
-            g_pEnvironment->ChangeBackground(-cGrassBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);
+    WARN_IF(pLaser->IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    pLaser->ChangeType(TYPE_VIRIDO_LASER);
 
-            g_pGame->GetInterface()->ShowMission(this);
-            g_pGame->StartIntro();
-        }
-
-        if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY))
-            STAGE_FINISH_NOW
-    });
-
-    // ################################################################
     // 
-    STAGE_MAIN
-    {
-        STAGE_BOSS(m_Dharuk)
-    });
+    ASSERT(pOwner)
+    m_apLaserOwner[iIndex] = pOwner;
 
-    // ################################################################
     // 
-    STAGE_MAIN
-    {
-        STAGE_BOSS(m_Torus)
-    });
+    pLaser->SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    pWave ->SetEnabled(CORE_OBJECT_ENABLE_ALL);
+}
 
-    // ################################################################
+
+// ****************************************************************
+// 
+void cViridoMission::DisableLaser(const coreUintW iIndex, const coreBool bAnimated)
+{
+    ASSERT(iIndex < VIRIDO_LASERS)
+    coreObject3D* pLaser = (*m_Laser    .List())[iIndex];
+    coreObject3D* pWave  = (*m_LaserWave.List())[iIndex];
+
     // 
-    STAGE_MAIN
-    {
-        STAGE_BOSS(m_Vaus)
-    });
+    if(!pLaser->IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    pLaser->ChangeType(0);
 
-    // ################################################################
-    // ################################################################
+    // 
+    m_apLaserOwner[iIndex] = NULL;
+
+    // 
+    pLaser->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    pWave ->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
+    // 
+    if(bAnimated) for(coreUintW j = 80u; j--; ) g_pSpecialEffects->CreateSplashColor(pLaser->GetPosition() + pLaser->GetDirection() * (2.0f * I_TO_F(j - 40u)), 10.0f, 1u, COLOR_ENERGY_PURPLE);
+}
+
+
+// ****************************************************************
+// 
+void cViridoMission::EnableShadow(const coreUintW iIndex, const cShip* pOwner, const coreVector2& vPosition)
+{
+    ASSERT(iIndex < VIRIDO_SHADOWS)
+    coreObject3D& oShadow = m_aShadowRaw[iIndex];
+
+    // 
+    WARN_IF(oShadow.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    ASSERT(pOwner)
+    m_apShadowOwner[iIndex] = pOwner;
+
+    // 
+    oShadow.SetPosition(coreVector3(vPosition,0.0f));
+    oShadow.SetSize    (coreVector3(0.0f,0.0f,0.0f));
+    oShadow.SetAlpha   (0.85f);
+    oShadow.SetEnabled (CORE_OBJECT_ENABLE_ALL);
+}
+
+
+// ****************************************************************
+// 
+void cViridoMission::DisableShadow(const coreUintW iIndex, const coreBool bAnimated)
+{
+    ASSERT(iIndex < VIRIDO_SHADOWS)
+    coreObject3D& oShadow = m_aShadowRaw[iIndex];
+
+    // 
+    if(!oShadow.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    m_apShadowOwner[iIndex] = NULL;
+
+    // 
+    if(!bAnimated) oShadow.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 }
 
 
@@ -321,32 +409,54 @@ void cViridoMission::__SetupOwn()
 // 
 void cViridoMission::__RenderOwnUnder()
 {
+    DEPTH_PUSH
+
+    glDepthMask(false);
+    {
+        // 
+        m_BallTrail.Render();
+
+        // 
+        m_LaserWave.Render();
+
+        // 
+        m_Shadow.Render();
+    }
+    glDepthMask(true);
+
+    DEPTH_PUSH
+
     // 
-    m_BallTrail.Render();
+    m_Laser.Render();
+    g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyList(&m_Laser);
 }
 
 
 // ****************************************************************
 // 
-void cViridoMission::__RenderOwnAttack()
+void cViridoMission::__RenderOwnOver()
+{
+    DEPTH_PUSH
+
+    // 
+    for(coreUintW i = 0u; i < VIRIDO_PADDLES; ++i) m_aPaddle[i].Render();
+    for(coreUintW i = 0u; i < VIRIDO_PADDLES; ++i) g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_DIRECT)->ApplyObject(&m_aPaddle[i]);
+
+    // 
+    m_Barrier.Render();
+    g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_DIRECT)->ApplyList(&m_Barrier);
+}
+
+
+// ****************************************************************
+// 
+void cViridoMission::__RenderOwnTop()
 {
     DEPTH_PUSH
 
     // 
     m_Ball.Render();
     g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyList(&m_Ball);
-
-    DEPTH_PUSH
-
-    // 
-    for(coreUintW i = 0u; i < VIRIDO_PADDLES; ++i)
-        m_aPaddle[i].Render();
-    for(coreUintW i = 0u; i < VIRIDO_PADDLES; ++i)
-        g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_DIRECT)->ApplyObject(&m_aPaddle[i]);
-
-    // 
-    m_Barrier.Render();
-    g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_DIRECT)->ApplyList(&m_Barrier);
 }
 
 
@@ -363,7 +473,7 @@ void cViridoMission::__MoveOwnBefore()
         coreObject3D* pBall = (*m_Ball.List())[i];
         if(!pBall->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
-        const coreVector3& vSize = pBall->GetSize();
+        const coreVector3 vSize = pBall->GetSize();
 
         // 
         coreVector2       vNewDir = pBall->GetDirection().xy();
@@ -478,6 +588,54 @@ void cViridoMission::__MoveOwnAfter()
     m_Barrier.MoveNormal();
 
     // 
+    for(coreUintW i = 0u; i < VIRIDO_LASERS; ++i)
+    {
+        coreObject3D* pLaser = (*m_Laser    .List())[i];
+        coreObject3D* pWave  = (*m_LaserWave.List())[i];
+        if(!pLaser->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+        // 
+        const coreFloat fValue = FRACT(10.0f * m_fAnimation);
+
+        // 
+        pLaser->SetTexOffset(coreVector2(3.0f,4.0f) * 0.8f * m_fAnimation);
+
+        // 
+        pWave->SetPosition (pLaser->GetPosition ());
+        pWave->SetSize     (pLaser->GetSize     () * (1.0f + 3.0f * fValue));
+        pWave->SetDirection(pLaser->GetDirection());
+        pWave->SetAlpha    (1.0f - fValue);
+        pWave->SetTexOffset(pLaser->GetTexOffset());
+    }
+
+    // 
+    m_Laser    .MoveNormal();
+    m_LaserWave.MoveNormal();
+
+    // 
+    for(coreUintW i = 0u; i < VIRIDO_SHADOWS; ++i)
+    {
+        coreObject3D& oShadow = m_aShadowRaw[i];
+        if(!oShadow.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+        // 
+        const cShip* pOwner = m_apShadowOwner[i];
+        if(pOwner)
+        {
+            oShadow.SetSize(coreVector3(1.0f,1.0f,1.0f) * 0.25f * pOwner->GetPosition().z);
+        }
+
+        // 
+        else oShadow.SetAlpha(MAX(oShadow.GetAlpha() - 5.0f*Core::System->GetTime(), 0.0f));
+
+        // 
+        if(!oShadow.GetAlpha()) this->DisableShadow(i, false);
+    }
+
+    // 
+    m_Shadow.MoveNormal();
+
+    // 
     m_iBounceState = 0u;
     STATIC_ASSERT(VIRIDO_PADDLES+1u <= sizeof(m_iBounceState)*8u)
 
@@ -506,7 +664,7 @@ void cViridoMission::__MoveOwnAfter()
                 if(CONTAINS_BIT(m_iRealState, iIndex))
                 {
                     // 
-                    coreVector2 vNewDir = coreVector2::Reflect(vBallDir, (vBallPos - oPaddleSphere.GetPosition().xy()).Normalized());
+                    coreVector2 vNewDir = coreVector2::Reflect(vBallDir, (vBallPos - oPaddleSphere.GetPosition().xy()).Normalized(vBallDir));
                     if(IsHorizontal(vPaddleDir)) vNewDir.x = MAX(ABS(vNewDir.x), 0.75f) * vPaddleDir.x;
                                             else vNewDir.y = MAX(ABS(vNewDir.y), 0.75f) * vPaddleDir.y;
 
@@ -585,6 +743,24 @@ void cViridoMission::__MoveOwnAfter()
         if(!bFirstHit) return;
 
         // 
+    });
+
+    // 
+    cPlayer::TestCollision(PLAYER_TEST_NORMAL | PLAYER_TEST_FEEL, TYPE_VIRIDO_LASER, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pLaser, const coreVector3& vIntersection, const coreBool bFirstHit)
+    {
+        if(!bFirstHit) return;
+
+        // 
+        const coreVector2 vDiff  = pPlayer->GetOldPos() - pLaser->GetPosition().xy();
+        const coreVector2 vHit   = coreVector2::Dot(vDiff, pLaser->GetDirection().xy()) * pLaser->GetDirection().xy() + pLaser->GetPosition().xy();
+        const coreVector2 vForce = pPlayer->GetOldPos() - vHit;
+
+        // 
+        pPlayer->ApplyForce(vForce.Normalized() * 100.0f);
+
+        // 
+        g_pSpecialEffects->CreateSplashColor(vIntersection, 5.0f, 3u, COLOR_ENERGY_PURPLE);
+        g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
     });
 
     // 

@@ -144,6 +144,9 @@ public:
     void UpdateExhaust(const coreFloat fStrength);
 
     // 
+    inline void ApplyForce(const coreVector2& vForce) {this->SetPosition(coreVector3(m_vOldPos, 0.0f)); m_vForce += vForce;}
+
+    // 
     inline cWeapon*     GetWeapon    (const coreUintW iIndex)const {ASSERT((iIndex < PLAYER_WEAPONS) && m_apWeapon[iIndex]) return m_apWeapon[iIndex];}
     inline cDataTable*  GetDataTable ()                            {return &m_DataTable;}
     inline cScoreTable* GetScoreTable()                            {return &m_ScoreTable;}
