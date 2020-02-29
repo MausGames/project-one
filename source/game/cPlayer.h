@@ -109,8 +109,10 @@ public:
     void GiveShield ();
 
     // render and move the player
-    void Render()final;
-    void Move  ()final;
+    void Render      ()final;
+    void RenderBefore();
+    void RenderAfter ();
+    void Move        ()final;
 
     // reduce current health
     coreInt32 TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact);

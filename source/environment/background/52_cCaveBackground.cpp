@@ -21,9 +21,11 @@ cCaveBackground::cCaveBackground()noexcept
 // 
 void cCaveBackground::__RenderOwnAfter()
 {
-    // 
     glDisable(GL_DEPTH_TEST);
-    m_Headlight.Render();
+    {
+        // 
+        m_Headlight.Render();
+    }
     glEnable(GL_DEPTH_TEST);
 }
 

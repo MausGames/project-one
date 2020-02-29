@@ -147,7 +147,7 @@ void cLeviathanBoss::__KillOwn(const coreBool bAnimated)
 
 // ****************************************************************
 // 
-void cLeviathanBoss::__RenderOwnAttack()
+void cLeviathanBoss::__RenderOwnOver()
 {
     if(m_Ray.GetCurEnabled())
     {
@@ -223,9 +223,9 @@ void cLeviathanBoss::__MoveOwn()
         const coreFloat fNewTime = m_afRayTime[i];
 
         // 
-        const cEnemy*      pPart = this->__GetPart(i);
-        const coreVector3& vPos  = pPart->GetPosition();
-        const coreVector3& vDir  = pPart->GetDirection();
+        const cEnemy*     pPart = this->__GetPart(i);
+        const coreVector3 vPos  = pPart->GetPosition();
+        const coreVector3 vDir  = pPart->GetDirection();
 
         // 
         const coreVector3 vColor = LERP(coreMath::IsNear(vDir.z, 0.0f, LEVIATHAN_RAY_HEIGHT) ? (COLOR_ENERGY_YELLOW * 0.8f) : (COLOR_ENERGY_BLUE * (0.8f - 0.4f * ABS(vDir.z))), pRay->GetColor3(), FrictionFactor(18.0f));
@@ -283,9 +283,9 @@ void cLeviathanBoss::__MoveOwn()
                 if(!pRay->GetType())                         continue;
 
                 // 
-                const coreVector3& vPos = pRay->GetPosition();
-                const coreVector3& vDir = pRay->GetDirection();
-                const coreFloat    fLen = pRay->GetSize().y;
+                const coreVector3 vPos = pRay->GetPosition();
+                const coreVector3 vDir = pRay->GetDirection();
+                const coreFloat   fLen = pRay->GetSize().y;
 
                 // 
                 const coreVector2 vTestPos = g_pForeground->Project2D(vPos + vDir * fLen);
@@ -326,8 +326,8 @@ void cLeviathanBoss::__MoveOwn()
         cEnemy* pPart = this->__GetPart(i);
 
         // 
-        const coreVector3& vPos    = pPart->GetPosition();
-        const coreFloat    fHeight = g_pEnvironment->RetrieveSafeHeight(pPart->GetPosition().xy());
+        const coreVector3 vPos    = pPart->GetPosition();
+        const coreFloat   fHeight = g_pEnvironment->RetrieveSafeHeight(pPart->GetPosition().xy());
 
         // 
         const coreBool bOldEnabled =  pPart->IsEnabled(CORE_OBJECT_ENABLE_ALL);
@@ -375,13 +375,11 @@ void cLeviathanBoss::__MoveOwn()
     if(m_aiCounter[ROTATION_STATUS])
     {
         // 
+        const coreVector2 vDiff     = pContainer->GetPosition().xy() - m_Head.GetPosition().xy();
         const coreVector2 vHeadMove = m_Head.GetMove();
-        if(!vHeadMove.IsNull())
-        {
-            // 
-            const coreVector2 vDiff = pContainer->GetPosition().xy() - m_Head.GetPosition().xy();
-            m_avVector[CONTAINER_DATA].y += 100.0f * coreVector2::Dot(vDiff.Rotated90().Normalized(), vHeadMove.Normalized()) * RCP(vDiff.LengthSq()) * Core::System->GetTime();
-        }
+
+        // 
+        if(!vDiff.IsNull() && !vHeadMove.IsNull()) m_avVector[CONTAINER_DATA].y += 100.0f * coreVector2::Dot(vDiff.Normalized().Rotated90(), vHeadMove.Normalized()) * RCP(vDiff.LengthSq()) * Core::System->GetTime();
     }
 
     // 
@@ -459,9 +457,9 @@ void cLeviathanBoss::__EnableRay(const coreUintW iIndex)
     nInitFunc(pWave);
 
     // 
-    const cEnemy*      pPart = this->__GetPart(iIndex);
-    const coreVector3& vPos  = pPart->GetPosition();
-    const coreVector3& vDir  = pPart->GetDirection();
+    const cEnemy*     pPart = this->__GetPart(iIndex);
+    const coreVector3 vPos  = pPart->GetPosition();
+    const coreVector3 vDir  = pPart->GetDirection();
 
     // 
     g_pSpecialEffects->CreateSplashColor(vPos + vDir * LEVIATHAN_RAY_OFFSET(iIndex), SPECIAL_SPLASH_TINY, COLOR_ENERGY_YELLOW);
@@ -491,9 +489,9 @@ void cLeviathanBoss::__DisableRay(const coreUintW iIndex, const coreBool bAnimat
     if(bAnimated)
     {
         // 
-        const cEnemy*      pPart = this->__GetPart(iIndex);
-        const coreVector3& vPos  = pPart->GetPosition();
-        const coreVector3& vDir  = pPart->GetDirection();
+        const cEnemy*     pPart = this->__GetPart(iIndex);
+        const coreVector3 vPos  = pPart->GetPosition();
+        const coreVector3 vDir  = pPart->GetDirection();
 
         // 
         for(coreUintW j = 25u; j--; ) g_pSpecialEffects->CreateSplashColor(vPos + vDir * (LEVIATHAN_RAY_OFFSET(iIndex) + 2.0f*I_TO_F(j)), 10.0f, 1u, COLOR_ENERGY_YELLOW);

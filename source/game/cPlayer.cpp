@@ -183,37 +183,34 @@ void cPlayer::Render()
 {
     if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
     {
-        glDisable(GL_DEPTH_TEST);
-        {
-            // 
-            m_Bubble .Render();
-            m_Exhaust.Render();
-        }
-        glEnable(GL_DEPTH_TEST);
-
         // render the 3d-object
         this->coreObject3D::Render();
+    }
+}
 
+void cPlayer::RenderBefore()
+{
+    if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
+    {
+        // 
+        m_Bubble .Render();
+        m_Exhaust.Render();
+    }
+}
+
+void cPlayer::RenderAfter()
+{
+    if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
+    {
         // 
         for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
             m_apWeapon[i]->Render();
 
         // 
-        if(m_Wind.IsEnabled(CORE_OBJECT_ENABLE_RENDER))
-        {
-            g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(this);
-            m_Wind.Render();
-        }
-
-        if(g_bDebugOutput)
-        {
-            glDepthFunc(GL_ALWAYS);
-            {
-                // 
-                m_Dot.Render();
-            }
-            glDepthFunc(GL_LEQUAL);
-        }
+        m_Wind.Render();
+        
+        g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Dot);
+        m_Dot .Render();
     }
 }
 

@@ -63,15 +63,6 @@ void cWeapon::Render()
 
 
 // ****************************************************************
-// 
-void cWeapon::RenderOverlay()
-{
-    // 
-    this->__RenderOverlayOwn();
-}
-
-
-// ****************************************************************
 // constructor
 cRayWeapon::cRayWeapon()noexcept
 {
@@ -224,11 +215,6 @@ cWaveWeapon::cWaveWeapon()noexcept
     // load shooting sound-effects
     m_pBulletSound = Core::Manager::Resource->Get<coreSound>("bullet_wave.wav");
     m_pChangeSound = Core::Manager::Resource->Get<coreSound>("bullet_wave.wav");
-
-    // 
-    m_Arrow.Construct(MENU_FONT_ICON_2, MENU_OUTLINE_SMALL);
-    m_Arrow.SetColor4(coreVector4(COLOR_ENERGY_GREEN, 0.8f));
-    m_Arrow.SetText  (ICON_CARET_UP);
 }
 
 
@@ -261,31 +247,6 @@ void cWaveWeapon::__ShootOwn()
 
     // play bullet sound-effect
     m_pBulletSound->PlayPosition(NULL, 1.0f, 1.0f, 0.0f, false, m_pOwner->GetPosition());
-}
-
-
-// ****************************************************************
-// 
-void cWaveWeapon::__RenderOverlayOwn()
-{
-    // 
-    const coreVector2 vPos = g_pForeground->Project2D(m_pOwner->GetPosition()) * g_vMenuCenter;
-    const coreVector2 vDir = m_bSide ? coreVector2(1.0f,0.0f) : coreVector2(0.0f,1.0f);
-
-    // 
-    m_Arrow.SetCenter(vPos);
-
-    // 
-    m_Arrow.SetPosition (vDir * 0.055f);
-    m_Arrow.SetDirection(vDir.InvertedX());
-    m_Arrow.Move();
-    m_Arrow.Render();
-
-    // 
-    m_Arrow.SetPosition (-vDir * 0.055f);
-    m_Arrow.SetDirection(-vDir.InvertedX());
-    m_Arrow.Move();
-    m_Arrow.Render();
 }
 
 

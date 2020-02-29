@@ -172,11 +172,11 @@ public:
     void Setup();
 
     // render and move the mission
-    void RenderUnder ();
-    void RenderAttack();
-    void RenderOver  ();
-    void MoveBefore  ();
-    void MoveAfter   ();
+    void RenderUnder();
+    void RenderOver ();
+    void RenderTop  ();
+    void MoveBefore ();
+    void MoveAfter  ();
 
     // 
     void            SkipStage ();
@@ -210,12 +210,12 @@ protected:
 
 private:
     // own routines for derived classes
-    virtual void __SetupOwn       () {}
-    virtual void __RenderOwnUnder () {}
-    virtual void __RenderOwnAttack() {}
-    virtual void __RenderOwnOver  () {}
-    virtual void __MoveOwnBefore  () {}
-    virtual void __MoveOwnAfter   () {}
+    virtual void __SetupOwn      () {}
+    virtual void __RenderOwnUnder() {}
+    virtual void __RenderOwnOver () {}
+    virtual void __RenderOwnTop  () {}
+    virtual void __MoveOwnBefore () {}
+    virtual void __MoveOwnAfter  () {}
 
     // 
     void __CloseSegment();
@@ -297,11 +297,12 @@ public:
 
 private:
     // execute own routines
-    void __SetupOwn       ()final;
-    void __RenderOwnUnder ()final;
-    void __RenderOwnAttack()final;
-    void __MoveOwnBefore  ()final;
-    void __MoveOwnAfter   ()final;
+    void __SetupOwn      ()final;
+    void __RenderOwnUnder()final;
+    void __RenderOwnOver ()final;
+    void __RenderOwnTop  ()final;
+    void __MoveOwnBefore ()final;
+    void __MoveOwnAfter  ()final;
 
     // 
     static void __BounceEffect(const coreVector2& vEffectPos);
@@ -348,9 +349,9 @@ public:
 
 private:
     // execute own routines
-    void __SetupOwn       ()final;
-    void __RenderOwnAttack()final;
-    void __MoveOwnAfter   ()final;
+    void __SetupOwn     ()final;
+    void __RenderOwnOver()final;
+    void __MoveOwnAfter ()final;
 };
 
 

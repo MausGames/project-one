@@ -177,11 +177,11 @@ public:
 
 private:
     // execute own routines
-    void __ResurrectOwn   ()final;
-    void __KillOwn        (const coreBool bAnimated)final;
-    void __RenderOwnUnder ()final;
-    void __RenderOwnAttack()final;
-    void __MoveOwn        ()final;
+    void __ResurrectOwn  ()final;
+    void __KillOwn       (const coreBool bAnimated)final;
+    void __RenderOwnUnder()final;
+    void __RenderOwnOver ()final;
+    void __MoveOwn       ()final;
 
     // 
     void __EnableDuplicate ();
@@ -234,11 +234,11 @@ public:
 
 private:
     // execute own routines
-    void __ResurrectOwn   ()final;
-    void __KillOwn        (const coreBool bAnimated)final;
-    void __RenderOwnUnder ()final;
-    void __RenderOwnAttack()final;
-    void __MoveOwn        ()final;
+    void __ResurrectOwn  ()final;
+    void __KillOwn       (const coreBool bAnimated)final;
+    void __RenderOwnUnder()final;
+    void __RenderOwnOver ()final;
+    void __MoveOwn       ()final;
 
     // 
     void __EnableSummon (const coreVector2& vPosition, const coreVector3& vColor);
@@ -272,10 +272,9 @@ public:
 
 private:
     // execute own routines
-    void __ResurrectOwn   ()final;
-    void __KillOwn        (const coreBool bAnimated)final;
-    void __RenderOwnAttack()final;
-    void __MoveOwn        ()final;
+    void __ResurrectOwn()final;
+    void __KillOwn     (const coreBool bAnimated)final;
+    void __MoveOwn     ()final;
 
     // 
     void __UpdateBreakout();
@@ -307,11 +306,10 @@ public:
 
 private:
     // execute own routines
-    void __ResurrectOwn   ()final;
-    void __KillOwn        (const coreBool bAnimated)final;
-    void __RenderOwnAttack()final;
-    void __RenderOwnOver  ()final;
-    void __MoveOwn        ()final;
+    void __ResurrectOwn ()final;
+    void __KillOwn      (const coreBool bAnimated)final;
+    void __RenderOwnOver()final;
+    void __MoveOwn      ()final;
 
     // 
     void __CreateInk(const coreUintW iIndex, const coreVector2& vPosition);
@@ -381,10 +379,10 @@ public:
 
 private:
     // execute own routines
-    void __ResurrectOwn   ()final;
-    void __KillOwn        (const coreBool bAnimated)final;
-    void __RenderOwnAttack()final;
-    void __MoveOwn        ()final;
+    void __ResurrectOwn ()final;
+    void __KillOwn      (const coreBool bAnimated)final;
+    void __RenderOwnOver()final;
+    void __MoveOwn      ()final;
 
     // 
     void __EnableRay      (const coreUintW iIndex);

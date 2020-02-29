@@ -83,7 +83,7 @@ void cSpecialEffects::Render()
 {
     if(m_bActive)
     {
-        glDepthMask(false);
+        glDisable(GL_DEPTH_TEST);
         {
             const coreBool bForeground = g_pForeground->IsTarget();
 
@@ -120,7 +120,7 @@ void cSpecialEffects::Render()
             };
             nRenderFunc(m_aBlast, SPECIAL_BLASTS);
         }
-        glDepthMask(true);
+        glEnable(GL_DEPTH_TEST);
     }
 }
 

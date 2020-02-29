@@ -416,9 +416,9 @@ void cEnemyManager::Render()
     }                                                                 \
 } 
 
-void cEnemyManager::RenderUnder () {__RENDER_OWN(__RenderOwnUnder)}
-void cEnemyManager::RenderAttack() {__RENDER_OWN(__RenderOwnAttack)}
-void cEnemyManager::RenderOver  () {__RENDER_OWN(__RenderOwnOver)}
+void cEnemyManager::RenderUnder() {__RENDER_OWN(__RenderOwnUnder)}
+void cEnemyManager::RenderOver () {__RENDER_OWN(__RenderOwnOver)}
+void cEnemyManager::RenderTop  () {__RENDER_OWN(__RenderOwnTop)}
 
 #undef __RENDER_OWN
 
@@ -820,7 +820,7 @@ cRepairEnemy::~cRepairEnemy()
 // 
 void cRepairEnemy::AssignPlayer(cPlayer* pPlayer)
 {
-    ASSERT(m_pPlayer)
+    ASSERT(pPlayer)
 
     // 
     m_pPlayer = pPlayer;
@@ -843,8 +843,14 @@ void cRepairEnemy::AssignPlayer(cPlayer* pPlayer)
 // 
 void cRepairEnemy::__RenderOwnUnder()
 {
-    // 
-    m_Bubble.Render();
+    DEPTH_PUSH
+
+    glDepthMask(false);
+    {
+        // 
+        m_Bubble.Render();
+    }
+    glDepthMask(true);
 }
 
 
@@ -858,8 +864,8 @@ void cRepairEnemy::__MoveOwn()
     m_fAnimation.UpdateMod(0.2f, 1.0f);
 
     // 
-    const coreVector2  vNewPos = this->GetPosition().xy() + m_vDirection * (30.0f * Core::System->GetTime());
-    const coreVector4& vArea   = m_pPlayer->GetArea();
+    const coreVector2 vNewPos = this->GetPosition().xy() + m_vDirection * (30.0f * Core::System->GetTime());
+    const coreVector4 vArea   = m_pPlayer->GetArea();
 
     // 
          if((vNewPos.x < vArea.x) && (m_vDirection.x < 0.0f)) m_vDirection.x =  ABS(m_vDirection.x);

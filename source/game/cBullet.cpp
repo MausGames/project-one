@@ -539,7 +539,7 @@ void cMineBullet::__ImpactOwn(const coreVector2& vImpact)
 // 
 void cMineBullet::__RenderOwnBefore()
 {
-    glDepthMask(false);
+    glDisable(GL_DEPTH_TEST);
     {
         const coreFloat fValue = LERPB(0.0f, 1.0f, FRACT(m_fAnimation * 0.5f));
 
@@ -550,7 +550,7 @@ void cMineBullet::__RenderOwnBefore()
         s_Wave.Move();
         s_Wave.Render();
     }
-    glDepthMask(true);
+    glEnable(GL_DEPTH_TEST);
 }
 
 

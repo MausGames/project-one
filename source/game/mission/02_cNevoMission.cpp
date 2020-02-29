@@ -128,11 +128,11 @@ void cNevoMission::__SetupOwn()
 
 // ****************************************************************
 // 
-void cNevoMission::__RenderOwnAttack()
+void cNevoMission::__RenderOwnOver()
 {
     // 
     if(m_bOverdraw) DEPTH_PUSH
-               else DEPTH_PUSH_IGNORE
+               else DEPTH_PUSH_SHIP
 
     // 
     m_Container.Render();

@@ -104,7 +104,7 @@ cGame::~cGame()
 // render the game
 void cGame::Render()
 {
-    __DEPTH_LEVEL_SHIP   // # 1
+    __DEPTH_GROUP_SHIP   // # 1
     {
         // render all players
         for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
@@ -114,57 +114,67 @@ void cGame::Render()
         m_EnemyManager.Render();
     }
 
-    __DEPTH_LEVEL_UNDER
+    __DEPTH_GROUP_UNDER
     {
+        DEPTH_PUSH_DOUBLE
+
         glDepthMask(false);
         {
-            // render underlying effects
-            m_EnemyManager.RenderUnder();
-            m_pCurMission->RenderUnder();
-
             // 
-            m_ShieldManager.Render();
+            for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+                m_aPlayer[i].RenderBefore();
         }
         glDepthMask(true);
 
         // render low-priority bullet manager
         m_BulletManagerPlayer.Render();
+
+        // render underlying objects
+        m_EnemyManager.RenderUnder();
+        m_pCurMission->RenderUnder();
     }
 
-    __DEPTH_LEVEL_SHIP   // # 2
+    __DEPTH_GROUP_SHIP   // # 2
     {
         // apply deferred outline-layer
         g_pOutline->Apply();
+    }
+
+    __DEPTH_GROUP_OVER
+    {
+        DEPTH_PUSH
 
         // 
         m_ChromaManager.Render();
+        m_ItemManager  .Render();
+        m_ShieldManager.Render();
 
-        // 
-        m_ItemManager.Render();
+        // render overlying objects
+        m_EnemyManager.RenderOver();
+        m_pCurMission->RenderOver();
     }
 
-    __DEPTH_LEVEL_ATTACK
+    __DEPTH_GROUP_TOP
     {
-        // render attacks and gameplay objects
-        m_EnemyManager.RenderAttack();
-        m_pCurMission->RenderAttack();
-    }
-
-    __DEPTH_LEVEL_OVER
-    {
-        glDisable(GL_DEPTH_TEST);
-        {
-            // render overlying effects
-            m_EnemyManager.RenderOver();
-            m_pCurMission->RenderOver();
-        }
-        glEnable(GL_DEPTH_TEST);
+        DEPTH_PUSH_DOUBLE
 
         // render special-effects
         g_pSpecialEffects->Render();
 
         // render high-priority bullet manager
         m_BulletManagerEnemy.Render();
+
+        // render top objects
+        m_EnemyManager.RenderTop();
+        m_pCurMission->RenderTop();
+
+        glDisable(GL_DEPTH_TEST);
+        {
+            // 
+            for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+                m_aPlayer[i].RenderAfter();
+        }
+        glEnable(GL_DEPTH_TEST);
     }
 
     __DEPTH_RESET
@@ -407,25 +417,28 @@ void cGame::ActivatePacifist()
 
 // ****************************************************************
 // 
-void cGame::PushDepthLevel()
+void cGame::ChangeDepthLevel(const coreUint8 iLevelNear, const coreUint8 iLevelFar)const
 {
     // 
-    m_iDepthLevel -= 1u;
-    ASSERT(m_iDepthLevel)
-
-    // 
-    glDepthRange(0.1f * I_TO_F(m_iDepthLevel - 1u),
-                 0.1f * I_TO_F(m_iDepthLevel));
+    ASSERT(iLevelNear < iLevelFar)
+    glDepthRange(0.05f * I_TO_F(iLevelNear), 0.05f * I_TO_F(iLevelFar));
 }
 
-
-// ****************************************************************
-// 
-void cGame::OffsetDepthLevel(const coreFloat fOffset)const
+void cGame::PushDepthLevel(const coreUint8 iLevels)
 {
     // 
-    glDepthRange(0.1f * I_TO_F(m_iDepthLevel - 1u),
-                 0.1f * I_TO_F(m_iDepthLevel) - fOffset);
+    ASSERT(m_iDepthLevel >= (m_iDepthDebug & ~BIT(7u)) + iLevels)
+    m_iDepthLevel -= iLevels;
+
+    // 
+    this->ChangeDepthLevel(m_iDepthLevel, m_iDepthLevel + iLevels);
+}
+
+void cGame::PushDepthLevelShip()
+{
+    // 
+    ASSERT(m_iDepthDebug & BIT(7u))
+    __DEPTH_GROUP_SHIP
 }
 
 

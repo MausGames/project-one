@@ -82,14 +82,6 @@ void cVausBoss::__KillOwn(const coreBool bAnimated)
 
 // ****************************************************************
 // 
-void cVausBoss::__RenderOwnAttack()
-{
-
-}
-
-
-// ****************************************************************
-// 
 void cVausBoss::__MoveOwn()
 {
     cViridoMission* pMission = d_cast<cViridoMission*>(g_pGame->GetCurMission());
