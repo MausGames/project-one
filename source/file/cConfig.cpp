@@ -97,6 +97,7 @@ void LoadConfig()
     g_OldConfig.Game.iMirrorMode     = Core::Config->GetInt(CONFIG_GAME_MIRROR_MODE);
 
     // read graphics values
+    g_OldConfig.Graphics.iRender     = Core::Config->GetInt(CONFIG_GRAPHICS_RENDER);
     g_OldConfig.Graphics.iShadow     = Core::Config->GetInt(CONFIG_GRAPHICS_SHADOW);
     g_OldConfig.Graphics.iReflection = Core::Config->GetInt(CONFIG_GRAPHICS_REFLECTION);
     g_OldConfig.Graphics.iGlow       = Core::Config->GetInt(CONFIG_GRAPHICS_GLOW);
@@ -151,6 +152,7 @@ void SaveConfig()
     Core::Config->SetInt(CONFIG_GAME_MIRROR_MODE,    g_OldConfig.Game.iMirrorMode);
 
     // write graphics values
+    Core::Config->SetInt(CONFIG_GRAPHICS_RENDER,     g_OldConfig.Graphics.iRender);
     Core::Config->SetInt(CONFIG_GRAPHICS_SHADOW,     g_OldConfig.Graphics.iShadow);
     Core::Config->SetInt(CONFIG_GRAPHICS_REFLECTION, g_OldConfig.Graphics.iReflection);
     Core::Config->SetInt(CONFIG_GRAPHICS_GLOW,       g_OldConfig.Graphics.iGlow);
@@ -177,6 +179,10 @@ void SaveConfig()
             Core::Config->SetInt(CONFIG_INPUT_ACTION(i, j), g_OldConfig.Input.aSet[i].aiAction[j]);
         }
     }
+
+    // 
+    Core::Config->SetInt (CORE_CONFIG_GRAPHICS_QUALITY,          g_OldConfig.Graphics.iRender);
+    Core::Config->SetBool(CORE_CONFIG_GRAPHICS_TEXTURETRILINEAR, g_OldConfig.Graphics.iRender ? true : false);
 
     // save configuration file
     Core::Config->Save();

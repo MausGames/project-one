@@ -24,6 +24,9 @@
 // TODO: highlight which joystick is which input set
 // TODO: fix all g_vMenuCenter usages when changing aspect ratio
 // TODO: summary_ add separate total-score for each player
+// TODO: update texture filter and render quality in realtime
+// TODO: double initial languages by switching to two columns (on demand?)
+// TODO: stages in GameMenu should be called segments
 
 
 // ****************************************************************
@@ -736,7 +739,7 @@ private:
     coreUint32   m_iPauseFrame;          // 
 
     coreFrameBuffer m_aFrameBuffer[3];   // 
-    coreFullscreen  m_MixObject;         // 
+    coreObject2D    m_MixObject;         // 
 
     coreTimer m_TransitionTime;          // 
     coreUint8 m_iTransitionState;        // 
