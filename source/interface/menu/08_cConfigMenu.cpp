@@ -375,13 +375,6 @@ void cConfigMenu::Move()
                 this->__LoadResolutions(m_Monitor.GetCurEntry().tValue);
 
             // 
-            if(m_Resolution.IsClickedArrow())
-            {
-                if(m_Resolution.GetEntry(m_Resolution.GetNumEntries() - 1u).tValue == 0xFFu)
-                    m_Resolution.DeleteEntry(m_Resolution.GetNumEntries() - 1u);
-            }
-
-            // 
             if(m_ShadowQuality.IsClickedArrow())
                 this->__UpdateShadowQuality();
 
@@ -648,9 +641,9 @@ void cConfigMenu::Move()
 // 
 void cConfigMenu::CheckValues()
 {
-    const coreUint8    iCurMonitor    = m_Monitor   .GetCurEntry().tValue;
-    const coreUint8    iCurValue      = m_Resolution.GetCurEntry().tValue;
-    const coreVector2& vCurResolution = (iCurValue == 0xFFu) ? Core::System->GetResolution() : Core::System->GetDisplayData(iCurMonitor).avAvailableRes[iCurValue];
+    const coreUint8   iCurMonitor    = m_Monitor   .GetCurEntry().tValue;
+    const coreUint8   iCurValue      = m_Resolution.GetCurEntry().tValue;
+    const coreVector2 vCurResolution = (iCurValue == 0xFFu) ? Core::System->GetResolution() : ((iCurValue == 0xEEu) ? coreVector2(0.0f,0.0f) : Core::System->GetDisplayData(iCurMonitor).avAvailableRes[iCurValue]);
 
     // 
     const coreBool bSave = (vCurResolution != coreVector2(I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH)), I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT)))) ||
@@ -697,10 +690,14 @@ void cConfigMenu::LoadValues()
     this->__LoadInputs();
 
     // 
-    if(!m_Resolution.SelectText(PRINT("%d x %d", Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH), Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT))))
+    if((Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH) <= 0) && (Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT) <= 0))
     {
-        m_Resolution.AddEntry("Other", 0xFFu);
-        m_Resolution.SelectLast();
+        m_Resolution.SelectValue(0xEEu);
+    }
+    else if(!m_Resolution.SelectText(PRINT("%d x %d", Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH), Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT))))
+    {
+        m_Resolution.AddEntryLanguage("RESOLUTION_CUSTOM", 0xFFu);
+        m_Resolution.SelectValue(0xFFu);
     }
 
     // 
@@ -758,9 +755,9 @@ void cConfigMenu::LoadValues()
 // 
 void cConfigMenu::SaveValues()
 {
-    const coreUint8    iCurMonitor    = m_Monitor   .GetCurEntry().tValue;
-    const coreUint8    iCurValue      = m_Resolution.GetCurEntry().tValue;
-    const coreVector2& vCurResolution = (iCurValue == 0xFFu) ? Core::System->GetResolution() : Core::System->GetDisplayData(iCurMonitor).avAvailableRes[iCurValue];
+    const coreUint8   iCurMonitor    = m_Monitor   .GetCurEntry().tValue;
+    const coreUint8   iCurValue      = m_Resolution.GetCurEntry().tValue;
+    const coreVector2 vCurResolution = (iCurValue == 0xFFu) ? Core::System->GetResolution() : ((iCurValue == 0xEEu) ? coreVector2(0.0f,0.0f) : Core::System->GetDisplayData(iCurMonitor).avAvailableRes[iCurValue]);
 
     // 
     const coreBool bReset = (vCurResolution != coreVector2(I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH)), I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT)))) ||
@@ -926,6 +923,9 @@ void cConfigMenu::__LoadResolutions(const coreUintW iMonitorIndex)
     // 
     const coreSet<coreVector2>& avResolutionList = Core::System->GetDisplayData(iMonitorIndex).avAvailableRes;
     for(coreUintW i = avResolutionList.size(); i--; ) m_Resolution.AddEntry(PRINT("%.0f x %.0f", avResolutionList[i].x, avResolutionList[i].y), i);
+
+    // 
+    m_Resolution.AddEntryLanguage("RESOLUTION_DESKTOP", 0xEEu);
 
     // 
     if(!m_Resolution.SelectText(m_asCurResolution[iMonitorIndex].c_str())) m_Resolution.SelectLast();
