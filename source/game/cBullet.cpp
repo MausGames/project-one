@@ -109,17 +109,63 @@ void cBullet::Deactivate(const coreBool bAnimated)
 
 // ****************************************************************
 // 
-void cBullet::Reflect(const coreObject3D* pObject)
+void cBullet::Reflect(const coreObject3D* pObject, const coreVector2& vIntersection, const coreVector2& vForceNormal)
 {
-    // 
-    this->Reflect((this->GetPosition().xy() - pObject->GetPosition().xy()).Normalized());
-}
+    ASSERT(pObject && pObject->GetModel()->GetNumClusters())
 
-void cBullet::Reflect(const coreVector2& vNormal)
-{
-    // 
+    // increase intersection precision
+    coreVector2 vHit = vIntersection;
+    {
+        coreFloat fHitDistance = 0.0f;
+        coreUint8 iHitCount    = 1u;
+
+        // shoot ray into fly direction
+        const coreVector2 vRayPos = vHit - m_vFlyDir * MAX(this->GetCollisionRadius() * 2.0f, m_fSpeed * Core::System->GetTime());
+        if(Core::Manager::Object->TestCollision(pObject, coreVector3(vRayPos, 0.0f), coreVector3(m_vFlyDir, 0.0f), &fHitDistance, &iHitCount))
+        {
+            vHit = vRayPos + m_vFlyDir * fHitDistance;
+        }
+        else
+        {
+            // move ray further towards object
+            const coreVector2 vTowardsDir = (pObject->GetPosition().xy() - vHit).Normalized();
+            if(Core::Manager::Object->TestCollision(pObject, coreVector3(vHit, 0.0f), coreVector3(vTowardsDir, 0.0f), &fHitDistance, &iHitCount))
+            {
+                // shoot ray again into fly direction
+                const coreVector2 vNewRayPos = vRayPos + vTowardsDir * fHitDistance;
+                if(Core::Manager::Object->TestCollision(pObject, coreVector3(vNewRayPos, 0.0f), coreVector3(m_vFlyDir, 0.0f), &fHitDistance, &(iHitCount = 1)))   // reset
+                {
+                    vHit = vNewRayPos + m_vFlyDir * fHitDistance;
+                }
+                else
+                {
+                    vHit = vHit + vTowardsDir * fHitDistance;
+                }
+            }
+        }
+    }
+
+    // calculate projected intersection (for error correction)
+    const coreVector2 vHitDiff = vHit - this->GetPosition().xy();
+    const coreFloat   fHitProj = coreVector2::Dot(vHitDiff, m_vFlyDir);
+    const coreVector2 vPeak    = this->GetPosition().xy() + m_vFlyDir * fHitProj;
+
+    // calculate reflection normal (approximation, sharp)
+    const coreVector2 vNormal = vForceNormal.IsNull() ? ((vPeak - m_vFlyDir * 3.0f) - pObject->GetPosition().xy()).Normalized(-m_vFlyDir) : vForceNormal;
+    if(coreVector2::Dot(m_vFlyDir, vNormal) >= 0.0f) return;
+
+    // reflect bullet
     ASSERT(vNormal.IsNormalized())
     m_vFlyDir = coreVector2::Reflect(m_vFlyDir, vNormal);
+
+    // set corrected position
+    this->SetPosition(coreVector3(vPeak - m_vFlyDir * fHitProj, 0.0f));
+
+    // call individual reflect routine
+    this->__ReflectOwn();
+
+    // move the 3d-object
+    this->coreObject3D::Move();   // for direction (and other) changes
 }
 
 
@@ -295,6 +341,21 @@ void cRayBullet::__ImpactOwn(const coreVector2& vImpact)
     {
         g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 1u, this->GetColor3());
     }
+}
+
+
+// ****************************************************************
+// 
+void cRayBullet::__ReflectOwn()
+{
+    // 
+    this->SetPosition (coreVector3(this->GetPosition().xy() + m_vFlyDir * this->GetCollisionRange().y, 0.0f));   // move to tip, to account for resetting the length
+    this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
+
+    // 
+    m_fFade = 0.0f;
+    this->SetSize (coreVector3(3.7f,0.0f,3.7f) * 0.5f);
+    this->SetAlpha(0.0f);
 }
 
 

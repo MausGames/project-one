@@ -722,7 +722,7 @@ void cViridoMission::__MoveOwnAfter()
         if(!bFirstHit) return;
 
         // 
-        pBullet->Reflect(pBall);
+        pBullet->Reflect(pBall, vIntersection.xy());
     });
 
     // 
@@ -731,10 +731,11 @@ void cViridoMission::__MoveOwnAfter()
         if(!bFirstHit) return;
 
         // 
-        pPlayer->SetForce(pBarrier->GetDirection().xy() * 100.0f);
+        pPlayer->ApplyForce(pBarrier->GetDirection().xy() * 100.0f);
 
         // 
         g_pSpecialEffects->CreateSplashColor(vIntersection, 5.0f, 3u, COLOR_ENERGY_BLUE);
+        g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
     });
 
     // 
@@ -743,6 +744,7 @@ void cViridoMission::__MoveOwnAfter()
         if(!bFirstHit) return;
 
         // 
+        pBullet->Reflect(pBarrier, vIntersection.xy(), pBarrier->GetDirection().xy());
     });
 
     // 

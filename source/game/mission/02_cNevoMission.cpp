@@ -192,7 +192,7 @@ void cNevoMission::__MoveOwnAfter()
                 if(!bFirstHit) return;
 
                 // 
-                pBullet->Reflect(pContainer);
+                pBullet->Reflect(pContainer, vIntersection.xy());
             });
         }
         m_Container.ActivateModelDefault();

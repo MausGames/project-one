@@ -75,8 +75,7 @@ public:
     void Deactivate(const coreBool bAnimated);
 
     // 
-    void Reflect(const coreObject3D* pObject);
-    void Reflect(const coreVector2&  vNormal);
+    void Reflect(const coreObject3D* pObject, const coreVector2& vIntersection, const coreVector2& vForceNormal = coreVector2(0.0f,0.0f));
 
     // 
     inline cBullet* ChangeSize   (const coreFloat fFactor) {this->SetSize   (this->GetSize   () * fFactor); return this;}
@@ -120,6 +119,7 @@ protected:
 private:
     // own routines for derived classes (render functions executed by manager)
     virtual void __ImpactOwn      (const coreVector2& vImpact) {}
+    virtual void __ReflectOwn     ()                           {}
     virtual void __RenderOwnBefore()                           {}
     virtual void __RenderOwnAfter ()                           {}
     virtual void __MoveOwn        ()                           {}
@@ -223,8 +223,9 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn(const coreVector2& vImpact)final;
-    void __MoveOwn  ()final;
+    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ReflectOwn()final;
+    void __MoveOwn   ()final;
 };
 
 
@@ -310,7 +311,7 @@ public:
     ASSIGN_ID(4, "Cone")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeOrange(); this->SetSize(coreVector3(1.35f,1.55f,1.35f) * 1.05f); this->SetTexSize(coreVector2(0.5f,0.2f) * 1.8f); m_fAnimation = 0.3f;}
+    inline void ResetProperties() {this->MakeOrange(); this->SetSize(coreVector3(1.35f,1.55f,1.35f) * 1.05f); this->SetTexSize(coreVector2(0.5f,0.2f) * 1.3f); m_fAnimation = 0.3f;}
 
     // change default color
     inline cConeBullet* MakeWhite () {this->_MakeWhite (0.6f); return this;}
