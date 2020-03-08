@@ -664,9 +664,9 @@ void cGame::__HandleDefeat()
             bAllDefeated = bAllDefeated && bDefeated;
 
             // 
-            g_pPostProcessing->SetSaturation(i, bDefeated ? 0.0f : CLAMP(1.0f - pPlayer->GetFeelTime(), 0.0f, 1.0f));
+            g_pPostProcessing->SetSaturation(i, bDefeated ? 0.0f : (1.0f - MIN(pPlayer->GetDesaturate(), 1.0f)));
 
-            if(bDefeated && m_bCoop && !m_pRepairEnemy)
+            if(bDefeated && m_bCoop && (m_pCurMission->GetID() != cNoMission::ID) && !m_pRepairEnemy)
             {
                 // 
                 m_pRepairEnemy = new cRepairEnemy();
@@ -707,7 +707,8 @@ void cGame::__HandleDefeat()
             // 
             pPlayer->SetPosition    (m_pRepairEnemy->GetPosition());
             pPlayer->SetCurHealthPct(I_TO_F(1u) / I_TO_F(PLAYER_LIVES));
-            pPlayer->StartFeeling   (PLAYER_FEEL_TIME, 0u);
+            pPlayer->SetDesaturate  (PLAYER_DESATURATE);
+            pPlayer->StartFeeling   (PLAYER_FEEL_TIME_REPAIR, 0u);
 
             // 
             SAFE_DELETE(m_pRepairEnemy)

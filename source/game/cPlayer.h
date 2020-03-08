@@ -31,6 +31,7 @@
 #define PLAYER_FEEL_TIME          (3.0f)            // 
 #define PLAYER_FEEL_TIME_CONTINUE (5.0f)            // 
 #define PLAYER_INTERRUPT          (3.0f)            // 
+#define PLAYER_DESATURATE         (1.2f)            // 
 
 #define PLAYER_SHIP_ATK (0u)        // 
 #define PLAYER_SHIP_DEF (1u)        // 
@@ -81,6 +82,8 @@ private:
     coreFlow  m_fInterrupt;                                     // 
     coreFlow  m_fLightningTime;                                 // 
     coreFloat m_fLightningAngle;                                // 
+
+    coreFlow m_fDesaturate;                                     // 
 
     cDataTable  m_DataTable;                                    // 
     cScoreTable m_ScoreTable;                                   // 
@@ -134,7 +137,7 @@ public:
     // 
     inline void     ActivateNormalShading()      {this->DefineProgram(m_pNormalProgram);}
     inline void     ActivateDarkShading  ()      {this->DefineProgram(m_pDarkProgram);}
-    inline coreBool IsDarkShading        ()const {return (this->GetProgram().GetHandle() == m_pDarkProgram.GetHandle()) ? true : false;}
+    inline coreBool IsDarkShading        ()const {return (this->GetProgram().GetHandle() == m_pDarkProgram.GetHandle());}
 
     // 
     void EnableWind   (const coreVector2& vDirection);
@@ -152,17 +155,18 @@ public:
     inline cScoreTable* GetScoreTable()                            {return &m_ScoreTable;}
 
     // set object properties
-    inline void SetInput    (const sGameInput*  pInput)     {m_pInput     = pInput;}
-    inline void SetArea     (const coreVector4& vArea)      {m_vArea      = vArea; ASSERT(vArea.xy() < vArea.zw())}
-    inline void SetForce    (const coreVector2& vForce)     {m_vForce     = vForce;}
-    inline void SetInterrupt(const coreFloat    fInterrupt) {m_fInterrupt = fInterrupt;}
+    inline void SetInput     (const sGameInput*  pInput)      {m_pInput      = pInput;}
+    inline void SetArea      (const coreVector4& vArea)       {m_vArea       = vArea; ASSERT(vArea.xy() < vArea.zw())}
+    inline void SetForce     (const coreVector2& vForce)      {m_vForce      = vForce;}
+    inline void SetInterrupt (const coreFloat    fInterrupt)  {m_fInterrupt  = fInterrupt;}
+    inline void SetDesaturate(const coreFloat    fDesaturate) {m_fDesaturate = fDesaturate;}
 
     // get object properties
-    inline const sGameInput*  GetInput    ()const {ASSERT(m_pInput) return m_pInput;}
-    inline const coreVector4& GetArea     ()const {return m_vArea;}
-    inline const coreVector2& GetForce    ()const {return m_vForce;}
-    inline const coreFloat&   GetInterrupt()const {return m_fInterrupt;}
-    inline       coreFloat    GetFeelTime ()const {return (m_iFeelType <= 1u) ? m_fFeelTime.ToFloat() : 0.0f;}
+    inline const sGameInput*  GetInput     ()const {ASSERT(m_pInput) return m_pInput;}
+    inline const coreVector4& GetArea      ()const {return m_vArea;}
+    inline const coreVector2& GetForce     ()const {return m_vForce;}
+    inline const coreFloat&   GetInterrupt ()const {return m_fInterrupt;}
+    inline const coreFloat&   GetDesaturate()const {return m_fDesaturate;}
 
     // 
     template <typename F> static FORCE_INLINE void TestCollision(const ePlayerTest eTest, const coreInt32 iType,        F&& nCallback);   // [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit) -> void

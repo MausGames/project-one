@@ -23,6 +23,7 @@ cPlayer::cPlayer()noexcept
 , m_fInterrupt      (0.0f)
 , m_fLightningTime  (0.0f)
 , m_fLightningAngle (0.0f)
+, m_fDesaturate     (0.0f)
 , m_fAnimation      (0.0f)
 {
     // load object resources
@@ -373,6 +374,9 @@ void cPlayer::Move()
                 g_pSpecialEffects->CreateLightning(this, vDir, 7.0f, SPECIAL_LIGHTNING_SMALL, coreVector3(1.0f,1.0f,1.0f), coreVector2(1.0f,1.0f), 0.0f);
             }
         }
+
+        // 
+        m_fDesaturate.UpdateMax(-1.0f, 0.0f);
     }
 
     // 
@@ -528,8 +532,8 @@ void cPlayer::StartFeeling(const coreFloat fTime, const coreUint8 iType)
     this->EnableBubble();
 
     // 
-         if(iType == 0u) g_pSpecialEffects->MacroExplosionDarkBig  (this->GetPosition());
-    else if(iType == 1u) g_pSpecialEffects->MacroExplosionDarkSmall(this->GetPosition());
+         if(iType == 0u) g_pSpecialEffects->MacroExplosionPhysicalDarkBig  (this->GetPosition());
+    else if(iType == 1u) g_pSpecialEffects->MacroExplosionPhysicalDarkSmall(this->GetPosition());
 }
 
 
