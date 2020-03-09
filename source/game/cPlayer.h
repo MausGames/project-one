@@ -14,13 +14,14 @@
 // TODO: all parts of player-rendering should be batched for coop
 // TODO: check which operations have to be done outside of dead-check
 // TODO: add in-game hint for roll-cooldown end ((just) acoustic)
-// TODO: render wind later to prevent depth/overdraw issues
+// TODO: render wind, bubble, etc. in group for coop
 // TODO: correct reverse-tracking when hitting the walls (position correction) ? only for 45degree, also on other code locations ?
 
 
 // ****************************************************************
 // player definitions
 #define PLAYER_WEAPONS            (1u)              // number of weapons a player can carry
+#define PLAYER_SUPPORTS           (1u)              // 
 #define PLAYER_LIVES              (LIVES)           // 
 #define PLAYER_SHIELD             (SHIELD)          // 
 #define PLAYER_COLLISION_MIN      (0.3f)            // 
@@ -30,14 +31,17 @@
 #define PLAYER_ROLL_COOLDOWN      (FRAMERATE_MAX)   // (ship is vulnerable for a single frame) 
 #define PLAYER_FEEL_TIME          (3.0f)            // 
 #define PLAYER_FEEL_TIME_CONTINUE (5.0f)            // 
+#define PLAYER_FEEL_TIME_REPAIR   (5.0f)            // 
+#define PLAYER_FEEL_TIME_SHIELD   (10.0f)           // 
 #define PLAYER_INTERRUPT          (3.0f)            // 
 #define PLAYER_DESATURATE         (1.2f)            // 
 
-#define PLAYER_SHIP_ATK (0u)        // 
-#define PLAYER_SHIP_DEF (1u)        // 
-#define PLAYER_SHIP_P1  (2u)        // 
-#define PLAYER_NO_ROLL  (0xFFu)     // 
-#define PLAYER_NO_FEEL  (-100.0f)   // 
+#define PLAYER_SHIP_ATK  (0u)        // 
+#define PLAYER_SHIP_DEF  (1u)        // 
+#define PLAYER_SHIP_P1   (2u)        // 
+#define PLAYER_NO_ROLL   (0xFFu)     // 
+#define PLAYER_NO_FEEL   (-100.0f)   // 
+#define PLAYER_NO_IGNORE (-100.0f)   // 
 
 STATIC_ASSERT(PLAYER_INTERRUPT > (1.0f / PLAYER_ROLL_SPEED))
 
@@ -58,7 +62,8 @@ enum ePlayerTest : coreUint8
     PLAYER_TEST_NORMAL = 0x01u,   // 
     PLAYER_TEST_ROLL   = 0x02u,   // 
     PLAYER_TEST_FEEL   = 0x04u,   // 
-    PLAYER_TEST_ALL    = PLAYER_TEST_NORMAL | PLAYER_TEST_ROLL | PLAYER_TEST_FEEL
+    PLAYER_TEST_IGNORE = 0x08u,   // 
+    PLAYER_TEST_ALL    = PLAYER_TEST_NORMAL | PLAYER_TEST_ROLL | PLAYER_TEST_FEEL | PLAYER_TEST_IGNORE
 };
 ENABLE_BITWISE(ePlayerTest)
 
@@ -76,8 +81,10 @@ private:
     coreVector2 m_vForce;                                       // 
     coreFlow    m_fRollTime;                                    // 
     coreFlow    m_fFeelTime;                                    // 
+    coreFlow    m_fIgnoreTime;                                  // 
     coreUint8   m_iRollDir;                                     // 
     coreUint8   m_iFeelType;                                    // 
+    coreUint8   m_iIgnoreType;                                  // 
 
     coreFlow  m_fInterrupt;                                     // 
     coreFlow  m_fLightningTime;                                 // 
@@ -95,6 +102,7 @@ private:
     coreObject3D m_Dot;                                         // 
     coreObject3D m_Wind;                                        // 
     coreObject3D m_Bubble;                                      // 
+    coreObject3D m_Shield;                                      // 
     coreObject3D m_Exhaust;                                     // 
 
     coreLookup<const coreObject3D*, coreUint32> m_aCollision;   // 
@@ -135,6 +143,11 @@ public:
     inline coreBool IsFeeling()const {return (m_fFeelTime > PLAYER_NO_FEEL);}
 
     // 
+    void StartIgnoring(const coreUint8 iType);
+    void EndIgnoring  ();
+    inline coreBool IsIgnoring()const {return (m_fIgnoreTime > PLAYER_NO_IGNORE);}
+
+    // 
     inline void     ActivateNormalShading()      {this->DefineProgram(m_pNormalProgram);}
     inline void     ActivateDarkShading  ()      {this->DefineProgram(m_pDarkProgram);}
     inline coreBool IsDarkShading        ()const {return (this->GetProgram().GetHandle() == m_pDarkProgram.GetHandle());}
@@ -144,6 +157,8 @@ public:
     void DisableWind  ();
     void EnableBubble ();
     void DisableBubble();
+    void EnableShield ();
+    void DisableShield();
     void UpdateExhaust(const coreFloat fStrength);
 
     // 
@@ -189,7 +204,7 @@ template <typename F> FORCE_INLINE void cPlayer::TestCollision(const ePlayerTest
     Core::Manager::Object->TestCollision(TYPE_PLAYER, iType, [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         // 
-        if(pPlayer->IsRolling() ? CONTAINS_FLAG(eTest, PLAYER_TEST_ROLL) : (pPlayer->IsFeeling() ? CONTAINS_FLAG(eTest, PLAYER_TEST_FEEL) : CONTAINS_FLAG(eTest, PLAYER_TEST_NORMAL)))
+        if(pPlayer->IsRolling() ? CONTAINS_FLAG(eTest, PLAYER_TEST_ROLL) : (pPlayer->IsFeeling() ? CONTAINS_FLAG(eTest, PLAYER_TEST_FEEL) : (pPlayer->IsIgnoring() ? CONTAINS_FLAG(eTest, PLAYER_TEST_IGNORE) : CONTAINS_FLAG(eTest, PLAYER_TEST_NORMAL))))
         {
             // 
             coreVector3 vNewIntersection;
@@ -208,7 +223,7 @@ template <typename F> FORCE_INLINE void cPlayer::TestCollision(const ePlayerTest
     Core::Manager::Object->TestCollision(TYPE_PLAYER, pObject, [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         // 
-        if(pPlayer->IsRolling() ? CONTAINS_FLAG(eTest, PLAYER_TEST_ROLL) : (pPlayer->IsFeeling() ? CONTAINS_FLAG(eTest, PLAYER_TEST_FEEL) : CONTAINS_FLAG(eTest, PLAYER_TEST_NORMAL)))
+        if(pPlayer->IsRolling() ? CONTAINS_FLAG(eTest, PLAYER_TEST_ROLL) : (pPlayer->IsFeeling() ? CONTAINS_FLAG(eTest, PLAYER_TEST_FEEL) : (pPlayer->IsIgnoring() ? CONTAINS_FLAG(eTest, PLAYER_TEST_IGNORE) : CONTAINS_FLAG(eTest, PLAYER_TEST_NORMAL))))
         {
             // 
             coreVector3 vNewIntersection;

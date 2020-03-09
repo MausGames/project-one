@@ -18,8 +18,10 @@ cPlayer::cPlayer()noexcept
 , m_vForce          (coreVector2(0.0f,0.0f))
 , m_fRollTime       (0.0f)
 , m_fFeelTime       (PLAYER_NO_FEEL)
+, m_fIgnoreTime     (PLAYER_NO_IGNORE)
 , m_iRollDir        (PLAYER_NO_ROLL)
 , m_iFeelType       (0u)
+, m_iIgnoreType     (0u)
 , m_fInterrupt      (0.0f)
 , m_fLightningTime  (0.0f)
 , m_fLightningAngle (0.0f)
@@ -69,7 +71,6 @@ cPlayer::cPlayer()noexcept
     m_Wind.DefineModel  ("object_sphere.md3");
     m_Wind.DefineTexture(0u, "effect_energy.png");
     m_Wind.DefineProgram("effect_energy_direct_program");
-    m_Wind.SetSize      (coreVector3(1.0f,1.08f,1.0f) * PLAYER_WIND_SIZE);
     m_Wind.SetColor4    (coreVector4(COLOR_ENERGY_BLUE * 1.6f, 0.0f));
     m_Wind.SetTexSize   (coreVector2(1.0f,5.0f));
     m_Wind.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
@@ -81,6 +82,14 @@ cPlayer::cPlayer()noexcept
     m_Bubble.SetColor4    (coreVector4(COLOR_ENERGY_WHITE * 0.5f, 0.0f));
     m_Bubble.SetTexSize   (coreVector2(5.0f,5.0f));
     m_Bubble.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+
+    // 
+    m_Shield.DefineModel  ("effect_shield.md3");
+    m_Shield.DefineTexture(0u, "effect_particle_128.png");
+    m_Shield.DefineProgram("effect_shield_program");
+    m_Shield.SetSize      (coreVector3(4.7f,4.7f,4.7f));
+    m_Shield.SetColor4    (coreVector4(COLOR_ENERGY_BLUE, 0.0f));
+    m_Shield.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 
     // 
     m_Exhaust.DefineModel  ("object_tube.md3");
@@ -194,7 +203,6 @@ void cPlayer::RenderBefore()
     if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
     {
         // 
-        m_Bubble .Render();
         m_Exhaust.Render();
     }
 }
@@ -208,10 +216,13 @@ void cPlayer::RenderAfter()
             m_apWeapon[i]->Render();
 
         // 
-        m_Wind.Render();
-        
-        g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Dot);
-        m_Dot .Render();
+        m_Bubble.Render();
+        m_Shield.Render();
+        m_Wind  .Render();
+
+        // 
+        //g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Dot);
+        //m_Dot .Render();
     }
 }
 
@@ -333,6 +344,7 @@ void cPlayer::Move()
 
             // 
             m_Wind.SetPosition (this->GetPosition());
+            m_Wind.SetSize     (coreVector3(1.0f,1.08f,1.0f) * PLAYER_WIND_SIZE * LERP(1.0f, 1.5f, POW3(m_fRollTime)));
             m_Wind.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.4f));
             m_Wind.Move();
         }
@@ -354,6 +366,27 @@ void cPlayer::Move()
             m_Bubble.SetSize     (coreVector3(1.0f,1.0f,1.0f) * PLAYER_BUBBLE_SIZE * m_Bubble.GetAlpha());
             m_Bubble.SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.1f));
             m_Bubble.Move();
+        }
+
+        if(m_Shield.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
+        {
+            // 
+            m_fIgnoreTime.Update(-2.0f);
+
+            // 
+            if(m_fIgnoreTime <= 0.0f) this->EndIgnoring();
+
+            // 
+            const coreVector2 vDir       = coreVector2::Direction(m_fAnimation * (0.3f*PI));
+            const coreFloat   fBounce    = 0.25f + 0.2f * m_fIgnoreTime;
+            const coreFloat   fExplosion = m_iIgnoreType ? ((1.0f - POW3(m_fIgnoreTime)) * 2.0f) : 0.0f;
+
+            // 
+            m_Shield.SetPosition   (this->GetPosition());
+            m_Shield.SetOrientation(coreVector3(vDir.x, 0.0f, vDir.y));
+            m_Shield.SetTexOffset  (coreVector2(fBounce + fExplosion, 1.0f));
+            m_Shield.SetAlpha      (MIN(POW2(m_fIgnoreTime) * 1.4f, 1.0f));
+            m_Shield.Move();
         }
 
         // 
@@ -411,7 +444,18 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
             if(!this->IsDarkShading()) this->RefreshColor();
 
             // 
-            this->StartFeeling(PLAYER_FEEL_TIME, 0u);
+            if(CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED))
+            {
+                this->StartIgnoring((m_iCurHealth == 1) ? 1u : 0u);
+            }
+            else
+            {
+                this->SetDesaturate(PLAYER_DESATURATE);
+                this->StartFeeling (PLAYER_FEEL_TIME, 0u);
+            }
+
+            // 
+            m_fInterrupt = 0.0f;
         }
         else
         {
@@ -461,10 +505,12 @@ void cPlayer::Kill(const coreBool bAnimated)
     // 
     this->EndRolling();
     this->EndFeeling();
+    this->EndIgnoring();
 
     // 
     this->DisableWind();
     this->DisableBubble();
+    this->DisableShield();
     this->UpdateExhaust(0.0f);
 
     // 
@@ -554,6 +600,46 @@ void cPlayer::EndFeeling()
 
 // ****************************************************************
 // 
+void cPlayer::StartIgnoring(const coreUint8 iType)
+{
+    WARN_IF(this->IsIgnoring()) return;
+
+    // 
+    m_fIgnoreTime = 1.0f;
+    m_iIgnoreType = iType;
+
+    // 
+    this->EnableShield();
+
+    // 
+    g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+
+    // 
+    if(iType == 1u)
+    {
+        this->SetDesaturate(PLAYER_DESATURATE);
+        this->StartFeeling (PLAYER_FEEL_TIME_SHIELD, 2u);
+    }
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::EndIgnoring()
+{
+    if(!this->IsIgnoring()) return;
+
+    // 
+    m_fIgnoreTime = PLAYER_NO_IGNORE;
+    m_iIgnoreType = 0u;
+
+    // 
+    this->DisableShield();
+}
+
+
+// ****************************************************************
+// 
 void cPlayer::EnableWind(const coreVector2& vDirection)
 {
     WARN_IF(m_Wind.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
@@ -612,6 +698,33 @@ void cPlayer::DisableBubble()
 
 // ****************************************************************
 // 
+void cPlayer::EnableShield()
+{
+    WARN_IF(m_Shield.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    m_Shield.SetAlpha(0.0f);
+
+    // 
+    m_Shield.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    g_pGlow->BindObject(&m_Shield);
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::DisableShield()
+{
+    if(!m_Shield.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    m_Shield.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    g_pGlow->UnbindObject(&m_Shield);
+}
+
+
+// ****************************************************************
+// 
 void cPlayer::UpdateExhaust(const coreFloat fStrength)
 {
     // 
@@ -652,8 +765,8 @@ coreBool cPlayer::__TestCollisionPrecise(const coreObject3D* pObject, coreVector
     if(vMove.IsNull())
     {
         // 
-        const coreVector3& vRayPos = this->GetPosition();
-        const coreVector3  vRayDir = coreVector3(0.0f,0.0f,1.0f);
+        const coreVector3 vRayPos = this->GetPosition();
+        const coreVector3 vRayDir = coreVector3(0.0f,0.0f,1.0f);
 
         // 
         coreFloat fHitDistance = 0.0f;
@@ -669,13 +782,13 @@ coreBool cPlayer::__TestCollisionPrecise(const coreObject3D* pObject, coreVector
     else
     {
         // 
-        const coreVector3& vRayPos = this->GetPosition();
-        const coreVector3  vRayDir = coreVector3(-vMove.Normalized(), 0.0f);
+        const coreVector3 vRayPos = this->GetPosition();
+        const coreVector3 vRayDir = coreVector3(-vMove.NormalizedUnsafe(), 0.0f);
 
         // 
         coreFloat fHitDistance = 0.0f;
         coreUint8 iHitCount    = 1u;
-        if(Core::Manager::Object->TestCollision(pObject, vRayPos, vRayDir, &fHitDistance, &iHitCount) && (POW2(fHitDistance) < vMove.LengthSq()))
+        if(Core::Manager::Object->TestCollision(pObject, vRayPos, vRayDir, &fHitDistance, &iHitCount) && ((iHitCount & 0x01u) || POW2(fHitDistance) < vMove.LengthSq()))
         {
             // 
             (*pvIntersection) = vRayPos + vRayDir * fHitDistance;

@@ -726,7 +726,7 @@ void cViridoMission::__MoveOwnAfter()
     });
 
     // 
-    cPlayer::TestCollision(PLAYER_TEST_NORMAL | PLAYER_TEST_FEEL, TYPE_VIRIDO_BARRIER, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBarrier, const coreVector3& vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(PLAYER_TEST_NORMAL | PLAYER_TEST_FEEL | PLAYER_TEST_IGNORE, TYPE_VIRIDO_BARRIER, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBarrier, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
 
@@ -748,7 +748,7 @@ void cViridoMission::__MoveOwnAfter()
     });
 
     // 
-    cPlayer::TestCollision(PLAYER_TEST_NORMAL | PLAYER_TEST_FEEL, TYPE_VIRIDO_LASER, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pLaser, const coreVector3& vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(PLAYER_TEST_NORMAL | PLAYER_TEST_FEEL | PLAYER_TEST_IGNORE, TYPE_VIRIDO_LASER, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pLaser, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
 
