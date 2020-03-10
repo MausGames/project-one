@@ -184,7 +184,7 @@ void cDefeatMenu::Move()
         if((m_fIntroTimer >= MENU_DEFEAT_BANNER_ANIMATION) && (m_eState < DEFEAT_WAIT)) m_eState = DEFEAT_WAIT;
 
         // calculate visibility and animation value
-        const coreFloat fVisibility = MIN(m_fIntroTimer, MENU_DEFEAT_BANNER_SPEED_REV - m_fOutroTimer) * MENU_DEFEAT_BANNER_SPEED;
+        const coreFloat fVisibility = MIN(m_fIntroTimer, MAX(MENU_DEFEAT_BANNER_SPEED_REV - m_fOutroTimer, 0.0f)) * MENU_DEFEAT_BANNER_SPEED;
         const coreFloat fAnimation  = LERPB(0.0f, 1.0f, MIN(m_fIntroTimer / MENU_DEFEAT_BANNER_ANIMATION, 1.0f)) * MENU_DEFEAT_BANNER_ANIMATION;
 
         // slash background across screen (# direction can be swapped, also alpha value is used as texture coordinate correction)
@@ -208,7 +208,7 @@ void cDefeatMenu::Move()
     }
 
     // 
-    g_pPostProcessing->SetSaturationAll(MIN(m_fOutroTimer, 1.0f));
+    g_pPostProcessing->SetSaturationAll(MIN(m_fOutroTimer * MENU_DEFEAT_BANNER_SPEED, 1.0f));
 }
 
 
@@ -227,6 +227,7 @@ void cDefeatMenu::ShowContinue()
 
     // 
     m_Background.SetSize(coreVector2(0.0f,0.0f));
+    m_Background.Move();
 
     // 
     const coreUint8 iContinues = g_pGame->GetContinues();
@@ -243,6 +244,7 @@ void cDefeatMenu::ShowContinue()
     }
 
     // 
+    this->SetAlpha(0.0f);
     this->ChangeSurface(SURFACE_DEFEAT_CONTINUE, 0.0f);
 }
 
@@ -262,7 +264,9 @@ void cDefeatMenu::ShowGameOver()
 
     // 
     m_Background.SetSize(coreVector2(0.0f,0.0f));
+    m_Background.Move();
 
     // 
+    this->SetAlpha(0.0f);
     this->ChangeSurface(SURFACE_DEFEAT_GAMEOVER, 0.0f);
 }

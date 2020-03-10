@@ -238,7 +238,7 @@ void cSummaryMenu::Move()
                 for(coreUintW i = 0u; i < MENU_SUMMARY_PARTS; ++i) m_aTotalPart[i].SetText(PRINT("%.0f", I_TO_F(m_aiFinalPart[i]) * fFinalSpin));
 
                 // calculate visibility and animation value
-                const coreFloat fVisibility = MIN(m_fIntroTimer, MENU_SUMMARY_BANNER_SPEED_REV - m_fOutroTimer) * MENU_SUMMARY_BANNER_SPEED;
+                const coreFloat fVisibility = MIN(m_fIntroTimer, MAX(MENU_SUMMARY_BANNER_SPEED_REV - m_fOutroTimer, 0.0f)) * MENU_SUMMARY_BANNER_SPEED;
                 const coreFloat fAnimation  = LERPB(0.0f, 1.0f, MIN(m_fIntroTimer / MENU_SUMMARY_BANNER_ANIMATION, 1.0f)) * MENU_SUMMARY_BANNER_ANIMATION;
 
                 // slash background across screen (# direction can be swapped, also alpha value is used as texture coordinate correction)
@@ -341,7 +341,9 @@ void cSummaryMenu::ShowNormal()
 
     // 
     m_BackgroundMain.SetSize(coreVector2(0.0f,0.0f));
+    m_BackgroundMain.Move();
     m_BackgroundCoop.SetSize(coreVector2(0.0f,0.0f));
+    m_BackgroundCoop.Move();
 
     // 
     m_aHeader[0].SetText(PRINT("%s %d", Core::Language->GetString("MISSION"), g_pGame->GetCurMission()->GetID()));
@@ -407,6 +409,7 @@ void cSummaryMenu::ShowNormal()
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i) {m_aiApplyMedal[i] = iMedalMission;});
 
     // 
+    this->SetAlpha(0.0f);
     this->ChangeSurface(g_pGame->GetCoop() ? SURFACE_SUMMARY_COOP : SURFACE_SUMMARY_SOLO, 0.0f);
 }
 
@@ -427,6 +430,7 @@ void cSummaryMenu::ShowBegin()
     m_eState      = SUMMARY_INTRO;
 
     // 
+    this->SetAlpha(0.0f);
     this->ChangeSurface(SURFACE_SUMMARY_BEGIN, 0.0f);
 }
 
