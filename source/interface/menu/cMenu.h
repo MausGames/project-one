@@ -258,6 +258,7 @@ private:
 
     coreLabel m_PromptText;         // 
     coreFlow  m_fPromptAnimation;   // 
+    coreFlow  m_fPromptExpand;      // 
 
     coreLabel m_aVersionText[2];    // hard-coded version info strings 
 
