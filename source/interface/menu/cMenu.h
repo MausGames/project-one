@@ -245,6 +245,9 @@ public:
     void Move()final;
 
     // 
+    void StartIntro();
+
+    // 
     void ActivateFirstPlay();
 };
 
@@ -719,9 +722,8 @@ public:
 class cMenu final : public coreMenu, public coreResourceRelation
 {
 private:
-    cIntroMenu* m_pIntroMenu;            // intro menu object (dynamically unloaded)
-    cTitleMenu* m_pTitleMenu;            // title menu object (dynamically unloaded)
-
+    cIntroMenu   m_IntroMenu;            // intro menu object
+    cTitleMenu   m_TitleMenu;            // title menu object
     cMainMenu    m_MainMenu;             // main menu object
     cGameMenu    m_GameMenu;             // game menu object
     cScoreMenu   m_ScoreMenu;            // score menu object

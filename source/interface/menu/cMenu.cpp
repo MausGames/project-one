@@ -18,10 +18,6 @@ cMenu::cMenu()noexcept
 , m_iTransitionState (0u)
 , m_pTransitionMenu  (NULL)
 {
-    // create intro and title menu
-    m_pIntroMenu = new cIntroMenu();
-    m_pTitleMenu = new cTitleMenu();
-
     // 
     m_PauseLayer.DefineTexture(0u, "menu_background_black.png");
     m_PauseLayer.DefineProgram("default_2d_program");
@@ -30,9 +26,9 @@ cMenu::cMenu()noexcept
     m_PauseLayer.SetTexSize   (coreVector2(1.2f,1.2f));
 
     // bind menu objects
-    this->BindObject(SURFACE_INTRO,   m_pIntroMenu);
-    this->BindObject(SURFACE_TITLE,   m_pIntroMenu);
-    this->BindObject(SURFACE_TITLE,   m_pTitleMenu);
+    this->BindObject(SURFACE_INTRO,   &m_IntroMenu);
+    this->BindObject(SURFACE_TITLE,   &m_IntroMenu);
+    this->BindObject(SURFACE_TITLE,   &m_TitleMenu);
     this->BindObject(SURFACE_MAIN,    &m_MainMenu);
     this->BindObject(SURFACE_GAME,    &m_GameMenu);
     this->BindObject(SURFACE_SCORE,   &m_ScoreMenu);
@@ -65,12 +61,15 @@ cMenu::cMenu()noexcept
     m_MixObject.Move();
 
     // 
+    m_IntroMenu.StartIntro();
+
+    // 
     if(g_pSave->GetHeader().oProgress.bFirstPlay)
     {
-        m_pIntroMenu->ActivateFirstPlay();
-        m_pTitleMenu->ActivateFirstPlay();
-        m_MainMenu   .ActivateFirstPlay();
-        m_GameMenu   .ActivateFirstPlay();
+        m_IntroMenu.ActivateFirstPlay();
+        m_TitleMenu.ActivateFirstPlay();
+        m_MainMenu .ActivateFirstPlay();
+        m_GameMenu .ActivateFirstPlay();
     }
 }
 
@@ -79,10 +78,6 @@ cMenu::cMenu()noexcept
 // destructor
 cMenu::~cMenu()
 {
-    // delete intro and title menu
-    SAFE_DELETE(m_pIntroMenu)
-    SAFE_DELETE(m_pTitleMenu)
-
     // explicitly undefine to detach textures
     m_MixObject.Undefine();
 }
@@ -206,7 +201,7 @@ void cMenu::Move()
 
     case SURFACE_INTRO:
         {
-            if(m_pIntroMenu->GetStatus())
+            if(m_IntroMenu.GetStatus())
             {
                 // switch to title menu
                 this->ShiftSurface(this, SURFACE_TITLE, 0.75f);
@@ -216,23 +211,10 @@ void cMenu::Move()
 
     case SURFACE_TITLE:
         {
-            if(m_pTitleMenu->GetStatus())
+            if(m_TitleMenu.GetStatus())
             {
                 // switch to main menu
-                this->ShiftSurface(this, SURFACE_MAIN, 2.0f);
-
-                // unload expendable menu resources
-                Core::Manager::Resource->AttachFunction([this]()
-                {
-                    if(!this->GetTransition().GetStatus() && (this->GetCurSurface() == SURFACE_MAIN))
-                    {
-                        // delete intro and title menu
-                        SAFE_DELETE(m_pIntroMenu)
-                        SAFE_DELETE(m_pTitleMenu)
-                        return CORE_OK;
-                    }
-                    return CORE_BUSY;
-                });
+                this->ShiftSurface(this, SURFACE_MAIN, 3.0f);
             }
         }
         break;
@@ -684,8 +666,9 @@ void cMenu::__EndGame()
     {
         g_pSave->EditProgress()->bFirstPlay = false;
 
-        m_MainMenu.DeactivateFirstPlay();
-        m_GameMenu.DeactivateFirstPlay();
+        m_TitleMenu.DeactivateFirstPlay();
+        m_MainMenu .DeactivateFirstPlay();
+        m_GameMenu .DeactivateFirstPlay();
     }
 }
 
