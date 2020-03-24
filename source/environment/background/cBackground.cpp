@@ -314,7 +314,7 @@ void cBackground::ShoveAdds(const coreFloat fOffset)
             FOR_EACH(et, *(*it)->List())
             {
                 // add offset to position
-                const coreVector3& vPos = (*et)->GetPosition();
+                const coreVector3 vPos = (*et)->GetPosition();
                 (*et)->SetPosition(coreVector3(vPos.x, vPos.y + fOffset, vPos.z));
             }
         }

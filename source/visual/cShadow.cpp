@@ -152,8 +152,8 @@ void cShadow::GlobalUpdate()
                                                    SHADOW_CLIP_NEAR, SHADOW_CLIP_FAR);
 
     // create movement compensation for foreground objects
-    const coreVector3& P = g_pEnvironment->GetCameraPos();
-    const coreVector2& D = g_pEnvironment->GetDirection();
+    const coreVector3 P = g_pEnvironment->GetCameraPos();
+    const coreVector2 D = g_pEnvironment->GetDirection();
     const coreMatrix4 mMove = coreMatrix4( D.y,  D.x, 0.0f, 0.0f,
                                           -D.x,  D.y, 0.0f, 0.0f,
                                           0.0f, 0.0f, 1.0f, 0.0f,

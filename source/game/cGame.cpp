@@ -25,6 +25,7 @@ cGame::cGame(const coreUint8 iDifficulty, const coreBool bCoop, const coreInt32*
 , m_fPacifistDamage     (0.0f)
 , m_bPacifist           (false)
 , m_iDepthLevel         (0u)
+, m_iDepthDebug         (0u)
 , m_iOutroType          (0u)
 , m_iStatus             (0u)
 , m_iDifficulty         (iDifficulty)

@@ -35,7 +35,7 @@ coreBool cShip::DefaultMovePath(const coreSpline2* pRawPath, const coreVector2& 
 
     // 
     this->SetPosition (coreVector3(((vPosition  * vFactor) + vRawOffset) * FOREGROUND_AREA, 0.0f));
-    this->SetDirection(coreVector3( (vDirection * vFactor).Normalized(),                    0.0f));
+    this->SetDirection(coreVector3( (vDirection * vFactor).Normalized(vDirection),          0.0f));
 
     // 
     return (fDistance >= pRawPath->GetTotalDistance()) ? true : false;
@@ -158,8 +158,8 @@ void cShip::DefaultRotateLerp(const coreFloat fFromAngle, const coreFloat fToAng
 void cShip::DefaultOrientate(const coreFloat fAngle)
 {
     // rotate around direction axis
-    const coreVector3& vDir = this->GetDirection();
-    const coreVector2  vOri = coreVector2::Direction(fAngle);
+    const coreVector3 vDir = this->GetDirection();
+    const coreVector2 vOri = coreVector2::Direction(fAngle);
     this->SetOrientation(coreVector3(-vOri.x*vDir.y, vOri.x*vDir.x, vOri.y));
 }
 
@@ -178,9 +178,9 @@ void cShip::DefaultOrientateLerp(const coreFloat fFromAngle, const coreFloat fTo
 void cShip::DefaultAxiate(const coreFloat fAngle)
 {
     // 
-    const coreVector3& vDir  = this->GetDirection();
-    const coreVector3  vOri  = coreVector3::Cross(vDir, coreVector3::Cross(vDir, coreVector3(0.0f,0.0f,1.0f)).Normalized());
-    const coreMatrix3  mRota = coreMatrix4::RotationAxis(fAngle, vDir).m123();
+    const coreVector3 vDir  = this->GetDirection();
+    const coreVector3 vOri  = coreVector3::Cross(vDir, coreVector3::Cross(vDir, coreVector3(0.0f,0.0f,1.0f)).Normalized());
+    const coreMatrix3 mRota = coreMatrix4::RotationAxis(fAngle, vDir).m123();
     this->SetOrientation(vOri * mRota);
 }
 
