@@ -474,6 +474,37 @@ RETURN_NONNULL cPlayer* cGame::FindPlayer(const coreVector2& vPosition)
 
 // ****************************************************************
 // 
+RETURN_NONNULL cPlayer* cGame::FindPlayerSide(const coreVector2& vPosition)
+{
+    STATIC_ASSERT(GAME_PLAYERS == 2u)
+
+    // 
+    if(CONTAINS_FLAG(m_aPlayer[1].GetStatus(), PLAYER_STATUS_DEAD)) return &m_aPlayer[0];
+    if(CONTAINS_FLAG(m_aPlayer[0].GetStatus(), PLAYER_STATUS_DEAD)) return &m_aPlayer[1];
+
+    // 
+    return &m_aPlayer[(vPosition.x > 0.0f) ? 1u : 0u];
+}
+
+
+// ****************************************************************
+// 
+RETURN_NONNULL cPlayer* cGame::FindPlayerDual(const coreUintW iIndex)
+{
+    STATIC_ASSERT(GAME_PLAYERS == 2u)
+
+    // 
+    if(CONTAINS_FLAG(m_aPlayer[1].GetStatus(), PLAYER_STATUS_DEAD)) return &m_aPlayer[0];
+    if(CONTAINS_FLAG(m_aPlayer[0].GetStatus(), PLAYER_STATUS_DEAD)) return &m_aPlayer[1];
+
+    // 
+    ASSERT(iIndex < GAME_PLAYERS)
+    return &m_aPlayer[iIndex];
+}
+
+
+// ****************************************************************
+// 
 coreUint8 cGame::CalcMedal(const coreFloat fTime, const coreUint32 iDamageTaken, const coreFloat* pfMedalGoal)
 {
     ASSERT(pfMedalGoal && (pfMedalGoal[0] < pfMedalGoal[1]) && (pfMedalGoal[1] < pfMedalGoal[2]) && (pfMedalGoal[2] < pfMedalGoal[3]))
