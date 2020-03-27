@@ -63,6 +63,15 @@ void cWeapon::Render()
 
 
 // ****************************************************************
+// 
+coreBool cWeapon::_IsOwnerDarkShading()const
+{
+    // 
+    return m_pOwner->IsDarkShading();
+}
+
+
+// ****************************************************************
 // constructor
 cRayWeapon::cRayWeapon()noexcept
 {
@@ -149,7 +158,6 @@ void cRayWeapon::__ShootOwn()
 // constructor
 cPulseWeapon::cPulseWeapon()noexcept
 : m_fCharge (0.0f)
-, m_iCombo  (0u)
 {
     // set base fire-rate
     m_CooldownTimer.SetSpeed(3.0f);
