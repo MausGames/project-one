@@ -80,7 +80,6 @@ cConfigMenu::cConfigMenu()noexcept
     m_BackButton.SetAlignment (coreVector2(-1.0f,-1.0f));
     m_BackButton.GetCaption()->SetText(ICON_SHARE);
 
-    // create configuration entries
     coreUint8 iOffset = 0u;
     for(coreUintW i = 0u; i < ENTRY_MAX; ++i)
     {
@@ -88,7 +87,6 @@ cConfigMenu::cConfigMenu()noexcept
         if(i == ENTRY_VIDEO_ANTIALIASING)  ++iOffset;   // # new paragraph
         if(i == ENTRY_VIDEO_RENDERQUALITY) ++iOffset;
         if(i == ENTRY_AUDIO_MUSICVOLUME)   ++iOffset;
-        if(i == ENTRY_AUDIO_AMBIENTSOUND)  ++iOffset;
         if(i == ENTRY_INPUT_MOVEUP)        ++iOffset;
         if(i == ENTRY_INPUT_ACTION1)       ++iOffset;
         if(i == ENTRY_GAME_GAMEROTATION)   ++iOffset;
@@ -146,10 +144,10 @@ cConfigMenu::cConfigMenu()noexcept
         __SET_OPTION(m_TextureFilter, VIDEO_TEXTUREFILTER, 0.26f)
         __SET_OPTION(m_RenderQuality, VIDEO_RENDERQUALITY, 0.26f)
         __SET_OPTION(m_ShadowQuality, VIDEO_SHADOWQUALITY, 0.26f)
-        __SET_OPTION(m_OverallVolume, AUDIO_OVERALLVOLUME, 0.26f)
+        __SET_OPTION(m_GlobalVolume,  AUDIO_GLOBALVOLUME,  0.26f)
         __SET_OPTION(m_MusicVolume,   AUDIO_MUSICVOLUME,   0.26f)
         __SET_OPTION(m_EffectVolume,  AUDIO_EFFECTVOLUME,  0.26f)
-        __SET_OPTION(m_AmbientSound,  AUDIO_AMBIENTSOUND,  0.26f)
+        __SET_OPTION(m_AmbientVolume, AUDIO_AMBIENTVOLUME, 0.26f)
         __SET_OPTION(m_Language,      GAME_LANGUAGE,       0.26f)
         __SET_OPTION(m_TextSize,      GAME_TEXTSIZE,       0.26f)
         __SET_OPTION(m_GameRotation,  GAME_GAMEROTATION,   0.26f)
@@ -161,22 +159,11 @@ cConfigMenu::cConfigMenu()noexcept
         __SET_OPTION(m_UpdateFreq,    GAME_UPDATEFREQ,     0.26f)
         __SET_OPTION(m_MirrorMode,    GAME_MIRRORMODE,     0.26f)
 
-        m_Monitor      .SetAutomatic(0.0f);   // # because of realtime-update
-        m_ShadowQuality.SetAutomatic(0.0f);
-        m_Language     .SetAutomatic(0.0f);
-        m_TextSize     .SetAutomatic(0.0f);
-        m_GameRotation .SetAutomatic(0.0f);
-        m_GameScale    .SetAutomatic(0.0f);
-        m_HudRotation  .SetAutomatic(0.0f);
-        m_HudScale     .SetAutomatic(0.0f);
-        m_HudType      .SetAutomatic(0.0f);
-        m_MirrorMode   .SetAutomatic(0.0f);
-        m_AmbientSound .SetEndless(true);
-        m_Language     .SetEndless(true);
-        m_GameRotation .SetEndless(true);
-        m_HudRotation  .SetEndless(true);
-        m_HudType      .SetEndless(true);
-        m_MirrorMode   .SetEndless(true);
+        m_Language    .SetEndless(true);
+        m_GameRotation.SetEndless(true);
+        m_HudRotation .SetEndless(true);
+        m_HudType     .SetEndless(true);
+        m_MirrorMode  .SetEndless(true);
     }
     #undef __SET_OPTION
 
@@ -210,7 +197,6 @@ cConfigMenu::cConfigMenu()noexcept
             __SET_INPUT(aAction[3], INPUT_ACTION4,   0.22f)
             __SET_INPUT(aAction[4], INPUT_ACTION5,   0.22f)
 
-            m_aInput[i].oType  .SetAutomatic(0.0f);   // # because of realtime-update
             m_aInput[i].oType  .SetEndless(true);
             m_aInput[i].oRumble.SetEndless(true);
         }
@@ -253,11 +239,10 @@ cConfigMenu::cConfigMenu()noexcept
     m_RenderQuality.AddEntryLanguage("VALUE_HIGH",             1u);
     m_ShadowQuality.AddEntryLanguage("VALUE_LOW",              1u);
     m_ShadowQuality.AddEntryLanguage("VALUE_HIGH",             2u);
-    for(coreUintW i = 0u; i <= 100u; i += 5u) m_OverallVolume.AddEntry(PRINT("%zu%%", i), i);
+    for(coreUintW i = 0u; i <= 100u; i += 5u) m_GlobalVolume .AddEntry(PRINT("%zu%%", i), i);
     for(coreUintW i = 0u; i <= 100u; i += 5u) m_MusicVolume  .AddEntry(PRINT("%zu%%", i), i);
     for(coreUintW i = 0u; i <= 100u; i += 5u) m_EffectVolume .AddEntry(PRINT("%zu%%", i), i);
-    m_AmbientSound .AddEntryLanguage("VALUE_OFF",              0u);
-    m_AmbientSound .AddEntryLanguage("VALUE_ON",               1u);
+    for(coreUintW i = 0u; i <= 100u; i += 5u) m_AmbientVolume.AddEntry(PRINT("%zu%%", i), i);
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oRumble  .AddEntryLanguage("VALUE_OFF",       0u);
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oRumble  .AddEntryLanguage("VALUE_ON",        10u);
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oFireMode.AddEntryLanguage("FIREMODE_NORMAL", 0u);
@@ -322,10 +307,10 @@ cConfigMenu::cConfigMenu()noexcept
     this->BindObject(SURFACE_CONFIG_VIDEO, &m_TextureFilter);
     this->BindObject(SURFACE_CONFIG_VIDEO, &m_RenderQuality);
     this->BindObject(SURFACE_CONFIG_VIDEO, &m_ShadowQuality);
-    this->BindObject(SURFACE_CONFIG_AUDIO, &m_OverallVolume);
+    this->BindObject(SURFACE_CONFIG_AUDIO, &m_GlobalVolume);
     this->BindObject(SURFACE_CONFIG_AUDIO, &m_MusicVolume);
     this->BindObject(SURFACE_CONFIG_AUDIO, &m_EffectVolume);
-    this->BindObject(SURFACE_CONFIG_AUDIO, &m_AmbientSound);
+    this->BindObject(SURFACE_CONFIG_AUDIO, &m_AmbientVolume);
     this->BindObject(SURFACE_CONFIG_GAME,  &m_Language);
     this->BindObject(SURFACE_CONFIG_GAME,  &m_TextSize);
     this->BindObject(SURFACE_CONFIG_GAME,  &m_GameRotation);
@@ -371,11 +356,11 @@ void cConfigMenu::Move()
     case SURFACE_CONFIG_VIDEO:
         {
             // 
-            if(m_Monitor.IsClickedArrow())
+            if(m_Monitor.GetUserSwitch())
                 this->__LoadResolutions(m_Monitor.GetCurEntry().tValue);
 
             // 
-            if(m_ShadowQuality.IsClickedArrow())
+            if(m_ShadowQuality.GetUserSwitch())
                 this->__UpdateShadowQuality();
 
             // 
@@ -398,19 +383,27 @@ void cConfigMenu::Move()
     case SURFACE_CONFIG_AUDIO:
         {
             // 
-            if(m_OverallVolume.IsClickedArrow(CORE_INPUT_LEFT, CORE_INPUT_HOLD))
-                this->__UpdateOverallVolume();
+            if(m_GlobalVolume .GetUserSwitch() ||
+               m_MusicVolume  .GetUserSwitch() ||
+               m_EffectVolume .GetUserSwitch() ||
+               m_AmbientVolume.GetUserSwitch())
+                this->__UpdateVolume();
 
             // 
-            cMenu::UpdateSwitchBox(&m_OverallVolume);
+            if(m_EffectVolume .GetUserSwitch())
+                {/* play effect */}
+
+            // 
+            cMenu::UpdateSwitchBox(&m_GlobalVolume);
             cMenu::UpdateSwitchBox(&m_MusicVolume);
             cMenu::UpdateSwitchBox(&m_EffectVolume);
-            cMenu::UpdateSwitchBox(&m_AmbientSound);
+            cMenu::UpdateSwitchBox(&m_AmbientVolume);
 
             // 
-            m_OverallVolume.GetCaption()->SetColor3(COLOR_HEALTH(I_TO_F(m_OverallVolume.GetCurEntry().tValue) * 0.01f));
+            m_GlobalVolume .GetCaption()->SetColor3(COLOR_HEALTH(I_TO_F(m_GlobalVolume .GetCurEntry().tValue) * 0.01f));
             m_MusicVolume  .GetCaption()->SetColor3(COLOR_HEALTH(I_TO_F(m_MusicVolume  .GetCurEntry().tValue) * 0.01f));
             m_EffectVolume .GetCaption()->SetColor3(COLOR_HEALTH(I_TO_F(m_EffectVolume .GetCurEntry().tValue) * 0.01f));
+            m_AmbientVolume.GetCaption()->SetColor3(COLOR_HEALTH(I_TO_F(m_AmbientVolume.GetCurEntry().tValue) * 0.01f));
         }
         break;
 
@@ -436,7 +429,7 @@ void cConfigMenu::Move()
                 sPlayerInput& oInput = m_aInput[i];
 
                 // 
-                if(oInput.oType.IsClickedArrow())
+                if(oInput.oType.GetUserSwitch())
                 {
                     for(coreUintW j = 0u, je = oInput.oType.GetNumEntries(); j < je; ++j)
                     {
@@ -459,8 +452,8 @@ void cConfigMenu::Move()
                         // 
                         if(bSkip)
                         {
-                                 if(oInput.oType.GetArrow(0u)->IsClicked()) oInput.oType.Previous();
-                            else if(oInput.oType.GetArrow(1u)->IsClicked()) oInput.oType.Next();
+                                 if(oInput.oType.GetUserSwitch() < 0) oInput.oType.Previous();
+                            else if(oInput.oType.GetUserSwitch() > 0) oInput.oType.Next();
                         }
                         else break;
                     }
@@ -471,8 +464,8 @@ void cConfigMenu::Move()
                 }
 
                 // 
-                if(oInput.oRumble  .IsClickedArrow()) g_CurConfig.Input.aiRumble  [i] = oInput.oRumble  .GetCurEntry().tValue;
-                if(oInput.oFireMode.IsClickedArrow()) g_CurConfig.Input.aiFireMode[i] = oInput.oFireMode.GetCurEntry().tValue;
+                if(oInput.oRumble  .GetUserSwitch()) g_CurConfig.Input.aiRumble  [i] = oInput.oRumble  .GetCurEntry().tValue;
+                if(oInput.oFireMode.GetUserSwitch()) g_CurConfig.Input.aiFireMode[i] = oInput.oFireMode.GetCurEntry().tValue;
 
                 // 
                 cMenu::UpdateSwitchBox(&oInput.oType);
@@ -544,20 +537,20 @@ void cConfigMenu::Move()
     case SURFACE_CONFIG_GAME:
         {
             // 
-            if(m_Language.IsClickedArrow())
+            if(m_Language.GetUserSwitch())
                 this->__UpdateLanguage();
 
             // 
-            if(m_TextSize.IsClickedArrow())
+            if(m_TextSize.GetUserSwitch())
                 {}
 
             // 
-            if(m_GameRotation.IsClickedArrow() ||
-               m_GameScale   .IsClickedArrow() ||
-               m_HudRotation .IsClickedArrow() ||
-               m_HudScale    .IsClickedArrow() ||
-               m_HudType     .IsClickedArrow() ||
-               m_MirrorMode  .IsClickedArrow())
+            if(m_GameRotation.GetUserSwitch() ||
+               m_GameScale   .GetUserSwitch() ||
+               m_HudRotation .GetUserSwitch() ||
+               m_HudScale    .GetUserSwitch() ||
+               m_HudType     .GetUserSwitch() ||
+               m_MirrorMode  .GetUserSwitch())
                 this->__UpdateInterface();
 
             // 
@@ -653,10 +646,10 @@ void cConfigMenu::CheckValues()
                            (m_TextureFilter.GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY))             ||
                            (m_RenderQuality.GetCurEntry().tValue != g_OldConfig.Graphics.iRender)                                             ||
                            (m_ShadowQuality.GetCurEntry().tValue != g_OldConfig.Graphics.iShadow)                                             ||
-                           (m_OverallVolume.GetCurEntry().tValue != F_TO_UI(Core::Config->GetFloat(CORE_CONFIG_AUDIO_GLOBALVOLUME) * 100.0f)) ||
+                           (m_GlobalVolume .GetCurEntry().tValue != F_TO_UI(Core::Config->GetFloat(CORE_CONFIG_AUDIO_GLOBALVOLUME) * 100.0f)) ||
                            (m_MusicVolume  .GetCurEntry().tValue != F_TO_UI(Core::Config->GetFloat(CORE_CONFIG_AUDIO_MUSICVOLUME)  * 100.0f)) ||
-                           (m_EffectVolume .GetCurEntry().tValue != F_TO_UI(Core::Config->GetFloat(CORE_CONFIG_AUDIO_SOUNDVOLUME)  * 100.0f)) ||
-                           (m_AmbientSound .GetCurEntry().tValue != g_OldConfig.Audio.iAmbient)                                               ||
+                           (m_EffectVolume .GetCurEntry().tValue != F_TO_UI(g_OldConfig.Audio.fEffectVolume                        * 100.0f)) ||
+                           (m_AmbientVolume.GetCurEntry().tValue != F_TO_UI(g_OldConfig.Audio.fAmbientVolume                       * 100.0f)) ||
                            (std::strcmp(Core::Language->GetPath(), Core::Config->GetString(CORE_CONFIG_BASE_LANGUAGE)))                       ||
                            (m_TextSize     .GetCurEntry().tValue != g_OldConfig.Game.iTextSize)                                               ||
                            (m_GameRotation .GetCurEntry().tValue != g_OldConfig.Game.iGameRotation)                                           ||
@@ -680,7 +673,6 @@ void cConfigMenu::CheckValues()
 void cConfigMenu::LoadValues()
 {
     const coreUintW iShadowQualityIndex = m_ShadowQuality.GetCurIndex();
-    const coreUintW iOverallVolumeIndex = m_OverallVolume.GetCurIndex();
     const coreUintW iLanguageIndex      = m_Language     .GetCurIndex();
 
     // 
@@ -709,10 +701,10 @@ void cConfigMenu::LoadValues()
     m_ShadowQuality.SelectValue(g_CurConfig.Graphics.iShadow);
 
     // 
-    m_OverallVolume.SelectValue(F_TO_UI(Core::Config->GetFloat(CORE_CONFIG_AUDIO_GLOBALVOLUME) * 100.0f));
+    m_GlobalVolume .SelectValue(F_TO_UI(Core::Config->GetFloat(CORE_CONFIG_AUDIO_GLOBALVOLUME) * 100.0f));
     m_MusicVolume  .SelectValue(F_TO_UI(Core::Config->GetFloat(CORE_CONFIG_AUDIO_MUSICVOLUME)  * 100.0f));
-    m_EffectVolume .SelectValue(F_TO_UI(Core::Config->GetFloat(CORE_CONFIG_AUDIO_SOUNDVOLUME)  * 100.0f));
-    m_AmbientSound .SelectValue(g_CurConfig.Audio.iAmbient);
+    m_EffectVolume .SelectValue(F_TO_UI(g_CurConfig.Audio.fEffectVolume                        * 100.0f));
+    m_AmbientVolume.SelectValue(F_TO_UI(g_CurConfig.Audio.fAmbientVolume                       * 100.0f));
 
     // 
     const std::vector<std::string>& asLanguageList = cMenu::GetLanguageList().get_valuelist();
@@ -739,10 +731,11 @@ void cConfigMenu::LoadValues()
     if(m_SaveButton.GetOverride() >= 0)
     {
         if(iShadowQualityIndex != m_ShadowQuality.GetCurIndex()) this->__UpdateShadowQuality();
-        if(iOverallVolumeIndex != m_OverallVolume.GetCurIndex()) this->__UpdateOverallVolume();
         if(iLanguageIndex      != m_Language     .GetCurIndex()) this->__UpdateLanguage();
-        // TODO m_TextSize
+        this->__UpdateVolume();
         this->__UpdateInterface();
+
+        // TODO m_TextSize
     }
 
     // 
@@ -778,10 +771,10 @@ void cConfigMenu::SaveValues()
     g_CurConfig.Graphics.iShadow = m_ShadowQuality.GetCurEntry().tValue;
 
     // 
-    Core::Config->SetFloat(CORE_CONFIG_AUDIO_GLOBALVOLUME, I_TO_F(m_OverallVolume.GetCurEntry().tValue) * 0.01f);
-    Core::Config->SetFloat(CORE_CONFIG_AUDIO_MUSICVOLUME,  I_TO_F(m_MusicVolume  .GetCurEntry().tValue) * 0.01f);
-    Core::Config->SetFloat(CORE_CONFIG_AUDIO_SOUNDVOLUME,  I_TO_F(m_EffectVolume .GetCurEntry().tValue) * 0.01f);
-    g_CurConfig.Audio.iAmbient = m_AmbientSound.GetCurEntry().tValue;
+    Core::Config->SetFloat(CORE_CONFIG_AUDIO_GLOBALVOLUME, I_TO_F(m_GlobalVolume.GetCurEntry().tValue) * 0.01f);
+    Core::Config->SetFloat(CORE_CONFIG_AUDIO_MUSICVOLUME,  I_TO_F(m_MusicVolume .GetCurEntry().tValue) * 0.01f);
+    g_CurConfig.Audio.fEffectVolume  = I_TO_F(m_EffectVolume .GetCurEntry().tValue) * 0.01f;
+    g_CurConfig.Audio.fAmbientVolume = I_TO_F(m_AmbientVolume.GetCurEntry().tValue) * 0.01f;
 
     // 
     Core::Config->SetString(CORE_CONFIG_BASE_LANGUAGE, Core::Language->GetPath());
@@ -842,10 +835,16 @@ void cConfigMenu::__UpdateShadowQuality()
 
 // ****************************************************************
 // 
-void cConfigMenu::__UpdateOverallVolume()
+void cConfigMenu::__UpdateVolume()
 {
     // 
-    Core::Audio->SetVolume(I_TO_F(m_OverallVolume.GetCurEntry().tValue) * 0.01f);
+    Core::Audio->SetGlobalVolume(I_TO_F(m_GlobalVolume.GetCurEntry().tValue) * 0.01f);
+    Core::Audio->SetMusicVolume (I_TO_F(m_MusicVolume .GetCurEntry().tValue) * 0.01f);
+
+    // 
+    g_CurConfig.Audio.fEffectVolume  = I_TO_F(m_EffectVolume .GetCurEntry().tValue) * 0.01f;
+    g_CurConfig.Audio.fAmbientVolume = I_TO_F(m_AmbientVolume.GetCurEntry().tValue) * 0.01f;
+    // TODO: update sound volumes here   
 }
 
 

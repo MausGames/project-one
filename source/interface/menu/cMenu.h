@@ -163,10 +163,10 @@ enum eEntry : coreUint8
     ENTRY_VIDEO_SHADOWQUALITY,
     ENTRY_VIDEO,
 
-    ENTRY_AUDIO_OVERALLVOLUME = ENTRY_VIDEO,
+    ENTRY_AUDIO_GLOBALVOLUME = ENTRY_VIDEO,
     ENTRY_AUDIO_MUSICVOLUME,
     ENTRY_AUDIO_EFFECTVOLUME,
-    ENTRY_AUDIO_AMBIENTSOUND,
+    ENTRY_AUDIO_AMBIENTVOLUME,
     ENTRY_AUDIO,
 
     ENTRY_INPUT_TYPE = ENTRY_AUDIO,
@@ -483,10 +483,10 @@ private:
     coreSwitchBoxU8 m_TextureFilter;
     coreSwitchBoxU8 m_RenderQuality;
     coreSwitchBoxU8 m_ShadowQuality;
-    coreSwitchBoxU8 m_OverallVolume;
+    coreSwitchBoxU8 m_GlobalVolume;
     coreSwitchBoxU8 m_MusicVolume;
     coreSwitchBoxU8 m_EffectVolume;
-    coreSwitchBoxU8 m_AmbientSound;
+    coreSwitchBoxU8 m_AmbientVolume;
     coreSwitchBoxU8 m_Language;
     coreSwitchBoxU8 m_TextSize;
     coreSwitchBoxU8 m_GameRotation;
@@ -522,7 +522,7 @@ public:
 private:
     // 
     void __UpdateShadowQuality();
-    void __UpdateOverallVolume();
+    void __UpdateVolume();
     void __UpdateLanguage();
     void __UpdateInterface();
 
