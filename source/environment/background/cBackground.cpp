@@ -464,11 +464,23 @@ void cBackground::_SortBackToFront(coreBatchList* OUTPUT pObjectList)
 // check for intersection with other objects
 FUNC_PURE coreBool cBackground::_CheckIntersection(const coreBatchList* pObjectList, const coreVector2& vNewPos, const coreFloat fDistanceSq)
 {
+    const coreSet<coreObject3D*>* pList = pObjectList->List();
+
+    // find first relevant object with binary search
+    ASSERT(std::is_sorted(pList->begin(), pList->end(), [](const coreObject3D* A, const coreObject3D* B) {return (A->GetPosition().y < B->GetPosition().y);}))
+    auto et = std::lower_bound(pList->begin(), pList->end(), vNewPos.y - fDistanceSq, [](const coreObject3D* pObject, const coreFloat fValue) {return (pObject->GetPosition().y < fValue);});
+
     // loop through all objects
-    FOR_EACH(it, *pObjectList->List())
+    FOR_EACH_SET(it, et, *pList)
     {
+        const coreVector2 vDiff = (*it)->GetPosition().xy() - vNewPos;
+
+        // check for going too far (# compare non-square with square)
+        if(vDiff.y > fDistanceSq)
+            return false;
+
         // check for quadratic distance
-        if(((*it)->GetPosition().xy() - vNewPos).LengthSq() < fDistanceSq)
+        if(vDiff.LengthSq() < fDistanceSq)
             return true;
     }
     return false;
@@ -482,8 +494,10 @@ FUNC_PURE coreBool cBackground::_CheckIntersectionQuick(const coreBatchList* pOb
     // compare only with last few objects
     for(coreUintW i = 6u; i-- && (it != et); )
     {
+        const coreVector2 vDiff = (*(--it))->GetPosition().xy() - vNewPos;
+
         // check for quadratic distance
-        if(((*(--it))->GetPosition().xy() - vNewPos).LengthSq() < fDistanceSq)
+        if(vDiff.LengthSq() < fDistanceSq)
             return true;
     }
     return false;
