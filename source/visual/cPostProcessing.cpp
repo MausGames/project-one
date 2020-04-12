@@ -203,7 +203,10 @@ void cPostProcessing::__UpdateInterior()
     if(m_bSplitScreen)
     {
         // 
-        m_aInterior[1].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+        for(coreUintW i = 1u; i < POST_INTERIORS; ++i)
+        {
+            m_aInterior[i].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+        }
 
         // 
         for(coreUintW i = 0u; i < POST_INTERIORS; ++i)
@@ -220,7 +223,10 @@ void cPostProcessing::__UpdateInterior()
     else
     {
         // 
-        m_aInterior[1].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        for(coreUintW i = 1u; i < POST_INTERIORS; ++i)
+        {
+            m_aInterior[i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        }
 
         // 
         m_aInterior[0].SetPosition (this->GetPosition ());
@@ -239,9 +245,9 @@ void cPostProcessing::__UpdateInterior()
 void cPostProcessing::__UpdateWall()
 {
     // place objects left-right or top-down depending on window aspect ratio
-    const coreVector2& vResolution = Core::System->GetResolution();
-    const coreVector2  vFlip       = (vResolution.AspectRatio() < 1.0f) ? coreVector2(0.0f,1.0f) : coreVector2(1.0f,0.0f);
-    const coreVector2  vSize       = coreVector2(1.0f, ((vResolution - g_vGameResolution) / vResolution.yx()).Max() * 0.5f) + 0.1f;
+    const coreVector2 vResolution = Core::System->GetResolution();
+    const coreVector2 vFlip       = (vResolution.AspectRatio() < 1.0f) ? coreVector2(0.0f,1.0f) : coreVector2(1.0f,0.0f);
+    const coreVector2 vSize       = coreVector2(1.0f, ((vResolution - g_vGameResolution) / vResolution.yx()).Max() * 0.5f) + 0.1f;
 
     // 
     for(coreUintW i = 0u; i < POST_WALLS; ++i)

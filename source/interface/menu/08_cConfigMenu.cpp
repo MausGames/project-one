@@ -390,7 +390,7 @@ void cConfigMenu::Move()
                 this->__UpdateVolume();
 
             // 
-            if(m_EffectVolume .GetUserSwitch())
+            if(m_EffectVolume.GetUserSwitch())
                 {/* play effect */}
 
             // 

@@ -393,13 +393,13 @@ template <typename T> cEnemyManager::sEnemySet<T>::sEnemySet()noexcept
     {
         pBuffer->DefineAttribute(SHIP_SHADER_ATTRIBUTE_BLINK, 1u, GL_FLOAT, false, 0u);
     },
-    [](coreFloat* OUTPUT pData, const cEnemy* pEnemy)
+    [](coreByte* OUTPUT pData, const coreObject3D* pEnemy)
     {
-        (*pData) = pEnemy->GetBlink();
+        (*r_cast<coreFloat*>(pData)) = d_cast<const cEnemy*>(pEnemy)->GetBlink();
     },
-    [](const coreProgramPtr& pProgram, const cEnemy* pEnemy)
+    [](const coreProgramPtr& pProgram, const coreObject3D* pEnemy)
     {
-        pEnemy->_EnableBlink(pProgram);
+        d_cast<const cEnemy*>(pEnemy)->_EnableBlink(pProgram);
     });
 
     // add enemy set to global shadow and outline

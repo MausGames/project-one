@@ -1,4 +1,4 @@
-﻿///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
@@ -110,7 +110,7 @@ cGameMenu::cGameMenu()noexcept
 
     for(coreUintW i = 0u; i < MENU_GAME_STAGES; ++i)
     {
-        const coreBool    bBoss = ((i % 6u) == 5u) ? true : false;
+        const coreBool    bBoss = MISSION_SEGMENT_IS_BOSS(i);
         const coreVector2 vPos  = bBoss ? coreVector2(0.0f, -0.07f * (I_TO_F(i / 6u) * 2.0f - 1.5f)) : coreVector2(0.07f * (I_TO_F(i % 6u) - 2.0f), -0.07f * (I_TO_F(i / 6u) * 2.0f - 2.5f));
         const coreVector2 vSize = bBoss ? coreVector2(0.35f,0.07f)                                   : coreVector2(0.07f,0.07f);
 
@@ -373,7 +373,7 @@ void cGameMenu::LoadValues()
     // 
     for(coreUintW i = 0u; i < WORLDMAP_PINS; ++i)
     {
-        m_WorldMap.EnablePin(i, g_pSave->GetHeader().oProgress.aiDisclosure[i]);
+        m_WorldMap.EnablePin(i, g_pSave->GetHeader().oProgress.aiDisclosure[i] ? true : false);
     }
 
     // 

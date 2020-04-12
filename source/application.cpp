@@ -14,7 +14,7 @@ const coreChar* const CoreApp::Settings::IconPath                   = "data/text
 const coreChar* const CoreApp::Settings::CursorPath                 = "data/textures/default_cursor.png";
 const coreUint8       CoreApp::Settings::RenderBuffer::DepthSize    = 16u;
 const coreUint8       CoreApp::Settings::RenderBuffer::StencilSize  = 0u;
-const coreBool        CoreApp::Settings::RenderBuffer::AlphaChannel = true;
+const coreBool        CoreApp::Settings::RenderBuffer::AlphaChannel = false;
 const coreBool        CoreApp::Settings::RenderBuffer::DoubleBuffer = true;
 const coreBool        CoreApp::Settings::RenderBuffer::StereoRender = false;
 

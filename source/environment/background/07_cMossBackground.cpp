@@ -88,7 +88,7 @@ cMossBackground::cMossBackground()noexcept
     m_pRainSound = Core::Manager::Resource->Get<coreSound>("environment_rain.wav");
     m_pRainSound.OnUsableOnce([this, pResource = m_pRainSound]()
     {
-        pResource->PlayRelative(this, 0.0f, 1.0f, 0.0f, true);
+        pResource->PlayRelative(this, 0.0f, 1.0f, true);
     });
 }
 

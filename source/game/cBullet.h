@@ -655,13 +655,13 @@ template <typename T> cBulletManager::sBulletSet<T>::sBulletSet(cOutline* pOutli
     {
         pBuffer->DefineAttribute(BULLET_SHADER_ATTRIBUTE_DEPTH, 1u, GL_FLOAT, false, 0u);
     },
-    [](coreFloat* OUTPUT pData, const cBullet* pBullet)
+    [](coreByte* OUTPUT pData, const coreObject3D* pBullet)
     {
-        (*pData) = pBullet->m_fDepth;
+        (*r_cast<coreFloat*>(pData)) = d_cast<const cBullet*>(pBullet)->m_fDepth;
     },
-    [](const coreProgramPtr& pProgram, const cBullet* pBullet)
+    [](const coreProgramPtr& pProgram, const coreObject3D* pBullet)
     {
-        pBullet->_EnableDepth(pProgram);
+        d_cast<const cBullet*>(pBullet)->_EnableDepth(pProgram);
     });
 
     // 

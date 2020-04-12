@@ -801,7 +801,7 @@ void cViridoMission::__MoveOwnAfter()
             const coreVector2 vDiff = vOldBallPos - pCurEnemy->GetPosition().xy();
 
             // 
-            coreUintW iAxis = 0u;
+            coreUintW iAxis;
             if(IsHorizontal(vDiff)) iAxis = ((vDiff.x * vBallDir.x) >= 0.0f) ? 1u : 0u;
                                else iAxis = ((vDiff.y * vBallDir.y) >= 0.0f) ? 0u : 1u;
 

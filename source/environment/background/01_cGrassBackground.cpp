@@ -214,7 +214,7 @@ cGrassBackground::cGrassBackground()noexcept
 
                     // set object properties
                     pObject->SetPosition(coreVector3(vPosition, fHeight));
-                    pObject->SetSize    (coreVector3(2.3f,0.0f,1.0f));
+                    pObject->SetSize    (coreVector3(2.4f,0.0f,1.0f));
                     pObject->SetColor3  (coreVector3(1.0f,1.0f,1.0f) * (0.75f + 0.2f * fHeight/40.0f));
                     pObject->SetTexSize (coreVector2(0.5f,0.85f));
 
@@ -284,7 +284,7 @@ cGrassBackground::cGrassBackground()noexcept
     m_pNatureSound = Core::Manager::Resource->Get<coreSound>("environment_nature.wav");
     m_pNatureSound.OnUsableOnce([this, pResource = m_pNatureSound]()
     {
-        pResource->PlayRelative(this, 0.0f, 1.0f, 0.0f, true);
+        pResource->PlayRelative(this, 0.0f, 1.0f, true);
     });
 }
 
