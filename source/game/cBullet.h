@@ -19,7 +19,7 @@
 // TODO: sort bullet classes (color, enemy<>player, normal<>special), improve array indexing and caching
 // TODO: shift spear-bullet collision like ray-bullet
 // TODO: bullet -> to POD-type with single parent object
-// TODO: reorder bullets either yellow->green or green->yellow, so they are overlapping consistently
+// TODO: reorder bullets either yellow->green or green->yellow, so they are overlapping consistently (in default order)
 
 
 // ****************************************************************
@@ -158,6 +158,8 @@ private:
     cOutline  m_Outline;                              // 
     coreInt32 m_iType;                                // 
 
+    coreUint8 m_aiOrder[BULLET_SET_COUNT];            // 
+
 
 public:
     explicit cBulletManager(const coreInt32 iType)noexcept;
@@ -181,6 +183,10 @@ public:
 
     // 
     template <typename T> void PrefetchBullet();
+
+    // 
+    void OverrideOrder(const coreUint8* piNewOrder, const coreUintW iSize);
+    void ResetOrder();
 
     // 
     inline coreUintW                       GetNumBullets     ()const {coreUintW iNum = 0u; this->ForEachBullet        ([&](void*) {++iNum;}); return iNum;}
