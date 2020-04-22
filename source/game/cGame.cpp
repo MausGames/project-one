@@ -802,14 +802,17 @@ void cGame::__HandleCollisions()
     {
         if(!bFirstHit) return;
 
-        // 
-        const coreVector2 vDir = (pPlayer->GetPosition().xy() - pEnemy->GetPosition().xy()).Normalized();
-        pPlayer->SetForce    (vDir * 100.0f);
-        pPlayer->SetInterrupt(PLAYER_INTERRUPT);
+        if(!CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST) && (pEnemy->GetLifeTime() >= 0.5f))
+        {
+            // 
+            const coreVector2 vDiff = pPlayer->GetOldPos() - pEnemy->GetPosition().xy();
+            pPlayer->ApplyForce  (vDiff.Normalized() * 100.0f);
+            pPlayer->SetInterrupt(PLAYER_INTERRUPT);
 
-        // 
-        g_pSpecialEffects->CreateSplashColor(pPlayer->GetPosition(), 50.0f, 10u, coreVector3(1.0f,1.0f,1.0f));
-        g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+            // 
+            g_pSpecialEffects->CreateSplashColor(pPlayer->GetPosition(), 50.0f, 10u, coreVector3(1.0f,1.0f,1.0f));
+            g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+        }
     });
 
     // 
@@ -829,18 +832,30 @@ void cGame::__HandleCollisions()
         if(!g_pForeground->IsVisiblePoint(vIntersection.xy())) return;
 
         // 
-        if(pEnemy->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner())))
+        if(!CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
         {
             // 
-            pBullet->Deactivate(true, vIntersection.xy());
+            if(pEnemy->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner())))
+            {
+                // 
+                pBullet->Deactivate(true, vIntersection.xy());
 
-            // 
-            g_pSpecialEffects->RumblePlayer(d_cast<cPlayer*>(pBullet->GetOwner()), SPECIAL_RUMBLE_DEFAULT);
-        }
-        else
-        {
-            // 
-            pBullet->Reflect(pEnemy);
+                // 
+                g_pSpecialEffects->RumblePlayer(d_cast<cPlayer*>(pBullet->GetOwner()), SPECIAL_RUMBLE_DEFAULT);
+            }
+            else
+            {
+                // prevent an already killed but immortal enemy from reflecting bullets (in the same frame)
+                if(!pEnemy->ReachedDeath())
+                {
+                    const coreVector2 vFlyDir = pBullet->GetFlyDir();
+                    const coreVector2 vDiff   = pBullet->GetPosition().xy() - pEnemy->GetPosition().xy();
+                    const coreVector2 vNormal = (vDiff.Normalized(-vFlyDir) - vFlyDir * 10.0f).Normalized(-vFlyDir);
+
+                    // 
+                    pBullet->Reflect(pEnemy, vIntersection.xy(), vNormal);
+                }
+            }
         }
     });
 

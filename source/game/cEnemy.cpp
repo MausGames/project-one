@@ -19,11 +19,8 @@ cEnemy::cEnemy()noexcept
     this->DefineTexture(0u, "ship_enemy.png");
     this->DefineProgram("object_ship_blink_program");
 
-    // set object properties
+    // reset base properties
     this->ResetProperties();
-
-    // set initial status
-    m_iStatus = ENEMY_STATUS_DEAD;
 }
 
 
@@ -84,8 +81,8 @@ void cEnemy::Move()
         // 
         if(g_pForeground->IsVisibleObject(this))
         {
-            this->SetEnabled(CORE_OBJECT_ENABLE_ALL);
-            this->ChangeType(TYPE_ENEMY);   // # makes it available in cEnemyManager::ForEachEnemy
+            this->SetEnabled(CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_HIDDEN) ? CORE_OBJECT_ENABLE_MOVE : CORE_OBJECT_ENABLE_ALL);
+            this->ChangeType(TYPE_ENEMY);   // # make it available in cEnemyManager::ForEachEnemy
         }
         else
         {
@@ -120,9 +117,7 @@ coreInt32 cEnemy::TakeDamage(coreInt32 iDamage, const coreUint8 iElement, const 
             if(pAttacker)
             {
                 const coreUint32 iValue = ABS(CLAMP(iDamage, this->GetCurHealth() - this->GetMaxHealth(), this->GetCurHealth()));
-
-                pAttacker->GetScoreTable()->AddCombo(iValue);
-                pAttacker->GetScoreTable()->AddChain(iValue);
+                pAttacker->GetScoreTable()->AddScore(iValue, false);
             }
 
             // 
@@ -260,13 +255,17 @@ void cEnemy::Kill(const coreBool bAnimated)
 
 
 // ****************************************************************
-//  reset base properties
+// reset base properties
 void cEnemy::ResetProperties()
 {
-    this->SetPosition   (coreVector3(FLT_MAX,FLT_MAX,0.0f));
+    // set object properties
+    this->SetPosition   (coreVector3(1.0f, 1.0f,0.0f) * 1000.0f);
     this->SetSize       (coreVector3(1.0f, 1.0f,1.0f) * ENEMY_SIZE_FACTOR);
     this->SetDirection  (coreVector3(0.0f,-1.0f,0.0f));
     this->SetOrientation(coreVector3(0.0f, 0.0f,1.0f));
+
+    // set initial status
+    m_iStatus = ENEMY_STATUS_DEAD;
 }
 
 

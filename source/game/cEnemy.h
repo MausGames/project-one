@@ -32,7 +32,9 @@ enum eEnemyStatus : coreUint16
     ENEMY_STATUS_CHILD       = 0x0020u,   // 
     ENEMY_STATUS_SHIELDED    = 0x0040u,   // 
     ENEMY_STATUS_INVINCIBLE  = 0x0080u,   // 
-    ENEMY_STATUS_IMMORTAL    = 0x0100u    // 
+    ENEMY_STATUS_IMMORTAL    = 0x0100u,   // 
+    ENEMY_STATUS_GHOST       = 0x0200u,   // 
+    ENEMY_STATUS_HIDDEN      = 0x0400u    // 
 };
 
 
