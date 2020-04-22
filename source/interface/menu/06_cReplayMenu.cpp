@@ -34,7 +34,7 @@ cReplayMenu::cReplayMenu()noexcept
         m_aName[i].SetAlignment(coreVector2(1.0f,0.0f));
         m_aName[i].SetColor3   (COLOR_MENU_WHITE);
 
-        m_aTime[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+        m_aTime[i].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
         m_aTime[i].SetPosition (coreVector2(-1.0f,1.0f) * m_aName[i].GetPosition());
         m_aTime[i].SetAlignment(coreVector2(-1.0f,0.0f));
         m_aTime[i].SetColor3   (COLOR_MENU_WHITE);

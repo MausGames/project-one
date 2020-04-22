@@ -14,10 +14,10 @@
 cIntroMenu::cIntroMenu()noexcept
 : coreMenu       (SURFACE_INTRO_MAX, SURFACE_INTRO_EMPTY)
 , m_IntroTimer   (coreTimer(3.0f, 0.5f, 1u))
-, m_iIntroStatus (1u)
+, m_iIntroStatus (0xFFu)
 {
     // create menu objects
-    m_WelcomeText.Construct      (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+    m_WelcomeText.Construct      (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_WelcomeText.SetPosition    (coreVector2(0.0f,0.0f));
     m_WelcomeText.SetTextLanguage("WELCOME");
 

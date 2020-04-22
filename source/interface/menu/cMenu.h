@@ -63,20 +63,20 @@
 
 #define MENU_BUTTON             "menu_background_black.png", "menu_background_black.png"
 #define MENU_SWITCHBOX          "default_black.png", "default_black.png"
-#define MENU_FONT_DEFAULT       "ethnocentric.ttf"
-#define MENU_FONT_DYNAMIC_1     "dynamic_font",     (13u)
-#define MENU_FONT_DYNAMIC_2     "dynamic_font",     (20u)
-#define MENU_FONT_DYNAMIC_3     "dynamic_font",     (30u)
-#define MENU_FONT_DYNAMIC_4     "dynamic_font",     (40u)
-#define MENU_FONT_DYNAMIC_5     "dynamic_font",     (70u)
-#define MENU_FONT_STANDARD_1    "ethnocentric.ttf", (13u)
-#define MENU_FONT_STANDARD_2    "ethnocentric.ttf", (20u)
-#define MENU_FONT_STANDARD_3    "ethnocentric.ttf", (30u)
-#define MENU_FONT_STANDARD_4    "ethnocentric.ttf", (40u)
-#define MENU_FONT_STANDARD_5    "ethnocentric.ttf", (70u)
-#define MENU_FONT_ICON_1        "fontawesome.otf",  (20u)
-#define MENU_FONT_ICON_2        "fontawesome.otf",  (24u)
-#define MENU_FONT_ICON_3        "fontawesome.otf",  (40u)
+#define MENU_FONT_DEFAULT       "keifont.ttf"
+#define MENU_FONT_STANDARD_1    MENU_FONT_DEFAULT, (16u)
+#define MENU_FONT_STANDARD_2    MENU_FONT_DEFAULT, (22u)
+#define MENU_FONT_STANDARD_3    MENU_FONT_DEFAULT, (32u)
+#define MENU_FONT_STANDARD_4    MENU_FONT_DEFAULT, (42u)
+#define MENU_FONT_STANDARD_5    MENU_FONT_DEFAULT, (72u)
+#define MENU_FONT_DYNAMIC_1     "dynamic_font",    (16u)
+#define MENU_FONT_DYNAMIC_2     "dynamic_font",    (22u)
+#define MENU_FONT_DYNAMIC_3     "dynamic_font",    (32u)
+#define MENU_FONT_DYNAMIC_4     "dynamic_font",    (42u)
+#define MENU_FONT_DYNAMIC_5     "dynamic_font",    (72u)
+#define MENU_FONT_ICON_1        "fontawesome.otf", (20u)
+#define MENU_FONT_ICON_2        "fontawesome.otf", (24u)
+#define MENU_FONT_ICON_3        "fontawesome.otf", (40u)
 #define MENU_OUTLINE_SMALL      (1u)
 #define MENU_OUTLINE_BIG        (4u)
 

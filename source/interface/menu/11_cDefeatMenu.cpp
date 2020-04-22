@@ -35,7 +35,7 @@ cDefeatMenu::cDefeatMenu()noexcept
     m_ContinueText.SetPosition    (coreVector2(0.0f,-0.1f));
     m_ContinueText.SetTextLanguage("DEFEAT_CONTINUE");
 
-    m_ContinueTimer.Construct  (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
+    m_ContinueTimer.Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
     m_ContinueTimer.SetPosition(m_ContinueText.GetPosition() + coreVector2(0.0f,-0.05f));
 
     for(coreUintW i = 0u; i < MENU_DEFEAT_CONTINUES; ++i)

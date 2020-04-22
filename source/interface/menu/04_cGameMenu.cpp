@@ -122,7 +122,7 @@ cGameMenu::cGameMenu()noexcept
 
     for(coreUintW i = 0u; i < MENU_GAME_OPTIONS; ++i)
     {
-        m_aOptionName[i].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
+        m_aOptionName[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
         m_aOptionName[i].SetPosition (m_ArmoryBackground.GetPosition() + m_ArmoryBackground.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.04f, -0.1f - 0.05f*I_TO_F(i * 2u)));
         m_aOptionName[i].SetAlignment(coreVector2(1.0f,0.0f));
         m_aOptionName[i].SetColor3   (COLOR_MENU_WHITE);

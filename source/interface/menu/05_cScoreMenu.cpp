@@ -29,7 +29,7 @@ cScoreMenu::cScoreMenu()noexcept
 
     for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i)
     {
-        m_aRank[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+        m_aRank[i].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
         m_aRank[i].SetPosition (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.04f, -0.05f - 0.05f*I_TO_F(i)));
         m_aRank[i].SetAlignment(coreVector2(1.0f,0.0f));
         m_aRank[i].SetColor3   (COLOR_MENU_WHITE);
@@ -41,7 +41,7 @@ cScoreMenu::cScoreMenu()noexcept
         m_aName[i].SetColor3   (COLOR_MENU_WHITE);
         m_aName[i].SetText     ("Horst");
 
-        m_aScore[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+        m_aScore[i].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
         m_aScore[i].SetPosition (coreVector2(-1.0f,1.0f) * m_aRank[i].GetPosition());
         m_aScore[i].SetAlignment(coreVector2(-1.0f,0.0f));
         m_aScore[i].SetColor3   (COLOR_MENU_WHITE);

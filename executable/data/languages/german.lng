@@ -1,5 +1,8 @@
 $LANGUAGE = Deutsch
-$FONT = ethnocentric.ttf
+$FONT = keifont.ttf
+
+$WELCOME = Ein Spiel von Martin Mauersics
+$PROMPT = TASTE DRÜCKEN
 
 $START_GAME = Spielen
 $EXIT_GAME = Beenden

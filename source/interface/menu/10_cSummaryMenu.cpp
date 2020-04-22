@@ -61,7 +61,7 @@ cSummaryMenu::cSummaryMenu()noexcept
 
     for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES; ++i)
     {
-        m_aName[i].Construct  (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+        m_aName[i].Construct  (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
         m_aName[i].SetPosition(coreVector2(0.0f, -0.01f - 0.1f*I_TO_F(i)));
         m_aName[i].SetColor3  (COLOR_MENU_BLUE);
 
