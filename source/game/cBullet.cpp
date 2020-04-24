@@ -712,8 +712,8 @@ void cRocketBullet::__MoveOwn()
     const cEnemy* pEnemy = g_pGame->GetEnemyManager()->FindEnemy(this->GetPosition().xy());
     if(pEnemy)
     {
-        const coreVector2 vDiffNorm = (pEnemy->GetPosition().xy() - this->GetPosition().xy()).Normalized();
-        const coreVector2 vNewDir   = (m_vFlyDir + vDiffNorm * (0.05f * m_fSpeed * Core::System->GetTime())).Normalized();
+        const coreVector2 vAim    = (pEnemy->GetPosition().xy() - this->GetPosition().xy()).Normalized();
+        const coreVector2 vNewDir = SmoothAim(m_vFlyDir, vAim, 0.05f * m_fSpeed);
 
         m_vFlyDir = vNewDir;
     }

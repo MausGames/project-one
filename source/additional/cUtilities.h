@@ -10,7 +10,7 @@
 #ifndef _P1_GUARD_UTILITIES_H_
 #define _P1_GUARD_UTILITIES_H_
 
-// TODO: optimize AlongStar and AlongStarNormal
+// TODO: optimize AlongStar, AlongStarNormal, SmoothAim (and AngleDiff ?)
 
 
 // ****************************************************************
@@ -43,14 +43,6 @@ constexpr FUNC_CONST coreFloat AngleDiff(const coreFloat x, const coreFloat y)
     while(A <  -PI) A += 2.0f*PI;
     while(A >=  PI) A -= 2.0f*PI;
     return A;
-}
-
-
-// ****************************************************************
-// 
-inline FUNC_CONST coreFloat SmoothTowards(const coreFloat fLength, const coreFloat fRadius)
-{
-    return MIN(fLength, fRadius) * RCP(fRadius);
 }
 
 
@@ -94,9 +86,31 @@ template <typename T, typename S, typename R> constexpr FUNC_LOCAL T TernaryLerp
 
 // ****************************************************************
 // 
-inline coreFloat FUNC_PURE FrictionFactor(const coreFloat fStrength)
+inline FUNC_PURE coreFloat FrictionFactor(const coreFloat fStrength)
 {
     return POW(1.0f - fStrength * (1.0f / FRAMERATE_MIN), Core::System->GetTime() * FRAMERATE_MIN);
+}
+
+
+// ****************************************************************
+// 
+inline FUNC_PURE coreVector2 SmoothAim(const coreVector2 vOldDir, const coreVector2 vNewDir, const coreFloat fStrength)
+{
+    ASSERT(vOldDir.IsNormalized() && vNewDir.IsNormalized())
+
+    const coreFloat fFrom = vOldDir.Angle();
+    const coreFloat fTo   = vNewDir.Angle();
+    const coreFloat fDiff = AngleDiff(fTo, fFrom);
+
+    return coreVector2::Direction(fFrom + fDiff * (1.0f - FrictionFactor(fStrength)));
+}
+
+
+// ****************************************************************
+// 
+inline FUNC_CONST coreFloat SmoothTowards(const coreFloat fDistance, const coreFloat fThreshold)
+{
+    return MIN(fDistance, fThreshold) * RCP(fThreshold);
 }
 
 
