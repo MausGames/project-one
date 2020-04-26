@@ -840,11 +840,12 @@ void cConfigMenu::__UpdateVolume()
     // 
     Core::Audio->SetGlobalVolume(I_TO_F(m_GlobalVolume.GetCurEntry().tValue) * 0.01f);
     Core::Audio->SetMusicVolume (I_TO_F(m_MusicVolume .GetCurEntry().tValue) * 0.01f);
-
-    // 
     g_CurConfig.Audio.fEffectVolume  = I_TO_F(m_EffectVolume .GetCurEntry().tValue) * 0.01f;
     g_CurConfig.Audio.fAmbientVolume = I_TO_F(m_AmbientVolume.GetCurEntry().tValue) * 0.01f;
-    // TODO: update sound volumes here   
+
+    // 
+    Core::Audio->SetTypeVolume(g_CurConfig.Audio.fEffectVolume,  SOUND_EFFECT);
+    Core::Audio->SetTypeVolume(g_CurConfig.Audio.fAmbientVolume, SOUND_AMBIENT);
 }
 
 

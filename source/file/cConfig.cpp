@@ -126,6 +126,11 @@ void LoadConfig()
         }
     }
 
+    // 
+    Core::Audio->SetSoundVolume(1.0f);
+    Core::Audio->SetTypeVolume(g_OldConfig.Audio.fEffectVolume,  SOUND_EFFECT);
+    Core::Audio->SetTypeVolume(g_OldConfig.Audio.fAmbientVolume, SOUND_AMBIENT);
+
     // check configuration for valid values
     CheckConfig(&g_OldConfig);
 

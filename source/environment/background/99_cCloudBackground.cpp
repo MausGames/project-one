@@ -65,7 +65,7 @@ cCloudBackground::cCloudBackground()noexcept
     m_pWindSound = Core::Manager::Resource->Get<coreSound>("environment_wind.wav");
     m_pWindSound.OnUsableOnce([this, pResource = m_pWindSound]()
     {
-        pResource->PlayRelative(this, 0.0f, 1.0f, true);
+        pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
     });
 }
 

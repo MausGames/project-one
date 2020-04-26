@@ -191,6 +191,13 @@ enum eType : coreInt32
     TYPE_LEVIATHAN_RAY
 };
 
+// 
+enum eSound : coreUint8
+{
+    SOUND_EFFECT = 1u,
+    SOUND_AMBIENT
+};
+
 // attack elements
 enum eElement : coreUint8
 {

@@ -88,7 +88,7 @@ cMossBackground::cMossBackground()noexcept
     m_pRainSound = Core::Manager::Resource->Get<coreSound>("environment_rain.wav");
     m_pRainSound.OnUsableOnce([this, pResource = m_pRainSound]()
     {
-        pResource->PlayRelative(this, 0.0f, 1.0f, true);
+        pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
     });
 }
 
@@ -177,7 +177,14 @@ void cMossBackground::__MoveOwn()
     if((fPrevDelay < 0.0f) && (m_fThunderDelay >= 0.0f))
     {
         m_iThunderIndex = (m_iThunderIndex + Core::Rand->Int(1, ARRAY_SIZE(m_apThunder) - 1)) % ARRAY_SIZE(m_apThunder);
-        m_apThunder[m_iThunderIndex]->PlayRelative(NULL, 1.0f, 1.0f, 0.0f, false);
+        m_apThunder[m_iThunderIndex]->PlayRelative(this, 0.0f, 1.0f, false, SOUND_AMBIENT);
+    }
+
+    // 
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_apThunder); ++i)
+    {
+        if(m_apThunder[i]->EnableRef(this))
+            m_apThunder[i]->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
     }
 
     // 
