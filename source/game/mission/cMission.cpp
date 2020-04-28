@@ -83,6 +83,9 @@ void cMission::RenderTop  () {this->__RenderOwnTop  ();}
 // move the mission
 void cMission::MoveBefore()
 {
+    // 
+    this->__MoveOwnBefore();
+
     if(!m_anStage.empty())
     {
         // 
@@ -90,18 +93,11 @@ void cMission::MoveBefore()
         m_fStageTime.Update(1.0f);
 
         // 
-        if(m_fStageTime > 0.0f)
-        {
-            // 
-            m_anStage.back()();
+        m_anStage.back()();
 
-            // 
-            if(m_anStage.empty()) g_pGame->StartOutro(0u);
-        }
+        // 
+        if(m_anStage.empty()) g_pGame->StartOutro(0u);
     }
-
-    // 
-    this->__MoveOwnBefore();
 }
 
 void cMission::MoveAfter()
@@ -119,12 +115,6 @@ void cMission::SkipStage()
     m_anStage.pop_back();
 
     // 
-    m_fStageTime       = -MISSION_STAGE_DELAY;
-    m_fStageTimeBefore = -MISSION_STAGE_DELAY;
-    m_iStageSub        = 0u;
-    m_pfMedalGoal      = NULL;
-
-    // 
     FOR_EACH(it, m_apPath)  SAFE_DELETE(*it)
     FOR_EACH(it, m_apSquad) SAFE_DELETE(*it)
 
@@ -133,8 +123,20 @@ void cMission::SkipStage()
     m_apSquad.clear();
 
     // 
-    std::memset(m_piData, 0, sizeof(coreUint32) * m_iDataSize);
+    if(m_piData) std::memset(m_piData, 0, sizeof(coreUint32) * m_iDataSize);
 
+    // 
+    m_fStageTime       = 0.0f;
+    m_fStageTimeBefore = 0.0f;
+    m_iStageSub        = 0u;
+
+    // 
+    m_pfMedalGoal = NULL;
+
+    // 
+    m_nCollPlayerEnemy  = NULL;
+    m_nCollPlayerBullet = NULL;
+    m_nCollEnemyBullet  = NULL;
 }
 
 
@@ -159,7 +161,7 @@ void cMission::ActivateBoss(const cBoss* pBoss)
 
 void cMission::DeactivateBoss()
 {
-    ASSERT(m_iCurSegmentIndex != MISSION_NO_SEGMENT)
+    if(m_iCurSegmentIndex == MISSION_NO_SEGMENT) return;
 
     // 
     this->__CloseSegment();
@@ -188,7 +190,7 @@ void cMission::ActivateWave(const coreChar* pcName)
 
 void cMission::DeactivateWave()
 {
-    ASSERT(m_iCurSegmentIndex != MISSION_NO_SEGMENT)
+    if(m_iCurSegmentIndex == MISSION_NO_SEGMENT) return;
 
     // 
     this->__CloseSegment();

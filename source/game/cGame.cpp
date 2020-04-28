@@ -792,68 +792,83 @@ void cGame::__HandlePacifist()
 void cGame::__HandleCollisions()
 {
     // 
-    m_EnemyManager.ForEachEnemy([](cEnemy* OUTPUT pEnemy)
-    {
-        pEnemy->ActivateModelLowOnly();
-    });
+    m_EnemyManager.ForEachEnemy([](cEnemy* OUTPUT pEnemy) {pEnemy->ActivateModelLowOnly();});
 
     // 
-    cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_ENEMY, [](cPlayer* OUTPUT pPlayer, cEnemy* OUTPUT pEnemy, const coreVector3& vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_ENEMY, [this](cPlayer* OUTPUT pPlayer, cEnemy* OUTPUT pEnemy, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
-        if(!bFirstHit) return;
+        // 
+        if(pEnemy->GetLifeTime() < 0.5f) return;
 
-        if(!CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST) && (pEnemy->GetLifeTime() >= 0.5f))
+        // 
+        m_pCurMission->CollPlayerEnemy(pPlayer, pEnemy, vIntersection, bFirstHit);
+
+        if(bFirstHit)
         {
             // 
-            const coreVector2 vDiff = pPlayer->GetOldPos() - pEnemy->GetPosition().xy();
-            pPlayer->ApplyForce  (vDiff.Normalized() * 100.0f);
-            pPlayer->SetInterrupt(PLAYER_INTERRUPT);
+            if(!CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
+            {
+                // 
+                const coreVector2 vDiff = pPlayer->GetOldPos() - pEnemy->GetPosition().xy();
+                pPlayer->ApplyForce  (vDiff.Normalized() * 100.0f);
+                pPlayer->SetInterrupt(PLAYER_INTERRUPT);
 
-            // 
-            g_pSpecialEffects->CreateSplashColor(pPlayer->GetPosition(), 50.0f, 10u, coreVector3(1.0f,1.0f,1.0f));
-            g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+                // 
+                g_pSpecialEffects->CreateSplashColor(pPlayer->GetPosition(), 50.0f, 10u, coreVector3(1.0f,1.0f,1.0f));
+                g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+            }
         }
     });
 
     // 
-    cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_BULLET_ENEMY, [](cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_BULLET_ENEMY, [this](cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         // 
-        pPlayer->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy());
-        pBullet->Deactivate(true, vIntersection.xy());
+        m_pCurMission->CollPlayerBullet(pPlayer, pBullet, vIntersection, bFirstHit);
+
+        if(bFirstHit)
+        {
+            // 
+            pPlayer->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy());
+            pBullet->Deactivate(true, vIntersection.xy());
+        }
     });
 
     // 
-    Core::Manager::Object->TestCollision(TYPE_ENEMY, TYPE_BULLET_PLAYER, [](cEnemy* OUTPUT pEnemy, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
+    Core::Manager::Object->TestCollision(TYPE_ENEMY, TYPE_BULLET_PLAYER, [this](cEnemy* OUTPUT pEnemy, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
-        if(!bFirstHit) return;
-
         // 
         if(!g_pForeground->IsVisiblePoint(vIntersection.xy())) return;
 
         // 
-        if(!CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
+        m_pCurMission->CollEnemyBullet(pEnemy, pBullet, vIntersection, bFirstHit);
+
+        if(bFirstHit)
         {
             // 
-            if(pEnemy->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner())))
+            if(!CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
             {
                 // 
-                pBullet->Deactivate(true, vIntersection.xy());
-
-                // 
-                g_pSpecialEffects->RumblePlayer(d_cast<cPlayer*>(pBullet->GetOwner()), SPECIAL_RUMBLE_DEFAULT);
-            }
-            else
-            {
-                // prevent an already killed but immortal enemy from reflecting bullets (in the same frame)
-                if(!pEnemy->ReachedDeath())
+                if(pEnemy->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner())))
                 {
-                    const coreVector2 vFlyDir = pBullet->GetFlyDir();
-                    const coreVector2 vDiff   = pBullet->GetPosition().xy() - pEnemy->GetPosition().xy();
-                    const coreVector2 vNormal = (vDiff.Normalized(-vFlyDir) - vFlyDir * 10.0f).Normalized(-vFlyDir);
+                    // 
+                    pBullet->Deactivate(true, vIntersection.xy());
 
                     // 
-                    pBullet->Reflect(pEnemy, vIntersection.xy(), vNormal);
+                    g_pSpecialEffects->RumblePlayer(d_cast<cPlayer*>(pBullet->GetOwner()), SPECIAL_RUMBLE_DEFAULT);
+                }
+                else
+                {
+                    // prevent an already killed but immortal enemy from reflecting bullets (in the same frame)
+                    if(!pEnemy->ReachedDeath())
+                    {
+                        const coreVector2 vFlyDir = pBullet->GetFlyDir();
+                        const coreVector2 vDiff   = pBullet->GetPosition().xy() - pEnemy->GetPosition().xy();
+                        const coreVector2 vNormal = (vDiff.Normalized(-vFlyDir) - vFlyDir * 10.0f).Normalized(-vFlyDir);
+
+                        // 
+                        pBullet->Reflect(pEnemy, vIntersection.xy(), vNormal);
+                    }
                 }
             }
         }
@@ -874,10 +889,7 @@ void cGame::__HandleCollisions()
     });
 
     // 
-    m_EnemyManager.ForEachEnemy([](cEnemy* OUTPUT pEnemy)
-    {
-        pEnemy->ActivateModelDefault();
-    });
+    m_EnemyManager.ForEachEnemy([](cEnemy* OUTPUT pEnemy) {pEnemy->ActivateModelDefault();});
 }
 
 
