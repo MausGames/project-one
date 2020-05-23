@@ -569,6 +569,27 @@ private:
 
 // ****************************************************************
 // 
+class cErrorMission final : public cMission
+{
+private:
+    cProjectOneBoss m_ProjectOne;   // 
+
+
+public:
+    cErrorMission()noexcept;
+
+    DISABLE_COPY(cErrorMission)
+    ASSIGN_ID(100, "Error")
+
+
+private:
+    // execute own routines
+    void __SetupOwn()final;
+};
+
+
+// ****************************************************************
+// 
 template <typename F> coreSpline2* cMission::_AddPath(const coreUint16 iCodeLine, F&& nInitFunc)
 {
     if(!m_apPath.count(iCodeLine))

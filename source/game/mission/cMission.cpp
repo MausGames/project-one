@@ -267,3 +267,4 @@ UNITY_BUILD
 #include "07_cMuscusMission.cpp"
 #include "08_cAterMission.cpp"
 #include "99_cIntroMission.cpp"
+#include "AA_cErrorMission.cpp"

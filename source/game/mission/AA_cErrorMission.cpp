@@ -6,15 +6,13 @@
 //| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
-#pragma once
-#ifndef _P1_GUARD_VALIDATE_H_
-#define _P1_GUARD_VALIDATE_H_
+#include "main.h"
 
 
 // ****************************************************************
-// validation disabled
-inline coreBool ValidateReplay(cReplay* OUTPUT pReplay) {return true;}
-inline coreBool ValidateSave  (cSave*   OUTPUT pSave)   {return true;}
-
-
-#endif // _P1_GUARD_VALIDATE_H_
+// constructor
+cErrorMission::cErrorMission()noexcept
+{
+    // 
+    m_apBoss[0] = &m_ProjectOne;
+}
