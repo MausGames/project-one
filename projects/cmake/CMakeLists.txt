@@ -28,6 +28,16 @@ target_sources(
     ${BASE_DIRECTORY}/source/file/cReplay.cpp
     ${BASE_DIRECTORY}/source/file/cSave.cpp
     ${BASE_DIRECTORY}/source/game/boss/cBoss.cpp
+    ${BASE_DIRECTORY}/source/game/mission/01_cViridoMission_setup.cpp
+    ${BASE_DIRECTORY}/source/game/mission/02_cNevoMission_setup.cpp
+    ${BASE_DIRECTORY}/source/game/mission/03_cHarenaMission_setup.cpp
+    ${BASE_DIRECTORY}/source/game/mission/04_cRutilusMission_setup.cpp
+    ${BASE_DIRECTORY}/source/game/mission/05_cGeluMission_setup.cpp
+    ${BASE_DIRECTORY}/source/game/mission/06_cCalorMission_setup.cpp
+    ${BASE_DIRECTORY}/source/game/mission/07_cMuscusMission_setup.cpp
+    ${BASE_DIRECTORY}/source/game/mission/08_cAterMission_setup.cpp
+    ${BASE_DIRECTORY}/source/game/mission/99_cIntroMission_setup.cpp
+    ${BASE_DIRECTORY}/source/game/mission/AA_cErrorMission_setup.cpp
     ${BASE_DIRECTORY}/source/game/mission/cMission.cpp
     ${BASE_DIRECTORY}/source/game/cBullet.cpp
     ${BASE_DIRECTORY}/source/game/cChroma.cpp

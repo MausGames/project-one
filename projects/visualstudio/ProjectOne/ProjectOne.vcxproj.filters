@@ -249,7 +249,6 @@
     <ClCompile Include="..\..\..\source\additional\cLodObject.cpp">
       <Filter>additional</Filter>
     </ClCompile>
-    </ClCompile>
     <ClCompile Include="..\..\..\source\interface\cWorldMap.cpp">
       <Filter>interface</Filter>
     </ClCompile>
@@ -273,6 +272,42 @@
     </ClCompile>
     <ClCompile Include="..\..\..\source\interface\menu\11_cDefeatMenu.cpp">
       <Filter>interface\menu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\interface\menu\12_cFinishMenu.cpp">
+      <Filter>interface\menu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\game\mission\01_cViridoMission_setup.cpp">
+      <Filter>game\mission</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\game\mission\02_cNevoMission_setup.cpp">
+      <Filter>game\mission</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\game\mission\03_cHarenaMission_setup.cpp">
+      <Filter>game\mission</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\game\mission\04_cRutilusMission_setup.cpp">
+      <Filter>game\mission</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\game\mission\05_cGeluMission_setup.cpp">
+      <Filter>game\mission</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\game\mission\06_cCalorMission_setup.cpp">
+      <Filter>game\mission</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\game\mission\07_cMuscusMission_setup.cpp">
+      <Filter>game\mission</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\game\mission\08_cAterMission_setup.cpp">
+      <Filter>game\mission</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\game\mission\99_cIntroMission_setup.cpp">
+      <Filter>game\mission</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\game\mission\AA_cErrorMission.cpp">
+      <Filter>game\mission</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\game\mission\AA_cErrorMission_setup.cpp">
+      <Filter>game\mission</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
