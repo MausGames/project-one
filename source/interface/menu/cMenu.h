@@ -192,6 +192,7 @@ enum eEntry : coreUint8
     ENTRY_GAME_HUDSCALE,
     ENTRY_GAME_HUDTYPE,
     ENTRY_GAME_UPDATEFREQ,
+    ENTRY_GAME_VERSION,
     ENTRY_GAME_MIRRORMODE,
     ENTRY_MAX
 };
@@ -496,6 +497,7 @@ private:
     coreSwitchBoxU8 m_HudScale;
     coreSwitchBoxU8 m_HudType;
     coreSwitchBoxU8 m_UpdateFreq;
+    coreSwitchBoxU8 m_Version;
     coreSwitchBoxU8 m_MirrorMode;
 
     sPlayerInput m_aInput[MENU_CONFIG_INPUTS];

@@ -47,7 +47,8 @@
 #define CONFIG_GAME_HUD_ROTATION    "Game",     "HudRotation",                          (0)
 #define CONFIG_GAME_HUD_SCALE       "Game",     "HudScale",                             (100)
 #define CONFIG_GAME_HUD_TYPE        "Game",     "HudType",                              (0)
-#define CONFIG_GAME_UPDATE_FREQ     "Game",     "UpdateFreq",                           (60)
+#define CONFIG_GAME_UPDATE_FREQ     "Game",     "UpdateFreq",                           (120)
+#define CONFIG_GAME_VERSION         "Game",     "Version",                              (0)
 #define CONFIG_GAME_MIRROR_MODE     "Game",     "MirrorMode",                           (0)
 
 #define INPUT_TYPES         (PLAYERS)                                     // number of input set selections
@@ -110,6 +111,7 @@ struct sConfig final
         coreUint8 iHudScale;       // 
         coreUint8 iHudType;        // 
         coreUint8 iUpdateFreq;     // 
+        coreUint8 iVersion;        // 
         coreUint8 iMirrorMode;     // 
     }
     Game;
