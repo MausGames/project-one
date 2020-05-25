@@ -251,7 +251,7 @@ void cBackground::Move()
                 pObject->SetEnabled(bIsVisible ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
 
                 // keep object while in current view
-                if(bIsAlive) DYN_KEEP(it)
+                if(bIsAlive) DYN_KEEP(et)
                 else
                 {
                     // remove object when not visible anymore

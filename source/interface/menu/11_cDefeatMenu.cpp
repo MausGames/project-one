@@ -184,7 +184,7 @@ void cDefeatMenu::Move()
         if((m_fIntroTimer >= MENU_DEFEAT_BANNER_ANIMATION) && (m_eState < DEFEAT_WAIT)) m_eState = DEFEAT_WAIT;
 
         // calculate visibility and animation value
-        const coreFloat fVisibility = MIN(m_fIntroTimer, MAX(MENU_DEFEAT_BANNER_SPEED_REV - m_fOutroTimer, 0.0f)) * MENU_DEFEAT_BANNER_SPEED;
+        const coreFloat fVisibility = MAX(MIN(m_fIntroTimer, MENU_DEFEAT_BANNER_SPEED_REV - m_fOutroTimer), 0.0f) * MENU_DEFEAT_BANNER_SPEED;
         const coreFloat fAnimation  = LERPB(0.0f, 1.0f, MIN(m_fIntroTimer / MENU_DEFEAT_BANNER_ANIMATION, 1.0f)) * MENU_DEFEAT_BANNER_ANIMATION;
 
         // slash background across screen (# direction can be swapped, also alpha value is used as texture coordinate correction)

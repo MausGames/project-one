@@ -5,4 +5,8 @@ cd bin/linux/x64
 export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
 
 # start game
-./ProjectOne.elf "$@"
+if type gamemoderun &> /dev/null; then
+    gamemoderun ./ProjectOne.elf "$@"
+else
+    ./ProjectOne.elf "$@"
+fi

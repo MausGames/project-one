@@ -238,7 +238,7 @@ void cSummaryMenu::Move()
                 for(coreUintW i = 0u; i < MENU_SUMMARY_PARTS; ++i) m_aTotalPart[i].SetText(PRINT("%.0f", I_TO_F(m_aiFinalPart[i]) * fFinalSpin));
 
                 // calculate visibility and animation value
-                const coreFloat fVisibility = MIN(m_fIntroTimer, MAX(MENU_SUMMARY_BANNER_SPEED_REV - m_fOutroTimer, 0.0f)) * MENU_SUMMARY_BANNER_SPEED;
+                const coreFloat fVisibility = MAX(MIN(m_fIntroTimer, MENU_SUMMARY_BANNER_SPEED_REV - m_fOutroTimer), 0.0f) * MENU_SUMMARY_BANNER_SPEED;
                 const coreFloat fAnimation  = LERPB(0.0f, 1.0f, MIN(m_fIntroTimer / MENU_SUMMARY_BANNER_ANIMATION, 1.0f)) * MENU_SUMMARY_BANNER_ANIMATION;
 
                 // slash background across screen (# direction can be swapped, also alpha value is used as texture coordinate correction)
@@ -369,7 +369,7 @@ void cSummaryMenu::ShowNormal()
         for(coreUintW j = 0u; j < MENU_SUMMARY_MEDALS; ++j)
         {
             const coreUint8 iMedalSegment = pPlayer->GetDataTable()->GetMedalSegment(iMissionIndex, j);
-            const coreBool  bValid        = (iMedalSegment != MEDAL_NONE) ? true : false;
+            const coreBool  bValid        = (iMedalSegment != MEDAL_NONE);
 
             // 
             iBonusMedal += cGame::CalcBonusMedal(iMedalSegment);

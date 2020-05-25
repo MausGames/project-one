@@ -256,7 +256,6 @@ extern coreMusicPlayer g_MusicPlayer;       // central music-player
 #include "file/cConfig.h"
 #include "file/cReplay.h"
 #include "file/cSave.h"
-#include "file/cValidate.h"
 #include "visual/cShadow.h"
 #include "visual/cOutline.h"
 #include "visual/cBlur.h"

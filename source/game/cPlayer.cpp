@@ -404,7 +404,7 @@ void cPlayer::Move()
                 const coreVector2 vDir = coreVector2::Direction(m_fLightningAngle);
 
                 // 
-                g_pSpecialEffects->CreateLightning(this, vDir, 7.0f, SPECIAL_LIGHTNING_SMALL, coreVector3(1.0f,1.0f,1.0f), coreVector2(1.0f,1.0f), 0.0f);
+                g_pSpecialEffects->CreateLightning(this, vDir, 7.5f, SPECIAL_LIGHTNING_SMALL, coreVector3(1.0f,1.0f,1.0f), coreVector2(1.0f,1.0f), 0.0f);
             }
         }
 

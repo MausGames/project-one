@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.16)
 set(BASE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 
 
@@ -76,10 +76,10 @@ target_include_directories(
 )
 
 
-#target_precompile_headers(
-#   ProjectOne PRIVATE
-#   ${BASE_DIRECTORY}/source/main.h
-#) with >=3.16
+target_precompile_headers(
+   ProjectOne PRIVATE
+   $<$<COMPILE_LANGUAGE:CXX>: ${BASE_DIRECTORY}/source/main.h>
+)
 
 
 target_link_libraries(

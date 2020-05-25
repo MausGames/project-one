@@ -24,7 +24,6 @@
 // ****************************************************************
 // constructor
 cVausBoss::cVausBoss()noexcept
-: m_iScoutOrder (0u)
 {
     // load models
     this->DefineModelHigh("ship_boss_vaus_high.md3");
