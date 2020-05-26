@@ -227,7 +227,7 @@ void cMenu::Move()
                 this->ShiftSurface(this, SURFACE_GAME, 3.0f);
 
                 // 
-                m_GameMenu.ChangeSurface(g_pSave->GetHeader()->bFirstPlay ? SURFACE_GAME_ARMORY : SURFACE_GAME_STANDARD, 0.0f);
+                m_GameMenu.ChangeSurface(g_pSave->GetHeader().oProgress.bFirstPlay ? SURFACE_GAME_ARMORY : SURFACE_GAME_STANDARD, 0.0f);
                 m_GameMenu.LoadValues();
             }
             else if(m_MainMenu.GetStatus() == 2)

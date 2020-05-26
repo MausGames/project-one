@@ -253,6 +253,9 @@ void cGameMenu::Move()
             else if(m_BackButton.IsClicked() || g_MenuInput.bCancel)
             {
                 // 
+                this->SaveValues();
+
+                // 
                 m_iStatus = 2;
             }
         }
@@ -263,6 +266,9 @@ void cGameMenu::Move()
             if(m_BackButton.IsClicked() || g_MenuInput.bCancel)
             {
                 // 
+                this->SaveValues();
+
+                // 
                 m_iStatus = 2;
             }
         }
@@ -272,6 +278,9 @@ void cGameMenu::Move()
         {
             if(m_StartButton.IsClicked())
             {
+                // 
+                this->SaveValues();
+
                 // 
                 m_iStatus = 1;
             }
@@ -382,8 +391,8 @@ void cGameMenu::LoadValues()
     // 
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
     {
-        m_aWeapon [i].SelectValue(g_pSave->GetHeader().oOptions.aiWeapon [i]);
-        m_aSupport[i].SelectValue(g_pSave->GetHeader().oOptions.aiSupport[i]);
+        m_aWeapon [i].SelectValue(g_pSave->GetHeader().oOptions.aaiWeapon [i][0]);
+        m_aSupport[i].SelectValue(g_pSave->GetHeader().oOptions.aaiSupport[i][0]);
     }
 }
 
@@ -398,7 +407,7 @@ void cGameMenu::SaveValues()
     // 
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
     {
-        g_pSave->EditOptions()->aiWeapon [i] = m_aWeapon [i].GetCurEntry().tValue;
-        g_pSave->EditOptions()->aiSupport[i] = m_aSupport[i].GetCurEntry().tValue;
+        g_pSave->EditOptions()->aaiWeapon [i][0] = m_aWeapon [i].GetCurEntry().tValue;
+        g_pSave->EditOptions()->aaiSupport[i][0] = m_aSupport[i].GetCurEntry().tValue;
     }
 }
