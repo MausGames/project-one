@@ -632,9 +632,19 @@ void cMenu::__Reset(const coreResourceReset eInit)
 void cMenu::__StartGame()
 {
     // 
+    sGameOptions oOptions = {};
+    oOptions.iPlayers     = m_GameMenu.GetSelectedPlayers();
+    oOptions.iDifficulty  = 0xFFu;
+    for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
+    {
+        oOptions.aaiWeapon [i][0] = m_GameMenu.GetSelectedWeapon (i);
+        oOptions.aaiSupport[i][0] = m_GameMenu.GetSelectedSupport(i);
+    }
+
+    // 
     ASSERT(!STATIC_ISVALID(g_pGame))
-    STATIC_NEW(g_pGame, 0xFFu, (m_GameMenu.GetSelectedPlayers() > 1u) ? true : false, GAME_MISSION_LIST_MAIN)
-    g_pGame->LoadNextMission();
+    STATIC_NEW(g_pGame, oOptions, GAME_MISSION_LIST_MAIN)
+    g_pGame->LoadMissionIndex(m_GameMenu.GetMissionIndex());
 
     // 
     g_pReplay->StartRecording();

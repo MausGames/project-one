@@ -20,8 +20,8 @@
 
 // ****************************************************************
 // player definitions
-#define PLAYER_WEAPONS            (1u)              // number of weapons a player can carry
-#define PLAYER_SUPPORTS           (1u)              // 
+#define PLAYER_EQUIP_WEAPONS      (EQUIP_WEAPONS)   // number of weapons a player can carry
+#define PLAYER_EQUIP_SUPPORTS     (EQUIP_SUPPORTS)  // 
 #define PLAYER_LIVES              (LIVES)           // 
 #define PLAYER_SHIELD             (SHIELD)          // 
 #define PLAYER_COLLISION_MIN      (0.3f)            // 
@@ -73,7 +73,7 @@ ENABLE_BITWISE(ePlayerTest)
 class cPlayer final : public cShip
 {
 private:
-    cWeapon* m_apWeapon[PLAYER_WEAPONS];                        // main weapon objects (bullet factories, should never be NULL)
+    cWeapon* m_apWeapon[PLAYER_EQUIP_WEAPONS];                  // main weapon objects (bullet factories, should never be NULL)
 
     const sGameInput* m_pInput;                                 // pointer to associated input set (should never be NULL)
     coreVector4       m_vArea;                                  // 
@@ -115,9 +115,10 @@ public:
     DISABLE_COPY(cPlayer)
 
     // configure the player
-    void Configure  (const coreUintW iShipType, const coreVector3& vColor);
-    void EquipWeapon(const coreUintW iIndex, const coreInt32 iID);
-    void GiveShield ();
+    void Configure   (const coreUintW iShipType, const coreVector3& vColor);
+    void EquipWeapon (const coreUintW iIndex, const coreInt32 iID);
+    void EquipSupport(const coreUintW iIndex, const coreInt32 iID);
+    void GiveShield  ();
 
     // render and move the player
     void Render      ()final;
@@ -165,7 +166,7 @@ public:
     inline void ApplyForce(const coreVector2& vForce) {this->SetPosition(coreVector3(m_vOldPos, 0.0f)); m_vForce += vForce;}
 
     // 
-    inline cWeapon*     GetWeapon    (const coreUintW iIndex)const {ASSERT((iIndex < PLAYER_WEAPONS) && m_apWeapon[iIndex]) return m_apWeapon[iIndex];}
+    inline cWeapon*     GetWeapon    (const coreUintW iIndex)const {ASSERT((iIndex < PLAYER_EQUIP_WEAPONS) && m_apWeapon[iIndex]) return m_apWeapon[iIndex];}
     inline cDataTable*  GetDataTable ()                            {return &m_DataTable;}
     inline cScoreTable* GetScoreTable()                            {return &m_ScoreTable;}
 

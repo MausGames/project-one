@@ -11,10 +11,10 @@
 
 // ****************************************************************
 // constructor
-cGame::cGame(const coreUint8 iDifficulty, const coreBool bCoop, const coreInt32* piMissionList, const coreUintW iNumMissions)noexcept
+cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const coreUintW iNumMissions)noexcept
 : m_BulletManagerPlayer (TYPE_BULLET_PLAYER)
 , m_BulletManagerEnemy  (TYPE_BULLET_ENEMY)
-, m_Interface           (bCoop ? GAME_PLAYERS : 1u)
+, m_Interface           (oOptions.iPlayers)
 , m_pRepairEnemy        (NULL)
 , m_piMissionList       (piMissionList)
 , m_iNumMissions        (iNumMissions)
@@ -27,9 +27,9 @@ cGame::cGame(const coreUint8 iDifficulty, const coreBool bCoop, const coreInt32*
 , m_iDepthLevel         (0u)
 , m_iDepthDebug         (0u)
 , m_iOutroType          (0u)
+, m_Options             (oOptions)
+, m_bCoop               (oOptions.iPlayers > 1u)
 , m_iStatus             (0u)
-, m_iDifficulty         (iDifficulty)
-, m_bCoop               (bCoop)
 {
     ASSERT(m_piMissionList && (m_iNumMissions <= MISSIONS))
 
@@ -43,16 +43,16 @@ cGame::cGame(const coreUint8 iDifficulty, const coreBool bCoop, const coreInt32*
 #endif
 
     // configure first player
-    m_aPlayer[0].Configure  (PLAYER_SHIP_ATK, COLOR_SHIP_RED);
-    m_aPlayer[0].EquipWeapon(0u, cRayWeapon::ID);
-    if(!m_iDifficulty) m_aPlayer[0].GiveShield();
+    m_aPlayer[0].Configure(PLAYER_SHIP_ATK, COLOR_SHIP_RED);
+    for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS;  ++i) m_aPlayer[0].EquipWeapon (i, oOptions.aaiWeapon [0][i]);
+    for(coreUintW i = 0u; i < PLAYER_EQUIP_SUPPORTS; ++i) m_aPlayer[0].EquipSupport(i, oOptions.aaiSupport[0][i]);
 
     if(m_bCoop)
     {
         // configure second player
-        m_aPlayer[1].Configure  (PLAYER_SHIP_DEF, COLOR_SHIP_BLUE);
-        m_aPlayer[1].EquipWeapon(0u, cRayWeapon::ID);
-        if(!m_iDifficulty) m_aPlayer[1].GiveShield();
+        m_aPlayer[1].Configure(PLAYER_SHIP_DEF, COLOR_SHIP_BLUE);
+        for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS;  ++i) m_aPlayer[1].EquipWeapon (i, oOptions.aaiWeapon [1][i]);
+        for(coreUintW i = 0u; i < PLAYER_EQUIP_SUPPORTS; ++i) m_aPlayer[1].EquipSupport(i, oOptions.aaiSupport[1][i]);
 
         // 
         m_aPlayer[0].SetInput(&g_aGameInput[0]);
