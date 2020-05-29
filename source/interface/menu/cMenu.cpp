@@ -660,6 +660,7 @@ void cMenu::__EndGame()
     {
         g_pReplay->EndRecording();
         g_pReplay->SaveFile(coreData::DateTimePrint("Debug Replay %Y-%m-%d %H:%M:%S"));
+        g_pReplay->Clear();
     }
     else if(g_pReplay->GetStatus() == REPLAY_STATUS_PLAYBACK)
     {

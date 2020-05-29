@@ -362,6 +362,7 @@ void cGame::StartIntro()
 // 
 void cGame::StartOutro(const coreUint8 iType)
 {
+    ASSERT( CONTAINS_FLAG(m_iStatus, GAME_STATUS_PLAY))
     ASSERT(!CONTAINS_FLAG(m_iStatus, GAME_STATUS_INTRO))
 
     // 
@@ -373,14 +374,14 @@ void cGame::StartOutro(const coreUint8 iType)
     m_iOutroType = iType;
 
     // 
-    for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+    for(coreUintW i = 0u, ie = (m_bCoop ? GAME_PLAYERS : 1u); i < ie; ++i)
         m_aPlayer[i].AddStatus(PLAYER_STATUS_NO_INPUT_ALL);
 
     // 
     m_Interface.SetVisible(false);
 
     // 
-    g_pReplay->ApplyKeyFrame(REPLAY_KEYFRAME_MISSION_END(m_pCurMission->GetID()));
+    g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_MISSION_END(m_pCurMission->GetID()));
 }
 
 
@@ -603,14 +604,14 @@ coreBool cGame::__HandleIntro()
             ADD_FLAG   (m_iStatus, GAME_STATUS_PLAY)
 
             // re-enable player controls
-            for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+            for(coreUintW i = 0u, ie = (m_bCoop ? GAME_PLAYERS : 1u); i < ie; ++i)
                 m_aPlayer[i].RemoveStatus(PLAYER_STATUS_NO_INPUT_ALL);
 
             // 
             m_Interface.SetVisible(true);
 
             // 
-            g_pReplay->ApplyKeyFrame(REPLAY_KEYFRAME_MISSION_START(m_pCurMission->GetID()));
+            g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_MISSION_START(m_pCurMission->GetID()));
         }
         else
         {
@@ -689,7 +690,7 @@ void cGame::__HandleDefeat()
         coreBool bAllDefeated = true;
 
         // 
-        for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+        for(coreUintW i = 0u, ie = (m_bCoop ? GAME_PLAYERS : 1u); i < ie; ++i)
         {
             cPlayer* pPlayer = &m_aPlayer[i];
 
@@ -700,7 +701,7 @@ void cGame::__HandleDefeat()
             // 
             g_pPostProcessing->SetSaturation(i, bDefeated ? 0.0f : (1.0f - MIN(pPlayer->GetDesaturate(), 1.0f)));
 
-            if(bDefeated && m_bCoop && (m_pCurMission->GetID() != cNoMission::ID) && !m_pRepairEnemy)
+            if(m_bCoop && bDefeated && (m_pCurMission->GetID() != cNoMission::ID) && !m_pRepairEnemy)
             {
                 // 
                 m_pRepairEnemy = new cRepairEnemy();
