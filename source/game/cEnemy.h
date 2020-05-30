@@ -14,6 +14,7 @@
 // TODO: manager: Find, ForEach, ForEachAll -> typed 
 // TODO: implement own enemy-types for custom-enemies which would require instancing
 // TODO: virtual void Render()override; -> final
+// TODO: remove "/ iPower"
 
 
 // ****************************************************************

@@ -17,6 +17,7 @@
 // TODO: STAGE_FLYPAST with dot-product or simpler per-axis
 // TODO: there seems to be a bug in STAGE_TICK_TIME, which sometimes gives early or late ticks with 30.0f speed, compared with STAGE_TICK_LIFETIME
 // TODO: wrap m_piData in function with RETURN_RESTRICT
+// TODO: set progress when finishing segment, not when starting, but consider mission-wrapping
 
 
 // ****************************************************************
@@ -254,6 +255,7 @@ private:
     virtual void __MoveOwnAfter  () {}
 
     // 
+    void __OpenSegment ();
     void __CloseSegment();
 };
 

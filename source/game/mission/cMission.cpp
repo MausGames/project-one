@@ -156,6 +156,9 @@ void cMission::ActivateBoss(const cBoss* pBoss)
     m_iCurSegmentIndex = MISSION_BOSS_TO_SEGMENT(m_iCurBossIndex);
 
     // 
+    this->__OpenSegment();
+
+    // 
     g_pGame->GetInterface()->ShowBoss(m_pCurBoss);
 }
 
@@ -170,6 +173,9 @@ void cMission::DeactivateBoss()
     m_pCurBoss         = NULL;
     m_iCurBossIndex    = MISSION_NO_BOSS;
     m_iCurSegmentIndex = MISSION_NO_SEGMENT;
+
+    // 
+    g_pSave->EditGlobalStats()->iBossesDone += 1u;
 }
 
 
@@ -185,6 +191,9 @@ void cMission::ActivateWave(const coreChar* pcName)
     m_iCurSegmentIndex = MISSION_WAVE_TO_SEGMENT(m_iCurWaveIndex);
 
     // 
+    this->__OpenSegment();
+
+    // 
     g_pGame->GetInterface()->ShowWave(pcName);
 }
 
@@ -198,6 +207,28 @@ void cMission::DeactivateWave()
     // 
     m_iCurWaveIndex    = MISSION_NO_WAVE;
     m_iCurSegmentIndex = MISSION_NO_SEGMENT;
+
+    // 
+    g_pSave->EditGlobalStats()->iWavesDone += 1u;
+}
+
+
+// ****************************************************************
+// 
+void cMission::__OpenSegment()
+{
+    // 
+    const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
+
+    // 
+    coreUint8& iAdvance = g_pSave->EditProgress()->aiAdvance[iMissionIndex];
+    iAdvance = MAX(iAdvance, m_iCurSegmentIndex + 1u);
+
+    // 
+    g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_SEGMENT_START(iMissionIndex, m_iCurSegmentIndex));
+
+    // 
+    g_pSave->EditLocalStatsSegment()->iCountStart += 1u;
 }
 
 
@@ -225,14 +256,21 @@ void cMission::__CloseSegment()
     coreUint32 aiPower[GAME_PLAYERS] = {};
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
-        const coreUint32 iDamageTaken = pPlayer->GetDataTable()->GetCounterSegment(iMissionIndex, m_iCurSegmentIndex).iDamageTaken;
+        const coreUint32 iDamageTaken  = pPlayer->GetDataTable ()->GetCounterSegment(iMissionIndex, m_iCurSegmentIndex).iDamageTaken;
+        const coreUint32 iScoreSegment = pPlayer->GetScoreTable()->GetScoreSegment  (iMissionIndex, m_iCurSegmentIndex);
 
         // 
         aiMedal[i] = cGame::CalcMedal(fTime, iDamageTaken, m_pfMedalGoal);
-        aiPower[i] = pPlayer->GetScoreTable()->GetScoreSegment(iMissionIndex, m_iCurSegmentIndex) + aiMedal[i] * 1000000u;
+        aiPower[i] = iScoreSegment + aiMedal[i] * 1000000u;
 
         // 
         pPlayer->GetScoreTable()->AddScore(iBonus, false);
+
+        // 
+        const coreUint32 iScoreFull = iScoreSegment + iBonus;
+        g_pSave->EditLocalStatsSegment()->iScoreBest   = MAX(g_pSave->EditLocalStatsSegment()->iScoreBest,       iScoreFull);
+        g_pSave->EditLocalStatsSegment()->iScoreWorst  = MIN(g_pSave->EditLocalStatsSegment()->iScoreWorst - 1u, iScoreFull - 1u) + 1u;
+        g_pSave->EditLocalStatsSegment()->iScoreTotal += iScoreFull;
     });
 
     if(g_pGame->GetCoop())
@@ -252,6 +290,19 @@ void cMission::__CloseSegment()
     const coreUint8 iShowMedal     = MAX(aiMedal[0], aiMedal[1]);
     const coreUint8 iShowMedalType = MISSION_SEGMENT_IS_BOSS(m_iCurSegmentIndex) ? MEDAL_TYPE_BOSS : MEDAL_TYPE_WAVE;
     g_pGame->GetInterface()->ShowScore(iBonus, iShowMedal, iShowMedalType);
+
+    // 
+    g_pReplay->ApplySnapshot(REPLAY_SNAPSHOT_SEGMENT_END(iMissionIndex, m_iCurSegmentIndex));
+
+    // 
+    const coreUint32 iTimeUint = TABLE_TIME_TO_UINT(fTime);
+    g_pSave->EditLocalStatsSegment()->iTimeBest   = MAX(g_pSave->EditLocalStatsSegment()->iTimeBest,       iTimeUint);
+    g_pSave->EditLocalStatsSegment()->iTimeWorst  = MIN(g_pSave->EditLocalStatsSegment()->iTimeWorst - 1u, iTimeUint - 1u) + 1u;
+    g_pSave->EditLocalStatsSegment()->iTimeTotal += iTimeUint;
+    g_pSave->EditLocalStatsSegment()->iCountEnd  += 1u;
+
+    // 
+    g_pSave->SaveFile();
 }
 
 

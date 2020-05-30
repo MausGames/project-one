@@ -444,7 +444,6 @@ void cPlayer::Move()
 // reduce current health
 coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact)
 {
-    // 
     if(iDamage > 0)
     {
         // 
@@ -459,19 +458,30 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
             // 
             if(!this->IsDarkShading()) this->RefreshColor();
 
-            // 
             if(CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED))
             {
+                // 
                 this->StartIgnoring((m_iCurHealth == 1) ? 1u : 0u);
             }
             else
             {
+                // 
                 this->SetDesaturate(PLAYER_DESATURATE);
                 this->StartFeeling (PLAYER_FEEL_TIME, 0u);
             }
 
             // 
             m_fInterrupt = 0.0f;
+
+            // 
+            m_DataTable.EditCounterTotal  ()->iDamageTaken += iTaken;
+            m_DataTable.EditCounterMission()->iDamageTaken += iTaken;
+            m_DataTable.EditCounterSegment()->iDamageTaken += iTaken;
+
+            // 
+            g_pSave->EditGlobalStats      ()->iDamageTaken += iTaken;
+            g_pSave->EditLocalStatsMission()->iDamageTaken += iTaken;
+            g_pSave->EditLocalStatsSegment()->iDamageTaken += iTaken;
         }
         else
         {

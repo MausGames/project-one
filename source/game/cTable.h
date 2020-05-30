@@ -19,6 +19,9 @@
 #define TABLE_BOSSES   (BOSSES)     // 
 #define TABLE_SEGMENTS (SEGMENTS)   // 
 
+#define TABLE_TIME_TO_UINT(x)   (F_TO_UI((x)  * 1000.0f))
+#define TABLE_TIME_TO_FLOAT(x)  (I_TO_F ((x)) / 1000.0f))
+
 #define __TABLE_SCORE_COMBO(x)  (LERP(50.0f, 1.0f, RCP(1.0f + I_TO_F(x) * 0.0002f)))
 #define __TABLE_TIME_CONVERT(x) (I_TO_F(x) * m_fFrameTime)
 
@@ -31,14 +34,16 @@ public:
     // 
     struct sCounter final
     {
-        coreUint64 iDamageGiven;     // 
-        coreUint32 iDamageTaken;     // 
-        coreUint32 iContinuesUsed;   // 
-        coreUint32 iRepairsUsed;     // 
-        coreUint64 iMovesMade;       // 
-        coreUint32 iTurnsMade;       // 
-        coreUint32 iRollsMade;       // 
-        coreUint64 iBulletsShot;     // 
+        coreUint64 iDamageGiven;       // 
+        coreUint32 iDamageTaken;       // 
+        coreUint32 iContinuesUsed;     // 
+        coreUint32 iRepairsUsed;       // 
+        coreUint64 iMovesMade;         // 
+        coreUint32 iTurnsMade;         // 
+        coreUint32 iRollsMade;         // 
+        coreUint64 iBulletsShot;       // 
+        coreUint64 iChromaCollected;   // 
+        coreUint32 iItemsCollected;    // 
     };
 
 
@@ -50,7 +55,8 @@ private:
     coreUint8 m_aiMedalMission [TABLE_MISSIONS];                   // 
     coreUint8 m_aaiMedalSegment[TABLE_MISSIONS][TABLE_SEGMENTS];   // 
 
-    coreUint8 m_aiFragment[SAVE_MISSIONS];                         // 
+    coreUint8  m_aiFragment[TABLE_MISSIONS];                       // (bitfield) 
+    coreUint32 m_aiBadge   [TABLE_MISSIONS];                       // (bitfield) 
 
     const cPlayer* m_pOwner;                                       // 
 
@@ -67,11 +73,11 @@ public:
     void Reset();
 
     // 
-    sCounter* EditCounterTotal  ();
-    sCounter* EditCounterMission(const coreUintW iMissionIndex);
-    sCounter* EditCounterMission();
-    sCounter* EditCounterSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
-    sCounter* EditCounterSegment();
+    RETURN_NONNULL sCounter* EditCounterTotal  ();
+    RETURN_NONNULL sCounter* EditCounterMission(const coreUintW iMissionIndex);
+    RETURN_NONNULL sCounter* EditCounterMission();
+    RETURN_NONNULL sCounter* EditCounterSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
+    RETURN_NONNULL sCounter* EditCounterSegment();
 
     // 
     void GiveMedalMission(const coreUint8 iMedal, const coreUintW iMissionIndex);
@@ -84,6 +90,10 @@ public:
     void GiveFragment();
 
     // 
+    void GiveBadge(const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
+    void GiveBadge();
+
+    // 
     inline void SetOwner(const cPlayer* pOwner) {m_pOwner = pOwner;}
 
     // 
@@ -93,6 +103,7 @@ public:
     inline const coreUint8& GetMedalMission  (const coreUintW iMissionIndex)const                                {ASSERT(iMissionIndex < TABLE_MISSIONS)                                   return m_aiMedalMission  [iMissionIndex];}
     inline const coreUint8& GetMedalSegment  (const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {ASSERT(iMissionIndex < TABLE_MISSIONS && iSegmentIndex < TABLE_SEGMENTS) return m_aaiMedalSegment [iMissionIndex][iSegmentIndex];}
     inline       coreBool   GetFragment      (const coreUintW iMissionIndex, const coreUintW iBossIndex)const    {ASSERT(iMissionIndex < TABLE_MISSIONS && iBossIndex    < TABLE_BOSSES)   return CONTAINS_BIT(m_aiFragment[iMissionIndex], iBossIndex);}
+    inline       coreBool   GetBadge         (const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {ASSERT(iMissionIndex < TABLE_MISSIONS && iSegmentIndex < TABLE_SEGMENTS) return CONTAINS_BIT(m_aiBadge   [iMissionIndex], iSegmentIndex);}
 };
 
 
