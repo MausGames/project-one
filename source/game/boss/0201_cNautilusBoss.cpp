@@ -180,7 +180,7 @@ void cNautilusBoss::__MoveOwn()
             const coreVector3 vPos = this->GetPosition();
 
             // 
-            this->__EnableBullet(vPos.xy(), this->NearestPlayer()->GetPosition().xy());
+            this->__EnableBullet(vPos.xy(), this->NearestPlayerDual(m_aiCounter[INK_INDEX])->GetPosition().xy());
 
             // 
             g_pSpecialEffects->CreateSplashSmoke(vPos, SPECIAL_SPLASH_TINY, coreVector3(0.1f,0.1f,0.1f));

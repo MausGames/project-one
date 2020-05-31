@@ -280,26 +280,33 @@ void cEnemy::ResetProperties()
 
 // ****************************************************************
 // 
-cPlayer* cEnemy::NearestPlayer()const
+cPlayer* cEnemy::NearestPlayerSide()const
 {
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
     return g_pGame->FindPlayerSide(this->GetPosition().xy());
 }
 
+cPlayer* cEnemy::NearestPlayerDual(const coreUintW iIndex)const
+{
+    // 
+    ASSERT(STATIC_ISVALID(g_pGame))
+    return g_pGame->FindPlayerDual(iIndex);
+}
+
 
 // ****************************************************************
 // 
-coreVector2 cEnemy::AimAtPlayer()const
+coreVector2 cEnemy::AimAtPlayerSide()const
 {
     // 
-    return this->AimAtPlayer(this->NearestPlayer());
+    return (this->NearestPlayerSide()->GetPosition().xy() - this->GetPosition().xy());
 }
 
-coreVector2 cEnemy::AimAtPlayer(const cPlayer* pPlayer)const
+coreVector2 cEnemy::AimAtPlayerDual(const coreUintW iIndex)const
 {
     // 
-    return (pPlayer->GetPosition().xy() - this->GetPosition().xy());
+    return (this->NearestPlayerDual(iIndex)->GetPosition().xy() - this->GetPosition().xy());
 }
 
 

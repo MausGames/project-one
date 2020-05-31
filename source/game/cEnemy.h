@@ -77,13 +77,14 @@ public:
     void ResetProperties();
 
     // 
-    inline coreBool IsParent()const {return !CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_CHILD) && !m_apMember.empty();}
-    inline coreBool IsChild ()const {return  CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_CHILD) && !m_apMember.empty();}
+    inline coreBool IsParent()const {return !m_apMember.empty() && !CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_CHILD);}
+    inline coreBool IsChild ()const {return !m_apMember.empty() &&  CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_CHILD);}
 
     // 
-    cPlayer*    NearestPlayer()const;
-    coreVector2 AimAtPlayer  ()const;
-    coreVector2 AimAtPlayer  (const cPlayer* pPlayer)const;
+    cPlayer*    NearestPlayerSide()const;
+    cPlayer*    NearestPlayerDual(const coreUintW iIndex)const;
+    coreVector2 AimAtPlayerSide  ()const;
+    coreVector2 AimAtPlayerDual  (const coreUintW iIndex)const;
 
     // get object properties
     inline const coreFloat& GetLifeTime      ()const {return m_fLifeTime;}

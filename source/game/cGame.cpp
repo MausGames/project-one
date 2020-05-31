@@ -498,35 +498,6 @@ void cGame::PushDepthLevelShip()
 
 // ****************************************************************
 // 
-RETURN_NONNULL cPlayer* cGame::FindPlayer(const coreVector2& vPosition)
-{
-    // 
-    if(!m_bCoop) return &m_aPlayer[0];
-
-    // 
-    cPlayer*  pPlayer = &m_aPlayer[0];
-    coreFloat fLenSq  = FLT_MAX;
-
-    // 
-    this->ForEachPlayer([&](cPlayer* OUTPUT pCurPlayer, const coreUintW i)
-    {
-        // 
-        const coreFloat fCurLenSq = (pCurPlayer->GetPosition().xy() - vPosition).LengthSq();
-        if(fCurLenSq < fLenSq)
-        {
-            // 
-            pPlayer = pCurPlayer;
-            fLenSq  = fCurLenSq;
-        }
-    });
-
-    ASSERT(pPlayer)
-    return pPlayer;
-}
-
-
-// ****************************************************************
-// 
 RETURN_NONNULL cPlayer* cGame::FindPlayerSide(const coreVector2& vPosition)
 {
     STATIC_ASSERT(GAME_PLAYERS == 2u)
