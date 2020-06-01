@@ -20,6 +20,7 @@ cBullet::cBullet()noexcept
 , m_pOwner     (NULL)
 , m_fDepth     (0.0f)
 , m_fAnimation (0.0f)
+, m_fFade      (0.0f)
 , m_iElement   (ELEMENT_NEUTRAL)
 , m_fFlyTime   (0.0f)
 , m_vFlyDir    (coreVector2(0.0f,0.0f))
@@ -361,7 +362,7 @@ void cBulletManager::ResetOrder()
 // ****************************************************************
 // constructor
 cRayBullet::cRayBullet()noexcept
-: m_fFade (0.0f)
+: m_fScale (1.0f)
 {
     // load object resources
     this->DefineModel  ("bullet_ray.md3");
@@ -378,14 +379,7 @@ cRayBullet::cRayBullet()noexcept
 void cRayBullet::__ImpactOwn(const coreVector2& vImpact)
 {
     // 
-    if(m_iElement == ELEMENT_WHITE)
-    {
-        g_pSpecialEffects->CreateSplashDark(coreVector3(vImpact, 0.0f), 5.0f, 1u);
-    }
-    else
-    {
-        g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 1u, this->GetColor3());
-    }
+    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 1u, this->GetColor3());
 }
 
 
@@ -399,7 +393,7 @@ void cRayBullet::__ReflectOwn()
 
     // 
     m_fFade = 0.0f;
-    this->SetSize (coreVector3(3.7f,0.0f,3.7f) * 0.5f);
+    this->SetSize (coreVector3(0.0f,0.0f,0.0f));
     this->SetAlpha(0.0f);
 }
 
@@ -409,16 +403,16 @@ void cRayBullet::__ReflectOwn()
 void cRayBullet::__MoveOwn()
 {
     // fly around
-    this->SetPosition (coreVector3(this->GetPosition().xy() + m_vFlyDir * (m_fSpeed * Core::System->GetTime()), 0.0f));
+    this->SetPosition (coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
     this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
     // update animation
     m_fAnimation.Update(0.4f);
     this->SetTexOffset(coreVector2(0.35f, m_fAnimation));
 
-    // 
+    // update fade
     m_fFade.Update(1.0f);
-    this->SetSize (coreVector3(3.7f, 3.7f * MIN(12.0f * m_fFade, 1.0f), 3.7f) * 0.5f);
+    this->SetSize (coreVector3(3.7f, 3.7f * MIN(12.0f * m_fFade, 1.0f), 3.7f) * 0.5f * m_fScale);
     this->SetAlpha(MIN(15.0f * m_fFade, 1.0f));
 }
 
@@ -426,14 +420,39 @@ void cRayBullet::__MoveOwn()
 // ****************************************************************
 // constructor
 cPulseBullet::cPulseBullet()noexcept
+: m_fScale (1.0f)
 {
     // load object resources
-    this->DefineModel  ("bullet_ray.md3");
+    this->DefineModel  ("bullet_pulse.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_direct_program");
 
-    // set object properties
-    this->SetCollisionModifier(coreVector3(1.0f,0.333f,1.0f));   // model with offset
+    // 
+    ADD_FLAG(m_iStatus, BULLET_STATUS_PENETRATE)
+}
+
+
+// ****************************************************************
+// 
+void cPulseBullet::__ImpactOwn(const coreVector2& vImpact)
+{
+    // 
+    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
+}
+
+
+// ****************************************************************
+// 
+void cPulseBullet::__ReflectOwn()
+{
+    // 
+    this->SetPosition (coreVector3(this->GetPosition().xy() + m_vFlyDir * this->GetCollisionRange().y, 0.0f));   // move to tip, to account for resetting the length
+    this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
+
+    // 
+    m_fFade = 0.0f;
+    this->SetSize (coreVector3(0.0f,0.0f,0.0f));
+    this->SetAlpha(0.0f);
 }
 
 
@@ -445,86 +464,24 @@ void cPulseBullet::__MoveOwn()
     m_fSpeed += 2.5f * BULLET_SPEED_FACTOR * Core::System->GetTime();
 
     // fly around
-    this->SetPosition (coreVector3(this->GetPosition().xy() + m_vFlyDir * (m_fSpeed * Core::System->GetTime()), 0.0f));
+    this->SetPosition (coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
     this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
     // update animation
     m_fAnimation.Update(0.4f);
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
+
+    // update fade
+    m_fFade.Update(1.0f);
+    this->SetSize (coreVector3(1.0f, 2.5f * MIN(12.0f * m_fFade, 1.0f), 1.0f) * 1.3f * m_fScale);
+    this->SetAlpha(MIN(15.0f * m_fFade, 1.0f));
 }
 
 
 // ****************************************************************
 // constructor
-cOrbBullet::cOrbBullet()noexcept
-{
-    // load object resources
-    this->DefineModel  ("bullet_orb.md3");
-    this->DefineTexture(0u, "effect_energy.png");
-    this->DefineProgram("effect_energy_bullet_program");
-}
-
-
-// ****************************************************************
-// 
-void cOrbBullet::__ImpactOwn(const coreVector2& vImpact)
-{
-    // 
-    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
-}
-
-
-// ****************************************************************
-// move the orb bullet
-void cOrbBullet::__MoveOwn()
-{
-    // fly around
-    this->SetPosition (coreVector3(this->GetPosition().xy() + m_vFlyDir * (m_fSpeed * Core::System->GetTime()), 0.0f));
-    this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
-
-    // update animation
-    m_fAnimation.Update(0.2f);
-    this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
-}
-
-
-// ****************************************************************
-// constructor
-cConeBullet::cConeBullet()noexcept
-{
-    // load object resources
-    this->DefineModel  ("bullet_cone.md3");
-    this->DefineTexture(0u, "effect_energy.png");
-    this->DefineProgram("effect_energy_bullet_program");
-}
-
-
-// ****************************************************************
-// 
-void cConeBullet::__ImpactOwn(const coreVector2& vImpact)
-{
-    // 
-    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
-}
-
-
-// ****************************************************************
-// move the cone bullet
-void cConeBullet::__MoveOwn()
-{
-    // fly around
-    this->SetPosition (coreVector3(this->GetPosition().xy() + m_vFlyDir * (m_fSpeed * Core::System->GetTime()), 0.0f));
-    this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
-
-    // update animation
-    m_fAnimation.Update(0.2f);
-    this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
-}
-
-
-// ****************************************************************
-// constructor
-cWaveBullet::cWaveBullet()noexcept
+cSurgeBullet::cSurgeBullet()noexcept
+: m_fScale (1.0f)
 {
     // load object resources
     this->DefineModel  ("bullet_wave.md3");
@@ -535,7 +492,7 @@ cWaveBullet::cWaveBullet()noexcept
 
 // ****************************************************************
 // 
-void cWaveBullet::__ImpactOwn(const coreVector2& vImpact)
+void cSurgeBullet::__ImpactOwn(const coreVector2& vImpact)
 {
     // 
     g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
@@ -543,23 +500,44 @@ void cWaveBullet::__ImpactOwn(const coreVector2& vImpact)
 
 
 // ****************************************************************
-// move the wave bullet
-void cWaveBullet::__MoveOwn()
+// 
+void cSurgeBullet::__ReflectOwn()
+{
+    // 
+    this->SetPosition (coreVector3(this->GetPosition().xy() + m_vFlyDir * this->GetCollisionRange().y, 0.0f));   // move to tip, to account for resetting the length
+    this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
+
+    // 
+    m_fFade = 0.0f;
+    this->SetSize (coreVector3(0.0f,0.0f,0.0f));
+    this->SetAlpha(0.0f);
+}
+
+
+// ****************************************************************
+// move the surge bullet
+void cSurgeBullet::__MoveOwn()
 {
     // fly around
-    this->SetPosition (coreVector3(this->GetPosition().xy() + m_vFlyDir * (m_fSpeed * Core::System->GetTime()), 0.0f));
+    this->SetPosition (coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
     this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
     // update animation
     m_fAnimation.Update(0.06f);
     this->SetTexOffset(coreVector2(0.3f, m_fAnimation));
+
+    // update fade
+    m_fFade.Update(1.0f);
+    this->SetSize (coreVector3(1.5f, 1.5f * MIN(12.0f * m_fFade, 1.0f), 1.5f) * 2.35f * m_fScale);
+    this->SetAlpha(MIN(15.0f * m_fFade, 1.0f));
 }
 
 
 // ****************************************************************
 // constructor
 cTeslaBullet::cTeslaBullet()noexcept
-: m_fLightningTime (1.0f)
+: m_fScale         (1.0f)
+, m_fLightningTime (1.0f)
 , m_bLightningSide (false)
 {
     // load object resources
@@ -570,16 +548,41 @@ cTeslaBullet::cTeslaBullet()noexcept
 
 
 // ****************************************************************
+// 
+void cTeslaBullet::__ImpactOwn(const coreVector2& vImpact)
+{
+    // 
+    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
+}
+
+
+// ****************************************************************
+// 
+void cTeslaBullet::__ReflectOwn()
+{
+    // 
+    m_fFade = 0.0f;
+    this->SetSize (coreVector3(0.0f,0.0f,0.0f));
+    this->SetAlpha(0.0f);
+}
+
+
+// ****************************************************************
 // move the tesla bullet
 void cTeslaBullet::__MoveOwn()
 {
     // fly around
-    this->SetPosition (coreVector3(this->GetPosition().xy() + m_vFlyDir * (m_fSpeed * Core::System->GetTime()), 0.0f));
+    this->SetPosition (coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
     this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
     // update animation
     m_fAnimation.Update(-0.2f);
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
+
+    // update fade
+    m_fFade.Update(1.0f);
+    this->SetSize(coreVector3(2.5f,2.5f,2.5f) * MIN(12.0f * m_fFade, 1.0f) * m_fScale);
+    this->SetAlpha(MIN(15.0f * m_fFade, 1.0f));
 
     // 
     m_fLightningTime.Update(10.0f);
@@ -600,6 +603,348 @@ void cTeslaBullet::__MoveOwn()
 
 // ****************************************************************
 // constructor
+cOrbBullet::cOrbBullet()noexcept
+{
+    // load object resources
+    this->DefineModel  ("bullet_orb.md3");
+    this->DefineTexture(0u, "effect_energy.png");
+    this->DefineProgram("effect_energy_bullet_program");
+
+    // set object properties
+    this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * BULLET_COLLISION_FACTOR);
+}
+
+
+// ****************************************************************
+// 
+void cOrbBullet::__ImpactOwn(const coreVector2& vImpact)
+{
+    // 
+    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
+}
+
+
+// ****************************************************************
+// 
+void cOrbBullet::__ReflectOwn()
+{
+}
+
+
+// ****************************************************************
+// move the orb bullet
+void cOrbBullet::__MoveOwn()
+{
+    // fly around
+    this->SetPosition (coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
+    this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
+
+    // update animation
+    m_fAnimation.Update(0.2f);
+    this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
+
+    // update fade
+    m_fFade.Update(1.0f);
+    this->SetAlpha(MIN(20.0f * m_fFade, 1.0f));
+}
+
+
+// ****************************************************************
+// constructor
+cConeBullet::cConeBullet()noexcept
+{
+    // load object resources
+    this->DefineModel  ("bullet_cone.md3");
+    this->DefineTexture(0u, "effect_energy.png");
+    this->DefineProgram("effect_energy_bullet_program");
+
+    // set object properties
+    this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * BULLET_COLLISION_FACTOR);
+}
+
+
+// ****************************************************************
+// 
+void cConeBullet::__ImpactOwn(const coreVector2& vImpact)
+{
+    // 
+    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
+}
+
+
+// ****************************************************************
+// 
+void cConeBullet::__ReflectOwn()
+{
+    // 
+    this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
+}
+
+
+// ****************************************************************
+// move the cone bullet
+void cConeBullet::__MoveOwn()
+{
+    // fly around
+    this->SetPosition (coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
+    this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
+
+    // update animation
+    m_fAnimation.Update(0.2f);
+    this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
+
+    // update fade
+    m_fFade.Update(1.0f);
+    this->SetAlpha(MIN(20.0f * m_fFade, 1.0f));
+}
+
+
+// ****************************************************************
+// constructor
+cWaveBullet::cWaveBullet()noexcept
+{
+    // load object resources
+    this->DefineModel  ("bullet_wave.md3");
+    this->DefineTexture(0u, "effect_energy.png");
+    this->DefineProgram("effect_energy_bullet_direct_program");
+
+    // set object properties
+    this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * BULLET_COLLISION_FACTOR);
+}
+
+
+// ****************************************************************
+// 
+void cWaveBullet::__ImpactOwn(const coreVector2& vImpact)
+{
+    // 
+    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
+}
+
+
+// ****************************************************************
+// 
+void cWaveBullet::__ReflectOwn()
+{
+    // 
+    this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
+}
+
+
+// ****************************************************************
+// move the wave bullet
+void cWaveBullet::__MoveOwn()
+{
+    // fly around
+    this->SetPosition (coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
+    this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
+
+    // update animation
+    m_fAnimation.Update(0.06f);
+    this->SetTexOffset(coreVector2(0.3f, m_fAnimation));
+
+    // update fade
+    m_fFade.Update(1.0f);
+    this->SetAlpha(MIN(20.0f * m_fFade, 1.0f));
+}
+
+
+// ****************************************************************
+// constructor
+cSpearBullet::cSpearBullet()noexcept
+{
+    // load object resources
+    this->DefineModel  ("bullet_spear.md3");
+    this->DefineTexture(0u, "effect_energy.png");
+    this->DefineProgram("effect_energy_bullet_direct_program");
+
+    // set object properties
+    this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * BULLET_COLLISION_FACTOR);
+}
+
+
+// ****************************************************************
+// 
+void cSpearBullet::__ImpactOwn(const coreVector2& vImpact)
+{
+    // 
+    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
+}
+
+
+// ****************************************************************
+// 
+void cSpearBullet::__ReflectOwn()
+{
+    // 
+    this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
+}
+
+
+// ****************************************************************
+// move the spear bullet
+void cSpearBullet::__MoveOwn()
+{
+    // fly around
+    this->SetPosition (coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
+    this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
+
+    // update animation
+    m_fAnimation.Update(0.2f);
+    this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
+
+    // update fade
+    m_fFade.Update(1.0f);
+    this->SetAlpha(MIN(20.0f * m_fFade, 1.0f));
+}
+
+
+// ****************************************************************
+// constructor
+cTriangleBullet::cTriangleBullet()noexcept
+{
+    // load object resources
+    this->DefineModel  ("bullet_triangle.md3");
+    this->DefineTexture(0u, "effect_energy.png");
+    this->DefineProgram("effect_energy_bullet_direct_program");
+
+    // set object properties
+    this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * BULLET_COLLISION_FACTOR);
+}
+
+
+// ****************************************************************
+// 
+void cTriangleBullet::__ImpactOwn(const coreVector2& vImpact)
+{
+    // 
+    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
+}
+
+
+// ****************************************************************
+// 
+void cTriangleBullet::__ReflectOwn()
+{
+}
+
+
+// ****************************************************************
+// move the triangle bullet
+void cTriangleBullet::__MoveOwn()
+{
+    // fly around
+    this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
+
+    // update animation
+    m_fAnimation.Update(0.2f);
+    this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation * 10.0f), 0.0f));
+    this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
+
+    // update fade
+    m_fFade.Update(1.0f);
+    this->SetAlpha(MIN(20.0f * m_fFade, 1.0f));
+}
+
+
+// ****************************************************************
+// constructor
+cFlipBullet::cFlipBullet()noexcept
+{
+    // load object resources
+    this->DefineModel  ("bullet_spear.md3");
+    this->DefineTexture(0u, "effect_energy.png");
+    this->DefineProgram("effect_energy_bullet_program");
+
+    // set object properties
+    this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * BULLET_COLLISION_FACTOR);
+}
+
+
+// ****************************************************************
+// 
+void cFlipBullet::__ImpactOwn(const coreVector2& vImpact)
+{
+    // 
+    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
+}
+
+
+// ****************************************************************
+// 
+void cFlipBullet::__ReflectOwn()
+{
+}
+
+
+// ****************************************************************
+// move the flip bullet
+void cFlipBullet::__MoveOwn()
+{
+    // fly around
+    this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
+
+    // update animation
+    m_fAnimation.Update(-0.2f);
+    this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation * 50.0f), 0.0f));
+    this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
+
+    // update fade
+    m_fFade.Update(1.0f);
+    this->SetAlpha(MIN(20.0f * m_fFade, 1.0f));
+}
+
+
+// ****************************************************************
+// constructor
+cQuadBullet::cQuadBullet()noexcept
+{
+    // load object resources
+    this->DefineModel  ("bullet_quad.md3");
+    this->DefineTexture(0u, "effect_energy.png");
+    this->DefineProgram("effect_energy_bullet_direct_program");
+
+    // set object properties
+    this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * BULLET_COLLISION_FACTOR);
+}
+
+
+// ****************************************************************
+// 
+void cQuadBullet::__ImpactOwn(const coreVector2& vImpact)
+{
+    // 
+    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
+}
+
+
+// ****************************************************************
+// 
+void cQuadBullet::__ReflectOwn()
+{
+}
+
+
+// ****************************************************************
+// move the quad bullet
+void cQuadBullet::__MoveOwn()
+{
+    // fly around
+    this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
+
+    // update animation
+    m_fAnimation.Update(0.2f);
+    this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation * 10.0f), 0.0f));
+    this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
+
+    // update fade
+    m_fFade.Update(1.0f);
+    this->SetAlpha(MIN(20.0f * m_fFade, 1.0f));
+}
+
+
+// ****************************************************************
+// constructor
 cMineBullet::cMineBullet()noexcept
 {
     // load object resources
@@ -608,7 +953,8 @@ cMineBullet::cMineBullet()noexcept
     this->DefineProgram("object_ship_glow_program");
 
     // set object properties
-    this->SetColor3(coreVector3(1.0f,0.0f,0.0f));
+    this->SetColor3           (coreVector3(1.0f,0.0f,0.0f));
+    this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * BULLET_COLLISION_FACTOR);
 }
 
 
@@ -643,6 +989,13 @@ void cMineBullet::__ImpactOwn(const coreVector2& vImpact)
 
 // ****************************************************************
 // 
+void cMineBullet::__ReflectOwn()
+{
+}
+
+
+// ****************************************************************
+// 
 void cMineBullet::__RenderOwnBefore()
 {
     glDisable(GL_DEPTH_TEST);
@@ -668,12 +1021,16 @@ void cMineBullet::__MoveOwn()
     m_fSpeed = MAX(m_fSpeed * FrictionFactor(3.5f), 0.0f);
 
     // fly around
-    this->SetPosition(coreVector3(this->GetPosition().xy() + m_vFlyDir * (m_fSpeed * Core::System->GetTime()), 0.0f));
+    this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
 
     // update animation
     m_fAnimation.Update(1.5f);
     this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation), 0.0f));
     this->SetColor3   (coreVector3(0.5f + 0.5f * SIN(PI*m_fAnimation), 0.0f, 0.0f));
+
+    // update fade
+    m_fFade.Update(1.0f);
+    this->SetAlpha(MIN(20.0f * m_fFade, 1.0f));
 }
 
 
@@ -687,7 +1044,8 @@ cRocketBullet::cRocketBullet()noexcept
     this->DefineProgram("object_ship_glow_program");
 
     // set object properties
-    this->SetColor3(coreVector3(0.0f,1.0f,0.0f));
+    this->SetColor3           (coreVector3(0.0f,1.0f,0.0f));
+    this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * BULLET_COLLISION_FACTOR);
 }
 
 
@@ -697,6 +1055,15 @@ void cRocketBullet::__ImpactOwn(const coreVector2& vImpact)
 {
     // 
     g_pSpecialEffects->MacroExplosionPhysicalColorSmall(this->GetPosition(), COLOR_FIRE_ORANGE);
+}
+
+
+// ****************************************************************
+// 
+void cRocketBullet::__ReflectOwn()
+{
+    // 
+    this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 }
 
 
@@ -719,151 +1086,19 @@ void cRocketBullet::__MoveOwn()
     }
 
     // fly around
-    this->SetPosition (coreVector3(this->GetPosition().xy() + m_vFlyDir * (m_fSpeed * Core::System->GetTime()), 0.0f));
+    this->SetPosition (coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
     this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
     // update animation
     m_fAnimation.Update(10.0f);
     this->SetColor3(coreVector3(0.0f, 0.6f + 0.4f * SIN(PI*m_fAnimation), 0.0f));
 
+    // update fade
+    m_fFade.Update(1.0f);
+    this->SetAlpha(MIN(20.0f * m_fFade, 1.0f));
+
     // 
     if(Core::System->GetTime()) g_pSpecialEffects->CreateSplashSmoke(this->GetPosition() - this->GetDirection() * 4.5f, 5.0f, 1u, coreVector3(1.0f,1.0f,1.0f));
-}
-
-
-// ****************************************************************
-// constructor
-cSpearBullet::cSpearBullet()noexcept
-{
-    // load object resources
-    this->DefineModel  ("bullet_spear.md3");
-    this->DefineTexture(0u, "effect_energy.png");
-    this->DefineProgram("effect_energy_bullet_direct_program");
-}
-
-
-// ****************************************************************
-// 
-void cSpearBullet::__ImpactOwn(const coreVector2& vImpact)
-{
-    // 
-    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
-}
-
-
-// ****************************************************************
-// move the spear bullet
-void cSpearBullet::__MoveOwn()
-{
-    // fly around
-    this->SetPosition (coreVector3(this->GetPosition().xy() + m_vFlyDir * (m_fSpeed * Core::System->GetTime()), 0.0f));
-    this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
-
-    // update animation
-    m_fAnimation.Update(0.2f);
-    this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
-}
-
-
-// ****************************************************************
-// constructor
-cTriangleBullet::cTriangleBullet()noexcept
-{
-    // load object resources
-    this->DefineModel  ("bullet_triangle.md3");
-    this->DefineTexture(0u, "effect_energy.png");
-    this->DefineProgram("effect_energy_bullet_direct_program");
-}
-
-
-// ****************************************************************
-// 
-void cTriangleBullet::__ImpactOwn(const coreVector2& vImpact)
-{
-    // 
-    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
-}
-
-
-// ****************************************************************
-// move the triangle bullet
-void cTriangleBullet::__MoveOwn()
-{
-    // fly around
-    this->SetPosition(coreVector3(this->GetPosition().xy() + m_vFlyDir * (m_fSpeed * Core::System->GetTime()), 0.0f));
-
-    // update animation
-    m_fAnimation.Update(0.2f);
-    this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation * 10.0f), 0.0f));
-    this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
-}
-
-
-// ****************************************************************
-// constructor
-cFlipBullet::cFlipBullet()noexcept
-{
-    // load object resources
-    this->DefineModel  ("bullet_spear.md3");
-    this->DefineTexture(0u, "effect_energy.png");
-    this->DefineProgram("effect_energy_bullet_program");
-}
-
-
-// ****************************************************************
-// 
-void cFlipBullet::__ImpactOwn(const coreVector2& vImpact)
-{
-    // 
-    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
-}
-
-
-// ****************************************************************
-// move the flip bullet
-void cFlipBullet::__MoveOwn()
-{
-    // fly around
-    this->SetPosition(coreVector3(this->GetPosition().xy() + m_vFlyDir * (m_fSpeed * Core::System->GetTime()), 0.0f));
-
-    // update animation
-    m_fAnimation.Update(-0.2f);
-    this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation * 50.0f), 0.0f));
-    this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
-}
-
-
-// ****************************************************************
-// constructor
-cQuadBullet::cQuadBullet()noexcept
-{
-    // load object resources
-    this->DefineModel  ("bullet_quad.md3");
-    this->DefineTexture(0u, "effect_energy.png");
-    this->DefineProgram("effect_energy_bullet_direct_program");
-}
-
-
-// ****************************************************************
-// 
-void cQuadBullet::__ImpactOwn(const coreVector2& vImpact)
-{
-    // 
-    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
-}
-
-
-// ****************************************************************
-// move the quad bullet
-void cQuadBullet::__MoveOwn()
-{
-    // fly around
-    this->SetPosition(coreVector3(this->GetPosition().xy() + m_vFlyDir * (m_fSpeed * Core::System->GetTime()), 0.0f));
-
-    // update animation
-    m_fAnimation.Update(0.2f);
-    this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation * 10.0f), 0.0f));
-    this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
 }
 
 
