@@ -18,14 +18,17 @@
 
 // ****************************************************************
 // tooltip definitions
-#define TOOLTIP_LINES        (8u)                                         // number of available text lines
-#define TOOLTIP_LINE_HEIGHT  (0.022f)                                     // spacing between to text lines
-#define TOOLTIP_OUTLINE_SIZE (1u)                                         // default text outline size
-#define TOOLTIP_BORDER_SIZE  (coreVector2(0.02f, 0.016f))                 // spacing between text and box-edge
-#define TOOLTIP_MOUSE_OFFSET (coreVector2(0.03f,-0.03f))                  // position offset from mouse cursor (and for direction/alignment)
+#define TOOLTIP_LINES         (4u)                                  // number of available text lines
+#define TOOLTIP_LINE_HEIGHT   (0.022f)                              // spacing between two text lines
+#define TOOLTIP_OUTLINE_SIZE  (MENU_OUTLINE_SMALL)                  // default text outline size
+#define TOOLTIP_BORDER_SIZE   (coreVector2(0.02f,0.016f))           // spacing between text and box-edge
+#define TOOLTIP_TARGET_OFFSET (coreVector2(0.04f,0.0f))             // position offset from target (and for direction/alignment)
 
-#define TOOLTIP_PRINT(f,...) (this + __LINE__ * 100u), f, ##__VA_ARGS__   // specialized print-function for ShowText()
-#define TOOLTIP_ONELINER     (FLT_MAX)                                    // create tooltip without wrapping (infinite width)
+#define TOOLTIP_PRINT(f,...)  (this + __LINE__), f, ##__VA_ARGS__   // specialized print-function for ShowText()
+#define TOOLTIP_ONELINER      (FLT_MAX)                             // create tooltip without wrapping (infinite width)
+
+#define TOOLTIP_MOUSE         (Core::Input->GetMousePosition())
+#define TOOLTIP_OBJECT(x)     (coreVector2((x).GetTransform()._31, (x).GetTransform()._32) * RCP(Core::System->GetResolution().Min()))
 
 
 // ****************************************************************
@@ -51,8 +54,8 @@ public:
     void Move  ()final;
 
     // 
-    template <typename... A> void ShowText(const coreFloat fWidth, const void* pRef, const coreChar* pcFormat, A&&... vArgs);
-    inline void                   ShowText(const coreFloat fWidth, const coreChar* pcText);
+    template <typename... A> void ShowText(const coreVector2& vTarget, const coreFloat fWidth, const void* pRef, const coreChar* pcFormat, A&&... vArgs);
+    inline void                   ShowText(const coreVector2& vTarget, const coreFloat fWidth, const coreChar* pcText);
 
     // force update on next display
     inline void Invalidate() {m_pLastRef = NULL;}
@@ -66,11 +69,11 @@ private:
 
 // ****************************************************************
 // 
-template <typename... A> void cTooltip::ShowText(const coreFloat fWidth, const void* pRef, const coreChar* pcFormat, A&&... vArgs)
+template <typename... A> void cTooltip::ShowText(const coreVector2& vTarget, const coreFloat fWidth, const void* pRef, const coreChar* pcFormat, A&&... vArgs)
 {
-    // show tooltip at current mouse position
+    // show tooltip at target position
     m_bDisplay = true;
-    this->SetCenter(Core::Input->GetMousePosition());
+    this->SetCenter(vTarget);
 
     // check and save last reference-pointer (to prevent redundant update)
     if(m_pLastRef == pRef) return;
@@ -80,10 +83,10 @@ template <typename... A> void cTooltip::ShowText(const coreFloat fWidth, const v
     this->__ShowText(fWidth, PRINT(pcFormat, std::forward<A>(vArgs)...));
 }
 
-inline void cTooltip::ShowText(const coreFloat fWidth, const coreChar* pcText)
+inline void cTooltip::ShowText(const coreVector2& vTarget, const coreFloat fWidth, const coreChar* pcText)
 {
     // forward copy of trivial string
-    this->ShowText(fWidth, pcText, "%s", pcText);
+    this->ShowText(vTarget, fWidth, pcText, "%s", pcText);
 }
 
 
