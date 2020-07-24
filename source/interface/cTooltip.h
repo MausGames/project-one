@@ -13,7 +13,8 @@
 // TODO: transfer to Core Engine
 // TODO: does not handle Kanji & Kana correctly
 // TODO: does not handle kerning (relevant ?)
-// TODO: (this + __LINE__ * 100u) may not handle implementation-split between cpp and h file
+// TODO: (this + __LINE__) may not handle implementation-split between cpp and h file
+// TODO: pre-resolve coreFontPtr (GetResource)
 
 
 // ****************************************************************
@@ -27,7 +28,7 @@
 #define TOOLTIP_PRINT(f,...)  (this + __LINE__), f, ##__VA_ARGS__   // specialized print-function for ShowText()
 #define TOOLTIP_ONELINER      (FLT_MAX)                             // create tooltip without wrapping (infinite width)
 
-#define TOOLTIP_MOUSE         (Core::Input->GetMousePosition())
+#define TOOLTIP_MOUSE         (Core::Input->GetMousePosition() * Core::System->GetResolution() * RCP(Core::System->GetResolution().Min()))
 #define TOOLTIP_OBJECT(x)     (coreVector2((x).GetTransform()._31, (x).GetTransform()._32) * RCP(Core::System->GetResolution().Min()))
 
 
@@ -56,6 +57,9 @@ public:
     // 
     template <typename... A> void ShowText(const coreVector2& vTarget, const coreFloat fWidth, const void* pRef, const coreChar* pcFormat, A&&... vArgs);
     inline void                   ShowText(const coreVector2& vTarget, const coreFloat fWidth, const coreChar* pcText);
+
+    // 
+    inline void UseColor(const coreUintW iIndex, const coreVector3& vColor) {ASSERT(iIndex < TOOLTIP_LINES) m_aLine[iIndex].SetColor3(vColor);}
 
     // force update on next display
     inline void Invalidate() {m_pLastRef = NULL;}
