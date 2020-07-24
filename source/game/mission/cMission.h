@@ -73,6 +73,7 @@
 #define STAGE_COLL_ENEMY_BULLET(a,b,i,f,...)   if(!m_nCollEnemyBullet)  m_nCollEnemyBullet  = ([__VA_ARGS__](cEnemy*  OUTPUT a, cBullet* OUTPUT b, const coreVector3& i, const coreBool f)   // NOLINT
 #define COLL_VAL(x)                             x = s_cast<typename std::conditional<!std::is_reference<decltype(x)>::value, decltype(x), void>::type>(x)
 #define COLL_REF(x)                            &x = s_cast<typename std::conditional< std::is_reference<decltype(x)>::value, decltype(x), void>::type>(x)
+#define COLL_THIS                              this
 
 #define STAGE_FOREACH_PLAYER(e,i)              g_pGame->ForEachPlayer   ([&](cPlayer* OUTPUT e, const coreUintW i)   // NOLINT
 #define STAGE_FOREACH_PLAYER_ALL(e,i)          g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT e, const coreUintW i)   // NOLINT

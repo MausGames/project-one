@@ -20,6 +20,7 @@ void cLodObject::Render(const coreProgramPtr& pProgram)
     if(!m_pModelLow.IsUsable()) return;
 
     // enable the shader-program
+    ASSERT(pProgram)
     if(!pProgram.IsUsable()) return;
     if(!pProgram->Enable())  return;
 

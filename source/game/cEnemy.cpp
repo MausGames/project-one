@@ -268,7 +268,7 @@ void cEnemy::Kill(const coreBool bAnimated)
 void cEnemy::ResetProperties()
 {
     // set object properties
-    this->SetPosition   (coreVector3(1.0f, 1.0f,0.0f) * 1000.0f);
+    this->SetPosition   (coreVector3(HIDDEN_POS,0.0f));
     this->SetSize       (coreVector3(1.0f, 1.0f,1.0f) * ENEMY_SIZE_FACTOR);
     this->SetDirection  (coreVector3(0.0f,-1.0f,0.0f));
     this->SetOrientation(coreVector3(0.0f, 0.0f,1.0f));

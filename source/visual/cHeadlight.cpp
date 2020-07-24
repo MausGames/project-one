@@ -20,18 +20,18 @@ cHeadlight::cHeadlight()noexcept
     m_FrameBuffer.Create(g_vGameResolution * HEADLIGHT_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     // load object resources
-    this->DefineProgram("effect_headlight_program");
     this->DefineTexture(0u, m_FrameBuffer.GetColorTarget(0u).pTexture);
+    this->DefineProgram("effect_headlight_program");
 
     // set object properties
     this->SetSize(coreVector2(1.0f,1.0f));
     this->Move();
 
     // 
-    m_Spot .DefineProgram("default_2d_program");
     m_Spot .DefineTexture(0u, "effect_headlight_spot.png");
-    m_Point.DefineProgram("default_2d_program");
+    m_Spot .DefineProgram("default_2d_program");
     m_Point.DefineTexture(0u, "effect_headlight_point.png");
+    m_Point.DefineProgram("default_2d_program");
 }
 
 

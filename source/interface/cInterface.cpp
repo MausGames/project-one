@@ -328,10 +328,10 @@ void cInterface::Move()
     {
         const coreFloat fPos = (vSize.x - 0.022f) * 0.5f;
         const coreFloat fOff = m_BossHealthValue.GetPosition().x;
-        m_aBossTime[0].SetPosition(coreVector2(fPos - fOff,          m_aBossTime[0].GetPosition().y));
-        m_aBossTime[1].SetPosition(coreVector2(fPos - fOff - 0.002f, m_aBossTime[1].GetPosition().y));
-        m_aWaveTime[0].SetPosition(coreVector2(fPos,                 m_aWaveTime[0].GetPosition().y));
-        m_aWaveTime[1].SetPosition(coreVector2(fPos        - 0.002f, m_aWaveTime[1].GetPosition().y));
+        m_aBossTime[0].SetPosition(coreVector2(fPos - fOff,        m_aBossTime[0].GetPosition().y));
+        m_aBossTime[1].SetPosition(coreVector2(fPos - fOff - 0.0f, m_aBossTime[1].GetPosition().y));
+        m_aWaveTime[0].SetPosition(coreVector2(fPos,               m_aWaveTime[0].GetPosition().y));
+        m_aWaveTime[1].SetPosition(coreVector2(fPos        - 0.0f, m_aWaveTime[1].GetPosition().y));
     });
 
     // set boss transparency
@@ -479,7 +479,7 @@ void cInterface::ShowMission(const coreChar* pcMain, const coreChar* pcSub)
 void cInterface::ShowMission(const cMission* pMission)
 {
     // show default mission banner
-    this->ShowMission(pMission->GetName(), PRINT("%s %d", Core::Language->GetString("MISSION"), pMission->GetID()));
+    this->ShowMission(coreData::StrUpper(pMission->GetName()), PRINT("%s %d", Core::Language->GetString("MISSION"), pMission->GetID()));
 }
 
 
@@ -531,7 +531,7 @@ void cInterface::ShowBoss(const coreChar* pcMain, const coreChar* pcSub)
 void cInterface::ShowBoss(const cBoss* pBoss)
 {
     // show default boss banner
-    this->ShowBoss(pBoss->GetName(), Core::Language->GetString(PRINT("BOSS_TITLE_%04d", pBoss->GetID())));
+    this->ShowBoss(coreData::StrUpper(pBoss->GetName()), Core::Language->GetString(PRINT("BOSS_TITLE_%04d", pBoss->GetID())));
 }
 
 

@@ -34,6 +34,9 @@
 // 
 #define LIST_KEY (CORE_MEMORY_SHARED)
 
+// 
+#define HIDDEN_POS (coreVector2(1000.0f,1000.0f))
+
 
 // ****************************************************************
 // angle difference helper-function
@@ -110,6 +113,7 @@ inline FUNC_PURE coreVector2 SmoothAim(const coreVector2 vOldDir, const coreVect
 // 
 inline FUNC_CONST coreFloat SmoothTowards(const coreFloat fDistance, const coreFloat fThreshold)
 {
+    ASSERT((fDistance >= 0.0f) && (fThreshold > 0.0f))
     return MIN(fDistance, fThreshold) * RCP(fThreshold);
 }
 
@@ -198,10 +202,15 @@ inline FUNC_LOCAL coreVector2 AlongStarNormal(const coreVector2& v)
 
 // ****************************************************************
 // 
-inline FUNC_LOCAL coreVector2 MapToAxis(const coreVector2& vVector, const coreVector2& vAxis)
+constexpr FUNC_LOCAL coreVector2 MapToAxis(const coreVector2& vVector, const coreVector2& vAxis)
 {
     return (vVector.x * vAxis.Rotated90()) +
            (vVector.y * vAxis);
+}
+
+constexpr FUNC_LOCAL coreVector2 MapToAxisInv(const coreVector2& vVector, const coreVector2& vAxis)
+{
+    return MapToAxis(vVector, vAxis.InvertedX());
 }
 
 

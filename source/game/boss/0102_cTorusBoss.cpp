@@ -499,7 +499,7 @@ void cTorusBoss::__EnableSummon(const coreVector2& vPosition, const coreVector3&
     WARN_IF(m_Summon.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
 
     // 
-    m_Summon.SetPosition(coreVector3(vPosition, 0.0f));
+    m_Summon.SetPosition(coreVector3(vPosition,0.0f));
     m_Summon.SetSize    (coreVector3(0.0f,0.0f,0.0f));
     m_Summon.SetColor3  (vColor);
 
@@ -594,7 +594,7 @@ void cTorusBoss::__EnableGunner(const coreUintW iIndex, const coreVector2& vPosi
     ADD_BIT(m_iGunnerActive, iIndex)
 
     // 
-    SET_BIT(m_iGunnerMove, iIndex, (iIndex < 2u));
+    SET_BIT(m_iGunnerMove, iIndex, (iIndex < 2u))
 
     // 
     pGunner->SetPosition (coreVector3(vPosition, 0.0f));

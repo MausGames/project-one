@@ -77,7 +77,7 @@
 #define MENU_FONT_ICON_1        "fontawesome.otf", (20u)
 #define MENU_FONT_ICON_2        "fontawesome.otf", (24u)
 #define MENU_FONT_ICON_3        "fontawesome.otf", (40u)
-#define MENU_OUTLINE_SMALL      (1u)
+#define MENU_OUTLINE_SMALL      (2u)
 #define MENU_OUTLINE_BIG        (4u)
 
 
@@ -200,27 +200,28 @@ enum eEntry : coreUint8
 
 // ****************************************************************
 // icon codes (UTF-8)
-#define ICON_CHECK        u8"\uF00C"
-#define ICON_TIMES        u8"\uF00D"
-#define ICON_POWER_OFF    u8"\uF011"
-#define ICON_REFRESH      u8"\uF021"
-#define ICON_ARROW_LEFT   u8"\uF060"
-#define ICON_ARROW_RIGHT  u8"\uF061"
-#define ICON_ARROW_UP     u8"\uF062"
-#define ICON_ARROW_DOWN   u8"\uF063"
-#define ICON_SHARE        u8"\uF064"
-#define ICON_COGS         u8"\uF085"
-#define ICON_CARET_DOWN   u8"\uF0D7"
-#define ICON_CARET_UP     u8"\uF0D8"
-#define ICON_CARET_LEFT   u8"\uF0D9"
-#define ICON_CARET_RIGHT  u8"\uF0DA"
-#define ICON_PAUSE_CIRCLE u8"\uF28B"
-#define ICON_UNDO_ALT     u8"\uF2EA"
-#define ICON_REFRESH_ALT  u8"\uF2F1"
-#define ICON_REDO_ALT     u8"\uF2F9"
-#define ICON_SHIELD_ALT   u8"\uF3ED"
-#define ICON_BURN         u8"\uF46A"
-#define ICON_FEATHER_ALT  u8"\uF56B"
+#define __ICON(x)         (r_cast<const coreChar*>(x))
+#define ICON_CHECK        (__ICON(u8"\uF00C"))
+#define ICON_TIMES        (__ICON(u8"\uF00D"))
+#define ICON_POWER_OFF    (__ICON(u8"\uF011"))
+#define ICON_REFRESH      (__ICON(u8"\uF021"))
+#define ICON_ARROW_LEFT   (__ICON(u8"\uF060"))
+#define ICON_ARROW_RIGHT  (__ICON(u8"\uF061"))
+#define ICON_ARROW_UP     (__ICON(u8"\uF062"))
+#define ICON_ARROW_DOWN   (__ICON(u8"\uF063"))
+#define ICON_SHARE        (__ICON(u8"\uF064"))
+#define ICON_COGS         (__ICON(u8"\uF085"))
+#define ICON_CARET_DOWN   (__ICON(u8"\uF0D7"))
+#define ICON_CARET_UP     (__ICON(u8"\uF0D8"))
+#define ICON_CARET_LEFT   (__ICON(u8"\uF0D9"))
+#define ICON_CARET_RIGHT  (__ICON(u8"\uF0DA"))
+#define ICON_PAUSE_CIRCLE (__ICON(u8"\uF28B"))
+#define ICON_UNDO_ALT     (__ICON(u8"\uF2EA"))
+#define ICON_REFRESH_ALT  (__ICON(u8"\uF2F1"))
+#define ICON_REDO_ALT     (__ICON(u8"\uF2F9"))
+#define ICON_SHIELD_ALT   (__ICON(u8"\uF3ED"))
+#define ICON_BURN         (__ICON(u8"\uF46A"))
+#define ICON_FEATHER_ALT  (__ICON(u8"\uF56B"))
 
 
 // ****************************************************************

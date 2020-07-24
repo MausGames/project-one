@@ -358,7 +358,7 @@ void cDharukBoss::__EnableBoomerang(const coreUintW iIndex, const coreVector2& v
     coreObject3D* pTrail     = (*m_BoomerangTrail.List())[iIndex*DHARUK_TRAILS];
 
     // 
-    WARN_IF(pBoomerang->GetType()) return;
+    WARN_IF(pBoomerang->IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
     pBoomerang->ChangeType(TYPE_DHARUK_BOOMERANG);
 
     // 
@@ -389,7 +389,7 @@ void cDharukBoss::__DisableBoomerang(const coreUintW iIndex, const coreBool bAni
     coreObject3D* pTrail     = (*m_BoomerangTrail.List())[iIndex*DHARUK_TRAILS];
 
     // 
-    if(!pBoomerang->GetType()) return;
+    if(!pBoomerang->IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
     pBoomerang->ChangeType(0);
 
     // 
@@ -460,7 +460,7 @@ coreVector2 cDharukBoss::__DecodeDirection(const coreUintW iIndex)
 
     // 
     const coreFloat P = CONTAINS_BIT(m_iPackedDir, 0u + 2u*iIndex) ? 1.0f : -1.0f;
-    const coreBool  X = CONTAINS_BIT(m_iPackedDir, 1u + 2u*iIndex) ? true : false;
+    const coreBool  X = CONTAINS_BIT(m_iPackedDir, 1u + 2u*iIndex);
 
     // 
     return coreVector2((X) ? P : 0.0f, (!X) ? P : 0.0f);

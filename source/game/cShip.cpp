@@ -38,7 +38,7 @@ coreBool cShip::DefaultMovePath(const coreSpline2* pRawPath, const coreVector2& 
     this->SetDirection(coreVector3( (vDirection * vFactor).Normalized(vDirection),          0.0f));
 
     // 
-    return (fDistance >= pRawPath->GetTotalDistance()) ? true : false;
+    return (fDistance >= pRawPath->GetTotalDistance());
 }
 
 
@@ -62,7 +62,7 @@ coreBool cShip::DefaultMoveTarget(const coreVector2& vTarget, const coreFloat fS
     this->SetDirection(coreVector3(vDir, 0.0f));
 
     // 
-    return (vDiff.LengthSq() < 0.5f) ? true : false;
+    return (vDiff.LengthSq() < 0.5f);
 }
 
 
@@ -85,7 +85,7 @@ coreBool cShip::DefaultMoveSmooth(const coreVector2& vRawPosition, const coreFlo
     this->SetPosition(coreVector3(vPos, 0.0f));
 
     // 
-    return (fLen < 0.1f) ? true : false;
+    return (fLen < 0.1f);
 }
 
 
@@ -140,7 +140,7 @@ coreBool cShip::DefaultRotateSmooth(const coreVector2& vDirection, const coreFlo
     this->SetDirection(coreVector3(vDir, 0.0f));
 
     // 
-    return (fLen < 0.1f) ? true : false;
+    return (fLen < 0.1f);
 }
 
 
@@ -250,7 +250,7 @@ void cShip::_Resurrect()
     // reset ship properties
     m_iCurHealth = m_iMaxHealth;
     m_iPreHealth = m_iMaxHealth;
-    m_vOldPos    = coreVector2(1000.0f,1000.0f);   // # for consistency
+    m_vOldPos    = HIDDEN_POS;   // # for consistency
     this->RefreshColor(1.0f);
 
     // 

@@ -170,7 +170,7 @@ void cEnvironment::ChangeBackground(const coreInt32 iID, const coreUintW iTransi
     m_pOldBackground = m_pBackground;
 
     // create new background
-    switch(ABS(iID))
+    switch(iID)
     {
     default: WARN_IF(true) {}
     case cNoBackground     ::ID: m_pBackground = new cNoBackground     (); break;

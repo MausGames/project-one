@@ -669,10 +669,6 @@ void cMenu::__EndGame()
     }
 
     // 
-    ASSERT(STATIC_ISVALID(g_pGame))
-    STATIC_DELETE(g_pGame)
-
-    // 
     if(g_pSave->GetHeader().oProgress.bFirstPlay)
     {
         g_pSave->EditProgress()->bFirstPlay = false;
@@ -681,6 +677,10 @@ void cMenu::__EndGame()
         m_MainMenu .DeactivateFirstPlay();
         m_GameMenu .DeactivateFirstPlay();
     }
+
+    // 
+    ASSERT(STATIC_ISVALID(g_pGame))
+    STATIC_DELETE(g_pGame)
 }
 
 

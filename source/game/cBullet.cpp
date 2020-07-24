@@ -256,7 +256,7 @@ void cBulletManager::Render()
 // move the bullet manager
 void cBulletManager::Move()
 {
-    coreVector2 vPrevPos    = coreVector2(1000.0f,1000.0f);
+    coreVector2 vPrevPos    = HIDDEN_POS;
     coreFloat   fPrevRadius = 0.0f;
     coreFloat   fDepth      = 0.0f;
 

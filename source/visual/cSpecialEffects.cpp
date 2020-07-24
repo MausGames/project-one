@@ -425,7 +425,7 @@ void cSpecialEffects::CreateBreakupColor(const cLodObject* pObject, const coreFl
     // 
     const coreModel*   pModel           = pObject->GetModelLow().GetResource();
     const coreVector3* pvVertexPosition = pModel->GetVertexPosition();
-    ASSERT(pvVertexPosition)
+    ASSERT(pModel->GetNumClusters())
 
     // 
     const coreVector3 vPosition = pObject->GetPosition();
@@ -457,7 +457,7 @@ void cSpecialEffects::CreateBreakupDark(const cLodObject* pObject, const coreFlo
     // 
     const coreModel*   pModel           = pObject->GetModelLow().GetResource();
     const coreVector3* pvVertexPosition = pModel->GetVertexPosition();
-    ASSERT(pvVertexPosition)
+    ASSERT(pModel->GetNumClusters())
 
     // 
     const coreVector3 vPosition = pObject->GetPosition();
