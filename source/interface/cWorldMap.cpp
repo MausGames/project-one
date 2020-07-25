@@ -12,17 +12,18 @@
 // ****************************************************************
 // constructor
 cWorldMap::cWorldMap()noexcept
-: m_iOldPin      (0u)
-, m_iNewPin      (0u)
+: m_aData        {}
 , m_fMove        (0.0f)
+, m_iOldPin      (0u)
+, m_iNewPin      (0u)
 , m_fPinAngle    (0.0f)
 , m_fCursorAngle (0.0f)
+, m_iEnabled     (0u)
 {
     // 
-    this->DefineTexture(0u, "menu_background_black.png");
-    this->DefineProgram("default_2d_program");
-    this->SetColor3    (coreVector3(1.0f,1.0f,1.0f) * 1.5f);   // TODO: remove 
-    this->SetTexSize   (coreVector2(0.767f,0.517f)  * 3.0f);   // TODO: remove 
+    this->DefineTexture(0u, "menu_worldmap.png");
+    this->DefineProgram("menu_worldmap_program");
+    this->SetColor3    (COLOR_MENU_BLUE * 1.3);
 
     // 
     for(coreUintW i = 0u; i < WORLDMAP_PINS; ++i)
@@ -53,6 +54,18 @@ cWorldMap::cWorldMap()noexcept
     m_Cursor.DefineProgram("default_2d_program");
     m_Cursor.SetSize      (WORLDMAP_PIN_SIZE * 1.55f);
     m_Cursor.SetTexSize   (coreVector2(0.5f,0.5f));
+
+    // 
+    m_aData[0] = {cIntroMission  ::ID, cIntroMission  ::Name, coreVector2(-0.12f,-0.12f) * 3.0f};
+    m_aData[1] = {cViridoMission ::ID, cViridoMission ::Name, coreVector2(-0.03f,-0.09f) * 3.0f};
+    m_aData[2] = {cNevoMission   ::ID, cNevoMission   ::Name, coreVector2( 0.06f,-0.11f) * 3.0f};
+    m_aData[3] = {cHarenaMission ::ID, cHarenaMission ::Name, coreVector2( 0.11f,-0.01f) * 3.0f};
+    m_aData[4] = {cRutilusMission::ID, cRutilusMission::Name, coreVector2( 0.04f, 0.04f) * 3.0f};
+    m_aData[5] = {cGeluMission   ::ID, cGeluMission   ::Name, coreVector2( 0.10f, 0.09f) * 3.0f};
+    m_aData[6] = {cCalorMission  ::ID, cCalorMission  ::Name, coreVector2( 0.01f, 0.12f) * 3.0f};
+    m_aData[7] = {cMuscusMission ::ID, cMuscusMission ::Name, coreVector2(-0.05f, 0.06f) * 3.0f};
+    m_aData[8] = {cAterMission   ::ID, cAterMission   ::Name, coreVector2(-0.11f, 0.10f) * 3.0f};
+    STATIC_ASSERT(WORLDMAP_PINS == 9u)
 }
 
 
@@ -60,6 +73,12 @@ cWorldMap::cWorldMap()noexcept
 // render the world map
 void cWorldMap::Render()
 {
+    if(!this->GetProgram().IsUsable()) return;
+
+    // 
+    this->GetProgram()->Enable();
+    this->GetProgram()->SendUniform("u_v1Time", FMOD(coreFloat(Core::System->GetTotalTime()), 10.0f));
+
     // 
     this->coreObject2D::Render();
 
@@ -70,6 +89,9 @@ void cWorldMap::Render()
 
     // 
     m_Cursor.Render();
+
+    // 
+    m_Tooltip.Render();
 }
 
 
@@ -83,15 +105,18 @@ void cWorldMap::Move()
     // 
     for(coreUintW i = 0u; i < WORLDMAP_PINS; ++i)
     {
-        m_aPin[i].Interact();
-        if(m_aPin[i].IsFocused() && (m_iNewPin != i))
+        if(CONTAINS_BIT(m_iEnabled, i))
         {
-            m_iOldPin   = m_iNewPin;
-            m_iNewPin   = i;
-            m_fMove     = 0.0f;
-            m_fPinAngle = m_aPin[i].GetDirection().Angle();
+            m_aPin[i].Interact();
+            if(m_aPin[i].IsFocused() && (m_iNewPin != i))
+            {
+                m_fMove     = 0.0f;
+                m_iOldPin   = m_iNewPin;
+                m_iNewPin   = i;
+                m_fPinAngle = m_aPin[i].GetDirection().Angle();
 
-            break;
+                break;
+            }
         }
     }
 
@@ -130,6 +155,12 @@ void cWorldMap::Move()
     // 
     m_Cursor.SetAlpha(this->GetAlpha() * 0.8f);
     m_Cursor.Move();
+
+    // 
+    m_Tooltip.SetAlpha(this->GetAlpha());
+    m_Tooltip.ShowText(TOOLTIP_OBJECT(m_Cursor), TOOLTIP_ONELINER, I_TO_P(m_iNewPin), "%s %d\n%s", Core::Language->GetString("MISSION"), m_iNewPin, m_aData[m_iNewPin].pcName);
+    m_Tooltip.UseColor(1u, COLOR_MENU_BLUE);
+    m_Tooltip.Move();
 }
 
 
@@ -138,21 +169,13 @@ void cWorldMap::Move()
 void cWorldMap::Arrange()
 {
     // 
-    m_aPin[0].SetPosition(coreVector2(-0.12f,-0.12f) * 3.0f);
-    m_aPin[1].SetPosition(coreVector2(-0.03f,-0.09f) * 3.0f);
-    m_aPin[2].SetPosition(coreVector2( 0.06f,-0.11f) * 3.0f);
-    m_aPin[3].SetPosition(coreVector2( 0.11f,-0.01f) * 3.0f);
-    m_aPin[4].SetPosition(coreVector2( 0.04f, 0.04f) * 3.0f);
-    m_aPin[5].SetPosition(coreVector2( 0.10f, 0.09f) * 3.0f);
-    m_aPin[6].SetPosition(coreVector2( 0.01f, 0.12f) * 3.0f);
-    m_aPin[7].SetPosition(coreVector2(-0.05f, 0.06f) * 3.0f);
-    m_aPin[8].SetPosition(coreVector2(-0.11f, 0.10f) * 3.0f);
-    STATIC_ASSERT(WORLDMAP_PINS == 9u)
+    this->SetTexSize  (this->GetSize() * RCP(this->GetSize().Max()));
+    this->SetTexOffset((coreVector2(1.0f,1.0f) * this->GetSize().Max() - this->GetSize()) * 0.5f);
 
     // 
     for(coreUintW i = 0u; i < WORLDMAP_PINS; ++i)
     {
-        const coreVector2 vRealPos = m_aPin[i].GetPosition() * this->GetSize() + this->GetPosition();
+        const coreVector2 vRealPos = m_aData[i].vPosition * this->GetSize() + this->GetPosition();
 
         m_aPin   [i].SetPosition(vRealPos);
         m_aPinDot[i].SetPosition(vRealPos);
@@ -178,18 +201,41 @@ void cWorldMap::Arrange()
 
 // ****************************************************************
 // 
-void cWorldMap::EnablePin(const coreUintW iIndex, const coreBool bEnable)
+void cWorldMap::EnablePin(const coreUintW iIndex, const coreBool bEnable, const coreBool bShow)
 {
     ASSERT(iIndex < WORLDMAP_PINS)
 
-    const coreObjectEnable eEnabled = bEnable ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING;
+    const coreVector3      vColor   = bEnable ? coreVector3(1.0f,1.0f,1.0f) : coreVector3(0.5f,0.5f,0.5f);
+    const coreObjectEnable eEnabled = bShow   ? CORE_OBJECT_ENABLE_ALL      : CORE_OBJECT_ENABLE_NOTHING;
+
+    // 
+    m_aPin   [iIndex].SetColor3(vColor);
+    m_aPinDot[iIndex].SetColor3(vColor);
 
     // 
     m_aPin   [iIndex].SetEnabled(eEnabled);
     m_aPinDot[iIndex].SetEnabled(eEnabled);
 
     // 
-    if(iIndex > 0u)             m_aLine[iIndex - 1u].SetEnabled((m_aPin[iIndex - 1u].IsEnabled(CORE_OBJECT_ENABLE_ALL) && bEnable) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
-    if(iIndex < WORLDMAP_LINES) m_aLine[iIndex]     .SetEnabled((m_aPin[iIndex + 1u].IsEnabled(CORE_OBJECT_ENABLE_ALL) && bEnable) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+    if(iIndex > 0u)             m_aLine[iIndex - 1u].SetEnabled((m_aPin[iIndex - 1u].IsEnabled(CORE_OBJECT_ENABLE_ALL) && bShow) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+    if(iIndex < WORLDMAP_LINES) m_aLine[iIndex]     .SetEnabled((m_aPin[iIndex + 1u].IsEnabled(CORE_OBJECT_ENABLE_ALL) && bShow) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
     STATIC_ASSERT(WORLDMAP_PINS > WORLDMAP_LINES)
+
+    // 
+    SET_BIT(m_iEnabled, iIndex, bEnable)
+    STATIC_ASSERT(WORLDMAP_PINS <= sizeof(m_iEnabled) * 8u)
+}
+
+
+// ****************************************************************
+// 
+void cWorldMap::SelectPin(const coreUintW iIndex)
+{
+    ASSERT(iIndex < WORLDMAP_PINS) 
+
+    // 
+    m_iNewPin = CONTAINS_BIT(m_iEnabled, iIndex) ? iIndex : 0u;
+
+    // 
+    m_Cursor.SetPosition(m_aPin[m_iNewPin].GetPosition());
 }

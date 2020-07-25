@@ -644,7 +644,7 @@ void cMenu::__StartGame()
     // 
     ASSERT(!STATIC_ISVALID(g_pGame))
     STATIC_NEW(g_pGame, oOptions, GAME_MISSION_LIST_MAIN)
-    g_pGame->LoadMissionIndex(m_GameMenu.GetMissionIndex());
+    g_pGame->LoadMissionID(m_GameMenu.GetMissionID());
 
     // 
     g_pReplay->StartRecording();

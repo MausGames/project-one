@@ -382,8 +382,12 @@ void cGameMenu::LoadValues()
     // 
     for(coreUintW i = 0u; i < WORLDMAP_PINS; ++i)
     {
-        m_WorldMap.EnablePin(i, g_pSave->GetHeader().oProgress.aiDisclosure[i] ? true : false);
+        const coreBool bEnable = (g_pSave->GetHeader().oProgress.aiAdvance[i] != 0u);
+        m_WorldMap.EnablePin(i, bEnable, bEnable || (i == WORLDMAP_PINS - 1u));
     }
+
+    // 
+    m_WorldMap.SelectPin(g_pSave->GetHeader().oOptions.iStandard);
 
     // 
     m_Players.SelectValue(g_pSave->GetHeader().oOptions.iPlayers);
@@ -401,6 +405,9 @@ void cGameMenu::LoadValues()
 // 
 void cGameMenu::SaveValues()
 {
+    // 
+    g_pSave->EditOptions()->iStandard = m_WorldMap.GetSelectionIndex();
+
     // 
     g_pSave->EditOptions()->iPlayers = m_Players.GetCurEntry().tValue;
 

@@ -362,6 +362,7 @@ public:
     void SaveValues();
 
     // 
+    inline const coreInt32& GetMissionID      ()const                       {return m_WorldMap.GetSelectionID();}
     inline const coreUint8& GetSelectedPlayers()const                       {return m_Players.GetCurEntry().tValue;}
     inline const coreUint8& GetSelectedWeapon (const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aWeapon [iIndex].GetCurEntry().tValue;}
     inline const coreUint8& GetSelectedSupport(const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aSupport[iIndex].GetCurEntry().tValue;}
