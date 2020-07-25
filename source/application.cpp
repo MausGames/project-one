@@ -32,6 +32,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("bullet_rocket.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_rocket.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_spear.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_spear.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_triangle.md3",                    CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_triangle.md3");
+    Core::Manager::Resource->Load<coreModel>  ("bullet_view.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_view.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_wave.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_wave.md3");
     Core::Manager::Resource->Load<coreModel>  ("effect_shield.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/effect_shield.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("environment_reed_01.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_reed_01.md3", false);

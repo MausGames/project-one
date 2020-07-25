@@ -68,7 +68,6 @@
 // TODO: replace / with RCP where possible
 // TODO: "pro" shortcut for types (e.g. proEnemy, proGame), dr too
 // TODO: remove game_icon.png from resource-index if not required anymore
-// TODO: brown bullet, directional
 // TODO: ENABLE_BITWISE when ?
 // TODO: remove multisampling for 2d, though may cause artifacts if the objects are fully shaded and moved
 // TODO: transition shader only needs alpha for menu, but not for background -> create permutations
@@ -131,6 +130,7 @@
 #define COLOR_ENERGY_YELLOW  (coreVector3(0.950f, 0.800f, 0.280f))
 #define COLOR_ENERGY_ORANGE  (coreVector3(1.000f, 0.420f, 0.000f))
 #define COLOR_ENERGY_RED     (coreVector3(1.000f, 0.290f, 0.290f))
+#define COLOR_ENERGY_MAGENTA (coreVector3(1.000f, 0.310f, 0.650f))
 #define COLOR_ENERGY_PURPLE  (coreVector3(0.450f, 0.200f, 1.000f))
 #define COLOR_ENERGY_BLUE    (coreVector3(0.100f, 0.430f, 1.000f))
 #define COLOR_ENERGY_CYAN    (coreVector3(0.184f, 0.569f, 0.635f))
@@ -140,6 +140,7 @@
 #define COLOR_SHIP_YELLOW    (coreVector3( 50.0f/360.0f, 100.0f/100.0f,  85.0f/100.0f).HsvToRgb())
 #define COLOR_SHIP_ORANGE    (coreVector3( 34.0f/360.0f, 100.0f/100.0f, 100.0f/100.0f).HsvToRgb())
 #define COLOR_SHIP_RED       (coreVector3(  0.0f/360.0f,  68.0f/100.0f,  90.0f/100.0f).HsvToRgb())
+#define COLOR_SHIP_MAGENTA   (coreVector3(330.0f/360.0f,  65.0f/100.0f,  85.0f/100.0f).HsvToRgb())
 #define COLOR_SHIP_PURPLE    (coreVector3(287.0f/360.0f,  55.0f/100.0f,  85.0f/100.0f).HsvToRgb())
 #define COLOR_SHIP_BLUE      (coreVector3(201.0f/360.0f,  74.0f/100.0f,  85.0f/100.0f).HsvToRgb())
 #define COLOR_SHIP_CYAN      (coreVector3(183.0f/360.0f,  70.0f/100.0f,  85.0f/100.0f).HsvToRgb())
@@ -209,6 +210,7 @@ enum eElement : coreUint8
     ELEMENT_YELLOW,
     ELEMENT_ORANGE,
     ELEMENT_RED,
+    ELEMENT_MAGENTA,
     ELEMENT_PURPLE,
     ELEMENT_BLUE,
     ELEMENT_CYAN,

@@ -113,14 +113,15 @@ public:
 
 protected:
     // change default color
-    inline void _MakeWhite (const coreFloat fFactor) {m_iElement = ELEMENT_WHITE;  this->__SetColorRand(COLOR_ENERGY_WHITE  * fFactor);}
-    inline void _MakeYellow(const coreFloat fFactor) {m_iElement = ELEMENT_YELLOW; this->__SetColorRand(COLOR_ENERGY_YELLOW * fFactor);}
-    inline void _MakeOrange(const coreFloat fFactor) {m_iElement = ELEMENT_ORANGE; this->__SetColorRand(COLOR_ENERGY_ORANGE * fFactor);}
-    inline void _MakeRed   (const coreFloat fFactor) {m_iElement = ELEMENT_RED;    this->__SetColorRand(COLOR_ENERGY_RED    * fFactor);}
-    inline void _MakePurple(const coreFloat fFactor) {m_iElement = ELEMENT_PURPLE; this->__SetColorRand(COLOR_ENERGY_PURPLE * fFactor);}
-    inline void _MakeBlue  (const coreFloat fFactor) {m_iElement = ELEMENT_BLUE;   this->__SetColorRand(COLOR_ENERGY_BLUE   * fFactor);}
-    inline void _MakeCyan  (const coreFloat fFactor) {m_iElement = ELEMENT_CYAN;   this->__SetColorRand(COLOR_ENERGY_CYAN   * fFactor);}
-    inline void _MakeGreen (const coreFloat fFactor) {m_iElement = ELEMENT_GREEN;  this->__SetColorRand(COLOR_ENERGY_GREEN  * fFactor);}
+    inline void _MakeWhite  (const coreFloat fFactor) {m_iElement = ELEMENT_WHITE;   this->__SetColorRand(COLOR_ENERGY_WHITE   * fFactor);}
+    inline void _MakeYellow (const coreFloat fFactor) {m_iElement = ELEMENT_YELLOW;  this->__SetColorRand(COLOR_ENERGY_YELLOW  * fFactor);}
+    inline void _MakeOrange (const coreFloat fFactor) {m_iElement = ELEMENT_ORANGE;  this->__SetColorRand(COLOR_ENERGY_ORANGE  * fFactor);}
+    inline void _MakeRed    (const coreFloat fFactor) {m_iElement = ELEMENT_RED;     this->__SetColorRand(COLOR_ENERGY_RED     * fFactor);}
+    inline void _MakeMagenta(const coreFloat fFactor) {m_iElement = ELEMENT_MAGENTA; this->__SetColorRand(COLOR_ENERGY_MAGENTA * fFactor);}
+    inline void _MakePurple (const coreFloat fFactor) {m_iElement = ELEMENT_PURPLE;  this->__SetColorRand(COLOR_ENERGY_PURPLE  * fFactor);}
+    inline void _MakeBlue   (const coreFloat fFactor) {m_iElement = ELEMENT_BLUE;    this->__SetColorRand(COLOR_ENERGY_BLUE    * fFactor);}
+    inline void _MakeCyan   (const coreFloat fFactor) {m_iElement = ELEMENT_CYAN;    this->__SetColorRand(COLOR_ENERGY_CYAN    * fFactor);}
+    inline void _MakeGreen  (const coreFloat fFactor) {m_iElement = ELEMENT_GREEN;   this->__SetColorRand(COLOR_ENERGY_GREEN   * fFactor);}
 
     // 
     void _EnableDepth(const coreProgramPtr& pProgram)const;
@@ -226,14 +227,15 @@ public:
     inline cRayBullet* ChangeScale(const coreFloat fScale) {m_fScale = fScale; return this;}
 
     // change default color
-    inline cRayBullet* MakeWhite () {this->_MakeWhite (0.7f); return this;}
-    inline cRayBullet* MakeYellow() {this->_MakeYellow(1.0f); return this;}
-    inline cRayBullet* MakeOrange() {this->_MakeOrange(1.0f); return this;}
-    inline cRayBullet* MakeRed   () {this->_MakeRed   (1.0f); return this;}
-    inline cRayBullet* MakePurple() {this->_MakePurple(1.0f); return this;}
-    inline cRayBullet* MakeBlue  () {this->_MakeBlue  (1.0f); return this;}
-    inline cRayBullet* MakeCyan  () {ASSERT(false)            return this;}
-    inline cRayBullet* MakeGreen () {this->_MakeGreen (1.0f); return this;}
+    inline cRayBullet* MakeWhite  () {this->_MakeWhite  (0.7f); return this;}
+    inline cRayBullet* MakeYellow () {this->_MakeYellow (1.0f); return this;}
+    inline cRayBullet* MakeOrange () {this->_MakeOrange (1.0f); return this;}
+    inline cRayBullet* MakeRed    () {this->_MakeRed    (1.0f); return this;}
+    inline cRayBullet* MakeMagenta() {ASSERT(false)             return this;}
+    inline cRayBullet* MakePurple () {this->_MakePurple (1.0f); return this;}
+    inline cRayBullet* MakeBlue   () {this->_MakeBlue   (1.0f); return this;}
+    inline cRayBullet* MakeCyan   () {ASSERT(false)             return this;}
+    inline cRayBullet* MakeGreen  () {this->_MakeGreen  (1.0f); return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
@@ -270,14 +272,15 @@ public:
     inline cPulseBullet* ChangeScale(const coreFloat fScale) {m_fScale = fScale; return this;}
 
     // change default color
-    inline cPulseBullet* MakeWhite () {this->_MakeWhite (0.7f); return this;}
-    inline cPulseBullet* MakeYellow() {ASSERT(false)            return this;}
-    inline cPulseBullet* MakeOrange() {ASSERT(false)            return this;}
-    inline cPulseBullet* MakeRed   () {ASSERT(false)            return this;}
-    inline cPulseBullet* MakePurple() {this->_MakePurple(1.0f); return this;}
-    inline cPulseBullet* MakeBlue  () {ASSERT(false)            return this;}
-    inline cPulseBullet* MakeCyan  () {ASSERT(false)            return this;}
-    inline cPulseBullet* MakeGreen () {ASSERT(false)            return this;}
+    inline cPulseBullet* MakeWhite  () {this->_MakeWhite  (0.7f); return this;}
+    inline cPulseBullet* MakeYellow () {ASSERT(false)             return this;}
+    inline cPulseBullet* MakeOrange () {ASSERT(false)             return this;}
+    inline cPulseBullet* MakeRed    () {ASSERT(false)             return this;}
+    inline cPulseBullet* MakeMagenta() {ASSERT(false)             return this;}
+    inline cPulseBullet* MakePurple () {this->_MakePurple (1.0f); return this;}
+    inline cPulseBullet* MakeBlue   () {ASSERT(false)             return this;}
+    inline cPulseBullet* MakeCyan   () {ASSERT(false)             return this;}
+    inline cPulseBullet* MakeGreen  () {ASSERT(false)             return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
@@ -314,14 +317,15 @@ public:
     inline cSurgeBullet* ChangeScale(const coreFloat fScale) {m_fScale = fScale; return this;}
 
     // change default color
-    inline cSurgeBullet* MakeWhite () {this->_MakeWhite (0.7f); return this;}
-    inline cSurgeBullet* MakeYellow() {ASSERT(false)            return this;}
-    inline cSurgeBullet* MakeOrange() {ASSERT(false)            return this;}
-    inline cSurgeBullet* MakeRed   () {this->_MakeRed   (1.0f); return this;}
-    inline cSurgeBullet* MakePurple() {ASSERT(false)            return this;}
-    inline cSurgeBullet* MakeBlue  () {ASSERT(false)            return this;}
-    inline cSurgeBullet* MakeCyan  () {ASSERT(false)            return this;}
-    inline cSurgeBullet* MakeGreen () {this->_MakeGreen (1.1f); return this;}
+    inline cSurgeBullet* MakeWhite  () {this->_MakeWhite  (0.7f); return this;}
+    inline cSurgeBullet* MakeYellow () {ASSERT(false)             return this;}
+    inline cSurgeBullet* MakeOrange () {ASSERT(false)             return this;}
+    inline cSurgeBullet* MakeRed    () {this->_MakeRed    (1.0f); return this;}
+    inline cSurgeBullet* MakeMagenta() {ASSERT(false)             return this;}
+    inline cSurgeBullet* MakePurple () {ASSERT(false)             return this;}
+    inline cSurgeBullet* MakeBlue   () {ASSERT(false)             return this;}
+    inline cSurgeBullet* MakeCyan   () {ASSERT(false)             return this;}
+    inline cSurgeBullet* MakeGreen  () {this->_MakeGreen  (1.1f); return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
@@ -361,14 +365,15 @@ public:
     inline cTeslaBullet* ChangeScale(const coreFloat fScale) {m_fScale = fScale; return this;}
 
     // change default color
-    inline cTeslaBullet* MakeWhite () {this->_MakeWhite (0.7f); return this;}
-    inline cTeslaBullet* MakeYellow() {ASSERT(false)            return this;}
-    inline cTeslaBullet* MakeOrange() {ASSERT(false)            return this;}
-    inline cTeslaBullet* MakeRed   () {ASSERT(false)            return this;}
-    inline cTeslaBullet* MakePurple() {ASSERT(false)            return this;}
-    inline cTeslaBullet* MakeBlue  () {this->_MakeBlue  (0.9f); return this;}
-    inline cTeslaBullet* MakeCyan  () {ASSERT(false)            return this;}
-    inline cTeslaBullet* MakeGreen () {ASSERT(false)            return this;}
+    inline cTeslaBullet* MakeWhite  () {this->_MakeWhite  (0.7f); return this;}
+    inline cTeslaBullet* MakeYellow () {ASSERT(false)             return this;}
+    inline cTeslaBullet* MakeOrange () {ASSERT(false)             return this;}
+    inline cTeslaBullet* MakeRed    () {ASSERT(false)             return this;}
+    inline cTeslaBullet* MakeMagenta() {ASSERT(false)             return this;}
+    inline cTeslaBullet* MakePurple () {ASSERT(false)             return this;}
+    inline cTeslaBullet* MakeBlue   () {this->_MakeBlue   (0.9f); return this;}
+    inline cTeslaBullet* MakeCyan   () {ASSERT(false)             return this;}
+    inline cTeslaBullet* MakeGreen  () {ASSERT(false)             return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_spheric_inst_program";}
@@ -398,14 +403,15 @@ public:
     inline void ResetProperties() {this->MakeBlue(); this->SetSize(coreVector3(1.6f,1.6f,1.6f) * 1.1f); this->SetTexSize(coreVector2(0.12f,0.12f)); m_fAnimation = 0.0f; m_fFade = 0.0f;}
 
     // change default color
-    inline cOrbBullet* MakeWhite () {this->_MakeWhite (0.6f); return this;}
-    inline cOrbBullet* MakeYellow() {ASSERT(false)            return this;}
-    inline cOrbBullet* MakeOrange() {this->_MakeOrange(0.9f); return this;}
-    inline cOrbBullet* MakeRed   () {this->_MakeRed   (0.9f); return this;}
-    inline cOrbBullet* MakePurple() {this->_MakePurple(0.9f); return this;}
-    inline cOrbBullet* MakeBlue  () {this->_MakeBlue  (0.9f); return this;}
-    inline cOrbBullet* MakeCyan  () {ASSERT(false)            return this;}
-    inline cOrbBullet* MakeGreen () {this->_MakeGreen (0.8f); return this;}
+    inline cOrbBullet* MakeWhite  () {this->_MakeWhite  (0.6f); return this;}
+    inline cOrbBullet* MakeYellow () {ASSERT(false)             return this;}
+    inline cOrbBullet* MakeOrange () {this->_MakeOrange (0.9f); return this;}
+    inline cOrbBullet* MakeRed    () {this->_MakeRed    (0.9f); return this;}
+    inline cOrbBullet* MakeMagenta() {ASSERT(false)             return this;}
+    inline cOrbBullet* MakePurple () {this->_MakePurple (0.9f); return this;}
+    inline cOrbBullet* MakeBlue   () {this->_MakeBlue   (0.9f); return this;}
+    inline cOrbBullet* MakeCyan   () {ASSERT(false)             return this;}
+    inline cOrbBullet* MakeGreen  () {this->_MakeGreen  (0.8f); return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_inst_program";}
@@ -435,14 +441,15 @@ public:
     inline void ResetProperties() {this->MakeOrange(); this->SetSize(coreVector3(1.35f,1.55f,1.35f) * 1.05f); this->SetTexSize(coreVector2(0.5f,0.2f) * 1.3f); m_fAnimation = 0.3f; m_fFade = 0.0f;}
 
     // change default color
-    inline cConeBullet* MakeWhite () {this->_MakeWhite (0.6f); return this;}
-    inline cConeBullet* MakeYellow() {this->_MakeYellow(0.8f); return this;}
-    inline cConeBullet* MakeOrange() {this->_MakeOrange(1.0f); return this;}
-    inline cConeBullet* MakeRed   () {ASSERT(false)            return this;}
-    inline cConeBullet* MakePurple() {ASSERT(false)            return this;}
-    inline cConeBullet* MakeBlue  () {ASSERT(false)            return this;}
-    inline cConeBullet* MakeCyan  () {ASSERT(false)            return this;}
-    inline cConeBullet* MakeGreen () {this->_MakeGreen (1.0f); return this;}
+    inline cConeBullet* MakeWhite  () {this->_MakeWhite  (0.6f); return this;}
+    inline cConeBullet* MakeYellow () {this->_MakeYellow (0.8f); return this;}
+    inline cConeBullet* MakeOrange () {this->_MakeOrange (1.0f); return this;}
+    inline cConeBullet* MakeRed    () {ASSERT(false)             return this;}
+    inline cConeBullet* MakeMagenta() {ASSERT(false)             return this;}
+    inline cConeBullet* MakePurple () {ASSERT(false)             return this;}
+    inline cConeBullet* MakeBlue   () {ASSERT(false)             return this;}
+    inline cConeBullet* MakeCyan   () {ASSERT(false)             return this;}
+    inline cConeBullet* MakeGreen  () {this->_MakeGreen  (1.0f); return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_inst_program";}
@@ -472,14 +479,15 @@ public:
     inline void ResetProperties() {this->MakeGreen(); this->SetSize(coreVector3(1.5f,1.5f,1.5f) * 1.3f); this->SetTexSize(coreVector2(1.1f,0.25f) * 0.2f); m_fAnimation = 0.2f; m_fFade = 0.0f;}
 
     // change default color
-    inline cWaveBullet* MakeWhite () {this->_MakeWhite (0.7f); return this;}
-    inline cWaveBullet* MakeYellow() {ASSERT(false)            return this;}
-    inline cWaveBullet* MakeOrange() {ASSERT(false)            return this;}
-    inline cWaveBullet* MakeRed   () {this->_MakeRed   (1.0f); return this;}
-    inline cWaveBullet* MakePurple() {ASSERT(false)            return this;}
-    inline cWaveBullet* MakeBlue  () {ASSERT(false)            return this;}
-    inline cWaveBullet* MakeCyan  () {ASSERT(false)            return this;}
-    inline cWaveBullet* MakeGreen () {this->_MakeGreen (1.1f); return this;}
+    inline cWaveBullet* MakeWhite  () {this->_MakeWhite  (0.7f); return this;}
+    inline cWaveBullet* MakeYellow () {ASSERT(false)             return this;}
+    inline cWaveBullet* MakeOrange () {ASSERT(false)             return this;}
+    inline cWaveBullet* MakeRed    () {this->_MakeRed    (1.0f); return this;}
+    inline cWaveBullet* MakeMagenta() {ASSERT(false)             return this;}
+    inline cWaveBullet* MakePurple () {ASSERT(false)             return this;}
+    inline cWaveBullet* MakeBlue   () {ASSERT(false)             return this;}
+    inline cWaveBullet* MakeCyan   () {ASSERT(false)             return this;}
+    inline cWaveBullet* MakeGreen  () {this->_MakeGreen  (1.1f); return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
@@ -509,14 +517,15 @@ public:
     inline void ResetProperties() {this->MakeYellow(); this->SetSize(coreVector3(1.45f,1.55f,1.45f) * 2.1f); this->SetTexSize(coreVector2(0.5f,0.2f)); m_fAnimation = 0.15f; m_fFade = 0.0f;}
 
     // change default color
-    inline cSpearBullet* MakeWhite () {this->_MakeWhite (0.8f); return this;}
-    inline cSpearBullet* MakeYellow() {this->_MakeYellow(1.0f); return this;}
-    inline cSpearBullet* MakeOrange() {ASSERT(false)            return this;}
-    inline cSpearBullet* MakeRed   () {ASSERT(false)            return this;}
-    inline cSpearBullet* MakePurple() {ASSERT(false)            return this;}
-    inline cSpearBullet* MakeBlue  () {ASSERT(false)            return this;}
-    inline cSpearBullet* MakeCyan  () {ASSERT(false)            return this;}
-    inline cSpearBullet* MakeGreen () {ASSERT(false)            return this;}
+    inline cSpearBullet* MakeWhite  () {this->_MakeWhite  (0.8f); return this;}
+    inline cSpearBullet* MakeYellow () {this->_MakeYellow (1.0f); return this;}
+    inline cSpearBullet* MakeOrange () {ASSERT(false)             return this;}
+    inline cSpearBullet* MakeRed    () {ASSERT(false)             return this;}
+    inline cSpearBullet* MakeMagenta() {ASSERT(false)             return this;}
+    inline cSpearBullet* MakePurple () {ASSERT(false)             return this;}
+    inline cSpearBullet* MakeBlue   () {ASSERT(false)             return this;}
+    inline cSpearBullet* MakeCyan   () {ASSERT(false)             return this;}
+    inline cSpearBullet* MakeGreen  () {ASSERT(false)             return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
@@ -546,14 +555,15 @@ public:
     inline void ResetProperties() {this->MakeRed(); this->SetSize(coreVector3(1.5f,1.5f,1.5f)); this->SetTexSize(coreVector2(0.5f,0.2f)); m_fAnimation = 0.0f; m_fFade = 0.0f;}
 
     // change default color
-    inline cTriangleBullet* MakeWhite () {ASSERT(false)            return this;}
-    inline cTriangleBullet* MakeYellow() {ASSERT(false)            return this;}
-    inline cTriangleBullet* MakeOrange() {ASSERT(false)            return this;}
-    inline cTriangleBullet* MakeRed   () {this->_MakeRed   (1.0f); return this;}
-    inline cTriangleBullet* MakePurple() {this->_MakePurple(1.0f); return this;}
-    inline cTriangleBullet* MakeBlue  () {ASSERT(false)            return this;}
-    inline cTriangleBullet* MakeCyan  () {ASSERT(false)            return this;}
-    inline cTriangleBullet* MakeGreen () {ASSERT(false)            return this;}
+    inline cTriangleBullet* MakeWhite  () {ASSERT(false)             return this;}
+    inline cTriangleBullet* MakeYellow () {ASSERT(false)             return this;}
+    inline cTriangleBullet* MakeOrange () {ASSERT(false)             return this;}
+    inline cTriangleBullet* MakeRed    () {this->_MakeRed    (1.0f); return this;}
+    inline cTriangleBullet* MakeMagenta() {ASSERT(false)             return this;}
+    inline cTriangleBullet* MakePurple () {this->_MakePurple (1.0f); return this;}
+    inline cTriangleBullet* MakeBlue   () {ASSERT(false)             return this;}
+    inline cTriangleBullet* MakeCyan   () {ASSERT(false)             return this;}
+    inline cTriangleBullet* MakeGreen  () {ASSERT(false)             return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
@@ -583,14 +593,15 @@ public:
     inline void ResetProperties() {this->MakePurple(); this->SetSize(coreVector3(2.6f,2.0f,2.6f)); this->SetTexSize(coreVector2(0.4f,0.2f)); m_fAnimation = 0.0f; m_fFade = 0.0f;}
 
     // change default color
-    inline cFlipBullet* MakeWhite () {this->_MakeWhite (0.6f); return this;}
-    inline cFlipBullet* MakeYellow() {ASSERT(false)            return this;}
-    inline cFlipBullet* MakeOrange() {ASSERT(false)            return this;}
-    inline cFlipBullet* MakeRed   () {ASSERT(false)            return this;}
-    inline cFlipBullet* MakePurple() {this->_MakePurple(1.0f); return this;}
-    inline cFlipBullet* MakeBlue  () {ASSERT(false)            return this;}
-    inline cFlipBullet* MakeCyan  () {ASSERT(false)            return this;}
-    inline cFlipBullet* MakeGreen () {ASSERT(false)            return this;}
+    inline cFlipBullet* MakeWhite  () {this->_MakeWhite  (0.6f); return this;}
+    inline cFlipBullet* MakeYellow () {ASSERT(false)             return this;}
+    inline cFlipBullet* MakeOrange () {ASSERT(false)             return this;}
+    inline cFlipBullet* MakeRed    () {ASSERT(false)             return this;}
+    inline cFlipBullet* MakeMagenta() {ASSERT(false)             return this;}
+    inline cFlipBullet* MakePurple () {this->_MakePurple (1.0f); return this;}
+    inline cFlipBullet* MakeBlue   () {ASSERT(false)             return this;}
+    inline cFlipBullet* MakeCyan   () {ASSERT(false)             return this;}
+    inline cFlipBullet* MakeGreen  () {ASSERT(false)             return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_inst_program";}
@@ -620,18 +631,57 @@ public:
     inline void ResetProperties() {this->MakeCyan(); this->SetSize(coreVector3(1.5f,1.5f,1.5f)); this->SetTexSize(coreVector2(0.5f,0.2f)); m_fAnimation = 0.0f; m_fFade = 0.0f;}
 
     // change default color
-    inline cQuadBullet* MakeWhite () {ASSERT(false)            return this;}
-    inline cQuadBullet* MakeYellow() {ASSERT(false)            return this;}
-    inline cQuadBullet* MakeOrange() {ASSERT(false)            return this;}
-    inline cQuadBullet* MakeRed   () {this->_MakeRed   (1.0f); return this;}
-    inline cQuadBullet* MakePurple() {this->_MakePurple(1.0f); return this;}
-    inline cQuadBullet* MakeBlue  () {ASSERT(false)            return this;}
-    inline cQuadBullet* MakeCyan  () {this->_MakeCyan  (1.0f); return this;}
-    inline cQuadBullet* MakeGreen () {ASSERT(false)            return this;}
+    inline cQuadBullet* MakeWhite  () {ASSERT(false)             return this;}
+    inline cQuadBullet* MakeYellow () {ASSERT(false)             return this;}
+    inline cQuadBullet* MakeOrange () {ASSERT(false)             return this;}
+    inline cQuadBullet* MakeRed    () {this->_MakeRed    (1.0f); return this;}
+    inline cQuadBullet* MakeMagenta() {ASSERT(false)             return this;}
+    inline cQuadBullet* MakePurple () {this->_MakePurple (1.0f); return this;}
+    inline cQuadBullet* MakeBlue   () {ASSERT(false)             return this;}
+    inline cQuadBullet* MakeCyan   () {this->_MakeCyan   (1.0f); return this;}
+    inline cQuadBullet* MakeGreen  () {ASSERT(false)             return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_FULL;}
+    static constexpr coreBool        ConfigShadow              () {return false;}
+
+
+private:
+    // execute own routines
+    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ReflectOwn()final;
+    void __MoveOwn   ()final;
+};
+
+
+// ****************************************************************
+// view bullet class
+class cViewBullet final : public cBullet
+{
+public:
+    cViewBullet()noexcept;
+
+    ENABLE_COPY(cViewBullet)
+    ASSIGN_ID(12, "View")
+
+    // reset base properties
+    inline void ResetProperties() {this->MakeMagenta(); this->SetSize(coreVector3(1.0f,3.0f,1.0f)); this->SetTexSize(coreVector2(0.2f,0.2f)); m_fAnimation = 0.0f; m_fFade = 0.0f;}
+
+    // change default color
+    inline cViewBullet* MakeWhite  () {ASSERT(false)             return this;}
+    inline cViewBullet* MakeYellow () {ASSERT(false)             return this;}
+    inline cViewBullet* MakeOrange () {ASSERT(false)             return this;}
+    inline cViewBullet* MakeRed    () {ASSERT(false)             return this;}
+    inline cViewBullet* MakeMagenta() {this->_MakeMagenta(1.0f); return this;}
+    inline cViewBullet* MakePurple () {ASSERT(false)             return this;}
+    inline cViewBullet* MakeBlue   () {ASSERT(false)             return this;}
+    inline cViewBullet* MakeCyan   () {ASSERT(false)             return this;}
+    inline cViewBullet* MakeGreen  () {ASSERT(false)             return this;}
+
+    // bullet configuration values
+    static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
+    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_DIRECT;}
     static constexpr coreBool        ConfigShadow              () {return false;}
 
 
@@ -655,7 +705,7 @@ public:
     cMineBullet()noexcept;
 
     ENABLE_COPY(cMineBullet)
-    ASSIGN_ID(12, "Mine")
+    ASSIGN_ID(13, "Mine")
 
     // reset base properties
     inline void ResetProperties() {this->SetSize(coreVector3(2.0f,2.0f,2.0f)); m_fAnimation = 0.0f; m_fFade = 0.0f;}
@@ -687,7 +737,7 @@ public:
     cRocketBullet()noexcept;
 
     ENABLE_COPY(cRocketBullet)
-    ASSIGN_ID(13, "Rocket")
+    ASSIGN_ID(14, "Rocket")
 
     // reset base properties
     inline void ResetProperties() {this->SetSize(coreVector3(1.7f,1.7f,1.7f)); m_fAnimation = 0.0f; m_fFade = 0.0f;}
@@ -714,7 +764,7 @@ public:
     cChromaBullet()noexcept;
 
     ENABLE_COPY(cChromaBullet)
-    ASSIGN_ID(13, "Chroma")
+    ASSIGN_ID(15, "Chroma")
 
     // reset base properties
     inline void ResetProperties() {this->SetSize(coreVector3(1.0f,1.0f,1.0f)); this->SetTexSize(coreVector2(0.5f,0.2f)); m_fAnimation = 0.0f;}
