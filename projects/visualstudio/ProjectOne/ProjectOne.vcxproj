@@ -520,7 +520,7 @@
     <None Include="..\..\..\executable\data\shaders\menu_grey.frag" />
     <None Include="..\..\..\executable\data\shaders\menu_inner.frag" />
     <None Include="..\..\..\executable\data\shaders\menu_inner.vert" />
-    <None Include="..\..\..\executable\data\shaders\menu_sharp.frag" />
+    <None Include="..\..\..\executable\data\shaders\menu_single.frag" />
     <None Include="..\..\..\executable\data\shaders\object.vert" />
     <None Include="..\..\..\executable\data\shaders\object_ground.frag" />
     <None Include="..\..\..\executable\data\shaders\object_ship.frag" />

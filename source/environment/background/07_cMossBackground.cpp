@@ -24,7 +24,7 @@ cMossBackground::cMossBackground()noexcept
     m_pOutdoor = new cOutdoor("moss", "grass", 5u, 4.5f);
 
     // 
-    m_pWater = new cRainWater("environment_clouds_blue.png");
+    m_pWater = new cRainWater("environment_clouds_grey.png");
 
     // allocate cloud list
     pList1 = new coreBatchList(MOSS_CLOUD_RESERVE);

@@ -15,7 +15,6 @@ void FragmentMain()
          v2ScreenCoord = abs(v2ScreenCoord - 0.5);
 
     // 
-    vec3  v3Color = coreTexture2D(0, v_av2TexCoord[0]).rgb;
     float v1Alpha = clamp(max(v2ScreenCoord.x, v2ScreenCoord.y) * 12.0 - 3.7, 0.0, 1.0);
 
     //if(v1Alpha == 1.0)
@@ -31,12 +30,14 @@ void FragmentMain()
 
 #if defined(_P1_GREY_)
 
-    // 
-    gl_FragColor = vec4(vec3(coreLuminance(v3Color)), v1Alpha);
+    // draw only single channel (as color)
+    float v1Value = coreTexture2D(0, v_av2TexCoord[0]).r;
+    gl_FragColor  = vec4(vec3(v1Value), v1Alpha);
 
 #else
 
     // 
+    vec3 v3Color = coreTexture2D(0, v_av2TexCoord[0]).rgb;
     gl_FragColor = vec4(v3Color, v1Alpha);
 
 #endif

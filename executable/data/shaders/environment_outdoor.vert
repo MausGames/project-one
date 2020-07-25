@@ -48,7 +48,7 @@ void VertexMain()
 #if defined(GL_EXT_gpu_shader4)
 
     // calculate vertex-position from vertex-ID (float-math for performance reasons)
-    vec2 v2Index  = floor(vec2(mod(gl_VertexID, c_v1Size), float(gl_VertexID) / c_v1Size));
+    vec2 v2Index  = floor(vec2(mod(float(gl_VertexID), c_v1Size), float(gl_VertexID) / c_v1Size));
     vec2 v2Vertex = vec2(v2Index - vec2(c_v1SizeHalf)) * c_v1Detail;
 
 #else

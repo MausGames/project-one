@@ -619,9 +619,6 @@
     <None Include="..\..\..\executable\data\shaders\menu_inner.vert">
       <Filter>_data\shaders</Filter>
     </None>
-    <None Include="..\..\..\executable\data\shaders\menu_sharp.frag">
-      <Filter>_data\shaders</Filter>
-    </None>
     <None Include="..\..\..\executable\data\shaders\object.vert">
       <Filter>_data\shaders</Filter>
     </None>
@@ -680,6 +677,9 @@
       <Filter>_data\shaders</Filter>
     </None>
     <None Include="..\..\..\executable\data\shaders\full_blur_2y.frag">
+      <Filter>_data\shaders</Filter>
+    </None>
+    <None Include="..\..\..\executable\data\shaders\menu_single.frag">
       <Filter>_data\shaders</Filter>
     </None>
     <None Include="..\..\..\executable\data\shaders\effect_ink.frag">

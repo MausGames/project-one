@@ -39,7 +39,7 @@ void FragmentMain()
     float v1Intensity = max(1.0 - u_v4Color.b * coreLengthSq(v_av2TexCoord[1] - vec2(0.5)), 0.0);
 
     // draw blend between all textures (glow only on environment for high contrast)
-    vec3 v3Blend = (v3Environment * v1Intensity + v3Glow) * (1.0 - v4Foreground.a) + v4Foreground.rgb;
+    vec3 v3Blend = ((v3Environment + v3Glow) * (1.0 - v4Foreground.a) + v4Foreground.rgb) * v1Intensity;
 
     // 
     vec3 v3Color = pow(v3Blend, vec3(1.05));

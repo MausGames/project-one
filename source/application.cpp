@@ -112,6 +112,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("effect_wave_norm.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_wave_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_algae.png",                  CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_algae.png");
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_blue.png",            CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_blue.png");
+    Core::Manager::Resource->Load<coreTexture>("environment_clouds_grey.png",            CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_grey.png");
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_low.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_low.png");
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_mid.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_mid.png");
     Core::Manager::Resource->Load<coreTexture>("environment_clouds_high.png",            CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_clouds_high.png");
