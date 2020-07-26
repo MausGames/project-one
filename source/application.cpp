@@ -9,7 +9,7 @@
 
 // ****************************************************************
 // project settings
-const coreChar* const CoreApp::Settings::Name                       = "Project One";
+const coreChar* const CoreApp::Settings::Name                       = "Eigengrau";
 const coreChar* const CoreApp::Settings::IconPath                   = "data/textures/game_icon.png";
 const coreChar* const CoreApp::Settings::CursorPath                 = "data/textures/default_cursor.png";
 const coreUint8       CoreApp::Settings::RenderBuffer::DepthSize    = 16u;
