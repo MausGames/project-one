@@ -1,4 +1,4 @@
-# Project One
+# Eigengrau - Project One
 
 Eigengrau is a **multi-directional shoot'em up** with colorful and diverse gameplay.
 
