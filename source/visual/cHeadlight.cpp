@@ -60,9 +60,6 @@ void cHeadlight::Render()
 // 
 void cHeadlight::Update()
 {
-    // 
-    if(!CORE_GL_SUPPORT(ARB_texture_rg)) glColorMask(true, false, false, false);
-
     if(!m_aSpotCommand.empty() || !m_aPointCommand.empty())
     {
         // 
@@ -101,9 +98,6 @@ void cHeadlight::Update()
         m_aPointCommand.clear();
     }
     else m_FrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);
-
-    // 
-    if(!CORE_GL_SUPPORT(ARB_texture_rg)) glColorMask(true, true, true, true);
 }
 
 

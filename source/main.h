@@ -51,7 +51,6 @@
 // TODO: clean mixing shader defines (x >= y) and (defined(x)) checks (also in engine)
 // TODO: check for 16-bit float shader usage
 // TODO: program enable has to be checked (if(x.Enable()){}) everywhere
-// TODO: check if "if(!CORE_GL_SUPPORT(ARB_texture_rg)) glColorMask(true, true, false, false);" reduces or improves performance on related hardware, it is recommended to remove it for compression purposes, but always test to be sure
 // TODO: change 0.5 FB factors from 0.5 to 0.4 (-36% pixel) if CORE_GL_SUPPORT(ARB_texture_rg) not available ?
 // TODO: unify "forward" and "transform" comments in shaders
 // TODO: add own coreRand for various random things which may affect feeling (screen shake), and reset on boss-start
