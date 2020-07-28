@@ -66,7 +66,7 @@
 #define DESERT_SAND_NUM       (7u)
 
 #define SPACE_METEOR_NUM      (1536u)
-#define SPACE_METEOR_RESERVE  (1824u)   // # exact 
+#define SPACE_METEOR_RESERVE  (1024u)
 
 #define VOLCANO_SMOKE_NUM     (512u)
 #define VOLCANO_SMOKE_RESERVE (64u)
@@ -275,11 +275,21 @@ private:
 // space background class
 class cSpaceBackground final : public cBackground
 {
+private:
+    coreFullscreen m_Cover;   // 
+
+
 public:
     cSpaceBackground()noexcept;
 
     DISABLE_COPY(cSpaceBackground)
     ASSIGN_ID(4, "Space")
+
+
+private:
+    // execute own routines
+    void __RenderOwnBefore()final;
+    void __MoveOwn        ()final;
 };
 
 

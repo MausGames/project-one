@@ -11,16 +11,23 @@
 
 // ****************************************************************
 // constructor
-cOutdoor::cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom, const coreUint8 iAlgorithm, const coreFloat fGrade)noexcept
-: m_iVertexOffset (0u)
+cOutdoor::cOutdoor()noexcept
+: m_aiHeight      {}
+, m_iVertexOffset (0u)
 , m_iIndexOffset  (0u)
 , m_fFlyOffset    (0.0f)
+, m_iHandleIndex  (0u)
 , m_iAlgorithm    (0u)
 , m_fGrade        (0.0f)
 , m_afLerpMul     {}
 , m_afLerpAdd     {}
 , m_aiLerpRange   {}
 , m_afLerpData    {}
+{
+}
+
+cOutdoor::cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom, const coreUint8 iAlgorithm, const coreFloat fGrade)noexcept
+: cOutdoor ()
 {
     const coreTextureSpec oSpec = CORE_GL_SUPPORT(ARB_texture_rg) ? CORE_TEXTURE_SPEC_R8 : CORE_TEXTURE_SPEC_RGB8;
 
@@ -71,7 +78,7 @@ void cOutdoor::Render()
     });
 
     // enable light map
-    m_LightMap.GetColorTarget(0u).pTexture->Enable(3u);
+    if(m_LightMap.GetIdentifier()) m_LightMap.GetColorTarget(0u).pTexture->Enable(3u);
 }
 
 void cOutdoor::RenderLight()
@@ -533,15 +540,22 @@ FUNC_LOCAL coreVector2 cOutdoor::CalcLerpVector(const coreFloat fPositionY)const
 // 
 void cOutdoor::UpdateLightMap()
 {
-    // 
-    if(!CORE_GL_SUPPORT(ARB_texture_rg)) glColorMask(true, false, false, false);
+    if(!m_LightMap.GetIdentifier()) return;
 
     // 
     m_LightMap.StartDraw();
     this->RenderLight();
+}
+
+
+// ****************************************************************
+// 
+void cOutdoor::InvalidateLightMap()
+{
+    if(!m_LightMap.GetIdentifier()) return;
 
     // 
-    if(!CORE_GL_SUPPORT(ARB_texture_rg)) glColorMask(true, true, true, true);
+    m_LightMap.Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
 }
 
 

@@ -16,6 +16,7 @@
 // TODO: outdoor parameters are reset on engine-reset !!!    
 // TODO: fix file getting unloaded while others are reading (in reource-manager), maybe make copies of the file
 // TODO: get max height of outdoor model and use for first step in RetrieveIntersect
+// TODO: attach function, then calling destructor will crash, implement detach function (>engine)
 
 
 // ****************************************************************
@@ -95,6 +96,7 @@ private:
 
 
 public:
+    cOutdoor()noexcept;
     cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom, const coreUint8 iAlgorithm, const coreFloat fGrade)noexcept;
     ~cOutdoor()final;
 
@@ -127,6 +129,7 @@ public:
     inline cShadow*         GetShadowMap() {return &m_ShadowMap;}
     inline coreFrameBuffer* GetLightMap () {return &m_LightMap;}
     void UpdateLightMap();
+    void InvalidateLightMap();
 
     // set object properties
     void SetFlyOffset(const coreFloat fFlyOffset);
@@ -151,9 +154,11 @@ template <typename F> void cOutdoor::__Render(const coreProgramPtr& pProgram, F&
     if(!this->IsEnabled(CORE_OBJECT_ENABLE_RENDER)) return;
 
     // check for model status
+    ASSERT(m_pModel)
     if(!m_pModel.IsUsable()) return;
 
     // enable the shader-program
+    ASSERT(pProgram)
     if(!pProgram.IsUsable()) return;
     if(!pProgram->Enable())  return;
 

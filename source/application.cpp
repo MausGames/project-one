@@ -140,6 +140,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("environment_sea_norm.png",               CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_sea_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_snow_diff.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_snow_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_snow_norm.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_snow_norm.png", false);
+    Core::Manager::Resource->Load<coreTexture>("environment_space.png",                  CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_space.png");
     Core::Manager::Resource->Load<coreTexture>("environment_stone_diff.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_stone_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_stone_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_stone_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_water_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_water_norm.png", false);
