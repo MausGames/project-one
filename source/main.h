@@ -296,6 +296,7 @@ extern cPostProcessing* const g_pPostProcessing;   // main post-processing objec
 #include "game/cWeapon.h"
 #include "game/cShip.h"
 #include "game/cEnemy.h"
+#include "game/cHelper.h"
 #include "game/cChroma.h"
 #include "game/cItem.h"
 #include "game/cShield.h"

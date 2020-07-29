@@ -93,6 +93,15 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("ship_enemy_star_low.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_star_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_enemy_warrior_high.md3",            CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_warrior_high.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("ship_enemy_warrior_low.md3",             CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_warrior_low.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_helper_01.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_01.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_helper_02.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_02.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_helper_03.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_03.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_helper_04.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_04.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_helper_05.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_05.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_helper_06.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_06.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_helper_07.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_07.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_helper_08.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_08.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_helper_09.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_09.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("ship_player_def_high.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_def_high.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("ship_player_def_low.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_def_low.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("ship_player_atk_high.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_atk_high.md3", false);

@@ -43,6 +43,7 @@ target_sources(
     ${BASE_DIRECTORY}/source/game/cChroma.cpp
     ${BASE_DIRECTORY}/source/game/cEnemy.cpp
     ${BASE_DIRECTORY}/source/game/cGame.cpp
+    ${BASE_DIRECTORY}/source/game/cHelper.cpp
     ${BASE_DIRECTORY}/source/game/cItem.cpp
     ${BASE_DIRECTORY}/source/game/cPlayer.cpp
     ${BASE_DIRECTORY}/source/game/cShield.cpp

@@ -20,6 +20,7 @@
 // ****************************************************************
 // game definitions
 #define GAME_PLAYERS         (PLAYERS)     // default number of players
+#define GAME_HELPERS         (9u)          // 
 #define GAME_CONTINUES       (CONTINUES)   // 
 #define GAME_INTRO_DELAY     (0.2f)        // 
 #define GAME_INTRO_DURATION  (3.5f)        // 
@@ -97,6 +98,7 @@ class cGame final
 {
 private:
     cPlayer m_aPlayer[GAME_PLAYERS];        // player objects
+    cHelper m_aHelper[GAME_HELPERS];        // 
 
     cEnemyManager  m_EnemyManager;          // enemy manager
     cBulletManager m_BulletManagerPlayer;   // low-priority bullet manager
@@ -176,18 +178,19 @@ public:
     template <typename F> void ForEachPlayerAll(F&& nFunction);   // [](cPlayer* OUTPUT pPlayer, const coreUintW i) -> void
 
     // access game objects
-    inline cPlayer*         GetPlayer             (const coreUintW iIndex) {ASSERT(iIndex < GAME_PLAYERS) return &m_aPlayer[iIndex];}
-    inline cEnemyManager*   GetEnemyManager       ()                       {return &m_EnemyManager;}
-    inline cBulletManager*  GetBulletManagerPlayer()                       {return &m_BulletManagerPlayer;}
-    inline cBulletManager*  GetBulletManagerEnemy ()                       {return &m_BulletManagerEnemy;}
-    inline cChromaManager*  GetChromaManager      ()                       {return &m_ChromaManager;}
-    inline cItemManager*    GetItemManager        ()                       {return &m_ItemManager;}
-    inline cShieldManager*  GetShieldManager      ()                       {return &m_ShieldManager;}
-    inline cCombatText*     GetCombatText         ()                       {return &m_CombatText;}
-    inline cInterface*      GetInterface          ()                       {return &m_Interface;}
-    inline cMission*        GetCurMission         ()const                  {ASSERT(m_pCurMission) return m_pCurMission;}
-    inline const coreUintW& GetCurMissionIndex    ()const                  {return m_iCurMissionIndex;}
-    inline cTimeTable*      GetTimeTable          ()                       {return &m_TimeTable;}
+    inline cPlayer*         GetPlayer             (const coreUintW iIndex)   {ASSERT(iIndex                   < GAME_PLAYERS) return &m_aPlayer[iIndex];}
+    inline cHelper*         GetHelper             (const coreUint8 iElement) {ASSERT(iElement - ELEMENT_WHITE < GAME_HELPERS) return &m_aHelper[iElement - ELEMENT_WHITE];}
+    inline cEnemyManager*   GetEnemyManager       ()                         {return &m_EnemyManager;}
+    inline cBulletManager*  GetBulletManagerPlayer()                         {return &m_BulletManagerPlayer;}
+    inline cBulletManager*  GetBulletManagerEnemy ()                         {return &m_BulletManagerEnemy;}
+    inline cChromaManager*  GetChromaManager      ()                         {return &m_ChromaManager;}
+    inline cItemManager*    GetItemManager        ()                         {return &m_ItemManager;}
+    inline cShieldManager*  GetShieldManager      ()                         {return &m_ShieldManager;}
+    inline cCombatText*     GetCombatText         ()                         {return &m_CombatText;}
+    inline cInterface*      GetInterface          ()                         {return &m_Interface;}
+    inline cMission*        GetCurMission         ()const                    {ASSERT(m_pCurMission) return m_pCurMission;}
+    inline const coreUintW& GetCurMissionIndex    ()const                    {return m_iCurMissionIndex;}
+    inline cTimeTable*      GetTimeTable          ()                         {return &m_TimeTable;}
 
     // get object properties
     inline const coreInt32*    GetMissionList()const {return m_piMissionList;}

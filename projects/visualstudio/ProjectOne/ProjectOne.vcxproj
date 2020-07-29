@@ -237,6 +237,7 @@
     <ClCompile Include="..\..\..\source\game\cChroma.cpp" />
     <ClCompile Include="..\..\..\source\game\cEnemy.cpp" />
     <ClCompile Include="..\..\..\source\game\cGame.cpp" />
+    <ClCompile Include="..\..\..\source\game\cHelper.cpp" />
     <ClCompile Include="..\..\..\source\game\cItem.cpp" />
     <ClCompile Include="..\..\..\source\game\cTable.cpp" />
     <ClCompile Include="..\..\..\source\game\cShield.cpp" />
@@ -427,6 +428,7 @@
     <ClInclude Include="..\..\..\source\game\cChroma.h" />
     <ClInclude Include="..\..\..\source\game\cEnemy.h" />
     <ClInclude Include="..\..\..\source\game\cGame.h" />
+    <ClInclude Include="..\..\..\source\game\cHelper.h" />
     <ClInclude Include="..\..\..\source\game\cItem.h" />
     <ClInclude Include="..\..\..\source\game\cPlayer.h" />
     <ClInclude Include="..\..\..\source\game\cTable.h" />

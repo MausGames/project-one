@@ -18,6 +18,9 @@
     <ClCompile Include="..\..\..\source\game\cGame.cpp">
       <Filter>game</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\game\cHelper.cpp">
+      <Filter>game</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\source\game\cBullet.cpp">
       <Filter>game</Filter>
     </ClCompile>
@@ -325,6 +328,9 @@
       <Filter>game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\source\game\cGame.h">
+      <Filter>game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\game\cHelper.h">
       <Filter>game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\source\game\cBullet.h">

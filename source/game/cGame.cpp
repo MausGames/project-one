@@ -69,11 +69,18 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
     }
 
     // 
+    for(coreUintW i = 0u; i < GAME_HELPERS; ++i)
+        m_aHelper[i].Configure(ELEMENT_WHITE + i);
+
+    // 
     m_Interface.UpdateLayout();
     m_Interface.UpdateEnabled();
 
     // load first mission
     m_pCurMission = new cNoMission();
+
+    // 
+    cHelper::GlobalReset();
 
     // 
     g_pSave->SaveFile();
@@ -116,6 +123,10 @@ void cGame::Render()
         // render all players
         for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
             m_aPlayer[i].Render();
+
+        // 
+        for(coreUintW i = 0u; i < GAME_HELPERS; ++i)
+            m_aHelper[i].Render();
 
         // render all enemies
         m_EnemyManager.Render();
@@ -202,12 +213,19 @@ void cGame::Move()
     // 
     this->__HandlePacifist();
 
+    // 
+    cHelper::GlobalUpdate();
+
     // move the mission
     m_pCurMission->MoveBefore();
     {
         // move all players
         for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
             m_aPlayer[i].Move();
+
+        // 
+        for(coreUintW i = 0u; i < GAME_HELPERS; ++i)
+            m_aHelper[i].Move();
 
         // move all enemies
         m_EnemyManager.Move();
@@ -958,6 +976,10 @@ void cGame::__ClearAll(const coreBool bAnimated)
     // 
     for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
         m_aPlayer[i].Kill(bAnimated);
+
+    // 
+    for(coreUintW i = 0u; i < GAME_HELPERS; ++i)
+        m_aHelper[i].Kill(bAnimated);
 
     // 
     m_EnemyManager       .ClearEnemies(bAnimated);
