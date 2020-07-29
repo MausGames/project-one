@@ -82,7 +82,7 @@ cLeviathanBoss::cLeviathanBoss()noexcept
 
             // load object resources
             coreObject3D* pRay = &m_aRayRaw[i];
-            pRay->DefineModel  ("object_tube.md3");
+            pRay->DefineModel  ("object_tube_open.md3");
             pRay->DefineTexture(0u, "effect_energy.png");
             pRay->DefineProgram(iType ? "effect_energy_direct_program" : "effect_energy_invert_program");
 

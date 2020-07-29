@@ -92,7 +92,7 @@ cPlayer::cPlayer()noexcept
     m_Shield.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 
     // 
-    m_Exhaust.DefineModel  ("object_tube.md3");
+    m_Exhaust.DefineModel  ("object_tube_open.md3");
     m_Exhaust.DefineTexture(0u, "effect_energy.png");
     m_Exhaust.DefineProgram("effect_energy_direct_program");
     m_Exhaust.SetDirection (this->GetDirection());

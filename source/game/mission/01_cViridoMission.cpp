@@ -114,7 +114,7 @@ cViridoMission::cViridoMission()noexcept
 
             // load object resources
             coreObject3D* pLaser = &m_aLaserRaw[i];
-            pLaser->DefineModel  ("object_tube.md3");
+            pLaser->DefineModel  ("object_tube_open.md3");
             pLaser->DefineTexture(0u, "effect_energy.png");
             pLaser->DefineProgram("effect_energy_flat_program");
 
