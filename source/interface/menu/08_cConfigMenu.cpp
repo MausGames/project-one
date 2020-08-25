@@ -768,12 +768,12 @@ void cConfigMenu::SaveValues()
                             (m_RenderQuality.GetCurEntry().tValue != g_CurConfig.Graphics.iRender);
 
     // 
-    Core::Config->SetInt (CORE_CONFIG_SYSTEM_WIDTH,               F_TO_SI(vCurResolution.x));
-    Core::Config->SetInt (CORE_CONFIG_SYSTEM_HEIGHT,              F_TO_SI(vCurResolution.y));
-    Core::Config->SetInt (CORE_CONFIG_SYSTEM_DISPLAY,             m_Monitor      .GetCurEntry().tValue);
-    Core::Config->SetInt (CORE_CONFIG_SYSTEM_FULLSCREEN,          m_DisplayMode  .GetCurEntry().tValue);
-    Core::Config->SetInt (CORE_CONFIG_GRAPHICS_ANTIALIASING,      m_AntiAliasing .GetCurEntry().tValue);
-    Core::Config->SetInt (CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY, m_TextureFilter.GetCurEntry().tValue);
+    Core::Config->SetInt(CORE_CONFIG_SYSTEM_WIDTH,               F_TO_SI(vCurResolution.x));
+    Core::Config->SetInt(CORE_CONFIG_SYSTEM_HEIGHT,              F_TO_SI(vCurResolution.y));
+    Core::Config->SetInt(CORE_CONFIG_SYSTEM_DISPLAY,             m_Monitor      .GetCurEntry().tValue);
+    Core::Config->SetInt(CORE_CONFIG_SYSTEM_FULLSCREEN,          m_DisplayMode  .GetCurEntry().tValue);
+    Core::Config->SetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING,      m_AntiAliasing .GetCurEntry().tValue);
+    Core::Config->SetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY, m_TextureFilter.GetCurEntry().tValue);
     g_CurConfig.Graphics.iRender = m_RenderQuality.GetCurEntry().tValue;
     g_CurConfig.Graphics.iShadow = m_ShadowQuality.GetCurEntry().tValue;
 
@@ -809,8 +809,10 @@ void cConfigMenu::SaveValues()
 
     if(bReset)
     {
+        const coreVector2 vSafeResolution = vCurResolution.IsNull() ? Core::System->GetDisplayData(iCurMonitor).vDesktopRes : vCurResolution;
+
         // 
-        InitResolution(vCurResolution);
+        InitResolution(vSafeResolution);
         Core::Reset();
 
         // 
