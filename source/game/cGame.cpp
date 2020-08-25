@@ -902,10 +902,24 @@ void cGame::__HandleCollisions()
             if(!CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
             {
                 // 
-                if(pEnemy->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner())))
+                const coreInt32 iTaken = pEnemy->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner()));
+
+                if(iTaken)
                 {
-                    // 
-                    pBullet->Deactivate(true, vIntersection.xy());
+                    if(CONTAINS_FLAG(pBullet->GetStatus(), BULLET_STATUS_PENETRATE))
+                    {
+                        // 
+                        pBullet->SetDamage(pBullet->GetDamage() - iTaken);
+                        ASSERT(pBullet->GetDamage() >= 0)
+
+                        // 
+                        if(!pBullet->GetDamage()) pBullet->Deactivate(true, vIntersection.xy());
+                    }
+                    else
+                    {
+                        // 
+                        pBullet->Deactivate(true, vIntersection.xy());
+                    }
 
                     // 
                     g_pSpecialEffects->RumblePlayer(d_cast<cPlayer*>(pBullet->GetOwner()), SPECIAL_RUMBLE_DEFAULT);
