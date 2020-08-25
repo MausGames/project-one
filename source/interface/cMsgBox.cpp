@@ -167,7 +167,10 @@ void cMsgBox::__ExecuteCallback(const coreInt32 a, const coreInt32 b)
 {
     if(!m_nCallback) return;
 
-    // 
-    m_nCallback(a, b);
+    // move callback to stack (to allow chaining)
+    const auto nLocal = std::move(m_nCallback);
     m_nCallback = NULL;
+
+    // execute callback
+    nLocal(a, b);
 }
