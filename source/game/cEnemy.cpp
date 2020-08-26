@@ -135,7 +135,8 @@ coreInt32 cEnemy::TakeDamage(coreInt32 iDamage, const coreUint8 iElement, const 
                 if(pAttacker)
                 {
                     // 
-                    pAttacker->GetScoreTable()->AddScore(iTaken, false);
+                    if(!CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_WORTHLESS))
+                        pAttacker->GetScoreTable()->AddScore(iTaken, false);
 
                     // 
                     pAttacker->GetDataTable()->EditCounterTotal  ()->iDamageGiven += iTaken;

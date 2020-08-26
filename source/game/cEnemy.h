@@ -27,15 +27,16 @@ enum eEnemyStatus : coreUint16
 {
     ENEMY_STATUS_DEAD        = 0x0001u,   // completely removed from the game
     ENEMY_STATUS_ASSIGNED    = 0x0002u,   // enemy is currently assigned to something
-    ENEMY_STATUS_BOSS        = 0x0004u,   // 
-    ENEMY_STATUS_SINGLE      = 0x0008u,   // 
-    ENEMY_STATUS_ENERGY      = 0x0010u,   // 
-    ENEMY_STATUS_CHILD       = 0x0020u,   // 
-    ENEMY_STATUS_SHIELDED    = 0x0040u,   // 
+    ENEMY_STATUS_CHILD       = 0x0004u,   // 
+    ENEMY_STATUS_SHIELDED    = 0x0008u,   // 
+    ENEMY_STATUS_BOSS        = 0x0010u,   // 
+    ENEMY_STATUS_SINGLE      = 0x0020u,   // 
+    ENEMY_STATUS_ENERGY      = 0x0040u,   // 
     ENEMY_STATUS_INVINCIBLE  = 0x0080u,   // 
     ENEMY_STATUS_IMMORTAL    = 0x0100u,   // 
     ENEMY_STATUS_GHOST       = 0x0200u,   // 
-    ENEMY_STATUS_HIDDEN      = 0x0400u    // 
+    ENEMY_STATUS_HIDDEN      = 0x0400u,   // 
+    ENEMY_STATUS_WORTHLESS   = 0x0800u    // 
 };
 
 
