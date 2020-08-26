@@ -17,7 +17,7 @@
 
 // ****************************************************************
 // combat text definitions
-#define COMBAT_LABELS (8u)   // number of label objects
+#define COMBAT_LABELS (16u)   // number of label objects
 
 
 // ****************************************************************

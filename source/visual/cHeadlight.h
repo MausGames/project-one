@@ -15,6 +15,7 @@
 // TODO: slow up and down glowing
 // TODO: old flickering effect and sound
 // TODO: activation-animation (e.g. for player or boss spot-lights)
+// TODO: use simpler shader for light (single-channel only)
 
 
 // ****************************************************************

@@ -352,7 +352,6 @@ void cDharukBoss::__DisableDuplicate(const coreBool bAnimated)
 // 
 void cDharukBoss::__EnableBoomerang(const coreUintW iIndex, const coreVector2& vPosition, const coreVector2& vDirection)
 {
-    // 
     ASSERT(iIndex < DHARUK_BOOMERANGS)
     coreObject3D* pBoomerang = (*m_Boomerang     .List())[iIndex];
     coreObject3D* pTrail     = (*m_BoomerangTrail.List())[iIndex*DHARUK_TRAILS];
@@ -383,7 +382,6 @@ void cDharukBoss::__EnableBoomerang(const coreUintW iIndex, const coreVector2& v
 // 
 void cDharukBoss::__DisableBoomerang(const coreUintW iIndex, const coreBool bAnimated)
 {
-    // 
     ASSERT(iIndex < DHARUK_BOOMERANGS)
     coreObject3D* pBoomerang = (*m_Boomerang     .List())[iIndex];
     coreObject3D* pTrail     = (*m_BoomerangTrail.List())[iIndex*DHARUK_TRAILS];

@@ -149,7 +149,7 @@ void cMenu::Move()
         Core::Input->ClearButtonAll();
 
     // 
-    m_MsgBox.Move();
+    m_MsgBox.Move();   // # clears input
 
     // move the menu
     this->coreMenu::Move();

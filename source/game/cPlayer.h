@@ -16,6 +16,7 @@
 // TODO: add in-game hint for roll-cooldown end ((just) acoustic)
 // TODO: render wind, bubble, etc. in group for coop
 // TODO: correct reverse-tracking when hitting the walls (position correction) ? only for 45degree, also on other code locations ?
+// TODO: orange/red exhaust for second ship ?
 
 
 // ****************************************************************
@@ -149,6 +150,9 @@ public:
     void StartIgnoring(const coreUint8 iType);
     void EndIgnoring  ();
     inline coreBool IsIgnoring()const {return (m_fIgnoreTime > PLAYER_NO_IGNORE);}
+
+    // 
+    inline coreBool IsNormal()const {return (!this->IsRolling() && !this->IsFeeling() && !this->IsIgnoring());}
 
     // 
     inline void     ActivateNormalShading()      {this->DefineProgram(m_pNormalProgram);}

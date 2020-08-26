@@ -169,6 +169,37 @@ inline FUNC_CONST coreVector2 StepRotated90X(const coreUint8 iStep)
 
 // ****************************************************************
 // 
+inline FUNC_CONST coreVector2 MapStepRotated45(const coreVector2& vDirection, const coreUint8 iStep)
+{
+    switch(iStep)
+    {
+    default: ASSERT(false)
+    case 0u: return  vDirection;
+    case 1u: return  vDirection.Rotated45();
+    case 2u: return  vDirection.Rotated90();
+    case 3u: return  vDirection.Rotated135();
+    case 4u: return -vDirection;
+    case 5u: return -vDirection.Rotated45();
+    case 6u: return -vDirection.Rotated90();
+    case 7u: return -vDirection.Rotated135();
+    }
+}
+
+inline FUNC_CONST coreVector2 MapStepRotated90(const coreVector2& vDirection, const coreUint8 iStep)
+{
+    switch(iStep)
+    {
+    default: ASSERT(false)
+    case 0u: return  vDirection;
+    case 1u: return  vDirection.Rotated90();
+    case 2u: return -vDirection;
+    case 3u: return -vDirection.Rotated90();
+    }
+}
+
+
+// ****************************************************************
+// 
 inline FUNC_LOCAL coreBool IsHorizontal(const coreVector2& v)
 {
     ASSERT(!v.IsNull())

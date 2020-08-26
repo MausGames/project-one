@@ -70,6 +70,21 @@
 // TODO: ENABLE_BITWISE when ?
 // TODO: remove multisampling for 2d, though may cause artifacts if the objects are fully shaded and moved
 // TODO: transition shader only needs alpha for menu, but not for background -> create permutations
+// TODO: default_black and default_white only 4x4
+// TODO: check all normalization calls if requires default or context-specific fallback, also check for more unsafe calls
+// TODO: check all RCP for division by zero
+// TODO: reshape causes some batch-list to be initialized twice
+// TODO: look for hot/cold optimizations, e.g. member-list in enemy can be pointer, write wrapper for that, coreCold<...>, check everything already pointer for switching to wrapper
+// TODO: check for and prevent accumulation of small rounding errors: incremental matrix rotation
+// TODO: check if outlines are correct on all text (multiple font-height, multiple screen-resolutions)
+// TODO: return boolean to cancel iteration on ForEachBullet, *Player, *Enemy (do I need this?)
+// TODO: make sure shaders use 0.5,0.5 for pixel centers
+// TODO: check for single-channel menu_background_black
+// TODO: make energy texture sharper (offline upsampling)
+// TODO: implement custom identifier for game, for replay, save, other compatibility
+// TODO: check for merging varyings with component = # and layoutEx (or merge manually)
+// TODO: use only 6 (or 8) pixel texture with nearest filtering for enemies
+// TODO: indicator when controls are enabled again (blinking und peeping sound)
 
 
 // ****************************************************************
@@ -137,16 +152,14 @@
 #define COLOR_FIRE_ORANGE    (coreVector3(0.991f, 0.305f, 0.042f))
 #define COLOR_FIRE_BLUE      (coreVector3(0.306f, 0.527f, 1.000f))
 #define COLOR_SHIP_YELLOW    (coreVector3( 50.0f/360.0f, 100.0f/100.0f,  85.0f/100.0f).HsvToRgb())
-#define COLOR_SHIP_ORANGE    (coreVector3( 34.0f/360.0f, 100.0f/100.0f, 100.0f/100.0f).HsvToRgb())
+#define COLOR_SHIP_ORANGE    (coreVector3( 34.0f/360.0f,  95.0f/100.0f,  95.0f/100.0f).HsvToRgb())
 #define COLOR_SHIP_RED       (coreVector3(  0.0f/360.0f,  68.0f/100.0f,  90.0f/100.0f).HsvToRgb())
 #define COLOR_SHIP_MAGENTA   (coreVector3(330.0f/360.0f,  65.0f/100.0f,  85.0f/100.0f).HsvToRgb())
 #define COLOR_SHIP_PURPLE    (coreVector3(287.0f/360.0f,  55.0f/100.0f,  85.0f/100.0f).HsvToRgb())
 #define COLOR_SHIP_BLUE      (coreVector3(201.0f/360.0f,  74.0f/100.0f,  85.0f/100.0f).HsvToRgb())
 #define COLOR_SHIP_CYAN      (coreVector3(183.0f/360.0f,  70.0f/100.0f,  85.0f/100.0f).HsvToRgb())
 #define COLOR_SHIP_GREEN     (coreVector3(118.0f/360.0f,  58.0f/100.0f,  70.0f/100.0f).HsvToRgb())
-#define COLOR_SHIP_BROWN     (coreVector3( 40.0f/360.0f,  95.0f/100.0f,  70.0f/100.0f).HsvToRgb())
 #define COLOR_SHIP_GREY      (coreVector3(  0.0f/360.0f,   0.0f/100.0f,  60.0f/100.0f).HsvToRgb())
-#define COLOR_SHIP_ICE       (coreVector3(208.0f/360.0f,  32.0f/100.0f,  90.0f/100.0f).HsvToRgb())
 #define COLOR_HEALTH(x)      (TernaryLerp(COLOR_MENU_RED, COLOR_MENU_YELLOW, COLOR_MENU_GREEN, x))
 #define COLOR_CHAIN(x)       (TernaryLerp(COLOR_MENU_RED, COLOR_MENU_PURPLE, COLOR_MENU_BLUE,  x))
 

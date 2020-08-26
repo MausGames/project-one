@@ -21,6 +21,7 @@
 // TODO: bullet -> to POD-type with single parent object
 // TODO: reorder bullets either yellow->green or green->yellow, so they are overlapping consistently (in default order)
 // TODO: surge-bullets to wave-weapon, rename one of it (probably wave-weapon to surge-weapon, code-only anyway)
+// TODO: dynamic depth needs to consider outline when calculating distance
 
 
 // ****************************************************************
