@@ -118,6 +118,17 @@ cGame::~cGame()
 // render the game
 void cGame::Render()
 {
+    __DEPTH_GROUP_BOTTOM
+    {
+        glDisable(GL_DEPTH_TEST);
+        {
+            // 
+            m_EnemyManager.RenderBottom();
+            m_pCurMission->RenderBottom();
+        }
+        glEnable(GL_DEPTH_TEST);
+    }
+
     __DEPTH_GROUP_SHIP   // # 1
     {
         // render all players

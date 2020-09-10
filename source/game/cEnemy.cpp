@@ -432,9 +432,10 @@ void cEnemyManager::Render()
     }                                                                 \
 } 
 
-void cEnemyManager::RenderUnder() {__RENDER_OWN(__RenderOwnUnder)}
-void cEnemyManager::RenderOver () {__RENDER_OWN(__RenderOwnOver)}
-void cEnemyManager::RenderTop  () {__RENDER_OWN(__RenderOwnTop)}
+void cEnemyManager::RenderBottom() {__RENDER_OWN(__RenderOwnBottom)}
+void cEnemyManager::RenderUnder () {__RENDER_OWN(__RenderOwnUnder)}
+void cEnemyManager::RenderOver  () {__RENDER_OWN(__RenderOwnOver)}
+void cEnemyManager::RenderTop   () {__RENDER_OWN(__RenderOwnTop)}
 
 #undef __RENDER_OWN
 

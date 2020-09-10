@@ -74,9 +74,10 @@ void cMission::Setup()
 
 // ****************************************************************
 // render the mission
-void cMission::RenderUnder() {this->__RenderOwnUnder();}
-void cMission::RenderOver () {this->__RenderOwnOver ();}
-void cMission::RenderTop  () {this->__RenderOwnTop  ();}
+void cMission::RenderBottom() {this->__RenderOwnBottom();}
+void cMission::RenderUnder () {this->__RenderOwnUnder ();}
+void cMission::RenderOver  () {this->__RenderOwnOver  ();}
+void cMission::RenderTop   () {this->__RenderOwnTop   ();}
 
 
 // ****************************************************************

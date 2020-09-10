@@ -99,12 +99,13 @@ protected:
 
 private:
     // own routines for derived classes (render functions executed by manager)
-    virtual void __ResurrectOwn  ()                         {}
-    virtual void __KillOwn       (const coreBool bAnimated) {}
-    virtual void __RenderOwnUnder()                         {}
-    virtual void __RenderOwnOver ()                         {}
-    virtual void __RenderOwnTop  ()                         {}
-    virtual void __MoveOwn       ()                         {}
+    virtual void __ResurrectOwn   ()                         {}
+    virtual void __KillOwn        (const coreBool bAnimated) {}
+    virtual void __RenderOwnBottom()                         {}
+    virtual void __RenderOwnUnder ()                         {}
+    virtual void __RenderOwnOver  ()                         {}
+    virtual void __RenderOwnTop   ()                         {}
+    virtual void __MoveOwn        ()                         {}
 };
 
 
@@ -143,11 +144,12 @@ public:
     DISABLE_COPY(cEnemyManager)
 
     // render and move the enemy manager
-    void Render     ();
-    void RenderUnder();
-    void RenderOver ();
-    void RenderTop  ();
-    void Move       ();
+    void Render      ();
+    void RenderBottom();
+    void RenderUnder ();
+    void RenderOver  ();
+    void RenderTop   ();
+    void Move        ();
 
     // add and remove enemies
     template <typename T> RETURN_RESTRICT T* AllocateEnemy();

@@ -205,11 +205,12 @@ public:
     void Setup();
 
     // render and move the mission
-    void RenderUnder();
-    void RenderOver ();
-    void RenderTop  ();
-    void MoveBefore ();
-    void MoveAfter  ();
+    void RenderBottom();
+    void RenderUnder ();
+    void RenderOver  ();
+    void RenderTop   ();
+    void MoveBefore  ();
+    void MoveAfter   ();
 
     // 
     void            SkipStage ();
@@ -248,12 +249,13 @@ protected:
 
 private:
     // own routines for derived classes
-    virtual void __SetupOwn      () {}
-    virtual void __RenderOwnUnder() {}
-    virtual void __RenderOwnOver () {}
-    virtual void __RenderOwnTop  () {}
-    virtual void __MoveOwnBefore () {}
-    virtual void __MoveOwnAfter  () {}
+    virtual void __SetupOwn       () {}
+    virtual void __RenderOwnBottom() {}
+    virtual void __RenderOwnUnder () {}
+    virtual void __RenderOwnOver  () {}
+    virtual void __RenderOwnTop   () {}
+    virtual void __MoveOwnBefore  () {}
+    virtual void __MoveOwnAfter   () {}
 
     // 
     void __OpenSegment ();
