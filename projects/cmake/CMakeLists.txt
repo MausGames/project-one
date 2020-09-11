@@ -64,6 +64,7 @@ target_sources(
     ${BASE_DIRECTORY}/source/visual/cOutline.cpp
     ${BASE_DIRECTORY}/source/visual/cPostProcessing.cpp
     ${BASE_DIRECTORY}/source/visual/cShadow.cpp
+    ${BASE_DIRECTORY}/source/visual/cSnow.cpp
     ${BASE_DIRECTORY}/source/visual/cSpecialEffects.cpp
     ${BASE_DIRECTORY}/source/visual/cWindscreen.cpp
     ${BASE_DIRECTORY}/source/application.cpp

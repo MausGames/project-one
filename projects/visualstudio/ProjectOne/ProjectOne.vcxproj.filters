@@ -309,6 +309,9 @@
     <ClCompile Include="..\..\..\source\game\mission\AA_cErrorMission.cpp">
       <Filter>game\mission</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\visual\cSnow.cpp">
+      <Filter>visual</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\source\game\mission\AA_cErrorMission_setup.cpp">
       <Filter>game\mission</Filter>
     </ClCompile>
@@ -434,6 +437,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\source\additional\cLodObject.h">
       <Filter>additional</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\visual\cSnow.h">
+      <Filter>visual</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\source\interface\cWorldMap.h">
       <Filter>interface</Filter>

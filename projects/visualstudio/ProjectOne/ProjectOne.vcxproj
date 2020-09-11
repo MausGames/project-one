@@ -407,6 +407,7 @@
     <ClCompile Include="..\..\..\source\visual\cOutline.cpp" />
     <ClCompile Include="..\..\..\source\visual\cPostProcessing.cpp" />
     <ClCompile Include="..\..\..\source\visual\cShadow.cpp" />
+    <ClCompile Include="..\..\..\source\visual\cSnow.cpp" />
     <ClCompile Include="..\..\..\source\visual\cSpecialEffects.cpp" />
     <ClCompile Include="..\..\..\source\visual\cWindscreen.cpp" />
   </ItemGroup>
@@ -451,6 +452,7 @@
     <ClInclude Include="..\..\..\source\visual\cOutline.h" />
     <ClInclude Include="..\..\..\source\visual\cPostProcessing.h" />
     <ClInclude Include="..\..\..\source\visual\cShadow.h" />
+    <ClInclude Include="..\..\..\source\visual\cSnow.h" />
     <ClInclude Include="..\..\..\source\visual\cSpecialEffects.h" />
     <ClInclude Include="..\..\..\source\visual\cWindscreen.h" />
   </ItemGroup>

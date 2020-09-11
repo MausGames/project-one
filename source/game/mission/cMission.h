@@ -491,9 +491,12 @@ private:
     cShelobBoss m_Shelob;   // 
     cZerothBoss m_Zeroth;   // 
 
+    cSnow m_Snow;           // 
+
 
 public:
     cCalorMission()noexcept;
+    ~cCalorMission()final;
 
     DISABLE_COPY(cCalorMission)
     ASSIGN_ID(6, "Calor")
@@ -501,7 +504,9 @@ public:
 
 private:
     // execute own routines
-    void __SetupOwn()final;
+    void __SetupOwn       ()final;
+    void __RenderOwnBottom()final;
+    void __MoveOwnAfter   ()final;
 };
 
 

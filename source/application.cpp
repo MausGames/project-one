@@ -251,6 +251,8 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("effect_shield.frag",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_shield.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_shield_inst.vert",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_shield.vert", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("effect_shield_inst.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_shield.frag", CORE_SHADER_OPTION_INSTANCING);
+    Core::Manager::Resource->Load<coreShader> ("effect_snow.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_snow.vert", CORE_SHADER_OPTION_NO_ROTATION);
+    Core::Manager::Resource->Load<coreShader> ("effect_snow.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_snow.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_weather_rain.vert",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_weather.vert", PRINT(SHADER_OVERLAYS(%u) SHADER_SINGLE, MOSS_RAIN_NUM));
     Core::Manager::Resource->Load<coreShader> ("effect_weather_rain.frag",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_weather.frag", PRINT(SHADER_OVERLAYS(%u) SHADER_SINGLE, MOSS_RAIN_NUM));
     Core::Manager::Resource->Load<coreShader> ("effect_weather_sand.vert",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_weather.vert", PRINT(SHADER_OVERLAYS(%u) SHADER_SINGLE, DESERT_SAND_NUM));
@@ -675,6 +677,11 @@ void CoreApp::Setup()
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_shield_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("effect_shield_inst.vert")
         ->AttachShader("effect_shield_inst.frag")
+        ->Finish();
+
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_snow_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("effect_snow.vert")
+        ->AttachShader("effect_snow.frag")
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_weather_rain_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
