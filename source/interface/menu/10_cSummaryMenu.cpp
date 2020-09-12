@@ -42,7 +42,7 @@ cSummaryMenu::cSummaryMenu()noexcept
 
     m_aHeader[1].Construct  (MENU_FONT_STANDARD_4, MENU_OUTLINE_SMALL);
     m_aHeader[1].SetPosition(coreVector2(0.0f, m_aHeader[0].GetPosition().y - 0.04f));
-    m_aHeader[1].SetColor3  (COLOR_MENU_BLUE);
+    m_aHeader[1].SetColor3  (COLOR_MENU_WHITE);
 
     m_MedalMission.DefineTexture(0u, "menu_medal.png");
     m_MedalMission.DefineProgram("default_2d_program");
@@ -63,7 +63,7 @@ cSummaryMenu::cSummaryMenu()noexcept
     {
         m_aName[i].Construct  (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
         m_aName[i].SetPosition(coreVector2(0.0f, -0.01f - 0.1f*I_TO_F(i)));
-        m_aName[i].SetColor3  (COLOR_MENU_BLUE);
+        m_aName[i].SetColor3  (COLOR_MENU_WHITE);
 
         m_aValue[i].Construct  (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
         m_aValue[i].SetPosition(coreVector2(0.0f, m_aName[i].GetPosition().y - 0.03f));
@@ -83,7 +83,7 @@ cSummaryMenu::cSummaryMenu()noexcept
 
     m_TotalName.Construct      (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
     m_TotalName.SetPosition    (coreVector2(0.0f,-0.26f));
-    m_TotalName.SetColor3      (COLOR_MENU_BLUE);
+    m_TotalName.SetColor3      (COLOR_MENU_WHITE);
     m_TotalName.SetTextLanguage("SUMMARY_TOTAL");
 
     m_TotalValue.Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
@@ -432,6 +432,19 @@ void cSummaryMenu::ShowBegin()
     // 
     this->SetAlpha(0.0f);
     this->ChangeSurface(SURFACE_SUMMARY_BEGIN, 0.0f);
+}
+
+
+// ****************************************************************
+// 
+void cSummaryMenu::SetHighlightColor(const coreVector3& vColor)
+{
+    // 
+    m_aHeader[1].SetColor3(vColor);
+
+    // 
+    for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES; ++i) m_aName[i].SetColor3(vColor);
+    m_TotalName.SetColor3(vColor);
 }
 
 

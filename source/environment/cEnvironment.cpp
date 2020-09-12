@@ -151,6 +151,10 @@ void cEnvironment::Move()
         }
         else m_pOldBackground->Move();
     }
+
+    // 
+    const coreVector3 vColor = m_pBackground->GetColor();
+    if(!vColor.IsNull()) g_pMenu->SetHighlightColor(vColor);
 }
 
 

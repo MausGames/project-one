@@ -17,6 +17,7 @@ cMenu::cMenu()noexcept
 , m_TransitionTime   (coreTimer(1.3f, 0.0f, 1u))
 , m_iTransitionState (0u)
 , m_pTransitionMenu  (NULL)
+, m_vHighlightColor  (coreVector3(0.0f,0.0f,0.0f))
 {
     // 
     m_PauseLayer.DefineTexture(0u, "menu_background_black.png");
@@ -469,6 +470,19 @@ void cMenu::ShiftSurface(coreMenu* OUTPUT pMenu, const coreUint8 iNewSurface, co
         m_iTransitionState = 2u;
         m_pTransitionMenu  = pMenu;
     }
+}
+
+// ****************************************************************
+// 
+void cMenu::SetHighlightColor(const coreVector3& vColor)
+{
+    // 
+    if(m_vHighlightColor == vColor) return;
+    m_vHighlightColor = vColor;
+
+    // 
+    m_SummaryMenu.SetHighlightColor(vColor);
+    m_FinishMenu .SetHighlightColor(vColor);
 }
 
 

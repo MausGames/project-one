@@ -623,6 +623,9 @@ public:
     void ShowNormal();
     void ShowBegin();
 
+    // 
+    void SetHighlightColor(const coreVector3& vColor);
+
 
 private:
     // 
@@ -718,6 +721,9 @@ public:
 
     // 
     void ShowThankYou();
+
+    // 
+    void SetHighlightColor(const coreVector3& vColor);
 };
 
 
@@ -752,6 +758,8 @@ private:
     coreUint8 m_iTransitionState;        // 
     coreMenu* m_pTransitionMenu;         // 
 
+    coreVector3 m_vHighlightColor;       // 
+
 
 public:
     cMenu()noexcept;
@@ -775,6 +783,9 @@ public:
     // 
     void ShiftSurface(coreMenu* OUTPUT pMenu, const coreUint8 iNewSurface, const coreFloat fSpeed);
     inline coreBool IsShifting()const {return m_TransitionTime.GetStatus();}
+
+    // 
+    void SetHighlightColor(const coreVector3& vColor);
 
     // 
     static void UpdateLanguageFont();
