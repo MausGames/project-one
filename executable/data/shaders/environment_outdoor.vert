@@ -45,7 +45,7 @@ void LerpLightingTransform(const in vec3 v3Position, const in float v1Lerp)
 
 void VertexMain()
 {
-#if defined(GL_EXT_gpu_shader4)
+#if defined(CORE_GL_gpu_shader4)
 
     // calculate vertex-position from vertex-ID (float-math for performance reasons)
     vec2 v2Index  = floor(vec2(mod(float(gl_VertexID), c_v1Size), float(gl_VertexID) / c_v1Size));
