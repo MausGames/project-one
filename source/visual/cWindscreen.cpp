@@ -12,16 +12,8 @@
 // ****************************************************************
 // constructor
 cWindscreen::cWindscreen()noexcept
-: m_fInkAnimation (0.0f)
-, m_fInkDelay     (0.0f)
-, m_vInkPosition  (coreVector4(FLT_MAX,FLT_MAX,FLT_MAX,FLT_MAX))
-, m_vInkAlpha     (coreVector2(0.0f,0.0f))
-, m_bActive       (false)
+: m_bActive (false)
 {
-    // 
-    m_Ink.DefineTexture(0u, "menu_background_black.png");
-    m_Ink.SetSize      (coreVector2(1.0f,1.0f));
-    m_Ink.SetTexSize   (coreVector2(3.5f,3.5f));
 }
 
 
@@ -46,8 +38,8 @@ void cWindscreen::Render()
             FOR_EACH(it, m_apAddList)
                 (*it)->Render();
 
-            // render the ink
-            this->__RenderInk();
+            // 
+            m_Ink.Render();
         }
         glEnable(GL_DEPTH_TEST);
     }
@@ -59,7 +51,7 @@ void cWindscreen::Render()
 void cWindscreen::Move()
 {
     // 
-    m_bActive = (!m_apAddList.empty() || !m_vInkAlpha.IsNull());
+    m_bActive = (!m_apAddList.empty() || m_Ink.IsActive());
     if(m_bActive)
     {
         // 
@@ -106,8 +98,8 @@ void cWindscreen::Move()
         FOR_EACH(it, m_apAddList)
             (*it)->MoveNormal();
 
-        // move the ink
-        this->__MoveInk();
+        // 
+        m_Ink.Move();
     }
 }
 
@@ -160,126 +152,4 @@ void cWindscreen::ClearAdds(const coreBool bAnimated)
         // clear memory
         m_apAddList.clear();
     }
-}
-
-
-// ****************************************************************
-// 
-void cWindscreen::EnableInk(const coreBool bLine)
-{
-    // 
-    m_Ink.DefineProgram(bLine ? "effect_ink_line_program" : "effect_ink_point_program");
-    m_Ink.SetStatus    (bLine ? 1 : 0);
-
-    // 
-    WARN_IF(!m_vInkAlpha.IsNull()) m_vInkAlpha = coreVector2(0.0f,0.0f);
-
-    // 
-    m_fInkDelay = 0.0f;
-}
-
-
-// ****************************************************************
-// 
-void cWindscreen::DisableInk(const coreFloat fDelay)
-{
-    // 
-    if(!fDelay) m_vInkAlpha = coreVector2(0.0f,0.0f);
-
-    // 
-    m_fInkDelay = fDelay;
-}
-
-
-// ****************************************************************
-// 
-void cWindscreen::SetInkPosition(const coreUintW iIndex, const coreVector2& vPosition)
-{
-    // 
-    const coreVector2 vProjectedPos = g_pForeground->Project2D(coreVector3(vPosition, 0.0f));
-
-    // 
-    m_vInkPosition.arr(iIndex * 2u)      = vProjectedPos.x;
-    m_vInkPosition.arr(iIndex * 2u + 1u) = vProjectedPos.y;
-}
-
-
-// ****************************************************************
-// 
-void cWindscreen::SetInkAlpha(const coreUintW iIndex, coreFloat fAlpha)
-{
-    // 
-    m_vInkAlpha.arr(iIndex) = fAlpha;
-}
-
-
-// ****************************************************************
-// render the ink
-void cWindscreen::__RenderInk()
-{
-    if(m_vInkAlpha.IsNull()) return;
-
-    // enable the shader-program
-    if(!m_Ink.GetProgram().IsUsable()) return;
-    if(!m_Ink.GetProgram()->Enable())  return;
-
-    // update all ink uniforms
-    coreProgram* pLocal = m_Ink.GetProgram().GetResource();
-    pLocal->SendUniform("u_v4Position", m_vInkPosition);
-    pLocal->SendUniform("u_v2Alpha",    m_vInkAlpha * 0.32f + 0.68f);
-
-    // get current animation value
-    const coreFloat fAnimation = m_fInkAnimation * 0.3f;
-
-    if(m_Ink.GetStatus())
-    {
-        coreVector2 avOffset[WINDSCREEN_INK_SAMPLES_LINE];
-
-        // update line ink samples
-        for(coreUintW i = 0u; i < WINDSCREEN_INK_SAMPLES_LINE; ++i)
-        {
-            const coreFloat fPartOff  = I_TO_F(i) / I_TO_F(WINDSCREEN_INK_SAMPLES_LINE);
-            const coreFloat fPartTime = FRACT(fAnimation + fPartOff);
-
-            avOffset[i] = coreVector2(0.675f * (0.5f - fPartTime), 0.05f * SIN(fPartTime * (4.0f*PI) + fPartOff * (2.0f*PI))) * 3.0f;
-        }
-
-        // merge two samples into one uniform
-        for(coreUintW i = 0u; i < WINDSCREEN_INK_SAMPLES_LINE/2u; ++i)
-        {
-            pLocal->SendUniform(PRINT("u_av4Offset[%zu]", i), r_cast<coreVector4*>(avOffset)[i]);
-        }
-    }
-    else
-    {
-        // update point ink samples
-        for(coreUintW i = 0u; i < WINDSCREEN_INK_SAMPLES_POINT; ++i)
-        {
-            const coreFloat fPartOff  = I_TO_F(i) / I_TO_F(WINDSCREEN_INK_SAMPLES_POINT);
-            const coreFloat fPartTime = FRACT(fAnimation + fPartOff);
-
-            pLocal->SendUniform(PRINT("u_av2Offset[%zu]", i), coreVector2::Direction(fPartTime * (4.0f*PI)) * 0.14f);
-        }
-    }
-
-    // render the ink overlay
-    m_Ink.Render();
-}
-
-
-// ****************************************************************
-// move the ink
-void cWindscreen::__MoveInk()
-{
-    if(m_vInkAlpha.IsNull()) return;
-
-    // 
-    m_fInkAnimation.UpdateMod(0.1f, 10.0f);
-
-    // 
-    if(m_fInkDelay) m_vInkAlpha = (m_vInkAlpha - m_fInkDelay * Core::System->GetTime()).Processed(MAX, 0.0f);
-
-    // move the ink overlay
-    m_Ink.SetTexOffset(coreVector2(m_fInkAnimation * -0.4, 0.0));
-    m_Ink.Move();
 }

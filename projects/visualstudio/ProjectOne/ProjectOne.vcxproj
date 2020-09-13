@@ -404,6 +404,7 @@
     <ClCompile Include="..\..\..\source\visual\cForeground.cpp" />
     <ClCompile Include="..\..\..\source\visual\cGlow.cpp" />
     <ClCompile Include="..\..\..\source\visual\cHeadlight.cpp" />
+    <ClCompile Include="..\..\..\source\visual\cInk.cpp" />
     <ClCompile Include="..\..\..\source\visual\cOutline.cpp" />
     <ClCompile Include="..\..\..\source\visual\cPostProcessing.cpp" />
     <ClCompile Include="..\..\..\source\visual\cShadow.cpp" />
@@ -449,6 +450,7 @@
     <ClInclude Include="..\..\..\source\visual\cForeground.h" />
     <ClInclude Include="..\..\..\source\visual\cGlow.h" />
     <ClInclude Include="..\..\..\source\visual\cHeadlight.h" />
+    <ClInclude Include="..\..\..\source\visual\cInk.h" />
     <ClInclude Include="..\..\..\source\visual\cOutline.h" />
     <ClInclude Include="..\..\..\source\visual\cPostProcessing.h" />
     <ClInclude Include="..\..\..\source\visual\cShadow.h" />

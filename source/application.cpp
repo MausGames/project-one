@@ -217,8 +217,8 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("effect_headlight.vert",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_headlight.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("effect_headlight.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_headlight.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_ink.vert",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_ink.vert", CORE_SHADER_OPTION_NO_ROTATION);
-    Core::Manager::Resource->Load<coreShader> ("effect_ink_point.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_ink.frag", PRINT(SHADER_SAMPLES(%u), WINDSCREEN_INK_SAMPLES_POINT));
-    Core::Manager::Resource->Load<coreShader> ("effect_ink_line.frag",                   CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_ink.frag", PRINT(SHADER_SAMPLES(%u) SHADER_LINE, WINDSCREEN_INK_SAMPLES_LINE/2u));
+    Core::Manager::Resource->Load<coreShader> ("effect_ink_point.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_ink.frag", PRINT(SHADER_SAMPLES(%u), INK_SAMPLES_POINT));
+    Core::Manager::Resource->Load<coreShader> ("effect_ink_line.frag",                   CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_ink.frag", PRINT(SHADER_SAMPLES(%u) SHADER_LINE, INK_SAMPLES_LINE/2u));
     Core::Manager::Resource->Load<coreShader> ("effect_lightning.vert",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_lightning.vert");
     Core::Manager::Resource->Load<coreShader> ("effect_lightning.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_lightning.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_lightning_inst.vert",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_lightning.vert", CORE_SHADER_OPTION_INSTANCING);

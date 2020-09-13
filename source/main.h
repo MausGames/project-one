@@ -280,6 +280,8 @@ extern coreMusicPlayer g_MusicPlayer;       // central music-player
 #include "visual/cGlow.h"
 #include "visual/cDistortion.h"
 #include "visual/cHeadlight.h"
+#include "visual/cInk.h"
+#include "visual/cSnow.h"
 #include "visual/cWindscreen.h"
 #include "visual/cSpecialEffects.h"
 #include "visual/cForeground.h"

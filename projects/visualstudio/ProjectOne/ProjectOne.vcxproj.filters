@@ -315,6 +315,9 @@
     <ClCompile Include="..\..\..\source\game\mission\AA_cErrorMission_setup.cpp">
       <Filter>game\mission</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\visual\cInk.cpp">
+      <Filter>visual</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\main.h" />
@@ -443,6 +446,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\source\interface\cWorldMap.h">
       <Filter>interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\visual\cInk.h">
+      <Filter>visual</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

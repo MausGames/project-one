@@ -16,14 +16,6 @@
 // TODO: strong breaks (across screen), left and right are strongly shifted
 // TODO: move weather-effects here, but make them controllable from the background ?
 // TODO: try to keep optimized lists longer, instead of only for one frame
-// TODO: ships and objects moving in and out of ink should draw some clouds
-// TODO: ink needs different color in point and line rendering
-
-
-// ****************************************************************
-// windscreen definitions
-#define WINDSCREEN_INK_SAMPLES_POINT (3u)    // 
-#define WINDSCREEN_INK_SAMPLES_LINE  (10u)   // 
 
 
 // ****************************************************************
@@ -33,11 +25,7 @@ class cWindscreen final
 private:
     coreLookupStr<coreBatchList*> m_apAddList;   // temporary additional objects
 
-    coreFullscreen m_Ink;                        // 
-    coreFlow       m_fInkAnimation;              // 
-    coreFloat      m_fInkDelay;                  // 
-    coreVector4    m_vInkPosition;               // 
-    coreVector2    m_vInkAlpha;                  // 
+    cInk m_Ink;                                  // 
 
     bool m_bActive;                              // 
 
@@ -57,19 +45,10 @@ public:
     void ClearAdds(const coreBool bAnimated);
 
     // 
-    void EnableInk     (const coreBool  bLine);
-    void DisableInk    (const coreFloat fDelay);
-    void SetInkPosition(const coreUintW iIndex, const coreVector2& vPosition);
-    void SetInkAlpha   (const coreUintW iIndex, const coreFloat    fAlpha);
+    inline cInk* GetInk() {return &m_Ink;}
 
     // 
     inline const coreBool& IsActive()const {return m_bActive;}
-
-
-private:
-    // render and move the ink
-    void __RenderInk();
-    void __MoveInk();
 };
 
 

@@ -75,7 +75,7 @@ void cNautilusBoss::__ResurrectOwn()
     pMission->SetContainerOverdraw(true);
 
     // 
-    g_pWindscreen->EnableInk(false);
+    g_pWindscreen->GetInk()->Enable(false);
 
     // 
     m_aiCounter[CONTAINER_ATTACHED] = 1;
@@ -87,7 +87,7 @@ void cNautilusBoss::__ResurrectOwn()
 void cNautilusBoss::__KillOwn(const coreBool bAnimated)
 {
     // 
-    g_pWindscreen->DisableInk(bAnimated ? NAUTILUS_INK_SPEED : 0.0f);
+    g_pWindscreen->GetInk()->Disable(bAnimated ? NAUTILUS_INK_SPEED : 0.0f);
 
     // 
     this->__DisableBullet(bAnimated);
@@ -219,7 +219,7 @@ void cNautilusBoss::__MoveOwn()
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_afInkAlpha); ++i)
     {
         m_afInkAlpha[i].Update(-1.0f);
-        g_pWindscreen->SetInkAlpha(i, CLAMP(MIN(m_afInkAlpha[i], NAUTILUS_INK_TIME - m_afInkAlpha[i]) * NAUTILUS_INK_SPEED, 0.0f, 1.0f));
+        g_pWindscreen->GetInk()->SetBlotAlpha(i, CLAMP(MIN(m_afInkAlpha[i], NAUTILUS_INK_TIME - m_afInkAlpha[i]) * NAUTILUS_INK_SPEED, 0.0f, 1.0f));
     }
 
     // TODO: line movement 
@@ -237,7 +237,7 @@ void cNautilusBoss::__CreateInk(const coreUintW iIndex, const coreVector2& vPosi
     m_afInkAlpha[iIndex] = NAUTILUS_INK_TIME;
 
     // 
-    g_pWindscreen->SetInkPosition(iIndex, vPosition);
+    g_pWindscreen->GetInk()->SetBlotPosition(iIndex, vPosition);
 }
 
 
