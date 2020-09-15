@@ -321,8 +321,10 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreSound>  ("bullet_wave.wav",                        CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/bullet_wave.wav");
     Core::Manager::Resource->Load<coreSound>  ("effect_explosion_energy.wav",            CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/effect_explosion_energy.wav");
     Core::Manager::Resource->Load<coreSound>  ("effect_explosion_physical.wav",          CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/effect_explosion_physical.wav");
+    Core::Manager::Resource->Load<coreSound>  ("effect_flicker.wav",                     CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/effect_flicker.wav");
     Core::Manager::Resource->Load<coreSound>  ("effect_launch.wav",                      CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/effect_launch.wav");
     Core::Manager::Resource->Load<coreSound>  ("effect_rush.wav",                        CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/effect_rush.wav");
+    Core::Manager::Resource->Load<coreSound>  ("effect_shatter.wav",                     CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/effect_shatter.wav");
     Core::Manager::Resource->Load<coreSound>  ("environment_lava.wav",                   CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_lava.wav");
     Core::Manager::Resource->Load<coreSound>  ("environment_nature.wav",                 CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_nature.wav");
     Core::Manager::Resource->Load<coreSound>  ("environment_rain.wav",                   CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_rain.wav");
