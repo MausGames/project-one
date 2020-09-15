@@ -577,8 +577,8 @@ void cReplay::__CheckHeader(sHeader* OUTPUT pHeader)
     }
 
     // 
-    pHeader->iConfigUpdateFreq = CLAMP(pHeader->iConfigUpdateFreq, FRAMERATE_MIN, FRAMERATE_MAX);
-    pHeader->iConfigVersion    = CLAMP(pHeader->iConfigVersion,    1u,            1u);   // TODO
+    pHeader->iConfigUpdateFreq = CLAMP(pHeader->iConfigUpdateFreq, F_TO_UI(FRAMERATE_MIN), F_TO_UI(FRAMERATE_MAX));
+    pHeader->iConfigVersion    = CLAMP(pHeader->iConfigVersion,    1u,                     1u);   // TODO
 
     // 
     pHeader->iMissionStartIndex = CLAMP(pHeader->iMissionStartIndex, 0u, REPLAY_MISSIONS-1u);

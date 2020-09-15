@@ -11,7 +11,7 @@
 #define _P1_GUARD_OUTDOOR_H_
 
 // TODO: definitions for algorithms (background names ?)
-// TODO: add F16C SSE to RetrieveBackHeight
+// TODO: add F16C SSE to RetrieveBackHeight (put values into an uint64 and convert to vec4 ?)
 // TODO: check out jcgt_Duff2017Basis to inline tangent calculations into shader (less bandwidth, but more ALU + reg ?)
 // TODO: outdoor parameters are reset on engine-reset !!!    
 // TODO: fix file getting unloaded while others are reading (in reource-manager), maybe make copies of the file

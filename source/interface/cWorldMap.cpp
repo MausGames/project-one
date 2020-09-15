@@ -23,7 +23,7 @@ cWorldMap::cWorldMap()noexcept
     // 
     this->DefineTexture(0u, "menu_worldmap.png");
     this->DefineProgram("menu_worldmap_program");
-    this->SetColor3    (COLOR_MENU_BLUE * 1.3);
+    this->SetColor3    (COLOR_MENU_BLUE * 1.3f);
 
     // 
     for(coreUintW i = 0u; i < WORLDMAP_PINS; ++i)

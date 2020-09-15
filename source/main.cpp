@@ -246,7 +246,7 @@ void InitResolution(const coreVector2& vResolution)
 void InitFramerate()
 {
     // calculate logical and physical frame time
-    if(!STATIC_ISVALID(g_pGame)) m_dLogicalTime  = (1.0   / coreDouble(CLAMP(g_CurConfig.Game.iUpdateFreq, FRAMERATE_MIN, FRAMERATE_MAX)));
+    if(!STATIC_ISVALID(g_pGame)) m_dLogicalTime  = (1.0   / coreDouble(CLAMP(g_CurConfig.Game.iUpdateFreq, F_TO_UI(FRAMERATE_MIN), F_TO_UI(FRAMERATE_MAX))));
                                  m_dPhysicalTime = (100.0 / coreDouble(MAX  (g_CurConfig.Game.iGameSpeed,  1u))) * m_dLogicalTime;
 
     if(Core::Config->GetBool(CORE_CONFIG_SYSTEM_VSYNC))
