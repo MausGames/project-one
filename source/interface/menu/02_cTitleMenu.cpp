@@ -36,7 +36,7 @@ cTitleMenu::cTitleMenu()noexcept
     m_aVersionText[1].SetPosition (m_aVersionText[0].GetPosition() + coreVector2(0.0f,-0.02f));
     m_aVersionText[1].SetCenter   (m_aVersionText[0].GetCenter());
     m_aVersionText[1].SetAlignment(m_aVersionText[0].GetAlignment());
-    m_aVersionText[1].SetText     (PRINT("Project One - v0.1.0a third edition - %s %.5s", __DATE__, __TIME__));
+    m_aVersionText[1].SetText     (PRINT("Project One - v0.1.0 third edition - %s %.5s", __DATE__, __TIME__));
 
     // bind menu objects
     this->BindObject(SURFACE_TITLE_LOGO,  &m_GameLogo);
