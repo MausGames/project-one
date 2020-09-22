@@ -712,4 +712,7 @@
       <Filter>_data\shaders</Filter>
     </Text>
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="version.rc" />
+  </ItemGroup>
 </Project>
