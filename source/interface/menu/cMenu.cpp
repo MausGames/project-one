@@ -42,6 +42,7 @@ cMenu::cMenu()noexcept
     this->BindObject(SURFACE_SUMMARY, &m_SummaryMenu);
     this->BindObject(SURFACE_DEFEAT,  &m_DefeatMenu);
     this->BindObject(SURFACE_FINISH,  &m_FinishMenu);
+    this->BindObject(SURFACE_BRIDGE,  &m_BridgeMenu);
 
     // 
     m_aFrameBuffer[0].AttachTargetBuffer(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGBA8);
@@ -179,6 +180,9 @@ void cMenu::Move()
                     // 
                     if(g_pGame->GetContinues()) m_DefeatMenu.ShowContinue();
                                            else m_DefeatMenu.ShowGameOver();
+
+                    // 
+                    Core::Audio->PauseSound();
                 }
                 else if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_FINISHED))
                 {
@@ -195,6 +199,9 @@ void cMenu::Move()
 
                     // 
                     this->InvokePauseStep();
+
+                    // 
+                    Core::Audio->PauseSound();
                 }
             }
         }
@@ -334,6 +341,9 @@ void cMenu::Move()
             {
                 // 
                 this->ChangeSurface(SURFACE_EMPTY, 0.0f);
+
+                // 
+                Core::Audio->ResumeSound();
             }
             else if(m_PauseMenu.GetStatus() == 2)
             {
@@ -347,10 +357,13 @@ void cMenu::Move()
             else if(m_PauseMenu.GetStatus() == 3)
             {
                 // 
-                this->ShiftSurface(this, SURFACE_MAIN, 1.0f);
+                this->ShiftSurface(this, SURFACE_BRIDGE, 3.0f);
 
                 // 
-                this->__EndGame();
+                m_BridgeMenu.ReturnMenu(SURFACE_TITLE);
+
+                // 
+                Core::Audio->CancelSound();
             }
         }
         break;
@@ -377,14 +390,20 @@ void cMenu::Move()
 
                 // 
                 g_pGame->UseContinue();
+
+                // 
+                Core::Audio->ResumeSound();
             }
             else if(m_DefeatMenu.GetStatus() == 2)
             {
                 // 
-                this->ShiftSurface(this, SURFACE_MAIN, 1.0f);
+                this->ShiftSurface(this, SURFACE_BRIDGE, 3.0f);
 
                 // 
-                this->__EndGame();
+                m_BridgeMenu.ReturnMenu(SURFACE_TITLE);
+
+                // 
+                Core::Audio->CancelSound();
             }
         }
         break;
@@ -394,7 +413,20 @@ void cMenu::Move()
             if(m_FinishMenu.GetStatus())
             {
                 // 
-                this->ShiftSurface(this, SURFACE_MAIN, 1.0f);
+                this->ShiftSurface(this, SURFACE_BRIDGE, 3.0f);
+
+                // 
+                m_BridgeMenu.ReturnMenu(SURFACE_TITLE);
+            }
+        }
+        break;
+
+    case SURFACE_BRIDGE:
+        {
+            if(m_BridgeMenu.GetStatus())
+            {
+                // 
+                this->ShiftSurface(this, m_BridgeMenu.GetReturnTarget(), 0.75f);
 
                 // 
                 this->__EndGame();
@@ -713,3 +745,4 @@ UNITY_BUILD
 #include "10_cSummaryMenu.cpp"
 #include "11_cDefeatMenu.cpp"
 #include "12_cFinishMenu.cpp"
+#include "13_cBridgeMenu.cpp"

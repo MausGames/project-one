@@ -62,14 +62,38 @@ void cTitleMenu::Move()
     switch(this->GetCurSurface())
     {
     case SURFACE_TITLE_LOGO:
-        {
-
-        }
-        break;
-
     case SURFACE_TITLE_FIRST:
         {
+            if(!g_pMenu->IsShifting())
+            {
+                // 
+                m_fPromptAnimation.UpdateMod(1.0f, 2.0f*PI);
+            }
 
+            if(m_fPromptExpand >= 0.0f)
+            {
+                // 
+                m_fPromptExpand.Update(5.0f);
+                if(m_fPromptExpand >= 1.0f)
+                {
+                    // 
+                    m_iStatus = 1;
+
+                    // 
+                    m_fPromptAnimation = -1.0f;
+                    m_fPromptExpand    = -1.0f;
+                }
+            }
+            else if((m_fPromptAnimation >= -0.5f) && Core::Input->GetAnyButton(CORE_INPUT_PRESS))
+            {
+                // 
+                m_fPromptExpand = 0.0f;
+            }
+
+            // 
+            m_PromptText.SetScale (LERPB(1.0f, 1.1f, MAX(m_fPromptExpand, 0.0f)));
+            m_PromptText.SetColor3(coreVector3(1.0f,1.0f,1.0f) * LERP(MENU_LIGHT_IDLE, MENU_LIGHT_ACTIVE, 0.5f + 0.5f * SIN(10.0f * m_fPromptAnimation)));
+            m_PromptText.SetAlpha (m_PromptText.GetAlpha() * MIN(m_fPromptAnimation + 1.0f, 1.0f) * LERPB(1.0f, 0.0f, MAX(m_fPromptExpand, 0.0f)));
         }
         break;
 
@@ -77,37 +101,6 @@ void cTitleMenu::Move()
         ASSERT(false)
         break;
     }
-
-    if(!g_pMenu->IsShifting())
-    {
-        // 
-        m_fPromptAnimation.UpdateMod(1.0f, 2.0f*PI);
-    }
-
-    if(m_fPromptExpand >= 0.0f)
-    {
-        // 
-        m_fPromptExpand.Update(5.0f);
-        if(m_fPromptExpand >= 1.0f)
-        {
-            // 
-            m_iStatus = 1;
-
-            // 
-            m_fPromptAnimation = -1.0f;
-            m_fPromptExpand    = -1.0f;
-        }
-    }
-    else if((m_fPromptAnimation >= -0.5f) && Core::Input->GetAnyButton(CORE_INPUT_PRESS))
-    {
-        // 
-        m_fPromptExpand = 0.0f;
-    }
-
-    // 
-    m_PromptText.SetScale (LERPB(1.0f, 1.1f, MAX(m_fPromptExpand, 0.0f)));
-    m_PromptText.SetColor3(coreVector3(1.0f,1.0f,1.0f) * LERP(MENU_LIGHT_IDLE, MENU_LIGHT_ACTIVE, 0.5f + 0.5f * SIN(10.0f * m_fPromptAnimation)));
-    m_PromptText.SetAlpha (m_PromptText.GetAlpha() * MIN(m_fPromptAnimation + 1.0f, 1.0f) * LERPB(1.0f, 0.0f, MAX(m_fPromptExpand, 0.0f)));
 }
 
 

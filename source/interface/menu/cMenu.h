@@ -98,6 +98,7 @@ enum eSurface : coreUint8
     SURFACE_SUMMARY,
     SURFACE_DEFEAT,
     SURFACE_FINISH,
+    SURFACE_BRIDGE,
     SURFACE_MAX,
 
     SURFACE_INTRO_EMPTY = 0u,
@@ -146,7 +147,10 @@ enum eSurface : coreUint8
     SURFACE_DEFEAT_MAX,
 
     SURFACE_FINISH_DEFAULT = 0u,
-    SURFACE_FINISH_MAX
+    SURFACE_FINISH_MAX,
+
+    SURFACE_BRIDGE_DEFAULT = 0u,
+    SURFACE_BRIDGE_MAX
 };
 
 
@@ -728,6 +732,32 @@ public:
 
 
 // ****************************************************************
+// bridge menu class
+class cBridgeMenu final : public coreMenu
+{
+private:
+    coreFlow  m_fReturnTimer;    // 
+    coreUint8 m_iReturnTarget;   // 
+    coreBool  m_bReturnState;    // 
+
+
+public:
+    cBridgeMenu()noexcept;
+
+    DISABLE_COPY(cBridgeMenu)
+
+    // move the bridge menu
+    void Move()final;
+
+    // 
+    void ReturnMenu(const coreUint8 iTarget);
+
+    // 
+    inline coreUint8 GetReturnTarget()const {return m_iReturnTarget;}
+};
+
+
+// ****************************************************************
 // master menu class
 class cMenu final : public coreMenu, public coreResourceRelation
 {
@@ -744,6 +774,7 @@ private:
     cSummaryMenu m_SummaryMenu;          // summary menu object
     cDefeatMenu  m_DefeatMenu;           // defeat menu object
     cFinishMenu  m_FinishMenu;           // finish menu object
+    cBridgeMenu  m_BridgeMenu;           // bridge menu object
 
     cMsgBox  m_MsgBox;                   // message box overlay
     cTooltip m_Tooltip;                  // tooltip overlay

@@ -696,6 +696,20 @@ void cSpecialEffects::ShakeScreen(const coreFloat fStrength)
 
 // ****************************************************************
 // 
+void cSpecialEffects::ClearAll()
+{
+    // 
+    m_ParticleColor.ClearAll();
+    m_ParticleDark .ClearAll();
+    m_ParticleSmoke.ClearAll();
+    m_ParticleFire .ClearAll();
+
+    // TODO: clear other stuff here   
+}
+
+
+// ****************************************************************
+// 
 void cSpecialEffects::MacroExplosionColorSmall(const coreVector3& vPosition, const coreVector3& vColor)
 {
     // 

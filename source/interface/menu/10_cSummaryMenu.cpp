@@ -312,6 +312,7 @@ void cSummaryMenu::Move()
 
                     // prevent flickering (# render function)
                     g_pGlow->Clear();
+                    g_pSpecialEffects->ClearAll();
                 }
             }
         }
