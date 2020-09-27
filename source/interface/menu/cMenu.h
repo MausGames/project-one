@@ -149,7 +149,8 @@ enum eSurface : coreUint8
     SURFACE_FINISH_DEFAULT = 0u,
     SURFACE_FINISH_MAX,
 
-    SURFACE_BRIDGE_DEFAULT = 0u,
+    SURFACE_BRIDGE_ENTER = 0u,
+    SURFACE_BRIDGE_RETURN,
     SURFACE_BRIDGE_MAX
 };
 
@@ -736,9 +737,11 @@ public:
 class cBridgeMenu final : public coreMenu
 {
 private:
-    coreFlow  m_fReturnTimer;    // 
-    coreUint8 m_iReturnTarget;   // 
-    coreBool  m_bReturnState;    // 
+    coreFlow m_fReturnTimer;    // 
+    coreBool m_bReturnState;    // 
+
+    coreUint8 m_iTarget;        // 
+    coreBool  m_bPaused;        // 
 
 
 public:
@@ -750,10 +753,12 @@ public:
     void Move()final;
 
     // 
-    void ReturnMenu(const coreUint8 iTarget);
+    void EnterGame();
+    void ReturnMenu(const coreUint8 iTarget, const coreBool bPaused);
 
     // 
-    inline coreUint8 GetReturnTarget()const {return m_iReturnTarget;}
+    inline coreUint8 GetTarget()const {return m_iTarget;}
+    inline coreBool  GetPaused()const {return m_bPaused;}
 };
 
 

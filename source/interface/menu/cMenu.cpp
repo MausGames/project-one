@@ -273,7 +273,10 @@ void cMenu::Move()
             if(m_GameMenu.GetStatus() == 1)
             {
                 // 
-                this->ShiftSurface(this, SURFACE_EMPTY, 1.0f);
+                this->ShiftSurface(this, SURFACE_BRIDGE, 1.0f);
+
+                // 
+                m_BridgeMenu.EnterGame();
 
                 // 
                 this->__StartGame();
@@ -301,7 +304,10 @@ void cMenu::Move()
             if(m_ReplayMenu.GetStatus() == 1)
             {
                 // 
-                this->ShiftSurface(this, SURFACE_EMPTY, 1.0f);
+                this->ShiftSurface(this, SURFACE_BRIDGE, 1.0f);
+
+                // 
+                m_BridgeMenu.EnterGame();
 
                 // 
                 g_pReplay->CreateGame();
@@ -360,7 +366,7 @@ void cMenu::Move()
                 this->ShiftSurface(this, SURFACE_BRIDGE, 3.0f);
 
                 // 
-                m_BridgeMenu.ReturnMenu(SURFACE_TITLE);
+                m_BridgeMenu.ReturnMenu(SURFACE_TITLE, true);
 
                 // 
                 Core::Audio->CancelSound();
@@ -397,10 +403,10 @@ void cMenu::Move()
             else if(m_DefeatMenu.GetStatus() == 2)
             {
                 // 
-                this->ShiftSurface(this, SURFACE_BRIDGE, 3.0f);
+                this->ChangeSurface(SURFACE_BRIDGE, 0.0f);
 
                 // 
-                m_BridgeMenu.ReturnMenu(SURFACE_TITLE);
+                m_BridgeMenu.ReturnMenu(SURFACE_TITLE, true);
 
                 // 
                 Core::Audio->CancelSound();
@@ -413,20 +419,25 @@ void cMenu::Move()
             if(m_FinishMenu.GetStatus())
             {
                 // 
-                this->ShiftSurface(this, SURFACE_BRIDGE, 3.0f);
+                this->ChangeSurface(SURFACE_BRIDGE, 0.0f);
 
                 // 
-                m_BridgeMenu.ReturnMenu(SURFACE_TITLE);
+                m_BridgeMenu.ReturnMenu(SURFACE_TITLE, false);
             }
         }
         break;
 
     case SURFACE_BRIDGE:
         {
-            if(m_BridgeMenu.GetStatus())
+            if(m_BridgeMenu.GetStatus() == 1)
             {
                 // 
-                this->ShiftSurface(this, m_BridgeMenu.GetReturnTarget(), 0.75f);
+                this->ChangeSurface(SURFACE_EMPTY, 0.0f);
+            }
+            else if(m_BridgeMenu.GetStatus() == 2)
+            {
+                // 
+                this->ShiftSurface(this, m_BridgeMenu.GetTarget(), 0.75f);
 
                 // 
                 this->__EndGame();
@@ -468,7 +479,8 @@ coreBool cMenu::IsPaused()const
 {
     return (this->GetCurSurface() != SURFACE_EMPTY)   &&
            (this->GetCurSurface() != SURFACE_SUMMARY) &&
-           (this->GetCurSurface() != SURFACE_FINISH)  && STATIC_ISVALID(g_pGame);
+           (this->GetCurSurface() != SURFACE_FINISH)  &&
+           (this->GetCurSurface() != SURFACE_BRIDGE || m_BridgeMenu.GetPaused()) && STATIC_ISVALID(g_pGame);
 }
 
 coreBool cMenu::IsPausedWithStep()

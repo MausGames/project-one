@@ -12,10 +12,11 @@
 // ****************************************************************
 // constructor
 cBridgeMenu::cBridgeMenu()noexcept
-: coreMenu        (SURFACE_BRIDGE_MAX, SURFACE_BRIDGE_DEFAULT)
-, m_fReturnTimer  (0.0f)
-, m_iReturnTarget (0u)
-, m_bReturnState  (false)
+: coreMenu       (SURFACE_BRIDGE_MAX, SURFACE_BRIDGE_ENTER)
+, m_fReturnTimer (0.0f)
+, m_bReturnState (false)
+, m_iTarget      (0u)
+, m_bPaused      (false)
 {
 }
 
@@ -31,7 +32,14 @@ void cBridgeMenu::Move()
     // 
     switch(this->GetCurSurface())
     {
-    case SURFACE_BRIDGE_DEFAULT:
+    case SURFACE_BRIDGE_ENTER:
+        {
+            // 
+            m_iStatus = 1;
+        }
+        break;
+
+    case SURFACE_BRIDGE_RETURN:
         {
             // 
             m_fReturnTimer.Update(1.0f);
@@ -44,7 +52,7 @@ void cBridgeMenu::Move()
                 if(m_fReturnTimer >= 1.5f)
                 {
                     // 
-                    m_iStatus = 1;
+                    m_iStatus = 2;
 
                     // 
                     m_bReturnState = false;
@@ -74,14 +82,36 @@ void cBridgeMenu::Move()
 
 // ****************************************************************
 // 
-void cBridgeMenu::ReturnMenu(const coreUint8 iTarget)
+void cBridgeMenu::EnterGame()
+{
+    ASSERT(!STATIC_ISVALID(g_pGame))
+
+    // 
+    m_fReturnTimer = 0.0f;
+    m_bReturnState = false;
+    m_iTarget      = 0u;
+    m_bPaused      = false;
+
+    // 
+    g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);
+
+    // 
+    this->SetAlpha(0.0f);
+    this->ChangeSurface(SURFACE_BRIDGE_ENTER, 0.0f);
+}
+
+
+// ****************************************************************
+// 
+void cBridgeMenu::ReturnMenu(const coreUint8 iTarget, const coreBool bPaused)
 {
     ASSERT(STATIC_ISVALID(g_pGame))
 
     // 
-    m_fReturnTimer  = 0.0f;
-    m_iReturnTarget = iTarget;
-    m_bReturnState  = true;
+    m_fReturnTimer = 0.0f;
+    m_bReturnState = true;
+    m_iTarget      = iTarget;
+    m_bPaused      = bPaused;
 
     // 
     g_pGame->GetInterface()->SetVisible(false);
@@ -89,5 +119,5 @@ void cBridgeMenu::ReturnMenu(const coreUint8 iTarget)
 
     // 
     this->SetAlpha(0.0f);
-    this->ChangeSurface(SURFACE_BRIDGE_DEFAULT, 0.0f);
+    this->ChangeSurface(SURFACE_BRIDGE_RETURN, 0.0f);
 }
