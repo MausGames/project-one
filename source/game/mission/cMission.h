@@ -329,7 +329,7 @@ public:
     void DisablePaddle(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    void EnableBarrier (const coreUintW iIndex, const cShip* pOwner, const coreVector2& vDirection);
+    void EnableBarrier (const coreUintW iIndex, const cShip* pOwner, const coreVector2& vDirection, const coreFloat fSize);
     void DisableBarrier(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
@@ -341,12 +341,14 @@ public:
     void DisableShadow(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    inline void             MakeReal      (const coreUintW iIndex)        {ADD_BIT(m_iRealState, iIndex)}
-    inline void             MakeSticky    ()                              {ADD_BIT(m_iStickyState, 0u)}
-    inline void             UnmakeSticky  (const coreVector2& vDirection) {m_iStickyState = 0; m_aBallRaw[0].SetDirection(coreVector3(vDirection, 0.0f));}
-    inline const coreUint8& GetRealState  ()const                         {return m_iRealState;}
-    inline coreBool         GetStickyState()const                         {return CONTAINS_BIT(m_iStickyState, 1u);}
-    inline const coreUint8& GetBounceState()const                         {return m_iBounceState;}
+    inline void MakeReal    (const coreUintW iIndex)        {ADD_BIT(m_iRealState, iIndex)}
+    inline void MakeSticky  ()                              {ADD_BIT(m_iStickyState, 0u)}
+    inline void UnmakeSticky(const coreVector2& vDirection) {m_iStickyState = 0; m_aBallRaw[0].SetDirection(coreVector3(vDirection, 0.0f));}
+
+    // 
+    inline const coreUint8& GetRealState  ()const {return m_iRealState;}
+    inline coreBool         GetStickyState()const {return CONTAINS_BIT(m_iStickyState, 1u);}
+    inline const coreUint8& GetBounceState()const {return m_iBounceState;}
 
     // 
     inline coreObject3D* GetBall  (const coreUintW iIndex) {ASSERT(iIndex < VIRIDO_BALLS)   return &m_aBallRaw[iIndex * (VIRIDO_TRAILS + 1u)];}

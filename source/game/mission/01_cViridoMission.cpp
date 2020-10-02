@@ -93,9 +93,7 @@ cViridoMission::cViridoMission()noexcept
             pBarrier->DefineProgram("effect_energy_flat_direct_program");
 
             // set object properties
-            pBarrier->SetSize   (coreVector3(7.5f,2.5f,2.5f));
             pBarrier->SetColor3 (COLOR_ENERGY_BLUE);
-            pBarrier->SetTexSize(coreVector2(1.2f,0.25f) * 0.5f);
             pBarrier->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
@@ -278,7 +276,7 @@ void cViridoMission::DisablePaddle(const coreUintW iIndex, const coreBool bAnima
 
 // ****************************************************************
 // 
-void cViridoMission::EnableBarrier(const coreUintW iIndex, const cShip* pOwner, const coreVector2& vDirection)
+void cViridoMission::EnableBarrier(const coreUintW iIndex, const cShip* pOwner, const coreVector2& vDirection, const coreFloat fSize)
 {
     ASSERT(iIndex < VIRIDO_BARRIERS)
     coreObject3D& oBarrier = m_aBarrierRaw[iIndex];
@@ -293,6 +291,8 @@ void cViridoMission::EnableBarrier(const coreUintW iIndex, const cShip* pOwner, 
     m_aiBarrierDir  [iIndex] = PackDirection(vDirection);
 
     // 
+    oBarrier.SetSize   (coreVector3(7.5f * fSize, 2.5f, 2.5f));
+    oBarrier.SetTexSize(coreVector2(1.2f * fSize, 0.25f) * 0.5f);
     oBarrier.SetAlpha  (0.0f);
     oBarrier.SetEnabled(CORE_OBJECT_ENABLE_ALL);
 }
