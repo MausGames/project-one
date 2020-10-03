@@ -35,17 +35,20 @@
 
 // ****************************************************************
 // mission specific definitions
-#define VIRIDO_TRAILS        (4u)                                    // 
-#define VIRIDO_BALLS         (2u)                                    // 
-#define VIRIDO_BALLS_RAWS    (VIRIDO_BALLS * (VIRIDO_TRAILS + 1u))   // 
-#define VIRIDO_PADDLES       (3u)                                    // 
-#define VIRIDO_BARRIERS      (14u)                                   // 
-#define VIRIDO_BARRIERS_RAWS (VIRIDO_BARRIERS)                       // 
-#define VIRIDO_LASERS        (4u)                                    // 
-#define VIRIDO_LASERS_RAWS   (VIRIDO_LASERS * 2u)                    // 
-#define VIRIDO_SHADOWS       (16u)                                   // 
-#define VIRIDO_SHADOWS_RAWS  (VIRIDO_SHADOWS)                        // 
-#define VIRIDO_BALL_SPEED    (1.5f)                                  // 
+#define VIRIDO_TRAILS               (4u)                                              // 
+#define VIRIDO_BALLS                (2u)                                              // 
+#define VIRIDO_BALLS_RAWS           (VIRIDO_BALLS * (VIRIDO_TRAILS + 1u))             // 
+#define VIRIDO_PADDLES              (3u)                                              // 
+#define VIRIDO_BARRIERS             (15u)                                             // 
+#define VIRIDO_BARRIERS_RAWS        (VIRIDO_BARRIERS)                                 // 
+#define VIRIDO_LASERS               (4u)                                              // 
+#define VIRIDO_LASERS_RAWS          (VIRIDO_LASERS * 2u)                              // 
+#define VIRIDO_SHADOWS              (16u)                                             // 
+#define VIRIDO_SHADOWS_RAWS         (VIRIDO_SHADOWS)                                  // 
+#define VIRIDO_BALL_SPEED           (1.5f)                                            // 
+
+#define NEVO_TILES                  (16u)                                             // 
+#define NEVO_TILES_RAWS             (NEVO_TILES)                                      // 
 
 
 // ****************************************************************
@@ -374,15 +377,19 @@ private:
 class cNevoMission final : public cMission
 {
 private:
-    cNautilusBoss  m_Nautilus;    // 
-    cAmemasuBoss   m_Amemasu;     // 
-    cLeviathanBoss m_Leviathan;   // 
+    cNautilusBoss  m_Nautilus;                       // 
+    cAmemasuBoss   m_Amemasu;                        // 
+    cLeviathanBoss m_Leviathan;                      // 
+
+    coreBatchList m_Tile;                            // 
+    coreObject3D  m_aTileRaw  [NEVO_TILES_RAWS];     // 
+    coreFlow      m_afTileTime[NEVO_TILES];          // 
 
     cLodObject  m_Container;      // 
-    coreVector2 m_vForce;         // 
-    coreVector2 m_vImpact;        // 
-    coreBool    m_bClamp;         // 
-    coreBool    m_bOverdraw;      // 
+    coreVector2 m_vForce;                            // 
+    coreVector2 m_vImpact;                           // 
+    coreBool    m_bClamp;                            // 
+    coreBool    m_bOverdraw;                         // 
 
 
 public:
@@ -393,15 +400,21 @@ public:
     ASSIGN_ID(2, "Nevo")
 
     // 
+    void EnableTile (const coreUintW iIndex, const coreUintW iDimension);
+    void DisableTile(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
     void EnableContainer (const coreVector2& vPosition);
     void DisableContainer(const coreBool bAnimated);
 
     // 
-    inline void               SetContainerForce   (const coreVector2& vForce)    {m_vForce    = vForce;}
-    inline void               SetContainerClamp   (const coreBool     bClamp)    {m_bClamp    = bClamp;}
-    inline void               SetContainerOverdraw(const coreBool     bOverdraw) {m_bOverdraw = bOverdraw;}
-    inline const coreVector2& GetContainerForce   ()const                        {return m_vForce;}
-    inline const coreVector2& GetContainerImpact  ()const                        {return m_vImpact;}
+    inline void SetContainerForce   (const coreVector2& vForce)    {m_vForce    = vForce;}
+    inline void SetContainerClamp   (const coreBool     bClamp)    {m_bClamp    = bClamp;}
+    inline void SetContainerOverdraw(const coreBool     bOverdraw) {m_bOverdraw = bOverdraw;}
+
+    // 
+    inline const coreVector2& GetContainerForce ()const                       {return m_vForce;}
+    inline const coreVector2& GetContainerImpact()const                       {return m_vImpact;}
 
     // 
     inline cLodObject* GetContainer() {return &m_Container;}
@@ -409,9 +422,10 @@ public:
 
 private:
     // execute own routines
-    void __SetupOwn     ()final;
-    void __RenderOwnOver()final;
-    void __MoveOwnAfter ()final;
+    void __SetupOwn       ()final;
+    void __RenderOwnBottom()final;
+    void __RenderOwnOver  ()final;
+    void __MoveOwnAfter   ()final;
 };
 
 

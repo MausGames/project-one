@@ -12,15 +12,37 @@
 // ****************************************************************
 // constructor
 cNevoMission::cNevoMission()noexcept
-: m_vForce    (coreVector2(0.0f,0.0f))
-, m_vImpact   (coreVector2(0.0f,0.0f))
-, m_bClamp    (false)
-, m_bOverdraw (false)
+, m_Tile        (NEVO_TILES)
+, m_afTileTime  {}
+, m_vForce      (coreVector2(0.0f,0.0f))
+, m_vImpact     (coreVector2(0.0f,0.0f))
+, m_bClamp      (false)
+, m_bOverdraw   (false)
 {
     // 
     m_apBoss[0] = &m_Nautilus;
     m_apBoss[1] = &m_Amemasu;
     m_apBoss[2] = &m_Leviathan;
+
+    // 
+    m_Tile.DefineProgram("object_tile_inst_program");
+    {
+        for(coreUintW i = 0u; i < NEVO_TILES_RAWS; ++i)
+        {
+            // load object resources
+            coreObject3D* pTile = &m_aTileRaw[i];
+            pTile->DefineModel  (Core::Manager::Object->GetLowQuad());
+            pTile->DefineTexture(0u, "menu_background_black.png");
+            pTile->DefineProgram("object_tile_program");
+
+            // set object properties
+            pTile->SetAlpha  (0.7f);
+            pTile->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
+            // add object to the list
+            m_Tile.BindObject(pTile);
+        }
+    }
 
     // 
     m_Container.DefineModelHigh("object_container_high.md3");
@@ -38,7 +60,50 @@ cNevoMission::cNevoMission()noexcept
 cNevoMission::~cNevoMission()
 {
     // 
+    for(coreUintW i = 0u; i < NEVO_TILES;  ++i) this->DisableTile (i, false);
     this->DisableContainer(false);
+}
+
+
+// ****************************************************************
+// 
+void cNevoMission::EnableTile(const coreUintW iIndex, const coreUintW iDimension)
+{
+    ASSERT(iIndex < NEVO_TILES)
+    coreObject3D& oTile = m_aTileRaw[iIndex];
+
+    // 
+    WARN_IF(oTile.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    m_afTileTime[iIndex] = 1.0f;
+
+    // 
+    const coreFloat   fScale = RCP(I_TO_F(iDimension)) * FOREGROUND_AREA.x * 2.2f;
+    const coreVector2 vPos   = (coreVector2(I_TO_F(iIndex % iDimension), I_TO_F(iIndex / iDimension)) - 0.5f * I_TO_F(iDimension - 1u)).InvertedY() * fScale;
+
+    // 
+    oTile.SetPosition(coreVector3(vPos, 0.0f));
+    oTile.SetSize    (coreVector3(0.0f, 0.0f, fScale - 1.0f));
+    oTile.SetEnabled (CORE_OBJECT_ENABLE_ALL);
+}
+
+
+// ****************************************************************
+// 
+void cNevoMission::DisableTile(const coreUintW iIndex, const coreBool bAnimated)
+{
+    ASSERT(iIndex < NEVO_TILES)
+    coreObject3D& oTile = m_aTileRaw[iIndex];
+
+    // 
+    if(!oTile.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    if(m_afTileTime[iIndex] > 0.0f) m_afTileTime[iIndex] = -1.0f;
+
+    // 
+    if(!bAnimated) oTile.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 }
 
 
@@ -82,6 +147,15 @@ void cNevoMission::DisableContainer(const coreBool bAnimated)
 
 // ****************************************************************
 // 
+void cNevoMission::__RenderOwnBottom()
+{
+    // 
+    m_Tile.Render();
+}
+
+
+// ****************************************************************
+// 
 void cNevoMission::__RenderOwnOver()
 {
     // 
@@ -98,6 +172,36 @@ void cNevoMission::__RenderOwnOver()
 // 
 void cNevoMission::__MoveOwnAfter()
 {
+    // 
+    for(coreUintW i = 0u; i < NEVO_TILES; ++i)
+    {
+        coreObject3D& oTile = m_aTileRaw[i];
+        if(!oTile.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+        coreFloat fScale;
+        if(m_afTileTime[i] > 0.0f)
+        {
+            // 
+            m_afTileTime[i].UpdateMin(2.0f, 2.0f);
+            fScale = LERPB(0.0f, 1.0f, m_afTileTime[i] - 1.0f);
+        }
+        else
+        {
+            // 
+            m_afTileTime[i].UpdateMax(-2.0f, -2.0f);
+            fScale = LERPB(1.0f, 0.0f, -m_afTileTime[i] - 1.0f);
+
+            // 
+            if(m_afTileTime[i] <= -2.0f) this->DisableTile(i, false);
+        }
+
+        // 
+        oTile.SetSize(coreVector3(fScale, fScale, 1.0f) * oTile.GetSize().z);
+    }
+
+    // 
+    m_Tile.MoveNormal();
+
     if(m_Container.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
     {
         coreVector2 vNewPos = m_Container.GetPosition().xy();

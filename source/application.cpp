@@ -313,6 +313,10 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("object_ground_inst.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ground.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("object_ship_glow_inst.frag",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", CORE_SHADER_OPTION_INSTANCING SHADER_GLOW);
     Core::Manager::Resource->Load<coreShader> ("object_ship_blink_inst.frag",            CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", CORE_SHADER_OPTION_INSTANCING SHADER_BLINK);
+    Core::Manager::Resource->Load<coreShader> ("object_tile.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_tile.vert");
+    Core::Manager::Resource->Load<coreShader> ("object_tile.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_tile.frag");
+    Core::Manager::Resource->Load<coreShader> ("object_tile_inst.vert",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_tile.vert", CORE_SHADER_OPTION_INSTANCING);
+    Core::Manager::Resource->Load<coreShader> ("object_tile_inst.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_tile.frag", CORE_SHADER_OPTION_INSTANCING);
 
     Core::Manager::Resource->Load<coreSound>  ("bullet_mine.wav",                        CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/bullet_mine.wav");
     Core::Manager::Resource->Load<coreSound>  ("bullet_pulse.wav",                       CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/bullet_pulse.wav");
@@ -903,5 +907,15 @@ void CoreApp::Setup()
         ->AttachShader ("object_inst.vert")
         ->AttachShader ("object_ship_blink_inst.frag")
         ->BindAttribute("a_v1Blink", SHIP_SHADER_ATTRIBUTE_BLINK)
+        ->Finish();
+
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_tile_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("object_tile.vert")
+        ->AttachShader("object_tile.frag")
+        ->Finish();
+
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_tile_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("object_tile_inst.vert")
+        ->AttachShader("object_tile_inst.frag")
         ->Finish();
 }
