@@ -22,11 +22,12 @@
 
 // ****************************************************************
 // mission definitions
-#define MISSION_BOSSES      (BOSSES)   // default number of bosses per mission
-#define MISSION_WAVES       (WAVES)    // 
-#define MISSION_NO_BOSS     (0xFFu)    // no boss currently active (error-value)
-#define MISSION_NO_WAVE     (0xFFu)    // 
-#define MISSION_NO_SEGMENT  (0xFFu)    // 
+#define MISSION_PLAYERS     (PLAYERS)   // 
+#define MISSION_BOSSES      (BOSSES)    // default number of bosses per mission
+#define MISSION_WAVES       (WAVES)     // 
+#define MISSION_NO_BOSS     (0xFFu)     // no boss currently active (error-value)
+#define MISSION_NO_WAVE     (0xFFu)     // 
+#define MISSION_NO_SEGMENT  (0xFFu)     // 
 
 #define MISSION_SEGMENT_IS_BOSS(i) ((i) % 6u == 5u)
 #define MISSION_BOSS_TO_SEGMENT(i) ((i) * 6u  + 5u)
@@ -55,6 +56,9 @@
 #define NEVO_TILES                  (16u)                                             // 
 #define NEVO_TILES_RAWS             (NEVO_TILES)                                      // 
 #define NEVO_BOMB_SIZE              (4.0f)                                            // 
+
+#define RUTILUS_TELEPORTER          (2u)                                              // 
+#define RUTILUS_TELEPORTER_COLOR(x) ((x) ? COLOR_ENERGY_BLUE : COLOR_ENERGY_ORANGE)   // 
 
 
 // ****************************************************************
@@ -483,21 +487,44 @@ private:
 class cRutilusMission final : public cMission
 {
 private:
-    cQuaternionBoss m_Quaternion;   // 
-    cSarosBoss      m_Saros;        // 
-    cMessierBoss    m_Messier;      // 
+    cQuaternionBoss m_Quaternion;                          // 
+    cSarosBoss      m_Saros;                               // 
+    cMessierBoss    m_Messier;                             // 
+
+    coreObject3D m_aTeleporter     [RUTILUS_TELEPORTER];   // 
+    coreVector2  m_avTeleporterPrev[RUTILUS_TELEPORTER];   // 
+    coreUint8    m_iTeleporterActive;                      // 
+
+    coreUint8 m_aiMoveFlip[MISSION_PLAYERS];               // 
+
+    coreFlow m_fAnimation;                                 // animation value
 
 
 public:
     cRutilusMission()noexcept;
+    ~cRutilusMission()final;
 
     DISABLE_COPY(cRutilusMission)
     ASSIGN_ID(4, "Rutilus")
 
+    // 
+    void EnableTeleporter (const coreUintW iIndex);
+    void DisableTeleporter(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    inline void SetTeleporterActive(const coreUint8 iActive) {m_iTeleporterActive = iActive;}
+
 
 private:
     // execute own routines
-    void __SetupOwn()final;
+    void __SetupOwn       ()final;
+    void __RenderOwnBottom()final;
+    void __RenderOwnOver  ()final;
+    void __MoveOwnBefore  ()final;
+    void __MoveOwnAfter   ()final;
+
+    // 
+    void __TeleporterEffect(const coreUintW iIndex)const;
 };
 
 
