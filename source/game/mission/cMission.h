@@ -47,8 +47,14 @@
 #define VIRIDO_SHADOWS_RAWS         (VIRIDO_SHADOWS)                                  // 
 #define VIRIDO_BALL_SPEED           (1.5f)                                            // 
 
+#define NEVO_BOMBS                  (6u)                                              // 
+#define NEVO_BOMBS_RAWS             (NEVO_BOMBS)                                      // 
+#define NEVO_LINES                  (4u)                                              // 
+#define NEVO_BLASTS                 (NEVO_BOMBS)                                      // 
+#define NEVO_BLASTS_RAWS            (NEVO_BLASTS * (NEVO_LINES + 1u))                 // 
 #define NEVO_TILES                  (16u)                                             // 
 #define NEVO_TILES_RAWS             (NEVO_TILES)                                      // 
+#define NEVO_BOMB_SIZE              (4.0f)                                            // 
 
 
 // ****************************************************************
@@ -381,6 +387,15 @@ private:
     cAmemasuBoss   m_Amemasu;                        // 
     cLeviathanBoss m_Leviathan;                      // 
 
+    coreBatchList m_Bomb;                            // 
+    cLodObject    m_aBombRaw  [NEVO_BOMBS_RAWS];     // 
+    coreBool      m_abBombGone[NEVO_BOMBS];          // 
+
+    coreBatchList m_Blast;                           // 
+    coreBatchList m_BlastLine;                       // 
+    coreObject3D  m_aBlastRaw  [NEVO_BLASTS_RAWS];   // 
+    coreFlow      m_afBlastTime[NEVO_BLASTS];        // 
+
     coreBatchList m_Tile;                            // 
     coreObject3D  m_aTileRaw  [NEVO_TILES_RAWS];     // 
     coreFlow      m_afTileTime[NEVO_TILES];          // 
@@ -391,6 +406,8 @@ private:
     coreBool    m_bClamp;                            // 
     coreBool    m_bOverdraw;                         // 
 
+    coreFlow m_fAnimation;                           // animation value
+
 
 public:
     cNevoMission()noexcept;
@@ -398,6 +415,14 @@ public:
 
     DISABLE_COPY(cNevoMission)
     ASSIGN_ID(2, "Nevo")
+
+    // 
+    void EnableBomb (const coreUintW iIndex, const coreBool bGrow);
+    void DisableBomb(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void EnableBlast (const coreUintW iIndex);
+    void DisableBlast(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
     void EnableTile (const coreUintW iIndex, const coreUintW iDimension);
@@ -413,6 +438,7 @@ public:
     inline void SetContainerOverdraw(const coreBool     bOverdraw) {m_bOverdraw = bOverdraw;}
 
     // 
+    inline const coreBool&    GetBombGone       (const coreUintW iIndex)const {ASSERT(iIndex < NEVO_BOMBS) return m_abBombGone[iIndex];}
     inline const coreVector2& GetContainerForce ()const                       {return m_vForce;}
     inline const coreVector2& GetContainerImpact()const                       {return m_vImpact;}
 
