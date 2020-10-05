@@ -516,5 +516,4 @@ UNITY_BUILD
 #include "07_cMossBackground.cpp"
 #include "08_cDarkBackground.cpp"
 #include "51_cStomachBackground.cpp"
-#include "52_cCaveBackground.cpp"
 #include "99_cCloudBackground.cpp"

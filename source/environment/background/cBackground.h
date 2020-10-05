@@ -415,28 +415,6 @@ private:
 
 
 // ****************************************************************
-// 
-class cCaveBackground final : public cBackground
-{
-private:
-    cHeadlight m_Headlight;   // 
-
-
-public:
-    cCaveBackground()noexcept;
-
-    DISABLE_COPY(cCaveBackground)
-    ASSIGN_ID_EX(52, "Cave", coreVector3(0.0f,0.0f,0.0f))
-
-
-private:
-    // execute own routines
-    void __RenderOwnAfter()final;
-    void __UpdateOwn     ()final;
-};
-
-
-// ****************************************************************
 // cloud background class
 class cCloudBackground final : public cBackground
 {

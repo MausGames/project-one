@@ -187,12 +187,11 @@ void cEnvironment::ChangeBackground(const coreInt32 iID, const coreUintW iTransi
     case cMossBackground   ::ID: m_pBackground = new cMossBackground   (); break;
     case cDarkBackground   ::ID: m_pBackground = new cDarkBackground   (); break;
     case cStomachBackground::ID: m_pBackground = new cStomachBackground(); break;
-    case cCaveBackground   ::ID: m_pBackground = new cCaveBackground   (); break;
     case cCloudBackground  ::ID: m_pBackground = new cCloudBackground  (); break;
     }
 
     // 
-    if((iID != cNoBackground::ID) && (iID != cStomachBackground::ID) && (iID != cCaveBackground::ID))
+    if((iID != cNoBackground::ID) && (iID != cStomachBackground::ID))
         m_iLastID = iID;
 
     if(m_pOldBackground)
