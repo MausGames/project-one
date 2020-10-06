@@ -27,6 +27,7 @@
 // TODO: remove texture-sampling from lightning effect in moss
 // TODO: stomach should not create all vertices
 // TODO: EnableShadowRead only if appropriate ground objects would be rendered (IsInstanced)
+// TODO: grass and blood textures are duplicated (especially normal maps)
 
 
 // ****************************************************************
@@ -360,6 +361,11 @@ private:
 
     coreSoundPtr m_pRainSound;          // 
 
+    cHeadlight m_Headlight;             // 
+
+    coreBool m_bEnableLightning;        // 
+    coreBool m_bEnableHeadlight;        // 
+
 
 public:
     cMossBackground()noexcept;
@@ -369,13 +375,19 @@ public:
     ASSIGN_ID_EX(7, "Moss", COLOR_MENU_RED)
 
     // 
-    inline void SetRainDirection(const coreVector2& vDirection) {m_vRainDirection = vDirection; ASSERT(vDirection.IsNormalized())}
+    inline void SetRainDirection  (const coreVector2& vDirection) {m_vRainDirection   = vDirection; ASSERT(vDirection.IsNormalized())}
+    inline void SetEnableLightning(const coreBool     bEnable)    {m_bEnableLightning = bEnable;    m_fLightningDelay = 0.0f;}
+    inline void SetEnableHeadlight(const coreBool     bEnable)    {m_bEnableHeadlight = bEnable;}
+
+    // 
+    inline cHeadlight* GetHeadlight() {return &m_Headlight;}
 
 
 private:
     // execute own routines
     void __RenderOwnAfter()final;
     void __MoveOwn       ()final;
+    void __UpdateOwn     ()final;
 };
 
 

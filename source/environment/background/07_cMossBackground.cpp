@@ -12,16 +12,18 @@
 // ****************************************************************
 // constructor
 cMossBackground::cMossBackground()noexcept
-: m_vRainDirection  (coreVector2(0.0f,1.0f))
-, m_fLightningDelay (Core::Rand->Float(15.0f, 30.0f))
-, m_LightningTicker (coreTimer(1.0f, 1.0f, 1u))
-, m_fThunderDelay   (0.0f)
-, m_iThunderIndex   (Core::Rand->Int(ARRAY_SIZE(m_apThunder) - 1))
+: m_vRainDirection   (coreVector2(0.0f,1.0f))
+, m_fLightningDelay  (Core::Rand->Float(15.0f, 30.0f))
+, m_LightningTicker  (coreTimer(1.0f, 1.0f, 1u))
+, m_fThunderDelay    (0.0f)
+, m_iThunderIndex    (Core::Rand->Int(ARRAY_SIZE(m_apThunder) - 1))
+, m_bEnableLightning (true)
+, m_bEnableHeadlight (false)
 {
     coreBatchList* pList1;
 
     // create outdoor-surface object
-    m_pOutdoor = new cOutdoor("moss", "grass", 5u, 4.5f);
+    m_pOutdoor = new cOutdoor("moss", "blood", 5u, 4.5f);
 
     // 
     m_pWater = new cRainWater("environment_clouds_grey.png");
@@ -125,6 +127,9 @@ void cMossBackground::__RenderOwnAfter()
         // 
         m_Rain     .Render();
         m_Lightning.Render();
+
+        // 
+        if(m_bEnableHeadlight) m_Headlight.Render();
     }
     glEnable(GL_DEPTH_TEST);
 }
@@ -145,20 +150,23 @@ void cMossBackground::__MoveOwn()
     m_Rain.SetTexOffset(vTexOffset.Processed(FRACT));
     m_Rain.Move();
 
-    // 
-    m_fLightningDelay.Update(-1.0f);
-    if(m_fLightningDelay <= 0.0f)
+    if(m_bEnableLightning)
     {
         // 
-         m_fLightningDelay = Core::Rand->Float(15.0f, 30.0f);
+        m_fLightningDelay.Update(-1.0f);
+        if(m_fLightningDelay <= 0.0f)
+        {
+            // 
+             m_fLightningDelay = Core::Rand->Float(15.0f, 30.0f);
 
-         // 
-         m_LightningTicker.SetSpeed   (Core::Rand->Float(8.0f, 11.0f));
-         m_LightningTicker.SetMaxLoops(Core::Rand->Bool(0.67f) ? 3u : 2u);
-         m_LightningTicker.Play       (CORE_TIMER_PLAY_RESET);
+             // 
+             m_LightningTicker.SetSpeed   (Core::Rand->Float(8.0f, 11.0f));
+             m_LightningTicker.SetMaxLoops(Core::Rand->Bool(0.67f) ? 3u : 2u);
+             m_LightningTicker.Play       (CORE_TIMER_PLAY_RESET);
 
-         // 
-         m_fThunderDelay = -1.0f;
+             // 
+             m_fThunderDelay = -1.0f;
+        }
     }
 
     // 
@@ -190,4 +198,13 @@ void cMossBackground::__MoveOwn()
     // 
     if(m_pRainSound->EnableRef(this))
         m_pRainSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
+}
+
+
+// ****************************************************************
+// 
+void cMossBackground::__UpdateOwn()
+{
+    // 
+    if(m_bEnableHeadlight) m_Headlight.UpdateDefault();
 }

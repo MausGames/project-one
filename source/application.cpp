@@ -138,6 +138,8 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("environment_earth_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_earth_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_grass_diff.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_grass_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_grass_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_grass_norm.png", false);
+    Core::Manager::Resource->Load<coreTexture>("environment_blood_diff.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_blood_diff.png");
+    Core::Manager::Resource->Load<coreTexture>("environment_blood_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_blood_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_lava_diff.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_lava_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_lava_norm.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_lava_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_leaf.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_leaf.png");
