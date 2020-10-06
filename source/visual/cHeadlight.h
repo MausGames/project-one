@@ -21,6 +21,7 @@
 // ****************************************************************
 // 
 #define HEADLIGHT_SCALE_FACTOR (0.5f)   // frame buffer resolution factor
+#define HEADLIGHT_INTENSITY    (1.5f)   // 
 
 
 // ****************************************************************
@@ -79,8 +80,9 @@ public:
     void DrawPoint(const coreObject3D* pObject);
 
     // 
-    void PlayFlicker(const coreUint8 iShatter);
-    void StopFlicker();
+    void PlayFlicker (const coreUint8 iShatter);
+    void StopFlicker ();
+    void ResetFlicker();
 
     // access frame buffer
     inline coreFrameBuffer* GetFrameBuffer() {return &m_FrameBuffer;}

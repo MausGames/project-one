@@ -76,7 +76,7 @@ void cHeadlight::Update()
         if(m_Flicker.GetStatus())
         {
             // 
-            m_Spot.SetColor3(coreVector3(1.0f,1.0f,1.0f) * m_Flicker.GetValue(CORE_TIMER_GET_NORMAL));
+            m_Spot.SetAlpha(m_Flicker.GetValue(CORE_TIMER_GET_NORMAL));
         }
         else
         {
@@ -85,12 +85,16 @@ void cHeadlight::Update()
             if(m_iShatter == 2u) m_pShatterSound->PlayRelative(NULL, 0.7f, 1.0f, false, SOUND_EFFECT);
 
             // 
-            m_Spot.SetColor3(coreVector3(1.0f,1.0f,1.0f) * (m_iShatter ? 0.0f : 1.0f));
+            m_Spot.SetAlpha(m_iShatter ? 0.0f : 1.0f);
         }
     }
 
     if(!m_aSpotCommand.empty() || !m_aPointCommand.empty())
     {
+        // 
+        m_Spot .SetColor3(coreVector3(1.0f,1.0f,1.0f) * HEADLIGHT_INTENSITY * m_Spot .GetAlpha());
+        m_Point.SetColor3(coreVector3(1.0f,1.0f,1.0f) * HEADLIGHT_INTENSITY * m_Point.GetAlpha());
+
         // 
         m_FrameBuffer.StartDraw();
         m_FrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);
@@ -139,8 +143,7 @@ void cHeadlight::UpdateDefault()
         // 
         g_pGame->ForEachPlayer([this](const cPlayer* pPlayer, const coreUintW i)
         {
-            this->DrawSpot (pPlayer->GetPosition() + 49.0f * pPlayer->GetDirection(), coreVector2(100.0f,100.0f), pPlayer->GetDirection().xy());
-            this->DrawPoint(pPlayer);
+            this->DrawSpot(pPlayer->GetPosition() + 49.0f * pPlayer->GetDirection(), coreVector2(60.0f,100.0f), pPlayer->GetDirection().xy());
         });
     }
 
@@ -192,6 +195,9 @@ void cHeadlight::DrawPoint(const coreObject3D* pObject)
 void cHeadlight::PlayFlicker(const coreUint8 iShatter)
 {
     // 
+    this->StopFlicker();
+
+    // 
     m_Flicker.Play(CORE_TIMER_PLAY_RESET);
     m_pFlickerSound->PlayRelative(this, 3.0f, 1.0f, true, SOUND_EFFECT);
 
@@ -205,6 +211,18 @@ void cHeadlight::StopFlicker()
     // 
     m_Flicker.Stop();
     if(m_pFlickerSound->EnableRef(this)) m_pFlickerSound->Stop();
+}
+
+void cHeadlight::ResetFlicker()
+{
+    // 
+    this->StopFlicker();
+
+    // 
+    m_iShatter = 0u;
+
+    // 
+    m_Spot.SetAlpha(1.0f);
 }
 
 
