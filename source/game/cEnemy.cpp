@@ -353,8 +353,6 @@ cEnemyManager::sEnemySetGen::sEnemySetGen()noexcept
 cEnemyManager::cEnemyManager()noexcept
 : m_apEnemySet {}
 {
-    // 
-    Core::Manager::Object->TestCollision(TYPE_ENEMY, [](coreObject3D*, coreObject3D*, coreVector3, coreBool) {});
 }
 
 

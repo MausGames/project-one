@@ -11,7 +11,7 @@
 #define _P1_GUARD_INTERFACE_H_
 
 // TODO: re-position everything after resolution-change (also menu)
-// TODO: realtime language update (other locations as well ?)
+// TODO: realtime language update (other locations as well ?), boss-titles and wave-names
 
 
 // ****************************************************************
@@ -106,11 +106,14 @@ public:
 
     // 
     void ShowStory(const coreChar* pcRow1, const coreChar* pcRow2 = "");
-    coreBool IsStoryActive(const coreFloat fOffset)const;
+    coreBool IsStoryActive()const;
 
     // 
     void UpdateLayout();
     void UpdateEnabled();
+
+    // 
+    inline void Reset() {m_fBannerStart = -FLT_MAX; m_fStoryStart = -FLT_MAX;}
 
     // set object properties
     inline void SetVisible  (const coreBool  bVisible) {m_bVisible   = bVisible;}

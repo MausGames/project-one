@@ -9,6 +9,7 @@ add_executable(ProjectOne)
 
 set_target_properties(
     ProjectOne PROPERTIES
+    C_STANDARD 11
     CXX_STANDARD 17
     DEBUG_POSTFIX _debug
     SUFFIX .elf

@@ -10,7 +10,7 @@
 #ifndef _P1_GUARD_MISSION_H_
 #define _P1_GUARD_MISSION_H_
 
-// TODO: reuse paths and squads over stages
+// TODO: reuse paths (beware of reserve assertion, and resize on refine) and squads over stages
 // TODO: add visible debug-spline
 // TODO: prevent multiple calculations in script-commands (because of macro variables), also boss
 // TODO: assertion for "active boss should be alive"
@@ -18,6 +18,9 @@
 // TODO: there seems to be a bug in STAGE_TICK_TIME, which sometimes gives early or late ticks with 30.0f speed, compared with STAGE_TICK_LIFETIME
 // TODO: wrap m_piData in function with RETURN_RESTRICT
 // TODO: set progress when finishing segment, not when starting, but consider mission-wrapping
+// TODO: low-resolution object_sphere for small sphere objects (what about bullet_orb) ?
+// TODO: change all missions to STATIC_MEMORY (check memory)
+// TODO: check if TYPE_NEVO_BOMB still needed
 
 
 // ****************************************************************

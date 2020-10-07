@@ -884,7 +884,6 @@ template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt
 }
 
 
-
 // ****************************************************************
 // 
 inline cBullet* cBulletManager::FindBullet(const coreVector2& vPosition)const

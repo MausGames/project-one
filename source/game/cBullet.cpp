@@ -205,9 +205,6 @@ cBulletManager::cBulletManager(const coreInt32 iType)noexcept
 , m_aiOrder     {}
 {
     // 
-    Core::Manager::Object->TestCollision(m_iType, [](coreObject3D*, coreObject3D*, coreVector3, coreBool) {});
-
-    // 
     this->ResetOrder();
 }
 

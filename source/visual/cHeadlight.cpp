@@ -195,11 +195,8 @@ void cHeadlight::DrawPoint(const coreObject3D* pObject)
 void cHeadlight::PlayFlicker(const coreUint8 iShatter)
 {
     // 
-    this->StopFlicker();
-
-    // 
+    if(!m_Flicker.GetStatus()) m_pFlickerSound->PlayRelative(this, 3.0f, 1.0f, true, SOUND_EFFECT);
     m_Flicker.Play(CORE_TIMER_PLAY_RESET);
-    m_pFlickerSound->PlayRelative(this, 3.0f, 1.0f, true, SOUND_EFFECT);
 
     // 
     ASSERT(m_iShatter != 2u)
@@ -209,8 +206,8 @@ void cHeadlight::PlayFlicker(const coreUint8 iShatter)
 void cHeadlight::StopFlicker()
 {
     // 
-    m_Flicker.Stop();
     if(m_pFlickerSound->EnableRef(this)) m_pFlickerSound->Stop();
+    m_Flicker.Stop();
 }
 
 void cHeadlight::ResetFlicker()
