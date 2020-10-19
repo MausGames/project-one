@@ -22,7 +22,7 @@ cFinishMenu::cFinishMenu()noexcept
     m_Background.DefineTexture(1u, "menu_background_black.png");
     m_Background.DefineProgram("menu_animate_program");
     m_Background.SetPosition  (coreVector2(0.0f,0.0f));
-    m_Background.SetCenter    (coreVector2(0.0f,0.1f) * g_vMenuCenter);
+    m_Background.SetCenter    (coreVector2(0.0f,0.1f));
 
     m_ThankYouText.Construct      (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
     m_ThankYouText.SetPosition    (coreVector2(0.0f,0.05f));

@@ -109,8 +109,8 @@ private:
     cItemManager   m_ItemManager;           // 
     cShieldManager m_ShieldManager;         // 
 
-    cCombatText m_CombatText;               // combat text overlay
     cInterface  m_Interface;                // interface overlay
+    cCombatText m_CombatText;               // combat text overlay
 
     cRepairEnemy* m_pRepairEnemy;           // 
 
@@ -149,8 +149,9 @@ public:
     void Render();
     void Move();
 
-    // render the overlay separately
+    // render and move the overlay separately
     void RenderOverlay();
+    void MoveOverlay();
 
     // control active mission
     void LoadMissionID   (const coreInt32 iID);
@@ -188,8 +189,8 @@ public:
     inline cChromaManager*  GetChromaManager      ()                         {return &m_ChromaManager;}
     inline cItemManager*    GetItemManager        ()                         {return &m_ItemManager;}
     inline cShieldManager*  GetShieldManager      ()                         {return &m_ShieldManager;}
-    inline cCombatText*     GetCombatText         ()                         {return &m_CombatText;}
     inline cInterface*      GetInterface          ()                         {return &m_Interface;}
+    inline cCombatText*     GetCombatText         ()                         {return &m_CombatText;}
     inline cMission*        GetCurMission         ()const                    {ASSERT(m_pCurMission) return m_pCurMission;}
     inline const coreUintW& GetCurMissionIndex    ()const                    {return m_iCurMissionIndex;}
     inline cTimeTable*      GetTimeTable          ()                         {return &m_TimeTable;}

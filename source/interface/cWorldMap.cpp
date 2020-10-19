@@ -80,7 +80,7 @@ void cWorldMap::Render()
     this->GetProgram()->SendUniform("u_v1Time", FMOD(coreFloat(Core::System->GetTotalTime()), 10.0f));
 
     // 
-    this->coreObject2D::Render();
+    this->cGuiObject::Render();
 
     // 
     for(coreUintW i = 0u; i < WORLDMAP_LINES; ++i) m_aLine  [i].Render();
@@ -100,7 +100,7 @@ void cWorldMap::Render()
 void cWorldMap::Move()
 {
     // 
-    this->coreObject2D::Move();
+    this->cGuiObject::Move();
 
     // 
     for(coreUintW i = 0u; i < WORLDMAP_PINS; ++i)

@@ -9,7 +9,7 @@
 #include "main.h"
 
 coreVector2     g_vGameResolution = coreVector2(0.0f,0.0f);
-coreVector2     g_vMenuCenter     = coreVector2(0.0f,0.0f);
+coreVector2     g_vHudDirection   = coreVector2(0.0f,1.0f);
 coreBool        g_bDebugOutput    = false;
 coreMusicPlayer g_MusicPlayer     = {};
 
@@ -57,6 +57,7 @@ void CoreApp::Init()
 
     // init system properties
     InitResolution(Core::System->GetResolution());
+    InitDirection();
     InitFramerate();
 
     // create and init main components
@@ -208,8 +209,14 @@ void CoreApp::Move()
             // move the environment
             g_pEnvironment->Move();
 
-            // move the game
-            if(STATIC_ISVALID(g_pGame)) g_pGame->Move();
+            if(STATIC_ISVALID(g_pGame))
+            {
+                // move the game
+                g_pGame->Move();
+
+                // move the overlay separately
+                g_pGame->MoveOverlay();
+            }
 
             // 
             g_pWindscreen->Move();
@@ -237,7 +244,26 @@ void InitResolution(const coreVector2& vResolution)
 {
     // calculate biggest possible 1:1 resolution
     g_vGameResolution = coreVector2(1.0f,1.0f) * vResolution.Min();
-    g_vMenuCenter     = g_vGameResolution / vResolution;
+}
+
+
+// ****************************************************************
+// 
+void InitDirection()
+{
+    // 
+    switch(g_CurConfig.Game.iHudRotation)
+    {
+    default: g_vHudDirection = coreVector2( 0.0f, 1.0f); break;
+    case 1u: g_vHudDirection = coreVector2(-1.0f, 0.0f); break;
+    case 2u: g_vHudDirection = coreVector2( 0.0f,-1.0f); break;
+    case 3u: g_vHudDirection = coreVector2( 1.0f, 0.0f); break;
+    }
+
+    // 
+    Core::Manager::Object->SetSpriteViewDir  (g_vHudDirection);
+    Core::Manager::Object->SetSpriteAltCenter(g_vGameResolution);
+    Core::Manager::Object->RefreshSprites();
 }
 
 
@@ -314,6 +340,7 @@ static void ReshapeGame()
 {
     // update system properties
     InitResolution(Core::System->GetResolution());
+    InitDirection();
     InitFramerate();
 
     // reshape engine

@@ -27,13 +27,13 @@ cTitleMenu::cTitleMenu()noexcept
     m_PromptText.SetTextLanguage("PROMPT");
 
     m_aVersionText[0].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
-    m_aVersionText[0].SetPosition (coreVector2(0.0f, 0.03f));
-    m_aVersionText[0].SetCenter   (coreVector2(0.0f,-0.5f) * g_vMenuCenter);
+    m_aVersionText[0].SetPosition (coreVector2(0.0f, 0.035f));
+    m_aVersionText[0].SetCenter   (coreVector2(0.0f,-0.5f));
     m_aVersionText[0].SetAlignment(coreVector2(0.0f, 1.0f));
     m_aVersionText[0].SetText     ("(c) 2010-2020 Martin Mauersics (@MausGames)");
 
     m_aVersionText[1].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
-    m_aVersionText[1].SetPosition (m_aVersionText[0].GetPosition() + coreVector2(0.0f,-0.02f));
+    m_aVersionText[1].SetPosition (m_aVersionText[0].GetPosition() + coreVector2(0.0f,-0.025f));
     m_aVersionText[1].SetCenter   (m_aVersionText[0].GetCenter());
     m_aVersionText[1].SetAlignment(m_aVersionText[0].GetAlignment());
     m_aVersionText[1].SetText     (PRINT("Project One - v0.1.0 third edition - %s %.5s", __DATE__, __TIME__));

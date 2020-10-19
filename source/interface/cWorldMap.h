@@ -24,7 +24,7 @@
 
 // ****************************************************************
 // world map class
-class cWorldMap final : public coreObject2D
+class cWorldMap final : public cGuiObject
 {
 private:
     // 
@@ -38,23 +38,23 @@ private:
 
 
 private:
-    coreObject2D m_aPin   [WORLDMAP_PINS];    // 
-    coreObject2D m_aPinDot[WORLDMAP_PINS];    // 
-    coreObject2D m_aLine  [WORLDMAP_LINES];   // 
-    coreObject2D m_Cursor;                    // 
+    cGuiObject m_aPin   [WORLDMAP_PINS];    // 
+    cGuiObject m_aPinDot[WORLDMAP_PINS];    // 
+    cGuiObject m_aLine  [WORLDMAP_LINES];   // 
+    cGuiObject m_Cursor;                    // 
 
-    cTooltip m_Tooltip;                       // 
+    cTooltip m_Tooltip;                     // 
 
-    sData m_aData[WORLDMAP_PINS];             // 
+    sData m_aData[WORLDMAP_PINS];           // 
 
-    coreFlow  m_fMove;                        // 
-    coreUint8 m_iOldPin;                      // 
-    coreUint8 m_iNewPin;                      // 
+    coreFlow  m_fMove;                      // 
+    coreUint8 m_iOldPin;                    // 
+    coreUint8 m_iNewPin;                    // 
 
-    coreFlow m_fPinAngle;                     // 
-    coreFlow m_fCursorAngle;                  // 
+    coreFlow m_fPinAngle;                   // 
+    coreFlow m_fCursorAngle;                // 
 
-    coreUint16 m_iEnabled;                    // 
+    coreUint16 m_iEnabled;                  // 
 
 
 public:

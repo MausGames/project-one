@@ -239,6 +239,7 @@ enum eMedal : coreUint8
 };
 
 extern void InitResolution(const coreVector2& vResolution);   // init resolution properties (1:1)
+extern void InitDirection();                                  // 
 extern void InitFramerate();                                  // init frame rate properties (lock)
 
 
@@ -254,13 +255,14 @@ class cMission;
 // ****************************************************************
 // game headers
 extern coreVector2     g_vGameResolution;   // pre-calculated 1:1 resolution
-extern coreVector2     g_vMenuCenter;       // pre-calculated menu center modifier
+extern coreVector2     g_vHudDirection;     // 
 extern coreBool        g_bDebugOutput;      // 
 extern coreMusicPlayer g_MusicPlayer;       // central music-player
 
 #include "additional/cUtilities.h"
 #include "additional/cBindContainer.h"
 #include "additional/cRotaCache.h"
+#include "additional/cGuiObject.h"
 #include "additional/cLodObject.h"
 #include "file/cConfig.h"
 #include "file/cReplay.h"

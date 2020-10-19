@@ -409,6 +409,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\source\additional\cBindContainer.h" />
     <ClInclude Include="..\..\..\source\additional\cLodObject.h" />
+    <ClInclude Include="..\..\..\source\additional\cGuiObject.h" />
     <ClInclude Include="..\..\..\source\additional\cRotaCache.h" />
     <ClInclude Include="..\..\..\source\additional\cUtilities.h" />
     <ClInclude Include="..\..\..\source\environment\background\cBackground.h" />

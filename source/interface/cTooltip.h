@@ -34,10 +34,10 @@
 
 // ****************************************************************
 // tooltip class
-class cTooltip final : public coreObject2D
+class cTooltip final : public cGuiObject
 {
 private:
-    coreLabel m_aLine[TOOLTIP_LINES];   // text lines
+    cGuiLabel m_aLine[TOOLTIP_LINES];   // text lines
 
     coreUintW m_iNumLines;              // currently active text lines
     coreBool  m_bDisplay;               // display the tooltip (once)
@@ -77,7 +77,7 @@ template <typename... A> void cTooltip::ShowText(const coreVector2& vTarget, con
 {
     // show tooltip at target position
     m_bDisplay = true;
-    this->SetCenter(vTarget);
+    this->SetCenter(MapToAxis(vTarget, g_vHudDirection));
 
     // check and save last reference-pointer (to prevent redundant update)
     if(m_pLastRef == pRef) return;

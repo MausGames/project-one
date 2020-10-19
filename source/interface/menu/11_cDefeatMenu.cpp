@@ -24,7 +24,7 @@ cDefeatMenu::cDefeatMenu()noexcept
     m_Background.DefineTexture(1u, "menu_background_black.png");
     m_Background.DefineProgram("menu_animate_program");
     m_Background.SetPosition  (coreVector2(0.0f,0.0f));
-    m_Background.SetCenter    (coreVector2(0.0f,0.1f) * g_vMenuCenter);
+    m_Background.SetCenter    (coreVector2(0.0f,0.1f));
 
     m_GameOverText.Construct      (MENU_FONT_DYNAMIC_4, MENU_OUTLINE_SMALL);
     m_GameOverText.SetPosition    (coreVector2(0.0f,0.0f));
@@ -142,8 +142,8 @@ void cDefeatMenu::Move()
                     }
 
                     // 
-                    coreObject2D&       oTarget = m_ContinueImage[iContinues - 1u];
-                    const coreObject2D& oSource = m_ContinueImage[iContinues % MENU_DEFEAT_CONTINUES];
+                    cGuiObject&       oTarget = m_ContinueImage[iContinues - 1u];
+                    const cGuiObject& oSource = m_ContinueImage[iContinues % MENU_DEFEAT_CONTINUES];
                     oTarget.SetPosition(coreVector2(oTarget.GetPosition().x, oSource.GetPosition().y + s_Spline.CalcPositionLerp(LERPB(1.0f, 0.0f, MAX(1.0f - m_fBurst, 0.0f))).y));
 
                     STATIC_ASSERT(MENU_DEFEAT_CONTINUES > 1u)

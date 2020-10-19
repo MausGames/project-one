@@ -38,7 +38,7 @@ void cCombatText::Move()
     // move active label objects
     for(coreUintW i = 0u; i < COMBAT_LABELS; ++i)
     {
-        coreLabel& oLabel = m_aLabel [i];
+        cGuiLabel& oLabel = m_aLabel [i];
         coreFlow&  fTimer = m_afTimer[i];
         if(!fTimer) continue;
 
@@ -61,17 +61,26 @@ void cCombatText::AddText(const coreChar* pcText, const coreVector3& vPosition, 
 
     // 
     if(++m_iCurLabel >= COMBAT_LABELS) m_iCurLabel = 0u;
-    coreLabel& oLabel = m_aLabel [m_iCurLabel];
+    cGuiLabel& oLabel = m_aLabel [m_iCurLabel];
     coreFlow&  fTimer = m_afTimer[m_iCurLabel];
 
     // init label object
     oLabel.SetText  (pcText);
-    oLabel.SetCenter(g_pForeground->Project2D(vPosition) * g_vMenuCenter);
+    oLabel.SetCenter(MapToAxis(g_pForeground->Project2D(vPosition), g_vHudDirection));
     oLabel.SetColor4(coreVector4(vColor, 0.0f));
 
     // start animation timer
     ASSERT(!fTimer)
     fTimer = 1.0f;
+}
+
+
+// ****************************************************************
+// 
+void cCombatText::UpdateLayout()
+{
+    // TODO: rotate position if game rotates
+    // TODO: rotate direction (without position) if interface rotates
 }
 
 

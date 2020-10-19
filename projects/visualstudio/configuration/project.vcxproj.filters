@@ -447,6 +447,9 @@
     <ClInclude Include="..\..\..\source\visual\cInk.h">
       <Filter>visual</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\source\additional\cGuiObject.h">
+      <Filter>additional</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="environment">

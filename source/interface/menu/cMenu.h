@@ -22,7 +22,6 @@
 // TODO: rumble when changing rumble-option
 // TODO: display unattached joysticks and joystick names somehow
 // TODO: highlight which joystick is which input set
-// TODO: fix all g_vMenuCenter usages when changing aspect ratio
 // TODO: summary_ add separate total-score for each player
 // TODO: update texture filter and render quality in realtime
 // TODO: double initial languages by switching to two columns (on demand?)
@@ -234,12 +233,12 @@ enum eEntry : coreUint8
 class cIntroMenu final : public coreMenu
 {
 private:
-    coreLabel m_WelcomeText;                                   // 
+    cGuiLabel m_WelcomeText;                                   // 
 
     coreTimer m_IntroTimer;                                    // intro animation 
     coreUint8 m_iIntroStatus;                                  // 
 
-    coreLookup<std::string, coreButton*> m_apLanguageButton;   // list with buttons for valid language files
+    coreLookup<std::string, cGuiButton*> m_apLanguageButton;   // list with buttons for valid language files
 
 
 public:
@@ -264,13 +263,13 @@ public:
 class cTitleMenu final : public coreMenu
 {
 private:
-    coreObject2D m_GameLogo;        // game logo
+    cGuiObject m_GameLogo;          // game logo
 
-    coreLabel m_PromptText;         // 
+    cGuiLabel m_PromptText;         // 
     coreFlow  m_fPromptAnimation;   // 
     coreFlow  m_fPromptExpand;      // 
 
-    coreLabel m_aVersionText[2];    // hard-coded version info strings 
+    cGuiLabel m_aVersionText[2];    // hard-coded version info strings 
 
 
 public:
@@ -292,12 +291,12 @@ public:
 class cMainMenu final : public coreMenu
 {
 private:
-    coreButton m_StartButton;    // start button
-    coreButton m_ScoreButton;    // score button
-    coreButton m_ReplayButton;   // replay button
-    coreButton m_ExtraButton;    // extra button
-    coreButton m_ConfigButton;   // config button
-    coreButton m_ExitButton;     // exit button
+    cGuiButton m_StartButton;    // start button
+    cGuiButton m_ScoreButton;    // score button
+    cGuiButton m_ReplayButton;   // replay button
+    cGuiButton m_ExtraButton;    // extra button
+    cGuiButton m_ConfigButton;   // config button
+    cGuiButton m_ExitButton;     // exit button
 
 
 public:
@@ -319,35 +318,35 @@ public:
 class cGameMenu final : public coreMenu
 {
 private:
-    coreObject2D m_DirectoryBackground;                  // 
-    coreObject2D m_ArmoryBackground;                     // 
+    cGuiObject m_DirectoryBackground;                  // 
+    cGuiObject m_ArmoryBackground;                     // 
 
-    coreButton m_StandardTab;                            // 
-    coreButton m_TrainingTab;                            // 
+    cGuiButton m_StandardTab;                          // 
+    cGuiButton m_TrainingTab;                          // 
 
-    coreButton m_StartButton;                            // start button
-    coreButton m_CancelButton;                           // cancel button
-    coreButton m_BackButton;                             // back button
+    cGuiButton m_StartButton;                          // start button
+    cGuiButton m_CancelButton;                         // cancel button
+    cGuiButton m_BackButton;                           // back button
 
-    coreLabel m_DirectoryHeader;                         // 
-    coreLabel m_ArmoryHeader;                            // 
+    cGuiLabel m_DirectoryHeader;                       // 
+    cGuiLabel m_ArmoryHeader;                          // 
 
-    cWorldMap m_WorldMap;                                // 
+    cWorldMap m_WorldMap;                              // 
 
-    coreLabel    m_aMissionName[MENU_GAME_MISSIONS];     // 
-    coreObject2D m_aMissionLine[MENU_GAME_MISSIONS];     // 
+    cGuiLabel  m_aMissionName[MENU_GAME_MISSIONS];     // 
+    cGuiObject m_aMissionLine[MENU_GAME_MISSIONS];     // 
 
-    coreObject2D m_StageArea;                            // 
-    coreButton   m_aStage[MENU_GAME_STAGES];             // 
+    cGuiObject m_StageArea;                            // 
+    cGuiButton m_aStage[MENU_GAME_STAGES];             // 
 
-    coreLabel    m_aOptionName[MENU_GAME_OPTIONS];       // 
-    coreObject2D m_aOptionLine[MENU_GAME_OPTIONS];       // 
+    cGuiLabel  m_aOptionName[MENU_GAME_OPTIONS];       // 
+    cGuiObject m_aOptionLine[MENU_GAME_OPTIONS];       // 
 
-    coreSwitchBoxU8 m_Players;                           // 
-    coreSwitchBoxU8 m_aWeapon     [MENU_GAME_PLAYERS];   // 
-    coreSwitchBoxU8 m_aSupport    [MENU_GAME_PLAYERS];   // 
-    coreObject2D    m_aWeaponIcon [MENU_GAME_PLAYERS];   // 
-    coreObject2D    m_aSupportIcon[MENU_GAME_PLAYERS];   // 
+    cGuiSwitchBox m_Players;                           // 
+    cGuiSwitchBox m_aWeapon     [MENU_GAME_PLAYERS];   // 
+    cGuiSwitchBox m_aSupport    [MENU_GAME_PLAYERS];   // 
+    cGuiObject    m_aWeaponIcon [MENU_GAME_PLAYERS];   // 
+    cGuiObject    m_aSupportIcon[MENU_GAME_PLAYERS];   // 
 
 
 public:
@@ -379,14 +378,14 @@ public:
 class cScoreMenu final : public coreMenu
 {
 private:
-    coreObject2D m_Background;                   // 
+    cGuiObject m_Background;                   // 
 
-    coreButton m_BackButton;                     // back button
+    cGuiButton m_BackButton;                   // back button
 
-    coreLabel    m_aRank [MENU_SCORE_ENTRIES];   // 
-    coreLabel    m_aName [MENU_SCORE_ENTRIES];   // 
-    coreLabel    m_aScore[MENU_SCORE_ENTRIES];   // 
-    coreObject2D m_aLine [MENU_SCORE_ENTRIES];   // 
+    cGuiLabel  m_aRank [MENU_SCORE_ENTRIES];   // 
+    cGuiLabel  m_aName [MENU_SCORE_ENTRIES];   // 
+    cGuiLabel  m_aScore[MENU_SCORE_ENTRIES];   // 
+    cGuiObject m_aLine [MENU_SCORE_ENTRIES];   // 
 
 
 public:
@@ -404,15 +403,15 @@ public:
 class cReplayMenu final : public coreMenu
 {
 private:
-    coreObject2D m_Background;                   // 
+    cGuiObject m_Background;                   // 
 
-    coreButton m_BackButton;                     // back button
+    cGuiButton m_BackButton;                   // back button
 
-    coreLabel    m_aName[MENU_REPLAY_ENTRIES];   // 
-    coreLabel    m_aTime[MENU_REPLAY_ENTRIES];   // 
-    coreObject2D m_aLine[MENU_REPLAY_ENTRIES];   // 
+    cGuiLabel  m_aName[MENU_REPLAY_ENTRIES];   // 
+    cGuiLabel  m_aTime[MENU_REPLAY_ENTRIES];   // 
+    cGuiObject m_aLine[MENU_REPLAY_ENTRIES];   // 
 
-    std::vector<cReplay::sInfo> m_aInfoList;     // 
+    std::vector<cReplay::sInfo> m_aInfoList;   // 
 
 
 public:
@@ -433,9 +432,9 @@ public:
 class cExtraMenu final : public coreMenu
 {
 private:
-    coreObject2D m_Background;   // 
+    cGuiObject m_Background;   // 
 
-    coreButton m_BackButton;     // back button
+    cGuiButton m_BackButton;   // back button
 
 
 public:
@@ -456,59 +455,60 @@ private:
     // 
     struct sPlayerInput final
     {
-        coreLabel       oHeader;
-        coreSwitchBoxU8 oType;
-        coreSwitchBoxU8 oRumble;
-        coreSwitchBoxU8 oFireMode;
-        coreButton      oMoveUp;
-        coreButton      oMoveLeft;
-        coreButton      oMoveDown;
-        coreButton      oMoveRight;
-        coreButton      aAction[INPUT_KEYS_ACTION];
+        cGuiLabel     oHeader;
+        cGuiSwitchBox oType;
+        cGuiSwitchBox oRumble;
+        cGuiSwitchBox oFireMode;
+        cGuiButton    oMoveUp;
+        cGuiButton    oMoveLeft;
+        cGuiButton    oMoveDown;
+        cGuiButton    oMoveRight;
+        cGuiButton    aAction[INPUT_KEYS_ACTION];
     };
 
 
 private:
-    coreObject2D m_Background;           // 
+    cGuiObject m_Background;              // 
 
-    coreButton m_VideoTab;               // 
-    coreButton m_AudioTab;               // 
-    coreButton m_InputTab;               // 
-    coreButton m_GameTab;                // 
+    cGuiButton m_VideoTab;                // 
+    cGuiButton m_AudioTab;                // 
+    cGuiButton m_InputTab;                // 
+    cGuiButton m_GameTab;                 // 
 
-    coreButton m_SaveButton;             // save button
-    coreButton m_DiscardButton;          // discard button
-    coreButton m_BackButton;             // back button
+    cGuiButton m_SaveButton;              // save button
+    cGuiButton m_DiscardButton;           // discard button
+    cGuiButton m_BackButton;              // back button
 
-    coreLabel    m_aLabel[ENTRY_MAX];    // 
-    coreObject2D m_aLine [ENTRY_MAX];    // 
-    coreLabel    m_aArrow[INPUT_KEYS];   // 
+    cGuiLabel  m_aLabel   [ENTRY_MAX];    // 
+    cGuiObject m_aLine    [ENTRY_MAX];    // 
+    cGuiLabel  m_aCueInput[INPUT_KEYS];   // 
+    cGuiLabel  m_aCueRota [2];            // 
 
-    coreSwitchBoxU8 m_Monitor;
-    coreSwitchBoxU8 m_Resolution;
-    coreSwitchBoxU8 m_DisplayMode;
-    coreSwitchBoxU8 m_AntiAliasing;
-    coreSwitchBoxU8 m_TextureFilter;
-    coreSwitchBoxU8 m_RenderQuality;
-    coreSwitchBoxU8 m_ShadowQuality;
-    coreSwitchBoxU8 m_GlobalVolume;
-    coreSwitchBoxU8 m_MusicVolume;
-    coreSwitchBoxU8 m_EffectVolume;
-    coreSwitchBoxU8 m_AmbientVolume;
-    coreSwitchBoxU8 m_Language;
-    coreSwitchBoxU8 m_TextSize;
-    coreSwitchBoxU8 m_GameRotation;
-    coreSwitchBoxU8 m_GameScale;
-    coreSwitchBoxU8 m_GameSpeed;
-    coreSwitchBoxU8 m_HudRotation;
-    coreSwitchBoxU8 m_HudScale;
-    coreSwitchBoxU8 m_HudType;
-    coreSwitchBoxU8 m_UpdateFreq;
-    coreSwitchBoxU8 m_Version;
-    coreSwitchBoxU8 m_MirrorMode;
+    cGuiSwitchBox m_Monitor;
+    cGuiSwitchBox m_Resolution;
+    cGuiSwitchBox m_DisplayMode;
+    cGuiSwitchBox m_AntiAliasing;
+    cGuiSwitchBox m_TextureFilter;
+    cGuiSwitchBox m_RenderQuality;
+    cGuiSwitchBox m_ShadowQuality;
+    cGuiSwitchBox m_GlobalVolume;
+    cGuiSwitchBox m_MusicVolume;
+    cGuiSwitchBox m_EffectVolume;
+    cGuiSwitchBox m_AmbientVolume;
+    cGuiSwitchBox m_Language;
+    cGuiSwitchBox m_TextSize;
+    cGuiSwitchBox m_GameRotation;
+    cGuiSwitchBox m_GameScale;
+    cGuiSwitchBox m_GameSpeed;
+    cGuiSwitchBox m_HudRotation;
+    cGuiSwitchBox m_HudScale;
+    cGuiSwitchBox m_HudType;
+    cGuiSwitchBox m_UpdateFreq;
+    cGuiSwitchBox m_Version;
+    cGuiSwitchBox m_MirrorMode;
 
     sPlayerInput m_aInput[MENU_CONFIG_INPUTS];
-    coreButton   m_SwapInput;
+    cGuiButton   m_SwapInput;
 
     coreUintW                          m_iCurMonitorIndex;
     coreLookup<coreUintW, std::string> m_asCurResolution;
@@ -541,7 +541,7 @@ private:
     void __LoadInputs();
 
     // 
-    inline coreButton& __RetrieveInputButton  (const coreUintW iPlayerIndex, const coreUintW iKeyIndex) {ASSERT((iPlayerIndex < MENU_CONFIG_INPUTS) && (iKeyIndex < INPUT_KEYS)) return *((&m_aInput[iPlayerIndex].oMoveUp)                                         + iKeyIndex);}
+    inline cGuiButton& __RetrieveInputButton  (const coreUintW iPlayerIndex, const coreUintW iKeyIndex) {ASSERT((iPlayerIndex < MENU_CONFIG_INPUTS) && (iKeyIndex < INPUT_KEYS)) return *((&m_aInput[iPlayerIndex].oMoveUp)                                         + iKeyIndex);}
     inline coreInt16&  __RetrieveInputCurValue(const coreUintW iPlayerIndex, const coreUintW iKeyIndex) {ASSERT((iPlayerIndex < INPUT_TYPES)        && (iKeyIndex < INPUT_KEYS)) return *((&g_CurConfig.Input.aSet[g_CurConfig.Input.aiType[iPlayerIndex]].iMoveUp) + iKeyIndex);}
     inline coreInt16&  __RetrieveInputDirValue(const coreUintW iType,        const coreUintW iKeyIndex) {ASSERT((iType        < INPUT_SETS)         && (iKeyIndex < INPUT_KEYS)) return *((&g_CurConfig.Input.aSet[iType].iMoveUp)                                  + iKeyIndex);}
 
@@ -555,9 +555,9 @@ private:
 class cPauseMenu final : public coreMenu
 {
 private:
-    coreButton m_ResumeButton;   // resume button
-    coreButton m_ConfigButton;   // config button
-    coreButton m_ExitButton;     // exit button
+    cGuiButton m_ResumeButton;   // resume button
+    cGuiButton m_ConfigButton;   // config button
+    cGuiButton m_ExitButton;     // exit button
 
 
 public:
@@ -586,23 +586,23 @@ private:
 
 
 private:
-    coreObject2D m_BackgroundMain;                                  // 
-    coreObject2D m_BackgroundCoop;                                  // 
+    cGuiObject m_BackgroundMain;                                    // 
+    cGuiObject m_BackgroundCoop;                                    // 
 
-    coreLabel m_Title;                                              // 
+    cGuiLabel m_Title;                                              // 
 
-    coreLabel m_aHeader[2];                                         // 
+    cGuiLabel m_aHeader[2];                                         // 
 
-    coreObject2D m_MedalMission;                                    // 
-    coreObject2D m_aMedalSegment[MENU_SUMMARY_MEDALS];              // 
+    cGuiObject m_MedalMission;                                      // 
+    cGuiObject m_aMedalSegment[MENU_SUMMARY_MEDALS];                // 
 
-    coreLabel m_aName [MENU_SUMMARY_ENTRIES];                       // 
-    coreLabel m_aValue[MENU_SUMMARY_ENTRIES];                       // 
-    coreLabel m_aaPart[MENU_SUMMARY_ENTRIES][MENU_SUMMARY_PARTS];   // 
+    cGuiLabel m_aName [MENU_SUMMARY_ENTRIES];                       // 
+    cGuiLabel m_aValue[MENU_SUMMARY_ENTRIES];                       // 
+    cGuiLabel m_aaPart[MENU_SUMMARY_ENTRIES][MENU_SUMMARY_PARTS];   // 
 
-    coreLabel m_TotalName;                                          // 
-    coreLabel m_TotalValue;                                         // 
-    coreLabel m_aTotalPart[MENU_SUMMARY_PARTS];                     // 
+    cGuiLabel m_TotalName;                                          // 
+    cGuiLabel m_TotalValue;                                         // 
+    cGuiLabel m_aTotalPart[MENU_SUMMARY_PARTS];                     // 
 
     coreUint32 m_iFinalValue;                                       // (just for display) 
     coreUint32 m_aiFinalPart [MENU_SUMMARY_PARTS];                  // (just for display) 
@@ -655,20 +655,20 @@ private:
 
 
 private:
-    coreObject2D m_Background;                             // 
+    cGuiObject m_Background;                             // 
 
-    coreLabel    m_GameOverText;                           // 
-    coreLabel    m_ContinueText;                           // 
-    coreLabel    m_ContinueTimer;                          // 
-    coreObject2D m_ContinueImage[MENU_DEFEAT_CONTINUES];   // 
+    cGuiLabel  m_GameOverText;                           // 
+    cGuiLabel  m_ContinueText;                           // 
+    cGuiLabel  m_ContinueTimer;                          // 
+    cGuiObject m_ContinueImage[MENU_DEFEAT_CONTINUES];   // 
 
-    coreFlow m_fCountdown;                                 // 
-    coreFlow m_fBurst;                                     // 
+    coreFlow m_fCountdown;                               // 
+    coreFlow m_fBurst;                                   // 
 
-    coreFlow m_fIntroTimer;                                // 
-    coreFlow m_fOutroTimer;                                // 
+    coreFlow m_fIntroTimer;                              // 
+    coreFlow m_fOutroTimer;                              // 
 
-    eDefeatState m_eState;                                 // 
+    eDefeatState m_eState;                               // 
 
 
 public:
@@ -701,13 +701,13 @@ private:
 
 
 private:
-    coreObject2D m_Background;                   // 
+    cGuiObject m_Background;                     // 
 
-    coreLabel m_ThankYouText;                    // 
+    cGuiLabel m_ThankYouText;                    // 
 
-    coreLabel m_TotalName;                       // 
-    coreLabel m_TotalValue;                      // 
-    coreLabel m_aTotalPart[MENU_FINISH_PARTS];   // 
+    cGuiLabel m_TotalName;                       // 
+    cGuiLabel m_TotalValue;                      // 
+    cGuiLabel m_aTotalPart[MENU_FINISH_PARTS];   // 
 
     coreFlow m_fIntroTimer;                      // 
     coreFlow m_fOutroTimer;                      // 
@@ -784,8 +784,8 @@ private:
     cMsgBox  m_MsgBox;                   // message box overlay
     cTooltip m_Tooltip;                  // tooltip overlay
 
-    coreObject2D m_PauseLayer;           // 
-    coreUint32   m_iPauseFrame;          // 
+    cGuiObject m_PauseLayer;             // 
+    coreUint32 m_iPauseFrame;            // 
 
     coreFrameBuffer m_aFrameBuffer[3];   // 
     coreObject2D    m_MixObject;         // 
@@ -828,10 +828,10 @@ public:
     static const coreLookup<std::string, std::string>& GetLanguageList();
 
     // menu helper routines
-    static void UpdateButton        (coreButton*      OUTPUT pButton, const coreBool bFocused, const coreVector3& vFocusColor = COLOR_MENU_WHITE);
-    static void UpdateSwitchBox     (coreSwitchBoxU8* OUTPUT pSwitchBox);
-    static void UpdateAnimateProgram(coreObject2D*    OUTPUT pObject);
-    static void ApplyMedalTexture   (coreObject2D*    OUTPUT pObject, const coreUint8 iMedal, const coreUint8 iMedalType);
+    static void UpdateButton        (cGuiButton*    OUTPUT pButton, const coreBool bFocused, const coreVector3& vFocusColor = COLOR_MENU_WHITE);
+    static void UpdateSwitchBox     (cGuiSwitchBox* OUTPUT pSwitchBox);
+    static void UpdateAnimateProgram(cGuiObject*    OUTPUT pObject);
+    static void ApplyMedalTexture   (cGuiObject*    OUTPUT pObject, const coreUint8 iMedal, const coreUint8 iMedalType);
 
 
 private:

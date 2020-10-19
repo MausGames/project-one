@@ -32,13 +32,13 @@
 
 // ****************************************************************
 // message box class
-class cMsgBox final : public coreObject2D
+class cMsgBox final : public cGuiObject
 {
 private:
-    coreObject2D m_Box;                                      // 
-    coreLabel    m_Msg;                                      // 
-    coreButton   m_Yes;                                      // 
-    coreButton   m_No;                                       // 
+    cGuiObject m_Box;                                        // 
+    cGuiLabel  m_Msg;                                        // 
+    cGuiButton m_Yes;                                        // 
+    cGuiButton m_No;                                         // 
 
     std::function<void(coreInt32, coreInt32)> m_nCallback;   // 
     coreVector2 m_vCurMouse;                                 // 

@@ -133,7 +133,7 @@ void cInterface::Render()
 {
     // 
     const coreMatrix4 mOldOrtho = Core::Graphics->GetOrtho();
-    if(g_pPostProcessing->GetSize().x < 0.0f) c_cast<coreMatrix4&>(Core::Graphics->GetOrtho()) = coreMatrix4::Scaling(coreVector3(-1.0f,1.0f,1.0f)) * mOldOrtho;
+    if(g_pPostProcessing->GetSize().x < 0.0f) c_cast<coreMatrix4&>(Core::Graphics->GetOrtho()) = coreMatrix4::Scaling(IsHorizontal(g_vHudDirection) ? coreVector3(1.0f,-1.0f,1.0f) : coreVector3(-1.0f,1.0f,1.0f)) * mOldOrtho;
 
     if(m_fAlphaAll)
     {
@@ -460,8 +460,8 @@ void cInterface::ShowMission(const coreChar* pcMain, const coreChar* pcSub)
         m_aBannerText[0].SetDirection(m_BannerBar.GetDirection());
         m_aBannerText[1].SetDirection(m_BannerBar.GetDirection());
 
-        m_BannerBar     .SetCenter(coreVector2(0.3f,0.0f)  * g_vMenuCenter);
-        m_aBannerText[0].SetCenter(coreVector2(0.3f,0.02f) * g_vMenuCenter);
+        m_BannerBar     .SetCenter(coreVector2(0.3f,0.0f));
+        m_aBannerText[0].SetCenter(coreVector2(0.3f,0.02f));
         m_aBannerText[1].SetCenter(m_aBannerText[0].GetCenter());
         m_aBannerText[2].SetCenter(m_aBannerText[0].GetCenter());
         m_aBannerText[3].SetCenter(m_aBannerText[0].GetCenter());
@@ -512,7 +512,7 @@ void cInterface::ShowBoss(const coreChar* pcMain, const coreChar* pcSub)
         m_aBannerText[0].SetDirection(m_BannerBar.GetDirection());
         m_aBannerText[1].SetDirection(m_BannerBar.GetDirection());
 
-        m_BannerBar     .SetCenter(coreVector2(0.0f,0.1f) * g_vMenuCenter);
+        m_BannerBar     .SetCenter(coreVector2(0.0f,0.1f));
         m_aBannerText[0].SetCenter(m_BannerBar.GetCenter());
         m_aBannerText[1].SetCenter(m_BannerBar.GetCenter());
         m_aBannerText[2].SetCenter(m_BannerBar.GetCenter());
@@ -572,7 +572,7 @@ void cInterface::ShowScore(const coreChar* pcMain, const coreChar* pcSub, const 
         m_aBannerText[0].SetDirection(m_BannerBar.GetDirection());
         m_aBannerText[1].SetDirection(m_BannerBar.GetDirection());
 
-        m_BannerBar     .SetCenter(coreVector2(0.0f,0.1f) * g_vMenuCenter);
+        m_BannerBar     .SetCenter(coreVector2(0.0f,0.1f));
         m_aBannerText[0].SetCenter(m_BannerBar.GetCenter());
         m_aBannerText[1].SetCenter(m_BannerBar.GetCenter());
         m_aBannerText[2].SetCenter(m_BannerBar.GetCenter());
@@ -639,9 +639,17 @@ coreBool cInterface::IsStoryActive()const
 void cInterface::UpdateLayout()
 {
     // 
-    const coreVector2 vModifier = 0.5f * (g_CurConfig.Game.iHudType ? g_vMenuCenter : coreVector2(1.0f,1.0f));
-    const coreVector2 vTop      = coreVector2(0.0f, 1.0f) * vModifier;
-    const coreVector2 vBottom   = coreVector2(0.0f,-1.0f) * vModifier;
+    const coreObject2DStyle eStyle  = CORE_OBJECT2D_STYLE_VIEWDIR | (g_CurConfig.Game.iHudType ? CORE_OBJECT2D_STYLE_ALTCENTER : CORE_OBJECT2D_STYLE_NOTHING);
+    const coreVector2       vTop    = coreVector2(0.0f, 0.5f);
+    const coreVector2       vBottom = coreVector2(0.0f,-0.5f);
+
+    // 
+    const auto nUpdateFunc = [&](coreObject2D* OUTPUT pObject, const coreVector2 vCenter)
+    {
+        pObject->SetCenter(vCenter);
+        pObject->SetStyle (eStyle);
+        pObject->Move();
+    };
 
     // loop through all player views
     for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i)
@@ -649,48 +657,28 @@ void cInterface::UpdateLayout()
         sPlayerView& oView = m_aView[i];
 
         // 
-        const coreVector2 vSide = coreVector2(i ? 1.0f : -1.0f, 0.0f) * vModifier;
+        const coreVector2 vSide = coreVector2(i ? 0.5f : -0.5f, 0.0f);
 
         // 
-        for(coreUintW j = 0u; j < INTERFACE_LIVES; ++j) oView.aLife[j].SetCenter(vBottom + vSide);
-        oView.aShieldBar[0].SetCenter(vBottom + vSide);
-        oView.aShieldBar[1].SetCenter(vBottom + vSide);
-        oView.oShieldValue .SetCenter(vBottom + vSide);
-        oView.oScoreTotal  .SetCenter(vTop    + vSide);
-        oView.oScoreMission.SetCenter(vTop    + vSide);
-
-        // 
-        for(coreUintW j = 0u; j < INTERFACE_LIVES; ++j) oView.aLife[j].Move();
-        oView.aShieldBar[0].Move();
-        oView.aShieldBar[1].Move();
-        oView.oShieldValue .Move();
-        oView.oScoreTotal  .Move();
-        oView.oScoreMission.Move();
+        for(coreUintW j = 0u; j < INTERFACE_LIVES; ++j) nUpdateFunc(&oView.aLife[j], vBottom + vSide);
+        nUpdateFunc(&oView.aShieldBar[0], vBottom + vSide);
+        nUpdateFunc(&oView.aShieldBar[1], vBottom + vSide);
+        nUpdateFunc(&oView.oShieldValue,  vBottom + vSide);
+        nUpdateFunc(&oView.oScoreTotal,   vTop    + vSide);
+        nUpdateFunc(&oView.oScoreMission, vTop    + vSide);
     }
 
     // 
-    m_aBossHealthBar[0].SetCenter(vTop);
-    m_aBossHealthBar[1].SetCenter(vTop);
-    m_BossHealthValue  .SetCenter(vTop);
-    m_aBossTime[0]     .SetCenter(vTop);
-    m_aBossTime[1]     .SetCenter(vTop);
+    nUpdateFunc(&m_aBossHealthBar[0], vTop);
+    nUpdateFunc(&m_aBossHealthBar[1], vTop);
+    nUpdateFunc(&m_BossHealthValue,   vTop);
+    nUpdateFunc(&m_aBossTime[0],      vTop);
+    nUpdateFunc(&m_aBossTime[1],      vTop);
 
     // 
-    m_aBossHealthBar[0].Move();
-    m_aBossHealthBar[1].Move();
-    m_BossHealthValue  .Move();
-    m_aBossTime[0]     .Move();
-    m_aBossTime[1]     .Move();
-
-    // 
-    m_WaveName    .SetCenter(vTop);
-    m_aWaveTime[0].SetCenter(vTop);
-    m_aWaveTime[1].SetCenter(vTop);
-
-    // 
-    m_WaveName    .Move();
-    m_aWaveTime[0].Move();
-    m_aWaveTime[1].Move();
+    nUpdateFunc(&m_WaveName,     vTop);
+    nUpdateFunc(&m_aWaveTime[0], vTop);
+    nUpdateFunc(&m_aWaveTime[1], vTop);
 }
 
 
