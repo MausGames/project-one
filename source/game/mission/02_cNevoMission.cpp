@@ -12,18 +12,21 @@
 // ****************************************************************
 // constructor
 cNevoMission::cNevoMission()noexcept
-: m_Bomb        (NEVO_BOMBS)
-, m_abBombGone  {}
-, m_Blast       (NEVO_BLASTS)
-, m_BlastLine   (NEVO_BLASTS * NEVO_LINES)
-, m_afBlastTime {}
-, m_Tile        (NEVO_TILES)
-, m_afTileTime  {}
-, m_vForce      (coreVector2(0.0f,0.0f))
-, m_vImpact     (coreVector2(0.0f,0.0f))
-, m_bClamp      (false)
-, m_bOverdraw   (false)
-, m_fAnimation  (0.0f)
+: m_Bomb         (NEVO_BOMBS)
+, m_abBombGone   {}
+, m_Blast        (NEVO_BLASTS)
+, m_BlastLine    (NEVO_BLASTS * NEVO_LINES)
+, m_afBlastTime  {}
+, m_Tile         (NEVO_TILES)
+, m_afTileTime   {}
+, m_Arrow        (NEVO_ARROWS)
+, m_apArrowOwner {}
+, m_aiArrowDir   {}
+, m_vForce       (coreVector2(0.0f,0.0f))
+, m_vImpact      (coreVector2(0.0f,0.0f))
+, m_bClamp       (false)
+, m_bOverdraw    (false)
+, m_fAnimation   (0.0f)
 {
     // 
     m_apBoss[0] = &m_Nautilus;
@@ -99,6 +102,28 @@ cNevoMission::cNevoMission()noexcept
     }
 
     // 
+    m_Arrow.DefineProgram("effect_energy_flat_invert_inst_program");
+    {
+        for(coreUintW i = 0u; i < NEVO_ARROWS_RAWS; ++i)
+        {
+            // load object resources
+            coreObject3D* pArrow = &m_aArrowRaw[i];
+            pArrow->DefineModel  ("bullet_cone.md3");
+            pArrow->DefineTexture(0u, "effect_energy.png");
+            pArrow->DefineProgram("effect_energy_flat_invert_program");
+
+            // set object properties
+            pArrow->SetSize   (coreVector3(1.35f,1.55f,1.35f) * 1.3f);
+            pArrow->SetColor3 (COLOR_ENERGY_GREEN * 0.6f);
+            pArrow->SetTexSize(coreVector2(0.5f,0.2f) * 1.3f);
+            pArrow->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
+            // add object to the list
+            m_Arrow.BindObject(pArrow);
+        }
+    }
+
+    // 
     m_Container.DefineModelHigh("object_container_high.md3");
     m_Container.DefineModelLow ("object_container_low.md3");
     m_Container.DefineTexture  (0u, "ship_enemy.png");
@@ -111,6 +136,7 @@ cNevoMission::cNevoMission()noexcept
     cShadow::GetGlobalContainer()->BindList(&m_Bomb);
     g_pGlow->BindList(&m_Blast);
     g_pGlow->BindList(&m_BlastLine);
+    g_pGlow->BindList(&m_Arrow);
 }
 
 
@@ -122,11 +148,13 @@ cNevoMission::~cNevoMission()
     cShadow::GetGlobalContainer()->UnbindList(&m_Bomb);
     g_pGlow->UnbindList(&m_Blast);
     g_pGlow->UnbindList(&m_BlastLine);
+    g_pGlow->UnbindList(&m_Arrow);
 
     // 
     for(coreUintW i = 0u; i < NEVO_BOMBS;  ++i) this->DisableBomb (i, false);
     for(coreUintW i = 0u; i < NEVO_BLASTS; ++i) this->DisableBlast(i, false);
     for(coreUintW i = 0u; i < NEVO_TILES;  ++i) this->DisableTile (i, false);
+    for(coreUintW i = 0u; i < NEVO_ARROWS; ++i) this->DisableArrow(i, false);
     this->DisableContainer(false);
 }
 
@@ -263,6 +291,45 @@ void cNevoMission::DisableTile(const coreUintW iIndex, const coreBool bAnimated)
 
 // ****************************************************************
 // 
+void cNevoMission::EnableArrow(const coreUintW iIndex, const cShip* pOwner, const coreVector2& vDirection)
+{
+    ASSERT(iIndex < NEVO_ARROWS)
+    coreObject3D& oArrow = m_aArrowRaw[iIndex];
+
+    // 
+    WARN_IF(oArrow.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    ASSERT(pOwner)
+    m_apArrowOwner[iIndex] = pOwner;
+    m_aiArrowDir  [iIndex] = PackDirection(vDirection);
+
+    // 
+    oArrow.SetAlpha  (0.0f);
+    oArrow.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+}
+
+
+// ****************************************************************
+// 
+void cNevoMission::DisableArrow(const coreUintW iIndex, const coreBool bAnimated)
+{
+    ASSERT(iIndex < NEVO_ARROWS)
+    coreObject3D& oArrow = m_aArrowRaw[iIndex];
+
+    // 
+    if(!oArrow.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    m_apArrowOwner[iIndex] = NULL;
+
+    // 
+    if(!bAnimated) oArrow.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+}
+
+
+// ****************************************************************
+// 
 void cNevoMission::EnableContainer(const coreVector2& vPosition)
 {
     // 
@@ -332,6 +399,10 @@ void cNevoMission::__RenderOwnOver()
 
     // 
     g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyList(&m_Bomb);
+
+    // 
+    m_Arrow.Render();
+    g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_DIRECT)->ApplyList(&m_Arrow);
 
     // 
     if(m_bOverdraw) DEPTH_PUSH
@@ -449,6 +520,36 @@ void cNevoMission::__MoveOwnAfter()
 
     // 
     m_Tile.MoveNormal();
+
+    // 
+    for(coreUintW i = 0u; i < NEVO_ARROWS; ++i)
+    {
+        coreObject3D& oArrow = m_aArrowRaw[i];
+        if(!oArrow.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+        // 
+        const cShip* pOwner = m_apArrowOwner[i];
+        if(pOwner)
+        {
+            const coreVector2 vDir = UnpackDirection(m_aiArrowDir[i]);
+
+            oArrow.SetPosition (coreVector3(pOwner->GetPosition().xy() + vDir * 3.5f, 0.0f));
+            oArrow.SetDirection(coreVector3(-vDir, 0.0f));
+        }
+
+        // 
+        if(pOwner) oArrow.SetAlpha(MIN(oArrow.GetAlpha() + 5.0f*Core::System->GetTime(), 1.0f));
+              else oArrow.SetAlpha(MAX(oArrow.GetAlpha() - 5.0f*Core::System->GetTime(), 0.0f));
+
+        // 
+        if(!oArrow.GetAlpha()) this->DisableArrow(i, false);
+
+        // 
+        oArrow.SetTexOffset(coreVector2(m_fAnimation * 0.6f, 0.0f));
+    }
+
+    // 
+    m_Arrow.MoveNormal();
 
     if(m_Container.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
     {

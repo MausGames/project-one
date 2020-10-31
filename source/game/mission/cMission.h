@@ -58,6 +58,8 @@
 #define NEVO_BLASTS_RAWS            (NEVO_BLASTS * (NEVO_LINES + 1u))                 // 
 #define NEVO_TILES                  (16u)                                             // 
 #define NEVO_TILES_RAWS             (NEVO_TILES)                                      // 
+#define NEVO_ARROWS                 (21u)                                             // 
+#define NEVO_ARROWS_RAWS            (NEVO_ARROWS)                                     // 
 #define NEVO_BOMB_SIZE              (4.0f)                                            // 
 
 #define RUTILUS_TELEPORTER          (2u)                                              // 
@@ -390,30 +392,35 @@ private:
 class cNevoMission final : public cMission
 {
 private:
-    cNautilusBoss  m_Nautilus;                       // 
-    cAmemasuBoss   m_Amemasu;                        // 
-    cLeviathanBoss m_Leviathan;                      // 
+    cNautilusBoss  m_Nautilus;                        // 
+    cAmemasuBoss   m_Amemasu;                         // 
+    cLeviathanBoss m_Leviathan;                       // 
 
-    coreBatchList m_Bomb;                            // 
-    cLodObject    m_aBombRaw  [NEVO_BOMBS_RAWS];     // 
-    coreBool      m_abBombGone[NEVO_BOMBS];          // 
+    coreBatchList m_Bomb;                             // 
+    cLodObject    m_aBombRaw  [NEVO_BOMBS_RAWS];      // 
+    coreBool      m_abBombGone[NEVO_BOMBS];           // 
 
-    coreBatchList m_Blast;                           // 
-    coreBatchList m_BlastLine;                       // 
-    coreObject3D  m_aBlastRaw  [NEVO_BLASTS_RAWS];   // 
-    coreFlow      m_afBlastTime[NEVO_BLASTS];        // 
+    coreBatchList m_Blast;                            // 
+    coreBatchList m_BlastLine;                        // 
+    coreObject3D  m_aBlastRaw  [NEVO_BLASTS_RAWS];    // 
+    coreFlow      m_afBlastTime[NEVO_BLASTS];         // 
 
-    coreBatchList m_Tile;                            // 
-    coreObject3D  m_aTileRaw  [NEVO_TILES_RAWS];     // 
-    coreFlow      m_afTileTime[NEVO_TILES];          // 
+    coreBatchList m_Tile;                             // 
+    coreObject3D  m_aTileRaw  [NEVO_TILES_RAWS];      // 
+    coreFlow      m_afTileTime[NEVO_TILES];           // 
 
-    cLodObject  m_Container;      // 
-    coreVector2 m_vForce;                            // 
-    coreVector2 m_vImpact;                           // 
-    coreBool    m_bClamp;                            // 
-    coreBool    m_bOverdraw;                         // 
+    coreBatchList m_Arrow;                            // 
+    coreObject3D  m_aArrowRaw   [NEVO_ARROWS_RAWS];   // 
+    const cShip*  m_apArrowOwner[NEVO_ARROWS];        // 
+    coreUint8     m_aiArrowDir  [NEVO_ARROWS];        // 
 
-    coreFlow m_fAnimation;                           // animation value
+    cLodObject  m_Container;                          // 
+    coreVector2 m_vForce;                             // 
+    coreVector2 m_vImpact;                            // 
+    coreBool    m_bClamp;                             // 
+    coreBool    m_bOverdraw;                          // 
+
+    coreFlow m_fAnimation;                            // animation value
 
 
 public:
@@ -434,6 +441,10 @@ public:
     // 
     void EnableTile (const coreUintW iIndex, const coreUintW iDimension);
     void DisableTile(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void EnableArrow (const coreUintW iIndex, const cShip* pOwner, const coreVector2& vDirection);
+    void DisableArrow(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
     void EnableContainer (const coreVector2& vPosition);
