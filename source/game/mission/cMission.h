@@ -19,8 +19,9 @@
 // TODO: wrap m_piData in function with RETURN_RESTRICT
 // TODO: set progress when finishing segment, not when starting, but consider mission-wrapping
 // TODO: low-resolution object_sphere for small sphere objects (what about bullet_orb) ?
-// TODO: change all missions to STATIC_MEMORY (check memory)
+// TODO: change all missions to STATIC_MEMORY (check memory, it would put all missions always in memory)
 // TODO: check if TYPE_NEVO_BOMB still needed
+// TODO: do not create objects and load resources of unused game-objects and bosses (e.g. move waves into own classes ? but then ?)
 
 
 // ****************************************************************

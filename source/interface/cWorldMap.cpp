@@ -223,7 +223,7 @@ void cWorldMap::EnablePin(const coreUintW iIndex, const coreBool bEnable, const 
 
     // 
     SET_BIT(m_iEnabled, iIndex, bEnable)
-    STATIC_ASSERT(WORLDMAP_PINS <= sizeof(m_iEnabled) * 8u)
+    STATIC_ASSERT(WORLDMAP_PINS <= sizeof(m_iEnabled)*8u)
 }
 
 

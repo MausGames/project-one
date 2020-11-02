@@ -636,7 +636,7 @@
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>$(SolutionDir)manifest.xml</AdditionalManifestFiles>
+      <AdditionalManifestFiles>manifest.xml</AdditionalManifestFiles>
     </Manifest>
     <ProjectReference>
       <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
@@ -666,7 +666,7 @@
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>$(SolutionDir)manifest.xml</AdditionalManifestFiles>
+      <AdditionalManifestFiles>manifest.xml</AdditionalManifestFiles>
     </Manifest>
     <ProjectReference>
       <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
@@ -711,7 +711,7 @@
       <Command>del $(IntDir)cMenu.obj</Command>
     </PreBuildEvent>
     <Manifest>
-      <AdditionalManifestFiles>$(SolutionDir)manifest.xml</AdditionalManifestFiles>
+      <AdditionalManifestFiles>manifest.xml</AdditionalManifestFiles>
     </Manifest>
     <ProjectReference>
       <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
@@ -755,7 +755,7 @@
       <Command>del $(IntDir)cMenu.obj</Command>
     </PreBuildEvent>
     <Manifest>
-      <AdditionalManifestFiles>$(SolutionDir)manifest.xml</AdditionalManifestFiles>
+      <AdditionalManifestFiles>manifest.xml</AdditionalManifestFiles>
     </Manifest>
     <ProjectReference>
       <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>

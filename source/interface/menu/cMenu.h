@@ -26,6 +26,9 @@
 // TODO: update texture filter and render quality in realtime
 // TODO: double initial languages by switching to two columns (on demand?)
 // TODO: stages in GameMenu should be called segments
+// TODO: upper white border in settings menu "moves" during transition on 1760x990, check all menus for moving during transition in common resolutions
+// TODO: every object in menu needs outline: weapon icons
+// TODO: custom resolution should be stored when switching monitors
 
 
 // ****************************************************************

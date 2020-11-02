@@ -162,6 +162,7 @@ void CoreApp::Render()
         Core::Debug->MeasureEnd("Foreground");
     }
 
+    glDisable(GL_CULL_FACE);   // for mirror mode
     glDisable(GL_DEPTH_TEST);
     {
         Core::Debug->MeasureStart("Post Processing");
@@ -180,6 +181,7 @@ void CoreApp::Render()
         }
         Core::Debug->MeasureEnd("Interface");
     }
+    glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
 }
 

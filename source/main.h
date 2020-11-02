@@ -74,6 +74,7 @@
 // TODO: check for merging varyings with component = # and layoutEx (or merge manually)
 // TODO: use only 6 (or 8) pixel texture with nearest filtering for enemies
 // TODO: indicator when controls are enabled again (blinking und peeping sound)
+// TODO: find (manual) interpolations and try to use smoothstep for it (engine, application and shader)
 
 
 // ****************************************************************
