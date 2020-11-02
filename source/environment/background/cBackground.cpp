@@ -488,13 +488,16 @@ FUNC_PURE coreBool cBackground::_CheckIntersection(const coreBatchList* pObjectL
 
 FUNC_PURE coreBool cBackground::_CheckIntersectionQuick(const coreBatchList* pObjectList, const coreVector2& vNewPos, const coreFloat fDistanceSq)
 {
-    auto it = pObjectList->List()->end();
-    auto et = pObjectList->List()->begin();
+    const coreSet<coreObject3D*>* pList = pObjectList->List();
 
     // compare only with last few objects
-    for(coreUintW i = 6u; i-- && (it != et); )
+    FOR_EACH_REV(it, *pList)
     {
-        const coreVector2 vDiff = (*(--it))->GetPosition().xy() - vNewPos;
+        const coreVector2 vDiff = (*it)->GetPosition().xy() - vNewPos;
+
+        // check for going too far
+        if(POW2(vDiff.y) > fDistanceSq)
+            return false;
 
         // check for quadratic distance
         if(vDiff.LengthSq() < fDistanceSq)
