@@ -614,6 +614,21 @@ coreUint32 cGame::CalcBonusMedal(const coreUint8 iMedal)
 
 // ****************************************************************
 // 
+coreUint32 cGame::CalcBonusBadge(const coreUint8 iBadge)
+{
+    // 
+    switch(iBadge)
+    {
+    default: ASSERT(false)
+    case BADGE_HARD:   return 3000u;
+    case BADGE_NORMAL: return 2000u;
+    case BADGE_EASY:   return 1000u;
+    }
+}
+
+
+// ****************************************************************
+// 
 coreUint32 cGame::CalcBonusSurvive(const coreUint32 iDamageTaken, const coreBool bWasDead)
 {
     // 

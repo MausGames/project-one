@@ -238,6 +238,14 @@ enum eMedal : coreUint8
     MEDAL_TYPE_MAX
 };
 
+// 
+enum eBadge : coreUint8
+{
+    BADGE_EASY = 1u,
+    BADGE_NORMAL,
+    BADGE_HARD
+};
+
 extern void InitResolution(const coreVector2& vResolution);   // init resolution properties (1:1)
 extern void InitDirection();                                  // 
 extern void InitFramerate();                                  // init frame rate properties (lock)

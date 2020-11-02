@@ -135,6 +135,9 @@ void cMission::SkipStage()
     m_pfMedalGoal = NULL;
 
     // 
+    m_bBadgeGiven = false;
+
+    // 
     m_nCollPlayerEnemy  = NULL;
     m_nCollPlayerBullet = NULL;
     m_nCollEnemyBullet  = NULL;
@@ -211,6 +214,28 @@ void cMission::DeactivateWave()
 
     // 
     g_pSave->EditGlobalStats()->iWavesDone += 1u;
+}
+
+
+// ****************************************************************
+// 
+void cMission::GiveBadge(const coreUint8 iBadge, const coreVector3& vPosition)
+{
+    if(m_bBadgeGiven) return;
+    m_bBadgeGiven = true;
+
+    // 
+    const coreUint32 iBonus = cGame::CalcBonusBadge(iBadge);
+
+    // 
+    g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    {
+        pPlayer->GetDataTable ()->GiveBadge();
+        pPlayer->GetScoreTable()->AddScore(iBonus, false);
+    });
+
+    // 
+    //g_pGame->GetCombatText()->AddBadge(iBonus, vPosition);   // TODO
 }
 
 

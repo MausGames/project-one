@@ -210,6 +210,7 @@ public:
     static coreUint8  CalcMedal       (const coreFloat fTime, const coreUint32 iDamageTaken, const coreFloat* pfMedalGoal);
     static coreUint32 CalcBonusTime   (const coreFloat fTime);
     static coreUint32 CalcBonusMedal  (const coreUint8 iMedal);
+    static coreUint32 CalcBonusBadge  (const coreUint8 iBadge);
     static coreUint32 CalcBonusSurvive(const coreUint32 iDamageTaken, const coreBool bWasDead);
 
 
