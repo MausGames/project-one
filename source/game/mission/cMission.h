@@ -69,7 +69,7 @@
 // ****************************************************************
 // stage management macros
 #define STAGE_MAIN                             m_anStage.emplace(__LINE__, [this]()
-#define STAGE_SUB(i)                           ((m_iStageSub < (i)) && [&]() {m_iStageSub = (i); return true;}())
+#define STAGE_SUB(i)                           ((m_iStageSub < (i)) && [&]() {m_iStageSub = (i); m_fStageSubTime = 0.0f; m_fStageSubTimeBefore = 0.0f; return true;}())
 
 #define STAGE_FINISH_NOW                       {this->SkipStage();}
 #define STAGE_FINISH_AFTER(t)                  {if(m_fStageTime >= (t)) STAGE_FINISH_NOW}
@@ -138,6 +138,11 @@
 #define STAGE_TIME_BETWEEN(t,u)                (InBetween(m_fStageTime, (t), (u)))
 #define STAGE_BEGINNING                        (STAGE_TIME_POINT(0.0f))
 
+#define STAGE_SUBTIME_POINT(t)                 (InBetween((t), m_fStageSubTimeBefore, m_fStageSubTime))
+#define STAGE_SUBTIME_BEFORE(t)                (m_fStageSubTime <  (t))
+#define STAGE_SUBTIME_AFTER(t)                 (m_fStageSubTime >= (t))
+#define STAGE_SUBTIME_BETWEEN(t,u)             (InBetween(m_fStageSubTime, (t), (u)))
+
 #define STAGE_LIFETIME_POINT(t)                (InBetween((t), fLifeTimeBefore, fLifeTime) && [&]() {s_fLifeTimePoint = (t); return true;}())
 #define STAGE_LIFETIME_BEFORE(t)               (fLifeTime     <  (t) && fLifeTime     >= 0.0f)
 #define STAGE_LIFETIME_BEFORE_BASE(t)          (fLifeTimeBase <  (t) && fLifeTimeBase >= 0.0f)
@@ -200,6 +205,8 @@ protected:
     coreFlow   m_fStageTime;                                   // 
     coreFloat  m_fStageTimeBefore;                             // 
     coreUint8  m_iStageSub;                                    // 
+    coreFlow   m_fStageSubTime;                                // 
+    coreFloat  m_fStageSubTimeBefore;                          // 
 
     const coreFloat* m_pfMedalGoal;                            // 
 
@@ -208,6 +215,8 @@ protected:
     uCollPlayerEnemyType  m_nCollPlayerEnemy;                  // 
     uCollPlayerBulletType m_nCollPlayerBullet;                 // 
     uCollEnemyBulletType  m_nCollEnemyBullet;                  // 
+
+    coreBool m_bRepeat;                                        // 
 
     static coreUint16  s_iTick;                                // 
     static coreFloat   s_fLifeTimePoint;                       // 
