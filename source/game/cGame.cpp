@@ -148,14 +148,6 @@ void cGame::Render()
     {
         DEPTH_PUSH_DOUBLE
 
-        glDepthMask(false);
-        {
-            // 
-            for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
-                m_aPlayer[i].RenderBefore();
-        }
-        glDepthMask(true);
-
         // render low-priority bullet manager
         m_BulletManagerPlayer.Render();
 
@@ -166,6 +158,14 @@ void cGame::Render()
 
     __DEPTH_GROUP_SHIP   // # 2
     {
+        glDepthMask(false);
+        {
+            // 
+            for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+                m_aPlayer[i].RenderBefore();
+        }
+        glDepthMask(true);
+
         // apply deferred outline-layer
         g_pOutline->Apply();
     }
@@ -241,20 +241,16 @@ void cGame::Move()
 
         // move all enemies
         m_EnemyManager.Move();
+
+        // move the bullet managers
+        m_BulletManagerPlayer.Move();
+        m_BulletManagerEnemy .Move();
     }
     m_pCurMission->MoveAfter();
 
-    // move the bullet managers
-    m_BulletManagerPlayer.Move();
-    m_BulletManagerEnemy .Move();
-
     // 
     m_ChromaManager.Move();
-
-    // 
-    m_ItemManager.Move();
-
-    // 
+    m_ItemManager  .Move();
     m_ShieldManager.Move();
 
     // handle default object collisions
