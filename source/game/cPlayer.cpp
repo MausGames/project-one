@@ -62,11 +62,15 @@ cPlayer::cPlayer()noexcept
     this->ActivateDarkShading();
 
     // 
-    m_Dot.DefineModel  ("object_dot.md3");
-    m_Dot.DefineTexture(0u, "effect_energy.png");
-    m_Dot.DefineProgram("effect_energy_flat_invert_program");
-    m_Dot.SetSize      (coreVector3(1.0f,1.0f,1.0f) * PLAYER_COLLISION_MIN);
-    m_Dot.SetColor4    (coreVector4(COLOR_ENERGY_RED * 0.7f, 1.0f));
+    m_Dot.DefineModel("object_dot.md3");
+    m_Dot.SetSize    (coreVector3(1.0f,1.0f,1.0f) * PLAYER_COLLISION_MIN);
+
+    // 
+    m_Range.DefineModel  ("object_sphere.md3");
+    m_Range.DefineTexture(0u, "default_white.png");
+    m_Range.DefineProgram("effect_energy_flat_spheric_program");
+    m_Range.SetSize      (coreVector3(1.0f,1.0f,1.0f) * 0.55f);
+    m_Range.SetColor4    (coreVector4(COLOR_ENERGY_RED * 0.7f, 1.0f));
 
     // 
     m_Wind.DefineModel  ("object_sphere.md3");
@@ -185,22 +189,9 @@ void cPlayer::EquipSupport(const coreUintW iIndex, const coreInt32 iID)
     switch(iID)
     {
     default: ASSERT(false)
-    case 0u:                     break;
-    case 1u: this->GiveShield(); break;
+    case 0u:                        break;
+    case 1u: this->__EquipShield(); break;
     }
-}
-
-
-// ****************************************************************
-// 
-void cPlayer::GiveShield()
-{
-    ASSERT( CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
-    ASSERT(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED))
-
-    // 
-    ADD_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED)
-    this->SetMaxHealth(PLAYER_SHIELD);
 }
 
 
@@ -238,8 +229,8 @@ void cPlayer::RenderAfter()
         m_Wind  .Render();
 
         // 
-        //g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Dot);
-        //m_Dot .Render();
+        //g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Range);
+        //m_Range.Render();
     }
 }
 
@@ -253,6 +244,9 @@ void cPlayer::Move()
 
     if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
     {
+        coreVector2 vNewPos = this->GetPosition().xy();
+        coreVector3 vNewOri = coreVector3(0.0f,0.0f,1.0f);
+
         if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_TURN))
         {
             coreVector2 vNewDir = this->GetDirection().xy();
@@ -274,37 +268,10 @@ void cPlayer::Move()
                 if(m_fRollTime <= 0.0f) this->StartRolling(m_pInput->vMove);
         }
 
-        // 
-        if(m_fRollTime >= 1.0f) this->EndRolling();
-
-        // 
-        m_fRollTime.Update(this->IsRolling() ? PLAYER_ROLL_SPEED : -PLAYER_ROLL_COOLDOWN);
-        m_fRollTime = CLAMP(m_fRollTime, 0.0f, 1.0f);
-
         if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
         {
-            coreVector2 vNewPos = this->GetPosition().xy();
-
-            // 
-            if(this->IsRolling())
-            {
-                // roll the ship
-                const coreFloat fSpeed = 50.0f + LERPB(25.0f, 0.0f, m_fRollTime);
-                vNewPos += m_pInput->vMove * (Core::System->GetTime() * fSpeed * m_fSpeed);
-            }
-            else
-            {
-                // move the ship
-                const coreFloat fSpeed = CONTAINS_BIT(m_pInput->iActionHold, 0u) ? 20.0f : 50.0f;
-                vNewPos += m_pInput->vMove * (Core::System->GetTime() * fSpeed * m_fSpeed);
-            }
-
-            // apply external forces
-            if(!m_vForce.IsNull())
-            {
-                vNewPos  += m_vForce * Core::System->GetTime();
-                m_vForce *= FrictionFactor(8.0f);
-            }
+            // move the ship
+            vNewPos += (m_pInput->vMove * this->CalcMoveSpeed() + m_vForce) * Core::System->GetTime();
 
             // restrict movement to the foreground area
                  if(vNewPos.x < m_vArea.x) {vNewPos.x = m_vArea.x; m_vForce.x =  ABS(m_vForce.x);}
@@ -313,20 +280,33 @@ void cPlayer::Move()
             else if(vNewPos.y > m_vArea.w) {vNewPos.y = m_vArea.w; m_vForce.y = -ABS(m_vForce.y);}
 
             // 
-            const coreVector2 vDiff = vNewPos - this->GetPosition().xy();
-            coreVector3 vOri = coreVector3(CLAMP(vDiff.x, -0.6f, 0.6f), CLAMP(vDiff.y, -0.6f, 0.6f), 1.0f).Normalized();
+            const coreVector2 vDiff = (vNewPos - this->GetPosition().xy()) * RCP(Core::System->GetTime() * FRAMERATE_MIN + CORE_MATH_PRECISION);
+            vNewOri = coreVector3(CLAMP(vDiff.x, -0.6f, 0.6f), CLAMP(vDiff.y, -0.6f, 0.6f), 1.0f).NormalizedUnsafe();
+        }
 
+        // 
+        if(m_fRollTime >= 1.0f) this->EndRolling();
+
+        // 
+        m_fRollTime.Update(this->IsRolling() ? PLAYER_ROLL_SPEED : -PLAYER_ROLL_COOLDOWN);
+        m_fRollTime = CLAMP(m_fRollTime, 0.0f, 1.0f);
+
+        // 
+        m_vForce *= FrictionFactor(8.0f);
+
+        if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_ALL))
+        {
             // 
             if(this->IsRolling())
             {
                 const coreFloat fAngle = LERPB(0.0f, 4.0f*PI, m_fRollTime);
                 const coreFloat fSide  = -SIGN(coreVector2::Dot(-this->GetDirection().xy().Rotated90(), UnpackDirection(m_iRollDir)));
-                vOri *= coreMatrix4::RotationAxis(fAngle * fSide, this->GetDirection()).m123();
+                vNewOri *= coreMatrix4::RotationAxis(fAngle * fSide, this->GetDirection()).m123();
             }
 
             // set new position and orientation
             this->SetPosition   (coreVector3(vNewPos, 0.0f));
-            this->SetOrientation(vOri);
+            this->SetOrientation(vNewOri);
         }
 
         // normalize collision size
@@ -335,6 +315,10 @@ void cPlayer::Move()
             const coreFloat fRadius = MAX(this->GetMove().Length(), PLAYER_COLLISION_MIN);
             this->SetCollisionModifier((coreVector3(1.0f,1.0f,1.0f) * fRadius) / this->GetModel()->GetBoundingRange());
         }
+
+        // 
+        m_fAnimation.UpdateMod(1.0f, 20.0f);
+        this->SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.25f));
 
         // move the 3d-object
         this->coreObject3D::Move();
@@ -347,12 +331,12 @@ void cPlayer::Move()
         }
 
         // 
-        m_fAnimation.UpdateMod(1.0f, 20.0f);
-        this->SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.25f));
-
-        // 
         m_Dot.SetPosition(this->GetPosition());
         m_Dot.Move();
+
+        // 
+        m_Range.SetPosition(this->GetPosition());
+        m_Range.Move();
 
         if(m_Wind.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
         {
@@ -401,7 +385,7 @@ void cPlayer::Move()
             // 
             m_Shield.SetPosition   (this->GetPosition());
             m_Shield.SetOrientation(coreVector3(vDir.x, 0.0f, vDir.y));
-            m_Shield.SetTexOffset  (coreVector2(fBounce + fExplosion, 1.0f));
+            m_Shield.SetTexOffset  (coreVector2(fBounce + fExplosion, 0.0f));
             m_Shield.SetAlpha      (MIN(POW2(m_fIgnoreTime) * 1.4f, 1.0f));
             m_Shield.Move();
         }
@@ -769,6 +753,49 @@ void cPlayer::UpdateExhaust(const coreFloat fStrength)
     m_Exhaust.SetDirection(this->GetDirection());
     m_Exhaust.SetEnabled  (fStrength ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
     m_Exhaust.Move();
+}
+
+
+// ****************************************************************
+// 
+coreVector2 cPlayer::CalcMove()const
+{
+    if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
+    {
+        // move the ship
+        coreVector2 vNewPos = this->GetPosition().xy() + (m_pInput->vMove * this->CalcMoveSpeed() + m_vForce) * Core::System->GetTime();
+
+        // restrict movement to the foreground area
+        vNewPos.x = CLAMP(vNewPos.x, m_vArea.x, m_vArea.z);
+        vNewPos.y = CLAMP(vNewPos.y, m_vArea.y, m_vArea.w);
+
+        return vNewPos - this->GetPosition().xy();
+    }
+
+    return coreVector2(0.0f,0.0f);
+}
+
+
+// ****************************************************************
+// 
+coreFloat cPlayer::CalcMoveSpeed()const
+{
+    // 
+    const coreFloat fModifier = this->IsRolling() ? (50.0f + LERPB(25.0f, 0.0f, m_fRollTime)) : (CONTAINS_BIT(m_pInput->iActionHold, 0u) ? 20.0f : 50.0f);
+    return m_fSpeed * fModifier;
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::__EquipShield()
+{
+    ASSERT( CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
+    ASSERT(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED))
+
+    // 
+    ADD_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED)
+    this->SetMaxHealth(PLAYER_SHIELD);
 }
 
 
