@@ -33,6 +33,8 @@ cMission::cMission()noexcept
 , m_fStageSubTimeBefore (0.0f)
 , m_pfMedalGoal         (NULL)
 , m_bBadgeGiven         (false)
+, m_iTakeFrom           (0u)
+, m_iTakeTo             (TAKE_MISSION)
 , m_bRepeat             (false)
 {
 }
@@ -58,8 +60,13 @@ cMission::~cMission()
 
 // ****************************************************************
 // setup the mission
-void cMission::Setup()
+void cMission::Setup(const coreUint8 iTakeFrom, const coreUint8 iTakeTo)
 {
+    // 
+    ASSERT(iTakeFrom <= iTakeTo)
+    m_iTakeFrom = iTakeFrom;
+    m_iTakeTo   = iTakeTo;
+
     // 
     ASSERT(m_anStage.empty())
     m_anStage.clear();

@@ -154,8 +154,8 @@ public:
     void MoveOverlay();
 
     // control active mission
-    void LoadMissionID   (const coreInt32 iID);
-    void LoadMissionIndex(const coreUintW iIndex);
+    void LoadMissionID   (const coreInt32 iID,    const coreUint8 iTakeFrom = 0u, const coreUint8 iTakeTo = TAKE_MISSION);
+    void LoadMissionIndex(const coreUintW iIndex, const coreUint8 iTakeFrom = 0u, const coreUint8 iTakeTo = TAKE_MISSION);
     void LoadNextMission();
     void RestartMission();
 

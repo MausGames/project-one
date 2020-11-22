@@ -283,7 +283,7 @@ void cGame::MoveOverlay()
 
 // ****************************************************************
 // load new active mission
-void cGame::LoadMissionID(const coreInt32 iID)
+void cGame::LoadMissionID(const coreInt32 iID, const coreUint8 iTakeFrom, const coreUint8 iTakeTo)
 {
     if(m_pCurMission) if(m_pCurMission->GetID() == iID) return;
 
@@ -346,7 +346,7 @@ void cGame::LoadMissionID(const coreInt32 iID)
     if(iID != cNoMission::ID)
     {
         // setup the mission
-        m_pCurMission->Setup();
+        m_pCurMission->Setup(iTakeFrom, iTakeTo);
 
         // set initial status
         m_iStatus = GAME_STATUS_LOADING;
@@ -361,10 +361,10 @@ void cGame::LoadMissionID(const coreInt32 iID)
 
 // ****************************************************************
 // 
-void cGame::LoadMissionIndex(const coreUintW iIndex)
+void cGame::LoadMissionIndex(const coreUintW iIndex, const coreUint8 iTakeFrom, const coreUint8 iTakeTo)
 {
     ASSERT(iIndex < m_iNumMissions)
-    this->LoadMissionID(m_piMissionList[iIndex]);
+    this->LoadMissionID(m_piMissionList[iIndex], iTakeFrom, iTakeTo);
 }
 
 
