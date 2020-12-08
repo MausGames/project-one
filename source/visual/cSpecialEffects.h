@@ -130,9 +130,9 @@ public:
     void      CreateLightning(coreObject3D*      pOwner,   const coreVector2& vDirection, const coreFloat fLength, const coreFloat fWidth, const coreVector3& vColor, const coreVector2& vTexSizeFactor, const coreFloat fTexOffset);
 
     // 
-    void CreateBlastSphere  (const coreVector3& vPosition,                                const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor);
-    void CreateBlastQuad    (const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor);
-    void CreateBlastTriangle(const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor);
+    void CreateBlastSphere(const coreVector3& vPosition,                                const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor);
+    void CreateBlastCube  (const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor);
+    void CreateBlastTetra (const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor);
 
     // 
     void PlaySound(const coreVector3& vPosition, const coreFloat fVolume, const eSoundEffect eSoundIndex);
