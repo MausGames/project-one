@@ -21,7 +21,7 @@ void FragmentMain()
          v3TexNormal = normalize(v3TexNormal * 2.0 - 1.0);
 
     // set distortion vector
-    vec2 v2Distortion = v3TexNormal.xy * 0.015;
+    vec2 v2Distortion = v3TexNormal.xy * 0.015 * DistortionStrength(v2ScreenCoord);
 
     // lookup refraction texture
     vec3 v3BelowRefraction = coreTexture2D(2, v2ScreenCoord + v2Distortion).rgb;

@@ -8,11 +8,8 @@
 ///////////////////////////////////////////////////////
 
 
-// constant values
-const float c_v1White = 0.8;   // white contrast value (to reduce eye strain)
-
 // shader input
-varying vec2 v_v2Move;         // 
+varying vec2 v_v2Move;   // 
 
 
 void FragmentMain()
