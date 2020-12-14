@@ -18,7 +18,7 @@ cGameMenu::cGameMenu()noexcept
     m_DirectoryBackground.DefineTexture(0u, "menu_background_black.png");
     m_DirectoryBackground.DefineProgram("menu_border_program");
     m_DirectoryBackground.SetPosition  (coreVector2(0.0f,0.0f));
-    m_DirectoryBackground.SetSize      (coreVector2(0.8f,0.55f));
+    m_DirectoryBackground.SetSize      (coreVector2(0.8f,0.7f));
 
     m_ArmoryBackground.DefineTexture(0u, "menu_background_black.png");
     m_ArmoryBackground.DefineProgram("menu_border_program");

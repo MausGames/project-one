@@ -269,9 +269,6 @@ private:
     void __ResurrectOwn()final;
     void __KillOwn     (const coreBool bAnimated)final;
     void __MoveOwn     ()final;
-
-    // 
-    void __UpdateBreakout();
 };
 
 

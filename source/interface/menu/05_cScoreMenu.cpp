@@ -18,7 +18,7 @@ cScoreMenu::cScoreMenu()noexcept
     m_Background.DefineTexture(0u, "menu_background_black.png");
     m_Background.DefineProgram("menu_border_program");
     m_Background.SetPosition  (coreVector2(0.0f,0.0f));
-    m_Background.SetSize      (coreVector2(0.8f,0.55f));
+    m_Background.SetSize      (coreVector2(0.8f,0.7f));
 
     m_BackButton.Construct    (MENU_BUTTON, MENU_FONT_ICON_2, MENU_OUTLINE_SMALL);
     m_BackButton.DefineProgram("menu_border_program");

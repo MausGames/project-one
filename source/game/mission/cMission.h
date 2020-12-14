@@ -83,7 +83,7 @@
 #define STAGE_BOSS(e,...)                      {if(STAGE_BEGINNING) {STAGE_MEDAL_GOAL(__VA_ARGS__) (e).Resurrect();} if(CONTAINS_FLAG((e).GetStatus(), ENEMY_STATUS_DEAD)) STAGE_FINISH_NOW}
 #define STAGE_WAVE(n,...)                      {if(STAGE_BEGINNING) {STAGE_MEDAL_GOAL(__VA_ARGS__) this->ActivateWave(n);} if(STAGE_CLEARED) {this->DeactivateWave(); if(!g_pGame->GetInterface()->IsBannerActive()) STAGE_FINISH_NOW}}
 
-#define STAGE_START_HERE                       {m_anStage.clear(); STAGE_MAIN({TAKE_ALWAYS}) {if(STAGE_BEGINNING) g_pGame->StartIntro(); if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY)) STAGE_FINISH_NOW});}
+#define STAGE_START_HERE                       {m_anStage.clear(); STAGE_MAIN({TAKE_ALWAYS}) {if(STAGE_BEGINNING) g_pGame->StartIntro(); STAGE_FINISH_PLAY});}
 
 #define STAGE_CLEARED                          (std::all_of(m_apSquad.begin(), m_apSquad.end(), [](const cEnemySquad* pSquad) {return pSquad->IsFinished();}))
 #define STAGE_RESSURECT(s,f,t)                 {STAGE_FOREACH_ENEMY_ALL(s, pEnemy, i) {if((coreInt32(i) >= coreInt32(f)) && (coreInt32(i) <= coreInt32(t))) pEnemy->Resurrect();}); ASSERT((coreInt32(f) <= coreInt32(t)) && (coreInt32(t) < coreInt32((s)->GetNumEnemies())))}

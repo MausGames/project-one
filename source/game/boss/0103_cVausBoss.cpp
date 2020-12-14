@@ -150,10 +150,3 @@ void cVausBoss::__MoveOwn()
     }
 
 }
-
-
-// ****************************************************************
-// 
-void cVausBoss::__UpdateBreakout()
-{
-}

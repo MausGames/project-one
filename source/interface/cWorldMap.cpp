@@ -33,6 +33,7 @@ cWorldMap::cWorldMap()noexcept
         m_aPin[i].SetSize         (WORLDMAP_PIN_SIZE);
         m_aPin[i].SetTexSize      (coreVector2(0.5f,0.5f) / 1.55f);
         m_aPin[i].SetTexOffset    (coreVector2(0.5f,0.0f) + 0.5f * (coreVector2(0.5f,0.5f) - m_aPin[i].GetTexSize()));
+        m_aPin[i].SetFocusable    (true);
         m_aPin[i].SetFocusModifier(coreVector2(1.5f,1.5f));
 
         m_aPinDot[i].DefineTexture(0u, "menu_mission.png");
