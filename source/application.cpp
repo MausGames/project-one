@@ -105,6 +105,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("ship_helper_07.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_07.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("ship_helper_08.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_08.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("ship_helper_09.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_09.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_meteor.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_stone_01.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_player_def_high.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_def_high.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("ship_player_def_low.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_def_low.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("ship_player_atk_high.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_atk_high.md3", false);
@@ -313,11 +314,13 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("object_ship_glow.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", SHADER_GLOW);
     Core::Manager::Resource->Load<coreShader> ("object_ship_blink.frag",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", SHADER_BLINK);
     Core::Manager::Resource->Load<coreShader> ("object_ship_darkness.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", SHADER_DARKNESS);
+    Core::Manager::Resource->Load<coreShader> ("object_meteor_blink.frag",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_meteor.frag", SHADER_BLINK);
     Core::Manager::Resource->Load<coreShader> ("object_inst.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("object_wave_inst.vert",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert", CORE_SHADER_OPTION_INSTANCING SHADER_WAVE);
     Core::Manager::Resource->Load<coreShader> ("object_ground_inst.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ground.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("object_ship_glow_inst.frag",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", CORE_SHADER_OPTION_INSTANCING SHADER_GLOW);
     Core::Manager::Resource->Load<coreShader> ("object_ship_blink_inst.frag",            CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", CORE_SHADER_OPTION_INSTANCING SHADER_BLINK);
+    Core::Manager::Resource->Load<coreShader> ("object_meteor_blink_inst.frag",          CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_meteor.frag", CORE_SHADER_OPTION_INSTANCING SHADER_BLINK);
     Core::Manager::Resource->Load<coreShader> ("object_tile.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_tile.vert");
     Core::Manager::Resource->Load<coreShader> ("object_tile.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_tile.frag");
     Core::Manager::Resource->Load<coreShader> ("object_tile_inst.vert",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_tile.vert", CORE_SHADER_OPTION_INSTANCING);
@@ -893,6 +896,11 @@ void CoreApp::Setup()
         ->AttachShader("object_ship_darkness.frag")
         ->Finish();
 
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_meteor_blink_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("object.vert")
+        ->AttachShader("object_meteor_blink.frag")
+        ->Finish();
+
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ground_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("object_inst.vert")
         ->AttachShader("object_ground_inst.frag")
@@ -911,6 +919,12 @@ void CoreApp::Setup()
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ship_blink_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader ("object_inst.vert")
         ->AttachShader ("object_ship_blink_inst.frag")
+        ->BindAttribute("a_v1Blink", SHIP_SHADER_ATTRIBUTE_BLINK)
+        ->Finish();
+
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_meteor_blink_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader ("object_inst.vert")
+        ->AttachShader ("object_meteor_blink_inst.frag")
         ->BindAttribute("a_v1Blink", SHIP_SHADER_ATTRIBUTE_BLINK)
         ->Finish();
 

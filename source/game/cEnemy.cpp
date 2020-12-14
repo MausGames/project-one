@@ -766,6 +766,19 @@ void cCinderEnemy::__MoveOwn()
 
 // ****************************************************************
 // constructor
+cMeteorEnemy::cMeteorEnemy()noexcept
+{
+    // load object resources
+    this->DefineModelHigh("ship_meteor.md3");
+    this->DefineModelLow ("ship_meteor.md3");
+    this->DefineTexture  (0u, "environment_stone_diff.png");
+    this->DefineTexture  (1u, "environment_stone_norm.png");
+    this->DefineProgram  ("object_meteor_blink_program");
+}
+
+
+// ****************************************************************
+// constructor
 cCustomEnemy::cCustomEnemy()noexcept
 {
     // 

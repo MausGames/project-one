@@ -165,7 +165,7 @@
 #define SHADER_SINGLE        "#define _P1_SINGLE_     (1) \n"        // decal, weather
 #define SHADER_LIGHT         "#define _P1_LIGHT_      (1) \n"        // outdoor, decal
 #define SHADER_DARKNESS      "#define _P1_DARKNESS_   (1) \n"        // object_ship
-#define SHADER_BLINK         "#define _P1_BLINK_      (1) \n"        // energy, object_ship
+#define SHADER_BLINK         "#define _P1_BLINK_      (1) \n"        // energy, object_ship, object_meteor
 #define SHADER_FLAT          "#define _P1_FLAT_       (1) \n"        // outline, energy
 #define SHADER_BULLET        "#define _P1_BULLET_     (1) \n"        // outline, energy
 #define SHADER_SPHERIC       "#define _P1_SPHERIC_    (1) \n"        // decal, energy

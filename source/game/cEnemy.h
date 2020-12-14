@@ -20,7 +20,7 @@
 // ****************************************************************
 // enemy definitions
 #define ENEMY_SET_INIT    (8u)      // initial size when creating a new enemy set
-#define ENEMY_SET_COUNT   (8u)      // 
+#define ENEMY_SET_COUNT   (16u)     // 
 #define ENEMY_SIZE_FACTOR (1.05f)   // 
 
 enum eEnemyStatus : coreUint16
@@ -90,6 +90,9 @@ public:
     // get object properties
     inline const coreFloat& GetLifeTime      ()const {return m_fLifeTime;}
     inline const coreFloat& GetLifeTimeBefore()const {return m_fLifeTimeBefore;}
+
+    // enemy configuration values
+    static constexpr const coreChar* ConfigProgramInstancedName() {return "object_ship_blink_inst_program";}
 
 
 protected:
@@ -337,6 +340,21 @@ private:
 
 
 // ****************************************************************
+// meteor enemy class
+class cMeteorEnemy final : public cEnemy
+{
+public:
+    cMeteorEnemy()noexcept;
+
+    ENABLE_COPY(cMeteorEnemy)
+    ASSIGN_ID(8, "Meteor")
+
+    // enemy configuration values
+    static constexpr const coreChar* ConfigProgramInstancedName() {return "object_meteor_blink_inst_program";}
+};
+
+
+// ****************************************************************
 // custom enemy class
 class cCustomEnemy final : public cEnemy
 {
@@ -393,7 +411,7 @@ template <typename T> cEnemyManager::sEnemySet<T>::sEnemySet()noexcept
     STATIC_ASSERT(T::ID != cCustomEnemy::ID)
 
     // set shader-program
-    oEnemyActive.DefineProgram("object_ship_blink_inst_program");
+    oEnemyActive.DefineProgram(T::ConfigProgramInstancedName());
 
     // 
     oEnemyActive.CreateCustom(sizeof(coreFloat), [](coreVertexBuffer* OUTPUT pBuffer)
