@@ -64,6 +64,8 @@
 #define NEVO_TILES_RAWS             (NEVO_TILES)                                      // 
 #define NEVO_ARROWS                 (21u)                                             // 
 #define NEVO_ARROWS_RAWS            (NEVO_ARROWS)                                     // 
+#define NEVO_BLOCKS                 (12u)                                             // 
+#define NEVO_BLOCKS_RAWS            (NEVO_BLOCKS * 2u)                                // 
 #define NEVO_BOMB_SIZE              (4.0f)                                            // 
 
 #define RUTILUS_TELEPORTER          (2u)                                              // 
@@ -440,6 +442,12 @@ private:
     const cShip*  m_apArrowOwner[NEVO_ARROWS];        // 
     coreUint8     m_aiArrowDir  [NEVO_ARROWS];        // 
 
+    coreBatchList m_Block;                            // 
+    coreBatchList m_BlockWave;                        // 
+    coreObject3D  m_aBlockRaw   [NEVO_BLOCKS_RAWS];   // 
+    const cShip*  m_apBlockOwner[NEVO_BLOCKS];        // 
+    coreFloat     m_afBlockScale[NEVO_BLOCKS];        // 
+
     cLodObject  m_Container;                          // 
     coreVector2 m_vForce;                             // 
     coreVector2 m_vImpact;                            // 
@@ -473,6 +481,10 @@ public:
     void DisableArrow(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
+    void EnableBlock (const coreUintW iIndex, const cShip* pOwner, const coreFloat fScale);
+    void DisableBlock(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
     void EnableContainer (const coreVector2& vPosition);
     void DisableContainer(const coreBool bAnimated);
 
@@ -494,6 +506,7 @@ private:
     // execute own routines
     void __SetupOwn       ()final;
     void __RenderOwnBottom()final;
+    void __RenderOwnUnder ()final;
     void __RenderOwnOver  ()final;
     void __MoveOwnAfter   ()final;
 };
