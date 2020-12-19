@@ -70,6 +70,8 @@
 
 #define RUTILUS_TELEPORTER          (2u)                                              // 
 #define RUTILUS_TELEPORTER_COLOR(x) ((x) ? COLOR_ENERGY_BLUE : COLOR_ENERGY_ORANGE)   // 
+#define RUTILUS_WAVES               (4u)                                              // 
+#define RUTILUS_WAVES_RAWS          (RUTILUS_WAVES)                                   // 
 
 
 // ****************************************************************
@@ -548,6 +550,12 @@ private:
     coreVector2  m_avTeleporterPrev[RUTILUS_TELEPORTER];   // 
     coreUint8    m_iTeleporterActive;                      // 
 
+    coreBatchList m_Wave;                                  // 
+    coreObject3D  m_aWaveRaw  [RUTILUS_WAVES_RAWS];        // 
+    coreFlow      m_afWaveTime[RUTILUS_WAVES];             // 
+    coreUint8     m_iWaveActive;                           // 
+    coreUint8     m_iWaveDir;                              // 
+
     coreUint8 m_aiMoveFlip[MISSION_PLAYERS];               // 
 
     coreFlow m_fAnimation;                                 // animation value
@@ -563,6 +571,10 @@ public:
     // 
     void EnableTeleporter (const coreUintW iIndex);
     void DisableTeleporter(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void EnableWave ();
+    void DisableWave(const coreBool bAnimated);
 
     // 
     inline void SetTeleporterActive(const coreUint8 iActive) {m_iTeleporterActive = iActive;}
