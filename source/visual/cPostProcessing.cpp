@@ -14,6 +14,8 @@
 cPostProcessing::cPostProcessing()noexcept
 : m_fSplitScreenValue (0.0f)
 , m_bSplitScreen      (false)
+, m_vDirectionConfig  (coreVector2(0.0f,1.0f))
+, m_vDirectionGame    (coreVector2(0.0f,1.0f))
 {
     // load post-processing shader-programs
     m_pProgramSimple    = Core::Manager::Resource->Get<coreProgram>("full_post_program");
@@ -61,9 +63,9 @@ void cPostProcessing::Render()
         m_aInterior[i].DefineTexture(POST_TEXTURE_UNIT_DISTORTION,  g_pDistortion ->GetFrameBuffer()->GetColorTarget(0u).pTexture);
     }
 
-    // clear color buffer on screen shake or scaling
+    // clear color buffer on non-default transformation
     if(!coreMath::IsNear(this->GetPosition().x, 0.0f) || !coreMath::IsNear(this->GetPosition().y, 0.0f) ||
-       !coreMath::IsNear(this->GetSize    ().x, 1.0f) || !coreMath::IsNear(this->GetSize    ().y, 1.0f))
+       !coreMath::IsNear(this->GetSize    ().x, 1.0f) || !coreMath::IsNear(this->GetSize    ().y, 1.0f) || !this->GetDirection().IsAligned())
         glClear(GL_COLOR_BUFFER_BIT);
 
     glDisable(GL_BLEND);
@@ -153,21 +155,16 @@ void cPostProcessing::UpdateLayout()
 {
     // 
     const coreVector2 vBase = coreVector2(g_CurConfig.Game.iMirrorMode ? -1.0f : 1.0f, 1.0f);
-    const coreVector2 vSize = vBase * (I_TO_F(MIN(g_CurConfig.Game.iGameScale, 100u)) / 100.0f);
+    this->SetSize(vBase * (I_TO_F(MIN(g_CurConfig.Game.iGameScale, 100u)) / 100.0f));
 
     // 
-    coreVector2 vDirection;
     switch(g_CurConfig.Game.iGameRotation)
     {
-    default: vDirection = coreVector2( 0.0f, 1.0f); break;
-    case 1u: vDirection = coreVector2(-1.0f, 0.0f); break;
-    case 2u: vDirection = coreVector2( 0.0f,-1.0f); break;
-    case 3u: vDirection = coreVector2( 1.0f, 0.0f); break;
+    default: m_vDirectionConfig = coreVector2( 0.0f, 1.0f); break;
+    case 1u: m_vDirectionConfig = coreVector2(-1.0f, 0.0f); break;
+    case 2u: m_vDirectionConfig = coreVector2( 0.0f,-1.0f); break;
+    case 3u: m_vDirectionConfig = coreVector2( 1.0f, 0.0f); break;
     }
-
-    // 
-    this->SetSize     (vSize);
-    this->SetDirection(vDirection);
 
     // 
     this->__UpdateInterior();
@@ -200,6 +197,9 @@ void cPostProcessing::__Reset(const coreResourceReset eInit)
 // update interiors
 void cPostProcessing::__UpdateInterior()
 {
+    // 
+    this->SetDirection(MapToAxis(m_vDirectionConfig, m_vDirectionGame));
+
     if(m_bSplitScreen)
     {
         // 
@@ -211,10 +211,11 @@ void cPostProcessing::__UpdateInterior()
         // 
         for(coreUintW i = 0u; i < POST_INTERIORS; ++i)
         {
-            m_aInterior[i].SetPosition (this->GetPosition ());
+            const coreVector2 vOffset = this->GetDirection().Rotated90().InvertedY() * (this->GetSize().x * (i ? 0.25f : -0.25f));
+
+            m_aInterior[i].SetPosition (this->GetPosition () + vOffset);
             m_aInterior[i].SetSize     (this->GetSize     () * coreVector2(0.5f,1.0f));
             m_aInterior[i].SetDirection(this->GetDirection());
-            m_aInterior[i].SetAlignment(this->GetDirection().Rotated90() * coreVector2(1.0f,-1.0f) * (i ? 1.0f : -1.0f) * SIGN(this->GetSize().x));
             m_aInterior[i].SetTexSize  (coreVector2(0.5f,1.0f));
             m_aInterior[i].SetTexOffset(coreVector2(i ? 0.5f : 0.0f, 0.0f));
             m_aInterior[i].Move();
@@ -232,7 +233,6 @@ void cPostProcessing::__UpdateInterior()
         m_aInterior[0].SetPosition (this->GetPosition ());
         m_aInterior[0].SetSize     (this->GetSize     ());
         m_aInterior[0].SetDirection(this->GetDirection());
-        m_aInterior[0].SetAlignment(coreVector2(0.0f,0.0f));
         m_aInterior[0].SetTexSize  (coreVector2(1.0f,1.0f));
         m_aInterior[0].SetTexOffset(coreVector2(0.0f,0.0f));
         m_aInterior[0].Move();

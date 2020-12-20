@@ -102,8 +102,9 @@ cGame::~cGame()
     g_pWindscreen->ClearAdds(true);
 
     // 
-    g_pPostProcessing->SetSaturationAll(1.0f);
     g_pPostProcessing->SetSplitScreen  (false);
+    g_pPostProcessing->SetDirectionGame(coreVector2(0.0f,1.0f));
+    g_pPostProcessing->SetSaturationAll(1.0f);
 
     // 
     g_pEnvironment->SetTargetDirection(ENVIRONMENT_DEFAULT_DIRECTION);
