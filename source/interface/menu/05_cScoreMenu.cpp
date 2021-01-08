@@ -33,7 +33,7 @@ cScoreMenu::cScoreMenu()noexcept
         m_aRank[i].SetPosition (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.04f, -0.05f - 0.05f*I_TO_F(i)));
         m_aRank[i].SetAlignment(coreVector2(1.0f,0.0f));
         m_aRank[i].SetColor3   (COLOR_MENU_WHITE);
-        m_aRank[i].SetText     (PRINT("%zu", i + 1u));
+        m_aRank[i].SetText     (coreData::ToChars(i + 1u));
 
         m_aName[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
         m_aName[i].SetPosition (coreVector2(0.05f,0.0f) + m_aRank[i].GetPosition());

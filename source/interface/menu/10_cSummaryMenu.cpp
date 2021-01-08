@@ -389,8 +389,8 @@ void cSummaryMenu::ShowNormal()
         m_aiApplyBonus[i] = iBonusMedal + iBonusSurvive;
 
         // 
-        m_aaPart[i][0].SetText(PRINT("%u", iBonusMedal));
-        m_aaPart[i][1].SetText(PRINT("%u", iBonusSurvive));
+        m_aaPart[i][0].SetText(coreData::ToChars(iBonusMedal));
+        m_aaPart[i][1].SetText(coreData::ToChars(iBonusSurvive));
         m_aiFinalPart[i] = iScore;
 
         // 
@@ -400,8 +400,8 @@ void cSummaryMenu::ShowNormal()
     });
 
     // 
-    m_aValue[0].SetText(PRINT("%u", iSumBonusMedal));
-    m_aValue[1].SetText(PRINT("%u", iSumBonusSurvive));
+    m_aValue[0].SetText(coreData::ToChars(iSumBonusMedal));
+    m_aValue[1].SetText(coreData::ToChars(iSumBonusSurvive));
     m_iFinalValue = iSumScore;
 
     // 
