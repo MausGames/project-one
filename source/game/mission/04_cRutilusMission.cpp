@@ -14,6 +14,9 @@
 cRutilusMission::cRutilusMission()noexcept
 : m_avTeleporterPrev  {}
 , m_iTeleporterActive (2u)
+, m_Plate             (RUTILUS_PLATES_RAWS)
+, m_afPlateTime       {}
+, m_avPlateData       {}
 , m_Wave              (RUTILUS_WAVES_RAWS)
 , m_afWaveTime        {}
 , m_iWaveActive       (0u)
@@ -34,6 +37,27 @@ cRutilusMission::cRutilusMission()noexcept
         m_aTeleporter[i].DefineProgram("effect_energy_flat_invert_program");
         m_aTeleporter[i].SetColor3    (RUTILUS_TELEPORTER_COLOR(i) * 1.2f);
         m_aTeleporter[i].SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+    }
+
+    // 
+    m_Plate.DefineProgram("object_plate_inst_program");
+    {
+        for(coreUintW i = 0u; i < RUTILUS_PLATES_RAWS; ++i)
+        {
+            // load object resources
+            coreObject3D* pPlate = &m_aPlateRaw[i];
+            pPlate->DefineModel  (Core::Manager::Object->GetLowQuad());
+            pPlate->DefineTexture(0u, "effect_arrow.png");
+            pPlate->DefineProgram("object_plate_program");
+
+            // set object properties
+            pPlate->SetColor3 ((i % 2u) ? COLOR_ENERGY_BLUE : COLOR_ENERGY_RED);
+            pPlate->SetAlpha  (0.7f);
+            pPlate->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
+            // add object to the list
+            m_Plate.BindObject(pPlate);
+        }
     }
 
     // 
@@ -71,6 +95,7 @@ cRutilusMission::~cRutilusMission()
 
     // 
     for(coreUintW i = 0u; i < RUTILUS_TELEPORTER; ++i) this->DisableTeleporter(i, false);
+    for(coreUintW i = 0u; i < RUTILUS_PLATES;     ++i) this->DisablePlate     (i, false);
     this->DisableWave(false);
 }
 
@@ -109,6 +134,42 @@ void cRutilusMission::DisableTeleporter(const coreUintW iIndex, const coreBool b
 
     // 
     if(bAnimated) cRutilusMission::__TeleporterEffect(iIndex);
+}
+
+
+// ****************************************************************
+// 
+void cRutilusMission::EnablePlate(const coreUintW iIndex, const coreFloat fFrom, const coreFloat fTo, const coreFloat fScale)
+{
+    ASSERT(iIndex < RUTILUS_PLATES)
+    coreObject3D& oPlate = m_aPlateRaw[iIndex];
+
+    // 
+    WARN_IF(oPlate.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    m_avPlateData[iIndex] = coreVector4(fFrom, fTo, 0.0f, fScale);
+
+    // 
+    oPlate.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+}
+
+
+// ****************************************************************
+// 
+void cRutilusMission::DisablePlate(const coreUintW iIndex, const coreBool bAnimated)
+{
+    ASSERT(iIndex < RUTILUS_PLATES)
+    coreObject3D& oPlate = m_aPlateRaw[iIndex];
+
+    // 
+    if(!oPlate.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    if(m_avPlateData[iIndex].w != 0.0f) this->SetPlateScale(iIndex, 0.0f);
+
+    // 
+    if(!bAnimated) oPlate.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 }
 
 
@@ -166,6 +227,9 @@ void cRutilusMission::DisableWave(const coreBool bAnimated)
 // 
 void cRutilusMission::__RenderOwnBottom()
 {
+    // 
+    m_Plate.Render();
+
     // 
     m_Wave.Render();
 }
@@ -230,6 +294,34 @@ void cRutilusMission::__MoveOwnAfter()
         oTeleporter.SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.6f));
         oTeleporter.Move();
     }
+
+    // 
+    for(coreUintW i = 0u; i < RUTILUS_PLATES; ++i)
+    {
+        coreObject3D& oPlate = m_aPlateRaw[i];
+        if(!oPlate.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+        // 
+        m_afPlateTime[i].UpdateMin(1.0f, 1.0f);
+        const coreFloat fOffset = LERPB(    m_avPlateData[i].x,      m_avPlateData[i].y,  m_afPlateTime[i]);
+        const coreFloat fScale  = LERPB(ABS(m_avPlateData[i].z), ABS(m_avPlateData[i].w), m_afPlateTime[i]);
+
+        // 
+        if(fScale <= 0.0f) this->DisablePlate(i, false);
+
+        // 
+        const coreVector2 vSize = coreVector2(fScale, (m_avPlateData[i].w <= 0.0f) ? 1.0f : fScale);
+        const coreVector2 vReal = IsHorizontal(oPlate.GetDirection().xy()) ? vSize : vSize.yx();
+
+        // 
+        oPlate.SetPosition (coreVector3(0.0f, fOffset, 0.0f) * (FOREGROUND_AREA.y * 2.2f));
+        oPlate.SetSize     (coreVector3(vReal,         1.0f) * (FOREGROUND_AREA.y * 2.2f));
+        oPlate.SetTexSize  (vReal * 4.0f);
+        oPlate.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.4f) - vReal * 2.0f);
+    }
+
+    // 
+    m_Plate.MoveNormal();
 
     // 
     for(coreUintW i = 0u; i < RUTILUS_WAVES; ++i)

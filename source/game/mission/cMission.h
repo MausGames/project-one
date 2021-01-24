@@ -70,6 +70,8 @@
 
 #define RUTILUS_TELEPORTER          (2u)                                              // 
 #define RUTILUS_TELEPORTER_COLOR(x) ((x) ? COLOR_ENERGY_BLUE : COLOR_ENERGY_ORANGE)   // 
+#define RUTILUS_PLATES              (5u)                                              // 
+#define RUTILUS_PLATES_RAWS         (RUTILUS_PLATES)                                  // 
 #define RUTILUS_WAVES               (4u)                                              // 
 #define RUTILUS_WAVES_RAWS          (RUTILUS_WAVES)                                   // 
 
@@ -550,6 +552,11 @@ private:
     coreVector2  m_avTeleporterPrev[RUTILUS_TELEPORTER];   // 
     coreUint8    m_iTeleporterActive;                      // 
 
+    coreBatchList m_Plate;                                 // 
+    coreObject3D  m_aPlateRaw  [RUTILUS_PLATES_RAWS];      // 
+    coreFlow      m_afPlateTime[RUTILUS_PLATES];           // 
+    coreVector4   m_avPlateData[RUTILUS_PLATES];           // 
+
     coreBatchList m_Wave;                                  // 
     coreObject3D  m_aWaveRaw  [RUTILUS_WAVES_RAWS];        // 
     coreFlow      m_afWaveTime[RUTILUS_WAVES];             // 
@@ -573,11 +580,19 @@ public:
     void DisableTeleporter(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
+    void EnablePlate (const coreUintW iIndex, const coreFloat fFrom, const coreFloat fTo, const coreFloat fScale);
+    void DisablePlate(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
     void EnableWave ();
     void DisableWave(const coreBool bAnimated);
 
     // 
     inline void SetTeleporterActive(const coreUint8 iActive) {m_iTeleporterActive = iActive;}
+
+    // 
+    inline void SetPlateOffset(const coreUintW iIndex, const coreFloat fOffset) {ASSERT(iIndex < RUTILUS_PLATES) m_afPlateTime[iIndex] = 0.0f; m_avPlateData[iIndex].xy(coreVector2(m_avPlateData[iIndex].y, fOffset));}
+    inline void SetPlateScale (const coreUintW iIndex, const coreFloat fScale)  {ASSERT(iIndex < RUTILUS_PLATES) m_afPlateTime[iIndex] = 0.0f; m_avPlateData[iIndex].zw(coreVector2(m_avPlateData[iIndex].w, fScale));}
 
 
 private:
