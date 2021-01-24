@@ -22,6 +22,7 @@
 // TODO: change all missions to STATIC_MEMORY (check memory, it would put all missions always in memory)
 // TODO: check if TYPE_NEVO_BOMB still needed
 // TODO: do not create objects and load resources of unused game-objects and bosses (e.g. move waves into own classes ? but then ?)
+// TODO: in delay, replace cScoutEnemy with something which does not load any resources (may need to support instancing)
 
 
 // ****************************************************************
@@ -94,6 +95,9 @@
 #define STAGE_CLEARED                          (std::all_of(m_apSquad.begin(), m_apSquad.end(), [](const cEnemySquad* pSquad) {return pSquad->IsFinished();}))
 #define STAGE_RESSURECT(s,f,t)                 {STAGE_FOREACH_ENEMY_ALL(s, pEnemy, i) {if((coreInt32(i) >= coreInt32(f)) && (coreInt32(i) <= coreInt32(t))) pEnemy->Resurrect();}); ASSERT((coreInt32(f) <= coreInt32(t)) && (coreInt32(t) < coreInt32((s)->GetNumEnemies())))}
 #define STAGE_BADGE(b,p)                       {this->GiveBadge(b, p);}
+
+#define STAGE_DELAY_START                      {UNUSED STAGE_ADD_SQUAD(pDelay, cScoutEnemy, 1u) {pDelay->GetEnemy(0u)->Configure(1, COLOR_SHIP_GREY); pDelay->GetEnemy(0u)->Resurrect();});}
+#define STAGE_DELAY_END                        {m_apSquad.back()->GetEnemy(0u)->Kill(false);}
 
 #define STAGE_ADD_PATH(n)                      const auto n = this->_AddPath    (__LINE__,      [](coreSpline2* OUTPUT n)
 #define STAGE_ADD_SQUAD(n,t,c)                 const auto n = this->_AddSquad<t>(__LINE__, (c), [](cEnemySquad* OUTPUT n)
