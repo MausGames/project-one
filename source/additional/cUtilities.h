@@ -59,6 +59,19 @@ constexpr FUNC_CONST coreFloat AngleDiff(const coreFloat x, const coreFloat y)
 
 // ****************************************************************
 // 
+inline FUNC_CONST coreFloat FmodRange(const coreFloat x, const coreFloat a, const coreFloat b)
+{
+    ASSERT(a < b)
+
+    if(x >= b) return FMOD(x - a, b - a) + a;
+    if(x <  a) return FMOD(x - b, a - b) + b;
+
+    return x;
+}
+
+
+// ****************************************************************
+// 
 inline FUNC_CONST coreFloat LerpSmoothRev(const coreFloat x, const coreFloat y, const coreFloat s)
 {
     return (s >= 0.5f) ? LERPB(y, (x + y) * 0.5f, 2.0f - s * 2.0f) :
