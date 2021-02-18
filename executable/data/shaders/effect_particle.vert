@@ -9,7 +9,7 @@
 
 
 // shader output
-flat varying float v_v1Time;   // current simulation time (from 0.0 to 1.0)
+flat varying vec2 v_v2Time;   // current simulation times (from 0.0 to 1.0)
 
 
 void VertexMain()
@@ -20,5 +20,6 @@ void VertexMain()
     v_av2TexCoord[1] = vec2(1.0) - v_av2TexCoord[0];
 
     // calculate current simulation time
-    v_v1Time = 1.0 - a_v1DivValue;
+    float v1Rev = 1.0 - a_v1DivValue;
+    v_v2Time = vec2(min(v1Rev * 3.0, 1.0), smoothstep(0.0, 0.05, v1Rev));
 }
