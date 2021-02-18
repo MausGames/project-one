@@ -77,6 +77,8 @@
 // TODO: find (manual) interpolations and try to use smoothstep for it (engine, application and shader)
 // TODO: re-export all models which are still in the old MD3 format (24.01.18 21:19) (+ update default)
 // TODO: search and remove unused resources from application.cpp (+ folder)
+// TODO: convert bigger sound-effects (ambient) to music ?
+// TODO: change all linear interpolation with at least LERPH3 to improve quality, where possible
 
 
 // ****************************************************************

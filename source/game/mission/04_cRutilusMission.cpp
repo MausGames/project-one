@@ -112,6 +112,9 @@ void cRutilusMission::EnableTeleporter(const coreUintW iIndex)
     oTeleporter.ChangeType(TYPE_RUTILUS_TELEPORTER);
 
     // 
+    m_iTeleporterActive = 2u;
+
+    // 
     oTeleporter.SetEnabled(CORE_OBJECT_ENABLE_ALL);
     g_pGlow->BindObject(&oTeleporter);
 }
@@ -127,6 +130,9 @@ void cRutilusMission::DisableTeleporter(const coreUintW iIndex, const coreBool b
     // 
     if(!oTeleporter.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
     oTeleporter.ChangeType(0);
+
+    // 
+    m_iTeleporterActive = 2u;
 
     // 
     oTeleporter.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
@@ -148,6 +154,7 @@ void cRutilusMission::EnablePlate(const coreUintW iIndex, const coreFloat fFrom,
     WARN_IF(oPlate.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
 
     // 
+    m_afPlateTime[iIndex] = 0.0f;
     m_avPlateData[iIndex] = coreVector4(fFrom, fTo, 0.0f, fScale);
 
     // 

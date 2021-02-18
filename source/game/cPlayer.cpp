@@ -258,7 +258,7 @@ void cPlayer::Move()
                 vNewDir =  vNewDir.Rotated90();
 
             // set new direction
-            this->SetDirection(coreVector3(AlongCrossNormal(vNewDir), 0.0f));
+            this->SetDirection(coreVector3(vNewDir, 0.0f));
         }
 
         if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_ROLL))

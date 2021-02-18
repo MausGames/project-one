@@ -27,12 +27,12 @@
 
 // ****************************************************************
 // mission definitions
-#define MISSION_PLAYERS     (PLAYERS)   // 
-#define MISSION_BOSSES      (BOSSES)    // default number of bosses per mission
-#define MISSION_WAVES       (WAVES)     // 
-#define MISSION_NO_BOSS     (0xFFu)     // no boss currently active (error-value)
-#define MISSION_NO_WAVE     (0xFFu)     // 
-#define MISSION_NO_SEGMENT  (0xFFu)     // 
+#define MISSION_PLAYERS    (PLAYERS)   // 
+#define MISSION_BOSSES     (BOSSES)    // default number of bosses per mission
+#define MISSION_WAVES      (WAVES)     // 
+#define MISSION_NO_BOSS    (0xFFu)     // no boss currently active (error-value)
+#define MISSION_NO_WAVE    (0xFFu)     // 
+#define MISSION_NO_SEGMENT (0xFFu)     // 
 
 #define MISSION_SEGMENT_IS_BOSS(i) ((i) % 6u == 5u)
 #define MISSION_BOSS_TO_SEGMENT(i) ((i) * 6u  + 5u)

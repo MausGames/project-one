@@ -83,7 +83,8 @@ void LoadConfig()
     std::memset(&g_MenuInput,  0, sizeof(g_MenuInput));
 
     // load configuration file
-    Core::Config->Load(true);
+    Core::Config->Save();
+    Core::Config->Load();
 
     // read game values
     g_OldConfig.Game.iTextSize     = Core::Config->GetInt(CONFIG_GAME_TEXT_SIZE);
