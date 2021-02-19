@@ -76,6 +76,11 @@
 #define RUTILUS_WAVES               (4u)                                              // 
 #define RUTILUS_WAVES_RAWS          (RUTILUS_WAVES)                                   // 
 
+#define GELU_ORBS                   (16u)                                             // 
+#define GELU_ORBS_RAWS              (GELU_ORBS)                                       // 
+#define GELU_LINES                  (24u)                                             // 
+#define GELU_LINES_RAWS             (GELU_LINES)                                      // 
+
 
 // ****************************************************************
 // stage management macros
@@ -617,21 +622,42 @@ private:
 class cGeluMission final : public cMission
 {
 private:
-    cTartarusBoss m_Tartarus;   // 
-    cPhalarisBoss m_Phalaris;   // 
-    cCholBoss     m_Chol;       // 
+    cTartarusBoss m_Tartarus;                      // 
+    cPhalarisBoss m_Phalaris;                      // 
+    cCholBoss     m_Chol;                          // 
+
+    coreBatchList m_Orb;                           // 
+    coreObject3D  m_aOrbRaw  [GELU_ORBS_RAWS];     // 
+    coreFlow      m_afOrbTime[GELU_ORBS];          // 
+
+    coreBatchList m_Line;                          // 
+    coreObject3D  m_aLineRaw  [GELU_LINES_RAWS];   // 
+    coreFlow      m_afLineTime[GELU_LINES];        // 
+
+    coreFlow m_fAnimation;                         // animation value
 
 
 public:
     cGeluMission()noexcept;
+    ~cGeluMission()final;
 
     DISABLE_COPY(cGeluMission)
     ASSIGN_ID(5, "Gelu")
 
+    // 
+    void EnableOrb (const coreUintW iIndex);
+    void DisableOrb(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void EnableLine (const coreUintW iIndex);
+    void DisableLine(const coreUintW iIndex, const coreBool bAnimated);
+
 
 private:
     // execute own routines
-    void __SetupOwn()final;
+    void __SetupOwn       ()final;
+    void __RenderOwnBottom()final;
+    void __MoveOwnAfter   ()final;
 };
 
 
