@@ -81,6 +81,9 @@
 #define GELU_LINES                  (24u)                                             // 
 #define GELU_LINES_RAWS             (GELU_LINES)                                      // 
 
+#define CALOR_LOADS                 (12u)                                             // 
+#define CALOR_LOADS_RAWS            (CALOR_LOADS)                                     // 
+
 
 // ****************************************************************
 // stage management macros
@@ -666,11 +669,19 @@ private:
 class cCalorMission final : public cMission
 {
 private:
-    cFenrirBoss m_Fenrir;   // 
-    cShelobBoss m_Shelob;   // 
-    cZerothBoss m_Zeroth;   // 
+    cFenrirBoss m_Fenrir;                            // 
+    cShelobBoss m_Shelob;                            // 
+    cZerothBoss m_Zeroth;                            // 
 
-    cSnow m_Snow;           // 
+    cSnow m_Snow;                                    // 
+
+    coreBatchList m_Load;                            // 
+    coreObject3D  m_aLoadRaw[CALOR_LOADS_RAWS];      // 
+    coreObject3D  m_LoadCopy;                        // 
+    const cShip*  m_pLoadOwner;                      // 
+    coreFlow      m_afLoadPower[3];                  // (0 = current | 1 = previous | 2 = bump) 
+
+    coreFlow m_fAnimation;                           // animation value
 
 
 public:
@@ -680,11 +691,20 @@ public:
     DISABLE_COPY(cCalorMission)
     ASSIGN_ID(6, "Calor")
 
+    // 
+    void EnableLoad (const cShip* pOwner);
+    void DisableLoad(const coreBool bAnimated);
+
+    // 
+    inline void BumpLoad(const coreFloat fValue) {ASSERT(fValue > 0.0f) m_afLoadPower[0] = MIN(m_afLoadPower[0] + fValue, I_TO_F(CALOR_LOADS)); m_afLoadPower[2] = 1.0f;}
+
 
 private:
     // execute own routines
     void __SetupOwn       ()final;
     void __RenderOwnBottom()final;
+    void __RenderOwnOver  ()final;
+    void __RenderOwnTop   ()final;
     void __MoveOwnAfter   ()final;
 };
 
