@@ -367,16 +367,11 @@ void cReplay::SaveFile(const coreChar* pcName)
     std::memcpy(pHeaderData, &m_Header, sizeof(sHeader));
 
     // 
-    coreFile* pHeaderFile = new coreFile("header", pHeaderData, sizeof(sHeader));
-    coreFile* pBodyFile   = new coreFile("body",   pBodyData,   iBodySize);
-
-    // 
-    pHeaderFile->Compress();
-
-    // 
     coreArchive oArchive;
-    oArchive.AddFile(pHeaderFile);
-    oArchive.AddFile(pBodyFile);
+    oArchive.CreateFile("header", pHeaderData, sizeof(sHeader))->Compress();
+    oArchive.CreateFile("body",   pBodyData,   iBodySize);
+
+    // 
     oArchive.Save(coreData::UserFolder(coreData::DateTimePrint(REPLAY_FILE_FOLDER "/replay_%Y%m%d_%H%M%S." REPLAY_FILE_EXTENSION)));
 
     Core::Log->Info("Replay (%s) saved", oArchive.GetPath());
