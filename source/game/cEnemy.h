@@ -82,10 +82,12 @@ public:
     inline coreBool IsChild ()const {return !m_apMember.empty() &&  CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_CHILD);}
 
     // 
-    cPlayer*    NearestPlayerSide()const;
-    cPlayer*    NearestPlayerDual(const coreUintW iIndex)const;
-    coreVector2 AimAtPlayerSide  ()const;
-    coreVector2 AimAtPlayerDual  (const coreUintW iIndex)const;
+    cPlayer*    NearestPlayerSide   ()const;
+    cPlayer*    NearestPlayerSideRev()const;
+    cPlayer*    NearestPlayerDual   (const coreUintW iIndex)const;
+    coreVector2 AimAtPlayerSide     ()const;
+    coreVector2 AimAtPlayerSideRev  ()const;
+    coreVector2 AimAtPlayerDual     (const coreUintW iIndex)const;
 
     // get object properties
     inline const coreFloat& GetLifeTime      ()const {return m_fLifeTime;}

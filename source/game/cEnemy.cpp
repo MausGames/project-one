@@ -288,6 +288,13 @@ cPlayer* cEnemy::NearestPlayerSide()const
     return g_pGame->FindPlayerSide(this->GetPosition().xy());
 }
 
+cPlayer* cEnemy::NearestPlayerSideRev()const
+{
+    // 
+    ASSERT(STATIC_ISVALID(g_pGame))
+    return g_pGame->FindPlayerSide(this->GetPosition().xy().InvertedX());
+}
+
 cPlayer* cEnemy::NearestPlayerDual(const coreUintW iIndex)const
 {
     // 
@@ -302,6 +309,12 @@ coreVector2 cEnemy::AimAtPlayerSide()const
 {
     // 
     return (this->NearestPlayerSide()->GetPosition().xy() - this->GetPosition().xy());
+}
+
+coreVector2 cEnemy::AimAtPlayerSideRev()const
+{
+    // 
+    return (this->NearestPlayerSideRev()->GetPosition().xy() - this->GetPosition().xy());
 }
 
 coreVector2 cEnemy::AimAtPlayerDual(const coreUintW iIndex)const
