@@ -16,6 +16,8 @@ cPostProcessing::cPostProcessing()noexcept
 , m_bSplitScreen      (false)
 , m_vDirectionConfig  (coreVector2(0.0f,1.0f))
 , m_vDirectionGame    (coreVector2(0.0f,1.0f))
+, m_afOffset          {}
+, m_bOffsetActive     (false)
 {
     // load post-processing shader-programs
     m_pProgramSimple    = Core::Manager::Resource->Get<coreProgram>("full_post_program");
@@ -27,6 +29,11 @@ cPostProcessing::cPostProcessing()noexcept
     this->UpdateLayout();
 
     // create wallpapers
+    for(coreUintW i = 0u; i < POST_WALLS; ++i)
+    {
+        m_aWall[i].DefineProgram("menu_border_direct_program");
+        m_aWall[i].DefineTexture(0u, "menu_background_black.png");
+    }
     this->__UpdateWall();
 
     // create separator
@@ -75,7 +82,7 @@ void cPostProcessing::Render()
             m_aInterior[i].Render(this->GetProgram());
 
         // render wallpapers
-        for(coreUintW i = 0u; i < POST_WALLS; ++i)
+        for(coreUintW i = m_bOffsetActive ? 0u : POST_WALLS_BASE; i < POST_WALLS; ++i)
             m_aWall[i].Render();
     }
     glEnable(GL_BLEND);
@@ -115,6 +122,16 @@ void cPostProcessing::Move()
 
     // update separator
     this->__UpdateSeparator();
+
+    if(m_bOffsetActive)
+    {
+        // update wallpapers
+        this->__UpdateWall();
+
+        // 
+        if(std::all_of(m_afOffset, m_afOffset + POST_WALLS, [](const coreFloat x) {return coreMath::IsNear(x, 0.0f);}))
+            m_bOffsetActive = false;
+    }
 }
 
 
@@ -246,21 +263,21 @@ void cPostProcessing::__UpdateWall()
 {
     // place objects left-right or top-down depending on window aspect ratio
     const coreVector2 vResolution = Core::System->GetResolution();
-    const coreVector2 vFlip       = (vResolution.AspectRatio() < 1.0f) ? coreVector2(0.0f,1.0f) : coreVector2(1.0f,0.0f);
     const coreVector2 vSize       = coreVector2(1.0f, ((vResolution - g_vGameResolution) / vResolution.yx()).Max() * 0.5f) + 0.1f;
+    const coreVector2 vFlip       = IsHorizontal(vResolution) ? coreVector2(1.0f,0.0f) : coreVector2(0.0f,1.0f);
+    const coreUintW   iAdd        = IsHorizontal(vResolution) ? POST_WALLS_BASE        : 0u;
 
     // 
     for(coreUintW i = 0u; i < POST_WALLS; ++i)
     {
-        const coreFloat fSide = (i ? 1.0f : -1.0f);
+        const coreVector2 vTurn = ((i < 2u) ? vFlip.yx() : vFlip) * ((i % 2u) ? 1.0f : -1.0f);
+        const coreFloat   fMove = ((i < 2u) ? vSize.y    :  0.1f) - m_afOffset[(i + iAdd) % POST_WALLS];
 
-        m_aWall[i].DefineProgram("menu_border_direct_program");
-        m_aWall[i].DefineTexture(0u, "menu_background_black.png");
-        m_aWall[i].SetPosition  (vFlip * (fSide *  0.1f));
-        m_aWall[i].SetSize      (vSize);
-        m_aWall[i].SetDirection (vFlip * (fSide *  coreVector2(-1.0f,1.0f)));
-        m_aWall[i].SetCenter    (vFlip * (fSide *  0.5f));
-        m_aWall[i].SetAlignment (vFlip * (fSide * -1.0f));
+        m_aWall[i].SetPosition (vTurn *  fMove);
+        m_aWall[i].SetSize     (vSize);
+        m_aWall[i].SetDirection(vTurn *  coreVector2(-1.0f,1.0f));
+        m_aWall[i].SetCenter   (vTurn *  0.5f);
+        m_aWall[i].SetAlignment(vTurn * -1.0f);
         m_aWall[i].Move();
     }
 }

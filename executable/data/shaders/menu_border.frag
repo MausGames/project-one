@@ -16,9 +16,16 @@ varying      float v_v1Factor;     //
 
 void FragmentMain()
 {
+    // 
+#if defined(_P1_DIRECT_)
+    bool bBorder = (v_v1Factor > 0.5);
+#else
+    const bool bBorder = true;
+#endif
+
     // compare object coordinates with border values
     if(any(lessThan   (v_v4Interior, v_v4Border.xyxy)) &&
-       all(greaterThan(v_v4Interior, v_v4Border.zwzw)))
+       all(greaterThan(v_v4Interior, v_v4Border.zwzw)) && bBorder)
     {
         // draw plain border
         gl_FragColor = vec4(vec3(c_v1White), 1.0) * u_v4Color;
