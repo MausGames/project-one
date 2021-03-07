@@ -133,7 +133,7 @@ inline FUNC_PURE coreVector2 SmoothAim(const coreVector2& vOldDir, const coreVec
 inline FUNC_CONST coreFloat SmoothTowards(const coreFloat fDistance, const coreFloat fThreshold)
 {
     ASSERT((fDistance >= 0.0f) && (fThreshold > 0.0f))
-    return MIN(fDistance, fThreshold) * RCP(fThreshold);
+    return (fDistance >= fThreshold) ? 1.0f : (fDistance * RCP(fThreshold));
 }
 
 

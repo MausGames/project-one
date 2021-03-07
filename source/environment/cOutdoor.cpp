@@ -300,7 +300,7 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
     // delete sync object
     m_Sync.Delete();
 
-    Core::Manager::Resource->AttachFunction([=]()
+    Core::Manager::Resource->AttachFunction([=, this]()
     {
         // check for sync object status
         const coreStatus eCheck = m_Sync.Check(0u, CORE_SYNC_CHECK_FLUSHED);
