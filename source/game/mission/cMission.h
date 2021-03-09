@@ -73,6 +73,7 @@
 #define RUTILUS_TELEPORTER_COLOR(x) ((x) ? COLOR_ENERGY_BLUE : COLOR_ENERGY_ORANGE)   // 
 #define RUTILUS_PLATES              (5u)                                              // 
 #define RUTILUS_PLATES_RAWS         (RUTILUS_PLATES)                                  // 
+#define RUTILUS_AREAS               (2u)                                              // 
 #define RUTILUS_WAVES               (4u)                                              // 
 #define RUTILUS_WAVES_RAWS          (RUTILUS_WAVES)                                   // 
 
@@ -569,6 +570,9 @@ private:
     coreFlow      m_afPlateTime[RUTILUS_PLATES];           // 
     coreVector4   m_avPlateData[RUTILUS_PLATES];           // 
 
+    coreObject3D m_aArea[RUTILUS_AREAS];                   // 
+    coreFlow     m_fAreaTime;                              // 
+
     coreBatchList m_Wave;                                  // 
     coreObject3D  m_aWaveRaw  [RUTILUS_WAVES_RAWS];        // 
     coreFlow      m_afWaveTime[RUTILUS_WAVES];             // 
@@ -594,6 +598,10 @@ public:
     // 
     void EnablePlate (const coreUintW iIndex, const coreFloat fFrom, const coreFloat fTo, const coreFloat fScale);
     void DisablePlate(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void EnableArea ();
+    void DisableArea(const coreBool bAnimated);
 
     // 
     void EnableWave ();
