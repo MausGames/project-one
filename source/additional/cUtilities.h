@@ -108,6 +108,15 @@ template <typename T, typename S, typename R> constexpr FUNC_LOCAL T TernaryLerp
 
 // ****************************************************************
 // 
+template <typename T, typename S, typename R> inline FUNC_LOCAL T ParaLerp(const T& x, const S& y, const R& z, const coreFloat s)
+{
+    const T A = (x - z);
+    return LERPB(x, y + A * 0.5f, s * 2.0f) - (A * s);
+}
+
+
+// ****************************************************************
+// 
 inline FUNC_PURE coreFloat FrictionFactor(const coreFloat fStrength)
 {
     return POW(1.0f - fStrength * (1.0f / FRAMERATE_MIN), Core::System->GetTime() * FRAMERATE_MIN);
