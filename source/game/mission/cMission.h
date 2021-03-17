@@ -85,6 +85,9 @@
 #define CALOR_LOADS                 (12u)                                             // 
 #define CALOR_LOADS_RAWS            (CALOR_LOADS)                                     // 
 
+#define MUSCUS_PEARLS               (20u)                                             // 
+#define MUSCUS_PEARLS_RAWS          (MUSCUS_PEARLS * 2u)                              // 
+
 
 // ****************************************************************
 // stage management macros
@@ -722,21 +725,35 @@ private:
 class cMuscusMission final : public cMission
 {
 private:
-    cOrlacBoss   m_Orlac;     // 
-    cGemingaBoss m_Geminga;   // 
-    cNagualBoss  m_Nagual;    // 
+    cOrlacBoss   m_Orlac;                            // 
+    cGemingaBoss m_Geminga;                          // 
+    cNagualBoss  m_Nagual;                           // 
+
+    coreBatchList m_Pearl;                           // 
+    coreBatchList m_PearlWave;                       // 
+    coreObject3D  m_aPearlRaw[MUSCUS_PEARLS_RAWS];   // 
+    coreUint32    m_aPearlActive;                    // 
+
+    coreFlow m_fAnimation;                           // animation value
 
 
 public:
     cMuscusMission()noexcept;
+    ~cMuscusMission()final;
 
     DISABLE_COPY(cMuscusMission)
     ASSIGN_ID(7, "Muscus")
 
+    // 
+    void EnablePearl (const coreUintW iIndex, const coreVector2& vPosition);
+    void DisablePearl(const coreUintW iIndex, const coreBool bAnimated);
+
 
 private:
     // execute own routines
-    void __SetupOwn()final;
+    void __SetupOwn      ()final;
+    void __RenderOwnUnder()final;
+    void __MoveOwnAfter  ()final;
 };
 
 
