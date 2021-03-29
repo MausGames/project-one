@@ -85,7 +85,9 @@
 #define CALOR_LOADS                 (12u)                                             // 
 #define CALOR_LOADS_RAWS            (CALOR_LOADS)                                     // 
 
-#define MUSCUS_PEARLS               (20u)                                             // 
+#define MUSCUS_GENERATES            (32u)                                             // 
+#define MUSCUS_GENERATES_RAWS       (MUSCUS_GENERATES * 2u)                           // 
+#define MUSCUS_PEARLS               (21u)                                             // 
 #define MUSCUS_PEARLS_RAWS          (MUSCUS_PEARLS * 2u)                              // 
 
 
@@ -725,16 +727,23 @@ private:
 class cMuscusMission final : public cMission
 {
 private:
-    cOrlacBoss   m_Orlac;                            // 
-    cGemingaBoss m_Geminga;                          // 
-    cNagualBoss  m_Nagual;                           // 
+    cOrlacBoss   m_Orlac;                                    // 
+    cGemingaBoss m_Geminga;                                  // 
+    cNagualBoss  m_Nagual;                                   // 
 
-    coreBatchList m_Pearl;                           // 
-    coreBatchList m_PearlWave;                       // 
-    coreObject3D  m_aPearlRaw[MUSCUS_PEARLS_RAWS];   // 
-    coreUint32    m_aPearlActive;                    // 
+    coreBatchList m_Generate;                                // 
+    coreBatchList m_GenerateWave;                            // 
+    coreObject3D  m_aGenerateRaw  [MUSCUS_GENERATES_RAWS];   // 
+    coreFlow      m_afGenerateTime[MUSCUS_GENERATES];        // 
+    coreFlow      m_afGenerateBang[MUSCUS_GENERATES];        // 
+    coreFlow      m_afGenerateView[MUSCUS_GENERATES];        // 
 
-    coreFlow m_fAnimation;                           // animation value
+    coreBatchList m_Pearl;                                   // 
+    coreBatchList m_PearlWave;                               // 
+    coreObject3D  m_aPearlRaw[MUSCUS_PEARLS_RAWS];           // 
+    coreUint32    m_aPearlActive;                            // 
+
+    coreFlow m_fAnimation;                                   // animation value
 
 
 public:
@@ -745,8 +754,16 @@ public:
     ASSIGN_ID(7, "Muscus")
 
     // 
-    void EnablePearl (const coreUintW iIndex, const coreVector2& vPosition);
+    void EnableGenerate (const coreUintW iIndex);
+    void DisableGenerate(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void EnablePearl (const coreUintW iIndex);
     void DisablePearl(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    inline void ShowGenerate(const coreUintW iIndex, const coreFloat fTime) {ASSERT(iIndex < MUSCUS_GENERATES) if(m_afGenerateTime[iIndex] >= 0.0f) m_afGenerateTime[iIndex] = fTime;}
+    inline void BangGenerate(const coreUintW iIndex)                        {ASSERT(iIndex < MUSCUS_GENERATES) if(m_afGenerateTime[iIndex] >= 0.0f) m_afGenerateBang[iIndex] = 1.0f;}
 
 
 private:
