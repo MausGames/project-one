@@ -31,6 +31,7 @@ cMission::cMission()noexcept
 , m_iStageSub           (0u)
 , m_fStageSubTime       (0.0f)
 , m_fStageSubTimeBefore (0.0f)
+, m_fStageWait          (0.0f)
 , m_pfMedalGoal         (NULL)
 , m_bBadgeGiven         (false)
 , m_iTakeFrom           (0u)
@@ -154,6 +155,7 @@ void cMission::SkipStage()
     m_iStageSub           = 0u;
     m_fStageSubTime       = 0.0f;
     m_fStageSubTimeBefore = 0.0f;
+    m_fStageWait          = 0.0f;
 
     // 
     m_pfMedalGoal = NULL;
@@ -238,6 +240,10 @@ void cMission::DeactivateWave()
     // 
     m_iCurWaveIndex    = MISSION_NO_WAVE;
     m_iCurSegmentIndex = MISSION_NO_SEGMENT;
+
+    // 
+    m_iStageSub  = 0xFFu;
+    m_fStageWait = 3.5f;
 
     // 
     g_pSave->EditGlobalStats()->iWavesDone += 1u;
