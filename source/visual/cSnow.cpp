@@ -76,10 +76,7 @@ void cSnow::Move()
     if(!m_fVisibility) return;
 
     // 
-    if(m_fDelay) m_fVisibility = MAX(m_fVisibility - m_fDelay * Core::System->GetTime(), 0.0f);
-
-    // 
-    if(!this->GetAlpha()) this->DrawAll(0u);
+    if(m_fDelay) m_fVisibility = MAX(m_fVisibility - m_fDelay * TIME, 0.0f);
     this->SetAlpha(m_fVisibility);
 
     // 
@@ -97,6 +94,9 @@ void cSnow::Enable()
 
     // 
     m_fDelay = 0.0f;
+
+    // 
+    this->DrawAll(0u);
 }
 
 
@@ -197,6 +197,8 @@ void cSnow::DrawAll(const coreUint8 iType)
 // 
 coreBool cSnow::TestCollision(const coreVector2& vPosition)const
 {
+    ASSERT(m_fVisibility)
+
     // 
     const coreUintW iX = cSnow::__GetMapIndex(vPosition.x);
     const coreUintW iY = cSnow::__GetMapIndex(vPosition.y);
@@ -220,7 +222,7 @@ void cSnow::__Reset(const coreResourceReset eInit)
 coreUintW cSnow::__GetMapIndex(const coreFloat fValue)
 {
     STATIC_ASSERT(FOREGROUND_AREA.x == FOREGROUND_AREA.y)
-    return coreUintW(CLAMP((fValue + (FOREGROUND_AREA.x * 1.1f)) / (FOREGROUND_AREA.x * 2.2f), 0.0f, 1.0f - CORE_MATH_PRECISION) * I_TO_F(SNOW_SIZE));
+    return F_TO_UI(CLAMP((fValue + (FOREGROUND_AREA.x * 1.1f)) / (FOREGROUND_AREA.x * 2.2f), 0.0f, 1.0f - CORE_MATH_PRECISION) * I_TO_F(SNOW_SIZE));
 }
 
 coreFloat cSnow::__GetMapValue(const coreUintW iIndex)
