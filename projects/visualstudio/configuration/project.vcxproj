@@ -308,6 +308,13 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\source\game\mission\AA_cErrorMission_setup.cpp" />
+    <ClCompile Include="..\..\..\source\game\mission\BB_cDemoMission.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\game\mission\BB_cDemoMission_setup.cpp" />
     <ClCompile Include="..\..\..\source\game\mission\cMission.cpp" />
     <ClCompile Include="..\..\..\source\interface\cCombatText.cpp" />
     <ClCompile Include="..\..\..\source\interface\cInterface.cpp" />

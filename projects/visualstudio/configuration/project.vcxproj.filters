@@ -312,6 +312,12 @@
     <ClCompile Include="..\..\..\source\game\mission\AA_cErrorMission_setup.cpp">
       <Filter>game\mission</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\game\mission\BB_cDemoMission.cpp">
+      <Filter>game\mission</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\game\mission\BB_cDemoMission_setup.cpp">
+      <Filter>game\mission</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\source\visual\cInk.cpp">
       <Filter>visual</Filter>
     </ClCompile>

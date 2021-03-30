@@ -39,6 +39,7 @@ target_sources(
     ${BASE_DIRECTORY}/source/game/mission/08_cAterMission_setup.cpp
     ${BASE_DIRECTORY}/source/game/mission/99_cIntroMission_setup.cpp
     ${BASE_DIRECTORY}/source/game/mission/AA_cErrorMission_setup.cpp
+    ${BASE_DIRECTORY}/source/game/mission/BB_cDemoMission_setup.cpp
     ${BASE_DIRECTORY}/source/game/mission/cMission.cpp
     ${BASE_DIRECTORY}/source/game/cBullet.cpp
     ${BASE_DIRECTORY}/source/game/cChroma.cpp

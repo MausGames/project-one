@@ -378,3 +378,4 @@ UNITY_BUILD
 #include "08_cAterMission.cpp"
 #include "99_cIntroMission.cpp"
 #include "AA_cErrorMission.cpp"
+#include "BB_cDemoMission.cpp"

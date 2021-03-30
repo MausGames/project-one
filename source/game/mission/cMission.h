@@ -845,6 +845,27 @@ private:
 
 // ****************************************************************
 // 
+class cDemoMission final : public cMission
+{
+private:
+    cProjectOneBoss m_ProjectOne;   // 
+
+
+public:
+    cDemoMission()noexcept;
+
+    DISABLE_COPY(cDemoMission)
+    ASSIGN_ID(101, "Demo")
+
+
+private:
+    // execute own routines
+    void __SetupOwn()final;
+};
+
+
+// ****************************************************************
+// 
 template <typename F> coreSpline2* cMission::_AddPath(const coreUint16 iCodeLine, F&& nInitFunc)
 {
     if(!m_apPath.count(iCodeLine))

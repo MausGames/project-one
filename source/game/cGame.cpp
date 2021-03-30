@@ -314,6 +314,7 @@ void cGame::LoadMissionID(const coreInt32 iID, const coreUint8 iTakeFrom, const 
     case cAterMission   ::ID: m_pCurMission = new cAterMission   (); break;
     case cIntroMission  ::ID: m_pCurMission = new cIntroMission  (); break;
     case cErrorMission  ::ID: m_pCurMission = new cErrorMission  (); break;
+    case cDemoMission   ::ID: m_pCurMission = new cDemoMission   (); break;
     }
 
     // 

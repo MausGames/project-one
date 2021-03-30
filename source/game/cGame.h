@@ -48,7 +48,7 @@ struct sGameOptions final
 
 // ****************************************************************
 // 
-static constexpr coreInt32 __GAME_MISSION_LIST_DEFAULT[] =
+static constexpr coreInt32 __GAME_MISSION_LIST_MAIN[] =
 {
     cIntroMission  ::ID,
     cViridoMission ::ID,
@@ -62,22 +62,21 @@ static constexpr coreInt32 __GAME_MISSION_LIST_DEFAULT[] =
     cNoMission     ::ID
 };
 
-static constexpr coreInt32 __GAME_MISSION_LIST_MAIN[] =
-{
-    cIntroMission ::ID,
-    cViridoMission::ID,
-    cNoMission    ::ID
-};
-
 static constexpr coreInt32 __GAME_MISSION_LIST_ERROR[] =
 {
     cErrorMission::ID,
     cNoMission   ::ID
 };
 
-#define GAME_MISSION_LIST_DEFAULT (__GAME_MISSION_LIST_DEFAULT), ARRAY_SIZE(__GAME_MISSION_LIST_DEFAULT)
-#define GAME_MISSION_LIST_MAIN    (__GAME_MISSION_LIST_MAIN),    ARRAY_SIZE(__GAME_MISSION_LIST_MAIN)
-#define GAME_MISSION_LIST_ERROR   (__GAME_MISSION_LIST_ERROR),   ARRAY_SIZE(__GAME_MISSION_LIST_ERROR)
+static constexpr coreInt32 __GAME_MISSION_LIST_DEMO[] =
+{
+    cDemoMission::ID,
+    cNoMission  ::ID
+};
+
+#define GAME_MISSION_LIST_MAIN  (__GAME_MISSION_LIST_MAIN),  ARRAY_SIZE(__GAME_MISSION_LIST_MAIN)
+#define GAME_MISSION_LIST_ERROR (__GAME_MISSION_LIST_ERROR), ARRAY_SIZE(__GAME_MISSION_LIST_ERROR)
+#define GAME_MISSION_LIST_DEMO  (__GAME_MISSION_LIST_DEMO),  ARRAY_SIZE(__GAME_MISSION_LIST_DEMO)
 
 
 // ****************************************************************

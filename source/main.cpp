@@ -370,7 +370,7 @@ static void DebugGame()
                 oOptions.aaiSupport[i][0] = 0u;
             }
 
-            #define __LOAD_GAME(x) {STATIC_NEW(g_pGame, oOptions, GAME_MISSION_LIST_DEFAULT) g_pGame->LoadMissionID(x); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f); g_pPostProcessing->SetWallOpacity(1.0f);}
+            #define __LOAD_GAME(x) {STATIC_NEW(g_pGame, oOptions, GAME_MISSION_LIST_MAIN) g_pGame->LoadMissionID(x); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f); g_pPostProcessing->SetWallOpacity(1.0f);}
                  if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS)) __LOAD_GAME(cIntroMission  ::ID)
             else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2), CORE_INPUT_PRESS)) __LOAD_GAME(cViridoMission ::ID)
             else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(3), CORE_INPUT_PRESS)) __LOAD_GAME(cNevoMission   ::ID)
