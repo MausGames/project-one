@@ -252,9 +252,9 @@ void cPlayer::Move()
             coreVector2 vNewDir = this->GetDirection().xy();
 
             // 
-            if(CONTAINS_BIT(m_pInput->iActionPress, PLAYER_EQUIP_WEAPONS * WEAPON_MODES + 1u))
+            if(CONTAINS_BIT(m_pInput->iActionPress, PLAYER_EQUIP_WEAPONS * WEAPON_MODES))
                 vNewDir = -vNewDir.Rotated90();
-            if(CONTAINS_BIT(m_pInput->iActionPress, PLAYER_EQUIP_WEAPONS * WEAPON_MODES + 2u))
+            if(CONTAINS_BIT(m_pInput->iActionPress, PLAYER_EQUIP_WEAPONS * WEAPON_MODES + 1u))
                 vNewDir =  vNewDir.Rotated90();
 
             // set new direction
@@ -264,8 +264,8 @@ void cPlayer::Move()
         if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_ROLL))
         {
             // 
-            if(CONTAINS_BIT(m_pInput->iActionPress, PLAYER_EQUIP_WEAPONS * WEAPON_MODES))
-                if(m_fRollTime <= 0.0f) this->StartRolling(m_pInput->vMove);
+            //if(CONTAINS_BIT(m_pInput->iActionPress, PLAYER_EQUIP_WEAPONS * WEAPON_MODES))
+            //    if(m_fRollTime <= 0.0f) this->StartRolling(m_pInput->vMove);
         }
 
         if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))

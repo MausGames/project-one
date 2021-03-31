@@ -125,8 +125,8 @@ cConfigMenu::cConfigMenu()noexcept
     m_aCueInput[1].SetText     (ICON_ARROW_UP);
     m_aCueInput[2].SetText     (ICON_ARROW_UP);
     m_aCueInput[3].SetText     (ICON_ARROW_UP);
-    m_aCueInput[6].SetText     (ICON_UNDO_ALT);
-    m_aCueInput[7].SetText     (ICON_REDO_ALT);
+    m_aCueInput[5].SetText     (ICON_UNDO_ALT);
+    m_aCueInput[6].SetText     (ICON_REDO_ALT);
 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCueRota); ++i)
     {
@@ -209,7 +209,6 @@ cConfigMenu::cConfigMenu()noexcept
             __SET_INPUT(aAction[1], INPUT_ACTION2,   0.22f)
             __SET_INPUT(aAction[2], INPUT_ACTION3,   0.22f)
             __SET_INPUT(aAction[3], INPUT_ACTION4,   0.22f)
-            __SET_INPUT(aAction[4], INPUT_ACTION5,   0.22f)
 
             m_aInput[i].oType  .SetEndless(true);
             m_aInput[i].oRumble.SetEndless(true);
