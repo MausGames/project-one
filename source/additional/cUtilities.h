@@ -119,7 +119,7 @@ template <typename T, typename S, typename R> inline FUNC_LOCAL T ParaLerp(const
 // 
 inline FUNC_PURE coreFloat FrictionFactor(const coreFloat fStrength)
 {
-    return POW(1.0f - fStrength * (1.0f / FRAMERATE_MIN), Core::System->GetTime() * FRAMERATE_MIN);
+    return POW(1.0f - fStrength * (1.0f / FRAMERATE_MIN), TIME * FRAMERATE_MIN);
 }
 
 

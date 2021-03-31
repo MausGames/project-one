@@ -271,7 +271,7 @@ void cPlayer::Move()
         if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
         {
             // move the ship
-            vNewPos += (m_pInput->vMove * this->CalcMoveSpeed() + m_vForce) * Core::System->GetTime();
+            vNewPos += (m_pInput->vMove * this->CalcMoveSpeed() + m_vForce) * TIME;
 
             // restrict movement to the foreground area
                  if(vNewPos.x < m_vArea.x) {vNewPos.x = m_vArea.x; m_vForce.x =  ABS(m_vForce.x);}
@@ -280,7 +280,7 @@ void cPlayer::Move()
             else if(vNewPos.y > m_vArea.w) {vNewPos.y = m_vArea.w; m_vForce.y = -ABS(m_vForce.y);}
 
             // 
-            const coreVector2 vDiff = (vNewPos - this->GetPosition().xy()) * RCP(Core::System->GetTime() * FRAMERATE_MIN + CORE_MATH_PRECISION);
+            const coreVector2 vDiff = (vNewPos - this->GetPosition().xy()) * RCP(TIME * FRAMERATE_MIN + CORE_MATH_PRECISION);
             vNewOri = coreVector3(CLAMP(vDiff.x, -0.6f, 0.6f), CLAMP(vDiff.y, -0.6f, 0.6f), 1.0f).NormalizedUnsafe();
         }
 
@@ -356,8 +356,8 @@ void cPlayer::Move()
             m_fFeelTime.Update(-1.0f);
 
             // 
-            if(m_fFeelTime > 0.0f) m_Bubble.SetAlpha(MIN(m_Bubble.GetAlpha() + 4.0f*Core::System->GetTime(), 0.8f));
-                              else m_Bubble.SetAlpha(MAX(m_Bubble.GetAlpha() - 4.0f*Core::System->GetTime(), 0.0f));
+            if(m_fFeelTime > 0.0f) m_Bubble.SetAlpha(MIN(m_Bubble.GetAlpha() + 4.0f*TIME, 0.8f));
+                              else m_Bubble.SetAlpha(MAX(m_Bubble.GetAlpha() - 4.0f*TIME, 0.0f));
 
             // 
             if(!m_Bubble.GetAlpha()) this->EndFeeling();
@@ -763,7 +763,7 @@ coreVector2 cPlayer::CalcMove()const
     if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
     {
         // move the ship
-        coreVector2 vNewPos = this->GetPosition().xy() + (m_pInput->vMove * this->CalcMoveSpeed() + m_vForce) * Core::System->GetTime();
+        coreVector2 vNewPos = this->GetPosition().xy() + (m_pInput->vMove * this->CalcMoveSpeed() + m_vForce) * TIME;
 
         // restrict movement to the foreground area
         vNewPos.x = CLAMP(vNewPos.x, m_vArea.x, m_vArea.z);

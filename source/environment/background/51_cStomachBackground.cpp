@@ -81,7 +81,7 @@ void cStomachBackground::__MoveOwn()
     ASSERT(!g_pEnvironment->GetSpeed())   // # no movement
 
     // 
-    const coreFloat fMove = Core::System->GetTime() * 6.0f;
+    const coreFloat fMove = TIME * 6.0f;
 
     // 
     coreBatchList* pList = m_apAirObjectList[0];

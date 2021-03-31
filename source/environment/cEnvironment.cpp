@@ -123,7 +123,7 @@ void cEnvironment::Move()
     m_afHeight   [0] = m_afHeight[0] + (m_afHeight[1] - m_afHeight[0]) * (Core::System->GetTime() *  2.0f);
 
     // calculate global fly offset
-    m_fFlyOffset += Core::System->GetTime() * m_afSpeed[0];
+    m_fFlyOffset += TIME * m_afSpeed[0];
     while(m_fFlyOffset <  0.0f)                   {m_fFlyOffset += I_TO_F(OUTDOOR_HEIGHT); m_pBackground->ShoveAdds( I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL); if(m_pOldBackground) m_pOldBackground->ShoveAdds( I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL);}
     while(m_fFlyOffset >= I_TO_F(OUTDOOR_HEIGHT)) {m_fFlyOffset -= I_TO_F(OUTDOOR_HEIGHT); m_pBackground->ShoveAdds(-I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL); if(m_pOldBackground) m_pOldBackground->ShoveAdds(-I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL);}
 

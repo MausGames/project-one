@@ -360,7 +360,7 @@ void cRainWater::__UpdateOwn()
 
                     // 
                     oDrop.SetSize (coreVector3(1.0f,1.0f,1.0f) * (RAIN_DROP_WIDTH * fMapSize * (1.0f - oDrop.GetAlpha())));
-                    oDrop.SetAlpha(MAX(oDrop.GetAlpha() - RAIN_DROP_SPEED * Core::System->GetTime(), 0.0f));
+                    oDrop.SetAlpha(MAX(oDrop.GetAlpha() - RAIN_DROP_SPEED * TIME, 0.0f));
                 }
 
                 // 

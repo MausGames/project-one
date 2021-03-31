@@ -312,7 +312,7 @@ void cTorusBoss::__MoveOwn()
 
             // 
             const coreFloat   fMoveSide = CONTAINS_BIT(m_iGunnerMove, i) ? -1.0f : 1.0f;
-            const coreVector2 vMoveDir  = coreVector2(fMoveSide * FOREGROUND_AREA.x * TORUS_GUNNER_SPEED * Core::System->GetTime(), 0.0f);
+            const coreVector2 vMoveDir  = coreVector2(fMoveSide * FOREGROUND_AREA.x * TORUS_GUNNER_SPEED * TIME, 0.0f);
             const coreVector2 vNewPos   = pGunner->GetPosition().xy() + ((i & 0x02u) ? vMoveDir.yx() : vMoveDir);
 
             // 

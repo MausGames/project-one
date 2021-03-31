@@ -197,9 +197,9 @@ void cDharukBoss::__MoveOwn()
     }
 
     // 
-    if(Core::System->GetTime())
+    if(TIME)
     {
-        const coreFloat fRcpTime = RCP(Core::System->GetTime());
+        const coreFloat fRcpTime = RCP(TIME);
 
         // 
         const coreVector2 vCurBasePos   = this->GetPosition   ().xy();
@@ -239,7 +239,7 @@ void cDharukBoss::__MoveOwn()
         const coreVector2 vFly = this->__DecodeDirection(i);
 
         // 
-        coreVector2       vNewPos = pBoomerang->GetPosition().xy() + vFly * FOREGROUND_AREA * (1.5f * Core::System->GetTime());
+        coreVector2       vNewPos = pBoomerang->GetPosition().xy() + vFly * FOREGROUND_AREA * (1.5f * TIME);
         const coreVector2 vNewDir = coreVector2::Direction((1.0f/16.0f) * PI * (vNewPos.x + vNewPos.y) * (vFly.x + vFly.y));
 
         // 
@@ -262,7 +262,7 @@ void cDharukBoss::__MoveOwn()
         // 
         pBoomerang->SetPosition (coreVector3(vNewPos, 0.0f));
         pBoomerang->SetDirection(coreVector3(vNewDir, 0.0f));
-        pBoomerang->SetAlpha    (MIN(pBoomerang->GetAlpha() + 10.0f * Core::System->GetTime(), 1.0f));
+        pBoomerang->SetAlpha    (MIN(pBoomerang->GetAlpha() + 10.0f * TIME, 1.0f));
         pBoomerang->SetTexOffset(coreVector2(0.0f, m_fAnimation));
 
         for(coreUintW j = 0u; j < DHARUK_TRAILS; ++j)

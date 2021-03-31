@@ -458,7 +458,7 @@ void cPulseBullet::__ReflectOwn()
 void cPulseBullet::__MoveOwn()
 {
     // 
-    m_fSpeed += 2.5f * BULLET_SPEED_FACTOR * Core::System->GetTime();
+    m_fSpeed += 2.5f * BULLET_SPEED_FACTOR * TIME;
 
     // fly around
     this->SetPosition (coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
@@ -1119,7 +1119,7 @@ void cRocketBullet::__ReflectOwn()
 void cRocketBullet::__MoveOwn()
 {
     // 
-    m_fSpeed += 2.0f * BULLET_SPEED_FACTOR * Core::System->GetTime();
+    m_fSpeed += 2.0f * BULLET_SPEED_FACTOR * TIME;
     if(m_fSpeed > 300.0f) this->Deactivate(true);
 
     // 
@@ -1145,7 +1145,7 @@ void cRocketBullet::__MoveOwn()
     this->SetAlpha(MIN(20.0f * m_fFade, 1.0f));
 
     // 
-    if(Core::System->GetTime()) g_pSpecialEffects->CreateSplashSmoke(this->GetPosition() - this->GetDirection() * 4.5f, 5.0f, 1u, coreVector3(1.0f,1.0f,1.0f));
+    if(TIME) g_pSpecialEffects->CreateSplashSmoke(this->GetPosition() - this->GetDirection() * 4.5f, 5.0f, 1u, coreVector3(1.0f,1.0f,1.0f));
 }
 
 

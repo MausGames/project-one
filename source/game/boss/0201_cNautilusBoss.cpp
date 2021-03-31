@@ -122,13 +122,13 @@ void cNautilusBoss::__MoveOwn()
     // ################################################################
     // ################################################################
 
-    if((m_iPhase < 10u) && Core::System->GetTime())
+    if((m_iPhase < 10u) && TIME)
     {
         // 
         m_fMovement.UpdateMod(1.0f, 2.0f*PI);
 
         // 
-        const coreFloat fPrevX = 0.6f * SIN(m_fMovement - Core::System->GetTime());
+        const coreFloat fPrevX = 0.6f * SIN(m_fMovement - TIME);
         const coreFloat fCurX  = 0.6f * SIN(m_fMovement);
 
         // 
@@ -193,7 +193,7 @@ void cNautilusBoss::__MoveOwn()
     {
         const coreVector3 vPos    = m_InkBullet.GetPosition();
         const coreVector3 vDir    = m_InkBullet.GetDirection();
-        const coreVector3 vNewPos = coreVector3(vPos.xy() + vDir.xy() * (40.0f * Core::System->GetTime()), 0.0f);
+        const coreVector3 vNewPos = coreVector3(vPos.xy() + vDir.xy() * (40.0f * TIME), 0.0f);
 
         // 
         m_InkBullet.SetPosition (vNewPos);

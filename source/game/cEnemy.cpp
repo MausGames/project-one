@@ -903,7 +903,7 @@ void cRepairEnemy::__MoveOwn()
     m_fAnimation.UpdateMod(0.2f, 1.0f);
 
     // 
-    const coreVector2 vNewPos = this->GetPosition().xy() + m_vDirection * (30.0f * Core::System->GetTime());
+    const coreVector2 vNewPos = this->GetPosition().xy() + m_vDirection * (30.0f * TIME);
     const coreVector4 vArea   = m_pPlayer->GetArea();
 
     // 
@@ -918,7 +918,7 @@ void cRepairEnemy::__MoveOwn()
     this->DefaultMultiate(m_fAnimation * (8.0f*PI));
 
     // 
-    m_Bubble.SetAlpha(MIN(m_Bubble.GetAlpha() + 4.0f * Core::System->GetTime(), 0.8f));
+    m_Bubble.SetAlpha(MIN(m_Bubble.GetAlpha() + 4.0f * TIME, 0.8f));
 
     // 
     m_Bubble.SetPosition (coreVector3(vNewPos, 0.0f));

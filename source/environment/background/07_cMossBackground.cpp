@@ -142,7 +142,7 @@ void cMossBackground::__MoveOwn()
     // 
     const coreVector2 vMove      = m_vRainDirection * (-0.35f * g_pEnvironment->GetSpeed());
     const coreVector2 vTexSize   = coreVector2(1.0f,1.0f) * 6.0f;
-    const coreVector2 vTexOffset = m_Rain.GetTexOffset() + (coreVector2(0.0f,-1.2f) + vMove) * (1.0f * Core::System->GetTime());
+    const coreVector2 vTexOffset = m_Rain.GetTexOffset() + (coreVector2(0.0f,-1.2f) + vMove) * (1.0f * TIME);
 
     // 
     m_Rain.SetDirection(MapToAxisInv(m_vRainDirection.InvertedX(), g_pEnvironment->GetDirection()));

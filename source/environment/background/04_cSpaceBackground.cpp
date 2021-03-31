@@ -90,7 +90,7 @@ void cSpaceBackground::__RenderOwnBefore()
 void cSpaceBackground::__MoveOwn()
 {
     // 
-    const coreMatrix3 mRota = coreMatrix4::RotationY(Core::System->GetTime() * -0.7f).m123();
+    const coreMatrix3 mRota = coreMatrix4::RotationY(TIME * -0.7f).m123();
 
     // 
     coreBatchList* pList = m_apGroundObjectList[0];
@@ -107,7 +107,7 @@ void cSpaceBackground::__MoveOwn()
 
     // 
     const coreVector2 vMove      = coreVector2(0.0f,1.0f) * (-0.35f * g_pEnvironment->GetSpeed());
-    const coreVector2 vTexOffset = m_Cover.GetTexOffset() + (coreVector2(0.0f,0.0f) + vMove) * (0.05f * Core::System->GetTime());
+    const coreVector2 vTexOffset = m_Cover.GetTexOffset() + (coreVector2(0.0f,0.0f) + vMove) * (0.05f * TIME);
 
     // 
     m_Cover.SetDirection(g_pEnvironment->GetDirection().InvertedX());

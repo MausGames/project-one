@@ -205,7 +205,7 @@ void cSnowBackground::__MoveOwn()
     // 
     const coreVector2 vMove      = m_vSnowDirection * (-0.35f * g_pEnvironment->GetSpeed());
     const coreVector2 vTexSize   = coreVector2(1.0f,1.0f) * 5.4f;
-    const coreVector2 vTexOffset = m_Snow.GetTexOffset() + (coreVector2(0.0f,0.0f) + vMove) * (0.9f * Core::System->GetTime());
+    const coreVector2 vTexOffset = m_Snow.GetTexOffset() + (coreVector2(0.0f,0.0f) + vMove) * (0.9f * TIME);
 
     // 
     m_Snow.SetDirection(MapToAxisInv(m_vSnowDirection.InvertedX(), g_pEnvironment->GetDirection()));

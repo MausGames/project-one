@@ -434,14 +434,14 @@ static void DebugGame()
         else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_9),        CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 1.0f, 1.0f).Normalized());
         else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_PLUS),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetSpeed((&g_pEnvironment->GetSpeed())[1] + 1.0f);
         else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_MINUS),    CORE_INPUT_PRESS)) g_pEnvironment->SetTargetSpeed((&g_pEnvironment->GetSpeed())[1] - 1.0f);
-        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_DIVIDE),   CORE_INPUT_HOLD))  g_pEnvironment->SetTargetSide ((&g_pEnvironment->GetSide ())[1] - coreVector2(30.0f * Core::System->GetTime(), 0.0f));
-        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_MULTIPLY), CORE_INPUT_HOLD))  g_pEnvironment->SetTargetSide ((&g_pEnvironment->GetSide ())[1] + coreVector2(30.0f * Core::System->GetTime(), 0.0f));
+        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_DIVIDE),   CORE_INPUT_HOLD))  g_pEnvironment->SetTargetSide ((&g_pEnvironment->GetSide ())[1] - coreVector2(30.0f * TIME, 0.0f));
+        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_MULTIPLY), CORE_INPUT_HOLD))  g_pEnvironment->SetTargetSide ((&g_pEnvironment->GetSide ())[1] + coreVector2(30.0f * TIME, 0.0f));
     }
 
     // set background height
     static coreFloat s_fHeight = 0.0f;
-         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(R), CORE_INPUT_HOLD)) s_fHeight += 15.0f * Core::System->GetTime();
-    else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(T), CORE_INPUT_HOLD)) s_fHeight -= 15.0f * Core::System->GetTime();
+         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(R), CORE_INPUT_HOLD)) s_fHeight += 15.0f * TIME;
+    else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(T), CORE_INPUT_HOLD)) s_fHeight -= 15.0f * TIME;
     g_pEnvironment->SetTargetHeight(s_fHeight);
 
     // set background interpolation

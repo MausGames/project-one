@@ -37,7 +37,7 @@ void cChromaManager::Move()
     {
         const coreBool  bRolling = pPlayer->IsRolling();
         const coreFloat fRange   = (bRolling ? POW2(40.0f) : POW2(15.0f));
-        const coreFloat fSpeed   = (bRolling ? 200.0f      : 100.0f) * RCP(fRange) * Core::System->GetTime();
+        const coreFloat fSpeed   = (bRolling ? 200.0f      : 100.0f) * RCP(fRange) * TIME;
 
         // 
         m_BulletManager.ForEachBulletTyped<cChromaBullet>([&](cChromaBullet* OUTPUT pBullet)

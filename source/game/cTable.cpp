@@ -314,7 +314,7 @@ void cScoreTable::TransferChain()
 // ****************************************************************
 // constructor
 cTimeTable::cTimeTable()noexcept
-: m_fFrameTime (Core::System->GetTime())
+: m_fFrameTime (TIME)
 {
     // 
     this->Reset();

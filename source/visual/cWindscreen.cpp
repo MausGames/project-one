@@ -60,7 +60,7 @@ void cWindscreen::Move()
             FOR_EACH_DYN(it, *papObject)
             {
                 // 
-                const coreFloat fNewLifeTime = coreMath::BitsToFloat((*it)->GetStatus()) - Core::System->GetTime();
+                const coreFloat fNewLifeTime = coreMath::BitsToFloat((*it)->GetStatus()) - TIME;
                 if(fNewLifeTime > 0.0f)
                 {
                     // 

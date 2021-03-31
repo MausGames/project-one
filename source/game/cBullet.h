@@ -100,7 +100,7 @@ public:
     inline const coreUint8&   GetElement()const {return m_iElement;}
     inline const coreFloat&   GetFlyTime()const {return m_fFlyTime;}
     inline const coreVector2& GetFlyDir ()const {return m_vFlyDir;}
-    inline       coreVector2  GetFlyMove()const {return m_vFlyDir * (m_fSpeed * Core::System->GetTime());}
+    inline       coreVector2  GetFlyMove()const {return m_vFlyDir * (m_fSpeed * TIME);}
 
     // bullet configuration values
     static inline const coreChar* ConfigProgramInstancedName() {ASSERT(false) return "";}

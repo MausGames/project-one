@@ -155,7 +155,7 @@ void cSpecialEffects::Move()
             if(pOwner) pLightning->SetPosition(pOwner->GetPosition());
 
             // 
-            pLightning->SetAlpha(pLightning->GetAlpha() - 4.0f * Core::System->GetTime());
+            pLightning->SetAlpha(pLightning->GetAlpha() - 4.0f * TIME);
 
             // 
             if(pLightning->GetAlpha() > 0.0f)
@@ -175,7 +175,7 @@ void cSpecialEffects::Move()
             const coreFloat fSpeed = oBlast.GetCollisionModifier().y;
 
             // 
-            oBlast.SetAlpha    (MAX(oBlast.GetAlpha() - fSpeed * Core::System->GetTime(), 0.0f));
+            oBlast.SetAlpha    (MAX(oBlast.GetAlpha() - fSpeed * TIME, 0.0f));
             oBlast.SetSize     (coreVector3(8.0f,8.0f,8.0f) * (fScale * (1.0f - oBlast.GetAlpha())));
             oBlast.SetTexOffset(coreVector2(0.0f,0.1f) * oBlast.GetAlpha());
             oBlast.Move();
