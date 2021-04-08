@@ -77,6 +77,8 @@
 #define RUTILUS_WAVES               (4u)                                              // 
 #define RUTILUS_WAVES_RAWS          (RUTILUS_WAVES)                                   // 
 
+#define GELU_WAYS                   (26u)                                             // 
+#define GELU_WAYS_RAWS              (GELU_WAYS * 2u)                                  // 
 #define GELU_ORBS                   (16u)                                             // 
 #define GELU_ORBS_RAWS              (GELU_ORBS)                                       // 
 #define GELU_LINES                  (24u)                                             // 
@@ -646,6 +648,12 @@ private:
     cPhalarisBoss m_Phalaris;                      // 
     cCholBoss     m_Chol;                          // 
 
+    coreBatchList m_Way;                           // 
+    coreBatchList m_WayArrow;                      // 
+    coreObject3D  m_aWayRaw[GELU_WAYS_RAWS];       // 
+    coreUint32    m_iWayActive;                    // 
+    coreUint32    m_iWayVisible;                   // 
+
     coreBatchList m_Orb;                           // 
     coreObject3D  m_aOrbRaw  [GELU_ORBS_RAWS];     // 
     coreFlow      m_afOrbTime[GELU_ORBS];          // 
@@ -665,6 +673,10 @@ public:
     ASSIGN_ID(5, "Gelu")
 
     // 
+    void EnableWay (const coreUintW iIndex, const coreVector2& vPosition, const coreVector2& vDirection);
+    void DisableWay(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
     void EnableOrb (const coreUintW iIndex);
     void DisableOrb(const coreUintW iIndex, const coreBool bAnimated);
 
@@ -677,6 +689,7 @@ private:
     // execute own routines
     void __SetupOwn       ()final;
     void __RenderOwnBottom()final;
+    void __RenderOwnUnder ()final;
     void __MoveOwnAfter   ()final;
 };
 

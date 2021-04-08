@@ -12,16 +12,47 @@
 // ****************************************************************
 // constructor
 cGeluMission::cGeluMission()noexcept
-: m_Orb        (GELU_ORBS)
-, m_afOrbTime  {}
-, m_Line       (GELU_LINES)
-, m_afLineTime {}
-, m_fAnimation (0.0f)
+: m_Way         (GELU_WAYS)
+, m_WayArrow    (GELU_WAYS)
+, m_iWayActive  (0u)
+, m_iWayVisible (0u)
+, m_Orb         (GELU_ORBS)
+, m_afOrbTime   {}
+, m_Line        (GELU_LINES)
+, m_afLineTime  {}
+, m_fAnimation  (0.0f)
 {
     // 
     m_apBoss[0] = &m_Tartarus;
     m_apBoss[1] = &m_Phalaris;
     m_apBoss[2] = &m_Chol;
+
+    // 
+    m_Way     .DefineProgram("effect_energy_flat_spheric_inst_program");
+    m_WayArrow.DefineProgram("effect_energy_flat_invert_inst_program");
+    {
+        for(coreUintW i = 0u; i < GELU_WAYS_RAWS; ++i)
+        {
+            // determine object type
+            const coreUintW iType = i % 2u;
+
+            // load object resources
+            coreObject3D* pWay = &m_aWayRaw[i];
+            pWay->DefineModel  (iType ? "object_arrow.md3" : "object_cube_top.md3");
+            pWay->DefineTexture(0u, "effect_energy.png");
+            pWay->DefineProgram(iType ? "effect_energy_flat_invert_program" : "effect_energy_flat_spheric_program");
+
+            // set object properties
+            pWay->SetSize   (coreVector3(1.0f,1.0f,1.0f) * (iType ? 2.0f : 7.0f));
+            pWay->SetColor3 (COLOR_ENERGY_MAGENTA * 0.8f);
+            pWay->SetTexSize(coreVector2(1.0f,1.0f) * (iType ? 0.4f : 0.7f));
+            pWay->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
+            // add object to the list
+            if(iType) m_WayArrow.BindObject(pWay);
+                 else m_Way     .BindObject(pWay);
+        }
+    }
 
     // 
     m_Orb.DefineProgram("effect_energy_flat_invert_inst_program");
@@ -66,6 +97,8 @@ cGeluMission::cGeluMission()noexcept
     }
 
     // 
+    g_pGlow->BindList(&m_Way);
+    g_pGlow->BindList(&m_WayArrow);
     g_pGlow->BindList(&m_Orb);
     g_pGlow->BindList(&m_Line);
 }
@@ -76,12 +109,63 @@ cGeluMission::cGeluMission()noexcept
 cGeluMission::~cGeluMission()
 {
     // 
+    g_pGlow->UnbindList(&m_Way);
+    g_pGlow->UnbindList(&m_WayArrow);
     g_pGlow->UnbindList(&m_Orb);
     g_pGlow->UnbindList(&m_Line);
 
     // 
+    for(coreUintW i = 0u; i < GELU_WAYS;  ++i) this->DisableWay (i, false);
     for(coreUintW i = 0u; i < GELU_ORBS;  ++i) this->DisableOrb (i, false);
     for(coreUintW i = 0u; i < GELU_LINES; ++i) this->DisableLine(i, false);
+}
+
+
+// ****************************************************************
+// 
+void cGeluMission::EnableWay(const coreUintW iIndex, const coreVector2& vPosition, const coreVector2& vDirection)
+{
+    ASSERT(iIndex < GELU_WAYS)
+    coreObject3D* pWay   = (*m_Way     .List())[iIndex];
+    coreObject3D* pArrow = (*m_WayArrow.List())[iIndex];
+
+    // 
+    WARN_IF(pWay->IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    ADD_BIT(m_iWayActive,  iIndex)
+    ADD_BIT(m_iWayVisible, iIndex)
+    STATIC_ASSERT(GELU_WAYS <= sizeof(m_iWayActive) *8u)
+    STATIC_ASSERT(GELU_WAYS <= sizeof(m_iWayVisible)*8u)
+
+    // 
+    pWay  ->SetPosition (coreVector3(vPosition,  0.0f));
+    pWay  ->SetDirection(coreVector3(vDirection, 0.0f));
+    pWay  ->SetEnabled  (CORE_OBJECT_ENABLE_ALL);
+    pArrow->SetEnabled  (CORE_OBJECT_ENABLE_ALL);
+}
+
+
+// ****************************************************************
+// 
+void cGeluMission::DisableWay(const coreUintW iIndex, const coreBool bAnimated)
+{
+    ASSERT(iIndex < GELU_WAYS)
+    coreObject3D* pWay   = (*m_Way     .List())[iIndex];
+    coreObject3D* pArrow = (*m_WayArrow.List())[iIndex];
+
+    // 
+    if(!pWay->IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    REMOVE_BIT(m_iWayActive, iIndex)
+
+    // 
+    if(!bAnimated)
+    {
+        pWay  ->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        pArrow->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    }
 }
 
 
@@ -176,10 +260,72 @@ void cGeluMission::__RenderOwnBottom()
 
 // ****************************************************************
 // 
+void cGeluMission::__RenderOwnUnder()
+{
+    DEPTH_PUSH
+    DEPTH_PUSH   // TODO: precision artifacts
+
+    // 
+    m_Way.Render();
+    g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyList(&m_Way);
+
+    DEPTH_PUSH
+
+    // 
+    m_WayArrow.Render();
+    g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyList(&m_WayArrow);
+}
+
+
+// ****************************************************************
+// 
 void cGeluMission::__MoveOwnAfter()
 {
     // 
     m_fAnimation.UpdateMod(0.2f, 10.0f);
+
+    // 
+    for(coreUintW i = 0u; i < GELU_WAYS; ++i)
+    {
+        coreObject3D* pWay   = (*m_Way     .List())[i];
+        coreObject3D* pArrow = (*m_WayArrow.List())[i];
+        if(!pWay->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+        if(!CONTAINS_BIT(m_iWayActive, i))
+        {
+            // 
+            const coreVector2 vPos    = pWay->GetPosition ().xy();
+            const coreVector2 vDir    = pWay->GetDirection().xy();
+            const coreVector2 vNewPos = vPos + vPos.Normalized() * coreVector2(1.0f,0.5f) * (TIME * 50.0f);
+            const coreVector2 vNewDir = coreVector2::Direction(vDir.Angle() + (TIME * 4.0f));
+
+            // 
+            pWay->SetPosition (coreVector3(vNewPos, 0.0f));
+            pWay->SetDirection(coreVector3(vNewDir, 0.0f));
+
+            // 
+            if(!g_pForeground->IsVisiblePoint(vNewPos, 1.3f))
+                this->DisableWay(i, false);
+        }
+
+        // 
+        const coreFloat fOffset  = I_TO_F(i) * (1.0f/7.0f);
+        const coreBool  bVisible = CONTAINS_BIT(m_iWayVisible, i);
+
+        // 
+        pWay->SetAlpha    (bVisible ? 1.0f : 0.0f);
+        pWay->SetTexOffset(coreVector2(0.0f, FRACT(-0.3f * m_fAnimation + fOffset)));
+
+        // 
+        pArrow->SetPosition (pWay->GetPosition ());
+        pArrow->SetDirection(pWay->GetDirection());
+        pArrow->SetAlpha    (bVisible ? 1.0f : 0.4f);
+        pArrow->SetTexOffset(pWay->GetTexOffset());
+    }
+
+    // 
+    m_Way     .MoveNormal();
+    m_WayArrow.MoveNormal();
 
     // 
     for(coreUintW i = 0u; i < GELU_ORBS; ++i)
