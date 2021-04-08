@@ -463,7 +463,7 @@ void cNevoMission::__RenderOwnBottom()
 void cNevoMission::__RenderOwnUnder()
 {
     DEPTH_PUSH
-    DEPTH_PUSH   // TODO: first push causes outline-overdraw artifacts, precision too low on the first level, can it be handled on outline(-shader) ?
+    DEPTH_PUSH   // TODO: precision artifacts
 
     glDepthMask(false);
     {

@@ -254,13 +254,13 @@ inline FUNC_LOCAL coreVector2 AlongStar(const coreVector2& v)
 
 inline FUNC_LOCAL coreVector2 AlongCrossNormal(const coreVector2& v)
 {
-    ASSERT(v.IsNormalized())
+    ASSERT(!v.IsNull())
     return IsHorizontal(v) ? coreVector2(SIGN(v.x), 0.0f) : coreVector2(0.0f, SIGN(v.y));
 }
 
 inline FUNC_LOCAL coreVector2 AlongStarNormal(const coreVector2& v)
 {
-    ASSERT(v.IsNormalized())
+    ASSERT(!v.IsNull())
     return UnpackDirection(PackDirection(v));
 }
 

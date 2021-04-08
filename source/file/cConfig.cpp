@@ -249,7 +249,7 @@ void UpdateInput()
             oMap.vMove = Core::Input->GetJoystickRelativeL(iJoystickID);
 
             // restrict movement input to the 8 base directions
-            if(!oMap.vMove.IsNull()) oMap.vMove = AlongStarNormal(oMap.vMove.NormalizedUnsafe());
+            if(!oMap.vMove.IsNull()) oMap.vMove = AlongStarNormal(oMap.vMove);
 
             // map action input
             for(coreUintW j = 0u; j < INPUT_KEYS_ACTION; ++j)

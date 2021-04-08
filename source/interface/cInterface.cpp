@@ -366,7 +366,7 @@ void cInterface::Move()
     {
         // calculate visibility and animation value
         const coreFloat fVisibility = MIN(fBanner, m_fBannerDuration - fBanner, INTERFACE_BANNER_SPEED_REV) * INTERFACE_BANNER_SPEED;
-        const coreFloat fAnimation  = LERPB(0.0f, 1.0f, fBanner / INTERFACE_BANNER_ANIMATION) * INTERFACE_BANNER_ANIMATION;
+        const coreFloat fAnimation  = LERPB(0.0f, 1.0f, MIN(fBanner / INTERFACE_BANNER_ANIMATION, 1.0f)) * INTERFACE_BANNER_ANIMATION;
 
         // slash banner bar across screen (# direction can be swapped, also alpha value is used as texture coordinate correction)
         const coreBool bLeftRight = (fBanner < (m_fBannerDuration * 0.5f)) ? false : true;

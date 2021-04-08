@@ -87,7 +87,7 @@
 #define CALOR_LOADS                 (12u)                                             // 
 #define CALOR_LOADS_RAWS            (CALOR_LOADS)                                     // 
 
-#define MUSCUS_GENERATES            (32u)                                             // 
+#define MUSCUS_GENERATES            (24u)                                             // 
 #define MUSCUS_GENERATES_RAWS       (MUSCUS_GENERATES * 2u)                           // 
 #define MUSCUS_PEARLS               (21u)                                             // 
 #define MUSCUS_PEARLS_RAWS          (MUSCUS_PEARLS * 2u)                              // 
@@ -758,7 +758,7 @@ private:
     coreBatchList m_Pearl;                                   // 
     coreBatchList m_PearlWave;                               // 
     coreObject3D  m_aPearlRaw[MUSCUS_PEARLS_RAWS];           // 
-    coreUint32    m_aPearlActive;                            // 
+    coreUint32    m_iPearlActive;                            // 
 
     coreFlow m_fAnimation;                                   // animation value
 

@@ -19,7 +19,7 @@ cMuscusMission::cMuscusMission()noexcept
 , m_afGenerateView {}
 , m_Pearl          (MUSCUS_PEARLS)
 , m_PearlWave      (MUSCUS_PEARLS)
-, m_aPearlActive   (0u)
+, m_iPearlActive   (0u)
 , m_fAnimation     (0.0f)
 {
     // 
@@ -161,8 +161,8 @@ void cMuscusMission::EnablePearl(const coreUintW iIndex)
     WARN_IF(pPearl->IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
 
     // 
-    ADD_BIT(m_aPearlActive, iIndex)
-    STATIC_ASSERT(MUSCUS_PEARLS <= sizeof(m_aPearlActive)*8u)
+    ADD_BIT(m_iPearlActive, iIndex)
+    STATIC_ASSERT(MUSCUS_PEARLS <= sizeof(m_iPearlActive)*8u)
 
     // 
     pPearl->SetAlpha  (0.0f);
@@ -183,7 +183,7 @@ void cMuscusMission::DisablePearl(const coreUintW iIndex, const coreBool bAnimat
     if(!pPearl->IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
 
     // 
-    REMOVE_BIT(m_aPearlActive, iIndex)
+    REMOVE_BIT(m_iPearlActive, iIndex)
 
     // 
     if(!bAnimated)
@@ -199,7 +199,7 @@ void cMuscusMission::DisablePearl(const coreUintW iIndex, const coreBool bAnimat
 void cMuscusMission::__RenderOwnUnder()
 {
     DEPTH_PUSH
-    DEPTH_PUSH   // TODO: first push causes outline-overdraw artifacts, precision too low on the first level, can it be handled on outline(-shader) ?
+    DEPTH_PUSH   // TODO: precision artifacts
 
     glDepthMask(false);
     {
@@ -286,7 +286,7 @@ void cMuscusMission::__MoveOwnAfter()
         if(!pPearl->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
         // 
-        if(CONTAINS_BIT(m_aPearlActive, i)) pPearl->SetAlpha(MIN(pPearl->GetAlpha() + 10.0f*TIME, 1.0f));
+        if(CONTAINS_BIT(m_iPearlActive, i)) pPearl->SetAlpha(MIN(pPearl->GetAlpha() + 10.0f*TIME, 1.0f));
                                        else pPearl->SetAlpha(MAX(pPearl->GetAlpha() - 10.0f*TIME, 0.0f));
 
         // 

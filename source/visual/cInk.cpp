@@ -91,7 +91,7 @@ void cInk::Move()
     if(m_fDelay) m_vBlotAlpha = (m_vBlotAlpha - m_fDelay * TIME).Processed(MAX, 0.0f);
 
     // 
-    this->SetTexOffset(coreVector2(m_fAnimation * -0.4, 0.0));
+    this->SetTexOffset(coreVector2(m_fAnimation * -0.4f, 0.0f));
     this->coreFullscreen::Move();
 }
 

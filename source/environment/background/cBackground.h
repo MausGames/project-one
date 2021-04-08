@@ -28,6 +28,8 @@
 // TODO: stomach should not create all vertices
 // TODO: EnableShadowRead only if appropriate ground objects would be rendered (IsInstanced)
 // TODO: grass and blood textures are duplicated (especially normal maps)
+// TODO: can thunder effect cause issues for some players ? are there other effects causing issues ? (change effects or add disable option)
+// TODO: object-sets with 0% visibility and no active object should be skipped entirely
 
 
 // ****************************************************************

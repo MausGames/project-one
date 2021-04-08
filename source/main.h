@@ -79,6 +79,9 @@
 // TODO: search and remove unused resources from application.cpp (+ folder)
 // TODO: convert bigger sound-effects (ambient) to music ?
 // TODO: change all linear interpolation with at least LERPH3 to improve quality, where possible
+// TODO: check all collision callbacks if OUTPUT can be replaced with const
+// TODO: make sure enemy bullet ClearAll is called on STAGE_DELAY
+// TODO: create animation offset for all gameplay objects (const coreFloat fOffset = I_TO_F(i) * (1.0f/7.0f);), try to use num-per-line + 1, what about bullets ?
 
 
 // ****************************************************************
@@ -205,7 +208,7 @@ enum eType : coreInt32
     TYPE_LEVIATHAN_RAY
 };
 
-// 
+// sound categories
 enum eSound : coreUint8
 {
     SOUND_EFFECT = 1u,
