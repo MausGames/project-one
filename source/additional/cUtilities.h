@@ -84,10 +84,10 @@ inline FUNC_CONST coreFloat LerpBreakRev(const coreFloat x, const coreFloat y, c
 
 // ****************************************************************
 // value range helper-functions
-template <typename T, typename S, typename R> inline FUNC_LOCAL coreBool InBetween(const T& x, const S& a, const R& b)
+template <typename T, typename S, typename R> constexpr FUNC_LOCAL coreBool InBetween(const T& x, const S& a, const R& b)
 {
     ASSERT(a <= b)
-    return (x >= a) && (x < b);
+    return (x >= a) && (x < b);   // [a,b)
 }
 
 template <typename T, typename S, typename R> constexpr FUNC_LOCAL coreInt32 InBetweenExt(const T& x, const S& a, const R& b)
@@ -139,7 +139,7 @@ inline FUNC_PURE coreVector2 SmoothAim(const coreVector2& vOldDir, const coreVec
 
 // ****************************************************************
 // 
-inline FUNC_CONST coreFloat SmoothTowards(const coreFloat fDistance, const coreFloat fThreshold)
+constexpr FUNC_CONST coreFloat SmoothTowards(const coreFloat fDistance, const coreFloat fThreshold)
 {
     ASSERT((fDistance >= 0.0f) && (fThreshold > 0.0f))
     return (fDistance >= fThreshold) ? 1.0f : (fDistance * RCP(fThreshold));
@@ -153,7 +153,7 @@ inline FUNC_LOCAL coreUint8 PackDirection(const coreVector2& vDirection)
     return vDirection.IsNull() ? 8u : (F_TO_UI(ROUND(vDirection.Angle() / (0.25f*PI))) & 0x07u);
 }
 
-inline FUNC_CONST coreVector2 UnpackDirection(const coreUint8 iPack)
+constexpr FUNC_CONST coreVector2 UnpackDirection(const coreUint8 iPack)
 {
     // 1 0 7
     // 2 8 6
@@ -176,25 +176,25 @@ inline FUNC_CONST coreVector2 UnpackDirection(const coreUint8 iPack)
 
 // ****************************************************************
 // 
-inline FUNC_CONST coreVector2 StepRotated45(const coreUint8 iStep)
+constexpr FUNC_CONST coreVector2 StepRotated45(const coreUint8 iStep)
 {
     ASSERT(iStep < 8u)
     return UnpackDirection(iStep);
 }
 
-inline FUNC_CONST coreVector2 StepRotated45X(const coreUint8 iStep)
+constexpr FUNC_CONST coreVector2 StepRotated45X(const coreUint8 iStep)
 {
     ASSERT(iStep < 8u)
     return UnpackDirection(iStep) * coreMatrix2(0.923879504f, 0.382683456f, -0.382683456f, 0.923879504f);
 }
 
-inline FUNC_CONST coreVector2 StepRotated90(const coreUint8 iStep)
+constexpr FUNC_CONST coreVector2 StepRotated90(const coreUint8 iStep)
 {
     ASSERT(iStep < 4u)
     return UnpackDirection(iStep * 2u);
 }
 
-inline FUNC_CONST coreVector2 StepRotated90X(const coreUint8 iStep)
+constexpr FUNC_CONST coreVector2 StepRotated90X(const coreUint8 iStep)
 {
     ASSERT(iStep < 4u)
     return UnpackDirection(iStep * 2u + 1u);
@@ -203,7 +203,7 @@ inline FUNC_CONST coreVector2 StepRotated90X(const coreUint8 iStep)
 
 // ****************************************************************
 // 
-inline FUNC_CONST coreVector2 MapStepRotated45(const coreVector2& vDirection, const coreUint8 iStep)
+constexpr FUNC_CONST coreVector2 MapStepRotated45(const coreVector2& vDirection, const coreUint8 iStep)
 {
     switch(iStep)
     {
@@ -219,7 +219,7 @@ inline FUNC_CONST coreVector2 MapStepRotated45(const coreVector2& vDirection, co
     }
 }
 
-inline FUNC_CONST coreVector2 MapStepRotated90(const coreVector2& vDirection, const coreUint8 iStep)
+constexpr FUNC_CONST coreVector2 MapStepRotated90(const coreVector2& vDirection, const coreUint8 iStep)
 {
     switch(iStep)
     {
@@ -240,7 +240,7 @@ inline FUNC_LOCAL coreBool IsHorizontal(const coreVector2& v)
     return ABS(v.x) > ABS(v.y);
 }
 
-inline FUNC_LOCAL coreVector2 AlongCross(const coreVector2& v)
+constexpr FUNC_LOCAL coreVector2 AlongCross(const coreVector2& v)
 {
     ASSERT(!v.IsNull())
     return IsHorizontal(v) ? coreVector2(v.x, 0.0f) : coreVector2(0.0f, v.y);
