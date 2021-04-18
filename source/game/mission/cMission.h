@@ -69,6 +69,10 @@
 #define NEVO_BLOCKS_RAWS            (NEVO_BLOCKS * 2u)                                // 
 #define NEVO_BOMB_SIZE              (4.0f)                                            // 
 
+#define HARENA_SPIKES               (36u)                                             // 
+#define HARENA_SPIKES_RAWS          (HARENA_SPIKES * 2u)                              // 
+#define HARENA_SPIKE_DIMENSION      (6u)                                              // 
+
 #define RUTILUS_TELEPORTER          (2u)                                              // 
 #define RUTILUS_TELEPORTER_COLOR(x) ((x) ? COLOR_ENERGY_BLUE : COLOR_ENERGY_ORANGE)   // 
 #define RUTILUS_PLATES              (5u)                                              // 
@@ -545,21 +549,41 @@ private:
 class cHarenaMission final : public cMission
 {
 private:
-    cUrticaBoss  m_Urtica;    // 
-    cTigerBoss   m_Tiger;     // 
-    cLuciferBoss m_Lucifer;   // 
+    cUrticaBoss  m_Urtica;                             // 
+    cTigerBoss   m_Tiger;                              // 
+    cLuciferBoss m_Lucifer;                            // 
+
+    coreBatchList m_Spike;                             // 
+    coreBatchList m_SpikeBoard;                        // 
+    coreObject3D  m_aSpikeRaw  [HARENA_SPIKES_RAWS];   // 
+    coreFlow      m_afSpikeTime[HARENA_SPIKES];        // 
+    coreFlow      m_afSpikeCur [HARENA_SPIKES];        // 
+    coreFloat     m_afSpikeMax [HARENA_SPIKES];        // 
 
 
 public:
     cHarenaMission()noexcept;
+    ~cHarenaMission()final;
 
     DISABLE_COPY(cHarenaMission)
     ASSIGN_ID(3, "Harena")
 
+    // 
+    void EnableSpike (const coreUintW iIndex);
+    void DisableSpike(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    inline void ActivateSpike(const coreUintW iIndex, const coreFloat fTime) {ASSERT(iIndex < HARENA_SPIKES) m_afSpikeCur[iIndex] = 0.0f; m_afSpikeMax[iIndex] = fTime;}
+
+    // 
+    inline coreBool GetSpikeActive(const coreUintW iIndex)const {ASSERT(iIndex < HARENA_SPIKES) return (m_afSpikeMax[iIndex] && InBetween(m_afSpikeCur[iIndex], 1.1f, m_afSpikeMax[iIndex] - 0.5f));}
+
 
 private:
     // execute own routines
-    void __SetupOwn()final;
+    void __SetupOwn       ()final;
+    void __RenderOwnBottom()final;
+    void __MoveOwnAfter   ()final;
 };
 
 

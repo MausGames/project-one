@@ -58,6 +58,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("object_paddle.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_paddle.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("object_ring.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_ring.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("object_sphere.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_sphere.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_spike.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_spike.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("object_teleporter.md3",                  CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_teleporter.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_tetra_rota.md3",                  CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tetra_rota.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_tetra_top.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tetra_top.md3");
