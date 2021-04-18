@@ -20,7 +20,8 @@
 // ****************************************************************
 // tooltip definitions
 #define TOOLTIP_LINES         (4u)                                  // number of available text lines
-#define TOOLTIP_LINE_HEIGHT   (0.022f)                              // spacing between two text lines
+#define TOOLTIP_LINE_HEIGHT   (0.026f)                              // spacing between two text lines
+#define TOOLTIP_LINE_BOTTOM   (0.022f)                              // 
 #define TOOLTIP_OUTLINE_SIZE  (MENU_OUTLINE_SMALL)                  // default text outline size
 #define TOOLTIP_BORDER_SIZE   (coreVector2(0.02f,0.016f))           // spacing between text and box-edge
 #define TOOLTIP_TARGET_OFFSET (coreVector2(0.04f,0.0f))             // position offset from target (and for direction/alignment)
