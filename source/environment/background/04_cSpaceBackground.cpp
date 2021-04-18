@@ -36,7 +36,7 @@ cSpaceBackground::cSpaceBackground()noexcept
             const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, SPACE_METEOR_NUM);
             const coreFloat   fHeight   = Core::Rand->Float(-30.0f, -20.0f);
 
-            if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 100.0f))
+            if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, POW2(10.0f)))
             {
                 // create object
                 coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);

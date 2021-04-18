@@ -45,7 +45,7 @@ cSeaBackground::cSeaBackground()noexcept
             // test for valid values
             if((fHeight > -23.0f) && (fHeight < -18.0f) && (F_TO_SI(vPosition.y+160.0f) % 80 < 40))
             {
-                if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 25.0f))
+                if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, POW2(5.0f)))
                 {
                     // create object
                     coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
@@ -96,8 +96,8 @@ cSeaBackground::cSeaBackground()noexcept
                 // test for valid values
                 if((fHeight > -23.0f) && (fHeight < -18.0f))
                 {
-                    if(!cBackground::_CheckIntersectionQuick(pList1,                  vPosition, 1.0f) &&
-                       !cBackground::_CheckIntersection     (m_apGroundObjectList[0], vPosition, 9.0f))
+                    if(!cBackground::_CheckIntersectionQuick(pList1,                  vPosition, POW2(1.0f)) &&
+                       !cBackground::_CheckIntersection     (m_apGroundObjectList[0], vPosition, POW2(3.0f)))
                     {
                         // create object
                         coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
@@ -155,10 +155,10 @@ cSeaBackground::cSeaBackground()noexcept
                 if((fHeight > fHeightDown) && (fHeight < fHeightUp) &&
                    (fHeight > -22.0f)      && (fHeight < -16.0f)    && (F_TO_SI(vPosition.y+160.0f) % 80 < 40))
                 {
-                    if(!cBackground::_CheckIntersectionQuick(pList1,                  vPosition, 25.0f) &&
-                       !cBackground::_CheckIntersectionQuick(pList2,                  vPosition, 25.0f) &&
-                       !cBackground::_CheckIntersection     (m_apGroundObjectList[1], vPosition, 25.0f) &&
-                       !cBackground::_CheckIntersection     (m_apGroundObjectList[0], vPosition, 4.0f))
+                    if(!cBackground::_CheckIntersectionQuick(pList1,                  vPosition, POW2(5.0f)) &&
+                       !cBackground::_CheckIntersectionQuick(pList2,                  vPosition, POW2(5.0f)) &&
+                       !cBackground::_CheckIntersection     (m_apGroundObjectList[1], vPosition, POW2(5.0f)) &&
+                       !cBackground::_CheckIntersection     (m_apGroundObjectList[0], vPosition, POW2(2.0f)))
                     {
                         // 
                         const coreVector3 vDirection   = m_pOutdoor->RetrieveBackNormal(vPosition);
@@ -225,7 +225,7 @@ cSeaBackground::cSeaBackground()noexcept
                 const coreFloat   fHeight   = Core::Rand->Float(10.0f, 40.0f);
 
                 // test for valid values
-                if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 700.0f))
+                if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, POW2(26.5f)))
                 {
                     // create object
                     coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);

@@ -62,7 +62,7 @@ coreBool cShip::DefaultMoveTarget(const coreVector2& vTarget, const coreFloat fS
     this->SetDirection(coreVector3(vDir, 0.0f));
 
     // 
-    return (vDiff.LengthSq() < 0.5f);
+    return (vDiff.LengthSq() < POW2(0.7f));
 }
 
 

@@ -43,7 +43,7 @@ cSnowBackground::cSnowBackground()noexcept
             // test for valid values
             if((fHeight > -20.0f) && (fHeight < -17.0f) && (F_TO_SI(vPosition.y+160.0f) % 80 < 40))
             {
-                if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 25.0f))
+                if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, POW2(5.0f)))
                 {
                     // create object
                     coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
@@ -94,8 +94,8 @@ cSnowBackground::cSnowBackground()noexcept
                 // test for valid values
                 if((fHeight > -20.0f) && (fHeight < -15.0f) && (F_TO_SI(vPosition.y+176.0f) % 80 < 60))
                 {
-                    if(!cBackground::_CheckIntersectionQuick(pList1,                  vPosition, 25.0f) &&
-                       !cBackground::_CheckIntersection     (m_apGroundObjectList[0], vPosition, 25.0f))
+                    if(!cBackground::_CheckIntersectionQuick(pList1,                  vPosition, POW2(5.0f)) &&
+                       !cBackground::_CheckIntersection     (m_apGroundObjectList[0], vPosition, POW2(5.0f)))
                     {
                         // create object
                         coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);

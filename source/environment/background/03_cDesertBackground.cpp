@@ -40,7 +40,7 @@ cDesertBackground::cDesertBackground()noexcept
             // test for valid values
             if((fHeight > -23.0f) && (fHeight < -18.0f) && (F_TO_SI(vPosition.y+160.0f) % 80 < 40))
             {
-                if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 25.0f))
+                if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, POW2(5.0f)))
                 {
                     // create object
                     coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);

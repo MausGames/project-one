@@ -317,7 +317,7 @@ void cTeslaWeapon::__TriggerOwn(const coreUint8 iMode)
             }
 
             // 
-            if((pEnemy->GetPosition().xy() - pObject->GetPosition().xy()).LengthSq() < 1600.0f)
+            if((pEnemy->GetPosition().xy() - pObject->GetPosition().xy()).LengthSq() < POW2(40.0f))
             {
                 apStrikeEmitter[iNum] = pObject;
                 apStrikeTarget [iNum] = pEnemy;
