@@ -437,8 +437,8 @@ void cRutilusMission::__MoveOwnAfter()
         coreObject3D& oWave = m_aWaveRaw[i];
         if(!oWave.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
-        const coreVector2 vDir  = CONTAINS_BIT(m_iWaveDir, 0u) ? coreVector2(1.0f,0.0f) : coreVector2(0.0f,1.0f);   // may be unnecessary
-        const coreFloat   fSign = CONTAINS_BIT(m_iWaveDir, 1u) ? -1.0f : 1.0f;
+        const coreVector2 vDir  = HAS_BIT(m_iWaveDir, 0u) ? coreVector2(1.0f,0.0f) : coreVector2(0.0f,1.0f);   // may be unnecessary
+        const coreFloat   fSign = HAS_BIT(m_iWaveDir, 1u) ? -1.0f : 1.0f;
 
         // 
         m_afWaveTime[i].Update(0.5f * fSign);
@@ -446,7 +446,7 @@ void cRutilusMission::__MoveOwnAfter()
         {
             // 
             m_afWaveTime[i] -= fSign;
-            SET_BIT(m_iWaveActive, i, CONTAINS_BIT(m_iWaveActive, RUTILUS_WAVES))
+            SET_BIT(m_iWaveActive, i, HAS_BIT(m_iWaveActive, RUTILUS_WAVES))
 
             // 
             oWave.SetDirection(coreVector3(vDir, 0.0f));
@@ -455,7 +455,7 @@ void cRutilusMission::__MoveOwnAfter()
         // 
         oWave.SetPosition(m_aWaveRaw[0].GetPosition());
         oWave.SetSize    (coreVector3(1.0f,1.0f,1.0f) * 30.0f * m_afWaveTime[i]);
-        oWave.SetAlpha   (MIN(1.0f - m_afWaveTime[i], 6.0f * m_afWaveTime[i], 1.0f) * (CONTAINS_BIT(m_iWaveActive, i) ? 1.0f : 0.0f));
+        oWave.SetAlpha   (MIN(1.0f - m_afWaveTime[i], 6.0f * m_afWaveTime[i], 1.0f) * (HAS_BIT(m_iWaveActive, i) ? 1.0f : 0.0f));
     }
 
     // 

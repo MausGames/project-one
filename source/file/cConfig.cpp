@@ -295,9 +295,9 @@ void UpdateInput()
         // 
         if(i >= INPUT_SETS_KEYBOARD)
         {
-            if(CONTAINS_BIT(oMap.iActionPress, 0u))                     g_MenuInput.bAccept = true;
-            if(CONTAINS_BIT(oMap.iActionPress, 1u))                     g_MenuInput.bCancel = true;
-            if(CONTAINS_BIT(oMap.iActionPress, INPUT_KEYS_ACTION - 1u)) g_MenuInput.bPause  = true;
+            if(HAS_BIT(oMap.iActionPress, 0u))                     g_MenuInput.bAccept = true;
+            if(HAS_BIT(oMap.iActionPress, 1u))                     g_MenuInput.bCancel = true;
+            if(HAS_BIT(oMap.iActionPress, INPUT_KEYS_ACTION - 1u)) g_MenuInput.bPause  = true;
         }
     }
 
@@ -308,9 +308,9 @@ void UpdateInput()
         if(iFireMode == 1u)
         {
             // 
-            const coreBool bPress   = CONTAINS_BIT(pInput->iActionPress,   0u);
-            const coreBool bRelease = CONTAINS_BIT(pInput->iActionRelease, 0u);
-            const coreBool bHold    = CONTAINS_BIT(pInput->iActionHold,    0u);
+            const coreBool bPress   = HAS_BIT(pInput->iActionPress,   0u);
+            const coreBool bRelease = HAS_BIT(pInput->iActionRelease, 0u);
+            const coreBool bHold    = HAS_BIT(pInput->iActionHold,    0u);
 
             SET_BIT(pInput->iActionPress,   0u,  bRelease)
             SET_BIT(pInput->iActionRelease, 0u,  bPress)
@@ -319,7 +319,7 @@ void UpdateInput()
         else if(iFireMode == 2u)
         {
             // 
-            const coreBool bPress = CONTAINS_BIT(pInput->iActionPress, 0u);
+            const coreBool bPress = HAS_BIT(pInput->iActionPress, 0u);
             if(bPress) m_abFireToggle[iToggleIndex] = !m_abFireToggle[iToggleIndex];
 
             SET_BIT(pInput->iActionPress,   0u,  m_abFireToggle[iToggleIndex] && bPress)

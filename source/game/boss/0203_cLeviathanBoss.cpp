@@ -535,12 +535,12 @@ void cLeviathanBoss::__CreateOverdrive(const coreUintW iIndex, const coreVector3
                 STATIC_ASSERT(sizeof(m_iDecalState)*8u >= LEVIATHAN_RAYS*2u)
 
                 // 
-                if(CONTAINS_BIT(m_iDecalState, iIndex * 2u)) TOGGLE_BIT(m_iDecalState, iIndex * 2u + 1u)
+                if(HAS_BIT(m_iDecalState, iIndex * 2u)) TOGGLE_BIT(m_iDecalState, iIndex * 2u + 1u)
                 TOGGLE_BIT(m_iDecalState, iIndex * 2u)
 
                 // 
-                const coreBool    bRotated   = CONTAINS_BIT(m_iDecalState, iIndex * 2u);
-                const coreBool    bFlipped   = CONTAINS_BIT(m_iDecalState, iIndex * 2u + 1u);
+                const coreBool    bRotated   = HAS_BIT(m_iDecalState, iIndex * 2u);
+                const coreBool    bFlipped   = HAS_BIT(m_iDecalState, iIndex * 2u + 1u);
                 const coreVector3 vDecalPos  = (vOldHit + vNewHit) * 0.5f;
                 const coreVector2 vDecalSize = coreVector2(Core::Rand->Float(5.0f, 6.5f), MIN(fLen, fMax)*1.8f);
                 const coreVector2 vDecalDir  = vDiff.xy().Normalized();

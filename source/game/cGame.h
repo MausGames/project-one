@@ -234,7 +234,7 @@ template <typename F> void cGame::ForEachPlayer(F&& nFunction)
     for(coreUintW i = 0u, ie = (m_bCoop ? GAME_PLAYERS : 1u); i < ie; ++i)
     {
         cPlayer* pPlayer = &m_aPlayer[i];
-        if(CONTAINS_FLAG(pPlayer->GetStatus(), PLAYER_STATUS_DEAD)) continue;
+        if(HAS_FLAG(pPlayer->GetStatus(), PLAYER_STATUS_DEAD)) continue;
 
         // 
         nFunction(pPlayer, i);

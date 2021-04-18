@@ -221,7 +221,7 @@ template <typename F> FORCE_INLINE void cPlayer::TestCollision(const ePlayerTest
     Core::Manager::Object->TestCollision(TYPE_PLAYER, iType, [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         // 
-        if(pPlayer->IsRolling() ? CONTAINS_FLAG(eTest, PLAYER_TEST_ROLL) : (pPlayer->IsFeeling() ? CONTAINS_FLAG(eTest, PLAYER_TEST_FEEL) : (pPlayer->IsIgnoring() ? CONTAINS_FLAG(eTest, PLAYER_TEST_IGNORE) : CONTAINS_FLAG(eTest, PLAYER_TEST_NORMAL))))
+        if(pPlayer->IsRolling() ? HAS_FLAG(eTest, PLAYER_TEST_ROLL) : (pPlayer->IsFeeling() ? HAS_FLAG(eTest, PLAYER_TEST_FEEL) : (pPlayer->IsIgnoring() ? HAS_FLAG(eTest, PLAYER_TEST_IGNORE) : HAS_FLAG(eTest, PLAYER_TEST_NORMAL))))
         {
             // 
             coreVector3 vNewIntersection;
@@ -240,7 +240,7 @@ template <typename F> FORCE_INLINE void cPlayer::TestCollision(const ePlayerTest
     Core::Manager::Object->TestCollision(TYPE_PLAYER, pObject, [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         // 
-        if(pPlayer->IsRolling() ? CONTAINS_FLAG(eTest, PLAYER_TEST_ROLL) : (pPlayer->IsFeeling() ? CONTAINS_FLAG(eTest, PLAYER_TEST_FEEL) : (pPlayer->IsIgnoring() ? CONTAINS_FLAG(eTest, PLAYER_TEST_IGNORE) : CONTAINS_FLAG(eTest, PLAYER_TEST_NORMAL))))
+        if(pPlayer->IsRolling() ? HAS_FLAG(eTest, PLAYER_TEST_ROLL) : (pPlayer->IsFeeling() ? HAS_FLAG(eTest, PLAYER_TEST_FEEL) : (pPlayer->IsIgnoring() ? HAS_FLAG(eTest, PLAYER_TEST_IGNORE) : HAS_FLAG(eTest, PLAYER_TEST_NORMAL))))
         {
             // 
             coreVector3 vNewIntersection;

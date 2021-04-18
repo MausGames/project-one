@@ -311,7 +311,7 @@ void cTorusBoss::__MoveOwn()
             const coreVector3 vSize = pGunner->GetSize();
 
             // 
-            const coreFloat   fMoveSide = CONTAINS_BIT(m_iGunnerMove, i) ? -1.0f : 1.0f;
+            const coreFloat   fMoveSide = HAS_BIT(m_iGunnerMove, i) ? -1.0f : 1.0f;
             const coreVector2 vMoveDir  = coreVector2(fMoveSide * FOREGROUND_AREA.x * TORUS_GUNNER_SPEED * TIME, 0.0f);
             const coreVector2 vNewPos   = pGunner->GetPosition().xy() + ((i & 0x02u) ? vMoveDir.yx() : vMoveDir);
 
@@ -530,11 +530,11 @@ void cTorusBoss::__EnableTurret(const coreUintW iIndex, const coreVector2& vPosi
     coreObject3D* pHull   = &m_aTurretHullRaw[iIndex];
 
     // 
-    if(!CONTAINS_FLAG(pTurret->GetStatus(), ENEMY_STATUS_DEAD)) return;
+    if(!HAS_FLAG(pTurret->GetStatus(), ENEMY_STATUS_DEAD)) return;
     pTurret->Resurrect();
 
     // 
-    ASSERT(!CONTAINS_BIT(m_iTurretActive, iIndex))
+    ASSERT(!HAS_BIT(m_iTurretActive, iIndex))
     ADD_BIT(m_iTurretActive, iIndex)
 
     // 
@@ -559,11 +559,11 @@ void cTorusBoss::__DisableTurret(const coreUintW iIndex, const coreBool bAnimate
     coreObject3D* pHull   = &m_aTurretHullRaw[iIndex];
 
     // 
-    if(CONTAINS_FLAG(pTurret->GetStatus(), ENEMY_STATUS_DEAD)) return;
+    if(HAS_FLAG(pTurret->GetStatus(), ENEMY_STATUS_DEAD)) return;
     pTurret->Kill(false);
 
     // 
-    ASSERT(CONTAINS_BIT(m_iTurretActive, iIndex))
+    ASSERT(HAS_BIT(m_iTurretActive, iIndex))
     REMOVE_BIT(m_iTurretActive, iIndex)
 
     // 
@@ -583,11 +583,11 @@ void cTorusBoss::__EnableGunner(const coreUintW iIndex, const coreVector2& vPosi
     coreObject3D* pHull   = &m_aGunnerHullRaw[iIndex];
 
     // 
-    if(!CONTAINS_FLAG(pGunner->GetStatus(), ENEMY_STATUS_DEAD)) return;
+    if(!HAS_FLAG(pGunner->GetStatus(), ENEMY_STATUS_DEAD)) return;
     pGunner->Resurrect();
 
     // 
-    ASSERT(!CONTAINS_BIT(m_iGunnerActive, iIndex))
+    ASSERT(!HAS_BIT(m_iGunnerActive, iIndex))
     ADD_BIT(m_iGunnerActive, iIndex)
 
     // 
@@ -615,11 +615,11 @@ void cTorusBoss::__DisableGunner(const coreUintW iIndex, const coreBool bAnimate
     coreObject3D* pHull   = &m_aGunnerHullRaw[iIndex];
 
     // 
-    if(CONTAINS_FLAG(pGunner->GetStatus(), ENEMY_STATUS_DEAD)) return;
+    if(HAS_FLAG(pGunner->GetStatus(), ENEMY_STATUS_DEAD)) return;
     pGunner->Kill(false);
 
     // 
-    ASSERT(CONTAINS_BIT(m_iGunnerActive, iIndex))
+    ASSERT(HAS_BIT(m_iGunnerActive, iIndex))
     REMOVE_BIT(m_iGunnerActive, iIndex)
 
     // 

@@ -291,7 +291,7 @@ void cGeluMission::__MoveOwnAfter()
         coreObject3D* pArrow = (*m_WayArrow.List())[i];
         if(!pWay->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
-        if(!CONTAINS_BIT(m_iWayActive, i))
+        if(!HAS_BIT(m_iWayActive, i))
         {
             // 
             const coreVector2 vPos    = pWay->GetPosition ().xy();
@@ -310,7 +310,7 @@ void cGeluMission::__MoveOwnAfter()
 
         // 
         const coreFloat fOffset  = I_TO_F(i) * (1.0f/7.0f);
-        const coreBool  bVisible = CONTAINS_BIT(m_iWayVisible, i);
+        const coreBool  bVisible = HAS_BIT(m_iWayVisible, i);
 
         // 
         pWay->SetAlpha    (bVisible ? 1.0f : 0.0f);

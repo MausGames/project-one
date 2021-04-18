@@ -199,7 +199,7 @@ void cPlayer::EquipSupport(const coreUintW iIndex, const coreInt32 iID)
 // render the player
 void cPlayer::Render()
 {
-    if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
+    if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
     {
         // render the 3d-object
         this->coreObject3D::Render();
@@ -208,7 +208,7 @@ void cPlayer::Render()
 
 void cPlayer::RenderBefore()
 {
-    if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
+    if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
     {
         // 
         m_Exhaust.Render();
@@ -217,7 +217,7 @@ void cPlayer::RenderBefore()
 
 void cPlayer::RenderAfter()
 {
-    if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
+    if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
     {
         // 
         for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
@@ -242,33 +242,33 @@ void cPlayer::Move()
     // 
     this->_UpdateAlwaysBefore();
 
-    if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
+    if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
     {
         coreVector2 vNewPos = this->GetPosition().xy();
         coreVector3 vNewOri = coreVector3(0.0f,0.0f,1.0f);
 
-        if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_TURN))
+        if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_TURN))
         {
             coreVector2 vNewDir = this->GetDirection().xy();
 
             // 
-            if(CONTAINS_BIT(m_pInput->iActionPress, PLAYER_EQUIP_WEAPONS * WEAPON_MODES))
+            if(HAS_BIT(m_pInput->iActionPress, PLAYER_EQUIP_WEAPONS * WEAPON_MODES))
                 vNewDir = -vNewDir.Rotated90();
-            if(CONTAINS_BIT(m_pInput->iActionPress, PLAYER_EQUIP_WEAPONS * WEAPON_MODES + 1u))
+            if(HAS_BIT(m_pInput->iActionPress, PLAYER_EQUIP_WEAPONS * WEAPON_MODES + 1u))
                 vNewDir =  vNewDir.Rotated90();
 
             // set new direction
             this->SetDirection(coreVector3(vNewDir, 0.0f));
         }
 
-        if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_ROLL))
+        if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_ROLL))
         {
             // 
-            //if(CONTAINS_BIT(m_pInput->iActionPress, PLAYER_EQUIP_WEAPONS * WEAPON_MODES))
+            //if(HAS_BIT(m_pInput->iActionPress, PLAYER_EQUIP_WEAPONS * WEAPON_MODES))
             //    if(m_fRollTime <= 0.0f) this->StartRolling(m_pInput->vMove);
         }
 
-        if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
+        if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
         {
             // move the ship
             vNewPos += (m_pInput->vMove * this->CalcMoveSpeed() + m_vForce) * TIME;
@@ -294,7 +294,7 @@ void cPlayer::Move()
         // 
         m_vForce *= FrictionFactor(8.0f);
 
-        if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_ALL))
+        if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_ALL))
         {
             // 
             if(this->IsRolling())
@@ -326,7 +326,7 @@ void cPlayer::Move()
         // update all weapons (shooting and stuff)
         for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
         {
-            const coreUint8 iShoot = (!this->IsRolling() && !CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_PACIFIST) && !CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && !m_fInterrupt) ? ((m_pInput->iActionHold & (BITLINE(WEAPON_MODES) << (i*WEAPON_MODES))) >> (i*WEAPON_MODES)) : 0u;
+            const coreUint8 iShoot = (!this->IsRolling() && !HAS_FLAG(m_iStatus, PLAYER_STATUS_PACIFIST) && !HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && !m_fInterrupt) ? ((m_pInput->iActionHold & (BITLINE(WEAPON_MODES) << (i*WEAPON_MODES))) >> (i*WEAPON_MODES)) : 0u;
             m_apWeapon[i]->Update(iShoot);
         }
 
@@ -443,7 +443,7 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
             // 
             if(!this->IsDarkShading()) this->RefreshColor();
 
-            if(CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED))
+            if(HAS_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED))
             {
                 // 
                 this->StartIgnoring((m_iCurHealth == 1) ? 1u : 0u);
@@ -486,7 +486,7 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
 void cPlayer::Resurrect()
 {
     // resurrect player
-    if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD)) return;
+    if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD)) return;
     REMOVE_FLAG(m_iStatus, PLAYER_STATUS_DEAD)
 
     // add ship to global shadow and outline
@@ -506,7 +506,7 @@ void cPlayer::Resurrect()
 void cPlayer::Kill(const coreBool bAnimated)
 {
     // kill player
-    if(CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD)) return;
+    if(HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD)) return;
     ADD_FLAG(m_iStatus, PLAYER_STATUS_DEAD)
 
     // reset weapon shoot status
@@ -760,7 +760,7 @@ void cPlayer::UpdateExhaust(const coreFloat fStrength)
 // 
 coreVector2 cPlayer::CalcMove()const
 {
-    if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
+    if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
     {
         // move the ship
         coreVector2 vNewPos = this->GetPosition().xy() + (m_pInput->vMove * this->CalcMoveSpeed() + m_vForce) * TIME;
@@ -790,8 +790,8 @@ coreFloat cPlayer::CalcMoveSpeed()const
 // 
 void cPlayer::__EquipShield()
 {
-    ASSERT( CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
-    ASSERT(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED))
+    ASSERT( HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
+    ASSERT(!HAS_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED))
 
     // 
     ADD_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED)

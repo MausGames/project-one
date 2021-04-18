@@ -854,7 +854,7 @@ template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt
 
             // check current bullet status
             T* pBullet = &pSet->aBulletPool[pSet->iCurBullet];
-            if(CONTAINS_FLAG(pBullet->GetStatus(), BULLET_STATUS_READY))
+            if(HAS_FLAG(pBullet->GetStatus(), BULLET_STATUS_READY))
             {
                 // prepare bullet and add to active list
                 pBullet->Activate(iDamage, fSpeed, pOwner, vPosition, vDirection, m_iType);
@@ -964,7 +964,7 @@ template <typename T, typename F> void cBulletManager::ForEachBulletTyped(F&& nF
         FOR_EACH(it, *oBulletActive.List())
         {
             T* pBullet = d_cast<T*>(*it);
-            if(!CONTAINS_FLAG(pBullet->GetStatus(), BULLET_STATUS_ACTIVE)) continue;
+            if(!HAS_FLAG(pBullet->GetStatus(), BULLET_STATUS_ACTIVE)) continue;
 
             // 
             nFunction(pBullet);

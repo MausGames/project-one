@@ -80,7 +80,7 @@ void cHelper::Configure(const coreUint8 iElement)
 // render the helper
 void cHelper::Render()
 {
-    if(!CONTAINS_FLAG(m_iStatus, HELPER_STATUS_DEAD))
+    if(!HAS_FLAG(m_iStatus, HELPER_STATUS_DEAD))
     {
         // render the 3d-object
         this->coreObject3D::Render();
@@ -95,7 +95,7 @@ void cHelper::Move()
     // 
     this->_UpdateAlwaysBefore();
 
-    if(!CONTAINS_FLAG(m_iStatus, HELPER_STATUS_DEAD))
+    if(!HAS_FLAG(m_iStatus, HELPER_STATUS_DEAD))
     {
         // 
         this->SetDirection(coreVector3(s_vDirection, 0.0f));
@@ -114,7 +114,7 @@ void cHelper::Move()
 void cHelper::Resurrect()
 {
     // resurrect helper
-    if(!CONTAINS_FLAG(m_iStatus, HELPER_STATUS_DEAD)) return;
+    if(!HAS_FLAG(m_iStatus, HELPER_STATUS_DEAD)) return;
     REMOVE_FLAG(m_iStatus, HELPER_STATUS_DEAD)
 
     // add ship to global shadow and outline
@@ -131,7 +131,7 @@ void cHelper::Resurrect()
 void cHelper::Kill(const coreBool bAnimated)
 {
     // kill helper
-    if(CONTAINS_FLAG(m_iStatus, HELPER_STATUS_DEAD)) return;
+    if(HAS_FLAG(m_iStatus, HELPER_STATUS_DEAD)) return;
     ADD_FLAG(m_iStatus, HELPER_STATUS_DEAD)
 
     // 

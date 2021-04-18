@@ -286,8 +286,8 @@ void cMuscusMission::__MoveOwnAfter()
         if(!pPearl->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
         // 
-        if(CONTAINS_BIT(m_iPearlActive, i)) pPearl->SetAlpha(MIN(pPearl->GetAlpha() + 10.0f*TIME, 1.0f));
-                                       else pPearl->SetAlpha(MAX(pPearl->GetAlpha() - 10.0f*TIME, 0.0f));
+        if(HAS_BIT(m_iPearlActive, i)) pPearl->SetAlpha(MIN(pPearl->GetAlpha() + 10.0f*TIME, 1.0f));
+                                  else pPearl->SetAlpha(MAX(pPearl->GetAlpha() - 10.0f*TIME, 0.0f));
 
         // 
         if(!pPearl->GetAlpha()) this->DisablePearl(i, false);

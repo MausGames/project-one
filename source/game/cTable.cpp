@@ -334,7 +334,7 @@ void cTimeTable::Update()
     // 
     m_iTimeEvent += 1u;
 
-    if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY))
+    if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY))
     {
         const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
         const coreUintW iSegmentIndex = g_pGame->GetCurMission()->GetCurSegmentIndex();

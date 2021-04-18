@@ -22,21 +22,21 @@ coreBool cWeapon::Update(const coreUint8 iShootStatus)
     // check firing-modes and call trigger or release routine
     for(coreUintW i = 0u; i < WEAPON_MODES; ++i)
     {
-        if(CONTAINS_BIT(iShootStatus, i))
-             {if(!CONTAINS_BIT(m_iLastStatus, i)) this->__TriggerOwn(i);}
-        else {if( CONTAINS_BIT(m_iLastStatus, i)) this->__ReleaseOwn(i);}
+        if(HAS_BIT(iShootStatus, i))
+             {if(!HAS_BIT(m_iLastStatus, i)) this->__TriggerOwn(i);}
+        else {if( HAS_BIT(m_iLastStatus, i)) this->__ReleaseOwn(i);}
     }
     m_iLastStatus = iShootStatus;
 
     // always update the primary cooldown timer
     if(m_CooldownTimer.Update(1.0f))
     {
-        if(CONTAINS_BIT(iShootStatus, 0u))
+        if(HAS_BIT(iShootStatus, 0u))
              m_CooldownTimer.Pause();   // preserve fractional part
         else m_CooldownTimer.Stop ();   // clamp to zero
     }
 
-    if(CONTAINS_BIT(iShootStatus, 0u))
+    if(HAS_BIT(iShootStatus, 0u))
     {
         // check current cooldown status
         if(!m_CooldownTimer.GetStatus())

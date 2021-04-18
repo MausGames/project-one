@@ -457,8 +457,8 @@ coreVector2 cDharukBoss::__DecodeDirection(const coreUintW iIndex)
     ASSERT(iIndex < DHARUK_BOOMERANGS)
 
     // 
-    const coreFloat P = CONTAINS_BIT(m_iPackedDir, 0u + 2u*iIndex) ? 1.0f : -1.0f;
-    const coreBool  X = CONTAINS_BIT(m_iPackedDir, 1u + 2u*iIndex);
+    const coreFloat P = HAS_BIT(m_iPackedDir, 0u + 2u*iIndex) ? 1.0f : -1.0f;
+    const coreBool  X = HAS_BIT(m_iPackedDir, 1u + 2u*iIndex);
 
     // 
     return coreVector2((X) ? P : 0.0f, (!X) ? P : 0.0f);

@@ -87,7 +87,7 @@ void cDefeatMenu::Move()
             m_fIntroTimer.Update(1.0f);
             if(m_fIntroTimer >= MENU_DEFEAT_BANNER_SPEED_REV)
             {
-                if(CONTAINS_BIT(g_TotalInput.iActionPress, 0u))
+                if(HAS_BIT(g_TotalInput.iActionPress, 0u))
                 {
                     // 
                     if(m_eState < DEFEAT_BURST) m_eState = DEFEAT_BURST;

@@ -474,7 +474,7 @@ void cViridoMission::__MoveOwnBefore()
 
         // 
         coreVector2       vNewDir = pBall->GetDirection().xy();
-        const coreVector2 vNewPos = pBall->GetPosition ().xy() + vNewDir * FOREGROUND_AREA * (CONTAINS_BIT(m_iStickyState, 1u) ? 0.0f : (VIRIDO_BALL_SPEED * TIME));
+        const coreVector2 vNewPos = pBall->GetPosition ().xy() + vNewDir * FOREGROUND_AREA * (HAS_BIT(m_iStickyState, 1u) ? 0.0f : (VIRIDO_BALL_SPEED * TIME));
 
         // restrict movement to the foreground area
              if((vNewPos.x < -FOREGROUND_AREA.x) && (vNewDir.x < 0.0f)) {cViridoMission::__BounceEffect(vNewPos + coreVector2(-vSize.x, 0.0f)); vNewDir.x =  ABS(vNewDir.x); if(!i) ADD_BIT(m_iBounceState, 7u)}
@@ -637,7 +637,7 @@ void cViridoMission::__MoveOwnAfter()
     STATIC_ASSERT(VIRIDO_PADDLES+1u <= sizeof(m_iBounceState)*8u)
 
     // 
-    if(!CONTAINS_BIT(m_iStickyState, 1u))
+    if(!HAS_BIT(m_iStickyState, 1u))
     {
         // 
         Core::Manager::Object->TestCollision(TYPE_VIRIDO_PADDLE, TYPE_VIRIDO_BALL, [this](coreObject3D* OUTPUT pPaddle, coreObject3D* OUTPUT pBall, const coreVector3& vIntersection, const coreBool bFirstHit)
@@ -658,7 +658,7 @@ void cViridoMission::__MoveOwnAfter()
                 const coreVector2 vBallDir   = pBall  ->GetDirection().xy();
                 const coreVector2 vPaddleDir = pPaddle->GetDirection().xy();
 
-                if(CONTAINS_BIT(m_iRealState, iIndex))
+                if(HAS_BIT(m_iRealState, iIndex))
                 {
                     // 
                     coreVector2 vNewDir = coreVector2::Reflect(vBallDir, (vBallPos - oPaddleSphere.GetPosition().xy()).Normalized(vBallDir));
@@ -690,7 +690,7 @@ void cViridoMission::__MoveOwnAfter()
     }
 
     // 
-    if(CONTAINS_BIT(m_iStickyState, 1u))
+    if(HAS_BIT(m_iStickyState, 1u))
     {
         // only between first ball and first paddle
         coreObject3D& oBall   = m_aBallRaw[0];
@@ -763,7 +763,7 @@ void cViridoMission::__MoveOwnAfter()
     });
 
     // 
-    if(!CONTAINS_FLAG(m_Vaus.GetStatus(), ENEMY_STATUS_DEAD))
+    if(!HAS_FLAG(m_Vaus.GetStatus(), ENEMY_STATUS_DEAD))
     {
         cEnemy*     pCurEnemy  = NULL;
         coreFloat   fCurLenSq  = FLT_MAX;
@@ -775,7 +775,7 @@ void cViridoMission::__MoveOwnAfter()
         // 
         const coreVector2 vBallPos    = oBall.GetPosition ().xy();
         const coreVector2 vBallDir    = oBall.GetDirection().xy();
-        const coreVector2 vOldBallPos = vBallPos - vBallDir * FOREGROUND_AREA * (CONTAINS_BIT(m_iStickyState, 1u) ? 0.0f : (VIRIDO_BALL_SPEED * TIME));
+        const coreVector2 vOldBallPos = vBallPos - vBallDir * FOREGROUND_AREA * (HAS_BIT(m_iStickyState, 1u) ? 0.0f : (VIRIDO_BALL_SPEED * TIME));
 
         // 
         Core::Manager::Object->TestCollision(TYPE_ENEMY, &oBall, [&](cEnemy* OUTPUT pEnemy, coreObject3D* OUTPUT pBall, const coreVector3& vIntersection, const coreBool bFirstHit)

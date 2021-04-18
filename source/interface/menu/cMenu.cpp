@@ -163,7 +163,7 @@ void cMenu::Move()
         {
             if(STATIC_ISVALID(g_pGame))
             {
-                if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_OUTRO))
+                if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_OUTRO))
                 {
                     // 
                     this->ChangeSurface(SURFACE_SUMMARY, 0.0f);
@@ -172,7 +172,7 @@ void cMenu::Move()
                     if(g_pGame->GetOutroType()) m_SummaryMenu.ShowBegin();
                                            else m_SummaryMenu.ShowNormal();
                 }
-                else if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_DEFEATED))
+                else if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_DEFEATED))
                 {
                     // 
                     this->ChangeSurface(SURFACE_DEFEAT, 0.0f);
@@ -184,7 +184,7 @@ void cMenu::Move()
                     // 
                     Core::Audio->PauseSound();
                 }
-                else if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_FINISHED))
+                else if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_FINISHED))
                 {
                     // 
                     this->ChangeSurface(SURFACE_FINISH, 0.0f);

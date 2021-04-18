@@ -204,7 +204,7 @@ void cReplay::Update()
     if(!STATIC_ISVALID(g_pGame)) return;
 
     // 
-    if(!CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY)) return;
+    if(!HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY)) return;
     ++m_iCurFrame;
 
     if(m_iStatus == REPLAY_STATUS_RECORDING)

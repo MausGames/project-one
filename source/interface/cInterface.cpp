@@ -219,7 +219,7 @@ void cInterface::Move()
         sPlayerView& oView   = m_aView[i];
         cPlayer*     pPlayer = g_pGame->GetPlayer(i);
 
-        if(CONTAINS_FLAG(pPlayer->GetStatus(), PLAYER_STATUS_SHIELDED))
+        if(HAS_FLAG(pPlayer->GetStatus(), PLAYER_STATUS_SHIELDED))
         {
             // 
             if(m_fAlphaAll) oView.fSpin.UpdateMin(1.0f, 1.0f);
@@ -692,7 +692,7 @@ void cInterface::UpdateEnabled()
         sPlayerView& oView   = m_aView[i];
         cPlayer*     pPlayer = g_pGame->GetPlayer(i);
 
-        if(CONTAINS_FLAG(pPlayer->GetStatus(), PLAYER_STATUS_SHIELDED))
+        if(HAS_FLAG(pPlayer->GetStatus(), PLAYER_STATUS_SHIELDED))
         {
             // 
             for(coreUintW j = 0u; j < INTERFACE_LIVES; ++j) oView.aLife[j].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);

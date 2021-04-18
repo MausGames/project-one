@@ -57,7 +57,7 @@ void cBullet::Move()
 void cBullet::Activate(const coreInt32 iDamage, const coreFloat fSpeed, cShip* pOwner, const coreVector2& vPosition, const coreVector2& vDirection, const coreInt32 iType)
 {
     // activate bullet and remove readiness
-    if(CONTAINS_FLAG(m_iStatus, BULLET_STATUS_ACTIVE)) return;
+    if(HAS_FLAG(m_iStatus, BULLET_STATUS_ACTIVE)) return;
     ADD_FLAG   (m_iStatus, BULLET_STATUS_ACTIVE)
     REMOVE_FLAG(m_iStatus, BULLET_STATUS_READY)
 
@@ -88,7 +88,7 @@ void cBullet::Activate(const coreInt32 iDamage, const coreFloat fSpeed, cShip* p
 void cBullet::Deactivate(const coreBool bAnimated, const coreVector2& vImpact)
 {
     // deactivate bullet (will be cleaned up by bullet manager)
-    if(!CONTAINS_FLAG(m_iStatus, BULLET_STATUS_ACTIVE)) return;
+    if(!HAS_FLAG(m_iStatus, BULLET_STATUS_ACTIVE)) return;
     REMOVE_FLAG(m_iStatus, BULLET_STATUS_ACTIVE)
 
     // 
@@ -269,7 +269,7 @@ void cBulletManager::Move()
             cBullet* pBullet = d_cast<cBullet*>(*it);
 
             // check current bullet status
-            if(!CONTAINS_FLAG(pBullet->GetStatus(), BULLET_STATUS_ACTIVE))
+            if(!HAS_FLAG(pBullet->GetStatus(), BULLET_STATUS_ACTIVE))
             {
                 // clean up bullet and make ready again
                 pBullet->SetStatus(pBullet->GetStatus() | BULLET_STATUS_READY);

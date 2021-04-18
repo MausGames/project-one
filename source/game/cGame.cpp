@@ -381,7 +381,7 @@ void cGame::LoadNextMission()
     // 
     if(m_pCurMission->GetID() == cNoMission::ID)
     {
-        ASSERT(CONTAINS_FLAG(m_iStatus, GAME_STATUS_OUTRO))
+        ASSERT(HAS_FLAG(m_iStatus, GAME_STATUS_OUTRO))
 
         // 
         REMOVE_FLAG(m_iStatus, GAME_STATUS_OUTRO)
@@ -408,8 +408,8 @@ void cGame::RestartMission()
 // 
 void cGame::StartIntro()
 {
-    ASSERT(!CONTAINS_FLAG(m_iStatus, GAME_STATUS_PLAY))
-    ASSERT(!CONTAINS_FLAG(m_iStatus, GAME_STATUS_OUTRO))
+    ASSERT(!HAS_FLAG(m_iStatus, GAME_STATUS_PLAY))
+    ASSERT(!HAS_FLAG(m_iStatus, GAME_STATUS_OUTRO))
 
     // 
     ADD_FLAG(m_iStatus, GAME_STATUS_INTRO)
@@ -435,8 +435,8 @@ void cGame::StartIntro()
 // 
 void cGame::StartOutro(const coreUint8 iType)
 {
-    ASSERT( CONTAINS_FLAG(m_iStatus, GAME_STATUS_PLAY))
-    ASSERT(!CONTAINS_FLAG(m_iStatus, GAME_STATUS_INTRO))
+    ASSERT( HAS_FLAG(m_iStatus, GAME_STATUS_PLAY))
+    ASSERT(!HAS_FLAG(m_iStatus, GAME_STATUS_INTRO))
 
     // 
     REMOVE_FLAG(m_iStatus, GAME_STATUS_PLAY)
@@ -462,7 +462,7 @@ void cGame::StartOutro(const coreUint8 iType)
 // 
 void cGame::UseContinue()
 {
-    ASSERT(CONTAINS_FLAG(m_iStatus, GAME_STATUS_DEFEATED))
+    ASSERT(HAS_FLAG(m_iStatus, GAME_STATUS_DEFEATED))
 
     // 
     REMOVE_FLAG(m_iStatus, GAME_STATUS_DEFEATED)
@@ -538,8 +538,8 @@ RETURN_NONNULL cPlayer* cGame::FindPlayerSide(const coreVector2& vPosition)
     STATIC_ASSERT(GAME_PLAYERS == 2u)
 
     // 
-    if(CONTAINS_FLAG(m_aPlayer[1].GetStatus(), PLAYER_STATUS_DEAD)) return &m_aPlayer[0];
-    if(CONTAINS_FLAG(m_aPlayer[0].GetStatus(), PLAYER_STATUS_DEAD)) return &m_aPlayer[1];
+    if(HAS_FLAG(m_aPlayer[1].GetStatus(), PLAYER_STATUS_DEAD)) return &m_aPlayer[0];
+    if(HAS_FLAG(m_aPlayer[0].GetStatus(), PLAYER_STATUS_DEAD)) return &m_aPlayer[1];
 
     // 
     ASSERT(vPosition.x)
@@ -554,8 +554,8 @@ RETURN_NONNULL cPlayer* cGame::FindPlayerDual(const coreUintW iIndex)
     STATIC_ASSERT(GAME_PLAYERS == 2u)
 
     // 
-    if(CONTAINS_FLAG(m_aPlayer[1].GetStatus(), PLAYER_STATUS_DEAD)) return &m_aPlayer[0];
-    if(CONTAINS_FLAG(m_aPlayer[0].GetStatus(), PLAYER_STATUS_DEAD)) return &m_aPlayer[1];
+    if(HAS_FLAG(m_aPlayer[1].GetStatus(), PLAYER_STATUS_DEAD)) return &m_aPlayer[0];
+    if(HAS_FLAG(m_aPlayer[0].GetStatus(), PLAYER_STATUS_DEAD)) return &m_aPlayer[1];
 
     // 
     ASSERT(iIndex < GAME_PLAYERS)
@@ -655,21 +655,21 @@ coreUint32 cGame::CalcBonusSurvive(const coreUint32 iDamageTaken, const coreBool
 // handle intro animation
 coreBool cGame::__HandleIntro()
 {
-    if(CONTAINS_FLAG(m_iStatus, GAME_STATUS_LOADING))
+    if(HAS_FLAG(m_iStatus, GAME_STATUS_LOADING))
     {
         // do not start while game resources are still loading
         if(Core::Manager::Resource->IsLoading()) return false;
         REMOVE_FLAG(m_iStatus, GAME_STATUS_LOADING)
     }
 
-    if(CONTAINS_FLAG(m_iStatus, GAME_STATUS_INTRO))
+    if(HAS_FLAG(m_iStatus, GAME_STATUS_INTRO))
     {
         // 
         m_fTimeInOut.Update(1.0f);
 
         if(m_fTimeInOut >= GAME_INTRO_DURATION)
         {
-            ASSERT(!CONTAINS_FLAG(m_iStatus, GAME_STATUS_OUTRO))
+            ASSERT(!HAS_FLAG(m_iStatus, GAME_STATUS_OUTRO))
 
             // end intro and start actual game
             REMOVE_FLAG(m_iStatus, GAME_STATUS_INTRO)
@@ -729,7 +729,7 @@ coreBool cGame::__HandleIntro()
 // handle outro animation
 coreBool cGame::__HandleOutro()
 {
-    if(CONTAINS_FLAG(m_iStatus, GAME_STATUS_OUTRO))
+    if(HAS_FLAG(m_iStatus, GAME_STATUS_OUTRO))
     {
         // 
         m_fTimeInOut.Update(1.0f);
@@ -757,7 +757,7 @@ coreBool cGame::__HandleOutro()
 // 
 void cGame::__HandleDefeat()
 {
-    if(CONTAINS_FLAG(m_iStatus, GAME_STATUS_PLAY))
+    if(HAS_FLAG(m_iStatus, GAME_STATUS_PLAY))
     {
         coreBool bAllDefeated = true;
 
@@ -767,7 +767,7 @@ void cGame::__HandleDefeat()
             cPlayer* pPlayer = &m_aPlayer[i];
 
             // 
-            const coreBool bDefeated = CONTAINS_FLAG(pPlayer->GetStatus(), PLAYER_STATUS_DEAD);
+            const coreBool bDefeated = HAS_FLAG(pPlayer->GetStatus(), PLAYER_STATUS_DEAD);
             bAllDefeated = bAllDefeated && bDefeated;
 
             // 
@@ -938,7 +938,7 @@ void cGame::__HandleCollisions()
 
                 if(iTaken)
                 {
-                    if(CONTAINS_FLAG(pBullet->GetStatus(), BULLET_STATUS_PENETRATE))
+                    if(HAS_FLAG(pBullet->GetStatus(), BULLET_STATUS_PENETRATE))
                     {
                         // 
                         pBullet->SetDamage(pBullet->GetDamage() - iTaken);
