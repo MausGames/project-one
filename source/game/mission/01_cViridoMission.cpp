@@ -408,7 +408,6 @@ void cViridoMission::DisableShadow(const coreUintW iIndex, const coreBool bAnima
 void cViridoMission::__RenderOwnUnder()
 {
     DEPTH_PUSH
-    DEPTH_PUSH   // TODO: precision artifacts (first push causes outline-overdraw artifacts, precision too low on the first level, can it be handled on outline(-shader) ?)
 
     glDepthMask(false);
     {

@@ -263,7 +263,6 @@ void cGeluMission::__RenderOwnBottom()
 void cGeluMission::__RenderOwnUnder()
 {
     DEPTH_PUSH
-    DEPTH_PUSH   // TODO: precision artifacts
 
     // 
     m_Way.Render();

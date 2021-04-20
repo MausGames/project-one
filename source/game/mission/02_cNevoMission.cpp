@@ -463,7 +463,6 @@ void cNevoMission::__RenderOwnBottom()
 void cNevoMission::__RenderOwnUnder()
 {
     DEPTH_PUSH
-    DEPTH_PUSH   // TODO: precision artifacts
 
     glDepthMask(false);
     {

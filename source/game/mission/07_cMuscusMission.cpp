@@ -199,7 +199,6 @@ void cMuscusMission::DisablePearl(const coreUintW iIndex, const coreBool bAnimat
 void cMuscusMission::__RenderOwnUnder()
 {
     DEPTH_PUSH
-    DEPTH_PUSH   // TODO: precision artifacts
 
     glDepthMask(false);
     {

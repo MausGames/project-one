@@ -36,7 +36,7 @@ void VertexMain()
         float v1Depth = u_v1Depth;
     #endif
 #else
-    const float v1Depth = 0.0;
+    const float v1Depth = -1.0;
 #endif
 
     // 
