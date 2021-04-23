@@ -132,8 +132,14 @@ void cCalorMission::DisableLoad(const coreBool bAnimated)
 // 
 void cCalorMission::__RenderOwnBottom()
 {
-    // 
-    m_Snow.Render();
+    DEPTH_PUSH
+
+    glDisable(GL_DEPTH_TEST);
+    {
+        // 
+        m_Snow.Render();
+    }
+    glEnable(GL_DEPTH_TEST);
 }
 
 

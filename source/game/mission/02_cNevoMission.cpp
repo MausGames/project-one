@@ -453,8 +453,14 @@ void cNevoMission::DisableContainer(const coreBool bAnimated)
 // 
 void cNevoMission::__RenderOwnBottom()
 {
-    // 
-    m_Tile.Render();
+    DEPTH_PUSH
+
+    glDisable(GL_DEPTH_TEST);
+    {
+        // 
+        m_Tile.Render();
+    }
+    glEnable(GL_DEPTH_TEST);
 }
 
 

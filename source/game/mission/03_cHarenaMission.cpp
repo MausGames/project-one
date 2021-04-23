@@ -117,6 +117,8 @@ void cHarenaMission::DisableSpike(const coreUintW iIndex, const coreBool bAnimat
 // 
 void cHarenaMission::__RenderOwnBottom()
 {
+    DEPTH_PUSH
+
     // 
     m_SpikeBoard.Render();
     m_Spike     .Render();

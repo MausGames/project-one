@@ -252,9 +252,15 @@ void cGeluMission::DisableLine(const coreUintW iIndex, const coreBool bAnimated)
 // 
 void cGeluMission::__RenderOwnBottom()
 {
-    // 
-    m_Line.Render();
-    m_Orb .Render();
+    DEPTH_PUSH
+
+    glDisable(GL_DEPTH_TEST);
+    {
+        // 
+        m_Line.Render();
+        m_Orb .Render();
+    }
+    glEnable(GL_DEPTH_TEST);
 }
 
 

@@ -295,14 +295,20 @@ void cRutilusMission::DisableWave(const coreBool bAnimated)
 // 
 void cRutilusMission::__RenderOwnBottom()
 {
-    // 
-    m_Plate.Render();
+    DEPTH_PUSH
 
-    //
-    for(coreUintW i = 0u; i < RUTILUS_AREAS; ++i) m_aArea[i].Render();
+    glDisable(GL_DEPTH_TEST);
+    {
+        // 
+        m_Plate.Render();
 
-    // 
-    m_Wave.Render();
+        //
+        for(coreUintW i = 0u; i < RUTILUS_AREAS; ++i) m_aArea[i].Render();
+
+        // 
+        m_Wave.Render();
+    }
+    glEnable(GL_DEPTH_TEST);
 }
 
 
