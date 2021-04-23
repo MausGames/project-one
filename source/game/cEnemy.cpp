@@ -48,7 +48,7 @@ void cEnemy::GiveShield(const coreUint8 iElement, const coreInt16 iHealth)
 // render the enemy
 void cEnemy::Render()
 {
-    if(!CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_DEAD))
+    if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_DEAD))
     {
         // 
         this->_EnableBlink();
@@ -102,7 +102,7 @@ coreInt32 cEnemy::TakeDamage(coreInt32 iDamage, const coreUint8 iElement, const 
     // forward to parent
     if(this->IsChild()) return m_apMember.front()->TakeDamage(iDamage, iElement, vImpact, pAttacker);
 
-    if(!CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_INVINCIBLE))
+    if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_INVINCIBLE))
     {
         // 
         const coreInt32 iPower = (pAttacker && (STATIC_ISVALID(g_pGame) && g_pGame->GetCoop())) ? 1 : GAME_PLAYERS;
@@ -170,12 +170,12 @@ coreInt32 cEnemy::TakeDamage(coreInt32 iDamage, const coreUint8 iElement, const 
 void cEnemy::Resurrect()
 {
     // resurrect enemy
-    if(!CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_DEAD)) return;
+    if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_DEAD)) return;
     REMOVE_FLAG(m_iStatus, ENEMY_STATUS_DEAD)
 
     // 
-    const coreBool bSingle = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_SINGLE);
-    const coreBool bEnergy = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_ENERGY);
+    const coreBool bSingle = HAS_FLAG(m_iStatus, ENEMY_STATUS_SINGLE);
+    const coreBool bEnergy = HAS_FLAG(m_iStatus, ENEMY_STATUS_ENERGY);
     ASSERT(!bEnergy || (bEnergy && bSingle))
 
     // 
@@ -211,12 +211,12 @@ void cEnemy::Resurrect()
 void cEnemy::Kill(const coreBool bAnimated)
 {
     // kill enemy
-    if(CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_DEAD)) return;
+    if(HAS_FLAG(m_iStatus, ENEMY_STATUS_DEAD)) return;
     ADD_FLAG(m_iStatus, ENEMY_STATUS_DEAD)
 
     // 
-    const coreBool bSingle = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_SINGLE);
-    const coreBool bEnergy = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_ENERGY);
+    const coreBool bSingle = HAS_FLAG(m_iStatus, ENEMY_STATUS_SINGLE);
+    const coreBool bEnergy = HAS_FLAG(m_iStatus, ENEMY_STATUS_ENERGY);
     ASSERT(!bEnergy || (bEnergy && bSingle))
 
     // 
@@ -226,7 +226,7 @@ void cEnemy::Kill(const coreBool bAnimated)
     if(bAnimated && this->IsEnabled(CORE_OBJECT_ENABLE_RENDER))
     {
         // 
-        if(CONTAINS_BIT(m_iBaseColor, SHIP_INVERTED_BIT))
+        if(HAS_BIT(m_iBaseColor, SHIP_INVERTED_BIT))
         {
             const coreVector3 vColor = (g_pEnvironment->GetBackground()->GetID() == cSnowBackground::ID) ? COLOR_FIRE_BLUE : COLOR_FIRE_ORANGE;
             g_pSpecialEffects->MacroDestructionColor(this, vColor);
@@ -391,7 +391,7 @@ void cEnemyManager::Render()
     // render all additional enemies
     FOR_EACH(it, m_apAdditional)
     {
-        if(CONTAINS_FLAG((*it)->GetStatus(), ENEMY_STATUS_DEAD))
+        if(HAS_FLAG((*it)->GetStatus(), ENEMY_STATUS_DEAD))
             continue;
 
         (*it)->Render();
@@ -421,7 +421,7 @@ void cEnemyManager::Render()
     /* */                                                             \
     const auto nRenderFunc = [](cEnemy* OUTPUT pEnemy)                \
     {                                                                 \
-        if(CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD))     \
+        if(HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD))          \
             return;                                                   \
                                                                       \
         pEnemy->f();                                                  \

@@ -575,9 +575,9 @@ void cSpecialEffects::CreateBlastSphere(const coreVector3& vPosition, const core
     oBlast.SetPosition         (vPosition);
     oBlast.SetSize             (coreVector3(0.0f,0.0f,0.0f));
     oBlast.SetDirection        (coreVector3(coreVector2::Rand(), 0.0f));
+    oBlast.SetCollisionModifier(coreVector3(fScale, fSpeed, 0.0f));
     oBlast.SetColor4           (coreVector4(vColor * 0.65f, 1.0f));
     oBlast.SetTexSize          (coreVector2(12.0f,12.0f));
-    oBlast.SetCollisionModifier(coreVector3(fScale, fSpeed, 0.0f));
 }
 
 void cSpecialEffects::CreateBlastCube(const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor)
@@ -593,9 +593,9 @@ void cSpecialEffects::CreateBlastCube(const coreVector3& vPosition, const coreVe
     oBlast.SetPosition         (vPosition);
     oBlast.SetSize             (coreVector3(0.0f,0.0f,0.0f));
     oBlast.SetDirection        (vDirection);
+    oBlast.SetCollisionModifier(coreVector3(fScale * 0.77f, fSpeed, 0.0f));
     oBlast.SetColor4           (coreVector4(vColor, 1.0f));
     oBlast.SetTexSize          (coreVector2(3.0f,1.2f));
-    oBlast.SetCollisionModifier(coreVector3(fScale * 0.77f, fSpeed, 0.0f));
 }
 
 void cSpecialEffects::CreateBlastTetra(const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor)
@@ -611,9 +611,9 @@ void cSpecialEffects::CreateBlastTetra(const coreVector3& vPosition, const coreV
     oBlast.SetPosition         (vPosition);
     oBlast.SetSize             (coreVector3(0.0f,0.0f,0.0f));
     oBlast.SetDirection        (vDirection);
+    oBlast.SetCollisionModifier(coreVector3(fScale * 0.69f, fSpeed, 0.0f));
     oBlast.SetColor4           (coreVector4(vColor, 1.0f));
     oBlast.SetTexSize          (coreVector2(3.0f,1.2f));
-    oBlast.SetCollisionModifier(coreVector3(fScale * 0.69f, fSpeed, 0.0f));
 }
 
 

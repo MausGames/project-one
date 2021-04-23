@@ -78,8 +78,8 @@ public:
     void ResetProperties();
 
     // 
-    inline coreBool IsParent()const {return !m_apMember.empty() && !CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_CHILD);}
-    inline coreBool IsChild ()const {return !m_apMember.empty() &&  CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_CHILD);}
+    inline coreBool IsParent()const {return !m_apMember.empty() && !HAS_FLAG(m_iStatus, ENEMY_STATUS_CHILD);}
+    inline coreBool IsChild ()const {return !m_apMember.empty() &&  HAS_FLAG(m_iStatus, ENEMY_STATUS_CHILD);}
 
     // 
     cPlayer*    NearestPlayerSide   ()const;
@@ -210,9 +210,9 @@ public:
 
     // 
     inline coreUintW GetNumEnemies        ()const {return m_apEnemy.size();}
-    inline coreUintW GetNumEnemiesAlive   ()const {return std::count_if(m_apEnemy.begin(), m_apEnemy.end(), [](const cEnemy* pEnemy) {return !CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD);});}
+    inline coreUintW GetNumEnemiesAlive   ()const {return std::count_if(m_apEnemy.begin(), m_apEnemy.end(), [](const cEnemy* pEnemy) {return !HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD);});}
     inline coreFloat GetNumEnemiesAlivePct()const {return I_TO_F(this->GetNumEnemiesAlive()) * RCP(I_TO_F(this->GetNumEnemies()));}
-    inline coreBool  IsFinished           ()const {return std::none_of (m_apEnemy.begin(), m_apEnemy.end(), [](const cEnemy* pEnemy) {return !CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD);});}
+    inline coreBool  IsFinished           ()const {return std::none_of (m_apEnemy.begin(), m_apEnemy.end(), [](const cEnemy* pEnemy) {return !HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD);});}
 
 
 private:
@@ -473,7 +473,7 @@ template <typename T> RETURN_RESTRICT T* cEnemyManager::AllocateEnemy()
         // check current enemy status
         T*& pEnemy = pSet->apEnemyPool[pSet->iTopEnemy++];
         if(!pEnemy) pEnemy = new T();
-        if(!CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_ASSIGNED))
+        if(!HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_ASSIGNED))
         {
             // prepare enemy and add to active list
             pEnemy->ResetProperties();
@@ -552,7 +552,7 @@ template <typename F> void cEnemySquad::ForEachEnemy(F&& nFunction)const
     for(coreUintW i = 0u, ie = m_apEnemy.size(); i < ie; ++i)
     {
         cEnemy* pEnemy = m_apEnemy[i];
-        if(CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD) && !pEnemy->ReachedDeath()) continue;    // # for scripting
+        if(HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD) && !pEnemy->ReachedDeath()) continue;    // # for scripting
 
         // 
         nFunction(pEnemy, i);

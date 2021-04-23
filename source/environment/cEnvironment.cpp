@@ -118,9 +118,9 @@ void cEnvironment::Move()
 {
     // update all transformation properties
     m_avDirection[0] = SmoothAim(m_avDirection[0], m_avDirection[1], 8.0f);
-    m_avSide     [0] = m_avSide  [0] + (m_avSide  [1] - m_avSide  [0]) * (Core::System->GetTime() * 16.0f);
-    m_afSpeed    [0] = m_afSpeed [0] + (m_afSpeed [1] - m_afSpeed [0]) * (Core::System->GetTime() *  1.0f);
-    m_afHeight   [0] = m_afHeight[0] + (m_afHeight[1] - m_afHeight[0]) * (Core::System->GetTime() *  2.0f);
+    m_avSide     [0] = m_avSide  [0] + (m_avSide  [1] - m_avSide  [0]) * (TIME * 16.0f);
+    m_afSpeed    [0] = m_afSpeed [0] + (m_afSpeed [1] - m_afSpeed [0]) * (TIME *  1.0f);
+    m_afHeight   [0] = m_afHeight[0] + (m_afHeight[1] - m_afHeight[0]) * (TIME *  2.0f);
 
     // calculate global fly offset
     m_fFlyOffset += TIME * m_afSpeed[0];

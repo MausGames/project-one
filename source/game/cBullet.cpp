@@ -1000,8 +1000,8 @@ cMineBullet::cMineBullet()noexcept
     this->DefineProgram("object_ship_glow_program");
 
     // set object properties
-    this->SetColor3           (coreVector3(1.0f,0.0f,0.0f));
     this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * BULLET_COLLISION_FACTOR);
+    this->SetColor3           (coreVector3(1.0f,0.0f,0.0f));
 }
 
 
@@ -1091,8 +1091,8 @@ cRocketBullet::cRocketBullet()noexcept
     this->DefineProgram("object_ship_glow_program");
 
     // set object properties
-    this->SetColor3           (coreVector3(0.0f,1.0f,0.0f));
     this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * BULLET_COLLISION_FACTOR);
+    this->SetColor3           (coreVector3(0.0f,1.0f,0.0f));
 }
 
 
