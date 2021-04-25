@@ -154,7 +154,9 @@ public:
     void RenderUnder ();
     void RenderOver  ();
     void RenderTop   ();
-    void Move        ();
+    void MoveBefore  ();
+    void MoveMiddle  ();
+    void MoveAfter   ();
 
     // add and remove enemies
     template <typename T> RETURN_RESTRICT T* AllocateEnemy();

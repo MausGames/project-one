@@ -226,24 +226,28 @@ void cGame::Move()
     // 
     cHelper::GlobalUpdate();
 
-    // move the mission
+    // 
+    m_EnemyManager.MoveBefore();
     m_pCurMission->MoveBefore();
-    {
-        // move all players
-        for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
-            m_aPlayer[i].Move();
 
-        // 
-        for(coreUintW i = 0u; i < GAME_HELPERS; ++i)
-            m_aHelper[i].Move();
+    // move all players
+    for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+        m_aPlayer[i].Move();
 
-        // move all enemies
-        m_EnemyManager.Move();
+    // move all helpers
+    for(coreUintW i = 0u; i < GAME_HELPERS; ++i)
+        m_aHelper[i].Move();
 
-        // move the bullet managers
-        m_BulletManagerPlayer.Move();
-        m_BulletManagerEnemy .Move();
-    }
+    // 
+    m_pCurMission->MoveMiddle();   // # swapped
+    m_EnemyManager.MoveMiddle();
+
+    // move the bullet managers
+    m_BulletManagerPlayer.Move();
+    m_BulletManagerEnemy .Move();
+
+    // 
+    m_EnemyManager.MoveAfter();
     m_pCurMission->MoveAfter();
 
     // 

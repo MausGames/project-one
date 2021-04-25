@@ -124,6 +124,12 @@ void cMission::MoveBefore()
     while(m_bRepeat);
 }
 
+void cMission::MoveMiddle()
+{
+    // 
+    this->__MoveOwnMiddle();
+}
+
 void cMission::MoveAfter()
 {
     // 

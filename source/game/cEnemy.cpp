@@ -63,10 +63,7 @@ void cEnemy::Render()
 // move the enemy
 void cEnemy::Move()
 {
-    // 
-    this->_UpdateAlwaysBefore();
-
-    if(!CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_DEAD))
+    if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_DEAD))
     {
         // 
         m_fLifeTimeBefore = m_fLifeTime;
@@ -453,7 +450,25 @@ void cEnemyManager::RenderTop   () {__RENDER_OWN(__RenderOwnTop)}
 
 // ****************************************************************
 // move the enemy manager
-void cEnemyManager::Move()
+void cEnemyManager::MoveBefore()
+{
+    // 
+    FOR_EACH(it, m_apAdditional)
+        (*it)->_UpdateAlwaysBefore();
+
+    // 
+    for(coreUintW i = 0u; i < ENEMY_SET_COUNT; ++i)
+    {
+        if(!m_apEnemySet[i]) continue;
+        coreBatchList* pEnemyActive = &m_apEnemySet[i]->oEnemyActive;
+
+        // 
+        FOR_EACH(it, *pEnemyActive->List())
+            d_cast<cEnemy*>(*it)->_UpdateAlwaysBefore();
+    }
+}
+
+void cEnemyManager::MoveMiddle()
 {
     // move all additional enemies (# bosses need to move before other enemies)
     FOR_EACH(it, m_apAdditional)
@@ -468,6 +483,11 @@ void cEnemyManager::Move()
         // move the enemy set
         pEnemyActive->MoveNormal();
     }
+}
+
+void cEnemyManager::MoveAfter()
+{
+    // not used
 }
 
 

@@ -279,6 +279,7 @@ public:
     void RenderOver  ();
     void RenderTop   ();
     void MoveBefore  ();
+    void MoveMiddle  ();
     void MoveAfter   ();
 
     // 
@@ -333,6 +334,7 @@ private:
     virtual void __RenderOwnOver  () {}
     virtual void __RenderOwnTop   () {}
     virtual void __MoveOwnBefore  () {}
+    virtual void __MoveOwnMiddle  () {}
     virtual void __MoveOwnAfter   () {}
 
     // 
