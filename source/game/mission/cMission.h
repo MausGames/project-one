@@ -90,6 +90,10 @@
 
 #define CALOR_LOADS                 (12u)                                             // 
 #define CALOR_LOADS_RAWS            (CALOR_LOADS)                                     // 
+#define CALOR_CHAINS                (16u)                                             // 
+#define CALOR_STARS                 (MISSION_PLAYERS)                                 // 
+#define CALOR_STARS_RAWS            (CALOR_STARS * (CALOR_CHAINS + 1u))               // 
+#define CALOR_CHAIN_CONSTRAINT      (46.0f)                                           // 
 
 #define MUSCUS_GENERATES            (24u)                                             // 
 #define MUSCUS_GENERATES_RAWS       (MUSCUS_GENERATES * 2u)                           // 
@@ -737,6 +741,22 @@ private:
     const cShip*  m_pLoadOwner;                      // 
     coreFlow      m_afLoadPower[3];                  // (0 = current | 1 = previous | 2 = bump) 
 
+    coreBatchList m_Star;                            // 
+    coreBatchList m_StarChain;                       // 
+    coreObject3D  m_aStarRaw   [CALOR_STARS_RAWS];   // 
+    const cShip*  m_apStarOwner[CALOR_STARS];        // 
+    coreUint8     m_iStarState;                      // 
+
+    coreFlow m_fSwingStart;                          // 
+    coreFlow m_fSwingValue;                          // 
+
+    cEnemy*     m_apCatchObject[CALOR_STARS];        // 
+    coreVector2 m_avCatchPos   [CALOR_STARS];        // 
+    coreVector2 m_avCatchDir   [CALOR_STARS];        // 
+    coreFlow    m_fCatchTransfer;                    // 
+
+    cCustomEnemy m_Boulder;                          // 
+
     coreFlow m_fAnimation;                           // animation value
 
 
@@ -752,15 +772,31 @@ public:
     void DisableLoad(const coreBool bAnimated);
 
     // 
+    void EnableStar (const coreUintW iIndex, const cShip* pOwner);
+    void DisableStar(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
     inline void BumpLoad(const coreFloat fValue) {ASSERT(fValue > 0.0f) m_afLoadPower[0] = MIN(m_afLoadPower[0] + fValue, I_TO_F(CALOR_LOADS)); m_afLoadPower[2] = 1.0f;}
+
+    // 
+    inline void StartSwing() {m_iStarState = BITLINE(CALOR_STARS); m_fSwingStart = 0.0f; m_fSwingValue = 0.0f;}
+
+    // 
+    void CatchObject  (const coreUintW iIndex, cEnemy* pObject);
+    void UncatchObject(const coreUintW iIndex);
+
+    // 
+    inline cEnemy* GetCatchObject(const coreUintW iIndex)const {ASSERT(iIndex < CALOR_STARS) return m_apCatchObject[iIndex];}
 
 
 private:
     // execute own routines
     void __SetupOwn       ()final;
     void __RenderOwnBottom()final;
+    void __RenderOwnUnder ()final;
     void __RenderOwnOver  ()final;
     void __RenderOwnTop   ()final;
+    void __MoveOwnMiddle  ()final;
     void __MoveOwnAfter   ()final;
 };
 
