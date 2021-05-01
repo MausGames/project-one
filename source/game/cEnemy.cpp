@@ -220,7 +220,7 @@ void cEnemy::Kill(const coreBool bAnimated)
     if(STATIC_ISVALID(g_pGame)) g_pGame->GetShieldManager()->UnbindEnemy(this);
 
     // 
-    if(bAnimated && this->IsEnabled(CORE_OBJECT_ENABLE_RENDER))
+    if(bAnimated && this->GetType())
     {
         // 
         if(HAS_BIT(m_iBaseColor, SHIP_INVERTED_BIT))
@@ -945,4 +945,7 @@ void cRepairEnemy::__MoveOwn()
     m_Bubble.SetSize     (coreVector3(1.0f,1.0f,1.0f) * PLAYER_BUBBLE_SIZE * m_Bubble.GetAlpha());
     m_Bubble.SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.5f));
     m_Bubble.Move();
+
+    // 
+    m_pPlayer->SetPosition(this->GetPosition());
 }

@@ -30,7 +30,7 @@ cHelper::cHelper()noexcept
     m_iStatus = HELPER_STATUS_DEAD;
 
     // 
-    this->SetMaxHealth(1u);
+    this->SetMaxHealth(1);
 }
 
 

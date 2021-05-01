@@ -21,7 +21,7 @@ varying float v_v1Strength;   // outline intensity
 void VertexMain()
 {
     // transform position normal-resized
-    vec3 v3BasePosition = coreQuatApply(u_v4Rotation, (a_v3RawPosition * u_v3Size) + (a_v3RawNormal * 0.31));
+    vec3 v3BasePosition = coreQuatApply(u_v4Rotation, (a_v3RawPosition * u_v3Size) + (a_v3RawNormal * 0.35));
 
 #if defined(_P1_FLAT_)
 

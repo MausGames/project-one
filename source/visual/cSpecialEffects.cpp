@@ -775,7 +775,7 @@ void cSpecialEffects::MacroExplosionPhysicalDarkSmall(const coreVector3& vPositi
     // 
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_SMALL);
     this         ->CreateSplashDark (vPosition, SPECIAL_SPLASH_SMALL);
-    this         ->CreateSplashFire (vPosition, SPECIAL_EXPLOSION_SMALL, coreVector3(0.22f,0.22f,0.22f));
+    this         ->CreateSplashFire (vPosition, SPECIAL_EXPLOSION_SMALL, COLOR_FIRE_WHITE);
     this         ->PlaySound        (vPosition, 1.0f, SOUND_EXPLOSION_PHYSICAL_SMALL);
     this         ->ShakeScreen      (SPECIAL_SHAKE_SMALL);
 }
@@ -785,7 +785,7 @@ void cSpecialEffects::MacroExplosionPhysicalDarkBig(const coreVector3& vPosition
     // 
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_BIG);
     this         ->CreateSplashDark (vPosition, SPECIAL_SPLASH_BIG);
-    this         ->CreateSplashFire (vPosition, SPECIAL_EXPLOSION_BIG, coreVector3(0.22f,0.22f,0.22f));
+    this         ->CreateSplashFire (vPosition, SPECIAL_EXPLOSION_BIG, COLOR_FIRE_WHITE);
     this         ->PlaySound        (vPosition, 1.0f, SOUND_EXPLOSION_PHYSICAL_BIG);
     this         ->ShakeScreen      (SPECIAL_SHAKE_BIG);
 }
@@ -852,7 +852,7 @@ void cSpecialEffects::MacroDestructionDark(const cLodObject* pObject)
     // (# more particles than color) 
     g_pDistortion->CreateWave       (vPosition, 2.5f  * fPower, 3.0f);
     this         ->CreateBreakupDark(pObject,   52.0f * fPower, F_TO_UI(30.0f * RCP(fPower)));
-    this         ->CreateSplashFire (vPosition, 5.0f  * fPower, F_TO_UI(14.0f *    (fPower)), coreVector3(0.22f,0.22f,0.22f));
+    this         ->CreateSplashFire (vPosition, 5.0f  * fPower, F_TO_UI(14.0f *    (fPower)), COLOR_FIRE_WHITE);
     this         ->PlaySound        (vPosition, 1.0f, SOUND_EXPLOSION_PHYSICAL_SMALL);
     this         ->ShakeScreen      (SPECIAL_SHAKE_TINY * fPower);
 }

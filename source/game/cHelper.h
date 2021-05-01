@@ -22,7 +22,7 @@ enum eHelperStatus : coreUint8
 
 
 // ****************************************************************
-// helper entity
+// helper entity class
 class cHelper final : public cShip
 {
 private:
