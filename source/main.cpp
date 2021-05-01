@@ -515,7 +515,7 @@ static void DebugGame()
     // load boss
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_PERIOD), CORE_INPUT_HOLD))
     {
-        static std::string s_sCode;
+        static coreString s_sCode;
         for(coreUintW i = 0u; i < 10u; ++i)
         {
             if(Core::Input->GetKeyboardButton(coreInputKey(CORE_INPUT_KEY(KP_1) + i), CORE_INPUT_PRESS))

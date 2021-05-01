@@ -232,7 +232,7 @@ cConfigMenu::cConfigMenu()noexcept
     STATIC_ASSERT(MENU_CONFIG_INPUTS == 2u)
 
     // fill configuration entries
-    const std::vector<std::string>& asLanguageList = cMenu::GetLanguageList().get_keylist();
+    const coreList<coreString>& asLanguageList = cMenu::GetLanguageList().get_keylist();
 
     for(coreUintW i = 0u, ie = asLanguageList.size(); i < ie; i++)
         m_Language.AddEntry(asLanguageList[i].c_str(), i);
@@ -725,7 +725,7 @@ void cConfigMenu::LoadValues()
     m_AmbientVolume.SelectValue(F_TO_UI(ROUND(g_CurConfig.Audio.fAmbientVolume                       * 100.0f)));
 
     // 
-    const std::vector<std::string>& asLanguageList = cMenu::GetLanguageList().get_valuelist();
+    const coreList<coreString>& asLanguageList = cMenu::GetLanguageList().get_valuelist();
     m_Language    .SelectIndex(std::find(asLanguageList.begin(), asLanguageList.end(), Core::Config->GetString(CORE_CONFIG_BASE_LANGUAGE)) - asLanguageList.begin());
     m_TextSize    .SelectValue(g_CurConfig.Game.iTextSize);
     m_GameRotation.SelectValue(g_CurConfig.Game.iGameRotation);
@@ -877,7 +877,7 @@ void cConfigMenu::__UpdateVolume()
 void cConfigMenu::__UpdateLanguage()
 {
     // 
-    const std::vector<std::string>& asLanguageList = cMenu::GetLanguageList().get_valuelist();
+    const coreList<coreString>& asLanguageList = cMenu::GetLanguageList().get_valuelist();
     Core::Language->Load(asLanguageList[m_Language.GetCurIndex()].c_str());
 
     // 

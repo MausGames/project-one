@@ -55,7 +55,7 @@ void cWindscreen::Move()
     if(m_bActive)
     {
         // 
-        const auto nControlAddFunc = [](std::vector<coreObject3D*>* OUTPUT papObject)
+        const auto nControlAddFunc = [](coreList<coreObject3D*>* OUTPUT papObject)
         {
             FOR_EACH_DYN(it, *papObject)
             {

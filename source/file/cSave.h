@@ -138,8 +138,8 @@ public:
 
 
 private:
-    sHeader     m_Header;   // 
-    std::string m_sPath;    // 
+    sHeader    m_Header;   // 
+    coreString m_sPath;    // 
 
 
 public:

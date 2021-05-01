@@ -46,19 +46,19 @@ private:
 
 
 private:
-    coreFrameBuffer m_FrameBuffer;                // 
+    coreFrameBuffer m_FrameBuffer;             // 
 
-    std::vector<sSpotCommand>  m_aSpotCommand;    // 
-    std::vector<sPointCommand> m_aPointCommand;   // 
+    coreList<sSpotCommand>  m_aSpotCommand;    // 
+    coreList<sPointCommand> m_aPointCommand;   // 
 
-    coreObject2D m_Spot;                          // 
-    coreObject2D m_Point;                         // 
+    coreObject2D m_Spot;                       // 
+    coreObject2D m_Point;                      // 
 
-    coreSoundPtr m_pFlickerSound;                 // 
-    coreSoundPtr m_pShatterSound;                 // 
+    coreSoundPtr m_pFlickerSound;              // 
+    coreSoundPtr m_pShatterSound;              // 
 
-    coreTimer m_Flicker;                          // 
-    coreUint8 m_iShatter;                         // 
+    coreTimer m_Flicker;                       // 
+    coreUint8 m_iShatter;                      // 
 
 
 public:

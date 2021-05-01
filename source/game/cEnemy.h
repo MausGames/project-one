@@ -130,7 +130,7 @@ private:
     };
     template <typename T> struct sEnemySet final : public sEnemySetGen
     {
-        std::vector<T*> apEnemyPool;   // semi-dynamic container with all enemies
+        coreList<T*> apEnemyPool;   // semi-dynamic container with all enemies
 
         sEnemySet()noexcept;
         ~sEnemySet()final;
@@ -185,7 +185,7 @@ public:
 class cEnemySquad final
 {
 private:
-    std::vector<cEnemy*> m_apEnemy;   // 
+    coreList<cEnemy*> m_apEnemy;   // 
 
 
 public:
@@ -500,7 +500,7 @@ template <typename T> RETURN_RESTRICT T* cEnemyManager::AllocateEnemy()
 template <typename F> void cEnemyManager::ForEachEnemy(F&& nFunction)const
 {
     // 
-    const std::vector<coreObject3D*>& oEnemyList = Core::Manager::Object->GetObjectList(TYPE_ENEMY);
+    const coreList<coreObject3D*>& oEnemyList = Core::Manager::Object->GetObjectList(TYPE_ENEMY);
     FOR_EACH(it, oEnemyList)
     {
         cEnemy* pEnemy = d_cast<cEnemy*>(*it);

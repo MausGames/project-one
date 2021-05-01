@@ -235,12 +235,12 @@ enum eEntry : coreUint8
 class cIntroMenu final : public coreMenu
 {
 private:
-    cGuiLabel m_WelcomeText;                                   // 
+    cGuiLabel m_WelcomeText;                               // 
 
-    coreTimer m_IntroTimer;                                    // intro animation 
-    coreUint8 m_iIntroStatus;                                  // 
+    coreTimer m_IntroTimer;                                // intro animation 
+    coreUint8 m_iIntroStatus;                              // 
 
-    coreLookup<std::string, cGuiButton*> m_apLanguageButton;   // list with buttons for valid language files
+    coreMap<coreString, cGuiButton*> m_apLanguageButton;   // list with buttons for valid language files
 
 
 public:
@@ -413,7 +413,7 @@ private:
     cGuiLabel  m_aTime[MENU_REPLAY_ENTRIES];   // 
     cGuiObject m_aLine[MENU_REPLAY_ENTRIES];   // 
 
-    std::vector<cReplay::sInfo> m_aInfoList;   // 
+    coreList<cReplay::sInfo> m_aInfoList;      // 
 
 
 public:
@@ -512,8 +512,8 @@ private:
     sPlayerInput m_aInput[MENU_CONFIG_INPUTS];
     cGuiButton   m_SwapInput;
 
-    coreUintW                          m_iCurMonitorIndex;
-    coreLookup<coreUintW, std::string> m_asCurResolution;
+    coreUintW                      m_iCurMonitorIndex;
+    coreMap<coreUintW, coreString> m_asCurResolution;
 
 
 public:
@@ -827,7 +827,7 @@ public:
 
     // 
     static void UpdateLanguageFont();
-    static const coreLookup<std::string, std::string>& GetLanguageList();
+    static const coreMap<coreString, coreString>& GetLanguageList();
 
     // menu helper routines
     static void UpdateButton        (cGuiButton*    OUTPUT pButton, const coreBool bFocused, const coreVector3& vFocusColor = COLOR_MENU_WHITE);

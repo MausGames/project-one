@@ -102,24 +102,24 @@
 class INTERFACE cBackground
 {
 protected:
-    coreFrameBuffer m_FrameBuffer;                      // background frame buffer (multisampled)
-    coreFrameBuffer m_ResolvedTexture;                  // resolved texture
+    coreFrameBuffer m_FrameBuffer;                   // background frame buffer (multisampled)
+    coreFrameBuffer m_ResolvedTexture;               // resolved texture
 
-    cOutdoor* m_pOutdoor;                               // outdoor-surface object (optional)
-    cWater*   m_pWater;                                 // water-surface object (optional)
+    cOutdoor* m_pOutdoor;                            // outdoor-surface object (optional)
+    cWater*   m_pWater;                              // water-surface object (optional)
 
-    std::vector<coreBatchList*> m_apGroundObjectList;   // persistent objects connected to the ground
-    std::vector<coreBatchList*> m_apDecalObjectList;    // persistent transparent objects connected to the ground
-    std::vector<coreBatchList*> m_apAirObjectList;      // persistent objects floating in the air
+    coreList<coreBatchList*> m_apGroundObjectList;   // persistent objects connected to the ground
+    coreList<coreBatchList*> m_apDecalObjectList;    // persistent transparent objects connected to the ground
+    coreList<coreBatchList*> m_apAirObjectList;      // persistent objects floating in the air
 
-    coreLookupStr<coreBatchList*> m_apGroundAddList;    // temporary objects connected to the ground
-    coreLookupStr<coreBatchList*> m_apDecalAddList;     // temporary transparent objects connected to the ground
-    coreLookupStr<coreBatchList*> m_apAirAddList;       // temporary objects floating in the air
+    coreMapStr<coreBatchList*> m_apGroundAddList;    // temporary objects connected to the ground
+    coreMapStr<coreBatchList*> m_apDecalAddList;     // temporary transparent objects connected to the ground
+    coreMapStr<coreBatchList*> m_apAirAddList;       // temporary objects floating in the air
 
-    coreLookup<const coreBatchList*, std::vector<coreUint16>> m_aaiBaseHeight;   // 
-    coreLookup<const coreBatchList*, std::vector<coreUint32>> m_aaiBaseNormal;   // 
+    coreMap<const coreBatchList*, coreList<coreUint16>> m_aaiBaseHeight;   // 
+    coreMap<const coreBatchList*, coreList<coreUint32>> m_aaiBaseNormal;   // 
 
-    static coreMemoryPool s_MemoryPool;                 // 
+    static coreMemoryPool s_MemoryPool;              // 
 
 
 public:

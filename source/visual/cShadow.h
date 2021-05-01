@@ -80,9 +80,9 @@ public:
     static void Recompile();
 
     // render shadow-casting objects
-    static void RenderSingle   (const coreMatrix4& mTransform, const std::vector<coreBatchList*>& apList, const std::vector<coreObject3D*>& apObject);
-    static void RenderSingle   (const coreMatrix4& mTransform, const std::vector<coreBatchList*>& apList);
-    static void RenderInstanced(const coreMatrix4& mTransform, const std::vector<coreBatchList*>& apList);
+    static void RenderSingle   (const coreMatrix4& mTransform, const coreList<coreBatchList*>& apList, const coreList<coreObject3D*>& apObject);
+    static void RenderSingle   (const coreMatrix4& mTransform, const coreList<coreBatchList*>& apList);
+    static void RenderInstanced(const coreMatrix4& mTransform, const coreList<coreBatchList*>& apList);
 
     // enable shader-program and apply read shadow matrix
     static void EnableShadowRead(const coreUintW iHandleIndex);

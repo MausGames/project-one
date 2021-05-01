@@ -223,48 +223,48 @@ private:
 
 
 protected:
-    cBoss* m_apBoss[MISSION_BOSSES];                           // pointers to all available bosses
+    cBoss* m_apBoss[MISSION_BOSSES];                        // pointers to all available bosses
 
-    cBoss*    m_pCurBoss;                                      // pointer to currently active boss
-    coreUintW m_iCurBossIndex;                                 // index of the active boss (or error-value)
+    cBoss*    m_pCurBoss;                                   // pointer to currently active boss
+    coreUintW m_iCurBossIndex;                              // index of the active boss (or error-value)
 
-    coreUintW m_iCurWaveCount;                                 // 
-    coreUintW m_iCurWaveIndex;                                 // 
+    coreUintW m_iCurWaveCount;                              // 
+    coreUintW m_iCurWaveIndex;                              // 
 
-    coreUintW m_iCurSegmentIndex;                              // 
+    coreUintW m_iCurSegmentIndex;                           // 
 
-    coreLookup<coreUint16, std::function<void()>> m_anStage;   // 
-    coreLookup<coreUint16, coreSpline2*>          m_apPath;    // 
-    coreLookup<coreUint16, cEnemySquad*>          m_apSquad;   // 
+    coreMap<coreUint16, std::function<void()>> m_anStage;   // 
+    coreMap<coreUint16, coreSpline2*>          m_apPath;    // 
+    coreMap<coreUint16, cEnemySquad*>          m_apSquad;   // 
 
-    coreUint32* m_piData;                                      // 
-    coreUint8   m_iDataSize;                                   // 
+    coreUint32* m_piData;                                   // 
+    coreUint8   m_iDataSize;                                // 
 
-    coreUint16 m_iStageNum;                                    // 
-    coreFlow   m_fStageTime;                                   // 
-    coreFloat  m_fStageTimeBefore;                             // 
-    coreUint8  m_iStageSub;                                    // 
-    coreFlow   m_fStageSubTime;                                // 
-    coreFloat  m_fStageSubTimeBefore;                          // 
-    coreFlow   m_fStageWait;                                   // 
+    coreUint16 m_iStageNum;                                 // 
+    coreFlow   m_fStageTime;                                // 
+    coreFloat  m_fStageTimeBefore;                          // 
+    coreUint8  m_iStageSub;                                 // 
+    coreFlow   m_fStageSubTime;                             // 
+    coreFloat  m_fStageSubTimeBefore;                       // 
+    coreFlow   m_fStageWait;                                // 
 
-    const coreFloat* m_pfMedalGoal;                            // 
+    const coreFloat* m_pfMedalGoal;                         // 
 
-    coreBool m_bBadgeGiven;                                    // 
+    coreBool m_bBadgeGiven;                                 // 
 
-    uCollPlayerEnemyType  m_nCollPlayerEnemy;                  // 
-    uCollPlayerBulletType m_nCollPlayerBullet;                 // 
-    uCollEnemyBulletType  m_nCollEnemyBullet;                  // 
+    uCollPlayerEnemyType  m_nCollPlayerEnemy;               // 
+    uCollPlayerBulletType m_nCollPlayerBullet;              // 
+    uCollEnemyBulletType  m_nCollEnemyBullet;               // 
 
-    coreUint8 m_iTakeFrom;                                     // 
-    coreUint8 m_iTakeTo;                                       // 
+    coreUint8 m_iTakeFrom;                                  // 
+    coreUint8 m_iTakeTo;                                    // 
 
-    coreBool m_bRepeat;                                        // 
+    coreBool m_bRepeat;                                     // 
 
-    static coreUint16  s_iTick;                                // 
-    static coreFloat   s_fLifeTimePoint;                       // 
-    static coreFloat   s_fHealthPctPoint;                      // 
-    static coreVector2 s_vPositionPoint;                       // 
+    static coreUint16  s_iTick;                             // 
+    static coreFloat   s_fLifeTimePoint;                    // 
+    static coreFloat   s_fHealthPctPoint;                   // 
+    static coreVector2 s_vPositionPoint;                    // 
 
 
 public:

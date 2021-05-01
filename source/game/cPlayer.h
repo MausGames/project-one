@@ -75,42 +75,42 @@ ENABLE_BITWISE(ePlayerTest)
 class cPlayer final : public cShip
 {
 private:
-    cWeapon* m_apWeapon[PLAYER_EQUIP_WEAPONS];                  // main weapon objects (bullet factories, should never be NULL)
+    cWeapon* m_apWeapon[PLAYER_EQUIP_WEAPONS];               // main weapon objects (bullet factories, should never be NULL)
 
-    const sGameInput* m_pInput;                                 // pointer to associated input set (should never be NULL)
-    coreVector4       m_vArea;                                  // 
+    const sGameInput* m_pInput;                              // pointer to associated input set (should never be NULL)
+    coreVector4       m_vArea;                               // 
 
-    coreVector2 m_vForce;                                       // 
-    coreFloat   m_fSpeed;                                       // 
+    coreVector2 m_vForce;                                    // 
+    coreFloat   m_fSpeed;                                    // 
 
-    coreFlow  m_fRollTime;                                      // 
-    coreFlow  m_fFeelTime;                                      // 
-    coreFlow  m_fIgnoreTime;                                    // 
-    coreUint8 m_iRollDir;                                       // 
-    coreUint8 m_iFeelType;                                      // 
-    coreUint8 m_iIgnoreType;                                    // 
+    coreFlow  m_fRollTime;                                   // 
+    coreFlow  m_fFeelTime;                                   // 
+    coreFlow  m_fIgnoreTime;                                 // 
+    coreUint8 m_iRollDir;                                    // 
+    coreUint8 m_iFeelType;                                   // 
+    coreUint8 m_iIgnoreType;                                 // 
 
-    coreFlow  m_fInterrupt;                                     // 
-    coreFlow  m_fLightningTime;                                 // 
-    coreFloat m_fLightningAngle;                                // 
+    coreFlow  m_fInterrupt;                                  // 
+    coreFlow  m_fLightningTime;                              // 
+    coreFloat m_fLightningAngle;                             // 
 
-    coreFlow m_fDesaturate;                                     // 
+    coreFlow m_fDesaturate;                                  // 
 
-    cDataTable  m_DataTable;                                    // 
-    cScoreTable m_ScoreTable;                                   // 
+    cDataTable  m_DataTable;                                 // 
+    cScoreTable m_ScoreTable;                                // 
 
-    coreProgramPtr m_pNormalProgram;                            // 
-    coreProgramPtr m_pDarkProgram;                              // 
-    coreFlow       m_fAnimation;                                // 
+    coreProgramPtr m_pNormalProgram;                         // 
+    coreProgramPtr m_pDarkProgram;                           // 
+    coreFlow       m_fAnimation;                             // 
 
-    coreObject3D m_Dot;                                         // 
-    coreObject3D m_Range;                                       // 
-    coreObject3D m_Wind;                                        // 
-    coreObject3D m_Bubble;                                      // 
-    coreObject3D m_Shield;                                      // 
-    coreObject3D m_Exhaust;                                     // 
+    coreObject3D m_Dot;                                      // 
+    coreObject3D m_Range;                                    // 
+    coreObject3D m_Wind;                                     // 
+    coreObject3D m_Bubble;                                   // 
+    coreObject3D m_Shield;                                   // 
+    coreObject3D m_Exhaust;                                  // 
 
-    coreLookup<const coreObject3D*, coreUint32> m_aCollision;   // 
+    coreMap<const coreObject3D*, coreUint32> m_aCollision;   // 
 
 
 public:

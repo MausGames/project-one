@@ -141,7 +141,7 @@ void cIntroMenu::StartIntro()
     if(bSelectLanguage)
     {
         // 
-        const coreLookup<std::string, std::string>& asLanguageList = cMenu::GetLanguageList();
+        const coreMap<coreString, coreString>& asLanguageList = cMenu::GetLanguageList();
         ASSERT(asLanguageList.size() <= 10u)
 
         // 
@@ -149,7 +149,7 @@ void cIntroMenu::StartIntro()
         FOR_EACH(it, asLanguageList)
         {
             // 
-            std::string sFont;
+            coreString sFont;
             if(!coreLanguage::FindString(it->c_str(), "FONT", &sFont)) sFont = MENU_FONT_DEFAULT;
 
             // create new language button

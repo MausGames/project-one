@@ -546,10 +546,10 @@ void cMenu::UpdateLanguageFont()
 
 // ****************************************************************
 // 
-const coreLookup<std::string, std::string>& cMenu::GetLanguageList()
+const coreMap<coreString, coreString>& cMenu::GetLanguageList()
 {
     // static language list <name, path>
-    static coreLookup<std::string, std::string> s_asLanguage;
+    static coreMap<coreString, coreString> s_asLanguage;
 
     if(s_asLanguage.empty())
     {
@@ -559,7 +559,7 @@ const coreLookup<std::string, std::string>& cMenu::GetLanguageList()
 #if defined(_P1_DEBUG_RANDOM_)
 
         // 
-        const std::string& sRandFile = s_asLanguage.get_valuelist()[CORE_RAND_RUNTIME % s_asLanguage.size()];
+        const coreString& sRandFile = s_asLanguage.get_valuelist()[CORE_RAND_RUNTIME % s_asLanguage.size()];
         Core::Language->Load(sRandFile.c_str());
 
         // 

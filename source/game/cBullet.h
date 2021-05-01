@@ -158,7 +158,7 @@ private:
     };
     template <typename T> struct sBulletSet final : public sBulletSetGen
     {
-        std::vector<T> aBulletPool;   // semi-dynamic container with all bullets
+        coreList<T> aBulletPool;   // semi-dynamic container with all bullets
 
         explicit sBulletSet(cOutline* pOutline)noexcept;
         ~sBulletSet()final;
@@ -939,7 +939,7 @@ template <typename T> T* cBulletManager::FindBulletTyped(const coreVector2& vPos
 template <typename F> void cBulletManager::ForEachBullet(F&& nFunction)const
 {
     // 
-    const std::vector<coreObject3D*>& oBulletList = Core::Manager::Object->GetObjectList(m_iType);
+    const coreList<coreObject3D*>& oBulletList = Core::Manager::Object->GetObjectList(m_iType);
     FOR_EACH(it, oBulletList)
     {
         cBullet* pBullet = d_cast<cBullet*>(*it);

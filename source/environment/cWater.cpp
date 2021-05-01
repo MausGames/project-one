@@ -175,7 +175,7 @@ void cWater::UpdateReflection()
 
 // ****************************************************************
 // update water depth map
-void cWater::UpdateDepth(cOutdoor* pOutdoor, const std::vector<coreBatchList*>& apGroundObjectList)
+void cWater::UpdateDepth(cOutdoor* pOutdoor, const coreList<coreBatchList*>& apGroundObjectList)
 {
     if(pOutdoor && pOutdoor->IsEnabled(CORE_OBJECT_ENABLE_ALL))
     {

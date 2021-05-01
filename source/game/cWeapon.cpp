@@ -283,7 +283,7 @@ void cTeslaWeapon::__TriggerOwn(const coreUint8 iMode)
     cEnemy*             apStrikeTarget [WEAPON_TESLA_TARGETS];
     coreUintW           iNum = 0u;
 
-    std::vector<const coreObject3D*> apNode;
+    coreList<const coreObject3D*> apNode;
 
     // 
     apNode.reserve(16u);

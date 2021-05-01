@@ -401,12 +401,12 @@ void cReplay::Clear()
 
 // ****************************************************************
 // 
-void cReplay::LoadInfoList(std::vector<sInfo>* OUTPUT paInfoList)
+void cReplay::LoadInfoList(coreList<sInfo>* OUTPUT paInfoList)
 {
     ASSERT(paInfoList)
 
     // 
-    std::vector<std::string> asFile;
+    coreList<coreString> asFile;
     coreData::ScanFolder(coreData::UserFolder(REPLAY_FILE_FOLDER), "*." REPLAY_FILE_EXTENSION, &asFile);
 
     // 
