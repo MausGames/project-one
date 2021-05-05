@@ -81,6 +81,9 @@
 #define RUTILUS_WAVES               (4u)                                              // 
 #define RUTILUS_WAVES_RAWS          (RUTILUS_WAVES)                                   // 
 
+#define GELU_FANGS                  (25u)                                             // 
+#define GELU_FANGS_RAWS             (GELU_FANGS)                                      // 
+#define GELU_FANGS_DIMENSION        (5u)                                              // 
 #define GELU_WAYS                   (26u)                                             // 
 #define GELU_WAYS_RAWS              (GELU_WAYS * 2u)                                  // 
 #define GELU_ORBS                   (16u)                                             // 
@@ -678,6 +681,9 @@ private:
     cPhalarisBoss m_Phalaris;                      // 
     cCholBoss     m_Chol;                          // 
 
+    coreBatchList m_Fang;                          // 
+    cLodObject    m_aFangRaw[GELU_FANGS_RAWS];     // 
+
     coreBatchList m_Way;                           // 
     coreBatchList m_WayArrow;                      // 
     coreObject3D  m_aWayRaw[GELU_WAYS_RAWS];       // 
@@ -701,6 +707,10 @@ public:
 
     DISABLE_COPY(cGeluMission)
     ASSIGN_ID(5, "Gelu")
+
+    // 
+    void EnableFang (const coreUintW iIndex);
+    void DisableFang(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
     void EnableWay (const coreUintW iIndex, const coreVector2& vPosition, const coreVector2& vDirection);

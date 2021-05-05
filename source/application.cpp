@@ -53,6 +53,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("object_container_high.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_container_high.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("object_container_low.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_container_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_cube_rota.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_cube_rota.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_fang.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_fang.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_cube_top.md3",                    CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_cube_top.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_dot.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_dot.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_star.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_star.md3");

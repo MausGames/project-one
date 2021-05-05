@@ -12,7 +12,8 @@
 // ****************************************************************
 // constructor
 cGeluMission::cGeluMission()noexcept
-: m_Way         (GELU_WAYS)
+: m_Fang        (GELU_FANGS)
+, m_Way         (GELU_WAYS)
 , m_WayArrow    (GELU_WAYS)
 , m_iWayActive  (0u)
 , m_iWayVisible (0u)
@@ -26,6 +27,28 @@ cGeluMission::cGeluMission()noexcept
     m_apBoss[0] = &m_Tartarus;
     m_apBoss[1] = &m_Phalaris;
     m_apBoss[2] = &m_Chol;
+
+    // 
+    m_Fang.DefineProgram("object_ship_glow_inst_program");
+    {
+        for(coreUintW i = 0u; i < GELU_FANGS_RAWS; ++i)
+        {
+            // load object resources
+            cLodObject* pFang = &m_aFangRaw[i];
+            pFang->DefineModelHigh("object_fang.md3");
+            pFang->DefineModelLow ("object_fang.md3");
+            pFang->DefineTexture  (0u, "ship_enemy.png");
+            pFang->DefineProgram  ("object_ship_glow_program");
+
+            // set object properties
+            pFang->SetSize   (coreVector3(1.0f,1.0f,1.0f) * 9.0f);
+            pFang->SetColor3 (coreVector3(0.5f,0.5f,0.5f));
+            pFang->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
+            // add object to the list
+            m_Fang.BindObject(pFang);
+        }
+    }
 
     // 
     m_Way     .DefineProgram("effect_energy_flat_spheric_inst_program");
@@ -115,9 +138,44 @@ cGeluMission::~cGeluMission()
     g_pGlow->UnbindList(&m_Line);
 
     // 
+    for(coreUintW i = 0u; i < GELU_FANGS; ++i) this->DisableFang(i, false);
     for(coreUintW i = 0u; i < GELU_WAYS;  ++i) this->DisableWay (i, false);
     for(coreUintW i = 0u; i < GELU_ORBS;  ++i) this->DisableOrb (i, false);
     for(coreUintW i = 0u; i < GELU_LINES; ++i) this->DisableLine(i, false);
+}
+
+
+// ****************************************************************
+// 
+void cGeluMission::EnableFang(const coreUintW iIndex)
+{
+    ASSERT(iIndex < GELU_FANGS)
+    cLodObject& oFang = m_aFangRaw[iIndex];
+
+    // 
+    WARN_IF(oFang.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    oFang.SetPosition(coreVector3(HIDDEN_POS, 0.0f));
+    oFang.SetEnabled (CORE_OBJECT_ENABLE_ALL);
+}
+
+
+// ****************************************************************
+// 
+void cGeluMission::DisableFang(const coreUintW iIndex, const coreBool bAnimated)
+{
+    ASSERT(iIndex < GELU_FANGS)
+    cLodObject& oFang = m_aFangRaw[iIndex];
+
+    // 
+    if(!oFang.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    oFang.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
+    // 
+    if(bAnimated) g_pSpecialEffects->MacroDestructionDark(&oFang);
 }
 
 
@@ -271,6 +329,10 @@ void cGeluMission::__RenderOwnUnder()
     DEPTH_PUSH
 
     // 
+    m_Fang.Render();
+    g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyList(&m_Fang);
+
+    // 
     m_Way.Render();
     g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyList(&m_Way);
 
@@ -288,6 +350,18 @@ void cGeluMission::__MoveOwnAfter()
 {
     // 
     m_fAnimation.UpdateMod(0.2f, 10.0f);
+
+    // 
+    for(coreUintW i = 0u; i < GELU_FANGS; ++i)
+    {
+        cLodObject& oFang = m_aFangRaw[i];
+        if(!oFang.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+        // nothing
+    }
+
+    // 
+    m_Fang.MoveNormal();
 
     // 
     for(coreUintW i = 0u; i < GELU_WAYS; ++i)
