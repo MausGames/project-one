@@ -530,7 +530,7 @@ void cTorusBoss::__EnableTurret(const coreUintW iIndex, const coreVector2& vPosi
     coreObject3D* pHull   = &m_aTurretHullRaw[iIndex];
 
     // 
-    if(!HAS_FLAG(pTurret->GetStatus(), ENEMY_STATUS_DEAD)) return;
+    if(!pTurret->HasStatus(ENEMY_STATUS_DEAD)) return;
     pTurret->Resurrect();
 
     // 
@@ -559,7 +559,7 @@ void cTorusBoss::__DisableTurret(const coreUintW iIndex, const coreBool bAnimate
     coreObject3D* pHull   = &m_aTurretHullRaw[iIndex];
 
     // 
-    if(HAS_FLAG(pTurret->GetStatus(), ENEMY_STATUS_DEAD)) return;
+    if(pTurret->HasStatus(ENEMY_STATUS_DEAD)) return;
     pTurret->Kill(false);
 
     // 
@@ -583,7 +583,7 @@ void cTorusBoss::__EnableGunner(const coreUintW iIndex, const coreVector2& vPosi
     coreObject3D* pHull   = &m_aGunnerHullRaw[iIndex];
 
     // 
-    if(!HAS_FLAG(pGunner->GetStatus(), ENEMY_STATUS_DEAD)) return;
+    if(!pGunner->HasStatus(ENEMY_STATUS_DEAD)) return;
     pGunner->Resurrect();
 
     // 
@@ -615,7 +615,7 @@ void cTorusBoss::__DisableGunner(const coreUintW iIndex, const coreBool bAnimate
     coreObject3D* pHull   = &m_aGunnerHullRaw[iIndex];
 
     // 
-    if(HAS_FLAG(pGunner->GetStatus(), ENEMY_STATUS_DEAD)) return;
+    if(pGunner->HasStatus(ENEMY_STATUS_DEAD)) return;
     pGunner->Kill(false);
 
     // 

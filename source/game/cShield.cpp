@@ -171,7 +171,7 @@ void cShieldManager::ClearShields(const coreBool bAnimated)
 // 
 void cShieldManager::BindEnemy(cEnemy* pEnemy, const coreUint8 iElement, const coreInt16 iHealth)
 {
-    ASSERT(!HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_SHIELDED))
+    ASSERT(!pEnemy->HasStatus(ENEMY_STATUS_SHIELDED))
 
     // 
     coreUintW i = 0u;
@@ -212,7 +212,7 @@ void cShieldManager::BindEnemy(cEnemy* pEnemy, const coreUint8 iElement, const c
 // 
 void cShieldManager::UnbindEnemy(cEnemy* pEnemy)
 {
-    if(!HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_SHIELDED)) return;
+    if(!pEnemy->HasStatus(ENEMY_STATUS_SHIELDED)) return;
 
     // 
     for(coreUintW i = 0u; i < SHIELD_SHIELDS; ++i)

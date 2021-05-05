@@ -762,7 +762,7 @@ void cViridoMission::__MoveOwnAfter()
     });
 
     // 
-    if(!HAS_FLAG(m_Vaus.GetStatus(), ENEMY_STATUS_DEAD))
+    if(!m_Vaus.HasStatus(ENEMY_STATUS_DEAD))
     {
         cEnemy*     pCurEnemy  = NULL;
         coreFloat   fCurLenSq  = FLT_MAX;

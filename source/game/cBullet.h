@@ -87,6 +87,11 @@ public:
     inline cBullet* ChangeTexSize(const coreFloat fFactor) {this->SetTexSize(this->GetTexSize() * fFactor); return this;}
 
     // 
+    inline void     AddStatus   (const coreInt32 iStatus)      {ADD_FLAG       (m_iStatus, iStatus)}
+    inline void     RemoveStatus(const coreInt32 iStatus)      {REMOVE_FLAG    (m_iStatus, iStatus)}
+    inline coreBool HasStatus   (const coreInt32 iStatus)const {return HAS_FLAG(m_iStatus, iStatus);}
+
+    // set object properties
     inline void SetDamage (const coreInt32    iDamage)  {m_iDamage  = iDamage;}
     inline void SetSpeed  (const coreFloat    fSpeed)   {m_fSpeed   = fSpeed * BULLET_SPEED_FACTOR;}
     inline void SetFade   (const coreFloat    fFade)    {m_fFade    = fFade;}
@@ -854,7 +859,7 @@ template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt
 
             // check current bullet status
             T* pBullet = &pSet->aBulletPool[pSet->iCurBullet];
-            if(HAS_FLAG(pBullet->GetStatus(), BULLET_STATUS_READY))
+            if(pBullet->HasStatus(BULLET_STATUS_READY))
             {
                 // prepare bullet and add to active list
                 pBullet->Activate(iDamage, fSpeed, pOwner, vPosition, vDirection, m_iType);
@@ -964,7 +969,7 @@ template <typename T, typename F> void cBulletManager::ForEachBulletTyped(F&& nF
         FOR_EACH(it, *oBulletActive.List())
         {
             T* pBullet = d_cast<T*>(*it);
-            if(!HAS_FLAG(pBullet->GetStatus(), BULLET_STATUS_ACTIVE)) continue;
+            if(!pBullet->HasStatus(BULLET_STATUS_ACTIVE)) continue;
 
             // 
             nFunction(pBullet);

@@ -269,10 +269,10 @@ void cBulletManager::Move()
             cBullet* pBullet = d_cast<cBullet*>(*it);
 
             // check current bullet status
-            if(!HAS_FLAG(pBullet->GetStatus(), BULLET_STATUS_ACTIVE))
+            if(!pBullet->HasStatus(BULLET_STATUS_ACTIVE))
             {
                 // clean up bullet and make ready again
-                pBullet->SetStatus(pBullet->GetStatus() | BULLET_STATUS_READY);
+                pBullet->AddStatus(BULLET_STATUS_READY);
                 DYN_REMOVE(it, *pBulletActive->List())
             }
             else

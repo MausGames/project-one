@@ -388,7 +388,7 @@ void cEnemyManager::Render()
     // render all additional enemies
     FOR_EACH(it, m_apAdditional)
     {
-        if(HAS_FLAG((*it)->GetStatus(), ENEMY_STATUS_DEAD))
+        if((*it)->HasStatus(ENEMY_STATUS_DEAD))
             continue;
 
         (*it)->Render();
@@ -418,7 +418,7 @@ void cEnemyManager::Render()
     /* */                                                             \
     const auto nRenderFunc = [](cEnemy* OUTPUT pEnemy)                \
     {                                                                 \
-        if(HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD))          \
+        if(pEnemy->HasStatus(ENEMY_STATUS_DEAD))                      \
             return;                                                   \
                                                                       \
         pEnemy->f();                                                  \

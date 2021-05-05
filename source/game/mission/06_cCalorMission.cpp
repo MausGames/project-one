@@ -381,7 +381,7 @@ void cCalorMission::__MoveOwnMiddle()
                 pChain->SetEnabled (pChain->GetAlpha() ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
             }
 
-            if(!HAS_FLAG(pPlayer->GetStatus(), PLAYER_STATUS_DEAD))
+            if(!pPlayer->HasStatus(PLAYER_STATUS_DEAD))
             {
                 // 
                 Core::Manager::Object->TestCollision(TYPE_ENEMY, pStar, [&](cEnemy* OUTPUT pEnemy, coreObject3D* OUTPUT pStar, const coreVector3& vIntersection, const coreBool bFirstHit)

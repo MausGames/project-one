@@ -538,8 +538,8 @@ RETURN_NONNULL cPlayer* cGame::FindPlayerSide(const coreVector2& vPosition)
     STATIC_ASSERT(GAME_PLAYERS == 2u)
 
     // 
-    if(HAS_FLAG(m_aPlayer[1].GetStatus(), PLAYER_STATUS_DEAD)) return &m_aPlayer[0];
-    if(HAS_FLAG(m_aPlayer[0].GetStatus(), PLAYER_STATUS_DEAD)) return &m_aPlayer[1];
+    if(m_aPlayer[1].HasStatus(PLAYER_STATUS_DEAD)) return &m_aPlayer[0];
+    if(m_aPlayer[0].HasStatus(PLAYER_STATUS_DEAD)) return &m_aPlayer[1];
 
     // 
     ASSERT(vPosition.x)
@@ -554,8 +554,8 @@ RETURN_NONNULL cPlayer* cGame::FindPlayerDual(const coreUintW iIndex)
     STATIC_ASSERT(GAME_PLAYERS == 2u)
 
     // 
-    if(HAS_FLAG(m_aPlayer[1].GetStatus(), PLAYER_STATUS_DEAD)) return &m_aPlayer[0];
-    if(HAS_FLAG(m_aPlayer[0].GetStatus(), PLAYER_STATUS_DEAD)) return &m_aPlayer[1];
+    if(m_aPlayer[1].HasStatus(PLAYER_STATUS_DEAD)) return &m_aPlayer[0];
+    if(m_aPlayer[0].HasStatus(PLAYER_STATUS_DEAD)) return &m_aPlayer[1];
 
     // 
     ASSERT(iIndex < GAME_PLAYERS)
@@ -767,7 +767,7 @@ void cGame::__HandleDefeat()
             cPlayer* pPlayer = &m_aPlayer[i];
 
             // 
-            const coreBool bDefeated = HAS_FLAG(pPlayer->GetStatus(), PLAYER_STATUS_DEAD);
+            const coreBool bDefeated = pPlayer->HasStatus(PLAYER_STATUS_DEAD);
             bAllDefeated = bAllDefeated && bDefeated;
 
             // 
@@ -938,7 +938,7 @@ void cGame::__HandleCollisions()
 
                 if(iTaken)
                 {
-                    if(HAS_FLAG(pBullet->GetStatus(), BULLET_STATUS_PENETRATE))
+                    if(pBullet->HasStatus(BULLET_STATUS_PENETRATE))
                     {
                         // 
                         pBullet->SetDamage(pBullet->GetDamage() - iTaken);
