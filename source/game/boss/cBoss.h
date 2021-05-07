@@ -86,11 +86,11 @@
 
 // ****************************************************************
 // 
-#define LERP_LINEAR     (&LERP <coreFloat>)
-#define LERP_SMOOTH     (&LERPS<coreFloat>)
-#define LERP_SMOOTH_REV (&LerpSmoothRev)
-#define LERP_BREAK      (&LERPB<coreFloat>)
-#define LERP_BREAK_REV  (&LerpBreakRev)
+#define LERP_LINEAR     (&LERP  <coreFloat>)
+#define LERP_SMOOTH     (&LERPS <coreFloat>)
+#define LERP_SMOOTH_REV (&LerpSmoothRev<coreFloat>)
+#define LERP_BREAK      (&LERPB <coreFloat>)
+#define LERP_BREAK_REV  (&LERPBR<coreFloat>)
 
 
 // ****************************************************************

@@ -69,20 +69,6 @@ inline FUNC_CONST coreFloat AngleDiff(const coreFloat x, const coreFloat y)
 
 
 // ****************************************************************
-// 
-inline FUNC_CONST coreFloat LerpSmoothRev(const coreFloat x, const coreFloat y, const coreFloat s)
-{
-    return (s >= 0.5f) ? LERPB(y, (x + y) * 0.5f, 2.0f - s * 2.0f) :
-                         LERPB(x, (x + y) * 0.5f,        s * 2.0f);
-}
-
-inline FUNC_CONST coreFloat LerpBreakRev(const coreFloat x, const coreFloat y, const coreFloat s)
-{
-    return LERPB(y, x, 1.0f - s);
-}
-
-
-// ****************************************************************
 // value range helper-functions
 template <typename T, typename S, typename R> constexpr FUNC_LOCAL coreBool InBetween(const T& x, const S& a, const R& b)
 {
@@ -94,6 +80,15 @@ template <typename T, typename S, typename R> constexpr FUNC_LOCAL coreInt32 InB
 {
     return (a <= b) ? (((x >= a) && (x < b)) ?  1 : 0) :   // [a,b)
                       (((x >= b) && (x < a)) ? -1 : 0);    // [b,a)
+}
+
+
+// ****************************************************************
+// 
+template <typename T> inline FUNC_LOCAL T LerpSmoothRev(const T& x, const T& y, const coreFloat s)
+{
+    return (s >= 0.5f) ? LERPB(y, (x + y) * 0.5f, 2.0f - s * 2.0f) :
+                         LERPB(x, (x + y) * 0.5f,        s * 2.0f);
 }
 
 
@@ -246,16 +241,28 @@ constexpr FUNC_LOCAL coreVector2 AlongCross(const coreVector2& v)
     return IsHorizontal(v) ? coreVector2(v.x, 0.0f) : coreVector2(0.0f, v.y);
 }
 
+constexpr FUNC_LOCAL coreVector2 AlongCrossNormal(const coreVector2& v)
+{
+    ASSERT(!v.IsNull())
+    return IsHorizontal(v) ? coreVector2(SIGN(v.x), 0.0f) : coreVector2(0.0f, SIGN(v.y));
+}
+
+constexpr FUNC_LOCAL coreVector2 AlongCrossX(const coreVector2& v)
+{
+    ASSERT(!v.IsNull())
+    return -AlongCross(v.Rotated45()).Rotated135();
+}
+
+constexpr FUNC_LOCAL coreVector2 AlongCrossXNormal(const coreVector2& v)
+{
+    ASSERT(!v.IsNull())
+    return -AlongCrossNormal(v.Rotated45()).Rotated135();
+}
+
 inline FUNC_LOCAL coreVector2 AlongStar(const coreVector2& v)
 {
     ASSERT(!v.IsNull())
     return UnpackDirection(PackDirection(v)) * v.Length();
-}
-
-inline FUNC_LOCAL coreVector2 AlongCrossNormal(const coreVector2& v)
-{
-    ASSERT(!v.IsNull())
-    return IsHorizontal(v) ? coreVector2(SIGN(v.x), 0.0f) : coreVector2(0.0f, SIGN(v.y));
 }
 
 inline FUNC_LOCAL coreVector2 AlongStarNormal(const coreVector2& v)
@@ -276,6 +283,14 @@ constexpr FUNC_LOCAL coreVector2 MapToAxis(const coreVector2& vVector, const cor
 constexpr FUNC_LOCAL coreVector2 MapToAxisInv(const coreVector2& vVector, const coreVector2& vAxis)
 {
     return MapToAxis(vVector, vAxis.InvertedX());
+}
+
+
+// ****************************************************************
+// 
+constexpr FUNC_CONST coreFloat DelayTime(const coreFloat fTime, const coreFloat fOffset, const coreFloat fLength)
+{
+    return MIN(fTime, fOffset) + MAX(fTime - fOffset - fLength, 0.0f);
 }
 
 
