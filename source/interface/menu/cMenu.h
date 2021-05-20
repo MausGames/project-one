@@ -76,9 +76,9 @@
 #define MENU_FONT_DYNAMIC_3     "dynamic_font",    (32u)
 #define MENU_FONT_DYNAMIC_4     "dynamic_font",    (42u)
 #define MENU_FONT_DYNAMIC_5     "dynamic_font",    (72u)
-#define MENU_FONT_ICON_1        "fontawesome.otf", (20u)
-#define MENU_FONT_ICON_2        "fontawesome.otf", (24u)
-#define MENU_FONT_ICON_3        "fontawesome.otf", (40u)
+#define MENU_FONT_ICON_1        "fontawesome.ttf", (20u)
+#define MENU_FONT_ICON_2        "fontawesome.ttf", (24u)
+#define MENU_FONT_ICON_3        "fontawesome.ttf", (40u)
 #define MENU_OUTLINE_SMALL      (2u)
 #define MENU_OUTLINE_BIG        (4u)
 
