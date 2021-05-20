@@ -692,7 +692,7 @@ void cInterface::UpdateEnabled()
         sPlayerView& oView   = m_aView[i];
         cPlayer*     pPlayer = g_pGame->GetPlayer(i);
 
-        if(HAS_FLAG(pPlayer->GetStatus(), PLAYER_STATUS_SHIELDED))
+        if(pPlayer->HasStatus(PLAYER_STATUS_SHIELDED))
         {
             // 
             for(coreUintW j = 0u; j < INTERFACE_LIVES; ++j) oView.aLife[j].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);

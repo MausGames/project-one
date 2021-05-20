@@ -125,19 +125,19 @@ cPlayer::~cPlayer()
 void cPlayer::Configure(const coreUintW iShipType, const coreVector3& vColor)
 {
     // select appearance type
-    const coreChar* pcModelHigh;
-    const coreChar* pcModelLow;
+    coreHashString sModelHigh;
+    coreHashString sModelLow;
     switch(iShipType)
     {
     default: ASSERT(false)
-    case PLAYER_SHIP_ATK: pcModelHigh = "ship_player_atk_high.md3"; pcModelLow = "ship_player_atk_low.md3"; break;
-    case PLAYER_SHIP_DEF: pcModelHigh = "ship_player_def_high.md3"; pcModelLow = "ship_player_def_low.md3"; break;
-    case PLAYER_SHIP_P1:  pcModelHigh = "ship_projectone.md3";      pcModelLow = "ship_projectone.md3";     break;
+    case PLAYER_SHIP_ATK: sModelHigh = "ship_player_atk_high.md3"; sModelLow = "ship_player_atk_low.md3"; break;
+    case PLAYER_SHIP_DEF: sModelHigh = "ship_player_def_high.md3"; sModelLow = "ship_player_def_low.md3"; break;
+    case PLAYER_SHIP_P1:  sModelHigh = "ship_projectone.md3";      sModelLow = "ship_projectone.md3";     break;
     }
 
     // load models
-    this->DefineModelHigh(pcModelHigh);
-    this->DefineModelLow (pcModelLow);
+    this->DefineModelHigh(sModelHigh);
+    this->DefineModelLow (sModelLow);
 
     // set color
     this->SetBaseColor(vColor);

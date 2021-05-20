@@ -847,7 +847,7 @@ void cGame::__HandlePacifist()
         // 
         this->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
         {
-            if(!pPlayer->IsRolling()) m_fPacifistDamage.Update(GAME_PACIFIST_DAMAGE / I_TO_F(m_bCoop ? GAME_PLAYERS : 1u));
+            if(!pPlayer->IsRolling()) m_fPacifistDamage.Update(GAME_PACIFIST_DAMAGE * RCP(I_TO_F(m_bCoop ? GAME_PLAYERS : 1u)));
         });
 
         // 

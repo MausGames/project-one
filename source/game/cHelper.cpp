@@ -51,25 +51,25 @@ void cHelper::Configure(const coreUint8 iElement)
     m_iElement = iElement;
 
     // select appearance type
-    const coreChar* pcModel;
-    coreVector3     vColor;
+    coreHashString sModel;
+    coreVector3    vColor;
     switch(iElement)
     {
     default: ASSERT(false)
-    case ELEMENT_WHITE:   pcModel = "ship_helper_01.md3"; vColor = COLOR_ENERGY_WHITE   * 0.6f; break;
-    case ELEMENT_YELLOW:  pcModel = "ship_helper_03.md3"; vColor = COLOR_ENERGY_YELLOW  * 0.7f; break;
-    case ELEMENT_ORANGE:  pcModel = "ship_helper_06.md3"; vColor = COLOR_ENERGY_ORANGE  * 0.9f; break;
-    case ELEMENT_RED:     pcModel = "ship_helper_02.md3"; vColor = COLOR_ENERGY_RED     * 0.8f; break;
-    case ELEMENT_MAGENTA: pcModel = "ship_helper_07.md3"; vColor = COLOR_ENERGY_MAGENTA * 0.9f; break;
-    case ELEMENT_PURPLE:  pcModel = "ship_helper_05.md3"; vColor = COLOR_ENERGY_PURPLE  * 0.9f; break;
-    case ELEMENT_BLUE:    pcModel = "ship_helper_09.md3"; vColor = COLOR_ENERGY_BLUE    * 0.9f; break;
-    case ELEMENT_CYAN:    pcModel = "ship_helper_08.md3"; vColor = COLOR_ENERGY_CYAN    * 0.9f; break;
-    case ELEMENT_GREEN:   pcModel = "ship_helper_04.md3"; vColor = COLOR_ENERGY_GREEN   * 0.8f; break;
+    case ELEMENT_WHITE:   sModel = "ship_helper_01.md3"; vColor = COLOR_ENERGY_WHITE   * 0.6f; break;
+    case ELEMENT_YELLOW:  sModel = "ship_helper_03.md3"; vColor = COLOR_ENERGY_YELLOW  * 0.7f; break;
+    case ELEMENT_ORANGE:  sModel = "ship_helper_06.md3"; vColor = COLOR_ENERGY_ORANGE  * 0.9f; break;
+    case ELEMENT_RED:     sModel = "ship_helper_02.md3"; vColor = COLOR_ENERGY_RED     * 0.8f; break;
+    case ELEMENT_MAGENTA: sModel = "ship_helper_07.md3"; vColor = COLOR_ENERGY_MAGENTA * 0.9f; break;
+    case ELEMENT_PURPLE:  sModel = "ship_helper_05.md3"; vColor = COLOR_ENERGY_PURPLE  * 0.9f; break;
+    case ELEMENT_BLUE:    sModel = "ship_helper_09.md3"; vColor = COLOR_ENERGY_BLUE    * 0.9f; break;
+    case ELEMENT_CYAN:    sModel = "ship_helper_08.md3"; vColor = COLOR_ENERGY_CYAN    * 0.9f; break;
+    case ELEMENT_GREEN:   sModel = "ship_helper_04.md3"; vColor = COLOR_ENERGY_GREEN   * 0.8f; break;
     }
 
     // load models
-    this->DefineModelHigh(pcModel);
-    this->DefineModelLow (pcModel);
+    this->DefineModelHigh(sModel);
+    this->DefineModelLow (sModel);
 
     // set color
     this->SetBaseColor(vColor);

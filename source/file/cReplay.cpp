@@ -526,9 +526,9 @@ cReplay::sPacket cReplay::__Pack(const sPacketRaw& oPacket)
 
     // 
     sPacket oOutput = {};
-    oOutput.iData = (coreUint32(oPacket.iFrame & BITLINE(22u)) << 7u) |
-                    (coreUint32(oPacket.iType  & BITLINE(2u))  << 5u) |
-                    (coreUint32(oPacket.iValue & BITLINE(5u)));
+    oOutput.iData = BITVALUE(22u, 7u, oPacket.iFrame) |
+                    BITVALUE( 2u, 5u, oPacket.iType)  |
+                    BITVALUE( 5u, 0u, oPacket.iValue);
 
     return oOutput;
 }
@@ -537,9 +537,9 @@ cReplay::sPacketRaw cReplay::__Unpack(const sPacket& oPacket)
 {
     // 
     sPacketRaw oOutput = {};
-    oOutput.iFrame = (oPacket.iData >> 7u) & BITLINE(22u);
-    oOutput.iType  = (oPacket.iData >> 5u) & BITLINE(2u);
-    oOutput.iValue = (oPacket.iData)       & BITLINE(5u);
+    oOutput.iFrame = GET_BITVALUE(oPacket.iData, 22u, 7u);
+    oOutput.iType  = GET_BITVALUE(oPacket.iData,  2u, 5u);
+    oOutput.iValue = GET_BITVALUE(oPacket.iData,  5u, 0u);
 
     return oOutput;
 }
@@ -586,5 +586,5 @@ coreUint64 cReplay::__GenerateChecksum(const sHeader& oHeader)
 {
     // 
     STATIC_ASSERT(offsetof(sHeader, iChecksum) == sizeof(sHeader) - sizeof(sHeader::iChecksum))
-    return coreHashMurmur64A(r_cast<const coreByte*>(&oHeader), sizeof(sHeader) - sizeof(sHeader::iChecksum));
+    return coreHashMurmur64(r_cast<const coreByte*>(&oHeader), sizeof(sHeader) - sizeof(sHeader::iChecksum));
 }

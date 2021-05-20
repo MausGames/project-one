@@ -236,5 +236,5 @@ coreUint64 cSave::__GenerateChecksum(const sHeader& oHeader)
 {
     // 
     STATIC_ASSERT(offsetof(sHeader, iChecksum) == sizeof(sHeader) - sizeof(sHeader::iChecksum))
-    return coreHashMurmur64A(r_cast<const coreByte*>(&oHeader), sizeof(sHeader) - sizeof(sHeader::iChecksum));
+    return coreHashMurmur64(r_cast<const coreByte*>(&oHeader), sizeof(sHeader) - sizeof(sHeader::iChecksum));
 }
