@@ -29,9 +29,7 @@ cViridoMission::cViridoMission()noexcept
 , m_fAnimation     (0.0f)
 {
     // 
-    m_apBoss[0] = &m_Dharuk;
     m_apBoss[1] = &m_Torus;
-    m_apBoss[2] = &m_Vaus;
 
     // create ball lists
     m_Ball     .DefineProgram("effect_energy_invert_inst_program");
@@ -762,7 +760,7 @@ void cViridoMission::__MoveOwnAfter()
     });
 
     // 
-    if(!m_Vaus.HasStatus(ENEMY_STATUS_DEAD))
+    if(false)   // !m_Vaus.HasStatus(ENEMY_STATUS_DEAD))
     {
         cEnemy*     pCurEnemy  = NULL;
         coreFloat   fCurLenSq  = FLT_MAX;

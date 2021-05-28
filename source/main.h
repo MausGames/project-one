@@ -107,9 +107,9 @@
 // ****************************************************************
 // general definitions
 #define PLAYERS              (2u)
-#define MISSIONS             (9u + 1u)
-#define BOSSES               (3u)
-#define WAVES                (15u)
+#define MISSIONS             (9u + 1u + 2u)
+#define BOSSES               (2u)
+#define WAVES                (10u)
 #define SEGMENTS             (BOSSES + WAVES)
 #define LIVES                (5u)
 #define CONTINUES            (3u)

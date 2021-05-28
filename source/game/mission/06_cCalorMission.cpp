@@ -28,9 +28,7 @@ cCalorMission::cCalorMission()noexcept
 , m_fAnimation     (0.0f)
 {
     // 
-    m_apBoss[0] = &m_Fenrir;
-    m_apBoss[1] = &m_Shelob;
-    m_apBoss[2] = &m_Zeroth;
+    m_apBoss[0] = &m_Zeroth;
 
     // 
     m_Load.DefineProgram("effect_energy_flat_invert_inst_program");

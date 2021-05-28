@@ -34,9 +34,11 @@
 #define MISSION_NO_WAVE    (0xFFu)     // 
 #define MISSION_NO_SEGMENT (0xFFu)     // 
 
-#define MISSION_SEGMENT_IS_BOSS(i) ((i) % 6u == 5u)
-#define MISSION_BOSS_TO_SEGMENT(i) ((i) * 6u  + 5u)
-#define MISSION_WAVE_TO_SEGMENT(i) ((i) + (i) / 5u)
+#define MISSION_SEGMENT_IS_BOSS(i) ((i) >= MISSION_WAVES)
+#define MISSION_BOSS_TO_SEGMENT(i) ((i) +  MISSION_WAVES)
+#define MISSION_WAVE_TO_SEGMENT(i) ((i))
+
+STATIC_ASSERT((MISSION_BOSSES == 2u) && (MISSION_WAVES == 10u))
 
 #define TAKE_ALWAYS  (0x00u)
 #define TAKE_MISSION (0xFFu)
@@ -367,9 +369,7 @@ public:
 class cViridoMission final : public cMission
 {
 private:
-    cDharukBoss m_Dharuk;                                   // 
-    cTorusBoss  m_Torus;                                    // 
-    cVausBoss   m_Vaus;                                     // 
+    cTorusBoss m_Torus;                                     // 
 
     coreBatchList m_Ball;                                   // 
     coreBatchList m_BallTrail;                              // 
@@ -461,8 +461,6 @@ private:
 class cNevoMission final : public cMission
 {
 private:
-    cNautilusBoss  m_Nautilus;                        // 
-    cAmemasuBoss   m_Amemasu;                         // 
     cLeviathanBoss m_Leviathan;                       // 
 
     coreBatchList m_Bomb;                             // 
@@ -558,9 +556,7 @@ private:
 class cHarenaMission final : public cMission
 {
 private:
-    cUrticaBoss  m_Urtica;                             // 
-    cTigerBoss   m_Tiger;                              // 
-    cLuciferBoss m_Lucifer;                            // 
+    cTigerBoss m_Tiger;                                // 
 
     coreBatchList m_Spike;                             // 
     coreBatchList m_SpikeBoard;                        // 
@@ -601,9 +597,7 @@ private:
 class cRutilusMission final : public cMission
 {
 private:
-    cQuaternionBoss m_Quaternion;                          // 
-    cSarosBoss      m_Saros;                               // 
-    cMessierBoss    m_Messier;                             // 
+    cMessierBoss m_Messier;                                // 
 
     coreObject3D m_aTeleporter     [RUTILUS_TELEPORTER];   // 
     coreVector2  m_avTeleporterPrev[RUTILUS_TELEPORTER];   // 
@@ -677,9 +671,7 @@ private:
 class cGeluMission final : public cMission
 {
 private:
-    cTartarusBoss m_Tartarus;                      // 
-    cPhalarisBoss m_Phalaris;                      // 
-    cCholBoss     m_Chol;                          // 
+    cCholBoss m_Chol;                              // 
 
     coreBatchList m_Fang;                          // 
     cLodObject    m_aFangRaw[GELU_FANGS_RAWS];     // 
@@ -739,8 +731,6 @@ private:
 class cCalorMission final : public cMission
 {
 private:
-    cFenrirBoss m_Fenrir;                            // 
-    cShelobBoss m_Shelob;                            // 
     cZerothBoss m_Zeroth;                            // 
 
     cSnow m_Snow;                                    // 
@@ -816,9 +806,7 @@ private:
 class cMuscusMission final : public cMission
 {
 private:
-    cOrlacBoss   m_Orlac;                                    // 
     cGemingaBoss m_Geminga;                                  // 
-    cNagualBoss  m_Nagual;                                   // 
 
     coreBatchList m_Generate;                                // 
     coreBatchList m_GenerateWave;                            // 

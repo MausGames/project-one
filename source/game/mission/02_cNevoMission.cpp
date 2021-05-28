@@ -33,9 +33,7 @@ cNevoMission::cNevoMission()noexcept
 , m_fAnimation   (0.0f)
 {
     // 
-    m_apBoss[0] = &m_Nautilus;
-    m_apBoss[1] = &m_Amemasu;
-    m_apBoss[2] = &m_Leviathan;
+    m_apBoss[0] = &m_Leviathan;
 
     // 
     m_Bomb.DefineProgram("object_ship_glow_inst_program");

@@ -24,9 +24,7 @@ cGeluMission::cGeluMission()noexcept
 , m_fAnimation  (0.0f)
 {
     // 
-    m_apBoss[0] = &m_Tartarus;
-    m_apBoss[1] = &m_Phalaris;
-    m_apBoss[2] = &m_Chol;
+    m_apBoss[0] = &m_Chol;
 
     // 
     m_Fang.DefineProgram("object_ship_glow_inst_program");

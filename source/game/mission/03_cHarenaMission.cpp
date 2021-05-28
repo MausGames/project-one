@@ -19,9 +19,7 @@ cHarenaMission::cHarenaMission()noexcept
 , m_afSpikeMax  {}
 {
     // 
-    m_apBoss[0] = &m_Urtica;
-    m_apBoss[1] = &m_Tiger;
-    m_apBoss[2] = &m_Lucifer;
+    m_apBoss[0] = &m_Tiger;
 
     // 
     m_Spike     .DefineProgram("object_ship_glow_inst_program");

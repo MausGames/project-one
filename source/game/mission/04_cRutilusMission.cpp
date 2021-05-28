@@ -26,9 +26,7 @@ cRutilusMission::cRutilusMission()noexcept
 , m_fAnimation        (0.0f)
 {
     // 
-    m_apBoss[0] = &m_Quaternion;
-    m_apBoss[1] = &m_Saros;
-    m_apBoss[2] = &m_Messier;
+    m_apBoss[0] = &m_Messier;
 
     // 
     for(coreUintW i = 0u; i < RUTILUS_TELEPORTER; ++i)
