@@ -14,8 +14,8 @@
 cReplay::cReplay()noexcept
 : m_Header      {}
 , m_aSnapshot   {}
-, m_aaPacket    {{}}
-, m_aInput      {{}}
+, m_aaPacket    {}
+, m_aInput      {}
 , m_iCurFrame   (0u)
 , m_aiCurPacket {}
 , m_iStatus     (REPLAY_STATUS_DISABLED)

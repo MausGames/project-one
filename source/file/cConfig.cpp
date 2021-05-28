@@ -10,7 +10,7 @@
 
 sConfig    g_CurConfig               = {};
 sConfig    g_OldConfig               = {};
-sGameInput g_aGameInput[INPUT_TYPES] = {{}};
+sGameInput g_aGameInput[INPUT_TYPES] = {};
 sGameInput g_TotalInput              = {};
 sMenuInput g_MenuInput               = {};
 
@@ -355,7 +355,6 @@ void UpdateInput()
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE),      CORE_INPUT_PRESS) ||
        Core::Input->GetKeyboardButton(CORE_INPUT_KEY(BACKSPACE),   CORE_INPUT_PRESS) ||
        Core::Input->GetMouseButton   (CORE_INPUT_RIGHT,            CORE_INPUT_PRESS)) g_MenuInput.bCancel     = true;
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE),      CORE_INPUT_PRESS) ||
-       Core::Input->GetKeyboardButton(CORE_INPUT_KEY(PAUSE),       CORE_INPUT_PRESS)) g_MenuInput.bPause      = true;
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE),      CORE_INPUT_PRESS)) g_MenuInput.bPause      = true;
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(PRINTSCREEN), CORE_INPUT_PRESS)) g_MenuInput.bScreenshot = true;
 }

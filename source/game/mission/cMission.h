@@ -582,10 +582,10 @@ public:
     void DisableSpike(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    inline void ActivateSpike(const coreUintW iIndex, const coreFloat fTime) {ASSERT(iIndex < HARENA_SPIKES) m_afSpikeCur[iIndex] = 0.0f; m_afSpikeMax[iIndex] = fTime;}
+    inline void LaunchSpike(const coreUintW iIndex, const coreFloat fTime) {ASSERT(iIndex < HARENA_SPIKES) m_afSpikeCur[iIndex] = 0.0f; m_afSpikeMax[iIndex] = fTime;}
 
     // 
-    inline coreBool GetSpikeActive(const coreUintW iIndex)const {ASSERT(iIndex < HARENA_SPIKES) return (m_afSpikeMax[iIndex] && InBetween(m_afSpikeCur[iIndex], 1.1f, m_afSpikeMax[iIndex] - 0.5f));}
+    inline coreBool GetSpikeLaunched(const coreUintW iIndex)const {ASSERT(iIndex < HARENA_SPIKES) return (m_afSpikeMax[iIndex] && InBetween(m_afSpikeCur[iIndex], 1.1f, m_afSpikeMax[iIndex] - 0.5f));}
 
 
 private:

@@ -416,19 +416,17 @@ void cNevoMission::DisableBlock(const coreUintW iIndex, const coreBool bAnimated
 void cNevoMission::EnableContainer(const coreVector2& vPosition)
 {
     // 
-    if(m_Container.GetType()) return;
+    WARN_IF(m_Container.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
     m_Container.ChangeType(TYPE_NEVO_CONTAINER);
-
-    // 
-    m_Container.SetPosition(coreVector3(vPosition, 0.0f));
-
-    // 
-    m_Container.SetEnabled(CORE_OBJECT_ENABLE_ALL);
-    cShadow::GetGlobalContainer()->BindObject(&m_Container);
 
     // 
     m_bClamp    = false;
     m_bOverdraw = false;
+
+    // 
+    m_Container.SetPosition(coreVector3(vPosition, 0.0f));
+    m_Container.SetEnabled (CORE_OBJECT_ENABLE_ALL);
+    cShadow::GetGlobalContainer()->BindObject(&m_Container);
 }
 
 
@@ -437,7 +435,7 @@ void cNevoMission::EnableContainer(const coreVector2& vPosition)
 void cNevoMission::DisableContainer(const coreBool bAnimated)
 {
     // 
-    if(!m_Container.GetType()) return;
+    if(!m_Container.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
     m_Container.ChangeType(0);
 
     // 
