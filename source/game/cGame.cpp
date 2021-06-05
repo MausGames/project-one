@@ -877,9 +877,6 @@ void cGame::__HandlePacifist()
 void cGame::__HandleCollisions()
 {
     // 
-    m_EnemyManager.ForEachEnemy([](cEnemy* OUTPUT pEnemy) {pEnemy->ActivateModelLowOnly();});
-
-    // 
     cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_ENEMY, [this](cPlayer* OUTPUT pPlayer, cEnemy* OUTPUT pEnemy, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         // 
@@ -1009,9 +1006,6 @@ void cGame::__HandleCollisions()
         g_pSave->EditLocalStatsMission()->iItemsCollected += 1u;
         g_pSave->EditLocalStatsSegment()->iItemsCollected += 1u;
     });
-
-    // 
-    m_EnemyManager.ForEachEnemy([](cEnemy* OUTPUT pEnemy) {pEnemy->ActivateModelDefault();});
 }
 
 

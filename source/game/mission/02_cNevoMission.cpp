@@ -494,14 +494,7 @@ void cNevoMission::__RenderOwnOver()
     glEnable(GL_DEPTH_TEST);
 
     // 
-    FOR_EACH(it, *m_Bomb.List()) d_cast<cLodObject*>(*it)->ActivateModelDefault();
-    {
-        // 
-        m_Bomb.Render();
-    }
-    FOR_EACH(it, *m_Bomb.List()) d_cast<cLodObject*>(*it)->ActivateModelLowOnly();
-
-    // 
+    cLodObject::RenderHighList(&m_Bomb);
     g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyList(&m_Bomb);
 
     // 
@@ -513,7 +506,7 @@ void cNevoMission::__RenderOwnOver()
                else DEPTH_PUSH_SHIP
 
     // 
-    m_Container.Render();
+    cLodObject::RenderHighObject(&m_Container);
     g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(&m_Container);
 }
 
@@ -740,29 +733,24 @@ void cNevoMission::__MoveOwnAfter()
         m_Container.Move();
 
         // 
-        m_Container.ActivateModelLowOnly();
+        cPlayer::TestCollision(PLAYER_TEST_NORMAL | PLAYER_TEST_FEEL | PLAYER_TEST_IGNORE, &m_Container, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pContainer, const coreVector3& vIntersection, const coreBool bFirstHit)
         {
-            // 
-            cPlayer::TestCollision(PLAYER_TEST_NORMAL | PLAYER_TEST_FEEL | PLAYER_TEST_IGNORE, &m_Container, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pContainer, const coreVector3& vIntersection, const coreBool bFirstHit)
-            {
-                if(!bFirstHit) return;
-
-                // 
-                pPlayer->TakeDamage(15, ELEMENT_NEUTRAL, vIntersection.xy());
-
-                // 
-                g_pSpecialEffects->MacroExplosionPhysicalDarkSmall(vIntersection);
-            });
+            if(!bFirstHit) return;
 
             // 
-            Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, &m_Container, [](cBullet* OUTPUT pBullet, coreObject3D* OUTPUT pContainer, const coreVector3& vIntersection, const coreBool bFirstHit)
-            {
-                if(!bFirstHit) return;
+            pPlayer->TakeDamage(15, ELEMENT_NEUTRAL, vIntersection.xy());
 
-                // 
-                pBullet->Reflect(pContainer, vIntersection.xy());
-            });
-        }
-        m_Container.ActivateModelDefault();
+            // 
+            g_pSpecialEffects->MacroExplosionPhysicalDarkSmall(vIntersection);
+        });
+
+        // 
+        Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, &m_Container, [](cBullet* OUTPUT pBullet, coreObject3D* OUTPUT pContainer, const coreVector3& vIntersection, const coreBool bFirstHit)
+        {
+            if(!bFirstHit) return;
+
+            // 
+            pBullet->Reflect(pContainer, vIntersection.xy());
+        });
     }
 }

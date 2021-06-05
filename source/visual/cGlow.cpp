@@ -37,7 +37,7 @@ void cGlow::Update()
         {
             // render single objects
             FOR_EACH(it, this->GetObjectSet())
-                (*it)->Render((*it)->GetProgram());   // # use low-polygon models
+                (*it)->coreObject3D::Render();   // # use low-polygon models
 
             // render lists with objects
             FOR_EACH(it, this->GetListSet())

@@ -327,7 +327,7 @@ void cGeluMission::__RenderOwnUnder()
     DEPTH_PUSH
 
     // 
-    m_Fang.Render();
+    cLodObject::RenderHighList(&m_Fang);
     g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyList(&m_Fang);
 
     // 

@@ -123,8 +123,8 @@ public:
     void CreateWhirlDark (const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum);
 
     // 
-    void CreateBreakupColor(const cLodObject* pObject, const coreFloat fScale, const coreUintW iStep, const coreVector3& vColor);
-    void CreateBreakupDark (const cLodObject* pObject, const coreFloat fScale, const coreUintW iStep);
+    void CreateBreakupColor(const coreObject3D* pObject, const coreFloat fScale, const coreUintW iStep, const coreVector3& vColor);
+    void CreateBreakupDark (const coreObject3D* pObject, const coreFloat fScale, const coreUintW iStep);
 
     // 
     coreFloat CreateLightning(const coreVector2& vPosFrom, const coreVector2& vPosTo,                              const coreFloat fWidth, const coreVector3& vColor, const coreVector2& vTexSizeFactor, const coreFloat fTexOffset);
@@ -162,8 +162,8 @@ public:
     void MacroEruptionColorBig           (const coreVector3& vPosition, const coreVector2& vDirection, const coreVector3& vColor);
     void MacroEruptionDarkSmall          (const coreVector3& vPosition, const coreVector2& vDirection);
     void MacroEruptionDarkBig            (const coreVector3& vPosition, const coreVector2& vDirection);
-    void MacroDestructionColor           (const cLodObject*  pObject,   const coreVector3& vColor);
-    void MacroDestructionDark            (const cLodObject*  pObject);
+    void MacroDestructionColor           (const coreObject3D* pObject,  const coreVector3& vColor);
+    void MacroDestructionDark            (const coreObject3D* pObject);
 
 
 private:

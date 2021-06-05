@@ -53,8 +53,8 @@ void cEnemy::Render()
         // 
         this->_EnableBlink();
 
-        // render the 3d-object
-        this->coreObject3D::Render();
+        // 
+        cLodObject::RenderHighObject(this);
     }
 }
 
@@ -403,13 +403,8 @@ void cEnemyManager::Render()
         // 
         if(!pEnemyActive->GetCurEnabled()) continue;
 
-        // 
-        FOR_EACH(it, *pEnemyActive->List()) d_cast<cEnemy*>(*it)->ActivateModelDefault();
-        {
-            // render all active enemies
-            pEnemyActive->Render();
-        }
-        FOR_EACH(it, *pEnemyActive->List()) d_cast<cEnemy*>(*it)->ActivateModelLowOnly();
+        // render all active enemies
+        cLodObject::RenderHighList(pEnemyActive);
     }
 }
 

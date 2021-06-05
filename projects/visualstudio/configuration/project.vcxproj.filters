@@ -246,9 +246,6 @@
     <ClCompile Include="..\..\..\source\visual\cWindscreen.cpp">
       <Filter>visual</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\additional\cLodObject.cpp">
-      <Filter>additional</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\source\interface\cWorldMap.cpp">
       <Filter>interface</Filter>
     </ClCompile>

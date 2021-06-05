@@ -415,49 +415,44 @@ void cCalorMission::__MoveOwnMiddle()
                 pCopy->SetDirection(coreVector3(MapToAxis(m_avCatchDir[i], -vDir), 0.0f));
 
                 // 
-                pCopy->ActivateModelLowOnly();
+                const auto nBulletCollFunc = [](cBullet* OUTPUT pBullet, const coreObject3D* pObject, const coreVector3& vIntersection, const coreBool bFirstHit)
                 {
-                    // 
-                    const auto nBulletCollFunc = [](cBullet* OUTPUT pBullet, const coreObject3D* pObject, const coreVector3& vIntersection, const coreBool bFirstHit)
-                    {
-                        pBullet->Deactivate(true);
-                    };
-                    Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, pCopy, nBulletCollFunc);
-                    Core::Manager::Object->TestCollision(TYPE_BULLET_ENEMY,  pCopy, nBulletCollFunc);
+                    pBullet->Deactivate(true);
+                };
+                Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, pCopy, nBulletCollFunc);
+                Core::Manager::Object->TestCollision(TYPE_BULLET_ENEMY,  pCopy, nBulletCollFunc);
+
+                // 
+                Core::Manager::Object->TestCollision(TYPE_ENEMY, pCopy, [&](cEnemy* OUTPUT pEnemy, cEnemy* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit)
+                {
+                    if(!m_apCatchObject[i]) return;
 
                     // 
-                    Core::Manager::Object->TestCollision(TYPE_ENEMY, pCopy, [&](cEnemy* OUTPUT pEnemy, cEnemy* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit)
+                    const coreBool bEnemyBig  = (pEnemy ->GetMaxHealth() >= 10);
+                    const coreBool bObjectBig = (pObject->GetMaxHealth() >= 10);
+
+                    if(!bEnemyBig || bObjectBig)
                     {
-                        if(!m_apCatchObject[i]) return;
+                        const coreBool bOther = (pEnemy == m_apCatchObject[1u - i]);
 
                         // 
-                        const coreBool bEnemyBig  = (pEnemy ->GetMaxHealth() >= 10);
-                        const coreBool bObjectBig = (pObject->GetMaxHealth() >= 10);
+                        pEnemy->RemoveStatus(ENEMY_STATUS_INVINCIBLE);
+                        pEnemy->TakeDamage  (1000u, ELEMENT_NEUTRAL, vIntersection.xy(), bOther ? g_pGame->GetPlayer(1u - i) : pPlayer);
 
-                        if(!bEnemyBig || bObjectBig)
-                        {
-                            const coreBool bOther = (pEnemy == m_apCatchObject[1u - i]);
+                        // 
+                        if(bOther) this->UncatchObject(1u - i);
+                    }
 
-                            // 
-                            pEnemy->RemoveStatus(ENEMY_STATUS_INVINCIBLE);
-                            pEnemy->TakeDamage  (1000u, ELEMENT_NEUTRAL, vIntersection.xy(), bOther ? g_pGame->GetPlayer(1u - i) : pPlayer);
+                    if(!bObjectBig || bEnemyBig)
+                    {
+                        // 
+                        pObject->RemoveStatus(ENEMY_STATUS_INVINCIBLE);
+                        pObject->TakeDamage  (1000u, ELEMENT_NEUTRAL, vIntersection.xy(), pPlayer);
 
-                            // 
-                            if(bOther) this->UncatchObject(1u - i);
-                        }
-
-                        if(!bObjectBig || bEnemyBig)
-                        {
-                            // 
-                            pObject->RemoveStatus(ENEMY_STATUS_INVINCIBLE);
-                            pObject->TakeDamage  (1000u, ELEMENT_NEUTRAL, vIntersection.xy(), pPlayer);
-
-                            // 
-                            this->UncatchObject(i);
-                        }
-                    });
-                }
-                pCopy->ActivateModelDefault();
+                        // 
+                        this->UncatchObject(i);
+                    }
+                });
             }
 
             STATIC_ASSERT(CALOR_STARS == 2u)

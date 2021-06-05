@@ -418,12 +418,12 @@ void cSpecialEffects::CreateWhirlDark(const coreVector3& vPosition, const coreFl
 
 // ****************************************************************
 // 
-void cSpecialEffects::CreateBreakupColor(const cLodObject* pObject, const coreFloat fScale, const coreUintW iStep, const coreVector3& vColor)
+void cSpecialEffects::CreateBreakupColor(const coreObject3D* pObject, const coreFloat fScale, const coreUintW iStep, const coreVector3& vColor)
 {
     ASSERT(pObject)
 
     // 
-    const coreModel*   pModel           = pObject->GetModelLow().GetResource();
+    const coreModel*   pModel           = pObject->GetModel().GetResource();
     const coreVector3* pvVertexPosition = pModel->GetVertexPosition();
     ASSERT(pModel->GetNumClusters())
 
@@ -450,12 +450,12 @@ void cSpecialEffects::CreateBreakupColor(const cLodObject* pObject, const coreFl
     });
 }
 
-void cSpecialEffects::CreateBreakupDark(const cLodObject* pObject, const coreFloat fScale, const coreUintW iStep)
+void cSpecialEffects::CreateBreakupDark(const coreObject3D* pObject, const coreFloat fScale, const coreUintW iStep)
 {
     ASSERT(pObject)
 
     // 
-    const coreModel*   pModel           = pObject->GetModelLow().GetResource();
+    const coreModel*   pModel           = pObject->GetModel().GetResource();
     const coreVector3* pvVertexPosition = pModel->GetVertexPosition();
     ASSERT(pModel->GetNumClusters())
 
@@ -825,7 +825,7 @@ void cSpecialEffects::MacroEruptionDarkBig(const coreVector3& vPosition, const c
 
 // ****************************************************************
 // 
-void cSpecialEffects::MacroDestructionColor(const cLodObject* pObject, const coreVector3& vColor)
+void cSpecialEffects::MacroDestructionColor(const coreObject3D* pObject, const coreVector3& vColor)
 {
     ASSERT(pObject)
 
@@ -841,7 +841,7 @@ void cSpecialEffects::MacroDestructionColor(const cLodObject* pObject, const cor
     this         ->ShakeScreen       (SPECIAL_SHAKE_TINY * fPower);
 }
 
-void cSpecialEffects::MacroDestructionDark(const cLodObject* pObject)
+void cSpecialEffects::MacroDestructionDark(const coreObject3D* pObject)
 {
     ASSERT(pObject)
 

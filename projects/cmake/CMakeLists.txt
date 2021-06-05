@@ -19,7 +19,6 @@ set_target_properties(
 
 target_sources(
     ProjectOne PRIVATE
-    ${BASE_DIRECTORY}/source/additional/cLodObject.cpp
     ${BASE_DIRECTORY}/source/additional/cMenuInput.cpp
     ${BASE_DIRECTORY}/source/environment/background/cBackground.cpp
     ${BASE_DIRECTORY}/source/environment/cEnvironment.cpp
