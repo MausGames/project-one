@@ -48,16 +48,16 @@ public:
         coreUint32 iMissionsDone;                 // 
         coreUint32 iBossesDone;                   // 
         coreUint32 iWavesDone;                    // 
-        coreUint32 iEnemiesDone;                  // TODO 
+        coreUint32 iEnemiesDone;                  // TODO  1
 
         coreUint64 iDamageGiven;                  // 
         coreUint32 iDamageTaken;                  // 
         coreUint32 iContinuesUsed;                // 
         coreUint32 iRepairsUsed;                  // 
-        coreUint64 iMovesMade;                    // TODO (+table) 
-        coreUint32 iTurnsMade;                    // TODO (+table) 
-        coreUint32 iRollsMade;                    // TODO (+table) 
-        coreUint64 iBulletsShot;                  // TODO (+table) 
+        coreUint64 iMovesMade;                    // TODO 1 (+table) 
+        coreUint32 iTurnsMade;                    // TODO 1 (+table) 
+        coreUint32 iRollsMade;                    // TODO 1 (+table) 
+        coreUint64 iBulletsShot;                  // TODO 1 (+table) 
         coreUint64 iChromaCollected;              // 
         coreUint32 iItemsCollected;               // 
         coreUint32 aiMedalsEarned[SAVE_MEDALS];   // 
@@ -81,10 +81,10 @@ public:
         coreUint32 iDamageTaken;                  // 
         coreUint32 iContinuesUsed;                // 
         coreUint32 iRepairsUsed;                  // 
-        coreUint64 iMovesMade;                    // TODO (+table) 
-        coreUint32 iTurnsMade;                    // TODO (+table) 
-        coreUint32 iRollsMade;                    // TODO (+table) 
-        coreUint64 iBulletsShot;                  // TODO (+table) 
+        coreUint64 iMovesMade;                    // TODO 1 (+table) 
+        coreUint32 iTurnsMade;                    // TODO 1 (+table) 
+        coreUint32 iRollsMade;                    // TODO 1 (+table) 
+        coreUint64 iBulletsShot;                  // TODO 1 (+table) 
         coreUint64 iChromaCollected;              // 
         coreUint32 iItemsCollected;               // 
         coreUint32 aiMedalsEarned[SAVE_MEDALS];   // 

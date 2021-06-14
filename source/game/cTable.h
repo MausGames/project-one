@@ -10,7 +10,7 @@
 #ifndef _P1_GUARD_TABLE_H_
 #define _P1_GUARD_TABLE_H_
 
-// TODO: handle -INTERFACE_BANNER_DURATION_BOSS differently (also remove MAX(this->GetTimeSegment(iMissionIndex, iSegmentIndex), 0.0f))
+// TODO 4: handle -INTERFACE_BANNER_DURATION_BOSS differently (also remove MAX(this->GetTimeSegment(iMissionIndex, iSegmentIndex), 0.0f))
 
 
 // ****************************************************************

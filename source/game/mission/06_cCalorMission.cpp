@@ -520,7 +520,7 @@ void cCalorMission::__MoveOwnAfter()
         m_LoadCopy.SetSize       (m_pLoadOwner->GetSize       ());
         m_LoadCopy.SetDirection  (m_pLoadOwner->GetDirection  ());
         m_LoadCopy.SetOrientation(m_pLoadOwner->GetOrientation());
-        m_LoadCopy.SetTexOffset  (coreVector2(FRACT(1.4f * m_fAnimation), 0.0f));   // TODO: fix model tex coords
+        m_LoadCopy.SetTexOffset  (coreVector2(FRACT(1.4f * m_fAnimation), 0.0f));   // TODO 1: fix model tex coords
 
         // 
         if(F_TO_UI(m_afLoadPower[0]) != F_TO_UI(m_afLoadPower[1]))

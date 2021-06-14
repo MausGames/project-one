@@ -402,7 +402,7 @@ void cBackground::_StoreNormalList(const coreBatchList* pObjectList)
     // 
     FOR_EACH(it, *pObjectList->List()) oNew.push_back((*it)->GetDirection().PackSnorm011());
 
-    // TODO: may needs change later, what is normal, direction or orientation or both (store quaternion? (already available)) 
+    // TODO 1: may needs change later, what is normal, direction or orientation or both (store quaternion? (already available)) 
 }
 
 

@@ -10,8 +10,8 @@
 #ifndef _P1_GUARD_LODOBJECT_H_
 #define _P1_GUARD_LODOBJECT_H_
 
-// TODO: change high-resolution models with pre-baked normal-maps or tessellation ?
-// TODO: find better way to handle using high for normal rendering and low for special effects + reflection + collision
+// TODO 5: change high-resolution models with pre-baked normal-maps or tessellation ?
+// TODO 3: use low-resolution model for reflection rendering (disable RenderHighObject with a global flag ? or identify per engine property ?)
 
 
 // ****************************************************************

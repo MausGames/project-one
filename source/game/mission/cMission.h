@@ -10,19 +10,20 @@
 #ifndef _P1_GUARD_MISSION_H_
 #define _P1_GUARD_MISSION_H_
 
-// TODO: reuse paths (beware of reserve assertion, and resize on refine) and squads over stages
-// TODO: add visible debug-spline
-// TODO: prevent multiple calculations in script-commands (because of macro variables), also boss
-// TODO: assertion for "active boss should be alive"
-// TODO: STAGE_FLYPAST with dot-product or simpler per-axis
-// TODO: there seems to be a bug in STAGE_TICK_TIME, which sometimes gives early or late ticks with 30.0f speed, compared with STAGE_TICK_LIFETIME
-// TODO: wrap m_piData in function with RETURN_RESTRICT
-// TODO: set progress when finishing segment, not when starting, but consider mission-wrapping
-// TODO: low-resolution object_sphere for small sphere objects (what about bullet_orb) ?
-// TODO: change all missions to STATIC_MEMORY (check memory, it would put all missions always in memory)
-// TODO: check if TYPE_NEVO_BOMB still needed
-// TODO: do not create objects and load resources of unused game-objects and bosses (e.g. move waves into own classes ? but then ?)
-// TODO: in delay, replace cScoutEnemy with something which does not load any resources (may need to support instancing)
+// TODO 3: reuse paths (beware of reserve assertion, and resize on refine) and squads over stages
+// TODO 3: prevent multiple calculations in script-commands (because of macro variables), also boss
+// TODO 3: assertion for "active boss should be alive"
+// TODO 3: STAGE_FLYPAST with dot-product or simpler per-axis
+// TODO 2: there seems to be a bug in STAGE_TICK_TIME, which sometimes gives early or late ticks with 30.0f speed, compared with STAGE_TICK_LIFETIME
+// TODO 3: wrap m_piData in function with RETURN_RESTRICT
+// TODO 3: set progress when finishing segment, not when starting, but consider mission-wrapping
+// TODO 3: low-resolution object_sphere for small sphere objects (what about bullet_orb) ?
+// TODO 3: change all missions to STATIC_MEMORY (check memory, it would put all missions always in memory)
+// TODO 4: check if TYPE_NEVO_BOMB still needed
+// TODO 3: do not create objects and load resources of unused game-objects and bosses (e.g. move waves into own classes ? but then ?)
+// TODO 3: in delay, replace cScoutEnemy with something which does not load any resources (may need to support instancing)
+// TODO 4: move as much gameplay from gameplay-objects from mission to stages, except for mission-shared stuff, animation stuff, or special-cases requiring before-after update (teleportation)
+// TODO 1: chain should shatter into pieces on disable, should drag the stone to player on swing-start, boulder should use ice-shader, multiple boulders, clearing/resetting swing and catch attributes etc.
 
 
 // ****************************************************************

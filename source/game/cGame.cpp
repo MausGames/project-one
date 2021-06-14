@@ -102,9 +102,9 @@ cGame::~cGame()
     g_pWindscreen->ClearAdds(true);
 
     // 
-    for(coreUintW i = 0u; i < POST_WALLS; ++i) g_pPostProcessing->SetWallOffset(i, 0.0f);   // TODO: make transition smoother
+    for(coreUintW i = 0u; i < POST_WALLS; ++i) g_pPostProcessing->SetWallOffset(i, 0.0f);   // TODO 1: make transition smoother
     g_pPostProcessing->SetSplitScreen  (false);
-    g_pPostProcessing->SetDirectionGame(coreVector2(0.0f,1.0f));   // TODO: make transition smoother
+    g_pPostProcessing->SetDirectionGame(coreVector2(0.0f,1.0f));   // TODO 1: make transition smoother
     g_pPostProcessing->SetSaturationAll(1.0f);
 
     // 

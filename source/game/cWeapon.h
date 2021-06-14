@@ -10,8 +10,9 @@
 #ifndef _P1_GUARD_WEAPON_H_
 #define _P1_GUARD_WEAPON_H_
 
-// TODO: weapons may have to share their cooldown (not relevant on single-weapon setup)
-// TODO: remove render functions if not required
+// TODO 3: weapons may have to share their cooldown (not relevant on single-weapon setup)
+// TODO 4: remove render functions if not required
+// TODO 1: sound and visual effect for charging pulse
 
 
 // ****************************************************************

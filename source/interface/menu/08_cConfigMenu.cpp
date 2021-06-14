@@ -569,8 +569,8 @@ void cConfigMenu::Move()
             m_aCueRota[0].SetDirection(MapToAxisInv(g_pPostProcessing->GetDirection(), g_vHudDirection));
 
             // 
-            m_TextSize  .SetOverride(-1);   // TODO: enable 
-            m_HudScale  .SetOverride(-1);   // TODO: enable 
+            m_TextSize  .SetOverride(-1);   // TODO 1: enable 
+            m_HudScale  .SetOverride(-1);   // TODO 1: enable 
             m_UpdateFreq.SetOverride(STATIC_ISVALID(g_pGame) ? -1 : 0);
             m_Version   .SetOverride(STATIC_ISVALID(g_pGame) ? -1 : 0);
 
@@ -754,7 +754,7 @@ void cConfigMenu::LoadValues()
         this->__UpdateVolume();
         this->__UpdateInterface();
 
-        // TODO m_TextSize
+        // TODO 1 m_TextSize 
     }
 
     // 

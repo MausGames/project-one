@@ -10,9 +10,9 @@
 #ifndef _P1_GUARD_UTILITIES_H_
 #define _P1_GUARD_UTILITIES_H_
 
-// TODO: optimize AlongStar, AlongStarNormal, SmoothAim
-// TODO: move ID color directly into background class if not used otherwise (emphasize "highlight" usage)
-// TODO: move a lot of those utilities into engine if proven well, look for other stuff in whole game
+// TODO 3: optimize AlongStar, AlongStarNormal, SmoothAim
+// TODO 4: move ID color directly into background class if not used otherwise (emphasize "highlight" usage)
+// TODO 1: move a lot of those utilities into engine if proven well, look for other stuff in whole game
 
 
 // ****************************************************************

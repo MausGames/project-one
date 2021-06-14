@@ -222,7 +222,7 @@ void cNautilusBoss::__MoveOwn()
         g_pWindscreen->GetInk()->SetBlotAlpha(i, CLAMP(MIN(m_afInkAlpha[i], NAUTILUS_INK_TIME - m_afInkAlpha[i]) * NAUTILUS_INK_SPEED, 0.0f, 1.0f));
     }
 
-    // TODO: line movement 
+    // TODO 1: line movement 
     //const coreVector2 vLinePos = coreVector2(0.0f, 0.1f * SIN(2.0f*PI * 0.08f * coreFloat(Core::System->GetTotalTime()))); 
 }
 

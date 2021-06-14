@@ -10,9 +10,7 @@
 #ifndef _P1_GUARD_FOREGROUND_H_
 #define _P1_GUARD_FOREGROUND_H_
 
-// TODO: #define FOREGROUND_AREA_FULL (FOREGROUND_AREA * 1.1f)
-// TODO: FOREGROUND_AREA_REV without RCP
-// TODO: IsVisibleObject takes the max axis, but what if the diagonal is visible
+// TODO 2: IsVisibleObject takes the max axis, but what if the diagonal is visible
 
 
 // ****************************************************************

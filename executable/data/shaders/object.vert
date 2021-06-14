@@ -60,7 +60,7 @@ void VertexMain()
 #if defined(_CORE_OPTION_INSTANCING_)
     float v1Blink = a_v1Blink;
 #else
-    float v1Blink = u_v1Blink;   // TODO: put into fragment shader 
+    float v1Blink = u_v1Blink;   // TODO 1: put into fragment shader 
 #endif
 
     // transform lighting properties
