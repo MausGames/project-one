@@ -358,7 +358,7 @@ void cReplay::SaveFile(const coreChar* pcName)
     if(!this->__GetBodyData(&pBodyData, &iBodySize) || !pBodyData || !iBodySize) return;
 
     // 
-    coreData::StrCopy(pcName, m_Header.acName, ARRAY_SIZE(m_Header.acName));
+    coreData::StrCopy(m_Header.acName, ARRAY_SIZE(m_Header.acName), pcName);
     m_Header.iBodySize = iBodySize;
     m_Header.iChecksum = cReplay::__GenerateChecksum(m_Header);
 

@@ -30,7 +30,7 @@ void FragmentMain()
     float v1BumpFactor   = dot(v3MathLightDir, v3BumpNormal);
 
     // calculate diffuse value
-    vec3 v3Diffuse  = v3TexColor * (1.1 * max(0.0, v1BumpFactor) + 0.7);
+    vec3 v3Diffuse = v3TexColor * (1.1 * max(0.0, v1BumpFactor) + 0.7);
 
     // draw final color
     gl_FragColor = vec4(v3Diffuse, 1.0);

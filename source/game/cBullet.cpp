@@ -1051,7 +1051,7 @@ void cMineBullet::__RenderOwnBefore()
 
         // 
         s_Wave.SetPosition(this->GetPosition());
-        s_Wave.SetSize    (coreVector3(coreVector2(15.0f,15.0f) * (0.25f + 0.75f*fValue), 1.0f));
+        s_Wave.SetSize    (coreVector3(coreVector2(7.5f,7.5f) * (0.25f + 0.75f*fValue) * this->GetSize().x, 1.0f));
         s_Wave.SetAlpha   (1.0f - fValue);
         s_Wave.Move();
         s_Wave.Render();

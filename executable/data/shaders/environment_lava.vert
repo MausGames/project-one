@@ -22,10 +22,6 @@ void VertexMain()
     vec4 v4NewPosition = vec4(coreObject3DTransformLow(), 1.0);
     gl_Position        = u_m4ViewProj * v4NewPosition;
 
-    // transform lighting properties (resolved)
-    v_v3TangentPos = v4NewPosition.xyz * vec3(1.0, -1.0, 1.0);
-    v_v3TangentCam = u_v3CamPosition   * vec3(1.0, -1.0, 1.0);
-
     // calculate current mapping base
     vec2 v2MapCoord = vec2(a_v2LowTexCoord.x * c_v1MapResolution,
                            a_v2LowTexCoord.y * c_v1MapResolution + u_v1Offset);

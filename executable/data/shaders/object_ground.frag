@@ -45,8 +45,8 @@ void FragmentMain()
     float v1Light = (coreTextureShadow(0, v_v4ShadowCoord)                            +
                      coreTextureShadow(0, v_v4ShadowCoord + vec4(0.0,   A, 0.0, 0.0)) +
                      coreTextureShadow(0, v_v4ShadowCoord + vec4(0.0,  -A, 0.0, 0.0)) +
-                     coreTextureShadow(0, v_v4ShadowCoord + vec4( A,  0.0, 0.0, 0.0)) +
-                     coreTextureShadow(0, v_v4ShadowCoord + vec4(-A,  0.0, 0.0, 0.0))) * 0.2;
+                     coreTextureShadow(0, v_v4ShadowCoord + vec4(  A, 0.0, 0.0, 0.0)) +
+                     coreTextureShadow(0, v_v4ShadowCoord + vec4( -A, 0.0, 0.0, 0.0))) * 0.2;
     v1Light = mix(1.0, 0.5, v1Light);
 
     if(coreTextureProj(3, v_v4ShadowCoord * vec4(vec2(c_v1TestFactor), 1.0, 1.0)).r != 0.0)
@@ -55,8 +55,8 @@ void FragmentMain()
         float v1DynLight = (coreTextureProj(3, v_v4ShadowCoord)                           .r +
                             coreTextureProj(3, v_v4ShadowCoord + vec4(0.0,   A, 0.0, 0.0)).r +
                             coreTextureProj(3, v_v4ShadowCoord + vec4(0.0,  -A, 0.0, 0.0)).r +
-                            coreTextureProj(3, v_v4ShadowCoord + vec4( A,  0.0, 0.0, 0.0)).r +
-                            coreTextureProj(3, v_v4ShadowCoord + vec4(-A,  0.0, 0.0, 0.0)).r) * 0.2;
+                            coreTextureProj(3, v_v4ShadowCoord + vec4(  A, 0.0, 0.0, 0.0)).r +
+                            coreTextureProj(3, v_v4ShadowCoord + vec4( -A, 0.0, 0.0, 0.0)).r) * 0.2;
 
         // 
         float v1Visibility = clamp(max(v_v2Border.x, v_v2Border.y), 0.0, 1.0);

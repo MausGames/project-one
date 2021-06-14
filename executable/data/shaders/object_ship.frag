@@ -45,7 +45,7 @@ void FragmentMain()
 #if defined(_P1_GLOW_)
 
     // make highlighted area glowing
-    v1BumpFactor += v4TexColor.a * 0.5;
+    v1BumpFactor = mix(v1BumpFactor, 1.0, v4TexColor.a * 0.5);
 
 #endif
 
