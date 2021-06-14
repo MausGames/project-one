@@ -249,11 +249,11 @@ protected:
 class cDesertBackground final : public cBackground
 {
 private:
-    coreFullscreen m_Sand;             // 
-    coreVector2    m_vSandDirection;   // 
-    coreFlow       m_fSandWave;        // 
+    coreFullscreen m_Sand;        // 
+    coreVector2    m_vSandMove;   // 
+    coreFlow       m_fSandWave;   // 
 
-    coreSoundPtr m_pWindSound;         // wind sound-effect
+    coreSoundPtr m_pWindSound;    // wind sound-effect
 
 
 public:
@@ -264,7 +264,10 @@ public:
     ASSIGN_ID_EX(3, "Desert", COLOR_MENU_YELLOW)
 
     // 
-    inline void SetSandDirection(const coreVector2& vDirection) {m_vSandDirection = vDirection; ASSERT(vDirection.IsNormalized())}
+    inline void SetSandMove(const coreVector2& vMove) {m_vSandMove = vMove;}
+
+    // 
+    inline const coreVector2& GetSandMove()const {return m_vSandMove;}
 
 
 private:
@@ -326,9 +329,9 @@ protected:
 class cSnowBackground final : public cBackground
 {
 private:
-    coreFullscreen m_Snow;             // 
-    coreVector2    m_vSnowDirection;   // 
-    coreFlow       m_fSnowWave;        // 
+    coreFullscreen m_Snow;        // 
+    coreVector2    m_vSnowMove;   // 
+    coreFlow       m_fSnowWave;   // 
 
 
 public:
@@ -338,7 +341,7 @@ public:
     ASSIGN_ID_EX(6, "Snow", COLOR_MENU_BLUE)
 
     // 
-    inline void SetSnowDirection(const coreVector2& vDirection) {m_vSnowDirection = vDirection; ASSERT(vDirection.IsNormalized())}
+    inline void SetSnowMove(const coreVector2& vMove) {m_vSnowMove = vMove;}
 
 
 private:
@@ -354,7 +357,7 @@ class cMossBackground final : public cBackground
 {
 private:
     coreFullscreen m_Rain;              // 
-    coreVector2    m_vRainDirection;    // 
+    coreVector2    m_vRainMove;         // 
 
     coreFullscreen m_Lightning;         // 
     coreFlow       m_fLightningDelay;   // 
@@ -380,9 +383,9 @@ public:
     ASSIGN_ID_EX(7, "Moss", COLOR_MENU_RED)
 
     // 
-    inline void SetRainDirection  (const coreVector2& vDirection) {m_vRainDirection   = vDirection; ASSERT(vDirection.IsNormalized())}
-    inline void SetEnableLightning(const coreBool     bEnable)    {m_bEnableLightning = bEnable;    m_fLightningDelay = 0.0f;}
-    inline void SetEnableHeadlight(const coreBool     bEnable)    {m_bEnableHeadlight = bEnable;}
+    inline void SetRainMove       (const coreVector2& vMove)   {m_vRainMove        = vMove;}
+    inline void SetEnableLightning(const coreBool     bEnable) {m_bEnableLightning = bEnable; m_fLightningDelay = 0.0f;}
+    inline void SetEnableHeadlight(const coreBool     bEnable) {m_bEnableHeadlight = bEnable;}
 
     // 
     inline cHeadlight* GetHeadlight() {return &m_Headlight;}

@@ -12,8 +12,8 @@
 // ****************************************************************
 // constructor
 cDesertBackground::cDesertBackground()noexcept
-: m_vSandDirection (coreVector2(0.0f,1.0f))
-, m_fSandWave      (0.0f)
+: m_vSandMove (coreVector2(0.0f,-1.0f))
+, m_fSandWave (0.0f)
 {
     coreBatchList* pList1;
 
@@ -104,12 +104,13 @@ void cDesertBackground::__RenderOwnAfter()
     if(!m_Sand.GetProgram()->Enable())  return;
 
     // 
+    coreProgram* pLocal = m_Sand.GetProgram().GetResource();
     for(coreUintW i = 0u; i < DESERT_SAND_NUM; ++i)
     {
-        const coreVector2 vNewTexOffset = m_Sand.GetTexOffset() + coreVector2(0.3f,0.3f) * I_TO_F(i*i) + coreVector2(0.26f * SIN(m_fSandWave * (0.125f*PI) + I_TO_F(i*i)), 0.0f);
+        const coreVector2 vNewTexOffset = m_Sand.GetTexOffset() + coreVector2(0.3f,0.3f) * I_TO_F(POW2(i)) + coreVector2(0.26f * SIN(m_fSandWave * (0.125f*PI) + I_TO_F(POW2(i))), 0.0f);
         const coreFloat   fNewScale     = 1.6f - 0.12f * I_TO_F(i);
 
-        m_Sand.GetProgram()->SendUniform(PRINT("u_av3OverlayTransform[%zu]", i), coreVector3(vNewTexOffset.Processed(FRACT), fNewScale));
+        pLocal->SendUniform(PRINT("u_av3OverlayTransform[%zu]", i), coreVector3(vNewTexOffset.Processed(FRACT), fNewScale));
     }
 
     glDisable(GL_DEPTH_TEST);
@@ -126,12 +127,12 @@ void cDesertBackground::__RenderOwnAfter()
 void cDesertBackground::__MoveOwn()
 {
     // 
-    const coreVector2 vMove      = m_vSandDirection * (-0.35f * g_pEnvironment->GetSpeed());
+    const coreVector2 vEnvMove   = coreVector2(0.0f,1.0f) * (-0.35f * g_pEnvironment->GetSpeed());
     const coreVector2 vTexSize   = coreVector2(1.0f,1.0f) * 2.3f;
-    const coreVector2 vTexOffset = m_Sand.GetTexOffset() + (coreVector2(0.0f,-1.2f) + vMove) * (0.4f * TIME);
+    const coreVector2 vTexOffset = m_Sand.GetTexOffset() + (m_vSandMove + vEnvMove) * (0.4f * TIME);
 
     // 
-    m_Sand.SetDirection(MapToAxisInv(m_vSandDirection.InvertedX(), g_pEnvironment->GetDirection()));
+    m_Sand.SetDirection(g_pEnvironment->GetDirection().InvertedX());
     m_Sand.SetTexSize  (vTexSize);
     m_Sand.SetTexOffset(vTexOffset.Processed(FRACT));
     m_Sand.Move();

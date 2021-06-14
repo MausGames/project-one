@@ -12,8 +12,8 @@
 // ****************************************************************
 // constructor
 cSnowBackground::cSnowBackground()noexcept
-: m_vSnowDirection (coreVector2(0.0f,1.0f))
-, m_fSnowWave      (0.0f)
+: m_vSnowMove (coreVector2(0.0f,0.0f))
+, m_fSnowWave (0.0f)
 {
     coreBatchList* pList1;
 
@@ -181,12 +181,13 @@ void cSnowBackground::__RenderOwnAfter()
     if(!m_Snow.GetProgram()->Enable())  return;
 
     // 
+    coreProgram* pLocal = m_Snow.GetProgram().GetResource();
     for(coreUintW i = 0u; i < SNOW_SNOW_NUM; ++i)
     {
-        const coreVector2 vNewTexOffset = m_Snow.GetTexOffset() + coreVector2(0.56f,0.36f) * I_TO_F(i*i) + coreVector2(0.13f * SIN(m_fSnowWave * (0.125f*PI) + I_TO_F(i*i)), 0.0f);
+        const coreVector2 vNewTexOffset = m_Snow.GetTexOffset() + coreVector2(0.56f,0.36f) * I_TO_F(POW2(i)) + coreVector2(0.13f * SIN(m_fSnowWave * (0.125f*PI) + I_TO_F(POW2(i))), 0.0f);
         const coreFloat   fNewScale     = 0.9f - 0.07f * I_TO_F(i);
 
-        m_Snow.GetProgram()->SendUniform(PRINT("u_av3OverlayTransform[%zu]", i), coreVector3(vNewTexOffset.Processed(FRACT), fNewScale));
+        pLocal->SendUniform(PRINT("u_av3OverlayTransform[%zu]", i), coreVector3(vNewTexOffset.Processed(FRACT), fNewScale));
     }
 
     glDisable(GL_DEPTH_TEST);
@@ -203,18 +204,16 @@ void cSnowBackground::__RenderOwnAfter()
 void cSnowBackground::__MoveOwn()
 {
     // 
-    const coreVector2 vMove      = m_vSnowDirection * (-0.35f * g_pEnvironment->GetSpeed());
+    const coreVector2 vEnvMove   = coreVector2(0.0f,1.0f) * (-0.35f * g_pEnvironment->GetSpeed());
     const coreVector2 vTexSize   = coreVector2(1.0f,1.0f) * 5.4f;
-    const coreVector2 vTexOffset = m_Snow.GetTexOffset() + (coreVector2(0.0f,0.0f) + vMove) * (0.9f * TIME);
+    const coreVector2 vTexOffset = m_Snow.GetTexOffset() + (m_vSnowMove + vEnvMove) * (0.9f * TIME);
 
     // 
-    m_Snow.SetDirection(MapToAxisInv(m_vSnowDirection.InvertedX(), g_pEnvironment->GetDirection()));
+    m_Snow.SetDirection(g_pEnvironment->GetDirection().InvertedX());
     m_Snow.SetTexSize  (vTexSize);
     m_Snow.SetTexOffset(vTexOffset.Processed(FRACT));
     m_Snow.Move();
 
     // 
     m_fSnowWave.UpdateMod(SQRT(MAX(ABS(g_pEnvironment->GetSpeed()), 1.0f)), 16.0f);
-
-    // TODO: improve snow texture to little flakes (broken quads) 
 }
