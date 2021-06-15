@@ -10,18 +10,16 @@
 #ifndef _P1_GUARD_WATER_H_
 #define _P1_GUARD_WATER_H_
 
-// TODO: reduce reflection-framebuffer without reflection enabled
-// TODO: water-surface clipping for refraction
-// TODO: flying should create strong/fast water ripples
-// TODO: alpha mapping water (no distortion) for very bad hardware
-// TODO: specular contribution should be reduced by shadow (object shadow and environment darkening)
-// TODO: rainwater-resolution: realtime in options-menu ?
-// TODO: remove sqrt in rainy shader (pre-processing like in outdoor)
-// TODO: underwater may render reflection (not required)
-// TODO: glBindTexture has to reset internal texture-cache
-// TODO: rainwater has mipmapping disabled (provide at least a couple of levels)
-// TODO: draw reflected ships only with low resolution models
-// TODO: remove stretched edges, especially on under
+// TODO 5: reduce reflection-framebuffer without reflection enabled
+// TODO 5: alpha mapping water (no distortion) for very bad hardware
+// TODO 3: water-surface clipping for refraction
+// TODO 3: flying should create strong/fast water ripples
+// TODO 3: specular contribution should be reduced by shadow (object shadow and environment darkening)
+// TODO 3: rainwater-resolution: realtime in options-menu ?
+// TODO 3: remove sqrt/coreUnpackNormalMap in rainy shader (pre-processing like in outdoor)
+// TODO 3: underwater may render reflection (not required)
+// TODO 3: glBindTexture has to reset internal texture-cache
+// TODO 3: rainwater has mipmapping disabled (provide at least a couple of levels)
 
 
 // ****************************************************************

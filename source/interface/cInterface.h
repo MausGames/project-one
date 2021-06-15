@@ -10,8 +10,8 @@
 #ifndef _P1_GUARD_INTERFACE_H_
 #define _P1_GUARD_INTERFACE_H_
 
-// TODO: re-position everything after resolution-change (also menu)
-// TODO: realtime language update (other locations as well ?), boss-titles and wave-names
+// TODO 1: re-position everything after resolution-change (also menu)
+// TODO 3: realtime language update (other locations as well ?), boss-titles and wave-names
 
 
 // ****************************************************************

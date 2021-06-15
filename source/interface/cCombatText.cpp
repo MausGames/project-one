@@ -79,8 +79,8 @@ void cCombatText::AddText(const coreChar* pcText, const coreVector3& vPosition, 
 // 
 void cCombatText::UpdateLayout()
 {
-    // TODO: rotate position if game rotates
-    // TODO: rotate direction (without position) if interface rotates
+    // TODO 1: rotate position if game rotates
+    // TODO 1: rotate direction (without position) if interface rotates
 }
 
 

@@ -10,14 +10,14 @@
 #ifndef _P1_GUARD_BOSS_H_
 #define _P1_GUARD_BOSS_H_
 
-// TODO: boss0101, boomerangs may generate double-hits because of rotating box collision (when moving away from it), bitfield with reset (player-num)
-// TODO: boss0101, energy direction in front-part of main-model should be inverted
-// TODO: boss0101, something should grow when small boomerangs begin to create the duplicate
-// TODO: boss0101, shadow and type rebinding for duplicate
-// TODO: boss0101, definition for 1.5f (and related multiplications)
-// TODO: boss0102, add slight explosion where rays hit the screen
-// TODO: boss0102, separate emitters to three objects, to make them blue
-// TODO: boss0103, remove small hitch when finishing rotation in the middle shortly before beginning laser-phase
+// TODO 5: boss0101, boomerangs may generate double-hits because of rotating box collision (when moving away from it), bitfield with reset (player-num)
+// TODO 5: boss0101, energy direction in front-part of main-model should be inverted
+// TODO 5: boss0101, something should grow when small boomerangs begin to create the duplicate
+// TODO 5: boss0101, shadow and type rebinding for duplicate
+// TODO 5: boss0101, definition for 1.5f (and related multiplications)
+// TODO 5: boss0102, add slight explosion where rays hit the screen
+// TODO 5: boss0102, separate emitters to three objects, to make them blue
+// TODO 5: boss0103, remove small hitch when finishing rotation in the middle shortly before beginning laser-phase
 
 
 // ****************************************************************

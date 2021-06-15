@@ -10,13 +10,13 @@
 #ifndef _P1_GUARD_SAVE_H_
 #define _P1_GUARD_SAVE_H_
 
-// TODO: add more stats, e.g. for favorite weapon+support, direction
-// TODO: move time, shoot time, move WASD, move dir 1234, min and max
-// TODO: add save indicator somewhere on screen (corner), maybe only for important saves (changes, game start+end) to reduce spam
-// TODO: output if loading (even backup) or saving did not work -> indicator in game, message box in menu
-// TODO: fix _WEAPONS and _SUPPORTS defines in save and replay
-// TODO: disable save stats while playing replays
-// TODO: disable or handle save stats while in error-mission
+// TODO 3: add more stats, e.g. for favorite weapon+support, direction
+// TODO 5: move time, shoot time, move WASD, move dir 1234, min and max
+// TODO 5: add save indicator somewhere on screen (corner), maybe only for important saves (changes, game start+end) to reduce spam
+// TODO 5: output if loading (even backup) or saving did not work -> indicator in game, message box in menu
+// TODO 4: fix _WEAPONS and _SUPPORTS defines in save and replay
+// TODO 2: disable save stats while playing replays
+// TODO 2: disable or handle save stats while in error-mission
 
 
 // ****************************************************************
@@ -48,7 +48,7 @@ public:
         coreUint32 iMissionsDone;                 // 
         coreUint32 iBossesDone;                   // 
         coreUint32 iWavesDone;                    // 
-        coreUint32 iEnemiesDone;                  // TODO  1
+        coreUint32 iEnemiesDone;                  // TODO 1 
 
         coreUint64 iDamageGiven;                  // 
         coreUint32 iDamageTaken;                  // 

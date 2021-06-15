@@ -74,7 +74,7 @@ void cReplay::StartRecording()
 
     // 
     m_Header.iConfigUpdateFreq = g_CurConfig.Game.iUpdateFreq;
-    m_Header.iConfigVersion    = 1u;   // TODO
+    m_Header.iConfigVersion    = 1u;   // TODO 1 
 
     // 
     m_Header.iMissionStartIndex = g_pGame->GetCurMissionIndex();
@@ -573,7 +573,7 @@ void cReplay::__CheckHeader(sHeader* OUTPUT pHeader)
 
     // 
     pHeader->iConfigUpdateFreq = CLAMP(pHeader->iConfigUpdateFreq, F_TO_UI(FRAMERATE_MIN), F_TO_UI(FRAMERATE_MAX));
-    pHeader->iConfigVersion    = CLAMP(pHeader->iConfigVersion,    1u,                     1u);   // TODO
+    pHeader->iConfigVersion    = CLAMP(pHeader->iConfigVersion,    1u,                     1u);   // TODO 1 
 
     // 
     pHeader->iMissionStartIndex = CLAMP(pHeader->iMissionStartIndex, 0u, REPLAY_MISSIONS-1u);

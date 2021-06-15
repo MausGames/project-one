@@ -10,11 +10,10 @@
 #ifndef _P1_GUARD_ENEMY_H_
 #define _P1_GUARD_ENEMY_H_
 
-// TODO: disable texture filtering for enemy texture (NEAREST, also default_black and default_white)
-// TODO: manager: Find, ForEach, ForEachAll -> typed 
-// TODO: implement own enemy-types for custom-enemies which would require instancing
-// TODO: virtual void Render()override; -> final
-// TODO: remove "/ iPower"
+// TODO 3: disable texture filtering for enemy texture (NEAREST, also default_black and default_white)
+// TODO 4: manager: Find, ForEach, ForEachAll -> typed 
+// TODO 3: implement own enemy-types for custom-enemies which would require instancing
+// TODO 3: memory-pool for each enemy-set (if single allocations still used)
 
 
 // ****************************************************************

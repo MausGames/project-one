@@ -97,7 +97,7 @@ void cSpaceBackground::__MoveOwn()
     for(coreUintW i = 0u, ie = pList->List()->size(); i < ie; ++i)
     {
         coreObject3D* pStone = (*pList->List())[i];
-        //if(!pStone->IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue; // TODO: because of infinity scrolling 
+        //if(!pStone->IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue; // TODO 1: because of infinity scrolling, check if copy and move 
 
         // 
         pStone->SetDirection  ((pStone->GetDirection  () * mRota).Normalized());

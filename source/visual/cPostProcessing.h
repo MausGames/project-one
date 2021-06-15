@@ -10,13 +10,13 @@
 #ifndef _P1_GUARD_POSTPROCESSING_H_
 #define _P1_GUARD_POSTPROCESSING_H_
 
-// TODO: don't update shader uniforms on single fullscreen objects (postprocessing, transition, glow, etc.)
-// TODO: support box mode (4 walls), for scaling
-// TODO: don't render wallpapers on 1:1
-// TODO: also clamp fullscreen distortion similar to water distortion ?
-// TODO: changing game size (option) should add fixed wallpaper offset
-// TODO: pause (or other) overlays should adapt to offsets
-// TODO: try to reduce overdraw when all walls are active
+// TODO 3: don't update shader uniforms on single fullscreen objects (postprocessing, transition, glow, etc.)
+// TODO 3: support box mode (4 walls), for scaling
+// TODO 3: don't render wallpapers on 1:1 (and without offsets)
+// TODO 3: also clamp fullscreen distortion similar to water distortion ?
+// TODO 1: changing game size (option) should add fixed wallpaper offset (related to gameplay stage)
+// TODO 1: pause (or other) overlays should adapt to offsets
+// TODO 3: try to reduce overdraw when all walls are active
 
 
 // ****************************************************************

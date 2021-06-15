@@ -10,26 +10,28 @@
 #ifndef _P1_GUARD_BACKGROUND_H_
 #define _P1_GUARD_BACKGROUND_H_
 
-// TODO: merge stone diff and norm textures (own shader ?)
-// TODO: added object gets shadow-shader
-// TODO: no blitting on disabled anti-aliasing (low-optimizations on other components)
-// TODO: optimize density to never try to draw on 0.0f 
-// TODO: make grass leafs same color as other plants
-// TODO: make wind-sound (sand) depend on speed
-// TODO: check if alL _RESERVES are correct
-// TODO: reduce object-buffer sizes, not all are drawn at once anyway, also allocate only once
-// TODO: positions in separate list (when iterating through lambda)
-// TODO: provide own memory pool for temporary additional objects (remove MANAGED_), also WindScreen
-// TODO: expose pool-allocator for additional objects (AddList), also WindScreen
-// TODO: all environment sound effects should fade in transition
-// TODO: popping artifacts with shadow in sea-background (configurable view-range ? per list ? auto per height ?)
-// TODO: calls to pList->MoveNormal(); may be redundant
-// TODO: remove texture-sampling from lightning effect in moss
-// TODO: stomach should not create all vertices
-// TODO: EnableShadowRead only if appropriate ground objects would be rendered (IsInstanced)
-// TODO: grass and blood textures are duplicated (especially normal maps)
-// TODO: can thunder effect cause issues for some players ? are there other effects causing issues ? (change effects or add disable option)
-// TODO: object-sets with 0% visibility and no active object should be skipped entirely
+// TODO 5: merge stone diff and norm textures (own shader ?)
+// TODO 3: added object gets shadow-shader
+// TODO 3: no blitting on disabled anti-aliasing (low-optimizations on other components)
+// TODO 3: optimize density to never try to draw on 0.0f
+// TODO 3: object-sets with 0% visibility and no active object should be skipped entirely
+// TODO 3: make grass leafs same color as other plants
+// TODO 1: make wind-sound (sand) depend on speed
+// TODO 3: check if alL _RESERVES are correct
+// TODO 3: reduce object-buffer sizes, not all are drawn at once anyway, also allocate only once
+// TODO 3: positions in separate list (when iterating through lambda)
+// TODO 3: provide own memory pool for temporary additional objects (remove MANAGED_), also WindScreen
+// TODO 3: expose pool-allocator for additional objects (AddList), also WindScreen
+// TODO 3: all environment sound effects should fade in transition
+// TODO 2: popping artifacts with shadow in sea-background (configurable view-range ? per list ? auto per height ?)
+// TODO 3: calls to pList->MoveNormal(); may be redundant
+// TODO 3: remove texture-sampling from lightning effect in moss
+// TODO 3: stomach should not create all vertices
+// TODO 3: EnableShadowRead only if appropriate ground objects would be rendered (IsInstanced)
+// TODO 5: grass and blood textures are duplicated (especially normal maps)
+// TODO 1: can thunder effect cause issues for some players ? are there other effects causing issues ? (change effects or add disable option)
+// TODO 3: pre-create all u_av3OverlayTransform permutation hashstrings for overlay uniforms (single table with max number)
+// TODO 3: improve snow texture to little flakes (broken quads) 
 
 
 // ****************************************************************

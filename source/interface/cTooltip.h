@@ -10,11 +10,10 @@
 #ifndef _P1_GUARD_TOOLTIP_H_
 #define _P1_GUARD_TOOLTIP_H_
 
-// TODO: transfer to Core Engine
-// TODO: does not handle Kanji & Kana correctly
-// TODO: does not handle kerning (relevant ?)
-// TODO: (this + __LINE__) may not handle implementation-split between cpp and h file
-// TODO: pre-resolve coreFontPtr (GetResource)
+// TODO 1: transfer to Core Engine
+// TODO 3: does not handle kerning (relevant ?)
+// TODO 3: (this + __LINE__) may not handle implementation-split between cpp and h file
+// TODO 3: pre-resolve coreFontPtr (GetResource)
 
 
 // ****************************************************************

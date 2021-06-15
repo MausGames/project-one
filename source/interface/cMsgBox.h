@@ -10,9 +10,9 @@
 #ifndef _P1_GUARD_MSGBOX_H_
 #define _P1_GUARD_MSGBOX_H_
 
-// TODO: transfer to Core Engine
-// TODO: fix controller support (mouse gets warped because of input-lock)
-// TODO: X character is off some pixels (font problem)
+// TODO 1: transfer to Core Engine
+// TODO 2: fix controller support (mouse gets warped because of input-lock)
+// TODO 3: X character is off some pixels (font problem)
 
 
 // ****************************************************************

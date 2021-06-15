@@ -10,9 +10,9 @@
 #ifndef _P1_GUARD_COMBATTEXT_H_
 #define _P1_GUARD_COMBATTEXT_H_
 
-// TODO: allow localized text with standard numbers
-// TODO: different labels and animations (size, solid background, 000000 -> 123456, ZSDK -> TEST)
-// TODO: if possible, reuse the same text
+// TODO 3: allow localized text with standard numbers
+// TODO 5: different labels and animations (size, solid background, 000000 -> 123456, ZSDK -> TEST)
+// TODO 3: if possible, reuse the same text
 
 
 // ****************************************************************

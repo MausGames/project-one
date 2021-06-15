@@ -10,18 +10,18 @@
 #ifndef _P1_GUARD_BULLET_H_
 #define _P1_GUARD_BULLET_H_
 
-// TODO: pre-allocate bullets (at least for player) at the beginning to improve resource loading
-// TODO: use prefetch with more precise numbers (also in enemy-manager)
-// TODO: align bullet memory ? (also check other possible locations (e.g. enemies))
-// TODO: remove tons of template instantiations (also enemies ? other templates ?) (CreateBullet and AllocateEnemy create tons of symbols)
-// TODO: add memory pool object for bullets ? also for enemy
-// TODO: make ray bullet smoother geometrically (front round)
-// TODO: sort bullet classes (color, enemy<>player, normal<>special), improve array indexing and caching
-// TODO: shift spear-bullet collision like ray-bullet
-// TODO: bullet -> to POD-type with single parent object
-// TODO: reorder bullets either yellow->green or green->yellow, so they are overlapping consistently (in default order)
-// TODO: surge-bullets to wave-weapon, rename one of it (probably wave-weapon to surge-weapon, code-only anyway)
-// TODO: dynamic depth needs to consider outline when calculating distance
+// TODO 3: pre-allocate bullets (at least for player) at the beginning to improve resource loading
+// TODO 3: use prefetch with more precise numbers (also in enemy-manager)
+// TODO 3: align bullet memory ? (also check other possible locations (e.g. enemies))
+// TODO 3: add memory pool object for bullets ? also for enemy
+// TODO 3: remove tons of template instantiations (also enemies ? other templates ?) (CreateBullet and AllocateEnemy create tons of symbols)
+// TODO 3: make ray bullet smoother geometrically (front round)
+// TODO 3: sort bullet classes (color, enemy<>player, normal<>special), improve array indexing and caching
+// TODO 3: shift spear-bullet collision like ray-bullet
+// TODO 5: bullet -> to POD-type with single parent object
+// TODO 3: reorder bullets either yellow->green or green->yellow, so they are overlapping consistently (in default order)
+// TODO 4: surge-bullets to wave-weapon, rename one of it (probably wave-weapon to surge-weapon, code-only anyway)
+// TODO 2: dynamic depth needs to consider outline when calculating distance
 
 
 // ****************************************************************

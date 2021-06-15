@@ -10,12 +10,12 @@
 #ifndef _P1_GUARD_WINDSCREEN_H_
 #define _P1_GUARD_WINDSCREEN_H_
 
-// TODO: rain (Metroid Prime)
-// TODO: dirt (smaller spray drops, brownish)
-// TODO: cracks (star, lightning)
-// TODO: strong breaks (across screen), left and right are strongly shifted
-// TODO: move weather-effects here, but make them controllable from the background ?
-// TODO: try to keep optimized lists longer, instead of only for one frame
+// TODO 5: rain (Metroid Prime)
+// TODO 5: dirt (smaller spray drops, brownish)
+// TODO 5: cracks (star, lightning)
+// TODO 5: strong breaks (across screen), left and right are strongly shifted
+// TODO 5: move weather-effects here, but make them controllable from the background ?
+// TODO 3: try to keep optimized lists longer, instead of only for one frame
 
 
 // ****************************************************************

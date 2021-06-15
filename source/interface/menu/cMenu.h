@@ -10,25 +10,26 @@
 #ifndef _P1_GUARD_MENU_H_
 #define _P1_GUARD_MENU_H_
 
-// TODO: language and main menu control with keyboard+joystick, cursor gets invisible on these inputs, in game menu only cursor
-// TODO: short YES-no questions: Exit Game ? Return to Menu ?
-// TODO: move mouse to buttons on joystick-input
-// TODO: real-time sound-configuration
-// TODO: score-menu names and all name-inputs MUST support all languages (japanese (keifont), russian (default), arabic (default), ...)
-// TODO: score-menu names must be sanitized
-// TODO: unload fonts currently not used (e.g. from score-menu)
-// TODO: options menu: ask if values should be discarded, ask if want to exit instead of saving
-// TODO: options menu: 15 second on video change, yes, no
-// TODO: rumble when changing rumble-option
-// TODO: display unattached joysticks and joystick names somehow
-// TODO: highlight which joystick is which input set
-// TODO: summary_ add separate total-score for each player
-// TODO: update texture filter and render quality in realtime
-// TODO: double initial languages by switching to two columns (on demand?)
-// TODO: stages in GameMenu should be called segments
-// TODO: upper white border in settings menu "moves" during transition on 1760x990, check all menus for moving during transition in common resolutions
-// TODO: every object in menu needs outline: weapon icons
-// TODO: custom resolution should be stored when switching monitors
+// TODO 1: menu control with keyboard+joystick, cursor gets invisible on these inputs
+// TODO 1: short YES-no questions: Exit Game ? Return to Menu ?
+// TODO 5: move mouse to buttons on joystick-input
+// TODO 1: real-time sound-configuration
+// TODO 1: score-menu names are restricted to characters from the text-board
+// TODO 3: score-menu names must be sanitized
+// TODO 3: unload fonts currently not used (e.g. from score-menu)
+// TODO 1: options menu: ask if values should be discarded, ask if want to exit instead of saving
+// TODO 3: options menu: 15 second on video change, yes, no
+// TODO 3: rumble when changing rumble-option
+// TODO 5: display unattached joysticks and joystick names somehow
+// TODO 3: highlight which joystick is which input set
+// TODO 3: summary_ add separate total-score for each player
+// TODO 3: update texture filter and render quality in realtime
+// TODO 3: double initial languages by switching to two columns (on demand?)
+// TODO 5: stages in GameMenu should be called segments
+// TODO 2: upper white border in settings menu "moves" during transition on 1760x990, check all menus for moving during transition in common resolutions
+// TODO 3: every object in menu needs outline: weapon icons
+// TODO 3: custom resolution should be stored when switching monitors
+// TODO 3: show target FPS in config menu (speed x update rate)
 
 
 // ****************************************************************

@@ -10,13 +10,13 @@
 #ifndef _P1_GUARD_REPLAY_H_
 #define _P1_GUARD_REPLAY_H_
 
-// TODO: replay-player with play, pause, speed up slow down, time-bar dragging, stage and boss markers auf bar, seitliche liste wie bei speedrun
-// TODO: track pause, with own event-stream ?
-// TODO: uInfo loadfile
-// TODO: add detailed death-stats, to make analyzing problematic situations easier
-// TODO: frame-count in stream-packet can be compressed further by using delta-frames and injecting wrap-around packets at max delta
-// TODO: check if num of streams and snapshots and sizes per stream would exceed anything, also replayhash + bodysize (those two are referencing the second file)
-// TODO: snapshot data: both player positions and state (roll, feel, force, interrupt, health, dead/repair (stats), continues, scores, shoot (timer), input), bullets, chroma (bullets), background
+// TODO 5: replay-player with play, pause, speed up slow down, time-bar dragging, stage and boss markers auf bar, seitliche liste wie bei speedrun
+// TODO 1: track pause, with own event-stream ?
+// TODO 5: sInfo loadfile
+// TODO 3: add detailed death-stats, to make analyzing problematic situations easier
+// TODO 3: frame-count in stream-packet can be compressed further by using delta-frames and injecting wrap-around packets at max delta
+// TODO 3: check if num of streams and snapshots and sizes per stream would exceed anything, also replayhash + bodysize (those two are referencing the second file)
+// TODO 1: snapshot data: both player positions and state (roll, feel, force, interrupt, health, dead/repair (stats), continues, scores, shoot (timer), input), bullets, chroma (bullets), background
 
 
 // ****************************************************************

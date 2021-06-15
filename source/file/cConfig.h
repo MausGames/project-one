@@ -10,12 +10,12 @@
 #ifndef _P1_GUARD_CONFIG_H_
 #define _P1_GUARD_CONFIG_H_
 
-// TODO: transfer to Core Engine
-// TODO: should low quality option also affect ship models ?
-// TODO: don't input-check for inactive players during game
-// TODO: default input should differ between keyboard and joystick, and between sets
-// TODO: SDL_JoystickCurrentPowerLevel
-// TODO: alt+F4 while having temp changes in the options menu should not save them
+// TODO 1: transfer to Core Engine
+// TODO 5: should low quality option also affect ship models ?
+// TODO 3: don't input-check for inactive players during game
+// TODO 1: default input should differ between keyboard and joystick, and between sets
+// TODO 5: SDL_JoystickCurrentPowerLevel
+// TODO 3: alt+F4 while having temp changes in the options menu should not save them
 
 
 // ****************************************************************

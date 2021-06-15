@@ -10,10 +10,9 @@
 #ifndef _P1_GUARD_SHIP_H_
 #define _P1_GUARD_SHIP_H_
 
-// TODO: change high-resolution models with pre-baked normal-maps or tessellation ?
-// TODO: reduce ship health and all damage values to 16-bit (also reorder for better packing if possible)
-// TODO: do not create explosions if ship is far outside of view-port (just ships or in general special-effects ?)
-// TODO: ReachedHealthPct, GetCurHealthPct -> ReachedHealthPct(0.7f) was triggered while interface was showing 71%
+// TODO 3: reduce ship health and all damage values to 16-bit (also reorder for better packing if possible)
+// TODO 3: do not create explosions if ship is far outside of view-port (just ships or in general special-effects ?)
+// TODO 2: ReachedHealthPct, GetCurHealthPct -> ReachedHealthPct(0.7f) was triggered while interface was showing 71%
 
 
 // ****************************************************************

@@ -10,16 +10,16 @@
 #ifndef _P1_GUARD_SPECIALEFFECTS_H_
 #define _P1_GUARD_SPECIALEFFECTS_H_
 
-// TODO: glowing waves
-// TODO: particles should not overdraw outlines (at least color-particles)
-// TODO: make lightning owner-sticky with position-offset
-// TODO: implement pixel-fitting screen-shake ? (currently shaking creates a fullscreen-blur)
-// TODO: don't invoke special-effects out of view (though consider effect-radius)
-// TODO: adjust rumble to be not toooo strong (and not be annoying)
-// TODO: remove object_ring.md3 if not required anymore (+file), thought might be required for Messier
-// TODO: remove effect_energy_ring_program if not required anymore (+file)
-// TODO: think about merging *Color and *Dark functions, as they are mostly identical
-// TODO: sinus shake
+// TODO 5: glowing waves
+// TODO 3: particles should not overdraw outlines (at least color-particles)
+// TODO 3: make lightning owner-sticky with position-offset
+// TODO 3: implement pixel-fitting screen-shake ? (currently shaking creates a fullscreen-blur)
+// TODO 3: don't invoke special-effects out of view (though consider effect-radius)
+// TODO 3: adjust rumble to be not toooo strong (and not be annoying)
+// TODO 4: remove effect_energy_ring_program if not required anymore (+file)
+// TODO 4: think about merging *Color and *Dark functions, as they are mostly identical
+// TODO 3: sinus shake
+// TODO 3: discard every X particle (create min 1) on low quality ?
 
 
 // ****************************************************************

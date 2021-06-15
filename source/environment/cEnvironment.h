@@ -10,14 +10,12 @@
 #ifndef _P1_GUARD_ENVIRONMENT_H_
 #define _P1_GUARD_ENVIRONMENT_H_
 
-// TODO: render depth-quads or use scissor test (tested: works bad, no gain) on unused background areas (for transition!)
-// TODO: make "side" parameterized
-// TODO: use depth from water as own map for decals to reconstruct position for shadow-mapping, maybe add normal for lighting
-// TODO: currently after changing the background there is no Background::Move before the first Render
-// TODO: separate culling between normal rendering an shadow, to improve efficiency (though this would update instancing buffer again ?)
-// TODO: transition is reset when resizing window
-// TODO: different background than cNoBackground on invalid ID (error background ?)
-// TODO: if m_fSideOffset will be used with rotation, make sure to use smooth lerp instead of the linear
+// TODO 3: render depth-quads or use scissor test (tested: works bad, no gain) on unused background areas (for transition!)
+// TODO 2: currently after changing the background there is no Background::Move before the first Render
+// TODO 3: separate culling between normal rendering an shadow, to improve efficiency (though this would update instancing buffer again ?)
+// TODO 2: transition is reset when resizing window
+// TODO 3: different background than cNoBackground on invalid ID (error background ?)
+// TODO 3: if m_fSideOffset will be used with rotation, make sure to use smooth lerp instead of the linear
 
 
 // ****************************************************************

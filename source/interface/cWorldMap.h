@@ -10,8 +10,8 @@
 #ifndef _P1_GUARD_WORLDMAP_H_
 #define _P1_GUARD_WORLDMAP_H_
 
-// TODO: design gamepad navigation (free movement?, fixed direction? (arbritrary, left-right), improve pin-order)
-// TODO: 2 blinking arrow cursors, to highlight navigation (blinking, not moving, for contrast with rotating pin)
+// TODO 1: design gamepad navigation (free movement?, fixed direction? (arbritrary, left-right), improve pin-order)
+// TODO 1: 2 blinking arrow cursors, to highlight navigation (blinking, not moving, for contrast with rotating pin)
 
 
 // ****************************************************************

@@ -10,9 +10,9 @@
 #ifndef _P1_GUARD_INK_H_
 #define _P1_GUARD_INK_H_
 
-// TODO: ships and objects moving in and out of ink should draw some clouds
-// TODO: ink needs different color in point and line rendering (red?, blue?)
-// TODO: ink flows away
+// TODO 3: ships and objects moving in and out of ink should draw some clouds
+// TODO 3: ink needs different color in point and line rendering (red?, blue?)
+// TODO 3: ink flows away
 
 
 // ****************************************************************

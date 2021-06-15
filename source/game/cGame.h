@@ -10,12 +10,12 @@
 #ifndef _P1_GUARD_GAME_H_
 #define _P1_GUARD_GAME_H_
 
-// TODO: enemy bullet (and enemy?) cleanup on mission unload
-// TODO: check for duplicate IDs in mission-lists ? LoadMissionID may behave wrong
-// TODO: show pacifist damage in interface, pulsing and filling up, also show that weapons are disabled
-// TODO: maybe spawn players in flight direction, mission start and continue ?
-// TODO: FindPlayer may find player outside of area (during resurrection)
-// TODO: check "hold old mission (to keep resources valid)" for loadmission/nextmission
+// TODO 3: enemy bullet (and enemy?) cleanup on mission unload
+// TODO 2: check for duplicate IDs in mission-lists ? LoadMissionID may behave wrong
+// TODO 3: show pacifist damage in interface, pulsing and filling up, also show that weapons are disabled
+// TODO 5: maybe spawn players in flight direction, mission start and continue ?
+// TODO 2: FindPlayer may find player outside of area (during resurrection)
+// TODO 3: check "hold old mission (to keep resources valid)" for loadmission/nextmission
 
 
 // ****************************************************************

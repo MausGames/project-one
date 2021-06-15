@@ -704,7 +704,7 @@ void cSpecialEffects::ClearAll()
     m_ParticleSmoke.ClearAll();
     m_ParticleFire .ClearAll();
 
-    // TODO: clear other stuff here   
+    // TODO 1: clear other stuff here   
 }
 
 
