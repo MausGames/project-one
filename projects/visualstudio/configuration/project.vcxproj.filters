@@ -318,6 +318,9 @@
     <ClCompile Include="..\..\..\source\visual\cInk.cpp">
       <Filter>visual</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\game\cCrash.cpp">
+      <Filter>game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\main.h" />
@@ -452,6 +455,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\source\additional\cGuiObject.h">
       <Filter>additional</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\game\cCrash.h">
+      <Filter>game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

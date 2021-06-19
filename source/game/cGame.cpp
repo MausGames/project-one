@@ -126,6 +126,9 @@ void cGame::Render()
         // 
         m_EnemyManager.RenderBottom();
         m_pCurMission->RenderBottom();
+
+        // 
+        m_CrashManager.Render();
     }
 
     __DEPTH_GROUP_SHIP   // # 1
@@ -254,6 +257,9 @@ void cGame::Move()
     m_ChromaManager.Move();
     m_ItemManager  .Move();
     m_ShieldManager.Move();
+
+    // 
+    m_CrashManager.Move();
 
     // handle default object collisions
     this->__HandleCollisions();
@@ -1028,6 +1034,7 @@ void cGame::__ClearAll(const coreBool bAnimated)
     m_ChromaManager      .ClearChromas(bAnimated);
     m_ItemManager        .ClearItems  (bAnimated);
     m_ShieldManager      .ClearShields(bAnimated);
+    m_CrashManager       .ClearCrashes(bAnimated);
 
     // 
     if(m_pRepairEnemy)

@@ -42,6 +42,7 @@ target_sources(
     ${BASE_DIRECTORY}/source/game/mission/cMission.cpp
     ${BASE_DIRECTORY}/source/game/cBullet.cpp
     ${BASE_DIRECTORY}/source/game/cChroma.cpp
+    ${BASE_DIRECTORY}/source/game/cCrash.cpp
     ${BASE_DIRECTORY}/source/game/cEnemy.cpp
     ${BASE_DIRECTORY}/source/game/cGame.cpp
     ${BASE_DIRECTORY}/source/game/cHelper.cpp

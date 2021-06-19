@@ -228,6 +228,7 @@
     <ClCompile Include="..\..\..\source\game\boss\cBoss.cpp" />
     <ClCompile Include="..\..\..\source\game\cBullet.cpp" />
     <ClCompile Include="..\..\..\source\game\cChroma.cpp" />
+    <ClCompile Include="..\..\..\source\game\cCrash.cpp" />
     <ClCompile Include="..\..\..\source\game\cEnemy.cpp" />
     <ClCompile Include="..\..\..\source\game\cGame.cpp" />
     <ClCompile Include="..\..\..\source\game\cHelper.cpp" />
@@ -429,6 +430,7 @@
     <ClInclude Include="..\..\..\source\game\boss\cBoss.h" />
     <ClInclude Include="..\..\..\source\game\cBullet.h" />
     <ClInclude Include="..\..\..\source\game\cChroma.h" />
+    <ClInclude Include="..\..\..\source\game\cCrash.h" />
     <ClInclude Include="..\..\..\source\game\cEnemy.h" />
     <ClInclude Include="..\..\..\source\game\cGame.h" />
     <ClInclude Include="..\..\..\source\game\cHelper.h" />

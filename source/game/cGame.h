@@ -107,6 +107,7 @@ private:
     cChromaManager m_ChromaManager;         // 
     cItemManager   m_ItemManager;           // 
     cShieldManager m_ShieldManager;         // 
+    cCrashManager  m_CrashManager;          // 
 
     cInterface  m_Interface;                // interface overlay
     cCombatText m_CombatText;               // combat text overlay
@@ -188,6 +189,7 @@ public:
     inline cChromaManager*  GetChromaManager      ()                         {return &m_ChromaManager;}
     inline cItemManager*    GetItemManager        ()                         {return &m_ItemManager;}
     inline cShieldManager*  GetShieldManager      ()                         {return &m_ShieldManager;}
+    inline cCrashManager*   GetCrashManager       ()                         {return &m_CrashManager;}
     inline cInterface*      GetInterface          ()                         {return &m_Interface;}
     inline cCombatText*     GetCombatText         ()                         {return &m_CombatText;}
     inline cMission*        GetCurMission         ()const                    {ASSERT(m_pCurMission) return m_pCurMission;}
