@@ -657,27 +657,27 @@ void cConfigMenu::CheckValues()
 
     // 
     const coreBool bSave = (vCurResolution != coreVector2(I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH)), I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT)))) ||
-                           (m_Monitor      .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY))                                ||
-                           (m_DisplayMode  .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN))                             ||
-                           (m_AntiAliasing .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING))                         ||
-                           (m_TextureFilter.GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY))                    ||
-                           (m_RenderQuality.GetCurEntry().tValue != g_OldConfig.Graphics.iRender)                                                    ||
-                           (m_ShadowQuality.GetCurEntry().tValue != g_OldConfig.Graphics.iShadow)                                                    ||
-                           (m_GlobalVolume .GetCurEntry().tValue != F_TO_UI(ROUND(Core::Config->GetFloat(CORE_CONFIG_AUDIO_GLOBALVOLUME) * 100.0f))) ||
-                           (m_MusicVolume  .GetCurEntry().tValue != F_TO_UI(ROUND(Core::Config->GetFloat(CORE_CONFIG_AUDIO_MUSICVOLUME)  * 100.0f))) ||
-                           (m_EffectVolume .GetCurEntry().tValue != F_TO_UI(ROUND(g_OldConfig.Audio.fEffectVolume                        * 100.0f))) ||
-                           (m_AmbientVolume.GetCurEntry().tValue != F_TO_UI(ROUND(g_OldConfig.Audio.fAmbientVolume                       * 100.0f))) ||
-                           (std::strcmp(Core::Language->GetPath(), Core::Config->GetString(CORE_CONFIG_BASE_LANGUAGE)))                              ||
-                           (m_TextSize     .GetCurEntry().tValue != g_OldConfig.Game.iTextSize)                                                      ||
-                           (m_GameRotation .GetCurEntry().tValue != g_OldConfig.Game.iGameRotation)                                                  ||
-                           (m_GameScale    .GetCurEntry().tValue != g_OldConfig.Game.iGameScale)                                                     ||
-                           (m_GameSpeed    .GetCurEntry().tValue != g_OldConfig.Game.iGameSpeed)                                                     ||
-                           (m_HudRotation  .GetCurEntry().tValue != g_OldConfig.Game.iHudRotation)                                                   ||
-                           (m_HudScale     .GetCurEntry().tValue != g_OldConfig.Game.iHudScale)                                                      ||
-                           (m_HudType      .GetCurEntry().tValue != g_OldConfig.Game.iHudType)                                                       ||
-                           (m_UpdateFreq   .GetCurEntry().tValue != g_OldConfig.Game.iUpdateFreq)                                                    ||
-                           (m_Version      .GetCurEntry().tValue != g_OldConfig.Game.iVersion)                                                       ||
-                           (m_MirrorMode   .GetCurEntry().tValue != g_OldConfig.Game.iMirrorMode)                                                    ||
+                           (m_Monitor      .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY))                                     ||
+                           (m_DisplayMode  .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN))                                  ||
+                           (m_AntiAliasing .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING))                              ||
+                           (m_TextureFilter.GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY))                         ||
+                           (m_RenderQuality.GetCurEntry().tValue != g_OldConfig.Graphics.iRender)                                                         ||
+                           (m_ShadowQuality.GetCurEntry().tValue != g_OldConfig.Graphics.iShadow)                                                         ||
+                           (m_GlobalVolume .GetCurEntry().tValue != cConfigMenu::__VolumeToUint8(Core::Config->GetFloat(CORE_CONFIG_AUDIO_GLOBALVOLUME))) ||
+                           (m_MusicVolume  .GetCurEntry().tValue != cConfigMenu::__VolumeToUint8(Core::Config->GetFloat(CORE_CONFIG_AUDIO_MUSICVOLUME)))  ||
+                           (m_EffectVolume .GetCurEntry().tValue != cConfigMenu::__VolumeToUint8(g_OldConfig.Audio.fEffectVolume))                        ||
+                           (m_AmbientVolume.GetCurEntry().tValue != cConfigMenu::__VolumeToUint8(g_OldConfig.Audio.fAmbientVolume))                       ||
+                           (std::strcmp(Core::Language->GetPath(), Core::Config->GetString(CORE_CONFIG_BASE_LANGUAGE)))                                   ||
+                           (m_TextSize     .GetCurEntry().tValue != g_OldConfig.Game.iTextSize)                                                           ||
+                           (m_GameRotation .GetCurEntry().tValue != g_OldConfig.Game.iGameRotation)                                                       ||
+                           (m_GameScale    .GetCurEntry().tValue != g_OldConfig.Game.iGameScale)                                                          ||
+                           (m_GameSpeed    .GetCurEntry().tValue != g_OldConfig.Game.iGameSpeed)                                                          ||
+                           (m_HudRotation  .GetCurEntry().tValue != g_OldConfig.Game.iHudRotation)                                                        ||
+                           (m_HudScale     .GetCurEntry().tValue != g_OldConfig.Game.iHudScale)                                                           ||
+                           (m_HudType      .GetCurEntry().tValue != g_OldConfig.Game.iHudType)                                                            ||
+                           (m_UpdateFreq   .GetCurEntry().tValue != g_OldConfig.Game.iUpdateFreq)                                                         ||
+                           (m_Version      .GetCurEntry().tValue != g_OldConfig.Game.iVersion)                                                            ||
+                           (m_MirrorMode   .GetCurEntry().tValue != g_OldConfig.Game.iMirrorMode)                                                         ||
                            (std::memcmp(&g_CurConfig.Input, &g_OldConfig.Input, sizeof(sConfig::Input)));
 
     // 
@@ -719,10 +719,10 @@ void cConfigMenu::LoadValues()
     m_ShadowQuality.SelectValue(g_CurConfig.Graphics.iShadow);
 
     // 
-    m_GlobalVolume .SelectValue(F_TO_UI(ROUND(Core::Config->GetFloat(CORE_CONFIG_AUDIO_GLOBALVOLUME) * 100.0f)));
-    m_MusicVolume  .SelectValue(F_TO_UI(ROUND(Core::Config->GetFloat(CORE_CONFIG_AUDIO_MUSICVOLUME)  * 100.0f)));
-    m_EffectVolume .SelectValue(F_TO_UI(ROUND(g_CurConfig.Audio.fEffectVolume                        * 100.0f)));
-    m_AmbientVolume.SelectValue(F_TO_UI(ROUND(g_CurConfig.Audio.fAmbientVolume                       * 100.0f)));
+    m_GlobalVolume .SelectValue(cConfigMenu::__VolumeToUint8(Core::Config->GetFloat(CORE_CONFIG_AUDIO_GLOBALVOLUME)));
+    m_MusicVolume  .SelectValue(cConfigMenu::__VolumeToUint8(Core::Config->GetFloat(CORE_CONFIG_AUDIO_MUSICVOLUME)));
+    m_EffectVolume .SelectValue(cConfigMenu::__VolumeToUint8(g_CurConfig.Audio.fEffectVolume));
+    m_AmbientVolume.SelectValue(cConfigMenu::__VolumeToUint8(g_CurConfig.Audio.fAmbientVolume));
 
     // 
     const coreList<coreString>& asLanguageList = cMenu::GetLanguageList().get_valuelist();
@@ -790,10 +790,10 @@ void cConfigMenu::SaveValues()
     g_CurConfig.Graphics.iShadow = m_ShadowQuality.GetCurEntry().tValue;
 
     // 
-    Core::Config->SetFloat(CORE_CONFIG_AUDIO_GLOBALVOLUME, I_TO_F(m_GlobalVolume.GetCurEntry().tValue) * 0.01f);
-    Core::Config->SetFloat(CORE_CONFIG_AUDIO_MUSICVOLUME,  I_TO_F(m_MusicVolume .GetCurEntry().tValue) * 0.01f);
-    g_CurConfig.Audio.fEffectVolume  = I_TO_F(m_EffectVolume .GetCurEntry().tValue) * 0.01f;
-    g_CurConfig.Audio.fAmbientVolume = I_TO_F(m_AmbientVolume.GetCurEntry().tValue) * 0.01f;
+    Core::Config->SetFloat(CORE_CONFIG_AUDIO_GLOBALVOLUME, cConfigMenu::__VolumeToFloat(m_GlobalVolume.GetCurEntry().tValue));
+    Core::Config->SetFloat(CORE_CONFIG_AUDIO_MUSICVOLUME,  cConfigMenu::__VolumeToFloat(m_MusicVolume .GetCurEntry().tValue));
+    g_CurConfig.Audio.fEffectVolume  = cConfigMenu::__VolumeToFloat(m_EffectVolume .GetCurEntry().tValue);
+    g_CurConfig.Audio.fAmbientVolume = cConfigMenu::__VolumeToFloat(m_AmbientVolume.GetCurEntry().tValue);
 
     // 
     Core::Config->SetString(CORE_CONFIG_BASE_LANGUAGE, Core::Language->GetPath());
@@ -861,10 +861,10 @@ void cConfigMenu::__UpdateShadowQuality()
 void cConfigMenu::__UpdateVolume()
 {
     // 
-    Core::Audio->SetGlobalVolume(I_TO_F(m_GlobalVolume.GetCurEntry().tValue) * 0.01f);
-    Core::Audio->SetMusicVolume (I_TO_F(m_MusicVolume .GetCurEntry().tValue) * 0.01f);
-    g_CurConfig.Audio.fEffectVolume  = I_TO_F(m_EffectVolume .GetCurEntry().tValue) * 0.01f;
-    g_CurConfig.Audio.fAmbientVolume = I_TO_F(m_AmbientVolume.GetCurEntry().tValue) * 0.01f;
+    Core::Audio->SetGlobalVolume(cConfigMenu::__VolumeToFloat(m_GlobalVolume.GetCurEntry().tValue));
+    Core::Audio->SetMusicVolume (cConfigMenu::__VolumeToFloat(m_MusicVolume .GetCurEntry().tValue));
+    g_CurConfig.Audio.fEffectVolume  = cConfigMenu::__VolumeToFloat(m_EffectVolume .GetCurEntry().tValue);
+    g_CurConfig.Audio.fAmbientVolume = cConfigMenu::__VolumeToFloat(m_AmbientVolume.GetCurEntry().tValue);
 
     // 
     Core::Audio->SetTypeVolume(g_CurConfig.Audio.fEffectVolume,  SOUND_EFFECT);

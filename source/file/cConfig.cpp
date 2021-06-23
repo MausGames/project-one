@@ -68,6 +68,10 @@ static void CheckConfig(sConfig* OUTPUT pConfig)
             }
         }
     }
+
+    // 
+    pConfig->Audio.fEffectVolume  = MAX(pConfig->Audio.fEffectVolume,  0.0f);
+    pConfig->Audio.fAmbientVolume = MAX(pConfig->Audio.fAmbientVolume, 0.0f);
 }
 
 
@@ -128,13 +132,13 @@ void LoadConfig()
         }
     }
 
+    // check configuration for valid values
+    CheckConfig(&g_OldConfig);
+
     // 
     Core::Audio->SetSoundVolume(1.0f);
     Core::Audio->SetTypeVolume(g_OldConfig.Audio.fEffectVolume,  SOUND_EFFECT);
     Core::Audio->SetTypeVolume(g_OldConfig.Audio.fAmbientVolume, SOUND_AMBIENT);
-
-    // check configuration for valid values
-    CheckConfig(&g_OldConfig);
 
     // forward values to the current structure
     g_CurConfig = g_OldConfig;
