@@ -284,7 +284,12 @@ private:
 class cSpaceBackground final : public cBackground
 {
 private:
-    coreFullscreen m_Cover;   // 
+    coreFullscreen m_Cover;       // 
+    coreVector2    m_vCoverDir;   // 
+
+    coreFloat  m_fMeteorSpeed;    // 
+    coreUint16 m_iCopyLower;      // 
+    coreUint16 m_iCopyUpper;      // 
 
 
 public:
@@ -294,7 +299,12 @@ public:
     ASSIGN_ID_EX(4, "Space", COLOR_MENU_MAGENTA)
 
     // 
-    inline void SetCoverColor(const coreVector3& vColor) {m_Cover.SetColor3(LERP(vColor, coreVector3(1.0f,1.0f,1.0f), 0.5f));}
+    inline void SetCoverColor (const coreVector3& vColor) {m_Cover.SetColor3(LERP(vColor, coreVector3(1.0f,1.0f,1.0f), 0.5f));}
+    inline void SetCoverDir   (const coreVector2& vDir)   {m_vCoverDir    = vDir; ASSERT(vDir.IsNormalized())}
+    inline void SetMeteorSpeed(const coreFloat    fSpeed) {m_fMeteorSpeed = fSpeed;}
+
+    // 
+    inline coreBatchList* GetMeteorList()const {return m_apGroundObjectList[0];}
 
 
 private:
