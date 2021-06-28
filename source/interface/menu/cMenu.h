@@ -42,7 +42,7 @@
 #define MENU_GAME_MISSIONS            (9u)
 #define MENU_GAME_STAGES              (SEGMENTS)
 #define MENU_GAME_PLAYERS             (PLAYERS)
-#define MENU_GAME_OPTIONS             (3u)
+#define MENU_GAME_OPTIONS             (4u)
 #define MENU_SCORE_ENTRIES            (10u)
 #define MENU_REPLAY_ENTRIES           (5u)
 #define MENU_CONFIG_INPUTS            (PLAYERS)
@@ -346,6 +346,7 @@ private:
     cGuiObject m_aOptionLine[MENU_GAME_OPTIONS];       // 
 
     cGuiSwitchBox m_Players;                           // 
+    cGuiSwitchBox m_Difficulty;                        // 
     cGuiSwitchBox m_aWeapon     [MENU_GAME_PLAYERS];   // 
     cGuiSwitchBox m_aSupport    [MENU_GAME_PLAYERS];   // 
     cGuiObject    m_aWeaponIcon [MENU_GAME_PLAYERS];   // 
@@ -369,10 +370,11 @@ public:
     void SaveValues();
 
     // 
-    inline const coreInt32& GetMissionID      ()const                       {return m_WorldMap.GetSelectionID();}
-    inline const coreUint8& GetSelectedPlayers()const                       {return m_Players.GetCurEntry().tValue;}
-    inline const coreUint8& GetSelectedWeapon (const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aWeapon [iIndex].GetCurEntry().tValue;}
-    inline const coreUint8& GetSelectedSupport(const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aSupport[iIndex].GetCurEntry().tValue;}
+    inline const coreInt32& GetMissionID         ()const                       {return m_WorldMap.GetSelectionID();}
+    inline const coreUint8& GetSelectedPlayers   ()const                       {return m_Players   .GetCurEntry().tValue;}
+    inline const coreUint8& GetSelectedDifficulty()const                       {return m_Difficulty.GetCurEntry().tValue;}
+    inline const coreUint8& GetSelectedWeapon    (const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aWeapon [iIndex].GetCurEntry().tValue;}
+    inline const coreUint8& GetSelectedSupport   (const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aSupport[iIndex].GetCurEntry().tValue;}
 };
 
 

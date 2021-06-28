@@ -691,8 +691,8 @@ void cMenu::__StartGame()
 {
     // 
     sGameOptions oOptions = {};
-    oOptions.iPlayers     = m_GameMenu.GetSelectedPlayers();
-    oOptions.iDifficulty  = 0xFFu;
+    oOptions.iPlayers     = m_GameMenu.GetSelectedPlayers   ();
+    oOptions.iDifficulty  = m_GameMenu.GetSelectedDifficulty();
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
     {
         oOptions.aaiWeapon [i][0] = m_GameMenu.GetSelectedWeapon (i);

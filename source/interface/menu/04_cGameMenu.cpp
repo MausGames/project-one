@@ -23,7 +23,7 @@ cGameMenu::cGameMenu()noexcept
     m_ArmoryBackground.DefineTexture(0u, "menu_background_black.png");
     m_ArmoryBackground.DefineProgram("menu_border_program");
     m_ArmoryBackground.SetPosition  (coreVector2(0.0f,0.0f));
-    m_ArmoryBackground.SetSize      (coreVector2(0.8f,0.35f));
+    m_ArmoryBackground.SetSize      (coreVector2(0.8f,0.4f));
 
     m_StandardTab.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_StandardTab.DefineProgram("menu_border_program");
@@ -120,10 +120,11 @@ cGameMenu::cGameMenu()noexcept
         m_aStage[i].SetSize      (vSize);
     }
 
+    coreUint8 iOffset = 0u;
     for(coreUintW i = 0u; i < MENU_GAME_OPTIONS; ++i)
     {
         m_aOptionName[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
-        m_aOptionName[i].SetPosition (m_ArmoryBackground.GetPosition() + m_ArmoryBackground.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.04f, -0.1f - 0.05f*I_TO_F(i * 2u)));
+        m_aOptionName[i].SetPosition (m_ArmoryBackground.GetPosition() + m_ArmoryBackground.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.04f, -0.1f - 0.05f*I_TO_F(iOffset)));
         m_aOptionName[i].SetAlignment(coreVector2(1.0f,0.0f));
         m_aOptionName[i].SetColor3   (COLOR_MENU_WHITE);
 
@@ -133,10 +134,13 @@ cGameMenu::cGameMenu()noexcept
         m_aOptionLine[i].SetPosition  (coreVector2(0.0f, m_aOptionName[i].GetPosition().y));
         m_aOptionLine[i].SetSize      (coreVector2(m_ArmoryBackground.GetSize().x, 0.05f));
         m_aOptionLine[i].SetTexOffset (coreVector2(I_TO_F(i)*0.09f, 0.0f));
+
+        iOffset += (i >= 1u) ? 2u : 1u;
     }
     m_aOptionName[0].SetTextLanguage("GAME_PLAYERS");
-    m_aOptionName[1].SetTextLanguage("GAME_WEAPON");
-    m_aOptionName[2].SetTextLanguage("GAME_SUPPORT");
+    m_aOptionName[1].SetTextLanguage("GAME_DIFFICULTY");
+    m_aOptionName[2].SetTextLanguage("GAME_WEAPON");
+    m_aOptionName[3].SetTextLanguage("GAME_SUPPORT");
 
     m_Players.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
     m_Players.SetPosition (coreVector2(-1.00f,1.00f) * m_aOptionName[0].GetPosition());
@@ -145,19 +149,26 @@ cGameMenu::cGameMenu()noexcept
     m_Players.SetEndless  (true);
     m_Players.GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
+    m_Difficulty.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+    m_Difficulty.SetPosition (coreVector2(-1.00f,1.00f) * m_aOptionName[1].GetPosition());
+    m_Difficulty.SetSize     (m_Players.GetSize());
+    m_Difficulty.SetAlignment(m_Players.GetAlignment());
+    m_Difficulty.SetEndless  (true);
+    m_Difficulty.GetCaption()->SetColor3(COLOR_MENU_WHITE);
+
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
     {
         const coreVector2 vOffset = coreVector2(0.25f * I_TO_F(MENU_GAME_PLAYERS - i - 1u), 0.0f);
 
         m_aWeapon[i].Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
-        m_aWeapon[i].SetPosition (coreVector2(-1.00f,1.00f) * m_aOptionName[1].GetPosition() - vOffset);
+        m_aWeapon[i].SetPosition (coreVector2(-1.00f,1.00f) * m_aOptionName[2].GetPosition() - vOffset);
         m_aWeapon[i].SetSize     (coreVector2( 0.22f,0.03f));
         m_aWeapon[i].SetAlignment(coreVector2(-1.00f,0.00f));
         m_aWeapon[i].SetEndless  (true);
         m_aWeapon[i].GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
         m_aSupport[i].Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
-        m_aSupport[i].SetPosition (coreVector2(-1.00f,1.00f) * m_aOptionName[2].GetPosition() - vOffset);
+        m_aSupport[i].SetPosition (coreVector2(-1.00f,1.00f) * m_aOptionName[3].GetPosition() - vOffset);
         m_aSupport[i].SetSize     (m_aWeapon[i].GetSize());
         m_aSupport[i].SetAlignment(m_aWeapon[i].GetAlignment());
         m_aSupport[i].SetEndless  (true);
@@ -177,8 +188,10 @@ cGameMenu::cGameMenu()noexcept
     }
 
     // fill option entries
-    m_Players.AddEntryLanguage("GAME_PLAYERS_SOLO", 1u);
-    m_Players.AddEntryLanguage("GAME_PLAYERS_COOP", 2u);
+    m_Players   .AddEntryLanguage("GAME_PLAYERS_SOLO",      1u);
+    m_Players   .AddEntryLanguage("GAME_PLAYERS_COOP",      2u);
+    m_Difficulty.AddEntryLanguage("GAME_DIFFICULTY_EASY",   0u);
+    m_Difficulty.AddEntryLanguage("GAME_DIFFICULTY_NORMAL", 1u);
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) m_aWeapon [i].AddEntryLanguage("GAME_WEAPON_NOTHING",  cNoWeapon ::ID);
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) m_aWeapon [i].AddEntryLanguage("GAME_WEAPON_RAY",      cRayWeapon::ID);
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) m_aSupport[i].AddEntryLanguage("GAME_SUPPORT_NOTHING", 0u);
@@ -217,6 +230,7 @@ cGameMenu::cGameMenu()noexcept
     for(coreUintW i = 0u; i < MENU_GAME_OPTIONS; ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aOptionName[i]);
 
     this->BindObject(SURFACE_GAME_ARMORY, &m_Players);
+    this->BindObject(SURFACE_GAME_ARMORY, &m_Difficulty);
 
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aWeapon     [i]);
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aSupport    [i]);
@@ -303,6 +317,7 @@ void cGameMenu::Move()
 
             // 
             cMenu::UpdateSwitchBox(&m_Players);
+            cMenu::UpdateSwitchBox(&m_Difficulty);
 
             for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
             {
@@ -391,6 +406,7 @@ void cGameMenu::LoadValues()
 
     // 
     m_Players.SelectValue(g_pSave->GetHeader().oOptions.iPlayers);
+    m_Players.SelectValue(g_pSave->GetHeader().oOptions.iDifficulty);
 
     // 
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
@@ -409,7 +425,8 @@ void cGameMenu::SaveValues()
     g_pSave->EditOptions()->iStandard = m_WorldMap.GetSelectionIndex();
 
     // 
-    g_pSave->EditOptions()->iPlayers = m_Players.GetCurEntry().tValue;
+    g_pSave->EditOptions()->iPlayers    = m_Players   .GetCurEntry().tValue;
+    g_pSave->EditOptions()->iDifficulty = m_Difficulty.GetCurEntry().tValue;
 
     // 
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
