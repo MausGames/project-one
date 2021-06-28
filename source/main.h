@@ -321,6 +321,7 @@ extern cPostProcessing* const g_pPostProcessing;   // main post-processing objec
 #include "game/cChroma.h"
 #include "game/cItem.h"
 #include "game/cShield.h"
+#include "game/cCrash.h"
 #include "game/boss/cBoss.h"
 #include "game/mission/cMission.h"
 #include "game/cPlayer.h"

@@ -63,8 +63,8 @@ public:
     void GiveShield(const coreUint8 iElement, const coreInt16 iHealth = 0);
 
     // render and move the enemy
-    virtual void Render()override;
-    void         Move  ()final;
+    void Render()final;
+    void Move  ()final;
 
     // reduce current health
     coreInt32 TakeDamage(coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact, cPlayer* pAttacker);

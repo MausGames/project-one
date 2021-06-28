@@ -129,7 +129,7 @@ void cDesertBackground::__MoveOwn()
     // 
     const coreVector2 vEnvMove   = coreVector2(0.0f,1.0f) * (-0.35f * g_pEnvironment->GetSpeed());
     const coreVector2 vTexSize   = coreVector2(1.0f,1.0f) * 2.3f;
-    const coreVector2 vTexOffset = m_Sand.GetTexOffset() + (m_vSandMove + vEnvMove) * (0.4f * TIME);
+    const coreVector2 vTexOffset = m_Sand.GetTexOffset() + (m_vSandMove.InvertedX() + vEnvMove) * (0.4f * TIME);
 
     // 
     m_Sand.SetDirection(g_pEnvironment->GetDirection().InvertedX());
