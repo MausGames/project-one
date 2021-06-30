@@ -120,7 +120,7 @@ public:
     DISABLE_COPY(cPlayer)
 
     // configure the player
-    void Configure   (const coreUintW iShipType, const coreVector3& vColor);
+    void Configure   (const coreUintW iShipType, const coreVector3 vColor);
     void EquipWeapon (const coreUintW iIndex, const coreInt32 iID);
     void EquipSupport(const coreUintW iIndex, const coreInt32 iID);
 
@@ -131,14 +131,14 @@ public:
     void Move        ()final;
 
     // reduce current health
-    coreInt32 TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact);
+    coreInt32 TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2 vImpact);
 
     // control life and death
     void Resurrect();
     void Kill     (const coreBool bAnimated);
 
     // 
-    void StartRolling(const coreVector2& vDirection);
+    void StartRolling(const coreVector2 vDirection);
     void EndRolling  ();
     inline coreBool IsRolling()const {return (m_iRollDir != PLAYER_NO_ROLL);}
 
@@ -161,7 +161,7 @@ public:
     inline coreBool IsDarkShading        ()const {return (this->GetProgram().GetHandle() == m_pDarkProgram.GetHandle());}
 
     // 
-    void EnableWind   (const coreVector2& vDirection);
+    void EnableWind   (const coreVector2 vDirection);
     void DisableWind  ();
     void EnableBubble ();
     void DisableBubble();
@@ -170,7 +170,7 @@ public:
     void UpdateExhaust(const coreFloat fStrength);
 
     // 
-    inline void ApplyForce(const coreVector2& vForce) {this->SetPosition(coreVector3(m_vOldPos, 0.0f)); m_vForce += vForce;}
+    inline void ApplyForce(const coreVector2 vForce) {this->SetPosition(coreVector3(m_vOldPos, 0.0f)); m_vForce += vForce;}
 
     // 
     coreVector2 CalcMove     ()const;
@@ -182,12 +182,12 @@ public:
     inline cScoreTable* GetScoreTable()                            {return &m_ScoreTable;}
 
     // set object properties
-    inline void SetInput     (const sGameInput*  pInput)      {m_pInput      = pInput;}
-    inline void SetArea      (const coreVector4& vArea)       {m_vArea       = vArea; ASSERT(vArea.xy() < vArea.zw())}
-    inline void SetForce     (const coreVector2& vForce)      {m_vForce      = vForce;}
-    inline void SetSpeed     (const coreFloat    fSpeed)      {m_fSpeed      = fSpeed;}
-    inline void SetInterrupt (const coreFloat    fInterrupt)  {m_fInterrupt  = fInterrupt;}
-    inline void SetDesaturate(const coreFloat    fDesaturate) {m_fDesaturate = fDesaturate;}
+    inline void SetInput     (const sGameInput* pInput)      {m_pInput      = pInput;}
+    inline void SetArea      (const coreVector4 vArea)       {m_vArea       = vArea; ASSERT(vArea.xy() < vArea.zw())}
+    inline void SetForce     (const coreVector2 vForce)      {m_vForce      = vForce;}
+    inline void SetSpeed     (const coreFloat   fSpeed)      {m_fSpeed      = fSpeed;}
+    inline void SetInterrupt (const coreFloat   fInterrupt)  {m_fInterrupt  = fInterrupt;}
+    inline void SetDesaturate(const coreFloat   fDesaturate) {m_fDesaturate = fDesaturate;}
 
     // get object properties
     inline const sGameInput*  GetInput     ()const {ASSERT(m_pInput) return m_pInput;}
@@ -198,8 +198,8 @@ public:
     inline const coreFloat&   GetDesaturate()const {return m_fDesaturate;}
 
     // 
-    template <typename F> static FORCE_INLINE void TestCollision(const ePlayerTest eTest, const coreInt32 iType,        F&& nCallback);   // [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit) -> void
-    template <typename F> static FORCE_INLINE void TestCollision(const ePlayerTest eTest, coreObject3D* OUTPUT pObject, F&& nCallback);   // [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit) -> void
+    template <typename F> static FORCE_INLINE void TestCollision(const ePlayerTest eTest, const coreInt32 iType,        F&& nCallback);   // [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3 vIntersection, const coreBool bFirstHit) -> void
+    template <typename F> static FORCE_INLINE void TestCollision(const ePlayerTest eTest, coreObject3D* OUTPUT pObject, F&& nCallback);   // [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3 vIntersection, const coreBool bFirstHit) -> void
 
 
 private:
@@ -218,7 +218,7 @@ private:
 template <typename F> FORCE_INLINE void cPlayer::TestCollision(const ePlayerTest eTest, const coreInt32 iType, F&& nCallback)
 {
     // 
-    Core::Manager::Object->TestCollision(TYPE_PLAYER, iType, [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit)
+    Core::Manager::Object->TestCollision(TYPE_PLAYER, iType, [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         // 
         if(pPlayer->IsRolling() ? HAS_FLAG(eTest, PLAYER_TEST_ROLL) : (pPlayer->IsFeeling() ? HAS_FLAG(eTest, PLAYER_TEST_FEEL) : (pPlayer->IsIgnoring() ? HAS_FLAG(eTest, PLAYER_TEST_IGNORE) : HAS_FLAG(eTest, PLAYER_TEST_NORMAL))))
@@ -237,7 +237,7 @@ template <typename F> FORCE_INLINE void cPlayer::TestCollision(const ePlayerTest
 template <typename F> FORCE_INLINE void cPlayer::TestCollision(const ePlayerTest eTest, coreObject3D* OUTPUT pObject, F&& nCallback)
 {
     // 
-    Core::Manager::Object->TestCollision(TYPE_PLAYER, pObject, [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit)
+    Core::Manager::Object->TestCollision(TYPE_PLAYER, pObject, [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         // 
         if(pPlayer->IsRolling() ? HAS_FLAG(eTest, PLAYER_TEST_ROLL) : (pPlayer->IsFeeling() ? HAS_FLAG(eTest, PLAYER_TEST_FEEL) : (pPlayer->IsIgnoring() ? HAS_FLAG(eTest, PLAYER_TEST_IGNORE) : HAS_FLAG(eTest, PLAYER_TEST_NORMAL))))

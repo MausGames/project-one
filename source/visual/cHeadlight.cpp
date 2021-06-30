@@ -154,7 +154,7 @@ void cHeadlight::UpdateDefault()
 
 // ****************************************************************
 // 
-void cHeadlight::DrawSpot(const coreVector3& vPosition, const coreVector2& vSize, const coreVector2& vDirection)
+void cHeadlight::DrawSpot(const coreVector3 vPosition, const coreVector2 vSize, const coreVector2 vDirection)
 {
     // 
     sSpotCommand oCommand;
@@ -169,7 +169,7 @@ void cHeadlight::DrawSpot(const coreVector3& vPosition, const coreVector2& vSize
 
 // ****************************************************************
 // 
-void cHeadlight::DrawPoint(const coreVector3& vPosition, const coreVector2& vSize)
+void cHeadlight::DrawPoint(const coreVector3 vPosition, const coreVector2 vSize)
 {
     // 
     sPointCommand oCommand;

@@ -518,7 +518,7 @@ void cMenu::ShiftSurface(coreMenu* OUTPUT pMenu, const coreUint8 iNewSurface, co
 
 // ****************************************************************
 // 
-void cMenu::SetHighlightColor(const coreVector3& vColor)
+void cMenu::SetHighlightColor(const coreVector3 vColor)
 {
     // 
     if(m_vHighlightColor == vColor) return;
@@ -574,7 +574,7 @@ const coreMap<coreString, coreString>& cMenu::GetLanguageList()
 
 // ****************************************************************
 // default button update routine
-void cMenu::UpdateButton(cGuiButton* OUTPUT pButton, const coreBool bFocused, const coreVector3& vFocusColor)
+void cMenu::UpdateButton(cGuiButton* OUTPUT pButton, const coreBool bFocused, const coreVector3 vFocusColor)
 {
     ASSERT(pButton)
 

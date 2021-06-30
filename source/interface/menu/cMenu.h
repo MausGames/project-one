@@ -638,7 +638,7 @@ public:
     void ShowBegin();
 
     // 
-    void SetHighlightColor(const coreVector3& vColor);
+    void SetHighlightColor(const coreVector3 vColor);
 
 
 private:
@@ -737,7 +737,7 @@ public:
     void ShowThankYou();
 
     // 
-    void SetHighlightColor(const coreVector3& vColor);
+    void SetHighlightColor(const coreVector3 vColor);
 };
 
 
@@ -830,14 +830,14 @@ public:
     inline coreBool IsShifting()const {return m_TransitionTime.GetStatus();}
 
     // 
-    void SetHighlightColor(const coreVector3& vColor);
+    void SetHighlightColor(const coreVector3 vColor);
 
     // 
     static void UpdateLanguageFont();
     static const coreMap<coreString, coreString>& GetLanguageList();
 
     // menu helper routines
-    static void UpdateButton        (cGuiButton*    OUTPUT pButton, const coreBool bFocused, const coreVector3& vFocusColor = COLOR_MENU_WHITE);
+    static void UpdateButton        (cGuiButton*    OUTPUT pButton, const coreBool bFocused, const coreVector3 vFocusColor = COLOR_MENU_WHITE);
     static void UpdateSwitchBox     (cGuiSwitchBox* OUTPUT pSwitchBox);
     static void UpdateAnimateProgram(cGuiObject*    OUTPUT pObject);
     static void ApplyMedalTexture   (cGuiObject*    OUTPUT pObject, const coreUint8 iMedal, const coreUint8 iMedalType);

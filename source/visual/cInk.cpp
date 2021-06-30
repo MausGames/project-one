@@ -126,7 +126,7 @@ void cInk::Disable(const coreFloat fDelay)
 
 // ****************************************************************
 // 
-void cInk::SetBlotPosition(const coreUintW iIndex, const coreVector2& vPosition)
+void cInk::SetBlotPosition(const coreUintW iIndex, const coreVector2 vPosition)
 {
     // 
     const coreVector2 vProjectedPos = g_pForeground->Project2D(coreVector3(vPosition, 0.0f));

@@ -179,7 +179,7 @@ void cGeluMission::DisableFang(const coreUintW iIndex, const coreBool bAnimated)
 
 // ****************************************************************
 // 
-void cGeluMission::EnableWay(const coreUintW iIndex, const coreVector2& vPosition, const coreVector2& vDirection)
+void cGeluMission::EnableWay(const coreUintW iIndex, const coreVector2 vPosition, const coreVector2 vDirection)
 {
     ASSERT(iIndex < GELU_WAYS)
     coreObject3D* pWay   = (*m_Way     .List())[iIndex];

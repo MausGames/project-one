@@ -26,7 +26,7 @@ cEnemy::cEnemy()noexcept
 
 // ****************************************************************
 // configure the enemy
-void cEnemy::Configure(const coreInt32 iHealth, const coreVector3& vColor, const coreBool bInverted)
+void cEnemy::Configure(const coreInt32 iHealth, const coreVector3 vColor, const coreBool bInverted)
 {
     // set health and color
     this->SetMaxHealth(iHealth);
@@ -94,7 +94,7 @@ void cEnemy::Move()
 
 // ****************************************************************
 // reduce current health
-coreInt32 cEnemy::TakeDamage(coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact, cPlayer* pAttacker)
+coreInt32 cEnemy::TakeDamage(coreInt32 iDamage, const coreUint8 iElement, const coreVector2 vImpact, cPlayer* pAttacker)
 {
     // forward to parent
     if(this->IsChild()) return m_apMember.front()->TakeDamage(iDamage, iElement, vImpact, pAttacker);
@@ -531,7 +531,7 @@ void cEnemyManager::ClearEnemies(const coreBool bAnimated)
 
 // ****************************************************************
 // 
-cEnemy* cEnemyManager::FindEnemy(const coreVector2& vPosition)const
+cEnemy* cEnemyManager::FindEnemy(const coreVector2 vPosition)const
 {
     // 
     cEnemy*   pEnemy = NULL;
@@ -556,7 +556,7 @@ cEnemy* cEnemyManager::FindEnemy(const coreVector2& vPosition)const
 
 // ****************************************************************
 // 
-cEnemy* cEnemyManager::FindEnemyRev(const coreVector2& vPosition)const
+cEnemy* cEnemyManager::FindEnemyRev(const coreVector2 vPosition)const
 {
     // 
     cEnemy*   pEnemy = NULL;
@@ -613,7 +613,7 @@ void cEnemySquad::ClearEnemies(const coreBool bAnimated)
 
 // ****************************************************************
 // 
-cEnemy* cEnemySquad::FindEnemy(const coreVector2& vPosition)const
+cEnemy* cEnemySquad::FindEnemy(const coreVector2 vPosition)const
 {
     // 
     cEnemy*   pEnemy = NULL;
@@ -638,7 +638,7 @@ cEnemy* cEnemySquad::FindEnemy(const coreVector2& vPosition)const
 
 // ****************************************************************
 // 
-cEnemy* cEnemySquad::FindEnemyRev(const coreVector2& vPosition)const
+cEnemy* cEnemySquad::FindEnemyRev(const coreVector2 vPosition)const
 {
     // 
     cEnemy*   pEnemy = NULL;

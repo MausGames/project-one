@@ -65,7 +65,7 @@ void cBoss::ChangePhase(const coreUint8 iPhase)
 
 // ****************************************************************
 // 
-void cBoss::StorePosition(const coreVector2& vPos)
+void cBoss::StorePosition(const coreVector2 vPos)
 {
     m_vLastPosition = vPos / FOREGROUND_AREA;
 }
@@ -78,7 +78,7 @@ void cBoss::StorePosition()
 
 // ****************************************************************
 // 
-void cBoss::StoreRotation(const coreVector3& vDir, const coreVector3& vOri)
+void cBoss::StoreRotation(const coreVector3 vDir, const coreVector3 vOri)
 {
     m_fLastDirAngle = (vDir.xy())                                                 .Angle();
     m_fLastOriAngle = (vOri.yz() * coreVector2(vDir.x ? RCP(vDir.x) : 0.0f, 1.0f)).Angle();

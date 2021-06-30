@@ -55,7 +55,7 @@ void cCombatText::Move()
 
 // ****************************************************************
 // add new active label object
-void cCombatText::AddText(const coreChar* pcText, const coreVector3& vPosition, const coreVector3& vColor)
+void cCombatText::AddText(const coreChar* pcText, const coreVector3 vPosition, const coreVector3 vColor)
 {
     ASSERT(pcText)
 

@@ -179,7 +179,7 @@ void cFinishMenu::ShowThankYou()
 
 // ****************************************************************
 // 
-void cFinishMenu::SetHighlightColor(const coreVector3& vColor)
+void cFinishMenu::SetHighlightColor(const coreVector3 vColor)
 {
     // 
     m_TotalName.SetColor3(vColor);

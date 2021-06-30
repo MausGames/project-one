@@ -71,16 +71,16 @@ public:
     void UpdateLayout();
 
     // 
-    void        SetWallOpacity  (const coreFloat    fOpacity);
-    inline void SetWallOffset   (const coreUintW    iIndex, const coreFloat fOffset)     {ASSERT(iIndex < POST_WALLS) m_afOffset[iIndex] = fOffset; m_bOffsetActive = true;}
-    inline void SetSplitScreen  (const coreBool     bSplitScreen)                        {m_bSplitScreen   = bSplitScreen;}
-    inline void SetDirectionGame(const coreVector2& vDirectionGame)                      {m_vDirectionGame = vDirectionGame; ASSERT(vDirectionGame.IsNormalized())}
-    inline void SetSaturation   (const coreUintW    iIndex, const coreFloat fSaturation) {ASSERT((iIndex < POST_INTERIORS) && (fSaturation >= 0.0f) && (fSaturation <= 1.0f)) m_aInterior[iIndex].SetColor3(coreVector3(LERP(1.0f, 0.06f, fSaturation), m_aInterior[iIndex].GetColor3().yz()));}
-    inline void SetValue        (const coreUintW    iIndex, const coreFloat fValue)      {ASSERT((iIndex < POST_INTERIORS) && (fValue      >= 0.0f) && (fValue      <= 1.0f)) m_aInterior[iIndex].SetColor3(coreVector3(m_aInterior[iIndex].GetColor3().x, fValue, m_aInterior[iIndex].GetColor3().z));}
-    inline void SetBorder       (const coreUintW    iIndex, const coreFloat fBorder)     {ASSERT((iIndex < POST_INTERIORS) && (fBorder     >= 0.0f) && (fBorder     <= 1.0f)) m_aInterior[iIndex].SetColor3(coreVector3(m_aInterior[iIndex].GetColor3().xy(), LERP(0.4f, 2.6f, fBorder)));}
-    inline void SetSaturationAll(const coreFloat    fSaturation)                         {for(coreUintW i = 0u; i < POST_INTERIORS; ++i) this->SetSaturation(i, fSaturation);}
-    inline void SetValueAll     (const coreFloat    fValue)                              {for(coreUintW i = 0u; i < POST_INTERIORS; ++i) this->SetValue     (i, fValue);}
-    inline void SetBorderAll    (const coreFloat    fBorder)                             {for(coreUintW i = 0u; i < POST_INTERIORS; ++i) this->SetBorder    (i, fBorder);}
+    void        SetWallOpacity  (const coreFloat   fOpacity);
+    inline void SetWallOffset   (const coreUintW   iIndex, const coreFloat fOffset)     {ASSERT(iIndex < POST_WALLS) m_afOffset[iIndex] = fOffset; m_bOffsetActive = true;}
+    inline void SetSplitScreen  (const coreBool    bSplitScreen)                        {m_bSplitScreen   = bSplitScreen;}
+    inline void SetDirectionGame(const coreVector2 vDirectionGame)                      {m_vDirectionGame = vDirectionGame; ASSERT(vDirectionGame.IsNormalized())}
+    inline void SetSaturation   (const coreUintW   iIndex, const coreFloat fSaturation) {ASSERT((iIndex < POST_INTERIORS) && (fSaturation >= 0.0f) && (fSaturation <= 1.0f)) m_aInterior[iIndex].SetColor3(coreVector3(LERP(1.0f, 0.06f, fSaturation), m_aInterior[iIndex].GetColor3().yz()));}
+    inline void SetValue        (const coreUintW   iIndex, const coreFloat fValue)      {ASSERT((iIndex < POST_INTERIORS) && (fValue      >= 0.0f) && (fValue      <= 1.0f)) m_aInterior[iIndex].SetColor3(coreVector3(m_aInterior[iIndex].GetColor3().x, fValue, m_aInterior[iIndex].GetColor3().z));}
+    inline void SetBorder       (const coreUintW   iIndex, const coreFloat fBorder)     {ASSERT((iIndex < POST_INTERIORS) && (fBorder     >= 0.0f) && (fBorder     <= 1.0f)) m_aInterior[iIndex].SetColor3(coreVector3(m_aInterior[iIndex].GetColor3().xy(), LERP(0.4f, 2.6f, fBorder)));}
+    inline void SetSaturationAll(const coreFloat   fSaturation)                         {for(coreUintW i = 0u; i < POST_INTERIORS; ++i) this->SetSaturation(i, fSaturation);}
+    inline void SetValueAll     (const coreFloat   fValue)                              {for(coreUintW i = 0u; i < POST_INTERIORS; ++i) this->SetValue     (i, fValue);}
+    inline void SetBorderAll    (const coreFloat   fBorder)                             {for(coreUintW i = 0u; i < POST_INTERIORS; ++i) this->SetBorder    (i, fBorder);}
 
 
 private:

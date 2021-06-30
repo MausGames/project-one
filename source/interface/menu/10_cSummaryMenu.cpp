@@ -438,7 +438,7 @@ void cSummaryMenu::ShowBegin()
 
 // ****************************************************************
 // 
-void cSummaryMenu::SetHighlightColor(const coreVector3& vColor)
+void cSummaryMenu::SetHighlightColor(const coreVector3 vColor)
 {
     // 
     m_aHeader[1].SetColor3(vColor);

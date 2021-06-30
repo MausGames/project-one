@@ -111,7 +111,7 @@ void cCrashManager::Move()
 
 // ****************************************************************
 // 
-void cCrashManager::AddCrash(const cLodObject& oBase, const coreVector2& vTarget, void* pData)
+void cCrashManager::AddCrash(const cLodObject& oBase, const coreVector2 vTarget, void* pData)
 {
     // 
     const cOutdoor* pOutdoor = g_pEnvironment->GetBackground()->GetOutdoor();

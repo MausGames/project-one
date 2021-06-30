@@ -72,7 +72,7 @@ public:
     void Move();
 
     // control active background
-    void ChangeBackground(const coreInt32 iID, const coreUintW iTransitionType, const coreFloat fTransitionSpeed, const coreVector2& vTransitionDir = coreVector2(0.0f,-1.0f));
+    void ChangeBackground(const coreInt32 iID, const coreUintW iTransitionType, const coreFloat fTransitionSpeed, const coreVector2 vTransitionDir = coreVector2(0.0f,-1.0f));
     inline cBackground*     GetBackground   ()const {ASSERT(m_pBackground) return m_pBackground;}
     inline cBackground*     GetOldBackground()const {return m_pOldBackground;}
     inline const coreInt32& GetLastID       ()const {return m_iLastID;}
@@ -81,16 +81,16 @@ public:
     FUNC_LOCAL coreFloat RetrieveTransitionBlend(const cBackground* pBackground)const;
 
     // retrieve safe height value
-    FUNC_PURE coreFloat RetrieveSafeHeight(const coreVector2& vPosition, const coreFloat fFallback = WATER_HEIGHT)const;
+    FUNC_PURE coreFloat RetrieveSafeHeight(const coreVector2 vPosition, const coreFloat fFallback = WATER_HEIGHT)const;
 
     // access frame buffer
     inline coreFrameBuffer* GetFrameBuffer() {return m_TransitionTime.GetStatus() ? &m_FrameBuffer : m_pBackground->GetResolvedTexture();}
 
     // set target transformation properties
-    inline void SetTargetDirection(const coreVector2& vDirection) {m_avDirection[1] = vDirection; ASSERT(vDirection.IsNormalized())}
-    inline void SetTargetSide     (const coreVector2& vSide)      {m_avSide     [1] = vSide;}
-    inline void SetTargetSpeed    (const coreFloat    fSpeed)     {m_afSpeed    [1] = fSpeed;}
-    inline void SetTargetHeight   (const coreFloat    fHeight)    {m_afHeight   [1] = fHeight;}
+    inline void SetTargetDirection(const coreVector2 vDirection) {m_avDirection[1] = vDirection; ASSERT(vDirection.IsNormalized())}
+    inline void SetTargetSide     (const coreVector2 vSide)      {m_avSide     [1] = vSide;}
+    inline void SetTargetSpeed    (const coreFloat   fSpeed)     {m_afSpeed    [1] = fSpeed;}
+    inline void SetTargetHeight   (const coreFloat   fHeight)    {m_afHeight   [1] = fHeight;}
 
     // get current transformation properties
     inline const coreVector2& GetDirection()const {return m_avDirection[0];}

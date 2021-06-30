@@ -305,7 +305,7 @@ void cLeviathanBoss::__MoveOwn()
         });
 
         // 
-        cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_LEVIATHAN_RAY, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pRay, const coreVector3& vIntersection, const coreBool bFirstHit)
+        cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_LEVIATHAN_RAY, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pRay, const coreVector3 vIntersection, const coreBool bFirstHit)
         {
             if(!bFirstHit) return;
 
@@ -501,7 +501,7 @@ void cLeviathanBoss::__DisableRay(const coreUintW iIndex, const coreBool bAnimat
 
 // ****************************************************************
 // 
-void cLeviathanBoss::__CreateOverdrive(const coreUintW iIndex, const coreVector3& vIntersect, const coreFloat fTime, const coreBool bGround)
+void cLeviathanBoss::__CreateOverdrive(const coreUintW iIndex, const coreVector3 vIntersect, const coreFloat fTime, const coreBool bGround)
 {
     ASSERT(iIndex < LEVIATHAN_RAYS)
 
@@ -644,7 +644,7 @@ void cLeviathanBoss::__RefreshHealth()
 
 // ****************************************************************
 // 
-FUNC_NOALIAS void cLeviathanBoss::__CalcCurvePosDir(const coreVector3& vAxis, const coreFloat fAngle, const coreVector3& vScale, coreVector3* OUTPUT vPosition, coreVector3* OUTPUT vDirection)
+FUNC_NOALIAS void cLeviathanBoss::__CalcCurvePosDir(const coreVector3 vAxis, const coreFloat fAngle, const coreVector3 vScale, coreVector3* OUTPUT vPosition, coreVector3* OUTPUT vDirection)
 {
     ASSERT(vAxis.IsNormalized() && vPosition && vDirection)
 

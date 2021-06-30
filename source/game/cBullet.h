@@ -75,12 +75,12 @@ public:
     void Move()final;
 
     // control status
-    void Activate  (const coreInt32 iDamage, const coreFloat fSpeed, cShip* pOwner, const coreVector2& vPosition, const coreVector2& vDirection, const coreInt32 iType);
-    void Deactivate(const coreBool bAnimated, const coreVector2& vImpact);
+    void Activate  (const coreInt32 iDamage, const coreFloat fSpeed, cShip* pOwner, const coreVector2 vPosition, const coreVector2 vDirection, const coreInt32 iType);
+    void Deactivate(const coreBool bAnimated, const coreVector2 vImpact);
     void Deactivate(const coreBool bAnimated);
 
     // 
-    void Reflect(const coreObject3D* pObject, const coreVector2& vIntersection, const coreVector2& vForceNormal = coreVector2(0.0f,0.0f));
+    void Reflect(const coreObject3D* pObject, const coreVector2 vIntersection, const coreVector2 vForceNormal = coreVector2(0.0f,0.0f));
 
     // 
     inline cBullet* ChangeSize   (const coreFloat fFactor) {this->SetSize   (this->GetSize   () * fFactor); return this;}
@@ -92,11 +92,11 @@ public:
     inline coreBool HasStatus   (const coreInt32 iStatus)const {return HAS_FLAG(m_iStatus, iStatus);}
 
     // set object properties
-    inline void SetDamage (const coreInt32    iDamage)  {m_iDamage  = iDamage;}
-    inline void SetSpeed  (const coreFloat    fSpeed)   {m_fSpeed   = fSpeed * BULLET_SPEED_FACTOR;}
-    inline void SetFade   (const coreFloat    fFade)    {m_fFade    = fFade;}
-    inline void SetFlyTime(const coreFloat    fFlyTime) {m_fFlyTime = fFlyTime;}
-    inline void SetFlyDir (const coreVector2& vFlyDir)  {m_vFlyDir  = vFlyDir;}
+    inline void SetDamage (const coreInt32   iDamage)  {m_iDamage  = iDamage;}
+    inline void SetSpeed  (const coreFloat   fSpeed)   {m_fSpeed   = fSpeed * BULLET_SPEED_FACTOR;}
+    inline void SetFade   (const coreFloat   fFade)    {m_fFade    = fFade;}
+    inline void SetFlyTime(const coreFloat   fFlyTime) {m_fFlyTime = fFlyTime;}
+    inline void SetFlyDir (const coreVector2 vFlyDir)  {m_vFlyDir  = vFlyDir;}
 
     // get object properties
     inline const coreInt32&   GetDamage ()const {return m_iDamage;}
@@ -136,14 +136,14 @@ protected:
 
 private:
     // own routines for derived classes (render functions executed by manager)
-    virtual void __ImpactOwn      (const coreVector2& vImpact) {}
-    virtual void __ReflectOwn     ()                           {}
-    virtual void __RenderOwnBefore()                           {}
-    virtual void __RenderOwnAfter ()                           {}
-    virtual void __MoveOwn        ()                           {}
+    virtual void __ImpactOwn      (const coreVector2 vImpact) {}
+    virtual void __ReflectOwn     ()                          {}
+    virtual void __RenderOwnBefore()                          {}
+    virtual void __RenderOwnAfter ()                          {}
+    virtual void __MoveOwn        ()                          {}
 
     // 
-    inline void __SetColorRand(const coreVector3& vColor) {this->SetColor3(vColor * Core::Rand->Float(0.8f, 1.0f));}
+    inline void __SetColorRand(const coreVector3 vColor) {this->SetColor3(vColor * Core::Rand->Float(0.8f, 1.0f));}
 };
 
 
@@ -190,12 +190,12 @@ public:
     void Move();
 
     // add and remove bullets
-    template <typename T> RETURN_RESTRICT T* AddBullet(const coreInt32 iDamage, const coreFloat fSpeed, cShip* pOwner, const coreVector2& vPosition, const coreVector2& vDirection);
+    template <typename T> RETURN_RESTRICT T* AddBullet(const coreInt32 iDamage, const coreFloat fSpeed, cShip* pOwner, const coreVector2 vPosition, const coreVector2 vDirection);
     void ClearBullets(const coreBool bAnimated);
 
     // 
-    inline cBullet*          FindBullet     (const coreVector2& vPosition)const;
-    template <typename T> T* FindBulletTyped(const coreVector2& vPosition)const;
+    inline cBullet*          FindBullet     (const coreVector2 vPosition)const;
+    template <typename T> T* FindBulletTyped(const coreVector2 vPosition)const;
     template <typename F> void             ForEachBullet     (F&& nFunction)const;   // [](cBullet* OUTPUT pBullet) -> void
     template <typename T, typename F> void ForEachBulletTyped(F&& nFunction)const;   // [](T*       OUTPUT pBullet) -> void
 
@@ -251,7 +251,7 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ImpactOwn (const coreVector2 vImpact)final;
     void __ReflectOwn()final;
     void __MoveOwn   ()final;
 };
@@ -296,7 +296,7 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ImpactOwn (const coreVector2 vImpact)final;
     void __ReflectOwn()final;
     void __MoveOwn   ()final;
 };
@@ -341,7 +341,7 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ImpactOwn (const coreVector2 vImpact)final;
     void __ReflectOwn()final;
     void __MoveOwn   ()final;
 };
@@ -389,7 +389,7 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ImpactOwn (const coreVector2 vImpact)final;
     void __ReflectOwn()final;
     void __MoveOwn   ()final;
 };
@@ -427,7 +427,7 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ImpactOwn (const coreVector2 vImpact)final;
     void __ReflectOwn()final;
     void __MoveOwn   ()final;
 };
@@ -465,7 +465,7 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ImpactOwn (const coreVector2 vImpact)final;
     void __ReflectOwn()final;
     void __MoveOwn   ()final;
 };
@@ -503,7 +503,7 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ImpactOwn (const coreVector2 vImpact)final;
     void __ReflectOwn()final;
     void __MoveOwn   ()final;
 };
@@ -541,7 +541,7 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ImpactOwn (const coreVector2 vImpact)final;
     void __ReflectOwn()final;
     void __MoveOwn   ()final;
 };
@@ -579,7 +579,7 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ImpactOwn (const coreVector2 vImpact)final;
     void __ReflectOwn()final;
     void __MoveOwn   ()final;
 };
@@ -617,7 +617,7 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ImpactOwn (const coreVector2 vImpact)final;
     void __ReflectOwn()final;
     void __MoveOwn   ()final;
 };
@@ -655,7 +655,7 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ImpactOwn (const coreVector2 vImpact)final;
     void __ReflectOwn()final;
     void __MoveOwn   ()final;
 };
@@ -693,7 +693,7 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ImpactOwn (const coreVector2 vImpact)final;
     void __ReflectOwn()final;
     void __MoveOwn   ()final;
 };
@@ -728,7 +728,7 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn      (const coreVector2& vImpact)final;
+    void __ImpactOwn      (const coreVector2 vImpact)final;
     void __ReflectOwn     ()final;
     void __RenderOwnBefore()final;
     void __MoveOwn        ()final;
@@ -756,7 +756,7 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ImpactOwn (const coreVector2 vImpact)final;
     void __ReflectOwn()final;
     void __MoveOwn   ()final;
 };
@@ -783,8 +783,8 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn(const coreVector2& vImpact)final;
-    void __MoveOwn  ()final;
+    void __ImpactOwn (const coreVector2 vImpact)final;
+    void __MoveOwn   ()final;
 };
 
 
@@ -842,7 +842,7 @@ template <typename T> cBulletManager::sBulletSet<T>::~sBulletSet()
 
 // ****************************************************************
 // add bullet to the game
-template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt32 iDamage, const coreFloat fSpeed, cShip* pOwner, const coreVector2& vPosition, const coreVector2& vDirection)
+template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt32 iDamage, const coreFloat fSpeed, cShip* pOwner, const coreVector2 vPosition, const coreVector2 vDirection)
 {
     // get requested bullet set
     this->PrefetchBullet<T>();
@@ -891,7 +891,7 @@ template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt
 
 // ****************************************************************
 // 
-inline cBullet* cBulletManager::FindBullet(const coreVector2& vPosition)const
+inline cBullet* cBulletManager::FindBullet(const coreVector2 vPosition)const
 {
     // 
     cBullet*  pBullet = NULL;
@@ -916,7 +916,7 @@ inline cBullet* cBulletManager::FindBullet(const coreVector2& vPosition)const
 
 // ****************************************************************
 // 
-template <typename T> T* cBulletManager::FindBulletTyped(const coreVector2& vPosition)const
+template <typename T> T* cBulletManager::FindBulletTyped(const coreVector2 vPosition)const
 {
     // 
     T*        pBullet = NULL;

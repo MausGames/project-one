@@ -176,7 +176,7 @@ cViridoMission::~cViridoMission()
 
 // ****************************************************************
 // 
-void cViridoMission::EnableBall(const coreUintW iIndex, const coreVector2& vPosition, const coreVector2& vDirection)
+void cViridoMission::EnableBall(const coreUintW iIndex, const coreVector2 vPosition, const coreVector2 vDirection)
 {
     ASSERT(iIndex < VIRIDO_BALLS)
     coreObject3D* pBall  = (*m_Ball     .List())[iIndex];
@@ -274,7 +274,7 @@ void cViridoMission::DisablePaddle(const coreUintW iIndex, const coreBool bAnima
 
 // ****************************************************************
 // 
-void cViridoMission::EnableBarrier(const coreUintW iIndex, const cShip* pOwner, const coreVector2& vDirection, const coreFloat fSize)
+void cViridoMission::EnableBarrier(const coreUintW iIndex, const cShip* pOwner, const coreVector2 vDirection, const coreFloat fSize)
 {
     ASSERT(iIndex < VIRIDO_BARRIERS)
     coreObject3D& oBarrier = m_aBarrierRaw[iIndex];
@@ -363,7 +363,7 @@ void cViridoMission::DisableLaser(const coreUintW iIndex, const coreBool bAnimat
 
 // ****************************************************************
 // 
-void cViridoMission::EnableShadow(const coreUintW iIndex, const cShip* pOwner, const coreVector2& vPosition)
+void cViridoMission::EnableShadow(const coreUintW iIndex, const cShip* pOwner, const coreVector2 vPosition)
 {
     ASSERT(iIndex < VIRIDO_SHADOWS)
     coreObject3D& oShadow = m_aShadowRaw[iIndex];
@@ -637,7 +637,7 @@ void cViridoMission::__MoveOwnAfter()
     if(!HAS_BIT(m_iStickyState, 1u))
     {
         // 
-        Core::Manager::Object->TestCollision(TYPE_VIRIDO_PADDLE, TYPE_VIRIDO_BALL, [this](coreObject3D* OUTPUT pPaddle, coreObject3D* OUTPUT pBall, const coreVector3& vIntersection, const coreBool bFirstHit)
+        Core::Manager::Object->TestCollision(TYPE_VIRIDO_PADDLE, TYPE_VIRIDO_BALL, [this](coreObject3D* OUTPUT pPaddle, coreObject3D* OUTPUT pBall, const coreVector3 vIntersection, const coreBool bFirstHit)
         {
             // 
             if(!bFirstHit || (coreVector2::Dot(pPaddle->GetDirection().xy(), pBall->GetDirection().xy()) >= 0.0f))
@@ -699,7 +699,7 @@ void cViridoMission::__MoveOwnAfter()
     }
 
     // 
-    cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_VIRIDO_BALL, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBall, const coreVector3& vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_VIRIDO_BALL, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBall, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
 
@@ -711,7 +711,7 @@ void cViridoMission::__MoveOwnAfter()
     });
 
     // 
-    Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, TYPE_VIRIDO_BALL, [](cBullet* OUTPUT pBullet, coreObject3D* OUTPUT pBall, const coreVector3& vIntersection, const coreBool bFirstHit)
+    Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, TYPE_VIRIDO_BALL, [](cBullet* OUTPUT pBullet, coreObject3D* OUTPUT pBall, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
 
@@ -720,7 +720,7 @@ void cViridoMission::__MoveOwnAfter()
     });
 
     // 
-    cPlayer::TestCollision(PLAYER_TEST_NORMAL | PLAYER_TEST_FEEL | PLAYER_TEST_IGNORE, TYPE_VIRIDO_BARRIER, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBarrier, const coreVector3& vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(PLAYER_TEST_NORMAL | PLAYER_TEST_FEEL | PLAYER_TEST_IGNORE, TYPE_VIRIDO_BARRIER, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBarrier, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
 
@@ -733,7 +733,7 @@ void cViridoMission::__MoveOwnAfter()
     });
 
     // 
-    Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, TYPE_VIRIDO_BARRIER, [](cBullet* OUTPUT pBullet, coreObject3D* OUTPUT pBarrier, const coreVector3& vIntersection, const coreBool bFirstHit)
+    Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, TYPE_VIRIDO_BARRIER, [](cBullet* OUTPUT pBullet, coreObject3D* OUTPUT pBarrier, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
 
@@ -742,7 +742,7 @@ void cViridoMission::__MoveOwnAfter()
     });
 
     // 
-    cPlayer::TestCollision(PLAYER_TEST_NORMAL | PLAYER_TEST_FEEL | PLAYER_TEST_IGNORE, TYPE_VIRIDO_LASER, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pLaser, const coreVector3& vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(PLAYER_TEST_NORMAL | PLAYER_TEST_FEEL | PLAYER_TEST_IGNORE, TYPE_VIRIDO_LASER, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pLaser, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
 
@@ -775,7 +775,7 @@ void cViridoMission::__MoveOwnAfter()
         const coreVector2 vOldBallPos = vBallPos - vBallDir * FOREGROUND_AREA * (HAS_BIT(m_iStickyState, 1u) ? 0.0f : (VIRIDO_BALL_SPEED * TIME));
 
         // 
-        Core::Manager::Object->TestCollision(TYPE_ENEMY, &oBall, [&](cEnemy* OUTPUT pEnemy, coreObject3D* OUTPUT pBall, const coreVector3& vIntersection, const coreBool bFirstHit)
+        Core::Manager::Object->TestCollision(TYPE_ENEMY, &oBall, [&](cEnemy* OUTPUT pEnemy, coreObject3D* OUTPUT pBall, const coreVector3 vIntersection, const coreBool bFirstHit)
         {
             // 
             if(!bFirstHit || (pEnemy->GetID() != cCinderEnemy::ID)) return;
@@ -819,7 +819,7 @@ void cViridoMission::__MoveOwnAfter()
 
 // ****************************************************************
 // 
-void cViridoMission::__BounceEffect(const coreVector2& vEffectPos)
+void cViridoMission::__BounceEffect(const coreVector2 vEffectPos)
 {
     g_pSpecialEffects->CreateSplashColor(coreVector3(vEffectPos, 0.0f), SPECIAL_SPLASH_TINY, COLOR_ENERGY_GREEN);
     g_pSpecialEffects->PlaySound        (coreVector3(vEffectPos, 0.0f), 1.0f, SOUND_EXPLOSION_ENERGY_SMALL);

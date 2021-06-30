@@ -316,7 +316,7 @@ void cTorusBoss::__MoveOwn()
             const coreVector2 vNewPos   = pGunner->GetPosition().xy() + ((i & 0x02u) ? vMoveDir.yx() : vMoveDir);
 
             // 
-            const auto nBounceEffect = [](const coreVector2& vEffectPos)
+            const auto nBounceEffect = [](const coreVector2 vEffectPos)
             {
                 g_pSpecialEffects->CreateSplashColor(coreVector3(vEffectPos, 0.0f), SPECIAL_SPLASH_TINY, COLOR_ENERGY_RED);
                 g_pSpecialEffects->PlaySound        (coreVector3(vEffectPos, 0.0f), 1.0f, SOUND_EXPLOSION_ENERGY_SMALL);
@@ -494,7 +494,7 @@ void cTorusBoss::__MoveOwn()
 
 // ****************************************************************
 // 
-void cTorusBoss::__EnableSummon(const coreVector2& vPosition, const coreVector3& vColor)
+void cTorusBoss::__EnableSummon(const coreVector2 vPosition, const coreVector3 vColor)
 {
     WARN_IF(m_Summon.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
 
@@ -523,7 +523,7 @@ void cTorusBoss::__DisableSummon()
 
 // ****************************************************************
 // 
-void cTorusBoss::__EnableTurret(const coreUintW iIndex, const coreVector2& vPosition)
+void cTorusBoss::__EnableTurret(const coreUintW iIndex, const coreVector2 vPosition)
 {
     ASSERT(iIndex < TORUS_TURRETS)
     cCustomEnemy* pTurret = &m_aTurret       [iIndex];
@@ -576,7 +576,7 @@ void cTorusBoss::__DisableTurret(const coreUintW iIndex, const coreBool bAnimate
 
 // ****************************************************************
 // 
-void cTorusBoss::__EnableGunner(const coreUintW iIndex, const coreVector2& vPosition)
+void cTorusBoss::__EnableGunner(const coreUintW iIndex, const coreVector2 vPosition)
 {
     ASSERT(iIndex < TORUS_GUNNERS)
     cCustomEnemy* pGunner = &m_aGunner       [iIndex];

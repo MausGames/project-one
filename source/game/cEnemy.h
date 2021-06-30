@@ -59,7 +59,7 @@ public:
     ENABLE_ID
 
     // configure the enemy
-    void Configure (const coreInt32 iHealth, const coreVector3& vColor, const coreBool bInverted = false);
+    void Configure (const coreInt32 iHealth, const coreVector3 vColor, const coreBool bInverted = false);
     void GiveShield(const coreUint8 iElement, const coreInt16 iHealth = 0);
 
     // render and move the enemy
@@ -67,7 +67,7 @@ public:
     void Move  ()final;
 
     // reduce current health
-    coreInt32 TakeDamage(coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact, cPlayer* pAttacker);
+    coreInt32 TakeDamage(coreInt32 iDamage, const coreUint8 iElement, const coreVector2 vImpact, cPlayer* pAttacker);
 
     // control life and death
     void Resurrect();
@@ -163,8 +163,8 @@ public:
     void ClearEnemies(const coreBool bAnimated);
 
     // 
-    cEnemy* FindEnemy   (const coreVector2& vPosition)const;
-    cEnemy* FindEnemyRev(const coreVector2& vPosition)const;
+    cEnemy* FindEnemy   (const coreVector2 vPosition)const;
+    cEnemy* FindEnemyRev(const coreVector2 vPosition)const;
     template <typename F> void ForEachEnemy(F&& nFunction)const;   // [](cEnemy* OUTPUT pEnemy) -> void
 
     // 
@@ -200,8 +200,8 @@ public:
     void ClearEnemies(const coreBool bAnimated);
 
     // 
-    cEnemy* FindEnemy   (const coreVector2& vPosition)const;
-    cEnemy* FindEnemyRev(const coreVector2& vPosition)const;
+    cEnemy* FindEnemy   (const coreVector2 vPosition)const;
+    cEnemy* FindEnemyRev(const coreVector2 vPosition)const;
     template <typename F> void ForEachEnemy   (F&& nFunction)const;   // [](cEnemy* OUTPUT pEnemy, const coreUintW i) -> void
     template <typename F> void ForEachEnemyAll(F&& nFunction)const;   // [](cEnemy* OUTPUT pEnemy, const coreUintW i) -> void
 

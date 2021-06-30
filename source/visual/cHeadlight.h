@@ -74,8 +74,8 @@ public:
     void UpdateDefault();
 
     // 
-    void DrawSpot (const coreVector3& vPosition, const coreVector2& vSize, const coreVector2& vDirection);
-    void DrawPoint(const coreVector3& vPosition, const coreVector2& vSize);
+    void DrawSpot (const coreVector3 vPosition, const coreVector2 vSize, const coreVector2 vDirection);
+    void DrawPoint(const coreVector3 vPosition, const coreVector2 vSize);
     void DrawPoint(const coreObject3D* pObject);
 
     // 

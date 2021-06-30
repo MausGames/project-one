@@ -136,9 +136,9 @@ public:
     void Move();
 
     // manage temporary objects
-    void AddGround(coreObject3D* pObject, const coreVector3& vRelativePos, const coreUint32 iCapacity, const coreHashString& sProgramInstancedName, const coreHashString& sListKey);
-    void AddDecal (coreObject3D* pObject, const coreVector3& vRelativePos, const coreUint32 iCapacity, const coreHashString& sProgramInstancedName, const coreHashString& sListKey);
-    void AddAir   (coreObject3D* pObject, const coreVector3& vRelativePos, const coreUint32 iCapacity, const coreHashString& sProgramInstancedName, const coreHashString& sListKey);
+    void AddGround(coreObject3D* pObject, const coreVector3 vRelativePos, const coreUint32 iCapacity, const coreHashString& sProgramInstancedName, const coreHashString& sListKey);
+    void AddDecal (coreObject3D* pObject, const coreVector3 vRelativePos, const coreUint32 iCapacity, const coreHashString& sProgramInstancedName, const coreHashString& sListKey);
+    void AddAir   (coreObject3D* pObject, const coreVector3 vRelativePos, const coreUint32 iCapacity, const coreHashString& sProgramInstancedName, const coreHashString& sListKey);
     void ShoveAdds(const coreFloat fOffset);
     void ClearAdds();
 
@@ -166,8 +166,8 @@ protected:
     static void _SortBackToFront(coreBatchList* OUTPUT pObjectList);
 
     // check for intersection with other objects
-    static FUNC_PURE coreBool _CheckIntersection     (const coreBatchList* pObjectList, const coreVector2& vNewPos, const coreFloat fDistanceSq);
-    static FUNC_PURE coreBool _CheckIntersectionQuick(const coreBatchList* pObjectList, const coreVector2& vNewPos, const coreFloat fDistanceSq);
+    static FUNC_PURE coreBool _CheckIntersection     (const coreBatchList* pObjectList, const coreVector2 vNewPos, const coreFloat fDistanceSq);
+    static FUNC_PURE coreBool _CheckIntersectionQuick(const coreBatchList* pObjectList, const coreVector2 vNewPos, const coreFloat fDistanceSq);
 
 
 private:
@@ -266,7 +266,7 @@ public:
     ASSIGN_ID_EX(3, "Desert", COLOR_MENU_YELLOW)
 
     // 
-    inline void SetSandMove(const coreVector2& vMove) {m_vSandMove = vMove;}
+    inline void SetSandMove(const coreVector2 vMove) {m_vSandMove = vMove;}
 
     // 
     inline const coreVector2& GetSandMove()const {return m_vSandMove;}
@@ -299,9 +299,9 @@ public:
     ASSIGN_ID_EX(4, "Space", COLOR_MENU_MAGENTA)
 
     // 
-    inline void SetCoverColor (const coreVector3& vColor) {m_Cover.SetColor3(LERP(vColor, coreVector3(1.0f,1.0f,1.0f), 0.5f));}
-    inline void SetCoverDir   (const coreVector2& vDir)   {m_vCoverDir    = vDir; ASSERT(vDir.IsNormalized())}
-    inline void SetMeteorSpeed(const coreFloat    fSpeed) {m_fMeteorSpeed = fSpeed;}
+    inline void SetCoverColor (const coreVector3 vColor) {m_Cover.SetColor3(LERP(vColor, coreVector3(1.0f,1.0f,1.0f), 0.5f));}
+    inline void SetCoverDir   (const coreVector2 vDir)   {m_vCoverDir    = vDir; ASSERT(vDir.IsNormalized())}
+    inline void SetMeteorSpeed(const coreFloat   fSpeed) {m_fMeteorSpeed = fSpeed;}
 
     // 
     inline coreBatchList* GetMeteorList()const {return m_apGroundObjectList[0];}
@@ -353,7 +353,7 @@ public:
     ASSIGN_ID_EX(6, "Snow", COLOR_MENU_BLUE)
 
     // 
-    inline void SetSnowMove(const coreVector2& vMove) {m_vSnowMove = vMove;}
+    inline void SetSnowMove(const coreVector2 vMove) {m_vSnowMove = vMove;}
 
 
 private:
@@ -395,9 +395,9 @@ public:
     ASSIGN_ID_EX(7, "Moss", COLOR_MENU_RED)
 
     // 
-    inline void SetRainMove       (const coreVector2& vMove)   {m_vRainMove        = vMove;}
-    inline void SetEnableLightning(const coreBool     bEnable) {m_bEnableLightning = bEnable; m_fLightningDelay = 0.0f;}
-    inline void SetEnableHeadlight(const coreBool     bEnable) {m_bEnableHeadlight = bEnable;}
+    inline void SetRainMove       (const coreVector2 vMove)   {m_vRainMove        = vMove;}
+    inline void SetEnableLightning(const coreBool    bEnable) {m_bEnableLightning = bEnable; m_fLightningDelay = 0.0f;}
+    inline void SetEnableHeadlight(const coreBool    bEnable) {m_bEnableHeadlight = bEnable;}
 
     // 
     inline cHeadlight* GetHeadlight() {return &m_Headlight;}

@@ -471,7 +471,7 @@ void cRutilusMission::__MoveOwnAfter()
     if(m_iTeleporterActive == 1u)
     {
         // 
-        const auto nTeleportFunc = [this](const coreObject3D* pObject, const coreVector2& vMove, coreVector2* OUTPUT vNewPos, coreVector2* OUTPUT vNewDir, coreVector2* OUTPUT vNewMoveDir)
+        const auto nTeleportFunc = [this](const coreObject3D* pObject, const coreVector2 vMove, coreVector2* OUTPUT vNewPos, coreVector2* OUTPUT vNewDir, coreVector2* OUTPUT vNewMoveDir)
         {
             ASSERT(pObject && vNewPos && vNewDir && vNewMoveDir)
 

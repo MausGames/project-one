@@ -295,9 +295,9 @@ void cBackground::Move()
     (x).at(sListKey)->BindObject(pObject);                                                         \
 }
 
-void cBackground::AddGround(coreObject3D* pObject, const coreVector3& vRelativePos, const coreUint32 iCapacity, const coreHashString& sProgramInstancedName, const coreHashString& sListKey) {__ADD_OBJECT(m_apGroundAddList)}
-void cBackground::AddDecal (coreObject3D* pObject, const coreVector3& vRelativePos, const coreUint32 iCapacity, const coreHashString& sProgramInstancedName, const coreHashString& sListKey) {__ADD_OBJECT(m_apDecalAddList)}
-void cBackground::AddAir   (coreObject3D* pObject, const coreVector3& vRelativePos, const coreUint32 iCapacity, const coreHashString& sProgramInstancedName, const coreHashString& sListKey) {__ADD_OBJECT(m_apAirAddList)}
+void cBackground::AddGround(coreObject3D* pObject, const coreVector3 vRelativePos, const coreUint32 iCapacity, const coreHashString& sProgramInstancedName, const coreHashString& sListKey) {__ADD_OBJECT(m_apGroundAddList)}
+void cBackground::AddDecal (coreObject3D* pObject, const coreVector3 vRelativePos, const coreUint32 iCapacity, const coreHashString& sProgramInstancedName, const coreHashString& sListKey) {__ADD_OBJECT(m_apDecalAddList)}
+void cBackground::AddAir   (coreObject3D* pObject, const coreVector3 vRelativePos, const coreUint32 iCapacity, const coreHashString& sProgramInstancedName, const coreHashString& sListKey) {__ADD_OBJECT(m_apAirAddList)}
 
 #undef __ADD_OBJECT
 
@@ -462,7 +462,7 @@ void cBackground::_SortBackToFront(coreBatchList* OUTPUT pObjectList)
 
 // ****************************************************************
 // check for intersection with other objects
-FUNC_PURE coreBool cBackground::_CheckIntersection(const coreBatchList* pObjectList, const coreVector2& vNewPos, const coreFloat fDistanceSq)
+FUNC_PURE coreBool cBackground::_CheckIntersection(const coreBatchList* pObjectList, const coreVector2 vNewPos, const coreFloat fDistanceSq)
 {
     const coreSet<coreObject3D*>* pList = pObjectList->List();
 
@@ -486,7 +486,7 @@ FUNC_PURE coreBool cBackground::_CheckIntersection(const coreBatchList* pObjectL
     return false;
 }
 
-FUNC_PURE coreBool cBackground::_CheckIntersectionQuick(const coreBatchList* pObjectList, const coreVector2& vNewPos, const coreFloat fDistanceSq)
+FUNC_PURE coreBool cBackground::_CheckIntersectionQuick(const coreBatchList* pObjectList, const coreVector2 vNewPos, const coreFloat fDistanceSq)
 {
     const coreSet<coreObject3D*>* pList = pObjectList->List();
 

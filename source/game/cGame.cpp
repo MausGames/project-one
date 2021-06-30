@@ -539,7 +539,7 @@ void cGame::PushDepthLevelShip()
 
 // ****************************************************************
 // 
-RETURN_NONNULL cPlayer* cGame::FindPlayerSide(const coreVector2& vPosition)
+RETURN_NONNULL cPlayer* cGame::FindPlayerSide(const coreVector2 vPosition)
 {
     STATIC_ASSERT(GAME_PLAYERS == 2u)
 
@@ -883,7 +883,7 @@ void cGame::__HandlePacifist()
 void cGame::__HandleCollisions()
 {
     // 
-    cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_ENEMY, [this](cPlayer* OUTPUT pPlayer, cEnemy* OUTPUT pEnemy, const coreVector3& vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_ENEMY, [this](cPlayer* OUTPUT pPlayer, cEnemy* OUTPUT pEnemy, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         // 
         if(pEnemy->GetLifeTime() < 1.0f) return;
@@ -909,7 +909,7 @@ void cGame::__HandleCollisions()
     });
 
     // 
-    cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_BULLET_ENEMY, [this](cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_BULLET_ENEMY, [this](cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         // 
         m_pCurMission->CollPlayerBullet(pPlayer, pBullet, vIntersection, bFirstHit);
@@ -923,7 +923,7 @@ void cGame::__HandleCollisions()
     });
 
     // 
-    Core::Manager::Object->TestCollision(TYPE_ENEMY, TYPE_BULLET_PLAYER, [this](cEnemy* OUTPUT pEnemy, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
+    Core::Manager::Object->TestCollision(TYPE_ENEMY, TYPE_BULLET_PLAYER, [this](cEnemy* OUTPUT pEnemy, cBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         // 
         if(!g_pForeground->IsVisiblePoint(vIntersection.xy())) return;
@@ -977,7 +977,7 @@ void cGame::__HandleCollisions()
     });
 
     // 
-    cPlayer::TestCollision(PLAYER_TEST_ALL, TYPE_CHROMA, [](cPlayer* OUTPUT pPlayer, cChromaBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(PLAYER_TEST_ALL, TYPE_CHROMA, [](cPlayer* OUTPUT pPlayer, cChromaBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         // 
         pPlayer->GetScoreTable()->AddScore(pBullet->GetDamage(), false);
@@ -997,7 +997,7 @@ void cGame::__HandleCollisions()
     });
 
     // 
-    cPlayer::TestCollision(PLAYER_TEST_ALL, TYPE_ITEM, [](cPlayer* OUTPUT pPlayer, cItem* OUTPUT pItem, const coreVector3& vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(PLAYER_TEST_ALL, TYPE_ITEM, [](cPlayer* OUTPUT pPlayer, cItem* OUTPUT pItem, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         // 
         pItem->Collect(pPlayer);

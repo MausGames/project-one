@@ -55,11 +55,11 @@ public:
     void Move  ()final;
 
     // 
-    template <typename... A> void ShowText(const coreVector2& vTarget, const coreFloat fWidth, const void* pRef, const coreChar* pcFormat, A&&... vArgs);
-    inline void                   ShowText(const coreVector2& vTarget, const coreFloat fWidth, const coreChar* pcText);
+    template <typename... A> void ShowText(const coreVector2 vTarget, const coreFloat fWidth, const void* pRef, const coreChar* pcFormat, A&&... vArgs);
+    inline void                   ShowText(const coreVector2 vTarget, const coreFloat fWidth, const coreChar* pcText);
 
     // 
-    inline void UseColor(const coreUintW iIndex, const coreVector3& vColor) {ASSERT(iIndex < TOOLTIP_LINES) m_aLine[iIndex].SetColor3(vColor);}
+    inline void UseColor(const coreUintW iIndex, const coreVector3 vColor) {ASSERT(iIndex < TOOLTIP_LINES) m_aLine[iIndex].SetColor3(vColor);}
 
     // force update on next display
     inline void Invalidate() {m_pLastRef = NULL;}
@@ -73,7 +73,7 @@ private:
 
 // ****************************************************************
 // 
-template <typename... A> void cTooltip::ShowText(const coreVector2& vTarget, const coreFloat fWidth, const void* pRef, const coreChar* pcFormat, A&&... vArgs)
+template <typename... A> void cTooltip::ShowText(const coreVector2 vTarget, const coreFloat fWidth, const void* pRef, const coreChar* pcFormat, A&&... vArgs)
 {
     // show tooltip at target position
     m_bDisplay = true;
@@ -87,7 +87,7 @@ template <typename... A> void cTooltip::ShowText(const coreVector2& vTarget, con
     this->__ShowText(fWidth, PRINT(pcFormat, std::forward<A>(vArgs)...));
 }
 
-inline void cTooltip::ShowText(const coreVector2& vTarget, const coreFloat fWidth, const coreChar* pcText)
+inline void cTooltip::ShowText(const coreVector2 vTarget, const coreFloat fWidth, const coreChar* pcText)
 {
     // forward copy of trivial string
     this->ShowText(vTarget, fWidth, pcText, "%s", pcText);

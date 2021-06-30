@@ -286,7 +286,7 @@ void cDharukBoss::__MoveOwn()
     m_BoomerangTrail.MoveNormal();
 
     // 
-    cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_DHARUK_BOOMERANG, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBoomerang, const coreVector3& vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_DHARUK_BOOMERANG, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBoomerang, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
 
@@ -350,7 +350,7 @@ void cDharukBoss::__DisableDuplicate(const coreBool bAnimated)
 
 // ****************************************************************
 // 
-void cDharukBoss::__EnableBoomerang(const coreUintW iIndex, const coreVector2& vPosition, const coreVector2& vDirection)
+void cDharukBoss::__EnableBoomerang(const coreUintW iIndex, const coreVector2 vPosition, const coreVector2 vDirection)
 {
     ASSERT(iIndex < DHARUK_BOOMERANGS)
     coreObject3D* pBoomerang = (*m_Boomerang     .List())[iIndex];
@@ -405,7 +405,7 @@ void cDharukBoss::__DisableBoomerang(const coreUintW iIndex, const coreBool bAni
 
 // ****************************************************************
 // 
-coreVector2 cDharukBoss::__RepeatPosition(const coreVector2& vPosition, const coreFloat fThreshold, coreBool* OUTPUT pbChange)
+coreVector2 cDharukBoss::__RepeatPosition(const coreVector2 vPosition, const coreFloat fThreshold, coreBool* OUTPUT pbChange)
 {
     const coreVector2 vThreshVec = fThreshold * FOREGROUND_AREA;
 
@@ -423,7 +423,7 @@ coreVector2 cDharukBoss::__RepeatPosition(const coreVector2& vPosition, const co
     return vRepeatPos;
 }
 
-coreVector2 cDharukBoss::__RepeatPosition(const coreVector2& vPosition, const coreFloat fThreshold)
+coreVector2 cDharukBoss::__RepeatPosition(const coreVector2 vPosition, const coreFloat fThreshold)
 {
     coreBool bChange;
     return this->__RepeatPosition(vPosition, fThreshold, &bChange);
@@ -432,7 +432,7 @@ coreVector2 cDharukBoss::__RepeatPosition(const coreVector2& vPosition, const co
 
 // ****************************************************************
 // 
-void cDharukBoss::__EncodeDirection(const coreUintW iIndex, const coreVector2& vDirection)
+void cDharukBoss::__EncodeDirection(const coreUintW iIndex, const coreVector2 vDirection)
 {
     ASSERT(iIndex < DHARUK_BOOMERANGS)
 

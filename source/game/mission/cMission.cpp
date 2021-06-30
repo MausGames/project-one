@@ -258,7 +258,7 @@ void cMission::DeactivateWave()
 
 // ****************************************************************
 // 
-void cMission::GiveBadge(const coreUint8 iBadge, const coreVector3& vPosition)
+void cMission::GiveBadge(const coreUint8 iBadge, const coreVector3 vPosition)
 {
     if(m_bBadgeGiven) return;
     m_bBadgeGiven = true;

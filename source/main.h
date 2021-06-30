@@ -251,9 +251,9 @@ enum eBadge : coreUint8
     BADGE_HARD
 };
 
-extern void InitResolution(const coreVector2& vResolution);   // init resolution properties (1:1)
-extern void InitDirection();                                  // 
-extern void InitFramerate();                                  // init frame rate properties (lock)
+extern void InitResolution(const coreVector2 vResolution);   // init resolution properties (1:1)
+extern void InitDirection();                                 // 
+extern void InitFramerate();                                 // init frame rate properties (lock)
 
 
 // ****************************************************************

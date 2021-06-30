@@ -47,8 +47,8 @@ public:
     void Disable(const coreFloat fDelay);
 
     // 
-    void SetBlotPosition(const coreUintW iIndex, const coreVector2& vPosition);
-    void SetBlotAlpha   (const coreUintW iIndex, const coreFloat    fAlpha);
+    void SetBlotPosition(const coreUintW iIndex, const coreVector2 vPosition);
+    void SetBlotAlpha   (const coreUintW iIndex, const coreFloat   fAlpha);
 
     // 
     inline coreBool IsActive()const {return !m_vBlotAlpha.IsNull();}

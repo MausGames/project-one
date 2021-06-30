@@ -324,7 +324,7 @@ void cInterface::Move()
     }
 
     // adjust time position (# only required if alignment is centered)
-    (m_fAlphaBoss ? m_aBossTime[0] : m_aWaveTime[0]).RetrieveDesiredSize([this](const coreVector2& vSize)
+    (m_fAlphaBoss ? m_aBossTime[0] : m_aWaveTime[0]).RetrieveDesiredSize([this](const coreVector2 vSize)
     {
         const coreFloat fPos = (vSize.x - 0.022f) * 0.5f;
         const coreFloat fOff = m_BossHealthValue.GetPosition().x;

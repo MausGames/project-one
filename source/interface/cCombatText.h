@@ -41,8 +41,8 @@ public:
     void Move();
 
     // add new active label object
-    void        AddText (const coreChar*  pcText, const coreVector3& vPosition, const coreVector3& vColor);
-    inline void AddBonus(const coreUint32 iValue, const coreVector3& vPosition) {if(iValue) this->AddText(PRINT("%u", iValue), vPosition, COLOR_MENU_BLUE);}
+    void        AddText (const coreChar*  pcText, const coreVector3 vPosition, const coreVector3 vColor);
+    inline void AddBonus(const coreUint32 iValue, const coreVector3 vPosition) {if(iValue) this->AddText(PRINT("%u", iValue), vPosition, COLOR_MENU_BLUE);}
 
     // 
     void UpdateLayout();

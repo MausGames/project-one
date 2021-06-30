@@ -144,7 +144,7 @@ void cNautilusBoss::__MoveOwn()
     }
 
     // 
-    const coreVector2& vImpact = pMission->GetContainerImpact();
+    const coreVector2 vImpact = pMission->GetContainerImpact();
     if(!vImpact.IsNull())
     {
         for(coreUintW i = 20u; i--; )
@@ -228,7 +228,7 @@ void cNautilusBoss::__MoveOwn()
 
 // ****************************************************************
 // 
-void cNautilusBoss::__CreateInk(const coreUintW iIndex, const coreVector2& vPosition)
+void cNautilusBoss::__CreateInk(const coreUintW iIndex, const coreVector2 vPosition)
 {
     ASSERT(iIndex < ARRAY_SIZE(m_afInkAlpha))
 
@@ -243,7 +243,7 @@ void cNautilusBoss::__CreateInk(const coreUintW iIndex, const coreVector2& vPosi
 
 // ****************************************************************
 // 
-void cNautilusBoss::__EnableBullet(const coreVector2& vStart, const coreVector2& vEnd)
+void cNautilusBoss::__EnableBullet(const coreVector2 vStart, const coreVector2 vEnd)
 {
     WARN_IF(m_InkBullet.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
 

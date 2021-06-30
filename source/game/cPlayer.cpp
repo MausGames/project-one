@@ -122,7 +122,7 @@ cPlayer::~cPlayer()
 
 // ****************************************************************
 // configure the player
-void cPlayer::Configure(const coreUintW iShipType, const coreVector3& vColor)
+void cPlayer::Configure(const coreUintW iShipType, const coreVector3 vColor)
 {
     // select appearance type
     coreHashString sModelHigh;
@@ -427,7 +427,7 @@ void cPlayer::Move()
 
 // ****************************************************************
 // reduce current health
-coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact)
+coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2 vImpact)
 {
     if(iDamage > 0)
     {
@@ -547,7 +547,7 @@ void cPlayer::Kill(const coreBool bAnimated)
 
 // ****************************************************************
 // 
-void cPlayer::StartRolling(const coreVector2& vDirection)
+void cPlayer::StartRolling(const coreVector2 vDirection)
 {
     WARN_IF(this->IsRolling()) return;
 
@@ -651,7 +651,7 @@ void cPlayer::EndIgnoring()
 
 // ****************************************************************
 // 
-void cPlayer::EnableWind(const coreVector2& vDirection)
+void cPlayer::EnableWind(const coreVector2 vDirection)
 {
     WARN_IF(m_Wind.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
 

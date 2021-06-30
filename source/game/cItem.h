@@ -72,7 +72,7 @@ public:
     void Move();
 
     // add and remove items
-    template <typename T> RETURN_RESTRICT T* AddItem(const coreVector2& vPosition);
+    template <typename T> RETURN_RESTRICT T* AddItem(const coreVector2 vPosition);
     void ClearItems(const coreBool bAnimated);
 
     // 
@@ -112,7 +112,7 @@ private:
 
 // ****************************************************************
 // 
-template <typename T> RETURN_RESTRICT T* cItemManager::AddItem(const coreVector2& vPosition)
+template <typename T> RETURN_RESTRICT T* cItemManager::AddItem(const coreVector2 vPosition)
 {
     // 
     const coreVector2 vClampPos = coreVector2(CLAMP(vPosition.x, -FOREGROUND_AREA.x, FOREGROUND_AREA.x),

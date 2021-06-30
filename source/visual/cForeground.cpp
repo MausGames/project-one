@@ -63,7 +63,7 @@ void cForeground::End()
 
 // ****************************************************************
 // 
-coreBool cForeground::IsVisiblePoint(const coreVector2& vPosition, const coreFloat fFactor)const
+coreBool cForeground::IsVisiblePoint(const coreVector2 vPosition, const coreFloat fFactor)const
 {
     // 
     return ((ABS(vPosition.x) < FOREGROUND_AREA.x * fFactor) &&
@@ -93,7 +93,7 @@ coreBool cForeground::IsVisibleObject(const coreObject3D* pObject)const
 
 // ****************************************************************
 // 
-coreFloat cForeground::RayIntersection(const coreVector2& vPosition, const coreVector2& vDirection, const coreFloat fFactor)const
+coreFloat cForeground::RayIntersection(const coreVector2 vPosition, const coreVector2 vDirection, const coreFloat fFactor)const
 {
     ASSERT(vDirection.IsNormalized())
 

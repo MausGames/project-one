@@ -111,7 +111,7 @@ void cDistortion::Update()
 
 // ****************************************************************
 // create animated distortion-wave
-void cDistortion::CreateWave(const coreVector3& vPosition, const coreFloat fScale, const coreFloat fSpeed)
+void cDistortion::CreateWave(const coreVector3 vPosition, const coreFloat fScale, const coreFloat fSpeed)
 {
     // 
     if(++m_iCurWave >= DISTORTION_WAVES) m_iCurWave = 0u;
@@ -125,7 +125,7 @@ void cDistortion::CreateWave(const coreVector3& vPosition, const coreFloat fScal
 
 // ****************************************************************
 // create animated distortion-burst
-void cDistortion::CreateBurst(const coreVector3& vPosition, const coreVector2& vDirection, const coreFloat fScale, const coreFloat fSpeed)
+void cDistortion::CreateBurst(const coreVector3 vPosition, const coreVector2 vDirection, const coreFloat fScale, const coreFloat fSpeed)
 {
     ASSERT(vDirection.IsNormalized() && (fScale > 0.0f))
 

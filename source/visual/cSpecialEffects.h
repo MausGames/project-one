@@ -105,38 +105,38 @@ public:
     inline const coreBool& IsActive()const {return m_bActive;}
 
     // create centered particle splash
-    void CreateSplashColor(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor);
-    void CreateSplashDark (const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum);
-    void CreateSplashSmoke(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor);
-    void CreateSplashFire (const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor);
+    void CreateSplashColor(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor);
+    void CreateSplashDark (const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum);
+    void CreateSplashSmoke(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor);
+    void CreateSplashFire (const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor);
 
     // create directional particle blow
-    void CreateBlowColor(const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor);
-    void CreateBlowDark (const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat fScale, const coreUintW iNum);
+    void CreateBlowColor(const coreVector3 vPosition, const coreVector3 vDirection, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor);
+    void CreateBlowDark (const coreVector3 vPosition, const coreVector3 vDirection, const coreFloat fScale, const coreUintW iNum);
 
     // 
-    void CreateChargeColor(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor);
-    void CreateChargeDark (const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum);
+    void CreateChargeColor(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor);
+    void CreateChargeDark (const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum);
 
     // 
-    void CreateWhirlColor(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor);
-    void CreateWhirlDark (const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum);
+    void CreateWhirlColor(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor);
+    void CreateWhirlDark (const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum);
 
     // 
-    void CreateBreakupColor(const coreObject3D* pObject, const coreFloat fScale, const coreUintW iStep, const coreVector3& vColor);
+    void CreateBreakupColor(const coreObject3D* pObject, const coreFloat fScale, const coreUintW iStep, const coreVector3 vColor);
     void CreateBreakupDark (const coreObject3D* pObject, const coreFloat fScale, const coreUintW iStep);
 
     // 
-    coreFloat CreateLightning(const coreVector2& vPosFrom, const coreVector2& vPosTo,                              const coreFloat fWidth, const coreVector3& vColor, const coreVector2& vTexSizeFactor, const coreFloat fTexOffset);
-    void      CreateLightning(coreObject3D*      pOwner,   const coreVector2& vDirection, const coreFloat fLength, const coreFloat fWidth, const coreVector3& vColor, const coreVector2& vTexSizeFactor, const coreFloat fTexOffset);
+    coreFloat CreateLightning(const coreVector2 vPosFrom, const coreVector2 vPosTo,                              const coreFloat fWidth, const coreVector3 vColor, const coreVector2 vTexSizeFactor, const coreFloat fTexOffset);
+    void      CreateLightning(coreObject3D*     pOwner,   const coreVector2 vDirection, const coreFloat fLength, const coreFloat fWidth, const coreVector3 vColor, const coreVector2 vTexSizeFactor, const coreFloat fTexOffset);
 
     // 
-    void CreateBlastSphere(const coreVector3& vPosition,                                const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor);
-    void CreateBlastCube  (const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor);
-    void CreateBlastTetra (const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor);
+    void CreateBlastSphere(const coreVector3 vPosition,                               const coreFloat fScale, const coreFloat fSpeed, const coreVector3 vColor);
+    void CreateBlastCube  (const coreVector3 vPosition, const coreVector3 vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3 vColor);
+    void CreateBlastTetra (const coreVector3 vPosition, const coreVector3 vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3 vColor);
 
     // 
-    void PlaySound(const coreVector3& vPosition, const coreFloat fVolume, const eSoundEffect eSoundIndex);
+    void PlaySound(const coreVector3 vPosition, const coreFloat fVolume, const eSoundEffect eSoundIndex);
 
     // 
     void RumblePlayer(const cPlayer* pPlayer, const coreFloat fStrength, const coreUint32 iLengthMs);
@@ -150,19 +150,19 @@ public:
     void ClearAll();
 
     // 
-    void MacroExplosionColorSmall        (const coreVector3& vPosition, const coreVector3& vColor);
-    void MacroExplosionColorBig          (const coreVector3& vPosition, const coreVector3& vColor);
-    void MacroExplosionDarkSmall         (const coreVector3& vPosition);
-    void MacroExplosionDarkBig           (const coreVector3& vPosition);
-    void MacroExplosionPhysicalColorSmall(const coreVector3& vPosition, const coreVector3& vColor);
-    void MacroExplosionPhysicalColorBig  (const coreVector3& vPosition, const coreVector3& vColor);
-    void MacroExplosionPhysicalDarkSmall (const coreVector3& vPosition);
-    void MacroExplosionPhysicalDarkBig   (const coreVector3& vPosition);
-    void MacroEruptionColorSmall         (const coreVector3& vPosition, const coreVector2& vDirection, const coreVector3& vColor);
-    void MacroEruptionColorBig           (const coreVector3& vPosition, const coreVector2& vDirection, const coreVector3& vColor);
-    void MacroEruptionDarkSmall          (const coreVector3& vPosition, const coreVector2& vDirection);
-    void MacroEruptionDarkBig            (const coreVector3& vPosition, const coreVector2& vDirection);
-    void MacroDestructionColor           (const coreObject3D* pObject,  const coreVector3& vColor);
+    void MacroExplosionColorSmall        (const coreVector3 vPosition, const coreVector3 vColor);
+    void MacroExplosionColorBig          (const coreVector3 vPosition, const coreVector3 vColor);
+    void MacroExplosionDarkSmall         (const coreVector3 vPosition);
+    void MacroExplosionDarkBig           (const coreVector3 vPosition);
+    void MacroExplosionPhysicalColorSmall(const coreVector3 vPosition, const coreVector3 vColor);
+    void MacroExplosionPhysicalColorBig  (const coreVector3 vPosition, const coreVector3 vColor);
+    void MacroExplosionPhysicalDarkSmall (const coreVector3 vPosition);
+    void MacroExplosionPhysicalDarkBig   (const coreVector3 vPosition);
+    void MacroEruptionColorSmall         (const coreVector3 vPosition, const coreVector2 vDirection, const coreVector3 vColor);
+    void MacroEruptionColorBig           (const coreVector3 vPosition, const coreVector2 vDirection, const coreVector3 vColor);
+    void MacroEruptionDarkSmall          (const coreVector3 vPosition, const coreVector2 vDirection);
+    void MacroEruptionDarkBig            (const coreVector3 vPosition, const coreVector2 vDirection);
+    void MacroDestructionColor           (const coreObject3D* pObject, const coreVector3 vColor);
     void MacroDestructionDark            (const coreObject3D* pObject);
 
 

@@ -200,7 +200,7 @@ void cSpecialEffects::Move()
 
 // ****************************************************************
 // create centered particle splash
-void cSpecialEffects::CreateSplashColor(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor)
+void cSpecialEffects::CreateSplashColor(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor)
 {
     // 
     const coreFloat fBase = Core::Rand->Float(-PI, PI);
@@ -220,7 +220,7 @@ void cSpecialEffects::CreateSplashColor(const coreVector3& vPosition, const core
     });
 }
 
-void cSpecialEffects::CreateSplashDark(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum)
+void cSpecialEffects::CreateSplashDark(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum)
 {
     // 
     const coreFloat fBase = Core::Rand->Float(-PI, PI);
@@ -240,7 +240,7 @@ void cSpecialEffects::CreateSplashDark(const coreVector3& vPosition, const coreF
     });
 }
 
-void cSpecialEffects::CreateSplashSmoke(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor)
+void cSpecialEffects::CreateSplashSmoke(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor)
 {
     // 
     const coreFloat fBase = Core::Rand->Float(-PI, PI);
@@ -260,7 +260,7 @@ void cSpecialEffects::CreateSplashSmoke(const coreVector3& vPosition, const core
     });
 }
 
-void cSpecialEffects::CreateSplashFire(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor)
+void cSpecialEffects::CreateSplashFire(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor)
 {
     // 
     const coreFloat fBase = Core::Rand->Float(-PI, PI);
@@ -283,7 +283,7 @@ void cSpecialEffects::CreateSplashFire(const coreVector3& vPosition, const coreF
 
 // ****************************************************************
 // create directional particle blow
-void cSpecialEffects::CreateBlowColor(const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor)
+void cSpecialEffects::CreateBlowColor(const coreVector3 vPosition, const coreVector3 vDirection, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor)
 {
     ASSERT(vDirection.IsNormalized())
 
@@ -305,7 +305,7 @@ void cSpecialEffects::CreateBlowColor(const coreVector3& vPosition, const coreVe
     });
 }
 
-void cSpecialEffects::CreateBlowDark(const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat fScale, const coreUintW iNum)
+void cSpecialEffects::CreateBlowDark(const coreVector3 vPosition, const coreVector3 vDirection, const coreFloat fScale, const coreUintW iNum)
 {
     ASSERT(vDirection.IsNormalized())
 
@@ -330,7 +330,7 @@ void cSpecialEffects::CreateBlowDark(const coreVector3& vPosition, const coreVec
 
 // ****************************************************************
 // 
-void cSpecialEffects::CreateChargeColor(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor)
+void cSpecialEffects::CreateChargeColor(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor)
 {
     // 
     const coreFloat fBase = Core::Rand->Float(-PI, PI);
@@ -350,7 +350,7 @@ void cSpecialEffects::CreateChargeColor(const coreVector3& vPosition, const core
     });
 }
 
-void cSpecialEffects::CreateChargeDark(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum)
+void cSpecialEffects::CreateChargeDark(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum)
 {
     // 
     const coreFloat fBase = Core::Rand->Float(-PI, PI);
@@ -373,7 +373,7 @@ void cSpecialEffects::CreateChargeDark(const coreVector3& vPosition, const coreF
 
 // ****************************************************************
 // 
-void cSpecialEffects::CreateWhirlColor(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor)
+void cSpecialEffects::CreateWhirlColor(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor)
 {
     // 
     const coreFloat fBase = Core::Rand->Float(-PI, PI);
@@ -394,7 +394,7 @@ void cSpecialEffects::CreateWhirlColor(const coreVector3& vPosition, const coreF
     });
 }
 
-void cSpecialEffects::CreateWhirlDark(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum)
+void cSpecialEffects::CreateWhirlDark(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum)
 {
     // 
     const coreFloat fBase = Core::Rand->Float(-PI, PI);
@@ -418,7 +418,7 @@ void cSpecialEffects::CreateWhirlDark(const coreVector3& vPosition, const coreFl
 
 // ****************************************************************
 // 
-void cSpecialEffects::CreateBreakupColor(const coreObject3D* pObject, const coreFloat fScale, const coreUintW iStep, const coreVector3& vColor)
+void cSpecialEffects::CreateBreakupColor(const coreObject3D* pObject, const coreFloat fScale, const coreUintW iStep, const coreVector3 vColor)
 {
     ASSERT(pObject)
 
@@ -485,7 +485,7 @@ void cSpecialEffects::CreateBreakupDark(const coreObject3D* pObject, const coreF
 
 // ****************************************************************
 // 
-coreFloat cSpecialEffects::CreateLightning(const coreVector2& vPosFrom, const coreVector2& vPosTo, const coreFloat fWidth, const coreVector3& vColor, const coreVector2& vTexSizeFactor, const coreFloat fTexOffset)
+coreFloat cSpecialEffects::CreateLightning(const coreVector2 vPosFrom, const coreVector2 vPosTo, const coreFloat fWidth, const coreVector3 vColor, const coreVector2 vTexSizeFactor, const coreFloat fTexOffset)
 {
     // 
     if(++m_iCurLightning >= SPECIAL_LIGHTNINGS) m_iCurLightning = 0u;
@@ -533,7 +533,7 @@ coreFloat cSpecialEffects::CreateLightning(const coreVector2& vPosFrom, const co
     return fTexLen + fTexOffset;
 }
 
-void cSpecialEffects::CreateLightning(coreObject3D* pOwner, const coreVector2& vDirection, const coreFloat fLength, const coreFloat fWidth, const coreVector3& vColor, const coreVector2& vTexSizeFactor, const coreFloat fTexOffset)
+void cSpecialEffects::CreateLightning(coreObject3D* pOwner, const coreVector2 vDirection, const coreFloat fLength, const coreFloat fWidth, const coreVector3 vColor, const coreVector2 vTexSizeFactor, const coreFloat fTexOffset)
 {
     // 
     if(++m_iCurLightning >= SPECIAL_LIGHTNINGS) m_iCurLightning = 0u;
@@ -562,7 +562,7 @@ void cSpecialEffects::CreateLightning(coreObject3D* pOwner, const coreVector2& v
 
 // ****************************************************************
 // 
-void cSpecialEffects::CreateBlastSphere(const coreVector3& vPosition, const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor)
+void cSpecialEffects::CreateBlastSphere(const coreVector3 vPosition, const coreFloat fScale, const coreFloat fSpeed, const coreVector3 vColor)
 {
     // 
     if(++m_iCurBlast >= SPECIAL_BLASTS) m_iCurBlast = 0u;
@@ -580,7 +580,7 @@ void cSpecialEffects::CreateBlastSphere(const coreVector3& vPosition, const core
     oBlast.SetTexSize          (coreVector2(12.0f,12.0f));
 }
 
-void cSpecialEffects::CreateBlastCube(const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor)
+void cSpecialEffects::CreateBlastCube(const coreVector3 vPosition, const coreVector3 vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3 vColor)
 {
     // 
     if(++m_iCurBlast >= SPECIAL_BLASTS) m_iCurBlast = 0u;
@@ -598,7 +598,7 @@ void cSpecialEffects::CreateBlastCube(const coreVector3& vPosition, const coreVe
     oBlast.SetTexSize          (coreVector2(3.0f,1.2f));
 }
 
-void cSpecialEffects::CreateBlastTetra(const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor)
+void cSpecialEffects::CreateBlastTetra(const coreVector3 vPosition, const coreVector3 vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3 vColor)
 {
     // 
     if(++m_iCurBlast >= SPECIAL_BLASTS) m_iCurBlast = 0u;
@@ -619,7 +619,7 @@ void cSpecialEffects::CreateBlastTetra(const coreVector3& vPosition, const coreV
 
 // ****************************************************************
 // 
-void cSpecialEffects::PlaySound(const coreVector3& vPosition, const coreFloat fVolume, const eSoundEffect eSoundIndex)
+void cSpecialEffects::PlaySound(const coreVector3 vPosition, const coreFloat fVolume, const eSoundEffect eSoundIndex)
 {
     ASSERT(fVolume > 0.0f)
 
@@ -710,7 +710,7 @@ void cSpecialEffects::ClearAll()
 
 // ****************************************************************
 // 
-void cSpecialEffects::MacroExplosionColorSmall(const coreVector3& vPosition, const coreVector3& vColor)
+void cSpecialEffects::MacroExplosionColorSmall(const coreVector3 vPosition, const coreVector3 vColor)
 {
     // 
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_SMALL);
@@ -720,7 +720,7 @@ void cSpecialEffects::MacroExplosionColorSmall(const coreVector3& vPosition, con
     this         ->ShakeScreen      (SPECIAL_SHAKE_SMALL);
 }
 
-void cSpecialEffects::MacroExplosionColorBig(const coreVector3& vPosition, const coreVector3& vColor)
+void cSpecialEffects::MacroExplosionColorBig(const coreVector3 vPosition, const coreVector3 vColor)
 {
     // 
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_BIG);
@@ -730,7 +730,7 @@ void cSpecialEffects::MacroExplosionColorBig(const coreVector3& vPosition, const
     this         ->ShakeScreen      (SPECIAL_SHAKE_BIG);
 }
 
-void cSpecialEffects::MacroExplosionDarkSmall(const coreVector3& vPosition)
+void cSpecialEffects::MacroExplosionDarkSmall(const coreVector3 vPosition)
 {
     // 
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_SMALL);
@@ -740,7 +740,7 @@ void cSpecialEffects::MacroExplosionDarkSmall(const coreVector3& vPosition)
     this         ->ShakeScreen      (SPECIAL_SHAKE_SMALL);
 }
 
-void cSpecialEffects::MacroExplosionDarkBig(const coreVector3& vPosition)
+void cSpecialEffects::MacroExplosionDarkBig(const coreVector3 vPosition)
 {
     // 
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_BIG);
@@ -750,7 +750,7 @@ void cSpecialEffects::MacroExplosionDarkBig(const coreVector3& vPosition)
     this         ->ShakeScreen      (SPECIAL_SHAKE_BIG);
 }
 
-void cSpecialEffects::MacroExplosionPhysicalColorSmall(const coreVector3& vPosition, const coreVector3& vColor)
+void cSpecialEffects::MacroExplosionPhysicalColorSmall(const coreVector3 vPosition, const coreVector3 vColor)
 {
     // 
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_SMALL);
@@ -760,7 +760,7 @@ void cSpecialEffects::MacroExplosionPhysicalColorSmall(const coreVector3& vPosit
     this         ->ShakeScreen      (SPECIAL_SHAKE_SMALL);
 }
 
-void cSpecialEffects::MacroExplosionPhysicalColorBig(const coreVector3& vPosition, const coreVector3& vColor)
+void cSpecialEffects::MacroExplosionPhysicalColorBig(const coreVector3 vPosition, const coreVector3 vColor)
 {
     // 
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_BIG);
@@ -770,7 +770,7 @@ void cSpecialEffects::MacroExplosionPhysicalColorBig(const coreVector3& vPositio
     this         ->ShakeScreen      (SPECIAL_SHAKE_BIG);
 }
 
-void cSpecialEffects::MacroExplosionPhysicalDarkSmall(const coreVector3& vPosition)
+void cSpecialEffects::MacroExplosionPhysicalDarkSmall(const coreVector3 vPosition)
 {
     // 
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_SMALL);
@@ -780,7 +780,7 @@ void cSpecialEffects::MacroExplosionPhysicalDarkSmall(const coreVector3& vPositi
     this         ->ShakeScreen      (SPECIAL_SHAKE_SMALL);
 }
 
-void cSpecialEffects::MacroExplosionPhysicalDarkBig(const coreVector3& vPosition)
+void cSpecialEffects::MacroExplosionPhysicalDarkBig(const coreVector3 vPosition)
 {
     // 
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_BIG);
@@ -790,7 +790,7 @@ void cSpecialEffects::MacroExplosionPhysicalDarkBig(const coreVector3& vPosition
     this         ->ShakeScreen      (SPECIAL_SHAKE_BIG);
 }
 
-void cSpecialEffects::MacroEruptionColorSmall(const coreVector3& vPosition, const coreVector2& vDirection, const coreVector3& vColor)
+void cSpecialEffects::MacroEruptionColorSmall(const coreVector3 vPosition, const coreVector2 vDirection, const coreVector3 vColor)
 {
     // 
     g_pDistortion->CreateBurst    (vPosition,             vDirection,        DISTORTION_BURST_SMALL);
@@ -798,7 +798,7 @@ void cSpecialEffects::MacroEruptionColorSmall(const coreVector3& vPosition, cons
     this         ->PlaySound      (vPosition, 1.0f, SOUND_EXPLOSION_ENERGY_SMALL);
 }
 
-void cSpecialEffects::MacroEruptionColorBig(const coreVector3& vPosition, const coreVector2& vDirection, const coreVector3& vColor)
+void cSpecialEffects::MacroEruptionColorBig(const coreVector3 vPosition, const coreVector2 vDirection, const coreVector3 vColor)
 {
     // 
     g_pDistortion->CreateBurst    (vPosition,             vDirection,        DISTORTION_BURST_BIG);
@@ -806,7 +806,7 @@ void cSpecialEffects::MacroEruptionColorBig(const coreVector3& vPosition, const 
     this         ->PlaySound      (vPosition, 1.0f, SOUND_EXPLOSION_ENERGY_BIG);
 }
 
-void cSpecialEffects::MacroEruptionDarkSmall(const coreVector3& vPosition, const coreVector2& vDirection)
+void cSpecialEffects::MacroEruptionDarkSmall(const coreVector3 vPosition, const coreVector2 vDirection)
 {
     // 
     g_pDistortion->CreateBurst   (vPosition,             vDirection,        DISTORTION_BURST_SMALL);
@@ -814,7 +814,7 @@ void cSpecialEffects::MacroEruptionDarkSmall(const coreVector3& vPosition, const
     this         ->PlaySound     (vPosition, 1.0f, SOUND_EXPLOSION_ENERGY_SMALL);
 }
 
-void cSpecialEffects::MacroEruptionDarkBig(const coreVector3& vPosition, const coreVector2& vDirection)
+void cSpecialEffects::MacroEruptionDarkBig(const coreVector3 vPosition, const coreVector2 vDirection)
 {
     // 
     g_pDistortion->CreateBurst   (vPosition,             vDirection,        DISTORTION_BURST_BIG);
@@ -825,7 +825,7 @@ void cSpecialEffects::MacroEruptionDarkBig(const coreVector3& vPosition, const c
 
 // ****************************************************************
 // 
-void cSpecialEffects::MacroDestructionColor(const coreObject3D* pObject, const coreVector3& vColor)
+void cSpecialEffects::MacroDestructionColor(const coreObject3D* pObject, const coreVector3 vColor)
 {
     ASSERT(pObject)
 

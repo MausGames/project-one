@@ -46,13 +46,13 @@ public:
     ENABLE_COPY(cShip)
 
     // transformation functions (raw parameters are multiplied with FOREGROUND_AREA)
-    coreBool DefaultMovePath     (const coreSpline2* pRawPath, const coreVector2& vFactor, const coreVector2& vRawOffset, const coreFloat fDistance);
-    coreBool DefaultMoveTarget   (const coreVector2& vTarget, const coreFloat fSpeedMove, const coreFloat fSpeedTurn);
-    coreBool DefaultMoveSmooth   (const coreVector2& vRawPosition, const coreFloat fSpeedMove, const coreFloat fDistThreshold);
-    void     DefaultMoveForward  (const coreVector2& vDirection, const coreFloat fSpeedMove);
-    void     DefaultMoveLerp     (const coreVector2& vFromRawPos, const coreVector2& vToRawPos, const coreFloat fTime);
+    coreBool DefaultMovePath     (const coreSpline2* pRawPath, const coreVector2 vFactor, const coreVector2 vRawOffset, const coreFloat fDistance);
+    coreBool DefaultMoveTarget   (const coreVector2 vTarget, const coreFloat fSpeedMove, const coreFloat fSpeedTurn);
+    coreBool DefaultMoveSmooth   (const coreVector2 vRawPosition, const coreFloat fSpeedMove, const coreFloat fDistThreshold);
+    void     DefaultMoveForward  (const coreVector2 vDirection, const coreFloat fSpeedMove);
+    void     DefaultMoveLerp     (const coreVector2 vFromRawPos, const coreVector2 vToRawPos, const coreFloat fTime);
     void     DefaultRotate       (const coreFloat fAngle);
-    coreBool DefaultRotateSmooth (const coreVector2& vDirection, const coreFloat fSpeedTurn, const coreFloat fDistThreshold);
+    coreBool DefaultRotateSmooth (const coreVector2 vDirection, const coreFloat fSpeedTurn, const coreFloat fDistThreshold);
     void     DefaultRotateLerp   (const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime);
     void     DefaultOrientate    (const coreFloat fAngle);
     void     DefaultOrientateLerp(const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime);
@@ -99,7 +99,7 @@ public:
 
 protected:
     // 
-    coreInt32 _TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact);
+    coreInt32 _TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2 vImpact);
 
     // 
     void _Resurrect();

@@ -324,7 +324,7 @@ void cNevoMission::DisableTile(const coreUintW iIndex, const coreBool bAnimated)
 
 // ****************************************************************
 // 
-void cNevoMission::EnableArrow(const coreUintW iIndex, const cShip* pOwner, const coreVector2& vDirection)
+void cNevoMission::EnableArrow(const coreUintW iIndex, const cShip* pOwner, const coreVector2 vDirection)
 {
     ASSERT(iIndex < NEVO_ARROWS)
     coreObject3D& oArrow = m_aArrowRaw[iIndex];
@@ -411,7 +411,7 @@ void cNevoMission::DisableBlock(const coreUintW iIndex, const coreBool bAnimated
 
 // ****************************************************************
 // 
-void cNevoMission::EnableContainer(const coreVector2& vPosition)
+void cNevoMission::EnableContainer(const coreVector2 vPosition)
 {
     // 
     WARN_IF(m_Container.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
@@ -694,7 +694,7 @@ void cNevoMission::__MoveOwnAfter()
     m_BlockWave.MoveNormal();
 
     // 
-    cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_NEVO_BLOCK, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBlock, const coreVector3& vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_NEVO_BLOCK, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBlock, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
 
@@ -733,7 +733,7 @@ void cNevoMission::__MoveOwnAfter()
         m_Container.Move();
 
         // 
-        cPlayer::TestCollision(PLAYER_TEST_NORMAL | PLAYER_TEST_FEEL | PLAYER_TEST_IGNORE, &m_Container, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pContainer, const coreVector3& vIntersection, const coreBool bFirstHit)
+        cPlayer::TestCollision(PLAYER_TEST_NORMAL | PLAYER_TEST_FEEL | PLAYER_TEST_IGNORE, &m_Container, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pContainer, const coreVector3 vIntersection, const coreBool bFirstHit)
         {
             if(!bFirstHit) return;
 
@@ -745,7 +745,7 @@ void cNevoMission::__MoveOwnAfter()
         });
 
         // 
-        Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, &m_Container, [](cBullet* OUTPUT pBullet, coreObject3D* OUTPUT pContainer, const coreVector3& vIntersection, const coreBool bFirstHit)
+        Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, &m_Container, [](cBullet* OUTPUT pBullet, coreObject3D* OUTPUT pContainer, const coreVector3 vIntersection, const coreBool bFirstHit)
         {
             if(!bFirstHit) return;
 

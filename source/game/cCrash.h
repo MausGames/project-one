@@ -55,7 +55,7 @@ public:
     void Move();
 
     // 
-    void AddCrash    (const cLodObject& oBase, const coreVector2& vTarget, void* pData);
+    void AddCrash    (const cLodObject& oBase, const coreVector2 vTarget, void* pData);
     void ClearCrashes(const coreBool bAnimated);
 
     // 

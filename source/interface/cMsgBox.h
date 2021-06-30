@@ -126,7 +126,7 @@ template <typename F> void cMsgBox::__ShowMessage(const coreChar* pcText, F&& nC
 
     // 
     m_Box.SetSize(coreVector2(0.0f,0.0f));
-    m_Msg.RetrieveDesiredSize([this](const coreVector2& vSize)
+    m_Msg.RetrieveDesiredSize([this](const coreVector2 vSize)
     {
         m_Box.SetSize(coreVector2(MAX(vSize.x + 0.1f, 0.55f), 0.25f));
     });

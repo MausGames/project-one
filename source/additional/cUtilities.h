@@ -121,7 +121,7 @@ inline FUNC_PURE coreFloat FrictionFactor(const coreFloat fStrength)
 
 // ****************************************************************
 // 
-inline FUNC_PURE coreVector2 SmoothAim(const coreVector2& vOldDir, const coreVector2& vNewDir, const coreFloat fStrength)
+inline FUNC_PURE coreVector2 SmoothAim(const coreVector2 vOldDir, const coreVector2 vNewDir, const coreFloat fStrength)
 {
     ASSERT(vOldDir.IsNormalized() && vNewDir.IsNormalized())
 
@@ -144,7 +144,7 @@ constexpr FUNC_CONST coreFloat SmoothTowards(const coreFloat fDistance, const co
 
 // ****************************************************************
 // direction quantization and packing helper-functions
-inline FUNC_LOCAL coreUint8 PackDirection(const coreVector2& vDirection)
+inline FUNC_CONST coreUint8 PackDirection(const coreVector2 vDirection)
 {
     return vDirection.IsNull() ? 8u : (F_TO_UI(ROUND(vDirection.Angle() / (0.25f*PI))) & 0x07u);
 }
@@ -199,7 +199,7 @@ constexpr FUNC_CONST coreVector2 StepRotated90X(const coreUint8 iStep)
 
 // ****************************************************************
 // 
-constexpr FUNC_CONST coreVector2 MapStepRotated45(const coreVector2& vDirection, const coreUint8 iStep)
+constexpr FUNC_CONST coreVector2 MapStepRotated45(const coreVector2 vDirection, const coreUint8 iStep)
 {
     switch(iStep)
     {
@@ -215,7 +215,7 @@ constexpr FUNC_CONST coreVector2 MapStepRotated45(const coreVector2& vDirection,
     }
 }
 
-constexpr FUNC_CONST coreVector2 MapStepRotated90(const coreVector2& vDirection, const coreUint8 iStep)
+constexpr FUNC_CONST coreVector2 MapStepRotated90(const coreVector2 vDirection, const coreUint8 iStep)
 {
     switch(iStep)
     {
@@ -230,43 +230,43 @@ constexpr FUNC_CONST coreVector2 MapStepRotated90(const coreVector2& vDirection,
 
 // ****************************************************************
 // 
-inline FUNC_LOCAL coreBool IsHorizontal(const coreVector2& v)
+inline FUNC_CONST coreBool IsHorizontal(const coreVector2 v)
 {
     ASSERT(!v.IsNull())
     return ABS(v.x) > ABS(v.y);
 }
 
-constexpr FUNC_LOCAL coreVector2 AlongCross(const coreVector2& v)
+constexpr FUNC_CONST coreVector2 AlongCross(const coreVector2 v)
 {
     ASSERT(!v.IsNull())
     return IsHorizontal(v) ? coreVector2(v.x, 0.0f) : coreVector2(0.0f, v.y);
 }
 
-constexpr FUNC_LOCAL coreVector2 AlongCrossNormal(const coreVector2& v)
+constexpr FUNC_CONST coreVector2 AlongCrossNormal(const coreVector2 v)
 {
     ASSERT(!v.IsNull())
     return IsHorizontal(v) ? coreVector2(SIGN(v.x), 0.0f) : coreVector2(0.0f, SIGN(v.y));
 }
 
-constexpr FUNC_LOCAL coreVector2 AlongCrossX(const coreVector2& v)
+constexpr FUNC_CONST coreVector2 AlongCrossX(const coreVector2 v)
 {
     ASSERT(!v.IsNull())
     return -AlongCross(v.Rotated45()).Rotated135();
 }
 
-constexpr FUNC_LOCAL coreVector2 AlongCrossXNormal(const coreVector2& v)
+constexpr FUNC_CONST coreVector2 AlongCrossXNormal(const coreVector2 v)
 {
     ASSERT(!v.IsNull())
     return -AlongCrossNormal(v.Rotated45()).Rotated135();
 }
 
-inline FUNC_LOCAL coreVector2 AlongStar(const coreVector2& v)
+inline FUNC_CONST coreVector2 AlongStar(const coreVector2 v)
 {
     ASSERT(!v.IsNull())
     return UnpackDirection(PackDirection(v)) * v.Length();
 }
 
-inline FUNC_LOCAL coreVector2 AlongStarNormal(const coreVector2& v)
+inline FUNC_CONST coreVector2 AlongStarNormal(const coreVector2 v)
 {
     ASSERT(!v.IsNull())
     return UnpackDirection(PackDirection(v));
@@ -275,13 +275,13 @@ inline FUNC_LOCAL coreVector2 AlongStarNormal(const coreVector2& v)
 
 // ****************************************************************
 // 
-constexpr FUNC_LOCAL coreVector2 MapToAxis(const coreVector2& vVector, const coreVector2& vAxis)
+constexpr FUNC_CONST coreVector2 MapToAxis(const coreVector2 vVector, const coreVector2 vAxis)
 {
     return (vVector.x * vAxis.Rotated90()) +
            (vVector.y * vAxis);
 }
 
-constexpr FUNC_LOCAL coreVector2 MapToAxisInv(const coreVector2& vVector, const coreVector2& vAxis)
+constexpr FUNC_CONST coreVector2 MapToAxisInv(const coreVector2 vVector, const coreVector2 vAxis)
 {
     return MapToAxis(vVector, vAxis.InvertedX());
 }

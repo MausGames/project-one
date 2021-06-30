@@ -160,7 +160,7 @@ void cEnvironment::Move()
 
 // ****************************************************************
 // change current background
-void cEnvironment::ChangeBackground(const coreInt32 iID, const coreUintW iTransitionType, const coreFloat fTransitionSpeed, const coreVector2& vTransitionDir)
+void cEnvironment::ChangeBackground(const coreInt32 iID, const coreUintW iTransitionType, const coreFloat fTransitionSpeed, const coreVector2 vTransitionDir)
 {
     if(m_pBackground) if(m_pBackground->GetID() == iID) return;
 
@@ -224,7 +224,7 @@ FUNC_LOCAL coreFloat cEnvironment::RetrieveTransitionBlend(const cBackground* pB
 
 // ****************************************************************
 // retrieve safe height value
-FUNC_PURE coreFloat cEnvironment::RetrieveSafeHeight(const coreVector2& vPosition, const coreFloat fFallback)const
+FUNC_PURE coreFloat cEnvironment::RetrieveSafeHeight(const coreVector2 vPosition, const coreFloat fFallback)const
 {
     // check for available outdoor-surface
     const cOutdoor* pOutdoor = m_pBackground->GetOutdoor();

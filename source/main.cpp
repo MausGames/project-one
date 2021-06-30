@@ -242,7 +242,7 @@ void CoreApp::Move()
 
 // ****************************************************************
 // init resolution properties
-void InitResolution(const coreVector2& vResolution)
+void InitResolution(const coreVector2 vResolution)
 {
     // calculate biggest possible 1:1 resolution
     g_vGameResolution = coreVector2(1.0f,1.0f) * vResolution.Min();

@@ -132,9 +132,9 @@ STATIC_ASSERT((MISSION_BOSSES == 2u) && (MISSION_WAVES == 10u))
 #define STAGE_ADD_PATH(n)                      const auto n = this->_AddPath    (__LINE__,      [](coreSpline2* OUTPUT n)
 #define STAGE_ADD_SQUAD(n,t,c)                 const auto n = this->_AddSquad<t>(__LINE__, (c), [](cEnemySquad* OUTPUT n)
 
-#define STAGE_COLL_PLAYER_ENEMY(a,b,i,f,...)   if(!m_nCollPlayerEnemy)  m_nCollPlayerEnemy  = ([__VA_ARGS__](cPlayer* OUTPUT a, cEnemy*  OUTPUT b, const coreVector3& i, const coreBool f)   // NOLINT
-#define STAGE_COLL_PLAYER_BULLET(a,b,i,f,...)  if(!m_nCollPlayerBullet) m_nCollPlayerBullet = ([__VA_ARGS__](cPlayer* OUTPUT a, cBullet* OUTPUT b, const coreVector3& i, const coreBool f)   // NOLINT
-#define STAGE_COLL_ENEMY_BULLET(a,b,i,f,...)   if(!m_nCollEnemyBullet)  m_nCollEnemyBullet  = ([__VA_ARGS__](cEnemy*  OUTPUT a, cBullet* OUTPUT b, const coreVector3& i, const coreBool f)   // NOLINT
+#define STAGE_COLL_PLAYER_ENEMY(a,b,i,f,...)   if(!m_nCollPlayerEnemy)  m_nCollPlayerEnemy  = ([__VA_ARGS__](cPlayer* OUTPUT a, cEnemy*  OUTPUT b, const coreVector3 i, const coreBool f)   // NOLINT
+#define STAGE_COLL_PLAYER_BULLET(a,b,i,f,...)  if(!m_nCollPlayerBullet) m_nCollPlayerBullet = ([__VA_ARGS__](cPlayer* OUTPUT a, cBullet* OUTPUT b, const coreVector3 i, const coreBool f)   // NOLINT
+#define STAGE_COLL_ENEMY_BULLET(a,b,i,f,...)   if(!m_nCollEnemyBullet)  m_nCollEnemyBullet  = ([__VA_ARGS__](cEnemy*  OUTPUT a, cBullet* OUTPUT b, const coreVector3 i, const coreBool f)   // NOLINT
 #define COLL_VAL(x)                             x = s_cast<typename std::conditional<!std::is_reference<decltype(x)>::value, decltype(x), void>::type>(x)
 #define COLL_REF(x)                            &x = s_cast<typename std::conditional< std::is_reference<decltype(x)>::value, decltype(x), void>::type>(x)
 #define COLL_THIS                              this
@@ -223,9 +223,9 @@ class INTERFACE cMission
 {
 private:
     // 
-    using uCollPlayerEnemyType  = std::function<void(cPlayer* OUTPUT, cEnemy*  OUTPUT, const coreVector3&, const coreBool)>;
-    using uCollPlayerBulletType = std::function<void(cPlayer* OUTPUT, cBullet* OUTPUT, const coreVector3&, const coreBool)>;
-    using uCollEnemyBulletType  = std::function<void(cEnemy*  OUTPUT, cBullet* OUTPUT, const coreVector3&, const coreBool)>;
+    using uCollPlayerEnemyType  = std::function<void(cPlayer* OUTPUT, cEnemy*  OUTPUT, const coreVector3, const coreBool)>;
+    using uCollPlayerBulletType = std::function<void(cPlayer* OUTPUT, cBullet* OUTPUT, const coreVector3, const coreBool)>;
+    using uCollEnemyBulletType  = std::function<void(cEnemy*  OUTPUT, cBullet* OUTPUT, const coreVector3, const coreBool)>;
 
 
 protected:
@@ -308,12 +308,12 @@ public:
     inline void SetMedalGoal(const coreFloat* pfMedalGoal) {m_pfMedalGoal = pfMedalGoal; ASSERT(pfMedalGoal)}
 
     // 
-    void GiveBadge(const coreUint8 iBadge, const coreVector3& vPosition);
+    void GiveBadge(const coreUint8 iBadge, const coreVector3 vPosition);
 
     // 
-    inline void CollPlayerEnemy (cPlayer* OUTPUT pPlayer, cEnemy*  OUTPUT pEnemy,  const coreVector3& vIntersection, const coreBool bFirstHit) {if(m_nCollPlayerEnemy)  m_nCollPlayerEnemy (pPlayer, pEnemy,  vIntersection, bFirstHit);}
-    inline void CollPlayerBullet(cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit) {if(m_nCollPlayerBullet) m_nCollPlayerBullet(pPlayer, pBullet, vIntersection, bFirstHit);}
-    inline void CollEnemyBullet (cEnemy*  OUTPUT pEnemy,  cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit) {if(m_nCollEnemyBullet)  m_nCollEnemyBullet (pEnemy,  pBullet, vIntersection, bFirstHit);}
+    inline void CollPlayerEnemy (cPlayer* OUTPUT pPlayer, cEnemy*  OUTPUT pEnemy,  const coreVector3 vIntersection, const coreBool bFirstHit) {if(m_nCollPlayerEnemy)  m_nCollPlayerEnemy (pPlayer, pEnemy,  vIntersection, bFirstHit);}
+    inline void CollPlayerBullet(cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit) {if(m_nCollPlayerBullet) m_nCollPlayerBullet(pPlayer, pBullet, vIntersection, bFirstHit);}
+    inline void CollEnemyBullet (cEnemy*  OUTPUT pEnemy,  cBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit) {if(m_nCollEnemyBullet)  m_nCollEnemyBullet (pEnemy,  pBullet, vIntersection, bFirstHit);}
 
     // access mission objects
     inline cBoss*           GetBoss           (const coreUintW iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_apBoss[iIndex];}
@@ -409,7 +409,7 @@ public:
     ASSIGN_ID(1, "Virido")
 
     // 
-    void EnableBall (const coreUintW iIndex, const coreVector2& vPosition, const coreVector2& vDirection);
+    void EnableBall (const coreUintW iIndex, const coreVector2 vPosition, const coreVector2 vDirection);
     void DisableBall(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
@@ -417,7 +417,7 @@ public:
     void DisablePaddle(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    void EnableBarrier (const coreUintW iIndex, const cShip* pOwner, const coreVector2& vDirection, const coreFloat fSize);
+    void EnableBarrier (const coreUintW iIndex, const cShip* pOwner, const coreVector2 vDirection, const coreFloat fSize);
     void DisableBarrier(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
@@ -425,13 +425,13 @@ public:
     void DisableLaser(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    void EnableShadow (const coreUintW iIndex, const cShip* pOwner, const coreVector2& vPosition);
+    void EnableShadow (const coreUintW iIndex, const cShip* pOwner, const coreVector2 vPosition);
     void DisableShadow(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    inline void MakeReal    (const coreUintW iIndex)        {ADD_BIT(m_iRealState, iIndex)}
-    inline void MakeSticky  ()                              {ADD_BIT(m_iStickyState, 0u)}
-    inline void UnmakeSticky(const coreVector2& vDirection) {m_iStickyState = 0; m_aBallRaw[0].SetDirection(coreVector3(vDirection, 0.0f));}
+    inline void MakeReal    (const coreUintW iIndex)       {ADD_BIT(m_iRealState, iIndex)}
+    inline void MakeSticky  ()                             {ADD_BIT(m_iStickyState, 0u)}
+    inline void UnmakeSticky(const coreVector2 vDirection) {m_iStickyState = 0; m_aBallRaw[0].SetDirection(coreVector3(vDirection, 0.0f));}
 
     // 
     inline const coreUint8& GetRealState  ()const {return m_iRealState;}
@@ -453,7 +453,7 @@ private:
     void __MoveOwnAfter  ()final;
 
     // 
-    static void __BounceEffect(const coreVector2& vEffectPos);
+    static void __BounceEffect(const coreVector2 vEffectPos);
 };
 
 
@@ -517,7 +517,7 @@ public:
     void DisableTile(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    void EnableArrow (const coreUintW iIndex, const cShip* pOwner, const coreVector2& vDirection);
+    void EnableArrow (const coreUintW iIndex, const cShip* pOwner, const coreVector2 vDirection);
     void DisableArrow(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
@@ -525,13 +525,13 @@ public:
     void DisableBlock(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    void EnableContainer (const coreVector2& vPosition);
+    void EnableContainer (const coreVector2 vPosition);
     void DisableContainer(const coreBool bAnimated);
 
     // 
-    inline void SetContainerForce   (const coreVector2& vForce)    {m_vForce    = vForce;}
-    inline void SetContainerClamp   (const coreBool     bClamp)    {m_bClamp    = bClamp;}
-    inline void SetContainerOverdraw(const coreBool     bOverdraw) {m_bOverdraw = bOverdraw;}
+    inline void SetContainerForce   (const coreVector2 vForce)    {m_vForce    = vForce;}
+    inline void SetContainerClamp   (const coreBool    bClamp)    {m_bClamp    = bClamp;}
+    inline void SetContainerOverdraw(const coreBool    bOverdraw) {m_bOverdraw = bOverdraw;}
 
     // 
     inline const coreBool&    GetBombGone       (const coreUintW iIndex)const {ASSERT(iIndex < NEVO_BOMBS) return m_abBombGone[iIndex];}
@@ -706,7 +706,7 @@ public:
     void DisableFang(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    void EnableWay (const coreUintW iIndex, const coreVector2& vPosition, const coreVector2& vDirection);
+    void EnableWay (const coreUintW iIndex, const coreVector2 vPosition, const coreVector2 vDirection);
     void DisableWay(const coreUintW iIndex, const coreBool bAnimated);
 
     // 

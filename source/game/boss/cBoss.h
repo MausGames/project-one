@@ -125,9 +125,9 @@ public:
     void ChangePhase(const coreUint8 iPhase);
 
     // 
-    void StorePosition(const coreVector2& vPos);
+    void StorePosition(const coreVector2 vPos);
     void StorePosition();
-    void StoreRotation(const coreVector3& vDir, const coreVector3& vOri);
+    void StoreRotation(const coreVector3 vDir, const coreVector3 vOri);
     void StoreRotation();
 
     // 
@@ -183,13 +183,13 @@ private:
     void __DisableDuplicate(const coreBool bAnimated);
 
     // 
-    void __EnableBoomerang (const coreUintW iIndex, const coreVector2& vPosition, const coreVector2& vDirection);
+    void __EnableBoomerang (const coreUintW iIndex, const coreVector2 vPosition, const coreVector2 vDirection);
     void __DisableBoomerang(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    coreVector2 __RepeatPosition (const coreVector2& vPosition, const coreFloat fThreshold, coreBool* OUTPUT pbChange);
-    coreVector2 __RepeatPosition (const coreVector2& vPosition, const coreFloat fThreshold);
-    void        __EncodeDirection(const coreUintW iIndex, const coreVector2& vDirection);
+    coreVector2 __RepeatPosition (const coreVector2 vPosition, const coreFloat fThreshold, coreBool* OUTPUT pbChange);
+    coreVector2 __RepeatPosition (const coreVector2 vPosition, const coreFloat fThreshold);
+    void        __EncodeDirection(const coreUintW iIndex, const coreVector2 vDirection);
     coreVector2 __DecodeDirection(const coreUintW iIndex);
 };
 
@@ -236,15 +236,15 @@ private:
     void __MoveOwn       ()final;
 
     // 
-    void __EnableSummon (const coreVector2& vPosition, const coreVector3& vColor);
+    void __EnableSummon (const coreVector2 vPosition, const coreVector3 vColor);
     void __DisableSummon();
 
     // 
-    void __EnableTurret (const coreUintW iIndex, const coreVector2& vPosition);
+    void __EnableTurret (const coreUintW iIndex, const coreVector2 vPosition);
     void __DisableTurret(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    void __EnableGunner (const coreUintW iIndex, const coreVector2& vPosition);
+    void __EnableGunner (const coreUintW iIndex, const coreVector2 vPosition);
     void __DisableGunner(const coreUintW iIndex, const coreBool bAnimated);
 };
 
@@ -303,10 +303,10 @@ private:
     void __MoveOwn      ()final;
 
     // 
-    void __CreateInk(const coreUintW iIndex, const coreVector2& vPosition);
+    void __CreateInk(const coreUintW iIndex, const coreVector2 vPosition);
 
     // 
-    void __EnableBullet (const coreVector2& vStart, const coreVector2& vEnd);
+    void __EnableBullet (const coreVector2 vStart, const coreVector2 vEnd);
     void __DisableBullet(const coreBool bAnimated);
 };
 
@@ -378,14 +378,14 @@ private:
     // 
     void __EnableRay      (const coreUintW iIndex);
     void __DisableRay     (const coreUintW iIndex, const coreBool bAnimated);
-    void __CreateOverdrive(const coreUintW iIndex, const coreVector3& vIntersect, const coreFloat fTime, const coreBool bGround);
+    void __CreateOverdrive(const coreUintW iIndex, const coreVector3 vIntersect, const coreFloat fTime, const coreBool bGround);
 
     // 
     void __UpdateHealth();
     void __RefreshHealth();
 
     // 
-    static FUNC_NOALIAS void      __CalcCurvePosDir(const coreVector3& vAxis, const coreFloat fAngle, const coreVector3& vScale, coreVector3* OUTPUT vPosition, coreVector3* OUTPUT vDirection);
+    static FUNC_NOALIAS void      __CalcCurvePosDir(const coreVector3 vAxis, const coreFloat fAngle, const coreVector3 vScale, coreVector3* OUTPUT vPosition, coreVector3* OUTPUT vDirection);
     static FUNC_CONST   coreFloat __CalcAngle      (const coreFloat fDistance, const coreFloat fRadius);
 
     // 

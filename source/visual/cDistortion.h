@@ -50,8 +50,8 @@ public:
     void Update();
 
     // create distortion-objects
-    void CreateWave (const coreVector3& vPosition,                                const coreFloat fScale, const coreFloat fSpeed);
-    void CreateBurst(const coreVector3& vPosition, const coreVector2& vDirection, const coreFloat fScale, const coreFloat fSpeed);
+    void CreateWave (const coreVector3 vPosition,                               const coreFloat fScale, const coreFloat fSpeed);
+    void CreateBurst(const coreVector3 vPosition, const coreVector2 vDirection, const coreFloat fScale, const coreFloat fSpeed);
 
     // access frame buffer
     inline coreFrameBuffer* GetFrameBuffer() {return &m_FrameBuffer;}

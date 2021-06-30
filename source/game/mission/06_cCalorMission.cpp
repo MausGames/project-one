@@ -382,7 +382,7 @@ void cCalorMission::__MoveOwnMiddle()
             if(!pPlayer->HasStatus(PLAYER_STATUS_DEAD))
             {
                 // 
-                Core::Manager::Object->TestCollision(TYPE_ENEMY, pStar, [&](cEnemy* OUTPUT pEnemy, coreObject3D* OUTPUT pStar, const coreVector3& vIntersection, const coreBool bFirstHit)
+                Core::Manager::Object->TestCollision(TYPE_ENEMY, pStar, [&](cEnemy* OUTPUT pEnemy, coreObject3D* OUTPUT pStar, const coreVector3 vIntersection, const coreBool bFirstHit)
                 {
                     if(m_apCatchObject[i]) return;
 
@@ -415,7 +415,7 @@ void cCalorMission::__MoveOwnMiddle()
                 pCopy->SetDirection(coreVector3(MapToAxis(m_avCatchDir[i], -vDir), 0.0f));
 
                 // 
-                const auto nBulletCollFunc = [](cBullet* OUTPUT pBullet, const coreObject3D* pObject, const coreVector3& vIntersection, const coreBool bFirstHit)
+                const auto nBulletCollFunc = [](cBullet* OUTPUT pBullet, const coreObject3D* pObject, const coreVector3 vIntersection, const coreBool bFirstHit)
                 {
                     pBullet->Deactivate(true);
                 };
@@ -423,7 +423,7 @@ void cCalorMission::__MoveOwnMiddle()
                 Core::Manager::Object->TestCollision(TYPE_BULLET_ENEMY,  pCopy, nBulletCollFunc);
 
                 // 
-                Core::Manager::Object->TestCollision(TYPE_ENEMY, pCopy, [&](cEnemy* OUTPUT pEnemy, cEnemy* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit)
+                Core::Manager::Object->TestCollision(TYPE_ENEMY, pCopy, [&](cEnemy* OUTPUT pEnemy, cEnemy* OUTPUT pObject, const coreVector3 vIntersection, const coreBool bFirstHit)
                 {
                     if(!m_apCatchObject[i]) return;
 
