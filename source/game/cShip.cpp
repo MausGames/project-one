@@ -158,9 +158,9 @@ void cShip::DefaultRotateLerp(const coreFloat fFromAngle, const coreFloat fToAng
 void cShip::DefaultOrientate(const coreFloat fAngle)
 {
     // rotate around direction axis
-    const coreVector3 vDir = this->GetDirection();
+    const coreVector2 vDir = this->GetDirection().xy();
     const coreVector2 vOri = coreVector2::Direction(fAngle);
-    this->SetOrientation(coreVector3(-vOri.x*vDir.y, vOri.x*vDir.x, vOri.y));
+    this->SetOrientation(OriRoundDir(vOri, vDir));
 }
 
 
@@ -201,7 +201,7 @@ void cShip::DefaultMultiate(const coreFloat fAngle)
     // rotate around the rotating direction axis
     const coreVector2 vDir = coreVector2::Direction(fAngle);
     this->SetDirection  (coreVector3(vDir, 0.0f));
-    this->SetOrientation(coreVector3(-vDir.x*vDir.y, vDir.x*vDir.x, vDir.y));
+    this->SetOrientation(OriRoundDir(vDir, vDir));
 }
 
 

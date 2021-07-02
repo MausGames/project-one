@@ -76,7 +76,7 @@ void cCrashManager::Move()
             // 
             oObject.SetPosition   (vPos);
             oObject.SetDirection  (coreVector3(vDir, 0.0f));
-            oObject.SetOrientation(coreVector3(-vDir.x*vDir.y, vDir.x*vDir.x, vDir.y));
+            oObject.SetOrientation(OriRoundDir(vDir, vDir));
             oObject.Move();
 
             // 

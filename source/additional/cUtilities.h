@@ -289,6 +289,17 @@ constexpr FUNC_CONST coreVector2 MapToAxisInv(const coreVector2 vVector, const c
 
 // ****************************************************************
 // 
+constexpr FUNC_CONST coreVector3 OriRoundDir(const coreVector2 vOrientation, const coreVector2 vDirection)
+{
+    ASSERT(vOrientation.IsNormalized() && vDirection.IsNormalized())
+    return coreVector3(-vOrientation.x * vDirection.y,
+                        vOrientation.x * vDirection.x,
+                        vOrientation.y);
+}
+
+
+// ****************************************************************
+// 
 constexpr FUNC_CONST coreFloat DelayTime(const coreFloat fTime, const coreFloat fOffset, const coreFloat fLength)
 {
     return MIN(fTime, fOffset) + MAX(fTime - fOffset - fLength, 0.0f);

@@ -182,7 +182,7 @@ void cHarenaMission::__MoveOwnAfter()
         // 
         pBoard->SetSize       (coreVector3(fBlend, fBlend, 1.0f) * pBoard->GetSize().z);
         pBoard->SetDirection  (coreVector3(vDir, 0.0f));
-        pBoard->SetOrientation(coreVector3(-vDir.x*vDir.y, vDir.x*vDir.x, vDir.y));
+        pBoard->SetOrientation(OriRoundDir(vDir, vDir));
         pBoard->SetColor3     (LERP(coreVector3(1.0f,1.0f,1.0f) * 0.9f, COLOR_SHIP_RED, STEPH3(-6.0f, -3.0f, fHeight) * 0.5f));
     }
 

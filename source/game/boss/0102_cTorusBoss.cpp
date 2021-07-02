@@ -274,7 +274,7 @@ void cTorusBoss::__MoveOwn()
 
         // 
         const coreVector3 vDir  = coreVector3(coreVector2::Direction(m_fRotationObject * PI), 0.0f);
-        const coreVector3 vOri  = coreVector3(-vDir.x*vDir.y, vDir.x*vDir.x, vDir.y);
+        const coreVector3 vOri  = OriRoundDir(vDir.xy(), vDir.xy());
         const coreVector2 vTex  = coreVector2(0.2f,1.0f) * m_fRotationObject;
         const coreFloat   fTime = FMOD(m_fRotationObject * -5.0f, 2.0f);
 
