@@ -224,14 +224,27 @@ FUNC_LOCAL coreFloat cEnvironment::RetrieveTransitionBlend(const cBackground* pB
 
 // ****************************************************************
 // retrieve safe height value
-FUNC_PURE coreFloat cEnvironment::RetrieveSafeHeight(const coreVector2 vPosition, const coreFloat fFallback)const
+FUNC_PURE coreFloat cEnvironment::RetrieveSafeHeight(const coreVector2 vPosition, const coreFloat fFallbackHeight)const
 {
     // check for available outdoor-surface
     const cOutdoor* pOutdoor = m_pBackground->GetOutdoor();
-    if(!pOutdoor) return fFallback;
+    if(!pOutdoor) return fFallbackHeight;
 
     // retrieve height value
     return pOutdoor->RetrieveHeight(vPosition);
+}
+
+
+// ****************************************************************
+// retrieve safe ray intersection point
+FUNC_PURE coreVector3 cEnvironment::RetrieveSafeIntersect(const coreVector3 vRayPosition, const coreVector3 vRayDirection, const coreFloat fFallbackHeight)const
+{
+    // check for available outdoor-surface
+    const cOutdoor* pOutdoor = m_pBackground->GetOutdoor();
+    if(!pOutdoor) return vRayPosition + vRayDirection * ((vRayPosition.z - fFallbackHeight) * RCP(vRayDirection.z));
+
+    // retrieve ray intersection point
+    return pOutdoor->RetrieveIntersect(vRayPosition, vRayDirection);
 }
 
 
