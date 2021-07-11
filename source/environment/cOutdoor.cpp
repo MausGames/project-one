@@ -344,10 +344,10 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
             ASSERT((xz1 <= 255.0f) && (yz1 <= 255.0f) &&
                    (xz2 <= 255.0f) && (yz2 <= 255.0f))
 
-            const coreByte aPixel[] = {coreByte(xz1), coreByte(yz1),
-                                       coreByte(xz2), coreByte(yz2)};
+            const coreUint8 aiPixel[] = {coreUint8(xz1), coreUint8(yz1),
+                                         coreUint8(xz2), coreUint8(yz2)};
 
-            std::memcpy(pOutput + i, aPixel, sizeof(aPixel));
+            std::memcpy(pOutput + i, aiPixel, sizeof(aiPixel));
         }
 
         // create final normal map

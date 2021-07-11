@@ -37,7 +37,7 @@ void FragmentMain()
     // calculate dot-3 reflection factor
     vec3  v3MathViewDir = normalize(v_v3ViewDir);
     vec3  v3ReflNormal  = normalize(v3MathLightDir + v3MathViewDir);
-    float v1ReflFactor  = max(0.0, dot(v3ReflNormal, v3BumpNormal));
+    float v1ReflFactor  = max(dot(v3ReflNormal, v3BumpNormal), 0.0);
           v1ReflFactor  = 0.6 * min(coreGGX(v1ReflFactor, 0.008), 1.0);
 
     // adjust depth value
@@ -48,8 +48,8 @@ void FragmentMain()
     vec3 v3Refraction = coreTexture2D(2, v2ScreenCoord + v2Distortion * v1Depth).rgb;
 
     // adjust reflection value
-    v3Reflection = mix(c_v3Blue, v3Reflection, max(0.0, dot(v3BumpNormal, v3MathViewDir) - 0.3)) + vec3(v1ReflFactor);
+    v3Reflection = mix(c_v3Blue, v3Reflection, max(dot(v3BumpNormal, v3MathViewDir) - 0.3, 0.0)) + vec3(v1ReflFactor);
 
     // draw final color
-    gl_FragColor = vec4(mix(v3Refraction, v3Reflection, v1Depth) * (0.85 + 0.2 * v1BumpFactor), 1.0);
+    gl_FragColor = vec4(mix(v3Refraction, v3Reflection, v1Depth) * (v1BumpFactor * 0.2 + 0.85), 1.0);
 }

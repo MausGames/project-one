@@ -27,5 +27,5 @@ void VertexMain()
                            a_v2LowTexCoord.y * c_v1MapResolution + u_v1Offset);
 
     // transform texture coordinates with different animation properties
-    v_av2TexCoord[0] = (v2MapCoord + u_v1Time * vec2(0.5,-0.5)) * 1.0;
+    v_av2TexCoord[0] = (v2MapCoord + u_v1Time * vec2(0.5, -0.5)) * 1.0;
 }

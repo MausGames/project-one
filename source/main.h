@@ -35,7 +35,7 @@
 // TODO 5: menu optimization by caching into framebuffer (general class for leaderboard, options, etc.)
 // TODO 3: protect main (LockFramerate)
 // TODO 3: check all shaders if alpha is required
-// TODO 4: full initializer lists everywhere
+// TODO 4: full initializer lists everywhere (don't forget parent classes)
 // TODO 3: clean mixing shader defines (x >= y) and (defined(x)) checks (also in engine)
 // TODO 3: check for 16-bit float shader usage
 // TODO 2: program enable has to be checked (if(x.Enable()){}) everywhere

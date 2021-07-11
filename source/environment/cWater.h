@@ -20,6 +20,7 @@
 // TODO 3: underwater may render reflection (not required)
 // TODO 3: glBindTexture has to reset internal texture-cache
 // TODO 3: rainwater has mipmapping disabled (provide at least a couple of levels)
+// TODO 3: stencil or early depth to not evaluate land areas
 
 
 // ****************************************************************

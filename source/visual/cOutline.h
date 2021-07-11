@@ -12,6 +12,7 @@
 
 // TODO 3: check that bullet-styles are only used by objects with bullet-shaders
 // TODO 3: bullets on top of each other have their outline multiplied
+// TODO 1: improve outlining on top of each other (e.g. tiger body + weapon)
 
 
 // ****************************************************************

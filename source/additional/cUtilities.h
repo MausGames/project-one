@@ -277,6 +277,7 @@ inline FUNC_CONST coreVector2 AlongStarNormal(const coreVector2 v)
 // 
 constexpr FUNC_CONST coreVector2 MapToAxis(const coreVector2 vVector, const coreVector2 vAxis)
 {
+    ASSERT(vAxis.IsNormalized())
     return (vVector.x * vAxis.Rotated90()) +
            (vVector.y * vAxis);
 }

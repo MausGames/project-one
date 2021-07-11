@@ -32,6 +32,9 @@
 // TODO 1: can thunder effect cause issues for some players ? are there other effects causing issues ? (change effects or add disable option)
 // TODO 3: pre-create all u_av3OverlayTransform permutation hashstrings for overlay uniforms (single table with max number)
 // TODO 3: improve snow texture to little flakes (broken quads) 
+// TODO 3: in Add functions change sListKey to a combination of resource identifiers
+// TODO 3: adding temporary objects should cache resources
+// TODO 3: adding temporary objects can/should implicitly rotate the position ?
 
 
 // ****************************************************************

@@ -863,6 +863,6 @@ void cSpecialEffects::MacroDestructionDark(const coreObject3D* pObject)
 coreVector2 cSpecialEffects::__GetBreakupSide()
 {
     // 
-    if(++m_iBreakupCount >= 12u) m_iBreakupCount = 0u;
+    if(++m_iBreakupCount >= 8u) m_iBreakupCount = 0u;
     return coreVector2::Direction(0.25f*PI * (I_TO_F(m_iBreakupCount) + 0.5f));
 }

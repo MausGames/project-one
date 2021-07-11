@@ -35,12 +35,12 @@ void FragmentMain()
     // calculate dot-3 bump factor
     vec3  v3MathLightDir = normalize(v_av4ShipLight.xyz);
     vec3  v3BumpNormal   = normalize(v_av3ShipNormal);
-    float v1BumpFactor   = dot(v3MathLightDir, v3BumpNormal);
+    float v1BumpFactor   = max(dot(v3MathLightDir, v3BumpNormal), 0.0);
 
     // calculate dot-3 reflection factor
     vec3  v3MathViewDir = normalize(v_av3ShipView);
     vec3  v3ReflNormal  = normalize(v3MathLightDir + v3MathViewDir);
-    float v1ReflFactor  = max(0.0, dot(v3ReflNormal, v3BumpNormal));
+    float v1ReflFactor  = max(dot(v3ReflNormal, v3BumpNormal), 0.0);
 
 #if defined(_P1_GLOW_)
 
@@ -62,7 +62,7 @@ void FragmentMain()
 #endif
 
     // calculate diffuse and specular value
-    vec3 v3Diffuse  = v4TexColor.rgb * (1.4 * max(0.0, v1BumpFactor) + 0.4);
+    vec3 v3Diffuse  = v4TexColor.rgb * (v1BumpFactor * 1.4 + 0.4);
     vec3 v3Specular = vec3(0.15 * min(coreGGX(v1ReflFactor, 0.09), 1.0));
 
     // draw final color

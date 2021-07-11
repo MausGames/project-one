@@ -126,15 +126,15 @@ void FragmentMain()
     // calculate dot-3 bump factor
     vec3  v3MathLightDir = normalize(v_av4LightDir[0].xyz);
     vec3  v3BumpNormal   = coreUnpackNormalMapDeriv(v2TexNormal);
-    float v1BumpFactor   = dot(v3MathLightDir, v3BumpNormal);
+    float v1BumpFactor   = max(dot(v3MathLightDir, v3BumpNormal), v1Max);
 
     // calculate dot-3 reflection factor
     vec3  v3MathViewDir = normalize(v_v3ViewDir);
     vec3  v3ReflNormal  = normalize(v3MathLightDir + v3MathViewDir);
-    float v1ReflFactor  = max(0.0, dot(v3ReflNormal, v3BumpNormal));
+    float v1ReflFactor  = max(dot(v3ReflNormal, v3BumpNormal), 0.0);
 
     // calculate diffuse and specular value
-    float v1Diffuse  = v1Light * (1.4 * max(v1Max, v1BumpFactor) + 0.2);
+    float v1Diffuse  = v1Light * (v1BumpFactor * 1.4 + 0.2);
     float v1Specular = 0.1 * min(coreGGX(v1ReflFactor, 0.09), 1.0) * v1Shine;
 
 #if defined(_P1_LIGHT_)
