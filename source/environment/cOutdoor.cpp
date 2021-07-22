@@ -400,15 +400,15 @@ FUNC_PURE coreFloat cOutdoor::RetrieveBackHeight(const coreVector2 vPosition)con
     ASSERT((iI00 < OUTDOOR_TOTAL_VERTICES) && (iI11 < OUTDOOR_TOTAL_VERTICES))
 
     // retrieve height values of the corners
-    const coreFloat fH00 = coreMath::Float16To32(m_aiHeight[iI00]);
-    const coreFloat fH01 = coreMath::Float16To32(m_aiHeight[iI01]);
-    const coreFloat fH10 = coreMath::Float16To32(m_aiHeight[iI10]);
-    const coreFloat fH11 = coreMath::Float16To32(m_aiHeight[iI11]);
+    const coreVector4 vUnpack = coreVector4::UnpackFloat4x16((coreUint64(m_aiHeight[iI00]))        |
+                                                             (coreUint64(m_aiHeight[iI01]) << 16u) |
+                                                             (coreUint64(m_aiHeight[iI10]) << 32u) |
+                                                             (coreUint64(m_aiHeight[iI11]) << 48u));
 
     // interpolate between all height values
     const coreFloat fFractX = FRACT(fX);
     const coreFloat fFractY = FRACT(fY);
-    const coreFloat fHeight = LERP(LERP(fH00, fH01, fFractX), LERP(fH10, fH11, fFractX), fFractY);
+    const coreFloat fHeight = LERP(LERP(vUnpack.x, vUnpack.y, fFractX), LERP(vUnpack.z, vUnpack.w, fFractX), fFractY);
 
     // 
     const coreVector2 vLerp = this->CalcLerpVector(vPosition.y);
