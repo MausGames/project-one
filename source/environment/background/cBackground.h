@@ -16,7 +16,6 @@
 // TODO 3: optimize density to never try to draw on 0.0f
 // TODO 3: object-sets with 0% visibility and no active object should be skipped entirely
 // TODO 3: make grass leafs same color as other plants
-// TODO 1: make wind-sound (sand) depend on speed
 // TODO 3: check if alL _RESERVES are correct
 // TODO 3: reduce object-buffer sizes, not all are drawn at once anyway, also allocate only once
 // TODO 3: positions in separate list (when iterating through lambda)

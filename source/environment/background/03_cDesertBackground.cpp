@@ -142,5 +142,8 @@ void cDesertBackground::__MoveOwn()
 
     // 
     if(m_pWindSound->EnableRef(this))
+    {
         m_pWindSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
+        m_pWindSound->SetPitch (1.0f + 0.1f * (m_vSandMove.Length() - 1.0f));
+    }
 }
