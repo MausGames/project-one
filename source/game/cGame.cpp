@@ -293,17 +293,13 @@ void cGame::MoveOverlay()
 // load new active mission
 void cGame::LoadMissionID(const coreInt32 iID, const coreUint8 iTakeFrom, const coreUint8 iTakeTo)
 {
-    if(m_pCurMission) if(m_pCurMission->GetID() == iID) return;
-
     // 
     this->__ClearAll(false);
 
-    // 
-    const coreInt32 iOldID    = m_pCurMission ? m_pCurMission->GetID() : cNoMission::ID;
-    const coreUintW iOldIndex = m_iCurMissionIndex;
-
-    // delete possible old mission
-    SAFE_DELETE(m_pCurMission)
+    // hold old mission (to keep resources valid)
+    const cMission* pOldMission = m_pCurMission;
+    const coreInt32 iOldID      = m_pCurMission ? m_pCurMission->GetID() : cNoMission::ID;
+    const coreUintW iOldIndex   = m_iCurMissionIndex;
 
     // create new mission
     switch(iID)
@@ -322,6 +318,9 @@ void cGame::LoadMissionID(const coreInt32 iID, const coreUint8 iTakeFrom, const 
     case cErrorMission  ::ID: m_pCurMission = new cErrorMission  (); break;
     case cDemoMission   ::ID: m_pCurMission = new cDemoMission   (); break;
     }
+
+    // delete possible old mission
+    SAFE_DELETE(pOldMission)
 
     // 
     m_iCurMissionIndex = std::find(m_piMissionList, m_piMissionList + m_iNumMissions, iID) - m_piMissionList;
@@ -400,13 +399,7 @@ void cGame::LoadNextMission()
 // restart currently active mission
 void cGame::RestartMission()
 {
-    // hold old mission (to keep resources valid)
-    cMission* pOldMission = m_pCurMission;
-    m_pCurMission = NULL;
-
-    // 
-    this->LoadMissionID(pOldMission->GetID());
-    SAFE_DELETE(pOldMission)
+    this->LoadMissionID(m_pCurMission->GetID());
 }
 
 

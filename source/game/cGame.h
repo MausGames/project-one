@@ -15,7 +15,6 @@
 // TODO 3: show pacifist damage in interface, pulsing and filling up, also show that weapons are disabled
 // TODO 5: maybe spawn players in flight direction, mission start and continue ?
 // TODO 2: FindPlayer may find player outside of area (during resurrection)
-// TODO 3: check "hold old mission (to keep resources valid)" for loadmission/nextmission
 
 
 // ****************************************************************
