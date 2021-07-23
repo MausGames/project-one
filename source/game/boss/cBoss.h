@@ -273,7 +273,7 @@ private:
 
 
 // ****************************************************************
-// 
+// Nautilus boss class
 class cNautilusBoss final : public cBoss
 {
 private:
@@ -312,7 +312,7 @@ private:
 
 
 // ****************************************************************
-// 
+// Amemasu boss class
 class cAmemasuBoss final : public cBoss
 {
 private:
@@ -342,7 +342,7 @@ private:
 
 
 // ****************************************************************
-// 
+// Leviathan boss class
 class cLeviathanBoss final : public cBoss
 {
 private:
@@ -395,7 +395,7 @@ private:
 
 
 // ****************************************************************
-// 
+// Urtica boss class
 class cUrticaBoss final : public cBoss
 {
 public:
@@ -412,7 +412,7 @@ private:
 
 
 // ****************************************************************
-// 
+// Tiger boss class
 class cTigerBoss final : public cBoss
 {
 public:
@@ -429,7 +429,7 @@ private:
 
 
 // ****************************************************************
-// 
+// Lucifer boss class
 class cLuciferBoss final : public cBoss
 {
 public:
@@ -446,7 +446,7 @@ private:
 
 
 // ****************************************************************
-// 
+// Quaternion boss class
 class cQuaternionBoss final : public cBoss
 {
 public:
@@ -463,7 +463,7 @@ private:
 
 
 // ****************************************************************
-// 
+// Saros boss class
 class cSarosBoss final : public cBoss
 {
 public:
@@ -480,7 +480,7 @@ private:
 
 
 // ****************************************************************
-// 
+// Messier boss class
 class cMessierBoss final : public cBoss
 {
 public:
@@ -497,7 +497,7 @@ private:
 
 
 // ****************************************************************
-// 
+// Tartarus boss class
 class cTartarusBoss final : public cBoss
 {
 public:
@@ -514,7 +514,7 @@ private:
 
 
 // ****************************************************************
-// 
+// Phalaris boss class
 class cPhalarisBoss final : public cBoss
 {
 public:
@@ -531,7 +531,7 @@ private:
 
 
 // ****************************************************************
-// 
+// Chol boss class
 class cCholBoss final : public cBoss
 {
 public:
@@ -548,7 +548,7 @@ private:
 
 
 // ****************************************************************
-// 
+// Fenrir boss class
 class cFenrirBoss final : public cBoss
 {
 public:
@@ -565,7 +565,7 @@ private:
 
 
 // ****************************************************************
-// 
+// Shelob boss class
 class cShelobBoss final : public cBoss
 {
 public:
@@ -582,7 +582,7 @@ private:
 
 
 // ****************************************************************
-// 
+// Zeroth boss class
 class cZerothBoss final : public cBoss
 {
 public:
@@ -599,7 +599,7 @@ private:
 
 
 // ****************************************************************
-// 
+// Orlac boss class
 class cOrlacBoss final : public cBoss
 {
 public:
@@ -616,7 +616,7 @@ private:
 
 
 // ****************************************************************
-// 
+// Geminga boss class
 class cGemingaBoss final : public cBoss
 {
 public:
@@ -633,7 +633,7 @@ private:
 
 
 // ****************************************************************
-// 
+// Nagual boss class
 class cNagualBoss final : public cBoss
 {
 public:
@@ -669,7 +669,7 @@ private:
 
 
 // ****************************************************************
-// 
+// Eigengrau boss class
 class cEigengrauBoss final : public cBoss
 {
 public:

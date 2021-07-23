@@ -149,7 +149,7 @@ void cPlayer::Configure(const coreUintW iShipType, const coreVector3 vColor)
 void cPlayer::EquipWeapon(const coreUintW iIndex, const coreInt32 iID)
 {
     ASSERT(iIndex < PLAYER_EQUIP_WEAPONS)
-    if(m_apWeapon[iIndex]) if(m_apWeapon[iIndex]->GetID() == iID) return;
+    if(m_apWeapon[iIndex] && (m_apWeapon[iIndex]->GetID() == iID)) return;
 
     // delete possible old weapon
     SAFE_DELETE(m_apWeapon[iIndex])
@@ -280,7 +280,7 @@ void cPlayer::Move()
             else if(vNewPos.y > m_vArea.w) {vNewPos.y = m_vArea.w; m_vForce.y = -ABS(m_vForce.y);}
 
             // 
-            const coreVector2 vDiff = (vNewPos - this->GetPosition().xy()) * RCP(TIME * FRAMERATE_MIN + CORE_MATH_PRECISION);
+            const coreVector2 vDiff = (vNewPos - this->GetPosition().xy()) * RCP(MAX(TIME * FRAMERATE_MIN, CORE_MATH_PRECISION));
             vNewOri = coreVector3(CLAMP(vDiff.x, -0.6f, 0.6f), CLAMP(vDiff.y, -0.6f, 0.6f), 1.0f).NormalizedUnsafe();
         }
 
@@ -310,10 +310,10 @@ void cPlayer::Move()
         }
 
         // normalize collision size
-        if(this->GetModel().IsUsable())
+        if(this->GetVolume().IsUsable())
         {
             const coreFloat fRadius = MAX(this->GetMove().Length(), PLAYER_COLLISION_MIN);
-            this->SetCollisionModifier((coreVector3(1.0f,1.0f,1.0f) * fRadius) / this->GetModel()->GetBoundingRange());
+            this->SetCollisionModifier((coreVector3(1.0f,1.0f,1.0f) * fRadius) / this->GetVolume()->GetBoundingRange());
         }
 
         // 

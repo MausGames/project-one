@@ -50,7 +50,7 @@
 // TODO 3: reduce number of shader-lights with static_assert
 // TODO 3: check if hole in object_sphere causes reflection issues, also check if other objects have a hole
 // TODO 3: on bosses and missions: don't move or render or test objects outside their phases (e.g. boomerangs active)
-// TODO 3: make sure everything with at least 5 copies uses batch-lists
+// TODO 3: make sure everything with at least 4 instances uses batch-lists
 // TODO 4: replace / with RCP where possible
 // TODO 5: "pro" shortcut for types (e.g. proEnemy, proGame), dr too
 // TODO 4: ENABLE_BITWISE when ?
@@ -74,9 +74,11 @@
 // TODO 5: convert bigger sound-effects (ambient) to music ?
 // TODO 3: change all linear interpolation with at least LERPH3 to improve quality, where possible
 // TODO 3: find (manual) interpolations and try to use smoothstep for it (engine, application and shader)
-// TODO 4: check all collision callbacks if OUTPUT can be replaced with const
+// TODO 4: check all lambdas if OUTPUT can be replaced with const
 // TODO 3: make sure enemy bullet ClearAll is called on STAGE_DELAY
 // TODO 3: create animation offset for all gameplay objects (const coreFloat fOffset = I_TO_F(i) * (1.0f/7.0f);), try to use num-per-line + 1, what about bullets ?
+// TODO 1: make sure user folder is correctly handled for multi-user (-> corePlatform)
+// TODO 3: every boss, enemy, player-bullet-interacting object needs a volume
 
 
 // ****************************************************************

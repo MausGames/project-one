@@ -17,7 +17,7 @@
 // TODO 3: specular contribution should be reduced by shadow (object shadow and environment darkening)
 // TODO 3: rainwater-resolution: realtime in options-menu ?
 // TODO 3: remove sqrt/coreUnpackNormalMap in rainy shader (pre-processing like in outdoor)
-// TODO 3: underwater may render reflection (not required)
+// TODO 3: underwater may render reflection (not required), and render depth (not required)
 // TODO 3: glBindTexture has to reset internal texture-cache
 // TODO 3: rainwater has mipmapping disabled (provide at least a couple of levels)
 // TODO 3: stencil or early depth to not evaluate land areas

@@ -171,7 +171,7 @@ template <typename F> void cOutdoor::__Render(const coreProgramPtr& pProgram, F&
 
     // draw the model
     m_pModel->Enable();
-    glDrawRangeElements(m_pModel->GetPrimitiveType(), m_iVertexOffset, m_iVertexOffset + OUTDOOR_RANGE, OUTDOOR_COUNT, m_pModel->GetIndexType(), I_TO_P(m_iIndexOffset));
+    glDrawRangeElements(m_pModel->GetPrimitiveType(), m_iVertexOffset, m_iVertexOffset + OUTDOOR_RANGE - 1u, OUTDOOR_COUNT, m_pModel->GetIndexType(), I_TO_P(m_iIndexOffset));
 }
 
 

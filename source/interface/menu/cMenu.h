@@ -30,6 +30,8 @@
 // TODO 3: every object in menu needs outline: weapon icons
 // TODO 3: custom resolution should be stored when switching monitors
 // TODO 3: show target FPS in config menu (speed x update rate)
+// TODO 3: when switching resolution, and confirming by returning, the transition is broken
+// TODO 3: when switching resolution, the next mouse click is not recognized (no press even is coming from SDL, only the release event)
 
 
 // ****************************************************************

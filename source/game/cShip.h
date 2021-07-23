@@ -91,6 +91,7 @@ public:
     inline       coreFloat    GetCurHealthPct()const {return I_TO_F(m_iCurHealth) * RCP(I_TO_F(m_iMaxHealth));}
     inline       coreInt32    GetPreHealth   ()const {return m_iPreHealth;}
     inline       coreFloat    GetPreHealthPct()const {return I_TO_F(m_iPreHealth) * RCP(I_TO_F(m_iMaxHealth));}
+    inline       coreInt32    GetLostHealth  ()const {return m_iMaxHealth - m_iCurHealth;}
     inline const coreVector2& GetOldPos      ()const {return m_vOldPos;}
     inline       coreVector2  GetMove        ()const {return this->GetPosition().xy() - m_vOldPos;}
     inline       coreVector3  GetBaseColor   ()const {return coreVector4::UnpackUnorm4x8(m_iBaseColor).xyz();}

@@ -897,7 +897,7 @@ private:
 
 
 // ****************************************************************
-// 
+// Error mission class
 class cErrorMission final : public cMission
 {
 private:
@@ -918,7 +918,7 @@ private:
 
 
 // ****************************************************************
-// 
+// Demo mission class
 class cDemoMission final : public cMission
 {
 private:
