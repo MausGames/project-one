@@ -110,7 +110,7 @@ void cDesertBackground::__RenderOwnAfter()
         const coreVector2 vNewTexOffset = m_Sand.GetTexOffset() + coreVector2(0.3f,0.3f) * I_TO_F(POW2(i)) + coreVector2(0.26f * SIN(m_fSandWave * (0.125f*PI) + I_TO_F(POW2(i))), 0.0f);
         const coreFloat   fNewScale     = 1.6f - 0.12f * I_TO_F(i);
 
-        pLocal->SendUniform(PRINT("u_av3OverlayTransform[%zu]", i), coreVector3(vNewTexOffset.Processed(FRACT), fNewScale));
+        pLocal->SendUniform(s_asOverlayTransform[i], coreVector3(vNewTexOffset.Processed(FRACT), fNewScale));
     }
 
     glDisable(GL_DEPTH_TEST);
