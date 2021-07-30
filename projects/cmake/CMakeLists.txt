@@ -41,7 +41,6 @@ target_sources(
     ${BASE_DIRECTORY}/source/game/mission/BB_cDemoMission_setup.cpp
     ${BASE_DIRECTORY}/source/game/mission/cMission.cpp
     ${BASE_DIRECTORY}/source/game/cBullet.cpp
-    ${BASE_DIRECTORY}/source/game/cChroma.cpp
     ${BASE_DIRECTORY}/source/game/cCrash.cpp
     ${BASE_DIRECTORY}/source/game/cEnemy.cpp
     ${BASE_DIRECTORY}/source/game/cGame.cpp

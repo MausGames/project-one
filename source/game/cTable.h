@@ -42,7 +42,7 @@ public:
         coreUint32 iTurnsMade;         // 
         coreUint32 iRollsMade;         // 
         coreUint64 iBulletsShot;       // 
-        coreUint64 iChromaCollected;   // 
+        coreUint64 iChromaCollected;   // TODO 1: remove 
         coreUint32 iItemsCollected;    // 
     };
 

@@ -176,7 +176,6 @@ void cGame::Render()
         DEPTH_PUSH
 
         // 
-        m_ChromaManager.Render();
         m_ItemManager  .Render();
         m_ShieldManager.Render();
 
@@ -254,7 +253,6 @@ void cGame::Move()
     m_pCurMission->MoveAfter();
 
     // 
-    m_ChromaManager.Move();
     m_ItemManager  .Move();
     m_ShieldManager.Move();
 
@@ -1024,7 +1022,6 @@ void cGame::__ClearAll(const coreBool bAnimated)
     m_EnemyManager       .ClearEnemies(bAnimated);
     m_BulletManagerPlayer.ClearBullets(bAnimated);
     m_BulletManagerEnemy .ClearBullets(bAnimated);
-    m_ChromaManager      .ClearChromas(bAnimated);
     m_ItemManager        .ClearItems  (bAnimated);
     m_ShieldManager      .ClearShields(bAnimated);
     m_CrashManager       .ClearCrashes(bAnimated);

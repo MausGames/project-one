@@ -190,7 +190,6 @@ enum eType : coreInt32
     TYPE_BULLET_PLAYER,
     TYPE_BULLET_ENEMY,
 
-    TYPE_CHROMA,
     TYPE_ITEM,
 
     TYPE_VIRIDO_BALL,
@@ -320,7 +319,6 @@ extern cPostProcessing* const g_pPostProcessing;   // main post-processing objec
 #include "game/cShip.h"
 #include "game/cEnemy.h"
 #include "game/cHelper.h"
-#include "game/cChroma.h"
 #include "game/cItem.h"
 #include "game/cShield.h"
 #include "game/cCrash.h"

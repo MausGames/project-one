@@ -763,32 +763,6 @@ private:
 
 
 // ****************************************************************
-// 
-class cChromaBullet final : public cBullet
-{
-public:
-    cChromaBullet()noexcept;
-
-    ENABLE_COPY(cChromaBullet)
-    ASSIGN_ID(15, "Chroma")
-
-    // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(1.0f,1.0f,1.0f)); this->SetTexSize(coreVector2(0.5f,0.2f)); m_fAnimation = 0.0f;}
-
-    // bullet configuration values
-    static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
-    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_FULL;}
-    static constexpr coreBool        ConfigShadow              () {return false;}
-
-
-private:
-    // execute own routines
-    void __ImpactOwn (const coreVector2 vImpact)final;
-    void __MoveOwn   ()final;
-};
-
-
-// ****************************************************************
 // constructor
 template <typename T> cBulletManager::sBulletSet<T>::sBulletSet(cOutline* pOutline)noexcept
 {

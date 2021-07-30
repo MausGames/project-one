@@ -103,7 +103,6 @@ private:
     cEnemyManager  m_EnemyManager;          // enemy manager
     cBulletManager m_BulletManagerPlayer;   // low-priority bullet manager
     cBulletManager m_BulletManagerEnemy;    // high-priority bullet manager
-    cChromaManager m_ChromaManager;         // 
     cItemManager   m_ItemManager;           // 
     cShieldManager m_ShieldManager;         // 
     cCrashManager  m_CrashManager;          // 
@@ -185,7 +184,6 @@ public:
     inline cEnemyManager*   GetEnemyManager       ()                         {return &m_EnemyManager;}
     inline cBulletManager*  GetBulletManagerPlayer()                         {return &m_BulletManagerPlayer;}
     inline cBulletManager*  GetBulletManagerEnemy ()                         {return &m_BulletManagerEnemy;}
-    inline cChromaManager*  GetChromaManager      ()                         {return &m_ChromaManager;}
     inline cItemManager*    GetItemManager        ()                         {return &m_ItemManager;}
     inline cShieldManager*  GetShieldManager      ()                         {return &m_ShieldManager;}
     inline cCrashManager*   GetCrashManager       ()                         {return &m_CrashManager;}

@@ -1147,37 +1147,3 @@ void cRocketBullet::__MoveOwn()
     // 
     if(TIME) g_pSpecialEffects->CreateSplashSmoke(this->GetPosition() - this->GetDirection() * 4.5f, 5.0f, 1u, coreVector3(1.0f,1.0f,1.0f));
 }
-
-
-// ****************************************************************
-// constructor
-cChromaBullet::cChromaBullet()noexcept
-{
-    // load object resources
-    this->DefineModel  ("bullet_quad.md3");
-    this->DefineTexture(0u, "effect_energy.png");
-    this->DefineProgram("effect_energy_bullet_direct_program");
-}
-
-
-// ****************************************************************
-// 
-void cChromaBullet::__ImpactOwn(const coreVector2 vImpact)
-{
-    // 
-    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
-}
-
-
-// ****************************************************************
-// 
-void cChromaBullet::__MoveOwn()
-{
-    // fly around
-    this->SetPosition(coreVector3(this->GetPosition().xy() + m_vFlyDir * (m_fSpeed * Core::System->GetTime()), 0.0f));
-
-    // update animation
-    m_fAnimation.Update(0.2f);
-    this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation * 10.0f), 0.0f));
-    this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
-}

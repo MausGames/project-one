@@ -237,9 +237,6 @@
     <ClCompile Include="..\..\..\source\game\cTable.cpp">
       <Filter>game</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\game\cChroma.cpp">
-      <Filter>game</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\source\game\cItem.cpp">
       <Filter>game</Filter>
     </ClCompile>
@@ -430,9 +427,6 @@
       <Filter>additional</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\source\game\cTable.h">
-      <Filter>game</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\source\game\cChroma.h">
       <Filter>game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\source\game\cItem.h">

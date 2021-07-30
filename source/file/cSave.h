@@ -58,7 +58,7 @@ public:
         coreUint32 iTurnsMade;                    // TODO 1 (+table) 
         coreUint32 iRollsMade;                    // TODO 1 (+table) 
         coreUint64 iBulletsShot;                  // TODO 1 (+table) 
-        coreUint64 iChromaCollected;              // 
+        coreUint64 iChromaCollected;              // TODO 1: remove 
         coreUint32 iItemsCollected;               // 
         coreUint32 aiMedalsEarned[SAVE_MEDALS];   // 
         coreUint32 iFragmentsEarned;              // 
@@ -85,7 +85,7 @@ public:
         coreUint32 iTurnsMade;                    // TODO 1 (+table) 
         coreUint32 iRollsMade;                    // TODO 1 (+table) 
         coreUint64 iBulletsShot;                  // TODO 1 (+table) 
-        coreUint64 iChromaCollected;              // 
+        coreUint64 iChromaCollected;              // TODO 1: remove 
         coreUint32 iItemsCollected;               // 
         coreUint32 aiMedalsEarned[SAVE_MEDALS];   // 
         coreUint32 iFragmentsEarned;              // 
