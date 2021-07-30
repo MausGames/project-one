@@ -15,7 +15,6 @@
 // TODO 3: align bullet memory ? (also check other possible locations (e.g. enemies))
 // TODO 3: add memory pool object for bullets ? also for enemy
 // TODO 3: remove tons of template instantiations (also enemies ? other templates ?) (CreateBullet and AllocateEnemy create tons of symbols)
-// TODO 3: make ray bullet smoother geometrically (front round)
 // TODO 3: sort bullet classes (color, enemy<>player, normal<>special), improve array indexing and caching
 // TODO 3: shift spear-bullet collision like ray-bullet
 // TODO 5: bullet -> to POD-type with single parent object

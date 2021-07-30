@@ -363,11 +363,9 @@ cRayBullet::cRayBullet()noexcept
 {
     // load object resources
     this->DefineModel  ("bullet_ray.md3");
+    this->DefineVolume ("bullet_ray_volume.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_direct_program");
-
-    // set object properties
-    this->SetCollisionModifier(coreVector3(1.0f,0.333f,1.0f));   // model with offset
 }
 
 
