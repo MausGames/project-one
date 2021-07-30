@@ -26,6 +26,20 @@ cShip::cShip()noexcept
 
 // ****************************************************************
 // 
+void cShip::SetBaseColor(const coreVector3 vColor, const coreBool bInverted)
+{
+    // 
+    m_iBaseColor = coreVector4(vColor, 0.0f).PackUnorm4x8();
+    if(bInverted) ADD_BIT(m_iBaseColor, SHIP_INVERTED_BIT)
+
+    // 
+    this->SetColor3(vColor);
+    if(m_iCurHealth) this->RefreshColor();
+}
+
+
+// ****************************************************************
+// 
 coreBool cShip::DefaultMovePath(const coreSpline2* pRawPath, const coreVector2 vFactor, const coreVector2 vRawOffset, const coreFloat fDistance)
 {
     // 
@@ -211,20 +225,6 @@ void cShip::DefaultMultiateLerp(const coreFloat fFromAngle, const coreFloat fToA
 {
     // 
     this->DefaultMultiate(LERP(fFromAngle, fToAngle, fTime));
-}
-
-
-// ****************************************************************
-// 
-void cShip::SetBaseColor(const coreVector3 vColor, const coreBool bInverted)
-{
-    // 
-    m_iBaseColor = coreVector4(vColor, 0.0f).PackUnorm4x8();
-    if(bInverted) ADD_BIT(m_iBaseColor, SHIP_INVERTED_BIT)
-
-    // 
-    this->SetColor3(vColor);
-    if(m_iCurHealth) this->RefreshColor();
 }
 
 

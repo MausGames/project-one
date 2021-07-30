@@ -13,6 +13,7 @@
 // TODO 3: reduce ship health and all damage values to 16-bit (also reorder for better packing if possible)
 // TODO 3: do not create explosions if ship is far outside of view-port (just ships or in general special-effects ?)
 // TODO 2: ReachedHealthPct, GetCurHealthPct -> ReachedHealthPct(0.7f) was triggered while interface was showing 71%
+// TODO 4: check and cleanup transformation functions
 
 
 // ****************************************************************
@@ -45,6 +46,9 @@ protected:
 public:
     ENABLE_COPY(cShip)
 
+    // 
+    void SetBaseColor(const coreVector3 vColor, const coreBool bInverted = false);
+
     // transformation functions (raw parameters are multiplied with FOREGROUND_AREA)
     coreBool DefaultMovePath     (const coreSpline2* pRawPath, const coreVector2 vFactor, const coreVector2 vRawOffset, const coreFloat fDistance);
     coreBool DefaultMoveTarget   (const coreVector2 vTarget, const coreFloat fSpeedMove, const coreFloat fSpeedTurn);
@@ -62,17 +66,22 @@ public:
     void     DefaultMultiateLerp (const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime);
 
     // 
-    void SetBaseColor(const coreVector3& vColor, const coreBool bInverted = false);
+    inline cShip* InvertX  () {this->SetPosition(this->GetPosition().InvertedX ());                                 this->SetDirection(this->GetDirection().InvertedX ());                                 this->SetOrientation(this->GetOrientation().InvertedX ());                                 return this;}
+    inline cShip* InvertY  () {this->SetPosition(this->GetPosition().InvertedY ());                                 this->SetDirection(this->GetDirection().InvertedY ());                                 this->SetOrientation(this->GetOrientation().InvertedY ());                                 return this;}
+    inline cShip* Rotate90 () {this->SetPosition(this->GetPosition().RotatedZ90());                                 this->SetDirection(this->GetDirection().RotatedZ90());                                 this->SetOrientation(this->GetOrientation().RotatedZ90());                                 return this;}
+    inline cShip* Rotate180() {this->SetPosition(this->GetPosition()              * coreVector3(-1.0f,-1.0f,1.0f)); this->SetDirection(this->GetDirection()              * coreVector3(-1.0f,-1.0f,1.0f)); this->SetOrientation(this->GetOrientation()              * coreVector3(-1.0f,-1.0f,1.0f)); return this;}
+    inline cShip* Rotate270() {this->SetPosition(this->GetPosition().RotatedZ90() * coreVector3(-1.0f,-1.0f,1.0f)); this->SetDirection(this->GetDirection().RotatedZ90() * coreVector3(-1.0f,-1.0f,1.0f)); this->SetOrientation(this->GetOrientation().RotatedZ90() * coreVector3(-1.0f,-1.0f,1.0f)); return this;}
 
     // 
-    inline void RefreshColor(const coreFloat fFactor) {const coreFloat fNewFactor = CLAMP((fFactor - 0.4f) * (1.0f/0.6f) * (0.6f/0.2f), 0.0f, 1.0f); this->SetColor3(LERP(COLOR_SHIP_GREY, this->GetBaseColor(), CONTAINS_BIT(m_iBaseColor, SHIP_INVERTED_BIT) ? (1.0f - fNewFactor) : fNewFactor));}
+    inline void RefreshColor(const coreFloat fFactor) {const coreFloat fNewFactor = CLAMP((fFactor - 0.2f) * (1.0f/0.8f) * (0.8f/0.6f), 0.0f, 1.0f); this->SetColor3(LERP(COLOR_SHIP_GREY, this->GetBaseColor(), HAS_BIT(m_iBaseColor, SHIP_INVERTED_BIT) ? (1.0f - fNewFactor) : fNewFactor));}
     inline void RefreshColor()                        {this->RefreshColor(this->GetCurHealthPct());}
-    inline void InvokeBlink ()                        {m_fBlink = 1.2f;}
+    inline void InvokeBlink ()                        {if(m_fBlink < 0.4f) m_fBlink = 1.2f;}
 
     // 
     inline coreBool ReachedHealth   (const coreInt32 iHealth)const    {return InBetween(iHealth,                                    m_iCurHealth, m_iPreHealth);}
     inline coreBool ReachedHealthPct(const coreFloat fHealthPct)const {return InBetween(F_TO_SI(fHealthPct * I_TO_F(m_iMaxHealth)), m_iCurHealth, m_iPreHealth);}
     inline coreBool ReachedDeath    ()const                           {return ((m_iCurHealth == 0) && (m_iPreHealth != 0));}
+    inline coreBool WasDamaged      ()const                           {return (m_iCurHealth < m_iPreHealth);}
     inline coreBool WasTeleporting  ()const                           {return (this->GetMove().LengthSq() > (0.125f * FOREGROUND_AREA.x * FOREGROUND_AREA.y));}
 
     // 
