@@ -41,12 +41,25 @@ void cInterface::sPlayerView::Construct(const coreUintW iIndex)
     oShieldValue.SetAlignment(coreVector2(1.0f,1.0f) * vSide);
 
     oScoreTotal.Construct   (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
-    oScoreTotal.SetPosition (coreVector2(0.01f,0.0f) * vSide);
-    oScoreTotal.SetAlignment(coreVector2(1.0f,-1.0f) * vSide);
+    oScoreTotal.SetPosition (coreVector2(0.01f,-0.005f) * vSide);
+    oScoreTotal.SetAlignment(coreVector2(1.0f, -1.0f)   * vSide);
 
     oScoreMission.Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
     oScoreMission.SetPosition (oScoreTotal.GetPosition() + coreVector2(0.01f,-0.035f) * vSide);
     oScoreMission.SetAlignment(oScoreTotal.GetAlignment());
+
+    oCooldownBar.DefineTexture(0u, "default_white.png");
+    oCooldownBar.DefineProgram("default_2d_program");
+    oCooldownBar.SetPosition  (oScoreTotal.GetPosition() + coreVector2(0.003f,-0.105f) * vSide);
+    oCooldownBar.SetAlignment (oScoreTotal.GetAlignment());
+
+    oComboValue.Construct   (MENU_FONT_STANDARD_4, MENU_OUTLINE_SMALL);
+    oComboValue.SetPosition (oScoreTotal.GetPosition() + coreVector2(0.003f,-0.045f) * vSide);
+    oComboValue.SetAlignment(oScoreTotal.GetAlignment());
+
+    oChainValue.Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+    oChainValue.SetPosition (oScoreTotal.GetPosition() + coreVector2(0.003f,-0.13f) * vSide);
+    oChainValue.SetAlignment(oScoreTotal.GetAlignment());
 
     // 
     fSpin = 0.0f;
@@ -98,12 +111,12 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
     m_aBossTime[1].SetPosition (m_aBossTime[0].GetPosition());
     m_aBossTime[1].SetAlignment(coreVector2(1.0f,-1.0f));
 
-    m_WaveName.Construct   (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
-    m_WaveName.SetPosition (m_aBossHealthBar[0].GetPosition());
-    m_WaveName.SetAlignment(m_aBossHealthBar[0].GetAlignment());
+    m_WaveName.Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+    m_WaveName.SetPosition (coreVector2(0.0f,0.005f));
+    m_WaveName.SetAlignment(coreVector2(0.0f,1.0f));
 
     m_aWaveTime[0].Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
-    m_aWaveTime[0].SetPosition (coreVector2( 0.0f,-0.002f));
+    m_aWaveTime[0].SetPosition (coreVector2( 0.0f,-0.005f));
     m_aWaveTime[0].SetAlignment(coreVector2(-1.0f,-1.0f));
 
     m_aWaveTime[1].Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
@@ -143,6 +156,7 @@ void cInterface::Render()
             for(coreUintW j = 0u; j < INTERFACE_LIVES; ++j) m_aView[i].aLife[j].Render();
             m_aView[i].aShieldBar[0].Render();
             m_aView[i].aShieldBar[1].Render();
+            m_aView[i].oCooldownBar .Render();
         }
 
         if(m_fAlphaBoss)
@@ -157,7 +171,9 @@ void cInterface::Render()
             // render player labels
             m_aView[i].oShieldValue .Render();
             m_aView[i].oScoreTotal  .Render();
-            m_aView[i].oScoreMission.Render();
+            //m_aView[i].oScoreMission.Render();   // TODO 1: still needed ?
+            m_aView[i].oComboValue  .Render();
+            m_aView[i].oChainValue  .Render();
         }
 
         if(m_fAlphaBoss)
@@ -213,6 +229,11 @@ void cInterface::Move()
     m_fAnimation.UpdateMod(6.0f*PI, 2.0f*PI);
     const coreFloat fDanger = 1.0f + 0.8f * (1.0f + 0.5f * SIN(m_fAnimation));
 
+    // 
+    const coreFloat fAlphaPlayerFull = m_fAlphaAll * MENU_INSIDE_ALPHA;
+    const coreFloat fAlphaBossFull   = m_fAlphaAll * MENU_INSIDE_ALPHA * (m_fAlphaBoss);
+    const coreFloat fAlphaWaveFull   = m_fAlphaAll * MENU_INSIDE_ALPHA * (1.0f - m_fAlphaBoss);
+
     // loop through all player views
     for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i)
     {
@@ -264,22 +285,35 @@ void cInterface::Move()
                 // 
                 oView.aLife[j].SetPosition(vNewPos * vSide);
                 oView.aLife[j].SetSize    (vNewSize);
-                oView.aLife[j].SetAlpha   (m_fAlphaAll * fCurSpin);
+                oView.aLife[j].SetAlpha   (fAlphaPlayerFull * fCurSpin);
                 oView.aLife[j].SetEnabled (fCurSpin ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
                 oView.aLife[j].Move();
             }
         }
 
+        const cScoreTable* pScoreTable = pPlayer->GetScoreTable();
+
         // display score
-        oView.oScoreTotal  .SetText(PRINT("%07u", pPlayer->GetScoreTable()->GetScoreTotal()));
-        oView.oScoreMission.SetText(PRINT("%07u", pPlayer->GetScoreTable()->GetScoreMission(g_pGame->GetCurMissionIndex())));
+        oView.oScoreTotal  .SetText(PRINT("%07u", pScoreTable->GetScoreTotal()));
+        oView.oScoreMission.SetText(PRINT("%07u", pScoreTable->GetScoreMission(g_pGame->GetCurMissionIndex())));
+
+        // 
+        oView.oCooldownBar.SetSize  (coreVector2(0.15f * MIN(pScoreTable->GetCooldown() * 1.1f, 1.0f), 0.013f));
+        oView.oCooldownBar.SetColor3((pScoreTable->GetCooldown() > 0.5f) ? COLOR_MENU_BLUE : COLOR_MENU_RED);
+
+        // 
+        oView.oComboValue.SetText(PRINT("x%.1f", pScoreTable->GetModifier()));
+        oView.oChainValue.SetText(pScoreTable->GetCurChain() ? PRINT("+%u", pScoreTable->GetCurChain()) : "");
 
         // set player transparency
-        oView.aShieldBar[0].SetAlpha(m_fAlphaAll);
-        oView.aShieldBar[1].SetAlpha(m_fAlphaAll);
-        oView.oShieldValue .SetAlpha(m_fAlphaAll);
-        oView.oScoreTotal  .SetAlpha(m_fAlphaAll);
-        oView.oScoreMission.SetAlpha(m_fAlphaAll);
+        oView.aShieldBar[0].SetAlpha(fAlphaPlayerFull);
+        oView.aShieldBar[1].SetAlpha(fAlphaPlayerFull);
+        oView.oShieldValue .SetAlpha(fAlphaPlayerFull);
+        oView.oScoreTotal  .SetAlpha(fAlphaPlayerFull);
+        oView.oScoreMission.SetAlpha(fAlphaPlayerFull);
+        oView.oCooldownBar .SetAlpha(fAlphaPlayerFull);
+        oView.oComboValue  .SetAlpha(fAlphaPlayerFull);
+        oView.oChainValue  .SetAlpha(fAlphaPlayerFull);
 
         // move player
         oView.oShieldValue .Move();
@@ -287,6 +321,9 @@ void cInterface::Move()
         oView.aShieldBar[1].Move();
         oView.oScoreTotal  .Move();
         oView.oScoreMission.Move();
+        oView.oCooldownBar .Move();
+        oView.oComboValue  .Move();
+        oView.oChainValue  .Move();
     }
 
     // check for active boss
@@ -305,7 +342,7 @@ void cInterface::Move()
         m_aBossHealthBar[1].SetTexSize (coreVector2(fPercent, 1.0f));
 
         // set health bar color
-        const coreVector3 vColor = COLOR_HEALTH(fPercent) * ((fPercent <= 0.2f) ? fDanger : 1.0f);
+        const coreVector3 vColor = LERP(coreVector3(1.0f,1.0f,1.0f), pBoss->GetColor(), fPercent) * ((fPercent <= 0.2f) ? fDanger : 1.0f);
         m_aBossHealthBar[0].SetColor3(vColor * 0.2f);
         m_aBossHealthBar[1].SetColor3(vColor * 0.9f);
 
@@ -335,7 +372,6 @@ void cInterface::Move()
     });
 
     // set boss transparency
-    const coreFloat fAlphaBossFull = m_fAlphaAll * m_fAlphaBoss;
     m_aBossHealthBar[0].SetAlpha(fAlphaBossFull);
     m_aBossHealthBar[1].SetAlpha(fAlphaBossFull);
     m_BossHealthValue  .SetAlpha(fAlphaBossFull);
@@ -350,7 +386,6 @@ void cInterface::Move()
     m_aBossTime[1]     .Move();
 
     // set wave transparency
-    const coreFloat fAlphaWaveFull = m_fAlphaAll * (1.0f - m_fAlphaBoss);
     m_WaveName    .SetAlpha(fAlphaWaveFull);
     m_aWaveTime[0].SetAlpha(fAlphaWaveFull);
     m_aWaveTime[1].SetAlpha(fAlphaWaveFull);
@@ -408,7 +443,7 @@ void cInterface::Move()
     if((fStory <= INTERFACE_STORY_DURATION) && (fStory >= 0.0f))
     {
         // 
-        const coreFloat fVisibility = MIN(fStory, INTERFACE_STORY_DURATION - fStory, 1.0f / INTERFACE_STORY_SPEED) * INTERFACE_STORY_SPEED;
+        const coreFloat fVisibility = MIN(fStory, INTERFACE_STORY_DURATION - fStory, 1.0f / INTERFACE_STORY_SPEED) * INTERFACE_STORY_SPEED * MENU_INSIDE_ALPHA;
 
         // set story transparency
         m_aStoryText[0].SetAlpha(fVisibility);
@@ -421,13 +456,13 @@ void cInterface::Move()
 
     // smoothly toggle interface visibility (after forwarding, to allow overriding)
     if(m_bVisible)
-         {if(m_fAlphaAll < 1.0f) m_fAlphaAll.UpdateMin( 2.0f, 1.0f);}
-    else {if(m_fAlphaAll > 0.0f) m_fAlphaAll.UpdateMax(-2.0f, 0.0f);}
+         m_fAlphaAll.UpdateMin( 2.0f, 1.0f);
+    else m_fAlphaAll.UpdateMax(-2.0f, 0.0f);
 
     // smoothly toggle boss data visibility
     if(pBoss && (m_iBannerType == INTERFACE_BANNER_TYPE_BOSS) && (fBanner >= INTERFACE_BOSS_DELAY))
-         {if(m_fAlphaBoss < 1.0f) m_fAlphaBoss.UpdateMin( 2.0f, 1.0f);}
-    else {if(m_fAlphaBoss > 0.0f) m_fAlphaBoss.UpdateMax(-2.0f, 0.0f);}
+         m_fAlphaBoss.UpdateMin( 2.0f, 1.0f);
+    else m_fAlphaBoss.UpdateMax(-2.0f, 0.0f);
 }
 
 
@@ -601,7 +636,7 @@ void cInterface::ShowScore(const coreUint32 iScore, const coreUint8 iMedal, cons
 coreBool cInterface::IsBannerActive()const
 {
     // compare with game-time offset
-    return ((g_pGame->GetTimeTable()->GetTimeEvent() - m_fBannerStart) <= m_fBannerDuration) ? true : false;
+    return ((g_pGame->GetTimeTable()->GetTimeEvent() - m_fBannerStart) <= m_fBannerDuration);
 }
 
 
@@ -630,7 +665,19 @@ void cInterface::ShowStory(const coreChar* pcRow1, const coreChar* pcRow2)
 coreBool cInterface::IsStoryActive()const
 {
     // 
-    return ((g_pGame->GetTimeTable()->GetTimeEvent() - m_fStoryStart) <= INTERFACE_STORY_DURATION) ? true : false;
+    return ((g_pGame->GetTimeTable()->GetTimeEvent() - m_fStoryStart) <= INTERFACE_STORY_DURATION);
+}
+
+
+// ****************************************************************
+// 
+void cInterface::ChangeBannerText(const coreChar* pcMain, const coreChar* pcSub)
+{
+    // 
+    if(pcMain) m_aBannerText[0].SetText(pcMain);
+    if(pcMain) m_aBannerText[1].SetText(pcMain);
+    if(pcSub)  m_aBannerText[2].SetText(pcSub);
+    if(pcMain) m_aBannerText[3].SetText(pcMain);
 }
 
 
@@ -666,6 +713,9 @@ void cInterface::UpdateLayout()
         nUpdateFunc(&oView.oShieldValue,  vBottom + vSide);
         nUpdateFunc(&oView.oScoreTotal,   vTop    + vSide);
         nUpdateFunc(&oView.oScoreMission, vTop    + vSide);
+        nUpdateFunc(&oView.oCooldownBar,  vTop    + vSide);
+        nUpdateFunc(&oView.oComboValue,   vTop    + vSide);
+        nUpdateFunc(&oView.oChainValue,   vTop    + vSide);
     }
 
     // 
@@ -676,7 +726,7 @@ void cInterface::UpdateLayout()
     nUpdateFunc(&m_aBossTime[1],      vTop);
 
     // 
-    nUpdateFunc(&m_WaveName,     vTop);
+    nUpdateFunc(&m_WaveName,     vBottom);
     nUpdateFunc(&m_aWaveTime[0], vTop);
     nUpdateFunc(&m_aWaveTime[1], vTop);
 }

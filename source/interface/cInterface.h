@@ -12,6 +12,7 @@
 
 // TODO 1: re-position everything after resolution-change (also menu)
 // TODO 3: realtime language update (other locations as well ?), boss-titles and wave-names
+// TODO 3: MENU_INSIDE_ALPHA should only be used with inside-hud
 
 
 // ****************************************************************
@@ -25,7 +26,7 @@
 #define INTERFACE_BANNER_ANIMATION        (2.9f)                            // animation duration
 #define INTERFACE_BANNER_DURATION_MISSION (3.0f)                            // 
 #define INTERFACE_BANNER_DURATION_BOSS    (3.0f)                            // display duration (with fading)  
-#define INTERFACE_BANNER_DURATION_SCORE   (2.0f)                            // 
+#define INTERFACE_BANNER_DURATION_SCORE   (2.5f)                            // 
 
 #define INTERFACE_BANNER_TYPE_MISSION     (0u)                              // mission banner type
 #define INTERFACE_BANNER_TYPE_BOSS        (1u)                              // boss banner type
@@ -49,6 +50,9 @@ private:
         cGuiLabel  oShieldValue;             // player shield value
         cGuiLabel  oScoreTotal;              // total score
         cGuiLabel  oScoreMission;            // mission score
+        cGuiObject oCooldownBar;             // cooldown bar
+        cGuiLabel  oComboValue;              // combo label
+        cGuiLabel  oChainValue;              // chain value
         coreFlow   fSpin;                    // 
 
         void Construct(const coreUintW iIndex);
@@ -107,6 +111,9 @@ public:
     // 
     void ShowStory(const coreChar* pcRow1, const coreChar* pcRow2 = "");
     coreBool IsStoryActive()const;
+
+    // 
+    void ChangeBannerText(const coreChar* pcMain, const coreChar* pcSub);
 
     // 
     void UpdateLayout();
