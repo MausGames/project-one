@@ -58,8 +58,7 @@ void cBullet::Activate(const coreInt32 iDamage, const coreFloat fSpeed, cShip* p
 {
     // activate bullet and remove readiness
     if(HAS_FLAG(m_iStatus, BULLET_STATUS_ACTIVE)) return;
-    ADD_FLAG   (m_iStatus, BULLET_STATUS_ACTIVE)
-    REMOVE_FLAG(m_iStatus, BULLET_STATUS_READY)
+    m_iStatus = BULLET_STATUS_ACTIVE;   // # reset status
 
     // save damage, speed and owner
     m_iDamage = iDamage;
@@ -421,9 +420,6 @@ cPulseBullet::cPulseBullet()noexcept
     this->DefineModel  ("bullet_pulse.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_direct_program");
-
-    // 
-    ADD_FLAG(m_iStatus, BULLET_STATUS_PENETRATE)
 }
 
 

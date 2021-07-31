@@ -88,6 +88,8 @@ public:
 class cRayWeapon final : public cWeapon
 {
 private:
+    coreBool m_bBurst;             // 
+
     coreSoundPtr m_pBulletSound;   // 
     coreSoundPtr m_pRocketSound;   // 
     coreSoundPtr m_pMineSound;     // 
@@ -108,6 +110,7 @@ public:
 private:
     // execute own routines
     void __TriggerOwn(const coreUint8 iMode)final;
+    void __ReleaseOwn(const coreUint8 iMode)final;
     void __ShootOwn  ()final;
 };
 
@@ -146,10 +149,7 @@ private:
 class cWaveWeapon final : public cWeapon
 {
 private:
-    coreBool m_bSide;              // 
-
-    coreSoundPtr m_pBulletSound;   // 
-    coreSoundPtr m_pChangeSound;   // 
+    coreSoundPtr m_pBulletSound;    // 
 
 
 public:
@@ -166,8 +166,7 @@ public:
 
 private:
     // execute own routines
-    void __TriggerOwn(const coreUint8 iMode)final;
-    void __ShootOwn  ()final;
+    void __ShootOwn()final;
 };
 
 
