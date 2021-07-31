@@ -18,6 +18,7 @@
 // TODO 5: boss0102, add slight explosion where rays hit the screen
 // TODO 5: boss0102, separate emitters to three objects, to make them blue
 // TODO 5: boss0103, remove small hitch when finishing rotation in the middle shortly before beginning laser-phase
+// TODO 3: transformation properties are invalid on start (basically for phase 0), should this be handled ?
 
 
 // ****************************************************************
@@ -105,11 +106,12 @@ protected:
     coreVector4 m_avVector [BOSS_VECTORS];    // 
 
     coreVector2 m_vLastPosition;              // 
-    coreFloat   m_fLastDirAngle;              // 
-    coreFloat   m_fLastOriAngle;              // 
+    coreVector3 m_vLastDirection;             // 
+    coreVector3 m_vLastOrientation;           // 
 
     coreUint8 m_iPhase;                       // 
-    coreUint8 m_iLevel;                       // 
+    coreFlow  m_fPhaseTime;                   // 
+    coreFloat m_fPhaseTimeBefore;             // 
 
     static coreVector2 s_vPositionPoint;      // 
 
@@ -119,7 +121,7 @@ public:
     virtual ~cBoss()override;
 
     DISABLE_COPY(cBoss)
-    ENABLE_ID
+    ENABLE_ID_EX
 
     // 
     void ChangePhase(const coreUint8 iPhase);
@@ -132,13 +134,15 @@ public:
 
     // 
     inline const coreUint8& GetPhase()const {return m_iPhase;}
-    inline const coreUint8& GetLevel()const {return m_iLevel;}
 
 
 protected:
     // 
     void _StartBoss();
     void _EndBoss(const coreBool bAnimated);
+
+    // 
+    void _UpdateBoss();
 
     // 
     template <typename F, typename G> void _PhaseTimer (const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreFloat  fSpeed,                        G&& nLerpFunc, F&& nUpdateFunc);   // [](const coreFloat x, const coreFloat y, const coreFloat s) -> coreFloat, [](const coreFloat  fTime, const coreFloat fTimeBefore, const coreBool __bEnd) -> void
@@ -167,7 +171,7 @@ public:
     cDharukBoss()noexcept;
 
     DISABLE_COPY(cDharukBoss)
-    ASSIGN_ID(101, "Dharuk")
+    ASSIGN_ID_EX(101, "Dharuk", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -224,7 +228,7 @@ public:
     cTorusBoss()noexcept;
 
     DISABLE_COPY(cTorusBoss)
-    ASSIGN_ID(102, "Torus")
+    ASSIGN_ID_EX(102, "Torus", COLOR_SHIP_GREEN)
 
 
 private:
@@ -261,7 +265,7 @@ public:
     cVausBoss()noexcept;
 
     DISABLE_COPY(cVausBoss)
-    ASSIGN_ID(103, "Vaus")
+    ASSIGN_ID_EX(103, "Vaus", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -292,7 +296,7 @@ public:
     cNautilusBoss()noexcept;
 
     DISABLE_COPY(cNautilusBoss)
-    ASSIGN_ID(201, "Nautilus")
+    ASSIGN_ID_EX(201, "Nautilus", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -330,7 +334,7 @@ public:
     cAmemasuBoss()noexcept;
 
     DISABLE_COPY(cAmemasuBoss)
-    ASSIGN_ID(202, "Amemasu")
+    ASSIGN_ID_EX(202, "Amemasu", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -365,7 +369,7 @@ public:
     cLeviathanBoss()noexcept;
 
     DISABLE_COPY(cLeviathanBoss)
-    ASSIGN_ID(203, "Leviathan")
+    ASSIGN_ID_EX(203, "Leviathan", COLOR_SHIP_BLUE)
 
 
 private:
@@ -402,7 +406,7 @@ public:
     cUrticaBoss()noexcept;
 
     DISABLE_COPY(cUrticaBoss)
-    ASSIGN_ID(301, "Urtica")
+    ASSIGN_ID_EX(301, "Urtica", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -419,7 +423,7 @@ public:
     cTigerBoss()noexcept;
 
     DISABLE_COPY(cTigerBoss)
-    ASSIGN_ID(302, "Tiger MK-III")
+    ASSIGN_ID_EX(302, "Tiger MK-III", COLOR_SHIP_YELLOW)
 
 
 private:
@@ -436,7 +440,7 @@ public:
     cLuciferBoss()noexcept;
 
     DISABLE_COPY(cLuciferBoss)
-    ASSIGN_ID(303, "L.U.C.I.F.E.R.")
+    ASSIGN_ID_EX(303, "L.U.C.I.F.E.R.", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -453,7 +457,7 @@ public:
     cQuaternionBoss()noexcept;
 
     DISABLE_COPY(cQuaternionBoss)
-    ASSIGN_ID(401, "Quaternion")
+    ASSIGN_ID_EX(401, "Quaternion", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -470,7 +474,7 @@ public:
     cSarosBoss()noexcept;
 
     DISABLE_COPY(cSarosBoss)
-    ASSIGN_ID(402, "Saros")
+    ASSIGN_ID_EX(402, "Saros", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -487,7 +491,7 @@ public:
     cMessierBoss()noexcept;
 
     DISABLE_COPY(cMessierBoss)
-    ASSIGN_ID(403, "Messier 87")
+    ASSIGN_ID_EX(403, "Messier 87", COLOR_SHIP_RED)
 
 
 private:
@@ -504,7 +508,7 @@ public:
     cTartarusBoss()noexcept;
 
     DISABLE_COPY(cTartarusBoss)
-    ASSIGN_ID(501, "Tartarus")
+    ASSIGN_ID_EX(501, "Tartarus", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -521,7 +525,7 @@ public:
     cPhalarisBoss()noexcept;
 
     DISABLE_COPY(cPhalarisBoss)
-    ASSIGN_ID(502, "Phalaris")
+    ASSIGN_ID_EX(502, "Phalaris", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -538,7 +542,7 @@ public:
     cCholBoss()noexcept;
 
     DISABLE_COPY(cCholBoss)
-    ASSIGN_ID(503, "Chol")
+    ASSIGN_ID_EX(503, "Chol", COLOR_SHIP_ORANGE)
 
 
 private:
@@ -555,7 +559,7 @@ public:
     cFenrirBoss()noexcept;
 
     DISABLE_COPY(cFenrirBoss)
-    ASSIGN_ID(601, "Fenrir")
+    ASSIGN_ID_EX(601, "Fenrir", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -572,7 +576,7 @@ public:
     cShelobBoss()noexcept;
 
     DISABLE_COPY(cShelobBoss)
-    ASSIGN_ID(602, "Shelob")
+    ASSIGN_ID_EX(602, "Shelob", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -589,7 +593,7 @@ public:
     cZerothBoss()noexcept;
 
     DISABLE_COPY(cZerothBoss)
-    ASSIGN_ID(603, "???")
+    ASSIGN_ID_EX(603, "???", COLOR_SHIP_MAGENTA)
 
 
 private:
@@ -606,7 +610,7 @@ public:
     cOrlacBoss()noexcept;
 
     DISABLE_COPY(cOrlacBoss)
-    ASSIGN_ID(701, "Orlac")
+    ASSIGN_ID_EX(701, "Orlac", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -623,7 +627,7 @@ public:
     cGemingaBoss()noexcept;
 
     DISABLE_COPY(cGemingaBoss)
-    ASSIGN_ID(702, "Geminga")
+    ASSIGN_ID_EX(702, "Geminga", COLOR_SHIP_RED)
 
 
 private:
@@ -640,7 +644,7 @@ public:
     cNagualBoss()noexcept;
 
     DISABLE_COPY(cNagualBoss)
-    ASSIGN_ID(703, "Nagual")
+    ASSIGN_ID_EX(703, "Nagual", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -659,6 +663,9 @@ public:
     DISABLE_COPY(cProjectOneBoss)
     ASSIGN_ID(801, "Project One")
 
+    // 
+    inline coreVector3 GetColor()const final {return coreVector3(0.0f,0.0f,0.0f);}
+
 
 private:
     // execute own routines
@@ -676,7 +683,7 @@ public:
     cEigengrauBoss()noexcept;
 
     DISABLE_COPY(cEigengrauBoss)
-    ASSIGN_ID(802, "Eigengrau")
+    ASSIGN_ID_EX(802, "Eigengrau", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
