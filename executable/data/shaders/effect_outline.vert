@@ -40,7 +40,7 @@ void VertexMain()
 #endif
 
     // 
-    gl_Position.z -= (v1Depth * 0.001 - 0.0005) * gl_Position.w;
+    gl_Position.z -= (v1Depth * 0.0012 - 0.0006) * gl_Position.w;
 
 #else
 
