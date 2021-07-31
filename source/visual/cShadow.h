@@ -45,7 +45,7 @@ class cShadow final : public cBindContainerIn, public coreResourceRelation
 {
 private:
     coreFrameBuffer m_FrameBuffer;                      // shadow map frame buffer
-    coreUint8 m_iLevel;                                 // current configuration level
+    coreUint8       m_iLevel;                           // current configuration level
 
     static cBindContainer s_GlobalContainer;            // global shadow-casting objects (in all frame buffers)
 

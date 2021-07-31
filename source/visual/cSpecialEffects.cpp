@@ -656,7 +656,7 @@ void cSpecialEffects::RumblePlayer(const cPlayer* pPlayer, const coreFloat fStre
     if(!STATIC_ISVALID(g_pGame)) return;
 
     // loop through all active players
-    g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pCurPlayer, const coreUintW i)
+    g_pGame->ForEachPlayer([&](const cPlayer* pCurPlayer, const coreUintW i)
     {
         if((pPlayer != pCurPlayer) && (pPlayer != NULL)) return;
 

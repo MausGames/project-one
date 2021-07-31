@@ -294,10 +294,12 @@ void cGame::LoadMissionID(const coreInt32 iID, const coreUint8 iTakeFrom, const 
     // 
     this->__ClearAll(false);
 
+    // 
+    const coreInt32 iOldID    = m_pCurMission ? m_pCurMission->GetID() : cNoMission::ID;
+    const coreUintW iOldIndex = m_iCurMissionIndex;
+
     // hold old mission (to keep resources valid)
     const cMission* pOldMission = m_pCurMission;
-    const coreInt32 iOldID      = m_pCurMission ? m_pCurMission->GetID() : cNoMission::ID;
-    const coreUintW iOldIndex   = m_iCurMissionIndex;
 
     // create new mission
     switch(iID)

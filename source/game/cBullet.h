@@ -11,12 +11,14 @@
 #define _P1_GUARD_BULLET_H_
 
 // TODO 3: pre-allocate bullets (at least for player) at the beginning to improve resource loading
-// TODO 3: use prefetch with more precise numbers (also in enemy-manager)
+// TODO 3: use prefetch with more precise numbers (also in enemy-manager) (maybe with per-class config)
 // TODO 3: align bullet memory ? (also check other possible locations (e.g. enemies))
 // TODO 3: add memory pool object for bullets ? also for enemy
 // TODO 3: remove tons of template instantiations (also enemies ? other templates ?) (CreateBullet and AllocateEnemy create tons of symbols)
 // TODO 3: sort bullet classes (color, enemy<>player, normal<>special), improve array indexing and caching
 // TODO 3: shift spear-bullet collision like ray-bullet
+// TODO 2: lots of bullets with direction-outlines can create holes in outlines by nearly-invisible backsides (can this even be fixed ?)
+// TODO 3: bullets (ray) spawning directly in front of a hollow object fly inside
 // TODO 5: bullet -> to POD-type with single parent object
 // TODO 3: reorder bullets either yellow->green or green->yellow, so they are overlapping consistently (in default order)
 // TODO 4: surge-bullets to wave-weapon, rename one of it (probably wave-weapon to surge-weapon, code-only anyway)
@@ -674,7 +676,7 @@ public:
     inline void ResetProperties() {this->MakeMagenta(); this->SetSize(coreVector3(1.0f,3.0f,1.0f)); this->SetTexSize(coreVector2(0.2f,0.2f)); m_fAnimation = 0.0f; m_fFade = 0.0f;}
 
     // change default color
-    inline cViewBullet* MakeWhite  () {ASSERT(false)             return this;}
+    inline cViewBullet* MakeWhite  () {this->_MakeWhite  (0.7f); return this;}
     inline cViewBullet* MakeYellow () {ASSERT(false)             return this;}
     inline cViewBullet* MakeOrange () {ASSERT(false)             return this;}
     inline cViewBullet* MakeRed    () {ASSERT(false)             return this;}
@@ -713,7 +715,7 @@ public:
     ASSIGN_ID(13, "Mine")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(2.0f,2.0f,2.0f)); m_fAnimation = 0.0f; m_fFade = 0.0f;}
+    inline void ResetProperties() {this->SetSize(coreVector3(2.4f,2.4f,2.4f)); m_fAnimation = 0.0f; m_fFade = 0.0f;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "object_ship_glow_inst_program";}

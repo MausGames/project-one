@@ -35,7 +35,7 @@
 // TODO 5: menu optimization by caching into framebuffer (general class for leaderboard, options, etc.)
 // TODO 3: protect main (LockFramerate)
 // TODO 3: check all shaders if alpha is required
-// TODO 4: full initializer lists everywhere (don't forget parent classes)
+// TODO 4: full initializer lists everywhere (don't forget parent classes) (also in other projects)
 // TODO 3: clean mixing shader defines (x >= y) and (defined(x)) checks (also in engine)
 // TODO 3: check for 16-bit float shader usage
 // TODO 2: program enable has to be checked (if(x.Enable()){}) everywhere
@@ -141,7 +141,7 @@
 #define COLOR_ENERGY_MAGENTA (coreVector3(1.000f, 0.310f, 0.650f))
 #define COLOR_ENERGY_PURPLE  (coreVector3(0.450f, 0.200f, 1.000f))
 #define COLOR_ENERGY_BLUE    (coreVector3(0.100f, 0.430f, 1.000f))
-#define COLOR_ENERGY_CYAN    (coreVector3(0.184f, 0.569f, 0.635f))
+#define COLOR_ENERGY_CYAN    (coreVector3(0.184f, 0.635f, 0.635f))
 #define COLOR_ENERGY_GREEN   (coreVector3(0.270f, 0.710f, 0.270f))
 #define COLOR_FIRE_WHITE     (coreVector3(0.220f, 0.220f, 0.220f))
 #define COLOR_FIRE_ORANGE    (coreVector3(0.991f, 0.305f, 0.042f))

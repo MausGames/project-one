@@ -102,10 +102,10 @@ void cOutdoor::RenderDepth()
 // load outdoor geometry
 void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
 {
-    BIG_STATIC sVertex     aVertexData[OUTDOOR_TOTAL_VERTICES];
-    BIG_STATIC coreUint16  aiIndexData[OUTDOOR_TOTAL_INDICES];
-    BIG_STATIC coreVector3 avOrtho1   [OUTDOOR_TOTAL_VERTICES]; std::memset(avOrtho1, 0, sizeof(avOrtho1));
-    BIG_STATIC coreVector3 avOrtho2   [OUTDOOR_TOTAL_VERTICES]; std::memset(avOrtho2, 0, sizeof(avOrtho2));
+    BIG_STATIC sVertex     s_aVertexData[OUTDOOR_TOTAL_VERTICES];
+    BIG_STATIC coreUint16  s_aiIndexData[OUTDOOR_TOTAL_INDICES];
+    BIG_STATIC coreVector3 s_avOrtho1   [OUTDOOR_TOTAL_VERTICES]; std::memset(s_avOrtho1, 0, sizeof(s_avOrtho1));
+    BIG_STATIC coreVector3 s_avOrtho2   [OUTDOOR_TOTAL_VERTICES]; std::memset(s_avOrtho2, 0, sizeof(s_avOrtho2));
 
     // delete old data
     m_pModel->Unload();
@@ -157,7 +157,7 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
         m_aiHeight[i] = coreMath::Float32To16(fLevel);
 
         // set vertex position
-        aVertexData[i].vPosition = coreVector3(I_TO_F(x - OUTDOOR_WIDTH / 2u) * OUTDOOR_DETAIL, I_TO_F(y - OUTDOOR_VIEW / 2u) * OUTDOOR_DETAIL, fLevel);
+        s_aVertexData[i].vPosition = coreVector3(I_TO_F(x - OUTDOOR_WIDTH / 2u) * OUTDOOR_DETAIL, I_TO_F(y - OUTDOOR_VIEW / 2u) * OUTDOOR_DETAIL, fLevel);
     }
 
     // sync beginning and ending height to create an infinite looking grid when resetting the position
@@ -168,8 +168,8 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
             const coreUintW f = i * OUTDOOR_WIDTH + j;
             const coreUintW t = f + OUTDOOR_HEIGHT * OUTDOOR_WIDTH;
 
-            aVertexData[t].vPosition.z = aVertexData[f].vPosition.z;
-            m_aiHeight [t]             = m_aiHeight [f];
+            s_aVertexData[t].vPosition.z = s_aVertexData[f].vPosition.z;
+            m_aiHeight   [t]             = m_aiHeight   [f];
         }
     }
 
@@ -181,12 +181,12 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
         {
             const coreUint16 iVertex = x + y*OUTDOOR_WIDTH;
 
-            aiIndexData[iIndex+0u] = iVertex;
-            aiIndexData[iIndex+1u] = iVertex + 1u + OUTDOOR_WIDTH;
-            aiIndexData[iIndex+2u] = iVertex      + OUTDOOR_WIDTH;
-            aiIndexData[iIndex+3u] = iVertex;
-            aiIndexData[iIndex+4u] = iVertex + 1u;
-            aiIndexData[iIndex+5u] = iVertex + 1u + OUTDOOR_WIDTH;
+            s_aiIndexData[iIndex+0u] = iVertex;
+            s_aiIndexData[iIndex+1u] = iVertex + 1u + OUTDOOR_WIDTH;
+            s_aiIndexData[iIndex+2u] = iVertex      + OUTDOOR_WIDTH;
+            s_aiIndexData[iIndex+3u] = iVertex;
+            s_aiIndexData[iIndex+4u] = iVertex + 1u;
+            s_aiIndexData[iIndex+5u] = iVertex + 1u + OUTDOOR_WIDTH;
 
             iIndex += 6u;
         }
@@ -203,16 +203,16 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
         const coreUintW iDown  = MAX(y-1, 0)                               *OUTDOOR_WIDTH + x;
         const coreUintW iUp    = MIN(y+1, coreInt32(OUTDOOR_HEIGHT_FULL)-1)*OUTDOOR_WIDTH + x;
 
-        aVertexData[i].vNormal = coreVector3::Cross((aVertexData[iLeft].vPosition - aVertexData[iRight].vPosition).NormalizedUnsafe(),
-                                                    (aVertexData[iDown].vPosition - aVertexData[iUp   ].vPosition).NormalizedUnsafe());
+        s_aVertexData[i].vNormal = coreVector3::Cross((s_aVertexData[iLeft].vPosition - s_aVertexData[iRight].vPosition).NormalizedUnsafe(),
+                                                      (s_aVertexData[iDown].vPosition - s_aVertexData[iUp   ].vPosition).NormalizedUnsafe());
     }
 
     // calculate tangents
     for(coreUintW i = 0u; i < OUTDOOR_TOTAL_INDICES; i += 3u)
     {
         // calculate triangle sides
-        const coreVector3 A1 = aVertexData[aiIndexData[i+1u]].vPosition - aVertexData[aiIndexData[i+0u]].vPosition;
-        const coreVector3 A2 = aVertexData[aiIndexData[i+2u]].vPosition - aVertexData[aiIndexData[i+0u]].vPosition;
+        const coreVector3 A1 = s_aVertexData[s_aiIndexData[i+1u]].vPosition - s_aVertexData[s_aiIndexData[i+0u]].vPosition;
+        const coreVector3 A2 = s_aVertexData[s_aiIndexData[i+2u]].vPosition - s_aVertexData[s_aiIndexData[i+0u]].vPosition;
         const coreVector2 B1 = coreVector2(0.25f, (i%2u) ? 0.0f : 0.25f);
         const coreVector2 B2 = coreVector2((i%2u) ? 0.25f : 0.0f, 0.25f);
 
@@ -224,15 +224,15 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
         for(coreUintW j = 0u; j < 3u; ++j)
         {
             // add local values to each point of the triangle
-            avOrtho1[aiIndexData[i+j]] += D1;
-            avOrtho2[aiIndexData[i+j]] += D2;
+            s_avOrtho1[s_aiIndexData[i+j]] += D1;
+            s_avOrtho2[s_aiIndexData[i+j]] += D2;
         }
     }
     for(coreUintW i = 0u; i < OUTDOOR_TOTAL_VERTICES; ++i)
     {
         // finish the Gram-Schmidt process to calculate the tangent vector and bitangent sign (w)
-        aVertexData[i].vTangent = coreVector4((avOrtho1[i] - aVertexData[i].vNormal * coreVector3::Dot(aVertexData[i].vNormal, avOrtho1[i])).NormalizedUnsafe(),
-                                              SIGN(coreVector3::Dot(coreVector3::Cross(aVertexData[i].vNormal, avOrtho1[i]), avOrtho2[i])));
+        s_aVertexData[i].vTangent = coreVector4((s_avOrtho1[i] - s_aVertexData[i].vNormal * coreVector3::Dot(s_aVertexData[i].vNormal, s_avOrtho1[i])).NormalizedUnsafe(),
+                                                SIGN(coreVector3::Dot(coreVector3::Cross(s_aVertexData[i].vNormal, s_avOrtho1[i]), s_avOrtho2[i])));
     }
 
     GLuint iNormFormat;
@@ -251,34 +251,34 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
     }
 
     // reduce total vertex size
-    BIG_STATIC sVertexPacked aPackedData[OUTDOOR_TOTAL_VERTICES];
+    BIG_STATIC sVertexPacked s_aPackedData[OUTDOOR_TOTAL_VERTICES];
     for(coreUintW i = 0u; i < OUTDOOR_TOTAL_VERTICES; ++i)
     {
-        const sVertex& oVertex = aVertexData[i];
+        const sVertex& oVertex = s_aVertexData[i];
 
         // convert vertex attributes
-        aPackedData[i].fHeight  = oVertex.vPosition.z;
-        aPackedData[i].iNormal  = nPackFunc(coreVector4(oVertex.vNormal, 0.0f));
-        aPackedData[i].iTangent = nPackFunc(oVertex.vTangent);
+        s_aPackedData[i].fHeight  = oVertex.vPosition.z;
+        s_aPackedData[i].iNormal  = nPackFunc(coreVector4(oVertex.vNormal, 0.0f));
+        s_aPackedData[i].iTangent = nPackFunc(oVertex.vTangent);
     }
 
     // create vertex buffer
-    coreVertexBuffer* pBuffer = m_pModel->CreateVertexBuffer(OUTDOOR_TOTAL_VERTICES, sizeof(sVertexPacked), aPackedData, CORE_DATABUFFER_STORAGE_STATIC);
+    coreVertexBuffer* pBuffer = m_pModel->CreateVertexBuffer(OUTDOOR_TOTAL_VERTICES, sizeof(sVertexPacked), s_aPackedData, CORE_DATABUFFER_STORAGE_STATIC);
     pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_POSITION_NUM, 1u, GL_FLOAT,    false, 0u);
     pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_NORMAL_NUM,   4u, iNormFormat, false, 1u*sizeof(coreFloat));
     pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_TANGENT_NUM,  4u, iNormFormat, false, 1u*sizeof(coreFloat) + 1u*sizeof(coreUint32));
 
     // create index buffer
-    m_pModel->CreateIndexBuffer(OUTDOOR_TOTAL_INDICES, sizeof(coreUint16), aiIndexData, CORE_DATABUFFER_STORAGE_STATIC);
+    m_pModel->CreateIndexBuffer(OUTDOOR_TOTAL_INDICES, sizeof(coreUint16), s_aiIndexData, CORE_DATABUFFER_STORAGE_STATIC);
 
     if(!CORE_GL_SUPPORT(EXT_gpu_shader4))
     {
         // 
-        BIG_STATIC coreVector2 avPosition[OUTDOOR_TOTAL_VERTICES];
-        for(coreUintW i = 0u; i < OUTDOOR_TOTAL_VERTICES; ++i) avPosition[i] = aVertexData[i].vPosition.xy();
+        BIG_STATIC coreVector2 s_avPosition[OUTDOOR_TOTAL_VERTICES];
+        for(coreUintW i = 0u; i < OUTDOOR_TOTAL_VERTICES; ++i) s_avPosition[i] = s_aVertexData[i].vPosition.xy();
 
         // 
-        pBuffer = m_pModel->CreateVertexBuffer(OUTDOOR_TOTAL_VERTICES, sizeof(coreVector2), avPosition, CORE_DATABUFFER_STORAGE_STATIC);
+        pBuffer = m_pModel->CreateVertexBuffer(OUTDOOR_TOTAL_VERTICES, sizeof(coreVector2), s_avPosition, CORE_DATABUFFER_STORAGE_STATIC);
         pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_TEXCOORD_NUM, 2u, GL_FLOAT, false, 0u);
     }
 

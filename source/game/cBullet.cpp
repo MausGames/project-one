@@ -120,7 +120,7 @@ void cBullet::Reflect(const coreObject3D* pObject, const coreVector2 vIntersecti
         coreUint8 iHitCount    = 1u;
 
         // shoot ray into fly direction
-        const coreVector2 vRayPos = vHit - m_vFlyDir * MAX(this->GetCollisionRadius() * 2.0f, m_fSpeed * Core::System->GetTime());
+        const coreVector2 vRayPos = vHit - m_vFlyDir * MAX(this->GetCollisionRadius() * 2.0f, m_fSpeed * TIME);
         if(Core::Manager::Object->TestCollision(pObject, coreVector3(vRayPos, 0.0f), coreVector3(m_vFlyDir, 0.0f), &fHitDistance, &iHitCount))
         {
             vHit = vRayPos + m_vFlyDir * fHitDistance;

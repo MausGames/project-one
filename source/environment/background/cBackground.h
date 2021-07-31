@@ -420,7 +420,7 @@ public:
     cDarkBackground()noexcept;
 
     DISABLE_COPY(cDarkBackground)
-    ASSIGN_ID_EX(8, "Dark", COLOR_MENU_PURPLE)
+    ASSIGN_ID_EX(8, "Dark", coreVector3(0.5f,0.5f,0.5f))
 };
 
 
@@ -463,7 +463,7 @@ public:
     ~cCloudBackground()final;
 
     DISABLE_COPY(cCloudBackground)
-    ASSIGN_ID_EX(99, "Cloud", coreVector3(0.5f,0.5f,0.5f))
+    ASSIGN_ID_EX(99, "Cloud", COLOR_MENU_PURPLE)
 
 
 private:
