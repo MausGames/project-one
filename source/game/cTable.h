@@ -19,11 +19,11 @@
 #define TABLE_BOSSES   (BOSSES)     // 
 #define TABLE_SEGMENTS (SEGMENTS)   // 
 
-#define TABLE_TIME_TO_UINT(x)   (F_TO_UI((x)  * 1000.0f))
-#define TABLE_TIME_TO_FLOAT(x)  (I_TO_F ((x)) / 1000.0f))
+#define TABLE_TIME_TO_UINT(x)     (F_TO_UI((x)  * 1000.0f))
+#define TABLE_TIME_TO_FLOAT(x)    (I_TO_F ((x)) / 1000.0f))
 
-#define __TABLE_SCORE_COMBO(x)  (LERP(50.0f, 1.0f, RCP(1.0f + I_TO_F(x) * 0.0002f)))
-#define __TABLE_TIME_CONVERT(x) (I_TO_F(x) * m_fFrameTime)
+#define __TABLE_SCORE_MODIFIER(x) (1.0f + 0.1f * I_TO_F(x))
+#define __TABLE_TIME_CONVERT(x)   (I_TO_F(x) * m_fFrameTime)
 
 
 // ****************************************************************
@@ -118,7 +118,7 @@ private:
 
     coreProtect<coreUint32> m_aiComboValue[2];                                   // absolute values for combo calculations (0 = current value, 1 = max value) 
     coreProtect<coreUint32> m_aiChainValue[2];                                   // 
-    coreProtect<coreFlow>   m_fChainCooldown;                                    // 
+    coreProtect<coreFlow>   m_fCooldown;                                         // 
 
     const cPlayer* m_pOwner;                                                     // 
 
@@ -134,28 +134,30 @@ public:
     // 
     void Reset();
 
-    // control scoring stats 
-    void AddScore(const coreUint32 iValue, const coreBool bModified, const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
-    void AddScore(const coreUint32 iValue, const coreBool bModified);
-    void AddCombo(const coreUint32 iValue);
-    void AddChain(const coreUint32 iValue);
+    // control scoring stats   
+    coreUint32 AddScore(const coreUint32 iValue, const coreBool bModified, const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
+    coreUint32 AddScore(const coreUint32 iValue, const coreBool bModified);
+    void       AddCombo(const coreUint32 iValue);
+    void       AddChain(const coreUint32 iValue);
 
     // 
-    void ReduceCombo  ();
-    void TransferChain();
+    void TransferChain  ();
+    void RefreshCooldown();
+    void CancelCooldown ();
 
     // 
     inline void SetOwner(const cPlayer* pOwner) {m_pOwner = pOwner;}
 
     // 
-    inline coreUint32 GetScoreTotal   ()const                                                             {return m_iScoreTotal;}
-    inline coreUint32 GetScoreMission (const coreUintW iMissionIndex)const                                {ASSERT(iMissionIndex < TABLE_MISSIONS)                                   return m_aiScoreMission [iMissionIndex];}
-    inline coreUint32 GetScoreSegment (const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {ASSERT(iMissionIndex < TABLE_MISSIONS && iSegmentIndex < TABLE_SEGMENTS) return m_aaiScoreSegment[iMissionIndex][iSegmentIndex];}
-    inline coreFloat  GetCurCombo     ()const                                                             {return __TABLE_SCORE_COMBO(m_aiComboValue[0]);}
-    inline coreFloat  GetMaxCombo     ()const                                                             {return __TABLE_SCORE_COMBO(m_aiComboValue[1]);}
-    inline coreUint32 GetCurChain     ()const                                                             {return m_aiChainValue[0];}
-    inline coreUint32 GetMaxChain     ()const                                                             {return m_aiChainValue[1];}
-    inline coreFloat  GetChainCooldown()const                                                             {return m_fChainCooldown;}
+    inline coreUint32 GetScoreTotal  ()const                                                             {return m_iScoreTotal;}
+    inline coreUint32 GetScoreMission(const coreUintW iMissionIndex)const                                {ASSERT(iMissionIndex < TABLE_MISSIONS)                                   return m_aiScoreMission [iMissionIndex];}
+    inline coreUint32 GetScoreSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {ASSERT(iMissionIndex < TABLE_MISSIONS && iSegmentIndex < TABLE_SEGMENTS) return m_aaiScoreSegment[iMissionIndex][iSegmentIndex];}
+    inline coreUint32 GetCurCombo    ()const                                                             {return m_aiComboValue[0];}
+    inline coreUint32 GetMaxCombo    ()const                                                             {return m_aiComboValue[1];}
+    inline coreUint32 GetCurChain    ()const                                                             {return m_aiChainValue[0];}
+    inline coreUint32 GetMaxChain    ()const                                                             {return m_aiChainValue[1];}
+    inline coreFloat  GetCooldown    ()const                                                             {return m_fCooldown;}
+    inline coreFloat  GetModifier    ()const                                                             {return __TABLE_SCORE_MODIFIER(m_aiComboValue[0]);}
 };
 
 

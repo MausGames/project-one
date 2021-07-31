@@ -209,10 +209,10 @@ cScoreTable::cScoreTable()noexcept
 void cScoreTable::Update()
 {
     // 
-    if(m_fChainCooldown)
+    if(m_fCooldown)
     {
-        m_fChainCooldown.UpdateMax(-1.0f, 0.0f);
-        if(!m_fChainCooldown) this->TransferChain();
+        m_fCooldown.UpdateMax(-1.0f/2.0f, 0.0f);
+        if(!m_fCooldown) this->CancelCooldown();
     }
 }
 
@@ -229,15 +229,15 @@ void cScoreTable::Reset()
     // reset combo and chain values (# no memset)
     m_aiComboValue[1] = m_aiComboValue[0] = 0u;
     m_aiChainValue[1] = m_aiChainValue[0] = 0u;
-    m_fChainCooldown = 0.0f;
+    m_fCooldown = 0.0f;
 }
 
 
 // ****************************************************************
 // 
-void cScoreTable::AddScore(const coreUint32 iValue, const coreBool bModified, const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
+coreUint32 cScoreTable::AddScore(const coreUint32 iValue, const coreBool bModified, const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
 {
-    const coreUint32 iFinalValue = bModified ? F_TO_UI(I_TO_F(iValue) * this->GetCurCombo()) : iValue;
+    const coreUint32 iFinalValue = bModified ? F_TO_UI(I_TO_F(iValue) * this->GetModifier()) : iValue;
 
     // 
     ASSERT(iMissionIndex < TABLE_MISSIONS)
@@ -253,13 +253,15 @@ void cScoreTable::AddScore(const coreUint32 iValue, const coreBool bModified, co
 
     // 
     g_pSave->EditGlobalStats()->iScoreGained += iFinalValue;
+
+    return iFinalValue;
 }
 
-void cScoreTable::AddScore(const coreUint32 iValue, const coreBool bModified)
+coreUint32 cScoreTable::AddScore(const coreUint32 iValue, const coreBool bModified)
 {
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
-    this->AddScore(iValue, bModified, g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
+    return this->AddScore(iValue, bModified, g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
 }
 
 
@@ -270,6 +272,9 @@ void cScoreTable::AddCombo(const coreUint32 iValue)
     // 
     m_aiComboValue[0] += iValue;
     m_aiComboValue[1]  = MAX(m_aiComboValue[0], m_aiComboValue[1]);
+
+    // 
+    this->RefreshCooldown();
 }
 
 
@@ -282,16 +287,7 @@ void cScoreTable::AddChain(const coreUint32 iValue)
     m_aiChainValue[1]  = MAX(m_aiChainValue[0], m_aiChainValue[1]);
 
     // 
-    m_fChainCooldown = 1.0f;
-}
-
-
-// ****************************************************************
-// 
-void cScoreTable::ReduceCombo()
-{
-    // 
-    m_aiComboValue[0] /= 2u;
+    this->RefreshCooldown();
 }
 
 
@@ -302,12 +298,36 @@ void cScoreTable::TransferChain()
     if(m_aiChainValue[0])
     {
         // 
-        this->AddScore(m_aiChainValue[0], true);
+        const coreUint32 iScore = this->AddScore(m_aiChainValue[0], true);
         m_aiChainValue[0] = 0u;
 
         // 
-        m_fChainCooldown = 0.0f;
+        ASSERT(STATIC_ISVALID(g_pGame))
+        g_pGame->GetCombatText()->DrawChain(iScore, m_pOwner->GetPosition());
     }
+}
+
+
+// ****************************************************************
+// 
+void cScoreTable::RefreshCooldown()
+{
+    // 
+    m_fCooldown = 1.0f;
+}
+
+
+// ****************************************************************
+// 
+void cScoreTable::CancelCooldown()
+{
+    // 
+    this->TransferChain();
+
+    // 
+    m_aiComboValue[0] = 0u;
+    m_aiChainValue[0] = 0u;
+    m_fCooldown       = 0.0f;
 }
 
 

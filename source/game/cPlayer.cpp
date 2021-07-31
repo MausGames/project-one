@@ -432,8 +432,7 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
     if(iDamage > 0)
     {
         // 
-        m_ScoreTable.TransferChain();
-        m_ScoreTable.ReduceCombo();
+        m_ScoreTable.CancelCooldown();
 
         // 
         const coreInt32 iTaken = this->_TakeDamage(1, iElement, vImpact);
