@@ -44,7 +44,7 @@ void cBullet::Move()
     this->__MoveOwn();
 
     // deactivate bullet when leaving the defined area
-    if((m_fFlyTime >= 0.5f) && !g_pForeground->IsVisibleObject(this))
+    if((m_fFlyTime >= 0.5f) && !HAS_FLAG(m_iStatus, BULLET_STATUS_IMMORTAL) && !g_pForeground->IsVisibleObject(this))
         this->Deactivate(false);
 
     // move the 3d-object
@@ -91,7 +91,8 @@ void cBullet::Deactivate(const coreBool bAnimated, const coreVector2 vImpact)
     REMOVE_FLAG(m_iStatus, BULLET_STATUS_ACTIVE)
 
     // 
-    if(bAnimated) this->__ImpactOwn(vImpact);
+    if(bAnimated && (!HAS_FLAG(m_iStatus, BULLET_STATUS_IMMORTAL) || g_pForeground->IsVisibleObject(this)))
+        this->__ImpactOwn(vImpact);
 
     // 
     this->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
@@ -111,7 +112,7 @@ void cBullet::Deactivate(const coreBool bAnimated)
 // 
 void cBullet::Reflect(const coreObject3D* pObject, const coreVector2 vIntersection, const coreVector2 vForceNormal)
 {
-    ASSERT(pObject && pObject->GetModel()->GetNumClusters())
+    ASSERT(pObject && pObject->GetVolume()->GetNumClusters())
 
     // increase intersection precision
     coreVector2 vHit = vIntersection;
@@ -278,7 +279,7 @@ void cBulletManager::Move()
             {
                 // calculate properties between current and previous bullet
                 const coreFloat fLengthSq   = (vPrevPos    - pBullet->GetPosition().xy()).LengthSq();
-                const coreFloat fFullRadius = (fPrevRadius + pBullet->GetCollisionRadius());
+                const coreFloat fFullRadius = (fPrevRadius + pBullet->GetCollisionRadius() + 2.0f * OUTLINE_THICKNESS);
                 vPrevPos    = pBullet->GetPosition().xy();
                 fPrevRadius = pBullet->GetCollisionRadius();
 

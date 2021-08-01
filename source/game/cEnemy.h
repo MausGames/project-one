@@ -14,6 +14,8 @@
 // TODO 4: manager: Find, ForEach, ForEachAll -> typed 
 // TODO 3: implement own enemy-types for custom-enemies which would require instancing
 // TODO 3: memory-pool for each enemy-set (if single allocations still used)
+// TODO 3: add score-value to cEnemy class, either for base, or for extra score
+// TODO 2: make sure ENEMY_STATUS_DAMAGING is used for damaging contact, and no additional checks and (duplicate) TakeDamage calls are made
 
 
 // ****************************************************************
@@ -27,15 +29,17 @@ enum eEnemyStatus : coreUint16
     ENEMY_STATUS_DEAD        = 0x0001u,   // completely removed from the game
     ENEMY_STATUS_ASSIGNED    = 0x0002u,   // enemy is currently assigned to something
     ENEMY_STATUS_CHILD       = 0x0004u,   // 
-    ENEMY_STATUS_SHIELDED    = 0x0008u,   // 
+    ENEMY_STATUS_SHIELDED    = 0x0008u,   // TODO 1: currently not used 
     ENEMY_STATUS_BOSS        = 0x0010u,   // 
     ENEMY_STATUS_SINGLE      = 0x0020u,   // 
     ENEMY_STATUS_ENERGY      = 0x0040u,   // 
-    ENEMY_STATUS_INVINCIBLE  = 0x0080u,   // 
-    ENEMY_STATUS_IMMORTAL    = 0x0100u,   // 
-    ENEMY_STATUS_GHOST       = 0x0200u,   // 
-    ENEMY_STATUS_HIDDEN      = 0x0400u,   // 
-    ENEMY_STATUS_WORTHLESS   = 0x0800u    // 
+    ENEMY_STATUS_BOTTOM      = 0x0080u,   // TODO 1: not yet used 
+    ENEMY_STATUS_INVINCIBLE  = 0x0100u,   // 
+    ENEMY_STATUS_DAMAGING    = 0x0200u,   // 
+    ENEMY_STATUS_IMMORTAL    = 0x0400u,   // 
+    ENEMY_STATUS_GHOST       = 0x0800u,   // 
+    ENEMY_STATUS_HIDDEN      = 0x1000u,   // 
+    ENEMY_STATUS_WORTHLESS   = 0x2000u    // 
 };
 
 
@@ -46,6 +50,8 @@ class INTERFACE cEnemy : public cShip
 protected:
     coreFlow  m_fLifeTime;         // 
     coreFloat m_fLifeTimeBefore;   // 
+
+    coreUint8 m_iLastAttacker;     // 
 
     coreSet<cEnemy*> m_apMember;   // 
 
@@ -59,15 +65,14 @@ public:
     ENABLE_ID
 
     // configure the enemy
-    void Configure (const coreInt32 iHealth, const coreVector3 vColor, const coreBool bInverted = false);
-    void GiveShield(const coreUint8 iElement, const coreInt16 iHealth = 0);
+    void Configure(const coreInt32 iHealth, const coreVector3 vColor, const coreBool bInverted = false);
 
     // render and move the enemy
     void Render()final;
     void Move  ()final;
 
     // reduce current health
-    coreInt32 TakeDamage(coreInt32 iDamage, const coreUint8 iElement, const coreVector2 vImpact, cPlayer* pAttacker);
+    coreInt32 TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2 vImpact, cPlayer* pAttacker);
 
     // control life and death
     void Resurrect();
@@ -81,6 +86,7 @@ public:
     inline coreBool IsChild ()const {return !m_apMember.empty() &&  HAS_FLAG(m_iStatus, ENEMY_STATUS_CHILD);}
 
     // 
+    cPlayer*    LastAttacker        ()const;
     cPlayer*    NearestPlayerSide   ()const;
     cPlayer*    NearestPlayerSideRev()const;
     cPlayer*    NearestPlayerDual   (const coreUintW iIndex)const;
@@ -260,6 +266,12 @@ public:
     ENABLE_COPY(cStarEnemy)
     ASSIGN_ID(3, "Star")
 
+    // 
+    inline void SetAngle(const coreFloat fAngle) {m_fAngle = fAngle;}
+
+    // 
+    inline const coreFloat& GetAngle()const {return m_fAngle;}
+
 
 private:
     // execute own routines
@@ -280,6 +292,12 @@ public:
 
     ENABLE_COPY(cArrowEnemy)
     ASSIGN_ID(4, "Arrow")
+
+    // 
+    inline void SetAngle(const coreFloat fAngle) {m_fAngle = fAngle;}
+
+    // 
+    inline const coreFloat& GetAngle()const {return m_fAngle;}
 
 
 private:
@@ -314,6 +332,12 @@ public:
     ENABLE_COPY(cFreezerEnemy)
     ASSIGN_ID(6, "Freezer")
 
+    // 
+    inline void SetAngle(const coreFloat fAngle) {m_fAngle = fAngle;}
+
+    // 
+    inline const coreFloat& GetAngle()const {return m_fAngle;}
+
 
 private:
     // execute own routines
@@ -334,6 +358,12 @@ public:
 
     ENABLE_COPY(cCinderEnemy)
     ASSIGN_ID(7, "Cinder")
+
+    // 
+    inline void SetAngle(const coreFloat fAngle) {m_fAngle = fAngle;}
+
+    // 
+    inline const coreFloat& GetAngle()const {return m_fAngle;}
 
 
 private:

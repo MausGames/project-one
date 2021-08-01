@@ -14,6 +14,7 @@
 cEnemy::cEnemy()noexcept
 : m_fLifeTime       (0.0f)
 , m_fLifeTimeBefore (0.0f)
+, m_iLastAttacker   (0u)
 {
     // load object resources
     this->DefineTexture(0u, "ship_enemy.png");
@@ -31,16 +32,6 @@ void cEnemy::Configure(const coreInt32 iHealth, const coreVector3 vColor, const 
     // set health and color
     this->SetMaxHealth(iHealth);
     this->SetBaseColor(vColor, bInverted);
-}
-
-
-// ****************************************************************
-// 
-void cEnemy::GiveShield(const coreUint8 iElement, const coreInt16 iHealth)
-{
-    // 
-    ASSERT(STATIC_ISVALID(g_pGame))
-    g_pGame->GetShieldManager()->BindEnemy(this, iElement, iHealth);
 }
 
 
@@ -76,9 +67,9 @@ void cEnemy::Move()
         this->coreObject3D::Move();
 
         // 
-        if(g_pForeground->IsVisibleObject(this))
+        if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_DEAD) && g_pForeground->IsVisibleObject(this))
         {
-            this->SetEnabled(CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_HIDDEN) ? CORE_OBJECT_ENABLE_MOVE : CORE_OBJECT_ENABLE_ALL);
+            this->SetEnabled(HAS_FLAG(m_iStatus, ENEMY_STATUS_HIDDEN) ? CORE_OBJECT_ENABLE_MOVE : CORE_OBJECT_ENABLE_ALL);
             this->ChangeType(TYPE_ENEMY);   // # make it available in cEnemyManager::ForEachEnemy
         }
         else
@@ -94,24 +85,25 @@ void cEnemy::Move()
 
 // ****************************************************************
 // reduce current health
-coreInt32 cEnemy::TakeDamage(coreInt32 iDamage, const coreUint8 iElement, const coreVector2 vImpact, cPlayer* pAttacker)
+coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2 vImpact, cPlayer* pAttacker)
 {
-    // forward to parent
-    if(this->IsChild()) return m_apMember.front()->TakeDamage(iDamage, iElement, vImpact, pAttacker);
+    ASSERT(STATIC_ISVALID(g_pGame))
+
+    // 
+    const coreBool bCoop = (pAttacker && g_pGame->GetCoop());
+    m_iLastAttacker = bCoop ? (pAttacker - g_pGame->GetPlayer(0u)) : 0u;
 
     if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_INVINCIBLE))
     {
-        // 
-        const coreInt32 iPower = (pAttacker && (STATIC_ISVALID(g_pGame) && g_pGame->GetCoop())) ? 1 : GAME_PLAYERS;
-        iDamage *= iPower;
-
-        // 
-        if(STATIC_ISVALID(g_pGame)) g_pGame->GetShieldManager()->AbsorbDamage(this, &iDamage, iElement);
+        // forward to parent
+        if(this->IsChild()) return m_apMember.front()->TakeDamage(iDamage, iElement, vImpact, pAttacker);
 
         if(iDamage > 0)
         {
             // 
-            const coreInt32 iTaken = this->_TakeDamage(iDamage, iElement, vImpact) / iPower;
+            const coreInt32 iPower = (bCoop || (this->GetMaxHealth() == 1)) ? 1 : GAME_PLAYERS;
+            const coreInt32 iTaken = this->_TakeDamage(iDamage * iPower, iElement, vImpact) / iPower;
+            ASSERT(!(this->GetMaxHealth() % iPower))
 
             if(iTaken)
             {
@@ -132,26 +124,49 @@ coreInt32 cEnemy::TakeDamage(coreInt32 iDamage, const coreUint8 iElement, const 
                 if(pAttacker)
                 {
                     // 
-                    if(!CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_WORTHLESS))
-                        pAttacker->GetScoreTable()->AddScore(iTaken, false);
+                    pAttacker->GetScoreTable()->RefreshCooldown();
 
-                    // 
-                    pAttacker->GetDataTable()->EditCounterTotal  ()->iDamageGiven += iTaken;
-                    pAttacker->GetDataTable()->EditCounterMission()->iDamageGiven += iTaken;
-                    pAttacker->GetDataTable()->EditCounterSegment()->iDamageGiven += iTaken;
+                    if(HAS_FLAG(m_iStatus, ENEMY_STATUS_BOSS))
+                    {
+                        // 
+                        pAttacker->GetScoreTable()->AddChain(iTaken);
+                    }
 
-                    // 
-                    g_pSave->EditGlobalStats      ()->iDamageGiven += iTaken;
-                    g_pSave->EditLocalStatsMission()->iDamageGiven += iTaken;
-                    g_pSave->EditLocalStatsSegment()->iDamageGiven += iTaken;
+                    if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_WORTHLESS))
+                    {
+                        // 
+                        pAttacker->GetDataTable()->EditCounterTotal  ()->iDamageGiven += iTaken;
+                        pAttacker->GetDataTable()->EditCounterMission()->iDamageGiven += iTaken;
+                        pAttacker->GetDataTable()->EditCounterSegment()->iDamageGiven += iTaken;
+
+                        // 
+                        g_pSave->EditGlobalStats      ()->iDamageGiven += iTaken;
+                        g_pSave->EditLocalStatsMission()->iDamageGiven += iTaken;
+                        g_pSave->EditLocalStatsSegment()->iDamageGiven += iTaken;
+                    }
                 }
             }
 
             if(!m_iCurHealth)
             {
-                // 
-                if(!CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_IMMORTAL))
+                if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_IMMORTAL))   // TODO 1: some immortal enemies killed in scripts need to give score, move stuff into own "GiveScore" function or so
+                {
+                    // 
                     this->Kill(true);
+
+                    if(pAttacker)
+                    {
+                        if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_WORTHLESS))
+                        {
+                            // 
+                            const coreUint32 iScore = pAttacker->GetScoreTable()->AddScore(10u * m_iMaxHealth, true);
+                            pAttacker->GetScoreTable()->AddCombo(1u);
+
+                            // 
+                            g_pGame->GetCombatText()->DrawScore(iScore, this->GetPosition(), !g_pGame->GetEnemyManager()->GetNumEnemiesAlive());
+                        }
+                    }
+                }
             }
 
             return iTaken;
@@ -273,6 +288,16 @@ void cEnemy::ResetProperties()
 
     // set initial status
     m_iStatus = ENEMY_STATUS_DEAD;
+}
+
+
+// ****************************************************************
+// 
+cPlayer* cEnemy::LastAttacker()const
+{
+    // 
+    ASSERT(STATIC_ISVALID(g_pGame))
+    return g_pGame->GetPlayer(m_iLastAttacker);
 }
 
 

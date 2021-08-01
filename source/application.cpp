@@ -28,7 +28,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("bullet_mine.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_mine.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("bullet_pulse.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_pulse.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_ray.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_ray.md3");
-    Core::Manager::Resource->Load<coreModel>  ("bullet_ray_volume.md3",                  CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_ray_volume.md3", CORE_MODEL_LOAD_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("bullet_ray_volume.md3",                  CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_ray_volume.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_orb.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_orb.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("bullet_quad.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_quad.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_rocket.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_rocket.md3");

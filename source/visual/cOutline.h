@@ -25,6 +25,8 @@
 #define OUTLINE_STYLE_BULLET_DIRECT (5u)   // 
 #define OUTLINE_STYLES              (6u)   // 
 
+#define OUTLINE_THICKNESS (0.35f)
+
 
 // ****************************************************************
 // outline-style class

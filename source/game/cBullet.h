@@ -22,7 +22,7 @@
 // TODO 5: bullet -> to POD-type with single parent object
 // TODO 3: reorder bullets either yellow->green or green->yellow, so they are overlapping consistently (in default order)
 // TODO 4: surge-bullets to wave-weapon, rename one of it (probably wave-weapon to surge-weapon, code-only anyway)
-// TODO 2: dynamic depth needs to consider outline when calculating distance
+// TODO 1: player was taking damage when moving "into" transparent back of spearbullet (maybe also viewbullet, and more), after evasive maneuver, make sure to add own collision volume
 
 
 // ****************************************************************
@@ -37,9 +37,11 @@
 
 enum eBulletStatus : coreUint8
 {
-    BULLET_STATUS_READY     = 0x01u,  // bullet is ready to be created
-    BULLET_STATUS_ACTIVE    = 0x02u,  // bullet is currently flying around, doing stuff (no checking required, is managed)
-    BULLET_STATUS_PENETRATE = 0x04u   // 
+    BULLET_STATUS_READY     = 0x01u,   // bullet is ready to be created
+    BULLET_STATUS_ACTIVE    = 0x02u,   // bullet is currently flying around, doing stuff (no checking required, is managed)
+    BULLET_STATUS_PENETRATE = 0x04u,   // 
+    BULLET_STATUS_IMMORTAL  = 0x08u,   // 
+    BULLET_STATUS_GHOST     = 0x10u    // 
 };
 
 

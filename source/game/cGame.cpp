@@ -879,16 +879,18 @@ void cGame::__HandleCollisions()
     cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_ENEMY, [this](cPlayer* OUTPUT pPlayer, cEnemy* OUTPUT pEnemy, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         // 
-        if(pEnemy->GetLifeTime() < 1.0f) return;
-
-        // 
         m_pCurMission->CollPlayerEnemy(pPlayer, pEnemy, vIntersection, bFirstHit);
 
         if(bFirstHit)
         {
-            // 
-            if(!CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
+            if(!pEnemy->HasStatus(ENEMY_STATUS_GHOST))
             {
+                if(pEnemy->HasStatus(ENEMY_STATUS_DAMAGING))
+                {
+                    // 
+                    pPlayer->TakeDamage(15, ELEMENT_NEUTRAL, vIntersection.xy());
+                }
+
                 // 
                 const coreVector2 vDiff = pPlayer->GetOldPos() - pEnemy->GetPosition().xy();
                 pPlayer->ApplyForce  (vDiff.Normalized() * 100.0f);
@@ -909,9 +911,12 @@ void cGame::__HandleCollisions()
 
         if(bFirstHit)
         {
-            // 
-            pPlayer->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy());
-            pBullet->Deactivate(true, vIntersection.xy());
+            if(!pBullet->HasStatus(BULLET_STATUS_GHOST))
+            {
+                // 
+                pPlayer->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy());
+                pBullet->Deactivate(true, vIntersection.xy());
+            }
         }
     });
 
@@ -922,12 +927,11 @@ void cGame::__HandleCollisions()
         if(!g_pForeground->IsVisiblePoint(vIntersection.xy())) return;
 
         // 
-        m_pCurMission->CollEnemyBullet(pEnemy, pBullet, vIntersection, bFirstHit);
+        if(pEnemy->GetID() != cRepairEnemy::ID) m_pCurMission->CollEnemyBullet(pEnemy, pBullet, vIntersection, bFirstHit);
 
         if(bFirstHit)
         {
-            // 
-            if(!CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
+            if(!pEnemy->HasStatus(ENEMY_STATUS_GHOST) && !pBullet->HasStatus(BULLET_STATUS_GHOST))
             {
                 // 
                 const coreInt32 iTaken = pEnemy->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner()));
@@ -952,41 +956,18 @@ void cGame::__HandleCollisions()
                     // 
                     g_pSpecialEffects->RumblePlayer(d_cast<cPlayer*>(pBullet->GetOwner()), SPECIAL_RUMBLE_DEFAULT);
                 }
-                else
+
+                if(pBullet->HasStatus(BULLET_STATUS_ACTIVE))
                 {
                     // prevent an already killed but immortal enemy from reflecting bullets (in the same frame)
                     if(!pEnemy->ReachedDeath())
                     {
-                        const coreVector2 vFlyDir = pBullet->GetFlyDir();
-                        const coreVector2 vDiff   = pBullet->GetPosition().xy() - pEnemy->GetPosition().xy();
-                        const coreVector2 vNormal = (vDiff.Normalized(-vFlyDir) - vFlyDir * 10.0f).Normalized(-vFlyDir);
-
                         // 
-                        pBullet->Reflect(pEnemy, vIntersection.xy(), vNormal);
+                        pBullet->Reflect(pEnemy, vIntersection.xy(), -pBullet->GetFlyDir());
                     }
                 }
             }
         }
-    });
-
-    // 
-    cPlayer::TestCollision(PLAYER_TEST_ALL, TYPE_CHROMA, [](cPlayer* OUTPUT pPlayer, cChromaBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit)
-    {
-        // 
-        pPlayer->GetScoreTable()->AddScore(pBullet->GetDamage(), false);
-
-        // 
-        pBullet->Deactivate(true, vIntersection.xy());
-
-        // 
-        pPlayer->GetDataTable()->EditCounterTotal  ()->iChromaCollected += 1u;
-        pPlayer->GetDataTable()->EditCounterMission()->iChromaCollected += 1u;
-        pPlayer->GetDataTable()->EditCounterSegment()->iChromaCollected += 1u;
-
-        // 
-        g_pSave->EditGlobalStats      ()->iChromaCollected += 1u;
-        g_pSave->EditLocalStatsMission()->iChromaCollected += 1u;
-        g_pSave->EditLocalStatsSegment()->iChromaCollected += 1u;
     });
 
     // 
