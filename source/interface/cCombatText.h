@@ -12,12 +12,18 @@
 
 // TODO 3: allow localized text with standard numbers
 // TODO 5: different labels and animations (size, solid background, 000000 -> 123456, ZSDK -> TEST)
-// TODO 3: if possible, reuse the same text
+// TODO 4: calling functions to display text is not consistent, chain is displayed by table, but (regular) score, extra and badge individually alongside adding score to table
+// TODO 2: use oldest active label instead of nothing, if all labels are busy (or dynamically allocated fallback)
+// TODO 3: RestrictCenter should also use size
+// TODO 4: use index instead of pointer for order-list ?
 
 
 // ****************************************************************
 // combat text definitions
-#define COMBAT_LABELS (16u)   // number of label objects
+#define COMBAT_LABELS_SMALL (16u)                                       // 
+#define COMBAT_LABELS_BIG   (4u)                                        // 
+#define COMBAT_LABELS       (COMBAT_LABELS_SMALL + COMBAT_LABELS_BIG)   // total number of label objects
+#define COMBAT_BORDER       (0.47f)                                     // 
 
 
 // ****************************************************************
@@ -25,10 +31,16 @@
 class cCombatText final
 {
 private:
-    cGuiLabel m_aLabel [COMBAT_LABELS];   // label objects to display combat text
-    coreFlow  m_afTimer[COMBAT_LABELS];   // animation timers
+    cGuiLabel m_aLabel [COMBAT_LABELS];    // label objects to display combat text
+    coreFlow  m_afTimer[COMBAT_LABELS];    // animation timers
+    coreUint8 m_aiType [COMBAT_LABELS];    // 
 
-    coreUintW m_iCurLabel;                // current label object
+    cGuiLabel* m_apOrder[COMBAT_LABELS];   // 
+    coreUint8  m_iOrderNum;                // 
+
+    cGuiObject m_BadgeIcon;                // 
+    cGuiLabel  m_BadgeLabel;               // 
+    coreFlow   m_fBadgeTimer;              // 
 
 
 public:
@@ -40,15 +52,29 @@ public:
     void Render();
     void Move();
 
-    // add new active label object
-    void        AddText (const coreChar*  pcText, const coreVector3 vPosition, const coreVector3 vColor);
-    inline void AddBonus(const coreUint32 iValue, const coreVector3 vPosition) {if(iValue) this->AddText(PRINT("%u", iValue), vPosition, COLOR_MENU_BLUE);}
+    // 
+    void DrawScore(const coreUint32 iValue, const coreVector3 vPosition, const coreBool bBig);
+    void DrawExtra(const coreUint32 iValue, const coreVector3 vPosition, const coreBool bBig);
+    void DrawChain(const coreUint32 iValue, const coreVector3 vPosition);
+    void DrawBadge(const coreUint32 iValue, const coreVector3 vPosition);
 
     // 
     void UpdateLayout();
 
     // reset the combat text
     void Reset();
+
+
+private:
+    // 
+    void __DrawLabel(const coreChar* pcText, const coreVector3 vPosition, const coreBool bBig, const coreVector3 vColor, const coreUint8 iType);
+
+    // 
+    void __AddOrder   (cGuiLabel* pLabel);
+    void __RemoveOrder(cGuiLabel* pLabel);
+
+    // 
+    static coreVector2 __RestrictCenter(const coreVector2 vPosition, const coreVector2 vCenter);
 };
 
 
