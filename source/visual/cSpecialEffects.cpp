@@ -831,7 +831,7 @@ void cSpecialEffects::MacroDestructionColor(const coreObject3D* pObject, const c
 
     // 
     const coreVector3 vPosition = pObject->GetPosition();
-    const coreFloat   fPower    = SQRT(MAX(pObject->GetCollisionRadius() / 3.0f - 0.4f, 1.0f));
+    const coreFloat   fPower    = SQRT(MAX(pObject->GetVisualRadius() / 3.0f - 0.4f, 1.0f));
 
     // 
     g_pDistortion->CreateWave        (vPosition, 2.5f  * fPower, 3.0f);
@@ -847,7 +847,7 @@ void cSpecialEffects::MacroDestructionDark(const coreObject3D* pObject)
 
     // 
     const coreVector3 vPosition = pObject->GetPosition();
-    const coreFloat   fPower    = SQRT(MAX(pObject->GetCollisionRadius() / 3.0f - 0.4f, 1.0f));
+    const coreFloat   fPower    = SQRT(MAX(pObject->GetVisualRadius() / 3.0f - 0.4f, 1.0f));
 
     // (# more particles than color) 
     g_pDistortion->CreateWave       (vPosition, 2.5f  * fPower, 3.0f);

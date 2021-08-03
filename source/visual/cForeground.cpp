@@ -83,11 +83,11 @@ coreBool cForeground::IsVisibleObject(const coreObject3D* pObject)const
 
     // 
     const coreVector2 vProjectedPos = this->Project3D(pObject->GetPosition());
-    const coreFloat   fRange        = pObject->GetModel().IsUsable() ? (pObject->GetModel()->GetBoundingRange() * pObject->GetSize()).Max() : 0.0f;
+    const coreFloat   fRadius       = pObject->GetVisualRadius();
 
     // 
-    return ((ABS(vProjectedPos.x) < FOREGROUND_AREA.x * 1.1f + fRange) &&
-            (ABS(vProjectedPos.y) < FOREGROUND_AREA.y * 1.1f + fRange));
+    return ((ABS(vProjectedPos.x) < FOREGROUND_AREA.x * 1.1f + fRadius) &&
+            (ABS(vProjectedPos.y) < FOREGROUND_AREA.y * 1.1f + fRadius));
 }
 
 

@@ -279,9 +279,9 @@ void cBulletManager::Move()
             {
                 // calculate properties between current and previous bullet
                 const coreFloat fLengthSq   = (vPrevPos    - pBullet->GetPosition().xy()).LengthSq();
-                const coreFloat fFullRadius = (fPrevRadius + pBullet->GetCollisionRadius() + 2.0f * OUTLINE_THICKNESS);
+                const coreFloat fFullRadius = (fPrevRadius + pBullet->GetVisualRadius() + 2.0f * OUTLINE_THICKNESS);
                 vPrevPos    = pBullet->GetPosition().xy();
-                fPrevRadius = pBullet->GetCollisionRadius();
+                fPrevRadius = pBullet->GetVisualRadius();
 
                 // increase depth (half if not near each other)
                 fDepth += BULLET_DEPTH_FACTOR * ((fLengthSq < POW2(fFullRadius)) ? 1.0f : 0.5f);

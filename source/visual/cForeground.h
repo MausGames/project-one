@@ -10,8 +10,6 @@
 #ifndef _P1_GUARD_FOREGROUND_H_
 #define _P1_GUARD_FOREGROUND_H_
 
-// TODO 2: IsVisibleObject takes the max axis, but what if the diagonal is visible
-
 
 // ****************************************************************
 // foreground definitions

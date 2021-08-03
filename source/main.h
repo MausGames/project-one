@@ -100,6 +100,9 @@
     #endif
 #endif
 
+#define GetVisualRange  GetCollisionRange   // TODO 1: remove again
+#define GetVisualRadius GetCollisionRadius
+
 
 // ****************************************************************
 // general definitions
