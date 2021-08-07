@@ -13,6 +13,7 @@
 // constructor
 cOutdoor::cOutdoor()noexcept
 : m_aiHeight      {}
+, m_fMaxHeight    (0.0f)
 , m_iVertexOffset (0u)
 , m_iIndexOffset  (0u)
 , m_fFlyOffset    (0.0f)
@@ -110,6 +111,7 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
     // delete old data
     m_pModel->Unload();
     std::memset(m_aiHeight, 0, sizeof(m_aiHeight));
+    m_fMaxHeight = -FLT_MAX;
 
     // save properties
     m_iAlgorithm = iAlgorithm;
@@ -155,6 +157,7 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
 
         // save height value
         m_aiHeight[i] = coreMath::Float32To16(fLevel);
+        m_fMaxHeight  = MAX(m_fMaxHeight, fLevel);
 
         // set vertex position
         s_aVertexData[i].vPosition = coreVector3(I_TO_F(x - OUTDOOR_WIDTH / 2u) * OUTDOOR_DETAIL, I_TO_F(y - OUTDOOR_VIEW / 2u) * OUTDOOR_DETAIL, fLevel);
@@ -446,7 +449,10 @@ FUNC_PURE coreVector3 cOutdoor::RetrieveBackNormal(const coreVector2 vPosition)c
 FUNC_PURE coreVector3 cOutdoor::RetrieveIntersect(const coreVector3 vRayPosition, const coreVector3 vRayDirection)const
 {
     ASSERT(vRayDirection.z < 0.0f)
-    coreVector3 vOutput = vRayPosition;
+
+    // 
+    const coreFloat fStart  = MAX(m_fMaxHeight * m_afLerpMul[0] + m_afLerpAdd[0], m_fMaxHeight * m_afLerpMul[1] + m_afLerpAdd[1]);
+    coreVector3     vOutput = vRayPosition + vRayDirection * (MIN(fStart - vRayPosition.z, 0.0f) * RCP(vRayDirection.z));
 
     // naive ray-tracing with fixed step-size
     for(coreUintW i = 100u; i--; )

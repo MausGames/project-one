@@ -14,7 +14,6 @@
 // TODO 5: check out jcgt_Duff2017Basis to inline tangent calculations into shader (less bandwidth, but more ALU + reg ?)
 // TODO 1: outdoor parameters are reset on engine-reset
 // TODO 1: fix file getting unloaded while others are reading (in reource-manager), maybe make copies of the file -> also affects shader-permutations when loading from two threads
-// TODO 3: get max height of outdoor model and use for first step in RetrieveIntersect
 // TODO 2: attach function, then calling destructor will crash, implement detach function (>engine)
 // TODO 5: increase normal map sharpness, if quality improves (raise depth-value in generator until it throws an assertion)
 
@@ -71,6 +70,7 @@ private:
 
 private:
     coreUint16 m_aiHeight[OUTDOOR_TOTAL_VERTICES];   // height data for height calculations (half-float)
+    coreFloat  m_fMaxHeight;                         // 
 
     coreUint32 m_iVertexOffset;                      // current vertex offset
     coreUint32 m_iIndexOffset;                       // current index offset
