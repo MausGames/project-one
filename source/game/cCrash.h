@@ -39,7 +39,8 @@ private:
     cLodObject m_aObject[CRASH_OBJECTS];      // 
     sStatus    m_aStatus[CRASH_OBJECTS];      // 
 
-    coreFlow m_fSmokeTimer;                   // 
+    coreFlow  m_fSmokeTimer;                  // 
+    coreUint8 m_iActiveObjects;               // 
 
     std::function<void(void*)> m_nCallback;   // 
 
@@ -60,6 +61,9 @@ public:
 
     // 
     template <typename F> void SetImpactCallback(F&& nCallback) {m_nCallback = nCallback;}   // [](void* pData) -> void
+
+    // 
+    inline coreBool IsActive()const {return (m_iActiveObjects > 0u);}
 
 
 private:
