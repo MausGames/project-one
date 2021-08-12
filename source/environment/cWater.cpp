@@ -17,27 +17,33 @@ cWater::cWater(const coreHashString& sSkyTexture)noexcept
 {
     const coreVector2 vWaterResolution = g_vGameResolution * WATER_SCALE_FACTOR;
 
-    // create reflection frame buffer
-    m_Reflection.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB8);
-    m_Reflection.AttachTargetBuffer (CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH16);
-    m_Reflection.Create(vWaterResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+    if(sSkyTexture)
+    {
+        // create reflection frame buffer
+        m_Reflection.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB8);
+        m_Reflection.AttachTargetBuffer (CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH16);
+        m_Reflection.Create(vWaterResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+    }
 
     // create refraction frame buffer
     m_Refraction.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB8);
     m_Refraction.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
-    // create depth frame buffer
-    m_Depth.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH16);
-    m_Depth.Create(vWaterResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+    if(sSkyTexture)
+    {
+        // create depth frame buffer
+        m_Depth.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH16);
+        m_Depth.Create(vWaterResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
-    // create sky-plane object
-    m_Sky.DefineTexture(0u, sSkyTexture);
-    m_Sky.SetSize      (coreVector2(WATER_SCALE_FACTOR, WATER_SCALE_FACTOR) * SQRT2);
-    m_Sky.SetTexSize   (coreVector2(WATER_SKY_SIZE,     WATER_SKY_SIZE));
+        // create sky-plane object
+        m_Sky.DefineTexture(0u, sSkyTexture);
+        m_Sky.SetSize      (coreVector2(WATER_SCALE_FACTOR, WATER_SCALE_FACTOR) * SQRT2);
+        m_Sky.SetTexSize   (coreVector2(WATER_SKY_SIZE,     WATER_SKY_SIZE));
 
-    // 
-    m_apSkyProgram[0] = Core::Manager::Resource->Get<coreProgram>("default_2d_program");
-    m_apSkyProgram[1] = Core::Manager::Resource->Get<coreProgram>("environment_vignette_program");
+        // 
+        m_apSkyProgram[0] = Core::Manager::Resource->Get<coreProgram>("default_2d_program");
+        m_apSkyProgram[1] = Core::Manager::Resource->Get<coreProgram>("environment_vignette_program");
+    }
 
     // load object resources
     this->DefineModel  (Core::Manager::Object->GetLowTriangle());
@@ -82,9 +88,9 @@ void cWater::Render(coreFrameBuffer* pBackground)
     this->coreObject3D::Render();
 
     // invalidate all frame buffer objects
-    m_Reflection.Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR | CORE_FRAMEBUFFER_TARGET_DEPTH);
-    m_Refraction.Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
-    m_Depth     .Invalidate(CORE_FRAMEBUFFER_TARGET_DEPTH);
+    if(m_Reflection.GetIdentifier()) m_Reflection.Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR | CORE_FRAMEBUFFER_TARGET_DEPTH);
+    if(m_Refraction.GetIdentifier()) m_Refraction.Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
+    if(m_Depth     .GetIdentifier()) m_Depth     .Invalidate(CORE_FRAMEBUFFER_TARGET_DEPTH);
 }
 
 
@@ -110,6 +116,8 @@ void cWater::Move()
 // update water reflection map
 void cWater::UpdateReflection()
 {
+    if(!m_Reflection.GetIdentifier()) return;
+
     // 
     this->__UpdateOwn();
 
@@ -177,6 +185,8 @@ void cWater::UpdateReflection()
 // update water depth map
 void cWater::UpdateDepth(cOutdoor* pOutdoor, const coreList<coreBatchList*>& apGroundObjectList)
 {
+    if(!m_Depth.GetIdentifier()) return;
+
     if(pOutdoor && pOutdoor->IsEnabled(CORE_OBJECT_ENABLE_ALL))
     {
         // fill depth frame buffer
@@ -212,7 +222,7 @@ cIceWater::cIceWater(const coreHashString& sSkyTexture)noexcept
 : cWater (sSkyTexture)
 {
     // 
-    m_Ice = (*this);
+    m_Ice = (*s_cast<coreObject3D*>(this));
 
     // 
     m_Ice.DefineTexture(0u, "environment_water_norm.png");

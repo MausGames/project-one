@@ -16,7 +16,7 @@
 // TODO 3: flying should create strong/fast water ripples
 // TODO 3: specular contribution should be reduced by shadow (object shadow and environment darkening)
 // TODO 3: remove sqrt/coreUnpackNormalMap in rainy shader (pre-processing like in outdoor)
-// TODO 3: underwater may render reflection (not required), and render depth (not required)
+// TODO 3: do not load default water shader and texture if not required (maybe create water-interface, NormalWater, Clean, Fresh)
 // TODO 3: glBindTexture has to reset internal texture-cache (or implement method to change in texture)
 // TODO 3: stencil or early depth to not evaluate land areas
 
