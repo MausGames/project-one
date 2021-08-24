@@ -85,7 +85,7 @@ cGameMenu::cGameMenu()noexcept
         m_aMissionName[i].SetAlignment(coreVector2(1.0f,0.0f));
         m_aMissionName[i].SetColor3   (COLOR_MENU_WHITE);
 
-        m_aMissionLine[i].DefineTexture(0u, "menu_detail_03.png");
+        m_aMissionLine[i].DefineTexture(0u, "menu_detail_04.png");
         m_aMissionLine[i].DefineTexture(1u, "menu_background_black.png");
         m_aMissionLine[i].DefineProgram("menu_inner_program");
         m_aMissionLine[i].SetPosition  (coreVector2(0.0f, m_aMissionName[i].GetPosition().y));
@@ -128,7 +128,7 @@ cGameMenu::cGameMenu()noexcept
         m_aOptionName[i].SetAlignment(coreVector2(1.0f,0.0f));
         m_aOptionName[i].SetColor3   (COLOR_MENU_WHITE);
 
-        m_aOptionLine[i].DefineTexture(0u, "menu_detail_03.png");
+        m_aOptionLine[i].DefineTexture(0u, "menu_detail_04.png");
         m_aOptionLine[i].DefineTexture(1u, "menu_background_black.png");
         m_aOptionLine[i].DefineProgram("menu_inner_program");
         m_aOptionLine[i].SetPosition  (coreVector2(0.0f, m_aOptionName[i].GetPosition().y));

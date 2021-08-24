@@ -22,12 +22,12 @@ cSummaryMenu::cSummaryMenu()noexcept
 , m_eState       (SUMMARY_INTRO)
 {
     // create menu objects
-    m_BackgroundMain.DefineTexture(0u, "menu_detail_03.png");
+    m_BackgroundMain.DefineTexture(0u, "menu_detail_04.png");
     m_BackgroundMain.DefineTexture(1u, "menu_background_black.png");
     m_BackgroundMain.DefineProgram("menu_animate_program");
     m_BackgroundMain.SetDirection (coreVector2(-1.0f,0.0f));
 
-    m_BackgroundCoop.DefineTexture(0u, "menu_detail_03.png");
+    m_BackgroundCoop.DefineTexture(0u, "menu_detail_04.png");
     m_BackgroundCoop.DefineTexture(1u, "menu_background_black.png");
     m_BackgroundCoop.DefineProgram("menu_animate_program");
     m_BackgroundCoop.SetCenter    (coreVector2(0.0f,-0.16f));

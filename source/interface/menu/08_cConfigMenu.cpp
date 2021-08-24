@@ -104,7 +104,7 @@ cConfigMenu::cConfigMenu()noexcept
 
     for(coreUintW i = 0u; i < ENTRY_MAX; ++i)
     {
-        m_aLine[i].DefineTexture(0u, "menu_detail_03.png");
+        m_aLine[i].DefineTexture(0u, "menu_detail_04.png");
         m_aLine[i].DefineTexture(1u, "menu_background_black.png");
         m_aLine[i].DefineProgram("menu_inner_program");
         m_aLine[i].SetPosition  (coreVector2(0.0f, m_aLabel[i].GetPosition().y));

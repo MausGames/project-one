@@ -27,8 +27,8 @@ void cInterface::sPlayerView::Construct(const coreUintW iIndex)
     aShieldBar[0].DefineTexture(0u, "menu_detail_01.png");
     aShieldBar[0].DefineProgram("default_2d_program");
     aShieldBar[0].SetPosition  (coreVector2(0.0f,0.005f) * vSide);
-    aShieldBar[0].SetSize      (coreVector2(3.5f,0.4f) * 0.07f);
-    aShieldBar[0].SetAlignment (coreVector2(1.0f,1.0f) * vSide);
+    aShieldBar[0].SetSize      (coreVector2(3.5f,0.45f)  * 0.07f);
+    aShieldBar[0].SetAlignment (coreVector2(1.0f,1.0f)   * vSide);
 
     aShieldBar[1].DefineTexture(0u, "menu_detail_01.png");
     aShieldBar[1].DefineProgram("default_2d_program");
@@ -87,13 +87,13 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
         m_aView[i].Construct(i);
 
     // create interface objects
-    m_aBossHealthBar[0].DefineTexture(0u, "menu_detail_02.png");
+    m_aBossHealthBar[0].DefineTexture(0u, "menu_detail_03.png");
     m_aBossHealthBar[0].DefineProgram("default_2d_program");
     m_aBossHealthBar[0].SetPosition  (coreVector2(0.0f,-0.005f));
-    m_aBossHealthBar[0].SetSize      (coreVector2(7.0f, 0.4f) * 0.07f);
+    m_aBossHealthBar[0].SetSize      (coreVector2(14.0f,0.45f) * 0.07f);
     m_aBossHealthBar[0].SetAlignment (coreVector2(0.0f,-1.0f));
 
-    m_aBossHealthBar[1].DefineTexture(0u, "menu_detail_02.png");
+    m_aBossHealthBar[1].DefineTexture(0u, "menu_detail_03.png");
     m_aBossHealthBar[1].DefineProgram("default_2d_program");
     m_aBossHealthBar[1].SetPosition  (m_aBossHealthBar[0].GetPosition() + coreVector2(0.00f,-0.01f) * 0.5f);
     m_aBossHealthBar[1].SetSize      (m_aBossHealthBar[0].GetSize()     - coreVector2(0.01f, 0.01f));
@@ -123,7 +123,7 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
     m_aWaveTime[1].SetPosition (m_aWaveTime[0].GetPosition());
     m_aWaveTime[1].SetAlignment(coreVector2(1.0f,-1.0f));
 
-    m_BannerBar.DefineTexture(0u, "menu_detail_03.png");
+    m_BannerBar.DefineTexture(0u, "menu_detail_04.png");
     m_BannerBar.DefineTexture(1u, "menu_background_black.png");
     m_BannerBar.DefineProgram("menu_animate_program");
 
