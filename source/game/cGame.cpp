@@ -786,7 +786,7 @@ void cGame::__HandleDefeat()
             if(m_pCurMission->GetID() == cIntroMission::ID)
             {
                 // 
-                this->StartOutro(1u);
+                this->StartOutro(2u);
             }
             else
             {

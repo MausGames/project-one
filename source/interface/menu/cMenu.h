@@ -637,7 +637,8 @@ public:
     void Move  ()final;
 
     // 
-    void ShowNormal();
+    void ShowMission();
+    void ShowSegment();
     void ShowBegin();
 
     // 

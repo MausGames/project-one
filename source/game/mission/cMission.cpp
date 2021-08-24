@@ -118,7 +118,7 @@ void cMission::MoveBefore()
             m_anStage.back()();
 
             // 
-            if(m_anStage.empty()) g_pGame->StartOutro(0u);
+            if(m_anStage.empty()) g_pGame->StartOutro((m_iTakeTo == TAKE_MISSION) ? 0u : 1u);
         }
     }
     while(m_bRepeat);

@@ -169,8 +169,9 @@ void cMenu::Move()
                     this->ChangeSurface(SURFACE_SUMMARY, 0.0f);
 
                     // 
-                    if(g_pGame->GetOutroType()) m_SummaryMenu.ShowBegin();
-                                           else m_SummaryMenu.ShowNormal();
+                         if(g_pGame->GetOutroType() == 0u) m_SummaryMenu.ShowMission();
+                    else if(g_pGame->GetOutroType() == 1u) m_SummaryMenu.ShowSegment();
+                                                      else m_SummaryMenu.ShowBegin();
                 }
                 else if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_DEFEATED))
                 {
