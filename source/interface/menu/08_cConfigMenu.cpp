@@ -372,6 +372,10 @@ void cConfigMenu::Move()
                 this->__LoadResolutions(m_Monitor.GetCurEntry().tValue);
 
             // 
+            if(m_RenderQuality.GetUserSwitch())
+                this->__UpdateRenderQuality();
+
+            // 
             if(m_ShadowQuality.GetUserSwitch())
                 this->__UpdateShadowQuality();
 
@@ -690,6 +694,7 @@ void cConfigMenu::CheckValues()
 // 
 void cConfigMenu::LoadValues()
 {
+    const coreUintW iRenderQualityIndex = m_RenderQuality.GetCurIndex();
     const coreUintW iShadowQualityIndex = m_ShadowQuality.GetCurIndex();
     const coreUintW iLanguageIndex      = m_Language     .GetCurIndex();
 
@@ -749,6 +754,7 @@ void cConfigMenu::LoadValues()
     // 
     if(m_SaveButton.GetOverride() >= 0)
     {
+        if(iRenderQualityIndex != m_RenderQuality.GetCurIndex()) this->__UpdateRenderQuality();
         if(iShadowQualityIndex != m_ShadowQuality.GetCurIndex()) this->__UpdateShadowQuality();
         if(iLanguageIndex      != m_Language     .GetCurIndex()) this->__UpdateLanguage();
         this->__UpdateVolume();
@@ -836,6 +842,15 @@ void cConfigMenu::SaveValues()
     // 
     InitDirection();
     InitFramerate();
+}
+
+
+// ****************************************************************
+// 
+void cConfigMenu::__UpdateRenderQuality()
+{
+    // 
+    g_CurConfig.Graphics.iRender = m_RenderQuality.GetCurEntry().tValue;
 }
 
 

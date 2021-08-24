@@ -538,6 +538,7 @@ public:
 
 private:
     // 
+    void __UpdateRenderQuality();
     void __UpdateShadowQuality();
     void __UpdateVolume();
     void __UpdateLanguage();
