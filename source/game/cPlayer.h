@@ -138,27 +138,23 @@ public:
     void Kill     (const coreBool bAnimated);
 
     // 
-    void StartRolling(const coreVector2 vDirection);
-    void EndRolling  ();
-    inline coreBool IsRolling()const {return (m_iRollDir != PLAYER_NO_ROLL);}
-
-    // 
-    void StartFeeling(const coreFloat fTime, const coreUint8 iType);
-    void EndFeeling  ();
-    inline coreBool IsFeeling()const {return (m_fFeelTime > PLAYER_NO_FEEL);}
-
-    // 
+    void StartRolling (const coreVector2 vDirection);
+    void EndRolling   ();
+    void StartFeeling (const coreFloat fTime, const coreUint8 iType);
+    void EndFeeling   ();
     void StartIgnoring(const coreUint8 iType);
     void EndIgnoring  ();
-    inline coreBool IsIgnoring()const {return (m_fIgnoreTime > PLAYER_NO_IGNORE);}
 
     // 
-    inline coreBool IsNormal()const {return (!this->IsRolling() && !this->IsFeeling() && !this->IsIgnoring());}
+    inline void ActivateNormalShading() {this->DefineProgram(m_pNormalProgram);}
+    inline void ActivateDarkShading  () {this->DefineProgram(m_pDarkProgram);}
 
     // 
-    inline void     ActivateNormalShading()      {this->DefineProgram(m_pNormalProgram);}
-    inline void     ActivateDarkShading  ()      {this->DefineProgram(m_pDarkProgram);}
-    inline coreBool IsDarkShading        ()const {return (this->GetProgram().GetHandle() == m_pDarkProgram.GetHandle());}
+    inline coreBool IsNormal     ()const {return (!this->IsRolling() && !this->IsFeeling() && !this->IsIgnoring());}
+    inline coreBool IsRolling    ()const {return (m_iRollDir    != PLAYER_NO_ROLL);}
+    inline coreBool IsFeeling    ()const {return (m_fFeelTime   >  PLAYER_NO_FEEL);}
+    inline coreBool IsIgnoring   ()const {return (m_fIgnoreTime >  PLAYER_NO_IGNORE);}
+    inline coreBool IsDarkShading()const {return (this->GetProgram().GetHandle() == m_pDarkProgram.GetHandle());}
 
     // 
     void EnableWind   (const coreVector2 vDirection);
@@ -170,7 +166,11 @@ public:
     void UpdateExhaust(const coreFloat fStrength);
 
     // 
-    inline void ApplyForce(const coreVector2 vForce) {this->SetPosition(coreVector3(m_vOldPos, 0.0f)); m_vForce += vForce;}
+    coreBool TestCollisionPrecise(const coreObject3D* pObject, coreVector3* OUTPUT pvIntersection, coreBool* OUTPUT pbFirstHit);
+
+    // 
+    inline void ApplyForce     (const coreVector2 vForce) {m_vForce += vForce; this->SetPosition(coreVector3(m_vOldPos, 0.0f));}
+    inline void ApplyForceTimed(const coreVector2 vForce) {m_vForce += vForce * TIME;}
 
     // 
     coreVector2 CalcMove     ()const;
@@ -207,9 +207,8 @@ private:
     void __EquipShield();
 
     // 
-    coreBool __TestCollisionPrecise(const coreObject3D* pObject, coreVector3* OUTPUT pvIntersection, coreBool* OUTPUT pbFirstHit);
-    coreBool __NewCollision        (const coreObject3D* pObject);
-    void     __UpdateCollisions    ();
+    coreBool __NewCollision(const coreObject3D* pObject);
+    void     __UpdateCollisions();
 };
 
 
@@ -226,7 +225,7 @@ template <typename F> FORCE_INLINE void cPlayer::TestCollision(const ePlayerTest
             // 
             coreVector3 vNewIntersection;
             coreBool    bNewFirstHit;
-            if(pPlayer->__TestCollisionPrecise(pObject, &vNewIntersection, &bNewFirstHit))
+            if(pPlayer->TestCollisionPrecise(pObject, &vNewIntersection, &bNewFirstHit))
             {
                 nCallback(pPlayer, d_cast<typename TRAIT_ARG_TYPE(F, 1u)>(pObject), vNewIntersection, bNewFirstHit);
             }
@@ -245,7 +244,7 @@ template <typename F> FORCE_INLINE void cPlayer::TestCollision(const ePlayerTest
             // 
             coreVector3 vNewIntersection;
             coreBool    bNewFirstHit;
-            if(pPlayer->__TestCollisionPrecise(pObject, &vNewIntersection, &bNewFirstHit))
+            if(pPlayer->TestCollisionPrecise(pObject, &vNewIntersection, &bNewFirstHit))
             {
                 nCallback(pPlayer, d_cast<typename TRAIT_ARG_TYPE(F, 1u)>(pObject), vNewIntersection, bNewFirstHit);
             }

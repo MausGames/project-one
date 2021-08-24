@@ -757,50 +757,7 @@ void cPlayer::UpdateExhaust(const coreFloat fStrength)
 
 // ****************************************************************
 // 
-coreVector2 cPlayer::CalcMove()const
-{
-    if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
-    {
-        // move the ship
-        coreVector2 vNewPos = this->GetPosition().xy() + (m_pInput->vMove * this->CalcMoveSpeed() + m_vForce) * TIME;
-
-        // restrict movement to the foreground area
-        vNewPos.x = CLAMP(vNewPos.x, m_vArea.x, m_vArea.z);
-        vNewPos.y = CLAMP(vNewPos.y, m_vArea.y, m_vArea.w);
-
-        return vNewPos - this->GetPosition().xy();
-    }
-
-    return coreVector2(0.0f,0.0f);
-}
-
-
-// ****************************************************************
-// 
-coreFloat cPlayer::CalcMoveSpeed()const
-{
-    // 
-    const coreFloat fModifier = this->IsRolling() ? (50.0f + LERPB(25.0f, 0.0f, m_fRollTime)) : (CONTAINS_BIT(m_pInput->iActionHold, 0u) ? 20.0f : 50.0f);
-    return m_fSpeed * fModifier;
-}
-
-
-// ****************************************************************
-// 
-void cPlayer::__EquipShield()
-{
-    ASSERT( HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
-    ASSERT(!HAS_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED))
-
-    // 
-    ADD_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED)
-    this->SetMaxHealth(PLAYER_SHIELD);
-}
-
-
-// ****************************************************************
-// 
-coreBool cPlayer::__TestCollisionPrecise(const coreObject3D* pObject, coreVector3* OUTPUT pvIntersection, coreBool* OUTPUT pbFirstHit)
+coreBool cPlayer::TestCollisionPrecise(const coreObject3D* pObject, coreVector3* OUTPUT pvIntersection, coreBool* OUTPUT pbFirstHit)
 {
     ASSERT(pObject && pvIntersection && pbFirstHit)
 
@@ -850,6 +807,49 @@ coreBool cPlayer::__TestCollisionPrecise(const coreObject3D* pObject, coreVector
         }
     }
     return false;
+}
+
+
+// ****************************************************************
+// 
+coreVector2 cPlayer::CalcMove()const
+{
+    if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
+    {
+        // move the ship
+        coreVector2 vNewPos = this->GetPosition().xy() + (m_pInput->vMove * this->CalcMoveSpeed() + m_vForce) * TIME;
+
+        // restrict movement to the foreground area
+        vNewPos.x = CLAMP(vNewPos.x, m_vArea.x, m_vArea.z);
+        vNewPos.y = CLAMP(vNewPos.y, m_vArea.y, m_vArea.w);
+
+        return vNewPos - this->GetPosition().xy();
+    }
+
+    return coreVector2(0.0f,0.0f);
+}
+
+
+// ****************************************************************
+// 
+coreFloat cPlayer::CalcMoveSpeed()const
+{
+    // 
+    const coreFloat fModifier = this->IsRolling() ? (50.0f + LERPB(25.0f, 0.0f, m_fRollTime)) : (HAS_BIT(m_pInput->iActionHold, 0u) ? 20.0f : 50.0f);
+    return m_fSpeed * fModifier;
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::__EquipShield()
+{
+    ASSERT( HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
+    ASSERT(!HAS_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED))
+
+    // 
+    ADD_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED)
+    this->SetMaxHealth(PLAYER_SHIELD);
 }
 
 
