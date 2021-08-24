@@ -21,7 +21,7 @@
 // TODO 3: positions in separate list (when iterating through lambda)
 // TODO 3: provide own memory pool for temporary additional objects (remove MANAGED_), also WindScreen
 // TODO 3: expose pool-allocator for additional objects (AddList), also WindScreen
-// TODO 3: all environment sound effects should fade in transition
+// TODO 3: all environment sound effects should fade in transition (check at end)
 // TODO 2: popping artifacts with shadow in sea-background (configurable view-range ? per list ? auto per height ?)
 // TODO 3: calls to pList->MoveNormal(); may be redundant
 // TODO 3: remove texture-sampling from lightning effect in moss

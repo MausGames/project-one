@@ -39,7 +39,7 @@
 // TODO 3: clean mixing shader defines (x >= y) and (defined(x)) checks (also in engine)
 // TODO 3: check for 16-bit float shader usage
 // TODO 2: program enable has to be checked (if(x.Enable()){}) everywhere
-// TODO 3: change 0.5 FB factors from 0.5 to 0.4 (-36% pixel) if CORE_GL_SUPPORT(ARB_texture_rg) not available ?
+// TODO 3: change 0.5 FB factors from 0.5 to 0.4 (-36% pixel) if CORE_GL_SUPPORT(ARB_texture_rg) not available ? on low quality ?
 // TODO 4: unify "forward" and "transform" comments in shaders
 // TODO 3: add own coreRand for various random things which may affect feeling (screen shake), and reset on boss-start
 // TODO 3: check issues with all the F&& functions (especially in boss.h and mission.h), also check Core engine, use force_inline on small functions
@@ -67,7 +67,7 @@
 // TODO 3: check for single-channel menu_background_black
 // TODO 3: make energy texture sharper (offline upsampling)
 // TODO 5: check for merging varyings with component = # and layoutEx (or merge manually)
-// TODO 3: use only 6 (or 8) pixel texture with nearest filtering for enemies
+// TODO 3: use only 6 (or 8) pixel texture with nearest filtering for enemies (eneme texture can be 2-channel (maybe others too), but needs fallback handling in texture loading, and shader)
 // TODO 1: indicator when controls are enabled again (blinking und peeping sound)
 // TODO 3: search and remove unused resources from application.cpp (+ folder)
 // TODO 3: remove game_icon.png from resource-index if not required anymore
@@ -79,6 +79,9 @@
 // TODO 3: create animation offset for all gameplay objects (const coreFloat fOffset = I_TO_F(i) * (1.0f/7.0f);), try to use num-per-line + 1, what about bullets ?
 // TODO 1: make sure user folder is correctly handled for multi-user (-> corePlatform)
 // TODO 3: every boss, enemy, player-bullet-interacting object needs a volume
+// TODO 1: all sounds need IsUsable checks
+// TODO 4: look if coreUintW member variables can be made smaller (also engine)
+// TODO 1: 3d sound needs to be correct based on game orientation
 
 
 // ****************************************************************

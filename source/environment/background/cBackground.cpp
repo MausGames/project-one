@@ -387,7 +387,7 @@ void cBackground::SetAirDensity   (const coreUintW iIndex, const coreFloat fDens
 // 
 void cBackground::_StoreHeight(const coreBatchList* pObjectList, const coreFloat fHeight)
 {
-    ASSERT(!m_aaiBaseHeight.count(pObjectList))
+    ASSERT(!m_aaiBaseHeight.count(pObjectList) && m_pOutdoor)
 
     // 
     m_aaiBaseHeight[pObjectList].push_back(coreMath::Float32To16(fHeight));
@@ -395,7 +395,7 @@ void cBackground::_StoreHeight(const coreBatchList* pObjectList, const coreFloat
 
 void cBackground::_StoreHeightList(const coreBatchList* pObjectList)
 {
-    ASSERT(!m_aaiBaseHeight.count(pObjectList))
+    ASSERT(!m_aaiBaseHeight.count(pObjectList) && m_pOutdoor)
     ASSERT(pObjectList->List()->back()->GetPosition().y < (I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL))
 
     // 
@@ -410,7 +410,7 @@ void cBackground::_StoreHeightList(const coreBatchList* pObjectList)
 // 
 void cBackground::_StoreNormalList(const coreBatchList* pObjectList)
 {
-    ASSERT(!m_aaiBaseNormal.count(pObjectList))
+    ASSERT(!m_aaiBaseNormal.count(pObjectList) && m_pOutdoor)
     ASSERT(pObjectList->List()->back()->GetPosition().y < (I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL))
 
     // 

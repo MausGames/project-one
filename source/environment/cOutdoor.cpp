@@ -216,8 +216,8 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
         // calculate triangle sides
         const coreVector3 A1 = s_aVertexData[s_aiIndexData[i+1u]].vPosition - s_aVertexData[s_aiIndexData[i+0u]].vPosition;
         const coreVector3 A2 = s_aVertexData[s_aiIndexData[i+2u]].vPosition - s_aVertexData[s_aiIndexData[i+0u]].vPosition;
-        const coreVector2 B1 = coreVector2(0.25f, (i%2u) ? 0.0f : 0.25f);
-        const coreVector2 B2 = coreVector2((i%2u) ? 0.25f : 0.0f, 0.25f);
+        const coreVector2 B1 = coreVector2(0.25f, (i % 2u) ? 0.0f : 0.25f);
+        const coreVector2 B2 = coreVector2((i % 2u) ? 0.25f : 0.0f, 0.25f);
 
         // calculate local tangent vector parameters
         const coreFloat   R  = RCP(B1.x*B2.y - B2.x*B1.y);
@@ -344,8 +344,10 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
             const coreFloat xz2 = x2 * z2 + 127.5f;
             const coreFloat yz2 = y2 * z2 + 127.5f;
 
-            ASSERT((xz1 <= 255.0f) && (yz1 <= 255.0f) &&
-                   (xz2 <= 255.0f) && (yz2 <= 255.0f))
+            ASSERT((xz1 >= 0.0f) && (xz1 <= 255.0f) &&
+                   (yz1 >= 0.0f) && (yz1 <= 255.0f) &&
+                   (xz2 >= 0.0f) && (xz2 <= 255.0f) &&
+                   (yz2 >= 0.0f) && (yz2 <= 255.0f))
 
             const coreUint8 aiPixel[] = {coreUint8(xz1), coreUint8(yz1),
                                          coreUint8(xz2), coreUint8(yz2)};

@@ -55,7 +55,7 @@ void cCrashManager::Move()
 
     // 
     const cOutdoor* pOutdoor = g_pEnvironment->GetBackground()->GetOutdoor();
-    if(!pOutdoor) this->ClearCrashes(true);
+    if(!pOutdoor || !pOutdoor->IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->ClearCrashes(true);
 
     // 
     m_fSmokeTimer.Update(30.0f);
@@ -126,7 +126,7 @@ void cCrashManager::AddCrash(const cLodObject& oBase, const coreVector2 vTarget,
 {
     // 
     const cOutdoor* pOutdoor = g_pEnvironment->GetBackground()->GetOutdoor();
-    if(!pOutdoor) return;
+    if(!pOutdoor || !pOutdoor->IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
 
     for(coreUintW i = 0u; i < CRASH_OBJECTS; ++i)
     {

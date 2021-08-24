@@ -505,10 +505,10 @@ static void DebugGame()
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(P), CORE_INPUT_PRESS))
     {
         if(STATIC_ISVALID(g_pGame) &&
-           CONTAINS_FLAG(g_pGame->GetCurMission()->GetBoss(0u)->GetStatus(), ENEMY_STATUS_DEAD) &&
-           CONTAINS_FLAG(g_pGame->GetCurMission()->GetBoss(1u)->GetStatus(), ENEMY_STATUS_DEAD) &&
-           CONTAINS_FLAG(g_pGame->GetCurMission()->GetBoss(2u)->GetStatus(), ENEMY_STATUS_DEAD))
+           (!g_pGame->GetCurMission()->GetBoss(0u) || g_pGame->GetCurMission()->GetBoss(0u)->HasStatus(ENEMY_STATUS_DEAD)) &&
+           (!g_pGame->GetCurMission()->GetBoss(1u) || g_pGame->GetCurMission()->GetBoss(1u)->HasStatus(ENEMY_STATUS_DEAD)))
         {
+            c_cast<coreUintW&>(g_pGame->GetCurMission()->GetCurSegmentIndex()) = MISSION_NO_SEGMENT;
             g_pGame->GetCurMission()->SkipStage();
         }
     }

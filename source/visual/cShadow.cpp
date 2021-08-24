@@ -141,9 +141,9 @@ void cShadow::GlobalUpdate()
     if(!g_CurConfig.Graphics.iShadow) return;
 
     // create orthographic projection
-    const coreMatrix4 mOrtho = coreMatrix4::Ortho(-SHADOW_RANGE_X,   SHADOW_RANGE_X,
-                                                  -SHADOW_RANGE_Y,   SHADOW_RANGE_Y,
-                                                   SHADOW_CLIP_NEAR, SHADOW_CLIP_FAR);
+    constexpr coreMatrix4 mOrtho = coreMatrix4::Ortho(-SHADOW_RANGE_X,   SHADOW_RANGE_X,
+                                                      -SHADOW_RANGE_Y,   SHADOW_RANGE_Y,
+                                                       SHADOW_CLIP_NEAR, SHADOW_CLIP_FAR);
 
     // create movement compensation for foreground objects
     const coreVector3 P = g_pEnvironment->GetCameraPos();

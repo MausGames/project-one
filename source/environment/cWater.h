@@ -13,7 +13,7 @@
 // TODO 5: reduce reflection-framebuffer without reflection enabled
 // TODO 5: alpha mapping water (no distortion) for very bad hardware
 // TODO 3: water-surface clipping for refraction
-// TODO 3: flying should create strong/fast water ripples
+// TODO 5: flying should create strong/fast water ripples
 // TODO 3: specular contribution should be reduced by shadow (object shadow and environment darkening)
 // TODO 3: remove sqrt/coreUnpackNormalMap in rainy shader (pre-processing like in outdoor)
 // TODO 3: do not load default water shader and texture if not required (maybe create water-interface, NormalWater, Clean, Fresh)
