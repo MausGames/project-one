@@ -24,6 +24,7 @@ cOutdoor::cOutdoor()noexcept
 , m_afLerpAdd     {}
 , m_aiLerpRange   {}
 , m_afLerpData    {}
+, m_iToken        (0u)
 {
 }
 
@@ -57,6 +58,9 @@ cOutdoor::cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom
 // destructor
 cOutdoor::~cOutdoor()
 {
+    // 
+    Core::Manager::Resource->DetachFunction(m_iToken);
+
     // free resources
     this->DefineTexture(2u, NULL);
     Core::Manager::Resource->Free(&m_pModel);
@@ -303,7 +307,10 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
     // delete sync object
     m_Sync.Delete();
 
-    Core::Manager::Resource->AttachFunction([=, this]()
+    // 
+    Core::Manager::Resource->DetachFunction(m_iToken);
+
+    m_iToken = Core::Manager::Resource->AttachFunction([=, this]()
     {
         // check for sync object status
         const coreStatus eCheck = m_Sync.Check(0u, CORE_SYNC_CHECK_FLUSHED);

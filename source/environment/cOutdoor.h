@@ -14,7 +14,6 @@
 // TODO 5: check out jcgt_Duff2017Basis to inline tangent calculations into shader (less bandwidth, but more ALU + reg ?)
 // TODO 1: outdoor parameters are reset on engine-reset
 // TODO 1: fix file getting unloaded while others are reading (in reource-manager), maybe make copies of the file -> also affects shader-permutations when loading from two threads
-// TODO 2: attach function, then calling destructor will crash, implement detach function (>engine)
 // TODO 5: increase normal map sharpness, if quality improves (raise depth-value in generator until it throws an assertion)
 // TODO 3: don't calculate level for vertices which get overridden by infinity
 // TODO 4: move m_pOutdoor->SetEnabled(CORE_OBJECT_ENABLE_NOTHING); into constructor/factoryfunc
@@ -94,7 +93,8 @@ private:
     coreUint16 m_aiLerpRange[2];                     // (current, target) 
     coreFloat  m_afLerpData [7];                     // (from mul, from add, to mul, to add, mid mul, mid add, mid pos) 
 
-    coreSync m_Sync;                                 // sync object for asynchronous texture loading
+    coreSync   m_Sync;                               // sync object for asynchronous texture loading
+    coreUint32 m_iToken;                             // 
 
 
 public:
