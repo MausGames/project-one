@@ -216,7 +216,7 @@ void cBackground::Move()
                     // recalculate properties when becoming visible
                     if(pObject->IsEnabled(CORE_OBJECT_ENABLE_ALL))
                     {
-                        const coreUintW iIndex = et - (*it)->List()->begin();
+                        const coreUintW iIndex = (*it)->List()->index(et);
 
                         // retrieve height and add offset
                         if(paiBaseHeight)

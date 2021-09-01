@@ -137,7 +137,7 @@ void cIntroMenu::StartIntro()
     m_iIntroStatus = 1u;
 
     // 
-    const coreBool bSelectLanguage = Core::Language->GetPath()[0] ? false : true;
+    const coreBool bSelectLanguage = (Core::Language->GetPath()[0] == '\0');
     if(bSelectLanguage)
     {
         // 

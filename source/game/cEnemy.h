@@ -213,7 +213,7 @@ public:
 
     // 
     inline cEnemy*   GetEnemy(const coreUintW iIndex)const {ASSERT(iIndex < m_apEnemy.size()) return m_apEnemy[iIndex];}
-    inline coreUintW GetIndex(const cEnemy*   pEnemy)const {const coreUintW iIndex = std::find(m_apEnemy.begin(), m_apEnemy.end(), pEnemy) - m_apEnemy.begin(); ASSERT(iIndex < m_apEnemy.size()) return iIndex;}
+    inline coreUintW GetIndex(const cEnemy*   pEnemy)const {const coreUintW iIndex = m_apEnemy.first_index(c_cast<cEnemy*>(pEnemy)); ASSERT(iIndex < m_apEnemy.size()) return iIndex;}
 
     // 
     inline coreUintW GetNumEnemies        ()const {return m_apEnemy.size();}

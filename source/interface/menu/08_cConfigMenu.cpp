@@ -731,7 +731,7 @@ void cConfigMenu::LoadValues()
 
     // 
     const coreList<coreString>& asLanguageList = cMenu::GetLanguageList().get_valuelist();
-    m_Language    .SelectIndex(std::find(asLanguageList.begin(), asLanguageList.end(), Core::Config->GetString(CORE_CONFIG_BASE_LANGUAGE)) - asLanguageList.begin());
+    m_Language    .SelectIndex(asLanguageList.first_index(Core::Config->GetString(CORE_CONFIG_BASE_LANGUAGE)));
     m_TextSize    .SelectValue(g_CurConfig.Game.iTextSize);
     m_GameRotation.SelectValue(g_CurConfig.Game.iGameRotation);
     m_GameScale   .SelectValue(g_CurConfig.Game.iGameScale);

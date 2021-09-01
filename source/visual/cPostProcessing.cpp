@@ -98,8 +98,8 @@ void cPostProcessing::Render()
     // invalidate all frame buffers (# not cGlow and cDistortion, because of incremental rendering and pause)
     if(!g_pMenu->IsPaused())
     {
-        g_pEnvironment->GetFrameBuffer()->GetColorTarget(0u).pTexture->Invalidate(0u);
-        g_pForeground ->GetFrameBuffer()->GetColorTarget(0u).pTexture->Invalidate(0u);
+        g_pEnvironment->GetFrameBuffer()->Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
+        g_pForeground ->GetFrameBuffer()->Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
     }
 }
 
