@@ -23,7 +23,7 @@ cShieldManager::cShieldManager()noexcept
     for(coreUintW i = 0u; i < SHIELD_SHIELDS; ++i)
     {
         m_aShield[i].DefineModel  ("effect_shield.md3");
-        m_aShield[i].DefineTexture(0u, "effect_particle_128.png");
+        m_aShield[i].DefineTexture(0u, "effect_shield.png");
         m_aShield[i].DefineProgram("effect_shield_program");
     }
 

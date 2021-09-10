@@ -22,7 +22,6 @@
 // TODO 5: bullet -> to POD-type with single parent object
 // TODO 3: reorder bullets either yellow->green or green->yellow, so they are overlapping consistently (in default order)
 // TODO 4: surge-bullets to wave-weapon, rename one of it (probably wave-weapon to surge-weapon, code-only anyway)
-// TODO 1: player was taking damage when moving "into" transparent back of spearbullet (maybe also viewbullet, and more), after evasive maneuver, make sure to add own collision volume
 
 
 // ****************************************************************

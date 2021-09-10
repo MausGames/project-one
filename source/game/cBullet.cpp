@@ -647,6 +647,7 @@ cConeBullet::cConeBullet()noexcept
 {
     // load object resources
     this->DefineModel  ("bullet_cone.md3");
+    this->DefineVolume ("bullet_cone_volume.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_program");
 
@@ -747,6 +748,7 @@ cSpearBullet::cSpearBullet()noexcept
 {
     // load object resources
     this->DefineModel  ("bullet_spear.md3");
+    this->DefineVolume ("bullet_spear_volume.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_direct_program");
 
@@ -941,6 +943,7 @@ cViewBullet::cViewBullet()noexcept
 {
     // load object resources
     this->DefineModel  ("bullet_view.md3");
+    this->DefineVolume ("bullet_view_volume.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_direct_program");
 

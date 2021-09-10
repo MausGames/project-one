@@ -29,13 +29,13 @@ cSpecialEffects::cSpecialEffects()noexcept
 {
     // 
     m_ParticleColor.DefineProgram("effect_particle_color_program");
-    m_ParticleColor.DefineTexture(0u, "effect_particle_32.png");
+    m_ParticleColor.DefineTexture(0u, "effect_particle.png");
     m_ParticleDark .DefineProgram("effect_particle_dark_program");
-    m_ParticleDark .DefineTexture(0u, "effect_particle_32.png");
+    m_ParticleDark .DefineTexture(0u, "effect_particle.png");
     m_ParticleSmoke.DefineProgram("effect_particle_smoke_program");
-    m_ParticleSmoke.DefineTexture(0u, "effect_particle_128.png");
+    m_ParticleSmoke.DefineTexture(0u, "effect_smoke.png");
     m_ParticleFire .DefineProgram("effect_particle_fire_program");
-    m_ParticleFire .DefineTexture(0u, "effect_particle_128.png");
+    m_ParticleFire .DefineTexture(0u, "effect_smoke.png");
 
     // 
     for(coreUintW i = 0u; i < SPECIAL_LIGHTNINGS; ++i)
