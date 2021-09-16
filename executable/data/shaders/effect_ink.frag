@@ -82,5 +82,5 @@ void FragmentMain()
 #endif
 
     // 
-    gl_FragColor = vec4(mix(vec3(0.03), vec3(0.184, 0.569, 0.635) * 1.35, clamp(v1Max - 2.9, 0.0, 1.0)), smoothstep(2.6, 2.9, v1Max));
+    gl_FragColor = vec4(mix(vec3(0.03), vec3(0.184, 0.569, 0.635) * 1.35, coreSaturate(v1Max - 2.9)), smoothstep(2.6, 2.9, v1Max));
 }

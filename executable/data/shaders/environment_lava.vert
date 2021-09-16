@@ -29,5 +29,5 @@ void VertexMain()
     // transform texture coordinates with different animation properties
     v_av2TexCoord[0] = (v2MapCoord + u_v1Time * vec2( 0.5, -0.5)) * 1.0;
     v_av2TexCoord[1] = (v2MapCoord + u_v1Time * vec2(-0.1,  0.1)) * 2.0;
-    v_av2TexCoord[2] = v4NewPosition.xy * 0.04167;
+    v_av2TexCoord[2] = v4NewPosition.xy * 0.03125;
 }

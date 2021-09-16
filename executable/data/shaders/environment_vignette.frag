@@ -15,7 +15,7 @@ void FragmentMain()
          v2ScreenCoord = abs(v2ScreenCoord - 0.5);
 
     // 
-    float v1Alpha = clamp(max(v2ScreenCoord.x, v2ScreenCoord.y) * 12.0 - 3.7, 0.0, 1.0);
+    float v1Alpha = coreSaturate(max(v2ScreenCoord.x, v2ScreenCoord.y) * 12.0 - 3.7);
 
     //if(v1Alpha == 1.0)
     //{

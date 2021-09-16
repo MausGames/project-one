@@ -27,5 +27,5 @@ void FragmentMain()
     vec3 v3BelowRefraction = coreTexture2D(2, v2ScreenCoord + v2Distortion).rgb;
 
     // draw final color
-    gl_FragColor = vec4(mix(c_v3Blue, v3BelowRefraction, 0.88), 1.0);
+    gl_FragColor = vec4(mix(c_v3Blue, v3BelowRefraction, 0.78), 1.0);
 }

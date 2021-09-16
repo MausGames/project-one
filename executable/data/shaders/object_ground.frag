@@ -33,7 +33,7 @@ void FragmentMain()
         float v1DynLight = coreTextureProj(3, v_v4ShadowCoord).r;
 
         // 
-        float v1Visibility = clamp(max(v_v2Border.x, v_v2Border.y), 0.0, 1.0);
+        float v1Visibility = coreSaturate(max(v_v2Border.x, v_v2Border.y));
         v1Light = mix(v1Light, 0.5, mix(v1DynLight, 0.0, v1Visibility));
     }
 
@@ -59,7 +59,7 @@ void FragmentMain()
                             coreTextureProj(3, v_v4ShadowCoord + vec4( -A, 0.0, 0.0, 0.0)).r) * 0.2;
 
         // 
-        float v1Visibility = clamp(max(v_v2Border.x, v_v2Border.y), 0.0, 1.0);
+        float v1Visibility = coreSaturate(max(v_v2Border.x, v_v2Border.y));
         v1Light = mix(v1Light, 0.5, mix(v1DynLight, 0.0, v1Visibility));
     }
 

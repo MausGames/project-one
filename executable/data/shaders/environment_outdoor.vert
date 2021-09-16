@@ -77,7 +77,7 @@ void VertexMain()
     v_v4ShadowCoord    = u_m4ShadowMatrix * v4NewPosition;
 
     // forward texture coordinates
-    v_av2TexCoord[0] = v4NewPosition.xy * 0.04167;
+    v_av2TexCoord[0] = v4NewPosition.xy * 0.03125;
 
     // 
     v_v2Border = coreMat4to2(u_m4Camera) * (v4NewPosition.xy - u_v3CamPosition.xy) - v4NewPosition.z * vec2(-0.5, 0.5);

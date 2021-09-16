@@ -31,5 +31,5 @@ void VertexMain()
 
     // calculate light and color intensity
     float v1Base = dot(vec3(v3ViewDir.xy, abs(v3ViewDir.z)), vec3(v3NewNormal.xy, abs(v3NewNormal.z)));
-    v_v1Strength = 3.0 - 2.7 * v1Base;
+    v_v1Strength = 3.0 - 2.1 * v1Base;
 }
