@@ -50,12 +50,11 @@ STATIC_ASSERT(PLAYER_INTERRUPT > (1.0f / PLAYER_ROLL_SPEED))
 enum ePlayerStatus : coreUint8
 {
     PLAYER_STATUS_DEAD           = 0x01u,   // completely removed from the game
-    PLAYER_STATUS_PACIFIST       = 0x02u,   // 
-    PLAYER_STATUS_SHIELDED       = 0x04u,   // 
-    PLAYER_STATUS_NO_INPUT_MOVE  = 0x08u,   // disable player movement (user controls only)
-    PLAYER_STATUS_NO_INPUT_SHOOT = 0x10u,   // disable player weapons
-    PLAYER_STATUS_NO_INPUT_ROLL  = 0x20u,   // 
-    PLAYER_STATUS_NO_INPUT_TURN  = 0x40u,   // 
+    PLAYER_STATUS_SHIELDED       = 0x02u,   // 
+    PLAYER_STATUS_NO_INPUT_MOVE  = 0x04u,   // disable player movement (user controls only)
+    PLAYER_STATUS_NO_INPUT_SHOOT = 0x08u,   // disable player weapons
+    PLAYER_STATUS_NO_INPUT_ROLL  = 0x10u,   // 
+    PLAYER_STATUS_NO_INPUT_TURN  = 0x20u,   // 
     PLAYER_STATUS_NO_INPUT_ALL   = PLAYER_STATUS_NO_INPUT_MOVE | PLAYER_STATUS_NO_INPUT_SHOOT | PLAYER_STATUS_NO_INPUT_ROLL | PLAYER_STATUS_NO_INPUT_TURN
 };
 

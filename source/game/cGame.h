@@ -12,19 +12,17 @@
 
 // TODO 3: enemy bullet (and enemy?) cleanup on mission unload
 // TODO 2: check for duplicate IDs in mission-lists ? LoadMissionID may behave wrong
-// TODO 3: show pacifist damage in interface, pulsing and filling up, also show that weapons are disabled
 // TODO 5: maybe spawn players in flight direction, mission start and continue ?
 // TODO 2: FindPlayer may find player outside of area (during resurrection)
 
 
 // ****************************************************************
 // game definitions
-#define GAME_PLAYERS         (PLAYERS)     // default number of players
-#define GAME_HELPERS         (9u)          // 
-#define GAME_CONTINUES       (CONTINUES)   // 
-#define GAME_INTRO_DELAY     (0.2f)        // 
-#define GAME_INTRO_DURATION  (3.5f)        // 
-#define GAME_PACIFIST_DAMAGE (20.0f)       // 
+#define GAME_PLAYERS        (PLAYERS)     // default number of players
+#define GAME_HELPERS        (9u)          // 
+#define GAME_CONTINUES      (CONTINUES)   // 
+#define GAME_INTRO_DELAY    (0.2f)        // 
+#define GAME_INTRO_DURATION (3.5f)        // 
 
 enum eGameStatus : coreUint8
 {
@@ -123,9 +121,6 @@ private:
 
     coreUint8 m_iContinues;                 // 
 
-    coreFlow m_fPacifistDamage;             // 
-    coreBool m_bPacifist;                   // 
-
     coreUint8 m_iDepthLevel;                // 
     coreUint8 m_iDepthDebug;                // 
 
@@ -165,9 +160,6 @@ public:
     void UseContinue();
 
     // 
-    void ActivatePacifist();
-
-    // 
     void ChangeDepthLevel  (const coreUint8 iLevelNear, const coreUint8 iLevelFar)const;
     void PushDepthLevel    (const coreUint8 iLevels);
     void PushDepthLevelShip();
@@ -197,7 +189,6 @@ public:
     inline const coreInt32*    GetMissionList()const {return m_piMissionList;}
     inline const coreUintW&    GetNumMissions()const {return m_iNumMissions;}
     inline const coreUint8&    GetContinues  ()const {return m_iContinues;}
-    inline const coreBool&     GetPacifist   ()const {return m_bPacifist;}
     inline const coreUint8&    GetOutroType  ()const {return m_iOutroType;}
     inline const sGameOptions& GetOptions    ()const {return m_Options;}
     inline const coreUint8&    GetDifficulty ()const {return m_Options.iDifficulty;}
@@ -217,7 +208,6 @@ private:
     coreBool __HandleIntro();
     coreBool __HandleOutro();
     void     __HandleDefeat();
-    void     __HandlePacifist();
     void     __HandleCollisions();
 
     // 

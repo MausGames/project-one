@@ -22,8 +22,6 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
 , m_iCurMissionIndex    (coreUintW(-1))
 , m_fTimeInOut          (0.0f)
 , m_iContinues          (GAME_CONTINUES)
-, m_fPacifistDamage     (0.0f)
-, m_bPacifist           (false)
 , m_iDepthLevel         (0u)
 , m_iDepthDebug         (0u)
 , m_iOutroType          (0u)
@@ -221,9 +219,6 @@ void cGame::Move()
 
     // 
     m_TimeTable.Update();
-
-    // 
-    this->__HandlePacifist();
 
     // 
     cHelper::GlobalUpdate();
@@ -486,20 +481,6 @@ void cGame::UseContinue()
     g_pSave->EditGlobalStats      ()->iContinuesUsed += 1u;
     g_pSave->EditLocalStatsMission()->iContinuesUsed += 1u;
     g_pSave->EditLocalStatsSegment()->iContinuesUsed += 1u;
-}
-
-
-// ****************************************************************
-// 
-void cGame::ActivatePacifist()
-{
-    // 
-    ASSERT(!m_bPacifist)
-    m_bPacifist = true;
-
-    // 
-    for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
-        m_aPlayer[i].AddStatus(PLAYER_STATUS_PACIFIST);
 }
 
 
@@ -829,44 +810,6 @@ void cGame::__HandleDefeat()
             // 
             SAFE_DELETE(m_pRepairEnemy)
         }
-    }
-}
-
-
-// ****************************************************************
-// 
-void cGame::__HandlePacifist()
-{
-    if(!m_bPacifist) return;
-
-    // 
-    const coreUintW iNumEnemies = m_EnemyManager.GetNumEnemiesAlive();
-    if(iNumEnemies)
-    {
-        // 
-        this->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
-        {
-            if(!pPlayer->IsRolling()) m_fPacifistDamage.Update(GAME_PACIFIST_DAMAGE * RCP(I_TO_F(m_bCoop ? GAME_PLAYERS : 1u)));
-        });
-
-        // 
-        if((m_fPacifistDamage >= GAME_PACIFIST_DAMAGE) && (F_TO_UI(m_fPacifistDamage) >= iNumEnemies))
-        {
-            // 
-            const coreInt32 iDamage = F_TO_UI(m_fPacifistDamage) / iNumEnemies;
-            m_fPacifistDamage -= I_TO_F(iDamage * iNumEnemies);
-
-            // 
-            m_EnemyManager.ForEachEnemy([&](cEnemy* OUTPUT pEnemy)
-            {
-                pEnemy->TakeDamage(iDamage, ELEMENT_NEUTRAL, pEnemy->GetPosition().xy(), NULL);
-            });
-        }
-    }
-    else
-    {
-        // 
-        m_fPacifistDamage = 0.0f;
     }
 }
 
