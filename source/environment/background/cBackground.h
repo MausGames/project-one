@@ -188,7 +188,7 @@ public:
     cNoBackground() = default;
 
     DISABLE_COPY(cNoBackground)
-    ASSIGN_ID_EX(0, "Nothing", coreVector3(0.0f,0.0f,0.0f))
+    ASSIGN_ID_EX(0, "Nothing", coreVector3(0.5f,0.5f,0.5f))
 
 
 private:
@@ -436,7 +436,7 @@ public:
     cStomachBackground()noexcept;
 
     DISABLE_COPY(cStomachBackground)
-    ASSIGN_ID_EX(51, "Stomach", coreVector3(0.0f,0.0f,0.0f))
+    ASSIGN_ID_EX(51, "Stomach", coreVector3(0.5f,0.5f,0.5f))
 
 
 private:
