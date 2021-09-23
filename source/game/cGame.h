@@ -165,6 +165,9 @@ public:
     void PushDepthLevelShip();
 
     // 
+    inline void KillRepairEnemy() {if(m_pRepairEnemy) m_pRepairEnemy->TakeDamage(m_pRepairEnemy->GetCurHealth(), ELEMENT_NEUTRAL, coreVector2(0.0f,0.0f), NULL);}
+
+    // 
     RETURN_NONNULL cPlayer* FindPlayerSide(const coreVector2 vPosition);
     RETURN_NONNULL cPlayer* FindPlayerDual(const coreUintW   iIndex);
     template <typename F> void ForEachPlayer   (F&& nFunction);   // [](cPlayer* OUTPUT pPlayer, const coreUintW i) -> void

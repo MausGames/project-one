@@ -519,6 +519,11 @@ void CoreApp::Setup()
         ->AttachShader("effect_energy_blink.frag")
         ->Finish();
 
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_blink_flat_spheric_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("effect_energy_flat_spheric.vert")
+        ->AttachShader("effect_energy_blink.frag")
+        ->Finish();
+
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("effect_energy_inst.vert")
         ->AttachShader("effect_energy_inst.frag")

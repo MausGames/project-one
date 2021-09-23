@@ -309,6 +309,9 @@ void cMission::__CloseSegment()
     g_pGame->GetShieldManager     ()->ClearShields(true);
 
     // 
+    g_pGame->KillRepairEnemy();
+
+    // 
     const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
 
     // 

@@ -432,8 +432,10 @@ public:
 
 private:
     // execute own routines
-    void __RenderOwnUnder()final;
-    void __MoveOwn       ()final;
+    void __ResurrectOwn ()final;
+    void __KillOwn      (const coreBool bAnimated)final;
+    void __RenderOwnOver()final;
+    void __MoveOwn      ()final;
 };
 
 
