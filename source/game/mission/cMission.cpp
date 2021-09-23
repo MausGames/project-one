@@ -309,6 +309,7 @@ void cMission::__CloseSegment()
     g_pGame->GetShieldManager     ()->ClearShields(true);
 
     // 
+    g_pGame->HideHelpers    ();
     g_pGame->KillRepairEnemy();
 
     // 

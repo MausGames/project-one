@@ -953,6 +953,9 @@ void cGame::__ClearAll(const coreBool bAnimated)
     m_CrashManager       .ClearCrashes(bAnimated);
 
     // 
+    this->HideHelpers();
+
+    // 
     if(m_pRepairEnemy)
     {
         if(bAnimated) g_pSpecialEffects->MacroExplosionDarkSmall(m_pRepairEnemy->GetPosition());

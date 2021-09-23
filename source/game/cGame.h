@@ -19,7 +19,7 @@
 // ****************************************************************
 // game definitions
 #define GAME_PLAYERS        (PLAYERS)     // default number of players
-#define GAME_HELPERS        (9u)          // 
+#define GAME_HELPERS        (HELPERS)     // 
 #define GAME_CONTINUES      (CONTINUES)   // 
 #define GAME_INTRO_DELAY    (0.2f)        // 
 #define GAME_INTRO_DURATION (3.5f)        // 
@@ -165,6 +165,7 @@ public:
     void PushDepthLevelShip();
 
     // 
+    inline void HideHelpers    () {for(coreUintW i = 0u; i < GAME_HELPERS; ++i) if(m_aHelper[i].HasStatus(HELPER_STATUS_DEAD)) m_aHelper[i].SetPosition(coreVector3(HIDDEN_POS, 0.0f));}
     inline void KillRepairEnemy() {if(m_pRepairEnemy) m_pRepairEnemy->TakeDamage(m_pRepairEnemy->GetCurHealth(), ELEMENT_NEUTRAL, coreVector2(0.0f,0.0f), NULL);}
 
     // 
