@@ -11,7 +11,6 @@
 #define _P1_GUARD_LODOBJECT_H_
 
 // TODO 5: change high-resolution models with pre-baked normal-maps or tessellation ?
-// TODO 3: use low-resolution model for reflection rendering (disable RenderHighObject with a global flag ? or identify per engine property ?)
 
 
 // ****************************************************************
@@ -19,8 +18,10 @@
 class cLodObject : public coreObject3D
 {
 private:
-    coreModelPtr m_pModelHigh;   // high-polygon model object (used for regular shading)
-    coreModelPtr m_pModelLow;    // low-polygon model object (used for shadow, outline, glow)
+    coreModelPtr m_pModelHigh;      // high-polygon model object (used for regular shading)
+    coreModelPtr m_pModelLow;       // low-polygon model object (used for shadow, outline, glow)
+
+    static coreBool s_bAllowHigh;   // 
 
 
 public:
@@ -38,7 +39,7 @@ public:
     inline void DefineModelLow (const coreHashString& sName)  {m_pModelLow  = Core::Manager::Resource->Get<coreModel>(sName);  this->coreObject3D::DefineModel(m_pModelLow);}
 
     // 
-    inline void ActivateModelHigh() {this->coreObject3D::DefineModel(m_pModelHigh);}
+    inline void ActivateModelHigh() {if(s_bAllowHigh) this->coreObject3D::DefineModel(m_pModelHigh);}
     inline void ActivateModelLow () {this->coreObject3D::DefineModel(m_pModelLow);}
 
     // get object properties
@@ -49,6 +50,9 @@ public:
     static inline void RenderHighObject(cLodObject*    pObject) {pObject->ActivateModelHigh(); pObject->coreObject3D::Render(); pObject->ActivateModelLow();}
     static inline void RenderHighList  (coreBatchList* pList)   {FOR_EACH(it, *pList->List()) d_cast<cLodObject*>(*it)->ActivateModelHigh(); pList->Render(); FOR_EACH(it, *pList->List()) d_cast<cLodObject*>(*it)->ActivateModelLow();}
 
+    // 
+    static inline void AllowHigh(const coreBool bState) {ASSERT(s_bAllowHigh != bState) s_bAllowHigh = bState;}
+
 
 private:
     // 
@@ -56,6 +60,11 @@ private:
     inline void DefineModel(const coreModelPtr&   pModel) {ASSERT(false)}
     inline void DefineModel(const coreHashString& sName)  {ASSERT(false)}
 };
+
+
+// ****************************************************************
+// 
+inline coreBool cLodObject::s_bAllowHigh = true;
 
 
 #endif // _P1_GUARD_LODOBJECT_H_

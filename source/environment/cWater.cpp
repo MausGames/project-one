@@ -150,6 +150,9 @@ void cWater::UpdateReflection()
 
         if(g_CurConfig.Graphics.iReflection && (STATIC_ISVALID(g_pGame) || g_pSpecialEffects->IsActive()))
         {
+            // 
+            cLodObject::AllowHigh(false);
+
             glCullFace(GL_FRONT);
             {
                 if(STATIC_ISVALID(g_pGame))
@@ -171,6 +174,9 @@ void cWater::UpdateReflection()
                 m_Sky.Render(m_apSkyProgram[1]);
             }
             glEnable(GL_DEPTH_TEST);
+
+            // 
+            cLodObject::AllowHigh(true);
         }
     }
 
