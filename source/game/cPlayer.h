@@ -11,8 +11,8 @@
 #define _P1_GUARD_PLAYER_H_
 
 // TODO 3: add all weapons to player directly in class
-// TODO 3: all parts of player-rendering should be batched for coop
-// TODO 3: render wind, bubble, etc. in group for coop
+// TODO 3: all parts of player-rendering should be batched for multiplayer
+// TODO 3: render wind, bubble, etc. in group for multiplayer
 // TODO 1: check which operations have to be done outside of dead-check
 // TODO 3: add in-game hint for roll-cooldown end ((just) acoustic)
 // TODO 3: correct reverse-tracking when hitting the walls (position correction) ? only for 45degree, also on other code locations ?

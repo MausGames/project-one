@@ -34,9 +34,34 @@ enum eGameStatus : coreUint8
     GAME_STATUS_FINISHED = 0x20u    // 
 };
 
+enum eGameType : coreUint8
+{
+    GAME_TYPE_SOLO = 0u,   // (opposite of MULTI) 
+    GAME_TYPE_COOP,        // 
+    GAME_TYPE_DUEL,        // 
+    GAME_TYPE_MAX          // 
+};
+
+enum eGameMode : coreUint8
+{
+    GAME_MODE_STANDARD = 0u,   // 
+    GAME_MODE_PACIFIST,        // 
+    GAME_MODE_MASOCHIST,       // 
+    GAME_MODE_MAX              // 
+};
+
+enum eGameDifficulty : coreUint8
+{
+    GAME_DIFFICULTY_EASY = 0u,   // 
+    GAME_DIFFICULTY_NORMAL,      // 
+    GAME_DIFFICULTY_HARD,        // 
+    GAME_DIFFICULTY_MAX          // 
+};
+
 struct sGameOptions final
 {
-    coreUint8 iPlayers;                                          // 
+    coreUint8 iType;                                             // 
+    coreUint8 iMode;                                             // 
     coreUint8 iDifficulty;                                       // 
     coreUint8 aaiWeapon [GAME_PLAYERS][PLAYER_EQUIP_WEAPONS];    // 
     coreUint8 aaiSupport[GAME_PLAYERS][PLAYER_EQUIP_SUPPORTS];   // 
@@ -110,7 +135,7 @@ private:
 
     cRepairEnemy* m_pRepairEnemy;           // 
 
-    const coreInt32* m_piMissionList;       // 
+    const coreInt32* m_piMissionList;       // (should never be NULL) 
     coreUintW        m_iNumMissions;        // 
 
     cMission* m_pCurMission;                // currently active mission (should never be NULL)
@@ -127,7 +152,7 @@ private:
     coreUint8 m_iOutroType;                 // 
 
     sGameOptions m_Options;                 // 
-    coreBool     m_bCoop;                   // 
+    coreUint16   m_iVersion;                // 
 
     coreUint8 m_iStatus;                    // 
 
@@ -174,6 +199,16 @@ public:
     template <typename F> void ForEachPlayer   (F&& nFunction);   // [](cPlayer* OUTPUT pPlayer, const coreUintW i) -> void
     template <typename F> void ForEachPlayerAll(F&& nFunction);   // [](cPlayer* OUTPUT pPlayer, const coreUintW i) -> void
 
+    // 
+    inline coreBool IsMulti    ()const                          {return (this->GetType      () != GAME_TYPE_SOLO);}
+    inline coreBool IsCoop     ()const                          {return (this->GetType      () == GAME_TYPE_COOP);}
+    inline coreBool IsDuel     ()const                          {return (this->GetType      () == GAME_TYPE_DUEL);}
+    inline coreBool IsPacifist ()const                          {return (this->GetMode      () == GAME_MODE_PACIFIST);}
+    inline coreBool IsMasochist()const                          {return (this->GetMode      () == GAME_MODE_MASOCHIST);}
+    inline coreBool IsEasy     ()const                          {return (this->GetDifficulty() == GAME_DIFFICULTY_EASY);}
+    inline coreBool IsHard     ()const                          {return (this->GetDifficulty() == GAME_DIFFICULTY_HARD);}
+    inline coreBool IsVersion  (const coreUint16 iVersion)const {return (this->GetVersion   () >= iVersion);}
+
     // access game objects
     inline cPlayer*         GetPlayer             (const coreUintW iIndex)   {ASSERT(iIndex                   < GAME_PLAYERS) return &m_aPlayer[iIndex];}
     inline cHelper*         GetHelper             (const coreUint8 iElement) {ASSERT(iElement - ELEMENT_WHITE < GAME_HELPERS) return &m_aHelper[iElement - ELEMENT_WHITE];}
@@ -190,13 +225,16 @@ public:
     inline cTimeTable*      GetTimeTable          ()                         {return &m_TimeTable;}
 
     // get object properties
-    inline const coreInt32*    GetMissionList()const {return m_piMissionList;}
+    inline       coreUint8     GetNumPlayers ()const {return this->IsMulti() ? GAME_PLAYERS : 1u;}
+    inline const coreInt32*    GetMissionList()const {ASSERT(m_piMissionList) return m_piMissionList;}
     inline const coreUintW&    GetNumMissions()const {return m_iNumMissions;}
     inline const coreUint8&    GetContinues  ()const {return m_iContinues;}
     inline const coreUint8&    GetOutroType  ()const {return m_iOutroType;}
     inline const sGameOptions& GetOptions    ()const {return m_Options;}
+    inline const coreUint8&    GetType       ()const {return m_Options.iType;}
+    inline const coreUint8&    GetMode       ()const {return m_Options.iMode;}
     inline const coreUint8&    GetDifficulty ()const {return m_Options.iDifficulty;}
-    inline const coreBool&     GetCoop       ()const {return m_bCoop;}
+    inline const coreUint16&   GetVersion    ()const {return m_iVersion;}
     inline const coreUint8&    GetStatus     ()const {return m_iStatus;}
 
     // 
@@ -224,7 +262,7 @@ private:
 template <typename F> void cGame::ForEachPlayer(F&& nFunction)
 {
     // 
-    for(coreUintW i = 0u, ie = (m_bCoop ? GAME_PLAYERS : 1u); i < ie; ++i)
+    for(coreUintW i = 0u, ie = this->GetNumPlayers(); i < ie; ++i)
     {
         cPlayer* pPlayer = &m_aPlayer[i];
         if(pPlayer->HasStatus(PLAYER_STATUS_DEAD)) continue;
@@ -240,7 +278,7 @@ template <typename F> void cGame::ForEachPlayer(F&& nFunction)
 template <typename F> void cGame::ForEachPlayerAll(F&& nFunction)
 {
     // 
-    for(coreUintW i = 0u, ie = (m_bCoop ? GAME_PLAYERS : 1u); i < ie; ++i)
+    for(coreUintW i = 0u, ie = this->GetNumPlayers(); i < ie; ++i)
     {
         // 
         nFunction(&m_aPlayer[i], i);

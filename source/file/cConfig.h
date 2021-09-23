@@ -12,7 +12,7 @@
 
 // TODO 1: transfer to Core Engine
 // TODO 5: should low quality option also affect ship models, or vegetation density, or sprite density, or FB resolution ?
-// TODO 5: don't input-check inactive input-sets in coop
+// TODO 5: don't input-check inactive input-sets in multiplayer
 // TODO 1: default input should differ between keyboard and joystick, and between sets
 // TODO 5: SDL_JoystickCurrentPowerLevel
 // TODO 3: alt+F4 while having temp changes in the options menu should not save them
@@ -103,16 +103,16 @@ struct sConfig final
 
     struct
     {
-        coreUint8 iTextSize;       // 
-        coreUint8 iGameRotation;   // 
-        coreUint8 iGameScale;      // 
-        coreUint8 iGameSpeed;      // 
-        coreUint8 iHudRotation;    // 
-        coreUint8 iHudScale;       // 
-        coreUint8 iHudType;        // 
-        coreUint8 iUpdateFreq;     // 
-        coreUint8 iVersion;        // 
-        coreUint8 iMirrorMode;     // 
+        coreUint8  iTextSize;       // 
+        coreUint8  iGameRotation;   // 
+        coreUint8  iGameScale;      // 
+        coreUint8  iGameSpeed;      // 
+        coreUint8  iHudRotation;    // 
+        coreUint8  iHudScale;       // 
+        coreUint8  iHudType;        // 
+        coreUint16 iUpdateFreq;     // 
+        coreUint16 iVersion;        // 
+        coreUint8  iMirrorMode;     // 
     }
     Game;
 };

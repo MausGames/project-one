@@ -14,7 +14,7 @@
 cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const coreUintW iNumMissions)noexcept
 : m_BulletManagerPlayer (TYPE_BULLET_PLAYER)
 , m_BulletManagerEnemy  (TYPE_BULLET_ENEMY)
-, m_Interface           (oOptions.iPlayers)
+, m_Interface           ((oOptions.iType != GAME_TYPE_SOLO) ? GAME_PLAYERS : 1u)
 , m_pRepairEnemy        (NULL)
 , m_piMissionList       (piMissionList)
 , m_iNumMissions        (iNumMissions)
@@ -26,7 +26,7 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
 , m_iDepthDebug         (0u)
 , m_iOutroType          (0u)
 , m_Options             (oOptions)
-, m_bCoop               (oOptions.iPlayers > 1u)
+, m_iVersion            (0u)
 , m_iStatus             (0u)
 {
     ASSERT(m_piMissionList && (m_iNumMissions <= MISSIONS))
@@ -34,7 +34,7 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
 #if defined(_P1_DEBUG_RANDOM_)
 
     // 
-    if(!m_bCoop && (CORE_RAND_RUNTIME & 0x01u))
+    if(!this->IsMulti() && (CORE_RAND_RUNTIME & 0x01u))
         m_aPlayer[0].Configure(PLAYER_SHIP_DEF, COLOR_SHIP_BLUE);
     else
 
@@ -45,7 +45,7 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
     for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS;  ++i) m_aPlayer[0].EquipWeapon (i, oOptions.aaiWeapon [0][i]);
     for(coreUintW i = 0u; i < PLAYER_EQUIP_SUPPORTS; ++i) m_aPlayer[0].EquipSupport(i, oOptions.aaiSupport[0][i]);
 
-    if(m_bCoop)
+    if(this->IsMulti())
     {
         // configure second player
         m_aPlayer[1].Configure(PLAYER_SHIP_DEF, COLOR_SHIP_BLUE);
@@ -326,7 +326,7 @@ void cGame::LoadMissionID(const coreInt32 iID, const coreUint8 iTakeFrom, const 
         // 
         g_pSave->EditGlobalStats()->iMissionsDone += 1u;
 
-        for(coreUintW i = 0u, ie = (m_bCoop ? GAME_PLAYERS : 1u); i < ie; ++i)
+        for(coreUintW i = 0u, ie = this->GetNumPlayers(); i < ie; ++i)
         {
             // 
             const coreUint32 iScoreFull = m_aPlayer[i].GetScoreTable()->GetScoreMission(iOldIndex);
@@ -411,7 +411,7 @@ void cGame::StartIntro()
     // 
     m_fTimeInOut = -GAME_INTRO_DELAY;
 
-    for(coreUintW i = 0u, ie = (m_bCoop ? GAME_PLAYERS : 1u); i < ie; ++i)
+    for(coreUintW i = 0u, ie = this->GetNumPlayers(); i < ie; ++i)
     {
         // 
         m_aPlayer[i].Kill(false);
@@ -419,8 +419,10 @@ void cGame::StartIntro()
         m_aPlayer[i].AddStatus(PLAYER_STATUS_NO_INPUT_ALL);
 
         // 
-        const coreFloat fSide = m_bCoop ? (20.0f * (I_TO_F(i) - 0.5f * I_TO_F(GAME_PLAYERS-1u))) : 0.0f;
+        const coreFloat fSide = this->IsMulti() ? (20.0f * (I_TO_F(i) - 0.5f * I_TO_F(GAME_PLAYERS - 1u))) : 0.0f;
         m_aPlayer[i].SetPosition(coreVector3(fSide, -140.0f, 0.0f));
+
+        STATIC_ASSERT(GAME_PLAYERS == 2u)
     }
 }
 
@@ -441,7 +443,7 @@ void cGame::StartOutro(const coreUint8 iType)
     m_iOutroType = iType;
 
     // 
-    for(coreUintW i = 0u, ie = (m_bCoop ? GAME_PLAYERS : 1u); i < ie; ++i)
+    for(coreUintW i = 0u, ie = this->GetNumPlayers(); i < ie; ++i)
         m_aPlayer[i].AddStatus(PLAYER_STATUS_NO_INPUT_ALL);
 
     // 
@@ -466,7 +468,7 @@ void cGame::UseContinue()
     ASSERT(m_iContinues)
     m_iContinues -= 1u;
 
-    for(coreUintW i = 0u, ie = (m_bCoop ? GAME_PLAYERS : 1u); i < ie; ++i)
+    for(coreUintW i = 0u, ie = this->GetNumPlayers(); i < ie; ++i)
     {
         // 
         m_aPlayer[i].StartFeeling(PLAYER_FEEL_TIME_CONTINUE, 2u);
@@ -656,7 +658,7 @@ coreBool cGame::__HandleIntro()
             ADD_FLAG   (m_iStatus, GAME_STATUS_PLAY)
 
             // re-enable player controls
-            for(coreUintW i = 0u, ie = (m_bCoop ? GAME_PLAYERS : 1u); i < ie; ++i)
+            for(coreUintW i = 0u, ie = this->GetNumPlayers(); i < ie; ++i)
                 m_aPlayer[i].RemoveStatus(PLAYER_STATUS_NO_INPUT_ALL);
 
             // 
@@ -742,7 +744,7 @@ void cGame::__HandleDefeat()
         coreBool bAllDefeated = true;
 
         // 
-        for(coreUintW i = 0u, ie = (m_bCoop ? GAME_PLAYERS : 1u); i < ie; ++i)
+        for(coreUintW i = 0u, ie = this->GetNumPlayers(); i < ie; ++i)
         {
             cPlayer* pPlayer = &m_aPlayer[i];
 
@@ -753,7 +755,7 @@ void cGame::__HandleDefeat()
             // 
             g_pPostProcessing->SetSaturation(i, bDefeated ? 0.0f : (1.0f - MIN(pPlayer->GetDesaturate(), 1.0f)));
 
-            if(m_bCoop && bDefeated && (m_pCurMission->GetID() != cNoMission::ID) && !m_pRepairEnemy)
+            if(this->IsMulti() && bDefeated && (m_pCurMission->GetID() != cNoMission::ID) && !m_pRepairEnemy)
             {
                 // 
                 m_pRepairEnemy = new cRepairEnemy();

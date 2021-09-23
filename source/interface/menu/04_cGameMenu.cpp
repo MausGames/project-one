@@ -23,7 +23,7 @@ cGameMenu::cGameMenu()noexcept
     m_ArmoryBackground.DefineTexture(0u, "menu_background_black.png");
     m_ArmoryBackground.DefineProgram("menu_border_program");
     m_ArmoryBackground.SetPosition  (coreVector2(0.0f,0.0f));
-    m_ArmoryBackground.SetSize      (coreVector2(0.8f,0.4f));
+    m_ArmoryBackground.SetSize      (coreVector2(0.8f,0.45f));
 
     m_StandardTab.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_StandardTab.DefineProgram("menu_border_program");
@@ -32,7 +32,7 @@ cGameMenu::cGameMenu()noexcept
     m_StandardTab.SetAlignment (coreVector2(0.0f, 1.0f));
     m_StandardTab.SetTexSize   (coreVector2(1.0f,-1.0f));
     m_StandardTab.SetTexOffset (m_StandardTab.GetSize()*coreVector2(-0.5f,-1.0f) + coreVector2(0.21f,0.0115f));
-    m_StandardTab.GetCaption()->SetTextLanguage("GAME_MODE_STANDARD");
+    m_StandardTab.GetCaption()->SetTextLanguage("GAME_TAB_STANDARD");
 
     m_TrainingTab.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_TrainingTab.DefineProgram("menu_border_program");
@@ -41,7 +41,7 @@ cGameMenu::cGameMenu()noexcept
     m_TrainingTab.SetAlignment (m_StandardTab.GetAlignment());
     m_TrainingTab.SetTexSize   (m_StandardTab.GetTexSize());
     m_TrainingTab.SetTexOffset (m_StandardTab.GetTexOffset() + coreVector2(m_TrainingTab.GetPosition().x - m_StandardTab.GetPosition().x, 0.0));
-    m_TrainingTab.GetCaption()->SetTextLanguage("GAME_MODE_TRAINING");
+    m_TrainingTab.GetCaption()->SetTextLanguage("GAME_TAB_TRAINING");
 
     m_StartButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_StartButton.DefineProgram("menu_border_program");
@@ -135,24 +135,32 @@ cGameMenu::cGameMenu()noexcept
         m_aOptionLine[i].SetSize      (coreVector2(m_ArmoryBackground.GetSize().x, 0.05f));
         m_aOptionLine[i].SetTexOffset (coreVector2(I_TO_F(i)*0.09f, 0.0f));
 
-        iOffset += (i >= 1u) ? 2u : 1u;
+        iOffset += (i >= 2u) ? 2u : 1u;
     }
-    m_aOptionName[0].SetTextLanguage("GAME_PLAYERS");
-    m_aOptionName[1].SetTextLanguage("GAME_DIFFICULTY");
-    m_aOptionName[2].SetTextLanguage("GAME_WEAPON");
-    m_aOptionName[3].SetTextLanguage("GAME_SUPPORT");
+    m_aOptionName[0].SetTextLanguage("GAME_TYPE");
+    m_aOptionName[1].SetTextLanguage("GAME_MODE");
+    m_aOptionName[2].SetTextLanguage("GAME_DIFFICULTY");
+    m_aOptionName[3].SetTextLanguage("GAME_WEAPON");
+    m_aOptionName[4].SetTextLanguage("GAME_SUPPORT");
 
-    m_Players.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
-    m_Players.SetPosition (coreVector2(-1.00f,1.00f) * m_aOptionName[0].GetPosition());
-    m_Players.SetSize     (coreVector2( 0.47f,0.03f));
-    m_Players.SetAlignment(coreVector2(-1.00f,0.00f));
-    m_Players.SetEndless  (true);
-    m_Players.GetCaption()->SetColor3(COLOR_MENU_WHITE);
+    m_Type.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+    m_Type.SetPosition (coreVector2(-1.00f,1.00f) * m_aOptionName[0].GetPosition());
+    m_Type.SetSize     (coreVector2( 0.47f,0.03f));
+    m_Type.SetAlignment(coreVector2(-1.00f,0.00f));
+    m_Type.SetEndless  (true);
+    m_Type.GetCaption()->SetColor3(COLOR_MENU_WHITE);
+
+    m_Mode.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+    m_Mode.SetPosition (coreVector2(-1.00f,1.00f) * m_aOptionName[1].GetPosition());
+    m_Mode.SetSize     (m_Type.GetSize());
+    m_Mode.SetAlignment(m_Type.GetAlignment());
+    m_Mode.SetEndless  (true);
+    m_Mode.GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
     m_Difficulty.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
-    m_Difficulty.SetPosition (coreVector2(-1.00f,1.00f) * m_aOptionName[1].GetPosition());
-    m_Difficulty.SetSize     (m_Players.GetSize());
-    m_Difficulty.SetAlignment(m_Players.GetAlignment());
+    m_Difficulty.SetPosition (coreVector2(-1.00f,1.00f) * m_aOptionName[2].GetPosition());
+    m_Difficulty.SetSize     (m_Type.GetSize());
+    m_Difficulty.SetAlignment(m_Type.GetAlignment());
     m_Difficulty.SetEndless  (true);
     m_Difficulty.GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
@@ -161,14 +169,14 @@ cGameMenu::cGameMenu()noexcept
         const coreVector2 vOffset = coreVector2(0.25f * I_TO_F(MENU_GAME_PLAYERS - i - 1u), 0.0f);
 
         m_aWeapon[i].Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
-        m_aWeapon[i].SetPosition (coreVector2(-1.00f,1.00f) * m_aOptionName[2].GetPosition() - vOffset);
+        m_aWeapon[i].SetPosition (coreVector2(-1.00f,1.00f) * m_aOptionName[3].GetPosition() - vOffset);
         m_aWeapon[i].SetSize     (coreVector2( 0.22f,0.03f));
         m_aWeapon[i].SetAlignment(coreVector2(-1.00f,0.00f));
         m_aWeapon[i].SetEndless  (true);
         m_aWeapon[i].GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
         m_aSupport[i].Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
-        m_aSupport[i].SetPosition (coreVector2(-1.00f,1.00f) * m_aOptionName[3].GetPosition() - vOffset);
+        m_aSupport[i].SetPosition (coreVector2(-1.00f,1.00f) * m_aOptionName[4].GetPosition() - vOffset);
         m_aSupport[i].SetSize     (m_aWeapon[i].GetSize());
         m_aSupport[i].SetAlignment(m_aWeapon[i].GetAlignment());
         m_aSupport[i].SetEndless  (true);
@@ -188,10 +196,15 @@ cGameMenu::cGameMenu()noexcept
     }
 
     // fill option entries
-    m_Players   .AddEntryLanguage("GAME_PLAYERS_SOLO",      1u);
-    m_Players   .AddEntryLanguage("GAME_PLAYERS_COOP",      2u);
-    m_Difficulty.AddEntryLanguage("GAME_DIFFICULTY_EASY",   0u);
-    m_Difficulty.AddEntryLanguage("GAME_DIFFICULTY_NORMAL", 1u);
+    m_Type      .AddEntryLanguage("GAME_TYPE_SOLO",         GAME_TYPE_SOLO);
+    m_Type      .AddEntryLanguage("GAME_TYPE_COOP",         GAME_TYPE_COOP);
+    m_Type      .AddEntryLanguage("GAME_TYPE_DUEL",         GAME_TYPE_DUEL);
+    m_Mode      .AddEntryLanguage("GAME_MODE_STANDARD",     GAME_MODE_STANDARD);
+    m_Mode      .AddEntryLanguage("GAME_MODE_PACIFIST",     GAME_MODE_PACIFIST);
+    m_Mode      .AddEntryLanguage("GAME_MODE_MASOCHIST",    GAME_MODE_MASOCHIST);
+    m_Difficulty.AddEntryLanguage("GAME_DIFFICULTY_EASY",   GAME_DIFFICULTY_EASY);
+    m_Difficulty.AddEntryLanguage("GAME_DIFFICULTY_NORMAL", GAME_DIFFICULTY_NORMAL);
+    m_Difficulty.AddEntryLanguage("GAME_DIFFICULTY_HARD",   GAME_DIFFICULTY_HARD);
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) m_aWeapon [i].AddEntryLanguage("GAME_WEAPON_NOTHING",  cNoWeapon   ::ID);
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) m_aWeapon [i].AddEntryLanguage("GAME_WEAPON_RAY",      cRayWeapon  ::ID);
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) m_aWeapon [i].AddEntryLanguage("GAME_WEAPON_PULSE",    cPulseWeapon::ID);
@@ -233,7 +246,8 @@ cGameMenu::cGameMenu()noexcept
     for(coreUintW i = 0u; i < MENU_GAME_OPTIONS; ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aOptionLine[i]);
     for(coreUintW i = 0u; i < MENU_GAME_OPTIONS; ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aOptionName[i]);
 
-    this->BindObject(SURFACE_GAME_ARMORY, &m_Players);
+    this->BindObject(SURFACE_GAME_ARMORY, &m_Type);
+    this->BindObject(SURFACE_GAME_ARMORY, &m_Mode);
     this->BindObject(SURFACE_GAME_ARMORY, &m_Difficulty);
 
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i) this->BindObject(SURFACE_GAME_ARMORY, &m_aWeapon     [i]);
@@ -320,7 +334,8 @@ void cGameMenu::Move()
             }
 
             // 
-            cMenu::UpdateSwitchBox(&m_Players);
+            cMenu::UpdateSwitchBox(&m_Type);
+            cMenu::UpdateSwitchBox(&m_Mode);
             cMenu::UpdateSwitchBox(&m_Difficulty);
 
             for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
@@ -417,8 +432,9 @@ void cGameMenu::LoadValues()
     m_WorldMap.SelectPin(g_pSave->GetHeader().oOptions.iStandard);
 
     // 
-    m_Players.SelectValue(g_pSave->GetHeader().oOptions.iPlayers);
-    m_Players.SelectValue(g_pSave->GetHeader().oOptions.iDifficulty);
+    m_Type      .SelectValue(g_pSave->GetHeader().oOptions.iType);
+    m_Mode      .SelectValue(g_pSave->GetHeader().oOptions.iMode);
+    m_Difficulty.SelectValue(g_pSave->GetHeader().oOptions.iDifficulty);
 
     // 
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
@@ -437,7 +453,8 @@ void cGameMenu::SaveValues()
     g_pSave->EditOptions()->iStandard = m_WorldMap.GetSelectionIndex();
 
     // 
-    g_pSave->EditOptions()->iPlayers    = m_Players   .GetCurEntry().tValue;
+    g_pSave->EditOptions()->iType       = m_Type      .GetCurEntry().tValue;
+    g_pSave->EditOptions()->iMode       = m_Mode      .GetCurEntry().tValue;
     g_pSave->EditOptions()->iDifficulty = m_Difficulty.GetCurEntry().tValue;
 
     // 

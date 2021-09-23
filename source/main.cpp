@@ -363,12 +363,13 @@ static void DebugGame()
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LALT), CORE_INPUT_HOLD))
         {
             sGameOptions oOptions = {};
-            oOptions.iPlayers    = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(X), CORE_INPUT_HOLD) ? 2u : 1u;
-            oOptions.iDifficulty = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(Z), CORE_INPUT_HOLD) ? 0u : 1u;
+            oOptions.iType       = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(X), CORE_INPUT_HOLD) ? GAME_TYPE_COOP : GAME_TYPE_SOLO;
+            oOptions.iMode       = GAME_MODE_STANDARD;
+            oOptions.iDifficulty = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(V), CORE_INPUT_HOLD) ? GAME_DIFFICULTY_EASY : GAME_DIFFICULTY_HARD;
             for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
             {
                 oOptions.aaiWeapon [i][0] = cRayWeapon::ID;
-                oOptions.aaiSupport[i][0] = 0u;
+                oOptions.aaiSupport[i][0] = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(C), CORE_INPUT_HOLD) ? 1u : 0u;
             }
 
             #define __LOAD_GAME(x) {STATIC_NEW(g_pGame, oOptions, GAME_MISSION_LIST_MAIN) g_pGame->LoadMissionID(x); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f); g_pPostProcessing->SetWallOpacity(1.0f);}

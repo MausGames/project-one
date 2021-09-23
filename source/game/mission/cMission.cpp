@@ -320,16 +320,14 @@ void cMission::__CloseSegment()
     const coreUint32 iBonus = cGame::CalcBonusTime(fTime);
 
     // 
-    coreUint8  aiMedal[GAME_PLAYERS] = {};
-    coreUint32 aiPower[GAME_PLAYERS] = {};
+    coreUint8 iMedal = 0u;
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
         const coreUint32 iDamageTaken  = pPlayer->GetDataTable ()->GetCounterSegment(iMissionIndex, m_iCurSegmentIndex).iDamageTaken;
         const coreUint32 iScoreSegment = pPlayer->GetScoreTable()->GetScoreSegment  (iMissionIndex, m_iCurSegmentIndex);
 
         // 
-        aiMedal[i] = cGame::CalcMedal(fTime, iDamageTaken, m_pfMedalGoal);
-        aiPower[i] = iScoreSegment + aiMedal[i] * 1000000u;
+        iMedal += cGame::CalcMedal(fTime, iDamageTaken, m_pfMedalGoal);
 
         // 
         pPlayer->GetScoreTable()->AddScore(iBonus, false);
@@ -341,21 +339,17 @@ void cMission::__CloseSegment()
         g_pSave->EditLocalStatsSegment()->iScoreTotal += iScoreFull;
     });
 
-    if(g_pGame->GetCoop())
-    {
-        // give medal to the better player (or both on draw)
-        if(aiPower[0] >= aiPower[1]) g_pGame->GetPlayer(0u)->GetDataTable()->GiveMedalSegment(aiMedal[0]);
-        if(aiPower[1] >= aiPower[0]) g_pGame->GetPlayer(1u)->GetDataTable()->GiveMedalSegment(aiMedal[1]);
-        STATIC_ASSERT(GAME_PLAYERS == 2u)
-    }
-    else
-    {
-        // give medal to the only player
-        g_pGame->GetPlayer(0u)->GetDataTable()->GiveMedalSegment(aiMedal[0]);
-    }
+    // 
+    if(g_pGame->IsCoop()) iMedal /= GAME_PLAYERS;
 
     // 
-    const coreUint8 iShowMedal     = MAX(aiMedal[0], aiMedal[1]);
+    g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    {
+        pPlayer->GetDataTable()->GiveMedalSegment(iMedal);
+    });
+
+    // 
+    const coreUint8 iShowMedal     = iMedal;
     const coreUint8 iShowMedalType = MISSION_SEGMENT_IS_BOSS(m_iCurSegmentIndex) ? MEDAL_TYPE_BOSS : MEDAL_TYPE_WAVE;
     g_pGame->GetInterface()->ShowScore(iBonus, iShowMedal, iShowMedalType);
 

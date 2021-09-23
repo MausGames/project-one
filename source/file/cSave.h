@@ -98,7 +98,8 @@ public:
         coreChar  acName[SAVE_NAME_LENGTH];                        // 
         coreUint8 iStandard;                                       // 
         coreUint8 iTraining;                                       // 
-        coreUint8 iPlayers;                                        // 
+        coreUint8 iType;                                           // 
+        coreUint8 iMode;                                           // 
         coreUint8 iDifficulty;                                     // 
         coreUint8 aaiWeapon [SAVE_PLAYERS][SAVE_EQUIP_WEAPONS];    // 
         coreUint8 aaiSupport[SAVE_PLAYERS][SAVE_EQUIP_SUPPORTS];   // 

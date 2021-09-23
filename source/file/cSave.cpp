@@ -208,9 +208,11 @@ void cSave::__CheckHeader(sHeader* OUTPUT pHeader)
     pHeader->oOptions.acName[SAVE_NAME_LENGTH - 1u] = '\0';
 
     // 
-    pHeader->oOptions.iStandard = CLAMP(pHeader->oOptions.iStandard, 0u, SAVE_MISSIONS-1u);
-    pHeader->oOptions.iTraining = CLAMP(pHeader->oOptions.iTraining, 0u, SAVE_MISSIONS-1u);
-    pHeader->oOptions.iPlayers  = CLAMP(pHeader->oOptions.iPlayers,  1u, SAVE_PLAYERS);
+    pHeader->oOptions.iStandard   = CLAMP(pHeader->oOptions.iStandard,   0u, SAVE_MISSIONS      -1u);
+    pHeader->oOptions.iTraining   = CLAMP(pHeader->oOptions.iTraining,   0u, SAVE_MISSIONS      -1u);
+    pHeader->oOptions.iType       = CLAMP(pHeader->oOptions.iType,       0u, GAME_TYPE_MAX      -1u);
+    pHeader->oOptions.iMode       = CLAMP(pHeader->oOptions.iMode,       0u, GAME_MODE_MAX      -1u);
+    pHeader->oOptions.iDifficulty = CLAMP(pHeader->oOptions.iDifficulty, 0u, GAME_DIFFICULTY_MAX-1u);
     for(coreUintW i = 0u; i < SAVE_PLAYERS; ++i)
     {
         for(coreUintW j = 0u; j < SAVE_EQUIP_WEAPONS;  ++j) pHeader->oOptions.aaiWeapon [i][j] = CLAMP(pHeader->oOptions.aaiWeapon [i][j], 0u, WEAPONS -1u);

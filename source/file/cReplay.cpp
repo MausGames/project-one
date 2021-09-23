@@ -32,7 +32,8 @@ void cReplay::CreateGame()
 
     // 
     sGameOptions oOptions = {};
-    oOptions.iPlayers     = m_Header.iNumPlayers;
+    oOptions.iType        = m_Header.iOptionType;
+    oOptions.iMode        = m_Header.iOptionMode;
     oOptions.iDifficulty  = m_Header.iOptionDifficulty;
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
     {
@@ -60,11 +61,13 @@ void cReplay::StartRecording()
     m_Header.iMagic          = REPLAY_FILE_MAGIC;
     m_Header.iVersion        = REPLAY_FILE_VERSION;
     m_Header.iStartTimestamp = std::time(NULL);
-    m_Header.iNumPlayers     = g_pGame->GetCoop() ? REPLAY_PLAYERS : 1u;
+    m_Header.iNumPlayers     = g_pGame->IsMulti() ? REPLAY_PLAYERS : 1u;
     m_Header.iNumMissions    = g_pGame->GetNumMissions();
     m_Header.iNumSegments    = REPLAY_SEGMENTS;
 
     // 
+    m_Header.iOptionType       = g_pGame->GetOptions().iType;
+    m_Header.iOptionMode       = g_pGame->GetOptions().iMode;
     m_Header.iOptionDifficulty = g_pGame->GetOptions().iDifficulty;
     for(coreUintW i = 0u; i < REPLAY_PLAYERS; ++i)
     {
@@ -565,6 +568,10 @@ void cReplay::__CheckHeader(sHeader* OUTPUT pHeader)
     pHeader->iNumSegments = CLAMP(pHeader->iNumSegments, 1u, REPLAY_SEGMENTS);
 
     // 
+    // TODO 1: force solo if players == 1
+    pHeader->iOptionType       = CLAMP(pHeader->iOptionType,       0u, GAME_TYPE_MAX      -1u);
+    pHeader->iOptionMode       = CLAMP(pHeader->iOptionMode,       0u, GAME_MODE_MAX      -1u);
+    pHeader->iOptionDifficulty = CLAMP(pHeader->iOptionDifficulty, 0u, GAME_DIFFICULTY_MAX-1u);
     for(coreUintW i = 0u; i < REPLAY_PLAYERS; ++i)
     {
         for(coreUintW j = 0u; j < REPLAY_EQUIP_WEAPONS;  ++j) pHeader->aaiOptionWeapon [i][j] = CLAMP(pHeader->aaiOptionWeapon [i][j], 0u, WEAPONS -1u);

@@ -90,8 +90,8 @@ coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, 
     ASSERT(STATIC_ISVALID(g_pGame))
 
     // 
-    const coreBool bCoop = (pAttacker && g_pGame->GetCoop());
-    m_iLastAttacker = bCoop ? (pAttacker - g_pGame->GetPlayer(0u)) : 0u;
+    const coreBool bMulti = (pAttacker && g_pGame->IsMulti());
+    m_iLastAttacker = bMulti ? (pAttacker - g_pGame->GetPlayer(0u)) : 0u;
 
     if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_INVINCIBLE))
     {
@@ -101,7 +101,7 @@ coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, 
         if(iDamage > 0)
         {
             // 
-            const coreInt32 iPower = (bCoop || (this->GetMaxHealth() == 1)) ? 1 : GAME_PLAYERS;
+            const coreInt32 iPower = (bMulti || (this->GetMaxHealth() == 1)) ? 1 : GAME_PLAYERS;
             const coreInt32 iTaken = this->_TakeDamage(iDamage * iPower, iElement, vImpact) / iPower;
             ASSERT(!(this->GetMaxHealth() % iPower))
 

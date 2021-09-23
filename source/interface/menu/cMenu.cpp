@@ -692,7 +692,8 @@ void cMenu::__StartGame()
 {
     // 
     sGameOptions oOptions = {};
-    oOptions.iPlayers     = m_GameMenu.GetSelectedPlayers   ();
+    oOptions.iType        = m_GameMenu.GetSelectedType      ();
+    oOptions.iMode        = m_GameMenu.GetSelectedMode      ();
     oOptions.iDifficulty  = m_GameMenu.GetSelectedDifficulty();
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
     {

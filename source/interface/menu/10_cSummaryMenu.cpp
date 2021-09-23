@@ -37,11 +37,11 @@ cSummaryMenu::cSummaryMenu()noexcept
     m_Title.SetText    (Core::Application->Settings.Name);
 
     m_aHeader[0].Construct  (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
-    m_aHeader[0].SetPosition(coreVector2(0.0f,0.37f));
+    m_aHeader[0].SetPosition(coreVector2(0.0f,0.39f));
     m_aHeader[0].SetColor3  (COLOR_MENU_WHITE);
 
     m_aHeader[1].Construct  (MENU_FONT_STANDARD_4, MENU_OUTLINE_SMALL);
-    m_aHeader[1].SetPosition(coreVector2(0.0f, m_aHeader[0].GetPosition().y - 0.04f));
+    m_aHeader[1].SetPosition(coreVector2(0.0f, m_aHeader[0].GetPosition().y - 0.05f));
     m_aHeader[1].SetColor3  (COLOR_MENU_WHITE);
 
     m_MedalMission.DefineTexture(0u, "menu_medal.png");
@@ -51,11 +51,11 @@ cSummaryMenu::cSummaryMenu()noexcept
 
     for(coreUintW i = 0u; i < MENU_SUMMARY_MEDALS; ++i)
     {
-        const coreFloat fOffset = MISSION_SEGMENT_IS_BOSS(i) ? 0.004f : -0.008f;
+        const coreVector2 vOffset = MISSION_SEGMENT_IS_BOSS(i) ? coreVector2(0.0f,-0.157f) : coreVector2((I_TO_F(i % 3u) - 1.0f) * 0.065f, I_TO_F(i / 3u) * -0.075f);
 
         m_aMedalSegment[i].DefineTexture(0u, "menu_medal.png");
         m_aMedalSegment[i].DefineProgram("default_2d_program");
-        m_aMedalSegment[i].SetPosition  (coreVector2((I_TO_F(i % 6u) - 2.5f) * 0.055f + fOffset, I_TO_F(i / 6u) * -0.065f + 0.24f));
+        m_aMedalSegment[i].SetPosition  (coreVector2(0.0f, 0.255f) + vOffset);
         m_aMedalSegment[i].SetTexSize   (coreVector2(0.25f,0.25f));
     }
 
@@ -82,12 +82,12 @@ cSummaryMenu::cSummaryMenu()noexcept
     m_aName[1].SetTextLanguage("BONUS_SURVIVE");
 
     m_TotalName.Construct      (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
-    m_TotalName.SetPosition    (coreVector2(0.0f,-0.26f));
+    m_TotalName.SetPosition    (coreVector2(0.0f,-0.245f));
     m_TotalName.SetColor3      (COLOR_MENU_WHITE);
     m_TotalName.SetTextLanguage("SUMMARY_TOTAL");
 
     m_TotalValue.Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
-    m_TotalValue.SetPosition(coreVector2(0.0f, m_TotalName.GetPosition().y - 0.04f));
+    m_TotalValue.SetPosition(coreVector2(0.0f, m_TotalName.GetPosition().y - 0.045f));
     m_TotalValue.SetColor3  (COLOR_MENU_WHITE);
 
     for(coreUintW j = 0u; j < MENU_SUMMARY_PARTS; ++j)
@@ -102,19 +102,19 @@ cSummaryMenu::cSummaryMenu()noexcept
     // bind menu objects
     this->BindObject(SURFACE_SUMMARY_COOP, &m_BackgroundCoop);
 
-    for(coreUintW k = SURFACE_SUMMARY_SOLO; k <= SURFACE_SUMMARY_COOP; ++k)
+    for(coreUintW j = SURFACE_SUMMARY_SOLO; j <= SURFACE_SUMMARY_COOP; ++j)
     {
-        this->BindObject(k, &m_BackgroundMain);
-        this->BindObject(k, &m_MedalMission);
-        for(coreUintW i = 0u; i < MENU_SUMMARY_MEDALS; ++i) this->BindObject(k, &m_aMedalSegment[i]);
+        this->BindObject(j, &m_BackgroundMain);
+        this->BindObject(j, &m_MedalMission);
+        for(coreUintW i = 0u; i < MENU_SUMMARY_MEDALS; ++i) this->BindObject(j, &m_aMedalSegment[i]);
 
-        this->BindObject(k, &m_aHeader[0]);
-        this->BindObject(k, &m_aHeader[1]);
+        this->BindObject(j, &m_aHeader[0]);
+        this->BindObject(j, &m_aHeader[1]);
 
-        for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES; ++i) this->BindObject(k, &m_aName[i]);
-        this->BindObject(k, &m_TotalName);
-        for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES; ++i) this->BindObject(k, &m_aValue[i]);
-        this->BindObject(k, &m_TotalValue);
+        for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES; ++i) this->BindObject(j, &m_aName[i]);
+        this->BindObject(j, &m_TotalName);
+        for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES; ++i) this->BindObject(j, &m_aValue[i]);
+        this->BindObject(j, &m_TotalValue);
     }
 
     for(coreUintW j = 0u; j < MENU_SUMMARY_PARTS; ++j)
@@ -211,8 +211,8 @@ void cSummaryMenu::Move()
                     // 
                     pMedal->Move();
                 };
-                nBlendMedalFunc(&m_MedalMission, 0.085f, 5.5f);
-                for(coreUintW i = 0u; i < MENU_SUMMARY_MEDALS; ++i) nBlendMedalFunc(&m_aMedalSegment[i], MISSION_SEGMENT_IS_BOSS(i) ? 0.07f : 0.055f, 0.8f + 0.055f * I_TO_F(i));
+                nBlendMedalFunc(&m_MedalMission, 0.1f, 5.5f);
+                for(coreUintW i = 0u; i < MENU_SUMMARY_MEDALS; ++i) nBlendMedalFunc(&m_aMedalSegment[i], MISSION_SEGMENT_IS_BOSS(i) ? 0.085f : 0.07f, 0.8f + 0.1f * I_TO_F(i));
 
                 // 
                 const auto nBlendLabelFunc = [&](cGuiLabel* OUTPUT pName, cGuiLabel* OUTPUT pValue, cGuiLabel* OUTPUT pPart, const coreFloat fThreshold)
@@ -251,7 +251,7 @@ void cSummaryMenu::Move()
                 m_BackgroundMain.SetTexSize  (coreVector2(fVisibility, 1.0f));
                 m_BackgroundMain.SetTexOffset(coreVector2(1.0f,1.0f) * (fAnimation * 0.05f));
 
-                // duplicate background for coop
+                // duplicate background for multiplayer
                 m_BackgroundCoop.SetPosition (m_BackgroundMain.GetPosition ().Rotated90() * -1.0f);
                 m_BackgroundCoop.SetAlpha    (m_BackgroundMain.GetAlpha    ());
                 m_BackgroundCoop.SetSize     (m_BackgroundMain.GetSize     ());
@@ -348,17 +348,30 @@ void cSummaryMenu::ShowMission()
 
     // 
     m_aHeader[0].SetText(PRINT("%s %d", Core::Language->GetString("MISSION"), g_pGame->GetCurMission()->GetID()));
-    m_aHeader[1].SetText(g_pGame->GetCurMission()->GetName());
+    m_aHeader[1].SetText(coreData::StrUpper(g_pGame->GetCurMission()->GetName()));
 
     // 
     const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
 
     // 
-    coreUint32 iSumBonusMedal   = 0u;
-    coreUint32 iSumBonusSurvive = 0u;
-    coreUint32 iSumScore        = 0u;
-    coreUint16 iMedalTotal      = 0u;
-    coreUint8  iMedalCount      = 0u;
+    coreUint32 iBonusMedal = 0u;
+    coreUint16 iMedalTotal = 0u;
+    coreUint8  iMedalCount = 0u;
+    for(coreUintW i = 0u; i < MENU_SUMMARY_MEDALS; ++i)
+    {
+        const coreUint8 iMedalSegment = MAX(g_pGame->GetPlayer(0u)->GetDataTable()->GetMedalSegment(iMissionIndex, i), DEFINED(_CORE_DEBUG_) ? MEDAL_BRONZE : MEDAL_NONE);
+
+        // 
+        iBonusMedal += cGame::CalcBonusMedal(iMedalSegment);
+        iMedalTotal += iMedalSegment;
+        iMedalCount += iMedalSegment ? 1u : 0u;
+
+        // 
+        this->__SetMedalSegment(i, iMedalSegment);
+    }
+
+    // 
+    coreUint32 iBonusSurvive = 0u;
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
         const coreUint32 iDamageTaken   = pPlayer->GetDataTable()->GetCounterMission(iMissionIndex).iDamageTaken;
@@ -366,52 +379,41 @@ void cSummaryMenu::ShowMission()
         const coreUint32 iRepairsUsed   = pPlayer->GetDataTable()->GetCounterMission(iMissionIndex).iRepairsUsed;
 
         // 
-        coreUint32 iBonusMedal = 0u;
-        for(coreUintW j = 0u; j < MENU_SUMMARY_MEDALS; ++j)
-        {
-            const coreUint8 iMedalSegment = pPlayer->GetDataTable()->GetMedalSegment(iMissionIndex, j);
-            const coreBool  bValid        = (iMedalSegment != MEDAL_NONE);
-
-            // 
-            iBonusMedal += cGame::CalcBonusMedal(iMedalSegment);
-            iMedalTotal += iMedalSegment;
-            iMedalCount += bValid ? 1u : 0u;
-
-            // 
-            if(bValid || !i) this->__SetMedalSegment(j, iMedalSegment);
-        }
-
-        // 
-        const coreUint32 iBonusSurvive = cGame::CalcBonusSurvive(iDamageTaken, iContinuesUsed || iRepairsUsed);
-        const coreUint32 iScore        = pPlayer->GetScoreTable()->GetScoreMission(iMissionIndex) + iBonusMedal + iBonusSurvive;
-
-        // 
-        m_aiApplyBonus[i] = iBonusMedal + iBonusSurvive;
-
-        // 
-        m_aaPart[i][0].SetText(coreData::ToChars(iBonusMedal));
-        m_aaPart[i][1].SetText(coreData::ToChars(iBonusSurvive));
-        m_aiFinalPart[i] = iScore;
-
-        // 
-        iSumBonusMedal   += iBonusMedal;
-        iSumBonusSurvive += iBonusSurvive;
-        iSumScore        += iScore;
+        iBonusSurvive += cGame::CalcBonusSurvive(iDamageTaken, iContinuesUsed || iRepairsUsed);
     });
 
     // 
-    m_aValue[0].SetText(coreData::ToChars(iSumBonusMedal));
-    m_aValue[1].SetText(coreData::ToChars(iSumBonusSurvive));
-    m_iFinalValue = iSumScore;
+    const coreUint32 iModifier = g_pGame->IsCoop() ? GAME_PLAYERS : 1u;
+    iBonusSurvive /= iModifier;
 
     // 
-    const coreUint8 iMedalMission = (iMedalCount == MENU_SUMMARY_MEDALS) ? (iMedalTotal / MENU_SUMMARY_MEDALS) : MEDAL_NONE;   // round down
+    const coreUint8 iMedalMission = (iMedalCount == MENU_SUMMARY_MEDALS) ? (iMedalTotal / MENU_SUMMARY_MEDALS) : MEDAL_NONE;
     this->__SetMedalMission(iMedalMission);
-    g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i) {m_aiApplyMedal[i] = iMedalMission;});
+
+    // 
+    g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    {
+        const coreUint32 iBonus = iBonusMedal + iBonusSurvive;
+        const coreUint32 iScore = pPlayer->GetScoreTable()->GetScoreMission(iMissionIndex);
+
+        // 
+        m_iFinalValue    += iBonus + iScore;
+        m_aiFinalPart [i] = iBonus + iScore;
+        m_aiApplyBonus[i] = iBonus;
+        m_aiApplyMedal[i] = iMedalMission;
+
+        // 
+        m_aaPart[0][i].SetText(coreData::ToChars(iBonusMedal));
+        m_aaPart[1][i].SetText(coreData::ToChars(iBonusSurvive));
+    });
+
+    // 
+    m_aValue[0].SetText(coreData::ToChars(iBonusMedal   * iModifier));
+    m_aValue[1].SetText(coreData::ToChars(iBonusSurvive * iModifier));
 
     // 
     this->SetAlpha(0.0f);
-    this->ChangeSurface(g_pGame->GetCoop() ? SURFACE_SUMMARY_COOP : SURFACE_SUMMARY_SOLO, 0.0f);
+    this->ChangeSurface(g_pGame->IsCoop() ? SURFACE_SUMMARY_COOP : SURFACE_SUMMARY_SOLO, 0.0f);
 }
 
 
