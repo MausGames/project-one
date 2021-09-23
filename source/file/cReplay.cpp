@@ -410,7 +410,7 @@ void cReplay::LoadInfoList(coreList<sInfo>* OUTPUT paInfoList)
 
     // 
     coreList<coreString> asFile;
-    coreData::ScanFolder(coreData::UserFolder(REPLAY_FILE_FOLDER), "*." REPLAY_FILE_EXTENSION, &asFile);
+    coreData::FolderScan(coreData::UserFolder(REPLAY_FILE_FOLDER), "*." REPLAY_FILE_EXTENSION, &asFile);
 
     // 
     paInfoList->reserve(asFile.size());

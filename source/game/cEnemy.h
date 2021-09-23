@@ -10,8 +10,7 @@
 #ifndef _P1_GUARD_ENEMY_H_
 #define _P1_GUARD_ENEMY_H_
 
-// TODO 3: disable texture filtering for enemy texture (NEAREST, also default_black and default_white)
-// TODO 4: manager: Find, ForEach, ForEachAll -> typed 
+// TODO 4: manager: Find, ForEach, ForEachAll -> typed
 // TODO 3: implement own enemy-types for custom-enemies which would require instancing
 // TODO 3: memory-pool for each enemy-set (if single allocations still used)
 // TODO 3: add score-value to cEnemy class, either for base, or for extra score
@@ -414,6 +413,7 @@ private:
     coreFlow    m_fAnimation;   // 
 
     coreObject3D m_Bubble;      // 
+    cLodObject   m_Ship;        // 
 
 
 public:

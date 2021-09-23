@@ -124,7 +124,7 @@ void cRutilusMission::EnableTeleporter(const coreUintW iIndex)
     oTeleporter.ChangeType(TYPE_RUTILUS_TELEPORTER);
 
     // 
-    m_iTeleporterActive = 2u;
+    ASSERT(m_iTeleporterActive == 2u)
 
     // 
     oTeleporter.SetEnabled(CORE_OBJECT_ENABLE_ALL);

@@ -246,7 +246,7 @@ void cBackground::Move()
     };
     const coreMatrix2 mRota = coreMatrix3::Rotation(g_pEnvironment->GetDirection().InvertedX().Rotated45()).m12();
     nControlObjectsFunc(&m_apGroundObjectList, BACKGROUND_OBJECT_RANGE,         mRota);
-    nControlObjectsFunc(&m_apDecalObjectList,  BACKGROUND_OBJECT_RANGE - 9.0f,  mRota);
+    nControlObjectsFunc(&m_apDecalObjectList,  BACKGROUND_OBJECT_RANGE -  9.0f, mRota);
     nControlObjectsFunc(&m_apAirObjectList,    BACKGROUND_OBJECT_RANGE - 11.0f, mRota);
 
     // control and move all temporary objects
@@ -283,7 +283,7 @@ void cBackground::Move()
         }
     };
     nControlAddFunc(&m_apGroundAddList, BACKGROUND_OBJECT_RANGE);
-    nControlAddFunc(&m_apDecalAddList,  BACKGROUND_OBJECT_RANGE - 9.0f);
+    nControlAddFunc(&m_apDecalAddList,  BACKGROUND_OBJECT_RANGE -  9.0f);
     nControlAddFunc(&m_apAirAddList,    BACKGROUND_OBJECT_RANGE - 11.0f);
 
     // call individual move routine

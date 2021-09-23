@@ -16,6 +16,7 @@
 // TODO 1: default input should differ between keyboard and joystick, and between sets
 // TODO 5: SDL_JoystickCurrentPowerLevel
 // TODO 3: alt+F4 while having temp changes in the options menu should not save them
+// TODO 3: AnyButton should not get triggered by g_MenuInput.bScreenshot (in engine ?)
 
 
 // ****************************************************************

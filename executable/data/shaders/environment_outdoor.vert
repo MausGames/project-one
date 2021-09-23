@@ -38,7 +38,7 @@ void LerpLightingTransform(const in vec3 v3Position, const in float v1Lerp)
     mat3 TBN = coreTangentSpaceMatrix(vec4(0.0), v3LerpNormal, vec4(v3LerpTangent, a_v4RawTangent.w));
 
     // 
-    v_av4LightDir[0] = vec4(TBN * -u_aLight[0].v4Direction.xyz, u_aLight[0].v4Direction.w);
+    v_av4LightDir[0] = vec4(TBN * -u_av4LightDir[0].xyz, u_av4LightDir[0].w);
     v_v3TangentPos   = TBN * v3Position;
     v_v3TangentCam   = TBN * u_v3CamPosition;
 }

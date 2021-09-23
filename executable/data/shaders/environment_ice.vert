@@ -31,7 +31,7 @@ void VertexMain()
     // transform lighting properties (resolved, with rotation for ray-tracing)
     v_v3TangentPos   = (m3Rotation * vec3(a_v2LowPosition, 0.0) * u_v3Size + u_v3Position) * vec3( 1.0, -1.0,  1.0);
     v_v3TangentCam   = u_v3CamPosition                                                     * vec3( 1.0, -1.0,  1.0);
-    v_v4Lighting.xyz = (m3Rotation * u_aLight[0].v4Direction.xyz)                          * vec3(-1.0,  1.0, -1.0);
+    v_v4Lighting.xyz = (m3Rotation * u_av4LightDir[0].xyz)                                 * vec3(-1.0,  1.0, -1.0);
 
     // transform texture coordinates
     v_av2TexCoord[0] = vec2(a_v2LowTexCoord.x * c_v1MapResolution,

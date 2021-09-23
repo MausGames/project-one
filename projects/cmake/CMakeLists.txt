@@ -13,13 +13,12 @@ set_target_properties(
     CXX_STANDARD 20
     DEBUG_POSTFIX _debug
     SUFFIX .elf
-    RUNTIME_OUTPUT_DIRECTORY ${BASE_DIRECTORY}/executable/bin/linux/x64/
+    RUNTIME_OUTPUT_DIRECTORY ${BASE_DIRECTORY}/executable/bin/linux_x86_64/
 )
 
 
 target_sources(
     ProjectOne PRIVATE
-    ${BASE_DIRECTORY}/source/additional/cMenuInput.cpp
     ${BASE_DIRECTORY}/source/environment/background/cBackground.cpp
     ${BASE_DIRECTORY}/source/environment/cEnvironment.cpp
     ${BASE_DIRECTORY}/source/environment/cOutdoor.cpp
