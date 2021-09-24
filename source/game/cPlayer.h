@@ -16,7 +16,6 @@
 // TODO 1: check which operations have to be done outside of dead-check
 // TODO 3: add in-game hint for roll-cooldown end ((just) acoustic)
 // TODO 3: correct reverse-tracking when hitting the walls (position correction) ? only for 45degree, also on other code locations ?
-// TODO 5: orange/red exhaust for second ship ?
 // TODO 3: when applying force with (all) objects (collision with container) always quantize 4 or 8, but not in general (wind)
 
 
@@ -27,8 +26,10 @@
 #define PLAYER_LIVES              (LIVES)           // 
 #define PLAYER_SHIELD             (SHIELD)          // 
 #define PLAYER_COLLISION_MIN      (0.15f)           // 
+#define PLAYER_AREA_FACTOR        (1.06f)           // 
+#define PLAYER_RANGE_SIZE         (1.04f)           // 
 #define PLAYER_WIND_SIZE          (4.5f)            // 
-#define PLAYER_BUBBLE_SIZE        (6.0f)            // 
+#define PLAYER_BUBBLE_SIZE        (4.8f)            // 
 #define PLAYER_ROLL_SPEED         (1.0f)            // 
 #define PLAYER_ROLL_COOLDOWN      (FRAMERATE_MAX)   // (ship is vulnerable for a single frame) 
 #define PLAYER_FEEL_TIME          (3.0f)            // 
@@ -102,11 +103,16 @@ private:
     coreProgramPtr m_pDarkProgram;                           // 
     coreFlow       m_fAnimation;                             // 
 
+    coreVector2 m_vOldDir;                                   // 
+    coreFlow    m_fRangeValue;                               // 
+    coreFlow    m_fArrowValue;                               // 
+
     coreObject3D m_Dot;                                      // 
     coreObject3D m_Range;                                    // 
+    coreObject3D m_Arrow;                                    // 
     coreObject3D m_Wind;                                     // 
     coreObject3D m_Bubble;                                   // 
-    coreObject3D m_Shield;                                   // 
+    coreObject3D m_aShield[2];                               // 
     coreObject3D m_Exhaust;                                  // 
 
     coreMap<const coreObject3D*, coreUint32> m_aCollision;   // 
@@ -119,13 +125,14 @@ public:
     DISABLE_COPY(cPlayer)
 
     // configure the player
-    void Configure   (const coreUintW iShipType, const coreVector3 vColor);
+    void Configure   (const coreUintW iShipType);
     void EquipWeapon (const coreUintW iIndex, const coreInt32 iID);
     void EquipSupport(const coreUintW iIndex, const coreInt32 iID);
 
     // render and move the player
     void Render      ()final;
     void RenderBefore();
+    void RenderMiddle();
     void RenderAfter ();
     void Move        ()final;
 
@@ -156,6 +163,10 @@ public:
     inline coreBool IsDarkShading()const {return (this->GetProgram().GetHandle() == m_pDarkProgram.GetHandle());}
 
     // 
+    void EnableRange  ();
+    void DisableRange ();
+    void EnableArrow  ();
+    void DisableArrow ();
     void EnableWind   (const coreVector2 vDirection);
     void DisableWind  ();
     void EnableBubble ();

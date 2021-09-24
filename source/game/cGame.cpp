@@ -35,20 +35,20 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
 
     // 
     if(!this->IsMulti() && (CORE_RAND_RUNTIME & 0x01u))
-        m_aPlayer[0].Configure(PLAYER_SHIP_DEF, COLOR_SHIP_BLUE);
+        m_aPlayer[0].Configure(PLAYER_SHIP_DEF);
     else
 
 #endif
 
     // configure first player
-    m_aPlayer[0].Configure(PLAYER_SHIP_ATK, COLOR_SHIP_RED);
+    m_aPlayer[0].Configure(PLAYER_SHIP_ATK);
     for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS;  ++i) m_aPlayer[0].EquipWeapon (i, oOptions.aaiWeapon [0][i]);
     for(coreUintW i = 0u; i < PLAYER_EQUIP_SUPPORTS; ++i) m_aPlayer[0].EquipSupport(i, oOptions.aaiSupport[0][i]);
 
     if(this->IsMulti())
     {
         // configure second player
-        m_aPlayer[1].Configure(PLAYER_SHIP_DEF, COLOR_SHIP_BLUE);
+        m_aPlayer[1].Configure(PLAYER_SHIP_DEF);
         for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS;  ++i) m_aPlayer[1].EquipWeapon (i, oOptions.aaiWeapon [1][i]);
         for(coreUintW i = 0u; i < PLAYER_EQUIP_SUPPORTS; ++i) m_aPlayer[1].EquipSupport(i, oOptions.aaiSupport[1][i]);
 
@@ -146,10 +146,7 @@ void cGame::Render()
         // render underlying objects
         m_EnemyManager.RenderUnder();
         m_pCurMission->RenderUnder();
-    }
 
-    __DEPTH_GROUP_SHIP   // # 2
-    {
         glDepthMask(false);
         {
             // 
@@ -157,7 +154,10 @@ void cGame::Render()
                 m_aPlayer[i].RenderBefore();
         }
         glDepthMask(true);
+    }
 
+    __DEPTH_GROUP_SHIP   // # 2
+    {
         // apply deferred outline-layer
         g_pOutline->Apply();
     }
@@ -173,6 +173,14 @@ void cGame::Render()
         // render overlying objects
         m_EnemyManager.RenderOver();
         m_pCurMission->RenderOver();
+
+        glDepthMask(false);
+        {
+            // 
+            for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+                m_aPlayer[i].RenderMiddle();
+        }
+        glDepthMask(true);
     }
 
     __DEPTH_GROUP_TOP

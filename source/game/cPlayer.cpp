@@ -14,7 +14,7 @@
 cPlayer::cPlayer()noexcept
 : m_apWeapon        {}
 , m_pInput          (&g_TotalInput)
-, m_vArea           (coreVector4(-FOREGROUND_AREA, FOREGROUND_AREA))
+, m_vArea           (coreVector4(-FOREGROUND_AREA, FOREGROUND_AREA) * PLAYER_AREA_FACTOR)
 , m_vForce          (coreVector2(0.0f,0.0f))
 , m_fSpeed          (1.0f)
 , m_fRollTime       (0.0f)
@@ -28,6 +28,9 @@ cPlayer::cPlayer()noexcept
 , m_fLightningAngle (0.0f)
 , m_fDesaturate     (0.0f)
 , m_fAnimation      (0.0f)
+, m_vOldDir         (coreVector2(0.0f,0.0f))
+, m_fRangeValue     (0.0f)
+, m_fArrowValue     (0.0f)
 {
     // load object resources
     this->DefineTexture(0u, "ship_player.png");
@@ -66,11 +69,20 @@ cPlayer::cPlayer()noexcept
     m_Dot.SetSize    (coreVector3(1.0f,1.0f,1.0f) * PLAYER_COLLISION_MIN);
 
     // 
-    m_Range.DefineModel  ("object_sphere.md3");
-    m_Range.DefineTexture(0u, "default_white.png");
-    m_Range.DefineProgram("effect_energy_flat_spheric_program");
-    m_Range.SetSize      (coreVector3(1.0f,1.0f,1.0f) * 0.55f);
-    m_Range.SetColor4    (coreVector4(COLOR_ENERGY_RED * 0.7f, 1.0f));
+    m_Range.DefineTexture(0u, "effect_energy.png");
+    m_Range.DefineProgram("effect_energy_flat_invert_program");
+    m_Range.SetAlpha     (0.0f);
+    m_Range.SetTexSize   (coreVector2(0.1f,0.1f));
+    m_Range.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+
+    // 
+    m_Arrow.DefineModel  ("bullet_cone.md3");
+    m_Arrow.DefineTexture(0u, "effect_energy.png");
+    m_Arrow.DefineProgram("effect_energy_flat_invert_program");
+    m_Arrow.SetSize      (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
+    m_Arrow.SetAlpha     (0.0f);
+    m_Arrow.SetTexSize   (coreVector2(4.0f,1.0f) * 0.2f);
+    m_Arrow.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 
     // 
     m_Wind.DefineModel  ("object_sphere.md3");
@@ -81,27 +93,29 @@ cPlayer::cPlayer()noexcept
     m_Wind.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 
     // 
-    m_Bubble.DefineModel  ("object_sphere.md3");
     m_Bubble.DefineTexture(0u, "effect_energy.png");
     m_Bubble.DefineProgram("effect_energy_flat_spheric_program");
-    m_Bubble.SetColor4    (coreVector4(COLOR_ENERGY_WHITE * 0.5f, 0.0f));
-    m_Bubble.SetTexSize   (coreVector2(5.0f,5.0f));
+    m_Bubble.SetColor4    (coreVector4(COLOR_ENERGY_WHITE * 0.6f, 0.0f));
+    m_Bubble.SetTexSize   (coreVector2(0.5f,0.5f));
     m_Bubble.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 
     // 
-    m_Shield.DefineModel  ("effect_shield.md3");
-    m_Shield.DefineTexture(0u, "effect_particle_128.png");
-    m_Shield.DefineProgram("effect_shield_program");
-    m_Shield.SetSize      (coreVector3(4.7f,4.7f,4.7f));
-    m_Shield.SetColor4    (coreVector4(COLOR_ENERGY_BLUE, 0.0f));
-    m_Shield.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aShield); ++i)
+    {
+        m_aShield[i].DefineModel  ("effect_shield.md3");
+        m_aShield[i].DefineTexture(0u, "effect_shield.png");
+        m_aShield[i].DefineProgram("effect_shield_program");
+        m_aShield[i].SetSize      (coreVector3(4.7f,4.7f,4.7f) * (i ? -1.0f : 1.0f));
+        m_aShield[i].SetAlpha     (0.0f);
+        m_aShield[i].SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+    }
 
     // 
     m_Exhaust.DefineModel  ("object_tube_open.md3");
     m_Exhaust.DefineTexture(0u, "effect_energy.png");
     m_Exhaust.DefineProgram("effect_energy_direct_program");
     m_Exhaust.SetDirection (this->GetDirection());
-    m_Exhaust.SetColor4    (coreVector4(COLOR_FIRE_BLUE, 0.7f));
+    m_Exhaust.SetAlpha     (0.7f);
     m_Exhaust.SetTexSize   (coreVector2(0.5f,0.25f));
     m_Exhaust.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 }
@@ -122,25 +136,35 @@ cPlayer::~cPlayer()
 
 // ****************************************************************
 // configure the player
-void cPlayer::Configure(const coreUintW iShipType, const coreVector3 vColor)
+void cPlayer::Configure(const coreUintW iShipType)
 {
     // select appearance type
     coreHashString sModelHigh;
     coreHashString sModelLow;
+    coreHashString sGeometry;
+    coreVector3    vEnergy;
     switch(iShipType)
     {
     default: ASSERT(false)
-    case PLAYER_SHIP_ATK: sModelHigh = "ship_player_atk_high.md3"; sModelLow = "ship_player_atk_low.md3"; break;
-    case PLAYER_SHIP_DEF: sModelHigh = "ship_player_def_high.md3"; sModelLow = "ship_player_def_low.md3"; break;
-    case PLAYER_SHIP_P1:  sModelHigh = "ship_projectone.md3";      sModelLow = "ship_projectone.md3";     break;
+    case PLAYER_SHIP_ATK: sModelHigh = "ship_player_atk_high.md3"; sModelLow = "ship_player_atk_low.md3"; sGeometry = "object_cube_top.md3";  vEnergy = COLOR_ENERGY_BLUE   * 1.1f; break;
+    case PLAYER_SHIP_DEF: sModelHigh = "ship_player_def_high.md3"; sModelLow = "ship_player_def_low.md3"; sGeometry = "object_tetra_top.md3"; vEnergy = COLOR_ENERGY_YELLOW * 0.7f; break;
+    case PLAYER_SHIP_P1:  sModelHigh = "ship_projectone.md3";      sModelLow = "ship_projectone.md3";     sGeometry = "object_cube_top.md3";  vEnergy = COLOR_ENERGY_GREEN  * 0.8f; break;
     }
 
     // load models
     this->DefineModelHigh(sModelHigh);
     this->DefineModelLow (sModelLow);
 
-    // set color
-    this->SetBaseColor(vColor);
+    // 
+    m_Range .DefineModel(sGeometry);
+    m_Bubble.DefineModel(sGeometry);
+
+    // 
+    m_Range     .SetColor3(vEnergy);
+    m_Arrow     .SetColor3(vEnergy * (0.9f/1.1f));
+    m_aShield[0].SetColor3(vEnergy * (1.0f/1.1f));
+    m_aShield[1].SetColor3(vEnergy * (1.0f/1.1f));
+    m_Exhaust   .SetColor3(vEnergy);
 }
 
 
@@ -211,7 +235,21 @@ void cPlayer::RenderBefore()
     if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
     {
         // 
-        m_Exhaust.Render();
+        g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Bubble);
+
+        // 
+        m_Bubble    .Render();
+        m_aShield[1].Render();
+        m_Exhaust   .Render();
+    }
+}
+
+void cPlayer::RenderMiddle()
+{
+    if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
+    {
+        // 
+        m_aShield[0].Render();
     }
 }
 
@@ -224,13 +262,13 @@ void cPlayer::RenderAfter()
             m_apWeapon[i]->Render();
 
         // 
-        m_Bubble.Render();
-        m_Shield.Render();
-        m_Wind  .Render();
+        g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Range);
+        g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Arrow);
 
         // 
-        //g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Range);
-        //m_Range.Render();
+        m_Arrow.Render();   // # swapped
+        m_Range.Render();
+        m_Wind .Render();
     }
 }
 
@@ -331,12 +369,61 @@ void cPlayer::Move()
         }
 
         // 
+        if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_ALL))
+        {
+            if(!m_fRangeValue) this->EnableRange();
+            m_fRangeValue.UpdateMin(3.0f, 1.0f);
+        }
+        else
+        {
+            m_fRangeValue.UpdateMax(-3.0f, 0.0f);
+            if(!m_fRangeValue) this->DisableRange();
+        }
+
+        // 
+        if(!coreMath::IsNear(m_vOldDir.x, this->GetDirection().x) ||
+           !coreMath::IsNear(m_vOldDir.y, this->GetDirection().y))
+        {
+            m_vOldDir = this->GetDirection().xy();
+
+            if(m_fArrowValue <= 0.0f) this->EnableArrow();
+            m_fArrowValue = 1.0f;
+        }
+
+        // 
         m_Dot.SetPosition(this->GetPosition());
         m_Dot.Move();
 
-        // 
-        m_Range.SetPosition(this->GetPosition());
-        m_Range.Move();
+        if(m_Range.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
+        {
+            // 
+            const coreVector2 vDir   = coreVector2::Direction(m_fAnimation * (-1.6f*PI));
+            const coreFloat   fScale = LERPS(0.0f, 1.0f, m_fRangeValue);
+
+            // 
+            m_Range.SetPosition (this->GetPosition());
+            m_Range.SetSize     (coreVector3(1.0f,1.0f,1.0f) * PLAYER_RANGE_SIZE * fScale);
+            m_Range.SetDirection(coreVector3(vDir, 0.0f));
+            m_Range.SetAlpha    (STEP(0.0f, 0.15f, fScale));
+            m_Range.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.1f));
+            m_Range.Move();
+        }
+
+        if(m_Arrow.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
+        {
+            // 
+            m_fArrowValue.Update(-2.0f);
+
+            // 
+            if(m_fArrowValue <= 0.0f) this->DisableArrow();
+
+            // 
+            m_Arrow.SetPosition (this->GetPosition () + this->GetDirection() * 6.2f);
+            m_Arrow.SetDirection(this->GetDirection());
+            m_Arrow.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.15f));
+            m_Arrow.SetAlpha    (LERPH3(0.0f, 1.0f, m_fArrowValue));
+            m_Arrow.Move();
+        }
 
         if(m_Wind.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
         {
@@ -356,38 +443,48 @@ void cPlayer::Move()
             m_fFeelTime.Update(-1.0f);
 
             // 
-            if(m_fFeelTime > 0.0f) m_Bubble.SetAlpha(MIN(m_Bubble.GetAlpha() + 4.0f*TIME, 0.8f));
+            if(m_fFeelTime > 0.0f) m_Bubble.SetAlpha(MIN(m_Bubble.GetAlpha() + 4.0f*TIME, 1.0f));
                               else m_Bubble.SetAlpha(MAX(m_Bubble.GetAlpha() - 4.0f*TIME, 0.0f));
 
             // 
             if(!m_Bubble.GetAlpha()) this->EndFeeling();
 
             // 
+            const coreVector2 vDir = coreVector2::Direction(m_fAnimation * (1.6f*PI));
+
+            // 
             m_Bubble.SetPosition (this->GetPosition());
             m_Bubble.SetSize     (coreVector3(1.0f,1.0f,1.0f) * PLAYER_BUBBLE_SIZE * m_Bubble.GetAlpha());
-            m_Bubble.SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.1f));
+            m_Bubble.SetDirection(coreVector3(vDir, 0.0f));
+            m_Bubble.SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.2f));
             m_Bubble.Move();
         }
 
-        if(m_Shield.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
+        if(m_aShield[0].IsEnabled(CORE_OBJECT_ENABLE_MOVE))
         {
             // 
-            m_fIgnoreTime.Update(-2.0f);
+            m_fIgnoreTime.Update(-0.9f);
 
             // 
             if(m_fIgnoreTime <= 0.0f) this->EndIgnoring();
 
             // 
-            const coreVector2 vDir       = coreVector2::Direction(m_fAnimation * (0.3f*PI));
-            const coreFloat   fBounce    = 0.25f + 0.2f * m_fIgnoreTime;
-            const coreFloat   fExplosion = m_iIgnoreType ? ((1.0f - POW3(m_fIgnoreTime)) * 2.0f) : 0.0f;
+            const coreVector2 vDir    = coreVector2::Direction(m_fAnimation * (1.0f*PI));
+            const coreFloat   fBounce = m_iIgnoreType ? LERPBR(2.0f, 0.5f, m_fIgnoreTime) : LERPH3(0.0f, 0.5f, m_fIgnoreTime);
 
             // 
-            m_Shield.SetPosition   (this->GetPosition());
-            m_Shield.SetOrientation(coreVector3(vDir.x, 0.0f, vDir.y));
-            m_Shield.SetTexOffset  (coreVector2(fBounce + fExplosion, 0.0f));
-            m_Shield.SetAlpha      (MIN(POW2(m_fIgnoreTime) * 1.4f, 1.0f));
-            m_Shield.Move();
+            m_aShield[0].SetPosition   (this->GetPosition());
+            m_aShield[0].SetOrientation(coreVector3(vDir.x, 0.0f, vDir.y));
+            m_aShield[0].SetTexOffset  (coreVector2(fBounce, 0.0f));
+            m_aShield[0].SetAlpha      (LERPH3(0.0f, 1.0f, MIN(m_fIgnoreTime * 1.4f, 1.0f)));
+            m_aShield[0].Move();
+
+            // 
+            m_aShield[1].SetPosition   (m_aShield[0].GetPosition   ());
+            m_aShield[1].SetOrientation(m_aShield[0].GetOrientation() * -1.0f);
+            m_aShield[1].SetTexOffset  (m_aShield[0].GetTexOffset  ());
+            m_aShield[1].SetAlpha      (m_aShield[0].GetAlpha      ());
+            m_aShield[1].Move();
         }
 
         // 
@@ -518,6 +615,8 @@ void cPlayer::Kill(const coreBool bAnimated)
     this->EndIgnoring();
 
     // 
+    this->DisableRange();
+    this->DisableArrow();
     this->DisableWind();
     this->DisableBubble();
     this->DisableShield();
@@ -527,6 +626,11 @@ void cPlayer::Kill(const coreBool bAnimated)
     m_fInterrupt      = 0.0f;
     m_fLightningTime  = 0.0f;
     m_fLightningAngle = 0.0f;
+
+    // 
+    m_vOldDir     = coreVector2(0.0f,0.0f);
+    m_fRangeValue = 0.0f;
+    m_fArrowValue = 0.0f;
 
     // 
     if(bAnimated && this->IsEnabled(CORE_OBJECT_ENABLE_RENDER))
@@ -650,6 +754,60 @@ void cPlayer::EndIgnoring()
 
 // ****************************************************************
 // 
+void cPlayer::EnableRange()
+{
+    WARN_IF(m_Range.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    m_Range.SetAlpha(0.0f);
+
+    // 
+    m_Range.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    g_pGlow->BindObject(&m_Range);
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::DisableRange()
+{
+    if(!m_Range.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    m_Range.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    g_pGlow->UnbindObject(&m_Range);
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::EnableArrow()
+{
+    WARN_IF(m_Arrow.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    m_Arrow.SetAlpha(0.0f);
+
+    // 
+    m_Arrow.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    g_pGlow->BindObject(&m_Arrow);
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::DisableArrow()
+{
+    if(!m_Arrow.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    m_Arrow.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    g_pGlow->UnbindObject(&m_Arrow);
+}
+
+
+// ****************************************************************
+// 
 void cPlayer::EnableWind(const coreVector2 vDirection)
 {
     WARN_IF(m_Wind.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
@@ -710,14 +868,17 @@ void cPlayer::DisableBubble()
 // 
 void cPlayer::EnableShield()
 {
-    WARN_IF(m_Shield.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    WARN_IF(m_aShield[0].IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
 
-    // 
-    m_Shield.SetAlpha(0.0f);
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aShield); ++i)
+    {
+        // 
+        m_aShield[i].SetAlpha(0.0f);
 
-    // 
-    m_Shield.SetEnabled(CORE_OBJECT_ENABLE_ALL);
-    g_pGlow->BindObject(&m_Shield);
+        // 
+        m_aShield[i].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+        g_pGlow->BindObject(&m_aShield[i]);
+    }
 }
 
 
@@ -725,11 +886,14 @@ void cPlayer::EnableShield()
 // 
 void cPlayer::DisableShield()
 {
-    if(!m_Shield.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    if(!m_aShield[0].IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
 
-    // 
-    m_Shield.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
-    g_pGlow->UnbindObject(&m_Shield);
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aShield); ++i)
+    {
+        // 
+        m_aShield[i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        g_pGlow->UnbindObject(&m_aShield[i]);
+    }
 }
 
 
