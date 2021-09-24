@@ -56,13 +56,6 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
         m_aPlayer[0].SetInput(&g_aGameInput[0]);
         m_aPlayer[1].SetInput(&g_aGameInput[1]);
 
-        // 
-        m_aPlayer[0].SetArea(coreVector4(-FOREGROUND_AREA, FOREGROUND_AREA * coreVector2(-0.1f,1.0f)));
-        m_aPlayer[1].SetArea(coreVector4(-FOREGROUND_AREA * coreVector2(-0.1f,1.0f), FOREGROUND_AREA));
-
-        // 
-        g_pPostProcessing->SetSplitScreen(true);
-
         STATIC_ASSERT(GAME_PLAYERS == 2u)
     }
 
@@ -103,7 +96,7 @@ cGame::~cGame()
     for(coreUintW i = 0u; i < POST_WALLS; ++i) g_pPostProcessing->SetWallOffset(i, 0.0f);   // TODO 1: make transition smoother
     g_pPostProcessing->SetSplitScreen  (false);
     g_pPostProcessing->SetDirectionGame(coreVector2(0.0f,1.0f));   // TODO 1: make transition smoother
-    g_pPostProcessing->SetSaturationAll(1.0f);
+    g_pPostProcessing->SetSaturationAll(1.0f);   // TODO 1: make transition smoother
 
     // 
     g_pEnvironment->SetTargetDirection(ENVIRONMENT_DEFAULT_DIRECTION);

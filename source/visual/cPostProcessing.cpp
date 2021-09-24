@@ -16,6 +16,7 @@ cPostProcessing::cPostProcessing()noexcept
 , m_bSplitScreen      (false)
 , m_vDirectionConfig  (coreVector2(0.0f,1.0f))
 , m_vDirectionGame    (coreVector2(0.0f,1.0f))
+, m_avData            {}
 , m_afOffset          {}
 , m_bOffsetActive     (false)
 {
@@ -69,6 +70,9 @@ void cPostProcessing::Render()
         m_aInterior[i].DefineTexture(POST_TEXTURE_UNIT_GLOW,        g_pGlow       ->GetFrameBuffer()->GetColorTarget(0u).pTexture);
         m_aInterior[i].DefineTexture(POST_TEXTURE_UNIT_DISTORTION,  g_pDistortion ->GetFrameBuffer()->GetColorTarget(0u).pTexture);
     }
+
+    // 
+    this->__UpdateData();
 
     glDisable(GL_BLEND);
     {
@@ -292,5 +296,34 @@ void cPostProcessing::__UpdateSeparator()
         m_Separator.SetDirection(this->GetDirection());
         m_Separator.SetAlpha    (LERP(0.0f, 0.8f, fValue));
         m_Separator.Move();
+    }
+}
+
+
+// ****************************************************************
+// 
+void cPostProcessing::__UpdateData()
+{
+    if(m_bSplitScreen)
+    {
+        // 
+        for(coreUintW i = 0u; i < POST_INTERIORS; ++i)
+        {
+            m_aInterior[i].SetColor3(m_avData[i]);
+        }
+    }
+    else
+    {
+        // 
+        coreVector3 vFullData = m_avData[0];
+        for(coreUintW i = 1u; i < POST_INTERIORS; ++i)
+        {
+            vFullData.x = MIN(vFullData.x, m_avData[i].x);
+            vFullData.y = MIN(vFullData.y, m_avData[i].y);
+            vFullData.z = MAX(vFullData.z, m_avData[i].z);
+        }
+
+        // 
+        m_aInterior[0].SetColor3(vFullData);
     }
 }
