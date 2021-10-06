@@ -603,7 +603,7 @@ void cConfigMenu::Move()
         // 
         this->SaveValues();
     }
-    else if(m_DiscardButton.IsClicked())
+    else if(m_DiscardButton.IsClicked() || Core::System->GetTerminated())
     {
         // 
         this->LoadValues();
