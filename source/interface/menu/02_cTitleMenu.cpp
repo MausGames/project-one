@@ -27,7 +27,7 @@ cTitleMenu::cTitleMenu()noexcept
     m_PromptText.SetTextLanguage("PROMPT");
 
     m_aVersionText[0].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
-    m_aVersionText[0].SetPosition (coreVector2(0.0f, 0.04f));
+    m_aVersionText[0].SetPosition (coreVector2(0.0f, 0.045f));
     m_aVersionText[0].SetCenter   (coreVector2(0.0f,-0.5f));
     m_aVersionText[0].SetAlignment(coreVector2(0.0f, 1.0f));
     m_aVersionText[0].SetText     ("(c) 2010 Martin Mauersics (www.maus-games.at)");
