@@ -118,6 +118,7 @@
 #define LIVES                (5u)
 #define CONTINUES            (3u)
 #define SHIELD               (100u)
+#define BADGES               (3u)
 #define WEAPONS              (6u)
 #define SUPPORTS             (2u)
 #define EQUIP_WEAPONS        (1u)

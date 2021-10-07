@@ -90,8 +90,8 @@ public:
     void GiveFragment();
 
     // 
-    void GiveBadge(const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
-    void GiveBadge();
+    void GiveBadge(const coreUintW iBadgeIndex, const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
+    void GiveBadge(const coreUintW iBadgeIndex);
 
     // 
     inline void SetOwner(const cPlayer* pOwner) {m_pOwner = pOwner;}

@@ -33,7 +33,7 @@ cMission::cMission()noexcept
 , m_fStageSubTimeBefore (0.0f)
 , m_fStageWait          (0.0f)
 , m_pfMedalGoal         (NULL)
-, m_bBadgeGiven         (false)
+, m_iBadgeGiven         (0u)
 , m_iTakeFrom           (0u)
 , m_iTakeTo             (TAKE_MISSION)
 , m_bRepeat             (false)
@@ -167,7 +167,7 @@ void cMission::SkipStage()
     m_pfMedalGoal = NULL;
 
     // 
-    m_bBadgeGiven = false;
+    m_iBadgeGiven = 0u;
 
     // 
     m_nCollPlayerEnemy  = NULL;
@@ -258,10 +258,12 @@ void cMission::DeactivateWave()
 
 // ****************************************************************
 // 
-void cMission::GiveBadge(const coreUint8 iBadge, const coreVector3 vPosition)
+void cMission::GiveBadge(const coreUintW iIndex, const coreUint8 iBadge, const coreVector3 vPosition)
 {
-    if(m_bBadgeGiven) return;
-    m_bBadgeGiven = true;
+    ASSERT(iIndex < BADGES)
+
+    if(HAS_BIT(m_iBadgeGiven, iIndex)) return;
+    ADD_BIT(m_iBadgeGiven, iIndex)
 
     // 
     const coreUint32 iBonus = cGame::CalcBonusBadge(iBadge);
@@ -269,7 +271,7 @@ void cMission::GiveBadge(const coreUint8 iBadge, const coreVector3 vPosition)
     // 
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
-        pPlayer->GetDataTable ()->GiveBadge();
+        pPlayer->GetDataTable ()->GiveBadge(iIndex);
         pPlayer->GetScoreTable()->AddScore(iBonus, false);
     });
 

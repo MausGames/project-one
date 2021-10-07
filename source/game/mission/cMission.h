@@ -124,7 +124,7 @@ STATIC_ASSERT((MISSION_BOSSES == 2u) && (MISSION_WAVES == 10u))
 
 #define STAGE_CLEARED                          (std::all_of(m_apSquad.begin(), m_apSquad.end(), [](const cEnemySquad* pSquad) {return pSquad->IsFinished();}))
 #define STAGE_RESURRECT(s,f,t)                 {STAGE_FOREACH_ENEMY_ALL(s, pEnemy, i) {if((coreInt32(i) >= coreInt32(f)) && (coreInt32(i) <= coreInt32(t))) pEnemy->Resurrect();}); ASSERT((coreInt32(f) <= coreInt32(t)) && (coreInt32(t) < coreInt32((s)->GetNumEnemies())))}
-#define STAGE_BADGE(b,p)                       {this->GiveBadge(b, p);}
+#define STAGE_BADGE(i,b,p)                     {this->GiveBadge(i, b, p);}
 
 #define STAGE_DELAY_START                      {UNUSED STAGE_ADD_SQUAD(pDelay, cScoutEnemy, 1u) {pDelay->GetEnemy(0u)->Configure(1, COLOR_SHIP_GREY); pDelay->GetEnemy(0u)->Resurrect();});}
 #define STAGE_DELAY_END                        {m_apSquad.back()->GetEnemy(0u)->Kill(false);}
@@ -256,7 +256,7 @@ protected:
 
     const coreFloat* m_pfMedalGoal;                         // 
 
-    coreBool m_bBadgeGiven;                                 // 
+    coreUint8 m_iBadgeGiven;                                // 
 
     uCollPlayerEnemyType  m_nCollPlayerEnemy;               // 
     uCollPlayerBulletType m_nCollPlayerBullet;              // 
@@ -308,7 +308,7 @@ public:
     inline void SetMedalGoal(const coreFloat* pfMedalGoal) {m_pfMedalGoal = pfMedalGoal; ASSERT(pfMedalGoal)}
 
     // 
-    void GiveBadge(const coreUint8 iBadge, const coreVector3 vPosition);
+    void GiveBadge(const coreUintW iIndex, const coreUint8 iBadge, const coreVector3 vPosition);
 
     // 
     inline void CollPlayerEnemy (cPlayer* OUTPUT pPlayer, cEnemy*  OUTPUT pEnemy,  const coreVector3 vIntersection, const coreBool bFirstHit) {if(m_nCollPlayerEnemy)  m_nCollPlayerEnemy (pPlayer, pEnemy,  vIntersection, bFirstHit);}

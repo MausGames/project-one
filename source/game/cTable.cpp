@@ -170,9 +170,10 @@ void cDataTable::GiveFragment()
 
 // ****************************************************************
 // 
-void cDataTable::GiveBadge(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
+void cDataTable::GiveBadge(const coreUintW iBadgeIndex, const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
 {
     // 
+    ASSERT(iBadgeIndex   < BADGES)
     ASSERT(iMissionIndex < TABLE_MISSIONS)
     ASSERT(iSegmentIndex < TABLE_SEGMENTS)
     ADD_BIT(m_aiBadge[iMissionIndex], iSegmentIndex)
@@ -183,14 +184,14 @@ void cDataTable::GiveBadge(const coreUintW iMissionIndex, const coreUintW iSegme
     g_pSave->EditLocalStatsSegment(iMissionIndex, iSegmentIndex)->iBadgesEarned += 1u;
 
     // 
-    ADD_BIT(g_pSave->EditProgress()->aiBadge[iMissionIndex], iSegmentIndex)
+    ADD_BIT(g_pSave->EditProgress()->aiBadge[iMissionIndex], iBadgeIndex + BADGES * iSegmentIndex)
 }
 
-void cDataTable::GiveBadge()
+void cDataTable::GiveBadge(const coreUintW iBadgeIndex)
 {
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
-    this->GiveBadge(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
+    this->GiveBadge(iBadgeIndex, g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
 }
 
 
