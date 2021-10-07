@@ -262,6 +262,9 @@ void cEnvironment::__Reset(const coreResourceReset eInit)
 
         // re-create environment frame buffer
         m_FrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+
+        // 
+        m_MixObject.Move();
     }
     else
     {

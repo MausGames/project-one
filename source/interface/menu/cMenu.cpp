@@ -671,6 +671,7 @@ void cMenu::__Reset(const coreResourceReset eInit)
         // 
         m_MixObject.DefineTexture(0u, m_aFrameBuffer[2].GetColorTarget(0u).pTexture);
         m_MixObject.DefineTexture(1u, m_aFrameBuffer[1].GetColorTarget(0u).pTexture);
+        m_MixObject.Move();
     }
     else
     {

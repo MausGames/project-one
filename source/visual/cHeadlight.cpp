@@ -226,6 +226,6 @@ void cHeadlight::ResetFlicker()
 // reset with the resource manager
 void cHeadlight::__Reset(const coreResourceReset eInit)
 {
-    if(eInit) m_FrameBuffer.Create(g_vGameResolution * HEADLIGHT_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
-         else m_FrameBuffer.Delete();
+    if(eInit) {m_FrameBuffer.Create(g_vGameResolution * HEADLIGHT_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL); this->Move();}
+         else {m_FrameBuffer.Delete();}
 }
