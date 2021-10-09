@@ -39,8 +39,6 @@
 #define MISSION_BOSS_TO_SEGMENT(i) ((i) +  MISSION_WAVES)
 #define MISSION_WAVE_TO_SEGMENT(i) ((i))
 
-STATIC_ASSERT((MISSION_BOSSES == 2u) && (MISSION_WAVES == 10u))
-
 #define TAKE_ALWAYS  (0x00u)
 #define TAKE_MISSION (0xFFu)
 

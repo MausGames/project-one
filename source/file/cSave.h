@@ -17,6 +17,7 @@
 // TODO 4: fix _WEAPONS and _SUPPORTS defines in save and replay
 // TODO 2: disable save stats while playing replays
 // TODO 2: disable or handle save stats while in error-mission
+// TODO 3: add various static asserts for values and bitfields, on save & replay & table (e.g. STATIC_ASSERT(SEGMENTS * BADGES <= sizeof(aiBadge[0])*8u))
 
 
 // ****************************************************************

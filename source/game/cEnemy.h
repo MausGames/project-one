@@ -15,6 +15,8 @@
 // TODO 3: memory-pool for each enemy-set (if single allocations still used)
 // TODO 3: add score-value to cEnemy class, either for base, or for extra score
 // TODO 2: make sure ENEMY_STATUS_DAMAGING is used for damaging contact, and no additional checks and (duplicate) TakeDamage calls are made
+// TODO 4: get rid of ENEMY_SIZE_FACTOR, because lots of places override it directly anyway
+// TODO 4: move parent-child system to custom-enemy, if not elsewhere required
 
 
 // ****************************************************************

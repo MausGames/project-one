@@ -46,7 +46,7 @@
 // TODO 4: RETURN_NONNULL to everything which should never be null (and other attributes, both FUNC and RETURN)
 // TODO 3: check all vert shader for CORE_SHADER_OPTION_NO_ROTATION
 // TODO 5: control flow guard and buffer security check
-// TODO 1: _CORE_SSE_ try to just remove the coreMath low-precision functions
+// TODO 1: _CORE_SSE_ try to just remove the coreMath low-precision functions (macro replace ? will only work partially)
 // TODO 3: reduce number of shader-lights with static_assert
 // TODO 3: check if hole in object_sphere causes reflection issues, also check if other objects have a hole
 // TODO 3: on bosses and missions: don't move or render or test objects outside their phases (e.g. boomerangs active)
@@ -67,7 +67,7 @@
 // TODO 3: check for single-channel menu_background_black
 // TODO 3: make energy texture sharper (offline upsampling)
 // TODO 5: check for merging varyings with component = # and layoutEx (or merge manually)
-// TODO 3: use only 6 (or 8) pixel texture with nearest filtering for enemies (eneme texture can be 2-channel (maybe others too), but needs fallback handling in texture loading, and shader)
+// TODO 3: use only 6 (or 8) pixel texture with nearest filtering for enemies (enemy texture can be 2-channel (maybe others too), but needs fallback handling in texture loading, and shader)
 // TODO 1: indicator when controls are enabled again (blinking und peeping sound)
 // TODO 3: search and remove unused resources from application.cpp (+ folder)
 // TODO 3: remove game_icon.png from resource-index if not required anymore
@@ -78,10 +78,12 @@
 // TODO 3: make sure enemy bullet ClearAll is called on STAGE_DELAY
 // TODO 3: create animation offset for all gameplay objects (const coreFloat fOffset = I_TO_F(i) * (1.0f/7.0f);), try to use num-per-line + 1, what about bullets ?
 // TODO 1: make sure user folder is correctly handled for multi-user (-> corePlatform)
-// TODO 3: every boss, enemy, player-bullet-interacting object needs a volume
+// TODO 3: every boss, enemy, gameplay-objects, player-bullet-interacting object needs a volume (including all enemy-bullet types)
 // TODO 1: all sounds need IsUsable checks
 // TODO 4: look if coreUintW member variables can be made smaller (also engine)
 // TODO 1: 3d sound needs to be correct based on game orientation
+// TODO 3: skip rendering (like in pause) when update frequency is >= 2x of the refresh rate
+// TODO 4: check if glDrawBuffer(GL_NONE); is required in game code
 
 
 // ****************************************************************
@@ -166,27 +168,27 @@
 #define COLOR_HEALTH(x)      (TernaryLerp(COLOR_MENU_RED, COLOR_MENU_YELLOW, COLOR_MENU_GREEN, x))   // TODO 1: remove
 
 // shader modifiers
-#define SHADER_TRANSITION(x) "#define _P1_TRANSITION_ (" #x ") \n"   // full_transition
-#define SHADER_SHADOW(x)     "#define _P1_SHADOW_     (" #x ") \n"   // outdoor, object_ground
-#define SHADER_OVERLAYS(x)   "#define _P1_OVERLAYS_   (" #x ") \n"   // weather
-#define SHADER_SAMPLES(x)    "#define _P1_SAMPLES_    (" #x ") \n"   // ink
-#define SHADER_GLOW          "#define _P1_GLOW_       (1) \n"        // post, outdoor, object_ship
-#define SHADER_DISTORTION    "#define _P1_DISTORTION_ (1) \n"        // post
-#define SHADER_DEBUG         "#define _P1_DEBUG_      (1) \n"        // post
-#define SHADER_OBJECT3D      "#define _P1_OBJECT3D_   (1) \n"        // distortion
-#define SHADER_SINGLE        "#define _P1_SINGLE_     (1) \n"        // decal, weather
-#define SHADER_LIGHT         "#define _P1_LIGHT_      (1) \n"        // outdoor, decal
-#define SHADER_DARKNESS      "#define _P1_DARKNESS_   (1) \n"        // object_ship
-#define SHADER_BLINK         "#define _P1_BLINK_      (1) \n"        // energy, object_ship, object_meteor
-#define SHADER_FLAT          "#define _P1_FLAT_       (1) \n"        // outline, energy
-#define SHADER_BULLET        "#define _P1_BULLET_     (1) \n"        // outline, energy
-#define SHADER_SPHERIC       "#define _P1_SPHERIC_    (1) \n"        // decal, energy
-#define SHADER_INVERT        "#define _P1_INVERT_     (1) \n"        // energy
-#define SHADER_DIRECT        "#define _P1_DIRECT_     (1) \n"        // outline, energy, distortion, menu_border
-#define SHADER_RING          "#define _P1_RING_       (1) \n"        // energy
-#define SHADER_WAVE          "#define _P1_WAVE_       (1) \n"        // object
-#define SHADER_GREY          "#define _P1_GREY_       (1) \n"        // vignette
-#define SHADER_LINE          "#define _P1_LINE_       (1) \n"        // ink
+#define SHADER_TRANSITION(x) "#define _P1_TRANSITION_" " (" #x ") \n"   // full_transition
+#define SHADER_SHADOW(x)     "#define _P1_SHADOW_"     " (" #x ") \n"   // outdoor, object_ground
+#define SHADER_OVERLAYS(x)   "#define _P1_OVERLAYS_"   " (" #x ") \n"   // weather
+#define SHADER_SAMPLES(x)    "#define _P1_SAMPLES_"    " (" #x ") \n"   // ink
+#define SHADER_GLOW          "#define _P1_GLOW_"       " (1) \n"        // post, outdoor, object_ship
+#define SHADER_DISTORTION    "#define _P1_DISTORTION_" " (1) \n"        // post
+#define SHADER_DEBUG         "#define _P1_DEBUG_"      " (1) \n"        // post
+#define SHADER_OBJECT3D      "#define _P1_OBJECT3D_"   " (1) \n"        // distortion
+#define SHADER_SINGLE        "#define _P1_SINGLE_"     " (1) \n"        // decal, weather
+#define SHADER_LIGHT         "#define _P1_LIGHT_"      " (1) \n"        // outdoor, decal
+#define SHADER_DARKNESS      "#define _P1_DARKNESS_"   " (1) \n"        // object_ship
+#define SHADER_BLINK         "#define _P1_BLINK_"      " (1) \n"        // energy, object_ship, object_meteor
+#define SHADER_FLAT          "#define _P1_FLAT_"       " (1) \n"        // outline, energy
+#define SHADER_BULLET        "#define _P1_BULLET_"     " (1) \n"        // outline, energy
+#define SHADER_SPHERIC       "#define _P1_SPHERIC_"    " (1) \n"        // decal, energy
+#define SHADER_INVERT        "#define _P1_INVERT_"     " (1) \n"        // energy
+#define SHADER_DIRECT        "#define _P1_DIRECT_"     " (1) \n"        // outline, energy, distortion, menu_border
+#define SHADER_RING          "#define _P1_RING_"       " (1) \n"        // energy
+#define SHADER_WAVE          "#define _P1_WAVE_"       " (1) \n"        // object
+#define SHADER_GREY          "#define _P1_GREY_"       " (1) \n"        // vignette
+#define SHADER_LINE          "#define _P1_LINE_"       " (1) \n"        // ink
 
 // collision types
 enum eType : coreInt32

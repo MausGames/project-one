@@ -550,24 +550,28 @@ void cMenu::UpdateLanguageFont()
 const coreMap<coreString, coreString>& cMenu::GetLanguageList()
 {
     // static language list <name, path>
-    static coreMap<coreString, coreString> s_asLanguage;
-
-    if(s_asLanguage.empty())
+    static const coreMap<coreString, coreString> s_asLanguage = []()
     {
         // 
-        coreLanguage::GetAvailableLanguages(&s_asLanguage);
+        coreMap<coreString, coreString> asOutput;
+        coreLanguage::GetAvailableLanguages(&asOutput);
+
+        // 
+        if(asOutput.empty()) asOutput.emplace("MISSING", "");
 
 #if defined(_P1_DEBUG_RANDOM_)
 
         // 
-        const coreString& sRandFile = s_asLanguage.get_valuelist()[CORE_RAND_RUNTIME % s_asLanguage.size()];
+        const coreString& sRandFile = asOutput.get_valuelist()[CORE_RAND_RUNTIME % asOutput.size()];
         Core::Language->Load(sRandFile.c_str());
 
         // 
         cMenu::UpdateLanguageFont();
 
 #endif
-    }
+
+        return asOutput;
+    }();
 
     return s_asLanguage;
 }
