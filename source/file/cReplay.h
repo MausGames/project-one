@@ -69,7 +69,6 @@ public:
         coreUint64 iStartTimestamp;                                                        // 
         coreUint64 iEndTimestamp;                                                          // 
 
-        coreUint32 iBodySize;                                                              // 
         coreUint32 iFrameCount;                                                            // 
         coreUint32 iSnapshotCount;                                                         // 
         coreUint32 aiPacketCount[REPLAY_PLAYERS];                                          // 
