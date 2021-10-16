@@ -33,9 +33,9 @@ void VertexMain()
     v_av2TexCoord[0] = (a_v2LowTexCoord * v2Size + v2Offset) * c_v1TileRate;
 
     // calculate border properties
-    v_v4Interior = vec4(a_v2LowTexCoord, vec2(1.0) - a_v2LowTexCoord * u_v2TexSize);
+    v_v4Interior = vec4(a_v2LowTexCoord, vec2(1.0) - a_v2LowTexCoord * u_v2TexSize) * v4Pixel + vec4(0.001);
     v_v4Border   = vec4(vec2(24.0/1080.0), vec2(14.0/1080.0)) / v2Size.xyxy;
-    v_v4Border   = floor(v_v4Border * v4Pixel + vec4(0.001)) / v4Pixel;
+    v_v4Border   = floor(v_v4Border * v4Pixel + vec4(0.001));
 
     // 
     v_v1Factor = a_v2LowTexCoord.y * 2.2 - 0.2;
