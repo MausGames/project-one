@@ -137,9 +137,14 @@ Definitions
     #define SQRT2                 // principal square root of 2
     #define SQRT3                 // principal square root of 3
 
+    // version wrappers
+    #define CORE_GL_VERSION
+    #define CORE_GL_ES_VERSION
+
     // extension wrappers
-    #define CORE_GL_gpu_shader4
     #define CORE_GL_conservative_depth
+    #define CORE_GL_gpu_shader4
+    #define CORE_GL_sample_shading
     #define CORE_GL_shader_image_load_store
 
 Functions
@@ -152,6 +157,7 @@ Functions
     T     coreSaturate            (in T)                          // clamp values between 0.0 and 1.0
     T     coreLinearStep          (in T, in T, in T)              // linear interpolation between 0.0 and 1.0
     T     coreSign                (in T)                          // extract the sign without returning 0.0
+    S     coreIsNan               (in T)                          // test if the parameter is not a number
     vec3  coreRgbToHsv            (in vec3)                       // RGB to HSV conversion
     vec3  coreHsvToRgb            (in vec3)                       // HSV to RGB conversion
     vec3  coreRgbToYiq            (in vec3)                       // RGB to YIQ conversion   (BT.601, NTSC)

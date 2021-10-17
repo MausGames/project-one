@@ -270,7 +270,7 @@ cRainWater::cRainWater(const coreHashString& sSkyTexture)noexcept
 , m_fFallDelay (0.0f)
 {
     // 
-    m_WaveMap.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGBA16);
+    m_WaveMap.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, DEFINED(_CORE_GLES_) ? CORE_TEXTURE_SPEC_RGBA8 : CORE_TEXTURE_SPEC_RGBA16);
     m_WaveMap.Create(g_vGameResolution * RAIN_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     // 

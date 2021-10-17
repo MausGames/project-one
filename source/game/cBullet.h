@@ -801,7 +801,7 @@ template <typename T> cBulletManager::sBulletSet<T>::sBulletSet(cOutline* pOutli
 
 // ****************************************************************
 // destructor
-template <typename T> cBulletManager::sBulletSet<T>::~sBulletSet()
+template <typename T> cBulletManager::sBulletSet<T>::sBulletSet::~sBulletSet()
 {
     // 
     T::GlobalExit();

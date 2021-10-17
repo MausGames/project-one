@@ -82,6 +82,8 @@
 // TODO 4: look if coreUintW member variables can be made smaller (also engine)
 // TODO 3: skip rendering (like in pause) when update frequency is >= 2x of the refresh rate
 // TODO 4: check if glDrawBuffer(GL_NONE); is required in game code
+// TODO 3: for uneven resolutions, some objects need g_vGameResolution.AspectRatio() (on both axes, with max(1.0f)): menu transition, postprocessing
+// TODO 4: change arrays of structs to structs of arrays where possible (also in engine)
 
 
 // ****************************************************************

@@ -476,7 +476,7 @@ template <typename T> cEnemyManager::sEnemySet<T>::sEnemySet()noexcept
 
 // ****************************************************************
 // destructor
-template <typename T> cEnemyManager::sEnemySet<T>::~sEnemySet()
+template <typename T> cEnemyManager::sEnemySet<T>::sEnemySet::~sEnemySet()
 {
     // 
     FOR_EACH(it, apEnemyPool)
