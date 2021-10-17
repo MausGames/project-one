@@ -38,7 +38,7 @@
 #define OUTDOOR_RANGE          (OUTDOOR_WIDTH * (OUTDOOR_VIEW + 1u))                      // vertices used in a draw call
 #define OUTDOOR_COUNT          (OUTDOOR_BLOCKS_X * OUTDOOR_VIEW * OUTDOOR_PER_INDICES)    // indices to draw
 
-#define OUTDOOR_SCALE_FACTOR   (0.5f)                                                     // frame buffer resolution factor
+#define OUTDOOR_SCALE_FACTOR   (SCALE_FACTOR)                                             // frame buffer resolution factor
 
 STATIC_ASSERT((OUTDOOR_WIDTH == OUTDOOR_VIEW) && (OUTDOOR_WIDTH % 2u))
 

@@ -19,8 +19,8 @@
 
 // ****************************************************************
 // 
-#define HEADLIGHT_SCALE_FACTOR (0.5f)   // frame buffer resolution factor
-#define HEADLIGHT_INTENSITY    (1.5f)   // 
+#define HEADLIGHT_SCALE_FACTOR (SCALE_FACTOR)   // frame buffer resolution factor
+#define HEADLIGHT_INTENSITY    (1.5f)           // 
 
 
 // ****************************************************************

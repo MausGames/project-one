@@ -39,7 +39,6 @@
 // TODO 3: clean mixing shader defines (x >= y) and (defined(x)) checks (also in engine)
 // TODO 3: check for 16-bit float shader usage
 // TODO 2: program enable has to be checked (if(x.Enable()){}) everywhere
-// TODO 3: change 0.5 FB factors from 0.5 to 0.4 (-36% pixel) if CORE_GL_SUPPORT(ARB_texture_rg) not available ? on low quality ?
 // TODO 4: unify "forward" and "transform" comments in shaders
 // TODO 3: add own coreRand for various random things which may affect feeling (screen shake), and reset on boss-start
 // TODO 3: check issues with all the F&& functions (especially in boss.h and mission.h), also check Core engine, use force_inline on small functions
@@ -126,6 +125,7 @@
 #define EQUIP_SUPPORTS       (1u)
 #define FRAMERATE_MIN        (60.0f)
 #define FRAMERATE_MAX        (240.0f)
+#define SCALE_FACTOR         (CORE_GL_SUPPORT(ARB_texture_rg) ? 0.5f : 0.4f)
 #define CAMERA_POSITION      (coreVector3(0.0f, 0.0f, 110.0f))
 #define CAMERA_DIRECTION     (coreVector3(0.0f, 0.0f,  -1.0f))
 #define CAMERA_ORIENTATION   (coreVector3(0.0f, 1.0f,   0.0f))
