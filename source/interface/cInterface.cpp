@@ -146,7 +146,7 @@ void cInterface::Render()
 {
     // 
     const coreMatrix4 mOldOrtho = Core::Graphics->GetOrtho();
-    if(g_pPostProcessing->GetSize().x < 0.0f) c_cast<coreMatrix4&>(Core::Graphics->GetOrtho()) = coreMatrix4::Scaling(IsHorizontal(g_vHudDirection) ? coreVector3(1.0f,-1.0f,1.0f) : coreVector3(-1.0f,1.0f,1.0f)) * mOldOrtho;
+    if(g_pPostProcessing->IsMirrored()) c_cast<coreMatrix4&>(Core::Graphics->GetOrtho()) = coreMatrix4::Scaling(IsHorizontal(g_vHudDirection) ? coreVector3(1.0f,-1.0f,1.0f) : coreVector3(-1.0f,1.0f,1.0f)) * mOldOrtho;
 
     if(m_fAlphaAll)
     {
@@ -217,7 +217,7 @@ void cInterface::Render()
     }
 
     // 
-    if(g_pPostProcessing->GetSize().x < 0.0f) c_cast<coreMatrix4&>(Core::Graphics->GetOrtho()) = mOldOrtho;
+    if(g_pPostProcessing->IsMirrored()) c_cast<coreMatrix4&>(Core::Graphics->GetOrtho()) = mOldOrtho;
 }
 
 

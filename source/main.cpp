@@ -31,6 +31,7 @@ static coreDouble s_dLogicalTime  = 0.0;   // logical frame time (simulation rat
 static coreDouble s_dPhysicalTime = 0.0;   // physical frame time (display rate)
 
 static void LockFramerate();               // lock frame rate and override frame time
+static void UpdateListener();              // 
 static void ReshapeGame();                 // reshape and resize game
 static void DebugGame();                   // debug and test game
 
@@ -46,8 +47,7 @@ void CoreApp::Init()
     Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 50.0f, 500.0f);
 
     // set listener to default values
-    Core::Audio->SetListener(coreVector3(0.0f,0.0f,10.0f), coreVector3(0.0f,0.0f,0.0f),
-                             coreVector3(0.0f,0.0f,-1.0f), coreVector3(0.0f,1.0f,0.0f));
+    Core::Audio->SetListener(LISTENER_POSITION, LISTENER_VELOCITY, coreVector3(0.0f,0.0f,-1.0f), coreVector3(0.0f,1.0f,0.0f));
 
     // load configuration
     LoadConfig();
@@ -235,6 +235,9 @@ void CoreApp::Move()
     }
     Core::Debug->MeasureEnd("Move");
 
+    // 
+    UpdateListener();
+
     // debug and test game
     if(Core::Debug->IsEnabled()) DebugGame();
 }
@@ -336,7 +339,20 @@ static void LockFramerate()
 
     // override frame time
     if(TIME) c_cast<coreFloat&>(TIME) = coreFloat(s_dLogicalTime);
+}
 
+
+// ****************************************************************
+// 
+static void UpdateListener()
+{
+    // 
+    const coreFloat   fSide = g_pPostProcessing->IsMirrored() ? 1.0f : -1.0f;
+    const coreVector2 vGame = g_pPostProcessing->GetDirection();
+    const coreVector2 vHud  = g_vHudDirection;
+
+    // 
+    Core::Audio->SetListener(LISTENER_POSITION, LISTENER_VELOCITY, coreVector3(0.0f, 0.0f, fSide), coreVector3(MapToAxisInv(vGame, vHud), 0.0f));
 }
 
 

@@ -296,8 +296,8 @@ void UpdateInput()
         {
             // 
             const coreVector2 vGame  = g_pPostProcessing->GetDirection();
-            const coreVector2 vHud   = g_vHudDirection.InvertedX();
-            const coreVector2 vFinal = MapToAxis(vGame, vHud);
+            const coreVector2 vHud   = g_vHudDirection;
+            const coreVector2 vFinal = MapToAxisInv(vGame, vHud);
             ASSERT(vFinal.IsNormalized())
 
             // 
@@ -305,7 +305,7 @@ void UpdateInput()
             pInput->vMove = pInput->vMove.NormalizedUnsafe();
         }
 
-        if(g_pPostProcessing->GetSize().x < 0.0f)
+        if(g_pPostProcessing->IsMirrored())
         {
             // 
             pInput->vMove = pInput->vMove.InvertedX();

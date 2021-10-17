@@ -72,6 +72,9 @@ public:
     void UpdateLayout();
 
     // 
+    inline coreBool IsMirrored()const {return (this->GetSize().x < 0.0f);}
+
+    // 
     void        SetWallOpacity  (const coreFloat   fOpacity);
     inline void SetWallOffset   (const coreUintW   iIndex, const coreFloat fOffset)     {ASSERT(iIndex < POST_WALLS) m_afOffset[iIndex] = fOffset; m_bOffsetActive = true;}
     inline void SetSplitScreen  (const coreBool    bSplitScreen)                        {m_bSplitScreen   = bSplitScreen;}

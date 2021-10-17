@@ -81,7 +81,6 @@
 // TODO 3: every boss, enemy, gameplay-objects, player-bullet-interacting object needs a volume (including all enemy-bullet types)
 // TODO 1: all sounds need IsUsable checks
 // TODO 4: look if coreUintW member variables can be made smaller (also engine)
-// TODO 1: 3d sound needs to be correct based on game orientation
 // TODO 3: skip rendering (like in pause) when update frequency is >= 2x of the refresh rate
 // TODO 4: check if glDrawBuffer(GL_NONE); is required in game code
 
@@ -130,6 +129,8 @@
 #define CAMERA_POSITION      (coreVector3(0.0f, 0.0f, 110.0f))
 #define CAMERA_DIRECTION     (coreVector3(0.0f, 0.0f,  -1.0f))
 #define CAMERA_ORIENTATION   (coreVector3(0.0f, 1.0f,   0.0f))
+#define LISTENER_POSITION    (coreVector3(0.0f, 0.0f,  10.0f))
+#define LISTENER_VELOCITY    (coreVector3(0.0f, 0.0f,   0.0f))
 #define LIGHT_DIRECTION      (coreVector3(0.583953857f, -0.642349243f, -0.496360779f))
 
 // color values
