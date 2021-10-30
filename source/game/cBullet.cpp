@@ -847,6 +847,7 @@ cFlipBullet::cFlipBullet()noexcept
 {
     // load object resources
     this->DefineModel  ("bullet_spear.md3");
+    this->DefineVolume ("bullet_flip_volume.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_program");
 
