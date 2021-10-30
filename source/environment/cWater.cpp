@@ -198,14 +198,12 @@ void cWater::UpdateDepth(cOutdoor* pOutdoor, const coreList<coreBatchList*>& apG
         // fill depth frame buffer
         m_Depth.StartDraw();
         {
-            glDepthFunc (GL_ALWAYS);   // better performance than clear
-            glDrawBuffer(GL_NONE);
+            glDepthFunc(GL_ALWAYS);   // better performance than clear
             {
                 // render the outdoor-surface
                 pOutdoor->RenderDepth();
             }
-            glDepthFunc (GL_LEQUAL);
-            glDrawBuffer(GL_COLOR_ATTACHMENT0);
+            glDepthFunc(GL_LEQUAL);
         }
     }
     else m_Depth.Clear(CORE_FRAMEBUFFER_TARGET_DEPTH);
