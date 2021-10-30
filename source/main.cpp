@@ -26,14 +26,14 @@ STATIC_MEMORY(cEnvironment,    g_pEnvironment)
 STATIC_MEMORY(cMenu,           g_pMenu)
 STATIC_MEMORY(cGame,           g_pGame)
 
-static coreUint64 s_iOldPerfTime  = 0u;    // last measured high-precision time value
-static coreDouble s_dLogicalTime  = 0.0;   // logical frame time (simulation rate)
-static coreDouble s_dPhysicalTime = 0.0;   // physical frame time (display rate)
+static coreProtect<coreUint64> s_iOldPerfTime  = 0u;    // last measured high-precision time value
+static coreProtect<coreDouble> s_dLogicalTime  = 0.0;   // logical frame time (simulation rate)
+static coreProtect<coreDouble> s_dPhysicalTime = 0.0;   // physical frame time (display rate)
 
-static void LockFramerate();               // lock frame rate and override frame time
-static void UpdateListener();              // 
-static void ReshapeGame();                 // reshape and resize game
-static void DebugGame();                   // debug and test game
+static void LockFramerate();                            // lock frame rate and override frame time
+static void UpdateListener();                           // 
+static void ReshapeGame();                              // reshape and resize game
+static void DebugGame();                                // debug and test game
 
 
 // ****************************************************************

@@ -33,7 +33,6 @@
 // TODO 5: implement static/coherent branching interface instead of many shader-permutations ? (maybe only in situations with frequent switching)
 // TODO 3: use single-channel texture where possible
 // TODO 5: menu optimization by caching into framebuffer (general class for leaderboard, options, etc.)
-// TODO 3: protect main (LockFramerate)
 // TODO 3: check all shaders if alpha is required
 // TODO 4: full initializer lists everywhere (don't forget parent classes) (also in other projects)
 // TODO 3: clean mixing shader defines (x >= y) and (defined(x)) checks (also in engine)
