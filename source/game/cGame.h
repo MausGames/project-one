@@ -84,6 +84,18 @@ static constexpr coreInt32 __GAME_MISSION_LIST_MAIN[] =
     cNoMission     ::ID
 };
 
+static constexpr coreInt32 __GAME_MISSION_LIST_BONUS1[] =
+{
+    cBonus1Mission::ID,
+    cNoMission    ::ID
+};
+
+static constexpr coreInt32 __GAME_MISSION_LIST_BONUS2[] =
+{
+    cBonus2Mission::ID,
+    cNoMission    ::ID
+};
+
 static constexpr coreInt32 __GAME_MISSION_LIST_ERROR[] =
 {
     cErrorMission::ID,

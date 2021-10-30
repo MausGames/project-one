@@ -311,6 +311,8 @@ void cGame::LoadMissionID(const coreInt32 iID, const coreUint8 iTakeFrom, const 
     case cMuscusMission ::ID: m_pCurMission = new cMuscusMission (); break;
     case cAterMission   ::ID: m_pCurMission = new cAterMission   (); break;
     case cIntroMission  ::ID: m_pCurMission = new cIntroMission  (); break;
+    case cBonus1Mission ::ID: m_pCurMission = new cBonus1Mission (); break;
+    case cBonus2Mission ::ID: m_pCurMission = new cBonus2Mission (); break;
     case cErrorMission  ::ID: m_pCurMission = new cErrorMission  (); break;
     case cDemoMission   ::ID: m_pCurMission = new cDemoMission   (); break;
     }

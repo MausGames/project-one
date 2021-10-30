@@ -36,8 +36,10 @@ target_sources(
     ${BASE_DIRECTORY}/source/game/mission/07_cMuscusMission_setup.cpp
     ${BASE_DIRECTORY}/source/game/mission/08_cAterMission_setup.cpp
     ${BASE_DIRECTORY}/source/game/mission/99_cIntroMission_setup.cpp
-    ${BASE_DIRECTORY}/source/game/mission/AA_cErrorMission_setup.cpp
-    ${BASE_DIRECTORY}/source/game/mission/BB_cDemoMission_setup.cpp
+    ${BASE_DIRECTORY}/source/game/mission/A1_cBonus1Mission_setup.cpp
+    ${BASE_DIRECTORY}/source/game/mission/A2_cBonus2Mission_setup.cpp
+    ${BASE_DIRECTORY}/source/game/mission/B1_cErrorMission_setup.cpp
+    ${BASE_DIRECTORY}/source/game/mission/B2_cDemoMission_setup.cpp
     ${BASE_DIRECTORY}/source/game/mission/cMission.cpp
     ${BASE_DIRECTORY}/source/game/cBullet.cpp
     ${BASE_DIRECTORY}/source/game/cCrash.cpp

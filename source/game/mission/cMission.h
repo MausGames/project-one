@@ -895,6 +895,48 @@ private:
 
 
 // ****************************************************************
+// Bonus1 mission class
+class cBonus1Mission final : public cMission
+{
+private:
+    cProjectOneBoss m_ProjectOne;   // 
+
+
+public:
+    cBonus1Mission()noexcept;
+
+    DISABLE_COPY(cBonus1Mission)
+    ASSIGN_ID(101, "Bonus1")
+
+
+private:
+    // execute own routines
+    void __SetupOwn()final;
+};
+
+
+// ****************************************************************
+// Bonus2 mission class
+class cBonus2Mission final : public cMission
+{
+private:
+    cProjectOneBoss m_ProjectOne;   // 
+
+
+public:
+    cBonus2Mission()noexcept;
+
+    DISABLE_COPY(cBonus2Mission)
+    ASSIGN_ID(102, "Bonus2")
+
+
+private:
+    // execute own routines
+    void __SetupOwn()final;
+};
+
+
+// ****************************************************************
 // Error mission class
 class cErrorMission final : public cMission
 {
@@ -906,7 +948,7 @@ public:
     cErrorMission()noexcept;
 
     DISABLE_COPY(cErrorMission)
-    ASSIGN_ID(100, "Error")
+    ASSIGN_ID(201, "Error")
 
 
 private:
@@ -927,7 +969,7 @@ public:
     cDemoMission()noexcept;
 
     DISABLE_COPY(cDemoMission)
-    ASSIGN_ID(101, "Demo")
+    ASSIGN_ID(202, "Demo")
 
 
 private:
