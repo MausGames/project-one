@@ -325,12 +325,8 @@ static void LockFramerate()
             const coreUint32 iSleep = F_TO_UI((s_dPhysicalTime - dDifference) * 1000.0);
             if(iSleep) SDL_Delay(iSleep);
 
-        #if defined(_CORE_SSE_)
-
-            // processor level spinning
-            else _mm_pause();
-
-        #endif
+            // 
+            else CORE_SPINLOCK_YIELD
         }
 
         // save last high-precision time value
@@ -384,7 +380,7 @@ static void DebugGame()
             sGameOptions oOptions = {};
             oOptions.iType       = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(X), CORE_INPUT_HOLD) ? GAME_TYPE_COOP : GAME_TYPE_SOLO;
             oOptions.iMode       = GAME_MODE_STANDARD;
-            oOptions.iDifficulty = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(V), CORE_INPUT_HOLD) ? GAME_DIFFICULTY_EASY : GAME_DIFFICULTY_HARD;
+            oOptions.iDifficulty = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(V), CORE_INPUT_HOLD) ? GAME_DIFFICULTY_HARD : GAME_DIFFICULTY_NORMAL;
             for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
             {
                 oOptions.aaiWeapon [i][0] = cRayWeapon::ID;

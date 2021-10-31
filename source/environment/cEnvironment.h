@@ -11,7 +11,6 @@
 #define _P1_GUARD_ENVIRONMENT_H_
 
 // TODO 3: render depth-quads or use scissor test (tested: works bad, no gain) or stencil test on unused background areas (for transition!)
-// TODO 2: currently after changing the background there is no Background::Move before the first Render
 // TODO 3: separate culling between normal rendering and shadow, to improve efficiency (though this would update instancing buffer again ?)
 // TODO 2: transition is reset when resizing window
 // TODO 3: different background than cNoBackground on invalid ID (error background ?)

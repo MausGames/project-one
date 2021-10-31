@@ -19,7 +19,7 @@ varying vec3  v_av3ShipNormal;   // simplified normal vector
 
 void FragmentMain()
 {
-#if (_CORE_QUALITY_) >= 1
+#if (_CORE_QUALITY_ >= 1)
 
     // evaluate shader per sample
     CORE_SAMPLE_SHADING

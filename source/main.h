@@ -45,7 +45,7 @@
 // TODO 3: check all vert shader for CORE_SHADER_OPTION_NO_ROTATION
 // TODO 5: control flow guard and buffer security check
 // TODO 1: _CORE_SSE_ try to just remove the coreMath low-precision functions (macro replace ? will only work partially)
-// TODO 3: reduce number of shader-lights with static_assert
+// TODO 3: reduce number of shader-lights with static_assert, change something like that into static config
 // TODO 3: check if hole in object_sphere causes reflection issues, also check if other objects have a hole
 // TODO 3: on bosses and missions: don't move or render or test objects outside their phases (e.g. boomerangs active)
 // TODO 3: make sure everything with at least 4 instances uses batch-lists
@@ -65,7 +65,6 @@
 // TODO 3: check for single-channel menu_background_black
 // TODO 3: make energy texture sharper (offline upsampling)
 // TODO 5: check for merging varyings with component = # and layoutEx (or merge manually)
-// TODO 3: use only 6 (or 8) pixel texture with nearest filtering for enemies (enemy texture can be 2-channel (maybe others too), but needs fallback handling in texture loading, and shader)
 // TODO 1: indicator when controls are enabled again (blinking und peeping sound)
 // TODO 3: search and remove unused resources from application.cpp (+ folder)
 // TODO 3: remove game_icon.png from resource-index if not required anymore
@@ -117,7 +116,7 @@
 #define SEGMENTS             (BOSSES + WAVES)
 #define LIVES                (5u)
 #define CONTINUES            (3u)
-#define SHIELD               (100u)
+#define SHIELD               (20u)
 #define BADGES               (3u)
 #define WEAPONS              (6u)
 #define SUPPORTS             (2u)
@@ -126,12 +125,12 @@
 #define FRAMERATE_MIN        (60.0f)
 #define FRAMERATE_MAX        (240.0f)
 #define SCALE_FACTOR         (CORE_GL_SUPPORT(ARB_texture_rg) ? 0.5f : 0.4f)
-#define CAMERA_POSITION      (coreVector3(0.0f, 0.0f, 110.0f))
-#define CAMERA_DIRECTION     (coreVector3(0.0f, 0.0f,  -1.0f))
-#define CAMERA_ORIENTATION   (coreVector3(0.0f, 1.0f,   0.0f))
-#define LISTENER_POSITION    (coreVector3(0.0f, 0.0f,  10.0f))
-#define LISTENER_VELOCITY    (coreVector3(0.0f, 0.0f,   0.0f))
-#define LIGHT_DIRECTION      (coreVector3(0.583953857f, -0.642349243f, -0.496360779f))
+#define CAMERA_POSITION      (coreVector3(0.0f,  0.0f,  1.0f) * 110.0f)
+#define CAMERA_DIRECTION     (coreVector3(0.0f,  0.0f, -1.0f))
+#define CAMERA_ORIENTATION   (coreVector3(0.0f,  1.0f,  0.0f))
+#define LISTENER_POSITION    (coreVector3(0.0f,  0.0f,  1.0f) * 10.0f)
+#define LISTENER_VELOCITY    (coreVector3(0.0f,  0.0f,  0.0f))
+#define LIGHT_DIRECTION      (coreVector3(1.0f, -1.1f, -0.85f).Normalized())   // (0.583957136f, -0.642352879f, -0.496363580f)
 
 // color values
 #define COLOR_MENU_WHITE     (coreVector3(1.000f, 1.000f, 1.000f) * MENU_CONTRAST_WHITE)

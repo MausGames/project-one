@@ -14,7 +14,7 @@
 // TODO 5: should low quality option also affect ship models, or vegetation density, or sprite density, or FB resolution ?
 // TODO 5: don't input-check inactive input-sets in multiplayer
 // TODO 1: default input should differ between keyboard and joystick, and between sets
-// TODO 5: SDL_JoystickCurrentPowerLevel
+// TODO 3: SDL_JoystickCurrentPowerLevel (will it disconnect automatically if empty (triggering focus-loss event), or is manual checking required ?)
 // TODO 3: AnyButton should not get triggered by g_MenuInput.bScreenshot (in engine ?)
 
 

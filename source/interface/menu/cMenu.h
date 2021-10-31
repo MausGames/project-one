@@ -32,6 +32,9 @@
 // TODO 3: show target FPS in config menu (speed x update rate)
 // TODO 3: when switching resolution, and confirming by returning, the transition is broken
 // TODO 3: when switching resolution, the next mouse click is not recognized (no press even is coming from SDL, only the release event)
+// TODO 3: swapping controls should swap buttons visually
+// TODO 3: context specific controller button icons on top of J0 J1 etc.
+// TODO 3: in config menu, switchboxes flicker when discarding config
 
 
 // ****************************************************************

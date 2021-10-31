@@ -17,6 +17,8 @@
 // TODO 3: add in-game hint for roll-cooldown end ((just) acoustic)
 // TODO 3: correct reverse-tracking when hitting the walls (position correction) ? only for 45degree, also on other code locations ?
 // TODO 3: when applying force with (all) objects (collision with container) always quantize 4 or 8, but not in general (wind)
+// TODO 4: remove dark shading resources, if not required anymore (maybe for bonus phases)
+// TODO 3: add more delay to bubble/feeling (to stay longer invincible after bubble disappeared)
 
 
 // ****************************************************************

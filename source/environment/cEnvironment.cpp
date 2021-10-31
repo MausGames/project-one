@@ -141,8 +141,7 @@ void cEnvironment::Move()
     if(m_TransitionTime.GetStatus())
     {
         // update transition and move old background (do not update while new background is still loading)
-        if(m_bActive && (!Core::Manager::Resource->IsLoading() || (m_TransitionTime.GetValue(CORE_TIMER_GET_NORMAL) > 0.0f)) &&
-           m_TransitionTime.Update(1.0f))
+        if(m_bActive && (!Core::Manager::Resource->IsLoading() || (m_TransitionTime.GetValue(CORE_TIMER_GET_NORMAL) > 0.0f)) && m_TransitionTime.Update(1.0f))
         {
             // delete old background
             m_MixObject.DefineTexture(0u, NULL);

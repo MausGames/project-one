@@ -12,7 +12,7 @@
 // ****************************************************************
 // constructor
 cGameMenu::cGameMenu()noexcept
-: coreMenu(SURFACE_GAME_MAX, SURFACE_GAME_STANDARD)
+: coreMenu (SURFACE_GAME_MAX, SURFACE_GAME_STANDARD)
 {
     // create menu objects
     m_DirectoryBackground.DefineTexture(0u, "menu_background_black.png");

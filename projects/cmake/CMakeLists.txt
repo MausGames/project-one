@@ -12,8 +12,6 @@ set_target_properties(
     C_STANDARD 11
     CXX_STANDARD 20
     DEBUG_POSTFIX _debug
-    SUFFIX .elf
-    RUNTIME_OUTPUT_DIRECTORY ${BASE_DIRECTORY}/executable/bin/linux_x86_64/
 )
 
 
@@ -91,3 +89,26 @@ target_link_libraries(
     ProjectOne PRIVATE
     CoreEngine
 )
+
+
+if(EMSCRIPTEN)
+
+
+    set_target_properties(
+        ProjectOne PROPERTIES
+        SUFFIX .html
+        RUNTIME_OUTPUT_DIRECTORY ${BASE_DIRECTORY}/executable/bin/emscripten/
+    )
+
+
+else()
+
+
+    set_target_properties(
+        ProjectOne PROPERTIES
+        SUFFIX .elf
+        RUNTIME_OUTPUT_DIRECTORY ${BASE_DIRECTORY}/executable/bin/linux_x86_64/
+    )
+
+
+endif()

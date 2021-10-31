@@ -9,7 +9,7 @@
 
 
 // constant values
-const vec3 c_v3LightDir = vec3(-0.583953857, -0.642349243, 0.496360779);   // overridden light direction
+const vec3 c_v3LightDir = vec3(-0.583957136, -0.642352879, 0.496363580);   // overridden light direction
 
 
 void FragmentMain()

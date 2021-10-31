@@ -30,7 +30,7 @@ cPlayer::cPlayer()noexcept
 , m_iMaxShield      (0)
 , m_iCurShield      (0)
 , m_fAnimation      (0.0f)
-, m_vOldDir         (coreVector2(0.0f,0.0f))
+, m_vOldDir         (coreVector2(0.0f,1.0f))
 , m_fRangeValue     (0.0f)
 , m_fArrowValue     (0.0f)
 {
@@ -639,7 +639,7 @@ void cPlayer::Kill(const coreBool bAnimated)
     m_fLightningAngle = 0.0f;
 
     // 
-    m_vOldDir     = coreVector2(0.0f,0.0f);
+    m_vOldDir     = coreVector2(0.0f,1.0f);
     m_fRangeValue = 0.0f;
     m_fArrowValue = 0.0f;
 

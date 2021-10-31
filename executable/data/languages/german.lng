@@ -101,7 +101,7 @@ $QUESTION_EXIT_GAME = Spiel verlassen ?
 $QUESTION_SAVE = Änderungen speichern ?
 $MAPPING = Neue Taste
 
-$DEFEAT_GAMEOVER = Game Over
+$DEFEAT_GAMEOVER = GAME OVER
 $DEFEAT_CONTINUE = Weiter ?
 
 $INPUT_KEYBOARD = Tastatur
