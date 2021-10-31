@@ -233,11 +233,11 @@ void cShip::DefaultMultiateLerp(const coreFloat fFromAngle, const coreFloat fToA
 coreInt32 cShip::_TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2 vImpact)
 {
     // 
-    const coreInt32 iClamped = CLAMP(iDamage, m_iCurHealth - m_iMaxHealth, m_iCurHealth);
-    m_iCurHealth -= iClamped;
+    const coreInt32 iHealthDamage = CLAMP(iDamage, m_iCurHealth - m_iMaxHealth, m_iCurHealth);
+    m_iCurHealth -= iHealthDamage;
 
     // 
-    return iClamped;
+    return iHealthDamage;
 }
 
 

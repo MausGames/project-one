@@ -96,6 +96,9 @@ private:
 
     coreFlow m_fDesaturate;                                  // 
 
+    coreProtect<coreInt32> m_iMaxShield;                     // 
+    coreProtect<coreInt32> m_iCurShield;                     // 
+
     cDataTable  m_DataTable;                                 // 
     cScoreTable m_ScoreTable;                                // 
 
@@ -198,14 +201,18 @@ public:
     inline void SetSpeed     (const coreFloat   fSpeed)      {m_fSpeed      = fSpeed;}
     inline void SetInterrupt (const coreFloat   fInterrupt)  {m_fInterrupt  = fInterrupt;}
     inline void SetDesaturate(const coreFloat   fDesaturate) {m_fDesaturate = fDesaturate;}
+    inline void SetCurShield (const coreUint8   iCurShield)  {m_iCurShield  = iCurShield;}
 
     // get object properties
-    inline const sGameInput*  GetInput     ()const {ASSERT(m_pInput) return m_pInput;}
-    inline const coreVector4& GetArea      ()const {return m_vArea;}
-    inline const coreVector2& GetForce     ()const {return m_vForce;}
-    inline const coreFloat&   GetSpeed     ()const {return m_fSpeed;}
-    inline const coreFloat&   GetInterrupt ()const {return m_fInterrupt;}
-    inline const coreFloat&   GetDesaturate()const {return m_fDesaturate;}
+    inline const sGameInput*  GetInput       ()const {ASSERT(m_pInput) return m_pInput;}
+    inline const coreVector4& GetArea        ()const {return m_vArea;}
+    inline const coreVector2& GetForce       ()const {return m_vForce;}
+    inline const coreFloat&   GetSpeed       ()const {return m_fSpeed;}
+    inline const coreFloat&   GetInterrupt   ()const {return m_fInterrupt;}
+    inline const coreFloat&   GetDesaturate  ()const {return m_fDesaturate;}
+    inline       coreInt32    GetMaxShield   ()const {return m_iMaxShield;}
+    inline       coreInt32    GetCurShield   ()const {return m_iCurShield;}
+    inline       coreFloat    GetCurShieldPct()const {return I_TO_F(m_iCurShield) * RCP(I_TO_F(m_iMaxShield));}
 
     // 
     template <typename F> static FORCE_INLINE void TestCollision(const ePlayerTest eTest, const coreInt32 iType,        F&& nCallback);   // [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3 vIntersection, const coreBool bFirstHit) -> void

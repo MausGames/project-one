@@ -27,6 +27,8 @@ cPlayer::cPlayer()noexcept
 , m_fLightningTime  (0.0f)
 , m_fLightningAngle (0.0f)
 , m_fDesaturate     (0.0f)
+, m_iMaxShield      (0)
+, m_iCurShield      (0)
 , m_fAnimation      (0.0f)
 , m_vOldDir         (coreVector2(0.0f,0.0f))
 , m_fRangeValue     (0.0f)
@@ -528,21 +530,27 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
 {
     if(iDamage > 0)
     {
+        constexpr coreInt32 iReplacement = 1;
+
         // 
         m_ScoreTable.CancelCooldown();
 
         // 
-        const coreInt32 iTaken = this->_TakeDamage(1, iElement, vImpact);
+        const coreInt32 iShieldDamage = CLAMP(iReplacement, m_iCurShield - m_iMaxShield, m_iCurShield);
+        m_iCurShield -= iShieldDamage;
+
+        // 
+        const coreInt32 iTaken = this->_TakeDamage(iReplacement - iShieldDamage, iElement, vImpact) + iShieldDamage;
 
         if(m_iCurHealth)
         {
             // 
             if(!this->IsDarkShading()) this->RefreshColor();
 
-            if(HAS_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED))
+            if(iShieldDamage)
             {
                 // 
-                this->StartIgnoring((m_iCurHealth == 1) ? 1u : 0u);
+                this->StartIgnoring(m_iCurShield ? 0u : 1u);
             }
             else
             {
@@ -553,22 +561,22 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
 
             // 
             m_fInterrupt = 0.0f;
-
-            // 
-            m_DataTable.EditCounterTotal  ()->iDamageTaken += iTaken;
-            m_DataTable.EditCounterMission()->iDamageTaken += iTaken;
-            m_DataTable.EditCounterSegment()->iDamageTaken += iTaken;
-
-            // 
-            g_pSave->EditGlobalStats      ()->iDamageTaken += iTaken;
-            g_pSave->EditLocalStatsMission()->iDamageTaken += iTaken;
-            g_pSave->EditLocalStatsSegment()->iDamageTaken += iTaken;
         }
         else
         {
             // 
             this->Kill(true);
         }
+
+        // 
+        m_DataTable.EditCounterTotal  ()->iDamageTaken += iTaken;
+        m_DataTable.EditCounterMission()->iDamageTaken += iTaken;
+        m_DataTable.EditCounterSegment()->iDamageTaken += iTaken;
+
+        // 
+        g_pSave->EditGlobalStats      ()->iDamageTaken += iTaken;
+        g_pSave->EditLocalStatsMission()->iDamageTaken += iTaken;
+        g_pSave->EditLocalStatsSegment()->iDamageTaken += iTaken;
 
         return iTaken;
     }
@@ -584,6 +592,9 @@ void cPlayer::Resurrect()
     // resurrect player
     if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD)) return;
     REMOVE_FLAG(m_iStatus, PLAYER_STATUS_DEAD)
+
+    // 
+    m_iCurShield = m_iMaxShield;
 
     // add ship to global shadow and outline
     cShadow::GetGlobalContainer()->BindObject(this);
@@ -1013,7 +1024,7 @@ void cPlayer::__EquipShield()
 
     // 
     ADD_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED)
-    this->SetMaxHealth(PLAYER_SHIELD);
+    m_iMaxShield = PLAYER_SHIELD;
 }
 
 
