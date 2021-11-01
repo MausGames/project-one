@@ -99,9 +99,9 @@ cGame::~cGame()
     g_pPostProcessing->SetSaturationAll(1.0f);   // TODO 1: make transition smoother
 
     // 
-    g_pEnvironment->SetTargetDirection(ENVIRONMENT_DEFAULT_DIRECTION);
-    g_pEnvironment->SetTargetSide     (ENVIRONMENT_DEFAULT_SIDE);
-    g_pEnvironment->SetTargetSpeed    (ENVIRONMENT_DEFAULT_SPEED);
+    g_pEnvironment->SetTargetDirectionNow(ENVIRONMENT_DEFAULT_DIRECTION);
+    g_pEnvironment->SetTargetSideNow     (ENVIRONMENT_DEFAULT_SIDE);
+    g_pEnvironment->SetTargetSpeedNow    (ENVIRONMENT_DEFAULT_SPEED);
 
     // 
     g_pSave->SaveFile();

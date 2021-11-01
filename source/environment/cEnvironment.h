@@ -16,6 +16,8 @@
 // TODO 3: different background than cNoBackground on invalid ID (error background ?)
 // TODO 3: if m_fSideOffset will be used with rotation, make sure to use smooth lerp instead of the linear
 // TODO 1: all background parameters (sand wind, dark dissolve, etc.) are removed on __Reset
+// TODO 3: remove unused mix types, or init them on demand
+// TODO 4: check if m_afStrength != 0.0f is required and remove otherwise
 
 
 // ****************************************************************
@@ -52,6 +54,7 @@ private:
     coreVector2 m_avSide     [2];                        // background position offset
     coreFloat   m_afSpeed    [2];                        // movement speed
     coreFloat   m_afHeight   [2];                        // 
+    coreFloat   m_afStrength [4];                        // 
 
     coreFloat   m_fFlyOffset;                            // global fly offset (directly accessed by background objects)
     coreFloat   m_fSideOffset;                           // global side offset
@@ -88,10 +91,14 @@ public:
     inline coreFrameBuffer* GetFrameBuffer() {return m_TransitionTime.GetStatus() ? &m_FrameBuffer : m_pBackground->GetResolvedTexture();}
 
     // set target transformation properties
-    inline void SetTargetDirection(const coreVector2 vDirection) {m_avDirection[1] = vDirection; ASSERT(vDirection.IsNormalized())}
-    inline void SetTargetSide     (const coreVector2 vSide)      {m_avSide     [1] = vSide;}
-    inline void SetTargetSpeed    (const coreFloat   fSpeed)     {m_afSpeed    [1] = fSpeed;}
-    inline void SetTargetHeight   (const coreFloat   fHeight)    {m_afHeight   [1] = fHeight;}
+    inline void SetTargetDirection   (const coreVector2 vDirection, const coreFloat fStrength) {m_avDirection[1] = vDirection; m_afStrength[0] = fStrength; ASSERT(vDirection.IsNormalized())}
+    inline void SetTargetSide        (const coreVector2 vSide,      const coreFloat fStrength) {m_avSide     [1] = vSide;      m_afStrength[1] = fStrength;}
+    inline void SetTargetSpeed       (const coreFloat   fSpeed,     const coreFloat fStrength) {m_afSpeed    [1] = fSpeed;     m_afStrength[2] = fStrength;}
+    inline void SetTargetHeight      (const coreFloat   fHeight,    const coreFloat fStrength) {m_afHeight   [1] = fHeight;    m_afStrength[3] = fStrength;}
+    inline void SetTargetDirectionNow(const coreVector2 vDirection)                            {this->SetTargetDirection(vDirection, 0.0f); m_avDirection[0] = vDirection;}
+    inline void SetTargetSideNow     (const coreVector2 vSide)                                 {this->SetTargetSide     (vSide,      0.0f); m_avSide     [0] = vSide;}
+    inline void SetTargetSpeedNow    (const coreFloat   fSpeed)                                {this->SetTargetSpeed    (fSpeed,     0.0f); m_afSpeed    [0] = fSpeed;}
+    inline void SetTargetHeightNow   (const coreFloat   fHeight)                               {this->SetTargetHeight   (fHeight,    0.0f); m_afHeight   [0] = fHeight;}
 
     // get current transformation properties
     inline const coreVector2& GetDirection()const {return m_avDirection[0];}

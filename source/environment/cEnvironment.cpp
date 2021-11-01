@@ -17,6 +17,7 @@ cEnvironment::cEnvironment()noexcept
 , m_iLastID        (0)
 , m_TransitionTime (coreTimer(1.3f, 0.0f, 1u))
 , m_vTransitionDir (coreVector2(0.0f,0.0f))
+, m_afStrength     {}
 , m_fFlyOffset     (0.0f)
 , m_fSideOffset    (0.0f)
 , m_vCameraPos     (CAMERA_POSITION)
@@ -117,10 +118,10 @@ void cEnvironment::Render()
 void cEnvironment::Move()
 {
     // update all transformation properties
-    m_avDirection[0] = SmoothAim(m_avDirection[0], m_avDirection[1], 8.0f);
-    m_avSide     [0] = m_avSide  [0] + (m_avSide  [1] - m_avSide  [0]) * (TIME * 16.0f);
-    m_afSpeed    [0] = m_afSpeed [0] + (m_afSpeed [1] - m_afSpeed [0]) * (TIME *  1.0f);
-    m_afHeight   [0] = m_afHeight[0] + (m_afHeight[1] - m_afHeight[0]) * (TIME *  2.0f);
+    if(m_afStrength[0] > 0.0f) m_avDirection[0] = SmoothAim(m_avDirection[0], m_avDirection[1], m_afStrength[0]);
+    if(m_afStrength[1] > 0.0f) m_avSide     [0] = m_avSide  [0] + (m_avSide  [1] - m_avSide  [0]) * (TIME * m_afStrength[1]);
+    if(m_afStrength[2] > 0.0f) m_afSpeed    [0] = m_afSpeed [0] + (m_afSpeed [1] - m_afSpeed [0]) * (TIME * m_afStrength[2]);
+    if(m_afStrength[3] > 0.0f) m_afHeight   [0] = m_afHeight[0] + (m_afHeight[1] - m_afHeight[0]) * (TIME * m_afStrength[3]);
 
     // calculate global fly offset
     m_fFlyOffset += TIME * m_afSpeed[0];
