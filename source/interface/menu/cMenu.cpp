@@ -21,7 +21,7 @@ cMenu::cMenu()noexcept
 {
     // 
     m_PauseLayer.DefineTexture(0u, "menu_background_black.png");
-    m_PauseLayer.DefineProgram("default_2d_program");
+    m_PauseLayer.DefineProgram("menu_grey_program");
     m_PauseLayer.SetSize      (coreVector2(1.0f,1.0f));
     m_PauseLayer.SetColor4    (coreVector4(0.6f,0.6f,0.6f,0.0f));
     m_PauseLayer.SetTexSize   (coreVector2(1.2f,1.2f));

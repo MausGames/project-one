@@ -25,10 +25,10 @@ void FragmentMain()
     else
     {
         // lookup textures
-        vec4 v4Shape  = coreTexture2D(0, v_av2TexCoord[0]);
-        vec3 v3Detail = coreTexture2D(1, v_av2TexCoord[1]).rgb;
+        vec4  v4Shape  = coreTexture2D(0, v_av2TexCoord[0]);
+        float v1Detail = coreTexture2D(1, v_av2TexCoord[1]).r;
 
         // draw shape with detail map and subtle white glow
-        gl_FragColor = vec4(mix(vec3(1.0), v4Shape.rgb + v3Detail + vec3(c_v1Black + 0.1), v4Shape.a), v4Shape.a) * u_v4Color;
+        gl_FragColor = vec4(mix(vec3(1.0), v4Shape.rgb + vec3(v1Detail + c_v1Black + 0.1), v4Shape.a), v4Shape.a) * u_v4Color;
     }
 }
