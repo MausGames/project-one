@@ -126,7 +126,7 @@ void FragmentMain()
     vec3 v3Refraction = coreTexture2D(2, v2ScreenCoord + v2Distortion * v1Depth).rgb;
 
     // adjust reflection value
-    v3Reflection = mix(c_v3Blue * v1Intensity, v3Reflection, max(0.0, dot(v3BumpNormal, v3MathViewDir) - 0.27)) + vec3(v1ReflFactor);
+    v3Reflection = mix(c_v3Blue * v1Intensity, v3Reflection, max(dot(v3BumpNormal, v3MathViewDir) - 0.4, 0.0)) + vec3(v1ReflFactor);
 
     // draw final color
     float v1Light = (0.85 + 0.15 * v2ScreenCoord.x);

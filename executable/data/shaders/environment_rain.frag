@@ -55,7 +55,7 @@ void FragmentMain()
     vec3 v3Refraction = coreTexture2D(2, v2ScreenCoord + v2Distortion * v1Depth).rgb;
 
     // adjust reflection value
-    v3Reflection = mix(c_v3Blue, v3Reflection, max(dot(v3BumpNormal, v3MathViewDir) - 0.3, 0.0)) + vec3(v1ReflFactor);
+    v3Reflection = mix(c_v3Blue, v3Reflection, max(dot(v3BumpNormal, v3MathViewDir) - 0.5, 0.0)) + vec3(v1ReflFactor);
 
     // draw final color
     gl_FragColor = vec4(mix(v3Refraction, v3Reflection, v1Depth) * (v1BumpFactor * 0.2 + 0.85), 1.0);
