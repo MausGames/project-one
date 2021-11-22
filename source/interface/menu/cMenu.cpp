@@ -638,11 +638,11 @@ void cMenu::UpdateAnimateProgram(cGuiObject* OUTPUT pObject)
     if(!pObject->GetProgram()->Enable())  return;
 
     // 
-    const coreFloat fSize = 2.0f * pObject->GetSize().y;
-    const coreFloat fLerp = ((fSize - 0.4f) * RCP(fSize)) * 0.5f;
+    const coreFloat fSize = pObject->GetSize().y;
+    const coreFloat fLerp = ((fSize - 0.2f) * RCP(fSize)) * 0.5f;
 
     // 
-    pObject->GetProgram()->SendUniform("u_v4Scale", coreVector4(0.5f - fLerp, 0.5f + fLerp, 2.0f, fSize));
+    pObject->GetProgram()->SendUniform("u_v4Scale", coreVector4(0.5f - fLerp, 0.5f + fLerp, 2.0f, 2.0f * fSize));
 }
 
 

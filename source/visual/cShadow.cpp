@@ -46,7 +46,7 @@ void cShadow::Update()
             }
             glColorMask(true, true, true, true);
 
-            if(!s_GlobalContainer.GetListSet().empty() || !s_GlobalContainer.GetObjectSet().empty())
+            if(!s_GlobalContainer.IsEmpty())
             {
                 glDisable(GL_DEPTH_TEST);
                 {

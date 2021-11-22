@@ -34,7 +34,7 @@
 // TODO 3: use single-channel texture where possible
 // TODO 5: menu optimization by caching into framebuffer (general class for leaderboard, options, etc.)
 // TODO 3: check all shaders if alpha is required
-// TODO 4: full initializer lists everywhere (don't forget parent classes) (also in other projects)
+// TODO 4: full initializer lists everywhere (don't forget parent classes)
 // TODO 3: clean mixing shader defines (x >= y) and (defined(x)) checks (also in engine)
 // TODO 3: check for 16-bit float shader usage
 // TODO 2: program enable has to be checked (if(x.Enable()){}) everywhere
@@ -72,7 +72,6 @@
 // TODO 3: change all linear interpolation with at least LERPH3 to improve quality, where possible
 // TODO 3: find (manual) interpolations and try to use smoothstep for it (engine, application and shader)
 // TODO 4: check all lambdas if OUTPUT can be replaced with const
-// TODO 3: make sure enemy bullet ClearAll is called on STAGE_DELAY
 // TODO 3: create animation offset for all gameplay objects (const coreFloat fOffset = I_TO_F(i) * (1.0f/7.0f);), try to use num-per-line + 1, what about bullets ?
 // TODO 1: make sure user folder is correctly handled for multi-user (-> corePlatform)
 // TODO 3: every boss, enemy, gameplay-objects, player-bullet-interacting object needs a volume (including all enemy-bullet types)
@@ -81,6 +80,12 @@
 // TODO 3: skip rendering (like in pause) when update frequency is >= 2x of the refresh rate
 // TODO 3: for uneven resolutions, some objects need g_vGameResolution.AspectRatio() (on both axes, with max(1.0f)): menu transition, postprocessing
 // TODO 4: change arrays of structs to structs of arrays where possible (also in engine)
+// TODO 3: check if more textures can be changed to grayscale (grey+noalpha, black+alpha)
+// TODO 2: test maximum number of replays, provide upper limit, define communication when approaching or reaching limit
+// TODO 2: prevent shaking of center-aligned rectified animated text
+// TODO 3: add gamepad led colors
+// TODO 1: clarify and simplify upper-case handling (for all texts, but especially for boss and mission names)
+// TODO 3: only disable culling in actual mirror mode
 
 
 // ****************************************************************

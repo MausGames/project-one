@@ -105,7 +105,7 @@ public:
 
 protected:
     // 
-    void _SetParent(cEnemy* OUTPUT pParent);
+    void _SetParent(cEnemy* pParent);
 
 
 private:

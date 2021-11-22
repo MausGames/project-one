@@ -232,7 +232,7 @@ void cWorldMap::EnablePin(const coreUintW iIndex, const coreBool bEnable, const 
 // 
 void cWorldMap::SelectPin(const coreUintW iIndex)
 {
-    ASSERT(iIndex < WORLDMAP_PINS) 
+    ASSERT(iIndex < WORLDMAP_PINS)
 
     // 
     m_iNewPin = HAS_BIT(m_iEnabled, iIndex) ? iIndex : 0u;

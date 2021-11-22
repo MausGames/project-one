@@ -348,7 +348,7 @@ coreVector2 cEnemy::AimAtPlayerDual(const coreUintW iIndex)const
 
 // ****************************************************************
 // 
-void cEnemy::_SetParent(cEnemy* OUTPUT pParent)
+void cEnemy::_SetParent(cEnemy* pParent)
 {
     ASSERT(!this->IsParent())
 
@@ -364,7 +364,7 @@ void cEnemy::_SetParent(cEnemy* OUTPUT pParent)
         ASSERT(!pParent->IsChild())
 
         // 
-        m_apMember.insert(&*pParent);
+        m_apMember.insert(pParent);
         this->AddStatus(ENEMY_STATUS_CHILD);
 
         // 

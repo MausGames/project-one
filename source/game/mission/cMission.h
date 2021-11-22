@@ -125,6 +125,7 @@
 #define STAGE_BADGE(i,b,p)                     {this->GiveBadge(i, b, p);}
 
 #define STAGE_DELAY_START                      {UNUSED STAGE_ADD_SQUAD(pDelay, cScoutEnemy, 1u) {pDelay->GetEnemy(0u)->Configure(1, COLOR_SHIP_GREY); pDelay->GetEnemy(0u)->Resurrect();});}
+#define STAGE_DELAY_START_CLEAR                {STAGE_DELAY_START g_pGame->GetBulletManagerEnemy()->ClearBullets(true);}
 #define STAGE_DELAY_END                        {m_apSquad.back()->GetEnemy(0u)->Kill(false);}
 
 #define STAGE_ADD_PATH(n)                      const auto n = this->_AddPath    (__LINE__,      [](coreSpline2* OUTPUT n)
@@ -906,7 +907,7 @@ public:
     cBonus1Mission()noexcept;
 
     DISABLE_COPY(cBonus1Mission)
-    ASSIGN_ID(101, "Bonus1")
+    ASSIGN_ID(101, "Bonus 1")
 
 
 private:
@@ -927,7 +928,7 @@ public:
     cBonus2Mission()noexcept;
 
     DISABLE_COPY(cBonus2Mission)
-    ASSIGN_ID(102, "Bonus2")
+    ASSIGN_ID(102, "Bonus 2")
 
 
 private:
