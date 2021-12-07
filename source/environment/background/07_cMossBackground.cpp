@@ -126,8 +126,10 @@ void cMossBackground::__RenderOwnAfter()
     glDisable(GL_DEPTH_TEST);
     {
         // 
-        m_Rain     .Render();
-        m_Lightning.Render();
+        m_Rain.Render();
+
+        // 
+        if(g_CurConfig.Graphics.iFlash) m_Lightning.Render();
 
         // 
         if(m_bEnableHeadlight) m_Headlight.Render();

@@ -175,6 +175,8 @@ enum eEntry : coreUint8
     ENTRY_VIDEO_TEXTUREFILTER,
     ENTRY_VIDEO_RENDERQUALITY,
     ENTRY_VIDEO_SHADOWQUALITY,
+    ENTRY_VIDEO_SHAKEEFFECTS,
+    ENTRY_VIDEO_FLASHEFFECTS,
     ENTRY_VIDEO,
 
     ENTRY_AUDIO_GLOBALVOLUME = ENTRY_VIDEO,
@@ -504,6 +506,8 @@ private:
     cGuiSwitchBox m_TextureFilter;
     cGuiSwitchBox m_RenderQuality;
     cGuiSwitchBox m_ShadowQuality;
+    cGuiSwitchBox m_ShakeEffects;
+    cGuiSwitchBox m_FlashEffects;
     cGuiSwitchBox m_GlobalVolume;
     cGuiSwitchBox m_MusicVolume;
     cGuiSwitchBox m_EffectVolume;

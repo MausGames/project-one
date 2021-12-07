@@ -27,6 +27,8 @@
 #define CONFIG_GRAPHICS_REFLECTION  "Graphics", "Reflection",                           (1)
 #define CONFIG_GRAPHICS_GLOW        "Graphics", "Glow",                                 (1)
 #define CONFIG_GRAPHICS_DISTORTION  "Graphics", "Distortion",                           (1)
+#define CONFIG_GRAPHICS_SHAKE       "Graphics", "Shake",                                (100)
+#define CONFIG_GRAPHICS_FLASH       "Graphics", "Flash",                                (1)
 
 #define CONFIG_AUDIO_EFFECT_VOLUME  "Audio",    "EffectVolume",                         (1.0f)
 #define CONFIG_AUDIO_AMBIENT_VOLUME "Audio",    "AmbientVolume",                        (1.0f)
@@ -74,6 +76,8 @@ struct sConfig final
         coreUint8 iReflection;   // water reflection level
         coreUint8 iGlow;         // fullscreen glow level
         coreUint8 iDistortion;   // fullscreen distortion level
+        coreUint8 iShake;        // 
+        coreUint8 iFlash;        // 
     }
     Graphics;
 

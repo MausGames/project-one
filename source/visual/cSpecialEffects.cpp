@@ -193,7 +193,8 @@ void cSpecialEffects::Move()
         m_iShakeCount    = m_iShakeCount + 1u;
 
         // 
-        g_pPostProcessing->SetPosition(g_vHudDirection.InvertedX() * (m_fShakeStrength * 0.01f * ((m_iShakeCount & 0x01u) ? 1.0f : -1.0f)));
+        const coreFloat fPower = I_TO_F(g_CurConfig.Graphics.iShake) * 0.0001f;
+        g_pPostProcessing->SetPosition(((g_vHudDirection.InvertedX() * (m_fShakeStrength * fPower * ((m_iShakeCount & 0x01u) ? 1.0f : -1.0f))) * g_vGameResolution).Processed(ROUND) / g_vGameResolution);
     }
 }
 
@@ -686,15 +687,11 @@ void cSpecialEffects::RumblePlayer(const cPlayer* pPlayer, const coreFloat fStre
 // 
 void cSpecialEffects::ShakeScreen(const coreFloat fStrength)
 {
-    if(m_fShakeStrength < fStrength)
-    {
-        // 
-        m_fShakeStrength = fStrength;
-        m_iShakeCount    = 0u;
+    // 
+    m_fShakeStrength = fStrength;
 
-        // 
-        this->RumblePlayer(NULL, fStrength * 0.5f, 250u);
-    }
+    // 
+    this->RumblePlayer(NULL, fStrength * 0.5f, 250u);
 }
 
 

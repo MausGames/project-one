@@ -86,6 +86,7 @@ cConfigMenu::cConfigMenu()noexcept
         if(i == ENTRY_VIDEO || i == ENTRY_AUDIO || i == ENTRY_INPUT) iOffset = 0u;
         if(i == ENTRY_VIDEO_ANTIALIASING)  ++iOffset;   // # new paragraph
         if(i == ENTRY_VIDEO_RENDERQUALITY) ++iOffset;
+        if(i == ENTRY_VIDEO_SHAKEEFFECTS)  ++iOffset;
         if(i == ENTRY_AUDIO_MUSICVOLUME)   ++iOffset;
         if(i == ENTRY_INPUT_MOVEUP)        ++iOffset;
         if(i == ENTRY_INPUT_ACTION1)       ++iOffset;
@@ -157,6 +158,8 @@ cConfigMenu::cConfigMenu()noexcept
         __SET_OPTION(m_TextureFilter, VIDEO_TEXTUREFILTER, 0.26f)
         __SET_OPTION(m_RenderQuality, VIDEO_RENDERQUALITY, 0.26f)
         __SET_OPTION(m_ShadowQuality, VIDEO_SHADOWQUALITY, 0.26f)
+        __SET_OPTION(m_ShakeEffects,  VIDEO_SHAKEEFFECTS,  0.26f)
+        __SET_OPTION(m_FlashEffects,  VIDEO_FLASHEFFECTS,  0.26f)
         __SET_OPTION(m_GlobalVolume,  AUDIO_GLOBALVOLUME,  0.26f)
         __SET_OPTION(m_MusicVolume,   AUDIO_MUSICVOLUME,   0.26f)
         __SET_OPTION(m_EffectVolume,  AUDIO_EFFECTVOLUME,  0.26f)
@@ -252,6 +255,9 @@ cConfigMenu::cConfigMenu()noexcept
     m_RenderQuality.AddEntryLanguage("VALUE_HIGH",             1u);
     m_ShadowQuality.AddEntryLanguage("VALUE_LOW",              1u);
     m_ShadowQuality.AddEntryLanguage("VALUE_HIGH",             2u);
+    for(coreUintW i = 0u; i <= 200u; i += 5u) m_ShakeEffects .AddEntry(PRINT("%zu%%", i), i);
+    m_FlashEffects .AddEntryLanguage("VALUE_OFF",              0u);
+    m_FlashEffects .AddEntryLanguage("VALUE_ON",               1u);
     for(coreUintW i = 0u; i <= 100u; i += 5u) m_GlobalVolume .AddEntry(PRINT("%zu%%", i), i);
     for(coreUintW i = 0u; i <= 100u; i += 5u) m_MusicVolume  .AddEntry(PRINT("%zu%%", i), i);
     for(coreUintW i = 0u; i <= 100u; i += 5u) m_EffectVolume .AddEntry(PRINT("%zu%%", i), i);
@@ -320,6 +326,8 @@ cConfigMenu::cConfigMenu()noexcept
     this->BindObject(SURFACE_CONFIG_VIDEO, &m_TextureFilter);
     this->BindObject(SURFACE_CONFIG_VIDEO, &m_RenderQuality);
     this->BindObject(SURFACE_CONFIG_VIDEO, &m_ShadowQuality);
+    this->BindObject(SURFACE_CONFIG_VIDEO, &m_ShakeEffects);
+    this->BindObject(SURFACE_CONFIG_VIDEO, &m_FlashEffects);
     this->BindObject(SURFACE_CONFIG_AUDIO, &m_GlobalVolume);
     this->BindObject(SURFACE_CONFIG_AUDIO, &m_MusicVolume);
     this->BindObject(SURFACE_CONFIG_AUDIO, &m_EffectVolume);
@@ -387,6 +395,8 @@ void cConfigMenu::Move()
             cMenu::UpdateSwitchBox(&m_TextureFilter);
             cMenu::UpdateSwitchBox(&m_RenderQuality);
             cMenu::UpdateSwitchBox(&m_ShadowQuality);
+            cMenu::UpdateSwitchBox(&m_ShakeEffects);
+            cMenu::UpdateSwitchBox(&m_FlashEffects);
 
             // 
                  if(m_RenderQuality.GetCurEntry().tValue == 0u) m_RenderQuality.GetCaption()->SetColor3(COLOR_MENU_YELLOW);
@@ -667,6 +677,8 @@ void cConfigMenu::CheckValues()
                            (m_TextureFilter.GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY))                         ||
                            (m_RenderQuality.GetCurEntry().tValue != g_OldConfig.Graphics.iRender)                                                         ||
                            (m_ShadowQuality.GetCurEntry().tValue != g_OldConfig.Graphics.iShadow)                                                         ||
+                           (m_ShakeEffects .GetCurEntry().tValue != g_OldConfig.Graphics.iShake)                                                          ||
+                           (m_FlashEffects .GetCurEntry().tValue != g_OldConfig.Graphics.iFlash)                                                          ||
                            (m_GlobalVolume .GetCurEntry().tValue != cConfigMenu::__VolumeToUint8(Core::Config->GetFloat(CORE_CONFIG_AUDIO_GLOBALVOLUME))) ||
                            (m_MusicVolume  .GetCurEntry().tValue != cConfigMenu::__VolumeToUint8(Core::Config->GetFloat(CORE_CONFIG_AUDIO_MUSICVOLUME)))  ||
                            (m_EffectVolume .GetCurEntry().tValue != cConfigMenu::__VolumeToUint8(g_OldConfig.Audio.fEffectVolume))                        ||
@@ -722,6 +734,8 @@ void cConfigMenu::LoadValues()
     m_TextureFilter.SelectValue(Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY));
     m_RenderQuality.SelectValue(g_CurConfig.Graphics.iRender);
     m_ShadowQuality.SelectValue(g_CurConfig.Graphics.iShadow);
+    m_ShakeEffects .SelectValue(g_CurConfig.Graphics.iShake);
+    m_FlashEffects .SelectValue(g_CurConfig.Graphics.iFlash);
 
     // 
     m_GlobalVolume .SelectValue(cConfigMenu::__VolumeToUint8(Core::Config->GetFloat(CORE_CONFIG_AUDIO_GLOBALVOLUME)));
@@ -794,6 +808,8 @@ void cConfigMenu::SaveValues()
     Core::Config->SetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY, m_TextureFilter.GetCurEntry().tValue);
     g_CurConfig.Graphics.iRender = m_RenderQuality.GetCurEntry().tValue;
     g_CurConfig.Graphics.iShadow = m_ShadowQuality.GetCurEntry().tValue;
+    g_CurConfig.Graphics.iShake  = m_ShakeEffects .GetCurEntry().tValue;
+    g_CurConfig.Graphics.iFlash  = m_FlashEffects .GetCurEntry().tValue;
 
     // 
     Core::Config->SetFloat(CORE_CONFIG_AUDIO_GLOBALVOLUME, cConfigMenu::__VolumeToFloat(m_GlobalVolume.GetCurEntry().tValue));

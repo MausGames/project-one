@@ -303,5 +303,5 @@ void cShip::_UpdateAlwaysAfter()
 
     // 
     if(g_MenuInput.bScreenshot) m_fBlink = 0.0f;
-    m_fBlink.UpdateMax(-15.0f, 0.0f);
+    m_fBlink.UpdateMax(g_CurConfig.Graphics.iFlash ? -10.0f : -2.0f, 0.0f);
 }
