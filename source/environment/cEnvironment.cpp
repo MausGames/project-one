@@ -254,12 +254,6 @@ void cEnvironment::__Reset(const coreResourceReset eInit)
 {
     if(eInit)
     {
-        const coreInt32 iID = P_TO_SI(m_pBackground);
-
-        // re-create background with saved ID
-        m_pBackground = NULL;
-        this->ChangeBackground(iID, ENVIRONMENT_MIX_FADE, 0.0f);
-
         // re-create environment frame buffer
         m_FrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
@@ -268,21 +262,7 @@ void cEnvironment::__Reset(const coreResourceReset eInit)
     }
     else
     {
-        const coreInt32 iID = m_pBackground->GetID();
-
-        // unbind textures and stop possible transition
-        m_MixObject.DefineTexture(0u, NULL);
-        m_MixObject.DefineTexture(1u, NULL);
-        m_TransitionTime.Stop();
-
-        // delete both backgrounds
-        SAFE_DELETE(m_pBackground)
-        SAFE_DELETE(m_pOldBackground)
-
         // delete environment frame buffer
         m_FrameBuffer.Delete();
-
-        // save background ID
-        m_pBackground = s_cast<cBackground*>(I_TO_P(iID));
     }
 }

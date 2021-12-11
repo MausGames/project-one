@@ -526,6 +526,31 @@ FUNC_PURE coreBool cBackground::_CheckIntersectionQuick(const coreBatchList* pOb
 
 
 // ****************************************************************
+// reset with the resource manager
+void cBackground::__Reset(const coreResourceReset eInit)
+{
+    if(eInit)
+    {
+        // 
+        m_FrameBuffer    .Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED);
+        m_ResolvedTexture.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+
+        // 
+        this->__InitOwn();
+    }
+    else
+    {
+        // 
+        m_FrameBuffer    .Delete();
+        m_ResolvedTexture.Delete();
+
+        // 
+        SAFE_DELETE(m_pWater)
+    }
+}
+
+
+// ****************************************************************
 // 
 UNITY_BUILD
 #include "01_cGrassBackground.cpp"

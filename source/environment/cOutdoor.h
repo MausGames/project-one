@@ -12,10 +12,9 @@
 
 // TODO 4: definitions for algorithms (background names ?)
 // TODO 5: check out jcgt_Duff2017Basis to inline tangent calculations into shader (less bandwidth, but more ALU + reg ?)
-// TODO 1: outdoor parameters are reset on engine-reset
-// TODO 1: fix file getting unloaded while others are reading (in reource-manager), maybe make copies of the file -> also affects shader-permutations when loading from two threads
 // TODO 5: increase normal map sharpness, if quality improves (raise depth-value in generator until it throws an assertion)
 // TODO 4: move m_pOutdoor->SetEnabled(CORE_OBJECT_ENABLE_NOTHING); into constructor/factoryfunc
+// TODO 3: only create and use light-map when it is used
 
 
 // ****************************************************************
@@ -45,7 +44,7 @@ STATIC_ASSERT((OUTDOOR_WIDTH == OUTDOOR_VIEW) && (OUTDOOR_WIDTH % 2u))
 
 // ****************************************************************
 // outdoor-surface class
-class cOutdoor final : public coreObject3D
+class cOutdoor final : public coreObject3D, public coreResourceRelation
 {
 private:
     // vertex structure
@@ -76,9 +75,13 @@ private:
     coreUint32 m_iIndexOffset;                       // current index offset
     coreFloat  m_fFlyOffset;                         // current fly offset
 
-    coreUint8 m_iHandleIndex;                        // 
-    coreUint8 m_iAlgorithm;                          // geometry algorithm ID
-    coreFloat m_fGrade;                              // randomness grade
+    coreUint8  m_iHandleIndex;                       // 
+    coreUint8  m_iAlgorithm;                         // geometry algorithm ID
+    coreFloat  m_fGrade;                             // randomness grade
+    coreUint32 m_iSeed;                              // 
+
+    const coreChar* m_pcTop;                         // 
+    const coreChar* m_pcBottom;                      // 
 
     cShadow         m_ShadowMap;                     // shadow map object
     coreFrameBuffer m_LightMap;                      // 
@@ -98,7 +101,7 @@ private:
 
 public:
     cOutdoor()noexcept;
-    cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom, const coreUint8 iAlgorithm, const coreFloat fGrade)noexcept;
+    cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom, const coreUint8 iAlgorithm, const coreFloat fGrade, const coreUint32 iSeed = CORE_RAND_SEED)noexcept;
     ~cOutdoor()final;
 
     DISABLE_COPY(cOutdoor)
@@ -109,7 +112,7 @@ public:
     void RenderDepth();
 
     // load outdoor resources
-    void LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade);
+    void LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade, const coreUint32 iSeed);
     void LoadTextures(const coreChar* pcTextureTop, const coreChar* pcTextureBottom);
     void LoadProgram (const coreBool bGlow);
 
@@ -143,6 +146,9 @@ public:
 
 
 private:
+    // reset with the resource manager
+    void __Reset(const coreResourceReset eInit)final;
+
     // 
     template <typename F> void __Render(const coreProgramPtr& pProgram, F&& nFunction);   // [](void) -> void
 };

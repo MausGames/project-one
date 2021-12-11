@@ -20,6 +20,9 @@ cOutdoor::cOutdoor()noexcept
 , m_iHandleIndex  (0u)
 , m_iAlgorithm    (0u)
 , m_fGrade        (0.0f)
+, m_iSeed         (0u)
+, m_pcTop         (NULL)
+, m_pcBottom      (NULL)
 , m_afLerpMul     {}
 , m_afLerpAdd     {}
 , m_aiLerpRange   {}
@@ -28,7 +31,7 @@ cOutdoor::cOutdoor()noexcept
 {
 }
 
-cOutdoor::cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom, const coreUint8 iAlgorithm, const coreFloat fGrade)noexcept
+cOutdoor::cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom, const coreUint8 iAlgorithm, const coreFloat fGrade, const coreUint32 iSeed)noexcept
 : cOutdoor ()
 {
     const coreTextureSpec oSpec = CORE_GL_SUPPORT(ARB_texture_rg) ? CORE_TEXTURE_SPEC_R8 : CORE_TEXTURE_SPEC_RGB8;
@@ -43,7 +46,7 @@ cOutdoor::cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom
 
     // load outdoor geometry
     m_pModel = Core::Manager::Resource->LoadNew<coreModel>();
-    this->LoadGeometry(iAlgorithm, fGrade);
+    this->LoadGeometry(iAlgorithm, fGrade, iSeed);
 
     // load outdoor textures
     m_pNormalMap = Core::Manager::Resource->LoadNew<coreTexture>();
@@ -105,21 +108,21 @@ void cOutdoor::RenderDepth()
 
 // ****************************************************************
 // load outdoor geometry
-void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
+void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade, const coreUint32 iSeed)
 {
     BIG_STATIC sVertex     s_aVertexData[OUTDOOR_TOTAL_VERTICES];
     BIG_STATIC coreUint16  s_aiIndexData[OUTDOOR_TOTAL_INDICES];
     BIG_STATIC coreVector3 s_avOrtho1   [OUTDOOR_TOTAL_VERTICES]; std::memset(s_avOrtho1, 0, sizeof(s_avOrtho1));
     BIG_STATIC coreVector3 s_avOrtho2   [OUTDOOR_TOTAL_VERTICES]; std::memset(s_avOrtho2, 0, sizeof(s_avOrtho2));
 
-    // delete old data
-    m_pModel->Unload();
-    std::memset(m_aiHeight, 0, sizeof(m_aiHeight));
-    m_fMaxHeight = -FLT_MAX;
-
     // save properties
     m_iAlgorithm = iAlgorithm;
     m_fGrade     = fGrade;
+    m_iSeed      = iSeed;
+
+    // delete old data
+    m_pModel->Unload();
+    m_fMaxHeight = -FLT_MAX;
 
     // select algorithm function
     coreFloat (*nAlgorithmFunc) (const coreFloat, const coreFloat);
@@ -138,6 +141,7 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
     }
 
     // create vertices
+    coreRand oRand(iSeed);
     for(coreUintW i = 0u; i < OUTDOOR_TOTAL_VERTICES; ++i)
     {
         const coreInt32 x = i % OUTDOOR_WIDTH;
@@ -152,7 +156,7 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
             {
                 // add randomness to the level and smooth out water-intersection-area
                 coreFloat fSmoothLevel;
-                do {fSmoothLevel = CLAMP(fLevel, -fGrade*1.5f, fGrade*1.5f) + Core::Rand->Float(-0.5f, 0.5f)*fGrade;}
+                do {fSmoothLevel = CLAMP(fLevel, -fGrade*1.5f, fGrade*1.5f) + fGrade * oRand.Float(-0.5f, 0.5f) * ((fLevel < 0.0f) ? 0.6f : 1.0f);}
                 while(coreMath::IsNear(fSmoothLevel, 0.0f, fGrade*0.25f));
 
                 // forward smooth level
@@ -301,12 +305,16 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
 // load outdoor textures
 void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcTextureBottom)
 {
+    // save properties
+    m_pcTop    = pcTextureTop;
+    m_pcBottom = pcTextureBottom;
+
     // load color textures
     this->DefineTexture(0u, PRINT("environment_%s_diff.png", pcTextureTop));
     this->DefineTexture(1u, PRINT("environment_%s_diff.png", pcTextureBottom));
 
     // unbind normal map to prevent concurrency problems
-    this->DefineTexture(2u, NULL);
+    this->DefineTexture(2u, "default_normal.png");   // placeholder
 
     // delete sync object
     m_Sync.Delete();
@@ -637,4 +645,25 @@ void cOutdoor::SetTransform(const coreFloat fFlyOffset, const coreFloat fSideOff
     // (only used for height-calculations, not for shading) 
     this->SetPosition (coreVector3(-fSideOffset, fFlyOffset * -OUTDOOR_DETAIL, 0.0f));
     this->SetDirection(coreVector3( vDirection,                                0.0f));
+}
+
+
+// ****************************************************************
+// 
+void cOutdoor::__Reset(const coreResourceReset eInit)
+{
+    if(eInit)
+    {
+        // 
+        this->LoadGeometry(m_iAlgorithm, m_fGrade, m_iSeed);
+        this->LoadTextures(m_pcTop, m_pcBottom);
+
+        // 
+        if(m_LightMap.GetColorTarget(0u).IsValid()) m_LightMap.Create(g_vGameResolution * OUTDOOR_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
+    }
+    else
+    {
+        // 
+        if(m_LightMap.GetColorTarget(0u).IsValid()) m_LightMap.Delete();
+    }
 }

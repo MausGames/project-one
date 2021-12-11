@@ -33,6 +33,7 @@
 // TODO 3: in Add functions change sListKey to a combination of resource identifiers
 // TODO 3: adding temporary objects should cache resources
 // TODO 3: adding temporary objects can/should implicitly rotate the position ?
+// TODO 3: use __Reset in water class, instead of __OwnInit
 
 
 // ****************************************************************
@@ -102,7 +103,7 @@
 
 // ****************************************************************
 // background interface
-class INTERFACE cBackground
+class INTERFACE cBackground : public coreResourceRelation
 {
 protected:
     coreFrameBuffer m_FrameBuffer;                   // background frame buffer (multisampled)
@@ -172,7 +173,11 @@ protected:
 
 
 private:
+    // reset with the resource manager
+    void __Reset(const coreResourceReset eInit)final;
+
     // own routines for derived classes
+    virtual void __InitOwn        () {}
     virtual void __RenderOwnBefore() {}
     virtual void __RenderOwnAfter () {}
     virtual void __MoveOwn        () {}
