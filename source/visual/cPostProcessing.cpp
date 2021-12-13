@@ -262,7 +262,7 @@ void cPostProcessing::__UpdateWall()
 {
     // place objects left-right or top-down depending on window aspect ratio
     const coreVector2 vResolution = Core::System->GetResolution();
-    const coreVector2 vSize       = coreVector2(1.0f, ((vResolution - g_vGameResolution) / vResolution.yx()).Max() * 0.5f) + 0.1f;
+    const coreVector2 vSize       = coreVector2(0.0f, ((vResolution - g_vGameResolution) / vResolution.yx()).Max() * 0.5f) + 1.1f;
     const coreVector2 vFlip       = IsHorizontal(vResolution) ? coreVector2(1.0f,0.0f) : coreVector2(0.0f,1.0f);
     const coreUintW   iAdd        = IsHorizontal(vResolution) ? POST_WALLS_BASE        : 0u;
 
@@ -270,7 +270,7 @@ void cPostProcessing::__UpdateWall()
     for(coreUintW i = 0u; i < POST_WALLS; ++i)
     {
         const coreVector2 vTurn = ((i < 2u) ? vFlip.yx() : vFlip) * ((i % 2u) ? 1.0f : -1.0f);
-        const coreFloat   fMove = ((i < 2u) ? vSize.y    :  0.1f) - m_afOffset[(i + iAdd) % POST_WALLS];
+        const coreFloat   fMove = ((i < 2u) ? vSize.y    :  1.1f) - m_afOffset[(i + iAdd) % POST_WALLS];
 
         m_aWall[i].SetPosition (vTurn *  fMove);
         m_aWall[i].SetSize     (vSize);

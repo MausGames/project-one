@@ -38,5 +38,8 @@ void VertexMain()
     v_v4Border   = floor(v_v4Border * v4Pixel + vec4(0.001));
 
     // 
-    v_v1Factor = a_v2LowTexCoord.y * 2.2 - 0.2;
+    float v1Max  = max(u_v4Resolution.x, u_v4Resolution.y);
+    float v1Min  = min(u_v4Resolution.x, u_v4Resolution.y);
+    float v1Term = (v1Max * 0.5 - v1Min * 0.4) / v4Pixel.y;
+    v_v1Factor   = ((a_v2LowTexCoord.y - (1.0 - v1Term)) / v1Term) * 2.2 - 0.2;
 }
