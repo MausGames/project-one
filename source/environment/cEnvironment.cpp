@@ -19,6 +19,7 @@ cEnvironment::cEnvironment()noexcept
 , m_vTransitionDir (coreVector2(0.0f,0.0f))
 , m_afStrength     {}
 , m_fFlyOffset     (0.0f)
+, m_fFlyShove      (0.0f)
 , m_fSideOffset    (0.0f)
 , m_vCameraPos     (CAMERA_POSITION)
 , m_vLightDir      (LIGHT_DIRECTION)
@@ -125,8 +126,12 @@ void cEnvironment::Move()
 
     // calculate global fly offset
     m_fFlyOffset += TIME * m_afSpeed[0];
-    while(m_fFlyOffset <  0.0f)                   {m_fFlyOffset += I_TO_F(OUTDOOR_HEIGHT); m_pBackground->ShoveAdds( I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL); if(m_pOldBackground) m_pOldBackground->ShoveAdds( I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL);}
-    while(m_fFlyOffset >= I_TO_F(OUTDOOR_HEIGHT)) {m_fFlyOffset -= I_TO_F(OUTDOOR_HEIGHT); m_pBackground->ShoveAdds(-I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL); if(m_pOldBackground) m_pOldBackground->ShoveAdds(-I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL);}
+    m_fFlyShove   = 0.0f;
+         if(m_fFlyOffset <  0.0f)                   {m_fFlyOffset += I_TO_F(OUTDOOR_HEIGHT); m_fFlyShove =  I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL; m_pBackground->ShoveAdds(m_fFlyShove); if(m_pOldBackground) m_pOldBackground->ShoveAdds(m_fFlyShove);}
+    else if(m_fFlyOffset >= I_TO_F(OUTDOOR_HEIGHT)) {m_fFlyOffset -= I_TO_F(OUTDOOR_HEIGHT); m_fFlyShove = -I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL; m_pBackground->ShoveAdds(m_fFlyShove); if(m_pOldBackground) m_pOldBackground->ShoveAdds(m_fFlyShove);}
+
+    // handle rare rounding errors
+    m_fFlyOffset = CLAMP(m_fFlyOffset, 0.0f, I_TO_F(OUTDOOR_HEIGHT) - CORE_MATH_PRECISION);
 
     // calculate global side offset (only perpendicular to flight direction, never on diagonal camera (smooth with max-min))
     const coreVector2 vAbsDir = m_avDirection[0].Processed(ABS);

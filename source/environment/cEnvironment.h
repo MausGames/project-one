@@ -55,6 +55,7 @@ private:
     coreFloat   m_afStrength [4];                        // 
 
     coreFloat   m_fFlyOffset;                            // global fly offset (directly accessed by background objects)
+    coreFloat   m_fFlyShove;                             // 
     coreFloat   m_fSideOffset;                           // global side offset
     coreVector3 m_vCameraPos;                            // moved camera position
     coreVector3 m_vLightDir;                             // rotated light direction
@@ -106,6 +107,7 @@ public:
 
     // get offset values
     inline const coreFloat&   GetFlyOffset ()const {return m_fFlyOffset;}
+    inline const coreFloat&   GetFlyShove  ()const {return m_fFlyShove;}
     inline const coreFloat&   GetSideOffset()const {return m_fSideOffset;}
     inline const coreVector3& GetCameraPos ()const {return m_vCameraPos;}
     inline const coreVector3& GetLightDir  ()const {return m_vLightDir;}
