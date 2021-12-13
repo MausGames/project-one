@@ -105,6 +105,11 @@
 // background interface
 class INTERFACE cBackground : public coreResourceRelation
 {
+private:
+    // 
+    template <typename T> using uDataMap = coreMap<const coreBatchList*, coreList<T>>;
+
+
 protected:
     coreFrameBuffer m_FrameBuffer;                   // background frame buffer (multisampled)
     coreFrameBuffer m_ResolvedTexture;               // resolved texture
@@ -120,8 +125,8 @@ protected:
     coreMapStr<coreBatchList*> m_apDecalAddList;     // temporary transparent objects connected to the ground
     coreMapStr<coreBatchList*> m_apAirAddList;       // temporary objects floating in the air
 
-    coreMap<const coreBatchList*, coreList<coreUint16>> m_aaiBaseHeight;   // 
-    coreMap<const coreBatchList*, coreList<coreUint32>> m_aaiBaseNormal;   // 
+    uDataMap<coreUint16> m_aaiBaseHeight;            // 
+    uDataMap<coreUint32> m_aaiBaseNormal;            // 
 
     static coreMemoryPool s_MemoryPool;              // 
 

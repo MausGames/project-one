@@ -193,7 +193,7 @@ void cDefeatMenu::Move()
         m_Background.SetAlpha    ( bLeftRight ? fVisibility :  1.0f);
 
         // animate background
-        m_Background.SetSize     (coreVector2(fVisibility, 1.0f) * (coreVector2(1.0f,0.21f)));
+        m_Background.SetSize     (coreVector2(fVisibility, 1.0f) * coreVector2(1.0f,0.21f));
         m_Background.SetTexSize  (coreVector2(fVisibility, 1.0f));
         m_Background.SetTexOffset(coreVector2(1.0f,1.0f) * (fAnimation * 0.05f));
 

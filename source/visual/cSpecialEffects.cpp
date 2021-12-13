@@ -676,7 +676,7 @@ void cSpecialEffects::RumblePlayer(const cPlayer* pPlayer, const coreFloat fStre
             if((pCurInput == &g_TotalInput) || (P_TO_UI(pCurInput - g_aGameInput) < INPUT_SETS))
             {
                 // create rumble effect
-                Core::Input->RumbleJoystick(iJoystickID, CLAMP(fStrength * I_TO_F(iRumble) * 0.1f, 0.0f, 1.0f), iLengthMs);
+                Core::Input->JoystickRumble(iJoystickID, CLAMP(fStrength * I_TO_F(iRumble) * 0.1f, 0.0f, 1.0f), 0.0f, iLengthMs);
             }
         }
     });

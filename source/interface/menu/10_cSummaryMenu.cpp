@@ -247,7 +247,7 @@ void cSummaryMenu::Move()
                 m_BackgroundMain.SetAlpha    ( bLeftRight ? fVisibility :  1.0f);
 
                 // animate background
-                m_BackgroundMain.SetSize     (coreVector2(fVisibility, 1.0f) * (coreVector2(1.0f,0.45f)));
+                m_BackgroundMain.SetSize     (coreVector2(fVisibility, 1.0f) * coreVector2(1.0f,0.45f));
                 m_BackgroundMain.SetTexSize  (coreVector2(fVisibility, 1.0f));
                 m_BackgroundMain.SetTexOffset(coreVector2(1.0f,1.0f) * (fAnimation * 0.05f));
 
