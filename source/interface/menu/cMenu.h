@@ -40,10 +40,11 @@
 // ****************************************************************
 // menu definitions
 #define MENU_LIGHT_ACTIVE             (1.0f)     // visible strength of active menu objects
-#define MENU_LIGHT_IDLE               (0.667f)   // visible strength of idle menu objects
+#define MENU_LIGHT_IDLE               (0.65f)    // visible strength of idle menu objects
 #define MENU_CONTRAST_WHITE           (0.8f)     // white contrast value (to reduce eye strain)
 #define MENU_CONTRAST_BLACK           (0.04f)    // black contrast value
-#define MENU_INSIDE_ALPHA             (0.9f)     // 
+#define MENU_CONTRAST_INSIDE          (0.94f)    // 
+#define MENU_INSIDE_ALPHA             (0.95f)    // 
 
 #define MENU_GAME_MISSIONS            (9u)
 #define MENU_GAME_STAGES              (SEGMENTS)

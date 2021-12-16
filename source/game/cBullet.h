@@ -416,7 +416,7 @@ public:
     inline cOrbBullet* MakeRed    () {this->_MakeRed    (0.9f); return this;}
     inline cOrbBullet* MakeMagenta() {ASSERT(false)             return this;}
     inline cOrbBullet* MakePurple () {this->_MakePurple (0.9f); return this;}
-    inline cOrbBullet* MakeBlue   () {this->_MakeBlue   (0.9f); return this;}
+    inline cOrbBullet* MakeBlue   () {this->_MakeBlue   (1.0f); return this;}
     inline cOrbBullet* MakeCyan   () {ASSERT(false)             return this;}
     inline cOrbBullet* MakeGreen  () {this->_MakeGreen  (0.8f); return this;}
 
@@ -494,7 +494,7 @@ public:
     inline cWaveBullet* MakePurple () {ASSERT(false)             return this;}
     inline cWaveBullet* MakeBlue   () {ASSERT(false)             return this;}
     inline cWaveBullet* MakeCyan   () {ASSERT(false)             return this;}
-    inline cWaveBullet* MakeGreen  () {this->_MakeGreen  (1.1f); return this;}
+    inline cWaveBullet* MakeGreen  () {this->_MakeGreen  (1.0f); return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
@@ -645,7 +645,7 @@ public:
     inline cQuadBullet* MakeMagenta() {ASSERT(false)             return this;}
     inline cQuadBullet* MakePurple () {this->_MakePurple (1.0f); return this;}
     inline cQuadBullet* MakeBlue   () {ASSERT(false)             return this;}
-    inline cQuadBullet* MakeCyan   () {this->_MakeCyan   (1.0f); return this;}
+    inline cQuadBullet* MakeCyan   () {this->_MakeCyan   (0.9f); return this;}
     inline cQuadBullet* MakeGreen  () {ASSERT(false)             return this;}
 
     // bullet configuration values
