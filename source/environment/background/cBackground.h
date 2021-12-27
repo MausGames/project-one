@@ -183,6 +183,7 @@ private:
 
     // own routines for derived classes
     virtual void __InitOwn        () {}
+    virtual void __ExitOwn        () {}
     virtual void __RenderOwnBefore() {}
     virtual void __RenderOwnAfter () {}
     virtual void __MoveOwn        () {}
@@ -228,6 +229,8 @@ public:
 
 protected:
     // execute own routines
+    void __InitOwn()final;
+    void __ExitOwn()final;
     void __MoveOwn()final;
 };
 
@@ -252,6 +255,8 @@ public:
 
 protected:
     // execute own routines
+    void __InitOwn  ()final;
+    void __ExitOwn  ()final;
     void __MoveOwn  ()final;
     void __UpdateOwn()final;
 };
@@ -285,6 +290,8 @@ public:
 
 private:
     // execute own routines
+    void __InitOwn       ()final;
+    void __ExitOwn       ()final;
     void __RenderOwnAfter()final;
     void __MoveOwn       ()final;
 };
@@ -335,6 +342,7 @@ private:
 
 public:
     cVolcanoBackground()noexcept;
+    ~cVolcanoBackground()final;
 
     DISABLE_COPY(cVolcanoBackground)
     ASSIGN_ID_EX(5, "Volcano", COLOR_MENU_ORANGE)
@@ -342,6 +350,8 @@ public:
 
 protected:
     // execute own routines
+    void __InitOwn        ()final;
+    void __ExitOwn        ()final;
     void __RenderOwnBefore()final;
     void __MoveOwn        ()final;
 };
@@ -359,6 +369,7 @@ private:
 
 public:
     cSnowBackground()noexcept;
+    ~cSnowBackground()final;
 
     DISABLE_COPY(cSnowBackground)
     ASSIGN_ID_EX(6, "Snow", COLOR_MENU_BLUE)
@@ -369,6 +380,8 @@ public:
 
 private:
     // execute own routines
+    void __InitOwn       ()final;
+    void __ExitOwn       ()final;
     void __RenderOwnAfter()final;
     void __MoveOwn       ()final;
 };
@@ -416,6 +429,8 @@ public:
 
 private:
     // execute own routines
+    void __InitOwn       ()final;
+    void __ExitOwn       ()final;
     void __RenderOwnAfter()final;
     void __MoveOwn       ()final;
     void __UpdateOwn     ()final;
@@ -444,6 +459,7 @@ private:
 
 public:
     cStomachBackground()noexcept;
+    ~cStomachBackground()final;
 
     DISABLE_COPY(cStomachBackground)
     ASSIGN_ID_EX(51, "Stomach", coreVector3(0.5f,0.5f,0.5f))
@@ -451,6 +467,8 @@ public:
 
 private:
     // execute own routines
+    void __InitOwn       ()final;
+    void __ExitOwn       ()final;
     void __RenderOwnAfter()final;
     void __MoveOwn       ()final;
     void __UpdateOwn     ()final;
@@ -478,6 +496,8 @@ public:
 
 private:
     // execute own routines
+    void __InitOwn        ()final;
+    void __ExitOwn        ()final;
     void __RenderOwnBefore()final;
     void __MoveOwn        ()final;
 };

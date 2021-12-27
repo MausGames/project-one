@@ -17,11 +17,11 @@ cGrassBackground::cGrassBackground()noexcept
     coreBatchList* pList1;
     coreBatchList* pList2;
 
+    // 
+    this->__InitOwn();
+
     // create outdoor-surface object
     m_pOutdoor = new cOutdoor("grass", "dust", 2u, 4.0f);
-
-    // create water-surface object
-    m_pWater = new cWater("environment_clouds_blue.png");
 
     // allocate stone list
     pList1 = new coreBatchList(GRASS_STONE_RESERVE);
@@ -279,6 +279,24 @@ cGrassBackground::cGrassBackground()noexcept
 
         ASSERT(pList1->GetCurCapacity() == GRASS_CLOUD_RESERVE)
     }
+}
+
+
+// ****************************************************************
+// destructor
+cGrassBackground::~cGrassBackground()
+{
+    // 
+    this->__ExitOwn();
+}
+
+
+// ****************************************************************
+// 
+void cGrassBackground::__InitOwn()
+{
+    // create water-surface object
+    m_pWater = new cWater("environment_clouds_blue.png");
 
     // load nature sound-effect
     m_pNatureSound = Core::Manager::Resource->Get<coreSound>("environment_nature.wav");
@@ -290,12 +308,18 @@ cGrassBackground::cGrassBackground()noexcept
 
 
 // ****************************************************************
-// destructor
-cGrassBackground::~cGrassBackground()
+// 
+void cGrassBackground::__ExitOwn()
 {
+    // 
+    SAFE_DELETE(m_pWater)
+
     // stop nature sound-effect
-    if(m_pNatureSound->EnableRef(this))
-        m_pNatureSound->Stop();
+    m_pNatureSound.OnUsableOnce([this, pResource = m_pNatureSound]()
+    {
+        if(pResource->EnableRef(this))
+            pResource->Stop();
+    });
 }
 
 

@@ -13,9 +13,47 @@
 // constructor
 cVolcanoBackground::cVolcanoBackground()noexcept
 {
+    // 
+    this->__InitOwn();
+
     // create outdoor-surface object
     m_pOutdoor = new cOutdoor("rock", "lava", 7u, 4.0f);
     m_pOutdoor->LoadProgram(true);
+}
+
+
+// ****************************************************************
+// destructor
+cVolcanoBackground::~cVolcanoBackground()
+{
+    // 
+    this->__ExitOwn();
+}
+
+
+// ****************************************************************
+// 
+void cVolcanoBackground::__InitOwn()
+{
+    // 
+    m_pLavaSound = Core::Manager::Resource->Get<coreSound>("environment_lava.wav");
+    m_pLavaSound.OnUsableOnce([this, pResource = m_pLavaSound]()
+    {
+        pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
+    });
+}
+
+
+// ****************************************************************
+// 
+void cVolcanoBackground::__ExitOwn()
+{
+    // 
+    m_pLavaSound.OnUsableOnce([this, pResource = m_pLavaSound]()
+    {
+        if(pResource->EnableRef(this))
+            pResource->Stop();
+    });
 }
 
 

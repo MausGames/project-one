@@ -19,11 +19,11 @@ cSeaBackground::cSeaBackground()noexcept
     coreBatchList* pList1;
     coreBatchList* pList2;
 
+    // 
+    this->__InitOwn();
+
     // create outdoor-surface object
     m_pOutdoor = new cOutdoor("dust", "earth", 6u, 4.0f);
-
-    // create underwater-surface object
-    m_pWater = new cUnderWater();
 
     // allocate stone list
     pList1 = new coreBatchList(SEA_STONE_RESERVE);
@@ -249,6 +249,25 @@ cSeaBackground::cSeaBackground()noexcept
     }
     */
 
+}
+
+
+// ****************************************************************
+// destructor
+cSeaBackground::~cSeaBackground()
+{
+    // 
+    this->__ExitOwn();
+}
+
+
+// ****************************************************************
+// 
+void cSeaBackground::__InitOwn()
+{
+    // create underwater-surface object
+    m_pWater = new cUnderWater();
+
     // 
     m_pUnderSound = Core::Manager::Resource->Get<coreSound>("environment_under.wav");
     m_pUnderSound.OnUsableOnce([this, pResource = m_pUnderSound]()
@@ -259,12 +278,31 @@ cSeaBackground::cSeaBackground()noexcept
 
 
 // ****************************************************************
-// destructor
-cSeaBackground::~cSeaBackground()
+// 
+void cSeaBackground::__ExitOwn()
 {
     // 
+    SAFE_DELETE(m_pWater)
+
+    // 
+    m_pUnderSound.OnUsableOnce([this, pResource = m_pUnderSound]()
+    {
+        if(pResource->EnableRef(this))
+            pResource->Stop();
+    });
+}
+
+
+// ****************************************************************
+// move the sea background
+void cSeaBackground::__MoveOwn()
+{
+    // 
+    m_fWaveTime.Update(1.4f);
+
+    // 
     if(m_pUnderSound->EnableRef(this))
-        m_pUnderSound->Stop();
+        m_pUnderSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
 }
 
 
@@ -281,17 +319,4 @@ void cSeaBackground::__UpdateOwn()
 
     // 
     pProgram->SendUniform("u_v1Time", m_fWaveTime);
-}
-
-
-// ****************************************************************
-// move the sea background
-void cSeaBackground::__MoveOwn()
-{
-    // 
-    m_fWaveTime.Update(1.4f);
-
-    // 
-    if(m_pUnderSound->EnableRef(this))
-        m_pUnderSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
 }

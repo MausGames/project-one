@@ -17,6 +17,9 @@ cDesertBackground::cDesertBackground()noexcept
 {
     coreBatchList* pList1;
 
+    // 
+    this->__InitOwn();
+
     // create outdoor-surface object
     m_pOutdoor = new cOutdoor("dust", "crack", 3u, 4.0f);
 
@@ -75,7 +78,22 @@ cDesertBackground::cDesertBackground()noexcept
     m_Sand.SetPosition  (coreVector2(0.0f,0.0f));
     m_Sand.SetSize      (coreVector2(1.0f,1.0f) * SQRT2);
     m_Sand.SetColor3    (coreVector3(200.0f/255.0f, 186.0f/255.0f, 156.0f/255.0f) * 1.02f);
+}
 
+
+// ****************************************************************
+// destructor
+cDesertBackground::~cDesertBackground()
+{
+    // 
+    this->__ExitOwn();
+}
+
+
+// ****************************************************************
+// 
+void cDesertBackground::__InitOwn()
+{
     // load wind sound-effect
     m_pWindSound = Core::Manager::Resource->Get<coreSound>("environment_wind.wav");
     m_pWindSound.OnUsableOnce([this, pResource = m_pWindSound]()
@@ -86,12 +104,15 @@ cDesertBackground::cDesertBackground()noexcept
 
 
 // ****************************************************************
-// destructor
-cDesertBackground::~cDesertBackground()
+// 
+void cDesertBackground::__ExitOwn()
 {
     // stop wind sound-effect
-    if(m_pWindSound->EnableRef(this))
-        m_pWindSound->Stop();
+    m_pWindSound.OnUsableOnce([this, pResource = m_pWindSound]()
+    {
+        if(pResource->EnableRef(this))
+            pResource->Stop();
+    });
 }
 
 

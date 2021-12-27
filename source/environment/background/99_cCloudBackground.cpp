@@ -16,6 +16,9 @@ cCloudBackground::cCloudBackground()noexcept
 {
     coreBatchList* pList1;
 
+    // 
+    this->__InitOwn();
+
     // allocate cloud list
     pList1 = new coreBatchList(CLOUD_CLOUD_RESERVE);
     pList1->DefineProgram("environment_clouds_inst_program");
@@ -61,7 +64,22 @@ cCloudBackground::cCloudBackground()noexcept
     m_Cover.SetSize      (coreVector2(1.0f,1.0f) * SQRT2);
     m_Cover.SetColor3    (LERP(COLOR_SHIP_PURPLE, coreVector3(1.0f,1.0f,1.0f), 0.5f) * 0.5f);
     m_Cover.SetTexSize   (coreVector2(1.0f,1.0f) * SQRT2 * 1.2f);
+}
 
+
+// ****************************************************************
+// destructor
+cCloudBackground::~cCloudBackground()
+{
+    // 
+    this->__ExitOwn();
+}
+
+
+// ****************************************************************
+// 
+void cCloudBackground::__InitOwn()
+{
     // load wind sound-effect
     m_pWindSound = Core::Manager::Resource->Get<coreSound>("environment_wind.wav");
     m_pWindSound.OnUsableOnce([this, pResource = m_pWindSound]()
@@ -72,12 +90,15 @@ cCloudBackground::cCloudBackground()noexcept
 
 
 // ****************************************************************
-// destructor
-cCloudBackground::~cCloudBackground()
+// 
+void cCloudBackground::__ExitOwn()
 {
     // stop wind sound-effect
-    if(m_pWindSound->EnableRef(this))
-        m_pWindSound->Stop();
+    m_pWindSound.OnUsableOnce([this, pResource = m_pWindSound]()
+    {
+        if(pResource->EnableRef(this))
+            pResource->Stop();
+    });
 }
 
 

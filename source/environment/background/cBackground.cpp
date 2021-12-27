@@ -545,7 +545,7 @@ void cBackground::__Reset(const coreResourceReset eInit)
         m_ResolvedTexture.Delete();
 
         // 
-        SAFE_DELETE(m_pWater)
+        this->__ExitOwn();
     }
 }
 

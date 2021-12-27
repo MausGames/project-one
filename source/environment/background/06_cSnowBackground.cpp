@@ -17,11 +17,11 @@ cSnowBackground::cSnowBackground()noexcept
 {
     coreBatchList* pList1;
 
+    // 
+    this->__InitOwn();
+
     // create outdoor-surface object
     m_pOutdoor = new cOutdoor("snow", "snow", 1u, 4.0f);
-
-    // 
-    m_pWater = new cIceWater("environment_clouds_blue.png");
 
     // allocate stone list
     pList1 = new coreBatchList(SNOW_STONE_RESERVE);
@@ -169,6 +169,33 @@ cSnowBackground::cSnowBackground()noexcept
     m_Snow.SetPosition  (coreVector2(0.0f,0.0f));
     m_Snow.SetSize      (coreVector2(1.0f,1.0f) * SQRT2);
     m_Snow.SetAlpha     (0.9f);
+}
+
+
+// ****************************************************************
+// destructor
+cSnowBackground::~cSnowBackground()
+{
+    // 
+    this->__ExitOwn();
+}
+
+
+// ****************************************************************
+// 
+void cSnowBackground::__InitOwn()
+{
+    // 
+    m_pWater = new cIceWater("environment_clouds_blue.png");
+}
+
+
+// ****************************************************************
+// 
+void cSnowBackground::__ExitOwn()
+{
+    // 
+    SAFE_DELETE(m_pWater)
 }
 
 

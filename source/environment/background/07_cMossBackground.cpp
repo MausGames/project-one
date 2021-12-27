@@ -22,11 +22,13 @@ cMossBackground::cMossBackground()noexcept
 {
     coreBatchList* pList1;
 
+    // 
+    this->__InitOwn();
+
     // create outdoor-surface object
     m_pOutdoor = new cOutdoor("moss", "blood", 5u, 4.5f);
 
     // 
-    m_pWater = new cRainWater("environment_clouds_grey.png");
 
     // allocate cloud list
     pList1 = new coreBatchList(MOSS_CLOUD_RESERVE);
@@ -85,6 +87,24 @@ cMossBackground::cMossBackground()noexcept
     m_apThunder[0] = Core::Manager::Resource->Get<coreSound>("environment_thunder_01.wav");
     m_apThunder[1] = Core::Manager::Resource->Get<coreSound>("environment_thunder_02.wav");
     m_apThunder[2] = Core::Manager::Resource->Get<coreSound>("environment_thunder_03.wav");
+}
+
+
+// ****************************************************************
+// destructor
+cMossBackground::~cMossBackground()
+{
+    // 
+    this->__ExitOwn();
+}
+
+
+// ****************************************************************
+// 
+void cMossBackground::__InitOwn()
+{
+    // 
+    m_pWater = new cRainWater("environment_clouds_grey.png");
 
     // 
     m_pRainSound = Core::Manager::Resource->Get<coreSound>("environment_rain.wav");
@@ -96,12 +116,18 @@ cMossBackground::cMossBackground()noexcept
 
 
 // ****************************************************************
-// destructor
-cMossBackground::~cMossBackground()
+// 
+void cMossBackground::__ExitOwn()
 {
     // 
-    if(m_pRainSound->EnableRef(this))
-        m_pRainSound->Stop();
+    SAFE_DELETE(m_pWater)
+
+    // 
+    m_pRainSound.OnUsableOnce([this, pResource = m_pRainSound]()
+    {
+        if(pResource->EnableRef(this))
+            pResource->Stop();
+    });
 }
 
 
