@@ -34,6 +34,7 @@ cPostProcessing::cPostProcessing()noexcept
     {
         m_aWall[i].DefineProgram("menu_border_direct_program");
         m_aWall[i].DefineTexture(0u, "menu_background_black.png");
+        m_aWall[i].SetTexOffset (coreVector2(0.0f,0.071f));
     }
     this->__UpdateWall();
 
@@ -74,7 +75,10 @@ void cPostProcessing::Render()
     // 
     this->__UpdateData();
 
-    glDisable(GL_BLEND);
+    // 
+    const coreBool bDisableBlend = (m_aWall[0].GetAlpha() >= 1.0f);
+
+    if(bDisableBlend) glDisable(GL_BLEND);
     {
         // render interiors (post-process)
         for(coreUintW i = 0u; i < POST_INTERIORS; ++i)
@@ -84,7 +88,7 @@ void cPostProcessing::Render()
         for(coreUintW i = m_bOffsetActive ? 0u : POST_WALLS_BASE; i < POST_WALLS; ++i)
             m_aWall[i].Render();
     }
-    glEnable(GL_BLEND);
+    if(bDisableBlend) glEnable(GL_BLEND);
 
     // render separator
     if(m_fSplitScreenValue)
@@ -184,6 +188,7 @@ void cPostProcessing::UpdateLayout()
 
     // 
     this->__UpdateInterior();
+    this->__UpdateWall();
 }
 
 
@@ -191,13 +196,11 @@ void cPostProcessing::UpdateLayout()
 // set wallpaper opacity
 void cPostProcessing::SetWallOpacity(const coreFloat fOpacity)
 {
-    // change color instead of transparency (blending is disabled)
     ASSERT((fOpacity >= 0.0f) && (fOpacity <= 1.0f))
-    const coreVector3 vColor = coreVector3(1.0f,1.0f,1.0f) * fOpacity;
 
     // 
     for(coreUintW i = 0u; i < POST_WALLS; ++i)
-        m_aWall[i].SetColor3(vColor);
+        m_aWall[i].SetAlpha(fOpacity);
 }
 
 
@@ -264,13 +267,19 @@ void cPostProcessing::__UpdateWall()
     const coreVector2 vResolution = Core::System->GetResolution();
     const coreVector2 vSize       = coreVector2(0.0f, ((vResolution - g_vGameResolution) / vResolution.yx()).Max() * 0.5f) + 1.1f;
     const coreVector2 vFlip       = IsHorizontal(vResolution) ? coreVector2(1.0f,0.0f) : coreVector2(0.0f,1.0f);
-    const coreUintW   iAdd        = IsHorizontal(vResolution) ? POST_WALLS_BASE        : 0u;
+    const coreUintW   iAdd        = IsHorizontal(vResolution) ? POST_WALLS_BASE : 0u;
+
+    // change ordering depending on game-rotation and mirror-mode
+    const coreVector2 vBaseDir  = this->GetDirection();
+    const coreVector2 vBaseSize = this->GetSize();
+    const coreVector2 vSwap     = (vBaseDir.yx() + vBaseDir.InvertedX()) * (IsHorizontal(vBaseDir) ? vBaseSize.yx() : vBaseSize).Processed(SIGN);
+    const coreUintW   iAdd2     = IsHorizontal(vBaseDir) ? POST_WALLS_BASE : 0u;
 
     // 
     for(coreUintW i = 0u; i < POST_WALLS; ++i)
     {
-        const coreVector2 vTurn = ((i < 2u) ? vFlip.yx() : vFlip) * ((i % 2u) ? 1.0f : -1.0f);
-        const coreFloat   fMove = ((i < 2u) ? vSize.y    :  1.1f) - m_afOffset[(i + iAdd) % POST_WALLS];
+        const coreVector2 vTurn = ((i < 2u) ? vFlip.yx() : vFlip) * ((i % 2u) ? 1.0f : -1.0f) * vSwap;
+        const coreFloat   fMove = ((i < 2u) ? vSize.y    :  1.1f) - m_afOffset[(i + iAdd + iAdd2) % POST_WALLS];
 
         m_aWall[i].SetPosition (vTurn *  fMove);
         m_aWall[i].SetSize     (vSize);

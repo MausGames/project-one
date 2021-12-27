@@ -72,6 +72,7 @@ public:
     void UpdateLayout();
 
     // 
+    inline coreBool IsOffset  ()const {return m_bOffsetActive;}
     inline coreBool IsMirrored()const {return (this->GetSize().x < 0.0f);}
 
     // 
