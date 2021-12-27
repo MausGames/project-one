@@ -230,6 +230,18 @@ private:
 
 
 // ****************************************************************
+// dummy enemy class
+class cDummyEnemy final : public cEnemy
+{
+public:
+    cDummyEnemy()noexcept;
+
+    ENABLE_COPY(cDummyEnemy)
+    ASSIGN_ID(0, "Dummy")
+};
+
+
+// ****************************************************************
 // scout enemy class
 class cScoutEnemy final : public cEnemy
 {

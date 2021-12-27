@@ -21,7 +21,6 @@
 // TODO 3: change all missions to STATIC_MEMORY (check memory, it would put all missions always in memory)
 // TODO 4: check if TYPE_NEVO_BOMB still needed
 // TODO 3: do not create objects and load resources of unused game-objects and bosses (e.g. move waves into own classes ? but then ?)
-// TODO 3: in delay, replace cScoutEnemy with something which does not load any resources (may need to support instancing) (create dummy enemy with reserve 1)
 // TODO 4: move as much gameplay from gameplay-objects from mission to stages, except for mission-shared stuff, animation stuff, or special-cases requiring before-after update (teleportation)
 // TODO 1: chain should shatter into pieces on disable, should drag the stone to player on swing-start, boulder should use ice-shader, multiple boulders, clearing/resetting swing and catch attributes etc.
 
@@ -124,7 +123,7 @@
 #define STAGE_RESURRECT(s,f,t)                 {STAGE_FOREACH_ENEMY_ALL(s, pEnemy, i) {if((coreInt32(i) >= coreInt32(f)) && (coreInt32(i) <= coreInt32(t))) pEnemy->Resurrect();}); ASSERT((coreInt32(f) <= coreInt32(t)) && (coreInt32(t) < coreInt32((s)->GetNumEnemies())))}
 #define STAGE_BADGE(i,b,p)                     {this->GiveBadge(i, b, p);}
 
-#define STAGE_DELAY_START                      {UNUSED STAGE_ADD_SQUAD(pDelay, cScoutEnemy, 1u) {pDelay->GetEnemy(0u)->Configure(1, COLOR_SHIP_GREY); pDelay->GetEnemy(0u)->Resurrect();});}
+#define STAGE_DELAY_START                      {UNUSED STAGE_ADD_SQUAD(pDelay, cDummyEnemy, 1u) {pDelay->GetEnemy(0u)->Configure(1, COLOR_SHIP_GREY); pDelay->GetEnemy(0u)->Resurrect();});}
 #define STAGE_DELAY_START_CLEAR                {STAGE_DELAY_START g_pGame->GetBulletManagerEnemy()->ClearBullets(true);}
 #define STAGE_DELAY_END                        {m_apSquad.back()->GetEnemy(0u)->Kill(false);}
 

@@ -697,6 +697,16 @@ cEnemyManager* cEnemySquad::__GetDefaultEnemyManager()
 
 // ****************************************************************
 // constructor
+cDummyEnemy::cDummyEnemy()noexcept
+{
+    // load models
+    this->DefineModelHigh(Core::Manager::Object->GetLowQuad());
+    this->DefineModelLow (Core::Manager::Object->GetLowQuad());
+}
+
+
+// ****************************************************************
+// constructor
 cScoutEnemy::cScoutEnemy()noexcept
 {
     // load models
