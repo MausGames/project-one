@@ -55,7 +55,7 @@ void VertexMain()
 #if defined(_P1_DIRECT_)
 
     // calculate interpolated outline intensity
-    v_v1Strength = a_v2RawTexCoord.y * 2.0 - 1.0;
+    v_v1Strength = (a_v2RawTexCoord.y * 2.0 - 1.0) * (0.8/0.7);
 
 #endif
 }

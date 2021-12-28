@@ -182,7 +182,7 @@
 #define SHADER_DEBUG         "#define _P1_DEBUG_"      " (1) \n"        // post
 #define SHADER_OBJECT3D      "#define _P1_OBJECT3D_"   " (1) \n"        // distortion
 #define SHADER_SINGLE        "#define _P1_SINGLE_"     " (1) \n"        // decal, weather
-#define SHADER_LIGHT         "#define _P1_LIGHT_"      " (1) \n"        // outdoor, decal
+#define SHADER_LIGHT         "#define _P1_LIGHT_"      " (1) \n"        // outdoor, decal, outline
 #define SHADER_DARKNESS      "#define _P1_DARKNESS_"   " (1) \n"        // object_ship
 #define SHADER_BLINK         "#define _P1_BLINK_"      " (1) \n"        // energy, object_ship, object_meteor
 #define SHADER_FLAT          "#define _P1_FLAT_"       " (1) \n"        // outline, energy

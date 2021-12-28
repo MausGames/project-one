@@ -247,6 +247,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("effect_outline_flat.vert",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.vert", SHADER_FLAT);
     Core::Manager::Resource->Load<coreShader> ("effect_outline_bullet.vert",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.vert", SHADER_FLAT SHADER_BULLET);
     Core::Manager::Resource->Load<coreShader> ("effect_outline.frag",                    CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.frag");
+    Core::Manager::Resource->Load<coreShader> ("effect_outline_light.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.frag", SHADER_LIGHT);
     Core::Manager::Resource->Load<coreShader> ("effect_outline_direct.vert",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.vert", SHADER_DIRECT);
     Core::Manager::Resource->Load<coreShader> ("effect_outline_flat_direct.vert",        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.vert", SHADER_FLAT SHADER_DIRECT);
     Core::Manager::Resource->Load<coreShader> ("effect_outline_bullet_direct.vert",      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.vert", SHADER_FLAT SHADER_BULLET SHADER_DIRECT);
@@ -255,6 +256,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("effect_outline_flat_inst.vert",          CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.vert", CORE_SHADER_OPTION_INSTANCING SHADER_FLAT);
     Core::Manager::Resource->Load<coreShader> ("effect_outline_bullet_inst.vert",        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.vert", CORE_SHADER_OPTION_INSTANCING SHADER_FLAT SHADER_BULLET);
     Core::Manager::Resource->Load<coreShader> ("effect_outline_inst.frag",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.frag", CORE_SHADER_OPTION_INSTANCING);
+    Core::Manager::Resource->Load<coreShader> ("effect_outline_light_inst.frag",         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.frag", CORE_SHADER_OPTION_INSTANCING SHADER_LIGHT);
     Core::Manager::Resource->Load<coreShader> ("effect_outline_direct_inst.vert",        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.vert", CORE_SHADER_OPTION_INSTANCING SHADER_DIRECT);
     Core::Manager::Resource->Load<coreShader> ("effect_outline_flat_direct_inst.vert",   CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.vert", CORE_SHADER_OPTION_INSTANCING SHADER_FLAT SHADER_DIRECT);
     Core::Manager::Resource->Load<coreShader> ("effect_outline_bullet_direct_inst.vert", CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_outline.vert", CORE_SHADER_OPTION_INSTANCING SHADER_FLAT SHADER_BULLET SHADER_DIRECT);
@@ -629,6 +631,11 @@ void CoreApp::Setup()
         ->AttachShader("effect_outline.frag")
         ->Finish();
 
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_outline_light_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("effect_outline.vert")
+        ->AttachShader("effect_outline_light.frag")
+        ->Finish();
+
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_outline_direct_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("effect_outline_direct.vert")
         ->AttachShader("effect_outline_direct.frag")
@@ -658,6 +665,11 @@ void CoreApp::Setup()
         ->AttachShader("effect_outline_bullet_inst.vert")
         ->AttachShader("effect_outline_inst.frag")
         ->BindAttribute("a_v1Depth", BULLET_SHADER_ATTRIBUTE_DEPTH)
+        ->Finish();
+
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_outline_light_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("effect_outline_inst.vert")
+        ->AttachShader("effect_outline_light_inst.frag")
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_outline_direct_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
