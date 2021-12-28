@@ -52,6 +52,7 @@ target_sources(
     ${BASE_DIRECTORY}/source/game/cWeapon.cpp
     ${BASE_DIRECTORY}/source/interface/menu/cMenu.cpp
     ${BASE_DIRECTORY}/source/interface/cCombatText.cpp
+    ${BASE_DIRECTORY}/source/interface/cCreditRoll.cpp
     ${BASE_DIRECTORY}/source/interface/cInterface.cpp
     ${BASE_DIRECTORY}/source/interface/cMsgBox.cpp
     ${BASE_DIRECTORY}/source/interface/cTooltip.cpp
