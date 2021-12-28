@@ -884,7 +884,7 @@ cRepairEnemy::cRepairEnemy()noexcept
     // 
     this->DefineModelHigh("object_sphere.md3");
     this->DefineModelLow ("object_sphere.md3");
-    this->SetSize        (coreVector3(1.0f,1.0f,1.0f) * 5.0f);
+    this->SetSize        (coreVector3(1.0f,1.0f,1.0f) * 5.0f * PLAYER_SIZE_FACTOR);
 
     // 
     m_Bubble.DefineModel  ("object_sphere.md3");
@@ -1021,7 +1021,7 @@ void cRepairEnemy::__MoveOwn()
     // 
     m_Ship.SetPosition (coreVector3(vNewPos, 0.0f));
     m_Ship.SetDirection(coreVector3(vNewDir, 0.0f));
-    m_Ship.SetSize     (fAlpha * coreVector3(1.0f,1.0f,1.0f));
+    m_Ship.SetSize     (fAlpha * m_pPlayer->GetSize());
     m_Ship.SetAlpha    (fAlpha);
     m_Ship.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.5f));
     m_Ship.Move();

@@ -39,6 +39,7 @@ cPlayer::cPlayer()noexcept
     this->DefineTexture(1u, "menu_background_black.png");
 
     // set object properties
+    this->SetSize             (coreVector3(1.0f,1.0f,1.0f) * PLAYER_SIZE_FACTOR);
     this->SetDirection        (coreVector3(0.0f,1.0f,0.0f));
     this->SetOrientation      (coreVector3(0.0f,0.0f,1.0f));
     this->SetCollisionModifier(coreVector3(0.0f,0.0f,0.0f));
@@ -81,7 +82,7 @@ cPlayer::cPlayer()noexcept
     m_Arrow.DefineModel  ("bullet_cone.md3");
     m_Arrow.DefineTexture(0u, "effect_energy.png");
     m_Arrow.DefineProgram("effect_energy_flat_invert_program");
-    m_Arrow.SetSize      (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
+    m_Arrow.SetSize      (coreVector3(1.0f,1.0f,1.0f) * 1.3f * PLAYER_SIZE_FACTOR);
     m_Arrow.SetAlpha     (0.0f);
     m_Arrow.SetTexSize   (coreVector2(4.0f,1.0f) * 0.2f);
     m_Arrow.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
@@ -107,7 +108,7 @@ cPlayer::cPlayer()noexcept
         m_aShield[i].DefineModel  ("effect_shield.md3");
         m_aShield[i].DefineTexture(0u, "effect_shield.png");
         m_aShield[i].DefineProgram("effect_shield_program");
-        m_aShield[i].SetSize      (coreVector3(4.7f,4.7f,4.7f) * (i ? -1.0f : 1.0f));
+        m_aShield[i].SetSize      (coreVector3(4.7f,4.7f,4.7f) * (i ? -1.0f : 1.0f) * PLAYER_SIZE_FACTOR);
         m_aShield[i].SetAlpha     (0.0f);
         m_aShield[i].SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
     }
@@ -404,7 +405,7 @@ void cPlayer::Move()
 
             // 
             m_Range.SetPosition (this->GetPosition());
-            m_Range.SetSize     (coreVector3(1.0f,1.0f,1.0f) * PLAYER_RANGE_SIZE * fScale);
+            m_Range.SetSize     (coreVector3(1.0f,1.0f,1.0f) * PLAYER_RANGE_SIZE * PLAYER_SIZE_FACTOR * fScale);
             m_Range.SetDirection(coreVector3(vDir, 0.0f));
             m_Range.SetAlpha    (STEP(0.0f, 0.15f, fScale));
             m_Range.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.1f));
@@ -420,7 +421,7 @@ void cPlayer::Move()
             if(m_fArrowValue <= 0.0f) this->DisableArrow();
 
             // 
-            m_Arrow.SetPosition (this->GetPosition () + this->GetDirection() * 6.2f);
+            m_Arrow.SetPosition (this->GetPosition () + this->GetDirection() * 6.2f * PLAYER_SIZE_FACTOR);
             m_Arrow.SetDirection(this->GetDirection());
             m_Arrow.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.15f));
             m_Arrow.SetAlpha    (LERPH3(0.0f, 1.0f, m_fArrowValue));
@@ -434,7 +435,7 @@ void cPlayer::Move()
 
             // 
             m_Wind.SetPosition (this->GetPosition());
-            m_Wind.SetSize     (coreVector3(1.0f,1.08f,1.0f) * PLAYER_WIND_SIZE * LERP(1.0f, 1.5f, POW3(m_fRollTime)));
+            m_Wind.SetSize     (coreVector3(1.0f,1.08f,1.0f) * PLAYER_WIND_SIZE * PLAYER_SIZE_FACTOR * LERP(1.0f, 1.5f, POW3(m_fRollTime)));
             m_Wind.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.4f));
             m_Wind.Move();
         }
@@ -456,7 +457,7 @@ void cPlayer::Move()
 
             // 
             m_Bubble.SetPosition (this->GetPosition());
-            m_Bubble.SetSize     (coreVector3(1.0f,1.0f,1.0f) * PLAYER_BUBBLE_SIZE * m_Bubble.GetAlpha());
+            m_Bubble.SetSize     (coreVector3(1.0f,1.0f,1.0f) * PLAYER_BUBBLE_SIZE * PLAYER_SIZE_FACTOR * m_Bubble.GetAlpha());
             m_Bubble.SetDirection(coreVector3(vDir, 0.0f));
             m_Bubble.SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.2f));
             m_Bubble.Move();
@@ -921,9 +922,9 @@ void cPlayer::UpdateExhaust(const coreFloat fStrength)
     else if(!fStrength &&  m_Exhaust.IsEnabled(CORE_OBJECT_ENABLE_ALL)) g_pGlow->UnbindObject(&m_Exhaust);
 
     // 
-    m_Exhaust.SetSize     (coreVector3(fSize, fLen, fSize) * 0.6f);
+    m_Exhaust.SetSize     (coreVector3(fSize, fLen, fSize) * 0.6f * PLAYER_SIZE_FACTOR);
     m_Exhaust.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.75f));
-    m_Exhaust.SetPosition (this->GetPosition () - this->GetDirection() * (m_Exhaust.GetSize().y + 4.0f));
+    m_Exhaust.SetPosition (this->GetPosition () - this->GetDirection() * (m_Exhaust.GetSize().y + 4.0f * PLAYER_SIZE_FACTOR));
     m_Exhaust.SetDirection(this->GetDirection());
     m_Exhaust.SetEnabled  (fStrength ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
     m_Exhaust.Move();

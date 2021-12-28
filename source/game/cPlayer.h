@@ -28,6 +28,7 @@
 #define PLAYER_LIVES              (LIVES)           // 
 #define PLAYER_SHIELD             (SHIELD)          // 
 #define PLAYER_COLLISION_MIN      (0.15f)           // 
+#define PLAYER_SIZE_FACTOR        (1.15f)           // 
 #define PLAYER_AREA_FACTOR        (1.06f)           // 
 #define PLAYER_RANGE_SIZE         (1.04f)           // 
 #define PLAYER_WIND_SIZE          (4.5f)            // 
