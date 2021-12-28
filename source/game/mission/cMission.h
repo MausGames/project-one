@@ -362,7 +362,7 @@ public:
     cNoMission() = default;
 
     DISABLE_COPY(cNoMission)
-    ASSIGN_ID(0, "Nothing")
+    ASSIGN_ID(0, "NOTHING")
 };
 
 
@@ -407,7 +407,7 @@ public:
     ~cViridoMission()final;
 
     DISABLE_COPY(cViridoMission)
-    ASSIGN_ID(1, "Virido")
+    ASSIGN_ID(1, "VIRIDO")
 
     // 
     void EnableBall (const coreUintW iIndex, const coreVector2 vPosition, const coreVector2 vDirection);
@@ -503,7 +503,7 @@ public:
     ~cNevoMission()final;
 
     DISABLE_COPY(cNevoMission)
-    ASSIGN_ID(2, "Nevo")
+    ASSIGN_ID(2, "NEVO")
 
     // 
     void EnableBomb (const coreUintW iIndex, const coreBool bGrow);
@@ -573,7 +573,7 @@ public:
     ~cHarenaMission()final;
 
     DISABLE_COPY(cHarenaMission)
-    ASSIGN_ID(3, "Harena")
+    ASSIGN_ID(3, "HARENA")
 
     // 
     void EnableSpike (const coreUintW iIndex);
@@ -629,7 +629,7 @@ public:
     ~cRutilusMission()final;
 
     DISABLE_COPY(cRutilusMission)
-    ASSIGN_ID(4, "Rutilus")
+    ASSIGN_ID(4, "RUTILUS")
 
     // 
     void EnableTeleporter (const coreUintW iIndex);
@@ -700,7 +700,7 @@ public:
     ~cGeluMission()final;
 
     DISABLE_COPY(cGeluMission)
-    ASSIGN_ID(5, "Gelu")
+    ASSIGN_ID(5, "GELU")
 
     // 
     void EnableFang (const coreUintW iIndex);
@@ -767,7 +767,7 @@ public:
     ~cCalorMission()final;
 
     DISABLE_COPY(cCalorMission)
-    ASSIGN_ID(6, "Calor")
+    ASSIGN_ID(6, "CALOR")
 
     // 
     void EnableLoad (const cShip* pOwner);
@@ -836,7 +836,7 @@ public:
     ~cMuscusMission()final;
 
     DISABLE_COPY(cMuscusMission)
-    ASSIGN_ID(7, "Muscus")
+    ASSIGN_ID(7, "MUSCUS")
 
     // 
     void EnableGenerate (const coreUintW iIndex);
@@ -879,7 +879,7 @@ public:
     cAterMission()noexcept;
 
     DISABLE_COPY(cAterMission)
-    ASSIGN_ID(8, "Ater")
+    ASSIGN_ID(8, "ATER")
 
 
 private:
@@ -900,7 +900,7 @@ public:
     cIntroMission()noexcept;
 
     DISABLE_COPY(cIntroMission)
-    ASSIGN_ID(99, "Intro")
+    ASSIGN_ID(99, "INTRO")
 
 
 private:
@@ -922,7 +922,7 @@ public:
     cBonus1Mission()noexcept;
 
     DISABLE_COPY(cBonus1Mission)
-    ASSIGN_ID(101, "Bonus 1")
+    ASSIGN_ID(101, "BONUS 1")
 
 
 private:
@@ -943,7 +943,7 @@ public:
     cBonus2Mission()noexcept;
 
     DISABLE_COPY(cBonus2Mission)
-    ASSIGN_ID(102, "Bonus 2")
+    ASSIGN_ID(102, "BONUS 2")
 
 
 private:
@@ -964,7 +964,7 @@ public:
     cErrorMission()noexcept;
 
     DISABLE_COPY(cErrorMission)
-    ASSIGN_ID(201, "Error")
+    ASSIGN_ID(201, "ERROR")
 
 
 private:
@@ -985,7 +985,7 @@ public:
     cDemoMission()noexcept;
 
     DISABLE_COPY(cDemoMission)
-    ASSIGN_ID(202, "Demo")
+    ASSIGN_ID(202, "DEMO")
 
 
 private:
