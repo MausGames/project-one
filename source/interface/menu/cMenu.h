@@ -74,13 +74,13 @@
 #define MENU_BUTTON             "menu_background_black.png", "menu_background_black.png"
 #define MENU_SWITCHBOX          "default_black.png", "default_black.png"
 #define MENU_FONT_DEFAULT       "keifont.ttf"
-#define MENU_FONT_STANDARD_1    MENU_FONT_DEFAULT, (19u)
-#define MENU_FONT_STANDARD_2    MENU_FONT_DEFAULT, (24u)
+#define MENU_FONT_STANDARD_1    MENU_FONT_DEFAULT, (20u)
+#define MENU_FONT_STANDARD_2    MENU_FONT_DEFAULT, (25u)
 #define MENU_FONT_STANDARD_3    MENU_FONT_DEFAULT, (35u)
 #define MENU_FONT_STANDARD_4    MENU_FONT_DEFAULT, (46u)
 #define MENU_FONT_STANDARD_5    MENU_FONT_DEFAULT, (79u)
-#define MENU_FONT_DYNAMIC_1     "dynamic_font",    (19u)
-#define MENU_FONT_DYNAMIC_2     "dynamic_font",    (24u)
+#define MENU_FONT_DYNAMIC_1     "dynamic_font",    (20u)
+#define MENU_FONT_DYNAMIC_2     "dynamic_font",    (25u)
 #define MENU_FONT_DYNAMIC_3     "dynamic_font",    (35u)
 #define MENU_FONT_DYNAMIC_4     "dynamic_font",    (46u)
 #define MENU_FONT_DYNAMIC_5     "dynamic_font",    (79u)
