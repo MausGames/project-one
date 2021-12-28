@@ -412,7 +412,7 @@ void cGame::StartIntro()
     ADD_FLAG(m_iStatus, GAME_STATUS_INTRO)
 
     // 
-    m_fTimeInOut = -GAME_INTRO_DELAY;
+    m_fTimeInOut = GAME_INTRO_OFFSET;
 
     for(coreUintW i = 0u, ie = this->GetNumPlayers(); i < ie; ++i)
     {

@@ -21,8 +21,8 @@
 #define GAME_PLAYERS        (PLAYERS)     // default number of players
 #define GAME_HELPERS        (HELPERS)     // 
 #define GAME_CONTINUES      (CONTINUES)   // 
-#define GAME_INTRO_DELAY    (0.2f)        // 
-#define GAME_INTRO_DURATION (3.5f)        // 
+#define GAME_INTRO_OFFSET   (0.4f)        // 
+#define GAME_INTRO_DURATION (4.1f)        // 
 
 enum eGameStatus : coreUint8
 {

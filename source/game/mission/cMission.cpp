@@ -249,7 +249,7 @@ void cMission::DeactivateWave()
 
     // 
     m_iStageSub  = 0xFFu;
-    m_fStageWait = 3.5f;
+    m_fStageWait = 4.0f;
 
     // 
     g_pSave->EditGlobalStats()->iWavesDone += 1u;

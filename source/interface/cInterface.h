@@ -24,9 +24,9 @@
 #define INTERFACE_BANNER_SPEED            (4.0f)                            // fade-in and fade-out speed
 #define INTERFACE_BANNER_SPEED_REV        (1.0f / INTERFACE_BANNER_SPEED)   // 
 #define INTERFACE_BANNER_ANIMATION        (2.9f)                            // animation duration
-#define INTERFACE_BANNER_DURATION_MISSION (3.0f)                            // 
+#define INTERFACE_BANNER_DURATION_MISSION (3.7f)                            // 
 #define INTERFACE_BANNER_DURATION_BOSS    (3.0f)                            // display duration (with fading)  
-#define INTERFACE_BANNER_DURATION_SCORE   (2.5f)                            // 
+#define INTERFACE_BANNER_DURATION_SCORE   (3.0f)                            // 
 
 #define INTERFACE_BANNER_TYPE_MISSION     (0u)                              // mission banner type
 #define INTERFACE_BANNER_TYPE_BOSS        (1u)                              // boss banner type

@@ -33,6 +33,9 @@
 #define MISSION_NO_BOSS    (0xFFu)     // no boss currently active (error-value)
 #define MISSION_NO_WAVE    (0xFFu)     // 
 #define MISSION_NO_SEGMENT (0xFFu)     // 
+#define MISSION_WAIT_INTRO (1.5f)      // 
+#define MISSION_WAIT_OUTRO (2.0f)      // 
+#define MISSION_WAIT_PLAY  (5.9f)      // 
 
 #define MISSION_SEGMENT_IS_BOSS(i) ((i) >= MISSION_WAVES)
 #define MISSION_BOSS_TO_SEGMENT(i) ((i) +  MISSION_WAVES)
