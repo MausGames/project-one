@@ -30,7 +30,7 @@ using cGuiLabel     = cGuiObjectGen<coreLabel>;
 using cGuiButton    = cGuiObjectGen<coreButton>;
 using cGuiCheckBox  = cGuiObjectGen<coreCheckBox>;
 using cGuiTextBox   = cGuiObjectGen<coreTextBox>;
-using cGuiSwitchBox = cGuiObjectGen<coreSwitchBoxU8>;
+using cGuiSwitchBox = cGuiObjectGen<coreSwitchBoxU16>;
 
 
 // ****************************************************************

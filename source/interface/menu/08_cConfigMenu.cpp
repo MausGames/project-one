@@ -250,7 +250,7 @@ cConfigMenu::cConfigMenu()noexcept
     m_TextureFilter.AddEntryLanguage("VALUE_OFF",              0u);
     for(coreUintW i = 2u, ie = iMaxSamples;    i <= ie; i <<= 1u) m_AntiAliasing .AddEntry(PRINT("%zux", i), i);
     for(coreUintW i = 2u, ie = iMaxAnisotropy; i <= ie; i <<= 1u) m_TextureFilter.AddEntry(PRINT("%zux", i), i);
-    if(m_AntiAliasing.GetEntry(m_AntiAliasing.GetNumEntries() - 1u).tValue != iMaxSamples) m_AntiAliasing.AddEntry(PRINT("%ux", iMaxSamples), iMaxSamples);   // possible 6x
+    if(m_AntiAliasing.GetValue(m_AntiAliasing.GetNumEntries() - 1u) != iMaxSamples) m_AntiAliasing.AddEntry(PRINT("%ux", iMaxSamples), iMaxSamples);   // possible 6x
     m_RenderQuality.AddEntryLanguage("VALUE_LOW",              0u);
     m_RenderQuality.AddEntryLanguage("VALUE_HIGH",             1u);
     m_ShadowQuality.AddEntryLanguage("VALUE_LOW",              1u);
@@ -377,7 +377,7 @@ void cConfigMenu::Move()
         {
             // 
             if(m_Monitor.GetUserSwitch())
-                this->__LoadResolutions(m_Monitor.GetCurEntry().tValue);
+                this->__LoadResolutions(m_Monitor.GetCurValue());
 
             // 
             if(m_RenderQuality.GetUserSwitch())
@@ -399,10 +399,10 @@ void cConfigMenu::Move()
             cMenu::UpdateSwitchBox(&m_FlashEffects);
 
             // 
-                 if(m_RenderQuality.GetCurEntry().tValue == 0u) m_RenderQuality.GetCaption()->SetColor3(COLOR_MENU_YELLOW);
-            else if(m_RenderQuality.GetCurEntry().tValue == 1u) m_RenderQuality.GetCaption()->SetColor3(COLOR_MENU_GREEN);
-                 if(m_ShadowQuality.GetCurEntry().tValue == 1u) m_ShadowQuality.GetCaption()->SetColor3(COLOR_MENU_YELLOW);
-            else if(m_ShadowQuality.GetCurEntry().tValue == 2u) m_ShadowQuality.GetCaption()->SetColor3(COLOR_MENU_GREEN);
+                 if(m_RenderQuality.GetCurValue() == 0u) m_RenderQuality.GetCaption()->SetColor3(COLOR_MENU_YELLOW);
+            else if(m_RenderQuality.GetCurValue() == 1u) m_RenderQuality.GetCaption()->SetColor3(COLOR_MENU_GREEN);
+                 if(m_ShadowQuality.GetCurValue() == 1u) m_ShadowQuality.GetCaption()->SetColor3(COLOR_MENU_YELLOW);
+            else if(m_ShadowQuality.GetCurValue() == 2u) m_ShadowQuality.GetCaption()->SetColor3(COLOR_MENU_GREEN);
         }
         break;
 
@@ -426,10 +426,10 @@ void cConfigMenu::Move()
             cMenu::UpdateSwitchBox(&m_AmbientVolume);
 
             // 
-            m_GlobalVolume .GetCaption()->SetColor3(COLOR_HEALTH(I_TO_F(m_GlobalVolume .GetCurEntry().tValue) * 0.01f));
-            m_MusicVolume  .GetCaption()->SetColor3(COLOR_HEALTH(I_TO_F(m_MusicVolume  .GetCurEntry().tValue) * 0.01f));
-            m_EffectVolume .GetCaption()->SetColor3(COLOR_HEALTH(I_TO_F(m_EffectVolume .GetCurEntry().tValue) * 0.01f));
-            m_AmbientVolume.GetCaption()->SetColor3(COLOR_HEALTH(I_TO_F(m_AmbientVolume.GetCurEntry().tValue) * 0.01f));
+            m_GlobalVolume .GetCaption()->SetColor3(COLOR_HEALTH(I_TO_F(m_GlobalVolume .GetCurValue()) * 0.01f));
+            m_MusicVolume  .GetCaption()->SetColor3(COLOR_HEALTH(I_TO_F(m_MusicVolume  .GetCurValue()) * 0.01f));
+            m_EffectVolume .GetCaption()->SetColor3(COLOR_HEALTH(I_TO_F(m_EffectVolume .GetCurValue()) * 0.01f));
+            m_AmbientVolume.GetCaption()->SetColor3(COLOR_HEALTH(I_TO_F(m_AmbientVolume.GetCurValue()) * 0.01f));
         }
         break;
 
@@ -462,13 +462,13 @@ void cConfigMenu::Move()
                         coreBool bSkip = false;
 
                         // skip joystick/gamepad input sets without available device
-                        if((oInput.oType.GetCurEntry().tValue >= INPUT_SETS_KEYBOARD) && (oInput.oType.GetCurEntry().tValue - INPUT_SETS_KEYBOARD >= Core::Input->GetJoystickNum()))
+                        if((oInput.oType.GetCurValue() >= INPUT_SETS_KEYBOARD) && (oInput.oType.GetCurValue() - INPUT_SETS_KEYBOARD >= Core::Input->GetJoystickNum()))
                             bSkip = true;
 
                         // skip already assigned input sets
                         for(coreUintW k = 0u; k < MENU_CONFIG_INPUTS; ++k)
                         {
-                            if((g_CurConfig.Input.aiType[k] == oInput.oType.GetCurEntry().tValue) && (k != i))
+                            if((g_CurConfig.Input.aiType[k] == oInput.oType.GetCurValue()) && (k != i))
                             {
                                 bSkip = true;
                                 break;
@@ -485,13 +485,13 @@ void cConfigMenu::Move()
                     }
 
                     // 
-                    g_CurConfig.Input.aiType[i] = oInput.oType.GetCurEntry().tValue;
+                    g_CurConfig.Input.aiType[i] = oInput.oType.GetCurValue();
                     this->__LoadInputs();
                 }
 
                 // 
-                if(oInput.oRumble  .GetUserSwitch()) g_CurConfig.Input.aiRumble  [i] = oInput.oRumble  .GetCurEntry().tValue;
-                if(oInput.oFireMode.GetUserSwitch()) g_CurConfig.Input.aiFireMode[i] = oInput.oFireMode.GetCurEntry().tValue;
+                if(oInput.oRumble  .GetUserSwitch()) g_CurConfig.Input.aiRumble  [i] = oInput.oRumble  .GetCurValue();
+                if(oInput.oFireMode.GetUserSwitch()) g_CurConfig.Input.aiFireMode[i] = oInput.oFireMode.GetCurValue();
 
                 // 
                 cMenu::UpdateSwitchBox(&oInput.oType);
@@ -505,8 +505,8 @@ void cConfigMenu::Move()
 
                     if(oButton.IsClicked())
                     {
-                        const coreChar*  pcText = PRINT("%s [%s]", Core::Language->GetString("MAPPING"), m_aLabel[ENTRY_INPUT_MOVEUP + j].GetText());
-                        const coreUint8& iType  = oInput.oType.GetCurEntry().tValue;   // # referenced in lambda
+                        const coreChar*   pcText = PRINT("%s [%s]", Core::Language->GetString("MAPPING"), m_aLabel[ENTRY_INPUT_MOVEUP + j].GetText());
+                        const coreUint16& iType  = oInput.oType.GetCurValue();   // # referenced in lambda
 
                         // 
                         g_pMenu->GetMsgBox()->ShowMapping(pcText, iType, [&](const coreInt32 iAnswer, const coreInt16 iKey)
@@ -665,35 +665,35 @@ void cConfigMenu::Move()
 // 
 void cConfigMenu::CheckValues()
 {
-    const coreUint8   iCurMonitor    = m_Monitor   .GetCurEntry().tValue;
-    const coreUint8   iCurValue      = m_Resolution.GetCurEntry().tValue;
+    const coreUint16  iCurMonitor    = m_Monitor   .GetCurValue();
+    const coreUint16  iCurValue      = m_Resolution.GetCurValue();
     const coreVector2 vCurResolution = (iCurValue == 0xFFu) ? Core::System->GetResolution() : ((iCurValue == 0xEEu) ? coreVector2(0.0f,0.0f) : Core::System->GetDisplayData(iCurMonitor).avAvailableRes[iCurValue]);
 
     // 
     const coreBool bSave = (vCurResolution != coreVector2(I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH)), I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT)))) ||
-                           (m_Monitor      .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY))                                     ||
-                           (m_DisplayMode  .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN))                                  ||
-                           (m_AntiAliasing .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING))                              ||
-                           (m_TextureFilter.GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY))                         ||
-                           (m_RenderQuality.GetCurEntry().tValue != g_OldConfig.Graphics.iRender)                                                         ||
-                           (m_ShadowQuality.GetCurEntry().tValue != g_OldConfig.Graphics.iShadow)                                                         ||
-                           (m_ShakeEffects .GetCurEntry().tValue != g_OldConfig.Graphics.iShake)                                                          ||
-                           (m_FlashEffects .GetCurEntry().tValue != g_OldConfig.Graphics.iFlash)                                                          ||
-                           (m_GlobalVolume .GetCurEntry().tValue != cConfigMenu::__VolumeToUint8(Core::Config->GetFloat(CORE_CONFIG_AUDIO_GLOBALVOLUME))) ||
-                           (m_MusicVolume  .GetCurEntry().tValue != cConfigMenu::__VolumeToUint8(Core::Config->GetFloat(CORE_CONFIG_AUDIO_MUSICVOLUME)))  ||
-                           (m_EffectVolume .GetCurEntry().tValue != cConfigMenu::__VolumeToUint8(g_OldConfig.Audio.fEffectVolume))                        ||
-                           (m_AmbientVolume.GetCurEntry().tValue != cConfigMenu::__VolumeToUint8(g_OldConfig.Audio.fAmbientVolume))                       ||
-                           (std::strcmp(Core::Language->GetPath(), Core::Config->GetString(CORE_CONFIG_BASE_LANGUAGE)))                                   ||
-                           (m_TextSize     .GetCurEntry().tValue != g_OldConfig.Game.iTextSize)                                                           ||
-                           (m_GameRotation .GetCurEntry().tValue != g_OldConfig.Game.iGameRotation)                                                       ||
-                           (m_GameScale    .GetCurEntry().tValue != g_OldConfig.Game.iGameScale)                                                          ||
-                           (m_GameSpeed    .GetCurEntry().tValue != g_OldConfig.Game.iGameSpeed)                                                          ||
-                           (m_HudRotation  .GetCurEntry().tValue != g_OldConfig.Game.iHudRotation)                                                        ||
-                           (m_HudScale     .GetCurEntry().tValue != g_OldConfig.Game.iHudScale)                                                           ||
-                           (m_HudType      .GetCurEntry().tValue != g_OldConfig.Game.iHudType)                                                            ||
-                           (m_UpdateFreq   .GetCurEntry().tValue != g_OldConfig.Game.iUpdateFreq)                                                         ||
-                           (m_Version      .GetCurEntry().tValue != g_OldConfig.Game.iVersion)                                                            ||
-                           (m_MirrorMode   .GetCurEntry().tValue != g_OldConfig.Game.iMirrorMode)                                                         ||
+                           (m_Monitor      .GetCurValue() != Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY))                                     ||
+                           (m_DisplayMode  .GetCurValue() != Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN))                                  ||
+                           (m_AntiAliasing .GetCurValue() != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING))                              ||
+                           (m_TextureFilter.GetCurValue() != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY))                         ||
+                           (m_RenderQuality.GetCurValue() != g_OldConfig.Graphics.iRender)                                                         ||
+                           (m_ShadowQuality.GetCurValue() != g_OldConfig.Graphics.iShadow)                                                         ||
+                           (m_ShakeEffects .GetCurValue() != g_OldConfig.Graphics.iShake)                                                          ||
+                           (m_FlashEffects .GetCurValue() != g_OldConfig.Graphics.iFlash)                                                          ||
+                           (m_GlobalVolume .GetCurValue() != cConfigMenu::__VolumeToUint8(Core::Config->GetFloat(CORE_CONFIG_AUDIO_GLOBALVOLUME))) ||
+                           (m_MusicVolume  .GetCurValue() != cConfigMenu::__VolumeToUint8(Core::Config->GetFloat(CORE_CONFIG_AUDIO_MUSICVOLUME)))  ||
+                           (m_EffectVolume .GetCurValue() != cConfigMenu::__VolumeToUint8(g_OldConfig.Audio.fEffectVolume))                        ||
+                           (m_AmbientVolume.GetCurValue() != cConfigMenu::__VolumeToUint8(g_OldConfig.Audio.fAmbientVolume))                       ||
+                           (std::strcmp(Core::Language->GetPath(), Core::Config->GetString(CORE_CONFIG_BASE_LANGUAGE)))                            ||
+                           (m_TextSize     .GetCurValue() != g_OldConfig.Game.iTextSize)                                                           ||
+                           (m_GameRotation .GetCurValue() != g_OldConfig.Game.iGameRotation)                                                       ||
+                           (m_GameScale    .GetCurValue() != g_OldConfig.Game.iGameScale)                                                          ||
+                           (m_GameSpeed    .GetCurValue() != g_OldConfig.Game.iGameSpeed)                                                          ||
+                           (m_HudRotation  .GetCurValue() != g_OldConfig.Game.iHudRotation)                                                        ||
+                           (m_HudScale     .GetCurValue() != g_OldConfig.Game.iHudScale)                                                           ||
+                           (m_HudType      .GetCurValue() != g_OldConfig.Game.iHudType)                                                            ||
+                           (m_UpdateFreq   .GetCurValue() != g_OldConfig.Game.iUpdateFreq)                                                         ||
+                           (m_Version      .GetCurValue() != g_OldConfig.Game.iVersion)                                                            ||
+                           (m_MirrorMode   .GetCurValue() != g_OldConfig.Game.iMirrorMode)                                                         ||
                            (std::memcmp(&g_CurConfig.Input, &g_OldConfig.Input, sizeof(sConfig::Input)));
 
     // 
@@ -787,54 +787,54 @@ void cConfigMenu::LoadValues()
 // 
 void cConfigMenu::SaveValues()
 {
-    const coreUint8   iCurMonitor    = m_Monitor   .GetCurEntry().tValue;
-    const coreUint8   iCurValue      = m_Resolution.GetCurEntry().tValue;
+    const coreUint16  iCurMonitor    = m_Monitor   .GetCurValue();
+    const coreUint16  iCurValue      = m_Resolution.GetCurValue();
     const coreVector2 vCurResolution = (iCurValue == 0xFFu) ? Core::System->GetResolution() : ((iCurValue == 0xEEu) ? coreVector2(0.0f,0.0f) : Core::System->GetDisplayData(iCurMonitor).avAvailableRes[iCurValue]);
 
     // 
     const coreBool bReset = (vCurResolution != coreVector2(I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH)), I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT)))) ||
-                            (m_Monitor      .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY))             ||
-                            (m_DisplayMode  .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN))          ||
-                            (m_AntiAliasing .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING))      ||
-                            (m_TextureFilter.GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY)) ||
-                            (m_RenderQuality.GetCurEntry().tValue != g_CurConfig.Graphics.iRender);
+                            (m_Monitor      .GetCurValue() != Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY))             ||
+                            (m_DisplayMode  .GetCurValue() != Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN))          ||
+                            (m_AntiAliasing .GetCurValue() != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING))      ||
+                            (m_TextureFilter.GetCurValue() != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY)) ||
+                            (m_RenderQuality.GetCurValue() != g_CurConfig.Graphics.iRender);
 
     // 
     Core::Config->SetInt(CORE_CONFIG_SYSTEM_WIDTH,               F_TO_SI(vCurResolution.x));
     Core::Config->SetInt(CORE_CONFIG_SYSTEM_HEIGHT,              F_TO_SI(vCurResolution.y));
-    Core::Config->SetInt(CORE_CONFIG_SYSTEM_DISPLAY,             m_Monitor      .GetCurEntry().tValue);
-    Core::Config->SetInt(CORE_CONFIG_SYSTEM_FULLSCREEN,          m_DisplayMode  .GetCurEntry().tValue);
-    Core::Config->SetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING,      m_AntiAliasing .GetCurEntry().tValue);
-    Core::Config->SetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY, m_TextureFilter.GetCurEntry().tValue);
-    g_CurConfig.Graphics.iRender = m_RenderQuality.GetCurEntry().tValue;
-    g_CurConfig.Graphics.iShadow = m_ShadowQuality.GetCurEntry().tValue;
-    g_CurConfig.Graphics.iShake  = m_ShakeEffects .GetCurEntry().tValue;
-    g_CurConfig.Graphics.iFlash  = m_FlashEffects .GetCurEntry().tValue;
+    Core::Config->SetInt(CORE_CONFIG_SYSTEM_DISPLAY,             m_Monitor      .GetCurValue());
+    Core::Config->SetInt(CORE_CONFIG_SYSTEM_FULLSCREEN,          m_DisplayMode  .GetCurValue());
+    Core::Config->SetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING,      m_AntiAliasing .GetCurValue());
+    Core::Config->SetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY, m_TextureFilter.GetCurValue());
+    g_CurConfig.Graphics.iRender = m_RenderQuality.GetCurValue();
+    g_CurConfig.Graphics.iShadow = m_ShadowQuality.GetCurValue();
+    g_CurConfig.Graphics.iShake  = m_ShakeEffects .GetCurValue();
+    g_CurConfig.Graphics.iFlash  = m_FlashEffects .GetCurValue();
 
     // 
-    Core::Config->SetFloat(CORE_CONFIG_AUDIO_GLOBALVOLUME, cConfigMenu::__VolumeToFloat(m_GlobalVolume.GetCurEntry().tValue));
-    Core::Config->SetFloat(CORE_CONFIG_AUDIO_MUSICVOLUME,  cConfigMenu::__VolumeToFloat(m_MusicVolume .GetCurEntry().tValue));
-    g_CurConfig.Audio.fEffectVolume  = cConfigMenu::__VolumeToFloat(m_EffectVolume .GetCurEntry().tValue);
-    g_CurConfig.Audio.fAmbientVolume = cConfigMenu::__VolumeToFloat(m_AmbientVolume.GetCurEntry().tValue);
+    Core::Config->SetFloat(CORE_CONFIG_AUDIO_GLOBALVOLUME, cConfigMenu::__VolumeToFloat(m_GlobalVolume.GetCurValue()));
+    Core::Config->SetFloat(CORE_CONFIG_AUDIO_MUSICVOLUME,  cConfigMenu::__VolumeToFloat(m_MusicVolume .GetCurValue()));
+    g_CurConfig.Audio.fEffectVolume  = cConfigMenu::__VolumeToFloat(m_EffectVolume .GetCurValue());
+    g_CurConfig.Audio.fAmbientVolume = cConfigMenu::__VolumeToFloat(m_AmbientVolume.GetCurValue());
 
     // 
     Core::Config->SetString(CORE_CONFIG_BASE_LANGUAGE, Core::Language->GetPath());
-    g_CurConfig.Game.iGameRotation = m_GameRotation.GetCurEntry().tValue;
-    g_CurConfig.Game.iGameScale    = m_GameScale   .GetCurEntry().tValue;
-    g_CurConfig.Game.iGameSpeed    = m_GameSpeed   .GetCurEntry().tValue;
-    g_CurConfig.Game.iHudRotation  = m_HudRotation .GetCurEntry().tValue;
-    g_CurConfig.Game.iHudScale     = m_HudScale    .GetCurEntry().tValue;
-    g_CurConfig.Game.iHudType      = m_HudType     .GetCurEntry().tValue;
-    g_CurConfig.Game.iUpdateFreq   = m_UpdateFreq  .GetCurEntry().tValue;
-    g_CurConfig.Game.iVersion      = m_Version     .GetCurEntry().tValue;
-    g_CurConfig.Game.iMirrorMode   = m_MirrorMode  .GetCurEntry().tValue;
+    g_CurConfig.Game.iGameRotation = m_GameRotation.GetCurValue();
+    g_CurConfig.Game.iGameScale    = m_GameScale   .GetCurValue();
+    g_CurConfig.Game.iGameSpeed    = m_GameSpeed   .GetCurValue();
+    g_CurConfig.Game.iHudRotation  = m_HudRotation .GetCurValue();
+    g_CurConfig.Game.iHudScale     = m_HudScale    .GetCurValue();
+    g_CurConfig.Game.iHudType      = m_HudType     .GetCurValue();
+    g_CurConfig.Game.iUpdateFreq   = m_UpdateFreq  .GetCurValue();
+    g_CurConfig.Game.iVersion      = m_Version     .GetCurValue();
+    g_CurConfig.Game.iMirrorMode   = m_MirrorMode  .GetCurValue();
 
     // 
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i)
     {
-        g_CurConfig.Input.aiType    [i] = m_aInput[i].oType    .GetCurEntry().tValue;
-        g_CurConfig.Input.aiRumble  [i] = m_aInput[i].oRumble  .GetCurEntry().tValue;
-        g_CurConfig.Input.aiFireMode[i] = m_aInput[i].oFireMode.GetCurEntry().tValue;
+        g_CurConfig.Input.aiType    [i] = m_aInput[i].oType    .GetCurValue();
+        g_CurConfig.Input.aiRumble  [i] = m_aInput[i].oRumble  .GetCurValue();
+        g_CurConfig.Input.aiFireMode[i] = m_aInput[i].oFireMode.GetCurValue();
     }
 
     // 
@@ -866,7 +866,7 @@ void cConfigMenu::SaveValues()
 void cConfigMenu::__UpdateRenderQuality()
 {
     // 
-    g_CurConfig.Graphics.iRender = m_RenderQuality.GetCurEntry().tValue;
+    g_CurConfig.Graphics.iRender = m_RenderQuality.GetCurValue();
 }
 
 
@@ -875,7 +875,7 @@ void cConfigMenu::__UpdateRenderQuality()
 void cConfigMenu::__UpdateShadowQuality()
 {
     // 
-    g_CurConfig.Graphics.iShadow = m_ShadowQuality.GetCurEntry().tValue;
+    g_CurConfig.Graphics.iShadow = m_ShadowQuality.GetCurValue();
 
     // 
     cOutdoor* pOutdoor = g_pEnvironment->GetBackground()->GetOutdoor();
@@ -892,10 +892,10 @@ void cConfigMenu::__UpdateShadowQuality()
 void cConfigMenu::__UpdateVolume()
 {
     // 
-    Core::Audio->SetGlobalVolume(cConfigMenu::__VolumeToFloat(m_GlobalVolume.GetCurEntry().tValue));
-    Core::Audio->SetMusicVolume (cConfigMenu::__VolumeToFloat(m_MusicVolume .GetCurEntry().tValue));
-    g_CurConfig.Audio.fEffectVolume  = cConfigMenu::__VolumeToFloat(m_EffectVolume .GetCurEntry().tValue);
-    g_CurConfig.Audio.fAmbientVolume = cConfigMenu::__VolumeToFloat(m_AmbientVolume.GetCurEntry().tValue);
+    Core::Audio->SetGlobalVolume(cConfigMenu::__VolumeToFloat(m_GlobalVolume.GetCurValue()));
+    Core::Audio->SetMusicVolume (cConfigMenu::__VolumeToFloat(m_MusicVolume .GetCurValue()));
+    g_CurConfig.Audio.fEffectVolume  = cConfigMenu::__VolumeToFloat(m_EffectVolume .GetCurValue());
+    g_CurConfig.Audio.fAmbientVolume = cConfigMenu::__VolumeToFloat(m_AmbientVolume.GetCurValue());
 
     // 
     Core::Audio->SetTypeVolume(g_CurConfig.Audio.fEffectVolume,  SOUND_EFFECT);
@@ -926,12 +926,12 @@ void cConfigMenu::__UpdateLanguage()
 void cConfigMenu::__UpdateInterface()
 {
     // 
-    g_CurConfig.Game.iGameRotation = m_GameRotation.GetCurEntry().tValue;
-    g_CurConfig.Game.iGameScale    = m_GameScale   .GetCurEntry().tValue;
-    g_CurConfig.Game.iHudRotation  = m_HudRotation .GetCurEntry().tValue;
-    g_CurConfig.Game.iHudScale     = m_HudScale    .GetCurEntry().tValue;
-    g_CurConfig.Game.iHudType      = m_HudType     .GetCurEntry().tValue;
-    g_CurConfig.Game.iMirrorMode   = m_MirrorMode  .GetCurEntry().tValue;
+    g_CurConfig.Game.iGameRotation = m_GameRotation.GetCurValue();
+    g_CurConfig.Game.iGameScale    = m_GameScale   .GetCurValue();
+    g_CurConfig.Game.iHudRotation  = m_HudRotation .GetCurValue();
+    g_CurConfig.Game.iHudScale     = m_HudScale    .GetCurValue();
+    g_CurConfig.Game.iHudType      = m_HudType     .GetCurValue();
+    g_CurConfig.Game.iMirrorMode   = m_MirrorMode  .GetCurValue();
 
     // 
     InitDirection();
@@ -979,7 +979,7 @@ void cConfigMenu::__LoadMonitors()
 void cConfigMenu::__LoadResolutions(const coreUintW iMonitorIndex)
 {
     // 
-    m_asCurResolution[m_iCurMonitorIndex] = m_Resolution.GetNumEntries() ? std::move(*m_Resolution.GetCurEntry().psText) : "";
+    m_asCurResolution[m_iCurMonitorIndex] = m_Resolution.GetNumEntries() ? m_Resolution.GetCurText() : "";
     m_Resolution.ClearEntries();
 
     // 

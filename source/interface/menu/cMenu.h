@@ -380,12 +380,12 @@ public:
     void SaveValues();
 
     // 
-    inline const coreInt32& GetMissionID         ()const                       {return m_WorldMap.GetSelectionID();}
-    inline const coreUint8& GetSelectedType      ()const                       {return m_Type      .GetCurEntry().tValue;}
-    inline const coreUint8& GetSelectedMode      ()const                       {return m_Mode      .GetCurEntry().tValue;}
-    inline const coreUint8& GetSelectedDifficulty()const                       {return m_Difficulty.GetCurEntry().tValue;}
-    inline const coreUint8& GetSelectedWeapon    (const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aWeapon [iIndex].GetCurEntry().tValue;}
-    inline const coreUint8& GetSelectedSupport   (const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aSupport[iIndex].GetCurEntry().tValue;}
+    inline const coreInt32&  GetMissionID         ()const                       {return m_WorldMap.GetSelectionID();}
+    inline const coreUint16& GetSelectedType      ()const                       {return m_Type      .GetCurValue();}
+    inline const coreUint16& GetSelectedMode      ()const                       {return m_Mode      .GetCurValue();}
+    inline const coreUint16& GetSelectedDifficulty()const                       {return m_Difficulty.GetCurValue();}
+    inline const coreUint16& GetSelectedWeapon    (const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aWeapon [iIndex].GetCurValue();}
+    inline const coreUint16& GetSelectedSupport   (const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aSupport[iIndex].GetCurValue();}
 };
 
 
