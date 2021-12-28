@@ -723,7 +723,6 @@ void cConfigMenu::LoadValues()
     }
     else if(!m_Resolution.SelectText(PRINT("%d x %d", Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH), Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT))))
     {
-        m_Resolution.AddEntryLanguage("RESOLUTION_CUSTOM", 0xFFu);
         m_Resolution.SelectValue(0xFFu);
     }
 
@@ -988,6 +987,10 @@ void cConfigMenu::__LoadResolutions(const coreUintW iMonitorIndex)
 
     // 
     m_Resolution.AddEntryLanguage("RESOLUTION_DESKTOP", 0xEEu);
+    if((iMonitorIndex == Core::System->GetDisplayIndex()) && !avResolutionList.count(Core::System->GetResolution()))
+    {
+        m_Resolution.AddEntryLanguage("RESOLUTION_CUSTOM", 0xFFu);
+    }
 
     // 
     if(!m_Resolution.SelectText(m_asCurResolution[iMonitorIndex].c_str())) m_Resolution.SelectLast();
