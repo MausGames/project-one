@@ -819,6 +819,12 @@ private:
     coreObject3D  m_aPearlRaw[MUSCUS_PEARLS_RAWS];           // 
     coreUint32    m_iPearlActive;                            // 
 
+    coreSpline2  m_aStrikeSpline [MUSCUS_PEARLS];            // 
+    coreFlow     m_afStrikeTime  [MUSCUS_PEARLS];            // 
+    cPlayer*     m_apStrikePlayer[MUSCUS_PEARLS];            // 
+    const cShip* m_apStrikeTarget[MUSCUS_PEARLS];            // 
+    coreUint32   m_iStrikeState;                             // 
+
     coreFlow m_fAnimation;                                   // animation value
 
 
@@ -840,6 +846,13 @@ public:
     // 
     inline void ShowGenerate(const coreUintW iIndex, const coreFloat fTime) {ASSERT(iIndex < MUSCUS_GENERATES) if(m_afGenerateTime[iIndex] >= 0.0f) m_afGenerateTime[iIndex] = fTime;}
     inline void BangGenerate(const coreUintW iIndex)                        {ASSERT(iIndex < MUSCUS_GENERATES) if(m_afGenerateTime[iIndex] >= 0.0f) m_afGenerateBang[iIndex] = 1.0f;}
+
+    // 
+    void StrikeAttack(const coreUintW iIndex, cPlayer* pPlayer, const cShip* pTarget);
+
+    // 
+    inline cPlayer*          GetStrikePlayer(const coreUintW iIndex)const {ASSERT(iIndex < MUSCUS_PEARLS) return m_apStrikePlayer[iIndex];}
+    inline const coreUint32& GetStrikeState ()const                       {return m_iStrikeState;}
 
 
 private:

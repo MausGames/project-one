@@ -20,6 +20,10 @@ cMuscusMission::cMuscusMission()noexcept
 , m_Pearl          (MUSCUS_PEARLS)
 , m_PearlWave      (MUSCUS_PEARLS)
 , m_iPearlActive   (0u)
+, m_afStrikeTime   {}
+, m_apStrikePlayer {}
+, m_apStrikeTarget {}
+, m_iStrikeState   (0u)
 , m_fAnimation     (0.0f)
 {
     // 
@@ -75,6 +79,14 @@ cMuscusMission::cMuscusMission()noexcept
             if(iType) m_PearlWave.BindObject(pPearl);
                  else m_Pearl    .BindObject(pPearl);
         }
+    }
+
+    // 
+    for(coreUintW i = 0u; i < MUSCUS_PEARLS; ++i)
+    {
+        m_aStrikeSpline[i].Reserve(2u);
+        m_aStrikeSpline[i].AddNode(coreVector2(0.0f,0.0f), coreVector2(0.0f,0.0f));
+        m_aStrikeSpline[i].AddNode(coreVector2(0.0f,0.0f), coreVector2(0.0f,0.0f), 3.0f);
     }
 
     // 
@@ -163,6 +175,11 @@ void cMuscusMission::EnablePearl(const coreUintW iIndex)
     STATIC_ASSERT(MUSCUS_PEARLS <= sizeof(m_iPearlActive)*8u)
 
     // 
+    m_afStrikeTime  [iIndex] = 0.0f;
+    m_apStrikePlayer[iIndex] = NULL;
+    m_apStrikeTarget[iIndex] = NULL;
+
+    // 
     pPearl->SetAlpha  (0.0f);
     pPearl->SetEnabled(CORE_OBJECT_ENABLE_ALL);
     pWave ->SetEnabled(CORE_OBJECT_ENABLE_ALL);
@@ -189,6 +206,32 @@ void cMuscusMission::DisablePearl(const coreUintW iIndex, const coreBool bAnimat
         pPearl->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
         pWave ->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     }
+}
+
+
+// ****************************************************************
+// 
+void cMuscusMission::StrikeAttack(const coreUintW iIndex, cPlayer* pPlayer, const cShip* pTarget)
+{
+    ASSERT(iIndex < MUSCUS_PEARLS)
+    coreObject3D* pPearl = (*m_Pearl.List())[iIndex];
+
+    ASSERT(pPlayer && pTarget && HAS_BIT(m_iPearlActive, iIndex))
+
+    // 
+    const coreVector2 vDirIn  = (pTarget->GetPosition().xy() - pPearl->GetPosition().xy()).Normalized();
+    const coreVector2 vDirOut = (-vDirIn + vDirIn.Rotated90() * Core::Rand->Float(1.0f) * ((iIndex & 0x01u) ? -1.0f : 1.0f)).Normalized() * Core::Rand->Float(2.5f,3.5f);
+
+    // 
+    m_aStrikeSpline[iIndex].EditNodePosition(0u, pPearl ->GetPosition().xy());
+    m_aStrikeSpline[iIndex].EditNodePosition(1u, pTarget->GetPosition().xy());
+    m_aStrikeSpline[iIndex].EditNodeTangent (0u, vDirOut);
+    m_aStrikeSpline[iIndex].EditNodeTangent (1u, vDirIn);
+
+    // 
+    m_afStrikeTime  [iIndex] = 0.0f;
+    m_apStrikePlayer[iIndex] = pPlayer;
+    m_apStrikeTarget[iIndex] = pTarget;
 }
 
 
@@ -276,11 +319,36 @@ void cMuscusMission::__MoveOwnAfter()
     m_GenerateWave.MoveNormal();
 
     // 
+    m_iStrikeState = 0u;
+
+    // 
     for(coreUintW i = 0u; i < MUSCUS_PEARLS; ++i)
     {
         coreObject3D* pPearl = (*m_Pearl    .List())[i];
         coreObject3D* pWave  = (*m_PearlWave.List())[i];
         if(!pPearl->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+        // 
+        if(m_apStrikeTarget[i])
+        {
+            // 
+            m_aStrikeSpline[i].EditNodePosition(1u, m_apStrikeTarget[i]->GetPosition().xy());
+            m_afStrikeTime [i].UpdateMin(1.0f, 1.0f);
+
+            // 
+            pPearl->SetPosition(coreVector3(m_aStrikeSpline[i].CalcPositionLerp(m_afStrikeTime[i]), 0.0f));
+
+            if(m_afStrikeTime[i] >= 1.0f)
+            {
+                // 
+                this->DisablePearl(i, true);
+                g_pSpecialEffects->CreateSplashColor(pPearl->GetPosition(), SPECIAL_SPLASH_TINY, COLOR_ENERGY_YELLOW);
+
+                // 
+                ADD_BIT(m_iStrikeState, i)
+                STATIC_ASSERT(MUSCUS_PEARLS <= sizeof(m_iStrikeState)*8u)
+            }
+        }
 
         // 
         if(HAS_BIT(m_iPearlActive, i)) pPearl->SetAlpha(MIN(pPearl->GetAlpha() + 10.0f*TIME, 1.0f));
