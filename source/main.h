@@ -325,6 +325,7 @@ extern cPostProcessing* const g_pPostProcessing;   // main post-processing objec
 #include "interface/cCreditRoll.h"
 #include "interface/cInterface.h"
 #include "interface/cMsgBox.h"
+#include "interface/cScrollBox.h"
 #include "interface/cTooltip.h"
 #include "interface/cWorldMap.h"
 #include "interface/menu/cMenu.h"

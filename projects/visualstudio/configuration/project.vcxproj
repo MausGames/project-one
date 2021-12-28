@@ -333,6 +333,7 @@
     <ClCompile Include="..\..\..\source\interface\cCreditRoll.cpp" />
     <ClCompile Include="..\..\..\source\interface\cInterface.cpp" />
     <ClCompile Include="..\..\..\source\interface\cMsgBox.cpp" />
+    <ClCompile Include="..\..\..\source\interface\cScrollBox.cpp" />
     <ClCompile Include="..\..\..\source\interface\cTooltip.cpp" />
     <ClCompile Include="..\..\..\source\interface\cWorldMap.cpp" />
     <ClCompile Include="..\..\..\source\interface\menu\01_cIntroMenu.cpp">
@@ -458,6 +459,7 @@
     <ClInclude Include="..\..\..\source\interface\cCreditRoll.h" />
     <ClInclude Include="..\..\..\source\interface\cInterface.h" />
     <ClInclude Include="..\..\..\source\interface\cMsgBox.h" />
+    <ClInclude Include="..\..\..\source\interface\cScrollBox.h" />
     <ClInclude Include="..\..\..\source\interface\cTooltip.h" />
     <ClInclude Include="..\..\..\source\interface\cWorldMap.h" />
     <ClInclude Include="..\..\..\source\interface\menu\cMenu.h" />

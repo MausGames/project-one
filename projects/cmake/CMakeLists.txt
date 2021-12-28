@@ -55,6 +55,7 @@ target_sources(
     ${BASE_DIRECTORY}/source/interface/cCreditRoll.cpp
     ${BASE_DIRECTORY}/source/interface/cInterface.cpp
     ${BASE_DIRECTORY}/source/interface/cMsgBox.cpp
+    ${BASE_DIRECTORY}/source/interface/cScrollBox.cpp
     ${BASE_DIRECTORY}/source/interface/cTooltip.cpp
     ${BASE_DIRECTORY}/source/interface/cWorldMap.cpp
     ${BASE_DIRECTORY}/source/visual/cBlur.cpp
