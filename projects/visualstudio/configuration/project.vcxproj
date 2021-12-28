@@ -329,6 +329,7 @@
     </ClCompile>
     <ClCompile Include="..\..\..\source\game\mission\B2_cDemoMission_setup.cpp" />
     <ClCompile Include="..\..\..\source\game\mission\cMission.cpp" />
+    <ClCompile Include="..\..\..\source\interface\cArcadeInput.cpp" />
     <ClCompile Include="..\..\..\source\interface\cCombatText.cpp" />
     <ClCompile Include="..\..\..\source\interface\cCreditRoll.cpp" />
     <ClCompile Include="..\..\..\source\interface\cInterface.cpp" />
@@ -455,6 +456,7 @@
     <ClInclude Include="..\..\..\source\game\cShip.h" />
     <ClInclude Include="..\..\..\source\game\cWeapon.h" />
     <ClInclude Include="..\..\..\source\game\mission\cMission.h" />
+    <ClInclude Include="..\..\..\source\interface\cArcadeInput.h" />
     <ClInclude Include="..\..\..\source\interface\cCombatText.h" />
     <ClInclude Include="..\..\..\source\interface\cCreditRoll.h" />
     <ClInclude Include="..\..\..\source\interface\cInterface.h" />

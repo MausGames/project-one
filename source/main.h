@@ -321,6 +321,7 @@ extern cPostProcessing* const g_pPostProcessing;   // main post-processing objec
 #include "environment/cWater.h"
 #include "environment/background/cBackground.h"
 #include "environment/cEnvironment.h"
+#include "interface/cArcadeInput.h"
 #include "interface/cCombatText.h"
 #include "interface/cCreditRoll.h"
 #include "interface/cInterface.h"

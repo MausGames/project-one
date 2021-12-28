@@ -51,6 +51,7 @@ target_sources(
     ${BASE_DIRECTORY}/source/game/cTable.cpp
     ${BASE_DIRECTORY}/source/game/cWeapon.cpp
     ${BASE_DIRECTORY}/source/interface/menu/cMenu.cpp
+    ${BASE_DIRECTORY}/source/interface/cArcadeInput.cpp
     ${BASE_DIRECTORY}/source/interface/cCombatText.cpp
     ${BASE_DIRECTORY}/source/interface/cCreditRoll.cpp
     ${BASE_DIRECTORY}/source/interface/cInterface.cpp
