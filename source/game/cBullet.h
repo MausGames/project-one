@@ -522,7 +522,7 @@ public:
     ASSIGN_ID(8, "Spear")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeYellow(); this->SetSize(coreVector3(1.45f,1.55f,1.45f) * 2.1f); this->SetTexSize(coreVector2(0.5f,0.2f)); m_fAnimation = 0.15f; m_fFade = 0.0f;}
+    inline void ResetProperties() {this->MakeYellow(); this->SetSize(coreVector3(1.45f,1.55f,1.45f) * 2.1f); this->SetTexSize(coreVector2(0.5f,0.2f) * 0.9f); m_fAnimation = 0.15f; m_fFade = 0.0f;}
 
     // change default color
     inline cSpearBullet* MakeWhite  () {this->_MakeWhite  (0.8f); return this;}

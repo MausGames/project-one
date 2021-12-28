@@ -683,7 +683,7 @@ void cConeBullet::__MoveOwn()
     this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
     // update animation
-    m_fAnimation.UpdateMod(0.2f, 1.0f);
+    m_fAnimation.UpdateMod(0.15f, 1.0f);
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
 
     // update fade
@@ -784,7 +784,7 @@ void cSpearBullet::__MoveOwn()
     this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
     // update animation
-    m_fAnimation.UpdateMod(0.2f, 1.0f);
+    m_fAnimation.UpdateMod(0.18f, 1.0f);
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
 
     // update fade
@@ -831,9 +831,9 @@ void cTriangleBullet::__MoveOwn()
     this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
 
     // update animation
-    m_fAnimation.UpdateMod(0.2f, 2.0f);
+    m_fAnimation.UpdateMod(0.2f, 16.0f);
     this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation * (3.0f*PI)), 0.0f));
-    this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
+    this->SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.625f));
 
     // update fade
     m_fFade.Update(1.0f);
@@ -880,9 +880,9 @@ void cFlipBullet::__MoveOwn()
     this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
 
     // update animation
-    m_fAnimation.UpdateMod(-0.2f, -2.0f);
-    this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation * (15.0f*PI)), 0.0f));
-    this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
+    m_fAnimation.UpdateMod(-0.2f, -16.0f);
+    this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation * (9.0f*PI)), 0.0f));
+    this->SetTexOffset(coreVector2(m_fAnimation * 0.625f, 0.0f));
 
     // update fade
     m_fFade.Update(1.0f);
@@ -928,9 +928,9 @@ void cQuadBullet::__MoveOwn()
     this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
 
     // update animation
-    m_fAnimation.UpdateMod(0.2f, 2.0f);
+    m_fAnimation.UpdateMod(0.2f, 16.0f);
     this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation * (3.0f*PI)), 0.0f));
-    this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
+    this->SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.625f));
 
     // update fade
     m_fFade.Update(1.0f);
