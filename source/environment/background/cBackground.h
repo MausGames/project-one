@@ -133,7 +133,7 @@ protected:
 
 public:
     cBackground()noexcept;
-    virtual ~cBackground();
+    virtual ~cBackground()override;
 
     DISABLE_COPY(cBackground)
     ENABLE_ID_EX

@@ -291,7 +291,8 @@ void cGame::LoadMissionID(const coreInt32 iID, const coreUint8 iTakeFrom, const 
     this->__ClearAll(false);
 
     // 
-    const coreInt32 iOldID    = m_pCurMission ? m_pCurMission->GetID() : cNoMission::ID;
+    ASSERT(m_pCurMission)
+    const coreInt32 iOldID    = m_pCurMission->GetID();
     const coreUintW iOldIndex = m_iCurMissionIndex;
 
     // hold old mission (to keep resources valid)
@@ -673,15 +674,17 @@ coreBool cGame::__HandleIntro()
         else
         {
             // create spline for intro animation (YZ)
-            static coreSpline2 s_Spline;
-            if(!s_Spline.GetNumNodes())
+            static coreSpline2 s_Spline = []()
             {
-                s_Spline.Reserve(3u);
-                s_Spline.AddNode(coreVector2(-140.0f,-10.0f), coreVector2( 1.0f, 0.0f));
-                s_Spline.AddNode(coreVector2(  10.0f, 10.0f), coreVector2(-1.0f,-1.0f).Normalized());
-                s_Spline.AddNode(coreVector2( -30.0f,  0.0f), coreVector2(-1.0f, 0.0f));
-                s_Spline.Refine();
-            }
+                coreSpline2 oSpline(3u);
+
+                oSpline.AddNode(coreVector2(-140.0f,-10.0f), coreVector2( 1.0f, 0.0f));
+                oSpline.AddNode(coreVector2(  10.0f, 10.0f), coreVector2(-1.0f,-1.0f).Normalized());
+                oSpline.AddNode(coreVector2( -30.0f,  0.0f), coreVector2(-1.0f, 0.0f));
+                oSpline.Refine();
+
+                return oSpline;
+            }();
 
             this->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
             {

@@ -10,14 +10,15 @@
 #ifndef _P1_GUARD_GLOW_H_
 #define _P1_GUARD_GLOW_H_
 
-// TODO 2: glow is cleared abruptly when getting inactive, should afterglow instead
+// TODO 3: glow is cleared abruptly when getting inactive, should afterglow instead
 // TODO 4: remove exposed clear function (location where this is called should use a different way)
+// TODO 3: sort bound objects and lists by shaders, then by models (not textures), handle index/address
 
 
 // ****************************************************************
 // glow definitions
 #define GLOW_SCALE_FACTOR       (SCALE_FACTOR)   // frame buffer resolution factor
-#define GLOW_ATTENUATION_FACTOR (0.43f)          // blur shader attenuation (higher value = weaker glow)
+#define GLOW_ATTENUATION_FACTOR (0.4f)           // blur shader attenuation (higher value = weaker glow)
 
 
 // ****************************************************************

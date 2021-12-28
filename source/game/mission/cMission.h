@@ -1035,6 +1035,8 @@ template <typename T, typename F> cEnemySquad* cMission::_AddSquad(const coreUin
 // 
 constexpr FUNC_LOCAL coreBool cMission::_TakeRange(const coreUint8 iFrom, const coreUint8 iTo, const coreUint8* piIndexList, const coreUintW iSize)
 {
+    ASSERT((iFrom <= iTo) && piIndexList && iSize)
+
     // 
     if((piIndexList[0] == TAKE_MISSION) && (iTo != TAKE_MISSION))
         return false;

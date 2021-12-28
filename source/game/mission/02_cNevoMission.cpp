@@ -642,7 +642,10 @@ void cNevoMission::__MoveOwnAfter()
         if(!oArrow.GetAlpha()) this->DisableArrow(i, false);
 
         // 
-        oArrow.SetTexOffset(coreVector2(m_fAnimation * 0.6f, 0.0f));
+        const coreFloat fOffset = I_TO_F(NEVO_ARROWS - i) * (1.0f/8.0f);
+
+        // 
+        oArrow.SetTexOffset(coreVector2(0.6f * m_fAnimation + fOffset, 0.0f));
     }
 
     // 

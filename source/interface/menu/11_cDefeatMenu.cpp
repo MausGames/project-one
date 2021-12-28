@@ -131,15 +131,17 @@ void cDefeatMenu::Move()
                 if(iContinues)
                 {
                     // 
-                    static coreSpline2 s_Spline;
-                    if(!s_Spline.GetNumNodes())
+                    static coreSpline2 s_Spline = []()
                     {
-                        s_Spline.Reserve(3u);
-                        s_Spline.AddNode(coreVector2(-0.05f, 0.0f),  coreVector2(0.0f,-1.0f));
-                        s_Spline.AddNode(coreVector2( 0.0f, -0.05f), coreVector2(1.0f, 0.0f));
-                        s_Spline.AddNode(coreVector2( 0.05f, 0.8f),  coreVector2(0.0f, 1.0f));
-                        s_Spline.Refine();
-                    }
+                        coreSpline2 oSpline(3u);
+
+                        oSpline.AddNode(coreVector2(-0.05f, 0.0f),  coreVector2(0.0f,-1.0f));
+                        oSpline.AddNode(coreVector2( 0.0f, -0.05f), coreVector2(1.0f, 0.0f));
+                        oSpline.AddNode(coreVector2( 0.05f, 0.8f),  coreVector2(0.0f, 1.0f));
+                        oSpline.Refine();
+
+                        return oSpline;
+                    }();
 
                     // 
                     cGuiObject&       oTarget = m_ContinueImage[iContinues - 1u];

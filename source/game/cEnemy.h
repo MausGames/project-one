@@ -17,6 +17,7 @@
 // TODO 2: make sure ENEMY_STATUS_DAMAGING is used for damaging contact, and no additional checks and (duplicate) TakeDamage calls are made
 // TODO 4: get rid of ENEMY_SIZE_FACTOR, because lots of places override it directly anyway
 // TODO 4: move parent-child system to custom-enemy, if not elsewhere required
+// TODO 3: rota cache for enemies, or make rotation more irregular ?
 
 
 // ****************************************************************

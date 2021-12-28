@@ -43,6 +43,6 @@ void FragmentMain()
         float v1Detail = coreTexture2D(0, v_av2TexCoord[0]).r;
 
         // draw interior with detail map
-        gl_FragColor = vec4(vec3((v1Detail + c_v1Black) * fFactor), 1.0) * u_v4Color;
+        gl_FragColor = vec4(vec3((v1Detail + c_v1Black) * fFactor), u_v4Color.a);
     }
 }

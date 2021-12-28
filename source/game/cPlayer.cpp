@@ -50,6 +50,7 @@ cPlayer::cPlayer()noexcept
 
     // 
     this->SetMaxHealth(PLAYER_LIVES);
+    this->SetBaseColor(COLOR_SHIP_GREY * 0.6f);
 
     // load first weapons
     for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
@@ -65,7 +66,7 @@ cPlayer::cPlayer()noexcept
     // 
     m_pNormalProgram = Core::Manager::Resource->Get<coreProgram>("object_ship_program");
     m_pDarkProgram   = Core::Manager::Resource->Get<coreProgram>("object_ship_darkness_program");
-    this->ActivateDarkShading();
+    this->ActivateNormalShading();
 
     // 
     m_Dot.DefineModel("object_dot.md3");
@@ -545,9 +546,6 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
 
         if(m_iCurHealth)
         {
-            // 
-            if(!this->IsDarkShading()) this->RefreshColor();
-
             if(iShieldDamage)
             {
                 // 
@@ -937,6 +935,8 @@ coreBool cPlayer::TestCollisionPrecise(const coreObject3D* pObject, coreVector3*
 {
     ASSERT(pObject && pvIntersection && pbFirstHit)
 
+#if 0   // # disable volume collision
+
     // 
     if(Core::Manager::Object->TestCollision(&m_Dot, pObject, pvIntersection))
     {
@@ -945,6 +945,8 @@ coreBool cPlayer::TestCollisionPrecise(const coreObject3D* pObject, coreVector3*
         (*pbFirstHit)     = this->__NewCollision(pObject);
         return true;
     }
+
+#endif
 
     // 
     const coreVector2 vMove = this->GetMove();

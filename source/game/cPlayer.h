@@ -19,6 +19,7 @@
 // TODO 3: when applying force with (all) objects (collision with container) always quantize 4 or 8, but not in general (wind)
 // TODO 4: remove dark shading resources, if not required anymore (maybe for bonus phases)
 // TODO 3: add more delay to bubble/feeling (to stay longer invincible after bubble disappeared)
+// TODO 4: PLAYER_FEEL_TIME_SHIELD still used ?
 
 
 // ****************************************************************

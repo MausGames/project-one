@@ -330,6 +330,15 @@
     <ClCompile Include="..\..\..\source\game\mission\A2_cBonus2Mission_setup.cpp">
       <Filter>game\mission</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\interface\cArcadeInput.cpp">
+      <Filter>interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\interface\cCreditRoll.cpp">
+      <Filter>interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\interface\cScrollBox.cpp">
+      <Filter>interface</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\main.h" />
@@ -464,6 +473,15 @@
     </ClInclude>
     <ClInclude Include="..\..\..\source\game\cCrash.h">
       <Filter>game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\interface\cArcadeInput.h">
+      <Filter>interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\interface\cCreditRoll.h">
+      <Filter>interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\interface\cScrollBox.h">
+      <Filter>interface</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

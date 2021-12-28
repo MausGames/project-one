@@ -73,7 +73,7 @@ public:
     inline cShip* Rotate270() {this->SetPosition(this->GetPosition().RotatedZ90() * coreVector3(-1.0f,-1.0f,1.0f)); this->SetDirection(this->GetDirection().RotatedZ90() * coreVector3(-1.0f,-1.0f,1.0f)); this->SetOrientation(this->GetOrientation().RotatedZ90() * coreVector3(-1.0f,-1.0f,1.0f)); return this;}
 
     // 
-    inline void RefreshColor(const coreFloat fFactor) {const coreFloat fNewFactor = CLAMP((fFactor - 0.2f) * (1.0f/0.8f) * (0.8f/0.6f), 0.0f, 1.0f); this->SetColor3(LERP(COLOR_SHIP_GREY, this->GetBaseColor(), HAS_BIT(m_iBaseColor, SHIP_INVERTED_BIT) ? (1.0f - fNewFactor) : fNewFactor));}
+    inline void RefreshColor(const coreFloat fFactor) {const coreFloat fRealFactor = cShip::TransformColorFactor(fFactor); this->SetColor3(LERP(COLOR_SHIP_GREY, this->GetBaseColor(), HAS_BIT(m_iBaseColor, SHIP_INVERTED_BIT) ? (1.0f - fRealFactor) : fRealFactor));}
     inline void RefreshColor()                        {this->RefreshColor(this->GetCurHealthPct());}
     inline void InvokeBlink ()                        {if(!g_CurConfig.Graphics.iFlash || (m_fBlink < 0.4f)) m_fBlink = 1.2f;}
 
@@ -105,6 +105,9 @@ public:
     inline       coreVector2  GetMove        ()const {return this->GetPosition().xy() - m_vOldPos;}
     inline       coreVector3  GetBaseColor   ()const {return coreVector4::UnpackUnorm4x8(m_iBaseColor).xyz();}
     inline       coreFloat    GetBlink       ()const {return MIN(m_fBlink, 1.0f);}
+
+    // 
+    static constexpr coreFloat TransformColorFactor(const coreFloat fFactor) {return (fFactor < (1.0f/3.0f)) ? 0.0f : ((fFactor < (2.0f/3.0f)) ? 0.5f : 1.0f);}
 
 
 protected:

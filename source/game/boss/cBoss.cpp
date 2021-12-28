@@ -32,6 +32,7 @@ cBoss::cBoss()noexcept
     this->AddStatus(ENEMY_STATUS_BOSS);
     this->AddStatus(ENEMY_STATUS_SINGLE);
     this->AddStatus(ENEMY_STATUS_IMMORTAL);
+    this->AddStatus(ENEMY_STATUS_WORTHLESS);
 
     // 
     g_pGame->GetEnemyManager()->BindEnemy(this);
