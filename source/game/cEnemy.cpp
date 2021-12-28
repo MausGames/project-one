@@ -76,6 +76,17 @@ void cEnemy::Move()
         {
             this->SetEnabled(CORE_OBJECT_ENABLE_MOVE);
         }
+
+        // reduce collision overhead for ghost enemies without bounding volume
+        const coreModelPtr& pLowQuad = Core::Manager::Object->GetLowQuad();
+        if(HAS_FLAG(m_iStatus, ENEMY_STATUS_GHOST))
+        {
+            if(m_pVolume.GetHandle() == NULL) this->DefineVolume(pLowQuad);
+        }
+        else
+        {
+            if(m_pVolume.GetHandle() == pLowQuad.GetHandle()) this->DefineVolume(NULL);
+        }
     }
 
     // 
