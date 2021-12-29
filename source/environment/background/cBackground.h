@@ -337,7 +337,9 @@ private:
 class cVolcanoBackground final : public cBackground
 {
 private:
-    cLava m_Lava;   // 
+    cLava m_Lava;                // 
+
+    coreSoundPtr m_pLavaSound;   // 
 
 
 public:

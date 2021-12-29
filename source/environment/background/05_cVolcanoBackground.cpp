@@ -73,4 +73,8 @@ void cVolcanoBackground::__MoveOwn()
     // 
     m_Lava.SetFlyOffset(g_pEnvironment->GetFlyOffset());
     m_Lava.Move();
+
+    // 
+    if(m_pLavaSound->EnableRef(this))
+        m_pLavaSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
 }
