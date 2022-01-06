@@ -470,6 +470,9 @@ void cMenu::Move()
     }
 
     // 
+    m_PauseLayer.SetSize(Core::System->GetResolution() * RCP(Core::System->GetResolution().Min()));
+
+    // 
     m_Tooltip.Move();
 }
 

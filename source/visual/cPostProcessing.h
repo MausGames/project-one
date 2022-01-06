@@ -15,7 +15,6 @@
 // TODO 3: don't render wallpapers on 1:1 (and without offsets)
 // TODO 3: also clamp fullscreen distortion similar to water distortion ?
 // TODO 1: changing game size (option) should add fixed wallpaper offset (related to gameplay stage)
-// TODO 1: pause (or other) overlays should adapt to offsets
 // TODO 3: try to reduce overdraw when all walls are active
 
 

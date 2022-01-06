@@ -20,10 +20,8 @@ cMsgBox::cMsgBox()noexcept
     // 
     this->DefineTexture(0u, "menu_background_black.png");
     this->DefineProgram("menu_grey_program");
-    this->SetSize      (coreVector2(1.0f,1.0f));
     this->SetColor4    (coreVector4(0.6f,0.6f,0.6f,0.0f));
     this->SetTexSize   (coreVector2(1.2f,1.2f));
-    this->cGuiObject::Move();
 
     // 
     m_Box.DefineTexture(0u, "menu_background_black.png");
@@ -86,8 +84,10 @@ void cMsgBox::Move()
         g_MenuInput.bCancel = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS);
 
     // 
+    this->SetSize     (Core::System->GetResolution() * RCP(Core::System->GetResolution().Min()));
     this->SetAlpha    (m_fFade * 0.5f);
     this->SetTexOffset(coreVector2(0.0f, FRACT(coreFloat(-0.04 * Core::System->GetTotalTime()))));
+    this->cGuiObject::Move();
 
     // 
     m_Box.SetAlpha(m_fFade);
