@@ -23,7 +23,7 @@ vec4 GetMultipleTextures()
     }
 
     // 
-    return min(v4Output, 1.0);
+    return v4Output;
 }
 
 void FragmentMain()

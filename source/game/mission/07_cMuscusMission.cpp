@@ -201,6 +201,9 @@ void cMuscusMission::DisablePearl(const coreUintW iIndex, const coreBool bAnimat
     REMOVE_BIT(m_iPearlActive, iIndex)
 
     // 
+    m_apStrikeTarget[iIndex] = NULL;   // only
+
+    // 
     if(!bAnimated)
     {
         pPearl->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);

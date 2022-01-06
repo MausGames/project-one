@@ -674,7 +674,7 @@ coreBool cGame::__HandleIntro()
         else
         {
             // create spline for intro animation (YZ)
-            static coreSpline2 s_Spline = []()
+            static const coreSpline2 s_Spline = []()
             {
                 coreSpline2 oSpline(3u);
 

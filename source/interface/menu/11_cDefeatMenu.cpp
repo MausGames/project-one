@@ -131,7 +131,7 @@ void cDefeatMenu::Move()
                 if(iContinues)
                 {
                     // 
-                    static coreSpline2 s_Spline = []()
+                    static const coreSpline2 s_Spline = []()
                     {
                         coreSpline2 oSpline(3u);
 

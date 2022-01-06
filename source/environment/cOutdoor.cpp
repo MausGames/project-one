@@ -31,7 +31,7 @@ cOutdoor::cOutdoor()noexcept
 {
 }
 
-cOutdoor::cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom, const coreUint8 iAlgorithm, const coreFloat fGrade, const coreUint32 iSeed)noexcept
+cOutdoor::cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom, const coreUint8 iAlgorithm, const coreFloat fGrade, const coreUint64 iSeed)noexcept
 : cOutdoor ()
 {
     const coreTextureSpec oSpec = CORE_GL_SUPPORT(ARB_texture_rg) ? CORE_TEXTURE_SPEC_R8 : CORE_TEXTURE_SPEC_RGB8;
@@ -108,7 +108,7 @@ void cOutdoor::RenderDepth()
 
 // ****************************************************************
 // load outdoor geometry
-void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade, const coreUint32 iSeed)
+void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade, const coreUint64 iSeed)
 {
     BIG_STATIC sVertex     s_aVertexData[OUTDOOR_TOTAL_VERTICES];
     BIG_STATIC coreUint16  s_aiIndexData[OUTDOOR_TOTAL_INDICES];

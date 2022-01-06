@@ -24,9 +24,9 @@ static void CheckConfig(sConfig* OUTPUT pConfig)
 #if defined(CONFIG_FORCE)
 
     // force specific settings
-    g_OldConfig.Graphics.iReflection = 1;
-    g_OldConfig.Graphics.iGlow       = 1;
-    g_OldConfig.Graphics.iDistortion = 1;
+    g_OldConfig.Graphics.iReflection = 1u;
+    g_OldConfig.Graphics.iGlow       = 1u;
+    g_OldConfig.Graphics.iDistortion = 1u;
 
 #endif
 

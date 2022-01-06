@@ -348,7 +348,7 @@ void cSummaryMenu::ShowMission()
 
     // 
     m_aHeader[0].SetText(PRINT("%s %d", Core::Language->GetString("MISSION"), g_pGame->GetCurMission()->GetID()));
-    m_aHeader[1].SetText(coreData::StrUpper(g_pGame->GetCurMission()->GetName()));
+    m_aHeader[1].SetText(g_pGame->GetCurMission()->GetName());
 
     // 
     const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
