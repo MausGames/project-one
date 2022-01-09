@@ -12,13 +12,13 @@ This project is still under development.
 
 <table>
     <tr>
-        <td><a href="material/screenshots/p1_screen_001.jpg?raw=true"><img src="material/screenshots/p1_screen_001t.jpg"></a></td>
-        <td><a href="material/screenshots/p1_screen_002.jpg?raw=true"><img src="material/screenshots/p1_screen_002t.jpg"></a></td>
-        <td><a href="material/screenshots/p1_screen_003.jpg?raw=true"><img src="material/screenshots/p1_screen_003t.jpg"></a></td>
+        <td><a href="material/screenshots/p1_screen_007.jpg?raw=true"><img src="material/screenshots/p1_screen_007t.jpg"></a></td>
+        <td><a href="material/screenshots/p1_screen_008.jpg?raw=true"><img src="material/screenshots/p1_screen_008t.jpg"></a></td>
+        <td><a href="material/screenshots/p1_screen_009.jpg?raw=true"><img src="material/screenshots/p1_screen_009t.jpg"></a></td>
     </tr>
     <tr>
-        <td><a href="material/screenshots/p1_screen_004.jpg?raw=true"><img src="material/screenshots/p1_screen_004t.jpg"></a></td>
-        <td><a href="material/screenshots/p1_screen_005.jpg?raw=true"><img src="material/screenshots/p1_screen_005t.jpg"></a></td>
-        <td><a href="material/screenshots/p1_screen_006.jpg?raw=true"><img src="material/screenshots/p1_screen_006t.jpg"></a></td>
+        <td><a href="material/screenshots/p1_screen_010.jpg?raw=true"><img src="material/screenshots/p1_screen_010t.jpg"></a></td>
+        <td><a href="material/screenshots/p1_screen_011.jpg?raw=true"><img src="material/screenshots/p1_screen_011t.jpg"></a></td>
+        <td><a href="material/screenshots/p1_screen_012.jpg?raw=true"><img src="material/screenshots/p1_screen_012t.jpg"></a></td>
     </tr>
 </table>
