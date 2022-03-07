@@ -351,12 +351,12 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
         // merge XY components of both normal maps (divided by Z, partial-derivative)
         for(coreUintW i = 0u, j = 0u; i < iSize; i += 4u, j += 3u)
         {
-            const coreFloat x1 =             (coreFloat(*(pInput1 + j))      - 127.5f);
-            const coreFloat y1 =             (coreFloat(*(pInput1 + j + 1u)) - 127.5f);
-            const coreFloat z1 = 127.5f * RCP(coreFloat(*(pInput1 + j + 2u)) - 127.5f);
-            const coreFloat x2 =             (coreFloat(*(pInput2 + j))      - 127.5f);
-            const coreFloat y2 =             (coreFloat(*(pInput2 + j + 1u)) - 127.5f);
-            const coreFloat z2 = 127.5f * RCP(coreFloat(*(pInput2 + j + 2u)) - 127.5f);
+            const coreFloat x1 =             (I_TO_F(*(pInput1 + j))      - 127.5f);
+            const coreFloat y1 =             (I_TO_F(*(pInput1 + j + 1u)) - 127.5f);
+            const coreFloat z1 = 127.5f * RCP(I_TO_F(*(pInput1 + j + 2u)) - 127.5f);
+            const coreFloat x2 =             (I_TO_F(*(pInput2 + j))      - 127.5f);
+            const coreFloat y2 =             (I_TO_F(*(pInput2 + j + 1u)) - 127.5f);
+            const coreFloat z2 = 127.5f * RCP(I_TO_F(*(pInput2 + j + 2u)) - 127.5f);
 
             const coreFloat xz1 = x1 * z1 + 127.5f;
             const coreFloat yz1 = y1 * z1 + 127.5f;
