@@ -15,6 +15,13 @@
 // 
 #define SNOW_SIZE (64u)   // 
 
+enum eSnowType : coreUint8
+{
+    SNOW_TYPE_REMOVE = 0u,   // 
+    SNOW_TYPE_ADD    = 1u,   // 
+    SNOW_TYPE_INVERT = 2u    // 
+};
+
 
 // ****************************************************************
 // 
@@ -44,9 +51,9 @@ public:
     void Disable(const coreFloat fDelay);
 
     // 
-    coreUintW DrawPoint(const coreVector2 vPosition, const coreFloat fSize, const coreUint8 iType);
-    coreUintW DrawLine (const coreVector2 vPosition, const coreFloat fSize, const coreBool bHorizontal, const coreUint8 iType);
-    void      DrawAll  (const coreUint8 iType);
+    coreUintW DrawPoint(const coreVector2 vPosition, const coreFloat fSize, const eSnowType eType);
+    coreUintW DrawLine (const coreVector2 vPosition, const coreFloat fSize, const coreBool bHorizontal, const eSnowType eType);
+    void      DrawAll  (const eSnowType eType);
 
     // 
     coreBool TestCollision(const coreVector2 vPosition)const;
@@ -62,6 +69,9 @@ private:
     // 
     static coreUintW __GetMapIndex(const coreFloat fValue);
     static coreFloat __GetMapValue(const coreUintW iIndex);
+
+    // 
+    static coreVector2 __SnapPosition(const coreVector2 vPosition);
 };
 
 

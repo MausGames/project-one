@@ -16,8 +16,11 @@ void FragmentMain()
     float v1Offset = coreTexture2D(1, v_av2TexCoord[2]).r * 16.0 - 1.0;
 
     // 
+    float v1Intensity = coreLengthSq(v_av2TexCoord[3]) * 0.15;
+
+    // 
     float v1Mix = smoothstep(-0.22 + 0.5, 0.22 + 0.5, v1Value + v1Offset * 0.3);
 
     // 
-    gl_FragColor = vec4(vec3((1.0 - v1Detail) * mix(0.5, 1.0, v1Mix)), v1Mix * u_v4Color.a);
+    gl_FragColor = vec4(vec3(1.0 - v1Detail - v1Intensity), u_v4Color.a) * v1Mix;
 }

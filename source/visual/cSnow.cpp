@@ -96,7 +96,7 @@ void cSnow::Enable()
     m_fDelay = 0.0f;
 
     // 
-    this->DrawAll(0u);
+    this->DrawAll(SNOW_TYPE_REMOVE);
 }
 
 
@@ -111,15 +111,18 @@ void cSnow::Disable(const coreFloat fDelay)
 
 // ****************************************************************
 // 
-coreUintW cSnow::DrawPoint(const coreVector2 vPosition, const coreFloat fSize, const coreUint8 iType)
+coreUintW cSnow::DrawPoint(const coreVector2 vPosition, const coreFloat fSize, const eSnowType eType)
 {
     coreUintW iHit = 0u;
 
     // 
-    const coreUintW iFromX = cSnow::__GetMapIndex(vPosition.x - (fSize + 1.0f));
-    const coreUintW iToX   = cSnow::__GetMapIndex(vPosition.x + (fSize + 1.0f));
-    const coreUintW iFromY = cSnow::__GetMapIndex(vPosition.y - (fSize + 1.0f));
-    const coreUintW iToY   = cSnow::__GetMapIndex(vPosition.y + (fSize + 1.0f));
+    const coreVector2 vSnap = cSnow::__SnapPosition(vPosition);
+
+    // 
+    const coreUintW iFromX = cSnow::__GetMapIndex(vSnap.x - (fSize + 1.0f));
+    const coreUintW iToX   = cSnow::__GetMapIndex(vSnap.x + (fSize + 1.0f));
+    const coreUintW iFromY = cSnow::__GetMapIndex(vSnap.y - (fSize + 1.0f));
+    const coreUintW iToY   = cSnow::__GetMapIndex(vSnap.y + (fSize + 1.0f));
 
     // 
     for(coreUintW j = iFromY; j <= iToY; ++j)
@@ -128,16 +131,16 @@ coreUintW cSnow::DrawPoint(const coreVector2 vPosition, const coreFloat fSize, c
         {
             // 
             coreUint8& iByte = m_piSnowData[j * SNOW_SIZE + i];
-            if(iType ? !iByte : iByte)
+            if((eType == SNOW_TYPE_INVERT) || (eType ? !iByte : iByte))
             {
                 // 
                 const coreFloat fPosX = cSnow::__GetMapValue(i);
                 const coreFloat fPosY = cSnow::__GetMapValue(j);
 
                 // 
-                if((coreVector2(fPosX, fPosY) - vPosition).LengthSq() < POW2(fSize))
+                if((coreVector2(fPosX, fPosY) - vSnap).LengthSq() < POW2(fSize))
                 {
-                    iByte = iType ? 0xFFu : 0x00u;
+                    iByte = (eType == SNOW_TYPE_INVERT) ? ~iByte : (eType ? 0xFFu : 0x00u);
                     iHit += 1u;
                 }
             }
@@ -152,15 +155,18 @@ coreUintW cSnow::DrawPoint(const coreVector2 vPosition, const coreFloat fSize, c
 
 // ****************************************************************
 // 
-coreUintW cSnow::DrawLine(const coreVector2 vPosition, const coreFloat fSize, const coreBool bHorizontal, const coreUint8 iType)
+coreUintW cSnow::DrawLine(const coreVector2 vPosition, const coreFloat fSize, const coreBool bHorizontal, const eSnowType eType)
 {
     coreUintW iHit = 0u;
 
     // 
-    const coreUintW iFromX =  bHorizontal ? (0u)             : cSnow::__GetMapIndex(vPosition.x - fSize);
-    const coreUintW iToX   =  bHorizontal ? (SNOW_SIZE - 1u) : cSnow::__GetMapIndex(vPosition.x + fSize);
-    const coreUintW iFromY = !bHorizontal ? (0u)             : cSnow::__GetMapIndex(vPosition.y - fSize);
-    const coreUintW iToY   = !bHorizontal ? (SNOW_SIZE - 1u) : cSnow::__GetMapIndex(vPosition.y + fSize);
+    const coreVector2 vSnap = cSnow::__SnapPosition(vPosition);
+
+    // 
+    const coreUintW iFromX =  bHorizontal ? (0u)             : cSnow::__GetMapIndex(vSnap.x - fSize);
+    const coreUintW iToX   =  bHorizontal ? (SNOW_SIZE - 1u) : cSnow::__GetMapIndex(vSnap.x + fSize);
+    const coreUintW iFromY = !bHorizontal ? (0u)             : cSnow::__GetMapIndex(vSnap.y - fSize);
+    const coreUintW iToY   = !bHorizontal ? (SNOW_SIZE - 1u) : cSnow::__GetMapIndex(vSnap.y + fSize);
 
     // 
     for(coreUintW j = iFromY; j <= iToY; ++j)
@@ -169,9 +175,9 @@ coreUintW cSnow::DrawLine(const coreVector2 vPosition, const coreFloat fSize, co
         {
             // 
             coreUint8& iByte = m_piSnowData[j * SNOW_SIZE + i];
-            if(iType ? !iByte : iByte)
+            if((eType == SNOW_TYPE_INVERT) || (eType ? !iByte : iByte))
             {
-                iByte = iType ? 0xFFu : 0x00u;
+                iByte = (eType == SNOW_TYPE_INVERT) ? ~iByte : (eType ? 0xFFu : 0x00u);
                 iHit += 1u;
             }
         }
@@ -185,10 +191,26 @@ coreUintW cSnow::DrawLine(const coreVector2 vPosition, const coreFloat fSize, co
 
 // ****************************************************************
 // 
-void cSnow::DrawAll(const coreUint8 iType)
+void cSnow::DrawAll(const eSnowType eType)
 {
+    if(eType == SNOW_TYPE_INVERT)
+    {
+        STATIC_ASSERT(coreMath::IsAligned(SNOW_SIZE * SNOW_SIZE, 8u))
+
+        // 
+        coreUint64* piSnowData64 = r_cast<coreUint64*>(m_piSnowData);
+        for(coreUintW i = 0u; i < SNOW_SIZE * SNOW_SIZE / 8u; ++i)
+        {
+            piSnowData64[i] = ~piSnowData64[i];
+        }
+    }
+    else
+    {
+        // 
+        std::memset(m_piSnowData, eType ? 0xFFu : 0x00u, SNOW_SIZE * SNOW_SIZE);
+    }
+
     // 
-    std::memset(m_piSnowData, iType ? 0xFFu : 0x00u, SNOW_SIZE * SNOW_SIZE);
     m_bDirty = true;
 }
 
@@ -229,4 +251,12 @@ coreFloat cSnow::__GetMapValue(const coreUintW iIndex)
 {
     STATIC_ASSERT(FOREGROUND_AREA.x == FOREGROUND_AREA.y)
     return ((I_TO_F(iIndex) + 0.5f) / I_TO_F(SNOW_SIZE)) * (FOREGROUND_AREA.x * 2.2f) - (FOREGROUND_AREA.x * 1.1f);
+}
+
+
+// ****************************************************************
+// 
+coreVector2 cSnow::__SnapPosition(const coreVector2 vPosition)
+{
+    return (((((vPosition / (FOREGROUND_AREA * 1.1f)) * 0.5f + 0.5f) * I_TO_F(SNOW_SIZE)).Processed(ROUND) / I_TO_F(SNOW_SIZE)) * 2.0f - 1.0f) * (FOREGROUND_AREA * 1.1f);
 }
