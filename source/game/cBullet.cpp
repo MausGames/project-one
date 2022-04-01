@@ -477,6 +477,7 @@ cSurgeBullet::cSurgeBullet()noexcept
 {
     // load object resources
     this->DefineModel  ("bullet_wave.md3");
+    this->DefineVolume ("bullet_wave_volume.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_direct_program");
 }
@@ -698,6 +699,7 @@ cWaveBullet::cWaveBullet()noexcept
 {
     // load object resources
     this->DefineModel  ("bullet_wave.md3");
+    this->DefineVolume ("bullet_wave_volume.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_direct_program");
 
