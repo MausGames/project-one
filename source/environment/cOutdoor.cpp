@@ -381,8 +381,12 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
         // free required memory
         SAFE_DELETE_ARRAY(pOutput)
 
+        // create sync object
+        const coreBool bSync = m_Sync.Create();
+        if(!bSync) this->DefineTexture(2u, m_pNormalMap);
+
         Core::Log->Info("Outdoor-Textures (%s, %s) loaded", pcTextureTop, pcTextureBottom);
-        return m_Sync.Create() ? CORE_BUSY : CORE_OK;
+        return bSync ? CORE_BUSY : CORE_OK;
     });
 }
 
@@ -655,8 +659,8 @@ void cOutdoor::__Reset(const coreResourceReset eInit)
     if(eInit)
     {
         // 
-        this->LoadGeometry(m_iAlgorithm, m_fGrade, m_iSeed);
-        this->LoadTextures(m_pcTop, m_pcBottom);
+        if(m_pModel)     this->LoadGeometry(m_iAlgorithm, m_fGrade, m_iSeed);
+        if(m_pNormalMap) this->LoadTextures(m_pcTop, m_pcBottom);
 
         // 
         if(m_LightMap.GetColorTarget(0u).IsValid()) m_LightMap.Create(g_vGameResolution * OUTDOOR_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
