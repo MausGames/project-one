@@ -12,7 +12,6 @@
 
 // TODO 4: manager: Find, ForEach, ForEachAll -> typed
 // TODO 3: implement own enemy-types for custom-enemies which would require instancing
-// TODO 3: memory-pool for each enemy-set (if single allocations still used)
 // TODO 3: add score-value to cEnemy class, either for base, or for extra score
 // TODO 2: make sure ENEMY_STATUS_DAMAGING is used for damaging contact, and no additional checks and (duplicate) TakeDamage calls are made
 // TODO 4: get rid of ENEMY_SIZE_FACTOR, because lots of places override it directly anyway
@@ -137,7 +136,8 @@ private:
     };
     template <typename T> struct sEnemySet final : public sEnemySetGen
     {
-        coreList<T*> apEnemyPool;   // semi-dynamic container with all enemies
+        coreMemoryPool oMemoryPool;   // 
+        coreList<T*>   apEnemyPool;   // semi-dynamic container with all enemies
 
         sEnemySet()noexcept;
         ~sEnemySet()final;
@@ -481,9 +481,12 @@ template <typename T> cEnemyManager::sEnemySet<T>::sEnemySet()noexcept
     cShadow::GetGlobalContainer()->BindList(&oEnemyActive);
     g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->BindList(&oEnemyActive);
 
+    // 
+    oMemoryPool.Configure(sizeof(T), ENEMY_SET_INIT);
+
     // set enemy pool to initial size
     apEnemyPool.resize(ENEMY_SET_INIT);
-    apEnemyPool[0] = new T();   // already request resources
+    apEnemyPool[0] = POOLED_NEW(oMemoryPool, T);   // already request resources
 }
 
 
@@ -492,8 +495,7 @@ template <typename T> cEnemyManager::sEnemySet<T>::sEnemySet()noexcept
 template <typename T> cEnemyManager::sEnemySet<T>::sEnemySet::~sEnemySet()
 {
     // 
-    FOR_EACH(it, apEnemyPool)
-        SAFE_DELETE(*it)
+    FOR_EACH(it, apEnemyPool) POOLED_DELETE(oMemoryPool, *it)
 
     // remove enemy set from global shadow and outline
     cShadow::GetGlobalContainer()->UnbindList(&oEnemyActive);
@@ -520,7 +522,7 @@ template <typename T> RETURN_RESTRICT T* cEnemyManager::AllocateEnemy()
     {
         // check current enemy status
         T*& pEnemy = pSet->apEnemyPool[pSet->iTopEnemy++];
-        if(!pEnemy) pEnemy = new T();
+        if(!pEnemy) pEnemy = POOLED_NEW(pSet->oMemoryPool, T);
         if(!pEnemy->HasStatus(ENEMY_STATUS_ASSIGNED))
         {
             // prepare enemy and add to active list

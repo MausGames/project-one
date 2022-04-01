@@ -13,7 +13,7 @@
 // TODO 3: pre-allocate bullets (at least for player) at the beginning to improve resource loading
 // TODO 3: use prefetch with more precise numbers (also in enemy-manager) (maybe with per-class config)
 // TODO 3: align bullet memory ? (also check other possible locations (e.g. enemies))
-// TODO 3: add memory pool object for bullets ? also for enemy
+// TODO 3: add memory pool for bullets, instead of always reallocating
 // TODO 3: remove tons of template instantiations (also enemies ? other templates ?) (CreateBullet and AllocateEnemy create tons of symbols)
 // TODO 3: sort bullet classes (color, enemy<>player, normal<>special), improve array indexing and caching
 // TODO 2: lots of bullets with direction-outlines can create holes in outlines by nearly-invisible backsides (can this even be fixed ?)
