@@ -36,7 +36,7 @@
 // TODO 3: check all shaders if alpha is required
 // TODO 4: full initializer lists everywhere (don't forget parent classes)
 // TODO 3: clean mixing shader defines (x >= y) and (defined(x)) checks (also in engine)
-// TODO 3: check for 16-bit float shader usage
+// TODO 3: check for 16-bit half float shader usage
 // TODO 2: program enable has to be checked (if(x.Enable()){}) everywhere
 // TODO 4: unify "forward" and "transform" comments in shaders
 // TODO 3: add own coreRand for various random things which may affect feeling (screen shake), and reset on boss-start

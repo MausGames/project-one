@@ -442,7 +442,7 @@ void cCalorMission::__MoveOwnMiddle()
 
                             // 
                             pEnemy->RemoveStatus(ENEMY_STATUS_INVINCIBLE);
-                            pEnemy->TakeDamage  (1000u, ELEMENT_NEUTRAL, vIntersection.xy(), bOther ? g_pGame->GetPlayer(1u - i) : pPlayer);
+                            pEnemy->TakeDamage  (1000, ELEMENT_NEUTRAL, vIntersection.xy(), bOther ? g_pGame->GetPlayer(1u - i) : pPlayer);
 
                             // 
                             if(bOther) this->UncatchObject(1u - i);
@@ -452,7 +452,7 @@ void cCalorMission::__MoveOwnMiddle()
                         {
                             // 
                             pObject->RemoveStatus(ENEMY_STATUS_INVINCIBLE);
-                            pObject->TakeDamage  (1000u, ELEMENT_NEUTRAL, vIntersection.xy(), pPlayer);
+                            pObject->TakeDamage  (1000, ELEMENT_NEUTRAL, vIntersection.xy(), pPlayer);
 
                             // 
                             this->UncatchObject(i);

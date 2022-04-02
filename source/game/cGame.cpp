@@ -834,7 +834,7 @@ void cGame::__HandleCollisions()
 
         if(bFirstHit)
         {
-            if(!pPlayer->HasStatus(PLAYER_STATUS_GHOST) && !pEnemy->HasStatus(ENEMY_STATUS_GHOST_PLAYER))
+            if(!pPlayer->HasStatus(PLAYER_STATUS_GHOST) && !pEnemy->HasStatus(ENEMY_STATUS_GHOST))
             {
                 if(pEnemy->HasStatus(ENEMY_STATUS_DAMAGING))
                 {

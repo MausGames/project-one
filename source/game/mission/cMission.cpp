@@ -55,7 +55,7 @@ cMission::~cMission()
     m_apSquad.clear();
 
     // 
-    ZERO_DELETE(m_piData)
+    ALIGNED_DELETE(m_piData)
 }
 
 

@@ -787,7 +787,7 @@ public:
 
 
 // ****************************************************************
-// master menu class
+// primary menu class
 class cMenu final : public coreMenu, public coreResourceRelation
 {
 private:

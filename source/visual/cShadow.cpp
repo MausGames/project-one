@@ -94,7 +94,7 @@ void cShadow::Reconfigure()
         m_FrameBuffer.Create(vRes, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
         // enable depth value comparison
-        m_FrameBuffer.GetDepthTarget().pTexture->ShadowSampling(true);
+        m_FrameBuffer.GetDepthTarget().pTexture->EnableShadowSampling();
 
         // set polygon fill properties (to reduce projective aliasing, not in GlobalInit, because of easier engine-reset)
         glPolygonOffset(3.3f, 12.0f);

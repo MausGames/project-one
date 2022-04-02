@@ -24,6 +24,7 @@
     #extension GL_EXT_conservative_depth       : enable
     #extension GL_EXT_shadow_samplers          : enable
     #extension GL_OES_sample_variables         : enable
+    #extension GL_OES_standard_derivatives     : enable
 #else
     #extension GL_AMD_conservative_depth       : enable
     #extension GL_AMD_gpu_shader_half_float    : enable
@@ -58,6 +59,9 @@
 #endif
 #if defined(GL_ARB_shader_image_load_store) || defined(GL_EXT_shader_image_load_store) || (CORE_GL_VERSION >= 420) || (CORE_GL_ES_VERSION >= 310)
     #define CORE_GL_shader_image_load_store
+#endif
+#if defined(GL_OES_standard_derivatives) || (CORE_GL_VERSION >= 110) || (CORE_GL_ES_VERSION >= 300)
+    #define CORE_GL_standard_derivatives
 #endif
 #pragma optimize(on)
 #pragma debug(off)
@@ -97,7 +101,8 @@
         #define shadow2DProj(t,v) (shadow2DProjEXT(t, v))
     #else
         #define sampler2DShadow   sampler2D
-        #define shadow2DProj(t,v) ((texture2DProj(t, v).r < (v.z / v.w)) ? 1.0 : 0.0)
+        #define shadow2DProj(t,v) (coreShadow2DProj(t, v))
+        vec4 coreShadow2DProj(const in sampler2DShadow t, const in vec4 v) {return (texture2DProj(t, v).r < (v.z / v.w)) ? vec4(1.0) : vec4(0.0);}
     #endif
 #endif
 #if (CORE_GL_VERSION >= 130) || (CORE_GL_ES_VERSION >= 300)
@@ -124,6 +129,11 @@
 #endif
 #if !defined(GL_ES) && (CORE_GL_VERSION < 120)
     #define invariant
+#endif
+#if !defined(CORE_GL_standard_derivatives)
+    #define dFdx(x)   ((x) * 0.0)
+    #define dFdy(x)   ((x) * 0.0)
+    #define fwidth(x) ((x) * 0.0)
 #endif
 
 // type definitions
@@ -508,8 +518,8 @@ uniform lowp    vec4 u_v4Color;
 uniform mediump vec4 u_v4TexParam;
 
 // texture uniforms
-uniform lowp sampler2D       u_as2Texture2D    [CORE_NUM_TEXTURES_2D];
-uniform lowp sampler2DShadow u_as2TextureShadow[CORE_NUM_TEXTURES_SHADOW];
+uniform lowp    sampler2D       u_as2Texture2D    [CORE_NUM_TEXTURES_2D];
+uniform mediump sampler2DShadow u_as2TextureShadow[CORE_NUM_TEXTURES_SHADOW];
 
 
 // ****************************************************************
@@ -594,7 +604,7 @@ uniform lowp sampler2DShadow u_as2TextureShadow[CORE_NUM_TEXTURES_SHADOW];
     void VertexMain();
     void ShaderMain()
     {
-    #if defined(_CORE_PLATFORM_MACOS_)
+    #if defined(_CORE_TARGET_MACOS_)
         v_v4VarColor   = vec4(0.0);
         for(int i = 0; i < CORE_NUM_TEXTURES_2D; ++i) v_av2TexCoord[i] = vec2(0.0);
         for(int i = 0; i < CORE_NUM_LIGHTS;      ++i) v_av4LightPos[i] = vec4(0.0);

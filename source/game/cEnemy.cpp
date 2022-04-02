@@ -895,7 +895,6 @@ cRepairEnemy::cRepairEnemy()noexcept
     // 
     this->DefineModelHigh("object_sphere.md3");
     this->DefineModelLow ("object_sphere.md3");
-    this->SetSize        (coreVector3(1.0f,1.0f,1.0f) * 5.0f * PLAYER_SIZE_FACTOR);
 
     // 
     m_Bubble.DefineModel  ("object_sphere.md3");
@@ -939,6 +938,7 @@ void cRepairEnemy::AssignPlayer(cPlayer* pPlayer)
 
     // 
     this->SetPosition(pPlayer->GetPosition());
+    this->SetSize    (pPlayer->GetSize    ());
 
     // 
     m_Ship.DefineModelHigh(pPlayer->GetModelHigh());

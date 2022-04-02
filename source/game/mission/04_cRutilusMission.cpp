@@ -337,7 +337,7 @@ void cRutilusMission::__MoveOwnBefore()
     }
 
     // 
-    g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    g_pGame->ForEachPlayer([&](const cPlayer* pPlayer, const coreUintW i)
     {
         sGameInput* pInput = c_cast<sGameInput*>(pPlayer->GetInput());
 
