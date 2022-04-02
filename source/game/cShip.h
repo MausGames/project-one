@@ -20,7 +20,8 @@
 // ship definitions
 #define SHIP_INVERTED_BIT (24u)   // for inverted base color interpolation
 
-#define SHIP_SHADER_ATTRIBUTE_BLINK (CORE_SHADER_ATTRIBUTE_DIV_TEXPARAM_NUM + 1u)
+#define SHIP_SHADER_ATTRIBUTE_BLINK     "a_v1Blink"
+#define SHIP_SHADER_ATTRIBUTE_BLINK_NUM (CORE_SHADER_ATTRIBUTE_USER_NUM + 0u)
 
 
 // ****************************************************************

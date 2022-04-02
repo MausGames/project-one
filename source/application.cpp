@@ -570,25 +570,25 @@ void CoreApp::Setup()
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_bullet_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("effect_energy_bullet_inst.vert")
         ->AttachShader("effect_energy_inst.frag")
-        ->BindAttribute("a_v1Depth", BULLET_SHADER_ATTRIBUTE_DEPTH)
+        ->BindAttribute(BULLET_SHADER_ATTRIBUTE_DEPTH, BULLET_SHADER_ATTRIBUTE_DEPTH_NUM)
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_bullet_spheric_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("effect_energy_bullet_spheric_inst.vert")
         ->AttachShader("effect_energy_inst.frag")
-        ->BindAttribute("a_v1Depth", BULLET_SHADER_ATTRIBUTE_DEPTH)
+        ->BindAttribute(BULLET_SHADER_ATTRIBUTE_DEPTH, BULLET_SHADER_ATTRIBUTE_DEPTH_NUM)
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_bullet_invert_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("effect_energy_bullet_invert_inst.vert")
         ->AttachShader("effect_energy_inst.frag")
-        ->BindAttribute("a_v1Depth", BULLET_SHADER_ATTRIBUTE_DEPTH)
+        ->BindAttribute(BULLET_SHADER_ATTRIBUTE_DEPTH, BULLET_SHADER_ATTRIBUTE_DEPTH_NUM)
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_bullet_direct_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("effect_energy_bullet_direct_inst.vert")
         ->AttachShader("effect_energy_inst.frag")
-        ->BindAttribute("a_v1Depth", BULLET_SHADER_ATTRIBUTE_DEPTH)
+        ->BindAttribute(BULLET_SHADER_ATTRIBUTE_DEPTH, BULLET_SHADER_ATTRIBUTE_DEPTH_NUM)
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_headlight_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
@@ -664,7 +664,7 @@ void CoreApp::Setup()
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_outline_bullet_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("effect_outline_bullet_inst.vert")
         ->AttachShader("effect_outline_inst.frag")
-        ->BindAttribute("a_v1Depth", BULLET_SHADER_ATTRIBUTE_DEPTH)
+        ->BindAttribute(BULLET_SHADER_ATTRIBUTE_DEPTH, BULLET_SHADER_ATTRIBUTE_DEPTH_NUM)
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_outline_light_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
@@ -685,7 +685,7 @@ void CoreApp::Setup()
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_outline_bullet_direct_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("effect_outline_bullet_direct_inst.vert")
         ->AttachShader("effect_outline_direct_inst.frag")
-        ->BindAttribute("a_v1Depth", BULLET_SHADER_ATTRIBUTE_DEPTH)
+        ->BindAttribute(BULLET_SHADER_ATTRIBUTE_DEPTH, BULLET_SHADER_ATTRIBUTE_DEPTH_NUM)
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_particle_color_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
@@ -771,29 +771,29 @@ void CoreApp::Setup()
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_outdoor_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("environment_outdoor.vert")
         ->AttachShader("environment_outdoor.frag")
-        ->BindAttribute("a_v1Height",   CORE_SHADER_ATTRIBUTE_POSITION_NUM)
-        ->BindAttribute("a_v2Position", CORE_SHADER_ATTRIBUTE_TEXCOORD_NUM)
+        ->BindAttribute(OUTDOOR_SHADER_ATTRIBUTE_HEIGHT,   OUTDOOR_SHADER_ATTRIBUTE_HEIGHT_NUM)
+        ->BindAttribute(OUTDOOR_SHADER_ATTRIBUTE_POSITION, OUTDOOR_SHADER_ATTRIBUTE_POSITION_NUM)
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_outdoor_glow_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("environment_outdoor.vert")
         ->AttachShader("environment_outdoor_glow.frag")
-        ->BindAttribute("a_v1Height",   CORE_SHADER_ATTRIBUTE_POSITION_NUM)
-        ->BindAttribute("a_v2Position", CORE_SHADER_ATTRIBUTE_TEXCOORD_NUM)
+        ->BindAttribute(OUTDOOR_SHADER_ATTRIBUTE_HEIGHT,   OUTDOOR_SHADER_ATTRIBUTE_HEIGHT_NUM)
+        ->BindAttribute(OUTDOOR_SHADER_ATTRIBUTE_POSITION, OUTDOOR_SHADER_ATTRIBUTE_POSITION_NUM)
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_outdoor_light_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("environment_outdoor.vert")
         ->AttachShader("environment_outdoor_light.frag")
-        ->BindAttribute("a_v1Height",   CORE_SHADER_ATTRIBUTE_POSITION_NUM)
-        ->BindAttribute("a_v2Position", CORE_SHADER_ATTRIBUTE_TEXCOORD_NUM)
+        ->BindAttribute(OUTDOOR_SHADER_ATTRIBUTE_HEIGHT,   OUTDOOR_SHADER_ATTRIBUTE_HEIGHT_NUM)
+        ->BindAttribute(OUTDOOR_SHADER_ATTRIBUTE_POSITION, OUTDOOR_SHADER_ATTRIBUTE_POSITION_NUM)
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_outdoor_light_glow_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("environment_outdoor.vert")
         ->AttachShader("environment_outdoor_light_glow.frag")
-        ->BindAttribute("a_v1Height",   CORE_SHADER_ATTRIBUTE_POSITION_NUM)
-        ->BindAttribute("a_v2Position", CORE_SHADER_ATTRIBUTE_TEXCOORD_NUM)
+        ->BindAttribute(OUTDOOR_SHADER_ATTRIBUTE_HEIGHT,   OUTDOOR_SHADER_ATTRIBUTE_HEIGHT_NUM)
+        ->BindAttribute(OUTDOOR_SHADER_ATTRIBUTE_POSITION, OUTDOOR_SHADER_ATTRIBUTE_POSITION_NUM)
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("environment_rain_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
@@ -954,13 +954,13 @@ void CoreApp::Setup()
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ship_blink_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader ("object_inst.vert")
         ->AttachShader ("object_ship_blink_inst.frag")
-        ->BindAttribute("a_v1Blink", SHIP_SHADER_ATTRIBUTE_BLINK)
+        ->BindAttribute(SHIP_SHADER_ATTRIBUTE_BLINK, SHIP_SHADER_ATTRIBUTE_BLINK_NUM)
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_meteor_blink_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader ("object_inst.vert")
         ->AttachShader ("object_meteor_blink_inst.frag")
-        ->BindAttribute("a_v1Blink", SHIP_SHADER_ATTRIBUTE_BLINK)
+        ->BindAttribute(SHIP_SHADER_ATTRIBUTE_BLINK, SHIP_SHADER_ATTRIBUTE_BLINK_NUM)
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_plate_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())

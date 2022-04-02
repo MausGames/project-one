@@ -279,9 +279,9 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade, 
 
     // create vertex buffer
     coreVertexBuffer* pBuffer = m_pModel->CreateVertexBuffer(OUTDOOR_TOTAL_VERTICES, sizeof(sVertexPacked), s_aPackedData, CORE_DATABUFFER_STORAGE_STATIC);
-    pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_POSITION_NUM, 1u, GL_FLOAT,    false, 0u);
-    pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_NORMAL_NUM,   4u, iNormFormat, false, 1u*sizeof(coreFloat));
-    pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_TANGENT_NUM,  4u, iNormFormat, false, 1u*sizeof(coreFloat) + 1u*sizeof(coreUint32));
+    pBuffer->DefineAttribute(OUTDOOR_SHADER_ATTRIBUTE_HEIGHT_NUM, 1u, GL_FLOAT,    false, 0u);
+    pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_NORMAL_NUM,    4u, iNormFormat, false, 1u*sizeof(coreFloat));
+    pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_TANGENT_NUM,   4u, iNormFormat, false, 1u*sizeof(coreFloat) + 1u*sizeof(coreUint32));
 
     // create index buffer
     m_pModel->CreateIndexBuffer(OUTDOOR_TOTAL_INDICES, sizeof(coreUint16), s_aiIndexData, CORE_DATABUFFER_STORAGE_STATIC);
@@ -294,7 +294,7 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade, 
 
         // 
         pBuffer = m_pModel->CreateVertexBuffer(OUTDOOR_TOTAL_VERTICES, sizeof(coreVector2), s_avPosition, CORE_DATABUFFER_STORAGE_STATIC);
-        pBuffer->DefineAttribute(CORE_SHADER_ATTRIBUTE_TEXCOORD_NUM, 2u, GL_FLOAT, false, 0u);
+        pBuffer->DefineAttribute(OUTDOOR_SHADER_ATTRIBUTE_POSITION_NUM, 2u, GL_FLOAT, false, 0u);
     }
 
     Core::Log->Info("Outdoor-Geometry (%u, %.1f) loaded", iAlgorithm, fGrade);
