@@ -14,7 +14,7 @@ void FragmentMain()
 
     // 
     vec2  v2ScreenCoord = gl_FragCoord.xy * u_v4Resolution.zw;
-    float v1Light       = coreTexture2D(3, v2ScreenCoord).r * 1.75;
+    float v1Light       = coreTextureBase2D(3, v2ScreenCoord).r * 1.75;
 
 #else
 

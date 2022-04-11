@@ -46,7 +46,7 @@ void FragmentMain()
     vec2 v2ScreenCoord = gl_FragCoord.xy * u_v4Resolution.zw;
 
     // lookup depth map
-    float v1Depth = coreTexture2D(3, v2ScreenCoord).r;
+    float v1Depth = coreTextureBase2D(3, v2ScreenCoord).r;
 
     if(v1Depth > c_v1ThreshIgnore)
     {
@@ -76,7 +76,7 @@ void FragmentMain()
             v1Height      += v3Step.z;
 
             // 
-            v1Depth = coreTexture2D(3, v2ScreenCoord).r;
+            v1Depth = coreTextureBase2D(3, v2ScreenCoord).r;
 
             if(v1Depth <= c_v1ThreshTrace)
             {
@@ -116,14 +116,14 @@ void FragmentMain()
 
     // set distortion vector and lookup reflection texture
     vec2 v2Distortion = v3BumpNormal.xy * 0.022 * DistortionStrength(v2ScreenCoord);
-    vec3 v3Reflection = coreTexture2D(1, v2ScreenCoord + v2Distortion).rgb;
+    vec3 v3Reflection = coreTextureBase2D(1, v2ScreenCoord + v2Distortion).rgb;
 
     // adjust depth value
     v1Depth = smoothstep(0.64, 0.735, v1Depth) * 0.9 + v_v4Lighting.w;
     v1Depth = max(v1Depth - (0.5 - 0.5 * smoothstep(0.3, 0.4, v1Depth)), 0.0);
 
     // lookup refraction texture
-    vec3 v3Refraction = coreTexture2D(2, v2ScreenCoord + v2Distortion * v1Depth).rgb;
+    vec3 v3Refraction = coreTextureBase2D(2, v2ScreenCoord + v2Distortion * v1Depth).rgb;
 
     // adjust reflection value
     v3Reflection = mix(c_v3Blue * v1Intensity, v3Reflection, max(dot(v3BumpNormal, v3MathViewDir) - 0.4, 0.0)) + vec3(v1ReflFactor);

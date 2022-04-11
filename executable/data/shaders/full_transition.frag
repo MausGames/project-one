@@ -19,8 +19,8 @@ void FragmentMain()
     float v1Offset = coreTexture2D(2, v_av2TexCoord[2]).r * 16.0 - 1.0;
 
     // lookup color textures
-    vec4 v4TexColorOld = coreTexture2D(0, v_av2TexCoord[0]);
-    vec4 v4TexColorNew = coreTexture2D(1, v_av2TexCoord[0]);
+    vec4 v4TexColorOld = coreTextureBase2D(0, v_av2TexCoord[0]);
+    vec4 v4TexColorNew = coreTextureBase2D(1, v_av2TexCoord[0]);
 
     // 
     vec2  v2AbsDir  = abs(u_v2TransitionDir);

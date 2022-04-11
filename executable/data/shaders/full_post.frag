@@ -15,7 +15,7 @@ void FragmentMain()
 #if defined(_P1_DISTORTION_)
 
     // lookup distortion map
-    vec2 v2Distortion = coreTexture2D(3, v_av2TexCoord[1]).rg;   // # low-res
+    vec2 v2Distortion = coreTextureBase2D(3, v_av2TexCoord[1]).rg;   // # low-res
 
     // move texture coordinates
     if(any(bvec4(lessThan(v2Distortion, vec2(127.35/255.0)), greaterThan(v2Distortion, vec2(127.65/255.0)))))
@@ -24,9 +24,9 @@ void FragmentMain()
 #endif
 
     // lookup textures
-    vec4 v4Foreground  = coreTexture2D(0, v2TexCoord);
-    vec3 v3Environment = coreTexture2D(1, v2TexCoord).rgb;
-    vec3 v3Glow        = coreTexture2D(2, v2TexCoord).rgb;   // # low-res
+    vec4 v4Foreground  = coreTextureBase2D(0, v2TexCoord);
+    vec3 v3Environment = coreTextureBase2D(1, v2TexCoord).rgb;
+    vec3 v3Glow        = coreTextureBase2D(2, v2TexCoord).rgb;   // # low-res
 
 #if !defined(_P1_GLOW_)
 

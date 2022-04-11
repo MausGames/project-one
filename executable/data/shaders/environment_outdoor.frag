@@ -61,12 +61,12 @@ void FragmentMain()
 #if (_P1_SHADOW_) == 1 || defined(_P1_LIGHT_)
 
     // apply shadow mapping with single depth value comparison
-    float v1Light = mix(1.0, 0.5, coreTextureShadow(0, v_v4ShadowCoord));
+    float v1Light = mix(1.0, 0.5, coreTextureBaseShadow(0, v_v4ShadowCoord));
 
-    if(coreTextureProj(3, v_v4ShadowCoord * vec4(vec2(c_v1TestFactor), 1.0, 1.0)).r != 0.0)
+    if(coreTextureBaseProj(3, v_v4ShadowCoord * vec4(vec2(c_v1TestFactor), 1.0, 1.0)).r != 0.0)
     {
         // 
-        float v1DynLight = coreTextureProj(3, v_v4ShadowCoord).r;
+        float v1DynLight = coreTextureBaseProj(3, v_v4ShadowCoord).r;
 
         // 
         float v1Visibility = coreSaturate(max(v_v2Border.x, v_v2Border.y));
@@ -78,21 +78,21 @@ void FragmentMain()
     const float A = 0.0012;
 
     // apply shadow mapping with percentage closer filtering
-    float v1Light = (coreTextureShadow(0, v_v4ShadowCoord)                            +
-                     coreTextureShadow(0, v_v4ShadowCoord + vec4(0.0,   A, 0.0, 0.0)) +
-                     coreTextureShadow(0, v_v4ShadowCoord + vec4(0.0,  -A, 0.0, 0.0)) +
-                     coreTextureShadow(0, v_v4ShadowCoord + vec4(  A, 0.0, 0.0, 0.0)) +
-                     coreTextureShadow(0, v_v4ShadowCoord + vec4( -A, 0.0, 0.0, 0.0))) * 0.2;
+    float v1Light = (coreTextureBaseShadow(0, v_v4ShadowCoord)                            +
+                     coreTextureBaseShadow(0, v_v4ShadowCoord + vec4(0.0,   A, 0.0, 0.0)) +
+                     coreTextureBaseShadow(0, v_v4ShadowCoord + vec4(0.0,  -A, 0.0, 0.0)) +
+                     coreTextureBaseShadow(0, v_v4ShadowCoord + vec4(  A, 0.0, 0.0, 0.0)) +
+                     coreTextureBaseShadow(0, v_v4ShadowCoord + vec4( -A, 0.0, 0.0, 0.0))) * 0.2;
     v1Light = mix(1.0, 0.5, v1Light);
 
-    if(coreTextureProj(3, v_v4ShadowCoord * vec4(vec2(c_v1TestFactor), 1.0, 1.0)).r != 0.0)
+    if(coreTextureBaseProj(3, v_v4ShadowCoord * vec4(vec2(c_v1TestFactor), 1.0, 1.0)).r != 0.0)
     {
         // 
-        float v1DynLight = (coreTextureProj(3, v_v4ShadowCoord)                           .r +
-                            coreTextureProj(3, v_v4ShadowCoord + vec4(0.0,   A, 0.0, 0.0)).r +
-                            coreTextureProj(3, v_v4ShadowCoord + vec4(0.0,  -A, 0.0, 0.0)).r +
-                            coreTextureProj(3, v_v4ShadowCoord + vec4(  A, 0.0, 0.0, 0.0)).r +
-                            coreTextureProj(3, v_v4ShadowCoord + vec4( -A, 0.0, 0.0, 0.0)).r) * 0.2;
+        float v1DynLight = (coreTextureBaseProj(3, v_v4ShadowCoord)                           .r +
+                            coreTextureBaseProj(3, v_v4ShadowCoord + vec4(0.0,   A, 0.0, 0.0)).r +
+                            coreTextureBaseProj(3, v_v4ShadowCoord + vec4(0.0,  -A, 0.0, 0.0)).r +
+                            coreTextureBaseProj(3, v_v4ShadowCoord + vec4(  A, 0.0, 0.0, 0.0)).r +
+                            coreTextureBaseProj(3, v_v4ShadowCoord + vec4( -A, 0.0, 0.0, 0.0)).r) * 0.2;
 
         // 
         float v1Visibility = coreSaturate(max(v_v2Border.x, v_v2Border.y));

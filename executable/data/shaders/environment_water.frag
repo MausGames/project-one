@@ -20,9 +20,9 @@ void FragmentMain()
     vec2 v2ScreenCoord = gl_FragCoord.xy * u_v4Resolution.zw;
 
     // lookup normal map (multiple times) and depth map
-    vec3  v3BumpNormal1 = coreTexture2D(0, v_av2TexCoord[0]).xyz;
-    vec3  v3BumpNormal2 = coreTexture2D(0, v_av2TexCoord[1]).xyz;
-    float v1Depth       = coreTexture2D(3, v2ScreenCoord).r;
+    vec3  v3BumpNormal1 = coreTexture2D    (0, v_av2TexCoord[0]).xyz;
+    vec3  v3BumpNormal2 = coreTexture2D    (0, v_av2TexCoord[1]).xyz;
+    float v1Depth       = coreTextureBase2D(3, v2ScreenCoord).r;
 
     // calculate dot-3 bump factor
     vec3  v3MathLightDir = normalize(v_v4Lighting.xyz);
@@ -32,7 +32,7 @@ void FragmentMain()
 
     // set distortion vector and lookup reflection texture
     vec2 v2Distortion = v3BumpNormal.xy * 0.022 * DistortionStrength(v2ScreenCoord);
-    vec3 v3Reflection = coreTexture2D(1, v2ScreenCoord + v2Distortion).rgb;
+    vec3 v3Reflection = coreTextureBase2D(1, v2ScreenCoord + v2Distortion).rgb;
 
     // calculate dot-3 reflection factor
     vec3  v3MathViewDir = normalize(v_v3ViewDir);
@@ -45,7 +45,7 @@ void FragmentMain()
     v1Depth = max(v1Depth - (0.5 - 0.5 * smoothstep(0.3, 0.4, v1Depth)), 0.0);
 
     // lookup refraction texture
-    vec3 v3Refraction = coreTexture2D(2, v2ScreenCoord + v2Distortion * v1Depth).rgb;
+    vec3 v3Refraction = coreTextureBase2D(2, v2ScreenCoord + v2Distortion * v1Depth).rgb;
 
     // adjust reflection value
     v3Reflection = mix(c_v3Blue, v3Reflection, max(dot(v3BumpNormal, v3MathViewDir) - 0.5, 0.0)) + vec3(v1ReflFactor);

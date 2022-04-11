@@ -11,9 +11,9 @@
 void FragmentMain()
 {
     // 
-    float v1Value  = coreTexture2D(0, v_av2TexCoord[0]).r;
-    float v1Detail = coreTexture2D(1, v_av2TexCoord[1]).r;
-    float v1Offset = coreTexture2D(1, v_av2TexCoord[2]).r * 16.0 - 1.0;
+    float v1Value  = coreTextureBase2D(0, v_av2TexCoord[0]).r;
+    float v1Detail = coreTexture2D    (1, v_av2TexCoord[1]).r;
+    float v1Offset = coreTexture2D    (1, v_av2TexCoord[2]).r * 16.0 - 1.0;
 
     // 
     float v1Intensity = coreLengthSq(v_av2TexCoord[3]) * 0.15;
