@@ -343,10 +343,10 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
         WARN_IF(!pSurface2 || (pSurface2->format->BitsPerPixel != 24u)) return CORE_OK;
 
         // allocate required memory
-        const coreUintW iSize = pSurface1->w * pSurface1->h * 4u;
-        coreByte* pOutput = new coreByte[iSize];
-        coreByte* pInput1 = s_cast<coreByte*>(pSurface1->pixels);
-        coreByte* pInput2 = s_cast<coreByte*>(pSurface2->pixels);
+        const coreUintW iSize   = pSurface1->w * pSurface1->h * 4u;
+        coreByte*       pOutput = new coreByte[iSize];
+        const coreByte* pInput1 = s_cast<const coreByte*>(pSurface1->pixels);
+        const coreByte* pInput2 = s_cast<const coreByte*>(pSurface2->pixels);
 
         // merge XY components of both normal maps (divided by Z, partial-derivative)
         for(coreUintW i = 0u, j = 0u; i < iSize; i += 4u, j += 3u)

@@ -12,7 +12,7 @@
 // ****************************************************************
 // constructor
 cGlow::cGlow()noexcept
-: m_Blur    (CORE_GL_SUPPORT(EXT_packed_float) ? CORE_TEXTURE_SPEC_R11F_G11F_B10F : (CORE_GL_SUPPORT(ARB_texture_float) ? CORE_TEXTURE_SPEC_RGB16F : CORE_TEXTURE_SPEC_RGB10_A2), GLOW_SCALE_FACTOR, GLOW_ATTENUATION_FACTOR)
+: m_Blur    (CORE_GL_SUPPORT(EXT_packed_float) ? CORE_TEXTURE_SPEC_R11F_G11F_B10F : (CORE_GL_SUPPORT(ARB_texture_float) ? CORE_TEXTURE_SPEC_RGB16F : (CORE_GL_SUPPORT(EXT_texture_type_2_10_10_10_rev) ? CORE_TEXTURE_SPEC_RGB10_A2 : CORE_TEXTURE_SPEC_RGB8)), GLOW_SCALE_FACTOR, GLOW_ATTENUATION_FACTOR)
 , m_bActive (false)
 {
 }

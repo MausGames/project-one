@@ -31,9 +31,9 @@ cHeadlight::cHeadlight()noexcept
 
     // 
     m_Spot .DefineTexture(0u, "effect_headlight_spot.png");
-    m_Spot .DefineProgram("default_2d_program");
+    m_Spot .DefineProgram("menu_grey_program");
     m_Point.DefineTexture(0u, "effect_headlight_point.png");
-    m_Point.DefineProgram("default_2d_program");
+    m_Point.DefineProgram("menu_grey_program");
 
     // 
     m_pFlickerSound = Core::Manager::Resource->Get<coreSound>("effect_flicker.wav");

@@ -14,7 +14,6 @@
 // TODO 3: reduce black/transparent (0,0,0) color-areas in light-textures
 // TODO 3: slow up-and-down glowing
 // TODO 5: activation-animation (e.g. for player or boss spot-lights)
-// TODO 3: use simpler shader for light (single-channel only)
 
 
 // ****************************************************************
