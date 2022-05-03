@@ -76,8 +76,7 @@ cMossBackground::cMossBackground()noexcept
     m_Rain.SetAlpha     (0.6f);
 
     // 
-    m_Lightning.DefineTexture(0u, "default_white.png");
-    m_Lightning.DefineProgram("default_2d_program");
+    m_Lightning.DefineProgram("menu_color_program");
     m_Lightning.SetPosition  (coreVector2(0.0f,0.0f));
     m_Lightning.SetSize      (coreVector2(1.0f,1.0f));
     m_Lightning.SetAlpha     (0.0f);

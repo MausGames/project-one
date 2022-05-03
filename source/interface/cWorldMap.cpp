@@ -46,8 +46,7 @@ cWorldMap::cWorldMap()noexcept
     // 
     for(coreUintW i = 0u; i < WORLDMAP_LINES; ++i)
     {
-        m_aLine[i].DefineTexture(0u, "default_white.png");
-        m_aLine[i].DefineProgram("default_2d_program");
+        m_aLine[i].DefineProgram("menu_color_program");
     }
 
     // 

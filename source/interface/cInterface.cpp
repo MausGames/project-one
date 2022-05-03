@@ -48,8 +48,7 @@ void cInterface::sPlayerView::Construct(const coreUintW iIndex)
     oScoreMission.SetPosition (oScoreTotal.GetPosition() + coreVector2(0.01f,-0.035f) * vSide);
     oScoreMission.SetAlignment(oScoreTotal.GetAlignment());
 
-    oCooldownBar.DefineTexture(0u, "default_white.png");
-    oCooldownBar.DefineProgram("default_2d_program");
+    oCooldownBar.DefineProgram("menu_color_program");
     oCooldownBar.SetPosition  (oScoreTotal.GetPosition() + coreVector2(0.003f,-0.105f) * vSide);
     oCooldownBar.SetAlignment (oScoreTotal.GetAlignment());
 

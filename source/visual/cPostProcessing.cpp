@@ -39,8 +39,7 @@ cPostProcessing::cPostProcessing()noexcept
     this->__UpdateWall();
 
     // create separator
-    m_Separator.DefineProgram("default_2d_program");
-    m_Separator.DefineTexture(0u, "default_white.png");
+    m_Separator.DefineProgram("menu_color_program");
     m_Separator.SetColor4    (coreVector4(0.05f,0.05f,0.05f,0.0f));
 
     // 

@@ -24,7 +24,6 @@
 // TODO 3: all environment sound effects should fade in transition (check at end)
 // TODO 2: popping artifacts with shadow in sea-background (configurable view-range ? per list ? auto per height ?)
 // TODO 3: calls to pList->MoveNormal(); may be redundant
-// TODO 3: remove texture-sampling from lightning effect in moss
 // TODO 3: stomach should not create all vertices
 // TODO 3: EnableShadowRead only if appropriate ground objects would be rendered (IsInstanced)
 // TODO 5: grass and blood textures are duplicated (especially normal maps)
