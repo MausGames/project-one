@@ -17,8 +17,8 @@ This project is still under development.
         <td><a href="material/screenshots/p1_screen_009.jpg?raw=true"><img src="material/screenshots/p1_screen_009t.jpg"></a></td>
     </tr>
     <tr>
+        <td><a href="material/screenshots/p1_screen_013.jpg?raw=true"><img src="material/screenshots/p1_screen_013t.jpg"></a></td>
         <td><a href="material/screenshots/p1_screen_010.jpg?raw=true"><img src="material/screenshots/p1_screen_010t.jpg"></a></td>
-        <td><a href="material/screenshots/p1_screen_011.jpg?raw=true"><img src="material/screenshots/p1_screen_011t.jpg"></a></td>
         <td><a href="material/screenshots/p1_screen_012.jpg?raw=true"><img src="material/screenshots/p1_screen_012t.jpg"></a></td>
     </tr>
 </table>
