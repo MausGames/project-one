@@ -327,8 +327,8 @@ public:
 
 protected:
     // 
-    template             <typename F> coreSpline2* _AddPath (const coreUint16 iCodeLine,                       F&& nInitFunc);   // [](coreSpline2* OUTPUT pPath)  -> void
-    template <typename T, typename F> cEnemySquad* _AddSquad(const coreUint16 iCodeLine, const coreUint8 iNum, F&& nInitFunc);   // [](cEnemySquad* OUTPUT pSquad) -> void
+    template             <typename F> RETURN_RESTRICT coreSpline2* _AddPath (const coreUint16 iCodeLine,                       F&& nInitFunc);   // [](coreSpline2* OUTPUT pPath)  -> void
+    template <typename T, typename F> RETURN_RESTRICT cEnemySquad* _AddSquad(const coreUint16 iCodeLine, const coreUint8 iNum, F&& nInitFunc);   // [](cEnemySquad* OUTPUT pSquad) -> void
 
     // 
     inline coreBool _UpdateWait() {m_fStageWait.UpdateMax(-1.0f, 0.0f); return !m_fStageWait;}
@@ -996,7 +996,7 @@ private:
 
 // ****************************************************************
 // 
-template <typename F> coreSpline2* cMission::_AddPath(const coreUint16 iCodeLine, F&& nInitFunc)
+template <typename F> RETURN_RESTRICT coreSpline2* cMission::_AddPath(const coreUint16 iCodeLine, F&& nInitFunc)
 {
     if(!m_apPath.count(iCodeLine))
     {
@@ -1014,7 +1014,7 @@ template <typename F> coreSpline2* cMission::_AddPath(const coreUint16 iCodeLine
 
 // ****************************************************************
 // 
-template <typename T, typename F> cEnemySquad* cMission::_AddSquad(const coreUint16 iCodeLine, const coreUint8 iNum, F&& nInitFunc)
+template <typename T, typename F> RETURN_RESTRICT cEnemySquad* cMission::_AddSquad(const coreUint16 iCodeLine, const coreUint8 iNum, F&& nInitFunc)
 {
     if(!m_apSquad.count(iCodeLine))
     {

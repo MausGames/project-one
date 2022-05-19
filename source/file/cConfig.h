@@ -23,7 +23,7 @@
 #define CONFIG_FORCE   // # force specific settings (for fairness)
 
 #define CONFIG_GRAPHICS_RENDER      "Graphics", "Render",                               (1)
-#define CONFIG_GRAPHICS_SHADOW      "Graphics", "Shadow",                               (1)
+#define CONFIG_GRAPHICS_SHADOW      "Graphics", "Shadow",                               (2)
 #define CONFIG_GRAPHICS_REFLECTION  "Graphics", "Reflection",                           (1)
 #define CONFIG_GRAPHICS_GLOW        "Graphics", "Glow",                                 (1)
 #define CONFIG_GRAPHICS_DISTORTION  "Graphics", "Distortion",                           (1)

@@ -389,9 +389,7 @@ void cPlayer::Move()
            !coreMath::IsNear(m_vOldDir.y, this->GetDirection().y))
         {
             m_vOldDir = this->GetDirection().xy();
-
-            if(m_fArrowValue <= 0.0f) this->EnableArrow();
-            m_fArrowValue = 1.0f;
+            this->ShowArrow();
         }
 
         // 
@@ -655,6 +653,16 @@ void cPlayer::Kill(const coreBool bAnimated)
 
     // remove ship from the game
     this->_Kill(bAnimated);
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::ShowArrow()
+{
+    // 
+    if(m_fArrowValue <= 0.0f) this->EnableArrow();
+    m_fArrowValue = 1.0f;
 }
 
 

@@ -308,6 +308,13 @@ coreBool cReplay::LoadFile(const coreChar* pcPath, const coreBool bOnlyHeader)
     this->Clear();
 
     // 
+    if(!coreData::FileExists(pcPath))
+    {
+        Core::Log->Warning("Replay (%s) does not exists!", pcPath);
+        return false;
+    }
+
+    // 
     coreArchive oArchive(pcPath);
     coreFile* pHeaderFile = oArchive.GetFile("header");
     coreFile* pBodyFile   = oArchive.GetFile("body");

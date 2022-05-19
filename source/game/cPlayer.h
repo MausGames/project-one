@@ -152,6 +152,9 @@ public:
     void Kill     (const coreBool bAnimated);
 
     // 
+    void ShowArrow();
+
+    // 
     void StartRolling (const coreVector2 vDirection);
     void EndRolling   ();
     void StartFeeling (const coreFloat fTime, const coreUint8 iType);
@@ -182,6 +185,9 @@ public:
     void EnableShield ();
     void DisableShield();
     void UpdateExhaust(const coreFloat fStrength);
+
+    // 
+    inline coreVector3 GetEnergyColor()const {return m_Range.GetColor3() * (1.0f/1.1f);}
 
     // 
     coreBool TestCollisionPrecise(const coreObject3D* pObject, coreVector3* OUTPUT pvIntersection, coreBool* OUTPUT pbFirstHit);

@@ -121,15 +121,15 @@ inline FUNC_PURE coreFloat FrictionFactor(const coreFloat fStrength)
 
 // ****************************************************************
 // 
+inline FUNC_PURE coreFloat SmoothAimAngle(const coreFloat vOldAngle, const coreFloat vNewAngle, const coreFloat fStrength)
+{
+    return vOldAngle + AngleDiff(vNewAngle, vOldAngle) * (1.0f - FrictionFactor(fStrength));
+}
+
 inline FUNC_PURE coreVector2 SmoothAim(const coreVector2 vOldDir, const coreVector2 vNewDir, const coreFloat fStrength)
 {
     ASSERT(vOldDir.IsNormalized() && vNewDir.IsNormalized())
-
-    const coreFloat fFrom = vOldDir.Angle();
-    const coreFloat fTo   = vNewDir.Angle();
-    const coreFloat fDiff = AngleDiff(fTo, fFrom);
-
-    return coreVector2::Direction(fFrom + fDiff * (1.0f - FrictionFactor(fStrength)));
+    return coreVector2::Direction(SmoothAimAngle(vOldDir.Angle(), vNewDir.Angle(), fStrength));
 }
 
 
@@ -205,13 +205,13 @@ constexpr FUNC_CONST coreVector2 MapStepRotated45(const coreVector2 vDirection, 
     {
     default: ASSERT(false)
     case 0u: return  vDirection;
-    case 1u: return  vDirection.Rotated45();
-    case 2u: return  vDirection.Rotated90();
-    case 3u: return  vDirection.Rotated135();
+    case 1u: return -vDirection.Rotated135();
+    case 2u: return -vDirection.Rotated90 ();
+    case 3u: return -vDirection.Rotated45 ();
     case 4u: return -vDirection;
-    case 5u: return -vDirection.Rotated45();
-    case 6u: return -vDirection.Rotated90();
-    case 7u: return -vDirection.Rotated135();
+    case 5u: return  vDirection.Rotated135();
+    case 6u: return  vDirection.Rotated90 ();
+    case 7u: return  vDirection.Rotated45 ();
     }
 }
 
@@ -221,10 +221,15 @@ constexpr FUNC_CONST coreVector2 MapStepRotated90(const coreVector2 vDirection, 
     {
     default: ASSERT(false)
     case 0u: return  vDirection;
-    case 1u: return  vDirection.Rotated90();
+    case 1u: return -vDirection.Rotated90();
     case 2u: return -vDirection;
-    case 3u: return -vDirection.Rotated90();
+    case 3u: return  vDirection.Rotated90();
     }
+}
+
+constexpr FUNC_CONST coreVector2 MapStepRotated90X(const coreVector2 vDirection, const coreUint8 iStep)
+{
+    return -MapStepRotated90(vDirection, iStep).Rotated135();
 }
 
 

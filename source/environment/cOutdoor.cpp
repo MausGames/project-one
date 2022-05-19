@@ -668,6 +668,10 @@ void cOutdoor::__Reset(const coreResourceReset eInit)
     else
     {
         // 
+        if(m_pModel)     m_pModel    ->Unload();
+        if(m_pNormalMap) m_pNormalMap->Unload();
+
+        // 
         if(m_LightMap.GetColorTarget(0u).IsValid()) m_LightMap.Delete();
     }
 }
