@@ -21,7 +21,7 @@ cSnowBackground::cSnowBackground()noexcept
     this->__InitOwn();
 
     // create outdoor-surface object
-    m_pOutdoor = new cOutdoor("snow", "snow", 1u, 4.0f);
+    m_pOutdoor = new cOutdoor("snow", "snow", OUTDOOR_ALGORITHM_SNOW, 4.0f, false);
 
     // allocate stone list
     pList1 = new coreBatchList(SNOW_STONE_RESERVE);

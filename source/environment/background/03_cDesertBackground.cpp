@@ -21,7 +21,7 @@ cDesertBackground::cDesertBackground()noexcept
     this->__InitOwn();
 
     // create outdoor-surface object
-    m_pOutdoor = new cOutdoor("dust", "crack", 3u, 4.0f);
+    m_pOutdoor = new cOutdoor("dust", "crack", OUTDOOR_ALGORITHM_DESERT, 4.0f, false);
 
     // allocate stone list
     pList1 = new coreBatchList(DESERT_STONE_RESERVE);

@@ -10,11 +10,9 @@
 #ifndef _P1_GUARD_OUTDOOR_H_
 #define _P1_GUARD_OUTDOOR_H_
 
-// TODO 4: definitions for algorithms (background names ?)
 // TODO 5: check out jcgt_Duff2017Basis to inline tangent calculations into shader (less bandwidth, but more ALU + reg ?)
 // TODO 5: increase normal map sharpness, if quality improves (raise depth-value in generator until it throws an assertion)
 // TODO 4: move m_pOutdoor->SetEnabled(CORE_OBJECT_ENABLE_NOTHING); into constructor/factoryfunc
-// TODO 3: only create and use light-map when it is used
 
 
 // ****************************************************************
@@ -45,6 +43,20 @@
 #define OUTDOOR_SHADER_ATTRIBUTE_POSITION_NUM (CORE_SHADER_ATTRIBUTE_USER_NUM + 1u)
 
 STATIC_ASSERT((OUTDOOR_WIDTH == OUTDOOR_VIEW) && !coreMath::IsAligned(OUTDOOR_WIDTH, 2u))
+
+enum eOutdoorAlgorithm : coreUint8
+{
+    OUTDOOR_ALGORITHM_NOTHING = 0u,
+    OUTDOOR_ALGORITHM_SNOW,
+    OUTDOOR_ALGORITHM_GRASS,
+    OUTDOOR_ALGORITHM_DESERT,
+    OUTDOOR_ALGORITHM_UNUSED_1,
+    OUTDOOR_ALGORITHM_MOSS,
+    OUTDOOR_ALGORITHM_SEA,
+    OUTDOOR_ALGORITHM_VOLCANO,
+    OUTDOOR_ALGORITHM_UNUSED_2,
+    OUTDOOR_ALGORITHM_STOMACH
+};
 
 
 // ****************************************************************
@@ -106,7 +118,7 @@ private:
 
 public:
     cOutdoor()noexcept;
-    cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom, const coreUint8 iAlgorithm, const coreFloat fGrade, const coreUint64 iSeed = CORE_RAND_SEED)noexcept;
+    cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom, const coreUint8 iAlgorithm, const coreFloat fGrade, const coreBool bLight, const coreUint64 iSeed = CORE_RAND_SEED)noexcept;
     ~cOutdoor()final;
 
     DISABLE_COPY(cOutdoor)
