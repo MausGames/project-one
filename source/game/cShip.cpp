@@ -8,6 +8,8 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
+cRotaCache cShip::s_RotaCache = {};
+
 
 // ****************************************************************
 // constructor
@@ -130,7 +132,7 @@ void cShip::DefaultMoveLerp(const coreVector2 vFromRawPos, const coreVector2 vTo
 void cShip::DefaultRotate(const coreFloat fAngle)
 {
     // rotate around z-axis
-    const coreVector2 vDir = coreVector2::Direction(fAngle);
+    const coreVector2 vDir = s_RotaCache.Direction(fAngle);
     this->SetDirection(coreVector3(vDir, 0.0f));
 }
 
@@ -173,7 +175,7 @@ void cShip::DefaultOrientate(const coreFloat fAngle)
 {
     // rotate around direction axis
     const coreVector2 vDir = this->GetDirection().xy();
-    const coreVector2 vOri = coreVector2::Direction(fAngle);
+    const coreVector2 vOri = s_RotaCache.Direction(fAngle);
     this->SetOrientation(OriRoundDir(vOri, vDir));
 }
 
@@ -213,7 +215,7 @@ void cShip::DefaultAxiateLerp(const coreFloat fFromAngle, const coreFloat fToAng
 void cShip::DefaultMultiate(const coreFloat fAngle)
 {
     // rotate around the rotating direction axis
-    const coreVector2 vDir = coreVector2::Direction(fAngle);
+    const coreVector2 vDir = s_RotaCache.Direction(fAngle);
     this->SetDirection  (coreVector3(vDir, 0.0f));
     this->SetOrientation(OriRoundDir(vDir, vDir));
 }

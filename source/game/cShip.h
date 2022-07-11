@@ -38,6 +38,8 @@ protected:
     coreUint32 m_iBaseColor;               // packed base color for interpolations
     coreFlow   m_fBlink;                   // blink intensity (to highlight successful hits)
 
+    static cRotaCache s_RotaCache;         // 
+
 
 protected:
     cShip()noexcept;
