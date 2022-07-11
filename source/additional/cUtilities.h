@@ -232,6 +232,21 @@ constexpr FUNC_CONST coreVector2 MapStepRotated90X(const coreVector2 vDirection,
     return -MapStepRotated90(vDirection, iStep).Rotated135();
 }
 
+constexpr FUNC_CONST coreVector2 MapStepRotatedInv45(const coreVector2 vDirection, const coreUint8 iStep)
+{
+    return MapStepRotated45(vDirection, (8u - iStep) % 8u);
+}
+
+constexpr FUNC_CONST coreVector2 MapStepRotatedInv90(const coreVector2 vDirection, const coreUint8 iStep)
+{
+    return MapStepRotated90(vDirection, (4u - iStep) % 4u);
+}
+
+constexpr FUNC_CONST coreVector2 MapStepRotatedInv90X(const coreVector2 vDirection, const coreUint8 iStep)
+{
+    return MapStepRotated90X(vDirection, (4u - iStep) % 4u);
+}
+
 
 // ****************************************************************
 // 
@@ -298,6 +313,16 @@ constexpr FUNC_CONST coreVector2 MapToAxis(const coreVector2 vVector, const core
 constexpr FUNC_CONST coreVector2 MapToAxisInv(const coreVector2 vVector, const coreVector2 vAxis)
 {
     return MapToAxis(vVector, vAxis.InvertedX());
+}
+
+constexpr FUNC_CONST coreVector3 MapToAxis(const coreVector3 vVector, const coreVector2 vAxis)
+{
+    return coreVector3(MapToAxis(vVector.xy(), vAxis), vVector.z);
+}
+
+constexpr FUNC_CONST coreVector3 MapToAxisInv(const coreVector3 vVector, const coreVector2 vAxis)
+{
+    return coreVector3(MapToAxisInv(vVector.xy(), vAxis), vVector.z);
 }
 
 
