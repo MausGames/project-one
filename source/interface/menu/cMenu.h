@@ -19,16 +19,15 @@
 // TODO 3: unload fonts currently not used (e.g. from score-menu)
 // TODO 1: options menu: ask if values should be discarded, ask if want to exit instead of saving
 // TODO 3: options menu: 15 second on video change, yes, no
-// TODO 3: rumble when changing rumble-option
+// TODO 3: rumble when changing rumble-option (could be annoying)
 // TODO 5: display unattached joysticks and joystick names somehow
 // TODO 3: highlight which joystick is which input set
-// TODO 3: summary_ add separate total-score for each player
+// TODO 3: summary: add separate total-score for each player
 // TODO 3: update texture filter and render quality in realtime (resource-manager reset ?)
 // TODO 3: double initial languages by switching to two columns (on demand?)
 // TODO 5: stages in GameMenu should be called segments
 // TODO 2: upper white border in settings menu "moves" during transition on 1760x990, check all menus for moving during transition in common resolutions
 // TODO 3: every object in menu needs outline: weapon icons
-// TODO 3: custom resolution should be stored when switching monitors
 // TODO 3: show target FPS in config menu (speed x update rate)
 // TODO 3: when switching resolution, and confirming by returning, the transition is broken
 // TODO 3: when switching resolution, the next mouse click is not recognized (no press event is coming from SDL, only the release event)

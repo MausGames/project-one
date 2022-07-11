@@ -27,7 +27,7 @@ private:
 
     cInk m_Ink;                               // 
 
-    bool m_bActive;                           // 
+    coreBool m_bActive;                       // 
 
 
 public:

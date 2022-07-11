@@ -62,7 +62,6 @@
 // TODO 3: check if outlines are correct on all text (multiple font-height, multiple screen-resolutions)
 // TODO 3: return boolean to cancel iteration on ForEachBullet, *Player, *Enemy (do I need this?)
 // TODO 3: make sure shaders use 0.5,0.5 for pixel centers
-// TODO 3: check for single-channel menu_background_black
 // TODO 3: make energy texture sharper (offline upsampling)
 // TODO 5: check for merging varyings with component = # and layoutEx (or merge manually)
 // TODO 1: indicator when controls are enabled again (blinking und peeping sound)
@@ -96,7 +95,7 @@
 //#define _P1_DEBUG_RANDOM_ (1)
 
 #if !defined(_CORE_DEBUG_)
-    #if defined(_CORE_SSE_)
+    #if defined(_CORE_SSE_) || defined(_CORE_NEON_)
         #pragma message("Warning: Precision reduced!")
     #endif
     #if defined(_P1_DEBUG_INPUT_)

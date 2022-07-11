@@ -132,6 +132,7 @@ void cWater::UpdateReflection()
 
     // fill reflection frame buffer
     m_Reflection.StartDraw();
+    if(DEFINED(_CORE_GLES_)) m_Reflection.Clear(CORE_FRAMEBUFFER_TARGET_COLOR | CORE_FRAMEBUFFER_TARGET_DEPTH);
     {
         // flip projection left-right (also culling!, after StartDraw())
         c_cast<coreMatrix4&>(Core::Graphics->GetPerspective())._11 *= -1.0f;
@@ -197,6 +198,7 @@ void cWater::UpdateDepth(cOutdoor* pOutdoor, const coreList<coreBatchList*>& apG
     {
         // fill depth frame buffer
         m_Depth.StartDraw();
+        if(DEFINED(_CORE_GLES_)) m_Depth.Clear(CORE_FRAMEBUFFER_TARGET_DEPTH);
         {
             glDepthFunc(GL_ALWAYS);   // better performance than clear
             {

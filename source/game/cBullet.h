@@ -859,7 +859,9 @@ template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt
 
     // fix addresses for all active bullets
     FOR_EACH(it, *pSet->oBulletActive.List())
+    {
         (*it) = s_cast<coreObject3D*>(I_TO_P(P_TO_UI(*it) - iBefore + iAfter));
+    }
 
     // execute again with first new bullet
     pSet->iCurBullet = iSize - 1u;

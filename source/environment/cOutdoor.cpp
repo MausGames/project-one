@@ -656,7 +656,7 @@ void cOutdoor::SetTransform(const coreFloat fFlyOffset, const coreFloat fSideOff
 
 
 // ****************************************************************
-// 
+// reset with the resource manager
 void cOutdoor::__Reset(const coreResourceReset eInit)
 {
     if(eInit)
