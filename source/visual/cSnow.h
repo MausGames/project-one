@@ -53,13 +53,14 @@ public:
     // 
     coreUintW DrawPoint(const coreVector2 vPosition, const coreFloat fSize, const eSnowType eType);
     coreUintW DrawLine (const coreVector2 vPosition, const coreFloat fSize, const coreBool bHorizontal, const eSnowType eType);
+    coreUintW DrawRay  (const coreVector2 vPosition, const coreVector2 vDirection, const eSnowType eType);
     void      DrawAll  (const eSnowType eType);
 
     // 
     coreBool TestCollision(const coreVector2 vPosition)const;
 
     // 
-    inline coreBool IsActive()const {return (m_fVisibility != 0.0f);}
+    inline coreBool IsActive()const {return (m_fVisibility != 0.0f) && (m_fDelay == 0.0f);}
 
 
 private:
@@ -67,8 +68,9 @@ private:
     void __Reset(const coreResourceReset eInit)final;
 
     // 
-    static coreUintW __GetMapIndex(const coreFloat fValue);
-    static coreFloat __GetMapValue(const coreUintW iIndex);
+    static coreFloat __GetMapIndexFloat(const coreFloat fValue);
+    static coreUintW __GetMapIndex     (const coreFloat fValue);
+    static coreFloat __GetMapValue     (const coreUintW iIndex);
 
     // 
     static coreVector2 __SnapPosition(const coreVector2 vPosition);
