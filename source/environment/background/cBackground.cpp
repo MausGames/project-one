@@ -54,6 +54,9 @@ cBackground::~cBackground()
     m_aaiBaseHeight.clear();
     m_aaiBaseNormal.clear();
 
+    // 
+    m_apWaterRefList.clear();
+
     // remove all persistent objects
     const auto nRemoveObjectsFunc = [](coreList<coreBatchList*>* OUTPUT papList)
     {
@@ -91,7 +94,7 @@ void cBackground::Render()
     {
         // update water reflection and depth map
         m_pWater->UpdateReflection();
-        m_pWater->UpdateDepth(m_pOutdoor, m_apGroundObjectList);
+        m_pWater->UpdateDepth(m_pOutdoor, m_apWaterRefList);
     }
 
     if(m_pOutdoor)

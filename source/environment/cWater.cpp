@@ -190,7 +190,7 @@ void cWater::UpdateReflection()
 
 // ****************************************************************
 // update water depth map
-void cWater::UpdateDepth(cOutdoor* pOutdoor, const coreList<coreBatchList*>& apGroundObjectList)
+void cWater::UpdateDepth(cOutdoor* pOutdoor, const coreList<coreBatchList*>& apObjectList)
 {
     if(!m_Depth.GetIdentifier()) return;
 
@@ -206,6 +206,9 @@ void cWater::UpdateDepth(cOutdoor* pOutdoor, const coreList<coreBatchList*>& apG
                 pOutdoor->RenderDepth();
             }
             glDepthFunc(GL_LEQUAL);
+
+            // 
+            FOR_EACH(it, apObjectList) (*it)->Render();
         }
     }
     else m_Depth.Clear(CORE_FRAMEBUFFER_TARGET_DEPTH);

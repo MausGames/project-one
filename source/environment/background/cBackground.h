@@ -124,6 +124,8 @@ protected:
     coreMapStr<coreBatchList*> m_apDecalAddList;     // temporary transparent objects connected to the ground
     coreMapStr<coreBatchList*> m_apAirAddList;       // temporary objects floating in the air
 
+    coreList<coreBatchList*> m_apWaterRefList;       // 
+
     uDataMap<coreUint16> m_aaiBaseHeight;            // 
     uDataMap<coreUint32> m_aaiBaseNormal;            // 
 
