@@ -9,19 +9,19 @@
 
 
 // shader uniforms
-uniform mat4  u_m4ShadowMatrix;        // own shadow view-projection matrix (with coordinate adjustment)
-uniform float u_v1Blink;               // 
-uniform float u_v1Time;                // 
+uniform mat4  u_m4ShadowMatrix;      // own shadow view-projection matrix (with coordinate adjustment)
+uniform float u_v1Blink;             // 
+uniform float u_v1Time;              // 
 
 // vertex attributes
-attribute float a_v1Blink;             // 
+attribute float a_v1Blink;           // 
 
 // shader output
-varying      vec4 v_v4ShadowCoord;     // pixel coordinates viewed from the light source
-varying      vec2 v_v2Border;          // 
-flat varying vec4 v_av4ShipLight;      // simplified light vector (w = base blink intensity (to highlight successful hits))
-varying      vec3 v_av3ShipView;       // simplified view vector
-varying      vec3 v_av3ShipNormal;     // simplified normal vector
+varying      vec4 v_v4ShadowCoord;   // pixel coordinates viewed from the light source
+varying      vec2 v_v2Border;        // 
+flat varying vec4 v_v4ShipLight;     // simplified light vector (w = base blink intensity (to highlight successful hits))
+varying      vec3 v_v3ShipView;      // simplified view vector
+varying      vec3 v_v3ShipNormal;    // simplified normal vector
 
 
 void VertexMain()
@@ -67,7 +67,7 @@ void VertexMain()
     coreLightingTransform(v4NewPosition.xyz);
 
     // 
-    v_av4ShipLight  = vec4(-u_av4LightDir[0].xyz, v1Blink);
-    v_av3ShipView   = u_v3CamPosition - v4NewPosition.xyz;   // # no normalization
-    v_av3ShipNormal = coreQuatApply(u_v4Rotation, a_v3RawNormal);
+    v_v4ShipLight  = vec4(-u_av4LightDir[0].xyz, v1Blink);
+    v_v3ShipView   = u_v3CamPosition - v4NewPosition.xyz;   // # no normalization
+    v_v3ShipNormal = coreQuatApply(u_v4Rotation, a_v3RawNormal);
 }

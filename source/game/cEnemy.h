@@ -466,7 +466,7 @@ template <typename T> cEnemyManager::sEnemySet<T>::sEnemySet()noexcept
     // 
     oEnemyActive.CreateCustom(sizeof(coreFloat), [](coreVertexBuffer* OUTPUT pBuffer)
     {
-        pBuffer->DefineAttribute(SHIP_SHADER_ATTRIBUTE_BLINK_NUM, 1u, GL_FLOAT, false, 0u);
+        pBuffer->DefineAttribute(SHIP_SHADER_ATTRIBUTE_BLINK_NUM, 1u, GL_FLOAT, sizeof(coreFloat), false, 0u, 0u);
     },
     [](coreByte* OUTPUT pData, const coreObject3D* pEnemy)
     {

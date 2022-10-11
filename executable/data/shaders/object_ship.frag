@@ -9,9 +9,9 @@
 
 
 // shader input
-flat varying vec4 v_av4ShipLight;     // simplified light vector (w = base blink intensity (to highlight successful hits))
-varying      vec3 v_av3ShipView;      // simplified view vector
-varying      vec3 v_av3ShipNormal;    // simplified normal vector
+flat varying vec4 v_v4ShipLight;    // simplified light vector (w = base blink intensity (to highlight successful hits))
+varying      vec3 v_v3ShipView;     // simplified view vector
+varying      vec3 v_v3ShipNormal;   // simplified normal vector
 
 
 void FragmentMain()
@@ -33,12 +33,12 @@ void FragmentMain()
 #endif
 
     // calculate dot-3 bump factor
-    vec3  v3MathLightDir = normalize(v_av4ShipLight.xyz);
-    vec3  v3BumpNormal   = normalize(v_av3ShipNormal);
+    vec3  v3MathLightDir = normalize(v_v4ShipLight.xyz);
+    vec3  v3BumpNormal   = normalize(v_v3ShipNormal);
     float v1BumpFactor   = dot(v3MathLightDir, v3BumpNormal);
 
     // calculate dot-3 reflection factor
-    vec3  v3MathViewDir = normalize(v_av3ShipView);
+    vec3  v3MathViewDir = normalize(v_v3ShipView);
     vec3  v3ReflNormal  = normalize(v3MathLightDir + v3MathViewDir);
     float v1ReflFactor  = max(dot(v3ReflNormal, v3BumpNormal), 0.0);
 
@@ -52,7 +52,7 @@ void FragmentMain()
 #if defined(_P1_BLINK_)
 
     // calculate smooth blink color
-    vec3 v3Blink = vec3(v_av4ShipLight.w * (0.7 - 0.56 * abs(dot(v3MathViewDir, v3BumpNormal))));
+    vec3 v3Blink = vec3(v_v4ShipLight.w * (0.7 - 0.56 * abs(dot(v3MathViewDir, v3BumpNormal))));
 
 #else
 
@@ -62,7 +62,7 @@ void FragmentMain()
 #endif
 
     // calculate diffuse and specular value
-    vec3 v3Diffuse  = v4TexColor.rgb * (max(v1BumpFactor * 1.2 + 0.6, 0.0));
+    vec3 v3Diffuse  = v4TexColor.rgb * max(v1BumpFactor * 1.2 + 0.6, 0.0);
     vec3 v3Specular = vec3(0.15 * min(coreGGX(v1ReflFactor, 0.09), 1.0));
 
     // draw final color

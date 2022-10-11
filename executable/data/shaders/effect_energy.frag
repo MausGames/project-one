@@ -9,12 +9,12 @@
 
 
 // shader uniforms
-uniform float u_v1Blink;         // 
+uniform float u_v1Blink;        // 
 
 // shader input
-varying float v_v1Strength;      // light and color intensity
-varying vec3  v_av3ShipView;     // simplified view vector
-varying vec3  v_av3ShipNormal;   // simplified normal vector
+varying float v_v1Strength;     // light and color intensity
+varying vec3  v_v3ShipView;     // simplified view vector
+varying vec3  v_v3ShipNormal;   // simplified normal vector
 
 
 void FragmentMain()
@@ -29,8 +29,8 @@ void FragmentMain()
 #if defined(_P1_BLINK_)
 
     // 
-    vec3 v3MathViewDir = normalize(v_av3ShipView);
-    vec3 v3BumpNormal  = normalize(v_av3ShipNormal);
+    vec3 v3MathViewDir = normalize(v_v3ShipView);
+    vec3 v3BumpNormal  = normalize(v_v3ShipNormal);
 
     // calculate smooth blink color
     vec3 v3Blink = vec3(u_v1Blink * (0.7 - 0.56 * abs(dot(v3MathViewDir, v3BumpNormal))));

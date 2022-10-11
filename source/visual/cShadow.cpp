@@ -80,6 +80,9 @@ void cShadow::Reconfigure()
     if(m_iLevel == g_CurConfig.Graphics.iShadow) return;
     m_iLevel = g_CurConfig.Graphics.iShadow;
 
+    // 
+    if(!CORE_GL_SUPPORT(ARB_depth_texture)) m_iLevel = 0u;
+
     // delete old shadow map
     m_FrameBuffer.Delete();
 

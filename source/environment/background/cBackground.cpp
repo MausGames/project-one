@@ -432,7 +432,7 @@ void cBackground::_StoreNormalList(const coreBatchList* pObjectList)
 void cBackground::_FillInfinite(coreBatchList* OUTPUT pObjectList, const coreUintW iReserve)
 {
     coreSet<coreObject3D*>* pContent = pObjectList->List();
-    WARN_IF(pContent->size() < 2u) return;
+    WARN_IF(pContent->size() <= 1u) return;
 
     // 
     if((*pContent)[0]->GetPosition().y > (*pContent)[1]->GetPosition().y)
@@ -461,7 +461,6 @@ void cBackground::_FillInfinite(coreBatchList* OUTPUT pObjectList, const coreUin
 
     // reduce memory consumption
     ASSERT(pObjectList->List()->size() <= iReserve)
-    ASSERT(pObjectList->List()->size() >= iReserve * 2u / 5u)
     pObjectList->ShrinkToFit();
 }
 

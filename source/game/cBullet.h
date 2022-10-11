@@ -776,7 +776,7 @@ template <typename T> cBulletManager::sBulletSet<T>::sBulletSet(cOutline* pOutli
     // 
     oBulletActive.CreateCustom(sizeof(coreFloat), [](coreVertexBuffer* OUTPUT pBuffer)
     {
-        pBuffer->DefineAttribute(BULLET_SHADER_ATTRIBUTE_DEPTH_NUM, 1u, GL_FLOAT, false, 0u);
+        pBuffer->DefineAttribute(BULLET_SHADER_ATTRIBUTE_DEPTH_NUM, 1u, GL_FLOAT, sizeof(coreFloat), false, 0u, 0u);
     },
     [](coreByte* OUTPUT pData, const coreObject3D* pBullet)
     {

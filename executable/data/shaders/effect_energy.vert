@@ -9,15 +9,15 @@
 
 
 // shader uniforms
-uniform float u_v1Depth;         // 
+uniform float u_v1Depth;        // 
 
 // vertex attributes
-attribute float a_v1Depth;       // 
+attribute float a_v1Depth;      // 
 
 // shader output
-varying float v_v1Strength;      // light and color intensity
-varying vec3  v_av3ShipView;     // simplified view vector
-varying vec3  v_av3ShipNormal;   // simplified normal vector
+varying float v_v1Strength;     // light and color intensity
+varying vec3  v_v3ShipView;     // simplified view vector
+varying vec3  v_v3ShipNormal;   // simplified normal vector
 
 
 void VertexMain()
@@ -96,6 +96,6 @@ void VertexMain()
 #endif
 
     // 
-    v_av3ShipView   = u_v3CamPosition - v4NewPosition.xyz;   // # no normalization
-    v_av3ShipNormal = coreQuatApply(u_v4Rotation, a_v3RawNormal);
+    v_v3ShipView   = u_v3CamPosition - v4NewPosition.xyz;   // # no normalization
+    v_v3ShipNormal = coreQuatApply(u_v4Rotation, a_v3RawNormal);
 }
