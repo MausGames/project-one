@@ -12,7 +12,6 @@
 
 // TODO 3: render depth-quads or use scissor test (tested: works bad, no gain) or stencil test on unused background areas (for transition!)
 // TODO 3: separate culling between normal rendering and shadow, to improve efficiency (though this would update instancing buffer again ?)
-// TODO 3: different background than cNoBackground on invalid ID (error background ?)
 // TODO 3: if m_fSideOffset will be used with rotation, make sure to use smooth lerp instead of the linear
 // TODO 3: remove unused mix types, or init them on demand
 // TODO 4: check if m_afStrength != 0.0f is required and remove otherwise

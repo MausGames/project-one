@@ -167,8 +167,6 @@ void cEnvironment::Move()
 // change current background
 void cEnvironment::ChangeBackground(const coreInt32 iID, const coreUintW iTransitionType, const coreFloat fTransitionSpeed, const coreVector2 vTransitionDir)
 {
-    if(m_pBackground) if(m_pBackground->GetID() == iID) return;
-
     // delete possible old background
     m_MixObject.DefineTexture(0u, NULL);
     m_MixObject.DefineTexture(1u, NULL);
@@ -182,6 +180,7 @@ void cEnvironment::ChangeBackground(const coreInt32 iID, const coreUintW iTransi
     switch(iID)
     {
     default: WARN_IF(true) {}
+    case cCloudBackground  ::ID: m_pBackground = new cCloudBackground  (); break;   // fallback for invalid IDs
     case cNoBackground     ::ID: m_pBackground = new cNoBackground     (); break;
     case cGrassBackground  ::ID: m_pBackground = new cGrassBackground  (); break;
     case cSeaBackground    ::ID: m_pBackground = new cSeaBackground    (); break;
@@ -192,7 +191,6 @@ void cEnvironment::ChangeBackground(const coreInt32 iID, const coreUintW iTransi
     case cMossBackground   ::ID: m_pBackground = new cMossBackground   (); break;
     case cDarkBackground   ::ID: m_pBackground = new cDarkBackground   (); break;
     case cStomachBackground::ID: m_pBackground = new cStomachBackground(); break;
-    case cCloudBackground  ::ID: m_pBackground = new cCloudBackground  (); break;
     }
 
     // 
