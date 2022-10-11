@@ -71,17 +71,21 @@ void cCrashManager::Move()
 
         if(oObject.IsEnabled(CORE_OBJECT_ENABLE_ALL))
         {
+            ASSERT(pOutdoor)
+
             // 
             oStatus.fTime.Update(1.0f);
 
             // 
-            const coreVector3 vPos = oObject.GetPosition() + oStatus.vAim * (40.0f * (oStatus.fTime + 1.0f) * TIME);
-            const coreVector2 vDir = coreVector2::Direction(2.0f*PI * oStatus.fTime);
+            const coreVector2 vAxis = coreVector2::Direction((2.0f*PI) * oStatus.fTime);
+            const coreVector3 vPos  = oObject.GetPosition() + oStatus.vAim * (40.0f * (oStatus.fTime + 1.0f) * TIME);
+            const coreVector3 vDir  = MapToAxis(oStatus.vDir, vAxis);
+            const coreVector3 vOri  = MapToAxis(oStatus.vOri, vAxis);
 
             // 
             oObject.SetPosition   (vPos);
-            oObject.SetDirection  (coreVector3(vDir, 0.0f));
-            oObject.SetOrientation(OriRoundDir(vDir, vDir));
+            oObject.SetDirection  (vDir);
+            oObject.SetOrientation(vOri);
             oObject.Move();
 
             // 
@@ -135,6 +139,8 @@ void cCrashManager::AddCrash(const cLodObject& oBase, const coreVector2 vTarget,
 
         if(!oObject.IsEnabled(CORE_OBJECT_ENABLE_ALL))
         {
+            ASSERT(pOutdoor)
+
             // 
             oObject.DefineModelHigh(oBase.GetModelHigh());
             oObject.DefineModelLow (oBase.GetModelLow ());
@@ -145,9 +151,11 @@ void cCrashManager::AddCrash(const cLodObject& oBase, const coreVector2 vTarget,
             oObject.SetSize       (oBase.GetSize       ());
             oObject.SetDirection  (oBase.GetDirection  ());
             oObject.SetOrientation(oBase.GetOrientation());
-            oObject.SetColor3     (oBase.GetColor3     ());
+            oObject.SetColor3     (COLOR_SHIP_BLACK);
 
             // 
+            oStatus.vDir  = oBase.GetDirection  ();
+            oStatus.vOri  = oBase.GetOrientation();
             oStatus.vAim  = (coreVector3(vTarget, pOutdoor->RetrieveHeight(vTarget)) - oBase.GetPosition()).Normalized();
             oStatus.fTime = 0.0f;
             oStatus.pData = pData;

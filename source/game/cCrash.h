@@ -10,7 +10,6 @@
 #ifndef _P1_GUARD_CRASH_H_
 #define _P1_GUARD_CRASH_H_
 
-// TODO 3: make rotation start with correct direction + orientation (relative rotation)
 // TODO 3: improve fall timing and speed
 // TODO 5: add wreckage at impact
 // TODO 3: add proper fallback if out of crash objects
@@ -18,7 +17,7 @@
 
 // ****************************************************************
 // crash definitions
-#define CRASH_OBJECTS (8u)   // 
+#define CRASH_OBJECTS (16u)   // 
 
 
 // ****************************************************************
@@ -29,6 +28,8 @@ private:
     // 
     struct sStatus final
     {
+        coreVector3 vDir;    // 
+        coreVector3 vOri;    // 
         coreVector3 vAim;    // 
         coreFlow    fTime;   // 
         void*       pData;   // 
