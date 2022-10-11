@@ -319,4 +319,7 @@ void cSeaBackground::__UpdateOwn()
 
     // 
     pProgram->SendUniform("u_v1Time", m_fWaveTime);
+
+    // 
+    cShadow::EnableShadowRead(pGround->IsInstanced() ? SHADOW_HANDLE_OBJECT_WAVE_INST : SHADOW_HANDLE_OBJECT_WAVE);
 }

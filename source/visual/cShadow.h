@@ -38,7 +38,9 @@
 #define SHADOW_HANDLE_OUTDOOR_LIGHT_GLOW (3u)   // 
 #define SHADOW_HANDLE_OBJECT             (4u)   // single object handle
 #define SHADOW_HANDLE_OBJECT_INST        (5u)   // instanced object handle
-#define SHADOW_HANDLES                   (6u)   // number of handles for shader-programs for shadow-receiving objects
+#define SHADOW_HANDLE_OBJECT_WAVE        (6u)   // 
+#define SHADOW_HANDLE_OBJECT_WAVE_INST   (7u)   // 
+#define SHADOW_HANDLES                   (8u)   // number of handles for shader-programs for shadow-receiving objects
 
 
 // ****************************************************************
