@@ -57,9 +57,14 @@ void cShadow::Update()
                     // reduce current view frustum
                     Core::Graphics->SetView(m_FrameBuffer.GetResolution() * SHADOW_TEST_FACTOR, m_FrameBuffer.GetFOV(), m_FrameBuffer.GetNearClip(), m_FrameBuffer.GetFarClip());
 
-                    // render low-resolution test area (for improved shading performance)
-                    cShadow::RenderInstanced(s_amDrawShadowMatrix[1], s_GlobalContainer.GetListSet());
-                    cShadow::RenderSingle   (s_amDrawShadowMatrix[1], s_GlobalContainer.GetListSet(), s_GlobalContainer.GetObjectSet());
+                    // 
+                    Core::Graphics->StartConservativeRaster();
+                    {
+                        // render low-resolution test area (for improved shading performance)
+                        cShadow::RenderInstanced(s_amDrawShadowMatrix[1], s_GlobalContainer.GetListSet());
+                        cShadow::RenderSingle   (s_amDrawShadowMatrix[1], s_GlobalContainer.GetListSet(), s_GlobalContainer.GetObjectSet());
+                    }
+                    Core::Graphics->EndConservativeRaster();
                 }
                 glEnable(GL_DEPTH_TEST);
             }
