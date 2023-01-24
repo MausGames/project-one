@@ -6,8 +6,8 @@
 
 Eigengrau is a colorful shoot 'em up with varied and non-repetitive gameplay beyond the familiar shooting and dodging.
 
-This repository is incomplete and only partially maintained.  
-You can find the game on [Steam](https://store.steampowered.com/app/1624320/Eigengrau/) and [itch.io](https://mausgames.itch.io/eigengrau).
+*This repository is incomplete and only partially maintained.*  
+*You can find the game on [Steam](https://store.steampowered.com/app/1624320/Eigengrau/) and [itch.io](https://mausgames.itch.io/eigengrau).*
 
 #
 
