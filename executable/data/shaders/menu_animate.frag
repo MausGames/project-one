@@ -18,7 +18,7 @@ varying vec3 v_v3AnimCoord;       //
 void FragmentMain()
 {
     // prepare texture coordinates
-    float v1Dir  = coreAllInvocations(v_v3AnimCoord.z > 0.5) ? v_v3AnimCoord.x : v_v3AnimCoord.y;
+    float v1Dir  = (v_v3AnimCoord.z > 0.5) ? v_v3AnimCoord.x : v_v3AnimCoord.y;
     float v1Lerp = (coreLinearStep(0.0, u_v4Scale.x, v_v3AnimCoord.z) +
                     coreLinearStep(u_v4Scale.y, 1.0, v_v3AnimCoord.z)) * 0.5;
 

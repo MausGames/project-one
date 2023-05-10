@@ -49,7 +49,7 @@
 #pragma optimize(on)
 #pragma debug(off)
 
-// feature helper
+// feature helpers
 #if defined(GL_ES)
     #define CORE_GL_VERSION    (0)
     #define CORE_GL_ES_VERSION (__VERSION__)
@@ -242,6 +242,16 @@ float coreSign(const in float v) {return (v >= 0.0) ? 1.0 : -1.0;}
     bvec2 coreIsNan(const in vec2  v) {return bvec2(coreIsNan(v.x), coreIsNan(v.y));}
     bvec3 coreIsNan(const in vec3  v) {return bvec3(coreIsNan(v.x), coreIsNan(v.y), coreIsNan(v.z));}
     bvec4 coreIsNan(const in vec4  v) {return bvec4(coreIsNan(v.x), coreIsNan(v.y), coreIsNan(v.z), coreIsNan(v.w));}
+#endif
+
+// integer modulo operation
+#if defined(CORE_GL_gpu_shader4)
+    #define coreIntMod(a,b) ((a) % (b))
+#else
+    int   coreIntMod(const in int   a, const in int b) {return (a - (b * (a / b)));}
+    ivec2 coreIntMod(const in ivec2 a, const in int b) {return (a - (b * (a / b)));}
+    ivec3 coreIntMod(const in ivec3 a, const in int b) {return (a - (b * (a / b)));}
+    ivec4 coreIntMod(const in ivec4 a, const in int b) {return (a - (b * (a / b)));}
 #endif
 
 // color convert
@@ -860,6 +870,23 @@ uniform mediump sampler2DShadow u_as2TextureShadow[CORE_NUM_TEXTURES_SHADOW];
         float v1Value   = 1.0 + v1DotSq * (v1RoughSq - 1.0);
         return v1RoughSq / (PI * v1Value * v1Value);
     }
+
+    // ordered dithering function (modified)
+    float coreDither(const in ivec2 i2PixelCoord)
+    {
+        const mat4 c_m4Matrix = mat4( 0.0,  8.0,  2.0, 10.0,
+                                     12.0,  4.0, 14.0,  6.0,
+                                      3.0, 11.0,  1.0,  9.0,
+                                     15.0,  7.0, 13.0,  5.0) / 15.0 - 0.5;
+
+        ivec2 i2Index = coreIntMod(i2PixelCoord, 4);
+        #if defined(GL_ES)
+            for(int i = 0; i < 4; ++i) for(int j = 0; j < 4; ++j) if((i == i2Index.y) && (j == i2Index.x)) return c_m4Matrix[i][j];
+        #else
+            return c_m4Matrix[i2Index.y][i2Index.x];
+        #endif
+    }
+    float coreDither() {return coreDither(ivec2(gl_FragCoord.xy));}
 
 #endif // _CORE_FRAGMENT_SHADER_
 

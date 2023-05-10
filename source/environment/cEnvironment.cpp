@@ -221,7 +221,7 @@ void cEnvironment::ChangeBackground(const coreInt32 iID, const coreUintW iTransi
 // 
 FUNC_LOCAL coreFloat cEnvironment::RetrieveTransitionBlend(const cBackground* pBackground)const
 {
-    return MAX(m_TransitionTime.GetValue((m_pBackground == pBackground) ? CORE_TIMER_GET_NORMAL : CORE_TIMER_GET_REVERSED), 0.0f);
+    return BLENDH3(CLAMP01(m_TransitionTime.GetValue((m_pBackground == pBackground) ? CORE_TIMER_GET_NORMAL : CORE_TIMER_GET_REVERSED)));
 }
 
 

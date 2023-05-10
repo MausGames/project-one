@@ -123,5 +123,5 @@ void cForeground::__Reset(const coreResourceReset eInit)
 // 
 void cForeground::__CalculateViewProj()
 {
-    m_mViewProj = Core::Graphics->GetCamera() * coreMatrix4::Perspective(g_vGameResolution, Core::Graphics->GetFOV(), Core::Graphics->GetNearClip(), Core::Graphics->GetFarClip());
+    m_mViewProj = coreMatrix4::Camera(CAMERA_POSITION, CAMERA_DIRECTION, CAMERA_ORIENTATION) * coreMatrix4::Perspective(g_vGameResolution, Core::Graphics->GetFOV(), Core::Graphics->GetNearClip(), Core::Graphics->GetFarClip());
 }

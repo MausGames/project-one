@@ -76,8 +76,8 @@ void cSnow::Move()
     if(!m_fVisibility) return;
 
     // 
-    if(m_fDelay) m_fVisibility = MAX(m_fVisibility - m_fDelay * TIME, 0.0f);
-    this->SetAlpha(m_fVisibility);
+    if(m_fDelay) m_fVisibility = MAX0(m_fVisibility - m_fDelay * TIME);
+    this->SetAlpha(BLENDH3(m_fVisibility));
 
     // 
     this->coreFullscreen::Move();
@@ -269,6 +269,18 @@ coreBool cSnow::TestCollision(const coreVector2 vPosition)const
 
     // 
     return (m_piSnowData[iY * SNOW_SIZE + iX] != 0x00u);
+}
+
+// ****************************************************************
+// 
+coreBool cSnow::AnyData()const
+{
+    return std::memchr(m_piSnowData, 0xFFu, SNOW_SIZE * SNOW_SIZE);
+}
+
+coreBool cSnow::AllData()const
+{
+    return !std::memchr(m_piSnowData, 0x00u, SNOW_SIZE * SNOW_SIZE);
 }
 
 
