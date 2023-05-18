@@ -12,7 +12,6 @@
 
 // TODO 3: improve fall timing and speed
 // TODO 5: add wreckage at impact
-// TODO 3: add proper fallback if out of crash objects
 
 
 // ****************************************************************
