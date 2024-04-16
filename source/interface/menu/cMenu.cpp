@@ -1450,7 +1450,7 @@ void cMenu::__EndGame()
     // 
     if(!g_pSave->GetHeader().oProgress.bFirstPlay)
     {
-        ADD_BIT(g_pSave->EditProgress()->iState, STATE_AFTER_FIRST)
+        ADD_BIT_EX(g_pSave->EditProgress()->aiState, STATE_AFTER_FIRST)
     }
 
     // 

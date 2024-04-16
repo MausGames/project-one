@@ -41,7 +41,7 @@ cGeluMission::cGeluMission()noexcept
 , m_abCrushInside  {}
 , m_iCrushState    (0u)
 , m_fAnimation     (0.0f)
-, m_bStory         (g_pSave->GetHeader().oProgress.aiAdvance[5] < 7u)
+, m_bStory         (!HAS_BIT_EX(g_pSave->GetHeader().oProgress.aiState, STATE_STORY_GELU))
 {
     // 
     m_apBoss[0] = &m_Chol;

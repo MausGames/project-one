@@ -55,6 +55,7 @@ alignas(ALIGNMENT_CACHE) static constexpr const coreChar* g_aapcCreditEntry[][2]
     {"Michael Hartinger",                         "$THANKS"},
     {"Miho Miyazaki (DICO Co., Ltd.)",            "$LOCA - 日本語"},
     {"Murilo Martins (Locsmiths)",                "$LOCA - Português (Brasil)"},
+    {"Neil Doppelmayr",                           "$THANKS"},
     {"Oliver Bisztyga",                           "$THANKS"},
     {"Rainer Petermann",                          "$THANKS"},
     {"Ricardo Nakaoka (Locsmiths)",               "$LOCA - Português (Brasil)"},

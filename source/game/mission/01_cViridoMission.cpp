@@ -49,7 +49,7 @@ cViridoMission::cViridoMission()noexcept
 , m_iStickyState    (0u)
 , m_iBounceState    (0u)
 , m_fAnimation      (0.0f)
-, m_bStory          (g_pSave->GetHeader().oProgress.aiAdvance[1] < 7u)
+, m_bStory          (!HAS_BIT_EX(g_pSave->GetHeader().oProgress.aiState, STATE_STORY_VIRIDO))
 {
     // 
     m_apBoss[0] = &m_Torus;
@@ -1062,8 +1062,9 @@ void cViridoMission::__MoveOwnAfter()
                 
                 if(pBullet->GetFlyTime() < 0.1f)
                 {
-                    if(coreVector2::Dot(vOriginDiff, oBarrier.GetDirection().xy()) < 0.0f) return;
+                    if(bBehind) return;
                 }
+                const coreBool bAlways = (pBullet->GetFlyTime() < 0.1f) && !bBehind;
                 
                 const coreFloat fSlant = (1.0f + coreVector2::Dot(pBullet->GetFlyDir(), oBarrier.GetDirection().xy())) * (bBehind ? 0.0f : 1.0f);      
                 
@@ -1089,7 +1090,7 @@ void cViridoMission::__MoveOwnAfter()
                 const coreVector2 vRealDiff = vRayPos - vRealIntersection;
             
                 // 
-                if((SIGN(fDot) != SIGN(fDotOld))/* && (ABS(fDot) < 5.0f) && (ABS(fDotOld) < 5.0f)*/    &&   // to handle teleportation
+                if(((SIGN(fDot) != SIGN(fDotOld)) || (bAlways && (SIGN(fDot) > 0.0f)))/* && (ABS(fDot) < 5.0f) && (ABS(fDotOld) < 5.0f)*/    &&   // to handle teleportation
                     (/*ABS(coreVector2::Dot(vDiff,    vRayDir))*/vRealDiff.LengthSq()    < POW2(oBarrier.GetCollisionRange().x + pBullet->GetCollisionRange().x)))
                 {
                     const coreVector2 vIntersection = vRayPos + vRayDir * coreVector2::Dot(vDiff, vRayDir);

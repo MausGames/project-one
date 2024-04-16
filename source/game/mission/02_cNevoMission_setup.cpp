@@ -3203,5 +3203,13 @@ void cNevoMission::__SetupOwn()
     });
 
     // ################################################################
+    // story state
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        ADD_BIT_EX(g_pSave->EditProgress()->aiState, STATE_STORY_NEVO)
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
     // ################################################################
 }

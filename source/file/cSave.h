@@ -28,7 +28,7 @@
 #define SAVE_FILE_FOLDER    ""                       // 
 #define SAVE_FILE_EXTENSION "p1sv"                   // 
 #define SAVE_FILE_MAGIC     (UINT_LITERAL("P1SV"))   // 
-#define SAVE_FILE_VERSION   (0x00000002u)            // 
+#define SAVE_FILE_VERSION   (0x00000003u)            // 
 
 #define SAVE_NAME_LENGTH    (32u)                    // 
 #define SAVE_PLAYERS        (PLAYERS)                // 
@@ -84,7 +84,17 @@ enum eSaveNew : coreUint8   // # never change bits after release
 
 enum eSaveState : coreUint8   // # never change bits after release
 {
-    STATE_AFTER_FIRST = 0u
+    STATE_AFTER_FIRST   = 0u,
+    STATE_STORY_VIRIDO  = 1u,
+    STATE_STORY_NEVO    = 2u,
+    STATE_STORY_HARENA  = 3u,
+    STATE_STORY_RUTILUS = 4u,
+    STATE_STORY_GELU    = 5u,
+    STATE_STORY_CALOR   = 6u,
+    STATE_STORY_MUSCUS  = 7u,
+    STATE_STORY_ATER    = 8u,
+    STATE_STORY_BONUS1  = 9u,
+    STATE_STORY_BONUS2  = 10u
 };
 
 
@@ -209,7 +219,7 @@ public:
         coreUint64 aiTrophy          [2];                              // (bitfield) 
         coreUint64 aiUnlock          [2];                              // (bitfield) 
         coreUint64 aiNew             [2];                              // (bitfield) 
-        coreUint64 iState;                                             // (bitfield) 
+        coreUint64 aiState           [1];                              // (bitfield) 
     };
 
     // 

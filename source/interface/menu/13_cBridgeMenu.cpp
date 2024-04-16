@@ -507,10 +507,10 @@ coreBool cBridgeMenu::HasUnlocks()
         }
     };
 
-         if(nApplyUnlockFunc(UNLOCK_MIRRORMODE)   && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[4][1];}))             return true;
-    else if(nApplyUnlockFunc(UNLOCK_GAMESPEEDUP)  && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[6][3];}))             return true;
-    else if(nApplyUnlockFunc(UNLOCK_POWERSHIELD)  && HAS_BIT(g_pSave->GetHeader().oProgress.iState, STATE_AFTER_FIRST)) return true;
-    else if(nApplyUnlockFunc(UNLOCK_WEAPON_PULSE) && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[8][5];}))             return true;
+         if(nApplyUnlockFunc(UNLOCK_MIRRORMODE)   && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[4][1];}))                 return true;
+    else if(nApplyUnlockFunc(UNLOCK_GAMESPEEDUP)  && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[6][3];}))                 return true;
+    else if(nApplyUnlockFunc(UNLOCK_POWERSHIELD)  && HAS_BIT_EX(g_pSave->GetHeader().oProgress.aiState, STATE_AFTER_FIRST)) return true;
+    else if(nApplyUnlockFunc(UNLOCK_WEAPON_PULSE) && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[8][5];}))                 return true;
 
     return false;
 }

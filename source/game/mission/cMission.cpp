@@ -201,9 +201,13 @@ void cMission::MoveBefore()
             {
                 g_pGame->StartOutro((m_iTakeTo == TAKE_MISSION) ? GAME_OUTRO_MISSION : GAME_OUTRO_SEGMENT, m_iOutroSub);
 
-                if((m_iTakeTo == TAKE_MISSION) || ((m_iTakeTo == 5u) && (g_pGame->GetCurMissionIndex() != MISSION_ATER)))
+                if(m_iTakeTo == TAKE_MISSION)
                 {
                     g_pGame->FadeMusic(0.3f);
+                }
+                else if((m_iTakeTo == 5u) && (g_pGame->GetCurMissionIndex() != MISSION_ATER))
+                {
+                    g_pGame->FadeMusic(0.4f);   // a bit faster
                 }
             }
         }

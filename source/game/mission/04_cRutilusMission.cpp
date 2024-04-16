@@ -46,7 +46,7 @@ cRutilusMission::cRutilusMission()noexcept
 , m_aiRegisterID      {}
 , m_afRegisterSpeed   {}
 , m_fAnimation        (0.0f)
-, m_bStory            (g_pSave->GetHeader().oProgress.aiAdvance[4] < 7u)
+, m_bStory            (!HAS_BIT_EX(g_pSave->GetHeader().oProgress.aiState, STATE_STORY_RUTILUS))
 {
     // 
     m_apBoss[0] = &m_Messier;

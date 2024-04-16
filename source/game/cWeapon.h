@@ -157,8 +157,6 @@ private:
     coreFlow m_fWave;              // 
     coreFlow m_fAnimation;         // 
 
-    coreSoundPtr m_PingSound;      // 
-
 
 public:
     cPulseWeapon()noexcept;

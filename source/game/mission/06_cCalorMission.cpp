@@ -43,7 +43,7 @@ cCalorMission::cCalorMission()noexcept
 , m_fCatchTransfer  (0.0f)
 , m_fStoryRangeAnim (0.0f)
 , m_fAnimation      (0.0f)
-, m_bStory          (g_pSave->GetHeader().oProgress.aiAdvance[6] < 7u)
+, m_bStory          (!HAS_BIT_EX(g_pSave->GetHeader().oProgress.aiState, STATE_STORY_CALOR))
 {
     // 
     m_apBoss[0] = &m_Zeroth;

@@ -601,7 +601,7 @@ void cProjectOneBoss::__MoveOwn()
         PHASE_CONTROL_PAUSE(0u, 0.7f)
         {
             PHASE_CHANGE_TO(30u)
-            if(DEFINED(_CORE_DEBUG_)) PHASE_CHANGE_TO(40u)                                                                                        
+            //if(DEFINED(_CORE_DEBUG_)) PHASE_CHANGE_TO(40u)                                                                                        
         });
     }
 

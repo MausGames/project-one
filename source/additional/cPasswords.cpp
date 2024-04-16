@@ -24,52 +24,54 @@ coreBool ApplyPassword(const coreChar* pcText)
     // 
     switch(iHash)
     {
-    // GAMBOGE yellow
-    case 14976658933825851731u:
-        {
-            for(coreUintW i = 0u; i < SAVE_MISSIONS; ++i) g_pSave->EditProgress()->aiAdvance[i] = MAX(g_pSave->EditProgress()->aiAdvance[i], 1u);
-        }
-        break;
-
-    // SAFFRON orange
-    case 4606173178869511954u:
+    // ZINNOBER red
+    case 18123262277673915876u:
         {
             for(coreUintW i = 0u; i < SAVE_MISSIONS; ++i) g_pSave->EditProgress()->aiAdvance[i] = MAX(g_pSave->EditProgress()->aiAdvance[i], 7u);
-        }
-        break;
-
-    // FUCHSIA pink
-    case 8219416175255162026u:
-        {
-            std::memset(g_pSave->EditProgress()->aiFragment, 1, sizeof(g_pSave->EditProgress()->aiFragment));
-        }
-        break;
-
-    // ORCHIL purple
-    case 16681166332002509082u:
-        {
-            g_pSave->EditProgress()->bFirstPlay   = true;
-            g_pSave->EditProgress()->aiAdvance[0] = 0u;
-            bRestart = true;
         }
         break;
 
     // INDIGO blue
     case 13535575702665342035u:
         {
-            ADD_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_MIRRORMODE)
+            std::memset(g_pSave->EditProgress()->aiFragment, 1, sizeof(g_pSave->EditProgress()->aiFragment));
         }
         break;
 
     // SEPIA brown
     case 4083581750562567063u:
         {
+            g_pSave->EditProgress()->bFirstPlay   = true;
+            g_pSave->EditProgress()->aiAdvance[0] = 0u;
+
+            REMOVE_BIT_EX(g_pSave->EditProgress()->aiState, STATE_STORY_VIRIDO)
+            REMOVE_BIT_EX(g_pSave->EditProgress()->aiState, STATE_STORY_NEVO)
+            REMOVE_BIT_EX(g_pSave->EditProgress()->aiState, STATE_STORY_HARENA)
+            REMOVE_BIT_EX(g_pSave->EditProgress()->aiState, STATE_STORY_RUTILUS)
+            REMOVE_BIT_EX(g_pSave->EditProgress()->aiState, STATE_STORY_GELU)
+            REMOVE_BIT_EX(g_pSave->EditProgress()->aiState, STATE_STORY_CALOR)
+            REMOVE_BIT_EX(g_pSave->EditProgress()->aiState, STATE_STORY_MUSCUS)
+
+            bRestart = true;
+        }
+        break;
+
+    // SAFRAN orange
+    case 12809514335711897236u:
+        {
+            ADD_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_MIRRORMODE)
+        }
+        break;
+
+    // FUCHSIN pink
+    case 17376649531488240964u:
+        {
             ADD_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_GAMESPEEDUP)
         }
         break;
 
-    // SCARLET red
-    case 4594381807352121855u:
+    // GAMBOGE yellow
+    case 14976658933825851731u:
         {
             ADD_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_POWERSHIELD)
         }
@@ -82,8 +84,8 @@ coreBool ApplyPassword(const coreChar* pcText)
         }
         break;
 
-    // CELADON green
-    case 9262066068920926272u:
+    // SELADON green
+    case 2162088830537969827u:
         {
             g_bCheatP1 = true;
         }

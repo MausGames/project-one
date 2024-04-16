@@ -447,8 +447,6 @@ void cPulseWeapon::__UpdateOwn(const coreUint8 iShootStatus, const coreFloat fSh
     if((m_fCharge >= 1.0f) && (fOld < 1.0f))
     {
         m_fWave = 1.0f;
-        
-        // TODO 1: m_PingSound play
     }
 }
 

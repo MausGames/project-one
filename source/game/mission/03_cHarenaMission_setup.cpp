@@ -3349,12 +3349,20 @@ void cHarenaMission::__SetupOwn()
     // end
     STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
+        STAGE_FINISH_AFTER(MISSION_WAIT_OUTRO)
+    });
+
+    // ################################################################
+    // story state
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
         if(m_bStory)
         {
             m_iOutroSub = 11u;
         }
 
-        STAGE_FINISH_AFTER(MISSION_WAIT_OUTRO)
+        ADD_BIT_EX(g_pSave->EditProgress()->aiState, STATE_STORY_HARENA)
+        STAGE_FINISH_NOW
     });
 
     // ################################################################

@@ -141,11 +141,13 @@ cGame::~cGame()
 
     // 
     g_pSave->SaveFile();
+
+    // 
+    this->CancelFadeMusic();
     
     if(g_bDemoVersion && (g_MusicPlayer.GetCurMusic() != g_MusicPlayer.GetMusicName("menu.ogg")))   // TODO 1: condition for finale in demo
         g_MusicPlayer.Stop();
     
-    m_fMusicVolume = 1.0f;
 }
 
 
@@ -838,6 +840,9 @@ void cGame::FadeMusic(const coreFloat fSpeed)
 // 
 void cGame::CancelFadeMusic()
 {
+    // 
+    if(m_fMusicFade) g_MusicPlayer.Stop();
+
     //
     m_fMusicFade = 0.0f;
 }
@@ -1303,7 +1308,7 @@ coreBool cGame::__HandleIntro()
             });
 
             // 
-            if(InBetween(0.65f, fOldTime, m_fTimeInOut) && !g_MusicPlayer.IsPlaying())
+            if(InBetween(0.65f, fOldTime, m_fTimeInOut) && (!g_MusicPlayer.IsPlaying() || m_fMusicFade))   // # beware of intro/loop and game-destruction on segment-change
             {
                 const coreChar* pcName = m_pCurMission->GetMusicName();
                 if(pcName && pcName[0])

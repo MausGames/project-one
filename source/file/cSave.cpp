@@ -331,7 +331,7 @@ void cSave::__UpgradeHeader(sHeader* OUTPUT pHeader)
             coreUint8  aiHelper  [SAVE_MISSIONS];
             coreUint8  aiFragment[SAVE_MISSIONS];
             coreUint8  aaiBadge  [SAVE_MISSIONS][SAVE_SEGMENTS];
-            coreUint64 iState;
+            coreUint64 aiState   [1];
             coreUint64 aiTrophy  [2];
             coreUint64 aiUnlock  [2];
             coreUint64 aiNew     [2];
@@ -340,13 +340,25 @@ void cSave::__UpgradeHeader(sHeader* OUTPUT pHeader)
         sProgressOld oProgressOld;
         std::memcpy(&oProgressOld, &pHeader->oProgress, sizeof(sProgress)); STATIC_ASSERT(sizeof(sProgress) == sizeof(sProgressOld))
 
-        std::memcpy( pHeader->oProgress.aiHelper,    oProgressOld.aiHelper,   sizeof(sProgress::aiHelper));   STATIC_ASSERT(sizeof(sProgress::aiHelper)   == sizeof(sProgressOld::aiHelper))
-        std::memcpy( pHeader->oProgress.aiFragment,  oProgressOld.aiFragment, sizeof(sProgress::aiFragment)); STATIC_ASSERT(sizeof(sProgress::aiFragment) == sizeof(sProgressOld::aiFragment))
-        std::memcpy( pHeader->oProgress.aaiBadge,    oProgressOld.aaiBadge,   sizeof(sProgress::aaiBadge));   STATIC_ASSERT(sizeof(sProgress::aaiBadge)   == sizeof(sProgressOld::aaiBadge))
-        std::memcpy(&pHeader->oProgress.iState,     &oProgressOld.iState,     sizeof(sProgress::iState));     STATIC_ASSERT(sizeof(sProgress::iState)     == sizeof(sProgressOld::iState))
-        std::memcpy( pHeader->oProgress.aiTrophy,    oProgressOld.aiTrophy,   sizeof(sProgress::aiTrophy));   STATIC_ASSERT(sizeof(sProgress::aiTrophy)   == sizeof(sProgressOld::aiTrophy))
-        std::memcpy( pHeader->oProgress.aiUnlock,    oProgressOld.aiUnlock,   sizeof(sProgress::aiUnlock));   STATIC_ASSERT(sizeof(sProgress::aiUnlock)   == sizeof(sProgressOld::aiUnlock))
-        std::memcpy( pHeader->oProgress.aiNew,       oProgressOld.aiNew,      sizeof(sProgress::aiNew));      STATIC_ASSERT(sizeof(sProgress::aiNew)      == sizeof(sProgressOld::aiNew))
+        std::memcpy(pHeader->oProgress.aiHelper,    oProgressOld.aiHelper,   sizeof(sProgress::aiHelper));   STATIC_ASSERT(sizeof(sProgress::aiHelper)   == sizeof(sProgressOld::aiHelper))
+        std::memcpy(pHeader->oProgress.aiFragment,  oProgressOld.aiFragment, sizeof(sProgress::aiFragment)); STATIC_ASSERT(sizeof(sProgress::aiFragment) == sizeof(sProgressOld::aiFragment))
+        std::memcpy(pHeader->oProgress.aaiBadge,    oProgressOld.aaiBadge,   sizeof(sProgress::aaiBadge));   STATIC_ASSERT(sizeof(sProgress::aaiBadge)   == sizeof(sProgressOld::aaiBadge))
+        std::memcpy(pHeader->oProgress.aiState,     oProgressOld.aiState,    sizeof(sProgress::aiState));    STATIC_ASSERT(sizeof(sProgress::aiState)    == sizeof(sProgressOld::aiState))
+        std::memcpy(pHeader->oProgress.aiTrophy,    oProgressOld.aiTrophy,   sizeof(sProgress::aiTrophy));   STATIC_ASSERT(sizeof(sProgress::aiTrophy)   == sizeof(sProgressOld::aiTrophy))
+        std::memcpy(pHeader->oProgress.aiUnlock,    oProgressOld.aiUnlock,   sizeof(sProgress::aiUnlock));   STATIC_ASSERT(sizeof(sProgress::aiUnlock)   == sizeof(sProgressOld::aiUnlock))
+        std::memcpy(pHeader->oProgress.aiNew,       oProgressOld.aiNew,      sizeof(sProgress::aiNew));      STATIC_ASSERT(sizeof(sProgress::aiNew)      == sizeof(sProgressOld::aiNew))
+    }
+
+    // 
+    if(pHeader->iVersion <= 2u)
+    {
+        if(pHeader->oProgress.aiAdvance[1] >= 7) ADD_BIT_EX(pHeader->oProgress.aiState, STATE_STORY_VIRIDO)
+        if(pHeader->oProgress.aiAdvance[2] >= 7) ADD_BIT_EX(pHeader->oProgress.aiState, STATE_STORY_NEVO)
+        if(pHeader->oProgress.aiAdvance[3] >= 7) ADD_BIT_EX(pHeader->oProgress.aiState, STATE_STORY_HARENA)
+        if(pHeader->oProgress.aiAdvance[4] >= 7) ADD_BIT_EX(pHeader->oProgress.aiState, STATE_STORY_RUTILUS)
+        if(pHeader->oProgress.aiAdvance[5] >= 7) ADD_BIT_EX(pHeader->oProgress.aiState, STATE_STORY_GELU)
+        if(pHeader->oProgress.aiAdvance[6] >= 7) ADD_BIT_EX(pHeader->oProgress.aiState, STATE_STORY_CALOR)
+        if(pHeader->oProgress.aiAdvance[7] >= 7) ADD_BIT_EX(pHeader->oProgress.aiState, STATE_STORY_MUSCUS)
     }
 
     // 

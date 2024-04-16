@@ -440,10 +440,13 @@ void cPlayer::Move()
             {
                 if(!HAS_BIT(m_pInput->iActionHold, PLAYER_ACTION_SHOOT(0u, 0u)) && !m_pInput->vMove.IsNull())
                 {
+                    if(PackDirection(m_pInput->vMove) != m_iLastMove)
+                    {
                          if(SameDirection90(coreVector2( 0.0f, 1.0f), m_pInput->vMove) && !SameDirection90(coreVector2( 0.0f, 1.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 0.0f, 1.0f) * vFlip, vOldDir2));
                     else if(SameDirection90(coreVector2(-1.0f, 0.0f), m_pInput->vMove) && !SameDirection90(coreVector2(-1.0f, 0.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2(-1.0f, 0.0f) * vFlip, vOldDir2));
                     else if(SameDirection90(coreVector2( 0.0f,-1.0f), m_pInput->vMove) && !SameDirection90(coreVector2( 0.0f,-1.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 0.0f,-1.0f) * vFlip, vOldDir2));
                     else if(SameDirection90(coreVector2( 1.0f, 0.0f), m_pInput->vMove) && !SameDirection90(coreVector2( 1.0f, 0.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 1.0f, 0.0f) * vFlip, vOldDir2));
+                    }
                 }
             }
             
