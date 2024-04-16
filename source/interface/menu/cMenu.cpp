@@ -178,6 +178,8 @@ void cMenu::Render()
 
     if(m_TransitionTime.GetStatus())
     {
+        ASSERT(m_pTransitionMenu)
+        
         const auto nRenderFunc = [this](const coreUintW iSurface, coreMenu* pMenu)
         {
             // 

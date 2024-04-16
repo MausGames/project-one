@@ -235,6 +235,16 @@ cReplayMenu::cReplayMenu()noexcept
     m_DetailTitle.SetAlignment(coreVector2(0.0f,0.0f));
     m_DetailTitle.SetColor3   (COLOR_MENU_WHITE);
 
+    m_DetailTitleSmall.Construct   (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
+    m_DetailTitleSmall.SetPosition (m_DetailTitle.GetPosition ());
+    m_DetailTitleSmall.SetAlignment(m_DetailTitle.GetAlignment());
+    m_DetailTitleSmall.SetColor3   (m_DetailTitle.GetColor3   ());
+
+    m_DetailTitleSmall2.Construct   (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
+    m_DetailTitleSmall2.SetPosition (m_DetailTitle.GetPosition ());
+    m_DetailTitleSmall2.SetAlignment(m_DetailTitle.GetAlignment());
+    m_DetailTitleSmall2.SetColor3   (m_DetailTitle.GetColor3   ());
+
     m_aDetailScore[0].Construct      (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_aDetailScore[0].SetPosition    (m_DetailArea.GetPosition() + coreVector2(-0.235f,0.018f));
     m_aDetailScore[0].SetColor3      (g_aMissionData[MISSION_ATER].vColor);
@@ -379,14 +389,14 @@ cReplayMenu::cReplayMenu()noexcept
 
     m_NavigatorOverview.BindScroll(&m_ReplayBox);
 
-    m_NavigatorOverview.AssignFirst(&m_aLine[0]);
+    m_NavigatorOverview.AssignFirst(&m_aLine[0]);   // TODO 1: changed in ResetNavigator            
     m_NavigatorOverview.AssignBack (&m_BackButtonOverview);
     m_NavigatorOverview.AssignMenu (this);
 
 #if !defined(REPLAY_SLOTSYSTEM)
 
-    m_NavigatorOverview.UseShoulderLeft ([this]() {if(--m_iPageOffset >= m_iPageMax) m_iPageOffset = m_iPageMax - 1u; this->__UpdateList(true); g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SWITCH_ENABLED);});
-    m_NavigatorOverview.UseShoulderRight([this]() {if(++m_iPageOffset >= m_iPageMax) m_iPageOffset = 0u;              this->__UpdateList(true); g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SWITCH_ENABLED);});
+    m_NavigatorOverview.UseShoulderLeft ([this]() {if(m_iPageMax > 1) {if(--m_iPageOffset >= m_iPageMax) m_iPageOffset = m_iPageMax - 1u; this->__UpdateList(true);} g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SWITCH_ENABLED);});
+    m_NavigatorOverview.UseShoulderRight([this]() {if(m_iPageMax > 1) {if(++m_iPageOffset >= m_iPageMax) m_iPageOffset = 0u;              this->__UpdateList(true);} g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SWITCH_ENABLED);});
 
     m_NavigatorOverview.SetShoulder(true);
 
@@ -447,11 +457,13 @@ cReplayMenu::cReplayMenu()noexcept
     for(coreUintW i = 0u; i < MENU_REPLAY_DETAIL_MEDALS;  ++i) this->BindObject(SURFACE_REPLAY_DETAILS, &m_aDetailMedal    [i]);
     this->BindObject(SURFACE_REPLAY_DETAILS, &m_DetailStartBack);
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aDetailStartArrow); ++i) this->BindObject(SURFACE_REPLAY_DETAILS, &m_aDetailStartArrow[i]);
+    this->BindObject(SURFACE_REPLAY_DETAILS, &m_DetailSelection);   // # before title
     this->BindObject(SURFACE_REPLAY_DETAILS, &m_DetailTitle);
+    this->BindObject(SURFACE_REPLAY_DETAILS, &m_DetailTitleSmall);
+    this->BindObject(SURFACE_REPLAY_DETAILS, &m_DetailTitleSmall2);
     this->BindObject(SURFACE_REPLAY_DETAILS, &m_DetailStartLabel);
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aDetailScore); ++i) this->BindObject(SURFACE_REPLAY_DETAILS, &m_aDetailScore[i]);
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aDetailTime);  ++i) this->BindObject(SURFACE_REPLAY_DETAILS, &m_aDetailTime [i]);
-    this->BindObject(SURFACE_REPLAY_DETAILS, &m_DetailSelection);
     this->BindObject(SURFACE_REPLAY_DETAILS, &m_DetailBox);
     this->BindObject(SURFACE_REPLAY_DETAILS, &m_NavigatorDetails);
 
@@ -994,9 +1006,24 @@ void cReplayMenu::LoadDetails(const coreUintW iIndex)
     }
 
     // 
-    m_DetailTitle    .SetText(oInfo.oHeader.acName);
-    m_aDetailScore[1].SetText(PRINT("%'u",      iTotalScore));
-    m_aDetailTime [1].SetText(PRINT("%.1f %+d", fTime, iShift));
+    m_DetailTitle      .SetText(oInfo.oHeader.acName);
+    m_DetailTitleSmall .SetText(oInfo.oHeader.acName);
+    m_DetailTitleSmall2.SetText(oInfo.oHeader.acName);
+    m_aDetailScore[1]  .SetText(PRINT("%'u",      iTotalScore));
+    m_aDetailTime [1]  .SetText(PRINT("%.1f %+d", fTime, iShift));
+
+    m_DetailTitle.RetrieveDesiredSize([this](const coreVector2 vSize)
+    {
+        m_DetailTitleSmall.RetrieveDesiredSize([=, this](const coreVector2 vSize2)
+        {
+            const coreBool bBig  = (vSize .x > m_DetailSelection.GetSize().x - m_DetailSelection.GetSize().y * 2.0f);
+            const coreBool bBig2 = (vSize2.x > m_DetailSelection.GetSize().x - m_DetailSelection.GetSize().y * 2.0f);
+
+            m_DetailTitle      .SetEnabled(bBig  ? CORE_OBJECT_ENABLE_NOTHING : CORE_OBJECT_ENABLE_ALL);
+            m_DetailTitleSmall .SetEnabled(bBig2 ? CORE_OBJECT_ENABLE_NOTHING : bBig ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+            m_DetailTitleSmall2.SetEnabled(bBig2 ? CORE_OBJECT_ENABLE_ALL     : CORE_OBJECT_ENABLE_NOTHING);
+        });
+    });
 
     // 
     cMenu::ApplyMedalTexture(&m_aDetailMedal[0], oInfo.oHeader.iMedalArcade, MEDAL_TYPE_ARCADE, false);
@@ -1237,7 +1264,9 @@ void cReplayMenu::__UpdateList(const coreBool bReset)
     {
         const cReplay::sHeader& oHeader = m_aInfoList[i + iStart].oHeader;
 
-        m_aName [i].SetText(oHeader.acName);
+        const coreUintW iLen = std::strlen(oHeader.acName);
+        
+        m_aName [i].SetText((iLen <= REPLAY_NAME_INPUT) ? oHeader.acName : PRINT("%.*s~", REPLAY_NAME_INPUT, oHeader.acName));
         m_aTime [i].SetText(oHeader.iMagic ? coreData::DateTimePrint("%Y-%m-%d %H:%M", TIMEMAP_LOCAL(oHeader.iViewTimestamp)) : "-");
         m_aScore[i].SetText(oHeader.iMagic ? PRINT("%'u", cReplayMenu::__GetTotalScore(oHeader))                              : "");
     }
@@ -1261,7 +1290,11 @@ void cReplayMenu::__UpdateList(const coreBool bReset)
         m_ReplayBox.SetCurOffset(0.0f);
 
         // 
-        if(m_NavigatorOverview.GetCurScroll() == &m_ReplayBox)
+        if(!m_aLine[0].IsEnabled(CORE_OBJECT_ENABLE_ALL))
+        {
+            m_NavigatorOverview.OverrideCurrent(&m_PageSelection);
+        }
+        else if(m_NavigatorOverview.GetCurScroll() == &m_ReplayBox)
         {
             m_NavigatorOverview.OverrideCurrent(&m_aLine[0]);
         }

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 //*----------------------------------------------------------------------------*//
-//| Project One v1.3.0 (https://www.maus-games.at)                             |//
+//| Project One v1.3.1 (https://www.maus-games.at)                             |//
 //*----------------------------------------------------------------------------*//
 //| Copyright (c) 2010 Martin Mauersics                                        |//
 //|                                                                            |//
@@ -61,7 +61,6 @@
 // TODO 1: [MF] [HIGH] [ULTRA] swap visuals for task objects (not all of them are used anymore, so show the best looking first)
 // TODO 3: rogue like mode (grey mode), with negative or positive+negative (combined) effects to select (shoot speed, shoot damage, move speed, score multiplier, player size, player bullet size, enemy size, enemy bullet size, enemy bullet/attack speed, enemy speed, side-modifier (more damage to the right), extra/minus life, extra/minus shield, ...)
 // TODO 4: cleanup badge difficulty and index mixup
-// TODO 1: design sweep über alle stages, boss und P1 [RP]
 
 // Small Task List:
 // TODO 3: better player bullet creation effect (muzzle flash)
@@ -109,10 +108,6 @@
     #if defined(_P1_DEBUG_RANDOM_)
         #pragma message("Warning: Debug randomization enabled!")
     #endif
-#endif
-
-#if defined(_CORE_DEBUG_)
-    #define _P1_VERSION_1_1_0_
 #endif
 
 
@@ -237,15 +232,16 @@ struct sVersion final
 };
 constexpr sVersion g_aVersion[] =
 {
-    {"1.2.0", 1u},
-    {"1.2.1", 2u},
-    {"1.2.2", 3u},
-    {"1.2.3", 4u},
-    {"1.2.4", 5u},
-    {"1.2.5", 6u},
-    {"1.2.6", 7u},
-    {"1.2.7", 8u},
-    {"1.3.0", 9u}
+    {"1.2.0",  1u},
+    {"1.2.1",  2u},
+    {"1.2.2",  3u},
+    {"1.2.3",  4u},
+    {"1.2.4",  5u},
+    {"1.2.5",  6u},
+    {"1.2.6",  7u},
+    {"1.2.7",  8u},
+    {"1.3.0",  9u},
+    {"1.3.1", 10u}
 };
 constexpr sVersion g_Version = g_aVersion[ARRAY_SIZE(g_aVersion) - 1u];
 

@@ -425,25 +425,7 @@ void UpdateInput()
             {
                 if(STATIC_ISVALID(g_pGame) && !g_pMenu->IsPaused())
                 {
-                    //const sGameInput* pCheck = NULL;
-                    //for(coreUintW j = 0u; j < INPUT_TYPES; ++j)
-                    //{
-                    //    if(g_CurConfig.Input.aiType[j] == i)
-                    //    {
-                    //        pCheck = &g_aGameInput[j];
-                    //        break;
-                    //    }
-                    //}
-                    
-                    //coreVector2 vPlayerDir;
-                    //g_pGame->ForEachPlayer([&](const cPlayer* pPlayer, const coreUintW i)
-                    //{
-                    //    const sGameInput* pInput = pPlayer->GetInput();
-                    //    if((pInput == &g_TotalInput) || (pInput == pCheck)) vPlayerDir = pPlayer->GetDirection().xy();
-                    //});
-                    
                     coreVector2 vNewStick = Core::Input->GetJoystickRelativeR(iJoystickID);
-                    //if(vNewStick.IsNull()) s_avOldStick[iJoystickID] = vPlayerDir;
                     
                     const coreVector2 vOldStick = s_avOldStick[iJoystickID];
                     
@@ -451,7 +433,7 @@ void UpdateInput()
                     const coreBool bValidOld = (vOldStick.LengthSq() >= POW2(0.7f));
                     if(!vNewStick.IsNull()) vNewStick = vNewStick.Normalized();
                     
-                    
+                    coreBool bReset = true;
                     for(coreUintW j = 0u; j < 4u; ++j)
                     {
                         const coreVector2 vBase = StepRotated90(j);
@@ -462,13 +444,13 @@ void UpdateInput()
                             ADD_BIT(oMap.iActionPress,   PLAYER_ACTION_SHOOT_UP + j)
                         if( bOldState && !bNewState) 
                             ADD_BIT(oMap.iActionRelease, PLAYER_ACTION_SHOOT_UP + j)
-                        if( bNewState)               
-                            ADD_BIT(oMap.iActionHold,    PLAYER_ACTION_SHOOT_UP + j)
+                        if( bNewState)
+                        {ADD_BIT(oMap.iActionHold,    PLAYER_ACTION_SHOOT_UP + j) bReset = false;}
                         
                         
                         if(!bOldState && bNewState) s_avOldStick[iJoystickID] = AlongCrossNormal(vNewStick);
                     }
-                       if(vNewStick.IsNull())     s_avOldStick[iJoystickID] = coreVector2(0.0f,0.0f);
+                       if(vNewStick.IsNull() || bReset)     s_avOldStick[iJoystickID] = coreVector2(0.0f,0.0f);
                 }
                 else
                 {

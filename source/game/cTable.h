@@ -22,8 +22,8 @@
 #define TABLE_HELPERS  (HELPERS - 1u)   // 
 #define TABLE_RUNS     (CONTINUES)      // 
 
-#define TABLE_TIME_TO_UINT(x)   (F_TO_UI  (coreDouble(x) * 1000.0))
-#define TABLE_TIME_TO_FLOAT(x)  (coreFloat(coreDouble(x) / 1000.0))
+#define TABLE_TIME_TO_UINT(x)   (F_TO_UI  (coreDouble((x) + CORE_MATH_PRECISION) * 1000.0))
+#define TABLE_TIME_TO_FLOAT(x)  (coreFloat(coreDouble((x))                       / 1000.0))
 
 #define __TABLE_TIME_CONVERT_LOGICAL(x)  (coreFloat(coreDouble(I_TO_F(x)) * m_dLogicalTime))
 #define __TABLE_TIME_CONVERT_PHYSICAL(x) (coreFloat(coreDouble(I_TO_F(x)) * m_dPhysicalTime))

@@ -146,7 +146,7 @@ void cArcadeInput::Move()
     if(g_MenuInput.bCancel && (cChar != ARCADE_COMMAND_DEL))
     {
         // 
-        if(!m_sTextValue.empty()) {m_sTextValue.pop_back(); g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_BUTTON_PRESS);}
+        if(!m_sTextValue.empty()) {this->__PopCharacter(); g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_BUTTON_PRESS);}
         this->__SetText(m_sTextValue.c_str());
     }
     
@@ -159,7 +159,8 @@ void cArcadeInput::Move()
         m_aButton[i].Interact();
 
         // 
-        if(TIME && (m_aButton[i].IsClicked(CORE_INPUT_LEFT, CORE_INPUT_RELEASE) || (g_MenuInput.bAccept && (m_iCurGlyph == i)) || (g_acArcadeGlyph[i] == cChar)))
+        // TODO 1: cannot use bAccept with RELEASE, gamepad does double-input
+        if(TIME && (m_aButton[i].IsClicked(CORE_INPUT_LEFT, CORE_INPUT_RELEASE) || /*(g_MenuInput.bAccept && (m_iCurGlyph == i)) || */(g_acArcadeGlyph[i] == cChar)))
         {
             // 
             if(cChar) this->__MoveCursor(cArcadeInput::__RetrieveGlyphIndex(cChar));
@@ -167,7 +168,7 @@ void cArcadeInput::Move()
             if(g_acArcadeGlyph[i] == ARCADE_COMMAND_DEL)
             {
                 // 
-                if(!m_sTextValue.empty()) m_sTextValue.pop_back();
+                if(!m_sTextValue.empty()) this->__PopCharacter();
                 this->__SetText(m_sTextValue.c_str());
             }
             else if(g_acArcadeGlyph[i] == ARCADE_COMMAND_END)
@@ -182,11 +183,11 @@ void cArcadeInput::Move()
                 this->__SetText(m_sTextValue.c_str());
 
                 // 
-                if(g_MenuInput.bAccept && m_sTextTemplate.starts_with(m_sTextValue))
-                {
-                    const coreChar cGlyph = (m_sTextTemplate == m_sTextValue) ? ARCADE_COMMAND_END : m_sTextTemplate[m_sTextValue.length()];
-                    this->__MoveCursor(cArcadeInput::__RetrieveGlyphIndex(cGlyph));
-                }
+                //if(g_MenuInput.bAccept && m_sTextTemplate.starts_with(m_sTextValue))
+                //{
+                //    const coreChar cGlyph = (m_sTextTemplate == m_sTextValue) ? ARCADE_COMMAND_END : m_sTextTemplate[m_sTextValue.length()];
+                //    this->__MoveCursor(cArcadeInput::__RetrieveGlyphIndex(cGlyph));
+                //}
             }
 
             // 
@@ -315,4 +316,21 @@ void cArcadeInput::__SetText(const coreChar* pcText)
 
     // 
     m_aText[0].SetText((iLen < m_iTextLength) ? PRINT("%s|", pcText) : pcText);
+}
+
+
+// ****************************************************************
+// 
+void cArcadeInput::__PopCharacter()
+{
+    // remove last character
+    if(!m_sTextValue.empty())
+    {
+        if(HAS_FLAG(m_sTextValue.back(), 0x80u))
+        {
+            // handle UTF-8 encoding
+            while(!HAS_FLAG(m_sTextValue.back(), 0xC0u)) m_sTextValue.pop_back();
+        }
+        m_sTextValue.pop_back();
+    }
 }

@@ -362,7 +362,12 @@ void cSave::ImportDemo()
 // 
 coreBool cSave::CanImportDemo()const
 {
-    return !g_bDemoVersion && !coreData::FileExists(m_sPath.c_str()) && !coreData::FileExists(PRINT("%s.backup", m_sPath.c_str())) && coreData::FileExists(m_sPathDemo.c_str());
+    if(g_bDemoVersion || coreData::FileExists(m_sPath.c_str()) || coreData::FileExists(PRINT("%s.backup", m_sPath.c_str())))
+    {
+        return false;
+    }
+
+    return coreData::FileExists(m_sPathDemo.c_str());
 }
 
 

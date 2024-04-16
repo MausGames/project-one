@@ -13,7 +13,7 @@
 // TODO 3: implement string sanitize function, and check function (for save and replay ?)
 // TODO 3: require two enter presses to confirm with keyboard input
 // TODO 3: cancel feature CORE_INPUT_CHAR(ESCAPE) (check coreTextBox issues) (with message box "do you really want to ...", but makes only sense in volatile situations)
-// TODO 3: add blinking label-cursor | (also to engine textbox)
+// TODO 3: add blinking label-cursor | (also to engine textbox) (separate object on pos+size.x)
 // TODO 3: check if template longer than expected length can cause issues (or shorter)
 
 
@@ -40,6 +40,18 @@ alignas(ALIGNMENT_CACHE) static constexpr coreChar g_acArcadeGlyph[] =
     ARCADE_COMMAND_DEL,
     ARCADE_COMMAND_END
 };
+
+//alignas(ALIGNMENT_CACHE) static constexpr coreChar g_acArcadeGlyph2[] =
+//{
+//    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i',
+//    'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
+//    's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0',
+//    '1', '2', '3', '4', '5', '6', '7', '8', '9',
+//    '!', '?', '+', '-', '*', '/', '=', '&', '#',
+//    '.', ':', ',', ';', '[', ']', ' ',
+//    ARCADE_COMMAND_DEL,
+//    ARCADE_COMMAND_END
+//};
 
 STATIC_ASSERT(ARCADE_COLUMNS * ARCADE_ROWS == ARCADE_GLYPHS)
 
@@ -99,6 +111,9 @@ private:
 
     // 
     void __SetText(const coreChar* pcText);
+
+    // 
+    void __PopCharacter();
 
     // 
     static constexpr coreUintW __RetrieveGlyphIndex(const coreChar cGlyph);

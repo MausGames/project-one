@@ -484,7 +484,7 @@ void InitFramerate(const coreUint16 iUpdateFreq, const coreUint8 iGameSpeed)
     SDL_DisplayMode oMode = {};
     SDL_GetCurrentDisplayMode(Core::System->GetDisplayIndex(), &oMode);
 
-#if defined(_CORE_EMSCRIPTEN_)
+#if defined(_CORE_EMSCRIPTEN_) || defined(_CORE_SWITCH_)
     if(!oMode.refresh_rate) oMode.refresh_rate = 60;
 #endif
 

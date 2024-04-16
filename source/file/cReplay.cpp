@@ -96,6 +96,12 @@ void cReplay::StartRecording()
     std::memset(m_aiCurPacket, 0, sizeof(m_aiCurPacket));
 
     // 
+    for(coreUintW i = 0u; i < REPLAY_PLAYERS; ++i)
+    {
+        m_aInput[i].iMoveStep = 8u;
+    }
+
+    // 
     m_Header.iMagic          = REPLAY_FILE_MAGIC;
     m_Header.iVersion        = REPLAY_FILE_VERSION;
     m_Header.iViewTimestamp  = std::time(NULL);
@@ -195,6 +201,12 @@ void cReplay::StartPlayback()
     // 
     std::memset(m_aInput,      0, sizeof(m_aInput));
     std::memset(m_aiCurPacket, 0, sizeof(m_aiCurPacket));
+
+    // 
+    for(coreUintW i = 0u; i < REPLAY_PLAYERS; ++i)
+    {
+        m_aInput[i].iMoveStep = 8u;
+    }
 
     // 
     g_pSave->SetIgnore(true);
@@ -546,8 +558,7 @@ void cReplay::Update()
             const sGameInput* pNewInput = g_pGame->GetPlayer(i)->GetInput();
 
             // 
-            if(!coreMath::IsNear(pNewInput->vMove.x, m_aInput[i].vMove.x) ||
-               !coreMath::IsNear(pNewInput->vMove.y, m_aInput[i].vMove.y))
+            if(pNewInput->iMoveStep != m_aInput[i].iMoveStep)
             {
                 ASSERT(pNewInput->vMove == MapToAxis(UnpackDirection(pNewInput->iMoveStep), g_pPostProcessing->GetDirectionGame()))
                 nNewPacketFunc(i, REPLAY_TYPE_MOVE, pNewInput->iMoveStep);
@@ -630,7 +641,7 @@ void cReplay::Update()
                     switch(oPacketRaw.iType)
                     {
                     case REPLAY_TYPE_MOVE:
-                        oCurInput.vMove = MapToAxis(UnpackDirection(oPacketRaw.iValue), g_pPostProcessing->GetDirectionGame());
+                        oCurInput.iMoveStep = oPacketRaw.iValue;
                         break;
 
                     case REPLAY_TYPE_PRESS:
@@ -665,6 +676,9 @@ void cReplay::Update()
                     break;
                 }
             }
+
+            // 
+            oCurInput.vMove = MapToAxis(UnpackDirection(oCurInput.iMoveStep), g_pPostProcessing->GetDirectionGame());
         }
 
         for(coreUintW j = m_iCurChange, je = m_aChange.size(); j < je; ++j)   // multiple package on the same frame
@@ -840,12 +854,18 @@ coreBool cReplay::LoadData(const coreByte* pData, const coreUint32 iSize)
     
     coreByte*  pFullData = NULL;
     coreUint32 iFullSize = 0u;
+    
+    coreDataScope oScope = NULL;
 
     // 
     if(coreData::Decompress(pData, iSize, &pFullData, &iFullSize, 10u * 1024u * 1024u) != CORE_OK)
     {
         pFullData = c_cast<coreByte*>(pData);
         iFullSize = iSize;
+    }
+    else
+    {
+        oScope = pFullData;
     }
     
     const coreByte*  pBodyData = pFullData + sizeof(sHeader);
@@ -858,7 +878,6 @@ coreBool cReplay::LoadData(const coreByte* pData, const coreUint32 iSize)
             (m_Header.iVersion  >  REPLAY_FILE_VERSION) ||
             (m_Header.iChecksum != cReplay::__GenerateChecksum(m_Header)))
     {
-        if(pFullData != pData) SAFE_DELETE_ARRAY(pFullData)
         Core::Log->Warning("Replay data is not a valid replay-file!");
         return false;
     }
@@ -869,13 +888,9 @@ coreBool cReplay::LoadData(const coreByte* pData, const coreUint32 iSize)
     // 
     WARN_IF((m_Header.iBodySize != iBodySize) || !this->__SetBodyData(pBodyData, iBodySize))
     {
-        if(pFullData != pData) SAFE_DELETE_ARRAY(pFullData)
         Core::Log->Warning("Replay data is corrupt!");
         return false;
     }
-    
-    
-    if(pFullData != pData) SAFE_DELETE_ARRAY(pFullData)
 
     // 
     m_Header.iViewTimestamp = 0u;
@@ -943,6 +958,12 @@ void cReplay::Clear()
     std::memset(&m_Header,     0, sizeof(m_Header));
     std::memset(m_aInput,      0, sizeof(m_aInput));
     std::memset(m_aiCurPacket, 0, sizeof(m_aiCurPacket));
+
+    // 
+    for(coreUintW i = 0u; i < REPLAY_PLAYERS; ++i)
+    {
+        m_aInput[i].iMoveStep = 8u;
+    }
 
     // 
     m_aSnapshot.clear();

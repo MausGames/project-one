@@ -53,7 +53,7 @@ void cIntroMenu::Move()
     if(this->GetCurSurface() == SURFACE_INTRO_LANGUAGE)
     {
         // 
-        const coreBool bAllow = !g_pMenu->IsShifting() || (g_pMenu->GetShifting().GetValue(CORE_TIMER_GET_NORMAL) > 0.7f);
+        const coreBool bAllow = !g_pMenu->IsShifting() || (g_pMenu->GetShifting().GetValue(CORE_TIMER_GET_NORMAL) > 0.7f);   // only works for mouse input
 
         if(bAllow)
         {
@@ -102,7 +102,17 @@ void cIntroMenu::Move()
     else if(this->GetOldSurface() == SURFACE_INTRO_LANGUAGE)   // # old surface
     {
         // 
-        if(!this->GetTransition().GetStatus()) g_pMenu->ShiftSurface(this, g_pSave->CanImportDemo() ? SURFACE_INTRO_IMPORT : SURFACE_INTRO_WELCOME, 1.0f, 0u);
+        if(!this->GetTransition().GetStatus())
+        {
+            if(g_pSave->CanImportDemo())
+            {
+                this->ChangeSurface(SURFACE_INTRO_IMPORT, 0.0f);
+            }
+            else
+            {
+                g_pMenu->ShiftSurface(this, SURFACE_INTRO_WELCOME, 1.0f, 0u);
+            }
+        }
     }
     else if(this->GetCurSurface() == SURFACE_INTRO_IMPORT)
     {

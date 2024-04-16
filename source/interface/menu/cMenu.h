@@ -773,6 +773,8 @@ private:
     cGuiObject m_aDetailIconBack [MENU_REPLAY_DETAIL_ICONS];      // 
     cGuiObject m_aDetailArrow    [MENU_REPLAY_DETAIL_ARROWS];     // 
     cGuiLabel  m_DetailTitle;                                     // 
+    cGuiLabel  m_DetailTitleSmall;                                // 
+    cGuiLabel  m_DetailTitleSmall2;                               // 
     cGuiLabel  m_aDetailScore[2];                                 // 
     cGuiLabel  m_aDetailTime [2];                                 // 
 
@@ -828,7 +830,7 @@ public:
     void SelectNext    ();
 
     // 
-    inline void ResetNavigator() {m_NavigatorOverview.ResetFirst(); m_NavigatorDetails.ResetFirst();}
+    inline void ResetNavigator() {m_NavigatorOverview.AssignFirst(m_aLine[0].IsEnabled(CORE_OBJECT_ENABLE_ALL) ? s_cast<coreObject2D*>(&m_aLine[0]) : &m_PageSelection); m_NavigatorOverview.ResetFirst(); m_NavigatorDetails.ResetFirst();}
 
     // 
     static void HandleSaveError(const std::function<void(coreInt32)> nCallback);

@@ -15,6 +15,7 @@
 // TODO 3: async loading and saving
 // TODO 3: hard stage skip, hard enemy kill, hard boss health
 // TODO 3: kompression könnte noch verstärkt werden wenn daten von ABABAB auf AAABBB geändert werden vorm komprimieren (geht einfach mit version bump)
+// TODO 3: add move-step to keyframe (fallback: go to the marked packet and iterate rev until finding the first move packet)
 
 
 // ****************************************************************
@@ -25,7 +26,7 @@
 #define REPLAY_FILE_VERSION   (0x00000001u)            // 
 
 #define REPLAY_NAME_LENGTH    (128u)                   // 
-#define REPLAY_NAME_INPUT     (16u)                    // 
+#define REPLAY_NAME_INPUT     (20u)                    // 
 #define REPLAY_PLAYERS        (PLAYERS)                // 
 #define REPLAY_MISSIONS       (MISSIONS)               // 
 #define REPLAY_SEGMENTS       (SEGMENTS)               // 

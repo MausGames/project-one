@@ -1834,7 +1834,7 @@ void cConfigMenu::__LoadInputs()
         if(bStickyR) cConfigMenu::PrintFigure(&oInput.oFigureStickR, g_CurConfig.Input.aiType[i], FIGURE_KEY_RIGHTSTICK);
 
         #if defined(_CORE_SWITCH_)
-            if(bHideSecond )oInput.oFigureStickL.SetEnabled(CORE_OBJECT_ENABLE_MOVE);
+            if(bHideSecond) oInput.oFigureStickL.SetEnabled(CORE_OBJECT_ENABLE_MOVE);
             if(bHideSecond) oInput.oFigureStickR.SetEnabled(CORE_OBJECT_ENABLE_MOVE);
             oInput.oHeader.SetColor3(COLOR_MENU_WHITE * (bHideSecond ? MENU_LIGHT_IDLE : MENU_LIGHT_ACTIVE));
         #endif
