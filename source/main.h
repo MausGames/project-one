@@ -51,7 +51,6 @@
 // TODO: clean mixing shader defines (x >= y) and (defined(x)) checks (also in engine)
 // TODO: check for 16-bit float shader usage
 // TODO: program enable has to be checked (if(x.Enable()){}) everywhere
-// TODO: check if "if(!CORE_GL_SUPPORT(ARB_texture_rg)) glColorMask(true, true, false, false);" reduces or improves performance on related hardware, it is recommended to remove it for compression purposes, but always test to be sure
 // TODO: change 0.5 FB factors from 0.5 to 0.4 (-36% pixel) if CORE_GL_SUPPORT(ARB_texture_rg) not available ?
 // TODO: unify "forward" and "transform" comments in shaders
 // TODO: add own coreRand for various random things which may affect feeling (screen shake), and reset on boss-start
@@ -68,7 +67,6 @@
 // TODO: replace / with RCP where possible
 // TODO: "pro" shortcut for types (e.g. proEnemy, proGame), dr too
 // TODO: remove game_icon.png from resource-index if not required anymore
-// TODO: brown bullet, directional
 // TODO: ENABLE_BITWISE when ?
 // TODO: remove multisampling for 2d, though may cause artifacts if the objects are fully shaded and moved
 // TODO: transition shader only needs alpha for menu, but not for background -> create permutations
@@ -80,6 +78,10 @@
 // TODO: check for and prevent accumulation of small rounding errors: incremental matrix rotation
 // TODO: check if outlines are correct on all text (multiple font-height, multiple screen-resolutions)
 // TODO: return boolean to cancel iteration on ForEachBullet, *Player, *Enemy (do I need this?)
+// TODO: make sure shaders use 0.5,0.5 for pixel centers
+// TODO: check for single-channel menu_background_black
+// TODO: make energy texture sharper
+// TODO: implement custom identifier for game, for replay, save, other comptability
 
 
 // ****************************************************************
@@ -139,13 +141,11 @@
 #define COLOR_MENU_PURPLE    (coreVector3(0.710f, 0.333f, 1.000f))   // TODO: improve 
 #define COLOR_MENU_BLUE      (coreVector3(0.102f, 0.702f, 1.000f))   // TODO: improve 
 #define COLOR_MENU_GREEN     (coreVector3(0.118f, 0.745f, 0.353f))   // TODO: improve 
-#define COLOR_MENU_BRONZE    (coreVector3(0.925f, 0.663f, 0.259f))
-#define COLOR_MENU_SILVER    (coreVector3(0.855f, 0.855f, 0.878f))
-#define COLOR_MENU_GOLD      (coreVector3(1.000f, 0.859f, 0.000f))
 #define COLOR_ENERGY_WHITE   (coreVector3(1.000f, 1.000f, 1.000f))
 #define COLOR_ENERGY_YELLOW  (coreVector3(0.950f, 0.800f, 0.280f))
 #define COLOR_ENERGY_ORANGE  (coreVector3(1.000f, 0.420f, 0.000f))
 #define COLOR_ENERGY_RED     (coreVector3(1.000f, 0.290f, 0.290f))
+#define COLOR_ENERGY_MAGENTA (coreVector3(1.000f, 0.310f, 0.650f))
 #define COLOR_ENERGY_PURPLE  (coreVector3(0.450f, 0.200f, 1.000f))
 #define COLOR_ENERGY_BLUE    (coreVector3(0.100f, 0.430f, 1.000f))
 #define COLOR_ENERGY_CYAN    (coreVector3(0.184f, 0.569f, 0.635f))
@@ -153,17 +153,17 @@
 #define COLOR_FIRE_ORANGE    (coreVector3(0.991f, 0.305f, 0.042f))
 #define COLOR_FIRE_BLUE      (coreVector3(0.306f, 0.527f, 1.000f))
 #define COLOR_SHIP_YELLOW    (coreVector3( 50.0f/360.0f, 100.0f/100.0f,  85.0f/100.0f).HsvToRgb())
-#define COLOR_SHIP_ORANGE    (coreVector3( 34.0f/360.0f, 100.0f/100.0f, 100.0f/100.0f).HsvToRgb())
+#define COLOR_SHIP_ORANGE    (coreVector3( 34.0f/360.0f,  95.0f/100.0f,  95.0f/100.0f).HsvToRgb())
 #define COLOR_SHIP_RED       (coreVector3(  0.0f/360.0f,  68.0f/100.0f,  90.0f/100.0f).HsvToRgb())
+#define COLOR_SHIP_MAGENTA   (coreVector3(330.0f/360.0f,  70.0f/100.0f,  80.0f/100.0f).HsvToRgb())
 #define COLOR_SHIP_PURPLE    (coreVector3(287.0f/360.0f,  55.0f/100.0f,  85.0f/100.0f).HsvToRgb())
 #define COLOR_SHIP_BLUE      (coreVector3(201.0f/360.0f,  74.0f/100.0f,  85.0f/100.0f).HsvToRgb())
 #define COLOR_SHIP_CYAN      (coreVector3(183.0f/360.0f,  70.0f/100.0f,  85.0f/100.0f).HsvToRgb())
 #define COLOR_SHIP_GREEN     (coreVector3(118.0f/360.0f,  58.0f/100.0f,  70.0f/100.0f).HsvToRgb())
-#define COLOR_SHIP_BROWN     (coreVector3( 40.0f/360.0f,  95.0f/100.0f,  70.0f/100.0f).HsvToRgb())
-#define COLOR_SHIP_GREY      (coreVector3(  0.0f/360.0f,   0.0f/100.0f,  60.0f/100.0f).HsvToRgb())
-#define COLOR_SHIP_ICE       (coreVector3(208.0f/360.0f,  32.0f/100.0f,  90.0f/100.0f).HsvToRgb())
+#define COLOR_SHIP_GREY      (coreVector3(  0.0f/360.0f,   0.0f/100.0f,  60.0f/100.0f).HsvToRgb())   // TODO: remove ??? 
+#define COLOR_SHIP_BROWN     (coreVector3( 40.0f/360.0f,  95.0f/100.0f,  70.0f/100.0f).HsvToRgb())   // TODO: remove ??? 
+#define COLOR_SHIP_ICE       (coreVector3(208.0f/360.0f,  32.0f/100.0f,  90.0f/100.0f).HsvToRgb())   // TODO: remove ??? 
 #define COLOR_HEALTH(x)      (TernaryLerp(COLOR_MENU_RED, COLOR_MENU_YELLOW, COLOR_MENU_GREEN, x))
-#define COLOR_CHAIN(x)       (TernaryLerp(COLOR_MENU_RED, COLOR_MENU_PURPLE, COLOR_MENU_BLUE,  x))
 
 // shader modifiers
 #define SHADER_TRANSITION(x) "#define _P1_TRANSITION_ (" #x ") \n"   // full_transition
@@ -204,6 +204,7 @@ enum eType : coreInt32
     TYPE_VIRIDO_PADDLE,
     TYPE_VIRIDO_BARRIER,
     TYPE_VIRIDO_LASER,
+    TYPE_NEVO_BOMB,
     TYPE_NEVO_CONTAINER,
     TYPE_RUTILUS_TELEPORTER,
 
@@ -225,6 +226,7 @@ enum eElement : coreUint8
     ELEMENT_YELLOW,
     ELEMENT_ORANGE,
     ELEMENT_RED,
+    ELEMENT_MAGENTA,
     ELEMENT_PURPLE,
     ELEMENT_BLUE,
     ELEMENT_CYAN,
@@ -292,6 +294,8 @@ extern coreMusicPlayer g_MusicPlayer;       // central music-player
 #include "visual/cGlow.h"
 #include "visual/cDistortion.h"
 #include "visual/cHeadlight.h"
+#include "visual/cInk.h"
+#include "visual/cSnow.h"
 #include "visual/cWindscreen.h"
 #include "visual/cSpecialEffects.h"
 #include "visual/cForeground.h"
@@ -321,6 +325,7 @@ extern cPostProcessing* const g_pPostProcessing;   // main post-processing objec
 #include "game/cWeapon.h"
 #include "game/cShip.h"
 #include "game/cEnemy.h"
+#include "game/cHelper.h"
 #include "game/cChroma.h"
 #include "game/cItem.h"
 #include "game/cShield.h"

@@ -729,7 +729,7 @@ void cDharukBoss::__EnableBoomerang(const coreUintW iIndex, const coreVector2& v
     coreObject3D* pTrail     = (*m_BoomerangTrail.List())[iIndex*DHARUK_TRAILS];
 
     // 
-    WARN_IF(pBoomerang->GetType()) return;
+    WARN_IF(pBoomerang->IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
     pBoomerang->ChangeType(TYPE_DHARUK_BOOMERANG);
 
     // 
@@ -760,7 +760,7 @@ void cDharukBoss::__DisableBoomerang(const coreUintW iIndex, const coreBool bAni
     coreObject3D* pTrail     = (*m_BoomerangTrail.List())[iIndex*DHARUK_TRAILS];
 
     // 
-    if(!pBoomerang->GetType()) return;
+    if(!pBoomerang->IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
     pBoomerang->ChangeType(0);
 
     // 

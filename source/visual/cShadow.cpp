@@ -32,9 +32,6 @@ void cShadow::Update()
 {
     if(!m_iLevel) return;
 
-    // 
-    if(!CORE_GL_SUPPORT(ARB_texture_rg)) glColorMask(true, false, false, false);
-
     // fill the shadow map
     m_FrameBuffer.StartDraw();
     m_FrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR | CORE_FRAMEBUFFER_TARGET_DEPTH);
@@ -69,9 +66,6 @@ void cShadow::Update()
         }
         glDisable(GL_POLYGON_OFFSET_FILL);
     }
-
-    // 
-    if(!CORE_GL_SUPPORT(ARB_texture_rg)) glColorMask(true, true, true, true);
 
     // enable shadow map
     m_FrameBuffer.GetColorTarget(0u).pTexture->Enable(3u);

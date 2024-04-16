@@ -553,14 +553,8 @@ FUNC_LOCAL coreVector2 cOutdoor::CalcLerpVector(const coreFloat fPositionY)const
 void cOutdoor::UpdateLightMap()
 {
     // 
-    if(!CORE_GL_SUPPORT(ARB_texture_rg)) glColorMask(true, false, false, false);
-
-    // 
     m_LightMap.StartDraw();
     this->RenderLight();
-
-    // 
-    if(!CORE_GL_SUPPORT(ARB_texture_rg)) glColorMask(true, true, true, true);
 }
 
 

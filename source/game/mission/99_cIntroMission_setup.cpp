@@ -386,7 +386,10 @@ void cIntroMission::__SetupOwn()
         });
         */
 
-        if(STAGE_BEGINNING) g_pGame->StartOutro(1u);
+        if(STAGE_BEGINNING)
+        {
+            g_pGame->StartOutro(1u);
+        }
 
         STAGE_BOSS(m_ProjectOne, {1.0f, 2.0f, 3.0, 4.0f})
     });

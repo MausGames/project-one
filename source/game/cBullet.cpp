@@ -945,6 +945,56 @@ void cQuadBullet::__MoveOwn()
 
 // ****************************************************************
 // constructor
+cViewBullet::cViewBullet()noexcept
+{
+    // load object resources
+    this->DefineModel  ("bullet_view.md3");
+    this->DefineTexture(0u, "effect_energy.png");
+    this->DefineProgram("effect_energy_bullet_direct_program");
+
+    // set object properties
+    this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * BULLET_COLLISION_FACTOR);
+}
+
+
+// ****************************************************************
+// 
+void cViewBullet::__ImpactOwn(const coreVector2& vImpact)
+{
+    // 
+    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
+}
+
+
+// ****************************************************************
+// 
+void cViewBullet::__ReflectOwn()
+{
+    // 
+    this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
+}
+
+
+// ****************************************************************
+// move the view bullet
+void cViewBullet::__MoveOwn()
+{
+    // fly around
+    this->SetPosition (coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
+    this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
+
+    // update animation
+    m_fAnimation.Update(0.2f);
+    this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
+
+    // update fade
+    m_fFade.Update(1.0f);
+    this->SetAlpha(MIN(20.0f * m_fFade, 1.0f));
+}
+
+
+// ****************************************************************
+// constructor
 cMineBullet::cMineBullet()noexcept
 {
     // load object resources

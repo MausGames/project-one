@@ -38,6 +38,7 @@ void cGeluMission::__SetupOwn()
     // 2: 2 jumping left, 2 jumping right (0.25f,0.25f | 0.25f, 0.25f)
     // 3: 20 jumping at bottom (X/0.6f, 0.4frest)
     // ##: jump at player, reflect from side
+    // TODO: !!! everyone awakes at the same time       
     STAGE_MAIN
     {
         STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 16u)
@@ -175,7 +176,7 @@ void cGeluMission::__SetupOwn()
                         const coreVector2 vPos = pEnemy->GetPosition().xy();
                         const coreVector2 vDir = pEnemy->GetMove().Normalized();
                         
-                        const coreVector2 vTan = vDir.Rotated90();
+                        //const coreVector2 vTan = vDir.Rotated90();
         
                         g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.4f, pEnemy, vPos, -vDir)->ChangeSize(1.25f);
                     }

@@ -16,6 +16,7 @@ cPlayer::cPlayer()noexcept
 , m_pInput          (&g_TotalInput)
 , m_vArea           (coreVector4(-FOREGROUND_AREA, FOREGROUND_AREA))
 , m_vForce          (coreVector2(0.0f,0.0f))
+, m_fSpeed          (1.0f)
 , m_fRollTime       (0.0f)
 , m_fFeelTime       (PLAYER_NO_FEEL)
 , m_fIgnoreTime     (PLAYER_NO_IGNORE)
@@ -94,7 +95,7 @@ cPlayer::cPlayer()noexcept
     m_Shield.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 
     // 
-    m_Exhaust.DefineModel  ("object_tube.md3");
+    m_Exhaust.DefineModel  ("object_tube_open.md3");
     m_Exhaust.DefineTexture(0u, "effect_energy.png");
     m_Exhaust.DefineProgram("effect_energy_direct_program");
     m_Exhaust.SetDirection (this->GetDirection());
@@ -136,7 +137,7 @@ void cPlayer::Configure(const coreUintW iShipType, const coreVector3& vColor)
     this->DefineModelHigh(pcModelHigh);
     this->DefineModelLow (pcModelLow);
 
-    // save color
+    // set color
     this->SetBaseColor(vColor);
 }
 
@@ -291,13 +292,13 @@ void cPlayer::Move()
             {
                 // roll the ship
                 const coreFloat fSpeed = 50.0f + LERPB(25.0f, 0.0f, m_fRollTime);
-                vNewPos += m_pInput->vMove * (Core::System->GetTime() * fSpeed);
+                vNewPos += m_pInput->vMove * (Core::System->GetTime() * fSpeed * m_fSpeed);
             }
             else
             {
                 // move the ship
                 const coreFloat fSpeed = CONTAINS_BIT(m_pInput->iActionHold, 0u) ? 20.0f : 50.0f;
-                vNewPos += m_pInput->vMove * (Core::System->GetTime() * fSpeed);
+                vNewPos += m_pInput->vMove * (Core::System->GetTime() * fSpeed * m_fSpeed);
             }
 
             // apply external forces

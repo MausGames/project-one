@@ -48,6 +48,13 @@
 #define VIRIDO_SHADOWS_RAWS         (VIRIDO_SHADOWS)                                  // 
 #define VIRIDO_BALL_SPEED           (1.5f)                                            // 
 
+#define NEVO_BOMBS                  (4u)                                              // 
+#define NEVO_BOMBS_RAWS             (NEVO_BOMBS)                                      // 
+#define NEVO_LINES                  (4u)                                              // 
+#define NEVO_BLASTS                 (NEVO_BOMBS)                                      // 
+#define NEVO_BLASTS_RAWS            (NEVO_BLASTS * (NEVO_LINES + 1u))                 // 
+#define NEVO_BOMB_SIZE              (4.0f)                                            // 
+
 #define RUTILUS_TELEPORTER          (2u)                                              // 
 #define RUTILUS_TELEPORTER_COLOR(x) ((x) ? COLOR_ENERGY_BLUE : COLOR_ENERGY_ORANGE)   // 
 
@@ -67,7 +74,7 @@
 #define STAGE_START_HERE                       {m_anStage.clear(); STAGE_MAIN {if(STAGE_BEGINNING) g_pGame->StartIntro(); if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY)) STAGE_FINISH_NOW});}
 
 #define STAGE_CLEARED                          (std::all_of(m_apSquad.begin(), m_apSquad.end(), [](const cEnemySquad* pSquad) {return pSquad->IsFinished();}))
-#define STAGE_RESSURECT(s,f,t)                 {STAGE_FOREACH_ENEMY_ALL(s, pEnemy, i) {if((coreInt32(i) >= coreInt32(f)) && (coreInt32(i) <= coreInt32(t))) pEnemy->Resurrect();});}
+#define STAGE_RESSURECT(s,f,t)                 {STAGE_FOREACH_ENEMY_ALL(s, pEnemy, i) {if((coreInt32(i) >= coreInt32(f)) && (coreInt32(i) <= coreInt32(t))) pEnemy->Resurrect();}); ASSERT(((f) <= (t)) && ((t) < (s)->GetNumEnemies()))}
 #define STAGE_BADGE(b,p)                       {this->GiveBadge(b, p);}
 
 #define STAGE_ADD_PATH(n)                      const auto n = this->_AddPath    (__LINE__,      [](coreSpline2* OUTPUT n)
@@ -349,12 +356,14 @@ public:
     void DisableShadow(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    inline void             MakeReal      (const coreUintW iIndex)        {ADD_BIT(m_iRealState, iIndex)}
-    inline void             MakeSticky    ()                              {ADD_BIT(m_iStickyState, 0u)}
-    inline void             UnmakeSticky  (const coreVector2& vDirection) {m_iStickyState = 0; m_aBallRaw[0].SetDirection(coreVector3(vDirection, 0.0f));}
-    inline const coreUint8& GetRealState  ()const                         {return m_iRealState;}
-    inline coreBool         GetStickyState()const                         {return CONTAINS_BIT(m_iStickyState, 1u);}
-    inline const coreUint8& GetBounceState()const                         {return m_iBounceState;}
+    inline void MakeReal    (const coreUintW iIndex)        {ADD_BIT(m_iRealState, iIndex)}
+    inline void MakeSticky  ()                              {ADD_BIT(m_iStickyState, 0u)}
+    inline void UnmakeSticky(const coreVector2& vDirection) {m_iStickyState = 0; m_aBallRaw[0].SetDirection(coreVector3(vDirection, 0.0f));}
+
+    // 
+    inline const coreUint8& GetRealState  ()const {return m_iRealState;}
+    inline coreBool         GetStickyState()const {return CONTAINS_BIT(m_iStickyState, 1u);}
+    inline const coreUint8& GetBounceState()const {return m_iBounceState;}
 
     // 
     inline coreObject3D* GetBall  (const coreUintW iIndex) {ASSERT(iIndex < VIRIDO_BALLS)   return &m_aBallRaw[iIndex * (VIRIDO_TRAILS + 1u)];}
@@ -380,15 +389,26 @@ private:
 class cNevoMission final : public cMission
 {
 private:
-    cNautilusBoss  m_Nautilus;    // 
-    cAmemasuBoss   m_Amemasu;     // 
-    cLeviathanBoss m_Leviathan;   // 
+    cNautilusBoss  m_Nautilus;                       // 
+    cAmemasuBoss   m_Amemasu;                        // 
+    cLeviathanBoss m_Leviathan;                      // 
 
-    cLodObject  m_Container;      // 
-    coreVector2 m_vForce;         // 
-    coreVector2 m_vImpact;        // 
-    coreBool    m_bClamp;         // 
-    coreBool    m_bOverdraw;      // 
+    coreBatchList m_Bomb;                            // 
+    cLodObject    m_aBombRaw  [NEVO_BOMBS_RAWS];     // 
+    coreBool      m_abBombGone[NEVO_BOMBS];          // 
+
+    coreBatchList m_Blast;                           // 
+    coreBatchList m_BlastLine;                       // 
+    coreObject3D  m_aBlastRaw  [NEVO_BLASTS_RAWS];   // 
+    coreFlow      m_afBlastTime[NEVO_BLASTS];        // 
+
+    cLodObject  m_Container;                         // 
+    coreVector2 m_vForce;                            // 
+    coreVector2 m_vImpact;                           // 
+    coreBool    m_bClamp;                            // 
+    coreBool    m_bOverdraw;                         // 
+
+    coreFlow m_fAnimation;                           // animation value
 
 
 public:
@@ -399,15 +419,26 @@ public:
     ASSIGN_ID(2, "Nevo")
 
     // 
+    void EnableBomb (const coreUintW iIndex, const coreBool bGrow);
+    void DisableBomb(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void EnableBlast (const coreUintW iIndex);
+    void DisableBlast(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
     void EnableContainer (const coreVector2& vPosition);
     void DisableContainer(const coreBool bAnimated);
 
     // 
-    inline void               SetContainerForce   (const coreVector2& vForce)    {m_vForce    = vForce;}
-    inline void               SetContainerClamp   (const coreBool     bClamp)    {m_bClamp    = bClamp;}
-    inline void               SetContainerOverdraw(const coreBool     bOverdraw) {m_bOverdraw = bOverdraw;}
-    inline const coreVector2& GetContainerForce   ()const                        {return m_vForce;}
-    inline const coreVector2& GetContainerImpact  ()const                        {return m_vImpact;}
+    inline void SetContainerForce   (const coreVector2& vForce)    {m_vForce    = vForce;}
+    inline void SetContainerClamp   (const coreBool     bClamp)    {m_bClamp    = bClamp;}
+    inline void SetContainerOverdraw(const coreBool     bOverdraw) {m_bOverdraw = bOverdraw;}
+
+    // 
+    inline const coreBool&    GetBombGone       (const coreUintW iIndex)const {ASSERT(iIndex < NEVO_BOMBS) return m_abBombGone[iIndex];}
+    inline const coreVector2& GetContainerForce ()const                       {return m_vForce;}
+    inline const coreVector2& GetContainerImpact()const                       {return m_vImpact;}
 
     // 
     inline cLodObject* GetContainer() {return &m_Container;}
@@ -521,9 +552,12 @@ private:
     cShelobBoss m_Shelob;   // 
     cZerothBoss m_Zeroth;   // 
 
+    cSnow m_Snow;           // 
+
 
 public:
     cCalorMission()noexcept;
+    ~cCalorMission()final;
 
     DISABLE_COPY(cCalorMission)
     ASSIGN_ID(6, "Calor")
@@ -531,7 +565,9 @@ public:
 
 private:
     // execute own routines
-    void __SetupOwn()final;
+    void __SetupOwn      ()final;
+    void __RenderOwnUnder()final;
+    void __MoveOwnAfter  ()final;
 };
 
 

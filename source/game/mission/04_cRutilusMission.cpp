@@ -55,7 +55,7 @@ void cRutilusMission::EnableTeleporter(const coreUintW iIndex)
     oTeleporter.ChangeType(TYPE_RUTILUS_TELEPORTER);
 
     // 
-    oTeleporter.SetEnabled  (CORE_OBJECT_ENABLE_ALL);
+    oTeleporter.SetEnabled(CORE_OBJECT_ENABLE_ALL);
     g_pGlow->BindObject(&oTeleporter);
 }
 
@@ -204,6 +204,9 @@ void cRutilusMission::__MoveOwnAfter()
         g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
         {
             sGameInput* pInput = c_cast<sGameInput*>(pPlayer->GetInput());
+
+            // 
+            if(pPlayer->IsRolling()) return;
 
             // 
             if(m_aiMoveFlip[i]) pInput->vMove = MapToAxis(pInput->vMove, UnpackDirection(m_aiMoveFlip[i]).InvertedX());

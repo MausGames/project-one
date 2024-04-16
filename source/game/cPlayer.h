@@ -16,6 +16,7 @@
 // TODO: add in-game hint for roll-cooldown end ((just) acoustic)
 // TODO: render wind, bubble, etc. in group for coop
 // TODO: correct reverse-tracking when hitting the walls (position correction) ? only for 45degree, also on other code locations ?
+// TODO: orange/red exhaust for second ship ?
 
 
 // ****************************************************************
@@ -80,12 +81,14 @@ private:
     coreVector4       m_vArea;                                  // 
 
     coreVector2 m_vForce;                                       // 
-    coreFlow    m_fRollTime;                                    // 
-    coreFlow    m_fFeelTime;                                    // 
-    coreFlow    m_fIgnoreTime;                                  // 
-    coreUint8   m_iRollDir;                                     // 
-    coreUint8   m_iFeelType;                                    // 
-    coreUint8   m_iIgnoreType;                                  // 
+    coreFloat   m_fSpeed;                                       // 
+
+    coreFlow  m_fRollTime;                                      // 
+    coreFlow  m_fFeelTime;                                      // 
+    coreFlow  m_fIgnoreTime;                                    // 
+    coreUint8 m_iRollDir;                                       // 
+    coreUint8 m_iFeelType;                                      // 
+    coreUint8 m_iIgnoreType;                                    // 
 
     coreFlow  m_fInterrupt;                                     // 
     coreFlow  m_fLightningTime;                                 // 
@@ -151,6 +154,9 @@ public:
     inline coreBool IsIgnoring()const {return (m_fIgnoreTime > PLAYER_NO_IGNORE);}
 
     // 
+    inline coreBool IsNormal()const {return (!this->IsRolling() && !this->IsFeeling() && !this->IsIgnoring());}
+
+    // 
     inline void     ActivateNormalShading()      {this->DefineProgram(m_pNormalProgram);}
     inline void     ActivateDarkShading  ()      {this->DefineProgram(m_pDarkProgram);}
     inline coreBool IsDarkShading        ()const {return (this->GetProgram().GetHandle() == m_pDarkProgram.GetHandle());}
@@ -176,6 +182,7 @@ public:
     inline void SetInput     (const sGameInput*  pInput)      {m_pInput      = pInput;}
     inline void SetArea      (const coreVector4& vArea)       {m_vArea       = vArea; ASSERT(vArea.xy() < vArea.zw())}
     inline void SetForce     (const coreVector2& vForce)      {m_vForce      = vForce;}
+    inline void SetSpeed     (const coreFloat    fSpeed)      {m_fSpeed      = fSpeed;}
     inline void SetInterrupt (const coreFloat    fInterrupt)  {m_fInterrupt  = fInterrupt;}
     inline void SetDesaturate(const coreFloat    fDesaturate) {m_fDesaturate = fDesaturate;}
 
@@ -183,6 +190,7 @@ public:
     inline const sGameInput*  GetInput     ()const {ASSERT(m_pInput) return m_pInput;}
     inline const coreVector4& GetArea      ()const {return m_vArea;}
     inline const coreVector2& GetForce     ()const {return m_vForce;}
+    inline const coreFloat&   GetSpeed     ()const {return m_fSpeed;}
     inline const coreFloat&   GetInterrupt ()const {return m_fInterrupt;}
     inline const coreFloat&   GetDesaturate()const {return m_fDesaturate;}
 

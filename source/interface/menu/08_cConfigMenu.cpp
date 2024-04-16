@@ -611,7 +611,7 @@ void cConfigMenu::Move()
         break;
     }
 
-    if(m_SaveButton.IsClicked())
+    if(m_SaveButton.IsClicked())   // TODO: + CTRL+S
     {
         // 
         this->SaveValues();
@@ -839,7 +839,7 @@ void cConfigMenu::SaveValues()
     if(bReset)
     {
         // 
-        InitResolution(vCurResolution);
+        InitResolution(vCurResolution); // TODO: don't forward (0.0f,0.0f)
         Core::Reset();
 
         // 

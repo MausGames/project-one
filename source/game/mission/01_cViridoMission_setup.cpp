@@ -342,6 +342,7 @@ void cViridoMission::__SetupOwn()
     // first two patterns have no single equal line 
     // no intro-crossing in first two patterns 
     // TODO: fix ASSERT for getting the laser  
+    // TODO: purple helper visible at border of one laser
     STAGE_MAIN
     {
         STAGE_ADD_SQUAD(pSquad1, cStarEnemy, 15u)
@@ -755,7 +756,7 @@ void cViridoMission::__SetupOwn()
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
             {
-                pEnemy->Configure(50, COLOR_SHIP_BROWN);
+                pEnemy->Configure(50, COLOR_SHIP_YELLOW);
             });
         });
 
@@ -1075,6 +1076,7 @@ void cViridoMission::__SetupOwn()
     // - all: enemy attack begins later, to not slow down bullets immediately after shooting
     // - 1,2: enemy path is not too wide, to not slow down bullets immediately after shooting
     // TODO: enemy or golden ball (1-N) hides in blue balls, to attack for badge
+    // TODO: blue helper in one of the bullets
     STAGE_MAIN
     {
         STAGE_ADD_PATH(pPath1)
@@ -1498,7 +1500,7 @@ void cViridoMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.3f,1.3f,1.3f));
-                pEnemy->Configure(4, coreVector3(0.0f,0.0f,0.0f));
+                pEnemy->Configure(4, COLOR_SHIP_GREY);
 
                 d_cast<cStarEnemy*>(pEnemy)->SetAngle(I_TO_F(i) * 2.0f/5.0f * PI);
             });

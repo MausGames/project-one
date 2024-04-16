@@ -119,6 +119,9 @@ void CoreApp::Render()
                 g_pGlow      ->Update();
                 g_pDistortion->Update();
 
+                // 
+                g_pWindscreen->Update();
+
                 // update the shadow map class
                 cShadow::GlobalUpdate();
             }

@@ -32,6 +32,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("bullet_rocket.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_rocket.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_spear.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_spear.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_triangle.md3",                    CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_triangle.md3");
+    Core::Manager::Resource->Load<coreModel>  ("bullet_view.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_view.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_wave.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_wave.md3");
     Core::Manager::Resource->Load<coreModel>  ("effect_shield.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/effect_shield.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("environment_reed_01.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_reed_01.md3", false);
@@ -41,6 +42,8 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("environment_stone_01.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_stone_01.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("environment_weed.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_weed.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("object_barrier.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_barrier.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_bomb_high.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_bomb_high.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("object_bomb_low.md3",                    CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_bomb_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_boss_amemasu_tooth.md3",          CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_amemasu_tooth.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_boss_dharuk_boomerang.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_dharuk_boomerang.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_boss_torus_circle.md3",           CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_torus_circle.md3", false);
@@ -59,7 +62,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("object_teleporter.md3",                  CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_teleporter.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_tetra.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tetra.md3"); // TODO ###
     Core::Manager::Resource->Load<coreModel>  ("object_triangle.md3",                    CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_triangle.md3"); // TODO ###
-    Core::Manager::Resource->Load<coreModel>  ("object_tube.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tube.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_tube_open.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tube_open.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_tube_closed.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tube_closed.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_bottom_high.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_bottom_high.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_bottom_low.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_bottom_low.md3");
@@ -95,6 +98,15 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("ship_enemy_star_low.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_star_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_enemy_warrior_high.md3",            CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_warrior_high.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("ship_enemy_warrior_low.md3",             CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_warrior_low.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_helper_01.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_01.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_helper_02.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_02.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_helper_03.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_03.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_helper_04.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_04.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_helper_05.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_05.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_helper_06.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_06.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_helper_07.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_07.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_helper_08.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_08.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_helper_09.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_09.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("ship_player_def_high.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_def_high.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("ship_player_def_low.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_def_low.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("ship_player_atk_high.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_atk_high.md3", false);
@@ -214,8 +226,8 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("effect_headlight.vert",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_headlight.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("effect_headlight.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_headlight.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_ink.vert",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_ink.vert", CORE_SHADER_OPTION_NO_ROTATION);
-    Core::Manager::Resource->Load<coreShader> ("effect_ink_point.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_ink.frag", PRINT(SHADER_SAMPLES(%u), WINDSCREEN_INK_SAMPLES_POINT));
-    Core::Manager::Resource->Load<coreShader> ("effect_ink_line.frag",                   CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_ink.frag", PRINT(SHADER_SAMPLES(%u) SHADER_LINE, WINDSCREEN_INK_SAMPLES_LINE/2u));
+    Core::Manager::Resource->Load<coreShader> ("effect_ink_point.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_ink.frag", PRINT(SHADER_SAMPLES(%u), INK_SAMPLES_POINT));
+    Core::Manager::Resource->Load<coreShader> ("effect_ink_line.frag",                   CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_ink.frag", PRINT(SHADER_SAMPLES(%u) SHADER_LINE, INK_SAMPLES_LINE/2u));
     Core::Manager::Resource->Load<coreShader> ("effect_lightning.vert",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_lightning.vert");
     Core::Manager::Resource->Load<coreShader> ("effect_lightning.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_lightning.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_lightning_inst.vert",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_lightning.vert", CORE_SHADER_OPTION_INSTANCING);
@@ -248,6 +260,8 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("effect_shield.frag",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_shield.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_shield_inst.vert",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_shield.vert", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("effect_shield_inst.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_shield.frag", CORE_SHADER_OPTION_INSTANCING);
+    Core::Manager::Resource->Load<coreShader> ("effect_snow.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_snow.vert", CORE_SHADER_OPTION_NO_ROTATION);
+    Core::Manager::Resource->Load<coreShader> ("effect_snow.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_snow.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_weather_rain.vert",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_weather.vert", PRINT(SHADER_OVERLAYS(%u) SHADER_SINGLE, MOSS_RAIN_NUM));
     Core::Manager::Resource->Load<coreShader> ("effect_weather_rain.frag",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_weather.frag", PRINT(SHADER_OVERLAYS(%u) SHADER_SINGLE, MOSS_RAIN_NUM));
     Core::Manager::Resource->Load<coreShader> ("effect_weather_sand.vert",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_weather.vert", PRINT(SHADER_OVERLAYS(%u) SHADER_SINGLE, DESERT_SAND_NUM));
@@ -686,6 +700,11 @@ void CoreApp::Setup()
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_shield_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("effect_shield_inst.vert")
         ->AttachShader("effect_shield_inst.frag")
+        ->Finish();
+
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_snow_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("effect_snow.vert")
+        ->AttachShader("effect_snow.frag")
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_weather_rain_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())

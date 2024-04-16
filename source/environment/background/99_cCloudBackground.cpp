@@ -55,7 +55,7 @@ cCloudBackground::cCloudBackground()noexcept
     }
 
     // 
-    m_Cover.DefineTexture(0u, "environment_clouds_blue.png");
+    m_Cover.DefineTexture(0u, "environment_clouds_grey.png");
     m_Cover.DefineProgram("menu_grey_program");
     m_Cover.SetPosition  (coreVector2(0.0f,0.0f));
     m_Cover.SetSize      (coreVector2(1.0f,1.0f) * SQRT2);

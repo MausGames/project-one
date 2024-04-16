@@ -112,7 +112,7 @@ cViridoMission::cViridoMission()noexcept
 
             // load object resources
             coreObject3D* pLaser = &m_aLaserRaw[i];
-            pLaser->DefineModel  ("object_tube.md3");
+            pLaser->DefineModel  ("object_tube_open.md3");
             pLaser->DefineTexture(0u, "effect_energy.png");
             pLaser->DefineProgram("effect_energy_flat_program");
 
@@ -186,7 +186,7 @@ void cViridoMission::EnableBall(const coreUintW iIndex, const coreVector2& vPosi
     coreObject3D* pTrail = (*m_BallTrail.List())[iIndex*VIRIDO_TRAILS];
 
     // 
-    WARN_IF(pBall->GetType()) return;
+    WARN_IF(pBall->IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
     pBall->ChangeType(TYPE_VIRIDO_BALL);
 
     // 
@@ -215,7 +215,7 @@ void cViridoMission::DisableBall(const coreUintW iIndex, const coreBool bAnimate
     coreObject3D* pTrail = (*m_BallTrail.List())[iIndex*VIRIDO_TRAILS];
 
     // 
-    if(!pBall->GetType()) return;
+    if(!pBall->IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
     pBall->ChangeType(0);
 
     // 

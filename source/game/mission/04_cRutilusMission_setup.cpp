@@ -89,10 +89,13 @@ void cRutilusMission::__SetupOwn()
             fTransitionTime  = 0.0f;
         }
 
+        cHelper* pHelperOrange = g_pGame->GetHelper(ELEMENT_ORANGE);
+        cHelper* pHelperBlue   = g_pGame->GetHelper(ELEMENT_BLUE);
+
         if(STAGE_BEGINNING)
         {
-            for(coreUintW i = 0u; i < RUTILUS_TELEPORTER; ++i)
-                this->EnableTeleporter(i);
+            pHelperOrange->Resurrect();
+            pHelperBlue  ->Resurrect();
         }
 
         const coreBool bVertical = false;
@@ -116,6 +119,7 @@ void cRutilusMission::__SetupOwn()
                     iTransitionState += 1u;
 
                     this->SetTeleporterActive(1u);
+                    for(coreUintW i = 0u; i < RUTILUS_TELEPORTER; ++i) this->EnableTeleporter(i);
                     for(coreUintW i = 0u; i < RUTILUS_TELEPORTER; ++i) g_pSpecialEffects->CreateSplashColor(m_aTeleporter[i].GetPosition(), 50.0f, 10u, RUTILUS_TELEPORTER_COLOR(i));
                 }
             }
@@ -214,8 +218,14 @@ void cRutilusMission::__SetupOwn()
 
                 pSquad1->GetEnemy(26u)->Kill(false);
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_BIG);
+
+                pHelperOrange->Kill(false);
+                pHelperBlue  ->Kill(false);
             }
         }
+
+        pHelperOrange->SetPosition(m_aTeleporter[0].GetPosition());
+        pHelperBlue  ->SetPosition(m_aTeleporter[1].GetPosition());
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
@@ -252,7 +262,7 @@ void cRutilusMission::__SetupOwn()
                 pEnemy->SetPosition(coreVector3(1000.0f,1000.0f,0.0f));
             }
 
-            if(STAGE_TICK_LIFETIME(1.25f, 0.0f))
+            if(STAGE_TICK_LIFETIME(1.2f, 0.0f))
             {
                 const coreUintW   iCount = (i < 6u || (i >= 14 && i < 22u)) ? 1u : 5u;
                 const coreVector2 vPos   = pEnemy->GetPosition().xy();
@@ -276,6 +286,9 @@ void cRutilusMission::__SetupOwn()
     {
         for(coreUintW i = 0u; i < RUTILUS_TELEPORTER; ++i)
             this->DisableTeleporter(i, false);
+
+        g_pGame->GetHelper(ELEMENT_ORANGE)->Kill(false);
+        g_pGame->GetHelper(ELEMENT_BLUE)  ->Kill(false);
 
         STAGE_FINISH_NOW
     });

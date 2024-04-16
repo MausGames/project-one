@@ -110,6 +110,7 @@ inline FUNC_PURE coreVector2 SmoothAim(const coreVector2 vOldDir, const coreVect
 // 
 inline FUNC_CONST coreFloat SmoothTowards(const coreFloat fDistance, const coreFloat fThreshold)
 {
+    ASSERT((fDistance >= 0.0f) && (fThreshold > 0.0f))
     return MIN(fDistance, fThreshold) * RCP(fThreshold);
 }
 
@@ -160,6 +161,37 @@ inline FUNC_CONST coreVector2 StepRotated90X(const coreUint8 iStep)
 {
     ASSERT(iStep < 4u)
     return UnpackDirection(iStep * 2u + 1u);
+}
+
+
+// ****************************************************************
+// 
+inline FUNC_CONST coreVector2 MapStepRotated45(const coreVector2& vDirection, const coreUint8 iStep)
+{
+    switch(iStep)
+    {
+    default: ASSERT(false)
+    case 0u: return  vDirection;
+    case 1u: return  vDirection.Rotated45();
+    case 2u: return  vDirection.Rotated90();
+    case 3u: return  vDirection.Rotated135();
+    case 4u: return -vDirection;
+    case 5u: return -vDirection.Rotated45();
+    case 6u: return -vDirection.Rotated90();
+    case 7u: return -vDirection.Rotated135();
+    }
+}
+
+inline FUNC_CONST coreVector2 MapStepRotated90(const coreVector2& vDirection, const coreUint8 iStep)
+{
+    switch(iStep)
+    {
+    default: ASSERT(false)
+    case 0u: return  vDirection;
+    case 1u: return  vDirection.Rotated90();
+    case 2u: return -vDirection;
+    case 3u: return -vDirection.Rotated90();
+    }
 }
 
 
