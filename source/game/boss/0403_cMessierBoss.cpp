@@ -22,18 +22,17 @@
 // platten sollte spieler nur so wegdrehen, dass er mit 1 aktion wieder richtung boss schauen kann (außer wenn spieler neben boss fliegt, aber das is speziell)
 // time bubble hides stopping background movement
 // TODO 1: hard mode: in intro fliegt ein meteorit auf den bildschirm und crackt ihn
-// TODO 1: ACHIEVEMENT: name (), description (), destroy one big meteor / ###
-// TODO 1: MAIN: juiciness (move, rota, muzzle, effects)
+// TODO 1: [MF] ACHIEVEMENT: name (), description (), destroy one big meteor / ###
+// TODO 1: [MF] MAIN: juiciness (move, rota, muzzle, effects)
+// TODO 1: [MF] lebenspunkte bei time-phase begrenzen (geben keine punkte, sollte somit als soft-clamp in takedamage eingebaut werden), aber heal-status mit factor<=0.0f erst umschlagen, und auflösen mit der welle (effekt muss es anzeigen)
+// TODO 1: [MF] art der rotation ändert sich im laufe des kampfes, achtung wegen rota in time-phase, sollte schön sichtbar sein
 
-// TODO 1: lebenspunkte bei time-phase begrenzen (geben keine punkte, sollte somit als soft-clamp in takedamage eingebaut werden), aber heal-status mit factor<=0.0f erst umschlagen, und auflösen mit der welle (effekt muss es anzeigen)
-// TODO 1: art der rotation ändert sich im laufe des kampfes, achtung wegen rota in time-phase, sollte schön sichtbar sein
-
-// TODO 1: blaue geschosse hacken bei nem single-shot, weil der health-abhängig wert zu schnell geändert wird
-// TODO 1: uhr-werk effekt verbessern: allgemeine optik (mittel-teil?, boss-glow?), fade-out am ende (mehr bewegung)
-// TODO 1: improve bullet-directions for time-slowdown phase (sometimes they cluster, maybe first identify the reason/origin)
-// TODO 1: eine cyan-bullet welle die nah beim boss war wurde normal weggeschleudert statt rotiert
-// TODO 1: cover sollte sich beim schwarzen loch drehen ? ja, BLENDBR
-// TODO 1: greatly reduce rotation when related option is disabled
+// TODO 1: [MF] blaue geschosse hacken bei nem single-shot, weil der health-abhängig wert zu schnell geändert wird
+// TODO 1: [MF] uhr-werk effekt verbessern: allgemeine optik (mittel-teil?, boss-glow?), fade-out am ende (mehr bewegung)
+// TODO 1: [MF] improve bullet-directions for time-slowdown phase (sometimes they cluster, maybe first identify the reason/origin)
+// TODO 1: [MF] eine cyan-bullet welle die nah beim boss war wurde normal weggeschleudert statt rotiert
+// TODO 1: [MF] cover sollte sich beim schwarzen loch drehen ? ja, BLENDBR
+// TODO 1: [MF] greatly reduce rotation when related option is disabled
 
 
 // ****************************************************************

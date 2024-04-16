@@ -17,9 +17,8 @@
 // (zwischen ende von grow-bullet abschnitt und 5-laser angriff braucht es ne pause um die beiden angriffe mental zu trennen)
 // TODO 1: hard-mode: alle laser-einschläge erzeugen zusätzliche geschosse (betrifft alle phasen außer grow-bullet und arrow)
 // TODO 1: quad-bullet teppich verdeckt laser-einschlag
-// TODO 1: background-richtung sollte sich gegen laser-wände in links-rechts phase bewegen
-// TODO 1: auftauchende parts sollten angreifbar sein sobald arrow sichtbar ist, bei untertauchen kann es ruhig wie vorher sein, aber vielleicht besser auch anpassen
-// TODO 1: ACHIEVEMENT: name (), description (), 
+// TODO 1: [MF] auftauchende parts sollten angreifbar sein sobald arrow sichtbar ist, bei untertauchen kann es ruhig wie vorher sein, aber vielleicht besser auch anpassen
+// TODO 1: [MF] ACHIEVEMENT: name (), description (), 
 
 // NOTE: never ever use exactly 4 rays with equal distribution, the resulting laser+fire pattern does NOT look good
 
@@ -1911,6 +1910,8 @@ void cLeviathanBoss::__MoveOwn()
     
     
     
+    if(m_iPhase < 200u)
+    {
     // 
     cHelper* pYellowHelper = g_pGame->GetHelper(ELEMENT_YELLOW);
     if(!pYellowHelper->HasStatus(HELPER_STATUS_DEAD))
@@ -2008,6 +2009,7 @@ void cLeviathanBoss::__MoveOwn()
         pGreenHelper->SetPosition(coreVector3(1.3f - 0.5f * SIN(fTime * (1.0f*PI)), 0.0f, 0.0f) * FOREGROUND_AREA3);
 
         if(fTime >= 1.0f) this->_KillHelper(ELEMENT_GREEN, false);
+    }
     }
 }
 

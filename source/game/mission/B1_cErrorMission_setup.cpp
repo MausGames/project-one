@@ -74,7 +74,7 @@ void cErrorMission::__SetupOwn()
             pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
         });
 
-        STAGE_WAVE(0u, "", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(0u, "", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})
     });
     */
     
@@ -122,7 +122,7 @@ void cErrorMission::__SetupOwn()
         SINGLE_ENEMY_SQUAD(cCinderEnemy,  COLOR_SHIP_CYAN,     0.6f)
         SINGLE_ENEMY_SQUAD(cCinderEnemy,  COLOR_SHIP_GREEN,    0.8f)
 
-        STAGE_WAVE(0u, "", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(0u, "", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})
     });
 
     // ################################################################
@@ -268,7 +268,7 @@ void cErrorMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE(0u, "", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(0u, "", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})
     });
 
     // ################################################################
@@ -447,7 +447,7 @@ void cErrorMission::__SetupOwn()
 
         });
 
-        STAGE_WAVE(0u, "fünf", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(0u, "fünf", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})
     });
 
     // ################################################################
@@ -596,7 +596,7 @@ void cErrorMission::__SetupOwn()
             }
         }
 
-        STAGE_WAVE(0u, "", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(0u, "", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})
     });
 
     // ################################################################
@@ -650,7 +650,7 @@ void cErrorMission::__SetupOwn()
 
         
 
-        STAGE_WAVE(0u, "", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(0u, "", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})
 
         // der ausweichende gegner weicht aus sobald er getroffen wird
     });
@@ -704,7 +704,7 @@ void cErrorMission::__SetupOwn()
             pEnemy->SetPosition (coreVector3(vNewPos, 0.0f));
         });
 
-        STAGE_WAVE(0u, "", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(0u, "", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})
 
         // pushing enemies are on left and right side and shooting on them will move them to the other side, they die when reaching the other side (is only second wave?)
     });
@@ -785,7 +785,7 @@ void cErrorMission::__SetupOwn()
                               else pBullet->SetPosition(coreVector3(pOwner ->GetPosition().x, pBullet->GetPosition().y, pBullet->GetPosition().z));
         });
 
-        STAGE_WAVE(0u, "", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(0u, "", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})
     });
 
     // ################################################################
@@ -823,7 +823,7 @@ void cErrorMission::__SetupOwn()
             pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
         });
 
-        STAGE_WAVE(0u, "", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(0u, "", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})
     });
 
     // ################################################################
@@ -895,7 +895,7 @@ void cErrorMission::__SetupOwn()
                         else pBulletEnemy->SetDamage(iDamage - 1);
         });
 
-        STAGE_WAVE(0u, "", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(0u, "", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})
     });
 
     // ################################################################
@@ -946,7 +946,7 @@ void cErrorMission::__SetupOwn()
             pBullet->SetPosition(pBullet->GetPosition() + coreVector3(0.0f, TIME * FOREGROUND_AREA.y * -1.5f, 0.0f));
         });
 
-        STAGE_WAVE(0u, "", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(0u, "", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})
     });
 
     // ################################################################
@@ -998,7 +998,7 @@ void cErrorMission::__SetupOwn()
             g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.0f, NULL, -vPos,  vDir)->ChangeSize(1.2f); 
         }
 
-        STAGE_WAVE(0u, "", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(0u, "", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})
     });
 
     // ################################################################
@@ -1047,7 +1047,7 @@ void cErrorMission::__SetupOwn()
             pEnemy->DefaultMoveForward(pEnemy->GetDirection().xy(), 30.0f);
         });
 
-        STAGE_WAVE(0u, "", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(0u, "", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})
     });
 
     // ################################################################
@@ -1106,7 +1106,7 @@ void cErrorMission::__SetupOwn()
 
         });
 
-        STAGE_WAVE(0u, "", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(0u, "", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})
     });
 
     // ################################################################
@@ -1189,7 +1189,7 @@ void cErrorMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE(0u, "", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(0u, "", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})
     });
 
     // ################################################################
@@ -1289,7 +1289,7 @@ void cErrorMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE(0u, "", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(0u, "", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})
     });
 
     // ################################################################
@@ -1337,7 +1337,7 @@ void cErrorMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE(0u, "", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(0u, "", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})
     });
 
     // ################################################################
@@ -1412,7 +1412,7 @@ void cErrorMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE(0u, "fünf", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(0u, "fünf", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})
     });
 
     // ################################################################
@@ -1580,7 +1580,7 @@ void cErrorMission::__SetupOwn()
 
         });
 
-        STAGE_WAVE(0u, "EINUNDSECHZIG", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(0u, "EINUNDSECHZIG", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})
     });
 
     // ################################################################
@@ -2270,7 +2270,7 @@ void UnusedWaves()
             }
         });
 
-        STAGE_WAVE(0u, "EINS", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(0u, "EINS", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})
     });
 
     // ################################################################
@@ -2349,7 +2349,7 @@ void UnusedWaves()
             }
         });
 
-        STAGE_WAVE(0u, "EINS", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(0u, "EINS", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})
     });
 
     // ################################################################
@@ -2458,7 +2458,7 @@ void UnusedWaves()
             pEnemy->TakeDamage(100, ELEMENT_NEUTRAL, vIntersection.xy(), pPlayer);
         });
 
-        STAGE_WAVE(0u, "VIER", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(0u, "VIER", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})
     });
 
     // ################################################################
@@ -2579,7 +2579,7 @@ void UnusedWaves()
             }
         });
 #endif
-        STAGE_WAVE(0u, "SECHSUNDSECHZIG", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(0u, "SECHSUNDSECHZIG", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})
     });
 
     // ################################################################
@@ -2753,7 +2753,7 @@ void UnusedWaves()
             }
         });
 
-        STAGE_WAVE(0u, "SECHSUNDNEUNZIG", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(0u, "SECHSUNDNEUNZIG", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})
     });
 
     // ################################################################

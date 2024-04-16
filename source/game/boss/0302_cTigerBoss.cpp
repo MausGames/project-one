@@ -25,21 +25,16 @@
 // abstürzende gegner sollten explodieren vor absturz, was besonders wichtig ist um die gegner über spike-plates zu kaschieren
 // TODO 1: hard-mode: wind + minen
 // TODO 1: hard mode: wind force in environment-richtung (damit es von tiger position beeinflusst wird) (stark genug, dass man beim schießen nicht dagegen ankommt)
-
-// TODO 1: manche gegner in mission sollen schon abstürzen
-// TODO 1: Symbol I V X L C D M Value 1 5 10 50 100 500 1000    -> anbringen mit eigenem kleinen quad als sub-weapon pro waffe
-// TODO 1: sollen jetzt noch zahlen und/oder farben für jede waffe hinzugefügt werden ? ein eigenes quad, das über die waffe schwebt (kann durch explosion versteckt werden)
-// TODO 1: improve/fix beam effect
-
-// TODO 1: weißer rauch bei laser-waffe vermischt sich mit weißem rauch von maulwürfen
-// TODO 1: fliegend tower gegner sollten roten schein haben -> duplicate
-
-// TODO 1: ACHIEVEMENT: name (), description (), spin around the boss 10 times without getting hit
-// TODO 1: MAIN: juiciness (move, rota, muzzle, effects)
-
-// TODO 1: rote bullet noch mal überprüfen, da flog ein einzelnes geschoss herum, und nochmal mehrere einzelne einer linie
-// TODO 1: alle phasen nochmal für verbesserungen anschauen
-
+// TODO 1: [MF] manche gegner in mission sollen schon abstürzen
+// TODO 1: [MF] Symbol I V X L C D M Value 1 5 10 50 100 500 1000    -> anbringen mit eigenem kleinen quad als sub-weapon pro waffe
+// TODO 1: [MF] sollen jetzt noch zahlen und/oder farben für jede waffe hinzugefügt werden ? ein eigenes quad, das über die waffe schwebt (kann durch explosion versteckt werden)
+// TODO 1: [MF] improve/fix beam effect
+// TODO 1: [MF] weißer rauch bei laser-waffe vermischt sich mit weißem rauch von maulwürfen
+// TODO 1: [MF] fliegend tower gegner sollten roten schein haben -> duplicate
+// TODO 1: [MF] ACHIEVEMENT: name (), description (), spin around the boss 10 times without getting hit
+// TODO 1: [MF] MAIN: juiciness (move, rota, muzzle, effects)
+// TODO 1: [MF] rote bullet noch mal überprüfen, da flog ein einzelnes geschoss herum, und nochmal mehrere einzelne einer linie
+// TODO 1: [MF] alle phasen nochmal für verbesserungen anschauen
 // TODO 5: (mines need to be enemies to allow blinking, combo/chain)
 // TODO 5: (in die stacheln schießen erzeugt effekt (knusprig))
 // TODO 5: (make sure to disable wind on boss-death (hard if necessary))
@@ -1623,7 +1618,7 @@ void cTigerBoss::__SwitchWeapon(const coreUintW iType)
         g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_10);
     }
 
-    m_aiCounter[WEAPON_SHOT] = 0;   // TODO 1: wave-weapon might be activated too early
+    m_aiCounter[WEAPON_SHOT] = 0;   // TODO 1: [MF] wave-weapon might be activated too early
     
     // 
     PHASE_RESET(3u)

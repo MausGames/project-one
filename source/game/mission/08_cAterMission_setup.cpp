@@ -91,7 +91,7 @@ void cAterMission::__SetupOwn()
             });
         });
 
-        STAGE_BOSS(m_ProjectOne, {60.0f, 120.0f, 180.0, 240.0f})
+        STAGE_BOSS(m_ProjectOne, {60.0f, 120.0f, 180.0, 240.0f, 480.0f})
     });
 
     // ################################################################
@@ -139,7 +139,7 @@ void cAterMission::__SetupOwn()
 
     // ################################################################
     // 
-    STAGE_MAIN({TAKE_ALWAYS, 6u})
+    STAGE_MAIN({TAKE_ALWAYS, 5u, 6u})
     {
         STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
         {
@@ -151,14 +151,14 @@ void cAterMission::__SetupOwn()
 
     // ################################################################
     // 
-    STAGE_MAIN({TAKE_ALWAYS, 6u})
+    STAGE_MAIN({TAKE_ALWAYS, 5u, 6u})
     {
-        STAGE_BOSS(m_Eigengrau, {141.0f, 210.0f, 280.0f, 350.0f})
+        STAGE_BOSS(m_Eigengrau, {141.0f, 210.0f, 280.0f, 350.0f, 700.0f})
     });
 
     // ################################################################
     // 
-    STAGE_MAIN({TAKE_ALWAYS, 6u})
+    STAGE_MAIN({TAKE_ALWAYS, 5u, 6u})
     {
         STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
         {
@@ -170,7 +170,7 @@ void cAterMission::__SetupOwn()
 
     // ################################################################
     // 
-    STAGE_MAIN({TAKE_ALWAYS, 6u})
+    STAGE_MAIN({TAKE_ALWAYS, 5u, 6u})
     {
         if(STAGE_BEGINNING)
         {

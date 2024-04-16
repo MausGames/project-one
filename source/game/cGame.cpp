@@ -663,6 +663,9 @@ void cGame::StartIntro()
         m_aPlayer[i].AddStatus(PLAYER_STATUS_NO_INPUT_ALL);   // TODO 1: handle combination with gameplay code
 
         // 
+        m_aPlayer[i].ActivateNormalShading();
+
+        // 
         const coreFloat fSide = this->IsMulti() ? (20.0f * (I_TO_F(i) - 0.5f * I_TO_F(GAME_PLAYERS - 1u))) : 0.0f;
         m_aPlayer[i].SetPosition(coreVector3(fSide, -140.0f, 0.0f));
 
@@ -977,7 +980,7 @@ RETURN_NONNULL cPlayer* cGame::FindPlayerDual(const coreUintW iIndex)
 // 
 coreUint8 cGame::CalcMedal(const coreFloat fTime, const coreFloat* pfMedalGoal)
 {
-    ASSERT(pfMedalGoal && (pfMedalGoal[0] < pfMedalGoal[1]) && (pfMedalGoal[1] < pfMedalGoal[2]) && (pfMedalGoal[2] < pfMedalGoal[3]))
+    ASSERT(pfMedalGoal && (pfMedalGoal[0] < pfMedalGoal[1]) && (pfMedalGoal[1] < pfMedalGoal[2]) && (pfMedalGoal[2] < pfMedalGoal[3]) && (pfMedalGoal[3] < pfMedalGoal[4]))
 
     // 
          if(fTime <= pfMedalGoal[0]) return MEDAL_DARK;
@@ -992,7 +995,7 @@ coreUint8 cGame::CalcMedal(const coreFloat fTime, const coreFloat* pfMedalGoal)
 // 
 coreFloat cGame::CalcMedalTime(const coreFloat fTime, const coreFloat* pfMedalGoal)
 {
-    ASSERT(pfMedalGoal && (pfMedalGoal[0] < pfMedalGoal[1]) && (pfMedalGoal[1] < pfMedalGoal[2]) && (pfMedalGoal[2] < pfMedalGoal[3]))
+    ASSERT(pfMedalGoal && (pfMedalGoal[0] < pfMedalGoal[1]) && (pfMedalGoal[1] < pfMedalGoal[2]) && (pfMedalGoal[2] < pfMedalGoal[3]) && (pfMedalGoal[3] < pfMedalGoal[4]))
 
     // 
          if(fTime <= pfMedalGoal[0]) return pfMedalGoal[0] - fTime;
@@ -1007,12 +1010,10 @@ coreFloat cGame::CalcMedalTime(const coreFloat fTime, const coreFloat* pfMedalGo
 // 
 coreUint32 cGame::CalcBonusTime(const coreFloat fTime, const coreFloat* pfMedalGoal)
 {
-    ASSERT(pfMedalGoal && (pfMedalGoal[0] < pfMedalGoal[1]) && (pfMedalGoal[1] < pfMedalGoal[2]) && (pfMedalGoal[2] < pfMedalGoal[3]))
-
-    // TODO 1: weiteres medal-goal für time-bonus ?
+    ASSERT(pfMedalGoal && (pfMedalGoal[0] < pfMedalGoal[1]) && (pfMedalGoal[1] < pfMedalGoal[2]) && (pfMedalGoal[2] < pfMedalGoal[3]) && (pfMedalGoal[3] < pfMedalGoal[4]))
 
     // 
-    return F_TO_UI(LERP(20000.0f, 1000.0f, MIN(fTime * RCP(pfMedalGoal[3] * 2.0f), 1.0f)));
+    return F_TO_UI(LERP(20000.0f, 1000.0f, MIN(fTime * RCP(pfMedalGoal[4]), 1.0f)));
 }
 
 
@@ -1302,8 +1303,12 @@ void cGame::__HandleDefeat()
 // handle default object collisions
 void cGame::__HandleCollisions()
 {
-    m_ShieldManager.GetEffect(SHIELD_EFFECT_INVINCIBLE)->ForEachShield([this](coreObject3D* OUTPUT pShield)
+    // (# before enemy-bullet collision) 
+    m_ShieldManager.GetEffect(SHIELD_EFFECT_INVINCIBLE)->ForEachShield([this](coreObject3D* OUTPUT pShield, const cEnemy* pOwner)
     {
+        // 
+        if(!pOwner || pOwner->HasStatus(ENEMY_STATUS_GHOST_BULLET) || !pOwner->GetType()) return;
+
         Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, pShield, [this](cBullet* OUTPUT pBullet, const coreObject3D* pShield, const coreVector3 vIntersection, const coreBool bFirstHit)
         {
             // 

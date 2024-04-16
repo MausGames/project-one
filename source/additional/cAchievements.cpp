@@ -9,7 +9,7 @@
 #include "main.h"
 
 static coreBool  s_bInit = false;
-//static coreUint8 s_iStep = 0u;
+static coreUint8 s_iStep = 0u;
 
 
 // ****************************************************************
@@ -49,18 +49,17 @@ void InitAchievements()
 // 
 void CheckAchievements()
 {
-#if 0
     if(g_bDemoVersion) return;
 
     // 
-    if(++s_iStep >= 11u) s_iStep = 0u;
+    if(++s_iStep >= 8u) s_iStep = 0u;
 
     // 
     const auto nStageFunc = [](const coreUintW iMissionIndex)
     {
         for(coreUintW i = 0u; i < 6u; ++i)
         {
-            if(HAS_BIT(g_pSave->GetHeader().oProgress.aiBadge[iMissionIndex], 3u + BADGES * i))
+            if(HAS_BIT(g_pSave->GetHeader().oProgress.aaiBadge[iMissionIndex][i], 3u))
             {
                 Core::Platform->UnlockAchievement(PRINT("stage_%02zu_%02zu", iMissionIndex, i + 1u));
             }
@@ -86,34 +85,26 @@ void CheckAchievements()
         break;
 
     case 2u:
+        nStageFunc(0u);
         nStageFunc(1u);
         break;
 
     case 3u:
         nStageFunc(2u);
-        break;
-
-    case 4u:
         nStageFunc(3u);
         break;
 
-    case 5u:
+    case 4u:
         nStageFunc(4u);
-        break;
-
-    case 6u:
         nStageFunc(5u);
         break;
 
-    case 7u:
+    case 5u:
         nStageFunc(6u);
-        break;
-
-    case 8u:
         nStageFunc(7u);
         break;
 
-    case 9u:
+    case 6u:
         {
             if(HAS_BIT_EX(g_pSave->GetHeader().oProgress.aiTrophy, TROPHY_ONECOLORCLEAR))
             {
@@ -156,7 +147,7 @@ void CheckAchievements()
         }
         break;
 
-    case 10u:
+    case 7u:
         {
             if([]()
             {
@@ -164,9 +155,9 @@ void CheckAchievements()
                 {
                     for(coreUintW j = 0u; j < 5u; ++j)
                     {
-                        if(!HAS_BIT(g_pSave->GetHeader().oProgress.aiBadge[i], 0u + BADGES * j)) return false;
-                        if(!HAS_BIT(g_pSave->GetHeader().oProgress.aiBadge[i], 1u + BADGES * j)) return false;
-                        if(!HAS_BIT(g_pSave->GetHeader().oProgress.aiBadge[i], 2u + BADGES * j)) return false;
+                        if(!HAS_BIT(g_pSave->GetHeader().oProgress.aaiBadge[i][j], 0u)) return false;
+                        if(!HAS_BIT(g_pSave->GetHeader().oProgress.aaiBadge[i][j], 1u)) return false;
+                        if(!HAS_BIT(g_pSave->GetHeader().oProgress.aaiBadge[i][j], 2u)) return false;
                     }
                 }
                 return true;
@@ -198,5 +189,4 @@ void CheckAchievements()
         ASSERT(false)
         break;
     }
-#endif
 }

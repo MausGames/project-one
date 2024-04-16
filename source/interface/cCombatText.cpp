@@ -12,15 +12,17 @@
 // ****************************************************************
 // constructor
 cCombatText::cCombatText()noexcept
-: m_afTime       {}
-, m_aiType       {}
-, m_apOrder      {}
-, m_iOrderNum    (0u)
-, m_iMarkerState (0u)
-, m_fBadgeTime   (0.0f)
-, m_iLastScore   (0u)
-, m_bVisible     (false)
-, m_fAlpha       (0.0f)
+: m_afTime        {}
+, m_aiType        {}
+, m_apOrder       {}
+, m_iOrderNum     (0u)
+, m_iMarkerState  (0u)
+, m_fBadgeTime    (0.0f)
+, m_iLastScore    (0u)
+, m_vOldDirection (coreVector2(0.0f,1.0f))
+, m_fOldSide      (1.0f)
+, m_bVisible      (false)
+, m_fAlpha        (0.0f)
 {
     // create label objects
     for(coreUintW i = 0u;                  i < COMBAT_LABELS_SMALL; ++i) m_aLabel[i].Construct(MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
@@ -56,6 +58,18 @@ cCombatText::cCombatText()noexcept
     // 
     m_BadgeLabel.Construct(MENU_FONT_STANDARD_4, MENU_OUTLINE_SMALL);
     m_BadgeLabel.SetColor3(COLOR_MENU_INSIDE);
+    
+    
+    
+    // 
+    //m_vOldDirection = g_pPostProcessing->GetDirection();
+    m_fOldSide      = (g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f;
+    
+    
+    const coreVector2 vGame  = g_pPostProcessing->GetDirection();
+    const coreVector2 vHud   = g_vHudDirection;
+    m_vOldDirection = MapToAxisInv(vGame, vHud);
+    ASSERT(m_vOldDirection.IsNormalized())
 }
 
 
@@ -332,7 +346,7 @@ void cCombatText::DrawBadge(const coreUint32 iValue, const coreVector3 vPosition
     m_BadgeBack.SetAlpha (0.0f);
 
     // 
-    m_BadgeLabel.SetText  (HAS_BIT(g_CurConfig.Game.iCombatText, 2u) ? PRINT("-%u", iValue) : "");
+    m_BadgeLabel.SetText  ((HAS_BIT(g_CurConfig.Game.iCombatText, 2u) && iValue) ? PRINT("-%u", iValue) : "");
     m_BadgeLabel.SetCenter(vOnScreen);
     m_BadgeLabel.SetAlpha (0.0f);
 
@@ -375,8 +389,52 @@ void cCombatText::AttachMarker(const coreUintW iIndex, const coreChar* pcText, c
 // 
 void cCombatText::UpdateLayout()
 {
-    // TODO 1: rotate position if game rotates
-    // TODO 1: rotate direction (without position) if interface rotates
+    // 
+    const coreFloat fSide = (g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f;
+
+    // 
+    const coreVector2 vGame  = g_pPostProcessing->GetDirection();
+    const coreVector2 vHud   = g_vHudDirection;
+    const coreVector2 vFinal = MapToAxisInv(vGame, vHud);
+    ASSERT(vFinal.IsNormalized())
+    
+    
+    const auto nTransformFunc = [&](coreObject2D* OUTPUT pObject)
+    {
+        coreVector2 vCurCenter = pObject->GetCenter();
+
+        if(m_fOldSide != fSide)
+        {
+            vCurCenter.arr(IsHorizontal(m_vOldDirection) ? 1u : 0u) *= -1.0f;
+        }
+
+        vCurCenter = MapToAxisInv(MapToAxis(vCurCenter, m_vOldDirection), vFinal);
+
+        pObject->SetCenter(vCurCenter);
+        pObject->Move();
+    };
+
+    // 
+    for(coreUintW i = 0u; i < COMBAT_LABELS; ++i)
+    {
+        nTransformFunc(&m_aLabel[i]);
+    }
+
+    // 
+    for(coreUintW i = 0u; i < COMBAT_MARKERS; ++i)
+    {
+        nTransformFunc(&m_aMarker[i]);
+        nTransformFunc(&m_aMarkerBack[i]);
+    }
+
+    // 
+    nTransformFunc(&m_BadgeIcon);
+    nTransformFunc(&m_BadgeBack);
+    nTransformFunc(&m_BadgeLabel);
+
+    // 
+    m_vOldDirection = vFinal;
+    m_fOldSide      = fSide;
 }
 
 
@@ -493,7 +551,7 @@ coreVector2 cCombatText::__TransformPosition(const coreVector3 vPosition)
     ASSERT(vFinal.IsNormalized())
 
     // 
-    return MapToAxisInv(g_pForeground->Project2D(vPosition    - coreVector3(Core::Graphics->GetCamPosition().xy(), 0.0f)) * coreVector2(fSide, 1.0f), vFinal);
+    return MapToAxisInv(g_pForeground->Project2D(vPosition - coreVector3(Core::Graphics->GetCamPosition().xy(), 0.0f)) * coreVector2(fSide, 1.0f), vFinal);
 }
 
 

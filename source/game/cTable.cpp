@@ -41,7 +41,7 @@ void cDataTable::Reset()
 
     // 
     std::memset(&m_aiFragment, 0, sizeof(m_aiFragment));
-    std::memset(&m_aiBadge,    0, sizeof(m_aiBadge));
+    std::memset(&m_aaiBadge,   0, sizeof(m_aaiBadge));
 }
 
 
@@ -52,8 +52,8 @@ void cDataTable::RevertSegment(const coreUintW iMissionIndex, const coreUintW iS
     ASSERT(iMissionIndex < TABLE_MISSIONS)
     ASSERT(iSegmentIndex < TABLE_SEGMENTS)
 
-    m_aiFragment[iMissionIndex] = 0u;   // reset whole mission
-    SET_BITVALUE(m_aiBadge[iMissionIndex], TABLE_BADGES, TABLE_BADGES * iSegmentIndex, 0u)
+    m_aiFragment[iMissionIndex]                = 0u;   // reset whole mission
+    m_aaiBadge  [iMissionIndex][iSegmentIndex] = 0u;
 }
 
 void cDataTable::RevertSegment()
@@ -204,7 +204,7 @@ void cDataTable::GiveBadge(const coreUintW iBadgeIndex, const coreUintW iMission
     ASSERT(iBadgeIndex   < TABLE_BADGES)
     ASSERT(iMissionIndex < TABLE_MISSIONS)
     ASSERT(iSegmentIndex < TABLE_SEGMENTS)
-    ADD_BIT(m_aiBadge[iMissionIndex], iBadgeIndex + TABLE_BADGES * iSegmentIndex)
+    ADD_BIT(m_aaiBadge[iMissionIndex][iSegmentIndex], iBadgeIndex)
 
     // 
     g_pSave->EditGlobalStats      ()                            ->iBadgesEarned += 1u;

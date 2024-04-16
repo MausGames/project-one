@@ -1072,6 +1072,7 @@ void cInterface::Move()
                 const coreFloat fTime2 = CLAMP01(fFragment - INTERFACE_FRAGMENT_DURATION - I_TO_F(i) * 0.3f);
 
                 m_aFragment[i].SetPosition(vPos + ((i == 8u) ? coreVector2(0.0f,1.0f) : vPos.Normalized()) * LERPBR(0.0f, 1.5f, fTime2) + m_aFragmentTable[0].GetPosition());
+                // TODO 1: Condition 'i==8u' is always false
             }
 
             m_aFragment[8].SetDirection(coreVector2::Direction(STEPBR(INTERFACE_FRAGMENT_DURATION, INTERFACE_FRAGMENT_DURATION_EXT, fFragment) * (4.0f*PI) - (0.25f*PI)));
@@ -1318,8 +1319,10 @@ void cInterface::ShowBoss(const cBoss* pBoss, const coreBool bSilent)
 void cInterface::ShowWave(const coreChar* pcName)
 {
     // 
-    m_SegmentName.SetText(PRINT("%s %s", coreData::StrToUpperUTF8(Core::Language->GetString("SEGMENT")), pcName));
     m_sSegmentString = pcName;
+
+    // 
+    this->__Update();
 }
 
 

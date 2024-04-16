@@ -11,8 +11,6 @@
 #define _P1_GUARD_ITEM_H_
 
 // TODO 4: lifetime should be handled in base class
-// TODO 1: fragment sollte in die mitte fliegen wenn zu nah am rand (zeroth, chol)
-// TODO 1: create own energy shader for fragment, to prevent issues should the default shaders change
 
 
 // ****************************************************************
@@ -109,7 +107,7 @@ private:
 
     cPlayer*  m_pTarget;               // 
 
-    coreUint8 m_iType;                 // 
+    coreUint8 m_iType;                 // TODO 1: The class 'cFragmentItem' defines member variable with name 'm_iType' also defined in its parent class 'coreObject3D'.   
     coreUint8 m_iMissionIndex;         // 
     coreUint8 m_iBossIndex;            // 
 

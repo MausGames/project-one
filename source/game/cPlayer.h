@@ -20,9 +20,6 @@
 // TODO 3: add more delay to bubble/feeling (to stay longer invincible after bubble disappeared)
 // TODO 4: PLAYER_FEEL_TIME_SHIELD still used ?
 // TODO 3: effect on player when loosing combo or chain (and on UI, and combat text)
-// TODO 3: all player bullets get destroyed with death
-// TODO 1: make sure player receives final combo or chain at the end of segment
-// TODO 1: check what variables and states need to be reset on player kill
 // TODO 3: ein großer teil aller sub-objekte wird ständig bei glow ge-added und removed, sollte permanent sein (resurrect<>kill), und mit setenabled gesteuert werden, auch bei tracker und P1
 
 
@@ -163,6 +160,7 @@ private:
     coreFlow    m_fArrowValue;                                // 
     coreFlow    m_fBubbleValue;                               // 
     coreFlow    m_fCircleValue;                               // 
+    coreFlow    m_fBoost;                                     // 
     coreUint8   m_iLastMove;                                  // 
 
     coreObject3D m_Dot;                                       // 
@@ -177,9 +175,7 @@ private:
     coreMap<const coreObject3D*, coreUint32> m_aiCollision;   // 
     coreMap<const coreObject3D*, sRayData>   m_aRayData;      // 
     
-    coreFlow m_fHitDelay;
-    coreFloat m_fBoost;
-    coreBool  m_bWasDamaged;
+    coreBool m_bWasDamaged;
 
 
 public:
@@ -283,20 +279,21 @@ public:
     inline cScoreTable* GetScoreTable()                            {return &m_ScoreTable;}
 
     // set object properties
-    inline void SetInput     (const sGameInput* pInput)      {m_pInput      = pInput;}
-    inline void SetArea      (const coreVector4 vArea)       {m_vArea       = vArea; ASSERT(vArea.xy() < vArea.zw())}
-    inline void SetForce     (const coreVector2 vForce)      {m_vForce      = vForce;}
-    inline void SetScale     (const coreFloat   fScale)      {m_fScale      = fScale;}
-    inline void SetThrust    (const coreFloat   fThrust)     {m_fThrust     = fThrust;}
-    inline void SetTilt      (const coreFloat   fTilt)       {m_fTilt       = fTilt;}
-    inline void SetRainbow   (const coreBool    bRainbow)    {m_bRainbow    = bRainbow;}
-    inline void SetMoveSpeed (const coreFloat   fMoveSpeed)  {m_fMoveSpeed  = fMoveSpeed;}
-    inline void SetShootSpeed(const coreFloat   fShootSpeed) {m_fShootSpeed = fShootSpeed;}
-    inline void SetAnimSpeed (const coreFloat   fAnimSpeed)  {m_fAnimSpeed  = fAnimSpeed;}
-    inline void SetInterrupt (const coreFloat   fInterrupt)  {m_fInterrupt  = fInterrupt;}
-    inline void SetDesaturate(const coreFloat   fDesaturate) {m_fDesaturate = fDesaturate;}
-    inline void SetMaxShield (const coreInt32   iMaxShield)  {m_iMaxShield  = iMaxShield;}
-    inline void SetCurShield (const coreInt32   iCurShield)  {m_iCurShield  = iCurShield;}
+    inline void SetInput       (const sGameInput* pInput)        {m_pInput      = pInput;}
+    inline void SetArea        (const coreVector4 vArea)         {m_vArea       = vArea; ASSERT(vArea.xy() < vArea.zw())}
+    inline void SetForce       (const coreVector2 vForce)        {m_vForce      = vForce;}
+    inline void SetScale       (const coreFloat   fScale)        {m_fScale      = fScale;}
+    inline void SetThrust      (const coreFloat   fThrust)       {m_fThrust     = fThrust;}
+    inline void SetTilt        (const coreFloat   fTilt)         {m_fTilt       = fTilt;}
+    inline void SetRainbow     (const coreBool    bRainbow)      {m_bRainbow    = bRainbow;}
+    inline void SetMoveSpeed   (const coreFloat   fMoveSpeed)    {m_fMoveSpeed  = fMoveSpeed;}
+    inline void SetShootSpeed  (const coreFloat   fShootSpeed)   {m_fShootSpeed = fShootSpeed;}
+    inline void SetAnimSpeed   (const coreFloat   fAnimSpeed)    {m_fAnimSpeed  = fAnimSpeed;}
+    inline void SetInterrupt   (const coreFloat   fInterrupt)    {m_fInterrupt  = fInterrupt;}
+    inline void SetDesaturate  (const coreFloat   fDesaturate)   {m_fDesaturate = fDesaturate;}
+    inline void SetMaxShield   (const coreInt32   iMaxShield)    {m_iMaxShield  = iMaxShield;}
+    inline void SetCurShield   (const coreInt32   iCurShield)    {m_iCurShield  = iCurShield;}
+    inline void SetCurShieldPct(const coreFloat   fCurShieldPct) {m_iCurShield = F_TO_SI(fCurShieldPct * I_TO_F(m_iMaxShield)); ASSERT((fCurShieldPct >= 0.0f) && (fCurShieldPct <= 1.0f))}
 
     // get object properties
     inline const sGameInput*  GetInput       ()const {ASSERT(m_pInput) return m_pInput;}

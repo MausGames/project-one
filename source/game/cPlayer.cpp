@@ -49,10 +49,9 @@ cPlayer::cPlayer()noexcept
 , m_fArrowValue     (0.0f)
 , m_fBubbleValue    (0.0f)
 , m_fCircleValue    (0.0f)
+, m_fBoost          (0.0f)
 , m_iLastMove       (8u)
 
-, m_fHitDelay (0.0f)
-, m_fBoost    (0.0f)
 , m_bWasDamaged (false)
 {
     // load object resources
@@ -383,13 +382,22 @@ void cPlayer::Move()
             if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_TURN_RIGHT))  vNewDir =  vNewDir.Rotated90();
 
             
-            const coreVector2 vOldDir2 = AlongCrossNormal(MapToAxisInv(vOldDir, g_pPostProcessing->GetDirection()));
             
             // 
-            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_UP)    && !SameDirection90(coreVector2( 0.0f, 1.0f), vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 0.0f, 1.0f), vOldDir2));
-            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_LEFT)  && !SameDirection90(coreVector2(-1.0f, 0.0f), vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2(-1.0f, 0.0f), vOldDir2));
-            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_DOWN)  && !SameDirection90(coreVector2( 0.0f,-1.0f), vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 0.0f,-1.0f), vOldDir2));
-            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_RIGHT) && !SameDirection90(coreVector2( 1.0f, 0.0f), vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 1.0f, 0.0f), vOldDir2));
+            const coreVector2 vGame  = g_pPostProcessing->GetDirection();
+            const coreVector2 vHud   = g_vHudDirection;
+            const coreVector2 vFinal = MapToAxisInv(vGame, vHud);
+            ASSERT(vFinal.IsNormalized())
+            
+            const coreVector2 vFlip = vFinal.Processed(ABS) + vFinal.yx().Processed(ABS) * ((g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f);
+            
+            const coreVector2 vOldDir2 = AlongCrossNormal(MapToAxisInv(vOldDir, vFinal));
+            
+            // 
+            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_UP)    && !SameDirection90(coreVector2( 0.0f, 1.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 0.0f, 1.0f) * vFlip, vOldDir2));
+            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_LEFT)  && !SameDirection90(coreVector2(-1.0f, 0.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2(-1.0f, 0.0f) * vFlip, vOldDir2));
+            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_DOWN)  && !SameDirection90(coreVector2( 0.0f,-1.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 0.0f,-1.0f) * vFlip, vOldDir2));
+            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_RIGHT) && !SameDirection90(coreVector2( 1.0f, 0.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 1.0f, 0.0f) * vFlip, vOldDir2));
 
             // set new direction
             this->coreObject3D::SetDirection(coreVector3(vNewDir, 0.0f));
@@ -760,15 +768,6 @@ void cPlayer::Move()
 
     // 
     this->_UpdateAlwaysAfter();
-    
-    if(m_fHitDelay)
-    {
-        m_fHitDelay.UpdateMax(-1.0f, 0.0f, 0);
-        if(!m_fHitDelay)
-        {
-
-        }
-    }
 }
 
 
@@ -912,7 +911,7 @@ void cPlayer::Resurrect()
     
     this->EnableWind(this->GetDirection().xy());
     
-    m_bWasDamaged = false;
+    m_bWasDamaged = false;   // # not on kill
 }
 
 
@@ -942,7 +941,7 @@ void cPlayer::Kill(const coreBool bAnimated)
     this->DisableCircle();
     this->DisableExhaust();
 
-    // 
+    // (currently do not reset: m_fScale, m_fTilt, m_bRainbow) 
     m_vArea   = PLAYER_AREA_DEFAULT;
     m_vForce  = coreVector2(0.0f,0.0f);
     m_fThrust = 0.0f;
@@ -966,6 +965,7 @@ void cPlayer::Kill(const coreBool bAnimated)
     m_fArrowValue   = 0.0f;
     m_fBubbleValue  = 0.0f;
     m_fCircleValue  = 0.0f;
+    m_fBoost        = 0.0f;
     m_iLastMove     = 8u;
 
     // 
@@ -1115,20 +1115,22 @@ void cPlayer::EndIgnoring()
 void cPlayer::TurnIntoEnemy()
 {
     ASSERT(!this->IsEnemyLook())
-    
-    
+
+    // 
     this->DefineModelHigh("ship_enemy_miner_high.md3");
     this->DefineModelLow ("ship_enemy_miner_low.md3");
     this->DefineTexture  (0u, "ship_enemy.png");
-    
-    this->SetBaseColor(COLOR_SHIP_MAGENTA);           
-    this->RefreshColor(1.0f);        
+
+    // 
     SAFE_DELETE(m_apWeapon[0])
     m_apWeapon[0] = new cEnemyWeapon();
     m_apWeapon[0]->SetOwner(this);
-    //this->EquipWeapon(0u, cEnemyWeapon::ID);           // <- bad overwrite
-    //this->ActivateNormalShading();           
 
+    // 
+    this->SetBaseColor(COLOR_SHIP_MAGENTA);
+    this->RefreshColor(1.0f);
+
+    // 
     this->SetScale(1.1f);
 }
 
@@ -1139,18 +1141,18 @@ void cPlayer::TurnIntoPlayer()
 {
     ASSERT(this->IsEnemyLook())
 
-    this->DefineTexture  (0u, "ship_player.png");
+    // 
+    this->Configure(GET_BITVALUE(m_iLook, 4u, 0u));
+    this->DefineTexture(0u, "ship_player.png");
 
-    this->Configure(GET_BITVALUE(m_iLook, 4u, 0u));//, coreVector4::UnpackUnorm4x8(GET_BITVALUE(m_iLook, 8u, 4u)).xyz());
+    // 
     this->EquipWeapon(0u, GET_BITVALUE(m_iLook, 4u, 12u));
-    //this->ActivateDarkShading();
-    // TODO 1: color
-    
-    
+
+    // 
     this->SetBaseColor(COLOR_SHIP_BLACK);
-    this->RefreshColor(1.0f);        
-    
-    
+    this->RefreshColor(1.0f);
+
+    // 
     this->SetScale(1.0f);
 }
 
@@ -1466,18 +1468,13 @@ coreVector2 cPlayer::CalcMove()
 // 
 coreFloat cPlayer::CalcMoveSpeed()
 {
-    //if(HAS_BIT(m_pInput->iActionPress,   0u) ||   // to make movement during quickshots easier
-    //   HAS_BIT(m_pInput->iActionRelease, 0u))     // to make emergency evasion maneuvers easier
-    //    s_fBoost = 1.0f;
-    //else s_fBoost = MAX(s_fBoost - 10.0f * TIME, 0.0f);
+    // 
          if(HAS_BIT(m_pInput->iActionPress,   0u)) m_fBoost = 1.0f;
     else if(HAS_BIT(m_pInput->iActionRelease, 0u)) m_fBoost = 0.0f;
-    else m_fBoost = MAX(m_fBoost - 10.0f * TIME, 0.0f);
+    else m_fBoost.UpdateMax(-10.0f, 0.0f);
 
     // 
-    //const coreFloat fModifier = this->IsRolling() ? (50.0f + LERPB(25.0f, 0.0f, m_fRollTime)) : (HAS_BIT(m_pInput->iActionHold, 0u) ? LERPH3(20.0f, 40.0f, s_fBoost) : LERPH3(50.0f, 70.0f, s_fBoost));
-    //const coreFloat fModifier = HAS_BIT(m_pInput->iActionHold, 0u) ? LERPH3(20.0f, 40.0f, m_fBoost) : LERPH3(50.0f, 70.0f, m_fBoost);
-    const coreFloat fModifier = HAS_BIT(m_pInput->iActionHold, PLAYER_ACTION_SHOOT(0u, 0u)) ? ((m_fBoost) ? 50.0f : 20.0f) : 50.0f;
+    const coreFloat fModifier = (HAS_BIT(m_pInput->iActionHold, PLAYER_ACTION_SHOOT(0u, 0u)) && !m_fBoost) ? 20.0f : 50.0f;
     return m_fMoveSpeed * fModifier;
 }
 

@@ -184,7 +184,7 @@ void cMission::MoveBefore()
             m_fStageSubTimeBefore = m_fStageSubTime;
             m_fStageSubTime.Update(1.0f);
             
-            // TODO 1: erste iteration startet mit m_fStageTime=0.016 und m_fStageSubTime=0.0, wegen erstem STAGE_SUB, is das problematisch ?
+            // TODO 1: [MF] erste iteration startet mit m_fStageTime=0.016 und m_fStageSubTime=0.0, wegen erstem STAGE_SUB, is das problematisch ?
 
             // 
             m_anStage.back()();
@@ -293,7 +293,7 @@ void cMission::DeactivateBoss()
 
     // 
     coreUint8& iAdvance = g_pSave->EditProgress()->aiAdvance[iMissionIndex + 1u];
-    iAdvance = MAX(iAdvance, 1u);
+    iAdvance = MAX(iAdvance, (iMissionIndex + 1u == MISSION_ATER) ? 6u : 1u);
 
     // 
     this->__CloseSegment();
@@ -417,6 +417,16 @@ void cMission::GiveBadge(const coreUintW iIndex, const coreUint8 iBadge, const c
 
         // 
         g_pSpecialEffects->PlaySound(vPosition, 1.0f, 1.0f, SOUND_BADGE);
+    }
+
+    // 
+    if(iBadge == BADGE_ACHIEVEMENT)
+    {
+        // 
+        const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
+
+        // 
+        ADD_BIT(g_pSave->EditProgress()->aaiBadge[iMissionIndex][m_iCurSegmentIndex], iIndex)
     }
 }
 
@@ -561,7 +571,7 @@ void cMission::__CloseSegment()
     // 
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
-        ADD_FLAG(g_pSave->EditProgress()->aiBadge[iMissionIndex], pPlayer->GetDataTable()->GetBadgeAll(iMissionIndex))
+        ADD_FLAG(g_pSave->EditProgress()->aaiBadge[iMissionIndex][m_iCurSegmentIndex], pPlayer->GetDataTable()->GetBadgeAll(iMissionIndex, m_iCurSegmentIndex))
     });
 
     // 

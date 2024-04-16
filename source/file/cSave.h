@@ -12,23 +12,17 @@
 
 // TODO 3: add more stats, e.g. for favorite weapon+support, direction
 // TODO 5: move time, shoot time, move WASD, move dir 1234, min and max
-// TODO 5: add save indicator somewhere on screen (corner), maybe only for important saves (changes, game start+end) to reduce spam
+// TODO 3: add save (and loading) indicator somewhere on screen (corner), maybe only for important saves (changes, game start+end) to reduce spam
 // TODO 5: output if loading (even backup) or saving did not work -> indicator in game, message box in menu
 // TODO 4: fix _WEAPONS and _SUPPORTS defines in save and replay
 // TODO 2: disable save stats while playing replays
 // TODO 2: disable or handle save stats while in error-mission
 // TODO 3: add various static asserts for values and bitfields, on save & replay & table (e.g. STATIC_ASSERT(SEGMENTS * BADGES <= sizeof(aiBadge[0])*8u))
 // TODO 1: scoring + leaderboard also needs to be version specific
-// TODO 1: iBadge needs to be handled correctly, 64-bit ? 5 badges per segment ? [SAVE_MISSIONS][SAVE_SEGMENTS]
-// TODO 1: handle unsuccessful saving (dialog box, retry, cancel, show available disc space, test for write access)
+// TODO 1: [MF] handle unsuccessful saving (dialog box, retry, cancel, show available disc space, test for write access)
 // TODO 1: check for, and ask for import of savegame (+ whole user folder?) from demo (Steam) (save_demo.p1sv or user_demo_1000 folder, could also be general, if savegame is (also) stored globally (delete copy after import)), if no save is available on startup -> needs own menu state in intro menu (show date-time of file, maybe also some meta-data (name, time played, max mission))
-// TODO 1: set-up Steam cloud (sollte schon fertig sein, muss noch gtestet werden, vor allem macOS)
-// TODO 1: mission-all stats need to be handled correctly
-// TODO 1: be aware, boss P1 muss mit advance 5 statt 1 freigeschalten werden
-// TODO 1: implement setting TROPHY_ONECOLORCLEAR on arcade finish
-// TODO 1: achievement badges sollten als secret badges verwendet werden (silberner stern -5)
-// TODO 1: properly implement arcade mode stats + medals   -> ShowEndingNormal + ShowEndingSecret, nach den credits (falls enabled) sollte summary angezeigt werden (segment, mission, arcade), dort kann mans setzen
-// TODO 2: some options, like mirror-mode, should only take affect if it is allowed
+// TODO 1: [MF] mission-all stats need to be handled correctly (segment <> mission <> all <> arcade <> global, for extra menu)
+// TODO 1: [MF] achievement badges sollten als secret badges verwendet werden (silberner stern -5)
 
 
 // ****************************************************************
@@ -186,17 +180,18 @@ public:
     // 
     struct sProgress final
     {
-        coreBool   bFirstPlay;                  // 
-        coreUint8  aiAdvance [SAVE_MISSIONS];   // 
+        coreBool   bFirstPlay;                                 // 
+        coreUint8  aiAdvance [SAVE_MISSIONS];                  // 
         coreUint8  aaaiMedalArcade   [SAVE_TYPES][SAVE_MODES][SAVE_DIFFICULTIES];                                 // 
         coreUint8  aaaaiMedalMission [SAVE_TYPES][SAVE_MODES][SAVE_DIFFICULTIES][SAVE_MISSIONS];                  // 
         coreUint8  aaaaaiMedalSegment[SAVE_TYPES][SAVE_MODES][SAVE_DIFFICULTIES][SAVE_MISSIONS][SAVE_SEGMENTS];   // 
-        coreUint8  aiHelper  [SAVE_MISSIONS];   // 
-        coreUint8  aiFragment[SAVE_MISSIONS];   // (bitfield) 
-        coreUint64 aiBadge   [SAVE_MISSIONS];   // (bitfield) 
-        coreUint64 aiTrophy  [2];               // (bitfield) 
-        coreUint64 aiUnlock  [2];               // (bitfield) 
-        coreUint64 aiNew     [2];               // (bitfield) 
+        coreUint8  aiHelper  [SAVE_MISSIONS];                  // 
+        coreUint8  aiFragment[SAVE_MISSIONS];                  // (bitfield) 
+        coreUint8  aaiBadge  [SAVE_MISSIONS][SAVE_SEGMENTS];   // (bitfield) 
+        coreUint64 iPadding; // TODO 1: [MF] remove   + aiHelper after aaiBadge (auch in code überall)
+        coreUint64 aiTrophy  [2];                              // (bitfield) 
+        coreUint64 aiUnlock  [2];                              // (bitfield) 
+        coreUint64 aiNew     [2];                              // (bitfield) 
     };
 
     // 

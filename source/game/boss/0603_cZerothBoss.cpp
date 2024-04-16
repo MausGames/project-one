@@ -28,13 +28,14 @@
 // transition in drag-phase kann nicht an jeder schnittstelle passieren, weil das plötzliche bremsen dann komisch wirkt (zb. nach der bogen-bewegung)
 // spieler kann bei schwing-phase einfach stehen bleiben und alle rand-geschosse werden sauber zerstört, aber der zusätzliche boss-angriff bringt ihn dazu sich zu bewegen (geschwindigkeit der rand-geschosse sollte nicht weiter erhöht werden, weil es sonst zu schwer wird in kombination mit boss-angriff)
 // TODO 1: hard mode: gleiten
-// TODO 1: MAIN: sound
-// TODO 1: ACHIEVEMENT: name (), description (), destroy one ice cube with another ice cube / ###
-
+// TODO 1: [MF] besserer effekt wenn eis in boss einschlägt
+// TODO 1: [MF] andere position für orange helper
+// TODO 1: [MF] green-wave und laser phase etwas verbessern (vor allem der fehlende angriff bei green-wave is seltsam)
+// TODO 1: [MF] MAIN: sound
+// TODO 1: [MF] ACHIEVEMENT: name (), description (), destroy one ice cube with another ice cube (#schlecht) / in laser-phase go around boss N times against rotation without taking damage (#geht nicht)
 // TODO 1: in finaler phase, flip-bullets und partikel sollten unter gegner sein (auch im level), aber cone-bullets drüber, kann man das im bullet-manager aufteilen ? oder eigener bullet-manager für boss (nur für cone) [[das ganze is aber ziemlich orsch, normale gegner können (derzeit) nicht TOP gemacht werden]]
 // TODO 1: boss should bounce around in the final phase if all players are dead (instead of just standing still)
 // TODO 1: chain should break on game over instead of just disappear (also in wave) (not when zero-length)
-// TODO 1: snow under laser is still not perfect (45 degree misses some spots, not always ?)
 
 
 // ****************************************************************
@@ -176,6 +177,9 @@ void cZerothBoss::ResurrectIntro()
     m_bForeshadow = true;
 
     // 
+    this->AddStatus(ENEMY_STATUS_WORTHLESS);
+
+    // 
     constexpr coreUint8 aiNewOrder[] = {cSpearBullet::ID};
     g_pGame->GetBulletManagerEnemy()->OverrideOrder(aiNewOrder, ARRAY_SIZE(aiNewOrder));
 
@@ -236,6 +240,9 @@ void cZerothBoss::__KillOwn(const coreBool bAnimated)
         // 
         g_pGlow->UnbindObject(&m_Indicator);
     }
+
+    // 
+    this->RemoveStatus(ENEMY_STATUS_WORTHLESS);
 
     // 
     g_pGame->GetBulletManagerEnemy()->ResetOrder();
@@ -370,7 +377,6 @@ void cZerothBoss::__MoveOwn()
         PHASE_CONTROL_PAUSE(0u, 1.0f)
         {
             PHASE_CHANGE_TO(60u)
-            PHASE_CHANGE_TO(40u)
         });
     }
 
@@ -1369,7 +1375,7 @@ void cZerothBoss::__MoveOwn()
 
             PHASE_CONTROL_TICKER(1u, 0u, 1.0f + 29.0f * SIN(fTime * (1.0f*PI)), LERP_LINEAR)
             {
-                for(coreUintW j = g_pGame->IsEasy() ? 1u : 3u; j--; )
+                for(coreUintW j = g_pGame->IsEasy() ? 2u : 3u; j--; )
                 {
                     const coreVector2 vDir = coreVector2::Direction(I_TO_F(iTick * 3u + j) * GA);
                     const coreVector2 vPos = this->GetPosition().xy() + vDir * ZEROTH_RADIUS;
@@ -1413,7 +1419,15 @@ void cZerothBoss::__MoveOwn()
             }
         });
 
-        constexpr coreFloat fDuration = 10.0f;
+        PHASE_CONTROL_TIMER(1u, 0.1f, LERP_SMOOTH)
+        {
+            //this->DefaultRotate(SIN(fTime * (2.0f*PI)) * (-0.1f*PI));
+
+            if(PHASE_FINISHED)
+                PHASE_CHANGE_INC
+        });
+
+        //constexpr coreFloat fDuration = 10.0f;
 
         //const coreFloat fTime1 = STEPH3(fDuration * (1.0f/6.0f), fDuration * (2.0f/6.0f), m_fPhaseTime);
         //const coreFloat fTime2 = STEPH3(fDuration * (2.0f/6.0f), fDuration * (3.0f/6.0f), m_fPhaseTime);
@@ -1424,15 +1438,15 @@ void cZerothBoss::__MoveOwn()
         //this->__SetLimbValue(4u,        1.0f - fTime2 + fTime4);
         //this->__SetLimbValue(ZEROTH_LIMB_TAIL, fTime2 - fTime3);
 
-        if(PHASE_MAINTIME_AFTER(fDuration))
-            PHASE_CHANGE_INC
+        //if(PHASE_MAINTIME_AFTER(fDuration))
+        //    PHASE_CHANGE_INC
     }
 
     // ################################################################
     // 
     else if(m_iPhase == 203u)
     {
-        PHASE_CONTROL_TIMER(0u, 0.2f, LERP_LINEAR)
+        PHASE_CONTROL_TIMER(0u, 0.165f, LERP_LINEAR)
         {
             this->DefaultRotate(LERPBR(0.0f*PI, 6.0f*PI, fTime));
             
@@ -1453,7 +1467,6 @@ void cZerothBoss::__MoveOwn()
     // 
     else if(m_iPhase == 204u)
     {
-
         const coreFloat fSpeed = 4.0f;
         
         this->DefaultRotate(m_fPhaseTime * fSpeed);
@@ -1632,12 +1645,12 @@ void cZerothBoss::__MoveOwn()
         {
             for(coreUintW j = 120u; j--; )
             {
-                if((j % 8u) < (g_pGame->IsEasy() ? 6u : 4u)) continue;
+                if((j % 8u) < (g_pGame->IsEasy() ? 5u : 4u)) continue;
 
                 const coreVector2 vDir = coreVector2::Direction((I_TO_F(j) + I_TO_F(iTick % 3u) * (8.0f/3.0f)) * (2.0f*PI) / 120.0f * ((iTick % 2u) ? -1.0f : 1.0f));
                 const coreVector2 vPos = this->GetPosition().xy() + vDir * ZEROTH_RADIUS;
 
-                const coreFloat fSpeed = 0.9f + 0.08f * I_TO_F(j % 4u);
+                const coreFloat fSpeed = 0.9f + 0.08f * I_TO_F(1u - (j % 2u));
 
                 g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, fSpeed, this, vPos, vDir)->ChangeSize(2.1f);
             }
@@ -1649,11 +1662,13 @@ void cZerothBoss::__MoveOwn()
     if(m_avVector[SLAP_ROTATION].x)
     {
         m_avVector[SLAP_ROTATION].x = MAX0(m_avVector[SLAP_ROTATION].x - 1.0f * TIME);
-        g_pEnvironment->SetTargetSideNow(coreVector2(SIN(BLENDBR(m_avVector[SLAP_ROTATION].x) * (1.0f*PI)) * SIGN(m_avVector[SLAP_ROTATION].y) * -15.0f, 0.0f));
+        //g_pEnvironment->SetTargetSideNow(coreVector2(SIN(BLENDBR(m_avVector[SLAP_ROTATION].x) * (1.0f*PI)) * SIGN(m_avVector[SLAP_ROTATION].y) * -15.0f, 0.0f));
     }
 
     if(m_Laser.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
     {
+        const coreVector2 vOldDir = m_Laser.GetDirection().xy();
+
         // 
         const coreFloat fOldTime = m_fLaserTime;
         m_fLaserTime.Update(0.8f);
@@ -1726,11 +1741,21 @@ void cZerothBoss::__MoveOwn()
             {
                 const coreVector2 vSide = vRayDir.Rotated90();
 
-                for(coreUintW i = 0u; i < 4u; ++i)
-                {
-                    const coreVector2 vFinalPos = vRayPos + vSide * ((I_TO_F(i) - 1.5f) * 0.35f);
+                const coreFloat fFrom = vOldDir.Angle();
+                const coreFloat fTo   = vRayDir.Angle();
+                const coreFloat fDiff = AngleDiff(fTo, fFrom);
+                const coreUintW iNum  = F_TO_UI(fDiff * 200.0f) + 1u;
 
-                    pSnow->DrawRay(vFinalPos, vRayDir, SNOW_TYPE_ADD);
+                for(coreUintW i = 0u; i < iNum; ++i)
+                {
+                    const coreVector2 vFinalDir = coreVector2::Direction(fFrom + fDiff * (I_TO_F(i) / I_TO_F(iNum)));   // # current direction will be used in the next iteration
+
+                    for(coreUintW j = 0u; j < 2u; ++j)
+                    {
+                        const coreVector2 vFinalPos = vRayPos + vSide * ((I_TO_F(j) - 0.5f) * 0.6f);
+
+                        pSnow->DrawRay(vFinalPos, vFinalDir, SNOW_TYPE_ADD);
+                    }
                 }
             }
 
@@ -1806,6 +1831,8 @@ void cZerothBoss::__MoveOwn()
         PHASE_CHANGE_TO(80u)
     }
     
+    if(m_iPhase < 200u)
+    {
     // 
     cHelper* pYellowHelper = g_pGame->GetHelper(ELEMENT_YELLOW);
     if(!pYellowHelper->HasStatus(HELPER_STATUS_DEAD))
@@ -1832,7 +1859,7 @@ void cZerothBoss::__MoveOwn()
     cHelper* pRedHelper = g_pGame->GetHelper(ELEMENT_RED);
     if(!pRedHelper->HasStatus(HELPER_STATUS_DEAD))
     {
-        const coreVector2 vPos = pRedHelper->GetPosition().xy() + coreVector2(SIGN(pRedHelper->GetPosition().y) * (5.0f + 20.0f * pRedHelper->GetLifeTime()) * TIME, 0.0f);
+        const coreVector2 vPos = pRedHelper->GetPosition().xy() + coreVector2(SIGN(pRedHelper->GetPosition().y) * (0.0f + 20.0f * pRedHelper->GetLifeTime()) * TIME, 0.0f);
 
         pRedHelper->SetPosition(coreVector3(vPos, 0.0f));
 
@@ -1846,7 +1873,7 @@ void cZerothBoss::__MoveOwn()
     cHelper* pMagentaHelper = g_pGame->GetHelper(ELEMENT_MAGENTA);
     if(!pMagentaHelper->HasStatus(HELPER_STATUS_DEAD))
     {
-        const coreVector2 vPos = pMagentaHelper->GetPosition().xy() + coreVector2(-1.0f,-1.0f).Normalized() * (FOREGROUND_AREA.x * 0.5f * TIME);
+        const coreVector2 vPos = pMagentaHelper->GetPosition().xy() + coreVector2(-1.0f,-1.0f).Normalized() * (FOREGROUND_AREA.x * 0.4f * TIME);
 
         pMagentaHelper->SetPosition(coreVector3(vPos, 0.0f));
 
@@ -1867,7 +1894,7 @@ void cZerothBoss::__MoveOwn()
 
         const coreVector2 vDiff = this->GetPosition().xy() - pPlayer->GetPosition().xy();
 
-        const coreFloat   fTime = pPurpleHelper->GetLifeTime() * 0.3f;
+        const coreFloat   fTime = pPurpleHelper->GetLifeTime() * 0.25f;
         const coreFloat   fLen  = LERP(2.3f, 0.5f, SIN(fTime * (1.0f*PI))) * FOREGROUND_AREA.x;
         const coreVector2 vDir  = -vDiff.Normalized();
         const coreVector2 vPos  = pPlayer->GetPosition().xy() + vDir * fLen;
@@ -1910,6 +1937,7 @@ void cZerothBoss::__MoveOwn()
         pGreenHelper->SetPosition(coreVector3(0.0f, 1.3f - 0.5f * SIN(fTime * (1.0f*PI)), 0.0f) * FOREGROUND_AREA3);
 
         if(fTime >= 1.0f) this->_KillHelper(ELEMENT_GREEN, false);
+    }
     }
 }
 
@@ -2029,7 +2057,7 @@ void cZerothBoss::__DestroyCube(const coreUintW iIndex, const coreBool bAnimated
     {
         if(pMission->GetCatchObject(i) == &oIce)
         {
-            pMission->UncatchObject(iIndex);
+            pMission->UncatchObject(i);
             break;
         }
     }

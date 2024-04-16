@@ -34,6 +34,9 @@ cIntroMission::cIntroMission()noexcept
 void cIntroMission::__RenderOwnTop()
 {
     // 
+    if(g_CurConfig.Game.iMirrorMode) glDisable(GL_CULL_FACE);
+
+    // 
     for(coreUintW i = 0u; i < MISSION_PLAYERS; ++i)
     {
         for(coreUintW j = 0u; j < INTRO_MANUALS; ++j)
@@ -41,6 +44,9 @@ void cIntroMission::__RenderOwnTop()
             m_aaManual[i][j].Render();
         }
     }
+
+    // 
+    if(g_CurConfig.Game.iMirrorMode) glEnable(GL_CULL_FACE);
 }
 
 
@@ -71,6 +77,18 @@ void cIntroMission::__MoveOwnAfter()
         cConfigMenu::PrintFigure(&m_aaManual[i][10], iType, oSet.aiAction[6]);
 
         // 
+        const coreVector2 vGame  = g_pPostProcessing->GetDirection();
+        const coreVector2 vHud   = g_vHudDirection;
+        const coreVector2 vFinal = MapToAxisInv(vGame, vHud);
+        
+        const coreUintW iShift = PackDirection(vFinal)  / 2u;
+
+        
+        const coreVector2 vFlip  = vHud  .Processed(ABS) + vHud  .yx().Processed(ABS) * ((g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f);
+        const coreVector2 vFlip2 = vFinal.Processed(ABS) + vFinal.yx().Processed(ABS) * ((g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f);
+        const coreVector2 vFlip3 = coreVector2((g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f, 1.0f);
+
+        // 
         constexpr coreVector2 avOffset[] =
         {
             coreVector2( 0.0f, 1.0f),
@@ -87,12 +105,19 @@ void cIntroMission::__MoveOwnAfter()
         };
 
         // 
+        const coreBool abBaseMove[] =
+        {
+            (pPlayer->GetInput()->vMove.y * vFlip3.y > 0.0f),
+            (pPlayer->GetInput()->vMove.x * vFlip3.x < 0.0f),
+            (pPlayer->GetInput()->vMove.y * vFlip3.y < 0.0f),
+            (pPlayer->GetInput()->vMove.x * vFlip3.x > 0.0f)
+        };
         const coreBool abPress[] =
         {
-            (pPlayer->GetInput()->vMove.y > 0.0f),
-            (pPlayer->GetInput()->vMove.x < 0.0f),
-            (pPlayer->GetInput()->vMove.y < 0.0f),
-            (pPlayer->GetInput()->vMove.x > 0.0f),
+            abBaseMove[(0u + iShift) % 4u],
+            abBaseMove[(1u + iShift) % 4u],
+            abBaseMove[(2u + iShift) % 4u],
+            abBaseMove[(3u + iShift) % 4u],
             (HAS_BIT(pPlayer->GetInput()->iActionHold, PLAYER_ACTION_SHOOT(0u, 0u))),
             (HAS_BIT(pPlayer->GetInput()->iActionHold, PLAYER_ACTION_TURN_LEFT)),
             (HAS_BIT(pPlayer->GetInput()->iActionHold, PLAYER_ACTION_TURN_RIGHT)),
@@ -119,12 +144,6 @@ void cIntroMission::__MoveOwnAfter()
         };
 
         // 
-        const coreVector2 vGame  = g_pPostProcessing->GetDirection();
-        const coreVector2 vHud   = g_vHudDirection;
-        const coreVector2 vFinal = MapToAxisInv(vGame, vHud);
-        ASSERT(vFinal.IsNormalized())
-
-        // 
         for(coreUintW j = 0u; j < INTRO_MANUALS; ++j)
         {
             coreFlow& fTime = m_aafManualTime[i][j];
@@ -134,11 +153,12 @@ void cIntroMission::__MoveOwnAfter()
                 fTime.UpdateMax(-1.0f, 0.0f);
 
                 // 
-                m_aaManual[i][j].SetPosition(avOffset[j] * 0.1f);
-                m_aaManual[i][j].SetSize    (coreVector2(0.1f,0.1f) * (abPress[j] ? 0.8f : 1.0f));
-                m_aaManual[i][j].SetCenter  (MapToAxisInv(g_pForeground->Project2D(pPlayer->GetPosition()), vFinal));
-                m_aaManual[i][j].SetAlpha   (BLENDH3(MIN1(fTime)));
-                m_aaManual[i][j].SetEnabled ((fTime && HAS_BIT(aiModeBits[j], iMode)) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+                m_aaManual[i][j].SetPosition (MapToAxis(avOffset[j] * 0.1f, vGame) * vFlip);
+                m_aaManual[i][j].SetSize     (coreVector2(0.1f,0.1f) * (abPress[j] ? 0.8f : 1.0f) * vFlip2);
+                m_aaManual[i][j].SetDirection(MapToAxisInv(coreVector2(0.0f,1.0f), vGame));
+                m_aaManual[i][j].SetCenter   (MapToAxis(g_pForeground->Project2D(pPlayer->GetPosition()), vHud));
+                m_aaManual[i][j].SetAlpha    (BLENDH3(MIN1(fTime)));
+                m_aaManual[i][j].SetEnabled  ((fTime && HAS_BIT(aiModeBits[j], iMode)) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
                 m_aaManual[i][j].Move();
             }
         }

@@ -232,7 +232,7 @@ public:
 
 // ****************************************************************
 // ray bullet class
-// TODO 1: split up ray-bullet for normal, gravity, and tilted attacks
+// TODO 1: split up ray-bullet for normal and gravity
 class cRayBullet final : public cBullet
 {
 private:

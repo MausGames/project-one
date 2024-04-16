@@ -20,7 +20,7 @@
 // TODO 1: completely remove PlayerSide aiming (for coop)
 // TODO 3: normale gruppen-gegner mit TOP haben doppelte outline (einmal im batch, und einmal durch TOP)
 // TODO 3: warrior model eiert etwas beim drehen um die Z-achse (siehe secret enemies bei mimic-wave)
-// TODO 2: preload enemies used in specific stage, before entering stage for the first time (same for bullets, maybe add to stage-specification)
+// TODO 2: [MF] preload enemies (and bullets?) used in specific stage, before entering stage for the first time (same for bullets, maybe add to stage-specification)
 
 
 // ****************************************************************
@@ -48,13 +48,15 @@ enum eEnemyStatus : coreUint32
     ENEMY_STATUS_GHOST        = ENEMY_STATUS_GHOST_PLAYER | ENEMY_STATUS_GHOST_BULLET,
     ENEMY_STATUS_HIDDEN       = 0x4000u,   // 
     ENEMY_STATUS_WORTHLESS    = 0x8000u,   // TODO 1: should be changed to explicit score value in configure (boss?) + setter ?
-    ENEMY_STATUS_LIGHT = 0x10000u,
-    ENEMY_STATUS_FLAT  = 0x20000u,
-    ENEMY_STATUS_SECRET = 0x40000u,
-    ENEMY_STATUS_CUSTOM = 0x80000u,
-    ENEMY_STATUS_CHAIN = 0x100000u,
+    
+    ENEMY_STATUS_LIGHT      = 0x010000u,
+    ENEMY_STATUS_FLAT       = 0x020000u,
+    ENEMY_STATUS_SECRET     = 0x040000u,
+    ENEMY_STATUS_CUSTOM     = 0x080000u,
+    ENEMY_STATUS_CHAIN      = 0x100000u,
     ENEMY_STATUS_KEEPVOLUME = 0x200000u,
-    ENEMY_STATUS_DEACTIVATE = 0x400000u
+    ENEMY_STATUS_SKIPEXPLOSION = 0x200000u,
+    ENEMY_STATUS_DEACTIVATE = 0x800000u
    // ENEMY_STATUS_UNDER = 0x20000u
 };
 

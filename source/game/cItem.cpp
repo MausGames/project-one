@@ -159,7 +159,7 @@ cFragmentItem::cFragmentItem(const coreUint8 iType, const coreUint8 iMissionInde
     this->DefineModel  (PRINT("fragment_%02zu.md3", g_aFragmentData[iType].iIndex));
     this->DefineVolume ("object_sphere.md3");
     this->DefineTexture(0u, "default_white.png");
-    this->DefineProgram("effect_energy_invert_program");
+    this->DefineProgram("effect_energy_rotated_program");
     this->SetColor3    (COLOR_ENERGY_WHITE * 0.05f);
     this->SetTexSize   (coreVector2(4.0f,4.0f));
 
@@ -294,8 +294,10 @@ void cFragmentItem::Move()
     // 
     const coreFloat   fScale = LERPB(0.0f, 3.0f, MIN1(m_fAnimation * 3.0f));
     const coreVector2 vDir   = coreVector2::Direction(m_fAnimation);
+    const coreVector2 vMove  = (this->GetPosition().xy().Processed(ABS) - 25.0f).Processed(MAX, 0.0f) * this->GetPosition().xy().Processed(SIGN);
 
     // 
+    this->SetPosition   (coreVector3(this->GetPosition().xy() - vMove * (2.0f * TIME), 0.0f));
     this->SetSize       (coreVector3(1.0f,1.0f,1.0f) * fScale * MAX(1.0f - m_fChange * 4.0f, 0.0f));
     this->SetDirection  (coreVector3(vDir, 0.0f));
     this->SetOrientation(OriRoundDir(vDir, vDir));

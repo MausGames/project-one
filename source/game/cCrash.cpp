@@ -170,6 +170,9 @@ void cCrashManager::AddCrash(const cLodObject& oBase, const coreVector2 vTarget,
 
     // 
     WARN_IF(true) {}
+
+    // 
+    if(m_nCallback) m_nCallback(pData);
 }
 
 

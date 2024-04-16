@@ -15,6 +15,7 @@ cConfigMenu::cConfigMenu()noexcept
 : coreMenu           (SURFACE_CONFIG_MAX, SURFACE_CONFIG_VIDEO)
 , m_apcDescKey       {}
 , m_iCurMonitorIndex (Core::System->GetDisplayIndex())
+, m_iJoystickNum     (0u)
 {
     // create menu objects
     m_Background.DefineTexture(0u, "menu_background_black.png");
@@ -196,7 +197,7 @@ cConfigMenu::cConfigMenu()noexcept
         cGuiLabel& oLabel = m_aLabel[ENTRY_ ## n];                               \
         oLabel.SetTextLanguage("CONFIG_" #n);                                    \
                                                                                  \
-        x.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL); \
+        x.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL); \
         x.SetPosition (coreVector2(-1.00f,1.00f) * oLabel.GetPosition());        \
         x.SetSize     (coreVector2( 0.26f,0.03f));                               \
         x.SetAlignment(coreVector2(-1.00f,0.00f));                               \
@@ -281,7 +282,7 @@ cConfigMenu::cConfigMenu()noexcept
         cGuiLabel& oLabel = m_aLabel[ENTRY_ ## n];                                              \
         oLabel.SetTextLanguage("CONFIG_" #n);                                                   \
                                                                                                 \
-        m_aInput[i].x.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);    \
+        m_aInput[i].x.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);    \
         m_aInput[i].x.SetPosition (coreVector2(-1.00f,1.00f) * oLabel.GetPosition() - vOffset); \
         m_aInput[i].x.SetSize     (coreVector2( 0.26f,0.03f));                                  \
         m_aInput[i].x.SetAlignment(coreVector2(-1.00f,0.00f));                                  \
@@ -380,10 +381,10 @@ cConfigMenu::cConfigMenu()noexcept
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;      ++i) for(coreUintW j = 0u; j < INPUT_KEYS; ++j) if(!this->__RetrieveInputButton(i, j).GetStatus()) m_InputBox.BindObject(&this->__RetrieveInputButton(i, j));
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;      ++i) for(coreUintW j = 0u; j < INPUT_KEYS; ++j) if(!this->__RetrieveInputFigure(i, j).GetStatus()) m_InputBox.BindObject(&this->__RetrieveInputFigure(i, j));
 
-    m_SwapInput.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+    m_SwapInput.Construct  (MENU_SWITCHBOX, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
     m_SwapInput.SetPosition(LERP(m_aInput[0].oHeader.GetPosition(), m_aInput[1].oHeader.GetPosition(), 0.5f));
     m_SwapInput.SetSize    (coreVector2(0.06f,0.03f));
-    m_SwapInput.GetCaption()->SetText("<>");
+    m_SwapInput.GetCaption()->SetText("< >");
     STATIC_ASSERT(MENU_CONFIG_INPUTS == 2u)
 
     m_Navigator.BindObject(&m_SwapInput, &m_aInput[0].oMoveRight, NULL, &m_SaveButton, NULL, MENU_TYPE_TAB_NODE, SURFACE_CONFIG_INPUT);
@@ -664,6 +665,7 @@ void cConfigMenu::Move()
 
                 // 
                 this->__LoadInputs();
+                this->__RefreshManual();
             }
             STATIC_ASSERT(MENU_CONFIG_INPUTS == 2u)
 
@@ -709,6 +711,7 @@ void cConfigMenu::Move()
                     // 
                     g_CurConfig.Input.aiType[i] = oInput.oType.GetCurValue();
                     this->__LoadInputs();
+                    this->__RefreshManual();
                 }
 
                 // 
@@ -720,6 +723,7 @@ void cConfigMenu::Move()
                 if(oInput.oControlMode.GetUserSwitch())
                 {
                     this->__LoadInputs();
+                    this->__RefreshManual();
                 }
 
                 // 
@@ -908,8 +912,8 @@ void cConfigMenu::Move()
             m_aCueLock[3].SetEnabled(STATIC_ISVALID(g_pGame) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
 
             // 
-            m_GameNew      .Ressolve();
-            m_MirrorModeNew.Ressolve();
+            m_GameNew      .Resolve();
+            m_MirrorModeNew.Resolve();
 
             // 
             cMenu::UpdateSwitchBox(&m_Language);
@@ -991,6 +995,15 @@ void cConfigMenu::Move()
         {
             m_Description.SetEnabled(CORE_OBJECT_ENABLE_ALL);
             m_Description.SetTextLanguage(m_apcDescKey[i]);
+        }
+    }
+    
+    
+    if(m_iJoystickNum != Core::Input->GetJoystickNum())
+    {
+        if(m_SaveButton.GetOverride() < 0)
+        {
+            //this->LoadValues();
         }
     }
 }
@@ -1360,6 +1373,8 @@ void cConfigMenu::__UpdateInterface()
         g_pGame->GetInterface ()->UpdateSpacing();
         g_pGame->GetInterface ()->MoveTimeless();
         g_pGame->GetCombatText()->UpdateLayout();
+
+        this->__RefreshManual();
     }
 
     // 
@@ -1503,6 +1518,9 @@ void cConfigMenu::__LoadInputs()
         // 
         //oInput.oRumble.SetOverride((bKeyboard || !Core::Input->GetJoystickHasRumble(g_CurConfig.Input.aiType[i] - INPUT_SETS_KEYBOARD)) ? -1 : 0);
     }
+
+    // 
+    m_iJoystickNum = Core::Input->GetJoystickNum();
 }
 
 
@@ -1510,7 +1528,7 @@ void cConfigMenu::__LoadInputs()
 // 
 void cConfigMenu::__LoadUnlocks()
 {
-    const coreBool bMirrorMode = HAS_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_MIRRORMORE);
+    const coreBool bMirrorMode = HAS_BIT_EX(g_pSave->GetHeader().oProgress.aiUnlock, UNLOCK_MIRRORMORE);
 
     // 
     m_MirrorMode.ClearEntries();
@@ -1532,4 +1550,19 @@ void cConfigMenu::__LoadUnlocks()
     // 
     m_aLabel[ENTRY_GAME_MIRRORMODE].SetColor3      (COLOR_MENU_WHITE * (bMirrorMode ? MENU_LIGHT_ACTIVE : MENU_LIGHT_IDLE));
     m_aLabel[ENTRY_GAME_MIRRORMODE].SetTextLanguage(bMirrorMode ? "CONFIG_GAME_MIRRORMODE" : "UNKNOWN");
+}
+
+
+// ****************************************************************
+// 
+void cConfigMenu::__RefreshManual()
+{
+    if(STATIC_ISVALID(g_pGame) && (g_pGame->GetCurMission()->GetID() == cIntroMission::ID))
+    {
+        Timeless([]()
+        {
+            g_pGame->GetCurMission()->MoveAfter();
+        });
+        g_pMenu->InvokePauseStep();
+    }
 }

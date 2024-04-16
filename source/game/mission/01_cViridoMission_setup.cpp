@@ -93,11 +93,11 @@ void cViridoMission::__SetupOwn()
     // TASK: kill enemy with reflected bullet
     // TASK: destroy all marked shields
     // TODO 1: hard mode: reflektierte geschosse verursachen schaden
-    // TODO 1: ray-ray kollision für bullets verwenden
-    // TODO 1: drum shield needs blink!
-    // TODO 1: ich konnte durch schräge schilde von unten durchschießen, und durch die großen rotierenden schilden (wenn ich direkt am schild hänge)
-    // TODO 1: MAIN: task-check, regular score, badges, sound
-    // TODO 1: ACHIEVEMENT: name (), description (), beat the mission without touching any shield / fly through a shield / ping-pong a single bullet at least 3 times
+    // TODO 1: [MF] ray-ray kollision für bullets verwenden (schon implementiert ?)
+    // TODO 1: [MF] drum shield needs blink! und combo hold
+    // TODO 1: [MF] ich konnte durch schräge schilde von unten durchschießen, und durch die großen rotierenden schilden (wenn ich direkt am schild hänge)
+    // TODO 1: [MF] MAIN: task-check, regular score, badges, sound
+    // TODO 1: [MF] ACHIEVEMENT: name (), description (), beat the mission without touching any shield / fly through a shield / ping-pong a single bullet at least 3 times
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         constexpr coreFloat fWidth = 0.38f;
@@ -324,7 +324,7 @@ void cViridoMission::__SetupOwn()
                 if(!oBarrier.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
                 coreVector3 vIntersection;
-                if(Core::Manager::Object->TestCollision(pHelper, &oBarrier, &vIntersection))   // TODO 1: barrier können infinity-position haben hier (floating-point exception)
+                if(Core::Manager::Object->TestCollision(pHelper, &oBarrier, &vIntersection))   // TODO 1: [MF] barrier können infinity-position haben hier (floating-point exception)
                 {
                     if(coreVector2::Dot(vHelperMove, oBarrier.GetDirection().xy()) < 0.0f)
                     {
@@ -572,7 +572,7 @@ void cViridoMission::__SetupOwn()
         pBackground->SetDecalDensity (0u, STEP(0.5f, 1.0f, fEnvLerp));
         pBackground->SetAirDensity   (0u, STEP(0.5f, 1.0f, fEnvLerp));
 
-        STAGE_WAVE(0u, "1-1", {35.0f, 50.0f, 70.0f, 85.0f})   // EINS
+        STAGE_WAVE(0u, "1-1", {35.0f, 50.0f, 70.0f, 85.0f, 170.0f})   // EINS
     });
 
     // ################################################################
@@ -629,13 +629,14 @@ void cViridoMission::__SetupOwn()
     // TASK: gegner in finaler phase in bestimmter reihenfolge töten, ändert sich je nach start-gegner
     // TASK: markierte linie muss für 1 sekunde berührt werden (pole dancing)
     // COOP: nothing
-    // TODO 1: ziele am ende besser markieren (die 3 leichten violett)
-    // TODO 1: fix laser collision (on intersecting lasers)
+    // TODO 1: [MF] ziele am ende besser markieren (die 3 leichten violett)
+    // TODO 1: [MF] fix laser collision (on intersecting lasers)
     // TODO 1: effect on laser when pole dancing
-    // TODO 1: gegner im 3er-kreuz werden teleportiert: range muss dort erweitert werden
-    // TODO 1: HARD: laser halten geschosse auf
-    // TODO 1: MAIN: regular score, sound
-    // TODO 1: ACHIEVEMENT: name (), description (), touch every line at least once
+    // TODO 1: [MF] gegner im 3er-kreuz werden teleportiert: range muss dort erweitert werden
+    // TODO 1: hard mode: laser halten geschosse auf
+    // TODO 1: [MF] MAIN: regular score, sound
+    // TODO 1: [MF] ACHIEVEMENT: name (), description (), touch every line at least once
+    // TODO 1: [MF] remove/relax order for 1 2 3 badge
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         constexpr coreUintW iNumData = 8u;
@@ -1064,7 +1065,7 @@ void cViridoMission::__SetupOwn()
             }
         }
 
-        STAGE_WAVE(1u, "1-2", {40.0f, 60.0f, 80.0f, 100.0f})   // ZWEI
+        STAGE_WAVE(1u, "1-2", {40.0f, 60.0f, 80.0f, 100.0f, 200.0f})   // ZWEI
     });
 
     // ################################################################
@@ -1112,12 +1113,11 @@ void cViridoMission::__SetupOwn()
     // TASK: jump over big enemy
     // TASK: fly over marked shadows
     // TASK: kill all single-jumpers
-    // TODO 1: improve jump-over test
+    // TODO 1: [MF] improve jump-over test
     // TODO 1: bullets sollten sich schön überlagern bei 2x2
     // TODO 1: big sollte extra box haben die den schaden weiterleitet (und bullet zerstört! damit nicht doppelt zählt), statt volume-change
-    // TODO 1: MAIN: hard idea, regular score, sound
-    // TODO 1: ACHIEVEMENT: name (), description (), get crushed by at least 10 enemies / never touch an aim-object
-    // TODO 1: shadow sollte drehendes rundes faden-kreuz sein (Shape_Shifter_Formations screenshot)
+    // TODO 1: [MF] MAIN: hard idea, regular score, sound
+    // TODO 1: [MF] ACHIEVEMENT: name (), description (), get crushed by at least 10 enemies / never touch an aim-object
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         constexpr coreUintW iNumData  = 12u;
@@ -1641,7 +1641,7 @@ void cViridoMission::__SetupOwn()
             });
         }
 
-        if(!bPostpone) STAGE_WAVE(2u, "1-3", {60.0f, 90.0f, 120.0f, 150.0f})   // DREI
+        if(!bPostpone) STAGE_WAVE(2u, "1-3", {60.0f, 90.0f, 120.0f, 150.0f, 300.0f})   // DREI
     });
 
     // ################################################################
@@ -1684,8 +1684,8 @@ void cViridoMission::__SetupOwn()
     // TASK: continue attacking big ship when bouncing around
     // TODO 1: hard-mode: enemies which charge infinitely (teleport, N-times)
     // TODO 1: hard-mode: every enemy bounces once (what about bouncy enemy?), oder 1 infinity move (and bouncy enemy just moves N times infinitely)
-    // TODO 1: MAIN: regular score, sound
-    // TODO 1: ACHIEVEMENT: name (), description (), catch 3 enemies while they rush at you
+    // TODO 1: [MF] MAIN: regular score, sound
+    // TODO 1: [MF] ACHIEVEMENT: name (), description (), catch 3 enemies while they rush at you
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreUintW iNumData     = 16u;
@@ -2050,7 +2050,7 @@ void cViridoMission::__SetupOwn()
             }
         });
 
-        if(!bPostpone) STAGE_WAVE(3u, "1-4", {60.0f, 90.0f, 120.0f, 150.0f})   // VIER
+        if(!bPostpone) STAGE_WAVE(3u, "1-4", {60.0f, 90.0f, 120.0f, 150.0f, 300.0f})   // VIER
     });
 
     // ################################################################
@@ -2102,11 +2102,11 @@ void cViridoMission::__SetupOwn()
     // TASK: 3 geheime gegner, die sich nur an bestimmter position zeigen
     // TASK: collect all moving energy beans
     // TODO 1: HARD: 1:1 invert-mimic für beide spieler, mit den schnellen laser-bullets (gelbe geschosse?), oder steuerung komplett invertiert
-    // TODO 1: MAIN: task-check, regular score, sound
-    // TODO 1: ACHIEVEMENT: name (), description (), 
-    // TODO 1: reihenfolge ziel besser markieren (leuchten, wie bei laser)
-    // TODO 1: implement proper bean-wave or remove related objects!
-    // TODO 1: der helfer nervt
+    // TODO 1: [MF] MAIN: task-check, regular score, sound
+    // TODO 1: [MF] ACHIEVEMENT: name (), description (), 
+    // TODO 1: [MF] reihenfolge ziel besser markieren (leuchten, wie bei laser)
+    // TODO 1: [MF] implement proper bean-wave or remove related objects!
+    // TODO 1: [MF] der helfer nervt
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         STAGE_ADD_SQUAD(pSquad1, cWarriorEnemy, 58u)
@@ -2416,7 +2416,7 @@ void cViridoMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE(4u, "1-5", {60.0f, 90.0f, 120.0f, 150.0f})   // FÜNF
+        STAGE_WAVE(4u, "1-5", {60.0f, 90.0f, 120.0f, 150.0f, 300.0f})   // FÜNF
     });
 
     // ################################################################
@@ -2547,7 +2547,7 @@ void cViridoMission::__SetupOwn()
             //pPlayer->SetScale(3.0f);
         });
 
-        STAGE_WAVE(5u, "1-?", {60.0f, 80.0f, 100.0f, 120.0f})   // SECHS
+        STAGE_WAVE(5u, "1-?", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})   // SECHS
     });
 
     // ################################################################
@@ -2570,7 +2570,7 @@ void cViridoMission::__SetupOwn()
     // boss
     STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
-        STAGE_BOSS(m_Torus, {140.0f, 210.0f, 280.0, 350.0f})
+        STAGE_BOSS(m_Torus, {140.0f, 210.0f, 280.0, 350.0f, 700.0f})
     });
 
     // ################################################################

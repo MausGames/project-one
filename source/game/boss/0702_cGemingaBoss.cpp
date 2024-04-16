@@ -20,18 +20,10 @@
 // orange geschosse sollten bis zum rand gehen, aber bei abwechselnden schießen wird das nur von einer der beiden hälften gemacht ohne es komplett zu überspannen
 // stampf-phase geht nur auf einer ache, um die achse zu verändern müsste der boss in die mitte springen
 // pearls sollten so erzeugt werden, dass ihre animation eine schöne welle erzeugt (in bewegungs-richtung vom boss)
-// TODO 1: MAIN: hard idea, foreshadow, sound
-// TODO 1: ACHIEVEMENT: name (), description (), collect ALL pills / ###
-// TODO 1: foreshadow: other boss, flies in the background
-
-// TODO 1: maybe remove the quick-jump in the wavebullet-phase, it's too stressful
-
-// TODO 1: lebenspunkte des inneren bosses müssen sichtbar werden (entweder zweiter bar, der separat gesteuert werden kann, oder ausblenden boss life 1, einblenden boss life 2 (mit hoch-animieren), oder shared life, anpassen der health-grenzen und anwenden auf geminga)
-// TODO 1: besseres auskotzen (innen): theme: explosion von dharuk bringt geminga dazu dich wieder auszukotzen
+// TODO 1: [MF] MAIN: hard idea, sound
+// TODO 1: lebenspunkte des inneren bosses sollten sichtbar werden (entweder zweiter bar, der separat gesteuert werden kann, oder ausblenden boss life 1, einblenden boss life 2 (mit hoch-animieren), oder shared life, anpassen der health-grenzen und anwenden auf geminga)
 // TODO 1: player bullets shot into mouth should be on the same visual height
 // TODO 1: repair-enemy wird beim einsaugen und ausspucken über boss gezeichnet, boss kann aber nicht TOP gesetzt werden, wegen partikel-effekte, repair-enemy muss angepasst werden (render-order oder size)
-// TODO 1: bullets go through boss, especially when mouth is closed and rotating (could it slip between volumes ? related to ray-cast on reflect calculation) -> use sphere volume on full close
-// TODO 1: bullets get reflected when hitting inside, but at the border (green jump phase)
 
 
 // ****************************************************************
@@ -39,6 +31,7 @@
 #define CONNECTED_MOUTH (0u)
 #define SMASH_COUNT     (1u)
 #define STRIKE_COUNT    (2u)
+#define BULLET_REFLECT  (3u)
 
 
 // ****************************************************************
@@ -71,6 +64,14 @@ cGemingaBoss::cGemingaBoss()noexcept
     // configure the boss
     this->Configure(8600, 0u, COLOR_SHIP_RED);
     this->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
+
+    // 
+    m_Sphere.DefineModelHigh("object_sphere.md3");
+    m_Sphere.DefineModelLow ("object_sphere.md3");
+    m_Sphere.SetSize        (this->GetSize() * 4.0f);
+    m_Sphere.Configure      (1, 0u, COLOR_SHIP_RED);
+    m_Sphere.AddStatus      (ENEMY_STATUS_INVINCIBLE | ENEMY_STATUS_HIDDEN | ENEMY_STATUS_SECRET);
+    m_Sphere.SetParent      (this);
 
     // 
     m_InsideTop.DefineModelHigh("ship_boss_amemasu_top_inside.md3");
@@ -184,17 +185,54 @@ cGemingaBoss::cGemingaBoss()noexcept
 
 // ****************************************************************
 // 
-void cGemingaBoss::__ResurrectOwn()
+void cGemingaBoss::ResurrectIntro()
 {
     // 
     m_aiCounter[CONNECTED_MOUTH] = 1;
 
     // 
-    cMossBackground* pBackground = d_cast<cMossBackground*>(g_pEnvironment->GetBackground());
-    pBackground->SetEnableLightning(false);
+    m_fMouthAngle = SIN(0.05f*PI);
 
     // 
-    this->_ResurrectBoss();
+    this->SetPosition(coreVector3(0.0f,0.0f,0.0f));
+
+    // 
+    m_InsideTop   .AddStatus(ENEMY_STATUS_GHOST);
+    m_InsideBottom.AddStatus(ENEMY_STATUS_GHOST);
+    m_Top         .AddStatus(ENEMY_STATUS_GHOST);
+    m_Bottom      .AddStatus(ENEMY_STATUS_GHOST);
+
+    // 
+    m_bForeshadow = true;
+
+    // 
+    m_iPhase = 200u;
+    this->Resurrect();
+}
+
+
+// ****************************************************************
+// 
+void cGemingaBoss::__ResurrectOwn()
+{
+    if(m_iPhase < 200u)
+    {
+        // 
+        m_aiCounter[CONNECTED_MOUTH] = 1;
+
+        // 
+        m_fMouthAngle = 0.0f;
+
+        // 
+        this->SetPosition(coreVector3(HIDDEN_POS, 0.0f));
+
+        // 
+        cMossBackground* pBackground = d_cast<cMossBackground*>(g_pEnvironment->GetBackground());
+        pBackground->SetEnableLightning(false);
+
+        // 
+        this->_ResurrectBoss();
+    }
 }
 
 
@@ -202,27 +240,42 @@ void cGemingaBoss::__ResurrectOwn()
 // 
 void cGemingaBoss::__KillOwn(const coreBool bAnimated)
 {
-    cMuscusMission* pMission = d_cast<cMuscusMission*>(g_pGame->GetCurMission());
-
-    // 
-    for(coreUintW i = 0u; i < MUSCUS_PEARLS; ++i)
-        pMission->DisablePearl(i, bAnimated);
-
-    // 
-    pMission->GetEnemySquad(0u)->ClearEnemies(bAnimated);
-    pMission->GetEnemySquad(1u)->ClearEnemies(bAnimated);
-
-    // 
-    m_Dharuk.Kill(bAnimated);
-
-    // 
-    if(m_pVacuumSound->EnableRef(this)) m_pVacuumSound->Stop();
-
-    // 
-    g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    if(m_iPhase < 200u)
     {
-        pPlayer->RemoveStatus(PLAYER_STATUS_GHOST | PLAYER_STATUS_NO_INPUT_ALL);
-    });
+        cMuscusMission* pMission = d_cast<cMuscusMission*>(g_pGame->GetCurMission());
+
+        // 
+        for(coreUintW i = 0u; i < MUSCUS_PEARLS; ++i)
+            pMission->DisablePearl(i, bAnimated);
+
+        // 
+        pMission->ResetCollEnemyBullet();
+
+        // 
+        pMission->GetEnemySquad(0u)->ClearEnemies(bAnimated);
+        pMission->GetEnemySquad(1u)->ClearEnemies(bAnimated);
+
+        // 
+        m_Dharuk.Kill(bAnimated);
+
+        // 
+        if(m_pVacuumSound->EnableRef(this)) m_pVacuumSound->Stop();
+
+        // 
+        g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
+        {
+            pPlayer->RemoveStatus(PLAYER_STATUS_GHOST | PLAYER_STATUS_NO_INPUT_ALL);
+        });
+    }
+
+    // 
+    m_InsideTop   .RemoveStatus(ENEMY_STATUS_GHOST);
+    m_InsideBottom.RemoveStatus(ENEMY_STATUS_GHOST);
+    m_Top         .RemoveStatus(ENEMY_STATUS_GHOST);
+    m_Bottom      .RemoveStatus(ENEMY_STATUS_GHOST);
+
+    // 
+    m_iPhase = 0u;
 }
 
 
@@ -236,10 +289,10 @@ void cGemingaBoss::__MoveOwn()
     this->_UpdateBoss();
 
     // 
-    const cEnemySquad* pSquad1 = g_pGame->GetCurMission()->GetEnemySquad(0u);
-    const cEnemySquad* pSquad2 = g_pGame->GetCurMission()->GetEnemySquad(1u);
-    ASSERT(pSquad1->GetNumEnemies() == GEMINGA_ENEMIES_TELEPORT)
-    ASSERT(pSquad2->GetNumEnemies() == GEMINGA_ENEMIES_LEGION)
+    const cEnemySquad* pSquad1 = (m_iPhase == 200u) ? NULL : g_pGame->GetCurMission()->GetEnemySquad(0u);
+    const cEnemySquad* pSquad2 = (m_iPhase == 200u) ? NULL : g_pGame->GetCurMission()->GetEnemySquad(1u);
+    ASSERT(!pSquad1 || (pSquad1->GetNumEnemies() == GEMINGA_ENEMIES_TELEPORT))
+    ASSERT(!pSquad2 || (pSquad2->GetNumEnemies() == GEMINGA_ENEMIES_LEGION))
 
     coreFloat fSuck = 0.0f;
 
@@ -520,6 +573,7 @@ void cGemingaBoss::__MoveOwn()
                 g_pEnvironment->ChangeBackground(g_pEnvironment->GetLastID(), ENVIRONMENT_MIX_CURTAIN, 1.0f, coreVector2(1.0f,0.0f));
                 g_pEnvironment->SetTargetSideNow(coreVector2(0.0f,0.0f));
             }
+            
 
             g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
             {
@@ -535,6 +589,18 @@ void cGemingaBoss::__MoveOwn()
 
             if(PHASE_FINISHED)
                 PHASE_CHANGE_INC
+        });
+
+        PHASE_CONTROL_TICKER(1u, 18u, 10.0f, LERP_LINEAR)
+        {
+            const coreFloat fSide = (iTick % 2u) ? 1.0f : -1.0f;
+
+            const coreVector2 vPos = coreVector2(fSide *  1.2f, Core::Rand->Float(-0.9f, 0.9f)) * FOREGROUND_AREA;
+            const coreVector2 vDir = coreVector2(fSide * -1.0f, 0.0f);
+
+            g_pSpecialEffects->MacroEruptionColorBig(coreVector3(vPos, 0.0f), vDir, COLOR_ENERGY_RED);
+            g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_04);
+            g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_TINY);
         });
     }
 
@@ -553,7 +619,8 @@ void cGemingaBoss::__MoveOwn()
 
                 g_pSpecialEffects->MacroEruptionColorBig(this->GetPosition(), coreVector2(0.0f,1.0f), COLOR_ENERGY_RED);
                 g_pSpecialEffects->CreateSplashSmoke(this->GetPosition(), 40.0f, 40u, coreVector3(1.0f,1.0f,1.0f));
-                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_02);
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.2f, 1.0f, SOUND_ENEMY_EXPLOSION_02);
+                g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
             }
 
             this->DefaultMoveLerp(coreVector2(0.0f,0.0f), coreVector2(0.0f,-0.75f), fTime);
@@ -611,7 +678,7 @@ void cGemingaBoss::__MoveOwn()
     {
         PHASE_CONTROL_TIMER(0u, g_pGame->IsEasy() ? 0.5f : 0.7f, LERP_LINEAR)
         {
-            const coreBool bExit = (this->GetCurHealth() <= 8000);//this->GetCurHealth() <= 2100);
+            const coreBool bExit = (this->GetCurHealth() <= 2100);
 
             if(PHASE_BEGINNING)
             {
@@ -1377,7 +1444,7 @@ void cGemingaBoss::__MoveOwn()
             const coreFloat fLerp = LERPH3(1.2f, 1.0f, CLAMP01(fTime));
 
             const coreFloat fOffset = COS(fTime + I_TO_F((i / 2u) % 2u) * (1.0f*PI)) * fLerp;
-            const coreFloat fHeight = (I_TO_F(i) - 9.5f) * 0.105f;
+            const coreFloat fHeight = (I_TO_F(i) - 9.5f) * 0.095f;
 
             const coreVector2 vPos = coreVector2(fOffset, fHeight) * FOREGROUND_AREA;
 
@@ -1643,8 +1710,76 @@ void cGemingaBoss::__MoveOwn()
     }
 
     // ################################################################
+    // 
+    else if(m_iPhase == 200u)
+    {
+    }
+
+    // ################################################################
     // ################################################################
 
+    if(m_aiCounter[CONNECTED_MOUTH])
+    {
+        const coreFloat fFinalAngle = m_fMouthAngle * (1.0f + 0.08f * SIN(m_fLifeTime * 3.0f));
+
+        // 
+        const coreMatrix3 mRota = coreMatrix4::RotationAxis(0.2f*PI * fFinalAngle, coreVector3::Cross(this->GetDirection(), this->GetOrientation()).Normalized()).m123();
+        const coreVector3 vDir1 = this->GetDirection() * mRota;
+        const coreVector3 vDir2 = this->GetDirection() * mRota.Transposed();
+        const coreVector3 vPos1 = this->GetPosition () + (vDir1 - this->GetDirection()) * (m_Top   .GetSize().x * 3.5f);
+        const coreVector3 vPos2 = this->GetPosition () + (vDir2 - this->GetDirection()) * (m_Bottom.GetSize().x * 3.5f);
+
+        // 
+        m_Top.SetPosition   (vPos1);
+        m_Top.SetDirection  (vDir1);
+        m_Top.SetOrientation(this->GetOrientation());
+        m_Top.SetAlpha      (this->GetAlpha());
+
+        // 
+        m_Bottom.SetPosition   (vPos2);
+        m_Bottom.SetDirection  (vDir2);
+        m_Bottom.SetOrientation(this->GetOrientation());
+        m_Bottom.SetAlpha      (this->GetAlpha());
+    }
+
+    // 
+    m_Sphere.SetPosition   (this->GetPosition   ());
+    m_Sphere.SetDirection  (this->GetDirection  ());
+    m_Sphere.SetOrientation(this->GetOrientation());
+
+    // 
+    m_InsideTop.SetPosition   (m_Top.GetPosition   ());
+    m_InsideTop.SetDirection  (m_Top.GetDirection  ());
+    m_InsideTop.SetOrientation(m_Top.GetOrientation());
+
+    // 
+    m_InsideBottom.SetPosition   (m_Bottom.GetPosition   ());
+    m_InsideBottom.SetDirection  (m_Bottom.GetDirection  ());
+    m_InsideBottom.SetOrientation(m_Bottom.GetOrientation());
+
+    // 
+    const coreBool bClosed = coreMath::IsNear((m_Top.GetPosition() - m_Bottom.GetPosition()).LengthSq(), 0.0f);
+    if(bClosed)
+    {
+        m_InsideTop   .AddStatus(ENEMY_STATUS_INVINCIBLE);
+        m_InsideBottom.AddStatus(ENEMY_STATUS_INVINCIBLE);
+    }
+    else
+    {
+        m_InsideTop   .RemoveStatus(ENEMY_STATUS_INVINCIBLE);
+        m_InsideBottom.RemoveStatus(ENEMY_STATUS_INVINCIBLE);
+    }
+    if(bClosed && !m_InsideTop.HasStatus(ENEMY_STATUS_GHOST))
+    {
+        m_Sphere.RemoveStatus(ENEMY_STATUS_GHOST);
+    }
+    else
+    {
+        m_Sphere.AddStatus(ENEMY_STATUS_GHOST);
+    }
+
+    if(m_iPhase < 200u)
+    {
     if(this->GetLostHealth() >= 3700) m_avVector[SUCK_ANGLE].x += (g_pGame->IsEasy() ? 0.7f : 1.0f) * TIME;
 
     const coreVector2 vBulletDir    = -coreVector2::Direction(SIN(m_avVector[SUCK_ANGLE].x) * (0.2f*PI));
@@ -1688,51 +1823,28 @@ void cGemingaBoss::__MoveOwn()
             pBullet->Deactivate(true);
     });
 
-    if(m_aiCounter[CONNECTED_MOUTH])
+    pMission->SetCollEnemyBullet([COLL_THIS](cEnemy* OUTPUT pEnemy, cBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
-        const coreFloat fFinalAngle = m_fMouthAngle * (1.0f + 0.08f * SIN(m_fLifeTime * 3.0f));
+        if((pEnemy != &m_InsideTop) && (pEnemy != &m_InsideBottom)) return;
 
-        // 
-        const coreMatrix3 mRota = coreMatrix4::RotationAxis(0.2f*PI * fFinalAngle, coreVector3::Cross(this->GetDirection(), this->GetOrientation()).Normalized()).m123();
-        const coreVector3 vDir1 = this->GetDirection() * mRota;
-        const coreVector3 vDir2 = this->GetDirection() * mRota.Transposed();
-        const coreVector3 vPos1 = this->GetPosition () + (vDir1 - this->GetDirection()) * (m_Top   .GetSize().x * 3.5f);
-        const coreVector3 vPos2 = this->GetPosition () + (vDir2 - this->GetDirection()) * (m_Bottom.GetSize().x * 3.5f);
+        if(pBullet->HasStatus(BULLET_STATUS_REFLECTED))
+        {
+            pBullet->Deactivate(true);
+            pBullet->AddStatus(BULLET_STATUS_GHOST);
+        }
+        else
+        {
+            const coreVector3 vTan = coreVector3::Cross(pEnemy->GetDirection(), pEnemy->GetOrientation()).Normalized();
+            const coreVector3 vOri = coreVector3::Cross(pEnemy->GetDirection(), vTan);
+            const coreFloat   fDot = coreVector3::Dot(coreVector3(pBullet->GetFlyDir(), 0.0f), vOri * ((pEnemy == &m_InsideTop) ? -1.0f : 1.0f));
 
-        // 
-        m_Top.SetPosition   (vPos1);
-        m_Top.SetDirection  (vDir1);
-        m_Top.SetOrientation(this->GetOrientation());
-
-        // 
-        m_Bottom.SetPosition   (vPos2);
-        m_Bottom.SetDirection  (vDir2);
-        m_Bottom.SetOrientation(this->GetOrientation());
-    }
-
-    // 
-    m_InsideTop.SetPosition   (m_Top.GetPosition   ());
-    m_InsideTop.SetDirection  (m_Top.GetDirection  ());
-    m_InsideTop.SetOrientation(m_Top.GetOrientation());
-
-    // 
-    m_InsideBottom.SetPosition   (m_Bottom.GetPosition   ());
-    m_InsideBottom.SetDirection  (m_Bottom.GetDirection  ());
-    m_InsideBottom.SetOrientation(m_Bottom.GetOrientation());
-
-    // 
-    if(coreMath::IsNear((m_Top.GetPosition() - m_Bottom.GetPosition()).LengthSq(), 0.0f))
-    {
-        m_InsideTop   .AddStatus(ENEMY_STATUS_INVINCIBLE);
-        m_InsideBottom.AddStatus(ENEMY_STATUS_INVINCIBLE);
-    }
-    else
-    {
-        m_InsideTop   .RemoveStatus(ENEMY_STATUS_INVINCIBLE);
-        m_InsideBottom.RemoveStatus(ENEMY_STATUS_INVINCIBLE);
-    }
-
-
+            if(fDot < CORE_MATH_PRECISION)
+            {
+                pBullet->Deactivate(true);
+                pBullet->AddStatus(BULLET_STATUS_GHOST);
+            }
+        }
+    });
 
     g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
@@ -1749,6 +1861,11 @@ void cGemingaBoss::__MoveOwn()
                 pMission->StrikeAttack(j, pPlayer, this);
                 g_pSpecialEffects->CreateSplashColor(pPearl->GetPosition(), 5.0f, 3u, COLOR_ENERGY_WHITE);
                 g_pSpecialEffects->PlaySound(pPearl->GetPosition(), 1.0f, pMission->RetrievePearlPitch(), SOUND_EFFECT_PEARL);
+
+                if(!m_aiCounter[BULLET_REFLECT])
+                {
+                    pMission->GiveBadge(3u, BADGE_ACHIEVEMENT, pPearl->GetPosition());
+                }
 
                 if(m_iPhase == 90u)
                 {
@@ -1774,7 +1891,7 @@ void cGemingaBoss::__MoveOwn()
             {
                 pMission->DisablePearl(i, true);
                 g_pSpecialEffects->CreateSplashColor(pPearl->GetPosition(), 5.0f, 3u, COLOR_ENERGY_YELLOW);
-                g_pSpecialEffects->PlaySound(pPearl->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_DUST);
+                g_pSpecialEffects->PlaySound(pPearl->GetPosition(), 1.2f, 1.0f, SOUND_EFFECT_DUST);
 
                 if(!g_pGame->IsEasy())
                 {
@@ -1802,8 +1919,19 @@ void cGemingaBoss::__MoveOwn()
             if(HAS_BIT(iStrikeState, i))
             {
                 this->TakeDamage(50, ELEMENT_NEUTRAL, this->GetPosition().xy(), pMission->GetStrikePlayer(i), true);
+
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.2f, SOUND_EFFECT_DUST);
             }
         }
+    }
+
+    if(!m_aiCounter[BULLET_REFLECT])
+    {
+        g_pGame->GetBulletManagerPlayer()->ForEachBullet([&](cBullet* OUTPUT pBullet)
+        {
+            if(pBullet->HasStatus(BULLET_STATUS_REFLECTED))
+                m_aiCounter[BULLET_REFLECT] = 1;
+        });
     }
 
     if(fSuck)
@@ -1983,5 +2111,6 @@ void cGemingaBoss::__MoveOwn()
     if(!pGreenHelper->HasStatus(HELPER_STATUS_DEAD))
     {
         // handled in phase code
+    }
     }
 }

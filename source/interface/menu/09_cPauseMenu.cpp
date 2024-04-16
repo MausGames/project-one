@@ -12,12 +12,12 @@
 // ****************************************************************
 // constructor
 cPauseMenu::cPauseMenu()noexcept
-: coreMenu (SURFACE_PAUSE_MAX, SURFACE_PAUSE_DEFAULT)
+: coreMenu (SURFACE_PAUSE_MAX, SURFACE_PAUSE_FULL)
 {
     // create menu objects
     m_ResumeButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_ResumeButton.DefineProgram("menu_border_program");
-    m_ResumeButton.SetPosition  (coreVector2(0.0f,0.135f));
+    m_ResumeButton.SetPosition  (MENU_PAUSE_RESUME_POSITION);
     m_ResumeButton.SetSize      (coreVector2(0.4f,0.07f));
     m_ResumeButton.GetCaption()->SetTextLanguage("RESUME");
 
@@ -50,11 +50,14 @@ cPauseMenu::cPauseMenu()noexcept
     m_Navigator.ShowIcon   (true);
 
     // bind menu objects
-    this->BindObject(SURFACE_PAUSE_DEFAULT, &m_ResumeButton);
-    this->BindObject(SURFACE_PAUSE_DEFAULT, &m_RestartButton);
-    this->BindObject(SURFACE_PAUSE_DEFAULT, &m_ConfigButton);
-    this->BindObject(SURFACE_PAUSE_DEFAULT, &m_ExitButton);
-    this->BindObject(SURFACE_PAUSE_DEFAULT, &m_Navigator);
+    this->BindObject(SURFACE_PAUSE_FULL, &m_ResumeButton);
+    this->BindObject(SURFACE_PAUSE_FULL, &m_RestartButton);
+    this->BindObject(SURFACE_PAUSE_FULL, &m_ConfigButton);
+    this->BindObject(SURFACE_PAUSE_FULL, &m_ExitButton);
+    this->BindObject(SURFACE_PAUSE_FULL, &m_Navigator);
+
+    this->BindObject(SURFACE_PAUSE_LIGHT, &m_ResumeButton);
+    this->BindObject(SURFACE_PAUSE_LIGHT, &m_Navigator);
 }
 
 
@@ -72,7 +75,7 @@ void cPauseMenu::Move()
     // 
     switch(this->GetCurSurface())
     {
-    case SURFACE_PAUSE_DEFAULT:
+    case SURFACE_PAUSE_FULL:
         {
             if(m_ResumeButton.IsClicked() || g_MenuInput.bPause)
             {
@@ -104,10 +107,29 @@ void cPauseMenu::Move()
             }
 
             // 
+            m_ResumeButton.SetPosition(MENU_PAUSE_RESUME_POSITION);
+
+            // 
             cMenu::UpdateButton(&m_ResumeButton,  m_ResumeButton .IsFocused());
             cMenu::UpdateButton(&m_RestartButton, m_RestartButton.IsFocused());
             cMenu::UpdateButton(&m_ConfigButton,  m_ConfigButton .IsFocused());
             cMenu::UpdateButton(&m_ExitButton,    m_ExitButton   .IsFocused());
+        }
+        break;
+
+    case SURFACE_PAUSE_LIGHT:
+        {
+            if(m_ResumeButton.IsClicked() || g_MenuInput.bPause)
+            {
+                // 
+                m_iStatus = 1;
+            }
+
+            // 
+            m_ResumeButton.SetPosition(coreVector2(0.0f,0.0f));
+
+            // 
+            cMenu::UpdateButton(&m_ResumeButton, m_ResumeButton.IsFocused());
         }
         break;
 

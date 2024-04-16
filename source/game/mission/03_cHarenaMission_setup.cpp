@@ -100,13 +100,13 @@ void cHarenaMission::__SetupOwn()
     // TASK: kill 4 very quick enemies before they disappear
     // TODO 1: hardmode: bad visibility (sand storm) in einer der missionen hier, muss vielleicht sinus-förmig (oder anders) ganz verschwinden, auch geschosse wegen pressure
     // TODO 1: hardmode: enemies also shoot when getting invisible
-    // TODO 1: maybe add more meaning to new second wave (enemies top and bottom)
-    // TODO 1: sub-wave 2 is too similar to the boss waves
-    // TODO 1: der flip muss verbessert werden: er muss viel sichtbarer sein, farbe form bewegung ?
-    // TODO 1: MAIN: task-check, hard idea, regular score, sound, background rota/speed
-    // TODO 1: ACHIEVEMENT: name (), description (), 
-    // TODO 1: im ersten frame beim flimmern is nur die outline sichtbar (gefüllt) (aufgenommen im video von 05.11.2022)
-    // TODO 1: delay nach N sekunden, wenn der letzte gegner am leben gelassen wird, damit zeit+combo nicht abläuft
+    // TODO 1: [MF] maybe add more meaning to new second wave (enemies top and bottom) (sollte schon reichen ?)
+    // TODO 1: [MF] sub-wave 2 is too similar to the boss waves
+    // TODO 1: [MF] der flip muss verbessert werden: er muss viel sichtbarer sein, farbe form bewegung ?
+    // TODO 1: [MF] MAIN: task-check, hard idea, regular score, sound, background rota/speed
+    // TODO 1: [MF] ACHIEVEMENT: name (), description (), 
+    // TODO 1: [MF] im ersten frame beim flimmern is nur die outline sichtbar (gefüllt) (aufgenommen im video von 05.11.2022)
+    // TODO 1: [MF] delay nach N sekunden, wenn der letzte gegner am leben gelassen wird, damit zeit+combo nicht abläuft
     m_aInsanityStage[0] = [this]()
     {
         STAGE_ADD_PATH(pPath1)
@@ -745,7 +745,7 @@ void cHarenaMission::__SetupOwn()
             this->CrashEnemy(pEnemy);
         });
 
-        if(!m_iInsanity) if(!bPostpone) STAGE_WAVE(0u, "3-1", {50.0f, 75.0f, 100.0f, 125.0f})   // DREIZEHN
+        if(!m_iInsanity) if(!bPostpone) STAGE_WAVE(0u, "3-1", {50.0f, 75.0f, 100.0f, 125.0f, 250.0f})   // DREIZEHN
     };
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
@@ -780,14 +780,14 @@ void cHarenaMission::__SetupOwn()
     // TASK: collect all eggs
     // TASK: kill golden enemy
     // TODO 1: hardmode: big can change, like in tiger boss, just (iBig << 1u), maybe not on the first 1-2 hits
-    // TODO 1: coop: ein gegner muss innerhalb des zeitlimits von beiden erwischt werden
-    // TODO 1: idea: gegner die eng zusammen gehen
-    // TODO 1: add sound effect when the correct target was hit (ka-ching), also when the wrong was hit (düd-düüd)
-    // TODO 1: fix short movements by enemies when transitioning 4->6 and 6->8 (und intro für new enemies)
-    // TODO 1: check if bullet-collision really affects the whole shooting area, to never cause any frame-delay when getting visible
-    // TODO 1: MAIN: task-check, coop, regular score, badges, sound
-    // TODO 1: badge: ride the wave
-    // TODO 1: ACHIEVEMENT: name (), description (), trigger revenge-wave at least once from every enemy
+    // TODO 5: coop: ein gegner muss innerhalb des zeitlimits von beiden erwischt werden
+    // TODO 5: idea: gegner die eng zusammen gehen
+    // TODO 1: [MF] add sound effect when the correct target was hit (ka-ching), also when the wrong was hit (düd-düüd)
+    // TODO 1: [MF] fix short movements by enemies when transitioning 4->6 and 6->8 (und intro für new enemies)
+    // TODO 1: [MF] check if bullet-collision really affects the whole shooting area, to never cause any frame-delay when getting visible
+    // TODO 1: [MF] MAIN: task-check, coop, regular score, badges, sound
+    // TODO 1: [MF] badge: ride the wave
+    // TODO 1: [MF] ACHIEVEMENT: name (), description (), trigger revenge-wave at least once from every enemy
     m_aInsanityStage[1] = [this]()
     {
         constexpr coreUintW iNumEnemies = 8u;
@@ -1184,7 +1184,7 @@ void cHarenaMission::__SetupOwn()
 
             pBackground->SetVeilAlpha(STEPH3(0.0f, 30.0f, m_fStageTime));
 
-            STAGE_WAVE(1u, "3-2", {45.0f, 65.0f, 90.0f, 110.0f})   // VIERZEHN
+            STAGE_WAVE(1u, "3-2", {45.0f, 65.0f, 90.0f, 110.0f, 220.0f})   // VIERZEHN
         }
     };
     STAGE_MAIN({TAKE_ALWAYS, 1u})
@@ -1247,10 +1247,12 @@ void cHarenaMission::__SetupOwn()
     // moving enemies need to look into their fly-direction, to not cause teleportation when hitting them outside the view (though it's more likely they are hit from where they come and not from where they go)
     // sandstorm hides shadow artifacts
     // player can kill a lot of sub-groups by staying at the bottom
-    // TODO 1: coop: abwechselnd gegner treffen
-    // TODO 1: moving tower sollte nicht in seine (exakte) flug-richtung schießen
-    // TODO 1: MAIN: task-check, hard idea, coop, regular score, badges, sound
-    // TODO 1: ACHIEVEMENT: name (), description (), dance at least 60s with the big enemy without getting hit
+    // TODO 5: coop: abwechselnd gegner treffen
+    // TODO 1: [MF] visuals komplett überarbeiten
+    // TODO 1: [MF] boss-enemies komplett überarbeiten
+    // TODO 1: [MF] moving tower sollte nicht in seine (exakte) flug-richtung schießen
+    // TODO 1: [MF] MAIN: task-check, hard idea, coop, regular score, badges, sound
+    // TODO 1: [MF] ACHIEVEMENT: name (), description (), dance at least 60s with the big enemy without getting hit
     m_aInsanityStage[2] = [this]()
     {
         constexpr coreUintW iNumEnemies = 61u;
@@ -1676,7 +1678,7 @@ void cHarenaMission::__SetupOwn()
 
         m_iStageSub = MAX(m_iStageSub, iPoints + 1u);
 
-        if(!m_iInsanity) STAGE_WAVE(2u, "3-3", {40.0f, 60.0f, 80.0f, 100.0f})   // FÜNFZEHN
+        if(!m_iInsanity) STAGE_WAVE(2u, "3-3", {40.0f, 60.0f, 80.0f, 100.0f, 200.0f})   // FÜNFZEHN
     };
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
@@ -1741,8 +1743,8 @@ void cHarenaMission::__SetupOwn()
     // TASK: kill all marked arrows
     // TODO 1: hardmode: every killed enemy makes an attack (target single ?)
     // TODO 1: pacifist: holes in line border attack
-    // TODO 1: MAIN: task-check, regular score, badges, sound, background rota/speed
-    // TODO 1: ACHIEVEMENT: name (), description (), beat the level without every destroying an arrow
+    // TODO 1: [MF] MAIN: task-check, regular score, badges, sound, background rota/speed
+    // TODO 1: [MF] ACHIEVEMENT: name (), description (), beat the level without every destroying an arrow
     m_aInsanityStage[3] = [this]()
     {
         constexpr coreUintW iNumEnemies = 170u;
@@ -2309,7 +2311,7 @@ void cHarenaMission::__SetupOwn()
 
             pBackground->SetVeilAlpha(1.0f - STEPH3(0.0f, 30.0f, m_fStageTime));
 
-            STAGE_WAVE(3u, "3-4", {50.0f, 75.0f, 100.0f, 125.0f})   // SECHSZEHN
+            STAGE_WAVE(3u, "3-4", {50.0f, 75.0f, 100.0f, 125.0f, 250.0f})   // SECHSZEHN
         }
     };
     STAGE_MAIN({TAKE_ALWAYS, 3u})
@@ -2357,11 +2359,11 @@ void cHarenaMission::__SetupOwn()
     // TASK: collect all the good plates
     // TASK: a single enemy with lots of health needs to be killed, but disappears after some time
     // TODO 1: hard mode: infinity movement (only X or Y always, even with possible pattern issues, though maybe some have nice transitions) (also enemies ?)
-    // TODO 1: dünklere kreise sollten auf der platte sein, wo die stacheln raus kommen ? 
-    // TODO 1: badge: % time moving on purple plates
-    // TODO 1: badge: touch each plate at least once (needs visual highlight)
-    // TODO 1: MAIN: task-check, easy, regular score, extra score, badges, sound, background rota/speed
-    // TODO 1: ACHIEVEMENT: name (), description (), stay on 10 plates when an enemy is currently spawning there
+    // TODO 1: [MF] dünklere kreise sollten auf der platte sein, wo die stacheln raus kommen ? 
+    // TODO 1: [MF] badge: % time moving on purple plates
+    // TODO 1: [MF] badge: touch each plate at least once (needs visual highlight)
+    // TODO 1: [MF] MAIN: task-check, easy, regular score, extra score, badges, sound, background rota/speed
+    // TODO 1: [MF] ACHIEVEMENT: name (), description (), stay on 10 plates when an enemy is currently spawning there
     m_aInsanityStage[4] = [this]()
     {
         constexpr coreUintW iNumData  = 16u;
@@ -2826,7 +2828,7 @@ void cHarenaMission::__SetupOwn()
             pBackground->SetGroundDensity(0u, 1.0f - STEPH3(0.0f, 30.0f, m_fStageTime));
             pBackground->SetGroundDensity(1u, 1.0f - STEPH3(0.0f, 30.0f, m_fStageTime));
 
-            if(!bPostpone) STAGE_WAVE(4u, "3-5", {65.0f, 95.0f, 130.0f, 160.0f})   // SIEBZEHN
+            if(!bPostpone) STAGE_WAVE(4u, "3-5", {65.0f, 95.0f, 130.0f, 160.0f, 320.0f})   // SIEBZEHN
         }
     };
     STAGE_MAIN({TAKE_ALWAYS, 4u})
@@ -2990,7 +2992,7 @@ void cHarenaMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE(5u, "3-?", {60.0f, 80.0f, 100.0f, 120.0f})   // ACHTZEHN
+        STAGE_WAVE(5u, "3-?", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})   // ACHTZEHN
     });
 
     // ################################################################
@@ -3025,7 +3027,7 @@ void cHarenaMission::__SetupOwn()
     // boss
     STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
-        STAGE_BOSS(m_Tiger, {140.0f, 210.0f, 280.0, 350.0f})
+        STAGE_BOSS(m_Tiger, {140.0f, 210.0f, 280.0, 350.0f, 700.0f})
     });
 
     // ################################################################

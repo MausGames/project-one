@@ -271,6 +271,18 @@ coreBool cSnow::TestCollision(const coreVector2 vPosition)const
     return (m_piSnowData[iY * SNOW_SIZE + iX] != 0x00u);
 }
 
+// ****************************************************************
+// 
+coreBool cSnow::AnyData()const
+{
+    return std::memchr(m_piSnowData, 0xFFu, SNOW_SIZE * SNOW_SIZE);
+}
+
+coreBool cSnow::AllData()const
+{
+    return !std::memchr(m_piSnowData, 0x00u, SNOW_SIZE * SNOW_SIZE);
+}
+
 
 // ****************************************************************
 // reset with the resource manager

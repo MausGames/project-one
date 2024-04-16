@@ -51,7 +51,7 @@ cReplayMenu::cReplayMenu()noexcept
     m_BackButton.SetAlignment (coreVector2(-1.0f, -1.0f));
     m_BackButton.GetCaption()->SetText(ICON_SHARE);
 
-    m_Page.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+    m_Page.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
     m_Page.SetPosition(m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.0f,0.5f) + coreVector2(0.0f,-0.05f));
     m_Page.SetSize    (coreVector2(0.47f,0.03f));
     m_Page.SetEndless (true);

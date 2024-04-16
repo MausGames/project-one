@@ -46,13 +46,13 @@ cScoreMenu::cScoreMenu()noexcept
         m_aFilterLine[i].SetTexOffset (coreVector2(I_TO_F(i)*0.09f, 0.0f));
     }
 
-    m_FilterMission.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+    m_FilterMission.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
     m_FilterMission.SetPosition(m_aFilterLine[0].GetPosition());
     m_FilterMission.SetSize    (coreVector2(0.47f,0.03f));
     m_FilterMission.SetEndless (true);
     m_FilterMission.GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
-    m_FilterSegment.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+    m_FilterSegment.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
     m_FilterSegment.SetPosition(m_aFilterLine[1].GetPosition());
     m_FilterSegment.SetSize    (m_FilterMission.GetSize());
     m_FilterSegment.SetEndless (true);

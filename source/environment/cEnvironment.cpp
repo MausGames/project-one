@@ -212,7 +212,7 @@ void cEnvironment::ChangeBackground(const coreInt32 iID, const coreUintW iTransi
         // start transition
         m_TransitionTime.Play(CORE_TIMER_PLAY_RESET);
         m_TransitionTime.SetValue(-0.15f);
-        m_TransitionTime.SetSpeed(0.9f * fTransitionSpeed);
+        m_TransitionTime.SetSpeed(ENVIRONMENT_TRANSITION_FACTOR * fTransitionSpeed);
         m_vTransitionDir = vTransitionDir;
 
         // set transition resources
@@ -250,6 +250,8 @@ FUNC_PURE coreFloat cEnvironment::RetrieveSafeHeight(const coreVector2 vPosition
 // retrieve safe ray intersection point
 FUNC_PURE coreVector3 cEnvironment::RetrieveSafeIntersect(const coreVector3 vRayPosition, const coreVector3 vRayDirection, const coreFloat fFallbackHeight)const
 {
+    ASSERT(vRayDirection.z < 0.0f)
+
     // check for available outdoor-surface
     const cOutdoor* pOutdoor = m_pBackground->GetOutdoor();
     if(!pOutdoor) return vRayPosition + vRayDirection * ((vRayPosition.z - fFallbackHeight) * RCP(vRayDirection.z));

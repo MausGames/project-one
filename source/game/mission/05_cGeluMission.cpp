@@ -1040,7 +1040,7 @@ void cGeluMission::__UpdateCollisionFang()
             if(InBetween(pPlayer->GetPosition().xy(), oFang.GetPosition().xy() - vFangRange, oFang.GetPosition().xy() + vFangRange))
             {
                 bIntersect = true;
-                if((iHitIndex != 255u) && (iHitIndex != j)) bCrush = true;
+                if((iHitIndex != 255u) && (iHitIndex != j) && !HAS_BIT(m_iCrushState, 2u)) bCrush = true;
 
                 ADD_BIT(m_iTouchState, j)
                 STATIC_ASSERT(GELU_FANGS <= sizeof(m_iTouchState)*8u)
@@ -1063,11 +1063,11 @@ void cGeluMission::__UpdateCollisionFang()
                 if(pPlayer->IsNormal())
                 {
                     pPlayer->TakeDamage(5, ELEMENT_NEUTRAL, vNewPos);
-                    if(HAS_BIT(m_iCrushState, 0u)) m_abCrushImmune[i] = true;
                 }
+                if(HAS_BIT(m_iCrushState, 0u)) m_abCrushImmune[i] = true;
 
-                if(!InBetween(vNewPos, pPlayer->GetArea().xy() * 1.01f, pPlayer->GetArea().zw() * 1.01f))   // prevent damaged player being pushed outside
-                    if(HAS_BIT(m_iCrushState, 0u)) m_abCrushImmune[i] = true;
+                //if(!InBetween(vNewPos, pPlayer->GetArea().xy() * 1.01f, pPlayer->GetArea().zw() * 1.01f))   // prevent damaged player being pushed outside
+                //    if(HAS_BIT(m_iCrushState, 0u)) m_abCrushImmune[i] = true;
             }
         }
         else if(!bIntersect && m_abCrushImmune[i])
@@ -1235,7 +1235,7 @@ void cGeluMission::__UpdateCollisionWay()
             if(InBetween(pPlayer->GetPosition().xy(), pWay->GetPosition().xy() - vWayRange, pWay->GetPosition().xy() + vWayRange))
             {
                 bIntersect = true;
-                if((iHitIndex != 255u) && (iHitIndex != j)) bCrush = true;
+                if((iHitIndex != 255u) && (iHitIndex != j) && !HAS_BIT(m_iCrushState, 2u)) bCrush = true;
 
                 ADD_BIT(m_iTouchState, j)
                 STATIC_ASSERT(GELU_WAYS <= sizeof(m_iTouchState)*8u)
@@ -1258,11 +1258,11 @@ void cGeluMission::__UpdateCollisionWay()
                 if(pPlayer->IsNormal())
                 {
                     pPlayer->TakeDamage(5, ELEMENT_NEUTRAL, vNewPos);
-                    if(HAS_BIT(m_iCrushState, 0u)) m_abCrushImmune[i] = true;
                 }
+                if(HAS_BIT(m_iCrushState, 0u)) m_abCrushImmune[i] = true;
 
-                if(!InBetween(vNewPos, pPlayer->GetArea().xy() * 1.01f, pPlayer->GetArea().zw() * 1.01f))
-                    if(HAS_BIT(m_iCrushState, 0u)) m_abCrushImmune[i] = true;
+                //if(!InBetween(vNewPos, pPlayer->GetArea().xy() * 1.01f, pPlayer->GetArea().zw() * 1.01f))
+                //    if(HAS_BIT(m_iCrushState, 0u)) m_abCrushImmune[i] = true;
             }
         }
         else if(!bIntersect && m_abCrushImmune[i])

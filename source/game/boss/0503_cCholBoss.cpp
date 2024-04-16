@@ -21,21 +21,17 @@
 // einzelteil-phase sollt kohärente muster haben, damit die gefahr einfach einzuschätzen ist, vor allem weil der spieler die bewegung kontrolliert (er soll sich nicht so fühlen als hätte er keine kontrolle)
 // final big explosion is used to highlight that the boss is really finished now
 // TODO 1: hard mode: hitze und wasser
-// TODO 1: enum for the wingstate
-// TODO 1: pause time during fake time-bonus ? (and show it)
-
-// TODO 1: MAIN: foreshadow, sound
-// TODO 1: ACHIEVEMENT: name (), description (), 
-
-// TODO 1: wellen beim sturmangriff sind zu ähnlich wie von sword, vielleicht kreis-wellen wie beim alten leviathan ?
-
+// TODO 4: enum for the wingstate
+// TODO 1: [MF] pause time during fake time-bonus ? (and show it)
+// TODO 1: [MF] MAIN: foreshadow, sound
+// TODO 1: [MF] ACHIEVEMENT: name (), description (), 
+// TODO 1: [MF] wellen beim sturmangriff sind zu ähnlich wie von sword, vielleicht kreis-wellen wie beim alten leviathan ?
 // TODO 1: boss glüht nach dem einschlag in boden (und wand ?)
 // TODO 1: rotierende einzelteile kurz vorm abschuss brauchen einen weiter (glow) effekt, damit mans gscheit sieht
-// TODO 1: wenn einzelteile rotiert werden (zb. bei explosion) sollten sie geshiftet werden wie bei einzelteil-phase
+// TODO 1: [MF] wenn einzelteile rotiert werden (zb. bei explosion) sollten sie geshiftet werden wie bei einzelteil-phase ?
 // TODO 1: ram von boss und wings braucht flammen-wellen-effekt
-
-// TODO 1: foreshadow: rast 1-2 mal (untersch waves) über schirm (above) mit einzelteilen
-// TODO 1: ein cyaner-effekt flog beim aktivieren der ORBs herum, nachdem das level gespielt wurde, vermutlich wird etwas nicht korrekt zurückgesetzt
+// TODO 1: [MF] foreshadow: rast 1-2 mal (untersch waves) über schirm (above) mit einzelteilen
+// TODO 1: [MF] ein cyaner-effekt flog beim aktivieren der ORBs herum, nachdem das level gespielt wurde, vermutlich wird etwas nicht korrekt zurückgesetzt
 
 
 // ****************************************************************
@@ -274,7 +270,6 @@ void cCholBoss::__MoveOwn()
         PHASE_CONTROL_PAUSE(0u, 1.0f)
         {
             PHASE_CHANGE_TO(20u)
-            //PHASE_CHANGE_TO(70u)
         });
     }
 
@@ -282,6 +277,13 @@ void cCholBoss::__MoveOwn()
     // 
     else if(m_iPhase == 20u)
     {
+        if(PHASE_BEGINNING2)
+        {
+            pMission->SetCrushFree  (true);
+            pMission->SetCrushLong  (false);
+            pMission->SetCrushIgnore(false);
+        }
+
         const coreInt32 iLostHealth    = this->GetLostHealth();
         const coreInt32 iLostHealthOld = this->GetMaxHealth() - this->GetPreHealth();
 
@@ -600,8 +602,9 @@ void cCholBoss::__MoveOwn()
 
             this->ChangeToBottom();
 
-            pMission->SetCrushFree(true);
-            pMission->SetCrushLong(true);
+            pMission->SetCrushFree  (true);
+            pMission->SetCrushLong  (true);
+            pMission->SetCrushIgnore(true);
         }
 
         constexpr coreFloat fDelay = 0.7f;
@@ -2048,10 +2051,7 @@ void cCholBoss::__KillFake()
     // 
     g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
-        pPlayer->GetScoreTable()->TransferChain();
-    });
-    g_pGame->ForEachPlayer([](cPlayer* OUTPUT pPlayer, const coreUintW i)
-    {
+        pPlayer->GetScoreTable()->CancelCooldown();
         pPlayer->StartRolling(pPlayer->GetInput()->vMove);
     });
 

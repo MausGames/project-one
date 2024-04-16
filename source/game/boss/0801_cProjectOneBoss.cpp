@@ -22,16 +22,14 @@
 // boss should use absolutely all mechanics from the game (so far), a color for every mission and its mechanics, with new combinations and twists, this makes the fight extremely long (>12 min), but it is possible to scale by reducing the required number of colors the player has to beat
 // TODO 1: remove turf from base classes
 // TODO 1: hard mode: add another mechanic to each sub-stage, spieler muss in der letzten phase doch angreifen
-// TODO 1: MAIN: fragment, medal goal, juiciness (move, rota, muzzle, effects), outro, sound
-// TODO 1: ACHIEVEMENT: name (), description (), beat all sub-bosses in the correct order (levels)
+// TODO 1: [MF] MAIN: fragment, medal goal, juiciness (move, rota, muzzle, effects), outro, sound
+// TODO 1: [MF] ACHIEVEMENT: name (), description (), beat all sub-bosses in the correct order (levels)
 
-// TODO 1: fragmente fliegen am ende so zusammen wie die helfer, bilden das tafel-muster, muss aber erst letztes fragment einsammeln, man kann sich entscheiden zwischen letztem fragment oder P1 töten
-// TODO 1: final endboss, ship jumps into z dimension, while side blocks move away, star fox (either looping or dive animation), rotation around z
 // TODO 1: how to handle death on boss ? maybe keep finished helpers disabled and skip intro !
 // TODO 1: in easy fliegen die restlichen helfer nach außen weg bevor weiß kommt
 
-// TODO 1: #### measure each phase individually on normal (add code), and add separate times for easy and normal, easy uses the 4 smallest ones?
-// TODO 1: bei platten phase, blinkender (option) pfeil zeigt nächsten flug an
+// TODO 1: [MF] #### measure each phase individually on normal (add code), and add separate times for easy and normal, easy uses the 4 smallest ones?
+// TODO 1: [MF] bei platten phase, blinkender (option) pfeil zeigt nächsten flug an
 
 // yellow:
 // spikes sollten so lang aktiv sein, dass es für den spieler wichtig ist seine position dem auf-und-ab der spikes anzupassen
@@ -463,7 +461,7 @@ void cProjectOneBoss::__MoveOwn()
     {
         if(PHASE_BEGINNING2)
         {
-            g_pEnvironment->SetTargetSpeed(1.0f, 0.2f);
+            g_pEnvironment->SetTargetSpeed(1.2f, 0.2f);
 
             this->AddStatus(ENEMY_STATUS_GHOST);
         }
@@ -628,6 +626,12 @@ void cProjectOneBoss::__MoveOwn()
             g_pSpecialEffects->SlowScreen(4.0f);
 
             g_pGame->GetItemManager()->ClearItems(true);
+
+            g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
+            {
+                pPlayer->ActivateNormalShading();
+                g_pSpecialEffects->CreateSplashDark(pPlayer->GetPosition(), SPECIAL_SPLASH_SMALL);
+            });
         }
     }
 
@@ -765,21 +769,25 @@ void cProjectOneBoss::__MoveOwn()
 
             cPlayer* pPlayer = g_pGame->GetPlayer(0u);
 
-            pPlayer->Configure     (PLAYER_SHIP_P1);
-            pPlayer->RemoveStatus  (PLAYER_STATUS_KEEP_RANGE);
-            pPlayer->EquipWeapon   (0u, cFinalWeapon::ID);
-            pPlayer->SetPosition   (this->GetPosition ());
-            pPlayer->SetDirection  (this->GetDirection());
-            pPlayer->SetOrientation(coreVector3(0.0f,0.0f,1.0f));
-            pPlayer->SetScale      (1.5f / PLAYER_SIZE_FACTOR);
-            pPlayer->SetRainbow    (true);
+            pPlayer->Configure      (PLAYER_SHIP_P1);
+            pPlayer->RemoveStatus   (PLAYER_STATUS_KEEP_RANGE);
+            pPlayer->EquipWeapon    (0u, cFinalWeapon::ID);
+            pPlayer->SetPosition    (this->GetPosition ());
+            pPlayer->SetDirection   (this->GetDirection());
+            pPlayer->SetOrientation (coreVector3(0.0f,0.0f,1.0f));
+            pPlayer->SetScale       (1.5f / PLAYER_SIZE_FACTOR);
+            pPlayer->SetRainbow     (true);
+            pPlayer->SetCurHealthPct(1.0f);
+            pPlayer->SetCurShieldPct(1.0f);
 
             if(g_pGame->IsMulti())
             {
-                pOther->EquipWeapon(0u, cFinalWeapon::ID);
-                pOther->SetScale   (1.5f / PLAYER_SIZE_FACTOR);
-                pOther->SetRainbow (true);
-                pOther->EnableWind ();
+                pOther->EquipWeapon    (0u, cFinalWeapon::ID);
+                pOther->SetScale       (1.5f / PLAYER_SIZE_FACTOR);
+                pOther->SetRainbow     (true);
+                pOther->SetCurHealthPct(1.0f);
+                pOther->SetCurShieldPct(1.0f);
+                pOther->EnableWind     ();
             }
 
             this->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
@@ -1094,6 +1102,9 @@ void cProjectOneBoss::__MoveOwn()
                 pPlayer->ApplyForce(vDiff.Normalized() * 300.0f);
                 pPlayer->AddStatus(PLAYER_STATUS_NO_INPUT_SHOOT);
 
+                pPlayer->ActivateDarkShading();
+                g_pSpecialEffects->CreateSplashDark(pPlayer->GetPosition(), SPECIAL_SPLASH_SMALL);
+
                 if(g_pGame->IsEasy())
                 {
                     pPlayer->StartFeeling(50.0f, 1u);
@@ -1270,7 +1281,7 @@ void cProjectOneBoss::__MoveOwn()
     }
     else if((m_iPatternType >= 1u) && (m_iPatternType <= 8u))
     {
-        m_fPatternValue.Update(1.0f);
+        m_fPatternValue.Update(g_pEnvironment->GetSpeed());
 
         if((m_iPhase >= 30u) && (m_iPhase <= 49u)) m_fPatternStrength.UpdateMax(-0.5f, 0.0f);
                                               else m_fPatternStrength.UpdateMin(0.25f, 1.0f);
@@ -1740,7 +1751,8 @@ void cProjectOneBoss::__MoveOrange()
             coreObject3D* pWay = pGelu->GetWay(i);
             if(!pWay->IsEnabled(CORE_OBJECT_ENABLE_MOVE) || !pGelu->IsWayActive(i)) continue;
 
-            const coreVector2 vNewPos = pWay->GetPosition().xy() - pWay->GetPosition().xy().Normalized() * (25.0f * TIME * fSpeed);
+            const coreVector2 vDir    = pWay->GetPosition().xy().Normalized();
+            const coreVector2 vNewPos = pWay->GetPosition().xy() - vDir * (25.0f * TIME * fSpeed);
 
             if(InBetween(coreVector2(0.0f,0.0f), vNewPos - pWay->GetCollisionRange().xy(), vNewPos + pWay->GetCollisionRange().xy()))
             {
@@ -1753,6 +1765,9 @@ void cProjectOneBoss::__MoveOrange()
                 }
 
                 pGelu->DisableWay(i, true);
+
+                g_pSpecialEffects->CreateBlowColor(pWay->GetPosition(), coreVector3(vDir, 0.0f), SPECIAL_BLOW_SMALL, COLOR_ENERGY_MAGENTA);
+                g_pSpecialEffects->PlaySound(pWay->GetPosition(), 1.0f, 1.0f, SOUND_PLACEHOLDER);
             }
 
             pWay->SetPosition(coreVector3(vNewPos, 0.0f));
@@ -1785,8 +1800,9 @@ void cProjectOneBoss::__MoveOrange()
             for(coreUintW i = 0u; i < GELU_FANGS; ++i)
                 pGelu->EnableFang(i);
 
-            pGelu->SetCrushFree(true);
-            pGelu->SetCrushLong(false);
+            pGelu->SetCrushFree  (true);
+            pGelu->SetCrushLong  (false);
+            pGelu->SetCrushIgnore(false);
         }
 
         PHASE_CONTROL_TIMER(0u, 0.7f, LERP_BREAK_REV)
@@ -2521,6 +2537,7 @@ void cProjectOneBoss::__MoveRed()
 
                 pMuscus->StrikeAttack(j, pPlayer, this);
                 g_pSpecialEffects->CreateSplashColor(pPearl->GetPosition(), 5.0f, 3u, COLOR_ENERGY_WHITE);
+                g_pSpecialEffects->PlaySound(pPearl->GetPosition(), 1.0f, pMuscus->RetrievePearlPitch(), SOUND_EFFECT_PEARL);
             }
         }
     });
@@ -2534,6 +2551,8 @@ void cProjectOneBoss::__MoveRed()
             {
                 this->TakeDamage(50, ELEMENT_NEUTRAL, this->GetPosition().xy(), pMuscus->GetStrikePlayer(i), true);
                 m_fPearlFlash = 1.0f;
+
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.2f, SOUND_EFFECT_DUST);
             }
         }
     }
@@ -4028,6 +4047,8 @@ void cProjectOneBoss::__MoveGreen()
             g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
         });
 
+        this->SetDirection(coreVector3(coreVector2::Direction(m_avVector[LASER_ROTA].x * 3.0f - (0.5f*PI)), 0.0f));
+
         if(this->GetLostHealth() >= 1600)
         {
             PHASE_CHANGE_INC
@@ -4036,6 +4057,8 @@ void cProjectOneBoss::__MoveGreen()
             pVirido->DisableLaser(1u, true);
 
             pVirido->SetLaserCross(true);
+
+            this->SetDirection(coreVector3(0.0f,-1.0f,0.0f));
         }
     }
 
@@ -5192,7 +5215,7 @@ void cProjectOneBoss::__EndExplosion(const coreBool bClear)
     {
         pPlayer->HealShield(pPlayer->GetMaxShield() / 10);
 
-        pPlayer->GetScoreTable()->TransferChain();
+        pPlayer->GetScoreTable()->CancelCooldown();
         pPlayer->GetScoreTable()->ResetOverride();
 
         pPlayer->StartRolling(pPlayer->GetInput()->vMove);
@@ -5203,6 +5226,7 @@ void cProjectOneBoss::__EndExplosion(const coreBool bClear)
 
     // 
     g_pSpecialEffects->MacroExplosionDarkBig(this->GetPosition());
+    g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_09);
 }
 
 

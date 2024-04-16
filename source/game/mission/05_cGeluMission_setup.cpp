@@ -82,12 +82,12 @@ void cGeluMission::__SetupOwn()
     // in 1 and 2 back of enemies should not be reachable without shooting at them first
     // TASK: collect all coins in the dungeon
     // TASK: hit specific enemies to reactivate them
+    // ACHIEVEMENT: hit every enemy at least one time
     // TODO 1: hardmode: force is much stronger, and all enemies bounce at some point
     // TODO 1: hardmode: enemies get bigger, based on life or force
     // TODO 1: // 0b1101'1011u, // 0b1101'1011u, ?
-    // TODO 1: MAIN: task-check, regular score, badges, sound, background rota/speed
-    // TODO 1: ACHIEVEMENT: name (), description (), hit every enemy at least one time
-    // TODO 1: s_aiMark anpassen, is derzeit viel viel zu leicht
+    // TODO 1: [MF] : task-check, regular score, badges, sound, background rota/speed
+    // TODO 1: [MF] s_aiMark anpassen, is derzeit viel viel zu leicht
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         constexpr coreFloat fDungeonFactor  = 0.095f;
@@ -155,6 +155,8 @@ void cGeluMission::__SetupOwn()
             0b0010'0000u,
             0u, 0u, 0u
         };
+
+        constexpr coreUintW iDungeonTotal = std::accumulate(aiDungeon, aiDungeon + ARRAY_SIZE(aiDungeon), 0u, [](const coreUintW A, const coreUint8 B) {return A + coreMath::PopCount(B);});
 
         STATIC_ASSERT(ARRAY_SIZE(aiDungeon) == ARRAY_SIZE(aiDungeonCoin))
 
@@ -229,7 +231,7 @@ void cGeluMission::__SetupOwn()
             });
         });
 
-        STAGE_GET_START(178u)
+        STAGE_GET_START(180u)
             STAGE_GET_VEC2_ARRAY(avForce,     80u, for(coreUintW i = 0u; i < 80u; ++i) avForce[i] = ((i < 72u) ? 85.0f : 100.0f) * pSquad1->GetEnemy(i)->GetDirection().xy();)
             STAGE_GET_VEC2_ARRAY(avBouncePos, 2u,  avBouncePos[0] = 1.2f * SQRT2 * FOREGROUND_AREA;        avBouncePos[1] = avBouncePos[0].InvertedX();)
             STAGE_GET_VEC2_ARRAY(avBounceDir, 2u,  avBounceDir[0] = coreVector2(-1.5f,-1.0f).Normalized(); avBounceDir[1] = coreVector2(1.0f,-1.5f).Normalized();)
@@ -243,9 +245,13 @@ void cGeluMission::__SetupOwn()
             STAGE_GET_UINT      (iCoinState)
             STAGE_GET_UINT      (iMarkState)
             STAGE_GET_UINT      (iMarkCount)
+            STAGE_GET_UINT      (iHitField)
+            STAGE_GET_UINT      (iHitCount)
         STAGE_GET_END
 
-        STAGE_COLL_ENEMY_BULLET(pEnemy, pBullet, vIntersection, bFirstHit, COLL_THIS, COLL_VAL(pSquad1), COLL_VAL(avForce), COLL_REF(fBounceForce), COLL_REF(fMillForce), COLL_REF(fDragForce), COLL_REF(iMarkState), COLL_REF(iMarkCount), COLL_VAL(nIsMarkFunc), COLL_VAL(nGetMarkIndex))
+        ASSERT(pSquad1->GetNumEnemiesAlive() <= sizeof(iHitField)*8u)
+
+        STAGE_COLL_ENEMY_BULLET(pEnemy, pBullet, vIntersection, bFirstHit, COLL_THIS, COLL_VAL(pSquad1), COLL_VAL(avForce), COLL_REF(fBounceForce), COLL_REF(fMillForce), COLL_REF(fDragForce), COLL_REF(iMarkState), COLL_REF(iMarkCount), COLL_REF(iHitField), COLL_REF(iHitCount), COLL_VAL(nIsMarkFunc), COLL_VAL(nGetMarkIndex))
         {
             if(!bFirstHit) return;
 
@@ -286,6 +292,12 @@ void cGeluMission::__SetupOwn()
                 this->AddExtraScore(pEnemy->LastAttacker(), 100u * iGroupNum, pEnemy->GetPosition());
             }
 
+            if(!HAS_BIT(iHitField, i % (sizeof(iHitField)*8u)))
+            {
+                ADD_BIT(iHitField, i % (sizeof(iHitField)*8u))
+                iHitCount += 1u;
+            }
+
             if(nIsMarkFunc(i) && !HAS_BIT(iMarkState, nGetMarkIndex(i)))
             {
                 ADD_BIT(iMarkState, nGetMarkIndex(i))
@@ -309,6 +321,13 @@ void cGeluMission::__SetupOwn()
             else if(STAGE_SUB(6u)) STAGE_RESURRECT(pSquad1, 88u, 95u)   // #
             else if(STAGE_SUB(7u)) STAGE_RESURRECT(pSquad1, 80u, 87u)   // #
             else if(STAGE_SUB(8u)) STAGE_RESURRECT(pSquad1, 96u, 96u + iDungeonEnemies - 1u)
+            else
+            {
+                constexpr coreUintW iMargin = 4u;
+                if(iHitCount >= 96u + iDungeonTotal - iMargin) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, coreVector3(0.0f,0.0f,0.0f))
+            }
+
+            iHitField = 0u;
         }
 
         cHelper* pHelper = g_pGame->GetHelper(ELEMENT_YELLOW);
@@ -369,7 +388,10 @@ void cGeluMission::__SetupOwn()
                         cEnemy* pEnemy = pSquad1->GetEnemy(96u + iIndex);
                         ADD_BIT(iDragActive, iIndex)
 
-                        pEnemy->SetPosition(coreVector3(vPos * FOREGROUND_AREA + vCorr, 0.0f));
+                        pEnemy->SetPosition (coreVector3(vPos * FOREGROUND_AREA + vCorr, 0.0f));
+                        pEnemy->RemoveStatus(ENEMY_STATUS_SKIPEXPLOSION);
+
+                        REMOVE_BIT(iHitField, iIndex % (sizeof(iHitField)*8u))
                     }
 
                     if(HAS_BIT(iLevelCoin, j))
@@ -430,6 +452,7 @@ void cGeluMission::__SetupOwn()
                     if(vNewPos.y < -1.3f * FOREGROUND_AREA.y)
                     {
                         REMOVE_BIT(iDragActive, i - 96u)
+                        pEnemy->AddStatus(ENEMY_STATUS_SKIPEXPLOSION);
                     }
 
                     pEnemy->SetPosition(coreVector3(vNewPos, 0.0f));
@@ -516,7 +539,7 @@ void cGeluMission::__SetupOwn()
             }
         }
 
-        STAGE_WAVE(0u, "5-1", {50.0f, 75.0f, 100.0f, 125.0f})   // FÜNFUNDZWANZIG
+        STAGE_WAVE(0u, "5-1", {50.0f, 75.0f, 100.0f, 125.0f, 250.0f})   // FÜNFUNDZWANZIG
     });
 
     // ################################################################
@@ -562,8 +585,8 @@ void cGeluMission::__SetupOwn()
     // TASK: destroy specific enemies first
     // TODO 1: hard mode: attacking the border creates attacks (stings fly away, and respawn a second later ?)
     // TODO 1: etwas muss blinken oder reagieren bei treffern (e.g. die stacheln ?, eine unsichtbare linie am rand (im spielfield))
-    // TODO 1: MAIN: regular score, badges, sound, background rota/speed
-    // TODO 1: ACHIEVEMENT: name (), description (), never miss a shot (same as stage 0-2 ?!?!) / ###
+    // TODO 1: [MF] MAIN: regular score, badges, sound, background rota/speed
+    // TODO 1: [MF] ACHIEVEMENT: name (), description (), never miss a shot (same as stage 0-2 ?!?!) / ###
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         constexpr coreFloat fOffMin = 0.0f;
@@ -1205,7 +1228,7 @@ void cGeluMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE(1u, "5-2", {50.0f, 75.0f, 100.0f, 125.0f})   // SECHSUNDZWANZIG
+        STAGE_WAVE(1u, "5-2", {50.0f, 75.0f, 100.0f, 125.0f, 250.0f})   // SECHSUNDZWANZIG
     });
 
     // ################################################################
@@ -1253,11 +1276,10 @@ void cGeluMission::__SetupOwn()
     // TODO 1: hardmode: blocks have stings (but not always, and they attack certain areas, e.g in the tunnel from both sides), enemies start attacking
     // TODO 1: move shake (and color management if not yet) to mission code, it's only visual
     // TODO 1: smoke zwischen bewegenden steinen (smoke+partikel? oder nur smoke?)
-    // TODO 1: you can be crushed in last phase when two corners moth into each other and you are exactly inbetween
-    // TODO 1: fix/finish gap badge, fix/finish/remove block touch badge
-    // TODO 1: finale phase schaut mir background nach rechts gut aus
-    // TODO 1: MAIN: task-check, regular score, badges, sound, background rota/speed
-    // TODO 1: ACHIEVEMENT: name (), description (), destroy 10 enemies from inside the rocks / fly 5s on top of the tunnel without getting hit
+    // TODO 1: [MF] fix/finish gap badge, fix/finish/remove block touch badge
+    // TODO 1: [MF] finale phase schaut mir background nach rechts gut aus
+    // TODO 1: [MF] MAIN: task-check, regular score, badges, sound, background rota/speed
+    // TODO 1: [MF] ACHIEVEMENT: name (), description (), destroy 10 enemies from inside the rocks / fly 5s on top of the tunnel without getting hit
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         constexpr coreFloat fStep = GELU_FANG_STEP;
@@ -1371,7 +1393,7 @@ void cGeluMission::__SetupOwn()
 
             if(bShake && InBetween(fDelay, fOld, fNew)) g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
 
-            return CLAMP(fNew * RCP(fDelay), 0.0f, 1.0f);
+            return CLAMP01(fNew * RCP(fDelay));
         };
 
         if(pSquad1->IsFinished())
@@ -1402,10 +1424,11 @@ void cGeluMission::__SetupOwn()
                 else if(m_iStageSub == 10u) pSquad2->ClearEnemies(false);
             }
 
-            this->SetCrushLong(m_iStageSub >= 18u);
         }
 
-        this->SetCrushFree((m_iStageSub >= 9u) || STAGE_TIME_BEFORE(5.0f));
+        this->SetCrushFree  (m_iStageSub >= 9u || STAGE_TIME_BEFORE(5.0f));
+        this->SetCrushLong  (m_iStageSub >= 18u);
+        this->SetCrushIgnore(m_iStageSub >= 18u);
 
         cHelper* pHelper = g_pGame->GetHelper(ELEMENT_PURPLE);
 
@@ -1888,7 +1911,7 @@ void cGeluMission::__SetupOwn()
             pBackground->SetGroundDensity(0u, STEP(0.5f, 1.0f, 1.0f - fEnvLerp));
         }
 
-        STAGE_WAVE(2u, "5-3", {55.0f, 80.0f, 110.0f, 135.0f})   // SIEBENUNDZWANZIG
+        STAGE_WAVE(2u, "5-3", {55.0f, 80.0f, 110.0f, 135.0f, 270.0f})   // SIEBENUNDZWANZIG
     });
 
     // ################################################################
@@ -1943,18 +1966,18 @@ void cGeluMission::__SetupOwn()
     // lines can be used even when they blend-out, as long as the target orb is enabled
     // moving everything statically is possible and feels nice, but does not add any depth (so it's only used to improve the rail-sequence)
     // in rail-sequence, make sure enemies are stretched out, so player has to move all the way, and nearly touch the sides, and enemies do not die too quickly
+    // in 3. grid, 2/2+2/3 (X/Y, start 0, oben links) is ne todesfalle
+    // TASK: touch every orb at least once (collect all shines)
+    // ACHIEVEMENT: be on top of an orb which does not exist anymore
     // TODO 1: hardmode: crossing lines ?
     // TODO 1: hardmode: a bug trying to follow and bite you
     // TODO 1: add input-cache du allow quick movement, e.g. right up up right down
-    // TODO 1: in 3. grid, 2/2+2/3 (X/Y, start 0, oben links) is ne todesfalle, muster kann schwer geändert werden, vielleicht angriff ?
-    // TODO 1: irgendetwas mit dem linien-wechsel machen, wenn man gleich danach versuchen muss nem angriff auszuweichen, blinken, andere farbe vor wechsel
-    // TODO 1: badge: collect yellow blocks as badge (+ extra score ?)
-    // TODO 1: badge: move along a marked line after another
-    // TODO 1: badge: guitar hero
-    // TODO 1: badge: items in finaler phase einsammeln die von oben herunterfliegen
-    // TODO 1: badge: move into void, after killing an enemy which takes away an orb
-    // TODO 1: MAIN: task-check, regular score, badges, sound, background rota/speed
-    // TODO 1: ACHIEVEMENT: name (), description (), Be on top of an orb which does not exist anymore
+    // TODO 1: [MF] badge: collect yellow blocks as badge (+ extra score ?)
+    // TODO 1: [MF] badge: move along a marked line after another
+    // TODO 1: [MF] badge: guitar hero
+    // TODO 1: [MF] badge: items in finaler phase einsammeln die von oben herunterfliegen
+    // TODO 1: [MF] badge: move into void, after killing an enemy which takes away an orb
+    // TODO 1: [MF] MAIN: task-check, regular score, badges, sound, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreFloat fOrbLen = 0.5f;
@@ -2276,6 +2299,8 @@ void cGeluMission::__SetupOwn()
             {
                 if(!pPlayer->HasStatus(PLAYER_STATUS_NO_INPUT_MOVE)) return;
 
+                if(!this->IsOrbEnabled(aiTarget[i])) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, pPlayer->GetPosition())
+
                 const coreUint8   x      = (aiTarget[i] % 4u);
                 const coreUint8   y      = (aiTarget[i] / 4u);
                 const sGameInput* pInput = pPlayer->HasStatus(PLAYER_STATUS_DEAD) ? &oEmptyInput : pPlayer->GetInput();
@@ -2461,7 +2486,7 @@ void cGeluMission::__SetupOwn()
             }
         }
 
-        STAGE_WAVE(3u, "5-4", {50.0f, 75.0f, 100.0f, 125.0f})   // ACHTUNDZWANZIG
+        STAGE_WAVE(3u, "5-4", {50.0f, 75.0f, 100.0f, 125.0f, 250.0f})   // ACHTUNDZWANZIG
     });
 
     // ################################################################
@@ -2516,11 +2541,10 @@ void cGeluMission::__SetupOwn()
     // TASK: various blocks spin around and get destroyed when touched
     // TODO 1: hardmode: arrows drehen oder flippen sich alle N sekunden
     // TODO 1: hardmode: no arrows visible, maybe under exception (timed, blinking, when disabled)
-    // TODO 1: I somehow got crushed in DDR part, when I was on the left game-border and turned
-    // TODO 1: add dance fail condition ? (m_iTouchState & m_iWayVisible) && (m_iWayGhost & m_iWayVisible)
-    // TODO 1: I got hit in dance part, even though I was in the middle, when I moved between two blocks vertically and switched   -> vielleicht nur 1 linie, ändert aber nix am issue für andere stellen ?
-    // TODO 1: MAIN: task-check, regular score, badges, sound, background rota/speed
-    // TODO 1: ACHIEVEMENT: name (), description (), never touch a solid block
+    // TODO 1: [MF] I beat DDR, even though I got crushed and moved through blocks
+    // TODO 1: [MF] add dance fail condition ? (m_iTouchState & m_iWayVisible) && (m_iWayGhost & m_iWayVisible)
+    // TODO 1: [MF] MAIN: task-check, regular score, badges, sound, background rota/speed
+    // TODO 1: [MF] ACHIEVEMENT: name (), description (), never touch a solid block
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         constexpr coreFloat fStep        = GELU_WAY_STEP;
@@ -2654,8 +2678,9 @@ void cGeluMission::__SetupOwn()
 
         cHelper* pHelper = g_pGame->GetHelper(ELEMENT_MAGENTA);
 
-        this->SetCrushLong(true);
-        this->SetCrushFree(true);
+        this->SetCrushFree  (true);
+        this->SetCrushLong  (true);
+        this->SetCrushIgnore(true);
 
         const coreFloat fFactor = g_pGame->IsEasy() ? 0.8f : 1.0f;
 
@@ -2966,7 +2991,11 @@ void cGeluMission::__SetupOwn()
             }
         });
 
-        if(!bPostpone) STAGE_WAVE(4u, "5-5", {65.0f, 95.0f, 130.0f, 160.0f})   // NEUNUNDZWANZIG
+        if(!bPostpone)
+        {
+            if(g_pGame->IsEasy()) STAGE_WAVE(4u, "5-5", {70.0f, 100.0f, 135.0f, 165.0f, 325.0f})   // NEUNUNDZWANZIG
+                             else STAGE_WAVE(4u, "5-5", {65.0f,  95.0f, 130.0f, 160.0f, 320.0f})
+        }
     });
 
     // ################################################################
@@ -3144,7 +3173,7 @@ void cGeluMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE(5u, "5-?", {60.0f, 80.0f, 100.0f, 120.0f})   // DREISSIG
+        STAGE_WAVE(5u, "5-?", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})   // DREISSIG
     });
 
     // ################################################################
@@ -3167,7 +3196,7 @@ void cGeluMission::__SetupOwn()
     // boss
     STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
-        STAGE_BOSS(m_Chol, {155.0f, 230.0f, 310.0, 385.0f})
+        STAGE_BOSS(m_Chol, {155.0f, 230.0f, 310.0, 385.0f, 770.0f})
     });
 
     // ################################################################

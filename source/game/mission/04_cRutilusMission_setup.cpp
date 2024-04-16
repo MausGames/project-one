@@ -85,17 +85,17 @@ void cRutilusMission::__SetupOwn()
     // during moving plates, enemies on the side either still is bad (you can just mow them down), and moving too (too confusing, you crash all the time)
     // finaler ansturm ist kein problem, wenn man weiß von welcher seite er anfängt
     // TODO 1: hard mode: alles ist um 90 grad gedreht! (color/dir changes every X.X seconds) -> but adjust affected enemies in double-plate sub-stages to be meaningful in both types
-    // TODO 1: fix badges !!!!!!!
-    // TODO 1: effect (+ sound) when getting forced and unforced (also for boss) (not permanent, but when entering/exiting)
-    // TODO 1: maybe also move left-right! (plates can disappear by moving up and down) (maybe shrink center-plate when switching to left-right, or just begin rotating) (maybe also just skip top-bottom with 2 plates, and go straight to 4)
-    // TODO 1: badge: versuch N mal zu turnen, anzeige beginnt nach M mal (oder gar keine anzeige, hidden badge, na zm. für die letzten 3 mal)
-    // TODO 1: badge: N schwer zu erreichende gegner die sofort verschwinden, speziell markiert, black
-    // TODO 1: badge: kugerl bei rush-gruppe einsammeln
-    // TODO 1: badge: nicht zu lange auf einer platte, hin und her, timer für blau, etc.
-    // TODO 1: badge: another plate flies across the screen with a certain enemy in sight, killing from the plate gives badge (oder für boss)
-    // TODO 1: MAIN: task-check, regular score, badges, sound
-    // TODO 1: ACHIEVEMENT: name (), description (), beat the wave without ever shooting to the left (in regular game rotation)
-    // TODO 1: plate error badge in zusammenhang mit twin-stick anschauen
+    // TODO 1: [MF] fix badges !!!!!!!
+    // TODO 1: [MF] effect (+ sound) when getting forced and unforced ? (also for boss) (not permanent, but when entering/exiting)
+    // TODO 1: [MF] maybe also move left-right! (plates can disappear by moving up and down) (maybe shrink center-plate when switching to left-right, or just begin rotating) (maybe also just skip top-bottom with 2 plates, and go straight to 4)
+    // TODO 1: [MF] badge: versuch N mal zu turnen, anzeige beginnt nach M mal (oder gar keine anzeige, hidden badge, na zm. für die letzten 3 mal)
+    // TODO 1: [MF] badge: N schwer zu erreichende gegner die sofort verschwinden, speziell markiert, black
+    // TODO 1: [MF] badge: kugerl bei rush-gruppe einsammeln
+    // TODO 1: [MF] badge: nicht zu lange auf einer platte, hin und her, timer für blau, etc.
+    // TODO 1: [MF] badge: another plate flies across the screen with a certain enemy in sight, killing from the plate gives badge (oder für boss)
+    // TODO 1: [MF] MAIN: task-check, regular score, badges, sound
+    // TODO 1: [MF] ACHIEVEMENT: name (), description (), beat the wave without ever shooting to the left (in regular game rotation)
+    // TODO 1: [MF] plate error badge in zusammenhang mit twin-stick anschauen
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -479,7 +479,7 @@ void cRutilusMission::__SetupOwn()
             }
         });
 
-        if(!bPostpone) STAGE_WAVE(0u, "4-1", {50.0f, 75.0f, 100.0f, 125.0f})   // NEUNZEHN
+        if(!bPostpone) STAGE_WAVE(0u, "4-1", {50.0f, 75.0f, 100.0f, 125.0f, 250.0f})   // NEUNZEHN
     });
 
     // ################################################################
@@ -534,10 +534,10 @@ void cRutilusMission::__SetupOwn()
     // TASK: kill a certain group of enemies in order
     // TASK: move into all 4 invisible corners
     // TODO 1: hardmode: player cannot rotate, is rotating all the time, player bullets rotate with background, rotation is based on player position or other actions
-    // TODO 1: teilweise bessere bullet patterns ? https://www.youtube.com/watch?v=1uTQDKAN0sM https://www.youtube.com/watch?v=KJHt4cq1ti0
-    // TODO 1: MAIN: task-check, regular score, sound
-    // TODO 1: ACHIEVEMENT: name (), description (), beat the segment without every turning your ship manually
-    // TODO 1: greatly reduce rotation when related option is disabled
+    // TODO 1: [MF] teilweise bessere bullet patterns ? https://www.youtube.com/watch?v=1uTQDKAN0sM https://www.youtube.com/watch?v=KJHt4cq1ti0
+    // TODO 1: [MF] MAIN: task-check, regular score, sound
+    // TODO 1: [MF] ACHIEVEMENT: name (), description (), beat the segment without every turning your ship manually
+    // TODO 1: [MF] greatly reduce rotation when related option is disabled
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         constexpr coreUintW iCoreIndex = 61u;
@@ -996,7 +996,7 @@ void cRutilusMission::__SetupOwn()
             pParent->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
         });
 
-        if(!bPostpone) STAGE_WAVE(1u, "4-2", {55.0f, 80.0f, 110.0f, 135.0f})   // ZWANZIG
+        if(!bPostpone) STAGE_WAVE(1u, "4-2", {55.0f, 80.0f, 110.0f, 135.0f, 270.0f})   // ZWANZIG
     });
 
     // ################################################################
@@ -1049,15 +1049,15 @@ void cRutilusMission::__SetupOwn()
     // TASK: collect fast objects, which can only be caught within slowdown bubble
     // TODO 1: hardmode: slowdown/safe field follows player
     // TODO 1: effekt um verlangsamte objekte herum (schein)
-    // TODO 1: player bullets sollten nicht so stark gekürzt werden
-        // TODO 1: enemies in matrix wave may need a different configuration, to have more movement possibilities
-        // TODO 1: nochmal schauen ob man den wellen-angriffen der letzten gegner gescheit ausweichen kann (hab bubble-größe wieder zurückgesetzt von 22 auf 20, könnte damit zu tun haben), ansonsten vielleicht offsets ändern 0.5f,0.0f,0.5f,0.0f
-        // TODO 1: gegner links und rechts nach matrix phase, sollten vielleicht von 4+4 auf 2+2+4 geändert werden
-    // TODO 1: MAIN: task-check, hard idea, regular score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, background rota/speed
-    // TODO 1: ACHIEVEMENT: name (), description (), survive 60 seconds in the matrix phase without destroying an enemy (ähnlich zu tower) / destroy 10 enemies from within the bubble, or while being slowed down
-    // TODO 1: further slowdown: enemy exhaust, particle effects, sound effects, bubble (?)
-    // TODO 1:  #### vielleicht gerade gegner-angriffe (wenn sich bubble bewegt)
-    // TODO 1: background sollte selben winkel wie die items zum einsammeln haben
+    // TODO 1: [MF] player bullets sollten nicht so stark gekürzt werden
+        // TODO 1: [MF] enemies in matrix wave may need a different configuration, to have more movement possibilities
+        // TODO 1: [MF] nochmal schauen ob man den wellen-angriffen der letzten gegner gescheit ausweichen kann (hab bubble-größe wieder zurückgesetzt von 22 auf 20, könnte damit zu tun haben), ansonsten vielleicht offsets ändern 0.5f,0.0f,0.5f,0.0f
+        // TODO 1: [MF] gegner links und rechts nach matrix phase, sollten vielleicht von 4+4 auf 2+2+4 geändert werden
+    // TODO 1: [MF] MAIN: task-check, hard idea, regular score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, background rota/speed
+    // TODO 1: [MF] ACHIEVEMENT: name (), description (), survive 60 seconds in the matrix phase without destroying an enemy (ähnlich zu tower) / destroy 10 enemies from within the bubble, or while being slowed down
+    // TODO 1: [MF] further slowdown: enemy exhaust, particle effects, sound effects, bubble (?)
+    // TODO 1: [MF] #### vielleicht gerade gegner-angriffe (wenn sich bubble bewegt)
+    // TODO 1: [MF] background sollte selben winkel wie die items zum einsammeln haben
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         constexpr coreUintW iNumData   = 6u;
@@ -1441,7 +1441,7 @@ void cRutilusMission::__SetupOwn()
             });
         }
 
-        if(!bPostpone) STAGE_WAVE(2u, "4-3", {60.0f, 80.0f, 100.0f, 120.0f})   // EINUNDZWANZIG
+        if(!bPostpone) STAGE_WAVE(2u, "4-3", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})   // EINUNDZWANZIG
     });
 
     // ################################################################
@@ -1489,12 +1489,12 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: gravitation should work equally with all bullet types (basis-speed verwenden, von cWeapon, oder eher bullet, muss ich eh speichern für längen-veränderung)
     // TODO 1: distortion for waves ?
     // TODO 1: improve player bullet curve shape, with special vertex shader and different bullet entities
-    // TODO 1: improve coop targeting
-    // TODO 1: improve boring middle enemy-waves (first 3 are good, last 2 are good)
-    // TODO 1: bullet-linien sollten nicht unterbrochen werden, zumindest am anfang, nicht so wichtig beim kill
-    // TODO 1: MAIN: task-check, easy, hard idea, coop, regular score, badges, sound, background rota/speed
-    // TODO 1: ACHIEVEMENT: name (), description (), 
-    // TODO 1: final not-shooting enemy-move-pattern is weird
+    // TODO 1: [MF] improve coop targeting
+    // TODO 1: [MF] improve boring middle enemy-waves (first 3 are good, last 2 are good) (still?)
+    // TODO 1: [MF] bullet-linien sollten nicht unterbrochen werden, zumindest am anfang, nicht so wichtig beim kill
+    // TODO 1: [MF] MAIN: task-check, easy, hard idea, coop, regular score, badges, sound, background rota/speed
+    // TODO 1: [MF] ACHIEVEMENT: name (), description (), 
+    // TODO 1: [MF] final not-shooting enemy-move-pattern is weird
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreUintW iNumTargets = 16u;
@@ -1865,7 +1865,7 @@ void cRutilusMission::__SetupOwn()
             pParent->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
         });
 
-        if(!bPostpone) STAGE_WAVE(3u, "4-4", {50.0f, 75.0f, 100.0f, 125.0f})   // ZWEIUNDZWANZIG
+        if(!bPostpone) STAGE_WAVE(3u, "4-4", {50.0f, 75.0f, 100.0f, 125.0f, 250.0f})   // ZWEIUNDZWANZIG
     });
 
     // ################################################################
@@ -1914,11 +1914,11 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: hard mode: every small meteor splits into 4 more smaller meteors
     // TODO 1: hard mode: indestructible meteors
     // TODO 1: hard mode: meteor bounce
-    // TODO 1: orb angriff is zu ähnlich zur snow-wave
+    // TODO 1: [MF] orb angriff is zu ähnlich zur snow-wave
     // TODO 1: entweder hier oder bei boss, die kleinen meteoriten, wenn sie zerstört werden fliegen auf den bildschirm und erzeugen kleine cracks (keine distortion, nur decal)
-    // TODO 1: MAIN: task-check, regular score, sound, background rota/speed
-    // TODO 1: ACHIEVEMENT: name (), description (), keep all magenta enemies alive and flying around until the very end
-    // TODO 1: meteoriten sollten unterschiedliche explosionen haben abhängig von größe (vielleicht nur pitch)
+    // TODO 1: [MF] MAIN: task-check, regular score, sound, background rota/speed
+    // TODO 1: [MF] ACHIEVEMENT: name (), description (), keep all magenta enemies alive and flying around until the very end
+    // TODO 1: [MF] meteoriten sollten unterschiedliche explosionen (sound) haben abhängig von größe (vielleicht nur pitch)
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         constexpr coreUintW iNumMeteors = 21u;   // including big meteor
@@ -2491,7 +2491,7 @@ void cRutilusMission::__SetupOwn()
             });
         });
 
-        STAGE_WAVE(4u, "4-5", {50.0f, 75.0f, 100.0f, 125.0f})   // DREIUNDZWANZIG
+        STAGE_WAVE(4u, "4-5", {50.0f, 75.0f, 100.0f, 125.0f, 250.0f})   // DREIUNDZWANZIG
     });
 
     // ################################################################
@@ -3018,7 +3018,7 @@ void cRutilusMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE(5u, "4-?", {60.0f, 80.0f, 100.0f, 120.0f})   // VIERUNDZWANZIG
+        STAGE_WAVE(5u, "4-?", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})   // VIERUNDZWANZIG
     });
 
     // ################################################################
@@ -3066,7 +3066,7 @@ void cRutilusMission::__SetupOwn()
             });
         });
 
-        STAGE_BOSS(m_Messier, {145.0f, 215.0f, 290.0, 360.0f})
+        STAGE_BOSS(m_Messier, {145.0f, 215.0f, 290.0, 360.0f, 720.0f})
     });
 
     // ################################################################

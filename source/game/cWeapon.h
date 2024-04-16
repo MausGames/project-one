@@ -102,8 +102,6 @@ private:
     coreFlow m_fMuzzleTime;
     coreUint8 m_iMuzzleTick;
 
-    coreFlow m_fVolume;
-
     coreFlow fTest = 0.0f;
     coreFlow fScale = 0.0f;
     

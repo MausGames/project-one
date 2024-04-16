@@ -155,7 +155,7 @@ void cMainMenu::Move()
                 m_iStatus = 1;
 
                 // 
-                m_StartNew.Ressolve();
+                m_StartNew.Resolve();
             }
             else if(m_ScoreButton.IsClicked())
             {
@@ -173,7 +173,7 @@ void cMainMenu::Move()
                 m_iStatus = 4;
 
                 // 
-                m_ExtraNew.Ressolve();
+                m_ExtraNew.Resolve();
             }
             else if(m_ConfigButton.IsClicked())
             {
@@ -181,7 +181,7 @@ void cMainMenu::Move()
                 m_iStatus = 5;
 
                 // 
-                m_ConfigNew.Ressolve();
+                m_ConfigNew.Resolve();
             }
             else if(m_SteamButton.IsClicked())
             {

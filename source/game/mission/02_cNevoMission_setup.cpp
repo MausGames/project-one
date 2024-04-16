@@ -90,11 +90,11 @@ void cNevoMission::__SetupOwn()
     // TASK: guide one of the followers in circles
     // TODO 1: hard-mode: bullets get bigger with time
     // TODO 1: hard-mode: bullets are bigger in general
-    // TODO 1: die geschosse über scraps können zerstört werden ohne die scraps, wenn außerhalb des sichtfelds, weil beides unterschiedliche interaction-ranges haben (remove hiding for rotating scraps?)
+    // TODO 1: [MF] die geschosse über scraps können zerstört werden ohne die scraps, wenn außerhalb des sichtfelds, weil beides unterschiedliche interaction-ranges haben (remove hiding for rotating scraps?)
     // TODO 1: homing und non-homing müssen sich optisch unterscheiden (zm. irgendein effekt on top) (die finalen wellen könnten sonst verwirren)
-    // TODO 1: MAIN: regular score, sound, background rota/speed
-    // TODO 1: ACHIEVEMENT: name (), description (), beat the wave while destroying fewer than 10 enemy bullets
-    // TODO 1: items abschießen sollte kombo beibehalten (ÜBERALL)
+    // TODO 1: [MF] MAIN: regular score, sound, background rota/speed
+    // TODO 1: [MF] ACHIEVEMENT: name (), description (), beat the wave while destroying fewer than 10 enemy bullets
+    // TODO 1: [MF] items abschießen sollte kombo beibehalten (ÜBERALL)
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         constexpr coreFloat fRange = 1.25f;
@@ -483,13 +483,13 @@ void cNevoMission::__SetupOwn()
 
         if(g_pGame->IsTask() && !STAGE_CLEARED)
         {
-            const coreFloat fPercent = I_TO_F(iCleanupCount) / 1700.0f;
+            const coreFloat fPercent = I_TO_F(iCleanupCount) * (1.0f / (g_pGame->IsEasy() ? 1500.0f : 1700.0f));
 
                  if(fPercent >= 1.0f)  STAGE_BADGE(0u, BADGE_EASY, coreVector3(0.0f,0.0f,0.0f))
             else if(fPercent >= 0.01f) g_pGame->GetCombatText()->AttachMarker(0u, PRINT("%.0f%%", FLOOR(fPercent * 100.0f)), coreVector3(0.0f,0.0f,0.0f), COLOR_MENU_INSIDE);
         }
 
-        STAGE_WAVE(0u, "2-1", {50.0f, 75.0f, 100.0f, 125.0f})   // SIEBEN
+        STAGE_WAVE(0u, "2-1", {50.0f, 75.0f, 100.0f, 125.0f, 250.0f})   // SIEBEN
     });
 
     // ################################################################
@@ -527,11 +527,10 @@ void cNevoMission::__SetupOwn()
     // TASK: enable a list of tiles in a very short time
     // TODO 1: hardmode: flipswitch galaxy, || =, mit blink delay wie bei rot+blau blöcke in Mario 3D World (achtung: laser könnten so ähnlich sein wie bomben beim endboss)
     // TODO 1: hardmode: flipswitch galaxy: blocking tiles moving around, lasers blocking movement between tiles
-    // TODO 1: adjust enemy movement patterns
-    // TODO 1: anderes enabled-pattern bei finaler phase, das aktuelle is viel zu leicht, vielleicht alles disabled ?
-    // TODO 1: vielleicht doch auch leichte angriffe auf easy, nur N schuss pro sub-phaes ?
-    // TODO 1: MAIN: task-check, regular score, sound, background rota/speed
-    // TODO 1: ACHIEVEMENT: name (), description (), 
+    // TODO 1: [MF] anderes enabled-pattern bei finaler phase, das aktuelle is viel zu leicht, vielleicht alles disabled ?
+    // TODO 1: [MF] vielleicht doch auch leichte angriffe auf easy, nur N schuss pro sub-phase ?
+    // TODO 1: [MF] MAIN: task-check, regular score, sound, background rota/speed
+    // TODO 1: [MF] ACHIEVEMENT: name (), description (), 
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         constexpr coreUintW iSingleIndex = 60u;
@@ -975,7 +974,7 @@ void cNevoMission::__SetupOwn()
             }
         });
 
-        if(!bPostpone) STAGE_WAVE(1u, "2-2", {60.0f, 90.0f, 120.0f, 150.0f})   // ACHT
+        if(!bPostpone) STAGE_WAVE(1u, "2-2", {60.0f, 90.0f, 120.0f, 150.0f, 300.0f})   // ACHT
     });
 
     // ################################################################
@@ -1009,14 +1008,13 @@ void cNevoMission::__SetupOwn()
     // bounce and rotation directions need to be opposite
     // linear movement can't use diagonal bombs as the explosion-lines will pop
     // TASK: kill enemy multiple times from behind
-    // TODO 1: if backstabbing should be percent, then go down from 100% to 0% (but where to place the marker ?)
     // TODO 1: hardmode: enemy attacks with simple pattern
     // TODO 1: hardmode: bomben schießen geschosse bei explosion, gekruzt oder entlang strahl
     // TODO 1: hardmode: bomben können angegriffen werden und vorzeitig explodieren, oder blockieren einfach nur angriffe
-    // TODO 1: increase safe-block (artificially) in bomb-hail phase (quad-test)
-    // TODO 1: blaue kugerl bei wand-bomben sind schwer zu bekommen, sub-stage check hilft aber nicht, weil bomben ja in nächster phase explodieren können
-    // TODO 1: MAIN: task-check, regular score, badges, sound, background rota/speed
-    // TODO 1: ACHIEVEMENT: name (), description (), survive 5 blasts of the final phase without getting hit
+    // TODO 1: [MF] increase safe-block (artificially) in bomb-hail phase (quad-test)
+    // TODO 1: [MF] blaue kugerl bei wand-bomben sind schwer zu bekommen, sub-stage check hilft aber nicht, weil bomben ja in nächster phase explodieren können
+    // TODO 1: [MF] MAIN: task-check, regular score, badges, sound, background rota/speed
+    // TODO 1: [MF] ACHIEVEMENT: name (), description (), survive 5 blasts of the final phase without getting hit
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 58u)
@@ -1371,7 +1369,7 @@ void cNevoMission::__SetupOwn()
             });
         }
 
-        STAGE_WAVE(2u, "2-3", {45.0f, 65.0f, 90.0f, 110.0f})   // NEUN
+        STAGE_WAVE(2u, "2-3", {45.0f, 65.0f, 90.0f, 110.0f, 220.0f})   // NEUN
     });
 
     // ################################################################
@@ -1415,10 +1413,10 @@ void cNevoMission::__SetupOwn()
     // TODO 1: hardmode: hidden arrow
     // TODO 1: hardmode: arrow change direction with tick (visible display), though this is already in the final boss
     // TODO 1: hardmode: jeder gegner hat zwei pfeile (consistent mit der gruppe)
-    // TODO 1: 6x6 puzzle anpassen (falls nötig) (JA, WAR SPIELER FEEDBACK, DASS ES ZU PUZZLY IST, the weakest part of the demo), einzelne pfeile anpassen (falls nötig) (vielleicht auch shiften oder aufteilen oder rotiert infinity nach rechts oder chess-aufteilung (um sie von der kleinen davor zu unterscheiden!))
-    // TODO 1: MAIN: task-check, hard idea, regular score, badges, sound, background rota/speed
-    // TODO 1: ACHIEVEMENT: name (), description (), finish the stage without turning more than N times
-    // TODO 1: leichter angriff auf easy, vielleicht der einzel-schuss, und auf normal gibts multi-schuss
+    // TODO 1: [MF] 6x6 puzzle anpassen (falls nötig) (JA, WAR SPIELER FEEDBACK, DASS ES ZU PUZZLY IST, the weakest part of the demo), einzelne pfeile anpassen (falls nötig) (vielleicht auch shiften oder aufteilen oder rotiert infinity nach rechts oder chess-aufteilung (um sie von der kleinen davor zu unterscheiden!))
+    // TODO 1: [MF] MAIN: task-check, hard idea, regular score, badges, sound, background rota/speed
+    // TODO 1: [MF] ACHIEVEMENT: name (), description (), finish the stage without turning more than N times
+    // TODO 1: [MF] leichter angriff auf easy, vielleicht der einzel-schuss, und auf normal gibts multi-schuss
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreFloat fDistance = 1.1f;
@@ -1917,7 +1915,7 @@ void cNevoMission::__SetupOwn()
         pBackground->SetGroundDensity(4u, STEP(0.5f, 1.0f, fEnvLerp));
         pBackground->SetGroundDensity(5u, STEP(0.5f, 1.0f, fEnvLerp));
 
-        STAGE_WAVE(3u, "2-4", {50.0f, 75.0f, 100.0f, 125.0f})   // ZEHN
+        STAGE_WAVE(3u, "2-4", {50.0f, 75.0f, 100.0f, 125.0f, 250.0f})   // ZEHN
     });
 
     // ################################################################
@@ -1979,9 +1977,9 @@ void cNevoMission::__SetupOwn()
     // TODO 1: hardmode: große kugerl explodieren in viele kleine
     // TODO 1: hardmode: 3 rotieren vom center nach außen
     // TODO 1: move stuff from here (and Leviathan) into grow-bullet ?
-    // TODO 1: MAIN: regular score, auf boss übertragen (general, easy, coop), sound, background rota/speed
-    // TODO 1: ACHIEVEMENT: name (), description (), 
-    // TODO 1: badge durch big wurde nicht erkannt, in dem moment wo ich getroffen wurde, kann es sein, dass OldPos+FlyMove dann kaputt sind wenn die zeit einfriert ?
+    // TODO 1: [MF] MAIN: regular score, auf boss übertragen (general, easy, coop), sound, background rota/speed
+    // TODO 1: [MF] ACHIEVEMENT: name (), description (), 
+    // TODO 1: [MF] badge durch big wurde nicht erkannt, in dem moment wo ich getroffen wurde, kann es sein, dass OldPos+FlyMove dann kaputt sind wenn die zeit einfriert ?
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -2369,7 +2367,7 @@ void cNevoMission::__SetupOwn()
             });
         }
 
-        STAGE_WAVE(4u, "2-5", {50.0f, 75.0f, 100.0f, 125.0f})   // ELF
+        STAGE_WAVE(4u, "2-5", {50.0f, 75.0f, 100.0f, 125.0f, 250.0f})   // ELF
     });
 
     // ################################################################
@@ -2727,7 +2725,7 @@ void cNevoMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE(5u, "2-?", {60.0f, 80.0f, 100.0f, 120.0f})   // ZWÖLF
+        STAGE_WAVE(5u, "2-?", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})   // ZWÖLF
     });
 
     // ################################################################
@@ -2764,7 +2762,7 @@ void cNevoMission::__SetupOwn()
     // boss
     STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
-        STAGE_BOSS(m_Leviathan, {160.0f, 240.0f, 320.0, 400.0f})
+        STAGE_BOSS(m_Leviathan, {160.0f, 240.0f, 320.0, 400.0f, 800.0f})
     });
 
     // ################################################################

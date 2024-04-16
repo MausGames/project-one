@@ -19,10 +19,9 @@
 // TODO 5: boss0102, separate emitters to three objects, to make them blue
 // TODO 5: boss0103, remove small hitch when finishing rotation in the middle shortly before beginning laser-phase
 // TODO 3: transformation properties are invalid on start (basically for phase 0), should this be handled ?
-// TODO 1: boss hat mit PHASE_CONTROL_TICKER noch einmal geschossen, nachdem er gestorben ist und alle geschosse zerstört wurden, sollte allgemein verhindert werden, auch bei normalen waves
-// TODO 1: check if PHASE_AGAIN is required on some PHASE_RESET calls (if 1.0f is reached, all calculations will be repeated with 0.0f, for a (nearly) perfect loop (fractions are still not handled))
+// TODO 1: [MF] boss hat mit PHASE_CONTROL_TICKER noch einmal geschossen, nachdem er gestorben ist und alle geschosse zerstört wurden, sollte allgemein verhindert werden, auch bei normalen waves
+// TODO 1: [MF] check if PHASE_AGAIN is required on some PHASE_RESET calls (if 1.0f is reached, all calculations will be repeated with 0.0f, for a (nearly) perfect loop (fractions are still not handled))
 // TODO 4: remove counters and vectors (first remove usage)
-// TODO 1: chain sollte beim erscheinen des time-bonus-banners gebrochen werden
 
 
 // ****************************************************************
@@ -1050,6 +1049,8 @@ public:
 
     // 
     void ResurrectIntro();
+    
+    inline void HideTail() {this->__SetLimbValue(ZEROTH_LIMB_TAIL, 1.0f);}
 
     // get object properties
     inline const coreChar* GetMusicName()const final {return "boss_06.ogg";}
@@ -1102,6 +1103,7 @@ private:
 class cGemingaBoss final : public cBoss
 {
 private:
+    cCustomEnemy m_Sphere;             // 
     cCustomEnemy m_InsideTop;          // 
     cCustomEnemy m_InsideBottom;       // 
     cCustomEnemy m_Top;                // 
@@ -1126,6 +1128,9 @@ public:
 
     DISABLE_COPY(cGemingaBoss)
     ASSIGN_ID_EX(702, "GEMINGA", COLOR_MENU_RED, COLOR_MENU_RED, coreVector2(0.5f,0.0f))
+
+    // 
+    void ResurrectIntro();
 
     // get object properties
     inline const coreChar* GetMusicName()const final {return "boss_07.ogg";}
@@ -1239,7 +1244,7 @@ public:
     cProjectOneBoss()noexcept;
 
     DISABLE_COPY(cProjectOneBoss)
-    ASSIGN_ID(801, "???")
+    ASSIGN_ID(801, "P-ONE")
 
     // get object properties
     inline coreVector3     GetColor    ()const final {return m_vLevelColor;}

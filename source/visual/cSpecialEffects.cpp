@@ -1252,7 +1252,17 @@ void cSpecialEffects::ClearAll()
         m_aParticleDot  [i].ClearAll();
     }
 
-    // TODO 1: clear other stuff here   
+    // 
+    m_LightningList.Clear();
+    m_GustList     .Clear();
+    for(coreUintW i = 0u; i < SPECIAL_BLASTS;    ++i) m_aBlast        [i].SetAlpha(0.0f);
+    for(coreUintW i = 0u; i < SPECIAL_EXPLOSION; ++i) m_aExplosionBody[i].SetAlpha(0.0f);
+    m_fShakeStrength = 0.0f;
+    m_fFreezeTime    = 0.0f;
+    m_fSlowTime      = 0.0f;
+
+    // 
+    g_pPostProcessing->SetPosition(coreVector2(0.0f,0.0f));
 }
 
 

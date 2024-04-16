@@ -10,7 +10,7 @@
 #ifndef _P1_GUARD_FIGURE_H_
 #define _P1_GUARD_FIGURE_H_
 
-// TODO 1: arcade stick texture ?
+// TODO 3: arcade stick texture ?
 
 
 // ****************************************************************

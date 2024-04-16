@@ -163,6 +163,17 @@ cCalorMission::cCalorMission()noexcept
     m_Bull.AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_GHOST_PLAYER | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_FLAT);
 
     // 
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aBullWave); ++i)
+    {
+        m_aBullWave[i].DefineModel  ("object_cube_top.md3");
+        m_aBullWave[i].DefineTexture(0u, "effect_energy.png");
+        m_aBullWave[i].DefineProgram("effect_energy_flat_invert_program");
+        m_aBullWave[i].SetColor3    (COLOR_ENERGY_ORANGE * 0.8f);
+        m_aBullWave[i].SetTexSize   (coreVector2(1.0f,1.0f) * 0.4f);
+        m_aBullWave[i].SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+    }
+
+    // 
     m_Star     .DefineProgram("effect_energy_flat_invert_inst_program");
     m_StarChain.DefineProgram("effect_energy_flat_invert_inst_program");
     {
@@ -217,9 +228,6 @@ cCalorMission::cCalorMission()noexcept
 cCalorMission::~cCalorMission()
 {
     // 
-    m_Bull.Kill(false);
-
-    // 
     m_Boulder.Kill(false);
 
     // 
@@ -235,6 +243,7 @@ cCalorMission::~cCalorMission()
     this->DisableSnow(false);
     this->DisableLoad(false);
     this->DisableAim (false);
+    this->DisableBull(false);
     for(coreUintW i = 0u; i < CALOR_HAILS;  ++i) this->DisableHail (i, false);
     for(coreUintW i = 0u; i < CALOR_CHESTS; ++i) this->DisableChest(i, false);
     for(coreUintW i = 0u; i < CALOR_STARS;  ++i) this->DisableStar (i, false);
@@ -466,6 +475,48 @@ void cCalorMission::DisableAim(const coreBool bAnimated)
 
 // ****************************************************************
 // 
+void cCalorMission::EnableBull()
+{
+    WARN_IF(m_aBullWave[0].IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableBull(false);
+
+    // 
+    m_Bull.Resurrect();
+
+    // 
+    const auto nInitFunc = [](coreObject3D* OUTPUT pObject)
+    {
+        pObject->SetAlpha   (0.0f);
+        pObject->SetEnabled (CORE_OBJECT_ENABLE_ALL);
+        g_pGlow->BindObject(pObject);
+    };
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aBullWave); ++i) nInitFunc(&m_aBullWave[i]);
+}
+
+
+// ****************************************************************
+// 
+void cCalorMission::DisableBull(const coreBool bAnimated)
+{
+    if(!m_aBullWave[0].IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    m_Bull.Kill(false);
+
+    // 
+    const auto nExitFunc = [](coreObject3D* OUTPUT pObject)
+    {
+        pObject->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        g_pGlow->UnbindObject(pObject);
+    };
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aBullWave); ++i) nExitFunc(&m_aBullWave[i]);
+
+    // 
+    if(bAnimated) g_pSpecialEffects->CreateSplashColor(m_Bull.GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_ORANGE);
+}
+
+
+// ****************************************************************
+// 
 void cCalorMission::EnableStar(const coreUintW iIndex, const cShip* pOwner, const coreVector2 vOffset)
 {
     ASSERT(iIndex < CALOR_STARS)
@@ -658,6 +709,9 @@ void cCalorMission::__RenderOwnUnder()
     // 
     m_Star.Render();
     g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyList(&m_Star);
+
+    // 
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aBullWave); ++i) m_aBullWave[i].Render();
 }
 
 
@@ -844,12 +898,15 @@ void cCalorMission::__MoveOwnMiddle()
                         {
                             // 
                             this->CatchObject(i, pEnemy);
-                            
+
+                            // 
                             pPlayer->GetScoreTable()->RefreshCooldown();
 
                             // 
                             //pEnemy->ChangeToTop();
-                            pEnemy->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_KEEPVOLUME);
+                            pEnemy->AddStatus           (ENEMY_STATUS_GHOST | ENEMY_STATUS_KEEPVOLUME);
+                            pEnemy->RemoveStatus        (ENEMY_STATUS_INVINCIBLE);
+                            pEnemy->SetCollisionModifier(pEnemy->GetCollisionModifier() * coreVector3(1.0f,1.0f,0.1f));
                         }
                     });
 
@@ -1171,13 +1228,32 @@ void cCalorMission::__MoveOwnAfter()
             m_aAimSphere[i].Move();
         }
     }
-
+    
+    
     // 
     if(!m_Bull.HasStatus(ENEMY_STATUS_DEAD))
     {
+        // 
         m_Bull.SetDirection(coreVector3(coreVector2::Direction((-4.0f*PI) * m_fAnimation), 0.0f));
         m_Bull.SetTexOffset(coreVector2(0.0f, -0.5f * m_fAnimation));
+
+        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aBullWave); ++i)
+        {
+            const coreFloat   fStep   = I_TO_F(ARRAY_SIZE(m_aBullWave) - i);
+            const coreFloat   fOffset = I_TO_F(i) * (1.0f/3.0f);
+            const coreVector2 vDir    = coreVector2::Direction((-4.0f*PI) * m_fAnimation * (fStep + 1.0f) - (0.2f*PI) * fStep);
+
+            m_aBullWave[i].SetPosition (m_Bull.GetPosition());
+            m_aBullWave[i].SetSize     (m_Bull.GetSize    () * (1.0f + 0.2f * fStep));
+            m_aBullWave[i].SetDirection(coreVector3(vDir, 0.0f));
+            m_aBullWave[i].SetTexOffset(coreVector2(0.0f, m_fAnimation + fOffset));
+            m_aBullWave[i].SetAlpha    (0.5f / fStep);
+            m_aBullWave[i].Move();
+        }
     }
+    
+    
+    
 
     // 
     for(coreUintW i = 0u; i < CALOR_STARS; ++i)

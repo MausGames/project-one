@@ -32,7 +32,7 @@ public:
     void Move  ()final;
 
     // 
-    void Ressolve();
+    void Resolve();
 
     // 
     inline void SetIndex(const coreUint8 iIndex) {m_iIndex = iIndex;}

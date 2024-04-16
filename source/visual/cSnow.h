@@ -62,6 +62,10 @@ public:
     coreBool TestCollision(const coreVector2 vPosition)const;
 
     // 
+    coreBool AnyData()const;
+    coreBool AllData()const;
+
+    // 
     inline coreBool IsActive()const {return (m_fVisibility != 0.0f) && (m_fDelay == 0.0f);}
 
 

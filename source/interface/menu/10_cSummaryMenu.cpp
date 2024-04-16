@@ -605,16 +605,9 @@ void cSummaryMenu::Move()
             }
 
             // 
-            if((m_eState == SUMMARY_OUTRO) && STATIC_ISVALID(g_pGame))
+            if(m_eState == SUMMARY_OUTRO)
             {
-                ASSERT((g_pGame->GetCurMission()->GetCurSegmentIndex() == MISSION_NO_SEGMENT))
-
-                // 
-                g_pGame->ForEachPlayerAll([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
-                {
-                    if(m_aiApplyBonus[i]) {pPlayer->GetScoreTable()->AddScore(m_aiApplyBonus[i], false);  m_aiApplyBonus[i] = 0u;}
-                    if(m_aiApplyMedal[i]) {pPlayer->GetDataTable ()->GiveMedalMission(m_aiApplyMedal[i]); m_aiApplyMedal[i] = 0u;}
-                });
+                this->__ApplyDeferred();
             }
 
             if(m_eState != SUMMARY_WAIT)
@@ -792,15 +785,15 @@ void cSummaryMenu::Move()
             m_fIntroTimer.Update(1.0f);
             if((m_fIntroTimer >= 1.0f /*MENU_SUMMARY_BANNER_SPEED_REV*/) && m_iSelection)
             {
-                const eSummaryState eOld = m_eState;
+                //const eSummaryState eOld = m_eState;
                 
                 // 
                      if(m_eState      >= SUMMARY_SKIPPED) m_eState = SUMMARY_OUTRO;     // leave summary
                 else if(m_fIntroTimer >= fSpinTo)         m_eState = SUMMARY_OUTRO;
                 else if(m_fIntroTimer <  fSpinTo)         m_eState = SUMMARY_SKIPPED;   // skip blend-in
                 
-                if((m_iSelection == 3u) && (eOld != SUMMARY_OUTRO) && (m_eState == SUMMARY_OUTRO)) 
-                    g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);
+                //if((m_iSelection == 3u) && (eOld != SUMMARY_OUTRO) && (m_eState == SUMMARY_OUTRO)) 
+                //    g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);
             }
 
             // 
@@ -964,17 +957,7 @@ void cSummaryMenu::Move()
                     m_eState = SUMMARY_OUTRO;
 
                     // 
-                    if(STATIC_ISVALID(g_pGame))
-                    {
-                        ASSERT((g_pGame->GetCurMission()->GetCurSegmentIndex() == MISSION_NO_SEGMENT))
-
-                        // 
-                        g_pGame->ForEachPlayerAll([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
-                        {
-                            if(m_aiApplyBonus[i]) {pPlayer->GetScoreTable()->AddScore(m_aiApplyBonus[i], false);  m_aiApplyBonus[i] = 0u;}
-                            if(m_aiApplyMedal[i]) {pPlayer->GetDataTable ()->GiveMedalMission(m_aiApplyMedal[i]); m_aiApplyMedal[i] = 0u;}
-                        });
-                    }
+                    this->__ApplyDeferred();
 
                     // 
                     cMenu::ClearScreen();
@@ -1011,6 +994,9 @@ void cSummaryMenu::Move()
                 m_eState = SUMMARY_OUTRO;
 
                 // 
+                this->__ApplyDeferred();
+
+                // 
                 g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 0.0f);
 
                 // 
@@ -1031,6 +1017,9 @@ void cSummaryMenu::Move()
 
                 // 
                 m_eState = SUMMARY_OUTRO;
+
+                // 
+                this->__ApplyDeferred();
 
                 // 
                 g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 0.0f);
@@ -1062,10 +1051,11 @@ void cSummaryMenu::ShowArcade()
     this->__ResetState();
 
     // 
-    coreUint16 iShiftGood  = 0u;
-    coreUint16 iShiftBad   = 0u;
-    coreUint16 iMedalTotal = 0u;
-    coreUint8  iMedalCount = 0u;
+    coreUint16 iContinuesUsed = 0u;
+    coreUint16 iShiftGood     = 0u;
+    coreUint16 iShiftBad      = 0u;
+    coreUint16 iMedalTotal    = 0u;
+    coreUint8  iMedalCount    = 0u;
     for(coreUintW i = 0u; i < MENU_SUMMARY_ARCADES; ++i)
     {
         // 
@@ -1073,7 +1063,8 @@ void cSummaryMenu::ShowArcade()
         g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW j)
         {
             // 
-            iScoreFull += pPlayer->GetScoreTable()->GetScoreMission(i);
+            iScoreFull     += pPlayer->GetScoreTable()->GetScoreMission(i);
+            iContinuesUsed += pPlayer->GetDataTable ()->GetCounterTotal().iContinuesUsed;
         });
 
         // 
@@ -1184,12 +1175,17 @@ void cSummaryMenu::ShowArcade()
             g_pSave->EditLocalStatsArcade()->iTimeWorstShiftGood = iShiftGood;
             g_pSave->EditLocalStatsArcade()->iTimeWorstShiftBad  = iShiftBad;
         }
-    }
 
-    // 
-    if(g_CurConfig.Game.iGameSpeed >= 200u)
-    {
-        ADD_BIT(g_pSave->EditLocalStatsArcade()->iFeat, FEAT_TWOHUNDRED)
+        if(!iContinuesUsed)
+        {
+            ADD_BIT_EX(g_pSave->EditProgress()->aiTrophy, TROPHY_ONECOLORCLEAR)
+        }
+
+        // 
+        if(g_CurConfig.Game.iGameSpeed >= 200u)
+        {
+            ADD_BIT(g_pSave->EditLocalStatsArcade()->iFeat, FEAT_TWOHUNDRED)
+        }
     }
 
     // 
@@ -1243,8 +1239,8 @@ void cSummaryMenu::ShowMission()
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
         const coreUint32 iDamageTaken   = pPlayer->GetDataTable()->GetCounterMission(iMissionIndex).iDamageTaken;
-        const coreUint32 iContinuesUsed = pPlayer->GetDataTable()->GetCounterMission(iMissionIndex).iContinuesUsed;
-        const coreUint32 iRepairsUsed   = pPlayer->GetDataTable()->GetCounterMission(iMissionIndex).iRepairsUsed;
+        const coreUint16 iContinuesUsed = pPlayer->GetDataTable()->GetCounterMission(iMissionIndex).iContinuesUsed;
+        const coreUint16 iRepairsUsed   = pPlayer->GetDataTable()->GetCounterMission(iMissionIndex).iRepairsUsed;
 
         // 
         iBonusSurvive += cGame::CalcBonusSurvive(iDamageTaken, iContinuesUsed || iRepairsUsed);
@@ -1403,7 +1399,7 @@ void cSummaryMenu::ShowEndingNormal()
     ASSERT(STATIC_ISVALID(g_pGame))
 
     // 
-    this->__ResetState();
+    this->ShowMission();
 
     // 
     this->ChangeSurface(SURFACE_SUMMARY_ENDING_NORMAL, 0.0f);
@@ -1417,7 +1413,7 @@ void cSummaryMenu::ShowEndingSecret()
     ASSERT(STATIC_ISVALID(g_pGame))
 
     // 
-    this->__ResetState();
+    this->ShowMission();
 
     // 
     this->ChangeSurface(SURFACE_SUMMARY_ENDING_SECRET, 0.0f);
@@ -1458,6 +1454,24 @@ void cSummaryMenu::__SetMedalSegment(const coreUintW iIndex, const coreUint8 iMe
     // 
     ASSERT(iIndex < MENU_SUMMARY_MEDALS)
     cMenu::ApplyMedalTexture(&m_aMedalSegment[iIndex], iMedal, MISSION_SEGMENT_IS_BOSS(iIndex) ? MEDAL_TYPE_BOSS : MEDAL_TYPE_WAVE, true);
+}
+
+
+// ****************************************************************
+// 
+void cSummaryMenu::__ApplyDeferred()
+{
+    if(STATIC_ISVALID(g_pGame))
+    {
+        ASSERT((g_pGame->GetCurMission()->GetCurSegmentIndex() == MISSION_NO_SEGMENT))
+
+        // 
+        g_pGame->ForEachPlayerAll([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
+        {
+            if(m_aiApplyBonus[i]) {pPlayer->GetScoreTable()->AddScore(m_aiApplyBonus[i], false);  m_aiApplyBonus[i] = 0u;}
+            if(m_aiApplyMedal[i]) {pPlayer->GetDataTable ()->GiveMedalMission(m_aiApplyMedal[i]); m_aiApplyMedal[i] = 0u;}
+        });
+    }
 }
 
 

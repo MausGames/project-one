@@ -33,18 +33,18 @@
 // TODO 1: hard: additional enemies and side-turning
 // TODO 1: improve player-arrow appearance when looking into/outof z-axis
 // TODO 1: background für time-score-banner hängt in leere bei vertikaler resolution
-// TODO 1: spieler kann bei wänden hinaushängen, solange sie noch sichtbar sind (vor allem in coop) -> restrict with area ?
-// TODO 1: MAIN: sound
-// TODO 1: ACHIEVEMENT: name (), description (), 
+// TODO 1: [MF] MAIN: sound
+// TODO 1: [MF] ACHIEVEMENT: name (), description (), 
+// TODO 1: [MF] check hud rotation, game rotation, mirror mode
 
-// TODO 1: sound when fragment-board splits up, sound when bullet flies past player
+// TODO 1: [MF] sound when fragment-board splits up, sound when bullet flies past player
 
 // TODO 1: post-processing fehlt und farben sind anders, fix glow and distortion on extended viewport
 
-// TODO 1: alle layer sollten getroffen werden können (custom-enemy geht aber nicht, wegen render-reihenfolge), adjust size+dir+ori depending on current layer
+// TODO 1: [MF] alle layer sollten getroffen werden können (custom-enemy geht aber nicht, wegen render-reihenfolge), adjust size+dir+ori depending on current layer
 // TODO 1: boss sollte vielleicht eigenen shader haben, zum rand hin weniger transparenz (spherisch ?) statt ganz flach
 
-// TODO 1: vielleicht doch nicht spieler unsterblich machen, repair enemy soll timer haben, und bei continue spielt man von der aktuellen stelle weiter mit eigenem einflug
+// TODO 1: [MF] vielleicht doch nicht spieler unsterblich machen, repair enemy soll timer haben, und bei continue spielt man von der aktuellen stelle weiter mit eigenem einflug
 
 // (TODO 1: sinus-line gegner sieht man schlecht von oben kommen (vielleicht beim ersten gegner ein loch lassen um (überraschendes) erstes ausweichen zu erleichtern))
 // (TODO 1: handle farb-änderung von adds)

@@ -119,7 +119,6 @@ cRayWeapon::cRayWeapon()noexcept
 : m_bBurst  (false)
 , m_fMuzzleTime (0.0f)
 , m_iMuzzleTick (0u)
-, m_fVolume (0.0f)
 {
     // set base fire-rate
     m_CooldownTimer.SetSpeed(20.0f);
@@ -255,7 +254,7 @@ void cRayWeapon::__ShootOwn()
         //this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(2 * iSign, 6.0f, m_pOwner, vPos, vDir))->ChangeHeight(m_pOwner->GetPosition().z);
 
         // play bullet sound-effect
-        g_pSpecialEffects->PlaySound(m_pOwner->GetPosition(), LERP(1.0f, 0.5f, m_fVolume), 1.0f, SOUND_WEAPON_RAY);
+        g_pSpecialEffects->PlaySound(m_pOwner->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_RAY);
     }
 }
 

@@ -244,6 +244,8 @@ void cHelper::Kill(const coreBool bAnimated)
 
     // 
     this->DisableShield(bAnimated);
+    
+    REMOVE_FLAG(m_iStatus, HELPER_STATUS_HIDDEN)
 
     // 
     g_pGlow->UnbindObject(&m_Wind);

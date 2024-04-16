@@ -12,6 +12,9 @@
 
 // TODO 5: rotate entries and make them rotatable
 // TODO 3: add label pool
+// TODO 1: [MF] finish credits
+// TODO 3: do not end with cloud-background
+
 
 // https://old.reddit.com/r/shmups/comments/10dd8qd/i_would_like_to_show_you_the_game_ive_been/
 

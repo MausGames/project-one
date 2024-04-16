@@ -13,9 +13,9 @@
 // TODO 3: enemy bullet (and enemy?) cleanup on mission unload (probably not really necessary, can be re-used for next mission)
 // TODO 5: maybe spawn players in flight direction, mission start and continue ?
 // TODO 2: FindPlayer may find player outside of area (during resurrection)
-// TODO 2: removing ghost status (player, enemy, bullet) should reset firsthit property on collision somehow (but needs separation between sub-ghost states, maybe add own collision-tracker and merge with the one in player-class)
+// TODO 2: [MF] removing ghost status (player, enemy, bullet) should reset firsthit property on collision somehow (but needs separation between sub-ghost states, maybe add own collision-tracker and merge with the one in player-class)
 // TODO 3: repair enemy only in coop ? (not duel)
-// TODO 2: vor dem tod von immortal enemies, vor allem bossen, kann es sein, dass spieler-geschosse (sichtbar) reflektiert werden und der entsprechende sound-gespielt wird
+// TODO 2: [MF] vor dem tod von immortal enemies, vor allem bossen, kann es sein, dass spieler-geschosse (sichtbar) reflektiert werden und der entsprechende sound-gespielt wird
 
 
 // ****************************************************************

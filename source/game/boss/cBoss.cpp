@@ -128,7 +128,7 @@ void cBoss::_EndBoss()
     // 
     g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
-        pPlayer->GetScoreTable()->TransferChain();
+        pPlayer->GetScoreTable()->CancelCooldown();
         pPlayer->GetScoreTable()->ResetOverride();
     });
 
@@ -212,7 +212,6 @@ void cBoss::_UpdateBoss()
                         g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
                         {
                             pPlayer->ActivateDarkShading();
-
                             g_pSpecialEffects->CreateSplashDark(pPlayer->GetPosition(), SPECIAL_SPLASH_SMALL);
                         });
                     }

@@ -13,16 +13,15 @@
 // TODO 1: transfer to Core Engine
 // TODO 5: should low quality option also affect ship models, or vegetation density, or sprite density, or FB resolution ?
 // TODO 5: don't input-check inactive input-sets in multiplayer
-// TODO 1: controller input mapping should use gamepad-actions instead of button-IDs
-// TODO 1: controller input mapping should be tied to the GUID
+// TODO 1: [MF] controller input mapping should be tied to the GUID
 // TODO 3: SDL_JoystickCurrentPowerLevel (will it disconnect automatically if empty (triggering focus-loss event), or is manual checking required ?)
 // TODO 3: AnyButton should not get triggered by g_MenuInput.bScreenshot (in engine ?)
 // TODO 3: last-used input type might get disconnected, without reset
 // TODO 3: how to properly go back to the correct last-input keyboard, if player just uses mouse, currently it's initialized to 0, but gets set to the set with the mouse-button when navigating menu with mouse
 // TODO 3: HRTF from core-config (improves spatial acuity with headphones, makes only sense with 3D sound)
-// TODO 3: vielleicht bei toggle fire-mode single-feuer solange bei aktivierung gedrückt gehalten wird
+// TODO 3: [MF] vielleicht bei toggle fire-mode single-feuer solange bei aktivierung gedrückt gehalten wird
 // TODO 3: weitere optionen: particle effects (%)
-// TODO 1: test if disable back rotation and set speed option works everywhere: tiger, zeroth, messier, p1 (blue and magenta), rutilus-rotation
+// TODO 1: [MF] test if disable back rotation and set speed option works everywhere: tiger, zeroth, messier, p1 (blue and magenta), rutilus-rotation
 // TODO 3: EMSCRIPTEN: gamepad calibration feature required, buttons on different gamepads are always different -> man muss aber alle buttons sehn können, damit man fire-up, fire-down etc. versteht  (or warning: gamepads might not work properly, due to browser limitations, for better support, please download the desktop versions for Windows, Linux, or macOS
 
 

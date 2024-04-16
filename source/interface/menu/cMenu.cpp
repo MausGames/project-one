@@ -292,6 +292,8 @@ void cMenu::Move()
                 {
                     if(g_pGame->GetKind() == GAME_KIND_ALL)
                     {
+                        ASSERT(g_bDemoVersion)
+
                         // 
                         m_FinishMenu.ShowThankYou();
 
@@ -314,6 +316,7 @@ void cMenu::Move()
                 else if((HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY) && g_MenuInput.bPause) || Core::System->GetWinFocusLost())
                 {
                     // 
+                    m_PauseMenu.ChangeSurface(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY) ? SURFACE_PAUSE_FULL : SURFACE_PAUSE_LIGHT, 0.0f);
                     m_PauseMenu.ResetNavigator();
 
                     // 
@@ -434,6 +437,7 @@ void cMenu::Move()
                 this->__StartGame();
 
                 // 
+                ASSERT(STATIC_ISVALID(g_pGame))
                 if((g_pGame->GetKind() == GAME_KIND_SEGMENT) && (g_pSave->GetHeader().oProgress.aiAdvance[g_pGame->GetCurMissionIndex()] > 1))
                 {
                     g_pGame->DisableMissionName();   // only when starting single/first segment from menu, when first segment of mission was already finished
@@ -615,11 +619,22 @@ void cMenu::Move()
             {
                 if(g_pGame->GetKind() == GAME_KIND_ALL)
                 {
-                    // 
-                    m_SummaryMenu.ShowArcade();
+                    if(g_bDemoVersion)
+                    {
+                        // 
+                        m_FinishMenu.ShowThankYou();
 
-                    // 
-                    this->ChangeSurface(SURFACE_SUMMARY, 0.0f);
+                        // 
+                        this->ChangeSurface(SURFACE_FINISH, 0.0f);
+                    }
+                    else
+                    {
+                        // 
+                        m_SummaryMenu.ShowArcade();
+
+                        // 
+                        this->ChangeSurface(SURFACE_SUMMARY, 0.0f);
+                    }
                 }
                 else
                 {
@@ -743,13 +758,7 @@ void cMenu::Move()
         break;
     }
 
-    // 
-    //Core::Input->ShowCursor((this->GetCurSurface() != SURFACE_EMPTY)   &&
-    //                        (this->GetCurSurface() != SURFACE_SUMMARY) &&
-    //                        (this->GetCurSurface() != SURFACE_DEFEAT)  &&
-    //                        (this->GetCurSurface() != SURFACE_FINISH)  &&
-    //                        (this->GetCurSurface() != SURFACE_BRIDGE));
-    
+
     const coreFloat fSpeed = STATIC_ISVALID(g_pGame) ? 1000.0f : 0.5f;
     if(((this->GetCurSurface() == SURFACE_CONFIG) || (this->GetCurSurface() == SURFACE_PAUSE)) && STATIC_ISVALID(g_pGame))
          m_PauseLayer.SetAlpha(MIN(m_PauseLayer.GetAlpha() + fSpeed*TIME, 0.25f));
@@ -1254,17 +1263,10 @@ void cMenu::__Reset(const coreResourceReset eInit)
         m_aFrameBuffer[2].Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
         // 
-        m_MixObject.DefineTexture(0u, m_aFrameBuffer[2].GetColorTarget(0u).pTexture);
-        m_MixObject.DefineTexture(1u, m_aFrameBuffer[1].GetColorTarget(0u).pTexture);
         m_MixObject.Move();
     }
     else
     {
-        // unbind textures and stop possible transition
-        m_MixObject.DefineTexture(0u, NULL);
-        m_MixObject.DefineTexture(1u, NULL);
-        m_TransitionTime.Stop();
-
         // 
         for(coreUintW i = 0u; i < ARRAY_SIZE(m_aFrameBuffer); ++i)
             m_aFrameBuffer[i].Delete();

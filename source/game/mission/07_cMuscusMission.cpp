@@ -24,6 +24,8 @@ cMuscusMission::cMuscusMission()noexcept
 , m_iPearlActive   (0u)
 , m_iPearlHidden   (0u)
 , m_iPearlPitch    (0u)
+, m_fSunValue      (0.0f)
+, m_fSunAnimation  (0.0f)
 , m_iDiamondIndex  (UINT8_MAX)
 , m_afStrikeTime   {}
 , m_apStrikePlayer {}
@@ -99,6 +101,24 @@ cMuscusMission::cMuscusMission()noexcept
     }
 
     // 
+    m_Sun.DefineModel  ("object_sphere.md3");
+    m_Sun.DefineTexture(0u, "effect_energy.png");
+    m_Sun.DefineProgram("effect_energy_flat_invert_program");
+    m_Sun.SetSize      (coreVector3(1.0f,1.0f,1.0f) * 3.5f);
+    m_Sun.SetTexSize   (coreVector2(1.0f,1.0f) * 3.5f);
+    m_Sun.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+
+    // 
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aSunWave); ++i)
+    {
+        m_aSunWave[i].DefineModel  ("object_tetra_top.md3");
+        m_aSunWave[i].DefineTexture(0u, "effect_energy.png");
+        m_aSunWave[i].DefineProgram("effect_energy_flat_spheric_program");
+        m_aSunWave[i].SetTexSize   (coreVector2(1.0f,1.0f) * 0.5f);
+        m_aSunWave[i].SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+    }
+
+    // 
     m_Diamond.DefineModel  ("object_cube_top.md3");
     m_Diamond.DefineTexture(0u, "effect_energy.png");
     m_Diamond.DefineProgram("effect_energy_flat_invert_program");
@@ -136,6 +156,7 @@ cMuscusMission::~cMuscusMission()
     for(coreUintW i = 0u; i < MUSCUS_GENERATES; ++i) this->DisableGenerate(i, false);
     for(coreUintW i = 0u; i < MUSCUS_PEARLS;    ++i) this->DisablePearl   (i, false);
     for(coreUintW i = 0u; i < MUSCUS_ZOMBIES;   ++i) this->DisableZombie  (i, false);
+    this->DisableSun(false);
 }
 
 
@@ -286,6 +307,50 @@ void cMuscusMission::DisableZombie(const coreUintW iIndex, const coreBool bAnima
 
 // ****************************************************************
 // 
+void cMuscusMission::EnableSun()
+{
+    // 
+    WARN_IF(m_Sun.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableSun(false);
+
+    // 
+    m_fSunValue     = 0.0f;
+    m_fSunAnimation = 0.0f;
+
+    // 
+    const auto nInitFunc = [](coreObject3D* OUTPUT pObject)
+    {
+        pObject->SetPosition(coreVector3(HIDDEN_POS, 0.0f));
+        pObject->SetEnabled (CORE_OBJECT_ENABLE_ALL);
+        g_pGlow->BindObject(pObject);
+    };
+    nInitFunc(&m_Sun);
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aSunWave); ++i) nInitFunc(&m_aSunWave[i]);
+}
+
+
+// ****************************************************************
+// 
+void cMuscusMission::DisableSun(const coreBool bAnimated)
+{
+    // 
+    if(!m_Sun.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    const auto nExitFunc = [](coreObject3D* OUTPUT pObject)
+    {
+        pObject->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        g_pGlow->UnbindObject(pObject);
+    };
+    nExitFunc(&m_Sun);
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aSunWave); ++i) nExitFunc(&m_aSunWave[i]);
+
+    // 
+    if(bAnimated) g_pSpecialEffects->MacroExplosionColorSmall(m_Sun.GetPosition(), COLOR_ENERGY_CYAN);
+}
+
+
+// ****************************************************************
+// 
 void cMuscusMission::StartDiamond(const coreUintW iIndex)
 {
     WARN_IF(m_iDiamondIndex != UINT8_MAX) return;
@@ -336,14 +401,16 @@ void cMuscusMission::EndDiamond(const coreBool bAnimated)
 coreFloat cMuscusMission::RetrievePearlPitch()
 {
     const coreUint8 iValue = m_iPearlPitch;
-    if(++m_iPearlPitch >= 3u) m_iPearlPitch = 0u;
+    if(++m_iPearlPitch >= 5u) m_iPearlPitch = 0u;
 
     switch(iValue)
     {
     default: ASSERT(false)
-    case 0u: return 1.0f;
-    case 1u: return 1.1f;
-    case 2u: return 1.2f;
+    case 0u: return 0.9f;
+    case 1u: return 0.95f;
+    case 2u: return 1.0f;
+    case 3u: return 1.05f;
+    case 4u: return 1.1f;
     }
 }
 
@@ -426,6 +493,25 @@ void cMuscusMission::__RenderOwnOver()
     // 
     m_Pearl.Render();
     g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyList(&m_Pearl);
+}
+
+
+// ****************************************************************
+// 
+void cMuscusMission::__RenderOwnTop()
+{
+    DEPTH_PUSH
+
+    glDisable(GL_DEPTH_TEST);
+    {
+        // 
+        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aSunWave); ++i) m_aSunWave[i].Render();
+    }
+    glEnable(GL_DEPTH_TEST);
+
+    // 
+    m_Sun.Render();
+    g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Sun);
 }
 
 
@@ -517,24 +603,6 @@ void cMuscusMission::__MoveOwnAfter()
     m_GenerateWave.MoveNormal();
 
     // 
-    if(m_Diamond.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
-    {
-        ASSERT(m_iDiamondIndex != UINT8_MAX)
-        coreObject3D* pGenerate = (*m_Generate.List())[m_iDiamondIndex];
-
-        // 
-        const coreVector2 vDir = coreVector2::Direction(m_fAnimation * (4.0f*PI));
-
-        // 
-        m_Diamond.SetPosition (pGenerate->GetPosition ());
-        m_Diamond.SetSize     (pGenerate->GetSize     () * 0.5f);
-        m_Diamond.SetDirection(coreVector3(vDir, 0.0f));
-        m_Diamond.SetAlpha    (pGenerate->GetAlpha    ());
-        m_Diamond.SetTexOffset(pGenerate->GetTexOffset());
-        m_Diamond.Move();
-    }
-
-    // 
     m_iStrikeState = 0u;
 
     // 
@@ -608,5 +676,50 @@ void cMuscusMission::__MoveOwnAfter()
         // 
         oZombie.SetTexOffset(coreVector2(1.0f,1.0f) * -0.5f * m_fAnimation);
         oZombie.Move();
+    }
+
+    // 
+    if(m_Sun.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
+    {
+        m_fSunAnimation.UpdateMod(m_fSunValue * 0.2f, 10.0f);
+
+        const coreVector3 vColor = LERPH3(COLOR_ENERGY_WHITE * 0.1f, COLOR_ENERGY_ORANGE, m_fSunValue);
+
+        // 
+        m_Sun.SetColor3   (vColor);
+        m_Sun.SetTexOffset(coreVector2(0.0f, -m_fSunAnimation));
+        m_Sun.Move();
+
+        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aSunWave); ++i)
+        {
+            const coreVector2 vDir = coreVector2::Direction((m_fSunAnimation + I_TO_F(i) / 9.0f) * (2.0f*PI));
+
+            // 
+            m_aSunWave[i].SetPosition (m_Sun.GetPosition ());
+            m_aSunWave[i].SetSize     (m_Sun.GetSize     () * LERP(0.0f, 1.5f, m_fSunValue));
+            m_aSunWave[i].SetDirection(coreVector3(vDir, 0.0f));
+            m_aSunWave[i].SetColor3   (m_Sun.GetColor3   ());
+            m_aSunWave[i].SetAlpha    (m_Sun.GetAlpha    () * 0.8f);
+            m_aSunWave[i].SetTexOffset(m_Sun.GetTexOffset());
+            m_aSunWave[i].Move();
+        }
+    }
+
+    // 
+    if(m_Diamond.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
+    {
+        ASSERT(m_iDiamondIndex != UINT8_MAX)
+        coreObject3D* pGenerate = (*m_Generate.List())[m_iDiamondIndex];
+
+        // 
+        const coreVector2 vDir = coreVector2::Direction(m_fAnimation * (4.0f*PI));
+
+        // 
+        m_Diamond.SetPosition (pGenerate->GetPosition ());
+        m_Diamond.SetSize     (pGenerate->GetSize     () * 0.5f);
+        m_Diamond.SetDirection(coreVector3(vDir, 0.0f));
+        m_Diamond.SetAlpha    (pGenerate->GetAlpha    ());
+        m_Diamond.SetTexOffset(pGenerate->GetTexOffset());
+        m_Diamond.Move();
     }
 }

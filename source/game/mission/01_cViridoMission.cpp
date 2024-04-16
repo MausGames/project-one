@@ -626,7 +626,6 @@ void cViridoMission::EnableTarget()
     };
     nInitFunc(&m_Target);
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aTargetWave); ++i) nInitFunc(&m_aTargetWave[i]);
-
 }
 
 
@@ -1040,8 +1039,11 @@ void cViridoMission::__MoveOwnAfter()
                         if(i == m_aiDrumIndex[j])
                         {
                             // 
+                            d_cast<cPlayer*>(pBullet->GetOwner())->GetScoreTable()->RefreshCooldown();
+
+                            // 
                             m_aiDrumCount[j] += pBullet->GetDamage();
-    
+
                             // 
                             pBullet->Deactivate(true);
 
@@ -1072,51 +1074,6 @@ void cViridoMission::__MoveOwnAfter()
                         pBullet->Deactivate(true);
                     }
                 }
-            });
-            
-            // 
-            // TODO 1: auf ray-ray kollision mit old data ändern
-            if(false)Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, &oBarrier, [&](cBullet* OUTPUT pBullet, const coreObject3D* pBarrier, const coreVector3 vIntersection, const coreBool bFirstHit)
-            {
-                if(!bFirstHit) return;
-                if(coreVector2::Dot(pBullet->GetFlyDir(), pBarrier->GetDirection().xy()) > 0.0f) return;   // TODO 1: kollidiert immer noch bei ner schräge mit der rückseite, sollte nur beim passieren der front-linie reagieren
-
-                // 
-                if(!g_pForeground->IsVisiblePoint(vIntersection.xy()))
-                {
-                    pBullet->AddStatus(BULLET_STATUS_GHOST);
-                    return;
-                }
-
-                // 
-                for(coreUintW j = 0u; j < VIRIDO_DRUMS; ++j)
-                {
-                    if(i == m_aiDrumIndex[j])
-                    {
-                        // 
-                        m_aiDrumCount[j] += pBullet->GetDamage();
-
-                        // 
-                        pBullet->Deactivate(true);
-
-                        // 
-                        g_pGame->PlayHitSound(vIntersection);
-                        return;
-                    }
-                }
-
-                // 
-                coreVector2 vNormal = pBarrier->GetDirection().xy();
-                if(SameDirection(-pBullet->GetFlyDir(), vNormal))
-                {
-                    vNormal = (vNormal + vNormal.Rotated90() * Core::Rand->Float(-0.1f, 0.1f)).Normalized();
-                }
-
-                // 
-                pBullet->Reflect(pBarrier, vIntersection.xy(), vNormal);
-
-                // 
-                g_pGame->PlayReflectSound(vIntersection);
             });
         }
     }
@@ -1195,7 +1152,7 @@ void cViridoMission::__MoveOwnAfter()
                 
                 coreVector2 vOldPos = pPlayer->GetOldPos();
                 
-                // TODO 1: funktioniert noch immer nicht ganz richtig bei >=3 linien (Torus)
+                // TODO 1: [MF] funktioniert noch immer nicht ganz richtig bei >=3 linien (Torus)
                 for(coreUintW j = 0u; j < VIRIDO_LASERS; ++j)
                 {
                     if(iCurLaser == j) continue;

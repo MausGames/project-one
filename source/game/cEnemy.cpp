@@ -150,7 +150,7 @@ coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, 
             // 
             const coreInt32 iPower = (bMulti || bNeutral || (this->GetMaxHealth() == 1)) ? 1 : GAME_PLAYERS;
             
-            const coreInt32 iTotal = m_iExtraDamage + iDamage * iPower * ((g_pGame->IsEasy() && !bNeutral) ? 110 : 100);
+            const coreInt32 iTotal = m_iExtraDamage + iDamage * iPower * ((g_pGame->IsEasy() && !bNeutral) ? 115 : 100);
             
             const coreInt32 iTaken = ABS(this->_TakeDamage(iTotal / 100, iElement, vImpact) / iPower);
             ASSERT(!(this->GetMaxHealth() % iPower))
@@ -292,6 +292,8 @@ void cEnemy::Kill(const coreBool bAnimated)
     // 
     if(bAnimated)// && this->IsEnabled(CORE_OBJECT_ENABLE_RENDER)) sollten am rand explodieren // this->GetType())   
     {
+        if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_SKIPEXPLOSION))
+        {
         // 
         if(HAS_BIT(m_iBaseColor, SHIP_INVERTED_BIT))
         {
@@ -312,6 +314,7 @@ void cEnemy::Kill(const coreBool bAnimated)
         {
             // TODO 1: position 0.0f,0.0f
             //g_pGame->GetCrashManager()->AddCrash(*this, this->GetPosition().xy() - this->GetPosition().xy().Normalized() * 10.0f, NULL);
+        }
         }
 
         // 

@@ -86,7 +86,7 @@ void cNewIndicator::Move()
 
 // ****************************************************************
 // 
-void cNewIndicator::Ressolve()
+void cNewIndicator::Resolve()
 {
     REMOVE_BIT_EX(g_pSave->EditProgress()->aiNew, m_iIndex)
 }

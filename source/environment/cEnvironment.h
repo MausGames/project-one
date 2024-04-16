@@ -25,6 +25,8 @@
 #define ENVIRONMENT_MIX_CIRCLE  (3u)   // 
 #define ENVIRONMENT_MIXES       (4u)   // 
 
+#define ENVIRONMENT_TRANSITION_FACTOR (0.9f)   // 
+
 #define ENVIRONMENT_DEFAULT_DIRECTION (coreVector2(0.0f,1.0f))
 #define ENVIRONMENT_DEFAULT_SIDE      (coreVector2(0.0f,0.0f))
 #define ENVIRONMENT_DEFAULT_SPEED     (1.0f)
@@ -78,6 +80,9 @@ public:
     inline cBackground*     GetBackground   ()const {ASSERT(m_pBackground) return m_pBackground;}
     inline cBackground*     GetOldBackground()const {return m_pOldBackground;}
     inline const coreInt32& GetLastID       ()const {return m_iLastID;}
+    
+    
+    inline void UpdateTransitionSpeed(const coreFloat fTransitionSpeed) {m_TransitionTime.SetSpeed(ENVIRONMENT_TRANSITION_FACTOR * fTransitionSpeed);}
 
     // 
     FUNC_LOCAL coreFloat RetrieveTransitionBlend(const cBackground* pBackground)const;

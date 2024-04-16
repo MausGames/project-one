@@ -221,6 +221,65 @@ cSnowBackground::cSnowBackground()noexcept
         ASSERT(pList1->GetCurCapacity() == SNOW_CLOUD_RESERVE)
     }
 
+
+#if 0
+    // allocate stone list
+    pList1 = new coreBatchList(GRASS_STONE_RESERVE);
+    pList1->DefineProgram("object_ground_inst_program");
+    {
+        // load object resources
+        coreObject3D oBase;
+        oBase.DefineModel  ("environment_stone_01.md3");
+        oBase.DefineTexture(0u, "environment_stone_diff.png");
+        oBase.DefineTexture(1u, "environment_stone_norm.png");
+        oBase.DefineProgram("object_ground_program");
+
+        for(coreUintW i = 0u; i < GRASS_STONE_NUM; ++i)
+        {
+            // calculate position and height
+            const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, GRASS_STONE_NUM);
+            const coreFloat   fHeight   = m_pOutdoor->RetrieveBackHeight(vPosition);
+
+            // test for valid values
+            if((fHeight > -200.0f) && (fHeight < 18.0f) && (F_TO_SI(vPosition.y+160.0f) % 80 < 40))
+            {
+                if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, POW2(5.0f)) &&
+                   !cBackground::_CheckIntersection     (m_apGroundObjectList[1], vPosition, POW2(8.0f)) &&
+                   !cBackground::_CheckIntersection     (m_apGroundObjectList[2], vPosition, POW2(8.0f)))
+                {
+                    // create object
+                    coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
+
+                    // set object properties
+                    pObject->SetPosition   (coreVector3(vPosition, 0.0f));
+                    pObject->SetSize       (coreVector3::Rand(0.85f,1.3f, 0.85f,1.3f, 0.85f,1.3f) * Core::Rand->Float(2.0f, 2.6f) * 1.3f);
+                    pObject->SetDirection  (coreVector3::Rand());
+                    pObject->SetOrientation(coreVector3::Rand());
+                    pObject->SetColor3     (coreVector3(1.0f,1.0f,1.0f) * Core::Rand->Float(0.85f, 1.0f));
+
+                    // add object to the list
+                    pList1->BindObject(pObject);
+                }
+            }
+        }
+
+        // 
+        this->_StoreHeight(pList1, 0.2f);
+
+        // post-process list and add to the ground
+        cBackground::_FillInfinite(pList1, GRASS_STONE_RESERVE);
+        m_apGroundObjectList.push_back(pList1);
+
+        // bind list to shadow map
+        m_pOutdoor->GetShadowMap()->BindList(pList1);
+
+        // 
+        //m_apWaterRefList.push_back(pList1);
+    }
+#endif
+    
+    
+
     // 
     m_Snow.DefineTexture(0u, "effect_snow.png");
     m_Snow.DefineProgram("effect_weather_snow_program");

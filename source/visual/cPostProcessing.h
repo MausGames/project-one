@@ -19,7 +19,6 @@
 // TODO 3: remove overdraw when rendering border object (own shader with discard ?)
 // TODO 3: border might flicker-disappear when rotating, briefly passing 0.0f, and shaking screen
 // TODO 3: if overdraw can be handled, then N "shadow-border" can be used when rotating (like on Dharuk) (own shader with discard ?)
-// TODO 1: implement automatic smooth reset for certain values (e.g. wall offset, frame value, etc.)
 
 
 // ****************************************************************
@@ -89,7 +88,17 @@ public:
     void Render()final;
     void Move  ()final;
     
-    inline void RenderBlack() {m_Black.Render();}
+    inline void RenderTilt()
+    {
+        m_Black.Render();
+
+        if(m_fFrameValue < 2.0f)
+        {
+            // render wallpapers
+            for(coreUintW i = m_bOffsetActive ? 0u : POST_WALLS_BASE; i < POST_WALLS; ++i)
+                m_aWall[i].Render();
+        }
+    }
 
     // recompile post-processing shader-programs
     void Recompile();

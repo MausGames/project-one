@@ -231,10 +231,7 @@ void cDarkBackground::__MoveOwn()
     m_fLightningFlash.UpdateMax(-1.0f, 0.0f);
 
     // 
-    m_Lightning.SetColor3 (g_CurConfig.Graphics.iFlash ? coreVector3(1.0f,1.0f,1.0f) : COLOR_MENU_BLACK);
-    m_Lightning.SetAlpha  (BLENDH3(MIN1(m_fLightningFlash)) * 0.7f);
-    m_Lightning.SetEnabled(m_fLightningFlash ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
-    m_Lightning.Move();
+    this->__UpdateLightning();
 }
 
 
@@ -244,6 +241,18 @@ void cDarkBackground::__UpdateOwn()
 {
     // 
     if(m_Headlight.GetAlpha()) m_Headlight.UpdateDefault(1u);
+}
+
+
+// ****************************************************************
+// 
+void cDarkBackground::__UpdateLightning()
+{
+    // 
+    m_Lightning.SetColor3 (g_CurConfig.Graphics.iFlash ? coreVector3(1.0f,1.0f,1.0f) : COLOR_MENU_BLACK);
+    m_Lightning.SetAlpha  (BLENDH3(MIN1(m_fLightningFlash)) * 0.7f);
+    m_Lightning.SetEnabled(m_fLightningFlash ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+    m_Lightning.Move();
 }
 
 

@@ -15,11 +15,11 @@
 // general rotation between phases needs to alternate
 // bei rundum-schwung, boss sollte nicht mit schwung nach außen fliegen, sonst erwischt es den überraschten spieler, erst schwung bremsen
 // TODO 1: hard: shield, verfolgt spieler (vielleicht front), und wehrt angriffe ab
-// TODO 1: das erste fragment bekommt man im intro (die mitte der tafel, das viereck), und saugt einen ein und zerstört das schiff, und erzeugt eine graue kopie (Eigengrau) -> erst dann bekommt man blauen schein und quad, auch health-icon anders
-// TODO 1: improve intro and outro (including fragment collection)
-// TODO 1: MAIN: task-check, fragment, regular score, outro, sound
-// TODO 1: ACHIEVEMENT: name (), description (), keep enemy on sword alive until it gets thrown away
-// TODO 1: nach erstem spielen erscheinen helper für extra punkte
+// TODO 5: das erste fragment bekommt man im intro (die mitte der tafel, das viereck), und saugt einen ein und zerstört das schiff, und erzeugt eine graue kopie (Eigengrau) -> erst dann bekommt man blauen schein und quad, auch health-icon anders
+// TODO 1: [MF] improve intro and outro (including fragment collection)
+// TODO 1: [MF] MAIN: task-check, fragment, regular score, outro, sound
+// TODO 1: [MF] ACHIEVEMENT: name (), description (), keep enemy on sword alive until it gets thrown away
+// TODO 1: [MF] nach erstem spielen erscheinen helper für extra punkte
 
 
 // ****************************************************************

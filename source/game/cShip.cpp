@@ -46,14 +46,12 @@ void cShip::SetBaseColor(const coreVector3 vColor, const coreBool bInverted, con
 // 
 coreBool cShip::DefaultMovePath(const coreSpline2* pRawPath, const coreVector2 vFactor, const coreVector2 vRawOffset, const coreFloat fDistance)
 {
-    // TODO 1: factor < 1.0f (oder > 1.0f) drückt das spline in eine richtung zusammen, und damit die geschwindigkeit in dieser richtung
-    
     // 
     coreVector2 vPosition;
     coreVector2 vDirection;
     pRawPath->CalcPosDir(CLAMP(fDistance, 0.0f, pRawPath->GetTotalDistance()), &vPosition, &vDirection);
 
-    // 
+    // (factor-variable can also change speed along only one axis) 
     this->SetPosition (coreVector3(((vPosition  * vFactor) + vRawOffset) * FOREGROUND_AREA, 0.0f));
     this->SetDirection(coreVector3( (vDirection * vFactor).Normalized(vDirection),          0.0f));
 

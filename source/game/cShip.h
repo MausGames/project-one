@@ -12,10 +12,10 @@
 
 // TODO 4: reduce ship health (and player shield) and all damage values to 16-bit (also reorder for better packing if possible)
 // TODO 3: do not create explosions if ship is far outside of view-port (just ships or in general special-effects ?) (but needs to be far, because explosions with sound on borders are still important)
-// TODO 2: ReachedHealthPct, GetCurHealthPct -> ReachedHealthPct(0.7f) was triggered while interface was showing 71%
+// TODO 2: [MF] ReachedHealthPct, GetCurHealthPct -> ReachedHealthPct(0.7f) was triggered while interface was showing 71%
 // TODO 4: check and cleanup transformation functions
 // TODO 3: merge WasDamaged in cShip and cEnemy
-// TODO 2: ReachedDeath könnte übersprungen werden, wenn nicht geprüft wird, während es passiert
+// TODO 2: [MF] ReachedDeath könnte übersprungen werden, wenn nicht geprüft wird, während es passiert
 
 
 // ****************************************************************
@@ -109,16 +109,17 @@ public:
     inline void SetCurHealthPct(const coreFloat fCurHealthPct) {m_iCurHealth = F_TO_SI(fCurHealthPct * I_TO_F(m_iMaxHealth)); ASSERT((fCurHealthPct >= 0.0f) && (fCurHealthPct <= 1.0f))}
 
     // get object properties
-    inline       coreInt32    GetMaxHealth   ()const {return m_iMaxHealth;}
-    inline       coreInt32    GetCurHealth   ()const {return m_iCurHealth;}
-    inline       coreFloat    GetCurHealthPct()const {return I_TO_F(m_iCurHealth) / I_TO_F(m_iMaxHealth);}   // # normal division
-    inline       coreInt32    GetPreHealth   ()const {return m_iPreHealth;}
-    inline       coreFloat    GetPreHealthPct()const {return I_TO_F(m_iPreHealth) / I_TO_F(m_iMaxHealth);}   // # normal division
-    inline       coreInt32    GetLostHealth  ()const {return m_iMaxHealth - m_iCurHealth;}
-    inline const coreVector2& GetOldPos      ()const {return m_vOldPos;}
-    inline       coreVector2  GetMove        ()const {return this->GetPosition().xy() - m_vOldPos;}
-    inline       coreVector3  GetBaseColor   ()const {return coreVector4::UnpackUnorm4x8(m_iBaseColor).xyz();}
-    inline       coreFloat    GetBlink       ()const {return MIN(m_fBlink, 1.0f);}
+    inline       coreInt32    GetMaxHealth    ()const {return m_iMaxHealth;}
+    inline       coreInt32    GetCurHealth    ()const {return m_iCurHealth;}
+    inline       coreFloat    GetCurHealthPct ()const {return I_TO_F(m_iCurHealth) / I_TO_F(m_iMaxHealth);}   // # normal division
+    inline       coreInt32    GetPreHealth    ()const {return m_iPreHealth;}
+    inline       coreFloat    GetPreHealthPct ()const {return I_TO_F(m_iPreHealth) / I_TO_F(m_iMaxHealth);}   // # normal division
+    inline       coreInt32    GetLostHealth   ()const {return m_iMaxHealth - m_iCurHealth;}
+    inline       coreInt32    GetPreLostHealth()const {return m_iMaxHealth - m_iPreHealth;}
+    inline const coreVector2& GetOldPos       ()const {return m_vOldPos;}
+    inline       coreVector2  GetMove         ()const {return this->GetPosition().xy() - m_vOldPos;}
+    inline       coreVector3  GetBaseColor    ()const {return coreVector4::UnpackUnorm4x8(m_iBaseColor).xyz();}
+    inline       coreFloat    GetBlink        ()const {return MIN(m_fBlink, 1.0f);}
 
     // 
     static constexpr coreFloat TransformColorFactor(const coreFloat fFactor) {return (fFactor < (1.0f/3.0f)) ? 0.0f : ((fFactor < (2.0f/3.0f)) ? 0.5f : 1.0f);}

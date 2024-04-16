@@ -251,7 +251,7 @@ void CoreApp::Render()
                     }
                     glDisable(GL_DEPTH_TEST);
 
-                    g_pPostProcessing->RenderBlack();
+                    g_pPostProcessing->RenderTilt();
                 }
             }
 
@@ -555,12 +555,21 @@ static void ReshapeGame()
     Core::Reshape();
     
     
-    if(STATIC_ISVALID(g_pGame))   // TODO 1: sollte nur beim draggen passieren, passiert aber auch bei normaler resolution änderung
+    if(STATIC_ISVALID(g_pGame))   // TODO 1: sollte nur beim draggen passieren, passiert aber auch bei normaler resolution änderung durch options (GetWinSizeChanged ist in beiden fällen TRUE)
     {
         g_pGame->GetInterface ()->UpdateLayout();
         g_pGame->GetInterface ()->UpdateSpacing();
         g_pGame->GetInterface ()->MoveTimeless();
         g_pGame->GetCombatText()->UpdateLayout();
+
+        if(STATIC_ISVALID(g_pGame) && (g_pGame->GetCurMission()->GetID() == cIntroMission::ID))
+        {
+            Timeless([]()
+            {
+                g_pGame->GetCurMission()->MoveAfter();
+            });
+            g_pMenu->InvokePauseStep();
+        }
     }
     
 
@@ -822,7 +831,7 @@ static void DebugGame()
         if(STATIC_ISVALID(g_pGame))
         {
             for(coreUintW i = 0u; i < FRAGMENTS; ++i)
-                g_pGame->GetItemManager()->AddItem<cFragmentItem>(coreVector2((I_TO_F(i % 3u) - 1.0f) * 0.7f, (I_TO_F(i / 3u) - 1.0f) * 0.7f) * FOREGROUND_AREA, i, 0u, 0u);
+                g_pGame->GetItemManager()->AddItem<cFragmentItem>(coreVector2((I_TO_F(i % 3u) - 1.0f) * 0.7f, (I_TO_F(i / 3u) - 1.0f) * 0.7f) * FOREGROUND_AREA     * 1.5f, i, 0u, 0u);
         }
     }
     

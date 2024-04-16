@@ -28,7 +28,7 @@
 #define _P1_GUARD_MAIN_H_
 
 // TODO 4: remove magic numbers (regularly)
-// TODO 3: test framerate-lock for g-sync stuff, also test for 144hz displays if render x144 but move x60 is better
+// TODO 3: [MF] test framerate-lock for g-sync stuff, also test for 144hz displays if render x144 but move x60 is better
 // TODO 3: clean up shader modifiers and shaders, also try to look at unused uniforms, varyings and attributes (shadow-matrix is used in ship-shader !? a_v1Blink used in ground-shader but only when instancing), and reduce passing data across shader stages
 // TODO 5: implement static/coherent branching interface instead of many shader-permutations ? (maybe only in situations with frequent switching)
 // TODO 3: use single-channel texture where possible
@@ -54,8 +54,6 @@
 // TODO 4: ENABLE_BITWISE when ?
 // TODO 5: remove multisampling for 2d, though may cause artifacts if the objects are fully shaded and moved
 // TODO 3: transition shader only needs alpha for menu, but not for background -> create permutations
-// TODO 3: check all normalization calls if requires default or context-specific fallback, also check for more unsafe calls
-// TODO 3: check all RCP for division by zero
 // TODO 2: reshape causes some batch-list to be initialized twice
 // TODO 5: look for hot/cold optimizations, e.g. member-list in enemy can be pointer, write wrapper for that, coreCold<...>, check everything already pointer for switching to wrapper
 // TODO 3: check for and prevent accumulation of small rounding errors: incremental matrix rotation
@@ -65,13 +63,12 @@
 // TODO 3: make energy texture sharper (offline upsampling)
 // TODO 5: check for merging varyings with component = # and layoutEx (or merge manually)
 // TODO 1: indicator when controls are enabled again (blinking und peeping sound)
-// TODO 3: search and remove unused resources from application.cpp (+ folder)
+// TODO 3: [MF] search and remove unused resources from application.cpp (+ folder)
 // TODO 5: convert bigger sound-effects (ambient) to music ?
 // TODO 3: change all linear interpolation with at least LERPH3 to improve quality, where possible
 // TODO 3: find (manual) interpolations and try to use smoothstep for it (engine, application and shader)
 // TODO 4: check all lambdas if OUTPUT can be replaced with const (maybe check everything for it, engine + p1)
 // TODO 3: create animation offset for all gameplay objects (const coreFloat fOffset = I_TO_F(i) * (1.0f/7.0f);), try to use num-per-line + 1, what about bullets ?
-// TODO 1: make sure user folder is correctly handled for multi-user (-> corePlatform)
 // TODO 3: every boss, enemy, gameplay-objects, player-bullet-interacting object needs a volume (including all enemy-bullet types, blender decimate tool factor ~0.1)
 // TODO 1: all sounds need IsUsable checks
 // TODO 4: look if coreUintW member variables can be made smaller (also engine)
@@ -82,8 +79,6 @@
 // TODO 2: test maximum number of replays, provide upper limit, define communication when approaching or reaching limit
 // TODO 2: prevent shaking of center-aligned rectified animated text
 // TODO 3: add gamepad led colors (nur wenn multiplayer aktiv ist, ansonsten zurück auf default value, wegen merged input)
-// TODO 1: clarify and simplify upper-case handling (for all texts, but especially for boss and mission names) (manually fix all-uppercase character/glyph distance(!) -> CALOR)
-// TODO 3: expose HRTF option (Headphones: No, Yes, Auto)
 // TODO 4: if font awesome will be used in the end, remove all unused icons in font-file
 // TODO 3: make sure bullet->disable has correct positioned impact-effect everywhere, especially with fast ray-bullets going deep into other objects (manual correction or ray-cast)
 // TODO 4: check if any % (modulo) can be changed to coreMath::IsAligned
@@ -96,18 +91,68 @@
 // TODO 1: should bullets create particles when shot ? especially for bosses
 // TODO 3: remove unused mechanics (#ifdef would be enough) so they don't take up code and memory
 // TODO 1: check for coreVector2::Direction and .Angle() and .Length() calls in loops with more than N iterations and replace them if possible (e.g. relative rotation)
-// TODO 1: all music files need equal base volume, also remove meta data
-// TODO 1: all sound files need u-law compression (if it does not affect quality (check with good headphones)), also remove meta data, also shorten sound front and back (make sure there is no micro-sound), also make mono if better
+// TODO 1: [MF] all music files need equal base volume
+// TODO 1: [MF] all sound files need u-law compression (if it does not affect quality (check with good headphones)), also remove meta data (should already be done), also shorten sound front and back (make sure there is no micro-sound), also make mono if better
 // TODO 3: object_tetra_top und object_cube_top brauchen gute outline
-// TODO 1: alle sound-effekte bei denen man was einsammeln soll, prüfen ob pitch-inkrement verwendet werden soll
+// TODO 1: [MF] alle sound-effekte bei denen man was einsammeln soll, prüfen ob pitch-inkrement verwendet werden soll
 // TODO 3: FORCE_INLINE for various callback-wrappern (eg. ForeachEnemy)
 // TODO 4: MIN1, MAX0, CLAMP01, BLEND* everywhere possible
 // TODO 3: menu outlines kaputt in transition bei 1759x990 (allgemein bei ungeradeXgerade), menü-line-objekte verschieben ihre textur -> resolution muss gleich bleiben X=Y, also sollte position shift eingebaut werden (aber ALLE 2d-objekte dann auch ?)
 // TODO 4: wenn möglich sollten statische variablen in funktionen raus-gezogen werden, damit nicht ständig ein init-check gemacht wird
-// TODO 1: badges anordnen nach reihenfolge im level (index + description)
-// TODO 1: the repair-enemy needs to work in every wave and boss!
+// TODO 1: [MF] badges anordnen nach reihenfolge im level (index + description)
+// TODO 1: [MF] the repair-enemy needs to work in every wave and boss!
 // TODO 3: multiplicative rotation for bullet-waves, to create better interleaving (orb-bullets in geminga) -> only where it makes sense or improves the visuals
 // TODO 3: sphere model kann ungenau sein, vor allem bei der area-bubble bei P1 magenta phase
+// TODO 3: pfeile der switch-boxen sind leicht vertikal verschoben bei 1920x1080
+
+// Small Task List:
+// TODO 3: better player bullet creation effect (muzzle flash)
+// TODO 1: [MF] menu musik wie bei XC3
+// TODO 3: player shooting wie ikaruga, RSG (single shot + vulkan)
+// TODO 5: plant movement
+// TODO 1: [MF] musik: bongos am ende von mission_03 entfernen, mission 04 laute piano-note bei ~01:08 und ~3:17, boss_08 wiederholt ständig den anfangs-jingle
+// TODO 1: [MF] last badge for: barrier, bombs, arrows, mother, spikes, tower, mole, force, time, gravity, push, fangs, orbs, ways, automove, highspeed, evade, morningstar, pearls, teleport, ghosts, generates
+// TODO 2: [MF] normal enemies with BOTTOM or TOP, are rendered two times, once in bottom/top, and once in their batch-list, this causes various issues, especially for BOTTOM   (ALSO FOR OUTLINE) (maybe with separation of active-list), eine liste für shadow
+// TODO 1: [MF] possible badge: bullets + items zum einsammeln, wie damals
+// TODO 3: bei Torus, rückseite von spear bullets zerstören outline von orb bullets
+// TODO 3: improve big boss explosion: Sakurai https://www.youtube.com/watch?v=ZDopYzDX-Jg   https://youtu.be/D-4RsUI3ZNI?t=246   energy line explosion: https://youtu.be/j56eUNx4sZk?t=1311
+// TODO 1: [MF] fixup update frequency (allow less than 60?, how to communicate increases? (on low speed))
+// TODO 3: [MF] rename level to section/stage !!!! in store page and game
+// TODO 3: [MF] remap stage to area !!!! in store page and game
+// TODO 1: [MF] in selection mode übergang zu nächstem level muss super-smooth sein (black transition entfernen), wie bei super meat boy (+ wenn man ins erste level geht ohne dass das zweite freigeschalten wurde kommt intro) (wenn man single spielt und gerade das nächste freigeschalten hat gibts Next Level statt Play Again)
+// TODO 1: [MF] finish all achievement names and descriptions
+// TODO 1: [MF] finish all badge descriptions
+// TODO 1: [MF] track all sound credits
+
+// Public Feedback and Suggestions:
+// TODO 3: improve player ship visuals
+// TODO 3: improve bloom without affecting visibility, or make configurable
+// TODO 5: (match-2 mechanic ?)
+// TODO 3: easy mode for bosses still too hard -> separate extra damage ? 20%
+// TODO 3: [MF] D4Windows anschauen, ob sie maus steuert und controller gleichzeitig verwendet
+
+// Merged List:
+// TODO 4: MAX SERIES überall entfernen (im frontend)   überall nach maxseries suchen und ausbessern, außerdem nur relevant auf segment-ebene
+// TODO 3: difficulty wird zu game mode sobald prismatc etc freigeschalten wurde
+// TODO 3: ich könnte sterne im game-menü anzeigen
+// TODO 3: [MF] add more details to cloud background (transparent enemy ships far in the back ?)
+// TODO 3: [MF] einen anderen bottom-background im wolken-level ? stadt, andere textur, outdoor ?
+// TODO 3: emscripten demo für v0.2.0
+// TODO 1: [MF] ACHIEVEMENTS
+// TODO 1: [MF] final fantasy ending screen (objekt in mitte (fragment, Sonic) darüber text THE END ?), "thank you for playing" beim tod von P1, in normalem playthorugh kommen credits über alle backgrounds, die grau werden und verrotten (turf brennt sich langsam ein), beim echten playthrough sind sie bunt
+// TODO 1: [MF] ENDE auf deutsch am secret ending
+// TODO 3: etwas muss gemacht werden, wenn sich die player hitboxen überlappen (vielleicht nicht möglich, schieben ?)
+// TODO 3: gegner und geschosse am rand müssen gut sichtbar bleiben, wenn interface im inneren ist
+// TODO 1: [MF] P1 flies fast across summary screen after you, when you finish a mission for the first time (+ weißer helfer)
+// TODO 1: [MF] ruhige piano musik im menü (breath of the wild)
+
+// Cleanup Task List:
+// TODO 4: more cleanup surrounding Eigengrau: game, postprocessing (cpp + shader), camera, player, weapon, bullet
+// TODO 4: enemy bottom/top + special bottom, menu transition, interface, menu changes (INSIDE), mission data, (pause/msgbox stretch)
+// TODO 4: Torus, Leviathan
+
+// TODO 3: sound: button-click und menu-in/menu-out überlagern sich
+// TODO 3: fix demo save
 
 
 // ****************************************************************
@@ -252,6 +297,7 @@
 #define SHADER_RING          "#define _P1_RING_"        " (1) \n"        // energy
 #define SHADER_WAVE          "#define _P1_WAVE_"        " (1) \n"        // object
 #define SHADER_GREY          "#define _P1_GREY_"        " (1) \n"        // vignette
+#define SHADER_ROTATED       "#define _P1_ROTATED_"     " (1) \n"        // energy
 #define SHADER_LINE          "#define _P1_LINE_"        " (1) \n"        // ink    // TODO 1: used for ink, remove ?
 
 

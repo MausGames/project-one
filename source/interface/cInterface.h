@@ -10,9 +10,10 @@
 #ifndef _P1_GUARD_INTERFACE_H_
 #define _P1_GUARD_INTERFACE_H_
 
-// TODO 1: realtime language update (other locations as well ?), boss-titles and wave-names
+// TODO 2: realtime language update (also combat text, LUCKY, HIT, etc.), boss-titles, mission-titles, time-bonus
 // TODO 3: MENU_INSIDE_ALPHA should only be used with inside-hud
 // TODO 4: merge wave time and boss time if possible
+// TODO 1: [MF] sterne anzeigen in score banner und wave summary
 
 
 // ****************************************************************

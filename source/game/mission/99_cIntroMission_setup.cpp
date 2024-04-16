@@ -9,14 +9,15 @@
 #include "main.h"
 
 // TODO 1: hard mode: x3 gegner und x3 attacks (= x9)
-// TODO 1: MAIN: task-check, helper, regular score, badges, sound
-// TODO 1: ACHIEVEMENT: name (), description (Do not press a single button / Destroy all enemies without pressing a single button), 1 destroy all enemies without every moving or pressing fire button
-// TODO 1: ACHIEVEMENT: name (), description (), 2 destroy all enemies without missing a single shot
-// TODO 1: ACHIEVEMENT: name (), description (), 3 
-// TODO 1: ACHIEVEMENT: name (), description (), 4 destroy all enemies while staying at the very top of the screen, without getting hit
-// TODO 1: ACHIEVEMENT: name (), description (), 5 destroy all enemies while no enemy bullet is present
-// TODO 1: gegner und spieler farben ?
-// TODO 1: add some gimmick, as this part can becom boring for advanced players: https://youtu.be/RENI2gk0ZJA?t=567
+// TODO 1: [MF] MAIN: task-check, helper, regular score, badges, sound
+// TODO 1: [MF] ACHIEVEMENT: name (), description (Do not press a single button / Destroy all enemies without pressing a single button), 1 destroy all enemies without every moving or pressing fire button
+// TODO 1: [MF] ACHIEVEMENT: name (), description (), 2 destroy all enemies without missing a single shot
+// TODO 1: [MF] ACHIEVEMENT: name (), description (), 3 
+// TODO 1: [MF] ACHIEVEMENT: name (), description (), 4 destroy all enemies while staying at the very top of the screen, without getting hit
+// TODO 1: [MF] ACHIEVEMENT: name (), description (), 5 destroy all enemies while no enemy bullet is present
+// TODO 1: [MF] gegner und spieler farben ?
+// TODO 1: [MF] add some gimmick, as this part can becom boring for advanced players: https://youtu.be/RENI2gk0ZJA?t=567
+// TODO 1: [MF] medal goals nochmal prüfen wegen badges
 
 
 // ****************************************************************
@@ -120,7 +121,7 @@ void cIntroMission::__SetupOwn()
     // simple without attacks 1
     // teaches: moving (general), shooting (general, sustained), combo, enemies from every side, enemies fly infinite (#1), segment structure, sub-stage structure
     // - 5: from different side than previous group, to not fly into players
-    // TODO 1: in coop, player 1 will be hit by enemies if not moving after intro
+    // TODO 1: [MF] in coop, player 1 will be hit by enemies if not moving after intro  -> schon gefixt, aber sollte das pattern vielleicht immer so sein ?
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -211,7 +212,7 @@ void cIntroMission::__SetupOwn()
             pEnemy->DefaultMovePath(pPath, vFactor, vOffset * vFactor, fLifeTime);
         });
 
-        STAGE_WAVE(0u, "0-1", {7.0f, 10.0f, 14.0f, 20.0f})
+        STAGE_WAVE(0u, "0-1", {7.0f, 10.0f, 14.0f, 20.0f, 40.0f})
     });
 
     // ################################################################
@@ -340,7 +341,7 @@ void cIntroMission::__SetupOwn()
                 STAGE_BADGE(0u, BADGE_EASY, pEnemy->GetPosition())
         });
 
-        STAGE_WAVE(1u, "0-2", {10.0f, 15.0f, 20.0f, 25.0f})
+        STAGE_WAVE(1u, "0-2", {10.0f, 15.0f, 20.0f, 25.0f, 50.0f})
     });
 
     // ################################################################
@@ -361,7 +362,7 @@ void cIntroMission::__SetupOwn()
     // geschwindigkeit des charges sollte am anfang hoch sein, damit der spieler (nahezu) unmöglich ausweichen kann
     // chargende gegner aus der ecke werden nicht so wahrscheinlich schon beim spawnen getötet, zusätzlich sind sie eine kurze zeit immun
     // erster chargender gegner kommt von dort wo der spieler unwahrscheinlicher ist
-    // TODO 1: badge
+    // TODO 1: [MF] badge
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -469,7 +470,7 @@ void cIntroMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE(2u, "0-3", {13.0f, 19.0f, 26.0f, 32.0f})
+        STAGE_WAVE(2u, "0-3", {13.0f, 19.0f, 26.0f, 32.0f, 64.0f})
     });
 
     // ################################################################
@@ -599,7 +600,7 @@ void cIntroMission::__SetupOwn()
             }
         });
 
-        if(!bPostpone) STAGE_WAVE(3u, "0-4", {11.0f, 16.0f, 22.0f, 27.0f})
+        if(!bPostpone) STAGE_WAVE(3u, "0-4", {11.0f, 16.0f, 22.0f, 27.0f, 54.0f})
     });
 
     // ################################################################
@@ -739,7 +740,7 @@ void cIntroMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE(4u, "0-5", {22.0f, 33.0f, 44.0f, 55.0f})
+        STAGE_WAVE(4u, "0-5", {22.0f, 33.0f, 44.0f, 55.0f, 110.0f})
     });
 
     // ################################################################
@@ -756,7 +757,7 @@ void cIntroMission::__SetupOwn()
             });
         });
 
-        STAGE_BOSS(m_Intro, {70.0f, 105.0f, 140.0, 175.0f})
+        STAGE_BOSS(m_Intro, {70.0f, 105.0f, 140.0, 175.0f, 350.0f})
     });
 
     // ################################################################

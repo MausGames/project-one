@@ -20,6 +20,7 @@
 // TODO 1: handle unsuccessful saving
 // TODO 1: first-play and other outside-variables need to be handled
 // TODO 1: stats, unlocks, etc. should not change during replay playback
+// TODO 1: make sure, data is correctly stored based on game and hud-rotation (360 degree for rotation wave), move and shooting (twin-stick) [if changes are made, make sure tutorial still works in all rotations]
 
 
 // ****************************************************************

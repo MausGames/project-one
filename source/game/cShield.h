@@ -10,8 +10,6 @@
 #ifndef _P1_GUARD_SHIELD_H_
 #define _P1_GUARD_SHIELD_H_
 
-// TODO 1: bullets should reflect from shield, not from enemy (but not every invincible enemy has a shield)
-
 
 // ****************************************************************
 // shield definitions
@@ -58,7 +56,7 @@ public:
     void ClearShields(const coreBool bAnimated);
 
     // 
-    template <typename F> void ForEachShield(F&& nFunction);   // [](coreObject3D* OUTPUT pShield) -> void
+    template <typename F> void ForEachShield(F&& nFunction);   // [](coreObject3D* OUTPUT pShield, const cEnemy* pOwner) -> void
 
     // 
     void SetActive(const coreBool bActive);
@@ -108,7 +106,7 @@ template <typename F> void cShieldEffect::ForEachShield(F&& nFunction)
         if(!pShield->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
         // 
-        nFunction(pShield);
+        nFunction(pShield, m_apOwner[i]);
     }
 }
 

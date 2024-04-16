@@ -10,34 +10,29 @@
 #ifndef _P1_GUARD_MENU_H_
 #define _P1_GUARD_MENU_H_
 
-// TODO 1: short YES-no questions: Exit Game ? Return to Menu ?
 // TODO 1: real-time sound-configuration (also quick left-right sound effect on 3d-sound option)
 // TODO 1: score-menu names are restricted to characters from the text-board
 // TODO 3: score-menu names must be sanitized
 // TODO 3: unload fonts currently not used (e.g. from score-menu)
-// TODO 3: options menu: highlight changed options
+// TODO 3: options menu: highlight changed options mit sternchen oder eigenem icon (damit text nicht immer erneuert werden muss)
 // TODO 3: options menu: 15 second on video change, yes, no
 // TODO 3: rumble when changing rumble-option (could be annoying)
 // TODO 5: display unattached joysticks and joystick names somehow
 // TODO 3: highlight which joystick is which input set
 // TODO 3: update texture filter and render quality in realtime (resource-manager reset ?)
 // TODO 3: double initial languages by switching to two columns (on demand?)
-// TODO 5: stages in GameMenu should be called segments
-// TODO 3: every object in menu needs outline: weapon icons
 // TODO 3: show target FPS in config menu (speed x update rate)
-// TODO 3: when switching resolution, and confirming by returning, the transition is broken
 // TODO 3: when switching resolution, the next mouse click is not recognized (no press event is coming from SDL, only the release event)
 // TODO 3: swapping controls should swap buttons visually
 // TODO 3: load replay number only on first entry, load headers async on demand, handle changes during runtime
 // TODO 3: display gamepad/device name in options description
 // TODO 4: locked config input buttons are set with dummy values before getting locked
-// TODO 2: handle plugging in and out gamepad while in config menu, handle plugging out gamepad in general (when controller is currently selected)
+// TODO 2: [MF] handle plugging in and out gamepad while in config menu, handle plugging out gamepad in general (when controller is currently selected)
 // TODO 2: in emscripten müssen einige optionen geändert werden (disable: monitor, resolution, display mode | change/disable: anti-aliasing [on/off] | anisotropic ?)
 // TODO 3: leichtes wackeln des texts wenn sich switch-box ändert
 // TODO 3: welle, wenn button/switchbox gedrückt wird
 // TODO 3: anderes: ganzes menü wackelt/shifted wenn man tab ändert, tabs verändern höhe, buttons ändern größe bei selection
-// TODO 3: GetWinFocusLost to force pause should only take effect when pause is actually allowed, save and apply state, but reset state if focus comes back before applying pause
-// TODO 1: re-position everything after resolution-change
+// TODO 1: [MF] re-position everything after resolution-change
 // TODO 3: menu sound response is super-confused with gamepad-input, related to having fokus on multiple sub-menus (unnecessary button-fokus sound -> catch initial focusing), and being able to focus disabled buttons (active tab, save button)
 // TODO 3: de-couple interface-class and display in options when game is not running (for HUD type option)
 // TODO 3: bigger effect, when password is correct (maybe not text, but a fullscreen effect)
@@ -50,7 +45,10 @@
 // TODO 1: click-wave when clicking on active button or tab (not for switch-box), what about stage tile ?
 // TODO 4: remove unnecessary tiles, medals, and others related to the missing Ater segments (and possible second bosses everywhere else)
 // TODO 3: check render-reihenfolge (bind-object) in ALLEN menüs und view-boxen
-// TODO 1: invincible medal and survive bonus in Intro (first) and Ater ? Intro already has it, but maybe not clearly for user
+// TODO 1: [MF] invisible medal and survive bonus in Intro (first) and Ater ? Intro already has it, but maybe not clearly for user
+
+// NOTE: only short YES-NO questions: Exit Game ? Return to Menu ?
+// NOTE: every object in menu needs outline: weapons, medals, icons
 
 
 // ****************************************************************
@@ -83,6 +81,7 @@
 #define MENU_EXTRA_STATS              (27u)
 #define MENU_EXTRA_OTHERS             (2u)
 #define MENU_CONFIG_INPUTS            (PLAYERS)
+#define MENU_PAUSE_RESUME_POSITION    (coreVector2(0.0f,0.135f))
 #define MENU_SUMMARY_ARCADES          (9u)
 #define MENU_SUMMARY_MEDALS           (6u)
 #define MENU_SUMMARY_ENTRIES          (2u)
@@ -119,7 +118,7 @@
 #define MENU_FONT_DYNAMIC_5     "dynamic_font",    (79u)
 #define MENU_FONT_ICON_1        "fontawesome.ttf", (20u)
 #define MENU_FONT_ICON_2        "fontawesome.ttf", (24u)
-#define MENU_FONT_ICON_3        "fontawesome.ttf", (40u)
+#define MENU_FONT_ICON_3        "fontawesome.ttf", (30u)
 #define MENU_OUTLINE_SMALL      (3u)
 #define MENU_OUTLINE_BIG        (4u)
 
@@ -185,7 +184,8 @@ enum eSurface : coreUint8
     SURFACE_CONFIG_GAME,
     SURFACE_CONFIG_MAX,
 
-    SURFACE_PAUSE_DEFAULT = 0u,
+    SURFACE_PAUSE_FULL = 0u,
+    SURFACE_PAUSE_LIGHT,
     SURFACE_PAUSE_MAX,
 
     SURFACE_SUMMARY_ARCADE = 0u,
@@ -280,29 +280,15 @@ enum eEntry : coreUint8
 
 // ****************************************************************
 // icon codes (UTF-8)
-#define __ICON(x)         (r_cast<const coreChar*>(x))
-#define ICON_CHECK        (__ICON(u8"\uF00C"))
-#define ICON_TIMES        (__ICON(u8"\uF00D"))
-#define ICON_POWER_OFF    (__ICON(u8"\uF011"))
-#define ICON_REFRESH      (__ICON(u8"\uF021"))
-#define ICON_LOCK         (__ICON(u8"\uF023"))
-#define ICON_ARROW_LEFT   (__ICON(u8"\uF060"))
-#define ICON_ARROW_RIGHT  (__ICON(u8"\uF061"))
-#define ICON_ARROW_UP     (__ICON(u8"\uF062"))
-#define ICON_ARROW_DOWN   (__ICON(u8"\uF063"))
-#define ICON_SHARE        (__ICON(u8"\uF064"))
-#define ICON_COGS         (__ICON(u8"\uF085"))
-#define ICON_CARET_DOWN   (__ICON(u8"\uF0D7"))
-#define ICON_CARET_UP     (__ICON(u8"\uF0D8"))
-#define ICON_CARET_LEFT   (__ICON(u8"\uF0D9"))
-#define ICON_CARET_RIGHT  (__ICON(u8"\uF0DA"))
-#define ICON_PAUSE_CIRCLE (__ICON(u8"\uF28B"))
-#define ICON_UNDO_ALT     (__ICON(u8"\uF2EA"))
-#define ICON_REFRESH_ALT  (__ICON(u8"\uF2F1"))
-#define ICON_REDO_ALT     (__ICON(u8"\uF2F9"))
-#define ICON_SHIELD_ALT   (__ICON(u8"\uF3ED"))
-#define ICON_BURN         (__ICON(u8"\uF46A"))
-#define ICON_FEATHER_ALT  (__ICON(u8"\uF56B")
+#define __ICON(x)     (r_cast<const coreChar*>(x))
+#define ICON_CHECK    (__ICON(u8"\uF00C"))
+#define ICON_TIMES    (__ICON(u8"\uF00D"))
+#define ICON_LOCK     (__ICON(u8"\uF023"))
+#define ICON_ARROW_UP (__ICON(u8"\uF062"))
+#define ICON_SHARE    (__ICON(u8"\uF064"))
+#define ICON_UNDO_ALT (__ICON(u8"\uF2EA"))
+#define ICON_REDO_ALT (__ICON(u8"\uF2F9"))
+#define ICON_BURN     (__ICON(u8"\uF46A"))
 
 
 // ****************************************************************
@@ -842,6 +828,8 @@ private:
     coreUintW                      m_iCurMonitorIndex;
     coreMap<coreUintW, coreString> m_asCurResolution;
 
+    coreUintW m_iJoystickNum;
+
     cNewIndicator m_GameNew;
     cNewIndicator m_MirrorModeNew;
 
@@ -883,6 +871,9 @@ private:
     void __LoadFrequencies(const coreUintW iMonitorIndex);
     void __LoadInputs();
     void __LoadUnlocks();
+
+    // 
+    void __RefreshManual();
 
     // 
     inline cGuiButton& __RetrieveInputButton  (const coreUintW iPlayerIndex, const coreUintW iKeyIndex) {ASSERT((iPlayerIndex < MENU_CONFIG_INPUTS) && (iKeyIndex < INPUT_KEYS)) return *((&m_aInput[iPlayerIndex].oMoveUp)                                         + iKeyIndex);}
@@ -1049,6 +1040,9 @@ private:
     // 
     void __SetMedalMission(const coreUint8 iMedal);
     void __SetMedalSegment(const coreUintW iIndex, const coreUint8 iMedal);
+
+    // 
+    void __ApplyDeferred();
 
     // 
     void __ResetState();

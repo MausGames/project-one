@@ -21,13 +21,12 @@
 // TODO 3: positions in separate list (when iterating through lambda)
 // TODO 3: provide own memory pool for temporary additional objects (remove MANAGED_), also WindScreen
 // TODO 3: expose pool-allocator for additional objects (AddList), also WindScreen
-// TODO 3: all environment sound effects should fade in transition (check at end)
 // TODO 2: popping artifacts with shadow in sea-background (configurable view-range ? per list ? auto per height ?)
 // TODO 3: calls to pList->MoveNormal(); may be redundant
 // TODO 3: stomach should not create all vertices
 // TODO 3: EnableShadowRead only if appropriate ground objects would be rendered (IsInstanced)
 // TODO 5: grass+blood and sand+snow (norm) textures are duplicated (especially normal maps), proxies are not possible, because files are loaded directly
-// TODO 1: thunder effect can cause issues for some players, are there other effects causing issues ? (not only flash or shake) (add them to/as disable option)
+// TODO 1: [MF] thunder effect can cause issues for some players, are there other effects causing issues ? (not only flash or shake) (add them to/as disable option)
 // TODO 3: improve snow texture to little flakes (broken quads) 
 // TODO 3: in Add functions change sListKey to a combination of resource identifiers
 // TODO 3: adding temporary objects should cache resources
@@ -37,11 +36,10 @@
 // TODO 3: tropfen einschlag bei moss
 // TODO 3: there is no shadow on the lava (add shadow to lava or blend on edges ?)
 // TODO 3: if dark-background blocks are only using 1 channel, only use single-channel texture, but requires special shader (merge with normal map then ?)
-// TODO 2: if flashes are disabled, disabling darkness in moss background cannot be hidden by lightning, so implement smooth blending (or black lightning with single fade (no flicker))
 // TODO 4: move base-sound into base class ?
 // TODO 3: caustics for sea background (Worley noise)
 // TODO 3: vielleicht visual height + Z reinrechnen für visibility calculations (dann kann große view range reduziert werden)
-// TODO 5: background object replication bug (wo objekte zu nah zusammen sind an der replikations-linie) (bei fly offset 145 in center), fällt fast nicht auf, nur bei sting-only snow background
+// TODO 3: background object replication bug (wo objekte zu nah zusammen sind an der replikations-linie) (bei fly offset 145 in center), fällt fast nicht auf, nur bei sting-only snow background
 
 
 // ****************************************************************
@@ -521,7 +519,7 @@ public:
     ASSIGN_ID_EX(7, "Moss", COLOR_MENU_RED, COLOR_MENU_RED, coreVector2(0.5f,0.0f))
 
     // 
-    inline void FlashLightning() {m_fLightningFlash = 1.0f;}
+    inline void FlashLightning() {m_fLightningFlash = 1.0f; this->__UpdateLightning();}
 
     // 
     inline void SetRainMove       (const coreVector2 vMove)   {m_vRainMove        = vMove;}
@@ -531,6 +529,10 @@ public:
     // 
     inline cHeadlight* GetHeadlight() {return &m_Headlight;}
 
+    // 
+    inline const coreFloat& GetLightningAlpha ()const {return m_Lightning.GetAlpha();}
+    inline const coreBool&  GetLightningStatus()const {return m_LightningTicker.GetStatus();}
+
 
 private:
     // execute own routines
@@ -539,6 +541,9 @@ private:
     void __RenderOwnAfter()final;
     void __MoveOwn       ()final;
     void __UpdateOwn     ()final;
+
+    // 
+    void __UpdateLightning();
 };
 
 
@@ -589,7 +594,7 @@ public:
     inline coreBool IsDissolved()const {return (m_fDissolve >= 10.0f);}
 
     // 
-    inline void FlashLightning() {m_fLightningFlash = 1.0f;}
+    inline void FlashLightning() {m_fLightningFlash = 1.0f; this->__UpdateLightning();}
 
     // 
     inline void SetColor      (const coreVector3 vColor, const coreVector3 vColor2) {m_vColor = vColor; m_vColor2 = vColor2;}
@@ -619,6 +624,9 @@ private:
     void __RenderOwnAfter ()final;
     void __MoveOwn        ()final;
     void __UpdateOwn      ()final;
+
+    // 
+    void __UpdateLightning();
 
     // 
     static coreVector2 __GetCameraPos();

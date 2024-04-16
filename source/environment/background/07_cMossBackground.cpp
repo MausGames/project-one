@@ -306,7 +306,7 @@ void cMossBackground::__MoveOwn()
     m_Rain.SetTexOffset(vTexOffset.Processed(FRACT));
     m_Rain.Move();
 
-    if(m_bEnableLightning)
+    if(m_bEnableLightning && g_CurConfig.Graphics.iFlash)
     {
         // 
         m_fLightningDelay.Update(-1.0f);
@@ -334,13 +334,9 @@ void cMossBackground::__MoveOwn()
 
     // 
     m_fLightningFlash.UpdateMax(-1.0f, 0.0f);
-    const coreFloat fValue = MAX(MIN1(m_fLightningFlash), m_LightningTicker.GetStatus() ? m_LightningTicker.GetValue(CORE_TIMER_GET_REVERSED) : 0.0f);
 
     // 
-    m_Lightning.SetColor3 (g_CurConfig.Graphics.iFlash ? coreVector3(1.0f,1.0f,1.0f) : COLOR_MENU_BLACK);
-    m_Lightning.SetAlpha  (BLENDH3(fValue) * 0.7f);
-    m_Lightning.SetEnabled(fValue ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
-    m_Lightning.Move();
+    this->__UpdateLightning();
 
     // 
     if((fPrevDelay < 0.0f) && (m_fThunderDelay >= 0.0f))
@@ -372,4 +368,18 @@ void cMossBackground::__UpdateOwn()
 {
     // 
     if(m_bEnableHeadlight) m_Headlight.UpdateDefault(0u);
+}
+
+
+// ****************************************************************
+// 
+void cMossBackground::__UpdateLightning()
+{
+    const coreFloat fValue = MAX(MIN1(m_fLightningFlash), m_LightningTicker.GetStatus() ? m_LightningTicker.GetValue(CORE_TIMER_GET_REVERSED) : 0.0f);
+
+    // 
+    m_Lightning.SetColor3 (g_CurConfig.Graphics.iFlash ? coreVector3(1.0f,1.0f,1.0f) : COLOR_MENU_BLACK);
+    m_Lightning.SetAlpha  (BLENDH3(fValue) * 0.7f);
+    m_Lightning.SetEnabled(fValue ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+    m_Lightning.Move();
 }

@@ -45,8 +45,7 @@ void cCalorMission::__SetupOwn()
     {
         cSnowBackground* pBackground = d_cast<cSnowBackground*>(g_pEnvironment->GetBackground());
 
-        pBackground->GetOutdoor()->LerpHeightNow(-0.5f, -34.0f);   // TODO 1: decide what to use
-        //pBackground->GetOutdoor()->LerpHeightNow(0.0f, -25.0f);
+        pBackground->GetOutdoor()->LerpHeightNow(-0.5f, -34.0f);
         pBackground->SetGroundDensity(0u, 1.0f);
         pBackground->SetGroundDensity(1u, 0.0f);
         pBackground->SetGroundDensity(2u, 0.0f);
@@ -94,18 +93,18 @@ void cCalorMission::__SetupOwn()
     // next groups need to spawn (source, target) where player would not attack from/into the previous group
     // uhrzeiger-gruppen haben die selbe winkel-geschwindigkeit, um sie leichter zu steuern
     // in sternen-gruppe hat jeder seinen eigenen pfad, geht nur mit ungerader anzahl gegner
+    // TASK: intercept every move by the jumping enemies
     // TODO 1: hardmode: enemies return after some time
     // TODO 1: hardmode: enemy splits up, the original location attacks, the other keeps moving
-    // TODO 1: badge: [schlecht] items unter gegnern solange sie noch leben
-    // TODO 1: badge: [schlecht?] secret enemies wenn man an bestimmte stellen außerhalb des sichtbereichs feuert
-    // TODO 1: badge: [schlecht?] auf ein ziel draufhalten 0%-100%
-    // TODO 1: teilweise bessere bullet patterns ? https://www.youtube.com/watch?v=1uTQDKAN0sM https://www.youtube.com/watch?v=KJHt4cq1ti0
-    // TODO 1: position patterns in finaler phase können noch etwas mehr variieren
-    // TODO 1: MAIN: task-check, regular score, badges, sound, background rota/speed
-    // TODO 1: ACHIEVEMENT: name (), description (), 
+    // TODO 1: [MF] badge: [schlecht] items unter gegnern solange sie noch leben
+    // TODO 1: [MF] badge: [schlecht?] secret enemies wenn man an bestimmte stellen außerhalb des sichtbereichs feuert
+    // TODO 1: [MF] badge: [schlecht?] auf ein ziel draufhalten 0%-100%
+    // TODO 1: [MF] MAIN: task-check, regular score, badges, sound, background rota/speed
+    // TODO 1: [MF] ACHIEVEMENT: name (), description (), touch every enemy
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
-        constexpr coreUintW iNumData = 16u;
+        constexpr coreUintW iNumData  = 16u;
+        constexpr coreUintW iMaxTrail = 12u;
 
         STAGE_ADD_PATH(pPath1)
         {
@@ -145,13 +144,14 @@ void cCalorMission::__SetupOwn()
             });
         });
 
-        STAGE_GET_START(iNumData * 2u + 4u)
+        STAGE_GET_START(iNumData * 2u + 5u)
             STAGE_GET_FLOAT_ARRAY(afRecover,    iNumData)
             STAGE_GET_FLOAT_ARRAY(afRecoverOld, iNumData)
             STAGE_GET_FLOAT      (fShootTime)
             STAGE_GET_UINT       (iTrail)
             STAGE_GET_UINT       (iTrailOld)
             STAGE_GET_UINT       (iHelperState)
+            STAGE_GET_UINT       (iIntercept)
         STAGE_GET_END
 
         ASSERT(pSquad1->GetNumEnemiesAlive() <= iNumData)
@@ -163,7 +163,7 @@ void cCalorMission::__SetupOwn()
             else if(STAGE_SUB( 3u)) STAGE_RESURRECT(pSquad1, 16u, 31u)
             else if(STAGE_SUB( 4u)) STAGE_RESURRECT(pSquad1, 32u, 43u)
             else if(STAGE_SUB( 5u)) STAGE_RESURRECT(pSquad1, 44u, 55u)
-            else if(STAGE_SUB( 7u)) STAGE_RESURRECT(pSquad1, 56u, 64u)
+            else if(STAGE_SUB( 7u)) STAGE_RESURRECT(pSquad1, 56u, 64u)   // skip 6
             else if(STAGE_SUB( 8u)) STAGE_RESURRECT(pSquad1, 65u, 70u)
             else if(STAGE_SUB( 9u)) STAGE_RESURRECT(pSquad1, 71u, 76u)
             else if(STAGE_SUB(10u)) STAGE_RESURRECT(pSquad1, 77u, 80u)
@@ -264,6 +264,8 @@ void cCalorMission::__SetupOwn()
                     fFactor   = MIN1(fRecover * 0.15f);
                     vStart    = vDir * (1.3f * SQRT2);
                     vLocation = MapToAxis(vDir * LERP(0.3f, 0.6f, fFactor), coreVector2::Direction(LERP(0.0f*PI, 4.0f*PI, fFactor)));
+
+                    if(i == 56u) g_pEnvironment->SetTargetDirection(coreVector2::Direction(fFactor * (-2.0f*PI)), 1.0f);
                 }
                 else if(i < 71u)
                 {
@@ -272,12 +274,16 @@ void cCalorMission::__SetupOwn()
                     fFactor   = MIN1(fRecover * 0.2f);
                     vStart    = coreVector2(1.3f,1.3f);
                     vLocation = MapToAxis(coreVector2(0.0f, fHeight), coreVector2::Direction(LERP(-1.25f*PI, -4.0f*PI, fFactor)));
+
+                    if(i == 65u) g_pEnvironment->SetTargetDirection(coreVector2::Direction(fFactor * (2.0f*PI)), 1.0f);
                 }
                 else
                 {
                     fFactor   = CLAMP01((fRecover - I_TO_F(i - 71u) * 0.2f) * RCP(pPath1->GetTotalDistance()));
                     vStart    = coreVector2(-1.3f,0.0f);
                     vLocation = pPath1->CalcPositionLerp(fFactor);
+
+                    if(i == 71u) g_pEnvironment->SetTargetDirection(coreVector2::Direction(fFactor * (-2.0f*PI)), 1.0f);
                 }
 
                 if(fFactor >= 1.0f) bActive = true;
@@ -286,8 +292,8 @@ void cCalorMission::__SetupOwn()
             }
             else
             {
-                     if(iTrailOld ==  0u) vLocation = coreVector2(-0.5f,0.9f);
-                else if(iTrailOld >= 12u) vLocation = coreVector2( 0.0f,0.0f);
+                     if(iTrailOld == 0u)        vLocation = coreVector2(-0.5f,0.9f);
+                else if(iTrailOld >= iMaxTrail) vLocation = coreVector2( 0.0f,0.0f);
                 else
                 {
                          if((i == 78u)             && (iTrailOld >= 6u)) vLocation = coreVector2::Direction(I_TO_F(iTrailOld) * (3.0f/7.0f) * (-2.0f*PI) + 1.5f * 0.3f) * 0.9f;
@@ -344,7 +350,7 @@ void cCalorMission::__SetupOwn()
                         const coreVector2 vPos = pEnemy->GetPosition().xy();
                         const coreVector2 vDir = pEnemy->AimAtPlayerDual(s_iTick % 2u).Normalized();
 
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.1f, pEnemy, vPos, vDir)->ChangeSize(1.6f);
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.1f, pEnemy, vPos, vDir)->ChangeSize(1.7f);
                     }
                 }
             }
@@ -362,13 +368,13 @@ void cCalorMission::__SetupOwn()
                         const coreVector2 vPos = pEnemy->GetPosition().xy();
                         const coreVector2 vDir = pEnemy->AimAtPlayerDual(s_iTick % 2u).Normalized();
 
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.1f, pEnemy, vPos, vDir)->ChangeSize(1.6f);
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.1f, pEnemy, vPos, vDir)->ChangeSize(1.7f);
                     }
                 }
             }
             else
             {
-                bActive = (iTrail >= 12u) && (fDistSq < POW2(2.0f));
+                bActive = (iTrail >= iMaxTrail) && (fDistSq < POW2(2.0f));
 
                 if(iHit && !bActive && (fDistSq < POW2(2.0f)) && (iTrail == iTrailOld))
                 {
@@ -396,6 +402,28 @@ void cCalorMission::__SetupOwn()
             const coreVector2 vTarget = fRecover ? (vLocation + vEvade) : vLocation;
 
             pEnemy->DefaultMoveSmooth(vTarget, 120.0f, 12.0f);
+
+            if(i >= 77u)
+            {
+                if(iTrail && !HAS_BIT(iIntercept, iTrail) && (fDistSq >= POW2(10.0f)))
+                {
+                    STAGE_FOREACH_PLAYER(pPlayer, j)
+                    {
+                        const coreVector2 vDiff = pEnemy->GetPosition().xy() - pPlayer->GetPosition().xy();
+                        if(vDiff.LengthSq() < POW2(7.0f))
+                        {
+                            ADD_BIT(iIntercept, iTrail)
+                            const coreUint32 iCount = coreMath::PopCount(iIntercept);
+
+                            if(iCount >= iMaxTrail) STAGE_BADGE(2u, BADGE_HARD, pEnemy->GetPosition())
+                            else g_pGame->GetCombatText()->DrawCountdown(coreMath::PopCount(iIntercept), iMaxTrail, pEnemy->GetPosition());
+
+                            g_pSpecialEffects->CreateSplashColor(pEnemy->GetPosition(), SPECIAL_SPLASH_TINY, COLOR_ENERGY_YELLOW);
+                            g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iCount, iMaxTrail), SOUND_ITEM_COLLECT);
+                        }
+                    });
+                }
+            }
         });
 
         if((m_iStageSub >= 5u) && (m_iStageSub < 10u))
@@ -446,8 +474,8 @@ void cCalorMission::__SetupOwn()
 
                     const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(j) * 4.5f - 2.25f));
 
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.1f, pEnemy, vPos,  vDir)->ChangeSize(1.6f);
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.1f, pEnemy, vPos, -vDir)->ChangeSize(1.6f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.1f, pEnemy, vPos,  vDir)->ChangeSize(1.7f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.1f, pEnemy, vPos, -vDir)->ChangeSize(1.7f);
                 }
 
                 g_pSpecialEffects->CreateSplashColor(pEnemy->GetPosition(), 25.0f, 5u, COLOR_ENERGY_GREEN);
@@ -483,7 +511,7 @@ void cCalorMission::__SetupOwn()
             }
         }
 
-        STAGE_WAVE(0u, "6-1", {50.0f, 75.0f, 100.0f, 125.0f})   // EINUNDDREISSIG
+        STAGE_WAVE(0u, "6-1", {50.0f, 75.0f, 100.0f, 125.0f, 250.0f})   // EINUNDDREISSIG
     });
 
     // ################################################################
@@ -521,13 +549,12 @@ void cCalorMission::__SetupOwn()
     // TASK: destroy all enemies under the snow
     // TASK: get stuck in snow
     // TASK: collect all snowing objects
+    // ACHIEVEMENT: clean the whole screen before destroying the last enemy
     // TODO 1: hardmode: player is slipping
     // TODO 1: hardmode: snow can freeze player
     // TODO 1: hardmode: snow is created all the time (snowing, avalanche)
     // TODO 1: adjust (and fix!) snow for all weapons
-    // TODO 1: MAIN: task-check, regular score, sound, background rota/speed
-    // TODO 1: ACHIEVEMENT: name (), description (), clean the whole screen before destroying the last enemy
-    // TODO 1: letzter enemy soll ganzen schnee zerstören, kein ausblenden
+    // TODO 1: [MF] MAIN: sound, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -597,17 +624,28 @@ void cCalorMission::__SetupOwn()
             else if(STAGE_SUB(18u))
             {
                 this->DisableSnow(true);
+                if(!m_Snow.AnyData()) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, coreVector3(0.0f,0.0f,0.0f))   // snow not yet inverted
             }
 
-                 if(m_iStageSub ==  8u) STAGE_RESURRECT(pSquad2, 0u, 2u)
-            else if(m_iStageSub == 16u) g_pGame->GetBulletManagerEnemy()->ClearBullets(true);
-
-            if((m_iStageSub == 3u) || (m_iStageSub == 6u) || (m_iStageSub == 11u) || (m_iStageSub == 14u) || (m_iStageSub == 17u))
+            if(m_iStageSub == 16u)
             {
-                if(++iHailCreate >= CALOR_HAILS) iHailCreate = 0u;
+                g_pGame->GetBulletManagerEnemy()->ClearBullets(true);
+            }
 
-                this->EnableHail(iHailCreate);
-                this->GetHail(iHailCreate)->SetPosition(coreVector3(0.0f,1.3f,0.0f) * FOREGROUND_AREA3);
+            if(g_pGame->IsTask())
+            {
+                if(m_iStageSub == 8u)
+                {
+                    STAGE_RESURRECT(pSquad2, 0u, 2u)
+                }
+
+                if((m_iStageSub == 3u) || (m_iStageSub == 6u) || (m_iStageSub == 11u) || (m_iStageSub == 14u) || (m_iStageSub == 17u))
+                {
+                    if(++iHailCreate >= CALOR_HAILS) iHailCreate = 0u;
+
+                    this->EnableHail(iHailCreate);
+                    this->GetHail(iHailCreate)->SetPosition(coreVector3(0.0f,1.3f,0.0f) * FOREGROUND_AREA3);
+                }
             }
         }
 
@@ -681,36 +719,6 @@ void cCalorMission::__SetupOwn()
             });
         }
 
-        for(coreUintW i = 0u; i < CALOR_HAILS; ++i)
-        {
-            coreObject3D* pHail = this->GetHail(i);
-            if(!pHail->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
-
-            afHailTime[i] += 1.0f * TIME;
-
-            const coreFloat   fOffset = SIN(afHailTime[i] * fHailSpeed + I_TO_F(i + 2u) * -GA);
-            const coreVector2 vDir    = coreVector2(fOffset, -1.5f).Normalized();
-            const coreVector2 vPos    = pHail->GetPosition().xy() + vDir * (1.1f * fHailSpeed * BULLET_SPEED_FACTOR * TIME);
-
-            if(vPos.y < -FOREGROUND_AREA.y * 1.3f) this->DisableHail(i, false);
-
-            pHail->SetPosition(coreVector3(vPos, 0.0f));
-
-            STAGE_FOREACH_PLAYER(pPlayer, j)
-            {
-                const coreVector2 vDiff = pHail->GetPosition().xy() - pPlayer->GetPosition().xy();
-                if(vDiff.LengthSq() < POW2(5.0f))
-                {
-                    this->DisableHail(i, true);
-
-                    if(++iHailState >= 5u) STAGE_BADGE(2u, BADGE_HARD, pHail->GetPosition())
-                    else g_pGame->GetCombatText()->DrawProgress(iHailState, 5u, pHail->GetPosition());
-
-                    g_pSpecialEffects->PlaySound(pHail->GetPosition(), 1.0f, 1.0f, SOUND_PLACEHOLDER);
-                }
-            });
-        }
-
         if(!pHelper->HasStatus(HELPER_STATUS_DEAD))
         {
             const coreFloat   fOffset = SIN(pHelper->GetLifeTime() * fHailSpeed);
@@ -722,13 +730,46 @@ void cCalorMission::__SetupOwn()
             pHelper->SetPosition(coreVector3(vPos, 0.0f));
         }
 
-        STAGE_FOREACH_PLAYER(pPlayer, i)
+        if(g_pGame->IsTask())
         {
-            if(m_afSnowStuck[i] >= 1.0f)
+            for(coreUintW i = 0u; i < CALOR_HAILS; ++i)
             {
-                STAGE_BADGE(0u, BADGE_EASY, pPlayer->GetPosition())
+                coreObject3D* pHail = this->GetHail(i);
+                if(!pHail->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+                afHailTime[i] += 1.0f * TIME;
+
+                const coreFloat   fOffset = SIN(afHailTime[i] * fHailSpeed + I_TO_F(i + 2u) * -GA);
+                const coreVector2 vDir    = coreVector2(fOffset, -1.5f).Normalized();
+                const coreVector2 vPos    = pHail->GetPosition().xy() + vDir * (1.1f * fHailSpeed * BULLET_SPEED_FACTOR * TIME);
+
+                if(vPos.y < -FOREGROUND_AREA.y * 1.3f) this->DisableHail(i, false);
+
+                pHail->SetPosition(coreVector3(vPos, 0.0f));
+
+                STAGE_FOREACH_PLAYER(pPlayer, j)
+                {
+                    const coreVector2 vDiff = pHail->GetPosition().xy() - pPlayer->GetPosition().xy();
+                    if(vDiff.LengthSq() < POW2(5.0f))
+                    {
+                        this->DisableHail(i, true);
+
+                        if(++iHailState >= 5u) STAGE_BADGE(2u, BADGE_HARD, pHail->GetPosition())
+                        else g_pGame->GetCombatText()->DrawProgress(iHailState, 5u, pHail->GetPosition());
+
+                        g_pSpecialEffects->PlaySound(pHail->GetPosition(), 1.0f, 1.0f, SOUND_PLACEHOLDER);
+                    }
+                });
             }
-        });
+
+            STAGE_FOREACH_PLAYER(pPlayer, i)
+            {
+                if(m_afSnowStuck[i] >= 1.0f)
+                {
+                    STAGE_BADGE(0u, BADGE_EASY, pPlayer->GetPosition())
+                }
+            });
+        }
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
@@ -896,7 +937,7 @@ void cCalorMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE(1u, "6-2", {55.0f, 80.0f, 110.0f, 135.0f})   // ZWEIUNDDREISSIG
+        STAGE_WAVE(1u, "6-2", {55.0f, 80.0f, 110.0f, 135.0f, 270.0f})   // ZWEIUNDDREISSIG
     });
 
     // ################################################################
@@ -952,16 +993,13 @@ void cCalorMission::__SetupOwn()
     // collision handling in the dungeon is extremely unstable, and can fail with slightly different parameters, should be fixed or not reused (possible issues: player collision handling, bullet collision range (player needs to touch cluster), global move, bullet test order, cGame callback being called later, ...)
     // TASK: destroy secret enemy at the back of the initial room
     // TASK: collect hidden treasure-boxes in dungeons (open up when flying over it)
+    // ACHIEVEMENT: create a prison with a maximum size of 4x4 bullets
     // TODO 1: hardmode: attacking enemies
     // TODO 1: hardmode: moving enemies in dungeon
     // TODO 1: hardmode: additional attacking pseudo-enemy, made of bullet?), or infinity object, even in dungeon (though similar to P1 object)
-    // TODO 1: badge: create very small box in pressure-phase, show state with combat-text ?
     // TODO 1: could be during a sandstorm, rainstorm or other visual distortion to remove the background movement
     // TODO 3: late update: make sure corners in dungeon are visually consistent (depth)
-    // TODO 1: helper sollte eher irgendwo draußen sein, und ziel is empty, sonst glaubt spieler man muss den helper anschießen
-    // TODO 1: reduce medal time in easy ? also in other wave/bosses ?
-    // TODO 1: MAIN: task-check, regular score, badges, sound, background rota/speed
-    // TODO 1: ACHIEVEMENT: name (), description (), create a prison with a maximum size of 4x4 bullets (2x2 inside volume)
+    // TODO 1: [MF] MAIN: task-check, badges, sound, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -1028,8 +1066,9 @@ void cCalorMission::__SetupOwn()
             }
         }
 
-        cHelper* pHelper = g_pGame->GetHelper(ELEMENT_CYAN);
-        cEnemy*  pDummy  = pSquad1->GetEnemy(0u);
+        cHelper* pHelperBlue = g_pGame->GetHelper(ELEMENT_BLUE);
+        cHelper* pHelperCyan = g_pGame->GetHelper(ELEMENT_CYAN);
+        cEnemy*  pDummy      = pSquad1->GetEnemy(0u);
 
         constexpr coreFloat fScale = 0.1f;
 
@@ -1255,10 +1294,15 @@ void cCalorMission::__SetupOwn()
 
                 nCreateEnemyFunc(1000, 1000);
 
-                pHelper->Resurrect(false);
-                pHelper->SetPosition(coreVector3(nPositionFunc(0, 21), 0.0f));
+                pHelperBlue->AddStatus(HELPER_STATUS_HIDDEN);
 
-                this->EnableAim(pHelper);
+                pHelperBlue->Resurrect(false);
+                pHelperBlue->SetPosition(coreVector3(nPositionFunc(0, 21), 0.0f));
+
+                pHelperCyan->Resurrect(false);
+                pHelperCyan->SetPosition(coreVector3(nPositionFunc(3, 12), 0.0f));
+
+                this->EnableAim(pHelperBlue);
                 break;
             }
         }
@@ -1364,11 +1408,16 @@ void cCalorMission::__SetupOwn()
                 }
             }
 
+            coreFloat afRange[4] = {1000.0f};   // +y, -x, -y, +x
+
             const coreVector2 vBorder = (vGlobalOffset - vGlobalMove).Processed(FmodRange, 0.0f, FOREGROUND_AREA.x * 0.11f);
 
             g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cQuadBullet>([&](cQuadBullet* OUTPUT pBullet)
             {
-                const coreVector2 vDir = UnpackDirection((pBullet->GetDamage() - 1u) * 2u);
+                const coreUintW iDamage = pBullet->GetDamage();
+                ASSERT((iDamage >= 1u) && (iDamage <= 4u))
+
+                const coreVector2 vDir = UnpackDirection((iDamage - 1u) * 2u);
 
                 coreVector2 vNewPos = pBullet->GetPosition().xy();
 
@@ -1378,7 +1427,15 @@ void cCalorMission::__SetupOwn()
                 else if((vNewPos.y >  FOREGROUND_AREA.y * 1.21f) && (vDir.y > 0.0f)) vNewPos.y =  FOREGROUND_AREA.y * 1.21f + vBorder.y;
 
                 pBullet->SetPosition(coreVector3(vNewPos, 0.0f));
+
+                afRange[iDamage - 1u] = pBullet->GetPosition().arr(iDamage % 2u);
             });
+
+            if((afRange[3] - afRange[1] < 15.0f) &&
+               (afRange[0] - afRange[2] < 15.0f))
+            {
+                STAGE_BADGE(3u, BADGE_ACHIEVEMENT, coreVector3(0.0f,0.0f,0.0f))
+            }
 
             STAGE_COLL_PLAYER_BULLET(pPlayer, pBullet, vIntersection, bFirstHit, COLL_REF(vGlobalOffset))
             {
@@ -1522,27 +1579,36 @@ void cCalorMission::__SetupOwn()
             pBullet->SetAnimSpeed(0.0f);
         });
 
-        if(!pHelper->HasStatus(HELPER_STATUS_DEAD))
+        if(!pHelperBlue->HasStatus(HELPER_STATUS_DEAD))
         {
-            const coreVector2 vNewPos = pHelper->GetPosition().xy() + vGlobalMove;
+            const coreVector2 vNewPos = pHelperBlue->GetPosition().xy() + vGlobalMove;
 
-            pHelper->SetPosition(coreVector3(vNewPos, 0.0f));
+            pHelperBlue->SetPosition(coreVector3(vNewPos, 0.0f));
 
             STAGE_FOREACH_PLAYER(pPlayer, i)
             {
                 const coreVector2 vDiff = pPlayer->GetPosition().xy() - vNewPos;
 
-                if(vDiff.LengthSq() < POW2(5.0f))
+                if(vDiff.LengthSq() < POW2(6.0f))
                 {
                     pSquad1->ClearEnemies(true);
-                    pHelper->Kill(true);
+                    pHelperBlue->Kill(true);
+                    pHelperCyan->Kill(true);
 
                     this->DisableAim(true);
                 }
             });
         }
 
-        STAGE_WAVE(2u, "6-3", {45.0f, 65.0f, 90.0f, 110.0f})   // DREIUNDDREISSIG
+        if(!pHelperCyan->HasStatus(HELPER_STATUS_DEAD))
+        {
+            const coreVector2 vNewPos = pHelperCyan->GetPosition().xy() + vGlobalMove;
+
+            pHelperCyan->SetPosition(coreVector3(vNewPos, 0.0f));
+        }
+
+        if(g_pGame->IsEasy()) STAGE_WAVE(2u, "6-3", {50.0f, 70.0f, 95.0f, 115.0f, 225.0f})   // DREIUNDDREISSIG
+                         else STAGE_WAVE(2u, "6-3", {45.0f, 65.0f, 90.0f, 110.0f, 220.0f})
     });
 
     // ################################################################
@@ -1578,19 +1644,19 @@ void cCalorMission::__SetupOwn()
     // in galaga, only the bottom enemies shoot, but ignoring it here creates a better bullet-pattern
     // TASK: destroy the UFO
     // TASK: reach the top, while on full speed, with back-fire push
-    // TODO 1: badge: order on first tontaubenschießen
-    // TODO 1: badge: irgendwas mit/wärend dem helper am ende
+    // ACHIEVEMENT: destroy all regular enemies while shooting down
+    // TODO 1: [MF] badge: order on first tontaubenschießen
+    // TODO 1: [MF] badge: irgendwas mit/wärend dem helper am ende
+    // TODO 1: [MF] badge: gegner dropen items die nach unten fliegen, wie in anderen shmups
     // TODO 1: hardmode: richtung ändert sich ständig
     // TODO 1: hardmode: man wird regelmäßig raufgeschleudert
-    // TODO 1: change 1.2f to 1.3f ?
-    // TODO 1: MAIN: task-check, regular score, badges, sound
-    // TODO 1: ACHIEVEMENT: name (), description (), destroy all enemies while shooting down
+    // TODO 1: [MF] MAIN: task-check, badges, sound
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         STAGE_ADD_PATH(pPath1)
         {
             pPath1->Reserve(4u);
-            pPath1->AddNode(coreVector2( 0.2f,  1.2f),  coreVector2(0.0f,-1.0f));
+            pPath1->AddNode(coreVector2( 0.2f,  1.3f),  coreVector2(0.0f,-1.0f));
             pPath1->AddNode(coreVector2(-0.7f,  0.0f),  coreVector2(0.0f,-1.0f));
             pPath1->AddNode(coreVector2(-0.45f,-0.25f), coreVector2(1.0f, 0.0f));
             pPath1->AddNode(coreVector2(-0.2f,  0.0f),  coreVector2(0.0f, 1.0f));
@@ -1600,7 +1666,7 @@ void cCalorMission::__SetupOwn()
         STAGE_ADD_PATH(pPath2)
         {
             pPath2->Reserve(6u);
-            pPath2->AddNode(coreVector2(-1.2f, -0.8f),  coreVector2( 1.0f, 0.0f));
+            pPath2->AddNode(coreVector2(-1.3f, -0.8f),  coreVector2( 1.0f, 0.0f));
             pPath2->AddNode(coreVector2(-0.2f,  0.0f),  coreVector2( 0.0f, 1.0f));
             pPath2->AddNode(coreVector2(-0.45f, 0.25f), coreVector2(-1.0f, 0.0f));
             pPath2->AddNode(coreVector2(-0.7f,  0.0f),  coreVector2( 0.0f,-1.0f));
@@ -1612,18 +1678,18 @@ void cCalorMission::__SetupOwn()
         STAGE_ADD_PATH(pPath3)
         {
             pPath3->Reserve(6u);
-            pPath3->AddNode (coreVector2(-1.0f, 1.2f), coreVector2(0.0f,-1.0f));
+            pPath3->AddNode (coreVector2(-1.0f, 1.3f), coreVector2(0.0f,-1.0f));
             pPath3->AddNodes(coreVector2(-1.0f,-1.0f), coreVector2(0.0f,-1.0f), coreVector2(1.0f,0.0f));
             pPath3->AddNodes(coreVector2( 1.0f,-1.0f), coreVector2(1.0f, 0.0f), coreVector2(0.0f,1.0f));
-            pPath3->AddNode (coreVector2( 1.0f, 1.2f), coreVector2(0.0f, 1.0f));
+            pPath3->AddNode (coreVector2( 1.0f, 1.3f), coreVector2(0.0f, 1.0f));
             pPath3->Refine();
         });
 
         STAGE_ADD_PATH(pPath4)
         {
             pPath4->Reserve(2u);
-            pPath4->AddNode(coreVector2(0.0f, 1.3f), coreVector2(0.0f,-1.0f));
-            pPath4->AddNode(coreVector2(0.0f,-1.3f), coreVector2(0.0f,-1.0f));
+            pPath4->AddNode(coreVector2(0.0f, 1.4f), coreVector2(0.0f,-1.0f));
+            pPath4->AddNode(coreVector2(0.0f,-1.4f), coreVector2(0.0f,-1.0f));
             pPath4->Refine();
         });
 
@@ -1642,7 +1708,7 @@ void cCalorMission::__SetupOwn()
             pPath5->Refine();
         });
 
-        STAGE_ADD_SQUAD(pSquad1, cArrowEnemy, 100u)
+        STAGE_ADD_SQUAD(pSquad1, cArrowEnemy, 104u)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
@@ -1662,29 +1728,34 @@ void cCalorMission::__SetupOwn()
             });
         });
 
-        STAGE_GET_START(36u + 2u * GAME_PLAYERS)
+        STAGE_GET_START(37u + 2u * GAME_PLAYERS)
             STAGE_GET_VEC2_ARRAY (avForce,   16u)
             STAGE_GET_VEC2_ARRAY (avTurn,    GAME_PLAYERS)
             STAGE_GET_FLOAT_ARRAY(afBoost,   2u)
             STAGE_GET_FLOAT      (fOldSpeed, fOldSpeed = g_pEnvironment->GetSpeed())
             STAGE_GET_UINT       (iPushBack, iPushBack = 1u)
+            STAGE_GET_UINT       (iFrontShot)
         STAGE_GET_END
 
         if(pSquad1->IsFinished())
         {
-                 if(STAGE_SUB( 1u)) STAGE_RESURRECT(pSquad1,  0u, 11u)
-            else if(STAGE_SUB( 2u)) STAGE_RESURRECT(pSquad1, 20u, 35u)
-            else if(STAGE_SUB( 3u)) STAGE_RESURRECT(pSquad1, 36u, 51u)
-            else if(STAGE_SUB( 4u)) STAGE_RESURRECT(pSquad1, 60u, 75u)   // #
-            else if(STAGE_SUB( 5u)) STAGE_RESURRECT(pSquad1, 52u, 59u)   // #
-            else if(STAGE_SUB( 6u)) STAGE_RESURRECT(pSquad1, 12u, 12u)
-            else if(STAGE_SUB( 7u)) STAGE_RESURRECT(pSquad1, 13u, 13u)
-            else if(STAGE_SUB( 8u)) STAGE_RESURRECT(pSquad1, 14u, 15u)
-            else if(STAGE_SUB( 9u)) STAGE_RESURRECT(pSquad1, 16u, 17u)
-            else if(STAGE_SUB(10u)) STAGE_RESURRECT(pSquad1, 18u, 19u)
-            else if(STAGE_SUB(11u)) STAGE_RESURRECT(pSquad1, 76u, 83u)
-            else if(STAGE_SUB(12u)) STAGE_RESURRECT(pSquad1, 84u, 99u)
-            else if(STAGE_SUB(13u)) STAGE_DELAY_START_CLEAR
+                 if(STAGE_SUB( 1u)) STAGE_RESURRECT(pSquad1,  0u,  11u)
+            else if(STAGE_SUB( 2u)) STAGE_RESURRECT(pSquad1, 20u,  35u)
+            else if(STAGE_SUB( 3u)) STAGE_RESURRECT(pSquad1, 36u,  51u)
+            else if(STAGE_SUB( 4u)) STAGE_RESURRECT(pSquad1, 64u,  79u)   // #
+            else if(STAGE_SUB( 5u)) STAGE_RESURRECT(pSquad1, 52u,  63u)   // #
+            else if(STAGE_SUB( 6u)) STAGE_RESURRECT(pSquad1, 12u,  12u)
+            else if(STAGE_SUB( 7u)) STAGE_RESURRECT(pSquad1, 13u,  13u)
+            else if(STAGE_SUB( 8u)) STAGE_RESURRECT(pSquad1, 14u,  15u)
+            else if(STAGE_SUB( 9u)) STAGE_RESURRECT(pSquad1, 16u,  17u)
+            else if(STAGE_SUB(10u)) STAGE_RESURRECT(pSquad1, 18u,  19u)
+            else if(STAGE_SUB(11u)) STAGE_RESURRECT(pSquad1, 80u,  87u)
+            else if(STAGE_SUB(12u)) STAGE_RESURRECT(pSquad1, 88u, 103u)
+            else if(STAGE_SUB(13u))
+            {
+                STAGE_DELAY_START_CLEAR
+                if(!iFrontShot) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, coreVector3(0.0f,0.0f,0.0f))
+            }
 
                  if(m_iStageSub == 2u) g_pGame->GetBulletManagerEnemy()->ClearBullets(true);
             else if(m_iStageSub == 3u) STAGE_RESURRECT(pSquad2, 0u, 0u)
@@ -1739,7 +1810,7 @@ void cCalorMission::__SetupOwn()
                 STAGE_FOREACH_PLAYER(pPlayer, i)
                 {
                     pPlayer->SetDirection(coreVector3(MapToAxis(avTurn[i], vRota), 0.0f));
-                    pPlayer->AddStatus (PLAYER_STATUS_NO_INPUT_TURN);
+                    pPlayer->AddStatus   (PLAYER_STATUS_NO_INPUT_TURN);
                 });
             }
             else if(STAGE_SUBTIME_POINT(fRotaDist))
@@ -1789,7 +1860,13 @@ void cCalorMission::__SetupOwn()
             if(fExaust > 0.05f)
             {
                 pPlayer->SetDirection(coreVector3(0.0f,1.0f,0.0f));
+                pPlayer->AddStatus   (PLAYER_STATUS_NO_INPUT_TURN);
+
                 pPlayer->ShowArrow(0u);
+            }
+            else if(iPushBack)
+            {
+                pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_TURN);
             }
 
             if((pPlayer->GetPosition().y >= vArea.w) && (afBoost[1] >= 1.0f))
@@ -1802,7 +1879,7 @@ void cCalorMission::__SetupOwn()
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
-            STAGE_LIFETIME(pEnemy, ((i < 12u) ? 0.9f : ((i < 20u) ? 0.7f : ((i < 52u) ? 1.5f : ((i < 60u) ? 1.4f : 1.1f)))) * (((i >= 12u && i < 20u) || (i >= 52u)) ? fMoveSpeed : 1.0f), (i < 12u) ? (3.0f + 0.65f * I_TO_F(i)) : ((i < 20u) ? 0.0f : ((i >= 60u && i < 76u) ? (0.2f * I_TO_F((i - 60u) % 16u) + 1.2f * I_TO_F(MIN((i - 60u) / 4u, 2u))) : ((i < 84u) ? (0.2f * I_TO_F((i - 20u) % 8u) + (((i >= 20u) && (i < 36u)) ? 4.0f : 0.0f)) : ((i < 92u) ? 0.0f : 0.1f)))))
+            STAGE_LIFETIME(pEnemy, ((i < 12u) ? 0.9f : ((i < 20u) ? 0.7f : ((i < 52u) ? 1.5f : ((i < 64u) ? 1.4f : 1.1f)))) * (((i >= 12u && i < 20u) || (i >= 52u)) ? fMoveSpeed : 1.0f), (i < 12u) ? (3.0f + 0.7f * I_TO_F(i)) : ((i < 20u) ? 0.0f : ((i < 52u) ? (0.2f * I_TO_F((i - 20u) % 8u) + ((i < 36u) ? 4.0f : 0.0f)) : ((i < 64u) ? (0.2f * I_TO_F(i - 52u)) : ((i < 80u) ? (0.2f * I_TO_F((i - 64u) % 16u) + 1.2f * I_TO_F(MIN((i - 64u) / 4u, 2u))) : ((i < 88u) ? (0.2f * I_TO_F(i - 80u)) : ((i < 96u) ? 0.0f : 0.1f)))))))
 
             if(i < 12u)
             {
@@ -1857,11 +1934,11 @@ void cCalorMission::__SetupOwn()
                     pEnemy->SetPosition(coreVector3(LERPH3(vFrom.x, vTo.x, fTime), LERP(vFrom.y, vTo.y, fTime), 0.0f));
                 }
             }
-            else if(i < 76u)
+            else if(i < 80u)
             {
                 STAGE_REPEAT(pPath3->GetTotalDistance())
 
-                const coreVector2 vFactor = coreVector2(((i < 60u) || ((i >= 64u) && (i < 68u))) ? 1.0f : -1.0f, 1.0f);
+                const coreVector2 vFactor = coreVector2(((i < 64u) || ((i >= 68u) && (i < 72u))) ? 1.0f : -1.0f, 1.0f);
                 const coreVector2 vOffset = coreVector2(0.0f,0.0f);
 
                 pEnemy->DefaultMovePath(pPath3, vFactor, vOffset * vFactor, fLifeTime);
@@ -1869,21 +1946,21 @@ void cCalorMission::__SetupOwn()
                 const coreVector2 vPos   = pEnemy->GetPosition().xy();
                 const coreVector2 vNorm  = AlongCrossNormal(-vPos);
                 const coreFloat   fValue = coreVector2::Dot(vPos, vNorm.Rotated90()) / (FOREGROUND_AREA.x * 1.0f);
-                const coreFloat   fPower = ((i >= 60u) && (vPos.y <= 0.0f)) ? 0.0f : 12.0f;
+                const coreFloat   fPower = ((i >= 64u) && (vPos.y <= 0.0f)) ? 0.0f : 12.0f;
                 const coreFloat   fJump  = fPower * ABS(SIN(fValue * (1.0f*PI)));
 
                 pEnemy->SetPosition(coreVector3(vPos + vNorm * fJump, 0.0f));
 
-                if(i < 60u) pEnemy->DefaultRotate(fLifeTime * -3.0f);
+                if(i < 64u) pEnemy->DefaultRotate(fLifeTime * -3.0f);
             }
             else
             {
-                coreVector2& vForce = avForce[(i - 76u) % 16u];
+                coreVector2& vForce = avForce[(i - 80u) % 16u];
 
                 if(STAGE_TAKEOFF)
                 {
                     pEnemy->SetPosition(coreVector3(-1.2f,-0.9f,0.0f) * FOREGROUND_AREA3);
-                    vForce = coreVector2::Direction(I_TO_F((i - 76u) % 8u) / 8.0f * (-0.1f*PI) - ((i < 84u) ? (0.1f*PI) : (0.05f*PI))) * 1.65f;
+                    vForce = coreVector2::Direction(I_TO_F((i - 80u) % 8u) / 8.0f * (-0.1f*PI) - ((i < 88u) ? (0.1f*PI) : (0.05f*PI))) * 1.65f;
 
                     if(i % 2u)
                     {
@@ -1958,7 +2035,13 @@ void cCalorMission::__SetupOwn()
             }
         }
 
-        STAGE_WAVE(3u, "6-4", {80.0f, 120.0f, 160.0f, 200.0f})   // VIERUNDDREISSIG
+        STAGE_COLL_ENEMY_BULLET(pEnemy, pBullet, vIntersection, bFirstHit, COLL_REF(iFrontShot))
+        {
+            const coreFloat fDot = coreVector2::Dot(pBullet->GetFlyDir(), coreVector2(0.0f,-1.0f));
+            if(fDot < (1.0f/SQRT2)) iFrontShot += 1u;
+        });
+
+        STAGE_WAVE(3u, "6-4", {80.0f, 120.0f, 160.0f, 200.0f, 400.0f})   // VIERUNDDREISSIG
     });
 
     // ################################################################
@@ -1998,17 +2081,12 @@ void cCalorMission::__SetupOwn()
     // in coop, captured enemies need to be usable on the whole screen, e.g. transfer to other player
     // TASK: attack specific targets with your normal weapon
     // TASK: do enough damage to Zeroth before time runs out
+    // ACHIEVEMENT: in coop only capture enemies with a single player
     // TODO 1: hardmode: enemies keep attacking while being swung
     // TODO 1: hardmode: permanent bullets from top
-    // TODO 1: badge: zerstöre N bullets mit morgenstern (+ anzeige, aber erst am ende)
-    // TODO 1: badge: some enemies are paired (swing one on the other), only once
-    // TODO 1: interpolationen bei boss rotation is noch abgehackt (BREAK, LINEAR SMOOTH)
-    // TODO 1: schild sollte die bullets zerstören, nicht gegner (vielleicht schild-kollision-size dann etwas anpassen, geht hauptsächlich um die runde form, morgenstern auch in schild ? für mehr determinismus)
-    // TODO 1: in coop, gegner am morgenstern sollte spieler nicht attackieren können, aber GHOST ändert das volumen
-    // TODO 1: wenn boss attackiert wird sollte keine chain akkumuliert werden, sondern punkte absolut (*5) gutgeschrieben werden (lösen mit Dharuk)
-    // TODO 1: die objekte zum abschießen schauen noch etwas zu langweilig aus, vielleicht 1-2 waves die nachfliegen
-    // TODO 1: MAIN: task-check, regular score, extra score (boss), badges, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, background rota/speed
-    // TODO 1: ACHIEVEMENT: name (), description (), 
+    // TODO 1: [MF] badge: zerstöre N bullets mit morgenstern (+ anzeige, aber erst am ende)
+    // TODO 1: [MF] badge: some enemies are paired (swing one on the other), only once
+    // TODO 1: [MF] MAIN: task-check, regular score, extra score (boss), badges, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, background rota/speed
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         
@@ -2072,15 +2150,22 @@ void cCalorMission::__SetupOwn()
             });
         });
 
-        STAGE_GET_START(5u)
-            STAGE_GET_VEC2(vHelperMove)
-            STAGE_GET_VEC2(vBullMove)
-            STAGE_GET_UINT(iBullCount)
+        STAGE_GET_START(11u)
+            STAGE_GET_VEC2 (vHelperMove)
+            STAGE_GET_VEC2 (vBullPos)
+            STAGE_GET_VEC2 (vBullMove)
+            STAGE_GET_VEC2 (vBullMoveReal)
+            STAGE_GET_FLOAT(fBullTime)
+            STAGE_GET_UINT (iBullCount)
+            STAGE_GET_UINT (iAnyCatch)
         STAGE_GET_END
 
         const cShip* pCatchObject1 = this->GetCatchObject(0u);
         const cShip* pCatchObject2 = this->GetCatchObject(1u);
         STATIC_ASSERT(CALOR_STARS == 2u)
+
+        if(pCatchObject1) ADD_BIT(iAnyCatch, 0u)
+        if(pCatchObject2) ADD_BIT(iAnyCatch, 1u)
 
         coreBool bLastCatch = false;
         if(pSquad1->IsFinished() && (pSquad2->GetNumEnemiesAlive() == 1u) && m_Boulder.HasStatus(ENEMY_STATUS_DEAD))
@@ -2107,6 +2192,13 @@ void cCalorMission::__SetupOwn()
             else if(STAGE_SUB(11u)) STAGE_RESURRECT(pSquad2,  6u,  6u)
             else if(STAGE_SUB(12u)) STAGE_RESURRECT(pSquad2,  7u,  7u)
             else if(STAGE_SUB(13u)) STAGE_RESURRECT(pSquad2,  8u,  8u)
+            else if(STAGE_SUB(14u))
+            {
+                if(g_pGame->IsMulti() && (coreMath::PopCount(iAnyCatch) == 1u))
+                {
+                    STAGE_BADGE(3u, BADGE_ACHIEVEMENT, coreVector3(0.0f,0.0f,0.0f))
+                }
+            }
         }
 
         cHelper* pHelper = g_pGame->GetHelper(ELEMENT_PURPLE);
@@ -2134,20 +2226,39 @@ void cCalorMission::__SetupOwn()
 
         if(g_pGame->IsTask())
         {
-                 if((m_iStageSub ==  3u) && STAGE_SUBTIME_POINT( 3.0f)) {m_Bull.Resurrect(); m_Bull.SetPosition(coreVector3(-0.9f,-1.3f,0.0f) * FOREGROUND_AREA3); vBullMove = coreVector2( 0.0f, 1.0f);}
-            else if((m_iStageSub ==  6u) && STAGE_SUBTIME_POINT( 1.0f)) {m_Bull.Resurrect(); m_Bull.SetPosition(coreVector3( 1.3f,-0.9f,0.0f) * FOREGROUND_AREA3); vBullMove = coreVector2(-1.0f, 0.0f);}
-            else if((m_iStageSub ==  7u) && STAGE_SUBTIME_POINT( 3.0f)) {m_Bull.Resurrect(); m_Bull.SetPosition(coreVector3( 0.9f,-1.3f,0.0f) * FOREGROUND_AREA3); vBullMove = coreVector2( 0.0f, 1.0f);}
-            else if((m_iStageSub == 10u) && STAGE_SUBTIME_POINT(10.0f)) {m_Bull.Resurrect(); m_Bull.SetPosition(coreVector3(-1.3f, 0.9f,0.0f) * FOREGROUND_AREA3); vBullMove = coreVector2( 1.0f, 0.0f);}
+            if(STAGE_BEGINNING2)
+            {
+                     if(m_iStageSub ==  3u) {fBullTime =  2.0f; vBullPos = coreVector2(-0.9f,-1.3f); vBullMove = coreVector2( 0.0f, 1.0f);}
+                else if(m_iStageSub ==  6u) {fBullTime =  2.0f; vBullPos = coreVector2( 1.3f,-0.9f); vBullMove = coreVector2(-1.0f, 0.0f);}
+                else if(m_iStageSub ==  7u) {fBullTime =  3.0f; vBullPos = coreVector2( 0.9f,-1.3f); vBullMove = coreVector2( 0.0f, 1.0f);}
+                else if(m_iStageSub == 10u) {fBullTime = 10.0f; vBullPos = coreVector2(-1.3f, 0.9f); vBullMove = coreVector2( 1.0f, 0.0f);}
+            }
+
+            if(fBullTime > 0.0f)
+            {
+                const coreFloat fOldTime = fBullTime;
+                fBullTime -= 1.0f * TIME;
+
+                if(InBetween(0.0f, fBullTime, fOldTime))
+                {
+                    this->DisableBull(true);
+                    this->EnableBull();
+
+                    m_Bull.SetPosition(coreVector3(vBullPos * FOREGROUND_AREA, 0.0f));
+
+                    vBullMoveReal = vBullMove;
+                }
+            }
 
             if(!m_Bull.HasStatus(ENEMY_STATUS_DEAD))
             {
-                const coreVector2 vNewPos = m_Bull.GetPosition().xy() + vBullMove * (30.0f * TIME);
+                const coreVector2 vNewPos = m_Bull.GetPosition().xy() + vBullMoveReal * (30.0f * TIME);
 
                 m_Bull.SetPosition(coreVector3(vNewPos, 0.0f));
 
                 if(!g_pForeground->IsVisiblePoint(vNewPos / FOREGROUND_AREA, 1.3f) || m_Bull.WasDamaged())
                 {
-                    m_Bull.Kill(false);
+                    this->DisableBull(false);
                 }
 
                 if(m_Bull.WasDamaged())
@@ -2163,13 +2274,27 @@ void cCalorMission::__SetupOwn()
 
         if(!m_Zeroth.HasStatus(ENEMY_STATUS_DEAD))
         {
-            const coreFloat fPercent = I_TO_F(m_Zeroth.GetLostHealth()) / 500.0f;
+            const coreFloat fPercent    = I_TO_F(m_Zeroth.GetLostHealth   ()) / 500.0f;
+            const coreFloat fPrePercent = I_TO_F(m_Zeroth.GetPreLostHealth()) / 500.0f;
+
+            for(coreUintW i = 1u; i < 5u; ++i)
+            {
+                if(InBetween(I_TO_F(i) * 0.2f, fPrePercent, fPercent))
+                {
+                    cPlayer* pPlayer = m_Zeroth.LastAttacker();
+                    this->AddExtraScore(pPlayer, 200u, pPlayer->GetPosition());
+                }
+            }
 
             if(fPercent >= 1.0f)
             {
                 STAGE_BADGE(0u, BADGE_EASY, m_Zeroth.GetPosition())
+                m_Zeroth.HideTail();
             }
-            else g_pGame->GetCombatText()->AttachMarker(0u, PRINT("%.0f%%", CEIL((1.0f - fPercent) * 100.0f)), m_Zeroth.GetPosition(), COLOR_MENU_INSIDE);
+            else if(fPercent >= 0.2f)
+            {
+                g_pGame->GetCombatText()->AttachMarker(0u, PRINT("%.0f%%", CEIL((1.0f - fPercent) * 100.0f)), m_Zeroth.GetPosition(), COLOR_MENU_INSIDE);
+            }
         }
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
@@ -2240,12 +2365,14 @@ void cCalorMission::__SetupOwn()
 
             pEnemy->DefaultMovePath(pPath, vFactor, vOffset * vFactor, fLifeTime);
 
-            if((i < 6u) && !g_pGame->IsEasy() && STAGE_TICK_LIFETIME(10.0f, 0.0f))
+            if((i < 6u) && STAGE_TICK_LIFETIME(10.0f, 0.0f))
             {
                 const coreVector2 vPos = pEnemy->GetPosition().xy();
 
                 for(coreUintW j = 3u; j--; )
                 {
+                    if(g_pGame->IsEasy() && (j != 1u)) continue;
+
                     const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD((I_TO_F(j) - 1.0f) * 20.0f) + (1.0f*PI));
 
                     g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, 1.4f, pEnemy, vPos, vDir)->ChangeSize(1.5f);
@@ -2259,7 +2386,7 @@ void cCalorMission::__SetupOwn()
 
             for(coreUintW j = 30u; j--; )
             {
-                if(g_pGame->IsEasy() && (((j + s_iTick * 2u) / 2u) % 2u)) continue;
+                if(g_pGame->IsEasy() && (((j + s_iTick * 2u) / 3u) % 2u)) continue;
 
                 const coreVector2 vPos = coreVector2((I_TO_F(j) - 14.5f + ((s_iTick % 2u) ? -0.25f : 0.25f)) * 0.08f, (j % 2u) ? 1.2f : 1.22f) * FOREGROUND_AREA;
                 const coreVector2 vDir = coreVector2(0.0f,-1.0f);
@@ -2268,7 +2395,7 @@ void cCalorMission::__SetupOwn()
             }
         }
 
-        STAGE_WAVE(4u, "6-5", {70.0f, 105.0f, 140.0f, 175.0f})   // FÜNFUNDDREISSIG
+        STAGE_WAVE(4u, "6-5", {70.0f, 105.0f, 140.0f, 175.0f, 350.0f})   // FÜNFUNDDREISSIG
     });
 
     // ################################################################
@@ -2277,7 +2404,7 @@ void cCalorMission::__SetupOwn()
     {
         g_pGame->KillHelpers();
 
-        m_Bull.Kill(false);
+        this->DisableBull(false);
 
         STAGE_FINISH_NOW
     });
@@ -2455,7 +2582,7 @@ void cCalorMission::__SetupOwn()
             pBullet->Deactivate(true, vIntersection.xy());
         });
 
-        STAGE_WAVE(5u, "6-?", {60.0f, 80.0f, 100.0f, 120.0f})   // SECHSUNDDREISSIG
+        STAGE_WAVE(5u, "6-?", {60.0f, 80.0f, 100.0f, 120.0f, 240.0f})   // SECHSUNDDREISSIG
     });
 
     // ################################################################
@@ -2502,7 +2629,7 @@ void cCalorMission::__SetupOwn()
     // boss
     STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
-        STAGE_BOSS(m_Zeroth, {155.0f, 230.0f, 310.0, 385.0f})
+        STAGE_BOSS(m_Zeroth, {155.0f, 230.0f, 310.0, 385.0f, 770.0f})
     });
 
     // ################################################################

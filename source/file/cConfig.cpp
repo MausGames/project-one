@@ -448,8 +448,8 @@ void UpdateInput()
             
             if(STATIC_ISVALID(g_pGame))
             {
-                const cPlayer* pPlayer = g_pGame->GetPlayer(iModeIndex);
-                const coreVector2 vDir = pPlayer->GetDirection().xy();
+                const cPlayer*    pPlayer = g_pGame->GetPlayer(iModeIndex);
+                const coreVector2 vDir    = pPlayer->GetDirection().xy();
                 
                 if((SameDirection90(vDir, coreVector2( 0.0f, 1.0f)) && HAS_BIT(pInput->iActionPress, 3u)) ||
                    (SameDirection90(vDir, coreVector2(-1.0f, 0.0f)) && HAS_BIT(pInput->iActionPress, 4u)) ||

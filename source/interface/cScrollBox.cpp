@@ -21,7 +21,7 @@ cScrollBox::cScrollBox()noexcept
     // 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aArrow); ++i)
     {
-        m_aArrow[i].Construct    (MENU_BUTTON, MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
+        m_aArrow[i].Construct    (MENU_BUTTON, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
         m_aArrow[i].DefineProgram("menu_border_program");
         m_aArrow[i].SetSize      (coreVector2(1.0f,1.0f) * SCROLL_WIDTH);
         m_aArrow[i].SetDirection (coreVector2(i ? 1.0f : -1.0f, 0.0f));
@@ -158,7 +158,7 @@ void cScrollBox::Move()
 
                 if(pObject->IsFocused() && cMenuNavigator::IsValid(pObject))
                 {
-                    this->ScrollToObject(pObject, false);   // TODO 1: (HAS_FLAG(m_aObject.at(m_pCurObject).eType, MENU_TYPE_BIG) ? 1.5f : 1.0f
+                    this->ScrollToObject(pObject, false);
                 }
             }
         }

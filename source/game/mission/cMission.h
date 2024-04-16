@@ -14,9 +14,8 @@
 // TODO 3: prevent multiple calculations in script-commands (because of macro variables), also boss
 // TODO 3: assertion for "active boss should be alive"
 // TODO 3: STAGE_FLYPAST with dot-product or simpler per-axis
-// TODO 2: there seems to be a bug in STAGE_TICK_TIME, which sometimes gives early or late ticks with 30.0f speed, compared with STAGE_TICK_LIFETIME
+// TODO 2: [MF] there seems to be a bug in STAGE_TICK_TIME, which sometimes gives early or late ticks with 30.0f speed, compared with STAGE_TICK_LIFETIME
 // TODO 3: wrap m_piData in function with RETURN_RESTRICT
-// TODO 3: set progress when finishing segment, not when starting, but consider mission-wrapping
 // TODO 3: low-resolution object_sphere for small sphere objects (what about bullet_orb) ?
 // TODO 3: change all missions to STATIC_MEMORY (check memory, it would put all missions always in memory), or create 2 max-size blocks (old, cur), also in Ater mission ?
 // TODO 3: do not create objects and load resources of unused game-objects and bosses (e.g. move waves into own classes ? but then ?)
@@ -30,16 +29,14 @@
 // TODO 3: change m_piData into static buffer (needs manual clear), that way I can also remove init-number (! sometimes there are 2 missions in memory at the same time)
 // TODO 3: morning star chain should be above player wind
 // TODO 3: insanity functions in harena copy (and override) some of the mission code, maybe this can be cleaned up
-// TODO 1: what happens to morningstar if any player is dead
 // TODO 4: remove direct access with .List() or Raw containers in all missions (change to Getters)
 // TODO 4: change fangs back from cLodObject to coreObject3D, if lod not required (other objects as well ? (low == high))
-// TODO 3: delay sollte zeit anhalten
 // TODO 3: hail should only use one batchlist, both can be merged
-// TODO 3: cMission::Close() sollte auch nach dem finalen/secret boss aufgerufen werden (mission und/oder segment ?)
-// TODO 3: manual graphics are not updated when changing resolution during pause in intro mission
+// TODO 3: [MF] cMission::Close() sollte auch nach dem finalen/secret boss aufgerufen werden (mission und/oder segment ?)
 // TODO 3: manual/tutorial might react strange on inverted and toggled firing mode, because iActionHold is inspected
-// TODO 1: wenn P1 oder Eigengrau besiegt wird, beim ersten mal kommen immer credits, danach kommen keine bei single segment und single mission, aber immer bei arcade
-// TODO 1: add 3 different pearl-pitch tracks (wave, boss, p1) and reset state properly
+// TODO 1: [MF] wenn P1 oder Eigengrau besiegt wird, beim ersten mal kommen immer credits, danach kommen keine bei single segment und single mission, aber immer bei arcade
+// TODO 1: [MF] handle Ater mission, P1, Eigengrau
+// TODO 1: [MF] add 3 different pearl-collect-pitch tracks (wave, boss, p1) and reset state properly
 // TODO 3: flash-teleportation (mission, boss, p1) should be by the player doing the most damage, not the last attacker
 
 
@@ -190,7 +187,7 @@
 #define STAGE_FINISH_PLAY                      {if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY)) STAGE_FINISH_NOW}
 #define STAGE_FINISH_AFTER(t)                  {if(m_fStageTime >= (t))                              STAGE_FINISH_NOW}
 
-#define STAGE_MEDAL_GOAL(...)                  {static constexpr coreFloat A[] = __VA_ARGS__; this->SetMedalGoal(A); STATIC_ASSERT((ARRAY_SIZE(A) == 4u) && (A[0] < A[1]) && (A[1] < A[2]) && (A[2] < A[3]))}
+#define STAGE_MEDAL_GOAL(...)                  {static constexpr coreFloat A[] = __VA_ARGS__; this->SetMedalGoal(A); STATIC_ASSERT((ARRAY_SIZE(A) == 5u) && (A[0] < A[1]) && (A[1] < A[2]) && (A[2] < A[3]) && (A[3] < A[4]))}
 #define STAGE_BOSS(e,...)                      {if(STAGE_BEGINNING) {STAGE_MEDAL_GOAL(__VA_ARGS__) (e).Resurrect();} if((e).HasStatus(ENEMY_STATUS_DEAD)) STAGE_FINISH_NOW}
 #define STAGE_WAVE(i,n,...)                    {if(STAGE_BEGINNING) {STAGE_MEDAL_GOAL(__VA_ARGS__) this->ActivateWave(i, n);} if(STAGE_CLEARED) {this->DeactivateWave(); if(this->_UpdateWait()) STAGE_FINISH_NOW}}
 
@@ -1168,8 +1165,9 @@ public:
     inline void SetWayFree(const coreUintW iIndex, const coreBool bFree) {ASSERT(iIndex < GELU_WAYS) SET_BIT(m_iWayFree, iIndex, bFree)}
 
     // 
-    inline void SetCrushFree(const coreBool bCrushFree) {SET_BIT(m_iCrushState, 0u, bCrushFree)}   // move through blocks after crush
-    inline void SetCrushLong(const coreBool bCrushLong) {SET_BIT(m_iCrushState, 1u, bCrushLong)}   // move in-and-out of blocks after crush
+    inline void SetCrushFree  (const coreBool bCrushFree)   {SET_BIT(m_iCrushState, 0u, bCrushFree)}     // move through blocks after crush
+    inline void SetCrushLong  (const coreBool bCrushLong)   {SET_BIT(m_iCrushState, 1u, bCrushLong)}     // move in-and-out of blocks after crush
+    inline void SetCrushIgnore(const coreBool bCrushIgnore) {SET_BIT(m_iCrushState, 2u, bCrushIgnore)}   // ignore crush between two blocks
 
     // 
     inline coreBool IsGapActive(const coreUintW iIndex)const {ASSERT(iIndex < GELU_GAPS) return HAS_BIT(m_iGapActive, iIndex);}
@@ -1237,6 +1235,7 @@ private:
     coreFloat    m_fAimFade;                          // 
 
     cCustomEnemy m_Bull;                              // 
+    coreObject3D m_aBullWave[2];                      // 
 
     coreBatchList m_Star;                             // 
     coreBatchList m_StarChain;                        // 
@@ -1288,6 +1287,10 @@ public:
     // 
     void EnableAim (const cShip* pOwner);
     void DisableAim(const coreBool bAnimated);
+
+    // 
+    void EnableBull ();
+    void DisableBull(const coreBool bAnimated);
 
     // 
     void EnableStar (const coreUintW iIndex, const cShip* pOwner, const coreVector2 vOffset);
@@ -1368,6 +1371,11 @@ private:
 
     coreObject3D m_aZombie[MUSCUS_ZOMBIES];                  // 
 
+    coreObject3D m_Sun;                                      // 
+    coreObject3D m_aSunWave[3];                              // 
+    coreFlow     m_fSunValue;                                // 
+    coreFlow     m_fSunAnimation;                            // 
+
     coreObject3D m_Diamond;                                  // 
     coreUint8    m_iDiamondIndex;                            // 
 
@@ -1400,6 +1408,10 @@ public:
     void DisableZombie(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
+    void EnableSun ();
+    void DisableSun(const coreBool bAnimated);
+
+    // 
     void StartDiamond(const coreUintW iIndex);
     void EndDiamond  (const coreBool bAnimated);
 
@@ -1411,6 +1423,7 @@ public:
     // 
     inline coreBool IsGenerateHit    (const coreUintW iIndex)const {ASSERT(iIndex < MUSCUS_GENERATES) return HAS_BIT(m_iGenerateHit, iIndex);}
     inline coreBool IsGenerateDiamond(const coreUintW iIndex)const {ASSERT(iIndex < MUSCUS_GENERATES) return (iIndex == m_iDiamondIndex);}
+    inline coreBool IsGenerateVisible(const coreUintW iIndex)const {ASSERT(iIndex < MUSCUS_GENERATES) return (m_afGenerateView[iIndex] > 0.0f);}
 
     // 
     inline coreBool IsPearlActive  (const coreUintW iIndex)const {ASSERT(iIndex < MUSCUS_PEARLS) return (HAS_BIT(m_iPearlActive, iIndex) && !m_apStrikeTarget[iIndex]);}
@@ -1440,6 +1453,7 @@ private:
     void __SetupOwn       ()final;
     void __RenderOwnBottom()final;
     void __RenderOwnOver  ()final;
+    void __RenderOwnTop   ()final;
     void __MoveOwnAfter   ()final;
 };
 

@@ -196,9 +196,10 @@ void cCreditRoll::Move()
 
             if(iNewID != g_pEnvironment->GetBackground()->GetID())
             {
-                g_pEnvironment->ChangeBackground(iNewID, ENVIRONMENT_MIX_FADE, 0.5f);
+                g_pEnvironment->ChangeBackground(iNewID, ENVIRONMENT_MIX_FADE, 100.0f);
                 g_pEnvironment->SetTargetSpeedNow(1.0f);
             }
+            g_pEnvironment->UpdateTransitionSpeed(0.5f * fSpeed);
 
             g_pPostProcessing->SetSaturationAll(0.0f);
 

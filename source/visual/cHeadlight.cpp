@@ -167,9 +167,6 @@ void cHeadlight::UpdateDefault(const coreUint8 iType)
         }
 
         STATIC_ASSERT(GAME_PLAYERS <= sizeof(m_iDefault)*8u)
-    
-    if(g_pGame->GetCurMission() && !g_pGame->GetCurMission()->GetCurBoss())
-        g_pPostProcessing->SetBorderAll(POST_DEFAULT_BORDER_MIN);   // TODO 1: no effect during pause here
     }
 
     // 
