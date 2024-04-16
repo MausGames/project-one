@@ -27,6 +27,7 @@
 // TODO: remove texture-sampling from lightning effect in moss
 // TODO: stomach should not create all vertices
 // TODO: EnableShadowRead only if appropriate ground objects would be rendered (IsInstanced)
+// TODO: grass textures are duplicated (normal maps)
 
 
 // ****************************************************************
@@ -125,7 +126,7 @@ public:
     virtual ~cBackground();
 
     DISABLE_COPY(cBackground)
-    ENABLE_ID
+    ENABLE_ID_EX
 
     // render and move the background
     void Render();
@@ -183,7 +184,7 @@ public:
     cNoBackground() = default;
 
     DISABLE_COPY(cNoBackground)
-    ASSIGN_ID(0, "Nothing")
+    ASSIGN_ID_EX(0, "Nothing", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -208,7 +209,7 @@ public:
     ~cGrassBackground()final;
 
     DISABLE_COPY(cGrassBackground)
-    ASSIGN_ID(1, "Grass")
+    ASSIGN_ID_EX(1, "Grass", COLOR_MENU_GREEN)
 
 
 protected:
@@ -232,7 +233,7 @@ public:
     ~cSeaBackground()final;
 
     DISABLE_COPY(cSeaBackground)
-    ASSIGN_ID(2, "Sea")
+    ASSIGN_ID_EX(2, "Sea", COLOR_MENU_CYAN)
 
 
 protected:
@@ -259,7 +260,7 @@ public:
     ~cDesertBackground()final;
 
     DISABLE_COPY(cDesertBackground)
-    ASSIGN_ID(3, "Desert")
+    ASSIGN_ID_EX(3, "Desert", COLOR_MENU_YELLOW)
 
     // 
     inline void SetSandDirection(const coreVector2& vDirection) {m_vSandDirection = vDirection; ASSERT(vDirection.IsNormalized())}
@@ -284,7 +285,7 @@ public:
     cSpaceBackground()noexcept;
 
     DISABLE_COPY(cSpaceBackground)
-    ASSIGN_ID(4, "Space")
+    ASSIGN_ID_EX(4, "Space", COLOR_MENU_MAGENTA)
 
 
 private:
@@ -318,7 +319,7 @@ public:
     ~cVolcanoBackground()final;
 
     DISABLE_COPY(cVolcanoBackground)
-    ASSIGN_ID(5, "Volcano")
+    ASSIGN_ID_EX(5, "Volcano", COLOR_MENU_ORANGE)
 
 
 protected:
@@ -342,7 +343,7 @@ public:
     cSnowBackground()noexcept;
 
     DISABLE_COPY(cSnowBackground)
-    ASSIGN_ID(6, "Snow")
+    ASSIGN_ID_EX(6, "Snow", COLOR_MENU_BLUE)
 
     // 
     inline void SetSnowDirection(const coreVector2& vDirection) {m_vSnowDirection = vDirection; ASSERT(vDirection.IsNormalized())}
@@ -383,7 +384,7 @@ public:
     ~cMossBackground()final;
 
     DISABLE_COPY(cMossBackground)
-    ASSIGN_ID(7, "Moss")
+    ASSIGN_ID_EX(7, "Moss", COLOR_MENU_RED)
 
     // 
     inline void SetRainDirection(const coreVector2& vDirection) {m_vRainDirection = vDirection; ASSERT(vDirection.IsNormalized())}
@@ -407,7 +408,7 @@ public:
     cDarkBackground()noexcept;
 
     DISABLE_COPY(cDarkBackground)
-    ASSIGN_ID(8, "Dark")
+    ASSIGN_ID_EX(8, "Dark", COLOR_MENU_PURPLE)
 };
 
 
@@ -423,7 +424,7 @@ public:
     cStomachBackground()noexcept;
 
     DISABLE_COPY(cStomachBackground)
-    ASSIGN_ID(51, "Stomach")
+    ASSIGN_ID_EX(51, "Stomach", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -446,7 +447,7 @@ public:
     cCaveBackground()noexcept;
 
     DISABLE_COPY(cCaveBackground)
-    ASSIGN_ID(52, "Cave")
+    ASSIGN_ID_EX(52, "Cave", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -472,7 +473,7 @@ public:
     ~cCloudBackground()final;
 
     DISABLE_COPY(cCloudBackground)
-    ASSIGN_ID(99, "Cloud")
+    ASSIGN_ID_EX(99, "Cloud", coreVector3(0.5f,0.5f,0.5f))
 
 
 private:

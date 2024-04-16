@@ -110,7 +110,7 @@ void cRutilusMission::DisableTeleporter(const coreUintW iIndex, const coreBool b
     g_pGlow->UnbindObject(&oTeleporter);
 
     // 
-    if(bAnimated) cRutilusMission::__LineEffect(iIndex);
+    if(bAnimated) cRutilusMission::__TeleporterEffect(iIndex);
 }
 
 
@@ -395,7 +395,7 @@ void cRutilusMission::__MoveOwnAfter()
 
 // ****************************************************************
 // 
-void cRutilusMission::__LineEffect(const coreUintW iIndex)const
+void cRutilusMission::__TeleporterEffect(const coreUintW iIndex)const
 {
     ASSERT(iIndex < RUTILUS_TELEPORTER)
     const coreObject3D& oTeleporter = m_aTeleporter[iIndex];

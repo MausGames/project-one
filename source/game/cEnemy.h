@@ -27,7 +27,7 @@ enum eEnemyStatus : coreUint16
     ENEMY_STATUS_DEAD        = 0x0001u,   // completely removed from the game
     ENEMY_STATUS_ASSIGNED    = 0x0002u,   // enemy is currently assigned to something
     ENEMY_STATUS_CHILD       = 0x0004u,   // 
-    ENEMY_STATUS_SHIELDED    = 0x0008u,   // 
+    ENEMY_STATUS_SHIELDED    = 0x0008u,   // TODO
     ENEMY_STATUS_BOSS        = 0x0010u,   // 
     ENEMY_STATUS_SINGLE      = 0x0020u,   // 
     ENEMY_STATUS_ENERGY      = 0x0040u,   // 
@@ -152,6 +152,11 @@ public:
     void RenderOver  ();
     void RenderTop   ();
     void Move        ();
+
+    // add and remove enemies
+    template <typename T> RETURN_RESTRICT T* AllocateEnemy();
+    void FreeEnemy(cEnemy** OUTPUT ppEnemy);
+    void ClearEnemies(const coreBool bAnimated);
     
     
     
@@ -169,12 +174,6 @@ void MoveBefore()
             d_cast<cEnemy*>(*it)->_UpdateAlwaysBefore();
     }
 }
-
-
-    // add and remove enemies
-    template <typename T> RETURN_RESTRICT T* AllocateEnemy();
-    void FreeEnemy(cEnemy** OUTPUT ppEnemy);
-    void ClearEnemies(const coreBool bAnimated);
 
     // 
     cEnemy* FindEnemy   (const coreVector2& vPosition)const;

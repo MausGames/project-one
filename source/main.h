@@ -1,39 +1,28 @@
-/////////////////////////////////////////////////////////////////////////////////////
-//*-------------------------------------------------------------------------------*//
-//|    _____  _____   ____       _ ______ _____ _______     ____  _   _ ______    |//
-//|   |  __ \|  __ \ / __ \     | |  ____/ ____|__   __|   / __ \| \ | |  ____|   |//
-//|   | |__) | |__) | |  | |    | | |__ | |       | |     | |  | |  \| | |__      |//
-//|   |  ___/|  _  /| |  | |_   | |  __|| |       | |     | |  | |     |  __|     |//
-//|   | |    | | \ \| |__| | |__| | |___| |____   | |     | |__| | |\  | |____    |//
-//|   |_|    |_|  \_\\____/ \____/|______\_____|  |_|      \____/|_| \_|______|   |//
-//|                                                                               |//
-//*-------------------------------------------------------------------------------*//
-/////////////////////////////////////////////////////////////////////////////////////
-//*-------------------------------------------------------------------------------*//
-//| Project One v0.1.0a (https://www.maus-games.at)                               |//
-//*-------------------------------------------------------------------------------*//
-//| Copyright (c) 2010-2020 Martin Mauersics                                      |//
-//|                                                                               |//
-//| This software is provided 'as-is', without any express or implied             |//
-//| warranty. In no event will the authors be held liable for any damages         |//
-//| arising from the use of this software.                                        |//
-//|                                                                               |//
-//| Permission is granted to anyone to use this software for any purpose,         |//
-//| including commercial applications, and to alter it and redistribute it        |//
-//| freely, subject to the following restrictions:                                |//
-//|                                                                               |//
-//|   1. The origin of this software must not be misrepresented; you must not     |//
-//|   claim that you wrote the original software. If you use this software        |//
-//|   in a product, an acknowledgment in the product documentation would be       |//
-//|   appreciated but is not required.                                            |//
-//|                                                                               |//
-//|   2. Altered source versions must be plainly marked as such, and must not be  |//
-//|   misrepresented as being the original software.                              |//
-//|                                                                               |//
-//|   3. This notice may not be removed or altered from any source                |//
-//|   distribution.                                                               |//
-//*-------------------------------------------------------------------------------*//
-/////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+//*----------------------------------------------------------------------------*//
+//| Project One v0.1.0 (https://www.maus-games.at)                             |//
+//*----------------------------------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics                                        |//
+//|                                                                            |//
+//| This software is provided 'as-is', without any express or implied          |//
+//| warranty. In no event will the authors be held liable for any damages      |//
+//| arising from the use of this software.                                     |//
+//|                                                                            |//
+//| Permission is granted to anyone to use this software for any purpose,      |//
+//| including commercial applications, and to alter it and redistribute it     |//
+//| freely, subject to the following restrictions:                             |//
+//|                                                                            |//
+//| 1. The origin of this software must not be misrepresented; you must not    |//
+//|    claim that you wrote the original software. If you use this software    |//
+//|    in a product, an acknowledgment in the product documentation would be   |//
+//|    appreciated but is not required.                                        |//
+//|                                                                            |//
+//| 2. Altered source versions must be plainly marked as such, and must not be |//
+//|    misrepresented as being the original software.                          |//
+//|                                                                            |//
+//| 3. This notice may not be removed or altered from any source distribution. |//
+//*----------------------------------------------------------------------------*//
+//////////////////////////////////////////////////////////////////////////////////
 #pragma once
 #ifndef _P1_GUARD_MAIN_H_
 #define _P1_GUARD_MAIN_H_

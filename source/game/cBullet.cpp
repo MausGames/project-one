@@ -150,12 +150,13 @@ void cBullet::__Reflect(const coreObject3D* pObject, const coreVector2& vInterse
     // increase intersection precision
     coreVector2 vHit = vIntersection;
     {
-        coreFloat fHitDistance = 0.0f;
-        coreUint8 iHitCount    = 1u;
+        coreFloat   fHitDistance = 0.0f;
+        coreVector3 vHitNormal   = coreVector3(0.0f,0.0f,0.0f);
+        coreUint8   iHitCount    = 1u;
 
         // shoot ray into fly direction
         const coreVector2 vRayPos = vHit - m_vFlyDir * MAX(this->GetCollisionRadius() * 2.0f, m_fSpeed * Core::System->GetTime());
-        if(Core::Manager::Object->TestCollision(pObject, coreVector3(vRayPos, 0.0f), coreVector3(m_vFlyDir, 0.0f), &fHitDistance, &iHitCount))
+        if(Core::Manager::Object->TestCollision(pObject, coreVector3(vRayPos, 0.0f), coreVector3(m_vFlyDir, 0.0f), &fHitDistance, &vHitNormal, &iHitCount))
         {
             vHit = vRayPos + m_vFlyDir * fHitDistance;
         }
@@ -163,11 +164,11 @@ void cBullet::__Reflect(const coreObject3D* pObject, const coreVector2& vInterse
         {
             // move ray further towards object
             const coreVector2 vTowardsDir = (pObject->GetPosition().xy() - vHit).Normalized();
-            if(Core::Manager::Object->TestCollision(pObject, coreVector3(vHit, 0.0f), coreVector3(vTowardsDir, 0.0f), &fHitDistance, &iHitCount))
+            if(Core::Manager::Object->TestCollision(pObject, coreVector3(vHit, 0.0f), coreVector3(vTowardsDir, 0.0f), &fHitDistance, &vHitNormal, &iHitCount))
             {
                 // shoot ray again into fly direction
                 const coreVector2 vNewRayPos = vRayPos + vTowardsDir * fHitDistance;
-                if(Core::Manager::Object->TestCollision(pObject, coreVector3(vNewRayPos, 0.0f), coreVector3(m_vFlyDir, 0.0f), &fHitDistance, &(iHitCount = 1)))   // reset
+                if(Core::Manager::Object->TestCollision(pObject, coreVector3(vNewRayPos, 0.0f), coreVector3(m_vFlyDir, 0.0f), &fHitDistance, &vHitNormal, &(iHitCount = 1)))   // reset
                 {
                     vHit = vNewRayPos + m_vFlyDir * fHitDistance;
                 }
@@ -219,9 +220,6 @@ cBulletManager::cBulletManager(const coreInt32 iType)noexcept
 , m_iType       (iType)
 , m_aiOrder     {}
 {
-    // 
-    Core::Manager::Object->TestCollision(m_iType, [](coreObject3D*, coreObject3D*, coreVector3, coreBool) {});   // TODO: remove 
-
     // 
     this->ResetOrder();
 }

@@ -21,7 +21,7 @@ cMossBackground::cMossBackground()noexcept
     coreBatchList* pList1;
 
     // create outdoor-surface object
-    m_pOutdoor = new cOutdoor("moss", "grass", 5u, 4.5f);
+    m_pOutdoor = new cOutdoor("moss", "grass2", 5u, 4.5f);
 
     // 
     m_pWater = new cRainWater("environment_clouds_grey.png");

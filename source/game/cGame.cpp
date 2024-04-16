@@ -92,7 +92,7 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
 cGame::~cGame()
 {
     // 
-    this->__ClearAll(!DEFINED(_CORE_DEBUG_));   // # prevent assertions when force-quitting
+    this->__ClearAll(false);
 
     // delete last mission
     SAFE_DELETE(m_pCurMission)

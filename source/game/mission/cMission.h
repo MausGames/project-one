@@ -18,6 +18,9 @@
 // TODO: there seems to be a bug in STAGE_TICK_TIME, which sometimes gives early or late ticks with 30.0f speed, compared with STAGE_TICK_LIFETIME
 // TODO: wrap m_piData in function with RETURN_RESTRICT
 // TODO: set progress when finishing segment, not when starting, but consider mission-wrapping
+// TODO: low-resolution object_sphere for small sphere objects (what about bullet_orb) ?
+// TODO: change all missions to STATIC_MEMORY (check memory)
+// TODO: check if TYPE_NEVO_BOMB still needed
 
 
 // ****************************************************************
@@ -62,6 +65,10 @@
 #define RUTILUS_WAVES               (4u)                                              // 
 #define RUTILUS_WAVES_RAWS          (RUTILUS_WAVES)                                   // 
 
+#define CALOR_CHAINS                (15u)                                             // 
+#define CALOR_STARS                 (MISSION_PLAYERS)                                 // 
+#define CALOR_STARS_RAWS            (CALOR_STARS * (CALOR_CHAINS + 1u))               // 
+
 
 // ****************************************************************
 // stage management macros
@@ -96,22 +103,22 @@
 #define STAGE_FOREACH_ENEMY(s,e,i)             (s)->ForEachEnemy        ([&](cEnemy*  OUTPUT e, const coreUintW i)   // NOLINT
 #define STAGE_FOREACH_ENEMY_ALL(s,e,i)         (s)->ForEachEnemyAll     ([&](cEnemy*  OUTPUT e, const coreUintW i)   // NOLINT
 
-#define STAGE_GET_START(c)                     {if((c) > m_iDataSize) {ZERO_DELETE(m_piData) STATIC_ASSERT((c) < 0xFFu) m_iDataSize = (c); m_piData = ZERO_NEW(coreUint32, m_iDataSize);}} coreUintW iDataIndex = 0u; constexpr coreUintW iCurDataSize = (c); const coreBool bStageBeginning = STAGE_BEGINNING;
+#define STAGE_GET_START(c)                     {if((c) > m_iDataSize) {ZERO_DELETE(m_piData) STATIC_ASSERT((c) < 0xFFu) m_iDataSize = (c); m_piData = ZERO_NEW(coreUint32, m_iDataSize);}} coreUintW iDataIndex = 0u; constexpr coreUintW iCurDataSize = (c);
 #define STAGE_GET_END                          {ASSERT(iDataIndex == iCurDataSize)}
-#define STAGE_GET_INT(n,...)                   coreInt32&                n = r_cast<coreInt32&>  ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(bStageBeginning) {__VA_ARGS__;}}
-#define STAGE_GET_UINT(n,...)                  coreUint32&               n = r_cast<coreUint32&> ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(bStageBeginning) {__VA_ARGS__;}}
-#define STAGE_GET_UINT64(n,...)                coreUint64&               n = r_cast<coreUint64&> ( m_piData[iDataIndex]); iDataIndex += 2u;       {if(bStageBeginning) {__VA_ARGS__;}}
-#define STAGE_GET_FLOAT(n,...)                 coreFloat&                n = r_cast<coreFloat&>  ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(bStageBeginning) {__VA_ARGS__;}}
-#define STAGE_GET_VEC2(n,...)                  coreVector2&              n = r_cast<coreVector2&>( m_piData[iDataIndex]); iDataIndex += 2u;       {if(bStageBeginning) {__VA_ARGS__;}}
-#define STAGE_GET_VEC3(n,...)                  coreVector3&              n = r_cast<coreVector3&>( m_piData[iDataIndex]); iDataIndex += 3u;       {if(bStageBeginning) {__VA_ARGS__;}}
-#define STAGE_GET_VEC4(n,...)                  coreVector4&              n = r_cast<coreVector4&>( m_piData[iDataIndex]); iDataIndex += 4u;       {if(bStageBeginning) {__VA_ARGS__;}}
-#define STAGE_GET_INT_ARRAY(n,c,...)           coreInt32*   const OUTPUT n = r_cast<coreInt32*>  (&m_piData[iDataIndex]); iDataIndex += 1u * (c); {if(bStageBeginning) {__VA_ARGS__;}}
-#define STAGE_GET_UINT_ARRAY(n,c,...)          coreUint32*  const OUTPUT n = r_cast<coreUint32*> (&m_piData[iDataIndex]); iDataIndex += 1u * (c); {if(bStageBeginning) {__VA_ARGS__;}}
-#define STAGE_GET_UINT64_ARRAY(n,c,...)        coreUint64*  const OUTPUT n = r_cast<coreUint64*> (&m_piData[iDataIndex]); iDataIndex += 2u * (c); {if(bStageBeginning) {__VA_ARGS__;}}
-#define STAGE_GET_FLOAT_ARRAY(n,c,...)         coreFloat*   const OUTPUT n = r_cast<coreFloat*>  (&m_piData[iDataIndex]); iDataIndex += 1u * (c); {if(bStageBeginning) {__VA_ARGS__;}}
-#define STAGE_GET_VEC2_ARRAY(n,c,...)          coreVector2* const OUTPUT n = r_cast<coreVector2*>(&m_piData[iDataIndex]); iDataIndex += 2u * (c); {if(bStageBeginning) {__VA_ARGS__;}}
-#define STAGE_GET_VEC3_ARRAY(n,c,...)          coreVector3* const OUTPUT n = r_cast<coreVector3*>(&m_piData[iDataIndex]); iDataIndex += 3u * (c); {if(bStageBeginning) {__VA_ARGS__;}}
-#define STAGE_GET_VEC4_ARRAY(n,c,...)          coreVector4* const OUTPUT n = r_cast<coreVector4*>(&m_piData[iDataIndex]); iDataIndex += 4u * (c); {if(bStageBeginning) {__VA_ARGS__;}}
+#define STAGE_GET_INT(n,...)                   coreInt32&                n = r_cast<coreInt32&>  ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_UINT(n,...)                  coreUint32&               n = r_cast<coreUint32&> ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_UINT64(n,...)                coreUint64&               n = r_cast<coreUint64&> ( m_piData[iDataIndex]); iDataIndex += 2u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_FLOAT(n,...)                 coreFloat&                n = r_cast<coreFloat&>  ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_VEC2(n,...)                  coreVector2&              n = r_cast<coreVector2&>( m_piData[iDataIndex]); iDataIndex += 2u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_VEC3(n,...)                  coreVector3&              n = r_cast<coreVector3&>( m_piData[iDataIndex]); iDataIndex += 3u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_VEC4(n,...)                  coreVector4&              n = r_cast<coreVector4&>( m_piData[iDataIndex]); iDataIndex += 4u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_INT_ARRAY(n,c,...)           coreInt32*   const OUTPUT n = r_cast<coreInt32*>  (&m_piData[iDataIndex]); iDataIndex += 1u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_UINT_ARRAY(n,c,...)          coreUint32*  const OUTPUT n = r_cast<coreUint32*> (&m_piData[iDataIndex]); iDataIndex += 1u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_UINT64_ARRAY(n,c,...)        coreUint64*  const OUTPUT n = r_cast<coreUint64*> (&m_piData[iDataIndex]); iDataIndex += 2u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_FLOAT_ARRAY(n,c,...)         coreFloat*   const OUTPUT n = r_cast<coreFloat*>  (&m_piData[iDataIndex]); iDataIndex += 1u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_VEC2_ARRAY(n,c,...)          coreVector2* const OUTPUT n = r_cast<coreVector2*>(&m_piData[iDataIndex]); iDataIndex += 2u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_VEC3_ARRAY(n,c,...)          coreVector3* const OUTPUT n = r_cast<coreVector3*>(&m_piData[iDataIndex]); iDataIndex += 3u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_VEC4_ARRAY(n,c,...)          coreVector4* const OUTPUT n = r_cast<coreVector4*>(&m_piData[iDataIndex]); iDataIndex += 4u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 
 #define STAGE_LIFETIME(e,m,a)                                                                         \
     UNUSED const coreFloat fLifeSpeed          = (m);                                                 \
@@ -419,7 +426,7 @@ private:
     coreObject3D  m_aTileRaw  [NEVO_TILES_RAWS];     // 
     coreFlow      m_afTileTime[NEVO_TILES];          // 
 
-    cLodObject  m_Container;                         // 
+    cLodObject  m_Container;      // 
     coreVector2 m_vForce;                            // 
     coreVector2 m_vImpact;                           // 
     coreBool    m_bClamp;                            // 
@@ -549,7 +556,7 @@ private:
     void __MoveOwnAfter   ()final;
 
     // 
-    void __LineEffect(const coreUintW iIndex)const;
+    void __TeleporterEffect(const coreUintW iIndex)const;
 };
 
 
@@ -581,11 +588,19 @@ private:
 class cCalorMission final : public cMission
 {
 private:
-    cFenrirBoss m_Fenrir;   // 
-    cShelobBoss m_Shelob;   // 
-    cZerothBoss m_Zeroth;   // 
+    cFenrirBoss m_Fenrir;                            // 
+    cShelobBoss m_Shelob;                            // 
+    cZerothBoss m_Zeroth;                            // 
 
-    cSnow m_Snow;           // 
+    cSnow m_Snow;                                    // 
+
+    coreBatchList m_Star;                            // 
+    coreBatchList m_StarChain;                       // 
+    coreObject3D  m_aStarRaw   [CALOR_STARS_RAWS];   // 
+    const cShip*  m_apStarOwner[CALOR_STARS];        // 
+    coreUint8     m_iStarState;                      // 
+
+    coreFlow m_fSwing;    
 
 
 public:
@@ -595,11 +610,16 @@ public:
     DISABLE_COPY(cCalorMission)
     ASSIGN_ID(6, "Calor")
 
+    // 
+    void EnableStar (const coreUintW iIndex, const cShip* pOwner);
+    void DisableStar(const coreUintW iIndex, const coreBool bAnimated);
+
 
 private:
     // execute own routines
     void __SetupOwn       ()final;
     void __RenderOwnBottom()final;
+    void __RenderOwnUnder ()final;
     void __MoveOwnAfter   ()final;
 };
 

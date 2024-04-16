@@ -119,9 +119,6 @@ void CoreApp::Render()
                 g_pGlow      ->Update();
                 g_pDistortion->Update();
 
-                // 
-                g_pWindscreen->Update();
-
                 // update the shadow map class
                 cShadow::GlobalUpdate();
             }
@@ -198,7 +195,7 @@ void CoreApp::Render()
 void CoreApp::Move()
 {
     // reshape and resize game
-    //if(Core::System->GetWinSizeChanged()) ReshapeGame();
+    if(Core::System->GetWinSizeChanged()) ReshapeGame();
 
     // lock frame rate and override frame time
     LockFramerate();
@@ -225,11 +222,6 @@ void CoreApp::Move()
             {
                 // move the game
                 g_pGame->Move();
-
-                // move the overlay separately
-                Core::Manager::Object->SetSpriteViewDir(g_vHudDirection);
-                g_pGame->MoveOverlay();
-                Core::Manager::Object->SetSpriteViewDir(coreVector2(0.0f,1.0f));
             }
 
             // 
@@ -240,6 +232,16 @@ void CoreApp::Move()
 
             // move post-processing
             g_pPostProcessing->Move();
+        }
+        
+        
+
+        if(STATIC_ISVALID(g_pGame)) // outside for bridge menu
+        {
+            // move the overlay separately
+            Core::Manager::Object->SetSpriteViewDir(g_vHudDirection);
+            g_pGame->MoveOverlay();
+            Core::Manager::Object->SetSpriteViewDir(coreVector2(0.0f,1.0f));
         }
 
         // update the music-player

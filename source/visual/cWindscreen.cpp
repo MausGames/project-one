@@ -105,17 +105,6 @@ void cWindscreen::Move()
 
 
 // ****************************************************************
-// 
-void cWindscreen::Update()
-{
-    if(m_bActive)
-    {
-
-    }
-}
-
-
-// ****************************************************************
 // add temporary object
 void cWindscreen::AddObject(coreObject3D* pObject, const coreVector3& vRelativePos, const coreFloat fLifeTime, const coreUint32 iCapacity, const coreHashString& sProgramInstancedName, const coreHashString& sListKey)
 {

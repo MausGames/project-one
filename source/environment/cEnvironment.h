@@ -17,6 +17,7 @@
 // TODO: separate culling between normal rendering an shadow, to improve efficiency (though this would update instancing buffer again ?)
 // TODO: transition is reset when resizing window
 // TODO: different background than cNoBackground on invalid ID (error background ?)
+// TODO: if m_fSideOffset will be used with rotation, make sure to use smooth lerp instead of the linear
 
 
 // ****************************************************************

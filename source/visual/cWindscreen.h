@@ -40,9 +40,6 @@ public:
     void Render();
     void Move();
 
-    // 
-    void Update();
-
     // manage temporary objects
     void AddObject(coreObject3D* pObject, const coreVector3& vRelativePos, const coreFloat fLifeTime, const coreUint32 iCapacity, const coreHashString& sProgramInstancedName, const coreHashString& sListKey);
     void ClearAdds(const coreBool bAnimated);

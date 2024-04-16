@@ -54,12 +54,12 @@ void cGeluMission::__SetupOwn()
                 if(i >= 6u) pSquad1->GetEnemy(i)->SetPosition(coreVector3((I_TO_F(i-6u) - 4.5f) * 0.2f, 0.0f, 0.0f) * FOREGROUND_AREA3);
             });
 
-            pSquad1->GetEnemy(0u)->SetPosition(coreVector3(-0.5f,0.0f,0.0f) * FOREGROUND_AREA3);
-            pSquad1->GetEnemy(1u)->SetPosition(coreVector3( 0.5f,0.0f,0.0f) * FOREGROUND_AREA3);
-            pSquad1->GetEnemy(2u)->SetPosition(coreVector3(0.0f,-0.5f,0.0f) * FOREGROUND_AREA3);
-            pSquad1->GetEnemy(3u)->SetPosition(coreVector3(0.0f, 0.7f,0.0f) * FOREGROUND_AREA3);
-            pSquad1->GetEnemy(4u)->SetPosition(coreVector3(0.0f,-0.7f,0.0f) * FOREGROUND_AREA3);
-            pSquad1->GetEnemy(5u)->SetPosition(coreVector3(0.0f, 0.5f,0.0f) * FOREGROUND_AREA3);
+            pSquad1->GetEnemy(0u)->SetPosition(coreVector3(-0.5f, 0.0f,0.0f) * FOREGROUND_AREA3);
+            pSquad1->GetEnemy(1u)->SetPosition(coreVector3( 0.5f, 0.0f,0.0f) * FOREGROUND_AREA3);
+            pSquad1->GetEnemy(2u)->SetPosition(coreVector3( 0.0f,-0.5f,0.0f) * FOREGROUND_AREA3);
+            pSquad1->GetEnemy(3u)->SetPosition(coreVector3( 0.0f, 0.7f,0.0f) * FOREGROUND_AREA3);
+            pSquad1->GetEnemy(4u)->SetPosition(coreVector3( 0.0f,-0.7f,0.0f) * FOREGROUND_AREA3);
+            pSquad1->GetEnemy(5u)->SetPosition(coreVector3( 0.0f, 0.5f,0.0f) * FOREGROUND_AREA3);
             
         });
 

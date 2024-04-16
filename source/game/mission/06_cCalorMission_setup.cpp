@@ -22,7 +22,7 @@ void cCalorMission::__SetupOwn()
             g_pEnvironment->ChangeBackground(cSnowBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);
 
             g_pGame->GetInterface()->ShowMission(this);
-            g_pGame->StartIntro();
+            g_pGame->StartIntro();                  this->EnableStar(0u, g_pGame->GetPlayer(0u));
         }
 
         if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY))

@@ -33,7 +33,7 @@ cFinishMenu::cFinishMenu()noexcept
     m_TotalName.Construct      (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_TotalName.SetPosition    (coreVector2(0.0f,-0.025f));
     m_TotalName.SetCenter      (m_Background.GetCenter());
-    m_TotalName.SetColor3      (COLOR_MENU_BLUE);
+    m_TotalName.SetColor3      (COLOR_MENU_WHITE);
     m_TotalName.SetTextLanguage("FINISH_TOTAL");
 
     m_TotalValue.Construct  (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
@@ -174,4 +174,13 @@ void cFinishMenu::ShowThankYou()
     // 
     this->SetAlpha(0.0f);
     this->ChangeSurface(SURFACE_FINISH_DEFAULT, 0.0f);
+}
+
+
+// ****************************************************************
+// 
+void cFinishMenu::SetHighlightColor(const coreVector3& vColor)
+{
+    // 
+    m_TotalName.SetColor3(vColor);
 }

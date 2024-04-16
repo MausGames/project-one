@@ -231,7 +231,7 @@ void cWaveWeapon::__ShootOwn()
 {
     // 
     const coreVector2 vPos = m_pOwner->GetPosition ().xy();
-    const coreVector2 vDir = m_pOwner->GetDirection().xy().Rotated90();
+    const coreVector2 vDir = m_pOwner->GetDirection().xy();
 
     // 
     this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cSurgeBullet>(2, 3.5f, m_pOwner, vPos,  vDir))->ChangeScale(1.8f);

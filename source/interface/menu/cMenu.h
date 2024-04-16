@@ -100,6 +100,7 @@ enum eSurface : coreUint8
     SURFACE_SUMMARY,
     SURFACE_DEFEAT,
     SURFACE_FINISH,
+    SURFACE_BRIDGE,
     SURFACE_MAX,
 
     SURFACE_INTRO_EMPTY = 0u,
@@ -109,7 +110,6 @@ enum eSurface : coreUint8
 
     SURFACE_TITLE_LOGO = 0u,
     SURFACE_TITLE_FIRST,
-    SURFACE_TITLE_RETURN,
     SURFACE_TITLE_MAX,
 
     SURFACE_MAIN_DEFAULT = 0u,
@@ -149,7 +149,11 @@ enum eSurface : coreUint8
     SURFACE_DEFEAT_MAX,
 
     SURFACE_FINISH_DEFAULT = 0u,
-    SURFACE_FINISH_MAX
+    SURFACE_FINISH_MAX,
+
+    SURFACE_BRIDGE_ENTER = 0u,
+    SURFACE_BRIDGE_RETURN,
+    SURFACE_BRIDGE_MAX
 };
 
 
@@ -269,8 +273,6 @@ private:
     coreFlow  m_fPromptExpand;      // 
 
     coreLabel m_aVersionText[2];    // hard-coded version info strings 
-
-    coreFlow m_fReturnTimer;        // 
 
 
 public:
@@ -644,6 +646,9 @@ public:
     void ShowNormal();
     void ShowBegin();
 
+    // 
+    void SetHighlightColor(const coreVector3& vColor);
+
 
 private:
     // 
@@ -739,8 +744,40 @@ public:
 
     // 
     void ShowThankYou();
-    
+
+    // 
+    void SetHighlightColor(const coreVector3& vColor);
     // this menu is handling score and replay saving
+};
+
+
+// ****************************************************************
+// bridge menu class
+class cBridgeMenu final : public coreMenu
+{
+private:
+    coreFlow m_fReturnTimer;    // 
+    coreBool m_bReturnState;    // 
+
+    coreUint8 m_iTarget;        // 
+    coreBool  m_bPaused;        // 
+
+
+public:
+    cBridgeMenu()noexcept;
+
+    DISABLE_COPY(cBridgeMenu)
+
+    // move the bridge menu
+    void Move()final;
+
+    // 
+    void EnterGame();
+    void ReturnMenu(const coreUint8 iTarget, const coreBool bPaused);
+
+    // 
+    inline coreUint8 GetTarget()const {return m_iTarget;}
+    inline coreBool  GetPaused()const {return m_bPaused;}
 };
 
 
@@ -761,6 +798,7 @@ private:
     cSummaryMenu m_SummaryMenu;          // summary menu object
     cDefeatMenu  m_DefeatMenu;           // defeat menu object
     cFinishMenu  m_FinishMenu;           // finish menu object
+    cBridgeMenu  m_BridgeMenu;           // bridge menu object
 
     cMsgBox  m_MsgBox;                   // message box overlay
     cTooltip m_Tooltip;                  // tooltip overlay
@@ -777,6 +815,8 @@ private:
     coreTimer m_TransitionTime;          // 
     coreUint8 m_iTransitionState;        // 
     coreMenu* m_pTransitionMenu;         // 
+
+    coreVector3 m_vHighlightColor;       // 
 
 
 public:
@@ -801,6 +841,9 @@ public:
     // 
     void ShiftSurface(coreMenu* OUTPUT pMenu, const coreUint8 iNewSurface, const coreFloat fSpeed, const coreBool bUpdateFrom = false, const coreBool bUpdateTo = false);
     inline coreBool IsShifting()const {return m_TransitionTime.GetStatus();}
+
+    // 
+    void SetHighlightColor(const coreVector3& vColor);
 
     // 
     static void UpdateLanguageFont();

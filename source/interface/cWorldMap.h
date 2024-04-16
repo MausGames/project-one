@@ -32,8 +32,8 @@ private:
     {
         coreInt32       iID;         // 
         const coreChar* pcName;      // 
-        coreVector2     vPosition;   // 
         coreVector3     vColor;      // 
+        coreVector2     vPosition;   // 
     };
 
 

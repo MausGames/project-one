@@ -147,7 +147,7 @@ void cRutilusMission::__SetupOwn()
                     iTransitionState += 1u;
 
                     this->SetTeleporterActive(0u);
-                    for(coreUintW i = 0u; i < RUTILUS_TELEPORTER; ++i) cRutilusMission::__LineEffect(i);
+                    for(coreUintW i = 0u; i < RUTILUS_TELEPORTER; ++i) cRutilusMission::__TeleporterEffect(i);
                 }
             }
             else if(iTransitionState == 1u)
@@ -186,7 +186,7 @@ void cRutilusMission::__SetupOwn()
                     iTransitionState += 1u;
 
                     this->SetTeleporterActive(1u);
-                    for(coreUintW i = 0u; i < RUTILUS_TELEPORTER; ++i) cRutilusMission::__LineEffect(i);
+                    for(coreUintW i = 0u; i < RUTILUS_TELEPORTER; ++i) cRutilusMission::__TeleporterEffect(i);
                 }
             }
         }
@@ -324,6 +324,7 @@ void cRutilusMission::__SetupOwn()
     // TODO: UNVOLLSTÄNDIG
     // bounce zwischen meteoriten is total nicht nachvollziehbar, Ikaruga und RSG haben sowas nicht
     // meteoriten mit gegnern darin müssen etwas mehr aushalten um nicht unabsichtlich beim erzeugen schon zerstört zu werden
+    // inspiration: ikaruga end 3rd mission ?
     STAGE_MAIN
     {
         constexpr coreUintW iMeteorNum = 90u;//10u+2u+6u+1u+3u+9u;        
@@ -572,8 +573,8 @@ void cRutilusMission::__SetupOwn()
 
                 if(STAGE_TICK_LIFETIME_BASE(26.0f, 0.0f) && ((s_iTick % 4u) < 2u))   // TODO: tick-1 ? 
                 {
-                    const coreVector2 vPos = pEnemy->GetPosition ().xy();
-                    const coreVector2 vDir = pEnemy->GetDirection().xy();
+                    //const coreVector2 vPos = pEnemy->GetPosition ().xy();
+                    //const coreVector2 vDir = pEnemy->GetDirection().xy();
 
                     //g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5, 1.0f, pEnemy, vPos, vDir)->ChangeSize(1.6f);
                 }
@@ -735,7 +736,7 @@ STAGE_START_HERE
         if(CONTAINS_BIT(m_iWaveActive, RUTILUS_WAVES))
         {
             const coreFloat   fSign = ((m_iStageSub >= 2u) ? 1.0f : -1.0f);
-            const coreVector2 vRota = ((m_iStageSub >= 3u) ? coreVector2(0.01f,1.0f) : coreVector2(1.0f,0.01f)) * fSign;
+            //const coreVector2 vRota = ((m_iStageSub >= 3u) ? coreVector2(0.01f,1.0f) : coreVector2(1.0f,0.01f)) * fSign;
             //const coreVector2 vRota = ((m_iStageSub >= 3u) ? coreVector2(0.0f,1.0f) : coreVector2(1.0f,0.0f)) * fSign;
 
             const auto nGravityFunc = [&](cBullet* OUTPUT pBullet)

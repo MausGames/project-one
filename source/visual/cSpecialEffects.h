@@ -16,7 +16,7 @@
 // TODO: implement pixel-fitting screen-shake ? (currently shaking creates a fullscreen-blur)
 // TODO: don't invoke special-effects out of view (though consider effect-radius)
 // TODO: adjust rumble to be not toooo strong (and not be annoying)
-// TODO: remove object_ring.md3 if not required anymore (+file)
+// TODO: remove object_ring.md3 if not required anymore (+file), thought might be required for Messier
 // TODO: remove effect_energy_ring_program if not required anymore (+file)
 // TODO: think about merging *Color and *Dark functions, as they are mostly identical
 
@@ -149,6 +149,9 @@ public:
     // 
     void FreezeScreen(const coreFloat fTime);
     inline const coreFloat& GetFreezeTime()const {return m_fFreezeTime;}
+
+    // 
+    void ClearAll();
 
     // 
     void MacroExplosionColorSmall        (const coreVector3& vPosition, const coreVector3& vColor);

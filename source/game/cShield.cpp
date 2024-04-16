@@ -60,7 +60,7 @@ void cShieldManager::Move()
 
     // 
     m_fAnimation.Update(1.0f);
-    const coreVector2 vDir  = coreVector2::Direction(m_fAnimation);
+    //const coreVector2 vDir  = coreVector2::Direction(m_fAnimation);
     const coreFloat   fWave = 0.25f ;//+ 0.05f * SIN(2.0f * m_fAnimation);
 
     // 

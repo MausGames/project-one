@@ -193,7 +193,7 @@ void cInterface::Render()
         m_aBannerText[3].Render();
     }
 
-    if(this->IsStoryActive(0.0f))
+    if(this->IsStoryActive())
     {
         // render story
         m_aStoryText[0].Render();
@@ -632,11 +632,10 @@ void cInterface::ShowStory(const coreChar* pcRow1, const coreChar* pcRow2)
 
 // ****************************************************************
 // 
-coreBool cInterface::IsStoryActive(const coreFloat fOffset)const
+coreBool cInterface::IsStoryActive()const
 {
     // 
-    ASSERT(fOffset < INTERFACE_STORY_DURATION)
-    return ((g_pGame->GetTimeTable()->GetTimeEvent() - m_fStoryStart) <= (INTERFACE_STORY_DURATION - fOffset)) ? true : false;
+    return ((g_pGame->GetTimeTable()->GetTimeEvent() - m_fStoryStart) <= INTERFACE_STORY_DURATION) ? true : false;
 }
 
 

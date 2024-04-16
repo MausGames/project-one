@@ -127,8 +127,6 @@ cNevoMission::~cNevoMission()
     for(coreUintW i = 0u; i < NEVO_BOMBS;  ++i) this->DisableBomb (i, false);
     for(coreUintW i = 0u; i < NEVO_BLASTS; ++i) this->DisableBlast(i, false);
     for(coreUintW i = 0u; i < NEVO_TILES;  ++i) this->DisableTile (i, false);
-
-    // 
     this->DisableContainer(false);
 }
 

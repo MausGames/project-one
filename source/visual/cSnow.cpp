@@ -81,19 +81,7 @@ void cSnow::Move()
     // 
     if(!this->GetAlpha()) this->DrawAll(0u);
     this->SetAlpha(m_fVisibility);
-    
-    
-    
-    
-    if(Core::Input->GetMouseButton(CORE_INPUT_MIDDLE, CORE_INPUT_HOLD))
-    {
-        const coreVector2 vPos = Core::Input->GetMousePosition() * FOREGROUND_AREA * 2.0f * coreVector2(Core::System->GetResolution().AspectRatio(), 1.0f);//g_pForeground->Project2D()
-        this->DrawPoint(vPos, 3.0f, 1u);
-    }
-    
-    
-    
-    
+
     // 
     this->coreFullscreen::Move();
 }

@@ -78,7 +78,7 @@ coreBool cForeground::IsVisibleObject(const coreObject3D* pObject)const
     ASSERT(pObject)
 
     // 
-    if(!InBetween(CAMERA_POSITION.z - pObject->GetPosition().z, Core::Graphics->GetNearClip(), Core::Graphics->GetFarClip()))
+    if(pObject->GetPosition().z >= CAMERA_POSITION.z - Core::Graphics->GetNearClip())
         return false;
 
     // 

@@ -11,6 +11,7 @@
 #define _P1_GUARD_UTILITIES_H_
 
 // TODO: optimize AlongStar, AlongStarNormal, SmoothAim (and AngleDiff ?)
+// TODO: move ID color directly into background class if not used otherwise (emphasize "highlight" usage)
 
 
 // ****************************************************************
@@ -30,6 +31,13 @@
     static constexpr const coreChar* Name = n;              \
     inline       coreInt32 GetID  ()const final {return i;} \
     inline const coreChar* GetName()const final {return n;}
+#define ENABLE_ID_EX                                        \
+    ENABLE_ID                                               \
+    virtual coreVector3 GetColor()const = 0;
+#define ASSIGN_ID_EX(i,n,c)                                 \
+    ASSIGN_ID(i, n)                                         \
+    static constexpr const coreVector3 Color = c;           \
+    inline coreVector3 GetColor()const final {return c;}
 
 // 
 #define LIST_KEY (CORE_MEMORY_SHARED)

@@ -32,8 +32,10 @@ cHeadlight::cHeadlight()noexcept
     // 
     m_Spot .DefineTexture(0u, "effect_headlight_spot.png");
     m_Spot .DefineProgram("default_2d_program");
+    m_Spot .SetColor3    (coreVector3(1.0f,1.0f,1.0f) * HEADLIGHT_INTENSITY);
     m_Point.DefineTexture(0u, "effect_headlight_point.png");
     m_Point.DefineProgram("default_2d_program");
+    m_Point.SetColor3    (coreVector3(1.0f,1.0f,1.0f) * HEADLIGHT_INTENSITY);
 
     // 
     m_pFlickerSound = Core::Manager::Resource->Get<coreSound>("effect_flicker.wav");
@@ -45,11 +47,11 @@ cHeadlight::cHeadlight()noexcept
 // destructor
 cHeadlight::~cHeadlight()
 {
-    // 
-    this->StopFlicker();
-
     // explicitly undefine to detach textures
     this->Undefine();
+
+    // 
+    this->StopFlicker();
 }
 
 
@@ -76,7 +78,7 @@ void cHeadlight::Update()
         if(m_Flicker.GetStatus())
         {
             // 
-            m_Spot.SetColor3(coreVector3(1.0f,1.0f,1.0f) * m_Flicker.GetValue(CORE_TIMER_GET_NORMAL));
+            m_Spot.SetColor3(coreVector3(1.0f,1.0f,1.0f) * HEADLIGHT_INTENSITY * m_Flicker.GetValue(CORE_TIMER_GET_NORMAL));
         }
         else
         {
@@ -85,7 +87,7 @@ void cHeadlight::Update()
             if(m_iShatter == 2u) m_pShatterSound->PlayRelative(NULL, 0.7f, 1.0f, false, SOUND_EFFECT);
 
             // 
-            m_Spot.SetColor3(coreVector3(1.0f,1.0f,1.0f) * (m_iShatter ? 0.0f : 1.0f));
+            m_Spot.SetColor3(coreVector3(1.0f,1.0f,1.0f) * HEADLIGHT_INTENSITY * (m_iShatter ? 0.0f : 1.0f));
         }
     }
 
@@ -139,9 +141,17 @@ void cHeadlight::UpdateDefault()
         // 
         g_pGame->ForEachPlayer([this](const cPlayer* pPlayer, const coreUintW i)
         {
-            this->DrawSpot (pPlayer->GetPosition() + 49.0f * pPlayer->GetDirection(), coreVector2(100.0f,100.0f), pPlayer->GetDirection().xy());
+            this->DrawSpot (pPlayer->GetPosition() + 49.0f * pPlayer->GetDirection(), coreVector2(60.0f,100.0f), pPlayer->GetDirection().xy());
             this->DrawPoint(pPlayer);
         });
+    }
+    else
+    {
+        // 
+        if(m_Flicker.GetStatus()) this->StopFlicker();
+        m_Spot.SetColor3(coreVector3(1.0f,1.0f,1.0f) * HEADLIGHT_INTENSITY);
+        m_iShatter = 0u;
+        // TODO: mission restart 
     }
 
     // 
@@ -191,6 +201,9 @@ void cHeadlight::DrawPoint(const coreObject3D* pObject)
 // 
 void cHeadlight::PlayFlicker(const coreUint8 iShatter)
 {
+    // 
+    this->StopFlicker();
+
     // 
     m_Flicker.Play(CORE_TIMER_PLAY_RESET);
     m_pFlickerSound->PlayRelative(this, 3.0f, 1.0f, true, SOUND_EFFECT);
