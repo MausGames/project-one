@@ -10,6 +10,8 @@
 #ifndef _P1_GUARD_CHROMA_H_
 #define _P1_GUARD_CHROMA_H_
 
+// TODO: deprecated class, remove or disable
+
 
 // ****************************************************************
 // 

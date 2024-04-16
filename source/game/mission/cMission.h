@@ -10,7 +10,7 @@
 #ifndef _P1_GUARD_MISSION_H_
 #define _P1_GUARD_MISSION_H_
 
-// TODO: reuse paths and squads over stages
+// TODO: reuse paths (beware of reserve assertion, and resize on refine) and squads over stages
 // TODO: add visible debug-spline
 // TODO: prevent multiple calculations in script-commands (because of macro variables), also boss
 // TODO: assertion for "active boss should be alive"
@@ -41,6 +41,8 @@
 #define VIRIDO_PADDLES       (3u)                                    // 
 #define VIRIDO_BARRIERS      (14u)                                   // 
 #define VIRIDO_BARRIERS_RAWS (VIRIDO_BARRIERS)                       // 
+#define VIRIDO_LASERS        (4u)                                    // 
+#define VIRIDO_LASERS_RAWS   (VIRIDO_LASERS * 2u)                    // 
 #define VIRIDO_SHADOWS       (16u)                                   // 
 #define VIRIDO_SHADOWS_RAWS  (VIRIDO_SHADOWS)                        // 
 #define VIRIDO_BALL_SPEED    (1.5f)                                  // 
@@ -124,6 +126,7 @@
 #define STAGE_LIFETIME_POINT(t)         (InBetween((t), fLifeTimeBefore, fLifeTime) && [&]() {s_fLifeTimePoint = (t); return true;}())
 #define STAGE_LIFETIME_BEFORE(t)        (fLifeTime <  (t) && fLifeTime >= 0.0f)
 #define STAGE_LIFETIME_AFTER(t)         (fLifeTime >= (t))
+#define STAGE_LIFETIME_AFTER_BASE(t)         (fLifeTimeBase >= (t))
 #define STAGE_LIFETIME_BETWEEN(t,u)     (InBetween(fLifeTime, (t), (u)))
 #define STAGE_TAKEOFF                   (InBetween(0.0f, fLifeTimeBeforeBase, fLifeTimeBase) || (fLifeTimeBase == 0.0f))
 
@@ -198,11 +201,11 @@ public:
     void Setup();
 
     // render and move the mission
-    void RenderUnder ();
-    void RenderAttack();
-    void RenderOver  ();
-    void MoveBefore  ();
-    void MoveAfter   ();
+    void RenderUnder();
+    void RenderOver ();
+    void RenderTop  ();
+    void MoveBefore ();
+    void MoveAfter  ();
 
     // 
     void            SkipStage ();
@@ -251,12 +254,12 @@ protected:
 
 private:
     // own routines for derived classes
-    virtual void __SetupOwn       () {}
-    virtual void __RenderOwnUnder () {}
-    virtual void __RenderOwnAttack() {}
-    virtual void __RenderOwnOver  () {}
-    virtual void __MoveOwnBefore  () {}
-    virtual void __MoveOwnAfter   () {}
+    virtual void __SetupOwn      () {}
+    virtual void __RenderOwnUnder() {}
+    virtual void __RenderOwnOver () {}
+    virtual void __RenderOwnTop  () {}
+    virtual void __MoveOwnBefore () {}
+    virtual void __MoveOwnAfter  () {}
 
     // 
     void __CloseSegment();
@@ -297,6 +300,11 @@ private:
     const cShip*  m_apBarrierOwner[VIRIDO_BARRIERS];        // 
     coreUint8     m_aiBarrierDir  [VIRIDO_BARRIERS];        // 
 
+    coreBatchList m_Laser;                                  // 
+    coreBatchList m_LaserWave;                              // 
+    coreObject3D  m_aLaserRaw   [VIRIDO_LASERS_RAWS];       // 
+    const cShip*  m_apLaserOwner[VIRIDO_LASERS];            // 
+
     coreBatchList m_Shadow;                                 // 
     coreObject3D  m_aShadowRaw   [VIRIDO_SHADOWS_RAWS];     // 
     const cShip*  m_apShadowOwner[VIRIDO_SHADOWS];          // 
@@ -328,6 +336,10 @@ public:
     void DisableBarrier(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
+    void EnableLaser (const coreUintW iIndex, const cShip* pOwner);
+    void DisableLaser(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
     void EnableShadow (const coreUintW iIndex, const cShip* pOwner, const coreVector2& vPosition);
     void DisableShadow(const coreUintW iIndex, const coreBool bAnimated);
 
@@ -346,11 +358,12 @@ public:
 
 private:
     // execute own routines
-    void __SetupOwn       ()final;
-    void __RenderOwnUnder ()final;
-    void __RenderOwnAttack()final;
-    void __MoveOwnBefore  ()final;
-    void __MoveOwnAfter   ()final;
+    void __SetupOwn      ()final;
+    void __RenderOwnUnder()final;
+    void __RenderOwnOver ()final;
+    void __RenderOwnTop  ()final;
+    void __MoveOwnBefore ()final;
+    void __MoveOwnAfter  ()final;
 
     // 
     static void __BounceEffect(const coreVector2& vEffectPos);
@@ -397,9 +410,9 @@ public:
 
 private:
     // execute own routines
-    void __SetupOwn       ()final;
-    void __RenderOwnAttack()final;
-    void __MoveOwnAfter   ()final;
+    void __SetupOwn     ()final;
+    void __RenderOwnOver()final;
+    void __MoveOwnAfter ()final;
 };
 
 

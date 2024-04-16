@@ -151,7 +151,7 @@ void cBullet::Reflect(const coreObject3D* pObject, const coreVector2& vIntersect
     const coreVector2 vNewPos  = this->GetPosition().xy() + m_vFlyDir * fHitProj;   // TODO: name   
 
     // 
-    const coreVector2 vNormal = vForceNormal.IsNull() ? ((vNewPos - m_vFlyDir * (m_fSpeed * Core::System->GetTime())) - pObject->GetPosition().xy()).Normalized() : vForceNormal;
+    const coreVector2 vNormal = vForceNormal.IsNull() ? ((vNewPos - m_vFlyDir * (m_fSpeed * Core::System->GetTime())) - pObject->GetPosition().xy()).Normalized(-m_vFlyDir) : vForceNormal;
     if(coreVector2::Dot(m_vFlyDir, vNormal) >= 0.0f) return;
 
     // 
@@ -602,7 +602,7 @@ void cMineBullet::__ImpactOwn(const coreVector2& vImpact)
 // 
 void cMineBullet::__RenderOwnBefore()
 {
-    glDepthMask(false);
+    glDisable(GL_DEPTH_TEST);
     {
         const coreFloat fValue = LERPB(0.0f, 1.0f, FRACT(m_fAnimation * 0.5f));
 
@@ -613,7 +613,7 @@ void cMineBullet::__RenderOwnBefore()
         s_Wave.Move();
         s_Wave.Render();
     }
-    glDepthMask(true);
+    glEnable(GL_DEPTH_TEST);
 }
 
 
@@ -669,8 +669,8 @@ void cRocketBullet::__MoveOwn()
     const cEnemy* pEnemy = g_pGame->GetEnemyManager()->FindEnemy(this->GetPosition().xy());
     if(pEnemy)
     {
-        const coreVector2 vDiffNorm = (pEnemy->GetPosition().xy() - this->GetPosition().xy()).Normalized();
-        const coreVector2 vNewDir   = (m_vFlyDir + vDiffNorm * (0.05f * m_fSpeed * Core::System->GetTime())).Normalized();
+        const coreVector2 vAim    = (pEnemy->GetPosition().xy() - this->GetPosition().xy()).Normalized();
+        const coreVector2 vNewDir = (m_vFlyDir + vAim * (0.05f * m_fSpeed * Core::System->GetTime())).Normalized(vAim);
 
         m_vFlyDir = vNewDir;
     }
@@ -753,6 +753,10 @@ void cTriangleBullet::__MoveOwn()
     m_fAnimation.Update(0.2f);
     this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation * 10.0f), 0.0f));
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
+
+
+    
+    this->SetAlpha(MIN(m_fFlyTime * 20.0f, 1.0f));
 }
 
 
@@ -821,6 +825,9 @@ void cQuadBullet::__MoveOwn()
     m_fAnimation.Update(0.2f);
     this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation * 10.0f), 0.0f));
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
+
+
+    this->SetAlpha(MIN(m_fFlyTime * 20.0f, 1.0f));
 }
 
 

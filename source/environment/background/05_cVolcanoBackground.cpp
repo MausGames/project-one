@@ -154,9 +154,11 @@ void cVolcanoBackground::__RenderOwnBefore()
     // 
     m_Lava.Render();
 
-    // 
     glDisable(GL_DEPTH_TEST);
-    m_Smoke.Render();
+    {
+        // 
+        m_Smoke.Render();
+    }
     glEnable(GL_DEPTH_TEST);
 }
 

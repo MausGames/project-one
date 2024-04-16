@@ -282,8 +282,6 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("menu_border.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_border.vert");
     Core::Manager::Resource->Load<coreShader> ("menu_border.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_border.frag");
     Core::Manager::Resource->Load<coreShader> ("menu_border_direct.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_border.frag", SHADER_DIRECT);
-    Core::Manager::Resource->Load<coreShader> ("menu_circle.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_circle.vert", CORE_SHADER_OPTION_NO_ROTATION);
-    Core::Manager::Resource->Load<coreShader> ("menu_circle.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_circle.frag");
     Core::Manager::Resource->Load<coreShader> ("menu_grey.frag",                         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_grey.frag");
     Core::Manager::Resource->Load<coreShader> ("menu_inner.vert",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_inner.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("menu_inner.frag",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_inner.frag");
@@ -813,11 +811,6 @@ void CoreApp::Setup()
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_border_direct_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("menu_border.vert")
         ->AttachShader("menu_border_direct.frag")
-        ->Finish();
-
-    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_circle_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
-        ->AttachShader("menu_circle.vert")
-        ->AttachShader("menu_circle.frag")
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_grey_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())

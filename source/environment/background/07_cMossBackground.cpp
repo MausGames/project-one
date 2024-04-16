@@ -120,10 +120,12 @@ void cMossBackground::__RenderOwnAfter()
         m_Rain.GetProgram()->SendUniform(PRINT("u_av3OverlayTransform[%zu]", i), coreVector3(vNewTexOffset.Processed(FRACT), fNewScale));
     }
 
-    // 
     glDisable(GL_DEPTH_TEST);
-    m_Rain     .Render();
-    m_Lightning.Render();
+    {
+        // 
+        m_Rain     .Render();
+        m_Lightning.Render();
+    }
     glEnable(GL_DEPTH_TEST);
 }
 
@@ -138,7 +140,7 @@ void cMossBackground::__MoveOwn()
     const coreVector2 vTexOffset = m_Rain.GetTexOffset() + (coreVector2(0.0f,-1.2f) + vMove) * (1.0f * Core::System->GetTime());
 
     // 
-    m_Rain.SetDirection((m_vRainDirection.InvertedX() * coreMatrix3::Rotation(g_pEnvironment->GetDirection()).m12()).Normalized());
+    m_Rain.SetDirection(m_vRainDirection.InvertedX() * coreMatrix3::Rotation(g_pEnvironment->GetDirection()).m12());
     m_Rain.SetTexSize  (vTexSize);
     m_Rain.SetTexOffset(vTexOffset.Processed(FRACT));
     m_Rain.Move();

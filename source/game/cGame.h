@@ -50,13 +50,13 @@ static constexpr coreInt32 __GAME_MISSION_LIST_DEFAULT[] =
 {
     cIntroMission  ::ID,
     cViridoMission ::ID,
-    //cNevoMission   ::ID,
-    //cHarenaMission ::ID,
-    //cRutilusMission::ID,
-    //cGeluMission   ::ID,
-    //cCalorMission  ::ID,
-    //cMuscusMission ::ID,
-    //cAterMission   ::ID,
+    cNevoMission   ::ID,
+    cHarenaMission ::ID,
+    cRutilusMission::ID,
+    cGeluMission   ::ID,
+    cCalorMission  ::ID,
+    cMuscusMission ::ID,
+    cAterMission   ::ID,
     cNoMission     ::ID
 };
 
@@ -73,13 +73,16 @@ static constexpr coreInt32 __GAME_MISSION_LIST_MAIN[] =
 
 // ****************************************************************
 // depth-level management
-#define DEPTH_PUSH           {g_pGame->PushDepthLevel();}
-#define DEPTH_PUSH_IGNORE    {__DEPTH_LEVEL_SHIP}
-#define __DEPTH_LEVEL_UNDER  {glDepthRange(0.9f, 1.0f);}
-#define __DEPTH_LEVEL_SHIP   {glDepthRange(0.8f, 0.9f);}
-#define __DEPTH_LEVEL_ATTACK {m_iDepthLevel = 9u;}
-#define __DEPTH_LEVEL_OVER   {g_pGame->PushDepthLevel();}
-#define __DEPTH_RESET        {glDepthRange(0.0f, 1.0f);}
+#define DEPTH_PUSH            {g_pGame->PushDepthLevel(1u);}
+#define DEPTH_PUSH_DOUBLE     {g_pGame->PushDepthLevel(2u);}
+#define DEPTH_PUSH_SHIP       {g_pGame->PushDepthLevelShip();}
+
+#define __DEPTH_GROUP_SHIP    {this->ChangeDepthLevel(9u, 11u);}
+#define __DEPTH_GROUP_UNDER   {m_iDepthDebug = 11u;     m_iDepthLevel = 20u;}
+#define __DEPTH_GROUP_OVER    {m_iDepthDebug = BIT(7u); m_iDepthLevel = 9u;}
+#define __DEPTH_GROUP_TOP     {m_iDepthDebug = 0u;}
+#define __DEPTH_GROUP_SPECIAL {}
+#define __DEPTH_RESET         {this->ChangeDepthLevel(0u, 20u);}
 
 
 // ****************************************************************
@@ -96,9 +99,8 @@ private:
     cItemManager   m_ItemManager;           // 
     cShieldManager m_ShieldManager;         // 
 
-    cCombatStats m_CombatStats;             // combat stats overlay
-    cCombatText  m_CombatText;              // combat text overlay
-    cInterface   m_Interface;               // interface overlay
+    cCombatText m_CombatText;               // combat text overlay
+    cInterface  m_Interface;                // interface overlay
 
     cRepairEnemy* m_pRepairEnemy;           // 
 
@@ -117,6 +119,8 @@ private:
     coreBool m_bPacifist;                   // 
 
     coreUint8 m_iDepthLevel;                // 
+    coreUint8 m_iDepthDebug;                // 
+
     coreUint8 m_iOutroType;                 // 
 
     coreUint8 m_iStatus;                    // 
@@ -154,8 +158,9 @@ public:
     void ActivatePacifist();
 
     // 
-    void PushDepthLevel();
-    void OffsetDepthLevel(const coreFloat fOffset)const;
+    void ChangeDepthLevel  (const coreUint8 iLevelNear, const coreUint8 iLevelFar)const;
+    void PushDepthLevel    (const coreUint8 iLevels);
+    void PushDepthLevelShip();
 
     // 
     RETURN_NONNULL cPlayer* FindPlayer(const coreVector2& vPosition);
@@ -170,7 +175,6 @@ public:
     inline cChromaManager*  GetChromaManager      ()                       {return &m_ChromaManager;}
     inline cItemManager*    GetItemManager        ()                       {return &m_ItemManager;}
     inline cShieldManager*  GetShieldManager      ()                       {return &m_ShieldManager;}
-    inline cCombatStats*    GetCombatStats        ()                       {return &m_CombatStats;}
     inline cCombatText*     GetCombatText         ()                       {return &m_CombatText;}
     inline cInterface*      GetInterface          ()                       {return &m_Interface;}
     inline cMission*        GetCurMission         ()const                  {ASSERT(m_pCurMission) return m_pCurMission;}

@@ -38,6 +38,297 @@ void cTinkerMission::__SetupOwn()
     });
 
     // ################################################################
+    // enemies survive invincible and merge 
+    STAGE_MAIN
+    {
+        STAGE_ADD_PATH(pPath1)
+        {
+            pPath1->Reserve(2u);
+            pPath1->AddNode(coreVector2(0.0f, 1.2f), coreVector2(0.0f,-1.0f));
+            pPath1->AddNode(coreVector2(0.0f,-1.2f), coreVector2(0.0f,-1.0f));
+            pPath1->Refine();
+        });
+
+        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 31u)
+        {
+            STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
+            {
+                pEnemy->Configure(4, COLOR_SHIP_YELLOW);
+                pEnemy->AddStatus(ENEMY_STATUS_IMMORTAL);
+
+                if(i < 16u) pEnemy->Resurrect();
+            });
+        });
+
+        STAGE_GET_START(76u)
+            STAGE_GET_FLOAT_ARRAY(afMergeTime, 15u)
+            STAGE_GET_VEC2_ARRAY (avMergePos,  30u)
+            STAGE_GET_UINT       (iValid)
+        STAGE_GET_END
+
+            /*
+        const auto nTargetFunc = [](const coreUintW i)
+        {
+            coreVector2 vTarget;
+                 if(i < 16u) vTarget = coreVector2((I_TO_F(i % 8u)  - 3.5f) * 0.2f, (i < 8) ? 0.0f : 0.1f);
+            else if(i < 24u) vTarget = coreVector2((I_TO_F(i - 16u) - 3.5f) * 0.2f, 0.2f);
+            else if(i < 28u) vTarget = coreVector2((I_TO_F(i - 24u) - 1.5f) * 0.3f, 0.4f);
+            else if(i < 30u) vTarget = coreVector2((I_TO_F(i - 28u) - 0.5f) * 0.4f, 0.6f);
+            else             vTarget = coreVector2(0.0f,                            0.8f);
+
+            return vTarget;
+        };
+        */
+        const auto nTargetFunc = [](const coreUintW i)
+        {
+            coreVector2 vTarget;
+                 if(i < 16u) {vTarget = coreVector2((I_TO_F(i % 8u)  - 3.5f) * 0.2f, (i < 8) ? 0.0f : 0.1f);                                                         if(i % 2u) vTarget = vTarget;}
+            else if(i < 24u) {vTarget = coreVector2((I_TO_F(i - 16u) - 3.5f) * 0.2f, 0.2f);                   vTarget = vTarget.Rotated90();                         if(i % 2u) vTarget = vTarget;}
+            else if(i < 28u) {vTarget = coreVector2((I_TO_F(i - 24u) - 1.5f) * 0.3f, 0.4f);                   vTarget = vTarget.Rotated90().Rotated90();             if(i % 2u) vTarget = vTarget;}
+            else if(i < 30u) {vTarget = coreVector2((I_TO_F(i - 28u) - 0.5f) * 0.4f, 0.6f);                   vTarget = vTarget.Rotated90().Rotated90().Rotated90(); if(i % 2u) vTarget = vTarget;}
+            else              vTarget = coreVector2(0.0f,                            0.8f);
+
+            return vTarget;
+        };
+
+        for(coreUintW i = 0u; i < 15u; ++i)
+        {
+            const coreUintW iIndex1 = i * 2u;
+            const coreUintW iIndex2 = i * 2u + 1u;
+
+            cEnemy* pEnemy1 = pSquad1->GetEnemy(iIndex1);
+            cEnemy* pEnemy2 = pSquad1->GetEnemy(iIndex2);
+
+            if(CONTAINS_FLAG(pEnemy1->GetStatus(), ENEMY_STATUS_DEAD)) continue;
+            if(CONTAINS_FLAG(pEnemy2->GetStatus(), ENEMY_STATUS_DEAD)) continue;
+
+            if(!CONTAINS_BIT(iValid, i))
+            {
+                if(!pEnemy1->GetCurHealth() == 0u) continue;
+                if(!pEnemy2->GetCurHealth() == 0u) continue;
+
+                avMergePos[iIndex1] = pEnemy1->GetPosition().xy();
+                avMergePos[iIndex2] = pEnemy2->GetPosition().xy();
+
+                ADD_BIT(iValid, i)
+            }
+        }
+
+        for(coreUintW i = 0u; i < 15u; ++i)
+        {
+            if(!CONTAINS_BIT(iValid, i)) continue;
+
+            const coreUintW iIndex1 = i * 2u;
+            const coreUintW iIndex2 = i * 2u + 1u;
+
+            cEnemy* pEnemy1 = pSquad1->GetEnemy(iIndex1);
+            cEnemy* pEnemy2 = pSquad1->GetEnemy(iIndex2);
+
+            const coreUintW iNewIndex = (i < 8u) ? (16u + i) : ((i < 12u) ? (24u + i - 8u) : ((i < 14u) ? (28u + i - 12u) : 30u));
+
+            coreFloat& fTime = afMergeTime[i];
+            fTime += 1.0f * Core::System->GetTime();
+
+            if(fTime >= 1.0f)
+            {
+                pEnemy1->Kill(true);
+                pEnemy2->Kill(false);
+
+                pSquad1->GetEnemy(iNewIndex)->Resurrect();
+
+                REMOVE_BIT(iValid, i)
+            }
+            else
+            {
+                const coreVector2& vPos1 = avMergePos[iIndex1];
+                const coreVector2& vPos2 = avMergePos[iIndex2];
+
+                const coreVector2 vTarget = nTargetFunc(iNewIndex) * FOREGROUND_AREA;
+
+                pEnemy1->SetPosition(coreVector3(LERPB(vTarget, vPos1, 1.0f - fTime), 0.0f));
+                pEnemy2->SetPosition(coreVector3(LERPB(vTarget, vPos2, 1.0f - fTime), 0.0f));
+
+                const coreVector2 vDir = coreVector2::Direction(LERPB(5.0f*PI, 1.0f*PI, 1.0f - fTime));
+                
+                pEnemy1->SetDirection(coreVector3(vDir, 0.0f));
+                pEnemy2->SetDirection(coreVector3(vDir, 0.0f));
+            }
+        }
+
+
+        // set valid, set mergepos 
+
+        STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
+        {
+            STAGE_LIFETIME(pEnemy, 1.0f, 0.0f)
+
+            //STAGE_REPEAT(pPath1->GetTotalDistance())
+
+            //const coreVector2 vFactor = coreVector2((i < 8u) ? -1.0f : 1.0f, (i < 8u) ? -1.0f : 1.0f);
+            //const coreVector2 vOffset = coreVector2(0.0f,0.0f);
+
+            //pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
+
+            const coreUintW iMergeIndex = i / 2u;
+
+            if(!CONTAINS_BIT(iValid, iMergeIndex))
+                pEnemy->SetPosition(coreVector3(nTargetFunc(i) * FOREGROUND_AREA, 0.0f));
+
+        });
+
+        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
+    });
+
+    // ################################################################
+    // enemies survive invincible
+    // - all: delay attack, to get players accustomed
+    // FAILURE 
+    STAGE_MAIN
+    {//bewegung entfernen, zu ähnlich wie 1, links rechts kreuzen                                                                               
+        STAGE_ADD_PATH(pPath1)
+        {
+            pPath1->Reserve(2u);
+            pPath1->AddNode(coreVector2(0.0f,1.2f), coreVector2(0.0f,-1.0f));
+            pPath1->AddStop(coreVector2(0.0f,1.0f), coreVector2(0.0f,-1.0f));
+            pPath1->Refine();
+        });
+
+        STAGE_ADD_PATH(pPath2)
+        {
+            pPath2->Reserve(2u);
+            pPath2->AddNode(coreVector2(0.0f, 1.2f), coreVector2(0.0f,-1.0f));
+            pPath2->AddNode(coreVector2(0.0f,-1.2f), coreVector2(0.0f,-1.0f));
+            pPath2->Refine();
+        });
+
+        STAGE_ADD_SQUAD(pSquad1, cStarEnemy, 44u)
+        {
+            STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
+            {
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
+                pEnemy->Configure(4, COLOR_SHIP_YELLOW);
+                pEnemy->AddStatus(ENEMY_STATUS_IMMORTAL);
+            });
+        });
+
+        STAGE_GET_START(1u)
+            STAGE_GET_UINT(iShootOrder)
+        STAGE_GET_END
+
+        if(STAGE_CLEARED)
+        {
+                 if(STAGE_SUB(1u)) STAGE_RESSURECT(pSquad1,  0u, 19u)
+            else if(STAGE_SUB(2u)) STAGE_RESSURECT(pSquad1, 20u, 43u)
+        }
+
+        coreBool  bActive    = false;
+        cEnemy*   pTarget    = NULL;
+        coreFloat fTargetVal = FLT_MAX;
+
+        STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
+        {
+            if(i < 20u)
+            {
+                STAGE_LIFETIME(pEnemy, 0.5f, 0.0f)
+
+                const coreFloat fPosX = I_TO_F(i % 10u) * 0.2f - 0.9f;
+
+                if(STAGE_BRANCH(pPath1->GetTotalDistance(), 4.0f))
+                {
+                    const coreVector2 vFactor = coreVector2(1.0f,1.0f);
+                    const coreVector2 vOffset = coreVector2(fPosX, 0.0f);
+
+                    pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
+                }
+                else
+                {
+                    const coreFloat fValue = FMOD(fLifeTime + ((i < 10u) ? 1.0f : 0.0f) + 1.0f, 4.0f);
+                    const coreFloat fPosY  = (fValue < 2.0f) ? LERPS(-1.0f, 1.0f, MIN(fValue, 1.0f)) : (LERPS(1.0f, -1.0f, MIN(fValue-2.0f, 1.0f)));
+
+                    pEnemy->SetPosition(coreVector3(fPosX, fPosY, 0.0f) * FOREGROUND_AREA3);
+                }
+
+                if(i < 10u) pEnemy->Rotate90();
+            }
+            else
+            {
+                STAGE_LIFETIME(pEnemy, 0.5f, 0.2f * I_TO_F((i-20u) % 12u) - LERPB(0.0f, 2.0f, MIN(pEnemy->GetLifeTime() * 0.5f, 1.0f)))
+
+                STAGE_REPEAT(pPath2->GetTotalDistance())
+
+                const coreVector2 vFactor = coreVector2(1.0f, ((i-20u) < 12u) ? -1.0f : 1.0f);
+                const coreVector2 vOffset = coreVector2((((i-20u) < 12u) ? -1.0f : 1.0f) * (0.1f + LERPB(1.0f, 0.0f, MIN(pEnemy->GetLifeTime() * 0.5f, 1.0f))), 0.0f);
+
+                pEnemy->DefaultMovePath(pPath2, vFactor, vOffset * vFactor, fLifeTime);
+            }
+
+            if(pEnemy->GetCurHealth())
+            {
+                bActive = true;
+            }
+            else
+            {
+                const coreFloat fCurValue = (i < 20u) ? pEnemy->GetPosition().arr((i < 10u) ? 1u : 0u) : pEnemy->GetPosition().xy().LengthSq();
+                if(fCurValue < fTargetVal)
+                {
+                    pTarget    = pEnemy;
+                    fTargetVal = fCurValue;
+                }
+
+                STATIC_ASSERT(FRAMERATE_VALUE == 60.0f)
+            }
+        });
+
+        if(STAGE_TICK_TIME_FREE(2.0f, 0.0f))
+        {
+            cEnemy*     pEnemy;
+            coreVector2 vPos;
+            coreVector2 vDir;
+
+            if(++iShootOrder >= 10u) iShootOrder = 0u;
+            const coreBool  bType   = (iShootOrder % 2u) ? true : false;
+            const coreFloat fHeight = I_TO_F((iShootOrder * 3u) % 10u) * 0.2f - 0.9f;
+
+            if(m_iStageSub == 1u)
+            {
+                pEnemy = pSquad1->GetEnemy(bType ? 0u : 10u);
+                vPos   = bType ? coreVector2(pEnemy->GetPosition().x, fHeight * FOREGROUND_AREA.y) : coreVector2(fHeight * FOREGROUND_AREA.x, pEnemy->GetPosition().y);
+                vDir   = bType ? coreVector2(-SIGN(pEnemy->GetPosition().x), 0.0f)                 : coreVector2(0.0f, -SIGN(pEnemy->GetPosition().y));
+            }
+            else
+            {
+                pEnemy = pSquad1->GetEnemy(bType ? 20u : 32u);
+                vPos   = coreVector2(pEnemy->GetPosition().x, fHeight * FOREGROUND_AREA.y);
+                vDir   = coreVector2(SIGN(pEnemy->GetPosition().x), 0.0f);
+            }
+
+            if(pEnemy->GetLifeTime() >= 1.5f)
+            {
+                for(coreUintW i = 8u; i--; )
+                {
+                    const coreVector2 vOffset = coreVector2::Direction(DEG_TO_RAD((I_TO_F(i) + 0.5f) * 45.0f));
+
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.2f, pEnemy, vPos + 5.0f * vOffset, vDir)->ChangeSize(1.2f);
+                }
+            }
+        }
+
+        if(!bActive)
+        {
+            ASSERT(pTarget)
+            pTarget->Kill(true);
+
+            if((m_iStageSub == 1u) && pSquad1->IsFinished())
+            {
+                iShootOrder = 0u;
+                return;
+            }
+        }
+
+        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
+    });
+
+    // ################################################################
     // bending away from bullets 
     STAGE_MAIN
     {
@@ -114,7 +405,7 @@ void cTinkerMission::__SetupOwn()
 
         STAGE_COLL_ENEMY_BULLET(pEnemy, pBullet, vIntersection, COLL_REF(vForce))
         {
-            //vForce += (pEnemy->GetPosition().xy() - pBullet->GetPosition().xy()).Normalized() * 10.0f;
+            //vForce += (pEnemy->GetPosition().xy() - pBullet->GetPosition().xy()).Normalized(pBullet->GetFlyDir()) * 10.0f;
             vForce -= AlongCrossNormal(pBullet->GetFlyDir()) * 5.0f;
         });
 
@@ -378,47 +669,6 @@ void cTinkerMission::__SetupOwn()
         g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cConeBullet>([](cConeBullet* OUTPUT pBullet)
         {
             pBullet->SetPosition(pBullet->GetPosition() + coreVector3(0.0f, Core::System->GetTime() * FOREGROUND_AREA.y * -1.5f, 0.0f));
-        });
-
-        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
-    });
-
-    // ################################################################
-    // enemies survive invincible and merge 
-    STAGE_MAIN
-    {
-        STAGE_ADD_PATH(pPath1)
-        {
-            pPath1->Reserve(2u);
-            pPath1->AddNode(coreVector2(0.0f, 1.2f), coreVector2(0.0f,-1.0f));
-            pPath1->AddNode(coreVector2(0.0f,-1.2f), coreVector2(0.0f,-1.0f));
-            pPath1->Refine();
-        });
-
-        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 8u)
-        {
-            STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
-            {
-                pEnemy->Configure(30, COLOR_SHIP_YELLOW);
-                pEnemy->AddStatus(ENEMY_STATUS_IMMORTAL);
-
-                pEnemy->Resurrect();
-            });
-        });
-
-        STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
-        {
-            STAGE_LIFETIME(pEnemy, 0.5f, 0.2f * I_TO_F((i % 8u) + (((i % 8u) < 4u) ? 0u : 2u)))
-
-            STAGE_REPEAT(pPath1->GetTotalDistance())
-
-            const coreVector2 vFactor = coreVector2((i < 8u) ? -1.0f : 1.0f, (i < 8u) ? -1.0f : 1.0f);
-            const coreVector2 vOffset = coreVector2(0.0f,0.0f);
-
-            pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
-
-
-            //if(pEnemy->ReachedDeath()) pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
         });
 
         STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
@@ -1223,8 +1473,8 @@ void UnusedWaves()
             }
 
             const coreVector2 vDiff  = vLastPosition - pEnemy->GetPosition().xy();
-            const coreFloat   fLenSq = vDiff.LengthSq();
-            const coreVector2 vDir   = vDiff.Normalized();
+            const coreFloat   fLenSq = vDiff.LengthSq(); danger
+            const coreVector2 vDir   = vDiff.Normalized(); danger
             const coreVector2 vPos   = pEnemy->GetPosition().xy() + vDir * (Core::System->GetTime() * 20.0f * SmoothTowards(fLenSq, 5.0f));
 
             pEnemy->SetPosition (coreVector3(vPos, 0.0f));
@@ -1309,4 +1559,33 @@ void UnusedWaves()
                 //pSquad1->GetEnemy(i)->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner()));
             }
         });
+*/
+
+/*
+        // map bitfield to game area
+        constexpr coreUintW iBitfieldNum = POW2(24u) / 32u;
+
+        STAGE_GET_START(iBitfieldNum)
+            STAGE_GET_UINT_ARRAY(aiEnabled, iBitfieldNum)
+        STAGE_GET_END
+
+        const auto nEnableFunc = [&](const coreVector2& vPos, coreVector2* OUTPUT vNewPos)
+        {
+            const coreUintW X = F_TO_UI(CLAMP((vPos.x / FOREGROUND_AREA.x) * 11.5f + 11.5f, 0.0f, 23.0f));
+            const coreUintW Y = F_TO_UI(CLAMP((vPos.y / FOREGROUND_AREA.y) * 11.5f + 11.5f, 0.0f, 23.0f));
+            const coreUintW I = X + Y * 24u;
+            const coreUintW B = I / 32u;
+            const coreUintW S = I % 32;
+
+            ASSERT(B < iBitfieldNum)
+
+            if(CONTAINS_BIT(aiEnabled[B], S))
+                return false;
+
+            vNewPos->x = ((I_TO_F(X) - 11.5f) / 11.5f) * FOREGROUND_AREA.x;
+            vNewPos->y = ((I_TO_F(Y) - 11.5f) / 11.5f) * FOREGROUND_AREA.x;
+
+            ADD_BIT(aiEnabled[B], S)
+            return true;
+        };
 */

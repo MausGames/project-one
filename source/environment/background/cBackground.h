@@ -117,6 +117,7 @@ protected:
     coreLookup<const coreBatchList*, std::vector<coreUint32>> m_aaiBaseNormal;   // 
 
     static coreMemoryPool s_MemoryPool;                 // 
+    static coreRand       s_Rand;                       // 
 
 
 public:

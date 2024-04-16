@@ -14,7 +14,7 @@
 // TODO: all parts of player-rendering should be batched for coop
 // TODO: check which operations have to be done outside of dead-check
 // TODO: add in-game hint for roll-cooldown end ((just) acoustic)
-// TODO: render wind later to prevent depth/overdraw issues
+// TODO: render wind, bubble, etc. in group for ooop
 // TODO: correct reverse-tracking when hitting the walls (position correction) ? only for 45degree, also on other code locations ?
 
 
@@ -24,7 +24,7 @@
 #define PLAYER_SUPPORTS           (1u)                // 
 #define PLAYER_LIVES              (LIVES)             // 
 #define PLAYER_SHIELD             (SHIELD)            // 
-#define PLAYER_COLLISION_MIN      (0.4f)              // 
+#define PLAYER_COLLISION_MIN      (0.3f)              // 
 #define PLAYER_WIND_SIZE          (4.5f)              // 
 #define PLAYER_BUBBLE_SIZE        (6.0f)              // 
 #define PLAYER_ROLL_SPEED         (1.0f)              // 
@@ -90,6 +90,7 @@ private:
     coreProgramPtr m_pDarkProgram;                              // 
     coreFlow       m_fAnimation;                                // 
 
+    coreObject3D m_Range;                                       // 
     coreObject3D m_Dot;                                         // 
     coreObject3D m_Wind;                                        // 
     coreObject3D m_Bubble;                                      // 
@@ -111,8 +112,10 @@ public:
     void GiveShield  ();
 
     // render and move the player
-    void Render()final;
-    void Move  ()final;
+    void Render      ()final;
+    void RenderBefore();
+    void RenderAfter ();
+    void Move        ()final;
 
     // reduce current health
     coreInt32 TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact);
@@ -142,6 +145,9 @@ public:
     void EnableBubble ();
     void DisableBubble();
     void UpdateExhaust(const coreFloat fStrength);
+
+    // 
+    inline void ApplyForce(const coreVector2& vForce) {this->SetPosition(coreVector3(m_vOldPos, 0.0f)); m_vForce += vForce;}
 
     // 
     inline cWeapon*     GetWeapon    (const coreUintW iIndex)const {ASSERT((iIndex < PLAYER_WEAPONS) && m_apWeapon[iIndex]) return m_apWeapon[iIndex];}

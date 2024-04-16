@@ -112,9 +112,11 @@ void cDesertBackground::__RenderOwnAfter()
         m_Sand.GetProgram()->SendUniform(PRINT("u_av3OverlayTransform[%zu]", i), coreVector3(vNewTexOffset.Processed(FRACT), fNewScale));
     }
 
-    // 
     glDisable(GL_DEPTH_TEST);
-    m_Sand.Render();
+    {
+        // 
+        m_Sand.Render();
+    }
     glEnable(GL_DEPTH_TEST);
 }
 
@@ -129,7 +131,7 @@ void cDesertBackground::__MoveOwn()
     const coreVector2 vTexOffset = m_Sand.GetTexOffset() + (coreVector2(0.0f,-1.2f) + vMove) * (0.4f * Core::System->GetTime());
 
     // 
-    m_Sand.SetDirection((m_vSandDirection.InvertedX() * coreMatrix3::Rotation(g_pEnvironment->GetDirection()).m12()).Normalized());
+    m_Sand.SetDirection(m_vSandDirection.InvertedX() * coreMatrix3::Rotation(g_pEnvironment->GetDirection()).m12());
     m_Sand.SetTexSize  (vTexSize);
     m_Sand.SetTexOffset(vTexOffset.Processed(FRACT));
     m_Sand.Move();

@@ -165,6 +165,7 @@ void cWorldMap::Arrange()
     {
         const coreVector2& vNewPos = m_aPin[i + 1u].GetPosition();
         const coreVector2  vDiff   = vNewPos - vOldPos;
+        ASSERT(!vDiff.IsNull())
 
         m_aLine[i].SetPosition (vOldPos + vDiff * 0.5f);
         m_aLine[i].SetSize     (coreVector2(WORLDMAP_LINE_SIZE, vDiff.Length()));

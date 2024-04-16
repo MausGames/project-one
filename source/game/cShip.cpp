@@ -35,7 +35,7 @@ coreBool cShip::DefaultMovePath(const coreSpline2* pRawPath, const coreVector2& 
 
     // 
     this->SetPosition (coreVector3(((vPosition  * vFactor) + vRawOffset) * FOREGROUND_AREA, 0.0f));
-    this->SetDirection(coreVector3( (vDirection * vFactor).Normalized(),                    0.0f));
+    this->SetDirection(coreVector3( (vDirection * vFactor).Normalized(vDirection),          0.0f));
 
     // 
     return (fDistance >= pRawPath->GetTotalDistance()) ? true : false;
@@ -54,7 +54,7 @@ coreBool cShip::DefaultMoveTarget(const coreVector2& vTarget, const coreFloat fS
 
     // 
     const coreVector2 vAim = vDiff.Normalized();
-    const coreVector2 vDir = (this->GetDirection().xy() + vAim * (fSpeedTurn * Core::System->GetTime())).Normalized();
+    const coreVector2 vDir = (this->GetDirection().xy() + vAim * (fSpeedTurn * Core::System->GetTime())).Normalized(vAim);
     const coreVector2 vPos =  this->GetPosition ().xy() + vDir * (fSpeedMove * Core::System->GetTime());
 
     // 
@@ -134,7 +134,7 @@ coreBool cShip::DefaultRotateSmooth(const coreVector2& vDirection, const coreFlo
     // 
     const coreVector2 vAim = vDiff.Normalized();
     const coreFloat   fLen = SmoothTowards(vDiff.Length(), fDistThreshold);
-    const coreVector2 vDir = (this->GetDirection().xy() + vAim * (fLen * fSpeedTurn * Core::System->GetTime())).Normalized();
+    const coreVector2 vDir = (this->GetDirection().xy() + vAim * (fLen * fSpeedTurn * Core::System->GetTime())).Normalized(vAim);
 
     // 
     this->SetDirection(coreVector3(vDir, 0.0f));

@@ -10,10 +10,12 @@
 #ifndef _P1_GUARD_SHIELD_H_
 #define _P1_GUARD_SHIELD_H_
 
+// TODO: deprecated class, remove or disable
+
 
 // ****************************************************************
 // shield definitions
-#define SHIELD_SHIELDS (16u)   // 
+#define SHIELD_SHIELDS (1u)//(16u)   // 
 
 
 // ****************************************************************

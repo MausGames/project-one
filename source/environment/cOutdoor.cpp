@@ -196,8 +196,8 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
         const coreUintW iDown  = MAX(y-1, 0)                               *OUTDOOR_WIDTH + x;
         const coreUintW iUp    = MIN(y+1, coreInt32(OUTDOOR_HEIGHT_FULL)-1)*OUTDOOR_WIDTH + x;
 
-        aVertexData[i].vNormal = coreVector3::Cross((aVertexData[iLeft].vPosition - aVertexData[iRight].vPosition).Normalized(),
-                                                    (aVertexData[iDown].vPosition - aVertexData[iUp   ].vPosition).Normalized());
+        aVertexData[i].vNormal = coreVector3::Cross((aVertexData[iLeft].vPosition - aVertexData[iRight].vPosition).NormalizedUnsafe(),
+                                                    (aVertexData[iDown].vPosition - aVertexData[iUp   ].vPosition).NormalizedUnsafe());
     }
 
     // calculate tangents
@@ -224,7 +224,7 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
     for(coreUintW i = 0u; i < OUTDOOR_TOTAL_VERTICES; ++i)
     {
         // finish the Gram-Schmidt process to calculate the tangent vector and bitangent sign (w)
-        aVertexData[i].vTangent = coreVector4((avOrtho1[i] - aVertexData[i].vNormal * coreVector3::Dot(aVertexData[i].vNormal, avOrtho1[i])).Normalized(),
+        aVertexData[i].vTangent = coreVector4((avOrtho1[i] - aVertexData[i].vNormal * coreVector3::Dot(aVertexData[i].vNormal, avOrtho1[i])).NormalizedUnsafe(),
                                               SIGN(coreVector3::Dot(coreVector3::Cross(aVertexData[i].vNormal, avOrtho1[i]), avOrtho2[i])));
     }
 
@@ -429,8 +429,8 @@ FUNC_PURE coreVector3 cOutdoor::RetrieveBackNormal(const coreVector2& vPosition)
     const coreFloat D = this->RetrieveBackHeight(vPosition - coreVector2(fWidth, 0.0f));
 
     // 
-    return coreVector3::Cross(coreVector3(fWidth * -2.0f, 0.0f, D - B).Normalized(),
-                              coreVector3(0.0f, fWidth * -2.0f, C - A).Normalized()).Normalized();
+    return coreVector3::Cross(coreVector3(fWidth * -2.0f, 0.0f, D - B).NormalizedUnsafe(),
+                              coreVector3(0.0f, fWidth * -2.0f, C - A).NormalizedUnsafe()).NormalizedUnsafe();
 }
 
 

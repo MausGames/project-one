@@ -74,7 +74,7 @@ void cProjectOneBoss::__MoveOwn()
             {
                 const coreVector2 vDir = (pPlayer->GetPosition().xy() - this->GetPosition().xy()).Normalized();
 
-                pPlayer->SetForce(vDir * 120.0f);
+                pPlayer->ApplyForce(vDir * 120.0f);
             });
 
             g_pSpecialEffects->MacroExplosionDarkBig(coreVector3(0.0f, FOREGROUND_AREA.y, 0.0f));
@@ -184,7 +184,7 @@ void cProjectOneBoss::__MoveOwn()
                 if(pBullet->GetFlyTime() >= 2.0f) return;
 
                 const coreVector2 vAim = (vPlayerPos - pBullet->GetPosition().xy()).Normalized();
-                const coreVector2 vDir = (pBullet->GetFlyDir() + vAim * (2.0f * Core::System->GetTime())).Normalized();
+                const coreVector2 vDir = (pBullet->GetFlyDir() + vAim * (2.0f * Core::System->GetTime())).Normalized(vAim);
 
                 pBullet->SetSpeed (pBullet->GetSpeed() + 2.0f * Core::System->GetTime());   
                 pBullet->SetFlyDir(vDir);

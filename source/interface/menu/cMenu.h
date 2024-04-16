@@ -24,6 +24,8 @@
 // TODO: highlight which joystick is which input set
 // TODO: fix all g_vMenuCenter usages when changing aspect ratio
 // TODO: summary_ add separate total-score for each player
+// TODO: update texture filter and render quality i nrealtime
+// TODO: double initial languages by switching to two columns (on demand?)
 
 
 // ****************************************************************
@@ -507,6 +509,10 @@ private:
 
     sPlayerInput m_aInput[MENU_CONFIG_INPUTS];
     coreButton   m_SwapInput;
+
+    coreUintW                          m_iCurMonitorIndex;
+    coreLookup<coreUintW, std::string> m_asCurResolution;
+
 
 
     

@@ -58,11 +58,15 @@ cPlayer::cPlayer()noexcept
     this->ActivateDarkShading();
 
     // 
-    m_Dot.DefineModel  ("object_dot.md3");
+    m_Range.DefineModel("object_dot.md3");
+    m_Range.SetSize    (coreVector3(1.0f,1.0f,1.0f) * PLAYER_COLLISION_MIN);
+
+    // 
+    m_Dot.DefineModel  ("object_sphere.md3");
     m_Dot.DefineTexture(0u, "effect_energy.png");
-    m_Dot.DefineProgram("effect_energy_flat_invert_program");
-    m_Dot.SetSize      (coreVector3(1.0f,1.0f,1.0f) * PLAYER_COLLISION_MIN);
-    m_Dot.SetColor4    (coreVector4(COLOR_ENERGY_RED * 0.7f, 1.0f));
+    m_Dot.DefineProgram("effect_energy_flat_program");
+    m_Dot.SetSize      (coreVector3(1.0f,1.0f,1.0f) * 0.6f);
+    m_Dot.SetColor4    (coreVector4(COLOR_ENERGY_PURPLE * 1.1f, 1.0f));
 
     // 
     m_Wind.DefineModel  ("object_sphere.md3");
@@ -199,37 +203,32 @@ void cPlayer::Render()
 {
     if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
     {
-        glDisable(GL_DEPTH_TEST);
-        {
-            // 
-            m_Bubble .Render();
-            m_Exhaust.Render();
-        }
-        glEnable(GL_DEPTH_TEST);
-
         // render the 3d-object
         this->coreObject3D::Render();
+    }
+}
 
+void cPlayer::RenderBefore()
+{
+    if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
+    {
+        // 
+        m_Bubble .Render();
+        m_Exhaust.Render();
+    }
+}
+
+void cPlayer::RenderAfter()
+{
+    if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
+    {
         // 
         for(coreUintW i = 0u; i < PLAYER_WEAPONS; ++i)
             m_apWeapon[i]->Render();
 
         // 
-        if(m_Wind.IsEnabled(CORE_OBJECT_ENABLE_RENDER))
-        {
-            g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(this);
-            m_Wind.Render();
-        }
-
-        if(g_bDebugOutput)
-        {
-            glDepthFunc(GL_ALWAYS);
-            {
-                // 
-                m_Dot.Render();
-            }
-            glDepthFunc(GL_LEQUAL);
-        }
+        m_Wind.Render();
+        m_Dot .Render();
     }
 }
 
@@ -292,7 +291,8 @@ void cPlayer::Move()
             // apply external forces
             if(!m_vForce.IsNull())
             {
-                vNewPos  += AlongStar(m_vForce) * Core::System->GetTime();
+                //vNewPos  += AlongStar(m_vForce) * Core::System->GetTime();
+                vNewPos  += m_vForce * Core::System->GetTime();
                 m_vForce *= FrictionFactor(8.0f);
             }
 
@@ -304,7 +304,7 @@ void cPlayer::Move()
 
             // 
             const coreVector2 vDiff = vNewPos - this->GetPosition().xy();
-            coreVector3 vOri = coreVector3(CLAMP(vDiff.x, -0.6f, 0.6f), CLAMP(vDiff.y, -0.6f, 0.6f), 1.0f).Normalized();
+            coreVector3 vOri = coreVector3(CLAMP(vDiff.x, -0.6f, 0.6f), CLAMP(vDiff.y, -0.6f, 0.6f), 1.0f).NormalizedUnsafe();
 
             // 
             if(this->IsRolling())
@@ -339,6 +339,10 @@ void cPlayer::Move()
         // 
         m_fAnimation.UpdateMod(1.0f, 20.0f);
         this->SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.25f));
+
+        // 
+        m_Range.SetPosition(this->GetPosition());
+        m_Range.Move();
 
         // 
         m_Dot.SetPosition(this->GetPosition());
@@ -654,7 +658,7 @@ coreBool cPlayer::__TestCollisionPrecise(const coreObject3D* pObject, coreVector
     ASSERT(pObject && pvIntersection && pbFirstHit)
 
     // 
-    if(Core::Manager::Object->TestCollision(&m_Dot, pObject, pvIntersection))
+    if(Core::Manager::Object->TestCollision(&m_Range, pObject, pvIntersection))
     {
         // 
         (*pvIntersection) = this->GetPosition();
@@ -685,7 +689,7 @@ coreBool cPlayer::__TestCollisionPrecise(const coreObject3D* pObject, coreVector
     {
         // 
         const coreVector3& vRayPos = this->GetPosition();
-        const coreVector3  vRayDir = coreVector3(-vMove.Normalized(), 0.0f);
+        const coreVector3  vRayDir = coreVector3(-vMove.NormalizedUnsafe(), 0.0f);
 
         // 
         coreFloat fHitDistance = 0.0f;

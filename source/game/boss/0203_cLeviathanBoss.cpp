@@ -147,22 +147,27 @@ void cLeviathanBoss::__KillOwn(const coreBool bAnimated)
 
 // ****************************************************************
 // 
-void cLeviathanBoss::__RenderOwnAttack()
+void cLeviathanBoss::__RenderOwnOver()
 {
     if(m_Ray.GetCurEnabled())
     {
+        // TODO: check if underlying + player-bullets can be moved inside ship depth (e.g. ship: 0.0-0.5, under: 0.2-0.3)
+
+        // TODO: DEPTH_PUSH even even lasers, DEPTH_PUSH_SHIP when spinning
         DEPTH_PUSH
+        //DEPTH_PUSH_SHIP
 
         // 
         m_Ray.Render();
         g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyList(&m_Ray);
 
-        glDisable(GL_DEPTH_TEST);
+        // TODO: look if visuals change with and without depth, if possible remove those gl-calls
+        //glDisable(GL_DEPTH_TEST);
         {
             // 
             m_RayWave.Render();
         }
-        glEnable(GL_DEPTH_TEST);
+        //glEnable(GL_DEPTH_TEST);
     }
 }
 
@@ -723,13 +728,11 @@ void cLeviathanBoss::__MoveOwn()
     if(m_aiCounter[ROTATION_STATUS])
     {
         // 
+        const coreVector2 vDiff     = pContainer->GetPosition().xy() - m_Head.GetPosition().xy();
         const coreVector2 vHeadMove = m_Head.GetMove();
-        if(!vHeadMove.IsNull())
-        {
-            // 
-            const coreVector2 vDiff = pContainer->GetPosition().xy() - m_Head.GetPosition().xy();
-            m_avVector[CONTAINER_DATA].y += 100.0f * coreVector2::Dot(vDiff.Rotated90().Normalized(), vHeadMove.Normalized()) * RCP(vDiff.LengthSq()) * Core::System->GetTime();
-        }
+
+        // 
+        if(!vDiff.IsNull() && !vHeadMove.IsNull()) m_avVector[CONTAINER_DATA].y += 100.0f * coreVector2::Dot(vDiff.Normalized().Rotated90(), vHeadMove.Normalized()) * RCP(vDiff.LengthSq()) * Core::System->GetTime();
     }
 
     // 
@@ -1000,8 +1003,8 @@ FUNC_NOALIAS void cLeviathanBoss::__CalcCurvePosDir(const coreVector3& vAxis, co
 
     // 
     const coreMatrix3 mRota = coreMatrix4::RotationAxis(fAngle, vAxis).m123();
-    const coreVector3 vDir  = vAxis.xy().IsNull() ? coreVector3(1.0f,0.0f,0.0f) : coreVector3(vAxis.xy().Normalized().Rotated90(), 0.0f);
-    const coreVector3 vPos  = (vDir * mRota).Normalized();
+    const coreVector3 vDir  = coreVector3(vAxis.xy().Normalized().Rotated90(), 0.0f);
+    const coreVector3 vPos  = vDir * mRota; // TODO: why was that normalized ?  
 
     // 
     (*vPosition)  = vPos * vScale;

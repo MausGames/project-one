@@ -73,6 +73,8 @@
 // TODO: remove multisampling for 2d, though may cause artifacts if the objects are fully shaded and moved
 // TODO: transition shader only needs alpha for menu, but not for background -> create permutations
 // TODO: default_black and default_white only 4x4
+// TODO: check all normalization calls if requires default or context-specific fallback, also check for more unsafe calls
+// TODO: check all RCP for division by zero
 
 
 // ****************************************************************
@@ -185,6 +187,7 @@ enum eType : coreInt32
     TYPE_VIRIDO_BALL,
     TYPE_VIRIDO_PADDLE,
     TYPE_VIRIDO_BARRIER,
+    TYPE_VIRIDO_LASER,
     TYPE_NEVO_CONTAINER,
 
     TYPE_DHARUK_BOOMERANG,
@@ -275,7 +278,6 @@ extern cPostProcessing* const g_pPostProcessing;   // main post-processing objec
 #include "environment/cWater.h"
 #include "environment/background/cBackground.h"
 #include "environment/cEnvironment.h"
-#include "interface/cCombatStats.h"
 #include "interface/cCombatText.h"
 #include "interface/cInterface.h"
 #include "interface/cMsgBox.h"

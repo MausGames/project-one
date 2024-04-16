@@ -25,6 +25,7 @@ cGame::cGame(const sGameConfig oConfig, const coreInt32* piMissionList, const co
 , m_fPacifistDamage     (0.0f)
 , m_bPacifist           (false)
 , m_iDepthLevel         (0u)
+, m_iDepthDebug         (0u)
 , m_iOutroType          (0u)
 , m_iStatus             (0u)
 , m_iDifficulty         (oConfig.iDifficulty)
@@ -104,7 +105,7 @@ cGame::~cGame()
 // render the game
 void cGame::Render()
 {
-    __DEPTH_LEVEL_SHIP   // # 1
+    __DEPTH_GROUP_SHIP   // # 1
     {
         // render all players
         for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
@@ -114,55 +115,70 @@ void cGame::Render()
         m_EnemyManager.Render();
     }
 
-    __DEPTH_LEVEL_UNDER
+    __DEPTH_GROUP_UNDER
     {
+        DEPTH_PUSH_DOUBLE
+
         glDepthMask(false);
         {
-            // render underlying effects
-            m_EnemyManager.RenderUnder();
-            m_pCurMission->RenderUnder();
-
             // 
-            m_ShieldManager.Render();
+            for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+                m_aPlayer[i].RenderBefore();
         }
         glDepthMask(true);
 
         // render low-priority bullet manager
         m_BulletManagerPlayer.Render();
 
-        //m_BulletManagerEnemy.Render(); // temporary for r-type residue wave   
+        // render underlying objects
+        m_EnemyManager.RenderUnder();
+        m_pCurMission->RenderUnder();
     }
 
-    __DEPTH_LEVEL_SHIP   // # 2
+    __DEPTH_GROUP_SHIP   // # 2
     {
         // apply deferred outline-layer
         g_pOutline->Apply();
+    }
+
+    __DEPTH_GROUP_OVER
+    {
+        DEPTH_PUSH
 
         // 
         m_ChromaManager.Render();
+        m_ItemManager  .Render();
+        m_ShieldManager.Render();
 
-        // 
-        m_ItemManager.Render();
+        // render overlying objects
+        m_EnemyManager.RenderOver();
+        m_pCurMission->RenderOver();
     }
 
-    __DEPTH_LEVEL_ATTACK
+    __DEPTH_GROUP_TOP
     {
-        // render attacks and gameplay objects
-        m_EnemyManager.RenderAttack();
-        m_pCurMission->RenderAttack();
+        DEPTH_PUSH_DOUBLE
+
+        // render high-priority bullet manager
+        m_BulletManagerEnemy.Render();
+
+        // render top objects
+        m_EnemyManager.RenderTop();
+        m_pCurMission->RenderTop();
     }
 
-    __DEPTH_LEVEL_OVER
+    __DEPTH_GROUP_SPECIAL
     {
         // render special-effects
         g_pSpecialEffects->Render();
 
-        // render high-priority bullet manager
-        m_BulletManagerEnemy.Render();   // TODO: below attack ? to be consistent with over ? rename all 3 stages ? 
-
-        // render overlying effects
-        m_EnemyManager.RenderOver();
-        m_pCurMission->RenderOver();
+        glDisable(GL_DEPTH_TEST);
+        {
+            // 
+            for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+                m_aPlayer[i].RenderAfter();
+        }
+        glEnable(GL_DEPTH_TEST);
     }
 
     __DEPTH_RESET
@@ -201,16 +217,11 @@ void cGame::Move()
 
     // 
     m_ChromaManager.Move();
-
-    // 
-    m_ItemManager.Move();
-
-    // 
+    m_ItemManager  .Move();
     m_ShieldManager.Move();
 
     // handle default object collisions
-    this->__HandleCollisions();
-    // TODO: do all collisions here (virtual funcs), for consistency, e.g. bullet collisions are done before move when handled in mission/boss 
+    this->__HandleCollisions();   // TODO: do all collisions here (virtual funcs), for consistency, e.g. bullet collisions are done before move when handled in mission/boss 
 
     // 
     this->__HandleDefeat();
@@ -225,9 +236,6 @@ void cGame::Move()
 // render the overlay separately
 void cGame::RenderOverlay()
 {
-    // apply combat stats
-    m_CombatStats.Apply();
-
     // render combat text and interface
     m_CombatText.Render();
     m_Interface .Render();
@@ -265,7 +273,7 @@ void cGame::LoadMissionID(const coreInt32 iID)
 
     // 
     m_iCurMissionIndex = std::find(m_piMissionList, m_piMissionList + m_iNumMissions, iID) - m_piMissionList;
-    ASSERT((m_iCurMissionIndex < m_iNumMissions) || (iID < 0))
+    ASSERT(m_iCurMissionIndex < m_iNumMissions)
 
     if(iID != cNoMission::ID)
     {
@@ -401,6 +409,7 @@ void cGame::UseContinue()
 // 
 void cGame::ActivatePacifist()
 {
+    /*
     // 
     ASSERT(!m_bPacifist)
     m_bPacifist = true;
@@ -408,30 +417,34 @@ void cGame::ActivatePacifist()
     // 
     for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
         m_aPlayer[i].AddStatus(PLAYER_STATUS_PACIFIST);
+    */
 }
 
 
 // ****************************************************************
 // 
-void cGame::PushDepthLevel()
+void cGame::ChangeDepthLevel(const coreUint8 iLevelNear, const coreUint8 iLevelFar)const
 {
     // 
-    m_iDepthLevel -= 1u;
-    ASSERT(m_iDepthLevel)
-
-    // 
-    glDepthRange(0.1f * I_TO_F(m_iDepthLevel - 1u),
-                 0.1f * I_TO_F(m_iDepthLevel));
+    ASSERT(iLevelNear < iLevelFar)
+    glDepthRange(0.05f * I_TO_F(iLevelNear), 0.05f * I_TO_F(iLevelFar));
 }
 
-
-// ****************************************************************
-// 
-void cGame::OffsetDepthLevel(const coreFloat fOffset)const
+void cGame::PushDepthLevel(const coreUint8 iLevels)
 {
     // 
-    glDepthRange(0.1f * I_TO_F(m_iDepthLevel - 1u),
-                 0.1f * I_TO_F(m_iDepthLevel) - fOffset);
+    ASSERT(m_iDepthLevel >= (m_iDepthDebug & ~BIT(7u)) + iLevels)
+    m_iDepthLevel -= iLevels;
+
+    // 
+    this->ChangeDepthLevel(m_iDepthLevel, m_iDepthLevel + iLevels);
+}
+
+void cGame::PushDepthLevelShip()
+{
+    // 
+    ASSERT(m_iDepthDebug & BIT(7u))
+    __DEPTH_GROUP_SHIP
 }
 
 
@@ -439,7 +452,7 @@ void cGame::OffsetDepthLevel(const coreFloat fOffset)const
 // 
 RETURN_NONNULL cPlayer* cGame::FindPlayer(const coreVector2& vPosition)
 {
-    // TODO: should use side for target, not nearest   
+    // TODO: change targeting here 
 
     // 
     if(!m_bCoop) return &m_aPlayer[0];
@@ -661,7 +674,7 @@ void cGame::__HandleDefeat()
             // 
             g_pPostProcessing->SetSaturation(i, bDefeated ? 0.0f : CLAMP(1.0f - pPlayer->GetFeelTime(), 0.0f, 1.0f));
 
-            if(bDefeated && m_bCoop && !m_pRepairEnemy)
+            if(bDefeated && m_bCoop && (m_pCurMission->GetID() != cNoMission::ID) && !m_pRepairEnemy)
             {
                 // 
                 m_pRepairEnemy = new cRepairEnemy();
@@ -767,9 +780,8 @@ void cGame::__HandleCollisions()
         if(!CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
         {
             // 
-            const coreVector2 vDiff = pPlayer->GetPosition().xy() - pEnemy->GetPosition().xy();
-            const coreVector2 vDir  = (vDiff.IsNull() ? coreVector2(1.0f,0.0f) : vDiff.Normalized());
-            pPlayer->SetForce    (vDir * 100.0f);
+            const coreVector2 vDiff = pPlayer->GetOldPos() - pEnemy->GetPosition().xy();
+            pPlayer->ApplyForce  (vDiff.Normalized() * 100.0f);
             pPlayer->SetInterrupt(PLAYER_INTERRUPT);
 
             // 
@@ -777,7 +789,7 @@ void cGame::__HandleCollisions()
             g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
         }
 
-
+         
         m_pCurMission->CollPlayerEnemy(pPlayer, pEnemy, vIntersection);
     });
 
@@ -817,17 +829,19 @@ void cGame::__HandleCollisions()
             }
             else
             {
-                const coreVector2 vDiff   = pBullet->GetPosition().xy() - pEnemy->GetPosition().xy();
-                const coreVector2 vNormal = (vDiff.Normalized() - pBullet->GetFlyDir() * 10.0f).Normalized();
+                // prevent an already killed but immortal enemy from reflecting bullets (in the same frame)
+                if(!pEnemy->ReachedDeath())
+                {
+                    const coreVector2 vFlyDir = pBullet->GetFlyDir();
+                    const coreVector2 vDiff   = pBullet->GetPosition().xy() - pEnemy->GetPosition().xy();
+                    const coreVector2 vNormal = (vDiff.Normalized(-vFlyDir) - vFlyDir * 10.0f).Normalized(-vFlyDir);
 
-                // 
-                pBullet->Reflect(pEnemy, vIntersection.xy(), vNormal);
+                    // 
+                    pBullet->Reflect(pEnemy, vIntersection.xy(), vNormal);
+                }
             }
         }
 
-        //const coreVector2 vDiff   = vIntersection.xy() - pBullet->GetPosition().xy();
-        //const coreFloat   fOffset = pBullet->GetCollisionRange().y - coreVector2::Dot(vDiff, pBullet->GetDirection().xy());
-        //pBullet->SetPosition(pBullet->GetPosition() - fOffset * pBullet->GetDirection());
 
 
         //g_pGame->GetChromaManager()->AddChroma(vIntersection.xy(), -pBullet->GetDirection().xy(), CHROMA_SCALE_TINY, pEnemy->GetBaseColor());     

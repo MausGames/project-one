@@ -12,7 +12,8 @@
 // ****************************************************************
 // constructor
 cConfigMenu::cConfigMenu()noexcept
-: coreMenu (SURFACE_CONFIG_MAX, SURFACE_CONFIG_VIDEO)
+: coreMenu           (SURFACE_CONFIG_MAX, SURFACE_CONFIG_VIDEO)
+, m_iCurMonitorIndex (Core::System->GetDisplayIndex())
 {
     // create menu objects
     m_Background.DefineTexture(0u, "menu_background_black.png");
@@ -661,7 +662,7 @@ void cConfigMenu::CheckValues()
                            (m_DisplayMode  .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN))                      ||
                            (m_AntiAliasing .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING))                  ||
                            (m_TextureFilter.GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY))             ||
-                           (m_RenderQuality.GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_QUALITY))                       ||
+                           (m_RenderQuality.GetCurEntry().tValue != g_OldConfig.Graphics.iRender)                                             ||
                            (m_ShadowQuality.GetCurEntry().tValue != g_OldConfig.Graphics.iShadow)                                             ||
                            (m_OverallVolume.GetCurEntry().tValue != F_TO_UI(Core::Config->GetFloat(CORE_CONFIG_AUDIO_GLOBALVOLUME) * 100.0f)) ||
                            (m_MusicVolume  .GetCurEntry().tValue != F_TO_UI(Core::Config->GetFloat(CORE_CONFIG_AUDIO_MUSICVOLUME)  * 100.0f)) ||
@@ -710,7 +711,7 @@ void cConfigMenu::LoadValues()
     m_DisplayMode  .SelectValue(Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN));
     m_AntiAliasing .SelectValue(Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING));
     m_TextureFilter.SelectValue(Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY));
-    m_RenderQuality.SelectValue(Core::Config->GetInt(CORE_CONFIG_GRAPHICS_QUALITY));
+    m_RenderQuality.SelectValue(g_CurConfig.Graphics.iRender);
     m_ShadowQuality.SelectValue(g_CurConfig.Graphics.iShadow);
 
     // 
@@ -765,10 +766,11 @@ void cConfigMenu::SaveValues()
 
     // 
     const coreBool bReset = (vCurResolution != coreVector2(I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH)), I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT)))) ||
-                            (m_Monitor      .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY))        ||
-                            (m_DisplayMode  .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN))     ||
-                            (m_AntiAliasing .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING)) ||
-                            (m_TextureFilter.GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY));
+                            (m_Monitor      .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY))             ||
+                            (m_DisplayMode  .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN))          ||
+                            (m_AntiAliasing .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING))      ||
+                            (m_TextureFilter.GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY)) ||
+                            (m_RenderQuality.GetCurEntry().tValue != g_CurConfig.Graphics.iRender);
 
     // 
     Core::Config->SetInt (CORE_CONFIG_SYSTEM_WIDTH,               F_TO_SI(vCurResolution.x));
@@ -777,8 +779,7 @@ void cConfigMenu::SaveValues()
     Core::Config->SetInt (CORE_CONFIG_SYSTEM_FULLSCREEN,          m_DisplayMode  .GetCurEntry().tValue);
     Core::Config->SetInt (CORE_CONFIG_GRAPHICS_ANTIALIASING,      m_AntiAliasing .GetCurEntry().tValue);
     Core::Config->SetInt (CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY, m_TextureFilter.GetCurEntry().tValue);
-    Core::Config->SetInt (CORE_CONFIG_GRAPHICS_QUALITY,           m_RenderQuality.GetCurEntry().tValue);
-    Core::Config->SetBool(CORE_CONFIG_GRAPHICS_TEXTURETRILINEAR,  m_RenderQuality.GetCurEntry().tValue ? true : false);
+    g_CurConfig.Graphics.iRender = m_RenderQuality.GetCurEntry().tValue;
     g_CurConfig.Graphics.iShadow = m_ShadowQuality.GetCurEntry().tValue;
 
     // 
@@ -917,7 +918,7 @@ void cConfigMenu::__LoadMonitors()
 void cConfigMenu::__LoadResolutions(const coreUintW iMonitorIndex)
 {
     // 
-    const std::string sOldEntry = m_Resolution.GetNumEntries() ? (*m_Resolution.GetCurEntry().psText) : "";
+    m_asCurResolution[m_iCurMonitorIndex] = m_Resolution.GetNumEntries() ? std::move(*m_Resolution.GetCurEntry().psText) : "";
     m_Resolution.ClearEntries();
 
     // 
@@ -925,7 +926,10 @@ void cConfigMenu::__LoadResolutions(const coreUintW iMonitorIndex)
     for(coreUintW i = avResolutionList.size(); i--; ) m_Resolution.AddEntry(PRINT("%.0f x %.0f", avResolutionList[i].x, avResolutionList[i].y), i);
 
     // 
-    if(!m_Resolution.SelectText(sOldEntry.c_str())) m_Resolution.SelectLast();
+    if(!m_Resolution.SelectText(m_asCurResolution[iMonitorIndex].c_str())) m_Resolution.SelectLast();
+
+    // 
+    m_iCurMonitorIndex = iMonitorIndex;
 }
 
 

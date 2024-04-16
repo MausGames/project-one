@@ -511,9 +511,9 @@ void cEnemyManager::Render()
     }                                                                 \
 } 
 
-void cEnemyManager::RenderUnder () {__RENDER_OWN(__RenderOwnUnder)}
-void cEnemyManager::RenderAttack() {__RENDER_OWN(__RenderOwnAttack)}
-void cEnemyManager::RenderOver  () {__RENDER_OWN(__RenderOwnOver)}
+void cEnemyManager::RenderUnder() {__RENDER_OWN(__RenderOwnUnder)}
+void cEnemyManager::RenderOver () {__RENDER_OWN(__RenderOwnOver)}
+void cEnemyManager::RenderTop  () {__RENDER_OWN(__RenderOwnTop)}
 
 #undef __RENDER_OWN
 
@@ -903,8 +903,14 @@ void cRepairEnemy::AssignPlayer(cPlayer* pPlayer)
 // 
 void cRepairEnemy::__RenderOwnUnder()
 {
-    // 
-    m_Bubble.Render();
+    DEPTH_PUSH
+
+    glDepthMask(false);
+    {
+        // 
+        m_Bubble.Render();
+    }
+    glDepthMask(true);
 }
 
 

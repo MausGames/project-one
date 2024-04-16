@@ -189,9 +189,11 @@ void cSnowBackground::__RenderOwnAfter()
         m_Snow.GetProgram()->SendUniform(PRINT("u_av3OverlayTransform[%zu]", i), coreVector3(vNewTexOffset.Processed(FRACT), fNewScale));
     }
 
-    // 
     glDisable(GL_DEPTH_TEST);
-    m_Snow.Render();
+    {
+        // 
+        m_Snow.Render();
+    }
     glEnable(GL_DEPTH_TEST);
 }
 
@@ -206,7 +208,7 @@ void cSnowBackground::__MoveOwn()
     const coreVector2 vTexOffset = m_Snow.GetTexOffset() + (coreVector2(0.0f,0.0f) + vMove) * (0.9f * Core::System->GetTime());
 
     // 
-    m_Snow.SetDirection((m_vSnowDirection.InvertedX() * coreMatrix3::Rotation(g_pEnvironment->GetDirection()).m12()).Normalized());
+    m_Snow.SetDirection(m_vSnowDirection.InvertedX() * coreMatrix3::Rotation(g_pEnvironment->GetDirection()).m12());
     m_Snow.SetTexSize  (vTexSize);
     m_Snow.SetTexOffset(vTexOffset.Processed(FRACT));
     m_Snow.Move();

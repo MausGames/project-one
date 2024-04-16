@@ -99,14 +99,6 @@ void cNautilusBoss::__KillOwn(const coreBool bAnimated)
 
 // ****************************************************************
 // 
-void cNautilusBoss::__RenderOwnAttack()
-{
-
-}
-
-
-// ****************************************************************
-// 
 void cNautilusBoss::__RenderOwnOver()
 {
     DEPTH_PUSH

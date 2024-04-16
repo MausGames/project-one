@@ -340,7 +340,7 @@ static void DebugGame()
                 oConfig.aaiSupport[i][0] = 0u;
             }
 
-            #define __LOAD_GAME(x) {STATIC_NEW(g_pGame, oConfig, GAME_MISSION_LIST_DEFAULT) g_pGame->LoadMissionID(x); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f); g_pPostProcessing->SetWallOpacity(1.0f);}
+            #define __LOAD_GAME(x) {static constexpr coreInt32 aiMission[] = {x}; STATIC_NEW(g_pGame, oConfig, aiMission, 1u) g_pGame->LoadNextMission(); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f); g_pPostProcessing->SetWallOpacity(1.0f);}
                  if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1),     CORE_INPUT_PRESS)) __LOAD_GAME(cIntroMission  ::ID)
             else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2),     CORE_INPUT_PRESS)) __LOAD_GAME(cViridoMission ::ID)
             else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(3),     CORE_INPUT_PRESS)) __LOAD_GAME(cNevoMission   ::ID)
@@ -352,6 +352,7 @@ static void DebugGame()
             else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(9),     CORE_INPUT_PRESS)) __LOAD_GAME(cAterMission   ::ID)
             else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(0),     CORE_INPUT_PRESS)) __LOAD_GAME(cErrorMission  ::ID)
             else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(GRAVE), CORE_INPUT_PRESS)) __LOAD_GAME(cTinkerMission ::ID)
+            #undef __LOAD_GAME
         }
     }
 

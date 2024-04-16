@@ -140,24 +140,23 @@ void cDharukBoss::__KillOwn(const coreBool bAnimated)
 // 
 void cDharukBoss::__RenderOwnUnder()
 {
-    // 
-    m_DuplicateTrail.Render();
-    //m_BoomerangTrail.Render();
+    DEPTH_PUSH
+
+    glDepthMask(false);
+    {
+        // 
+        m_DuplicateTrail.Render();
+        m_BoomerangTrail.Render();
+    }
+    glDepthMask(true);
 }
 
 
 // ****************************************************************
 // 
-void cDharukBoss::__RenderOwnAttack()
+void cDharukBoss::__RenderOwnOver()
 {
     DEPTH_PUSH
-
-    glDisable(GL_DEPTH_TEST);
-    {
-        // 
-        m_BoomerangTrail.Render();
-    }
-    glEnable(GL_DEPTH_TEST);
 
     // 
     m_Boomerang.Render();

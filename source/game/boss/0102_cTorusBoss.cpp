@@ -213,35 +213,36 @@ void cTorusBoss::__KillOwn(const coreBool bAnimated)
 // 
 void cTorusBoss::__RenderOwnUnder()
 {
-    // 
-    if(m_iTurretActive)
-        m_TurretHull.Render();
+    if(m_iTurretActive || m_iGunnerActive)
+    {
+        DEPTH_PUSH
 
-    // 
-    if(m_iGunnerActive)
-        m_GunnerHull.Render();
+        glDepthMask(false);
+        {
+            // 
+            m_TurretHull.Render();
+            m_GunnerHull.Render();
+        }
+        glDepthMask(true);
+    }
 }
 
 
 // ****************************************************************
 // 
-void cTorusBoss::__RenderOwnAttack()
+void cTorusBoss::__RenderOwnOver()
 {
-    DEPTH_PUSH
+    DEPTH_PUSH_SHIP
 
-    glDisable(GL_DEPTH_TEST);
-    {
-        // 
-        m_Emitter.Render();
+    // 
+    m_Emitter.Render();
 
-        // 
-        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCircle); ++i)
-            m_aCircle[i].Render();
+    // 
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCircle); ++i)
+        m_aCircle[i].Render();
 
-        // 
-        m_Summon.Render();
-    }
-    glEnable(GL_DEPTH_TEST);
+    // 
+    m_Summon.Render();
 }
 
 
@@ -466,7 +467,7 @@ void cTorusBoss::__MoveOwn()
             for(coreUintW i = 4u; i--; )
             {
                 const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(i) * 90.0f + fAngle));
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.2f, this, this->GetPosition().xy(), vDir)->ChangeSize(1.1f);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.2f, this, this->GetPosition().xy(), vDir)->ChangeSize(1.3f);
             }
 
             g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 5.0f, 1u, COLOR_ENERGY_BLUE);
@@ -732,7 +733,7 @@ void cTorusBoss::__MoveOwn()
 
         // 
         const coreVector2 vMove = this->GetMove();
-        m_avVector[TUMBLE_DIRECTION].xy(vMove.IsNull() ? vMove : vMove.Normalized());
+        m_avVector[TUMBLE_DIRECTION].xy(vMove.IsNull() ? coreVector2(0.0f,0.0f) : vMove.Normalized());   // TODO: change normalization with factor?, to account for speed
         m_avVector[TUMBLE_DIRECTION].z = g_pEnvironment->GetDirection().Angle();
 
         // 

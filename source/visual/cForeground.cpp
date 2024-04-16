@@ -75,6 +75,8 @@ coreBool cForeground::IsVisiblePoint(const coreVector2& vPosition, const coreFlo
 // 
 coreBool cForeground::IsVisibleObject(const coreObject3D* pObject)const
 {
+    ASSERT(pObject)
+
     // 
     const coreVector2 vProjectedPos = this->Project3D(pObject->GetPosition());
     const coreFloat   fRange        = pObject->GetModel().IsUsable() ? (pObject->GetModel()->GetBoundingRange() * pObject->GetSize()).Max() : 0.0f;
@@ -82,6 +84,25 @@ coreBool cForeground::IsVisibleObject(const coreObject3D* pObject)const
     // 
     return ((ABS(vProjectedPos.x) < FOREGROUND_AREA.x * 1.1f + fRange) &&
             (ABS(vProjectedPos.y) < FOREGROUND_AREA.y * 1.1f + fRange));
+}
+
+
+// ****************************************************************
+// 
+coreFloat cForeground::RayIntersection(const coreVector2& vPosition, const coreVector2& cDirection, const coreFloat fFactor)const
+{
+    ASSERT(cDirection.IsNormalized())
+
+    // 
+    if(coreMath::IsNear(cDirection.x, 0.0f)) return (FOREGROUND_AREA.y * fFactor) - vPosition.y * cDirection.y;
+    if(coreMath::IsNear(cDirection.y, 0.0f)) return (FOREGROUND_AREA.x * fFactor) - vPosition.x * cDirection.x;
+
+    // 
+    const coreVector2 vCorner = (FOREGROUND_AREA * fFactor) * cDirection.Processed(SIGN);
+    const coreVector2 vDiff   = vCorner - vPosition;
+    const coreVector2 vLength = vDiff / cDirection;
+
+    return vLength.Min();
 }
 
 

@@ -64,6 +64,9 @@ public:
     coreBool IsVisiblePoint (const coreVector2& vPosition, const coreFloat fFactor = 1.1f)const;
     coreBool IsVisibleObject(const coreObject3D* pObject)const;
 
+    // 
+    coreFloat RayIntersection(const coreVector2& vPosition, const coreVector2& cDirection, const coreFloat fFactor = 1.1f)const;
+
 
 private:
     // reset with the resource manager
