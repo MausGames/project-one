@@ -459,10 +459,6 @@ RETURN_NONNULL cPlayer* cGame::FindPlayer(const coreVector2& vPosition)
     if(!m_bCoop) return &m_aPlayer[0];
 
     // 
-    if(!coreMath::IsNear(vPosition.x, 0.0f)) return &m_aPlayer[(vPosition.x > 0.0f) ? 1u : 0u];
-    if(!coreMath::IsNear(vPosition.y, 0.0f)) return &m_aPlayer[(vPosition.y > 0.0f) ? 0u : 1u];
-
-    // 
     cPlayer*  pPlayer = &m_aPlayer[0];
     coreFloat fLenSq  = FLT_MAX;
 
@@ -481,6 +477,37 @@ RETURN_NONNULL cPlayer* cGame::FindPlayer(const coreVector2& vPosition)
 
     ASSERT(pPlayer)
     return pPlayer;
+}
+
+
+// ****************************************************************
+// 
+RETURN_NONNULL cPlayer* cGame::FindPlayerSide(const coreVector2& vPosition)
+{
+    STATIC_ASSERT(GAME_PLAYERS == 2u)
+
+    // 
+    if(CONTAINS_FLAG(m_aPlayer[1].GetStatus(), PLAYER_STATUS_DEAD)) return &m_aPlayer[0];
+    if(CONTAINS_FLAG(m_aPlayer[0].GetStatus(), PLAYER_STATUS_DEAD)) return &m_aPlayer[1];
+
+    // 
+    return &m_aPlayer[(vPosition.x > 0.0f) ? 1u : 0u];
+}
+
+
+// ****************************************************************
+// 
+RETURN_NONNULL cPlayer* cGame::FindPlayerDual(const coreUintW iIndex)
+{
+    STATIC_ASSERT(GAME_PLAYERS == 2u)
+
+    // 
+    if(CONTAINS_FLAG(m_aPlayer[1].GetStatus(), PLAYER_STATUS_DEAD)) return &m_aPlayer[0];
+    if(CONTAINS_FLAG(m_aPlayer[0].GetStatus(), PLAYER_STATUS_DEAD)) return &m_aPlayer[1];
+
+    // 
+    ASSERT(iIndex < GAME_PLAYERS)
+    return &m_aPlayer[iIndex];
 }
 
 

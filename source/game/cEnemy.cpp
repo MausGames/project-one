@@ -282,7 +282,7 @@ cPlayer* cEnemy::NearestPlayer()const
 {
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
-    return g_pGame->FindPlayer(this->GetPosition().xy());
+    return g_pGame->FindPlayerSide(this->GetPosition().xy());
 }
 
 

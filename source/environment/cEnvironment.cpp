@@ -14,6 +14,7 @@
 cEnvironment::cEnvironment()noexcept
 : m_pBackground    (NULL)
 , m_pOldBackground (NULL)
+, m_iLastID        (0)
 , m_TransitionTime (coreTimer(1.3f, 0.0f, 1u))
 , m_vTransitionDir (coreVector2(0.0f,0.0f))
 , m_fFlyOffset     (0.0f)
@@ -54,7 +55,7 @@ cEnvironment::cEnvironment()noexcept
 cEnvironment::~cEnvironment()
 {
     // save last background
-    Core::Config->SetInt("Game", "Background", m_pBackground->GetID());
+    Core::Config->SetInt("Game", "Background", m_iLastID);
 
     // explicitly undefine to detach textures
     m_MixObject.Undefine();
@@ -150,6 +151,9 @@ void cEnvironment::Move()
         }
         else m_pOldBackground->Move();
     }
+    
+    
+    Core::Debug->InspectValue("env", m_TransitionTime.GetValue(CORE_TIMER_GET_NORMAL));
 }
 
 
@@ -185,6 +189,10 @@ void cEnvironment::ChangeBackground(const coreInt32 iID, const coreUintW iTransi
     case cCaveBackground   ::ID: m_pBackground = new cCaveBackground   (); break;
     case cCloudBackground  ::ID: m_pBackground = new cCloudBackground  (); break;
     }
+
+    // 
+    if((iID != cNoBackground::ID) && (iID != cStomachBackground::ID) && (iID != cCaveBackground::ID))
+        m_iLastID = iID;
 
     if(m_pOldBackground)
     {

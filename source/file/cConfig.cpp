@@ -86,15 +86,15 @@ void LoadConfig()
     Core::Config->Load(true);
 
     // read game values
-    g_OldConfig.Game.iTextSize       = Core::Config->GetInt(CONFIG_GAME_TEXT_SIZE);
-    g_OldConfig.Game.iGameRotation   = Core::Config->GetInt(CONFIG_GAME_GAME_ROTATION);
-    g_OldConfig.Game.iGameScale      = Core::Config->GetInt(CONFIG_GAME_GAME_SCALE);
-    g_OldConfig.Game.iGameSpeed      = Core::Config->GetInt(CONFIG_GAME_GAME_SPEED);
-    g_OldConfig.Game.iHudRotation    = Core::Config->GetInt(CONFIG_GAME_HUD_ROTATION);
-    g_OldConfig.Game.iHudScale       = Core::Config->GetInt(CONFIG_GAME_HUD_SCALE);
-    g_OldConfig.Game.iHudType        = Core::Config->GetInt(CONFIG_GAME_HUD_TYPE);
-    g_OldConfig.Game.iUpdateFreq     = Core::Config->GetInt(CONFIG_GAME_UPDATE_FREQ);
-    g_OldConfig.Game.iMirrorMode     = Core::Config->GetInt(CONFIG_GAME_MIRROR_MODE);
+    g_OldConfig.Game.iTextSize     = Core::Config->GetInt(CONFIG_GAME_TEXT_SIZE);
+    g_OldConfig.Game.iGameRotation = Core::Config->GetInt(CONFIG_GAME_GAME_ROTATION);
+    g_OldConfig.Game.iGameScale    = Core::Config->GetInt(CONFIG_GAME_GAME_SCALE);
+    g_OldConfig.Game.iGameSpeed    = Core::Config->GetInt(CONFIG_GAME_GAME_SPEED);
+    g_OldConfig.Game.iHudRotation  = Core::Config->GetInt(CONFIG_GAME_HUD_ROTATION);
+    g_OldConfig.Game.iHudScale     = Core::Config->GetInt(CONFIG_GAME_HUD_SCALE);
+    g_OldConfig.Game.iHudType      = Core::Config->GetInt(CONFIG_GAME_HUD_TYPE);
+    g_OldConfig.Game.iUpdateFreq   = Core::Config->GetInt(CONFIG_GAME_UPDATE_FREQ);
+    g_OldConfig.Game.iMirrorMode   = Core::Config->GetInt(CONFIG_GAME_MIRROR_MODE);
 
     // read graphics values
     g_OldConfig.Graphics.iRender     = Core::Config->GetInt(CONFIG_GRAPHICS_RENDER);
@@ -104,7 +104,8 @@ void LoadConfig()
     g_OldConfig.Graphics.iDistortion = Core::Config->GetInt(CONFIG_GRAPHICS_DISTORTION);
 
     // read audio values
-    g_OldConfig.Audio.iAmbient       = Core::Config->GetInt(CONFIG_AUDIO_AMBIENT);
+    g_OldConfig.Audio.fEffectVolume  = Core::Config->GetFloat(CONFIG_AUDIO_EFFECT_VOLUME);
+    g_OldConfig.Audio.fAmbientVolume = Core::Config->GetFloat(CONFIG_AUDIO_AMBIENT_VOLUME);
 
     // read input values
     for(coreUintW i = 0u; i < INPUT_TYPES; ++i)
@@ -141,15 +142,15 @@ void SaveConfig()
     g_OldConfig = g_CurConfig;
 
     // write game values
-    Core::Config->SetInt(CONFIG_GAME_TEXT_SIZE,      g_OldConfig.Game.iTextSize);
-    Core::Config->SetInt(CONFIG_GAME_GAME_ROTATION,  g_OldConfig.Game.iGameRotation);
-    Core::Config->SetInt(CONFIG_GAME_GAME_SCALE,     g_OldConfig.Game.iGameScale);
-    Core::Config->SetInt(CONFIG_GAME_GAME_SPEED,     g_OldConfig.Game.iGameSpeed);
-    Core::Config->SetInt(CONFIG_GAME_HUD_ROTATION,   g_OldConfig.Game.iHudRotation);
-    Core::Config->SetInt(CONFIG_GAME_HUD_SCALE,      g_OldConfig.Game.iHudScale);
-    Core::Config->SetInt(CONFIG_GAME_HUD_TYPE,       g_OldConfig.Game.iHudType);
-    Core::Config->SetInt(CONFIG_GAME_UPDATE_FREQ,    g_OldConfig.Game.iUpdateFreq);
-    Core::Config->SetInt(CONFIG_GAME_MIRROR_MODE,    g_OldConfig.Game.iMirrorMode);
+    Core::Config->SetInt(CONFIG_GAME_TEXT_SIZE,     g_OldConfig.Game.iTextSize);
+    Core::Config->SetInt(CONFIG_GAME_GAME_ROTATION, g_OldConfig.Game.iGameRotation);
+    Core::Config->SetInt(CONFIG_GAME_GAME_SCALE,    g_OldConfig.Game.iGameScale);
+    Core::Config->SetInt(CONFIG_GAME_GAME_SPEED,    g_OldConfig.Game.iGameSpeed);
+    Core::Config->SetInt(CONFIG_GAME_HUD_ROTATION,  g_OldConfig.Game.iHudRotation);
+    Core::Config->SetInt(CONFIG_GAME_HUD_SCALE,     g_OldConfig.Game.iHudScale);
+    Core::Config->SetInt(CONFIG_GAME_HUD_TYPE,      g_OldConfig.Game.iHudType);
+    Core::Config->SetInt(CONFIG_GAME_UPDATE_FREQ,   g_OldConfig.Game.iUpdateFreq);
+    Core::Config->SetInt(CONFIG_GAME_MIRROR_MODE,   g_OldConfig.Game.iMirrorMode);
 
     // write graphics values
     Core::Config->SetInt(CONFIG_GRAPHICS_RENDER,     g_OldConfig.Graphics.iRender);
@@ -159,7 +160,8 @@ void SaveConfig()
     Core::Config->SetInt(CONFIG_GRAPHICS_DISTORTION, g_OldConfig.Graphics.iDistortion);
 
     // write audio values
-    Core::Config->SetInt(CONFIG_AUDIO_AMBIENT,       g_OldConfig.Audio.iAmbient);
+    Core::Config->SetFloat(CONFIG_AUDIO_EFFECT_VOLUME,  g_OldConfig.Audio.fEffectVolume);
+    Core::Config->SetFloat(CONFIG_AUDIO_AMBIENT_VOLUME, g_OldConfig.Audio.fAmbientVolume);
 
     // write input values
     for(coreUintW i = 0u; i < INPUT_TYPES; ++i)

@@ -106,6 +106,7 @@ enum eSurface : coreUint8
 
     SURFACE_TITLE_LOGO = 0u,
     SURFACE_TITLE_FIRST,
+    SURFACE_TITLE_RETURN,
     SURFACE_TITLE_MAX,
 
     SURFACE_MAIN_DEFAULT = 0u,
@@ -162,10 +163,10 @@ enum eEntry : coreUint8
     ENTRY_VIDEO_SHADOWQUALITY,
     ENTRY_VIDEO,
 
-    ENTRY_AUDIO_OVERALLVOLUME = ENTRY_VIDEO,
+    ENTRY_AUDIO_GLOBALVOLUME = ENTRY_VIDEO,
     ENTRY_AUDIO_MUSICVOLUME,
     ENTRY_AUDIO_EFFECTVOLUME,
-    ENTRY_AUDIO_AMBIENTSOUND,
+    ENTRY_AUDIO_AMBIENTVOLUME,
     ENTRY_AUDIO,
 
     ENTRY_INPUT_TYPE = ENTRY_AUDIO,
@@ -198,27 +199,27 @@ enum eEntry : coreUint8
 
 // ****************************************************************
 // icon codes (UTF-8)
-#define ICON_CHECK        u8"\uF00C"
-#define ICON_TIMES        u8"\uF00D"
-#define ICON_POWER_OFF    u8"\uF011"
-#define ICON_REFRESH      u8"\uF021"
-#define ICON_ARROW_LEFT   u8"\uF060"
-#define ICON_ARROW_RIGHT  u8"\uF061"
-#define ICON_ARROW_UP     u8"\uF062"
-#define ICON_ARROW_DOWN   u8"\uF063"
-#define ICON_SHARE        u8"\uF064"
-#define ICON_COGS         u8"\uF085"
-#define ICON_CARET_DOWN   u8"\uF0D7"
-#define ICON_CARET_UP     u8"\uF0D8"
-#define ICON_CARET_LEFT   u8"\uF0D9"
-#define ICON_CARET_RIGHT  u8"\uF0DA"
-#define ICON_PAUSE_CIRCLE u8"\uF28B"
-#define ICON_UNDO_ALT     u8"\uF2EA"
-#define ICON_REFRESH_ALT  u8"\uF2F1"
-#define ICON_REDO_ALT     u8"\uF2F9"
-#define ICON_SHIELD_ALT   u8"\uF3ED"
-#define ICON_BURN         u8"\uF46A"
-#define ICON_FEATHER_ALT  u8"\uF56B"
+#define ICON_CHECK        (const coreChar*)u8"\uF00C"
+#define ICON_TIMES        (const coreChar*)u8"\uF00D"
+#define ICON_POWER_OFF    (const coreChar*)u8"\uF011"
+#define ICON_REFRESH      (const coreChar*)u8"\uF021"
+#define ICON_ARROW_LEFT   (const coreChar*)u8"\uF060"
+#define ICON_ARROW_RIGHT  (const coreChar*)u8"\uF061"
+#define ICON_ARROW_UP     (const coreChar*)u8"\uF062"
+#define ICON_ARROW_DOWN   (const coreChar*)u8"\uF063"
+#define ICON_SHARE        (const coreChar*)u8"\uF064"
+#define ICON_COGS         (const coreChar*)u8"\uF085"
+#define ICON_CARET_DOWN   (const coreChar*)u8"\uF0D7"
+#define ICON_CARET_UP     (const coreChar*)u8"\uF0D8"
+#define ICON_CARET_LEFT   (const coreChar*)u8"\uF0D9"
+#define ICON_CARET_RIGHT  (const coreChar*)u8"\uF0DA"
+#define ICON_PAUSE_CIRCLE (const coreChar*)u8"\uF28B"
+#define ICON_UNDO_ALT     (const coreChar*)u8"\uF2EA"
+#define ICON_REFRESH_ALT  (const coreChar*)u8"\uF2F1"
+#define ICON_REDO_ALT     (const coreChar*)u8"\uF2F9"
+#define ICON_SHIELD_ALT   (const coreChar*)u8"\uF3ED"
+#define ICON_BURN         (const coreChar*)u8"\uF46A"
+#define ICON_FEATHER_ALT  (const coreChar*)u8"\uF56B"
 
 
 // ****************************************************************
@@ -244,6 +245,9 @@ public:
     void Move()final;
 
     // 
+    void StartIntro();
+
+    // 
     void ActivateFirstPlay();
 };
 
@@ -257,12 +261,11 @@ private:
 
     coreLabel m_PromptText;         // 
     coreFlow  m_fPromptAnimation;   // 
-    coreFlow  m_fPromptExpand;   // 
-
-    
-    coreBool m_bTest2;
+    coreFlow  m_fPromptExpand;      // 
 
     coreLabel m_aVersionText[2];    // hard-coded version info strings 
+
+    coreFlow m_fReturnTimer;        // 
 
 
 public:
@@ -487,7 +490,7 @@ private:
     coreObject2D m_aLine    [ENTRY_MAX];    // 
     coreLabel    m_aCueInput[INPUT_KEYS];   // 
     coreLabel    m_aCueRota [2];            // 
-cMenuInput m_MenuInput;  
+
     coreSwitchBoxU8 m_Monitor;
     coreSwitchBoxU8 m_Resolution;
     coreSwitchBoxU8 m_DisplayMode;
@@ -495,10 +498,10 @@ cMenuInput m_MenuInput;
     coreSwitchBoxU8 m_TextureFilter;
     coreSwitchBoxU8 m_RenderQuality;
     coreSwitchBoxU8 m_ShadowQuality;
-    coreSwitchBoxU8 m_OverallVolume;
+    coreSwitchBoxU8 m_GlobalVolume;
     coreSwitchBoxU8 m_MusicVolume;
     coreSwitchBoxU8 m_EffectVolume;
-    coreSwitchBoxU8 m_AmbientSound;
+    coreSwitchBoxU8 m_AmbientVolume;
     coreSwitchBoxU8 m_Language;
     coreSwitchBoxU8 m_TextSize;
     coreSwitchBoxU8 m_GameRotation;
@@ -515,6 +518,9 @@ cMenuInput m_MenuInput;
 
     coreUintW                          m_iCurMonitorIndex;
     coreLookup<coreUintW, std::string> m_asCurResolution;
+    
+    
+cMenuInput m_MenuInput;  
 
 
 public:
@@ -534,7 +540,7 @@ public:
 private:
     // 
     void __UpdateShadowQuality();
-    void __UpdateOverallVolume();
+    void __UpdateVolume();
     void __UpdateLanguage();
     void __UpdateInterface();
 
@@ -726,6 +732,8 @@ public:
 
     // 
     void ShowThankYou();
+    
+    // this menu is handling score and replay saving
 };
 
 

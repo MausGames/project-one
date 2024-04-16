@@ -133,7 +133,7 @@ void cMission::SkipStage()
     m_apSquad.clear();
 
     // 
-    std::memset(m_piData, 0, sizeof(coreUint32) * m_iDataSize);
+    if(m_piData) std::memset(m_piData, 0, sizeof(coreUint32) * m_iDataSize);
 
 
 

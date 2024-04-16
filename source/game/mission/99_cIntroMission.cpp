@@ -36,15 +36,15 @@ void cIntroMission::__SetupOwn()
 
     // ################################################################
     // 
-    STAGE_MAIN
-    {
-        if(STAGE_BEGINNING)
-        {
-            //g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);
-        }
-
-        STAGE_FINISH_AFTER(1.5f)
-    });
+    //STAGE_MAIN
+    //{
+    //    if(STAGE_BEGINNING)
+    //    {
+    //        //g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);
+    //    }
+    //
+    //    STAGE_FINISH_AFTER(1.5f)
+    //});
 
     // ################################################################
     // 

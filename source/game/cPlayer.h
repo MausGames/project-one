@@ -33,7 +33,7 @@
 #define PLAYER_FEEL_TIME_CONTINUE (5.0f)            // 
 #define PLAYER_FEEL_TIME_REPAIR   (5.0f)            // 
 #define PLAYER_FEEL_TIME_SHIELD   (10.0f)           // 
-#define PLAYER_INTERRUPT          (3.0f)            // 
+#define PLAYER_INTERRUPT          (2.0f)            // 
 #define PLAYER_DESATURATE         (1.2f)            // 
 
 #define PLAYER_SHIP_ATK  (0u)        // 

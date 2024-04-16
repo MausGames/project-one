@@ -1,4 +1,4 @@
-﻿///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
@@ -466,7 +466,7 @@ void cGameMenu::LoadValues()
     // 
     for(coreUintW i = 0u; i < WORLDMAP_PINS; ++i)
     {
-        m_WorldMap.EnablePin(i, g_pSave->GetHeader().oProgress.aiDisclosure[i]);
+        m_WorldMap.EnablePin(i, g_pSave->GetHeader().oProgress.aiDisclosure[i] ? true : false);
     }
 
     // 

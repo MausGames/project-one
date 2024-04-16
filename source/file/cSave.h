@@ -37,23 +37,24 @@ public:
     // 
     struct sGlobalStats final
     {
-        coreUint64 iTimePlayed;         // 
-        coreUint64 iScoreGained;        // 
-        coreUint32 iMissionsDone;       // 
-        coreUint32 iBossesDone;         // 
-        coreUint32 iWavesDone;          // 
-        coreUint32 iEnemiesDone;        // 
+        coreUint64 iTimePlayed;                   // 
+        coreUint64 iScoreGained;                  // 
+        coreUint32 iMissionsDone;                 // 
+        coreUint32 iBossesDone;                   // 
+        coreUint32 iWavesDone;                    // 
+        coreUint32 iEnemiesDone;                  // 
 
-        coreUint64 iDamageGiven;        // 
-        coreUint32 iDamageTaken;        // 
-        coreUint32 iContinuesUsed;      // 
-        coreUint32 iRepairsUsed;        // 
-        coreUint64 iMovesMade;          // 
-        coreUint32 iTurnsMade;          // 
-        coreUint32 iRollsMade;          // 
-        coreUint64 iBulletsShot;        // 
-        coreUint32 aiMedalsEarned[5];   // 
-        coreUint32 iFragmentsEarned;    // 
+        coreUint64 iDamageGiven;                  // 
+        coreUint32 iDamageTaken;                  // 
+        coreUint32 iContinuesUsed;                // 
+        coreUint32 iRepairsUsed;                  // 
+        coreUint64 iMovesMade;                    // 
+        coreUint32 iTurnsMade;                    // 
+        coreUint32 iRollsMade;                    // 
+        coreUint64 iBulletsShot;                  // 
+        coreUint32 aiMedalsEarned[SAVE_MEDALS];   // 
+        coreUint32 iFragmentsEarned;              // 
+        coreUint32 iBadgesEarned;                 // (new)  
     };
 
     // 
@@ -78,6 +79,7 @@ public:
         coreUint64 iBulletsShot;                  // 
         coreUint32 aiMedalsEarned[SAVE_MEDALS];   // 
         coreUint32 iFragmentsEarned;              // 
+        coreUint32 iBadgesEarned;                 // (new)  
     };
 
     // 
@@ -96,6 +98,8 @@ public:
         coreUint8  aiMedalMission [SAVE_MISSIONS];                  // 
         coreUint8  aaiMedalSegment[SAVE_MISSIONS][SAVE_SEGMENTS];   // 
         coreUint8  aiFragment     [SAVE_MISSIONS];                  // 
+        coreUint32 aiBadge        [SAVE_MISSIONS];                  // (new)  
+        coreUint64 iTrophy;                                         // (new)  
         coreUint64 iUnlock;                                         // 
     };
 

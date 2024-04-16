@@ -27,7 +27,6 @@ cReplayMenu::cReplayMenu()noexcept
     m_BackButton.SetAlignment (coreVector2(-1.0f, -1.0f));
     m_BackButton.GetCaption()->SetText(ICON_SHARE);
 
-    // 
     for(coreUintW i = 0u; i < MENU_REPLAY_ENTRIES; ++i)
     {
         m_aName[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);

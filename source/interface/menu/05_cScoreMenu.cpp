@@ -27,7 +27,6 @@ cScoreMenu::cScoreMenu()noexcept
     m_BackButton.SetAlignment (coreVector2(-1.0f, -1.0f));
     m_BackButton.GetCaption()->SetText(ICON_SHARE);
 
-    // create score entries
     for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i)
     {
         m_aRank[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);

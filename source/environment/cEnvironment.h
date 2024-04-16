@@ -17,7 +17,6 @@
 // TODO: separate culling between normal rendering an shadow, to improve efficiency (though this would update instancing buffer again ?)
 // TODO: transition is reset when resizing window
 // TODO: different background than cNoBackground on invalid ID (error background ?)
-// TODO: do not save temp backgrounds and cNoBackground, maybe use previous one
 
 
 // ****************************************************************
@@ -41,6 +40,7 @@ class cEnvironment final : public coreResourceRelation
 private:
     cBackground* m_pBackground;                          // current background instance (should never be NULL)
     cBackground* m_pOldBackground;                       // previous background instance (may be NULL)
+    coreInt32    m_iLastID;                              // 
 
     coreFrameBuffer m_FrameBuffer;                       // environment frame buffer used for transition mixing
     coreFullscreen  m_MixObject;                         // fullscreen object for transition mixing
@@ -74,8 +74,9 @@ public:
 
     // control active background
     void ChangeBackground(const coreInt32 iID, const coreUintW iTransitionType, const coreFloat fTransitionSpeed, const coreVector2& vTransitionDir = coreVector2(0.0f,-1.0f));
-    inline cBackground* GetBackground   ()const {ASSERT(m_pBackground) return m_pBackground;}
-    inline cBackground* GetOldBackground()const {return m_pOldBackground;}
+    inline cBackground*     GetBackground   ()const {ASSERT(m_pBackground) return m_pBackground;}
+    inline cBackground*     GetOldBackground()const {return m_pOldBackground;}
+    inline const coreInt32& GetLastID       ()const {return m_iLastID;}
 
     // 
     FUNC_LOCAL coreFloat RetrieveTransitionBlend(const cBackground* pBackground)const;

@@ -14,7 +14,7 @@
 cIntroMenu::cIntroMenu()noexcept
 : coreMenu       (SURFACE_INTRO_MAX, SURFACE_INTRO_EMPTY)
 , m_IntroTimer   (coreTimer(3.0f, 0.5f, 1u))
-, m_iIntroStatus (1u)
+, m_iIntroStatus (0xFFu)
 {
     // create menu objects
     m_WelcomeText.Construct      (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
@@ -23,41 +23,6 @@ cIntroMenu::cIntroMenu()noexcept
 
     // bind menu objects
     this->BindObject(SURFACE_INTRO_WELCOME, &m_WelcomeText);
-
-    // 
-    const coreBool bSelectLanguage = Core::Language->GetPath()[0] ? false : true;
-    if(bSelectLanguage)
-    {
-        // 
-        const coreLookup<std::string, std::string>& asLanguageList = cMenu::GetLanguageList();
-        ASSERT(asLanguageList.size() <= 10u)
-
-        // 
-        const coreFloat fOffset = I_TO_F(asLanguageList.size()) * 0.5f - 0.5f;
-        FOR_EACH(it, asLanguageList)
-        {
-            // 
-            std::string sFont;
-            if(!coreLanguage::FindString(it->c_str(), "FONT", &sFont)) sFont = MENU_FONT_DEFAULT;
-
-            // create new language button
-            coreButton* pButton = new coreButton(MENU_BUTTON, coreData::StrFilename(sFont.c_str()), 20u, MENU_OUTLINE_SMALL);   // # always filter filename
-            pButton->DefineProgram("menu_border_program");
-            pButton->SetPosition  (coreVector2(0.00f,0.09f * (fOffset - I_TO_F(m_apLanguageButton.size()))));
-            pButton->SetSize      (coreVector2(0.34f,0.07f));
-            pButton->GetCaption()->SetText(asLanguageList.get_key(it)->c_str());
-
-            // 
-            this->BindObject(SURFACE_INTRO_LANGUAGE, pButton);
-
-            // 
-            m_apLanguageButton.emplace((*it), pButton);
-        }
-    }
-
-    // 
-    m_IntroTimer.Play(CORE_TIMER_PLAY_RESET);
-    g_pMenu->ShiftSurface(this, bSelectLanguage ? SURFACE_INTRO_LANGUAGE : SURFACE_INTRO_WELCOME, 0.75f);
 }
 
 
@@ -160,6 +125,50 @@ void cIntroMenu::Move()
             }
         }
     }
+}
+
+
+// ****************************************************************
+// 
+void cIntroMenu::StartIntro()
+{
+    // 
+    m_IntroTimer.Play(CORE_TIMER_PLAY_RESET);
+    m_iIntroStatus = 1u;
+
+    // 
+    const coreBool bSelectLanguage = Core::Language->GetPath()[0] ? false : true;
+    if(bSelectLanguage)
+    {
+        // 
+        const coreLookup<std::string, std::string>& asLanguageList = cMenu::GetLanguageList();
+        ASSERT(asLanguageList.size() <= 10u)
+
+        // 
+        const coreFloat fOffset = I_TO_F(asLanguageList.size()) * 0.5f - 0.5f;
+        FOR_EACH(it, asLanguageList)
+        {
+            // 
+            std::string sFont;
+            if(!coreLanguage::FindString(it->c_str(), "FONT", &sFont)) sFont = MENU_FONT_DEFAULT;
+
+            // create new language button
+            coreButton* pButton = new coreButton(MENU_BUTTON, coreData::StrFilename(sFont.c_str()), 20u, MENU_OUTLINE_SMALL);   // # always filter filename
+            pButton->DefineProgram("menu_border_program");
+            pButton->SetPosition  (coreVector2(0.00f,0.09f * (fOffset - I_TO_F(m_apLanguageButton.size()))));
+            pButton->SetSize      (coreVector2(0.34f,0.07f));
+            pButton->GetCaption()->SetText(asLanguageList.get_key(it)->c_str());
+
+            // 
+            this->BindObject(SURFACE_INTRO_LANGUAGE, pButton);
+
+            // 
+            m_apLanguageButton.emplace((*it), pButton);
+        }
+    }
+
+    // 
+    g_pMenu->ShiftSurface(this, bSelectLanguage ? SURFACE_INTRO_LANGUAGE : SURFACE_INTRO_WELCOME, 0.75f);
 }
 
 

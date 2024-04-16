@@ -56,7 +56,8 @@ public:
 
 protected:
     // 
-    //template <typename T> FORCE_INLINE T* _MakeWhite(T* OUTPUT ptBullet)const {if(m_pOwner->IsDarkShading()) ptBullet->MakeWhite(); return ptBullet;}
+    coreBool _IsOwnerDarkShading()const;
+    template <typename T> FORCE_INLINE T* _MakeWhite(T* OUTPUT ptBullet)const {if(this->_IsOwnerDarkShading()) ptBullet->MakeWhite(); return ptBullet;}
 
 
 private:
@@ -115,8 +116,7 @@ private:
 class cPulseWeapon final : public cWeapon
 {
 private:
-    coreFlow  m_fCharge;           // 
-    //coreUint8 m_iCombo;            // 
+    coreFlow m_fCharge;            // 
 
     coreSoundPtr m_pBulletSound;   // 
 

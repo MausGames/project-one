@@ -14,9 +14,8 @@
 cTitleMenu::cTitleMenu()noexcept
 : coreMenu           (SURFACE_TITLE_MAX, SURFACE_TITLE_LOGO)
 , m_fPromptAnimation (-1.0f)
-, m_fPromptExpand    (0.0f)
-
-, m_bTest2 (false)
+, m_fPromptExpand    (-1.0f)
+, m_fReturnTimer     (0.0f)
 {
     // create menu objects
     m_GameLogo.DefineTexture(0u, "game_logo.png");
@@ -67,49 +66,82 @@ void cTitleMenu::Move()
         {
 
         }
-        break;
+        //break;
 
     case SURFACE_TITLE_FIRST:
         {
+            if(!g_pMenu->IsShifting())
+            {
+                // 
+                m_fPromptAnimation.UpdateMod(1.0f, 2.0f*PI);
+            }
+        
+            if(m_fPromptExpand >= 0.0f)
+            {
+                // 
+                m_fPromptExpand.Update(5.0f);
+                if(m_fPromptExpand >= 1.0f)
+                {
+                    // 
+                    m_iStatus = 1;
+        
+                    // 
+                    m_fPromptAnimation = -1.0f;
+                    m_fPromptExpand    = -1.0f;
+                }
+            }
+            else if((m_fPromptAnimation >= -0.5f) && Core::Input->GetAnyButton(CORE_INPUT_PRESS))
+            {
+                // 
+                m_fPromptExpand = 0.0f;
+            }
+        
+            // 
+            m_PromptText.SetScale (LERPB(1.0f, 1.1f, MAX(m_fPromptExpand, 0.0f)));
+            m_PromptText.SetColor3(coreVector3(1.0f,1.0f,1.0f) * LERP(MENU_LIGHT_IDLE, MENU_LIGHT_ACTIVE, 0.5f + 0.5f * SIN(10.0f * m_fPromptAnimation)));
+            m_PromptText.SetAlpha (m_PromptText.GetAlpha() * MIN(m_fPromptAnimation + 1.0f, 1.0f) * LERPB(1.0f, 0.0f, MAX(m_fPromptExpand, 0.0f)));
+        }
+        break;
 
+    case SURFACE_TITLE_RETURN:
+        {
+            // 
+            m_fReturnTimer.Update(1.0f);
+            
+            g_pGame->GetInterface()->SetVisible(false);
+            g_pGame->GetInterface()->DisableTimes();
+            g_pGame->GetInterface()->Move();
+
+            {
+                // 
+                g_pPostProcessing->SetValueAll(CLAMP(1.0f - m_fReturnTimer, 0.0f, 1.0f));
+
+                if(m_fReturnTimer >= 1.5f)
+                {
+                    // 
+                    m_iStatus = 2;
+
+                    // 
+                    g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 0.0f);
+                    g_pEnvironment->ChangeBackground(g_pEnvironment->GetLastID(), ENVIRONMENT_MIX_CURTAIN, 0.75f, coreVector2(1.0f,0.0f));
+
+                    // 
+                    g_pPostProcessing->SetSaturationAll(1.0f);
+                    g_pPostProcessing->SetValueAll     (1.0f);
+
+                    // prevent flickering (# render function)
+                    g_pGlow->Clear();
+                    
+                    g_pMenu->ShiftSurface(this, SURFACE_TITLE_LOGO, 0.75f);
+                    m_fReturnTimer = 0.0f;
+                }
+            }
         }
         break;
 
     default:
         ASSERT(false)
         break;
-    }
-
-    if(!g_pMenu->IsShifting())
-    {
-        // 
-        m_fPromptAnimation.UpdateMod(1.0f, 2.0f*PI);
-    }
-
-    // 
-    m_PromptText.SetColor3(coreVector3(1.0f,1.0f,1.0f) * LERP(MENU_LIGHT_IDLE, MENU_LIGHT_ACTIVE, 0.5f + 0.5f * SIN(10.0f * m_fPromptAnimation)));
-    m_PromptText.SetAlpha (m_PromptText.GetAlpha() * MIN(m_fPromptAnimation + 1.0f, 1.0f));
-
-    if((m_fPromptAnimation >= -0.5f) && Core::Input->GetAnyButton(CORE_INPUT_PRESS))
-    {
-        m_bTest2 = true;
-        // 
-        //m_iStatus = 1;
-    }
-
-    if(m_bTest2)
-    {
-        m_fPromptExpand.UpdateMin(5.0f, 1.0f);
-
-        m_PromptText.SetScale(LERPB(1.0f,                    1.1f, m_fPromptExpand));
-        m_PromptText.SetAlpha(LERPB(m_PromptText.GetAlpha(), 0.0f, MIN(m_fPromptExpand, 1.0f)));
-
-        if(m_fPromptExpand >= 1.0f)
-        {
-            m_bTest2 = false;      
-            m_fPromptExpand = 0.0f;
-            m_iStatus = 1;
-        }
     }
 }
 

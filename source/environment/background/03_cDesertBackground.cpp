@@ -80,7 +80,7 @@ cDesertBackground::cDesertBackground()noexcept
     m_pWindSound = Core::Manager::Resource->Get<coreSound>("environment_wind.wav");
     m_pWindSound.OnUsableOnce([this, pResource = m_pWindSound]()
     {
-        pResource->PlayRelative(this, 0.0f, 1.0f, 0.0f, true);
+        pResource->PlayRelative(this, 0.0f, 1.0f, true);
     });
 }
 
@@ -141,5 +141,5 @@ void cDesertBackground::__MoveOwn()
 
     // 
     if(m_pWindSound->EnableRef(this))
-        m_pWindSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
+        m_pWindSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this) * g_CurConfig.Audio.fAmbientVolume);
 }

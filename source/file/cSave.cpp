@@ -127,7 +127,11 @@ void cSave::SaveFile()
     m_Header.iChecksum      = cSave::__GenerateChecksum(m_Header);
 
     // 
-    coreFile* pHeader = new coreFile("header", r_cast<coreByte*>(new sHeader(m_Header)), sizeof(sHeader));
+    coreByte* pHeaderData = new coreByte[sizeof(sHeader)];
+    std::memcpy(pHeaderData, &m_Header, sizeof(sHeader));
+
+    // 
+    coreFile* pHeader = new coreFile("header", pHeaderData, sizeof(sHeader));
 
     // 
     pHeader->Compress();

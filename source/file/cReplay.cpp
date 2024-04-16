@@ -337,7 +337,11 @@ void cReplay::SaveFile(const coreChar* pcName)
     m_Header.iChecksum = cReplay::__GenerateChecksum(m_Header);
 
     // 
-    coreFile* pHeader = new coreFile("header", r_cast<coreByte*>(new sHeader(m_Header)), sizeof(sHeader));
+    coreByte* pHeaderData = new coreByte[sizeof(sHeader)];
+    std::memcpy(pHeaderData, &m_Header, sizeof(sHeader));
+
+    // 
+    coreFile* pHeader = new coreFile("header", pHeaderData, sizeof(sHeader));
     coreFile* pBody   = new coreFile("body", pBodyData, iBodySize);
    // coreFile* pSave   = new coreFile("save", pBodyData, iBodySize);
 

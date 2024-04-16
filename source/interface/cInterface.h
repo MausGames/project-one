@@ -111,6 +111,9 @@ public:
     // 
     void UpdateLayout();
     void UpdateEnabled();
+    
+    
+    void DisableTimes() {m_fBannerStart = -FLT_MAX; m_fStoryStart = -FLT_MAX;}
 
     // set object properties
     inline void SetVisible  (const coreBool  bVisible) {m_bVisible   = bVisible;}

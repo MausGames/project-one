@@ -34,9 +34,7 @@ cMenu::cMenu()noexcept
     this->BindObject(SURFACE_SCORE,   &m_ScoreMenu);
     this->BindObject(SURFACE_REPLAY,  &m_ReplayMenu);
     this->BindObject(SURFACE_EXTRA,   &m_ExtraMenu);
-    this->BindObject(SURFACE_CONFIG,  &m_PauseLayer);
     this->BindObject(SURFACE_CONFIG,  &m_ConfigMenu);
-    this->BindObject(SURFACE_PAUSE,   &m_PauseLayer);
     this->BindObject(SURFACE_PAUSE,   &m_PauseMenu);
     this->BindObject(SURFACE_SUMMARY, &m_SummaryMenu);
     this->BindObject(SURFACE_DEFEAT,  &m_DefeatMenu);
@@ -59,6 +57,9 @@ cMenu::cMenu()noexcept
     m_MixObject.DefineProgram("full_transition_wipe_program");
     m_MixObject.SetSize      (coreVector2(1.0f,1.0f));
     m_MixObject.Move();
+
+    // 
+    m_IntroMenu.StartIntro();
 
     // 
     if(g_pSave->GetHeader().oProgress.bFirstPlay)
@@ -84,6 +85,9 @@ cMenu::~cMenu()
 // render the menu
 void cMenu::Render()
 {
+    // 
+    m_PauseLayer.Render();
+
     if(m_TransitionTime.GetStatus())
     {
         if((m_iTransitionState == 2u) || ((m_iTransitionState == 1u) && !m_pTransitionMenu->GetTransition().GetStatus()))
@@ -139,14 +143,15 @@ void cMenu::Render()
 void cMenu::Move()
 {
     // 
-    m_TransitionTime.Update(1.0f);
+    if(!Core::Manager::Resource->IsLoading())   // TODO: hier wegen sync mit environment-change   
+        m_TransitionTime.Update(1.0f);
 
     // 
     if(m_TransitionTime.GetStatus() && (this->GetCurSurface() != SURFACE_INTRO))
         Core::Input->ClearButtonAll();
 
     // 
-    m_MsgBox.Move();
+    m_MsgBox.Move();   // # clears input
 
     // move the menu
     this->coreMenu::Move();
@@ -191,6 +196,8 @@ void cMenu::Move()
 
                     // 
                     this->InvokePauseStep();
+                    
+                    Core::Audio->PauseSound();
                 }
             }
         }
@@ -208,10 +215,15 @@ void cMenu::Move()
 
     case SURFACE_TITLE:
         {
-            if(m_TitleMenu.GetStatus())
+            if(m_TitleMenu.GetStatus() == 1)
             {
                 // switch to main menu
-                this->ShiftSurface(this, SURFACE_MAIN, 2.0f);
+                this->ShiftSurface(this, SURFACE_MAIN, 3.0f);
+            }
+            else if(m_TitleMenu.GetStatus() == 2)
+            {
+                // 
+                this->__EndGame();
             }
         }
         break;
@@ -262,7 +274,7 @@ void cMenu::Move()
             if(m_GameMenu.GetStatus() == 1)
             {
                 // 
-                this->ShiftSurface(this, SURFACE_EMPTY, 1.0f);
+                this->ShiftSurface(this, SURFACE_EMPTY, 3.0f);
 
                 // 
                 g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);
@@ -293,7 +305,7 @@ void cMenu::Move()
             if(m_ReplayMenu.GetStatus() == 1)
             {
                 // 
-                this->ShiftSurface(this, SURFACE_EMPTY, 1.0f);
+                this->ShiftSurface(this, SURFACE_EMPTY, 3.0f);
 
                 // 
                 g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);
@@ -336,6 +348,8 @@ void cMenu::Move()
             {
                 // 
                 this->ChangeSurface(SURFACE_EMPTY, 0.0f);
+                
+                Core::Audio->ResumeSound();
             }
             else if(m_PauseMenu.GetStatus() == 2)
             {
@@ -349,10 +363,12 @@ void cMenu::Move()
             else if(m_PauseMenu.GetStatus() == 3)
             {
                 // 
-                this->ShiftSurface(this, SURFACE_TITLE, 1.0f);
+                this->ShiftSurface(this, SURFACE_TITLE, 3.0f);
 
                 // 
-                this->__EndGame();
+                m_TitleMenu.ChangeSurface(SURFACE_TITLE_RETURN, 0.0f);
+                
+                Core::Audio->CancelSound();
             }
         }
         break;
@@ -383,10 +399,10 @@ void cMenu::Move()
             else if(m_DefeatMenu.GetStatus() == 2)
             {
                 // 
-                this->ShiftSurface(this, SURFACE_TITLE, 1.0f);
+                this->ShiftSurface(this, SURFACE_TITLE, 3.0f);
 
                 // 
-                this->__EndGame();
+                m_TitleMenu.ChangeSurface(SURFACE_TITLE_RETURN, 0.0f);
             }
         }
         break;
@@ -396,10 +412,10 @@ void cMenu::Move()
             if(m_FinishMenu.GetStatus())
             {
                 // 
-                this->ShiftSurface(this, SURFACE_TITLE, 1.0f);
+                this->ShiftSurface(this, SURFACE_TITLE, 3.0f);
 
                 // 
-                this->__EndGame();
+                m_TitleMenu.ChangeSurface(SURFACE_TITLE_RETURN, 0.0f);
             }
         }
         break;
@@ -416,19 +432,28 @@ void cMenu::Move()
     //                        (this->GetCurSurface() != SURFACE_FINISH));
 
     // 
-    if((this->GetCurSurface() == SURFACE_PAUSE) || (this->GetOldSurface() == SURFACE_PAUSE))
+    if(((this->GetCurSurface() == SURFACE_CONFIG) || (this->GetCurSurface() == SURFACE_PAUSE)) && STATIC_ISVALID(g_pGame))
     {
-        m_PauseLayer.SetAlpha    (m_PauseLayer.GetAlpha() * 0.25f);
+        //m_PauseLayer.SetAlpha    (0.25f);
         m_PauseLayer.SetTexOffset(coreVector2(0.0f, FRACT(coreFloat(-0.04 * Core::System->GetTotalTime()))));
-        m_PauseLayer.SetEnabled  (CORE_OBJECT_ENABLE_ALL);
+        //m_PauseLayer.SetEnabled  (CORE_OBJECT_ENABLE_ALL);
     }
     else
     {
-        m_PauseLayer.SetEnabled(CORE_OBJECT_ENABLE_MOVE);
+        //m_PauseLayer.SetEnabled(CORE_OBJECT_ENABLE_MOVE);
     }
+    
+    const coreFloat fSpeed = STATIC_ISVALID(g_pGame) ? 1000.0f : 0.5f;
+    if(((this->GetCurSurface() == SURFACE_CONFIG) || (this->GetCurSurface() == SURFACE_PAUSE))) m_PauseLayer.SetAlpha(MIN(m_PauseLayer.GetAlpha() + fSpeed*Core::System->GetTime(), 0.25f));
+                                                                                           else m_PauseLayer.SetAlpha(MAX(m_PauseLayer.GetAlpha() - fSpeed*Core::System->GetTime(), 0.0f));
 
     // 
-    m_Tooltip.Move();
+    m_Tooltip   .Move();
+    m_PauseLayer.Move();
+    
+    
+    
+    Core::Debug->InspectValue("men", m_TransitionTime.GetValue(CORE_TIMER_GET_NORMAL));
 }
 
 
