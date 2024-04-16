@@ -14,11 +14,9 @@
 // TODO 5: different labels and animations (size, solid background, 000000 -> 123456, ZSDK -> TEST)
 // TODO 4: calling functions to display text is not consistent, chain is displayed by table, but (regular) score, extra and badge individually alongside adding score to table
 // TODO 2: use oldest active label instead of nothing, if all labels are busy (or dynamically allocated fallback)
-// TODO 3: RestrictCenter should also use size
 // TODO 4: use index instead of pointer for order-list ?
 // TODO 2: also invert with mirror mode (like interface, maybe move outside ?) (even more, like summary and continue menu) (should it be a 3rd option ? Off, Light, Full)
-// TODO 1: alle stellen mit DrawProgress und vielleicht DrawText (1, 2, 3, ...) brauchen sound effect
-// TODO 1: text which bumps up and down (score in arkanoid: https://www.youtube.com/watch?v=dm95AFruFEc)
+// TODO 1: alle stellen mit DrawProgress und vielleicht DrawCountdown (1, 2, 3, ...) brauchen sound effect
 
 
 // ****************************************************************
@@ -30,31 +28,43 @@
 
 #define COMBAT_MARKERS (8u)
 
+enum eCombatType : coreUint8
+{
+    COMBAT_TYPE_SCORE = 0u,
+    COMBAT_TYPE_EXTRA,
+    COMBAT_TYPE_CHAIN,
+    COMBAT_TYPE_SHIFT,
+    COMBAT_TYPE_PROGRESS,
+    COMBAT_TYPE_COUNTDOWN,
+    COMBAT_TYPE_TEXT
+};
+
 
 // ****************************************************************
 // combat text class
 class cCombatText final
 {
 private:
-    cGuiLabel m_aLabel [COMBAT_LABELS];    // label objects to display combat text
-    coreFlow  m_afTimer[COMBAT_LABELS];    // animation timers
-    coreUint8 m_aiType [COMBAT_LABELS];    // 
+    cGuiLabel m_aLabel[COMBAT_LABELS];          // label objects to display combat text
+    coreFlow  m_afTime[COMBAT_LABELS];          // animation timers
+    coreUint8 m_aiType[COMBAT_LABELS];          // 
 
-    cGuiLabel* m_apOrder[COMBAT_LABELS];   // 
-    coreUint8  m_iOrderNum;                // 
-    
+    cGuiLabel* m_apOrder[COMBAT_LABELS];        // 
+    coreUint8  m_iOrderNum;                     // 
+
     cGuiLabel  m_aMarker    [COMBAT_MARKERS];   // 
     cGuiObject m_aMarkerBack[COMBAT_MARKERS];   // 
-    coreUint16 m_iMarkerState;              // 
+    coreUint16 m_iMarkerState;                  // 
 
-    cGuiObject m_BadgeIcon;                // 
-    cGuiLabel  m_BadgeLabel;               // 
-    coreFlow   m_fBadgeTimer;              // 
-    
-    coreBool m_bVisible;                   // visibility status
-    coreFlow m_fAlpha;                     // 
-    
-    coreUint8 m_iLastLabel;
+    cGuiObject m_BadgeIcon;                     // 
+    cGuiObject m_BadgeBack;                     // 
+    cGuiLabel  m_BadgeLabel;                    // 
+    coreFlow   m_fBadgeTime;                    // 
+
+    coreUint8 m_iLastScore;                     // 
+
+    coreBool m_bVisible;                        // visibility status
+    coreFlow m_fAlpha;                          // 
 
 
 public:
@@ -67,14 +77,15 @@ public:
     void Move();
 
     // 
-    void DrawScore(const coreUint32 iValue, const coreVector3 vPosition, const coreBool bBig);
-    void DrawExtra(const coreUint32 iValue, const coreVector3 vPosition, const coreBool bBig);
-    void DrawChain(const coreUint32 iValue, const coreVector3 vPosition);
-    void DrawShift(const coreUint32 iValue, const coreVector3 vPosition);
-    void DrawProgress(const coreUint32 iCurrent, const coreUint32 iTotal, const coreVector3 vPosition);
-    void DrawText(const coreChar* pcText, const coreVector3 vPosition, const coreVector3 vColor);
-    void DrawBadge(const coreUint32 iValue, const coreVector3 vPosition);
-    
+    void DrawScore    (const coreUint32 iValue, const coreVector3 vPosition, const coreBool bBig);
+    void DrawExtra    (const coreUint32 iValue, const coreVector3 vPosition, const coreBool bBig);
+    void DrawChain    (const coreUint32 iValue, const coreVector3 vPosition);
+    void DrawShift    (const coreUint32 iValue, const coreVector3 vPosition);
+    void DrawProgress (const coreUint32 iCurrent, const coreUint32 iTotal, const coreVector3 vPosition);
+    void DrawCountdown(const coreUint32 iCurrent, const coreUint32 iTotal, const coreVector3 vPosition);
+    void DrawText     (const coreChar*  pcText, const coreVector3 vPosition, const coreVector3 vColor);
+    void DrawBadge    (const coreUint32 iValue, const coreVector3 vPosition);
+
     // 
     void AttachMarker(const coreUintW iIndex, const coreChar* pcText, const coreVector3 vPosition, const coreVector3 vColor);
 
@@ -99,9 +110,7 @@ private:
 
     // 
     static coreVector2 __TransformPosition(const coreVector3 vPosition);
-
-    // 
-    static coreVector2 __RestrictCenter(const coreVector2 vPosition, const coreVector2 vSize, const coreVector2 vCenter);
+    static coreVector2 __RestrictCenter   (const coreVector2 vPosition, const coreVector2 vSize, const coreVector2 vCenter);
 };
 
 

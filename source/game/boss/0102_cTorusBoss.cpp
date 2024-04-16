@@ -1371,7 +1371,7 @@ void cTorusBoss::__MoveOwn()
         // 
         const coreVector3 vDir  = coreVector3(coreVector2::Direction(m_fRotationObject *   (2.0f*PI)), 0.0f);
         const coreVector3 vDir2 = coreVector3(coreVector2::Direction(m_fRotationObject * (-10.0f*PI)), 0.0f);
-        const coreVector2 vTex  = coreVector2(0.2f,1.0f) * m_fRotationObject;
+        const coreVector2 vTex  = (coreVector2(0.2f,1.0f) * m_fRotationObject).Processed(FRACT);
         const coreFloat   fTime = FMOD(m_fRotationObject * -10.0f, 2.0f);
 
         // 

@@ -27,13 +27,14 @@
 
 // ****************************************************************
 // special-effects definitions
-#define SPECIAL_LIGHTNINGS       (32u)     // number of lightning sprites
-#define SPECIAL_GUSTS            (16u)     // 
-#define SPECIAL_BLASTS           (8u)      // number of energy-blasts
-#define SPECIAL_EXPLOSION        (8u)      // 
+#define SPECIAL_LIGHTNINGS       (32u)       // number of lightning sprites
+#define SPECIAL_GUSTS            (16u)       // 
+#define SPECIAL_BLASTS           (8u)        // number of energy-blasts
+#define SPECIAL_EXPLOSION        (8u)        // 
+#define SPECIAL_ICONS            (PLAYERS)   // 
 
-#define SPECIAL_LIGHTNING_RESIZE (0.66f)   // 
-#define SPECIAL_LIGHTNING_CUTOUT (0.5f)    // 
+#define SPECIAL_LIGHTNING_RESIZE (0.66f)     // 
+#define SPECIAL_LIGHTNING_CUTOUT (0.5f)      // 
 
 #define SPECIAL_DEPTH(x)         (((x).z < -1.0f) ? 1u : 0u)
 
@@ -198,6 +199,8 @@ private:
     coreFloat m_fSlowTime;                                  // 
     coreFloat m_fSlowStrength;                              // 
 
+    cIcon m_aIcon[SPECIAL_ICONS];                           // 
+
     coreUint16 m_iEffectFrame;                              // 
     coreUint8  m_iEffectCount;                              // 
     coreUint8  m_iBreakupCount;                             // 
@@ -215,7 +218,9 @@ public:
     void RenderBottom();
     void Move();
     void MoveAlways();
-    
+
+    // 
+    void Update();
 
     // 
     inline const coreBool& IsActive()const {return m_bActive;}
@@ -278,8 +283,9 @@ public:
     void SlowScreen(const coreFloat fTime);
     inline const coreFloat& GetSlowTime    ()const {return m_fSlowTime;}
     inline const coreFloat& GetSlowStrength()const {return m_fSlowStrength;}
-    
-    // slow time
+
+    // 
+    inline const coreTexturePtr& GetIconTexture(const coreUintW iIndex) {ASSERT(iIndex < SPECIAL_ICONS) return m_aIcon[iIndex].GetFrameBuffer()->GetColorTarget(0u).pTexture;}
 
     // 
     void ClearAll();

@@ -29,12 +29,14 @@
 #define POST_TEXTURE_UNIT_GLOW        (2u)   // same for glow
 #define POST_TEXTURE_UNIT_DISTORTION  (3u)   // same for distortion
 
-#define POST_INTERIORS     (PLAYERS)
-#define POST_WALLS_BASE    (2u)
-#define POST_WALLS_EXTRA   (2u)
-#define POST_WALLS         (POST_WALLS_BASE + POST_WALLS_EXTRA)
-#define POST_BORDERS       (3u)
-#define POST_CHROMA_FACTOR (0.01f)
+#define POST_INTERIORS          (PLAYERS)
+#define POST_WALLS_BASE         (2u)
+#define POST_WALLS_EXTRA        (2u)
+#define POST_WALLS              (POST_WALLS_BASE + POST_WALLS_EXTRA)
+#define POST_BORDERS            (3u)
+#define POST_CHROMA_FACTOR      (0.01f)
+#define POST_DEFAULT_BORDER_MIN (0.2f)
+#define POST_DEFAULT_BORDER_MAX (0.7f)
 
 
 // ****************************************************************

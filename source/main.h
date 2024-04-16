@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 //*----------------------------------------------------------------------------*//
-//| Project One v0.1.0 (https://www.maus-games.at)                             |//
+//| Project One v0.1.1 (https://www.maus-games.at)                             |//
 //*----------------------------------------------------------------------------*//
 //| Copyright (c) 2010 Martin Mauersics                                        |//
 //|                                                                            |//
@@ -44,7 +44,7 @@
 // TODO 4: RETURN_NONNULL to everything which should never be null (and other attributes, both FUNC and RETURN)
 // TODO 3: check all vert shader for CORE_SHADER_OPTION_NO_ROTATION
 // TODO 5: control flow guard and buffer security check
-// TODO 1: _CORE_SSE_ try to just remove the coreMath low-precision functions (macro replace ? will only work partially)
+// TODO 1: _CORE_SSE_ try to just remove the coreMath low-precision functions (macro replace ? will only work partially (in gameplay code))
 // TODO 3: reduce number of shader-lights with static_assert, change something like that into static config
 // TODO 3: check if hole in object_sphere causes reflection issues, also check if other objects have a hole
 // TODO 3: on bosses and missions: don't move or render or test objects outside their phases (e.g. boomerangs active)
@@ -81,10 +81,9 @@
 // TODO 3: check if more textures can be changed to grayscale (grey+noalpha, black+alpha)
 // TODO 2: test maximum number of replays, provide upper limit, define communication when approaching or reaching limit
 // TODO 2: prevent shaking of center-aligned rectified animated text
-// TODO 3: add gamepad led colors
+// TODO 3: add gamepad led colors (nur wenn multiplayer aktiv ist, ansonsten zurück auf default value, wegen merged input)
 // TODO 1: clarify and simplify upper-case handling (for all texts, but especially for boss and mission names) (manually fix all-uppercase character/glyph distance(!) -> CALOR)
 // TODO 3: expose HRTF option (Headphones: No, Yes, Auto)
-// TODO 2: d-pad is for movement, but and can also be used for button mapping
 // TODO 4: if font awesome will be used in the end, remove all unused icons in font-file
 // TODO 3: make sure bullet->disable has correct positioned impact-effect everywhere, especially with fast ray-bullets going deep into other objects (manual correction or ray-cast)
 // TODO 4: check if any % (modulo) can be changed to coreMath::IsAligned
@@ -100,9 +99,9 @@
 // TODO 1: all music files need equal base volume, also remove meta data
 // TODO 1: all sound files need u-law compression (if it does not affect quality (check with good headphones)), also remove meta data, also shorten sound front and back (make sure there is no micro-sound), also make mono if better
 // TODO 3: object_tetra_top und object_cube_top brauchen gute outline
-// TODO 3: medal textur ist groß und sollten komprimiert werden, aber hat dann artefakte bei kleiner scale, vielleicht separate kleine textur erzeugen, andere texturen auch ?
 // TODO 1: alle sound-effekte bei denen man was einsammeln soll, prüfen ob pitch-inkrement verwendet werden soll
 // TODO 3: FORCE_INLINE for various callback-wrappern (eg. ForeachEnemy)
+// TODO 4: MIN1, MAX0, CLAMP01, BLEND* everywhere possible
 
 
 // ****************************************************************
@@ -147,7 +146,8 @@
 #define SEGMENTS             (BOSSES + WAVES)
 #define LIVES                (5u)
 #define CONTINUES            (3u)
-#define SHIELD               (100u)
+#define SHIELD_MAX           (255u)
+#define SHIELD_INVINCIBLE    (1000u)
 #define BADGES               (3u)
 #define WEAPONS              (6u)
 #define SUPPORTS             (2u)
@@ -188,6 +188,15 @@
 #define COLOR_FIRE_WHITE     (coreVector3(0.220f, 0.220f, 0.220f))
 #define COLOR_FIRE_ORANGE    (coreVector3(0.991f, 0.305f, 0.042f))
 #define COLOR_FIRE_BLUE      (coreVector3(0.306f, 0.527f, 1.000f))
+#define COLOR_LED_WHITE      (coreVector3(1.000f, 1.000f, 1.000f))
+#define COLOR_LED_YELLOW     (coreVector3(1.000f, 0.900f, 0.000f))
+#define COLOR_LED_ORANGE     (coreVector3(1.000f, 0.420f, 0.000f))
+#define COLOR_LED_RED        (coreVector3(1.000f, 0.000f, 0.000f))
+#define COLOR_LED_MAGENTA    (coreVector3(1.000f, 0.010f, 0.550f))
+#define COLOR_LED_PURPLE     (coreVector3(0.250f, 0.000f, 1.000f))
+#define COLOR_LED_BLUE       (coreVector3(0.050f, 0.380f, 1.000f))
+#define COLOR_LED_CYAN       (coreVector3(0.184f, 0.635f, 0.635f))
+#define COLOR_LED_GREEN      (coreVector3(0.170f, 1.000f, 0.070f))
 #define COLOR_SHIP_YELLOW    (coreVector3(0.950f, 0.778f, 0.170f))
 #define COLOR_SHIP_ORANGE    (coreVector3(1.000f, 0.539f, 0.108f))
 #define COLOR_SHIP_RED       (coreVector3(0.950f, 0.288f, 0.288f))
@@ -345,14 +354,16 @@ extern coreMusicPlayer g_MusicPlayer;       // central music-player
 
 #include "additional/cUtilities.h"
 #include "additional/cBindContainer.h"
-#include "additional/cMenuNavigator.h"
 #include "additional/cRotaCache.h"
 #include "additional/cGuiObject.h"
 #include "additional/cLodObject.h"
+#include "interface/cFigure.h"
+#include "additional/cMenuNavigator.h"
 #include "file/cConfig.h"
 #include "file/cReplay.h"
 #include "file/cSave.h"
 #include "visual/cWorm.h"
+#include "visual/cIcon.h"
 #include "visual/cShadow.h"
 #include "visual/cOutline.h"
 #include "visual/cBlur.h"

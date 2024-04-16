@@ -10,49 +10,42 @@
 #ifndef _P1_GUARD_INTERFACE_H_
 #define _P1_GUARD_INTERFACE_H_
 
-// TODO 1: re-position everything after resolution-change (also menu)
-// TODO 3: realtime language update (other locations as well ?), boss-titles and wave-names
+// TODO 1: realtime language update (other locations as well ?), boss-titles and wave-names
 // TODO 3: MENU_INSIDE_ALPHA should only be used with inside-hud
-// TODO 3: effect on UI when recovering life or shield (and on player, and combat text)
-// TODO 1: aktuelles level anzeigen mit wave 01-03, 03-BOSS (e.g. oben rechts im single-player)
-// TODO 1: show best time and best score in-game (mission, segment), and when a new record was made! (score also in mission summary)
-// TODO 1: health icons should be different, when the player has color (+ transformed to enemy)
 // TODO 4: merge wave time and boss time if possible
-// TODO 1: wave-name FÜNF is getting shifted down
-// TODO 1: add option to display outside interface near line, to handle ultrawide screens
-// TODO 3: UI is not correctly updated when changing window size (manually) during pause
 
 
 // ****************************************************************
 // interface definitions
-#define INTERFACE_VIEWS                   (PLAYERS)                         // number of player views
-#define INTERFACE_LIVES                   (LIVES)                           // 
-#define INTERFACE_BADGES                  (BADGES)                          // 
-#define INTERFACE_BOSS_DELAY              (1.5f)                            // 
-#define INTERFACE_DIALOGS                 (2u)
+#define INTERFACE_VIEWS                   (PLAYERS)        // number of player views
+#define INTERFACE_LIVES                   (LIVES)          // 
+#define INTERFACE_BADGES                  (BADGES)         // 
+#define INTERFACE_HELPERS                 (HELPERS - 1u)   // 
+#define INTERFACE_BOSS_DELAY              (1.5f)           // 
+#define INTERFACE_DIALOGS                 (2u)             // 
+#define INTERFACE_INVALID_START           (-3600.0f)       // 
 
-#define INTERFACE_BANNER_SPEED            (4.0f)                            // fade-in and fade-out speed
-//#define INTERFACE_BANNER_SPEED_REV        (1.0f / INTERFACE_BANNER_SPEED)   // 
-#define INTERFACE_BANNER_SPEED_MISSION    (1.0f)                            // 
-#define INTERFACE_BANNER_ANIMATION        (2.9f)                            // animation duration
-#define INTERFACE_BANNER_DURATION_MISSION (3.7f)                            // 
-#define INTERFACE_BANNER_DURATION_BOSS    (3.0f)                            // display duration (with fading)  
-#define INTERFACE_BANNER_DURATION_SCORE   (5.0f)                            // 
-#define INTERFACE_BANNER_DURATION_ALERT   (3.5f)                            // 
+#define INTERFACE_BANNER_SPEED            (4.0f)           // fade-in and fade-out speed
+#define INTERFACE_BANNER_SPEED_OPEN       (1.0f)           // 
+#define INTERFACE_BANNER_ANIMATION        (2.9f)           // animation duration
+#define INTERFACE_BANNER_DURATION_MISSION (3.7f)           // 
+#define INTERFACE_BANNER_DURATION_BOSS    (3.0f)           // display duration (with fading)  
+#define INTERFACE_BANNER_DURATION_SCORE   (5.0f)           // 
+#define INTERFACE_BANNER_DURATION_ALERT   (3.5f)           // 
 
-#define INTERFACE_BANNER_TYPE_MISSION     (0u)                              // mission banner type
-#define INTERFACE_BANNER_TYPE_BOSS        (1u)                              // boss banner type
-#define INTERFACE_BANNER_TYPE_WAVE        (2u)                              // 
-#define INTERFACE_BANNER_TYPE_SCORE       (3u)                              // 
-#define INTERFACE_BANNER_TYPE_ALERT       (4u)                              // 
+#define INTERFACE_BANNER_TYPE_MISSION     (0u)             // mission banner type
+#define INTERFACE_BANNER_TYPE_BOSS        (1u)             // boss banner type
+#define INTERFACE_BANNER_TYPE_WAVE        (2u)             // 
+#define INTERFACE_BANNER_TYPE_SCORE       (3u)             // 
+#define INTERFACE_BANNER_TYPE_ALERT       (4u)             // 
 
-#define INTERFACE_STORY_SPEED             (1.0f)                            // 
-#define INTERFACE_STORY_DURATION          (4.0f)                            // 
+#define INTERFACE_STORY_SPEED             (1.0f)           // 
+#define INTERFACE_STORY_DURATION          (4.0f)           // 
 
 
 // ****************************************************************
 // interface class
-class cInterface final
+class cInterface final : public coreTranslate
 {
 private:
     // player view structure
@@ -61,8 +54,9 @@ private:
         cGuiObject aLife[INTERFACE_LIVES];   // player lives
         cGuiObject aShieldBar[3];            // player shield bar (0 = background, 1 = foreground, 2 = empty)
         cGuiLabel  oShieldValue;             // player shield value
-        cGuiLabel  oScoreTotal;              // total score
-        cGuiLabel  oScoreMission;            // mission score
+        coreFlow   fShieldBump;              // 
+        coreInt32  iShieldOld;               // 
+        cGuiLabel  oScore;                   // 
         cGuiObject oCooldownBar;             // cooldown bar
         cGuiLabel  oComboValue;              // combo label
         cGuiLabel  oChainValue;              // chain value
@@ -76,52 +70,68 @@ private:
 
 
 private:
-    sPlayerView m_aView[INTERFACE_VIEWS];    // player views
-    coreUint8   m_iNumViews;                 // number of constructed player views
+    sPlayerView m_aView[INTERFACE_VIEWS];           // player views
+    coreUint8   m_iNumViews;                        // number of constructed player views
 
-    cGuiObject m_aBossHealthBar[3];          // boss health bar (0 = background, 1 = foreground, 2 = empty)
-    cGuiLabel  m_BossHealthValue;            // boss health value
-    cGuiLabel  m_aBossTime[3];               // boss time (0 = seconds, 1 = deci-seconds, 2 = shift)
-    coreFlow   m_fBossSpin;                  // 
+    cGuiObject m_aBossHealthBar[3];                 // boss health bar (0 = background, 1 = foreground, 2 = empty)
+    cGuiLabel  m_BossHealthValue;                   // boss health value
+    cGuiLabel  m_aBossTime[3];                      // boss time (0 = seconds, 1 = deci-seconds, 2 = shift)
+    coreFlow   m_fBossSpin;                         // 
 
-    cGuiLabel m_WaveName;                    // wave name
-    cGuiLabel m_aWaveTime[3];                // wave time (0 = seconds, 1 = deci-seconds, 2 = shift)
+    cGuiLabel m_aWaveTime[3];                       // wave time (0 = seconds, 1 = deci-seconds, 2 = shift)
 
-    cGuiObject m_aTurfBar[3];                // 
-    cGuiLabel  m_TurfValue;                  // 
+    cGuiLabel  m_SegmentName;                       // segment name
+    cGuiLabel  m_SegmentBest;                       // 
+    coreString m_sSegmentString;                    // 
 
-    cGuiObject m_GoalMedal;                  // 
-    cGuiLabel  m_GoalTime;                   // 
+    cGuiObject m_aTurfBar[3];                       // 
+    cGuiLabel  m_TurfValue;                         // 
 
-    cGuiObject m_aBadge[INTERFACE_BADGES];   // 
+    cGuiObject m_GoalMedal;                         // 
+    cGuiLabel  m_GoalTime;                          // 
+    coreFlow   m_fGoalBump;                         // 
+    coreUint8  m_iGoalOld;                          // 
 
-    cGuiObject m_BannerBar;                  // banner background
-    cGuiObject m_BannerShadow;               // 
-    cGuiLabel  m_aBannerText[4];             // banner labels
-    coreFloat  m_fBannerStart;               // animation start time
-    coreFloat  m_fBannerDuration;            // 
-    coreFloat  m_fBannerSpeed;               // 
-    coreUint8  m_iBannerType;                // animation type (boss, mission, wave, score, alert)
+    cGuiObject m_aHelper     [INTERFACE_HELPERS];   // 
+    cGuiObject m_aHelperWave [INTERFACE_HELPERS];   // 
+    coreFlow   m_afHelperBump[INTERFACE_HELPERS];   // 
+    coreUint8  m_iHelperState;                      // 
 
-    cGuiLabel m_aStoryText[2];               // 
-    coreFloat m_fStoryStart;                 // 
+    cGuiObject m_aBadge     [INTERFACE_BADGES];     // 
+    cGuiObject m_aBadgeWave [INTERFACE_BADGES];     // 
+    coreFlow   m_afBadgeBump[INTERFACE_BADGES];     // 
+    coreUint8  m_iBadgeState;                       // 
 
-    cGuiLabel m_aDialogText[INTERFACE_DIALOGS];              // 
+    cGuiObject m_BannerBar;                         // banner background
+    cGuiObject m_BannerShadow;                      // 
+    cGuiObject m_aBannerIcon[2];                    // 
+    cGuiLabel  m_aBannerText[4];                    // banner labels
+    coreFloat  m_fBannerStart;                      // animation start time
+    coreFloat  m_fBannerDuration;                   // 
+    coreFloat  m_fBannerSpeed;                      // 
+    coreUint8  m_iBannerType;                       // animation type (boss, mission, wave, score, alert)
 
-    cGuiObject m_Medal;                      // 
+    cGuiLabel m_aStoryText[2];                      // 
+    coreFloat m_fStoryStart;                        // 
 
-    coreFlow m_fAnimation;                   // 
+    cGuiLabel m_aDialogText[INTERFACE_DIALOGS];     // 
 
-    coreBool m_bVisible;                     // visibility status
-    coreFlow m_fAlphaAll;                    // overall alpha value (except for banner)
-    coreFlow m_fAlphaBoss;                   // boss alpha value
-    coreFlow m_fAlphaWave;                   // 
-    coreFlow m_fAlphaTurf;                   // 
-    
-    coreFlow m_fAlphaValid;
-    
-    coreSoundPtr m_pAlertSound;
-    coreFloat m_fAlertStart;
+    cGuiObject m_Medal;                             // 
+
+    coreSoundPtr m_pAlertSound;                     // 
+    coreFloat    m_fAlertStart;                     // 
+
+    coreFlow m_fAnimation;                          // 
+    coreFlow m_fRotation;                           // 
+
+    coreBool m_bVisible;                            // visibility status
+    coreFlow m_fAlphaAll;                           // overall alpha value (except for banner)
+    coreFlow m_fAlphaBoss;                          // boss alpha value
+    coreFlow m_fAlphaWave;                          // 
+    coreFlow m_fAlphaSegment;                       // 
+    coreFlow m_fAlphaTurf;                          // 
+    coreFlow m_fAlphaGoal;                          // 
+    coreFlow m_fAlphaBadge;                         // 
 
 
 public:
@@ -150,20 +160,16 @@ public:
     coreBool IsStoryActive()const;
 
     // 
-    inline cGuiLabel* GetDialogText(const coreUintW iIndex) {ASSERT(iIndex < INTERFACE_DIALOGS) return &m_aDialogText[iIndex];}
-
-    // 
-    void ChangeBannerText(const coreChar* pcMain, const coreChar* pcSub);
-
-    // 
     void UpdateLayout();
+    void UpdateSpacing();
     void UpdateEnabled();
-    
-    // 
-    void PingImmune(const coreUintW iIndex) {ASSERT(iIndex < INTERFACE_VIEWS) m_aView[iIndex].fImmuneTime = 1.0f;}
+    void MoveTimeless();
 
     // 
-    inline void Reset() {m_fBannerStart = -FLT_MAX; m_fStoryStart = -FLT_MAX; m_fAlertStart = -FLT_MAX;}
+    inline void PingImmune(const coreUintW iIndex) {ASSERT(iIndex < INTERFACE_VIEWS) m_aView[iIndex].fImmuneTime = 1.0f;}
+
+    // 
+    inline void Reset() {m_fBannerStart = INTERFACE_INVALID_START; m_fStoryStart = INTERFACE_INVALID_START; m_fAlertStart = INTERFACE_INVALID_START;}
 
     // set object properties
     inline void SetVisible  (const coreBool  bVisible) {m_bVisible   = bVisible;}
@@ -171,8 +177,14 @@ public:
     inline void SetAlphaBoss(const coreFloat fAlpha)   {m_fAlphaBoss = fAlpha;}
     inline void SetAlphaWave(const coreFloat fAlpha)   {m_fAlphaWave = fAlpha;}
 
+    // 
+    inline cGuiLabel* GetDialogText(const coreUintW iIndex) {ASSERT(iIndex < INTERFACE_DIALOGS) return &m_aDialogText[iIndex];}
+
 
 private:
+    // update object after modification
+    void __Update()final;
+
     // 
     void __PrepareBanner();
 };

@@ -27,6 +27,7 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
 , m_fMusicFade          (0.0f)
 , m_fMusicSpeed         (0.0f)
 , m_fHitDelay           (0.0f)
+, m_bDefeatDelay        (false)
 , m_iContinues          (GAME_CONTINUES)
 , m_iDepthLevel         (0u)
 , m_iDepthDebug         (0u)
@@ -584,6 +585,9 @@ void cGame::LoadMissionID(const coreInt32 iID, const coreUint8 iTakeFrom, const 
         m_iStatus = GAME_STATUS_LOADING;
 
         // 
+        m_bDefeatDelay = false;
+
+        // 
         g_pSave->EditLocalStatsMission()->iCountStart += 1u;
     }
 
@@ -793,41 +797,57 @@ void cGame::UseRestart()
 // 
 void cGame::RepairPlayer()
 {
-    if(!m_pRepairEnemy) return;
-    
-    cPlayer* pPlayer = m_pRepairEnemy->GetPlayer();
-
-    // 
-    pPlayer->Resurrect();
-
-    // 
-    pPlayer->SetPosition    (m_pRepairEnemy->GetPosition());
-    //pPlayer->SetCurHealthPct(I_TO_F(1u) / I_TO_F(PLAYER_LIVES));
-    pPlayer->SetDesaturate  (PLAYER_DESATURATE);
-    pPlayer->StartFeeling   (PLAYER_FEEL_TIME_REPAIR, 0u);
-    
-    pPlayer->SetCurHealth(1u);
-    if(pPlayer->HasStatus(PLAYER_STATUS_SHIELDED))
+    if(m_pRepairEnemy)
     {
-        pPlayer->SetCurShield(5u);
+        cPlayer* pPlayer = m_pRepairEnemy->GetPlayer();
+
+        // 
+        pPlayer->Resurrect();
+
+        // 
+        pPlayer->SetPosition  (m_pRepairEnemy->GetPosition());
+        pPlayer->SetDesaturate(PLAYER_DESATURATE);
+        pPlayer->StartFeeling (PLAYER_FEEL_TIME_REPAIR, 0u);
+
+        pPlayer->SetCurHealth(1);
+        pPlayer->SetCurShield(pPlayer->GetMaxShield() / 5);
+        pPlayer->AddStatus   (PLAYER_STATUS_REPAIRED);
+
+        // 
+        g_pSpecialEffects->PlaySound(m_pRepairEnemy->GetPosition(), 1.0f, 1.0f, SOUND_PLAYER_REPAIR);
+
+        // 
+        pPlayer->GetDataTable()->EditCounterTotal  ()->iRepairsUsed += 1u;
+        pPlayer->GetDataTable()->EditCounterMission()->iRepairsUsed += 1u;
+        pPlayer->GetDataTable()->EditCounterSegment()->iRepairsUsed += 1u;
+
+        // 
+        g_pSave->EditGlobalStats      ()->iRepairsUsed += 1u;
+        g_pSave->EditLocalStatsMission()->iRepairsUsed += 1u;
+        g_pSave->EditLocalStatsSegment()->iRepairsUsed += 1u;
+
+        // 
+        SAFE_DELETE(m_pRepairEnemy)
     }
-    pPlayer->AddStatus(PLAYER_STATUS_REPAIRED);
-        
-    // 
-    g_pSpecialEffects->PlaySound(m_pRepairEnemy->GetPosition(), 1.0f, 1.0f, SOUND_PLAYER_REPAIR);
 
     // 
-    pPlayer->GetDataTable()->EditCounterTotal  ()->iRepairsUsed += 1u;
-    pPlayer->GetDataTable()->EditCounterMission()->iRepairsUsed += 1u;
-    pPlayer->GetDataTable()->EditCounterSegment()->iRepairsUsed += 1u;
+    g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    {
+        if(pPlayer->HasStatus(PLAYER_STATUS_DEAD))
+        {
+            pPlayer->Resurrect();
 
-    // 
-    g_pSave->EditGlobalStats      ()->iRepairsUsed += 1u;
-    g_pSave->EditLocalStatsMission()->iRepairsUsed += 1u;
-    g_pSave->EditLocalStatsSegment()->iRepairsUsed += 1u;
+            pPlayer->SetDesaturate(PLAYER_DESATURATE);
+            pPlayer->StartFeeling (PLAYER_FEEL_TIME_REPAIR, 0u);
 
-    // 
-    SAFE_DELETE(m_pRepairEnemy)
+            pPlayer->SetCurHealth(1);
+            pPlayer->AddStatus   (PLAYER_STATUS_REPAIRED);
+
+            m_CombatText.DrawText(Core::Language->GetString("LUCKY"), pPlayer->GetPosition(), COLOR_MENU_INSIDE);
+
+            m_bDefeatDelay = false;
+        }
+    });
 }
 
 
@@ -1149,39 +1169,11 @@ void cGame::__HandleDefeat()
 {
     if(HAS_FLAG(m_iStatus, GAME_STATUS_PLAY))
     {
-        coreBool bAllDefeated = true;
-
-        // 
-        for(coreUintW i = 0u, ie = this->GetNumPlayers(); i < ie; ++i)
-        {
-            cPlayer* pPlayer = &m_aPlayer[i];
-
-            // 
-            const coreBool bDefeated = pPlayer->HasStatus(PLAYER_STATUS_DEAD);
-            bAllDefeated = bAllDefeated && bDefeated;
-
-            // 
-            g_pPostProcessing->SetSaturation(i, bDefeated ? 0.0f : (1.0f - MIN(pPlayer->GetDesaturate(), 1.0f)));
-
-            if(this->IsMulti() && bDefeated && !m_pRepairEnemy)
-            {
-                // 
-                m_pRepairEnemy = new cRepairEnemy();
-                m_pRepairEnemy->AssignPlayer(pPlayer);
-                m_pRepairEnemy->Resurrect();
-            }
-        }
-
-        if(bAllDefeated)
+        if(m_bDefeatDelay)
         {
             // 
             REMOVE_FLAG(m_iStatus, GAME_STATUS_PLAY)
             ADD_FLAG   (m_iStatus, GAME_STATUS_DEFEATED)
-
-            // 
-            m_BulletManagerPlayer.ClearBullets(true);
-            
-            m_BulletManagerPlayerTop.ClearBullets(true);
 
             if(m_pRepairEnemy)
             {
@@ -1189,13 +1181,50 @@ void cGame::__HandleDefeat()
                 g_pSpecialEffects->CreateSplashDark(m_pRepairEnemy->GetPosition(), SPECIAL_SPLASH_TINY);
                 SAFE_DELETE(m_pRepairEnemy)
             }
-            
+
+            // 
             g_MusicPlayer.Stop();
         }
-
-        if(m_pRepairEnemy && m_pRepairEnemy->ReachedDeath())
+        else
         {
-            this->RepairPlayer();
+            coreBool bAllDefeated = true;
+
+            // 
+            for(coreUintW i = 0u, ie = this->GetNumPlayers(); i < ie; ++i)
+            {
+                cPlayer* pPlayer = &m_aPlayer[i];
+
+                // 
+                const coreBool bDefeated = pPlayer->HasStatus(PLAYER_STATUS_DEAD);
+                bAllDefeated = bAllDefeated && bDefeated;
+
+                // 
+                g_pPostProcessing->SetSaturation(i, bDefeated ? 0.0f : (1.0f - MIN(pPlayer->GetDesaturate(), 1.0f)));
+
+                if(this->IsMulti() && bDefeated && !m_pRepairEnemy)
+                {
+                    // 
+                    m_pRepairEnemy = new cRepairEnemy();
+                    m_pRepairEnemy->AssignPlayer(pPlayer);
+                    m_pRepairEnemy->Resurrect();
+                }
+            }
+
+            if(bAllDefeated)
+            {
+                // 
+                m_bDefeatDelay = true;
+
+                // 
+                m_BulletManagerPlayer.ClearBullets(true);
+
+                m_BulletManagerPlayerTop.ClearBullets(true);
+            }
+
+            if(m_pRepairEnemy && m_pRepairEnemy->ReachedDeath())
+            {
+                this->RepairPlayer();
+            }
         }
     }
 }
@@ -1242,7 +1271,7 @@ void cGame::__HandleCollisions()
                 {
                     if(true || pEnemy->HasStatus(ENEMY_STATUS_DAMAGING))
                     {
-                        if(pEnemy->GetLifeTime() >= 1.0f)   // TODO 1: modifiers are not applied
+                        if(pEnemy->GetLifeTime() >= 1.0f)   // TODO 1: modifiers are not applied (vielleicht egal, weil es eher wichtig für den anfang einer sub-gruppe is ?)
 
                         // 
                         pPlayer->TakeDamage(15, ELEMENT_NEUTRAL, vIntersection.xy());

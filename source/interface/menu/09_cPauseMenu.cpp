@@ -77,6 +77,9 @@ void cPauseMenu::Move()
             {
                 // 
                 m_iStatus = 1;
+
+                // 
+                m_Navigator.ResetFirst();
             }
             else if(m_RestartButton.IsClicked())
             {

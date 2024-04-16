@@ -127,21 +127,22 @@ struct sMissionData final
     coreInt32       iID;      // 
     const coreChar* pcName;   // 
     coreVector3     vColor;   // 
+    coreVector2     vIcon;    // 
 };
 
 static constexpr sMissionData g_aMissionData[] =
 {
-    {cIntroMission  ::ID, cIntroMission  ::Name, cCloudBackground  ::Color},
-    {cViridoMission ::ID, cViridoMission ::Name, cGrassBackground  ::Color},
-    {cNevoMission   ::ID, cNevoMission   ::Name, cSeaBackground    ::Color},
-    {cHarenaMission ::ID, cHarenaMission ::Name, cDesertBackground ::Color},
-    {cRutilusMission::ID, cRutilusMission::Name, cSpaceBackground  ::Color},
-    {cGeluMission   ::ID, cGeluMission   ::Name, cVolcanoBackground::Color},
-    {cCalorMission  ::ID, cCalorMission  ::Name, cSnowBackground   ::Color},
-    {cMuscusMission ::ID, cMuscusMission ::Name, cMossBackground   ::Color},
-    {cAterMission   ::ID, cAterMission   ::Name, cDarkBackground   ::Color},
-    {cBonus1Mission ::ID, cBonus1Mission ::Name, cDarkBackground   ::Color},   // #
-    {cBonus2Mission ::ID, cBonus2Mission ::Name, cDarkBackground   ::Color}    // #
+    {cIntroMission  ::ID, cIntroMission  ::Name, cCloudBackground  ::Color, cCloudBackground  ::Icon},
+    {cViridoMission ::ID, cViridoMission ::Name, cGrassBackground  ::Color, cGrassBackground  ::Icon},
+    {cNevoMission   ::ID, cNevoMission   ::Name, cSeaBackground    ::Color, cSeaBackground    ::Icon},
+    {cHarenaMission ::ID, cHarenaMission ::Name, cDesertBackground ::Color, cDesertBackground ::Icon},
+    {cRutilusMission::ID, cRutilusMission::Name, cSpaceBackground  ::Color, cSpaceBackground  ::Icon},
+    {cGeluMission   ::ID, cGeluMission   ::Name, cVolcanoBackground::Color, cVolcanoBackground::Icon},
+    {cCalorMission  ::ID, cCalorMission  ::Name, cSnowBackground   ::Color, cSnowBackground   ::Icon},
+    {cMuscusMission ::ID, cMuscusMission ::Name, cMossBackground   ::Color, cMossBackground   ::Icon},
+    {cAterMission   ::ID, cAterMission   ::Name, cDarkBackground   ::Color, cDarkBackground   ::Icon},
+    {cBonus1Mission ::ID, cBonus1Mission ::Name, cDarkBackground   ::Color, cDarkBackground   ::Icon},   // #
+    {cBonus2Mission ::ID, cBonus2Mission ::Name, cDarkBackground   ::Color, cDarkBackground   ::Icon}    // #
 };
 
 
@@ -165,9 +166,9 @@ static constexpr sMissionData g_aMissionData[] =
 class cGame final
 {
 private:
-    cPlayer  m_aPlayer[GAME_PLAYERS];       // player objects
-    cHelper  m_aHelper[GAME_HELPERS];       // 
-    cTracker m_Tracker;                    // 
+    cPlayer  m_aPlayer[GAME_PLAYERS];        // player objects
+    cHelper  m_aHelper[GAME_HELPERS];        // 
+    cTracker m_Tracker;                      // 
 
     cEnemyManager   m_EnemyManager;          // enemy manager
     cBulletManager  m_BulletManagerPlayer;   // low-priority bullet manager
@@ -197,6 +198,7 @@ private:
     coreFloat m_fMusicSpeed;                // 
     
     coreFlow m_fHitDelay;
+    coreBool m_bDefeatDelay;                // 
 
     coreUint8 m_iContinues;                 // 
 

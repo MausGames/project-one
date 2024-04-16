@@ -171,32 +171,14 @@ void cIntroMission::__SetupOwn()
 
             if(!HAS_BIT(iInputState, 0u) && (fInputDelay >= 2.0f))
             {
-                const coreUint8 iType = g_CurConfig.Input.aiType[i];
-                const auto&     oSet  = g_CurConfig.Input.aSet[iType];
-
-                const coreChar* pcText;
-                if(iType < INPUT_SETS_KEYBOARD)
-                {
-                    pcText = PRINT("<%s> / <%s> / <%s> / <%s>\nMOVE", cConfigMenu::PrintKey(iType, oSet.iMoveUp),
-                                                                      cConfigMenu::PrintKey(iType, oSet.iMoveLeft),
-                                                                      cConfigMenu::PrintKey(iType, oSet.iMoveDown),
-                                                                      cConfigMenu::PrintKey(iType, oSet.iMoveRight));
-                }
-                else
-                {
-                    pcText = PRINT("<LEFT STICK> / <D-PAD>\nMOVE");
-                }
-
-                m_aManual[i].ShowText(g_pForeground->Project2D(pPlayer->GetPosition()), TOOLTIP_ONELINER, pcText);
+                this->EnableManual(i, 0u);
+                this->EnableManual(i, 1u);
+                this->EnableManual(i, 2u);
+                this->EnableManual(i, 3u);
             }
-            else if(!HAS_BIT(iInputState, 1u) && (fInputDelay >= 2.0f))
+            else if(!HAS_BIT(iInputState, 1u) && (fInputDelay >= 3.0f))
             {
-                const coreUint8 iType = g_CurConfig.Input.aiType[i];
-                const auto&     oSet  = g_CurConfig.Input.aSet[iType];
-
-                const coreChar* pcText = PRINT("<%s>\nSHOOT", cConfigMenu::PrintKey(iType, oSet.aiAction[0]));
-
-                m_aManual[i].ShowText(g_pForeground->Project2D(pPlayer->GetPosition()), TOOLTIP_ONELINER, pcText);
+                this->EnableManual(i, 4u);
             }
         });
 
@@ -208,13 +190,13 @@ void cIntroMission::__SetupOwn()
 
             STAGE_REPEAT(pPath->GetTotalDistance())
 
-            const coreVector2 vFactor = coreVector2(((i % 12u) < 6u) ? -1.0f : 1.0f, (i < 24u) ? 1.0f : -1.0f);
+            const coreVector2 vFactor = coreVector2((((i % 12u) < 6u) ? -1.0f : 1.0f) * ((g_pGame->IsMulti() && (i < 12u)) ? 1.1f : 1.0f), (i < 24u) ? 1.0f : -1.0f);
             const coreVector2 vOffset = coreVector2((i < 24u) ? 0.0f : -0.2f, 0.0f);
 
             pEnemy->DefaultMovePath(pPath, vFactor, vOffset * vFactor, fLifeTime);
         });
 
-        STAGE_WAVE(0u, "TEST", {7.0f, 10.0f, 14.0f, 20.0f})
+        STAGE_WAVE(0u, "0-1", {7.0f, 10.0f, 14.0f, 20.0f})
     });
 
     // ################################################################
@@ -253,8 +235,6 @@ void cIntroMission::__SetupOwn()
                  if(STAGE_SUB(1u)) STAGE_RESURRECT(pSquad1,  0u, 23u)
             else if(STAGE_SUB(2u)) STAGE_RESURRECT(pSquad1, 24u, 47u)
             else if(STAGE_SUB(3u)) STAGE_RESURRECT(pSquad1, 48u, 59u)
-
-            if(m_iStageSub == 2u) STAGE_BADGE(0u, BADGE_EASY, coreVector3(0.0f,0.0f,0.0f))
         }
 
         coreBool bFront = false;
@@ -278,13 +258,8 @@ void cIntroMission::__SetupOwn()
 
             if(!HAS_BIT(iInputState, 0u) && (fInputDelay >= 4.0f))
             {
-                const coreUint8 iType = g_CurConfig.Input.aiType[i];
-                const auto&     oSet  = g_CurConfig.Input.aSet[iType];
-
-                const coreChar* pcText = PRINT("<%s> / <%s>\nTURN", cConfigMenu::PrintKey(iType, oSet.aiAction[1]),
-                                                                    cConfigMenu::PrintKey(iType, oSet.aiAction[2]));
-
-                m_aManual[i].ShowText(g_pForeground->Project2D(pPlayer->GetPosition()), TOOLTIP_ONELINER, pcText);
+                this->EnableManual(i, 5u);
+                this->EnableManual(i, 6u);
             }
         });
 
@@ -332,9 +307,12 @@ void cIntroMission::__SetupOwn()
                     g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.5f, pEnemy, vPos, vDir)->ChangeSize(1.4f);
                 }
             }
+
+            if((i < 24u) && pEnemy->ReachedDeath() && (m_iStageSub == 2u))
+                STAGE_BADGE(0u, BADGE_EASY, pEnemy->GetPosition())
         });
 
-        STAGE_WAVE(1u, "", {10.0f, 15.0f, 20.0f, 25.0f})
+        STAGE_WAVE(1u, "0-2", {10.0f, 15.0f, 20.0f, 25.0f})
     });
 
     // ################################################################
@@ -463,7 +441,7 @@ void cIntroMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE(2u, "", {13.0f, 19.0f, 26.0f, 32.0f})
+        STAGE_WAVE(2u, "0-3", {13.0f, 19.0f, 26.0f, 32.0f})
     });
 
     // ################################################################
@@ -593,7 +571,7 @@ void cIntroMission::__SetupOwn()
             }
         });
 
-        if(!bPostpone) STAGE_WAVE(3u, "", {11.0f, 16.0f, 22.0f, 27.0f})
+        if(!bPostpone) STAGE_WAVE(3u, "0-4", {11.0f, 16.0f, 22.0f, 27.0f})
     });
 
     // ################################################################
@@ -733,7 +711,7 @@ void cIntroMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE(4u, "", {22.0f, 33.0f, 44.0f, 55.0f})
+        STAGE_WAVE(4u, "0-5", {22.0f, 33.0f, 44.0f, 55.0f})
     });
 
     // ################################################################

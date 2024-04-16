@@ -45,7 +45,7 @@ cCloudBackground::cCloudBackground()noexcept
             pObject->SetDirection(coreVector3(coreVector2::Rand(), 0.0f));
             pObject->SetColor3   (coreVector3(1.0f,1.0f,1.0f) * MIN(0.0f + 1.0f * fHeight/50.0f, 1.0f));
             pObject->SetAlpha    (0.85f);
-            pObject->SetTexOffset(coreVector2::Rand(0.0f,10.0f, 0.0f,10.0f));
+            pObject->SetTexOffset(coreVector2::Rand(0.0f,4.0f, 0.0f,4.0f));
 
             // add object to the list
             pList1->BindObject(pObject);

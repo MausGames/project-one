@@ -230,7 +230,28 @@ void UpdateInput()
 {
     // forward hat input to stick input
     for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
+    {
         Core::Input->ForwardHatToStick(i);
+    }
+
+    // 
+    for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
+    {
+        coreVector3 vColor = COLOR_LED_WHITE;
+
+        // 
+        for(coreUintW j = 0u; j < INPUT_TYPES; ++j)
+        {
+            if(i == g_CurConfig.Input.aiType[j] - INPUT_SETS_KEYBOARD)
+            {
+                vColor = (STATIC_ISVALID(g_pGame) && (j < g_pGame->GetNumPlayers())) ? g_pGame->GetPlayer(j)->GetLedColor() : (j ? COLOR_LED_YELLOW : COLOR_LED_BLUE);
+                break;
+            }
+        }
+
+        // 
+        Core::Input->JoystickChangeLED(i, vColor);
+    }
 
     // reset mapped input values
     std::memset(&g_aGameInput, 0, sizeof(g_aGameInput));
@@ -288,7 +309,7 @@ void UpdateInput()
             if(Core::Input->GetJoystickButton(iJoystickID, SDL_CONTROLLER_BUTTON_B, CORE_INPUT_PRESS)) g_MenuInput.bCancel = true;
 
             // TODO 1: es gibt keinen cancel-button mehr
-            //if(Core::Input->GetJoystickButton(iJoystickID, 1u, CORE_INPUT_PRESS)) g_MenuInput.bCancel = true;
+            //if(Core::Input->GetJoystickButton(iJoystickID, SDL_CONTROLLER_BUTTON_B, CORE_INPUT_PRESS)) g_MenuInput.bCancel = true;
         }
 
         // 

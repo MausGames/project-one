@@ -66,7 +66,7 @@ cHarenaMission::cHarenaMission()noexcept
             pSpike->DefineProgram(iType ? "object_board_program" : "object_ship_depth_program");
 
             // set object properties
-            pSpike->SetTexOffset        (coreVector2(0.17f,0.31f) * I_TO_F(i / 2u));
+            pSpike->SetTexOffset        ((coreVector2(0.17f,0.31f) * I_TO_F(i / 2u)).Processed(FRACT));
             pSpike->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * 1.07f);
             pSpike->SetAlpha            (0.7f);
             pSpike->SetEnabled          (CORE_OBJECT_ENABLE_NOTHING);

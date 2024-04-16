@@ -470,6 +470,9 @@ void cRayBullet::__ReflectOwn()
     m_fFade = 0.0f;
     this->SetSize (coreVector3(0.0f,0.0f,0.0f));
     this->SetAlpha(0.0f);
+
+    // 
+    g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 10.0f, 1u, this->GetColor3());
 }
 
 

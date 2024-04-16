@@ -57,7 +57,7 @@ void CoreApp::Init()
 
     // load configuration
     LoadConfig();
-    
+
     //coreData::SymlinkCreate("test", "data");
 
     // load available music files
@@ -159,6 +159,13 @@ void CoreApp::Exit()
 // render the application
 void CoreApp::Render()
 {
+    Core::Debug->MeasureStart("Update Always");
+    {
+        // 
+        g_pSpecialEffects->Update();
+    }
+    Core::Debug->MeasureEnd("Update Always");
+
     if(!g_pMenu->IsPausedWithStep())
     {
         Core::Debug->MeasureStart("Update");
@@ -208,33 +215,6 @@ void CoreApp::Render()
                 // clear the foreground
                 g_pForeground->Clear();
             }
-
-#if 0
-            static cPlayer s_Player;
-            if(s_Player.HasStatus(PLAYER_STATUS_DEAD))
-            {
-                s_Player.Configure(PLAYER_SHIP_DEF);
-                s_Player.Resurrect();
-                s_Player.SetPosition(coreVector3(0.0f,0.0f,0.0f));
-                s_Player.SetSize    (coreVector3(1.0f,1.0f,1.0f) * 10.0f);
-            }
-            s_Player.Move();
-            g_pForeground->Start();
-                glClearColor(1.0f,1.0f,1.0f,1.0f);
-                glClear(GL_COLOR_BUFFER_BIT);
-                glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-                glDepthRange(0.8f, 1.0f);
-                    s_Player.RenderBefore();
-                glDepthRange(0.6f, 0.8f);
-                    s_Player.Render();
-                    g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(&s_Player);
-                glDepthRange(0.4f, 0.6f);
-                    s_Player.RenderMiddle();
-                glDepthRange(0.2f, 0.4f);
-                    s_Player.RenderAfter();
-                glDepthRange(0.0f, 1.0f);
-            g_pForeground->End();
-#endif
         }
         Core::Debug->MeasureEnd("Foreground");
     }
@@ -305,7 +285,7 @@ void CoreApp::Move()
     static coreFlow fBorder = 0.0f;
     if(STATIC_ISVALID(g_pGame)) fBorder.UpdateMin( 0.3f, 1.0f);
                            else fBorder.UpdateMax(-0.3f, 0.0f);
-    g_pPostProcessing->SetBorderAll(LERPH3(0.0f, 0.7f, fBorder));
+    g_pPostProcessing->SetBorderAll(LERPH3(POST_DEFAULT_BORDER_MIN, POST_DEFAULT_BORDER_MAX, fBorder));
 
     Core::Debug->MeasureStart("Move");
     {
@@ -376,7 +356,7 @@ void InitResolution(const coreVector2 vResolution)
     g_vGameResolution = coreVector2(1.0f,1.0f) * vResolution.Min();
 
     // 
-    if(F_TO_UI(vResolution.x + vResolution.y) & 0x01u) g_vGameResolution.arr(IsHorizontal(vResolution) ? 0u : 1u) += 1.0f;
+    if(F_TO_UI(vResolution.x + vResolution.y) & 0x01u) g_vGameResolution.arr(IsHorizontal(vResolution) ? 0u : 1u) -= 1.0f;
 }
 
 
@@ -557,6 +537,16 @@ static void ReshapeGame()
 
     // reshape engine
     Core::Reshape();
+    
+    
+    if(STATIC_ISVALID(g_pGame))   // TODO 1: sollte nur beim draggen passieren, passiert aber auch bei normaler resolution änderung
+    {
+        g_pGame->GetInterface ()->UpdateLayout();
+        g_pGame->GetInterface ()->UpdateSpacing();
+        g_pGame->GetInterface ()->MoveTimeless();
+        g_pGame->GetCombatText()->UpdateLayout();
+    }
+    
 
     // 
     g_pMenu->InvokePauseStep();
@@ -707,8 +697,8 @@ static void DebugGame()
             s_bInvincible = !s_bInvincible;
             g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
             {
-                pPlayer->SetMaxHealth(s_bInvincible ? 100u : PLAYER_LIVES);
-                pPlayer->SetCurHealth(s_bInvincible ? 100u : PLAYER_LIVES);
+                pPlayer->SetMaxHealth(s_bInvincible ? 100 : PLAYER_LIVES);
+                pPlayer->SetCurHealth(s_bInvincible ? 100 : PLAYER_LIVES);
             });
         }
     }

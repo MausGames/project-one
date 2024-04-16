@@ -180,6 +180,10 @@ cSpecialEffects::cSpecialEffects()noexcept
 
     // 
     m_ShakeTimer.SetTimeID(0);
+
+    // 
+    for(coreUintW i = 0u; i < SPECIAL_ICONS; ++i)
+        m_aIcon[i].SetIndex(i);
     
     
     m_aSoundData.resize(SOUND_MAX);
@@ -414,6 +418,16 @@ void cSpecialEffects::MoveAlways()
     // reset sound-guard
     m_iSoundGuard = 0u;
     STATIC_ASSERT(SOUND_MAX <= sizeof(m_iSoundGuard)*8u)
+}
+
+
+// ****************************************************************
+// 
+void cSpecialEffects::Update()
+{
+    // 
+    for(coreUintW i = 0u; i < SPECIAL_ICONS; ++i)
+        m_aIcon[i].Update();
 }
 
 

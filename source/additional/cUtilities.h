@@ -35,11 +35,14 @@
     inline const coreChar* GetName()const final {return n;}
 #define ENABLE_ID_EX                                        \
     ENABLE_ID                                               \
-    virtual coreVector3 GetColor()const = 0;
-#define ASSIGN_ID_EX(i,n,c)                                 \
+    virtual coreVector3 GetColor()const = 0;                \
+    virtual coreVector2 GetIcon ()const = 0;
+#define ASSIGN_ID_EX(i,n,c,o)                               \
     ASSIGN_ID(i, n)                                         \
     static constexpr const coreVector3 Color = c;           \
-    inline coreVector3 GetColor()const final {return c;}
+    static constexpr const coreVector2 Icon  = o;           \
+    inline coreVector3 GetColor()const final {return c;}    \
+    inline coreVector2 GetIcon ()const final {return o;}
 
 // 
 #define LIST_KEY (CORE_MEMORY_SHARED)
@@ -442,6 +445,30 @@ constexpr FUNC_CONST coreFloat MaxAspectRatio(const coreVector2 vVector)
 inline FUNC_LOCAL coreVector2 GetTranslation(const coreObject2D& oObject)
 {
     return coreVector2(oObject.GetTransform()._31, oObject.GetTransform()._32);
+}
+
+inline FUNC_PURE coreVector2 GetTranslationArea(const coreObject2D& oObject)
+{
+    return GetTranslation(oObject) * RCP(Core::System->GetResolution().Min());
+}
+
+inline FUNC_PURE coreVector2 GetTranslationScreen(const coreObject2D& oObject)
+{
+    return GetTranslation(oObject) / Core::System->GetResolution();
+}
+
+
+// ****************************************************************
+// execute function without frame time
+template <typename F> FORCE_INLINE void Timeless(F&& nFunction)   // []() -> void
+{
+    // store current frame time
+    const coreFloat fSave = TIME;
+
+    // modify global state and execute function
+    c_cast<coreFloat&>(TIME) = 0.0f;
+    nFunction();
+    c_cast<coreFloat&>(TIME) = fSave;
 }
 
 

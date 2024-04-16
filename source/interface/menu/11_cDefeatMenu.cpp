@@ -40,9 +40,11 @@ cDefeatMenu::cDefeatMenu()noexcept
 
     for(coreUintW i = 0u; i < MENU_DEFEAT_CONTINUES; ++i)
     {
-        m_ContinueImage[i].DefineTexture(0u, "ship_icon_01.png");
+        m_ContinueImage[i].DefineTexture(0u, g_pSpecialEffects->GetIconTexture(0u));
         m_ContinueImage[i].DefineProgram("default_2d_program");
-        m_ContinueImage[i].SetSize      (coreVector2(1.0f,1.0f) * 0.045f);
+        m_ContinueImage[i].SetSize      (coreVector2(1.0f,1.0f) * 0.058f);
+        m_ContinueImage[i].SetTexSize   (ICON_TEXSIZE);
+        m_ContinueImage[i].SetTexOffset (ICON_TEXOFFSET * I_TO_F(i + 1u));
     }
 
     // bind menu objects
@@ -252,7 +254,7 @@ void cDefeatMenu::ShowContinue()
     // 
     for(coreUintW i = 0u; i < MENU_DEFEAT_CONTINUES; ++i)
     {
-        m_ContinueImage[i].SetPosition(m_ContinueText.GetPosition() + coreVector2((I_TO_F(i) - 0.5f * I_TO_F(iContinues-1u)) * 0.04f, -0.1f));
+        m_ContinueImage[i].SetPosition(m_ContinueText.GetPosition() + coreVector2((I_TO_F(i) - 0.5f * I_TO_F(iContinues-1u)) * 0.055f, -0.11f));
         m_ContinueImage[i].SetEnabled ((iContinues > i) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
     }
 

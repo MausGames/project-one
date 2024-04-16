@@ -133,7 +133,7 @@ private:
     coreProtect<coreUint32> m_aiMaxSeriesMission [TABLE_MISSIONS];                   // 
     coreProtect<coreUint32> m_aaiMaxSeriesSegment[TABLE_MISSIONS][TABLE_SEGMENTS];   // 
 
-    const cPlayer* m_pOwner;                                                         // 
+    cPlayer* m_pOwner;                                                               // 
 
 
 public:
@@ -171,7 +171,7 @@ public:
     inline coreUint32 ModifyValue(const coreUint32 iValue)const {return (iValue * this->GetModifier()) / 10u;}
 
     // 
-    inline void SetOwner(const cPlayer* pOwner) {m_pOwner = pOwner;}
+    inline void SetOwner(cPlayer* pOwner) {m_pOwner = pOwner;}
 
     // 
     inline coreUint32 GetScoreTotal      ()const                                                             {return m_iScoreTotal;}

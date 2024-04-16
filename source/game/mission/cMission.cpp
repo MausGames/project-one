@@ -354,6 +354,8 @@ void cMission::DeactivateWave()
         {
             const coreUint32 iScore = pPlayer->GetScoreTable()->AddScore(100u * iCombo, false);
             g_pGame->GetCombatText()->DrawExtra(iScore, pPlayer->GetPosition(), true);
+
+            pPlayer->GetScoreTable()->CancelCooldown();
         }
     });
 

@@ -611,6 +611,13 @@ void cBackground::__Reset(const coreResourceReset eInit)
 
         // 
         this->__InitOwn();
+        
+        
+        if(m_pWater)
+        {
+            m_pWater->SetPosition(coreVector3(0.0f, g_pEnvironment->GetFlyOffset() * OUTDOOR_DETAIL, WATER_HEIGHT));
+            m_pWater->SetFlyOffset(g_pEnvironment->GetFlyOffset());
+        }
     }
     else
     {

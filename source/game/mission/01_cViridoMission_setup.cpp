@@ -80,7 +80,7 @@ void cViridoMission::__SetupOwn()
     {
         STAGE_FINISH_PLAY
     });
-#if 1 || !defined(_CORE_DEBUG_)
+
     // ################################################################
     // shields on sides to force attacks from certain directions
     // [deprecated] - 3: starts with offset, to not fly into players
@@ -94,7 +94,7 @@ void cViridoMission::__SetupOwn()
     // TASK: destroy all marked shields
     // TODO 1: hard mode: reflektierte geschosse verursachen schaden
     // TODO 1: ray-ray kollision für bullets verwenden
-    // TODO 1: drum shield needs blink
+    // TODO 1: drum shield needs blink!
     // TODO 1: MAIN: task-check, regular score, badges, sound
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
@@ -154,7 +154,7 @@ void cViridoMission::__SetupOwn()
                 this->EnableBarrier( 2u, pSquad1->GetEnemy( 1u), coreVector2( 0.0f, 1.0f), 1.0f);
                 this->EnableBarrier( 3u, pSquad1->GetEnemy( 1u), coreVector2( 0.0f,-1.0f), 1.0f);
             }
-            /*else if(STAGE_SUB(2u))
+            else if(STAGE_SUB(2u))
             {
                 STAGE_RESURRECT(pSquad1, 2u, 7u)
                 this->EnableBarrier( 4u, pSquad1->GetEnemy( 2u), coreVector2( 0.0f, 1.0f), 1.0f);
@@ -290,7 +290,7 @@ void cViridoMission::__SetupOwn()
                     this->DisableBarrier(15u, false);
                     this->DisableBarrier(20u, false);
                 }
-            }*/
+            }
         }
 
         cHelper* pHelper = g_pGame->GetHelper(ELEMENT_BLUE);
@@ -570,7 +570,7 @@ void cViridoMission::__SetupOwn()
         pBackground->SetDecalDensity (0u, STEP(0.5f, 1.0f, fEnvLerp));
         pBackground->SetAirDensity   (0u, STEP(0.5f, 1.0f, fEnvLerp));
 
-        STAGE_WAVE(0u, "EINS", {35.0f, 50.0f, 70.0f, 85.0f})
+        STAGE_WAVE(0u, "1-1", {35.0f, 50.0f, 70.0f, 85.0f})   // EINS
     });
 
     // ################################################################
@@ -1061,7 +1061,7 @@ void cViridoMission::__SetupOwn()
             }
         }
 
-        STAGE_WAVE(1u, "ZWEI", {40.0f, 60.0f, 80.0f, 100.0f})
+        STAGE_WAVE(1u, "1-2", {40.0f, 60.0f, 80.0f, 100.0f})   // ZWEI
     });
 
     // ################################################################
@@ -1384,7 +1384,7 @@ void cViridoMission::__SetupOwn()
                 if(g_pGame->IsTask() && pEnemy->ReachedDeath())
                 {
                     if(++iSingleHit >= 5u) STAGE_BADGE(1u, BADGE_NORMAL, coreVector3(0.0f,0.0f,0.0f))
-                    else g_pGame->GetCombatText()->DrawText(coreData::ToChars(5u - iSingleHit), coreVector3(0.0f,0.0f,0.0f), COLOR_MENU_INSIDE);
+                    else g_pGame->GetCombatText()->DrawCountdown(iSingleHit, 5u, coreVector3(0.0f,0.0f,0.0f));
                 }
             }
             
@@ -1636,7 +1636,7 @@ void cViridoMission::__SetupOwn()
             });
         }
 
-        if(!bPostpone) STAGE_WAVE(2u, "DREI", {60.0f, 90.0f, 120.0f, 150.0f})
+        if(!bPostpone) STAGE_WAVE(2u, "1-3", {60.0f, 90.0f, 120.0f, 150.0f})   // DREI
     });
 
     // ################################################################
@@ -2042,7 +2042,7 @@ void cViridoMission::__SetupOwn()
             }
         });
 
-        if(!bPostpone) STAGE_WAVE(3u, "VIER", {60.0f, 90.0f, 120.0f, 150.0f})
+        if(!bPostpone) STAGE_WAVE(3u, "1-4", {60.0f, 90.0f, 120.0f, 150.0f})   // VIER
     });
 
     // ################################################################
@@ -2220,7 +2220,7 @@ void cViridoMission::__SetupOwn()
                     this->DisableBean(i, true);
 
                     if(++iBeanState >= VIRIDO_BEANS) STAGE_BADGE(2u, BADGE_HARD, pBean->GetPosition())
-                    else g_pGame->GetCombatText()->DrawText(coreData::ToChars(VIRIDO_BEANS - iBeanState), pBean->GetPosition(), COLOR_MENU_INSIDE);
+                    else g_pGame->GetCombatText()->DrawCountdown(iBeanState, VIRIDO_BEANS, pBean->GetPosition());
 
                     g_pSpecialEffects->PlaySound(pBean->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iBeanState, VIRIDO_BEANS), SOUND_ITEM_COLLECT);
                 }
@@ -2407,7 +2407,7 @@ void cViridoMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE(4u, "FÜNF", {60.0f, 90.0f, 120.0f, 150.0f})
+        STAGE_WAVE(4u, "1-5", {60.0f, 90.0f, 120.0f, 150.0f})   // FÜNF
     });
 
     // ################################################################
@@ -2538,7 +2538,7 @@ void cViridoMission::__SetupOwn()
             //pPlayer->SetScale(3.0f);
         });
 
-        STAGE_WAVE(5u, "SECHS", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(5u, "1-?", {60.0f, 80.0f, 100.0f, 120.0f})   // SECHS
     });
 
     // ################################################################
@@ -2563,7 +2563,7 @@ void cViridoMission::__SetupOwn()
     {
         STAGE_BOSS(m_Torus, {140.0f, 210.0f, 280.0, 350.0f})
     });
-#endif
+
     // ################################################################
     // end
     STAGE_MAIN({TAKE_MISSION})

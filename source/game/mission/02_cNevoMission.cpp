@@ -106,7 +106,7 @@ cNevoMission::cNevoMission()noexcept
 
             // set object properties
             pTile->SetAlpha    (0.7f);
-            pTile->SetTexOffset(coreVector2(0.17f,0.31f) * I_TO_F(i));
+            pTile->SetTexOffset((coreVector2(0.17f,0.31f) * I_TO_F(i)).Processed(FRACT));
             pTile->SetEnabled  (CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list

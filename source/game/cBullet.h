@@ -151,10 +151,10 @@ protected:
 private:
     // own routines for derived classes (render functions executed by manager)
     virtual void __ImpactOwn      (const coreVector2 vImpact, const coreVector2 vForce) {}
-    virtual void __ReflectOwn     ()                                                  {}
-    virtual void __RenderOwnBefore()                                                  {}
-    virtual void __RenderOwnAfter ()                                                  {}
-    virtual void __MoveOwn        ()                                                  {}
+    virtual void __ReflectOwn     ()                                                    {}
+    virtual void __RenderOwnBefore()                                                    {}
+    virtual void __RenderOwnAfter ()                                                    {}
+    virtual void __MoveOwn        ()                                                    {}
 
     // 
     inline void __SetColorRand(const coreVector3 vColor) {this->SetColor3(vColor * Core::Rand->Float(0.8f, 1.0f));}

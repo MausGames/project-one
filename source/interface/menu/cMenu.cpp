@@ -90,8 +90,12 @@ cMenu::cMenu()noexcept
     {
         m_MainMenu.ActivateDemoVersion();
     }
-    
+
+    // 
     m_TransitionTime.SetTimeID(0);
+
+    // 
+    cFigure::GlobalInit();
 }
 
 
@@ -101,6 +105,9 @@ cMenu::~cMenu()
 {
     // explicitly undefine to detach textures
     m_MixObject.Undefine();
+
+    // 
+    cFigure::GlobalExit();
 }
 
 
@@ -137,16 +144,16 @@ void cMenu::Render()
         
         if(((m_iTransitionState <= 1u) && !m_pTransitionMenu->GetTransition().GetStatus()) && iForceA != 0xFFu)
         {
-            const coreUint8 iPrev = m_pTransitionMenu->GetCurSurface();
-            const coreFloat fTime = TIME;   // TODO 1: HACK
+            Timeless([&]()
+            {
+                const coreUint8 iPrev = m_pTransitionMenu->GetCurSurface();
 
-            c_cast<coreFloat&>(TIME) = 0.0f;   // TODO 1: HACK
-            m_pTransitionMenu->ChangeSurface(iForceA, 0.0f);   // TODO 1: calls move for both old and new
-            //m_pTransitionMenu->coreMenu::Move();
-            nRenderFunc(2u, m_pTransitionMenu);
-            
-            m_pTransitionMenu->ChangeSurface(iPrev, 0.0f);   // TODO 1: calls move for both old and new
-            c_cast<coreFloat&>(TIME) = fTime;   // TODO 1: HACK
+                m_pTransitionMenu->ChangeSurface(iForceA, 0.0f);   // TODO 1: calls move for both old and new
+                //m_pTransitionMenu->coreMenu::Move();
+                nRenderFunc(2u, m_pTransitionMenu);
+                
+                m_pTransitionMenu->ChangeSurface(iPrev, 0.0f);   // TODO 1: calls move for both old and new
+            });
         }
         if(m_iTransitionState < 1u && iForceB != 0xFFu)
         {
@@ -192,9 +199,10 @@ void cMenu::Render()
 // move the menu
 void cMenu::Move()
 {
+    // 
+    cFigure       ::GlobalUpdate();
     cMenuNavigator::GlobalUpdate();
-    
-    
+
     // 
     if(!Core::Manager::Resource->IsLoading())   // TODO 1: hier wegen sync mit environment-change   
         m_TransitionTime.Update(1.0f);
@@ -279,9 +287,6 @@ void cMenu::Move()
                     this->ChangeSurface(SURFACE_PAUSE, 0.0f);
 
                     // 
-                    this->InvokePauseStep();   // TODO 1: why is this here ???
-
-                    // 
                     Core::Audio->PauseSound(SOUND_EFFECT);
                     Core::Audio->PauseSound(SOUND_AMBIENT);
                 }
@@ -305,6 +310,9 @@ void cMenu::Move()
             {
                 // switch to main menu
                 this->ShiftSurface(this, SURFACE_MAIN, 3.0f, 0u);
+
+                // 
+                m_MainMenu.ResetNavigator();
             }
         }
         break;
@@ -320,6 +328,7 @@ void cMenu::Move()
                 m_GameMenu.ChangeSurface(g_bDemoVersion ? SURFACE_GAME_DEMO : (g_pSave->GetHeader().oProgress.bFirstPlay ? SURFACE_GAME_ARMORY : SURFACE_GAME_STANDARD), 0.0f);
                 m_GameMenu.LoadValues();
                 m_GameMenu.LoadValuesDemo();
+                m_GameMenu.ResetNavigator();
             }
             else if(m_MainMenu.GetStatus() == 2)
             {
@@ -354,6 +363,7 @@ void cMenu::Move()
                 // 
                 m_ConfigMenu.ChangeSurface(SURFACE_CONFIG_VIDEO, 0.0f);
                 m_ConfigMenu.LoadValues();
+                m_ConfigMenu.ResetNavigator();
             }
         }
         break;
@@ -467,6 +477,7 @@ void cMenu::Move()
                 // 
                 m_ConfigMenu.ChangeSurface(SURFACE_CONFIG_VIDEO, 0.0f);
                 m_ConfigMenu.LoadValues();
+                m_ConfigMenu.ResetNavigator();
             }
             else if(m_PauseMenu.GetStatus() == 4)
             {
@@ -671,8 +682,8 @@ coreBool cMenu::IsPaused()const
 
 coreBool cMenu::IsPausedWithStep()
 {
-    if(!this->IsPaused()) this->InvokePauseStep();
-    return (m_iPauseFrame != Core::System->GetCurFrame());
+    if(!this->IsPaused() || Core::Manager::Resource->IsLoading()) this->InvokePauseStep();
+    return (m_iPauseFrame + 1u < Core::System->GetCurFrame());
 }
 
 

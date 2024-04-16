@@ -376,6 +376,13 @@ void cScoreTable::RefreshCooldown()
 void cScoreTable::CancelCooldown()
 {
     // 
+    if(m_iCurCombo || m_iCurChain)
+    {
+        m_pOwner->ShowCircle();
+        // TODO 1: sound
+    }
+
+    // 
     this->TransferChain();
 
     // 

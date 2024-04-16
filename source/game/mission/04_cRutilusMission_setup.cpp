@@ -469,12 +469,12 @@ void cRutilusMission::__SetupOwn()
                     aiTryCount[i] += 1u;
 
                          if(aiTryCount[i] >= iTotal)      STAGE_BADGE(0u, BADGE_EASY, pPlayer->GetPosition())
-                    else if(aiTryCount[i] >= iTotal - 3u) g_pGame->GetCombatText()->DrawText(coreData::ToChars(iTotal - aiTryCount[i]), pPlayer->GetPosition(), COLOR_MENU_INSIDE);
+                    else if(aiTryCount[i] >= iTotal - 3u) g_pGame->GetCombatText()->DrawCountdown(aiTryCount[i], iTotal, pPlayer->GetPosition());
                 }
             }
         });
 
-        if(!bPostpone) STAGE_WAVE(0u, "NEUNZEHN", {50.0f, 75.0f, 100.0f, 125.0f})
+        if(!bPostpone) STAGE_WAVE(0u, "4-1", {50.0f, 75.0f, 100.0f, 125.0f})   // NEUNZEHN
     });
 
     // ################################################################
@@ -779,7 +779,7 @@ void cRutilusMission::__SetupOwn()
                         pBullet->Deactivate(true);
 
                         if(++iCapsCount >= iCapsTotal) STAGE_BADGE(1u, BADGE_NORMAL, m_Capsule.GetPosition())
-                        else g_pGame->GetCombatText()->DrawText(coreData::ToChars(iCapsTotal - iCapsCount), m_Capsule.GetPosition(), COLOR_MENU_INSIDE);
+                        else g_pGame->GetCombatText()->DrawCountdown(iCapsCount, iCapsTotal, m_Capsule.GetPosition());
 
                         fCapsDelay = (iCapsCount >= iCapsTotal) ? 3600.0f : 10.0f;
 
@@ -957,7 +957,7 @@ void cRutilusMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE(1u, "ZWANZIG", {55.0f, 80.0f, 110.0f, 135.0f})
+        STAGE_WAVE(1u, "4-2", {55.0f, 80.0f, 110.0f, 135.0f})   // ZWANZIG
     });
 
     // ################################################################
@@ -1369,7 +1369,7 @@ void cRutilusMission::__SetupOwn()
             });
         }
 
-        STAGE_WAVE(2u, "EINUNDZWANZIG", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(2u, "4-3", {60.0f, 80.0f, 100.0f, 120.0f})   // EINUNDZWANZIG
     });
 
     // ################################################################
@@ -1760,7 +1760,7 @@ void cRutilusMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE(3u, "ZWEIUNDZWANZIG", {50.0f, 75.0f, 100.0f, 125.0f})
+        STAGE_WAVE(3u, "4-4", {50.0f, 75.0f, 100.0f, 125.0f})   // ZWEIUNDZWANZIG
     });
 
     // ################################################################
@@ -2356,12 +2356,12 @@ void cRutilusMission::__SetupOwn()
                     pBullet->Deactivate(true);
 
                     if(++iDebrisCount >= 10u) STAGE_BADGE(1u, BADGE_NORMAL, pBullet->GetPosition())
-                    else g_pGame->GetCombatText()->DrawText(coreData::ToChars(10u - iDebrisCount), pBullet->GetPosition(), COLOR_MENU_INSIDE);
+                    else g_pGame->GetCombatText()->DrawCountdown(iDebrisCount, 10u, pBullet->GetPosition());
                 }
             });
         });
 
-        STAGE_WAVE(4u, "DREIUNDZWANZIG", {50.0f, 75.0f, 100.0f, 125.0f})
+        STAGE_WAVE(4u, "4-5", {50.0f, 75.0f, 100.0f, 125.0f})   // DREIUNDZWANZIG
     });
 
     // ################################################################
@@ -2888,7 +2888,7 @@ void cRutilusMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE(5u, "VIERUNDZWANZIG", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(5u, "4-?", {60.0f, 80.0f, 100.0f, 120.0f})   // VIERUNDZWANZIG
     });
 
     // ################################################################

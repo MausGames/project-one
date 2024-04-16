@@ -62,7 +62,7 @@ cPostProcessing::cPostProcessing()noexcept
     this->SetWallOpacity  (0.0f);
     this->SetSaturationAll(1.0f);
     this->SetValueAll     (1.0f);
-    this->SetBorderAll    (0.0f);
+    this->SetBorderAll    (POST_DEFAULT_BORDER_MIN);
 
 
     // 

@@ -738,7 +738,7 @@ void cHarenaMission::__SetupOwn()
             this->CrashEnemy(pEnemy);
         });
 
-        if(!m_iInsanity) if(!bPostpone) STAGE_WAVE(0u, "DREIZEHN", {50.0f, 75.0f, 100.0f, 125.0f})
+        if(!m_iInsanity) if(!bPostpone) STAGE_WAVE(0u, "3-1", {50.0f, 75.0f, 100.0f, 125.0f})   // DREIZEHN
     };
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
@@ -1144,7 +1144,7 @@ void cHarenaMission::__SetupOwn()
                     this->DisableEgg(i, true);
 
                     if(++iEggState >= HARENA_EGGS) STAGE_BADGE(2u, BADGE_HARD, pEgg->GetPosition())
-                    else g_pGame->GetCombatText()->DrawText(coreData::ToChars(HARENA_EGGS - iEggState), pEgg->GetPosition(), COLOR_MENU_INSIDE);
+                    else g_pGame->GetCombatText()->DrawCountdown(iEggState, HARENA_EGGS, pEgg->GetPosition());
 
                     g_pSpecialEffects->PlaySound(pEgg->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iEggState, HARENA_EGGS), SOUND_PLACEHOLDER);
                 }
@@ -1159,7 +1159,7 @@ void cHarenaMission::__SetupOwn()
 
             pBackground->SetVeilAlpha(STEPH3(0.0f, 30.0f, m_fStageTime));
 
-            STAGE_WAVE(1u, "VIERZEHN", {45.0f, 65.0f, 90.0f, 110.0f})
+            STAGE_WAVE(1u, "3-2", {45.0f, 65.0f, 90.0f, 110.0f})   // VIERZEHN
         }
     };
     STAGE_MAIN({TAKE_ALWAYS, 1u})
@@ -1360,7 +1360,7 @@ void cHarenaMission::__SetupOwn()
                     this->DisableFlummi(i, true);
 
                     if(++iFlummiCollect >= iFlummiRequire) STAGE_BADGE(0u, BADGE_EASY, pFlummi->GetPosition())
-                    else g_pGame->GetCombatText()->DrawText(coreData::ToChars(iFlummiRequire - iFlummiCollect), pFlummi->GetPosition(), COLOR_MENU_INSIDE);
+                    else g_pGame->GetCombatText()->DrawCountdown(iFlummiCollect, iFlummiRequire, pFlummi->GetPosition());
 
                     g_pSpecialEffects->PlaySound(pFlummi->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iFlummiCollect, iFlummiRequire), SOUND_PLACEHOLDER);
                 }
@@ -1647,7 +1647,7 @@ void cHarenaMission::__SetupOwn()
 
         m_iStageSub = MAX(m_iStageSub, iPoints + 1u);
 
-        if(!m_iInsanity) STAGE_WAVE(2u, "FÜNFZEHN", {40.0f, 60.0f, 80.0f, 100.0f})
+        if(!m_iInsanity) STAGE_WAVE(2u, "3-3", {40.0f, 60.0f, 80.0f, 100.0f})   // FÜNFZEHN
     };
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
@@ -1858,7 +1858,7 @@ void cHarenaMission::__SetupOwn()
                 if(iState == 1u)
                 {
                     if(++iInitCount >= 20u) STAGE_BADGE(0u, BADGE_EASY, pEnemy->GetPosition())
-                    else g_pGame->GetCombatText()->DrawText(coreData::ToChars(20u - iInitCount), pEnemy->GetPosition(), COLOR_MENU_INSIDE);
+                    else g_pGame->GetCombatText()->DrawCountdown(iInitCount, 20u, pEnemy->GetPosition());
                 }
                 else if(iState == 2u)
                 {
@@ -2246,7 +2246,7 @@ void cHarenaMission::__SetupOwn()
 
             pBackground->SetVeilAlpha(1.0f - STEPH3(0.0f, 30.0f, m_fStageTime));
 
-            STAGE_WAVE(3u, "SECHSZEHN", {50.0f, 75.0f, 100.0f, 125.0f})
+            STAGE_WAVE(3u, "3-4", {50.0f, 75.0f, 100.0f, 125.0f})   // SECHSZEHN
         }
     };
     STAGE_MAIN({TAKE_ALWAYS, 3u})
@@ -2762,7 +2762,7 @@ void cHarenaMission::__SetupOwn()
             pBackground->SetGroundDensity(0u, 1.0f - STEPH3(0.0f, 30.0f, m_fStageTime));
             pBackground->SetGroundDensity(1u, 1.0f - STEPH3(0.0f, 30.0f, m_fStageTime));
 
-            if(!bPostpone) STAGE_WAVE(4u, "SIEBZEHN", {65.0f, 95.0f, 130.0f, 160.0f})
+            if(!bPostpone) STAGE_WAVE(4u, "3-5", {65.0f, 95.0f, 130.0f, 160.0f})   // SIEBZEHN
         }
     };
     STAGE_MAIN({TAKE_ALWAYS, 4u})
@@ -2926,7 +2926,7 @@ void cHarenaMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE(5u, "ACHTZEHN", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(5u, "3-?", {60.0f, 80.0f, 100.0f, 120.0f})   // ACHTZEHN
     });
 
     // ################################################################

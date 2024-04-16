@@ -146,7 +146,7 @@ void cHeadlight::UpdateDefault(const coreUint8 iType)
             // 
             g_pGame->ForEachPlayer([this](const cPlayer* pPlayer, const coreUintW i)
             {
-                if(HAS_BIT(m_iDefault, i)) this->DrawSpot(pPlayer->GetPosition() + 49.0f * pPlayer->GetDirection() * 1.15f, coreVector2(60.0f,100.0f) * 1.2f, pPlayer->GetDirection().xy());
+                if(HAS_BIT(m_iDefault, i)) this->DrawSpot(pPlayer->GetPosition(), coreVector2(60.0f,100.0f) * 1.2f, 49.0f * pPlayer->GetDirection().xy() * 1.15f);
             });
         }
         else
@@ -161,7 +161,7 @@ void cHeadlight::UpdateDefault(const coreUint8 iType)
         STATIC_ASSERT(GAME_PLAYERS <= sizeof(m_iDefault)*8u)
     
     if(g_pGame->GetCurMission() && !g_pGame->GetCurMission()->GetCurBoss())
-        g_pPostProcessing->SetBorderAll(0.0f);   // TODO 1: no effect during pause here
+        g_pPostProcessing->SetBorderAll(POST_DEFAULT_BORDER_MIN);   // TODO 1: no effect during pause here
     }
 
     // 
@@ -171,13 +171,13 @@ void cHeadlight::UpdateDefault(const coreUint8 iType)
 
 // ****************************************************************
 // 
-void cHeadlight::DrawSpot(const coreVector3 vPosition, const coreVector2 vSize, const coreVector2 vDirection)
+void cHeadlight::DrawSpot(const coreVector3 vPosition, const coreVector2 vSize, const coreVector2 vOffset)
 {
     // 
     sSpotCommand oCommand;
-    oCommand.vPosition  = g_pForeground->Project2D(vPosition)                * HEADLIGHT_SCALE_FACTOR;
-    oCommand.vSize      = g_pForeground->Project2D(coreVector3(vSize, 0.0f)) * HEADLIGHT_SCALE_FACTOR;
-    oCommand.vDirection = vDirection.InvertedX();
+    oCommand.vPosition  = (g_pForeground->Project2D(vPosition) + g_pForeground->Project2D(coreVector3(vOffset, 0.0f))) * HEADLIGHT_SCALE_FACTOR;   // separate
+    oCommand.vSize      = (g_pForeground->Project2D(coreVector3(vSize, 0.0f)))                                         * HEADLIGHT_SCALE_FACTOR;
+    oCommand.vDirection = vOffset.Normalized().InvertedX();
 
     // 
     m_aSpotCommand.push_back(oCommand);

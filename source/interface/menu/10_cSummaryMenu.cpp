@@ -734,7 +734,7 @@ void cSummaryMenu::Move()
 
     // 
     const coreFloat fScale = 1.0f + 0.1f * SIN(coreFloat(Core::System->GetTotalTime()) * (2.0f*PI));
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRecord); ++i) m_aRecord[i].SetScale(fScale);
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRecord); ++i) m_aRecord[i].SetScale(coreVector2(1.0f,1.0f) * fScale);
 }
 
 

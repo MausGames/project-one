@@ -44,6 +44,7 @@
 // TODO 3: welle, wenn button/switchbox gedrückt wird
 // TODO 3: anderes: ganzes menü wackelt/shifted wenn man tab ändert, tabs verändern höhe, buttons ändern größe bei selection
 // TODO 3: GetWinFocusLost to force pause should only take effect when pause is actually allowed, save and apply state
+// TODO 1: re-position everything after resolution-change
 
 
 // ****************************************************************
@@ -365,6 +366,9 @@ public:
 
     // 
     void ActivateDemoVersion();
+
+    // 
+    inline void ResetNavigator() {m_Navigator.ResetFirst();}
 };
 
 
@@ -482,6 +486,9 @@ public:
     inline const coreUint8& GetSelectedShield    (const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aShield [iIndex].GetCurValue();}
     inline const coreUint8& GetSelectedWeapon    (const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aWeapon [iIndex].GetCurValue();}
     inline const coreUint8& GetSelectedSupport   (const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aSupport[iIndex].GetCurValue();}
+
+    // 
+    inline void ResetNavigator() {m_Navigator.ResetFirst();}
 
 
 private:
@@ -644,6 +651,11 @@ private:
         cGuiButton    oMoveDown;
         cGuiButton    oMoveRight;
         cGuiButton    aAction[INPUT_KEYS_ACTION];
+        cFigure       oFigureMoveUp;
+        cFigure       oFigureMoveLeft;
+        cFigure       oFigureMoveDown;
+        cFigure       oFigureMoveRight;
+        cFigure       aFigureAction[INPUT_KEYS_ACTION];
     };
 
 
@@ -716,8 +728,11 @@ public:
     void LoadValues();
     void SaveValues();
 
-    // convert input key to readable string
-    static const coreChar* PrintKey(const coreUint8 iType, const coreInt16 iKey);
+    // 
+    inline void ResetNavigator() {m_Navigator.ResetFirst();}
+
+    // convert input key to readable string                 
+    static void PrintFigure(cFigure* OUTPUT pFigure, const coreUint8 iType, const coreInt16 iKey);
 
 
 private:
@@ -735,6 +750,7 @@ private:
 
     // 
     inline cGuiButton& __RetrieveInputButton  (const coreUintW iPlayerIndex, const coreUintW iKeyIndex) {ASSERT((iPlayerIndex < MENU_CONFIG_INPUTS) && (iKeyIndex < INPUT_KEYS)) return *((&m_aInput[iPlayerIndex].oMoveUp)                                         + iKeyIndex);}
+    inline cFigure&    __RetrieveInputFigure  (const coreUintW iPlayerIndex, const coreUintW iKeyIndex) {ASSERT((iPlayerIndex < MENU_CONFIG_INPUTS) && (iKeyIndex < INPUT_KEYS)) return *((&m_aInput[iPlayerIndex].oFigureMoveUp)                                     + iKeyIndex);}
     inline coreInt16&  __RetrieveInputCurValue(const coreUintW iPlayerIndex, const coreUintW iKeyIndex) {ASSERT((iPlayerIndex < INPUT_TYPES)        && (iKeyIndex < INPUT_KEYS)) return *((&g_CurConfig.Input.aSet[g_CurConfig.Input.aiType[iPlayerIndex]].iMoveUp) + iKeyIndex);}
     inline coreInt16&  __RetrieveInputDirValue(const coreUintW iType,        const coreUintW iKeyIndex) {ASSERT((iType        < INPUT_SETS)         && (iKeyIndex < INPUT_KEYS)) return *((&g_CurConfig.Input.aSet[iType].iMoveUp)                                  + iKeyIndex);}
 
@@ -1107,6 +1123,7 @@ public:
     // 
     void SetHighlightColor(const coreVector3 vColor);
     void SetButtonColor(const coreVector3 vColor);
+   
     
     inline const coreVector3& GetHighlightColor()const {return m_vHighlightColor;}
     inline const coreVector3& GetButtonColor()const {return m_vButtonColor;}

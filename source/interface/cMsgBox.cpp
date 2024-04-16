@@ -46,9 +46,9 @@ cMsgBox::cMsgBox()noexcept
     m_No.GetCaption()->SetText(ICON_TIMES);
 
     // 
-    m_Navigator.BindObject(NULL,   NULL, &m_Yes, NULL, &m_No, NULL, MENU_TYPE_DEFAULT);
-    m_Navigator.BindObject(&m_Yes, NULL, NULL,   NULL, &m_No, NULL, MENU_TYPE_DEFAULT);
-    m_Navigator.BindObject(&m_No,  NULL, &m_Yes, NULL, NULL,  NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(NULL,   NULL, &m_Yes, NULL, &m_No, NULL,  MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_Yes, NULL, NULL,   NULL, &m_No, &m_No, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_No,  NULL, &m_Yes, NULL, NULL,  NULL,  MENU_TYPE_DEFAULT);
 }
 
 
@@ -76,13 +76,14 @@ void cMsgBox::Render()
 // move the message box
 void cMsgBox::Move()
 {
+    if(!m_fFade && !m_nCallback) return;
+
     // 
     if(m_nCallback) m_fFade.UpdateMin( 10.0f, 1.0f);
                else m_fFade.UpdateMax(-10.0f, 0.0f);
 
-    if(!m_fFade) return;
-
-    // (before mouse-position override) 
+    // (before mouse-position override)   
+    m_Navigator.SetAlpha(m_fFade);
     m_Navigator.Update();
     m_Navigator.Move();
 
@@ -165,13 +166,16 @@ void cMsgBox::Move()
     }
 
     // 
-    Core::Input->SetMousePosition(MSGBOX_IGNORE_MOUSE);
-    for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
+    if(m_nCallback || (m_iMsgType == MSGBOX_TYPE_MAPPING))
     {
-        Core::Input->SetJoystickRelative(i, 0u, 0.0f);
-        Core::Input->SetJoystickRelative(i, 1u, 0.0f);
+        Core::Input->SetMousePosition(MSGBOX_IGNORE_MOUSE);
+        for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
+        {
+            Core::Input->SetJoystickRelative(i, 0u, 0.0f);
+            Core::Input->SetJoystickRelative(i, 1u, 0.0f);
+        }
+        Core::Input->ClearButtonAll();
     }
-    Core::Input->ClearButtonAll();
 
     // 
     std::memset(&g_MenuInput, 0, sizeof(g_MenuInput));

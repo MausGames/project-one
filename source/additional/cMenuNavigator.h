@@ -23,6 +23,8 @@
 // ****************************************************************
 // 
 #define MENUNAVIGATOR_IGNORE_MOUSE (coreVector2(3.0f,3.0f))   // 
+#define MENUNAVIGATOR_INVALID      (0xFFu)                    // 
+#define MENUNAVIGATOR_PROMPTS      (3u)                       // 
 
 enum eMenuType : coreUint8
 {
@@ -60,11 +62,12 @@ private:
 
 private:
     coreMap<coreObject2D*, sMenuEntry> m_aObject;   // 
-    coreMap<coreObject2D*, sMenuTab> m_aTab;        // 
+    coreMap<coreObject2D*, sMenuTab>   m_aTab;      // 
 
     coreObject2D* m_pCurObject;                     // 
     coreUint8 m_iStore;                             // 
     coreUint8 m_iFirst;                             // 
+    coreUint8 m_iBack;                              // 
 
     coreBool m_bPressed;                            // 
     coreList<coreUint8> m_aiLock;                   // (0 = all | 1 = move) 
@@ -74,8 +77,11 @@ private:
 
     coreMenu* m_pMenu;                              // 
 
+    cFigure m_aPrompt[MENUNAVIGATOR_PROMPTS];       // 
+
     static coreVector2 s_vMouseMove;                // 
     static coreBool    s_bJoystick;                 // 
+    static coreUint8   s_iJoystickType;             // 
 
 
 public:
@@ -84,6 +90,7 @@ public:
     DISABLE_COPY(cMenuNavigator)
 
     // 
+    void Render()final;
     void Move()final;
 
     // 
@@ -95,8 +102,9 @@ public:
     // 
     inline void AssignMenu   (coreMenu*     pMenu)                          {ASSERT(pMenu)                    m_pMenu  = pMenu;}
     inline void AssignSurface(coreObject2D* pTab, const coreUint8 iSurface) {ASSERT(m_aTab   .count(pTab))    m_aTab.at(pTab).iSurface = iSurface;}
-    inline void AssignFirst  (coreObject2D* pObject)                        {ASSERT(m_aObject.count(pObject)) m_iFirst = this->__ToIndex(pObject);}
-    inline void ResetFirst   ()                                             {m_pCurObject = NULL; m_iStore = 0u;}
+    inline void AssignFirst  (coreObject2D* pObject)                        {ASSERT(m_aObject.count(pObject)) m_iFirst = pObject ? this->__ToIndex(pObject) : MENUNAVIGATOR_INVALID;}
+    inline void AssignBack   (coreObject2D* pObject)                        {ASSERT(m_aObject.count(pObject)) m_iBack  = pObject ? this->__ToIndex(pObject) : MENUNAVIGATOR_INVALID;}
+    inline void ResetFirst   ()                                             {m_pCurObject = NULL; m_iStore = MENUNAVIGATOR_INVALID;}
 
     // 
     inline void SetCurrent(coreObject2D* pObject) {ASSERT(m_aObject.count(pObject)) m_pCurObject = pObject;}

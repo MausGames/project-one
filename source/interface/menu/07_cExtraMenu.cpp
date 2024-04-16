@@ -198,8 +198,17 @@ cExtraMenu::cExtraMenu()noexcept
     m_Credits2.GetCaption()->SetTextLanguage("WATCH");
 
     // 
+    m_Navigator.BindObject(&m_ProgressTab, &m_BackButton, &m_OtherTab,    &m_BackButton, &m_StatsTab,    NULL, MENU_TYPE_TAB_ROOT | MENU_TYPE_AUTO_CLICK);
+    m_Navigator.BindObject(&m_StatsTab,    &m_BackButton, &m_ProgressTab, &m_BackButton, &m_OtherTab,    NULL, MENU_TYPE_TAB_ROOT | MENU_TYPE_AUTO_CLICK);
+    m_Navigator.BindObject(&m_OtherTab,    &m_BackButton, &m_StatsTab,    &m_BackButton, &m_ProgressTab, NULL, MENU_TYPE_TAB_ROOT | MENU_TYPE_AUTO_CLICK);
+
+    m_Navigator.AssignSurface(&m_ProgressTab,  SURFACE_EXTRA_PROGRESS);
+    m_Navigator.AssignSurface(&m_StatsTab,    SURFACE_EXTRA_STATS);
+    m_Navigator.AssignSurface(&m_OtherTab,    SURFACE_EXTRA_OTHER);
+
     m_Navigator.BindObject(&m_BackButton, NULL, NULL, NULL, NULL, NULL, MENU_TYPE_DEFAULT);
     m_Navigator.AssignFirst(&m_BackButton);
+    m_Navigator.AssignBack(&m_BackButton);
     m_Navigator.AssignMenu(this);
 
     // bind menu objects
@@ -357,7 +366,7 @@ void cExtraMenu::Move()
     cMenu::UpdateButton(&m_BackButton, m_BackButton.IsFocused());
 
     // 
-    if(m_BackButton.IsFocused()) g_pMenu->GetTooltip()->ShowText(TOOLTIP_OBJECT(m_BackButton), TOOLTIP_ONELINER, Core::Language->GetString("BACK"));
+    //if(m_BackButton.IsFocused()) g_pMenu->GetTooltip()->ShowText(TOOLTIP_OBJECT(m_BackButton), TOOLTIP_ONELINER, Core::Language->GetString("BACK"));
 }
 
 

@@ -492,7 +492,7 @@ void cGeluMission::__SetupOwn()
                     REMOVE_BIT(iDragActiveCoin, i)
 
                     if(++iCoinState >= 8u) STAGE_BADGE(2u, BADGE_HARD, pCoin->GetPosition())
-                    else g_pGame->GetCombatText()->DrawText(coreData::ToChars(8u - iCoinState), pCoin->GetPosition(), COLOR_MENU_INSIDE);
+                    else g_pGame->GetCombatText()->DrawCountdown(iCoinState, 8u, pCoin->GetPosition());
 
                     g_pSpecialEffects->PlaySound(pCoin->GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iCoinState, 8u), SOUND_PLACEHOLDER);
                 }
@@ -515,7 +515,7 @@ void cGeluMission::__SetupOwn()
             }
         }
 
-        STAGE_WAVE(0u, "FÜNFUNDZWANZIG", {50.0f, 75.0f, 100.0f, 125.0f})
+        STAGE_WAVE(0u, "5-1", {50.0f, 75.0f, 100.0f, 125.0f})   // FÜNFUNDZWANZIG
     });
 
     // ################################################################
@@ -1197,7 +1197,7 @@ void cGeluMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE(1u, "SECHSUNDZWANZIG", {50.0f, 75.0f, 100.0f, 125.0f})
+        STAGE_WAVE(1u, "5-2", {50.0f, 75.0f, 100.0f, 125.0f})   // SECHSUNDZWANZIG
     });
 
     // ################################################################
@@ -1879,7 +1879,7 @@ void cGeluMission::__SetupOwn()
             pBackground->SetGroundDensity(0u, STEP(0.5f, 1.0f, 1.0f - fEnvLerp));
         }
 
-        STAGE_WAVE(2u, "SIEBENUNDZWANZIG", {55.0f, 80.0f, 110.0f, 135.0f})
+        STAGE_WAVE(2u, "5-3", {55.0f, 80.0f, 110.0f, 135.0f})   // SIEBENUNDZWANZIG
     });
 
     // ################################################################
@@ -2452,7 +2452,7 @@ void cGeluMission::__SetupOwn()
             }
         }
 
-        STAGE_WAVE(3u, "ACHTUNDZWANZIG", {50.0f, 75.0f, 100.0f, 125.0f})
+        STAGE_WAVE(3u, "5-4", {50.0f, 75.0f, 100.0f, 125.0f})   // ACHTUNDZWANZIG
     });
 
     // ################################################################
@@ -2955,7 +2955,7 @@ void cGeluMission::__SetupOwn()
             }
         });
 
-        if(!bPostpone) STAGE_WAVE(4u, "NEUNUNDZWANZIG", {65.0f, 95.0f, 130.0f, 160.0f})
+        if(!bPostpone) STAGE_WAVE(4u, "5-5", {65.0f, 95.0f, 130.0f, 160.0f})   // NEUNUNDZWANZIG
     });
 
     // ################################################################
@@ -3133,7 +3133,7 @@ void cGeluMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE(5u, "DREISSIG", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(5u, "5-?", {60.0f, 80.0f, 100.0f, 120.0f})   // DREISSIG
     });
 
     // ################################################################

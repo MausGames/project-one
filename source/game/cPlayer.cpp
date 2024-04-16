@@ -35,6 +35,8 @@ cPlayer::cPlayer()noexcept
 , m_iCurShield      (0)
 , m_fAnimation      (0.0f)
 , m_iLook           (0u)
+, m_vMenuColor      (coreVector3(1.0f,1.0f,1.0f))
+, m_vLedColor       (coreVector3(1.0f,1.0f,1.0f))
 , m_vOldDir         (coreVector2(0.0f,1.0f))
 , m_vSmoothOri      (coreVector2(0.0f,0.0f))
 , m_fSmoothTilt     (0.0f)
@@ -126,7 +128,7 @@ cPlayer::cPlayer()noexcept
     m_Circle.DefineModel  ("object_sphere.md3");
     m_Circle.DefineTexture(0u, "effect_energy.png");
     m_Circle.DefineProgram("effect_energy_flat_spheric_program");
-    m_Circle.SetColor4    (coreVector4(COLOR_ENERGY_WHITE * 0.8f, 0.0f));
+    m_Circle.SetColor4    (coreVector4(COLOR_ENERGY_WHITE * 1.0f, 0.0f));
     m_Circle.SetTexSize   (coreVector2(1.0f,5.0f));
     m_Circle.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 
@@ -165,9 +167,9 @@ void cPlayer::Configure(const coreUintW iShipType)
     switch(iShipType)
     {
     default: ASSERT(false)
-    case PLAYER_SHIP_ATK: sModelHigh = "ship_player_atk_high.md3"; sModelLow = "ship_player_atk_low.md3"; sGeometry = "object_cube_top.md3";  vEnergy = COLOR_PLAYER_BLUE;   break;
-    case PLAYER_SHIP_DEF: sModelHigh = "ship_player_def_high.md3"; sModelLow = "ship_player_def_low.md3"; sGeometry = "object_tetra_top.md3"; vEnergy = COLOR_PLAYER_YELLOW; break;
-    case PLAYER_SHIP_P1:  sModelHigh = "ship_projectone_high.md3"; sModelLow = "ship_projectone_low.md3"; sGeometry = "object_penta_top.md3"; vEnergy = COLOR_PLAYER_GREEN;  break;
+    case PLAYER_SHIP_ATK: sModelHigh = "ship_player_atk_high.md3"; sModelLow = "ship_player_atk_low.md3"; sGeometry = "object_cube_top.md3";  vEnergy = COLOR_PLAYER_BLUE;   m_vMenuColor = COLOR_MENU_BLUE;   m_vLedColor = COLOR_LED_BLUE;   break;
+    case PLAYER_SHIP_DEF: sModelHigh = "ship_player_def_high.md3"; sModelLow = "ship_player_def_low.md3"; sGeometry = "object_tetra_top.md3"; vEnergy = COLOR_PLAYER_YELLOW; m_vMenuColor = COLOR_MENU_YELLOW; m_vLedColor = COLOR_LED_YELLOW; break;
+    case PLAYER_SHIP_P1:  sModelHigh = "ship_projectone_high.md3"; sModelLow = "ship_projectone_low.md3"; sGeometry = "object_penta_top.md3"; vEnergy = COLOR_PLAYER_GREEN;  m_vMenuColor = COLOR_MENU_GREEN;  m_vLedColor = COLOR_LED_GREEN;  break;
     }
 
     // load models
@@ -204,7 +206,7 @@ void cPlayer::EquipShield(const coreInt32 iShield)
     {
         // 
         ADD_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED)
-        m_iMaxShield = iShield;
+        m_iMaxShield = (iShield == SHIELD_MAX) ? SHIELD_INVINCIBLE : iShield;
     }
 }
 
@@ -469,7 +471,7 @@ void cPlayer::Move()
         // update all weapons (shooting and stuff)
         for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
         {
-            const coreUint8 iShoot = (/*!this->IsRolling() && */!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && !m_fInterrupt) ? ((m_pInput->iActionHold & PLAYER_ACTION_TURN_SHOOT(i)) >> (i*WEAPON_MODES)) : 0u;
+            const coreUint8 iShoot = (/*!this->IsRolling() && */!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && !m_fInterrupt) ? ((m_pInput->iActionHold & (BITLINE(WEAPON_MODES) << (i*WEAPON_MODES))) >> (i*WEAPON_MODES)) : 0u;
             m_apWeapon[i]->Update(iShoot, m_fShootSpeed);
         }
 
@@ -596,16 +598,16 @@ void cPlayer::Move()
         if(m_Circle.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
         {
             // 
-            m_fCircleValue.Update(-5.0f * m_fAnimSpeed);
+            m_fCircleValue.Update(-2.0f * m_fAnimSpeed);
 
             // 
             if(m_fCircleValue <= 0.0f) this->DisableCircle();
 
             // 
             m_Circle.SetPosition (this->GetPosition());
-            m_Circle.SetSize     (coreVector3(1.0f,1.0f,1.0f) * 1.5f * PLAYER_SIZE_FACTOR * LERPBR(4.0f, 1.0f, m_fCircleValue));
+            m_Circle.SetSize     (coreVector3(1.0f,1.0f,1.0f) * 1.5f * PLAYER_SIZE_FACTOR * LERPBR(5.0f, 1.0f, m_fCircleValue));
             m_Circle.SetAlpha    (LERPBR(0.0f, 1.0f, m_fCircleValue));
-            m_Circle.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.3f));
+            m_Circle.SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.2f));
             m_Circle.Move();
         }
 

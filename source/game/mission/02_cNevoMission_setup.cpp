@@ -487,7 +487,7 @@ void cNevoMission::__SetupOwn()
             else if(fPercent >= 0.01f) g_pGame->GetCombatText()->AttachMarker(0u, PRINT("%.0f%%", FLOOR(fPercent * 100.0f)), coreVector3(0.0f,0.0f,0.0f), COLOR_MENU_INSIDE);
         }
 
-        STAGE_WAVE(0u, "SIEBEN", {50.0f, 75.0f, 100.0f, 125.0f})
+        STAGE_WAVE(0u, "2-1", {50.0f, 75.0f, 100.0f, 125.0f})   // SIEBEN
     });
 
     // ################################################################
@@ -970,7 +970,7 @@ void cNevoMission::__SetupOwn()
             }
         });
 
-        if(!bPostpone) STAGE_WAVE(1u, "ACHT", {60.0f, 90.0f, 120.0f, 150.0f})
+        if(!bPostpone) STAGE_WAVE(1u, "2-2", {60.0f, 90.0f, 120.0f, 150.0f})   // ACHT
     });
 
     // ################################################################
@@ -1344,7 +1344,7 @@ void cNevoMission::__SetupOwn()
                             if(SameDirection90(vDiff.Normalized(), pEnemy->GetDirection().xy()))   // use old direction
                             {
                                 if(++iBackstabCount >= 20u) STAGE_BADGE(2u, BADGE_HARD, pPlayer->GetPosition())
-                                else g_pGame->GetCombatText()->DrawText(coreData::ToChars(20u - iBackstabCount), pPlayer->GetPosition(), COLOR_MENU_INSIDE);
+                                else g_pGame->GetCombatText()->DrawCountdown(iBackstabCount, 20u, pPlayer->GetPosition());
                             }
                         }
                     }
@@ -1376,7 +1376,7 @@ void cNevoMission::__SetupOwn()
         pBackground->SetGroundDensity(4u, STEP(0.5f, 1.0f, fEnvLerp));
         pBackground->SetGroundDensity(5u, STEP(0.5f, 1.0f, fEnvLerp));
 
-        STAGE_WAVE(2u, "NEUN", {45.0f, 65.0f, 90.0f, 110.0f})
+        STAGE_WAVE(2u, "2-3", {45.0f, 65.0f, 90.0f, 110.0f})   // NEUN
     });
 
     // ################################################################
@@ -1886,7 +1886,7 @@ void cNevoMission::__SetupOwn()
             pBullet->AddStatus(BULLET_STATUS_GHOST);
         });
 
-        STAGE_WAVE(3u, "ZEHN", {50.0f, 75.0f, 100.0f, 125.0f})
+        STAGE_WAVE(3u, "2-4", {50.0f, 75.0f, 100.0f, 125.0f})   // ZEHN
     });
 
     // ################################################################
@@ -2319,7 +2319,7 @@ void cNevoMission::__SetupOwn()
             });
         }
 
-        STAGE_WAVE(4u, "ELF", {50.0f, 75.0f, 100.0f, 125.0f})
+        STAGE_WAVE(4u, "2-5", {50.0f, 75.0f, 100.0f, 125.0f})   // ELF
     });
 
     // ################################################################
@@ -2677,7 +2677,7 @@ void cNevoMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE(5u, "ZWÖLF", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(5u, "2-?", {60.0f, 80.0f, 100.0f, 120.0f})   // ZWÖLF
     });
 
     // ################################################################

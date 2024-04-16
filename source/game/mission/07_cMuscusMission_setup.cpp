@@ -536,7 +536,7 @@ void cMuscusMission::__SetupOwn()
             }
         });
 
-        if(!bPostpone) STAGE_WAVE(0u, "SIEBENUNDDREISSIG", {50.0f, 75.0f, 100.0f, 125.0f})
+        if(!bPostpone) STAGE_WAVE(0u, "7-1", {50.0f, 75.0f, 100.0f, 125.0f})   // SIEBENUNDDREISSIG
     });
 
     // ################################################################
@@ -1082,7 +1082,7 @@ void cMuscusMission::__SetupOwn()
             afGenerateTime[i] += 1.0f * TIME;   // after update, to align with enemies
         }
 
-        STAGE_WAVE(1u, "ACHTUNDDREISSIG", {60.0f, 90.0f, 120.0f, 150.0f})
+        STAGE_WAVE(1u, "7-2", {60.0f, 90.0f, 120.0f, 150.0f})   // ACHTUNDDREISSIG
     });
 
     // ################################################################
@@ -1683,7 +1683,7 @@ void cMuscusMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE(2u, "NEUNUNDDREISSIG", {60.0f, 90.0f, 120.0f, 150.0f})
+        STAGE_WAVE(2u, "7-3", {60.0f, 90.0f, 120.0f, 150.0f})   // NEUNUNDDREISSIG
     });
 
     // ################################################################
@@ -2080,7 +2080,7 @@ void cMuscusMission::__SetupOwn()
                 if(pEnemy->ReachedDeath())
                 {
                     if(++iQuickState >= 7u) STAGE_BADGE(2u, BADGE_HARD, pEnemy->GetPosition())
-                    else g_pGame->GetCombatText()->DrawText(coreData::ToChars(7u - iQuickState), pEnemy->GetPosition(), COLOR_MENU_INSIDE);
+                    else g_pGame->GetCombatText()->DrawCountdown(iQuickState, 7u, pEnemy->GetPosition());
                 }
             }
             else if(i < 160u)
@@ -2173,7 +2173,7 @@ void cMuscusMission::__SetupOwn()
 
         if(STAGE_CLEARED) nReturnFunc();
 
-        if(!bPostpone) STAGE_WAVE(3u, "VIERZIG", {55.0f, 80.0f, 110.0f, 135.0f})
+        if(!bPostpone) STAGE_WAVE(3u, "7-4", {55.0f, 80.0f, 110.0f, 135.0f})   // VIERZIG
     });
 
     // ################################################################
@@ -2746,7 +2746,7 @@ void cMuscusMission::__SetupOwn()
             });
         }
 
-        STAGE_WAVE(4u, "EINUNDVIERZIG", {85.0f, 125.0f, 170.0f, 210.0f})
+        STAGE_WAVE(4u, "7-5", {85.0f, 125.0f, 170.0f, 210.0f})   // EINUNDVIERZIG
     });
 
     // ################################################################
@@ -2935,7 +2935,7 @@ void cMuscusMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE(5u, "ZWEIUNDVIERZIG", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(5u, "7-?", {60.0f, 80.0f, 100.0f, 120.0f})   // ZWEIUNDVIERZIG
     });
 
     // ################################################################

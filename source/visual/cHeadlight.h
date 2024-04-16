@@ -82,7 +82,7 @@ public:
     void UpdateDefault(const coreUint8 iType);
 
     // 
-    void DrawSpot (const coreVector3 vPosition, const coreVector2 vSize, const coreVector2 vDirection);
+    void DrawSpot (const coreVector3 vPosition, const coreVector2 vSize, const coreVector2 vOffset);
     void DrawPoint(const coreVector3 vPosition, const coreVector2 vSize);
     void DrawPoint(const coreObject3D* pObject);
 

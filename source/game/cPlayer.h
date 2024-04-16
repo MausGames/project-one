@@ -54,11 +54,10 @@
 #define PLAYER_NO_FEEL   (-100.0f)   // 
 #define PLAYER_NO_IGNORE (-100.0f)   // 
 
-
-#define PLAYER_ACTION_TURN_SHOOT(i) (BITLINE(WEAPON_MODES) << ((i) * WEAPON_MODES))
-#define PLAYER_ACTION_TURN_LEFT     (PLAYER_EQUIP_WEAPONS * WEAPON_MODES)
-#define PLAYER_ACTION_TURN_RIGHT    (PLAYER_EQUIP_WEAPONS * WEAPON_MODES + 1u)
-#define PLAYER_ACTION_TURN_ROLL     (PLAYER_EQUIP_WEAPONS * WEAPON_MODES)   // TODO 1: not used
+#define PLAYER_ACTION_SHOOT(i,j) ((i) * WEAPON_MODES + (j))
+#define PLAYER_ACTION_TURN_LEFT  (PLAYER_EQUIP_WEAPONS * WEAPON_MODES)
+#define PLAYER_ACTION_TURN_RIGHT (PLAYER_EQUIP_WEAPONS * WEAPON_MODES + 1u)
+#define PLAYER_ACTION_ROLL       (PLAYER_EQUIP_WEAPONS * WEAPON_MODES)   // TODO 1: not used
 
 #define PLAYER_AREA_DEFAULT (coreVector4(-FOREGROUND_AREA, FOREGROUND_AREA) * PLAYER_AREA_FACTOR)
 
@@ -143,6 +142,8 @@ private:
     coreProgramPtr m_pDarkProgram;                            // 
     coreFlow       m_fAnimation;                              // 
     coreUint16     m_iLook;                                   // 
+    coreVector3    m_vMenuColor;                              // 
+    coreVector3    m_vLedColor;                               // 
 
     coreVector2 m_vOldDir;                                    // 
     coreVector2 m_vSmoothOri;                                 // 
@@ -242,7 +243,10 @@ public:
     void UpdateExhaust(const coreFloat fStrength);
 
     // 
-    inline coreVector3 GetEnergyColor()const {return m_Range.GetColor3() * (1.0f/1.1f);}
+    inline const coreModelPtr& GetRangeModel ()const {return m_Range.GetModel();}
+    inline       coreVector3   GetEnergyColor()const {return m_Range.GetColor3() * (1.0f/1.1f);}
+    inline const coreVector3&  GetMenuColor  ()const {return m_vMenuColor;}
+    inline const coreVector3&  GetLedColor   ()const {return m_vLedColor;}
 
     // 
     coreBool TestCollisionPrecise(const coreObject3D* pObject, coreVector3* OUTPUT pvIntersection, coreBool* OUTPUT pbFirstHit);

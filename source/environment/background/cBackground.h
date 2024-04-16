@@ -252,7 +252,7 @@ public:
     cNoBackground() = default;
 
     DISABLE_COPY(cNoBackground)
-    ASSIGN_ID_EX(0, "Nothing", coreVector3(0.5f,0.5f,0.5f))
+    ASSIGN_ID_EX(0, "Nothing", coreVector3(0.5f,0.5f,0.5f), coreVector2(-1.0f,-1.0f))
     
     
     inline coreVector3 GetButtonColor()const final {return coreVector3(1.0f,1.0f,1.0f) * 0.8f;}      
@@ -280,7 +280,7 @@ public:
     ~cGrassBackground()final;
 
     DISABLE_COPY(cGrassBackground)
-    ASSIGN_ID_EX(1, "Grass", COLOR_MENU_GREEN)
+    ASSIGN_ID_EX(1, "Grass", COLOR_MENU_GREEN, coreVector2(0.75f,0.25f))
 
 
 protected:
@@ -312,7 +312,7 @@ public:
     ~cSeaBackground()final;
 
     DISABLE_COPY(cSeaBackground)
-    ASSIGN_ID_EX(2, "Sea", COLOR_MENU_CYAN)
+    ASSIGN_ID_EX(2, "Sea", COLOR_MENU_CYAN, coreVector2(0.5f,0.25f))
 
 
 protected:
@@ -349,7 +349,7 @@ public:
     ~cDesertBackground()final;
 
     DISABLE_COPY(cDesertBackground)
-    ASSIGN_ID_EX(3, "Desert", COLOR_MENU_YELLOW)
+    ASSIGN_ID_EX(3, "Desert", COLOR_MENU_YELLOW, coreVector2(0.0f,0.0f))
 
     // 
     inline void SetSandMove (const coreVector2 vMove)  {m_vSandMove = vMove;}
@@ -396,7 +396,7 @@ public:
     ~cSpaceBackground()final;
 
     DISABLE_COPY(cSpaceBackground)
-    ASSIGN_ID_EX(4, "Space", COLOR_MENU_MAGENTA)
+    ASSIGN_ID_EX(4, "Space", COLOR_MENU_MAGENTA, coreVector2(0.75f,0.0f))
 
     // 
     inline void SetCoverColor (const coreVector3 vColor) {m_Cover.SetColor3(LERP(vColor, coreVector3(1.0f,1.0f,1.0f), 0.35f) * 1.3f); m_Cover2.SetColor3(LERP(vColor, coreVector3(1.0f,1.0f,1.0f), 0.15f) * 1.3f);}
@@ -438,7 +438,7 @@ public:
     ~cVolcanoBackground()final;
 
     DISABLE_COPY(cVolcanoBackground)
-    ASSIGN_ID_EX(5, "Volcano", COLOR_MENU_ORANGE)
+    ASSIGN_ID_EX(5, "Volcano", COLOR_MENU_ORANGE, coreVector2(0.25f,0.0f))
 
 
 protected:
@@ -467,7 +467,7 @@ public:
     ~cSnowBackground()final;
 
     DISABLE_COPY(cSnowBackground)
-    ASSIGN_ID_EX(6, "Snow", COLOR_MENU_BLUE)
+    ASSIGN_ID_EX(6, "Snow", COLOR_MENU_BLUE, coreVector2(0.25f,0.25f))
 
     // 
     inline void SetSnowMove(const coreVector2 vMove) {m_vSnowMove = vMove;}
@@ -512,7 +512,7 @@ public:
     ~cMossBackground()final;
 
     DISABLE_COPY(cMossBackground)
-    ASSIGN_ID_EX(7, "Moss", COLOR_MENU_RED)
+    ASSIGN_ID_EX(7, "Moss", COLOR_MENU_RED, coreVector2(0.5f,0.0f))
 
     // 
     inline void FlashLightning() {m_fLightningFlash = 1.0f;}
@@ -566,7 +566,7 @@ public:
     ~cDarkBackground()final;
 
     DISABLE_COPY(cDarkBackground)
-    ASSIGN_ID_EX(8, "Dark", coreVector3(0.5f,0.5f,0.5f))
+    ASSIGN_ID_EX(8, "Dark", coreVector3(0.5f,0.5f,0.5f), coreVector2(0.0f,0.5f))
 
     // 
     void Dissolve();
@@ -622,7 +622,7 @@ public:
     ~cStomachBackground()final;
 
     DISABLE_COPY(cStomachBackground)
-    ASSIGN_ID_EX(51, "Stomach", COLOR_MENU_RED)
+    ASSIGN_ID_EX(51, "Stomach", COLOR_MENU_RED, coreVector2(-1.0f,-1.0f))
 
 
 private:
@@ -653,7 +653,7 @@ public:
     ~cCloudBackground()final;
 
     DISABLE_COPY(cCloudBackground)
-    ASSIGN_ID_EX(99, "Cloud", COLOR_MENU_PURPLE)
+    ASSIGN_ID_EX(99, "Cloud", COLOR_MENU_PURPLE, coreVector2(0.0f,0.25f))
 
 
 private:

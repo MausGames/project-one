@@ -10,8 +10,6 @@
 #ifndef _P1_GUARD_FOREGROUND_H_
 #define _P1_GUARD_FOREGROUND_H_
 
-// TODO 3: player cone has wrong position on intro flight
-
 
 // ****************************************************************
 // foreground definitions

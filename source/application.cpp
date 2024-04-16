@@ -285,20 +285,30 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("environment_water_rain.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_water_rain.png", CORE_TEXTURE_LOAD_NO_COMPRESS);
     Core::Manager::Resource->Load<coreTexture>("game_logo.png",                          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/game_logo.png");
     Core::Manager::Resource->Load<coreTexture>("game_logo_demo.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/game_logo_demo.png");
+    Core::Manager::Resource->Load<coreTexture>("input_gamepad_luna.png",                 CORE_RESOURCE_UPDATE_AUTO,   "data/textures/input_gamepad_luna.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
+    Core::Manager::Resource->Load<coreTexture>("input_gamepad_ps3.png",                  CORE_RESOURCE_UPDATE_AUTO,   "data/textures/input_gamepad_ps3.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
+    Core::Manager::Resource->Load<coreTexture>("input_gamepad_ps4.png",                  CORE_RESOURCE_UPDATE_AUTO,   "data/textures/input_gamepad_ps4.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
+    Core::Manager::Resource->Load<coreTexture>("input_gamepad_ps5.png",                  CORE_RESOURCE_UPDATE_AUTO,   "data/textures/input_gamepad_ps5.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
+    Core::Manager::Resource->Load<coreTexture>("input_gamepad_stadia.png",               CORE_RESOURCE_UPDATE_AUTO,   "data/textures/input_gamepad_stadia.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
+    Core::Manager::Resource->Load<coreTexture>("input_gamepad_steamdeck.png",            CORE_RESOURCE_UPDATE_AUTO,   "data/textures/input_gamepad_steamdeck.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
+    Core::Manager::Resource->Load<coreTexture>("input_gamepad_switch.png",               CORE_RESOURCE_UPDATE_AUTO,   "data/textures/input_gamepad_switch.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
+    Core::Manager::Resource->Load<coreTexture>("input_gamepad_xbox360.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/input_gamepad_xbox360.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
+    Core::Manager::Resource->Load<coreTexture>("input_gamepad_xboxone.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/input_gamepad_xboxone.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
+    Core::Manager::Resource->Load<coreTexture>("input_keyboard.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/input_keyboard.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
     Core::Manager::Resource->Load<coreTexture>("maus_logo.png",                          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/maus_logo.png");
     Core::Manager::Resource->Load<coreTexture>("menu_background_black.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_background_black.png");
+    Core::Manager::Resource->Load<coreTexture>("menu_badge.png",                         CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_badge.png");
     Core::Manager::Resource->Load<coreTexture>("menu_detail_01.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_detail_01.png");
     Core::Manager::Resource->Load<coreTexture>("menu_detail_02.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_detail_02.png");
     Core::Manager::Resource->Load<coreTexture>("menu_detail_03.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_detail_03.png");
     Core::Manager::Resource->Load<coreTexture>("menu_detail_04.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_detail_04.png");
+    Core::Manager::Resource->Load<coreTexture>("menu_helper_big.png",                    CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_helper_big.png");
+    Core::Manager::Resource->Load<coreTexture>("menu_helper_small.png",                  CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_helper_small.png");
     Core::Manager::Resource->Load<coreTexture>("menu_medal.png",                         CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_medal.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
     Core::Manager::Resource->Load<coreTexture>("menu_mission.png",                       CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_mission.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
-    Core::Manager::Resource->Load<coreTexture>("menu_star.png",                          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_star.png");
     Core::Manager::Resource->Load<coreTexture>("menu_weapon.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_weapon.png");
     Core::Manager::Resource->Load<coreTexture>("menu_worldmap.png",                      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_worldmap.png");
     Core::Manager::Resource->Load<coreTexture>("ship_enemy.png",                         CORE_RESOURCE_UPDATE_AUTO,   "data/textures/ship_enemy.png", CORE_TEXTURE_LOAD_NEAREST);
-    Core::Manager::Resource->Load<coreTexture>("ship_icon_01.png",                       CORE_RESOURCE_UPDATE_AUTO,   "data/textures/ship_icon_01.png");
-    Core::Manager::Resource->Load<coreTexture>("ship_icon_02.png",                       CORE_RESOURCE_UPDATE_AUTO,   "data/textures/ship_icon_02.png");
     Core::Manager::Resource->Load<coreTexture>("ship_player.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/ship_player.png", CORE_TEXTURE_LOAD_NEAREST);
 
     Core::Manager::Resource->Load<coreShader> ("effect_decal.vert",                      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.vert");

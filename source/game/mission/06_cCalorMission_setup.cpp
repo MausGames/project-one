@@ -482,7 +482,7 @@ void cCalorMission::__SetupOwn()
             }
         }
 
-        STAGE_WAVE(0u, "EINUNDDREISSIG", {50.0f, 75.0f, 100.0f, 125.0f})
+        STAGE_WAVE(0u, "6-1", {50.0f, 75.0f, 100.0f, 125.0f})   // EINUNDDREISSIG
     });
 
     // ################################################################
@@ -893,7 +893,7 @@ void cCalorMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE(1u, "ZWEIUNDDREISSIG", {55.0f, 80.0f, 110.0f, 135.0f})
+        STAGE_WAVE(1u, "6-2", {55.0f, 80.0f, 110.0f, 135.0f})   // ZWEIUNDDREISSIG
     });
 
     // ################################################################
@@ -1538,7 +1538,7 @@ void cCalorMission::__SetupOwn()
             });
         }
 
-        STAGE_WAVE(2u, "DREIUNDDREISSIG", {45.0f, 65.0f, 90.0f, 110.0f})
+        STAGE_WAVE(2u, "6-3", {45.0f, 65.0f, 90.0f, 110.0f})   // DREIUNDDREISSIG
     });
 
     // ################################################################
@@ -1953,7 +1953,7 @@ void cCalorMission::__SetupOwn()
             }
         }
 
-        STAGE_WAVE(3u, "VIERUNDDREISSIG", {80.0f, 120.0f, 160.0f, 200.0f})
+        STAGE_WAVE(3u, "6-4", {80.0f, 120.0f, 160.0f, 200.0f})   // VIERUNDDREISSIG
     });
 
     // ################################################################
@@ -2261,7 +2261,7 @@ void cCalorMission::__SetupOwn()
             }
         }
 
-        STAGE_WAVE(4u, "FÜNFUNDDREISSIG", {70.0f, 105.0f, 140.0f, 175.0f})
+        STAGE_WAVE(4u, "6-5", {70.0f, 105.0f, 140.0f, 175.0f})   // FÜNFUNDDREISSIG
     });
 
     // ################################################################
@@ -2448,7 +2448,7 @@ void cCalorMission::__SetupOwn()
             pBullet->Deactivate(true, vIntersection.xy());
         });
 
-        STAGE_WAVE(5u, "SECHSUNDDREISSIG", {60.0f, 80.0f, 100.0f, 120.0f})
+        STAGE_WAVE(5u, "6-?", {60.0f, 80.0f, 100.0f, 120.0f})   // SECHSUNDDREISSIG
     });
 
     // ################################################################

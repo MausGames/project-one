@@ -166,6 +166,8 @@
 #define MUSCUS_PEARLS_RAWS          (MUSCUS_PEARLS * 2u)                              // 
 #define MUSCUS_ZOMBIES              (3u)                                              // 
 
+#define INTRO_MANUALS               (7u)                                              // 
+
 
 // ****************************************************************
 // stage management macros
@@ -1456,11 +1458,12 @@ private:
 class cIntroMission final : public cMission
 {
 private:
-    cIntroBoss m_Intro;                    // 
+    cIntroBoss m_Intro;                                         // 
 
-    cTooltip m_aManual[MISSION_PLAYERS];   // 
+    cFigure  m_aaManual     [MISSION_PLAYERS][INTRO_MANUALS];   // 
+    coreFlow m_aafManualTime[MISSION_PLAYERS][INTRO_MANUALS];   // 
 
-    coreBool m_bFirstPlay;                 // 
+    coreBool m_bFirstPlay;                                      // 
 
 
 public:
@@ -1468,6 +1471,9 @@ public:
 
     DISABLE_COPY(cIntroMission)
     ASSIGN_ID(99, "INTRO")
+
+    // 
+    inline void EnableManual(const coreUintW iPlayerIndex, const coreUintW iManualIndex) {ASSERT(iPlayerIndex < MISSION_PLAYERS) ASSERT(iManualIndex < INTRO_MANUALS) m_aafManualTime[iPlayerIndex][iManualIndex] = 3.0f;}
 
     // get object properties
     inline const coreChar* GetMusicName()const final {return "mission_00_intro.ogg";}

@@ -4375,7 +4375,7 @@ void cProjectOneBoss::__EndMission(const coreBool bAnimated, const coreBool bRet
     });
 
     // 
-    g_pGame->GetBulletManagerEnemy()->ClearBullets(true);
+    g_pGame->GetBulletManagerEnemy()->ClearBullets(bAnimated);
 
     // 
     g_pGame->GetBulletManagerEnemy()->ResetOrder();

@@ -103,6 +103,9 @@ template <typename F> void cMsgBox::ShowQuestion(const coreChar* pcText, F&& nCa
     m_No .SetEnabled(CORE_OBJECT_ENABLE_ALL);
 
     // 
+    m_Navigator.AssignBack(&m_No);
+
+    // 
     m_iMsgType = MSGBOX_TYPE_QUESTION;
     this->__ShowMessage(pcText, [=](const coreInt32 a, const coreInt32 b) {nCallback(a);});
 }
@@ -118,6 +121,9 @@ template <typename F> void cMsgBox::ShowMapping(const coreChar* pcText, const co
     // 
     m_Yes.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     m_No .SetEnabled(CORE_OBJECT_ENABLE_ALL);
+
+    // 
+    m_Navigator.AssignBack(NULL);
 
     // 
     m_iMsgType = MSGBOX_TYPE_MAPPING;
