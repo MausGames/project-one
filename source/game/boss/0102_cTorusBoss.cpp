@@ -9,6 +9,7 @@
 #include "main.h"
 
 // TODO 1: bottom state during intro
+// TODO 1: yellow bullets and current rotation need to align, or bullets are disabled when rotation gets out of control
 
 
 // ****************************************************************
@@ -23,14 +24,14 @@
 // ****************************************************************
 // vector identifier
 #define TUMBLE_DIRECTION (0u)
-
+#define GRIND_VALUE      (1u)
 
 
 
 void __TorusCreateOverdrive(const coreUintW iIndex, const coreVector3 vIntersect, const coreFloat fTime, const coreBool bGround)
 {
     
-static coreVector3 vOldHit = coreVector3(0.0f,0.0f,0.0f);
+static coreVector3 vOldHit = coreVector3(0.0f,0.0f,0.0f); // s_. ganzes file
 static coreUint16 m_iDecalState = 0u;     
 
 
@@ -344,6 +345,9 @@ void cTorusBoss::__RenderOwnOver()
 // 
 void cTorusBoss::__MoveOwn()
 {
+    // 
+    this->_UpdateBoss();
+
     if(this->ReachedDeath()) this->Kill(true);   
     
     
@@ -401,12 +405,12 @@ void cTorusBoss::__MoveOwn()
             
             
             const coreVector3 vOri2 = (vAnchor - coreVector3(vNewPos, -20.0f)).Normalized();//LERP(coreVector3(-vDir, 0.0f), coreVector3(0.0f,0.0f,1.0f), fCurTime).Normalized();
-            const coreVector2 vOffset = (ABS(vOri2.z) == 1.0f) ? coreVector2(0.0f,0.0f) : coreVector3::Cross(vOri2, coreVector3::Cross(vOri2, coreVector3(0.0f,0.0f,1.0f)).Normalized()).xy() * LERP(this->GetCollisionRange().x, 0.0f, ABS(vOri2.z));
+            const coreVector2 vOffset = (ABS(vOri2.z) == 1.0f) ? coreVector2(0.0f,0.0f) : coreVector3::Cross(vOri2, coreVector3::Cross(vOri2, coreVector3(0.0f,0.0f,1.0f)).Normalized()).xy() * LERP(this->GetVisualRange().x, 0.0f, ABS(vOri2.z));
             
             Core::Debug->InspectValue("dir", vOffset);
             const coreFloat fHeight = g_pEnvironment->RetrieveSafeHeight(vNewPos + vOffset) ;
             fCurHeight = LERP(fCurHeight, fHeight, 10.0f * TIME);
-            this->SetPosition(coreVector3(vNewPos, fCurHeight + LERP(this->GetCollisionRange().x - 2.0f, this->GetCollisionRange().z + 1.0f*0.0f, ABS(vOri2.z))));
+            this->SetPosition(coreVector3(vNewPos, fCurHeight + LERP(this->GetVisualRange().x - 2.0f, this->GetVisualRange().z + 1.0f*0.0f, ABS(vOri2.z))));
             
             if(fTime < 0.5f) __TorusCreateOverdrive(0u, coreVector3(vNewPos + vOffset, fCurHeight), fTime, true);
             
@@ -456,7 +460,7 @@ void cTorusBoss::__MoveOwn()
              
 
             if(PHASE_FINISHED)
-                PHASE_CHANGE_TO(10u)
+                PHASE_CHANGE_TO(80u)
         });
     }
 
@@ -487,11 +491,6 @@ void cTorusBoss::__MoveOwn()
             {
                 this->DefaultMoveLerp(vPosFrom, vPosTo, fTime);
                 g_pEnvironment->SetTargetDirection(coreVector2::Direction(LERP(fAngFrom, fAngTo, fTime)));
-            }
-
-            if(m_aiCounter[SUB_PHASE])
-            {
-                vNewOri.yz(coreVector2::Direction(LERP(5.5f*PI, 5.0f*PI, fTime) + (m_aiCounter[ROTATION_DIRECTION] ? 0.0f : PI)));
             }
 
             if(PHASE_FINISHED)
@@ -568,8 +567,6 @@ void cTorusBoss::__MoveOwn()
     {
         PHASE_CONTROL_TIMER(0u, 0.5f, LERP_SMOOTH)
         {
-            vNewOri.yz(coreVector2::Direction(LERP(4.5f*PI, 4.0f*PI, fTime)));
-
             this->DefaultMoveLerp(m_vLastPosition, coreVector2(0.0f,0.0f), fTime);
 
             if(PHASE_FINISHED)
@@ -698,7 +695,7 @@ void cTorusBoss::__MoveOwn()
             const coreFloat fBreakTime  = LERPB(0.0f, 1.0f, fTime);
             const coreFloat fSmoothTime = LERPS(0.0f, 1.0f, fTime);
 
-            vNewOri.yz(coreVector2::Direction((5.5f*PI) * fBreakTime + (m_aiCounter[ROTATION_DIRECTION] ? PI : 0.0f)));
+            vNewOri.yz(coreVector2::Direction((5.0f*PI) * fBreakTime + (m_aiCounter[ROTATION_DIRECTION] ? PI : 0.0f)));
 
             this->DefaultMoveLerp(m_vLastPosition, m_vLastPosition + m_avVector[TUMBLE_DIRECTION].xy(), fBreakTime);
             g_pEnvironment->SetTargetDirection(coreVector2::Direction(LERP(m_avVector[TUMBLE_DIRECTION].z, 0.0f*PI, fBreakTime)));
@@ -721,6 +718,129 @@ void cTorusBoss::__MoveOwn()
 
                 m_aiCounter[ROTATION_DIRECTION] = 1 - m_aiCounter[ROTATION_DIRECTION];
                 if(m_aiCounter[ROTATION_DIRECTION]) this->StorePosition(this->GetPosition().xy().InvertedX());
+            }
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 80u)
+    {
+        // fliegt auf rand
+        PHASE_CONTROL_TIMER(0u, 1.0f, LERP_BREAK_REV)
+        {
+            this->DefaultMoveLerp(m_vLastPosition, coreVector2(m_vLastPosition.x, 0.9f), fTime);
+
+            if(PHASE_FINISHED)
+            {
+                PHASE_CHANGE_INC
+
+                m_avVector[GRIND_VALUE].x = cTorusBoss::__PositionToGrind(this->GetPosition().xy());
+
+                g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+            }
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 81u)
+    {
+        // rollt am rand entlang
+        const coreFloat fPrevGrind = m_avVector[GRIND_VALUE].x;
+        m_avVector[GRIND_VALUE].x += 0.5f * TIME;
+
+        this->SetPosition(coreVector3(cTorusBoss::__GrindToPosition(m_avVector[GRIND_VALUE].x) * FOREGROUND_AREA * 0.9f, 0.0f));
+
+        m_fRotationBoss.UpdateMod(-3.0f - TORUS_BOSS_ROTATION, 2.0f*PI);   // -4.5f is realistic
+
+        if(this->GetCurHealthPct() >= 0.9f)
+        {
+            g_pGame->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
+            {
+                if(m_iPhase != 81u) return;
+
+                if(F_TO_UI(m_avVector[GRIND_VALUE].x) == F_TO_UI(m_avVector[GRIND_VALUE].y)) return;
+
+                if(InBetween(pPlayer->GetPosition().xy(), FOREGROUND_AREA * -0.8f, FOREGROUND_AREA * 0.8f))
+                {
+                    const coreBool X = PHASE_FLYPAST(this, pPlayer, x);
+                    const coreBool Y = PHASE_FLYPAST(this, pPlayer, y);
+
+                    if(X || Y)
+                    {
+                        PHASE_CHANGE_TO(82u)
+                        PHASE_RESET(0u)
+
+                        m_avVector[GRIND_VALUE].xy(coreVector2(1.0f,1.0f) * cTorusBoss::__PositionToGrind(this->GetPosition().xy() * (X ? coreVector2(1.0f,-1.0f) : coreVector2(-1.0f,1.0f))));
+                    }
+                }
+            });
+        }
+        else
+        {
+            if(InBetweenExt(0.5f, FRACT(fPrevGrind), FRACT(m_avVector[GRIND_VALUE].x)) == 1)
+            {
+                PHASE_CHANGE_TO(83u)
+                PHASE_RESET(0u)
+            }
+        }
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 82u)
+    {
+        // springt auf andere seite
+        PHASE_CONTROL_TIMER(0u, 1.0f, LERP_BREAK_REV)
+        {
+            const coreVector2 vTarget = cTorusBoss::__GrindToPosition(m_avVector[GRIND_VALUE].x) * 0.9f;
+
+            this->DefaultMoveLerp(m_vLastPosition, vTarget, fTime);
+
+            if(PHASE_FINISHED)
+            {
+                PHASE_CHANGE_TO(81u)
+
+                g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+            }
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 83u)
+    {
+        // springt im muster
+        const coreFloat fPrevGrind = m_avVector[GRIND_VALUE].x;
+        m_avVector[GRIND_VALUE].x += 0.5f * SQRT2 * TIME;
+
+        this->SetPosition(coreVector3(cTorusBoss::__GrindToPosition2(m_avVector[GRIND_VALUE].x) * FOREGROUND_AREA * 0.9f, 0.0f));
+
+        if(InBetweenExt(0.5f, FRACT(fPrevGrind), FRACT(m_avVector[GRIND_VALUE].x)) == 1)
+        {
+            g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+
+            if(this->GetCurHealthPct() < 0.7f)
+            {
+                PHASE_CHANGE_INC
+                PHASE_RESET(0u)
+            }
+        }
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 84u)
+    {
+        // beendet phase
+        PHASE_CONTROL_TIMER(0u, 1.0f, LERP_BREAK)
+        {
+            this->DefaultMoveLerp(m_vLastPosition, coreVector2(0.0f,0.0f), fTime);
+
+            if(PHASE_FINISHED)
+            {
+                PHASE_CHANGE_INC      
             }
         });
     }
@@ -1249,4 +1369,45 @@ void cTorusBoss::__DisableGunner(const coreUintW iIndex, const coreBool bAnimate
 
     // 
     if(bAnimated) g_pSpecialEffects->MacroExplosionColorSmall(pGunner->GetPosition(), COLOR_ENERGY_RED);
+}
+
+
+// ****************************************************************
+// 
+coreFloat cTorusBoss::__PositionToGrind(const coreVector2 vPosition)
+{
+    if(vPosition.IsNull()) return 0.5f;
+
+    if(IsHorizontal(vPosition)) return (vPosition.y * RCP(ABS(vPosition.x))) * -SIGN(vPosition.x) * 0.5f + 0.5f + ((vPosition.x > 0.0f) ? 1.0f : 3.0f);
+                           else return (vPosition.x * RCP(ABS(vPosition.y))) *  SIGN(vPosition.y) * 0.5f + 0.5f + ((vPosition.y > 0.0f) ? 0.0f : 2.0f);
+}
+
+
+// ****************************************************************
+// 
+coreVector2 cTorusBoss::__GrindToPosition(const coreFloat fGrind)
+{
+    ASSERT(fGrind >= 0.0f)
+
+    const coreFloat fRealGrind = FMOD(fGrind, 4.0f);
+
+    if(fRealGrind < 1.0f) return LERP(coreVector2(-1.0f, 1.0f), coreVector2( 1.0f, 1.0f), fRealGrind);
+    if(fRealGrind < 2.0f) return LERP(coreVector2( 1.0f, 1.0f), coreVector2( 1.0f,-1.0f), fRealGrind - 1.0f);
+    if(fRealGrind < 3.0f) return LERP(coreVector2( 1.0f,-1.0f), coreVector2(-1.0f,-1.0f), fRealGrind - 2.0f);
+                          return LERP(coreVector2(-1.0f,-1.0f), coreVector2(-1.0f, 1.0f), fRealGrind - 3.0f);
+}
+
+
+// ****************************************************************
+// 
+coreVector2 cTorusBoss::__GrindToPosition2(const coreFloat fGrind)
+{
+    ASSERT(fGrind >= 0.0f)
+
+    const coreFloat fRealGrind = FMOD(fGrind - 0.5f, 4.0f);
+
+    if(fRealGrind < 1.0f) return LERP(coreVector2( 0.0f, 1.0f), coreVector2( 1.0f, 0.0f), fRealGrind);
+    if(fRealGrind < 2.0f) return LERP(coreVector2( 1.0f, 0.0f), coreVector2( 0.0f,-1.0f), fRealGrind - 1.0f);
+    if(fRealGrind < 3.0f) return LERP(coreVector2( 0.0f,-1.0f), coreVector2(-1.0f, 0.0f), fRealGrind - 2.0f);
+                          return LERP(coreVector2(-1.0f, 0.0f), coreVector2( 0.0f, 1.0f), fRealGrind - 3.0f);
 }

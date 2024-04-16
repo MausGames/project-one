@@ -180,6 +180,9 @@ void cTigerBoss::__RenderOwnOver()
 // 
 void cTigerBoss::__MoveOwn()
 {
+    // 
+    this->_UpdateBoss();
+
     if(this->ReachedDeath()) this->Kill(true);   
 
     // 

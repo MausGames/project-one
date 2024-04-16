@@ -13,6 +13,7 @@
 // TODO 3: reduce ship health and all damage values to 16-bit (also reorder for better packing if possible)
 // TODO 3: do not create explosions if ship is far outside of view-port (just ships or in general special-effects ?)
 // TODO 2: ReachedHealthPct, GetCurHealthPct -> ReachedHealthPct(0.7f) was triggered while interface was showing 71%
+// TODO 4: check and cleanup transformation functions
 
 
 // ****************************************************************
@@ -45,6 +46,9 @@ protected:
 public:
     ENABLE_COPY(cShip)
 
+    // 
+    void SetBaseColor(const coreVector3 vColor, const coreBool bInverted = false);
+
     // transformation functions (raw parameters are multiplied with FOREGROUND_AREA)
     coreBool DefaultMovePath     (const coreSpline2* pRawPath, const coreVector2 vFactor, const coreVector2 vRawOffset, const coreFloat fDistance);
     coreBool DefaultMoveTarget   (const coreVector2 vTarget, const coreFloat fSpeedMove, const coreFloat fSpeedTurn);
@@ -61,21 +65,15 @@ public:
     void     DefaultMultiate     (const coreFloat fAngle);
     void     DefaultMultiateLerp (const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime);
 
-    
-    inline cShip* InvertX  () {this->SetPosition( this->GetPosition().InvertedX ()); this->SetDirection( this->GetDirection().InvertedX ()); return this;}
-    inline cShip* InvertY  () {this->SetPosition( this->GetPosition().InvertedY ()); this->SetDirection( this->GetDirection().InvertedY ()); return this;}
-    inline cShip* Rotate90 () {this->SetPosition( this->GetPosition().RotatedZ90()); this->SetDirection( this->GetDirection().RotatedZ90()); return this;}
-    inline cShip* Rotate180() {this->SetPosition(-this->GetPosition());              this->SetDirection(-this->GetDirection());              return this;}
-    inline cShip* Rotate270() {this->SetPosition(-this->GetPosition().RotatedZ90()); this->SetDirection(-this->GetDirection().RotatedZ90()); return this;}
-
+    // 
+    inline cShip* InvertX  () {this->SetPosition(this->GetPosition().InvertedX ());                                 this->SetDirection(this->GetDirection().InvertedX ());                                 this->SetOrientation(this->GetOrientation().InvertedX ());                                 return this;}
+    inline cShip* InvertY  () {this->SetPosition(this->GetPosition().InvertedY ());                                 this->SetDirection(this->GetDirection().InvertedY ());                                 this->SetOrientation(this->GetOrientation().InvertedY ());                                 return this;}
+    inline cShip* Rotate90 () {this->SetPosition(this->GetPosition().RotatedZ90());                                 this->SetDirection(this->GetDirection().RotatedZ90());                                 this->SetOrientation(this->GetOrientation().RotatedZ90());                                 return this;}
+    inline cShip* Rotate180() {this->SetPosition(this->GetPosition()              * coreVector3(-1.0f,-1.0f,1.0f)); this->SetDirection(this->GetDirection()              * coreVector3(-1.0f,-1.0f,1.0f)); this->SetOrientation(this->GetOrientation()              * coreVector3(-1.0f,-1.0f,1.0f)); return this;}
+    inline cShip* Rotate270() {this->SetPosition(this->GetPosition().RotatedZ90() * coreVector3(-1.0f,-1.0f,1.0f)); this->SetDirection(this->GetDirection().RotatedZ90() * coreVector3(-1.0f,-1.0f,1.0f)); this->SetOrientation(this->GetOrientation().RotatedZ90() * coreVector3(-1.0f,-1.0f,1.0f)); return this;}
 
     // 
-    void SetBaseColor(const coreVector3 vColor, const coreBool bInverted = false);
-
-    // 
-    //inline void RefreshColor(const coreFloat fFactor) {const coreFloat fNewFactor = CLAMP((fFactor - 0.2f) * (1.0f/0.8f) * (0.8f/0.6f), 0.0f, 1.0f); this->SetColor3(LERP(COLOR_SHIP_GREY * 0.5f, this->GetBaseColor(), HAS_BIT(m_iBaseColor, SHIP_INVERTED_BIT) ? (1.0f - fNewFactor) : fNewFactor));}
     inline void RefreshColor(const coreFloat fFactor) {const coreFloat fNewFactor = CLAMP((fFactor - 0.2f) * (1.0f/0.8f) * (0.8f/0.6f), 0.0f, 1.0f); this->SetColor3(LERP(COLOR_SHIP_GREY, this->GetBaseColor(), HAS_BIT(m_iBaseColor, SHIP_INVERTED_BIT) ? (1.0f - fNewFactor) : fNewFactor));}
-    //inline void RefreshColor(const coreFloat fFactor) {this->SetColor3(this->GetBaseColor());}
     inline void RefreshColor()                        {this->RefreshColor(this->GetCurHealthPct());}
     inline void InvokeBlink ()                        {if(m_fBlink < 0.2f) m_fBlink = 1.2f;}
 
@@ -102,6 +100,7 @@ public:
     inline       coreFloat    GetCurHealthPct()const {return I_TO_F(m_iCurHealth) * RCP(I_TO_F(m_iMaxHealth));}
     inline       coreInt32    GetPreHealth   ()const {return m_iPreHealth;}
     inline       coreFloat    GetPreHealthPct()const {return I_TO_F(m_iPreHealth) * RCP(I_TO_F(m_iMaxHealth));}
+    inline       coreInt32    GetLostHealth  ()const {return m_iMaxHealth - m_iCurHealth;}
     inline const coreVector2& GetOldPos      ()const {return m_vOldPos;}
     inline       coreVector2  GetMove        ()const {return this->GetPosition().xy() - m_vOldPos;}
     inline       coreVector3  GetBaseColor   ()const {return coreVector4::UnpackUnorm4x8(m_iBaseColor).xyz();}

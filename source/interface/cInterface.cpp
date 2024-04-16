@@ -41,32 +41,25 @@ void cInterface::sPlayerView::Construct(const coreUintW iIndex)
     oShieldValue.SetAlignment(coreVector2(1.0f,1.0f) * vSide);
 
     oScoreTotal.Construct   (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
-    oScoreTotal.SetPosition (coreVector2(0.01f,0.0f) * vSide);
-    oScoreTotal.SetAlignment(coreVector2(1.0f,-1.0f) * vSide);
+    oScoreTotal.SetPosition (coreVector2(0.01f,-0.005f) * vSide);
+    oScoreTotal.SetAlignment(coreVector2(1.0f, -1.0f)   * vSide);
 
     oScoreMission.Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
     oScoreMission.SetPosition (oScoreTotal.GetPosition() + coreVector2(0.01f,-0.035f) * vSide);
     oScoreMission.SetAlignment(oScoreTotal.GetAlignment());
-    
-    
-    
 
-    oComboBar.DefineTexture(0u, "default_white.png");
-    oComboBar.DefineProgram("default_2d_program");
-    oComboBar.SetPosition  (oScoreMission.GetPosition() + coreVector2(-0.007f,-0.07f));
-    oComboBar.SetCenter    (oScoreMission.GetCenter());
-    oComboBar.SetAlignment (oScoreMission.GetAlignment());
+    oCooldownBar.DefineTexture(0u, "default_white.png");
+    oCooldownBar.DefineProgram("default_2d_program");
+    oCooldownBar.SetPosition  (oScoreTotal.GetPosition() + coreVector2(0.003f,-0.105f) * vSide);
+    oCooldownBar.SetAlignment (oScoreTotal.GetAlignment());
 
     oComboValue.Construct   (MENU_FONT_STANDARD_4, MENU_OUTLINE_SMALL);
-    oComboValue.SetPosition (oScoreMission.GetPosition() + coreVector2(-0.007f,-0.01f));
-    oComboValue.SetCenter   (oScoreMission.GetCenter());
-    oComboValue.SetAlignment(oScoreMission.GetAlignment());
+    oComboValue.SetPosition (oScoreTotal.GetPosition() + coreVector2(0.003f,-0.045f) * vSide);
+    oComboValue.SetAlignment(oScoreTotal.GetAlignment());
 
     oChainValue.Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
-    oChainValue.SetPosition (oScoreMission.GetPosition() + coreVector2(0.001f,-0.06f));
-    oChainValue.SetCenter   (oScoreMission.GetCenter());
-    oChainValue.SetAlignment(oScoreMission.GetAlignment());
-    
+    oChainValue.SetPosition (oScoreTotal.GetPosition() + coreVector2(0.003f,-0.13f) * vSide);
+    oChainValue.SetAlignment(oScoreTotal.GetAlignment());
 
     // 
     fSpin = 0.0f;
@@ -163,7 +156,7 @@ void cInterface::Render()
             for(coreUintW j = 0u; j < INTERFACE_LIVES; ++j) m_aView[i].aLife[j].Render();
             m_aView[i].aShieldBar[0].Render();
             m_aView[i].aShieldBar[1].Render();
-            m_aView[i].oComboBar    .Render();
+            m_aView[i].oCooldownBar .Render();
         }
 
         if(m_fAlphaBoss)
@@ -178,7 +171,7 @@ void cInterface::Render()
             // render player labels
             m_aView[i].oShieldValue .Render();
             m_aView[i].oScoreTotal  .Render();
-            //m_aView[i].oScoreMission.Render();
+            //m_aView[i].oScoreMission.Render();   // TODO 1: still needed ?
             m_aView[i].oComboValue  .Render();
             m_aView[i].oChainValue  .Render();
         }
@@ -298,22 +291,22 @@ void cInterface::Move()
         // display score
         oView.oScoreTotal  .SetText(PRINT("%07u", pTable->GetScoreTotal()));
         oView.oScoreMission.SetText(PRINT("%07u", pTable->GetScoreMission(g_pGame->GetCurMissionIndex())));
-        
-        
-        oView.oComboBar.SetSize  (coreVector2(0.15f * MIN(pTable->GetComboCooldown() * 1.1f, 1.0f), 0.013f));
-        oView.oComboBar.SetColor3(COLOR_CHAIN(pTable->GetComboCooldown()));
 
-        oView.oComboValue         .SetText(PRINT("x%.1f",   pTable->GetCurCombo()));
-        oView.oChainValue    .SetText(pTable->GetCurChain() ? PRINT("+%u", pTable->GetCurChain()) : "");
+        // 
+        oView.oCooldownBar.SetSize  (coreVector2(0.15f * MIN(pTable->GetCooldown() * 1.1f, 1.0f), 0.013f));
+        oView.oCooldownBar.SetColor3((pTable->GetCooldown() > 0.5f) ? COLOR_MENU_BLUE : COLOR_MENU_RED);
 
-        
+        // 
+        oView.oComboValue.SetText(PRINT("x%.1f", pTable->GetModifier()));
+        oView.oChainValue.SetText(pTable->GetCurChain() ? PRINT("+%u", pTable->GetCurChain()) : "");
+
         // set player transparency
         oView.aShieldBar[0].SetAlpha(m_fAlphaAll);
         oView.aShieldBar[1].SetAlpha(m_fAlphaAll);
         oView.oShieldValue .SetAlpha(m_fAlphaAll);
         oView.oScoreTotal  .SetAlpha(m_fAlphaAll);
         oView.oScoreMission.SetAlpha(m_fAlphaAll);
-        oView.oComboBar    .SetAlpha(m_fAlphaAll);
+        oView.oCooldownBar .SetAlpha(m_fAlphaAll);
         oView.oComboValue  .SetAlpha(m_fAlphaAll);
         oView.oChainValue  .SetAlpha(m_fAlphaAll);
 
@@ -323,7 +316,7 @@ void cInterface::Move()
         oView.aShieldBar[1].Move();
         oView.oScoreTotal  .Move();
         oView.oScoreMission.Move();
-        oView.oComboBar    .Move();
+        oView.oCooldownBar .Move();
         oView.oComboValue  .Move();
         oView.oChainValue  .Move();
     }
@@ -344,12 +337,12 @@ void cInterface::Move()
         m_aBossHealthBar[1].SetTexSize (coreVector2(fPercent, 1.0f));
 
         // set health bar color
-        const coreVector3 vColor = COLOR_HEALTH(fPercent) * ((fPercent <= 0.2f) ? fDanger : 1.0f);
+        const coreVector3 vColor = LERP(coreVector3(1.0f,1.0f,1.0f), pBoss->GetColor(), fPercent) * ((fPercent <= 0.2f) ? fDanger : 1.0f);
         m_aBossHealthBar[0].SetColor3(vColor * 0.2f);
         m_aBossHealthBar[1].SetColor3(vColor * 0.9f);
 
         // display health value
-        m_BossHealthValue.SetText(PRINT("%.0f%%", CEIL(fPercent * 100.0f)));   // TODO 1: ceil may cause wrong rounding upwards, but still need to handle 0%
+        m_BossHealthValue.SetText(PRINT("%.0f%%", CEIL(fPercent * 100.0f)));   // TODO 1: ceil may cause wrong rounding upwards, but still needs to handle 0%
     }
 
     // display time
@@ -641,35 +634,11 @@ void cInterface::ShowScore(const coreUint32 iScore, const coreUint8 iMedal, cons
 
 
 // ****************************************************************
-// 
-void cInterface::CancelBanner()
-{
-    if(!this->IsBannerActive()) return;
-    
-    if(m_iBannerType != INTERFACE_BANNER_TYPE_SCORE) return;
-
-    if(coreMath::IsNear(m_Medal.GetAlpha(), 1.0f))
-        m_fBannerDuration = g_pGame->GetTimeTable()->GetTimeEvent() - m_fBannerStart + INTERFACE_BANNER_SPEED_REV;
-}
-
-
-// ****************************************************************
 // check for active banner
 coreBool cInterface::IsBannerActive()const
 {
     // compare with game-time offset
-    return ((g_pGame->GetTimeTable()->GetTimeEvent() - m_fBannerStart) <= m_fBannerDuration) ? true : false;
-}
-
-
-// ****************************************************************
-// 
-void cInterface::ChangeBossName(const coreChar* pcMain)
-{
-    // 
-    m_aBannerText[0].SetText(pcMain);
-    m_aBannerText[1].SetText(pcMain);
-    m_aBannerText[3].SetText(pcMain);
+    return ((g_pGame->GetTimeTable()->GetTimeEvent() - m_fBannerStart) <= m_fBannerDuration);
 }
 
 
@@ -698,7 +667,19 @@ void cInterface::ShowStory(const coreChar* pcRow1, const coreChar* pcRow2)
 coreBool cInterface::IsStoryActive()const
 {
     // 
-    return ((g_pGame->GetTimeTable()->GetTimeEvent() - m_fStoryStart) <= INTERFACE_STORY_DURATION) ? true : false;
+    return ((g_pGame->GetTimeTable()->GetTimeEvent() - m_fStoryStart) <= INTERFACE_STORY_DURATION);
+}
+
+
+// ****************************************************************
+// 
+void cInterface::ChangeBannerText(const coreChar* pcMain, const coreChar* pcSub)
+{
+    // 
+    if(pcMain) m_aBannerText[0].SetText(pcMain);
+    if(pcMain) m_aBannerText[1].SetText(pcMain);
+    if(pcSub)  m_aBannerText[2].SetText(pcSub);
+    if(pcMain) m_aBannerText[3].SetText(pcMain);
 }
 
 
@@ -734,7 +715,7 @@ void cInterface::UpdateLayout()
         nUpdateFunc(&oView.oShieldValue,  vBottom + vSide);
         nUpdateFunc(&oView.oScoreTotal,   vTop    + vSide);
         nUpdateFunc(&oView.oScoreMission, vTop    + vSide);
-        nUpdateFunc(&oView.oComboBar,     vTop    + vSide);
+        nUpdateFunc(&oView.oCooldownBar,  vTop    + vSide);
         nUpdateFunc(&oView.oComboValue,   vTop    + vSide);
         nUpdateFunc(&oView.oChainValue,   vTop    + vSide);
     }

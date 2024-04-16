@@ -64,7 +64,7 @@ void cWindscreen::Move()
                 if(fNewLifeTime > 0.0f)
                 {
                     // 
-                    (*it)->SetAlpha (CLAMP(fNewLifeTime, 0.0f, 1.0f));
+                    (*it)->SetAlpha (MIN(fNewLifeTime, 1.0f));
                     (*it)->SetStatus(coreMath::FloatToBits(fNewLifeTime));
                     DYN_KEEP(it)
                 }

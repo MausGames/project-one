@@ -11,17 +11,17 @@
 #define _P1_GUARD_BULLET_H_
 
 // TODO 3: pre-allocate bullets (at least for player) at the beginning to improve resource loading
-// TODO 3: use prefetch with more precise numbers (also in enemy-manager)
+// TODO 3: use prefetch with more precise numbers (also in enemy-manager) (maybe with per-class config)
 // TODO 3: align bullet memory ? (also check other possible locations (e.g. enemies))
 // TODO 3: add memory pool object for bullets ? also for enemy
 // TODO 3: remove tons of template instantiations (also enemies ? other templates ?) (CreateBullet and AllocateEnemy create tons of symbols)
-// TODO 3: make ray bullet smoother geometrically (front round)
 // TODO 3: sort bullet classes (color, enemy<>player, normal<>special), improve array indexing and caching
 // TODO 3: shift spear-bullet collision like ray-bullet
+// TODO 2: lots of bullets with direction-outlines can create holes in outlines by nearly-invisible backsides (can this be even fixed ?)
+// TODO 3: bullets (ray) spawning directly in front of a hollow object fly inside
 // TODO 5: bullet -> to POD-type with single parent object
 // TODO 3: reorder bullets either yellow->green or green->yellow, so they are overlapping consistently (in default order)
 // TODO 4: surge-bullets to wave-weapon, rename one of it (probably wave-weapon to surge-weapon, code-only anyway)
-// TODO 2: dynamic depth needs to consider outline when calculating distance
 
 
 // ****************************************************************
@@ -758,40 +758,6 @@ public:
     static constexpr const coreChar* ConfigProgramInstancedName() {return "object_ship_glow_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_FULL;}
     static constexpr coreBool        ConfigShadow              () {return true;}
-
-
-private:
-    // execute own routines
-    void __ImpactOwn (const coreVector2 vImpact)final;
-    void __ReflectOwn()final;
-    void __MoveOwn   ()final;
-};
-
-
-// ****************************************************************
-// 
-class cChromaBullet final : public cBullet
-{
-private:
-    coreFloat m_fScale;   // 
-
-
-public:
-    cChromaBullet()noexcept;
-
-    ENABLE_COPY(cChromaBullet)
-    ASSIGN_ID(15, "Chroma")
-
-    // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(1.0f,1.0f,1.0f)); m_fAnimation = 0.0f; m_fFade = 0.0f; m_fScale = 1.0f;}
-
-    // 
-    inline cChromaBullet* ChangeScale(const coreFloat fScale) {m_fScale = fScale; return this;}
-
-    // bullet configuration values
-    static constexpr const coreChar* ConfigProgramInstancedName() {return "object_chroma_inst_program";}
-    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_FULL;}
-    static constexpr coreBool        ConfigShadow              () {return false;}
 
 
 private:

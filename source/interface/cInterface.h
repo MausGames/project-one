@@ -49,7 +49,7 @@ private:
         cGuiLabel  oShieldValue;             // player shield value
         cGuiLabel  oScoreTotal;              // total score
         cGuiLabel  oScoreMission;            // mission score
-        cGuiObject oComboBar;                // combo bar
+        cGuiObject oCooldownBar;             // cooldown bar
         cGuiLabel  oComboValue;              // combo label
         cGuiLabel  oChainValue;              // chain value
         coreFlow   fSpin;                    // 
@@ -105,14 +105,14 @@ public:
     void ShowWave   (const coreChar*  pcName);
     void ShowScore  (const coreChar*  pcMain, const coreChar* pcSub, const coreUint8 iMedal, const coreUint8 iMedalType);
     void ShowScore  (const coreUint32 iScore,                        const coreUint8 iMedal, const coreUint8 iMedalType);
-    void CancelBanner();
     coreBool IsBannerActive()const;
-    
-    void ChangeBossName(const coreChar* pcMain);
 
     // 
     void ShowStory(const coreChar* pcRow1, const coreChar* pcRow2 = "");
     coreBool IsStoryActive()const;
+
+    // 
+    void ChangeBannerText(const coreChar* pcMain, const coreChar* pcSub);
 
     // 
     void UpdateLayout();

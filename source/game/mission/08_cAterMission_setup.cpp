@@ -52,13 +52,13 @@ void cAterMission::__SetupOwn()
 
         STAGE_FINISH_PLAY
     });
-
+STAGE_START_HERE
     // ################################################################
     // 
-    //STAGE_MAIN({TAKE_ALWAYS, 5u})
-    //{
-    //    STAGE_BOSS(m_ProjectOne, {60.0f, 120.0f, 180.0, 240.0f})
-    //});
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        STAGE_BOSS(m_ProjectOne, {60.0f, 120.0f, 180.0, 240.0f})
+    });
 
     // ################################################################
     // 

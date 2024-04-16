@@ -70,11 +70,6 @@ void cPostProcessing::Render()
         m_aInterior[i].DefineTexture(POST_TEXTURE_UNIT_DISTORTION,  g_pDistortion ->GetFrameBuffer()->GetColorTarget(0u).pTexture);
     }
 
-    // clear color buffer on non-default transformation
-    if(!coreMath::IsNear(this->GetPosition().x, 0.0f) || !coreMath::IsNear(this->GetPosition().y, 0.0f) ||
-       !coreMath::IsNear(this->GetSize    ().x, 1.0f) || !coreMath::IsNear(this->GetSize    ().y, 1.0f) || !this->GetDirection().IsAligned())
-        glClear(GL_COLOR_BUFFER_BIT);
-
     glDisable(GL_BLEND);
     {
         // render interiors (post-process)

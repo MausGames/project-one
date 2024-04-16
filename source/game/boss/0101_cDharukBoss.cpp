@@ -182,6 +182,9 @@ void cDharukBoss::__RenderOwnOver()
 // 
 void cDharukBoss::__MoveOwn()
 {
+    // 
+    this->_UpdateBoss();
+
     if(this->ReachedDeath()) this->Kill(true);   
 
     // 

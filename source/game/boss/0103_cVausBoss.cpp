@@ -83,6 +83,9 @@ void cVausBoss::__KillOwn(const coreBool bAnimated)
 // 
 void cVausBoss::__MoveOwn()
 {
+    // 
+    this->_UpdateBoss();
+
     if(this->GetCurHealthPct() < 0.9f) this->Kill(true);                
 
 
@@ -128,7 +131,7 @@ void cVausBoss::__MoveOwn()
 
                 if(fTime < 0.46f)
                 {
-                    this->DefaultMoveLerp(m_vLastPosition, m_vLastPosition + coreVector2(0.0f,0.3f), SIN(PI * LERPB(1.0f, 0.0f, 1.0f - fTime / 0.46f)));
+                    this->DefaultMoveLerp(m_vLastPosition, m_vLastPosition + coreVector2(0.0f,0.3f), SIN(PI * LERPBR(0.0f, 1.0f, fTime / 0.46f)));
                 }
                 else
                 {

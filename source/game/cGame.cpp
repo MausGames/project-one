@@ -178,7 +178,6 @@ void cGame::Render()
         DEPTH_PUSH
 
         // 
-        m_ChromaManager.Render();
         m_ItemManager  .Render();
         m_ShieldManager.Render();
 
@@ -256,7 +255,6 @@ void cGame::Move()
     m_pCurMission->MoveAfter();
 
     // 
-    m_ChromaManager.Move();
     m_ItemManager  .Move();
     m_ShieldManager.Move();
 
@@ -295,8 +293,6 @@ void cGame::MoveOverlay()
 // load new active mission
 void cGame::LoadMissionID(const coreInt32 iID, const coreUint8 iTakeFrom, const coreUint8 iTakeTo)
 {
-    if(m_pCurMission) if(m_pCurMission->GetID() == iID) return;
-
     // 
     this->__ClearAll(false);
 
@@ -304,8 +300,8 @@ void cGame::LoadMissionID(const coreInt32 iID, const coreUint8 iTakeFrom, const 
     const coreInt32 iOldID    = m_pCurMission ? m_pCurMission->GetID() : cNoMission::ID;
     const coreUintW iOldIndex = m_iCurMissionIndex;
 
-    // delete possible old mission
-    SAFE_DELETE(m_pCurMission)
+    // hold old mission (to keep resources valid)
+    const cMission* pOldMission = m_pCurMission;
 
     // create new mission
     switch(iID)
@@ -324,6 +320,9 @@ void cGame::LoadMissionID(const coreInt32 iID, const coreUint8 iTakeFrom, const 
     case cErrorMission  ::ID: m_pCurMission = new cErrorMission  (); break;
     case cDemoMission   ::ID: m_pCurMission = new cDemoMission   (); break;
     }
+
+    // delete possible old mission
+    SAFE_DELETE(pOldMission)
 
     // 
     m_iCurMissionIndex = std::find(m_piMissionList, m_piMissionList + m_iNumMissions, iID) - m_piMissionList;
@@ -402,13 +401,7 @@ void cGame::LoadNextMission()
 // restart currently active mission
 void cGame::RestartMission()
 {
-    // hold old mission (to keep resources valid)
-    cMission* pOldMission = m_pCurMission;
-    m_pCurMission = NULL;
-
-    // 
-    this->LoadMissionID(pOldMission->GetID());
-    SAFE_DELETE(pOldMission)
+    this->LoadMissionID(m_pCurMission->GetID());
 }
 
 
@@ -1029,26 +1022,6 @@ void cGame::__HandleCollisions()
     });
 
     // 
-    cPlayer::TestCollision(PLAYER_TEST_ALL, TYPE_CHROMA, [](cPlayer* OUTPUT pPlayer, cChromaBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit)
-    {
-        // 
-        pPlayer->GetScoreTable()->AddScore(pBullet->GetDamage(), false);
-
-        // 
-        pBullet->Deactivate(true, vIntersection.xy());
-
-        // 
-        pPlayer->GetDataTable()->EditCounterTotal  ()->iChromaCollected += 1u;
-        pPlayer->GetDataTable()->EditCounterMission()->iChromaCollected += 1u;
-        pPlayer->GetDataTable()->EditCounterSegment()->iChromaCollected += 1u;
-
-        // 
-        g_pSave->EditGlobalStats      ()->iChromaCollected += 1u;
-        g_pSave->EditLocalStatsMission()->iChromaCollected += 1u;
-        g_pSave->EditLocalStatsSegment()->iChromaCollected += 1u;
-    });
-
-    // 
     cPlayer::TestCollision(PLAYER_TEST_ALL, TYPE_ITEM, [](cPlayer* OUTPUT pPlayer, cItem* OUTPUT pItem, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         // 
@@ -1090,10 +1063,12 @@ void cGame::__ClearAll(const coreBool bAnimated)
     m_EnemyManager       .ClearEnemies(bAnimated);
     m_BulletManagerPlayer.ClearBullets(bAnimated);
     m_BulletManagerEnemy .ClearBullets(bAnimated);
-    m_ChromaManager      .ClearChromas(bAnimated);
     m_ItemManager        .ClearItems  (bAnimated);
     m_ShieldManager      .ClearShields(bAnimated);
     m_CrashManager       .ClearCrashes(bAnimated);
+
+    // 
+    this->HideHelpers();
 
     // 
     if(m_pRepairEnemy)

@@ -113,6 +113,9 @@ void cCholBoss::__RenderOwnUnder()
 void cCholBoss::__MoveOwn()
 {
     // 
+    this->_UpdateBoss();
+
+    // 
     m_fAnimation.UpdateMod(1.0f, 100.0f);
 
     // ################################################################

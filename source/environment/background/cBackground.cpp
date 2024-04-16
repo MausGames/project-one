@@ -12,13 +12,31 @@ coreMemoryPool cBackground::s_MemoryPool = coreMemoryPool(sizeof(coreObject3D), 
 
 
 // ****************************************************************
+// create static string lists (copied from coreShader)
+template <const coreChar* pcString, coreUintW iLength, coreUintW iNum> struct sStringList final
+{
+    coreChar       aacCharArray[iNum][iLength];
+    coreHashString asHashString[iNum];
+
+    sStringList()noexcept {for(coreUintW i = 0u; i < iNum; ++i) {WARN_IF(coreUintW(coreData::PrintBase(aacCharArray[i], iLength, pcString, i)) >= iLength) {} asHashString[i] = aacCharArray[i];}}
+    inline const coreHashString& operator [] (const coreUintW iIndex)const {ASSERT(iIndex < iNum) return asHashString[iIndex];}
+};
+
+#define __STRING_LIST(s,n,v)              \
+    extern const coreChar v ## __a[] = s; \
+    static const sStringList<v ## __a, ARRAY_SIZE(v ## __a), n> v;
+
+__STRING_LIST("u_av3OverlayTransform[%zu]", MAX(DESERT_SAND_NUM, SNOW_SNOW_NUM, MOSS_RAIN_NUM), s_asOverlayTransform)
+
+
+// ****************************************************************
 // constructor
 cBackground::cBackground()noexcept
 : m_pOutdoor (NULL)
 , m_pWater   (NULL)
 {
     // create background frame buffer
-    m_FrameBuffer.AttachTargetBuffer(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB8);   // TODO 1: RGB might not be supported for render targets, Create needs to return state, then configuration needs to change, or maybe transparent mechanism in Create -> is a TODO 
+    m_FrameBuffer.AttachTargetBuffer(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB8);   // TODO 1: RGB might not be supported for render targets, Create() needs to return state, then configuration needs to change, or maybe transparent mechanism in Create() -> is a TODO 
     m_FrameBuffer.AttachTargetBuffer(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH16);
     m_FrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED);
 

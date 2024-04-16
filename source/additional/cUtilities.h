@@ -10,7 +10,7 @@
 #ifndef _P1_GUARD_UTILITIES_H_
 #define _P1_GUARD_UTILITIES_H_
 
-// TODO 3: optimize AlongStar, AlongStarNormal, SmoothAim
+// TODO 3: optimize AlongStar, AlongStarNormal, SmoothAim (maybe remove this task)
 // TODO 4: move ID color directly into background class if not used otherwise (emphasize "highlight" usage)
 // TODO 1: move a lot of those utilities into engine if proven well, look for other stuff in whole game
 // TODO 3: bounce lerp
@@ -304,15 +304,6 @@ constexpr FUNC_CONST coreVector3 OriRoundDir(const coreVector2 vOrientation, con
 constexpr FUNC_CONST coreFloat DelayTime(const coreFloat fTime, const coreFloat fOffset, const coreFloat fLength)
 {
     return MIN(fTime, fOffset) + MAX(fTime - fOffset - fLength, 0.0f);
-}
-
-
-// ****************************************************************
-// 
-template <typename T> constexpr FUNC_LOCAL T QuickArray(const coreUintW iIndex, const std::initializer_list<T> atArray)
-{
-    ASSERT(iIndex < atArray.size())
-    return atArray.begin()[iIndex];
 }
 
 

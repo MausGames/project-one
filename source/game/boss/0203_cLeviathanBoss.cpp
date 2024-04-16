@@ -8,6 +8,8 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
+// TODO 1: there could be a wave-mechanik while boss is circling
+
 
 // ****************************************************************
 // counter identifier
@@ -115,8 +117,8 @@ void cLeviathanBoss::__ResurrectOwn()
     {
         cEnemy* pPart = this->__GetPart(i);
 
+        pPart->AddStatus(ENEMY_STATUS_HIDDEN);
         pPart->Resurrect();
-        pPart->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);   // # after resurrection
     }
 
     // 
@@ -177,6 +179,9 @@ void cLeviathanBoss::__RenderOwnOver()
 // 
 void cLeviathanBoss::__MoveOwn()
 {
+    // 
+    this->_UpdateBoss();
+
     cNevoMission* pMission   = d_cast<cNevoMission*>(g_pGame->GetCurMission());
     coreObject3D* pContainer = pMission->GetContainer();
 
@@ -679,14 +684,15 @@ void cLeviathanBoss::__MoveOwn()
         const coreFloat   fHeight = g_pEnvironment->RetrieveSafeHeight(pPart->GetPosition().xy());
 
         // 
-        const coreBool bOldEnabled =  pPart->IsEnabled(CORE_OBJECT_ENABLE_ALL);
-        const coreBool bNewEnabled = (pPart->GetPosition().z > fHeight);
+        const coreBool bOldHidden =  pPart->HasStatus(ENEMY_STATUS_HIDDEN);
+        const coreBool bNewHidden = (pPart->GetPosition().z <= fHeight);
 
         // 
-        pPart->SetEnabled(bNewEnabled ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+        if(bNewHidden) pPart->AddStatus   (ENEMY_STATUS_HIDDEN);
+                  else pPart->RemoveStatus(ENEMY_STATUS_HIDDEN);
 
         // 
-        if(bOldEnabled != bNewEnabled)
+        if(bOldHidden != bNewHidden)
         {
             const coreVector2 vProjectedPos = g_pForeground->Project3D(vPos);
 
@@ -718,7 +724,7 @@ void cLeviathanBoss::__MoveOwn()
         }
 
         // 
-        if(bNewEnabled) pPart->DefaultAxiate(m_fMovement * ((i & 0x01u) ? 1.0f : -1.0f));
+        if(!bNewHidden) pPart->DefaultAxiate(m_fMovement * ((i & 0x01u) ? 1.0f : -1.0f));
     }
 
     if(m_aiCounter[ROTATION_STATUS])
@@ -763,7 +769,7 @@ void cLeviathanBoss::__MoveOwn()
         {
             // 
             m_avVector[SCATTER_FORCE].w      = ROUND(m_Head.GetPosition().xy().Normalized().Angle() / (0.4f*PI)) * (0.4f*PI);
-            m_avVector[SCATTER_FORCE + 1u].w = SIGN(-vNewOri.y);
+            m_avVector[SCATTER_FORCE + 1u].w = -SIGN(vNewOri.y);
 
             // 
             for(coreUintW i = 0u; i < LEVIATHAN_PARTS; ++i)
@@ -942,7 +948,7 @@ void cLeviathanBoss::__UpdateHealth()
         cEnemy* pPart = this->__GetPart(i);
 
         // 
-        iNewDamage += pPart->GetMaxHealth() - pPart->GetCurHealth();
+        iNewDamage += pPart->GetLostHealth();
 
         if(pPart->ReachedDeath())
         {
@@ -965,7 +971,7 @@ void cLeviathanBoss::__UpdateHealth()
 void cLeviathanBoss::__RefreshHealth()
 {
     // 
-    m_aiCounter[OLD_DAMAGE] = this->GetMaxHealth() - this->GetCurHealth();
+    m_aiCounter[OLD_DAMAGE] = this->GetLostHealth();
 
     for(coreUintW i = 0u; i < LEVIATHAN_PARTS; ++i)
     {
@@ -998,8 +1004,8 @@ FUNC_NOALIAS void cLeviathanBoss::__CalcCurvePosDir(const coreVector3 vAxis, con
 
     // 
     const coreMatrix3 mRota = coreMatrix4::RotationAxis(fAngle, vAxis).m123();
-    const coreVector3 vDir  = coreVector3(vAxis.xy().Normalized().Rotated90(), 0.0f);
-    const coreVector3 vPos  = vDir * mRota; // TODO 1: why was that normalized ?  
+    const coreVector3 vDir  = vAxis.xy().IsNull() ? coreVector3(1.0f,0.0f,0.0f) : coreVector3(vAxis.xy().Normalized().Rotated90(), 0.0f);
+    const coreVector3 vPos  = vDir * mRota;
 
     // 
     (*vPosition)  = vPos * vScale;

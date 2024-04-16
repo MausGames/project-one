@@ -10,8 +10,6 @@
 #ifndef _P1_GUARD_HELPER_H_
 #define _P1_GUARD_HELPER_H_
 
-// TODO 2: make sure positions are reset to HIDDEN_POS between stages, not not cause accidental popping
-
 
 // ****************************************************************
 // helper definitions

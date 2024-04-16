@@ -14,7 +14,7 @@ sGameInput g_aGameInput[INPUT_TYPES] = {};
 sGameInput g_TotalInput              = {};
 sMenuInput g_MenuInput               = {};
 
-static coreBool m_abFireToggle[INPUT_TYPES + 1u] = {};
+static coreBool s_abFireToggle[INPUT_TYPES + 1u] = {};
 
 
 // ****************************************************************
@@ -324,19 +324,19 @@ void UpdateInput()
         {
             // 
             const coreBool bPress = HAS_BIT(pInput->iActionPress, 0u);
-            if(bPress) m_abFireToggle[iToggleIndex] = !m_abFireToggle[iToggleIndex];
+            if(bPress) s_abFireToggle[iToggleIndex] = !s_abFireToggle[iToggleIndex];
 
-            SET_BIT(pInput->iActionPress,   0u,  m_abFireToggle[iToggleIndex] && bPress)
-            SET_BIT(pInput->iActionRelease, 0u, !m_abFireToggle[iToggleIndex] && bPress)
-            SET_BIT(pInput->iActionHold,    0u,  m_abFireToggle[iToggleIndex])
+            SET_BIT(pInput->iActionPress,   0u,  s_abFireToggle[iToggleIndex] && bPress)
+            SET_BIT(pInput->iActionRelease, 0u, !s_abFireToggle[iToggleIndex] && bPress)
+            SET_BIT(pInput->iActionHold,    0u,  s_abFireToggle[iToggleIndex])
         }
 
         // 
         if((iFireMode != 2u) || !STATIC_ISVALID(g_pGame))
-            m_abFireToggle[iToggleIndex] = false;
+            s_abFireToggle[iToggleIndex] = false;
 
         // 
-        SET_BIT(pInput->iStatus, 0u, m_abFireToggle[iToggleIndex])
+        SET_BIT(pInput->iStatus, 0u, s_abFireToggle[iToggleIndex])
     };
     nFireModeFunc(&g_aGameInput[0], 0u, 0u);
     nFireModeFunc(&g_aGameInput[1], 1u, 1u);

@@ -23,7 +23,7 @@
 // TODO 5: display unattached joysticks and joystick names somehow
 // TODO 3: highlight which joystick is which input set
 // TODO 3: summary_ add separate total-score for each player
-// TODO 3: update texture filter and render quality in realtime
+// TODO 3: update texture filter and render quality in realtime (resource-manager reset ?)
 // TODO 3: double initial languages by switching to two columns (on demand?)
 // TODO 5: stages in GameMenu should be called segments
 // TODO 2: upper white border in settings menu "moves" during transition on 1760x990, check all menus for moving during transition in common resolutions

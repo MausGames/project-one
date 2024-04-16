@@ -187,7 +187,7 @@ void cSnowBackground::__RenderOwnAfter()
         const coreVector2 vNewTexOffset = m_Snow.GetTexOffset() + coreVector2(0.56f,0.36f) * I_TO_F(POW2(i)) + coreVector2(0.13f * SIN(m_fSnowWave * (0.125f*PI) + I_TO_F(POW2(i))), 0.0f);
         const coreFloat   fNewScale     = 0.9f - 0.07f * I_TO_F(i);
 
-        pLocal->SendUniform(PRINT("u_av3OverlayTransform[%zu]", i), coreVector3(vNewTexOffset.Processed(FRACT), fNewScale));
+        pLocal->SendUniform(s_asOverlayTransform[i], coreVector3(vNewTexOffset.Processed(FRACT), fNewScale));
     }
 
     glDisable(GL_DEPTH_TEST);

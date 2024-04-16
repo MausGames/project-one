@@ -695,7 +695,7 @@ void cSpecialEffects::RumblePlayer(const cPlayer* pPlayer, const coreFloat fStre
     if(!STATIC_ISVALID(g_pGame)) return;
 
     // loop through all active players
-    g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pCurPlayer, const coreUintW i)
+    g_pGame->ForEachPlayer([&](const cPlayer* pCurPlayer, const coreUintW i)
     {
         if((pPlayer != pCurPlayer) && (pPlayer != NULL)) return;
 
@@ -877,7 +877,7 @@ void cSpecialEffects::MacroDestructionColor(const coreObject3D* pObject, const c
 
     // 
     const coreVector3 vPosition = pObject->GetPosition();
-    const coreFloat   fPower    = SQRT(MAX(pObject->GetCollisionRadius() / 3.0f - 0.4f, 1.0f));
+    const coreFloat   fPower    = SQRT(MAX(pObject->GetVisualRadius() / 3.0f - 0.4f, 1.0f));
 
     // 
     g_pDistortion->CreateWave        (vPosition, 2.5f  * fPower, 3.0f);
@@ -893,7 +893,7 @@ void cSpecialEffects::MacroDestructionDark(const coreObject3D* pObject)
 
     // 
     const coreVector3 vPosition = pObject->GetPosition();
-    const coreFloat   fPower    = SQRT(MAX(pObject->GetCollisionRadius() / 3.0f - 0.4f, 1.0f));
+    const coreFloat   fPower    = SQRT(MAX(pObject->GetVisualRadius() / 3.0f - 0.4f, 1.0f));
 
     // (# more particles than color) 
     g_pDistortion->CreateWave       (vPosition, 2.5f  * fPower, 3.0f);

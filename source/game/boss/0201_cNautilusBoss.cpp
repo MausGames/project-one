@@ -113,6 +113,9 @@ void cNautilusBoss::__RenderOwnOver()
 // 
 void cNautilusBoss::__MoveOwn()
 {
+    // 
+    this->_UpdateBoss();
+
     cNevoMission* pMission   = d_cast<cNevoMission*>(g_pGame->GetCurMission());
     coreObject3D* pContainer = pMission->GetContainer();
 

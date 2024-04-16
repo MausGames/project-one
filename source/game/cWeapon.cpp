@@ -185,7 +185,7 @@ cPulseWeapon::cPulseWeapon()noexcept
 : m_fCharge (0.0f)
 {
     // set base fire-rate
-    m_CooldownTimer.SetSpeed(6.0f);//3.0f);
+    m_CooldownTimer.SetSpeed(6.0f);
 
     // load shooting sound-effects
     m_pBulletSound = Core::Manager::Resource->Get<coreSound>("bullet_pulse.wav");

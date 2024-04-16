@@ -15,13 +15,12 @@
 // TODO 3: show pacifist damage in interface, pulsing and filling up, also show that weapons are disabled
 // TODO 5: maybe spawn players in flight direction, mission start and continue ?
 // TODO 2: FindPlayer may find player outside of area (during resurrection)
-// TODO 3: check "hold old mission (to keep resources valid)" for loadmission/nextmission
 
 
 // ****************************************************************
 // game definitions
 #define GAME_PLAYERS         (PLAYERS)     // default number of players
-#define GAME_HELPERS         (9u)          // 
+#define GAME_HELPERS         (HELPERS)     // 
 #define GAME_CONTINUES       (CONTINUES)   // 
 #define GAME_INTRO_DELAY     (0.2f)        // 
 #define GAME_INTRO_DURATION  (3.5f)        // 
@@ -116,7 +115,6 @@ private:
     cEnemyManager  m_EnemyManager;          // enemy manager
     cBulletManager m_BulletManagerPlayer;   // low-priority bullet manager
     cBulletManager m_BulletManagerEnemy;    // high-priority bullet manager
-    cChromaManager m_ChromaManager;         // 
     cItemManager   m_ItemManager;           // 
     cShieldManager m_ShieldManager;         // 
     cCrashManager  m_CrashManager;          // 
@@ -186,6 +184,7 @@ public:
     void PushDepthLevel    (const coreUint8 iLevels);
     void PushDepthLevelShip();
     
+    void HideHelpers    () {for(coreUintW i = 0u; i < GAME_HELPERS; ++i) if(m_aHelper[i].HasStatus(HELPER_STATUS_DEAD)) m_aHelper[i].SetPosition(coreVector3(HIDDEN_POS, 0.0f));}
     void KillRepairEnemy() {if(m_pRepairEnemy) m_pRepairEnemy->TakeDamage(m_pRepairEnemy->GetCurHealth(), ELEMENT_NEUTRAL, coreVector2(0.0f,0.0f), NULL);}
 
     // 
@@ -200,7 +199,6 @@ public:
     inline cEnemyManager*   GetEnemyManager       ()                         {return &m_EnemyManager;}
     inline cBulletManager*  GetBulletManagerPlayer()                         {return &m_BulletManagerPlayer;}
     inline cBulletManager*  GetBulletManagerEnemy ()                         {return &m_BulletManagerEnemy;}
-    inline cChromaManager*  GetChromaManager      ()                         {return &m_ChromaManager;}
     inline cItemManager*    GetItemManager        ()                         {return &m_ItemManager;}
     inline cShieldManager*  GetShieldManager      ()                         {return &m_ShieldManager;}
     inline cCrashManager*   GetCrashManager       ()                         {return &m_CrashManager;}

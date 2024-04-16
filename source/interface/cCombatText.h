@@ -12,14 +12,15 @@
 
 // TODO 3: allow localized text with standard numbers
 // TODO 5: different labels and animations (size, solid background, 000000 -> 123456, ZSDK -> TEST)
-// TODO 3: if possible, reuse the same text
 // TODO 1: text should be moved into screen if outside (in realtime, due to labels moving each other)
 // TODO 1: badge text should also move with other text, or be above
 
 
 // ****************************************************************
 // combat text definitions
-#define COMBAT_LABELS (16u)   // number of label objects
+#define COMBAT_LABELS_SMALL (16u)                                       // 
+#define COMBAT_LABELS_BIG   (4u)                                        // 
+#define COMBAT_LABELS       (COMBAT_LABELS_SMALL + COMBAT_LABELS_BIG)   // total number of label objects
 
 
 // ****************************************************************
@@ -27,15 +28,16 @@
 class cCombatText final
 {
 private:
-    cGuiLabel m_aLabel [COMBAT_LABELS];   // label objects to display combat text
-    coreFlow  m_afTimer[COMBAT_LABELS];   // animation timers
-    coreUint8 m_aiType [COMBAT_LABELS];   // 
+    cGuiLabel m_aLabel [COMBAT_LABELS];    // label objects to display combat text
+    coreFlow  m_afTimer[COMBAT_LABELS];    // animation timers
+    coreUint8 m_aiType [COMBAT_LABELS];    // 
 
-    coreUintW m_iCurLabel;                // current label object
+    cGuiLabel* m_apOrder[COMBAT_LABELS];   // 
+    coreUint8  m_iOrderNum;                // 
 
-    cGuiObject m_BadgeIcon;               // 
-    cGuiLabel  m_BadgeLabel;              // 
-    coreFlow   m_fBadgeTimer;             // 
+    cGuiObject m_BadgeIcon;                // 
+    cGuiLabel  m_BadgeLabel;               // 
+    coreFlow   m_fBadgeTimer;              // 
 
 
 public:
@@ -47,11 +49,10 @@ public:
     void Render();
     void Move();
 
-    // add new active label object
-    void AddText (const coreChar* pcText, const coreVector3 vPosition, const coreVector3 vColor, const coreUint8 iType);
-    void AddScore(const coreInt32 iValue, const coreVector3 vPosition);
-
     // 
+    void AddScore(const coreUint32 iValue, const coreVector3 vPosition, const coreBool bBig);
+    void AddExtra(const coreUint32 iValue, const coreVector3 vPosition, const coreBool bBig);
+    void AddChain(const coreUint32 iValue, const coreVector3 vPosition, const coreBool bBig);
     void AddBadge(const coreUint32 iValue, const coreVector3 vPosition);
 
     // 
@@ -59,6 +60,15 @@ public:
 
     // reset the combat text
     void Reset();
+
+
+private:
+    // 
+    void __AddLabel(const coreChar* pcText, const coreVector3 vPosition, const coreVector3 vColor, const coreUint8 iType);
+
+    // 
+    void __AddOrder   (cGuiLabel* pLabel);
+    void __RemoveOrder(cGuiLabel* pLabel);
 };
 
 

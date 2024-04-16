@@ -1435,7 +1435,7 @@ void cErrorMission::__SetupOwn()
                 if(avJumpData[i].w >= 5.0f * fLifeSpeed)
                 {
                     pEnemy->SetCurHealthPct(0.5f);
-                    pEnemy->RefreshColor();
+                    pEnemy->RefreshColor(0.5f);
                     pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * ((i < 6u) ? 1.3f : 1.0f));
                     avJumpData[i].w = 0.0f;
                 }

@@ -497,7 +497,7 @@ void cCalorMission::__MoveOwnAfter()
         if(pOwner)
         {
             // 
-            oLoad.SetPosition(coreVector3(pOwner->GetPosition().xy() + vDir * (pOwner->GetCollisionRadius() + 3.5f), 0.0f));
+            oLoad.SetPosition(coreVector3(pOwner->GetPosition().xy() + vDir * (pOwner->GetVisualRadius() + 3.5f), 0.0f));
             oLoad.SetAlpha   (1.0f);
         }
         else

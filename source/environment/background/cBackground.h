@@ -16,7 +16,6 @@
 // TODO 3: optimize density to never try to draw on 0.0f
 // TODO 3: object-sets with 0% visibility and no active object should be skipped entirely
 // TODO 3: make grass leafs same color as other plants
-// TODO 1: make wind-sound (sand) depend on speed
 // TODO 3: check if alL _RESERVES are correct
 // TODO 3: reduce object-buffer sizes, not all are drawn at once anyway, also allocate only once
 // TODO 3: positions in separate list (when iterating through lambda)
@@ -30,7 +29,6 @@
 // TODO 3: EnableShadowRead only if appropriate ground objects would be rendered (IsInstanced)
 // TODO 5: grass and blood textures are duplicated (especially normal maps)
 // TODO 1: can thunder effect cause issues for some players ? are there other effects causing issues ? (change effects or add disable option)
-// TODO 3: pre-create all u_av3OverlayTransform permutation hashstrings for overlay uniforms (single table with max number)
 // TODO 3: improve snow texture to little flakes (broken quads) 
 // TODO 3: in Add functions change sListKey to a combination of resource identifiers
 // TODO 3: adding temporary objects should cache resources
@@ -436,7 +434,7 @@ public:
     cDarkBackground()noexcept;
 
     DISABLE_COPY(cDarkBackground)
-    ASSIGN_ID_EX(8, "Dark", COLOR_MENU_PURPLE)
+    ASSIGN_ID_EX(8, "Dark", coreVector3(0.5f,0.5f,0.5f))
 };
 
 
@@ -479,7 +477,7 @@ public:
     ~cCloudBackground()final;
 
     DISABLE_COPY(cCloudBackground)
-    ASSIGN_ID_EX(99, "Cloud", coreVector3(0.5f,0.5f,0.5f))
+    ASSIGN_ID_EX(99, "Cloud", COLOR_MENU_PURPLE)
 
 
 private:

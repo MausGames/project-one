@@ -105,7 +105,7 @@ coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, 
     const coreBool bCoop = (pAttacker && STATIC_ISVALID(g_pGame) && g_pGame->GetCoop());
     m_iLastAttacker = bCoop ? (pAttacker - g_pGame->GetPlayer(0u)) : 0u;
 
-    if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_INVINCIBLE))   // also allow creating children which do not forward to parent
+    if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_INVINCIBLE))   // also allow children which do not forward to parent
     {
         // forward to parent
         if(this->IsChild()) return m_apMember.front()->TakeDamage(iDamage, iElement, vImpact, pAttacker);
@@ -135,14 +135,14 @@ coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, 
 
                 if(pAttacker)
                 {
+                    // 
+                    pAttacker->GetScoreTable()->RefreshCooldown();
+
                     if(HAS_FLAG(m_iStatus, ENEMY_STATUS_BOSS))
                     {
                         // 
                         pAttacker->GetScoreTable()->AddChain(iTaken);
                     }
-
-                    // 
-                    pAttacker->GetScoreTable()->RefreshCombo();
 
                     if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_WORTHLESS))
                     {
@@ -171,8 +171,14 @@ coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, 
                         if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_WORTHLESS))
                         {
                             // 
-                            pAttacker->GetScoreTable()->AddScore(10u * m_iMaxHealth, true, this->GetPosition());
+                            const coreUint32 iScore = pAttacker->GetScoreTable()->AddScore(10u * m_iMaxHealth, true);
                             pAttacker->GetScoreTable()->AddCombo(1u);
+
+                            // 
+                            if(STATIC_ISVALID(g_pGame) && (g_pGame->GetEnemyManager()->GetNumEnemiesAlive() <= 0u))
+                                g_pGame->GetCombatText()->AddBadge(1000u, this->GetPosition());
+                            else
+                            g_pGame->GetCombatText()->AddScore(iScore, this->GetPosition(), STATIC_ISVALID(g_pGame) && (g_pGame->GetEnemyManager()->GetNumEnemiesAlive() <= 0u));
                         }
                     }
                 }

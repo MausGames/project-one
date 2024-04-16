@@ -134,6 +134,9 @@ void cAmemasuBoss::__KillOwn(const coreBool bAnimated)
 // 
 void cAmemasuBoss::__MoveOwn()
 {
+    // 
+    this->_UpdateBoss();
+
     cNevoMission* pMission   = d_cast<cNevoMission*>(g_pGame->GetCurMission());
     coreObject3D* pContainer = pMission->GetContainer();
 
@@ -183,7 +186,7 @@ void cAmemasuBoss::__MoveOwn()
         PHASE_CONTROL_TIMER(0u, 0.7f, LERP_BREAK_REV)
         {
 
-            static coreSpline2 aMove[GAME_PLAYERS];
+            static coreSpline2 aMove[GAME_PLAYERS]; // s_, ganzes file
             static coreFloat afAngle[GAME_PLAYERS];
                 
 

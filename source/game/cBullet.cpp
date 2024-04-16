@@ -112,16 +112,12 @@ void cBullet::Deactivate(const coreBool bAnimated)
 // 
 void cBullet::Reflect(const coreObject3D* pObject, const coreVector2 vIntersection, const coreVector2 vForceNormal)
 {
-    this->Deactivate(false);
-    
     if(coreVector2::Dot(m_vFlyDir, vForceNormal) >= 0.0f) return;
     this->__Reflect(pObject, vIntersection, vForceNormal, 0.0f);
 }
 
 void cBullet::Reflect(const coreObject3D* pObject, const coreVector2 vIntersection, const coreFloat fSharpness)
 {
-    this->Deactivate(false);
-    
     if(coreVector2::Dot(m_vFlyDir, this->GetPosition().xy() - vIntersection - m_vFlyDir * MAX(this->GetCollisionRadius(), m_fSpeed * TIME)) >= 0.0f) return;
     this->__Reflect(pObject, vIntersection, coreVector2(0.0f,0.0f), fSharpness);
 }
@@ -154,13 +150,12 @@ void cBullet::__Reflect(const coreObject3D* pObject, const coreVector2 vIntersec
     // increase intersection precision
     coreVector2 vHit = vIntersection;
     {
-        coreFloat   fHitDistance = 0.0f;
-        coreVector3 vHitNormal   = coreVector3(0.0f,0.0f,0.0f);
-        coreUint8   iHitCount    = 1u;
+        coreFloat fHitDistance = 0.0f;
+        coreUint8 iHitCount    = 1u;
 
         // shoot ray into fly direction
         const coreVector2 vRayPos = vHit - m_vFlyDir * MAX(this->GetCollisionRadius() * 2.0f, m_fSpeed * TIME);
-        if(Core::Manager::Object->TestCollision(pObject, coreVector3(vRayPos, 0.0f), coreVector3(m_vFlyDir, 0.0f), &fHitDistance, &vHitNormal, &iHitCount))
+        if(Core::Manager::Object->TestCollision(pObject, coreVector3(vRayPos, 0.0f), coreVector3(m_vFlyDir, 0.0f), &fHitDistance, &iHitCount))
         {
             vHit = vRayPos + m_vFlyDir * fHitDistance;
         }
@@ -168,11 +163,11 @@ void cBullet::__Reflect(const coreObject3D* pObject, const coreVector2 vIntersec
         {
             // move ray further towards object
             const coreVector2 vTowardsDir = (pObject->GetPosition().xy() - vHit).Normalized();
-            if(Core::Manager::Object->TestCollision(pObject, coreVector3(vHit, 0.0f), coreVector3(vTowardsDir, 0.0f), &fHitDistance, &vHitNormal, &iHitCount))
+            if(Core::Manager::Object->TestCollision(pObject, coreVector3(vHit, 0.0f), coreVector3(vTowardsDir, 0.0f), &fHitDistance, &iHitCount))
             {
                 // shoot ray again into fly direction
                 const coreVector2 vNewRayPos = vRayPos + vTowardsDir * fHitDistance;
-                if(Core::Manager::Object->TestCollision(pObject, coreVector3(vNewRayPos, 0.0f), coreVector3(m_vFlyDir, 0.0f), &fHitDistance, &vHitNormal, &(iHitCount = 1)))   // reset
+                if(Core::Manager::Object->TestCollision(pObject, coreVector3(vNewRayPos, 0.0f), coreVector3(m_vFlyDir, 0.0f), &fHitDistance, &(iHitCount = 1)))   // reset
                 {
                     vHit = vNewRayPos + m_vFlyDir * fHitDistance;
                 }
@@ -299,9 +294,9 @@ void cBulletManager::Move()
             {
                 // calculate properties between current and previous bullet
                 const coreFloat fLengthSq   = (vPrevPos    - pBullet->GetPosition().xy()).LengthSq();
-                const coreFloat fFullRadius = (fPrevRadius + pBullet->GetCollisionRadius());
+                const coreFloat fFullRadius = (fPrevRadius + pBullet->GetVisualRadius() + 2.0f * OUTLINE_THICKNESS);
                 vPrevPos    = pBullet->GetPosition().xy();
-                fPrevRadius = pBullet->GetCollisionRadius();
+                fPrevRadius = pBullet->GetVisualRadius();
 
                 // increase depth (half if not near each other)
                 fDepth += BULLET_DEPTH_FACTOR * ((fLengthSq < POW2(fFullRadius)) ? 1.0f : 0.5f);
@@ -1165,71 +1160,4 @@ void cRocketBullet::__MoveOwn()
     // 
     if(TIME) g_pSpecialEffects->CreateSplashSmoke(this->GetPosition() - this->GetDirection() * 4.5f, 5.0f, 1u, coreVector3(1.0f,1.0f,1.0f));
     // TODO 1: timer 
-}
-
-
-// ****************************************************************
-// constructor
-cChromaBullet::cChromaBullet()noexcept
-: m_fScale (1.0f)
-{
-    // load object resources
-    this->DefineModel  ("object_chroma.md3");
-    //this->DefineTexture(0u, "ship_enemy.png");
-    this->DefineProgram("object_chroma_program");
-}
-
-
-// ****************************************************************
-// 
-void cChromaBullet::__ImpactOwn(const coreVector2 vImpact)
-{
-    // 
-    //g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 2.0f, 1u, this->GetColor3());
-    
-    
-    //g_pGame->GetCombatText()->AddValue(m_iDamage, coreVector3(vImpact, 0.0f), this->GetColor3());
-}
-
-
-// ****************************************************************
-// 
-void cChromaBullet::__ReflectOwn()
-{
-}
-
-
-// ****************************************************************
-// 
-void cChromaBullet::__MoveOwn()
-{
-    // fly around
-    this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
-
-    // update animation
-    m_fAnimation.Update(1.0f);   // TODO 4: mod 
-
-    // update fade
-    m_fFade.Update(1.0f);   // TODO 4 
-    
-    const coreFloat fValue = m_fAnimation + 1.0f * MAX(m_fAnimation - 3.0f, 0.0f);
-    const coreVector2 vDir = s_RotaCache.Direction(fValue * 5.0f);
-    
-    m_iDamage = (m_fAnimation >= 3.0f) ? 300 : 100;
-    
-    this->SetColor3((m_fAnimation >= 3.0f) ? COLOR_WHITE : COLOR_GOLD);
-    
-    this->SetSize(coreVector3(1.0f,1.0f,1.0f) * ((m_fAnimation >= 3.0f) ? 1.2f : 1.0f) * m_fScale * MIN((4.5f - m_fAnimation) * 2.0f, 1.0f));
-    
-    if(m_fAnimation >= 4.5f)
-    {
-        this->Deactivate(false);
-        //g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 5.0f, 3u, COLOR_GOLD);
-    }
-    
-    this->SetDirection(coreVector3(0.0f,1.0f,0.0f));
-    this->SetOrientation(coreVector3(vDir.x, 0.0f, vDir.y));
-    
-    this->SetDirection(coreVector3(vDir, 0.0f));
-    this->SetOrientation(coreVector3(0.0f,0.0f,1.0f));
 }

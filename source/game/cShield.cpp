@@ -98,7 +98,7 @@ void cShieldManager::Move()
         {
             // 
             oShield.SetPosition(pOwner->GetPosition());
-            oShield.SetSize    (coreVector3(1.1f,1.1f,1.1f) * (pOwner->GetModel()->GetBoundingRadius() * pOwner->GetSize().Max()));
+            oShield.SetSize    (coreVector3(1.1f,1.1f,1.1f) * pOwner->GetVisualRadius());
 
             // 
             //if(iHealth > 0) fBlink = pOwner->GetBlink() * 0.8f;

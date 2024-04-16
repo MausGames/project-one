@@ -185,8 +185,7 @@ void cHeadlight::DrawPoint(const coreObject3D* pObject)
     ASSERT(pObject)
 
     // 
-    if(!pObject->GetModel().IsUsable()) return;
-    this->DrawPoint(pObject->GetPosition(), coreVector2(3.0f,3.0f) * (pObject->GetModel()->GetBoundingRadius() * pObject->GetSize().Max()));
+    this->DrawPoint(pObject->GetPosition(), coreVector2(3.0f,3.0f) * pObject->GetVisualRadius());
 }
 
 

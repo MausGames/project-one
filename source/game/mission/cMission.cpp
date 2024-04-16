@@ -255,11 +255,6 @@ void cMission::DeactivateWave()
 
     // 
     g_pSave->EditGlobalStats()->iWavesDone += 1u;
-    
-    g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
-    {
-        pPlayer->GetScoreTable()->TransferCombo();
-    });
 }
 
 
@@ -315,7 +310,9 @@ void cMission::__CloseSegment()
     g_pGame->GetItemManager       ()->LoseItems();
     g_pGame->GetShieldManager     ()->ClearShields(true);
     
+    g_pGame->HideHelpers();
     g_pGame->KillRepairEnemy();
+    
 
     // 
     const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();

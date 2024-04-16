@@ -144,7 +144,7 @@ void cDefeatMenu::Move()
                     // 
                     cGuiObject&       oTarget = m_ContinueImage[iContinues - 1u];
                     const cGuiObject& oSource = m_ContinueImage[iContinues % MENU_DEFEAT_CONTINUES];
-                    oTarget.SetPosition(coreVector2(oTarget.GetPosition().x, oSource.GetPosition().y + s_Spline.CalcPositionLerp(LERPB(1.0f, 0.0f, MAX(1.0f - m_fBurst, 0.0f))).y));
+                    oTarget.SetPosition(coreVector2(oTarget.GetPosition().x, oSource.GetPosition().y + s_Spline.CalcPositionLerp(LERPBR(0.0f, 1.0f, MIN(m_fBurst, 1.0f))).y));
 
                     STATIC_ASSERT(MENU_DEFEAT_CONTINUES > 1u)
                 }

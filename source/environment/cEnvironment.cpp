@@ -229,7 +229,7 @@ FUNC_PURE coreFloat cEnvironment::RetrieveSafeHeight(const coreVector2 vPosition
     if(!pOutdoor) return fFallbackHeight;
 
     // retrieve height value
-    return pOutdoor->RetrieveHeight(vPosition);
+    return pOutdoor->RetrieveHeight(vPosition.Processed(CLAMP, -FOREGROUND_AREA.x * 1.3f, FOREGROUND_AREA.x * 1.3f));
 }
 
 

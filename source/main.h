@@ -35,7 +35,7 @@
 // TODO 5: menu optimization by caching into framebuffer (general class for leaderboard, options, etc.)
 // TODO 3: protect main (LockFramerate)
 // TODO 3: check all shaders if alpha is required
-// TODO 4: full initializer lists everywhere (don't forget parent classes)
+// TODO 4: full initializer lists everywhere (don't forget parent classes) (also in other projects)
 // TODO 3: clean mixing shader defines (x >= y) and (defined(x)) checks (also in engine)
 // TODO 3: check for 16-bit float shader usage
 // TODO 2: program enable has to be checked (if(x.Enable()){}) everywhere
@@ -50,7 +50,7 @@
 // TODO 3: reduce number of shader-lights with static_assert
 // TODO 3: check if hole in object_sphere causes reflection issues, also check if other objects have a hole
 // TODO 3: on bosses and missions: don't move or render or test objects outside their phases (e.g. boomerangs active)
-// TODO 3: make sure everything with at least 5 copies uses batch-lists
+// TODO 3: make sure everything with at least 4 instances uses batch-lists
 // TODO 4: replace / with RCP where possible
 // TODO 5: "pro" shortcut for types (e.g. proEnemy, proGame), dr too
 // TODO 4: ENABLE_BITWISE when ?
@@ -74,7 +74,7 @@
 // TODO 5: convert bigger sound-effects (ambient) to music ?
 // TODO 3: change all linear interpolation with at least LERPH3 to improve quality, where possible
 // TODO 3: find (manual) interpolations and try to use smoothstep for it (engine, application and shader)
-// TODO 4: check all collision callbacks if OUTPUT can be replaced with const
+// TODO 4: check all lambdas if OUTPUT can be replaced with const
 // TODO 3: make sure enemy bullet ClearAll is called on STAGE_DELAY
 // TODO 3: create animation offset for all gameplay objects (const coreFloat fOffset = I_TO_F(i) * (1.0f/7.0f);), try to use num-per-line + 1, what about bullets ?
 // TODO 1: make sure user folder is correctly handled for multi-user (-> corePlatform)
@@ -104,6 +104,7 @@
 // ****************************************************************
 // general definitions
 #define PLAYERS              (2u)
+#define HELPERS              (9u)
 #define MISSIONS             (9u + 1u + 2u)
 #define BOSSES               (2u)
 #define WAVES                (10u)
@@ -140,7 +141,7 @@
 #define COLOR_ENERGY_MAGENTA (coreVector3(1.000f, 0.310f, 0.650f))
 #define COLOR_ENERGY_PURPLE  (coreVector3(0.450f, 0.200f, 1.000f))
 #define COLOR_ENERGY_BLUE    (coreVector3(0.100f, 0.430f, 1.000f))
-#define COLOR_ENERGY_CYAN    (coreVector3(0.184f, 0.569f, 0.635f))
+#define COLOR_ENERGY_CYAN    (coreVector3(0.184f, 0.635f, 0.635f))
 #define COLOR_ENERGY_GREEN   (coreVector3(0.270f, 0.710f, 0.270f))
 #define COLOR_FIRE_WHITE     (coreVector3(0.220f, 0.220f, 0.220f))
 #define COLOR_FIRE_ORANGE    (coreVector3(0.991f, 0.305f, 0.042f))
@@ -154,8 +155,7 @@
 #define COLOR_SHIP_CYAN      (coreVector3(183.0f/360.0f,  70.0f/100.0f,  85.0f/100.0f).HsvToRgb())
 #define COLOR_SHIP_GREEN     (coreVector3(118.0f/360.0f,  58.0f/100.0f,  70.0f/100.0f).HsvToRgb())
 #define COLOR_SHIP_GREY      (coreVector3(  0.0f/360.0f,   0.0f/100.0f,  60.0f/100.0f).HsvToRgb())
-#define COLOR_HEALTH(x)      (TernaryLerp(COLOR_MENU_RED, COLOR_MENU_YELLOW, COLOR_MENU_GREEN, x))
-#define COLOR_CHAIN(x)       ((x > 0.5f) ? COLOR_MENU_BLUE : COLOR_MENU_RED)//TernaryLerp(COLOR_MENU_RED, COLOR_MENU_PURPLE, COLOR_MENU_BLUE,  x))
+#define COLOR_HEALTH(x)      (TernaryLerp(COLOR_MENU_RED, COLOR_MENU_YELLOW, COLOR_MENU_GREEN, x))   // TODO 1: remove
 
 // shader modifiers
 #define SHADER_TRANSITION(x) "#define _P1_TRANSITION_ (" #x ") \n"   // full_transition
@@ -189,7 +189,6 @@ enum eType : coreInt32
     TYPE_BULLET_PLAYER,
     TYPE_BULLET_ENEMY,
 
-    TYPE_CHROMA,
     TYPE_ITEM,
     TYPE_SHIELD,
 
@@ -321,7 +320,6 @@ extern cPostProcessing* const g_pPostProcessing;   // main post-processing objec
 #include "game/cShip.h"
 #include "game/cEnemy.h"
 #include "game/cHelper.h"
-#include "game/cChroma.h"
 #include "game/cItem.h"
 #include "game/cShield.h"
 #include "game/cCrash.h"

@@ -159,6 +159,9 @@ void cGemingaBoss::__KillOwn(const coreBool bAnimated)
 // 
 void cGemingaBoss::__MoveOwn()
 {
+    // 
+    this->_UpdateBoss();
+
     //cNevoMission* pMission   = d_cast<cNevoMission*>(g_pGame->GetCurMission());
     //coreObject3D* pContainer = pMission->GetContainer();
 
@@ -204,12 +207,12 @@ void cGemingaBoss::__MoveOwn()
     // transition to inner phase
     else if(m_iPhase == 10u)
     {
-        g_pEnvironment->SetTargetSpeed(0.0f);    
+        g_pEnvironment->SetTargetSpeed(0.0f);     
 
         PHASE_CONTROL_TIMER(0u, 0.7f, LERP_BREAK_REV)
         {
 
-            static coreSpline2 aMove[GAME_PLAYERS];
+            static coreSpline2 aMove[GAME_PLAYERS]; // s_, ganzes file
             static coreFloat afAngle[GAME_PLAYERS];
                 
 

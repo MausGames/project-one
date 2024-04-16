@@ -935,7 +935,7 @@ void cDemoMission::__SetupOwn()
                 {
                     STAGE_FOREACH_PLAYER(pPlayer, j)
                     {
-                        const coreVector2 vDiff = pEnemy->GetPosition().xy() - (pPlayer->GetPosition().xy() + pPlayer->GetDirection().xy() * pPlayer->GetCollisionRadius());
+                        const coreVector2 vDiff = pEnemy->GetPosition().xy() - (pPlayer->GetPosition().xy() + pPlayer->GetDirection().xy() * pPlayer->GetVisualRadius());
                         const coreFloat   fDot  = coreVector2::Dot(pPlayer->GetDirection().xy(), vDiff.Normalized());
 
                         if(fDot > 0.96f) ADD_BIT(iLight, i)

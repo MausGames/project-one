@@ -75,7 +75,6 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("object_tetra_top.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tetra_top.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_tube_closed.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tube_closed.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_tube_open.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tube_open.md3");
-        Core::Manager::Resource->Load<coreModel>  ("object_chroma.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_chroma.md3", CORE_MODEL_LOAD_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_bottom_high.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_bottom_high.md3", CORE_MODEL_LOAD_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_bottom_low.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_bottom_low.md3");   // TODO 1: clusters currently for explosion, still required ?
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_bottom_inside.md3",    CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_bottom_inside.md3", CORE_MODEL_LOAD_CLUSTERS);
@@ -216,7 +215,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("menu_detail_02.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_detail_02.png");
     Core::Manager::Resource->Load<coreTexture>("menu_detail_03.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_detail_03.png");
     Core::Manager::Resource->Load<coreTexture>("menu_medal.png",                         CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_medal.png");
-    Core::Manager::Resource->Load<coreTexture>("menu_mission.png",                       CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_mission.png", false);
+    Core::Manager::Resource->Load<coreTexture>("menu_mission.png",                       CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_mission.png", false);   // # visual artifacts
     Core::Manager::Resource->Load<coreTexture>("menu_star.png",                          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_star.png");
     Core::Manager::Resource->Load<coreTexture>("menu_weapon.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_weapon.png");
     Core::Manager::Resource->Load<coreTexture>("menu_worldmap.png",                      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_worldmap.png");
@@ -362,7 +361,6 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("menu_worldmap.frag",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_worldmap.frag");
     Core::Manager::Resource->Load<coreShader> ("object.vert",                            CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert");
     Core::Manager::Resource->Load<coreShader> ("object_wave.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert", SHADER_WAVE);
-    Core::Manager::Resource->Load<coreShader> ("object_chroma.frag",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_chroma.frag");
     Core::Manager::Resource->Load<coreShader> ("object_ground.frag",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ground.frag");
     Core::Manager::Resource->Load<coreShader> ("object_ship.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag");
     Core::Manager::Resource->Load<coreShader> ("object_ship_glow.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", SHADER_GLOW);
@@ -372,7 +370,6 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("object_meteor_blink.frag",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_meteor.frag", SHADER_BLINK);
     Core::Manager::Resource->Load<coreShader> ("object_inst.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("object_wave_inst.vert",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert", CORE_SHADER_OPTION_INSTANCING SHADER_WAVE);
-    Core::Manager::Resource->Load<coreShader> ("object_chroma_inst.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_chroma.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("object_ground_inst.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ground.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("object_ship_glow_inst.frag",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", CORE_SHADER_OPTION_INSTANCING SHADER_GLOW);
     Core::Manager::Resource->Load<coreShader> ("object_ship_blink_inst.frag",            CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", CORE_SHADER_OPTION_INSTANCING SHADER_BLINK);
@@ -565,6 +562,11 @@ void CoreApp::Setup()
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_bullet_direct_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("effect_energy_bullet_direct.vert")
         ->AttachShader("effect_energy.frag")
+        ->Finish();
+
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_blink_spheric_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("effect_energy_spheric.vert")
+        ->AttachShader("effect_energy_blink.frag")
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_blink_invert_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
@@ -941,11 +943,6 @@ void CoreApp::Setup()
         ->AttachShader("menu_worldmap.frag")
         ->Finish();
 
-    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_chroma_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
-        ->AttachShader("object.vert")
-        ->AttachShader("object_chroma.frag")
-        ->Finish();
-
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ground_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("object.vert")
         ->AttachShader("object_ground.frag")
@@ -984,11 +981,6 @@ void CoreApp::Setup()
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_meteor_blink_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("object.vert")
         ->AttachShader("object_meteor_blink.frag")
-        ->Finish();
-
-    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_chroma_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
-        ->AttachShader("object_inst.vert")
-        ->AttachShader("object_chroma_inst.frag")
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ground_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())

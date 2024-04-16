@@ -73,6 +73,8 @@
 #define ZEROTH_LIMBS              (6u)                                         // 
 #define ZEROTH_ICES               (2u)                                         // 
 
+#define PROJECTONE_SHIELDS        (HELPERS - 1u)                               // 
+
 
 // ****************************************************************
 // phase management macros
@@ -85,6 +87,12 @@
 #define PHASE_TIME_AFTER(t)             (fTime >= (t))
 #define PHASE_TIME_BETWEEN(t,u)         (InBetween(fTime, (t), (u)))
 #define PHASE_BEGINNING                 (PHASE_TIME_POINT(0.0f))
+
+#define PHASE_MAINTIME_POINT(t)         (InBetween((t), m_fPhaseTimeBefore, m_fPhaseTime))
+#define PHASE_MAINTIME_BEFORE(t)        (m_fPhaseTime <  (t))
+#define PHASE_MAINTIME_AFTER(t)         (m_fPhaseTime >= (t))
+#define PHASE_MAINTIME_BETWEEN(t,u)     (InBetween(m_fPhaseTime, (t), (u)))
+#define PHASE_BEGINNING2                (PHASE_MAINTIME_POINT(0.0f))
 
 #define PHASE_POSITION_POINT(e,t,v)     (STAGE_POSITION_POINT  (e, t, v))
 #define PHASE_POSITION_BEFORE(e,t,v)    (STAGE_POSITION_BEFORE (e, t, v))
@@ -123,7 +131,8 @@ protected:
     coreVector3 m_vLastOrientation;           // 
 
     coreUint8 m_iPhase;                       // 
-    coreUint8 m_iLevel;                       // 
+    coreFlow  m_fPhaseTime;                   // 
+    coreFloat m_fPhaseTimeBefore;             // 
 
     static coreVector2 s_vPositionPoint;      // 
 
@@ -133,7 +142,7 @@ public:
     virtual ~cBoss()override;
 
     DISABLE_COPY(cBoss)
-    ENABLE_ID
+    ENABLE_ID_EX
 
     // 
     void ChangePhase(const coreUint8 iPhase);
@@ -146,13 +155,15 @@ public:
 
     // 
     inline const coreUint8& GetPhase()const {return m_iPhase;}
-    inline const coreUint8& GetLevel()const {return m_iLevel;}
 
 
 protected:
     // 
     void _StartBoss();
     void _EndBoss(const coreBool bAnimated);
+
+    // 
+    void _UpdateBoss();
 
     // 
     template <typename F, typename G> void _PhaseTimer (const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreFloat  fSpeed,                        G&& nLerpFunc, F&& nUpdateFunc);   // [](const coreFloat x, const coreFloat y, const coreFloat s) -> coreFloat, [](const coreFloat  fTime, const coreFloat fTimeBefore, const coreBool __bEnd) -> void
@@ -183,7 +194,7 @@ public:
     cDharukBoss()noexcept;
 
     DISABLE_COPY(cDharukBoss)
-    ASSIGN_ID(101, "Dharuk")
+    ASSIGN_ID_EX(101, "Dharuk", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -244,7 +255,7 @@ public:
     cTorusBoss()noexcept;
 
     DISABLE_COPY(cTorusBoss)
-    ASSIGN_ID(102, "Torus")
+    ASSIGN_ID_EX(102, "Torus", COLOR_SHIP_GREEN)
 
 
 private:
@@ -266,6 +277,11 @@ private:
     // 
     void __EnableGunner (const coreUintW iIndex, const coreVector2 vPosition);
     void __DisableGunner(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    static coreFloat   __PositionToGrind(const coreVector2 vPosition);
+    static coreVector2 __GrindToPosition(const coreFloat   fGrind);
+    static coreVector2 __GrindToPosition2(const coreFloat   fGrind);
 };
 
 
@@ -281,7 +297,7 @@ public:
     cVausBoss()noexcept;
 
     DISABLE_COPY(cVausBoss)
-    ASSIGN_ID(103, "Vaus")
+    ASSIGN_ID_EX(103, "Vaus", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -293,7 +309,7 @@ private:
 
 
 // ****************************************************************
-// 
+// Nautilus boss class
 class cNautilusBoss final : public cBoss
 {
 private:
@@ -312,7 +328,7 @@ public:
     cNautilusBoss()noexcept;
 
     DISABLE_COPY(cNautilusBoss)
-    ASSIGN_ID(201, "Nautilus")
+    ASSIGN_ID_EX(201, "Nautilus", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -332,7 +348,7 @@ private:
 
 
 // ****************************************************************
-// 
+// Amemasu boss class
 class cAmemasuBoss final : public cBoss
 {
 private:
@@ -352,7 +368,7 @@ public:
     cAmemasuBoss()noexcept;
 
     DISABLE_COPY(cAmemasuBoss)
-    ASSIGN_ID(202, "Amemasu")
+    ASSIGN_ID_EX(202, "Amemasu", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -364,7 +380,7 @@ private:
 
 
 // ****************************************************************
-// 
+// Leviathan boss class
 class cLeviathanBoss final : public cBoss
 {
 private:
@@ -387,7 +403,7 @@ public:
     cLeviathanBoss()noexcept;
 
     DISABLE_COPY(cLeviathanBoss)
-    ASSIGN_ID(203, "Leviathan")
+    ASSIGN_ID_EX(203, "Leviathan", COLOR_SHIP_BLUE)
 
 
 private:
@@ -417,14 +433,14 @@ private:
 
 
 // ****************************************************************
-// 
+// Urtica boss class
 class cUrticaBoss final : public cBoss
 {
 public:
     cUrticaBoss()noexcept;
 
     DISABLE_COPY(cUrticaBoss)
-    ASSIGN_ID(301, "Urtica")
+    ASSIGN_ID_EX(301, "Urtica", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -434,7 +450,7 @@ private:
 
 
 // ****************************************************************
-// 
+// Tiger boss class
 class cTigerBoss final : public cBoss
 {
 private:
@@ -480,7 +496,7 @@ public:
     cTigerBoss()noexcept;
 
     DISABLE_COPY(cTigerBoss)
-    ASSIGN_ID(302, "Tiger MK-III")
+    ASSIGN_ID_EX(302, "Tiger MK-III", COLOR_SHIP_YELLOW)
 
 
 private:
@@ -511,14 +527,14 @@ private:
 
 
 // ****************************************************************
-// 
+// Lucifer boss class
 class cLuciferBoss final : public cBoss
 {
 public:
     cLuciferBoss()noexcept;
 
     DISABLE_COPY(cLuciferBoss)
-    ASSIGN_ID(303, "L.U.C.I.F.E.R.")
+    ASSIGN_ID_EX(303, "L.U.C.I.F.E.R.", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -528,14 +544,14 @@ private:
 
 
 // ****************************************************************
-// 
+// Quaternion boss class
 class cQuaternionBoss final : public cBoss
 {
 public:
     cQuaternionBoss()noexcept;
 
     DISABLE_COPY(cQuaternionBoss)
-    ASSIGN_ID(401, "Quaternion")
+    ASSIGN_ID_EX(401, "Quaternion", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -545,14 +561,14 @@ private:
 
 
 // ****************************************************************
-// 
+// Saros boss class
 class cSarosBoss final : public cBoss
 {
 public:
     cSarosBoss()noexcept;
 
     DISABLE_COPY(cSarosBoss)
-    ASSIGN_ID(402, "Saros")
+    ASSIGN_ID_EX(402, "Saros", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -562,7 +578,7 @@ private:
 
 
 // ****************************************************************
-// 
+// Messier boss class
 class cMessierBoss final : public cBoss
 {
 private:
@@ -581,7 +597,7 @@ public:
     cMessierBoss()noexcept;
 
     DISABLE_COPY(cMessierBoss)
-    ASSIGN_ID(403, "Messier 87")
+    ASSIGN_ID_EX(403, "Messier 87", COLOR_SHIP_RED)
 
 
 private:
@@ -602,14 +618,14 @@ private:
 
 
 // ****************************************************************
-// 
+// Tartarus boss class
 class cTartarusBoss final : public cBoss
 {
 public:
     cTartarusBoss()noexcept;
 
     DISABLE_COPY(cTartarusBoss)
-    ASSIGN_ID(501, "Tartarus")
+    ASSIGN_ID_EX(501, "Tartarus", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -619,14 +635,14 @@ private:
 
 
 // ****************************************************************
-// 
+// Phalaris boss class
 class cPhalarisBoss final : public cBoss
 {
 public:
     cPhalarisBoss()noexcept;
 
     DISABLE_COPY(cPhalarisBoss)
-    ASSIGN_ID(502, "Phalaris")
+    ASSIGN_ID_EX(502, "Phalaris", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -636,7 +652,7 @@ private:
 
 
 // ****************************************************************
-// 
+// Chol boss class
 class cCholBoss final : public cBoss
 {
 private:
@@ -658,7 +674,7 @@ public:
     cCholBoss()noexcept;
 
     DISABLE_COPY(cCholBoss)
-    ASSIGN_ID(503, "Chol")
+    ASSIGN_ID_EX(503, "Chol", COLOR_SHIP_ORANGE)
 
 
 private:
@@ -685,14 +701,14 @@ private:
 
 
 // ****************************************************************
-// 
+// Fenrir boss class
 class cFenrirBoss final : public cBoss
 {
 public:
     cFenrirBoss()noexcept;
 
     DISABLE_COPY(cFenrirBoss)
-    ASSIGN_ID(601, "Fenrir")
+    ASSIGN_ID_EX(601, "Fenrir", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -702,14 +718,14 @@ private:
 
 
 // ****************************************************************
-// 
+// Shelob boss class
 class cShelobBoss final : public cBoss
 {
 public:
     cShelobBoss()noexcept;
 
     DISABLE_COPY(cShelobBoss)
-    ASSIGN_ID(602, "Shelob")
+    ASSIGN_ID_EX(602, "Shelob", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -719,7 +735,7 @@ private:
 
 
 // ****************************************************************
-// 
+// Zeroth boss class
 class cZerothBoss final : public cBoss
 {
 private:
@@ -739,7 +755,7 @@ public:
     cZerothBoss()noexcept;
 
     DISABLE_COPY(cZerothBoss)
-    ASSIGN_ID(603, "???")
+    ASSIGN_ID_EX(603, "???", COLOR_SHIP_MAGENTA)
 
 
 private:
@@ -762,14 +778,14 @@ private:
 
 
 // ****************************************************************
-// 
+// Orlac boss class
 class cOrlacBoss final : public cBoss
 {
 public:
     cOrlacBoss()noexcept;
 
     DISABLE_COPY(cOrlacBoss)
-    ASSIGN_ID(701, "Orlac")
+    ASSIGN_ID_EX(701, "Orlac", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -779,7 +795,7 @@ private:
 
 
 // ****************************************************************
-// 
+// Geminga boss class
 class cGemingaBoss final : public cBoss
 {
 private:
@@ -801,7 +817,7 @@ public:
     cGemingaBoss()noexcept;
 
     DISABLE_COPY(cGemingaBoss)
-    ASSIGN_ID(702, "Geminga")
+    ASSIGN_ID_EX(702, "Geminga", COLOR_SHIP_RED)
 
 
 private:
@@ -813,14 +829,14 @@ private:
 
 
 // ****************************************************************
-// 
+// Nagual boss class
 class cNagualBoss final : public cBoss
 {
 public:
     cNagualBoss()noexcept;
 
     DISABLE_COPY(cNagualBoss)
-    ASSIGN_ID(703, "Nagual")
+    ASSIGN_ID_EX(703, "Nagual", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -833,11 +849,25 @@ private:
 // Project One boss class
 class cProjectOneBoss final : public cBoss
 {
+private:
+    cCustomEnemy m_aShield[PROJECTONE_SHIELDS];   // 
+
+    coreSpline2 m_HelperPath;                     // 
+    coreUint8   m_iHelperState;                   // 
+
+    coreVector3 m_vLevelColor;                    // 
+
+    coreFlow m_fAnimation;                        // 
+
+
 public:
     cProjectOneBoss()noexcept;
 
     DISABLE_COPY(cProjectOneBoss)
     ASSIGN_ID(801, "Project One")
+
+    // 
+    inline coreVector3 GetColor()const final {return m_vLevelColor;}
 
 
 private:
@@ -849,14 +879,14 @@ private:
 
 
 // ****************************************************************
-// 
+// Eigengrau boss class
 class cEigengrauBoss final : public cBoss
 {
 public:
     cEigengrauBoss()noexcept;
 
     DISABLE_COPY(cEigengrauBoss)
-    ASSIGN_ID(802, "Eigengrau")
+    ASSIGN_ID_EX(802, "Eigengrau", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:

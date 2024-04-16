@@ -411,6 +411,7 @@ void cGeluMission::__SetupOwn()
     // TODO 1: maybe switch each phase to making the area more smaller, and opening it up to a cross and movement
     // TODO 1: maybe blocks trying to crush you get immediately attackable
     // TODO 1: create better fang model with low-detail version
+    // TODO 1: allow attacking and destroying blocks
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         constexpr coreFloat fStep = 0.44f;
@@ -1242,6 +1243,7 @@ void cGeluMission::__SetupOwn()
     // TODO 1: orb wave special effects
     // TODO 1: die finale welle brauch noch einen twist
     // TODO 1: animation-offset for each gameplay object (everywhere!)
+    // TODO 1: dance dance revolution as badge (+ extra score ?)
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreFloat fOrbLen = 0.5f;

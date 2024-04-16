@@ -27,7 +27,7 @@ cWater::cWater(const coreHashString& sSkyTexture)noexcept
     m_Refraction.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     // create depth frame buffer
-    m_Depth.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH24); // TODO 1: only 24 for ice
+    m_Depth.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH16);
     m_Depth.Create(vWaterResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     // create sky-plane object

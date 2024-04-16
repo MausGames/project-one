@@ -1149,7 +1149,7 @@ void cNevoMission::__SetupOwn()
 
         STAGE_WAVE("ZWÖLF", {20.0f, 30.0f, 40.0f, 50.0f})
     });
-
+STAGE_START_HERE
     // ################################################################
     // boss
     STAGE_MAIN({TAKE_ALWAYS, 10u})

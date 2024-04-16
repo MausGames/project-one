@@ -148,6 +148,9 @@ void cZerothBoss::__RenderOwnOver()
 void cZerothBoss::__MoveOwn()
 {
     // 
+    this->_UpdateBoss();
+
+    // 
     m_fAnimation.UpdateMod(1.0f, 10.0f);
     
     
@@ -161,7 +164,7 @@ void cZerothBoss::__MoveOwn()
         //g_pGame->GetInterface()->ChangeBossName(PRINT("%02XZE%02XRO%02XTH%02X", coreUint8(P_TO_UI(this) >> 24u), coreUint8(P_TO_UI(this) >> 16u), coreUint8(P_TO_UI(this) >> 8u), coreUint8(P_TO_UI(this))));
 
         coreRand oRand(F_TO_UI(m_fLifeTime * 10.0f));oRand.Raw();
-        g_pGame->GetInterface()->ChangeBossName(PRINT("%02XZE%02XRO%02XTH%02X", coreUint8(oRand.Raw() >> 8u), coreUint8(oRand.Raw() >> 8u), coreUint8(oRand.Raw() >> 8u), coreUint8(oRand.Raw() >> 8u)));
+        g_pGame->GetInterface()->ChangeBannerText(PRINT("%02XZE%02XRO%02XTH%02X", coreUint8(oRand.Raw() >> 8u), coreUint8(oRand.Raw() >> 8u), coreUint8(oRand.Raw() >> 8u), coreUint8(oRand.Raw() >> 8u)), NULL);
     }
 
     // ################################################################

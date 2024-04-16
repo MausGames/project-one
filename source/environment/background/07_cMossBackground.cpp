@@ -120,7 +120,7 @@ void cMossBackground::__RenderOwnAfter()
         const coreVector2 vNewTexOffset = m_Rain.GetTexOffset() + coreVector2(0.56f,0.36f) * I_TO_F(POW2(i));
         const coreFloat   fNewScale     = 1.0f - 0.15f * I_TO_F(i);
 
-        pLocal->SendUniform(PRINT("u_av3OverlayTransform[%zu]", i), coreVector3(vNewTexOffset.Processed(FRACT), fNewScale));
+        pLocal->SendUniform(s_asOverlayTransform[i], coreVector3(vNewTexOffset.Processed(FRACT), fNewScale));
     }
 
     glDisable(GL_DEPTH_TEST);

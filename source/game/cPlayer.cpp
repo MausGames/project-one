@@ -167,7 +167,7 @@ void cPlayer::Configure(const coreUintW iShipType, const coreVector3 vColor)
 void cPlayer::EquipWeapon(const coreUintW iIndex, const coreInt32 iID)
 {
     ASSERT(iIndex < PLAYER_EQUIP_WEAPONS)
-    if(m_apWeapon[iIndex]) if(m_apWeapon[iIndex]->GetID() == iID) return;
+    if(m_apWeapon[iIndex] && (m_apWeapon[iIndex]->GetID() == iID)) return;
 
     // delete possible old weapon
     SAFE_DELETE(m_apWeapon[iIndex])
@@ -308,7 +308,7 @@ void cPlayer::Move()
             else if(vNewPos.y > m_vArea.w) {vNewPos.y = m_vArea.w; m_vForce.y = -ABS(m_vForce.y);}
 
             // 
-            const coreVector2 vDiff = (vNewPos - this->GetPosition().xy()) * RCP(TIME * FRAMERATE_MIN + CORE_MATH_PRECISION);
+            const coreVector2 vDiff = (vNewPos - this->GetPosition().xy()) * RCP(MAX(TIME * FRAMERATE_MIN, CORE_MATH_PRECISION));
             vNewOri = coreVector3(CLAMP(vDiff.x, -0.6f, 0.6f), CLAMP(vDiff.y, -0.6f, 0.6f), 1.0f).NormalizedUnsafe();
         }
 
@@ -467,7 +467,7 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
     if(iDamage > 0)
     {
         // 
-        m_ScoreTable.CancelCombo();
+        m_ScoreTable.CancelCooldown();
 
         // 
         const coreInt32 iTaken = this->_TakeDamage(1, iElement, vImpact);
@@ -489,9 +489,6 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
                 this->SetDesaturate(PLAYER_DESATURATE);
                 this->StartFeeling (PLAYER_FEEL_TIME, 0u);
             }
-
-            // 
-            //g_pSpecialEffects->FreezeScreen(12.0f / FRAMERATE_MIN);
 
             // 
             m_fInterrupt = 0.0f;
@@ -853,10 +850,9 @@ coreBool cPlayer::TestCollisionPrecise(const coreObject3D* pObject, coreVector3*
         const coreVector3 vRayDir = coreVector3(0.0f,0.0f,1.0f);
 
         // 
-        coreFloat   fHitDistance = 0.0f;
-        coreVector3 vHitNormal   = coreVector3(0.0f,0.0f,0.0f);
-        coreUint8   iHitCount    = 1u;
-        if(Core::Manager::Object->TestCollision(pObject, vRayPos, vRayDir, &fHitDistance, &vHitNormal, &iHitCount) && (iHitCount & 0x01u))
+        coreFloat fHitDistance = 0.0f;
+        coreUint8 iHitCount    = 1u;
+        if(Core::Manager::Object->TestCollision(pObject, vRayPos, vRayDir, &fHitDistance, &iHitCount) && (iHitCount & 0x01u))
         {
             // 
             (*pvIntersection) = this->GetPosition();
@@ -871,10 +867,9 @@ coreBool cPlayer::TestCollisionPrecise(const coreObject3D* pObject, coreVector3*
         const coreVector3 vRayDir = coreVector3(-vMove.NormalizedUnsafe(), 0.0f);
 
         // 
-        coreFloat   fHitDistance = 0.0f;
-        coreVector3 vHitNormal   = coreVector3(0.0f,0.0f,0.0f);
-        coreUint8   iHitCount    = 1u;
-        if(Core::Manager::Object->TestCollision(pObject, vRayPos, vRayDir, &fHitDistance, &vHitNormal, &iHitCount) && ((iHitCount & 0x01u) || (POW2(fHitDistance) < vMove.LengthSq())))
+        coreFloat fHitDistance = 0.0f;
+        coreUint8 iHitCount    = 1u;
+        if(Core::Manager::Object->TestCollision(pObject, vRayPos, vRayDir, &fHitDistance, &iHitCount) && ((iHitCount & 0x01u) || (POW2(fHitDistance) < vMove.LengthSq())))
         {
             // 
             (*pvIntersection) = vRayPos + vRayDir * MIN(fHitDistance, vMove.Length());
@@ -910,14 +905,14 @@ coreVector2 cPlayer::CalcMove()const
 // 
 coreFloat cPlayer::CalcMoveSpeed()const
 {
-    static coreFloat fBoost = 0.0f;
+    static coreFloat s_fBoost = 0.0f;
     if(HAS_BIT(m_pInput->iActionPress,   0u) ||   // to make movement during quickshots easier
        HAS_BIT(m_pInput->iActionRelease, 0u))     // to make emergency evasion maneuvers easier
-        fBoost = 1.0f;
-    else fBoost = MAX(fBoost - 10.0f * TIME, 0.0f);
+        s_fBoost = 1.0f;
+    else s_fBoost = MAX(s_fBoost - 10.0f * TIME, 0.0f);
 
     // 
-    const coreFloat fModifier = this->IsRolling() ? (50.0f + LERPB(25.0f, 0.0f, m_fRollTime)) : (HAS_BIT(m_pInput->iActionHold, 0u) ? LERPH3(20.0f, 40.0f, fBoost) : LERPH3(50.0f, 70.0f, fBoost));
+    const coreFloat fModifier = this->IsRolling() ? (50.0f + LERPB(25.0f, 0.0f, m_fRollTime)) : (HAS_BIT(m_pInput->iActionHold, 0u) ? LERPH3(20.0f, 40.0f, s_fBoost) : LERPH3(50.0f, 70.0f, s_fBoost));
     return m_fSpeed * fModifier;
 }
 

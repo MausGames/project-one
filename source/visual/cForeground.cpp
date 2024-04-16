@@ -83,12 +83,11 @@ coreBool cForeground::IsVisibleObject(const coreObject3D* pObject)const
 
     // 
     const coreVector2 vProjectedPos = this->Project3D(pObject->GetPosition());
-    const coreFloat   fRange        = pObject->GetCollisionRange().Max();// pObject->GetCollisionRadius();
-    // TODO 1: as tight as possible, with rotation for box
+    const coreFloat   fRadius       = pObject->GetVisualRadius();
 
     // 
-    return ((ABS(vProjectedPos.x) < FOREGROUND_AREA.x * 1.1f + fRange) &&
-            (ABS(vProjectedPos.y) < FOREGROUND_AREA.y * 1.1f + fRange));
+    return ((ABS(vProjectedPos.x) < FOREGROUND_AREA.x * 1.1f + fRadius) &&
+            (ABS(vProjectedPos.y) < FOREGROUND_AREA.y * 1.1f + fRadius));
 }
 
 

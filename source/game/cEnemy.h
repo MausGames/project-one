@@ -14,6 +14,7 @@
 // TODO 4: manager: Find, ForEach, ForEachAll -> typed 
 // TODO 3: implement own enemy-types for custom-enemies which would require instancing
 // TODO 3: memory-pool for each enemy-set (if single allocations still used)
+// TODO 3: add score-value to cEnemy class, either for base, or for extra score
 
 
 // ****************************************************************
@@ -31,13 +32,13 @@ enum eEnemyStatus : coreUint16
     ENEMY_STATUS_BOSS        = 0x0010u,   // 
     ENEMY_STATUS_SINGLE      = 0x0020u,   // 
     ENEMY_STATUS_ENERGY      = 0x0040u,   // 
-    ENEMY_STATUS_INVINCIBLE  = 0x0080u,   //    ### geschosse werden reflektiert (bubble)  
-    ENEMY_STATUS_DAMAGING    = 0x0100u,   //    ### kollision verursacht schaden (spikes)  
-    ENEMY_STATUS_IMMORTAL    = 0x0200u,   //    ### soll nicht sterben, geschosse gehen hindurch  
-    ENEMY_STATUS_GHOST       = 0x0400u,   //    ### keine kollisionen mit spieler oder geschosse mehr    
-    ENEMY_STATUS_HIDDEN      = 0x0800u,   // 
-    ENEMY_STATUS_WORTHLESS   = 0x1000u,   // 
-    ENEMY_STATUS_BOTTOM      = 0x2000u    // 
+    ENEMY_STATUS_BOTTOM      = 0x0080u,   // 
+    ENEMY_STATUS_INVINCIBLE  = 0x0100u,   //    ### geschosse werden reflektiert (bubble)  
+    ENEMY_STATUS_DAMAGING    = 0x0200u,   //    ### kollision verursacht schaden (spikes)  
+    ENEMY_STATUS_IMMORTAL    = 0x0400u,   //    ### soll nicht sterben, geschosse gehen hindurch  
+    ENEMY_STATUS_GHOST       = 0x0800u,   //    ### keine kollisionen mit spieler oder geschosse mehr    
+    ENEMY_STATUS_HIDDEN      = 0x1000u,   // 
+    ENEMY_STATUS_WORTHLESS   = 0x2000u    // 
 };
 
 

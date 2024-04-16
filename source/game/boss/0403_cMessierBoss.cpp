@@ -103,6 +103,9 @@ void cMessierBoss::__RenderOwnOver()
 // 
 void cMessierBoss::__MoveOwn()
 {
+    // 
+    this->_UpdateBoss();
+
     if(this->ReachedDeath()) this->Kill(true);   
 
     // 
