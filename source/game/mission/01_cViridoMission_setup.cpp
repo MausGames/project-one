@@ -12,6 +12,53 @@
 // setup the Virido mission
 void cViridoMission::__SetupOwn()
 {
+    const auto nBallMoveFunc = [this](const coreVector2& vBallPos, const coreVector2& vBallDir, const coreVector2& vSyncFrom, const coreVector2& vSyncTo)
+    {
+        STAGE_GET_START(4u)
+            STAGE_GET_UINT (iMoveState)
+            STAGE_GET_VEC2 (vMoveBegin)
+            STAGE_GET_FLOAT(fMoveTime)
+        STAGE_GET_END
+
+        coreObject3D*     pBall = this->GetBall(0u);
+        const coreVector2 vPos  = pBall->GetPosition().xy();
+
+        if(!iMoveState && CONTAINS_BIT(this->GetBounceState(), 7u) &&
+           ((vPos.x >= vSyncFrom.x * FOREGROUND_AREA.x) && (vPos.x <= vSyncTo.x * FOREGROUND_AREA.x) &&
+            (vPos.y >= vSyncFrom.y * FOREGROUND_AREA.y) && (vPos.y <= vSyncTo.y * FOREGROUND_AREA.y)))
+        {
+            iMoveState = 1u;
+            vMoveBegin = vPos;
+        }
+
+        if(iMoveState)
+        {
+            fMoveTime += 0.5f * Core::System->GetTime();
+
+            pBall->SetPosition(coreVector3(LERPS(vMoveBegin, vBallPos, MIN(fMoveTime, 1.0f)), 0.0f));
+
+            if(fMoveTime >= 1.0f)
+            {
+                pBall->SetDirection(coreVector3(vBallDir, 0.0f));
+                STAGE_FINISH_NOW
+            }
+        }
+    };
+
+    const auto nBallSyncFunc = [this](const coreVector2& vBallPos, const coreVector2& vBallDir, const coreVector2& vSyncFrom, const coreVector2& vSyncTo)
+    {
+        coreObject3D* pBall = this->GetBall(0u);
+        const coreVector2   vPos  = pBall->GetPosition().xy();
+
+        if(STAGE_BEGINNING && !pBall->GetType())
+            this->EnableBall(0u, vBallPos, vBallDir);
+
+        if(CONTAINS_BIT(this->GetBounceState(), 7u) &&
+           ((vPos.x >= vSyncFrom.x * FOREGROUND_AREA.x) && (vPos.x <= vSyncTo.x * FOREGROUND_AREA.x) &&
+            (vPos.y >= vSyncFrom.y * FOREGROUND_AREA.y) && (vPos.y <= vSyncTo.y * FOREGROUND_AREA.y)))
+            STAGE_FINISH_NOW
+    };
+
     // ################################################################
     // 
     STAGE_MAIN
@@ -117,8 +164,8 @@ void cViridoMission::__SetupOwn()
                 const coreVector2 vPos = pEnemy->GetPosition ().xy();
                 const coreVector2 vDir = pEnemy->GetDirection().xy().Rotated90();
 
-                            g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.5f, pEnemy, vPos,  vDir)->ChangeSize(1.2f);
-                if(i < 24u) g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.5f, pEnemy, vPos, -vDir)->ChangeSize(1.2f);
+                            g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.5f, pEnemy, vPos,  vDir)->ChangeSize(1.25f);
+                if(i < 24u) g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.5f, pEnemy, vPos, -vDir)->ChangeSize(1.25f);
             }
         });
 
@@ -131,7 +178,6 @@ void cViridoMission::__SetupOwn()
     // - 4: reflect all bullets and players with force, except with barrel roll
     // - 5: arranged to allow only one kill per turn, and to improve coop gameplay
     // TODO: barriers have cut-off outline in maze-group   
-    STAGE_START_HERE
     STAGE_MAIN
     {
         STAGE_ADD_PATH(pPath1)
@@ -145,12 +191,12 @@ void cViridoMission::__SetupOwn()
         STAGE_ADD_PATH(pPath2)
         {
             pPath2->Reserve(2u);
-            pPath2->AddNode(coreVector2(0.0f,1.4f + 0.38f * 1.5f), coreVector2(0.0f,-1.0f));
-            pPath2->AddStop(coreVector2(0.0f,0.0f + 0.38f * 1.0f), coreVector2(0.0f,-1.0f));
+            pPath2->AddNode(coreVector2(0.0f,1.4f + 0.38f * 1.0f), coreVector2(0.0f,-1.0f));
+            pPath2->AddStop(coreVector2(0.0f,0.0f + 0.38f * 0.5f), coreVector2(0.0f,-1.0f));
             pPath2->Refine();
         });
 
-        STAGE_ADD_SQUAD(pSquad1, cMinerEnemy, 19u)
+        STAGE_ADD_SQUAD(pSquad1, cMinerEnemy, 18u)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
@@ -176,83 +222,75 @@ void cViridoMission::__SetupOwn()
         {
             if(STAGE_SUB(1u))
             {
-                STAGE_RESSURECT(pSquad1, 0u, 0u)
+                STAGE_RESSURECT(pSquad1, 0u, 1u)
                 this->EnableBarrier( 0u, pSquad1->GetEnemy( 0u), coreVector2( 0.0f, 1.0f), 1.0f);
                 this->EnableBarrier( 1u, pSquad1->GetEnemy( 0u), coreVector2( 0.0f,-1.0f), 1.0f);
+                this->EnableBarrier( 2u, pSquad1->GetEnemy( 1u), coreVector2( 0.0f, 1.0f), 1.0f);
+                this->EnableBarrier( 3u, pSquad1->GetEnemy( 1u), coreVector2( 0.0f,-1.0f), 1.0f);
             }
             else if(STAGE_SUB(2u))
             {
-                STAGE_RESSURECT(pSquad1, 1u, 2u)
-                this->EnableBarrier( 8u, pSquad1->GetEnemy( 1u), coreVector2( 0.0f, 1.0f), 1.0f);
-                this->EnableBarrier( 9u, pSquad1->GetEnemy( 1u), coreVector2(-1.0f, 0.0f), 1.0f);
-                this->EnableBarrier(10u, pSquad1->GetEnemy( 2u), coreVector2( 0.0f, 1.0f), 1.0f);
-                this->EnableBarrier(11u, pSquad1->GetEnemy( 2u), coreVector2( 1.0f, 0.0f), 1.0f);
+                STAGE_RESSURECT(pSquad1, 2u, 3u)
+                this->EnableBarrier( 8u, pSquad1->GetEnemy( 2u), coreVector2( 0.0f, 1.0f), 1.0f);
+                this->EnableBarrier(10u, pSquad1->GetEnemy( 2u), coreVector2( 0.0f,-1.0f), 1.0f);
+                this->EnableBarrier(11u, pSquad1->GetEnemy( 2u), coreVector2(-1.0f, 0.0f), 1.0f);
+                this->EnableBarrier(12u, pSquad1->GetEnemy( 3u), coreVector2( 0.0f, 1.0f), 1.0f);
+                this->EnableBarrier(13u, pSquad1->GetEnemy( 3u), coreVector2( 0.0f,-1.0f), 1.0f);
+                this->EnableBarrier(14u, pSquad1->GetEnemy( 3u), coreVector2( 1.0f, 0.0f), 1.0f);
             }
             else if(STAGE_SUB(3u))
             {
-                STAGE_RESSURECT(pSquad1, 3u, 6u)
-                this->EnableBarrier( 0u, pSquad1->GetEnemy( 3u), coreVector2( 0.0f, 1.0f), 1.0f);
-                this->EnableBarrier( 1u, pSquad1->GetEnemy( 3u), coreVector2( 0.0f,-1.0f), 1.0f);
-                this->EnableBarrier( 2u, pSquad1->GetEnemy( 4u), coreVector2( 0.0f, 1.0f), 1.0f);
-                this->EnableBarrier( 3u, pSquad1->GetEnemy( 4u), coreVector2( 0.0f,-1.0f), 1.0f);
-                this->EnableBarrier( 4u, pSquad1->GetEnemy( 5u), coreVector2( 1.0f, 0.0f), 1.0f);
-                this->EnableBarrier( 5u, pSquad1->GetEnemy( 5u), coreVector2(-1.0f, 0.0f), 1.0f);
-                this->EnableBarrier( 6u, pSquad1->GetEnemy( 6u), coreVector2( 1.0f, 0.0f), 1.0f);
-                this->EnableBarrier( 7u, pSquad1->GetEnemy( 6u), coreVector2(-1.0f, 0.0f), 1.0f);
+                STAGE_RESSURECT(pSquad1, 4u, 7u)
+                this->EnableBarrier( 0u, pSquad1->GetEnemy( 4u), coreVector2( 0.0f, 1.0f), 1.0f);
+                this->EnableBarrier( 1u, pSquad1->GetEnemy( 4u), coreVector2( 0.0f,-1.0f), 1.0f);
+                this->EnableBarrier( 2u, pSquad1->GetEnemy( 5u), coreVector2( 0.0f, 1.0f), 1.0f);
+                this->EnableBarrier( 3u, pSquad1->GetEnemy( 5u), coreVector2( 0.0f,-1.0f), 1.0f);
+                this->EnableBarrier( 4u, pSquad1->GetEnemy( 6u), coreVector2( 1.0f, 0.0f), 1.0f);
+                this->EnableBarrier( 5u, pSquad1->GetEnemy( 6u), coreVector2(-1.0f, 0.0f), 1.0f);
+                this->EnableBarrier( 6u, pSquad1->GetEnemy( 7u), coreVector2( 1.0f, 0.0f), 1.0f);
+                this->EnableBarrier( 7u, pSquad1->GetEnemy( 7u), coreVector2(-1.0f, 0.0f), 1.0f);
             }
             else if(STAGE_SUB(4u))
             {
-                STAGE_RESSURECT(pSquad1, 7u, 12u)
-                this->EnableBarrier(11u, pSquad1->GetEnemy( 7u), coreVector2( 0.0f,-1.0f), 1.0f);
-                this->EnableBarrier(12u, pSquad1->GetEnemy( 8u), coreVector2( 0.0f,-1.0f), 1.0f);
-                this->EnableBarrier(13u, pSquad1->GetEnemy( 9u), coreVector2( 0.0f,-1.0f), 1.0f);
-                this->EnableBarrier(14u, pSquad1->GetEnemy(10u), coreVector2( 0.0f,-1.0f), 1.0f);
-                this->EnableBarrier(15u, pSquad1->GetEnemy(11u), coreVector2( 0.0f,-1.0f), 1.0f);
-                this->EnableBarrier(16u, pSquad1->GetEnemy(12u), coreVector2( 0.0f,-1.0f), 1.0f);
+                STAGE_RESSURECT(pSquad1, 8u, 13u)
+                this->EnableBarrier( 8u, pSquad1->GetEnemy( 8u), coreVector2( 0.0f,-1.0f), 1.0f);
+                this->EnableBarrier( 9u, pSquad1->GetEnemy( 9u), coreVector2( 0.0f,-1.0f), 1.0f);
+                this->EnableBarrier(10u, pSquad1->GetEnemy(10u), coreVector2( 0.0f,-1.0f), 1.0f);
+                this->EnableBarrier(11u, pSquad1->GetEnemy(11u), coreVector2( 0.0f,-1.0f), 1.0f);
+                this->EnableBarrier(12u, pSquad1->GetEnemy(12u), coreVector2( 0.0f,-1.0f), 1.0f);
+                this->EnableBarrier(13u, pSquad1->GetEnemy(13u), coreVector2( 0.0f,-1.0f), 1.0f);
             }
             else if(STAGE_SUB(5u))
             {
-                STAGE_RESSURECT(pSquad1, 13u, 18u)
-                //this->EnableBarrier( 4u, pSquad1->GetEnemy(13u), coreVector2(-1.0f, 0.0f), 1.0f);   // # render order
-                //this->EnableBarrier( 1u, pSquad1->GetEnemy(14u), coreVector2( 0.0f,-1.0f), 1.0f);
-                //this->EnableBarrier( 2u, pSquad1->GetEnemy(14u), coreVector2( 1.0f, 0.0f), 1.0f);
-                //this->EnableBarrier( 3u, pSquad1->GetEnemy(15u), coreVector2( 0.0f, 1.0f), 1.0f);
-                //this->EnableBarrier( 0u, pSquad1->GetEnemy(15u), coreVector2( 0.0f,-1.0f), 1.0f);   // # render order
-                //this->EnableBarrier( 5u, pSquad1->GetEnemy(15u), coreVector2(-1.0f, 0.0f), 1.0f);
-                //this->EnableBarrier( 6u, pSquad1->GetEnemy(16u), coreVector2( 0.0f, 1.0f), 1.0f);
-                //this->EnableBarrier( 7u, pSquad1->GetEnemy(16u), coreVector2( 1.0f, 0.0f), 1.0f);
-                this->EnableBarrier( 3u, pSquad1->GetEnemy(13u), coreVector2(-1.0f, 0.0f), 1.0f);   // # render order 1
-                this->EnableBarrier( 1u, pSquad1->GetEnemy(14u), coreVector2( 0.0f,-1.0f), 1.0f);
-                this->EnableBarrier( 9u, pSquad1->GetEnemy(14u), coreVector2( 1.0f, 0.0f), 1.0f);   // # render order 2
-                this->EnableBarrier( 0u, pSquad1->GetEnemy(15u), coreVector2( 0.0f,-1.0f), 1.0f);   // # render order 1
-                this->EnableBarrier( 4u, pSquad1->GetEnemy(15u), coreVector2(-1.0f, 0.0f), 1.0f);
-                this->EnableBarrier( 5u, pSquad1->GetEnemy(16u), coreVector2( 1.0f, 0.0f), 1.0f);
-                
+                STAGE_RESSURECT(pSquad1, 14u, 17u)
+                this->EnableBarrier( 4u, pSquad1->GetEnemy(14u), coreVector2(-1.0f, 0.0f), 1.0f);   // # render order
+                this->EnableBarrier( 1u, pSquad1->GetEnemy(15u), coreVector2( 0.0f,-1.0f), 1.0f);
+                this->EnableBarrier( 2u, pSquad1->GetEnemy(15u), coreVector2( 1.0f, 0.0f), 1.0f);
+                this->EnableBarrier( 3u, pSquad1->GetEnemy(16u), coreVector2( 0.0f, 1.0f), 1.0f);
+                this->EnableBarrier( 0u, pSquad1->GetEnemy(16u), coreVector2( 0.0f,-1.0f), 1.0f);   // # render order
+                this->EnableBarrier( 5u, pSquad1->GetEnemy(16u), coreVector2(-1.0f, 0.0f), 1.0f);
                 this->EnableBarrier( 6u, pSquad1->GetEnemy(17u), coreVector2( 0.0f, 1.0f), 1.0f);
-                this->EnableBarrier( 7u, pSquad1->GetEnemy(17u), coreVector2(-1.0f, 0.0f), 1.0f);
-                this->EnableBarrier( 8u, pSquad1->GetEnemy(18u), coreVector2( 0.0f, 1.0f), 1.0f);
-                this->EnableBarrier( 2u, pSquad1->GetEnemy(18u), coreVector2( 0.0f,-1.0f), 1.0f);   // # render order 2
-                this->EnableBarrier(10u, pSquad1->GetEnemy(18u), coreVector2( 1.0f, 0.0f), 1.0f);
+                this->EnableBarrier( 7u, pSquad1->GetEnemy(17u), coreVector2( 1.0f, 0.0f), 1.0f);
             }
         }
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
-            STAGE_LIFETIME(pEnemy, 1.2f, (i >= 7u && i < 13u) ? (I_TO_F(i-7u) * 0.15f) : 0.0f)
+            STAGE_LIFETIME(pEnemy, 1.2f, (i >= 8u && i < 14u) ? (I_TO_F(i-8u) * 0.15f) : 0.0f)
 
-            const coreSpline2* pPath = (i >= 13u) ? pPath2 : pPath1;
+            const coreSpline2* pPath = (i >= 14u) ? pPath2 : pPath1;
 
-            const coreVector2 vFactor = coreVector2((i == 0u || i >= 7u) ? 0.0f : ((i >= 3u) ? ((i % 2u) ? 0.5f : -0.5f) : -1.0f), (i == 0u || i >= 7u) ? ((i >= 13u) ? -1.0f : 1.0f) : ((i % 2u) ? 1.0f : -1.0f));
-            const coreVector2 vOffset = coreVector2((i >= 7u) ? ((i >= 13u) ? ((I_TO_F((i-13u) % 2u) - 0.5f) * 0.38f) : ((I_TO_F(i-7u) - 2.5f) * 0.38f)) : 0.0f, (i >= 13u) ? (I_TO_F((i-13u) / 2u) * 0.38f) : 0.0f);
+            const coreVector2 vFactor = coreVector2((i >= 8u) ? 0.0f : ((i <= 1u || i >= 4u) ? ((i % 2u) ? 0.5f : -0.5f) : -1.0f), (i <= 1u || i >= 8u) ? ((i >= 14u) ? -1.0f : 1.0f) : ((i % 2u) ? 1.0f : -1.0f));
+            const coreVector2 vOffset = coreVector2((i >= 8u) ? ((i >= 14u) ? ((I_TO_F((i-14u) % 2u) - 0.5f) * 0.38f) : ((I_TO_F(i-8u) - 2.5f) * 0.38f)) : 0.0f, (i >= 14u) ? (I_TO_F((i-14u) / 2u) * 0.38f) : 0.0f);
 
             pEnemy->DefaultMovePath(pPath, vFactor, vOffset, fLifeTime);
 
-            if(i == 1u || i == 2u || i == 3u || i == 4u) pEnemy->Rotate90();
+            if(i == 2u || i == 3u || i == 4u || i == 5u) pEnemy->Rotate90();
 
-            if(STAGE_LIFETIME_AFTER(1.5f) && STAGE_TICK_LIFETIME(1.0f, 0.0f))
+            if(STAGE_LIFETIME_AFTER(0.7f) && STAGE_TICK_LIFETIME(1.0f, 0.0f))
             {
                 const coreVector2 vPos  = pEnemy->GetPosition().xy();
-                const coreFloat   fBase = ((i >= 7u && i < 13u) ? pEnemy->GetDirection().xy() : pEnemy->AimAtPlayer()).Angle();
+                const coreFloat   fBase = ((i >= 8u && i < 14u) ? pEnemy->GetDirection().xy() : pEnemy->AimAtPlayer()).Angle();
 
                 for(coreUintW j = 3u; j--; )
                 {
@@ -655,7 +693,7 @@ void cViridoMission::__SetupOwn()
     });
 
     // ################################################################
-    // 
+    // boss 1
     STAGE_MAIN
     {
         STAGE_BOSS(m_Dharuk, {60.0f, 120.0f, 180.0, 240.0f})
@@ -1343,10 +1381,19 @@ void cViridoMission::__SetupOwn()
     });
 
     // ################################################################
-    // 
+    // boss 2
     STAGE_MAIN
     {
         STAGE_BOSS(m_Torus, {60.0f, 120.0f, 180.0, 240.0f})
+    });
+
+STAGE_START_HERE
+
+    // ################################################################
+    // ball start 1
+    m_anStage.emplace(__LINE__, [=]()
+    {
+        nBallSyncFunc(coreVector2(0.0f,0.0f), coreVector2(-0.5f,1.0f).Normalized(), coreVector2(-2.0f,-2.0f), coreVector2(0.0f,-0.5f));
     });
 
     // ################################################################
@@ -1455,6 +1502,20 @@ void cViridoMission::__SetupOwn()
     });
 
     // ################################################################
+    // ball move 1
+    m_anStage.emplace(__LINE__, [=]()
+    {
+        nBallMoveFunc(coreVector2(41.8878708f,-41.7585716f), coreVector2(-0.5f,1.0f).Normalized(), coreVector2(-2.0f,-2.0f), coreVector2(2.0f,-0.5f));
+    });
+
+    // ################################################################
+    // ball start 2
+    m_anStage.emplace(__LINE__, [=]()
+    {
+        nBallSyncFunc(coreVector2(41.8878708f,-41.7585716f), coreVector2(-0.5f,1.0f).Normalized(), coreVector2(-2.0f,-2.0f), coreVector2(-0.5f,-0.5f));
+    });
+
+    // ################################################################
     // bend
     // cannot throw enemies at each other, may cause unstable movement  
     // cannot let all enemies of a sub-wave pass a single point, too easy (includes circle movement)  
@@ -1463,8 +1524,6 @@ void cViridoMission::__SetupOwn()
     // make this wave easier for pros, as the enemy-movement might not be as deterministic  
     STAGE_MAIN
     {
-        if(STAGE_BEGINNING) this->EnableBall(0u, coreVector2(0.0f,0.0f), coreVector2(-0.5f,1.0f).Normalized()); // TODO: adapt for single fight    
-
         STAGE_ADD_SQUAD(pSquad1, cStarEnemy, 100u)
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
@@ -1502,7 +1561,7 @@ void cViridoMission::__SetupOwn()
                 const coreUintW y2 = (i % 2u);
 
                 vTarget   = coreVector2(-0.7f + 0.7f * I_TO_F(x), -0.5f + 1.2f * I_TO_F(y) + 0.1f * I_TO_F(x2)) + 0.2f * coreVector2(-0.5f + 1.0f * I_TO_F(x2), -0.5f + 1.0f * I_TO_F(y2));
-                vTarget.y = vTarget.y - 1.3f * fLifeTime + 0.8f * I_TO_F((x + 2u) % 3u) + 2.0f;
+                vTarget.y = vTarget.y - ((i < 12u) ? 1.0f : 1.3f) * fLifeTime + 0.8f * I_TO_F((x + 2u) % 3u) + 2.0f;
             }
             else
             {
@@ -1591,6 +1650,20 @@ void cViridoMission::__SetupOwn()
     });
 
     // ################################################################
+    // ball move 2
+    m_anStage.emplace(__LINE__, [=]()
+    {
+        nBallMoveFunc(coreVector2(-42.0250816f,-0.525078177f), coreVector2(1.0f,1.0f).Normalized(), coreVector2(-2.0f,-2.0f), coreVector2(-0.5f,-0.5f));
+    });
+
+    // ################################################################
+    // ball start 3
+    m_anStage.emplace(__LINE__, [=]()
+    {
+        nBallSyncFunc(coreVector2(-42.0250816f,-0.525078177f), coreVector2(1.0f,1.0f).Normalized(), coreVector2(-2.0f,-2.0f), coreVector2(2.0f,-0.5f));
+    });
+
+    // ################################################################
     // push
     // bullets fly fast to give visual waves with space inbetween (but should not be shot too often to compensate) 
     // in 4 player should not be able to pass when enemies are axis aligned 
@@ -1601,8 +1674,6 @@ void cViridoMission::__SetupOwn()
     // TODO: turn middle line for coop ?   
     STAGE_MAIN
     {
-        if(STAGE_BEGINNING) this->EnableBall(0u, coreVector2(0.0f,0.0f), coreVector2(-0.5f,1.0f).Normalized()); // TODO: adapt for single fight    
-
         STAGE_ADD_PATH(pPath1)
         {
             pPath1->Reserve(2u);
@@ -1716,6 +1787,20 @@ void cViridoMission::__SetupOwn()
     });
 
     // ################################################################
+    // ball move 3
+    m_anStage.emplace(__LINE__, [=]()
+    {
+        nBallMoveFunc(coreVector2(-1.0f,1.0f) * FOREGROUND_AREA, coreVector2(1.0f,-1.0f).Normalized(), coreVector2(-2.0f,0.5f), coreVector2(2.0f,2.0f));
+    });
+
+    // ################################################################
+    // ball start 4
+    m_anStage.emplace(__LINE__, [=]()
+    {
+        nBallSyncFunc(coreVector2(-1.0f,1.0f) * FOREGROUND_AREA, coreVector2(1.0f,-1.0f).Normalized(), coreVector2(-2.0f,0.5f), coreVector2(-0.5f,2.0f));
+    });
+
+    // ################################################################
     // can only kill in order
     // coop last enemy, need to work together   
     // abwechselnd links rechts 
@@ -1812,6 +1897,20 @@ void cViridoMission::__SetupOwn()
     });
 
     // ################################################################
+    // ball move 4
+    m_anStage.emplace(__LINE__, [=]()
+    {
+        nBallMoveFunc(coreVector2(1.0f,1.0f) * FOREGROUND_AREA, coreVector2(-1.0f,-1.0f).Normalized(), coreVector2(0.5f,-2.0f), coreVector2(2.0f,-0.5f));
+    });
+
+    // ################################################################
+    // ball start 5
+    m_anStage.emplace(__LINE__, [=]()
+    {
+        nBallSyncFunc(coreVector2(1.0f,1.0f) * FOREGROUND_AREA, coreVector2(-1.0f,-1.0f).Normalized(), coreVector2(0.5f,0.5f), coreVector2(2.0f,2.0f));
+    });
+
+    // ################################################################
     // ghost appears for few seconds (zelda wizzrobe)
     // keine einzelnen gegner am anfang, sonst sieht der spieler die mechanik nicht, wenn er sie einfach über den haufen schießt
     // 1: two groups active at the same time to continue with changes while keeping enemies active for a longer time
@@ -1820,8 +1919,6 @@ void cViridoMission::__SetupOwn()
     // 1: diamond shape to not be able to kill 2 groups at the same time
     STAGE_MAIN
     {
-        if(STAGE_BEGINNING) this->EnableBall(0u, coreVector2(0.0f,0.0f), coreVector2(-0.5f,1.0f).Normalized()); // TODO: adapt for single fight    
-
         STAGE_ADD_PATH(pPath1)
         {
             pPath1->Reserve(9u);
@@ -2030,18 +2127,16 @@ void cViridoMission::__SetupOwn()
     });
 
     // ################################################################
-    // 
+    // ball move 5
+    m_anStage.emplace(__LINE__, [=]()
+    {
+        nBallMoveFunc(coreVector2(0.0f,-1.0f) * FOREGROUND_AREA, coreVector2(0.0f,1.0f), coreVector2(-2.0f,-2.0f), coreVector2(-0.5f,-0.5f));
+    });
+
+    // ################################################################
+    // boss 3
     STAGE_MAIN
     {
-        // boss taucht dann von unten auf (drehungs-effekt), und banner inkl breakout steine(!) von oben geht los   
-        UNUSED STAGE_ADD_SQUAD(pSquad1, cCinderEnemy, 24u)//18u)//VAUS_SCOUTS_X * VAUS_SCOUTS_Y)
-        {
-            STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
-            {
-                pEnemy->Configure(50, COLOR_SHIP_GREY);
-            });
-        });
-
         STAGE_BOSS(m_Vaus, {60.0f, 120.0f, 180.0, 240.0f})
     });
 

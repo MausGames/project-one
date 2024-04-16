@@ -17,6 +17,7 @@
 // TODO: STAGE_FLYPAST with dot-product or simpler per-axis
 // TODO: there seems to be a bug in STAGE_TICK_TIME, which sometimes gives early or late ticks with 30.0f speed, compared with STAGE_TICK_LIFETIME
 // TODO: wrap m_piData in function with RETURN_RESTRICT
+// TODO: get rid of m_anStage.emplace(__LINE__, [=]
 
 
 // ****************************************************************
@@ -26,7 +27,6 @@
 #define MISSION_NO_BOSS     (0xFFu)                                    // no boss currently active (error-value)
 #define MISSION_NO_WAVE     (0xFFu)                                    // 
 #define MISSION_NO_SEGMENT  (0xFFu)                                    // 
-#define MISSION_STAGE_DELAY (INTERFACE_BANNER_DURATION_SCORE - 0.5f)   // 
 
 #define MISSION_SEGMENT_IS_BOSS(i) ((i) % 6u == 5u)
 #define MISSION_BOSS_TO_SEGMENT(i) ((i) * 6u  + 5u)
@@ -39,7 +39,7 @@
 #define VIRIDO_BALLS         (2u)                                    // 
 #define VIRIDO_BALLS_RAWS    (VIRIDO_BALLS * (VIRIDO_TRAILS + 1u))   // 
 #define VIRIDO_PADDLES       (3u)                                    // 
-#define VIRIDO_BARRIERS      (17u)                                   // 
+#define VIRIDO_BARRIERS      (15u)                                   // 
 #define VIRIDO_BARRIERS_RAWS (VIRIDO_BARRIERS)                       // 
 #define VIRIDO_LASERS        (4u)                                    // 
 #define VIRIDO_LASERS_RAWS   (VIRIDO_LASERS * 2u)                    // 
@@ -58,7 +58,7 @@
 
 #define STAGE_MEDAL_GOAL(...)           {static constexpr coreFloat A[] = __VA_ARGS__; this->SetMedalGoal(A); STATIC_ASSERT((ARRAY_SIZE(A) == 4u) && (A[0] < A[1]) && (A[1] < A[2]) && (A[2] < A[3]))}
 #define STAGE_BOSS(e,...)               {if(STAGE_BEGINNING) {STAGE_MEDAL_GOAL(__VA_ARGS__) (e).Resurrect();} if(CONTAINS_FLAG((e).GetStatus(), ENEMY_STATUS_DEAD)) STAGE_FINISH_NOW}
-#define STAGE_WAVE(n,...)               {if(STAGE_BEGINNING) {STAGE_MEDAL_GOAL(__VA_ARGS__) this->ActivateWave(n);} if(STAGE_CLEARED) {this->DeactivateWave(); STAGE_FINISH_NOW}}
+#define STAGE_WAVE(n,...)               {if(STAGE_BEGINNING) {STAGE_MEDAL_GOAL(__VA_ARGS__) this->ActivateWave(n);} if(STAGE_CLEARED) {this->DeactivateWave(); if(!g_pGame->GetInterface()->IsBannerActive()) STAGE_FINISH_NOW}}
 
 #define STAGE_RESSURECT(s,f,t)          {STAGE_FOREACH_ENEMY_ALL(s, pEnemy, i) {if((coreInt32(i) >= coreInt32(f)) && (coreInt32(i) <= coreInt32(t))) pEnemy->Resurrect();});}
 #define STAGE_CLEARED                   (std::all_of(m_apSquad.begin(), m_apSquad.end(), [](const cEnemySquad* pSquad) {return pSquad->IsFinished();}))

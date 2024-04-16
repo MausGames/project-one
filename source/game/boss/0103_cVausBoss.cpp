@@ -343,6 +343,8 @@ static coreVector2 vTestOldPos = coreVector2(0.0f,0.0f);
 // 
 void cVausBoss::__UpdateBreakout()
 {
+#define VAUS_SCOUTS_X (8u)
+#define VAUS_SCOUTS_Y (2u)
 #if 0
     cViridoMission* pMission = d_cast<cViridoMission*>(g_pGame->GetCurMission());
     coreObject3D*   pBall    = pMission->GetBall(0u);

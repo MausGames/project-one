@@ -42,11 +42,6 @@
 #define TORUS_TURRET_SPEED        (-0.2f)                                      // 
 #define TORUS_GUNNER_SPEED        (0.2f)                                       // 
 
-#define VAUS_SCOUTS_TOTAL         (DEFINED(_CORE_DEBUG_) ? 16 : 80)            //         
-#define VAUS_SCOUTS_X             (8u)                                         //         
-#define VAUS_SCOUTS_Y             (2u)                                         //         
-#define VAUS_SHOTS                (10u)                                        //         
-
 #define NAUTILUS_ATTACH_DIST      (-10.0f)                                     // 
 #define NAUTILUS_INK_TIME         (10.0f)                                      // 
 #define NAUTILUS_INK_SPEED        (1.65f)                                      // 

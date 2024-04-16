@@ -49,7 +49,7 @@ cViridoMission::cViridoMission()noexcept
             pBall->DefineProgram("effect_energy_invert_program");
 
             // set object properties
-            pBall->SetSize   (coreVector3(2.7f,2.7f,2.7f));
+            pBall->SetSize   (coreVector3(3.0f,3.0f,3.0f));
             pBall->SetColor3 (COLOR_ENERGY_GREEN * 0.8f);
             pBall->SetTexSize(coreVector2(4.5f,4.5f));
             pBall->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
@@ -700,7 +700,7 @@ void cViridoMission::__MoveOwnAfter()
         coreObject3D& oPaddle = m_aPaddle [0];
 
         // 
-        oBall.SetPosition(oPaddle.GetPosition() + oPaddle.GetDirection() * (oPaddle.GetCollisionRange().y * 2.0f - 0.3f));
+        oBall.SetPosition(oPaddle.GetPosition() + oPaddle.GetDirection() * (oPaddle.GetCollisionRange().y * 2.0f - 0.3f)); // TODO: adjust distance (ball size 2.7f -> 3.0f)
         oBall.Move();
     }
 
@@ -801,7 +801,7 @@ void cViridoMission::__MoveOwnAfter()
             const coreVector2 vDiff = vOldBallPos - pCurEnemy->GetPosition().xy();
 
             // 
-            coreUintW iAxis = 0u;
+            coreUintW iAxis;
             if(IsHorizontal(vDiff)) iAxis = ((vDiff.x * vBallDir.x) >= 0.0f) ? 1u : 0u;
                                else iAxis = ((vDiff.y * vBallDir.y) >= 0.0f) ? 0u : 1u;
 

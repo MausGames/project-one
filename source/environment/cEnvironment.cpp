@@ -151,9 +151,6 @@ void cEnvironment::Move()
         }
         else m_pOldBackground->Move();
     }
-    
-    
-    Core::Debug->InspectValue("env", m_TransitionTime.GetValue(CORE_TIMER_GET_NORMAL));
 }
 
 

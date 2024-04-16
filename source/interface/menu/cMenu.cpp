@@ -451,7 +451,7 @@ void cMenu::Move()
     }
     
     const coreFloat fSpeed = STATIC_ISVALID(g_pGame) ? 1000.0f : 0.5f;
-    if(((this->GetCurSurface() == SURFACE_CONFIG) || (this->GetCurSurface() == SURFACE_PAUSE))) m_PauseLayer.SetAlpha(MIN(m_PauseLayer.GetAlpha() + fSpeed*Core::System->GetTime(), 0.25f));
+    if(((this->GetCurSurface() == SURFACE_CONFIG) || (this->GetCurSurface() == SURFACE_PAUSE)) && STATIC_ISVALID(g_pGame)) m_PauseLayer.SetAlpha(MIN(m_PauseLayer.GetAlpha() + fSpeed*Core::System->GetTime(), 0.25f));
                                                                                            else m_PauseLayer.SetAlpha(MAX(m_PauseLayer.GetAlpha() - fSpeed*Core::System->GetTime(), 0.0f));
 
     // 
