@@ -322,6 +322,14 @@ void cViridoMission::__SetupOwn()
                ((vNewPos.y < -FOREGROUND_AREA.y * 1.2f) && (vHelperMove.y < 0.0f)) ||
                ((vNewPos.y >  FOREGROUND_AREA.y * 1.2f) && (vHelperMove.y > 0.0f)))
             {
+                if(vNewPos.y < -FOREGROUND_AREA.y * 1.2f)
+                {
+                    STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
+                    {
+                        this->AddExtraScore(pPlayer, 100u, coreVector3(vNewPos, 0.0f));
+                    });
+                }
+
                 pHelper->Kill(false);
             }
 

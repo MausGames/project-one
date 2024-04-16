@@ -205,6 +205,11 @@ $STAT_MAX_CHAIN = Mejor encadenamiento
 $STAT_COUNT_START = Veces comenzado
 $STAT_COUNT_END = Veces completado
 
+$LEADERBOARD_SCORE = SCORE
+$LEADERBOARD_TIME = TIME
+$LEADERBOARD_GLOBAL = Global
+$LEADERBOARD_FRIENDS = Friends Only
+
 $VALUE_OFF = Apagado
 $VALUE_ON = Encendido
 $VALUE_LOW = Bajo

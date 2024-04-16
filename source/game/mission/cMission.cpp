@@ -150,10 +150,10 @@ void cMission::Close()
     }
 
     // 
-    g_pSave->SaveFile();
+    UploadLeaderboardsMission(iMissionIndex, iScoreFull, iTimeShiftedUint);
 
     // 
-    UploadLeaderboardsMission(iMissionIndex, iScoreFull);
+    g_pSave->SaveFile();
 }
 
 
@@ -629,10 +629,10 @@ void cMission::__CloseSegment()
     iAdvance = MAX(iAdvance, m_iCurSegmentIndex + 2u);
 
     // 
-    g_pSave->SaveFile();
+    UploadLeaderboardsSegment(iMissionIndex, m_iCurSegmentIndex, iScoreFull, iTimeShiftedUint);
 
     // 
-    UploadLeaderboardsSegment(iMissionIndex, m_iCurSegmentIndex, iScoreFull);
+    g_pSave->SaveFile();
 }
 
 

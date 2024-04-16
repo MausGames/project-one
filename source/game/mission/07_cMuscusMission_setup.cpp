@@ -2368,6 +2368,10 @@ void cMuscusMission::__SetupOwn()
                         if(!pEnemy->HasStatus(ENEMY_STATUS_GHOST_BULLET)) pEnemy->AddStatus(ENEMY_STATUS_GHOST_BULLET);
                     }
                 }
+                else
+                {
+                    if(i == 34u) g_pGame->GetBulletManagerEnemy()->ClearBullets(true);
+                }
             }
             else if(i < 61u)
             {

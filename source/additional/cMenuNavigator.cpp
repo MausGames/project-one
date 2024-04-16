@@ -116,15 +116,12 @@ void cMenuNavigator::Move()
         coreVector2 vNewPos  = MapToAxis(vPosition, g_vHudDirection) * RCP(vResolution.Min());
         const coreVector2 vNewSize = m_pCurObject->GetSize() * (HAS_FLAG(m_aObject.at(m_pCurObject).eType, MENU_TYPE_BIG) ? 1.5f : 1.0f);
 
-        FOR_EACH(it, m_apScroll)
+        const coreObject2D* pScroll = this->GetCurScroll();
+        if(pScroll)
         {
-            const cScrollBox* pScroll = d_cast<cScrollBox*>(*it);
-            if(pScroll->IsFocused() && cMenuNavigator::IsValid(pScroll) && pScroll->ContainsObject(m_pCurObject))
-            {
-                const coreVector2 vPos = GetTranslationArea(*pScroll);
-                vNewPos.x = CLAMP(vNewPos.x, vPos.x - pScroll->GetSize().x * 0.5f + m_vCurSize.x * 0.5f, vPos.x + pScroll->GetSize().x * 0.5f - m_vCurSize.x * 0.5f);
-                vNewPos.y = CLAMP(vNewPos.y, vPos.y - pScroll->GetSize().y * 0.5f + m_vCurSize.y * 0.5f, vPos.y + pScroll->GetSize().y * 0.5f - m_vCurSize.y * 0.5f);
-            }
+            const coreVector2 vPos = GetTranslationArea(*pScroll);
+            vNewPos.x = CLAMP(vNewPos.x, vPos.x - pScroll->GetSize().x * 0.5f + m_vCurSize.x * 0.5f, vPos.x + pScroll->GetSize().x * 0.5f - m_vCurSize.x * 0.5f);
+            vNewPos.y = CLAMP(vNewPos.y, vPos.y - pScroll->GetSize().y * 0.5f + m_vCurSize.y * 0.5f, vPos.y + pScroll->GetSize().y * 0.5f - m_vCurSize.y * 0.5f);
         }
 
         if(m_vCurPos == HIDDEN_POS)
@@ -161,15 +158,12 @@ void cMenuNavigator::Move()
         if(TIME)
         {
             coreVector2 vNewTarget = (vPosition + m_vMouseOffset) / vResolution;
-            FOR_EACH(it, m_apScroll)
+            const coreObject2D* pScroll2 = this->GetCurScroll();
+            if(pScroll2)
             {
-                const cScrollBox* pScroll = d_cast<cScrollBox*>(*it);
-                if(pScroll->IsFocused() && cMenuNavigator::IsValid(pScroll) && pScroll->ContainsObject(m_pCurObject))
-                {
-                    const coreVector2 vPos = GetTranslationArea(*pScroll);
-                    vNewTarget.x = CLAMP(vNewTarget.x, vPos.x - pScroll->GetSize().x * 0.5f, vPos.x + pScroll->GetSize().x * 0.5f);
-                    vNewTarget.y = CLAMP(vNewTarget.y, vPos.y - pScroll->GetSize().y * 0.5f, vPos.y + pScroll->GetSize().y * 0.5f);
-                }
+                const coreVector2 vPos = GetTranslationArea(*pScroll2);
+                vNewTarget.x = CLAMP(vNewTarget.x, vPos.x - pScroll2->GetSize().x * 0.5f, vPos.x + pScroll2->GetSize().x * 0.5f);
+                vNewTarget.y = CLAMP(vNewTarget.y, vPos.y - pScroll2->GetSize().y * 0.5f, vPos.y + pScroll2->GetSize().y * 0.5f);
             }
             Core::Input->SetMousePosition(vNewTarget);   // for focus
         }
@@ -554,15 +548,12 @@ void cMenuNavigator::Update()
         const coreVector2 vResolution = Core::System->GetResolution();
 
         coreVector2 vNewTarget = (vPosition + m_vMouseOffset) / vResolution;
-        FOR_EACH(it, m_apScroll)
+        const coreObject2D* pScroll = this->GetCurScroll();
+        if(pScroll)
         {
-            const cScrollBox* pScroll = d_cast<cScrollBox*>(*it);
-            if(pScroll->IsFocused() && cMenuNavigator::IsValid(pScroll) && pScroll->ContainsObject(m_pCurObject))
-            {
-                const coreVector2 vPos = GetTranslationArea(*pScroll);
-                vNewTarget.x = CLAMP(vNewTarget.x, vPos.x - pScroll->GetSize().x * 0.5f, vPos.x + pScroll->GetSize().x * 0.5f);
-                vNewTarget.y = CLAMP(vNewTarget.y, vPos.y - pScroll->GetSize().y * 0.5f, vPos.y + pScroll->GetSize().y * 0.5f);
-            }
+            const coreVector2 vPos = GetTranslationArea(*pScroll);
+            vNewTarget.x = CLAMP(vNewTarget.x, vPos.x - pScroll->GetSize().x * 0.5f, vPos.x + pScroll->GetSize().x * 0.5f);
+            vNewTarget.y = CLAMP(vNewTarget.y, vPos.y - pScroll->GetSize().y * 0.5f, vPos.y + pScroll->GetSize().y * 0.5f);
         }
         Core::Input->SetMousePosition(vNewTarget);   // for focus and click
     }
@@ -644,6 +635,22 @@ void cMenuNavigator::BindSurface(coreObject2D* pTab, const coreUint8 iSurface, c
 void cMenuNavigator::BindScroll(coreObject2D* pScroll)
 {
     m_apScroll.insert(pScroll);
+}
+
+
+// ****************************************************************
+// 
+const coreObject2D* cMenuNavigator::GetCurScroll()const
+{
+    FOR_EACH(it, m_apScroll)
+    {
+        const cScrollBox* pScroll = d_cast<cScrollBox*>(*it);
+        if(pScroll->IsFocused() && cMenuNavigator::IsValid(pScroll) && pScroll->ContainsObject(m_pCurObject))
+        {
+            return pScroll;
+        }
+    }
+    return NULL;
 }
 
 

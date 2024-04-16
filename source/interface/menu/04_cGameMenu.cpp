@@ -544,7 +544,7 @@ cGameMenu::cGameMenu()noexcept
         m_aArmoryWeaponIcon[i].DefineTexture(0u, "menu_weapon.png");
         m_aArmoryWeaponIcon[i].DefineProgram("default_2d_program");
         m_aArmoryWeaponIcon[i].SetPosition  (m_aArmoryWeapon[i].GetPosition() + coreVector2(m_aArmoryWeapon[i].GetSize().x * -0.5f, 0.0f));
-        m_aArmoryWeaponIcon[i].SetSize      (coreVector2(1.0f, 1.0f) * 0.08f);
+        m_aArmoryWeaponIcon[i].SetSize      (coreVector2(1.0f, 1.0f) * 0.085f);
         m_aArmoryWeaponIcon[i].SetTexSize   (coreVector2(0.25f,0.5f));
     }
 
@@ -1305,7 +1305,8 @@ void cGameMenu::Move()
                 m_aArmoryWeaponIcon[i].SetColor3   (vColor);
                 m_aArmoryWeaponIcon[i].SetTexOffset(vTexOffset);
 
-                m_aArmoryWeaponIcon[i].SetAlpha(m_aArmoryWeaponIcon[i].GetAlpha() * 0.6f * m_aArmoryWeapon[i].GetAlpha());
+                //m_aArmoryWeaponIcon[i].SetAlpha(m_aArmoryWeaponIcon[i].GetAlpha() * 0.6f * m_aArmoryWeapon[i].GetAlpha());
+                m_aArmoryWeaponIcon[i].SetAlpha(m_aArmoryWeaponIcon[i].GetAlpha() * 0.8f * m_aArmoryWeapon[i].GetAlpha());
             }
 
             //for(coreUintW i = 0u; i < MENU_GAME_ARMORY_WAVES; ++i)
@@ -2205,7 +2206,7 @@ void cGameMenu::__PrepareMission(const coreUintW iMissionIndex)
     // 
     m_aArmoryTitle[0].SetText(oData.pcName);
     m_aArmoryTitle[1].SetText(PRINT("%s %s", Core::Language->GetString("MISSION"), cMenu::GetMissionLetters(iMissionIndex)));
-    m_aArmoryScore[1].SetText(oStats.iScoreBest ? coreData::ToChars(oStats.iScoreBest)     : "-");
+    m_aArmoryScore[1].SetText(oStats.iScoreBest ? PRINT("%'u",      oStats.iScoreBest)     : "-");
     m_aArmoryTime [1].SetText(fBestTime         ? PRINT("%.1f %+d", fBestTime, iBestShift) : "-");
 
     // 
@@ -2431,7 +2432,7 @@ void cGameMenu::__PrepareSegment(const coreUintW iMissionIndex, const coreUintW 
     // 
     m_aArmoryTitle[0].SetText(bBoss ? oData.pcBoss : oData.pcName);
     m_aArmoryTitle[1].SetText(PRINT("%s %s", Core::Language->GetString("SEGMENT"), cMenu::GetSegmentLetters(iMissionIndex, iSegmentIndex)));
-    m_aArmoryScore[1].SetText(oStats.iScoreBest ? coreData::ToChars(oStats.iScoreBest)     : "-");
+    m_aArmoryScore[1].SetText(oStats.iScoreBest ? PRINT("%'u",      oStats.iScoreBest)     : "-");
     m_aArmoryTime [1].SetText(fBestTime         ? PRINT("%.1f %+d", fBestTime, iBestShift) : "-");
 
     // 
@@ -2646,7 +2647,7 @@ void cGameMenu::__PrepareArcade()
     m_aArmoryTime [0].SetColor3(oData.vColor);
 
     // 
-    m_aArmoryScore[1].SetText(oStats.iScoreBest ? coreData::ToChars(oStats.iScoreBest)     : "-");
+    m_aArmoryScore[1].SetText(oStats.iScoreBest ? PRINT("%'u",      oStats.iScoreBest)     : "-");
     m_aArmoryTime [1].SetText(fBestTime         ? PRINT("%.1f %+d", fBestTime, iBestShift) : "-");
     
     if(oStats.iScoreBest && !fBestTime)

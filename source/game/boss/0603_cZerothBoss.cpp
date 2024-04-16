@@ -692,10 +692,12 @@ void cZerothBoss::__MoveOwn()
             const coreVector2 vBaseDir = g_pGame->FindPlayerDual(0u)->GetDirection().xy();
 
             coreBool bSameBase = true;
-            g_pGame->ForEachPlayer([&](const cPlayer* pPlayer, const coreUintW i)
+            g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
             {
                 if(!SameDirection(vBaseDir, pPlayer->GetDirection().xy()))
                     bSameBase = false;
+
+                pPlayer->ShowArrow(0u);
             });
 
             if(bSameBase) m_vGlobalDir = vBaseDir;

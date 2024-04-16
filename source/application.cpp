@@ -10,7 +10,7 @@
 // ****************************************************************
 // project settings
 const coreChar* const CoreApp::Settings::Name                          = "Eigengrau";
-const coreChar* const CoreApp::Settings::Version                       = "1.2.0";
+const coreChar* const CoreApp::Settings::Version                       = "1.2.1";
 const coreChar* const CoreApp::Settings::IconPath                      = "data/textures/game_icon.png";
 const coreChar* const CoreApp::Settings::CursorPath                    = "data/textures/default_cursor.png";
 const coreBool        CoreApp::Settings::UserManagement                = true;
@@ -44,7 +44,8 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("bullet_ray_volume.md3",                  CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_ray_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("bullet_orb.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_orb.md3");  // TODO 1: kann man wieder hinzufügen wenn triangle-sphere intersection implementiert wurde, CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("bullet_quad.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_quad.md3");
-    Core::Manager::Resource->Load<coreModel>  ("bullet_rocket.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_rocket.md3");
+    Core::Manager::Resource->Load<coreModel>  ("bullet_rocket.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_rocket.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("bullet_rocket_volume.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_rocket_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("bullet_spear.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_spear.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("bullet_spear_volume.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_spear_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("bullet_surge.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_surge.md3", CORE_MODEL_LOAD_NO_CLUSTERS);

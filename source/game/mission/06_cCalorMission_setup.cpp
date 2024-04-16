@@ -1149,6 +1149,7 @@ void cCalorMission::__SetupOwn()
     // TODO 1: hardmode: additional attacking pseudo-enemy, made of bullet?), or infinity object, even in dungeon (though similar to P1 object)
     // TODO 1: could be during a sandstorm, rainstorm or other visual distortion to remove the background movement
     // TODO 3: late update: make sure corners in dungeon are visually consistent (depth)
+    // TODO 3: maybe show fullscreen arrow/cone
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -1472,6 +1473,8 @@ void cCalorMission::__SetupOwn()
         {
             if(!SameDirection(vBaseDir, pPlayer->GetDirection().xy()))
                 bSameBase = false;
+
+            if(m_iStageSub < 10u) pPlayer->ShowArrow(0u);
         });
 
         if(bSameBase) vGlobalDir = vBaseDir;

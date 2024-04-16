@@ -52,12 +52,19 @@ cMenu::cMenu()noexcept
 
     // 
     m_NoticeSave.Construct      (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
-    m_NoticeSave.SetPosition    (coreVector2(-0.02f, 0.015f));
-    m_NoticeSave.SetCenter      (coreVector2( 0.5f, -0.5f));
-    m_NoticeSave.SetAlignment   (coreVector2(-1.0f,  1.0f));
+    m_NoticeSave.SetCenter      (coreVector2( 0.5f,-0.5f));
+    m_NoticeSave.SetAlignment   (coreVector2(-1.0f, 1.0f));
     m_NoticeSave.SetColor3      (COLOR_MENU_INSIDE);
     m_NoticeSave.SetStyle       (m_NoticeSave.GetStyle() & ~CORE_OBJECT2D_STYLE_ALTCENTER);
     m_NoticeSave.SetTextLanguage("SAVING");
+
+    // 
+    m_NoticeSaveIcon.Construct   (MENU_FONT_ICON_2, MENU_OUTLINE_SMALL);
+    m_NoticeSaveIcon.SetCenter   (m_NoticeSave.GetCenter());
+    m_NoticeSaveIcon.SetAlignment(m_NoticeSave.GetAlignment());
+    m_NoticeSaveIcon.SetColor3   (COLOR_MENU_WHITE * MENU_LIGHT_IDLE);
+    m_NoticeSaveIcon.SetText     (ICON_GEAR);
+    m_NoticeSaveIcon.SetStyle    (m_NoticeSave.GetStyle() & ~CORE_OBJECT2D_STYLE_ALTCENTER);
 
     // bind menu objects
     this->BindObject(SURFACE_INTRO,   &m_IntroMenu);
@@ -256,7 +263,11 @@ void cMenu::Render()
     m_Tooltip.Render();
 
     // 
-    if(m_fNoticeSaveTime) m_NoticeSave.Render();
+    if(m_fNoticeSaveTime)
+    {
+        m_NoticeSave    .Render();
+        //m_NoticeSaveIcon.Render();
+    }
 }
 
 
@@ -431,6 +442,7 @@ void cMenu::Move()
             {
                 // 
                 m_ScoreMenu.LoadMissions();
+                m_ScoreMenu.ResetNavigator();
 
                 // switch to score menu
                 this->ShiftSurface(this, SURFACE_SCORE, 3.0f, 1u);
@@ -873,6 +885,17 @@ void cMenu::Move()
     m_NoticeSave.SetAlpha   (BLENDBR(m_fNoticeSaveTime));
     m_NoticeSave.Move();
     
+    m_NoticeSave.RetrieveDesiredSize([this](const coreVector2 vSize)
+    {
+        const coreFloat   fRotation  = coreFloat(Core::System->GetTotalTime());
+        const coreVector2 vDirection = coreVector2::Direction(fRotation * (0.5f*PI));
+
+        m_NoticeSaveIcon.SetPosition (m_NoticeSave.GetPosition() + coreVector2(vSize.x * -1.0f - 0.005f, 0.0f));
+        m_NoticeSaveIcon.SetDirection(vDirection);
+        m_NoticeSaveIcon.SetAlpha    (m_NoticeSave.GetAlpha());
+        m_NoticeSaveIcon.Move();
+    });
+    
     if((this->GetCurSurface() == SURFACE_SUMMARY) && ((m_SummaryMenu.GetCurSurface() == SURFACE_SUMMARY_SEGMENT_SOLO) || (m_SummaryMenu.GetCurSurface() == SURFACE_SUMMARY_SEGMENT_COOP)) && (!STATIC_ISVALID(g_pGame) || (g_pGame->GetCurMission()->GetID() != cAterMission::ID)))
     {
         m_fVolume.UpdateMax(-0.5f, 0.0f);
@@ -938,7 +961,7 @@ void cMenu::Move()
         m_pCurLine = m_pNewLine;
         if(m_pCurLine)
         {
-            g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_CHANGE_LINE);
+            //g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_CHANGE_LINE);
         }
     }
     m_pNewLine = NULL;
@@ -1519,6 +1542,7 @@ void cMenu::__EndGame()
         if(!g_bDemoVersion)
         {
             ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_MAIN_START)
+            ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_MAIN_SCORE)
             ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_MAIN_EXTRA)
         }
 

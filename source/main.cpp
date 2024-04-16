@@ -15,6 +15,7 @@ coreVector2     g_vHudDirection   = coreVector2(0.0f,1.0f);
 coreBool        g_bTiltMode       = false;
 coreFloat       g_fShiftMode      = 0.0f;
 coreBool        g_bDemoVersion    = false;
+coreBool        g_bLeaderboards   = false;
 coreBool        g_bDebugOutput    = false;
 coreMusicPlayer g_MusicPlayer     = {};
 
@@ -58,6 +59,12 @@ void CoreApp::Init()
 
     // load configuration
     LoadConfig();
+
+    // check for demo version (game would crash otherwise anyway)
+    g_bDemoVersion = !coreData::FileExists("data/archives/pack2.cfa");
+
+    // 
+    g_bLeaderboards = !std::strcmp(Core::Platform->GetIdentifier(), "Steam");
 
     // 
     InitAchievements();
@@ -110,9 +117,6 @@ void CoreApp::Init()
     InitResolution(Core::System->GetResolution());
     InitDirection();
     InitFramerate();
-
-    // check for demo version (game would crash otherwise anyway)
-    g_bDemoVersion = !coreData::FileExists("data/archives/pack2.cfa");
 
     // create and init main components
     cShadow::GlobalInit();
@@ -391,6 +395,7 @@ void CoreApp::Move()
 
     // 
     CheckAchievements();
+    CheckLeaderboards();
 
     // 
     UpdateListener();
@@ -901,19 +906,36 @@ static void DebugGame()
         //    d_cast<cDarkBackground*>(g_pEnvironment->GetBackground())->Dissolve();
         //}
         
-        if(STATIC_ISVALID(g_pGame)) g_pGame->GetBulletManagerEnemy()->ClearBullets(true);
+        //if(STATIC_ISVALID(g_pGame)) g_pGame->GetBulletManagerEnemy()->ClearBullets(true);
+        
+        
+        if(STATIC_ISVALID(g_pGame))
+        {
+            static coreUint32 iScore = 0u;
+            iScore += 1u;
+            
+            static coreUint32 iTime = 100'000u;
+            ASSERT(iTime)
+            iTime -= 1'000u;
+            
+            UploadLeaderboardsArcade(iScore, iTime);
+            
+            Core::Debug->InspectValue("Score", iScore);
+            Core::Debug->InspectValue("Time",  iTime);
+        }
         
         //if(STATIC_ISVALID(g_pGame) && g_pGame->GetCurMission()->GetCurBoss())
         //{
         //    c_cast<coreUint8&>(g_pGame->GetCurMission()->GetCurBoss()->GetHelperHit()) = 0xFFu;
         //}
         
-        if(STATIC_ISVALID(g_pGame))
-        {
-            for(coreUintW i = 0u; i < FRAGMENTS; ++i)
-                g_pGame->GetItemManager()->AddItem<cFragmentItem>(coreVector2((I_TO_F(i % 3u) - 1.0f) * 0.7f, (I_TO_F(i / 3u) - 1.0f) * 0.7f) * FOREGROUND_AREA     * 1.5f, i, 0u, 0u);
-        }
+        //if(STATIC_ISVALID(g_pGame))
+        //{
+        //    for(coreUintW i = 0u; i < FRAGMENTS; ++i)
+        //        g_pGame->GetItemManager()->AddItem<cFragmentItem>(coreVector2((I_TO_F(i % 3u) - 1.0f) * 0.7f, (I_TO_F(i / 3u) - 1.0f) * 0.7f) * FOREGROUND_AREA     * 1.5f, i, 0u, 0u);
+        //}
     }
+    Core::Debug->InspectValue("Queue", coreUint32(g_pSave->GetScoreQueue()->size()));
     
     Core::Debug->InspectValue("Fly Offset", g_pEnvironment->GetFlyOffset());
 }

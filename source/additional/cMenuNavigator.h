@@ -140,6 +140,9 @@ public:
     inline void SetShoulder(const coreBool bShoulder) {m_bShoulder = bShoulder;}
 
     // 
+    const coreObject2D* GetCurScroll()const;
+
+    // 
     inline void ShowIcon(const coreBool bStatus) {m_bShowIcon = bStatus;}
 
     // 

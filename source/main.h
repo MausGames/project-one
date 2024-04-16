@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 //*----------------------------------------------------------------------------*//
-//| Project One v1.2.0 (https://www.maus-games.at)                             |//
+//| Project One v1.2.1 (https://www.maus-games.at)                             |//
 //*----------------------------------------------------------------------------*//
 //| Copyright (c) 2010 Martin Mauersics                                        |//
 //|                                                                            |//
@@ -256,13 +256,18 @@
 #define SHADER_ROTATED       "#define _P1_ROTATED_"     " (1) \n"        // energy
 
 
+// 
 struct sVersion final
 {
     const coreChar*  pcString;
     const coreUint16 iNumber;
 };
-constexpr sVersion g_aVersion[] = {{"1.2.0", 1u}};
-constexpr sVersion g_Version = {"1.2.0", 1u};
+constexpr sVersion g_aVersion[] =
+{
+    {"1.2.0", 1u},
+    {"1.2.1", 2u}
+};
+constexpr sVersion g_Version = g_aVersion[ARRAY_SIZE(g_aVersion) - 1u];
 
 
 // collision types
@@ -362,6 +367,7 @@ extern coreVector2     g_vHudDirection;     //
 extern coreBool        g_bTiltMode;         // 
 extern coreFloat       g_fShiftMode;        // 
 extern coreBool        g_bDemoVersion;      // 
+extern coreBool        g_bLeaderboards;     // 
 extern coreBool        g_bDebugOutput;      // 
 extern coreMusicPlayer g_MusicPlayer;       // central music-player
 

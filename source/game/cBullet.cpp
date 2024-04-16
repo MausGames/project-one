@@ -1343,6 +1343,7 @@ cRocketBullet::cRocketBullet()noexcept
 {
     // load object resources
     this->DefineModel  ("bullet_rocket.md3");
+    this->DefineVolume ("bullet_rocket_volume.md3");
     this->DefineTexture(0u, "ship_enemy.png");
     this->DefineProgram("object_ship_glow_program");
 }

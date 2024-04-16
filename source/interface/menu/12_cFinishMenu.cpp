@@ -220,6 +220,22 @@ void cFinishMenu::ShowThankYou()
     m_TotalValue.SetText(coreData::ToChars(iSumScore));
 
     // 
+    g_pSave->EditGlobalStats     ()->aiMedalsEarned[MEDAL_BRONZE] += 1u;
+    g_pSave->EditLocalStatsArcade()->aiMedalsEarned[MEDAL_BRONZE] += 1u;
+
+    // 
+    coreUint8& iMedalArcade = g_pSave->EditProgress()->aaaiMedalArcade[g_pGame->GetType()][g_pGame->GetMode()][g_pGame->GetDifficulty()];
+    iMedalArcade = MAX(iMedalArcade, MEDAL_BRONZE);
+
+    // 
+    g_pSave->EditLocalStatsArcade()->iScoreBest   = MAX(g_pSave->EditLocalStatsArcade()->iScoreBest,       iSumScore);
+    g_pSave->EditLocalStatsArcade()->iScoreWorst  = MIN(g_pSave->EditLocalStatsArcade()->iScoreWorst - 1u, iSumScore - 1u) + 1u;
+    g_pSave->EditLocalStatsArcade()->iScoreTotal += iSumScore;
+
+    // 
+    g_pSave->SaveFile();
+
+    // 
     this->ChangeSurface(SURFACE_FINISH_DEFAULT, 0.0f);
 }
 

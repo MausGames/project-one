@@ -70,6 +70,14 @@ cMainMenu::cMainMenu()noexcept
         m_Navigator.BindObject(&m_ConfigButton, &m_ExtraButton,  NULL, &m_ExitButton,   NULL, MENU_TYPE_DEFAULT);
         m_Navigator.BindObject(&m_ExitButton,   &m_ConfigButton, NULL, &m_StartButton,  NULL, MENU_TYPE_DEFAULT);
     }
+    else if(g_bLeaderboards)
+    {
+        m_Navigator.BindObject(&m_StartButton,  &m_ExitButton,   NULL, &m_ScoreButton,  NULL, MENU_TYPE_DEFAULT);
+        m_Navigator.BindObject(&m_ScoreButton,  &m_StartButton,  NULL, &m_ExtraButton,  NULL, MENU_TYPE_DEFAULT);
+        m_Navigator.BindObject(&m_ExtraButton,  &m_ScoreButton,  NULL, &m_ConfigButton, NULL, MENU_TYPE_DEFAULT);
+        m_Navigator.BindObject(&m_ConfigButton, &m_ExtraButton,  NULL, &m_ExitButton,   NULL, MENU_TYPE_DEFAULT);
+        m_Navigator.BindObject(&m_ExitButton,   &m_ConfigButton, NULL, &m_StartButton,  NULL, MENU_TYPE_DEFAULT);
+    }
     else
     {
         m_Navigator.BindObject(&m_StartButton,  &m_ExitButton,   NULL, &m_ExtraButton,  NULL, MENU_TYPE_DEFAULT);
@@ -97,6 +105,12 @@ cMainMenu::cMainMenu()noexcept
         this->BindObject(SURFACE_MAIN_DEFAULT, &m_ExtraButton);
         this->BindObject(SURFACE_MAIN_DEFAULT, &m_ConfigButton);
     }
+    else if(g_bLeaderboards)
+    {
+        this->BindObject(SURFACE_MAIN_DEFAULT, &m_ScoreButton);
+        this->BindObject(SURFACE_MAIN_DEFAULT, &m_ExtraButton);
+        this->BindObject(SURFACE_MAIN_DEFAULT, &m_ConfigButton);
+    }
     else
     {
         this->BindObject(SURFACE_MAIN_DEFAULT, &m_ExtraButton);
@@ -108,19 +122,23 @@ cMainMenu::cMainMenu()noexcept
     #endif
 
     this->BindObject(SURFACE_MAIN_DEFAULT, &m_StartNew);
+    if(g_bLeaderboards) this->BindObject(SURFACE_MAIN_DEFAULT, &m_ScoreNew);
     this->BindObject(SURFACE_MAIN_DEFAULT, &m_ExtraNew);
     this->BindObject(SURFACE_MAIN_DEFAULT, &m_ConfigNew);
     this->BindObject(SURFACE_MAIN_DEFAULT, &m_Navigator);
 
     // 
     coreSet<coreObject2D*>* pObjectSet = this->GetObjectSet(SURFACE_MAIN_DEFAULT);
-    for(coreUintW i = 0u, ie = pObjectSet->size() - 4u; i < ie; ++i)
+    for(coreUintW i = 0u, ie = pObjectSet->size() - (g_bLeaderboards ? 5u : 4u); i < ie; ++i)
     {
         (*pObjectSet)[i]->SetPosition(coreVector2(0.0f, 0.09f * (I_TO_F(ie - 1u) * 0.5f - I_TO_F(i))));
     }
 
     m_StartNew.SetPosition(m_StartButton.GetPosition() + m_StartButton.GetSize()*coreVector2(0.5f,0.0f) + coreVector2(0.07f,0.0f));
     m_StartNew.SetIndex   (NEW_MAIN_START);
+
+    m_ScoreNew.SetPosition(m_ScoreButton.GetPosition() + m_ScoreButton.GetSize()*coreVector2(0.5f,0.0f) + coreVector2(0.07f,0.0f));
+    m_ScoreNew.SetIndex   (NEW_MAIN_SCORE);
 
     m_ExtraNew.SetPosition(m_ExtraButton.GetPosition() + m_ExtraButton.GetSize()*coreVector2(0.5f,0.0f) + coreVector2(0.07f,0.0f));
     m_ExtraNew.SetIndex   (NEW_MAIN_EXTRA);
@@ -161,6 +179,9 @@ void cMainMenu::Move()
             {
                 // 
                 m_iStatus = 2;
+
+                // 
+                m_ScoreNew.Resolve();
             }
             else if(m_ReplayButton.IsClicked())
             {

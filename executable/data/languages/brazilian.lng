@@ -1,7 +1,7 @@
 $LANGUAGE = Português (Brasil)
 $FONT = keifont.ttf
 
-$WELCOME = Um jogo de Martin Mauersics
+$WELfCOME = Um jogo de Martin Mauersics
 $PROMPT = APERTE UM BOTÃO
 $PROMPT_SWITCH = APERTE UM BOTÃO
 
@@ -204,6 +204,11 @@ $STAT_MAX_COMBO = Melhor combo
 $STAT_MAX_CHAIN = Melhor sequência
 $STAT_COUNT_START = Iniciada
 $STAT_COUNT_END = Concluída
+
+$LEADERBOARD_SCORE = SCORE
+$LEADERBOARD_TIME = TIME
+$LEADERBOARD_GLOBAL = Global
+$LEADERBOARD_FRIENDS = Friends Only
 
 $VALUE_OFF = Deslig
 $VALUE_ON = Lig

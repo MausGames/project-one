@@ -602,7 +602,7 @@ void cProjectOneBoss::__MoveOwn()
         PHASE_CONTROL_PAUSE(0u, 0.7f)
         {
             PHASE_CHANGE_TO(30u)
-            if(DEFINED(_CORE_DEBUG_)) PHASE_CHANGE_TO(40u)                                                                                        
+            //if(DEFINED(_CORE_DEBUG_)) PHASE_CHANGE_TO(40u)                                                                                        
         });
     }
 
@@ -3445,10 +3445,12 @@ void cProjectOneBoss::__MoveBlue()
     const coreVector2 vBaseDir = g_pGame->FindPlayerDual(0u)->GetDirection().xy();
 
     coreBool bSameBase = true;
-    g_pGame->ForEachPlayer([&](const cPlayer* pPlayer, const coreUintW i)
+    g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
         if(!SameDirection(vBaseDir, pPlayer->GetDirection().xy()))
             bSameBase = false;
+
+        if(pSnow->IsActive()) pPlayer->ShowArrow(0u);
     });
 
     if(bSameBase) m_vGlobalDir = vBaseDir;

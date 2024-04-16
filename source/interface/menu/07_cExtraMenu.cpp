@@ -90,13 +90,13 @@ cExtraMenu::cExtraMenu()noexcept
         const coreFloat fHeight = m_Background.GetPosition().y + m_Background.GetSize().y*0.5f + -0.175f - 0.15f*I_TO_F(i);
 
         m_aTrophyName[i].Construct   (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
-        m_aTrophyName[i].SetPosition (coreVector2(m_Background.GetPosition().x - m_Background.GetSize().x*0.5f, fHeight) + coreVector2(0.145f,0.032f));
+        //m_aTrophyName[i].SetPosition (coreVector2(m_Background.GetPosition().x - m_Background.GetSize().x*0.5f, fHeight) + coreVector2(0.145f,0.032f));
         m_aTrophyName[i].SetAlignment(coreVector2(1.0f,0.0f));
 
         for(coreUintW j = 0u; j < ARRAY_SIZE(m_aaTrophyDesc[0]); ++j)
         {
             m_aaTrophyDesc[i][j].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
-            m_aaTrophyDesc[i][j].SetPosition (coreVector2(m_Background.GetPosition().x - m_Background.GetSize().x*0.5f, fHeight) + coreVector2(0.145f, -0.003f - 0.03f*I_TO_F(j)));
+            //m_aaTrophyDesc[i][j].SetPosition (coreVector2(m_Background.GetPosition().x - m_Background.GetSize().x*0.5f, fHeight) + coreVector2(0.145f, -0.003f - 0.03f*I_TO_F(j)));
             m_aaTrophyDesc[i][j].SetAlignment(coreVector2(1.0f,0.0f));
             m_aaTrophyDesc[i][j].SetColor3   (COLOR_MENU_WHITE);
         }
@@ -368,6 +368,9 @@ void cExtraMenu::Move()
                     // 
                     m_iTrophyMission = i / 6u;
                     m_iTrophySegment = i % 6u;
+
+                    g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_BUTTON_PRESS);
+
                     break;
                 }
             }
@@ -531,7 +534,7 @@ void cExtraMenu::LoadTrophies()
     {
         if(oProgress.aiAdvance[i]) iMax = i * 6u + oProgress.aiAdvance[i];
     }
-    
+
     coreUintW iAchieved = 0u;
 
     coreUintW iCountBoss = 0u;
@@ -610,6 +613,14 @@ void cExtraMenu::LoadTrophies()
                     m_aaTrophyDesc[i][1].SetText("");
                 }
             }
+            
+            const coreFloat fHeight = m_Background.GetPosition().y + m_Background.GetSize().y*0.5f + -0.175f - 0.15f*I_TO_F(i) + (m_aaTrophyDesc[i][1].GetText()[0] ? 0.0f : -0.015f);
+
+            m_TrophyBox.ChangePosition(&m_aTrophyName[i], coreVector2(m_Background.GetPosition().x - m_Background.GetSize().x*0.5f, fHeight) + coreVector2(0.145f,0.032f));
+            for(coreUintW j = 0u; j < ARRAY_SIZE(m_aaTrophyDesc[0]); ++j)
+            {
+                m_TrophyBox.ChangePosition(&m_aaTrophyDesc[i][j], coreVector2(m_Background.GetPosition().x - m_Background.GetSize().x*0.5f, fHeight) + coreVector2(0.145f, -0.003f - 0.03f*I_TO_F(j)));
+            }
 
             if(bBoss) iCountBoss += 1u;
                  else iCountWave += 1u;
@@ -662,6 +673,7 @@ void cExtraMenu::LoadMissions()
     this->LoadSegments(m_FilterMission.GetCurValue());
     this->__UpdateStats();
     m_StatsBox.SetCurOffset(0.0f);
+    m_aiCurFilter.clear();
 }
 
 

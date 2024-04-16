@@ -38,6 +38,10 @@ cSave::~cSave()
 
     // 
     Core::Manager::Resource->UpdateFunctions();
+
+    // 
+    FOR_EACH(it, m_apScoreQueue) MANAGED_DELETE(*it)
+    m_apScoreQueue.clear();
 }
 
 
@@ -178,13 +182,13 @@ RETURN_NONNULL cSave::sProgress* cSave::EditProgress()
 coreBool cSave::LoadFile(const coreChar* pcPath)
 {
     // 
-    if(!cSave::__LoadHeader(&m_Header, pcPath))
+    if(!cSave::__LoadHeader(&m_Header, &m_apScoreQueue, pcPath))
     {
         // 
         coreData::FileMove(pcPath, PRINT("%s.invalid_%s", pcPath, coreData::DateTimePrint("%Y%m%d_%H%M%S")));
 
         // 
-        if(!cSave::__LoadHeader(&m_Header, PRINT("%s.backup", pcPath)))
+        if(!cSave::__LoadHeader(&m_Header, &m_apScoreQueue, PRINT("%s.backup", pcPath)))
         {
             // 
             this->Clear();
@@ -223,6 +227,11 @@ void cSave::SaveFile()
     static coreByte s_aHeaderData[sizeof(sHeader)];
     std::memcpy(s_aHeaderData, &m_Header, sizeof(sHeader));
 
+    // 
+    static coreByte*  s_pQueueData = NULL;
+    static coreUint32 s_iQueueSize = 0u;
+    cSave::__CreateQueueData(m_apScoreQueue, &s_pQueueData, &s_iQueueSize);
+
     m_iToken = Core::Manager::Resource->AttachFunction([this]()
     {
         // 
@@ -244,6 +253,13 @@ void cSave::SaveFile()
         // 
         coreArchive oArchive;
         oArchive.CreateFile("header", pCompressedData, iCompressedSize);
+
+        // 
+        if(s_pQueueData)
+        {
+            oArchive.CreateFile("score", s_pQueueData, s_iQueueSize)->Compress();
+            s_pQueueData = NULL;
+        }
 
         // 
         WARN_IF(oArchive.Save(m_sPath.c_str()) != CORE_OK)
@@ -303,6 +319,7 @@ void cSave::ImportDemo()
         // 
         m_Header.oOptions.iNavigation = 0u;
         ADD_BIT_EX(m_Header.oProgress.aiNew,   NEW_MAIN_START)
+        ADD_BIT_EX(m_Header.oProgress.aiNew,   NEW_MAIN_SCORE)
         ADD_BIT_EX(m_Header.oProgress.aiNew,   NEW_MAIN_EXTRA)
         ADD_BIT_EX(m_Header.oProgress.aiState, STATE_DEMO_IMPORTED)
     }
@@ -313,13 +330,13 @@ void cSave::ImportDemo()
 // 
 coreBool cSave::CanImportDemo()const
 {
-    return !g_bDemoVersion && !coreData::FileExists(m_sPath.c_str()) && coreData::FileExists(m_sPathDemo.c_str());
+    return !g_bDemoVersion && !coreData::FileExists(m_sPath.c_str()) && !coreData::FileExists(PRINT("%s.backup", m_sPath.c_str())) && coreData::FileExists(m_sPathDemo.c_str());
 }
 
 
 // ****************************************************************
 // 
-coreBool cSave::__LoadHeader(sHeader* OUTPUT pHeader, const coreChar* pcPath)
+coreBool cSave::__LoadHeader(sHeader* OUTPUT pHeader, coreSet<sScorePack*>* OUTPUT pQueue, const coreChar* pcPath)
 {
     // 
     if(!coreData::FileExists(pcPath))
@@ -350,6 +367,16 @@ coreBool cSave::__LoadHeader(sHeader* OUTPUT pHeader, const coreChar* pcPath)
     {
         Core::Log->Warning("Save (%s) is not a valid save-file!", pcPath);
         return false;
+    }
+
+    coreFile* pScoreFile = oArchive.GetFile("score");
+    if(pScoreFile)
+    {
+        pScoreFile->Decompress();
+        if(!cSave::__RestoreQueueData(pQueue, pScoreFile->GetData(), pScoreFile->GetSize()))
+        {
+            Core::Log->Warning("Save (%s) contains a broken score-queue!", pcPath);
+        }
     }
 
     Core::Log->Info("Save (%s) loaded", pcPath);
@@ -398,6 +425,15 @@ void cSave::__UpgradeHeader(sHeader* OUTPUT pHeader)
         if(pHeader->oProgress.aiAdvance[5] >= 7) ADD_BIT_EX(pHeader->oProgress.aiState, STATE_STORY_GELU)
         if(pHeader->oProgress.aiAdvance[6] >= 7) ADD_BIT_EX(pHeader->oProgress.aiState, STATE_STORY_CALOR)
         if(pHeader->oProgress.aiAdvance[7] >= 7) ADD_BIT_EX(pHeader->oProgress.aiState, STATE_STORY_MUSCUS)
+    }
+
+    // 
+    if(pHeader->iVersion <= 3u)
+    {
+        if(!pHeader->oProgress.bFirstPlay)
+        {
+            ADD_BIT_EX(pHeader->oProgress.aiNew, NEW_MAIN_SCORE)
+        }
     }
 
     // 
@@ -453,6 +489,7 @@ void cSave::__CheckHeader(sHeader* OUTPUT pHeader)
         if(!g_bDemoVersion)
         {
             ADD_BIT_EX(pHeader->oProgress.aiNew, NEW_MAIN_START)
+            ADD_BIT_EX(pHeader->oProgress.aiNew, NEW_MAIN_SCORE)
             ADD_BIT_EX(pHeader->oProgress.aiNew, NEW_MAIN_EXTRA)
         }
     }
@@ -463,6 +500,76 @@ void cSave::__CheckHeader(sHeader* OUTPUT pHeader)
     if(!HAS_BIT_EX(pHeader->oProgress.aiUnlock, UNLOCK_POWERSHIELD))  for(coreUintW i = 0u; i < SAVE_PLAYERS; ++i) pHeader->oOptions.aiShield [i]    = MIN(pHeader->oOptions.aiShield [i],    SHIELD_DEFAULT);
     if(!HAS_BIT_EX(pHeader->oProgress.aiUnlock, UNLOCK_WEAPON_PULSE)) for(coreUintW i = 0u; i < SAVE_PLAYERS; ++i) pHeader->oOptions.aaiWeapon[i][0] = MIN(pHeader->oOptions.aaiWeapon[i][0], 1u);
     if(!HAS_BIT_EX(pHeader->oProgress.aiUnlock, UNLOCK_WEAPON_WAVE))  for(coreUintW i = 0u; i < SAVE_PLAYERS; ++i) pHeader->oOptions.aaiWeapon[i][0] = MIN(pHeader->oOptions.aaiWeapon[i][0], 2u);
+}
+
+
+// ****************************************************************
+// 
+void cSave::__CreateQueueData(const coreSet<sScorePack*>& apQueue, coreByte** OUTPUT ppData, coreUint32* OUTPUT piSize)
+{
+    ASSERT(ppData && piSize)
+
+    // 
+    if(*ppData) SAFE_DELETE_ARRAY(*ppData)
+
+    // 
+    const coreUint32 iQueueNum  = apQueue.size();
+    const coreUint32 iQueueSize = sizeof(coreUint32) + sizeof(sScorePack) * iQueueNum;
+
+    if(iQueueNum)
+    {
+        coreByte* pQueueData = new coreByte[iQueueSize];
+        coreByte* pCursor    = pQueueData;
+
+        std::memcpy(pCursor, &iQueueNum, sizeof(coreUint32)); pCursor += sizeof(coreUint32);
+
+        for(coreUintW i = 0u, ie = iQueueNum; i < ie; ++i)
+        {
+            std::memcpy(pCursor, apQueue[i], sizeof(sScorePack)); pCursor += sizeof(sScorePack);
+        }
+
+        ASSERT(iQueueSize == coreUint32(pCursor - pQueueData))
+
+        (*ppData) = pQueueData;
+        (*piSize) = iQueueSize;
+    }
+    else
+    {
+        (*ppData) = NULL;
+        (*piSize) = 0u;
+    }
+}
+
+
+// ****************************************************************
+// 
+coreBool cSave::__RestoreQueueData(coreSet<sScorePack*>* OUTPUT pQueue, const coreByte* pData, const coreUint32 iSize)
+{
+    if(iSize < sizeof(coreUint32)) return false;
+
+    const coreByte* pCursor = pData;
+
+    coreUint32 iQueueNum;
+    std::memcpy(&iQueueNum, pCursor, sizeof(coreUint32)); pCursor += sizeof(coreUint32);
+
+    if(iSize != sizeof(coreUint32) + sizeof(sScorePack) * iQueueNum) return false;
+
+    ASSERT(pQueue->empty())
+    pQueue->reserve(iQueueNum);
+
+    for(coreUintW i = 0u, ie = iQueueNum; i < ie; ++i)
+    {
+        sScorePack* pPack = MANAGED_NEW(sScorePack);
+        std::memcpy(pPack, pCursor, sizeof(sScorePack)); pCursor += sizeof(sScorePack);
+
+        pPack->iStatus = 0u;
+
+        pQueue->push_back(pPack);
+    }
+
+    ASSERT(iSize == coreUint32(pCursor - pData))
+
+    return true;
 }
 
 

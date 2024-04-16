@@ -205,6 +205,11 @@ $STAT_MAX_CHAIN = Meilleur enchaînement
 $STAT_COUNT_START = Tentatives
 $STAT_COUNT_END = Tentatives réussies
 
+$LEADERBOARD_SCORE = SCORE
+$LEADERBOARD_TIME = TIME
+$LEADERBOARD_GLOBAL = Global
+$LEADERBOARD_FRIENDS = Friends Only
+
 $VALUE_OFF = Sans
 $VALUE_ON = Avec
 $VALUE_LOW = Faible

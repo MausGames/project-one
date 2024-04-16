@@ -12,28 +12,24 @@
 // ****************************************************************
 // constructor
 cScoreMenu::cScoreMenu()noexcept
-: coreMenu    (SURFACE_SCORE_MAX, SURFACE_SCORE_DEFAULT)
-, m_iCurIndex (0u)
+: coreMenu        (SURFACE_SCORE_MAX, SURFACE_SCORE_DEFAULT)
+, m_iCurIndex     (0u)
+, m_iPageOffset   (0u)
+, m_iPageMax      (0u)
+, m_bPageChanged  (false)
+, m_iWorkUpload   (0u)
+, m_iWorkDownload (0u)
 {
     // create menu objects
     m_Background.DefineTexture(0u, "menu_background_black.png");
     m_Background.DefineProgram("menu_border_program");
-    m_Background.SetPosition  (coreVector2(0.0f,0.01f));
-    m_Background.SetSize      (coreVector2(0.9f,0.75f));
-
-    m_DefaultTab.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
-    m_DefaultTab.DefineProgram("menu_border_program");
-    m_DefaultTab.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.0f,0.5f) + coreVector2(0.0f,-0.0125f));
-    m_DefaultTab.SetSize      (coreVector2(0.84f,0.07f));
-    m_DefaultTab.SetAlignment (coreVector2(0.0f, 1.0f));
-    m_DefaultTab.SetTexSize   (coreVector2(1.0f,-1.0f));
-    m_DefaultTab.SetTexOffset (m_DefaultTab.GetSize()*coreVector2(-0.5f,-1.0f) + coreVector2(m_Background.GetSize().x * 0.5f, 0.0125f));
-    m_DefaultTab.GetCaption()->SetTextLanguage("LEADERBOARDS");
+    m_Background.SetPosition  (coreVector2(0.0f,0.045f));
+    m_Background.SetSize      (coreVector2(0.9f,0.82f));
 
     m_BackButton.Construct    (MENU_BUTTON, MENU_FONT_ICON_2, MENU_OUTLINE_SMALL);
     m_BackButton.DefineProgram("menu_border_program");
     m_BackButton.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.5f,-0.5f) + coreVector2(0.0f,-0.02f));
-    m_BackButton.SetSize      (coreVector2( 0.07f, 0.07f)); // * m_SaveButton.GetSize().y); 
+    m_BackButton.SetSize      (coreVector2( 0.07f, 0.07f));
     m_BackButton.SetAlignment (coreVector2(-1.0f, -1.0f));
     m_BackButton.GetCaption()->SetText(ICON_SHARE);
 
@@ -45,6 +41,7 @@ cScoreMenu::cScoreMenu()noexcept
         m_aFilterLine[i].SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.0f,0.5f) + coreVector2(0.0f, -0.05f - 0.05f*I_TO_F(i)));
         m_aFilterLine[i].SetSize      (coreVector2(m_Background.GetSize().x, 0.05f));
         m_aFilterLine[i].SetTexOffset (coreVector2(I_TO_F(i)*0.09f, 0.0f));
+        m_aFilterLine[i].SetFocusable (true);
     }
 
     m_FilterMission.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
@@ -75,20 +72,38 @@ cScoreMenu::cScoreMenu()noexcept
     for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i)
     {
         m_aRank[i].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
-        m_aRank[i].SetPosition (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.04f, -0.075f - 0.05f*I_TO_F(i + MENU_SCORE_FILTERS)));
+        m_aRank[i].SetPosition (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.04f, -0.145f - 0.05f*I_TO_F(i + MENU_SCORE_FILTERS)));
         m_aRank[i].SetAlignment(coreVector2(1.0f,0.0f));
-        m_aRank[i].SetColor3   (COLOR_MENU_WHITE);
+        m_aRank[i].SetColor3   (COLOR_MENU_WHITE * MENU_LIGHT_IDLE);
         m_aRank[i].SetText     (coreData::ToChars(i + 1u));
 
         m_aName[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
-        m_aName[i].SetPosition (coreVector2(0.05f,0.0f) + m_aRank[i].GetPosition());
-        m_aName[i].SetAlignment(coreVector2(1.0f, 0.0f));
+        m_aName[i].SetPosition (coreVector2(1.0f,1.0f) * m_aRank[i].GetPosition() + coreVector2(0.08f,0.0f));
+        m_aName[i].SetAlignment(coreVector2(1.0f,0.0f));
         m_aName[i].SetColor3   (COLOR_MENU_WHITE);
 
+        m_aTime[i].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
+        m_aTime[i].SetPosition (coreVector2(0.0f,1.0f) * m_aRank[i].GetPosition());
+        m_aTime[i].SetColor3   (COLOR_MENU_WHITE);
+
         m_aScore[i].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
-        m_aScore[i].SetPosition (coreVector2(-1.0f,1.0f) * m_aRank[i].GetPosition());
+        m_aScore[i].SetPosition (coreVector2(-1.0f,1.0f) * m_aRank[i].GetPosition() + coreVector2(-0.105f,0.0f));
         m_aScore[i].SetAlignment(coreVector2(-1.0f,0.0f));
         m_aScore[i].SetColor3   (COLOR_MENU_WHITE);
+
+        m_aIcon[i].DefineTexture(0u, "menu_weapon.png");
+        m_aIcon[i].DefineProgram("default_2d_program");
+        m_aIcon[i].SetPosition  (coreVector2(-1.0f,1.0f) * m_aRank[i].GetPosition() + coreVector2(-0.04f,0.0f));
+        m_aIcon[i].SetSize      (coreVector2( 1.0f,1.0f) * 0.05f);
+        m_aIcon[i].SetAlignment (coreVector2(-1.0f,0.0f));
+        m_aIcon[i].SetTexSize   (coreVector2(0.25f,0.5f));
+
+        m_aMedal[i].DefineTexture(0u, "menu_medal.png");
+        m_aMedal[i].DefineProgram("default_2d_program");
+        m_aMedal[i].SetPosition  (coreVector2(-1.0f,1.0f) * m_aRank[i].GetPosition() + coreVector2(0.005f,0.0f));
+        m_aMedal[i].SetSize      (coreVector2( 1.0f,1.0f) * 0.046f);
+        m_aMedal[i].SetAlignment (coreVector2(-1.0f,0.0f));
+        m_aMedal[i].SetTexSize   (coreVector2(0.25f,0.25f));
 
         m_aLine[i].DefineTexture(0u, "menu_detail_04.png");
         m_aLine[i].DefineTexture(1u, "menu_background_black.png");
@@ -96,30 +111,51 @@ cScoreMenu::cScoreMenu()noexcept
         m_aLine[i].SetPosition  (coreVector2(0.0f, m_aRank[i].GetPosition().y));
         m_aLine[i].SetSize      (coreVector2(m_Background.GetSize().x, 0.05f));
         m_aLine[i].SetTexOffset (coreVector2(I_TO_F(i + MENU_SCORE_FILTERS)*0.09f, 0.0f));
+        m_aLine[i].SetFocusable (true);
     }
 
-    m_ScoreBox.SetPosition (m_Background.GetPosition() + coreVector2(0.0f,-0.05f));
-    m_ScoreBox.SetSize     (coreVector2(m_Background.GetSize().x, 0.45f));
-    m_ScoreBox.SetMaxOffset(0.05f * I_TO_F(MENU_SCORE_ENTRIES) - m_ScoreBox.GetSize().y);
+    m_ScoreBox.SetPosition(m_Background.GetPosition() + coreVector2(0.0f,-0.085f));
+    m_ScoreBox.SetSize    (coreVector2(m_Background.GetSize().x, 0.45f));
     for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i) m_ScoreBox.BindObject(&m_aLine [i]);
     for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i) m_ScoreBox.BindObject(&m_aRank [i]);
     for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i) m_ScoreBox.BindObject(&m_aName [i]);
+    for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i) m_ScoreBox.BindObject(&m_aTime [i]);
     for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i) m_ScoreBox.BindObject(&m_aScore[i]);
+    for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i) m_ScoreBox.BindObject(&m_aIcon [i]);
+    for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i) m_ScoreBox.BindObject(&m_aMedal[i]);
 
     m_PlayerRank.Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
-    m_PlayerRank.SetPosition (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.04f, -0.075f - 0.625f));
+    m_PlayerRank.SetPosition (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.04f, -0.145f - 0.625f));
     m_PlayerRank.SetAlignment(coreVector2(1.0f,0.0f));
-    m_PlayerRank.SetColor3   (COLOR_MENU_WHITE);
+    m_PlayerRank.SetColor3   (COLOR_MENU_WHITE * MENU_LIGHT_IDLE);
 
     m_PlayerName.Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
-    m_PlayerName.SetPosition (coreVector2(0.05f,0.0f) + m_PlayerRank.GetPosition());
-    m_PlayerName.SetAlignment(coreVector2(1.0f, 0.0f));
+    m_PlayerName.SetPosition (coreVector2(1.0f,1.0f) * m_PlayerRank.GetPosition() + coreVector2(0.08f,0.0f));
+    m_PlayerName.SetAlignment(coreVector2(1.0f,0.0f));
     m_PlayerName.SetColor3   (COLOR_MENU_WHITE);
 
+    m_PlayerTime.Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+    m_PlayerTime.SetPosition (coreVector2(0.0f,1.0f) * m_PlayerRank.GetPosition());
+    m_PlayerTime.SetColor3   (COLOR_MENU_WHITE);
+
     m_PlayerScore.Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
-    m_PlayerScore.SetPosition (coreVector2(-1.0f,1.0f) * m_PlayerRank.GetPosition());
+    m_PlayerScore.SetPosition (coreVector2(-1.0f,1.0f) * m_PlayerRank.GetPosition() + coreVector2(-0.105f,0.0f));
     m_PlayerScore.SetAlignment(coreVector2(-1.0f,0.0f));
     m_PlayerScore.SetColor3   (COLOR_MENU_WHITE);
+
+    m_PlayerIcon.DefineTexture(0u, "menu_weapon.png");
+    m_PlayerIcon.DefineProgram("default_2d_program");
+    m_PlayerIcon.SetPosition  (coreVector2(-1.0f,1.0f) * m_PlayerRank.GetPosition() + coreVector2(-0.04f,0.0f));
+    m_PlayerIcon.SetSize      (coreVector2( 1.0f,1.0f) * 0.05f);
+    m_PlayerIcon.SetAlignment (coreVector2(-1.0f,0.0f));
+    m_PlayerIcon.SetTexSize   (coreVector2(0.25f,0.5f));
+
+    m_PlayerMedal.DefineTexture(0u, "menu_medal.png");
+    m_PlayerMedal.DefineProgram("default_2d_program");
+    m_PlayerMedal.SetPosition  (coreVector2(-1.0f,1.0f) * m_PlayerRank.GetPosition() + coreVector2(0.005f,0.0f));
+    m_PlayerMedal.SetSize      (coreVector2( 1.0f,1.0f) * 0.046f);
+    m_PlayerMedal.SetAlignment (coreVector2(-1.0f,0.0f));
+    m_PlayerMedal.SetTexSize   (coreVector2(0.25f,0.25f));
 
     m_PlayerLine.DefineTexture(0u, "menu_detail_04.png");
     m_PlayerLine.DefineTexture(1u, "menu_background_black.png");
@@ -127,20 +163,49 @@ cScoreMenu::cScoreMenu()noexcept
     m_PlayerLine.SetPosition  (coreVector2(0.0f, m_PlayerRank.GetPosition().y));
     m_PlayerLine.SetSize      (coreVector2(m_Background.GetSize().x, 0.05f));
     m_PlayerLine.SetTexOffset (coreVector2(I_TO_F(MENU_SCORE_FILTERS + MENU_SCORE_ENTRIES)*0.09f, 0.0f));
+    m_PlayerLine.SetFocusable (true);
+
+    m_PageSelection.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_2, MENU_FONT_ICON_3, MENU_OUTLINE_SMALL);
+    m_PageSelection.SetPosition(m_FilterDifficulty.GetPosition() - coreVector2(0.0f,0.0725f));
+    m_PageSelection.SetSize    (coreVector2(0.73f,0.065f));
+    m_PageSelection.SetEndless (true);
+    m_PageSelection.GetArrow(0u)->DefineProgram("menu_border_program");
+    m_PageSelection.GetArrow(1u)->DefineProgram("menu_border_program");
+    
+    m_PageSelection.AddEntry("", 0u);
+    m_PageSelection.AddEntry("", 1u);
+
+    m_PageText.Construct  (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+    m_PageText.SetPosition(m_PageSelection.GetPosition());
+    m_PageText.SetColor3  (COLOR_MENU_WHITE);
+
+    m_Loading.Construct  (MENU_FONT_ICON_4, MENU_OUTLINE_SMALL);
+    m_Loading.SetPosition(m_ScoreBox.GetPosition());
+    m_Loading.SetColor3  (COLOR_MENU_WHITE);
+    m_Loading.SetText    (ICON_GEAR);
+    m_Loading.SetRectify (false);
+
+    m_LoadingPlayer.Construct   (MENU_FONT_ICON_3, MENU_OUTLINE_SMALL);
+    m_LoadingPlayer.SetPosition (m_PlayerRank.GetPosition() + coreVector2(-0.005f,0.0f));
+    m_LoadingPlayer.SetAlignment(coreVector2(1.0f,0.0f));
+    m_LoadingPlayer.SetColor3   (COLOR_MENU_WHITE);
+    m_LoadingPlayer.SetText     (ICON_GEAR);
+    m_LoadingPlayer.SetRectify  (false);
 
     // 
     m_FilterDifficulty.AddEntryLanguage("GAME_DIFFICULTY_EASY",   GAME_DIFFICULTY_EASY);
     m_FilterDifficulty.AddEntryLanguage("GAME_DIFFICULTY_NORMAL", GAME_DIFFICULTY_NORMAL);
 
     // 
-    m_Navigator.BindObject(&m_FilterMission,    &m_BackButton,    NULL, &m_FilterSegment,    NULL, MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
-    m_Navigator.BindObject(&m_FilterSegment,    &m_FilterMission, NULL, &m_FilterDifficulty, NULL, MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
-    m_Navigator.BindObject(&m_FilterDifficulty, &m_FilterSegment, NULL, &m_aLine[0],         NULL, MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
+    m_Navigator.BindObject(&m_FilterMission,    &m_BackButton,       NULL, &m_FilterSegment,    NULL, MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
+    m_Navigator.BindObject(&m_FilterSegment,    &m_FilterMission,    NULL, &m_FilterDifficulty, NULL, MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
+    m_Navigator.BindObject(&m_FilterDifficulty, &m_FilterSegment,    NULL, &m_PageSelection,    NULL, MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
+    m_Navigator.BindObject(&m_PageSelection,    &m_FilterDifficulty, NULL, &m_aLine[0],         NULL, MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
 
     for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i)
     {
-        m_Navigator.BindObject(&m_aLine[i], (i == 0u)                      ? s_cast<coreObject2D*>(&m_FilterDifficulty) : &m_aLine[(i + MENU_SCORE_ENTRIES - 1u) % MENU_SCORE_ENTRIES], NULL,
-                                            (i == MENU_SCORE_ENTRIES - 1u) ? s_cast<coreObject2D*>(&m_BackButton)       : &m_aLine[(i + 1u)                      % MENU_SCORE_ENTRIES], NULL, MENU_TYPE_DEFAULT);
+        m_Navigator.BindObject(&m_aLine[i], (i == 0u)                      ? s_cast<coreObject2D*>(&m_PageSelection) : &m_aLine[(i + MENU_SCORE_ENTRIES - 1u) % MENU_SCORE_ENTRIES], NULL,
+                                            (i == MENU_SCORE_ENTRIES - 1u) ? s_cast<coreObject2D*>(&m_PlayerLine)    : &m_aLine[(i + 1u)                      % MENU_SCORE_ENTRIES], NULL, MENU_TYPE_DEFAULT);
     }
 
     m_Navigator.BindObject(&m_PlayerLine, &m_aLine[MENU_SCORE_ENTRIES - 1u], NULL, &m_BackButton,    NULL, MENU_TYPE_DEFAULT);
@@ -156,7 +221,6 @@ cScoreMenu::cScoreMenu()noexcept
     for(coreUintW i = 0u; i < SURFACE_SCORE_MAX; ++i)
     {
         this->BindObject(i, &m_Background);
-        this->BindObject(i, &m_DefaultTab);
         this->BindObject(i, &m_BackButton);
     }
 
@@ -164,15 +228,19 @@ cScoreMenu::cScoreMenu()noexcept
 
     this->BindObject(SURFACE_SCORE_DEFAULT, &m_PlayerLine);
     this->BindObject(SURFACE_SCORE_DEFAULT, &m_PlayerRank);
+    this->BindObject(SURFACE_SCORE_DEFAULT, &m_PlayerTime);
     this->BindObject(SURFACE_SCORE_DEFAULT, &m_PlayerName);
     this->BindObject(SURFACE_SCORE_DEFAULT, &m_PlayerScore);
+    this->BindObject(SURFACE_SCORE_DEFAULT, &m_PlayerIcon);
+    this->BindObject(SURFACE_SCORE_DEFAULT, &m_PlayerMedal);
 
     this->BindObject(SURFACE_SCORE_DEFAULT, &m_FilterIcon);
     this->BindObject(SURFACE_SCORE_DEFAULT, &m_ScoreBox);
-    //for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i) this->BindObject(SURFACE_SCORE_DEFAULT, &m_aLine [i]);
-    //for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i) this->BindObject(SURFACE_SCORE_DEFAULT, &m_aRank [i]);
-    //for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i) this->BindObject(SURFACE_SCORE_DEFAULT, &m_aName [i]);
-    //for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i) this->BindObject(SURFACE_SCORE_DEFAULT, &m_aScore[i]);
+
+    this->BindObject(SURFACE_SCORE_DEFAULT, &m_PageSelection);
+    this->BindObject(SURFACE_SCORE_DEFAULT, &m_PageText);
+    this->BindObject(SURFACE_SCORE_DEFAULT, &m_Loading);
+    this->BindObject(SURFACE_SCORE_DEFAULT, &m_LoadingPlayer);
 
     this->BindObject(SURFACE_SCORE_DEFAULT, &m_FilterMission);
     this->BindObject(SURFACE_SCORE_DEFAULT, &m_FilterSegment);
@@ -204,7 +272,10 @@ void cScoreMenu::Move()
 
             // 
             if(m_FilterMission.GetUserSwitch() || m_FilterSegment.GetUserSwitch() || m_FilterDifficulty.GetUserSwitch())
+            {
+                m_iPageOffset = 0u;
                 this->__UpdateScores();
+            }
 
             // 
             cMenu::UpdateSwitchBox(&m_FilterMission);
@@ -214,12 +285,33 @@ void cScoreMenu::Move()
             // 
             for(coreUintW i = 0u; i < MENU_SCORE_FILTERS; ++i) cMenu::UpdateLine(&m_aFilterLine[i], true);
             for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i) cMenu::UpdateLine(&m_aLine      [i], false);
+            cMenu::UpdateLine(&m_PlayerLine, false);
 
             // 
             m_FilterMission.GetCaption()->SetColor3((m_FilterMission.GetCurValue() < ARRAY_SIZE(g_aMissionData)) ? g_aMissionData[m_FilterMission.GetCurValue()].vColor : COLOR_MENU_WHITE);
 
             // 
             m_FilterIcon.SetAlpha(m_FilterIcon.GetAlpha() * 0.6f);
+            
+            
+            coreBool bNavEnabled = false;
+            for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i)
+            {
+                if(m_aLine[i].IsFocused()) bNavEnabled = true;
+            }
+            if(m_PlayerLine.IsFocused()) bNavEnabled = true;
+            
+            const coreBool bLeft  = (bNavEnabled && !m_bPageChanged && (g_MenuInput.iMove == 2u));
+            const coreBool bRight = (bNavEnabled && !m_bPageChanged && (g_MenuInput.iMove == 4u));
+            
+            if(!g_MenuInput.iMove) m_bPageChanged = false;
+            
+            // 
+                 if((m_PageSelection.GetUserSwitch() < 0) || bLeft  || Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LEFT),  CORE_INPUT_PRESS)) {m_bPageChanged = true; if(--m_iPageOffset >= m_iPageMax) m_iPageOffset = m_iPageMax - 1u; this->__UpdateScores(false); g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SWITCH_ENABLED);}
+            else if((m_PageSelection.GetUserSwitch() > 0) || bRight || Core::Input->GetKeyboardButton(CORE_INPUT_KEY(RIGHT), CORE_INPUT_PRESS)) {m_bPageChanged = true; if(++m_iPageOffset >= m_iPageMax) m_iPageOffset = 0u;              this->__UpdateScores(false); g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SWITCH_ENABLED);}
+
+            cMenu::UpdateButton(m_PageSelection.GetArrow(0u), &m_Navigator, m_PageSelection.GetArrow(0u)->IsFocused(), g_pMenu->GetButtonColor(), true, false);
+            cMenu::UpdateButton(m_PageSelection.GetArrow(1u), &m_Navigator, m_PageSelection.GetArrow(1u)->IsFocused(), g_pMenu->GetButtonColor(), true, false);
         }
         break;
 
@@ -235,10 +327,48 @@ void cScoreMenu::Move()
     }
 
     // 
-    cMenu::UpdateTab(&m_DefaultTab, true, true);
+    cMenu::UpdateButton(&m_BackButton, &m_Navigator, m_BackButton.IsFocused());
 
     // 
-    cMenu::UpdateButton(&m_BackButton, &m_Navigator, m_BackButton.IsFocused());
+    const coreBool bNewWorkUpload = !g_pSave->GetScoreQueue()->empty();
+    if(m_iWorkUpload && !bNewWorkUpload)
+    {
+        this->__UpdateScores();
+    }
+    m_iWorkUpload = bNewWorkUpload;
+
+    // 
+    const coreFloat   fRotation  = coreFloat(Core::System->GetTotalTime());
+    const coreVector2 vDirection = coreVector2::Direction(fRotation * (0.5f*PI));
+
+    m_Loading      .SetDirection(vDirection);
+    m_LoadingPlayer.SetDirection(vDirection);
+
+    m_Loading      .SetEnabled(m_iWorkDownload ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE);
+    m_LoadingPlayer.SetEnabled(m_iWorkUpload   ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE);
+
+    if(m_iWorkDownload)
+    {
+        for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i)
+        {
+            m_aRank [i].SetAlpha(m_aRank [i].GetAlpha() * 0.5f);
+            m_aName [i].SetAlpha(m_aName [i].GetAlpha() * 0.5f);
+            m_aTime [i].SetAlpha(m_aTime [i].GetAlpha() * 0.5f);
+            m_aScore[i].SetAlpha(m_aScore[i].GetAlpha() * 0.5f);
+            m_aIcon [i].SetAlpha(m_aIcon [i].GetAlpha() * 0.5f);
+            m_aMedal[i].SetAlpha(m_aMedal[i].GetAlpha() * 0.5f);
+        }
+    }
+
+    if(m_iWorkUpload)
+    {
+        m_PlayerRank .SetAlpha(m_PlayerRank .GetAlpha() * 0.0f);   // #
+        m_PlayerName .SetAlpha(m_PlayerName .GetAlpha() * 0.5f);
+        m_PlayerTime .SetAlpha(m_PlayerTime .GetAlpha() * 0.5f);
+        m_PlayerScore.SetAlpha(m_PlayerScore.GetAlpha() * 0.5f);
+        m_PlayerIcon .SetAlpha(m_PlayerIcon .GetAlpha() * 0.5f);
+        m_PlayerMedal.SetAlpha(m_PlayerIcon .GetAlpha() * 0.5f);
+    }
 }
 
 
@@ -264,7 +394,11 @@ void cScoreMenu::LoadMissions()
     // 
     m_FilterDifficulty.SelectValue(g_pSave->GetHeader().oOptions.iDifficulty);
     this->LoadSegments(m_FilterMission.GetCurValue());
+    this->__ResetScores();
     this->__UpdateScores();
+    m_ScoreBox.SetCurOffset(0.0f);
+    m_ScoreBox.SetMaxOffset(0.0f);
+    m_aiCurFilter.clear();
 }
 
 
@@ -279,9 +413,7 @@ void cScoreMenu::LoadSegments(const coreUintW iMissionIndex)
     if(iMissionIndex == 254u)
     {
         m_FilterSegment.ClearEntries();
-
         m_FilterSegment.AddEntryLanguage("FILTER_COMPLETE", 255u);
-
         m_FilterSegment.SetOverride(-1);
 
         m_FilterIcon.SetEnabled(CORE_OBJECT_ENABLE_MOVE);
@@ -319,61 +451,224 @@ void cScoreMenu::LoadSegments(const coreUintW iMissionIndex)
 
 // ****************************************************************
 // 
-void cScoreMenu::__UpdateScores()
+void cScoreMenu::__UpdateScores(const coreBool bPlayer)
 {
-    const coreUint32 iStart = 0;
+    const coreUint32 iStart = m_iPageOffset * MENU_SCORE_ENTRIES;
 
-    const coreUint8 iMissionValue    = m_FilterMission.GetCurValue();
-    const coreUint8 iSegmentValue    = m_FilterSegment.GetCurValue();
-    //const coreUint8 iTypeValue       = 0u;
-    //const coreUint8 iModeValue       = 0u;
+    const coreUint8 iMissionValue    = m_FilterMission   .GetCurValue();
+    const coreUint8 iSegmentValue    = m_FilterSegment   .GetCurValue();
     const coreUint8 iDifficultyValue = m_FilterDifficulty.GetCurValue();
 
-    const coreChar* pcDifficulty  = iDifficultyValue ? "normal" : "easy";
-    const coreChar* pcLeaderboard = (iMissionValue < SAVE_MISSIONS) ? PRINT("stage_score_solo_%s_%02u_%02u", pcDifficulty, iMissionValue, iSegmentValue + 1u) : PRINT("arcade_score_solo_%s", pcDifficulty);
+    const coreBool bMission = (iMissionValue < SAVE_MISSIONS);
+    const coreBool bSegment = (iSegmentValue < SAVE_SEGMENTS);
 
-    Core::Platform->DownloadLeaderboard(pcLeaderboard, TYPE_GLOBAL, iStart + 1, iStart + MENU_SCORE_ENTRIES, [this](const coreScore* pScore, const coreUint32 iNum, const coreUint32 iTotal)
+    const coreChar* pcDifficulty  = iDifficultyValue ? "normal" : "easy";
+    const coreChar* pcLeaderboard = bSegment ? PRINT("stage_score_solo_%s_%02u_%02u", pcDifficulty, iMissionValue, iSegmentValue + 1u) : PRINT("arcade_score_solo_%s", pcDifficulty);
+
+    m_iWorkDownload += 1u;
+    Core::Platform->DownloadLeaderboard(pcLeaderboard, TYPE_GLOBAL, iStart + 1u, iStart + MENU_SCORE_ENTRIES, [=, this](const coreScore* pScore, const coreUint32 iNum, const coreUint32 iTotal)
     {
-        // TODO 1: check rank with start and discard if wrong
-        
-        for(coreUintW i = 0u, ie = MIN(iNum, MENU_SCORE_ENTRIES); i < ie; ++i)
+        m_iWorkDownload -= 1u;
+
+        const coreUint32 iRealNum = MIN(iNum, MENU_SCORE_ENTRIES);
+
+        for(coreUintW i = 0u, ie = iRealNum; i < ie; ++i)
         {
-            m_aRank [i].SetText(coreData::ToChars(pScore[i].iRank));
+            const sScoreData* pData = r_cast<const sScoreData*>(pScore[i].aData);
+
+            coreInt32 iShift = 0;
+            coreFloat fTime  = 0.0f;
+            for(coreUintW j = 0u, je = (bSegment || bMission) ? 1u : SCORE_MISSIONS; j < je; ++j)
+            {
+                iShift += coreInt32(pData->aiShiftBadMission[j]) - coreInt32(pData->aiShiftGoodMission[j]);
+                fTime  += FloorFactor(TABLE_TIME_TO_FLOAT(pData->aiTimeMission[j]), 10.0f);
+            }
+
+            m_aRank [i].SetText(PRINT("%u.", pScore[i].iRank));
             m_aName [i].SetText(pScore[i].pcName);
-            m_aScore[i].SetText(coreData::ToChars(pScore[i].iValue));
+            m_aTime [i].SetText(PRINT("%.1f %+d", fTime, iShift));
+            m_aScore[i].SetText(PRINT("%'u", pScore[i].iValue));
+
+            cScoreMenu::__SetWeaponIcon(&m_aIcon[i], pData->aaiOptionWeapon[0][0]);
+
+                 if(bSegment) cScoreMenu::__SetMedalIcon      (&m_aMedal[i], pData->aaiMedalSegment[0][0], MISSION_SEGMENT_IS_BOSS(iSegmentValue) ? MEDAL_TYPE_BOSS : MEDAL_TYPE_WAVE);
+            else if(bMission) cScoreMenu::__SetMedalIcon      (&m_aMedal[i], pData->aaiMedalSegment[0][0], MEDAL_TYPE_MISSION);
+            else              cScoreMenu::__SetMedalIconArcade(&m_aMedal[i], pData->aaiMedalSegment);
 
             m_aRank [i].SetEnabled(CORE_OBJECT_ENABLE_ALL);
             m_aName [i].SetEnabled(CORE_OBJECT_ENABLE_ALL);
             m_aScore[i].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+            m_aIcon [i].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+            m_aMedal[i].SetEnabled(CORE_OBJECT_ENABLE_ALL);
             m_aLine [i].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+            m_aLine [i].SetFocusable(true);
         }
         for(coreUintW i = iNum, ie = MENU_SCORE_ENTRIES; i < ie; ++i)
         {
             m_aRank [i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
             m_aName [i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
             m_aScore[i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+            m_aIcon [i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+            m_aMedal[i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
             m_aLine [i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+            m_aLine [i].SetFocusable(false);
+        }
+
+        m_iPageMax = coreMath::CeilAlign(iTotal, MENU_SCORE_ENTRIES) / MENU_SCORE_ENTRIES;
+
+        m_PageText.SetText(PRINT("%u-%u / %u", iStart + MIN(iRealNum, 1u), iStart + iRealNum, iTotal));
+
+        m_ScoreBox.SetCurOffset(0.0f);
+        m_ScoreBox.SetMaxOffset(0.05f * I_TO_F(iRealNum) - m_ScoreBox.GetSize().y - CORE_MATH_PRECISION);
+        if(m_Navigator.GetCurScroll() == &m_ScoreBox)
+        {
+            m_Navigator.OverrideCurrent(&m_aLine[0]);
         }
     });
 
-    // TODO 1: not on page change
-    Core::Platform->DownloadLeaderboard(pcLeaderboard, TYPE_USER, 0, 0, [this](const coreScore* pScore, const coreUint32 iNum, const coreUint32 iTotal)
+    if(bPlayer)
     {
-        if(iNum)
+        m_iWorkDownload += 1u;
+        Core::Platform->DownloadLeaderboard(pcLeaderboard, TYPE_USER, 0, 0, [=, this](const coreScore* pScore, const coreUint32 iNum, const coreUint32 iTotal)
         {
-            m_PlayerRank .SetText(coreData::ToChars(pScore->iRank));
-            m_PlayerName .SetText(pScore->pcName);
-            m_PlayerScore.SetText(coreData::ToChars(pScore->iValue));
+            m_iWorkDownload -= 1u;
 
-            m_PlayerRank .SetEnabled(CORE_OBJECT_ENABLE_ALL);
-            m_PlayerName .SetEnabled(CORE_OBJECT_ENABLE_ALL);
-            m_PlayerScore.SetEnabled(CORE_OBJECT_ENABLE_ALL);
-        }
-        else
+            if(iNum)
+            {
+                const sScoreData* pData = r_cast<const sScoreData*>(pScore->aData);
+
+                coreInt32 iShift = 0;
+                coreFloat fTime  = 0.0f;
+                for(coreUintW j = 0u, je = (bSegment || bMission) ? 1u : SCORE_MISSIONS; j < je; ++j)
+                {
+                    iShift += coreInt32(pData->aiShiftBadMission[j]) - coreInt32(pData->aiShiftGoodMission[j]);
+                    fTime  += FloorFactor(TABLE_TIME_TO_FLOAT(pData->aiTimeMission[j]), 10.0f);
+                }
+
+                m_PlayerRank .SetText(PRINT("%u.", pScore->iRank));
+                m_PlayerName .SetText(pScore->pcName);
+                m_PlayerTime .SetText(PRINT("%.1f %+d", fTime, iShift));
+                m_PlayerScore.SetText(PRINT("%'u", pScore->iValue));
+
+                cScoreMenu::__SetWeaponIcon(&m_PlayerIcon, pData->aaiOptionWeapon[0][0]);
+
+                     if(bSegment) cScoreMenu::__SetMedalIcon      (&m_PlayerMedal, pData->aaiMedalSegment[0][0], MISSION_SEGMENT_IS_BOSS(iSegmentValue) ? MEDAL_TYPE_BOSS : MEDAL_TYPE_WAVE);
+                else if(bMission) cScoreMenu::__SetMedalIcon      (&m_PlayerMedal, pData->aaiMedalSegment[0][0], MEDAL_TYPE_MISSION);
+                else              cScoreMenu::__SetMedalIconArcade(&m_PlayerMedal, pData->aaiMedalSegment);
+
+                m_PlayerRank .SetEnabled(CORE_OBJECT_ENABLE_ALL);
+                m_PlayerName .SetEnabled(CORE_OBJECT_ENABLE_ALL);
+                m_PlayerTime .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+                m_PlayerIcon .SetEnabled(CORE_OBJECT_ENABLE_ALL);
+                m_PlayerMedal.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+                m_PlayerScore.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+            }
+            else
+            {
+                m_PlayerTime.SetText("-");
+
+                m_PlayerRank .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+                m_PlayerName .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+                m_PlayerTime .SetEnabled(CORE_OBJECT_ENABLE_ALL);
+                m_PlayerIcon .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+                m_PlayerMedal.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+                m_PlayerScore.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+            }
+        });
+    }
+}
+
+
+// ****************************************************************
+// 
+void cScoreMenu::__ResetScores()
+{
+    // 
+    for(coreUintW i = 0u; i < MENU_SCORE_ENTRIES; ++i)
+    {
+        m_aRank [i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        m_aName [i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        m_aTime [i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        m_aScore[i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        m_aIcon [i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        m_aMedal[i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        m_aLine [i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    }
+
+    // 
+    m_PlayerRank .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    m_PlayerName .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    m_PlayerIcon .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    m_PlayerMedal.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    m_PlayerScore.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
+    // 
+    m_PageText.SetText("");
+
+    // 
+    m_iPageOffset = 0u;
+    m_iPageMax    = 0u;
+}
+
+
+// ****************************************************************
+// 
+void cScoreMenu::__SetWeaponIcon(cGuiObject* OUTPUT pObject, const coreUint8 iWeapon)
+{
+    ASSERT(pObject)
+
+    coreVector3 vColor;
+    coreVector2 vTexOffset;
+
+    switch(iWeapon)
+    {
+    default: ASSERT(false)
+    case 1u: vColor = COLOR_MENU_YELLOW; vTexOffset = coreVector2(0.0f, 0.0f); break;
+    case 2u: vColor = COLOR_MENU_PURPLE; vTexOffset = coreVector2(0.25f,0.0f); break;
+    case 3u: vColor = COLOR_MENU_GREEN;  vTexOffset = coreVector2(0.5f, 0.0f); break;
+    }
+
+    pObject->SetColor3   (vColor);
+    pObject->SetTexOffset(vTexOffset);
+}
+
+
+// ****************************************************************
+// 
+void cScoreMenu::__SetMedalIcon(cGuiObject* OUTPUT pObject, const coreUint8 iMedal, const coreUint8 iMedalType)
+{
+    // 
+    cMenu::ApplyMedalTexture(pObject, iMedal, iMedalType, true);
+}
+
+
+// ****************************************************************
+// 
+void cScoreMenu::__SetMedalIconArcade(cGuiObject* OUTPUT pObject, const coreUint8 (&aaiMedal)[SCORE_MISSIONS / 2u][SCORE_SEGMENTS])
+{
+    coreUint16 iMedalTotal = 0u;
+    coreUint8  iMedalCount = 0u;
+
+    for(coreUintW j = 0u, je = MISSION_BASE; j < je; ++j)
+    {
+        // 
+        const coreBool bAter = (j == MISSION_ATER);
+
+        for(coreUintW i = 0u, ie = bAter ? 2u : 6u; i < ie; ++i)
         {
-            m_PlayerRank .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
-            m_PlayerName .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
-            m_PlayerScore.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+            // 
+            const coreUintW iIndex = i + (bAter ? 5u : 0u);
+            const coreUint8 iValue = GET_BITVALUE(aaiMedal[j / 2u][iIndex], 4u, (j % 2u) * 4u);
+
+            // 
+            iMedalTotal += MAX(iValue, MEDAL_BRONZE);
+            iMedalCount += 1u;
         }
-    });
+    }
+
+    // 
+    const coreUint8 iMedal = iMedalCount ? (iMedalTotal / iMedalCount) : MEDAL_NONE;
+
+    // 
+    cMenu::ApplyMedalTexture(pObject, iMedal, MEDAL_TYPE_ARCADE, true);
 }

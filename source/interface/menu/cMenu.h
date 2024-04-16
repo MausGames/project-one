@@ -291,6 +291,7 @@ enum eEntry : coreUint8
 #define ICON_SWITCH   (__ICON(u8"\u0030"))
 #define ICON_CHECK    (__ICON(u8"\uF00C"))
 #define ICON_TIMES    (__ICON(u8"\uF00D"))
+#define ICON_GEAR     (__ICON(u8"\uF013"))
 #define ICON_LOCK     (__ICON(u8"\uF023"))
 #define ICON_PAUSE    (__ICON(u8"\uF04C"))
 #define ICON_FORWARD  (__ICON(u8"\uF04E"))
@@ -385,6 +386,7 @@ private:
     cGuiButton m_ExitButton;      // exit button
 
     cNewIndicator m_StartNew;
+    cNewIndicator m_ScoreNew;
     cNewIndicator m_ExtraNew;
     cNewIndicator m_ConfigNew;
 
@@ -609,8 +611,6 @@ class cScoreMenu final : public coreMenu
 private:
     cGuiObject m_Background;                        // 
 
-    cGuiButton m_DefaultTab;                        // 
-
     cGuiButton m_BackButton;                        // back button
 
     cGuiObject m_aFilterLine[MENU_SCORE_FILTERS];   // 
@@ -622,17 +622,35 @@ private:
 
     cGuiLabel  m_aRank [MENU_SCORE_ENTRIES];        // 
     cGuiLabel  m_aName [MENU_SCORE_ENTRIES];        // 
+    cGuiLabel  m_aTime [MENU_SCORE_ENTRIES];        // 
     cGuiLabel  m_aScore[MENU_SCORE_ENTRIES];        // 
+    cGuiObject m_aIcon [MENU_SCORE_ENTRIES];        // 
+    cGuiObject m_aMedal[MENU_SCORE_ENTRIES];        // 
     cGuiObject m_aLine [MENU_SCORE_ENTRIES];        // 
-    cScrollBox m_ScoreBox;
+    cScrollBox m_ScoreBox;                          // 
 
     cGuiLabel  m_PlayerRank;                        // 
     cGuiLabel  m_PlayerName;                        // 
+    cGuiLabel  m_PlayerTime;                        // 
     cGuiLabel  m_PlayerScore;                       // 
+    cGuiObject m_PlayerIcon;                        // 
+    cGuiObject m_PlayerMedal;                       // 
     cGuiObject m_PlayerLine;                        // 
+
+    cGuiSwitchBox m_PageSelection;                  // 
+    cGuiLabel     m_PageText;                       // 
+
+    cGuiLabel m_Loading;                            // 
+    cGuiLabel m_LoadingPlayer;                      // 
 
     coreMap<coreUint8, coreUint8> m_aiCurFilter;
     coreUint8 m_iCurIndex;
+
+    coreUint32 m_iPageOffset;                       // 
+    coreUint32 m_iPageMax;                          // 
+    coreBool   m_bPageChanged;                      // 
+    coreUint8  m_iWorkUpload;                       // 
+    coreUint8  m_iWorkDownload;                     // 
 
     cMenuNavigator m_Navigator;
 
@@ -649,10 +667,19 @@ public:
     void LoadMissions();
     void LoadSegments(const coreUintW iMissionIndex);
 
+    // 
+    inline void ResetNavigator() {m_Navigator.ResetFirst();}
+
 
 private:
     // 
-    void __UpdateScores();
+    void __UpdateScores(const coreBool bPlayer = true);
+    void __ResetScores();
+
+    // 
+    static void __SetWeaponIcon     (cGuiObject* OUTPUT pObject, const coreUint8 iWeapon);
+    static void __SetMedalIcon      (cGuiObject* OUTPUT pObject, const coreUint8 iMedal, const coreUint8 iMedalType);
+    static void __SetMedalIconArcade(cGuiObject* OUTPUT pObject, const coreUint8 (&aaiMedal)[SCORE_MISSIONS / 2u][SCORE_SEGMENTS]);
 };
 
 
@@ -1316,6 +1343,7 @@ private:
     coreUint32     m_iPauseFrame;        // 
 
     cGuiLabel m_NoticeSave;              // 
+    cGuiLabel m_NoticeSaveIcon;          // 
     coreFlow  m_fNoticeSaveTime;         // 
     coreBool  m_bNoticeSavePrevent;      // 
 

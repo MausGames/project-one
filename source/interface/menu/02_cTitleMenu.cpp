@@ -56,7 +56,7 @@ cTitleMenu::cTitleMenu()noexcept
     m_aVersionText[1].SetCenter   (m_aVersionText[0].GetCenter());
     m_aVersionText[1].SetAlignment(m_aVersionText[0].GetAlignment());
     m_aVersionText[1].SetColor3   (COLOR_MENU_INSIDE);
-    m_aVersionText[1].SetText     (PRINT("Project One%s (%s) - v1.2.0 third edition - %s %.5s", g_bDemoVersion ? " Demo" : "", Core::Platform->GetIdentifier(), __DATE__, __TIME__));
+    m_aVersionText[1].SetText     (PRINT("Project One%s (%s) - v1.2.1 third edition - %s %.5s", g_bDemoVersion ? " Demo" : "", Core::Platform->GetIdentifier(), __DATE__, __TIME__));
 
     // bind menu objects
     this->BindObject(SURFACE_TITLE_LOGO,  &m_Shadow);

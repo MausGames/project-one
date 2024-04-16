@@ -26,7 +26,7 @@
 #define SAVE_FILE_FOLDER    ""                       // 
 #define SAVE_FILE_EXTENSION "p1sv"                   // 
 #define SAVE_FILE_MAGIC     (UINT_LITERAL("P1SV"))   // 
-#define SAVE_FILE_VERSION   (0x00000003u)            // 
+#define SAVE_FILE_VERSION   (0x00000004u)            // 
 
 #define SAVE_NAME_LENGTH    (32u)                    // 
 #define SAVE_PLAYERS        (PLAYERS)                // 
@@ -71,6 +71,7 @@ enum eSaveUnlock : coreUint8   // # never change bits after release
 enum eSaveNew : coreUint8   // # never change bits after release
 {
     NEW_MAIN_START        = 0u,
+    NEW_MAIN_SCORE        = 3u,
     NEW_MAIN_EXTRA        = 1u,
     NEW_MAIN_CONFIG       = 2u,
     NEW_CONFIG_GAME       = 10u,
@@ -241,17 +242,30 @@ public:
         coreUint64   iChecksum;        // 
     };
 
+    // 
+    struct sScorePack final
+    {
+        coreUint8  iStatus;
+        coreUint8  iType;
+        coreUint8  iMissionIndex;
+        coreUint8  iSegmentIndex;
+        coreUint32 iScore;
+        sScoreData oData;
+    };
+
 
 private:
-    sHeader    m_Header;                 // 
-    coreString m_sPath;                  // 
-    coreString m_sPathDemo;              // 
+    sHeader    m_Header;                   // 
+    coreString m_sPath;                    // 
+    coreString m_sPathDemo;                // 
 
-    coreUint32 m_iToken;                 // 
-    coreBool   m_bIgnore;                // 
+    coreUint32 m_iToken;                   // 
+    coreBool   m_bIgnore;                  // 
 
-    coreAtomic<eSaveStatus> m_eStatus;   // 
-    coreAtomic<coreUint8>   m_iActive;   // 
+    coreSet<sScorePack*> m_apScoreQueue;   // 
+
+    coreAtomic<eSaveStatus> m_eStatus;     // 
+    coreAtomic<coreUint8>   m_iActive;     // 
 
 
 public:
@@ -291,6 +305,9 @@ public:
     inline void SetIgnore(const coreBool bIgnore) {m_bIgnore = bIgnore;}
 
     // 
+    inline coreSet<sScorePack*>* GetScoreQueue() {return &m_apScoreQueue;}
+
+    // 
     inline const sHeader& GetHeader()const {return m_Header;}
     inline eSaveStatus    GetStatus()const {return m_eStatus;}
     inline coreUint8      GetActive()const {return m_iActive;}
@@ -298,9 +315,13 @@ public:
 
 private:
     // 
-    static coreBool __LoadHeader   (sHeader* OUTPUT pHeader, const coreChar* pcPath);
+    static coreBool __LoadHeader   (sHeader* OUTPUT pHeader, coreSet<sScorePack*>* OUTPUT pQueue, const coreChar* pcPath);
     static void     __UpgradeHeader(sHeader* OUTPUT pHeader);
     static void     __CheckHeader  (sHeader* OUTPUT pHeader);
+
+    // 
+    static void     __CreateQueueData (const coreSet<sScorePack*>&  apQueue, coreByte** OUTPUT ppData, coreUint32* OUTPUT piSize);
+    static coreBool __RestoreQueueData(coreSet<sScorePack*>* OUTPUT pQueue,  const coreByte*   pData,  const coreUint32   iSize);
 
     // 
     static coreUint64 __GenerateChecksum(const sHeader& oHeader);

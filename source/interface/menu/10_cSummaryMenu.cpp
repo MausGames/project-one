@@ -1195,13 +1195,15 @@ void cSummaryMenu::ShowArcade()
             // 
             cMenu::ApplyMedalTexture(&m_aaArcadeMedalSegment[i][j], iMedalSegment, MISSION_SEGMENT_IS_BOSS(iIndex) ? MEDAL_TYPE_BOSS : MEDAL_TYPE_WAVE, true);
             if(iMedalSegment) m_iOtherNumMedal += 1u;
+
+            // 
+            iMedalTotal += MAX(iMedalSegment, MEDAL_BRONZE);
+            iMedalCount += 1u;
         }
 
         // 
-        iShiftGood  += g_pGame->GetTimeTable()->GetShiftGoodMission(i);
-        iShiftBad   += g_pGame->GetTimeTable()->GetShiftBadMission (i);
-        iMedalTotal += MAX(iMedalMission, MEDAL_BRONZE);
-        iMedalCount += 1u;
+        iShiftGood += g_pGame->GetTimeTable()->GetShiftGoodMission(i);
+        iShiftBad  += g_pGame->GetTimeTable()->GetShiftBadMission (i);
 
         // 
         if(fTime || DEFINED(_CORE_DEBUG_)) m_iOtherNumMission += 1u;
@@ -1302,10 +1304,10 @@ void cSummaryMenu::ShowArcade()
     }
 
     // 
-    g_pSave->SaveFile();
+    UploadLeaderboardsArcade(m_iFinalValue, TABLE_TIME_TO_UINT(m_fOtherTime + I_TO_F(iShiftBad) - I_TO_F(iShiftGood)));
 
     // 
-    UploadLeaderboardsArcade(m_iFinalValue);
+    g_pSave->SaveFile();
 
     // 
     this->ChangeSurface(SURFACE_SUMMARY_ARCADE, 0.0f);

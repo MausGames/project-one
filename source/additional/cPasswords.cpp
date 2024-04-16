@@ -59,6 +59,12 @@ coreBool ApplyPassword(const coreChar* pcText)
     // SAFRAN orange
     case 12809514335711897236u:
         {
+            if(!HAS_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_MIRRORMODE))
+            {
+                ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_MAIN_CONFIG)
+                ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_CONFIG_GAME)
+                ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_CONFIG_MIRRORMODE)
+            }
             ADD_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_MIRRORMODE)
         }
         break;
@@ -66,6 +72,11 @@ coreBool ApplyPassword(const coreChar* pcText)
     // FUCHSIN pink
     case 17376649531488240964u:
         {
+            if(!HAS_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_GAMESPEEDUP))
+            {
+                ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_MAIN_START)
+                ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_ARMORY_GAMESPEED)
+            }
             ADD_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_GAMESPEEDUP)
         }
         break;
@@ -73,6 +84,11 @@ coreBool ApplyPassword(const coreChar* pcText)
     // GAMBOGE yellow
     case 14976658933825851731u:
         {
+            if(!HAS_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_POWERSHIELD))
+            {
+                ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_MAIN_START)
+                ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_ARMORY_SHIELD)
+            }
             ADD_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_POWERSHIELD)
         }
         break;
@@ -80,6 +96,11 @@ coreBool ApplyPassword(const coreChar* pcText)
     // MAUVE purple
     case 11137863330129252440u:
         {
+            if(!HAS_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_WEAPON_PULSE))
+            {
+                ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_MAIN_START)
+                ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_ARMORY_WEAPON)
+            }
             ADD_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_WEAPON_PULSE)
         }
         break;
@@ -87,6 +108,11 @@ coreBool ApplyPassword(const coreChar* pcText)
     // JADE green
     case 2924535458287069379u:
         {
+            if(!HAS_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_WEAPON_WAVE))
+            {
+                ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_MAIN_START)
+                ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_ARMORY_WEAPON)
+            }
             ADD_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_WEAPON_WAVE)
         }
         break;
