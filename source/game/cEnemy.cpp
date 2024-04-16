@@ -15,7 +15,6 @@ cEnemy::cEnemy()noexcept
 : m_fLifeTime       (0.0f)
 , m_fLifeTimeBefore (0.0f)
 {
-    this->DefineTexture(1u, "menu_background_black.png");
     // load object resources
     this->DefineTexture(0u, "ship_enemy.png");
     this->DefineProgram("object_ship_blink_program");
@@ -93,9 +92,6 @@ void cEnemy::Move()
         //        if(CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_SHIELDED)) g_pGame->GetShieldManager()->UnbindEnemy(this);
         //    }
         //}
-
-        //this->SetTexSize  (coreVector2(1.2f,1.2f));
-        //this->SetTexOffset(coreVector2(0.0f, FMOD(coreFloat(Core::System->GetTotalTime()) * -0.25f, -1.0f)));
     }
 
     // 
@@ -223,11 +219,6 @@ void cEnemy::Kill(const coreBool bAnimated)
 
     // 
     if(STATIC_ISVALID(g_pGame)) g_pGame->GetShieldManager()->UnbindEnemy(this);
-    
-    
-    
-        //g_pGame->GetChromaManager()->AddChroma(this->GetPosition().xy(), coreVector2(0.0f,1.0f), CHROMA_SCALE_SMALL);     
-        
 
     // 
     if(bAnimated && this->IsEnabled(CORE_OBJECT_ENABLE_RENDER))
@@ -320,7 +311,7 @@ coreVector2 cEnemy::AimAtPlayerDual(const coreUintW iIndex)const
 
 // ****************************************************************
 // 
-void cEnemy::_SetParent(cEnemy* OUTPUT_2 pParent)
+void cEnemy::_SetParent(cEnemy* OUTPUT pParent)
 {
     ASSERT(!this->IsParent())
 
@@ -336,7 +327,7 @@ void cEnemy::_SetParent(cEnemy* OUTPUT_2 pParent)
         ASSERT(!pParent->IsChild())
 
         // 
-        m_apMember.insert(pParent);
+        m_apMember.insert(&*pParent);
         this->AddStatus(ENEMY_STATUS_CHILD);
 
         // 

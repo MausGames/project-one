@@ -15,7 +15,7 @@ void cIntroMission::__SetupOwn()
 {
     // ################################################################
     // 
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS})
     {
         g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
         {
@@ -27,14 +27,14 @@ void cIntroMission::__SetupOwn()
 
     // ################################################################
     // 
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS})
     {
         STAGE_FINISH_AFTER(1.5f)
     });
 
     // ################################################################
     // 
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS})
     {
         if(STAGE_BEGINNING)
         {
@@ -44,17 +44,16 @@ void cIntroMission::__SetupOwn()
         if(STAGE_TIME_POINT(0.6f))
         {
             g_pEnvironment->ChangeBackground(cCloudBackground::ID, ENVIRONMENT_MIX_CURTAIN, 1.0f, coreVector2(1.0f,0.0f));
-            g_pEnvironment->SetTargetSpeed(4.0f);
+            g_pEnvironment->SetTargetSpeed(4.0f);   // TODO: set earlier, because of acceleration delay   
         }
 
-        if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY))
-            STAGE_FINISH_NOW
+        STAGE_FINISH_PLAY
     });
 
     // ################################################################
     // simple without attacks, show scoring
     // - 5: from different side than previous group, to not fly into players
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         STAGE_ADD_PATH(pPath1)
         {
@@ -123,7 +122,7 @@ void cIntroMission::__SetupOwn()
     // ################################################################
     // simple without attacks, show wave gameplay
     // - 2: enemies cannot be killed in one run by shooting upwards, so they may fly another run
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         STAGE_ADD_PATH(pPath1)
         {
@@ -164,7 +163,7 @@ void cIntroMission::__SetupOwn()
 
     // ################################################################
     // simple with attacks
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         STAGE_ADD_PATH(pPath1)
         {
@@ -217,7 +216,7 @@ void cIntroMission::__SetupOwn()
 
     // ################################################################
     // simple with heavy attacks
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         STAGE_ADD_PATH(pPath1)
         {
@@ -280,7 +279,7 @@ void cIntroMission::__SetupOwn()
 
     // ################################################################
     // movement training
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         STAGE_ADD_PATH(pPath1)
         {
@@ -347,48 +346,11 @@ void cIntroMission::__SetupOwn()
 
     // ################################################################
     // 
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
-        /*
-        if(STAGE_TIME_POINT(3.0f))
-        {
-            //g_pGame->GetInterface()->ShowStory("Project One");
-        }
-
-        STAGE_ADD_PATH(pPath1)
-        {
-            pPath1->Reserve(2u);
-            pPath1->AddNode(coreVector2(0.3f, 1.3f), coreVector2(0.0f,-1.0f));
-            pPath1->AddNode(coreVector2(0.9f,-1.3f), coreVector2(0.5f,-1.0f).Normalized(), 1.5f);
-            pPath1->Refine();
-        });
-
-        STAGE_ADD_SQUAD(pSquad1, cFreezerEnemy, 5u)
-        {
-            STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
-            {
-                pEnemy->Configure(1000, COLOR_SHIP_RED, true);
-
-                pEnemy->Resurrect();
-            });
-        });
-
-        STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
-        {
-            STAGE_LIFETIME(pEnemy, 1.1f, 0.5f * I_TO_F(i))
-
-            const coreVector2 vFactor = coreVector2((i % 2u) ? -1.0f : 1.0f, 1.0f);
-            const coreVector2 vOffset = coreVector2(0.0f,0.0f);
-
-            pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
-
-            if(STAGE_LIFETIME_AFTER(pPath1->GetTotalDistance())) pEnemy->Kill(false);
-        });
-        */
-
         if(STAGE_BEGINNING)
         {
-            g_pGame->StartOutro(1u);
+            g_pGame->StartOutro(2u);
         }
 
         STAGE_BOSS(m_ProjectOne, {1.0f, 2.0f, 3.0, 4.0f})

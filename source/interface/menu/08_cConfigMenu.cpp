@@ -928,6 +928,7 @@ void cConfigMenu::__UpdateInterface()
 
     // 
     this->coreMenu::Move();
+    // TODO: iterate over all objects and move them instead, so buttons don't flicker, due to alpha update    
 }
 
 

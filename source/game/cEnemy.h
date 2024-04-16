@@ -96,7 +96,7 @@ public:
 
 protected:
     // 
-    void _SetParent(cEnemy* OUTPUT_2 pParent);
+    void _SetParent(cEnemy* OUTPUT pParent);
 
 
 private:
@@ -157,23 +157,6 @@ public:
     template <typename T> RETURN_RESTRICT T* AllocateEnemy();
     void FreeEnemy(cEnemy** OUTPUT ppEnemy);
     void ClearEnemies(const coreBool bAnimated);
-    
-    
-    
-void MoveBefore()
-{
-    FOR_EACH(it, m_apAdditional)
-        (*it)->_UpdateAlwaysBefore();
-
-    for(coreUintW i = 0u; i < ENEMY_SET_COUNT; ++i)
-    {
-        if(!m_apEnemySet[i]) continue;
-        coreBatchList* pEnemyActive = &m_apEnemySet[i]->oEnemyActive;
-
-        FOR_EACH(it, *pEnemyActive->List())
-            d_cast<cEnemy*>(*it)->_UpdateAlwaysBefore();
-    }
-}
 
     // 
     cEnemy* FindEnemy   (const coreVector2& vPosition)const;
@@ -189,6 +172,23 @@ void MoveBefore()
 
     // 
     inline coreUintW GetNumEnemiesAlive()const {coreUintW iNum = 0u; this->ForEachEnemy([&](void*) {++iNum;}); return iNum;}
+    
+    
+    
+    void MoveBefore()
+    {
+        FOR_EACH(it, m_apAdditional)
+            (*it)->_UpdateAlwaysBefore();
+
+        for(coreUintW i = 0u; i < ENEMY_SET_COUNT; ++i)
+        {
+            if(!m_apEnemySet[i]) continue;
+            coreBatchList* pEnemyActive = &m_apEnemySet[i]->oEnemyActive;
+
+            FOR_EACH(it, *pEnemyActive->List())
+                d_cast<cEnemy*>(*it)->_UpdateAlwaysBefore();
+        }
+    }
 };
 
 

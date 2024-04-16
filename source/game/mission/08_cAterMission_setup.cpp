@@ -15,30 +15,66 @@ void cAterMission::__SetupOwn()
 {
     // ################################################################
     // 
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS})
     {
-        if(STAGE_BEGINNING)
-        {
-            g_pEnvironment->ChangeBackground(cDarkBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);
-
-            g_pGame->GetInterface()->ShowMission(this);
-            g_pGame->StartIntro();
-        }
-
-        if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY))
-            STAGE_FINISH_NOW
+        STAGE_FINISH_AFTER(1.5f)
     });
 
     // ################################################################
     // 
-    //STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS})
+    {
+        g_pEnvironment->ChangeBackground(cDarkBackground::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        g_pEnvironment->SetTargetSpeed(4.0f);
+
+        g_pGame->StartIntro();
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN({TAKE_MISSION})
+    {
+        g_pGame->GetInterface()->ShowMission(this);
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        if(STAGE_BEGINNING)
+        {
+
+        }
+
+        STAGE_FINISH_PLAY
+    });
+
+    // ################################################################
+    // 
+    //STAGE_MAIN({TAKE_ALWAYS, 5u})
     //{
     //    STAGE_BOSS(m_ProjectOne, {60.0f, 120.0f, 180.0, 240.0f})
     //});
 
     // ################################################################
     // 
-    //STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 11u})
+    {
+        if(STAGE_BEGINNING)
+        {
+
+        }
+
+        STAGE_FINISH_PLAY
+    });
+
+    // ################################################################
+    // 
+    //STAGE_MAIN({TAKE_ALWAYS, 11u})
     //{
     //    STAGE_BOSS(m_Eigengrau, {60.0f, 120.0f, 180.0, 240.0f})
     //});

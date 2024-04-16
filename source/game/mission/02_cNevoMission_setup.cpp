@@ -15,18 +15,42 @@ void cNevoMission::__SetupOwn()
 {
     // ################################################################
     // 
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS})
+    {
+        STAGE_FINISH_AFTER(1.5f)
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN({TAKE_ALWAYS})
+    {
+        g_pEnvironment->ChangeBackground(cSeaBackground::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        g_pEnvironment->SetTargetSpeed(4.0f);
+
+        g_pGame->StartIntro();
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN({TAKE_MISSION})
+    {
+        g_pGame->GetInterface()->ShowMission(this);
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN({TAKE_ALWAYS, 0u, 1u, 2u, 3u, 4u, 5u})
     {
         if(STAGE_BEGINNING)
         {
-            g_pEnvironment->ChangeBackground(cSeaBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);
 
-            g_pGame->GetInterface()->ShowMission(this);
-            g_pGame->StartIntro();
         }
 
-        if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY))
-            STAGE_FINISH_NOW
+        STAGE_FINISH_PLAY
     });
 
     // ################################################################
@@ -41,7 +65,7 @@ void cNevoMission::__SetupOwn()
     // TODO: maybe only diagonal position on linear explosion and vice-versa
     // TODO: 2-3 quickly after another, with pattern or just aim
     // TODO: reference: Monolith
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         STAGE_ADD_SQUAD(pSquad1, cWarriorEnemy, 24u)
         {
@@ -203,7 +227,7 @@ void cNevoMission::__SetupOwn()
 
     // ################################################################
     // reset all bombs
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         for(coreUintW i = 0u; i < NEVO_BOMBS; ++i)
             this->DisableBomb(i, false);
@@ -223,7 +247,8 @@ void cNevoMission::__SetupOwn()
     // TODO: ON tiles have X (eher nicht, schlecht in japan) or other distinct difference (maybe only in lower-right corner)
     // TODO: wenn letztes tile schrumpft kommen funken bei size=0 und grüner helfer erscheint und fliegt weg
     // TODO: badge, helper marks N fields to active in that order
-    STAGE_MAIN
+    // TODO: create a image with the light tiles ?
+    STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         STAGE_ADD_PATH(pPath1)
         {
@@ -468,7 +493,7 @@ void cNevoMission::__SetupOwn()
 
     // ################################################################
     // reset all tiles
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         for(coreUintW i = 0u; i < NEVO_TILES; ++i)
             this->DisableTile(i, false);
@@ -477,11 +502,30 @@ void cNevoMission::__SetupOwn()
     });
 
     // ################################################################
+    // <REPLACE>                                                       
+    STAGE_MAIN({TAKE_ALWAYS, 2u})
+    {
+        STAGE_WAVE("ACHTZEHN", {20.0f, 30.0f, 40.0f, 50.0f})
+    });
+
+    // ################################################################
     // 
-    //STAGE_MAIN
+    //STAGE_MAIN({TAKE_ALWAYS, 5u})
     //{
     //    STAGE_BOSS(m_Nautilus, {60.0f, 120.0f, 180.0, 240.0f})
     //});
+
+    // ################################################################
+    // 
+    STAGE_MAIN({TAKE_ALWAYS, 6u, 7u, 8u, 9u, 10u, 11u})
+    {
+        if(STAGE_BEGINNING)
+        {
+
+        }
+
+        STAGE_FINISH_PLAY
+    });
 
     // ################################################################
     // attack triggers on multiple sides
@@ -496,7 +540,7 @@ void cNevoMission::__SetupOwn()
     // maximal 2 spieler-rotation pro angreifbarer ausrichtung
     // erste 3 gegner sind tutorial
     // TODO: 2 gegner pro seite, rotating arrow, start mit oben, gegen uhrzeigersinn
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 6u})
     {
         STAGE_ADD_PATH(pPath1)
         {
@@ -726,7 +770,7 @@ STAGE_START_HERE
     
     // partikel gezogen ()  werden gegen schussrichtung eingesaugt, bei schuss muss er linear nach in schussrichtung gehn und sich ausbreiten in weite
     // unter gegen, geschosse, container
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 7u})
     {
         if(STAGE_BEGINNING) this->EnableContainer(coreVector2(0.0f,0.0f));
         
@@ -774,10 +818,9 @@ STAGE_START_HERE
         STAGE_WAVE("ZWEIUNDZWANZIG", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
-
     // ################################################################
     // reset all arrows
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 7u})
     {
         for(coreUintW i = 0u; i < NEVO_ARROWS; ++i)
             this->DisableArrow(i, false);
@@ -786,15 +829,55 @@ STAGE_START_HERE
     });
 
     // ################################################################
+    // <REPLACE>                                                       
+    STAGE_MAIN({TAKE_ALWAYS, 8u})
+    {
+        STAGE_WAVE("DREIUNDZWANZIG", {20.0f, 30.0f, 40.0f, 50.0f})
+    });
+
+    // ################################################################
     // 
-    //STAGE_MAIN
+    //STAGE_MAIN({TAKE_ALWAYS, 11u})
     //{
     //    STAGE_BOSS(m_Amemasu, {60.0f, 120.0f, 180.0, 240.0f})
     //});
 
     // ################################################################
     // 
-    //STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 12u, 13u, 14u, 15u, 16u, 17u})
+    {
+        if(STAGE_BEGINNING)
+        {
+
+        }
+
+        STAGE_FINISH_PLAY
+    });
+
+    // ################################################################
+    // <REPLACE>                                                       
+    STAGE_MAIN({TAKE_ALWAYS, 12u})
+    {
+        STAGE_WAVE("SECHSUNDZWANZIG", {20.0f, 30.0f, 40.0f, 50.0f})
+    });
+
+    // ################################################################
+    // <REPLACE>                                                       
+    STAGE_MAIN({TAKE_ALWAYS, 13u})
+    {
+        STAGE_WAVE("SIEBENUNDZWANZIG", {20.0f, 30.0f, 40.0f, 50.0f})
+    });
+
+    // ################################################################
+    // <REPLACE>                                                       
+    STAGE_MAIN({TAKE_ALWAYS, 14u})
+    {
+        STAGE_WAVE("ACHTUNDZWANZIG", {20.0f, 30.0f, 40.0f, 50.0f})
+    });
+
+    // ################################################################
+    // 
+    //STAGE_MAIN({TAKE_ALWAYS, 17u})
     //{
     //    STAGE_BOSS(m_Leviathan, {60.0f, 120.0f, 180.0, 240.0f})
     //});

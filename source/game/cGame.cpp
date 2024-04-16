@@ -142,13 +142,22 @@ void cGame::Render()
 
         // render all enemies
         m_EnemyManager.Render();
-        // TODO: enemies z>=0.0f
     }
 
     __DEPTH_GROUP_UNDER
     {
         DEPTH_PUSH_DOUBLE
 
+        // render low-priority bullet manager
+        m_BulletManagerPlayer.Render();
+
+        // render underlying objects
+        m_EnemyManager.RenderUnder();
+        m_pCurMission->RenderUnder();
+    }
+
+    __DEPTH_GROUP_SHIP   // # 2
+    {
         glDepthMask(false);
         {
             // 
@@ -157,29 +166,19 @@ void cGame::Render()
         }
         glDepthMask(true);
 
-        // render low-priority bullet manager
-        m_BulletManagerPlayer.Render();
-
-        // 
-        m_ChromaManager.Render();
-        m_ItemManager  .Render();
-        m_ShieldManager.Render();
-
-        // render underlying objects
-        m_EnemyManager.RenderUnder();
-        m_pCurMission->RenderUnder();
-
-        // TODO: enemies z<0.0f or above renderunder ?
-    }
-
-    __DEPTH_GROUP_SHIP   // # 2
-    {
         // apply deferred outline-layer
         g_pOutline->Apply();
     }
 
     __DEPTH_GROUP_OVER
     {
+        DEPTH_PUSH
+
+        // 
+        m_ChromaManager.Render();
+        m_ItemManager  .Render();
+        m_ShieldManager.Render();
+
         // render overlying objects
         m_EnemyManager.RenderOver();
         m_pCurMission->RenderOver();
@@ -228,10 +227,13 @@ void cGame::Move()
 
     // 
     cHelper::GlobalUpdate();
+    
+    
+    m_EnemyManager.MoveBefore(); // only enemy, not player    
+    
+    
 
     // move the mission
-    m_EnemyManager.MoveBefore();
-    // TODO: how to handle GetMove for player in mission-movebefore ???    
     m_pCurMission->MoveBefore();
     {
         // move all players
@@ -286,7 +288,7 @@ void cGame::MoveOverlay()
 
 // ****************************************************************
 // load new active mission
-void cGame::LoadMissionID(const coreInt32 iID)
+void cGame::LoadMissionID(const coreInt32 iID, const coreUint8 iTakeFrom, const coreUint8 iTakeTo)
 {
     if(m_pCurMission) if(m_pCurMission->GetID() == iID) return;
 
@@ -349,7 +351,7 @@ void cGame::LoadMissionID(const coreInt32 iID)
     if(iID != cNoMission::ID)
     {
         // setup the mission
-        m_pCurMission->Setup();
+        m_pCurMission->Setup(iTakeFrom, iTakeTo);
 
         // set initial status
         m_iStatus = GAME_STATUS_LOADING;
@@ -364,10 +366,10 @@ void cGame::LoadMissionID(const coreInt32 iID)
 
 // ****************************************************************
 // 
-void cGame::LoadMissionIndex(const coreUintW iIndex)
+void cGame::LoadMissionIndex(const coreUintW iIndex, const coreUint8 iTakeFrom, const coreUint8 iTakeTo)
 {
     ASSERT(iIndex < m_iNumMissions)
-    this->LoadMissionID(m_piMissionList[iIndex]);
+    this->LoadMissionID(m_piMissionList[iIndex], iTakeFrom, iTakeTo);
 }
 
 
@@ -582,10 +584,6 @@ coreUint8 cGame::CalcMedal(const coreFloat fTime, const coreUint32 iDamageTaken,
     // 
     iMedal -= MIN(iDamageTaken, coreUint32(iMedal - MEDAL_BRONZE));
 
-    
-    if(iMedal == MEDAL_PLATINUM) iMedal = MEDAL_GOLD;   // TODO: platinum disabled 
-    
-
     return iMedal;
 }
 
@@ -793,7 +791,7 @@ void cGame::__HandleDefeat()
             if(m_pCurMission->GetID() == cIntroMission::ID)
             {
                 // 
-                this->StartOutro(1u);
+                this->StartOutro(2u);
             }
             else
             {

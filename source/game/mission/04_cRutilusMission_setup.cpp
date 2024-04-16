@@ -15,18 +15,42 @@ void cRutilusMission::__SetupOwn()
 {
     // ################################################################
     // 
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS})
+    {
+        STAGE_FINISH_AFTER(1.5f)
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN({TAKE_ALWAYS})
+    {
+        g_pEnvironment->ChangeBackground(cSpaceBackground::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        g_pEnvironment->SetTargetSpeed(4.0f);
+
+        g_pGame->StartIntro();
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN({TAKE_MISSION})
+    {
+        g_pGame->GetInterface()->ShowMission(this);
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN({TAKE_ALWAYS, 0u, 1u, 2u, 3u, 4u, 5u})
     {
         if(STAGE_BEGINNING)
         {
-            g_pEnvironment->ChangeBackground(cSpaceBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);
 
-            g_pGame->GetInterface()->ShowMission(this);
-            g_pGame->StartIntro();
         }
 
-        if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY))
-            STAGE_FINISH_NOW
+        STAGE_FINISH_PLAY
     });
 
     // ################################################################
@@ -48,7 +72,7 @@ void cRutilusMission::__SetupOwn()
     // TODO: fix coop, teleportation into other field not possible -> maybe relax and allow it, force teleport with effect back on end, check and change player-area, should make vertical possible again (repair enemy ?)
     // TODO: on vertical, enemy from below may ram into player
     // TODO: get rid of "fake enemy"
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         STAGE_ADD_PATH(pPath1)
         {
@@ -283,7 +307,7 @@ void cRutilusMission::__SetupOwn()
 
     // ################################################################
     // reset all teleporters
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         for(coreUintW i = 0u; i < RUTILUS_TELEPORTER; ++i)
             this->DisableTeleporter(i, false);
@@ -295,18 +319,77 @@ void cRutilusMission::__SetupOwn()
     });
 
     // ################################################################
+    // <REPLACE>                                                       
+    STAGE_MAIN({TAKE_ALWAYS, 1u})
+    {
+        STAGE_WAVE("SIEBENUNDVIERZIG", {20.0f, 30.0f, 40.0f, 50.0f})
+    });
+
+    // ################################################################
+    // <REPLACE>                                                       
+    STAGE_MAIN({TAKE_ALWAYS, 2u})
+    {
+        STAGE_WAVE("ACHTUNDVIERZIG", {20.0f, 30.0f, 40.0f, 50.0f})
+    });
+
+    // ################################################################
     // 
-    //STAGE_MAIN
+    //STAGE_MAIN({TAKE_ALWAYS, 5u})
     //{
     //    STAGE_BOSS(m_Quaternion, {60.0f, 120.0f, 180.0, 240.0f})
     //});
 
     // ################################################################
     // 
-    //STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 6u, 7u, 8u, 9u, 10u, 11u})
+    {
+        if(STAGE_BEGINNING)
+        {
+
+        }
+
+        STAGE_FINISH_PLAY
+    });
+
+    // ################################################################
+    // <REPLACE>                                                       
+    STAGE_MAIN({TAKE_ALWAYS, 6u})
+    {
+        STAGE_WAVE("EINDUNDFÜNFZIG", {20.0f, 30.0f, 40.0f, 50.0f})
+    });
+
+    // ################################################################
+    // <REPLACE>                                                       
+    STAGE_MAIN({TAKE_ALWAYS, 7u})
+    {
+        STAGE_WAVE("ZWEIDUNDFÜNFZIG", {20.0f, 30.0f, 40.0f, 50.0f})
+    });
+
+    // ################################################################
+    // <REPLACE>                                                       
+    STAGE_MAIN({TAKE_ALWAYS, 8u})
+    {
+        STAGE_WAVE("DREIDUNDFÜNFZIG", {20.0f, 30.0f, 40.0f, 50.0f})
+    });
+
+    // ################################################################
+    // 
+    //STAGE_MAIN({TAKE_ALWAYS, 11u})
     //{
     //    STAGE_BOSS(m_Saros, {60.0f, 120.0f, 180.0, 240.0f})
     //});
+
+    // ################################################################
+    // 
+    STAGE_MAIN({TAKE_ALWAYS, 12u, 13u, 14u, 15u, 16u, 17u})
+    {
+        if(STAGE_BEGINNING)
+        {
+
+        }
+
+        STAGE_FINISH_PLAY
+    });
 
     // ################################################################
     // meteor split-up with enemies at the end
@@ -325,7 +408,7 @@ void cRutilusMission::__SetupOwn()
     // bounce zwischen meteoriten is total nicht nachvollziehbar, Ikaruga und RSG haben sowas nicht
     // meteoriten mit gegnern darin müssen etwas mehr aushalten um nicht unabsichtlich beim erzeugen schon zerstört zu werden
     // inspiration: ikaruga end 3rd mission ?
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 12u})
     {
         constexpr coreUintW iMeteorNum = 90u;//10u+2u+6u+1u+3u+9u;        
 
@@ -611,7 +694,7 @@ STAGE_START_HERE
     // gravity both requires to get near to enemies, and allows to shoot in a curve
     // TODO: distortion for waves ?
     // TODO: UNVOLLSTÄNDIG
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 13u})
     {
         STAGE_ADD_PATH(pPath1)
         {
@@ -800,7 +883,7 @@ STAGE_START_HERE
 
     // ################################################################
     // reset all waves
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 13u})
     {
         this->DisableWave(false);
 
@@ -810,8 +893,15 @@ STAGE_START_HERE
     });
 
     // ################################################################
+    // <REPLACE>                                                       
+    STAGE_MAIN({TAKE_ALWAYS, 14u})
+    {
+        STAGE_WAVE("ACHTUNDFÜNFZIG", {20.0f, 30.0f, 40.0f, 50.0f})
+    });
+
+    // ################################################################
     // 
-    //STAGE_MAIN
+    //STAGE_MAIN({TAKE_ALWAYS, 17u})
     //{
     //    STAGE_BOSS(m_Messier, {60.0f, 120.0f, 180.0, 240.0f})
     //});

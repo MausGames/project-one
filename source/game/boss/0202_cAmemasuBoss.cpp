@@ -191,7 +191,7 @@ void cAmemasuBoss::__MoveOwn()
             {
                 g_pGame->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i) 
                 {
-                    pPlayer->AddStatus(PLAYER_STATUS_NO_INPUT_ALL & ~PLAYER_STATUS_NO_INPUT_SHOOT);
+                    pPlayer->AddStatus(PLAYER_STATUS_NO_INPUT_MOVE | PLAYER_STATUS_NO_INPUT_TURN);
                     pPlayer->ChangeType(0);
 
                     aMove[i].Reserve(2u);
@@ -284,7 +284,7 @@ void cAmemasuBoss::__MoveOwn()
             {
                 g_pGame->ForEachPlayer([](cPlayer* OUTPUT pPlayer, const coreUintW i)
                 {
-                    pPlayer->AddStatus(PLAYER_STATUS_NO_INPUT_ALL & ~PLAYER_STATUS_NO_INPUT_SHOOT);
+                    pPlayer->AddStatus(PLAYER_STATUS_NO_INPUT_MOVE | PLAYER_STATUS_NO_INPUT_TURN);
                     pPlayer->ChangeType(0);
                 });
 

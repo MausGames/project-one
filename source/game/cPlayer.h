@@ -17,7 +17,7 @@
 // TODO: render wind, bubble, etc. in group for coop
 // TODO: correct reverse-tracking when hitting the walls (position correction) ? only for 45degree, also on other code locations ?
 // TODO: orange/red exhaust for second ship ?
-// TODO: when applying force with (all) objects (collision with container) always quantizise 4 or 8, but not in general (wind)
+// TODO: when applying force with (all) objects (collision with container) always quantize 4 or 8, but not in general (wind)
 
 
 // ****************************************************************
@@ -27,7 +27,6 @@
 #define PLAYER_LIVES              (LIVES)           // 
 #define PLAYER_SHIELD             (SHIELD)          // 
 #define PLAYER_COLLISION_MIN      (0.15f)           // 
-#define PLAYER_DOT_SIZE           (0.55f)           // 
 #define PLAYER_WIND_SIZE          (4.5f)            // 
 #define PLAYER_BUBBLE_SIZE        (6.0f)            // 
 #define PLAYER_ROLL_SPEED         (1.0f)            // 
@@ -105,8 +104,8 @@ private:
     coreProgramPtr m_pDarkProgram;                              // 
     coreFlow       m_fAnimation;                                // 
 
-    coreObject3D m_Range;                                       // 
     coreObject3D m_Dot;                                         // 
+    coreObject3D m_Range;                                       // 
     coreObject3D m_Wind;                                        // 
     coreObject3D m_Bubble;                                      // 
     coreObject3D m_Shield;                                      // 
@@ -176,7 +175,8 @@ public:
     inline void ApplyForce(const coreVector2& vForce) {this->SetPosition(coreVector3(m_vOldPos, 0.0f)); m_vForce += vForce;}
 
     // 
-    coreFloat CalcMoveSpeed()const;
+    coreVector2 CalcMove     ()const;
+    coreFloat   CalcMoveSpeed()const;
 
     // 
     inline cWeapon*     GetWeapon    (const coreUintW iIndex)const {ASSERT((iIndex < PLAYER_EQUIP_WEAPONS) && m_apWeapon[iIndex]) return m_apWeapon[iIndex];}
@@ -203,6 +203,23 @@ public:
     template <typename F> static FORCE_INLINE void TestCollision(const ePlayerTest eTest, const coreInt32 iType,        F&& nCallback);   // [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit) -> void
     template <typename F> static FORCE_INLINE void TestCollision(const ePlayerTest eTest, coreObject3D* OUTPUT pObject, F&& nCallback);   // [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit) -> void
 
+    
+    /*
+    void SetPosition(const coreVector3& vPosition)
+    {
+        this->coreObject3D::SetPosition(vPosition);
+
+        m_Range  .SetPosition(vPosition);
+        m_Dot    .SetPosition(vPosition);
+        m_Wind   .SetPosition(vPosition);
+        m_Bubble .SetPosition(vPosition);
+        m_Shield .SetPosition(vPosition);
+        m_Exhaust.SetPosition(vPosition);
+    }
+     direction sollte auch aktualisiert werden können
+     coreObject3D::Move in teleport
+    */
+    
 
 private:
     // 

@@ -119,6 +119,7 @@ protected:
 
     static coreMemoryPool s_MemoryPool;                 // 
     static coreRand       s_Rand;                       // 
+    // rand für background, outdoor (andere location für dieses coreRand object?) (oder eigentlich nur ein stack-object in Outdoor und Background)
 
 
 public:

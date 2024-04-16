@@ -15,24 +15,46 @@ void cMuscusMission::__SetupOwn()
 {
     // ################################################################
     // 
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS})
+    {
+        STAGE_FINISH_AFTER(1.5f)
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN({TAKE_ALWAYS})
+    {
+        g_pEnvironment->ChangeBackground(cMossBackground::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        g_pEnvironment->SetTargetSpeed(4.0f);
+
+        g_pGame->StartIntro();
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN({TAKE_MISSION})
+    {
+        g_pGame->GetInterface()->ShowMission(this);
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN({TAKE_ALWAYS, 0u, 1u, 2u, 3u, 4u, 5u})
     {
         if(STAGE_BEGINNING)
         {
-            g_pEnvironment->ChangeBackground(cMossBackground::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
-
             cMossBackground* pBackground = d_cast<cMossBackground*>(g_pEnvironment->GetBackground());
 
             pBackground->GetHeadlight()->ResetFlicker();
             pBackground->SetEnableLightning(false);
             pBackground->SetEnableHeadlight(true);
-
-            g_pGame->GetInterface()->ShowMission(this);
-            g_pGame->StartIntro();
         }
 
-        if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY))
-            STAGE_FINISH_NOW
+        STAGE_FINISH_PLAY
     });
 
     // ################################################################
@@ -52,7 +74,7 @@ void cMuscusMission::__SetupOwn()
     // TODO: big ghost with teleport (back to border, follows other player then)
     // TODO: badge, kill 1 or 3 hidden enemies
     // TODO: coop exploit, spieler stehen einfach ganz links und rechts, was ist wenn immer nur einer ein licht hat, abwechselnd, spieler 2 zuerst, + remove lambda-targeting
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         STAGE_ADD_PATH(pPath1)
         {
@@ -210,34 +232,51 @@ void cMuscusMission::__SetupOwn()
     });
 
     // ################################################################
+    // <REPLACE>                                                       
+    STAGE_MAIN({TAKE_ALWAYS, 1u})
+    {
+        STAGE_WAVE("ZWEIUNDNEUNZIG", {20.0f, 30.0f, 40.0f, 50.0f})
+    });
+
+    // ################################################################
+    // <REPLACE>                                                       
+    STAGE_MAIN({TAKE_ALWAYS, 2u})
+    {
+        STAGE_WAVE("DREIUNDNEUNZIG", {20.0f, 30.0f, 40.0f, 50.0f})
+    });
+
+    // ################################################################
     // 
-    //STAGE_MAIN
+    //STAGE_MAIN({TAKE_ALWAYS, 5u})
     //{
     //    STAGE_BOSS(m_Orlac, {60.0f, 120.0f, 180.0, 240.0f})
     //});
 
-    STAGE_START_HERE
     // ################################################################
     // 
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 6u, 7u, 8u, 9u, 10u, 11u})
     {
-        cMossBackground* pBackground = d_cast<cMossBackground*>(g_pEnvironment->GetBackground());
+        if(STAGE_BEGINNING)
+        {
+            cMossBackground* pBackground = d_cast<cMossBackground*>(g_pEnvironment->GetBackground());
 
-        pBackground->GetHeadlight()->ResetFlicker();
-        pBackground->SetEnableLightning(true);
-        pBackground->SetEnableHeadlight(false);
+            pBackground->GetHeadlight()->ResetFlicker();
+            pBackground->SetEnableLightning(true);
+            pBackground->SetEnableHeadlight(false);
+        }
 
-        STAGE_FINISH_NOW
+        STAGE_FINISH_PLAY
     });
-
+STAGE_START_HERE
     // ################################################################
     // automatic forward movement
-    // helper is
     // rückwärts fliegen (dem spieler zeit geben) (beschleunigung interpolieren ??, aber sehr kurz ??)
-    // stillstand (in mitte) (rotation + dodge muss genutzt werden), gegner kommen auf ihn zu, geschosse kommen von diagonale (visiblity)
+    // stillstand (in mitte) (rotation + dodge muss genutzt werden), gegner kommen auf ihn zu, geschosse kommen von diagonale (visibility)
+    //   - bewegung geht in die mitte (erst Y, dann X), links-rechts in coop, weil gut sichtbar welche gegner welchen spieler dann angreifen
     // erste welle startet nach 2 turns
-    // automatic right-turn on wall-collision ?
-    STAGE_MAIN
+    // (automatic right-turn on wall-collision ?)
+    // schiff hat kleine explosionen und beginnt zu brennen -> orangener helfer kommt am ende raus
+    STAGE_MAIN({TAKE_ALWAYS, 6u})
     {
         STAGE_ADD_PATH(pPath1)
         {
@@ -269,28 +308,17 @@ void cMuscusMission::__SetupOwn()
         {
             if(STAGE_BEGINNING) pPlayer->AddStatus(PLAYER_STATUS_NO_INPUT_MOVE);
 
-            coreVector2 vNewPos = pPlayer->GetPosition ().xy();
-            coreVector2 vNewDir = pPlayer->GetDirection().xy();
-
-            vNewPos += vNewDir * (TIME * pPlayer->CalcMoveSpeed());
+            coreVector2 vNewPos = pPlayer->GetPosition().xy() + pPlayer->GetDirection().xy() * (pPlayer->CalcMoveSpeed() * TIME * 0.7f);
 
             const coreVector4 vArea = pPlayer->GetArea();
 
-                 if(vNewPos.x < vArea.x) {vNewDir = coreVector2( 0.0f, 1.0f); vNewPos += vNewDir * ABS(vNewPos.x - vArea.x); vNewPos.x = vArea.x; }
-            else if(vNewPos.x > vArea.z) {vNewDir = coreVector2( 0.0f,-1.0f); vNewPos += vNewDir * ABS(vNewPos.x - vArea.z); vNewPos.x = vArea.z; }
-                 if(vNewPos.y < vArea.y) {vNewDir = coreVector2(-1.0f, 0.0f); vNewPos += vNewDir * ABS(vNewPos.y - vArea.y); vNewPos.y = vArea.y; }
-            else if(vNewPos.y > vArea.w) {vNewDir = coreVector2( 1.0f, 0.0f); vNewPos += vNewDir * ABS(vNewPos.y - vArea.w); vNewPos.y = vArea.w; }
+            vNewPos.x = CLAMP(vNewPos.x, vArea.x, vArea.z);
+            vNewPos.y = CLAMP(vNewPos.y, vArea.y, vArea.w);
 
-            pPlayer->SetPosition (coreVector3(vNewPos, 0.0f));
-            pPlayer->SetDirection(coreVector3(vNewDir, 0.0f));
-
-           //pPlayer->coreObject3D::Move();
+            pPlayer->SetPosition(coreVector3(vNewPos, 0.0f));
             
-            // wenn ich hier oder bei bossen die positionen des spielers verändere werden objekte die anhand seiner attribute gesetzt werden falsch berechnet (auch blitze)
-            // !! ich bin hier in MissionBefore!
-            // !! kommentar in  cgame.cpp: how to handle GetMove for player in mission-movebefore ???
-            // fix this all
-            
+            g_pSpecialEffects->CreateSplashFire (pPlayer->GetPosition(),  5.0f, 1u, COLOR_FIRE_ORANGE);
+            g_pSpecialEffects->CreateSplashColor(pPlayer->GetPosition(), 10.0f, 1u, COLOR_FIRE_ORANGE);
         });
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
@@ -310,7 +338,7 @@ void cMuscusMission::__SetupOwn()
 
     // ################################################################
     // 
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 6u})
     {
         STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
         {
@@ -321,15 +349,62 @@ void cMuscusMission::__SetupOwn()
     });
 
     // ################################################################
+    // <REPLACE>                                                       
+    STAGE_MAIN({TAKE_ALWAYS, 7u})
+    {
+        STAGE_WAVE("SIEBENUNDNEUNZIG", {20.0f, 30.0f, 40.0f, 50.0f})
+    });
+
+    // ################################################################
+    // <REPLACE>                                                       
+    STAGE_MAIN({TAKE_ALWAYS, 8u})
+    {
+        STAGE_WAVE("ACHTUNDNEUNZIG", {20.0f, 30.0f, 40.0f, 50.0f})
+    });
+
+    // ################################################################
     // 
-    //STAGE_MAIN
+    //STAGE_MAIN({TAKE_ALWAYS, 11u})
     //{
     //    STAGE_BOSS(m_Geminga, {60.0f, 120.0f, 180.0, 240.0f})
     //});
 
     // ################################################################
     // 
-    //STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 12u, 13u, 14u, 15u, 16u, 17u})
+    {
+        if(STAGE_BEGINNING)
+        {
+
+        }
+
+        STAGE_FINISH_PLAY
+    });
+
+    // ################################################################
+    // <REPLACE>                                                       
+    STAGE_MAIN({TAKE_ALWAYS, 12u})
+    {
+        STAGE_WAVE("HUNDERTUNDEINS", {20.0f, 30.0f, 40.0f, 50.0f})
+    });
+
+    // ################################################################
+    // <REPLACE>                                                       
+    STAGE_MAIN({TAKE_ALWAYS, 13u})
+    {
+        STAGE_WAVE("HUNDERTUNDZWEI", {20.0f, 30.0f, 40.0f, 50.0f})
+    });
+
+    // ################################################################
+    // <REPLACE>                                                       
+    STAGE_MAIN({TAKE_ALWAYS, 14u})
+    {
+        STAGE_WAVE("HUNDERTUNDDREI", {20.0f, 30.0f, 40.0f, 50.0f})
+    });
+
+    // ################################################################
+    // 
+    //STAGE_MAIN({TAKE_ALWAYS, 17u})
     //{
     //    STAGE_BOSS(m_Nagual, {60.0f, 120.0f, 180.0, 240.0f})
     //});

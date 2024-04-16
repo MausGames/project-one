@@ -37,6 +37,11 @@
 #define MISSION_BOSS_TO_SEGMENT(i) ((i) * 6u  + 5u)
 #define MISSION_WAVE_TO_SEGMENT(i) ((i) + (i) / 5u)
 
+STATIC_ASSERT((BOSSES == 3u) && (WAVES == 15u) && (SEGMENTS == 18u))
+
+#define TAKE_ALWAYS  (0x00u)
+#define TAKE_MISSION (0xFFu)
+
 
 // ****************************************************************
 // mission specific definitions
@@ -76,22 +81,18 @@
 
 // ****************************************************************
 // stage management macros
-#define STAGE_MAIN                             m_anStage.emplace(__LINE__, [this]()
+#define STAGE_MAIN(...)                        if([this]() {static constexpr coreUint8 A[] = __VA_ARGS__; return cMission::_TakeRange(m_iTakeFrom, m_iTakeTo, A, ARRAY_SIZE(A));}()) m_anStage.emplace(__LINE__, [this]()
 #define STAGE_SUB(i)                           ((m_iStageSub < (i)) && [&]() {m_iStageSub = (i); m_fStageSubTime = 0.0f; m_fStageSubTimeBefore = 0.0f; return true;}())
 
 #define STAGE_FINISH_NOW                       {this->SkipStage();}
-#define STAGE_FINISH_AFTER(t)                  {if(m_fStageTime >= (t)) STAGE_FINISH_NOW}
+#define STAGE_FINISH_PLAY                      {if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY)) STAGE_FINISH_NOW}
+#define STAGE_FINISH_AFTER(t)                  {if(m_fStageTime >= (t))                                   STAGE_FINISH_NOW}
 
-#define STAGE_MAIN_2(...)     {static constexpr coreUint8 A[] = __VA_ARGS__; /* {0u, 1u} */}
-/*
-vor dem einfügen in den stage-container wird geprüft ob sie überhaupt hinzugefügt werden soll
-es muss definiert werden in welchen waves (nummern) eine stage hinzugefügt werden soll, bezogen auf die "vorbereitungen" und "abschlüsse"
-*/
 #define STAGE_MEDAL_GOAL(...)                  {static constexpr coreFloat A[] = __VA_ARGS__; this->SetMedalGoal(A); STATIC_ASSERT((ARRAY_SIZE(A) == 4u) && (A[0] < A[1]) && (A[1] < A[2]) && (A[2] < A[3]))}
 #define STAGE_BOSS(e,...)                      {if(STAGE_BEGINNING) {STAGE_MEDAL_GOAL(__VA_ARGS__) (e).Resurrect();} if(CONTAINS_FLAG((e).GetStatus(), ENEMY_STATUS_DEAD)) STAGE_FINISH_NOW}
 #define STAGE_WAVE(n,...)                      {if(STAGE_BEGINNING) {STAGE_MEDAL_GOAL(__VA_ARGS__) this->ActivateWave(n);} if(STAGE_CLEARED) {this->DeactivateWave(); if(!g_pGame->GetInterface()->IsBannerActive()) STAGE_FINISH_NOW}}
 
-#define STAGE_START_HERE                       {m_anStage.clear(); STAGE_MAIN {if(STAGE_BEGINNING) g_pGame->StartIntro(); if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY)) STAGE_FINISH_NOW});}
+#define STAGE_START_HERE                       {m_anStage.clear(); STAGE_MAIN({TAKE_ALWAYS}) {if(STAGE_BEGINNING) g_pGame->StartIntro(); STAGE_FINISH_PLAY});}
 
 #define STAGE_CLEARED                          (std::all_of(m_apSquad.begin(), m_apSquad.end(), [](const cEnemySquad* pSquad) {return pSquad->IsFinished();}))
 #define STAGE_RESSURECT(s,f,t)                 {STAGE_FOREACH_ENEMY_ALL(s, pEnemy, i) {if((coreInt32(i) >= coreInt32(f)) && (coreInt32(i) <= coreInt32(t))) pEnemy->Resurrect();}); ASSERT((coreInt32(f) <= coreInt32(t)) && (coreInt32(t) < coreInt32((s)->GetNumEnemies())))}
@@ -229,6 +230,9 @@ protected:
     uCollPlayerBulletType m_nCollPlayerBullet;                 // 
     uCollEnemyBulletType  m_nCollEnemyBullet;                  // 
 
+    coreUint8 m_iTakeFrom;                                     // 
+    coreUint8 m_iTakeTo;                                       // 
+
     coreBool m_bRepeat;                                        // 
 
     static coreUint16  s_iTick;                                // 
@@ -245,7 +249,7 @@ public:
     ENABLE_ID
 
     // setup the mission
-    void Setup();
+    void Setup(const coreUint8 iTakeFrom, const coreUint8 iTakeTo);
 
     // render and move the mission
     void RenderBottom();
@@ -291,6 +295,9 @@ protected:
     // 
     template             <typename F> coreSpline2* _AddPath (const coreUint16 iCodeLine,                       F&& nInitFunc);   // [](coreSpline2* OUTPUT pPath)  -> void
     template <typename T, typename F> cEnemySquad* _AddSquad(const coreUint16 iCodeLine, const coreUint8 iNum, F&& nInitFunc);   // [](cEnemySquad* OUTPUT pSquad) -> void
+
+    // 
+    static constexpr FUNC_LOCAL coreBool _TakeRange(const coreUint8 iFrom, const coreUint8 iTo, const coreUint8* piIndexList, const coreUintW iSize);
 
 
 private:
@@ -770,6 +777,27 @@ template <typename T, typename F> cEnemySquad* cMission::_AddSquad(const coreUin
     }
 
     return m_apSquad.at(iCodeLine);
+}
+
+
+// ****************************************************************
+// 
+constexpr FUNC_LOCAL coreBool cMission::_TakeRange(const coreUint8 iFrom, const coreUint8 iTo, const coreUint8* piIndexList, const coreUintW iSize)
+{
+    // 
+    if((piIndexList[0] == TAKE_MISSION) && (iTo != TAKE_MISSION))
+        return false;
+
+    // 
+    for(coreUintW i = 1u; i < iSize; ++i)
+    {
+        if((piIndexList[i] >= iFrom) &&
+           (piIndexList[i] <= iTo))
+            return true;
+    }
+
+    // 
+    return (iSize == 1u);
 }
 
 

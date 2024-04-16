@@ -33,6 +33,8 @@ cMission::cMission()noexcept
 , m_fStageSubTimeBefore (0.0f)
 , m_pfMedalGoal         (NULL)
 , m_bBadgeGiven         (false)
+, m_iTakeFrom           (0u)
+, m_iTakeTo             (TAKE_MISSION)
 , m_bRepeat             (false)
 {
 }
@@ -58,8 +60,13 @@ cMission::~cMission()
 
 // ****************************************************************
 // setup the mission
-void cMission::Setup()
+void cMission::Setup(const coreUint8 iTakeFrom, const coreUint8 iTakeTo)
 {
+    // 
+    ASSERT(iTakeFrom <= iTakeTo)
+    m_iTakeFrom = iTakeFrom;
+    m_iTakeTo   = iTakeTo;
+
     // 
     ASSERT(m_anStage.empty())
     m_anStage.clear();
@@ -110,7 +117,7 @@ void cMission::MoveBefore()
             m_anStage.back()();
 
             // 
-            if(m_anStage.empty()) g_pGame->StartOutro(0u);
+            if(m_anStage.empty()) g_pGame->StartOutro((m_iTakeTo == TAKE_MISSION) ? 0u : 1u);
         }
     }
     while(m_bRepeat);
@@ -213,6 +220,7 @@ void cMission::ActivateWave(const coreChar* pcName)
     ASSERT(m_iCurWaveCount < MISSION_WAVES)
     m_iCurWaveIndex    = m_iCurWaveCount++;
     m_iCurSegmentIndex = MISSION_WAVE_TO_SEGMENT(m_iCurWaveIndex);
+    // TODO: m_iCurWaveCount must be able to skip empty waves (4, 5), and start related to m_iTakeFrom, intro should be ok (bosses are already skipped)  
 
     // 
     this->__OpenSegment();

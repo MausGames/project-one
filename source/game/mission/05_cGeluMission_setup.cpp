@@ -15,18 +15,42 @@ void cGeluMission::__SetupOwn()
 {
     // ################################################################
     // 
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS})
+    {
+        STAGE_FINISH_AFTER(1.5f)
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN({TAKE_ALWAYS})
+    {
+        g_pEnvironment->ChangeBackground(cVolcanoBackground::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        g_pEnvironment->SetTargetSpeed(4.0f);
+
+        g_pGame->StartIntro();
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN({TAKE_MISSION})
+    {
+        g_pGame->GetInterface()->ShowMission(this);
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN({TAKE_ALWAYS, 0u, 1u, 2u, 3u, 4u, 5u})
     {
         if(STAGE_BEGINNING)
         {
-            g_pEnvironment->ChangeBackground(cVolcanoBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);
 
-            g_pGame->GetInterface()->ShowMission(this);
-            g_pGame->StartIntro();
         }
 
-        if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY))
-            STAGE_FINISH_NOW
+        STAGE_FINISH_PLAY
     });
 
     // ################################################################
@@ -39,7 +63,7 @@ void cGeluMission::__SetupOwn()
     // 3: 20 jumping at bottom (X/0.6f, 0.4frest)
     // ##: jump at player, reflect from side
     // TODO: !!! everyone awakes at the same time       
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 16u)
         {
@@ -197,22 +221,102 @@ void cGeluMission::__SetupOwn()
     });
 
     // ################################################################
+    // <REPLACE>                                                       
+    STAGE_MAIN({TAKE_ALWAYS, 1u})
+    {
+        STAGE_WAVE("ZWEIUNDSECHZIG", {20.0f, 30.0f, 40.0f, 50.0f})
+    });
+
+    // ################################################################
+    // <REPLACE>                                                       
+    STAGE_MAIN({TAKE_ALWAYS, 2u})
+    {
+        STAGE_WAVE("DREIUNDSECHZIG", {20.0f, 30.0f, 40.0f, 50.0f})
+    });
+
+    // ################################################################
     // 
-    //STAGE_MAIN
+    //STAGE_MAIN({TAKE_ALWAYS, 5u})
     //{
     //    STAGE_BOSS(m_Tartarus, {60.0f, 120.0f, 180.0, 240.0f})
     //});
 
     // ################################################################
     // 
-    //STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 6u, 7u, 8u, 9u, 10u, 11u})
+    {
+        if(STAGE_BEGINNING)
+        {
+
+        }
+
+        STAGE_FINISH_PLAY
+    });
+
+    // ################################################################
+    // <REPLACE>                                                       
+    STAGE_MAIN({TAKE_ALWAYS, 6u})
+    {
+        STAGE_WAVE("SECHSUNDSECHZIG", {20.0f, 30.0f, 40.0f, 50.0f})
+    });
+
+    // ################################################################
+    // <REPLACE>                                                       
+    STAGE_MAIN({TAKE_ALWAYS, 7u})
+    {
+        STAGE_WAVE("SIEBENUNDSECHZIG", {20.0f, 30.0f, 40.0f, 50.0f})
+    });
+
+    // ################################################################
+    // <REPLACE>                                                       
+    STAGE_MAIN({TAKE_ALWAYS, 8u})
+    {
+        STAGE_WAVE("ACHTUNDSECHZIG", {20.0f, 30.0f, 40.0f, 50.0f})
+    });
+
+    // ################################################################
+    // 
+    //STAGE_MAIN({TAKE_ALWAYS, 11u})
     //{
     //    STAGE_BOSS(m_Phalaris, {60.0f, 120.0f, 180.0, 240.0f})
     //});
 
     // ################################################################
     // 
-    //STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 12u, 13u, 14u, 15u, 16u, 17u})
+    {
+        if(STAGE_BEGINNING)
+        {
+
+        }
+
+        STAGE_FINISH_PLAY
+    });
+
+    // ################################################################
+    // <REPLACE>                                                       
+    STAGE_MAIN({TAKE_ALWAYS, 12u})
+    {
+        STAGE_WAVE("EINUNDSIEBZIG", {20.0f, 30.0f, 40.0f, 50.0f})
+    });
+
+    // ################################################################
+    // <REPLACE>                                                       
+    STAGE_MAIN({TAKE_ALWAYS, 13u})
+    {
+        STAGE_WAVE("ZWEIUNDSIEBZIG", {20.0f, 30.0f, 40.0f, 50.0f})
+    });
+
+    // ################################################################
+    // <REPLACE>                                                       
+    STAGE_MAIN({TAKE_ALWAYS, 14u})
+    {
+        STAGE_WAVE("DREIUNDSIEBZIG", {20.0f, 30.0f, 40.0f, 50.0f})
+    });
+
+    // ################################################################
+    // 
+    //STAGE_MAIN({TAKE_ALWAYS, 17u})
     //{
     //    STAGE_BOSS(m_Chol, {60.0f, 120.0f, 180.0, 240.0f})
     //});

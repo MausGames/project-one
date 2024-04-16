@@ -15,18 +15,14 @@ void cErrorMission::__SetupOwn()
 {
     // ################################################################
     // 
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS})
     {
         if(STAGE_BEGINNING)
         {
-            g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);
-
-            g_pGame->GetInterface()->ShowMission(this);
             g_pGame->StartIntro();
         }
 
-        if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY))
-            STAGE_FINISH_NOW
+        STAGE_FINISH_PLAY
     });
 
     // ################################################################
@@ -35,7 +31,7 @@ void cErrorMission::__SetupOwn()
     /*
     // ################################################################
     // template
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS})
     {
         STAGE_ADD_PATH(pPath1)
         {
@@ -85,7 +81,7 @@ void cErrorMission::__SetupOwn()
     // fixed position  
     // position based on player position   
     // snake like enemy-group  
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS})
     {
         STAGE_ADD_PATH(pPath1)
         {
@@ -230,7 +226,7 @@ void cErrorMission::__SetupOwn()
     // junks begin to attack   
     // destroy junks at end   
     STAGE_START_HERE
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS})
     {
         //STAGE_ADD_PATH(pPath1)
         //{
@@ -408,7 +404,7 @@ void cErrorMission::__SetupOwn()
     // enemies survive invincible
     // - all: delay attack, to get players accustomed
     // FAILURE 
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS})
     {//bewegung entfernen, zu ähnlich wie 1, links rechts kreuzen                                                                               
         STAGE_ADD_PATH(pPath1)
         {
@@ -555,7 +551,7 @@ void cErrorMission::__SetupOwn()
 
     // ################################################################
     // bending away from bullets 
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS})
     {
         //STAGE_ADD_PATH(pPath1)
         //{
@@ -611,7 +607,7 @@ void cErrorMission::__SetupOwn()
 
     // ################################################################
     // gets moved by shooting 
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS})
     {
         STAGE_ADD_SQUAD(pSquad1, cCinderEnemy, 1u)
         {
@@ -665,7 +661,7 @@ void cErrorMission::__SetupOwn()
 
     // ################################################################
     // laser rows from both axis 
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS})
     {
         STAGE_ADD_PATH(pPath1)
         {
@@ -744,7 +740,7 @@ void cErrorMission::__SetupOwn()
 
     // ################################################################
     // enemy leaves damaging area behind on death 
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS})
     {
         STAGE_ADD_PATH(pPath1)
         {
@@ -782,7 +778,7 @@ void cErrorMission::__SetupOwn()
 
     // ################################################################
     // laying mines in path 
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS})
     {
         STAGE_ADD_SQUAD(pSquad1, cMinerEnemy, 6u)
         {
@@ -854,7 +850,7 @@ void cErrorMission::__SetupOwn()
 
     // ################################################################
     // wave-like movement with lasers 
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS})
     {
         STAGE_ADD_PATH(pPath1)
         {
@@ -905,7 +901,7 @@ void cErrorMission::__SetupOwn()
 
     // ################################################################
     // bullet-lines from the side 
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS})
     {
         STAGE_ADD_PATH(pPath1)
         {
@@ -957,7 +953,7 @@ void cErrorMission::__SetupOwn()
 
     // ################################################################
     // move to side when crossing player (Ikaruga) 
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS})
     {
         STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 6u)
         {
@@ -1006,7 +1002,7 @@ void cErrorMission::__SetupOwn()
 
     // ################################################################
     // main-enemy with surrounding sub-enemies 
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS})
     {
         STAGE_ADD_SQUAD(pSquad1, cWarriorEnemy, 1u)
         {
@@ -1065,7 +1061,7 @@ void cErrorMission::__SetupOwn()
 
     // ################################################################
     // shotting axis-aligned from all sides
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS})
     {
         STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 7u)
         {
@@ -1148,7 +1144,7 @@ void cErrorMission::__SetupOwn()
 
     // ################################################################
     // invincible enemy blocking path
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS})
     {
         STAGE_ADD_PATH(pPath1)
         {
@@ -1248,7 +1244,7 @@ void cErrorMission::__SetupOwn()
 
     // ################################################################
     // side-attacking enemy lines
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS})
     {
         STAGE_ADD_PATH(pPath1)
         {
@@ -1296,7 +1292,7 @@ void cErrorMission::__SetupOwn()
 
     // ################################################################
     // bullet attack explodes on border
-    STAGE_MAIN                         
+    STAGE_MAIN({TAKE_ALWAYS})                         
     {
         STAGE_ADD_PATH(pPath1)
         {
@@ -1380,7 +1376,7 @@ void UnusedWaves()
 {
     // ################################################################
     // turning and constantly shooting enemy in center 
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS})
     {
         STAGE_ADD_SQUAD(pSquad1, cStarEnemy, 3u)
         {
@@ -1430,7 +1426,7 @@ void UnusedWaves()
 
     // ################################################################
     // infinity flying enemy shooting on teleport
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS})
     {
         STAGE_ADD_SQUAD(pSquad1, cArrowEnemy, 3u)
         {
@@ -1481,7 +1477,7 @@ void UnusedWaves()
 
     // ################################################################
     // infinity flying enemy shooting from his side (TODO: Zero Ranger effect)  
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS})
     {
         STAGE_ADD_SQUAD(pSquad1, cArrowEnemy, 3u)
         {
@@ -1531,7 +1527,7 @@ void UnusedWaves()
 
     // ################################################################
     // two side-shooting caterpillars winding down
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS})
     {
         STAGE_ADD_PATH(pPath1)
         {
@@ -1592,7 +1588,7 @@ void UnusedWaves()
 
     // ################################################################
     // split by bullets into four areas 
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS})
     {
         STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 20u)
         {
@@ -1660,7 +1656,7 @@ void UnusedWaves()
 
     // ################################################################
     // split by bullets into nine areas 
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS})
     {
         STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 20u)
         {
@@ -1734,7 +1730,7 @@ void UnusedWaves()
 
     // ################################################################
     // move to last player location 
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS})
     {
         STAGE_ADD_SQUAD(pSquad1, cArrowEnemy, 1u)
         {

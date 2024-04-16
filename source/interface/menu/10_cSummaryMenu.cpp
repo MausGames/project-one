@@ -328,7 +328,7 @@ void cSummaryMenu::Move()
 
 // ****************************************************************
 // 
-void cSummaryMenu::ShowNormal()
+void cSummaryMenu::ShowMission()
 {
     ASSERT(STATIC_ISVALID(g_pGame))
 
@@ -414,6 +414,16 @@ void cSummaryMenu::ShowNormal()
     // 
     this->SetAlpha(0.0f);
     this->ChangeSurface(g_pGame->GetCoop() ? SURFACE_SUMMARY_COOP : SURFACE_SUMMARY_SOLO, 0.0f);
+}
+
+
+// ****************************************************************
+// 
+void cSummaryMenu::ShowSegment()
+{
+    ASSERT(STATIC_ISVALID(g_pGame))
+
+
 }
 
 

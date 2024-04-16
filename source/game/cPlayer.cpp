@@ -62,13 +62,15 @@ cPlayer::cPlayer()noexcept
     this->ActivateDarkShading();
 
     // 
-    m_Range.DefineModel("object_dot.md3");
-    m_Range.SetSize    (coreVector3(1.0f,1.0f,1.0f) * PLAYER_COLLISION_MIN);
+    m_Dot.DefineModel("object_dot.md3");
+    m_Dot.SetSize    (coreVector3(1.0f,1.0f,1.0f) * PLAYER_COLLISION_MIN);
 
     // 
-    m_Dot.DefineModel  ("object_sphere.md3");
-    m_Dot.DefineTexture(0u, "default_white.png");
-    m_Dot.DefineProgram("effect_energy_flat_spheric_program");
+    m_Range.DefineModel  ("object_sphere.md3");
+    m_Range.DefineTexture(0u, "default_white.png");
+    m_Range.DefineProgram("effect_energy_flat_spheric_program");
+    m_Range.SetSize      (coreVector3(1.0f,1.0f,1.0f) * 0.55f);
+    m_Range.SetColor4    (coreVector4(COLOR_ENERGY_RED * 0.7f, 1.0f));
 
     // 
     m_Wind.DefineModel  ("object_sphere.md3");
@@ -227,8 +229,8 @@ void cPlayer::RenderAfter()
         m_Wind  .Render();
 
         // 
-        //g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Dot);
-        //m_Dot.Render();
+        //g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Range);
+        //m_Range.Render();
     }
 }
 
@@ -270,24 +272,10 @@ void cPlayer::Move()
                 if(m_fRollTime <= 0.0f) this->StartRolling(m_pInput->vMove);
         }
 
-        // 
-        if(m_fRollTime >= 1.0f) this->EndRolling();
-
-        // 
-        m_fRollTime.Update(this->IsRolling() ? PLAYER_ROLL_SPEED : -PLAYER_ROLL_COOLDOWN);
-        m_fRollTime = CLAMP(m_fRollTime, 0.0f, 1.0f);
-
         if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
         {
             // move the ship
-            vNewPos += m_pInput->vMove * (Core::System->GetTime() * this->CalcMoveSpeed());
-
-            // apply external forces
-            if(!m_vForce.IsNull())
-            {
-                vNewPos  += m_vForce * Core::System->GetTime();
-                m_vForce *= FrictionFactor(8.0f);
-            }
+            vNewPos += (m_pInput->vMove * this->CalcMoveSpeed() + m_vForce) * Core::System->GetTime();
 
             // restrict movement to the foreground area
                  if(vNewPos.x < m_vArea.x) {vNewPos.x = m_vArea.x; m_vForce.x =  ABS(m_vForce.x);}
@@ -299,6 +287,16 @@ void cPlayer::Move()
             const coreVector2 vDiff = (vNewPos - this->GetPosition().xy()) * RCP(Core::System->GetTime() * FRAMERATE_MIN + CORE_MATH_PRECISION);
             vNewOri = coreVector3(CLAMP(vDiff.x, -0.6f, 0.6f), CLAMP(vDiff.y, -0.6f, 0.6f), 1.0f).NormalizedUnsafe();
         }
+
+        // 
+        if(m_fRollTime >= 1.0f) this->EndRolling();
+
+        // 
+        m_fRollTime.Update(this->IsRolling() ? PLAYER_ROLL_SPEED : -PLAYER_ROLL_COOLDOWN);
+        m_fRollTime = CLAMP(m_fRollTime, 0.0f, 1.0f);
+
+        // 
+        m_vForce *= FrictionFactor(8.0f);
 
         if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_ALL))
         {
@@ -322,6 +320,10 @@ void cPlayer::Move()
             this->SetCollisionModifier((coreVector3(1.0f,1.0f,1.0f) * fRadius) / this->GetModel()->GetBoundingRange());
         }
 
+        // 
+        m_fAnimation.UpdateMod(1.0f, 20.0f);
+        this->SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.25f));
+
         // move the 3d-object
         this->coreObject3D::Move();
 
@@ -333,27 +335,12 @@ void cPlayer::Move()
         }
 
         // 
-        m_fAnimation.UpdateMod(1.0f, 20.0f);
-        this->SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.25f));
+        m_Dot.SetPosition(this->GetPosition());
+        m_Dot.Move();
 
         // 
         m_Range.SetPosition(this->GetPosition());
         m_Range.Move();
-
-        
-        if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE)) m_Dot.SetAlpha(MIN(m_Dot.GetAlpha() + 4.0f*Core::System->GetTime(), 1.0f));
-                                                              else m_Dot.SetAlpha(MAX(m_Dot.GetAlpha() - 4.0f*Core::System->GetTime(), 0.0f));
-        
-        m_Dot.SetColor3    (COLOR_ENERGY_YELLOW * 0.45f * (1.0f + 0.2f * SIN(8.0f*PI * coreFloat(Core::System->GetTotalTime()))));
-        //m_Dot.SetColor3    (/*coreVector3(1.0f,1.0f,1.0f)*/COLOR_ENERGY_PURPLE * 0.85f * (1.0f + 0.25f * SIN(8.0f*PI * coreFloat(Core::System->GetTotalTime()))));
-        //m_Dot.SetColor3    (/*coreVector3(1.0f,1.0f,1.0f)*/COLOR_ENERGY_BLUE * 0.85f * (1.0f + 0.25f * SIN(8.0f*PI * coreFloat(Core::System->GetTotalTime()))));
-        //m_Dot.SetColor3    (coreVector3(1.0f,1.0f,1.0f) * 0.45f * (1.0f + 0.2f * SIN(8.0f*PI * coreFloat(Core::System->GetTotalTime()))));
-        
-
-        // 
-        m_Dot.SetPosition(this->GetPosition());
-        m_Dot.SetSize    (coreVector3(1.0f,1.0f,1.0f) * PLAYER_DOT_SIZE * m_Dot.GetAlpha()       * 1.1f);
-        m_Dot.Move();
 
         if(m_Wind.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
         {
@@ -778,6 +765,26 @@ void cPlayer::UpdateExhaust(const coreFloat fStrength)
 
 // ****************************************************************
 // 
+coreVector2 cPlayer::CalcMove()const
+{
+    if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
+    {
+        // move the ship
+        coreVector2 vNewPos = this->GetPosition().xy() + (m_pInput->vMove * this->CalcMoveSpeed() + m_vForce) * Core::System->GetTime();
+
+        // restrict movement to the foreground area
+        vNewPos.x = CLAMP(vNewPos.x, m_vArea.x, m_vArea.z);
+        vNewPos.y = CLAMP(vNewPos.y, m_vArea.y, m_vArea.w);
+
+        return vNewPos - this->GetPosition().xy();
+    }
+
+    return coreVector2(0.0f,0.0f);
+}
+
+
+// ****************************************************************
+// 
 coreFloat cPlayer::CalcMoveSpeed()const
 {
     // 
@@ -806,7 +813,7 @@ coreBool cPlayer::__TestCollisionPrecise(const coreObject3D* pObject, coreVector
     ASSERT(pObject && pvIntersection && pbFirstHit)
 
     // 
-    if(Core::Manager::Object->TestCollision(&m_Range, pObject, pvIntersection))
+    if(Core::Manager::Object->TestCollision(&m_Dot, pObject, pvIntersection))
     {
         // 
         (*pvIntersection) = this->GetPosition();

@@ -15,7 +15,7 @@ void cViridoMission::__SetupOwn()
 {
     // ################################################################
     // 
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_MISSION})
     {
         g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
         {
@@ -27,33 +27,42 @@ void cViridoMission::__SetupOwn()
 
     // ################################################################
     // 
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS})
     {
         STAGE_FINISH_AFTER(1.5f)
     });
 
     // ################################################################
     // 
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS})
+    {
+        g_pEnvironment->ChangeBackground(cGrassBackground::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
+        g_pEnvironment->SetTargetSpeed(4.0f);
+
+        g_pGame->StartIntro();
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN({TAKE_MISSION})
+    {
+        g_pGame->GetInterface()->ShowMission(this);
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN({TAKE_ALWAYS, 0u, 1u, 2u, 3u, 4u, 5u})
     {
         if(STAGE_BEGINNING)
         {
-            g_pEnvironment->ChangeBackground(cGrassBackground::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,-1.0f));
-            g_pEnvironment->SetTargetSpeed(4.0f);
 
-            //g_pEnvironment->GetBackground()->GetOutdoor()->LerpHeightNow(0.4583f, -13.83f);
-            //g_pEnvironment->GetBackground()->SetGroundDensity(0u, 0.0f);
-            //g_pEnvironment->GetBackground()->SetGroundDensity(1u, 0.0f);
-            //g_pEnvironment->GetBackground()->SetGroundDensity(2u, 0.0f);
-            //g_pEnvironment->GetBackground()->SetDecalDensity (0u, 0.0f);
-            //g_pEnvironment->GetBackground()->SetAirDensity   (0u, 0.0f);
-
-            g_pGame->GetInterface()->ShowMission(this);
-            g_pGame->StartIntro();
         }
 
-        if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY))
-            STAGE_FINISH_NOW
+        STAGE_FINISH_PLAY
     });
 
     // ################################################################
@@ -68,7 +77,7 @@ void cViridoMission::__SetupOwn()
     // street middle
     // 3er links rechts ???
     // 1er links rechts
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         STAGE_ADD_PATH(pPath1)
         {
@@ -149,7 +158,7 @@ void cViridoMission::__SetupOwn()
     // top, bottom, side groups creating bullet carpet
     // - all: bullet patterns provide a lot of safe space, so players have time to think
     // - 2: push players consistently away into safe space, to reduce confusion when trying to fly into or under enemies
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, u})
     {
         STAGE_ADD_PATH(pPath1)
         {
@@ -231,7 +240,7 @@ void cViridoMission::__SetupOwn()
     // - 5: arranged to allow only one kill per turn, and to improve coop gameplay
     // TODO: barriers have cut-off outline in maze-group   
     // TODO: bullets (even single, like pulse) should be reflected with offset to highlight reflection (not 180 degree)
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         STAGE_ADD_PATH(pPath1)
         {
@@ -359,7 +368,7 @@ void cViridoMission::__SetupOwn()
 
     // ################################################################
     // reset all barriers
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         for(coreUintW i = 0u; i < VIRIDO_BARRIERS; ++i)
             this->DisableBarrier(i, false);
@@ -378,7 +387,7 @@ void cViridoMission::__SetupOwn()
     // no intro-crossing in first two patterns 
     // TODO: fix ASSERT for getting the laser  
     // TODO: purple helper visible at border of one laser
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         STAGE_ADD_SQUAD(pSquad1, cStarEnemy, 15u)
         {
@@ -512,7 +521,7 @@ void cViridoMission::__SetupOwn()
 
     // ################################################################
     // reset all lasers
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         for(coreUintW i = 0u; i < VIRIDO_LASERS; ++i)
             this->DisableLaser(i, false);
@@ -527,7 +536,7 @@ void cViridoMission::__SetupOwn()
     // - all: arrows spawn with offset, to reduce accidental killing them before getting visible
     // TODO: too similar to meteor wave
     // TODO: spawn small enemies from all sides
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         STAGE_ADD_PATH(pPath1)
         {
@@ -635,7 +644,7 @@ void cViridoMission::__SetupOwn()
     // enemies not visible are not allowed to shoot (especially in sub 3)
     // in coop: wenn spieler stirbt soll ziel-spieler gewechselt werden, aber nicht bei wiederbelebung
     // TODO: flying directly between two enemies can cause infinity push between two enemies (especially in sub-phase 4)
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         STAGE_ADD_SQUAD(pSquad1, cWarriorEnemy, 20u)
         {
@@ -736,14 +745,14 @@ void cViridoMission::__SetupOwn()
 
     // ################################################################
     // boss 1
-    //STAGE_MAIN
+    //STAGE_MAIN({TAKE_ALWAYS, 5u})
     //{
     //    STAGE_BOSS(m_Dharuk, {60.0f, 120.0f, 180.0, 240.0f})
     //});
 
     // ################################################################
     // 
-    //STAGE_MAIN
+    //STAGE_MAIN({TAKE_MISSION, 5u})
     //{
     //    STAGE_GET_START(1u)
     //        STAGE_GET_FLOAT(fOldAngle, fOldAngle = g_pEnvironment->GetDirection().Angle())
@@ -755,11 +764,23 @@ void cViridoMission::__SetupOwn()
     //});
 
     // ################################################################
+    // 
+    STAGE_MAIN({TAKE_ALWAYS, 6u, 7u, 8u, 9u, 10u, 11u})
+    {
+        if(STAGE_BEGINNING)
+        {
+
+        }
+
+        STAGE_FINISH_PLAY
+    });
+
+    // ################################################################
     // enemy has weakpoint which he keeps away from player
     // - all: miners rotation start against fly direction, to make evading the initial attack easier
     // - 2: cinders in pair always rotate together away from player when one is shot from outer direction, to prevent ping-pong effect
     // TODO: miner should be grey ?   
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 6u})
     {
         STAGE_ADD_PATH(pPath1)
         {
@@ -865,8 +886,8 @@ void cViridoMission::__SetupOwn()
                 const coreVector2 vParentDir = ((pEnemy->GetPosition().xy() + pParent->GetMove()) - pParent->GetPosition().xy()).Normalized();
 
                 const coreFloat fAngleFrom = vParentDir.Angle();
-                const coreFloat fAngleTo   =  (i == 3u || i == 5u || i == 7u || i == 9u) ? (afTarget[i-1u] + (0.5f*PI)) : afTarget[i];
-                const coreFloat fShift     = ((i == 3u || i == 5u || i == 7u || i == 9u) ?  afSign  [i-1u]              : afSign  [i]) * ABS(AngleDiff(fAngleTo, fAngleFrom));
+                const coreFloat fAngleTo   = ((i == 3u || i == 5u || i == 7u || i == 9u) ? (afTarget[i-1u] + (0.5f*PI)) : afTarget[i]);
+                const coreFloat fShift     = ((i == 3u || i == 5u || i == 7u || i == 9u) ? (afSign  [i-1u])             : afSign  [i]) * ABS(AngleDiff(fAngleTo, fAngleFrom));
 
                 const coreVector2 vDir = coreVector2::Direction(STAGE_TAKEOFF ? fAngleTo : (fAngleFrom + AngleDiff(fAngleTo + fShift, fAngleFrom) * 2.5f * Core::System->GetTime()));
                 const coreVector2 vPos = pParent->GetPosition().xy() + vDir * 13.0f;
@@ -921,7 +942,7 @@ void cViridoMission::__SetupOwn()
     // - all: number of bullet waves is uneven, to create a better pattern visually
     // - all: number of enemies is uneven, to let them cross the center alternately, but still in equal distance
     // TODO: slower with size
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 7u})
     {
         STAGE_ADD_SQUAD(pSquad1, cStarEnemy, 9u)
         {
@@ -996,7 +1017,7 @@ void cViridoMission::__SetupOwn()
     // bit-matrix or clearing on contact is bad 
     // start direction against whirl direction to not clutter the bullets and show the whirl effect   
     // TODO: handle dodge and enemy inside   
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 8u})
     {
         STAGE_ADD_SQUAD(pSquad1, cMinerEnemy, 16u)
         {
@@ -1116,7 +1137,7 @@ void cViridoMission::__SetupOwn()
     // - 1,2: enemy path is not too wide, to not slow down bullets immediately after shooting
     // TODO: enemy or golden ball (1-N) hides in blue balls, to attack for badge
     // TODO: blue helper in one of the bullets
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 9u})
     {
         STAGE_ADD_PATH(pPath1)
         {
@@ -1235,7 +1256,7 @@ void cViridoMission::__SetupOwn()
     // - all: target shadow is essential, to communicate direct targeting in third sub-stage
     // - 1,2: bullet patterns provide a lot of safe space, as jumping into the camera may overwhelm the player
     // TODO: check for and fix shadow artifacts, when jumping behind near clipping plane of shadow viewport (maybe fade out near plane)
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 10u})
     {
         STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 20u)
         {
@@ -1384,7 +1405,7 @@ void cViridoMission::__SetupOwn()
 
     // ################################################################
     // reset all shadows
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 10u})
     {
         for(coreUintW i = 0u; i < VIRIDO_SHADOWS; ++i)
             this->DisableShadow(i, false);
@@ -1394,7 +1415,7 @@ void cViridoMission::__SetupOwn()
 
     // ################################################################
     // boss 2
-    //STAGE_MAIN
+    //STAGE_MAIN({TAKE_ALWAYS, 11u})
     //{
     //    if(STAGE_BEGINNING)
     //    {
@@ -1405,13 +1426,25 @@ void cViridoMission::__SetupOwn()
     //});
 
     // ################################################################
+    // 
+    STAGE_MAIN({TAKE_ALWAYS, 12u, 13u, 14u, 15u, 16u, 17u})
+    {
+        if(STAGE_BEGINNING)
+        {
+
+        }
+
+        STAGE_FINISH_PLAY
+    });
+
+    // ################################################################
     // enemy charges straight forward on death (r-type fish)
     // - 2: should start one same spot an opposite of first group, to reduce accidental collision (which is more likely with 2x2)  
     // no passive attack, not impact attack, no bounce, because it's too overwhelming together with the green ball  
     // fire speed fast enough to create visual line  
     // 2x2 instead of 1x4, to force player keeping fire at the same position while an enemy is already flying at them  
     // TODO: give central effect to highlight damaging touch   
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 12u})
     {
         STAGE_ADD_PATH(pPath1)
         {
@@ -1513,7 +1546,7 @@ void cViridoMission::__SetupOwn()
     //     on first wave, one of the up-flying enemies need to fly first with some delay, to show the bullet-attack
     // coop: player not receiving two groups in second sub-wave needs to receive two groups in first sub-wave
     // TODO: completely disable player-enemy collision, just in case
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 13u})
     {
         STAGE_ADD_SQUAD(pSquad1, cStarEnemy, 100u)
         {
@@ -1651,7 +1684,7 @@ void cViridoMission::__SetupOwn()
     // in 2 lines should move over the center 
     // in 1 enemies should not reach bottom 
     // in 1 and 2 back of enemies should not be reachable without shooting at them first 
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 14u})
     {
         STAGE_ADD_PATH(pPath1)
         {
@@ -1776,7 +1809,7 @@ void cViridoMission::__SetupOwn()
     // doppelgruppe nur breites pattern um ausweichen zu erleichtern 
     // reihenfolge am weitesten entfernt 
     // TODO: show 3142 group at start, matrix of enemies
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 15u})
     {
         STAGE_ADD_PATH(pPath1)
         {
@@ -1874,7 +1907,7 @@ void cViridoMission::__SetupOwn()
     // 3: pattern should not have too long straight lines, as this makes it too easy, and should have no corners, as this creates placement artifacts
     // 1: diamond shape to not be able to kill 2 groups at the same time
     // TODO: maybe just a circle shape in last sub-stage (or double-circle)
-    STAGE_MAIN
+    STAGE_MAIN({TAKE_ALWAYS, 16u})
     {
         STAGE_ADD_PATH(pPath1)
         {
@@ -2116,18 +2149,18 @@ void cViridoMission::__SetupOwn()
     });
 
     // ################################################################
-    // end
-    STAGE_MAIN
-    {
-        STAGE_FINISH_AFTER(2.0f)
-    });
-
-    // ################################################################
     // boss 3
-    //STAGE_MAIN
+    //STAGE_MAIN({TAKE_ALWAYS, 17u})
     //{
     //    STAGE_BOSS(m_Vaus, {60.0f, 120.0f, 180.0, 240.0f})
     //});
+
+    // ################################################################
+    // end
+    STAGE_MAIN({TAKE_MISSION})
+    {
+        STAGE_FINISH_AFTER(2.0f)
+    });
 
     // ################################################################
     // ################################################################
