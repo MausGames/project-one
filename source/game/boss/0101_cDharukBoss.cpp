@@ -8,7 +8,7 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
-// TODO 1: boomerangs: can fly in sinus wave from left to right, can fly in a circle (either as row, or as column), can fly as star-shape back and forth in the center with delay
+// TODO 5: boomerangs: can fly in sinus wave from left to right, can fly in a circle (either as row, or as column), can fly as star-shape back and forth in the center with delay
 
 
 // ****************************************************************
@@ -269,7 +269,7 @@ void cDharukBoss::__MoveOwn()
 
     // ################################################################
     // 
-    else if(m_iPhase == 10u || m_iPhase == 11u)
+    else if((m_iPhase == 10u) || (m_iPhase == 11u))
     {
         PHASE_CONTROL_TIMER(0u, 0.2f, LERP_SMOOTH)
         {

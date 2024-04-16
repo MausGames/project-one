@@ -366,7 +366,7 @@ void cMenu::Move()
             if(m_MainMenu.GetStatus() == 1)
             {
                 // 
-                m_GameMenu.ChangeSurface(g_bDemoVersion ? SURFACE_GAME_DEMO : (g_pSave->GetHeader().oProgress.bFirstPlay ? SURFACE_GAME_ARMORY : SURFACE_GAME_OPTION), 0.0f);
+                m_GameMenu.ChangeSurface(g_bDemoVersion ? SURFACE_GAME_DEMO : (g_pSave->GetHeader().oProgress.bFirstPlay ? SURFACE_GAME_FIRST : SURFACE_GAME_SEGMENT), 0.0f);
                 m_GameMenu.LoadValues();
                 m_GameMenu.ResetNavigator();
 
@@ -392,8 +392,9 @@ void cMenu::Move()
             else if(m_MainMenu.GetStatus() == 4)
             {
                 // 
-                m_ExtraMenu.ChangeSurface(SURFACE_EXTRA_PROGRESS, 0.0f);
+                m_ExtraMenu.ChangeSurface(SURFACE_EXTRA_STATS, 0.0f);
                 m_ExtraMenu.LoadMissions();
+                m_ExtraMenu.ResetNavigator();
 
                 // switch to extra menu
                 this->ShiftSurface(this, SURFACE_EXTRA, 3.0f, 1u);
@@ -431,6 +432,12 @@ void cMenu::Move()
 
                 // 
                 this->__StartGame();
+
+                // 
+                if((g_pGame->GetKind() == GAME_KIND_SEGMENT) && (g_pSave->GetHeader().oProgress.aiAdvance[g_pGame->GetCurMissionIndex()] > 1))
+                {
+                    g_pGame->DisableMissionName();   // only when starting single/first segment from menu, when first segment of mission was already finished
+                }
 
                 // 
                 g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_START);
@@ -570,10 +577,26 @@ void cMenu::Move()
             else if(m_SummaryMenu.GetStatus() == 3)
             {
                 // 
+                m_BridgeMenu.UseNext();
+
+                // 
+                this->ShiftSurface(this, SURFACE_BRIDGE, 3.0f, 0u);
+            }
+            else if(m_SummaryMenu.GetStatus() == 4)
+            {
+                // 
                 m_BridgeMenu.UseRestart(false);
 
                 // 
                 this->ShiftSurface(this, SURFACE_BRIDGE, 3.0f, 0u);
+            }
+            else if(m_SummaryMenu.GetStatus() == 5)
+            {
+                // 
+                m_BridgeMenu.ReturnMenu(SURFACE_TITLE, false, true);
+
+                // 
+                this->ChangeSurface(SURFACE_BRIDGE, 0.0f);
             }
         }
         break;
@@ -590,11 +613,22 @@ void cMenu::Move()
             }
             else if(m_DefeatMenu.GetStatus() == 2)
             {
-                // 
-                m_BridgeMenu.ReturnMenu(SURFACE_TITLE, false, true);
+                if(g_pGame->GetKind() == GAME_KIND_ALL)
+                {
+                    // 
+                    m_SummaryMenu.ShowArcade();
 
-                // 
-                this->ChangeSurface(SURFACE_BRIDGE, 0.0f);
+                    // 
+                    this->ChangeSurface(SURFACE_SUMMARY, 0.0f);
+                }
+                else
+                {
+                    // 
+                    m_BridgeMenu.ReturnMenu(SURFACE_TITLE, false, true);
+
+                    // 
+                    this->ChangeSurface(SURFACE_BRIDGE, 0.0f);
+                }
             }
         }
         break;
@@ -641,13 +675,28 @@ void cMenu::Move()
                 this->ChangeSurface(SURFACE_EMPTY, 0.0f);
 
                 // 
+                m_GameMenu.SelectNext();
+
+                // 
+                this->__EndGame();
+                this->__StartGame();
+
+                // 
+                g_pGame->UseNext();
+            }
+            else if(m_BridgeMenu.GetStatus() == 5)
+            {
+                // 
+                this->ChangeSurface(SURFACE_EMPTY, 0.0f);
+
+                // 
                 this->__EndGame();
                 this->__StartGame();
 
                 // 
                 g_pGame->UseRestart();
             }
-            else if(m_BridgeMenu.GetStatus() == 5)
+            else if(m_BridgeMenu.GetStatus() == 6)
             {
                 // 
                 this->ShiftSurface(this, SURFACE_MAIN, 3.0f, 0u);
@@ -668,11 +717,22 @@ void cMenu::Move()
                 }
                 else
                 {
-                    // 
-                    m_BridgeMenu.ReturnMenu(SURFACE_TITLE, false, true);
+                    if(g_pGame->GetKind() == GAME_KIND_ALL)
+                    {
+                        // 
+                        m_SummaryMenu.ShowArcade();
 
-                    // 
-                    this->ChangeSurface(SURFACE_BRIDGE, 0.0f);
+                        // 
+                        this->ChangeSurface(SURFACE_SUMMARY, 0.0f);
+                    }
+                    else
+                    {
+                        // 
+                        m_BridgeMenu.ReturnMenu(SURFACE_TITLE, false, true);
+
+                        // 
+                        this->ChangeSurface(SURFACE_BRIDGE, 0.0f);
+                    }
                 }
             }
         }
@@ -768,6 +828,17 @@ coreBool cMenu::IsPausedWithStep()
 {
     if(!this->IsPaused() || Core::Manager::Resource->IsLoading()) this->InvokePauseStep();
     return (m_iPauseFrame + 1u < Core::System->GetCurFrame());
+}
+
+
+// ****************************************************************
+// 
+coreBool cMenu::NeedsCursor()const
+{
+    return (this->GetCurSurface() != SURFACE_EMPTY)  &&
+           (this->GetCurSurface() != SURFACE_SUMMARY || (this->GetCurSurface() == SURFACE_SUMMARY && (m_SummaryMenu.GetCurSurface() == SURFACE_SUMMARY_SEGMENT_SOLO || m_SummaryMenu.GetCurSurface() == SURFACE_SUMMARY_SEGMENT_COOP))) &&
+           (this->GetCurSurface() != SURFACE_DEFEAT) &&
+           (this->GetCurSurface() != SURFACE_BRIDGE);
 }
 
 
@@ -1064,6 +1135,7 @@ void cMenu::UpdateSwitchBox(cGuiSwitchBox* OUTPUT pSwitchBox, const coreBool bSo
 
         // 
         pArrow              ->SetAlpha (pSwitchBox->GetAlpha() * fAlpha);
+        pArrow              ->SetColor3(COLOR_MENU_WHITE       * fLight);
         pArrow->GetCaption()->SetColor3(COLOR_MENU_WHITE       * fLight);
     };
 
@@ -1149,7 +1221,7 @@ void cMenu::ApplyMedalTexture(cGuiObject* OUTPUT pObject, const coreUint8 iMedal
     pObject->SetTexOffset(coreVector2(I_TO_F(iIndex % 4u), I_TO_F(iIndex / 4u)) * 0.25f);
 
     // 
-    pObject->SetEnabled((bValid || !bHide) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+    pObject->SetEnabled((bValid || !bHide || DEFINED(_CORE_DEBUG_)) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
     pObject->SetColor3 (coreVector3(1.0f,1.0f,1.0f) * (bValid ? 1.0f : 0.5f));
 }
 
@@ -1234,8 +1306,14 @@ void cMenu::__StartGame()
 
 #if !defined(_CORE_EMSCRIPTEN_)
     // 
-    if(!g_bDemoVersion) g_pReplay->StartRecording();
+    //if(!g_bDemoVersion) g_pReplay->StartRecording();
 #endif
+
+    // 
+    if(iKind == GAME_KIND_ALL)
+    {
+        g_pSave->EditLocalStatsArcade()->iCountStart += 1u;
+    }
 }
 
 
@@ -1260,7 +1338,11 @@ void cMenu::__EndGame()
     if(g_pSave->GetHeader().oProgress.bFirstPlay && g_pSave->GetHeader().oProgress.aiAdvance[1])
     {
         g_pSave->EditProgress()->bFirstPlay = false;
-        if(!g_bDemoVersion) ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_MAIN_EXTRA)
+        if(!g_bDemoVersion)
+        {
+            ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_MAIN_START)
+            ADD_BIT_EX(g_pSave->EditProgress()->aiNew, NEW_MAIN_EXTRA)
+        }
 
         m_TitleMenu.DeactivateFirstPlay();
         m_MainMenu .DeactivateFirstPlay();

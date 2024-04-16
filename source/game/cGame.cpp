@@ -134,7 +134,7 @@ cGame::~cGame()
     // 
     g_pSave->SaveFile();
     
-    if(g_MusicPlayer.GetCurMusic() != g_MusicPlayer.GetMusicName("menu.ogg"))   // TODO 1: condition for finale in demo
+    if(g_bDemoVersion && (g_MusicPlayer.GetCurMusic() != g_MusicPlayer.GetMusicName("menu.ogg")))   // TODO 1: condition for finale in demo
         g_MusicPlayer.Stop();
     
     m_fMusicVolume = 1.0f;
@@ -767,6 +767,7 @@ void cGame::UseContinue()
     REMOVE_FLAG(m_iStatus, GAME_STATUS_DEFEATED)   // # already removed
     ADD_FLAG   (m_iStatus, GAME_STATUS_CONTINUE)
     ADD_FLAG   (m_iStatus, GAME_STATUS_QUICK)
+    ADD_FLAG   (m_iStatus, GAME_STATUS_NAMELESS)
 
     // 
     ASSERT(m_iContinues)
@@ -794,8 +795,18 @@ void cGame::UseContinue()
 
     // 
     g_pSave->EditGlobalStats      ()                            ->iContinuesUsed += 1u;
+    g_pSave->EditLocalStatsArcade ()                            ->iContinuesUsed += 1u;
     g_pSave->EditLocalStatsMission(iMissionIndex)               ->iContinuesUsed += 1u;
     g_pSave->EditLocalStatsSegment(iMissionIndex, iSegmentIndex)->iContinuesUsed += 1u;
+}
+
+
+// ****************************************************************
+// 
+void cGame::UseNext()
+{
+    // 
+    ADD_FLAG(m_iStatus, GAME_STATUS_QUICK)
 }
 
 
@@ -805,6 +816,15 @@ void cGame::UseRestart()
 {
     // 
     ADD_FLAG(m_iStatus, GAME_STATUS_QUICK)
+    ADD_FLAG(m_iStatus, GAME_STATUS_NAMELESS)
+}
+
+
+// ****************************************************************
+// 
+void cGame::DisableMissionName()
+{
+    ADD_FLAG(m_iStatus, GAME_STATUS_NAMELESS)
 }
 
 
@@ -840,6 +860,7 @@ void cGame::RepairPlayer()
 
         // 
         g_pSave->EditGlobalStats      ()->iRepairsUsed += 1u;
+        g_pSave->EditLocalStatsArcade ()->iRepairsUsed += 1u;
         g_pSave->EditLocalStatsMission()->iRepairsUsed += 1u;
         g_pSave->EditLocalStatsSegment()->iRepairsUsed += 1u;
 
@@ -1064,7 +1085,7 @@ coreBool cGame::__HandleIntro()
         if(Core::Manager::Resource->IsLoading()) return false;   // mission
         REMOVE_FLAG(m_iStatus, GAME_STATUS_LOADING)
     
-        if(!HAS_FLAG(m_iStatus, GAME_STATUS_CONTINUE)) this->FadeMusic(0.7f);
+        if(!HAS_FLAG(m_iStatus, GAME_STATUS_QUICK)) this->FadeMusic(0.7f);
     }
 
     if(HAS_FLAG(m_iStatus, GAME_STATUS_INTRO))
@@ -1131,7 +1152,7 @@ coreBool cGame::__HandleIntro()
             });
 
             // 
-            if(InBetween(0.65f, fOldTime, m_fTimeInOut))
+            if(InBetween(0.65f, fOldTime, m_fTimeInOut) && !g_MusicPlayer.IsPlaying())
             {
                 const coreChar* pcName = m_pCurMission->GetMusicName();
                 if(pcName && pcName[0])
@@ -1405,12 +1426,20 @@ void cGame::__HandleCollisions()
                     // prevent an already killed but immortal enemy from reflecting bullets (in the same frame)
                     if(!pEnemy->ReachedDeath())
                     {
-                        // 
-                        const coreVector2 vDiff = (vIntersection.xy() - pBullet->GetFlyDir() * MAX(pBullet->GetCollisionRadius() * 2.0f, pBullet->GetSpeed() * TIME)) - pEnemy->GetPosition().xy();
-                        pBullet->Reflect(pEnemy, vIntersection.xy(), vDiff.Normalized());
+                        if(pEnemy->HasStatus(ENEMY_STATUS_DEACTIVATE))
+                        {
+                            // 
+                            pBullet->Deactivate(true, vIntersection.xy());
+                        }
+                        else
+                        {
+                            // 
+                            const coreVector2 vDiff = (vIntersection.xy() - pBullet->GetFlyDir() * MAX(pBullet->GetCollisionRadius() * 2.0f, pBullet->GetSpeed() * TIME)) - pEnemy->GetPosition().xy();
+                            pBullet->Reflect(pEnemy, vIntersection.xy(), vDiff.Normalized());
 
-                        // 
-                        this->PlayReflectSound(vIntersection);
+                            // 
+                            this->PlayReflectSound(vIntersection);
+                        }
                     }
                 }
             }

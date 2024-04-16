@@ -12,6 +12,7 @@
 
 // TODO 4: lifetime should be handled in base class
 // TODO 1: fragment sollte in die mitte fliegen wenn zu nah am rand (zeroth, chol)
+// TODO 1: create own energy shader for fragment, to prevent issues should the default shaders change
 
 
 // ****************************************************************

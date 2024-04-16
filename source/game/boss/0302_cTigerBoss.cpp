@@ -38,6 +38,7 @@
 // TODO 1: MAIN: juiciness (move, rota, muzzle, effects)
 
 // TODO 1: rote bullet noch mal überprüfen, da flog ein einzelnes geschoss herum, und nochmal mehrere einzelne einer linie
+// TODO 1: alle phasen nochmal für verbesserungen anschauen
 
 // TODO 5: (mines need to be enemies to allow blinking, combo/chain)
 // TODO 5: (in die stacheln schießen erzeugt effekt (knusprig))
@@ -1459,7 +1460,7 @@ void cTigerBoss::__EnableBeam(const coreVector2 vPosition)
     const coreVector3 vImpact = coreVector3(vPosition, g_pEnvironment->RetrieveSafeHeight(vPosition));
 
     g_pSpecialEffects->MacroExplosionColorBig(vImpact, COLOR_ENERGY_MAGENTA);
-    g_pSpecialEffects->PlaySound(vImpact, 0.8f, 0.8f, SOUND_EFFECT_FIRE_START);
+    g_pSpecialEffects->PlaySound(vImpact, 0.8f, 1.0f, SOUND_EFFECT_FIRE_START);
 }
 
 
@@ -1730,7 +1731,7 @@ void cTigerBoss::__ShootWeapon()
 
 // ****************************************************************
 // 
-void cTigerBoss::__CauseBeamDamage(cPlayer* pTarget)
+void cTigerBoss::__CauseBeamDamage(cPlayer* OUTPUT pTarget)
 {
     const coreVector2 vDiff = this->GetPosition().xy() - m_vBeamPos;
     if(vDiff.LengthSq() < POW2(15.0f))
@@ -1740,7 +1741,7 @@ void cTigerBoss::__CauseBeamDamage(cPlayer* pTarget)
         g_pGame->GetCombatText()->DrawText(Core::Language->GetString("HIT"), this->GetPosition(), COLOR_MENU_MAGENTA);
     }
 
-    g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    g_pGame->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
         if(pPlayer->IsNormal())
         {

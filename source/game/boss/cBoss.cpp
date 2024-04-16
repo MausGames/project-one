@@ -131,6 +131,10 @@ void cBoss::_EndBoss()
         pPlayer->GetScoreTable()->TransferChain();
         pPlayer->GetScoreTable()->ResetOverride();
     });
+
+    // 
+    const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
+    ADD_FLAG(g_pSave->EditProgress()->aiHelper[iMissionIndex], m_iHelperHit)
 }
 
 
@@ -212,6 +216,11 @@ void cBoss::_UpdateBoss()
                             g_pSpecialEffects->CreateSplashDark(pPlayer->GetPosition(), SPECIAL_SPLASH_SMALL);
                         });
                     }
+
+                    g_pSave->EditGlobalStats      ()->iHelperHit += 1u;
+                    g_pSave->EditLocalStatsArcade ()->iHelperHit += 1u;
+                    g_pSave->EditLocalStatsMission()->iHelperHit += 1u;
+                    g_pSave->EditLocalStatsSegment()->iHelperHit += 1u;
                 }
             }
         }

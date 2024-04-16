@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 //*----------------------------------------------------------------------------*//
-//| Project One v0.1.5 (https://www.maus-games.at)                             |//
+//| Project One v0.2.1 (https://www.maus-games.at)                             |//
 //*----------------------------------------------------------------------------*//
 //| Copyright (c) 2010 Martin Mauersics                                        |//
 //|                                                                            |//
@@ -321,6 +321,7 @@ enum eMedal : coreUint8
     MEDAL_TYPE_WAVE = 0u,
     MEDAL_TYPE_BOSS,
     MEDAL_TYPE_MISSION,
+    MEDAL_TYPE_ARCADE = MEDAL_TYPE_MISSION,
     MEDAL_TYPE_MAX
 };
 

@@ -55,6 +55,10 @@
 #define MISSION_WAIT_OUTRO (2.0f)      // 
 #define MISSION_WAIT_PLAY  (6.9f)      // 
 
+#define MISSION_INTRO (0u)
+#define MISSION_ATER  (8u)
+#define MISSION_BASE  (9u)
+
 #define MISSION_SEGMENT_IS_BOSS(i) ((i) >= MISSION_WAVES)
 #define MISSION_BOSS_TO_SEGMENT(i) ((i) +  MISSION_WAVES)
 #define MISSION_WAVE_TO_SEGMENT(i) ((i))
@@ -92,7 +96,7 @@
 #define NEVO_LINES                  (4u)                                              // 
 #define NEVO_BLASTS                 (NEVO_BOMBS)                                      // 
 #define NEVO_BLASTS_RAWS            (NEVO_BLASTS * (NEVO_LINES + 1u))                 // 
-#define NEVO_TILES                  (20u)                                             // 
+#define NEVO_TILES                  (20u)                                             // TODO 1: vielleicht jetzt weniger mit neuem leviathan 
 #define NEVO_TILES_RAWS             (NEVO_TILES)                                      // 
 #define NEVO_ARROWS                 (38u)                                             // 
 #define NEVO_ARROWS_RAWS            (NEVO_ARROWS)                                     // 
@@ -403,9 +407,9 @@ public:
     inline void CollEnemyBullet (cEnemy*  OUTPUT pEnemy,  cBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit) {if(m_nCollEnemyBullet)  m_nCollEnemyBullet (pEnemy,  pBullet, vIntersection, bFirstHit);}
 
     // 
-    template <typename F> inline void SetCollPlayerEnemy (F&& nCollFunc) {if(!m_nCollPlayerEnemy)  m_nCollPlayerEnemy  = nCollFunc;}
-    template <typename F> inline void SetCollPlayerBullet(F&& nCollFunc) {if(!m_nCollPlayerBullet) m_nCollPlayerBullet = nCollFunc;}
-    template <typename F> inline void SetCollEnemyBullet (F&& nCollFunc) {if(!m_nCollEnemyBullet)  m_nCollEnemyBullet  = nCollFunc;}
+    template <typename F> inline void SetCollPlayerEnemy (F&& nCollFunc) {if(!m_nCollPlayerEnemy)  m_nCollPlayerEnemy  = nCollFunc;}   // [](cPlayer* OUTPUT pPlayer, cEnemy*  OUTPUT pEnemy,  const coreVector3 vIntersection, const coreBool bFirstHit) -> void
+    template <typename F> inline void SetCollPlayerBullet(F&& nCollFunc) {if(!m_nCollPlayerBullet) m_nCollPlayerBullet = nCollFunc;}   // [](cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit) -> void
+    template <typename F> inline void SetCollEnemyBullet (F&& nCollFunc) {if(!m_nCollEnemyBullet)  m_nCollEnemyBullet  = nCollFunc;}   // [](cEnemy*  OUTPUT pEnemy,  cBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit) -> void
 
     // 
     inline void ResetCollPlayerEnemy () {m_nCollPlayerEnemy  = NULL;}

@@ -26,16 +26,17 @@
 #define GAME_INTRO_OFFSET   (0.4f)        // 
 #define GAME_INTRO_DURATION (4.1f)        // 
 
-enum eGameStatus : coreUint8
+enum eGameStatus : coreUint16
 {
-    GAME_STATUS_INTRO    = 0x01u,   // 
-    GAME_STATUS_OUTRO    = 0x02u,   // 
-    GAME_STATUS_PLAY     = 0x04u,   // 
-    GAME_STATUS_LOADING  = 0x08u,   // 
-    GAME_STATUS_DEFEATED = 0x10u,   // 
-    GAME_STATUS_CONTINUE = 0x20u,   // 
-    GAME_STATUS_QUICK    = 0x40u,   // 
-    GAME_STATUS_FINISHED = 0x80u    // 
+    GAME_STATUS_INTRO    = 0x0001u,   // 
+    GAME_STATUS_OUTRO    = 0x0002u,   // 
+    GAME_STATUS_PLAY     = 0x0004u,   // 
+    GAME_STATUS_LOADING  = 0x0008u,   // 
+    GAME_STATUS_DEFEATED = 0x0010u,   // 
+    GAME_STATUS_CONTINUE = 0x0020u,   // 
+    GAME_STATUS_QUICK    = 0x0040u,   // 
+    GAME_STATUS_NAMELESS = 0x0080u,   // 
+    GAME_STATUS_FINISHED = 0x0100u    // 
 };
 
 enum eGameOutro : coreUint8
@@ -155,23 +156,24 @@ struct sFragmentData final
 {
     coreUintW   iIndex;    // 
     coreVector2 vOffset;   // 
+    coreVector2 vShift;    // 
     coreVector2 vSize;     // 
     coreVector3 vColor;    // 
 };
 
 static constexpr sFragmentData g_aFragmentData[] =
 {
-    {1u, coreVector2(  0.0f, 1024.0f -  516.0f) / 1024.0f, coreVector2(452.0f,517.0f) / 1024.0f, cCloudBackground  ::Color2 * 0.9f},
-    {7u, coreVector2(378.0f, 1024.0f - 1023.0f) / 1024.0f, coreVector2(648.0f,329.0f) / 1024.0f, cGrassBackground  ::Color2 * 0.9f},
-    {3u, coreVector2(638.0f, 1024.0f -  328.0f) / 1024.0f, coreVector2(388.0f,329.0f) / 1024.0f, cSeaBackground    ::Color2 * 0.9f},
-    {4u, coreVector2(  0.0f, 1024.0f - 1023.0f) / 1024.0f, coreVector2(372.0f,370.0f) / 1024.0f, cDesertBackground ::Color2 * 0.9f},
-    {6u, coreVector2(439.0f, 1024.0f -  783.0f) / 1024.0f, coreVector2(588.0f,533.0f) / 1024.0f, cSpaceBackground  ::Color2 * 0.9f},
-    {2u, coreVector2(252.0f, 1024.0f -  453.0f) / 1024.0f, coreVector2(524.0f,454.0f) / 1024.0f, cVolcanoBackground::Color2 * 0.9f},
-    {5u, coreVector2(  0.0f, 1024.0f - 1023.0f) / 1024.0f, coreVector2(520.0f,647.0f) / 1024.0f, cSnowBackground   ::Color2 * 0.9f},
-    {8u, coreVector2(760.0f, 1024.0f -  837.0f) / 1024.0f, coreVector2(264.0f,369.0f) / 1024.0f, cMossBackground   ::Color2 * 0.9f},
-    {9u, coreVector2(250.0f, 1024.0f -  773.0f) / 1024.0f, coreVector2(524.0f,524.0f) / 1024.0f, cDarkBackground   ::Color2 * 0.9f},
-    {0u, coreVector2(0.0f,0.0f),                           coreVector2(0.0f,0.0f),               cDarkBackground   ::Color2 * 0.9f},   // #
-    {0u, coreVector2(0.0f,0.0f),                           coreVector2(0.0f,0.0f),               cDarkBackground   ::Color2 * 0.9f}    // #
+    {1u, coreVector2(  0.0f, 1024.0f -  516.0f) / 1024.0f, coreVector2( 0.01f, 0.0f),   coreVector2(452.0f,517.0f) / 1024.0f, cCloudBackground  ::Color2 * 0.9f},
+    {7u, coreVector2(378.0f, 1024.0f - 1023.0f) / 1024.0f, coreVector2( 0.0f,  0.01f),  coreVector2(648.0f,329.0f) / 1024.0f, cGrassBackground  ::Color2 * 0.9f},
+    {3u, coreVector2(638.0f, 1024.0f -  328.0f) / 1024.0f, coreVector2( 0.0f, -0.005f), coreVector2(388.0f,329.0f) / 1024.0f, cSeaBackground    ::Color2 * 0.9f},
+    {4u, coreVector2(  0.0f, 1024.0f - 1023.0f) / 1024.0f, coreVector2( 0.0f,  0.02f),  coreVector2(372.0f,370.0f) / 1024.0f, cDesertBackground ::Color2 * 0.9f},
+    {6u, coreVector2(439.0f, 1024.0f -  783.0f) / 1024.0f, coreVector2( 0.0f,  0.0f),   coreVector2(588.0f,533.0f) / 1024.0f, cSpaceBackground  ::Color2 * 0.9f},
+    {2u, coreVector2(252.0f, 1024.0f -  453.0f) / 1024.0f, coreVector2( 0.0f,  0.005f), coreVector2(524.0f,454.0f) / 1024.0f, cVolcanoBackground::Color2 * 0.9f},
+    {5u, coreVector2(  0.0f, 1024.0f - 1023.0f) / 1024.0f, coreVector2( 0.0f, -0.01f),  coreVector2(520.0f,647.0f) / 1024.0f, cSnowBackground   ::Color2 * 0.9f},
+    {8u, coreVector2(760.0f, 1024.0f -  837.0f) / 1024.0f, coreVector2(-0.01f, 0.0f),   coreVector2(264.0f,369.0f) / 1024.0f, cMossBackground   ::Color2 * 0.9f},
+    {9u, coreVector2(250.0f, 1024.0f -  773.0f) / 1024.0f, coreVector2( 0.0f,  0.0f),   coreVector2(524.0f,524.0f) / 1024.0f, cDarkBackground   ::Color2 * 0.9f},
+    {0u, coreVector2(0.0f,0.0f),                           coreVector2( 0.0f,  0.0f),   coreVector2(0.0f,0.0f),               cDarkBackground   ::Color2 * 0.9f},   // #
+    {0u, coreVector2(0.0f,0.0f),                           coreVector2( 0.0f,  0.0f),   coreVector2(0.0f,0.0f),               cDarkBackground   ::Color2 * 0.9f}    // #
 };
 
 #define FRAGMENT_POSITION(x) (g_aFragmentData[x].vOffset + g_aFragmentData[x].vSize * 0.5f - 0.5f)
@@ -249,7 +251,7 @@ private:
     sGameOptions m_Options;                 // 
     coreUint16   m_iVersion;                // 
 
-    coreUint8 m_iStatus;                    // 
+    coreUint16 m_iStatus;                   // 
 
 
 public:
@@ -288,7 +290,11 @@ public:
 
     // 
     void UseContinue();
+    void UseNext();
     void UseRestart();
+
+    // 
+    void DisableMissionName();
 
     // 
     void RepairPlayer();
@@ -365,7 +371,7 @@ public:
     inline const coreUint8&    GetDifficulty ()const {return m_Options.iDifficulty;}
     inline const coreUint8&    GetFlags      ()const {return m_Options.iFlags;}
     inline const coreUint16&   GetVersion    ()const {return m_iVersion;}
-    inline const coreUint8&    GetStatus     ()const {return m_iStatus;}
+    inline const coreUint16&   GetStatus     ()const {return m_iStatus;}
 
     // 
     static coreUint8  CalcMedal       (const coreFloat fTime, const coreFloat* pfMedalGoal);

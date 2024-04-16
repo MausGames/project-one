@@ -44,7 +44,7 @@ alignas(ALIGNMENT_CACHE) static constexpr const coreChar* g_aapcCreditEntry[][2]
     {"Lukas Meindl",     "Tester"},
     {"Martin Mauersics", "Game Designer, Programmer"},
     {"Stefan Karner",    "Tester"},
-    {"Tova Sarah Bele",  "Adviser, Tester"}
+    {"Tova Bele",        "Adviser, Tester"}
 };
 
 // 

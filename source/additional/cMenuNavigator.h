@@ -63,6 +63,9 @@ private:
         coreUint8 iLastEntry;   // 
     };
 
+    // 
+    using uShoulderType = std::function<void()>;
+
 
 private:
     coreMap<coreObject2D*, sMenuEntry> m_aObject;    // 
@@ -92,6 +95,10 @@ private:
 
     coreMenu* m_pMenu;                               // 
 
+    uShoulderType m_nShoulderLeft;                   // 
+    uShoulderType m_nShoulderRight;                  // 
+    coreBool      m_bShoulder;                       // 
+
     cFigure m_aPrompt[MENUNAVIGATOR_PROMPTS];        // 
 
     static coreVector2 s_vMouseMove;                 // 
@@ -117,10 +124,15 @@ public:
     void BindScroll (coreObject2D* pScroll);
 
     // 
-    inline void AssignMenu (coreMenu*     pMenu)                          {ASSERT(pMenu)                    m_pMenu  = pMenu;}
-    inline void AssignFirst(coreObject2D* pObject)                        {ASSERT(m_aObject.count(pObject)) m_iFirst = pObject ? this->__ToIndex(pObject) : MENUNAVIGATOR_INVALID;}
-    inline void AssignBack (coreObject2D* pObject)                        {ASSERT(m_aObject.count(pObject)) m_iBack  = pObject ? this->__ToIndex(pObject) : MENUNAVIGATOR_INVALID;}
-    inline void ResetFirst ()                                             {m_pCurObject = NULL; m_iStore = MENUNAVIGATOR_INVALID; m_vCurPos = HIDDEN_POS; m_vCurSize = coreVector2(0.0f,0.0f);}
+    inline void AssignMenu (coreMenu*     pMenu)   {ASSERT(pMenu)                    m_pMenu  = pMenu;}
+    inline void AssignFirst(coreObject2D* pObject) {ASSERT(m_aObject.count(pObject)) m_iFirst = pObject ? this->__ToIndex(pObject) : MENUNAVIGATOR_INVALID;}
+    inline void AssignBack (coreObject2D* pObject) {ASSERT(m_aObject.count(pObject)) m_iBack  = pObject ? this->__ToIndex(pObject) : MENUNAVIGATOR_INVALID;}
+    inline void ResetFirst ()                      {m_pCurObject = NULL; m_iStore = MENUNAVIGATOR_INVALID; m_vCurPos = HIDDEN_POS; m_vCurSize = coreVector2(0.0f,0.0f);}
+
+    // 
+    template <typename F> inline void UseShoulderLeft (F&& nShoulderFunc) {ASSERT(!m_nShoulderLeft)  m_nShoulderLeft  = nShoulderFunc;}   // [](void) -> void
+    template <typename F> inline void UseShoulderRight(F&& nShoulderFunc) {ASSERT(!m_nShoulderRight) m_nShoulderRight = nShoulderFunc;}   // [](void) -> void
+    inline void SetShoulder(const coreBool bShoulder) {m_bShoulder = bShoulder;}
 
     // 
     inline void ShowIcon(const coreBool bStatus) {m_bShowIcon = bStatus;}

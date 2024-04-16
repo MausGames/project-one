@@ -914,7 +914,7 @@ public:
     ASSIGN_ID(17, "Grow")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeBlue(); this->SetSize(coreVector3(1.6f,1.6f,1.6f) * 1.1f); this->SetTexSize(coreVector2(0.12f,0.12f) * 3.0f); m_fAnimation = 0.0f; m_fFade = 0.0f;}
+    inline void ResetProperties() {this->MakeBlue(); this->SetSize(coreVector3(1.6f,1.6f,1.6f) * 1.1f); this->SetTexSize(coreVector2(0.12f,0.12f) * 3.0f); this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * 0.95f); m_fAnimation = 0.0f; m_fFade = 0.0f;}
 
     // change default color
     inline cGrowBullet* MakeWhite  () {ASSERT(false)             return this;}

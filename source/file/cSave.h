@@ -28,6 +28,7 @@
 // TODO 1: implement setting TROPHY_ONECOLORCLEAR on arcade finish
 // TODO 1: achievement badges sollten als secret badges verwendet werden (silberner stern -5)
 // TODO 1: properly implement arcade mode stats + medals   -> ShowEndingNormal + ShowEndingSecret, nach den credits (falls enabled) sollte summary angezeigt werden (segment, mission, arcade), dort kann mans setzen
+// TODO 2: some options, like mirror-mode, should only take affect if it is allowed
 
 
 // ****************************************************************
@@ -66,11 +67,12 @@ enum eSaveUnlock : coreUint8
 
 enum eSaveNew : coreUint8
 {
-    NEW_MAIN_EXTRA        = 0u,
-    NEW_MAIN_CONFIG       = 1u,
-    NEW_CONFIG_GAME       = 2u,
-    NEW_CONFIG_MIRRORMODE = 3u,
-    NEW_ARMORY_GAMESPEED  = 4u
+    NEW_MAIN_START        = 0u,
+    NEW_MAIN_EXTRA        = 1u,
+    NEW_MAIN_CONFIG       = 2u,
+    NEW_CONFIG_GAME       = 3u,
+    NEW_CONFIG_MIRRORMODE = 4u,
+    NEW_ARMORY_GAMESPEED  = 5u
 };
 
 
@@ -126,8 +128,8 @@ public:
         coreUint64 iMovesMade;                    // 
         coreUint64 iBulletsShot;                  // 
         coreUint32 aiMedalsEarned[SAVE_MEDALS];   // 
-        coreUint32 iFragmentsEarned;              // 
         coreUint32 iBadgesEarned;                 // 
+        coreUint32 iHelperHit;                    // 
     };
 
     // 
@@ -163,8 +165,8 @@ public:
         coreUint64 iMovesMade;                    // 
         coreUint64 iBulletsShot;                  // 
         coreUint32 aiMedalsEarned[SAVE_MEDALS];   // 
-        coreUint32 iFragmentsEarned;              // 
         coreUint32 iBadgesEarned;                 // 
+        coreUint32 iHelperHit;                    // 
     };
 
     // 
@@ -189,6 +191,7 @@ public:
         coreUint8  aaaiMedalArcade   [SAVE_TYPES][SAVE_MODES][SAVE_DIFFICULTIES];                                 // 
         coreUint8  aaaaiMedalMission [SAVE_TYPES][SAVE_MODES][SAVE_DIFFICULTIES][SAVE_MISSIONS];                  // 
         coreUint8  aaaaaiMedalSegment[SAVE_TYPES][SAVE_MODES][SAVE_DIFFICULTIES][SAVE_MISSIONS][SAVE_SEGMENTS];   // 
+        coreUint8  aiHelper  [SAVE_MISSIONS];   // 
         coreUint8  aiFragment[SAVE_MISSIONS];   // (bitfield) 
         coreUint64 aiBadge   [SAVE_MISSIONS];   // (bitfield) 
         coreUint64 aiTrophy  [2];               // (bitfield) 
@@ -233,6 +236,8 @@ public:
 
     // 
     RETURN_NONNULL sGlobalStats* EditGlobalStats      ();
+    RETURN_NONNULL sLocalStats*  EditLocalStatsArcade (const coreUint8 iType, const coreUint8 iMode, const coreUint8 iDifficulty);
+    RETURN_NONNULL sLocalStats*  EditLocalStatsArcade ();
     RETURN_NONNULL sLocalStats*  EditLocalStatsMission(const coreUint8 iType, const coreUint8 iMode, const coreUint8 iDifficulty, const coreUintW iMissionIndex);
     RETURN_NONNULL sLocalStats*  EditLocalStatsMission(const coreUintW iMissionIndex);
     RETURN_NONNULL sLocalStats*  EditLocalStatsMission();

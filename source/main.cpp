@@ -381,7 +381,7 @@ void InitResolution(const coreVector2 vResolution)
 void InitDirection()
 {
     // 
-    switch(g_CurConfig.Game.iHudRotation)
+    switch(g_CurConfig.Game.iHudDirection)
     {
     default: g_vHudDirection = coreVector2( 0.0f, 1.0f); break;
     case 1u: g_vHudDirection = coreVector2(-1.0f, 0.0f); break;

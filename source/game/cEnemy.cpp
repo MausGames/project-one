@@ -184,6 +184,7 @@ coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, 
 
                         // 
                         g_pSave->EditGlobalStats      ()->iDamageGiven += iTaken;
+                        g_pSave->EditLocalStatsArcade ()->iDamageGiven += iTaken;
                         g_pSave->EditLocalStatsMission()->iDamageGiven += iTaken;
                         g_pSave->EditLocalStatsSegment()->iDamageGiven += iTaken;
                     }

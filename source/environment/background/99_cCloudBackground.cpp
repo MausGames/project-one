@@ -181,4 +181,16 @@ void cCloudBackground::__MoveOwn()
     {
         m_pBaseSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
     }
+    
+    
+    
+    const coreFloat fCloudMove = 0.0016f * (1.0f + ABS(g_pEnvironment->GetSpeed())) * TIME;
+
+    coreBatchList* pList = m_apAirObjectList[0];
+    for(coreUintW i = 0u, ie = pList->List()->size(); i < ie; ++i)
+    {
+        coreObject3D* pCloud = (*pList->List())[i];
+        pCloud->SetTexOffset((pCloud->GetTexOffset() + MapToAxis(coreVector2(fCloudMove * ((FRACT(pCloud->GetPosition().z) < 0.5f) ? -1.0f : 1.0f), 0.0f), pCloud->GetDirection().xy())).Processed(FRACT));
+    }
+    pList->MoveNormal();
 }

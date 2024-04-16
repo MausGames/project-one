@@ -174,7 +174,7 @@ void cDefeatMenu::Move()
         {
             // 
             m_fIntroTimer.Update(1.0f);
-            if((m_fIntroTimer >= MENU_DEFEAT_BANNER_SPEED_REV) && Core::Input->GetAnyButton(CORE_INPUT_PRESS))
+            if((m_fIntroTimer >= MENU_DEFEAT_BANNER_SPEED_REV) && !this->GetTransition().GetStatus() && Core::Input->GetAnyButton(CORE_INPUT_PRESS))
             {
                 // 
                 m_eState = DEFEAT_OUTRO;

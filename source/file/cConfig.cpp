@@ -37,7 +37,7 @@ static void CheckConfig(sConfig* OUTPUT pConfig)
     // 
     if(Core::Config->GetInt(CORE_CONFIG_BASE_VERSION) == 0)
     {
-        for(coreUintW i = 0u; i < INPUT_SETS;  ++i)
+        for(coreUintW i = 0u; i < INPUT_SETS; ++i)
         {
             for(coreUintW j = 0u; j < INPUT_KEYS_ACTION; ++j)
             {
@@ -45,6 +45,12 @@ static void CheckConfig(sConfig* OUTPUT pConfig)
             }
         }
         Core::Config->SetInt(CORE_CONFIG_BASE_VERSION, 1);
+    }
+    if(Core::Config->GetInt(CORE_CONFIG_BASE_VERSION) == 1)
+    {
+        Core::Config->SetInt(CONFIG_GAME_GAME_DIRECTION, Core::Config->GetInt("Game", "GameRotation", 0));
+        Core::Config->SetInt(CONFIG_GAME_HUD_DIRECTION,  Core::Config->GetInt("Game", "HudRotation",  0));
+        Core::Config->SetInt(CORE_CONFIG_BASE_VERSION, 2);
     }
 
     // clamp input set selections
@@ -123,17 +129,16 @@ void LoadConfig()
     Core::Config->Load();
 
     // read game values
-    g_OldConfig.Game.iTextSize     = Core::Config->GetInt(CONFIG_GAME_TEXT_SIZE);
-    g_OldConfig.Game.iCombatText   = Core::Config->GetInt(CONFIG_GAME_COMBAT_TEXT);
-    g_OldConfig.Game.iGameRotation = Core::Config->GetInt(CONFIG_GAME_GAME_ROTATION);
-    g_OldConfig.Game.iGameScale    = Core::Config->GetInt(CONFIG_GAME_GAME_SCALE);
-    g_OldConfig.Game.iGameSpeed    = Core::Config->GetInt(CONFIG_GAME_GAME_SPEED);
-    g_OldConfig.Game.iMirrorMode   = Core::Config->GetInt(CONFIG_GAME_MIRROR_MODE);
-    g_OldConfig.Game.iHudRotation  = Core::Config->GetInt(CONFIG_GAME_HUD_ROTATION);
-    g_OldConfig.Game.iHudScale     = Core::Config->GetInt(CONFIG_GAME_HUD_SCALE);
-    g_OldConfig.Game.iHudType      = Core::Config->GetInt(CONFIG_GAME_HUD_TYPE);
-    g_OldConfig.Game.iUpdateFreq   = Core::Config->GetInt(CONFIG_GAME_UPDATE_FREQ);
-    g_OldConfig.Game.iVersion      = Core::Config->GetInt(CONFIG_GAME_VERSION);
+    g_OldConfig.Game.iGameDirection = Core::Config->GetInt(CONFIG_GAME_GAME_DIRECTION);
+    g_OldConfig.Game.iGameSpeed     = Core::Config->GetInt(CONFIG_GAME_GAME_SPEED);
+    g_OldConfig.Game.iMirrorMode    = Core::Config->GetInt(CONFIG_GAME_MIRROR_MODE);
+    g_OldConfig.Game.iHudDirection  = Core::Config->GetInt(CONFIG_GAME_HUD_DIRECTION);
+    g_OldConfig.Game.iHudType       = Core::Config->GetInt(CONFIG_GAME_HUD_TYPE);
+    g_OldConfig.Game.iCombatText    = Core::Config->GetInt(CONFIG_GAME_COMBAT_TEXT);
+    g_OldConfig.Game.iBackRotation  = Core::Config->GetInt(CONFIG_GAME_BACK_ROTATION);
+    g_OldConfig.Game.iBackSpeed     = Core::Config->GetInt(CONFIG_GAME_BACK_SPEED);
+    g_OldConfig.Game.iUpdateFreq    = Core::Config->GetInt(CONFIG_GAME_UPDATE_FREQ);
+    g_OldConfig.Game.iVersion       = Core::Config->GetInt(CONFIG_GAME_VERSION);
 
     // read graphics values
     g_OldConfig.Graphics.iRender     = Core::Config->GetInt(CONFIG_GRAPHICS_RENDER);
@@ -145,7 +150,6 @@ void LoadConfig()
     g_OldConfig.Graphics.iFlash      = Core::Config->GetInt(CONFIG_GRAPHICS_FLASH);
     g_OldConfig.Graphics.iHitStop    = Core::Config->GetInt(CONFIG_GRAPHICS_HIT_STOP);
     g_OldConfig.Graphics.iChroma     = Core::Config->GetInt(CONFIG_GRAPHICS_CHROMA);
-    g_OldConfig.Graphics.iRotation   = Core::Config->GetInt(CONFIG_GRAPHICS_ROTATION);
 
     // read audio values
     g_OldConfig.Audio.fEffectVolume  = Core::Config->GetFloat(CONFIG_AUDIO_EFFECT_VOLUME);
@@ -196,17 +200,16 @@ void SaveConfig()
     g_OldConfig = g_CurConfig;
 
     // write game values
-    Core::Config->SetInt(CONFIG_GAME_TEXT_SIZE,     g_OldConfig.Game.iTextSize);
-    Core::Config->SetInt(CONFIG_GAME_COMBAT_TEXT,   g_OldConfig.Game.iCombatText);
-    Core::Config->SetInt(CONFIG_GAME_GAME_ROTATION, g_OldConfig.Game.iGameRotation);
-    Core::Config->SetInt(CONFIG_GAME_GAME_SCALE,    g_OldConfig.Game.iGameScale);
-    Core::Config->SetInt(CONFIG_GAME_GAME_SPEED,    g_OldConfig.Game.iGameSpeed);
-    Core::Config->SetInt(CONFIG_GAME_MIRROR_MODE,   g_OldConfig.Game.iMirrorMode);
-    Core::Config->SetInt(CONFIG_GAME_HUD_ROTATION,  g_OldConfig.Game.iHudRotation);
-    Core::Config->SetInt(CONFIG_GAME_HUD_SCALE,     g_OldConfig.Game.iHudScale);
-    Core::Config->SetInt(CONFIG_GAME_HUD_TYPE,      g_OldConfig.Game.iHudType);
-    Core::Config->SetInt(CONFIG_GAME_UPDATE_FREQ,   g_OldConfig.Game.iUpdateFreq);
-    Core::Config->SetInt(CONFIG_GAME_VERSION,       g_OldConfig.Game.iVersion);
+    Core::Config->SetInt(CONFIG_GAME_GAME_DIRECTION, g_OldConfig.Game.iGameDirection);
+    Core::Config->SetInt(CONFIG_GAME_GAME_SPEED,     g_OldConfig.Game.iGameSpeed);
+    Core::Config->SetInt(CONFIG_GAME_MIRROR_MODE,    g_OldConfig.Game.iMirrorMode);
+    Core::Config->SetInt(CONFIG_GAME_HUD_DIRECTION,  g_OldConfig.Game.iHudDirection);
+    Core::Config->SetInt(CONFIG_GAME_HUD_TYPE,       g_OldConfig.Game.iHudType);
+    Core::Config->SetInt(CONFIG_GAME_COMBAT_TEXT,    g_OldConfig.Game.iCombatText);
+    Core::Config->SetInt(CONFIG_GAME_BACK_ROTATION,  g_OldConfig.Game.iBackRotation);
+    Core::Config->SetInt(CONFIG_GAME_BACK_SPEED,     g_OldConfig.Game.iBackSpeed);
+    Core::Config->SetInt(CONFIG_GAME_UPDATE_FREQ,    g_OldConfig.Game.iUpdateFreq);
+    Core::Config->SetInt(CONFIG_GAME_VERSION,        g_OldConfig.Game.iVersion);
 
     // write graphics values
     Core::Config->SetInt(CONFIG_GRAPHICS_RENDER,     g_OldConfig.Graphics.iRender);
@@ -218,7 +221,6 @@ void SaveConfig()
     Core::Config->SetInt(CONFIG_GRAPHICS_FLASH,      g_OldConfig.Graphics.iFlash);
     Core::Config->SetInt(CONFIG_GRAPHICS_HIT_STOP,   g_OldConfig.Graphics.iHitStop);
     Core::Config->SetInt(CONFIG_GRAPHICS_CHROMA,     g_OldConfig.Graphics.iChroma);
-    Core::Config->SetInt(CONFIG_GRAPHICS_ROTATION,   g_OldConfig.Graphics.iRotation);
 
     // write audio values
     Core::Config->SetFloat(CONFIG_AUDIO_EFFECT_VOLUME,  g_OldConfig.Audio.fEffectVolume);
@@ -250,7 +252,7 @@ void SaveConfig()
     // 
     Core::Config->SetInt (CORE_CONFIG_GRAPHICS_QUALITY,          g_OldConfig.Graphics.iRender);
     Core::Config->SetBool(CORE_CONFIG_GRAPHICS_TEXTURETRILINEAR, g_OldConfig.Graphics.iRender ? true : false);
-    Core::Config->SetInt (CORE_CONFIG_AUDIO_RESAMPLERINDEX,      BIT(g_OldConfig.Audio.iQuality));   // 1, 2, 4
+    Core::Config->SetInt (CORE_CONFIG_AUDIO_RESAMPLERINDEX,      g_OldConfig.Audio.iQuality ? 4 : 2);
 
     // save configuration file
     Core::Config->Save();

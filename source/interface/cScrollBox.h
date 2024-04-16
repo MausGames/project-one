@@ -13,9 +13,9 @@
 
 // ****************************************************************
 // 
-#define SCROLL_WIDTH        (0.05f)   // 
-#define SCROLL_DELAY        (-2.0f)   // 
-#define SCROLL_FOCUS_FACTOR (6.0f)    // 
+#define SCROLL_WIDTH      (0.05f)   // 
+#define SCROLL_DELAY      (-2.0f)   // 
+#define SCROLL_FOCUS_SIZE (0.3f)    // 
 
 
 // ****************************************************************
@@ -43,6 +43,9 @@ public:
     // 
     void Render()final;
     void Move  ()final;
+
+    // 
+    void ScrollToObject(const coreObject2D* pObject, const coreBool bNow);
 
     // 
     inline void SetCurOffset(const coreFloat fCurOffset) {m_fCurOffset = fCurOffset; this->SetOffset(coreVector2(0.0f, m_fCurOffset));}

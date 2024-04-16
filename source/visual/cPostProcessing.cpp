@@ -307,11 +307,10 @@ void cPostProcessing::Reset()
 void cPostProcessing::UpdateLayout()
 {
     // 
-    const coreVector2 vBase = coreVector2(g_CurConfig.Game.iMirrorMode ? -1.0f : 1.0f, 1.0f);
-    this->SetSize(vBase * (I_TO_F(MIN(g_CurConfig.Game.iGameScale, 100u)) / 100.0f));
+    this->SetSize(coreVector2(g_CurConfig.Game.iMirrorMode ? -1.0f : 1.0f, 1.0f));
 
     // 
-    switch(g_CurConfig.Game.iGameRotation)
+    switch(g_CurConfig.Game.iGameDirection)
     {
     default: m_vDirectionConfig = coreVector2( 0.0f, 1.0f); break;
     case 1u: m_vDirectionConfig = coreVector2(-1.0f, 0.0f); break;

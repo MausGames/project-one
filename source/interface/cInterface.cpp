@@ -753,7 +753,7 @@ void cInterface::Move()
         if(m_iGoalOld != iNewMedal) m_fGoalBump = 1.0f;
         m_iGoalOld = iNewMedal;
 
-        cMenu::ApplyMedalTexture(&m_GoalMedal, iNewMedal, pBoss ? MEDAL_TYPE_BOSS : MEDAL_TYPE_WAVE);
+        cMenu::ApplyMedalTexture(&m_GoalMedal, iNewMedal, pBoss ? MEDAL_TYPE_BOSS : MEDAL_TYPE_WAVE, true);
         m_GoalTime.SetText(PRINT("%03.0f", CEIL(cGame::CalcMedalTime(fTimeShifted, pfMedalGoal))));
 
         m_fAlphaGoal = 1.0f;
@@ -1318,7 +1318,7 @@ void cInterface::ShowBoss(const cBoss* pBoss, const coreBool bSilent)
 void cInterface::ShowWave(const coreChar* pcName)
 {
     // 
-    m_SegmentName.SetText(PRINT("%s %s", coreData::StrUpper(Core::Language->GetString("MISSION")), pcName));
+    m_SegmentName.SetText(PRINT("%s %s", coreData::StrToUpperUTF8(Core::Language->GetString("SEGMENT")), pcName));
     m_sSegmentString = pcName;
 }
 
@@ -1370,7 +1370,7 @@ void cInterface::ShowScore(const coreChar* pcMain, const coreChar* pcSub, const 
 
     // 
     ASSERT(iMedal != MEDAL_NONE)
-    cMenu::ApplyMedalTexture(&m_Medal, iMedal, iMedalType);
+    cMenu::ApplyMedalTexture(&m_Medal, iMedal, iMedalType, true);
 }
 
 void cInterface::ShowScore(const coreUint32 iScore, const coreUint8 iMedal, const coreUint8 iMedalType)
@@ -1738,7 +1738,7 @@ void cInterface::__Update()
     
     if(!m_sSegmentString.empty())
     {
-        m_SegmentName.SetText(PRINT("%s %s", coreData::StrUpper(Core::Language->GetString("MISSION")), m_sSegmentString.c_str()));
+        m_SegmentName.SetText(PRINT("%s %s", coreData::StrToUpperUTF8(Core::Language->GetString("SEGMENT")), m_sSegmentString.c_str()));
     }
 }
 

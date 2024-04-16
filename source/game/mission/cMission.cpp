@@ -106,25 +106,17 @@ void cMission::Close()
     g_pSave->EditGlobalStats()->iMissionsDone += 1u;
 
     // 
-    coreUint32 iScoreFull     = 0u;
-    coreUint32 iMaxSeriesFull = 0u;
+    coreUint32 iScoreFull = 0u;
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
         // 
-        iScoreFull     += pPlayer->GetScoreTable()->GetScoreMission    (iMissionIndex);
-        iMaxSeriesFull += pPlayer->GetScoreTable()->GetMaxSeriesMission(iMissionIndex);
+        iScoreFull += pPlayer->GetScoreTable()->GetScoreMission(iMissionIndex);
     });
-
-    // 
-    if(g_pGame->IsCoop()) iMaxSeriesFull /= GAME_PLAYERS;
 
     // 
     g_pSave->EditLocalStatsMission()->iScoreBest   = MAX(g_pSave->EditLocalStatsMission()->iScoreBest,       iScoreFull);
     g_pSave->EditLocalStatsMission()->iScoreWorst  = MIN(g_pSave->EditLocalStatsMission()->iScoreWorst - 1u, iScoreFull - 1u) + 1u;
     g_pSave->EditLocalStatsMission()->iScoreTotal += iScoreFull;
-
-    // 
-    g_pSave->EditLocalStatsMission()->iMaxSeries = MAX(g_pSave->EditLocalStatsMission()->iMaxSeries, iMaxSeriesFull);
 
     // 
     const coreUint32 iTimeUint = TABLE_TIME_TO_UINT(g_pGame->GetTimeTable()->GetTimeMission(iMissionIndex));
@@ -201,7 +193,7 @@ void cMission::MoveBefore()
             if(m_anStage.empty())
             {
                 g_pGame->StartOutro((m_iTakeTo == TAKE_MISSION) ? GAME_OUTRO_MISSION : GAME_OUTRO_SEGMENT);
-                g_pGame->FadeMusic(0.3f);
+                if(m_iTakeTo == TAKE_MISSION) g_pGame->FadeMusic(0.3f);
             }
         }
     }
@@ -354,13 +346,6 @@ void cMission::DeactivateWave()
     if(m_iCurSegmentIndex == MISSION_NO_SEGMENT) return;
 
     // 
-    const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
-
-    // 
-    coreUint8& iAdvance = g_pSave->EditProgress()->aiAdvance[iMissionIndex];
-    iAdvance = MAX(iAdvance, m_iCurSegmentIndex + 2u);
-
-    // 
     this->__CloseSegment();
 
     // 
@@ -423,6 +408,7 @@ void cMission::GiveBadge(const coreUintW iIndex, const coreUint8 iBadge, const c
 
         // 
         g_pSave->EditGlobalStats      ()->iShiftGoodAdded += iBonus;
+        g_pSave->EditLocalStatsArcade ()->iShiftGoodAdded += iBonus;
         g_pSave->EditLocalStatsMission()->iShiftGoodAdded += iBonus;
         g_pSave->EditLocalStatsSegment()->iShiftGoodAdded += iBonus;
 
@@ -507,9 +493,6 @@ void cMission::__CloseSegment()
     ASSERT(iMedal != MEDAL_NONE)
 
     // 
-    if(g_pGame->IsCoop()) iMaxSeriesFull /= GAME_PLAYERS;
-
-    // 
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
         pPlayer->GetDataTable()->GiveMedalSegment(iMedal);
@@ -543,14 +526,14 @@ void cMission::__CloseSegment()
     g_pSave->EditLocalStatsSegment()->iScoreTotal += iScoreFull;
 
     // 
-    g_pSave->EditLocalStatsSegment()->iMaxSeries = MAX(g_pSave->EditLocalStatsSegment()->iMaxSeries, iMaxSeriesFull);
-
-    // 
     const coreUint32 iTimeUint = TABLE_TIME_TO_UINT(fTime);
     g_pSave->EditLocalStatsSegment()->iTimeBest   = MIN(g_pSave->EditLocalStatsSegment()->iTimeBest - 1u, iTimeUint - 1u) + 1u;
     g_pSave->EditLocalStatsSegment()->iTimeWorst  = MAX(g_pSave->EditLocalStatsSegment()->iTimeWorst,     iTimeUint);
     g_pSave->EditLocalStatsSegment()->iTimeTotal += iTimeUint;
     g_pSave->EditLocalStatsSegment()->iCountEnd  += 1u;
+
+    // 
+    g_pSave->EditLocalStatsSegment()->iMaxSeries = MAX(g_pSave->EditLocalStatsSegment()->iMaxSeries, iMaxSeriesFull);
 
     // 
     const coreUint32 iTimeShiftedUint = TABLE_TIME_TO_UINT(fTimeShifted);
@@ -580,6 +563,10 @@ void cMission::__CloseSegment()
     {
         ADD_FLAG(g_pSave->EditProgress()->aiBadge[iMissionIndex], pPlayer->GetDataTable()->GetBadgeAll(iMissionIndex))
     });
+
+    // 
+    coreUint8& iAdvance = g_pSave->EditProgress()->aiAdvance[iMissionIndex];
+    iAdvance = MAX(iAdvance, m_iCurSegmentIndex + 2u);
 
     // 
     g_pSave->SaveFile();

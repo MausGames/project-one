@@ -404,6 +404,7 @@ void cPlayer::Move()
 
                 // 
                 g_pSave->EditGlobalStats      ()->iTurnsMade += 1u;
+                g_pSave->EditLocalStatsArcade ()->iTurnsMade += 1u;
                 g_pSave->EditLocalStatsMission()->iTurnsMade += 1u;
                 g_pSave->EditLocalStatsSegment()->iTurnsMade += 1u;
             }
@@ -447,6 +448,7 @@ void cPlayer::Move()
 
                 // 
                 g_pSave->EditGlobalStats      ()->iMovesMade += 1u;
+                g_pSave->EditLocalStatsArcade ()->iMovesMade += 1u;
                 g_pSave->EditLocalStatsMission()->iMovesMade += 1u;
                 g_pSave->EditLocalStatsSegment()->iMovesMade += 1u;
             }
@@ -794,6 +796,7 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
 
         // 
         g_pSave->EditGlobalStats      ()->iShiftBadAdded += iShift;
+        g_pSave->EditLocalStatsArcade ()->iShiftBadAdded += iShift;
         g_pSave->EditLocalStatsMission()->iShiftBadAdded += iShift;
         g_pSave->EditLocalStatsSegment()->iShiftBadAdded += iShift;
 
@@ -856,6 +859,7 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
 
         // 
         g_pSave->EditGlobalStats      ()->iDamageTaken += iTaken;
+        g_pSave->EditLocalStatsArcade ()->iDamageTaken += iTaken;
         g_pSave->EditLocalStatsMission()->iDamageTaken += iTaken;
         g_pSave->EditLocalStatsSegment()->iDamageTaken += iTaken;
 

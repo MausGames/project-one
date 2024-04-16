@@ -1471,9 +1471,6 @@ cGrowBullet::cGrowBullet()noexcept
     this->DefineModel  ("bullet_orb.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_spheric_program");
-
-    // set object properties
-    this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * 0.95f);
 }
 
 

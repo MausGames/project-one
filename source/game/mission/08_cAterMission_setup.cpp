@@ -41,9 +41,9 @@ void cAterMission::__SetupOwn()
 
     // ################################################################
     // show mission name
-    STAGE_MAIN({TAKE_MISSION})
+    STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
-        if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_CONTINUE))
+        if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_NAMELESS))
         {
             STAGE_FINISH_NOW
         }
@@ -96,7 +96,7 @@ void cAterMission::__SetupOwn()
 
     // ################################################################
     // end
-    STAGE_MAIN({TAKE_MISSION, 5u})
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         if(STAGE_BEGINNING)
         {
@@ -119,7 +119,7 @@ void cAterMission::__SetupOwn()
 
     // ################################################################
     // 
-    STAGE_MAIN({TAKE_MISSION, 5u})
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         if(m_Secret)
         {
@@ -170,7 +170,7 @@ void cAterMission::__SetupOwn()
 
     // ################################################################
     // 
-    STAGE_MAIN({TAKE_MISSION, 6u})
+    STAGE_MAIN({TAKE_ALWAYS, 6u})
     {
         if(STAGE_BEGINNING)
         {

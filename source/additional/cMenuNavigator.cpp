@@ -16,18 +16,21 @@ coreUint8   cMenuNavigator::s_iJoystickType = SDL_CONTROLLER_TYPE_UNKNOWN;
 // ****************************************************************
 // constructor
 cMenuNavigator::cMenuNavigator()noexcept
-: m_pCurObject   (NULL)
-, m_iStore       (MENUNAVIGATOR_INVALID)
-, m_iFirst       (MENUNAVIGATOR_INVALID)
-, m_iBack        (MENUNAVIGATOR_INVALID)
-, m_bPressed     (false)
-, m_bGrabbed     (false)
-, m_fGrabTime    (1.0f)
-, m_vMouseOffset (coreVector2(0.0f,0.0f))
-, m_vCurPos      (HIDDEN_POS)
-, m_vCurSize     (coreVector2(0.0f,0.0f))
-, m_bShowIcon    (false)
-, m_pMenu        (NULL)
+: m_pCurObject     (NULL)
+, m_iStore         (MENUNAVIGATOR_INVALID)
+, m_iFirst         (MENUNAVIGATOR_INVALID)
+, m_iBack          (MENUNAVIGATOR_INVALID)
+, m_bPressed       (false)
+, m_bGrabbed       (false)
+, m_fGrabTime      (1.0f)
+, m_vMouseOffset   (coreVector2(0.0f,0.0f))
+, m_vCurPos        (HIDDEN_POS)
+, m_vCurSize       (coreVector2(0.0f,0.0f))
+, m_bShowIcon      (false)
+, m_pMenu          (NULL)
+, m_nShoulderLeft  (NULL)
+, m_nShoulderRight (NULL)
+, m_bShoulder      (true)
 {
     // 
     this->DefineTexture(0u, g_pSpecialEffects->GetIconTexture(0u));
@@ -70,10 +73,15 @@ void cMenuNavigator::Render()
     if(s_bJoystick)
     {
         // 
-        if(m_aTab.size() >= 2u)
+        if((m_aTab.size() >= 2u) || (m_bShoulder && m_nShoulderLeft))
         {
             m_aPrompt[0].SetAlpha(this->GetAlpha());
             m_aPrompt[0].Render();
+        }
+
+        // 
+        if((m_aTab.size() >= 2u) || (m_bShoulder && m_nShoulderRight))
+        {
             m_aPrompt[1].SetAlpha(this->GetAlpha());
             m_aPrompt[1].Render();
         }
@@ -205,12 +213,16 @@ void cMenuNavigator::Move()
         }
 
         // 
-        if(m_aTab.size() >= 2u)
+        if((m_aTab.size() >= 2u) || (m_bShoulder && m_nShoulderLeft))
         {
             m_aPrompt[0].SetPosition(coreVector2(-0.43f,0.43f));
             m_aPrompt[0].SetSize    (coreVector2(0.1f,0.1f) * (abPress[0] ? 0.8f : 1.0f));
             m_aPrompt[0].Move();
+        }
 
+        // 
+        if((m_aTab.size() >= 2u) || (m_bShoulder && m_nShoulderRight))
+        {
             m_aPrompt[1].SetPosition(coreVector2(0.43f,0.43f));
             m_aPrompt[1].SetSize    (coreVector2(0.1f,0.1f) * (abPress[1] ? 0.8f : 1.0f));
             m_aPrompt[1].Move();
@@ -283,11 +295,14 @@ void cMenuNavigator::Update()
         {
             if(Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_A, CORE_INPUT_PRESS)) nPressFunc();
 
+            const coreBool bShoulderLeft  = Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_LEFTSHOULDER,  CORE_INPUT_PRESS) || Core::Input->GetJoystickButton(i, CORE_INPUT_BUTTON_LEFTTRIGGER,  CORE_INPUT_PRESS);
+            const coreBool bShoulderRight = Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, CORE_INPUT_PRESS) || Core::Input->GetJoystickButton(i, CORE_INPUT_BUTTON_RIGHTTRIGGER, CORE_INPUT_PRESS);
+
+            if(m_bShoulder && m_nShoulderLeft  && bShoulderLeft)  m_nShoulderLeft ();
+            if(m_bShoulder && m_nShoulderRight && bShoulderRight) m_nShoulderRight();
+
             if(!m_aTab.empty())
             {
-                const coreBool bShoulderLeft  = Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_LEFTSHOULDER,  CORE_INPUT_PRESS) || Core::Input->GetJoystickButton(i, CORE_INPUT_BUTTON_LEFTTRIGGER,  CORE_INPUT_PRESS);
-                const coreBool bShoulderRight = Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, CORE_INPUT_PRESS) || Core::Input->GetJoystickButton(i, CORE_INPUT_BUTTON_RIGHTTRIGGER, CORE_INPUT_PRESS);
-
                 if(bShoulderLeft || bShoulderRight)
                 {
                     ASSERT(m_pMenu)
@@ -336,9 +351,11 @@ void cMenuNavigator::Update()
 
             if(HAS_FLAG(oEntry.eType, MENU_TYPE_SWITCH_PRESS))
             {
+                coreSwitchBoxU8* pSwitchBox = d_cast<coreSwitchBoxU8*>(m_pCurObject);
+
                 const coreBool bOldGrabbed = m_bGrabbed;
 
-                if(Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_A, CORE_INPUT_PRESS))
+                if(Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_A, CORE_INPUT_PRESS) && (pSwitchBox->GetOverride() >= 0))
                 {
                     m_bGrabbed = !m_bGrabbed;
                 }
@@ -608,8 +625,5 @@ void cMenuNavigator::GlobalUpdate()
     }
 
     // 
-    Core::Input->ShowCursor(!s_bJoystick && (g_pMenu->GetCurSurface() != SURFACE_EMPTY)   &&
-                                            (g_pMenu->GetCurSurface() != SURFACE_SUMMARY) &&   // TODO 1: not for segment summary
-                                            (g_pMenu->GetCurSurface() != SURFACE_DEFEAT)  &&
-                                            (g_pMenu->GetCurSurface() != SURFACE_BRIDGE));
+    Core::Input->ShowCursor(!s_bJoystick && g_pMenu->NeedsCursor());
 }

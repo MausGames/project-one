@@ -158,19 +158,13 @@ void cScrollBox::Move()
 
                 if(pObject->IsFocused() && cMenuNavigator::IsValid(pObject))
                 {
-                    const coreVector2 vTarget = pObject->GetPosition();
-                    const coreVector2 vDiff   = vTarget - this->GetPosition();
-                    const coreFloat   fShift  = MAX0(ABS(vDiff.y) - (this->GetSize().y - pObject->GetSize().y * SCROLL_FOCUS_FACTOR) * 0.5f) * SIGN(vDiff.y);
-
-                    m_fCurOffset = CLAMP(this->GetOffset().y - fShift, 0.0f, m_fMaxOffset);
-
-                    this->SetFocused(true);
+                    this->ScrollToObject(pObject, false);   // TODO 1: (HAS_FLAG(m_aObject.at(m_pCurObject).eType, MENU_TYPE_BIG) ? 1.5f : 1.0f
                 }
             }
         }
 
         // 
-        this->SetOffset(coreVector2(0.0f, fDrag ? m_fCurOffset : (this->GetOffset().y + (m_fCurOffset - this->GetOffset().y) * ((cMenuNavigator::IsUsingJoystick() ? 5.0f : 20.0f) * TIME))));
+        this->SetOffset(coreVector2(0.0f, fDrag ? m_fCurOffset : (this->GetOffset().y + (m_fCurOffset - this->GetOffset().y) * ((cMenuNavigator::IsUsingJoystick() ? 4.0f : 20.0f) * TIME))));
 
         // 
         m_Cursor.SetPosition(coreVector2(m_aArrow[0].GetPosition().x, LERP(fPosUp, fPosDown, this->GetOffset().y * RCP(m_fMaxOffset))));
@@ -191,4 +185,27 @@ void cScrollBox::Move()
 
     // 
     this->coreViewBox::Move();
+}
+
+
+// ****************************************************************
+// 
+void cScrollBox::ScrollToObject(const coreObject2D* pObject, const coreBool bNow)
+{
+    // 
+    const coreVector2 vDiff  = pObject->GetPosition() - this->GetPosition();
+    const coreFloat   fShift = MAX0(ABS(vDiff.y) - (this->GetSize().y - SCROLL_FOCUS_SIZE) * 0.5f) * SIGN(vDiff.y);
+
+    // 
+    m_fCurOffset = CLAMP(this->GetOffset().y - fShift, 0.0f, m_fMaxOffset);
+
+    // 
+    this->SetFocused(true);
+
+    // 
+    if(bNow)
+    {
+        this->SetOffset(coreVector2(0.0f, m_fCurOffset));
+        this->coreViewBox::Move();
+    }
 }

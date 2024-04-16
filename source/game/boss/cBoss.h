@@ -61,8 +61,10 @@
 #define LEVIATHAN_PARTS_BODIES    (LEVIATHAN_PARTS - 2u)                       // 
 #define LEVIATHAN_RAYS            (LEVIATHAN_PARTS)                            // 
 #define LEVIATHAN_RAYS_RAWS       (2u * LEVIATHAN_RAYS)                        // 
+#define LEVIATHAN_MARKS           (LEVIATHAN_PARTS)                            // 
+#define LEVIATHAN_MARKS_RAWS      (LEVIATHAN_MARKS)                            // 
 #define LEVIATHAN_RADIUS_OUTER    (FOREGROUND_AREA.x * 0.8f)                   // 
-#define LEVIATHAN_RADIUS_INNER_1  (20.0f)                                      // 
+#define LEVIATHAN_RADIUS_INNER_1  (10.0f)                                      // 
 #define LEVIATHAN_RADIUS_INNER_2  (10.0f)                                      // 
 #define LEVIATHAN_RAY_OFFSET(i)   ((i) ? 3.6f : 4.8f)                          // 
 #define LEVIATHAN_RAY_HEIGHT      (0.2f)                                       // 
@@ -70,7 +72,7 @@
 #define LEVIATHAN_RAY_TEXSIZE     (coreVector2(0.5f,1.5f))                     // 
 #define LEVIATHAN_RAYWAVE_SIZE    (coreVector3(2.8f,7.0f,2.8f))                // 
 #define LEVIATHAN_RAYWAVE_TEXSIZE (coreVector2(0.5f,0.5f))                     // 
-#define LEVIATHAN_TILES           (20u)                                        // 
+#define LEVIATHAN_TILES           (16u)                                        // 
 
 #define TIGER_SIDES               (4u)                                         // 
 #define TIGER_STINGS              (32u * TIGER_SIDES)                          // 
@@ -575,7 +577,11 @@ private:
     coreBatchList m_RayWave;                          // 
     coreObject3D  m_aRayRaw  [LEVIATHAN_RAYS_RAWS];   // 
     coreFlow      m_afRayTime[LEVIATHAN_RAYS];        // 
+    coreFloat     m_afRayLen [LEVIATHAN_RAYS];        // 
     coreUint8     m_iRayState;                        // 
+
+    coreBatchList m_Mark;                             // 
+    coreObject3D  m_aMarkRaw  [LEVIATHAN_MARKS];      // 
 
     coreUint16 m_iDecalState;                         // 
 
@@ -615,6 +621,10 @@ private:
     void __DisableRay     (const coreUintW iIndex, const coreBool bAnimated);
     void __BeginRay       (const coreUintW iIndex);
     void __CreateOverdrive(const coreUintW iIndex, const coreVector3 vIntersect, const coreFloat fTime, const coreBool bGround);
+
+    // 
+    void __EnableMark (const coreUintW iIndex);
+    void __DisableMark(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
     void __UpdateHealth();
@@ -729,7 +739,7 @@ private:
     void __ShootWeapon();
 
     // 
-    void __CauseBeamDamage(cPlayer* pTarget);
+    void __CauseBeamDamage(cPlayer* OUTPUT pTarget);
 
     // 
     void __CreateTrail    (const coreUintW iIndex, const coreVector3 vIntersect);

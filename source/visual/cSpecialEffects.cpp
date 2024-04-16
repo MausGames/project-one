@@ -1094,7 +1094,7 @@ void cSpecialEffects::PlaySound(const coreVector3 vPosition, const coreFloat fVo
     case SOUND_EFFECT_CHARGE_OUT:    fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_EFFECT_DUST:          fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_EFFECT_ERROR:         fBaseVolume = 1.0f; fBasePitch = 0.9f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
-    case SOUND_EFFECT_FIRE_START:    fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
+    case SOUND_EFFECT_FIRE_START:    fBaseVolume = 1.0f; fBasePitch = 0.7f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_EFFECT_PEARL:         fBaseVolume = 1.1f; fBasePitch = 1.2f; fBasePitchRnd = 0.0f;  bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_EFFECT_SHAKE:         fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;
     case SOUND_EFFECT_WOOSH:         fBaseVolume = 1.0f; fBasePitch = 1.0f; fBasePitchRnd = 0.05f; bRelative = false; iType = SOUND_EFFECT; break;

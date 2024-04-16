@@ -1304,6 +1304,7 @@ void cNevoMission::__MoveOwnAfter()
 
         g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cGrowBullet>([](cGrowBullet* OUTPUT pBullet1)
         {
+            if(pBullet1->GetDamage() == 2) return;
             if(coreMath::IsNear(pBullet1->GetSpeed(), 0.1f)) return;
 
             if(((pBullet1->GetPosition().x <  -FOREGROUND_AREA.x * 1.0f) && (pBullet1->GetFlyDir().x < 0.0f)) ||

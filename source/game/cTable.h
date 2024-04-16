@@ -128,7 +128,6 @@ private:
     coreProtect<coreFlow>   m_fCooldown;                                             // 
     coreProtect<coreUint32> m_iOverride;                                             // 
 
-    coreProtect<coreUint32> m_aiMaxSeriesMission [TABLE_MISSIONS];                   // 
     coreProtect<coreUint32> m_aaiMaxSeriesSegment[TABLE_MISSIONS][TABLE_SEGMENTS];   // 
 
     cPlayer* m_pOwner;                                                               // 
@@ -179,7 +178,6 @@ public:
     inline coreUint32 GetCurChain        ()const                                                             {return m_iCurChain;}
     inline coreFloat  GetCooldown        ()const                                                             {return m_fCooldown;}
     inline coreUint32 GetModifier        ()const                                                             {return this->HasOverride() ? (m_iOverride + 0u) : (m_iCurCombo + 10u);}
-    inline coreUint32 GetMaxSeriesMission(const coreUintW iMissionIndex)const                                {ASSERT(iMissionIndex < TABLE_MISSIONS)                                   return m_aiMaxSeriesMission [iMissionIndex];}
     inline coreUint32 GetMaxSeriesSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {ASSERT(iMissionIndex < TABLE_MISSIONS && iSegmentIndex < TABLE_SEGMENTS) return m_aaiMaxSeriesSegment[iMissionIndex][iSegmentIndex];}
 
 

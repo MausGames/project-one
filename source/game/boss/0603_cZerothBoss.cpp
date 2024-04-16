@@ -7,7 +7,6 @@
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
-#include "file/cConfig.h"
 
 // snow-laser darf sich nicht zu schnell bewegen (test on 60 FPS), weil er keine dynamische funktion hat, und dann löcher hinterlässt
 // angriff während laser-phase soll den spieler vom boss fernhalten, damit er nicht ständig kurz umrunden kann
@@ -1126,14 +1125,14 @@ void cZerothBoss::__MoveOwn()
         {
             const coreFloat fSide = m_aiCounter[DRAG_SIDE] ? -1.0f : 1.0f;
 
-            const coreVector2 vDir = (g_CurConfig.Graphics.iRotation ? coreVector2::Direction((I_TO_F(m_aiCounter[DRAG_COUNT]) + fTime) * (0.5f*PI)) : ENVIRONMENT_DEFAULT_DIRECTION) * fSide;
+            const coreVector2 vDir = (g_CurConfig.Game.iBackRotation ? coreVector2::Direction((I_TO_F(m_aiCounter[DRAG_COUNT]) + fTime) * (0.5f*PI)) : ENVIRONMENT_DEFAULT_DIRECTION) * fSide;
 
             this->SetPosition (coreVector3(vDir * FOREGROUND_AREA * 0.7f, 0.0f));
             this->SetDirection(coreVector3(vDir, 0.0f));
 
             g_pEnvironment->SetTargetDirectionNow(vDir * SIGN(g_pEnvironment->GetSpeed()));
 
-            if(!g_CurConfig.Graphics.iRotation)
+            if(!g_CurConfig.Game.iBackRotation)
             {
                 const coreFloat fBase = m_aiCounter[DRAG_SIDE] ? (1.0f*PI) : (0.0f*PI);
                 this->DefaultRotateLerp(fBase, fBase + (4.0f*PI) * fSide, fTime);

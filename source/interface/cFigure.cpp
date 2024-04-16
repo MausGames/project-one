@@ -75,7 +75,7 @@ void cFigure::Move()
             else
             {
                 pcText = SDL_GameControllerGetStringForButton(SDL_GameControllerButton(m_iKey));
-                pcText = pcText ? coreData::StrUpper(pcText) : coreData::ToChars(m_iKey);
+                pcText = pcText ? coreData::StrToUpper(pcText) : coreData::ToChars(m_iKey);
 
                 this->SetTexOffset(coreVector2(4.0f,0.0f) * FIGURE_SCALE_GAMEPAD);
             }

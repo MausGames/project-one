@@ -19,15 +19,16 @@
 // view-bullets am ende sollen durchgängig sein, um spieler im kreis bewegen zu lassen (wenn möglich), aber trotzdem leicht versetzt und ausgefranst, um gracing zu erschweren
 // die schilde bringen spieler dazu sich um boss herum zu bewegen
 // durchgängig aufrichtige bewegung is kompletter bullshit, animation schaut orsch aus wenn sie boss auch dabei dreht, und der boss wirkt nicht mehr so massiv
-// TODO 1: clean up code (also in mission)
-// TODO 1: gelbe und blaue farbe is weird
+// TODO 4: clean up code (also in mission)
+// TODO 1: [MF] gelbe und blaue farbe is weird
 // TODO 1: hard mode: all object behaviors increase, gelber angriff is undurchdringbar (7 statt 3 geschosse)
 // TODO 1: hard mode: neue beschwörung die nicht zerstört werden kann (vielleicht finaler ball kann nicht zerstört werden)
-// TODO 1: purple helper shield wird unter laser gezeichnet
-// TODO 1: MAIN: medal goal (nochmal prüfen, nichts abziehen), explosion (verbessern: schneller, mit kleiner explosion um drehung anzustoßen), regular score, sound, background rota/speed
-// TODO 1: ACHIEVEMENT: name (), description (), fly through the hole without touching the boss
-// TODO 1: schilde reflektieren manchmal an falscher stelle, vielleicht old-pos issue, wenn sie zurück in die mitte teleportiert werden ? sollte überall gehandelt werden wo old-pos new-pos objekte berechnet werden
-// TODO 1: purple helper sollte immer bei Nth laser kommen
+// TODO 3: purple helper shield wird unter laser gezeichnet
+// TODO 1: [MF] MAIN: medal goal (nochmal prüfen, nichts abziehen), explosion (verbessern: schneller, mit kleiner explosion um drehung anzustoßen), regular score, sound, background rota/speed
+// TODO 1: [MF] ACHIEVEMENT: name (), description (), fly through the hole without touching the boss
+// TODO 1: [MF] schilde reflektieren manchmal an falscher stelle, vielleicht old-pos issue, wenn sie zurück in die mitte teleportiert werden ? sollte überall gehandelt werden wo old-pos new-pos objekte berechnet werden
+// TODO 1: [MF] purple helper sollte immer bei Nth laser kommen
+// TODO 1: [MF] alle phasen nochmal für verbesserungen anschauen
 
 
 // ****************************************************************
@@ -481,7 +482,7 @@ void cTorusBoss::__MoveOwn()
                 this->AddStatus(ENEMY_STATUS_GHOST);
                 this->ChangeToBottom();
 
-                g_pSpecialEffects->ExternPlayPosition(m_pFireSound, this, 0.0f, 1.0f, true, SOUND_EFFECT, coreVector3(0.0f,100.0f,0.0f));
+                g_pSpecialEffects->ExternPlayPosition(m_pFireSound, this, 0.0f, 0.8f, true, SOUND_EFFECT, coreVector3(0.0f,100.0f,0.0f));
             }
 
             if(PHASE_TIME_BEFORE(0.85f))

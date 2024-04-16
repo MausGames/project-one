@@ -298,6 +298,10 @@ private:
 
     coreFlow  m_fAlgaeTime;      // 
     coreUintW m_iAlgaeNum;       // 
+    
+    coreFlow  m_fOverdriveTime;   // 
+    coreUint8 m_vOverdriveCount;   // 
+    coreBool  m_bOverdrive;      // 
 
     coreSoundPtr m_pBaseSound;   // base sound-effect
 
@@ -309,6 +313,9 @@ public:
     DISABLE_COPY(cSeaBackground)
     ASSIGN_ID_EX(2, "Sea", COLOR_MENU_CYAN, COLOR_MENU_CYAN, coreVector2(0.5f,0.25f))
 
+    // 
+    inline void SetOverdrive(const coreBool bOrverdrive) {m_bOverdrive = bOrverdrive;}
+
 
 protected:
     // execute own routines
@@ -316,6 +323,8 @@ protected:
     void __ExitOwn  ()final;
     void __MoveOwn  ()final;
     void __UpdateOwn()final;
+
+    void __CreateOverdrive(const coreVector3 vIntersect);
 };
 
 

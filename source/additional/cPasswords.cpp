@@ -29,17 +29,25 @@ coreBool ApplyPassword(const coreChar* pcText)
         }
         break;
 
+    // SAFFRON orange
+    case 4606173178869511954u:
+        {
+            for(coreUintW i = 0u; i < SAVE_MISSIONS; ++i) g_pSave->EditProgress()->aiAdvance[i] = MAX(g_pSave->EditProgress()->aiAdvance[i], 6u);
+        }
+        break;
+
     // FUCHSIA pink
     case 8219416175255162026u:
         {
-            for(coreUintW i = 0u; i < SAVE_MISSIONS; ++i) g_pSave->EditProgress()->aiAdvance[i] = MAX(g_pSave->EditProgress()->aiAdvance[i], 6u);
+            std::memset(g_pSave->EditProgress()->aiFragment, 1, sizeof(g_pSave->EditProgress()->aiFragment));
         }
         break;
 
     // ORCHIL purple
     case 16681166332002509082u:
         {
-            g_pSave->EditProgress()->bFirstPlay = true;
+            g_pSave->EditProgress()->bFirstPlay   = true;
+            g_pSave->EditProgress()->aiAdvance[0] = 0u;
             bRestart = true;
         }
         break;

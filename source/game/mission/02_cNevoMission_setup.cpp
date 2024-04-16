@@ -48,9 +48,9 @@ void cNevoMission::__SetupOwn()
 
     // ################################################################
     // show mission name
-    STAGE_MAIN({TAKE_MISSION})
+    STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
-        if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_CONTINUE))
+        if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_NAMELESS))
         {
             STAGE_FINISH_NOW
         }
@@ -1652,7 +1652,7 @@ void cNevoMission::__SetupOwn()
             else if(STAGE_SUB(12u))
             {
                 STAGE_RESURRECT(pSquad1, 80u, 115u)
-                nEnableArrowFunc( 2u,  80u, 2u);
+                /*nEnableArrowFunc( 2u,  80u, 2u);
                 nEnableArrowFunc( 3u,  81u, 2u);
                 nEnableArrowFunc( 4u,  82u, 0u);
                 nEnableArrowFunc( 5u,  83u, 2u);
@@ -1688,6 +1688,43 @@ void cNevoMission::__SetupOwn()
                 nEnableArrowFunc(35u, 113u, 2u);
                 nEnableArrowFunc(36u, 114u, 0u);
                 nEnableArrowFunc(37u, 115u, 0u);
+                 */
+                nEnableArrowFunc( 2u,  80u, 3u);
+                nEnableArrowFunc( 3u,  81u, 0u);
+                nEnableArrowFunc( 4u,  82u, 2u);
+                nEnableArrowFunc( 5u,  83u, 0u);
+                nEnableArrowFunc( 6u,  84u, 3u);
+                nEnableArrowFunc( 7u,  85u, 0u);
+                nEnableArrowFunc( 8u,  86u, 2u);
+                nEnableArrowFunc( 9u,  87u, 1u);
+                nEnableArrowFunc(10u,  88u, 2u);
+                nEnableArrowFunc(11u,  89u, 0u);
+                nEnableArrowFunc(12u,  90u, 1u);
+                nEnableArrowFunc(13u,  91u, 1u);
+                nEnableArrowFunc(14u,  92u, 3u);
+                nEnableArrowFunc(15u,  93u, 3u);
+                nEnableArrowFunc(16u,  94u, 3u);
+                nEnableArrowFunc(17u,  95u, 0u);
+                nEnableArrowFunc(18u,  96u, 3u);
+                nEnableArrowFunc(19u,  97u, 3u);
+                nEnableArrowFunc(20u,  98u, 2u);
+                nEnableArrowFunc(21u,  99u, 1u);
+                nEnableArrowFunc(22u, 100u, 1u);
+                nEnableArrowFunc(23u, 101u, 0u);
+                nEnableArrowFunc(24u, 102u, 1u);
+                nEnableArrowFunc(25u, 103u, 1u);
+                nEnableArrowFunc(26u, 104u, 3u);
+                nEnableArrowFunc(27u, 105u, 0u);
+                nEnableArrowFunc(28u, 106u, 2u);
+                nEnableArrowFunc(29u, 107u, 3u);
+                nEnableArrowFunc(30u, 108u, 3u);
+                nEnableArrowFunc(31u, 109u, 0u);
+                nEnableArrowFunc(32u, 110u, 2u);
+                nEnableArrowFunc(33u, 111u, 1u);
+                nEnableArrowFunc(34u, 112u, 2u);
+                nEnableArrowFunc(35u, 113u, 1u);
+                nEnableArrowFunc(36u, 114u, 2u);
+                nEnableArrowFunc(37u, 115u, 1u);
             }
         }
 
@@ -1907,6 +1944,8 @@ void cNevoMission::__SetupOwn()
         pBackground->SetGroundDensity(3u, 0.0f);
         pBackground->SetGroundDensity(4u, 1.0f);
         pBackground->SetGroundDensity(5u, 1.0f);
+
+        pBackground->SetOverdrive(true);
 
         STAGE_FINISH_NOW
     });
@@ -2704,10 +2743,38 @@ void cNevoMission::__SetupOwn()
     });
 
     // ################################################################
+    // change background appearance
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        cSeaBackground* pBackground = d_cast<cSeaBackground*>(g_pEnvironment->GetBackground());
+
+        pBackground->SetOverdrive(false);
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
     // wait for play
     STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         STAGE_FINISH_PLAY
+    });
+
+    // ################################################################
+    // boss
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        STAGE_BOSS(m_Leviathan, {160.0f, 240.0f, 320.0, 400.0f})
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        if(!g_pGame->GetItemManager()->GetNumItems() && !g_pGame->GetInterface()->IsFragmentActive())
+        {
+            STAGE_FINISH_NOW
+        }
     });
 
     // ################################################################
@@ -2810,41 +2877,28 @@ void cNevoMission::__SetupOwn()
             g_pGame->GetInterface()->ShowFragment(INTERFACE_FRAGMENT_TYPE_HIDE);
 
             g_pEnvironment->ChangeBackground(cSeaBackground::ID, ENVIRONMENT_MIX_FADE, 0.0f);
-            g_pEnvironment->SetTargetSpeedNow(6.0f);
+            g_pEnvironment->SetTargetSpeedNow(ENVIRONMENT_DEFAULT_SPEED);
 
             Core::Manager::Resource->UpdateResources();
             Core::Manager::Resource->UpdateFunctions();
 
-            cPlayer* pPlayer = g_pGame->GetPlayer(0u);
+            //cPlayer* pPlayer = g_pGame->GetPlayer(0u);
 
-            pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_MOVE);
-            pPlayer->SetMoveSpeed(0.0f);
-            pPlayer->SetPosition (coreVector3(0.0f,-0.5f,0.0f) * FOREGROUND_AREA3);
-            pPlayer->SetDirection(coreVector3(0.0f, 1.0f,0.0f));
+            //pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_MOVE);
+            //pPlayer->SetMoveSpeed(0.0f);
+            //pPlayer->SetPosition (coreVector3(0.0f,-0.5f,0.0f) * FOREGROUND_AREA3);
+            //pPlayer->SetDirection(coreVector3(0.0f, 1.0f,0.0f));
 
             if(m_pNightmareSound->EnableRef(this)) m_pNightmareSound->Stop();
 
-            m_Leviathan.ResurrectDemo();
+            //m_Leviathan.ResurrectDemo();
         }
+        //else if(STAGE_TIME_AFTER(8.0f))
+        //{
+        //    if(m_Leviathan.HasStatus(ENEMY_STATUS_DEAD))
+        //        STAGE_FINISH_NOW
+        //}
         else if(STAGE_TIME_AFTER(8.0f))
-        {
-            if(m_Leviathan.HasStatus(ENEMY_STATUS_DEAD))
-                STAGE_FINISH_NOW
-        }
-    });
-
-    // ################################################################
-    // boss
-    if(!g_bDemoVersion) STAGE_MAIN({TAKE_ALWAYS, 5u})
-    {
-        STAGE_BOSS(m_Leviathan, {180.0f, 270.0f, 360.0, 450.0f})
-    });
-
-    // ################################################################
-    // 
-    if(!g_bDemoVersion) STAGE_MAIN({TAKE_ALWAYS, 5u})
-    {
-        if(!g_pGame->GetItemManager()->GetNumItems() && !g_pGame->GetInterface()->IsFragmentActive())
         {
             STAGE_FINISH_NOW
         }
@@ -2852,7 +2906,7 @@ void cNevoMission::__SetupOwn()
 
     // ################################################################
     // end
-    STAGE_MAIN({TAKE_MISSION})
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         STAGE_FINISH_AFTER(MISSION_WAIT_OUTRO)
     });

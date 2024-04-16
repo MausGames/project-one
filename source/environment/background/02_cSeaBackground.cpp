@@ -12,8 +12,11 @@
 // ****************************************************************
 // constructor
 cSeaBackground::cSeaBackground()noexcept
-: m_fWaveTime  (0.0f)
-, m_fAlgaeTime (0.0f)
+: m_fWaveTime       (0.0f)
+, m_fAlgaeTime      (0.0f)
+, m_fOverdriveTime  (0.0f)
+, m_vOverdriveCount (0u)
+, m_bOverdrive      (false)
 {
     coreBatchList* pList1;
     coreBatchList* pList2;
@@ -376,6 +379,34 @@ void cSeaBackground::__MoveOwn()
     {
         m_pBaseSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
     }
+    
+    
+    
+    if(m_bOverdrive)
+    {
+        // 
+        const coreVector2 vEnvDirection = g_pEnvironment->GetDirection();
+        const coreFloat   fEnvSpeed     = g_pEnvironment->GetSpeed();
+        const coreFloat   fEnvFlyOffset = g_pEnvironment->GetFlyOffset();
+    
+        if(TIME && (fEnvSpeed > 0.0f))
+        {
+            m_fOverdriveTime.Update(fEnvSpeed * 0.1f);
+            if(m_fOverdriveTime >= 1.0f)
+            {
+                m_fOverdriveTime = FRACT(m_fOverdriveTime);
+                
+
+                const coreFloat fOffest = 10.0f * OUTDOOR_DETAIL;
+    
+                const coreVector2 vGroundPos = coreVector2(SIN((fEnvFlyOffset + fOffest / OUTDOOR_DETAIL) * (0.075f*PI)) * -12.5f, fEnvFlyOffset * OUTDOOR_DETAIL);
+    
+                const coreVector2 vBodyPos = MapToAxis(coreVector2(vGroundPos.x, fOffest), vEnvDirection);
+
+                this->__CreateOverdrive(coreVector3(vBodyPos, g_pEnvironment->RetrieveSafeHeight(vBodyPos) - 0.0f));
+            }
+        }
+    }
 }
 
 
@@ -395,4 +426,33 @@ void cSeaBackground::__UpdateOwn()
 
     // 
     cShadow::EnableShadowRead(pGround->IsInstanced() ? SHADOW_HANDLE_OBJECT_WAVE_INST : SHADOW_HANDLE_OBJECT_WAVE);
+}
+
+
+// ****************************************************************
+// 
+void cSeaBackground::__CreateOverdrive(const coreVector3 vIntersect)
+{
+    const coreUintW i = (m_vOverdriveCount++);
+    
+    // 
+    const coreBool    bRotated   = i % 2u;
+    const coreBool    bFlipped   = (i / 2u) % 2u;
+    const coreVector3 vDecalPos  = vIntersect;
+    const coreVector2 vDecalSize = coreVector2(1.0f,1.0f) * 15.0f;
+    const coreVector2 vDecalDir  = coreVector2(0.0f,1.0f);
+
+    // load object resources
+    coreObject3D* pObject = MANAGED_NEW(coreObject3D);
+    pObject->DefineModel  (Core::Manager::Object->GetLowQuad());
+    pObject->DefineTexture(0u, "effect_soot.png");
+    pObject->DefineProgram("effect_decal_single_program");
+
+    // set object properties
+    pObject->SetSize     (coreVector3((bRotated ? vDecalSize.yx()       : vDecalSize),                            1.0f));
+    pObject->SetDirection(coreVector3((bRotated ? vDecalDir.Rotated90() : vDecalDir) * (bFlipped ? -1.0f : 1.0f), 0.0f));
+    pObject->SetColor3   (coreVector3(0.0f, 0.0f, 0.0f));
+
+    // add object to background
+    this->AddDecal(pObject, vDecalPos, 256u, "effect_decal_single_inst_program", LIST_KEY);
 }

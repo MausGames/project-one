@@ -49,6 +49,26 @@ RETURN_NONNULL cSave::sGlobalStats* cSave::EditGlobalStats()
     return &s_GlobalStatsDummy;
 }
 
+RETURN_NONNULL cSave::sLocalStats* cSave::EditLocalStatsArcade(const coreUint8 iType, const coreUint8 iMode, const coreUint8 iDifficulty)
+{
+    if(!m_bIgnore)
+    {
+        // 
+        return &m_Header.aaaLocalStatsArcade[iType][iMode][iDifficulty];
+    }
+
+    // 
+    static sLocalStats s_LocalStatsDummy;
+    return &s_LocalStatsDummy;
+}
+
+RETURN_NONNULL cSave::sLocalStats* cSave::EditLocalStatsArcade()
+{
+    // 
+    ASSERT(STATIC_ISVALID(g_pGame))
+    return this->EditLocalStatsArcade(g_pGame->GetType(), g_pGame->GetMode(), g_pGame->GetDifficulty());
+}
+
 RETURN_NONNULL cSave::sLocalStats* cSave::EditLocalStatsMission(const coreUint8 iType, const coreUint8 iMode, const coreUint8 iDifficulty, const coreUintW iMissionIndex)
 {
     if(!m_bIgnore)
@@ -318,17 +338,17 @@ void cSave::__CheckHeader(sHeader* OUTPUT pHeader)
     }
 
     // handle players which use ALT+F4 after finishing the intro mission
-    if(pHeader->oProgress.bFirstPlay && pHeader->oProgress.aiAdvance[1])
+    if(pHeader->oProgress.bFirstPlay && (pHeader->oProgress.aiAdvance[0] >= 7u))
     {
         pHeader->oProgress.bFirstPlay = false;
-        if(!g_bDemoVersion) ADD_BIT_EX(pHeader->oProgress.aiNew, NEW_MAIN_EXTRA)
+        if(!g_bDemoVersion)
+        {
+            ADD_BIT_EX(pHeader->oProgress.aiNew, NEW_MAIN_START)
+            ADD_BIT_EX(pHeader->oProgress.aiNew, NEW_MAIN_EXTRA)
+        }
     }
 
-#if defined(_CORE_DEBUG_)
-    std::memset(pHeader->oProgress.aiFragment, 1, sizeof(pHeader->oProgress.aiFragment));
-#endif
-    
-    
+    // 
     if(!HAS_BIT_EX(pHeader->oProgress.aiUnlock, UNLOCK_MIRRORMORE))  g_CurConfig.Game.iMirrorMode = 0u;
     if(!HAS_BIT_EX(pHeader->oProgress.aiUnlock, UNLOCK_GAMESPEEDUP)) g_CurConfig.Game.iGameSpeed  = MIN(g_CurConfig.Game.iGameSpeed, 100u);
 }

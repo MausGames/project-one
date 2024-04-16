@@ -215,7 +215,7 @@ void cArcadeInput::Start(const coreChar* pcTemplate, const coreUint8 iLength)
 
     // 
     m_sTextValue    = "";
-    m_sTextTemplate = coreData::StrUpper(pcTemplate);
+    m_sTextTemplate = coreData::StrToUpper(pcTemplate);
     m_iTextLength   = iLength;
 
     // 

@@ -125,7 +125,7 @@ void cIntroMenu::Move()
 
                 // 
                 g_pEnvironment->Activate();
-                g_pPostProcessing->SetWallOpacity(CLAMP(1.35f * (fTime2 - 2.0f), 0.0f, 1.0f));
+                g_pPostProcessing->SetWallOpacity(CLAMP01(1.35f * (fTime2 - 2.0f)));
             }
             if(fTime2 >= 1.0f)
             {

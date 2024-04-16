@@ -71,6 +71,7 @@ inline FUNC_CONST coreFloat FmodRange(const coreFloat x, const coreFloat a, cons
     return x;
 }
 
+
 // ****************************************************************
 // 
 inline FUNC_CONST coreFloat CeilFactor(const coreFloat fValue, const coreFloat fFactor)

@@ -9,14 +9,14 @@
 #include "main.h"
 
 static coreBool  s_bInit = false;
-static coreUint8 s_iStep = 0u;
+//static coreUint8 s_iStep = 0u;
 
 
 // ****************************************************************
 // 
 void InitAchievements()
 {
-    if(CoreApp::Settings::Platform::SteamAppID != 1624320u) return;
+    if(g_bDemoVersion) return;
 
     // 
     if(s_bInit) return;
@@ -49,7 +49,8 @@ void InitAchievements()
 // 
 void CheckAchievements()
 {
-    if(CoreApp::Settings::Platform::SteamAppID != 1624320u) return;
+#if 0
+    if(g_bDemoVersion) return;
 
     // 
     if(++s_iStep >= 11u) s_iStep = 0u;
@@ -126,7 +127,7 @@ void CheckAchievements()
 
             if([]()
             {
-                for(coreUintW i = 0u; i < 9u; ++i)
+                for(coreUintW i = 0u; i < MISSION_BASE; ++i)
                 {
                     if(!ALL_MEDAL_MISSION(aiMedal) {return (aiMedal[i] == MEDAL_DARK);})) return false;
                 }
@@ -138,15 +139,15 @@ void CheckAchievements()
 
             if([]()
             {
-                for(coreUintW i = 0u; i < 8u; ++i)
+                for(coreUintW i = 0u; i < MISSION_BASE - 1u; ++i)
                 {
                     for(coreUintW j = 0u; j < 6u; ++j)
                     {
                         if(!ALL_MEDAL_SEGMENT(aaiMedal) {return (aaiMedal[i][j] == MEDAL_DARK);})) return false;
                     }
                 }
-                if(!ALL_MEDAL_SEGMENT(aaiMedal) {return (aaiMedal[8][5] == MEDAL_DARK);})) return false;
-                if(!ALL_MEDAL_SEGMENT(aaiMedal) {return (aaiMedal[8][6] == MEDAL_DARK);})) return false;
+                if(!ALL_MEDAL_SEGMENT(aaiMedal) {return (aaiMedal[MISSION_ATER][5] == MEDAL_DARK);})) return false;
+                if(!ALL_MEDAL_SEGMENT(aaiMedal) {return (aaiMedal[MISSION_ATER][6] == MEDAL_DARK);})) return false;
                 return true;
             }())
             {
@@ -159,7 +160,7 @@ void CheckAchievements()
         {
             if([]()
             {
-                for(coreUintW i = 1u; i < 8u; ++i)
+                for(coreUintW i = 1u; i < MISSION_BASE - 1u; ++i)
                 {
                     for(coreUintW j = 0u; j < 5u; ++j)
                     {
@@ -197,4 +198,5 @@ void CheckAchievements()
         ASSERT(false)
         break;
     }
+#endif
 }

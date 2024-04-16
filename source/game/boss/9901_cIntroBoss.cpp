@@ -19,6 +19,7 @@
 // TODO 1: improve intro and outro (including fragment collection)
 // TODO 1: MAIN: task-check, fragment, regular score, outro, sound
 // TODO 1: ACHIEVEMENT: name (), description (), keep enemy on sword alive until it gets thrown away
+// TODO 1: nach erstem spielen erscheinen helper für extra punkte
 
 
 // ****************************************************************

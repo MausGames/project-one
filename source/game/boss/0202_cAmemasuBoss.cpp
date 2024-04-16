@@ -371,7 +371,7 @@ void cAmemasuBoss::__MoveOwn()
 
     // ################################################################
     // 
-    else if(m_iPhase == 31u || m_iPhase == 33u || m_iPhase == 35u || m_iPhase == 37u)
+    else if((m_iPhase == 31u) || (m_iPhase == 33u) || (m_iPhase == 35u) || (m_iPhase == 37u))
     {
         PHASE_CONTROL_TIMER(0u, 1.0f, LERP_LINEAR)
         {
@@ -389,7 +389,7 @@ void cAmemasuBoss::__MoveOwn()
 
                 for(coreUintW i = 0u; i < 4u; ++i)
                 {
-                    const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(i) * 8.0f - 12.0f + ((m_iPhase == 34u || m_iPhase == 38u) ? 45.0f : 0.0f)));
+                    const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(i) * 8.0f - 12.0f + (((m_iPhase == 34u) || (m_iPhase == 38u)) ? 45.0f : 0.0f)));
 
                     g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.2f, this, this->GetPosition().xy(),  vDir)            ->ChangeSize(1.4f);
                     g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.2f, this, this->GetPosition().xy(), -vDir)            ->ChangeSize(1.4f);
@@ -404,7 +404,7 @@ void cAmemasuBoss::__MoveOwn()
 
     // ################################################################
     // 
-    else if(m_iPhase == 32u || m_iPhase == 34u || m_iPhase == 36u || m_iPhase == 38u)
+    else if((m_iPhase == 32u) || (m_iPhase == 34u) || (m_iPhase == 36u) || (m_iPhase == 38u))
     {
         PHASE_CONTROL_PAUSE(0u, 2.0f)
         {

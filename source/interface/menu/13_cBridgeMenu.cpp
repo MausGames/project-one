@@ -212,7 +212,7 @@ void cBridgeMenu::Move()
                         else
                         {
                             // 
-                            m_iStatus = 5;
+                            m_iStatus = 6;
                         }
                     }
                 }
@@ -260,6 +260,34 @@ void cBridgeMenu::Move()
         }
         break;
 
+    case SURFACE_BRIDGE_NEXT:
+        {
+            // 
+            m_fReturnTimer.Update(1.0f);
+
+            if(m_bReturnState)
+            {
+                // 
+                g_pPostProcessing->SetValueAll(BLENDH3(CLAMP01(1.0f - m_fReturnTimer)));
+
+                if(m_fReturnTimer >= 1.5f)
+                {
+                    // 
+                    m_iStatus = 4;
+
+                    // 
+                    m_bReturnState = false;
+
+                    // 
+                    g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 0.0f);
+
+                    // 
+                    cMenu::ClearScreen();
+                }
+            }
+        }
+        break;
+
     case SURFACE_BRIDGE_RESTART:
         {
             // 
@@ -270,7 +298,7 @@ void cBridgeMenu::Move()
                 // 
                 g_pPostProcessing->SetValueAll(BLENDH3(CLAMP01(1.0f - m_fReturnTimer)));
 
-                if(g_pMenu->IsPaused())
+                if(g_pMenu->IsPaused())   // TODO 1: mit m_bPaused ersetzen ?
                 {
                     g_pGame->MoveOverlay();      
                     ASSERT(STATIC_ISVALID(g_pGame))      
@@ -280,7 +308,7 @@ void cBridgeMenu::Move()
                 if(m_fReturnTimer >= 1.5f)
                 {
                     // 
-                    m_iStatus = 4;
+                    m_iStatus = 5;
 
                     // 
                     m_bReturnState = false;
@@ -344,7 +372,7 @@ void cBridgeMenu::ReturnMenu(const coreUint8 iTarget, const coreBool bPaused, co
     g_pGame->GetCombatText()->SetVisible(false);
 
     // 
-    if(g_MusicPlayer.GetCurMusic() != g_MusicPlayer.GetMusicName("menu.ogg"))   // TODO 1: condition for finale in demo
+    if(g_MusicPlayer.GetCurMusic() != g_MusicPlayer.GetMusicName("menu.ogg"))   // TODO 1: [also] condition for finale in demo
         g_pGame->FadeMusic(1.0f);
 
     // 
@@ -363,6 +391,25 @@ void cBridgeMenu::UseContinue()
 
     // 
     this->ChangeSurface(SURFACE_BRIDGE_CONTINUE, 0.0f);
+}
+
+
+// ****************************************************************
+// 
+void cBridgeMenu::UseNext()
+{
+    ASSERT(STATIC_ISVALID(g_pGame))
+
+    // 
+    this->__ResetState();
+
+    // 
+    g_pGame->GetInterface ()->Reset();
+    g_pGame->GetInterface ()->SetVisible(false);
+    g_pGame->GetCombatText()->SetVisible(false);
+
+    // 
+    this->ChangeSurface(SURFACE_BRIDGE_NEXT, 0.0f);
 }
 
 

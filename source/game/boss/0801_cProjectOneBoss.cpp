@@ -993,7 +993,7 @@ void cProjectOneBoss::__MoveOwn()
             else
             {
                 const coreVector2 vDir = pHelper->GetPosition().xy().Normalized();
-                const coreVector2 vPos = pHelper->GetPosition().xy() + vDir * (10.0f * (3.0f + 6.0f * m_fPhaseTime) * TIME);
+                const coreVector2 vPos = pHelper->GetPosition().xy() + vDir * (20.0f * (3.0f + 6.0f * m_fPhaseTime) * TIME);
 
                 pHelper->SetPosition(coreVector3(vPos, 0.0f));
 
@@ -5061,8 +5061,8 @@ void cProjectOneBoss::__EndMission(const coreBool bAnimated, const coreBool bRet
             pHarena->DisableSpike(i, bAnimated);
 
         // 
-        pHarena->GetEnemySquad(0u)->ClearEnemies(bAnimated);
-        pHarena->GetEnemySquad(1u)->ClearEnemies(bAnimated);
+        if(bAnimated) pHarena->GetEnemySquad(0u)->ClearEnemies(true);
+        if(bAnimated) pHarena->GetEnemySquad(1u)->ClearEnemies(true);
     }
     else if(iID == cRutilusMission::ID)
     {

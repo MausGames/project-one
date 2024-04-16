@@ -107,6 +107,7 @@ void cWeapon::_TrackBullet()
 
     // 
     g_pSave->EditGlobalStats      ()->iBulletsShot += 1u;
+    g_pSave->EditLocalStatsArcade ()->iBulletsShot += 1u;
     g_pSave->EditLocalStatsMission()->iBulletsShot += 1u;
     g_pSave->EditLocalStatsSegment()->iBulletsShot += 1u;
 }

@@ -9,16 +9,22 @@
 
 // ****************************************************************
 // project settings
-const coreChar* const CoreApp::Settings::Name                   = "Eigengrau";
-const coreChar* const CoreApp::Settings::IconPath               = "data/textures/game_icon.png";
-const coreChar* const CoreApp::Settings::CursorPath             = "data/textures/default_cursor.png";
-const coreBool        CoreApp::Settings::UserManagement         = true;
-const coreUint8       CoreApp::Settings::Graphics::DepthSize    = 16u;
-const coreUint8       CoreApp::Settings::Graphics::StencilSize  = 0u;
-const coreBool        CoreApp::Settings::Graphics::AlphaChannel = false;
-const coreBool        CoreApp::Settings::Graphics::DoubleBuffer = true;
-const coreBool        CoreApp::Settings::Graphics::StereoRender = false;
+const coreChar* const CoreApp::Settings::Name                       = "Eigengrau";
+const coreChar* const CoreApp::Settings::Version                    = "0.2.1";
+const coreChar* const CoreApp::Settings::IconPath                   = "data/textures/game_icon.png";
+const coreChar* const CoreApp::Settings::CursorPath                 = "data/textures/default_cursor.png";
+const coreBool        CoreApp::Settings::UserManagement             = true;
+const coreUint8       CoreApp::Settings::Graphics::DepthSize        = 16u;
+const coreUint8       CoreApp::Settings::Graphics::StencilSize      = 0u;
+const coreBool        CoreApp::Settings::Graphics::AlphaChannel     = false;
+const coreBool        CoreApp::Settings::Graphics::DoubleBuffer     = true;
+const coreBool        CoreApp::Settings::Graphics::StereoRender     = false;
 /*const*/ coreUint32      CoreApp::Settings::Platform::SteamAppID   = 1624320u;
+const coreChar* const CoreApp::Settings::Platform::EpicProductID    = "7dd83e44b6984bd0b92c5b6a1850a9cb";
+const coreChar* const CoreApp::Settings::Platform::EpicSandboxID    = "d683ed3004f1479abdf2fc4bcfdc615d";
+const coreChar* const CoreApp::Settings::Platform::EpicDeploymentID = "64c112ed4c9d4151a814a6cc93b98070";
+const coreChar* const CoreApp::Settings::Platform::EpicClientID     = "";
+const coreChar* const CoreApp::Settings::Platform::EpicClientSecret = "";
 
 
 // ****************************************************************
@@ -301,6 +307,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("menu_fragment_plate.png",                CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_fragment_plate.png");
     Core::Manager::Resource->Load<coreTexture>("game_logo.png",                          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/game_logo.png");
     Core::Manager::Resource->Load<coreTexture>("game_logo_demo.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/game_logo_demo.png");
+    Core::Manager::Resource->Load<coreTexture>("game_logo_free.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/game_logo_free.png");
     Core::Manager::Resource->Load<coreTexture>("input_gamepad_luna.png",                 CORE_RESOURCE_UPDATE_AUTO,   "data/textures/input_gamepad_luna.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
     Core::Manager::Resource->Load<coreTexture>("input_gamepad_ps3.png",                  CORE_RESOURCE_UPDATE_AUTO,   "data/textures/input_gamepad_ps3.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
     Core::Manager::Resource->Load<coreTexture>("input_gamepad_ps4.png",                  CORE_RESOURCE_UPDATE_AUTO,   "data/textures/input_gamepad_ps4.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
@@ -313,12 +320,13 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("input_keyboard.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/input_keyboard.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
     Core::Manager::Resource->Load<coreTexture>("maus_logo.png",                          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/maus_logo.png");
     Core::Manager::Resource->Load<coreTexture>("menu_background_black.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_background_black.png");
-    Core::Manager::Resource->Load<coreTexture>("menu_badge.png",                         CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_badge.png");
+    Core::Manager::Resource->Load<coreTexture>("menu_badge.png",                         CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_badge.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
     Core::Manager::Resource->Load<coreTexture>("menu_cursor.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_cursor.png");
     Core::Manager::Resource->Load<coreTexture>("menu_detail_01.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_detail_01.png");
     Core::Manager::Resource->Load<coreTexture>("menu_detail_02.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_detail_02.png");
     Core::Manager::Resource->Load<coreTexture>("menu_detail_03.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_detail_03.png");
     Core::Manager::Resource->Load<coreTexture>("menu_detail_04.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_detail_04.png");
+    Core::Manager::Resource->Load<coreTexture>("menu_detail_05.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_detail_05.png");
     Core::Manager::Resource->Load<coreTexture>("menu_helper.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_helper.png");
     Core::Manager::Resource->Load<coreTexture>("menu_medal.png",                         CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_medal.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
     Core::Manager::Resource->Load<coreTexture>("menu_mission.png",                       CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_mission.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts

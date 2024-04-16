@@ -57,9 +57,9 @@ void cViridoMission::__SetupOwn()
 
     // ################################################################
     // show mission name
-    STAGE_MAIN({TAKE_MISSION})
+    STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
-        if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_CONTINUE))
+        if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_NAMELESS))
         {
             STAGE_FINISH_NOW
         }
@@ -2585,7 +2585,7 @@ void cViridoMission::__SetupOwn()
 
     // ################################################################
     // end
-    STAGE_MAIN({TAKE_MISSION})
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         STAGE_FINISH_AFTER(MISSION_WAIT_OUTRO)
     });

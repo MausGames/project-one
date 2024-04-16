@@ -61,12 +61,19 @@ cMainMenu::cMainMenu()noexcept
         m_Navigator.BindObject(&m_CreditsButton, &m_SteamButton,   NULL, &m_ExitButton,    NULL, MENU_TYPE_DEFAULT);
         m_Navigator.BindObject(&m_ExitButton,    &m_CreditsButton, NULL, &m_StartButton,   NULL, MENU_TYPE_DEFAULT);
     }
-    else
+    else if(DEFINED(_CORE_DEBUG_))
     {
         m_Navigator.BindObject(&m_StartButton,  &m_ExitButton,   NULL, &m_ScoreButton,  NULL, MENU_TYPE_DEFAULT);
         m_Navigator.BindObject(&m_ScoreButton,  &m_StartButton,  NULL, &m_ReplayButton, NULL, MENU_TYPE_DEFAULT);
         m_Navigator.BindObject(&m_ReplayButton, &m_ScoreButton,  NULL, &m_ExtraButton,  NULL, MENU_TYPE_DEFAULT);
         m_Navigator.BindObject(&m_ExtraButton,  &m_ReplayButton, NULL, &m_ConfigButton, NULL, MENU_TYPE_DEFAULT);
+        m_Navigator.BindObject(&m_ConfigButton, &m_ExtraButton,  NULL, &m_ExitButton,   NULL, MENU_TYPE_DEFAULT);
+        m_Navigator.BindObject(&m_ExitButton,   &m_ConfigButton, NULL, &m_StartButton,  NULL, MENU_TYPE_DEFAULT);
+    }
+    else
+    {
+        m_Navigator.BindObject(&m_StartButton,  &m_ExitButton,   NULL, &m_ExtraButton,  NULL, MENU_TYPE_DEFAULT);
+        m_Navigator.BindObject(&m_ExtraButton,  &m_StartButton,  NULL, &m_ConfigButton, NULL, MENU_TYPE_DEFAULT);
         m_Navigator.BindObject(&m_ConfigButton, &m_ExtraButton,  NULL, &m_ExitButton,   NULL, MENU_TYPE_DEFAULT);
         m_Navigator.BindObject(&m_ExitButton,   &m_ConfigButton, NULL, &m_StartButton,  NULL, MENU_TYPE_DEFAULT);
     }
@@ -83,10 +90,15 @@ cMainMenu::cMainMenu()noexcept
         this->BindObject(SURFACE_MAIN_DEFAULT, &m_SteamButton);
         this->BindObject(SURFACE_MAIN_DEFAULT, &m_CreditsButton);
     }
-    else
+    else if(DEFINED(_CORE_DEBUG_))
     {
         this->BindObject(SURFACE_MAIN_DEFAULT, &m_ScoreButton);
         this->BindObject(SURFACE_MAIN_DEFAULT, &m_ReplayButton);
+        this->BindObject(SURFACE_MAIN_DEFAULT, &m_ExtraButton);
+        this->BindObject(SURFACE_MAIN_DEFAULT, &m_ConfigButton);
+    }
+    else
+    {
         this->BindObject(SURFACE_MAIN_DEFAULT, &m_ExtraButton);
         this->BindObject(SURFACE_MAIN_DEFAULT, &m_ConfigButton);
     }
@@ -95,16 +107,20 @@ cMainMenu::cMainMenu()noexcept
         this->BindObject(SURFACE_MAIN_DEFAULT, &m_ExitButton);
     #endif
 
+    this->BindObject(SURFACE_MAIN_DEFAULT, &m_StartNew);
     this->BindObject(SURFACE_MAIN_DEFAULT, &m_ExtraNew);
     this->BindObject(SURFACE_MAIN_DEFAULT, &m_ConfigNew);
     this->BindObject(SURFACE_MAIN_DEFAULT, &m_Navigator);
 
     // 
     coreSet<coreObject2D*>* pObjectSet = this->GetObjectSet(SURFACE_MAIN_DEFAULT);
-    for(coreUintW i = 0u, ie = pObjectSet->size() - 3u; i < ie; ++i)
+    for(coreUintW i = 0u, ie = pObjectSet->size() - 4u; i < ie; ++i)
     {
         (*pObjectSet)[i]->SetPosition(coreVector2(0.0f, 0.09f * (I_TO_F(ie - 1u) * 0.5f - I_TO_F(i))));
     }
+
+    m_StartNew.SetPosition(m_StartButton.GetPosition() + m_StartButton.GetSize()*coreVector2(0.5f,0.0f) + coreVector2(0.07f,0.0f));
+    m_StartNew.SetIndex   (NEW_MAIN_START);
 
     m_ExtraNew.SetPosition(m_ExtraButton.GetPosition() + m_ExtraButton.GetSize()*coreVector2(0.5f,0.0f) + coreVector2(0.07f,0.0f));
     m_ExtraNew.SetIndex   (NEW_MAIN_EXTRA);
@@ -137,6 +153,9 @@ void cMainMenu::Move()
             {
                 // 
                 m_iStatus = 1;
+
+                // 
+                m_StartNew.Ressolve();
             }
             else if(m_ScoreButton.IsClicked())
             {

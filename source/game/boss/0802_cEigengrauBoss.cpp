@@ -44,6 +44,8 @@
 // TODO 1: alle layer sollten getroffen werden können (custom-enemy geht aber nicht, wegen render-reihenfolge), adjust size+dir+ori depending on current layer
 // TODO 1: boss sollte vielleicht eigenen shader haben, zum rand hin weniger transparenz (spherisch ?) statt ganz flach
 
+// TODO 1: vielleicht doch nicht spieler unsterblich machen, repair enemy soll timer haben, und bei continue spielt man von der aktuellen stelle weiter mit eigenem einflug
+
 // (TODO 1: sinus-line gegner sieht man schlecht von oben kommen (vielleicht beim ersten gegner ein loch lassen um (überraschendes) erstes ausweichen zu erleichtern))
 // (TODO 1: handle farb-änderung von adds)
 
@@ -191,7 +193,7 @@ void cEigengrauBoss::__ResurrectOwn()
     g_bTiltMode = true;
 
     // 
-    m_fAttackSpeed = g_pGame->IsEasy() ? 1.0f : 1.5f;
+    m_fAttackSpeed = g_pGame->IsEasy() ? 1.1f : 1.5f;
 
     // 
     this->_ResurrectBoss();
@@ -453,7 +455,7 @@ void cEigengrauBoss::__MoveOwn()
                 const coreVector2 vResolution = Core::System->GetResolution();
                 const coreVector2 vSize       = coreVector2(0.0f, ((vResolution - g_vGameResolution) / vResolution.yx()).Max() * 0.5f);
 
-                g_pPostProcessing->SetWallOffset(i, -vSize.Max() * BLENDH3(fTime));
+                g_pPostProcessing->SetWallOffset(i, -vSize.Max() * BLENDBR(fTime));
             }
 
             if(PHASE_FINISHED)

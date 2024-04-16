@@ -36,7 +36,7 @@ void cReplay::CreateGame()
     oOptions.iType        = m_Header.iOptionType;
     oOptions.iMode        = m_Header.iOptionMode;
     oOptions.iDifficulty  = m_Header.iOptionDifficulty;
-    oOptions.iFlags       = GAME_FLAG_TASK | GAME_FLAG_FRAGMENT;
+    oOptions.iFlags       = m_Header.iOptionFlags;
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
     {
         oOptions.aiShield[i] = m_Header.aaiOptionShield[i];
@@ -82,10 +82,11 @@ void cReplay::StartRecording()
     }
 
     // 
-    m_Header.iConfigRotation   = g_CurConfig.Graphics.iRotation;
-    m_Header.iConfigGameSpeed  = g_CurConfig.Game.iGameSpeed;
-    m_Header.iConfigUpdateFreq = g_CurConfig.Game.iUpdateFreq;   // TODO 1: should not be 0 
-    m_Header.iConfigVersion    = 1u;   // TODO 1 
+    m_Header.iConfigGameSpeed    = g_CurConfig.Game.iGameSpeed;
+    m_Header.iConfigBackRotation = g_CurConfig.Game.iBackRotation;
+    m_Header.iConfigBackSpeed    = g_CurConfig.Game.iBackSpeed;
+    m_Header.iConfigUpdateFreq   = g_CurConfig.Game.iUpdateFreq;   // TODO 1: should not be 0 
+    m_Header.iConfigVersion      = 1u;   // TODO 1 
 
     // 
     m_Header.iMissionStartIndex = g_pGame->GetCurMissionIndex();
@@ -167,7 +168,6 @@ void cReplay::EndRecording()
         for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) m_Header.aaiScoreMission[k][j] = pTable->GetScoreMission(j);
         for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) for(coreUintW i = 0u, ie = m_Header.iNumSegments; i < ie; ++i) m_Header.aaaiScoreSegment[k][j][i] = pTable->GetScoreSegment(j, i);
 
-        for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) m_Header.aaiMaxSeriesMission[k][j] = pTable->GetMaxSeriesMission(j);
         for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) for(coreUintW i = 0u, ie = m_Header.iNumSegments; i < ie; ++i) m_Header.aaaiMaxSeriesSegment[k][j][i] = pTable->GetMaxSeriesSegment(j, i);
     }
 
@@ -611,10 +611,11 @@ void cReplay::__CheckHeader(sHeader* OUTPUT pHeader)
     }
 
     // 
-    pHeader->iConfigRotation   = CLAMP(pHeader->iConfigRotation,   0u,                     1u);
-    pHeader->iConfigGameSpeed  = CLAMP(pHeader->iConfigGameSpeed,  50u,                    200u);
-    pHeader->iConfigUpdateFreq = CLAMP(pHeader->iConfigUpdateFreq, F_TO_UI(FRAMERATE_MIN), F_TO_UI(FRAMERATE_MAX));
-    pHeader->iConfigVersion    = CLAMP(pHeader->iConfigVersion,    1u,                     1u);   // TODO 1 
+    pHeader->iConfigGameSpeed    = CLAMP(pHeader->iConfigGameSpeed,    50u,                    200u);
+    pHeader->iConfigBackRotation = CLAMP(pHeader->iConfigBackRotation, 0u,                     1u);
+    pHeader->iConfigBackSpeed    = CLAMP(pHeader->iConfigBackSpeed,    50u,                    200u);
+    pHeader->iConfigUpdateFreq   = CLAMP(pHeader->iConfigUpdateFreq,   F_TO_UI(FRAMERATE_MIN), F_TO_UI(FRAMERATE_MAX));
+    pHeader->iConfigVersion      = CLAMP(pHeader->iConfigVersion,      1u,                     1u);   // TODO 1 
 
     // 
     pHeader->iMissionStartIndex = CLAMP(pHeader->iMissionStartIndex, 0u, REPLAY_MISSIONS-1u);

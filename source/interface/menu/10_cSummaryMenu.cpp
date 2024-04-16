@@ -12,18 +12,22 @@
 // ****************************************************************
 // constructor
 cSummaryMenu::cSummaryMenu()noexcept
-: coreMenu        (SURFACE_SUMMARY_MAX, SURFACE_SUMMARY_MISSION_SOLO)
-, m_iFinalValue   (0u)
-, m_aiFinalPart   {}
-, m_aiApplyBonus  {}
-, m_aiApplyMedal  {}
-, m_iSelection    (0u)
-, m_afSignalTime  {}
-, m_iSignalActive (0u)
-, m_fIntroTimer   (0.0f)
-, m_fOutroTimer   (0.0f)
-, m_fFinalSpinOld (0.0f)
-, m_eState        (SUMMARY_INTRO)
+: coreMenu           (SURFACE_SUMMARY_MAX, SURFACE_SUMMARY_MISSION_SOLO)
+, m_iFinalValue      (0u)
+, m_aiFinalPart      {}
+, m_aiApplyBonus     {}
+, m_aiApplyMedal     {}
+, m_fOtherTime       (0.0f)
+, m_iOtherShift      (0)
+, m_iOtherNumMission (0u)
+, m_iOtherNumMedal   (0u)
+, m_iSelection       (0u)
+, m_afSignalTime     {}
+, m_iSignalActive    (0u)
+, m_fIntroTimer      (0.0f)
+, m_fOutroTimer      (0.0f)
+, m_fFinalSpinOld    (0.0f)
+, m_eState           (SUMMARY_INTRO)
 {
     // create menu objects
     m_BackgroundMain.DefineTexture(0u, "menu_detail_04.png");
@@ -35,16 +39,22 @@ cSummaryMenu::cSummaryMenu()noexcept
     m_BackgroundCoop.DefineTexture(1u, "menu_background_black.png");
     m_BackgroundCoop.DefineProgram("menu_animate_program");
 
-    m_RestartButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
-    m_RestartButton.DefineProgram("menu_border_program");
-    m_RestartButton.SetPosition  (coreVector2(0.0f,-0.31f));
-    m_RestartButton.SetSize      (coreVector2(0.4f,0.07f));
-    m_RestartButton.GetCaption()->SetTextLanguage("AGAIN");
+    m_NextButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
+    m_NextButton.DefineProgram("menu_border_program");
+    m_NextButton.SetPosition  (coreVector2(0.0f,-0.22f));
+    m_NextButton.SetSize      (coreVector2(0.4f,0.07f));
+    m_NextButton.GetCaption()->SetTextLanguage("NEXT");
+
+    m_AgainButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
+    m_AgainButton.DefineProgram("menu_border_program");
+    m_AgainButton.SetPosition  (m_NextButton.GetPosition() + coreVector2(0.0f,-0.09f));
+    m_AgainButton.SetSize      (m_NextButton.GetSize());
+    m_AgainButton.GetCaption()->SetTextLanguage("AGAIN");
 
     m_ExitButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_ExitButton.DefineProgram("menu_border_program");
-    m_ExitButton.SetPosition  (m_RestartButton.GetPosition() + coreVector2(0.0f,-0.09f));
-    m_ExitButton.SetSize      (m_RestartButton.GetSize());
+    m_ExitButton.SetPosition  (m_AgainButton.GetPosition() + coreVector2(0.0f,-0.09f));
+    m_ExitButton.SetSize      (m_NextButton.GetSize());
     m_ExitButton.GetCaption()->SetTextLanguage("EXIT_GAME");
 
     m_aTitle[0].Construct   (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
@@ -58,6 +68,101 @@ cSummaryMenu::cSummaryMenu()noexcept
     m_aTitle[1].SetAlignment(coreVector2(1.0f,0.0f));
     m_aTitle[1].SetColor3   (COLOR_MENU_INSIDE * 0.6f);
     m_aTitle[1].SetText     ("GRAU");
+    
+    
+    
+    
+    m_ArcadeLayer.DefineTexture(0u, "menu_background_black.png");
+    m_ArcadeLayer.DefineProgram("menu_grey_program");
+    m_ArcadeLayer.SetColor3    (coreVector3(0.6f,0.6f,0.6f));
+    m_ArcadeLayer.SetSize      (coreVector2(1.0f,1.0f));
+    m_ArcadeLayer.SetTexSize   (coreVector2(1.2f,1.2f));
+
+    m_ArcadeHeader.Construct      (MENU_FONT_DYNAMIC_4, MENU_OUTLINE_SMALL);
+    m_ArcadeHeader.SetPosition    (coreVector2(0.0f,0.42f));
+    m_ArcadeHeader.SetColor3      (COLOR_MENU_WHITE);
+    m_ArcadeHeader.SetTextLanguage("SUMMARY_ARCADE");
+
+    for(coreUintW i = 0u; i < MENU_SUMMARY_ARCADES; ++i)
+    {
+        const coreFloat fHeight = 0.33f - 0.07f*I_TO_F(i);
+
+        m_aArcadeName[i].Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+        m_aArcadeName[i].SetPosition (coreVector2(-0.45f, fHeight));
+        m_aArcadeName[i].SetAlignment(coreVector2(1.0f,0.0f));
+        m_aArcadeName[i].SetColor3   (g_aMissionData[i].vColor);
+        m_aArcadeName[i].SetText     (g_aMissionData[i].pcName);
+
+        m_aArcadeScore[i].Construct  (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
+        m_aArcadeScore[i].SetPosition(coreVector2(-0.21f, fHeight));
+        m_aArcadeScore[i].SetColor3  (COLOR_MENU_WHITE);
+
+        m_aArcadeTime[i].Construct  (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
+        m_aArcadeTime[i].SetPosition(coreVector2(-0.04f, fHeight));
+        m_aArcadeTime[i].SetColor3  (COLOR_MENU_WHITE);
+
+        m_aArcadeIcon[i].DefineTexture(0u, "menu_helper.png");
+        m_aArcadeIcon[i].DefineProgram("menu_helper_program");
+        m_aArcadeIcon[i].SetPosition  (m_aArcadeName[i].GetPosition() + coreVector2(0.0f,0.0f));
+        m_aArcadeIcon[i].SetSize      (coreVector2(0.06f,0.06f));
+        m_aArcadeIcon[i].SetDirection (coreVector2(1.0f,1.0f).Normalized());
+        m_aArcadeIcon[i].SetColor3    (g_aMissionData[i].vColor * 0.8f);
+        m_aArcadeIcon[i].SetTexSize   (coreVector2(0.25f,0.25f));
+        m_aArcadeIcon[i].SetTexOffset (g_aMissionData[i].vIcon);
+
+        m_aArcadeMedalMission[i].DefineTexture(0u, "menu_medal.png");
+        m_aArcadeMedalMission[i].DefineProgram("default_2d_program");
+        m_aArcadeMedalMission[i].SetPosition  (coreVector2(0.45f, fHeight));
+        m_aArcadeMedalMission[i].SetTexSize   (coreVector2(0.25f,0.25f));
+
+        for(coreUintW j = 0u; j < MENU_SUMMARY_MEDALS; ++j)
+        {
+            m_aaArcadeMedalSegment[i][j].DefineTexture(0u, "menu_medal.png");
+            m_aaArcadeMedalSegment[i][j].DefineProgram("default_2d_program");
+            m_aaArcadeMedalSegment[i][j].SetPosition  (coreVector2(0.1f + 0.05f * I_TO_F(j), fHeight));
+            m_aaArcadeMedalSegment[i][j].SetTexSize   (coreVector2(0.25f,0.25f));
+        }
+
+        m_aArcadeLine[i].DefineTexture(0u, "menu_detail_04.png");
+        m_aArcadeLine[i].DefineTexture(1u, "menu_background_black.png");
+        m_aArcadeLine[i].DefineProgram("menu_inner_program");
+        m_aArcadeLine[i].SetPosition  (coreVector2(0.0f, fHeight));
+        m_aArcadeLine[i].SetSize      (coreVector2(1.1f, 0.06f));
+        m_aArcadeLine[i].SetTexOffset (coreVector2(I_TO_F(i)*0.09f, 0.0f));
+    }
+
+    m_aArcadeTotalName[0].Construct      (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
+    m_aArcadeTotalName[0].SetPosition    (coreVector2(-0.275f,-0.34f));
+    m_aArcadeTotalName[0].SetColor3      (COLOR_MENU_WHITE);
+    m_aArcadeTotalName[0].SetTextLanguage("SUMMARY_SEGMENT_SCORE");
+
+    m_aArcadeTotalName[1].Construct      (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
+    m_aArcadeTotalName[1].SetPosition    (coreVector2(0.06f,-0.34f));
+    m_aArcadeTotalName[1].SetColor3      (COLOR_MENU_WHITE);
+    m_aArcadeTotalName[1].SetTextLanguage("SUMMARY_SEGMENT_TIME");
+
+    m_aArcadeTotalBest[0].Construct  (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+    m_aArcadeTotalBest[0].SetPosition(m_aArcadeTotalName[0].GetPosition() + coreVector2(0.0f,-0.09f));
+    m_aArcadeTotalBest[0].SetColor3  (COLOR_MENU_WHITE * 0.5f);
+
+    m_aArcadeTotalBest[1].Construct  (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+    m_aArcadeTotalBest[1].SetPosition(m_aArcadeTotalName[1].GetPosition() + coreVector2(0.0f,-0.09f));
+    m_aArcadeTotalBest[1].SetColor3  (COLOR_MENU_WHITE * 0.5f);
+
+    m_ArcadeTotalScore.Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
+    m_ArcadeTotalScore.SetPosition(m_aArcadeTotalName[0].GetPosition() + coreVector2(0.0f,-0.05f));
+    m_ArcadeTotalScore.SetColor3  (COLOR_MENU_WHITE);
+
+    m_ArcadeTotalTime.Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
+    m_ArcadeTotalTime.SetPosition(m_aArcadeTotalName[1].GetPosition() + coreVector2(0.0f,-0.05f));
+    m_ArcadeTotalTime.SetColor3  (COLOR_MENU_WHITE);
+
+    m_ArcadeTotalMedal.DefineTexture(0u, "menu_medal.png");
+    m_ArcadeTotalMedal.DefineProgram("default_2d_program");
+    m_ArcadeTotalMedal.SetPosition  (coreVector2(0.34f,-0.378f));
+    m_ArcadeTotalMedal.SetTexSize   (coreVector2(0.25f,0.25f));
+    
+    
 
     m_aHeader[0].Construct  (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
     m_aHeader[0].SetPosition(coreVector2(0.0f,0.4f));
@@ -137,16 +242,16 @@ cSummaryMenu::cSummaryMenu()noexcept
     
     for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES_SEGMENT; ++i)
     {
-        m_aSegmentName[i].Construct  (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
-        m_aSegmentName[i].SetPosition(coreVector2(0.0f, 0.245f - 0.125f*I_TO_F(i)));
+        m_aSegmentName[i].Construct  (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
+        m_aSegmentName[i].SetPosition(coreVector2(0.0f, 0.245f - 0.16f*I_TO_F(i)));
         m_aSegmentName[i].SetColor3  (COLOR_MENU_WHITE);
 
         for(coreUintW j = 0u; j < MENU_SUMMARY_SIDES; ++j)
         {
-            if(j) m_aaSegmentValue[i][j].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
-             else m_aaSegmentValue[i][j].Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+            if(j) m_aaSegmentValue[i][j].Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+             else m_aaSegmentValue[i][j].Construct   (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
             //m_aaSegmentValue[i][j].SetPosition (coreVector2(m_aSegmentSide[j].GetPosition().x, m_aSegmentName[i].GetPosition().y - 0.035f));
-            m_aaSegmentValue[i][j].SetPosition (coreVector2(0.0f, m_aSegmentName[i].GetPosition().y - 0.035f    +(j ? -0.032f : 0.0f)));
+            m_aaSegmentValue[i][j].SetPosition (coreVector2(0.0f, m_aSegmentName[i].GetPosition().y - 0.05f    +(j ? -0.04f : 0.0f)));
             //m_aaSegmentValue[i][j].SetAlignment(m_aSegmentSide[j].GetAlignment());
             m_aaSegmentValue[i][j].SetColor3   (j ? (COLOR_MENU_WHITE * 0.5f) : COLOR_MENU_WHITE);
         }
@@ -155,25 +260,24 @@ cSummaryMenu::cSummaryMenu()noexcept
         {
             const coreFloat fSide = j ? 1.0f : -1.0f;
 
-            m_aaSegmentPart[i][j].Construct  (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+            m_aaSegmentPart[i][j].Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
             m_aaSegmentPart[i][j].SetPosition(m_aaSegmentValue[i][0].GetPosition() + coreVector2(fSide * 0.36f, 0.0f));
             m_aaSegmentPart[i][j].SetColor3  (COLOR_MENU_WHITE);
         }
     }
     m_aSegmentName[0].SetTextLanguage("SUMMARY_SEGMENT_SCORE");
     m_aSegmentName[1].SetTextLanguage("SUMMARY_SEGMENT_TIME");
-    m_aSegmentName[2].SetTextLanguage("SUMMARY_SEGMENT_COMBO");                           
 
     for(coreUintW j = 0u; j < MENU_SUMMARY_SIDES; ++j)
     {
         m_aSegmentShift[j].Construct  (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
-        m_aSegmentShift[j].SetPosition(m_aaSegmentValue[1][0].GetPosition() + coreVector2(0.36f, 0.0f));
+        m_aSegmentShift[j].SetPosition(m_aaSegmentValue[1][0].GetPosition() + coreVector2(0.36f,0.0f));
         m_aSegmentShift[j].SetColor3  (COLOR_MENU_WHITE);
     }
 
     m_SegmentMedal.DefineTexture(0u, "menu_medal.png");
     m_SegmentMedal.DefineProgram("default_2d_program");
-    m_SegmentMedal.SetPosition  (coreVector2(0.0f,-0.175f));
+    m_SegmentMedal.SetPosition  (coreVector2(0.0f,-0.1f));
     m_SegmentMedal.SetTexSize   (coreVector2(0.25f,0.25f));
     
     
@@ -197,17 +301,39 @@ cSummaryMenu::cSummaryMenu()noexcept
     m_aRecord[1].SetPosition(m_aaSegmentValue[1][1].GetPosition());
     m_aRecord[2].SetPosition(m_aaSegmentValue[2][1].GetPosition());
     m_aRecord[3].SetPosition(m_TotalBest           .GetPosition());
+    m_aRecord[4].SetPosition(m_aArcadeTotalBest[0] .GetPosition());
+    m_aRecord[5].SetPosition(m_aArcadeTotalBest[1] .GetPosition());
     
 
     // 
-    m_Navigator.BindObject(NULL,             &m_RestartButton, NULL, &m_ExitButton, NULL, MENU_TYPE_DEFAULT);
-    m_Navigator.BindObject(&m_RestartButton, NULL,             NULL, &m_ExitButton, NULL, MENU_TYPE_DEFAULT);
-    m_Navigator.BindObject(&m_ExitButton,    &m_RestartButton, NULL, NULL,          NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(NULL,           &m_NextButton,  NULL, &m_ExitButton,  NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_NextButton,  &m_ExitButton,  NULL, &m_AgainButton, NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_AgainButton, &m_NextButton,  NULL, &m_ExitButton,  NULL, MENU_TYPE_DEFAULT);
+    m_Navigator.BindObject(&m_ExitButton,  &m_AgainButton, NULL, &m_NextButton,  NULL, MENU_TYPE_DEFAULT);
 
     m_Navigator.AssignMenu(this);
     m_Navigator.ShowIcon  (true);
 
     // bind menu objects
+    this->BindObject(SURFACE_SUMMARY_ARCADE, &m_ArcadeLayer);
+    for(coreUintW i = 0u; i < MENU_SUMMARY_ARCADES; ++i) this->BindObject(SURFACE_SUMMARY_ARCADE, &m_aArcadeLine        [i]);
+    for(coreUintW i = 0u; i < MENU_SUMMARY_ARCADES; ++i) this->BindObject(SURFACE_SUMMARY_ARCADE, &m_aArcadeIcon        [i]);
+    for(coreUintW i = 0u; i < MENU_SUMMARY_ARCADES; ++i) this->BindObject(SURFACE_SUMMARY_ARCADE, &m_aArcadeMedalMission[i]);
+    for(coreUintW i = 0u; i < MENU_SUMMARY_ARCADES; ++i) for(coreUintW j = 0u; j < MENU_SUMMARY_MEDALS; ++j) this->BindObject(SURFACE_SUMMARY_ARCADE, &m_aaArcadeMedalSegment[i][j]);
+    this->BindObject(SURFACE_SUMMARY_ARCADE, &m_ArcadeTotalMedal);
+    this->BindObject(SURFACE_SUMMARY_ARCADE, &m_ArcadeHeader);
+    for(coreUintW i = 0u; i < MENU_SUMMARY_ARCADES; ++i) this->BindObject(SURFACE_SUMMARY_ARCADE, &m_aArcadeName        [i]);
+    for(coreUintW i = 0u; i < MENU_SUMMARY_ARCADES; ++i) this->BindObject(SURFACE_SUMMARY_ARCADE, &m_aArcadeScore       [i]);
+    for(coreUintW i = 0u; i < MENU_SUMMARY_ARCADES; ++i) this->BindObject(SURFACE_SUMMARY_ARCADE, &m_aArcadeTime        [i]);
+    this->BindObject(SURFACE_SUMMARY_ARCADE, &m_aArcadeTotalName[0]);
+    this->BindObject(SURFACE_SUMMARY_ARCADE, &m_aArcadeTotalName[1]);
+    this->BindObject(SURFACE_SUMMARY_ARCADE, &m_aArcadeTotalBest[0]);
+    this->BindObject(SURFACE_SUMMARY_ARCADE, &m_aArcadeTotalBest[1]);
+    this->BindObject(SURFACE_SUMMARY_ARCADE, &m_ArcadeTotalScore);
+    this->BindObject(SURFACE_SUMMARY_ARCADE, &m_ArcadeTotalTime);
+    this->BindObject(SURFACE_SUMMARY_ARCADE, &m_aRecord[4]);
+    this->BindObject(SURFACE_SUMMARY_ARCADE, &m_aRecord[5]);
+
     this->BindObject(SURFACE_SUMMARY_MISSION_COOP, &m_BackgroundCoop);
 
     for(coreUintW j = SURFACE_SUMMARY_MISSION_SOLO; j <= SURFACE_SUMMARY_MISSION_COOP; ++j)
@@ -245,7 +371,8 @@ cSummaryMenu::cSummaryMenu()noexcept
         this->BindObject(j, &m_Icon);
         this->BindObject(j, &m_SegmentMedal);
 
-        this->BindObject(j, &m_RestartButton);
+        this->BindObject(j, &m_NextButton);
+        this->BindObject(j, &m_AgainButton);
         this->BindObject(j, &m_ExitButton);
 
         this->BindObject(j, &m_aHeader[0]);
@@ -258,7 +385,7 @@ cSummaryMenu::cSummaryMenu()noexcept
         
         this->BindObject(j, &m_aRecord[0]);
         this->BindObject(j, &m_aRecord[1]);
-        this->BindObject(j, &m_aRecord[2]);
+        //this->BindObject(j, &m_aRecord[2]);
 
         this->BindObject(j, &m_Navigator);
     }
@@ -279,12 +406,26 @@ cSummaryMenu::cSummaryMenu()noexcept
 // render the summary menu
 void cSummaryMenu::Render()
 {
-    // 
-    cMenu::UpdateAnimateProgram(&m_BackgroundMain);
-    ASSERT(m_BackgroundMain.GetSize() == m_BackgroundCoop.GetSize())
+    if(this->GetCurSurface() == SURFACE_SUMMARY_ARCADE)
+    {
+        // 
+        const coreVector2 vCorner = coreVector2(0.5f,0.5f) * (g_vGameResolution / Core::Graphics->GetViewResolution().xy());
+        Core::Graphics->StartScissorTest(-vCorner, vCorner);
+        {
+            // 
+            this->coreMenu::Render();
+        }
+        Core::Graphics->EndScissorTest();
+    }
+    else
+    {
+        // 
+        cMenu::UpdateAnimateProgram(&m_BackgroundMain);
+        ASSERT(m_BackgroundMain.GetSize() == m_BackgroundCoop.GetSize())
 
-    // 
-    this->coreMenu::Render();
+        // 
+        this->coreMenu::Render();
+    }
 }
 
 
@@ -302,6 +443,137 @@ void cSummaryMenu::Move()
     // 
     switch(this->GetCurSurface())
     {
+    case SURFACE_SUMMARY_ARCADE:
+        {
+            constexpr coreFloat fSpinFrom = 1.0f;
+            
+            
+            m_fIntroTimer.Update(1.0f);
+            if((m_fIntroTimer >= fSpinFrom + 0.1f * I_TO_F(m_iOtherNumMission) + 0.05f * I_TO_F(m_iOtherNumMedal) + 1.45f + 1.0f) && (m_eState != SUMMARY_OUTRO) && Core::Input->GetAnyButton(CORE_INPUT_PRESS))
+            {
+                m_eState = SUMMARY_OUTRO;
+                g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_MSGBOX_YES);
+            }
+            
+            
+            if(m_eState == SUMMARY_OUTRO) m_fOutroTimer.Update(1.0f);
+            if(m_fOutroTimer >= 1.0f)
+            {
+                // 
+                m_iStatus = 5;
+            }
+            
+            const coreFloat fBlendIn  = m_fIntroTimer;
+            const coreFloat fBlendOut = 1.0f - m_fOutroTimer;
+            
+            const auto nBlendMedalFunc = [&](cGuiObject* OUTPUT pMedal, const coreFloat fScale, const coreFloat fThreshold, const eSoundEffect eSoundIndex = SOUND_PLACEHOLDER)
+            {
+                const coreFloat fFadeIn     = CLAMP01((fBlendIn - fThreshold) * 10.0f);
+                const coreInt32 iStatusdOld = pMedal->GetStatus();
+                const coreInt32 iStatusdNew = (fBlendIn >= fThreshold) ? 1 : 0;
+
+                // 
+                pMedal->SetSize (coreVector2(fScale, fScale) * LERP(1.5f, 1.0f, fFadeIn));
+                pMedal->SetAlpha(MIN(fFadeIn, fBlendOut));
+                pMedal->SetStatus(iStatusdNew);
+
+                // 
+                pMedal->Move();
+
+                // 
+                if(pMedal->GetEnabled() && !iStatusdOld && iStatusdNew && (eSoundIndex != SOUND_PLACEHOLDER)) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, eSoundIndex);
+            };
+            
+            const auto nAlphaFunc = [&](coreObject2D* OUTPUT pObject, const coreFloat fTime, const eSoundEffect eSoundIndex = SOUND_PLACEHOLDER)
+            {
+                const coreFloat        fFade       = fTime * fBlendOut;
+                const coreObjectEnable eEnabledOld = pObject->GetEnabled();
+                const coreObjectEnable eEnabledNew = fFade ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING;
+
+                pObject->SetAlpha  (pObject->GetAlpha() * fFade);
+                pObject->SetEnabled(eEnabledNew);
+
+                // 
+                if(!eEnabledOld && eEnabledNew && (eSoundIndex != SOUND_PLACEHOLDER)) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, eSoundIndex);
+            };
+            
+            nAlphaFunc(&m_ArcadeHeader, CLAMP01(m_fIntroTimer));
+            
+            
+            const coreFloat fNum = I_TO_F(m_iOtherNumMission);
+            
+            for(coreUintW i = 0u; i < MENU_SUMMARY_ARCADES; ++i)
+            {
+                const coreFloat fDelay = fSpinFrom + 0.1f * I_TO_F(i);
+                const coreFloat fTime  = (i < m_iOtherNumMission) ? CLAMP01((m_fIntroTimer - fDelay) * 10.0f) : 0.0f;
+
+                nAlphaFunc(&m_aArcadeName [i], fTime);
+                nAlphaFunc(&m_aArcadeScore[i], fTime);
+                nAlphaFunc(&m_aArcadeTime [i], fTime);
+                nAlphaFunc(&m_aArcadeIcon [i], fTime * 0.6f);
+                nAlphaFunc(&m_aArcadeLine [i], fTime, SOUND_MENU_MSGBOX_SHOW);
+
+                const coreUintW iAterOffset = (i == MISSION_ATER) ? (MENU_SUMMARY_MEDALS - ((m_iOtherNumMedal == 59u) ? 2u : 1u)) : 0u;
+
+                const coreFloat fThreshold = (i * (MENU_SUMMARY_MEDALS + 1u) + MENU_SUMMARY_MEDALS - iAterOffset < m_iOtherNumMedal) ? (fSpinFrom + 0.1f * fNum + 0.05f * I_TO_F(MENU_SUMMARY_MEDALS + i * (MENU_SUMMARY_MEDALS + 1u) - iAterOffset)) : 1000.0f;
+                nBlendMedalFunc(&m_aArcadeMedalMission[i], 0.07f, fThreshold, SOUND_SUMMARY_MEDAL);
+
+                for(coreUintW j = 0u; j < MENU_SUMMARY_MEDALS; ++j)
+                {
+                    const coreFloat fThreshold2 = (i * (MENU_SUMMARY_MEDALS + 1u) + j < m_iOtherNumMedal) ? (fSpinFrom + 0.1f * fNum + 0.05f * I_TO_F(j + i * (MENU_SUMMARY_MEDALS + 1u))) : 1000.0f;
+                    nBlendMedalFunc(&m_aaArcadeMedalSegment[i][j], 0.05f, fThreshold2, SOUND_SUMMARY_MEDAL);
+                }
+            }
+            
+            const coreFloat fDelay     = fSpinFrom + 0.1f * fNum + 0.05f * I_TO_F(m_iOtherNumMedal);
+            const coreFloat fFinalSpin = CLAMP01((fBlendIn - fDelay) * (1.0f/1.35f));
+            m_ArcadeTotalScore.SetText(PRINT("%.0f",       I_TO_F(m_iFinalValue) * fFinalSpin));
+            m_ArcadeTotalTime .SetText(PRINT("%.1f %+.0f", m_fOtherTime * fFinalSpin, I_TO_F(m_iOtherShift) * fFinalSpin));
+            
+            
+            const coreFloat fTickStep = 1.35f * RCP(ROUND(RCP(20.0f * TIME)) * TIME);
+            if(F_TO_UI(m_fFinalSpinOld * fTickStep) < F_TO_UI(fFinalSpin * fTickStep)) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_SUMMARY_SCORE);
+            m_fFinalSpinOld = fFinalSpin;
+            
+            
+            nAlphaFunc(&m_aArcadeTotalName[0], fFinalSpin ? 1.0f : 0.0f, SOUND_SUMMARY_TEXT);
+            nAlphaFunc(&m_aArcadeTotalName[1], fFinalSpin ? 1.0f : 0.0f);
+            nAlphaFunc(&m_ArcadeTotalScore,    fFinalSpin ? 1.0f : 0.0f);
+            nAlphaFunc(&m_ArcadeTotalTime,     fFinalSpin ? 1.0f : 0.0f);
+
+            nAlphaFunc(&m_ArcadeLayer, CLAMP01(m_fIntroTimer) * 0.5f);
+            
+            
+            m_aArcadeTotalBest[0].SetEnabled((m_ArcadeTotalScore.IsEnabled(CORE_OBJECT_ENABLE_ALL) && (fFinalSpin >= 1.0f)) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+            m_aArcadeTotalBest[0].SetAlpha  (m_ArcadeTotalScore.GetAlpha());
+            m_aArcadeTotalBest[1].SetEnabled((m_ArcadeTotalTime.IsEnabled(CORE_OBJECT_ENABLE_ALL) && (fFinalSpin >= 1.0f)) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+            m_aArcadeTotalBest[1].SetAlpha  (m_ArcadeTotalTime.GetAlpha());
+            
+            
+            const auto nSignalFunc = [&](cGuiLabel* OUTPUT pSignal, const coreObject2D* pParent, const coreBool bCondition)
+            {
+                const coreObjectEnable eEnabledOld = pSignal->GetEnabled();
+                const coreObjectEnable eEnabledNew = (pParent->IsEnabled(CORE_OBJECT_ENABLE_ALL) && bCondition) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING;
+
+                // 
+                pSignal->SetEnabled(eEnabledNew);
+                pSignal->SetAlpha  (pParent->GetAlpha());
+
+                // 
+                if(!eEnabledOld && eEnabledNew) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_SUMMARY_RECORD);
+            };
+            nSignalFunc(&m_aRecord[4], &m_aArcadeTotalBest[0], HAS_BIT(m_iSignalActive, 6u));
+            nSignalFunc(&m_aRecord[5], &m_aArcadeTotalBest[1], HAS_BIT(m_iSignalActive, 7u));
+
+            // 
+            const coreFloat fThreshold3 = fDelay + 1.45f;
+            nBlendMedalFunc(&m_ArcadeTotalMedal, 0.13f, fThreshold3, SPECIAL_SOUND_MEDAL(m_aiApplyMedal[0]));
+
+            // 
+            m_ArcadeLayer.SetTexOffset(coreVector2(0.0f, FRACT(coreFloat(-0.04 * Core::System->GetTotalTime()))));   // TODO 1: check if menu rotation is correct
+        }
+        break;
+
     case SURFACE_SUMMARY_MISSION_SOLO:
     case SURFACE_SUMMARY_MISSION_COOP:
         {
@@ -484,20 +756,29 @@ void cSummaryMenu::Move()
     case SURFACE_SUMMARY_SEGMENT_SOLO:
     case SURFACE_SUMMARY_SEGMENT_COOP:
         {
-            if(m_RestartButton.IsClicked())
+            // TODO 1: not available after both bonus-mission bosses
+            if(m_NextButton.IsClicked())
             {
                 // 
                 m_iSelection = 3u;
+            }
+            else if(m_AgainButton.IsClicked())
+            {
+                // 
+                m_iSelection = 4u;
             }
             else if(m_ExitButton.IsClicked())
             {
                 // 
                 m_iSelection = 1u;
+                 
+                g_pGame->FadeMusic(0.7f);
             }
 
             // 
-            cMenu::UpdateButton(&m_RestartButton, m_RestartButton.IsFocused());
-            cMenu::UpdateButton(&m_ExitButton,    m_ExitButton   .IsFocused());
+            cMenu::UpdateButton(&m_NextButton,  m_NextButton .IsFocused());
+            cMenu::UpdateButton(&m_AgainButton, m_AgainButton.IsFocused());
+            cMenu::UpdateButton(&m_ExitButton,  m_ExitButton .IsFocused());
             
             
             // 
@@ -558,7 +839,7 @@ void cSummaryMenu::Move()
                     // 
                     if(pMedal->GetEnabled() && !iStatusdOld && iStatusdNew) g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, bMission ? SPECIAL_SOUND_MEDAL(m_aiApplyMedal[0]) : SOUND_SUMMARY_MEDAL);
                 };
-                nBlendMedalFunc(&m_SegmentMedal, 0.13f, 3.4f, true);
+                nBlendMedalFunc(&m_SegmentMedal, 0.13f, 2.6f, true);
 
                 // 
                 const auto nBlendLabelFunc = [&](cGuiLabel* OUTPUT pName, cGuiLabel* OUTPUT pValue1, cGuiLabel* OUTPUT pValue2, cGuiLabel* OUTPUT pPart, const coreFloat fThreshold)
@@ -598,7 +879,7 @@ void cSummaryMenu::Move()
                 };
                 nSignalFunc(&m_aRecord[0], &m_aaSegmentValue[0][1], HAS_BIT(m_iSignalActive, 2u), SOUND_SUMMARY_RECORD);
                 nSignalFunc(&m_aRecord[1], &m_aaSegmentValue[1][1], HAS_BIT(m_iSignalActive, 3u), SOUND_SUMMARY_RECORD);
-                nSignalFunc(&m_aRecord[2], &m_aaSegmentValue[2][1], HAS_BIT(m_iSignalActive, 4u), SOUND_SUMMARY_RECORD);
+                //nSignalFunc(&m_aRecord[2], &m_aaSegmentValue[2][1], HAS_BIT(m_iSignalActive, 4u), SOUND_SUMMARY_RECORD);
 
                 // calculate visibility and animation value
                 const coreFloat fVisibility = MAX0(MIN(m_fIntroTimer, MENU_SUMMARY_BANNER_SPEED_REV - m_fOutroTimer)) * MENU_SUMMARY_BANNER_SPEED;
@@ -631,8 +912,10 @@ void cSummaryMenu::Move()
                 m_Icon      .SetAlpha(fVisibility);
                 
                 
-                m_RestartButton.SetAlpha(fVisibility);
-                m_ExitButton   .SetAlpha(fVisibility);
+                m_NextButton .SetAlpha(fVisibility);
+                m_AgainButton.SetAlpha(fVisibility);
+                m_ExitButton .SetAlpha(fVisibility);
+                m_Navigator  .SetAlpha(fVisibility);
                 
                 
                 m_Icon.SetSize(coreVector2(0.3f,0.3f) * LERPB(0.85f, 1.0f, fVisibility));
@@ -679,6 +962,19 @@ void cSummaryMenu::Move()
 
                     // 
                     m_eState = SUMMARY_OUTRO;
+
+                    // 
+                    if(STATIC_ISVALID(g_pGame))
+                    {
+                        ASSERT((g_pGame->GetCurMission()->GetCurSegmentIndex() == MISSION_NO_SEGMENT))
+
+                        // 
+                        g_pGame->ForEachPlayerAll([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
+                        {
+                            if(m_aiApplyBonus[i]) {pPlayer->GetScoreTable()->AddScore(m_aiApplyBonus[i], false);  m_aiApplyBonus[i] = 0u;}
+                            if(m_aiApplyMedal[i]) {pPlayer->GetDataTable ()->GiveMedalMission(m_aiApplyMedal[i]); m_aiApplyMedal[i] = 0u;}
+                        });
+                    }
 
                     // 
                     cMenu::ClearScreen();
@@ -753,6 +1049,151 @@ void cSummaryMenu::Move()
     // 
     const coreFloat fScale = 1.0f + 0.1f * SIN(coreFloat(Core::System->GetTotalTime()) * (2.0f*PI));
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRecord); ++i) m_aRecord[i].SetScale(coreVector2(1.0f,1.0f) * fScale);
+}
+
+
+// ****************************************************************
+// 
+void cSummaryMenu::ShowArcade()
+{
+    ASSERT(STATIC_ISVALID(g_pGame))
+
+    // 
+    this->__ResetState();
+
+    // 
+    coreUint16 iShiftGood  = 0u;
+    coreUint16 iShiftBad   = 0u;
+    coreUint16 iMedalTotal = 0u;
+    coreUint8  iMedalCount = 0u;
+    for(coreUintW i = 0u; i < MENU_SUMMARY_ARCADES; ++i)
+    {
+        // 
+        coreUint32 iScoreFull = 0u;
+        g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW j)
+        {
+            // 
+            iScoreFull += pPlayer->GetScoreTable()->GetScoreMission(i);
+        });
+
+        // 
+        const coreInt32 iShift = g_pGame->GetTimeTable()->GetShiftMission(i);
+        const coreFloat fTime  = g_pGame->GetTimeTable()->GetTimeMission (i);
+
+        // 
+        m_aArcadeScore[i].SetText(coreData::ToChars(iScoreFull));
+        m_aArcadeTime [i].SetText(PRINT("%.1f %+d", fTime, iShift));
+
+        // 
+        m_iFinalValue += iScoreFull;
+        m_fOtherTime  += fTime;
+        m_iOtherShift += iShift;
+
+        // 
+        const coreUint8 iMedalMission = g_pGame->GetPlayer(0u)->GetDataTable()->GetMedalMission(i);
+
+        // 
+        cMenu::ApplyMedalTexture(&m_aArcadeMedalMission[i], iMedalMission, MEDAL_TYPE_MISSION, true);
+        if(iMedalMission) m_iOtherNumMedal += 1u;
+
+        // 
+        const coreBool bAter = (i == MISSION_ATER);
+
+        for(coreUintW j = 0u, je = bAter ? 2u : MENU_SUMMARY_MEDALS; j < je; ++j)
+        {
+            // 
+            const coreUintW iIndex        = j + (bAter ? 5u : 0u);
+            const coreUint8 iMedalSegment = g_pGame->GetPlayer(0u)->GetDataTable()->GetMedalSegment(i, iIndex);
+
+            // 
+            cMenu::ApplyMedalTexture(&m_aaArcadeMedalSegment[i][j], iMedalSegment, MISSION_SEGMENT_IS_BOSS(iIndex) ? MEDAL_TYPE_BOSS : MEDAL_TYPE_WAVE, true);
+            if(iMedalSegment) m_iOtherNumMedal += 1u;
+        }
+
+        // 
+        iShiftGood  += g_pGame->GetTimeTable()->GetShiftGoodMission(i);
+        iShiftBad   += g_pGame->GetTimeTable()->GetShiftBadMission (i);
+        iMedalTotal += MAX(iMedalMission, MEDAL_BRONZE);
+        iMedalCount += 1u;
+
+        // 
+        if(fTime) m_iOtherNumMission += 1u;
+    }
+
+    // 
+    const coreUint8 iMedal = iMedalCount ? (iMedalTotal / iMedalCount) : MEDAL_NONE;
+
+    // 
+    cMenu::ApplyMedalTexture(&m_ArcadeTotalMedal, iMedal, MEDAL_TYPE_ARCADE, true);
+    m_aiApplyMedal[0] = iMedal;
+
+    // 
+    g_pSave->EditGlobalStats     ()->aiMedalsEarned[iMedal] += 1u;
+    g_pSave->EditLocalStatsArcade()->aiMedalsEarned[iMedal] += 1u;
+
+    // 
+    coreUint8& iMedalArcade = g_pSave->EditProgress()->aaaiMedalArcade[g_pGame->GetType()][g_pGame->GetMode()][g_pGame->GetDifficulty()];
+    iMedalArcade = MAX(iMedalArcade, iMedal);
+
+    // 
+    const coreBool bComplete = (g_pGame->GetPlayer(0u)->GetDataTable()->GetMedalSegment(MISSION_ATER, 6u) != MEDAL_NONE);
+
+    // 
+    const auto&      oStats     = g_pSave->GetHeader().aaaLocalStatsArcade[g_pGame->GetType()][g_pGame->GetMode()][g_pGame->GetDifficulty()];
+    const coreUint32 iBestScore = oStats.iScoreBest;
+    const coreInt32  iBestShift = coreInt32(oStats.iTimeBestShiftBad) - coreInt32(oStats.iTimeBestShiftGood);
+    const coreFloat  fBestTime  = FloorFactor(TABLE_TIME_TO_FLOAT(oStats.iTimeBestShifted) - I_TO_F(iBestShift), 10.0f);
+
+    // 
+    m_aArcadeTotalBest[0].SetText(coreData::ToChars(MAX(m_iFinalValue, iBestScore)));
+    m_aArcadeTotalBest[1].SetText(bComplete ? PRINT("%.1f %+d", m_fOtherTime, m_iOtherShift) : "");
+
+    // 
+    SET_BIT(m_iSignalActive, 6u, (m_iFinalValue > g_pSave->EditLocalStatsSegment()->iScoreBest))
+    SET_BIT(m_iSignalActive, 7u, (false))
+
+    // 
+    g_pSave->EditLocalStatsArcade()->iScoreBest   = MAX(g_pSave->EditLocalStatsArcade()->iScoreBest,       m_iFinalValue);
+    g_pSave->EditLocalStatsArcade()->iScoreWorst  = MIN(g_pSave->EditLocalStatsArcade()->iScoreWorst - 1u, m_iFinalValue - 1u) + 1u;
+    g_pSave->EditLocalStatsArcade()->iScoreTotal += m_iFinalValue;
+
+    if(bComplete)
+    {
+        // 
+        const coreUint32 iTimeUint = TABLE_TIME_TO_UINT(m_fOtherTime);
+        g_pSave->EditLocalStatsArcade()->iTimeBest   = MIN(g_pSave->EditLocalStatsArcade()->iTimeBest - 1u, iTimeUint - 1u) + 1u;
+        g_pSave->EditLocalStatsArcade()->iTimeWorst  = MAX(g_pSave->EditLocalStatsArcade()->iTimeWorst,     iTimeUint);
+        g_pSave->EditLocalStatsArcade()->iTimeTotal += iTimeUint;
+        g_pSave->EditLocalStatsArcade()->iCountEnd  += 1u;
+
+        // 
+        const coreUint32 iTimeShiftedUint = TABLE_TIME_TO_UINT(m_fOtherTime + I_TO_F(iShiftBad) - I_TO_F(iShiftGood));
+        if(iTimeShiftedUint - 1u < g_pSave->EditLocalStatsArcade()->iTimeBestShifted - 1u)
+        {
+            m_aArcadeTotalBest[1].SetText(PRINT("%.1f %+d", fBestTime, iBestShift));
+
+            ADD_BIT(m_iSignalActive, 7u)
+
+            g_pSave->EditLocalStatsArcade()->iTimeBestShifted   = iTimeShiftedUint;
+            g_pSave->EditLocalStatsArcade()->iTimeBestShiftGood = iShiftGood;
+            g_pSave->EditLocalStatsArcade()->iTimeBestShiftBad  = iShiftBad;
+        }
+        if(iTimeShiftedUint > g_pSave->EditLocalStatsArcade()->iTimeWorstShifted)
+        {
+            g_pSave->EditLocalStatsArcade()->iTimeWorstShifted   = iTimeShiftedUint;
+            g_pSave->EditLocalStatsArcade()->iTimeWorstShiftGood = iShiftGood;
+            g_pSave->EditLocalStatsArcade()->iTimeWorstShiftBad  = iShiftBad;
+        }
+    }
+
+    // 
+    if(g_CurConfig.Game.iGameSpeed >= 200u)
+    {
+        ADD_BIT(g_pSave->EditLocalStatsArcade()->iFeat, FEAT_TWOHUNDRED)
+    }
+
+    // 
+    this->ChangeSurface(SURFACE_SUMMARY_ARCADE, 0.0f);
 }
 
 
@@ -842,13 +1283,13 @@ void cSummaryMenu::ShowMission()
     m_aValue[1].SetText(coreData::ToChars(iBonusSurvive * iModifier));
 
     // 
-    const coreUint32 iScoreBest = g_pSave->GetHeader().aaaaLocalStatsMission[g_pGame->GetType()][g_pGame->GetMode()][g_pGame->GetDifficulty()][iMissionIndex].iScoreBest;
-    m_TotalBest.SetText(coreData::ToChars(MAX(m_iFinalValue, iScoreBest)));
+    const coreUint32 iBestScore = g_pSave->GetHeader().aaaaLocalStatsMission[g_pGame->GetType()][g_pGame->GetMode()][g_pGame->GetDifficulty()][iMissionIndex].iScoreBest;
+    m_TotalBest.SetText(coreData::ToChars(MAX(m_iFinalValue, iBestScore)));
 
     // 
     SET_BIT(m_iSignalActive, 0u, (iMedalMission == MEDAL_DARK))
     SET_BIT(m_iSignalActive, 1u, (bPerfectSurvive))
-    SET_BIT(m_iSignalActive, 5u, (m_iFinalValue > iScoreBest))
+    SET_BIT(m_iSignalActive, 5u, (m_iFinalValue > iBestScore))
 
     // 
     this->ChangeSurface(g_pGame->IsCoop() ? SURFACE_SUMMARY_MISSION_COOP : SURFACE_SUMMARY_MISSION_SOLO, 0.0f);
@@ -865,15 +1306,15 @@ void cSummaryMenu::ShowSegment()
     this->__ResetState();
 
     // 
-    m_BackgroundCoop.SetCenter(coreVector2(0.0f,0.095f));
+    m_BackgroundCoop.SetCenter(coreVector2(0.0f,0.12f));
 
     // 
     const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
     const coreUintW iSegmentIndex = g_pGame->GetCurMission()->GetTakeFrom();
-    const coreBool  bBoss         = MISSION_SEGMENT_IS_BOSS(iSegmentIndex);
+    //const coreBool  bBoss         = MISSION_SEGMENT_IS_BOSS(iSegmentIndex);
 
     // 
-    m_aHeader[0].SetText(PRINT("%s %s", Core::Language->GetString("MISSION"), cMenu::GetSegmentLetters(iMissionIndex, iSegmentIndex)));
+    m_aHeader[0].SetText(PRINT("%s %s", Core::Language->GetString("SEGMENT"), cMenu::GetSegmentLetters(iMissionIndex, iSegmentIndex)));
     m_aHeader[1].SetText(g_pGame->GetCurMission()->GetName());
 
     // 
@@ -882,27 +1323,24 @@ void cSummaryMenu::ShowSegment()
 
     // 
     coreUint32 iScoreFull     = 0u;
-    coreUint32 iMaxSeriesFull = 0u;
+    //coreUint32 iMaxSeriesFull = 0u;
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
         const auto& oCounter = pPlayer->GetDataTable()->GetCounterSegment(iMissionIndex, iSegmentIndex);
 
         const coreUint32 iScore     = pPlayer->GetScoreTable()->GetScoreSegment    (iMissionIndex, iSegmentIndex);
         const coreInt32  iShift     = coreInt32(oCounter.iShiftBadAdded) - coreInt32(oCounter.iShiftGoodAdded);
-        const coreUint32 iMaxSeries = pPlayer->GetScoreTable()->GetMaxSeriesSegment(iMissionIndex, iSegmentIndex);
+        //const coreUint32 iMaxSeries = pPlayer->GetScoreTable()->GetMaxSeriesSegment(iMissionIndex, iSegmentIndex);
 
         // 
         m_aaSegmentPart[0][i].SetText(coreData::ToChars(iScore));
         m_aaSegmentPart[1][i].SetText(PRINT("%+d", iShift));
-        m_aaSegmentPart[2][i].SetText(bBoss ? coreData::ToChars(iMaxSeries) : PRINT("x%u.%u", 1u + iMaxSeries / 10u, iMaxSeries % 10u));
+        //m_aaSegmentPart[2][i].SetText(bBoss ? coreData::ToChars(iMaxSeries) : PRINT("x%u.%u", 1u + iMaxSeries / 10u, iMaxSeries % 10u));
 
         // 
         iScoreFull     += iScore;
-        iMaxSeriesFull += iMaxSeries;
+        //iMaxSeriesFull += iMaxSeries;
     });
-
-    // 
-    if(g_pGame->IsCoop()) iMaxSeriesFull /= GAME_PLAYERS;
 
     // 
     const coreInt32 iShift = g_pGame->GetTimeTable()->GetShiftSegment(iMissionIndex, iSegmentIndex);
@@ -911,7 +1349,7 @@ void cSummaryMenu::ShowSegment()
     // 
     m_aaSegmentValue[0][0].SetText(coreData::ToChars(iScoreFull));
     m_aaSegmentValue[1][0].SetText(PRINT("%.1f %+d", fTime, iShift));
-    m_aaSegmentValue[2][0].SetText(bBoss ? coreData::ToChars(iMaxSeriesFull) : PRINT("x%u.%u", 1u + iMaxSeriesFull / 10u, iMaxSeriesFull % 10u));
+    //m_aaSegmentValue[2][0].SetText(bBoss ? coreData::ToChars(iMaxSeriesFull) : PRINT("x%u.%u", 1u + iMaxSeriesFull / 10u, iMaxSeriesFull % 10u));
 
     // 
     const auto&     oStats     = g_pSave->GetHeader().aaaaaLocalStatsSegment[g_pGame->GetType()][g_pGame->GetMode()][g_pGame->GetDifficulty()][iMissionIndex][iSegmentIndex];
@@ -921,14 +1359,14 @@ void cSummaryMenu::ShowSegment()
     // 
     m_aaSegmentValue[0][1].SetText(coreData::ToChars(oStats.iScoreBest));
     m_aaSegmentValue[1][1].SetText(PRINT("%.1f %+d", fBestTime, iBestShift));
-    m_aaSegmentValue[2][1].SetText(bBoss ? coreData::ToChars(oStats.iMaxSeries) : PRINT("x%u.%u", 1u + oStats.iMaxSeries / 10u, oStats.iMaxSeries % 10u));
+    //m_aaSegmentValue[2][1].SetText(bBoss ? coreData::ToChars(oStats.iMaxSeries) : PRINT("x%u.%u", 1u + oStats.iMaxSeries / 10u, oStats.iMaxSeries % 10u));
 
     // 
-    m_aSegmentName[2].SetTextLanguage(bBoss ? "SUMMARY_SEGMENT_CHAIN" : "SUMMARY_SEGMENT_COMBO");
+    //m_aSegmentName[2].SetTextLanguage(bBoss ? "SUMMARY_SEGMENT_CHAIN" : "SUMMARY_SEGMENT_COMBO");
 
     // 
     const coreUint8 iMedal = g_pGame->GetPlayer(0u)->GetDataTable()->GetMedalSegment(iMissionIndex, iSegmentIndex);
-    cMenu::ApplyMedalTexture(&m_SegmentMedal, iMedal, MISSION_SEGMENT_IS_BOSS(iSegmentIndex) ? MEDAL_TYPE_BOSS : MEDAL_TYPE_WAVE, !DEFINED(_CORE_DEBUG_));
+    cMenu::ApplyMedalTexture(&m_SegmentMedal, iMedal, MISSION_SEGMENT_IS_BOSS(iSegmentIndex) ? MEDAL_TYPE_BOSS : MEDAL_TYPE_WAVE, true);
 
     // 
     m_aiApplyMedal[0] = iMedal;
@@ -937,7 +1375,7 @@ void cSummaryMenu::ShowSegment()
     const coreUint8 iRecordBroken = g_pGame->GetCurMission()->GetRecordBroken();
     SET_BIT(m_iSignalActive, 2u, HAS_BIT(iRecordBroken, 0u))
     SET_BIT(m_iSignalActive, 3u, HAS_BIT(iRecordBroken, 1u))
-    SET_BIT(m_iSignalActive, 4u, HAS_BIT(iRecordBroken, 2u))
+    //SET_BIT(m_iSignalActive, 4u, HAS_BIT(iRecordBroken, 2u))
 
     // 
     this->ChangeSurface(g_pGame->IsCoop() ? SURFACE_SUMMARY_SEGMENT_COOP : SURFACE_SUMMARY_SEGMENT_SOLO, 0.0f);
@@ -951,7 +1389,7 @@ void cSummaryMenu::ShowBeginning()
     ASSERT(STATIC_ISVALID(g_pGame))
 
     // 
-    this->__ResetState();
+    this->ShowMission();
 
     // 
     this->ChangeSurface(SURFACE_SUMMARY_BEGINNING, 0.0f);
@@ -999,6 +1437,11 @@ void cSummaryMenu::SetHighlightColor(const coreVector3 vColor)
 
     // 
     for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES_SEGMENT; ++i) m_aSegmentName[i].SetColor3(vColor);
+    
+    
+    
+    m_aArcadeTotalName[0].SetColor3(vColor);
+    m_aArcadeTotalName[1].SetColor3(vColor);
 }
 
 
@@ -1007,14 +1450,14 @@ void cSummaryMenu::SetHighlightColor(const coreVector3 vColor)
 void cSummaryMenu::__SetMedalMission(const coreUint8 iMedal)
 {
     // 
-    cMenu::ApplyMedalTexture(&m_MedalMission, iMedal, MEDAL_TYPE_MISSION, !DEFINED(_CORE_DEBUG_));
+    cMenu::ApplyMedalTexture(&m_MedalMission, iMedal, MEDAL_TYPE_MISSION, true);
 }
 
 void cSummaryMenu::__SetMedalSegment(const coreUintW iIndex, const coreUint8 iMedal)
 {
     // 
     ASSERT(iIndex < MENU_SUMMARY_MEDALS)
-    cMenu::ApplyMedalTexture(&m_aMedalSegment[iIndex], iMedal, MISSION_SEGMENT_IS_BOSS(iIndex) ? MEDAL_TYPE_BOSS : MEDAL_TYPE_WAVE, !DEFINED(_CORE_DEBUG_));
+    cMenu::ApplyMedalTexture(&m_aMedalSegment[iIndex], iMedal, MISSION_SEGMENT_IS_BOSS(iIndex) ? MEDAL_TYPE_BOSS : MEDAL_TYPE_WAVE, true);
 }
 
 
@@ -1023,13 +1466,18 @@ void cSummaryMenu::__SetMedalSegment(const coreUintW iIndex, const coreUint8 iMe
 void cSummaryMenu::__ResetState()
 {
     // 
-    m_iFinalValue = 0u;
+    m_iFinalValue      = 0u;
     std::memset(m_aiFinalPart,  0, sizeof(m_aiFinalPart));
     std::memset(m_aiApplyBonus, 0, sizeof(m_aiApplyBonus));
     std::memset(m_aiApplyMedal, 0, sizeof(m_aiApplyMedal));
-    m_fIntroTimer = 0.0f;
-    m_fOutroTimer = 0.0f;
-    m_eState      = SUMMARY_INTRO;
+    m_fOtherTime       = 0.0f;
+    m_iOtherShift      = 0;
+    m_iOtherNumMission = 0u;
+    m_iOtherNumMedal   = 0u;
+    m_fIntroTimer      = 0.0f;
+    m_fOutroTimer      = 0.0f;
+    m_fFinalSpinOld    = 0.0f;
+    m_eState           = SUMMARY_INTRO;
 
     // 
     m_BackgroundMain.SetSize(coreVector2(0.0f,0.0f));
