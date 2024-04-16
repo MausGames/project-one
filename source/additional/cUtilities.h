@@ -11,7 +11,7 @@
 #define _P1_GUARD_UTILITIES_H_
 
 // TODO 4: move ID color directly into background class if not used otherwise (emphasize "highlight" usage)
-// TODO 1: move a lot of those utilities into engine if proven well, look for other stuff in whole game
+// TODO 1: move a lot of those utilities into engine if proven well, look for other stuff in whole game (also from other projects)
 
 
 // ****************************************************************
@@ -134,7 +134,7 @@ inline coreUint8 GetSystemGpuIndex()
 
 // ****************************************************************
 // 
-inline FUNC_CONST coreFloat FmodRange(const coreFloat x, const coreFloat a, const coreFloat b)
+inline FUNC_CONST coreFloat FmodRange(const coreFloat x, const coreFloat a, const coreFloat b)   // TODO 1: migrate
 {
     ASSERT(a < b)
 
@@ -147,19 +147,19 @@ inline FUNC_CONST coreFloat FmodRange(const coreFloat x, const coreFloat a, cons
 
 // ****************************************************************
 // 
-inline FUNC_CONST coreFloat CeilFactor(const coreFloat fValue, const coreFloat fFactor)
+inline FUNC_CONST coreFloat CeilFactor(const coreFloat fValue, const coreFloat fFactor)   // TODO 1: migrate
 {
-    return CEIL(fValue * fFactor) / fFactor;
+    return CEIL(fValue * fFactor) * RCP(fFactor);
 }
 
-inline FUNC_CONST coreFloat FloorFactor(const coreFloat fValue, const coreFloat fFactor)
+inline FUNC_CONST coreFloat FloorFactor(const coreFloat fValue, const coreFloat fFactor)   // TODO 1: migrate
 {
-    return FLOOR(fValue * fFactor) / fFactor;
+    return FLOOR(fValue * fFactor) * RCP(fFactor);
 }
 
-inline FUNC_CONST coreFloat RoundFactor(const coreFloat fValue, const coreFloat fFactor)
+inline FUNC_CONST coreFloat RoundFactor(const coreFloat fValue, const coreFloat fFactor)   // TODO 1: migrate
 {
-    return ROUND(fValue * fFactor) / fFactor;
+    return ROUND(fValue * fFactor) * RCP(fFactor);
 }
 
 
@@ -227,7 +227,7 @@ template <typename T> inline FUNC_LOCAL T LerpSmoothRev(const T& x, const T& y, 
 
 // ****************************************************************
 // ternary interpolation helper-function
-template <typename T, typename S, typename R> constexpr FUNC_LOCAL T TernaryLerp(const T& x, const S& y, const R& z, const coreFloat s)
+template <typename T, typename S, typename R> constexpr FUNC_LOCAL T LerpTernary(const T& x, const S& y, const R& z, const coreFloat s)
 {
     return (s >= 0.5f) ? LERP(y, z, s * 2.0f - 1.0f) :
                          LERP(x, y, s * 2.0f);
@@ -236,7 +236,7 @@ template <typename T, typename S, typename R> constexpr FUNC_LOCAL T TernaryLerp
 
 // ****************************************************************
 // 
-template <typename T, typename S, typename R> inline FUNC_LOCAL T ParaLerp(const T& x, const S& y, const R& z, const coreFloat s)
+template <typename T, typename S, typename R> inline FUNC_LOCAL T LerpPara(const T& x, const S& y, const R& z, const coreFloat s)
 {
     const T A = (x - z);
     return LERPB(x, y + A * 0.5f, s * 2.0f) - (A * s);
@@ -276,12 +276,12 @@ constexpr FUNC_CONST coreFloat SmoothTowards(const coreFloat fDistance, const co
 
 // ****************************************************************
 // direction quantization and packing helper-functions
-inline FUNC_CONST coreUint8 PackDirection(const coreVector2 vDirection)
+inline FUNC_CONST coreUint8 PackDirection(const coreVector2 vDirection)   // TODO 1: migrate
 {
     return vDirection.IsNull() ? 8u : (F_TO_UI(ROUND(vDirection.Angle() / (0.25f*PI))) & 0x07u);
 }
 
-constexpr FUNC_CONST coreVector2 UnpackDirection(const coreUint8 iPack)
+constexpr FUNC_CONST coreVector2 UnpackDirection(const coreUint8 iPack)   // TODO 1: migrate
 {
     // 1 0 7
     // 2 8 6
@@ -327,25 +327,25 @@ constexpr FUNC_CONST coreUint8 StepInvertedX(const coreUint8 iPack)
 
 // ****************************************************************
 // 
-constexpr FUNC_CONST coreVector2 StepRotated45(const coreUint8 iStep)
+constexpr FUNC_CONST coreVector2 StepRotated45(const coreUint8 iStep)   // TODO 1: migrate
 {
     ASSERT(iStep < 8u)
     return UnpackDirection(iStep);
 }
 
-constexpr FUNC_CONST coreVector2 StepRotated45X(const coreUint8 iStep)
+constexpr FUNC_CONST coreVector2 StepRotated45X(const coreUint8 iStep)   // TODO 1: migrate
 {
     ASSERT(iStep < 8u)
     return UnpackDirection(iStep) * coreMatrix2(0.923879504f, 0.382683456f, -0.382683456f, 0.923879504f);
 }
 
-constexpr FUNC_CONST coreVector2 StepRotated90(const coreUint8 iStep)
+constexpr FUNC_CONST coreVector2 StepRotated90(const coreUint8 iStep)   // TODO 1: migrate
 {
     ASSERT(iStep < 4u)
     return UnpackDirection(iStep * 2u);
 }
 
-constexpr FUNC_CONST coreVector2 StepRotated90X(const coreUint8 iStep)
+constexpr FUNC_CONST coreVector2 StepRotated90X(const coreUint8 iStep)   // TODO 1: migrate
 {
     ASSERT(iStep < 4u)
     return UnpackDirection(iStep * 2u + 1u);
@@ -354,7 +354,7 @@ constexpr FUNC_CONST coreVector2 StepRotated90X(const coreUint8 iStep)
 
 // ****************************************************************
 // 
-constexpr FUNC_CONST coreVector2 MapStepRotated45(const coreVector2 vDirection, const coreUint8 iStep)
+constexpr FUNC_CONST coreVector2 MapStepRotated45(const coreVector2 vDirection, const coreUint8 iStep)   // TODO 1: migrate
 {
     switch(iStep)
     {
@@ -370,7 +370,7 @@ constexpr FUNC_CONST coreVector2 MapStepRotated45(const coreVector2 vDirection, 
     }
 }
 
-constexpr FUNC_CONST coreVector2 MapStepRotated90(const coreVector2 vDirection, const coreUint8 iStep)
+constexpr FUNC_CONST coreVector2 MapStepRotated90(const coreVector2 vDirection, const coreUint8 iStep)   // TODO 1: migrate
 {
     switch(iStep)
     {
@@ -382,22 +382,22 @@ constexpr FUNC_CONST coreVector2 MapStepRotated90(const coreVector2 vDirection, 
     }
 }
 
-constexpr FUNC_CONST coreVector2 MapStepRotated90X(const coreVector2 vDirection, const coreUint8 iStep)
+constexpr FUNC_CONST coreVector2 MapStepRotated90X(const coreVector2 vDirection, const coreUint8 iStep)   // TODO 1: migrate
 {
     return -MapStepRotated90(vDirection, iStep).Rotated135();
 }
 
-constexpr FUNC_CONST coreVector2 MapStepRotatedInv45(const coreVector2 vDirection, const coreUint8 iStep)
+constexpr FUNC_CONST coreVector2 MapStepRotatedInv45(const coreVector2 vDirection, const coreUint8 iStep)   // TODO 1: migrate
 {
     return MapStepRotated45(vDirection, (8u - iStep) % 8u);
 }
 
-constexpr FUNC_CONST coreVector2 MapStepRotatedInv90(const coreVector2 vDirection, const coreUint8 iStep)
+constexpr FUNC_CONST coreVector2 MapStepRotatedInv90(const coreVector2 vDirection, const coreUint8 iStep)   // TODO 1: migrate
 {
     return MapStepRotated90(vDirection, (4u - iStep) % 4u);
 }
 
-constexpr FUNC_CONST coreVector2 MapStepRotatedInv90X(const coreVector2 vDirection, const coreUint8 iStep)
+constexpr FUNC_CONST coreVector2 MapStepRotatedInv90X(const coreVector2 vDirection, const coreUint8 iStep)   // TODO 1: migrate
 {
     return MapStepRotated90X(vDirection, (4u - iStep) % 4u);
 }
@@ -405,7 +405,7 @@ constexpr FUNC_CONST coreVector2 MapStepRotatedInv90X(const coreVector2 vDirecti
 
 // ****************************************************************
 // 
-constexpr FUNC_CONST coreBool IsHorizontal(const coreVector2 v)
+constexpr FUNC_CONST coreBool IsHorizontal(const coreVector2 v)   // TODO 1: migrate
 {
     ASSERT(!v.IsNull())
     if(std::is_constant_evaluated())
@@ -419,37 +419,37 @@ constexpr FUNC_CONST coreBool IsHorizontal(const coreVector2 v)
     }
 }
 
-constexpr FUNC_CONST coreVector2 AlongCross(const coreVector2 v)
+constexpr FUNC_CONST coreVector2 AlongCross(const coreVector2 v)   // TODO 1: migrate
 {
     ASSERT(!v.IsNull())
     return IsHorizontal(v) ? coreVector2(v.x, 0.0f) : coreVector2(0.0f, v.y);
 }
 
-constexpr FUNC_CONST coreVector2 AlongCrossNormal(const coreVector2 v)
+constexpr FUNC_CONST coreVector2 AlongCrossNormal(const coreVector2 v)   // TODO 1: migrate
 {
     ASSERT(!v.IsNull())
     return IsHorizontal(v) ? coreVector2(SIGN(v.x), 0.0f) : coreVector2(0.0f, SIGN(v.y));
 }
 
-constexpr FUNC_CONST coreVector2 AlongCrossX(const coreVector2 v)
+constexpr FUNC_CONST coreVector2 AlongCrossX(const coreVector2 v)   // TODO 1: migrate
 {
     ASSERT(!v.IsNull())
     return -AlongCross(v.Rotated45()).Rotated135();
 }
 
-constexpr FUNC_CONST coreVector2 AlongCrossXNormal(const coreVector2 v)
+constexpr FUNC_CONST coreVector2 AlongCrossXNormal(const coreVector2 v)   // TODO 1: migrate
 {
     ASSERT(!v.IsNull())
     return -AlongCrossNormal(v.Rotated45()).Rotated135();
 }
 
-inline FUNC_CONST coreVector2 AlongStar(const coreVector2 v)
+inline FUNC_CONST coreVector2 AlongStar(const coreVector2 v)   // TODO 1: migrate
 {
     ASSERT(!v.IsNull())
     return UnpackDirection(PackDirection(v)) * v.Length();
 }
 
-inline FUNC_CONST coreVector2 AlongStarNormal(const coreVector2 v)
+inline FUNC_CONST coreVector2 AlongStarNormal(const coreVector2 v)   // TODO 1: migrate
 {
     ASSERT(!v.IsNull())
     return UnpackDirection(PackDirection(v));
@@ -458,24 +458,24 @@ inline FUNC_CONST coreVector2 AlongStarNormal(const coreVector2 v)
 
 // ****************************************************************
 // 
-constexpr FUNC_CONST coreVector2 MapToAxis(const coreVector2 vVector, const coreVector2 vAxis)
+constexpr FUNC_CONST coreVector2 MapToAxis(const coreVector2 vVector, const coreVector2 vAxis)   // TODO 1: migrate
 {
     ASSERT(vAxis.IsNormalized())
     return (vVector.x * vAxis.Rotated90()) +
            (vVector.y * vAxis);
 }
 
-constexpr FUNC_CONST coreVector2 MapToAxisInv(const coreVector2 vVector, const coreVector2 vAxis)
+constexpr FUNC_CONST coreVector2 MapToAxisInv(const coreVector2 vVector, const coreVector2 vAxis)   // TODO 1: migrate
 {
     return MapToAxis(vVector, vAxis.InvertedX());
 }
 
-constexpr FUNC_CONST coreVector3 MapToAxis(const coreVector3 vVector, const coreVector2 vAxis)
+constexpr FUNC_CONST coreVector3 MapToAxis(const coreVector3 vVector, const coreVector2 vAxis)   // TODO 1: migrate
 {
     return coreVector3(MapToAxis(vVector.xy(), vAxis), vVector.z);
 }
 
-constexpr FUNC_CONST coreVector3 MapToAxisInv(const coreVector3 vVector, const coreVector2 vAxis)
+constexpr FUNC_CONST coreVector3 MapToAxisInv(const coreVector3 vVector, const coreVector2 vAxis)   // TODO 1: migrate
 {
     return coreVector3(MapToAxisInv(vVector.xy(), vAxis), vVector.z);
 }
@@ -494,7 +494,7 @@ constexpr FUNC_CONST coreVector3 OriRoundDir(const coreVector2 vOrientation, con
 
 // ****************************************************************
 // 
-inline FUNC_NOALIAS coreBool RayIntersection(const coreVector2 vPos1, const coreVector2 vDir1, const coreVector2 vPos2, const coreVector2 vDir2, coreVector2* OUTPUT pvIntersection)
+inline FUNC_NOALIAS coreBool RayIntersection(const coreVector2 vPos1, const coreVector2 vDir1, const coreVector2 vPos2, const coreVector2 vDir2, coreVector2* OUTPUT pvIntersection)   // TODO 1: migrate
 {
     ASSERT(vDir1.IsNormalized() && vDir2.IsNormalized() && pvIntersection)
 
@@ -513,15 +513,16 @@ inline FUNC_NOALIAS coreBool RayIntersection(const coreVector2 vPos1, const core
     return true;
 }
 
+
 // ****************************************************************
 // 
-constexpr FUNC_CONST coreBool SameDirection(const coreVector2 x, const coreVector2 y)
+constexpr FUNC_CONST coreBool SameDirection(const coreVector2 x, const coreVector2 y)   // TODO 1: migrate
 {
     ASSERT(x.IsNormalized() && y.IsNormalized())
     return (coreVector2::Dot(x, y) >= (1.0f - CORE_MATH_PRECISION));
 }
 
-constexpr FUNC_CONST coreBool SameDirection90(const coreVector2 x, const coreVector2 y)
+constexpr FUNC_CONST coreBool SameDirection90(const coreVector2 x, const coreVector2 y)   // TODO 1: migrate
 {
     ASSERT(x.IsNormalized() && y.IsNormalized())
     return (coreVector2::Dot(x, y) >= (1.0f / SQRT2) - CORE_MATH_PRECISION);

@@ -13,6 +13,7 @@
 // constructor
 cMusicBox::cMusicBox()noexcept
 : m_iSelection (MUSIC_DEFAULT)
+, m_fDelay     (0.0f)
 {
     // 
     this->SetAlpha(0.0f);   // due to late initialization
@@ -34,6 +35,19 @@ cMusicBox::cMusicBox()noexcept
     m_BackButton.SetPosition  (coreVector2(0.415f,-0.42f));
     m_BackButton.SetSize      (coreVector2(0.07f,  0.07f));
     m_BackButton.GetCaption()->SetText(ICON_SHARE);
+    
+#if defined(_CORE_DEBUG_)
+    // 
+    m_BigTitle.Construct   (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
+    m_BigTitle.SetPosition (coreVector2(-0.45f,-0.402f));
+    m_BigTitle.SetAlignment(coreVector2(1.0f,0.0f));
+
+    // 
+    m_BigArtist.Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+    m_BigArtist.SetPosition (m_BigTitle.GetPosition () + coreVector2(0.002f,-0.042f));
+    m_BigArtist.SetAlignment(m_BigTitle.GetAlignment());
+    m_BigArtist.SetColor3   (COLOR_MENU_WHITE);
+#endif
 
     for(coreUintW i = 0u; i < MUSIC_TRACKS; ++i)
     {
@@ -118,12 +132,22 @@ void cMusicBox::Render()
     m_Background.Render();
 
     // 
-    m_BackButton.SetAlpha(this->GetAlpha());
+    m_BackButton.SetAlpha(this->GetAlpha());   // # before
     m_BackButton.Render();
 
     // 
     m_Header.SetAlpha(this->GetAlpha());
     m_Header.Render();
+    
+#if defined(_CORE_DEBUG_)
+    // 
+    m_BigTitle.SetAlpha(this->GetAlpha());
+    m_BigTitle.Render();
+
+    // 
+    m_BigArtist.SetAlpha(this->GetAlpha());
+    m_BigArtist.Render();
+#endif
 
     // 
     m_ScrollBox.Render();
@@ -158,6 +182,7 @@ void cMusicBox::Move()
             {
                 // 
                 m_iSelection = i;
+                m_fDelay     = 0.0f;
 
                 // 
                 g_MusicPlayer.SelectName(g_aMusicTrack[i].pcFile);
@@ -177,6 +202,13 @@ void cMusicBox::Move()
                 // 
                 m_aTitle  [i].SetColor3(g_aMusicTrack[i].vColor);
                 m_aContext[i].SetColor3(g_aMusicTrack[i].vColor * MENU_LIGHT_IDLE);
+
+#if defined(_CORE_DEBUG_)
+                // 
+                m_BigTitle .SetColor3(g_aMusicTrack[i].vColor);
+                m_BigTitle .SetText  (g_aMusicTrack[i].pcTitle);
+                m_BigArtist.SetText  (g_aMusicTrack[i].pcArtist);
+#endif
             }
             else
             {
@@ -198,6 +230,19 @@ void cMusicBox::Move()
             m_aMusicIcon[i].SetColor3  (g_aMusicTrack[m_iSelection].vColor);
             m_aMusicIcon[i].SetEnabled (CORE_OBJECT_ENABLE_ALL);
         }
+
+#if defined(_CORE_DEBUG_)
+        // 
+        m_fDelay.Update(1.0f);
+        if(m_fDelay >= 2.0f)
+        {
+            const coreInt32 iBackground = g_aMusicTrack[m_iSelection].iBackground;
+            if(iBackground && (g_pEnvironment->GetBackground()->GetID() != iBackground))
+            {
+                g_pEnvironment->ChangeBackground(iBackground, ENVIRONMENT_MIX_FADE, 0.5f);
+            }
+        }
+#endif
     }
 
     // 
@@ -211,6 +256,12 @@ void cMusicBox::Move()
     // 
     m_Header    .Move();
     m_BackButton.Move();
+    
+#if defined(_CORE_DEBUG_)
+    // 
+    m_BigTitle .Move();
+    m_BigArtist.Move();
+#endif
 
     // 
     m_ScrollBox.SetAlpha(this->GetAlpha());

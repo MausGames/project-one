@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 //*----------------------------------------------------------------------------*//
-//| Project One v1.3.1 (https://www.maus-games.at)                             |//
+//| Project One v1.3.2 (https://www.maus-games.at)                             |//
 //*----------------------------------------------------------------------------*//
 //| Copyright (c) 2010 Martin Mauersics                                        |//
 //|                                                                            |//
@@ -94,6 +94,7 @@
     #pragma warning(disable : 4189)   // local variable is initialized but not referenced
 #else
     #pragma GCC diagnostic ignored "-Winconsistent-missing-override"
+    #pragma GCC diagnostic ignored "-Winvalid-offsetof"
 #endif
 
 #if defined(_CORE_DEBUG_)
@@ -132,7 +133,7 @@
 #define EQUIP_SUPPORTS       (1u)
 #define FRAMERATE_MIN        (60.0f)
 #define FRAMERATE_MAX        (360.0f * 2.0f)
-#define SCALE_FACTOR         (0.5f * (CORE_GL_SUPPORT(ARB_texture_rg) ? 1.0f : 0.8f) * (g_CurConfig.Graphics.iRender ? 1.0f : 0.8f))
+#define SCALE_FACTOR         ((DEFINED(_CORE_SWITCH_) ? 0.6f : 0.5f) * (CORE_GL_SUPPORT(ARB_texture_rg) ? 1.0f : 0.8f) * (g_CurConfig.Graphics.iRender ? 1.0f : 0.8f))
 #define CAMERA_POSITION      (coreVector3(0.0f,  0.0f,  1.0f) * 110.0f)
 #define CAMERA_DIRECTION     (coreVector3(0.0f,  0.0f, -1.0f))
 #define CAMERA_ORIENTATION   (coreVector3(0.0f,  1.0f,  0.0f))
@@ -241,7 +242,8 @@ constexpr sVersion g_aVersion[] =
     {"1.2.6",  7u},
     {"1.2.7",  8u},
     {"1.3.0",  9u},
-    {"1.3.1", 10u}
+    {"1.3.1", 10u},
+    {"1.3.2", 11u}
 };
 constexpr sVersion g_Version = g_aVersion[ARRAY_SIZE(g_aVersion) - 1u];
 

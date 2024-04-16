@@ -245,7 +245,7 @@ void cCreditRoll::Move()
 
         if(m_eType == CREDIT_TYPE_NORMAL)
         {
-            constexpr coreInt32 iBackground[] =
+            constexpr coreInt32 aiBackground[] =
             {
                 cNoBackground     ::ID,
                 cCloudBackground  ::ID,
@@ -259,8 +259,8 @@ void cCreditRoll::Move()
                 cDarkBackground   ::ID
             };
 
-            const coreUintW iNewIndex = MIN(F_TO_UI(fFactor1 * I_TO_F(ARRAY_SIZE(iBackground))), ARRAY_SIZE(iBackground) - 1u);
-            const coreInt32 iNewID    = iBackground[iNewIndex];
+            const coreUintW iNewIndex = MIN(F_TO_UI(fFactor1 * I_TO_F(ARRAY_SIZE(aiBackground))), ARRAY_SIZE(aiBackground) - 1u);
+            const coreInt32 iNewID    = aiBackground[iNewIndex];
 
             if(iNewID != g_pEnvironment->GetBackground()->GetID())
             {
@@ -320,13 +320,9 @@ void cCreditRoll::Move()
 void cCreditRoll::Start(const eCreditType eType)
 {
     // 
-    const coreBool bHorizontal = IsHorizontal(g_vHudDirection);
-
-    // 
     const auto nSetRectifyFunc = [&](cGuiLabel* OUTPUT pLabel)
     {
-        pLabel->SetRectifyX(!bHorizontal);
-        pLabel->SetRectifyY( bHorizontal);
+        pLabel->SetRectifyY(false);
     };
     const auto nSetRectifyListFunc = [&](cGuiLabel* OUTPUT pLabel, const coreUintW iNum)
     {

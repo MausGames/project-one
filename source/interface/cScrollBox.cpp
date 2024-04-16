@@ -155,14 +155,10 @@ void cScrollBox::Move()
         
         if(cMenuNavigator::IsUsingJoystick())
         {
-            FOR_EACH(it, m_apObject)
+            coreObject2D* pFocus = cMenuNavigator::GetCurFocus();
+            if(this->ContainsObject(pFocus) && cMenuNavigator::IsValid(pFocus))
             {
-                const coreObject2D* pObject = (*it);
-
-                if((pObject == cMenuNavigator::GetCurFocus()) && cMenuNavigator::IsValid(pObject))
-                {
-                    this->ScrollToObject(pObject, false);
-                }
+                this->ScrollToObject(pFocus, false);
             }
         }
         

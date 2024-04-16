@@ -641,7 +641,7 @@ void cReplayMenu::Move()
                                         // 
                                         if(!m_bDownloaded)
                                         {
-                                            g_pReplay->SetNameDefault();
+                                            g_pReplay->SetNameDefault(m_iOverwrite);
                                         }
 
                                         // 
@@ -664,7 +664,7 @@ void cReplayMenu::Move()
                         // 
                         if(!m_bDownloaded)
                         {
-                            g_pReplay->SetNameDefault();
+                            g_pReplay->SetNameDefault(m_iOverwrite);
                         }
 
                         // 
@@ -1123,7 +1123,7 @@ void cReplayMenu::LoadDetails(const coreUintW iIndex)
         }
     }
 
-    constexpr coreUintW iOffset = MENU_REPLAY_MISSION_OFFSET - (DEFINED(_CORE_SWITCH_) ? 1u : 0u);
+    constexpr coreUintW iOffset = MENU_REPLAY_MISSION_OFFSET;
 
     const coreUint32 iMaxValue = (*std::max_element(aiScoreFull, aiScoreFull + MENU_REPLAY_DETAIL_RUNS));
 
@@ -1156,7 +1156,7 @@ void cReplayMenu::LoadDetails(const coreUintW iIndex)
     m_iDetailStartIndex = MIN(iMissionIndexStart, MENU_REPLAY_DETAIL_MEDALS - 2u);
 
     // 
-    m_DetailBox.SetMaxOffset(0.05f * (2.5f + I_TO_F(iOffset) + I_TO_F(iMissionIndexEnd - iMissionIndexStart)) - m_DetailBox.GetSize().y);
+    m_DetailBox.SetMaxOffset(0.05f * (2.5f + I_TO_F(iOffset - (DEFINED(_CORE_SWITCH_) ? 1u : 0u)) + I_TO_F(iMissionIndexEnd - iMissionIndexStart)) - m_DetailBox.GetSize().y);
 }
 
 

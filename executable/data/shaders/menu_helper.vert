@@ -6,6 +6,8 @@
 //| Released under the zlib License                 |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
+#include "engine/data_transform_2d.glsl"
+#include "engine/util_matrix.glsl"
 
 
 // shader output

@@ -18,7 +18,6 @@ cSeaBackground::cSeaBackground()noexcept
 , m_fOverdriveTime  (0.0f)
 , m_vOverdriveCount (0u)
 , m_bOverdrive      (false)
-, m_Loaded          ()
 {
     coreBatchList* pList1;
     coreBatchList* pList2;
@@ -305,8 +304,6 @@ cSeaBackground::~cSeaBackground()
 // 
 void cSeaBackground::__InitOwn()
 {
-    m_Loaded.Release();
-    
     // create underwater-surface object
     m_pWater = new cUnderWater();
 
@@ -315,7 +312,6 @@ void cSeaBackground::__InitOwn()
     m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
         pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
-        m_Loaded.Acquire();
     });
 }
 
@@ -330,7 +326,7 @@ void cSeaBackground::__ExitOwn()
     // stop base sound-effect
     m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
-        if(m_Loaded && pResource->EnableRef(this))
+        if(pResource->EnableRef(this))
             pResource->Stop();
     });
 }
@@ -345,7 +341,7 @@ void cSeaBackground::__MoveOwn()
 
     // 
     coreBatchList* pList = m_apDecalObjectList[0];
-    for(coreUintW i = 0u, ie = LOOP_NONZERO(pList->List()->size()); i < ie; ++i)
+    for(coreUintW i = 0u, ie = LOOP_NONZERO(pList->GetSize()); i < ie; ++i)
     {
         coreObject3D* pAlgae = (*pList->List())[i];
 
@@ -366,7 +362,7 @@ void cSeaBackground::__MoveOwn()
 
     //
     pList = m_apGroundObjectList[0];
-    for(coreUintW i = 0u, ie = LOOP_NONZERO(pList->List()->size()); i < ie; ++i)
+    for(coreUintW i = 0u, ie = LOOP_NONZERO(pList->GetSize()); i < ie; ++i)
     {
         coreObject3D* pWeed = (*pList->List())[i];
         if(!pWeed->IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue;   // # all
@@ -380,7 +376,7 @@ void cSeaBackground::__MoveOwn()
     m_fWaveTime.Update(1.4f);
 
     // adjust volume of the base sound-effect
-    if(m_Loaded && m_pBaseSound->EnableRef(this))
+    if(m_pBaseSound.IsUsable() && m_pBaseSound->EnableRef(this))
     {
         m_pBaseSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
     }

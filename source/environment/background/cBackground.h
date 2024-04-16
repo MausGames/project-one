@@ -291,7 +291,6 @@ private:
     coreFlow       m_fOffset;     // 
 
     coreSoundPtr m_pBaseSound;   // base sound-effect
-    coreAtomic<coreUint8> m_Loaded;       // 
     //coreMusicPlayer m_Music;
 
 
@@ -333,7 +332,6 @@ private:
     coreBool  m_bOverdrive;      // 
 
     coreSoundPtr m_pBaseSound;   // base sound-effect
-    coreAtomic<coreUint8> m_Loaded;       // 
     //coreMusicPlayer m_Music;
 
 
@@ -377,7 +375,6 @@ private:
     coreVector2 m_vGroundPos;
 
     coreSoundPtr m_pBaseSound;    // base sound-effect
-    coreAtomic<coreUint8> m_Loaded;        // 
 
 
 public:
@@ -426,7 +423,6 @@ private:
     coreVector2  m_vNebulaMove;   // 
 
     coreSoundPtr m_pBaseSound;    // base sound-effect
-    coreAtomic<coreUint8> m_Loaded;        // 
 
 
 public:
@@ -470,7 +466,6 @@ private:
     coreUintW m_iSparkNum;          // 
 
     coreSoundPtr m_pBaseSound;   // base sound-effect
-    coreAtomic<coreUint8> m_Loaded;       // 
 
 
 public:
@@ -500,7 +495,6 @@ private:
     coreFlow       m_fSnowWave;   // 
 
     coreSoundPtr m_pBaseSound;    // base sound-effect
-    coreAtomic<coreUint8> m_Loaded;        // 
 
 
 public:
@@ -541,7 +535,6 @@ private:
     coreUint8    m_iThunderIndex;       // 
 
     coreSoundPtr m_pBaseSound;          // base sound-effect
-    coreAtomic<coreUint8> m_Loaded;              // 
 
     cHeadlight m_Headlight;             // 
 
@@ -613,7 +606,6 @@ private:
     coreVector3 m_vColor2;                    // 
 
     coreSoundPtr m_pBaseSound;                // base sound-effect
-    coreAtomic<coreUint8> m_Loaded;                    // 
 
     coreFullscreen m_Lightning;               // 
     coreFlow       m_fLightningFlash;         // 
@@ -681,7 +673,6 @@ private:
     cHeadlight m_Headlight;      // 
 
     coreSoundPtr m_pBaseSound;   // base sound-effect
-    coreAtomic<coreUint8> m_Loaded;       // 
 
 
 public:
@@ -717,7 +708,6 @@ private:
     coreFlow       m_fOffset;     // 
 
     coreSoundPtr m_pBaseSound;    // base sound-effect
-    coreAtomic<coreUint8> m_Loaded;        // 
 
 
 public:

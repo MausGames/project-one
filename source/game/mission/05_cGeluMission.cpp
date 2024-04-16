@@ -670,7 +670,7 @@ void cGeluMission::__RenderOwnUnder()
     g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyList(&m_Coin);
 
     // 
-    if(m_Fang.GetCurEnabled()) cLodObject::RenderHighList(&m_Fang);
+    if(m_Fang.GetNumEnabled()) cLodObject::RenderHighList(&m_Fang);
     g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyList(&m_Fang);
 
     // 

@@ -892,7 +892,7 @@ void cRutilusMission::__MoveOwnAfter()
         {
             // 
             m_fAreaTime.UpdateMax(-1.0f/0.6f, -2.0f);
-            fScale = ParaLerp(1.0f, 1.5f, 0.0f, -m_fAreaTime - 1.0f);
+            fScale = LerpPara(1.0f, 1.5f, 0.0f, -m_fAreaTime - 1.0f);
 
             // 
             if(m_fAreaTime <= -2.0f) this->DisableArea(false);
@@ -930,7 +930,7 @@ void cRutilusMission::__MoveOwnAfter()
         {
             // 
             m_fSafeTime.UpdateMax(-1.0f/0.6f, -2.0f);
-            fScale = ParaLerp(1.0f, 1.5f, 0.0f, -m_fSafeTime - 1.0f);
+            fScale = LerpPara(1.0f, 1.5f, 0.0f, -m_fSafeTime - 1.0f);
 
             // 
             if(m_fSafeTime <= -2.0f) this->DisableSafe(false);

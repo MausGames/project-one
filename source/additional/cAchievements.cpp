@@ -23,8 +23,8 @@ static coreUint32 s_aaaiCacheTimeArcade   [SCORE_PURES][SCORE_TYPES][SCORE_DIFFI
 static coreUint32 s_aaaaiCacheTimeMission [SCORE_PURES][SCORE_TYPES][SCORE_DIFFICULTIES][SCORE_MISSIONS]                 = {};
 static coreUint32 s_aaaaaiCacheTimeSegment[SCORE_PURES][SCORE_TYPES][SCORE_DIFFICULTIES][SCORE_MISSIONS][SCORE_SEGMENTS] = {};
 
-static coreFileHandle s_iFileHandle = 0u;
-static coreBool       s_bFileLock   = false;
+static corePlatformFileHandle s_iFileHandle = 0u;
+static coreBool               s_bFileLock   = false;
 
 
 // ****************************************************************
@@ -68,11 +68,11 @@ void InitAchievements()
     }
 
     // 
-    Core::Platform->DefineStat("achievement_badge",     "ACHIEVEMENT_BADGE");
-    Core::Platform->DefineStat("achievement_trophy",    "ACHIEVEMENT_TROPHY");
-    Core::Platform->DefineStat("achievement_stage_s",   "ACHIEVEMENT_STAGE_S");
-    Core::Platform->DefineStat("achievement_stage_x",   "ACHIEVEMENT_STAGE_X");
-    Core::Platform->DefineStat("achievement_stage_200", "ACHIEVEMENT_STAGE_200");
+    Core::Platform->DefineStat("achievement_badge",     "ACHIEVEMENT_BADGE",     "");
+    Core::Platform->DefineStat("achievement_trophy",    "ACHIEVEMENT_TROPHY",    "");
+    Core::Platform->DefineStat("achievement_stage_s",   "ACHIEVEMENT_STAGE_S",   "");
+    Core::Platform->DefineStat("achievement_stage_x",   "ACHIEVEMENT_STAGE_X",   "");
+    Core::Platform->DefineStat("achievement_stage_200", "ACHIEVEMENT_STAGE_200", "");
 }
 
 
@@ -171,7 +171,7 @@ void CheckAchievements()
                     Core::Platform->UnlockAchievement("challenge_04");
                     ADD_BIT(g_iChallengeUnlocked, 3u)
                 }
-                Core::Platform->UpdateStat("achievement_badge", iBadges);
+                Core::Platform->ModifyStat("achievement_badge", iBadges);
             }
         }
         break;
@@ -195,7 +195,7 @@ void CheckAchievements()
                     Core::Platform->UnlockAchievement("challenge_02");
                     ADD_BIT(g_iChallengeUnlocked, 1u)
                 }
-                Core::Platform->UpdateStat("achievement_stage_x", iMedal);
+                Core::Platform->ModifyStat("achievement_stage_x", iMedal);
             }
 
             if(!HAS_BIT(g_iChallengeUnlocked, 2u))
@@ -228,7 +228,7 @@ void CheckAchievements()
                     Core::Platform->UnlockAchievement("challenge_05");
                     ADD_BIT(g_iChallengeUnlocked, 4u)
                 }
-                Core::Platform->UpdateStat("achievement_stage_s", iMedal);
+                Core::Platform->ModifyStat("achievement_stage_s", iMedal);
             }
 
             if(!HAS_BIT(g_iChallengeUnlocked, 5u))
@@ -260,7 +260,7 @@ void CheckAchievements()
                     Core::Platform->UnlockAchievement("challenge_07");
                     ADD_BIT(g_iChallengeUnlocked, 6u)
                 }
-                Core::Platform->UpdateStat("achievement_trophy", iTrophies);
+                Core::Platform->ModifyStat("achievement_trophy", iTrophies);
             }
 
             if(!HAS_BIT(g_iChallengeUnlocked, 7u))
@@ -282,7 +282,7 @@ void CheckAchievements()
                     Core::Platform->UnlockAchievement("challenge_08");
                     ADD_BIT(g_iChallengeUnlocked, 7u)
                 }
-                Core::Platform->UpdateStat("achievement_stage_200", iCount);
+                Core::Platform->ModifyStat("achievement_stage_200", iCount);
             }
         }
         break;
@@ -737,7 +737,7 @@ void CheckLeaderboards()
 
 // ****************************************************************
 // 
-const sScoreData* GetScoreData(const coreScore* pScore)
+const sScoreData* GetScoreData(const corePlatformScore* pScore)
 {
     static sScoreData s_Static;
 

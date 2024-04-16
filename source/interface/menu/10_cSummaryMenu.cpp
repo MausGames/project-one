@@ -561,7 +561,7 @@ void cSummaryMenu::Move()
                                         m_iStatus = 106;
                                         return;
                                     #else
-                                        g_pReplay->SetNameDefault();
+                                        g_pReplay->SetNameDefault(0u);
                                         if(!g_pReplay->SaveFile(0u)) return;
                                     #endif
                                     }
@@ -1377,7 +1377,7 @@ void cSummaryMenu::ShowArcade()
     }
 
     // 
-    const coreUint8 iMedal = iMedalCount ? MIN<coreUint8>((iMedalTotal + MEDAL_MARGIN_ARCADE) / iMedalCount, MEDAL_MAX - 1u) : MEDAL_NONE;
+    const coreUint8 iMedal = iMedalCount ? MIN<coreUint8>((iMedalTotal + MEDAL_MARGIN_ARCADE) / iMedalCount, MEDAL_MAX - 1u) : MEDAL_NONE;   // TODO 1: get rid of template parameter
 
     // 
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
@@ -1568,7 +1568,7 @@ void cSummaryMenu::ShowMission()
     iBonusSurvive /= iModifier;
 
     // 
-    const coreUint8 iMedalMission = iMedalCount ? MIN<coreUint8>((iMedalTotal + (bAter ? MEDAL_MARGIN_MISSION_ATER : MEDAL_MARGIN_MISSION)) / iMedalCount, MEDAL_MAX - 1u) : MEDAL_NONE;
+    const coreUint8 iMedalMission = iMedalCount ? MIN<coreUint8>((iMedalTotal + (bAter ? MEDAL_MARGIN_MISSION_ATER : MEDAL_MARGIN_MISSION)) / iMedalCount, MEDAL_MAX - 1u) : MEDAL_NONE;   // TODO 1: get rid of template parameter
     this->__SetMedalMission(iMedalMission);
 
     // 

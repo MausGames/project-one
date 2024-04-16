@@ -32,6 +32,4 @@ void FragmentMain()
 
     // draw semi-transparent outline
     gl_FragColor = vec4(v3Base, u_v4Color.a * v_v1Strength);
-    
-//gl_FragColor = vec4(vec3(0.9), gl_FragColor.a); // [A1]
 }

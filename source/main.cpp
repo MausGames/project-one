@@ -169,8 +169,16 @@ void CoreApp::Exit()
 // render the application
 void CoreApp::Render()
 {
-    if(!g_pMenu->IsPaused() && Core::Graphics->IsFrameSkipped())
+    // prevent menu transition flickering   
+    if(Core::Graphics->IsFrameSkipped())
     {
+        glDisable(GL_DEPTH_TEST);
+        {
+            // always render to properly handle transitions
+            g_pMenu->Render();   // TODO 1: handle mirror mode ? or remove everywhere
+        }
+        glEnable(GL_DEPTH_TEST);
+
         ForceFramerate(false, false);
         return;
     }
@@ -502,9 +510,9 @@ void InitFramerate(const coreUint16 iUpdateFreq, const coreUint8 iGameSpeed)
 
         s_fLogicalRate  = coreFloat(dFixedRate);
         s_fLogicalTime  = coreFloat(1.0 / dFixedRate);
-        s_dPhysicalTime = 1.0 / (dFixedRate * dGameSpeed);
+        s_dPhysicalTime = 1.0 / ROUND(dFixedRate * dGameSpeed);   // TODO 1: test ROUND on PC, wenn update frequency 75 oder 144hz
 
-        const coreUint8 iSkip = oMode.refresh_rate ? (F_TO_UI(dFixedRate * dGameSpeed) / oMode.refresh_rate) : 0u;
+        const coreUint8 iSkip = oMode.refresh_rate ? (F_TO_UI(ROUND(dFixedRate * dGameSpeed)) / oMode.refresh_rate) : 0u;
         Core::Graphics->SetSkipFrame(iSkip ? (iSkip - 1u) : 0u);
 
         g_adGameTime[0] = 1.0 / dFixedRate;

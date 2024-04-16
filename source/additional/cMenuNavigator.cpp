@@ -279,7 +279,7 @@ void cMenuNavigator::Update()
     coreBool bNewPressed = false;
     const auto nPressFunc = [&]()
     {
-        if(!g_pMenu->IsShifting())
+        if(!g_pMenu->IsShifting() || (g_pMenu->GetShifting().GetValue(CORE_TIMER_GET_NORMAL) > 0.7f))
             if(!m_bPressed && !bNewPressed) Core::Input->SetMouseButtonNow(CORE_INPUT_LEFT, true);
         bNewPressed = true;
     };
@@ -299,7 +299,7 @@ void cMenuNavigator::Update()
     coreBool    bShoulderRight = false;
     for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
     {
-        if(vRelative.IsNull()) vRelative = Core::Input->GetJoystickRelativeL(i);
+        if(vRelative.IsNull()) vRelative = Core::Input->GetJoystickStickL(i);
         iCount         = MAX(iCount, Core::Input->GetCountJoystick(i, CORE_INPUT_HOLD));
         bButtonA       = bButtonA       || Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_A, CORE_INPUT_PRESS);
         bButtonB       = bButtonB       || Core::Input->GetJoystickButton(i, SDL_CONTROLLER_BUTTON_B, CORE_INPUT_PRESS);
@@ -706,7 +706,7 @@ void cMenuNavigator::GlobalUpdate()
     // 
     for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
     {
-        if(!Core::Input->GetJoystickRelativeL(i).IsNull() || !Core::Input->GetJoystickRelativeR(i).IsNull() || (Core::Input->GetCountJoystick(i, CORE_INPUT_PRESS) && (!g_pMenu->GetMsgBox()->IsVisible() || (g_pMenu->GetMsgBox()->GetMsgType() != MSGBOX_TYPE_MAPPING))))
+        if(!Core::Input->GetJoystickStickL(i).IsNull() || !Core::Input->GetJoystickStickR(i).IsNull() || (Core::Input->GetCountJoystick(i, CORE_INPUT_PRESS) && (!g_pMenu->GetMsgBox()->IsVisible() || (g_pMenu->GetMsgBox()->GetMsgType() != MSGBOX_TYPE_MAPPING))))
         {
             s_vMouseMove    = coreVector2(0.0f,0.0f);
             s_bJoystick     = true;

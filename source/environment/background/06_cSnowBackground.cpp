@@ -15,7 +15,6 @@ cSnowBackground::cSnowBackground()noexcept
 : cBackground (false)
 , m_vSnowMove (coreVector2(0.0f,0.0f))
 , m_fSnowWave (0.0f)
-, m_Loaded    ()
 {
     coreBatchList* pList1;
 
@@ -220,7 +219,7 @@ cSnowBackground::cSnowBackground()noexcept
         cBackground::_SortBackToFront(pList1);
         m_apAirObjectList.push_back(pList1);
 
-        ASSERT(pList1->GetCurCapacity() == SNOW_CLOUD_1_RESERVE)
+        ASSERT(pList1->GetCapacity() == SNOW_CLOUD_1_RESERVE)
     }
 
     // allocate cloud list
@@ -259,7 +258,7 @@ cSnowBackground::cSnowBackground()noexcept
         cBackground::_SortBackToFront(pList1);
         m_apAirObjectList.push_back(pList1);
 
-        ASSERT(pList1->GetCurCapacity() == SNOW_CLOUD_2_RESERVE)
+        ASSERT(pList1->GetCapacity() == SNOW_CLOUD_2_RESERVE)
     }
 
     // 
@@ -287,8 +286,6 @@ cSnowBackground::~cSnowBackground()
 // 
 void cSnowBackground::__InitOwn()
 {
-    m_Loaded.Release();
-    
     // 
     m_pWater = new cIceWater("environment_clouds_blue.png");
 
@@ -297,7 +294,6 @@ void cSnowBackground::__InitOwn()
     m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
         pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
-        m_Loaded.Acquire();
     });
 }
 
@@ -312,7 +308,7 @@ void cSnowBackground::__ExitOwn()
     // stop base sound-effect
     m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
-        if(m_Loaded && pResource->EnableRef(this))
+        if(pResource->EnableRef(this))
             pResource->Stop();
     });
 }
@@ -365,7 +361,7 @@ void cSnowBackground::__MoveOwn()
     m_fSnowWave.UpdateMod(SQRT(MAX(ABS(g_pEnvironment->GetSpeed()), 1.0f)), 16.0f);
 
     // adjust volume of the base sound-effect
-    if(m_Loaded && m_pBaseSound->EnableRef(this))
+    if(m_pBaseSound.IsUsable() && m_pBaseSound->EnableRef(this))
     {
         m_pBaseSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
     }
@@ -375,7 +371,7 @@ void cSnowBackground::__MoveOwn()
     const coreFloat fCloudMove = 0.0018f * (1.0f + ABS(g_pEnvironment->GetSpeed())) * TIME;
 
     coreBatchList* pList = m_apAirObjectList[0];
-    for(coreUintW i = 0u, ie = LOOP_NONZERO(pList->List()->size()); i < ie; ++i)
+    for(coreUintW i = 0u, ie = LOOP_NONZERO(pList->GetSize()); i < ie; ++i)
     {
         coreObject3D* pCloud = (*pList->List())[i];
         pCloud->SetTexOffset((pCloud->GetTexOffset() + MapToAxis(coreVector2(fCloudMove * ((pCloud->GetDirection().x < 0.0f) ? -1.0f : 1.0f), 0.0f), pCloud->GetDirection().xy())).Processed(FRACT));
@@ -383,9 +379,9 @@ void cSnowBackground::__MoveOwn()
     pList->MoveNormal();
 
     pList = m_apAirObjectList[1];
-    if(pList->GetCurEnabled())
+    if(pList->GetNumEnabled())
     {
-        for(coreUintW i = 0u, ie = LOOP_NONZERO(pList->List()->size()); i < ie; ++i)
+        for(coreUintW i = 0u, ie = LOOP_NONZERO(pList->GetSize()); i < ie; ++i)
         {
             coreObject3D* pCloud = (*pList->List())[i];
             pCloud->SetTexOffset((pCloud->GetTexOffset() + MapToAxis(coreVector2(fCloudMove * ((pCloud->GetDirection().x < 0.0f) ? -1.0f : 1.0f), 0.0f), pCloud->GetDirection().xy())).Processed(FRACT));

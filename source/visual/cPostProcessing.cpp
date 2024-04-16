@@ -291,7 +291,7 @@ void cPostProcessing::Recompile()
     if(Core::System->GetCurFrame())
     {
         coreSync::Finish();
-        Core::Manager::Resource->UpdateResources();
+        Core::Manager::Resource->UpdateWait();
     }
 
 #endif

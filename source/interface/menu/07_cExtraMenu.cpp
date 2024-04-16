@@ -671,10 +671,10 @@ void cExtraMenu::LoadTrophies()
             
             const coreFloat fHeight = m_Background.GetPosition().y + m_Background.GetSize().y*0.5f + -0.175f - 0.15f*I_TO_F(i) + (m_aaTrophyDesc[i][1].GetText()[0] ? 0.0f : -0.015f);
 
-            m_TrophyBox.ChangePosition(&m_aTrophyName[i], coreVector2(m_Background.GetPosition().x - m_Background.GetSize().x*0.5f, fHeight) + coreVector2(0.145f,0.032f));
+            m_aTrophyName[i].SetPosition(coreVector2(m_Background.GetPosition().x - m_Background.GetSize().x*0.5f, fHeight) + coreVector2(0.145f,0.032f));
             for(coreUintW j = 0u; j < ARRAY_SIZE(m_aaTrophyDesc[0]); ++j)
             {
-                m_TrophyBox.ChangePosition(&m_aaTrophyDesc[i][j], coreVector2(m_Background.GetPosition().x - m_Background.GetSize().x*0.5f, fHeight) + coreVector2(0.145f, -0.003f - 0.03f*I_TO_F(j)));
+                m_aaTrophyDesc[i][j].SetPosition(coreVector2(m_Background.GetPosition().x - m_Background.GetSize().x*0.5f, fHeight) + coreVector2(0.145f, -0.003f - 0.03f*I_TO_F(j)));
             }
 
             if(bBoss) iCountBoss += 1u;

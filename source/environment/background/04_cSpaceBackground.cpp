@@ -19,7 +19,6 @@ cSpaceBackground::cSpaceBackground()noexcept
 , m_iCopyLower   (0u)
 , m_iCopyUpper   (0u)
 , m_vNebulaMove  (coreVector2(0.0f,0.0f))
-, m_Loaded       ()
 {
     coreBatchList* pList1;
 
@@ -70,14 +69,14 @@ cSpaceBackground::cSpaceBackground()noexcept
         }
 
         // 
-        m_iCopyUpper = pList1->List()->size();
+        m_iCopyUpper = pList1->GetSize();
 
         // post-process list and add to the ground
         cBackground::_FillInfinite(pList1, SPACE_METEOR_RESERVE);
         m_apGroundObjectList.push_back(pList1);
 
         // 
-        m_iCopyLower = pList1->List()->size() - m_iCopyUpper;
+        m_iCopyLower = pList1->GetSize() - m_iCopyUpper;
 
         // 
         m_pOutdoor->GetShadowMap()->BindList(pList1);
@@ -118,14 +117,11 @@ cSpaceBackground::~cSpaceBackground()
 // 
 void cSpaceBackground::__InitOwn()
 {
-    m_Loaded.Release();
-    
     // load base sound-effect
     m_pBaseSound = Core::Manager::Resource->Get<coreSound>("environment_space.wav");
     m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
         pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
-        m_Loaded.Acquire();
     });
 }
 
@@ -137,7 +133,7 @@ void cSpaceBackground::__ExitOwn()
     // stop base sound-effect
     m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
-        if(m_Loaded && pResource->EnableRef(this))
+        if(pResource->EnableRef(this))
             pResource->Stop();
     });
 }
@@ -203,7 +199,7 @@ void cSpaceBackground::__MoveOwn()
 
     // 
     coreBatchList* pList = m_apGroundObjectList[0];
-    for(coreUintW i = 0u, ie = LOOP_NONZERO(pList->List()->size()); i < ie; ++i)
+    for(coreUintW i = 0u, ie = LOOP_NONZERO(pList->GetSize()); i < ie; ++i)
     {
         coreObject3D* pMeteor = (*pList->List())[i];
         if((i >= m_iCopyLower) && (i < m_iCopyUpper) && !pMeteor->IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue;   // # all
@@ -249,7 +245,7 @@ void cSpaceBackground::__MoveOwn()
     m_Nebula.Move();
 
     // adjust volume of the base sound-effect
-    if(m_Loaded && m_pBaseSound->EnableRef(this))
+    if(m_pBaseSound.IsUsable() && m_pBaseSound->EnableRef(this))
     {
         m_pBaseSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
     }

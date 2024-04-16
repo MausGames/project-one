@@ -6,6 +6,9 @@
 //| Released under the zlib License                 |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
+#include "engine/data_transform_2d.glsl"
+#include "engine/util_pack.glsl"
+#include "shared.glsl"
 
 
 // constant values

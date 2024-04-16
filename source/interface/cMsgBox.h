@@ -47,10 +47,10 @@ private:
     cGuiButton m_Yes;                                        // 
     cGuiButton m_No;                                         // 
 
-    cGuiObject     m_aDownloadBar [3];                       // (0 = background, 1 = foreground, 2 = empty) 
-    cGuiLabel      m_aDownloadText[2];                       // (0 = status, 1 = percent)
-    coreFileHandle m_iDownloadHandle;                        // 
-    coreFloat      m_fDownloadValue;                         // 
+    cGuiObject             m_aDownloadBar [3];               // (0 = background, 1 = foreground, 2 = empty) 
+    cGuiLabel              m_aDownloadText[2];               // (0 = status, 1 = percent)
+    corePlatformFileHandle m_iDownloadHandle;                // 
+    coreFloat              m_fDownloadValue;                 // 
 
     std::function<void(coreInt32, coreInt32)> m_nCallback;   // 
     coreVector2 m_vCurMouse;                                 // 
@@ -79,7 +79,7 @@ public:
     template <typename F> void ShowMapping    (const coreChar* pcText, const coreUint8 iInputType, F&& nCallback);   // [](const corInt32 iAnswer, const coreInt16 iKey) -> void
 
     // 
-    void StartDownload(const coreFileHandle iHandle);
+    void StartDownload(const corePlatformFileHandle iHandle);
     void EndDownload();
 
     // 

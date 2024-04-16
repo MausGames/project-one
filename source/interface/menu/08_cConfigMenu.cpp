@@ -116,7 +116,7 @@ cConfigMenu::cConfigMenu()noexcept
     #if !defined(_CORE_DEBUG_)
         aiSkip.insert(ENTRY_GAME_VERSION);
     #endif
-    if(!g_bLeaderboards && !DEFINED(_CORE_DEBUG_))
+    if((g_bDemoVersion || !g_bLeaderboards) && !DEFINED(_CORE_DEBUG_))
     {
         aiSkip.insert(ENTRY_GAME_LEADERBOARD);
     }
@@ -788,7 +788,7 @@ void cConfigMenu::Move()
             cMenu::UpdateSwitchBox(&m_3DSound);
 
             // 
-            const auto nColorFunc = [](const coreUint8 iValue) {return TernaryLerp(COLOR_MENU_RED, COLOR_MENU_YELLOW, COLOR_MENU_GREEN, cConfigMenu::__VolumeToFloat(iValue));};
+            const auto nColorFunc = [](const coreUint8 iValue) {return LerpTernary(COLOR_MENU_RED, COLOR_MENU_YELLOW, COLOR_MENU_GREEN, cConfigMenu::__VolumeToFloat(iValue));};
             m_GlobalVolume .GetCaption()->SetColor3(nColorFunc(m_GlobalVolume .GetCurValue()));
             m_MusicVolume  .GetCaption()->SetColor3(nColorFunc(m_MusicVolume  .GetCurValue()));
             m_EffectVolume .GetCaption()->SetColor3(nColorFunc(m_EffectVolume .GetCurValue()));
@@ -1734,7 +1734,7 @@ void cConfigMenu::__LoadResolutions(const coreUintW iMonitorIndex)
 // 
 void cConfigMenu::__LoadFrequencies(const coreUintW iMonitorIndex)
 {
-    const coreUint8 aiDefault[] = {60u, 75u, 100u, 120u, 144u, 165u, 240u};   // TODO 1: constexpr
+    constexpr coreUint8 aiDefault[] = {60u, 75u, 100u, 120u, 144u, 165u, 240u};
 
     // 
     const coreUintW iOldEntry = m_UpdateFreq.GetNumEntries() ? m_UpdateFreq.GetCurValue() : 0u;

@@ -110,7 +110,7 @@ cMainMenu::cMainMenu()noexcept
     #endif
 
     this->BindObject(SURFACE_MAIN_DEFAULT, &m_StartNew);
-    if(g_bLeaderboards) this->BindObject(SURFACE_MAIN_DEFAULT, &m_ScoreNew);
+    if(!g_bDemoVersion && g_bLeaderboards) this->BindObject(SURFACE_MAIN_DEFAULT, &m_ScoreNew);
     this->BindObject(SURFACE_MAIN_DEFAULT, &m_ReplayNew);
     this->BindObject(SURFACE_MAIN_DEFAULT, &m_ExtraNew);
     this->BindObject(SURFACE_MAIN_DEFAULT, &m_ConfigNew);
@@ -118,7 +118,7 @@ cMainMenu::cMainMenu()noexcept
 
     // 
     coreSet<coreObject2D*>* pObjectSet = this->GetObjectSet(SURFACE_MAIN_DEFAULT);
-    for(coreUintW i = 0u, ie = pObjectSet->size() - (g_bLeaderboards ? 1u : 0u) - 5u; i < ie; ++i)
+    for(coreUintW i = 0u, ie = pObjectSet->size() - ((!g_bDemoVersion && g_bLeaderboards) ? 1u : 0u) - 5u; i < ie; ++i)
     {
         (*pObjectSet)[i]->SetPosition(coreVector2(0.0f, 0.09f * (I_TO_F(ie - 1u) * 0.5f - I_TO_F(i))));
     }

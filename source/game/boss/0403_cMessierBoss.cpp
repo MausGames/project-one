@@ -826,7 +826,7 @@ void cMessierBoss::__MoveOwn()
         }
 
         const coreFloat A = 1.3f;
-        pMission->SetAreaScale(ParaLerp(1.0f, 0.8f, 4.2f * A, BLENDH3(MIN1(m_fPhaseTime * 0.85f / A))));
+        pMission->SetAreaScale(LerpPara(1.0f, 0.8f, 4.2f * A, BLENDH3(MIN1(m_fPhaseTime * 0.85f / A))));
 
         if(PHASE_MAINTIME_POINT(10.0f))
         {
@@ -1104,7 +1104,7 @@ void cMessierBoss::__MoveOwn()
         const coreFloat   fMove      = 70.0f * MIN1(m_fPhaseTime * 0.25f) * TIME;
 
         coreBatchList* pList = pBackground->GetMeteorList();
-        for(coreUintW i = 0u, ie = LOOP_NONZERO(pList->List()->size()); i < ie; ++i)
+        for(coreUintW i = 0u, ie = LOOP_NONZERO(pList->GetSize()); i < ie; ++i)
         {
             coreObject3D* pMeteor = (*pList->List())[i];
             if(!pMeteor->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
@@ -1226,7 +1226,7 @@ void cMessierBoss::__MoveOwn()
 
         // 
         coreBatchList* pList = pBackground->GetMeteorList();
-        for(coreUintW i = 0u, ie = LOOP_NONZERO(pList->List()->size()); i < ie; ++i)
+        for(coreUintW i = 0u, ie = LOOP_NONZERO(pList->GetSize()); i < ie; ++i)
         {
             coreObject3D* pMeteor = (*pList->List())[i];
             if(!pMeteor->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;

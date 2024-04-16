@@ -749,7 +749,7 @@ coreBool cReplay::LoadFile(const coreChar* pcPath, const coreBool bOnlyHeader)
     }
 
     // 
-    if(coreData::Decompress(pHeaderFile->GetData(), pHeaderFile->GetSize(), r_cast<coreByte*>(&m_Header), sizeof(sHeader), sizeof(sHeader)) != CORE_OK)
+    if(coreData::Decompress(pHeaderFile->GetData(), pHeaderFile->GetSize(), r_cast<coreByte*>(&m_Header), sizeof(sHeader)) != CORE_OK)
     {
         std::memcpy(&m_Header, pHeaderFile->GetData(), MIN(pHeaderFile->GetSize(), sizeof(sHeader)));
     }
@@ -855,7 +855,7 @@ coreBool cReplay::LoadData(const coreByte* pData, const coreUint32 iSize)
     coreByte*  pFullData = NULL;
     coreUint32 iFullSize = 0u;
     
-    coreDataScope oScope = NULL;
+    coreDataScope<coreByte> oScope = NULL;
 
     // 
     if(coreData::Decompress(pData, iSize, &pFullData, &iFullSize, 10u * 1024u * 1024u) != CORE_OK)
@@ -994,16 +994,25 @@ coreBool cReplay::HasData()
 // 
 void cReplay::SetName(const coreChar* pcName)
 {
-    ASSERT(coreData::StrIsUpper(pcName))
+    //ASSERT(coreData::StrIsUpper(pcName))
 
     // 
     coreData::StrCopy(m_Header.acName, REPLAY_NAME_LENGTH, pcName);
 }
 
-void cReplay::SetNameDefault()
+void cReplay::SetNameDefault(const coreUint8 iSlot)
 {
+#if defined(_CORE_SWITCH_)
+
+    // 
+    this->SetName(PRINT("REPLAY %u", iSlot + 1u));
+
+#else
+
     // 
     this->SetName(PRINT("REPLAY-%u", g_pSave->NextReplayFileNum()));
+
+#endif
 }
 
 

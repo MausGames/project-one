@@ -370,7 +370,7 @@ void cIntroBoss::__MoveOwn()
     {
         PHASE_CONTROL_TIMER(0u, 1.2f, LERP_LINEAR)
         {
-            this->DefaultMoveLerp(coreVector2(0.0f,0.8f), coreVector2(0.0f,-0.9f), ParaLerp(0.0f, -0.1f, 1.0f, fTime));
+            this->DefaultMoveLerp(coreVector2(0.0f,0.8f), coreVector2(0.0f,-0.9f), LerpPara(0.0f, -0.1f, 1.0f, fTime));
 
             if(PHASE_TIME_POINT(0.6f))
             {
@@ -645,7 +645,7 @@ void cIntroBoss::__MoveOwn()
     {
         PHASE_CONTROL_TIMER(0u, 1.0f, LERP_LINEAR)
         {
-            this->DefaultMoveLerp(m_vLastPosition, m_avVector[LAST_TARGET].xy(), ParaLerp(0.0f, -0.1f, 1.0f, fTime));
+            this->DefaultMoveLerp(m_vLastPosition, m_avVector[LAST_TARGET].xy(), LerpPara(0.0f, -0.1f, 1.0f, fTime));
 
             if(PHASE_TIME_POINT(0.6f))
             {

@@ -46,8 +46,4 @@ void FragmentMain()
 
     // draw final color
     gl_FragColor = vec4((v3Diffuse + v3Specular) * u_v4Color.rgb * 1.5 + v3Blink, u_v4Color.a);
-    
-    
-    
-//gl_FragColor = vec4(vec3(0.05), gl_FragColor.a); // [A1]
 }

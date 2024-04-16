@@ -198,7 +198,7 @@ void cIntroMission::__SetupOwn()
 
         for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
         {
-            if(!Core::Input->GetJoystickRelativeL(i).IsNull() || !Core::Input->GetJoystickRelativeR(i).IsNull())
+            if(!Core::Input->GetJoystickStickL(i).IsNull() || !Core::Input->GetJoystickStickR(i).IsNull())
             {
                 iAnyButton = 1u;
             }

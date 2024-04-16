@@ -2377,7 +2377,7 @@ void cGeluMission::__SetupOwn()
         if(!pHelper->HasStatus(HELPER_STATUS_DEAD))
         {
             const coreFloat   fTime = MAX0(pHelper->GetLifeTime() - 0.1f) * 1.3f;
-            const coreVector2 vPos  = m_aOrbRaw[15].GetPosition().xy() + coreVector2(0.0f, ParaLerp(0.0f, -6.0f, 15.0f, fTime));
+            const coreVector2 vPos  = m_aOrbRaw[15].GetPosition().xy() + coreVector2(0.0f, LerpPara(0.0f, -6.0f, 15.0f, fTime));
 
             pHelper->SetPosition(coreVector3(vPos, 0.0f));
 
@@ -2415,7 +2415,7 @@ void cGeluMission::__SetupOwn()
             }
             else if(m_iStageSub == 40u)
             {
-                const coreVector2 vValue = coreVector2(ParaLerp(4.0f, 4.2f, 0.0f, MIN1(m_fStageSubTime * 2.0f)), 0.0f);
+                const coreVector2 vValue = coreVector2(LerpPara(4.0f, 4.2f, 0.0f, MIN1(m_fStageSubTime * 2.0f)), 0.0f);
                 for(coreUintW i = 0u; i < ARRAY_SIZE(aiExpand); ++i)
                 {
                     m_aOrbRaw[aiExpand[i]].SetPosition(coreVector3(nPosToFunc(aiExpand[i]) * vValue + coreVector2(0.0f,-2.0f) * (fOrbLen * FOREGROUND_AREA.y), 0.0f));

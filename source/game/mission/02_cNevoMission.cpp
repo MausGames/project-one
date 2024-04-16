@@ -906,7 +906,7 @@ void cNevoMission::__RenderOwnOver()
     glEnable(GL_DEPTH_TEST);
 
     // 
-    if(m_Bomb.GetCurEnabled()) cLodObject::RenderHighList(&m_Bomb);
+    if(m_Bomb.GetNumEnabled()) cLodObject::RenderHighList(&m_Bomb);
     g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyList(&m_Bomb);
 
     // 

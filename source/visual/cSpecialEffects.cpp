@@ -1213,7 +1213,7 @@ void cSpecialEffects::PlaySound(const coreVector3 vPosition, const coreFloat fVo
 
     // 
     if(bRelative) pSound->PlayRelative(this, fVolume * fBaseVolume, fPitch * fBasePitch, false, iType);
-             else pSound->PlayPosition(this, fVolume * fBaseVolume, fPitch * fBasePitch, false, iType, vPosition);
+             else pSound->PlayPosition(this, fVolume * fBaseVolume, fPitch * fBasePitch, false, iType, vPosition * 0.1f);
 }
 
 
@@ -1235,7 +1235,7 @@ void cSpecialEffects::StopSound(const eSoundEffect eSoundIndex)
 void cSpecialEffects::ExternPlayPosition(const coreSoundPtr& pSound, const void* pRef, const coreFloat fVolume, const coreFloat fPitch, const coreBool bLoop, const coreUint8 iType, const coreVector3 vPosition)
 {
     // 
-    const coreVector3 vReal = g_CurConfig.Audio.i3DSound ? vPosition : Core::Audio->GetListenerPosition();
+    const coreVector3 vReal = g_CurConfig.Audio.i3DSound ? (vPosition * 0.1f) : Core::Audio->GetListenerPosition();
 
     // 
     pSound->PlayPosition(pRef, fVolume, fPitch, bLoop, iType, vReal);
@@ -1247,7 +1247,7 @@ void cSpecialEffects::ExternPlayPosition(const coreSoundPtr& pSound, const void*
 void cSpecialEffects::ExternSetSource(const coreSoundPtr& pSound, const coreVector3 vPosition)
 {
     // 
-    const coreVector3 vReal = g_CurConfig.Audio.i3DSound ? vPosition : Core::Audio->GetListenerPosition();
+    const coreVector3 vReal = g_CurConfig.Audio.i3DSound ? (vPosition * 0.1f) : Core::Audio->GetListenerPosition();
 
     // 
     pSound->SetSource(vReal);

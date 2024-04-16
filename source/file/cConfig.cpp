@@ -403,7 +403,7 @@ void UpdateInput()
             const coreUintW iJoystickID = i - INPUT_SETS_KEYBOARD;
 
             // map movement input
-            oMap.vMove = Core::Input->GetJoystickRelativeL(iJoystickID);
+            oMap.vMove = Core::Input->GetJoystickStickL(iJoystickID);
 
             // restrict movement input to the 8 base directions
             if(!oMap.vMove.IsNull()) oMap.vMove = AlongStarNormal(oMap.vMove);
@@ -425,7 +425,7 @@ void UpdateInput()
             {
                 if(STATIC_ISVALID(g_pGame) && !g_pMenu->IsPaused())
                 {
-                    coreVector2 vNewStick = Core::Input->GetJoystickRelativeR(iJoystickID);
+                    coreVector2 vNewStick = Core::Input->GetJoystickStickR(iJoystickID);
                     
                     const coreVector2 vOldStick = s_avOldStick[iJoystickID];
                     

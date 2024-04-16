@@ -156,7 +156,7 @@ coreBool ApplyPassword(const coreChar* pcText)
     {
         g_pMenu->GetMsgBox()->ShowInformation(Core::Language->GetString("INFORMATION_RESTART"), []()
         {
-            Core::RequestRestart();
+            Core::Restart();
         });
     }
 

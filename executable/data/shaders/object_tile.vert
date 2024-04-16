@@ -6,6 +6,7 @@
 //| Released under the zlib License                 |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
+#include "engine/data_transform_3d.glsl"
 
 // TODO 1: is object_board.vert still the same as object_tile.vert ?
 

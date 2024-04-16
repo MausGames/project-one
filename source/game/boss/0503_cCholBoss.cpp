@@ -835,7 +835,7 @@ void cCholBoss::__MoveOwn()
                 g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 0.5f, SOUND_EFFECT_WOOSH_01);
             }
 
-            this->SetPosition (coreVector3(0.0f, ParaLerp(1.5f, 0.6f, 0.7f, BLENDB(MIN1(fTime * 2.0f))), 0.0f) * FOREGROUND_AREA3);
+            this->SetPosition (coreVector3(0.0f, LerpPara(1.5f, 0.6f, 0.7f, BLENDB(MIN1(fTime * 2.0f))), 0.0f) * FOREGROUND_AREA3);
             this->SetDirection(coreVector3(0.0f,-1.0f,0.0f));
 
             m_fTilt = LERPS(0.0f*PI, 2.0f*PI, MAX0((fTime - 0.5f) * 2.0f));
@@ -914,7 +914,7 @@ void cCholBoss::__MoveOwn()
             }
             else
             {
-                this->DefaultMoveLerp(vFrom, vTo, ParaLerp(0.0f, -0.05f, 1.0f, fTime));
+                this->DefaultMoveLerp(vFrom, vTo, LerpPara(0.0f, -0.05f, 1.0f, fTime));
                 m_fFlap = BLENDS(MIN1(fTime * 1.0f));
             }
 

@@ -18,6 +18,3 @@ vec2 DistortionStrength(const in vec2 v2TexCoord)
     // 
     return 1.0 - smoothstep(0.85, 0.99, abs(v2TexCoord * 2.0 - 1.0));
 }
-
-
-#line 1

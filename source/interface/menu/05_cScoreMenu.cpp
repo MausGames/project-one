@@ -305,7 +305,7 @@ void cScoreMenu::Move()
                                 g_pMenu->GetMsgBox()->StartDownload(m_aiFileHandle[i]);
 
                                 // 
-                                Core::Platform->DownloadFile(m_aiFileHandle[i], [=, this](const coreFileHandle iHandle, const coreByte* pData, const coreUint32 iDataSize, const void* pResult)
+                                Core::Platform->DownloadFile(m_aiFileHandle[i], [=, this](const corePlatformFileHandle iHandle, const coreByte* pData, const coreUint32 iDataSize, const void* pResult)
                                 {
                                     // 
                                     g_pMenu->GetMsgBox()->EndDownload();
@@ -315,7 +315,8 @@ void cScoreMenu::Move()
                                         if(g_pReplay->LoadData(pData, iDataSize) && g_pReplay->HasData())
                                         {
                                             // 
-                                            g_pReplay->SetName(coreData::StrToUpperUTF8(m_aName[i].GetText()));
+                                            g_pReplay->SetName(m_aName[i].GetText());
+                                            g_pReplay->MarkDownloaded();
 
                                             // 
                                             m_iStatus = 101;
@@ -608,7 +609,7 @@ void cScoreMenu::__UpdateScores(const coreBool bPlayer)
     m_iCurRequest += 1u;
 
     m_iWorkDownload1 += 1u;
-    Core::Platform->DownloadLeaderboard(pcLeaderboard, TYPE_GLOBAL, iStart + 1u, iStart + MENU_SCORE_ENTRIES, [=, this, iThisRequest = m_iCurRequest](const coreScore* pScore, const coreUint32 iNum, const coreUint32 iTotal, const void* pResult)
+    Core::Platform->DownloadLeaderboard(pcLeaderboard, CORE_PLATFORM_LEADERBOARD_TYPE_GLOBAL, iStart + 1u, iStart + MENU_SCORE_ENTRIES, [=, this, iThisRequest = m_iCurRequest](const corePlatformScore* pScore, const coreUint32 iNum, const coreUint32 iTotal, const void* pResult)
     {
         m_iWorkDownload1 -= 1u;
 
@@ -680,7 +681,7 @@ void cScoreMenu::__UpdateScores(const coreBool bPlayer)
     if(bPlayer)
     {
         m_iWorkDownload2 += 1u;
-        Core::Platform->DownloadLeaderboard(pcLeaderboard, TYPE_USER, 0, 0, [=, this, iThisRequest = m_iCurRequest](const coreScore* pScore, const coreUint32 iNum, const coreUint32 iTotal, const void* pResult)
+        Core::Platform->DownloadLeaderboard(pcLeaderboard, CORE_PLATFORM_LEADERBOARD_TYPE_USER, 0, 0, [=, this, iThisRequest = m_iCurRequest](const corePlatformScore* pScore, const coreUint32 iNum, const coreUint32 iTotal, const void* pResult)
         {
             m_iWorkDownload2 -= 1u;
 
@@ -824,7 +825,7 @@ void cScoreMenu::__SetMedalIconArcade(cGuiObject* OUTPUT pObject, const coreUint
     }
 
     // 
-    const coreUint8 iMedal = iMedalCount ? MIN<coreUint8>((iMedalTotal + MEDAL_MARGIN_ARCADE) / iMedalCount, MEDAL_MAX - 1u) : MEDAL_NONE;
+    const coreUint8 iMedal = iMedalCount ? MIN<coreUint8>((iMedalTotal + MEDAL_MARGIN_ARCADE) / iMedalCount, MEDAL_MAX - 1u) : MEDAL_NONE;   // TODO 1: get rid of template parameter
 
     // 
     cMenu::ApplyMedalTexture(pObject, iMedal, MEDAL_TYPE_ARCADE, false);

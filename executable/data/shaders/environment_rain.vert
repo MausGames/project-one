@@ -6,6 +6,8 @@
 //| Released under the zlib License                 |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
+#include "engine/data_transform_3d.glsl"
+#include "engine/data_ambient.glsl"
 
 
 // constant values

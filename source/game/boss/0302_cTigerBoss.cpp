@@ -375,10 +375,10 @@ void cTigerBoss::__MoveOwn()
 
             if(m_pTankSound->EnableRef(this))
             {
-                m_pTankSound->SetVolume(ParaLerp(0.0f, 1.0f, 0.2f, fTime));
+                m_pTankSound->SetVolume(LerpPara(0.0f, 1.0f, 0.2f, fTime));
             }
 
-            m_avVector[POS_OFFSET].y = ParaLerp(-70.0f, -10.0f, -40.0f, fTime);
+            m_avVector[POS_OFFSET].y = LerpPara(-70.0f, -10.0f, -40.0f, fTime);
 
             if(PHASE_TIME_POINT(0.7f))
                 this->_StartBoss();

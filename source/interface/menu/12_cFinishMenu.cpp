@@ -25,19 +25,19 @@ cFinishMenu::cFinishMenu()noexcept
     m_Background.SetCenter    (coreVector2(0.0f,0.1f));
 
     m_ThankYouText.Construct      (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
-    m_ThankYouText.SetPosition    (coreVector2(0.0f,0.05f));
+    m_ThankYouText.SetPosition    (coreVector2(0.0f,0.06f));
     m_ThankYouText.SetCenter      (m_Background.GetCenter());
     m_ThankYouText.SetColor3      (COLOR_MENU_WHITE);
     m_ThankYouText.SetTextLanguage(g_bDemoVersion ? "THANK_YOU_DEMO" : "THANK_YOU");
 
-    m_TotalName.Construct      (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
-    m_TotalName.SetPosition    (coreVector2(0.0f,-0.025f));
+    m_TotalName.Construct      (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
+    m_TotalName.SetPosition    (coreVector2(0.0f,-0.015f));
     m_TotalName.SetCenter      (m_Background.GetCenter());
     m_TotalName.SetColor3      (COLOR_MENU_WHITE);
     m_TotalName.SetTextLanguage("FINISH_TOTAL");
 
-    m_TotalValue.Construct  (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
-    m_TotalValue.SetPosition(coreVector2(0.0f, m_TotalName.GetPosition().y - 0.033f));
+    m_TotalValue.Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
+    m_TotalValue.SetPosition(coreVector2(0.0f, m_TotalName.GetPosition().y - 0.05f));
     m_TotalValue.SetCenter  (m_Background.GetCenter());
     m_TotalValue.SetColor3  (COLOR_MENU_WHITE);
 
@@ -45,7 +45,7 @@ cFinishMenu::cFinishMenu()noexcept
     {
         const coreFloat fSide = i ? 1.0f : -1.0f;
 
-        m_aTotalPart[i].Construct  (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+        m_aTotalPart[i].Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
         m_aTotalPart[i].SetPosition(m_TotalValue.GetPosition() + coreVector2(fSide * 0.36f, 0.0f));
         m_aTotalPart[i].SetCenter  (m_Background.GetCenter());
         m_aTotalPart[i].SetColor3  (COLOR_MENU_WHITE);
@@ -165,7 +165,7 @@ void cFinishMenu::Move()
                 m_Background.SetAlpha    ( bLeftRight ? fVisibility :  1.0f);
 
                 // animate background
-                m_Background.SetSize     (coreVector2(fVisibility, 1.0f) * coreVector2(1.0f,0.3f));
+                m_Background.SetSize     (coreVector2(fVisibility, 1.0f) * coreVector2(1.0f,0.32f));
                 m_Background.SetTexSize  (coreVector2(fVisibility, 1.0f));
                 m_Background.SetTexOffset(coreVector2(1.0f,1.0f) * (fAnimation * 0.05f));
 

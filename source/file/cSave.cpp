@@ -410,7 +410,7 @@ coreBool cSave::__LoadHeader(sHeader* OUTPUT pHeader, coreSet<sScorePack*>* OUTP
     }
 
     // 
-    if(coreData::Decompress(pHeaderFile->GetData(), pHeaderFile->GetSize(), r_cast<coreByte*>(pHeader), sizeof(sHeader), sizeof(sHeader)) != CORE_OK)
+    if(coreData::Decompress(pHeaderFile->GetData(), pHeaderFile->GetSize(), r_cast<coreByte*>(pHeader), sizeof(sHeader)) != CORE_OK)
     {
         std::memcpy(pHeader, pHeaderFile->GetData(), MIN(pHeaderFile->GetSize(), sizeof(sHeader)));
     }

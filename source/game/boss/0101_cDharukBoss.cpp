@@ -450,7 +450,7 @@ void cDharukBoss::__MoveOwn()
     // 
     else if(m_iPhase == 120u)
     {
-        PHASE_CONTROL_TICKER(0u, g_pGame->IsEasy() ? 2u : 4u, m_Boomerang.GetCurEnabled() ? (2.2f/3.0f) : 1.0f, LERP_LINEAR)
+        PHASE_CONTROL_TICKER(0u, g_pGame->IsEasy() ? 2u : 4u, m_Boomerang.GetNumEnabled() ? (2.2f/3.0f) : 1.0f, LERP_LINEAR)
         {
             if(iTick < DHARUK_BOOMERANGS)
             {

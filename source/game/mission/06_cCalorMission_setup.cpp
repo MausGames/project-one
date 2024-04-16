@@ -2983,8 +2983,7 @@ void cCalorMission::__SetupOwn()
             g_pEnvironment->ChangeBackground(cDarkBackground::ID, ENVIRONMENT_MIX_FADE, 0.0f);
             g_pEnvironment->SetTargetSpeedNow(0.0f);
 
-            Core::Manager::Resource->UpdateResources();
-            Core::Manager::Resource->UpdateFunctions();
+            Core::Manager::Resource->UpdateWait();
 
             STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
             {
@@ -3014,8 +3013,7 @@ void cCalorMission::__SetupOwn()
 
             g_pEnvironment->ChangeBackground(cDarkBackground::ID, ENVIRONMENT_MIX_FADE, 0.0f);
 
-            Core::Manager::Resource->UpdateResources();
-            Core::Manager::Resource->UpdateFunctions();
+            Core::Manager::Resource->UpdateWait();
         }
         else if(STAGE_TIME_POINT(7.8f))
         {
@@ -3024,8 +3022,7 @@ void cCalorMission::__SetupOwn()
             g_pEnvironment->ChangeBackground(cSnowBackground::ID, ENVIRONMENT_MIX_FADE, 0.0f);
             g_pEnvironment->SetTargetSpeedNow(ENVIRONMENT_DEFAULT_SPEED);
 
-            Core::Manager::Resource->UpdateResources();
-            Core::Manager::Resource->UpdateFunctions();
+            Core::Manager::Resource->UpdateWait();
 
             STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
             {

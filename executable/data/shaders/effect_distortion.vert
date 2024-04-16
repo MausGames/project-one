@@ -6,6 +6,11 @@
 //| Released under the zlib License                 |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
+#include "engine/data_transform_2d.glsl"
+
+#if defined(_P1_OBJECT3D_)
+    #include "engine/data_transform_3d.glsl"
+#endif
 
 
 void VertexMain()

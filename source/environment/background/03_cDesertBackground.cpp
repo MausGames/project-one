@@ -20,7 +20,6 @@ cDesertBackground::cDesertBackground()noexcept
 , m_fTrailBlend (0.0f)
 , m_bTrail      (false)
 , m_vGroundPos  (coreVector2(0.0f,0.0f))
-, m_Loaded      ()
 {
     coreBatchList* pList1;
     coreBatchList* pList2;
@@ -312,14 +311,11 @@ cDesertBackground::~cDesertBackground()
 // 
 void cDesertBackground::__InitOwn()
 {
-    m_Loaded.Release();
-    
     // load base sound-effect
     m_pBaseSound = Core::Manager::Resource->Get<coreSound>("environment_desert.wav");
     m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
         pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
-        m_Loaded.Acquire();
     });
 }
 
@@ -331,7 +327,7 @@ void cDesertBackground::__ExitOwn()
     // stop base sound-effect
     m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
-        if(m_Loaded && pResource->EnableRef(this))
+        if(pResource->EnableRef(this))
             pResource->Stop();
     });
 }
@@ -403,7 +399,7 @@ void cDesertBackground::__MoveOwn()
     m_Veil.Move();
 
     // 
-    if(m_Loaded && m_pBaseSound->EnableRef(this))
+    if(m_pBaseSound.IsUsable() && m_pBaseSound->EnableRef(this))
     {
         m_pBaseSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
         m_pBaseSound->SetPitch (1.0f + 0.1f * (m_vSandMove.Length() - 1.0f));

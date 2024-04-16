@@ -1336,7 +1336,7 @@ void cViridoMission::__MoveOwnAfter()
                 const coreFloat fDotOld = coreVector2::Dot(vDiffOld, vOldRayDir.Rotated90());
                 
                 coreVector2 vRealIntersection;
-                RayIntersection(vNewPos, pBullet->GetFlyDir(), vRayPos, vRayDir, &vRealIntersection);
+                RayIntersection(vNewPos, pBullet->GetFlyDir(), vRayPos, vRayDir, &vRealIntersection); // ???
                 
                 const coreBool bAlways = (pBullet->GetFlyTime() < 0.1f);
 

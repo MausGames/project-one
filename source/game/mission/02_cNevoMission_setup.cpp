@@ -2773,7 +2773,7 @@ void cNevoMission::__SetupOwn()
                 m_afBlockScale[i]  = LERPBR(5.0f, 2.0f, CLAMP01(fTime));
                 m_afBlockRota [i] += LERP(0.0f, 10.0f, CLAMP01(fTime)) * TIME;
 
-                const coreVector2 vNewPos = MapToAxis(vPos * ParaLerp(1.0f, 1.1f, 0.0f, (CLAMP01(fTime))), coreVector2::Direction(LERPBR(0.0f*PI, -0.5f*PI, CLAMP01(fTime))));
+                const coreVector2 vNewPos = MapToAxis(vPos * LerpPara(1.0f, 1.1f, 0.0f, (CLAMP01(fTime))), coreVector2::Direction(LERPBR(0.0f*PI, -0.5f*PI, CLAMP01(fTime))));
 
                 pBlock->SetPosition(coreVector3(vNewPos, 0.0f));
 
@@ -3041,8 +3041,7 @@ void cNevoMission::__SetupOwn()
             g_pEnvironment->ChangeBackground(cDarkBackground::ID, ENVIRONMENT_MIX_FADE, 0.0f);
             g_pEnvironment->SetTargetSpeedNow(0.0f);
 
-            Core::Manager::Resource->UpdateResources();
-            Core::Manager::Resource->UpdateFunctions();
+            Core::Manager::Resource->UpdateWait();
 
             STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
             {
@@ -3059,8 +3058,7 @@ void cNevoMission::__SetupOwn()
             g_pEnvironment->ChangeBackground(cSeaBackground::ID, ENVIRONMENT_MIX_FADE, 0.0f);
             g_pEnvironment->SetTargetSpeedNow(ENVIRONMENT_DEFAULT_SPEED);
 
-            Core::Manager::Resource->UpdateResources();
-            Core::Manager::Resource->UpdateFunctions();
+            Core::Manager::Resource->UpdateWait();
 
             STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
             {
@@ -3135,8 +3133,7 @@ void cNevoMission::__SetupOwn()
             g_pEnvironment->ChangeBackground(cDarkBackground::ID, ENVIRONMENT_MIX_FADE, 0.0f);
             g_pEnvironment->SetTargetSpeedNow(0.0f);
 
-            Core::Manager::Resource->UpdateResources();
-            Core::Manager::Resource->UpdateFunctions();
+            Core::Manager::Resource->UpdateWait();
 
             STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
             {
@@ -3160,8 +3157,7 @@ void cNevoMission::__SetupOwn()
 
             g_pEnvironment->ChangeBackground(cDarkBackground::ID, ENVIRONMENT_MIX_FADE, 0.0f);
 
-            Core::Manager::Resource->UpdateResources();
-            Core::Manager::Resource->UpdateFunctions();
+            Core::Manager::Resource->UpdateWait();
         }
         else if(STAGE_TIME_POINT(7.0f))
         {
@@ -3190,8 +3186,7 @@ void cNevoMission::__SetupOwn()
             g_pEnvironment->ChangeBackground(cSeaBackground::ID, ENVIRONMENT_MIX_FADE, 0.0f);
             g_pEnvironment->SetTargetSpeedNow(ENVIRONMENT_DEFAULT_SPEED);
 
-            Core::Manager::Resource->UpdateResources();
-            Core::Manager::Resource->UpdateFunctions();
+            Core::Manager::Resource->UpdateWait();
 
             cSeaBackground* pBackground = d_cast<cSeaBackground*>(g_pEnvironment->GetBackground());
 

@@ -282,8 +282,8 @@ void cMsgBox::Move()
         Core::Input->SetMousePosition(MSGBOX_IGNORE_MOUSE);
         for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
         {
-            Core::Input->SetJoystickRelative(i, 0u, 0.0f);
-            Core::Input->SetJoystickRelative(i, 1u, 0.0f);
+            Core::Input->SetJoystickAxis(i, 0u, 0.0f);
+            Core::Input->SetJoystickAxis(i, 1u, 0.0f);
         }
         Core::Input->ClearButtonAll();
     }
@@ -295,7 +295,7 @@ void cMsgBox::Move()
 
 // ****************************************************************
 // 
-void cMsgBox::StartDownload(const coreFileHandle iHandle)
+void cMsgBox::StartDownload(const corePlatformFileHandle iHandle)
 {
     // 
     m_Delete.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
@@ -345,8 +345,8 @@ void cMsgBox::__ExecuteCallback(const coreInt32 a, const coreInt32 b)
         Core::Input->SetMousePosition(MSGBOX_IGNORE_MOUSE);
         for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
         {
-            Core::Input->SetJoystickRelative(i, 0u, 0.0f);
-            Core::Input->SetJoystickRelative(i, 1u, 0.0f);
+            Core::Input->SetJoystickAxis(i, 0u, 0.0f);
+            Core::Input->SetJoystickAxis(i, 1u, 0.0f);
         }
         Core::Input->ClearButtonAll();
         

@@ -15,7 +15,6 @@ cCloudBackground::cCloudBackground()noexcept
 : cBackground (false)
 , m_vRainMove (coreVector2(-0.5f,-1.2f))
 , m_fOffset   (0.0f)
-, m_Loaded    ()
 {
     coreBatchList* pList1;
 
@@ -58,7 +57,7 @@ cCloudBackground::cCloudBackground()noexcept
         cBackground::_SortBackToFront(pList1);
         m_apAirObjectList.push_back(pList1);
 
-        ASSERT(pList1->GetCurCapacity() == CLOUD_CLOUD_RESERVE)
+        ASSERT(pList1->GetCapacity() == CLOUD_CLOUD_RESERVE)
     }
 
     // 
@@ -89,14 +88,11 @@ cCloudBackground::~cCloudBackground()
 // 
 void cCloudBackground::__InitOwn()
 {
-    m_Loaded.Release();
-    
     // load base sound-effect
     m_pBaseSound = Core::Manager::Resource->Get<coreSound>("environment_cloud.wav");
     m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
         pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
-        m_Loaded.Acquire();
     });
 }
 
@@ -108,7 +104,7 @@ void cCloudBackground::__ExitOwn()
     // stop base sound-effect
     m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
-        if(m_Loaded && pResource->EnableRef(this))
+        if(pResource->EnableRef(this))
             pResource->Stop();
     });
 }
@@ -182,7 +178,7 @@ void cCloudBackground::__MoveOwn()
     m_Cover.Move();
 
     // adjust volume of the base sound-effect
-    if(m_Loaded && m_pBaseSound->EnableRef(this))
+    if(m_pBaseSound.IsUsable() && m_pBaseSound->EnableRef(this))
     {
         m_pBaseSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
     }
@@ -193,7 +189,7 @@ void cCloudBackground::__MoveOwn()
 
 
     coreBatchList* pList = m_apAirObjectList[0];
-    for(coreUintW i = 0u, ie = LOOP_NONZERO(pList->List()->size()); i < ie; ++i)
+    for(coreUintW i = 0u, ie = LOOP_NONZERO(pList->GetSize()); i < ie; ++i)
     {
         coreObject3D* pCloud = (*pList->List())[i];
         pCloud->SetTexOffset((pCloud->GetTexOffset() + MapToAxis(coreVector2(fCloudMove * ((pCloud->GetDirection().x < 0.0f) ? -1.0f : 1.0f), 0.0f), pCloud->GetDirection().xy())).Processed(FRACT));

@@ -628,7 +628,7 @@ void cEnemyManager::Render()
         coreBatchList* pEnemyActive = &m_apEnemySet[i]->oEnemyActive;
 
         // 
-        if(!pEnemyActive->GetCurEnabled()) continue;
+        if(!pEnemyActive->GetNumEnabled()) continue;
 
         // render all active enemies
         cLodObject::RenderHighList(pEnemyActive);

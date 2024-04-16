@@ -53,6 +53,7 @@ void cInterface::sPlayerView::Construct(const coreUintW iIndex)
     oImmune.Construct      (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
     oImmune.SetColor3      (COLOR_MENU_INSIDE);
     oImmune.SetTextLanguage("TEXT_IMMUNE");
+    oImmune.SetRectifyY    (false);
 
     oSpeed.Construct  (MENU_FONT_ICON_3, MENU_OUTLINE_SMALL);
     oSpeed.SetText    (ICON_FORWARD);

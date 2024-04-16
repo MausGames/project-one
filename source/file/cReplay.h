@@ -64,7 +64,7 @@ STATIC_ASSERT((REPLAY_RUNS + 1u <= BIT(2u)) && (REPLAY_MISSIONS <= BIT(4u)) && (
 #define REPLAY_WRAP_CONFIG_HIT_STOP      ((g_pReplay->GetMode() == REPLAY_MODE_PLAYBACK) ? g_pReplay->GetHeader().iConfigHitStop      : g_CurConfig.Graphics.iHitStop)
 #define REPLAY_WRAP_CONFIG_ROTATION_TURN ((g_pReplay->GetMode() == REPLAY_MODE_PLAYBACK) ? g_pReplay->GetHeader().iConfigRotationTurn : g_CurConfig.Legacy  .iRotationTurn)
 
-#if defined(_CORE_SWITCH_)
+#if defined(_CORE_SWITCH_) || 1
     #define REPLAY_SLOTSYSTEM (1u)
 #endif
 #define REPLAY_SLOTS (20u)
@@ -101,6 +101,11 @@ enum eReplayChange : coreUint8
     REPLAY_CHANGE_CONFIG_HIT_STOP       = 103u    // 
 };
 
+enum eReplayStatus : coreUint8
+{
+    REPLAY_STATUS_DOWNLOADED = 0u   // 
+};
+
 STATIC_ASSERT(REPLAY_CHANGE_PROGRESS_FRAGMENT_8 - REPLAY_CHANGE_PROGRESS_FRAGMENT_0 == FRAGMENTS - 1u)
 
 
@@ -125,13 +130,15 @@ public:
         coreUint32  iChangeCount;                                                                        // 
         coreUint32  aiPacketCount[REPLAY_PLAYERS];                                                       // 
 
-        coreVector2 avPackVector[9];                                                                    // 
+        coreVector2 avPackVector[9];                                                                     // 
 
         coreUint8   iBitsFrame;                                                                          // 
         coreUint8   iBitsType;                                                                           // 
         coreUint8   iBitsValue;                                                                          // 
 
-        coreUint8   aiPadding1[29];                                                                      // 
+        coreUint8   aiPadding1[25];                                                                      // 
+
+        coreUint32  iStatus;                                                                             // 
 
         coreInt32   aiMissionList[REPLAY_MISSIONS];                                                      // 
         coreUint8   iMissionIndexStart;                                                                  // 
@@ -343,8 +350,11 @@ public:
     coreBool HasData();
 
     // 
-    void SetName(const coreChar* pcName);
-    void SetNameDefault();
+    void SetName       (const coreChar* pcName);
+    void SetNameDefault(const coreUint8 iSlot);
+
+    // 
+    inline void MarkDownloaded() {ADD_BIT(m_Header.iStatus, REPLAY_STATUS_DOWNLOADED)}
 
     // 
     inline void ResetStatus() {m_eStatus = SAVE_STATUS_OK;}

@@ -1383,7 +1383,7 @@ void cRutilusMission::__SetupOwn()
                 g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_PURPLE);
             }
 
-            this->SetAreaScale(ParaLerp(1.0f, 0.8f, 4.2f, BLENDH3(MIN1(m_fStageSubTime * 0.85f))));
+            this->SetAreaScale(LerpPara(1.0f, 0.8f, 4.2f, BLENDH3(MIN1(m_fStageSubTime * 0.85f))));
         }
         else if(m_iStageSub == 17u)
         {
@@ -1990,7 +1990,7 @@ void cRutilusMission::__SetupOwn()
 
             const coreFloat fTime = MIN1(fTransitionTime / 1.3f);
 
-            pHelper->SetPosition(coreVector3(ParaLerp(0.0f, 0.3f, -1.2f, fTime) * FOREGROUND_AREA.x, pHelper->GetPosition().yz()));
+            pHelper->SetPosition(coreVector3(LerpPara(0.0f, 0.3f, -1.2f, fTime) * FOREGROUND_AREA.x, pHelper->GetPosition().yz()));
 
             if(fTransitionTime >= 1.3f)
             {

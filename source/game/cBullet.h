@@ -231,7 +231,7 @@ public:
     inline coreUintW                       GetNumBullets        ()const {coreUintW iNum = 0u; this->ForEachBullet        ([&](void*) {++iNum;}); return iNum;}
     template <typename T> inline coreUintW GetNumBulletsTyped   ()const {coreUintW iNum = 0u; this->ForEachBulletTyped<T>([&](void*) {++iNum;}); return iNum;}
     inline coreUintW                       GetNumBulletsEst     ()const {return Core::Manager::Object->GetObjectList(m_iType).size();}   // can spike on bullet-reallocation
-    template <typename T> inline coreUintW GetNumBulletsTypedEst()const {return m_apBulletSet[T::ID] ? m_apBulletSet[T::ID]->oBulletActive.List()->size() : 0u;}
+    template <typename T> inline coreUintW GetNumBulletsTypedEst()const {return m_apBulletSet[T::ID] ? m_apBulletSet[T::ID]->oBulletActive.GetSize() : 0u;}
 };
 
 
@@ -1099,7 +1099,7 @@ template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt
     ASSERT(iSize)
 
     // 
-    if(pSet->oBulletActive.List()->size() < iSize)
+    if(pSet->oBulletActive.GetSize() < iSize)
     {
         // loop through all bullets
         for(coreUintW i = iSize; i--; )

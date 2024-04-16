@@ -1820,7 +1820,7 @@ template <typename F> RETURN_RESTRICT coreSpline2* cMission::_AddPath(const core
         // 
         coreSpline2 oNewPath;
         nInitFunc(&oNewPath);
-        ASSERT(oNewPath.GetNumNodes() == oNewPath.GetCapacity())
+        ASSERT(oNewPath.GetSize() == oNewPath.GetCapacity())
 
         // 
         m_aPath.emplace(iCodeLine, std::move(oNewPath));

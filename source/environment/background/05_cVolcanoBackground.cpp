@@ -15,7 +15,6 @@ cVolcanoBackground::cVolcanoBackground()noexcept
 : cBackground  (false)
 , m_Smoke      (256u)
 , m_fSparkTime (Core::Rand->Float(10.0f))
-, m_Loaded     ()
 {
     coreBatchList* pList1;
     coreBatchList* pList2;
@@ -278,7 +277,7 @@ cVolcanoBackground::cVolcanoBackground()noexcept
         cBackground::_SortBackToFront(pList1);
         m_apAirObjectList.push_back(pList1);
 
-        ASSERT(pList1->GetCurCapacity() == VOLCANO_CLOUD_RESERVE)
+        ASSERT(pList1->GetCapacity() == VOLCANO_CLOUD_RESERVE)
     }
 
     // 
@@ -286,7 +285,7 @@ cVolcanoBackground::cVolcanoBackground()noexcept
     m_Smoke.DefineTexture(0u, "effect_smoke.png");   
 
     pList1 = m_apGroundObjectList[0];   
-    m_aSmokeEffect.reserve(pList1->List()->size());   
+    m_aSmokeEffect.reserve(pList1->GetSize());   
     FOR_EACH(it, *pList1->List())   
     {
         m_aSmokeEffect.emplace_back(&m_Smoke);   
@@ -308,14 +307,11 @@ cVolcanoBackground::~cVolcanoBackground()
 // 
 void cVolcanoBackground::__InitOwn()
 {
-    m_Loaded.Release();
-    
     // load base sound-effect
     m_pBaseSound = Core::Manager::Resource->Get<coreSound>("environment_volcano.wav");
     m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
         pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
-        m_Loaded.Acquire();
     });
 }
 
@@ -327,7 +323,7 @@ void cVolcanoBackground::__ExitOwn()
     // stop base sound-effect
     m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
-        if(m_Loaded && pResource->EnableRef(this))
+        if(pResource->EnableRef(this))
             pResource->Stop();
     });
 }
@@ -369,15 +365,15 @@ void cVolcanoBackground::__MoveOwn()
     {
         m_Smoke.ForEachParticleAll([&](coreParticle* OUTPUT pParticle, const coreUintW i)
         {
-            pParticle->GetBeginState().vPosition.y += fShove;
-            pParticle->GetEndState  ().vPosition.y += fShove;
+            pParticle->EditBeginState().vPosition.y += fShove;
+            pParticle->EditEndState  ().vPosition.y += fShove;
         });
     }
 
 
     // 
     coreBatchList* pList = m_apGroundObjectList[0];
-    for(coreUintW i = 0u, ie = LOOP_NONZERO(pList->List()->size()); i < ie; ++i)
+    for(coreUintW i = 0u, ie = LOOP_NONZERO(pList->GetSize()); i < ie; ++i)
     {
         coreObject3D* pSmoke = (*pList->List())[i];
         if(!pSmoke->IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue;   // # all
@@ -401,7 +397,7 @@ void cVolcanoBackground::__MoveOwn()
 
     // 
     pList = m_apAirObjectList[0];
-    for(coreUintW i = 0u, ie = LOOP_NONZERO(pList->List()->size()); i < ie; ++i)
+    for(coreUintW i = 0u, ie = LOOP_NONZERO(pList->GetSize()); i < ie; ++i)
     {
         coreObject3D* pSpark = (*pList->List())[i];
 
@@ -418,7 +414,7 @@ void cVolcanoBackground::__MoveOwn()
     pList->MoveNormal();
 
     // adjust volume of the base sound-effect
-    if(m_Loaded && m_pBaseSound->EnableRef(this))
+    if(m_pBaseSound.IsUsable() && m_pBaseSound->EnableRef(this))
     {
         m_pBaseSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
     }
@@ -428,7 +424,7 @@ void cVolcanoBackground::__MoveOwn()
     const coreFloat fCloudMove = 0.0018f * (1.0f + ABS(g_pEnvironment->GetSpeed())) * TIME;
 
     pList = m_apAirObjectList[1];
-    for(coreUintW i = 0u, ie = LOOP_NONZERO(pList->List()->size()); i < ie; ++i)
+    for(coreUintW i = 0u, ie = LOOP_NONZERO(pList->GetSize()); i < ie; ++i)
     {
         coreObject3D* pCloud = (*pList->List())[i];
         pCloud->SetTexOffset((pCloud->GetTexOffset() + MapToAxis(coreVector2(fCloudMove * ((pCloud->GetDirection().x < 0.0f) ? -1.0f : 1.0f), 0.0f), pCloud->GetDirection().xy())).Processed(FRACT));

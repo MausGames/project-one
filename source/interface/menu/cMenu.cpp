@@ -206,6 +206,7 @@ void cMenu::Render()
         {
             g_MenuInput = {};
             Core::Input->ClearMouseButton(CORE_INPUT_LEFT);
+            if(cMenuNavigator::IsUsingJoystick()) Core::Input->SetMousePosition(MENUNAVIGATOR_IGNORE_MOUSE);
             
             Timeless([&]()
             {
@@ -1156,8 +1157,7 @@ void cMenu::UpdateLanguageFont()
     Core::Manager::Resource->AssignProxy("dynamic_font", pcName);
 
     // 
-    Core::Manager::Resource->UpdateResources();
-    Core::Manager::Resource->UpdateFunctions();
+    Core::Manager::Resource->UpdateWait();
 }
 
 
@@ -1522,7 +1522,7 @@ void cMenu::ApplyMedalTexture(cGuiObject* OUTPUT pObject, const coreUint8 iMedal
 
 // ****************************************************************
 // 
-void cMenu::ClearButtonTime(const cGuiButton* pButton)
+void cMenu::ClearButtonTime(cGuiButton* OUTPUT pButton)
 {
     if(s_aButtonData.count_bs(pButton))
     {
@@ -1530,8 +1530,13 @@ void cMenu::ClearButtonTime(const cGuiButton* pButton)
 
         oData.fTime = 0.0f;
         oData.bGrow = false;
-        
-        // TODO 1: größe des objekts sollte auch resettet werden, wegen gamepad-cursor size-init (achtung, position muss auch angepasst werden)
+
+        pButton->SetSize(oData.vSize);
+
+        const coreFloat   fLight = MENU_LIGHT_IDLE;
+        const coreVector3 vColor = COLOR_MENU_WHITE;
+                                  pButton              ->SetColor3(vColor * fLight);
+        if(pButton->GetCaption()) pButton->GetCaption()->SetColor3(vColor * fLight);
     }
 }
 

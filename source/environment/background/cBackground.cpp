@@ -232,7 +232,7 @@ void cBackground::Move()
             const coreList<coreUint16>* paiBaseHeight = m_aaiBaseHeight.count(*it) ? &m_aaiBaseHeight.at(*it) : NULL;
             const coreList<coreUint32>* paiBaseNormal = m_aaiBaseNormal.count(*it) ? &m_aaiBaseNormal.at(*it) : NULL;
 
-            if((fDensity <= 0.0f) && !(*it)->GetCurEnabled()) continue;
+            if((fDensity <= 0.0f) && !(*it)->GetNumEnabled()) continue;
 
             FOR_EACH(et, *(*it)->List())
             {
@@ -461,7 +461,7 @@ void cBackground::_StoreHeightList(const coreBatchList* pObjectList)
 
     // 
     coreList<coreUint16>& oNew = m_aaiBaseHeight[pObjectList];
-    oNew.reserve(pObjectList->List()->size());
+    oNew.reserve(pObjectList->GetSize());
 
     // 
     FOR_EACH(it, *pObjectList->List()) oNew.push_back(coreMath::Float32To16((*it)->GetPosition().z));
@@ -476,7 +476,7 @@ void cBackground::_StoreNormalList(const coreBatchList* pObjectList)
 
     // 
     coreList<coreUint32>& oNew = m_aaiBaseNormal[pObjectList];
-    oNew.reserve(pObjectList->List()->size());
+    oNew.reserve(pObjectList->GetSize());
 
     // 
     FOR_EACH(it, *pObjectList->List()) oNew.push_back((*it)->GetDirection().PackSnorm011());
@@ -519,7 +519,7 @@ void cBackground::_FillInfinite(coreBatchList* OUTPUT pObjectList, const coreUin
     }
 
     // reduce memory consumption
-    ASSERT(pObjectList->List()->size() <= iReserve)
+    ASSERT(pObjectList->GetSize() <= iReserve)
     pObjectList->ShrinkToFit();
 }
 

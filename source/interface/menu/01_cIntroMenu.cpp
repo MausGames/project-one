@@ -124,7 +124,7 @@ void cIntroMenu::Move()
             {
                 // 
                 g_pSave->ImportDemo();
-                Core::RequestRestart();
+                Core::Restart();
             }
         }
         else

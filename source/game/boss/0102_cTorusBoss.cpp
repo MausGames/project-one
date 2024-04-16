@@ -1830,7 +1830,7 @@ void cTorusBoss::__MoveOwn()
         const coreVector3 vFrom = nColorFunc(F_TO_UI(m_avVector[COLOR_CHANGE].x));
         const coreVector3 vTo   = nColorFunc(F_TO_UI(m_avVector[COLOR_CHANGE].y));
 
-        const coreVector3 vNewColor = TernaryLerp(vTo, nColorFunc(0u), vFrom, BLENDS(m_avVector[COLOR_CHANGE].z));
+        const coreVector3 vNewColor = LerpTernary(vTo, nColorFunc(0u), vFrom, BLENDS(m_avVector[COLOR_CHANGE].z));
 
         for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCircle); ++i)
             m_aCircle[i].SetColor3(vNewColor);

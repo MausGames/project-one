@@ -699,7 +699,7 @@ private:
     coreUint8  m_iWorkDownload2;                    // 
     coreUint8  m_iCurRequest;                       // 
 
-    coreFileHandle m_aiFileHandle[MENU_SCORE_ENTRIES];   // 
+    corePlatformFileHandle m_aiFileHandle[MENU_SCORE_ENTRIES];   // 
 
     coreBool m_bLimitRequest;                       // 
     coreFlow m_fLimitCooldown;                      // 
@@ -1607,7 +1607,7 @@ public:
     static void UpdateAnimateProgram(cGuiObject*    OUTPUT pObject);
     static void ApplyMedalTexture   (cGuiObject*    OUTPUT pObject, const coreUint8 iMedal, const coreUint8 iMedalType, const coreBool bHide);
     
-    static void ClearButtonTime(const cGuiButton* pButton);
+    static void ClearButtonTime(cGuiButton* OUTPUT pButton);
 
 
 private:

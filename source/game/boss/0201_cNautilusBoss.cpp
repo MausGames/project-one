@@ -196,7 +196,7 @@ void cNautilusBoss::__MoveOwn()
             }
         });
 
-        if((this->GetCurHealthPct() <= (1.0f - fHealth)) && coreMath::IsNear(COS(m_fMovement), 0.0f, 0.01f))
+        if((this->GetCurHealthPct() <= (1.0f - fHealth)) && coreMath::IsNear(COS(m_fMovement.ToFloat()), 0.0f, 0.01f))
         {
             PHASE_CHANGE_TO(10u)
 

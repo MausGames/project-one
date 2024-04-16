@@ -254,7 +254,7 @@ void cLeviathanBoss::__KillOwn(const coreBool bAnimated)
 // 
 void cLeviathanBoss::__RenderOwnBottom()
 {
-    if(m_Ray.GetCurEnabled())
+    if(m_Ray.GetNumEnabled())
     {
         DEPTH_PUSH
 
@@ -268,7 +268,7 @@ void cLeviathanBoss::__RenderOwnBottom()
 // 
 void cLeviathanBoss::__RenderOwnUnder()
 {
-    if(m_Ray.GetCurEnabled())
+    if(m_Ray.GetNumEnabled())
     {
         DEPTH_PUSH
 
@@ -290,7 +290,7 @@ void cLeviathanBoss::__RenderOwnUnder()
 // 
 void cLeviathanBoss::__RenderOwnOver()
 {
-    if(m_Ray.GetCurEnabled())
+    if(m_Ray.GetNumEnabled())
     {
         DEPTH_PUSH_SHIP
 
@@ -1787,7 +1787,7 @@ void cLeviathanBoss::__MoveOwn()
     m_Ray    .MoveNormal();
     m_RayWave.MoveNormal();
 
-    if(m_Ray.GetCurEnabled())
+    if(m_Ray.GetNumEnabled())
     {
         coreVector2 vCenter = coreVector2(0.0f,0.0f);
 

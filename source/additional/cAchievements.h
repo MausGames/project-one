@@ -115,7 +115,7 @@ extern void UploadLeaderboardsArcade (                                          
 extern void UploadLeaderboardsMission(const coreUintW iMissionIndex,                                const coreUint32 iScore, const coreUint32 iTimeShifted);
 extern void UploadLeaderboardsSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex, const coreUint32 iScore, const coreUint32 iTimeShifted);
 extern void CheckLeaderboards();
-extern const sScoreData* GetScoreData(const coreScore* pScore);
+extern const sScoreData* GetScoreData(const corePlatformScore* pScore);
 
 
 #endif // _P1_GUARD_ACHIEVEMENTS_H_
