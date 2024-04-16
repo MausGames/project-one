@@ -36,6 +36,7 @@ cGeluMission::cGeluMission()noexcept
 , m_avOldPos      {}
 , m_iTouchState   (0u)
 , m_abCrushImmune {}
+, m_abCrushInside {}
 , m_iCrushState   (0u)
 , m_fAnimation    (0.0f)
 {
@@ -289,7 +290,7 @@ void cGeluMission::DisableFang(const coreUintW iIndex, const coreBool bAnimated)
     if(bAnimated)
     {
         g_pSpecialEffects->MacroExplosionDarkSmall(oFang.GetPosition());
-        g_pSpecialEffects->CreateBreakupDark(&oFang, 80.0f, 15u);
+        g_pSpecialEffects->CreateBreakupDark(&oFang, 80.0f, 14u);
     }
 }
 
@@ -416,7 +417,8 @@ void cGeluMission::EnableLine(const coreUintW iIndex)
     m_afLineTime[iIndex] = 1.0f;
 
     // 
-    oLine.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    oLine.SetPosition(coreVector3(HIDDEN_POS, 0.0f));
+    oLine.SetEnabled (CORE_OBJECT_ENABLE_ALL);
 }
 
 
@@ -642,7 +644,8 @@ void cGeluMission::__MoveOwnAfter()
         if(!oFang.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
         // 
-        m_avOldPos[i] = oFang.GetPosition().xy();
+        //if(!SPECIAL_FROZEN) 
+            m_avOldPos[i] = oFang.GetPosition().xy();
 
         // 
         const auto nBulletFangCollFunc = [&](cBullet* OUTPUT pBullet)
@@ -659,6 +662,8 @@ void cGeluMission::__MoveOwnAfter()
                     {
                         this->DisableFang(i, true);
                         this->AddExtraScore(d_cast<cPlayer*>(pBullet->GetOwner()), 40u, oFang.GetPosition());
+
+                        g_pSpecialEffects->PlaySound(oFang.GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_07);
                     }
                 }
             }
@@ -726,7 +731,8 @@ void cGeluMission::__MoveOwnAfter()
         if(!bFree) pArrow->SetDirection(pWay->GetDirection());
 
         // 
-        m_avOldPos[i] = pWay->GetPosition().xy();
+        //if(!SPECIAL_FROZEN) 
+            m_avOldPos[i] = pWay->GetPosition().xy();
 
         // 
         if(HAS_BIT(m_iWayActive, i))
@@ -919,7 +925,8 @@ void cGeluMission::__MoveOwnAfter()
         const coreFloat fOffset = I_TO_F(i) * (1.0f/5.0f);
 
         // 
-        oGap.SetSize     (coreVector3(1.0f,1.0f,1.0f) * 8.0f * LERP(1.2f, 1.0f, m_afGapTime[i]));
+        oGap.SetSize     (coreVector3(1.0f,1.0f,1.0f) * 6.0f * LERP(1.2f, 1.0f, m_afGapTime[i]));
+        oGap.SetDirection(coreVector3(coreVector2::Direction(m_fAnimation * (-4.0f*PI) + fOffset * (2.0f*PI)), 0.0f));
         oGap.SetAlpha    (LERPH3(0.0f, 1.0f, m_afGapTime[i]));
         oGap.SetTexOffset(coreVector2(0.0f, FRACT(-0.3f * m_fAnimation + fOffset)));
     }
@@ -1077,6 +1084,8 @@ void cGeluMission::__UpdateCollisionFang()
                 m_abCrushImmune[i] = false;
             }
         }
+
+        m_abCrushInside[i] = bIntersect;
     });
     
     if(false)
@@ -1113,7 +1122,7 @@ void cGeluMission::__UpdateCollisionFang()
                     const coreVector2 vPos  = oFang.GetPosition().xy() + (vSide + vSide.Rotated90()*0.0f) * oFang.GetVisualRange().xy();
                     
                     //g_pSpecialEffects->CreateSplashSmoke(coreVector3(vPos, 0.0f), 3.0f, 1u, coreVector3(1.0f,1.0f,1.0f));
-                    g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 5.0f, 1u, COLOR_ENERGY_WHITE);
+                    g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 5.0f, 1u, COLOR_ENERGY_WHITE * 0.8f);
                 }
             }
         }
@@ -1272,5 +1281,7 @@ void cGeluMission::__UpdateCollisionWay()
                 m_abCrushImmune[i] = false;
             }
         }
+
+        m_abCrushInside[i] = bIntersect;
     });
 }

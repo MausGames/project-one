@@ -53,6 +53,7 @@ cPlayer::cPlayer()noexcept
 , m_iLastMove       (8u)
 
 , m_bWasDamaged (false)
+, m_bGiveUp     (false)
 {
     // load object resources
     this->DefineTexture(0u, "ship_player.png");
@@ -178,6 +179,9 @@ void cPlayer::Configure(const coreUintW iShipType)
     case PLAYER_SHIP_DEF: sModelHigh = "ship_player_def_high.md3"; sModelLow = "ship_player_def_low.md3"; sGeometry = "object_tetra_top.md3"; vEnergy = COLOR_PLAYER_YELLOW; m_vMenuColor = COLOR_MENU_YELLOW; m_vLedColor = COLOR_LED_YELLOW; m_fRangeScale = 1.0f;  break;
     case PLAYER_SHIP_P1:  sModelHigh = "ship_projectone_high.md3"; sModelLow = "ship_projectone_low.md3"; sGeometry = "object_penta_top.md3"; vEnergy = COLOR_PLAYER_GREEN;  m_vMenuColor = COLOR_MENU_GREEN;  m_vLedColor = COLOR_LED_GREEN;  m_fRangeScale = 1.08f; break;
     }
+    
+    
+    //m_vMenuColor = COLOR_MENU_WHITE;  // [A1]
 
     // load models
     this->DefineModelHigh(sModelHigh);
@@ -206,14 +210,22 @@ void cPlayer::Configure(const coreUintW iShipType)
 // 
 void cPlayer::EquipShield(const coreInt32 iShield)
 {
-    ASSERT( HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
-    ASSERT(!HAS_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED))
-
     if(iShield)
     {
+        ASSERT( HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
+        ASSERT(!HAS_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED))
+
         // 
         ADD_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED)
         m_iMaxShield = (iShield == SHIELD_MAX) ? SHIELD_INVINCIBLE : iShield;
+    }
+    else
+    {
+        // 
+        REMOVE_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED)
+        m_iMaxShield = 0u;
+        m_iCurShield = 0u;
+        m_iPreShield = 0u;
     }
 }
 
@@ -241,7 +253,10 @@ void cPlayer::EquipWeapon(const coreUintW iIndex, const coreInt32 iID)
     case cEnemyWeapon::ID: m_apWeapon[iIndex] = new cEnemyWeapon(); break;
     case cFinalWeapon::ID: m_apWeapon[iIndex] = new cFinalWeapon(); break;
     }
+
+    // 
     m_apWeapon[iIndex]->SetOwner(this);
+    m_apWeapon[iIndex]->Prefetch();
 
     // 
     SET_BITVALUE(m_iLook, 4u, 12u, iID)
@@ -726,6 +741,12 @@ void cPlayer::Move()
         REMOVE_FLAG(m_iStatus, PLAYER_STATUS_REPAIRED)
         
         m_bWasDamaged = (m_iPreHealth > m_iCurHealth) || (m_iPreShield > m_iCurShield);
+    
+        if(m_bGiveUp)
+        {
+            m_bGiveUp = false;
+            g_pGame->GetCombatText()->DrawText(Core::Language->GetString("GIVEUP"), this->GetPosition(), COLOR_MENU_INSIDE);
+        }
     }
     
     
@@ -768,6 +789,68 @@ void cPlayer::Move()
 
     // 
     this->_UpdateAlwaysAfter();
+}
+
+
+
+void cPlayer::MoveFrozen()
+{
+    if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
+    {
+        if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_TURN))
+        {
+            const coreVector2 vOldDir = this->GetDirection().xy();
+            
+            coreVector2 vNewDir = this->GetDirection().xy();
+
+            // 
+            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_TURN_LEFT))   vNewDir = -vNewDir.Rotated90();
+            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_TURN_RIGHT))  vNewDir =  vNewDir.Rotated90();
+
+            
+            
+            // 
+            const coreVector2 vGame  = g_pPostProcessing->GetDirection();
+            const coreVector2 vHud   = g_vHudDirection;
+            const coreVector2 vFinal = MapToAxisInv(vGame, vHud);
+            ASSERT(vFinal.IsNormalized())
+            
+            const coreVector2 vFlip = vFinal.Processed(ABS) + vFinal.yx().Processed(ABS) * ((g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f);
+            
+            const coreVector2 vOldDir2 = AlongCrossNormal(MapToAxisInv(vOldDir, vFinal));
+            
+            // 
+            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_UP)    && !SameDirection90(coreVector2( 0.0f, 1.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 0.0f, 1.0f) * vFlip, vOldDir2));
+            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_LEFT)  && !SameDirection90(coreVector2(-1.0f, 0.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2(-1.0f, 0.0f) * vFlip, vOldDir2));
+            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_DOWN)  && !SameDirection90(coreVector2( 0.0f,-1.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 0.0f,-1.0f) * vFlip, vOldDir2));
+            if(HAS_BIT(m_pInput->iActionPress, PLAYER_ACTION_SHOOT_RIGHT) && !SameDirection90(coreVector2( 1.0f, 0.0f) * vFlip, vOldDir2)) vNewDir = MapToAxis(vOldDir, MapToAxisInv(coreVector2( 1.0f, 0.0f) * vFlip, vOldDir2));
+
+            // set new direction
+            this->coreObject3D::SetDirection(coreVector3(vNewDir, 0.0f));
+
+            // 
+            if(vNewDir != vOldDir)
+            {
+                // 
+                m_DataTable.EditCounterTotal  ()->iTurnsMade += 1u;
+                m_DataTable.EditCounterMission()->iTurnsMade += 1u;
+                m_DataTable.EditCounterSegment()->iTurnsMade += 1u;
+
+                // 
+                g_pSave->EditGlobalStats      ()->iTurnsMade += 1u;
+                g_pSave->EditLocalStatsArcade ()->iTurnsMade += 1u;
+                g_pSave->EditLocalStatsMission()->iTurnsMade += 1u;
+                g_pSave->EditLocalStatsSegment()->iTurnsMade += 1u;
+            }
+        }
+
+        if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
+        {
+             if(HAS_BIT(m_pInput->iActionPress,   0u)) m_fBoost = 1.0f;
+        else if(HAS_BIT(m_pInput->iActionRelease, 0u)) m_fBoost = 0.0f;
+        else m_fBoost.UpdateMax(-10.0f, 0.0f);
+        }
+    }
 }
 
 
@@ -814,6 +897,18 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
         {
             m_iCurHealth = m_iMaxHealth;
             g_pGame->GetInterface()->PingImmune(g_pGame->GetPlayerIndex(this));
+        }
+
+        // 
+        if(!m_iCurHealth && HAS_FLAG(m_iStatus, PLAYER_STATUS_INVINCIBLE_2))
+        {
+            m_iCurHealth = m_iMaxHealth;
+            if(g_CurConfig.Graphics.iHitStop) g_pSpecialEffects->FreezeScreen(1.5f);
+
+            REMOVE_FLAG(m_iStatus, PLAYER_STATUS_INVINCIBLE_2)
+            ADD_FLAG   (m_iStatus, PLAYER_STATUS_INVINCIBLE)
+
+            m_bGiveUp = true;
         }
 
         if(m_iCurHealth)
@@ -1019,6 +1114,12 @@ void cPlayer::StartRolling(const coreVector2 vDirection)
 
     // 
     //this->EnableWind(vDirection);
+}
+
+void cPlayer::StartRolling()
+{
+    // 
+    this->StartRolling(m_pInput->vMove);
 }
 
 

@@ -86,7 +86,7 @@ coreBool cForeground::IsVisibleObject(const coreObject3D* pObject)const
         if(pObject->GetPosition().z >= 10.0f)                                return true;
 
         // 
-        const coreVector2 vProjectedPos = this->Project3D(pObject->GetPosition() - coreVector3(Core::Graphics->GetCamPosition().xy(), 0.0f));
+        const coreVector2 vProjectedPos = this->Project3D(MapToAxis(pObject->GetPosition() - coreVector3(Core::Graphics->GetCamPosition().xy(), 0.0f), Core::Graphics->GetCamOrientation().xy()));
         const coreFloat   fRadius       = pObject->GetVisualRadius();
 
         const coreVector2 vRatio = Core::System->GetResolution().HighRatio();

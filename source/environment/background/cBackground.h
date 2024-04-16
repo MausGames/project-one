@@ -26,7 +26,6 @@
 // TODO 3: stomach should not create all vertices
 // TODO 3: EnableShadowRead only if appropriate ground objects would be rendered (IsInstanced)
 // TODO 5: grass+blood and sand+snow (norm) textures are duplicated (especially normal maps), proxies are not possible, because files are loaded directly
-// TODO 1: [MF] thunder effect can cause issues for some players, are there other effects causing issues ? (not only flash or shake) (add them to/as disable option)
 // TODO 3: improve snow texture to little flakes (broken quads) 
 // TODO 3: in Add functions change sListKey to a combination of resource identifiers
 // TODO 3: adding temporary objects should cache resources
@@ -63,8 +62,8 @@
 #define GRASS_FLOWER_RESERVE    (1024u)
 #define GRASS_LEAF_NUM          (2048u)
 #define GRASS_LEAF_RESERVE      (512u)
-#define GRASS_CLOUD_NUM         (64u)
-#define GRASS_CLOUD_RESERVE     (76u)   // # exact
+#define GRASS_CLOUD_NUM         (64u * 10u)
+#define GRASS_CLOUD_RESERVE     (76u * 10u)   // # exact
 
 #define SEA_CORAL_NUM           (2048u)
 #define SEA_CORAL_1_RESERVE     (256u)
@@ -266,6 +265,7 @@ private:
     coreUintW m_iLeafNum;        // 
 
     coreSoundPtr m_pBaseSound;   // base sound-effect
+    coreSpinLock m_Loaded;       // 
 
 
 public:
@@ -302,6 +302,7 @@ private:
     coreBool  m_bOverdrive;      // 
 
     coreSoundPtr m_pBaseSound;   // base sound-effect
+    coreSpinLock m_Loaded;       // 
 
 
 public:
@@ -344,6 +345,7 @@ private:
     coreVector2 m_vGroundPos;
 
     coreSoundPtr m_pBaseSound;    // base sound-effect
+    coreSpinLock m_Loaded;        // 
 
 
 public:
@@ -392,6 +394,7 @@ private:
     coreVector2  m_vNebulaMove;   // 
 
     coreSoundPtr m_pBaseSound;    // base sound-effect
+    coreSpinLock m_Loaded;        // 
 
 
 public:
@@ -434,7 +437,8 @@ private:
     coreFlow  m_fSparkTime;         // 
     coreUintW m_iSparkNum;          // 
 
-    coreSoundPtr m_pBaseSound;              // base sound-effect
+    coreSoundPtr m_pBaseSound;   // base sound-effect
+    coreSpinLock m_Loaded;       // 
 
 
 public:
@@ -464,6 +468,7 @@ private:
     coreFlow       m_fSnowWave;   // 
 
     coreSoundPtr m_pBaseSound;    // base sound-effect
+    coreSpinLock m_Loaded;        // 
 
 
 public:
@@ -504,6 +509,7 @@ private:
     coreUint8    m_iThunderIndex;       // 
 
     coreSoundPtr m_pBaseSound;          // base sound-effect
+    coreSpinLock m_Loaded;              // 
 
     cHeadlight m_Headlight;             // 
 
@@ -575,6 +581,7 @@ private:
     coreVector3 m_vColor2;                    // 
 
     coreSoundPtr m_pBaseSound;                // base sound-effect
+    coreSpinLock m_Loaded;                    // 
 
     coreFullscreen m_Lightning;               // 
     coreFlow       m_fLightningFlash;         // 
@@ -641,6 +648,7 @@ private:
     cHeadlight m_Headlight;      // 
 
     coreSoundPtr m_pBaseSound;   // base sound-effect
+    coreSpinLock m_Loaded;       // 
 
 
 public:
@@ -676,6 +684,7 @@ private:
     coreFlow       m_fOffset;     // 
 
     coreSoundPtr m_pBaseSound;    // base sound-effect
+    coreSpinLock m_Loaded;        // 
 
 
 public:

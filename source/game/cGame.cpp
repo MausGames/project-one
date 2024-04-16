@@ -147,11 +147,28 @@ void cGame::Render()
 {
     if(g_bTiltMode)
     {
+        const auto nFlipFunc = []()
+        {
+            if(g_CurConfig.Game.iMirrorMode)
+            {
+                if(IsHorizontal(g_pPostProcessing->GetDirection())) c_cast<coreMatrix4&>(Core::Graphics->GetPerspective())._22 *= -1.0f;
+                                                               else c_cast<coreMatrix4&>(Core::Graphics->GetPerspective())._11 *= -1.0f;
+            }
+        };
+        
+        coreVector3 vCamPos = CAMERA_POSITION;
         if(g_fShiftMode)
         {
             const coreVector3 vShake = coreVector3(g_pPostProcessing->GetPosition() * 80.0f, 0.0f);
-            Core::Graphics->SetCamera(CAMERA_POSITION + this->CalculateCamShift() * 0.5f + vShake, CAMERA_DIRECTION, CAMERA_ORIENTATION);   // do not reset at the end
+            vCamPos += this->CalculateCamShift() * 0.5f + vShake;
         }
+        
+        const coreVector3 vCamOri = MapToAxis(CAMERA_ORIENTATION, g_pPostProcessing->GetDirection());
+        
+        Core::Graphics->SetCamera(vCamPos, CAMERA_DIRECTION, vCamOri);   // do not reset at the end
+            
+        nFlipFunc();
+        if(g_CurConfig.Game.iMirrorMode) glCullFace(GL_FRONT);
 
         __DEPTH_GROUP_BOTTOM
         {
@@ -187,6 +204,7 @@ void cGame::Render()
             
             
         Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 1.0f, 500.0f);   // TODO 1: to make it possible for bullets flying towards screen
+        nFlipFunc();
 
             m_EnemyManager.RenderUnder();
             m_pCurMission->RenderUnder();
@@ -214,6 +232,7 @@ void cGame::Render()
             //if(!g_bTiltMode) m_pCurMission->RenderUnder();
 
         Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 50.0f, 500.0f);
+        nFlipFunc();
 
             DEPTH_PUSH
 
@@ -239,6 +258,7 @@ void cGame::Render()
             g_pOutline->Apply();
 
         Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 1.0f, 500.0f);   // TODO 1: to make it possible for bullets flying towards screen
+        nFlipFunc();
             
             m_BulletManagerPlayerTop.Render();
             m_BulletManagerPlayerTop.RenderAfter();
@@ -246,6 +266,7 @@ void cGame::Render()
         m_BulletManagerEnemy.RenderAfter();
             
         Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 50.0f, 500.0f);
+        nFlipFunc();
         }
 
         __DEPTH_GROUP_OVER
@@ -277,6 +298,7 @@ void cGame::Render()
             DEPTH_PUSH_DOUBLE
             
         Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 1.0f, 500.0f);   // TODO 1: to make it possible for ENEMIES and special effects near screen
+        nFlipFunc();
 
             // render special-effects
             g_pSpecialEffects->Render();
@@ -290,6 +312,7 @@ void cGame::Render()
             m_pCurMission->RenderTop();
             
         Core::Graphics->SetView(Core::System->GetResolution(), DEG_TO_RAD(45.0f), 50.0f, 500.0f);
+        nFlipFunc();
 
             glDisable(GL_DEPTH_TEST);
             {
@@ -308,9 +331,35 @@ void cGame::Render()
         }
 
         __DEPTH_RESET
+        
+        
+
+        nFlipFunc();
+        if(g_CurConfig.Game.iMirrorMode) glCullFace(GL_BACK);
+
     }
     else
     {
+/*
+        coreVector3 vShift = coreVector3(0.0f,0.0f,0.0f);
+        for(coreUintW i = 0u, ie = this->GetNumPlayers(); i < ie; ++i)
+        {
+            vShift += m_aPlayer[i].GetPosition();
+        }
+        vShift /= I_TO_F(this->GetNumPlayers());
+
+        Core::Graphics->SetCamera(CAMERA_POSITION + vShift * 0.02f, CAMERA_DIRECTION, CAMERA_ORIENTATION);
+
+        coreVector2 vTarget = coreVector2(0.0f,0.0f);
+        g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+        {
+            vTarget += pPlayer->GetPosition().xy();
+        });
+
+        g_pEnvironment->SetTargetSide(vTarget * (0.05f * BLENDH3(MIN1(g_pGame->GetTimeTable()->GetTimeEvent() * 0.5f)) * RCP(I_TO_F(g_pGame->GetNumPlayers()))), 10.0f);
+        //g_pEnvironment->SetTargetSideNow(vTarget * (0.1f * BLENDH3(MIN1(g_pGame->GetTimeTable()->GetTimeEvent() * 0.5f)) * RCP(I_TO_F(g_pGame->GetNumPlayers()))));
+*/
+        
         __DEPTH_GROUP_BOTTOM
         {
             // 
@@ -451,6 +500,13 @@ void cGame::Move()
     // handle intro and outro animation
     if(!this->__HandleIntro()) return;
     if(!this->__HandleOutro()) return;
+    
+    if(SPECIAL_FROZEN)
+    {
+        for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+            m_aPlayer[i].MoveFrozen();
+        return;
+    }
 
     // 
     m_TimeTable.Update();

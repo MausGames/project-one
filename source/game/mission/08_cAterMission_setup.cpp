@@ -76,7 +76,7 @@ void cAterMission::__SetupOwn()
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
                 pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 3.0f * fBaseScale);
-                pEnemy->Configure(10 * 1000, 0u, COLOR_SHIP_PURPLE / COLOR_SHIP_PURPLE.Max());
+                pEnemy->Configure(50 * 50, 0u, COLOR_SHIP_PURPLE / COLOR_SHIP_PURPLE.Max());
                 pEnemy->AddStatus(/*ENEMY_STATUS_INVINCIBLE |*/ ENEMY_STATUS_DAMAGING | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_SECRET);
             });
         });
@@ -143,7 +143,7 @@ void cAterMission::__SetupOwn()
     {
         STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
         {
-            pPlayer->AddStatus(PLAYER_STATUS_INVINCIBLE);
+            pPlayer->AddStatus(PLAYER_STATUS_INVINCIBLE_2);
         });
 
         STAGE_FINISH_NOW
@@ -162,7 +162,7 @@ void cAterMission::__SetupOwn()
     {
         STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
         {
-            pPlayer->RemoveStatus(PLAYER_STATUS_INVINCIBLE);
+            pPlayer->RemoveStatus(PLAYER_STATUS_INVINCIBLE_2);
         });
 
         STAGE_FINISH_NOW

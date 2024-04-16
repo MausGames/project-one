@@ -416,6 +416,20 @@ void cNevoMission::DisableBlast(const coreUintW iIndex, const coreBool bAnimated
         };
         nExitFunc(pBlast);
         for(coreUintW i = 0u; i < NEVO_LINES; ++i) nExitFunc(pLine + i);
+
+        if(bAnimated)
+        {
+            for(coreUintW i = 0u; i < NEVO_LINES; ++i)
+            {
+                // 
+                const coreVector3 vPos = pBlast ->GetPosition();
+                const coreVector3 vDir = pLine[i].GetDirection();
+                const coreUintW   iNum = F_TO_UI(g_pForeground->RayIntersection(vPos.xy(), vDir.xy()) * 0.5f);
+
+                // 
+                for(coreUintW j = iNum; j--; ) g_pSpecialEffects->CreateSplashColor(vPos + vDir * (I_TO_F(j) / 0.5f), 10.0f, 1u, COLOR_ENERGY_ORANGE);
+            }
+        }
     }
 }
 
@@ -949,7 +963,10 @@ void cNevoMission::__MoveOwnAfter()
 
         // 
         if(InBetween(2.0f, fPrevTime, m_afBombTime[i]))
+        {
             this->EnableBlast(i);
+            g_pSpecialEffects->PlaySound(oBomb.GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_DUST);
+        }
 
         // 
         oBomb.SetSize  (coreVector3(1.0f,1.0f,1.0f) * MIN(oBomb.GetSize().x + 20.0f * TIME, NEVO_BOMB_SIZE));
@@ -1178,7 +1195,7 @@ void cNevoMission::__MoveOwnAfter()
         if(!pChip->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
         // 
-        m_afChipTime[i].Update(0.3f * (i ? 1.0f : 0.5f));
+        m_afChipTime[i].Update(0.25f * (i ? 1.0f : 0.5f));
 
         // 
         if(m_afChipTime[i] >= 1.0f) this->DisableChip(i, false);
@@ -1259,7 +1276,7 @@ void cNevoMission::__MoveOwnAfter()
             pPlayer->ApplyForce(vDiff.Normalized() * 100.0f);
 
             // 
-            g_pSpecialEffects->CreateSplashColor(vIntersection, 5.0f, 3u, COLOR_ENERGY_WHITE);
+            g_pSpecialEffects->CreateSplashColor(vIntersection, 5.0f, 3u, COLOR_ENERGY_WHITE * 0.8f);
             g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
         });
 
@@ -1350,6 +1367,8 @@ void cNevoMission::__MoveOwnAfter()
             {
                 pBulletEnemy->SetDamage(pBulletEnemy->GetDamage() + pBulletPlayer->GetDamage());
                 g_pGame->PlayHitSound(vIntersection);
+
+                d_cast<cPlayer*>(pBulletPlayer->GetOwner())->GetScoreTable()->RefreshCooldown();
             }
 
             pBulletPlayer->Deactivate(true);

@@ -94,7 +94,7 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
 , m_fAlphaGoal       (0.0f)
 , m_fAlphaBadge      (0.0f)
 , m_fAlphaFragment   (0.0f)
-, m_bFakeEnd         (false)
+, m_iFakeEnd         (0u)
 , m_bBossChange      (false)
 {
     ASSERT((m_iNumViews > 0) && (m_iNumViews <= INTERFACE_VIEWS))
@@ -527,7 +527,7 @@ void cInterface::Move()
 
         // 
         oView.oComboValue.SetText(bShowValue ? PRINT("x%u.%u", iModifier / 10u, iModifier % 10u) : "");
-        oView.oChainValue.SetText(pScoreTable->GetCurChain() ? PRINT("+%u", pScoreTable->GetCurChain()) : "");
+        oView.oChainValue.SetText((bShowValue && pScoreTable->GetCurChain()) ? PRINT("+%u", pScoreTable->GetCurChain()) : "");
 
         // 
         oView.fImmuneTime.UpdateMax(-1.0f, 0.0f);
@@ -585,6 +585,9 @@ void cInterface::Move()
         const coreVector3 vColor = LERP(coreVector3(1.0f,1.0f,1.0f), pBoss->GetColor(), cShip::TransformColorFactor(fBase)) + ((fBase <= 0.2f) ? (fDanger * 0.5f) : 0.0f);
         m_aBossHealthBar[1].SetColor3(vColor * 1.0f);
         m_aBossHealthBar[2].SetColor3(vColor * 0.3f);
+        
+        //m_aBossHealthBar[1].SetColor3(COLOR_MENU_WHITE * 1.0f);   // [A1]
+        //m_aBossHealthBar[2].SetColor3(COLOR_MENU_WHITE * 0.3f);   // [A1]
 
         // display health value
         m_BossHealthValue.SetText(PRINT("%.0f%%", fPercent ? FLOOR(LERP(1.0f, 100.0f, fPercent)) : 0.0f));
@@ -652,7 +655,7 @@ void cInterface::Move()
     }
     
     
-    if(((pBoss ? fAlphaBossFull : fAlphaWaveFull) || m_bFakeEnd) && !m_bBossChange)
+    if(((pBoss ? fAlphaBossFull : fAlphaWaveFull) || m_iFakeEnd) && !m_bBossChange)
     {
         if(iSegmentIndex != MISSION_NO_SEGMENT)
         {
@@ -746,7 +749,7 @@ void cInterface::Move()
 
     const coreFloat* pfMedalGoal  = g_pGame->GetCurMission()->GetMedalGoal();
     const coreFloat  fTimeShifted = g_pGame->GetTimeTable ()->GetTimeShiftedSegmentSafe();
-    if(pfMedalGoal && fTime)
+    if(pfMedalGoal && fTime && !m_iFakeEnd)
     {
         const coreUint8 iNewMedal = cGame::CalcMedal(fTimeShifted, pfMedalGoal);
 
@@ -842,13 +845,13 @@ void cInterface::Move()
         // 
         if(pBoss)
         {
-            const coreBool bVisible = (pBoss->GetID() != cIntroBoss::ID) && (pBoss->GetID() != cProjectOneBoss::ID) && (pBoss->GetID() != cEigengrauBoss::ID);
+            const coreBool bVisible = ((pBoss->GetID() != cIntroBoss::ID) || !d_cast<cIntroMission*>(g_pGame->GetCurMission())->GetFirstPlay()) && (pBoss->GetID() != cProjectOneBoss::ID) && (pBoss->GetID() != cEigengrauBoss::ID);
             m_aHelper    [i].SetEnabled(bVisible ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
             m_aHelperWave[i].SetEnabled(bVisible ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
         }
     }
     
-    if(m_fAlphaWave >= 1.0f)   // # not full
+    if((m_fAlphaWave >= 1.0f) && !m_iFakeEnd)   // # not full
     {
         if(iSegmentIndex != MISSION_NO_SEGMENT)
         {
@@ -1120,7 +1123,7 @@ void cInterface::Move()
     else m_fAlphaBoss.UpdateMax(-2.0f, 0.0f);
 
     // 
-    if(!pBoss)
+    if(!pBoss || (m_iFakeEnd == 1u))
          m_fAlphaWave.UpdateMin( 2.0f, 1.0f);
     else m_fAlphaWave.UpdateMax(-2.0f, 0.0f);
 
@@ -1295,6 +1298,11 @@ void cInterface::ShowBoss(const cBoss* pBoss, const coreBool bSilent)
 
     // show default boss banner
     this->ShowBoss(pBoss->GetName(), Core::Language->GetString(PRINT("BOSS_TITLE_%04d", pBoss->GetID())));
+    
+    
+    
+    
+    //this->ShowBoss("???", Core::Language->GetString("BOSS_TITLE_HIDDEN"));   // [A1]
 
     if(bSilent)
     {

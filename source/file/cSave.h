@@ -19,7 +19,6 @@
 // TODO 2: disable or handle save stats while in error-mission
 // TODO 3: add various static asserts for values and bitfields, on save & replay & table (e.g. STATIC_ASSERT(SEGMENTS * BADGES <= sizeof(aiBadge[0])*8u))
 // TODO 1: scoring + leaderboard also needs to be version specific
-// TODO 1: [MF] handle unsuccessful saving (dialog box, retry, cancel, show available disc space, test for write access)
 // TODO 1: check for, and ask for import of savegame (+ whole user folder?) from demo (Steam) (save_demo.p1sv or user_demo_1000 folder, could also be general, if savegame is (also) stored globally (delete copy after import)), if no save is available on startup -> needs own menu state in intro menu (show date-time of file, maybe also some meta-data (name, time played, max mission))
 // TODO 1: [MF] mission-all stats need to be handled correctly (segment <> mission <> all <> arcade <> global, for extra menu)
 // TODO 1: [MF] achievement badges sollten als secret badges verwendet werden (silberner stern -5)
@@ -43,7 +42,15 @@
 #define SAVE_EQUIP_SUPPORTS (EQUIP_SUPPORTS)         // 
 #define SAVE_MEDALS         (MEDAL_MAX)              // 
 
-enum eSaveFeat  : coreUint8
+enum eSaveStatus : coreUint8
+{
+    SAVE_STATUS_OK            = 0u,
+    SAVE_STATUS_ERROR_UNKNOWN = 1u,
+    SAVE_STATUS_ERROR_SPACE   = 2u,
+    SAVE_STATUS_ERROR_ACCESS  = 3u
+};
+
+enum eSaveFeat : coreUint8
 {
     FEAT_TWOHUNDRED = 0u
 };
@@ -188,7 +195,7 @@ public:
         coreUint8  aiHelper  [SAVE_MISSIONS];                  // 
         coreUint8  aiFragment[SAVE_MISSIONS];                  // (bitfield) 
         coreUint8  aaiBadge  [SAVE_MISSIONS][SAVE_SEGMENTS];   // (bitfield) 
-        coreUint64 iPadding; // TODO 1: [MF] remove   + aiHelper after aaiBadge (auch in code überall)
+        coreUint64 iPadding; // TODO 1: [MF] remove   + aiHelper after aaiBadge (auch in code überall)   + bump version
         coreUint64 aiTrophy  [2];                              // (bitfield) 
         coreUint64 aiUnlock  [2];                              // (bitfield) 
         coreUint64 aiNew     [2];                              // (bitfield) 
@@ -216,11 +223,13 @@ public:
 
 
 private:
-    sHeader    m_Header;   // 
-    coreString m_sPath;    // 
+    sHeader    m_Header;                 // 
+    coreString m_sPath;                  // 
 
-    coreUint32 m_iToken;   // 
-    coreBool   m_bIgnore;  // 
+    coreUint32 m_iToken;                 // 
+    coreBool   m_bIgnore;                // 
+
+    coreAtomic<eSaveStatus> m_eStatus;   // 
 
 
 public:
@@ -248,10 +257,14 @@ public:
     void     Clear();
 
     // 
+    inline void ResetStatus() {m_eStatus = SAVE_STATUS_OK;}
+
+    // 
     inline void SetIgnore(const coreBool bIgnore) {m_bIgnore = bIgnore;}
 
     // 
     inline const sHeader& GetHeader()const {return m_Header;}
+    inline eSaveStatus    GetStatus()const {return m_eStatus;}
 
 
 private:

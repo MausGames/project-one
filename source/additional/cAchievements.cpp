@@ -25,22 +25,31 @@ void InitAchievements()
     // 
     for(coreUintW i = 0u; i < 10u; ++i)
     {
-        Core::Platform->DefineAchievement(PRINT("progress_%02zu", i), PRINT("PROGRESS_%02zu", i));
+        const coreChar* pcLocal    = PRINT("progress_%02zu", i);
+        const coreChar* pcPlatform = PRINT("PROGRESS_%02zu", i);
+
+        Core::Platform->DefineAchievement(pcLocal, pcPlatform, pcPlatform);
     }
 
     // 
-    for(coreUintW i = 0u; i < 7u; ++i)
+    for(coreUintW i = 0u; i < 8u; ++i)
     {
         for(coreUintW j = 0u; j < 6u; ++j)
         {
-            Core::Platform->DefineAchievement(PRINT("stage_%02zu_%02zu", i + 1u, j + 1u), PRINT("STAGE_%02zu_%02zu", i + 1u, j + 1u));
+            const coreChar* pcLocal    = PRINT("stage_%02zu_%02zu", i, j + 1u);
+            const coreChar* pcPlatform = PRINT("STAGE_%02zu_%02zu", i, j + 1u);
+
+            Core::Platform->DefineAchievement(pcLocal, pcPlatform, pcPlatform);
         }
     }
 
     // 
     for(coreUintW i = 0u; i < 6u; ++i)
     {
-        Core::Platform->DefineAchievement(PRINT("challenge_%02zu", i + 1u), PRINT("CHALLENGE_%02zu", i + 1u));
+        const coreChar* pcLocal    = PRINT("challenge_%02zu", i + 1u);
+        const coreChar* pcPlatform = PRINT("CHALLENGE_%02zu", i + 1u);
+
+        Core::Platform->DefineAchievement(pcLocal, pcPlatform, pcPlatform);
     }
 }
 

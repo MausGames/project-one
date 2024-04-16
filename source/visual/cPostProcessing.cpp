@@ -45,6 +45,9 @@ cPostProcessing::cPostProcessing()noexcept
         m_aWall[i].DefineTexture(0u, "menu_background_black.png");
         m_aWall[i].DefineProgram("menu_border_direct_program");
         m_aWall[i].SetTexOffset (coreVector2(0.0f,0.071f));
+        
+         
+        //m_aWall[i].DefineTexture(0u, "default_black.png");  // [A1]
     }
     this->__UpdateWall();
 
@@ -123,10 +126,12 @@ void cPostProcessing::Render()
             // 
             m_Frame.Render();
         }
-
-        // render interiors (post-process)
-        for(coreUintW i = 0u; i < POST_INTERIORS; ++i)
-            m_aInterior[i].Render(this->GetProgram());
+        else
+        {
+            // render interiors (post-process)
+            for(coreUintW i = 0u; i < POST_INTERIORS; ++i)
+                m_aInterior[i].Render(this->GetProgram());
+        }
 
         // 
         m_Black.Render();
@@ -210,7 +215,7 @@ void cPostProcessing::Move()
         coreVector2 vPos = coreVector2(0.0f,0.0f);
         if(STATIC_ISVALID(g_pGame) && g_fShiftMode)
         {
-            vPos = g_pGame->CalculateCamShift().xy() * 0.3f;
+            vPos = MapToAxisInv(g_pGame->CalculateCamShift().xy() * this->GetSize(), this->GetDirection()) * 0.3f;
         }
     
         // 
@@ -219,15 +224,11 @@ void cPostProcessing::Move()
         m_Frame.SetAlpha   (BLENDH3(MAX0(m_fFrameValue - 1.0f)) * 0.5f);
         m_Frame.SetTexOffset(coreVector2((m_fFrameAnimation * 0.01f) * (2.0f*PI), 0.0f));
         m_Frame.Move();
-    
-        for(coreUintW i = 0u; i < POST_INTERIORS; ++i)
-        {
-            m_aInterior[i].SetAlpha(BLENDH3(MAX0(m_fFrameValue - 1.0f)));
-        }
+
     }
     else
     {
-        m_Frame.SetAlpha   (0.0f);
+        m_Frame.SetAlpha(0.0f);
         
         m_fFrameAnimation = 0.0f;
     

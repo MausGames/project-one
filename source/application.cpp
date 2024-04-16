@@ -10,7 +10,7 @@
 // ****************************************************************
 // project settings
 const coreChar* const CoreApp::Settings::Name                       = "Eigengrau";
-const coreChar* const CoreApp::Settings::Version                    = "0.2.1";
+const coreChar* const CoreApp::Settings::Version                    = "0.2.2";
 const coreChar* const CoreApp::Settings::IconPath                   = "data/textures/game_icon.png";
 const coreChar* const CoreApp::Settings::CursorPath                 = "data/textures/default_cursor.png";
 const coreBool        CoreApp::Settings::UserManagement             = true;
@@ -21,10 +21,14 @@ const coreBool        CoreApp::Settings::Graphics::DoubleBuffer     = true;
 const coreBool        CoreApp::Settings::Graphics::StereoRender     = false;
 /*const*/ coreUint32      CoreApp::Settings::Platform::SteamAppID   = 1624320u;
 const coreChar* const CoreApp::Settings::Platform::EpicProductID    = "7dd83e44b6984bd0b92c5b6a1850a9cb";
-const coreChar* const CoreApp::Settings::Platform::EpicSandboxID    = "d683ed3004f1479abdf2fc4bcfdc615d";
-const coreChar* const CoreApp::Settings::Platform::EpicDeploymentID = "64c112ed4c9d4151a814a6cc93b98070";
+const coreChar* const CoreApp::Settings::Platform::EpicSandboxID    = DEFINED(_CORE_DEBUG_) ? "p-5qg8r3hlhjcsbgl4s4jp4xrauvd6wa" : "d683ed3004f1479abdf2fc4bcfdc615d";
+const coreChar* const CoreApp::Settings::Platform::EpicDeploymentID = DEFINED(_CORE_DEBUG_) ? "2914ec61294d4649b13521053c4dfb11" : "64c112ed4c9d4151a814a6cc93b98070";
 const coreChar* const CoreApp::Settings::Platform::EpicClientID     = "";
 const coreChar* const CoreApp::Settings::Platform::EpicClientSecret = "";
+
+//const coreUint32      CoreApp::Settings::Platform::SteamDemoAppID       = 2089690u;
+//const coreChar* const CoreApp::Settings::Platform::EpicDemoClientID     = "";
+//const coreChar* const CoreApp::Settings::Platform::EpicDemoClientSecret = "";
 
 
 // ****************************************************************
@@ -111,11 +115,11 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("object_tetra_volume.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tetra_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("object_tube_open.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tube_open.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_bottom_high.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_bottom_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_bottom_low.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_bottom_low.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_bottom_low.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_bottom_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_bottom_inside.md3",    CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_bottom_inside.md3", CORE_MODEL_LOAD_NO_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_bottom_volume.md3",    CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_bottom_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_top_high.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_top_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_top_low.md3",          CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_top_low.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_top_low.md3",          CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_top_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_top_inside.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_top_inside.md3", CORE_MODEL_LOAD_NO_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_top_volume.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_top_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_chol_body_high.md3",           CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_chol_body_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
@@ -169,14 +173,14 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_torus_high.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_torus_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_torus_low.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_torus_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_zeroth_body_high.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_zeroth_body_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_zeroth_body_low.md3",          CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_zeroth_body_low.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_zeroth_body_low.md3",          CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_zeroth_body_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_zeroth_body_volume.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_zeroth_body_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_zeroth_head_high.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_zeroth_head_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_zeroth_head_low.md3",          CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_zeroth_head_low.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_zeroth_head_low.md3",          CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_zeroth_head_low.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_zeroth_head_volume.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_zeroth_head_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_zeroth_leg.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_zeroth_leg.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_zeroth_leg.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_zeroth_leg.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_zeroth_leg_volume.md3",        CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_zeroth_leg_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_zeroth_tail.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_zeroth_tail.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_zeroth_tail.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_zeroth_tail.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_zeroth_tail_volume.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_zeroth_tail_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_enemy_arrow_high.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_arrow_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_enemy_arrow_low.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_arrow_low.md3");
@@ -357,6 +361,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("effect_energy_bullet_invert.vert",       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", SHADER_FLAT SHADER_BULLET SHADER_INVERT);
     Core::Manager::Resource->Load<coreShader> ("effect_energy_bullet_direct.vert",       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", SHADER_FLAT SHADER_BULLET SHADER_DIRECT);
     Core::Manager::Resource->Load<coreShader> ("effect_energy_rotated.vert",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", SHADER_ROTATED);
+    Core::Manager::Resource->Load<coreShader> ("effect_energy_rotated_spheric.vert",     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", SHADER_ROTATED SHADER_SPHERIC);
     Core::Manager::Resource->Load<coreShader> ("effect_energy.frag",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_energy_blink.frag",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.frag", SHADER_BLINK);
     Core::Manager::Resource->Load<coreShader> ("effect_energy_inst.vert",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_energy.vert", CORE_SHADER_OPTION_INSTANCING);
@@ -558,20 +563,24 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreSound>("bullet_reflect.wav",       CORE_RESOURCE_UPDATE_AUTO, "data/sounds/bullet_reflect.wav");
     Core::Manager::Resource->Load<coreSound>("continue_tick.wav",        CORE_RESOURCE_UPDATE_AUTO, "data/sounds/continue_tick.wav");
     Core::Manager::Resource->Load<coreSound>("continue_accept.wav",      CORE_RESOURCE_UPDATE_AUTO, "data/sounds/continue_accept.wav");
+    Core::Manager::Resource->Load<coreSound>("effect_beep.wav",          CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_beep.wav");
     Core::Manager::Resource->Load<coreSound>("effect_bell.wav",          CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_bell.wav");
     Core::Manager::Resource->Load<coreSound>("effect_charge_in.wav",     CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_charge_in.wav");
     Core::Manager::Resource->Load<coreSound>("effect_charge_out.wav",    CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_charge_out.wav");
     Core::Manager::Resource->Load<coreSound>("effect_dust.wav",          CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_dust.wav");
     Core::Manager::Resource->Load<coreSound>("effect_error.wav",         CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_error.wav");
+    Core::Manager::Resource->Load<coreSound>("effect_failure.wav",       CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_failure.wav");
     Core::Manager::Resource->Load<coreSound>("effect_fire.wav",          CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_fire.wav");
     Core::Manager::Resource->Load<coreSound>("effect_fire_start.wav",    CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_fire_start.wav");
     Core::Manager::Resource->Load<coreSound>("effect_heart.wav",         CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_heart.wav");
     Core::Manager::Resource->Load<coreSound>("effect_nightmare.wav",     CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_nightmare.wav");
     Core::Manager::Resource->Load<coreSound>("effect_pearl.wav",         CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_pearl.wav");
     Core::Manager::Resource->Load<coreSound>("effect_shake.wav",         CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_shake.wav");
+    Core::Manager::Resource->Load<coreSound>("effect_success.wav",       CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_success.wav");
     Core::Manager::Resource->Load<coreSound>("effect_tank.wav",          CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_tank.wav");
     Core::Manager::Resource->Load<coreSound>("effect_vacuum.wav",        CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_vacuum.wav");
     Core::Manager::Resource->Load<coreSound>("effect_woosh.wav",         CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_woosh.wav");
+    Core::Manager::Resource->Load<coreSound>("effect_woosh_2.wav",       CORE_RESOURCE_UPDATE_AUTO, "data/sounds/effect_woosh_2.wav");
     Core::Manager::Resource->Load<coreSound>("enemy_explosion_01.wav",   CORE_RESOURCE_UPDATE_AUTO, "data/sounds/enemy_explosion_01.wav");
     Core::Manager::Resource->Load<coreSound>("enemy_explosion_02.wav",   CORE_RESOURCE_UPDATE_AUTO, "data/sounds/enemy_explosion_02.wav");
     Core::Manager::Resource->Load<coreSound>("enemy_explosion_03.wav",   CORE_RESOURCE_UPDATE_AUTO, "data/sounds/enemy_explosion_03.wav");
@@ -787,6 +796,11 @@ void CoreApp::Setup()
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_rotated_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("effect_energy_rotated.vert")
+        ->AttachShader("effect_energy.frag")
+        ->Finish();
+
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_rotated_spheric_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("effect_energy_rotated_spheric.vert")
         ->AttachShader("effect_energy.frag")
         ->Finish();
 

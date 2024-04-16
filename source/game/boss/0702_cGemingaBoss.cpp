@@ -831,7 +831,7 @@ void cGemingaBoss::__MoveOwn()
                 {
                     const coreVector2 vPos = this->GetPosition().xy() + coreVector2(0.0f, (I_TO_F(j) - 8.5f) * 1.45f);
 
-                    g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 25.0f, 2u, COLOR_ENERGY_WHITE);
+                    g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 25.0f, 2u, COLOR_ENERGY_WHITE * 0.8f);
                 }
             }
 
@@ -1778,7 +1778,7 @@ void cGemingaBoss::__MoveOwn()
         m_Sphere.AddStatus(ENEMY_STATUS_GHOST);
     }
 
-    if(m_iPhase < 200u)
+    if((m_iPhase < 200u) && !this->HasStatus(ENEMY_STATUS_DEAD))
     {
     if(this->GetLostHealth() >= 3700) m_avVector[SUCK_ANGLE].x += (g_pGame->IsEasy() ? 0.7f : 1.0f) * TIME;
 
@@ -1859,7 +1859,6 @@ void cGemingaBoss::__MoveOwn()
                 pPlayer->GetScoreTable()->RefreshCooldown();
 
                 pMission->StrikeAttack(j, pPlayer, this);
-                g_pSpecialEffects->CreateSplashColor(pPearl->GetPosition(), 5.0f, 3u, COLOR_ENERGY_WHITE);
                 g_pSpecialEffects->PlaySound(pPearl->GetPosition(), 1.0f, pMission->RetrievePearlPitch(), SOUND_EFFECT_PEARL);
 
                 if(!m_aiCounter[BULLET_REFLECT])
@@ -1943,7 +1942,7 @@ void cGemingaBoss::__MoveOwn()
             pParticle->SetPositionAbs(coreVector3(vPos, 0.0f),               this->GetPosition() + coreVector3(0.0f,-7.0f,0.0f));
             pParticle->SetScaleAbs   (3.5f,                                  1.0f);
             pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),            PI);
-            pParticle->SetColor4Abs  (coreVector4(COLOR_ENERGY_WHITE, 1.0f), coreVector4(COLOR_ENERGY_WHITE, 0.0f));
+            pParticle->SetColor4Abs  (coreVector4(COLOR_ENERGY_WHITE * 0.8f, 1.0f), coreVector4(COLOR_ENERGY_WHITE * 0.8f, 0.0f));
             pParticle->SetSpeed      (1.3f * Core::Rand->Float(0.7f, 1.3f));
         });
     }
@@ -2005,7 +2004,7 @@ void cGemingaBoss::__MoveOwn()
 
                 const coreVector3 vPos  = vOldPos;
                 const coreVector3 vDiff = vNewPos - vPos;
-                const coreUintW   iNum  = MAX(F_TO_UI(vDiff.Length() / 1.9f), 2u);
+                const coreUintW   iNum  = MAX(F_TO_UI(vDiff.Length() / 1.7f), 2u);
 
                 for(coreUintW j = iNum; j--; ) g_pSpecialEffects->CreateSplashColor(vPos + vDiff * (I_TO_F(j) * RCP(I_TO_F(iNum - 1u))), 10.0f, 1u, pPlayer->GetEnergyColor());
             }

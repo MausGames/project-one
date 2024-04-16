@@ -438,7 +438,7 @@ void cTimeTable::Update()
 
     // 
     //if(!TIME) return;
-    if(TIME < 0.001f) return;
+    if(SPECIAL_FROZEN) return;       
     //ASSERT(TIME == m_dFrameTime)
 
     // 
@@ -559,7 +559,7 @@ void cTimeTable::StartBoss(const coreUintW iMissionIndex, const coreUintW iBossI
     // 
     ASSERT(iMissionIndex < TABLE_MISSIONS)
     ASSERT(iBossIndex    < TABLE_BOSSES)
-    m_aaiTimeSegment[iMissionIndex][MISSION_BOSS_TO_SEGMENT(iBossIndex)] = F_TO_UI(coreDouble(-INTERFACE_BANNER_DURATION_BOSS) / m_dFrameTime);
+    m_aaiTimeSegment[iMissionIndex][MISSION_BOSS_TO_SEGMENT(iBossIndex)] = ((iMissionIndex == MISSION_ATER) && (iBossIndex == 0u)) ? 0u : F_TO_UI(coreDouble(-INTERFACE_BANNER_DURATION_BOSS) / m_dFrameTime);
 }
 
 void cTimeTable::StartBoss()

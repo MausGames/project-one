@@ -33,19 +33,11 @@
 // TODO 1: hard: additional enemies and side-turning
 // TODO 1: improve player-arrow appearance when looking into/outof z-axis
 // TODO 1: background für time-score-banner hängt in leere bei vertikaler resolution
-// TODO 1: [MF] MAIN: sound
-// TODO 1: [MF] ACHIEVEMENT: name (), description (), 
-// TODO 1: [MF] check hud rotation, game rotation, mirror mode
-
-// TODO 1: [MF] sound when fragment-board splits up, sound when bullet flies past player
-
+// TODO 1: improve bullet depth überlagerung
 // TODO 1: post-processing fehlt und farben sind anders, fix glow and distortion on extended viewport
-
-// TODO 1: [MF] alle layer sollten getroffen werden können (custom-enemy geht aber nicht, wegen render-reihenfolge), adjust size+dir+ori depending on current layer
 // TODO 1: boss sollte vielleicht eigenen shader haben, zum rand hin weniger transparenz (spherisch ?) statt ganz flach
-
-// TODO 1: [MF] vielleicht doch nicht spieler unsterblich machen, repair enemy soll timer haben, und bei continue spielt man von der aktuellen stelle weiter mit eigenem einflug
-
+// TODO 1: [MF] MAIN: sound
+// TODO 1: [MF] sound when fragment-board splits up, sound when bullet flies past player
 // (TODO 1: sinus-line gegner sieht man schlecht von oben kommen (vielleicht beim ersten gegner ein loch lassen um (überraschendes) erstes ausweichen zu erleichtern))
 // (TODO 1: handle farb-änderung von adds)
 
@@ -99,7 +91,7 @@ cEigengrauBoss::cEigengrauBoss()noexcept
         m_aLayer[i].DefineModelLow ("object_cube_rota.md3");
         m_aLayer[i].DefineVolume   ("object_cube_volume.md3");
         m_aLayer[i].DefineTexture  (0u, "effect_energy.png");
-        m_aLayer[i].DefineProgram  ("effect_energy_spheric_program");
+        m_aLayer[i].DefineProgram  ("effect_energy_rotated_spheric_program");
         m_aLayer[i].SetSize        (coreVector3(0.0f,0.0f,0.0f));
         m_aLayer[i].SetColor3      (COLOR_ENERGY_WHITE * (0.1f + 0.1f * I_TO_F(EIGENGRAU_LAYERS - i)));
     }
@@ -267,12 +259,19 @@ void cEigengrauBoss::__RenderOwnTop()
 
     if(m_Lightning.IsEnabled(CORE_OBJECT_ENABLE_RENDER))
     {
+        
+        if(g_CurConfig.Game.iMirrorMode) glCullFace(GL_BACK);
+        
+        
         glDisable(GL_DEPTH_TEST);
         {
             // 
             m_Lightning.Render();
         }
         glEnable(GL_DEPTH_TEST);
+        
+        
+        if(g_CurConfig.Game.iMirrorMode) glCullFace(GL_FRONT);
     }
 }
 
@@ -1246,7 +1245,7 @@ void cEigengrauBoss::__MoveOwn()
     {
         g_pGame->ForEachPlayerAll([&](const cPlayer* pPlayer, const coreUintW i)
         {
-            const coreVector2 vRatio = Core::System->GetResolution().HighRatio();
+            const coreVector2 vRatio = MapToAxis(Core::System->GetResolution().HighRatio(), g_pPostProcessing->GetDirection()).Processed(ABS);
 
             const coreVector2 vFrom = g_pGame->CalculateCamShift().xy() * 0.5f;
             const coreVector2 vTo   = pPlayer->GetPosition().xy();
@@ -1362,7 +1361,7 @@ void cEigengrauBoss::__PhaseChange()
     // 
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
-        pPlayer->StartRolling(pPlayer->GetInput()->vMove);
+        pPlayer->StartRolling();
     });
 }
 

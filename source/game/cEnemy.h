@@ -20,7 +20,7 @@
 // TODO 1: completely remove PlayerSide aiming (for coop)
 // TODO 3: normale gruppen-gegner mit TOP haben doppelte outline (einmal im batch, und einmal durch TOP)
 // TODO 3: warrior model eiert etwas beim drehen um die Z-achse (siehe secret enemies bei mimic-wave)
-// TODO 2: [MF] preload enemies (and bullets?) used in specific stage, before entering stage for the first time (same for bullets, maybe add to stage-specification)
+// TODO 2: [MF] preload enemies (and bullets? + player-bullets) used in specific stage, before entering stage for the first time (same for bullets, maybe add to stage-specification) -> change m_anStage.emplace into a function receiving enemy and bullet list to immediately prefetch
 
 
 // ****************************************************************
@@ -49,14 +49,15 @@ enum eEnemyStatus : coreUint32
     ENEMY_STATUS_HIDDEN       = 0x4000u,   // 
     ENEMY_STATUS_WORTHLESS    = 0x8000u,   // TODO 1: should be changed to explicit score value in configure (boss?) + setter ?
     
-    ENEMY_STATUS_LIGHT      = 0x010000u,
-    ENEMY_STATUS_FLAT       = 0x020000u,
-    ENEMY_STATUS_SECRET     = 0x040000u,
-    ENEMY_STATUS_CUSTOM     = 0x080000u,
-    ENEMY_STATUS_CHAIN      = 0x100000u,
-    ENEMY_STATUS_KEEPVOLUME = 0x200000u,
-    ENEMY_STATUS_SKIPEXPLOSION = 0x200000u,
-    ENEMY_STATUS_DEACTIVATE = 0x800000u
+    ENEMY_STATUS_LIGHT         = 0x00010000u,
+    ENEMY_STATUS_FLAT          = 0x00020000u,
+    ENEMY_STATUS_SECRET        = 0x00040000u,
+    ENEMY_STATUS_CUSTOM        = 0x00080000u,
+    ENEMY_STATUS_CHAIN         = 0x00100000u,
+    ENEMY_STATUS_KEEPVOLUME    = 0x00200000u,
+    ENEMY_STATUS_SKIPEXPLOSION = 0x00400000u,
+    ENEMY_STATUS_CRASH         = 0x00800000u,
+    ENEMY_STATUS_DEACTIVATE    = 0x01000000u
    // ENEMY_STATUS_UNDER = 0x20000u
 };
 
@@ -157,6 +158,7 @@ public:
     inline  const coreUint16& GetScore         ()const {return m_iScore;}
     inline        coreUint16  GetRealScore     ()const {return m_iScore ? m_iScore : (10u * m_iMaxHealth);}
     virtual eSoundEffect      GetExplosionSound()const {return SOUND_ENEMY_EXPLOSION_09;}
+    virtual coreFloat         GetExplosionPitch()const {return 1.0f;}
 
     // enemy configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "object_ship_blink_inst_program";}
@@ -508,6 +510,7 @@ public:
 
     // get object properties
     inline eSoundEffect GetExplosionSound()const final {return SOUND_ENEMY_EXPLOSION_07;}
+    inline coreFloat    GetExplosionPitch()const final {return 0.5f + 0.5f * RCP(this->GetSize().x / 4.5f);}
 
     // enemy configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "object_meteor_blink_inst_program";}

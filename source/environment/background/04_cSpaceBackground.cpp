@@ -18,6 +18,7 @@ cSpaceBackground::cSpaceBackground()noexcept
 , m_iCopyLower   (0u)
 , m_iCopyUpper   (0u)
 , m_vNebulaMove  (coreVector2(0.0f,0.0f))
+, m_Loaded       ()
 {
     coreBatchList* pList1;
 
@@ -116,11 +117,14 @@ cSpaceBackground::~cSpaceBackground()
 // 
 void cSpaceBackground::__InitOwn()
 {
+    m_Loaded.Unlock();
+    
     // load base sound-effect
     m_pBaseSound = Core::Manager::Resource->Get<coreSound>("environment_space.wav");
     m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
         pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
+        m_Loaded.Lock();
     });
 }
 
@@ -132,7 +136,7 @@ void cSpaceBackground::__ExitOwn()
     // stop base sound-effect
     m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
-        if(pResource->EnableRef(this))
+        if(m_Loaded.IsLocked() && pResource->EnableRef(this))
             pResource->Stop();
     });
 }
@@ -232,14 +236,14 @@ void cSpaceBackground::__MoveOwn()
 
     // 
     m_Nebula.SetSize     (vSize);
-    m_Nebula.SetDirection(MapToAxisInv(g_pEnvironment->GetDirection().InvertedX(), m_vCoverDir));
+    m_Nebula.SetDirection(MapToAxis(g_pEnvironment->GetDirection().InvertedX(), m_vCoverDir));
     m_Nebula.SetColor3   (m_Cover.GetColor3().LowRatio());
     m_Nebula.SetTexSize  (vTexSize);
     m_Nebula.SetTexOffset(vTexOffset3.Processed(FRACT));
     m_Nebula.Move();
 
     // adjust volume of the base sound-effect
-    if(m_pBaseSound->EnableRef(this))
+    if(m_Loaded.IsLocked() && m_pBaseSound->EnableRef(this))
     {
         m_pBaseSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
     }

@@ -17,7 +17,6 @@
 // (zwischen ende von grow-bullet abschnitt und 5-laser angriff braucht es ne pause um die beiden angriffe mental zu trennen)
 // TODO 1: hard-mode: alle laser-einschläge erzeugen zusätzliche geschosse (betrifft alle phasen außer grow-bullet und arrow)
 // TODO 1: quad-bullet teppich verdeckt laser-einschlag
-// TODO 1: [MF] auftauchende parts sollten angreifbar sein sobald arrow sichtbar ist, bei untertauchen kann es ruhig wie vorher sein, aber vielleicht besser auch anpassen
 // TODO 1: [MF] ACHIEVEMENT: name (), description (), 
 
 // NOTE: never ever use exactly 4 rays with equal distribution, the resulting laser+fire pattern does NOT look good
@@ -487,7 +486,7 @@ void cLeviathanBoss::__MoveOwn()
                         this->__EnableRay(i, true);
                 }
 
-                if(PHASE_TIME_POINT(0.65f))
+                if(PHASE_TIME_POINT(0.7f))
                 {
                     if(this->_ResurrectHelper(ELEMENT_BLUE, true))
                     {
@@ -541,6 +540,7 @@ void cLeviathanBoss::__MoveOwn()
 
         static coreBool   bComplete2 = false;
         static coreUint32 iTileState = 0u;
+        static coreUint32 iTileScore = 0u;
         static coreUint32 aiRemember[GAME_PLAYERS] = {};
 
         STATIC_ASSERT(LEVIATHAN_TILES <= sizeof(iTileState)   *8u)
@@ -554,8 +554,11 @@ void cLeviathanBoss::__MoveOwn()
 
             bComplete2 = false;
             iTileState = 0u;
+            iTileScore = 0u;
             std::memset(aiRemember, 0, sizeof(aiRemember));
         }
+
+        const coreUint32 iTileStateOld = iTileState;
 
         for(coreUintW i = 0u; i < LEVIATHAN_TILES; ++i)
         {
@@ -570,7 +573,7 @@ void cLeviathanBoss::__MoveOwn()
 
             if(!bComplete2)
             {
-                g_pGame->ForEachPlayerAll([&](const cPlayer* pPlayer, const coreUintW j)
+                g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW j)
                 {
                     if(pPlayer->IsRolling()) return;
 
@@ -581,6 +584,13 @@ void cLeviathanBoss::__MoveOwn()
                     {
                         if(!HAS_BIT(aiRemember[j], i)) TOGGLE_BIT(iTileState, i)
                         ADD_BIT(aiRemember[j], i)
+
+                        if(HAS_BIT(iTileState, i) && !HAS_BIT(iTileScore, i))
+                        {
+                            ADD_BIT(iTileScore, i)
+                            pPlayer->GetScoreTable()->RefreshCooldown();
+                            pPlayer->GetScoreTable()->AddChain(50);
+                        }
                     }
                     else
                     {
@@ -591,11 +601,15 @@ void cLeviathanBoss::__MoveOwn()
                 if(HAS_BIT(iTileState, i))
                 {
                     pMission->SetTileStyle(i, 1u);
+
+                    if(!HAS_BIT(iTileStateOld, i)) g_pSpecialEffects->PlaySound(pTile->GetPosition(), 1.0f, 1.0f, SOUND_PLAYER_TURN);
                 }
                 else
                 {
                     pMission->SetTileStyle(i, 0u);
                     bComplete1 = false;
+
+                    if(HAS_BIT(iTileStateOld, i)) g_pSpecialEffects->PlaySound(pTile->GetPosition(), 1.0f, 0.9f, SOUND_PLAYER_TURN);
                 }
             }
         }
@@ -774,11 +788,11 @@ void cLeviathanBoss::__MoveOwn()
             {
             default: ASSERT(false)
             case 0: iArrow = 0u; break;
-            case 1: iArrow = 2u; break;
-            case 2: iArrow = 1u; break;
+            case 1: iArrow = 1u; break;
+            case 2: iArrow = 2u; break;
             case 3: iArrow = 3u; break;
-            case 4: iArrow = 2u; break;
-            case 5: iArrow = 0u; break;
+            case 4: iArrow = 0u; break;
+            case 5: iArrow = 1u; break;
             }
 
             cEnemy* pPart = &m_aBody[m_aiCounter[EMERGE_PART]];
@@ -830,16 +844,15 @@ void cLeviathanBoss::__MoveOwn()
                 pBullet->AddStatus(BULLET_STATUS_GHOST);
             });
 
-            const coreVector2 vPos    = vTarget * FOREGROUND_AREA * 0.4f;
+            const coreVector2 vPos    = vTarget * FOREGROUND_AREA * 0.6f;
             const coreFloat   fHeight = LERPB(-30.0f, 0.0f, CLAMP01(MIN(fTime, 1.0f - fTime) * 3.0f));
 
             pPart->SetPosition (coreVector3(vPos, fHeight));
-            pPart->SetDirection(coreVector3(StepRotated90(iArrow), 0.0f));
+            pPart->SetDirection(coreVector3(0.0f,0.0f,1.0f));
 
-            pMission->SetArrowEnabled(fHeight >= -5.0f);
+            pPart->SetCollisionModifier(this->GetCollisionModifier() * coreVector3(1.0f, pPart->HasStatus(ENEMY_STATUS_HIDDEN) ? 0.0f : 10.0f, 1.0f));
 
-            m_Head.SetPosition(coreVector3(HIDDEN_POS, 0.0f));
-            m_Tail.SetPosition(coreVector3(HIDDEN_POS, 0.0f));
+            vNewOri = coreVector2(1.0f,0.0f);
 
             if(fHeight >= -15.0f)
             {
@@ -860,12 +873,10 @@ void cLeviathanBoss::__MoveOwn()
                 }
                 else if(m_aiCounter[EMERGE_PART] == 1)
                 {
-                    PHASE_CONTROL_TICKER(1u, 0u, 5.5f, LERP_LINEAR)
+                    PHASE_CONTROL_TICKER(1u, 0u, 5.0f, LERP_LINEAR)
                     {
-                        if((iTick % 4u) < 2u) return;
-
                         const coreFloat fBase = pPart->AimAtPlayerDual(((iTick % 4u) == 3u) ? 1u : 0u).Angle();
-                        const coreUintW iNum  = g_pGame->IsEasy() ? 4u : 7u;
+                        const coreUintW iNum  = g_pGame->IsEasy() ? 3u : 7u;
 
                         for(coreUintW j = iNum; j--; )
                         {
@@ -922,6 +933,11 @@ void cLeviathanBoss::__MoveOwn()
                     PHASE_CHANGE_TO(60u)
 
                     pMission->ResetCollEnemyBullet();
+
+                    for(coreUintW i = 0u; i < LEVIATHAN_PARTS; ++i)
+                    {
+                        this->__GetPart(i)->SetCollisionModifier(this->GetCollisionModifier());
+                    }
                 }
                 else
                 {
@@ -1085,7 +1101,9 @@ void cLeviathanBoss::__MoveOwn()
             m_Head.SetDirection   (coreVector3(0.0f,1.0f,0.0f));
 
             for(coreUintW i = 1u; i < LEVIATHAN_PARTS; ++i)
+            {
                 this->__GetPart(i)->SetPosition(coreVector3(HIDDEN_POS, 0.0f));
+            }
 
             if(PHASE_FINISHED)
             {
@@ -1530,8 +1548,6 @@ void cLeviathanBoss::__MoveOwn()
             if(pBulletEnemy->GetID() != cQuadBullet::ID) return;
 
             pBulletEnemy->Deactivate(true, vIntersection.xy(), pBulletPlayer->GetFlyDir());
-
-            g_pSpecialEffects->PlaySound(vIntersection, 1.0f, 1.0f, SOUND_PLACEHOLDER);
         });
 
         const coreVector2 vMove1 = coreVector2(0.0f, -10.0f * fQuadSpeed) * TIME;
@@ -1800,7 +1816,7 @@ void cLeviathanBoss::__MoveOwn()
             {
                 // 
                 g_pSpecialEffects->CreateSplashSmoke(coreVector3(vPos.xy(), fHeight), 30.0f, 30u, coreVector3(1.0f,1.0f,1.0f));
-                g_pSpecialEffects->CreateSplashColor(coreVector3(vPos.xy(), fHeight), 50.0f, 15u, COLOR_ENERGY_WHITE);
+                g_pSpecialEffects->CreateSplashColor(coreVector3(vPos.xy(), fHeight), 50.0f, 15u, COLOR_ENERGY_WHITE * 0.8f);
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_TINY);
                 g_pSpecialEffects->PlaySound(coreVector3(vPos.xy(), fHeight), 0.4f, bNewHidden ? 2.0f : 1.2f, SOUND_EFFECT_SHAKE);
 
@@ -1910,7 +1926,7 @@ void cLeviathanBoss::__MoveOwn()
     
     
     
-    if(m_iPhase < 200u)
+    if((m_iPhase < 200u) && !this->HasStatus(ENEMY_STATUS_DEAD))
     {
     // 
     cHelper* pYellowHelper = g_pGame->GetHelper(ELEMENT_YELLOW);
@@ -2093,10 +2109,10 @@ void cLeviathanBoss::__DisableRay(const coreUintW iIndex, const coreBool bAnimat
         const cEnemy*     pPart = this->__GetPart(iIndex);
         const coreVector3 vPos  = pPart->GetPosition();
         const coreVector3 vDir  = pPart->GetDirection();
-        const coreUintW   iNum  = F_TO_UI(pRay->GetSize().y);
+        const coreUintW   iNum  = F_TO_UI(pRay->GetSize().y * 1.5f);
 
         // 
-        for(coreUintW j = iNum; j--; ) g_pSpecialEffects->CreateSplashColor(vPos + vDir * (LEVIATHAN_RAY_OFFSET(iIndex) + 2.0f*I_TO_F(j)), 10.0f, 1u, COLOR_ENERGY_ORANGE);
+        for(coreUintW j = iNum; j--; ) g_pSpecialEffects->CreateSplashColor(vPos + vDir * (LEVIATHAN_RAY_OFFSET(iIndex) + 2.0f*I_TO_F(j) / 1.5f), 10.0f, 1u, COLOR_ENERGY_ORANGE);
     }
 }
 
@@ -2239,7 +2255,7 @@ void cLeviathanBoss::__DisableMark(const coreUintW iIndex, const coreBool bAnima
     oMark.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
     // 
-    if(bAnimated) g_pSpecialEffects->CreateSplashColor(oMark.GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_WHITE);
+    if(bAnimated) g_pSpecialEffects->CreateSplashColor(oMark.GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_WHITE * 0.8f);
 }
 
 
@@ -2307,8 +2323,8 @@ void cLeviathanBoss::__RefreshHealth(const coreInt32 iHead, const coreInt32 iBod
         if(pPart->IsEnabled(CORE_OBJECT_ENABLE_ALL))
         {
             g_pSpecialEffects->CreateSplashSmoke(pPart->GetPosition(), 30.0f, 30u, coreVector3(1.0f,1.0f,1.0f));
-            g_pSpecialEffects->CreateSplashColor(pPart->GetPosition(), 50.0f, 15u, COLOR_ENERGY_WHITE);
-                g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_TINY);
+            g_pSpecialEffects->CreateSplashColor(pPart->GetPosition(), 50.0f, 15u, COLOR_ENERGY_WHITE * 0.8f);
+            g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_TINY);
         }
     }
 }

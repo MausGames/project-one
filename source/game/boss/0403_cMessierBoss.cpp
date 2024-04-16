@@ -21,22 +21,16 @@
 // platten müssen so überlagert werden, dass sie gut sichtbar und effektiv sind (kleine über große, schnelle über langsamere)
 // platten sollte spieler nur so wegdrehen, dass er mit 1 aktion wieder richtung boss schauen kann (außer wenn spieler neben boss fliegt, aber das is speziell)
 // time bubble hides stopping background movement
+// ACHIEVEMENT: destroy one of the big meteors
 // TODO 1: hard mode: in intro fliegt ein meteorit auf den bildschirm und crackt ihn
-// TODO 1: [MF] ACHIEVEMENT: name (), description (), destroy one big meteor / ###
 // TODO 1: [MF] MAIN: juiciness (move, rota, muzzle, effects)
 // TODO 1: [MF] lebenspunkte bei time-phase begrenzen (geben keine punkte, sollte somit als soft-clamp in takedamage eingebaut werden), aber heal-status mit factor<=0.0f erst umschlagen, und auflösen mit der welle (effekt muss es anzeigen)
-// TODO 1: [MF] art der rotation ändert sich im laufe des kampfes, achtung wegen rota in time-phase, sollte schön sichtbar sein
-
-// TODO 1: [MF] blaue geschosse hacken bei nem single-shot, weil der health-abhängig wert zu schnell geändert wird
-// TODO 1: [MF] uhr-werk effekt verbessern: allgemeine optik (mittel-teil?, boss-glow?), fade-out am ende (mehr bewegung)
-// TODO 1: [MF] improve bullet-directions for time-slowdown phase (sometimes they cluster, maybe first identify the reason/origin)
-// TODO 1: [MF] eine cyan-bullet welle die nah beim boss war wurde normal weggeschleudert statt rotiert
-// TODO 1: [MF] cover sollte sich beim schwarzen loch drehen ? ja, BLENDBR
-// TODO 1: [MF] greatly reduce rotation when related option is disabled
+// TODO 1: [MF] art der ring-rotation ändert sich im laufe des kampfes, achtung wegen rota in time-phase, sollte schön sichtbar sein
 
 
 // ****************************************************************
 // counter identifier
+#define BADGE_INVALID (0u)
 
 
 // ****************************************************************
@@ -46,24 +40,29 @@
 #define METEOR_MOVE    (2u)
 #define PLATE_DATA     (3u)
 #define HELPER_DATA    (4u)
+#define BULLET_LERP    (5u)
 
 
 // ****************************************************************
 // constructor
 cMessierBoss::cMessierBoss()noexcept
-: m_fRingTime   (0.0f)
-, m_fRingScreen (0.0f)
-, m_fClockTime  (0.0f)
-, m_bClockState (false)
-, m_bHoleState  (false)
-, m_fTimeFactor (1.0f)
-, m_iTimeRevert (0u)
-, m_bTimeMusic  (false)
-, m_afShootTime {}
-, m_aiShootTick {}
-, m_iTick       (0u)
-, m_fMeteorRota (0.0f)
-, m_fBossRota   (0.0f)
+: m_fRingTime     (0.0f)
+, m_fRingScreen   (0.0f)
+, m_aafClockAlpha {}
+, m_fClockTime    (0.0f)
+, m_bClockState   (false)
+, m_fBubbleTime   (0.0f)
+, m_fBubbleAlpha  (0.0f)
+, m_bBubbleState  (false)
+, m_bHoleState    (false)
+, m_fTimeFactor   (1.0f)
+, m_iTimeRevert   (0u)
+, m_bTimeMusic    (false)
+, m_afShootTime   {}
+, m_aiShootTick   {}
+, m_iTick         (0u)
+, m_fMeteorRota   (0.0f)
+, m_fBossRota     (0.0f)
 {
     // load models
     this->DefineModelHigh("ship_boss_messier_core.md3");
@@ -94,7 +93,7 @@ cMessierBoss::cMessierBoss()noexcept
     {
         m_aRing[i].DefineModel  ("object_ring.md3");
         m_aRing[i].DefineTexture(0u, "effect_energy.png");
-        m_aRing[i].DefineProgram("effect_energy_spheric_program");
+        m_aRing[i].DefineProgram("effect_energy_rotated_spheric_program");
         m_aRing[i].SetColor3    (COLOR_ENERGY_MAGENTA * 0.7f);
         m_aRing[i].SetTexSize   (coreVector2(0.5f,1.0f) * 2.5f);
         m_aRing[i].SetTexOffset (coreVector2(I_TO_F(i) / I_TO_F(MESSIER_RINGS), 0.0f));
@@ -106,12 +105,31 @@ cMessierBoss::cMessierBoss()noexcept
     {
         m_aClock[i].DefineModel  (i ? "object_arrow_long.md3" : "object_arrow.md3");
         m_aClock[i].DefineTexture(0u, "effect_energy.png");
-        m_aClock[i].DefineProgram("effect_energy_invert_program");
+        m_aClock[i].DefineProgram("effect_energy_flat_invert_program");
         m_aClock[i].SetSize      (coreVector3(1.0f,1.0f,1.0f) * 3.0f);
         m_aClock[i].SetColor3    (COLOR_ENERGY_PURPLE * 0.9f);
         m_aClock[i].SetTexSize   (coreVector2(0.5f,0.2f) * 1.7f * (i ? 2.0f : 1.0f));
         m_aClock[i].SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+
+        for(coreUintW j = 0u; j < MESSIER_TRAILS; ++j)
+        {
+            m_aaClockTrail[i][j].DefineModel  (m_aClock[i].GetModel  ());
+            m_aaClockTrail[i][j].DefineTexture(0u, m_aClock[i].GetTexture(0u));
+            m_aaClockTrail[i][j].DefineProgram(m_aClock[i].GetProgram());
+            m_aaClockTrail[i][j].SetSize      (m_aClock[i].GetSize   ());
+            m_aaClockTrail[i][j].SetTexSize   (m_aClock[i].GetTexSize());
+            m_aaClockTrail[i][j].SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+        }
     }
+
+    // 
+    m_Bubble.DefineModel  ("object_sphere_center.md3");
+    m_Bubble.DefineTexture(0u, "effect_energy.png");
+    m_Bubble.DefineProgram("effect_energy_flat_program");
+    m_Bubble.SetSize      (coreVector3(1.0f,1.0f,1.0f) * 18.0f);
+    m_Bubble.SetDirection (coreVector3(1.0f,0.0f,0.0f));
+    m_Bubble.SetTexSize   (coreVector2(2.4f,0.4f) * 1.0f);
+    m_Bubble.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 
     // 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aHole); ++i)
@@ -175,6 +193,9 @@ void cMessierBoss::__KillOwn(const coreBool bAnimated)
     this->__DisableClock(bAnimated);
 
     // 
+    this->__DisableBubble(bAnimated);
+
+    // 
     this->__DisableHole(bAnimated);
 
     // 
@@ -203,6 +224,21 @@ void cMessierBoss::__KillOwn(const coreBool bAnimated)
 
 // ****************************************************************
 // 
+void cMessierBoss::__RenderOwnUnder()
+{
+    DEPTH_PUSH
+
+    glDepthMask(false);
+    {
+        // 
+        m_Bubble.Render();
+    }
+    glDepthMask(true);
+}
+
+
+// ****************************************************************
+// 
 void cMessierBoss::__RenderOwnOver()
 {
     if(m_aRing[0].IsEnabled(CORE_OBJECT_ENABLE_MOVE))
@@ -225,11 +261,25 @@ void cMessierBoss::__RenderOwnTop()
 {
     DEPTH_PUSH
 
+    glDepthMask(false);
+    {
+        // 
+        for(coreUintW j = 0u; j < MESSIER_TRAILS; ++j) m_aaClockTrail[1][j].Render();
+    }
+    glDepthMask(true);
+
     // 
     m_aClock[1].Render();
     g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_aClock[1]);
 
     DEPTH_PUSH
+
+    glDepthMask(false);
+    {
+        // 
+        for(coreUintW j = 0u; j < MESSIER_TRAILS; ++j) m_aaClockTrail[0][j].Render();
+    }
+    glDepthMask(true);
 
     // 
     m_aClock[0].Render();
@@ -259,6 +309,10 @@ void cMessierBoss::__MoveOwn()
     const cEnemySquad* pSquad2 = g_pGame->GetCurMission()->GetEnemySquad(1u);
     ASSERT(pSquad1->GetNumEnemies() == MESSIER_ENEMIES_SMALL)
     ASSERT(pSquad2->GetNumEnemies() == MESSIER_ENEMIES_BIG)
+    
+    
+
+    const coreFloat fBackSpeed = (g_CurConfig.Game.iBackRotation ? 1.0f : 0.5f);
 
     
     const coreFloat fTotalSpeed = pMission->GetAreaSpeed() * m_fTimeFactor;
@@ -563,9 +617,14 @@ void cMessierBoss::__MoveOwn()
                 const coreVector2 vDir   = coreVector2::Direction(DEG_TO_RAD((I_TO_F(j) - 4.0f) * (g_pGame->IsEasy() ? 22.0f : 13.0f)) + fBase);
                 const coreFloat   fSpeed = 1.4f - ABS(I_TO_F(j - 4u)) * 0.1f;
 
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, fSpeed,        this, vPos, vDir)->ChangeSize(1.7f);
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, fSpeed - 0.1f, this, vPos, vDir)->ChangeSize(1.7f);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, fSpeed,        this, vPos,  vDir)->ChangeSize(1.7f);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, fSpeed - 0.1f, this, vPos,  vDir)->ChangeSize(1.7f);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, fSpeed,        this, vPos, -vDir)->ChangeSize(1.7f);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, fSpeed - 0.1f, this, vPos, -vDir)->ChangeSize(1.7f);
             }
+
+            g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), SPECIAL_SPLASH_TINY, COLOR_ENERGY_YELLOW);
+            g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
         });
 
         if(this->GetCurHealth() < 3500)
@@ -612,14 +671,19 @@ void cMessierBoss::__MoveOwn()
                     this->__AddBullet(2u, 1.0f, vPos,  vDir);
                     this->__AddBullet(2u, 1.0f, vPos, -vDir);
                 }
+
+                if(!m_iTimeRevert) g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
             }
         }
         else if((iCurHealth <= 2900 - 25) && (iCurHealth > 2300 + 25))
         {
+            const coreFloat fLerp = STEP(2300.0f, 2900.0f, I_TO_F(iCurHealth));
+            m_avVector[BULLET_LERP].x = m_avVector[BULLET_LERP].x + (fLerp - m_avVector[BULLET_LERP].x) * (TIME * 10.0f);
+
             if(this->__PhaseTicker(1u, 20.0f))
             {
                 const coreVector2 vPos  = this->GetPosition().xy();
-                const coreFloat   fBase = SIN(I_TO_F(m_iTick) * 0.2f) * (g_pGame->IsEasy() ? 17.0f : 24.0f) * SIN(STEP(2300.0f, 2900.0f, I_TO_F(iCurHealth)) * (1.0f*PI));
+                const coreFloat   fBase = SIN(I_TO_F(m_iTick) * 0.2f) * (g_pGame->IsEasy() ? 17.0f : 24.0f) * SIN(m_avVector[BULLET_LERP].x * (1.0f*PI));
 
                 for(coreUintW j = 5u; j--; )
                 {
@@ -628,6 +692,8 @@ void cMessierBoss::__MoveOwn()
                     this->__AddBullet(1u, 1.0f, vPos,  vDir);
                     this->__AddBullet(1u, 1.0f, vPos, -vDir);
                 }
+
+                if(!m_iTimeRevert) g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
             }
 
             if(!m_iTimeRevert && (iCurHealth <= 2600))
@@ -651,6 +717,8 @@ void cMessierBoss::__MoveOwn()
                     this->__AddBullet(0u, 1.0f + I_TO_F(j % 6u) * 0.07f, vPos,  vDir);
                     this->__AddBullet(0u, 1.0f + I_TO_F(j % 6u) * 0.07f, vPos, -vDir);
                 }
+
+                if(!m_iTimeRevert) g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
             }
 
             if(m_iTimeRevert && (iCurHealth >= 2000))
@@ -668,6 +736,7 @@ void cMessierBoss::__MoveOwn()
                     });
 
                     this->__EnableClock();
+                    this->__EnableBubble(COLOR_ENERGY_PURPLE * 1.0f);
                 }
 
                 m_iTimeRevert = 1u;
@@ -694,7 +763,8 @@ void cMessierBoss::__MoveOwn()
             pMission->EnableArea();
             pMission->SetAreaPosition(this->GetPosition().xy());
 
-            this->__DisableClock(true);
+            this->__DisableClock (true);
+            this->__DisableBubble(true);
 
             m_iTimeRevert = 2u;
         }
@@ -705,7 +775,7 @@ void cMessierBoss::__MoveOwn()
             {
                 if(g_pForeground->IsVisiblePoint(pBullet->GetPosition().xy(), 1.2f))
                 {
-                    pBullet->SetFlyDir(coreVector2::Direction(pBullet->GetFlyDir().Angle() * 9.5f));
+                    pBullet->SetFlyDir(coreVector2::Direction(pBullet->GetFlyDir().Angle() * 6.0f));
 
                     const coreFloat fSpeed = I_TO_F(pBullet->GetDamage()) * MESSIER_SHOOT_STEP;
                     pBullet->SetSpeed    (fSpeed);
@@ -763,6 +833,7 @@ void cMessierBoss::__MoveOwn()
                 PHASE_CHANGE_INC
 
                 this->__EnableRings();
+                this->__EnableBubble(COLOR_ENERGY_MAGENTA * 1.0f);
 
                 for(coreUintW i = 0u; i < 4u; ++i)
                 {
@@ -796,6 +867,9 @@ void cMessierBoss::__MoveOwn()
                     g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, fSpeed, this, vPos,  vDir)->ChangeSize(1.1f);
                     g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, fSpeed, this, vPos, -vDir)->ChangeSize(1.1f);
                 }
+
+                g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), SPECIAL_SPLASH_TINY, COLOR_ENERGY_RED);
+                g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
             });
 
             if(iCurHealth <= 2000)
@@ -814,6 +888,9 @@ void cMessierBoss::__MoveOwn()
                 g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5, 1.0f, this, vPos, -vDir)            ->ChangeSize(1.5f);
                 g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5, 1.0f, this, vPos,  vDir.Rotated90())->ChangeSize(1.5f);
                 g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5, 1.0f, this, vPos, -vDir.Rotated90())->ChangeSize(1.5f);
+
+                g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 10.0f, 2u, COLOR_ENERGY_PURPLE);
+                g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
             });
 
             if(!g_pGame->IsEasy())
@@ -826,6 +903,9 @@ void cMessierBoss::__MoveOwn()
                     const coreVector2 vDir = coreVector2::Direction(I_TO_F(iTick) * GA);
 
                     g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, 0.9f, this, vPos, vDir)->ChangeSize(1.7f);
+
+                    g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 10.0f, 5u, COLOR_ENERGY_PURPLE);
+                    g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
                 });
             }
 
@@ -863,7 +943,8 @@ void cMessierBoss::__MoveOwn()
                 pSquad2->GetEnemy(i)->Kill(true);
             }
 
-            this->__DisableRings(true);
+            this->__DisableRings (true);
+            this->__DisableBubble(true);
 
             g_pEnvironment->SetTargetSpeedNow(0.0f);
 
@@ -876,14 +957,31 @@ void cMessierBoss::__MoveOwn()
             g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_08);
         }
 
-        PHASE_CONTROL_TIMER(0u, 0.5f, LERP_LINEAR)
+        if(g_CurConfig.Game.iBackRotation)
         {
-            m_avVector[COVER_ROTATION].x += TIME * 0.5f * (1.0f - BLENDH3(fTime));
-            pBackground->SetCoverDir(coreVector2::Direction(m_avVector[COVER_ROTATION].x));
+            PHASE_CONTROL_TIMER(0u, 0.5f, LERP_LINEAR)
+            {
+                m_avVector[COVER_ROTATION].x += TIME * 0.5f * (1.0f - BLENDH3(fTime)) * fBackSpeed;
+                pBackground->SetCoverDir(coreVector2::Direction(m_avVector[COVER_ROTATION].x));
 
-            m_avVector[COVER_ROTATION].y += TIME * 1.0f * (1.0f - BLENDH3(fTime));
-            g_pPostProcessing->SetDirectionGame(coreVector2::Direction(m_avVector[COVER_ROTATION].y));
-        });
+                m_avVector[COVER_ROTATION].y += TIME * 1.0f * (1.0f - BLENDH3(fTime)) * fBackSpeed;
+                g_pPostProcessing->SetDirectionGame(coreVector2::Direction(m_avVector[COVER_ROTATION].y));
+            });
+        }
+        else
+        {
+            PHASE_CONTROL_TIMER(0u, 1.0f, LERP_LINEAR)
+            {
+                g_pPostProcessing->SetValueAll(COS(fTime * (2.0f*PI)) * 0.5f + 0.5f);
+
+                if(PHASE_TIME_POINT(0.5f))
+                {
+                    pBackground->SetCoverDir(coreVector2(0.0f,1.0f));
+
+                    g_pPostProcessing->SetDirectionGame(coreVector2(0.0f,1.0f));
+                }
+            });
+        }
 
         PHASE_CONTROL_PAUSE(1u, 0.18f)
         {
@@ -907,7 +1005,12 @@ void cMessierBoss::__MoveOwn()
                 m_pVoidSound->PlayRelative(this, 4.0f, 0.5f, true, SOUND_EFFECT);
             }
 
-            g_pPostProcessing->SetDirectionGame(coreVector2::Direction(LERPBR(m_avVector[COVER_ROTATION].y, m_avVector[COVER_ROTATION].z, fTime)));
+            if(g_CurConfig.Game.iBackRotation)
+            {
+                pBackground->SetCoverDir(coreVector2::Direction(m_avVector[COVER_ROTATION].x + BLENDBR(fTime) * (3.0f*PI)));
+
+                g_pPostProcessing->SetDirectionGame(coreVector2::Direction(LERPBR(m_avVector[COVER_ROTATION].y, m_avVector[COVER_ROTATION].z, fTime)));
+            }
 
             pBackground->SetCoverScale(1.0f - STEPBR(0.1f, 1.0f, fTime));
 
@@ -950,7 +1053,7 @@ void cMessierBoss::__MoveOwn()
         });
 
         const coreVector2 vCameraPos = g_pEnvironment->GetCameraPos().xy();
-        const coreFloat   fMove      = 100.0f * MIN1(m_fPhaseTime * 0.25f) * TIME;
+        const coreFloat   fMove      = 70.0f * MIN1(m_fPhaseTime * 0.25f) * TIME;
 
         coreBatchList* pList = pBackground->GetMeteorList();
         for(coreUintW i = 0u, ie = pList->List()->size(); i < ie; ++i)
@@ -1049,7 +1152,7 @@ void cMessierBoss::__MoveOwn()
         for(coreUintW i = 0u; i < MESSIER_RINGS; ++i)
         {
             // 
-            const coreFloat   fTime   = FRACT(MAX(m_fRingTime + (I_TO_F(i) / I_TO_F(MESSIER_RINGS)), 0.0f));
+            const coreFloat   fTime   = FRACT(MAX0(m_fRingTime + (I_TO_F(i) / I_TO_F(MESSIER_RINGS))));
             const coreFloat   fOffset = (I_TO_F(i) / I_TO_F(MESSIER_RINGS)) * 4.0f*PI + 1.1f*PI;
             const coreVector2 vDir    = coreVector2::Direction(0.5f*PI * m_fRingTime + fOffset);
             const coreVector2 vOri    = coreVector2::Direction(1.0f*PI * m_fRingTime + fOffset);
@@ -1059,13 +1162,13 @@ void cMessierBoss::__MoveOwn()
             m_aRing[i].SetSize       (coreVector3(1.0f,1.0f,1.0f) * LERP(10.0f, 30.0f, fTime));
             m_aRing[i].SetDirection  (coreVector3(vDir, 0.0f));
             m_aRing[i].SetOrientation(OriRoundDir(vOri, vDir));
-            m_aRing[i].SetAlpha      (LERPH3(0.0f, 1.0f, MIN(1.0f - fTime, 4.0f * fTime, 1.0f)));
+            m_aRing[i].SetAlpha      (BLENDH3(MIN(1.0f - fTime, 4.0f * fTime, 1.0f)));
             m_aRing[i].Move();
         }
 
         // 
         const coreVector2 vCameraPos = g_pEnvironment->GetCameraPos().xy();
-        const coreFloat   fRotaTime  = -TIME * CLAMP((m_fRingTime + 1.0f) * 0.5f, 0.0f, 1.0f);
+        const coreFloat   fRotaTime  = TIME * -1.0f * CLAMP01((m_fRingTime + 1.0f) * 0.5f) * fBackSpeed;
 
         // 
         const auto nRotaFunc = [&](const coreVector2 vPosition)
@@ -1110,12 +1213,17 @@ void cMessierBoss::__MoveOwn()
         if(this->GetCurHealth() <= 1400) m_fRingScreen.Update(0.4f);
 
         // 
-        m_avVector[COVER_ROTATION].x += TIME * 0.5f * STEPH3(0.0f, 10.0f, m_fRingTime);
+        m_avVector[COVER_ROTATION].x += TIME * 0.5f * STEPH3(0.0f, 10.0f, m_fRingTime) * fBackSpeed;
         pBackground->SetCoverDir(coreVector2::Direction(m_avVector[COVER_ROTATION].x));
 
         // 
-        m_avVector[COVER_ROTATION].y += TIME * 1.0f * STEPH3(0.0f, 10.0f, m_fRingScreen);
+        m_avVector[COVER_ROTATION].y += TIME * 1.0f * STEPH3(0.0f, 10.0f, m_fRingScreen) * fBackSpeed;
         g_pPostProcessing->SetDirectionGame(coreVector2::Direction(m_avVector[COVER_ROTATION].y));
+    }
+
+    if(!g_CurConfig.Game.iBackRotation)
+    {
+        d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground())->SetCoverDir(g_pPostProcessing->GetDirectionGame().InvertedX());
     }
 
     // 
@@ -1142,7 +1250,50 @@ void cMessierBoss::__MoveOwn()
             m_aClock[i].SetDirection(coreVector3(vDir, 0.0f));
             m_aClock[i].SetTexOffset(coreVector2(FRACT(0.8f * m_fClockTime + fOffset), 0.0f));
             m_aClock[i].Move();
+
+            for(coreUintW j = 0u; j < MESSIER_TRAILS; ++j)
+            {
+                coreObject3D* pTrail = &m_aaClockTrail[i][j];
+
+                // 
+                m_aafClockAlpha[i][j].Update(-2.0f);
+                if(m_aafClockAlpha[i][j] < 0.0f)
+                {
+                    // 
+                    m_aafClockAlpha[i][j] = 1.0f;
+
+                    // 
+                    pTrail->SetPosition (m_aClock[i].GetPosition ());
+                    pTrail->SetDirection(m_aClock[i].GetDirection());
+                    pTrail->SetTexOffset(m_aClock[i].GetTexOffset());
+                }
+
+                // 
+                pTrail->SetColor3(COLOR_ENERGY_PURPLE * LERP(0.2f, 0.9f, m_aafClockAlpha[i][j]));
+                pTrail->SetAlpha (m_aafClockAlpha[i][j] * m_aClock[i].GetAlpha());
+                pTrail->Move();
+            }
         }
+    }
+
+    // 
+    if(m_Bubble.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
+    {
+        // 
+        m_fBubbleTime.Update(-0.2f * m_fTimeFactor);
+
+        // 
+        if(m_bBubbleState) m_fBubbleAlpha.UpdateMin( 3.0f, 1.0f);
+                      else m_fBubbleAlpha.UpdateMax(-3.0f, 0.0f);
+
+        // 
+        if(!m_fBubbleAlpha) this->__DisableBubble(false);
+
+        // 
+        m_Bubble.SetPosition (this->GetPosition());
+        m_Bubble.SetAlpha    (BLENDH3(m_fBubbleAlpha) * 0.5f);
+        m_Bubble.SetTexOffset((coreVector2(1.0f,0.5f) * (0.8f * m_fBubbleTime)).Processed(FRACT));
+        m_Bubble.Move();
     }
 
     // 
@@ -1224,9 +1375,10 @@ void cMessierBoss::__MoveOwn()
             {
                 if(!g_pGame->IsEasy())
                 {
+                    const coreVector2 vPos = pEnemy->GetPosition().xy();
+
                     for(coreUintW j = 3u; j--; )
                     {
-                        const coreVector2 vPos  = pEnemy->GetPosition().xy();
                         const coreVector2 vDir2 = coreVector2::Direction(DEG_TO_RAD(I_TO_F(j) * 60.0f));
 
                         // 
@@ -1237,6 +1389,8 @@ void cMessierBoss::__MoveOwn()
                         g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.1f * 0.8f, this, vPos, -vDir2)->ChangeSize(1.7f);
                         g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.0f * 0.8f, this, vPos, -vDir2)->ChangeSize(1.7f);
                     }
+
+                    g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), SPECIAL_SPLASH_TINY, COLOR_ENERGY_GREEN);
                 }
 
                 if(pSquad1->GetNumEnemiesAlive() == 4u)
@@ -1250,6 +1404,14 @@ void cMessierBoss::__MoveOwn()
             }
         });
     }
+
+    g_pGame->ForEachPlayerAll([this](const cPlayer* pPlayer, const coreUintW i)
+    {
+        if(pPlayer->WasDamaged())
+        {
+            ADD_BIT(m_aiCounter[BADGE_INVALID], i)
+        }
+    });
 
     const auto nHideFunc = [this](cEnemy* OUTPUT pEnemy)
     {
@@ -1286,6 +1448,11 @@ void cMessierBoss::__MoveOwn()
         }
 
         pEnemy->DefaultRotate(-m_fMeteorRota + I_TO_F(i));
+
+        if(pEnemy->ReachedDeath() && !m_aiCounter[BADGE_INVALID])
+        {
+            pMission->GiveBadge(3u, BADGE_ACHIEVEMENT, pEnemy->GetPosition());
+        }
     });
 
     if(this->ReachedDeath())
@@ -1334,7 +1501,7 @@ void cMessierBoss::__MoveOwn()
     cHelper* pMagentaHelper = g_pGame->GetHelper(ELEMENT_MAGENTA);
     if(!pMagentaHelper->HasStatus(HELPER_STATUS_DEAD))
     {
-        if(pMagentaHelper->GetLifeTime() >= 12.0f)
+        if((pMagentaHelper->GetLifeTime() >= 12.0f) || this->ReachedDeath())
         {
             this->_KillHelper(ELEMENT_MAGENTA, true);
         }
@@ -1366,7 +1533,7 @@ void cMessierBoss::__MoveOwn()
     cHelper* pCyanHelper = g_pGame->GetHelper(ELEMENT_CYAN);
     if(!pCyanHelper->HasStatus(HELPER_STATUS_DEAD))
     {
-        if(pCyanHelper->GetLifeTime() >= 5.0f)
+        if(pCyanHelper->GetLifeTime() >= 6.0f)
         {
             this->_KillHelper(ELEMENT_CYAN, true);
         }
@@ -1432,15 +1599,26 @@ void cMessierBoss::__EnableClock()
     WARN_IF(m_aClock[0].IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->__DisableClock(false);
 
     // 
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aClock); ++i)
+    {
+        for(coreUintW j = 0u; j < MESSIER_TRAILS; ++j)
+        {
+            m_aafClockAlpha[i][j] = 1.0f - I_TO_F(j + 1u) / I_TO_F(MESSIER_TRAILS);
+        }
+    }
+
+    // 
     m_bClockState = true;
 
     // 
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aClock); ++i)
+    const auto nInitFunc = [](coreObject3D* OUTPUT pObject)
     {
-        m_aClock[i].SetAlpha  (0.0f);
-        m_aClock[i].SetEnabled(CORE_OBJECT_ENABLE_ALL);
-        g_pGlow->BindObject(&m_aClock[i]);
-    }
+        pObject->SetAlpha  (0.0f);
+        pObject->SetEnabled(CORE_OBJECT_ENABLE_ALL);
+        g_pGlow->BindObject(pObject);
+    };
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aClock); ++i) nInitFunc(&m_aClock[i]);
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aClock); ++i) for(coreUintW j = 0u; j < MESSIER_TRAILS; ++j) nInitFunc(&m_aaClockTrail[i][j]);
 
     // 
     g_pSpecialEffects->MacroExplosionColorBig(this->GetPosition(), COLOR_ENERGY_PURPLE);
@@ -1463,11 +1641,49 @@ void cMessierBoss::__DisableClock(const coreBool bAnimated)
     if(!bAnimated)
     {
         // 
-        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aClock); ++i)
+        const auto nExitFunc = [](coreObject3D* OUTPUT pObject)
         {
-            m_aClock[i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
-            g_pGlow->UnbindObject(&m_aClock[i]);
-        }
+            pObject->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+            g_pGlow->UnbindObject(pObject);
+        };
+        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aClock); ++i) nExitFunc(&m_aClock[i]);
+        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aClock); ++i) for(coreUintW j = 0u; j < MESSIER_TRAILS; ++j) nExitFunc(&m_aaClockTrail[i][j]);
+    }
+}
+
+
+// ****************************************************************
+// 
+void cMessierBoss::__EnableBubble(const coreVector3 vColor)
+{
+    WARN_IF(m_Bubble.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->__DisableBubble(false);
+
+    // 
+    m_fBubbleAlpha = 0.0f;
+    m_bBubbleState = true;
+
+    // 
+    m_Bubble.SetColor3 (vColor);
+    m_Bubble.SetAlpha  (0.0f);
+    m_Bubble.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    g_pGlow->BindObject(&m_Bubble);
+}
+
+
+// ****************************************************************
+// 
+void cMessierBoss::__DisableBubble(const coreBool bAnimated)
+{
+    if(!m_Bubble.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    m_bBubbleState = false;
+
+    if(!bAnimated)
+    {
+        // 
+        m_Bubble.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        g_pGlow->UnbindObject(&m_Bubble);
     }
 }
 

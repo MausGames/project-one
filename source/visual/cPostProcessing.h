@@ -127,6 +127,9 @@ public:
     inline void SetBorderAll    (const coreFloat   fBorder)                             {for(coreUintW i = 0u; i < POST_INTERIORS; ++i) this->SetBorder    (i, fBorder);}
     inline void SetChroma       (const coreFloat   fChroma)                             {m_fChroma = fChroma;}
 
+    // 
+    inline const coreVector2& GetDirectionGame()const {return m_vDirectionGame;}
+
 
 private:
     // reset with the resource manager

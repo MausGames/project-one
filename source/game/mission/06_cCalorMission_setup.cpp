@@ -351,6 +351,8 @@ void cCalorMission::__SetupOwn()
                         const coreVector2 vDir = pEnemy->AimAtPlayerDual(s_iTick % 2u).Normalized();
 
                         g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.1f, pEnemy, vPos, vDir)->ChangeSize(1.7f);
+
+                        g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
                     }
                 }
             }
@@ -369,6 +371,8 @@ void cCalorMission::__SetupOwn()
                         const coreVector2 vDir = pEnemy->AimAtPlayerDual(s_iTick % 2u).Normalized();
 
                         g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.1f, pEnemy, vPos, vDir)->ChangeSize(1.7f);
+
+                        g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
                     }
                 }
             }
@@ -478,7 +482,8 @@ void cCalorMission::__SetupOwn()
                     g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.1f, pEnemy, vPos, -vDir)->ChangeSize(1.7f);
                 }
 
-                g_pSpecialEffects->CreateSplashColor(pEnemy->GetPosition(), 25.0f, 5u, COLOR_ENERGY_GREEN);
+                g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 25.0f, 5u, COLOR_ENERGY_GREEN);
+                g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
             }
 
             fRecoverOld = fRecover;
@@ -831,6 +836,7 @@ void cCalorMission::__SetupOwn()
                     g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.1f, pEnemy, vPos, vDir)->ChangeSize(1.7f);
 
                     g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 10.0f, 1u, COLOR_ENERGY_BLUE);
+                    g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
                 }
             }
             else if(i < 22u)
@@ -868,6 +874,7 @@ void cCalorMission::__SetupOwn()
                     g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.1f, pEnemy, vPos, vDir)->ChangeSize(1.7f);
 
                     g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 10.0f, 1u, COLOR_ENERGY_BLUE);
+                    g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
                 }
             }
             else if(i < 35u)
@@ -1915,6 +1922,7 @@ void cCalorMission::__SetupOwn()
                     g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.0f, pSquad1->GetEnemy(0u), vPos, -vDir)->ChangeSize(1.7f);
 
                     g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 10.0f, 1u, COLOR_ENERGY_YELLOW);
+                    g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
                 }
             }
             else if(i < 52u)
@@ -2030,6 +2038,7 @@ void cCalorMission::__SetupOwn()
                         g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.0f, pEnemy, vPos, vDir)->ChangeSize(1.7f);
 
                         g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 10.0f, 3u, COLOR_ENERGY_YELLOW);
+                        g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
                     }
                 });
             }
@@ -2037,8 +2046,8 @@ void cCalorMission::__SetupOwn()
 
         STAGE_COLL_ENEMY_BULLET(pEnemy, pBullet, vIntersection, bFirstHit, COLL_REF(iFrontShot))
         {
-            const coreFloat fDot = coreVector2::Dot(pBullet->GetFlyDir(), coreVector2(0.0f,-1.0f));
-            if(fDot < (1.0f/SQRT2)) iFrontShot += 1u;
+            if(!SameDirection90(pBullet->GetFlyDir(), coreVector2(0.0f,-1.0f)))
+                iFrontShot += 1u;
         });
 
         STAGE_WAVE(3u, "6-4", {80.0f, 120.0f, 160.0f, 200.0f, 400.0f})   // VIERUNDDREISSIG
@@ -2106,7 +2115,7 @@ void cCalorMission::__SetupOwn()
 
                     this->StartSwing(1.0f);
 
-                    g_pSpecialEffects->CreateSplashColor(coreVector3(0.0f,-1.1f,0.0f) * FOREGROUND_AREA3, SPECIAL_SPLASH_SMALL, COLOR_ENERGY_WHITE);
+                    g_pSpecialEffects->CreateSplashColor(coreVector3(0.0f,-1.1f,0.0f) * FOREGROUND_AREA3, SPECIAL_SPLASH_SMALL, COLOR_ENERGY_WHITE * 0.8f);
                     g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
                     g_pSpecialEffects->PlaySound(coreVector3(0.0f,-1.1f,0.0f) * FOREGROUND_AREA3, 0.5f, 1.5f, SOUND_EFFECT_SHAKE);
                 }
@@ -2347,6 +2356,8 @@ void cCalorMission::__SetupOwn()
                 const coreVector2 vDir = pEnemy->GetDirection().xy();
 
                 g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, 1.4f, pEnemy, vPos, vDir)->ChangeSize(1.5f);
+
+                g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
             }
         });
 
@@ -2377,6 +2388,8 @@ void cCalorMission::__SetupOwn()
 
                     g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, 1.4f, pEnemy, vPos, vDir)->ChangeSize(1.5f);
                 }
+
+                g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
             }
         });
 

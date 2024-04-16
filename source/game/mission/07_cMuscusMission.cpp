@@ -31,6 +31,7 @@ cMuscusMission::cMuscusMission()noexcept
 , m_apStrikePlayer {}
 , m_apStrikeTarget {}
 , m_iStrikeState   (0u)
+, m_fStrikeTicker  (0.0f)
 , m_fAnimation     (0.0f)
 {
     // 
@@ -606,6 +607,11 @@ void cMuscusMission::__MoveOwnAfter()
     m_iStrikeState = 0u;
 
     // 
+    m_fStrikeTicker.Update(60.0f);
+    const coreUintW iStrikeTick = F_TO_UI(m_fStrikeTicker);
+    m_fStrikeTicker = FRACT(m_fStrikeTicker);
+
+    // 
     for(coreUintW i = 0u; i < MUSCUS_PEARLS; ++i)
     {
         coreObject3D* pPearl = (*m_Pearl    .List())[i];
@@ -615,6 +621,8 @@ void cMuscusMission::__MoveOwnAfter()
         // 
         if(m_apStrikeTarget[i])
         {
+            const coreVector2 vOldPos = pPearl->GetPosition().xy();
+
             // 
             m_aStrikeSpline[i].EditNodePosition(1u, m_apStrikeTarget[i]->GetPosition().xy());
             m_afStrikeTime [i].UpdateMin(1.0f, 1.0f);
@@ -622,11 +630,21 @@ void cMuscusMission::__MoveOwnAfter()
             // 
             pPearl->SetPosition(coreVector3(m_aStrikeSpline[i].CalcPositionLerp(m_afStrikeTime[i]), 0.0f));
 
+            if(iStrikeTick)
+            {
+                const coreVector3 vColor = COLOR_ENERGY_WHITE * LERP(0.5f, 1.0f, m_afStrikeTime[i]);
+                const coreVector2 vPos1  = LERP(pPearl->GetPosition().xy(), vOldPos, 0.5f);
+                const coreVector2 vPos2  = pPearl->GetPosition().xy();
+
+                g_pSpecialEffects->CreateSplashDot(coreVector3(vPos1, SPECIAL_DEEP), 0.0f, 1u, vColor);
+                g_pSpecialEffects->CreateSplashDot(coreVector3(vPos2, SPECIAL_DEEP), 0.0f, 1u, vColor);
+            }
+
             if(m_afStrikeTime[i] >= 1.0f)
             {
                 // 
                 this->DisablePearl(i, true);
-                g_pSpecialEffects->CreateBlowColor(pPearl->GetPosition(), coreVector3(-this->GetStrikeDir(i), 0.0f), 100.0f, 10u, COLOR_ENERGY_WHITE);
+                g_pSpecialEffects->CreateBlowColor(pPearl->GetPosition(), coreVector3(-this->GetStrikeDir(i), 0.0f), 100.0f, 10u, COLOR_ENERGY_WHITE * 0.8f);
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_TINY);
 
                 // 

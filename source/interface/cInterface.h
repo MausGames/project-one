@@ -153,8 +153,8 @@ private:
     coreFlow m_fAlphaBadge;                         // 
     coreFlow m_fAlphaFragment;                      // 
 
-    coreBool m_bFakeEnd;                            // 
-    coreBool m_bBossChange;                         // 
+    coreUint8 m_iFakeEnd;                           // 
+    coreBool  m_bBossChange;                        // 
 
 
 public:
@@ -205,7 +205,7 @@ public:
     inline void SetAlphaBoss    (const coreFloat fAlpha)      {m_fAlphaBoss     = fAlpha;}
     inline void SetAlphaWave    (const coreFloat fAlpha)      {m_fAlphaWave     = fAlpha;}
     inline void SetAlphaFragment(const coreFloat fAlpha)      {m_fAlphaFragment = fAlpha;}
-    inline void SetFakeEnd      (const coreBool  bFakeEnd)    {m_bFakeEnd       = bFakeEnd;}
+    inline void SetFakeEnd      (const coreUint8 iFakeEnd)    {m_iFakeEnd       = iFakeEnd;}
     inline void SetBossChange   (const coreBool  bBossChange) {m_bBossChange    = bBossChange;}
 
     // 

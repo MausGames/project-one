@@ -29,6 +29,8 @@ cViridoMission::cViridoMission()noexcept
 , m_avLaserPos      {}
 , m_avLaserDir      {}
 , m_afLaserTick     {}
+, m_iLaserTouch     (0u)
+, m_iLaserIgnore    (0u)
 , m_bLaserCross     (true)
 , m_Shadow          (VIRIDO_SHADOWS)
 , m_apShadowOwner   {}
@@ -135,9 +137,9 @@ cViridoMission::cViridoMission()noexcept
             pLaser->DefineProgram("effect_energy_flat_program");
 
             // set object properties
-            pLaser->SetSize   (coreVector3(0.55f,160.0f,0.55f));
+            pLaser->SetSize   (coreVector3(0.6f,160.0f,0.6f));
             pLaser->SetColor3 (COLOR_ENERGY_PURPLE * (iType ? 0.7f : 1.0f));
-            pLaser->SetTexSize(coreVector2(0.5f,40.0f));
+            pLaser->SetTexSize(coreVector2(0.5f,40.0f) * 0.25f);
             pLaser->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
@@ -201,11 +203,11 @@ cViridoMission::cViridoMission()noexcept
             coreObject3D* pBean = &m_aBeanRaw[i];
             pBean->DefineModel  ("object_cube_top.md3");
             pBean->DefineTexture(0u, "effect_energy.png");
-            pBean->DefineProgram(iType ? "effect_energy_flat_program" : "effect_energy_flat_program");
+            pBean->DefineProgram("effect_energy_flat_program");
 
             // set object properties
             pBean->SetSize   (coreVector3(1.0f,1.0f,1.0f) * (iType ? 3.7f : 2.7f));
-            pBean->SetColor3 (COLOR_ENERGY_MAGENTA * (iType ? 0.3f : 1.0f));
+            pBean->SetColor3 (COLOR_ENERGY_MAGENTA * (iType ? 0.6f : 1.0f));
             pBean->SetTexSize(coreVector2(1.0f,1.0f) * 0.4f);
             pBean->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
@@ -222,7 +224,7 @@ cViridoMission::cViridoMission()noexcept
     m_Globe.DefineTexture  (0u, "effect_energy.png");
     m_Globe.DefineProgram  ("effect_energy_flat_invert_program");
     m_Globe.SetTexSize     (coreVector2(1.0f,1.0f) * 0.4f);
-    m_Globe.Configure      (1000, 0u, COLOR_ENERGY_PURPLE * 0.8f);
+    m_Globe.Configure      (1000, 0u, COLOR_ENERGY_PURPLE * 0.9f);
     m_Globe.AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_GHOST_PLAYER | ENEMY_STATUS_WORTHLESS | ENEMY_STATUS_FLAT);
 
     // 
@@ -253,7 +255,7 @@ cViridoMission::cViridoMission()noexcept
     g_pGlow->BindList(&m_LaserWave);
     g_pGlow->BindList(&m_Hint);
     g_pGlow->BindList(&m_Bean);
-    //g_pGlow->BindList(&m_BeanWave);
+    g_pGlow->BindList(&m_BeanWave);
 
     // 
     for(coreUintW i = 0u; i < VIRIDO_DRUMS; ++i)
@@ -277,7 +279,7 @@ cViridoMission::~cViridoMission()
     g_pGlow->UnbindList(&m_LaserWave);
     g_pGlow->UnbindList(&m_Hint);
     g_pGlow->UnbindList(&m_Bean);
-    //g_pGlow->UnbindList(&m_BeanWave);
+    g_pGlow->UnbindList(&m_BeanWave);
 
     // 
     for(coreUintW i = 0u; i < VIRIDO_BALLS;    ++i) this->DisableBall   (i, false);
@@ -403,9 +405,10 @@ void cViridoMission::EnableBarrier(const coreUintW iIndex, const cShip* pOwner, 
     ASSERT(pOwner)
     m_apBarrierOwner[iIndex] = pOwner;
     m_avBarrierPos  [iIndex] = HIDDEN_POS;
-    m_avBarrierDir  [iIndex] = coreVector2(0.0f,1.0f);
+    m_avBarrierDir  [iIndex] = vDirection;
 
     // 
+    oBarrier.SetPosition (coreVector3(HIDDEN_POS, 0.0f));
     oBarrier.SetDirection(coreVector3(vDirection, 0.0f));
     oBarrier.SetAlpha    (0.0f);
     oBarrier.SetEnabled  (CORE_OBJECT_ENABLE_ALL);
@@ -780,7 +783,7 @@ void cViridoMission::__RenderOwnUnder()
         m_Shadow.Render();
 
         // 
-        //m_BeanWave.Render();
+        m_BeanWave.Render();
     }
     glDepthMask(true);
 
@@ -1001,20 +1004,26 @@ void cViridoMission::__MoveOwnAfter()
             });
 
             
+            if((m_avBarrierPos[i] - oBarrier.GetPosition().xy()).LengthSq() >= POW2(20.0f)) continue;       
+            
             g_pGame->GetBulletManagerPlayer()->ForEachBullet([&](cBullet* OUTPUT pBullet)
             {
                 if(coreVector2::Dot(pBullet->GetFlyDir(), oBarrier.GetDirection().xy()) > 0.0f) return;
-                if((m_avBarrierPos[i] - oBarrier.GetPosition().xy()).LengthSq() >= POW2(20.0f)) return;       
+                
+                const coreVector2 vOriginDiff = pBullet->GetOwner()->GetPosition().xy() - vRayPos;
+                const coreBool bBehind = (coreVector2::Dot(vOriginDiff, oBarrier.GetDirection().xy()) < 0.0f);
+                
+                const coreFloat fSlant = (1.0f + coreVector2::Dot(pBullet->GetFlyDir(), oBarrier.GetDirection().xy())) * (bBehind ? 0.0f : 1.0f);      
                 
                 const coreVector2 vNewPos = pBullet->GetPosition().xy() + pBullet->GetFlyDir() * pBullet->GetCollisionRadius();
-                const coreVector2 vOldPos = pBullet->GetPosition().xy() - pBullet->GetFlyDir() * MAX(pBullet->GetCollisionRadius() * 2.0f, pBullet->GetSpeed() * BULLET_SPEED_FACTOR * TIME);
+                const coreVector2 vOldPos = pBullet->GetPosition().xy() - pBullet->GetFlyDir() * MAX(pBullet->GetCollisionRadius() * 2.0f, pBullet->GetSpeed() * BULLET_SPEED_FACTOR * TIME * (1.0f + 10.0f * fSlant));
                 
                 const coreVector2 vOldRayPos = m_avBarrierPos[i] + m_avBarrierDir[i] * oBarrier.GetCollisionRange().y;
                 const coreVector2 vOldRayDir = m_avBarrierDir[i].Rotated90();
                 
                 // 
                 const coreVector2 vDiff    = vNewPos - vRayPos;
-                const coreVector2 vDiffOld = vOldPos                     - vOldRayPos;
+                const coreVector2 vDiffOld = vOldPos - vOldRayPos;
             
                 // 
                 const coreFloat fDot    = coreVector2::Dot(vDiff,    vRayDir   .Rotated90());
@@ -1078,18 +1087,24 @@ void cViridoMission::__MoveOwnAfter()
         }
     }
 
-    // 
-    for(coreUintW i = 0u; i < VIRIDO_BARRIERS; ++i)
+    //if(!SPECIAL_FROZEN)
     {
-        const coreObject3D& oBarrier = m_aBarrierRaw[i];
+        // 
+        for(coreUintW i = 0u; i < VIRIDO_BARRIERS; ++i)
+        {
+            const coreObject3D& oBarrier = m_aBarrierRaw[i];
 
-        m_avBarrierPos[i] = oBarrier.GetPosition ().xy();
-        m_avBarrierDir[i] = oBarrier.GetDirection().xy();
+            m_avBarrierPos[i] = oBarrier.GetPosition ().xy();
+            m_avBarrierDir[i] = oBarrier.GetDirection().xy();
+        }
     }
 
     // 
     m_Barrier1.MoveNormal();
     m_Barrier2.MoveNormal();
+
+    // 
+    m_iLaserTouch = 0u;
 
     // 
     for(coreUintW i = 0u; i < VIRIDO_LASERS; ++i)
@@ -1103,7 +1118,7 @@ void cViridoMission::__MoveOwnAfter()
         const coreFloat fOffset = I_TO_F(i) * (1.0f/7.0f);
 
         // 
-        pLaser->SetTexOffset(coreVector2(3.0f,4.0f) * FRACT(0.8f * m_fAnimation + fOffset));
+        pLaser->SetTexOffset(coreVector2(3.0f,4.0f) * FRACT(0.2f * m_fAnimation + fOffset));
 
         // 
         pWave->SetPosition (pLaser->GetPosition ());
@@ -1111,6 +1126,11 @@ void cViridoMission::__MoveOwnAfter()
         pWave->SetDirection(pLaser->GetDirection());
         pWave->SetAlpha    (1.0f - fValue);
         pWave->SetTexOffset(pLaser->GetTexOffset());
+        
+        STATIC_ASSERT(VIRIDO_LASERS <= sizeof(m_iLaserIgnore)*8u)
+        
+        if(HAS_BIT(m_iLaserIgnore, i)) continue;
+        if((m_avLaserPos[i] - pLaser->GetPosition().xy()).LengthSq() >= POW2(20.0f)) continue;
 
         // 
         const coreVector2 vRayDir = pLaser->GetDirection().xy();
@@ -1119,8 +1139,6 @@ void cViridoMission::__MoveOwnAfter()
         // (here due to ordering, to prevent player from flying through laser)
         cPlayer::TestCollision(PLAYER_TEST_NORMAL | PLAYER_TEST_FEEL | PLAYER_TEST_IGNORE, vRayPos, vRayDir, pLaser, [&](cPlayer* OUTPUT pPlayer, const coreFloat* pfHitDistance, const coreUint8 iHitCount, const coreBool bFirstHit)
         {
-            if((m_avLaserPos[i] - pLaser->GetPosition().xy()).LengthSq() >= POW2(20.0f)) return;
-            
             // 
             const coreVector4 vArea = pPlayer->GetArea();
             const coreVector2 vDiff = pPlayer->GetOldPos() - m_avLaserPos[i];
@@ -1192,6 +1210,9 @@ void cViridoMission::__MoveOwnAfter()
                 }
             }
             
+            // 
+            ADD_BIT(m_iLaserTouch, i)
+            STATIC_ASSERT(VIRIDO_LASERS <= sizeof(m_iLaserTouch)*8u)
 
             // 
             const coreUintW iIndex = g_pGame->GetPlayerIndex(pPlayer);
@@ -1215,20 +1236,18 @@ void cViridoMission::__MoveOwnAfter()
                 m_fPoleCount.Update(1.0f);
             }
         });
-
-        // 
-        //m_avLaserPos[i] = pLaser->GetPosition ().xy();
-        //m_avLaserDir[i] = pLaser->GetDirection().xy();
     }
-    
-    
-    // 
-    for(coreUintW i = 0u; i < VIRIDO_LASERS; ++i)
-    {
-        const coreObject3D* pLaser = (*m_Laser.List())[i];
 
-        m_avLaserPos[i] = pLaser->GetPosition ().xy();
-        m_avLaserDir[i] = pLaser->GetDirection().xy();
+    //if(!SPECIAL_FROZEN)
+    {
+        // 
+        for(coreUintW i = 0u; i < VIRIDO_LASERS; ++i)
+        {
+            const coreObject3D* pLaser = (*m_Laser.List())[i];
+
+            m_avLaserPos[i] = pLaser->GetPosition ().xy();
+            m_avLaserDir[i] = pLaser->GetDirection().xy();
+        }
     }
 
     // 
@@ -1299,7 +1318,7 @@ void cViridoMission::__MoveOwnAfter()
 
         // 
         const coreFloat   fOffset = I_TO_F(i) * (1.0f/7.0f);
-        const coreVector2 vDir    = coreVector2::Direction(((i % 2u) ? (-8.0f*PI) : (8.0f*PI)) * m_fAnimation);
+        const coreVector2 vDir    = coreVector2::Direction(((i % 2u) ? (-4.0f*PI) : (4.0f*PI)) * m_fAnimation);
 
         // 
         pBean->SetDirection(coreVector3(vDir, 0.0f));
@@ -1307,8 +1326,9 @@ void cViridoMission::__MoveOwnAfter()
 
         // 
         pWave->SetPosition (pBean->GetPosition ());
-        pWave->SetDirection(pBean->GetDirection());
+        pWave->SetDirection(pBean->GetDirection().InvertedX());
         pWave->SetTexOffset(pBean->GetTexOffset());
+        pWave->SetAlpha(0.6f);
     }
 
     // 

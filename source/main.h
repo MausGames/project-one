@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 //*----------------------------------------------------------------------------*//
-//| Project One v0.2.1 (https://www.maus-games.at)                             |//
+//| Project One v0.2.2 (https://www.maus-games.at)                             |//
 //*----------------------------------------------------------------------------*//
 //| Copyright (c) 2010 Martin Mauersics                                        |//
 //|                                                                            |//
@@ -104,6 +104,8 @@
 // TODO 3: multiplicative rotation for bullet-waves, to create better interleaving (orb-bullets in geminga) -> only where it makes sense or improves the visuals
 // TODO 3: sphere model kann ungenau sein, vor allem bei der area-bubble bei P1 magenta phase
 // TODO 3: pfeile der switch-boxen sind leicht vertikal verschoben bei 1920x1080
+// TODO 1: [MF] immer barrel roll bei waves und bosses, wenn sich phasen ändern, manuell für multi-sub-phasen (e.g. mehrere einzelne gegner mit selber logik) (oder vorzeitig, e.g. chol magenta wave änderung)
+// TODO 1: [MF] pirate version on modified steam dll
 
 // Small Task List:
 // TODO 3: better player bullet creation effect (muzzle flash)
@@ -123,6 +125,7 @@
 // TODO 1: [MF] finish all achievement names and descriptions
 // TODO 1: [MF] finish all badge descriptions
 // TODO 1: [MF] track all sound credits
+// TODO 1: improve stage icons
 
 // Public Feedback and Suggestions:
 // TODO 3: improve player ship visuals
@@ -256,7 +259,7 @@
 #define COLOR_SHIP_PURPLE    (coreVector3(0.729f, 0.382f, 0.900f))
 #define COLOR_SHIP_BLUE      (coreVector3(0.151f, 0.600f, 1.000f))
 #define COLOR_SHIP_CYAN      (coreVector3(0.000f, 0.800f, 0.800f))
-#define COLOR_SHIP_GREEN     (coreVector3(0.308f, 0.720f, 0.308f))
+#define COLOR_SHIP_GREEN     (coreVector3(0.308f, 0.730f, 0.308f))
 #define COLOR_SHIP_WHITE     (coreVector3(1.000f, 1.000f, 1.000f))
 #define COLOR_SHIP_GREY      (coreVector3(0.500f, 0.500f, 0.500f))
 #define COLOR_SHIP_BLACK     (COLOR_SHIP_GREY      * 0.6f)

@@ -225,7 +225,7 @@ public:
     // 
     inline coreUintW                       GetNumBullets        ()const {coreUintW iNum = 0u; this->ForEachBullet        ([&](void*) {++iNum;}); return iNum;}
     template <typename T> inline coreUintW GetNumBulletsTyped   ()const {coreUintW iNum = 0u; this->ForEachBulletTyped<T>([&](void*) {++iNum;}); return iNum;}
-    inline coreUintW                       GetNumBulletsEst     ()const {return Core::Manager::Object->GetObjectList(m_iType).size();}
+    inline coreUintW                       GetNumBulletsEst     ()const {return Core::Manager::Object->GetObjectList(m_iType).size();}   // can spike on bullet-reallocation
     template <typename T> inline coreUintW GetNumBulletsTypedEst()const {return m_apBulletSet[T::ID] ? m_apBulletSet[T::ID]->oBulletActive.List()->size() : 0u;}
 };
 
@@ -419,7 +419,7 @@ private:
 class cFinalBullet final : public cBullet
 {
 private:
-    coreFloat m_fScale;        // 
+    coreFloat   m_fScale;      // 
     coreVector3 m_vFlyDir3D;   // 
 
 
@@ -430,7 +430,7 @@ public:
     ASSIGN_ID(19, "Final")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(0.0f,0.0f,0.0f)); this->SetTexSize(coreVector2(0.4f,0.2f) * 0.7f); m_fAnimation = 0.09f; m_fFade = 0.0f; m_fScale = 1.0f;}
+    inline void ResetProperties() {this->SetSize(coreVector3(0.0f,0.0f,0.0f)); this->SetTexSize(coreVector2(0.5f,0.5f) * 0.4f); m_fAnimation = 0.09f; m_fFade = 0.0f; m_fScale = 1.0f;}
 
     // 
     inline cFinalBullet* SetTiltProperties(const coreVector3 vPosition, const coreVector3 vDirection) {this->SetPosition(vPosition); m_vFlyDir3D = vDirection; return this;}
@@ -449,9 +449,8 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn (const coreVector2 vImpact, const coreVector2 vForce)final;
-    void __ReflectOwn()final;
-    void __MoveOwn   ()final;
+    void __ImpactOwn(const coreVector2 vImpact, const coreVector2 vForce)final;
+    void __MoveOwn  ()final;
 };
 
 
@@ -987,7 +986,6 @@ public:
 private:
     // execute own routines
     void __ImpactOwn     (const coreVector2 vImpact, const coreVector2 vForce)final;
-    void __ReflectOwn    ()final;
     void __RenderOwnAfter()final;
     void __MoveOwn       ()final;
 };

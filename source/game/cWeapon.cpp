@@ -73,6 +73,15 @@ void cWeapon::Move()
 
 // ****************************************************************
 // 
+void cWeapon::Prefetch()
+{
+    // 
+    this->__PrefetchOwn();
+}
+
+
+// ****************************************************************
+// 
 coreBool cWeapon::_IsOwnerDarkShading()const
 {
     // 
@@ -306,6 +315,14 @@ void cRayWeapon::__MoveOwn()
 
 
 // ****************************************************************
+// 
+void cRayWeapon::__PrefetchOwn()
+{
+    g_pGame->GetBulletManagerPlayer()->PrefetchBullet<cRayBullet>();
+}
+
+
+// ****************************************************************
 // constructor
 cPulseWeapon::cPulseWeapon()noexcept
 : m_fCharge (0.0f)
@@ -347,6 +364,14 @@ void cPulseWeapon::__ShootOwn()
 
 
 // ****************************************************************
+// 
+void cPulseWeapon::__PrefetchOwn()
+{
+    g_pGame->GetBulletManagerPlayer()->PrefetchBullet<cPulseBullet>();
+}
+
+
+// ****************************************************************
 // constructor
 cWaveWeapon::cWaveWeapon()noexcept
 {
@@ -372,6 +397,14 @@ void cWaveWeapon::__ShootOwn()
 
     // play bullet sound-effect
     //g_pSpecialEffects->PlaySound(m_pOwner->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_WAVE);
+}
+
+
+// ****************************************************************
+// 
+void cWaveWeapon::__PrefetchOwn()
+{
+    g_pGame->GetBulletManagerPlayer()->PrefetchBullet<cSurgeBullet>();
 }
 
 
@@ -522,6 +555,14 @@ void cTeslaWeapon::__ShootOwn()
 
 
 // ****************************************************************
+// 
+void cTeslaWeapon::__PrefetchOwn()
+{
+    g_pGame->GetBulletManagerPlayer()->PrefetchBullet<cTeslaBullet>();
+}
+
+
+// ****************************************************************
 // constructor
 cEnemyWeapon::cEnemyWeapon()noexcept
 {
@@ -548,6 +589,14 @@ void cEnemyWeapon::__ShootOwn()
 
     // play bullet sound-effect
     g_pSpecialEffects->PlaySound(m_pOwner->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
+}
+
+
+// ****************************************************************
+// 
+void cEnemyWeapon::__PrefetchOwn()
+{
+    g_pGame->GetBulletManagerPlayer()->PrefetchBullet<cViewBullet>();
 }
 
 
@@ -585,6 +634,7 @@ void cFinalWeapon::__ShootOwn()
     const coreMatrix3 mTiltMat  = coreMatrix4::RotationX(m_pOwner->GetTilt()).m123();
     const coreVector3 vRealDir  = coreVector3(vDir, 0.0f) * mTiltMat;
     //const coreVector3 vRealTan  = coreVector3(vTan, 0.0f) * mTiltMat;
+
 /*
     // 
     if(!m_bBurst)
@@ -611,4 +661,12 @@ void cFinalWeapon::__ShootOwn()
         // play bullet sound-effect
         g_pSpecialEffects->PlaySound(m_pOwner->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_RAY);
     }
+}
+
+
+// ****************************************************************
+// 
+void cFinalWeapon::__PrefetchOwn()
+{
+    g_pGame->GetBulletManagerPlayer()->PrefetchBullet<cFinalBullet>();
 }

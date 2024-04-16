@@ -1273,7 +1273,7 @@ void cMuscusMission::__SetupOwn()
     // TASK: try to destroy the enemy with your normal weapon / attack enemy when his shield is down, until his health is gone
     // ACHIEVEMENT: strike the enemy only while its shield is up
     // TODO 1: background side-movement might be easier for direct attack from top
-    // TODO 1: striking pearls sollten sich strecken (direction anpassen + Y size größer + leichte XY size kleiner)
+    // TODO 1: striking pearls sollten sich strecken (direction anpassen + Y size größer + leichte XY size kleiner) (schon mit partikeln gemacht ?)
     // TODO 1: striking attack sollte weiter weggehn wenn sie näher bei target sind, vielleicht beschleunigt das mehr
     // TODO 1: maybe also update strike-spline target tangent in real-time (e.g. when enemy moves into strike the animation gets slower)
     // TODO 1: [MF] badge: fang den blauen flummi in der flummi phase (verchwindet bei X), oder der vom boss wie ein geschoss erzeugt wird
@@ -1629,7 +1629,6 @@ void cMuscusMission::__SetupOwn()
                     pPlayer->GetScoreTable()->RefreshCooldown();
 
                     this->StrikeAttack(j, pPlayer, pKnight);
-                    g_pSpecialEffects->CreateSplashColor(pPearl->GetPosition(), 5.0f, 3u, COLOR_ENERGY_WHITE);
                     g_pSpecialEffects->PlaySound(pPearl->GetPosition(), 1.0f, this->RetrievePearlPitch(), SOUND_EFFECT_PEARL);
 
                     if((m_iStageSub == 6u) && !bHidden)
@@ -2118,7 +2117,7 @@ void cMuscusMission::__SetupOwn()
 
                     const coreVector3 vPos  = vOldPos;
                     const coreVector3 vDiff = vNewPos - vPos;
-                    const coreUintW   iNum  = MAX(F_TO_UI(vDiff.Length() / 1.9f), 2u);
+                    const coreUintW   iNum  = MAX(F_TO_UI(vDiff.Length() / 1.7f), 2u);
 
                     for(coreUintW j = iNum; j--; ) g_pSpecialEffects->CreateSplashColor(vPos + vDiff * (I_TO_F(j) * RCP(I_TO_F(iNum - 1u))), 10.0f, 1u, pPlayer->GetEnergyColor());
                 }
@@ -2823,7 +2822,7 @@ void cMuscusMission::__SetupOwn()
                             vNewPos = vTarget * FOREGROUND_AREA * 1.05f;
                             vMove   = coreVector2(0.0f,0.0f);
 
-                            g_pSpecialEffects->CreateSplashColor(coreVector3(vNewPos, 0.0f), 10.0f, 3u, COLOR_ENERGY_WHITE);
+                            g_pSpecialEffects->CreateSplashColor(coreVector3(vNewPos, 0.0f), 10.0f, 3u, COLOR_ENERGY_WHITE * 0.8f);
                         }
 
                         pEnemy->SetPosition (coreVector3(vNewPos, 0.0f));
@@ -2846,7 +2845,7 @@ void cMuscusMission::__SetupOwn()
                     pEnemy->SetPosition (coreVector3(vNewPos, 0.0f));
                     pEnemy->SetDirection(coreVector3(vNewDir, 0.0f));
 
-                    if((fTime == 0.0f) && (fTime2 != 0.0f)) g_pSpecialEffects->CreateBlowColor(pEnemy->GetPosition(), pEnemy->GetPosition().Normalized(), 50.0f, 5u, COLOR_ENERGY_WHITE);
+                    if((fTime == 0.0f) && (fTime2 != 0.0f)) g_pSpecialEffects->CreateBlowColor(pEnemy->GetPosition(), pEnemy->GetPosition().Normalized(), 50.0f, 5u, COLOR_ENERGY_WHITE * 0.8f);
                 }
                 else
                 {

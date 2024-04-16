@@ -128,12 +128,11 @@ cHarenaMission::cHarenaMission()noexcept
     }
 
     // 
-    m_Aim.DefineModel  ("bullet_cone.md3");
+    m_Aim.DefineModel  ("object_arrow.md3");
     m_Aim.DefineTexture(0u, "effect_energy.png");
-    m_Aim.DefineProgram("effect_energy_flat_program");
-    m_Aim.SetSize      (coreVector3(1.0f,1.0f,1.0f) * 2.5f);
-    m_Aim.SetColor3    (COLOR_ENERGY_BLUE * 0.9f);
-    m_Aim.SetTexSize   (coreVector2(1.0f,0.5f) * 0.7f);
+    m_Aim.DefineProgram("effect_energy_flat_invert_program");
+    m_Aim.SetColor3    (COLOR_ENERGY_BLUE * 0.8f);
+    m_Aim.SetTexSize   (coreVector2(1.0f,1.0f) * 0.3f);
     m_Aim.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 
     // 
@@ -544,8 +543,7 @@ void cHarenaMission::__MoveOwnAfter()
             // 
             oFloor.SetPosition(coreVector3(pOwner->GetPosition().xy(), 0.0f));
             oFloor.SetSize    (coreVector3(coreVector2(1.0f,1.0f) * (10.0f + 10.0f * STEPH3(0.0f, 50.0f, fHeight)), 1.0f) * fScale);
-            //oFloor.SetAlpha   (1.0f - STEPH3(45.0f, 50.0f, fHeight));
-            oFloor.SetAlpha   (1.0f - STEPH3(0.0f, 50.0f, fHeight));
+            oFloor.SetAlpha   (1.0f - STEPH3(5.0f, 50.0f, fHeight));
         }
         else
         {

@@ -33,6 +33,11 @@ void cGlow::Update()
     m_bActive = !this->IsEmpty() || g_pSpecialEffects->IsActive();
     if(m_bActive)
     {
+        const coreVector3 vOldCamPos = Core::Graphics->GetCamPosition();
+        const coreVector3 vOldCamOri = Core::Graphics->GetCamOrientation();
+
+        Core::Graphics->SetCamera(vOldCamPos, CAMERA_DIRECTION, CAMERA_ORIENTATION);
+
         m_Blur.Start();
         {
             // render single objects
@@ -48,6 +53,8 @@ void cGlow::Update()
             g_pSpecialEffects->RenderBottom();
         }
         m_Blur.End();
+
+        Core::Graphics->SetCamera(vOldCamPos, CAMERA_DIRECTION, vOldCamOri);
     }
     else m_Blur.Clear();
 }

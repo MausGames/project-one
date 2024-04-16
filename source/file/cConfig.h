@@ -21,7 +21,6 @@
 // TODO 3: HRTF from core-config (improves spatial acuity with headphones, makes only sense with 3D sound)
 // TODO 3: [MF] vielleicht bei toggle fire-mode single-feuer solange bei aktivierung gedrückt gehalten wird
 // TODO 3: weitere optionen: particle effects (%)
-// TODO 1: [MF] test if disable back rotation and set speed option works everywhere: tiger, zeroth, messier, p1 (blue and magenta), rutilus-rotation
 // TODO 3: EMSCRIPTEN: gamepad calibration feature required, buttons on different gamepads are always different -> man muss aber alle buttons sehn können, damit man fire-up, fire-down etc. versteht  (or warning: gamepads might not work properly, due to browser limitations, for better support, please download the desktop versions for Windows, Linux, or macOS
 
 

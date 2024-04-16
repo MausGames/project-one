@@ -15,6 +15,7 @@
 // TODO 3: make lightning owner-sticky with position-offset
 // TODO 3: don't invoke special-effects out of view (though consider effect-radius)
 // TODO 3: [MF] adjust rumble to be not toooo strong (and not be annoying)
+// TODO 1: [MF] check for all locations where deep particles would make sense (or invert everything ?)
 // TODO 4: remove effect_energy_ring_program if not required anymore (+file +define)
 // TODO 4: think about merging *Color and *Dark functions, as they are mostly identical
 // TODO 3: sinus shake
@@ -24,6 +25,7 @@
 // TODO 3: options to completely disable certain sound effects: turn, player shooting
 // TODO 3: update 3d-sound settings in real-time (store position)
 // TODO 3: move some global sound effects to local pointers (where it makes sense), to reduce permanent memory load
+// TODO 1: [MF] find all old/prev position code and use SPECIAL_FROZEN where applicable (sollte auch was spezielles für bullet-move und ähnliches sein, wo TIME direkt verwendet wird)
 
 
 // ****************************************************************
@@ -38,6 +40,7 @@
 #define SPECIAL_LIGHTNING_CUTOUT (0.5f)      // 
 
 #define SPECIAL_DEPTH(x)         (((x).z < -1.0f) ? 1u : 0u)
+#define SPECIAL_DEEP             (-1.1f)
 
 #define SPECIAL_SPLASH_TINY      (25.0f), (13u)
 #define SPECIAL_SPLASH_SMALL     (50.0f), (25u)
@@ -63,6 +66,8 @@
 #define SPECIAL_RELATIVE            (coreVector3(0.0f,0.0f,0.0f))
 #define SPECIAL_SOUND_MEDAL(x)      (eSoundEffect(SOUND_MEDAL_BRONZE + ((x) - MEDAL_BRONZE)))
 #define SPECIAL_SOUND_PROGRESS(x,y) (LERP(0.7f, 1.3f, STEP(1.0f, I_TO_F(y), I_TO_F(x))))
+
+#define SPECIAL_FROZEN (TIME < 0.001f)
 
 enum eSoundEffect : coreUint8
 {
@@ -137,14 +142,18 @@ enum eSoundEffect : coreUint8
     SOUND_MENU_SUB_IN,
     SOUND_MENU_SUB_OUT,
 
+    SOUND_EFFECT_BEEP,
     SOUND_EFFECT_CHARGE_IN,
     SOUND_EFFECT_CHARGE_OUT,
     SOUND_EFFECT_DUST,
     SOUND_EFFECT_ERROR,
+    SOUND_EFFECT_FAILURE,
     SOUND_EFFECT_FIRE_START,
     SOUND_EFFECT_PEARL,
     SOUND_EFFECT_SHAKE,
+    SOUND_EFFECT_SUCCESS,
     SOUND_EFFECT_WOOSH,
+    SOUND_EFFECT_WOOSH_2,
 
     SOUND_PLACEHOLDER,
 
@@ -244,6 +253,7 @@ public:
     void CreateBlowColor(const coreVector3 vPosition, const coreVector3 vDirection, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor);
     void CreateBlowDark (const coreVector3 vPosition, const coreVector3 vDirection, const coreFloat fScale, const coreUintW iNum);
     void CreateBlowSmoke(const coreVector3 vPosition, const coreVector3 vDirection, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor);
+    void CreateBlowFire (const coreVector3 vPosition, const coreVector3 vDirection, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor);
 
     // 
     void CreateChargeColor(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor);

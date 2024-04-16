@@ -181,7 +181,7 @@ void cEnvironment::ChangeBackground(const coreInt32 iID, const coreUintW iTransi
     // create new background
     switch(iID)
     {
-    default: WARN_IF(true) {}
+    default: WARN_IF(true) {} FALLTHROUGH
     case cCloudBackground  ::ID: m_pBackground = new cCloudBackground  (); break;   // fallback for invalid IDs
     case cNoBackground     ::ID: m_pBackground = new cNoBackground     (); break;
     case cGrassBackground  ::ID: m_pBackground = new cGrassBackground  (); break;

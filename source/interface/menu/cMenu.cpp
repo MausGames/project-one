@@ -10,8 +10,8 @@
 
 coreVector3 cMenu::m_vHighlightColor = COLOR_MENU_WHITE;
 coreVector3 cMenu::m_vButtonColor    = COLOR_MENU_WHITE;
-cGuiButton* cMenu::m_apCurButton[2]  = {};
-cGuiButton* cMenu::m_apNewButton[2]  = {};
+coreButton* cMenu::m_apCurButton[2]  = {};
+coreButton* cMenu::m_apNewButton[2]  = {};
 cGuiButton* cMenu::m_pCurTab         = NULL;
 cGuiButton* cMenu::m_pNewTab         = NULL;
 cGuiObject* cMenu::m_pCurLine        = NULL;
@@ -784,6 +784,18 @@ void cMenu::Move()
     m_PauseLayer.Move();
     
     
+    const eSaveStatus eStatus = g_pSave->GetStatus();
+    if((eStatus != SAVE_STATUS_OK) && !STATIC_ISVALID(g_pGame) && !m_MsgBox.IsVisible())
+    {
+        m_MsgBox.ShowQuestion(PRINT("%s (%s)", Core::Language->GetString("QUESTION_ERROR_SAVE"), Core::Language->GetString(PRINT("ERROR_SAVE_%02u", eStatus))), [](const coreInt32 iAnswer)
+        {
+            if(iAnswer == MSGBOX_ANSWER_YES)
+                 g_pSave->SaveFile();
+            else g_pSave->ResetStatus();
+        });
+    }
+    
+    
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_apCurButton); ++i)
     {
         if(m_apCurButton[i] != m_apNewButton[i])
@@ -1006,7 +1018,7 @@ const coreChar* cMenu::GetSegmentLetters(const coreUintW iMissionIndex, const co
 
 // ****************************************************************
 // default button update routine
-void cMenu::UpdateButton(cGuiButton* OUTPUT pButton, const coreBool bFocused, const coreVector3 vFocusColor, const coreBool bGrow)
+void cMenu::UpdateButton(coreButton* OUTPUT pButton, const coreBool bFocused, const coreVector3 vFocusColor, const coreBool bGrow)
 {
     ASSERT(pButton)
 
@@ -1065,7 +1077,7 @@ void cMenu::UpdateButton(cGuiButton* OUTPUT pButton, const coreBool bFocused, co
     }
 }
 
-void cMenu::UpdateButton(cGuiButton* OUTPUT pButton, const coreBool bFocused, const coreBool bGrow)
+void cMenu::UpdateButton(coreButton* OUTPUT pButton, const coreBool bFocused, const coreBool bGrow)
 {
     // 
     cMenu::UpdateButton(pButton, bFocused, m_vButtonColor, bGrow);

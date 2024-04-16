@@ -641,7 +641,7 @@ cGameMenu::cGameMenu()noexcept
     m_ArmoryBack.DefineProgram("menu_color_program");
     m_ArmoryBack.SetColor3    (coreVector3(1.0f,1.0f,1.0f) * 0.1f);
 
-    m_ArmorySelection.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_2, MENU_FONT_ICON_3, MENU_OUTLINE_SMALL);   // TODO 1: [MF] appearance still weird, especially animations
+    m_ArmorySelection.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_2, MENU_FONT_ICON_3, MENU_OUTLINE_SMALL);
     m_ArmorySelection.SetPosition(m_BackgroundArmory.GetPosition() + m_BackgroundArmory.GetSize()*coreVector2(0.0f,0.5f) + coreVector2(0.0f,-0.08f));
     m_ArmorySelection.SetSize    (coreVector2(0.73f,0.065f));
     m_ArmorySelection.SetEndless (true);
@@ -1494,7 +1494,7 @@ void cGameMenu::Move()
             else if(m_ArmorySelection.GetUserSwitch() > 0) this->SelectNext();
 
             // 
-            cMenu::UpdateSwitchBox(&m_ArmorySelection);
+            //cMenu::UpdateSwitchBox(&m_ArmorySelection);
             cMenu::UpdateSwitchBox(&m_ArmoryType);
             cMenu::UpdateSwitchBox(&m_ArmoryMode);
             cMenu::UpdateSwitchBox(&m_ArmoryDifficulty);
@@ -1507,15 +1507,20 @@ void cGameMenu::Move()
             cMenu::UpdateButton(&m_BackButtonArmory,  m_BackButtonArmory .IsFocused());
 
             // 
-            coreVector3 vLineColor;
+            coreVector3 vLineColor, vButtonColor;
             switch(m_iCurPage)
             {
             default: ASSERT(false)
-            case 0u: vLineColor = g_aMissionData[m_aiCurIndex[0]].vColor2; break;
-            case 1u: vLineColor = g_aMissionData[m_aiCurIndex[1]].vColor2; break;
-            case 2u: vLineColor = g_aMissionData[MISSION_ATER]   .vColor2; break;
+            case 0u: vLineColor = g_aMissionData[m_aiCurIndex[0]].vColor2; vButtonColor = g_aMissionData[m_aiCurIndex[0]].vColor; break;
+            case 1u: vLineColor = g_aMissionData[m_aiCurIndex[1]].vColor2; vButtonColor = g_aMissionData[m_aiCurIndex[1]].vColor; break;
+            case 2u: vLineColor = g_aMissionData[MISSION_ATER]   .vColor2; vButtonColor = g_aMissionData[MISSION_ATER]   .vColor; break;
             }
             for(coreUintW i = 0u; i < MENU_GAME_ARMORIES; ++i) cMenu::UpdateLine(&m_aArmoryLine[i], true, vLineColor);
+            
+            
+            
+            cMenu::UpdateButton(m_ArmorySelection.GetArrow(0u), m_ArmorySelection.GetArrow(0u)->IsFocused(), vButtonColor);
+            cMenu::UpdateButton(m_ArmorySelection.GetArrow(1u), m_ArmorySelection.GetArrow(1u)->IsFocused(), vButtonColor);
 
             // 
             m_aArmoryShield[0].GetCaption()->SetColor3(m_aArmoryShield[0].GetCurValue() ? COLOR_MENU_BLUE   : COLOR_MENU_WHITE);
@@ -2354,7 +2359,7 @@ void cGameMenu::__PrepareMission(const coreUintW iMissionIndex)
     {
         for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES_ALL; ++i)
         {
-            if((i != 3u) && (i != 9u) && (i != 12u))
+            if(i % 3u)
             {
                 m_aArmoryBadge    [i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
                 m_aArmoryBadgeWave[i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
@@ -2470,7 +2475,7 @@ void cGameMenu::__PrepareSegment(const coreUintW iMissionIndex, const coreUintW 
         for(coreUintW i = 0u; i < MENU_GAME_ARMORY_BADGES; ++i)
         {
             const coreBool bState   = abState[i];
-            const coreBool bVisible = ((i == 0u) && (abState[0] || abState[3])) || ((i == 1u) && (abState[0] || abState[1])) || ((i == 2u) && ((abState[0] && abState[1]) || abState[2])) || (iMissionIndex == MISSION_INTRO);
+            const coreBool bVisible = (iMissionIndex == MISSION_INTRO) ? ((i != 0u) || abState[0]) : (((i == 0u) && (abState[0] || abState[3])) || ((i == 1u) && (abState[0] || abState[1])) || ((i == 2u) && ((abState[0] && abState[1]) || abState[2])));
 
             m_aArmoryBadge[i].SetTexOffset(coreVector2(bState ? 0.0f : 0.5f, 0.0f));
             m_aArmoryBadge[i].SetColor3   (coreVector3(1.0f,1.0f,1.0f) * (bState ? 1.0f : 0.5f));

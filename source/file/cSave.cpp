@@ -16,6 +16,7 @@ cSave::cSave()noexcept
 , m_sPath   (coreData::UserFolderPrivate(PRINT(SAVE_FILE_FOLDER "save%s." SAVE_FILE_EXTENSION, g_bDemoVersion ? "_demo" : "")))
 , m_iToken  (0u)
 , m_bIgnore (false)
+, m_eStatus (SAVE_STATUS_OK)
 {
     // 
     this->LoadFile();
@@ -188,6 +189,9 @@ coreBool cSave::LoadFile()
 void cSave::SaveFile()
 {
     // 
+    this->ResetStatus();
+
+    // 
     m_Header.iSaveTimestamp = std::time(NULL);
     m_Header.iSaveCount     = m_Header.iSaveCount + 1u;
 
@@ -223,7 +227,14 @@ void cSave::SaveFile()
         // 
         WARN_IF(oArchive.Save(m_sPath.c_str()) != CORE_OK)
         {
-            Core::Log->Warning("Save (%s) could not be saved", m_sPath.c_str());
+            coreUint64 iAvailable;
+            coreData::SystemSpace(&iAvailable, NULL);
+
+                 if(iAvailable < sizeof(sHeader) * 10u)                                 m_eStatus = SAVE_STATUS_ERROR_SPACE;
+            else if(!coreData::FolderWritable(coreData::StrDirectory(m_sPath.c_str()))) m_eStatus = SAVE_STATUS_ERROR_ACCESS;
+            else                                                                        m_eStatus = SAVE_STATUS_ERROR_UNKNOWN;
+
+            Core::Log->Warning("Save (%s) could not be saved (status %u)", m_sPath.c_str(), coreUint32(m_eStatus));
             return CORE_OK;
         }
 

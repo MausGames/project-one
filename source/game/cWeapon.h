@@ -46,6 +46,9 @@ public:
     void Render();
     void Move();
 
+    // 
+    void Prefetch();
+
     // set object properties
     inline void SetOwner(cPlayer* pOwner) {m_pOwner = pOwner;}
 
@@ -70,12 +73,13 @@ protected:
 
 private:
     // own routines for derived classes
-    virtual void __UpdateOwn (const coreUint8 iShootStatus, const coreFloat fShootSpeed) {}
-    virtual void __TriggerOwn(const coreUint8 iMode)                                     {}
-    virtual void __ReleaseOwn(const coreUint8 iMode)                                     {}
-    virtual void __ShootOwn  ()                                                          {}
-    virtual void __RenderOwn ()                                                          {}
-    virtual void __MoveOwn   ()                                                          {}
+    virtual void __UpdateOwn  (const coreUint8 iShootStatus, const coreFloat fShootSpeed) {}
+    virtual void __TriggerOwn (const coreUint8 iMode)                                     {}
+    virtual void __ReleaseOwn (const coreUint8 iMode)                                     {}
+    virtual void __ShootOwn   ()                                                          {}
+    virtual void __RenderOwn  ()                                                          {}
+    virtual void __MoveOwn    ()                                                          {}
+    virtual void __PrefetchOwn()                                                          {}
 };
 
 
@@ -121,12 +125,13 @@ public:
 
 private:
     // execute own routines
-    void __UpdateOwn (const coreUint8 iShootStatus, const coreFloat fShootSpeed)final;
-    void __TriggerOwn(const coreUint8 iMode)final;
-    void __ReleaseOwn(const coreUint8 iMode)final;
-    void __ShootOwn  ()final;
-    void __RenderOwn ()final;
-    void __MoveOwn   ()final;
+    void __UpdateOwn  (const coreUint8 iShootStatus, const coreFloat fShootSpeed)final;
+    void __TriggerOwn (const coreUint8 iMode)final;
+    void __ReleaseOwn (const coreUint8 iMode)final;
+    void __ShootOwn   ()final;
+    void __RenderOwn  ()final;
+    void __MoveOwn    ()final;
+    void __PrefetchOwn()final;
 };
 
 
@@ -152,8 +157,9 @@ public:
 
 private:
     // execute own routines
-    void __UpdateOwn(const coreUint8 iShootStatus, const coreFloat fShootSpeed)final;
-    void __ShootOwn ()final;
+    void __UpdateOwn  (const coreUint8 iShootStatus, const coreFloat fShootSpeed)final;
+    void __ShootOwn   ()final;
+    void __PrefetchOwn()final;
 };
 
 
@@ -175,7 +181,8 @@ public:
 
 private:
     // execute own routines
-    void __ShootOwn()final;
+    void __ShootOwn   ()final;
+    void __PrefetchOwn()final;
 };
 
 
@@ -203,8 +210,9 @@ public:
 
 private:
     // execute own routines
-    void __TriggerOwn(const coreUint8 iMode)final;
-    void __ShootOwn  ()final;
+    void __TriggerOwn (const coreUint8 iMode)final;
+    void __ShootOwn   ()final;
+    void __PrefetchOwn()final;
 };
 
 
@@ -243,7 +251,8 @@ public:
 
 private:
     // execute own routines
-    void __ShootOwn()final;
+    void __ShootOwn   ()final;
+    void __PrefetchOwn()final;
 };
 
 
@@ -269,8 +278,9 @@ public:
 
 private:
     // execute own routines
-    void __ReleaseOwn(const coreUint8 iMode)final;
-    void __ShootOwn  ()final;
+    void __ReleaseOwn (const coreUint8 iMode)final;
+    void __ShootOwn   ()final;
+    void __PrefetchOwn()final;
 };
 
 

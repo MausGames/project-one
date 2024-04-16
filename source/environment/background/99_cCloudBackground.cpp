@@ -14,6 +14,7 @@
 cCloudBackground::cCloudBackground()noexcept
 : m_vRainMove (coreVector2(-0.5f,-1.2f))
 , m_fOffset   (0.0f)
+, m_Loaded    ()
 {
     coreBatchList* pList1;
 
@@ -89,11 +90,14 @@ cCloudBackground::~cCloudBackground()
 // 
 void cCloudBackground::__InitOwn()
 {
+    m_Loaded.Unlock();
+    
     // load base sound-effect
     m_pBaseSound = Core::Manager::Resource->Get<coreSound>("environment_cloud.wav");
     m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
         pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
+        m_Loaded.Lock();
     });
 }
 
@@ -105,7 +109,7 @@ void cCloudBackground::__ExitOwn()
     // stop base sound-effect
     m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
-        if(pResource->EnableRef(this))
+        if(m_Loaded.IsLocked() && pResource->EnableRef(this))
             pResource->Stop();
     });
 }
@@ -177,7 +181,7 @@ void cCloudBackground::__MoveOwn()
     m_Cover.Move();
 
     // adjust volume of the base sound-effect
-    if(m_pBaseSound->EnableRef(this))
+    if(m_Loaded.IsLocked() && m_pBaseSound->EnableRef(this))
     {
         m_pBaseSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
     }

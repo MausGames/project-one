@@ -18,6 +18,7 @@ cMossBackground::cMossBackground()noexcept
 , m_LightningTicker  (coreTimer(1.0f, 1.0f, 1u))
 , m_fThunderDelay    (0.0f)
 , m_iThunderIndex    (Core::Rand->Uint(ARRAY_SIZE(m_apThunder) - 1u))
+, m_Loaded           ()
 , m_bEnableLightning (true)
 , m_bEnableHeadlight (false)
 {
@@ -230,6 +231,8 @@ cMossBackground::~cMossBackground()
 // 
 void cMossBackground::__InitOwn()
 {
+    m_Loaded.Unlock();
+    
     // 
     m_pWater = new cRainWater("environment_clouds_grey.png");
 
@@ -238,6 +241,7 @@ void cMossBackground::__InitOwn()
     m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
         pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
+        m_Loaded.Lock();
     });
 }
 
@@ -252,7 +256,7 @@ void cMossBackground::__ExitOwn()
     // stop base sound-effect
     m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
-        if(pResource->EnableRef(this))
+        if(m_Loaded.IsLocked() && pResource->EnableRef(this))
             pResource->Stop();
     });
 }
@@ -355,10 +359,23 @@ void cMossBackground::__MoveOwn()
     }
 
     // adjust volume of the base sound-effect
-    if(m_pBaseSound->EnableRef(this))
+    if(m_Loaded.IsLocked() && m_pBaseSound->EnableRef(this))
     {
         m_pBaseSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
     }
+    
+    
+    
+    
+    const coreFloat fCloudMove = 0.0016f * (1.0f + ABS(g_pEnvironment->GetSpeed())) * TIME;
+
+    coreBatchList* pList = m_apAirObjectList[0];
+    for(coreUintW i = 0u, ie = pList->List()->size(); i < ie; ++i)
+    {
+        coreObject3D* pCloud = (*pList->List())[i];
+        pCloud->SetTexOffset((pCloud->GetTexOffset() + MapToAxis(coreVector2(fCloudMove * ((FRACT(pCloud->GetPosition().z) < 0.5f) ? -1.0f : 1.0f), 0.0f), pCloud->GetDirection().xy())).Processed(FRACT));
+    }
+    pList->MoveNormal();
 }
 
 

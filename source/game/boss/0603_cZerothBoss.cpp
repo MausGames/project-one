@@ -400,7 +400,7 @@ void cZerothBoss::__MoveOwn()
                 m_aiCounter[EVADE_COUNT] += 1;
 
                 const coreVector2 vDir = MapToAxisInv(this->GetDirection().xy(), coreVector2::Direction(I_TO_F(i) * (2.0f*PI) / I_TO_F(ZEROTH_LIMBS)));
-                g_pSpecialEffects->MacroEruptionColorBig(this->GetPosition() + coreVector3(vDir * ZEROTH_RADIUS, 0.0f), vDir, COLOR_ENERGY_WHITE);
+                g_pSpecialEffects->MacroEruptionColorBig(this->GetPosition() + coreVector3(vDir * ZEROTH_RADIUS, 0.0f), vDir, COLOR_ENERGY_WHITE * 0.8f);
                 g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_04);
 
                 if(m_aiCounter[EVADE_COUNT] < 4)
@@ -706,7 +706,7 @@ void cZerothBoss::__MoveOwn()
                     ADD_BIT(m_aiCounter[DIR_FIELD], i)
 
                     const coreVector2 vDir = MapToAxisInv(this->GetDirection().xy(), coreVector2::Direction(I_TO_F(i) * (2.0f*PI) / I_TO_F(ZEROTH_LIMBS)));
-                    g_pSpecialEffects->MacroEruptionColorBig(this->GetPosition() + coreVector3(vDir * ZEROTH_RADIUS, 0.0f), vDir, COLOR_ENERGY_WHITE);
+                    g_pSpecialEffects->MacroEruptionColorBig(this->GetPosition() + coreVector3(vDir * ZEROTH_RADIUS, 0.0f), vDir, COLOR_ENERGY_WHITE * 0.8f);
                     g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_04);
                 }
             }
@@ -1331,6 +1331,8 @@ void cZerothBoss::__MoveOwn()
         {
             if(vNewPos.y > FOREGROUND_AREA.y * 1.0f)
             {
+                m_Body.Kill(true);
+
                 this->Kill(true);
 
                 if(this->HasAllHelpers())
@@ -1529,7 +1531,7 @@ void cZerothBoss::__MoveOwn()
 
                 m_avVector[STAR_LENGTH].zw(vPos);
 
-                g_pSpecialEffects->MacroEruptionColorSmall(coreVector3(vPos, 0.0f), coreVector2(0.0f,-1.0f), COLOR_ENERGY_WHITE);
+                g_pSpecialEffects->MacroEruptionColorSmall(coreVector3(vPos, 0.0f), coreVector2(0.0f,-1.0f), COLOR_ENERGY_WHITE * 0.8f);
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_BIG);
 
                 PHASE_CHANGE_INC
@@ -1588,7 +1590,7 @@ void cZerothBoss::__MoveOwn()
 
                 g_pGame->GetBulletManagerEnemy()->ClearBulletsTyped<cOrbBullet>(true);
 
-                g_pSpecialEffects->MacroExplosionColorBig(pMission->GetStar(0u)->GetPosition(), COLOR_ENERGY_WHITE);
+                g_pSpecialEffects->MacroExplosionColorBig(pMission->GetStar(0u)->GetPosition(), COLOR_ENERGY_WHITE * 0.8f);
             }
         });
     }
@@ -1764,7 +1766,7 @@ void cZerothBoss::__MoveOwn()
                 const coreFloat   fLen    = g_pForeground->RayIntersection(vRayPos, vRayDir);
                 const coreVector3 vTarget = coreVector3(vRayPos + vRayDir * fLen, 0.0f);
 
-                g_pSpecialEffects->CreateSplashColor(vTarget, 70.0f, 2u, COLOR_ENERGY_BLUE);
+                g_pSpecialEffects->CreateSplashColor(vTarget, 70.0f, 3u, COLOR_ENERGY_BLUE);
                 g_pSpecialEffects->CreateSplashFire (vTarget, 20.0f, 3u, COLOR_ENERGY_BLUE * 0.15f);
             });
         }
@@ -1831,7 +1833,7 @@ void cZerothBoss::__MoveOwn()
         PHASE_CHANGE_TO(80u)
     }
     
-    if(m_iPhase < 200u)
+    if((m_iPhase < 200u) && !this->HasStatus(ENEMY_STATUS_DEAD))
     {
     // 
     cHelper* pYellowHelper = g_pGame->GetHelper(ELEMENT_YELLOW);

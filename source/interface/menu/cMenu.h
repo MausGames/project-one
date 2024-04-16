@@ -1271,8 +1271,8 @@ private:
     static coreVector3 m_vHighlightColor;       // 
     static coreVector3 m_vButtonColor;       // 
     
-    static cGuiButton* m_apCurButton[2];
-    static cGuiButton* m_apNewButton[2];
+    static coreButton* m_apCurButton[2];
+    static coreButton* m_apNewButton[2];
     static cGuiButton* m_pCurTab;
     static cGuiButton* m_pNewTab;
     static cGuiObject* m_pCurLine;
@@ -1329,8 +1329,8 @@ public:
     static const coreChar* GetSegmentLetters(const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
 
     // menu helper routines
-    static void UpdateButton        (cGuiButton*    OUTPUT pButton, const coreBool bFocused, const coreVector3 vFocusColor, const coreBool bGrow = true);
-    static void UpdateButton        (cGuiButton*    OUTPUT pButton, const coreBool bFocused, const coreBool bGrow = true);
+    static void UpdateButton        (coreButton*    OUTPUT pButton, const coreBool bFocused, const coreVector3 vFocusColor, const coreBool bGrow = true);
+    static void UpdateButton        (coreButton*    OUTPUT pButton, const coreBool bFocused, const coreBool bGrow = true);
     static void UpdateTab           (cGuiButton*    OUTPUT pTab, const coreBool bLocked, const coreBool bFocused, const coreVector3 vFocusColor);
     static void UpdateTab           (cGuiButton*    OUTPUT pTab, const coreBool bLocked, const coreBool bFocused);
     static void UpdateSwitchBox     (cGuiSwitchBox* OUTPUT pSwitchBox, const coreBool bSound = true);

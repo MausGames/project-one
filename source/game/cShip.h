@@ -12,10 +12,8 @@
 
 // TODO 4: reduce ship health (and player shield) and all damage values to 16-bit (also reorder for better packing if possible)
 // TODO 3: do not create explosions if ship is far outside of view-port (just ships or in general special-effects ?) (but needs to be far, because explosions with sound on borders are still important)
-// TODO 2: [MF] ReachedHealthPct, GetCurHealthPct -> ReachedHealthPct(0.7f) was triggered while interface was showing 71%
 // TODO 4: check and cleanup transformation functions
 // TODO 3: merge WasDamaged in cShip and cEnemy
-// TODO 2: [MF] ReachedDeath könnte übersprungen werden, wenn nicht geprüft wird, während es passiert
 
 
 // ****************************************************************

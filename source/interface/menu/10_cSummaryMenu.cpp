@@ -1127,7 +1127,8 @@ void cSummaryMenu::ShowArcade()
     iMedalArcade = MAX(iMedalArcade, iMedal);
 
     // 
-    const coreBool bComplete = (g_pGame->GetPlayer(0u)->GetDataTable()->GetMedalSegment(MISSION_ATER, 6u) != MEDAL_NONE);
+    const coreBool bComplete     = (g_pGame->GetPlayer(0u)->GetDataTable()->GetMedalSegment(MISSION_ATER, 6u) != MEDAL_NONE);
+    const coreBool bNearComplete = (g_pGame->GetPlayer(0u)->GetDataTable()->GetMedalSegment(MISSION_ATER, 5u) != MEDAL_NONE);
 
     // 
     const auto&      oStats     = g_pSave->GetHeader().aaaLocalStatsArcade[g_pGame->GetType()][g_pGame->GetMode()][g_pGame->GetDifficulty()];
@@ -1175,7 +1176,10 @@ void cSummaryMenu::ShowArcade()
             g_pSave->EditLocalStatsArcade()->iTimeWorstShiftGood = iShiftGood;
             g_pSave->EditLocalStatsArcade()->iTimeWorstShiftBad  = iShiftBad;
         }
+    }
 
+    if(bNearComplete)
+    {
         if(!iContinuesUsed)
         {
             ADD_BIT_EX(g_pSave->EditProgress()->aiTrophy, TROPHY_ONECOLORCLEAR)
@@ -1187,6 +1191,9 @@ void cSummaryMenu::ShowArcade()
             ADD_BIT(g_pSave->EditLocalStatsArcade()->iFeat, FEAT_TWOHUNDRED)
         }
     }
+
+    // 
+    g_pSave->SaveFile();
 
     // 
     this->ChangeSurface(SURFACE_SUMMARY_ARCADE, 0.0f);

@@ -42,6 +42,7 @@ cRutilusMission::cRutilusMission()noexcept
 , m_afSlapValue       {}
 , m_aiMoveFlip        {}
 , m_aiWarnDir         {}
+, m_abWarn            {}
 , m_aiRegisterID      {}
 , m_afRegisterSpeed   {}
 , m_fAnimation        (0.0f)
@@ -817,22 +818,25 @@ void cRutilusMission::__MoveOwnAfter()
                     {
                         // 
                         coreUint8 iNewWarnDir = 0u;
-                        if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_SHOOT_UP)    && !SameDirection90(pPlayer->GetDirection().xy(), coreVector2( 0.0f, 1.0f))) iNewWarnDir = 1u;
-                        if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_SHOOT_LEFT)  && !SameDirection90(pPlayer->GetDirection().xy(), coreVector2(-1.0f, 0.0f))) iNewWarnDir = 2u;
-                        if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_SHOOT_DOWN)  && !SameDirection90(pPlayer->GetDirection().xy(), coreVector2( 0.0f,-1.0f))) iNewWarnDir = 3u;
-                        if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_SHOOT_RIGHT) && !SameDirection90(pPlayer->GetDirection().xy(), coreVector2( 1.0f, 0.0f))) iNewWarnDir = 4u;
+                        coreBool  bNewWarn    = false;
+                        if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_SHOOT_UP))    {iNewWarnDir = 1u; if(!SameDirection90(pPlayer->GetDirection().xy(), coreVector2( 0.0f, 1.0f))) bNewWarn = true;}
+                        if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_SHOOT_LEFT))  {iNewWarnDir = 2u; if(!SameDirection90(pPlayer->GetDirection().xy(), coreVector2(-1.0f, 0.0f))) bNewWarn = true;}
+                        if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_SHOOT_DOWN))  {iNewWarnDir = 3u; if(!SameDirection90(pPlayer->GetDirection().xy(), coreVector2( 0.0f,-1.0f))) bNewWarn = true;}
+                        if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_SHOOT_RIGHT)) {iNewWarnDir = 4u; if(!SameDirection90(pPlayer->GetDirection().xy(), coreVector2( 1.0f, 0.0f))) bNewWarn = true;}
 
                         // 
                         if(HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_TURN_LEFT)  ||
-                           HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_TURN_RIGHT) || (iNewWarnDir && (iNewWarnDir != m_aiWarnDir[i])))
+                           HAS_BIT(pPlayer->GetInput()->iActionPress, PLAYER_ACTION_TURN_RIGHT) || (bNewWarn && (iNewWarnDir != m_aiWarnDir[i])))
                         {
                             pPlayer->ShowArrow(1u);
                             g_pSpecialEffects->PlaySound(pPlayer->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_ERROR);
 
                             if(g_CurConfig.Graphics.iFlash) m_afPlatePulse[j] = 1.0f;
-
-                            m_aiWarnDir[i] = iNewWarnDir;
                         }
+
+                        // 
+                        if(iNewWarnDir) m_aiWarnDir[i] = iNewWarnDir;
+                        m_abWarn[i] = bNewWarn;
 
                         pPlayer->SetDirection(oPlate.GetDirection());
                         pPlayer->AddStatus   (PLAYER_STATUS_NO_INPUT_TURN);
@@ -1333,7 +1337,7 @@ void cRutilusMission::__TeleporterEffect(const coreUintW iIndex)const
     // 
     const coreVector3 vStart = vPos + vDir * fLen;
     const coreVector3 vDiff  = vPos - vDir * fLen - vStart;
-    const coreUintW   iNum   = MAX(F_TO_UI(fLen * 2.0f / 1.9f), 2u);
+    const coreUintW   iNum   = MAX(F_TO_UI(fLen * 2.0f / 1.7f), 2u);
 
     // 
     for(coreUintW j = iNum; j--; ) g_pSpecialEffects->CreateSplashColor(vStart + vDiff * (I_TO_F(j) * RCP(I_TO_F(iNum - 1u))), 10.0f, 1u, vColor);

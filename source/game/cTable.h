@@ -205,7 +205,7 @@ private:
     coreProtect<coreUint16> m_aiShiftBadMission  [TABLE_MISSIONS];                   // 
     coreProtect<coreUint16> m_aaiShiftBadSegment [TABLE_MISSIONS][TABLE_SEGMENTS];   // 
 
-    coreDouble m_dFrameTime;                                                          // 
+    coreDouble m_dFrameTime;                                                         // 
 
 
 public:

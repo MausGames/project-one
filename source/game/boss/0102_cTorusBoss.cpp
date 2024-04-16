@@ -19,15 +19,12 @@
 // view-bullets am ende sollen durchgängig sein, um spieler im kreis bewegen zu lassen (wenn möglich), aber trotzdem leicht versetzt und ausgefranst, um gracing zu erschweren
 // die schilde bringen spieler dazu sich um boss herum zu bewegen
 // durchgängig aufrichtige bewegung is kompletter bullshit, animation schaut orsch aus wenn sie boss auch dabei dreht, und der boss wirkt nicht mehr so massiv
+// ACHIEVEMENT: fly through the gate without taking damage
 // TODO 4: clean up code (also in mission)
-// TODO 1: [MF] gelbe und blaue farbe is weird
 // TODO 1: hard mode: all object behaviors increase, gelber angriff is undurchdringbar (7 statt 3 geschosse)
 // TODO 1: hard mode: neue beschwörung die nicht zerstört werden kann (vielleicht finaler ball kann nicht zerstört werden)
 // TODO 3: purple helper shield wird unter laser gezeichnet
 // TODO 1: [MF] MAIN: medal goal (nochmal prüfen, nichts abziehen), explosion (verbessern: schneller, mit kleiner explosion um drehung anzustoßen), regular score, sound, background rota/speed
-// TODO 1: [MF] ACHIEVEMENT: name (), description (), fly through the hole without touching the boss
-// TODO 1: [MF] schilde reflektieren manchmal an falscher stelle, vielleicht old-pos issue, wenn sie zurück in die mitte teleportiert werden ? sollte überall gehandelt werden wo old-pos new-pos objekte berechnet werden
-// TODO 1: [MF] purple helper sollte immer bei Nth laser kommen
 // TODO 1: [MF] alle phasen nochmal für verbesserungen anschauen
 
 
@@ -39,6 +36,7 @@
 #define CRASH_COUNT  (3u)
 #define TURRET_DIR   (4u)
 #define TURRET_COUNT (5u)
+#define DRIVER_COUNT (6u)
 
 
 // ****************************************************************
@@ -53,6 +51,7 @@
 #define HELPER_DATA      (7u)
 #define TUMBLE_DIRECTION (8u)
 #define MIRROR_LERP      (9u)
+#define GATE_DATA        (10u)
 
 
 // ****************************************************************
@@ -527,7 +526,7 @@ void cTorusBoss::__MoveOwn()
             {
                 this->_StartBoss();
 
-                this->__ChangeColor(1u);
+                this->__ChangeColor(6u);
 
                 m_fRotationBoss = this->GetDirection().xy().InvertedY().Angle();
                 vNewOri = coreVector3(0.0f,0.0f,1.0f);
@@ -656,7 +655,7 @@ void cTorusBoss::__MoveOwn()
 
                     m_aiCounter[CRASH_COUNT] += 1;
 
-                    g_pSpecialEffects->CreateSplashColor(this->GetPosition() + coreVector3(8.0f * AlongCrossNormal(this->GetPosition().xy()), 0.0f), 25.0f, 10u, COLOR_ENERGY_WHITE);
+                    g_pSpecialEffects->CreateSplashColor(this->GetPosition() + coreVector3(8.0f * AlongCrossNormal(this->GetPosition().xy()), 0.0f), 25.0f, 10u, COLOR_ENERGY_WHITE * 0.8f);
                     g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_DUST);
                 }
             });
@@ -698,16 +697,9 @@ void cTorusBoss::__MoveOwn()
                 g_pSpecialEffects->PlaySound(this->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
 
                 this->__EnableDriver(MIN(coreMath::BitScanFwd(~m_iDriverActive), TORUS_DRIVERS - 1u), this->GetPosition().xy(), -this->GetPosition().xy().Normalized());
+                m_aiCounter[DRIVER_COUNT] += 1;
 
-                coreUintW iCount = 0u;
-
-                for(coreUintW i = 0u; i < VIRIDO_LASERS; ++i)
-                {
-                    if(pMission->GetLaser(i)->IsEnabled(CORE_OBJECT_ENABLE_ALL))
-                        iCount += 1u;
-                }
-
-                if(iCount == 2u)
+                if(m_aiCounter[DRIVER_COUNT] == 3u)
                 {
                     if(this->_ResurrectHelper(ELEMENT_PURPLE, true))
                     {
@@ -795,7 +787,7 @@ void cTorusBoss::__MoveOwn()
             {
                 PHASE_CHANGE_TO(100u)
 
-                this->__ChangeColor(6u);
+                this->__ChangeColor(1u);
 
                 m_avVector[GRIND_VALUE].x = cTorusBoss::__PositionToGrind(this->GetPosition().xy());
             }
@@ -885,7 +877,7 @@ void cTorusBoss::__MoveOwn()
 
         if(PHASE_MAINTIME_POINT(3.0f))
         {
-            this->_ResurrectHelper(ELEMENT_BLUE, false);
+            this->_ResurrectHelper(ELEMENT_YELLOW, false);
         }
 
         if(this->GetCurHealth() < 1400)
@@ -931,7 +923,7 @@ void cTorusBoss::__MoveOwn()
 
                 m_aiCounter[CUR_TARGET] += 1;
 
-                if(m_aiCounter[CUR_TARGET] == 2u) this->_ResurrectHelper(ELEMENT_YELLOW, false);
+                if(m_aiCounter[CUR_TARGET] == 2u) this->_ResurrectHelper(ELEMENT_BLUE, false);
             }
         });
     }
@@ -955,6 +947,7 @@ void cTorusBoss::__MoveOwn()
             }
 
             g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 5.0f, 1u, COLOR_ENERGY_BLUE);
+            g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
 
             if(PHASE_FINISHED)
             {
@@ -1030,6 +1023,9 @@ void cTorusBoss::__MoveOwn()
                 this->__EnableWaver(MIN(coreMath::BitScanFwd(~m_iWaverActive), TORUS_WAVERS - 1u), this->GetPosition().xy());
 
                 if(m_pWooshSound->EnableRef(this)) m_pWooshSound->Stop();
+
+                g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+                g_pSpecialEffects->PlaySound(this->GetPosition(), 0.6f, 1.3f, SOUND_EFFECT_SHAKE);
             }
         });
     }
@@ -1241,6 +1237,7 @@ void cTorusBoss::__MoveOwn()
             g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5, 1.2f, this, vPos, (vDir + vTan * 0.01f).Normalized())->ChangeSize(1.8f);
 
             g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 5.0f, 1u, COLOR_ENERGY_MAGENTA);
+            g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
         });
     }
 
@@ -1579,6 +1576,7 @@ void cTorusBoss::__MoveOwn()
 
                 // 
                 g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), SPECIAL_SPLASH_TINY, COLOR_ENERGY_CYAN);
+                g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
             }
         });
 
@@ -1601,6 +1599,7 @@ void cTorusBoss::__MoveOwn()
 
                 // 
                 g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 10.0f, 1u, COLOR_ENERGY_RED);
+                g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
             }
         });
 
@@ -1623,6 +1622,7 @@ void cTorusBoss::__MoveOwn()
 
                 // 
                 g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 10.0f, 1u, COLOR_ENERGY_ORANGE);
+                g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
             }
         });
 
@@ -1664,12 +1664,13 @@ void cTorusBoss::__MoveOwn()
 
                 // 
                 g_pSpecialEffects->CreateSplashColor(pWaver->GetPosition(), SPECIAL_SPLASH_TINY, COLOR_ENERGY_GREEN);
+                g_pSpecialEffects->PlaySound(pWaver->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
             }
         });
     }
 
     // constantly shoot into three directions
-    PHASE_CONTROL_TICKER(7u, 0u, TORUS_BOSS_ROTATION * (2.0f / PI) * fShootSpeed, LERP_LINEAR)
+    PHASE_CONTROL_TICKER(7u, 0u, TORUS_BOSS_ROTATION * (2.0f / PI) * fShootSpeed * (g_pGame->IsEasy() ? 0.5f : 1.0f), LERP_LINEAR)
     {
         // 
         if(!m_aiCounter[EMIT_STATUS])
@@ -1683,7 +1684,7 @@ void cTorusBoss::__MoveOwn()
 
         for(coreUintW i = 5u; i--; )
         {
-            if(i == 0u || i == 4u) continue;
+            if((i == 0u) || (i == 4u)) continue;
 
             coreVector2 avDir[3];
 
@@ -1698,16 +1699,17 @@ void cTorusBoss::__MoveOwn()
                 const coreVector2 vPos = this->GetPosition().xy() + vDir * (4.7f * this->GetSize().x);
 
                 // 
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.0f, this, vPos, vDir)->ChangeSize(1.5f);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.0f, this, vPos, vDir)->ChangeSize(1.6f);
 
                 // 
                 g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 5.0f, 2u, COLOR_ENERGY_YELLOW);
+                g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
             }
         }
     });
 
     // 
-    if(!coreMath::IsNear(ABS(vNewOri.z), 1.0f) || (this->GetCurHealth() <= 0) || g_pGame->IsEasy())
+    if(!coreMath::IsNear(ABS(vNewOri.z), 1.0f) || (this->GetCurHealth() <= 0) || (g_pGame->IsEasy() && ((m_iPhase < 100u) || (m_iPhase >= 110u))))
         m_aiCounter[EMIT_STATUS] = 0;
 
     // 
@@ -1768,7 +1770,36 @@ void cTorusBoss::__MoveOwn()
         for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCircle); ++i)
             m_aCircle[i].SetColor3(vNewColor);
     }
-    
+
+    if(m_iPhase == 133u)
+    {
+        g_pGame->ForEachPlayer([&](const cPlayer* pPlayer, const coreUintW i)
+        {
+            const coreVector2 vDiff    = pPlayer->GetPosition().xy() - this->GetPosition().xy();
+            const coreVector2 vDiffOld = pPlayer->GetOldPos()        - this->GetOldPos();
+
+            const coreFloat fDot    = coreVector3::Dot(coreVector3(vDiff,    0.0f), this->GetOrientation());
+            const coreFloat fDotOld = coreVector3::Dot(coreVector3(vDiffOld, 0.0f), this->GetOrientation());   // not old orientation
+
+            if((SIGN(fDot) != SIGN(fDotOld)) && (vDiff.LengthSq() < POW2(8.0f)))
+            {
+                m_avVector[GATE_DATA].arr(i) = 0.3f;
+            }
+        });
+    }
+    g_pGame->ForEachPlayer([&](const cPlayer* pPlayer, const coreUintW i)
+    {
+        coreFloat& fValue = m_avVector[GATE_DATA].arr(i);
+        STATIC_ASSERT(GAME_PLAYERS <= 4u)
+
+        if(!pPlayer->IsNormal()) fValue = 0.0f;
+
+        if(fValue)
+        {
+            fValue = MAX0(fValue - 1.0f * TIME);
+            if(!fValue) pMission->GiveBadge(3u, BADGE_ACHIEVEMENT, this->GetPosition());
+        }
+    });
 
     if(this->ReachedDeath())
     {
@@ -1780,9 +1811,12 @@ void cTorusBoss::__MoveOwn()
     cHelper* pYellowHelper = g_pGame->GetHelper(ELEMENT_YELLOW);
     if(!pYellowHelper->HasStatus(HELPER_STATUS_DEAD))
     {
-        const coreFloat fTime = pYellowHelper->GetLifeTime() * 0.3f;
+        const coreFloat   fTime = pYellowHelper->GetLifeTime() * 0.3f;
+        const coreFloat   fLen  = LERP(1.3f, 1.0f, SIN(fTime * (1.0f*PI))) * FOREGROUND_AREA.x;
+        const coreVector2 vDir  = coreVector2::Direction(fTime * (-2.0f*PI) + (1.5f*PI));
+        const coreVector2 vPos  = vDir * fLen;
 
-        pYellowHelper->SetPosition(coreVector3(LERPS(-1.3f, 1.3f, fTime), 0.8f, 0.0f) * FOREGROUND_AREA3);
+        pYellowHelper->SetPosition(coreVector3(vPos, 0.0f));
 
         if(fTime >= 1.0f) this->_KillHelper(ELEMENT_YELLOW, false);
     }
@@ -1846,12 +1880,9 @@ void cTorusBoss::__MoveOwn()
     cHelper* pBlueHelper = g_pGame->GetHelper(ELEMENT_BLUE);
     if(!pBlueHelper->HasStatus(HELPER_STATUS_DEAD))
     {
-        const coreFloat   fTime = pBlueHelper->GetLifeTime() * 0.3f;
-        const coreFloat   fLen  = LERP(1.3f, 1.0f, SIN(fTime * (1.0f*PI))) * FOREGROUND_AREA.x;
-        const coreVector2 vDir  = coreVector2::Direction(fTime * (-2.0f*PI) + (1.5f*PI));
-        const coreVector2 vPos  = vDir * fLen;
+        const coreFloat fTime = pBlueHelper->GetLifeTime() * 0.3f;
 
-        pBlueHelper->SetPosition(coreVector3(vPos, 0.0f));
+        pBlueHelper->SetPosition(coreVector3(LERPS(-1.3f, 1.3f, fTime), 0.8f, 0.0f) * FOREGROUND_AREA3);
 
         if(fTime >= 1.0f) this->_KillHelper(ELEMENT_BLUE, false);
     }

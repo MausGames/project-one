@@ -128,7 +128,7 @@ void cFinishMenu::Move()
                 else if(m_ExitButton.IsClicked())
                 {
                     // 
-                    if(m_eState == FINISH_WAIT) m_eState = FINISH_OUTRO;
+                    if(m_eState == FINISH_WAIT) m_eState = FINISH_OUTRO;   // TODO 1: verhindert, dass man exit drueckt waerend banner noch animiert
                 }
             }
             

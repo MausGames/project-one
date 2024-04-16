@@ -35,9 +35,11 @@
 // TODO 3: [MF] cMission::Close() sollte auch nach dem finalen/secret boss aufgerufen werden (mission und/oder segment ?)
 // TODO 3: manual/tutorial might react strange on inverted and toggled firing mode, because iActionHold is inspected
 // TODO 1: [MF] wenn P1 oder Eigengrau besiegt wird, beim ersten mal kommen immer credits, danach kommen keine bei single segment und single mission, aber immer bei arcade
-// TODO 1: [MF] handle Ater mission, P1, Eigengrau
+// TODO 1: [MF] handle Ater mission, P1, Eigengrau (menu, flow)
 // TODO 1: [MF] add 3 different pearl-collect-pitch tracks (wave, boss, p1) and reset state properly
 // TODO 3: flash-teleportation (mission, boss, p1) should be by the player doing the most damage, not the last attacker
+// TODO 4: there are multiple "Aim" objects (mission + boss)
+// TODO 2: STAGE_GET_UINT64 and STAGE_GET_UINT64_ARRAY hat falsches alignment (undefined behaviour) (+ reorder iLineTouch)
 
 
 // ****************************************************************
@@ -93,7 +95,7 @@
 #define NEVO_LINES                  (4u)                                              // 
 #define NEVO_BLASTS                 (NEVO_BOMBS)                                      // 
 #define NEVO_BLASTS_RAWS            (NEVO_BLASTS * (NEVO_LINES + 1u))                 // 
-#define NEVO_TILES                  (20u)                                             // TODO 1: vielleicht jetzt weniger mit neuem leviathan 
+#define NEVO_TILES                  (17u)                                             // 
 #define NEVO_TILES_RAWS             (NEVO_TILES)                                      // 
 #define NEVO_ARROWS                 (38u)                                             // 
 #define NEVO_ARROWS_RAWS            (NEVO_ARROWS)                                     // 
@@ -195,9 +197,9 @@
 #define STAGE_RESURRECT(s,f,t)                 {STAGE_FOREACH_ENEMY_ALL(s, pEnemy, __i) {if((coreIntW(__i) >= coreIntW(f)) && (coreIntW(__i) <= coreIntW(t))) pEnemy->Resurrect();}); ASSERT((coreIntW(f) <= coreIntW(t)) && (coreIntW(t) < coreIntW((s)->GetNumEnemies())))}
 #define STAGE_BADGE(i,b,p)                     {this->GiveBadge(i, b, p);}
 
-#define STAGE_DELAY_START                      {UNUSED STAGE_ADD_SQUAD(pDelay, cDummyEnemy, 1u) {pDelay->GetEnemy(0u)->Configure(1, 0u, COLOR_SHIP_GREY); pDelay->GetEnemy(0u)->Resurrect(); m_bDelay = true;});}
+#define STAGE_DELAY_START                      {UNUSED STAGE_ADD_SQUAD(pDelay, cDummyEnemy, 1u) {pDelay->GetEnemy(0u)->Configure(1, 0u, COLOR_SHIP_GREY); pDelay->GetEnemy(0u)->Resurrect(); this->SetDelay(true);});}
 #define STAGE_DELAY_START_CLEAR                {STAGE_DELAY_START g_pGame->GetBulletManagerEnemy()->ClearBullets(true);}
-#define STAGE_DELAY_END                        {m_apSquad.back()->GetEnemy(0u)->Kill(false); m_bDelay = false;}
+#define STAGE_DELAY_END                        {if(this->GetDelay()) m_apSquad.back()->GetEnemy(0u)->Kill(false); this->SetDelay(false);}
 
 #define STAGE_SINK_UINT(x)                     (bIsDead ? r_cast<coreUint32&> (s_aiSink) : (x))
 #define STAGE_SINK_FLOAT(x)                    (bIsDead ? r_cast<coreFloat&>  (s_aiSink) : (x))
@@ -399,6 +401,9 @@ public:
     void AddExtraScore(cPlayer* OUTPUT pPlayer, const coreUint32 iScore, const coreVector3 vPosition);
 
     // 
+    inline void SetDelay(const coreBool bDelay) {m_bDelay = bDelay;}
+
+    // 
     inline void CollPlayerEnemy (cPlayer* OUTPUT pPlayer, cEnemy*  OUTPUT pEnemy,  const coreVector3 vIntersection, const coreBool bFirstHit) {if(m_nCollPlayerEnemy)  m_nCollPlayerEnemy (pPlayer, pEnemy,  vIntersection, bFirstHit);}
     inline void CollPlayerBullet(cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit) {if(m_nCollPlayerBullet) m_nCollPlayerBullet(pPlayer, pBullet, vIntersection, bFirstHit);}
     inline void CollEnemyBullet (cEnemy*  OUTPUT pEnemy,  cBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit) {if(m_nCollEnemyBullet)  m_nCollEnemyBullet (pEnemy,  pBullet, vIntersection, bFirstHit);}
@@ -432,6 +437,9 @@ public:
 
 
 protected:
+    // 
+    //template <typename F> void _AddStage(const coreUint16 iCodeLine, F&& nInitFunc);   // []()  -> void
+
     // 
     template             <typename F> RETURN_RESTRICT coreSpline2* _AddPath (const coreUint16 iCodeLine,                       F&& nInitFunc);   // [](coreSpline2* OUTPUT pPath)  -> void
     template <typename T, typename F> RETURN_RESTRICT cEnemySquad* _AddSquad(const coreUint16 iCodeLine, const coreUint8 iNum, F&& nInitFunc);   // [](cEnemySquad* OUTPUT pSquad) -> void
@@ -504,6 +512,8 @@ private:
     coreVector2   m_avLaserPos  [VIRIDO_LASERS];            // 
     coreVector2   m_avLaserDir  [VIRIDO_LASERS];            // 
     coreFlow      m_afLaserTick [MISSION_PLAYERS];          // 
+    coreUint8     m_iLaserTouch;                            // 
+    coreUint8     m_iLaserIgnore;                           //
     coreBool      m_bLaserCross;                            // 
 
     coreBatchList m_Shadow;                                 // 
@@ -591,7 +601,8 @@ public:
     inline void SetBarrierReflect(const coreBool bReflect) {m_bBarrierReflect = bReflect;}
 
     // 
-    inline void SetLaserCross(const coreBool bCross) {m_bLaserCross = bCross;}
+    inline void SetLaserIgnore(const coreUint8 iIgnore) {m_iLaserIgnore = iIgnore;}
+    inline void SetLaserCross (const coreBool  bCross)  {m_bLaserCross  = bCross;}
 
     // 
     inline void MakeReal    (const coreUintW iIndex)       {ADD_BIT(m_iRealState, iIndex)}
@@ -958,6 +969,7 @@ private:
     coreUint8 m_aiMoveFlip[MISSION_PLAYERS];               // 
 
     coreUint8 m_aiWarnDir[MISSION_PLAYERS];                // 
+    coreBool  m_abWarn   [MISSION_PLAYERS];                // 
 
     coreUint32 m_aiRegisterID   [RUTILUS_AREA_REGISTRY];   // 
     coreFloat  m_afRegisterSpeed[RUTILUS_AREA_REGISTRY];   // 
@@ -1109,6 +1121,7 @@ private:
     coreUint32  m_iTouchState;                       // 
 
     coreBool  m_abCrushImmune[MISSION_PLAYERS];      // 
+    coreBool  m_abCrushInside[MISSION_PLAYERS];      // 
     coreUint8 m_iCrushState;                         // 
 
     coreFlow m_fAnimation;                           // animation value
@@ -1384,6 +1397,7 @@ private:
     cPlayer*     m_apStrikePlayer[MUSCUS_PEARLS];            // 
     const cShip* m_apStrikeTarget[MUSCUS_PEARLS];            // 
     coreUint64   m_iStrikeState;                             // 
+    coreFlow     m_fStrikeTicker;                            // 
 
     coreFlow m_fAnimation;                                   // animation value
 
@@ -1519,6 +1533,8 @@ private:
     cFigure  m_aaManual     [MISSION_PLAYERS][INTRO_MANUALS];   // 
     coreFlow m_aafManualTime[MISSION_PLAYERS][INTRO_MANUALS];   // 
 
+    coreVector3 m_vSkewerColor;                                 // 
+
     coreBool m_bFirstPlay;                                      // 
 
 
@@ -1531,6 +1547,9 @@ public:
     // 
     inline void EnableManual(const coreUintW iPlayerIndex, const coreUintW iManualIndex) {ASSERT(iPlayerIndex < MISSION_PLAYERS) ASSERT(iManualIndex < INTRO_MANUALS) m_aafManualTime[iPlayerIndex][iManualIndex] = 3.0f;}
 
+    // 
+    inline const coreBool& GetFirstPlay()const {return m_bFirstPlay;}
+
     // get object properties
     inline const coreChar* GetMusicName()const final {return "mission_00_intro.ogg";}
 
@@ -1540,6 +1559,9 @@ private:
     void __SetupOwn    ()final;
     void __RenderOwnTop()final;
     void __MoveOwnAfter()final;
+
+    // 
+    static coreVector3 __GetEnemyColor(const coreUintW iIndex);
 };
 
 
@@ -1632,6 +1654,15 @@ private:
     // execute own routines
     void __SetupOwn()final;
 };
+
+
+// ****************************************************************
+// 
+//template <typename F> void cMission::_AddStage(const coreUint16 iCodeLine, F&& nInitFunc)
+//{
+//    // 
+//    m_anStage.emplace(iCodeLine, nInitFunc);
+//}
 
 
 // ****************************************************************

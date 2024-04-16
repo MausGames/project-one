@@ -13,6 +13,7 @@
 // constructor
 cIntroMission::cIntroMission()noexcept
 : m_aafManualTime {}
+, m_vSkewerColor  (COLOR_SHIP_PURPLE)
 , m_bFirstPlay    (g_pSave->GetHeader().oProgress.bFirstPlay)
 {
     // 
@@ -163,4 +164,23 @@ void cIntroMission::__MoveOwnAfter()
             }
         }
     });
+}
+
+
+// ****************************************************************
+// 
+coreVector3 cIntroMission::__GetEnemyColor(const coreUintW iIndex)
+{
+    switch(iIndex % 8u)
+    {
+    default: ASSERT(false)
+    case 0u: return COLOR_SHIP_YELLOW;
+    case 1u: return COLOR_SHIP_ORANGE;
+    case 2u: return COLOR_SHIP_RED;
+    case 3u: return COLOR_SHIP_MAGENTA;
+    case 4u: return COLOR_SHIP_PURPLE;
+    case 5u: return COLOR_SHIP_BLUE;
+    case 6u: return COLOR_SHIP_CYAN;
+    case 7u: return COLOR_SHIP_GREEN;
+    }
 }

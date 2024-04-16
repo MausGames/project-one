@@ -1338,7 +1338,7 @@ void cCalorMission::__MoveOwnAfter()
                 m_avStarOffset[i] = coreVector2(vDiff.Angle(), fLen * m_fSwingSpeed);
                 m_afStarLength[i] = 0.0f;
                 
-                g_pSpecialEffects->CreateSplashColor(pStar->GetPosition(), SPECIAL_SPLASH_BIG, COLOR_ENERGY_WHITE);
+                g_pSpecialEffects->CreateSplashColor(pStar->GetPosition(), SPECIAL_SPLASH_BIG, COLOR_ENERGY_WHITE * 0.8f);
                 g_pSpecialEffects->PlaySound(pStar->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_02);
                 (*m_Star.List())[i]->SetPosition(coreVector3(HIDDEN_POS, 0.0f));                 
                 

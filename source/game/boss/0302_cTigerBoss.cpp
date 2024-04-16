@@ -25,16 +25,11 @@
 // abstürzende gegner sollten explodieren vor absturz, was besonders wichtig ist um die gegner über spike-plates zu kaschieren
 // TODO 1: hard-mode: wind + minen
 // TODO 1: hard mode: wind force in environment-richtung (damit es von tiger position beeinflusst wird) (stark genug, dass man beim schießen nicht dagegen ankommt)
-// TODO 1: [MF] manche gegner in mission sollen schon abstürzen
-// TODO 1: [MF] Symbol I V X L C D M Value 1 5 10 50 100 500 1000    -> anbringen mit eigenem kleinen quad als sub-weapon pro waffe
-// TODO 1: [MF] sollen jetzt noch zahlen und/oder farben für jede waffe hinzugefügt werden ? ein eigenes quad, das über die waffe schwebt (kann durch explosion versteckt werden)
-// TODO 1: [MF] improve/fix beam effect
-// TODO 1: [MF] weißer rauch bei laser-waffe vermischt sich mit weißem rauch von maulwürfen
-// TODO 1: [MF] fliegend tower gegner sollten roten schein haben -> duplicate
+// TODO 1: Symbol I V X L C D M Value 1 5 10 50 100 500 1000    -> anbringen mit eigenem kleinen quad als sub-weapon pro waffe
+// TODO 1: sollen jetzt noch zahlen und/oder farben für jede waffe hinzugefügt werden ? ein eigenes quad, das über die waffe schwebt (kann durch explosion versteckt werden)
+// TODO 1: [MF] improve/fix beam effect + aiming + collision detection
 // TODO 1: [MF] ACHIEVEMENT: name (), description (), spin around the boss 10 times without getting hit
-// TODO 1: [MF] MAIN: juiciness (move, rota, muzzle, effects)
-// TODO 1: [MF] rote bullet noch mal überprüfen, da flog ein einzelnes geschoss herum, und nochmal mehrere einzelne einer linie
-// TODO 1: [MF] alle phasen nochmal für verbesserungen anschauen
+// TODO 1: [MF] vielleicht in grüner phase im mittel pause machen und nach unten bewegen, bei wechsel auf raketen wieder mittig
 // TODO 5: (mines need to be enemies to allow blinking, combo/chain)
 // TODO 5: (in die stacheln schießen erzeugt effekt (knusprig))
 // TODO 5: (make sure to disable wind on boss-death (hard if necessary))
@@ -57,6 +52,7 @@
 #define JUMP_DATA     (5u)
 #define HELPER_DATA   (6u)
 #define FINAL_ROTA    (7u)
+#define VEIL_VALUE    (8u)
 
 
 // ****************************************************************
@@ -121,10 +117,10 @@ cTigerBoss::cTigerBoss()noexcept
         // 
         m_aBeam[i].DefineModel  ("object_tube_open.md3");
         m_aBeam[i].DefineTexture(0u, "effect_energy.png");
-        m_aBeam[i].DefineProgram(i ? "effect_energy_direct_program" : "effect_energy_program");
-        m_aBeam[i].SetSize      (i ? coreVector3(0.0f,10.0f,0.0f) : coreVector3(0.0f,100.0f,0.0f));
-        m_aBeam[i].SetColor3    (i ? (LERP(COLOR_ENERGY_WHITE, COLOR_ENERGY_MAGENTA, 0.5f)) : (COLOR_ENERGY_MAGENTA * 0.8f));
-        m_aBeam[i].SetTexSize   (i ? coreVector2(1.0f,1.0f) : coreVector2(4.0f,1.0f));
+        m_aBeam[i].DefineProgram(i ? "effect_energy_direct_program" : "effect_energy_direct_program");
+        m_aBeam[i].SetSize      (i ? coreVector3(0.0f,0.0f,0.0f) : coreVector3(0.0f,100.0f,0.0f));
+        m_aBeam[i].SetColor3    (i ? (LERP(COLOR_ENERGY_WHITE, COLOR_ENERGY_MAGENTA, 0.5f)) : (COLOR_ENERGY_MAGENTA * 1.0f));
+        m_aBeam[i].SetTexSize   (i ? coreVector2(3.0f,0.2f) : coreVector2(4.0f,1.0f));
         m_aBeam[i].SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
     }
 
@@ -197,7 +193,6 @@ cTigerBoss::cTigerBoss()noexcept
 
     // 
     this->__SwitchWeapon(0u);
-    //m_fWeaponChange = 3.0f - CORE_MATH_PRECISION;
 }
 
 
@@ -270,16 +265,20 @@ void cTigerBoss::__RenderOwnOver()
     glDepthFunc(GL_ALWAYS);
     {
         // 
+        m_Sting.Render();
+    }
+    glDepthFunc(GL_LEQUAL);
+
+    glDisable(GL_DEPTH_TEST);
+    {
+        // 
         for(coreUintW i = 0u; i < TIGER_AIMS; ++i)
             m_aAim[i].Render();
 
         // 
         m_AimRing.Render();
-
-        // 
-        m_Sting.Render();
     }
-    glDepthFunc(GL_LEQUAL);
+    glEnable(GL_DEPTH_TEST);
 
     // 
     g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyList(&m_Sting);
@@ -383,9 +382,6 @@ void cTigerBoss::__MoveOwn()
             pMission->ChangeInsanity(1u);
 
             PHASE_CHANGE_TO(20u)
-            //PHASE_CHANGE_TO(80u)
-            //m_avVector[POS_OFFSET].y = 0.0f;
-            //this->__SwitchWeapon(4u);
         });
     }
 
@@ -462,9 +458,6 @@ void cTigerBoss::__MoveOwn()
     {
         PHASE_CONTROL_TIMER(0u, 0.1f, LERP_SMOOTH)
         {
-            cDesertBackground* pBackground = d_cast<cDesertBackground*>(g_pEnvironment->GetBackground());
-            pBackground->SetVeilAlpha(fTime);
-
             g_pEnvironment->SetTargetDirectionNow(coreVector2::Direction(fTime * (-1.5f*PI)));
 
             if(PHASE_FINISHED)
@@ -610,9 +603,6 @@ void cTigerBoss::__MoveOwn()
     // 
     else if(m_iPhase == 60u)
     {
-        cDesertBackground* pBackground = d_cast<cDesertBackground*>(g_pEnvironment->GetBackground());
-        pBackground->SetVeilAlpha(1.0f - STEPS(0.0f, 10.0f, m_fPhaseTime));
-
         constexpr coreUintW iHelperSpike = 35u;
         if(pMission->GetSpikeLaunched(iHelperSpike))
         {
@@ -759,7 +749,7 @@ void cTigerBoss::__MoveOwn()
                 case 4u: vPos = coreVector2( 0.0f, 0.0f); break;
                 }
 
-                m_aAim[iTick].SetPosition(coreVector3(vPos * FOREGROUND_AREA * 0.6f, 0.0f));
+                m_aAim[iTick].SetPosition(coreVector3(vPos * FOREGROUND_AREA * 0.5f, 0.0f));
             }
 
             if(PHASE_FINISHED)
@@ -822,12 +812,19 @@ void cTigerBoss::__MoveOwn()
                 m_aAim[0].SetPosition(coreVector3(m_vBeamPos, 0.0f));
             }
 
-            m_AimRing.SetSize(m_aAim[0].GetSize() * LERP(3.0f, 1.0f, STEP(0.0f, 0.85f, fTime)));
-            m_AimRing.SetAlpha     (STEP(0.0f, 0.85f, fTime) * 0.7f);
+            m_AimRing.SetSize  (m_aAim[0].GetSize() * LERPBR(3.0f, 1.0f, STEP(0.0f, 0.85f, fTime)));
+            m_AimRing.SetColor3(PHASE_TIME_BEFORE(0.85f) ? coreVector3(1.0f,1.0f,1.0f) : COLOR_MENU_MAGENTA);
+            m_AimRing.SetAlpha (STEPH3(0.0f, 0.85f, fTime));
+
+            PHASE_CONTROL_TICKER(1u, 4u, 5.0f * 0.5f, LERP_LINEAR)
+            {
+                //g_pSpecialEffects->PlaySound(coreVector3(m_vBeamPos, 0.0f), 1.0f, 0.7f, SOUND_EFFECT_BEEP);
+            });
 
             if(PHASE_FINISHED)
             {
                 PHASE_CHANGE_INC
+                PHASE_RESET(1u)
 
                 this->__DisableAim(0u, true);
                 this->__EnableBeam(m_vBeamPos);
@@ -858,6 +855,18 @@ void cTigerBoss::__MoveOwn()
 
     // ################################################################
     // ################################################################
+
+    if(m_iPhase >= 50u)
+    {
+        m_avVector[VEIL_VALUE].x = MAX0(m_avVector[VEIL_VALUE].x - 0.1f * TIME);
+    }
+    else if(m_iPhase >= 31u)
+    {
+        m_avVector[VEIL_VALUE].x = MIN1(m_avVector[VEIL_VALUE].x + 0.1f * TIME);
+    }
+
+    cDesertBackground* pBackground = d_cast<cDesertBackground*>(g_pEnvironment->GetBackground());
+    pBackground->SetVeilAlpha(BLENDS(m_avVector[VEIL_VALUE].x));
 
     if(m_iPhase >= 60u)
     {
@@ -953,7 +962,7 @@ void cTigerBoss::__MoveOwn()
         }
         else if(m_iWeaponType == 4u)
         {
-            PHASE_CONTROL_TIMER(3u, 1.0f, LERP_LINEAR)
+            PHASE_CONTROL_TIMER(3u, ((m_iPhase >= 83u) && (m_iPhase < 90u)) ? 2.0f : 1.0f, LERP_LINEAR)
             {
                 if(PHASE_BEGINNING)
                 {
@@ -1003,10 +1012,14 @@ void cTigerBoss::__MoveOwn()
     if(m_aBeam[0].IsEnabled(CORE_OBJECT_ENABLE_MOVE))
     {
         if(m_vBeamPos.IsNull()) m_vBeamPos = coreVector2(0.0f, CORE_MATH_PRECISION);
+        
+       // const coreFloat   fTempHeight = g_pEnvironment->RetrieveSafeHeight(m_vBeamPos);
+        const coreVector2 vRealPos = m_vBeamPos;// * 1.2f;
 
-        const coreFloat   fBeamHeight = g_pEnvironment->RetrieveSafeHeight(m_vBeamPos);
-        const coreVector2 vBeamCenter = m_vBeamPos + m_vBeamPos.Normalized() * 10.0f;// * (1.0f - STEP(0.0f, 50.0f, m_vBeamPos.Length()));
-        const coreVector3 vBeamDir    = (coreVector3(m_vBeamPos, fBeamHeight) - coreVector3(vBeamCenter, 0.0f)).Normalized();
+        const coreFloat   fBeamHeight = g_pEnvironment->RetrieveSafeHeight(vRealPos);
+        //const coreVector2 vBeamCenter = m_vBeamPos.Normalized() * -10.0f;// * (1.0f - 
+        const coreVector2 vBeamCenter = vRealPos + vRealPos.Normalized() * 11.0f;// * (1.0f - STEP(0.0f, 50.0f, m_vBeamPos.Length()));
+        const coreVector3 vBeamDir    = (coreVector3(vRealPos, fBeamHeight) - coreVector3(vBeamCenter, 0.0f)).Normalized();
         //const coreVector3 vBeamOri    = coreVector3(vBeamCenter.Normalized().x, coreVector3::Cross(vBeamDir, coreVector3(vBeamDir.xy().Normalized().Rotated90(), 0.0f)).yz()).Normalized();
         const coreVector3 vBeamOri    = coreVector3(vBeamCenter.Normalized(), 0.0f);
         
@@ -1014,7 +1027,7 @@ void cTigerBoss::__MoveOwn()
         
 
         // 
-        m_fBeamTime.Update(1.0f);
+        m_fBeamTime.Update(1.5f);
         const coreFloat fTime = m_fBeamTime;
 
         // 
@@ -1029,7 +1042,7 @@ void cTigerBoss::__MoveOwn()
         const coreFloat fTex   = (m_fAnimation * -1.0f);
         
             // 
-            const coreVector3 vPos = coreVector3(m_vBeamPos + m_vBeamPos.Normalized() * 0.0f, fBeamHeight) - vBeamDir * m_aBeam[0].GetSize().y;
+            const coreVector3 vPos = coreVector3(vRealPos, fBeamHeight) - vBeamDir * m_aBeam[0].GetSize().y;
 
             // 
             m_aBeam[0].SetPosition   (vPos);
@@ -1037,27 +1050,28 @@ void cTigerBoss::__MoveOwn()
             m_aBeam[0].SetOrientation(vBeamOri);
             m_aBeam[0].SetSize       (coreVector3(fSize, m_aBeam[0].GetSize().y, fSize));
             m_aBeam[0].SetAlpha      (fAlpha);
-            m_aBeam[0].SetTexOffset  (coreVector2(1.0f,1.0f) * fTex);
+            m_aBeam[0].SetTexOffset  (coreVector2(1.0f,1.0f) * -fTex);
             m_aBeam[0].Move();
             
             
             // 
-            const coreVector3 vPos2 = coreVector3(m_vBeamPos + m_vBeamPos.Normalized() * 0.0f, fBeamHeight) - vBeamDir * m_aBeam[1].GetSize().y * 1.0;
+            const coreFloat fLen = (20.0f - vRealPos.Processed(ABS).Max() / 50.0f * 15.0f) * 1.0f;
+            const coreVector3 vPos2 = coreVector3(vRealPos, fBeamHeight) - vBeamDir * fLen * 1.0f;
 
             // 
             m_aBeam[1].SetPosition   (vPos2);
             m_aBeam[1].SetDirection  (vBeamDir);
             m_aBeam[1].SetOrientation(vBeamOri);
-            m_aBeam[1].SetSize       (coreVector3(fSize * 1.1f, m_aBeam[1].GetSize().y, fSize * 1.3f));
+            m_aBeam[1].SetSize       (coreVector3(fSize * 1.1f, fLen, fSize * 1.3f));
             m_aBeam[1].SetAlpha      (fAlpha);
-            m_aBeam[1].SetTexOffset  (coreVector2(0.3f,0.3f) * fTex);
+            m_aBeam[1].SetTexOffset  (coreVector2(0.5f,0.5f) * fTex);
             m_aBeam[1].Move();
         
 
-        this->__CreateOverdrive(coreVector3(m_vBeamPos, fBeamHeight));
+        this->__CreateOverdrive(coreVector3(vRealPos, fBeamHeight));
     }
 
-    const coreVector2 vAimDir = coreVector2::Direction((1.0f*PI) * m_fAnimation);
+    const coreVector2 vAimDir = coreVector2::Direction((1.5f*PI) * m_fAnimation);
 
     for(coreUintW i = 0u; i < TIGER_AIMS; ++i)
     {
@@ -1078,7 +1092,9 @@ void cTigerBoss::__MoveOwn()
 
     g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cTriangleBullet>([](cTriangleBullet* OUTPUT pBullet)
     {
-        if(pBullet->GetDamage() > (g_pGame->IsEasy() ? 3 : 2))
+        const coreInt32 iLimit = g_pGame->IsEasy() ? 3 : 2;
+
+        if(pBullet->GetDamage() > iLimit)
         {
             coreVector2 vCurPos = pBullet->GetPosition().xy();
             coreVector2 vCurDir = pBullet->GetFlyDir();
@@ -1086,8 +1102,9 @@ void cTigerBoss::__MoveOwn()
 
                  if((vCurPos.x < -FOREGROUND_AREA.x * 1.1f) && (vCurDir.x < 0.0f)) {vCurPos.x -= 2.0f * (vCurPos.x + FOREGROUND_AREA.x * 1.1f); vCurDir.x =  ABS(vCurDir.x); iDamage -= 1;}
             else if((vCurPos.x >  FOREGROUND_AREA.x * 1.1f) && (vCurDir.x > 0.0f)) {vCurPos.x -= 2.0f * (vCurPos.x - FOREGROUND_AREA.x * 1.1f); vCurDir.x = -ABS(vCurDir.x); iDamage -= 1;}
-                 if((vCurPos.y < -FOREGROUND_AREA.y * 1.1f) && (vCurDir.y < 0.0f)) {vCurPos.y -= 2.0f * (vCurPos.y + FOREGROUND_AREA.y * 1.1f); vCurDir.y =  ABS(vCurDir.y); iDamage -= 1;}
+            else if((vCurPos.y < -FOREGROUND_AREA.y * 1.1f) && (vCurDir.y < 0.0f)) {vCurPos.y -= 2.0f * (vCurPos.y + FOREGROUND_AREA.y * 1.1f); vCurDir.y =  ABS(vCurDir.y); iDamage -= 1;}   // # else
             else if((vCurPos.y >  FOREGROUND_AREA.y * 1.1f) && (vCurDir.y > 0.0f)) {vCurPos.y -= 2.0f * (vCurPos.y - FOREGROUND_AREA.y * 1.1f); vCurDir.y = -ABS(vCurDir.y); iDamage -= 1;}
+            ASSERT(iDamage >= iLimit)
 
             pBullet->SetPosition(coreVector3(vCurPos, 0.0f));
             pBullet->SetFlyDir  (vCurDir);
@@ -1167,7 +1184,7 @@ void cTigerBoss::__MoveOwn()
 
         if((fPrevExtend < 0.3f) && (fExtend >= 0.3f))
         {
-            g_pSpecialEffects->CreateSplashColor(coreVector3(vBase + vDir * 2.0f, 0.0f), 5.0f, 3u, COLOR_ENERGY_WHITE);
+            g_pSpecialEffects->CreateSplashColor(coreVector3(vBase + vDir * 2.0f, 0.0f), 5.0f, 3u, COLOR_ENERGY_WHITE * 0.8f);
             g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_TINY);
         }
     }
@@ -1388,7 +1405,7 @@ void cTigerBoss::__MoveOwn()
     cHelper* pPurpleHelper = g_pGame->GetHelper(ELEMENT_PURPLE);
     if(!pPurpleHelper->HasStatus(HELPER_STATUS_DEAD))
     {
-        const coreVector2 vPos = pPurpleHelper->GetPosition().xy() + AlongCrossNormal(pPurpleHelper->GetPosition().xy()) * (pPurpleHelper->GetLifeTime() * 1.5f * TIME);
+        const coreVector2 vPos = pPurpleHelper->GetPosition().xy() + AlongCrossNormal(pPurpleHelper->GetPosition().xy()) * (MAX0(pPurpleHelper->GetLifeTime() - 1.0f) * 1.5f * TIME);
 
         pPurpleHelper->SetPosition(coreVector3(vPos, 0.0f));
 
@@ -1435,8 +1452,11 @@ void cTigerBoss::__EnableBeam(const coreVector2 vPosition)
     // 
     WARN_IF(m_aBeam[0].IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->__DisableBeam(false);
 
+    
+    const coreVector2 vRealPos = vPosition * 1.2f;
+    
     // 
-    m_vBeamPos  = vPosition;
+    m_vBeamPos  = vRealPos;
     m_fBeamTime = 0.0f;
 
     // 
@@ -1452,10 +1472,15 @@ void cTigerBoss::__EnableBeam(const coreVector2 vPosition)
     nInitFunc(&m_aBeam[0]);
     nInitFunc(&m_aBeam[1]);
     
-    const coreVector3 vImpact = coreVector3(vPosition, g_pEnvironment->RetrieveSafeHeight(vPosition));
+    const coreVector3 vImpact = coreVector3(vRealPos, g_pEnvironment->RetrieveSafeHeight(vRealPos));
 
     g_pSpecialEffects->MacroExplosionColorBig(vImpact, COLOR_ENERGY_MAGENTA);
     g_pSpecialEffects->PlaySound(vImpact, 0.8f, 1.0f, SOUND_EFFECT_FIRE_START);
+    
+    
+    
+    g_pSpecialEffects->CreateSplashFire(vImpact, 50.0f, 200u, COLOR_ENERGY_MAGENTA);
+    g_pSpecialEffects->CreateSplashColor(vImpact, 100.0f, 50u, COLOR_ENERGY_MAGENTA);
 }
 
 
@@ -1714,11 +1739,11 @@ void cTigerBoss::__ShootWeapon()
 
         const coreVector3 vStart = m_aWeapon[0].GetPosition() + m_aWeapon[0].GetDirection() * 9.0f;
         const coreVector3 vDiff  = coreVector3(vHit, 0.0f) - vStart;
-        const coreUintW   iNum   = MAX(F_TO_UI(vDiff.Length() / 1.9f), 2u);
+        const coreUintW   iNum   = MAX(F_TO_UI(vDiff.Length() / 1.7f), 2u);
 
-        for(coreUintW j = iNum; j--; ) g_pSpecialEffects->CreateSplashColor(vStart + vDiff * (I_TO_F(j) * RCP(I_TO_F(iNum - 1u))), 10.0f, 1u, COLOR_ENERGY_WHITE);
+        for(coreUintW j = iNum; j--; ) g_pSpecialEffects->CreateSplashColor(vStart + vDiff * (I_TO_F(j) * RCP(I_TO_F(iNum - 1u))), 10.0f, 1u, COLOR_ENERGY_WHITE * 0.8f);
 
-        g_pSpecialEffects->CreateSplashColor(coreVector3(vHit, 0.0f), SPECIAL_SPLASH_TINY, COLOR_ENERGY_WHITE);
+        g_pSpecialEffects->CreateSplashColor(coreVector3(vHit, 0.0f), SPECIAL_SPLASH_TINY, COLOR_ENERGY_WHITE * 0.8f);
         g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
     }
 }
@@ -1878,20 +1903,34 @@ void cTigerBoss::__CreateOverdrive(const coreVector3 vIntersect)
                 // add object to background or windscreen
                 g_pEnvironment->GetBackground()->AddDecal(pObject, vDecalPos, 128u, "effect_decal_single_inst_program", LIST_KEY);
                 
+                const coreVector3 vZero    = coreVector3(g_pForeground->Project3D(vNewHit), 0.0f);
+                const coreVector3 vTowards = vZero.Normalized() * -1.0f;
+                
+                
+                for(coreUintW i = 0u; i < 8u; ++i)
+                {
+                    const coreVector3 vDir = MapToAxisInv(vTowards, coreVector2::Direction((I_TO_F(i) - 3.5f) * (0.125f*PI))) * m_aBeam[0].GetSize().x * 1.0f;
+
+                    g_pSpecialEffects->CreateSplashFire (vZero + vDir, 5.0f*2.0f, 1u, COLOR_ENERGY_MAGENTA);
+                }
+                
+                
                 // 
                 for(coreUintW i = 0u; i < 8u; ++i)
                 {
-                    const coreVector3 vDir = coreVector3(coreVector2::Direction(I_TO_F(i) * (0.125f*PI)) * m_aBeam[0].GetSize().x * 1.0f, 0.0f);
+                    const coreVector3 vDir  = coreVector3(coreVector2::Direction(I_TO_F(i) * (0.125f*PI)), 0.0f);
+                    const coreVector3 vDir2 = vDir * (m_aBeam[0].GetSize().x * 1.0f);
 
                     // 
-                    g_pSpecialEffects->CreateSplashFire (vNewHit + vDir,  5.0f*2.0f, 1u, COLOR_ENERGY_MAGENTA);
-                    g_pSpecialEffects->CreateSplashFire (vNewHit - vDir,  5.0f*2.0f, 1u, COLOR_ENERGY_MAGENTA);
-                    g_pSpecialEffects->CreateSplashFire (vNewHit + vDir*1.5f,  5.0f*2.0f, 1u, COLOR_ENERGY_MAGENTA);
-                    g_pSpecialEffects->CreateSplashFire (vNewHit - vDir*1.5f,  5.0f*2.0f, 1u, COLOR_ENERGY_MAGENTA);
-                    g_pSpecialEffects->CreateSplashFire (vNewHit + vDir*2.0f,  5.0f*2.0f, 1u, COLOR_ENERGY_MAGENTA);
-                    g_pSpecialEffects->CreateSplashFire (vNewHit - vDir*2.0f,  5.0f*2.0f, 1u, COLOR_ENERGY_MAGENTA);
-                    g_pSpecialEffects->CreateSplashColor(vNewHit + vDir, 25.0f*2.0f, 2u, COLOR_ENERGY_MAGENTA);
-                    g_pSpecialEffects->CreateSplashColor(vNewHit - vDir, 25.0f*2.0f, 2u, COLOR_ENERGY_MAGENTA);
+                    g_pSpecialEffects->CreateSplashFire (vNewHit + vDir2,      5.0f*4.0f, 1u, COLOR_ENERGY_MAGENTA);
+                    g_pSpecialEffects->CreateSplashFire (vNewHit - vDir2,      5.0f*4.0f, 1u, COLOR_ENERGY_MAGENTA);
+                    g_pSpecialEffects->CreateSplashFire (vNewHit + vDir2*1.5f, 5.0f*4.0f, 1u, COLOR_ENERGY_MAGENTA);
+                    g_pSpecialEffects->CreateSplashFire (vNewHit - vDir2*1.5f, 5.0f*4.0f, 1u, COLOR_ENERGY_MAGENTA);
+                    g_pSpecialEffects->CreateSplashFire (vNewHit + vDir2*2.0f, 5.0f*4.0f, 1u, COLOR_ENERGY_MAGENTA);
+                    g_pSpecialEffects->CreateSplashFire (vNewHit - vDir2*2.0f, 5.0f*4.0f, 1u, COLOR_ENERGY_MAGENTA);
+
+                    g_pSpecialEffects->CreateBlowColor(vNewHit + vDir2,  vDir, 25.0f*3.0f, 1u, COLOR_ENERGY_MAGENTA);
+                    g_pSpecialEffects->CreateBlowColor(vNewHit - vDir2, -vDir, 25.0f*3.0f, 1u, COLOR_ENERGY_MAGENTA);
                 }
             }
 

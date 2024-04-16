@@ -102,6 +102,7 @@ alignas(ALIGNMENT_CACHE) static constexpr const coreChar* g_apcCreditEntryFonts[
 // 
 alignas(ALIGNMENT_CACHE) static constexpr const coreChar* g_apcCreditEntryLibraries[] =
 {
+    "epic_online_services",
     "forsyth_too",
     "glew",
     "imgui",
@@ -120,14 +121,7 @@ alignas(ALIGNMENT_CACHE) static constexpr const coreChar* g_apcCreditEntryLibrar
 // 
 alignas(ALIGNMENT_CACHE) static constexpr const coreChar* g_apcCreditEntryThanks[] =
 {
-        ""
-    //"AgitatedBrilliant",   // r/shmups: comment
-    //"cy13erpunk",          // r/shmups: feedback, comment
-    //"FaceTimePolice",      // r/shmups: feedback, comment
-    //"JewsEatFruit",        // r/shmups: comment, marking
-    //"leanderish",          // r/shmups: feedback, comment
-    //"Sentmoraap",          // r/shmups: comment
-    //"TheCaptainGhost"      // r/shmups: feedback, comment
+    "Damian Hiltebrand"
 };
 
 

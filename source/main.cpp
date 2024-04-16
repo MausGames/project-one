@@ -14,6 +14,7 @@ coreVector2     g_vHudDirection   = coreVector2(0.0f,1.0f);
 coreBool        g_bTiltMode       = false;
 coreFloat       g_fShiftMode      = 0.0f;
 coreBool        g_bDemoVersion    = false;
+coreBool        g_bPirateVersion  = false;
 coreBool        g_bDebugOutput    = false;
 coreMusicPlayer g_MusicPlayer     = {};
 
@@ -240,11 +241,12 @@ void CoreApp::Render()
             // render post-processing
             g_pPostProcessing->Render();
 
-
             if(g_bTiltMode)
             {
                 if(STATIC_ISVALID(g_pGame))
                 {
+                    if(g_CurConfig.Game.iMirrorMode) glEnable(GL_CULL_FACE);
+
                     glEnable(GL_DEPTH_TEST);
                     {
                         g_pGame->Render();
@@ -252,6 +254,8 @@ void CoreApp::Render()
                     glDisable(GL_DEPTH_TEST);
 
                     g_pPostProcessing->RenderTilt();
+
+                    if(g_CurConfig.Game.iMirrorMode) glDisable(GL_CULL_FACE);
                 }
             }
 

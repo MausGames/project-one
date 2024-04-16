@@ -105,7 +105,7 @@ void cCombatText::Render()
 // move the combat text
 void cCombatText::Move()
 {
-    if(TIME < 0.001f) return;
+    if(SPECIAL_FROZEN) return;
 
     // 
     const coreFloat fAlphaFull = BLENDH3(m_fAlpha) * MENU_INSIDE_ALPHA;
@@ -482,6 +482,9 @@ void cCombatText::__DrawLabel(const coreChar* pcText, const coreVector3 vPositio
         m_aLabel[i].SetText  (pcText);
         m_aLabel[i].SetCenter(vOnScreen);
         m_aLabel[i].SetColor4(coreVector4(vColor, 0.0f));
+        
+        
+        //m_aLabel[i].SetColor4(coreVector4(COLOR_MENU_WHITE, 0.0f));// [A1]
 
         // 
         m_afTime[i] = 1.0f;

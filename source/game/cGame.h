@@ -13,9 +13,8 @@
 // TODO 3: enemy bullet (and enemy?) cleanup on mission unload (probably not really necessary, can be re-used for next mission)
 // TODO 5: maybe spawn players in flight direction, mission start and continue ?
 // TODO 2: FindPlayer may find player outside of area (during resurrection)
-// TODO 2: [MF] removing ghost status (player, enemy, bullet) should reset firsthit property on collision somehow (but needs separation between sub-ghost states, maybe add own collision-tracker and merge with the one in player-class)
+// TODO 2: [MF] removing ghost status (player, enemy, bullet) should reset firsthit property on collision somehow (maybe add own collision-tracker and merge with the one in player-class)
 // TODO 3: repair enemy only in coop ? (not duel)
-// TODO 2: [MF] vor dem tod von immortal enemies, vor allem bossen, kann es sein, dass spieler-geschosse (sichtbar) reflektiert werden und der entsprechende sound-gespielt wird
 
 
 // ****************************************************************
@@ -82,8 +81,9 @@ enum eGameDifficulty : coreUint8
 
 enum eGameFlag : coreUint8
 {
-    GAME_FLAG_TASK     = 0x01u,   // 
-    GAME_FLAG_FRAGMENT = 0x02u    // 
+    GAME_FLAG_TASK       = 0x01u,   // 
+    GAME_FLAG_TASK_EXTRA = 0x02u,   // 
+    GAME_FLAG_FRAGMENT   = 0x04u    // 
 };
 
 struct sGameOptions final
@@ -333,6 +333,7 @@ public:
     inline coreBool IsEasy     ()const                          {return (this->GetDifficulty() == GAME_DIFFICULTY_EASY);}
     inline coreBool IsHard     ()const                          {return (this->GetDifficulty() == GAME_DIFFICULTY_HARD);}
     inline coreBool IsTask     ()const                          {return HAS_FLAG(this->GetFlags(), GAME_FLAG_TASK);}
+    inline coreBool IsTaskExtra()const                          {return HAS_FLAG(this->GetFlags(), GAME_FLAG_TASK_EXTRA);}
     inline coreBool IsFragment ()const                          {return HAS_FLAG(this->GetFlags(), GAME_FLAG_FRAGMENT);}
     inline coreBool IsVersion  (const coreUint16 iVersion)const {return (this->GetVersion   () >= iVersion);}
     

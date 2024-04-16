@@ -19,9 +19,9 @@
 // TODO 5: boss0102, separate emitters to three objects, to make them blue
 // TODO 5: boss0103, remove small hitch when finishing rotation in the middle shortly before beginning laser-phase
 // TODO 3: transformation properties are invalid on start (basically for phase 0), should this be handled ?
-// TODO 1: [MF] boss hat mit PHASE_CONTROL_TICKER noch einmal geschossen, nachdem er gestorben ist und alle geschosse zerstört wurden, sollte allgemein verhindert werden, auch bei normalen waves
 // TODO 1: [MF] check if PHASE_AGAIN is required on some PHASE_RESET calls (if 1.0f is reached, all calculations will be repeated with 0.0f, for a (nearly) perfect loop (fractions are still not handled))
 // TODO 4: remove counters and vectors (first remove usage)
+// TODO 1: [MF] change boss names: MESSIER -> SAROS, GEMINGA -> NAGUAL(?)    and check boss titles again
 
 
 // ****************************************************************
@@ -83,6 +83,7 @@
 
 #define MESSIER_SHELLS            (2u)                                         // 
 #define MESSIER_RINGS             (3u)                                         // 
+#define MESSIER_TRAILS            (3u)                                         // 
 #define MESSIER_ENEMIES_SMALL     (8u)                                         // 
 #define MESSIER_ENEMIES_BIG       (8u)                                         // 
 #define MESSIER_METEOR_RANGE      (1.35f)                                      // 
@@ -93,6 +94,7 @@
 #define MESSIER_SCALE             (10.0f)                                      // 
 
 #define CHOL_WINGS                (4u)                                         // 
+#define CHOL_SHIFT                (4.0f)                                       // 
 
 #define ZEROTH_LIMBS              (6u)                                         // 
 #define ZEROTH_ICES               (2u)                                         // 
@@ -802,33 +804,40 @@ private:
 class cMessierBoss final : public cBoss
 {
 private:
-    cCustomEnemy m_aShell[MESSIER_SHELLS];           // 
+    cCustomEnemy m_aShell[MESSIER_SHELLS];             // 
 
-    coreObject3D m_aRing[MESSIER_RINGS];             // 
-    coreFlow     m_fRingTime;                        // 
-    coreFlow     m_fRingScreen;                      // 
+    coreObject3D m_aRing[MESSIER_RINGS];               // 
+    coreFlow     m_fRingTime;                          // 
+    coreFlow     m_fRingScreen;                        // 
 
-    coreObject3D m_aClock[2];                        // 
-    coreFlow     m_fClockTime;                       // 
-    coreBool     m_bClockState;                      // 
+    coreObject3D m_aClock       [2];                   // 
+    coreObject3D m_aaClockTrail [2][MESSIER_TRAILS];   // 
+    coreFlow     m_aafClockAlpha[2][MESSIER_TRAILS];   // 
+    coreFlow     m_fClockTime;                         // 
+    coreBool     m_bClockState;                        // 
 
-    coreObject3D m_aHole[2];                         // 
-    coreBool     m_bHoleState;                       // 
+    coreObject3D m_Bubble;                             // 
+    coreFlow     m_fBubbleTime;                        // 
+    coreFlow     m_fBubbleAlpha;                       // 
+    coreBool     m_bBubbleState;                       // 
 
-    coreFloat m_fTimeFactor;                         // 
-    coreUint8 m_iTimeRevert;                         // 
-    coreBool  m_bTimeMusic;                          // 
+    coreObject3D m_aHole[2];                           // 
+    coreBool     m_bHoleState;                         // 
 
-    coreFlow   m_afShootTime[MESSIER_SHOOT_TIMES];   // 
-    coreUint32 m_aiShootTick[MESSIER_SHOOT_TIMES];   // 
+    coreFloat m_fTimeFactor;                           // 
+    coreUint8 m_iTimeRevert;                           // 
+    coreBool  m_bTimeMusic;                            // 
 
-    coreUint32 m_iTick;                              // 
+    coreFlow   m_afShootTime[MESSIER_SHOOT_TIMES];     // 
+    coreUint32 m_aiShootTick[MESSIER_SHOOT_TIMES];     // 
 
-    coreFlow m_fMeteorRota;                          // 
-    coreFlow m_fBossRota;                            // 
+    coreUint32 m_iTick;                                // 
 
-    coreSoundPtr m_pBellSound;                       // 
-    coreSoundPtr m_pVoidSound;                       // 
+    coreFlow m_fMeteorRota;                            // 
+    coreFlow m_fBossRota;                              // 
+
+    coreSoundPtr m_pBellSound;                         // 
+    coreSoundPtr m_pVoidSound;                         // 
 
 
 public:
@@ -844,11 +853,12 @@ public:
 
 private:
     // execute own routines
-    void __ResurrectOwn ()final;
-    void __KillOwn      (const coreBool bAnimated)final;
-    void __RenderOwnOver()final;
-    void __RenderOwnTop ()final;
-    void __MoveOwn      ()final;
+    void __ResurrectOwn  ()final;
+    void __KillOwn       (const coreBool bAnimated)final;
+    void __RenderOwnUnder()final;
+    void __RenderOwnOver ()final;
+    void __RenderOwnTop  ()final;
+    void __MoveOwn       ()final;
 
     // 
     void __EnableRings ();
@@ -857,6 +867,10 @@ private:
     // 
     void __EnableClock ();
     void __DisableClock(const coreBool bAnimated);
+
+    // 
+    void __EnableBubble (const coreVector3 vColor);
+    void __DisableBubble(const coreBool bAnimated);
 
     // 
     void __EnableHole ();
@@ -938,6 +952,9 @@ public:
 
     DISABLE_COPY(cCholBoss)
     ASSIGN_ID_EX(503, "CHOL", COLOR_MENU_ORANGE, COLOR_MENU_ORANGE, coreVector2(0.25f,0.0f))
+
+    // 
+    void ResurrectIntro(const coreUint8 iSub);
 
     // get object properties
     inline const coreChar* GetMusicName()const final {return "boss_05.ogg";}
@@ -1049,7 +1066,8 @@ public:
 
     // 
     void ResurrectIntro();
-    
+
+    // 
     inline void HideTail() {this->__SetLimbValue(ZEROTH_LIMB_TAIL, 1.0f);}
 
     // get object properties
@@ -1244,7 +1262,7 @@ public:
     cProjectOneBoss()noexcept;
 
     DISABLE_COPY(cProjectOneBoss)
-    ASSIGN_ID(801, "P-ONE")
+    ASSIGN_ID(801, "P1")
 
     // get object properties
     inline coreVector3     GetColor    ()const final {return m_vLevelColor;}
@@ -1428,6 +1446,9 @@ private:
     void __ResurrectOwn()final;
     void __KillOwn     (const coreBool bAnimated)final;
     void __MoveOwn     ()final;
+
+    // 
+    coreBool __ResurrectHelperIntro(const coreUint8 iElement, const coreBool bSmooth);
 };
 
 

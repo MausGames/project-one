@@ -170,7 +170,7 @@ void cMission::MoveBefore()
     {
         // 
         m_bRepeat = false;
-        
+
         // 
         std::memset(s_aiSink, 0, sizeof(s_aiSink));
 
@@ -182,9 +182,7 @@ void cMission::MoveBefore()
 
             // 
             m_fStageSubTimeBefore = m_fStageSubTime;
-            m_fStageSubTime.Update(1.0f);
-            
-            // TODO 1: [MF] erste iteration startet mit m_fStageTime=0.016 und m_fStageSubTime=0.0, wegen erstem STAGE_SUB, is das problematisch ?
+            m_fStageSubTime.Update(1.0f);   // will start with 0.0f, due to first STAGE_SUB
 
             // 
             m_anStage.back()();
@@ -210,6 +208,12 @@ void cMission::MoveAfter()
 {
     // 
     this->__MoveOwnAfter();
+
+    // 
+    if(!m_anStage.empty() && (m_iCurSegmentIndex == MISSION_NO_SEGMENT))
+    {
+        g_pGame->GetBulletManagerEnemy()->ClearBullets(false);
+    }
 }
 
 
@@ -393,7 +397,7 @@ void cMission::GiveBadge(const coreUintW iIndex, const coreUint8 iBadge, const c
 
     // 
     const coreUint32 iBonus = cGame::CalcBonusBadge(iBadge);
-    if(iBonus)
+    if(DEFINED(_CORE_DEBUG_) || iBonus)
     {
         // 
         g_pGame->GetTimeTable()->AddShiftGood(iBonus);
@@ -519,7 +523,7 @@ void cMission::__CloseSegment()
     // 
     g_pGame->ForEachPlayer([](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
-        pPlayer->StartRolling(pPlayer->GetInput()->vMove);
+        pPlayer->StartRolling();
     });
 
     // 

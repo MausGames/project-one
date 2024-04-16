@@ -72,14 +72,15 @@ enum ePlayerStatus : coreUint16
     PLAYER_STATUS_SHIELDED       = 0x0002u,   // 
     PLAYER_STATUS_GHOST          = 0x0004u,   // 
     PLAYER_STATUS_INVINCIBLE     = 0x0008u,   // 
-    PLAYER_STATUS_HEALER         = 0x0010u,   // 
-    PLAYER_STATUS_TOP            = 0x0020u,   // 
-    PLAYER_STATUS_KEEP_RANGE     = 0x0040u,   // TODO 1: still used ?
-    PLAYER_STATUS_REPAIRED       = 0x0080u,   // 
-    PLAYER_STATUS_NO_INPUT_MOVE  = 0x0100u,   // disable player movement (user controls only)
-    PLAYER_STATUS_NO_INPUT_SHOOT = 0x0200u,   // disable player weapons
-    PLAYER_STATUS_NO_INPUT_ROLL  = 0x0400u,   // 
-    PLAYER_STATUS_NO_INPUT_TURN  = 0x0800u,   // 
+    PLAYER_STATUS_INVINCIBLE_2   = 0x0010u,   // 
+    PLAYER_STATUS_HEALER         = 0x0020u,   // 
+    PLAYER_STATUS_TOP            = 0x0040u,   // 
+    PLAYER_STATUS_KEEP_RANGE     = 0x0080u,   // TODO 1: still used ?
+    PLAYER_STATUS_REPAIRED       = 0x0100u,   // 
+    PLAYER_STATUS_NO_INPUT_MOVE  = 0x0200u,   // disable player movement (user controls only)
+    PLAYER_STATUS_NO_INPUT_SHOOT = 0x0400u,   // disable player weapons
+    PLAYER_STATUS_NO_INPUT_ROLL  = 0x0800u,   // 
+    PLAYER_STATUS_NO_INPUT_TURN  = 0x1000u,   // 
     PLAYER_STATUS_NO_INPUT_ALL   = PLAYER_STATUS_NO_INPUT_MOVE | PLAYER_STATUS_NO_INPUT_SHOOT | PLAYER_STATUS_NO_INPUT_ROLL | PLAYER_STATUS_NO_INPUT_TURN
 };
 
@@ -176,6 +177,7 @@ private:
     coreMap<const coreObject3D*, sRayData>   m_aRayData;      // 
     
     coreBool m_bWasDamaged;
+    coreBool m_bGiveUp;
 
 
 public:
@@ -196,6 +198,8 @@ public:
     void RenderMiddle();
     void RenderAfter ();
     void Move        ()final;
+    
+    void MoveFrozen();
 
     // reduce current health
     coreInt32 TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2 vImpact);
@@ -214,6 +218,7 @@ public:
 
     // 
     void StartRolling (const coreVector2 vDirection);
+    void StartRolling ();
     void EndRolling   ();
     void StartFeeling (const coreFloat fTime, const coreUint8 iType);
     void EndFeeling   ();

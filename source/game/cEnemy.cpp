@@ -150,7 +150,7 @@ coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, 
             // 
             const coreInt32 iPower = (bMulti || bNeutral || (this->GetMaxHealth() == 1)) ? 1 : GAME_PLAYERS;
             
-            const coreInt32 iTotal = m_iExtraDamage + iDamage * iPower * ((g_pGame->IsEasy() && !bNeutral) ? 115 : 100);
+            const coreInt32 iTotal = m_iExtraDamage + iDamage * iPower * ((g_pGame->IsEasy() && !bNeutral) ? 110 : 100);
             
             const coreInt32 iTaken = ABS(this->_TakeDamage(iTotal / 100, iElement, vImpact) / iPower);
             ASSERT(!(this->GetMaxHealth() % iPower))
@@ -307,13 +307,13 @@ void cEnemy::Kill(const coreBool bAnimated)
 
         // 
         const coreFloat fVolume = ((g_pEnvironment->GetBackground()->GetID() == cCloudBackground::ID) && (this->GetExplosionSound() == SOUND_ENEMY_EXPLOSION_10)) ? 0.8f : 1.0f;
-        g_pSpecialEffects->PlaySound(this->GetPosition(), fVolume, 1.0f, this->GetExplosionSound());
+        g_pSpecialEffects->PlaySound(this->GetPosition(), fVolume, this->GetExplosionPitch(), this->GetExplosionSound());
 
         // 
-        if(STATIC_ISVALID(g_pGame) && (g_pGame->GetEnemyManager()->GetNumEnemiesAlive() <= 1u))
+        if(STATIC_ISVALID(g_pGame) && HAS_FLAG(m_iStatus, ENEMY_STATUS_CRASH))
         {
-            // TODO 1: position 0.0f,0.0f
-            //g_pGame->GetCrashManager()->AddCrash(*this, this->GetPosition().xy() - this->GetPosition().xy().Normalized() * 10.0f, NULL);
+            g_pGame->GetCrashManager()->AddCrash(*this, this->GetPosition().xy() - this->GetPosition().xy().Normalized() * 20.0f, NULL);
+            //g_pGame->GetCrashManager()->AddCrash(*this, coreVector2(0.0f,0.0f), NULL);
         }
         }
 
