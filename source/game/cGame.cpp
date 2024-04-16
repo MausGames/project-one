@@ -814,7 +814,7 @@ void cGame::__HandleCollisions()
         {
             // 
             const coreVector2 vDiff = pPlayer->GetOldPos() - pEnemy->GetPosition().xy();
-            pPlayer->ApplyForce  (vDiff.Normalized() * 100.0f);
+            pPlayer->ApplyForce(vDiff.Normalized() * 100.0f);
 
 
             if(pEnemy->GetLifeTime() >= 0.5f) pPlayer->SetInterrupt(PLAYER_INTERRUPT);

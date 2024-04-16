@@ -21,7 +21,6 @@ cViridoMission::cViridoMission()noexcept
 , m_Laser          (VIRIDO_LASERS)
 , m_LaserWave      (VIRIDO_LASERS)
 , m_apLaserOwner   {}
-, m_Junk           (VIRIDO_JUNKS)
 , m_Shadow         (VIRIDO_SHADOWS)
 , m_apShadowOwner  {}
 , m_iRealState     (0u)
@@ -94,9 +93,7 @@ cViridoMission::cViridoMission()noexcept
             pBarrier->DefineProgram("effect_energy_flat_direct_program");
 
             // set object properties
-            pBarrier->SetSize   (coreVector3(7.5f,2.5f,2.5f));
             pBarrier->SetColor3 (COLOR_ENERGY_BLUE);
-            pBarrier->SetTexSize(coreVector2(1.2f,0.25f) * 0.5f);
             pBarrier->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
@@ -128,25 +125,6 @@ cViridoMission::cViridoMission()noexcept
             // add object to the list
             if(iType) m_LaserWave.BindObject(pLaser);
                  else m_Laser    .BindObject(pLaser);
-        }
-    }
-
-    // 
-    m_Junk.DefineProgram("object_ship_inst_program");
-    {
-        for(coreUintW i = 0u; i < VIRIDO_JUNKS_RAWS; ++i)
-        {
-            // load object resources
-            coreObject3D* pJunk = &m_aJunkRaw[i];
-            pJunk->DefineModel  ("object_cube.md3");
-            pJunk->DefineTexture(0u, "effect_wave.png");
-            pJunk->DefineProgram("object_ship_program");
-
-            // set object properties
-            pJunk->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
-
-            // add object to the list
-            m_Junk.BindObject(pJunk);
         }
     }
 
@@ -300,7 +278,7 @@ void cViridoMission::DisablePaddle(const coreUintW iIndex, const coreBool bAnima
 
 // ****************************************************************
 // 
-void cViridoMission::EnableBarrier(const coreUintW iIndex, const cShip* pOwner, const coreVector2& vDirection)
+void cViridoMission::EnableBarrier(const coreUintW iIndex, const cShip* pOwner, const coreVector2& vDirection, const coreFloat fSize)
 {
     ASSERT(iIndex < VIRIDO_BARRIERS)
     coreObject3D& oBarrier = m_aBarrierRaw[iIndex];
@@ -315,6 +293,8 @@ void cViridoMission::EnableBarrier(const coreUintW iIndex, const cShip* pOwner, 
     m_aiBarrierDir  [iIndex] = PackDirection(vDirection);
 
     // 
+    oBarrier.SetSize   (coreVector3(7.5f * fSize, 2.5f, 2.5f));
+    oBarrier.SetTexSize(coreVector2(1.2f * fSize, 0.25f) * 0.5f);
     oBarrier.SetAlpha  (0.0f);
     oBarrier.SetEnabled(CORE_OBJECT_ENABLE_ALL);
 }
@@ -382,41 +362,6 @@ void cViridoMission::DisableLaser(const coreUintW iIndex, const coreBool bAnimat
 
     // 
     if(bAnimated) for(coreUintW j = 80u; j--; ) g_pSpecialEffects->CreateSplashColor(pLaser->GetPosition() + pLaser->GetDirection() * (2.0f * I_TO_F(j - 40u)), 10.0f, 1u, COLOR_ENERGY_PURPLE);
-}
-
-
-// ****************************************************************
-// 
-void cViridoMission::EnableJunk(const coreUintW iIndex, const coreVector2& vPosition, const coreVector2& vDirection)
-{
-    ASSERT(iIndex < VIRIDO_JUNKS)
-    coreObject3D& oJunk = m_aJunkRaw[iIndex];
-
-    // 
-    WARN_IF(oJunk.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
-
-    // 
-    oJunk.SetPosition(coreVector3(vPosition,  0.0f));
-    oJunk.SetSize    (coreVector3(vDirection, 0.0f));
-    oJunk.SetEnabled (CORE_OBJECT_ENABLE_ALL);
-}
-
-
-// ****************************************************************
-// 
-void cViridoMission::DisableJunk(const coreUintW iIndex, const coreBool bAnimated)
-{
-    ASSERT(iIndex < VIRIDO_JUNKS)
-    coreObject3D& oJunk = m_aJunkRaw[iIndex];
-
-    // 
-    if(!oJunk.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
-
-    // 
-    oJunk.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
-
-    // 
-    if(bAnimated) g_pSpecialEffects->CreateSplashColor(oJunk.GetPosition(), SPECIAL_SPLASH_TINY, COLOR_ENERGY_WHITE);
 }
 
 
@@ -666,24 +611,6 @@ void cViridoMission::__MoveOwnAfter()
     // 
     m_Laser    .MoveNormal();
     m_LaserWave.MoveNormal();
-    
-
-        const coreVector3 vJunkDir = coreVector3(coreVector2::Direction(m_fAnimation * PI), 0.0f);
-        const coreVector3 vJunkOri = coreVector3(-vJunkDir.x*vJunkDir.y, vJunkDir.x*vJunkDir.x, vJunkDir.y);
-
-    // 
-    for(coreUintW i = 0u; i < VIRIDO_JUNKS; ++i)
-    {
-        coreObject3D* pJunk = (*m_Junk.List())[i];
-        if(!pJunk->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
-
-        // 
-        pJunk->SetDirection  (vJunkDir);
-        pJunk->SetOrientation(vJunkOri);
-    }
-
-    // 
-    m_Junk.MoveNormal();
 
     // 
     for(coreUintW i = 0u; i < VIRIDO_SHADOWS; ++i)

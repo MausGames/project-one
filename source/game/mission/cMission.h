@@ -39,12 +39,10 @@
 #define VIRIDO_BALLS         (2u)                                    // 
 #define VIRIDO_BALLS_RAWS    (VIRIDO_BALLS * (VIRIDO_TRAILS + 1u))   // 
 #define VIRIDO_PADDLES       (3u)                                    // 
-#define VIRIDO_BARRIERS      (14u)                                   // 
+#define VIRIDO_BARRIERS      (17u)                                   // 
 #define VIRIDO_BARRIERS_RAWS (VIRIDO_BARRIERS)                       // 
 #define VIRIDO_LASERS        (4u)                                    // 
 #define VIRIDO_LASERS_RAWS   (VIRIDO_LASERS * 2u)                    // 
-#define VIRIDO_JUNKS         (48u)                                   // 
-#define VIRIDO_JUNKS_RAWS    (VIRIDO_JUNKS)                          // 
 #define VIRIDO_SHADOWS       (16u)                                   // 
 #define VIRIDO_SHADOWS_RAWS  (VIRIDO_SHADOWS)                        // 
 #define VIRIDO_BALL_SPEED    (1.5f)                                  // 
@@ -307,9 +305,6 @@ private:
     coreObject3D  m_aLaserRaw   [VIRIDO_LASERS_RAWS];       // 
     const cShip*  m_apLaserOwner[VIRIDO_LASERS];            // 
 
-    coreBatchList m_Junk;                                   // 
-    coreObject3D  m_aJunkRaw[VIRIDO_JUNKS_RAWS];            // 
-
     coreBatchList m_Shadow;                                 // 
     coreObject3D  m_aShadowRaw   [VIRIDO_SHADOWS_RAWS];     // 
     const cShip*  m_apShadowOwner[VIRIDO_SHADOWS];          // 
@@ -337,16 +332,12 @@ public:
     void DisablePaddle(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    void EnableBarrier (const coreUintW iIndex, const cShip* pOwner, const coreVector2& vDirection);
+    void EnableBarrier (const coreUintW iIndex, const cShip* pOwner, const coreVector2& vDirection, const coreFloat fSize);
     void DisableBarrier(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
     void EnableLaser (const coreUintW iIndex, const cShip* pOwner);
     void DisableLaser(const coreUintW iIndex, const coreBool bAnimated);
-
-    // 
-    void EnableJunk (const coreUintW iIndex, const coreVector2& vPosition, const coreVector2& vDirection);
-    void DisableJunk(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
     void EnableShadow (const coreUintW iIndex, const cShip* pOwner, const coreVector2& vPosition);

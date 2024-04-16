@@ -12,7 +12,9 @@
 
 // TODO: add more stats, e.g. for favorite weapon+support, direction
 // TODO: move time, shoot time, move WASD, move dir 1234, min and max
-// TODO: still add backup mechanism, you never know if the application writes garbage even though a temp-file is generated
+// TODO: still add backup mechanism (multiple files), you never know if the application writes garbage even though a temp-file is generated
+// TODO: add immediate update and autosave after progress or achievement changes, even during the game!
+// TODO: add save indicator somewhere on screen (corner), maybe only for important saves (changes) to reduce spam
 
 
 // ****************************************************************

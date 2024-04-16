@@ -180,6 +180,8 @@ void cMenu::Move()
                     // 
                     if(g_pGame->GetContinues()) m_DefeatMenu.ShowContinue();
                                            else m_DefeatMenu.ShowGameOver();
+
+                    Core::Audio->PauseSound();
                 }
                 else if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_FINISHED))
                 {
@@ -395,6 +397,8 @@ void cMenu::Move()
 
                 // 
                 g_pGame->UseContinue();
+                
+                Core::Audio->ResumeSound();
             }
             else if(m_DefeatMenu.GetStatus() == 2)
             {
@@ -403,6 +407,9 @@ void cMenu::Move()
 
                 // 
                 m_TitleMenu.ChangeSurface(SURFACE_TITLE_RETURN, 0.0f);
+                
+                
+                Core::Audio->CancelSound();
             }
         }
         break;

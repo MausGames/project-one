@@ -76,6 +76,7 @@
 // TODO: check all normalization calls if requires default or context-specific fallback, also check for more unsafe calls
 // TODO: check all RCP for division by zero
 // TODO: reshape causes some batch-list to be initialized twice
+// TODO: look for hot/cold optimizations, e.g. member-list in enemy can be pointer
 
 
 // ****************************************************************
