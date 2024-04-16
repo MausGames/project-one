@@ -319,7 +319,7 @@ void cNautilusBoss::__MoveOwn()
 
         if((m_aiCounter[STOMP_COUNT] & 0xFF) < 2)
         {
-            PHASE_CONTROL_TIMER(0u, 1.3f, LERP_LINEAR)
+            PHASE_CONTROL_TIMER(0u, 1.3f, LERP_BREAK_REV)
             {
                 const coreFloat vNewX = m_vLastPosition.x + (CONTAINS_BIT(m_aiCounter[STOMP_COUNT], 8u) ? 0.4f : -0.4f);
 

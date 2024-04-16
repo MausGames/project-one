@@ -63,6 +63,7 @@ cAmemasuBoss::cAmemasuBoss()noexcept
     }
 
     // 
+    m_ChangePath.Reserve(3u);
     m_ChangePath.AddNode(coreVector2(0.0f, 0.0f),  coreVector2(0.0f, 1.0f));
     m_ChangePath.AddNode(coreVector2(0.0f, 0.01f), coreVector2(0.0f, 1.0f));
     m_ChangePath.AddNode(coreVector2(0.0f,-3.0f),  coreVector2(0.0f,-1.0f));
@@ -193,6 +194,7 @@ void cAmemasuBoss::__MoveOwn()
                     pPlayer->AddStatus(PLAYER_STATUS_NO_INPUT_ALL & ~PLAYER_STATUS_NO_INPUT_SHOOT);
                     pPlayer->ChangeType(0);
 
+                    aMove[i].Reserve(2u);
                     aMove[i].AddNode(pPlayer->GetPosition().xy(), coreVector2(0.0f,-1.0f));
                     aMove[i].AddNode(this   ->GetPosition().xy(), coreVector2(0.0f, 8.0f));
                     aMove[i].Refine();
@@ -210,7 +212,7 @@ void cAmemasuBoss::__MoveOwn()
             {
                 const coreVector2 vDir = coreVector2::Direction(afAngle[i] + fTime * (4.0f*PI));
 
-                pPlayer->SetPosition (coreVector3(aMove[i].CalcPosition(aMove[i].GetTotalDistance() * fMoveTime), 0.0f));
+                pPlayer->SetPosition (coreVector3(aMove[i].CalcPositionLerp(fMoveTime), 0.0f));
 
 
                 //const coreVector2 vDiff = this->GetPosition().xy() - pPlayer->GetPosition().xy();
@@ -245,17 +247,17 @@ void cAmemasuBoss::__MoveOwn()
     {
         PHASE_CONTROL_TIMER(0u, 0.4f, LERP_SMOOTH)
         {
-            const coreFloat fHeightBoss = m_ChangePath.CalcPosition(CLAMP(fTime*1.4f, 0.0f, 1.0f) * m_ChangePath.GetTotalDistance()).y;
+            const coreFloat fHeightBoss = m_ChangePath.CalcPositionLerp(CLAMP(fTime*1.4f, 0.0f, 1.0f)).y;
             this->SetPosition(coreVector3(0.0f, (m_vLastPosition.y + fHeightBoss) * FOREGROUND_AREA.y, 0.0f));
 
-            const coreFloat fHeightContainer = m_ChangePath.CalcPosition(CLAMP((fTime*3.0f - 1.0f) / 2.0f, 0.0f, 1.0f) * m_ChangePath.GetTotalDistance()).y;
+            const coreFloat fHeightContainer = m_ChangePath.CalcPositionLerp(CLAMP((fTime*3.0f - 1.0f) / 2.0f, 0.0f, 1.0f)).y;
             pContainer->SetPosition(coreVector3(0.0f, -(-3.75f - fHeightContainer) * FOREGROUND_AREA.y, 0.0f));
 
             g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
             {
                 const coreFloat fSide = g_pGame->GetCoop() ? (20.0f * (I_TO_F(i) - 0.5f * I_TO_F(GAME_PLAYERS-1u))) : 0.0f;
 
-                const coreFloat fHeightPlayer = m_ChangePath.CalcPosition(CLAMP((fTime*3.0f - 1.0f) / 2.0f, 0.0f, 1.0f) * m_ChangePath.GetTotalDistance()).y;
+                const coreFloat fHeightPlayer = m_ChangePath.CalcPositionLerp(CLAMP((fTime*3.0f - 1.0f) / 2.0f, 0.0f, 1.0f)).y;
                 pPlayer->SetPosition(coreVector3(fSide, (-3.75f - fHeightPlayer) * FOREGROUND_AREA.y, 0.0f));
             });
 
@@ -291,7 +293,7 @@ void cAmemasuBoss::__MoveOwn()
                 g_pEnvironment->ChangeBackground(cSeaBackground::ID, ENVIRONMENT_MIX_WIPE, 1.0f, coreVector2(0.0f,1.0f));
             }
 
-            const coreFloat fHeightBoss = m_ChangePath.CalcPosition(CLAMP((LERPS(0.0f, 1.0f, fTime)*3.0f - 1.0f) / 2.0f, 0.0f, 1.0f) * m_ChangePath.GetTotalDistance()).y;
+            const coreFloat fHeightBoss = m_ChangePath.CalcPositionLerp(CLAMP((LERPS(0.0f, 1.0f, fTime)*3.0f - 1.0f) / 2.0f, 0.0f, 1.0f)).y;
             this->SetPosition(coreVector3(0.0f, (-3.0f - fHeightBoss) * FOREGROUND_AREA.y, 0.0f));
 
             const coreVector2 vDir = coreVector2::Direction(fTime * (10.0f*PI));

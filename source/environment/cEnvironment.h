@@ -41,7 +41,7 @@ private:
     cBackground* m_pOldBackground;                       // previous background instance (may be NULL)
 
     coreFrameBuffer m_FrameBuffer;                       // environment frame buffer used for transition mixing
-    coreObject2D    m_MixObject;                         // fullscreen object for transition mixing
+    coreFullscreen  m_MixObject;                         // fullscreen object for transition mixing
     coreProgramPtr  m_apMixProgram[ENVIRONMENT_MIXES];   // 
 
     coreTimer   m_TransitionTime;                        // background-transition timer
@@ -108,7 +108,7 @@ public:
 
 private:
     // reset with the resource manager
-    void __Reset(const coreResourceReset bInit)final;
+    void __Reset(const coreResourceReset eInit)final;
 };
 
 

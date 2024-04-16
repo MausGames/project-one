@@ -102,17 +102,17 @@ void cNevoMission::__SetupOwn()
 
     // ################################################################
     // 
-    //STAGE_MAIN
-    //{
-    //    STAGE_BOSS(m_Nautilus, coreVector2(0.0f,2.0f), coreVector2(0.0f,-1.0f))
-    //});
+    STAGE_MAIN
+    {
+        STAGE_BOSS(m_Nautilus, coreVector2(0.0f,2.0f), coreVector2(0.0f,-1.0f))
+    });
 
     // ################################################################
     // 
-    //STAGE_MAIN
-    //{
-    //    STAGE_BOSS(m_Amemasu, coreVector2(0.0f,2.0f), coreVector2(0.0f,-1.0f))
-    //});
+    STAGE_MAIN
+    {
+        STAGE_BOSS(m_Amemasu, coreVector2(0.0f,2.0f), coreVector2(0.0f,-1.0f))
+    });
 
     // ################################################################
     // 
@@ -152,7 +152,7 @@ void cNevoMission::__MoveOwnAfter()
         if(!m_vForce.IsNull())
         {
             vNewPos  += m_vForce * Core::System->GetTime();
-            m_vForce *= 1.0f - 2.5f * Core::System->GetTime();
+            m_vForce *= FrictionFactor(2.5f);
         }
 
         // 
@@ -190,11 +190,18 @@ void cNevoMission::__MoveOwnAfter()
             Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, &m_Container, [](cBullet* OUTPUT pBullet, coreObject3D* OUTPUT pContainer, const coreVector3& vIntersection, const coreBool bFirstHit)
             {
                 // 
-                pBullet->Deactivate(true, vIntersection.xy());
+                //pBullet->Deactivate(true, vIntersection.xy());
+                pBullet->Reflect(pContainer);
+            });
+
+            // 
+            Core::Manager::Object->TestCollision(TYPE_BULLET_ENEMY, &m_Container, [](cBullet* OUTPUT pBullet, coreObject3D* OUTPUT pContainer, const coreVector3& vIntersection, const coreBool bFirstHit)
+            {
+                // 
+                //pBullet->Deactivate(true, vIntersection.xy());
+                pBullet->Reflect(pContainer);
             });
         }
         m_Container.ActivateModelDefault();
     }
 }
-
-// container bekommt risse nach jedem boss death

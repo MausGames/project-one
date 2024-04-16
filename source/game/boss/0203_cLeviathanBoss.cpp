@@ -21,7 +21,7 @@
 // ****************************************************************
 // vector identifier
 #define FALL_BEHIND    (0u)
-#define CONTAINER_DIST (1u)
+#define CONTAINER_DATA (1u)
 #define ROTATION_ANGLE (2u)
 #define OVERDRIVE_HIT  (3u)   // # uses 3u - 7u
 #define SCATTER_FORCE  (3u)   // # uses 3u - 7u
@@ -30,8 +30,8 @@
 // ****************************************************************
 // constructor
 cLeviathanBoss::cLeviathanBoss()noexcept
-: m_Ray         (LEVIATHAN_RAYS_RAWS)
-, m_RayWave     (LEVIATHAN_RAYS_RAWS)
+: m_Ray         (LEVIATHAN_RAYS)
+, m_RayWave     (LEVIATHAN_RAYS)
 , m_afRayTime   {}
 , m_iDecalState (0u)
 , m_fAnimation  (0.0f)
@@ -395,7 +395,7 @@ void cLeviathanBoss::__MoveOwn()
     {
         PHASE_CONTROL_TIMER(0u, 1.0f/12.0f, LERP_SMOOTH)
         {
-            vNewOri    = coreVector2::Direction(PI * fTime + PI);
+            vNewOri    = coreVector2::Direction(PI*fTime + PI);
             bOverdrive = true;
 
             const cOutdoor* pOutdoor = g_pEnvironment->GetBackground()->GetOutdoor();
@@ -464,7 +464,7 @@ void cLeviathanBoss::__MoveOwn()
 
                 pPart->SetPosition(coreVector3(vPos.xy() + vPos.xy().Normalized() * vForce.x, vPos.z + vForce.y));
 
-                m_avVector[SCATTER_FORCE + i].x *= 1.0f - 0.5f * Core::System->GetTime();
+                m_avVector[SCATTER_FORCE + i].x *= FrictionFactor(0.5f);
                 m_avVector[SCATTER_FORCE + i].y -= Core::System->GetTime() * 150.0f;
             }
 
@@ -532,7 +532,6 @@ void cLeviathanBoss::__MoveOwn()
     // ################################################################
     // ################################################################
 
-    // 
     if(m_aiCounter[ROTATION_STATUS])
     {
         // 
@@ -557,71 +556,71 @@ void cLeviathanBoss::__MoveOwn()
         m_avVector[ROTATION_ANGLE].x += m_avVector[ROTATION_ANGLE].y * Core::System->GetTime();
     }
 
-    if(m_Ray.GetCurEnabled())
+    // 
+    for(coreUintW i = 0u; i < LEVIATHAN_RAYS; ++i)
     {
+        coreObject3D* pRay  = (*m_Ray    .List())[i];
+        coreObject3D* pWave = (*m_RayWave.List())[i];
+        if(!pRay->IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue;
+
         // 
-        for(coreUintW i = 0u; i < LEVIATHAN_RAYS; ++i)
+        const coreFloat fOldTime = m_afRayTime[i];
+        m_afRayTime[i].Update(0.8f);
+        const coreFloat fNewTime = m_afRayTime[i];
+
+        // 
+        const cEnemy*      pPart = this->__GetPart(i);
+        const coreVector3& vPos  = pPart->GetPosition();
+        const coreVector3& vDir  = pPart->GetDirection();
+
+        // 
+        const coreVector3 vColor = LERP(pRay->GetColor3(), coreMath::IsNear(vDir.z, 0.0f, LEVIATHAN_RAY_HEIGHT) ? (COLOR_ENERGY_YELLOW * 0.8f) : (COLOR_ENERGY_BLUE * (0.8f - 0.4f * ABS(vDir.z))), 0.3f);
+        const coreFloat   fAlpha = (fNewTime < 1.0f) ? (0.6f * (1.0f - fNewTime)) : 1.0f;
+        STATIC_ASSERT(FRAMERATE_VALUE == 60.0f)
+
+        if(!bOverdrive)
         {
-            coreObject3D* pRay  = (*m_Ray    .List())[i];
-            coreObject3D* pWave = (*m_RayWave.List())[i];
-            if(!pRay->IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue;
+            // 
+            const coreFloat   fLength = (fNewTime < 1.0f) ? 1.0f : (MIN((fNewTime - 1.0f) * 5.0f, 1.0f));
+            const coreFloat   fWidth  = 2.0f - fLength;
+            const coreVector3 vSize   = coreVector3(fWidth, fLength, fWidth);
 
             // 
-            const coreFloat fOldTime = m_afRayTime[i];
-            m_afRayTime[i].Update(0.8f);
-            const coreFloat fNewTime = m_afRayTime[i];
-
-            // 
-            const cEnemy*      pPart = this->__GetPart(i);
-            const coreVector3& vPos  = pPart->GetPosition();
-            const coreVector3& vDir  = pPart->GetDirection();
-
-            // 
-            const coreVector3 vColor = LERP(pRay->GetColor3(), coreMath::IsNear(vDir.z, 0.0f, LEVIATHAN_RAY_HEIGHT) ? (COLOR_ENERGY_YELLOW * 0.8f) : (COLOR_ENERGY_BLUE * (0.8f - 0.4f * ABS(vDir.z))), 0.3f);
-            const coreFloat   fAlpha = (fNewTime < 1.0f) ? (0.6f * (1.0f - fNewTime)) : 1.0f;
-            STATIC_ASSERT(FRAMERATE_VALUE == 60.0f)
-
-            if(!bOverdrive)
-            {
-                // 
-                const coreFloat   fLength = (fNewTime < 1.0f) ? 1.0f : (MIN((fNewTime - 1.0f) * 5.0f, 1.0f));
-                const coreFloat   fWidth  = 2.0f - fLength;
-                const coreVector3 vSize   = coreVector3(fWidth, fLength, fWidth);
-
-                // 
-                pRay ->SetSize(LEVIATHAN_RAY_SIZE     * vSize);
-                pWave->SetSize(LEVIATHAN_RAYWAVE_SIZE * vSize);
-            }
-
-            // 
-            pRay->SetPosition (vPos + vDir * (pRay->GetSize().y + LEVIATHAN_RAY_OFFSET(i)));
-            pRay->SetDirection(vDir);
-            pRay->SetColor3   (vColor);
-            pRay->SetAlpha    (fAlpha);
-            pRay->SetTexSize  (coreVector2(LEVIATHAN_RAY_TEXSIZE.x, LEVIATHAN_RAY_TEXSIZE.y * (pRay->GetSize().y * (1.0f/LEVIATHAN_RAY_SIZE.y))));
-            pRay->SetTexOffset(coreVector2(0.4f,0.3f) * m_fAnimation);
-
-            // 
-            pWave->SetPosition (vPos + vDir * (pWave->GetSize().y  + LEVIATHAN_RAY_OFFSET(i)));
-            pWave->SetDirection(-vDir);
-            pWave->SetColor3   (vColor);
-            pWave->SetAlpha    (fAlpha * 0.85f);
-            pWave->SetTexOffset(coreVector2(-0.3f,-0.6f) * m_fAnimation);
-
-            if((fOldTime < 1.0f) && (fNewTime >= 1.0f))
-            {
-                // 
-                pRay->ChangeType(TYPE_LEVIATHAN_RAY);
-
-                // 
-                g_pSpecialEffects->MacroEruptionColorBig(vPos + vDir * LEVIATHAN_RAY_OFFSET(i), vDir.xy(), COLOR_ENERGY_YELLOW);
-            }
+            pRay ->SetSize(LEVIATHAN_RAY_SIZE     * vSize);
+            pWave->SetSize(LEVIATHAN_RAYWAVE_SIZE * vSize);
         }
 
         // 
-        m_Ray    .MoveNormal();
-        m_RayWave.MoveNormal();
+        pRay->SetPosition (vPos + vDir * (pRay->GetSize().y + LEVIATHAN_RAY_OFFSET(i)));
+        pRay->SetDirection(vDir);
+        pRay->SetColor3   (vColor);
+        pRay->SetAlpha    (fAlpha);
+        pRay->SetTexSize  (coreVector2(LEVIATHAN_RAY_TEXSIZE.x, LEVIATHAN_RAY_TEXSIZE.y * (pRay->GetSize().y * (1.0f/LEVIATHAN_RAY_SIZE.y))));
+        pRay->SetTexOffset(coreVector2(0.4f,0.3f) * m_fAnimation);
 
+        // 
+        pWave->SetPosition (vPos + vDir * (pWave->GetSize().y  + LEVIATHAN_RAY_OFFSET(i)));
+        pWave->SetDirection(-vDir);
+        pWave->SetColor3   (vColor);
+        pWave->SetAlpha    (fAlpha * 0.85f);
+        pWave->SetTexOffset(coreVector2(-0.3f,-0.6f) * m_fAnimation);
+
+        if((fOldTime < 1.0f) && (fNewTime >= 1.0f))
+        {
+            // 
+            pRay->ChangeType(TYPE_LEVIATHAN_RAY);
+
+            // 
+            g_pSpecialEffects->MacroEruptionColorBig(vPos + vDir * LEVIATHAN_RAY_OFFSET(i), vDir.xy(), COLOR_ENERGY_YELLOW);
+        }
+    }
+
+    // 
+    m_Ray    .MoveNormal();
+    m_RayWave.MoveNormal();
+
+    if(m_Ray.GetCurEnabled())
+    {
         // create fire-effect at the screen border 
         PHASE_CONTROL_TICKER(3u, 0u, 30.0f, LERP_LINEAR)
         {
@@ -722,25 +721,22 @@ void cLeviathanBoss::__MoveOwn()
         if(bNewEnabled) pPart->DefaultAxiate(m_fMovement * ((i & 0x01u) ? 1.0f : -1.0f));
     }
 
-
-
-
-    static coreFloat POWER = 0.0f;
-    static coreFloat ANGLE = 0.0f;
+    if(m_aiCounter[ROTATION_STATUS])
+    {
+        // 
+        const coreVector2 vHeadMove = m_Head.GetMove();
+        if(!vHeadMove.IsNull())
+        {
+            // 
+            const coreVector2 vDiff = pContainer->GetPosition().xy() - m_Head.GetPosition().xy();
+            m_avVector[CONTAINER_DATA].y += 100.0f * coreVector2::Dot(vDiff.Rotated90().Normalized(), vHeadMove.Normalized()) * RCP(vDiff.LengthSq()) * Core::System->GetTime();
+        }
+    }
 
     // 
-    if(!m_Head.GetMove().IsNull())
-    {
-        const coreVector2 vDiff = pContainer->GetPosition().xy() - m_Head.GetPosition().xy();
-        POWER = POWER + 100.0f * coreVector2::Dot(vDiff.Rotated90().Normalized(), m_Head.GetMove().Normalized()) * RCP(vDiff.LengthSq()) * Core::System->GetTime();
-    }
-    ANGLE += POWER * Core::System->GetTime();
-    pContainer->SetDirection(coreVector3(coreVector2::Direction(ANGLE), 0.0f));
-
-    POWER *= 1.0f - 0.25f * Core::System->GetTime();
-
-
-
+    m_avVector[CONTAINER_DATA].z += m_avVector[CONTAINER_DATA].y * Core::System->GetTime();
+    m_avVector[CONTAINER_DATA].y *= FrictionFactor(0.25f);
+    pContainer->SetDirection(coreVector3(coreVector2::Direction(m_avVector[CONTAINER_DATA].z), 0.0f));
 
     // 
     this->__UpdateHealth();

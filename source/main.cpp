@@ -24,8 +24,7 @@ STATIC_MEMORY(cForeground,     g_pForeground)
 STATIC_MEMORY(cEnvironment,    g_pEnvironment)
 STATIC_MEMORY(cMenu,           g_pMenu)
 STATIC_MEMORY(cTheater,        g_pTheater)
-
-cGame* g_pGame = NULL;
+STATIC_MEMORY(cGame,           g_pGame)
 
 static coreUint64 m_iOldPerfTime = 0u;   // last measured high-precision time value
 static void LockFramerate();             // lock frame rate and override frame time
@@ -78,7 +77,7 @@ void CoreApp::Init()
 void CoreApp::Exit()
 {
     // 
-    SAFE_DELETE(g_pGame)
+    STATIC_DELETE(g_pGame)
 
     // delete and exit main components
     STATIC_DELETE(g_pTheater)
@@ -129,7 +128,7 @@ void CoreApp::Render()
         Core::Debug->MeasureEnd("Environment");
         Core::Debug->MeasureStart("Foreground");
         {
-            if(g_pGame || g_pTheater->IsActive() || g_pWindscreen->IsActive())
+            if(STATIC_ISVALID(g_pGame) || g_pTheater->IsActive() || g_pWindscreen->IsActive())
             {
                 // create foreground frame buffer
                 g_pForeground->Start();
@@ -138,7 +137,7 @@ void CoreApp::Render()
                     g_pTheater->Render();
 
                     // render the game
-                    if(g_pGame) g_pGame->Render();
+                    if(STATIC_ISVALID(g_pGame)) g_pGame->Render();
 
                     // 
                     g_pWindscreen->Render();
@@ -164,7 +163,7 @@ void CoreApp::Render()
         glDisable(GL_DEPTH_TEST);
         {
             // render the overlay separately
-            if(g_pGame) g_pGame->RenderOverlay();
+            if(STATIC_ISVALID(g_pGame)) g_pGame->RenderOverlay();
 
             // render the menu
             g_pMenu->Render();
@@ -183,7 +182,7 @@ void CoreApp::Move()
     if(Core::System->GetWinSizeChanged()) ReshapeGame();
 
     // lock frame rate and override frame time
-    if(g_pGame) LockFramerate();
+    if(STATIC_ISVALID(g_pGame)) LockFramerate();
 
     Core::Debug->MeasureStart("Move");
     {
@@ -204,7 +203,7 @@ void CoreApp::Move()
             g_pTheater->Move();
 
             // move the game
-            if(g_pGame) g_pGame->Move();
+            if(STATIC_ISVALID(g_pGame)) g_pGame->Move();
 
             // 
             g_pWindscreen->Move();
@@ -322,30 +321,32 @@ static void DebugGame()
 #if defined(_P1_DEBUG_INPUT_)
 
     // start game
-    if(!g_pGame)
+    if(!STATIC_ISVALID(g_pGame))
     {
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LALT), CORE_INPUT_HOLD))
         {
-            const coreUint8 iDifficulty = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(Y), CORE_INPUT_HOLD) ? 0u : 1u;
+            const coreUint8 iDifficulty = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(Z), CORE_INPUT_HOLD) ? 0u : 1u;
             const coreBool  bCoop       = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(X), CORE_INPUT_HOLD);
 
-            #define __LOAD_GAME(x) {g_pGame = new cGame(iDifficulty, bCoop, GAME_MISSION_LIST_DEFAULT); g_pGame->LoadMissionID(x); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f); g_pPostProcessing->SetSideOpacity(1.0f);}
-            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS)) __LOAD_GAME(cIntroMission  ::ID)
-            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2), CORE_INPUT_PRESS)) __LOAD_GAME(cViridoMission ::ID)
-            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(3), CORE_INPUT_PRESS)) __LOAD_GAME(cNevoMission   ::ID)
-            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(4), CORE_INPUT_PRESS)) __LOAD_GAME(cHarenaMission ::ID)
-            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(5), CORE_INPUT_PRESS)) __LOAD_GAME(cRutilusMission::ID)
-            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(6), CORE_INPUT_PRESS)) __LOAD_GAME(cGeluMission   ::ID)
-            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(7), CORE_INPUT_PRESS)) __LOAD_GAME(cCalorMission  ::ID)
-            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(8), CORE_INPUT_PRESS)) __LOAD_GAME(cMuscusMission ::ID)
-            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(9), CORE_INPUT_PRESS)) __LOAD_GAME(cAterMission   ::ID)
+            #define __LOAD_GAME(x) {STATIC_NEW(g_pGame, iDifficulty, bCoop, GAME_MISSION_LIST_DEFAULT) g_pGame->LoadMissionID(x); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f); g_pPostProcessing->SetSideOpacity(1.0f);}
+            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1),     CORE_INPUT_PRESS)) __LOAD_GAME(cIntroMission  ::ID)
+            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2),     CORE_INPUT_PRESS)) __LOAD_GAME(cViridoMission ::ID)
+            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(3),     CORE_INPUT_PRESS)) __LOAD_GAME(cNevoMission   ::ID)
+            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(4),     CORE_INPUT_PRESS)) __LOAD_GAME(cHarenaMission ::ID)
+            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(5),     CORE_INPUT_PRESS)) __LOAD_GAME(cRutilusMission::ID)
+            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(6),     CORE_INPUT_PRESS)) __LOAD_GAME(cGeluMission   ::ID)
+            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(7),     CORE_INPUT_PRESS)) __LOAD_GAME(cCalorMission  ::ID)
+            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(8),     CORE_INPUT_PRESS)) __LOAD_GAME(cMuscusMission ::ID)
+            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(9),     CORE_INPUT_PRESS)) __LOAD_GAME(cAterMission   ::ID)
+            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(0),     CORE_INPUT_PRESS)) __LOAD_GAME(cErrorMission  ::ID)
+            if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(GRAVE), CORE_INPUT_PRESS)) __LOAD_GAME(cTinkerMission ::ID)
         }
     }
 
     // end game
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(K), CORE_INPUT_PRESS))
     {
-        SAFE_DELETE(g_pGame)
+        STATIC_DELETE(g_pGame)
     }
 
     // hide menu
@@ -413,7 +414,7 @@ static void DebugGame()
     }
 
     // equip weapon
-    if(g_pGame)
+    if(STATIC_ISVALID(g_pGame))
     {
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LCTRL), CORE_INPUT_HOLD))
         {
@@ -424,43 +425,34 @@ static void DebugGame()
         }
     }
 
-    // turn player
-    //if(g_pGame)
-    //{
-    //    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(UP),    CORE_INPUT_PRESS)) g_pGame->GetPlayer(0u)->SetDirection(coreVector3( 0.0f, 1.0f,0.0f));
-    //    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LEFT),  CORE_INPUT_PRESS)) g_pGame->GetPlayer(0u)->SetDirection(coreVector3(-1.0f, 0.0f,0.0f));
-    //    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(DOWN),  CORE_INPUT_PRESS)) g_pGame->GetPlayer(0u)->SetDirection(coreVector3( 0.0f,-1.0f,0.0f));
-    //    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(RIGHT), CORE_INPUT_PRESS)) g_pGame->GetPlayer(0u)->SetDirection(coreVector3( 1.0f, 0.0f,0.0f));
-    //
-    //    //g_pGame->GetPlayer(0u)->SetDirection(coreVector3(g_pEnvironment->GetDirection(), 0.0f));
-    //}
-
     // toggle invincibility
-    if(g_pGame)
+    if(STATIC_ISVALID(g_pGame))
     {
-        static coreBool s_bInvincible = true;
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(Z), CORE_INPUT_PRESS)) s_bInvincible = !s_bInvincible;
-
-        g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
+        static coreBool s_bInvincible = false;
+        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(Z), CORE_INPUT_PRESS))
         {
-            pPlayer->SetMaxHealth(s_bInvincible ? 10000 : 1);
-            pPlayer->SetCurHealth(s_bInvincible ? 10000 : 1);
-        });
+            s_bInvincible = !s_bInvincible;
+            g_pGame->ForEachPlayerAll([](cPlayer* OUTPUT pPlayer, const coreUintW i)
+            {
+                pPlayer->SetMaxHealth(s_bInvincible ? PLAYER_SHIELD : (PLAYER_LIVES - 1u));
+                pPlayer->SetCurHealth(s_bInvincible ? PLAYER_SHIELD : (PLAYER_LIVES - 1u));
+            });
+        }
     }
 
     // damage boss
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(O), CORE_INPUT_PRESS))
     {
-        if(g_pGame && g_pGame->GetCurMission()->GetCurBoss())
+        if(STATIC_ISVALID(g_pGame) && g_pGame->GetCurMission()->GetCurBoss())
         {
-            g_pGame->GetCurMission()->GetCurBoss()->TakeDamage(1000, ELEMENT_NEUTRAL, coreVector2(0.0f,0.0f), NULL);
+            g_pGame->GetCurMission()->GetCurBoss()->TakeDamage(200, ELEMENT_NEUTRAL, coreVector2(0.0f,0.0f), NULL);
         }
     }
 
     // skip stage
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(P), CORE_INPUT_PRESS))
     {
-        if(g_pGame &&
+        if(STATIC_ISVALID(g_pGame) &&
            CONTAINS_FLAG(g_pGame->GetCurMission()->GetBoss(0u)->GetStatus(), ENEMY_STATUS_DEAD) &&
            CONTAINS_FLAG(g_pGame->GetCurMission()->GetBoss(1u)->GetStatus(), ENEMY_STATUS_DEAD) &&
            CONTAINS_FLAG(g_pGame->GetCurMission()->GetBoss(2u)->GetStatus(), ENEMY_STATUS_DEAD))

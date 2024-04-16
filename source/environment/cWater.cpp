@@ -140,7 +140,7 @@ void cWater::UpdateReflection()
         glDepthFunc(GL_LEQUAL);
         glEnable   (GL_BLEND);
 
-        if(g_CurConfig.Graphics.iReflection && (g_pGame || g_pTheater->IsActive()))
+        if(g_CurConfig.Graphics.iReflection && (STATIC_ISVALID(g_pGame) || g_pTheater->IsActive()))
         {
             glCullFace(GL_FRONT);
             {
@@ -148,7 +148,7 @@ void cWater::UpdateReflection()
                 g_pTheater->Render();
 
                 // render the game
-                if(g_pGame) g_pGame->Render();
+                if(STATIC_ISVALID(g_pGame)) g_pGame->Render();
             }
             glCullFace(GL_BACK);
 

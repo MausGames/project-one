@@ -10,8 +10,8 @@
 #ifndef _P1_GUARD_COMBATTEXT_H_
 #define _P1_GUARD_COMBATTEXT_H_
 
-// TODO: maybe get rid of the smooth text-overlap resolve
 // TODO: allow localized text with standard numbers
+// TODO: different labels and animations (size, solid background, 000000 -> 123456, ZSDK -> TEST)
 
 
 // ****************************************************************
@@ -24,22 +24,10 @@
 class cCombatText final
 {
 private:
-    // text data structure
-    struct sData final
-    {
-        std::string sText;       // text to display
-        coreVector2 vPosition;   // screen position (center)
-        coreUint32  iColor;      // packed RGBA color-value
-    };
-
-
-private:
     coreLabel m_aLabel [COMBAT_LABELS];   // label objects to display combat text
-    coreFloat m_afTimer[COMBAT_LABELS];   // animation timers
+    coreFlow  m_afTimer[COMBAT_LABELS];   // animation timers
 
     coreUintW m_iCurLabel;                // current label object
-
-    std::deque<sData> m_aData;            // text data list
 
 
 public:
@@ -51,13 +39,11 @@ public:
     void Render();
     void Move();
 
-    // add new combat text
-    void        AddText  (const coreChar*  pcText, const coreVector3& vPosition, const coreVector3& vColor);
-    inline void AddDamage(const coreInt32  iValue, const coreVector3& vPosition) {if(g_CurConfig.Game.Combat.iDamage && iValue) this->AddText(PRINT("%d",  iValue), vPosition, COLOR_MENU_RED);}
-    inline void AddChain (const coreUint32 iValue, const coreVector3& vPosition) {if(g_CurConfig.Game.Combat.iChain  && iValue) this->AddText(PRINT("+%u", iValue), vPosition, COLOR_MENU_BLUE);}
-    inline void AddCombo (const coreUint32 iValue, const coreVector3& vPosition) {if(g_CurConfig.Game.Combat.iCombo  && iValue) this->AddText(PRINT("x%u", iValue), vPosition, COLOR_MENU_PURPLE);}
+    // add new active label object
+    void        AddText (const coreChar*  pcText, const coreVector3& vPosition, const coreVector3& vColor);
+    inline void AddBonus(const coreUint32 iValue, const coreVector3& vPosition) {if(iValue) this->AddText(PRINT("%u", iValue), vPosition, COLOR_MENU_BLUE);}
 
-     // reset all active label objects
+    // reset the combat text
     void Reset();
 };
 

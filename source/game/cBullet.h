@@ -53,6 +53,9 @@ protected:
 
     coreUint8 m_iElement;            // 
 
+    coreFlow    m_fFlyTime;          // 
+    coreVector2 m_vFlyDir;           // 
+
     static cRotaCache s_RotaCache;   // 
 
 
@@ -73,14 +76,20 @@ public:
     void Deactivate(const coreBool bAnimated);
 
     // 
+    void Reflect(const coreObject3D* pObject);
+    void Reflect(const coreVector2&  vNormal);
+
+    // 
     inline cBullet* ChangeSize (const coreFloat fFactor) {this->SetSize (this->GetSize () * fFactor); return this;}
     inline cBullet* ChangeAlpha(const coreFloat fFactor) {this->SetAlpha(this->GetAlpha() * fFactor); return this;}
 
     // get object properties
-    inline const coreInt32& GetDamage ()const {return m_iDamage;}
-    inline const coreFloat& GetSpeed  ()const {return m_fSpeed;}
-    inline       cShip*     GetOwner  ()const {return m_pOwner;}
-    inline const coreUint8& GetElement()const {return m_iElement;}
+    inline const coreInt32&   GetDamage ()const {return m_iDamage;}
+    inline const coreFloat&   GetSpeed  ()const {return m_fSpeed;}
+    inline       cShip*       GetOwner  ()const {return m_pOwner;}
+    inline const coreUint8&   GetElement()const {return m_iElement;}
+    inline const coreFloat&   GetFlyTime()const {return m_fFlyTime;}
+    inline const coreVector2& GetFlyDir ()const {return m_vFlyDir;}
 
     // bullet configuration values
     static inline const coreChar* ConfigProgramInstancedName() {ASSERT(false) return "";}
@@ -172,6 +181,10 @@ public:
 
     // 
     template <typename T> void PrefetchBullet();
+
+    // 
+    inline coreUintW                       GetNumBullets     ()const {return Core::Manager::Object->GetObjectList(m_iType).size();}
+    template <typename T> inline coreUintW GetNumBulletsTyped()const {return m_apBulletSet[T::ID] ? m_apBulletSet[T::ID]->oBulletActive.List()->size() : 0u;}
 };
 
 
@@ -186,7 +199,7 @@ public:
     ASSIGN_ID(1, "Ray")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeWhite(); this->SetSize(coreVector3(3.7f,3.7f,3.7f) * 0.5f); m_fAnimation = 0.09f;}
+    inline void ResetProperties() {this->MakeYellow(); this->SetSize(coreVector3(3.7f,3.7f,3.7f) * 0.5f); m_fAnimation = 0.09f;}
 
     // change default color
     inline cRayBullet* MakeWhite () {this->_MakeWhite (0.7f); return this;}
@@ -225,7 +238,7 @@ public:
     inline void ResetProperties() {this->MakePurple(); this->SetSize(coreVector3(2.5f,2.5f,2.5f) * 1.3f); m_fAnimation = 0.09f;}
 
     // change default color
-    inline cPulseBullet* MakeWhite () {ASSERT(false)            return this;}
+    inline cPulseBullet* MakeWhite () {this->_MakeWhite (0.7f); return this;}
     inline cPulseBullet* MakeYellow() {ASSERT(false)            return this;}
     inline cPulseBullet* MakeOrange() {ASSERT(false)            return this;}
     inline cPulseBullet* MakeRed   () {ASSERT(false)            return this;}
@@ -332,7 +345,7 @@ public:
     inline void ResetProperties() {this->MakeGreen(); this->SetSize(coreVector3(1.5f,1.5f,1.5f) * 1.3f); m_fAnimation = 0.2f;}
 
     // change default color
-    inline cWaveBullet* MakeWhite () {ASSERT(false)            return this;}
+    inline cWaveBullet* MakeWhite () {this->_MakeWhite (0.7f); return this;}
     inline cWaveBullet* MakeYellow() {ASSERT(false)            return this;}
     inline cWaveBullet* MakeOrange() {ASSERT(false)            return this;}
     inline cWaveBullet* MakeRed   () {this->_MakeRed   (1.0f); return this;}
@@ -373,7 +386,7 @@ public:
     inline void ResetProperties() {this->MakeBlue(); this->SetSize(coreVector3(2.5f,2.5f,2.5f)); m_fAnimation = 0.09f; m_fLightningTime = 1.0f;}
 
     // change default color
-    inline cTeslaBullet* MakeWhite () {ASSERT(false)            return this;}
+    inline cTeslaBullet* MakeWhite () {this->_MakeWhite (0.7f); return this;}
     inline cTeslaBullet* MakeYellow() {ASSERT(false)            return this;}
     inline cTeslaBullet* MakeOrange() {ASSERT(false)            return this;}
     inline cTeslaBullet* MakeRed   () {ASSERT(false)            return this;}
@@ -399,8 +412,6 @@ private:
 class cMineBullet final : public cBullet
 {
 private:
-    coreVector2 m_vFlyDir;        // 
-
     static coreObject3D s_Wave;   // 
 
 
@@ -411,7 +422,7 @@ public:
     ASSIGN_ID(7, "Mine")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(2.0f,2.0f,2.0f)); m_fAnimation = 0.0f; m_vFlyDir = this->GetDirection().xy();}
+    inline void ResetProperties() {this->SetSize(coreVector3(2.0f,2.0f,2.0f)); m_fAnimation = 0.0f;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "object_ship_glow_inst_program";}
@@ -497,10 +508,6 @@ private:
 // triangle bullet class
 class cTriangleBullet final : public cBullet
 {
-private:
-    coreVector2 m_vFlyDir;   // 
-
-
 public:
     cTriangleBullet()noexcept;
 
@@ -508,7 +515,7 @@ public:
     ASSIGN_ID(10, "Triangle")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeRed(); this->SetSize(coreVector3(1.5f,1.5f,1.5f)); m_fAnimation = 0.0f; m_vFlyDir = this->GetDirection().xy();}
+    inline void ResetProperties() {this->MakeRed(); this->SetSize(coreVector3(1.5f,1.5f,1.5f)); m_fAnimation = 0.0f;}
 
     // change default color
     inline cTriangleBullet* MakeWhite () {ASSERT(false)            return this;}
@@ -537,10 +544,6 @@ private:
 // flip bullet class
 class cFlipBullet final : public cBullet
 {
-private:
-    coreVector2 m_vFlyDir;   // 
-
-
 public:
     cFlipBullet()noexcept;
 
@@ -548,7 +551,7 @@ public:
     ASSIGN_ID(11, "Flip")
 
     // reset base properties
-    inline void ResetProperties() {this->MakePurple(); this->SetSize(coreVector3(2.6f,2.0f,2.6f)); m_fAnimation = 0.0f; m_vFlyDir = this->GetDirection().xy();}
+    inline void ResetProperties() {this->MakePurple(); this->SetSize(coreVector3(2.6f,2.0f,2.6f)); m_fAnimation = 0.0f;}
 
     // change default color
     inline cFlipBullet* MakeWhite () {ASSERT(false)            return this;}
@@ -577,10 +580,6 @@ private:
 // quad bullet class
 class cQuadBullet final : public cBullet
 {
-private:
-    coreVector2 m_vFlyDir;   // 
-
-
 public:
     cQuadBullet()noexcept;
 
@@ -588,7 +587,7 @@ public:
     ASSIGN_ID(12, "Quad")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeCyan(); this->SetSize(coreVector3(1.5f,1.5f,1.5f)); m_fAnimation = 0.0f; m_vFlyDir = this->GetDirection().xy();}
+    inline void ResetProperties() {this->MakeCyan(); this->SetSize(coreVector3(1.5f,1.5f,1.5f)); m_fAnimation = 0.0f;}
 
     // change default color
     inline cQuadBullet* MakeWhite () {ASSERT(false)            return this;}
@@ -617,10 +616,6 @@ private:
 // 
 class cChromaBullet final : public cBullet
 {
-private:
-    coreVector2 m_vFlyDir;   // 
-
-
 public:
     cChromaBullet()noexcept;
 
@@ -628,7 +623,7 @@ public:
     ASSIGN_ID(13, "Chroma")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(1.0f,1.0f,1.0f)); m_fAnimation = 0.0f; m_vFlyDir = this->GetDirection().xy();}
+    inline void ResetProperties() {this->SetSize(coreVector3(1.0f,1.0f,1.0f)); m_fAnimation = 0.0f;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}

@@ -23,38 +23,42 @@
 // TODO: display unattached joysticks and joystick names somehow
 // TODO: highlight which joystick is which input set
 // TODO: fix all g_vMenuCenter usages when changing aspect ratio
+// TODO: summary_ add separate total-score for each player
 
 
 // ****************************************************************
 // menu definitions
-#define MENU_LIGHT_ACTIVE    (1.0f)     // visible strength of active menu objects
-#define MENU_LIGHT_IDLE      (0.667f)   // visible strength of idle menu objects
-#define MENU_CONTRAST_WHITE  (0.8f)     // white contrast value (to reduce eye strain)
-#define MENU_CONTRAST_BLACK  (0.04f)    // black contrast value
+#define MENU_LIGHT_ACTIVE       (1.0f)     // visible strength of active menu objects
+#define MENU_LIGHT_IDLE         (0.667f)   // visible strength of idle menu objects
+#define MENU_CONTRAST_WHITE     (0.8f)     // white contrast value (to reduce eye strain)
+#define MENU_CONTRAST_BLACK     (0.04f)    // black contrast value
 
-#define MENU_CONFIG_INPUTS   (PLAYERS)
-#define MENU_SCORE_ENTRIES   (10u)
-#define MENU_REPLAY_ENTRIES  (5u)
-#define MENU_SUMMARY_ENTRIES (3u)
-#define MENU_SUMMARY_PARTS   (PLAYERS)
+#define MENU_CONFIG_INPUTS      (PLAYERS)
+#define MENU_SCORE_ENTRIES      (10u)
+#define MENU_REPLAY_ENTRIES     (5u)
+#define MENU_SUMMARY_ENTRIES    (BOSSES)
+#define MENU_SUMMARY_PARTS      (PLAYERS)
+#define MENU_DEFEAT_DELAY_INTRO (0.5f)
+#define MENU_DEFEAT_DELAY_OUTRO (1.0f)
+#define MENU_DEFEAT_CONTINUES   (CONTINUES)
 
-#define MENU_BUTTON          "menu_background_black.png", "menu_background_black.png"
-#define MENU_SWITCHBOX       "default_black.png", "default_black.png"
-#define MENU_FONT_DYNAMIC_1  "dynamic_font",     (13u)
-#define MENU_FONT_DYNAMIC_2  "dynamic_font",     (20u)
-#define MENU_FONT_DYNAMIC_3  "dynamic_font",     (30u)
-#define MENU_FONT_DYNAMIC_4  "dynamic_font",     (40u)
-#define MENU_FONT_DYNAMIC_5  "dynamic_font",     (70u)
-#define MENU_FONT_STANDARD_1 "ethnocentric.ttf", (13u)
-#define MENU_FONT_STANDARD_2 "ethnocentric.ttf", (20u)
-#define MENU_FONT_STANDARD_3 "ethnocentric.ttf", (30u)
-#define MENU_FONT_STANDARD_4 "ethnocentric.ttf", (40u)
-#define MENU_FONT_STANDARD_5 "ethnocentric.ttf", (70u)
-#define MENU_FONT_ICON_1     "fontawesome.otf",  (20u)
-#define MENU_FONT_ICON_2     "fontawesome.otf",  (24u)
-#define MENU_FONT_ICON_3     "fontawesome.otf",  (40u)
-#define MENU_OUTLINE_SMALL   (1u)
-#define MENU_OUTLINE_BIG     (4u)
+#define MENU_BUTTON             "menu_background_black.png", "menu_background_black.png"
+#define MENU_SWITCHBOX          "default_black.png", "default_black.png"
+#define MENU_FONT_DYNAMIC_1     "dynamic_font",     (13u)
+#define MENU_FONT_DYNAMIC_2     "dynamic_font",     (20u)
+#define MENU_FONT_DYNAMIC_3     "dynamic_font",     (30u)
+#define MENU_FONT_DYNAMIC_4     "dynamic_font",     (40u)
+#define MENU_FONT_DYNAMIC_5     "dynamic_font",     (70u)
+#define MENU_FONT_STANDARD_1    "ethnocentric.ttf", (13u)
+#define MENU_FONT_STANDARD_2    "ethnocentric.ttf", (20u)
+#define MENU_FONT_STANDARD_3    "ethnocentric.ttf", (30u)
+#define MENU_FONT_STANDARD_4    "ethnocentric.ttf", (40u)
+#define MENU_FONT_STANDARD_5    "ethnocentric.ttf", (70u)
+#define MENU_FONT_ICON_1        "fontawesome.otf",  (20u)
+#define MENU_FONT_ICON_2        "fontawesome.otf",  (24u)
+#define MENU_FONT_ICON_3        "fontawesome.otf",  (40u)
+#define MENU_OUTLINE_SMALL      (1u)
+#define MENU_OUTLINE_BIG        (4u)
 
 
 // ****************************************************************
@@ -70,6 +74,8 @@
 #define SURFACE_EXTRA           (8u)
 #define SURFACE_PAUSE           (9u)
 #define SURFACE_SUMMARY         (10u)
+#define SURFACE_DEFEAT          (11u)
+#define SURFACE_MAX             (12u)
 
 #define SURFACE_INTRO_EMPTY     (0u)
 #define SURFACE_INTRO_LOGO      (1u)
@@ -96,6 +102,9 @@
 
 #define SURFACE_SUMMARY_DEFAULT (0u)
 
+#define SURFACE_DEFEAT_CONTINUE (0u)
+#define SURFACE_DEFEAT_GAMEOVER (1u)
+
 
 // ****************************************************************
 // configuration entry indices
@@ -104,7 +113,7 @@
 #define ENTRY_VIDEO_DISPLAYMODE   (2u)
 #define ENTRY_VIDEO_ANTIALIASING  (3u)
 #define ENTRY_VIDEO_TEXTUREFILTER (4u)
-#define ENTRY_VIDEO_ASSETQUALITY  (5u)
+#define ENTRY_VIDEO_RENDERQUALITY (5u)
 #define ENTRY_VIDEO_SHADOWQUALITY (6u)
 #define ENTRY_VIDEO               (7u)
 
@@ -128,7 +137,12 @@
 #define ENTRY_INPUT               (11u + ENTRY_AUDIO)
 
 #define ENTRY_GAME_LANGUAGE       (0u  + ENTRY_INPUT)
-#define ENTRY_MAX                 (1u  + ENTRY_INPUT)
+#define ENTRY_GAME_GAMEROTATION   (1u  + ENTRY_INPUT)
+#define ENTRY_GAME_GAMESCALE      (2u  + ENTRY_INPUT)
+#define ENTRY_GAME_HUDROTATION    (3u  + ENTRY_INPUT)
+#define ENTRY_GAME_HUDSCALE       (4u  + ENTRY_INPUT)
+#define ENTRY_GAME_HUDTYPE        (5u  + ENTRY_INPUT)
+#define ENTRY_MAX                 (6u  + ENTRY_INPUT)
 
 
 // ****************************************************************
@@ -190,8 +204,6 @@ private:
 
     coreLabel m_StartMessage;      // 
     coreLabel m_aVersionInfo[2];   // hard-coded version info strings
-
-    coreParticleEffect m_Effect;   // 
 
 
 public:
@@ -355,13 +367,18 @@ private:
     coreSwitchBoxU8 m_DisplayMode;
     coreSwitchBoxU8 m_AntiAliasing;
     coreSwitchBoxU8 m_TextureFilter;
-    coreSwitchBoxU8 m_AssetQuality;
+    coreSwitchBoxU8 m_RenderQuality;
     coreSwitchBoxU8 m_ShadowQuality;
     coreSwitchBoxU8 m_OverallVolume;
     coreSwitchBoxU8 m_MusicVolume;
     coreSwitchBoxU8 m_EffectVolume;
     coreSwitchBoxU8 m_AmbientSound;
     coreSwitchBoxU8 m_Language;
+    coreSwitchBoxU8 m_GameRotation;
+    coreSwitchBoxU8 m_GameScale;
+    coreSwitchBoxU8 m_HudRotation;
+    coreSwitchBoxU8 m_HudScale;
+    coreSwitchBoxU8 m_HudType;
     sPlayerInput    m_aInput[MENU_CONFIG_INPUTS];
 
 
@@ -384,6 +401,7 @@ private:
     void __UpdateShadowQuality();
     void __UpdateOverallVolume();
     void __UpdateLanguage();
+    void __UpdateInterface();
 
     // 
     void __LoadMonitors();
@@ -448,6 +466,17 @@ public:
 class cSummaryMenu final : public coreMenu
 {
 private:
+    // 
+    enum eSummaryState : coreUint8
+    {
+        SUMMARY_INTRO   = 0u,
+        SUMMARY_SKIPPED = 1u,
+        SUMMARY_WAIT    = 2u,
+        SUMMARY_OUTRO   = 3u
+    };
+
+
+private:
     coreObject2D m_Background;                                      // 
 
     coreLabel m_aTitle[MENU_SUMMARY_ENTRIES];                       // 
@@ -461,7 +490,8 @@ private:
     coreUint32 m_iFinalScore;                                       // (just for display) 
     coreFlow   m_fIntroTimer;                                       // 
     coreFlow   m_fOutroTimer;                                       // 
-    coreUint8  m_iSkipped;                                          // 
+
+    eSummaryState m_iState;                                         // 
 
 
 public:
@@ -479,27 +509,75 @@ public:
 
 
 // ****************************************************************
+// defeat menu class
+class cDefeatMenu final : public coreMenu
+{
+private:
+    // 
+    enum eDefeatState : coreUint8
+    {
+        DEFEAT_INTRO = 0u,
+        DEFEAT_WAIT  = 1u,
+        DEFEAT_BURST = 2u,
+        DEFEAT_OUTRO = 3u
+    };
+
+
+private:
+    coreObject2D m_Background;                             // 
+
+    coreLabel    m_GameOverText;                           // 
+    coreLabel    m_ContinueText;                           // 
+    coreLabel    m_ContinueTimer;                          // 
+    coreObject2D m_ContinueImage[MENU_DEFEAT_CONTINUES];   // 
+
+    coreFlow m_fCountdown;                                 // 
+    coreFlow m_fBurst;                                     // 
+
+    coreFlow m_fIntroTimer;                                // 
+    coreFlow m_fOutroTimer;                                // 
+
+    eDefeatState m_iState;                                 // 
+
+
+public:
+    cDefeatMenu()noexcept;
+
+    DISABLE_COPY(cDefeatMenu)
+
+    // render and move the defeat menu
+    void Render()final;
+    void Move  ()final;
+
+    // 
+    void ShowContinue();
+    void ShowGameOver();
+};
+
+
+// ****************************************************************
 // master menu class
 class cMenu final : public coreMenu
 {
 private:
-    cIntroMenu* m_pIntroMenu;     // intro menu object (dynamically unloaded)
-    cTitleMenu* m_pTitleMenu;     // title menu object (dynamically unloaded)
+    cIntroMenu* m_pIntroMenu;       // intro menu object (dynamically unloaded)
+    cTitleMenu* m_pTitleMenu;       // title menu object (dynamically unloaded)
 
-    cMainMenu    m_MainMenu;      // main menu object
-    cGameMenu    m_GameMenu;      // game menu object
-    cScoreMenu   m_ScoreMenu;     // score menu object
-    cReplayMenu  m_ReplayMenu;    // replay menu object
-    cConfigMenu  m_ConfigMenu;    // config menu object
-    cExtraMenu   m_ExtraMenu;     // extra menu object
-    cPauseMenu   m_PauseMenu;     // pause menu object
-    cSummaryMenu m_SummaryMenu;   // summary menu object
+    cMainMenu    m_MainMenu;        // main menu object
+    cGameMenu    m_GameMenu;        // game menu object
+    cScoreMenu   m_ScoreMenu;       // score menu object
+    cReplayMenu  m_ReplayMenu;      // replay menu object
+    cConfigMenu  m_ConfigMenu;      // config menu object
+    cExtraMenu   m_ExtraMenu;       // extra menu object
+    cPauseMenu   m_PauseMenu;       // pause menu object
+    cSummaryMenu m_SummaryMenu;     // summary menu object
+    cDefeatMenu  m_DefeatMenu;      // defeat menu object
 
-    cMsgBox  m_MsgBox;            // message box overlay
-    cTooltip m_Tooltip;           // tooltip overlay
+    cMsgBox  m_MsgBox;              // message box overlay
+    cTooltip m_Tooltip;             // tooltip overlay
 
-    coreObject2D m_PauseLayer;    // 
-    coreUint32   m_iPauseFrame;   // 
+    coreFullscreen m_PauseLayer;    // 
+    coreUint32     m_iPauseFrame;   // 
 
 
 public:
@@ -530,6 +608,12 @@ public:
     static void UpdateButton(coreButton* OUTPUT pButton, const coreBool bFocused);
     static void UpdateSwitchBox(coreSwitchBoxU8* OUTPUT pSwitchBox);
     static void UpdateAnimateProgram(coreObject2D* OUTPUT pObject);
+
+
+private:
+    // 
+    void __StartGame();
+    void __EndGame();
 };
 
 

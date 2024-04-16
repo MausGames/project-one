@@ -17,6 +17,8 @@
 
 // ****************************************************************
 // ship definitions
+#define SHIP_INVERTED_BIT (24u)   // for inverted base color interpolation
+
 #define SHIP_SHADER_ATTRIBUTE_BLINK (CORE_SHADER_ATTRIBUTE_DIV_TEXPARAM_NUM + 1u)
 
 
@@ -25,14 +27,14 @@
 class INTERFACE cShip : public cLodObject
 {
 protected:
-    coreProtect<coreInt32> m_iMaxHealth;   // maximum health value (armor)
-    coreProtect<coreInt32> m_iCurHealth;   // current health value (armor)
+    coreProtect<coreInt32> m_iMaxHealth;   // maximum health value
+    coreProtect<coreInt32> m_iCurHealth;   // current health value
     coreProtect<coreInt32> m_iPreHealth;   // 
 
-    coreUint32  m_iBaseColor;              // packed base color for interpolations
     coreVector2 m_vOldPos;                 // 
 
-    coreFloat m_fBlink;                    // blink intensity (to highlight successful hits)
+    coreUint32 m_iBaseColor;               // packed base color for interpolations
+    coreFlow   m_fBlink;                   // blink intensity (to highlight successful hits)
 
 
 protected:
@@ -60,7 +62,11 @@ public:
     void     DefaultMultiateLerp (const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime);
 
     // 
-    inline void RefreshColor(const coreFloat fFactor) {this->SetColor3(LERP(/*coreVector3(0.4f,0.4f,0.4f)*/COLOR_SHIP_GREY, this->GetBaseColor(), CLAMP((fFactor - 0.4f) * (1.0f/0.6f) * (0.6f/0.2f), 0.0f, 1.0f)));}
+    void SetBaseColor(const coreVector3& vColor, const coreBool bInverted = false);
+
+    // 
+    inline void RefreshColor(const coreFloat fFactor) {const coreFloat fNewFactor = CLAMP((fFactor - 0.4f) * (1.0f/0.6f) * (0.6f/0.2f), 0.0f, 1.0f); this->SetColor3(LERP(COLOR_SHIP_GREY, this->GetBaseColor(), CONTAINS_BIT(m_iBaseColor, SHIP_INVERTED_BIT) ? (1.0f - fNewFactor) : fNewFactor));}
+    inline void RefreshColor()                        {this->RefreshColor(this->GetCurHealthPct());}
     inline void InvokeBlink ()                        {m_fBlink = 1.2f;}
 
     // 
@@ -74,10 +80,9 @@ public:
     inline void RemoveStatus(const coreInt32 iStatus) {REMOVE_FLAG(m_iStatus, iStatus)}
 
     // set object properties
-    inline void SetMaxHealth   (const coreInt32    iMaxHealth)    {m_iMaxHealth = iMaxHealth;}
-    inline void SetCurHealth   (const coreInt32    iCurHealth)    {m_iCurHealth = iCurHealth;}
-    inline void SetCurHealthPct(const coreFloat    fCurHealthPct) {m_iCurHealth = F_TO_SI(fCurHealthPct * I_TO_F(m_iMaxHealth)); ASSERT((fCurHealthPct > 0.0f) && (fCurHealthPct <= 1.0f))}
-    inline void SetBaseColor   (const coreVector3& vBaseColor)    {m_iBaseColor = coreVector4(vBaseColor, 0.0f).PackUnorm4x8(); this->SetColor3(vBaseColor);}
+    inline void SetMaxHealth   (const coreInt32 iMaxHealth)    {m_iMaxHealth = iMaxHealth;}
+    inline void SetCurHealth   (const coreInt32 iCurHealth)    {m_iCurHealth = iCurHealth;}
+    inline void SetCurHealthPct(const coreFloat fCurHealthPct) {m_iCurHealth = F_TO_SI(fCurHealthPct * I_TO_F(m_iMaxHealth)); ASSERT((fCurHealthPct > 0.0f) && (fCurHealthPct <= 1.0f))}
 
     // get object properties
     inline       coreInt32    GetMaxHealth   ()const {return m_iMaxHealth;}
@@ -85,9 +90,9 @@ public:
     inline       coreFloat    GetCurHealthPct()const {return I_TO_F(m_iCurHealth) * RCP(I_TO_F(m_iMaxHealth));}
     inline       coreInt32    GetPreHealth   ()const {return m_iPreHealth;}
     inline       coreFloat    GetPreHealthPct()const {return I_TO_F(m_iPreHealth) * RCP(I_TO_F(m_iMaxHealth));}
-    inline       coreVector3  GetBaseColor   ()const {return coreVector4::UnpackUnorm4x8(m_iBaseColor).xyz();}
     inline const coreVector2& GetOldPos      ()const {return m_vOldPos;}
     inline       coreVector2  GetMove        ()const {return this->GetPosition().xy() - m_vOldPos;}
+    inline       coreVector3  GetBaseColor   ()const {return coreVector4::UnpackUnorm4x8(m_iBaseColor).xyz();}
     inline       coreFloat    GetBlink       ()const {return MIN(m_fBlink, 1.0f);}
 
 

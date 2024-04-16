@@ -13,52 +13,43 @@
 // construct player view
 void cInterface::sPlayerView::Construct(const coreUintW iIndex)
 {
+    // 
+    const coreVector2 vSide = coreVector2(iIndex ? -1.0f : 1.0f, 1.0f);
+
     // create view objects
-    aHealthBar[0].DefineTexture(0u, "menu_detail_01.png");
-    aHealthBar[0].DefineProgram("default_2d_program");
-    aHealthBar[0].SetPosition  (coreVector2( 0.0f, 0.005f));
-    aHealthBar[0].SetSize      (coreVector2( 4.0f, 0.4f) * 0.07f);
-    aHealthBar[0].SetCenter    (coreVector2(-0.5f,-0.5f) * g_vMenuCenter);
-    aHealthBar[0].SetAlignment (coreVector2( 1.0f, 1.0f));
+    for(coreUintW i = 0u; i < INTERFACE_LIVES; ++i)
+    {
+        aLife[i].DefineTexture(0u, "game_icon.png");
+        aLife[i].DefineProgram("default_2d_program");
+        aLife[i].SetAlignment (coreVector2(1.0f,1.0f) * vSide);
+    }
 
-    aHealthBar[1].DefineTexture(0u, "menu_detail_01.png");
-    aHealthBar[1].DefineProgram("default_2d_program");
-    aHealthBar[1].SetPosition  (aHealthBar[0].GetPosition() + coreVector2(0.01f,0.01f) * 0.5f);
-    aHealthBar[1].SetSize      (aHealthBar[0].GetSize()     - coreVector2(0.01f,0.01f));
-    aHealthBar[1].SetCenter    (aHealthBar[0].GetCenter());
-    aHealthBar[1].SetAlignment (aHealthBar[0].GetAlignment());
+    aShieldBar[0].DefineTexture(0u, "menu_detail_01.png");
+    aShieldBar[0].DefineProgram("default_2d_program");
+    aShieldBar[0].SetPosition  (coreVector2(0.0f,0.005f) * vSide);
+    aShieldBar[0].SetSize      (coreVector2(3.5f,0.4f) * 0.07f);
+    aShieldBar[0].SetAlignment (coreVector2(1.0f,1.0f) * vSide);
 
-    aHealthValue[0].Construct      (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
-    aHealthValue[0].SetPosition    (aHealthBar[0].GetPosition() + coreVector2(0.035f,0.01f));
-    aHealthValue[0].SetCenter      (aHealthBar[0].GetCenter());
-    aHealthValue[0].SetAlignment   (aHealthBar[0].GetAlignment());
-    aHealthValue[0].SetTextLanguage("ARMOR");
+    aShieldBar[1].DefineTexture(0u, "menu_detail_01.png");
+    aShieldBar[1].DefineProgram("default_2d_program");
+    aShieldBar[1].SetPosition  (aShieldBar[0].GetPosition() + coreVector2(0.01f,0.01f) * 0.5f * vSide);
+    aShieldBar[1].SetSize      (aShieldBar[0].GetSize()     - coreVector2(0.01f,0.01f));
+    aShieldBar[1].SetAlignment (aShieldBar[0].GetAlignment());
 
-    aHealthValue[1].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
-    aHealthValue[1].SetPosition (aHealthBar[0].GetPosition() + coreVector2(aHealthBar[0].GetSize().x - 0.035f, 0.01f));
-    aHealthValue[1].SetCenter   (aHealthBar[0].GetCenter());
-    aHealthValue[1].SetAlignment(aHealthBar[0].GetAlignment().InvertedX());
+    oShieldValue.Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+    oShieldValue.SetPosition (aShieldBar[0].GetPosition() + coreVector2(0.035f, 0.01f) * vSide);
+    oShieldValue.SetAlignment(coreVector2(1.0f,1.0f) * vSide);
 
-    oScore.Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
-    oScore.SetPosition (coreVector2( 0.01f,-0.005f));
-    oScore.SetCenter   (coreVector2(-0.5f,  0.5f) * g_vMenuCenter);
-    oScore.SetAlignment(coreVector2( 1.0f, -1.0f));
+    oScoreTotal.Construct   (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
+    oScoreTotal.SetPosition (coreVector2(0.01f,0.0f) * vSide);
+    oScoreTotal.SetAlignment(coreVector2(1.0f,-1.0f) * vSide);
 
-    oCombo.Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
-    oCombo.SetPosition (oScore.GetPosition() + coreVector2(0.002f,-0.03f));
-    oCombo.SetCenter   (oScore.GetCenter());
-    oCombo.SetAlignment(oScore.GetAlignment());
+    oScoreMission.Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+    oScoreMission.SetPosition (oScoreTotal.GetPosition() + coreVector2(0.01f,-0.035f) * vSide);
+    oScoreMission.SetAlignment(oScoreTotal.GetAlignment());
 
-    oChainBar.DefineTexture(0u, "default_white.png");
-    oChainBar.DefineProgram("default_2d_program");
-    oChainBar.SetPosition  (oScore.GetPosition() + coreVector2(0.001f,-0.055f));
-    oChainBar.SetCenter    (oScore.GetCenter());
-    oChainBar.SetAlignment (oScore.GetAlignment());
-
-    oChainValue.Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
-    oChainValue.SetPosition (oScore.GetPosition() + coreVector2(0.001f,-0.06f));
-    oChainValue.SetCenter   (oScore.GetCenter());
-    oChainValue.SetAlignment(oScore.GetAlignment());
+    // 
+    fSpin = 0.0f;
 }
 
 
@@ -66,14 +57,16 @@ void cInterface::sPlayerView::Construct(const coreUintW iIndex)
 // constructor
 cInterface::cInterface(const coreUint8 iNumViews)noexcept
 : m_iNumViews    (iNumViews)
+, m_fBossSpin    (0.0f)
 , m_fBannerStart (-FLT_MAX)
 , m_bBannerType  (false)
 , m_fStoryStart  (-FLT_MAX)
+, m_fAnimation   (0.0f)
 , m_bVisible     (false)
 , m_fAlphaAll    (0.0f)
 , m_fAlphaBoss   (0.0f)
 {
-    ASSERT(m_iNumViews <= INTERFACE_VIEWS)
+    ASSERT((m_iNumViews > 0) && (m_iNumViews <= INTERFACE_VIEWS))
 
     // construct player views
     for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i)
@@ -83,41 +76,38 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
     m_aBossHealthBar[0].DefineTexture(0u, "menu_detail_02.png");
     m_aBossHealthBar[0].DefineProgram("default_2d_program");
     m_aBossHealthBar[0].SetPosition  (coreVector2(0.0f,-0.005f));
-    m_aBossHealthBar[0].SetSize      (coreVector2(8.0f, 0.4f) * 0.07f);
-    m_aBossHealthBar[0].SetCenter    (coreVector2(0.0f, 0.5f) * g_vMenuCenter);
+    m_aBossHealthBar[0].SetSize      (coreVector2(7.0f, 0.4f) * 0.07f);
     m_aBossHealthBar[0].SetAlignment (coreVector2(0.0f,-1.0f));
 
     m_aBossHealthBar[1].DefineTexture(0u, "menu_detail_02.png");
     m_aBossHealthBar[1].DefineProgram("default_2d_program");
     m_aBossHealthBar[1].SetPosition  (m_aBossHealthBar[0].GetPosition() + coreVector2(0.00f,-0.01f) * 0.5f);
     m_aBossHealthBar[1].SetSize      (m_aBossHealthBar[0].GetSize()     - coreVector2(0.01f, 0.01f));
-    m_aBossHealthBar[1].SetCenter    (m_aBossHealthBar[0].GetCenter());
     m_aBossHealthBar[1].SetAlignment (m_aBossHealthBar[0].GetAlignment());
 
-    m_aBossHealthValue[0].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
-    m_aBossHealthValue[0].SetPosition (m_aBossHealthBar[0].GetPosition() + coreVector2(-(m_aBossHealthBar[0].GetSize().x*0.5f - 0.05f), -0.01f));
-    m_aBossHealthValue[0].SetCenter   (m_aBossHealthBar[0].GetCenter());
-    m_aBossHealthValue[0].SetAlignment(coreVector2(1.0f,-1.0f));
-
-    m_aBossHealthValue[1].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
-    m_aBossHealthValue[1].SetPosition (m_aBossHealthBar[0].GetPosition() + coreVector2( (m_aBossHealthBar[0].GetSize().x*0.5f - 0.05f), -0.01f));
-    m_aBossHealthValue[1].SetCenter   (m_aBossHealthBar[0].GetCenter());
-    m_aBossHealthValue[1].SetAlignment(coreVector2(-1.0f,-1.0f));
-
-    m_BossName.Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
-    m_BossName.SetPosition (coreVector2(-0.01f,-0.005f));
-    m_BossName.SetCenter   (coreVector2( 0.5f,   0.5f) * g_vMenuCenter);
-    m_BossName.SetAlignment(coreVector2(-1.0f,  -1.0f));
+    m_BossHealthValue.Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+    m_BossHealthValue.SetPosition (m_aBossHealthBar[0].GetPosition() + coreVector2(-0.1f,-0.01f));
+    m_BossHealthValue.SetAlignment(m_aBossHealthBar[0].GetAlignment());
 
     m_aBossTime[0].Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
-    m_aBossTime[0].SetPosition (m_BossName.GetPosition() + coreVector2(-0.023f,-0.025f));
-    m_aBossTime[0].SetCenter   (m_BossName.GetCenter());
-    m_aBossTime[0].SetAlignment(m_BossName.GetAlignment());
+    m_aBossTime[0].SetPosition (coreVector2( 0.0f, m_BossHealthValue.GetPosition().y));
+    m_aBossTime[0].SetAlignment(coreVector2(-1.0f,-1.0f));
 
     m_aBossTime[1].Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
-    m_aBossTime[1].SetPosition (m_BossName.GetPosition() + coreVector2(0.0f,-0.025f));
-    m_aBossTime[1].SetCenter   (m_BossName.GetCenter());
-    m_aBossTime[1].SetAlignment(m_BossName.GetAlignment());
+    m_aBossTime[1].SetPosition (m_aBossTime[0].GetPosition());
+    m_aBossTime[1].SetAlignment(coreVector2(1.0f,-1.0f));
+
+    m_WaveName.Construct   (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
+    m_WaveName.SetPosition (m_aBossHealthBar[0].GetPosition());
+    m_WaveName.SetAlignment(m_aBossHealthBar[0].GetAlignment());
+
+    m_aWaveTime[0].Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+    m_aWaveTime[0].SetPosition (coreVector2( 0.0f,-0.002f));
+    m_aWaveTime[0].SetAlignment(coreVector2(-1.0f,-1.0f));
+
+    m_aWaveTime[1].Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+    m_aWaveTime[1].SetPosition (m_aWaveTime[0].GetPosition());
+    m_aWaveTime[1].SetAlignment(coreVector2(1.0f,-1.0f));
 
     m_BannerBar.DefineTexture(0u, "menu_detail_03.png");
     m_BannerBar.DefineTexture(1u, "menu_background_black.png");
@@ -131,14 +121,8 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
     m_aBannerText[2].SetColor3(COLOR_MENU_WHITE * 0.75f);
     m_aBannerText[3].SetColor3(COLOR_MENU_WHITE);
 
-    m_aStoryText[0].Construct(MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
-    m_aStoryText[1].Construct(MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
-
-    m_aBonusText[0].Construct(MENU_FONT_STANDARD_4, MENU_OUTLINE_SMALL);
-    m_aBonusText[1].Construct(MENU_FONT_DYNAMIC_3,  MENU_OUTLINE_SMALL);
-
-    // 
-    this->UpdateLayout();
+    m_aStoryText[0].Construct(MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
+    m_aStoryText[1].Construct(MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
 }
 
 
@@ -148,45 +132,43 @@ void cInterface::Render()
 {
     if(m_fAlphaAll)
     {
-        // loop through all player views
         for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i)
         {
-            sPlayerView& oView = m_aView[i];
-
-            // render player bars
-            //oView.aHealthBar[0].Render();
-            //oView.aHealthBar[1].Render();
-            oView.oChainBar    .Render();
+            // render player images
+            for(coreUintW j = 0u; j < INTERFACE_LIVES; ++j) m_aView[i].aLife[j].Render();
+            m_aView[i].aShieldBar[0].Render();
+            m_aView[i].aShieldBar[1].Render();
         }
 
         if(m_fAlphaBoss)
         {
-            // render boss bars
+            // render boss images
             m_aBossHealthBar[0].Render();
             m_aBossHealthBar[1].Render();
         }
 
-        // loop through all player views
         for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i)
         {
-            sPlayerView& oView = m_aView[i];
-
-            // render player text
-            //oView.aHealthValue[0].Render();
-            //oView.aHealthValue[1].Render();
-            oView.oScore         .Render();
-            oView.oCombo         .Render();
-            oView.oChainValue    .Render();
+            // render player labels
+            m_aView[i].oShieldValue .Render();
+            m_aView[i].oScoreTotal  .Render();
+            m_aView[i].oScoreMission.Render();
         }
 
         if(m_fAlphaBoss)
         {
-            // render boss text
-            m_aBossHealthValue[0].Render();
-            m_aBossHealthValue[1].Render();
-            //m_aBossTime[0]       .Render();
-            //m_aBossTime[1]       .Render();
-            //m_BossName           .Render();
+            // render boss labels
+            m_BossHealthValue.Render();
+            m_aBossTime[0]   .Render();
+            m_aBossTime[1]   .Render();
+        }
+
+        if(m_fAlphaBoss != 1.0f)
+        {
+            // render wave labels
+            m_WaveName    .Render();
+            m_aWaveTime[0].Render();
+            m_aWaveTime[1].Render();
         }
     }
 
@@ -205,16 +187,9 @@ void cInterface::Render()
 
     if(this->IsStoryActive(0.0f))
     {
-        // 
-        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aStoryText); ++i)
-            m_aStoryText[i].Render();
-    }
-
-    if(this->IsBonusActive(0.0f))
-    {
-        // 
-        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aBonusText); ++i)
-            m_aBonusText[i].Render();
+        // render story
+        m_aStoryText[0].Render();
+        m_aStoryText[1].Render();
     }
 }
 
@@ -223,107 +198,160 @@ void cInterface::Render()
 // move the interface
 void cInterface::Move()
 {
+    // 
+    m_fAnimation.UpdateMod(6.0f*PI, 2.0f*PI);
+    const coreFloat fDanger = 1.0f + 0.8f * (1.0f + 0.5f * SIN(m_fAnimation));
+
     // loop through all player views
     for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i)
     {
         sPlayerView& oView   = m_aView[i];
         cPlayer*     pPlayer = g_pGame->GetPlayer(i);
-        cScoreTable* pTable  = pPlayer->GetScoreTable();
 
-        // set health bar size
-        const coreFloat fPercent = pPlayer->GetCurHealthPct();
-        const coreFloat fWidth   = oView.aHealthBar[0].GetSize().x - 0.01f;
-        oView.aHealthBar[1].SetSize     (coreVector2(fPercent * fWidth, oView.aHealthBar[1].GetSize().y));
-        oView.aHealthBar[1].SetTexSize  (coreVector2(fPercent, 1.0f));
-        oView.aHealthBar[1].SetTexOffset(coreVector2(i ? (1.0f-fPercent) : 0.0f, 0.0f));
+        if(CONTAINS_FLAG(pPlayer->GetStatus(), PLAYER_STATUS_SHIELDED))
+        {
+            // 
+            if(m_fAlphaAll) oView.fSpin.UpdateMin(1.0f, 1.0f);
+                       else oView.fSpin = 0.0f;
 
-        // set health bar color
-        const coreVector3 vColor = COLOR_HEALTH(fPercent);
-        oView.aHealthBar[0].SetColor3(vColor * 0.2f);
-        oView.aHealthBar[1].SetColor3(vColor * 0.9f);
+            // set shield bar size
+            const coreFloat fPercent = pPlayer->GetCurHealthPct() * oView.fSpin;
+            const coreFloat fWidth   = oView.aShieldBar[0].GetSize().x - 0.01f;
+            oView.aShieldBar[1].SetSize     (coreVector2(fPercent * fWidth, oView.aShieldBar[1].GetSize().y));
+            oView.aShieldBar[1].SetTexSize  (coreVector2(fPercent, 1.0f));
+            oView.aShieldBar[1].SetTexOffset(coreVector2(i ? (1.0f-fPercent) : 0.0f, 0.0f));
 
-        // set chain bar size and color
-        oView.oChainBar.SetSize  (coreVector2(0.05f * MIN(pTable->GetChainCooldown()*1.1f, 1.0f), 0.005f));
-        oView.oChainBar.SetColor3(COLOR_CHAIN(pTable->GetChainCooldown()));
+            // set shield bar color
+            const coreVector3 vColor = COLOR_MENU_BLUE * ((fPercent <= 0.2f) ? fDanger : 1.0f);
+            oView.aShieldBar[0].SetColor3(vColor * 0.2f);
+            oView.aShieldBar[1].SetColor3(vColor * 0.9f);
 
-        // display player values
-        oView.aHealthValue[1].SetText(PRINT("%d / %d", pPlayer->GetCurHealth(), pPlayer->GetMaxHealth()));
-        oView.oScore         .SetText(PRINT("%07u",    pTable->GetScoreMission(g_pGame->GetCurMissionIndex())));
-        oView.oCombo         .SetText(PRINT("x%.1f",   pTable->GetCurCombo()));
-        oView.oChainValue    .SetText(pTable->GetCurChain() ? PRINT("+%u", pTable->GetCurChain()) : "");
+            // display shield value
+            oView.oShieldValue.SetText(PRINT("%.0f", I_TO_F(pPlayer->GetCurHealth()) * oView.fSpin));
+        }
+        else
+        {
+            // 
+            const coreFloat fCurHealth = I_TO_F(pPlayer->GetCurHealth());
+                 if(!m_fAlphaAll)             oView.fSpin = 0.0f;
+            else if(fCurHealth > oView.fSpin) oView.fSpin.UpdateMin( 8.0f, fCurHealth);
+            else if(fCurHealth < oView.fSpin) oView.fSpin.UpdateMax(-8.0f, fCurHealth);
+
+            // 
+            for(coreUintW j = 0u; j < INTERFACE_LIVES; ++j)
+            {
+                // 
+                const coreVector2 vSide = coreVector2(i ? -1.0f : 1.0f, 1.0f);
+                const coreVector2 vPos  = coreVector2(0.007f + I_TO_F(j) * 0.04f, 0.005f);
+                const coreVector2 vSize = coreVector2(1.0f,1.0f) * 0.045f;
+
+                // 
+                const coreFloat   fCurSpin = CLAMP(oView.fSpin - I_TO_F(j), 0.0f, 1.0f);
+                const coreVector2 vNewSize = vSize * (1.5f - 0.5f * fCurSpin);
+                const coreVector2 vNewPos  = vPos + 0.5f * (vSize - vNewSize);
+
+                // 
+                oView.aLife[j].SetPosition(vNewPos * vSide);
+                oView.aLife[j].SetSize    (vNewSize);
+                oView.aLife[j].SetAlpha   (m_fAlphaAll * fCurSpin);
+                oView.aLife[j].SetEnabled (fCurSpin ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+                oView.aLife[j].Move();
+            }
+        }
+
+        // display score
+        oView.oScoreTotal  .SetText(PRINT("%07u", pPlayer->GetScoreTable()->GetScoreTotal()));
+        oView.oScoreMission.SetText(PRINT("%07u", pPlayer->GetScoreTable()->GetScoreMission(g_pGame->GetCurMissionIndex())));
 
         // set player transparency
-        oView.aHealthBar[0]  .SetAlpha(m_fAlphaAll);
-        oView.aHealthBar[1]  .SetAlpha(m_fAlphaAll);
-        oView.aHealthValue[0].SetAlpha(m_fAlphaAll);
-        oView.aHealthValue[1].SetAlpha(m_fAlphaAll);
-        oView.oScore         .SetAlpha(m_fAlphaAll);
-        oView.oCombo         .SetAlpha(m_fAlphaAll);
-        oView.oChainBar      .SetAlpha(m_fAlphaAll);
-        oView.oChainValue    .SetAlpha(m_fAlphaAll);
+        oView.aShieldBar[0].SetAlpha(m_fAlphaAll);
+        oView.aShieldBar[1].SetAlpha(m_fAlphaAll);
+        oView.oShieldValue .SetAlpha(m_fAlphaAll);
+        oView.oScoreTotal  .SetAlpha(m_fAlphaAll);
+        oView.oScoreMission.SetAlpha(m_fAlphaAll);
 
         // move player
-        oView.aHealthBar[0]  .Move();
-        oView.aHealthBar[1]  .Move();
-        oView.aHealthValue[0].Move();
-        oView.aHealthValue[1].Move();
-        oView.oScore         .Move();
-        oView.oCombo         .Move();
-        oView.oChainBar      .Move();
-        oView.oChainValue    .Move();
+        oView.oShieldValue .Move();
+        oView.aShieldBar[0].Move();
+        oView.aShieldBar[1].Move();
+        oView.oScoreTotal  .Move();
+        oView.oScoreMission.Move();
     }
 
     // check for active boss
     const cBoss* pBoss = g_pGame->GetCurMission()->GetCurBoss();
     if(pBoss)
     {
+        // 
+        if(m_fAlphaBoss) m_fBossSpin.UpdateMin(1.0f / (INTERFACE_BANNER_DURATION - INTERFACE_BOSS_DELAY), 1.0f);
+                    else m_fBossSpin = 0.0f;
+
         // set health bar size
-        const coreFloat fPercent = pBoss->GetCurHealthPct();
+        const coreFloat fPercent = pBoss->GetCurHealthPct() * m_fBossSpin;
         const coreFloat fWidth   = m_aBossHealthBar[0].GetSize().x - 0.01f;
         m_aBossHealthBar[1].SetPosition(coreVector2(fWidth * (fPercent-1.0f) * 0.5f, m_aBossHealthBar[1].GetPosition().y));
         m_aBossHealthBar[1].SetSize    (coreVector2(fWidth *  fPercent,              m_aBossHealthBar[1].GetSize    ().y));
         m_aBossHealthBar[1].SetTexSize (coreVector2(fPercent, 1.0f));
 
         // set health bar color
-        const coreVector3 vColor = COLOR_HEALTH(fPercent * 0.5f);
+        const coreVector3 vColor = COLOR_HEALTH(fPercent) * ((fPercent <= 0.2f) ? fDanger : 1.0f);
         m_aBossHealthBar[0].SetColor3(vColor * 0.2f);
         m_aBossHealthBar[1].SetColor3(vColor * 0.9f);
 
-        // display boss values
-        m_aBossHealthValue[0].SetText(PRINT("[%.0f%%]", fPercent * 100.0f));
-        m_aBossHealthValue[1].SetText(PRINT("%d / %d",  pBoss->GetCurHealth(), pBoss->GetMaxHealth()));
-
-        // display boss time
-        const coreFloat fTimeBoss = MAX(g_pGame->GetTimeTable()->GetTimeBoss(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurBossIndex()), 0.0f);
-        m_aBossTime[0].SetText(PRINT("%.0f.", FLOOR(      fTimeBoss)));
-        m_aBossTime[1].SetText(PRINT("%.0f",  FLOOR(FRACT(fTimeBoss)*10.0f)));
-
-        // set boss transparency
-        const coreFloat fAlphaBossFull = m_fAlphaAll * m_fAlphaBoss;
-        m_aBossHealthBar[0]  .SetAlpha(fAlphaBossFull);
-        m_aBossHealthBar[1]  .SetAlpha(fAlphaBossFull);
-        m_aBossHealthValue[0].SetAlpha(fAlphaBossFull);
-        m_aBossHealthValue[1].SetAlpha(fAlphaBossFull);
-        m_aBossTime[0]       .SetAlpha(fAlphaBossFull);
-        m_aBossTime[1]       .SetAlpha(fAlphaBossFull);
-        m_BossName           .SetAlpha(fAlphaBossFull);
-
-        // move boss
-        m_aBossHealthBar[0]  .Move();
-        m_aBossHealthBar[1]  .Move();
-        m_aBossHealthValue[0].Move();
-        m_aBossHealthValue[1].Move();
-        m_aBossTime[0]       .Move();
-        m_aBossTime[1]       .Move();
-        m_BossName           .Move();
+        // display health value
+        m_BossHealthValue.SetText(PRINT("%.0f%%", CEIL(fPercent * 100.0f)));
     }
+
+    // display time
+    const coreFloat fTime = MAX(g_pGame->GetTimeTable()->GetTimeBossWave(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurBossIndex(), g_pGame->GetCurMission()->GetCurWaveIndex()), 0.0f);
+    m_aBossTime[0].SetText(PRINT("%.0f.", FLOOR(      fTime)));
+    m_aBossTime[1].SetText(PRINT("%.0f",  FLOOR(FRACT(fTime)*10.0f)));
+    m_aWaveTime[0].SetText(m_aBossTime[0].GetText());
+    m_aWaveTime[1].SetText(m_aBossTime[1].GetText());
+
+    // adjust time position (# only required if alignment is centered)
+    (m_fAlphaBoss ? m_aBossTime[0] : m_aWaveTime[0]).RetrieveDesiredSize([this](const coreVector2& vSize)
+    {
+        const coreFloat fPos = (vSize.x - 0.022f) * 0.5f;
+        const coreFloat fOff = m_BossHealthValue.GetPosition().x;
+        m_aBossTime[0].SetPosition(coreVector2(fPos - fOff,          m_aBossTime[0].GetPosition().y));
+        m_aBossTime[1].SetPosition(coreVector2(fPos - fOff - 0.002f, m_aBossTime[1].GetPosition().y));
+        m_aWaveTime[0].SetPosition(coreVector2(fPos,                 m_aWaveTime[0].GetPosition().y));
+        m_aWaveTime[1].SetPosition(coreVector2(fPos        - 0.002f, m_aWaveTime[1].GetPosition().y));
+    });
+
+    // set boss transparency
+    const coreFloat fAlphaBossFull = m_fAlphaAll * m_fAlphaBoss;
+    m_aBossHealthBar[0].SetAlpha(fAlphaBossFull);
+    m_aBossHealthBar[1].SetAlpha(fAlphaBossFull);
+    m_BossHealthValue  .SetAlpha(fAlphaBossFull);
+    m_aBossTime[0]     .SetAlpha(fAlphaBossFull);
+    m_aBossTime[1]     .SetAlpha(fAlphaBossFull);
+
+    // move boss
+    m_aBossHealthBar[0].Move();
+    m_aBossHealthBar[1].Move();
+    m_BossHealthValue  .Move();
+    m_aBossTime[0]     .Move();
+    m_aBossTime[1]     .Move();
+
+    // set wave transparency
+    const coreFloat fAlphaWaveFull = m_fAlphaAll * (1.0f - m_fAlphaBoss);
+    m_WaveName    .SetAlpha(fAlphaWaveFull);
+    m_aWaveTime[0].SetAlpha(fAlphaWaveFull);
+    m_aWaveTime[1].SetAlpha(fAlphaWaveFull);
+
+    // move wave
+    m_WaveName    .Move();
+    m_aWaveTime[0].Move();
+    m_aWaveTime[1].Move();
 
     // check for active banner
     const coreFloat fBanner = g_pGame->GetTimeTable()->GetTimeEvent() - m_fBannerStart;
     if((fBanner <= INTERFACE_BANNER_DURATION) && (fBanner >= 0.0f))
     {
         // calculate visibility and animation value
-        const coreFloat fVisibility = MIN(fBanner, INTERFACE_BANNER_DURATION - fBanner, 1.0f / INTERFACE_BANNER_SPEED) * INTERFACE_BANNER_SPEED;
+        const coreFloat fVisibility = MIN(fBanner, INTERFACE_BANNER_DURATION - fBanner, INTERFACE_BANNER_SPEED_REV) * INTERFACE_BANNER_SPEED;
         const coreFloat fAnimation  = LERPB(0.0f, INTERFACE_BANNER_ANIMATION, fBanner / INTERFACE_BANNER_ANIMATION);
 
         // slash banner bar across screen (# direction can be swapped, also alpha value is used as texture coordinate correction)
@@ -355,45 +383,31 @@ void cInterface::Move()
         m_aBannerText[3].Move();
     }
 
-    // 
+    // check for active story
     const coreFloat fStory = g_pGame->GetTimeTable()->GetTimeEvent() - m_fStoryStart;
     if((fStory <= INTERFACE_STORY_DURATION) && (fStory >= 0.0f))
     {
         // 
         const coreFloat fVisibility = MIN(fStory, INTERFACE_STORY_DURATION - fStory, 1.0f / INTERFACE_STORY_SPEED) * INTERFACE_STORY_SPEED;
 
-        // 
-        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aStoryText); ++i)
-        {
-            m_aStoryText[i].SetAlpha(fVisibility);
-            m_aStoryText[i].Move();
-        }
+        // set story transparency
+        m_aStoryText[0].SetAlpha(fVisibility);
+        m_aStoryText[1].SetAlpha(fVisibility);
+
+        // move story
+        m_aStoryText[0].Move();
+        m_aStoryText[1].Move();
     }
 
-    // 
-    const coreFloat fBonus = g_pGame->GetTimeTable()->GetTimeEvent() - m_fBonusStart;
-    if((fBonus <= INTERFACE_BONUS_DURATION) && (fStory >= 0.0f))
-    {
-        // 
-        const coreFloat fVisibility = MIN(fBonus, INTERFACE_BONUS_DURATION - fBonus, 1.0f / INTERFACE_BONUS_SPEED) * INTERFACE_BONUS_SPEED;
-
-        // 
-        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aBonusText); ++i)
-        {
-            m_aBonusText[i].SetAlpha(fVisibility);
-            m_aBonusText[i].Move();
-        }
-    }
-
-    // smoothly toggle interface visibility (after forwarding, can be overloaded)
+    // smoothly toggle interface visibility (after forwarding, to allow overriding)
     if(m_bVisible)
-         {if(m_fAlphaAll < 1.0f) m_fAlphaAll = MIN(m_fAlphaAll + Core::System->GetTime() * 2.0f, 1.0f);}
-    else {if(m_fAlphaAll > 0.0f) m_fAlphaAll = MAX(m_fAlphaAll - Core::System->GetTime() * 2.0f, 0.0f);}
+         {if(m_fAlphaAll < 1.0f) m_fAlphaAll.UpdateMin( 2.0f, 1.0f);}
+    else {if(m_fAlphaAll > 0.0f) m_fAlphaAll.UpdateMax(-2.0f, 0.0f);}
 
     // smoothly toggle boss data visibility
     if(pBoss && (m_bBannerType == INTERFACE_BANNER_TYPE_BOSS) && (fBanner >= INTERFACE_BOSS_DELAY))
-         {if(m_fAlphaBoss < 1.0f) m_fAlphaBoss = MIN(m_fAlphaBoss + Core::System->GetTime() * 2.0f, 1.0f);}
-    else {if(m_fAlphaBoss > 0.0f) m_fAlphaBoss = MAX(m_fAlphaBoss - Core::System->GetTime() * 2.0f, 0.0f);}
+         {if(m_fAlphaBoss < 1.0f) m_fAlphaBoss.UpdateMin( 2.0f, 1.0f);}
+    else {if(m_fAlphaBoss > 0.0f) m_fAlphaBoss.UpdateMax(-2.0f, 0.0f);}
 }
 
 
@@ -401,9 +415,6 @@ void cInterface::Move()
 // show boss banner
 void cInterface::ShowBoss(const coreChar* pcMain, const coreChar* pcSub)
 {
-    // set boss name
-    m_BossName.SetText(pcMain);
-
     // set banner text
     m_aBannerText[0].SetText(pcMain);
     m_aBannerText[1].SetText(pcMain);
@@ -533,80 +544,69 @@ coreBool cInterface::IsStoryActive(const coreFloat fOffset)const
 
 // ****************************************************************
 // 
-void cInterface::ShowBonus(const coreChar* pcValue, const coreChar* pcTitle)
-{
-    ASSERT(pcValue && pcTitle)
-    const coreFloat fHeight = (pcTitle[0] ? 0.025f : 0.0f);
-
-    // 
-    m_aBonusText[0].SetText(pcValue);
-    m_aBonusText[0].SetPosition(coreVector2(0.0f, fHeight));
-
-    // 
-    m_aBonusText[1].SetText(pcTitle);
-    m_aBonusText[1].SetPosition(coreVector2(0.0f, -fHeight));
-
-    // 
-    m_fBonusStart = g_pGame->GetTimeTable()->GetTimeEvent();
-}
-
-
-// ****************************************************************
-// 
-coreBool cInterface::IsBonusActive(const coreFloat fOffset)const
-{
-    // 
-    ASSERT(fOffset < INTERFACE_BONUS_DURATION)
-    return ((g_pGame->GetTimeTable()->GetTimeEvent() - m_fBonusStart) <= (INTERFACE_BONUS_DURATION - fOffset)) ? true : false;
-}
-
-
-// ****************************************************************
-// 
 void cInterface::UpdateLayout()
 {
-    /*
-    for(coreUintW i = 0u; i < INTERFACE_VIEWS; ++i)
+    // 
+    const coreVector2 vModifier = 0.5f * (g_CurConfig.Game.iHudType ? g_vMenuCenter : coreVector2(1.0f,1.0f));
+    const coreVector2 vTop      = coreVector2(0.0f, 1.0f) * vModifier;
+    const coreVector2 vBottom   = coreVector2(0.0f,-1.0f) * vModifier;
+
+    // loop through all player views
+    for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i)
     {
         sPlayerView& oView = m_aView[i];
 
-        const coreUint8 iType = 2u;
+        // 
+        const coreVector2 vSide = coreVector2(i ? 1.0f : -1.0f, 0.0f) * vModifier;
 
-        const coreFloat A = ((iType == 1u) ? -1.0f : 1.0f); // type
-        const coreFloat B = ((i     == 1u) ? -1.0f : 1.0f); // player
-
-        const coreFloat fSide = A * B;
-        const coreFloat fOffset = ((iType == 1u) ? 0.015f : 0.0f);
-
-        oView.m_aHealthBar[0]  .SetPosition(coreVector2( (0.0f + fOffset) * fSide, 0.005f));
-        oView.m_aHealthBar[1]  .SetPosition(oView.m_aHealthBar[0].GetPosition() + coreVector2(0.01f * fSide,0.01f) * 0.5f);
-        oView.m_aHealthValue[0].SetPosition(oView.m_aHealthBar[0].GetPosition() + coreVector2(0.035f * fSide,0.01f));
-        oView.m_aHealthValue[1].SetPosition(oView.m_aHealthBar[0].GetPosition() + coreVector2((oView.m_aHealthBar[0].GetSize().x - 0.035f) * fSide, 0.01f));
-
-        oView.m_Score          .SetPosition(coreVector2(0.01f * fSide,0.005f) * coreVector2(1.0f,-1.0f));
-        oView.m_Combo          .SetPosition(coreVector2(0.012f * fSide,0.035f) * coreVector2(1.0f,-1.0f));
-        oView.m_ChainBar       .SetPosition(oView.m_Score.GetPosition() + coreVector2(0.001f * fSide,0.055f));
-        oView.m_ChainValue     .SetPosition(oView.m_Score.GetPosition() + coreVector2(0.001f * fSide,0.03f));
-
-        const coreVector2 vAlignment = coreVector2( A * B, 1.0f);
-        oView.m_aHealthBar[0]  .SetAlignment(vAlignment);
-        oView.m_aHealthBar[1]  .SetAlignment(vAlignment);
-        oView.m_aHealthValue[0].SetAlignment(vAlignment);
-        oView.m_aHealthValue[1].SetAlignment(vAlignment.InvertedX());
-        oView.m_Score          .SetAlignment(vAlignment.InvertedY());
-        oView.m_Combo          .SetAlignment(vAlignment.InvertedY());
-        oView.m_ChainBar       .SetAlignment(vAlignment);
-        oView.m_ChainValue     .SetAlignment(vAlignment);
-
-        const coreVector2 vCenter = coreVector2(-0.5f * B,-0.5f) * g_vMenuCenter;
-        oView.m_aHealthBar[0]  .SetCenter(vCenter);
-        oView.m_aHealthBar[1]  .SetCenter(vCenter);
-        oView.m_aHealthValue[0].SetCenter(vCenter);
-        oView.m_aHealthValue[1].SetCenter(vCenter);
-        oView.m_Score          .SetCenter(vCenter.InvertedY());
-        oView.m_Combo          .SetCenter(vCenter.InvertedY());
-        oView.m_ChainBar       .SetCenter(vCenter);
-        oView.m_ChainValue     .SetCenter(vCenter);
+        // 
+        for(coreUintW j = 0u; j < INTERFACE_LIVES; ++j) oView.aLife[j].SetCenter(vBottom + vSide);
+        oView.aShieldBar[0].SetCenter(vBottom + vSide);
+        oView.aShieldBar[1].SetCenter(vBottom + vSide);
+        oView.oShieldValue .SetCenter(vBottom + vSide);
+        oView.oScoreTotal  .SetCenter(vTop    + vSide);
+        oView.oScoreMission.SetCenter(vTop    + vSide);
     }
-    */
+
+    // 
+    m_aBossHealthBar[0].SetCenter(vTop);
+    m_aBossHealthBar[1].SetCenter(vTop);
+    m_BossHealthValue  .SetCenter(vTop);
+    m_aBossTime[0]     .SetCenter(vTop);
+    m_aBossTime[1]     .SetCenter(vTop);
+
+    // 
+    m_WaveName    .SetCenter(vTop);
+    m_aWaveTime[0].SetCenter(vTop);
+    m_aWaveTime[1].SetCenter(vTop);
+}
+
+
+// ****************************************************************
+// 
+void cInterface::UpdateEnabled()
+{
+    // loop through all player views
+    for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i)
+    {
+        sPlayerView& oView   = m_aView[i];
+        cPlayer*     pPlayer = g_pGame->GetPlayer(i);
+
+        if(CONTAINS_FLAG(pPlayer->GetStatus(), PLAYER_STATUS_SHIELDED))
+        {
+            // 
+            for(coreUintW j = 0u; j < INTERFACE_LIVES; ++j) oView.aLife[j].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+            oView.aShieldBar[0].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+            oView.aShieldBar[1].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+            oView.oShieldValue .SetEnabled(CORE_OBJECT_ENABLE_ALL);
+        }
+        else
+        {
+            // 
+            for(coreUintW j = 0u; j < INTERFACE_LIVES; ++j) oView.aLife[j].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+            oView.aShieldBar[0].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+            oView.aShieldBar[1].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+            oView.oShieldValue .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        }
+    }
 }

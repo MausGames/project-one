@@ -84,12 +84,14 @@ cConfigMenu::cConfigMenu()noexcept
     for(coreUintW i = 0u; i < ENTRY_MAX; ++i)
     {
         if(i == ENTRY_VIDEO || i == ENTRY_AUDIO || i == ENTRY_INPUT) iOffset = 0u;
-        if(i == ENTRY_VIDEO_ANTIALIASING) ++iOffset;   // # new paragraph
-        if(i == ENTRY_VIDEO_ASSETQUALITY) ++iOffset;
-        if(i == ENTRY_AUDIO_MUSICVOLUME)  ++iOffset;
-        if(i == ENTRY_AUDIO_AMBIENTSOUND) ++iOffset;
-        if(i == ENTRY_INPUT_MOVEUP)       ++iOffset;
-        if(i == ENTRY_INPUT_ACTION1)      ++iOffset;
+        if(i == ENTRY_VIDEO_ANTIALIASING)  ++iOffset;   // # new paragraph
+        if(i == ENTRY_VIDEO_RENDERQUALITY) ++iOffset;
+        if(i == ENTRY_AUDIO_MUSICVOLUME)   ++iOffset;
+        if(i == ENTRY_AUDIO_AMBIENTSOUND)  ++iOffset;
+        if(i == ENTRY_INPUT_MOVEUP)        ++iOffset;
+        if(i == ENTRY_INPUT_ACTION1)       ++iOffset;
+        if(i == ENTRY_GAME_GAMEROTATION)   ++iOffset;
+        if(i == ENTRY_GAME_HUDROTATION)    ++iOffset;
 
         m_aLabel[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
         m_aLabel[i].SetPosition (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.04f, -0.05f - 0.025f*I_TO_F(iOffset)));
@@ -143,19 +145,32 @@ cConfigMenu::cConfigMenu()noexcept
         __SET_OPTION(m_DisplayMode,   VIDEO_DISPLAYMODE,   0.26f)
         __SET_OPTION(m_AntiAliasing,  VIDEO_ANTIALIASING,  0.26f)
         __SET_OPTION(m_TextureFilter, VIDEO_TEXTUREFILTER, 0.26f)
-        __SET_OPTION(m_AssetQuality,  VIDEO_ASSETQUALITY,  0.26f)
+        __SET_OPTION(m_RenderQuality, VIDEO_RENDERQUALITY, 0.26f)
         __SET_OPTION(m_ShadowQuality, VIDEO_SHADOWQUALITY, 0.26f)
         __SET_OPTION(m_OverallVolume, AUDIO_OVERALLVOLUME, 0.26f)
         __SET_OPTION(m_MusicVolume,   AUDIO_MUSICVOLUME,   0.26f)
         __SET_OPTION(m_EffectVolume,  AUDIO_EFFECTVOLUME,  0.26f)
         __SET_OPTION(m_AmbientSound,  AUDIO_AMBIENTSOUND,  0.26f)
         __SET_OPTION(m_Language,      GAME_LANGUAGE,       0.26f)
+        __SET_OPTION(m_GameRotation,  GAME_GAMEROTATION,   0.26f)
+        __SET_OPTION(m_GameScale,     GAME_GAMESCALE,      0.26f)
+        __SET_OPTION(m_HudRotation,   GAME_HUDROTATION,    0.26f)
+        __SET_OPTION(m_HudScale,      GAME_HUDSCALE,       0.26f)
+        __SET_OPTION(m_HudType,       GAME_HUDTYPE,        0.26f)
 
         m_Monitor      .SetAutomatic(0.0f);   // # because of realtime-update
         m_ShadowQuality.SetAutomatic(0.0f);
         m_Language     .SetAutomatic(0.0f);
+        m_GameRotation .SetAutomatic(0.0f);
+        m_GameScale    .SetAutomatic(0.0f);
+        m_HudRotation  .SetAutomatic(0.0f);
+        m_HudScale     .SetAutomatic(0.0f);
+        m_HudType      .SetAutomatic(0.0f);
         m_AmbientSound .SetEndless(true);
         m_Language     .SetEndless(true);
+        m_GameRotation .SetEndless(true);
+        m_HudRotation  .SetEndless(true);
+        m_HudType      .SetEndless(true);
     }
     #undef __SET_OPTION
 
@@ -216,22 +231,34 @@ cConfigMenu::cConfigMenu()noexcept
     m_DisplayMode  .AddEntryLanguage("DISPLAYMODE_WINDOW",     0u);
     m_DisplayMode  .AddEntryLanguage("DISPLAYMODE_BORDERLESS", 1u);
     m_DisplayMode  .AddEntryLanguage("DISPLAYMODE_FULLSCREEN", 2u);
-    m_AntiAliasing .AddEntryLanguage("VALUE_OFF",  0u);
-    m_TextureFilter.AddEntryLanguage("VALUE_OFF",  0u);
+    m_AntiAliasing .AddEntryLanguage("VALUE_OFF",              0u);
+    m_TextureFilter.AddEntryLanguage("VALUE_OFF",              0u);
     for(coreUintW i = 2u, ie = iMaxSamples;    i <= ie; i <<= 1u) m_AntiAliasing .AddEntry(PRINT("%zux", i), i);
     for(coreUintW i = 2u, ie = iMaxAnisotropy; i <= ie; i <<= 1u) m_TextureFilter.AddEntry(PRINT("%zux", i), i);
     if(m_AntiAliasing.GetEntry(m_AntiAliasing.GetNumEntries() - 1u).tValue != iMaxSamples) m_AntiAliasing.AddEntry(PRINT("%ux", iMaxSamples), iMaxSamples);   // possible 6x
-    m_AssetQuality .AddEntryLanguage("VALUE_LOW",  0u);
-    m_AssetQuality .AddEntryLanguage("VALUE_HIGH", 1u);
-    m_ShadowQuality.AddEntryLanguage("VALUE_LOW",  1u);
-    m_ShadowQuality.AddEntryLanguage("VALUE_HIGH", 2u);
+    m_RenderQuality.AddEntryLanguage("VALUE_LOW",              0u);
+    m_RenderQuality.AddEntryLanguage("VALUE_HIGH",             1u);
+    m_ShadowQuality.AddEntryLanguage("VALUE_LOW",              1u);
+    m_ShadowQuality.AddEntryLanguage("VALUE_HIGH",             2u);
     for(coreUintW i = 0u; i <= 100u; i += 10u) m_OverallVolume.AddEntry(PRINT("%zu%%", i), i);
     for(coreUintW i = 0u; i <= 100u; i += 10u) m_MusicVolume  .AddEntry(PRINT("%zu%%", i), i);
     for(coreUintW i = 0u; i <= 100u; i += 10u) m_EffectVolume .AddEntry(PRINT("%zu%%", i), i);
-    m_AmbientSound .AddEntryLanguage("VALUE_OFF",  0u);
-    m_AmbientSound .AddEntryLanguage("VALUE_ON",   1u);
+    m_AmbientSound .AddEntryLanguage("VALUE_OFF",              0u);
+    m_AmbientSound .AddEntryLanguage("VALUE_ON",               1u);
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oRumble.AddEntryLanguage("VALUE_OFF", 0u);
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oRumble.AddEntryLanguage("VALUE_ON", 10u);
+    m_GameRotation .AddEntryLanguage("VALUE_OFF",              0u);
+    m_GameRotation .AddEntryLanguage("HUDROTATION_LEFT",       1u);
+    m_GameRotation .AddEntryLanguage("HUDROTATION_UPSIDE",     2u);
+    m_GameRotation .AddEntryLanguage("HUDROTATION_RIGHT",      3u);
+    for(coreUintW i = 50u; i <= 100u; i += 1u) m_GameScale.AddEntry(PRINT("%zu%%", i), i);
+    m_HudRotation  .AddEntryLanguage("VALUE_OFF",              0u);
+    m_HudRotation  .AddEntryLanguage("HUDROTATION_LEFT",       1u);
+    m_HudRotation  .AddEntryLanguage("HUDROTATION_UPSIDE",     2u);
+    m_HudRotation  .AddEntryLanguage("HUDROTATION_RIGHT",      3u);
+    for(coreUintW i = 50u; i <= 150u; i += 1u) m_HudScale.AddEntry(PRINT("%zu%%", i), i);
+    m_HudType      .AddEntryLanguage("HUDTYPE_OUTSIDE",        0u);
+    m_HudType      .AddEntryLanguage("HUDTYPE_INSIDE",         1u);
 
     // bind menu objects
     for(coreUintW i = 0u, ie = this->GetNumSurfaces(); i < ie; ++i)
@@ -268,13 +295,18 @@ cConfigMenu::cConfigMenu()noexcept
     this->BindObject(SURFACE_CONFIG_VIDEO, &m_DisplayMode);
     this->BindObject(SURFACE_CONFIG_VIDEO, &m_AntiAliasing);
     this->BindObject(SURFACE_CONFIG_VIDEO, &m_TextureFilter);
-    this->BindObject(SURFACE_CONFIG_VIDEO, &m_AssetQuality);
+    this->BindObject(SURFACE_CONFIG_VIDEO, &m_RenderQuality);
     this->BindObject(SURFACE_CONFIG_VIDEO, &m_ShadowQuality);
     this->BindObject(SURFACE_CONFIG_AUDIO, &m_OverallVolume);
     this->BindObject(SURFACE_CONFIG_AUDIO, &m_MusicVolume);
     this->BindObject(SURFACE_CONFIG_AUDIO, &m_EffectVolume);
     this->BindObject(SURFACE_CONFIG_AUDIO, &m_AmbientSound);
     this->BindObject(SURFACE_CONFIG_GAME,  &m_Language);
+    this->BindObject(SURFACE_CONFIG_GAME,  &m_GameRotation);
+    this->BindObject(SURFACE_CONFIG_GAME,  &m_GameScale);
+    this->BindObject(SURFACE_CONFIG_GAME,  &m_HudRotation);
+    this->BindObject(SURFACE_CONFIG_GAME,  &m_HudScale);
+    this->BindObject(SURFACE_CONFIG_GAME,  &m_HudType);
 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aArrow); ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aArrow[i]);
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;   ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aInput[i].oHeader);
@@ -327,12 +359,12 @@ void cConfigMenu::Move()
             cMenu::UpdateSwitchBox(&m_DisplayMode);
             cMenu::UpdateSwitchBox(&m_AntiAliasing);
             cMenu::UpdateSwitchBox(&m_TextureFilter);
-            cMenu::UpdateSwitchBox(&m_AssetQuality);
+            cMenu::UpdateSwitchBox(&m_RenderQuality);
             cMenu::UpdateSwitchBox(&m_ShadowQuality);
 
             // 
-                 if(m_AssetQuality .GetCurEntry().tValue == 0u) m_AssetQuality .GetCaption()->SetColor3(COLOR_MENU_YELLOW);
-            else if(m_AssetQuality .GetCurEntry().tValue == 1u) m_AssetQuality .GetCaption()->SetColor3(COLOR_MENU_GREEN);
+                 if(m_RenderQuality.GetCurEntry().tValue == 0u) m_RenderQuality.GetCaption()->SetColor3(COLOR_MENU_YELLOW);
+            else if(m_RenderQuality.GetCurEntry().tValue == 1u) m_RenderQuality.GetCaption()->SetColor3(COLOR_MENU_GREEN);
                  if(m_ShadowQuality.GetCurEntry().tValue == 1u) m_ShadowQuality.GetCaption()->SetColor3(COLOR_MENU_YELLOW);
             else if(m_ShadowQuality.GetCurEntry().tValue == 2u) m_ShadowQuality.GetCaption()->SetColor3(COLOR_MENU_GREEN);
         }
@@ -471,7 +503,20 @@ void cConfigMenu::Move()
                 this->__UpdateLanguage();
 
             // 
+            if(m_GameRotation.IsClickedArrow() ||
+               m_GameScale   .IsClickedArrow() ||
+               m_HudRotation .IsClickedArrow() ||
+               m_HudScale    .IsClickedArrow() ||
+               m_HudType     .IsClickedArrow())
+                this->__UpdateInterface();
+
+            // 
             cMenu::UpdateSwitchBox(&m_Language);
+            cMenu::UpdateSwitchBox(&m_GameRotation);
+            cMenu::UpdateSwitchBox(&m_GameScale);
+            cMenu::UpdateSwitchBox(&m_HudRotation);
+            cMenu::UpdateSwitchBox(&m_HudScale);
+            cMenu::UpdateSwitchBox(&m_HudType);
         }
         break;
 
@@ -524,7 +569,7 @@ void cConfigMenu::Move()
     cMenu::UpdateButton(&m_VideoTab, (this->GetCurSurface() == SURFACE_CONFIG_VIDEO) || m_VideoTab.IsFocused());
     cMenu::UpdateButton(&m_AudioTab, (this->GetCurSurface() == SURFACE_CONFIG_AUDIO) || m_AudioTab.IsFocused());
     cMenu::UpdateButton(&m_InputTab, (this->GetCurSurface() == SURFACE_CONFIG_INPUT) || m_InputTab.IsFocused());
-    cMenu::UpdateButton(&m_GameTab,  (this->GetCurSurface() == SURFACE_CONFIG_GAME ) || m_GameTab .IsFocused());
+    cMenu::UpdateButton(&m_GameTab,  (this->GetCurSurface() == SURFACE_CONFIG_GAME)  || m_GameTab .IsFocused());
 
     // 
     cMenu::UpdateButton(&m_SaveButton,    m_SaveButton   .IsFocused());
@@ -565,13 +610,18 @@ void cConfigMenu::CheckValues()
                            (m_DisplayMode  .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN))                      ||
                            (m_AntiAliasing .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING))                  ||
                            (m_TextureFilter.GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY))             ||
-                           (m_AssetQuality .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_QUALITY))                       ||
+                           (m_RenderQuality.GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_QUALITY))                       ||
                            (m_ShadowQuality.GetCurEntry().tValue != g_OldConfig.Graphics.iShadow)                                             ||
                            (m_OverallVolume.GetCurEntry().tValue != F_TO_UI(Core::Config->GetFloat(CORE_CONFIG_AUDIO_GLOBALVOLUME) * 100.0f)) ||
                            (m_MusicVolume  .GetCurEntry().tValue != F_TO_UI(Core::Config->GetFloat(CORE_CONFIG_AUDIO_MUSICVOLUME)  * 100.0f)) ||
                            (m_EffectVolume .GetCurEntry().tValue != F_TO_UI(Core::Config->GetFloat(CORE_CONFIG_AUDIO_SOUNDVOLUME)  * 100.0f)) ||
                            (m_AmbientSound .GetCurEntry().tValue != g_OldConfig.Audio.iAmbient)                                               ||
                            (std::strcmp(Core::Language->GetPath(), Core::Config->GetString(CORE_CONFIG_BASE_LANGUAGE)))                       ||
+                           (m_GameRotation .GetCurEntry().tValue != g_OldConfig.Game.iGameRotation)                                           ||
+                           (m_GameScale    .GetCurEntry().tValue != g_OldConfig.Game.iGameScale)                                              ||
+                           (m_HudRotation  .GetCurEntry().tValue != g_OldConfig.Game.iHudRotation)                                            ||
+                           (m_HudScale     .GetCurEntry().tValue != g_OldConfig.Game.iHudScale)                                               ||
+                           (m_HudType      .GetCurEntry().tValue != g_OldConfig.Game.iHudType)                                                ||
                            (std::memcmp(&g_CurConfig.Input, &g_OldConfig.Input, sizeof(sConfig::Input)));
 
     // 
@@ -606,7 +656,7 @@ void cConfigMenu::LoadValues()
     m_DisplayMode  .SelectValue(Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN));
     m_AntiAliasing .SelectValue(Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING));
     m_TextureFilter.SelectValue(Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY));
-    m_AssetQuality .SelectValue(Core::Config->GetInt(CORE_CONFIG_GRAPHICS_QUALITY));
+    m_RenderQuality.SelectValue(Core::Config->GetInt(CORE_CONFIG_GRAPHICS_QUALITY));
     m_ShadowQuality.SelectValue(g_CurConfig.Graphics.iShadow);
 
     // 
@@ -617,7 +667,12 @@ void cConfigMenu::LoadValues()
 
     // 
     const std::vector<std::string>& asLanguageList = cMenu::GetLanguageList().get_valuelist();
-    m_Language.SelectIndex(std::find(asLanguageList.begin(), asLanguageList.end(), Core::Config->GetString(CORE_CONFIG_BASE_LANGUAGE)) - asLanguageList.begin());
+    m_Language    .SelectIndex(std::find(asLanguageList.begin(), asLanguageList.end(), Core::Config->GetString(CORE_CONFIG_BASE_LANGUAGE)) - asLanguageList.begin());
+    m_GameRotation.SelectValue(g_CurConfig.Game.iGameRotation);
+    m_GameScale   .SelectValue(g_CurConfig.Game.iGameScale);
+    m_HudRotation .SelectValue(g_CurConfig.Game.iHudRotation);
+    m_HudScale    .SelectValue(g_CurConfig.Game.iHudScale);
+    m_HudType     .SelectValue(g_CurConfig.Game.iHudType);
 
     // 
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i)
@@ -632,6 +687,7 @@ void cConfigMenu::LoadValues()
         if(iShadowQualityIndex != m_ShadowQuality.GetCurIndex()) this->__UpdateShadowQuality();
         if(iOverallVolumeIndex != m_OverallVolume.GetCurIndex()) this->__UpdateOverallVolume();
         if(iLanguageIndex      != m_Language     .GetCurIndex()) this->__UpdateLanguage();
+        this->__UpdateInterface();
     }
 
     // 
@@ -656,13 +712,14 @@ void cConfigMenu::SaveValues()
                             (m_TextureFilter.GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY));
 
     // 
-    Core::Config->SetInt(CORE_CONFIG_SYSTEM_WIDTH,               F_TO_SI(vCurResolution.x));
-    Core::Config->SetInt(CORE_CONFIG_SYSTEM_HEIGHT,              F_TO_SI(vCurResolution.y));
-    Core::Config->SetInt(CORE_CONFIG_SYSTEM_DISPLAY,             m_Monitor      .GetCurEntry().tValue);
-    Core::Config->SetInt(CORE_CONFIG_SYSTEM_FULLSCREEN,          m_DisplayMode  .GetCurEntry().tValue);
-    Core::Config->SetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING,      m_AntiAliasing .GetCurEntry().tValue);
-    Core::Config->SetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY, m_TextureFilter.GetCurEntry().tValue);
-    Core::Config->SetInt(CORE_CONFIG_GRAPHICS_QUALITY,           m_AssetQuality .GetCurEntry().tValue);
+    Core::Config->SetInt (CORE_CONFIG_SYSTEM_WIDTH,               F_TO_SI(vCurResolution.x));
+    Core::Config->SetInt (CORE_CONFIG_SYSTEM_HEIGHT,              F_TO_SI(vCurResolution.y));
+    Core::Config->SetInt (CORE_CONFIG_SYSTEM_DISPLAY,             m_Monitor      .GetCurEntry().tValue);
+    Core::Config->SetInt (CORE_CONFIG_SYSTEM_FULLSCREEN,          m_DisplayMode  .GetCurEntry().tValue);
+    Core::Config->SetInt (CORE_CONFIG_GRAPHICS_ANTIALIASING,      m_AntiAliasing .GetCurEntry().tValue);
+    Core::Config->SetInt (CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY, m_TextureFilter.GetCurEntry().tValue);
+    Core::Config->SetInt (CORE_CONFIG_GRAPHICS_QUALITY,           m_RenderQuality.GetCurEntry().tValue);
+    Core::Config->SetBool(CORE_CONFIG_GRAPHICS_TEXTURETRILINEAR,  m_RenderQuality.GetCurEntry().tValue ? true : false);
     g_CurConfig.Graphics.iShadow = m_ShadowQuality.GetCurEntry().tValue;
 
     // 
@@ -673,6 +730,11 @@ void cConfigMenu::SaveValues()
 
     // 
     Core::Config->SetString(CORE_CONFIG_BASE_LANGUAGE, Core::Language->GetPath());
+    g_CurConfig.Game.iGameRotation = m_GameRotation.GetCurEntry().tValue;
+    g_CurConfig.Game.iGameScale    = m_GameScale   .GetCurEntry().tValue;
+    g_CurConfig.Game.iHudRotation  = m_HudRotation .GetCurEntry().tValue;
+    g_CurConfig.Game.iHudScale     = m_HudScale    .GetCurEntry().tValue;
+    g_CurConfig.Game.iHudType      = m_HudType     .GetCurEntry().tValue;
 
     // 
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i)
@@ -741,6 +803,30 @@ void cConfigMenu::__UpdateLanguage()
     g_pMenu->GetTooltip()->Invalidate();
     this->__LoadMonitors();
     this->__LoadInputs();
+}
+
+
+// ****************************************************************
+// 
+void cConfigMenu::__UpdateInterface()
+{
+    // 
+    g_CurConfig.Game.iGameRotation = m_GameRotation.GetCurEntry().tValue;
+    g_CurConfig.Game.iGameScale    = m_GameScale   .GetCurEntry().tValue;
+    g_CurConfig.Game.iHudRotation  = m_HudRotation .GetCurEntry().tValue;
+    g_CurConfig.Game.iHudScale     = m_HudScale    .GetCurEntry().tValue;
+    g_CurConfig.Game.iHudType      = m_HudType     .GetCurEntry().tValue;
+
+    // 
+    g_pPostProcessing->UpdateLayout();
+    g_pPostProcessing->Move();
+
+    if(STATIC_ISVALID(g_pGame))
+    {
+        // 
+        g_pGame->GetInterface()->UpdateLayout();
+        g_pGame->GetInterface()->Move();
+    }
 }
 
 

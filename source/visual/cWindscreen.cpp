@@ -243,7 +243,7 @@ void cWindscreen::__RenderInk()
         for(coreUintW i = 0u; i < WINDSCREEN_INK_SAMPLES_LINE; ++i)
         {
             const coreFloat fPartOff  = I_TO_F(i) / I_TO_F(WINDSCREEN_INK_SAMPLES_LINE);
-            const coreFloat fPartTime = FMOD(fAnimation + fPartOff, 1.0f);
+            const coreFloat fPartTime = FRACT(fAnimation + fPartOff);
 
             avOffset[i] = coreVector2(0.675f * (0.5f - fPartTime), 0.05f * SIN(fPartTime * (4.0f*PI) + fPartOff * (2.0f*PI))) * 3.0f;
         }
@@ -260,7 +260,7 @@ void cWindscreen::__RenderInk()
         for(coreUintW i = 0u; i < WINDSCREEN_INK_SAMPLES_POINT; ++i)
         {
             const coreFloat fPartOff  = I_TO_F(i) / I_TO_F(WINDSCREEN_INK_SAMPLES_POINT);
-            const coreFloat fPartTime = FMOD(fAnimation + fPartOff, 1.0f);
+            const coreFloat fPartTime = FRACT(fAnimation + fPartOff);
 
             pLocal->SendUniform(PRINT("u_av2Offset[%zu]", i), coreVector2::Direction(fPartTime * (4.0f*PI)) * 0.14f);
         }

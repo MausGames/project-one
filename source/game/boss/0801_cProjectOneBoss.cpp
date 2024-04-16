@@ -30,7 +30,7 @@ cProjectOneBoss::cProjectOneBoss()noexcept
     this->SetSize(coreVector3(1.2f,1.2f,1.2f));
 
     // configure the boss
-    this->Configure(10000, COLOR_SHIP_GREY);
+    this->Configure(200, COLOR_SHIP_GREY);
 }
 
 
@@ -65,11 +65,11 @@ void cProjectOneBoss::__MoveOwn()
             this->DefaultMoveLerp(coreVector2(0.0f,2.0f), coreVector2(0.0f,0.8f), fTime);
 
             // 
-            if(PHASE_TIME_POINT(0.85f))
-                this->_StartBoss();
+            //if(PHASE_TIME_POINT(0.85f))
+            //    this->_StartBoss();
 
             // 
-            if(PHASE_FINISHED && !g_pGame->GetInterface()->IsBannerActive())
+            if(PHASE_FINISHED)// && !g_pGame->GetInterface()->IsBannerActive())
                 ++m_iPhase;
         });
     }

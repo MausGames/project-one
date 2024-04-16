@@ -38,7 +38,7 @@ void cTheater::Render()
     FOR_EACH(it, m_aMute)
         it->pEnemy->Render();
 
-    if(!g_pGame)
+    if(!STATIC_ISVALID(g_pGame))
     {
         // apply deferred outline-layer
         g_pOutline->Apply();
@@ -54,7 +54,7 @@ void cTheater::Render()
 void cTheater::Move()
 {
     // 
-    if(!g_pGame && (g_pEnvironment->GetBackground()->GetID() != cCloudBackground::ID))
+    if(!STATIC_ISVALID(g_pGame) && (g_pEnvironment->GetBackground()->GetID() != cCloudBackground::ID))
     {
         // 
         m_fSpawnTimer.Update(1.0f);
@@ -105,7 +105,7 @@ void cTheater::Move()
 
     // 
     const coreBool    bInteract = (Core::Input->GetLastMouse() != CORE_INPUT_INVALID_MOUSE);
-    const coreVector2 vMousePos = (Core::Input->GetMousePosition() * Core::System->GetResolution() / g_vGameResolution) * (FOREGROUND_AREA * 2.2f);
+    const coreVector2 vMousePos = MapToAxis((Core::Input->GetMousePosition() * Core::System->GetResolution() / g_vGameResolution) * (FOREGROUND_AREA * 2.2f), g_pPostProcessing->GetDirection());
 
     // 
     FOR_EACH_DYN(it, m_aMute)
@@ -160,6 +160,7 @@ void cTheater::__KillMute(sMute* OUTPUT pMute, const coreBool bAnimated)
     cEnemy* pEnemy = pMute->pEnemy;
 
     // 
+    pEnemy->SetBaseColor(coreVector3(0.0f,0.0f,0.0f), true);   // # always use colored explosions
     pEnemy->Kill(bAnimated);
     SAFE_DELETE(pEnemy)
 }

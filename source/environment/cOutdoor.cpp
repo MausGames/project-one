@@ -299,9 +299,9 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
     Core::Manager::Resource->AttachFunction([=]()
     {
         // check for sync object status
-        const coreStatus iCheck = m_Sync.Check(0u, CORE_SYNC_CHECK_FLUSHED);
-        if(iCheck == CORE_OK) this->DefineTexture(2u, m_pNormalMap);
-        if(iCheck >= CORE_OK) return iCheck;
+        const coreStatus eCheck = m_Sync.Check(0u, CORE_SYNC_CHECK_FLUSHED);
+        if(eCheck == CORE_OK) this->DefineTexture(2u, m_pNormalMap);
+        if(eCheck >= CORE_OK) return eCheck;
 
         // delete old data
         m_pNormalMap->Unload();

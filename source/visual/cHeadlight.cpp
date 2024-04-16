@@ -49,7 +49,7 @@ cHeadlight::~cHeadlight()
 void cHeadlight::Render()
 {
     // 
-    this->coreObject2D::Render();
+    this->coreFullscreen::Render();
 
     // 
     m_FrameBuffer.Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
@@ -111,7 +111,7 @@ void cHeadlight::Update()
 // 
 void cHeadlight::UpdateDefault()
 {
-    if(g_pGame)
+    if(STATIC_ISVALID(g_pGame))
     {
         // 
         g_pGame->ForEachPlayer([this](const cPlayer* pPlayer, const coreUintW i)
@@ -175,8 +175,8 @@ void cHeadlight::DrawPoint(const coreObject3D* pObject)
 
 // ****************************************************************
 // reset with the resource manager
-void cHeadlight::__Reset(const coreResourceReset bInit)
+void cHeadlight::__Reset(const coreResourceReset eInit)
 {
-    if(bInit) m_FrameBuffer.Create(g_vGameResolution * HEADLIGHT_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
+    if(eInit) m_FrameBuffer.Create(g_vGameResolution * HEADLIGHT_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
          else m_FrameBuffer.Delete();
 }

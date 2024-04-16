@@ -97,7 +97,7 @@ cTorusBoss::cTorusBoss()noexcept
 
             // set object properties
             pTurret->SetSize   (m_aTurret[i].GetSize   ());
-            pTurret->SetColor3 (m_aTurret[i].GetColor3 ());
+            //pTurret->SetColor3 (m_aTurret[i].GetColor3 ());
             pTurret->SetTexSize(m_aTurret[i].GetTexSize());
             pTurret->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
@@ -132,7 +132,7 @@ cTorusBoss::cTorusBoss()noexcept
 
             // set object properties
             pGunner->SetSize   (m_aGunner[i].GetSize   ());
-            pGunner->SetColor3 (m_aGunner[i].GetColor3 ());
+            //pGunner->SetColor3 (m_aGunner[i].GetColor3 ());
             pGunner->SetTexSize(m_aGunner[i].GetTexSize());
             pGunner->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 

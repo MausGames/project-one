@@ -21,6 +21,8 @@ cBullet::cBullet()noexcept
 , m_fDepth     (0.0f)
 , m_fAnimation (0.0f)
 , m_iElement   (ELEMENT_NEUTRAL)
+, m_fFlyTime   (0.0f)
+, m_vFlyDir    (coreVector2(0.0f,0.0f))
 {
     // set initial status
     m_iStatus = BULLET_STATUS_READY;
@@ -31,14 +33,17 @@ cBullet::cBullet()noexcept
 // move the bullet
 void cBullet::Move()
 {
+    // 
+    m_fFlyTime.Update(1.0f);
+
     // call individual move routine
     this->__MoveOwn();
 
     // deactivate bullet when leaving the defined area
-    if((this->GetPosition().x < -FOREGROUND_AREA.x * BULLET_AREA_FACTOR) ||
-       (this->GetPosition().x >  FOREGROUND_AREA.x * BULLET_AREA_FACTOR) ||
-       (this->GetPosition().y < -FOREGROUND_AREA.y * BULLET_AREA_FACTOR) ||
-       (this->GetPosition().y >  FOREGROUND_AREA.y * BULLET_AREA_FACTOR))
+    if(((this->GetPosition().x < -FOREGROUND_AREA.x * BULLET_AREA_FACTOR) ||
+        (this->GetPosition().x >  FOREGROUND_AREA.x * BULLET_AREA_FACTOR) ||
+        (this->GetPosition().y < -FOREGROUND_AREA.y * BULLET_AREA_FACTOR) ||
+        (this->GetPosition().y >  FOREGROUND_AREA.y * BULLET_AREA_FACTOR)) && (m_fFlyTime >= 1.0f))
         this->Deactivate(false);
 
     // move the 3d-object
@@ -59,6 +64,10 @@ void cBullet::Activate(const coreInt32 iDamage, const coreFloat fSpeed, cShip* p
     m_iDamage = iDamage;
     m_fSpeed  = fSpeed * BULLET_SPEED_FACTOR;
     m_pOwner  = pOwner;
+
+    // 
+    m_fFlyTime = 0.0f;
+    m_vFlyDir  = vDirection;
 
     // reset bullet properties
     this->SetPosition (coreVector3(vPosition,  0.0f));
@@ -89,6 +98,21 @@ void cBullet::Deactivate(const coreBool bAnimated)
 {
     // 
     this->Deactivate(bAnimated, this->GetPosition().xy());
+}
+
+
+// ****************************************************************
+// 
+void cBullet::Reflect(const coreObject3D* pObject)
+{
+    // 
+    this->Reflect((this->GetPosition().xy() - pObject->GetPosition().xy()).Normalized());
+}
+
+void cBullet::Reflect(const coreVector2& vNormal)
+{
+    // 
+    m_vFlyDir = coreVector2::Reflect(m_vFlyDir, vNormal);
 }
 
 
@@ -127,6 +151,7 @@ cBulletManager::cBulletManager(const coreInt32 iType)noexcept
 {
     // 
     Core::Manager::Object->TestCollision(m_iType, [](coreObject3D*, coreObject3D*, coreVector3, coreBool) {});
+    // TODO   
 }
 
 
@@ -258,14 +283,11 @@ void cRayBullet::__ImpactOwn(const coreVector2& vImpact)
     // 
     if(m_iElement == ELEMENT_WHITE)
     {
-        g_pSpecialEffects->CreateSplashDark(coreVector3(vImpact, 0.0f),                        5.0f, 1u);  
-        //g_pSpecialEffects->CreateSplashDark(coreVector3(vImpact, 0.0f),                        25.0f, 2u);
-        //g_pSpecialEffects->CreateBlowDark  (coreVector3(vImpact, 0.0f), -this->GetDirection(), 50.0f, 1u);
+        g_pSpecialEffects->CreateSplashDark(coreVector3(vImpact, 0.0f), 5.0f, 1u);
     }
     else
     {
-        g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f),                        50.0f, 1u, this->GetColor3());
-        g_pSpecialEffects->CreateBlowColor  (coreVector3(vImpact, 0.0f), -this->GetDirection(), 50.0f, 1u, this->GetColor3());
+        g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 1u, this->GetColor3());
     }
 }
 
@@ -275,9 +297,10 @@ void cRayBullet::__ImpactOwn(const coreVector2& vImpact)
 void cRayBullet::__MoveOwn()
 {
     // fly around
-    this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetDirection().xy() * (m_fSpeed * Core::System->GetTime()), 0.0f));
+    this->SetPosition (coreVector3(this->GetPosition().xy() + m_vFlyDir * (m_fSpeed * Core::System->GetTime()), 0.0f));
+    this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
-    // update texture animation
+    // update animation
     m_fAnimation.Update(0.4f);
     this->SetTexOffset(coreVector2(0.35f, m_fAnimation));
 }
@@ -306,9 +329,10 @@ void cPulseBullet::__MoveOwn()
     m_fSpeed += 2.5f * BULLET_SPEED_FACTOR * Core::System->GetTime();
 
     // fly around
-    this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetDirection().xy() * (m_fSpeed * Core::System->GetTime()), 0.0f));
+    this->SetPosition (coreVector3(this->GetPosition().xy() + m_vFlyDir * (m_fSpeed * Core::System->GetTime()), 0.0f));
+    this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
-    // update texture animation
+    // update animation
     m_fAnimation.Update(0.4f);
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
 }
@@ -342,9 +366,10 @@ void cOrbBullet::__ImpactOwn(const coreVector2& vImpact)
 void cOrbBullet::__MoveOwn()
 {
     // fly around
-    this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetDirection().xy() * (m_fSpeed * Core::System->GetTime()), 0.0f));
+    this->SetPosition (coreVector3(this->GetPosition().xy() + m_vFlyDir * (m_fSpeed * Core::System->GetTime()), 0.0f));
+    this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
-    // update texture animation
+    // update animation
     m_fAnimation.Update(-0.2f);
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
 }
@@ -378,9 +403,10 @@ void cConeBullet::__ImpactOwn(const coreVector2& vImpact)
 void cConeBullet::__MoveOwn()
 {
     // fly around
-    this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetDirection().xy() * (m_fSpeed * Core::System->GetTime()), 0.0f));
+    this->SetPosition (coreVector3(this->GetPosition().xy() + m_vFlyDir * (m_fSpeed * Core::System->GetTime()), 0.0f));
+    this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
-    // update texture animation
+    // update animation
     m_fAnimation.Update(0.2f);
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
 }
@@ -414,9 +440,10 @@ void cWaveBullet::__ImpactOwn(const coreVector2& vImpact)
 void cWaveBullet::__MoveOwn()
 {
     // fly around
-    this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetDirection().xy() * (m_fSpeed * Core::System->GetTime()), 0.0f));
+    this->SetPosition (coreVector3(this->GetPosition().xy() + m_vFlyDir * (m_fSpeed * Core::System->GetTime()), 0.0f));
+    this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
-    // update texture animation
+    // update animation
     m_fAnimation.Update(0.06f);
     this->SetTexOffset(coreVector2(0.3f, m_fAnimation));
 }
@@ -443,25 +470,12 @@ cTeslaBullet::cTeslaBullet()noexcept
 void cTeslaBullet::__MoveOwn()
 {
     // fly around
-    this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetDirection().xy() * (m_fSpeed * Core::System->GetTime()), 0.0f));
+    this->SetPosition (coreVector3(this->GetPosition().xy() + m_vFlyDir * (m_fSpeed * Core::System->GetTime()), 0.0f));
+    this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
-    // update texture animation
+    // update animation
     m_fAnimation.Update(-0.2f);
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
-
-
-
-    // 
-    const cEnemy* pEnemy = g_pGame->GetEnemyManager()->FindEnemy(this->GetPosition().xy());
-    if(pEnemy)
-    {
-        const coreVector2 vDiffNorm = (pEnemy->GetPosition().xy() - this->GetPosition().xy()).Normalized();
-        const coreVector2 vNewDir   = (this->GetDirection().xy() + vDiffNorm * (0.05f * m_fSpeed * Core::System->GetTime())).Normalized();
-
-        this->SetDirection(coreVector3(vNewDir, 0.0f));
-    }
-
-
 
     // 
     m_fLightningTime.Update(10.0f);
@@ -483,7 +497,6 @@ void cTeslaBullet::__MoveOwn()
 // ****************************************************************
 // constructor
 cMineBullet::cMineBullet()noexcept
-: m_vFlyDir (coreVector2(0.0f,0.0f))
 {
     // load object resources
     this->DefineModel  ("bullet_mine.md3");
@@ -548,12 +561,12 @@ void cMineBullet::__RenderOwnBefore()
 void cMineBullet::__MoveOwn()
 {
     // 
-    m_fSpeed = MAX(m_fSpeed * (1.0f - 3.5f * Core::System->GetTime()), 0.0f);
+    m_fSpeed = MAX(m_fSpeed * FrictionFactor(3.5f), 0.0f);
 
     // fly around
     this->SetPosition(coreVector3(this->GetPosition().xy() + m_vFlyDir * (m_fSpeed * Core::System->GetTime()), 0.0f));
 
-    // 
+    // update animation
     m_fAnimation.Update(1.5f);
     this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation), 0.0f));
     this->SetColor3   (coreVector3(0.5f + 0.5f * SIN(PI*m_fAnimation), 0.0f, 0.0f));
@@ -591,20 +604,21 @@ void cRocketBullet::__MoveOwn()
     m_fSpeed += 2.0f * BULLET_SPEED_FACTOR * Core::System->GetTime();
     if(m_fSpeed > 300.0f) this->Deactivate(true);
 
-    // fly around
-    this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetDirection().xy() * (m_fSpeed * Core::System->GetTime()), 0.0f));
-
     // 
     const cEnemy* pEnemy = g_pGame->GetEnemyManager()->FindEnemy(this->GetPosition().xy());
     if(pEnemy)
     {
         const coreVector2 vDiffNorm = (pEnemy->GetPosition().xy() - this->GetPosition().xy()).Normalized();
-        const coreVector2 vNewDir   = (this->GetDirection().xy() + vDiffNorm * (0.05f * m_fSpeed * Core::System->GetTime())).Normalized();
+        const coreVector2 vNewDir   = (m_vFlyDir + vDiffNorm * (0.05f * m_fSpeed * Core::System->GetTime())).Normalized();
 
-        this->SetDirection(coreVector3(vNewDir, 0.0f));
+        m_vFlyDir = vNewDir;
     }
 
-    // 
+    // fly around
+    this->SetPosition (coreVector3(this->GetPosition().xy() + m_vFlyDir * (m_fSpeed * Core::System->GetTime()), 0.0f));
+    this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
+
+    // update animation
     m_fAnimation.Update(10.0f);
     this->SetColor3(coreVector3(0.0f, 0.6f + 0.4f * SIN(PI*m_fAnimation), 0.0f));
 
@@ -641,9 +655,10 @@ void cSpearBullet::__ImpactOwn(const coreVector2& vImpact)
 void cSpearBullet::__MoveOwn()
 {
     // fly around
-    this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetDirection().xy() * (m_fSpeed * Core::System->GetTime()), 0.0f));
+    this->SetPosition (coreVector3(this->GetPosition().xy() + m_vFlyDir * (m_fSpeed * Core::System->GetTime()), 0.0f));
+    this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
-    // update texture animation
+    // update animation
     m_fAnimation.Update(0.2f);
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
 }
@@ -652,7 +667,6 @@ void cSpearBullet::__MoveOwn()
 // ****************************************************************
 // constructor
 cTriangleBullet::cTriangleBullet()noexcept
-: m_vFlyDir (coreVector2(0.0f,0.0f))
 {
     // load object resources
     this->DefineModel  ("bullet_triangle.md3");
@@ -680,7 +694,7 @@ void cTriangleBullet::__MoveOwn()
     // fly around
     this->SetPosition(coreVector3(this->GetPosition().xy() + m_vFlyDir * (m_fSpeed * Core::System->GetTime()), 0.0f));
 
-    // 
+    // update animation
     m_fAnimation.Update(0.2f);
     this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation * 10.0f), 0.0f));
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
@@ -690,7 +704,6 @@ void cTriangleBullet::__MoveOwn()
 // ****************************************************************
 // constructor
 cFlipBullet::cFlipBullet()noexcept
-: m_vFlyDir (coreVector2(0.0f,0.0f))
 {
     // load object resources
     this->DefineModel  ("bullet_spear.md3");
@@ -718,7 +731,7 @@ void cFlipBullet::__MoveOwn()
     // fly around
     this->SetPosition(coreVector3(this->GetPosition().xy() + m_vFlyDir * (m_fSpeed * Core::System->GetTime()), 0.0f));
 
-    // 
+    // update animation
     m_fAnimation.Update(-0.2f);
     this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation * 50.0f), 0.0f));
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
@@ -728,7 +741,6 @@ void cFlipBullet::__MoveOwn()
 // ****************************************************************
 // constructor
 cQuadBullet::cQuadBullet()noexcept
-: m_vFlyDir (coreVector2(0.0f,0.0f))
 {
     // load object resources
     this->DefineModel  ("bullet_quad.md3");
@@ -756,7 +768,7 @@ void cQuadBullet::__MoveOwn()
     // fly around
     this->SetPosition(coreVector3(this->GetPosition().xy() + m_vFlyDir * (m_fSpeed * Core::System->GetTime()), 0.0f));
 
-    // 
+    // update animation
     m_fAnimation.Update(0.2f);
     this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation * 10.0f), 0.0f));
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
@@ -766,7 +778,6 @@ void cQuadBullet::__MoveOwn()
 // ****************************************************************
 // constructor
 cChromaBullet::cChromaBullet()noexcept
-: m_vFlyDir (coreVector2(0.0f,0.0f))
 {
     // load object resources
     this->DefineModel  ("bullet_quad.md3");
@@ -794,7 +805,7 @@ void cChromaBullet::__MoveOwn()
     // fly around
     this->SetPosition(coreVector3(this->GetPosition().xy() + m_vFlyDir * (m_fSpeed * Core::System->GetTime()), 0.0f));
 
-    // 
+    // update animation
     m_fAnimation.Update(0.2f);
     this->SetDirection(coreVector3(s_RotaCache.Direction(m_fAnimation * 10.0f), 0.0f));
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));

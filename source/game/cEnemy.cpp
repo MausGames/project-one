@@ -30,12 +30,22 @@ cEnemy::cEnemy()noexcept
 
 
 // ****************************************************************
-// configure the enemy
-void cEnemy::Configure(const coreInt32 iHealth, const coreVector3& vColor)
+// destructor
+cEnemy::~cEnemy()
 {
-    // set health and color value
+    // 
+    if(CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_SINGLE))
+        this->Kill(false);
+}
+
+
+// ****************************************************************
+// configure the enemy
+void cEnemy::Configure(const coreInt32 iHealth, const coreVector3& vColor, const coreBool bInverted)
+{
+    // set health and color
     this->SetMaxHealth(iHealth);
-    this->SetBaseColor(vColor);
+    this->SetBaseColor(vColor, bInverted);
 }
 
 
@@ -44,6 +54,7 @@ void cEnemy::Configure(const coreInt32 iHealth, const coreVector3& vColor)
 void cEnemy::GiveShield(const coreUint8 iElement, const coreInt16 iHealth)
 {
     // 
+    ASSERT(STATIC_ISVALID(g_pGame))
     g_pGame->GetShieldManager()->BindEnemy(this, iElement, iHealth);
 }
 
@@ -99,26 +110,26 @@ coreBool cEnemy::TakeDamage(coreInt32 iDamage, const coreUint8 iElement, const c
     if(!CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_INVINCIBLE))
     {
         // 
-        g_pGame->GetShieldManager()->AbsorbDamage(this, &iDamage, iElement);
-        if(iDamage)
+        const coreInt32 iPower = (pAttacker && (STATIC_ISVALID(g_pGame) && g_pGame->GetCoop())) ? 1 : GAME_PLAYERS;
+        iDamage *= iPower;
+
+        // 
+        if(STATIC_ISVALID(g_pGame)) g_pGame->GetShieldManager()->AbsorbDamage(this, &iDamage, iElement);
+        if(iDamage > 0)
         {
             // 
             if(pAttacker)
             {
                 const coreUint32 iValue = ABS(CLAMP(iDamage, this->GetCurHealth() - this->GetMaxHealth(), this->GetCurHealth()));
-
-                pAttacker->GetScoreTable()->AddCombo(iValue);
-                pAttacker->GetScoreTable()->AddChain(iValue);
+                pAttacker->GetScoreTable()->AddScore(iValue, false);
             }
 
             // 
-            if(this->_TakeDamage(iDamage, iElement, vImpact))
-            {
-                if(!CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_IMMORTAL))
-                    this->Kill(true);
+            const coreBool bReachedDeath = this->_TakeDamage(iDamage, iElement, vImpact);
 
-                return true;
-            }
+            // 
+            this->RefreshColor();
+            this->InvokeBlink();
 
             // 
             if(this->IsParent())
@@ -128,6 +139,15 @@ coreBool cEnemy::TakeDamage(coreInt32 iDamage, const coreUint8 iElement, const c
                     (*it)->RefreshColor(this->GetCurHealthPct());
                     (*it)->InvokeBlink();
                 }
+            }
+
+            // 
+            if(bReachedDeath)
+            {
+                if(!CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_IMMORTAL))
+                    this->Kill(true);
+
+                return true;
             }
         }
     }
@@ -164,7 +184,6 @@ void cEnemy::Resurrect(const coreVector2& vPosition, const coreVector2& vDirecti
     REMOVE_FLAG(m_iStatus, ENEMY_STATUS_DEAD)
 
     // 
-    const coreBool bBoss   = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_BOSS);
     const coreBool bSingle = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_SINGLE);
     const coreBool bEnergy = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_ENERGY);
     ASSERT(!bEnergy || (bEnergy && bSingle))
@@ -172,6 +191,9 @@ void cEnemy::Resurrect(const coreVector2& vPosition, const coreVector2& vDirecti
     // 
     m_fLifeTime       = 0.0f;
     m_fLifeTimeBefore = 0.0f;
+
+    // 
+    if(STATIC_ISVALID(g_pGame) && bSingle) g_pGame->GetEnemyManager()->BindEnemy(this);
 
     if(bEnergy)
     {
@@ -206,19 +228,31 @@ void cEnemy::Kill(const coreBool bAnimated)
     ADD_FLAG(m_iStatus, ENEMY_STATUS_DEAD)
 
     // 
-    const coreBool bBoss   = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_BOSS);
     const coreBool bSingle = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_SINGLE);
     const coreBool bEnergy = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_ENERGY);
     ASSERT(!bEnergy || (bEnergy && bSingle))
 
-    // 
-    g_pGame->GetShieldManager()->UnbindEnemy(this);
+    if(STATIC_ISVALID(g_pGame))
+    {
+        // 
+        g_pGame->GetShieldManager()->UnbindEnemy(this);
 
-    // 
+        // 
+        if(bSingle) g_pGame->GetEnemyManager()->UnbindEnemy(this);
+    }
+
     if(bAnimated && this->IsEnabled(CORE_OBJECT_ENABLE_RENDER))
     {
-        if(bBoss) g_pSpecialEffects->MacroExplosionPhysicalDarkBig  (this->GetPosition());
-             else g_pSpecialEffects->MacroExplosionPhysicalDarkSmall(this->GetPosition());
+        // 
+        if(CONTAINS_BIT(m_iBaseColor, SHIP_INVERTED_BIT))
+        {
+            const coreVector3 vColor = (g_pEnvironment->GetBackground()->GetID() == cSnowBackground::ID) ? COLOR_FIRE_BLUE : COLOR_FIRE_ORANGE;
+            g_pSpecialEffects->MacroExplosionPhysicalColorSmall(this->GetPosition(), vColor);
+        }
+        else
+        {
+            g_pSpecialEffects->MacroExplosionPhysicalDarkSmall(this->GetPosition());
+        }
     }
 
     if(bEnergy)
@@ -249,6 +283,8 @@ void cEnemy::Kill(const coreBool bAnimated)
 // 
 cPlayer* cEnemy::NearestPlayer()const
 {
+    // 
+    ASSERT(STATIC_ISVALID(g_pGame))
     return g_pGame->FindPlayer(this->GetPosition().xy());
 }
 
@@ -309,6 +345,8 @@ cEnemySquad::~cEnemySquad()
 // 
 void cEnemySquad::FreeEnemies()
 {
+    ASSERT(STATIC_ISVALID(g_pGame))
+
     // 
     FOR_EACH(it, m_apEnemy)
         g_pGame->GetEnemyManager()->FreeEnemy(&(*it));
@@ -354,6 +392,31 @@ cEnemy* cEnemySquad::FindEnemy(const coreVector2& vPosition)
 
 
 // ****************************************************************
+// 
+cEnemy* cEnemySquad::FindEnemyRev(const coreVector2& vPosition)
+{
+    // 
+    cEnemy*   pEnemy = NULL;
+    coreFloat fLenSq = 0.0f;
+
+    // 
+    this->ForEachEnemy([&](cEnemy* OUTPUT pCurEnemy, const coreUintW i)
+    {
+        // 
+        const coreFloat fCurLenSq = (pCurEnemy->GetPosition().xy() - vPosition).LengthSq();
+        if(fCurLenSq > fLenSq)
+        {
+            // 
+            pEnemy = pCurEnemy;
+            fLenSq = fCurLenSq;
+        }
+    });
+
+    return pEnemy;
+}
+
+
+// ****************************************************************
 // constructor
 cEnemyManager::sEnemySetGen::sEnemySetGen()noexcept
 : oEnemyActive (ENEMY_SET_INIT)
@@ -369,6 +432,7 @@ cEnemyManager::cEnemyManager()noexcept
 {
     // 
     Core::Manager::Object->TestCollision(TYPE_ENEMY, [](coreObject3D*, coreObject3D*, coreVector3, coreBool) {});
+    // TODO   
 }
 
 
@@ -392,6 +456,15 @@ cEnemyManager::~cEnemyManager()
 // render the enemy manager
 void cEnemyManager::Render()
 {
+    // render all additional enemies
+    FOR_EACH(it, m_apAdditional)
+    {
+        if(CONTAINS_FLAG((*it)->GetStatus(), ENEMY_STATUS_DEAD))
+            continue;
+
+        (*it)->Render();
+    }
+
     // loop through all enemy sets
     for(coreUintW i = 0u; i < ENEMY_SET_COUNT; ++i)
     {
@@ -404,19 +477,10 @@ void cEnemyManager::Render()
         // 
         FOR_EACH(it, *pEnemyActive->List()) d_cast<cEnemy*>(*it)->ActivateModelDefault();
         {
-            // 
+            // render all active enemies
             pEnemyActive->Render();
         }
         FOR_EACH(it, *pEnemyActive->List()) d_cast<cEnemy*>(*it)->ActivateModelLowOnly();
-    }
-
-    // render all additional enemies
-    FOR_EACH(it, m_apAdditional)
-    {
-        if(CONTAINS_FLAG((*it)->GetStatus(), ENEMY_STATUS_DEAD))
-            continue;
-
-        (*it)->Render();
     }
 }
 
@@ -431,6 +495,10 @@ void cEnemyManager::Render()
         pEnemy->f();                                                  \
     };                                                                \
                                                                       \
+    /* render all additional enemies */                               \
+    FOR_EACH(it, m_apAdditional)                                      \
+        nRenderFunc(*it);                                             \
+                                                                      \
     /* loop through all enemy sets */                                 \
     for(coreUintW i = 0u; i < ENEMY_SET_COUNT; ++i)                   \
     {                                                                 \
@@ -441,10 +509,6 @@ void cEnemyManager::Render()
         FOR_EACH(it, *pEnemyActive->List())                           \
             nRenderFunc(d_cast<cEnemy*>(*it));                        \
     }                                                                 \
-                                                                      \
-    /* render all additional enemies */                               \
-    FOR_EACH(it, m_apAdditional)                                      \
-        nRenderFunc(*it);                                             \
 } 
 
 void cEnemyManager::RenderUnder () {__RENDER_OWN(__RenderOwnUnder)}
@@ -458,7 +522,7 @@ void cEnemyManager::RenderOver  () {__RENDER_OWN(__RenderOwnOver)}
 // move the enemy manager
 void cEnemyManager::Move()
 {
-    // 
+    // move all additional enemies (# bosses need to move before other enemies)
     FOR_EACH(it, m_apAdditional)
         (*it)->Move();
 
@@ -577,6 +641,31 @@ cEnemy* cEnemyManager::FindEnemy(const coreVector2& vPosition)
 
 // ****************************************************************
 // 
+cEnemy* cEnemyManager::FindEnemyRev(const coreVector2& vPosition)
+{
+    // 
+    cEnemy*   pEnemy = NULL;
+    coreFloat fLenSq = 0.0f;
+
+    // 
+    this->ForEachEnemy([&](cEnemy* OUTPUT pCurEnemy)
+    {
+        // 
+        const coreFloat fCurLenSq = (pCurEnemy->GetPosition().xy() - vPosition).LengthSq();
+        if(fCurLenSq > fLenSq)
+        {
+            // 
+            pEnemy = pCurEnemy;
+            fLenSq = fCurLenSq;
+        }
+    });
+
+    return pEnemy;
+}
+
+
+// ****************************************************************
+// 
 void cEnemyManager::AttachFunction(cEnemy* pEnemy, const coreUint8 iRepeat, const coreFloat fDelay, const coreVariant16& oData, uRepeatFunc nFunction)
 {
     ASSERT(pEnemy && iRepeat && nFunction)
@@ -607,9 +696,6 @@ cScoutEnemy::cScoutEnemy()noexcept
     // load models
     this->DefineModelHigh("ship_enemy_scout_high.md3");
     this->DefineModelLow ("ship_enemy_scout_low.md3");
-
-    // configure the enemy
-    this->Configure(100, COLOR_SHIP_BLUE);
 }
 
 
@@ -620,9 +706,6 @@ cWarriorEnemy::cWarriorEnemy()noexcept
     // load models
     this->DefineModelHigh("ship_enemy_warrior_high.md3");
     this->DefineModelLow ("ship_enemy_warrior_low.md3");
-
-    // configure the enemy
-    this->Configure(100, COLOR_SHIP_YELLOW);
 }
 
 
@@ -634,9 +717,6 @@ cStarEnemy::cStarEnemy()noexcept
     // load models
     this->DefineModelHigh("ship_enemy_star_high.md3");
     this->DefineModelLow ("ship_enemy_star_low.md3");
-
-    // configure the enemy
-    this->Configure(100, COLOR_SHIP_RED);
 }
 
 
@@ -660,9 +740,6 @@ cArrowEnemy::cArrowEnemy()noexcept
     // load models
     this->DefineModelHigh("ship_enemy_arrow_high.md3");
     this->DefineModelLow ("ship_enemy_arrow_low.md3");
-
-    // configure the enemy
-    this->Configure(100, COLOR_SHIP_ORANGE);
 }
 
 
@@ -685,9 +762,6 @@ cMinerEnemy::cMinerEnemy()noexcept
     // load models
     this->DefineModelHigh("ship_enemy_miner_high.md3");
     this->DefineModelLow ("ship_enemy_miner_low.md3");
-
-    // configure the enemy
-    this->Configure(100, COLOR_SHIP_CYAN);
 }
 
 
@@ -699,9 +773,6 @@ cFreezerEnemy::cFreezerEnemy()noexcept
     // load models
     this->DefineModelHigh("ship_enemy_freezer_high.md3");
     this->DefineModelLow ("ship_enemy_freezer_low.md3");
-
-    // configure the enemy
-    this->Configure(100, COLOR_SHIP_ICE);
 }
 
 
@@ -725,9 +796,6 @@ cCinderEnemy::cCinderEnemy()noexcept
     // load models
     this->DefineModelHigh("ship_enemy_cinder_high.md3");
     this->DefineModelLow ("ship_enemy_cinder_low.md3");
-
-    // configure the enemy
-    this->Configure(100, COLOR_SHIP_GREY);
 }
 
 
@@ -749,19 +817,4 @@ cCustomEnemy::cCustomEnemy()noexcept
 {
     // 
     this->AddStatus(ENEMY_STATUS_SINGLE);
-
-    // 
-    g_pGame->GetEnemyManager()->BindEnemy(this);
-}
-
-
-// ****************************************************************
-// destructor
-cCustomEnemy::~cCustomEnemy()
-{
-    // 
-    this->Kill(false);
-
-    // 
-    g_pGame->GetEnemyManager()->UnbindEnemy(this);
 }

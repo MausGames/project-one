@@ -19,10 +19,6 @@ cPostProcessing::cPostProcessing()noexcept
     m_pProgramDebug     = Core::Manager::Resource->Get<coreProgram>("full_post_debug_program");
     this->Recompile();
 
-    // set object properties
-    this->SetSize(coreVector2(1.0f,1.0f));
-    this->Move();
-
     // create side-objects
     this->__Reset(CORE_RESOURCE_RESET_INIT);
 
@@ -41,6 +37,10 @@ cPostProcessing::cPostProcessing()noexcept
     // 
     this->SetSaturation(1.0f);
     this->SetValue     (1.0f);
+
+    // 
+    this->UpdateLayout();
+    this->Move();
 }
 
 
@@ -123,6 +123,29 @@ void cPostProcessing::Recompile()
 
 
 // ****************************************************************
+// 
+void cPostProcessing::UpdateLayout()
+{
+    // 
+    const coreVector2 vSize = coreVector2(1.0f,1.0f) * (I_TO_F(MIN(g_CurConfig.Game.iGameScale, 100u)) / 100.0f);
+
+    // 
+    coreVector2 vDirection;
+    switch(g_CurConfig.Game.iGameRotation)
+    {
+    default: vDirection = coreVector2( 0.0f, 1.0f); break;
+    case 1:  vDirection = coreVector2(-1.0f, 0.0f); break;
+    case 2:  vDirection = coreVector2( 0.0f,-1.0f); break;
+    case 3:  vDirection = coreVector2( 1.0f, 0.0f); break;
+    }
+
+    // 
+    this->SetSize     (vSize);
+    this->SetDirection(vDirection);
+}
+
+
+// ****************************************************************
 // set side-object opacity
 void cPostProcessing::SetSideOpacity(const coreFloat fValue)
 {
@@ -137,9 +160,9 @@ void cPostProcessing::SetSideOpacity(const coreFloat fValue)
 
 // ****************************************************************
 // reset with the resource manager
-void cPostProcessing::__Reset(const coreResourceReset bInit)
+void cPostProcessing::__Reset(const coreResourceReset eInit)
 {
-    if(bInit)
+    if(eInit)
     {
         const coreVector2& vResolution = Core::System->GetResolution();
 

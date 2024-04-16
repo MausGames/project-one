@@ -194,7 +194,7 @@ void cFragmentItem::Move()
         {
             // 
             ASSERT(m_pTarget)
-            m_pTarget->TransformDark(PLAYER_DARK_ON);
+            g_pSpecialEffects->MacroExplosionDarkBig(m_pTarget->GetPosition());
 
             // 
             this->Destroy(false);

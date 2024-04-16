@@ -23,11 +23,11 @@ void cOutlineStyle::Construct(const coreHashString& sProgramSingleName, const co
 // apply deferred outline-style
 void cOutlineStyle::Apply()
 {
-    // draw single objects
+    // render single objects
     FOR_EACH(it, this->GetObjectSet())
         (*it)->Render(s_pProgramSingle);
 
-    // draw lists with objects
+    // render lists with objects
     FOR_EACH(it, this->GetListSet())
         (*it)->Render(s_pProgramInstanced, s_pProgramSingle);
 }

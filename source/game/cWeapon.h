@@ -55,6 +55,11 @@ public:
     virtual coreUint8   GetElement    ()const {return ELEMENT_NEUTRAL;}
 
 
+protected:
+    // 
+    template <typename T> FORCE_INLINE T* _MakeWhite(T* OUTPUT ptBullet)const {if(m_pOwner->IsDarkShading()) ptBullet->MakeWhite(); return ptBullet;}
+
+
 private:
     // own routines for derived classes
     virtual void __UpdateOwn       (const coreUint8 iShootStatus) {}
@@ -112,7 +117,7 @@ private:
 class cPulseWeapon final : public cWeapon
 {
 private:
-    coreFloat m_fCharge;           // 
+    coreFlow  m_fCharge;           // 
     coreUint8 m_iCombo;            // 
 
     coreSoundPtr m_pBulletSound;   // 

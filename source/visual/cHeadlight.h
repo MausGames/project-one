@@ -23,7 +23,7 @@
 
 // ****************************************************************
 // 
-class cHeadlight final : public coreObject2D, public coreResourceRelation
+class cHeadlight final : public coreFullscreen, public coreResourceRelation
 {
 private:
     // 
@@ -76,7 +76,7 @@ public:
 
 private:
     // reset with the resource manager
-    void __Reset(const coreResourceReset bInit)final;
+    void __Reset(const coreResourceReset eInit)final;
 };
 
 

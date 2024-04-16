@@ -112,10 +112,10 @@ void cEnvironment::Render()
 void cEnvironment::Move()
 {
     // update all transformation properties
-    m_avDirection[0] = (m_avDirection[0] + (m_avDirection[1] - m_avDirection[0]) * (Core::System->GetTime() *  8.0f)).Normalized();
-    m_avSide     [0] =  m_avSide     [0] + (m_avSide     [1] - m_avSide     [0]) * (Core::System->GetTime() * 16.0f);
-    m_afSpeed    [0] =  m_afSpeed    [0] + (m_afSpeed    [1] - m_afSpeed    [0]) * (Core::System->GetTime() *  1.0f);
-    m_afHeight   [0] =  m_afHeight   [0] + (m_afHeight   [1] - m_afHeight   [0]) * (Core::System->GetTime() *  2.0f);
+    m_avDirection[0] = (m_avDirection[0] + (m_avDirection[1] - m_avDirection[0]) * (Core::System->GetTime() * 8.0f)).Normalized();
+    m_avSide     [0] =  m_avSide     [0] + (m_avSide     [1] - m_avSide     [0]) * (Core::System->GetTime() * 0.5f);
+    m_afSpeed    [0] =  m_afSpeed    [0] + (m_afSpeed    [1] - m_afSpeed    [0]) * (Core::System->GetTime() * 1.0f);
+    m_afHeight   [0] =  m_afHeight   [0] + (m_afHeight   [1] - m_afHeight   [0]) * (Core::System->GetTime() * 2.0f);
 
     // calculate global fly offset
     m_fFlyOffset += Core::System->GetTime() * m_afSpeed[0];
@@ -222,9 +222,9 @@ FUNC_PURE coreFloat cEnvironment::RetrieveSafeHeight(const coreVector2& vPositio
 
 // ****************************************************************
 // reset with the resource manager
-void cEnvironment::__Reset(const coreResourceReset bInit)
+void cEnvironment::__Reset(const coreResourceReset eInit)
 {
-    if(bInit)
+    if(eInit)
     {
         const coreInt32 iID = P_TO_SI(m_pBackground);
 

@@ -10,26 +10,25 @@
 #ifndef _P1_GUARD_INTERFACE_H_
 #define _P1_GUARD_INTERFACE_H_
 
-// TODO: re-position everything after resolution-change
+// TODO: re-position everything after resolution-change (also menu)
 
 
 // ****************************************************************
 // interface definitions
-#define INTERFACE_VIEWS               (PLAYERS)   // number of player views
-#define INTERFACE_BOSS_DELAY          (1.5f)      // 
+#define INTERFACE_VIEWS               (PLAYERS)                         // number of player views
+#define INTERFACE_LIVES               (LIVES)                           // 
+#define INTERFACE_BOSS_DELAY          (1.5f)                            // 
 
-#define INTERFACE_BANNER_SPEED        (4.0f)      // fade-in and fade-out speed
-#define INTERFACE_BANNER_DURATION     (3.0f)      // display duration (with fading)
-#define INTERFACE_BANNER_ANIMATION    (2.9f)      // animation duration
+#define INTERFACE_BANNER_SPEED        (4.0f)                            // fade-in and fade-out speed
+#define INTERFACE_BANNER_SPEED_REV    (1.0f / INTERFACE_BANNER_SPEED)   // 
+#define INTERFACE_BANNER_DURATION     (3.0f)                            // display duration (with fading)
+#define INTERFACE_BANNER_ANIMATION    (2.9f)                            // animation duration
 
-#define INTERFACE_BANNER_TYPE_BOSS    (false)     // boss banner type
-#define INTERFACE_BANNER_TYPE_MISSION (true)      // mission banner type
+#define INTERFACE_BANNER_TYPE_BOSS    (false)                           // boss banner type
+#define INTERFACE_BANNER_TYPE_MISSION (true)                            // mission banner type
 
-#define INTERFACE_STORY_SPEED         (1.0f)      // 
-#define INTERFACE_STORY_DURATION      (4.0f)      // 
-
-#define INTERFACE_BONUS_SPEED         (4.0f)      // 
-#define INTERFACE_BONUS_DURATION      (4.0f)      // 
+#define INTERFACE_STORY_SPEED         (1.0f)                            // 
+#define INTERFACE_STORY_DURATION      (4.0f)                            // 
 
 
 // ****************************************************************
@@ -40,12 +39,12 @@ private:
     // player view structure
     struct sPlayerView final
     {
-        coreObject2D aHealthBar  [2];   // player health bar   (0 = background, 1 = foreground)
-        coreLabel    aHealthValue[2];   // player health value (0 = armor text, 1 = actual value)
-        coreLabel    oScore;            // score label
-        coreLabel    oCombo;            // combo label
-        coreObject2D oChainBar;         // chain bar
-        coreLabel    oChainValue;       // chain value
+        coreObject2D aLife[INTERFACE_LIVES];   // player lives
+        coreObject2D aShieldBar[2];            // player shield bar (0 = background, 1 = foreground)
+        coreLabel    oShieldValue;             // player shield value
+        coreLabel    oScoreTotal;              // total score
+        coreLabel    oScoreMission;            // mission score
+        coreFlow     fSpin;                    // 
 
         void Construct(const coreUintW iIndex);
     };
@@ -55,10 +54,13 @@ private:
     sPlayerView m_aView[INTERFACE_VIEWS];   // player views
     coreUint8   m_iNumViews;                // number of constructed player views
 
-    coreObject2D m_aBossHealthBar  [2];     // boss health bar   (0 = background, 1 = foreground)
-    coreLabel    m_aBossHealthValue[2];     // boss health value (0 = percent,    1 = actual value)
-    coreLabel    m_aBossTime       [2];     // current boss time (0 = seconds,    1 = deci-seconds)
-    coreLabel    m_BossName;                // current boss name
+    coreObject2D m_aBossHealthBar[2];       // boss health bar (0 = background, 1 = foreground)
+    coreLabel    m_BossHealthValue;         // boss health value
+    coreLabel    m_aBossTime[2];            // boss time (0 = seconds, 1 = deci-seconds)
+    coreFlow     m_fBossSpin;               // 
+
+    coreLabel m_WaveName;                   // wave name
+    coreLabel m_aWaveTime[2];               // wave time (0 = seconds, 1 = deci-seconds)
 
     coreObject2D m_BannerBar;               // banner background
     coreLabel    m_aBannerText[4];          // banner labels
@@ -68,12 +70,11 @@ private:
     coreLabel m_aStoryText[2];              // 
     coreFloat m_fStoryStart;                // 
 
-    coreLabel m_aBonusText[2];              // 
-    coreFloat m_fBonusStart;                // 
+    coreFlow m_fAnimation;                  // 
 
-    coreBool  m_bVisible;                   // visibility status
-    coreFloat m_fAlphaAll;                  // overall alpha value (except for banner)
-    coreFloat m_fAlphaBoss;                 // boss alpha value
+    coreBool m_bVisible;                    // visibility status
+    coreFlow m_fAlphaAll;                   // overall alpha value (except for banner)
+    coreFlow m_fAlphaBoss;                  // boss alpha value
 
 
 public:
@@ -97,11 +98,8 @@ public:
     coreBool IsStoryActive(const coreFloat fOffset)const;
 
     // 
-    void ShowBonus(const coreChar* pcValue, const coreChar* pcTitle = "");
-    coreBool IsBonusActive(const coreFloat fOffset)const;
-
-    // 
     void UpdateLayout();
+    void UpdateEnabled();
 
     // set object properties
     inline void SetVisible  (const coreBool  bVisible) {m_bVisible   = bVisible;}

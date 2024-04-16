@@ -21,7 +21,7 @@ private:
     coreFrameBuffer m_aFrameBuffer[2];   // blur frame buffers (reduced resolution)
 
     coreProgramPtr m_apConvProgram[2];   // shader-programs for separate convolution (X and Y)
-    coreObject2D   m_Transformer;        // object to draw into the next stage
+    coreFullscreen m_Transformer;        // object to draw into the next stage
 
     coreFloat m_fScale;                  // frame buffer resolution factor
     coreFloat m_fAttenuation;            // blur shader attenuation
@@ -45,7 +45,7 @@ public:
 
 private:
     // reset with the resource manager
-    void __Reset(const coreResourceReset bInit)final;
+    void __Reset(const coreResourceReset eInit)final;
 };
 
 

@@ -10,9 +10,10 @@
 #ifndef _P1_GUARD_ENEMY_H_
 #define _P1_GUARD_ENEMY_H_
 
-// TODO: disable texture filtering for enemy texture (only mip, + default black and white)
+// TODO: disable texture filtering for enemy texture (NEAREST, also default_black and default_white)
 // TODO: manager: Find, ForEach, ForEachAll -> typed 
 // TODO: implement own enemy-types for custom-enemies which would require instancing
+// TODO: virtual void Render()override; -> final
 
 
 // ****************************************************************
@@ -49,14 +50,14 @@ protected:
 
 public:
     cEnemy()noexcept;
-    virtual ~cEnemy()override = default;
+    virtual ~cEnemy()override;
 
     FRIEND_CLASS(cEnemyManager)
     ENABLE_COPY (cEnemy)
     ENABLE_ID
 
     // configure the enemy
-    void Configure (const coreInt32 iHealth, const coreVector3& vColor);
+    void Configure (const coreInt32 iHealth, const coreVector3& vColor, const coreBool bInverted = false);
     void GiveShield(const coreUint8 iElement, const coreInt16 iHealth = 0);
 
     // render and move the enemy
@@ -123,7 +124,8 @@ public:
     void ClearEnemies(const coreBool bAnimated);
 
     // 
-    cEnemy* FindEnemy(const coreVector2& vPosition);
+    cEnemy* FindEnemy   (const coreVector2& vPosition);
+    cEnemy* FindEnemyRev(const coreVector2& vPosition);
     template <typename F> void ForEachEnemy   (F&& nFunction);   // [](cEnemy* OUTPUT pEnemy, const coreUintW i) -> void
     template <typename F> void ForEachEnemyAll(F&& nFunction);   // [](cEnemy* OUTPUT pEnemy, const coreUintW i) -> void
 
@@ -202,9 +204,9 @@ public:
     void ClearEnemies(const coreBool bAnimated);
 
     // 
-    cEnemy* FindEnemy(const coreVector2& vPosition);
-    template <typename F> void ForEachEnemy   (F&& nFunction);   // [](cEnemy* OUTPUT pEnemy) -> void
-    template <typename F> void ForEachEnemyAll(F&& nFunction);   // [](cEnemy* OUTPUT pEnemy) -> void
+    cEnemy* FindEnemy   (const coreVector2& vPosition);
+    cEnemy* FindEnemyRev(const coreVector2& vPosition);
+    template <typename F> void ForEachEnemy(F&& nFunction);   // [](cEnemy* OUTPUT pEnemy) -> void
 
     // 
     template <typename T> void PrefetchEnemy();
@@ -215,6 +217,9 @@ public:
     // 
     inline void BindEnemy  (cEnemy* pEnemy) {ASSERT(!m_apAdditional.count(pEnemy)) m_apAdditional.insert(pEnemy);}
     inline void UnbindEnemy(cEnemy* pEnemy) {ASSERT( m_apAdditional.count(pEnemy)) m_apAdditional.erase (pEnemy);}
+
+    // 
+    inline coreUintW GetNumEnemiesAlive()const {return Core::Manager::Object->GetObjectList(TYPE_ENEMY).size() - std::count_if(m_apAdditional.begin(), m_apAdditional.end(), [](const cEnemy* pEnemy) {return pEnemy->IsChild();});}
 };
 
 
@@ -347,7 +352,6 @@ class cCustomEnemy final : public cEnemy
 {
 public:
     cCustomEnemy()noexcept;
-    ~cCustomEnemy()final;
 
     ENABLE_COPY(cCustomEnemy)
     ASSIGN_ID(666, "Custom")
@@ -493,24 +497,10 @@ template <typename F> void cEnemyManager::ForEachEnemy(F&& nFunction)
     FOR_EACH(it, oEnemyList)
     {
         cEnemy* pEnemy = d_cast<cEnemy*>(*it);
-        if(!pEnemy) continue;
+        if(!pEnemy || pEnemy->IsChild()) continue;
 
         // 
         nFunction(pEnemy);
-    }
-}
-
-template <typename F> void cEnemyManager::ForEachEnemyAll(F&& nFunction)
-{
-    // loop through all enemy sets
-    for(coreUintW i = 0u; i < ENEMY_SET_COUNT; ++i)
-    {
-        if(!m_apEnemySet[i]) continue;
-        coreBatchList* pEnemyActive = &m_apEnemySet[i]->oEnemyActive;
-
-        // 
-        FOR_EACH(it, *pEnemyActive->List())
-            nFunction(*it);
     }
 }
 

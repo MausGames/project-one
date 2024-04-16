@@ -246,11 +246,11 @@ protected:
 class cDesertBackground final : public cBackground
 {
 private:
-    coreObject2D m_Sand;             // 
-    coreVector2  m_vSandDirection;   // 
-    coreFlow     m_fSandWave;        // 
+    coreFullscreen m_Sand;             // 
+    coreVector2    m_vSandDirection;   // 
+    coreFlow       m_fSandWave;        // 
 
-    coreSoundPtr m_pWindSound;       // wind sound-effect
+    coreSoundPtr m_pWindSound;         // wind sound-effect
 
 
 public:
@@ -327,9 +327,9 @@ protected:
 class cSnowBackground final : public cBackground
 {
 private:
-    coreObject2D m_Snow;             // 
-    coreVector2  m_vSnowDirection;   // 
-    coreFlow     m_fSnowWave;        // 
+    coreFullscreen m_Snow;             // 
+    coreVector2    m_vSnowDirection;   // 
+    coreFlow       m_fSnowWave;        // 
 
 
 public:
@@ -354,18 +354,18 @@ private:
 class cMossBackground final : public cBackground
 {
 private:
-    coreObject2D m_Rain;              // 
-    coreVector2  m_vRainDirection;    // 
+    coreFullscreen m_Rain;              // 
+    coreVector2    m_vRainDirection;    // 
 
-    coreObject2D m_Lightning;         // 
-    coreFlow     m_fLightningDelay;   // 
-    coreTimer    m_LightningTicker;   // 
+    coreFullscreen m_Lightning;         // 
+    coreFlow       m_fLightningDelay;   // 
+    coreTimer      m_LightningTicker;   // 
 
-    coreSoundPtr m_apThunder[3];      // 
-    coreFlow     m_fThunderDelay;     // 
-    coreUint8    m_iThunderIndex;     // 
+    coreSoundPtr m_apThunder[3];        // 
+    coreFlow     m_fThunderDelay;       // 
+    coreUint8    m_iThunderIndex;       // 
 
-    coreSoundPtr m_pRainSound;        // 
+    coreSoundPtr m_pRainSound;          // 
 
 
 public:
@@ -448,8 +448,8 @@ private:
 class cCloudBackground final : public cBackground
 {
 private:
-    coreObject2D m_Cover;        // 
-    coreFlow     m_fOffset;      // 
+    coreFullscreen m_Cover;      // 
+    coreFlow       m_fOffset;    // 
 
     coreSoundPtr m_pWindSound;   // wind sound-effect
 

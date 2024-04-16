@@ -13,7 +13,6 @@
 // constructor
 cTitleMenu::cTitleMenu()noexcept
 : coreMenu (1u, SURFACE_TITLE_DEFAULT)
-, m_Effect (g_pSpecialEffects->GetParticleDark())
 {
     // create menu objects
     m_GameLogo.DefineTexture(0u, "game_logo.png");
@@ -58,8 +57,7 @@ cTitleMenu::cTitleMenu()noexcept
 cTitleMenu::~cTitleMenu()
 {
 
-    m_Effect.Clear(); // TODO: race condition
-
+    //m_Effect.Clear(); // TODO: race condition
 
 }
 
@@ -99,13 +97,13 @@ void cTitleMenu::Move()
     }
 
 
-    m_Effect.ForEachParticle([&](coreParticle* OUTPUT pParticle, const coreUintW i)
-    {
-        const coreFloat fTime = FMOD(coreFloat(Core::System->GetTotalTime()) * 0.1f + 0.1f * I_TO_F(i), 1.0f);
-
-        pParticle->SetPositionStc(coreVector3(coreVector2((0.08f + 0.0f * fTime) * SIN((fTime + (I_TO_F(i) / 10.0f)) * 4.0f*PI), 0.27f - 0.54f * fTime) * (FOREGROUND_AREA * 4.5f), 5.0f));
-        pParticle->SetAngleStc   (4.0f*PI * fTime * ((i & 0x01u) ? -1.0f : 1.0f));
-        pParticle->SetColor4Stc  (coreVector4(0.0f, 173.0f/255.0f * 0.6f, 223.0f/255.0f * 0.6f, 0.9f * this->GetAlpha()));
-        // TODO: as ink shader   
-    });
+    //m_Effect.ForEachParticle([&](coreParticle* OUTPUT pParticle, const coreUintW i)
+    //{
+    //    const coreFloat fTime = FRACT(coreFloat(Core::System->GetTotalTime()) * 0.1f + 0.1f * I_TO_F(i));
+    //
+    //    pParticle->SetPositionStc(coreVector3(coreVector2((0.08f + 0.0f * fTime) * SIN((fTime + (I_TO_F(i) / 10.0f)) * 4.0f*PI), 0.27f - 0.54f * fTime) * (FOREGROUND_AREA * 4.5f), 5.0f));
+    //    pParticle->SetAngleStc   (4.0f*PI * fTime * ((i & 0x01u) ? -1.0f : 1.0f));
+    //    pParticle->SetColor4Stc  (coreVector4(0.0f, 173.0f/255.0f * 0.6f, 223.0f/255.0f * 0.6f, 0.9f * this->GetAlpha()));
+    //    // TODO: as ink shader   
+    //});
 }

@@ -15,6 +15,8 @@ cMission::cMission()noexcept
 : m_apBoss           {}
 , m_pCurBoss         (NULL)
 , m_iCurBossIndex    (MISSION_NO_BOSS)
+, m_iCurWaveCount    (0u)
+, m_iCurWaveIndex    (MISSION_NO_WAVE)
 , m_piInt            (NULL)
 , m_pfFloat          (NULL)
 , m_iIntSize         (0u)
@@ -58,12 +60,8 @@ void cMission::Setup()
     this->__SetupOwn();
 
     // 
+    ASSERT(!m_anStage.empty())
     m_anStage.reverse();
-    m_anStage.emplace(0u, [this]()
-    {
-        // begin mission
-        STAGE_FINISH_NOW
-    });
 
     // 
     m_iStageNum = m_anStage.size();
@@ -177,6 +175,36 @@ void cMission::DeactivateBoss()
 
 // ****************************************************************
 // 
+void cMission::ActivateWave()
+{
+    // 
+    ASSERT(m_iCurWaveCount < MISSION_WAVES)
+    m_iCurWaveIndex = m_iCurWaveCount++;
+}
+
+void cMission::DeactivateWave()
+{
+
+    g_pGame->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    {
+
+        const coreFloat fTime  = MAX(g_pGame->GetTimeTable()->GetTimeWave(g_pGame->GetCurMissionIndex(), m_iCurWaveIndex), 0.0f);
+        const coreFloat fScore = MAX(1000.0f * (1.0f - fTime * RCP(30.0f)), 0.0f);
+
+        g_pGame->GetCombatText()->AddBonus(F_TO_UI(fScore), pPlayer->GetPosition());
+        // TODO: only for player with most damage this wave 
+
+    });
+
+
+
+    // 
+    m_iCurWaveIndex = MISSION_NO_WAVE;
+}
+
+
+// ****************************************************************
+// 
 UNITY_BUILD
 #include "01_cViridoMission.cpp"
 #include "02_cNevoMission.cpp"
@@ -187,3 +215,5 @@ UNITY_BUILD
 #include "07_cMuscusMission.cpp"
 #include "08_cAterMission.cpp"
 #include "99_cIntroMission.cpp"
+#include "A1_cErrorMission.cpp"
+#include "A2_cTinkerMission.cpp"

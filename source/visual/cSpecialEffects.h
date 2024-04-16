@@ -81,7 +81,7 @@ private:
     coreUintW    m_iCurRing;                                // 
 
     coreSoundPtr m_apSound[SPECIAL_SOUNDS];                 // 
-    eSoundEffect m_iSoundGuard;                             // last played sound-effect (to reduce multiple same sound-effects within one frame)
+    eSoundEffect m_eSoundGuard;                             // last played sound-effect (to reduce multiple same sound-effects within one frame)
 
     coreTimer m_ShakeTimer;                                 // 
     coreFloat m_fShakeStrength;                             // current shake strength (decreasing)
@@ -128,7 +128,7 @@ public:
     void CreateRing (const coreVector3& vPosition, const coreVector3& vDirection, const coreVector3& vOrientation, const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor);
 
     // 
-    void PlaySound(const coreVector3& vPosition, const coreFloat fVolume, const eSoundEffect iSoundIndex);
+    void PlaySound(const coreVector3& vPosition, const coreFloat fVolume, const eSoundEffect eSoundIndex);
 
     // 
     void RumblePlayer(const cPlayer* pPlayer, const coreFloat fStrength, const coreUint32 iLength);
@@ -136,12 +136,6 @@ public:
     // 
     void ShakeScreen(const coreFloat fStrength);
     inline const coreFloat& GetShakeStrength()const {return m_fShakeStrength;}
-
-    // 
-    inline coreParticleSystem* GetParticleColor() {return &m_ParticleColor;}
-    inline coreParticleSystem* GetParticleDark () {return &m_ParticleDark;}
-    inline coreParticleSystem* GetParticleSmoke() {return &m_ParticleSmoke;}
-    inline coreParticleSystem* GetParticleFire () {return &m_ParticleFire;}
 
     // 
     void MacroExplosionColorSmall        (const coreVector3& vPosition, const coreVector3& vColor);

@@ -28,10 +28,10 @@ cReplay::cReplay()noexcept
 void cReplay::CreateGame()
 {
     ASSERT(m_iStatus == REPLAY_STATUS_DISABLED)
-    ASSERT(!g_pGame && this->__CanStartPlayback())
+    ASSERT(!STATIC_ISVALID(g_pGame) && this->__CanStartPlayback())
 
     // 
-    g_pGame = new cGame(m_Header.iGameDifficulty, (m_Header.iGamePlayers > 1u) ? true : false, m_Header.aiMissionList, m_Header.iNumMissions);
+    STATIC_NEW(g_pGame, m_Header.iGameDifficulty, (m_Header.iGamePlayers > 1u) ? true : false, m_Header.aiMissionList, m_Header.iNumMissions)
     g_pGame->LoadNextMission();
 }
 
@@ -41,7 +41,7 @@ void cReplay::CreateGame()
 void cReplay::StartRecording()
 {
     ASSERT(m_iStatus == REPLAY_STATUS_DISABLED)
-    ASSERT(g_pGame && this->__CanStartRecording())
+    ASSERT(STATIC_ISVALID(g_pGame) && this->__CanStartRecording())
 
     // 
     this->Clear();
@@ -54,9 +54,11 @@ void cReplay::StartRecording()
     m_Header.iGameMode       = 0u;
     m_Header.iGameDifficulty = g_pGame->GetDifficulty();
     m_Header.iGamePlayers    = g_pGame->GetCoop() ? GAME_PLAYERS : 1u;
+    m_Header.iPacifist       = g_pGame->GetPacifist();
     m_Header.iNumStreams     = g_pGame->GetCoop() ? GAME_PLAYERS : 1u;
     m_Header.iNumMissions    = g_pGame->GetNumMissions();
     m_Header.iNumBosses      = REPLAY_BOSSES;
+    m_Header.iNumWaves       = REPLAY_WAVES;
     m_Header.iPostMagic      = REPLAY_FILE_MAGIC;
     ASSERT(m_Header.iNumStreams <= REPLAY_STREAMS)
 
@@ -76,7 +78,7 @@ void cReplay::StartRecording()
 void cReplay::StartPlayback()
 {
     ASSERT(m_iStatus == REPLAY_STATUS_DISABLED)
-    ASSERT(g_pGame && this->__CanStartPlayback())
+    ASSERT(STATIC_ISVALID(g_pGame) && this->__CanStartPlayback())
 
     // 
     for(coreUintW i = 0u, ie = m_Header.iNumStreams; i < ie; ++i)
@@ -97,7 +99,7 @@ void cReplay::StartPlayback()
 void cReplay::EndRecording()
 {
     ASSERT(m_iStatus == REPLAY_STATUS_RECORDING)
-    ASSERT(g_pGame)
+    ASSERT(STATIC_ISVALID(g_pGame))
 
     // 
     m_Header.iReplayHash    = this->__CalculateReplayHash();
@@ -115,6 +117,7 @@ void cReplay::EndRecording()
         m_Header.fTimeTotal = pTable->GetTimeTotal();
         for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) m_Header.afTimeMission[j] = pTable->GetTimeMission(j);
         for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) for(coreUintW i = 0u, ie = m_Header.iNumBosses; i < ie; ++i) m_Header.aafTimeBoss[j][i] = pTable->GetTimeBoss(j, i);
+        for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) for(coreUintW i = 0u, ie = m_Header.iNumWaves;  i < ie; ++i) m_Header.aafTimeWave[j][i] = pTable->GetTimeWave(j, i);
     }
 
     // 
@@ -125,12 +128,14 @@ void cReplay::EndRecording()
         m_Header.aiScoreTotal[k] = pTable->GetScoreTotal();
         for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) m_Header.aaiScoreMission[k][j] = pTable->GetScoreMission(j);
         for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) for(coreUintW i = 0u, ie = m_Header.iNumBosses; i < ie; ++i) m_Header.aaaiScoreBoss[k][j][i] = pTable->GetScoreBoss(j, i);
+        for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) for(coreUintW i = 0u, ie = m_Header.iNumWaves;  i < ie; ++i) m_Header.aaaiScoreWave[k][j][i] = pTable->GetScoreWave(j, i);
     }
 
     // 
     std::memset(m_Header.aiActionsTotal,    0, sizeof(m_Header.aiActionsTotal));
     std::memset(m_Header.aaiActionsMission, 0, sizeof(m_Header.aaiActionsMission));
     std::memset(m_Header.aaaiActionsBoss,   0, sizeof(m_Header.aaaiActionsBoss));
+    std::memset(m_Header.aaaiActionsWave,   0, sizeof(m_Header.aaaiActionsWave));
 
     // 
     m_iStatus = REPLAY_STATUS_DISABLED;
@@ -144,7 +149,7 @@ void cReplay::EndRecording()
 void cReplay::EndPlayback()
 {
     ASSERT(m_iStatus == REPLAY_STATUS_PLAYBACK)
-    ASSERT(g_pGame)
+    ASSERT(STATIC_ISVALID(g_pGame))
 
     // 
     m_iStatus = REPLAY_STATUS_DISABLED;
@@ -157,7 +162,7 @@ void cReplay::EndPlayback()
 // 
 void cReplay::ApplyKeyFrame(const coreUint16 iIdentifier)
 {
-    if(!g_pGame) return;
+    if(!STATIC_ISVALID(g_pGame)) return;
 
     if(m_iStatus == REPLAY_STATUS_RECORDING)
     {
@@ -174,7 +179,7 @@ void cReplay::ApplyKeyFrame(const coreUint16 iIdentifier)
 // 
 void cReplay::Update()
 {
-    if(!g_pGame) return;
+    if(!STATIC_ISVALID(g_pGame)) return;
 
     // 
     if(!CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY)) return;
