@@ -204,7 +204,7 @@ void cReplay::Update()
     if(!STATIC_ISVALID(g_pGame)) return;
 
     // 
-    if(!CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY)) return;
+    if(!HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY)) return;
     ++m_iCurFrame;
 
     if(m_iStatus == REPLAY_STATUS_RECORDING)
@@ -401,12 +401,12 @@ void cReplay::Clear()
 
 // ****************************************************************
 // 
-void cReplay::LoadInfoList(std::vector<sInfo>* OUTPUT paInfoList)
+void cReplay::LoadInfoList(coreList<sInfo>* OUTPUT paInfoList)
 {
     ASSERT(paInfoList)
 
     // 
-    std::vector<std::string> asFile;
+    coreList<coreString> asFile;
     coreData::ScanFolder(coreData::UserFolder(REPLAY_FILE_FOLDER), "*." REPLAY_FILE_EXTENSION, &asFile);
 
     // 
@@ -526,9 +526,9 @@ cReplay::sPacket cReplay::__Pack(const sPacketRaw& oPacket)
 
     // 
     sPacket oOutput = {};
-    oOutput.iData = (coreUint32(oPacket.iFrame & BITLINE(22u)) << 7u) |
-                    (coreUint32(oPacket.iType  & BITLINE(2u))  << 5u) |
-                    (coreUint32(oPacket.iValue & BITLINE(5u)));
+    oOutput.iData = BITVALUE(22u, 7u, oPacket.iFrame) |
+                    BITVALUE( 2u, 5u, oPacket.iType)  |
+                    BITVALUE( 5u, 0u, oPacket.iValue);
 
     return oOutput;
 }
@@ -537,9 +537,9 @@ cReplay::sPacketRaw cReplay::__Unpack(const sPacket& oPacket)
 {
     // 
     sPacketRaw oOutput = {};
-    oOutput.iFrame = (oPacket.iData >> 7u) & BITLINE(22u);
-    oOutput.iType  = (oPacket.iData >> 5u) & BITLINE(2u);
-    oOutput.iValue = (oPacket.iData)       & BITLINE(5u);
+    oOutput.iFrame = GET_BITVALUE(oPacket.iData, 22u, 7u);
+    oOutput.iType  = GET_BITVALUE(oPacket.iData,  2u, 5u);
+    oOutput.iValue = GET_BITVALUE(oPacket.iData,  5u, 0u);
 
     return oOutput;
 }

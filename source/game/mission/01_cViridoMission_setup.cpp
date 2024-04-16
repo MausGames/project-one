@@ -122,10 +122,10 @@ void cViridoMission::__SetupOwn()
 
         if(STAGE_CLEARED)
         {
-                 if(STAGE_SUB(1u)) STAGE_RESSURECT(pSquad1,  0u,  5u)
-            else if(STAGE_SUB(2u)) STAGE_RESSURECT(pSquad1,  6u, 13u)
-            else if(STAGE_SUB(3u)) STAGE_RESSURECT(pSquad1, 14u, 21u)
-            else if(STAGE_SUB(4u)) STAGE_RESSURECT(pSquad1, 22u, 37u)
+                 if(STAGE_SUB(1u)) STAGE_RESURRECT(pSquad1,  0u,  5u)
+            else if(STAGE_SUB(2u)) STAGE_RESURRECT(pSquad1,  6u, 13u)
+            else if(STAGE_SUB(3u)) STAGE_RESURRECT(pSquad1, 14u, 21u)
+            else if(STAGE_SUB(4u)) STAGE_RESURRECT(pSquad1, 22u, 37u)
         }
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
@@ -191,10 +191,10 @@ void cViridoMission::__SetupOwn()
 
         if(STAGE_CLEARED)
         {
-                 if(STAGE_SUB(1u)) STAGE_RESSURECT(pSquad1,  0u,  5u)
-            else if(STAGE_SUB(2u)) STAGE_RESSURECT(pSquad1,  6u, 11u)
-            else if(STAGE_SUB(3u)) STAGE_RESSURECT(pSquad1, 12u, 23u)
-            else if(STAGE_SUB(4u)) STAGE_RESSURECT(pSquad1, 24u, 35u)
+                 if(STAGE_SUB(1u)) STAGE_RESURRECT(pSquad1,  0u,  5u)
+            else if(STAGE_SUB(2u)) STAGE_RESURRECT(pSquad1,  6u, 11u)
+            else if(STAGE_SUB(3u)) STAGE_RESURRECT(pSquad1, 12u, 23u)
+            else if(STAGE_SUB(4u)) STAGE_RESURRECT(pSquad1, 24u, 35u)
         }
 
         if((m_iStageSub == 2u) && (pSquad1->GetNumEnemiesAlive() == 6u))
@@ -281,7 +281,7 @@ void cViridoMission::__SetupOwn()
 
         for(coreUintW i = 0u; i < VIRIDO_BARRIERS; ++i)
         {
-            if(m_apBarrierOwner[i] && CONTAINS_FLAG(m_apBarrierOwner[i]->GetStatus(), ENEMY_STATUS_DEAD))
+            if(m_apBarrierOwner[i] && HAS_FLAG(m_apBarrierOwner[i]->GetStatus(), ENEMY_STATUS_DEAD))
                 this->DisableBarrier(i, true);
         }
 
@@ -289,7 +289,7 @@ void cViridoMission::__SetupOwn()
         {
             if(STAGE_SUB(1u))
             {
-                STAGE_RESSURECT(pSquad1, 0u, 1u)
+                STAGE_RESURRECT(pSquad1, 0u, 1u)
                 this->EnableBarrier( 0u, pSquad1->GetEnemy( 0u), coreVector2( 0.0f, 1.0f), 1.0f);
                 this->EnableBarrier( 1u, pSquad1->GetEnemy( 0u), coreVector2( 0.0f,-1.0f), 1.0f);
                 this->EnableBarrier( 2u, pSquad1->GetEnemy( 1u), coreVector2( 0.0f, 1.0f), 1.0f);
@@ -297,7 +297,7 @@ void cViridoMission::__SetupOwn()
             }
             else if(STAGE_SUB(2u))
             {
-                STAGE_RESSURECT(pSquad1, 2u, 3u)
+                STAGE_RESURRECT(pSquad1, 2u, 3u)
                 this->EnableBarrier( 8u, pSquad1->GetEnemy( 2u), coreVector2( 0.0f, 1.0f), 1.0f);
                 this->EnableBarrier(10u, pSquad1->GetEnemy( 2u), coreVector2( 0.0f,-1.0f), 1.0f);
                 this->EnableBarrier(11u, pSquad1->GetEnemy( 2u), coreVector2(-1.0f, 0.0f), 1.0f);
@@ -307,7 +307,7 @@ void cViridoMission::__SetupOwn()
             }
             else if(STAGE_SUB(3u))
             {
-                STAGE_RESSURECT(pSquad1, 4u, 7u)
+                STAGE_RESURRECT(pSquad1, 4u, 7u)
                 this->EnableBarrier( 0u, pSquad1->GetEnemy( 4u), coreVector2( 0.0f, 1.0f), 1.0f);
                 this->EnableBarrier( 1u, pSquad1->GetEnemy( 4u), coreVector2( 0.0f,-1.0f), 1.0f);
                 this->EnableBarrier( 2u, pSquad1->GetEnemy( 5u), coreVector2( 0.0f, 1.0f), 1.0f);
@@ -319,7 +319,7 @@ void cViridoMission::__SetupOwn()
             }
             else if(STAGE_SUB(4u))
             {
-                STAGE_RESSURECT(pSquad1, 8u, 13u)
+                STAGE_RESURRECT(pSquad1, 8u, 13u)
                 this->EnableBarrier( 8u, pSquad1->GetEnemy( 8u), coreVector2( 0.0f,-1.0f), 1.0f);
                 this->EnableBarrier( 9u, pSquad1->GetEnemy( 9u), coreVector2( 0.0f,-1.0f), 1.0f);
                 this->EnableBarrier(10u, pSquad1->GetEnemy(10u), coreVector2( 0.0f,-1.0f), 1.0f);
@@ -329,7 +329,7 @@ void cViridoMission::__SetupOwn()
             }
             else if(STAGE_SUB(5u))
             {
-                STAGE_RESSURECT(pSquad1, 14u, 17u)
+                STAGE_RESURRECT(pSquad1, 14u, 17u)
                 this->EnableBarrier( 4u, pSquad1->GetEnemy(14u), coreVector2(-1.0f, 0.0f), 1.0f);   // # render order
                 this->EnableBarrier( 1u, pSquad1->GetEnemy(15u), coreVector2( 0.0f,-1.0f), 1.0f);
                 this->EnableBarrier( 2u, pSquad1->GetEnemy(15u), coreVector2( 1.0f, 0.0f), 1.0f);
@@ -409,7 +409,7 @@ void cViridoMission::__SetupOwn()
 
         for(coreUintW i = 0u; i < VIRIDO_LASERS; ++i)
         {
-            if(m_apLaserOwner[i] && CONTAINS_FLAG(m_apLaserOwner[i]->GetStatus(), ENEMY_STATUS_DEAD))
+            if(m_apLaserOwner[i] && HAS_FLAG(m_apLaserOwner[i]->GetStatus(), ENEMY_STATUS_DEAD))
                 this->DisableLaser(i, true);
         }
 
@@ -417,14 +417,14 @@ void cViridoMission::__SetupOwn()
         {
             if(STAGE_SUB(1u))
             {
-                STAGE_RESSURECT(pSquad1, 0u, 2u)
+                STAGE_RESURRECT(pSquad1, 0u, 2u)
                 this->EnableLaser(0u, pSquad1->GetEnemy( 0u));
                 this->EnableLaser(1u, pSquad1->GetEnemy( 1u));
                 this->EnableLaser(2u, pSquad1->GetEnemy( 2u));
             }
             else if(STAGE_SUB(2u))
             {
-                STAGE_RESSURECT(pSquad1, 3u, 6u)
+                STAGE_RESURRECT(pSquad1, 3u, 6u)
                 this->EnableLaser(3u, pSquad1->GetEnemy( 3u));
                 this->EnableLaser(0u, pSquad1->GetEnemy( 4u));
                 this->EnableLaser(1u, pSquad1->GetEnemy( 5u));
@@ -432,7 +432,7 @@ void cViridoMission::__SetupOwn()
             }
             else if(STAGE_SUB(3u))
             {
-                STAGE_RESSURECT(pSquad1, 7u, 10u)
+                STAGE_RESURRECT(pSquad1, 7u, 10u)
                 this->EnableLaser(3u, pSquad1->GetEnemy( 7u));
                 this->EnableLaser(0u, pSquad1->GetEnemy( 8u));
                 this->EnableLaser(1u, pSquad1->GetEnemy( 9u));
@@ -440,7 +440,7 @@ void cViridoMission::__SetupOwn()
             }
             else if(STAGE_SUB(4u))
             {
-                STAGE_RESSURECT(pSquad1, 11u, 14u)
+                STAGE_RESURRECT(pSquad1, 11u, 14u)
                 this->EnableLaser(3u, pSquad1->GetEnemy(11u));
                 this->EnableLaser(0u, pSquad1->GetEnemy(12u));
                 this->EnableLaser(1u, pSquad1->GetEnemy(13u));
@@ -500,7 +500,7 @@ void cViridoMission::__SetupOwn()
                ((vNewPos.y < -FOREGROUND_AREA.y * 1.2f) && (vLerpDir.y < 0.0f)) ||
                ((vNewPos.y >  FOREGROUND_AREA.y * 1.2f) && (vLerpDir.y > 0.0f)))
             {
-                if(afDistance[i] > 0.0) afDistance[i] -= MAX(g_pForeground->RayIntersection(vNewPos, -vLerpDir, 1.2f), 0.0f);
+                if(afDistance[i] > 0.0f) afDistance[i] -= MAX(g_pForeground->RayIntersection(vNewPos, -vLerpDir, 1.2f), 0.0f);
             }
 
             coreObject3D* pLaser = (*m_Laser.List())[i % VIRIDO_LASERS];
@@ -596,8 +596,8 @@ void cViridoMission::__SetupOwn()
 
         if(STAGE_CLEARED)
         {
-                 if(STAGE_SUB(1u)) STAGE_RESSURECT(pSquad1, 0u, 0u)
-            else if(STAGE_SUB(2u)) STAGE_RESSURECT(pSquad1, 1u, 4u)
+                 if(STAGE_SUB(1u)) STAGE_RESURRECT(pSquad1, 0u, 0u)
+            else if(STAGE_SUB(2u)) STAGE_RESURRECT(pSquad1, 1u, 4u)
             else if(STAGE_SUB(3u)) nSpawnFunc(vLastPos, 5u);
             else if(STAGE_SUB(4u)) nSpawnFunc(vLastPos, 6u);
         }
@@ -673,13 +673,13 @@ void cViridoMission::__SetupOwn()
 
         const coreBool bCleared = STAGE_CLEARED;
 
-             if(CONTAINS_FLAG(pPlayer1->GetStatus(), PLAYER_STATUS_DEAD)) iPlayerTarget = 1u;
-        else if(CONTAINS_FLAG(pPlayer2->GetStatus(), PLAYER_STATUS_DEAD)) iPlayerTarget = 0u;
-        else if(bCleared)                                                 iPlayerTarget = 1u - iPlayerTarget;
+             if(HAS_FLAG(pPlayer1->GetStatus(), PLAYER_STATUS_DEAD)) iPlayerTarget = 1u;
+        else if(HAS_FLAG(pPlayer2->GetStatus(), PLAYER_STATUS_DEAD)) iPlayerTarget = 0u;
+        else if(bCleared)                                            iPlayerTarget = 1u - iPlayerTarget;
 
              if(bCleared)      vPlayerLerp = I_TO_F(iPlayerTarget);
-        else if(iPlayerTarget) vPlayerLerp = MIN(vPlayerLerp + 1.0f*Core::System->GetTime(), 1.0f);
-        else                   vPlayerLerp = MAX(vPlayerLerp - 1.0f*Core::System->GetTime(), 0.0f);
+        else if(iPlayerTarget) vPlayerLerp = MIN(vPlayerLerp + 1.0f*TIME, 1.0f);
+        else                   vPlayerLerp = MAX(vPlayerLerp - 1.0f*TIME, 0.0f);
 
         const coreVector2 vBasePos   = LERPS(pPlayer1->GetPosition ().xy(), pPlayer2->GetPosition ().xy(), vPlayerLerp) / FOREGROUND_AREA;
         const coreVector2 vBaseDir   = LERPS(pPlayer1->GetDirection().xy(), pPlayer2->GetDirection().xy(), vPlayerLerp).Normalized();
@@ -687,9 +687,9 @@ void cViridoMission::__SetupOwn()
 
         if(bCleared)
         {
-                 if(STAGE_SUB(1u)) STAGE_RESSURECT(pSquad1,  0u,  3u)
-            else if(STAGE_SUB(2u)) STAGE_RESSURECT(pSquad1,  4u, 11u)
-            else if(STAGE_SUB(3u)) STAGE_RESSURECT(pSquad1, 12u, 19u)
+                 if(STAGE_SUB(1u)) STAGE_RESURRECT(pSquad1,  0u,  3u)
+            else if(STAGE_SUB(2u)) STAGE_RESURRECT(pSquad1,  4u, 11u)
+            else if(STAGE_SUB(3u)) STAGE_RESURRECT(pSquad1, 12u, 19u)
 
             const coreVector2 vPos = vBasePos;
             const coreVector2 vDir = -vPos.Normalized();
@@ -834,7 +834,7 @@ void cViridoMission::__SetupOwn()
 
         STAGE_FOREACH_ENEMY(pSquad2, pEnemy, i)
         {
-            if(pEnemy->ReachedDeath() && ((i < 2u) || CONTAINS_FLAG(pSquad2->GetEnemy(i ^ 0x01u)->GetStatus(), ENEMY_STATUS_DEAD)))
+            if(pEnemy->ReachedDeath() && ((i < 2u) || HAS_FLAG(pSquad2->GetEnemy(i ^ 0x01u)->GetStatus(), ENEMY_STATUS_DEAD)))
             {
                 cEnemy* pParent = pSquad1->GetEnemy((i < 2u) ? i : ((i+2u) / 2u));
                 pParent->Kill(true);
@@ -843,9 +843,9 @@ void cViridoMission::__SetupOwn()
 
         if(STAGE_CLEARED)
         {
-                 if(STAGE_SUB(1u)) {STAGE_RESSURECT(pSquad1, 0u, 1u) STAGE_RESSURECT(pSquad2, 0u, 1u)}
-            else if(STAGE_SUB(2u)) {STAGE_RESSURECT(pSquad1, 2u, 3u) STAGE_RESSURECT(pSquad2, 2u, 5u)}
-            else if(STAGE_SUB(3u)) {STAGE_RESSURECT(pSquad1, 4u, 5u) STAGE_RESSURECT(pSquad2, 6u, 9u)}
+                 if(STAGE_SUB(1u)) {STAGE_RESURRECT(pSquad1, 0u, 1u) STAGE_RESURRECT(pSquad2, 0u, 1u)}
+            else if(STAGE_SUB(2u)) {STAGE_RESURRECT(pSquad1, 2u, 3u) STAGE_RESURRECT(pSquad2, 2u, 5u)}
+            else if(STAGE_SUB(3u)) {STAGE_RESURRECT(pSquad1, 4u, 5u) STAGE_RESURRECT(pSquad2, 6u, 9u)}
         }
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
@@ -871,7 +871,7 @@ void cViridoMission::__SetupOwn()
 
             const coreFloat fTurn = coreVector2::Dot(pEnemy->AimAtPlayerDual(i % 2u).Normalized(), vShootDir.Rotated90());
 
-            pEnemy->SetDirection(coreVector3(STAGE_TAKEOFF ? -pEnemy->GetDirection().xy() : coreVector2::Direction(vShootDir.Angle() + MIN(ABS(fTurn) * 5.0f, 1.0f) * SIGN(fTurn) * -1.2f * Core::System->GetTime()), 0.0f));
+            pEnemy->SetDirection(coreVector3(STAGE_TAKEOFF ? -pEnemy->GetDirection().xy() : coreVector2::Direction(vShootDir.Angle() + MIN(ABS(fTurn) * 5.0f, 1.0f) * SIGN(fTurn) * -1.2f * TIME), 0.0f));
 
             if(STAGE_TICK_LIFETIME_BASE(25.0f, 0.0f))
             {
@@ -895,7 +895,7 @@ void cViridoMission::__SetupOwn()
                 const coreFloat fAngleTo   = ((i == 3u || i == 5u || i == 7u || i == 9u) ? (afTarget[i-1u] + (0.5f*PI)) : afTarget[i]);
                 const coreFloat fShift     = ((i == 3u || i == 5u || i == 7u || i == 9u) ? (afSign  [i-1u])             : afSign  [i]) * ABS(AngleDiff(fAngleTo, fAngleFrom));
 
-                const coreVector2 vDir = coreVector2::Direction(STAGE_TAKEOFF ? fAngleTo : (fAngleFrom + AngleDiff(fAngleTo + fShift, fAngleFrom) * 2.5f * Core::System->GetTime()));
+                const coreVector2 vDir = coreVector2::Direction(STAGE_TAKEOFF ? fAngleTo : (fAngleFrom + AngleDiff(fAngleTo + fShift, fAngleFrom) * 2.5f * TIME));
                 const coreVector2 vPos = pParent->GetPosition().xy() + vDir * 13.0f;
 
                 pEnemy->SetPosition(coreVector3(vPos, 0.0f));
@@ -903,7 +903,7 @@ void cViridoMission::__SetupOwn()
             else
             {
                 coreVector2&      vDir = aiFreeMove[i-6u];
-                const coreVector2 vPos = pEnemy->GetPosition().xy() + vDir * (40.0f * Core::System->GetTime());
+                const coreVector2 vPos = pEnemy->GetPosition().xy() + vDir * (40.0f * TIME);
 
                      if((vPos.x < -FOREGROUND_AREA.x) && (vDir.x < 0.0f)) vDir.x =  ABS(vDir.x);
                 else if((vPos.x >  FOREGROUND_AREA.x) && (vDir.x > 0.0f)) vDir.x = -ABS(vDir.x);
@@ -980,7 +980,7 @@ void cViridoMission::__SetupOwn()
                     pEnemy->AddStatus(ENEMY_STATUS_GHOST);
                 }
 
-                const coreFloat fNewSize = pEnemy->GetSize().x - 4.0f * Core::System->GetTime();
+                const coreFloat fNewSize = pEnemy->GetSize().x - 4.0f * TIME;
                 const coreUint8 iOldTick = F_TO_UI(pEnemy->GetSize().x);
                 const coreUint8 iNewTick = F_TO_UI(fNewSize);
 
@@ -1005,7 +1005,7 @@ void cViridoMission::__SetupOwn()
                     g_pSpecialEffects->CreateSplashColor(pEnemy->GetPosition(), SPECIAL_SPLASH_TINY, COLOR_ENERGY_GREEN);
                 }
 
-                d_cast<cStarEnemy*>(pEnemy)->SetAngle(d_cast<cStarEnemy*>(pEnemy)->GetAngle() - 9.0f * Core::System->GetTime());
+                d_cast<cStarEnemy*>(pEnemy)->SetAngle(d_cast<cStarEnemy*>(pEnemy)->GetAngle() - 9.0f * TIME);
             }
         });
 
@@ -1057,18 +1057,18 @@ void cViridoMission::__SetupOwn()
 
         if(STAGE_CLEARED)
         {
-                 if(STAGE_SUB( 1u)) STAGE_RESSURECT(pSquad1,  0u,  0u)
-            else if(STAGE_SUB( 2u)) STAGE_RESSURECT(pSquad1,  1u,  1u)
-            else if(STAGE_SUB( 3u)) STAGE_RESSURECT(pSquad1,  2u,  2u)
-            else if(STAGE_SUB( 4u)) STAGE_RESSURECT(pSquad1,  3u,  3u)
-            else if(STAGE_SUB( 5u)) STAGE_RESSURECT(pSquad1,  4u,  5u)
-            else if(STAGE_SUB( 6u)) STAGE_RESSURECT(pSquad1,  6u,  7u)
-            else if(STAGE_SUB( 7u)) STAGE_RESSURECT(pSquad1,  8u,  8u)
-            else if(STAGE_SUB( 8u)) STAGE_RESSURECT(pSquad1,  9u,  9u)
-            else if(STAGE_SUB( 9u)) STAGE_RESSURECT(pSquad1, 10u, 10u)
-            else if(STAGE_SUB(10u)) STAGE_RESSURECT(pSquad1, 11u, 11u)
-            else if(STAGE_SUB(11u)) STAGE_RESSURECT(pSquad1, 12u, 13u)
-            else if(STAGE_SUB(12u)) STAGE_RESSURECT(pSquad1, 14u, 15u)
+                 if(STAGE_SUB( 1u)) STAGE_RESURRECT(pSquad1,  0u,  0u)
+            else if(STAGE_SUB( 2u)) STAGE_RESURRECT(pSquad1,  1u,  1u)
+            else if(STAGE_SUB( 3u)) STAGE_RESURRECT(pSquad1,  2u,  2u)
+            else if(STAGE_SUB( 4u)) STAGE_RESURRECT(pSquad1,  3u,  3u)
+            else if(STAGE_SUB( 5u)) STAGE_RESURRECT(pSquad1,  4u,  5u)
+            else if(STAGE_SUB( 6u)) STAGE_RESURRECT(pSquad1,  6u,  7u)
+            else if(STAGE_SUB( 7u)) STAGE_RESURRECT(pSquad1,  8u,  8u)
+            else if(STAGE_SUB( 8u)) STAGE_RESURRECT(pSquad1,  9u,  9u)
+            else if(STAGE_SUB( 9u)) STAGE_RESURRECT(pSquad1, 10u, 10u)
+            else if(STAGE_SUB(10u)) STAGE_RESURRECT(pSquad1, 11u, 11u)
+            else if(STAGE_SUB(11u)) STAGE_RESURRECT(pSquad1, 12u, 13u)
+            else if(STAGE_SUB(12u)) STAGE_RESURRECT(pSquad1, 14u, 15u)
         }
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
@@ -1111,9 +1111,9 @@ void cViridoMission::__SetupOwn()
 
         if(m_iStageSub >= 7u)
         {
-            fWhirlSpeed = MIN(fWhirlSpeed + 0.3f * Core::System->GetTime(), 1.0f);
+            fWhirlSpeed = MIN(fWhirlSpeed + 0.3f * TIME, 1.0f);
 
-            const coreMatrix2 mRota    = coreMatrix3::Rotation(LERPS(0.0f, 0.7f, fWhirlSpeed) * Core::System->GetTime()).m12();
+            const coreMatrix2 mRota    = coreMatrix3::Rotation(LERPS(0.0f, 0.7f, fWhirlSpeed) * TIME).m12();
             const coreMatrix2 mRotaRev = mRota.Transposed();
 
             g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cQuadBullet>([&](cQuadBullet* OUTPUT pBullet)
@@ -1184,9 +1184,9 @@ void cViridoMission::__SetupOwn()
 
         if(STAGE_CLEARED)
         {
-                 if(STAGE_SUB(1u)) STAGE_RESSURECT(pSquad1, 0u, 0u)
-            else if(STAGE_SUB(2u)) STAGE_RESSURECT(pSquad1, 1u, 2u)
-            else if(STAGE_SUB(3u)) STAGE_RESSURECT(pSquad1, 3u, 3u)
+                 if(STAGE_SUB(1u)) STAGE_RESURRECT(pSquad1, 0u, 0u)
+            else if(STAGE_SUB(2u)) STAGE_RESURRECT(pSquad1, 1u, 2u)
+            else if(STAGE_SUB(3u)) STAGE_RESURRECT(pSquad1, 3u, 3u)
         }
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
@@ -1286,7 +1286,7 @@ void cViridoMission::__SetupOwn()
 
         for(coreUintW i = 0u; i < VIRIDO_SHADOWS; ++i)
         {
-            if(m_apShadowOwner[i] && CONTAINS_FLAG(m_apShadowOwner[i]->GetStatus(), ENEMY_STATUS_DEAD))
+            if(m_apShadowOwner[i] && HAS_FLAG(m_apShadowOwner[i]->GetStatus(), ENEMY_STATUS_DEAD))
                 this->DisableShadow(i, true);
         }
 
@@ -1294,7 +1294,7 @@ void cViridoMission::__SetupOwn()
         {
             if(STAGE_SUB(1u))
             {
-                STAGE_RESSURECT(pSquad1, 0u, 3u)
+                STAGE_RESURRECT(pSquad1, 0u, 3u)
                 pSquad1->GetEnemy( 0u)->SetPosition(coreVector3( 0.6f, 1.3f,0.0f) * FOREGROUND_AREA3); pSquad1->GetEnemy( 0u)->SetDirection(coreVector3( 0.0f,-1.0f,0.0f));
                 pSquad1->GetEnemy( 1u)->SetPosition(coreVector3( 0.2f, 1.3f,0.0f) * FOREGROUND_AREA3); pSquad1->GetEnemy( 1u)->SetDirection(coreVector3( 0.0f,-1.0f,0.0f));
                 pSquad1->GetEnemy( 2u)->SetPosition(coreVector3(-0.2f, 1.3f,0.0f) * FOREGROUND_AREA3); pSquad1->GetEnemy( 2u)->SetDirection(coreVector3( 0.0f,-1.0f,0.0f));
@@ -1302,7 +1302,7 @@ void cViridoMission::__SetupOwn()
             }
             else if(STAGE_SUB(2u))
             {
-                STAGE_RESSURECT(pSquad1, 4u, 11u)
+                STAGE_RESURRECT(pSquad1, 4u, 11u)
                 pSquad1->GetEnemy( 4u)->SetPosition(coreVector3( 1.3f, 0.6f,0.0f) * FOREGROUND_AREA3); pSquad1->GetEnemy( 4u)->SetDirection(coreVector3(-1.0f, 0.0f,0.0f));
                 pSquad1->GetEnemy( 5u)->SetPosition(coreVector3( 1.3f, 0.2f,0.0f) * FOREGROUND_AREA3); pSquad1->GetEnemy( 5u)->SetDirection(coreVector3(-1.0f, 0.0f,0.0f));
                 pSquad1->GetEnemy( 6u)->SetPosition(coreVector3( 1.3f,-0.2f,0.0f) * FOREGROUND_AREA3); pSquad1->GetEnemy( 6u)->SetDirection(coreVector3(-1.0f, 0.0f,0.0f));
@@ -1314,7 +1314,7 @@ void cViridoMission::__SetupOwn()
             }
             else if(STAGE_SUB(3u))
             {
-                STAGE_RESSURECT(pSquad1, 12u, 19u)
+                STAGE_RESURRECT(pSquad1, 12u, 19u)
                 pSquad1->GetEnemy(12u)->SetPosition(coreVector3( 0.2f, 1.3f,0.0f) * FOREGROUND_AREA3); pSquad1->GetEnemy(12u)->SetDirection(coreVector3( 0.0f,-1.0f,0.0f));
                 pSquad1->GetEnemy(13u)->SetPosition(coreVector3(-0.2f, 1.3f,0.0f) * FOREGROUND_AREA3); pSquad1->GetEnemy(13u)->SetDirection(coreVector3( 0.0f,-1.0f,0.0f));
                 pSquad1->GetEnemy(14u)->SetPosition(coreVector3( 0.2f, 1.3f,0.0f) * FOREGROUND_AREA3); pSquad1->GetEnemy(14u)->SetDirection(coreVector3( 0.0f,-1.0f,0.0f));
@@ -1343,7 +1343,7 @@ void cViridoMission::__SetupOwn()
             {
                 if(afWait[i] < 1.0f)
                 {
-                    afWait[i] += fWaitSpeed * Core::System->GetTime();
+                    afWait[i] += fWaitSpeed * TIME;
                     if(afWait[i] >= 1.0f)
                     {
                         afJump[i] = 0.0f;
@@ -1375,7 +1375,7 @@ void cViridoMission::__SetupOwn()
                 }
                 else
                 {
-                    afJump[i] += fJumpSpeed * Core::System->GetTime();
+                    afJump[i] += fJumpSpeed * TIME;
                     if(afJump[i] >= 1.0f)
                     {
                         afJump[i] = 1.0f;
@@ -1484,13 +1484,13 @@ void cViridoMission::__SetupOwn()
 
         if(STAGE_CLEARED)
         {
-                 if(STAGE_SUB(1u)) STAGE_RESSURECT(pSquad1,  0u,  7u)
-            else if(STAGE_SUB(2u)) STAGE_RESSURECT(pSquad1,  8u, 15u)
-            else if(STAGE_SUB(3u)) STAGE_RESSURECT(pSquad1, 16u, 31u)
+                 if(STAGE_SUB(1u)) STAGE_RESURRECT(pSquad1,  0u,  7u)
+            else if(STAGE_SUB(2u)) STAGE_RESURRECT(pSquad1,  8u, 15u)
+            else if(STAGE_SUB(3u)) STAGE_RESURRECT(pSquad1, 16u, 31u)
         }
 
-             if(m_iStageSub == 2u) fAngle += 0.25f*PI * Core::System->GetTime();
-        else if(m_iStageSub == 3u) fAngle -= 0.25f*PI * Core::System->GetTime();
+             if(m_iStageSub == 2u) fAngle += 0.25f*PI * TIME;
+        else if(m_iStageSub == 3u) fAngle -= 0.25f*PI * TIME;
         const coreMatrix2 mRota = coreMatrix3::Rotation(fAngle).m12();
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
@@ -1505,9 +1505,9 @@ void cViridoMission::__SetupOwn()
 
             if(pEnemy->GetCurHealth() == 0)
             {
-                afSpeed[i] += 80.0f * Core::System->GetTime();
+                afSpeed[i] += 80.0f * TIME;
 
-                pEnemy->SetPosition(pEnemy->GetPosition() + pEnemy->GetDirection() * ((20.0f + afSpeed[i]) * Core::System->GetTime()));
+                pEnemy->SetPosition(pEnemy->GetPosition() + pEnemy->GetDirection() * ((20.0f + afSpeed[i]) * TIME));
 
                 if(STAGE_TICK_TIME(30.0f, 0.0f))
                 {
@@ -1568,9 +1568,9 @@ void cViridoMission::__SetupOwn()
 
         if(STAGE_CLEARED)
         {
-                 if(STAGE_SUB(1u)) STAGE_RESSURECT(pSquad1,  0u, 11u)
-            else if(STAGE_SUB(2u)) STAGE_RESSURECT(pSquad1, 12u, 35u)
-            else if(STAGE_SUB(3u)) STAGE_RESSURECT(pSquad1, 36u, 99u)
+                 if(STAGE_SUB(1u)) STAGE_RESURRECT(pSquad1,  0u, 11u)
+            else if(STAGE_SUB(2u)) STAGE_RESURRECT(pSquad1, 12u, 35u)
+            else if(STAGE_SUB(3u)) STAGE_RESURRECT(pSquad1, 36u, 99u)
         }
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
@@ -1628,7 +1628,7 @@ void cViridoMission::__SetupOwn()
                 const coreVector2 vRealTarget = LERP(vWrap, vEnemyPos + vDir * 35.0f, fStr);
                 const coreVector2 vChange     = vRealTarget - vEnemyPos;
 
-                pEnemy->SetPosition(coreVector3(pEnemy->GetPosition().xy() + (vChange * ((fStr * fDot * 9.0f + 2.0f) * Core::System->GetTime())) * mTransform, 0.0f));
+                pEnemy->SetPosition(coreVector3(pEnemy->GetPosition().xy() + (vChange * ((fStr * fDot * 9.0f + 2.0f) * TIME)) * mTransform, 0.0f));
 
                 if(fStr)
                 {
@@ -1651,7 +1651,7 @@ void cViridoMission::__SetupOwn()
                     const coreFloat A = (pEnemy ->GetPosition().xy() - vBase).LengthSq();
                     const coreFloat B = (pEnemy2->GetPosition().xy() - vBase).LengthSq();
 
-                    const coreVector2 vPush = vDiff.Normalized() * (fPower * Core::System->GetTime());
+                    const coreVector2 vPush = vDiff.Normalized() * (fPower * TIME);
 
                     if(A > B) pEnemy ->SetPosition(coreVector3(pEnemy ->GetPosition().xy() + vPush, 0.0f));
                          else pEnemy2->SetPosition(coreVector3(pEnemy2->GetPosition().xy() - vPush, 0.0f));
@@ -1759,15 +1759,15 @@ void cViridoMission::__SetupOwn()
 
         if(STAGE_CLEARED)
         {
-                 if(STAGE_SUB(1u)) STAGE_RESSURECT(pSquad1,  0u, 15u)
-            else if(STAGE_SUB(2u)) STAGE_RESSURECT(pSquad1, 16u, 31u)
-            else if(STAGE_SUB(3u)) STAGE_RESSURECT(pSquad1, 32u, 39u)
-            else if(STAGE_SUB(4u)) STAGE_RESSURECT(pSquad1, 40u, 47u)
+                 if(STAGE_SUB(1u)) STAGE_RESURRECT(pSquad1,  0u, 15u)
+            else if(STAGE_SUB(2u)) STAGE_RESURRECT(pSquad1, 16u, 31u)
+            else if(STAGE_SUB(3u)) STAGE_RESURRECT(pSquad1, 32u, 39u)
+            else if(STAGE_SUB(4u)) STAGE_RESURRECT(pSquad1, 40u, 47u)
         }
 
         if(fMillForce)
         {
-            fMillAngle += fMillForce * Core::System->GetTime();
+            fMillAngle += fMillForce * TIME;
             fMillForce *= FrictionFactor(6.0f);
         }
 
@@ -1783,7 +1783,7 @@ void cViridoMission::__SetupOwn()
 
                 if(!avForce[i].IsNull())
                 {
-                    vNewPos    += avForce[i] * Core::System->GetTime();
+                    vNewPos    += avForce[i] * TIME;
                     avForce[i] *= FrictionFactor(3.0f);
                 }
 
@@ -1883,7 +1883,7 @@ void cViridoMission::__SetupOwn()
                     if(iChiefNum == 8u) if(pSquad1->GetNumEnemiesAlive() == 1u) nCreateChiefFunc();
                 }
             }
-            else if(!CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_INVINCIBLE))
+            else if(!HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_INVINCIBLE))
             {
                 if(STAGE_TICK_TIME((iChiefNum == 9u) ? 3.0f : 1.1f, fShotOffset))
                 {
@@ -1962,9 +1962,9 @@ void cViridoMission::__SetupOwn()
 
         if(STAGE_CLEARED)
         {
-                 if(STAGE_SUB(1u)) STAGE_RESSURECT(pSquad1,  0u, 15u)
-            else if(STAGE_SUB(2u)) STAGE_RESSURECT(pSquad1, 16u, 31u)
-            else if(STAGE_SUB(3u)) STAGE_RESSURECT(pSquad1, 32u, 51u)
+                 if(STAGE_SUB(1u)) STAGE_RESURRECT(pSquad1,  0u, 15u)
+            else if(STAGE_SUB(2u)) STAGE_RESURRECT(pSquad1, 16u, 31u)
+            else if(STAGE_SUB(3u)) STAGE_RESURRECT(pSquad1, 32u, 51u)
 
             fChangeTime  = 0.0f;
             iChangeCount = 0u;
@@ -1972,7 +1972,7 @@ void cViridoMission::__SetupOwn()
 
         const coreFloat  fChangeTimePrev  = fChangeTime;
         const coreUint32 iChangeCountPrev = iChangeCount;
-        fChangeTime += 1.0f * Core::System->GetTime();
+        fChangeTime += 1.0f * TIME;
 
         if(m_iStageSub == 1u)
         {
@@ -2032,7 +2032,7 @@ void cViridoMission::__SetupOwn()
 
                         for(coreUintW i = 32u; i < 52u; ++i)
                         {
-                            if(!CONTAINS_FLAG(pSquad1->GetEnemy(i)->GetStatus(), ENEMY_STATUS_DEAD) && !CONTAINS_BIT(iStateGhost, i))
+                            if(!HAS_FLAG(pSquad1->GetEnemy(i)->GetStatus(), ENEMY_STATUS_DEAD) && !HAS_BIT(iStateGhost, i))
                             {
                                 ADD_BIT(iStateGhost, i)
                                 aiSnakeIndex[0] = i;
@@ -2088,9 +2088,9 @@ void cViridoMission::__SetupOwn()
                     }
                 }
 
-                if(CONTAINS_BIT(iStateActive, i))
+                if(HAS_BIT(iStateActive, i))
                 {
-                    if(CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
+                    if(HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
                     {
                         pEnemy->SetBaseColor(COLOR_SHIP_ORANGE);
                         pEnemy->SetAlpha    (1.0f);
@@ -2106,7 +2106,7 @@ void cViridoMission::__SetupOwn()
                 }
                 else
                 {
-                    if(!CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
+                    if(!HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
                     {
                         pEnemy->SetBaseColor(COLOR_SHIP_GREY);
                         pEnemy->SetAlpha    (0.0f);
@@ -2115,7 +2115,7 @@ void cViridoMission::__SetupOwn()
                 }
             }
 
-            if(!CONTAINS_BIT(iStateActive, i) && CONTAINS_BIT(iStateGhost, i))
+            if(!HAS_BIT(iStateActive, i) && HAS_BIT(iStateGhost, i))
             {
                 pEnemy->SetDirection(coreVector3(((i < 32u) ? pEnemy->AimAtPlayerDual((i / 8u) % 2u) : pEnemy->AimAtPlayerSide()).Normalized(), 0.0f));
                 pEnemy->SetAlpha    ((FRACT(fChangeTime * 20.0f) < 0.5f) ? 0.9f : 0.4f);
@@ -2126,11 +2126,11 @@ void cViridoMission::__SetupOwn()
             {
                 if(!fLastValue) iLastDual = pEnemy->NearestPlayerSide() - g_pGame->GetPlayer(0u);
 
-                fLastValue += 0.8f * Core::System->GetTime();
+                fLastValue += 0.8f * TIME;
 
                 if(fLastValue >= 1.8f)
                 {
-                    pEnemy->SetPosition(pEnemy->GetPosition() + pEnemy->GetDirection() * (320.0f * (fLastValue - 1.8f + 0.25f) * Core::System->GetTime()));
+                    pEnemy->SetPosition(pEnemy->GetPosition() + pEnemy->GetDirection() * (320.0f * (fLastValue - 1.8f + 0.25f) * TIME));
                 }
                 else
                 {
@@ -2138,7 +2138,7 @@ void cViridoMission::__SetupOwn()
                     coreVector2 vDir = pEnemy->AimAtPlayerDual(iLastDual).Normalized();
 
                          if(fLastValue >= 1.5f) vDir *= coreMatrix3::Rotation(LERPB(0.0f*PI, -1.0f*PI, (fLastValue - 1.5f) / 0.3f)).m12();
-                    else if(fLastValue >= 1.0f) vPos += vDir * (60.0f * (fLastValue - 1.5f) * Core::System->GetTime());
+                    else if(fLastValue >= 1.0f) vPos += vDir * (60.0f * (fLastValue - 1.5f) * TIME);
 
                     pEnemy->SetPosition (coreVector3(CLAMP(vPos.x, -FOREGROUND_AREA.x, FOREGROUND_AREA.x), CLAMP(vPos.y, -FOREGROUND_AREA.y, FOREGROUND_AREA.y), 0.0f));
                     pEnemy->SetDirection(coreVector3(vDir, 0.0f));

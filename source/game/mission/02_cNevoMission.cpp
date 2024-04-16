@@ -474,8 +474,14 @@ void cNevoMission::DisableContainer(const coreBool bAnimated)
 // 
 void cNevoMission::__RenderOwnBottom()
 {
-    // 
-    m_Tile.Render();
+    DEPTH_PUSH
+
+    glDisable(GL_DEPTH_TEST);
+    {
+        // 
+        m_Tile.Render();
+    }
+    glEnable(GL_DEPTH_TEST);
 }
 
 
@@ -484,7 +490,6 @@ void cNevoMission::__RenderOwnBottom()
 void cNevoMission::__RenderOwnUnder()
 {
     DEPTH_PUSH
-    DEPTH_PUSH   // TODO: first push causes outline-overdraw artifacts, precision too low on the first level, can it be handled on outline(-shader) ?
 
     glDepthMask(false);
     {
@@ -564,7 +569,7 @@ void cNevoMission::__MoveOwnAfter()
         if(!oBomb.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
         // 
-        oBomb.SetSize  (coreVector3(1.0f,1.0f,1.0f) * MIN(oBomb.GetSize().x + 20.0f * Core::System->GetTime(), NEVO_BOMB_SIZE));
+        oBomb.SetSize  (coreVector3(1.0f,1.0f,1.0f) * MIN(oBomb.GetSize().x + 20.0f * TIME, NEVO_BOMB_SIZE));
         oBomb.SetColor3(COLOR_ENERGY_YELLOW * (0.5f + 0.5f * COS(12.0f*PI * m_afBlastTime[i])));
     }
 
@@ -671,8 +676,8 @@ void cNevoMission::__MoveOwnAfter()
         }
 
         // 
-        if(pOwner) oArrow.SetAlpha(MIN(oArrow.GetAlpha() + 5.0f*Core::System->GetTime(), 1.0f));
-              else oArrow.SetAlpha(MAX(oArrow.GetAlpha() - 5.0f*Core::System->GetTime(), 0.0f));
+        if(pOwner) oArrow.SetAlpha(MIN(oArrow.GetAlpha() + 5.0f*TIME, 1.0f));
+              else oArrow.SetAlpha(MAX(oArrow.GetAlpha() - 5.0f*TIME, 0.0f));
 
         // 
         if(!oArrow.GetAlpha()) this->DisableArrow(i, false);
@@ -757,7 +762,7 @@ void cNevoMission::__MoveOwnAfter()
         // 
         if(!m_vForce.IsNull())
         {
-            vNewPos  += m_vForce * Core::System->GetTime();
+            vNewPos  += m_vForce * TIME;
             m_vForce *= FrictionFactor(2.5f);
         }
 

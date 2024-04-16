@@ -17,6 +17,10 @@ const coreUint8       CoreApp::Settings::RenderBuffer::StencilSize  = 0u;
 const coreBool        CoreApp::Settings::RenderBuffer::AlphaChannel = false;
 const coreBool        CoreApp::Settings::RenderBuffer::DoubleBuffer = true;
 const coreBool        CoreApp::Settings::RenderBuffer::StereoRender = false;
+const coreUint32      CoreApp::Settings::Platform::Steam::AppID     = 1624320u;
+
+const coreChar* test[] = {"TEST", ""};
+const coreChar**      CoreApp::Settings::Platform::Steam::Achievement = test;
 
 
 // ****************************************************************
@@ -41,6 +45,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("environment_starfish.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_starfish.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("environment_stone_01.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_stone_01.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("environment_weed.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_weed.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("object_arrow.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_arrow.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("object_barrier.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_barrier.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_bomb_high.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_bomb_high.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("object_bomb_low.md3",                    CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_bomb_low.md3");
@@ -53,12 +58,14 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("object_container_high.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_container_high.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("object_container_low.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_container_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_cube_rota.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_cube_rota.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_cube_smooth.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_cube_smooth.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_cube_top.md3",                    CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_cube_top.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_dot.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_dot.md3");
-    Core::Manager::Resource->Load<coreModel>  ("object_star.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_star.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("object_star.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_star.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_paddle.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_paddle.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("object_ring.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_ring.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("object_sphere.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_sphere.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_spike.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_spike.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("object_teleporter.md3",                  CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_teleporter.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_tetra_rota.md3",                  CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tetra_rota.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_tetra_top.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tetra_top.md3");
@@ -359,7 +366,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreSound>  ("environment_under.wav",                  CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_under.wav");
     Core::Manager::Resource->Load<coreSound>  ("environment_wind.wav",                   CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_wind.wav");
 
-    std::vector<std::string> asPath;
+    coreList<coreString> asPath;
     coreData::ScanFolder("data/fonts", "*.ttf", &asPath);
     coreData::ScanFolder("data/fonts", "*.otf", &asPath);
 
@@ -952,13 +959,13 @@ void CoreApp::Setup()
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ship_blink_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader ("object_inst.vert")
         ->AttachShader ("object_ship_blink_inst.frag")
-        ->BindAttribute("a_v1Blink", SHIP_SHADER_ATTRIBUTE_BLINK)
+        ->BindAttribute("a_v2Blink", SHIP_SHADER_ATTRIBUTE_BLINK)
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_meteor_blink_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader ("object_inst.vert")
         ->AttachShader ("object_meteor_blink_inst.frag")
-        ->BindAttribute("a_v1Blink", SHIP_SHADER_ATTRIBUTE_BLINK)
+        ->BindAttribute("a_v2Blink", SHIP_SHADER_ATTRIBUTE_BLINK)
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_plate_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())

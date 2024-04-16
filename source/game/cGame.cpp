@@ -59,8 +59,8 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
         m_aPlayer[1].SetInput(&g_aGameInput[1]);
 
         // 
-        m_aPlayer[0].SetArea(coreVector4(-FOREGROUND_AREA, FOREGROUND_AREA * coreVector2(-0.1f,1.0f)));
-        m_aPlayer[1].SetArea(coreVector4(-FOREGROUND_AREA * coreVector2(-0.1f,1.0f), FOREGROUND_AREA));
+        //m_aPlayer[0].SetArea(coreVector4(-FOREGROUND_AREA, FOREGROUND_AREA * coreVector2(-0.1f,1.0f)));
+        //m_aPlayer[1].SetArea(coreVector4(-FOREGROUND_AREA * coreVector2(-0.1f,1.0f), FOREGROUND_AREA)); walls are coming at you
 
         // 
         g_pPostProcessing->SetSplitScreen(true);
@@ -102,8 +102,9 @@ cGame::~cGame()
     g_pWindscreen->ClearAdds(true);
 
     // 
+    for(coreUintW i = 0u; i < POST_WALLS; ++i) g_pPostProcessing->SetWallOffset(i, 0.0f);   // TODO: make transition smoother
     g_pPostProcessing->SetSplitScreen  (false);
-    g_pPostProcessing->SetDirectionGame(coreVector2(0.0f,1.0f));
+    g_pPostProcessing->SetDirectionGame(coreVector2(0.0f,1.0f));   // TODO: make transition smoother
     g_pPostProcessing->SetSaturationAll(1.0f);
 
     // 
@@ -122,13 +123,9 @@ void cGame::Render()
 {
     __DEPTH_GROUP_BOTTOM
     {
-        glDisable(GL_DEPTH_TEST);
-        {
-            // 
-            m_EnemyManager.RenderBottom();
-            m_pCurMission->RenderBottom();
-        }
-        glEnable(GL_DEPTH_TEST);
+        // 
+        m_EnemyManager.RenderBottom();
+        m_pCurMission->RenderBottom();
     }
 
     __DEPTH_GROUP_SHIP   // # 1
@@ -228,30 +225,29 @@ void cGame::Move()
 
     // 
     cHelper::GlobalUpdate();
-    
-    
-    m_EnemyManager.MoveBefore(); // only enemy, not player    
-    
-    
 
-    // move the mission
+    // 
+    m_EnemyManager.MoveBefore();
     m_pCurMission->MoveBefore();
-    {
-        // move all players
-        for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
-            m_aPlayer[i].Move();
 
-        // 
-        for(coreUintW i = 0u; i < GAME_HELPERS; ++i)
-            m_aHelper[i].Move();
+    // move all players
+    for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+        m_aPlayer[i].Move();
 
-        // move all enemies
-        m_EnemyManager.Move();
+    // move all helpers
+    for(coreUintW i = 0u; i < GAME_HELPERS; ++i)
+        m_aHelper[i].Move();
 
-        // move the bullet managers
-        m_BulletManagerPlayer.Move();
-        m_BulletManagerEnemy .Move();
-    }
+    // 
+    m_pCurMission->MoveMiddle();   // # swapped
+    m_EnemyManager.MoveMiddle();
+
+    // move the bullet managers
+    m_BulletManagerPlayer.Move();
+    m_BulletManagerEnemy .Move();
+
+    // 
+    m_EnemyManager.MoveAfter();
     m_pCurMission->MoveAfter();
 
     // 
@@ -264,10 +260,6 @@ void cGame::Move()
 
     // 
     this->__HandleDefeat();
-    
-    
-    //if(!CONTAINS_FLAG(m_aPlayer[0].GetStatus(), PLAYER_STATUS_DEAD))
-    //    g_pEnvironment->SetTargetSide(m_aPlayer[0].GetPosition().xy() * 0.2f);
 }
 
 
@@ -322,6 +314,7 @@ void cGame::LoadMissionID(const coreInt32 iID, const coreUint8 iTakeFrom, const 
     case cAterMission   ::ID: m_pCurMission = new cAterMission   (); break;
     case cIntroMission  ::ID: m_pCurMission = new cIntroMission  (); break;
     case cErrorMission  ::ID: m_pCurMission = new cErrorMission  (); break;
+    case cDemoMission   ::ID: m_pCurMission = new cDemoMission   (); break;
     }
 
     // 
@@ -388,7 +381,7 @@ void cGame::LoadNextMission()
     // 
     if(m_pCurMission->GetID() == cNoMission::ID)
     {
-        ASSERT(CONTAINS_FLAG(m_iStatus, GAME_STATUS_OUTRO))
+        ASSERT(HAS_FLAG(m_iStatus, GAME_STATUS_OUTRO))
 
         // 
         REMOVE_FLAG(m_iStatus, GAME_STATUS_OUTRO)
@@ -415,8 +408,8 @@ void cGame::RestartMission()
 // 
 void cGame::StartIntro()
 {
-    ASSERT(!CONTAINS_FLAG(m_iStatus, GAME_STATUS_PLAY))
-    ASSERT(!CONTAINS_FLAG(m_iStatus, GAME_STATUS_OUTRO))
+    ASSERT(!HAS_FLAG(m_iStatus, GAME_STATUS_PLAY))
+    ASSERT(!HAS_FLAG(m_iStatus, GAME_STATUS_OUTRO))
 
     // 
     ADD_FLAG(m_iStatus, GAME_STATUS_INTRO)
@@ -429,7 +422,7 @@ void cGame::StartIntro()
         // 
         m_aPlayer[i].Kill(false);
         m_aPlayer[i].Resurrect();
-        m_aPlayer[i].AddStatus(PLAYER_STATUS_NO_INPUT_ALL);
+        m_aPlayer[i].AddStatus(PLAYER_STATUS_NO_INPUT_ALL); // handle combination with gameplay code
 
         // 
         const coreFloat fSide = m_bCoop ? (20.0f * (I_TO_F(i) - 0.5f * I_TO_F(GAME_PLAYERS-1u))) : 0.0f;
@@ -442,8 +435,8 @@ void cGame::StartIntro()
 // 
 void cGame::StartOutro(const coreUint8 iType)
 {
-    ASSERT( CONTAINS_FLAG(m_iStatus, GAME_STATUS_PLAY))
-    ASSERT(!CONTAINS_FLAG(m_iStatus, GAME_STATUS_INTRO))
+    ASSERT( HAS_FLAG(m_iStatus, GAME_STATUS_PLAY))
+    ASSERT(!HAS_FLAG(m_iStatus, GAME_STATUS_INTRO))
 
     // 
     REMOVE_FLAG(m_iStatus, GAME_STATUS_PLAY)
@@ -469,7 +462,7 @@ void cGame::StartOutro(const coreUint8 iType)
 // 
 void cGame::UseContinue()
 {
-    ASSERT(CONTAINS_FLAG(m_iStatus, GAME_STATUS_DEFEATED))
+    ASSERT(HAS_FLAG(m_iStatus, GAME_STATUS_DEFEATED))
 
     // 
     REMOVE_FLAG(m_iStatus, GAME_STATUS_DEFEATED)
@@ -547,8 +540,8 @@ RETURN_NONNULL cPlayer* cGame::FindPlayerSide(const coreVector2& vPosition)
     STATIC_ASSERT(GAME_PLAYERS == 2u)
 
     // 
-    if(CONTAINS_FLAG(m_aPlayer[1].GetStatus(), PLAYER_STATUS_DEAD)) return &m_aPlayer[0];
-    if(CONTAINS_FLAG(m_aPlayer[0].GetStatus(), PLAYER_STATUS_DEAD)) return &m_aPlayer[1];
+    if(HAS_FLAG(m_aPlayer[1].GetStatus(), PLAYER_STATUS_DEAD)) return &m_aPlayer[0];
+    if(HAS_FLAG(m_aPlayer[0].GetStatus(), PLAYER_STATUS_DEAD)) return &m_aPlayer[1];
 
     // 
     ASSERT(vPosition.x)
@@ -563,8 +556,8 @@ RETURN_NONNULL cPlayer* cGame::FindPlayerDual(const coreUintW iIndex)
     STATIC_ASSERT(GAME_PLAYERS == 2u)
 
     // 
-    if(CONTAINS_FLAG(m_aPlayer[1].GetStatus(), PLAYER_STATUS_DEAD)) return &m_aPlayer[0];
-    if(CONTAINS_FLAG(m_aPlayer[0].GetStatus(), PLAYER_STATUS_DEAD)) return &m_aPlayer[1];
+    if(HAS_FLAG(m_aPlayer[1].GetStatus(), PLAYER_STATUS_DEAD)) return &m_aPlayer[0];
+    if(HAS_FLAG(m_aPlayer[0].GetStatus(), PLAYER_STATUS_DEAD)) return &m_aPlayer[1];
 
     // 
     ASSERT(iIndex < GAME_PLAYERS)
@@ -664,21 +657,21 @@ coreUint32 cGame::CalcBonusSurvive(const coreUint32 iDamageTaken, const coreBool
 // handle intro animation
 coreBool cGame::__HandleIntro()
 {
-    if(CONTAINS_FLAG(m_iStatus, GAME_STATUS_LOADING))
+    if(HAS_FLAG(m_iStatus, GAME_STATUS_LOADING))
     {
         // do not start while game resources are still loading
         if(Core::Manager::Resource->IsLoading()) return false;
         REMOVE_FLAG(m_iStatus, GAME_STATUS_LOADING)
     }
 
-    if(CONTAINS_FLAG(m_iStatus, GAME_STATUS_INTRO))
+    if(HAS_FLAG(m_iStatus, GAME_STATUS_INTRO))
     {
         // 
         m_fTimeInOut.Update(1.0f);
 
         if(m_fTimeInOut >= GAME_INTRO_DURATION)
         {
-            ASSERT(!CONTAINS_FLAG(m_iStatus, GAME_STATUS_OUTRO))
+            ASSERT(!HAS_FLAG(m_iStatus, GAME_STATUS_OUTRO))
 
             // end intro and start actual game
             REMOVE_FLAG(m_iStatus, GAME_STATUS_INTRO)
@@ -738,7 +731,7 @@ coreBool cGame::__HandleIntro()
 // handle outro animation
 coreBool cGame::__HandleOutro()
 {
-    if(CONTAINS_FLAG(m_iStatus, GAME_STATUS_OUTRO))
+    if(HAS_FLAG(m_iStatus, GAME_STATUS_OUTRO))
     {
         // 
         m_fTimeInOut.Update(1.0f);
@@ -747,7 +740,7 @@ coreBool cGame::__HandleOutro()
         {
             // calculate new player position and rotation
             const coreFloat   fTime = MAX((i ? -0.16f : 0.0f) + m_fTimeInOut, 0.0f);
-            const coreFloat   fPos  = MIN(pPlayer->GetPosition().y + 90.0f * fTime * Core::System->GetTime(), 1000.0f);
+            const coreFloat   fPos  = MIN(pPlayer->GetPosition().y + 90.0f * fTime * TIME, 1000.0f);
             const coreVector2 vDir  = coreVector2::Direction(LERPS(0.0f, 2.0f*PI, 0.6f * fTime));
 
             // fly player animated out of the game field
@@ -766,7 +759,7 @@ coreBool cGame::__HandleOutro()
 // 
 void cGame::__HandleDefeat()
 {
-    if(CONTAINS_FLAG(m_iStatus, GAME_STATUS_PLAY))
+    if(HAS_FLAG(m_iStatus, GAME_STATUS_PLAY))
     {
         coreBool bAllDefeated = true;
 
@@ -776,7 +769,7 @@ void cGame::__HandleDefeat()
             cPlayer* pPlayer = &m_aPlayer[i];
 
             // 
-            const coreBool bDefeated = CONTAINS_FLAG(pPlayer->GetStatus(), PLAYER_STATUS_DEAD);
+            const coreBool bDefeated = HAS_FLAG(pPlayer->GetStatus(), PLAYER_STATUS_DEAD);
             bAllDefeated = bAllDefeated && bDefeated;
 
             // 
@@ -899,23 +892,27 @@ void cGame::__HandleCollisions()
 
         if(bFirstHit)
         {
-            if(CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DAMAGING))
+            if(HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DAMAGING))
+                        if(!HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
             {
                 // 
                 pPlayer->TakeDamage(15, ELEMENT_NEUTRAL, vIntersection.xy());
             }
 
-            if(!CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
+            if(!HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
             {
                 // 
                 const coreVector2 vDiff = pPlayer->GetOldPos() - pEnemy->GetPosition().xy();
-                pPlayer->ApplyForce(vDiff.Normalized() * 100.0f);
+                pPlayer->ApplyForce  (vDiff.Normalized() * 100.0f);
+                pPlayer->SetInterrupt(PLAYER_INTERRUPT);
 
                 // 
                 g_pSpecialEffects->CreateSplashColor(pPlayer->GetPosition(), 50.0f, 10u, coreVector3(1.0f,1.0f,1.0f));
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
             }
         }
+        
+        if(!HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST)) pPlayer->SetInterrupt(PLAYER_INTERRUPT);
     });
 
     // 
@@ -931,9 +928,12 @@ void cGame::__HandleCollisions()
 
         if(bFirstHit)
         {
-            // 
-            pPlayer->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy());
-            pBullet->Deactivate(true, vIntersection.xy());
+            if(!HAS_FLAG(pBullet->GetStatus(), BULLET_STATUS_GHOST))
+            {
+                // 
+                pPlayer->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy());
+                pBullet->Deactivate(true, vIntersection.xy());
+            }
         }
     });
 
@@ -944,18 +944,18 @@ void cGame::__HandleCollisions()
         if(!g_pForeground->IsVisiblePoint(vIntersection.xy())) return;
 
         // 
-        if(pEnemy->GetID() != cRepairEnemy::ID) m_pCurMission->CollEnemyBullet(pEnemy, pBullet, vIntersection, bFirstHit);
+        m_pCurMission->CollEnemyBullet(pEnemy, pBullet, vIntersection, bFirstHit);
 
         if(bFirstHit)
         {
-            if(!CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
+            if(!HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST) && !HAS_FLAG(pBullet->GetStatus(), BULLET_STATUS_GHOST))
             {
                 // 
                 const coreInt32 iTaken = pEnemy->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner()));
 
                 if(iTaken)
                 {
-                    if(CONTAINS_FLAG(pBullet->GetStatus(), BULLET_STATUS_PENETRATE))
+                    if(HAS_FLAG(pBullet->GetStatus(), BULLET_STATUS_PENETRATE))
                     {
                         // 
                         pBullet->SetDamage(pBullet->GetDamage() - iTaken);
@@ -974,7 +974,7 @@ void cGame::__HandleCollisions()
                     g_pSpecialEffects->RumblePlayer(d_cast<cPlayer*>(pBullet->GetOwner()), SPECIAL_RUMBLE_DEFAULT);
                 }
 
-                if(CONTAINS_FLAG(pBullet->GetStatus(), BULLET_STATUS_ACTIVE))
+                if(HAS_FLAG(pBullet->GetStatus(), BULLET_STATUS_ACTIVE))
                 {
                     // prevent an already killed but immortal enemy from reflecting bullets (in the same frame)
                     if(!pEnemy->ReachedDeath())
@@ -984,6 +984,41 @@ void cGame::__HandleCollisions()
                     }
                 }
             }
+        }
+    });
+
+    // 
+    if(m_pRepairEnemy) Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, m_pRepairEnemy, [](cBullet* OUTPUT pBullet, cEnemy* OUTPUT pEnemy, const coreVector3& vIntersection, const coreBool bFirstHit)
+    {
+        // 
+        if(!g_pForeground->IsVisiblePoint(vIntersection.xy())) return;
+
+        if(bFirstHit)
+        {
+
+                // 
+                const coreInt32 iTaken = pEnemy->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner()));
+
+                if(iTaken)
+                {
+                    if(HAS_FLAG(pBullet->GetStatus(), BULLET_STATUS_PENETRATE))
+                    {
+                        // 
+                        pBullet->SetDamage(pBullet->GetDamage() - iTaken);
+                        ASSERT(pBullet->GetDamage() >= 0)
+
+                        // 
+                        if(!pBullet->GetDamage()) pBullet->Deactivate(true, vIntersection.xy());
+                    }
+                    else
+                    {
+                        // 
+                        pBullet->Deactivate(true, vIntersection.xy());
+                    }
+
+                    // 
+                    g_pSpecialEffects->RumblePlayer(d_cast<cPlayer*>(pBullet->GetOwner()), SPECIAL_RUMBLE_DEFAULT);
+                }
         }
     });
 

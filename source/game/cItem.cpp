@@ -25,7 +25,7 @@ cItem::cItem()noexcept
 void cItem::Collect(cPlayer* OUTPUT pPlayer)
 {
     // 
-    if(!CONTAINS_FLAG(m_iStatus, ITEM_STATUS_ACTIVE)) return;
+    if(!HAS_FLAG(m_iStatus, ITEM_STATUS_ACTIVE)) return;
     REMOVE_FLAG(m_iStatus, ITEM_STATUS_ACTIVE)
     ADD_FLAG   (m_iStatus, ITEM_STATUS_COLLECTED)
 
@@ -40,7 +40,7 @@ void cItem::Collect(cPlayer* OUTPUT pPlayer)
 void cItem::Lose()
 {
     // 
-    if(!CONTAINS_FLAG(m_iStatus, ITEM_STATUS_ACTIVE)) return;
+    if(!HAS_FLAG(m_iStatus, ITEM_STATUS_ACTIVE)) return;
     REMOVE_FLAG(m_iStatus, ITEM_STATUS_ACTIVE)
     ADD_FLAG   (m_iStatus, ITEM_STATUS_LOST)
 
@@ -54,7 +54,7 @@ void cItem::Lose()
 void cItem::Destroy(const coreBool bAnimated)
 {
     // 
-    if(CONTAINS_FLAG(m_iStatus, ITEM_STATUS_FINISHED)) return;
+    if(HAS_FLAG(m_iStatus, ITEM_STATUS_FINISHED)) return;
     ADD_FLAG(m_iStatus, ITEM_STATUS_FINISHED)
 
     // 
@@ -91,7 +91,7 @@ void cItemManager::Move()
         cItem* pItem = (*it);
 
         // 
-        if(CONTAINS_FLAG(pItem->GetStatus(), ITEM_STATUS_FINISHED))
+        if(HAS_FLAG(pItem->GetStatus(), ITEM_STATUS_FINISHED))
         {
             SAFE_DELETE(pItem)
             DYN_REMOVE(it, m_apItemList)
@@ -187,7 +187,7 @@ void cFragmentItem::Render()
 void cFragmentItem::Move()
 {
     // 
-    if(CONTAINS_FLAG(m_iStatus, ITEM_STATUS_COLLECTED))
+    if(HAS_FLAG(m_iStatus, ITEM_STATUS_COLLECTED))
     {
         m_fChange.Update(2.0f);
         if(m_fChange >= 1.0f)

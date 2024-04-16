@@ -156,7 +156,7 @@ void cSpecialEffects::Move()
             if(pOwner) pLightning->SetPosition(pOwner->GetPosition());
 
             // 
-            pLightning->SetAlpha(pLightning->GetAlpha() - 4.0f * Core::System->GetTime());
+            pLightning->SetAlpha(pLightning->GetAlpha() - 4.0f * TIME);
 
             // 
             if(pLightning->GetAlpha() > 0.0f)
@@ -176,7 +176,7 @@ void cSpecialEffects::Move()
             const coreFloat fSpeed = oBlast.GetCollisionModifier().y;
 
             // 
-            oBlast.SetAlpha    (MAX(oBlast.GetAlpha() - fSpeed * Core::System->GetTime(), 0.0f));
+            oBlast.SetAlpha    (MAX(oBlast.GetAlpha() - fSpeed * TIME, 0.0f));
             oBlast.SetSize     (coreVector3(8.0f,8.0f,8.0f) * (fScale * (1.0f - oBlast.GetAlpha())));
             oBlast.SetTexOffset(coreVector2(0.0f,0.1f) * oBlast.GetAlpha());
             oBlast.Move();
@@ -576,9 +576,9 @@ void cSpecialEffects::CreateBlastSphere(const coreVector3& vPosition, const core
     oBlast.SetPosition         (vPosition);
     oBlast.SetSize             (coreVector3(0.0f,0.0f,0.0f));
     oBlast.SetDirection        (coreVector3(coreVector2::Rand(), 0.0f));
+    oBlast.SetCollisionModifier(coreVector3(fScale, fSpeed, 0.0f));
     oBlast.SetColor4           (coreVector4(vColor * 0.65f, 1.0f));
     oBlast.SetTexSize          (coreVector2(12.0f,12.0f));
-    oBlast.SetCollisionModifier(coreVector3(fScale, fSpeed, 0.0f));
 }
 
 void cSpecialEffects::CreateBlastCube(const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor)
@@ -594,9 +594,9 @@ void cSpecialEffects::CreateBlastCube(const coreVector3& vPosition, const coreVe
     oBlast.SetPosition         (vPosition);
     oBlast.SetSize             (coreVector3(0.0f,0.0f,0.0f));
     oBlast.SetDirection        (vDirection);
+    oBlast.SetCollisionModifier(coreVector3(fScale * 0.77f, fSpeed, 0.0f));
     oBlast.SetColor4           (coreVector4(vColor, 1.0f));
     oBlast.SetTexSize          (coreVector2(3.0f,1.2f));
-    oBlast.SetCollisionModifier(coreVector3(fScale * 0.77f, fSpeed, 0.0f));
 }
 
 void cSpecialEffects::CreateBlastTetra(const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor)
@@ -612,9 +612,9 @@ void cSpecialEffects::CreateBlastTetra(const coreVector3& vPosition, const coreV
     oBlast.SetPosition         (vPosition);
     oBlast.SetSize             (coreVector3(0.0f,0.0f,0.0f));
     oBlast.SetDirection        (vDirection);
+    oBlast.SetCollisionModifier(coreVector3(fScale * 0.69f, fSpeed, 0.0f));
     oBlast.SetColor4           (coreVector4(vColor, 1.0f));
     oBlast.SetTexSize          (coreVector2(3.0f,1.2f));
-    oBlast.SetCollisionModifier(coreVector3(fScale * 0.69f, fSpeed, 0.0f));
 }
 
 
@@ -784,7 +784,7 @@ void cSpecialEffects::MacroExplosionPhysicalDarkSmall(const coreVector3& vPositi
     // 
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_SMALL);
     this         ->CreateSplashDark (vPosition, SPECIAL_SPLASH_SMALL);
-    this         ->CreateSplashFire (vPosition, SPECIAL_EXPLOSION_SMALL, coreVector3(0.22f,0.22f,0.22f));
+    this         ->CreateSplashFire (vPosition, SPECIAL_EXPLOSION_SMALL, COLOR_FIRE_WHITE);
     this         ->PlaySound        (vPosition, 1.0f, SOUND_EXPLOSION_PHYSICAL_SMALL);
     this         ->ShakeScreen      (SPECIAL_SHAKE_SMALL);
 }
@@ -794,7 +794,7 @@ void cSpecialEffects::MacroExplosionPhysicalDarkBig(const coreVector3& vPosition
     // 
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_BIG);
     this         ->CreateSplashDark (vPosition, SPECIAL_SPLASH_BIG);
-    this         ->CreateSplashFire (vPosition, SPECIAL_EXPLOSION_BIG, coreVector3(0.22f,0.22f,0.22f));
+    this         ->CreateSplashFire (vPosition, SPECIAL_EXPLOSION_BIG, COLOR_FIRE_WHITE);
     this         ->PlaySound        (vPosition, 1.0f, SOUND_EXPLOSION_PHYSICAL_BIG);
     this         ->ShakeScreen      (SPECIAL_SHAKE_BIG);
 }
@@ -861,7 +861,7 @@ void cSpecialEffects::MacroDestructionDark(const cLodObject* pObject)
     // (# more particles than color) 
     g_pDistortion->CreateWave       (vPosition, 2.5f  * fPower, 3.0f);
     this         ->CreateBreakupDark(pObject,   52.0f * fPower, F_TO_UI(30.0f * RCP(fPower)));
-    this         ->CreateSplashFire (vPosition, 5.0f  * fPower, F_TO_UI(14.0f *    (fPower)), coreVector3(0.22f,0.22f,0.22f));
+    this         ->CreateSplashFire (vPosition, 5.0f  * fPower, F_TO_UI(14.0f *    (fPower)), COLOR_FIRE_WHITE);
     this         ->PlaySound        (vPosition, 1.0f, SOUND_EXPLOSION_PHYSICAL_SMALL);
     this         ->ShakeScreen      (SPECIAL_SHAKE_TINY * fPower);
 }

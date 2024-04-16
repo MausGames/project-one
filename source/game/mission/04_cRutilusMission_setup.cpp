@@ -99,17 +99,17 @@ void cRutilusMission::__SetupOwn()
 
         if(STAGE_CLEARED)
         {
-                 if(STAGE_SUB( 1u)) STAGE_RESSURECT(pSquad1,  0u,  5u)
-            else if(STAGE_SUB( 2u)) STAGE_RESSURECT(pSquad1,  6u,  7u)
-            else if(STAGE_SUB( 3u)) STAGE_RESSURECT(pSquad1,  8u,  9u)
-            else if(STAGE_SUB( 4u)) STAGE_RESSURECT(pSquad1, 10u, 11u)
-            else if(STAGE_SUB( 5u)) STAGE_RESSURECT(pSquad1, 12u, 13u)
-            else if(STAGE_SUB( 6u)) STAGE_RESSURECT(pSquad1, 14u, 15u)
-            else if(STAGE_SUB( 7u)) STAGE_RESSURECT(pSquad1, 16u, 21u)
-            else if(STAGE_SUB( 8u)) STAGE_RESSURECT(pSquad1, 22u, 22u)
-            else if(STAGE_SUB( 9u)) STAGE_RESSURECT(pSquad1, 23u, 23u)
-            else if(STAGE_SUB(10u)) STAGE_RESSURECT(pSquad1, 24u, 24u)
-            else if(STAGE_SUB(11u)) STAGE_RESSURECT(pSquad1, 25u, 25u)
+                 if(STAGE_SUB( 1u)) STAGE_RESURRECT(pSquad1,  0u,  5u)
+            else if(STAGE_SUB( 2u)) STAGE_RESURRECT(pSquad1,  6u,  7u)
+            else if(STAGE_SUB( 3u)) STAGE_RESURRECT(pSquad1,  8u,  9u)
+            else if(STAGE_SUB( 4u)) STAGE_RESURRECT(pSquad1, 10u, 11u)
+            else if(STAGE_SUB( 5u)) STAGE_RESURRECT(pSquad1, 12u, 13u)
+            else if(STAGE_SUB( 6u)) STAGE_RESURRECT(pSquad1, 14u, 15u)
+            else if(STAGE_SUB( 7u)) STAGE_RESURRECT(pSquad1, 16u, 21u)
+            else if(STAGE_SUB( 8u)) STAGE_RESURRECT(pSquad1, 22u, 22u)
+            else if(STAGE_SUB( 9u)) STAGE_RESURRECT(pSquad1, 23u, 23u)
+            else if(STAGE_SUB(10u)) STAGE_RESURRECT(pSquad1, 24u, 24u)
+            else if(STAGE_SUB(11u)) STAGE_RESURRECT(pSquad1, 25u, 25u)
             else if(STAGE_SUB(12u)) STAGE_DELAY_START
 
             iTransitionState = 0u;
@@ -127,7 +127,7 @@ void cRutilusMission::__SetupOwn()
 
         const coreBool bVertical = false;
 
-        fTransitionTime += 1.0f * Core::System->GetTime();
+        fTransitionTime += 1.0f * TIME;
 
         if(m_iStageSub == 1u)
         {
@@ -365,22 +365,22 @@ void cRutilusMission::__SetupOwn()
 
         if(STAGE_CLEARED)
         {
-                 if(STAGE_SUB( 1u)) STAGE_RESSURECT(pSquad1,  0u,  3u)
-            else if(STAGE_SUB( 2u)) STAGE_RESSURECT(pSquad1,  4u,  7u)
-            else if(STAGE_SUB( 3u)) STAGE_RESSURECT(pSquad1,  8u, 11u)
-            else if(STAGE_SUB( 4u)) STAGE_RESSURECT(pSquad1, 12u, 15u)
-            else if(STAGE_SUB( 5u)) STAGE_RESSURECT(pSquad1, 16u, 19u)
-            else if(STAGE_SUB( 6u)) STAGE_RESSURECT(pSquad1, 20u, 23u)
-            else if(STAGE_SUB( 7u)) STAGE_RESSURECT(pSquad1, 24u, 27u)
-            else if(STAGE_SUB( 8u)) STAGE_RESSURECT(pSquad1, 28u, 31u)
-            else if(STAGE_SUB( 9u)) STAGE_RESSURECT(pSquad1, 32u, 35u)
-            else if(STAGE_SUB(10u)) STAGE_RESSURECT(pSquad1, 36u, 39u)
-            else if(STAGE_SUB(11u)) STAGE_RESSURECT(pSquad1, 40u, 43u)
-            else if(STAGE_SUB(12u)) STAGE_RESSURECT(pSquad1, 44u, 51u)
-            else if(STAGE_SUB(13u)) STAGE_RESSURECT(pSquad1, 52u, 55u)
-            else if(STAGE_SUB(14u)) STAGE_RESSURECT(pSquad1, 56u, 59u)
-            else if(STAGE_SUB(15u)) STAGE_RESSURECT(pSquad1, 60u, 63u)
-            else if(STAGE_SUB(16u)) STAGE_RESSURECT(pSquad1, 60u, 63u)
+                 if(STAGE_SUB( 1u)) STAGE_RESURRECT(pSquad1,  0u,  3u)
+            else if(STAGE_SUB( 2u)) STAGE_RESURRECT(pSquad1,  4u,  7u)
+            else if(STAGE_SUB( 3u)) STAGE_RESURRECT(pSquad1,  8u, 11u)
+            else if(STAGE_SUB( 4u)) STAGE_RESURRECT(pSquad1, 12u, 15u)
+            else if(STAGE_SUB( 5u)) STAGE_RESURRECT(pSquad1, 16u, 19u)
+            else if(STAGE_SUB( 6u)) STAGE_RESURRECT(pSquad1, 20u, 23u)
+            else if(STAGE_SUB( 7u)) STAGE_RESURRECT(pSquad1, 24u, 27u)
+            else if(STAGE_SUB( 8u)) STAGE_RESURRECT(pSquad1, 28u, 31u)
+            else if(STAGE_SUB( 9u)) STAGE_RESURRECT(pSquad1, 32u, 35u)
+            else if(STAGE_SUB(10u)) STAGE_RESURRECT(pSquad1, 36u, 39u)
+            else if(STAGE_SUB(11u)) STAGE_RESURRECT(pSquad1, 40u, 43u)
+            else if(STAGE_SUB(12u)) STAGE_RESURRECT(pSquad1, 44u, 51u)
+            else if(STAGE_SUB(13u)) STAGE_RESURRECT(pSquad1, 52u, 55u)
+            else if(STAGE_SUB(14u)) STAGE_RESURRECT(pSquad1, 56u, 59u)
+            else if(STAGE_SUB(15u)) STAGE_RESURRECT(pSquad1, 60u, 63u)
+            else if(STAGE_SUB(16u)) STAGE_RESURRECT(pSquad1, 60u, 63u)
             else if(STAGE_SUB(17u)) STAGE_DELAY_START
 
             iTransitionState = 0u;
@@ -400,7 +400,7 @@ void cRutilusMission::__SetupOwn()
         {
             if(iTransitionState == 0u)
             {
-                pHelper->SetPosition(coreVector3(LERPB(1.08f, -1.2f, MAX(1.0 - fTransitionTime, 0.0f)) * FOREGROUND_AREA.x, 0.0f, 0.0f));
+                pHelper->SetPosition(coreVector3(LERPB(1.08f, -1.2f, MAX(1.0f - fTransitionTime, 0.0f)) * FOREGROUND_AREA.x, 0.0f, 0.0f));
 
                 if(fTransitionTime >= 1.0f)
                 {
@@ -412,7 +412,7 @@ void cRutilusMission::__SetupOwn()
             }
             else if(iTransitionState == 1u)
             {
-                fRotationValue = LERPB(0.25f*PI, 0.0f*PI, CLAMP(1.0 - (fTransitionTime - 1.5f) / 1.5f, 0.0f, 1.0f));
+                fRotationValue = LERPB(0.25f*PI, 0.0f*PI, CLAMP(1.0f - (fTransitionTime - 1.5f) / 1.5f, 0.0f, 1.0f));
 
                 if(fTransitionTime >= 3.0f)
                 {
@@ -460,7 +460,7 @@ void cRutilusMission::__SetupOwn()
                 fRotationTo    = (fRotationValue < -1.0f*PI) ? (-2.0f*PI) : (0.0f*PI);
             }
 
-            const coreFloat fTime = MAX(1.0 - fTransitionTime, 0.0f);
+            const coreFloat fTime = MAX(1.0f - fTransitionTime, 0.0f);
 
             pHelper->SetPosition(coreVector3(LERPB(-1.2f, 1.08f, fTime) * FOREGROUND_AREA.x, 0.0f, 0.0f));
 
@@ -579,25 +579,25 @@ void cRutilusMission::__SetupOwn()
 
         if(STAGE_CLEARED)
         {
-                 if(STAGE_SUB( 1u)) STAGE_RESSURECT(pSquad1,  0u,  3u)
-            else if(STAGE_SUB( 2u)) STAGE_RESSURECT(pSquad1,  4u,  7u)
-            else if(STAGE_SUB( 3u)) STAGE_RESSURECT(pSquad1,  8u, 11u)
-            else if(STAGE_SUB( 4u)) STAGE_RESSURECT(pSquad1, 12u, 15u)
-            else if(STAGE_SUB( 5u)) STAGE_RESSURECT(pSquad1, 16u, 19u)
-            else if(STAGE_SUB( 6u)) STAGE_RESSURECT(pSquad1, 20u, 23u)
-            else if(STAGE_SUB( 7u)) STAGE_RESSURECT(pSquad1, 24u, 27u)
-            else if(STAGE_SUB( 8u)) STAGE_RESSURECT(pSquad1, 28u, 29u)
-            else if(STAGE_SUB( 9u)) STAGE_RESSURECT(pSquad1, 30u, 31u)
-            else if(STAGE_SUB(10u)) STAGE_RESSURECT(pSquad1, 32u, 33u)
-            else if(STAGE_SUB(11u)) STAGE_RESSURECT(pSquad1, 34u, 35u)
-            else if(STAGE_SUB(12u)) STAGE_RESSURECT(pSquad1, 36u, 37u)
-            else if(STAGE_SUB(13u)) STAGE_RESSURECT(pSquad1, 38u, 39u)
-            else if(STAGE_SUB(14u)) STAGE_RESSURECT(pSquad1, 40u, 41u)
-            else if(STAGE_SUB(15u)) STAGE_RESSURECT(pSquad1, 42u, 43u)
-            else if(STAGE_SUB(16u)) STAGE_RESSURECT(pSquad1, 44u, 45u)
-            else if(STAGE_SUB(17u)) STAGE_RESSURECT(pSquad1, 46u, 47u)
-            else if(STAGE_SUB(18u)) STAGE_RESSURECT(pSquad1, 48u, 49u)
-            else if(STAGE_SUB(19u)) STAGE_RESSURECT(pSquad1, 50u, 51u)
+                 if(STAGE_SUB( 1u)) STAGE_RESURRECT(pSquad1,  0u,  3u)
+            else if(STAGE_SUB( 2u)) STAGE_RESURRECT(pSquad1,  4u,  7u)
+            else if(STAGE_SUB( 3u)) STAGE_RESURRECT(pSquad1,  8u, 11u)
+            else if(STAGE_SUB( 4u)) STAGE_RESURRECT(pSquad1, 12u, 15u)
+            else if(STAGE_SUB( 5u)) STAGE_RESURRECT(pSquad1, 16u, 19u)
+            else if(STAGE_SUB( 6u)) STAGE_RESURRECT(pSquad1, 20u, 23u)
+            else if(STAGE_SUB( 7u)) STAGE_RESURRECT(pSquad1, 24u, 27u)
+            else if(STAGE_SUB( 8u)) STAGE_RESURRECT(pSquad1, 28u, 29u)
+            else if(STAGE_SUB( 9u)) STAGE_RESURRECT(pSquad1, 30u, 31u)
+            else if(STAGE_SUB(10u)) STAGE_RESURRECT(pSquad1, 32u, 33u)
+            else if(STAGE_SUB(11u)) STAGE_RESURRECT(pSquad1, 34u, 35u)
+            else if(STAGE_SUB(12u)) STAGE_RESURRECT(pSquad1, 36u, 37u)
+            else if(STAGE_SUB(13u)) STAGE_RESURRECT(pSquad1, 38u, 39u)
+            else if(STAGE_SUB(14u)) STAGE_RESURRECT(pSquad1, 40u, 41u)
+            else if(STAGE_SUB(15u)) STAGE_RESURRECT(pSquad1, 42u, 43u)
+            else if(STAGE_SUB(16u)) STAGE_RESURRECT(pSquad1, 44u, 45u)
+            else if(STAGE_SUB(17u)) STAGE_RESURRECT(pSquad1, 46u, 47u)
+            else if(STAGE_SUB(18u)) STAGE_RESURRECT(pSquad1, 48u, 49u)
+            else if(STAGE_SUB(19u)) STAGE_RESURRECT(pSquad1, 50u, 51u)
 
             iTransitionState = 0u;
             fTransitionTime  = 0.0f;
@@ -609,7 +609,7 @@ void cRutilusMission::__SetupOwn()
             }
         }
 
-        STAGE_FOREACH_PLAYER(pPlayer, i)   // before plate changes, positions may not be updated yet
+        STAGE_FOREACH_PLAYER(pPlayer, i)   // before plates change, positions may not be updated yet
         {
             pPlayer->RemoveStatus(PLAYER_STATUS_NO_INPUT_TURN);
 
@@ -619,12 +619,15 @@ void cRutilusMission::__SetupOwn()
 
                 for(coreUintW j = 0u; j < RUTILUS_PLATES; ++j)
                 {
-                    const coreVector2 vSize = m_aPlateRaw[j].GetCollisionRange().xy();
-                    const coreVector2 vDiff = MapToAxis(m_aPlateRaw[j].GetPosition().xy() - vPos, m_aPlateRaw[j].GetDirection().xy());
+                    coreObject3D& oPlate = m_aPlateRaw[i];
+                    if(!oPlate.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+                    const coreVector2 vSize = oPlate.GetCollisionRange().xy();
+                    const coreVector2 vDiff = MapToAxis(oPlate.GetPosition().xy() - vPos, oPlate.GetDirection().xy());
 
                     if((ABS(vDiff.x) < vSize.x) && (ABS(vDiff.y) < vSize.y))
                     {
-                        pPlayer->SetDirection(m_aPlateRaw[j].GetDirection());
+                        pPlayer->SetDirection(oPlate.GetDirection());
                         pPlayer->AddStatus   (PLAYER_STATUS_NO_INPUT_TURN);
                         break;
                     }
@@ -803,10 +806,279 @@ void cRutilusMission::__SetupOwn()
     });
 
     // ################################################################
-    // <REPLACE>                                                       
+    // slowdown areas
+    // bubble works as shield to hide from attacks
+    // side-moving sphere works with continue attack, but not with wave-attack, front-moving sphere never works, round-moving sphere not sure
+    // first group shows the speed-reduction without attacks, next one with attacks
+    // enemies should attack from the opposite side in coop, so target-player can hide behind bubble
+    // NOTE: this stage was made while doing "Another Side" in parallel, so it might need more exploration
+    // TODO: effekt um verlangsamte objekte herum (schein)
+    // TODO: reduce bullet-animation + dark-animation speed
+    // TODO: weapon-shoot-speed, enemy-shoot-speed (wenn nötig)
+    // TODO: make a sub-stage with inverted speed and enemies scattered around (1.5f, 0.5f) (but how to put player into the bubble ? do I even want to if 0.5 is outside ?)
+    // TODO: multiple bubbles ? (2) in circles
+    // TODO: multiple smaller bubbles are created from center (like bubbles) and move around slightly
+    // TODO: change intro helper movement
+    // TODO: shift time-bubble to the side on disable ?
     STAGE_MAIN({TAKE_ALWAYS, 6u})
     {
+        constexpr coreUintW iRegisterSize = GAME_PLAYERS + 1u;
+
+        STAGE_ADD_PATH(pPath1)
+        {
+            pPath1->Reserve(2u);
+            pPath1->AddNode(coreVector2(0.0f,1.2f), coreVector2(0.0f,-1.0f));
+            pPath1->AddStop(coreVector2(0.0f,0.9f), coreVector2(0.0f,-1.0f));
+            pPath1->Refine();
+        });
+
+        STAGE_ADD_SQUAD(pSquad1, cWarriorEnemy, 19u)
+        {
+            STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
+            {
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
+                pEnemy->Configure(30, COLOR_SHIP_MAGENTA);
+
+                if(i < 4u)
+                {
+                    pEnemy->SetPosition (coreVector3((I_TO_F(i) - 1.5f) * 0.2f, 1.3f, 0.0f) * FOREGROUND_AREA3);
+                    pEnemy->SetDirection(coreVector3(0.0f,-1.0f,0.0f));
+                }
+                else if(i < 10u)
+                {
+                    const coreVector2 vDir = coreVector2::Direction(I_TO_F((i - 4u) % 3u) * ((4.0f/6.0f)*PI) - ((1.0f/6.0f)*PI)) * coreVector2((i < 7u) ? -1.0f : 1.0f, 1.0f);
+
+                    pEnemy->SetPosition (coreVector3(vDir *  1.4f, 0.0f) * FOREGROUND_AREA3);
+                    pEnemy->SetDirection(coreVector3(vDir * -1.0f, 0.0f));
+                }
+            });
+        });
+
+        STAGE_GET_START(2u * iRegisterSize + 4u)
+            STAGE_GET_UINT_ARRAY (aiRegisterID,    iRegisterSize)
+            STAGE_GET_FLOAT_ARRAY(aiRegisterSpeed, iRegisterSize)
+            STAGE_GET_UINT       (iTransitionState)
+            STAGE_GET_FLOAT      (fTransitionTime)
+            STAGE_GET_FLOAT      (fAreaMove)
+            STAGE_GET_FLOAT      (fAreaLerp)
+        STAGE_GET_END
+
+        if(STAGE_CLEARED)
+        {
+                 if(STAGE_SUB( 1u)) STAGE_RESURRECT(pSquad1,  0u,  3u)
+            else if(STAGE_SUB( 2u)) STAGE_RESURRECT(pSquad1,  4u,  4u)
+            else if(STAGE_SUB( 3u)) STAGE_RESURRECT(pSquad1,  5u,  5u)
+            else if(STAGE_SUB( 4u)) STAGE_RESURRECT(pSquad1,  6u,  6u)
+            else if(STAGE_SUB( 5u)) STAGE_RESURRECT(pSquad1,  7u,  7u)
+            else if(STAGE_SUB( 6u)) STAGE_RESURRECT(pSquad1,  8u,  8u)
+            else if(STAGE_SUB( 7u)) STAGE_RESURRECT(pSquad1,  9u,  9u)
+            else if(STAGE_SUB( 8u)) STAGE_RESURRECT(pSquad1, 10u, 10u)
+            else if(STAGE_SUB( 9u)) STAGE_RESURRECT(pSquad1, 11u, 11u)
+            else if(STAGE_SUB(10u)) STAGE_RESURRECT(pSquad1, 12u, 12u)
+            else if(STAGE_SUB(11u)) STAGE_RESURRECT(pSquad1, 13u, 14u)
+            else if(STAGE_SUB(12u)) STAGE_RESURRECT(pSquad1, 15u, 15u)
+            else if(STAGE_SUB(13u)) STAGE_RESURRECT(pSquad1, 16u, 16u)
+            else if(STAGE_SUB(14u)) STAGE_RESURRECT(pSquad1, 17u, 17u)
+            else if(STAGE_SUB(15u)) STAGE_RESURRECT(pSquad1, 18u, 18u)
+            else if(STAGE_SUB(16u)) STAGE_DELAY_START
+
+            iTransitionState = 0u;
+            fTransitionTime  = 0.0f;
+        }
+
+        cHelper* pHelper = g_pGame->GetHelper(ELEMENT_PURPLE);
+
+        if(STAGE_BEGINNING)
+        {
+            pHelper->Resurrect();
+        }
+
+        fTransitionTime += 1.0f * TIME;
+
+        if(m_iStageSub == 1u)
+        {
+            if(iTransitionState == 0u)
+            {
+                const coreFloat   fTime = MIN(fTransitionTime * 0.5f, 1.0f);
+                const coreVector2 vDir  = coreVector2::Direction(LERP(1.5f*PI, -0.5f*PI, fTime));
+
+                pHelper->SetPosition(coreVector3(vDir * LERP(-1.2f, 0.0f, fTime) * FOREGROUND_AREA.x, 0.0f));
+
+                if(fTransitionTime >= 2.0f)
+                {
+                    iTransitionState += 1u;
+
+                    this->EnableArea();
+                    g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_PURPLE);
+                }
+            }
+        }
+        else if((m_iStageSub >= 8u) && (m_iStageSub < 16u))
+        {
+            fAreaMove += 1.0f * TIME;
+
+            if(m_iStageSub < 12u) fAreaLerp = MIN(fAreaLerp + 0.5f * TIME, 1.0f);
+                             else fAreaLerp = MAX(fAreaLerp - 0.5f * TIME, 0.0f);
+
+            pHelper->SetPosition(coreVector3(SIN(fAreaMove) * 0.5f * FOREGROUND_AREA.x * LERPH3(0.0f, 1.0f, fAreaLerp), 0.0f, 0.0f));
+        }
+        else if(m_iStageSub == 16u)
+        {
+            if(iTransitionState == 0u)
+            {
+                iTransitionState += 1u;
+
+                g_pGame->GetBulletManagerEnemy()->ClearBullets(true);
+
+                this->DisableArea(true);
+                g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_TINY, COLOR_ENERGY_PURPLE);
+            }
+
+            if(fTransitionTime >= 0.6f)
+            {
+                pHelper->Kill(false);
+
+                g_pSpecialEffects->MacroExplosionColorBig(pHelper->GetPosition(), COLOR_ENERGY_PURPLE);
+
+                STAGE_DELAY_END
+            }
+        }
+
+        m_aArea[0].SetPosition(pHelper->GetPosition());
+
+        const coreVector2 vTestPos    = m_aArea[0].GetPosition().xy();
+        const coreFloat   fTestFromSq = POW2(m_aArea[1].GetSize().x) - 100.0f;   // inner sphere
+        const coreFloat   fTestToSq   = POW2(m_aArea[1].GetSize().x) +  50.0f;
+        const coreFloat   fSpeedSlow  = 0.2f;
+        const coreFloat   fSpeedFast  = 1.0f;
+
+        const auto nCalcSpeed = [&](const coreVector2 vPosition)
+        {
+            const coreVector2 vDiff = vPosition - vTestPos;
+            return LERP(fSpeedSlow, fSpeedFast, STEPH3(fTestFromSq, fTestToSq, vDiff.LengthSq()));
+        };
+
+        if(m_aArea[0].IsEnabled(CORE_OBJECT_ENABLE_ALL))
+        {
+            STAGE_FOREACH_PLAYER(pPlayer, i)
+            {
+                pPlayer->SetSpeed(nCalcSpeed(pPlayer->GetPosition().xy()));
+            });
+
+            const auto nBulletSlowFunc = [&](cBullet* OUTPUT pBullet)
+            {
+                coreFloat fBase = 0.0f;
+                for(coreUintW i = 0u; i < iRegisterSize; ++i)
+                {
+                    if(aiRegisterID[i] == 0u)
+                    {
+                        aiRegisterID   [i] = pBullet->GetID();
+                        aiRegisterSpeed[i] = pBullet->GetSpeed();
+                    }
+                    if(aiRegisterID[i] == coreUint32(pBullet->GetID()))
+                    {
+                        fBase = aiRegisterSpeed[i];
+                        break;
+                    }
+                }
+                ASSERT(fBase)
+
+                pBullet->SetSpeed(fBase * nCalcSpeed(pBullet->GetPosition().xy()));
+            };
+            g_pGame->GetBulletManagerPlayer()->ForEachBullet(nBulletSlowFunc);
+            g_pGame->GetBulletManagerEnemy ()->ForEachBullet(nBulletSlowFunc);
+        }
+
+        STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
+        {
+            STAGE_LIFETIME(pEnemy, 1.0f, (i < 4u) ? 2.0f : 0.0f)
+
+            if(i < 10u)
+            {
+                if(STAGE_LIFETIME_AFTER(0.0f)) pEnemy->DefaultMoveForward(pEnemy->GetDirection().xy(), 25.0f * nCalcSpeed(pEnemy->GetPosition().xy()));
+
+                coreVector2       vCurPos = pEnemy->GetPosition ().xy();
+                const coreVector2 vCurDir = pEnemy->GetDirection().xy();
+
+                     if((vCurPos.x < -FOREGROUND_AREA.x * 1.2f) && (vCurDir.x < 0.0f)) vCurPos.x =  ABS(vCurPos.x);
+                else if((vCurPos.x >  FOREGROUND_AREA.x * 1.2f) && (vCurDir.x > 0.0f)) vCurPos.x = -ABS(vCurPos.x);
+                     if((vCurPos.y < -FOREGROUND_AREA.y * 1.2f) && (vCurDir.y < 0.0f)) vCurPos.y =  ABS(vCurPos.y);
+                else if((vCurPos.y >  FOREGROUND_AREA.y * 1.2f) && (vCurDir.y > 0.0f)) vCurPos.y = -ABS(vCurPos.y);
+
+                pEnemy->SetPosition(coreVector3(vCurPos, 0.0f));
+            }
+            else if(i < 15u)
+            {
+                coreFloat fSide;
+                switch(i - 10u)
+                {
+                default: ASSERT(false)
+                case 0u: fSide =  0.00f; break;
+                case 1u: fSide = -0.75f; break;
+                case 2u: fSide =  0.75f; break;
+                case 3u: fSide = -0.25f; break;
+                case 4u: fSide =  0.25f; break;
+                }
+                const coreVector2 vFactor = coreVector2(1.0f,  1.0f);
+                const coreVector2 vOffset = coreVector2(fSide, 0.0f);
+
+                pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
+            }
+            else
+            {
+                const coreVector2 vFactor = coreVector2(1.0f,1.0f);
+                const coreVector2 vOffset = coreVector2(0.0f,0.0f);
+
+                pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
+
+                     if(i == 15u) {}
+                else if(i == 16u) pEnemy->Rotate90 ();
+                else if(i == 17u) pEnemy->Rotate180();
+                else if(i == 18u) pEnemy->Rotate270();
+            }
+
+            if(i < 4u)
+            {
+            }
+            else if(i < 15u)
+            {
+                if(STAGE_TICK_LIFETIME(10.0f, 0.0f))
+                {
+                    const coreVector2 vPos = pEnemy->GetPosition().xy();
+                    const coreVector2 vDir = pEnemy->AimAtPlayerSideRev().Normalized();
+
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.4f, pEnemy, vPos, vDir)->ChangeSize(1.4f);
+                }
+            }
+            else
+            {
+                if(STAGE_TICK_LIFETIME(0.9f, 0.0f))
+                {
+                    const coreVector2 vPos  = pEnemy->GetPosition().xy();
+                    const coreFloat   fBase = pEnemy->AimAtPlayerDual((i < 17u) ? 0u : 1u).Angle();
+
+                    for(coreUintW j = 30u; j--; )
+                    {
+                        const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD((I_TO_F(j) - 14.5f) * 4.0f) + fBase);
+
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.4f, pEnemy, vPos, vDir)->ChangeSize(1.4f);
+                    }
+                }
+            }
+        });
+
         STAGE_WAVE("EINDUNDFÜNFZIG", {20.0f, 30.0f, 40.0f, 50.0f})
+    });
+
+    // ################################################################
+    // reset all areas
+    STAGE_MAIN({TAKE_ALWAYS, 5u})
+    {
+        this->DisableArea(false);
+
+        g_pGame->GetHelper(ELEMENT_PURPLE)->Kill(false);
+
+        STAGE_FINISH_NOW
     });
 
     // ################################################################
@@ -1028,7 +1300,7 @@ void cRutilusMission::__SetupOwn()
                     coreVector2 vCurPos = pEnemy->GetPosition().xy();
                     coreVector2 vCurDir = avMove[i];
 
-                    vCurPos += vCurDir * ((bBig ? 50.0f : (bMedium ? 20.0f : 25.0f)) * Core::System->GetTime());
+                    vCurPos += vCurDir * ((bBig ? 50.0f : (bMedium ? 20.0f : 25.0f)) * TIME);
 
                     if(!bBig)
                     {
@@ -1052,9 +1324,9 @@ void cRutilusMission::__SetupOwn()
             const cEnemy*   pParent = pSquad1->GetEnemy(iIndex);
             coreVector2&    vMove   = avMove[iIndex];
 
-            if(CONTAINS_FLAG(pParent->GetStatus(), ENEMY_STATUS_DEAD))
+            if(HAS_FLAG(pParent->GetStatus(), ENEMY_STATUS_DEAD))
             {
-                if(CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
+                if(HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
                 {
                     pEnemy->RemoveStatus(ENEMY_STATUS_GHOST);
 
@@ -1069,7 +1341,7 @@ void cRutilusMission::__SetupOwn()
                     coreVector2 vCurPos = pEnemy->GetPosition().xy();
                     coreVector2 vCurDir = vMove;
 
-                    vCurPos += vCurDir * (25.0f * Core::System->GetTime());
+                    vCurPos += vCurDir * (25.0f * TIME);
 
                          if((vCurPos.x < -FOREGROUND_AREA.x * 1.0f) && (vCurDir.x < 0.0f)) vCurDir.x =  ABS(vCurDir.x);
                     else if((vCurPos.x >  FOREGROUND_AREA.x * 1.0f) && (vCurDir.x > 0.0f)) vCurDir.x = -ABS(vCurDir.x);
@@ -1080,7 +1352,7 @@ void cRutilusMission::__SetupOwn()
                     vMove = vCurDir;
                 }
 
-                afAddRotation[i] = FMOD(afAddRotation[i] - 2.4f * Core::System->GetTime(), -2.0f*PI);
+                afAddRotation[i] = FMOD(afAddRotation[i] - 2.4f * TIME, -2.0f*PI);
 
                 pEnemy->SetDirection(coreVector3(coreVector2::Direction((afAddRotation[i] + I_TO_F(iIndex)) * 1.0f), 0.0f));
 
@@ -1116,6 +1388,7 @@ void cRutilusMission::__SetupOwn()
     // TODO: distortion for waves ?
     // TODO: partikel die in die mitte gezogen werden, mit zusätzlichen waves
     // TODO: only half of the bullet wave is created for the line enemies, also not the full bullet-tripplet
+    // TODO: use ParaLerp for disappearance
     STAGE_MAIN({TAKE_ALWAYS, 13u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -1150,11 +1423,11 @@ void cRutilusMission::__SetupOwn()
 
         if(STAGE_CLEARED)
         {
-                 if(STAGE_SUB(1u)) STAGE_RESSURECT(pSquad1,  0u,  5u)
-            else if(STAGE_SUB(2u)) STAGE_RESSURECT(pSquad1,  6u, 11u)
-            else if(STAGE_SUB(3u)) STAGE_RESSURECT(pSquad1, 12u, 19u)
-            else if(STAGE_SUB(4u)) STAGE_RESSURECT(pSquad1, 20u, 27u)
-            else if(STAGE_SUB(5u)) STAGE_RESSURECT(pSquad1, 28u, 35u)
+                 if(STAGE_SUB(1u)) STAGE_RESURRECT(pSquad1,  0u,  5u)
+            else if(STAGE_SUB(2u)) STAGE_RESURRECT(pSquad1,  6u, 11u)
+            else if(STAGE_SUB(3u)) STAGE_RESURRECT(pSquad1, 12u, 19u)
+            else if(STAGE_SUB(4u)) STAGE_RESURRECT(pSquad1, 20u, 27u)
+            else if(STAGE_SUB(5u)) STAGE_RESURRECT(pSquad1, 28u, 35u)
             else if(STAGE_SUB(6u)) STAGE_DELAY_START
 
             iTransitionState = 0u;
@@ -1168,13 +1441,13 @@ void cRutilusMission::__SetupOwn()
             pHelper->Resurrect();
         }
 
-        fTransitionTime += 1.0f * Core::System->GetTime();
+        fTransitionTime += 1.0f * TIME;
 
         if(m_iStageSub == 1u)
         {
             if(iTransitionState == 0u)
             {
-                pHelper->SetPosition(coreVector3(0.0f, LERPB(-1.2f, 0.0f, fTransitionTime) * FOREGROUND_AREA.y, 0.0f));
+                pHelper->SetPosition(coreVector3(0.0f, LERPB(-1.2f, 0.0f, MIN(fTransitionTime, 1.0f)) * FOREGROUND_AREA.y, 0.0f));
 
                 if(fTransitionTime >= 1.0f)
                 {
@@ -1199,7 +1472,7 @@ void cRutilusMission::__SetupOwn()
         {
             if(iTransitionState == 0u)
             {
-                pHelper->SetPosition(coreVector3(0.0f, LERPB(0.0f, -0.95f, fTransitionTime) * FOREGROUND_AREA.y, 0.0f));
+                pHelper->SetPosition(coreVector3(0.0f, LERPB(0.0f, -0.95f, MIN(fTransitionTime, 1.0f)) * FOREGROUND_AREA.y, 0.0f));
 
                 if(fTransitionTime >= 1.0f)
                 {
@@ -1231,7 +1504,7 @@ void cRutilusMission::__SetupOwn()
             }
         }
 
-        if(CONTAINS_BIT(m_iWaveActive, RUTILUS_WAVES))
+        if(HAS_BIT(m_iWaveActive, RUTILUS_WAVES))
         {
             const coreFloat fSign = ((m_iStageSub >= 3u) ? 1.0f : -1.0f);
 

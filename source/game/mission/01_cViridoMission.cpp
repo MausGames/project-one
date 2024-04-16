@@ -408,7 +408,6 @@ void cViridoMission::DisableShadow(const coreUintW iIndex, const coreBool bAnima
 void cViridoMission::__RenderOwnUnder()
 {
     DEPTH_PUSH
-    DEPTH_PUSH   // TODO: first push causes outline-overdraw artifacts, precision too low on the first level, can it be handled on outline(-shader) ?
 
     glDepthMask(false);
     {
@@ -474,7 +473,7 @@ void cViridoMission::__MoveOwnBefore()
 
         // 
         coreVector2       vNewDir = pBall->GetDirection().xy();
-        const coreVector2 vNewPos = pBall->GetPosition ().xy() + vNewDir * FOREGROUND_AREA * (CONTAINS_BIT(m_iStickyState, 1u) ? 0.0f : (VIRIDO_BALL_SPEED * Core::System->GetTime()));
+        const coreVector2 vNewPos = pBall->GetPosition ().xy() + vNewDir * FOREGROUND_AREA * (HAS_BIT(m_iStickyState, 1u) ? 0.0f : (VIRIDO_BALL_SPEED * TIME));
 
         // restrict movement to the foreground area
              if((vNewPos.x < -FOREGROUND_AREA.x) && (vNewDir.x < 0.0f)) {cViridoMission::__BounceEffect(vNewPos + coreVector2(-vSize.x, 0.0f)); vNewDir.x =  ABS(vNewDir.x); if(!i) ADD_BIT(m_iBounceState, 7u)}
@@ -492,7 +491,7 @@ void cViridoMission::__MoveOwnBefore()
             coreObject3D* pTrail = (*m_BallTrail.List())[i*VIRIDO_TRAILS + j];
 
             // 
-            pTrail->SetAlpha(pTrail->GetAlpha() - 2.0f * Core::System->GetTime());
+            pTrail->SetAlpha(pTrail->GetAlpha() - 2.0f * TIME);
             if(pTrail->GetAlpha() < 0.0f)
             {
                 // 
@@ -539,8 +538,8 @@ void cViridoMission::__MoveOwnAfter()
         }
 
         // 
-        if(pOwner) oPaddle.SetAlpha(MIN(oPaddle.GetAlpha() + 5.0f*Core::System->GetTime(), 1.0f));
-              else oPaddle.SetAlpha(MAX(oPaddle.GetAlpha() - 5.0f*Core::System->GetTime(), 0.0f));
+        if(pOwner) oPaddle.SetAlpha(MIN(oPaddle.GetAlpha() + 5.0f*TIME, 1.0f));
+              else oPaddle.SetAlpha(MAX(oPaddle.GetAlpha() - 5.0f*TIME, 0.0f));
 
         // 
         if(!oPaddle.GetAlpha()) this->DisablePaddle(i, false);
@@ -571,8 +570,8 @@ void cViridoMission::__MoveOwnAfter()
         }
 
         // 
-        if(pOwner) oBarrier.SetAlpha(MIN(oBarrier.GetAlpha() + 5.0f*Core::System->GetTime(), 1.0f));
-              else oBarrier.SetAlpha(MAX(oBarrier.GetAlpha() - 5.0f*Core::System->GetTime(), 0.0f));
+        if(pOwner) oBarrier.SetAlpha(MIN(oBarrier.GetAlpha() + 5.0f*TIME, 1.0f));
+              else oBarrier.SetAlpha(MAX(oBarrier.GetAlpha() - 5.0f*TIME, 0.0f));
 
         // 
         if(!oBarrier.GetAlpha()) this->DisableBarrier(i, false);
@@ -623,7 +622,7 @@ void cViridoMission::__MoveOwnAfter()
         }
 
         // 
-        else oShadow.SetAlpha(MAX(oShadow.GetAlpha() - 5.0f*Core::System->GetTime(), 0.0f));
+        else oShadow.SetAlpha(MAX(oShadow.GetAlpha() - 5.0f*TIME, 0.0f));
 
         // 
         if(!oShadow.GetAlpha()) this->DisableShadow(i, false);
@@ -637,7 +636,7 @@ void cViridoMission::__MoveOwnAfter()
     STATIC_ASSERT(VIRIDO_PADDLES+1u <= sizeof(m_iBounceState)*8u)
 
     // 
-    if(!CONTAINS_BIT(m_iStickyState, 1u))
+    if(!HAS_BIT(m_iStickyState, 1u))
     {
         // 
         Core::Manager::Object->TestCollision(TYPE_VIRIDO_PADDLE, TYPE_VIRIDO_BALL, [this](coreObject3D* OUTPUT pPaddle, coreObject3D* OUTPUT pBall, const coreVector3& vIntersection, const coreBool bFirstHit)
@@ -658,7 +657,7 @@ void cViridoMission::__MoveOwnAfter()
                 const coreVector2 vBallDir   = pBall  ->GetDirection().xy();
                 const coreVector2 vPaddleDir = pPaddle->GetDirection().xy();
 
-                if(CONTAINS_BIT(m_iRealState, iIndex))
+                if(HAS_BIT(m_iRealState, iIndex))
                 {
                     // 
                     coreVector2 vNewDir = coreVector2::Reflect(vBallDir, (vBallPos - oPaddleSphere.GetPosition().xy()).Normalized(vBallDir));
@@ -690,7 +689,7 @@ void cViridoMission::__MoveOwnAfter()
     }
 
     // 
-    if(CONTAINS_BIT(m_iStickyState, 1u))
+    if(HAS_BIT(m_iStickyState, 1u))
     {
         // only between first ball and first paddle
         coreObject3D& oBall   = m_aBallRaw[0];
@@ -764,7 +763,7 @@ void cViridoMission::__MoveOwnAfter()
     });
 
     // 
-    if(!CONTAINS_FLAG(m_Vaus.GetStatus(), ENEMY_STATUS_DEAD))
+    if(!HAS_FLAG(m_Vaus.GetStatus(), ENEMY_STATUS_DEAD))
     {
         cEnemy*     pCurEnemy  = NULL;
         coreFloat   fCurLenSq  = FLT_MAX;
@@ -776,7 +775,7 @@ void cViridoMission::__MoveOwnAfter()
         // 
         const coreVector2 vBallPos    = oBall.GetPosition ().xy();
         const coreVector2 vBallDir    = oBall.GetDirection().xy();
-        const coreVector2 vOldBallPos = vBallPos - vBallDir * FOREGROUND_AREA * (CONTAINS_BIT(m_iStickyState, 1u) ? 0.0f : (VIRIDO_BALL_SPEED * Core::System->GetTime()));
+        const coreVector2 vOldBallPos = vBallPos - vBallDir * FOREGROUND_AREA * (HAS_BIT(m_iStickyState, 1u) ? 0.0f : (VIRIDO_BALL_SPEED * TIME));
 
         // 
         Core::Manager::Object->TestCollision(TYPE_ENEMY, &oBall, [&](cEnemy* OUTPUT pEnemy, coreObject3D* OUTPUT pBall, const coreVector3& vIntersection, const coreBool bFirstHit)
@@ -807,7 +806,7 @@ void cViridoMission::__MoveOwnAfter()
             vNewDir.arr(iAxis) = ABS(vBallDir.arr(iAxis)) * SIGN(vDiff.arr(iAxis));
 
             // 
-            oBall.SetPosition (coreVector3(vBallPos + vDiff * (3.0f * Core::System->GetTime()), 0.0f));
+            oBall.SetPosition (coreVector3(vBallPos + vDiff * (3.0f * TIME), 0.0f));
             oBall.SetDirection(coreVector3(vNewDir, 0.0f));
 
             // 

@@ -37,7 +37,7 @@ cBackground::~cBackground()
     m_aaiBaseNormal.clear();
 
     // remove all persistent objects
-    const auto nRemoveObjectsFunc = [](std::vector<coreBatchList*>* OUTPUT papList)
+    const auto nRemoveObjectsFunc = [](coreList<coreBatchList*>* OUTPUT papList)
     {
         // delete objects and lists
         FOR_EACH(it, *papList)
@@ -166,7 +166,7 @@ void cBackground::Move()
     }
 
     // control and move all persistent objects
-    const auto nControlObjectsFunc = [this](std::vector<coreBatchList*>* OUTPUT papList, const coreFloat fRange, const coreMatrix2& mRota)
+    const auto nControlObjectsFunc = [this](coreList<coreBatchList*>* OUTPUT papList, const coreFloat fRange, const coreMatrix2& mRota)
     {
         // cache current camera position (to improve performance)
         const coreVector2 vCameraPos = g_pEnvironment->GetCameraPos().xy();
@@ -178,9 +178,9 @@ void cBackground::Move()
             coreBool bUpdate = false;
 
             // 
-            const coreFloat                fDensity      = (*it)->List()->front()->GetCollisionModifier().x;
-            const std::vector<coreUint16>* paiBaseHeight = m_aaiBaseHeight.count(*it) ? &m_aaiBaseHeight.at(*it) : NULL;
-            const std::vector<coreUint32>* paiBaseNormal = m_aaiBaseNormal.count(*it) ? &m_aaiBaseNormal.at(*it) : NULL;
+            const coreFloat             fDensity      = (*it)->List()->front()->GetCollisionModifier().x;
+            const coreList<coreUint16>* paiBaseHeight = m_aaiBaseHeight.count(*it) ? &m_aaiBaseHeight.at(*it) : NULL;
+            const coreList<coreUint32>* paiBaseNormal = m_aaiBaseNormal.count(*it) ? &m_aaiBaseNormal.at(*it) : NULL;
 
             FOR_EACH(et, *(*it)->List())
             {
@@ -232,7 +232,7 @@ void cBackground::Move()
     nControlObjectsFunc(&m_apAirObjectList,    BACKGROUND_OBJECT_RANGE - 11.0f, mRota);
 
     // control and move all temporary objects
-    const auto nControlAddFunc = [](coreLookupStr<coreBatchList*>* OUTPUT papList, const coreFloat fRange)
+    const auto nControlAddFunc = [](coreMapStr<coreBatchList*>* OUTPUT papList, const coreFloat fRange)
     {
         // cache current camera position (to improve performance)
         const coreVector2 vCameraPos = g_pEnvironment->GetCameraPos().xy();
@@ -306,7 +306,7 @@ void cBackground::AddAir   (coreObject3D* pObject, const coreVector3& vRelativeP
 // move temporary objects (for infinite background)
 void cBackground::ShoveAdds(const coreFloat fOffset)
 {
-    const auto nUpdatePosFunc = [&](coreLookupStr<coreBatchList*>* OUTPUT papList)
+    const auto nUpdatePosFunc = [&](coreMapStr<coreBatchList*>* OUTPUT papList)
     {
         // update objects and lists
         FOR_EACH(it, *papList)
@@ -329,7 +329,7 @@ void cBackground::ShoveAdds(const coreFloat fOffset)
 // remove all temporary objects
 void cBackground::ClearAdds()
 {
-    const auto nRemoveAddsFunc = [](coreLookupStr<coreBatchList*>* OUTPUT papList)
+    const auto nRemoveAddsFunc = [](coreMapStr<coreBatchList*>* OUTPUT papList)
     {
         // delete objects and lists
         FOR_EACH(it, *papList)
@@ -381,7 +381,7 @@ void cBackground::_StoreHeightList(const coreBatchList* pObjectList)
     ASSERT(pObjectList->List()->back()->GetPosition().y < (I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL))
 
     // 
-    std::vector<coreUint16>& oNew = m_aaiBaseHeight[pObjectList];
+    coreList<coreUint16>& oNew = m_aaiBaseHeight[pObjectList];
     oNew.reserve(pObjectList->List()->size());
 
     // 
@@ -396,7 +396,7 @@ void cBackground::_StoreNormalList(const coreBatchList* pObjectList)
     ASSERT(pObjectList->List()->back()->GetPosition().y < (I_TO_F(OUTDOOR_HEIGHT) * OUTDOOR_DETAIL))
 
     // 
-    std::vector<coreUint32>& oNew = m_aaiBaseNormal[pObjectList];
+    coreList<coreUint32>& oNew = m_aaiBaseNormal[pObjectList];
     oNew.reserve(pObjectList->List()->size());
 
     // 

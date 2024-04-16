@@ -38,7 +38,7 @@ void cEnemy::Configure(const coreInt32 iHealth, const coreVector3& vColor, const
 // render the enemy
 void cEnemy::Render()
 {
-    if(!CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_DEAD))
+    if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_DEAD))
     {
         // 
         this->_EnableBlink();
@@ -53,10 +53,7 @@ void cEnemy::Render()
 // move the enemy
 void cEnemy::Move()
 {
-    // 
-    //this->_UpdateAlwaysBefore();
-
-    if(!CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_DEAD))
+    if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_DEAD))
     {
         // 
         m_fLifeTimeBefore = m_fLifeTime;
@@ -69,27 +66,26 @@ void cEnemy::Move()
         this->coreObject3D::Move();
 
         // 
-        if(g_pForeground->IsVisibleObject(this) && !CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_DEAD))
+        if(g_pForeground->IsVisibleObject(this) && !HAS_FLAG(m_iStatus, ENEMY_STATUS_DEAD))
         {
-            this->SetEnabled(CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_HIDDEN) ? CORE_OBJECT_ENABLE_MOVE : CORE_OBJECT_ENABLE_ALL);
-            this->ChangeType(TYPE_ENEMY);   // # make it available in cEnemyManager::ForEachEnemy
+            this->SetEnabled(HAS_FLAG(m_iStatus, ENEMY_STATUS_HIDDEN) ? CORE_OBJECT_ENABLE_MOVE : CORE_OBJECT_ENABLE_ALL);
+            if(this->GetID() != cRepairEnemy::ID) this->ChangeType(TYPE_ENEMY);   // # make it available in cEnemyManager::ForEachEnemy
         }
         else
         {
             this->SetEnabled(CORE_OBJECT_ENABLE_MOVE);
         }
 
-
         // TODO: better would be a shield which is only visible on bullet-hits (and tighter, maybe around silhouette)
         //if(STATIC_ISVALID(g_pGame)) 
         //{
-        //    if(CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_INVINCIBLE))
+        //    if(HAS_FLAG(m_iStatus, ENEMY_STATUS_INVINCIBLE))
         //    {
-        //        if(!CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_SHIELDED)) g_pGame->GetShieldManager()->BindEnemy(this);
+        //        if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_SHIELDED)) g_pGame->GetShieldManager()->BindEnemy(this);
         //    }
         //    else
         //    {
-        //        if(CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_SHIELDED)) g_pGame->GetShieldManager()->UnbindEnemy(this);
+        //        if(HAS_FLAG(m_iStatus, ENEMY_STATUS_SHIELDED)) g_pGame->GetShieldManager()->UnbindEnemy(this);
         //    }
         //}
     }
@@ -106,13 +102,14 @@ coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, 
     // forward to parent
     if(this->IsChild()) return m_apMember.front()->TakeDamage(iDamage, iElement, vImpact, pAttacker);
 
-    if(!CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_INVINCIBLE))
+    if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_INVINCIBLE))
     {
         if(iDamage > 0)
         {
             // 
             const coreInt32 iPower = (pAttacker && STATIC_ISVALID(g_pGame) && g_pGame->GetCoop()) ? 1 : GAME_PLAYERS;
-            const coreInt32 iTaken = this->_TakeDamage(iDamage * iPower, iElement, vImpact);
+            const coreInt32 iTaken = this->_TakeDamage(iDamage * iPower, iElement, vImpact) / iPower;
+            ASSERT(!(this->GetMaxHealth() % iPower))
 
             if(iTaken)
             {
@@ -132,27 +129,47 @@ coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, 
 
                 if(pAttacker)
                 {
-                    // 
-                    if(!CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_WORTHLESS))
-                        pAttacker->GetScoreTable()->AddScore(iTaken, false);
+                    if(HAS_FLAG(m_iStatus, ENEMY_STATUS_BOSS))
+                    {
+                        // 
+                        pAttacker->GetScoreTable()->AddChain(iTaken);
+                    }
 
                     // 
-                    pAttacker->GetDataTable()->EditCounterTotal  ()->iDamageGiven += iTaken;
-                    pAttacker->GetDataTable()->EditCounterMission()->iDamageGiven += iTaken;
-                    pAttacker->GetDataTable()->EditCounterSegment()->iDamageGiven += iTaken;
+                    pAttacker->GetScoreTable()->RefreshCombo();
 
-                    // 
-                    g_pSave->EditGlobalStats      ()->iDamageGiven += iTaken;
-                    g_pSave->EditLocalStatsMission()->iDamageGiven += iTaken;
-                    g_pSave->EditLocalStatsSegment()->iDamageGiven += iTaken;
+                    if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_WORTHLESS))
+                    {
+                        // 
+                        pAttacker->GetDataTable()->EditCounterTotal  ()->iDamageGiven += iTaken;
+                        pAttacker->GetDataTable()->EditCounterMission()->iDamageGiven += iTaken;
+                        pAttacker->GetDataTable()->EditCounterSegment()->iDamageGiven += iTaken;
+
+                        // 
+                        g_pSave->EditGlobalStats      ()->iDamageGiven += iTaken;
+                        g_pSave->EditLocalStatsMission()->iDamageGiven += iTaken;
+                        g_pSave->EditLocalStatsSegment()->iDamageGiven += iTaken;
+                    }
                 }
             }
 
             if(!m_iCurHealth)
             {
-                // 
-                if(!CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_IMMORTAL))
+                if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_IMMORTAL))
+                {
+                    // 
                     this->Kill(true);
+
+                    if(pAttacker)
+                    {
+                        if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_WORTHLESS))
+                        {
+                            // 
+                            pAttacker->GetScoreTable()->AddScore(10u * m_iMaxHealth, true, this->GetPosition());
+                            pAttacker->GetScoreTable()->AddCombo(1u);
+                        }
+                    }
+                }
             }
 
             return iTaken;
@@ -168,12 +185,12 @@ coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, 
 void cEnemy::Resurrect()
 {
     // resurrect enemy
-    if(!CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_DEAD)) return;
+    if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_DEAD)) return;
     REMOVE_FLAG(m_iStatus, ENEMY_STATUS_DEAD)
 
     // 
-    const coreBool bSingle = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_SINGLE);
-    const coreBool bEnergy = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_ENERGY);
+    const coreBool bSingle = HAS_FLAG(m_iStatus, ENEMY_STATUS_SINGLE);
+    const coreBool bEnergy = HAS_FLAG(m_iStatus, ENEMY_STATUS_ENERGY);
     ASSERT(!bEnergy || (bEnergy && bSingle))
 
     // 
@@ -209,22 +226,22 @@ void cEnemy::Resurrect()
 void cEnemy::Kill(const coreBool bAnimated)
 {
     // kill enemy
-    if(CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_DEAD)) return;
+    if(HAS_FLAG(m_iStatus, ENEMY_STATUS_DEAD)) return;
     ADD_FLAG(m_iStatus, ENEMY_STATUS_DEAD)
 
     // 
-    const coreBool bSingle = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_SINGLE);
-    const coreBool bEnergy = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_ENERGY);
+    const coreBool bSingle = HAS_FLAG(m_iStatus, ENEMY_STATUS_SINGLE);
+    const coreBool bEnergy = HAS_FLAG(m_iStatus, ENEMY_STATUS_ENERGY);
     ASSERT(!bEnergy || (bEnergy && bSingle))
 
     // 
     if(STATIC_ISVALID(g_pGame)) g_pGame->GetShieldManager()->UnbindEnemy(this);
 
     // 
-    if(bAnimated && this->IsEnabled(CORE_OBJECT_ENABLE_RENDER))
+    if(bAnimated && this->GetType())
     {
         // 
-        if(CONTAINS_BIT(m_iBaseColor, SHIP_INVERTED_BIT))
+        if(HAS_BIT(m_iBaseColor, SHIP_INVERTED_BIT))
         {
             const coreVector3 vColor = (g_pEnvironment->GetBackground()->GetID() == cSnowBackground::ID) ? COLOR_FIRE_BLUE : COLOR_FIRE_ORANGE;
             g_pSpecialEffects->MacroDestructionColor(this, vColor);
@@ -286,6 +303,13 @@ cPlayer* cEnemy::NearestPlayerSide()const
     return g_pGame->FindPlayerSide(this->GetPosition().xy());
 }
 
+cPlayer* cEnemy::NearestPlayerSideRev()const
+{
+    // 
+    ASSERT(STATIC_ISVALID(g_pGame))
+    return g_pGame->FindPlayerSide(this->GetPosition().xy().InvertedX());
+}
+
 cPlayer* cEnemy::NearestPlayerDual(const coreUintW iIndex)const
 {
     // 
@@ -300,6 +324,12 @@ coreVector2 cEnemy::AimAtPlayerSide()const
 {
     // 
     return (this->NearestPlayerSide()->GetPosition().xy() - this->GetPosition().xy());
+}
+
+coreVector2 cEnemy::AimAtPlayerSideRev()const
+{
+    // 
+    return (this->NearestPlayerSideRev()->GetPosition().xy() - this->GetPosition().xy());
 }
 
 coreVector2 cEnemy::AimAtPlayerDual(const coreUintW iIndex)const
@@ -376,7 +406,7 @@ void cEnemyManager::Render()
     // render all additional enemies
     FOR_EACH(it, m_apAdditional)
     {
-        if(CONTAINS_FLAG((*it)->GetStatus(), ENEMY_STATUS_DEAD))
+        if(HAS_FLAG((*it)->GetStatus(), ENEMY_STATUS_DEAD))
             continue;
 
         (*it)->Render();
@@ -406,7 +436,7 @@ void cEnemyManager::Render()
     /* */                                                             \
     const auto nRenderFunc = [](cEnemy* OUTPUT pEnemy)                \
     {                                                                 \
-        if(CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD))     \
+        if(HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD))          \
             return;                                                   \
                                                                       \
         pEnemy->f();                                                  \
@@ -438,7 +468,25 @@ void cEnemyManager::RenderTop   () {__RENDER_OWN(__RenderOwnTop)}
 
 // ****************************************************************
 // move the enemy manager
-void cEnemyManager::Move()
+void cEnemyManager::MoveBefore()
+{
+    // 
+    FOR_EACH(it, m_apAdditional)
+        (*it)->_UpdateAlwaysBefore();
+
+    // 
+    for(coreUintW i = 0u; i < ENEMY_SET_COUNT; ++i)
+    {
+        if(!m_apEnemySet[i]) continue;
+        coreBatchList* pEnemyActive = &m_apEnemySet[i]->oEnemyActive;
+
+        // 
+        FOR_EACH(it, *pEnemyActive->List())
+            d_cast<cEnemy*>(*it)->_UpdateAlwaysBefore();
+    }
+}
+
+void cEnemyManager::MoveMiddle()
 {
     // move all additional enemies (# bosses need to move before other enemies)
     FOR_EACH(it, m_apAdditional)
@@ -453,6 +501,11 @@ void cEnemyManager::Move()
         // move the enemy set
         pEnemyActive->MoveNormal();
     }
+}
+
+void cEnemyManager::MoveAfter()
+{
+    // not used
 }
 
 
@@ -888,7 +941,7 @@ void cRepairEnemy::__MoveOwn()
     m_fAnimation.UpdateMod(0.2f, 1.0f);
 
     // 
-    const coreVector2 vNewPos = this->GetPosition().xy() + m_vDirection * (30.0f * Core::System->GetTime());
+    const coreVector2 vNewPos = this->GetPosition().xy() + m_vDirection * (30.0f * TIME);
     const coreVector4 vArea   = m_pPlayer->GetArea();
 
     // 
@@ -903,11 +956,14 @@ void cRepairEnemy::__MoveOwn()
     this->DefaultMultiate(m_fAnimation * (8.0f*PI));
 
     // 
-    m_Bubble.SetAlpha(MIN(m_Bubble.GetAlpha() + 4.0f * Core::System->GetTime(), 0.8f));
+    m_Bubble.SetAlpha(MIN(m_Bubble.GetAlpha() + 4.0f * TIME, 0.8f));
 
     // 
     m_Bubble.SetPosition (coreVector3(vNewPos, 0.0f));
     m_Bubble.SetSize     (coreVector3(1.0f,1.0f,1.0f) * PLAYER_BUBBLE_SIZE * m_Bubble.GetAlpha());
     m_Bubble.SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.5f));
     m_Bubble.Move();
+
+    // 
+    m_pPlayer->SetPosition(this->GetPosition());
 }

@@ -36,7 +36,7 @@ cSpaceBackground::cSpaceBackground()noexcept
             const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, SPACE_METEOR_NUM);
             const coreFloat   fHeight   = Core::Rand->Float(-30.0f, -20.0f);
 
-            if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 100.0f))
+            if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, POW2(10.0f)))
             {
                 // create object
                 coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
@@ -90,7 +90,7 @@ void cSpaceBackground::__RenderOwnBefore()
 void cSpaceBackground::__MoveOwn()
 {
     // 
-    const coreMatrix3 mRota = coreMatrix4::RotationY(Core::System->GetTime() * -0.7f).m123();
+    const coreMatrix3 mRota = coreMatrix4::RotationY(TIME * -0.7f).m123();
 
     // 
     coreBatchList* pList = m_apGroundObjectList[0];
@@ -107,7 +107,7 @@ void cSpaceBackground::__MoveOwn()
 
     // 
     const coreVector2 vMove      = coreVector2(0.0f,1.0f) * (-0.35f * g_pEnvironment->GetSpeed());
-    const coreVector2 vTexOffset = m_Cover.GetTexOffset() + (coreVector2(0.0f,0.0f) + vMove) * (0.05f * Core::System->GetTime());
+    const coreVector2 vTexOffset = m_Cover.GetTexOffset() + (coreVector2(0.0f,0.0f) + vMove) * (0.05f * TIME);
 
     // 
     m_Cover.SetDirection(g_pEnvironment->GetDirection().InvertedX());

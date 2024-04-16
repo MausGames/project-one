@@ -126,7 +126,7 @@ void cSave::SaveFile()
     coreByte* pHeaderData = new coreByte[sizeof(sHeader)];
     std::memcpy(pHeaderData, &m_Header, sizeof(sHeader));
 
-    Core::Manager::Resource->AttachFunction([=]()
+    Core::Manager::Resource->AttachFunction([=, this]()
     {
         // 
         coreData::FileMove(m_sPath.c_str(), PRINT("%s.backup", m_sPath.c_str()));

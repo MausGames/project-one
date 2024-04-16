@@ -334,14 +334,14 @@ static void LockFramerate()
     }
 
     // override frame time
-    if(Core::System->GetTime()) c_cast<coreFloat&>(Core::System->GetTime()) = coreFloat(m_dLogicalTime);
+    if(TIME) c_cast<coreFloat&>(TIME) = coreFloat(m_dLogicalTime);
     
     
     coreFloat& fFreezeTime = c_cast<coreFloat&>(g_pSpecialEffects->GetFreezeTime());
     if(fFreezeTime)
     {
-        fFreezeTime = MAX(fFreezeTime - Core::System->GetTime(), 0.0f);
-        c_cast<coreFloat&>(Core::System->GetTime()) *= 0.001f;
+        fFreezeTime = MAX(fFreezeTime - TIME, 0.0f);
+        c_cast<coreFloat&>(TIME) *= 0.001f;
     }
 }
 
@@ -380,7 +380,7 @@ static void DebugGame()
                 oOptions.aaiSupport[i][0] = 0u;
             }
 
-            #define __LOAD_GAME(x) {STATIC_NEW(g_pGame, oOptions, GAME_MISSION_LIST_DEFAULT) g_pGame->LoadMissionID(x); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f); g_pPostProcessing->SetWallOpacity(1.0f);}
+            #define __LOAD_GAME(x) {STATIC_NEW(g_pGame, oOptions, GAME_MISSION_LIST_MAIN) g_pGame->LoadMissionID(x); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f); g_pPostProcessing->SetWallOpacity(1.0f);}
                  if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1), CORE_INPUT_PRESS)) __LOAD_GAME(cIntroMission  ::ID)
             else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2), CORE_INPUT_PRESS)) __LOAD_GAME(cViridoMission ::ID)
             else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(3), CORE_INPUT_PRESS)) __LOAD_GAME(cNevoMission   ::ID)
@@ -392,6 +392,23 @@ static void DebugGame()
             else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(9), CORE_INPUT_PRESS)) __LOAD_GAME(cAterMission   ::ID)
             else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(0), CORE_INPUT_PRESS)) __LOAD_GAME(cErrorMission  ::ID)
             #undef __LOAD_GAME
+        }
+
+        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(RALT), CORE_INPUT_HOLD))
+        {
+            sGameOptions oOptions = {};
+            oOptions.iPlayers    = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(X), CORE_INPUT_HOLD) ? 2u : 1u;
+            oOptions.iDifficulty = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(Z), CORE_INPUT_HOLD) ? 0u : 1u;
+            for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
+            {
+                oOptions.aaiWeapon [i][0] = cRayWeapon::ID;
+                oOptions.aaiSupport[i][0] = 0u;
+            }
+
+            STATIC_NEW(g_pGame, oOptions, GAME_MISSION_LIST_DEMO)
+            g_pGame->LoadMissionID(cDemoMission::ID);
+            g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f);
+            g_pPostProcessing->SetWallOpacity(1.0f);
         }
     }
 
@@ -444,14 +461,14 @@ static void DebugGame()
         else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_9),        CORE_INPUT_PRESS)) g_pEnvironment->SetTargetDirection(coreVector2( 1.0f, 1.0f).Normalized());
         else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_PLUS),     CORE_INPUT_PRESS)) g_pEnvironment->SetTargetSpeed((&g_pEnvironment->GetSpeed())[1] + 1.0f);
         else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_MINUS),    CORE_INPUT_PRESS)) g_pEnvironment->SetTargetSpeed((&g_pEnvironment->GetSpeed())[1] - 1.0f);
-        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_DIVIDE),   CORE_INPUT_HOLD))  g_pEnvironment->SetTargetSide ((&g_pEnvironment->GetSide ())[1] - coreVector2(30.0f * Core::System->GetTime(), 0.0f));
-        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_MULTIPLY), CORE_INPUT_HOLD))  g_pEnvironment->SetTargetSide ((&g_pEnvironment->GetSide ())[1] + coreVector2(30.0f * Core::System->GetTime(), 0.0f));
+        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_DIVIDE),   CORE_INPUT_HOLD))  g_pEnvironment->SetTargetSide ((&g_pEnvironment->GetSide ())[1] - coreVector2(30.0f * TIME, 0.0f));
+        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_MULTIPLY), CORE_INPUT_HOLD))  g_pEnvironment->SetTargetSide ((&g_pEnvironment->GetSide ())[1] + coreVector2(30.0f * TIME, 0.0f));
     }
 
     // set background height
     static coreFloat s_fHeight = 0.0f;
-         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(R), CORE_INPUT_HOLD)) s_fHeight += 15.0f * Core::System->GetTime();
-    else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(T), CORE_INPUT_HOLD)) s_fHeight -= 15.0f * Core::System->GetTime();
+         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(R), CORE_INPUT_HOLD)) s_fHeight += 15.0f * TIME;
+    else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(T), CORE_INPUT_HOLD)) s_fHeight -= 15.0f * TIME;
     g_pEnvironment->SetTargetHeight(s_fHeight);
 
     // set background interpolation
@@ -462,10 +479,10 @@ static void DebugGame()
 
         coreBool bChange = false;
 
-             if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(M),      CORE_INPUT_HOLD)) {s_fMul += 0.05f * Core::System->GetTime(); bChange = true;}
-        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(N),      CORE_INPUT_HOLD)) {s_fMul -= 0.05f * Core::System->GetTime(); bChange = true;}
-             if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(PERIOD), CORE_INPUT_HOLD)) {s_fAdd += 1.0f  * Core::System->GetTime(); bChange = true;}
-        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(COMMA),  CORE_INPUT_HOLD)) {s_fAdd -= 1.0f  * Core::System->GetTime(); bChange = true;}
+             if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(M),      CORE_INPUT_HOLD)) {s_fMul += 0.05f * TIME; bChange = true;}
+        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(N),      CORE_INPUT_HOLD)) {s_fMul -= 0.05f * TIME; bChange = true;}
+             if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(PERIOD), CORE_INPUT_HOLD)) {s_fAdd += 1.0f  * TIME; bChange = true;}
+        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(COMMA),  CORE_INPUT_HOLD)) {s_fAdd -= 1.0f  * TIME; bChange = true;}
 
         if(bChange)
         {
@@ -510,7 +527,7 @@ static void DebugGame()
         {
             g_pGame->GetEnemyManager()->ForEachEnemy([](cEnemy* OUTPUT pEnemy)
             {
-                pEnemy->TakeDamage(CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_BOSS) ? 500 : 10, ELEMENT_NEUTRAL, coreVector2(0.0f,0.0f), NULL);
+                pEnemy->TakeDamage(HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_BOSS) ? 500 : 10, ELEMENT_NEUTRAL, coreVector2(0.0f,0.0f), NULL);
             });
         }
     }
@@ -528,9 +545,9 @@ static void DebugGame()
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(P), CORE_INPUT_PRESS))
     {
         if(STATIC_ISVALID(g_pGame) &&
-           (!g_pGame->GetCurMission()->GetBoss(0u) || CONTAINS_FLAG(g_pGame->GetCurMission()->GetBoss(0u)->GetStatus(), ENEMY_STATUS_DEAD)) &&
-           (!g_pGame->GetCurMission()->GetBoss(1u) || CONTAINS_FLAG(g_pGame->GetCurMission()->GetBoss(1u)->GetStatus(), ENEMY_STATUS_DEAD)) &&
-           (!g_pGame->GetCurMission()->GetBoss(2u) || CONTAINS_FLAG(g_pGame->GetCurMission()->GetBoss(2u)->GetStatus(), ENEMY_STATUS_DEAD)))
+           (!g_pGame->GetCurMission()->GetBoss(0u) || HAS_FLAG(g_pGame->GetCurMission()->GetBoss(0u)->GetStatus(), ENEMY_STATUS_DEAD)) &&
+           (!g_pGame->GetCurMission()->GetBoss(1u) || HAS_FLAG(g_pGame->GetCurMission()->GetBoss(1u)->GetStatus(), ENEMY_STATUS_DEAD)) &&
+           (!g_pGame->GetCurMission()->GetBoss(2u) || HAS_FLAG(g_pGame->GetCurMission()->GetBoss(2u)->GetStatus(), ENEMY_STATUS_DEAD)))
         {
             c_cast<coreUintW&>(g_pGame->GetCurMission()->GetCurSegmentIndex()) = MISSION_NO_SEGMENT;
             g_pGame->GetCurMission()->SkipStage();
@@ -540,7 +557,7 @@ static void DebugGame()
     // load boss
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(KP_PERIOD), CORE_INPUT_HOLD))
     {
-        static std::string s_sCode;
+        static coreString s_sCode;
         for(coreUintW i = 0u; i < 10u; ++i)
         {
             if(Core::Input->GetKeyboardButton(coreInputKey(CORE_INPUT_KEY(KP_1) + i), CORE_INPUT_PRESS))

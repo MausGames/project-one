@@ -22,21 +22,21 @@ coreBool cWeapon::Update(const coreUint8 iShootStatus)
     // check firing-modes and call trigger or release routine
     for(coreUintW i = 0u; i < WEAPON_MODES; ++i)
     {
-        if(CONTAINS_BIT(iShootStatus, i))
-             {if(!CONTAINS_BIT(m_iLastStatus, i)) this->__TriggerOwn(i);}
-        else {if( CONTAINS_BIT(m_iLastStatus, i)) this->__ReleaseOwn(i);}
+        if(HAS_BIT(iShootStatus, i))
+             {if(!HAS_BIT(m_iLastStatus, i)) this->__TriggerOwn(i);}
+        else {if( HAS_BIT(m_iLastStatus, i)) this->__ReleaseOwn(i);}
     }
     m_iLastStatus = iShootStatus;
 
     // always update the primary cooldown timer
     if(m_CooldownTimer.Update(1.0f))
     {
-        if(CONTAINS_BIT(iShootStatus, 0u))
+        if(HAS_BIT(iShootStatus, 0u))
              m_CooldownTimer.Pause();   // preserve fractional part
         else m_CooldownTimer.Stop ();   // clamp to zero
     }
 
-    if(CONTAINS_BIT(iShootStatus, 0u))
+    if(HAS_BIT(iShootStatus, 0u))
     {
         // check current cooldown status
         if(!m_CooldownTimer.GetStatus())
@@ -172,7 +172,7 @@ cPulseWeapon::cPulseWeapon()noexcept
 void cPulseWeapon::__UpdateOwn(const coreUint8 iShootStatus)
 {
     // 
-    if(!CONTAINS_BIT(iShootStatus, 0u)) m_fCharge.UpdateMin(m_CooldownTimer.GetSpeed(), 2.0f);
+    if(!HAS_BIT(iShootStatus, 0u)) m_fCharge.UpdateMin(m_CooldownTimer.GetSpeed(), 2.0f);
 }
 
 
@@ -267,7 +267,7 @@ void cTeslaWeapon::__TriggerOwn(const coreUint8 iMode)
     cEnemy*             apStrikeTarget [WEAPON_TESLA_TARGETS];
     coreUintW           iNum = 0u;
 
-    std::vector<const coreObject3D*> apNode;
+    coreList<const coreObject3D*> apNode;
 
     // 
     apNode.reserve(16u);
@@ -301,7 +301,7 @@ void cTeslaWeapon::__TriggerOwn(const coreUint8 iMode)
             }
 
             // 
-            if((pEnemy->GetPosition().xy() - pObject->GetPosition().xy()).LengthSq() < 1600.0f)
+            if((pEnemy->GetPosition().xy() - pObject->GetPosition().xy()).LengthSq() < POW2(40.0f))
             {
                 apStrikeEmitter[iNum] = pObject;
                 apStrikeTarget [iNum] = pEnemy;

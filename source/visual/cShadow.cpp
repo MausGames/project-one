@@ -208,7 +208,7 @@ void cShadow::Recompile()
 
 // ****************************************************************
 // render single shadow-casting objects
-void cShadow::RenderSingle(const coreMatrix4& mTransform, const std::vector<coreBatchList*>& apList, const std::vector<coreObject3D*>& apObject)
+void cShadow::RenderSingle(const coreMatrix4& mTransform, const coreList<coreBatchList*>& apList, const coreList<coreObject3D*>& apObject)
 {
     // only enable and update without instancing
     if(!apObject.empty() || std::any_of(apList.begin(), apList.end(), [](const coreBatchList* pList) {return !pList->IsInstanced();}))
@@ -222,17 +222,17 @@ void cShadow::RenderSingle(const coreMatrix4& mTransform, const std::vector<core
     }
 }
 
-void cShadow::RenderSingle(const coreMatrix4& mTransform, const std::vector<coreBatchList*>& apList)
+void cShadow::RenderSingle(const coreMatrix4& mTransform, const coreList<coreBatchList*>& apList)
 {
     // 
-    const std::vector<coreObject3D*> apEmpty;
+    const coreList<coreObject3D*> apEmpty;
     cShadow::RenderSingle(mTransform, apList, apEmpty);
 }
 
 
 // ****************************************************************
 // render lists with shadow-casting objects
-void cShadow::RenderInstanced(const coreMatrix4& mTransform, const std::vector<coreBatchList*>& apList)
+void cShadow::RenderInstanced(const coreMatrix4& mTransform, const coreList<coreBatchList*>& apList)
 {
     // only enable and update on instancing
     if(std::any_of(apList.begin(), apList.end(), [](const coreBatchList* pList) {return pList->IsInstanced();}))

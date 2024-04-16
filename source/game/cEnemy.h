@@ -14,6 +14,7 @@
 // TODO: manager: Find, ForEach, ForEachAll -> typed 
 // TODO: implement own enemy-types for custom-enemies which would require instancing
 // TODO: virtual void Render()override; -> final
+// TODO: memory-pool for each enemy-set (if single allocations still used)
 
 
 // ****************************************************************
@@ -77,14 +78,16 @@ public:
     void ResetProperties();
 
     // 
-    inline coreBool IsParent()const {return !m_apMember.empty() && !CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_CHILD);}
-    inline coreBool IsChild ()const {return !m_apMember.empty() &&  CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_CHILD);}
+    inline coreBool IsParent()const {return !m_apMember.empty() && !HAS_FLAG(m_iStatus, ENEMY_STATUS_CHILD);}
+    inline coreBool IsChild ()const {return !m_apMember.empty() &&  HAS_FLAG(m_iStatus, ENEMY_STATUS_CHILD);}
 
     // 
-    cPlayer*    NearestPlayerSide()const;
-    cPlayer*    NearestPlayerDual(const coreUintW iIndex)const;
-    coreVector2 AimAtPlayerSide  ()const;
-    coreVector2 AimAtPlayerDual  (const coreUintW iIndex)const;
+    cPlayer*    NearestPlayerSide   ()const;
+    cPlayer*    NearestPlayerSideRev()const;
+    cPlayer*    NearestPlayerDual   (const coreUintW iIndex)const;
+    coreVector2 AimAtPlayerSide     ()const;
+    coreVector2 AimAtPlayerSideRev  ()const;
+    coreVector2 AimAtPlayerDual     (const coreUintW iIndex)const;
 
     // get object properties
     inline const coreFloat& GetLifeTime      ()const {return m_fLifeTime;}
@@ -127,7 +130,7 @@ private:
     };
     template <typename T> struct sEnemySet final : public sEnemySetGen
     {
-        std::vector<T*> apEnemyPool;   // semi-dynamic container with all enemies
+        coreList<T*> apEnemyPool;   // semi-dynamic container with all enemies
 
         sEnemySet()noexcept;
         ~sEnemySet()final;
@@ -151,7 +154,9 @@ public:
     void RenderUnder ();
     void RenderOver  ();
     void RenderTop   ();
-    void Move        ();
+    void MoveBefore  ();
+    void MoveMiddle  ();
+    void MoveAfter   ();
 
     // add and remove enemies
     template <typename T> RETURN_RESTRICT T* AllocateEnemy();
@@ -172,23 +177,6 @@ public:
 
     // 
     inline coreUintW GetNumEnemiesAlive()const {coreUintW iNum = 0u; this->ForEachEnemy([&](void*) {++iNum;}); return iNum;}
-    
-    
-    
-    void MoveBefore()
-    {
-        FOR_EACH(it, m_apAdditional)
-            (*it)->_UpdateAlwaysBefore();
-
-        for(coreUintW i = 0u; i < ENEMY_SET_COUNT; ++i)
-        {
-            if(!m_apEnemySet[i]) continue;
-            coreBatchList* pEnemyActive = &m_apEnemySet[i]->oEnemyActive;
-
-            FOR_EACH(it, *pEnemyActive->List())
-                d_cast<cEnemy*>(*it)->_UpdateAlwaysBefore();
-        }
-    }
 };
 
 
@@ -197,7 +185,7 @@ public:
 class cEnemySquad final
 {
 private:
-    std::vector<cEnemy*> m_apEnemy;   // 
+    coreList<cEnemy*> m_apEnemy;   // 
 
 
 public:
@@ -224,9 +212,9 @@ public:
 
     // 
     inline coreUintW GetNumEnemies        ()const {return m_apEnemy.size();}
-    inline coreUintW GetNumEnemiesAlive   ()const {return std::count_if(m_apEnemy.begin(), m_apEnemy.end(), [](const cEnemy* pEnemy) {return !CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD);});}
+    inline coreUintW GetNumEnemiesAlive   ()const {return std::count_if(m_apEnemy.begin(), m_apEnemy.end(), [](const cEnemy* pEnemy) {return !HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD);});}
     inline coreFloat GetNumEnemiesAlivePct()const {return I_TO_F(this->GetNumEnemiesAlive()) * RCP(I_TO_F(this->GetNumEnemies()));}
-    inline coreBool  IsFinished           ()const {return std::none_of (m_apEnemy.begin(), m_apEnemy.end(), [](const cEnemy* pEnemy) {return !CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD);});}
+    inline coreBool  IsFinished           ()const {return std::none_of (m_apEnemy.begin(), m_apEnemy.end(), [](const cEnemy* pEnemy) {return !HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD);});}
 
 
 private:
@@ -444,11 +432,12 @@ template <typename T> cEnemyManager::sEnemySet<T>::sEnemySet()noexcept
     // 
     oEnemyActive.CreateCustom(sizeof(coreFloat), [](coreVertexBuffer* OUTPUT pBuffer)
     {
-        pBuffer->DefineAttribute(SHIP_SHADER_ATTRIBUTE_BLINK, 1u, GL_FLOAT, false, 0u);
+        pBuffer->DefineAttribute(SHIP_SHADER_ATTRIBUTE_BLINK, 2u, GL_FLOAT, false, 0u);
     },
     [](coreByte* OUTPUT pData, const coreObject3D* pEnemy)
     {
-        (*r_cast<coreFloat*>(pData)) = d_cast<const cEnemy*>(pEnemy)->GetBlink();
+        const cEnemy* A = d_cast<const cEnemy*>(pEnemy);
+        (*r_cast<coreVector2*>(pData)) = coreVector2(A->GetBlink(), A->GetCurHealthPct());
     },
     [](const coreProgramPtr& pProgram, const coreObject3D* pEnemy)
     {
@@ -499,7 +488,7 @@ template <typename T> RETURN_RESTRICT T* cEnemyManager::AllocateEnemy()
         // check current enemy status
         T*& pEnemy = pSet->apEnemyPool[pSet->iTopEnemy++];
         if(!pEnemy) pEnemy = new T();
-        if(!CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_ASSIGNED))
+        if(!HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_ASSIGNED))
         {
             // prepare enemy and add to active list
             pEnemy->ResetProperties();
@@ -524,7 +513,7 @@ template <typename T> RETURN_RESTRICT T* cEnemyManager::AllocateEnemy()
 template <typename F> void cEnemyManager::ForEachEnemy(F&& nFunction)const
 {
     // 
-    const std::vector<coreObject3D*>& oEnemyList = Core::Manager::Object->GetObjectList(TYPE_ENEMY);
+    const coreList<coreObject3D*>& oEnemyList = Core::Manager::Object->GetObjectList(TYPE_ENEMY);
     FOR_EACH(it, oEnemyList)
     {
         cEnemy* pEnemy = d_cast<cEnemy*>(*it);
@@ -578,7 +567,7 @@ template <typename F> void cEnemySquad::ForEachEnemy(F&& nFunction)const
     for(coreUintW i = 0u, ie = m_apEnemy.size(); i < ie; ++i)
     {
         cEnemy* pEnemy = m_apEnemy[i];
-        if(CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD) && !pEnemy->ReachedDeath()) continue;    // # for scripting
+        if(HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD) && !pEnemy->ReachedDeath()) continue;    // # for scripting
 
         // 
         nFunction(pEnemy, i);

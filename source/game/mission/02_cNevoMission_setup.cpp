@@ -102,11 +102,11 @@ void cNevoMission::__SetupOwn()
 
         if(STAGE_CLEARED)
         {
-                 if(STAGE_SUB(1u)) STAGE_RESSURECT(pSquad1,  0u,  3u)
-            else if(STAGE_SUB(2u)) STAGE_RESSURECT(pSquad1,  4u,  7u)
-            else if(STAGE_SUB(3u)) STAGE_RESSURECT(pSquad1,  8u, 12u)
-            else if(STAGE_SUB(4u)) STAGE_RESSURECT(pSquad1, 13u, 17u)
-            else if(STAGE_SUB(5u)) STAGE_RESSURECT(pSquad1, 18u, 23u)
+                 if(STAGE_SUB(1u)) STAGE_RESURRECT(pSquad1,  0u,  3u)
+            else if(STAGE_SUB(2u)) STAGE_RESURRECT(pSquad1,  4u,  7u)
+            else if(STAGE_SUB(3u)) STAGE_RESURRECT(pSquad1,  8u, 12u)
+            else if(STAGE_SUB(4u)) STAGE_RESURRECT(pSquad1, 13u, 17u)
+            else if(STAGE_SUB(5u)) STAGE_RESURRECT(pSquad1, 18u, 23u)
         }
 
         if(STAGE_CLEARED)
@@ -119,7 +119,7 @@ void cNevoMission::__SetupOwn()
         }
         else
         {
-            vClusterPos += vClusterDir * (30.0f * Core::System->GetTime());
+            vClusterPos += vClusterDir * (30.0f * TIME);
 
             if(((vClusterPos.x < -FOREGROUND_AREA.x * 1.2f) && (vClusterDir.x < 0.0f)) ||
                ((vClusterPos.x >  FOREGROUND_AREA.x * 1.2f) && (vClusterDir.x > 0.0f)) ||
@@ -142,14 +142,14 @@ void cNevoMission::__SetupOwn()
                 if(oBomb.IsEnabled(CORE_OBJECT_ENABLE_ALL))
                 {
                     const coreFloat fPrevDelay = afDelay[i];
-                    afDelay[i] += 1.0f * Core::System->GetTime();
+                    afDelay[i] += 1.0f * TIME;
 
                     if(InBetween(2.0f, fPrevDelay, afDelay[i]))
                         this->EnableBlast(i);
 
                     if(aiType[i] >= 1u)
                     {
-                        oBomb.SetPosition(coreVector3(oBomb.GetPosition().xy() + avMove[i] * Core::System->GetTime(), 0.0f));
+                        oBomb.SetPosition(coreVector3(oBomb.GetPosition().xy() + avMove[i] * TIME, 0.0f));
                         avMove[i] *= FrictionFactor(1.5f);
                     }
                     if(aiType[i] == 2u)
@@ -244,10 +244,16 @@ void cNevoMission::__SetupOwn()
     // 3: for coop, make sure tiles are equally distributed
     // 1,2: blending in tiles needs to be equally delayed, to not favor certain start-positions
     // enemies need to die fast after loosing invincibility
-    // TODO: ON tiles have X (eher nicht, schlecht in japan) or other distinct difference (maybe only in lower-right corner)
+    // TODO: ON tiles have X (eher nicht, schlecht in japan) or other distinct difference (maybe only in lower-right corner, or center)
     // TODO: wenn letztes tile schrumpft kommen funken bei size=0 und grüner helfer erscheint und fliegt weg
     // TODO: badge, helper marks N fields to active in that order
+    // TODO: badge, 1-2 der gegner sind schon vorher abschießbar
     // TODO: create a image with the light tiles ?
+    // TODO: flipswitch galaxy: blocking tiles moving around, lasers blocking movement between tiles
+    // TODO: maybe just kill everything when plates are active -> contrast to pacman stage
+    // TODO: extend collision-range of tiles (to occupy 100%) not visuals, except on overlying sub-stage (like for spikes) (check with size first)
+    // TODO: in second wave, 2 plate shgould alreay by active (2,2 und 1,3 (start with 0, oben links), oder 2,3 + 3,2)
+    // TWIST: plate moves around and has positive effect when activated, negative when deactivated, never locks in
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -278,9 +284,9 @@ void cNevoMission::__SetupOwn()
 
         if(STAGE_CLEARED)
         {
-                 if(STAGE_SUB(1u)) STAGE_RESSURECT(pSquad1,  0u,  9u)
-            else if(STAGE_SUB(2u)) STAGE_RESSURECT(pSquad1, 10u, 19u)
-            else if(STAGE_SUB(3u)) STAGE_RESSURECT(pSquad1, 20u, 29u)
+                 if(STAGE_SUB(1u)) STAGE_RESURRECT(pSquad1,  0u,  9u)
+            else if(STAGE_SUB(2u)) STAGE_RESURRECT(pSquad1, 10u, 19u)
+            else if(STAGE_SUB(3u)) STAGE_RESURRECT(pSquad1, 20u, 29u)
 
             for(coreUintW i = 0u; i < NEVO_TILES; ++i)
                 this->DisableTile(i, true);
@@ -342,7 +348,7 @@ void cNevoMission::__SetupOwn()
             }
             else if(iGauntlet == 6u)
             {
-                fTileMove += 0.6f * Core::System->GetTime();
+                fTileMove += 0.6f * TIME;
 
                 m_aTileRaw[1].SetPosition(coreVector3(LERPS(coreVector2(-0.25f,0.75f), coreVector2(-0.25f,-0.75f), fTileMove) * (FOREGROUND_AREA * 1.1f), 0.0f));
                 m_aTileRaw[7].SetPosition(coreVector3(LERPS(coreVector2( 0.75f,0.25f), coreVector2(-0.75f, 0.25f), fTileMove) * (FOREGROUND_AREA * 1.1f), 0.0f));
@@ -360,7 +366,7 @@ void cNevoMission::__SetupOwn()
             }
             else if(iGauntlet == 8u)
             {
-                fTileMove += 1.0f * Core::System->GetTime();
+                fTileMove += 1.0f * TIME;
 
                 const coreVector2 vPos = coreVector2::Direction(fTileMove);
                 const coreVector2 vDir = coreVector2::Direction(fTileMove * -2.0f);
@@ -408,7 +414,7 @@ void cNevoMission::__SetupOwn()
                     if((ABS(vDiff.x) < oTile.GetCollisionRange().x) &&
                        (ABS(vDiff.y) < oTile.GetCollisionRange().y))
                     {
-                        if(!CONTAINS_BIT(aiRemember[j], i)) TOGGLE_BIT(iTileState, i)
+                        if(!HAS_BIT(aiRemember[j], i)) TOGGLE_BIT(iTileState, i)
                         ADD_BIT(aiRemember[j], i)
                     }
                     else
@@ -417,7 +423,7 @@ void cNevoMission::__SetupOwn()
                     }
                 });
 
-                if(CONTAINS_BIT(iTileState, i))
+                if(HAS_BIT(iTileState, i))
                 {
                     oTile.SetColor3(COLOR_ENERGY_YELLOW);
                 }
@@ -478,7 +484,7 @@ void cNevoMission::__SetupOwn()
 
             if(bComplete)
             {
-                if(CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_INVINCIBLE))
+                if(HAS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_INVINCIBLE))
                 {
                     pEnemy->SetBaseColor(COLOR_SHIP_BLUE);
                     pEnemy->RemoveStatus(ENEMY_STATUS_INVINCIBLE);
@@ -541,6 +547,7 @@ void cNevoMission::__SetupOwn()
     // erste 3 gegner sind tutorial
     // TODO: 2 gegner pro seite, rotating arrow, start mit oben, gegen uhrzeigersinn
     // TODO: vertical enemies offset so players have to work together
+    // TODO: use object_arrow.md3
     STAGE_MAIN({TAKE_ALWAYS, 6u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -588,7 +595,7 @@ void cNevoMission::__SetupOwn()
 
         for(coreUintW i = 0u; i < NEVO_ARROWS; ++i)
         {
-            if(m_apArrowOwner[i] && CONTAINS_FLAG(m_apArrowOwner[i]->GetStatus(), ENEMY_STATUS_DEAD))
+            if(m_apArrowOwner[i] && HAS_FLAG(m_apArrowOwner[i]->GetStatus(), ENEMY_STATUS_DEAD))
                 this->DisableArrow(i, true);
         }
 
@@ -598,23 +605,23 @@ void cNevoMission::__SetupOwn()
 
             if(STAGE_SUB(1u))
             {
-                STAGE_RESSURECT(pSquad1, 0u, 0u)
+                STAGE_RESURRECT(pSquad1, 0u, 0u)
                 nEnableArrowFunc( 0u,  0u, coreVector2( 0.0f,-1.0f));
             }
             else if(STAGE_SUB(2u))
             {
-                STAGE_RESSURECT(pSquad1, 1u, 1u)
+                STAGE_RESURRECT(pSquad1, 1u, 1u)
                 nEnableArrowFunc( 1u,  1u, coreVector2( 0.0f, 1.0f));
             }
             else if(STAGE_SUB(3u))
             {
-                STAGE_RESSURECT(pSquad1, 2u, 2u)
+                STAGE_RESURRECT(pSquad1, 2u, 2u)
                 nEnableArrowFunc( 2u,  2u, coreVector2( 0.0f,-1.0f));
                 nEnableArrowFunc( 3u,  2u, coreVector2( 1.0f, 0.0f));
             }
             else if(STAGE_SUB(4u))
             {
-                STAGE_RESSURECT(pSquad1, 3u, 6u)
+                STAGE_RESURRECT(pSquad1, 3u, 6u)
                 nEnableArrowFunc( 4u,  3u, coreVector2( 0.0f, 1.0f));
                 nEnableArrowFunc( 5u,  4u, coreVector2( 0.0f, 1.0f));
                 nEnableArrowFunc( 6u,  5u, coreVector2( 0.0f, 1.0f));
@@ -622,7 +629,7 @@ void cNevoMission::__SetupOwn()
             }
             else if(STAGE_SUB(5u))
             {
-                STAGE_RESSURECT(pSquad1, 7u, 10u)
+                STAGE_RESURRECT(pSquad1, 7u, 10u)
                 nEnableArrowFunc( 0u,  7u, coreVector2( 0.0f,-1.0f));
                 nEnableArrowFunc( 1u,  8u, coreVector2( 0.0f,-1.0f));
                 nEnableArrowFunc( 2u,  9u, coreVector2( 0.0f,-1.0f));
@@ -630,7 +637,7 @@ void cNevoMission::__SetupOwn()
             }
             else if(STAGE_SUB(6u))
             {
-                STAGE_RESSURECT(pSquad1, 11u, 14u)
+                STAGE_RESURRECT(pSquad1, 11u, 14u)
                 nEnableArrowFunc( 4u, 11u, coreVector2(-1.0f, 0.0f));
                 nEnableArrowFunc( 5u, 12u, coreVector2(-1.0f, 0.0f));
                 nEnableArrowFunc( 6u, 13u, coreVector2(-1.0f, 0.0f));
@@ -638,7 +645,7 @@ void cNevoMission::__SetupOwn()
             }
             else if(STAGE_SUB(7u))
             {
-                STAGE_RESSURECT(pSquad1, 15u, 18u)
+                STAGE_RESURRECT(pSquad1, 15u, 18u)
                 nEnableArrowFunc( 8u, 15u, coreVector2( 1.0f, 0.0f));
                 nEnableArrowFunc( 9u, 16u, coreVector2( 1.0f, 0.0f));
                 nEnableArrowFunc(10u, 17u, coreVector2( 1.0f, 0.0f));
@@ -646,7 +653,7 @@ void cNevoMission::__SetupOwn()
             }
             else if(STAGE_SUB(8u))
             {
-                STAGE_RESSURECT(pSquad1, 19u, 22u)
+                STAGE_RESURRECT(pSquad1, 19u, 22u)
                 nEnableArrowFunc(12u, 19u, coreVector2( 0.0f, 1.0f));
                 nEnableArrowFunc(13u, 20u, coreVector2( 0.0f, 1.0f));
                 nEnableArrowFunc(14u, 21u, coreVector2( 0.0f, 1.0f));
@@ -655,7 +662,7 @@ void cNevoMission::__SetupOwn()
             }
             else if(STAGE_SUB(9u))
             {
-                STAGE_RESSURECT(pSquad1, 23u, 26u)
+                STAGE_RESURRECT(pSquad1, 23u, 26u)
                 nEnableArrowFunc( 0u, 23u, coreVector2( 0.0f,-1.0f));
                 nEnableArrowFunc( 1u, 24u, coreVector2( 0.0f,-1.0f));
                 nEnableArrowFunc( 2u, 25u, coreVector2( 0.0f,-1.0f));
@@ -664,7 +671,7 @@ void cNevoMission::__SetupOwn()
             }
             else if(STAGE_SUB(10u))
             {
-                STAGE_RESSURECT(pSquad1, 27u, 42u)
+                STAGE_RESURRECT(pSquad1, 27u, 42u)
                 nEnableArrowFunc( 5u, 27u, coreVector2(-1.0f, 0.0f));
                 nEnableArrowFunc( 6u, 28u, coreVector2( 0.0f,-1.0f));
                 nEnableArrowFunc( 7u, 29u, coreVector2( 0.0f, 1.0f));
@@ -800,8 +807,8 @@ void cNevoMission::__SetupOwn()
 
         if(STAGE_CLEARED)
         {
-                 if(STAGE_SUB(1u)) STAGE_RESSURECT(pSquad1, 0u, 0u)
-            else if(STAGE_SUB(2u)) STAGE_RESSURECT(pSquad1, 1u, 1u)
+                 if(STAGE_SUB(1u)) STAGE_RESURRECT(pSquad1, 0u, 0u)
+            else if(STAGE_SUB(2u)) STAGE_RESURRECT(pSquad1, 1u, 1u)
         }
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
@@ -838,6 +845,8 @@ void cNevoMission::__SetupOwn()
     // wenn flug-drehrichtung anfängt, zweite welle von der seite kommen, von wo die großen dreiecke kommen werden
     // TODO: helfer spawnt und fliegt in Ntem teleportiertem dreieck, verschwindet nach nächster teleportation, kleiner funken-effekt bei kill (falls doch noch sichtbar)
     // TODO: something after the last wave (changing the triangles (size, movement), or the number, or ...), or start ? hmmm, no I want to start up quick
+    // TODO: also focus on difference from d/generate wave, make are strongly occupied ?
+    // TODO: create an absurd big object
     STAGE_MAIN({TAKE_ALWAYS, 8u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -865,21 +874,21 @@ void cNevoMission::__SetupOwn()
 
         for(coreUintW i = iNumBig; i < NEVO_BLOCKS; ++i)
         {
-            if(m_apBlockOwner[i] && CONTAINS_FLAG(m_apBlockOwner[i]->GetStatus(), ENEMY_STATUS_DEAD))
+            if(m_apBlockOwner[i] && HAS_FLAG(m_apBlockOwner[i]->GetStatus(), ENEMY_STATUS_DEAD))
                 this->DisableBlock(i, true);
         }
 
         if(STAGE_CLEARED)
         {
-                 if(STAGE_SUB( 1u)) STAGE_RESSURECT(pSquad1,  0u,  0u)
-            else if(STAGE_SUB( 2u)) STAGE_RESSURECT(pSquad1,  1u,  1u)
-            else if(STAGE_SUB( 3u)) STAGE_RESSURECT(pSquad1,  2u,  2u)
-            else if(STAGE_SUB( 4u)) STAGE_RESSURECT(pSquad1,  3u,  3u)
-            else if(STAGE_SUB( 5u)) STAGE_RESSURECT(pSquad1,  4u,  7u)
-            else if(STAGE_SUB( 6u)) STAGE_RESSURECT(pSquad1,  8u, 11u)
-            else if(STAGE_SUB( 7u)) STAGE_RESSURECT(pSquad1, 12u, 15u)
-            else if(STAGE_SUB( 8u)) STAGE_RESSURECT(pSquad1, 16u, 19u)
-            else if(STAGE_SUB( 9u)) STAGE_RESSURECT(pSquad1, 20u, 23u)
+                 if(STAGE_SUB( 1u)) STAGE_RESURRECT(pSquad1,  0u,  0u)
+            else if(STAGE_SUB( 2u)) STAGE_RESURRECT(pSquad1,  1u,  1u)
+            else if(STAGE_SUB( 3u)) STAGE_RESURRECT(pSquad1,  2u,  2u)
+            else if(STAGE_SUB( 4u)) STAGE_RESURRECT(pSquad1,  3u,  3u)
+            else if(STAGE_SUB( 5u)) STAGE_RESURRECT(pSquad1,  4u,  7u)
+            else if(STAGE_SUB( 6u)) STAGE_RESURRECT(pSquad1,  8u, 11u)
+            else if(STAGE_SUB( 7u)) STAGE_RESURRECT(pSquad1, 12u, 15u)
+            else if(STAGE_SUB( 8u)) STAGE_RESURRECT(pSquad1, 16u, 19u)
+            else if(STAGE_SUB( 9u)) STAGE_RESURRECT(pSquad1, 20u, 23u)
 
             STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
             {

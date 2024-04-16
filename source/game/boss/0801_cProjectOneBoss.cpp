@@ -164,7 +164,7 @@ void cProjectOneBoss::__MoveOwn()
     // 
     else if(m_iPhase == 20u)
     {
-        if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY))
+        if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY))
         {
             PHASE_CONTROL_TICKER(0u, 0u, 10.0f, LERP_LINEAR)
             {
@@ -185,7 +185,7 @@ void cProjectOneBoss::__MoveOwn()
                 const coreVector2 vAim = (vPlayerPos - pBullet->GetPosition().xy()).Normalized();
                 const coreVector2 vDir = SmoothAim(pBullet->GetFlyDir(), vAim, 2.0f);
 
-                pBullet->SetSpeed (pBullet->GetSpeed() + 2.0f * Core::System->GetTime());   
+                pBullet->SetSpeed (pBullet->GetSpeed() + 2.0f * TIME);   
                 pBullet->SetFlyDir(vDir);
             });
 
@@ -195,7 +195,7 @@ void cProjectOneBoss::__MoveOwn()
             });
         }
 
-        if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_OUTRO))
+        if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_OUTRO))
             PHASE_CHANGE_TO(30u)
     }
 

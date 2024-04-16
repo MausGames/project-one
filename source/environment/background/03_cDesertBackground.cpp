@@ -40,7 +40,7 @@ cDesertBackground::cDesertBackground()noexcept
             // test for valid values
             if((fHeight > -23.0f) && (fHeight < -18.0f)    )// && (F_TO_SI(vPosition.y+160.0f) % 80 < 40))
             {
-                if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 25.0f))
+                if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, POW2(5.0f)))
                 {
 
                     const coreVector3 vNormal = (m_pOutdoor->RetrieveBackNormal(vPosition) * coreVector3(1.0f,1.0f,0.5f)).Normalized();
@@ -132,7 +132,7 @@ void cDesertBackground::__MoveOwn()
     // 
     const coreVector2 vMove      = m_vSandDirection * (-0.35f * g_pEnvironment->GetSpeed());
     const coreVector2 vTexSize   = coreVector2(1.0f,1.0f) * 2.3f;
-    const coreVector2 vTexOffset = m_Sand.GetTexOffset() + (coreVector2(0.0f,-1.2f) + vMove) * (0.4f * Core::System->GetTime());
+    const coreVector2 vTexOffset = m_Sand.GetTexOffset() + (coreVector2(0.0f,-1.2f) + vMove) * (0.4f * TIME);
 
     // 
     m_Sand.SetDirection(MapToAxisInv(m_vSandDirection.InvertedX(), g_pEnvironment->GetDirection()));

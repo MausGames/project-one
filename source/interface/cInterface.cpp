@@ -47,6 +47,26 @@ void cInterface::sPlayerView::Construct(const coreUintW iIndex)
     oScoreMission.Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
     oScoreMission.SetPosition (oScoreTotal.GetPosition() + coreVector2(0.01f,-0.035f) * vSide);
     oScoreMission.SetAlignment(oScoreTotal.GetAlignment());
+    
+    
+    
+
+    oComboBar.DefineTexture(0u, "default_white.png");
+    oComboBar.DefineProgram("default_2d_program");
+    oComboBar.SetPosition  (oScoreMission.GetPosition() + coreVector2(-0.007f,-0.07f));
+    oComboBar.SetCenter    (oScoreMission.GetCenter());
+    oComboBar.SetAlignment (oScoreMission.GetAlignment());
+
+    oComboValue.Construct   (MENU_FONT_STANDARD_4, MENU_OUTLINE_SMALL);
+    oComboValue.SetPosition (oScoreMission.GetPosition() + coreVector2(-0.007f,-0.01f));
+    oComboValue.SetCenter   (oScoreMission.GetCenter());
+    oComboValue.SetAlignment(oScoreMission.GetAlignment());
+
+    oChainValue.Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+    oChainValue.SetPosition (oScoreMission.GetPosition() + coreVector2(0.001f,-0.06f));
+    oChainValue.SetCenter   (oScoreMission.GetCenter());
+    oChainValue.SetAlignment(oScoreMission.GetAlignment());
+    
 
     // 
     fSpin = 0.0f;
@@ -98,9 +118,9 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
     m_aBossTime[1].SetPosition (m_aBossTime[0].GetPosition());
     m_aBossTime[1].SetAlignment(coreVector2(1.0f,-1.0f));
 
-    m_WaveName.Construct   (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
-    m_WaveName.SetPosition (m_aBossHealthBar[0].GetPosition());
-    m_WaveName.SetAlignment(m_aBossHealthBar[0].GetAlignment());
+    m_WaveName.Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+    m_WaveName.SetPosition (coreVector2(0.0f,0.002f));    
+    m_WaveName.SetAlignment(coreVector2(0.0f,1.0f));   
 
     m_aWaveTime[0].Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
     m_aWaveTime[0].SetPosition (coreVector2( 0.0f,-0.002f));
@@ -143,6 +163,7 @@ void cInterface::Render()
             for(coreUintW j = 0u; j < INTERFACE_LIVES; ++j) m_aView[i].aLife[j].Render();
             m_aView[i].aShieldBar[0].Render();
             m_aView[i].aShieldBar[1].Render();
+            m_aView[i].oComboBar    .Render();
         }
 
         if(m_fAlphaBoss)
@@ -157,7 +178,9 @@ void cInterface::Render()
             // render player labels
             m_aView[i].oShieldValue .Render();
             m_aView[i].oScoreTotal  .Render();
-            m_aView[i].oScoreMission.Render();
+            //m_aView[i].oScoreMission.Render();
+            m_aView[i].oComboValue  .Render();
+            m_aView[i].oChainValue  .Render();
         }
 
         if(m_fAlphaBoss)
@@ -219,7 +242,7 @@ void cInterface::Move()
         sPlayerView& oView   = m_aView[i];
         cPlayer*     pPlayer = g_pGame->GetPlayer(i);
 
-        if(CONTAINS_FLAG(pPlayer->GetStatus(), PLAYER_STATUS_SHIELDED))
+        if(HAS_FLAG(pPlayer->GetStatus(), PLAYER_STATUS_SHIELDED))
         {
             // 
             if(m_fAlphaAll) oView.fSpin.UpdateMin(1.0f, 1.0f);
@@ -270,16 +293,29 @@ void cInterface::Move()
             }
         }
 
-        // display score
-        oView.oScoreTotal  .SetText(PRINT("%07u", pPlayer->GetScoreTable()->GetScoreTotal()));
-        oView.oScoreMission.SetText(PRINT("%07u", pPlayer->GetScoreTable()->GetScoreMission(g_pGame->GetCurMissionIndex())));
+        const cScoreTable* pTable = pPlayer->GetScoreTable();
 
+        // display score
+        oView.oScoreTotal  .SetText(PRINT("%07u", pTable->GetScoreTotal()));
+        oView.oScoreMission.SetText(PRINT("%07u", pTable->GetScoreMission(g_pGame->GetCurMissionIndex())));
+        
+        
+        oView.oComboBar.SetSize  (coreVector2(0.15f * MIN(pTable->GetComboCooldown() * 1.1f, 1.0f), 0.013f));
+        oView.oComboBar.SetColor3(COLOR_CHAIN(pTable->GetComboCooldown()));
+
+        oView.oComboValue         .SetText(PRINT("x%.1f",   pTable->GetCurCombo()));
+        oView.oChainValue    .SetText(pTable->GetCurChain() ? PRINT("+%u", pTable->GetCurChain()) : "");
+
+        
         // set player transparency
         oView.aShieldBar[0].SetAlpha(m_fAlphaAll);
         oView.aShieldBar[1].SetAlpha(m_fAlphaAll);
         oView.oShieldValue .SetAlpha(m_fAlphaAll);
         oView.oScoreTotal  .SetAlpha(m_fAlphaAll);
         oView.oScoreMission.SetAlpha(m_fAlphaAll);
+        oView.oComboBar    .SetAlpha(m_fAlphaAll);
+        oView.oComboValue  .SetAlpha(m_fAlphaAll);
+        oView.oChainValue  .SetAlpha(m_fAlphaAll);
 
         // move player
         oView.oShieldValue .Move();
@@ -287,6 +323,9 @@ void cInterface::Move()
         oView.aShieldBar[1].Move();
         oView.oScoreTotal  .Move();
         oView.oScoreMission.Move();
+        oView.oComboBar    .Move();
+        oView.oComboValue  .Move();
+        oView.oChainValue  .Move();
     }
 
     // check for active boss
@@ -366,7 +405,7 @@ void cInterface::Move()
     {
         // calculate visibility and animation value
         const coreFloat fVisibility = MIN(fBanner, m_fBannerDuration - fBanner, INTERFACE_BANNER_SPEED_REV) * INTERFACE_BANNER_SPEED;
-        const coreFloat fAnimation  = LERPB(0.0f, 1.0f, fBanner / INTERFACE_BANNER_ANIMATION) * INTERFACE_BANNER_ANIMATION;
+        const coreFloat fAnimation  = LERPB(0.0f, 1.0f, MIN(fBanner / INTERFACE_BANNER_ANIMATION, 1.0f)) * INTERFACE_BANNER_ANIMATION;
 
         // slash banner bar across screen (# direction can be swapped, also alpha value is used as texture coordinate correction)
         const coreBool bLeftRight = (fBanner < (m_fBannerDuration * 0.5f)) ? false : true;
@@ -411,8 +450,8 @@ void cInterface::Move()
         const coreFloat fVisibility = MIN(fStory, INTERFACE_STORY_DURATION - fStory, 1.0f / INTERFACE_STORY_SPEED) * INTERFACE_STORY_SPEED;
 
         // set story transparency
-        m_aStoryText[0].SetAlpha(fVisibility);
-        m_aStoryText[1].SetAlpha(fVisibility);
+        m_aStoryText[0].SetAlpha(fVisibility * MENU_INSIDE_ALPHA);
+        m_aStoryText[1].SetAlpha(fVisibility * MENU_INSIDE_ALPHA);
 
         // move story
         m_aStoryText[0].Move();
@@ -421,13 +460,13 @@ void cInterface::Move()
 
     // smoothly toggle interface visibility (after forwarding, to allow overriding)
     if(m_bVisible)
-         {if(m_fAlphaAll < 1.0f) m_fAlphaAll.UpdateMin( 2.0f, 1.0f);}
-    else {if(m_fAlphaAll > 0.0f) m_fAlphaAll.UpdateMax(-2.0f, 0.0f);}
+         m_fAlphaAll.UpdateMin( 2.0f, MENU_INSIDE_ALPHA);
+    else m_fAlphaAll.UpdateMax(-2.0f, 0.0f);
 
     // smoothly toggle boss data visibility
     if(pBoss && (m_iBannerType == INTERFACE_BANNER_TYPE_BOSS) && (fBanner >= INTERFACE_BOSS_DELAY))
-         {if(m_fAlphaBoss < 1.0f) m_fAlphaBoss.UpdateMin( 2.0f, 1.0f);}
-    else {if(m_fAlphaBoss > 0.0f) m_fAlphaBoss.UpdateMax(-2.0f, 0.0f);}
+         m_fAlphaBoss.UpdateMin( 2.0f, 1.0f);
+    else m_fAlphaBoss.UpdateMax(-2.0f, 0.0f);
 }
 
 
@@ -540,11 +579,11 @@ void cInterface::ShowBoss(const cBoss* pBoss)
 void cInterface::ShowWave(const coreChar* pcName)
 {
 
-
-    if(pcName && pcName[0]) this->ShowStory(pcName);   
+    //if(pcName && pcName[0]) this->ShowStory(pcName);   
     // TODO: story-text font is still dynamic
 
 
+    //m_WaveName.SetText(pcName);
 }
 
 
@@ -598,6 +637,19 @@ void cInterface::ShowScore(const coreUint32 iScore, const coreUint8 iMedal, cons
 {
     // show default score banner
     this->ShowScore(coreData::ToChars(iScore), Core::Language->GetString("BONUS_TIME"), iMedal, iMedalType);
+}
+
+
+// ****************************************************************
+// 
+void cInterface::CancelBanner()
+{
+    if(!this->IsBannerActive()) return;
+    
+    if(m_iBannerType != INTERFACE_BANNER_TYPE_SCORE) return;
+
+    if(coreMath::IsNear(m_Medal.GetAlpha(), 1.0f))
+        m_fBannerDuration = g_pGame->GetTimeTable()->GetTimeEvent() - m_fBannerStart + INTERFACE_BANNER_SPEED_REV;
 }
 
 
@@ -671,6 +723,9 @@ void cInterface::UpdateLayout()
         nUpdateFunc(&oView.oShieldValue,  vBottom + vSide);
         nUpdateFunc(&oView.oScoreTotal,   vTop    + vSide);
         nUpdateFunc(&oView.oScoreMission, vTop    + vSide);
+        nUpdateFunc(&oView.oComboBar,     vTop    + vSide);
+        nUpdateFunc(&oView.oComboValue,   vTop    + vSide);
+        nUpdateFunc(&oView.oChainValue,   vTop    + vSide);
     }
 
     // 
@@ -681,7 +736,7 @@ void cInterface::UpdateLayout()
     nUpdateFunc(&m_aBossTime[1],      vTop);
 
     // 
-    nUpdateFunc(&m_WaveName,     vTop);
+    nUpdateFunc(&m_WaveName,     vBottom);
     nUpdateFunc(&m_aWaveTime[0], vTop);
     nUpdateFunc(&m_aWaveTime[1], vTop);
 }
@@ -697,7 +752,7 @@ void cInterface::UpdateEnabled()
         sPlayerView& oView   = m_aView[i];
         cPlayer*     pPlayer = g_pGame->GetPlayer(i);
 
-        if(CONTAINS_FLAG(pPlayer->GetStatus(), PLAYER_STATUS_SHIELDED))
+        if(HAS_FLAG(pPlayer->GetStatus(), PLAYER_STATUS_SHIELDED))
         {
             // 
             for(coreUintW j = 0u; j < INTERFACE_LIVES; ++j) oView.aLife[j].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);

@@ -28,6 +28,8 @@
 // TODO: stomach should not create all vertices
 // TODO: EnableShadowRead only if appropriate ground objects would be rendered (IsInstanced)
 // TODO: grass and blood textures are duplicated (especially normal maps)
+// TODO: can thunder effect cause issues for some players ? are there other effects causing issues ? (change effects or add disable option)
+// TODO: object-sets with 0% visibility and no active object should be skipped entirely
 
 
 // ****************************************************************
@@ -100,29 +102,29 @@
 class INTERFACE cBackground
 {
 protected:
-    coreFrameBuffer m_FrameBuffer;                      // background frame buffer (multisampled)
-    coreFrameBuffer m_ResolvedTexture;                  // resolved texture
+    coreFrameBuffer m_FrameBuffer;                   // background frame buffer (multisampled)
+    coreFrameBuffer m_ResolvedTexture;               // resolved texture
 
-    cOutdoor* m_pOutdoor;                               // outdoor-surface object (optional)
-    cWater*   m_pWater;                                 // water-surface object (optional)
+    cOutdoor* m_pOutdoor;                            // outdoor-surface object (optional)
+    cWater*   m_pWater;                              // water-surface object (optional)
 
-    std::vector<coreBatchList*> m_apGroundObjectList;   // persistent objects connected to the ground
-    std::vector<coreBatchList*> m_apDecalObjectList;    // persistent transparent objects connected to the ground
-    std::vector<coreBatchList*> m_apAirObjectList;      // persistent objects floating in the air
+    coreList<coreBatchList*> m_apGroundObjectList;   // persistent objects connected to the ground
+    coreList<coreBatchList*> m_apDecalObjectList;    // persistent transparent objects connected to the ground
+    coreList<coreBatchList*> m_apAirObjectList;      // persistent objects floating in the air
 
-    coreLookupStr<coreBatchList*> m_apGroundAddList;    // temporary objects connected to the ground
-    coreLookupStr<coreBatchList*> m_apDecalAddList;     // temporary transparent objects connected to the ground
-    coreLookupStr<coreBatchList*> m_apAirAddList;       // temporary objects floating in the air
+    coreMapStr<coreBatchList*> m_apGroundAddList;    // temporary objects connected to the ground
+    coreMapStr<coreBatchList*> m_apDecalAddList;     // temporary transparent objects connected to the ground
+    coreMapStr<coreBatchList*> m_apAirAddList;       // temporary objects floating in the air
 
-    coreLookup<const coreBatchList*, std::vector<coreUint16>> m_aaiBaseHeight;   // 
-    coreLookup<const coreBatchList*, std::vector<coreUint32>> m_aaiBaseNormal;   // 
+    coreMap<const coreBatchList*, coreList<coreUint16>> m_aaiBaseHeight;   // 
+    coreMap<const coreBatchList*, coreList<coreUint32>> m_aaiBaseNormal;   // 
 
-    static coreMemoryPool s_MemoryPool;                 // 
-    static coreRand       s_Rand;                       // 
-    // rand für background, outdoor (andere location für dieses coreRand object?) (oder eigentlich nur ein stack-object in Outdoor und Background)
+    static coreMemoryPool s_MemoryPool;              // 
 
 
 public:
+    static coreRand       s_Rand;                    // 
+    // rand für background, outdoor (andere location für dieses coreRand object?) (oder eigentlich nur ein stack-object in Outdoor und Background)
     cBackground()noexcept;
     virtual ~cBackground();
 
@@ -312,7 +314,7 @@ private:
     coreSoundPtr m_pLavaSound;              // 
 
     coreParticleSystem m_Smoke;
-    std::vector<coreParticleEffect> m_aSmokeEffect;
+    coreList<coreParticleEffect> m_aSmokeEffect;
 
     coreFlow  m_fSparkTime;         // 
     coreUintW m_iSparkNum;          // 

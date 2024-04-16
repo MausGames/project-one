@@ -43,7 +43,7 @@ cGrassBackground::cGrassBackground()noexcept
             // test for valid values
             if((fHeight > -23.0f) && (fHeight < -18.0f) && (F_TO_SI(vPosition.y+160.0f) % 80 < 40))
             {
-                if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 25.0f))
+                if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, POW2(5.0f)))
                 {
                     // create object
                     coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
@@ -96,9 +96,9 @@ cGrassBackground::cGrassBackground()noexcept
                 // test for valid values
                 if((fHeight > -23.0f) && (fHeight < -18.0f) && (F_TO_SI(vPosition.y+176.0f) % 80 < 60))
                 {
-                    if(!cBackground::_CheckIntersectionQuick(pList1,                  vPosition, 25.0f) &&
-                       !cBackground::_CheckIntersectionQuick(pList2,                  vPosition, 25.0f) &&
-                       !cBackground::_CheckIntersection     (m_apGroundObjectList[0], vPosition, 25.0f))
+                    if(!cBackground::_CheckIntersectionQuick(pList1,                  vPosition, POW2(5.0f)) &&
+                       !cBackground::_CheckIntersectionQuick(pList2,                  vPosition, POW2(5.0f)) &&
+                       !cBackground::_CheckIntersection     (m_apGroundObjectList[0], vPosition, POW2(5.0f)))
                     {
                         // determine object type
                         const coreBool bType = (Core::Rand->Bool(0.75f) || (fHeight >= -20.0f)) ? true : false;
@@ -159,7 +159,7 @@ cGrassBackground::cGrassBackground()noexcept
                 // test for valid values
                 if(fHeight > -15.0f)
                 {
-                    if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 40.0f))
+                    if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, POW2(6.35f)))
                     {
                         // create object
                         coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
@@ -207,7 +207,7 @@ cGrassBackground::cGrassBackground()noexcept
                 const coreFloat   fHeight   = Core::Rand->Float(10.0f, 40.0f);
 
                 // test for valid values
-                if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 680.0f))
+                if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, POW2(26.0f)))
                 {
                     // create object
                     coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);

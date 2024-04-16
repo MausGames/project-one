@@ -81,7 +81,7 @@ void cReplayMenu::Move()
                     if(i < m_aInfoList.size())
                     {
                         // 
-                        g_pMenu->GetMsgBox()->ShowQuestion(PRINT("%s [%s] ?", Core::Language->GetString("QUESTION_LOAD"), m_aInfoList[i].oHeader.acName), [=](const coreInt32 iAnswer)
+                        g_pMenu->GetMsgBox()->ShowQuestion(PRINT("%s [%s] ?", Core::Language->GetString("QUESTION_LOAD"), m_aInfoList[i].oHeader.acName), [=, this](const coreInt32 iAnswer)
                         {
                             if(iAnswer == MSGBOX_ANSWER_YES)
                             {

@@ -209,10 +209,10 @@ cScoreTable::cScoreTable()noexcept
 void cScoreTable::Update()
 {
     // 
-    if(m_fChainCooldown)
+    if(m_fComboCooldown)
     {
-        m_fChainCooldown.UpdateMax(-1.0f, 0.0f);
-        if(!m_fChainCooldown) this->TransferChain();
+        m_fComboCooldown.UpdateMax(-1.0f/3.0f, 0.0f);
+        if(!m_fComboCooldown) this->CancelCombo();
     }
 }
 
@@ -229,13 +229,13 @@ void cScoreTable::Reset()
     // reset combo and chain values (# no memset)
     m_aiComboValue[1] = m_aiComboValue[0] = 0u;
     m_aiChainValue[1] = m_aiChainValue[0] = 0u;
-    m_fChainCooldown = 0.0f;
+    m_fComboCooldown = 0.0f;
 }
 
 
 // ****************************************************************
 // 
-void cScoreTable::AddScore(const coreUint32 iValue, const coreBool bModified, const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
+coreUint32 cScoreTable::AddScore(const coreUint32 iValue, const coreBool bModified, const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
 {
     const coreUint32 iFinalValue = bModified ? F_TO_UI(I_TO_F(iValue) * this->GetCurCombo()) : iValue;
 
@@ -253,13 +253,27 @@ void cScoreTable::AddScore(const coreUint32 iValue, const coreBool bModified, co
 
     // 
     g_pSave->EditGlobalStats()->iScoreGained += iFinalValue;
+
+    return iFinalValue;
 }
 
-void cScoreTable::AddScore(const coreUint32 iValue, const coreBool bModified)
+coreUint32 cScoreTable::AddScore(const coreUint32 iValue, const coreBool bModified, const coreVector3& vPosition)
 {
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
-    this->AddScore(iValue, bModified, g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
+    const coreUint32 iFinalValue = this->AddScore(iValue, bModified, g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
+
+    // 
+    g_pGame->GetCombatText()->AddScore(iFinalValue, vPosition);
+
+    return iFinalValue;
+}
+
+coreUint32 cScoreTable::AddScore(const coreUint32 iValue, const coreBool bModified)
+{
+    // 
+    ASSERT(STATIC_ISVALID(g_pGame))
+    return this->AddScore(iValue, bModified, g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
 }
 
 
@@ -270,6 +284,9 @@ void cScoreTable::AddCombo(const coreUint32 iValue)
     // 
     m_aiComboValue[0] += iValue;
     m_aiComboValue[1]  = MAX(m_aiComboValue[0], m_aiComboValue[1]);
+
+    // 
+    this->RefreshCombo();
 }
 
 
@@ -282,16 +299,47 @@ void cScoreTable::AddChain(const coreUint32 iValue)
     m_aiChainValue[1]  = MAX(m_aiChainValue[0], m_aiChainValue[1]);
 
     // 
-    m_fChainCooldown = 1.0f;
+    this->RefreshCombo();
 }
 
 
 // ****************************************************************
 // 
-void cScoreTable::ReduceCombo()
+void cScoreTable::RefreshCombo()
 {
     // 
-    m_aiComboValue[0] /= 2u;
+    if(m_aiComboValue[0]) m_fComboCooldown = 1.0f;
+}
+
+
+// ****************************************************************
+// 
+void cScoreTable::CancelCombo()
+{
+    //if(m_aiComboValue[0] && !m_aiChainValue[0]) g_pGame->GetCombatText()->AddText("-COMBO", m_pOwner->GetPosition(), COLOR_MENU_RED, 1u);
+
+
+    // 
+    this->TransferChain();
+
+    // 
+    m_aiComboValue[0] = 0u;
+    m_fComboCooldown  = 0.0f;
+}
+
+
+// ****************************************************************
+// 
+void cScoreTable::TransferCombo()
+{
+    const coreUint32 iBonus = this->AddScore(100u * m_aiComboValue[0], false);
+    
+    // 
+    g_pGame->GetCombatText()->AddText(PRINT("+%u", iBonus), m_pOwner->GetPosition(), COLOR_MENU_BLUE, 1u);
+    
+    // 
+    m_aiComboValue[0] = 0u;
+    m_fComboCooldown  = 0.0f;
 }
 
 
@@ -299,14 +347,11 @@ void cScoreTable::ReduceCombo()
 // 
 void cScoreTable::TransferChain()
 {
+    // 
     if(m_aiChainValue[0])
     {
-        // 
-        this->AddScore(m_aiChainValue[0], true);
+        this->AddScore(m_aiChainValue[0], true, m_pOwner->GetPosition());
         m_aiChainValue[0] = 0u;
-
-        // 
-        m_fChainCooldown = 0.0f;
     }
 }
 
@@ -314,7 +359,7 @@ void cScoreTable::TransferChain()
 // ****************************************************************
 // constructor
 cTimeTable::cTimeTable()noexcept
-: m_fFrameTime (Core::System->GetTime())
+: m_fFrameTime (TIME)
 {
     // 
     this->Reset();
@@ -328,14 +373,14 @@ void cTimeTable::Update()
     ASSERT(STATIC_ISVALID(g_pGame))
 
     // 
-    //if(!Core::System->GetTime()) return;
-    if(Core::System->GetTime() < 0.001f) return;
-    ASSERT(Core::System->GetTime() == m_fFrameTime)
+    //if(!TIME) return;
+    if(TIME < 0.001f) return;
+    ASSERT(TIME == m_fFrameTime)
 
     // 
     m_iTimeEvent += 1u;
 
-    if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY))
+    if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY))
     {
         const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
         const coreUintW iSegmentIndex = g_pGame->GetCurMission()->GetCurSegmentIndex();

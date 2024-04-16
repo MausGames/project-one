@@ -14,6 +14,9 @@
 // TODO: support box mode (4 walls), for scaling
 // TODO: don't render wallpapers on 1:1
 // TODO: also clamp fullscreen distortion similar to water distortion ?
+// TODO: changing game size (option) should add fixed wallpaper offset
+// TODO: pause (or other) overlays should adapt to offsets
+// TODO: try to reduce overdraw when all walls are active
 
 
 // ****************************************************************
@@ -23,8 +26,10 @@
 #define POST_TEXTURE_UNIT_GLOW        (2u)   // same for glow
 #define POST_TEXTURE_UNIT_DISTORTION  (3u)   // same for distortion
 
-#define POST_INTERIORS (PLAYERS)
-#define POST_WALLS     (2u)
+#define POST_INTERIORS   (PLAYERS)
+#define POST_WALLS_BASE  (2u)
+#define POST_WALLS_EXTRA (2u)
+#define POST_WALLS       (POST_WALLS_BASE + POST_WALLS_EXTRA)
 
 
 // ****************************************************************
@@ -46,6 +51,9 @@ private:
     coreVector2 m_vDirectionConfig;             // 
     coreVector2 m_vDirectionGame;               // 
 
+    coreFloat m_afOffset[POST_WALLS];           // (-x, +x, -y, +y) 
+    coreBool  m_bOffsetActive;                  // 
+
 
 public:
     cPostProcessing()noexcept;
@@ -64,6 +72,7 @@ public:
 
     // 
     void        SetWallOpacity  (const coreFloat    fOpacity);
+    inline void SetWallOffset   (const coreUintW    iIndex, const coreFloat fOffset)     {ASSERT(iIndex < POST_WALLS) m_afOffset[iIndex] = fOffset; m_bOffsetActive = true;}
     inline void SetSplitScreen  (const coreBool     bSplitScreen)                        {m_bSplitScreen   = bSplitScreen;}
     inline void SetDirectionGame(const coreVector2& vDirectionGame)                      {m_vDirectionGame = vDirectionGame; ASSERT(vDirectionGame.IsNormalized())}
     inline void SetSaturation   (const coreUintW    iIndex, const coreFloat fSaturation) {ASSERT((iIndex < POST_INTERIORS) && (fSaturation >= 0.0f) && (fSaturation <= 1.0f)) m_aInterior[iIndex].SetColor3(coreVector3(LERP(1.0f, 0.06f, fSaturation), m_aInterior[iIndex].GetColor3().yz()));}

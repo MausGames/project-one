@@ -121,23 +121,23 @@ public:
     // 
     struct sInfo final
     {
-        std::string sPath;     // 
-        sHeader     oHeader;   // 
+        coreString sPath;     // 
+        sHeader    oHeader;   // 
     };
 
 
 private:
-    sHeader m_Header;                                    // 
+    sHeader m_Header;                                 // 
 
-    std::vector<sSnapshot> m_aSnapshot;                  // 
-    std::vector<sPacket>   m_aaPacket[REPLAY_PLAYERS];   // 
+    coreList<sSnapshot> m_aSnapshot;                  // 
+    coreList<sPacket>   m_aaPacket[REPLAY_PLAYERS];   // 
 
-    sGameInput m_aInput[REPLAY_PLAYERS];                 // 
+    sGameInput m_aInput[REPLAY_PLAYERS];              // 
 
-    coreUint32 m_iCurFrame;                              // 
-    coreUint32 m_aiCurPacket[REPLAY_PLAYERS];            // 
+    coreUint32 m_iCurFrame;                           // 
+    coreUint32 m_aiCurPacket[REPLAY_PLAYERS];         // 
 
-    eReplayStatus m_iStatus;                             // 
+    eReplayStatus m_iStatus;                          // 
 
 
 public:
@@ -170,7 +170,7 @@ public:
     inline const eReplayStatus& GetStatus()const {return m_iStatus;}
 
     // 
-    static void LoadInfoList(std::vector<sInfo>* OUTPUT paInfoList);
+    static void LoadInfoList(coreList<sInfo>* OUTPUT paInfoList);
 
 
 private:

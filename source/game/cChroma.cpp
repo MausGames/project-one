@@ -40,7 +40,7 @@ void cChromaManager::Move()
                                               MIN(CHROMA_AREA.y - ABS(vPos.y), 0.0f) * SIGN(vPos.y));
 
         // 
-        if(!vMove.IsNull()) pBullet->SetPosition(pBullet->GetPosition() + coreVector3(vMove * (3.0f * Core::System->GetTime()), 0.0f));
+        if(!vMove.IsNull()) pBullet->SetPosition(pBullet->GetPosition() + coreVector3(vMove * (3.0f * TIME), 0.0f));
     });
 
     // 
@@ -48,7 +48,7 @@ void cChromaManager::Move()
     {
         const coreBool  bRolling = pPlayer->IsRolling();
         const coreFloat fRange   = (bRolling ? POW2(40.0f) : POW2(15.0f));
-        const coreFloat fSpeed   = (bRolling ? 200.0f      : 100.0f) * RCP(fRange) * Core::System->GetTime();
+        const coreFloat fSpeed   = (bRolling ? 200.0f      : 100.0f) * RCP(fRange) * TIME;
 
         // 
         m_BulletManager.ForEachBulletTyped<cChromaBullet>([&](cChromaBullet* OUTPUT pBullet)

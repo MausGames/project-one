@@ -38,9 +38,10 @@
 #define MENU_LIGHT_IDLE               (0.667f)   // visible strength of idle menu objects
 #define MENU_CONTRAST_WHITE           (0.8f)     // white contrast value (to reduce eye strain)
 #define MENU_CONTRAST_BLACK           (0.04f)    // black contrast value
+#define MENU_INSIDE_ALPHA             (0.9f)     // 
 
 #define MENU_GAME_MISSIONS            (9u)
-#define MENU_GAME_STAGES              (SEGMENTS)
+#define MENU_GAME_STAGES              (8u)//SEGMENTS)
 #define MENU_GAME_PLAYERS             (PLAYERS)
 #define MENU_GAME_OPTIONS             (3u)
 #define MENU_SCORE_ENTRIES            (10u)
@@ -67,12 +68,12 @@
 #define MENU_BUTTON             "menu_background_black.png", "menu_background_black.png"
 #define MENU_SWITCHBOX          "default_black.png", "default_black.png"
 #define MENU_FONT_DEFAULT       "keifont.ttf"
-#define MENU_FONT_STANDARD_1    MENU_FONT_DEFAULT, (16u)
+#define MENU_FONT_STANDARD_1    MENU_FONT_DEFAULT, (18u)
 #define MENU_FONT_STANDARD_2    MENU_FONT_DEFAULT, (22u)
 #define MENU_FONT_STANDARD_3    MENU_FONT_DEFAULT, (32u)
 #define MENU_FONT_STANDARD_4    MENU_FONT_DEFAULT, (42u)
 #define MENU_FONT_STANDARD_5    MENU_FONT_DEFAULT, (72u)
-#define MENU_FONT_DYNAMIC_1     "dynamic_font",    (16u)
+#define MENU_FONT_DYNAMIC_1     "dynamic_font",    (18u)
 #define MENU_FONT_DYNAMIC_2     "dynamic_font",    (22u)
 #define MENU_FONT_DYNAMIC_3     "dynamic_font",    (32u)
 #define MENU_FONT_DYNAMIC_4     "dynamic_font",    (42u)
@@ -188,7 +189,6 @@ enum eEntry : coreUint8
     ENTRY_INPUT_ACTION2,
     ENTRY_INPUT_ACTION3,
     ENTRY_INPUT_ACTION4,
-    ENTRY_INPUT_ACTION5,
     ENTRY_INPUT,
 
     ENTRY_GAME_LANGUAGE = ENTRY_INPUT,
@@ -237,12 +237,12 @@ enum eEntry : coreUint8
 class cIntroMenu final : public coreMenu
 {
 private:
-    cGuiLabel m_WelcomeText;                                   // 
+    cGuiLabel m_WelcomeText;                               // 
 
-    coreTimer m_IntroTimer;                                    // intro animation 
-    coreUint8 m_iIntroStatus;                                  // 
+    coreTimer m_IntroTimer;                                // intro animation 
+    coreUint8 m_iIntroStatus;                              // 
 
-    coreLookup<std::string, cGuiButton*> m_apLanguageButton;   // list with buttons for valid language files
+    coreMap<coreString, cGuiButton*> m_apLanguageButton;   // list with buttons for valid language files
 
 
 public:
@@ -343,7 +343,8 @@ private:
     cGuiObject m_aMissionLine[MENU_GAME_MISSIONS];     // 
 
     cGuiObject m_StageArea;                            // 
-    cGuiButton m_aStage[MENU_GAME_STAGES];             // 
+    cGuiButton m_aaStage[MENU_GAME_MISSIONS][MENU_GAME_STAGES];             // 
+    cGuiObject m_aStageCursor;
 
     cGuiLabel  m_aOptionName[MENU_GAME_OPTIONS];       // 
     cGuiObject m_aOptionLine[MENU_GAME_OPTIONS];       // 
@@ -419,7 +420,7 @@ private:
     cGuiLabel  m_aTime[MENU_REPLAY_ENTRIES];   // 
     cGuiObject m_aLine[MENU_REPLAY_ENTRIES];   // 
 
-    std::vector<cReplay::sInfo> m_aInfoList;   // 
+    coreList<cReplay::sInfo> m_aInfoList;      // 
 
 
 public:
@@ -518,14 +519,14 @@ private:
     sPlayerInput m_aInput[MENU_CONFIG_INPUTS];
     cGuiButton   m_SwapInput;
 
-    coreUintW                          m_iCurMonitorIndex;
-    coreLookup<coreUintW, std::string> m_asCurResolution;
-    
-    
-cMenuInput m_MenuInput;  
+    coreUintW                      m_iCurMonitorIndex;
+    coreMap<coreUintW, coreString> m_asCurResolution;
 
 
 public:
+    
+    
+cMenuInput m_MenuInput;  
     cConfigMenu()noexcept;
 
     DISABLE_COPY(cConfigMenu)
@@ -841,7 +842,7 @@ public:
 
     // 
     static void UpdateLanguageFont();
-    static const coreLookup<std::string, std::string>& GetLanguageList();
+    static const coreMap<coreString, coreString>& GetLanguageList();
 
     // menu helper routines
     static void UpdateButton        (cGuiButton*    OUTPUT pButton, const coreBool bFocused, const coreVector3& vFocusColor = COLOR_MENU_WHITE);

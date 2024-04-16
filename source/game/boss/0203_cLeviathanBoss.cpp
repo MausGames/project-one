@@ -195,7 +195,7 @@ void cLeviathanBoss::__MoveOwn()
         if(m_Head.GetPosition().z < fHeadHeight)
         {
             // below
-            m_avVector[FALL_BEHIND].x -= Core::System->GetTime() * g_pEnvironment->GetSpeed() * MIN(OUTDOOR_DETAIL, (fHeadHeight - m_Head.GetPosition().z) * 0.5f);
+            m_avVector[FALL_BEHIND].x -= TIME * g_pEnvironment->GetSpeed() * MIN(OUTDOOR_DETAIL, (fHeadHeight - m_Head.GetPosition().z) * 0.5f);
         }
         else
         {
@@ -465,12 +465,12 @@ void cLeviathanBoss::__MoveOwn()
                 cEnemy* pPart = this->__GetPart(i);
 
                 const coreVector3 vPos   = pPart->GetPosition();
-                const coreVector2 vForce = m_avVector[SCATTER_FORCE + i].xy() * Core::System->GetTime();
+                const coreVector2 vForce = m_avVector[SCATTER_FORCE + i].xy() * TIME;
 
                 pPart->SetPosition(coreVector3(vPos.xy() + vPos.xy().Normalized() * vForce.x, vPos.z + vForce.y));
 
                 m_avVector[SCATTER_FORCE + i].x *= FrictionFactor(0.5f);
-                m_avVector[SCATTER_FORCE + i].y -= Core::System->GetTime() * 150.0f;
+                m_avVector[SCATTER_FORCE + i].y -= TIME * 150.0f;
             }
 
             if(PHASE_FINISHED)
@@ -558,7 +558,7 @@ void cLeviathanBoss::__MoveOwn()
         }
 
         // 
-        m_avVector[ROTATION_ANGLE].x += m_avVector[ROTATION_ANGLE].y * Core::System->GetTime();
+        m_avVector[ROTATION_ANGLE].x += m_avVector[ROTATION_ANGLE].y * TIME;
     }
 
     // 
@@ -731,11 +731,11 @@ void cLeviathanBoss::__MoveOwn()
         const coreVector2 vHeadMove = m_Head.GetMove();
 
         // 
-        if(!vDiff.IsNull() && !vHeadMove.IsNull()) m_avVector[CONTAINER_DATA].y += 100.0f * coreVector2::Dot(vDiff.Normalized().Rotated90(), vHeadMove.Normalized()) * RCP(vDiff.LengthSq()) * Core::System->GetTime();
+        if(!vDiff.IsNull() && !vHeadMove.IsNull()) m_avVector[CONTAINER_DATA].y += 100.0f * coreVector2::Dot(vDiff.Normalized().Rotated90(), vHeadMove.Normalized()) * RCP(vDiff.LengthSq()) * TIME;
     }
 
     // 
-    m_avVector[CONTAINER_DATA].z += m_avVector[CONTAINER_DATA].y * Core::System->GetTime();
+    m_avVector[CONTAINER_DATA].z += m_avVector[CONTAINER_DATA].y * TIME;
     m_avVector[CONTAINER_DATA].y *= FrictionFactor(0.25f);
     pContainer->SetDirection(coreVector3(coreVector2::Direction(m_avVector[CONTAINER_DATA].z), 0.0f));
 
@@ -887,12 +887,12 @@ void cLeviathanBoss::__CreateOverdrive(const coreUintW iIndex, const coreVector3
                 STATIC_ASSERT(sizeof(m_iDecalState)*8u >= LEVIATHAN_RAYS*2u)
 
                 // 
-                if(CONTAINS_BIT(m_iDecalState, iIndex * 2u)) TOGGLE_BIT(m_iDecalState, iIndex * 2u + 1u)
+                if(HAS_BIT(m_iDecalState, iIndex * 2u)) TOGGLE_BIT(m_iDecalState, iIndex * 2u + 1u)
                 TOGGLE_BIT(m_iDecalState, iIndex * 2u)
 
                 // 
-                const coreBool    bRotated   = CONTAINS_BIT(m_iDecalState, iIndex * 2u);
-                const coreBool    bFlipped   = CONTAINS_BIT(m_iDecalState, iIndex * 2u + 1u);
+                const coreBool    bRotated   = HAS_BIT(m_iDecalState, iIndex * 2u);
+                const coreBool    bFlipped   = HAS_BIT(m_iDecalState, iIndex * 2u + 1u);
                 const coreVector3 vDecalPos  = (vOldHit + vNewHit) * 0.5f;
                 const coreVector2 vDecalSize = coreVector2(Core::Rand->Float(5.0f, 6.5f), MIN(fLen, fMax)*1.8f);
                 const coreVector2 vDecalDir  = vDiff.xy().Normalized();
@@ -927,7 +927,7 @@ void cLeviathanBoss::__CreateOverdrive(const coreUintW iIndex, const coreVector3
     }
 
     // 
-    vOldHit.y -= g_pEnvironment->GetSpeed() * Core::System->GetTime() * OUTDOOR_DETAIL;
+    vOldHit.y -= g_pEnvironment->GetSpeed() * TIME * OUTDOOR_DETAIL;
 
     // 
     m_avVector[OVERDRIVE_HIT + iIndex].xyz(vOldHit);

@@ -58,7 +58,7 @@ private:
 class cItemManager final
 {
 private:
-    std::vector<cItem*> m_apItemList;   // 
+    coreList<cItem*> m_apItemList;   // 
 
 
 public:

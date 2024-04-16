@@ -106,7 +106,7 @@ void cWorldMap::Move()
     // 
     for(coreUintW i = 0u; i < WORLDMAP_PINS; ++i)
     {
-        if(CONTAINS_BIT(m_iEnabled, i))
+        if(HAS_BIT(m_iEnabled, i))
         {
             m_aPin[i].Interact();
             if(m_aPin[i].IsFocused() && (m_iNewPin != i))
@@ -235,7 +235,7 @@ void cWorldMap::SelectPin(const coreUintW iIndex)
     ASSERT(iIndex < WORLDMAP_PINS) 
 
     // 
-    m_iNewPin = CONTAINS_BIT(m_iEnabled, iIndex) ? iIndex : 0u;
+    m_iNewPin = HAS_BIT(m_iEnabled, iIndex) ? iIndex : 0u;
 
     // 
     m_Cursor.SetPosition(m_aPin[m_iNewPin].GetPosition());

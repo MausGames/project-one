@@ -19,7 +19,7 @@ class cMenuInput final : public coreObject2D
 {
 private:
     coreSet<coreObject2D*> m_apObject;   // 
-    coreLookup<coreUint8, coreObject2D*> m_aiShoulder;   // 
+    coreMap<coreUint8, coreObject2D*> m_aiShoulder;   // 
 
     coreObject2D* m_pCurObject;          // 
     coreObject2D* m_pCurTab;

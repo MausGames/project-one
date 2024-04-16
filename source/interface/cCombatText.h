@@ -13,6 +13,9 @@
 // TODO: allow localized text with standard numbers
 // TODO: different labels and animations (size, solid background, 000000 -> 123456, ZSDK -> TEST)
 // TODO: if possible, reuse the same text
+// TODO: text should be moved into screen if outside (in realtime, due to labels moving each other)
+// TODO: badge text should also move with other text
+// TODO: moving text needs to stay sharp, either adjust engine non-rectified text, or increase size and scale down
 
 
 // ****************************************************************
@@ -27,6 +30,7 @@ class cCombatText final
 private:
     cGuiLabel m_aLabel [COMBAT_LABELS];   // label objects to display combat text
     coreFlow  m_afTimer[COMBAT_LABELS];   // animation timers
+    coreUint8 m_aiType [COMBAT_LABELS];   // 
 
     coreUintW m_iCurLabel;                // current label object
 
@@ -45,8 +49,8 @@ public:
     void Move();
 
     // add new active label object
-    void AddText (const coreChar* pcText, const coreVector3& vPosition, const coreVector3& vColor);
-    void AddValue(const coreInt32 iValue, const coreVector3& vPosition, const coreVector3& vColor);
+    void AddText (const coreChar* pcText, const coreVector3& vPosition, const coreVector3& vColor, const coreUint8 iType);
+    void AddScore(const coreInt32 iValue, const coreVector3& vPosition);
 
     // 
     void AddBadge(const coreUint32 iValue, const coreVector3& vPosition);

@@ -125,8 +125,8 @@ cConfigMenu::cConfigMenu()noexcept
     m_aCueInput[1].SetText     (ICON_ARROW_UP);
     m_aCueInput[2].SetText     (ICON_ARROW_UP);
     m_aCueInput[3].SetText     (ICON_ARROW_UP);
-    m_aCueInput[6].SetText     (ICON_UNDO_ALT);
-    m_aCueInput[7].SetText     (ICON_REDO_ALT);
+    m_aCueInput[5].SetText     (ICON_UNDO_ALT);
+    m_aCueInput[6].SetText     (ICON_REDO_ALT);
 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCueRota); ++i)
     {
@@ -209,7 +209,6 @@ cConfigMenu::cConfigMenu()noexcept
             __SET_INPUT(aAction[1], INPUT_ACTION2,   0.22f)
             __SET_INPUT(aAction[2], INPUT_ACTION3,   0.22f)
             __SET_INPUT(aAction[3], INPUT_ACTION4,   0.22f)
-            __SET_INPUT(aAction[4], INPUT_ACTION5,   0.22f)
 
             m_aInput[i].oType  .SetEndless(true);
             m_aInput[i].oRumble.SetEndless(true);
@@ -233,7 +232,7 @@ cConfigMenu::cConfigMenu()noexcept
     STATIC_ASSERT(MENU_CONFIG_INPUTS == 2u)
 
     // fill configuration entries
-    const std::vector<std::string>& asLanguageList = cMenu::GetLanguageList().get_keylist();
+    const coreList<coreString>& asLanguageList = cMenu::GetLanguageList().get_keylist();
 
     for(coreUintW i = 0u, ie = asLanguageList.size(); i < ie; i++)
         m_Language.AddEntry(asLanguageList[i].c_str(), i);
@@ -738,7 +737,7 @@ void cConfigMenu::LoadValues()
     m_AmbientVolume.SelectValue(F_TO_UI(ROUND(g_CurConfig.Audio.fAmbientVolume                       * 100.0f)));
 
     // 
-    const std::vector<std::string>& asLanguageList = cMenu::GetLanguageList().get_valuelist();
+    const coreList<coreString>& asLanguageList = cMenu::GetLanguageList().get_valuelist();
     m_Language    .SelectIndex(std::find(asLanguageList.begin(), asLanguageList.end(), Core::Config->GetString(CORE_CONFIG_BASE_LANGUAGE)) - asLanguageList.begin());
     m_TextSize    .SelectValue(g_CurConfig.Game.iTextSize);
     m_GameRotation.SelectValue(g_CurConfig.Game.iGameRotation);
@@ -890,7 +889,7 @@ void cConfigMenu::__UpdateVolume()
 void cConfigMenu::__UpdateLanguage()
 {
     // 
-    const std::vector<std::string>& asLanguageList = cMenu::GetLanguageList().get_valuelist();
+    const coreList<coreString>& asLanguageList = cMenu::GetLanguageList().get_valuelist();
     Core::Language->Load(asLanguageList[m_Language.GetCurIndex()].c_str());
 
     // 

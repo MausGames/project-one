@@ -30,7 +30,7 @@
 // TODO: create timer and int-value as tick-multiplier for sustained damage
 // TODO: remove magic numbers (regularly)
 // TODO: test framerate-lock for g-sync stuff, also test for 144hz displays if render x144 but move x60 is better
-// TODO: clean up shader modifiers and shaders, also try to look at unused uniforms, varyings and attributes (shadow-matrix is used in ship-shader !? a_v1Blink used in ground-shader but only when instancing), and reduce passing data across shader stages
+// TODO: clean up shader modifiers and shaders, also try to look at unused uniforms, varyings and attributes (shadow-matrix is used in ship-shader !? a_v1Blink/a_v2Blink used in ground-shader but only when instancing), and reduce passing data across shader stages
 // TODO: implement static/coherent branching interface instead of many shader-permutations ? (maybe only in situations with frequent switching)
 // TODO: use single-channel texture where possible
 // TODO: menu optimization by caching into framebuffer (general class for leaderboard, options, etc.)
@@ -79,6 +79,9 @@
 // TODO: search and remove unused resources from application.cpp (+ folder)
 // TODO: convert bigger sound-effects (ambient) to music ?
 // TODO: change all linear interpolation with at least LERPH3 to improve quality, where possible
+// TODO: check all collision callbacks if OUTPUT can be replaced with const
+// TODO: make sure enemy bullet ClearAll is called on STAGE_DELAY
+// TODO: create animation offset for all gameplay objects (const coreFloat fOffset = I_TO_F(i) * (1.0f/7.0f);), try to use num-per-line + 1, what about bullets ?
 
 
 // ****************************************************************
@@ -98,11 +101,6 @@
     #if defined(_P1_DEBUG_RANDOM_)
         #pragma message("Warning: Debug randomization enabled!")
     #endif
-#endif
-
-#if defined(_CORE_GCC_) || defined(_CORE_CLANG_)
-    #pragma GCC diagnostic ignored "-Winconsistent-missing-override"
-    #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 #endif
 
 
@@ -147,6 +145,7 @@
 #define COLOR_ENERGY_BLUE    (coreVector3(0.100f, 0.430f, 1.000f))
 #define COLOR_ENERGY_CYAN    (coreVector3(0.184f, 0.569f, 0.635f))
 #define COLOR_ENERGY_GREEN   (coreVector3(0.270f, 0.710f, 0.270f))
+#define COLOR_FIRE_WHITE     (coreVector3(0.220f, 0.220f, 0.220f))
 #define COLOR_FIRE_ORANGE    (coreVector3(0.991f, 0.305f, 0.042f))
 #define COLOR_FIRE_BLUE      (coreVector3(0.306f, 0.527f, 1.000f))
 #define COLOR_SHIP_YELLOW    (coreVector3( 50.0f/360.0f, 100.0f/100.0f,  85.0f/100.0f).HsvToRgb())
@@ -159,7 +158,7 @@
 #define COLOR_SHIP_GREEN     (coreVector3(118.0f/360.0f,  58.0f/100.0f,  70.0f/100.0f).HsvToRgb())
 #define COLOR_SHIP_GREY      (coreVector3(  0.0f/360.0f,   0.0f/100.0f,  60.0f/100.0f).HsvToRgb())
 #define COLOR_HEALTH(x)      (TernaryLerp(COLOR_MENU_RED, COLOR_MENU_YELLOW, COLOR_MENU_GREEN, x))
-#define COLOR_CHAIN(x)       (TernaryLerp(COLOR_MENU_RED, COLOR_MENU_PURPLE, COLOR_MENU_BLUE,  x))
+#define COLOR_CHAIN(x)       ((x > 0.5f) ? COLOR_MENU_BLUE : COLOR_MENU_RED)//TernaryLerp(COLOR_MENU_RED, COLOR_MENU_PURPLE, COLOR_MENU_BLUE,  x))
 
 // shader modifiers
 #define SHADER_TRANSITION(x) "#define _P1_TRANSITION_ (" #x ") \n"   // full_transition
@@ -199,10 +198,10 @@ enum eType : coreInt32
 
     TYPE_VIRIDO_BALL,
     TYPE_VIRIDO_PADDLE,
-    TYPE_VIRIDO_BARRIER,
-    TYPE_VIRIDO_LASER,
-    TYPE_NEVO_BOMB,
-    TYPE_NEVO_BLOCK,
+    TYPE_VIRIDO_BARRIER,   // # move collisions into stages where possible and remove types
+    TYPE_VIRIDO_LASER,     // #
+    TYPE_NEVO_BOMB,        // #
+    TYPE_NEVO_BLOCK,       // #
     TYPE_NEVO_CONTAINER,
     TYPE_RUTILUS_TELEPORTER,
 
@@ -210,7 +209,7 @@ enum eType : coreInt32
     TYPE_LEVIATHAN_RAY
 };
 
-// 
+// sound categories
 enum eSound : coreUint8
 {
     SOUND_EFFECT = 1u,

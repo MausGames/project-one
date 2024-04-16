@@ -22,7 +22,7 @@ cGlow::cGlow()noexcept
 // update the glow-effect
 void cGlow::Update()
 {
-    if(!g_CurConfig.Graphics.iGlow || (!Core::System->GetTime() && Core::System->GetCurFrame()))
+    if(!g_CurConfig.Graphics.iGlow || (!TIME && Core::System->GetCurFrame()))
     {
         // 
         m_bActive = false;

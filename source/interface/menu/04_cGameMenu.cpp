@@ -108,6 +108,7 @@ cGameMenu::cGameMenu()noexcept
     m_StageArea.SetSize      (m_DirectoryBackground.GetSize()*coreVector2(0.5f,1.0f) + coreVector2(-0.035f * 0.5f, -0.09f));
     m_StageArea.SetColor3    (coreVector3(1.0f,1.0f,1.0f) * 0.7f);
 
+    /*
     for(coreUintW i = 0u; i < MENU_GAME_STAGES; ++i)
     {
         const coreBool    bBoss = MISSION_SEGMENT_IS_BOSS(i);
@@ -119,6 +120,26 @@ cGameMenu::cGameMenu()noexcept
         m_aStage[i].SetPosition  (vPos + m_StageArea.GetPosition());
         m_aStage[i].SetSize      (vSize);
     }
+    */
+    for(coreUintW i = 0u; i < MENU_GAME_MISSIONS; ++i)
+    {
+        for(coreUintW j = 0u; j < MENU_GAME_STAGES; ++j)
+        {
+            const coreBool    bBoss = (j == MENU_GAME_STAGES-1u);//MISSION_SEGMENT_IS_BOSS(j);
+            const coreVector2 vPos  = coreVector2((I_TO_F(j) - 3.5f) * 0.05f + (bBoss ? 0.025f : 0.0f), m_aMissionName[i].GetPosition().y);//bBoss ? coreVector2(0.0f, -0.07f * (I_TO_F(j / 6u) * 2.0f - 1.5f)) : coreVector2(0.07f * (I_TO_F(j % 6u) - 2.0f), -0.07f * (I_TO_F(j / 6u) * 2.0f - 2.5f));
+            const coreVector2 vSize = bBoss ? coreVector2(0.1f,0.05f)                                   : coreVector2(0.05f,0.05f);
+
+            m_aaStage[i][j].Construct    (MENU_BUTTON, MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+            m_aaStage[i][j].DefineProgram("menu_border_program");
+            m_aaStage[i][j].SetPosition  (vPos);// + m_StageArea.GetPosition());
+            m_aaStage[i][j].SetSize      (vSize);
+        }
+    }
+    
+    m_aStageCursor.DefineTexture(0u, "default_black.png");
+    m_aStageCursor.DefineProgram("menu_border_program");
+    m_aStageCursor.SetPosition  (HIDDEN_POS);// + m_StageArea.GetPosition());
+    m_aStageCursor.SetSize      (coreVector2(0.07f,0.07f));
 
     for(coreUintW i = 0u; i < MENU_GAME_OPTIONS; ++i)
     {
@@ -214,9 +235,11 @@ cGameMenu::cGameMenu()noexcept
     for(coreUintW i = 0u; i < MENU_GAME_MISSIONS; ++i) this->BindObject(SURFACE_GAME_TRAINING, &m_aMissionLine[i]);
     for(coreUintW i = 0u; i < MENU_GAME_MISSIONS; ++i) this->BindObject(SURFACE_GAME_TRAINING, &m_aMissionName[i]);
 
-    this->BindObject(SURFACE_GAME_TRAINING, &m_StageArea);
+    //this->BindObject(SURFACE_GAME_TRAINING, &m_StageArea);
 
-    for(coreUintW i = 0u; i < MENU_GAME_STAGES; ++i) this->BindObject(SURFACE_GAME_TRAINING, &m_aStage[i]);
+    //for(coreUintW i = 0u; i < MENU_GAME_STAGES; ++i) this->BindObject(SURFACE_GAME_TRAINING, &m_aStage[i]);
+    for(coreUintW i = 0u; i < 7u/*MENU_GAME_MISSIONS*/; ++i) for(coreUintW j = 0u; j < MENU_GAME_STAGES; ++j) this->BindObject(SURFACE_GAME_TRAINING, &m_aaStage[i][j]);
+    this->BindObject(SURFACE_GAME_TRAINING, &m_aStageCursor);
 
     this->BindObject(SURFACE_GAME_ARMORY, &m_ArmoryBackground);
     this->BindObject(SURFACE_GAME_ARMORY, &m_StartButton);
@@ -287,6 +310,24 @@ void cGameMenu::Move()
                 // 
                 m_iStatus = 2;
             }
+            
+            m_aStageCursor.SetPosition(HIDDEN_POS);
+            for(coreUintW i = 0u; i < MENU_GAME_MISSIONS; ++i)
+            {
+                for(coreUintW j = 0u; j < MENU_GAME_STAGES; ++j)
+                {
+                    if(m_aaStage[i][j].IsFocused())
+                    {
+                        m_aStageCursor.SetPosition(m_aaStage[i][j].GetPosition());
+                        m_aStageCursor.SetSize    (m_aaStage[i][j].GetSize    () + coreVector2(0.02f,0.02f));
+                        break;
+                    }
+                    //m_aaStage[i][j].SetSize(m_aaStage[i][j].IsFocused() ? coreVector2(0.07f,0.07f) : coreVector2(0.05f,0.05f));
+                    //m_aaStage[i][j].Move();           
+                }
+            }
+            m_aStageCursor.Move();
+            
         }
         break;
 

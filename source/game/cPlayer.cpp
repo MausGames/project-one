@@ -79,6 +79,16 @@ cPlayer::cPlayer()noexcept
     m_Wind.SetColor4    (coreVector4(COLOR_ENERGY_BLUE * 1.6f, 0.0f));
     m_Wind.SetTexSize   (coreVector2(1.0f,5.0f));
     m_Wind.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+    
+    
+    m_Wind2.DefineModel  ("object_sphere.md3");
+    m_Wind2.DefineTexture(0u, "effect_energy.png");
+    m_Wind2.DefineProgram("effect_energy_direct_program");
+    m_Wind2.SetColor4    (coreVector4(COLOR_ENERGY_BLUE * 1.6f, 1.0f));
+    m_Wind2.SetTexSize   (coreVector2(1.0f,5.0f));
+    
+    g_pGlow->BindObject(&m_Wind2);
+    //m_Wind2.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 
     // 
     m_Bubble.DefineModel  ("object_sphere.md3");
@@ -117,6 +127,9 @@ cPlayer::~cPlayer()
     // delete weapon objects
     for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
         SAFE_DELETE(m_apWeapon[i])
+        
+        
+    g_pGlow->UnbindObject(&m_Wind2);
 }
 
 
@@ -199,8 +212,13 @@ void cPlayer::EquipSupport(const coreUintW iIndex, const coreInt32 iID)
 // render the player
 void cPlayer::Render()
 {
-    if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
+    if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
     {
+        
+        glDisable(GL_DEPTH_TEST);
+        m_Wind2.Render();
+        glEnable(GL_DEPTH_TEST);
+        
         // render the 3d-object
         this->coreObject3D::Render();
     }
@@ -208,7 +226,7 @@ void cPlayer::Render()
 
 void cPlayer::RenderBefore()
 {
-    if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
+    if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
     {
         // 
         m_Exhaust.Render();
@@ -217,7 +235,7 @@ void cPlayer::RenderBefore()
 
 void cPlayer::RenderAfter()
 {
-    if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
+    if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
     {
         // 
         for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
@@ -242,40 +260,36 @@ void cPlayer::Move()
     // 
     this->_UpdateAlwaysBefore();
 
-    // 
-    if(m_iRollDir == PLAYER_WAS_ROLL)
-        m_iRollDir = PLAYER_NO_ROLL;
-
-    if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
+    if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
     {
         coreVector2 vNewPos = this->GetPosition().xy();
         coreVector3 vNewOri = coreVector3(0.0f,0.0f,1.0f);
 
-        if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_TURN))
+        if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_TURN))
         {
             coreVector2 vNewDir = this->GetDirection().xy();
 
             // 
-            if(CONTAINS_BIT(m_pInput->iActionPress, PLAYER_EQUIP_WEAPONS * WEAPON_MODES + 1u))
+            if(HAS_BIT(m_pInput->iActionPress, PLAYER_EQUIP_WEAPONS * WEAPON_MODES))
                 vNewDir = -vNewDir.Rotated90();
-            if(CONTAINS_BIT(m_pInput->iActionPress, PLAYER_EQUIP_WEAPONS * WEAPON_MODES + 2u))
+            if(HAS_BIT(m_pInput->iActionPress, PLAYER_EQUIP_WEAPONS * WEAPON_MODES + 1u))
                 vNewDir =  vNewDir.Rotated90();
 
             // set new direction
-            this->SetDirection(coreVector3(vNewDir, 0.0f)); 
+            this->SetDirection(coreVector3(vNewDir, 0.0f));
         }
 
-        if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_ROLL))
+        if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_ROLL))
         {
             // 
-            //if(CONTAINS_BIT(m_pInput->iActionPress, PLAYER_EQUIP_WEAPONS * WEAPON_MODES))
+            //if(HAS_BIT(m_pInput->iActionPress, PLAYER_EQUIP_WEAPONS * WEAPON_MODES))
             //    if(m_fRollTime <= 0.0f) this->StartRolling(m_pInput->vMove);
         }
 
-        if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
+        if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
         {
             // move the ship
-            vNewPos += (m_pInput->vMove * this->CalcMoveSpeed() + m_vForce) * Core::System->GetTime();
+            vNewPos += (m_pInput->vMove * this->CalcMoveSpeed() + m_vForce) * TIME;
 
             // restrict movement to the foreground area
                  if(vNewPos.x < m_vArea.x) {vNewPos.x = m_vArea.x; m_vForce.x =  ABS(m_vForce.x);}
@@ -284,7 +298,7 @@ void cPlayer::Move()
             else if(vNewPos.y > m_vArea.w) {vNewPos.y = m_vArea.w; m_vForce.y = -ABS(m_vForce.y);}
 
             // 
-            const coreVector2 vDiff = (vNewPos - this->GetPosition().xy()) * RCP(Core::System->GetTime() * FRAMERATE_MIN + CORE_MATH_PRECISION);
+            const coreVector2 vDiff = (vNewPos - this->GetPosition().xy()) * RCP(TIME * FRAMERATE_MIN + CORE_MATH_PRECISION);
             vNewOri = coreVector3(CLAMP(vDiff.x, -0.6f, 0.6f), CLAMP(vDiff.y, -0.6f, 0.6f), 1.0f).NormalizedUnsafe();
         }
 
@@ -298,7 +312,7 @@ void cPlayer::Move()
         // 
         m_vForce *= FrictionFactor(8.0f);
 
-        if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_ALL))
+        if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_ALL))
         {
             // 
             if(this->IsRolling())
@@ -330,7 +344,7 @@ void cPlayer::Move()
         // update all weapons (shooting and stuff)
         for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
         {
-            const coreUint8 iShoot = (!this->IsRolling() && !CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_PACIFIST) && !CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && !m_fInterrupt) ? ((m_pInput->iActionHold & (BITLINE(WEAPON_MODES) << (i*WEAPON_MODES))) >> (i*WEAPON_MODES)) : 0u;
+            const coreUint8 iShoot = (!this->IsRolling() && !HAS_FLAG(m_iStatus, PLAYER_STATUS_PACIFIST) && !HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && !m_fInterrupt) ? ((m_pInput->iActionHold & (BITLINE(WEAPON_MODES) << (i*WEAPON_MODES))) >> (i*WEAPON_MODES)) : 0u;
             m_apWeapon[i]->Update(iShoot);
         }
 
@@ -354,14 +368,21 @@ void cPlayer::Move()
             m_Wind.Move();
         }
 
+        // 
+        m_Wind2.SetPosition (this->GetPosition());
+        m_Wind2.SetSize     (coreVector3(1.0f,1.08f,1.0f) * PLAYER_WIND_SIZE * 1.0f);
+        m_Wind2.SetDirection(this->GetDirection() * -1.0f);
+        m_Wind2.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.3f));
+        m_Wind2.Move();
+
         if(m_Bubble.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
         {
             // 
             m_fFeelTime.Update(-1.0f);
 
             // 
-            if(m_fFeelTime > 0.0f) m_Bubble.SetAlpha(MIN(m_Bubble.GetAlpha() + 4.0f*Core::System->GetTime(), 0.8f));
-                              else m_Bubble.SetAlpha(MAX(m_Bubble.GetAlpha() - 4.0f*Core::System->GetTime(), 0.0f));
+            if(m_fFeelTime > 0.0f) m_Bubble.SetAlpha(MIN(m_Bubble.GetAlpha() + 4.0f*TIME, 0.8f));
+                              else m_Bubble.SetAlpha(MAX(m_Bubble.GetAlpha() - 4.0f*TIME, 0.0f));
 
             // 
             if(!m_Bubble.GetAlpha()) this->EndFeeling();
@@ -436,8 +457,7 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
     if(iDamage > 0)
     {
         // 
-        m_ScoreTable.TransferChain();
-        m_ScoreTable.ReduceCombo();
+        m_ScoreTable.CancelCombo();
 
         // 
         const coreInt32 iTaken = this->_TakeDamage(1, iElement, vImpact);
@@ -447,9 +467,10 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
             // 
             if(!this->IsDarkShading()) this->RefreshColor();
 
-            if(CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED))
+            if(HAS_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED))
             {
                 // 
+                this->SetDesaturate(PLAYER_DESATURATE);
                 this->StartIgnoring((m_iCurHealth == 1) ? 1u : 0u);
             }
             else
@@ -493,7 +514,7 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
 void cPlayer::Resurrect()
 {
     // resurrect player
-    if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD)) return;
+    if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD)) return;
     REMOVE_FLAG(m_iStatus, PLAYER_STATUS_DEAD)
 
     // add ship to global shadow and outline
@@ -513,7 +534,7 @@ void cPlayer::Resurrect()
 void cPlayer::Kill(const coreBool bAnimated)
 {
     // kill player
-    if(CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD)) return;
+    if(HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD)) return;
     ADD_FLAG(m_iStatus, PLAYER_STATUS_DEAD)
 
     // reset weapon shoot status
@@ -575,7 +596,7 @@ void cPlayer::EndRolling()
 
     // 
     m_fRollTime = 1.0f;
-    m_iRollDir  = PLAYER_WAS_ROLL;
+    m_iRollDir  = PLAYER_NO_ROLL;
 
     // 
     this->DisableWind();
@@ -767,10 +788,10 @@ void cPlayer::UpdateExhaust(const coreFloat fStrength)
 // 
 coreVector2 cPlayer::CalcMove()const
 {
-    if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
+    if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
     {
         // move the ship
-        coreVector2 vNewPos = this->GetPosition().xy() + (m_pInput->vMove * this->CalcMoveSpeed() + m_vForce) * Core::System->GetTime();
+        coreVector2 vNewPos = this->GetPosition().xy() + (m_pInput->vMove * this->CalcMoveSpeed() + m_vForce) * TIME;
 
         // restrict movement to the foreground area
         vNewPos.x = CLAMP(vNewPos.x, m_vArea.x, m_vArea.z);
@@ -788,15 +809,15 @@ static coreFloat fBoost = 0.0f;
 coreFloat cPlayer::CalcMoveSpeed()const
 {
     if(
-            CONTAINS_BIT(m_pInput->iActionPress, 0u)   // to make movement during quickshots easier
+            HAS_BIT(m_pInput->iActionPress, 0u)   // to make movement during quickshots easier
     || 
-    CONTAINS_BIT(m_pInput->iActionRelease, 0u)   // to make emergency evasion maneuvers easier
+    HAS_BIT(m_pInput->iActionRelease, 0u)   // to make emergency evasion maneuvers easier
     ) fBoost = 1.0f;
     else 
         fBoost = MAX(fBoost - 10.0f * TIME, 0.0f);
     
     // 
-    const coreFloat fModifier = this->IsRolling() ? (50.0f + LERPB(25.0f, 0.0f, m_fRollTime)) : (CONTAINS_BIT(m_pInput->iActionHold, 0u) ? LERPH3(20.0f, 40.0f, fBoost) : LERPH3(50.0f, 70.0f, fBoost));
+    const coreFloat fModifier = this->IsRolling() ? (50.0f + LERPB(25.0f, 0.0f, m_fRollTime)) : (HAS_BIT(m_pInput->iActionHold, 0u) ? LERPH3(20.0f, 40.0f, fBoost) : LERPH3(50.0f, 70.0f, fBoost));
     return m_fSpeed * fModifier;
 }
 
@@ -805,8 +826,8 @@ coreFloat cPlayer::CalcMoveSpeed()const
 // 
 void cPlayer::__EquipShield()
 {
-    ASSERT( CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
-    ASSERT(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED))
+    ASSERT( HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
+    ASSERT(!HAS_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED))
 
     // 
     ADD_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED)

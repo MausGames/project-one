@@ -12,6 +12,7 @@ coreUint16  cMission::s_iTick           = 0u;
 coreFloat   cMission::s_fLifeTimePoint  = 0.0f;
 coreFloat   cMission::s_fHealthPctPoint = 0.0f;
 coreVector2 cMission::s_vPositionPoint  = coreVector2(0.0f,0.0f);
+cRotaCache  cMission::s_RotaCache       = {};
 
 
 // ****************************************************************
@@ -31,6 +32,7 @@ cMission::cMission()noexcept
 , m_iStageSub           (0u)
 , m_fStageSubTime       (0.0f)
 , m_fStageSubTimeBefore (0.0f)
+, m_fStageWait          (0.0f)
 , m_pfMedalGoal         (NULL)
 , m_bBadgeGiven         (false)
 , m_iTakeFrom           (0u)
@@ -123,6 +125,12 @@ void cMission::MoveBefore()
     while(m_bRepeat);
 }
 
+void cMission::MoveMiddle()
+{
+    // 
+    this->__MoveOwnMiddle();
+}
+
 void cMission::MoveAfter()
 {
     // 
@@ -154,6 +162,7 @@ void cMission::SkipStage()
     m_iStageSub           = 0u;
     m_fStageSubTime       = 0.0f;
     m_fStageSubTimeBefore = 0.0f;
+    m_fStageWait          = 0.0f;
 
     // 
     m_pfMedalGoal = NULL;
@@ -241,7 +250,16 @@ void cMission::DeactivateWave()
     m_iCurSegmentIndex = MISSION_NO_SEGMENT;
 
     // 
+    m_iStageSub  = 0xFFu;
+    m_fStageWait = 3.5f;
+
+    // 
     g_pSave->EditGlobalStats()->iWavesDone += 1u;
+    
+    g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    {
+        pPlayer->GetScoreTable()->TransferCombo();
+    });
 }
 
 
@@ -263,7 +281,7 @@ void cMission::GiveBadge(const coreUint8 iBadge, const coreVector3& vPosition)
     });
 
     // 
-    //g_pGame->GetCombatText()->AddBadge(iBonus, vPosition);   // TODO
+    g_pGame->GetCombatText()->AddBadge(iBonus, vPosition);
 }
 
 
@@ -296,6 +314,8 @@ void cMission::__CloseSegment()
     g_pGame->GetBulletManagerEnemy()->ClearBullets(true);
     g_pGame->GetItemManager       ()->LoseItems();
     g_pGame->GetShieldManager     ()->ClearShields(true);
+    
+    g_pGame->KillRepairEnemy();
 
     // 
     const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();
@@ -372,3 +392,4 @@ UNITY_BUILD
 #include "08_cAterMission.cpp"
 #include "99_cIntroMission.cpp"
 #include "AA_cErrorMission.cpp"
+#include "BB_cDemoMission.cpp"

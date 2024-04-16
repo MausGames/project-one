@@ -35,18 +35,17 @@
 #define PLAYER_FEEL_TIME_CONTINUE (5.0f)            // 
 #define PLAYER_FEEL_TIME_REPAIR   (5.0f)            // 
 #define PLAYER_FEEL_TIME_SHIELD   (10.0f)           // 
-#define PLAYER_INTERRUPT          (2.0f)            // 
+#define PLAYER_INTERRUPT          (0.3f)            // 
 #define PLAYER_DESATURATE         (1.2f)            // 
 
 #define PLAYER_SHIP_ATK  (0u)        // 
 #define PLAYER_SHIP_DEF  (1u)        // 
 #define PLAYER_SHIP_P1   (2u)        // 
-#define PLAYER_WAS_ROLL  (0xFEu)     // 
 #define PLAYER_NO_ROLL   (0xFFu)     // 
 #define PLAYER_NO_FEEL   (-100.0f)   // 
 #define PLAYER_NO_IGNORE (-100.0f)   // 
 
-STATIC_ASSERT(PLAYER_INTERRUPT > (1.0f / PLAYER_ROLL_SPEED))
+//STATIC_ASSERT(PLAYER_INTERRUPT > (1.0f / PLAYER_ROLL_SPEED))
 
 enum ePlayerStatus : coreUint8
 {
@@ -76,45 +75,46 @@ ENABLE_BITWISE(ePlayerTest)
 class cPlayer final : public cShip
 {
 private:
-    cWeapon* m_apWeapon[PLAYER_EQUIP_WEAPONS];                  // main weapon objects (bullet factories, should never be NULL)
+    cWeapon* m_apWeapon[PLAYER_EQUIP_WEAPONS];               // main weapon objects (bullet factories, should never be NULL)
 
-    const sGameInput* m_pInput;                                 // pointer to associated input set (should never be NULL)
-    coreVector4       m_vArea;                                  // 
+    const sGameInput* m_pInput;                              // pointer to associated input set (should never be NULL)
+    coreVector4       m_vArea;                               // 
 
-    coreVector2 m_vForce;                                       // 
-    coreFloat   m_fSpeed;                                       // 
+    coreVector2 m_vForce;                                    // 
+    coreFloat   m_fSpeed;                                    // 
 
-    coreFlow  m_fRollTime;                                      // 
-    coreFlow  m_fFeelTime;                                      // 
-    coreFlow  m_fIgnoreTime;                                    // 
-    coreUint8 m_iRollDir;                                       // 
-    coreUint8 m_iFeelType;                                      // 
-    coreUint8 m_iIgnoreType;                                    // 
+    coreFlow  m_fRollTime;                                   // 
+    coreFlow  m_fFeelTime;                                   // 
+    coreFlow  m_fIgnoreTime;                                 // 
+    coreUint8 m_iRollDir;                                    // 
+    coreUint8 m_iFeelType;                                   // 
+    coreUint8 m_iIgnoreType;                                 // 
 
-    coreFlow  m_fInterrupt;                                     // 
-    coreFlow  m_fLightningTime;                                 // 
-    coreFloat m_fLightningAngle;                                // 
+    coreFlow  m_fInterrupt;                                  // 
+    coreFlow  m_fLightningTime;                              // 
+    coreFloat m_fLightningAngle;                             // 
 
-    coreFlow m_fDesaturate;                                     // 
+    coreFlow m_fDesaturate;                                  // 
 
-    cDataTable  m_DataTable;                                    // 
-    cScoreTable m_ScoreTable;                                   // 
+    cDataTable  m_DataTable;                                 // 
+    cScoreTable m_ScoreTable;                                // 
 
-    coreProgramPtr m_pNormalProgram;                            // 
-    coreProgramPtr m_pDarkProgram;                              // 
-    coreFlow       m_fAnimation;                                // 
+    coreProgramPtr m_pNormalProgram;                         // 
+    coreProgramPtr m_pDarkProgram;                           // 
+    coreFlow       m_fAnimation;                             // 
 
-    coreObject3D m_Dot;                                         // 
-    coreObject3D m_Range;                                       // 
-    coreObject3D m_Wind;                                        // 
-    coreObject3D m_Bubble;                                      // 
-    coreObject3D m_Shield;                                      // 
-    coreObject3D m_Exhaust;                                     // 
+    coreObject3D m_Dot;                                      // 
+    coreObject3D m_Range;                                    // 
+    coreObject3D m_Wind;                                     // 
+    coreObject3D m_Bubble;                                   // 
+    coreObject3D m_Shield;                                   // 
+    coreObject3D m_Exhaust;                                  // 
 
-    coreLookup<const coreObject3D*, coreUint32> m_aCollision;   // 
+    coreMap<const coreObject3D*, coreUint32> m_aCollision;   // 
 
 
 public:
+    coreObject3D m_Wind2;                                     //            
     cPlayer()noexcept;
     ~cPlayer()final;
 
@@ -141,8 +141,7 @@ public:
     // 
     void StartRolling(const coreVector2& vDirection);
     void EndRolling  ();
-    inline coreBool IsRolling ()const {return (m_iRollDir != PLAYER_WAS_ROLL) && (m_iRollDir != PLAYER_NO_ROLL);}
-    inline coreBool WasRolling()const {return (m_iRollDir == PLAYER_WAS_ROLL);}
+    inline coreBool IsRolling()const {return (m_iRollDir != PLAYER_NO_ROLL);}
 
     // 
     void StartFeeling(const coreFloat fTime, const coreUint8 iType);
@@ -240,7 +239,7 @@ template <typename F> FORCE_INLINE void cPlayer::TestCollision(const ePlayerTest
     Core::Manager::Object->TestCollision(TYPE_PLAYER, iType, [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         // 
-        if(pPlayer->IsRolling() ? CONTAINS_FLAG(eTest, PLAYER_TEST_ROLL) : (pPlayer->IsFeeling() ? CONTAINS_FLAG(eTest, PLAYER_TEST_FEEL) : (pPlayer->IsIgnoring() ? CONTAINS_FLAG(eTest, PLAYER_TEST_IGNORE) : CONTAINS_FLAG(eTest, PLAYER_TEST_NORMAL))))
+        if(pPlayer->IsRolling() ? HAS_FLAG(eTest, PLAYER_TEST_ROLL) : (pPlayer->IsFeeling() ? HAS_FLAG(eTest, PLAYER_TEST_FEEL) : (pPlayer->IsIgnoring() ? HAS_FLAG(eTest, PLAYER_TEST_IGNORE) : HAS_FLAG(eTest, PLAYER_TEST_NORMAL))))
         {
             // 
             coreVector3 vNewIntersection;
@@ -259,7 +258,7 @@ template <typename F> FORCE_INLINE void cPlayer::TestCollision(const ePlayerTest
     Core::Manager::Object->TestCollision(TYPE_PLAYER, pObject, [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         // 
-        if(pPlayer->IsRolling() ? CONTAINS_FLAG(eTest, PLAYER_TEST_ROLL) : (pPlayer->IsFeeling() ? CONTAINS_FLAG(eTest, PLAYER_TEST_FEEL) : (pPlayer->IsIgnoring() ? CONTAINS_FLAG(eTest, PLAYER_TEST_IGNORE) : CONTAINS_FLAG(eTest, PLAYER_TEST_NORMAL))))
+        if(pPlayer->IsRolling() ? HAS_FLAG(eTest, PLAYER_TEST_ROLL) : (pPlayer->IsFeeling() ? HAS_FLAG(eTest, PLAYER_TEST_FEEL) : (pPlayer->IsIgnoring() ? HAS_FLAG(eTest, PLAYER_TEST_IGNORE) : HAS_FLAG(eTest, PLAYER_TEST_NORMAL))))
         {
             // 
             coreVector3 vNewIntersection;

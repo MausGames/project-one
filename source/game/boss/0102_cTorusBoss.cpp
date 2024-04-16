@@ -64,12 +64,12 @@ static coreUint16 m_iDecalState = 0u;
                 STATIC_ASSERT(sizeof(m_iDecalState)*8u >= LEVIATHAN_RAYS*2u)
 
                 // 
-                if(CONTAINS_BIT(m_iDecalState, iIndex * 2u)) TOGGLE_BIT(m_iDecalState, iIndex * 2u + 1u)
+                if(HAS_BIT(m_iDecalState, iIndex * 2u)) TOGGLE_BIT(m_iDecalState, iIndex * 2u + 1u)
                 TOGGLE_BIT(m_iDecalState, iIndex * 2u)
 
                 // 
-                const coreBool    bRotated   = CONTAINS_BIT(m_iDecalState, iIndex * 2u);
-                const coreBool    bFlipped   = CONTAINS_BIT(m_iDecalState, iIndex * 2u + 1u);
+                const coreBool    bRotated   = HAS_BIT(m_iDecalState, iIndex * 2u);
+                const coreBool    bFlipped   = HAS_BIT(m_iDecalState, iIndex * 2u + 1u);
                 const coreVector3 vDecalPos  = (vOldHit + vNewHit) * 0.5f;
                 const coreVector2 vDecalSize = coreVector2(Core::Rand->Float(5.0f, 6.5f), MIN(fLen, fMax)*1.8f);
                 const coreVector2 vDecalDir  = vDiff.xy().Normalized();
@@ -104,7 +104,7 @@ static coreUint16 m_iDecalState = 0u;
     }
 
     // 
-    vOldHit.y -= g_pEnvironment->GetSpeed() * Core::System->GetTime() * OUTDOOR_DETAIL;
+    vOldHit.y -= g_pEnvironment->GetSpeed() * TIME * OUTDOOR_DETAIL;
 
     // 
     //m_avVector[OVERDRIVE_HIT + iIndex].xyz(vOldHit);
@@ -403,7 +403,7 @@ void cTorusBoss::__MoveOwn()
             
             Core::Debug->InspectValue("dir", vOffset);
             const coreFloat fHeight = g_pEnvironment->RetrieveSafeHeight(vNewPos + vOffset) ;
-            fCurHeight = LERP(fCurHeight, fHeight, 10.0f * Core::System->GetTime());
+            fCurHeight = LERP(fCurHeight, fHeight, 10.0f * TIME);
             this->SetPosition(coreVector3(vNewPos, fCurHeight + LERP(this->GetCollisionRange().x - 2.0f, this->GetCollisionRange().z + 1.0f*0.0f, ABS(vOri2.z))));
             
             if(fTime < 0.5f) __TorusCreateOverdrive(0u, coreVector3(vNewPos + vOffset, fCurHeight), fTime, true);
@@ -496,8 +496,8 @@ void cTorusBoss::__MoveOwn()
             {
                 PHASE_CHANGE_TO(m_iPhase + 10u)
 
-                m_aiCounter[SKIP_SUMMON] = (CONTAINS_BIT(m_iGunnerActive, (m_iPhase - 20u) % TORUS_GUNNERS) ||
-                                            CONTAINS_BIT(m_iTurretActive, (m_iPhase - 20u) % TORUS_TURRETS)) ? 1 : 0;
+                m_aiCounter[SKIP_SUMMON] = (HAS_BIT(m_iGunnerActive, (m_iPhase - 20u) % TORUS_GUNNERS) ||
+                                            HAS_BIT(m_iTurretActive, (m_iPhase - 20u) % TORUS_TURRETS)) ? 1 : 0;
             }
         });
     }
@@ -799,8 +799,8 @@ void cTorusBoss::__MoveOwn()
             const coreVector3 vSize = pGunner->GetSize();
 
             // 
-            const coreFloat   fMoveSide = CONTAINS_BIT(m_iGunnerMove, i) ? -1.0f : 1.0f;
-            const coreVector2 vMoveDir  = coreVector2(fMoveSide * FOREGROUND_AREA.x * TORUS_GUNNER_SPEED * Core::System->GetTime(), 0.0f);
+            const coreFloat   fMoveSide = HAS_BIT(m_iGunnerMove, i) ? -1.0f : 1.0f;
+            const coreVector2 vMoveDir  = coreVector2(fMoveSide * FOREGROUND_AREA.x * TORUS_GUNNER_SPEED * TIME, 0.0f);
             const coreVector2 vNewPos   = pGunner->GetPosition().xy() + ((i & 0x02u) ? vMoveDir.yx() : vMoveDir);
 
             // 
@@ -1150,11 +1150,11 @@ void cTorusBoss::__EnableTurret(const coreUintW iIndex, const coreVector2& vPosi
     coreObject3D* pHull   = &m_aTurretHullRaw[iIndex];
 
     // 
-    if(!CONTAINS_FLAG(pTurret->GetStatus(), ENEMY_STATUS_DEAD)) return;
+    if(!HAS_FLAG(pTurret->GetStatus(), ENEMY_STATUS_DEAD)) return;
     pTurret->Resurrect();
 
     // 
-    ASSERT(!CONTAINS_BIT(m_iTurretActive, iIndex))
+    ASSERT(!HAS_BIT(m_iTurretActive, iIndex))
     ADD_BIT(m_iTurretActive, iIndex)
 
     // 
@@ -1179,11 +1179,11 @@ void cTorusBoss::__DisableTurret(const coreUintW iIndex, const coreBool bAnimate
     coreObject3D* pHull   = &m_aTurretHullRaw[iIndex];
 
     // 
-    if(CONTAINS_FLAG(pTurret->GetStatus(), ENEMY_STATUS_DEAD)) return;
+    if(HAS_FLAG(pTurret->GetStatus(), ENEMY_STATUS_DEAD)) return;
     pTurret->Kill(false);
 
     // 
-    ASSERT(CONTAINS_BIT(m_iTurretActive, iIndex))
+    ASSERT(HAS_BIT(m_iTurretActive, iIndex))
     REMOVE_BIT(m_iTurretActive, iIndex)
 
     // 
@@ -1203,11 +1203,11 @@ void cTorusBoss::__EnableGunner(const coreUintW iIndex, const coreVector2& vPosi
     coreObject3D* pHull   = &m_aGunnerHullRaw[iIndex];
 
     // 
-    if(!CONTAINS_FLAG(pGunner->GetStatus(), ENEMY_STATUS_DEAD)) return;
+    if(!HAS_FLAG(pGunner->GetStatus(), ENEMY_STATUS_DEAD)) return;
     pGunner->Resurrect();
 
     // 
-    ASSERT(!CONTAINS_BIT(m_iGunnerActive, iIndex))
+    ASSERT(!HAS_BIT(m_iGunnerActive, iIndex))
     ADD_BIT(m_iGunnerActive, iIndex)
 
     // 
@@ -1235,11 +1235,11 @@ void cTorusBoss::__DisableGunner(const coreUintW iIndex, const coreBool bAnimate
     coreObject3D* pHull   = &m_aGunnerHullRaw[iIndex];
 
     // 
-    if(CONTAINS_FLAG(pGunner->GetStatus(), ENEMY_STATUS_DEAD)) return;
+    if(HAS_FLAG(pGunner->GetStatus(), ENEMY_STATUS_DEAD)) return;
     pGunner->Kill(false);
 
     // 
-    ASSERT(CONTAINS_BIT(m_iGunnerActive, iIndex))
+    ASSERT(HAS_BIT(m_iGunnerActive, iIndex))
     REMOVE_BIT(m_iGunnerActive, iIndex)
 
     // 

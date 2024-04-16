@@ -23,11 +23,11 @@
 class cWindscreen final
 {
 private:
-    coreLookupStr<coreBatchList*> m_apAddList;   // temporary additional objects
+    coreMapStr<coreBatchList*> m_apAddList;   // temporary additional objects
 
-    cInk m_Ink;                                  // 
+    cInk m_Ink;                               // 
 
-    bool m_bActive;                              // 
+    bool m_bActive;                           // 
 
 
 public:

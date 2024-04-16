@@ -423,7 +423,7 @@ void cDharukBoss::__MoveOwn()
     // 
     else if(m_iPhase == 21u)
     {
-        PHASE_CONTROL_TICKER(0u, 4u, m_Boomerang.GetCurEnabled() ? ((1.5f/1.35f) * (2.8f/3.0f)) : RCP(Core::System->GetTime()), LERP_LINEAR)
+        PHASE_CONTROL_TICKER(0u, 4u, m_Boomerang.GetCurEnabled() ? ((1.5f/1.35f) * (2.8f/3.0f)) : RCP(TIME), LERP_LINEAR)
         {
             const coreFloat fSideSign = m_aiCounter[CURRENT_SIDE] ? -1.0f : 1.0f;
 
@@ -564,9 +564,9 @@ void cDharukBoss::__MoveOwn()
     }
 
     // 
-    if(Core::System->GetTime())
+    if(TIME)
     {
-        const coreFloat fRcpTime = RCP(Core::System->GetTime());
+        const coreFloat fRcpTime = RCP(TIME);
 
         // 
         const coreVector2 vCurBasePos   = this->GetPosition   ().xy();
@@ -606,7 +606,7 @@ void cDharukBoss::__MoveOwn()
         const coreVector2 vFly = this->__DecodeDirection(i);
 
         // 
-        coreVector2       vNewPos = pBoomerang->GetPosition().xy() + vFly * FOREGROUND_AREA * (1.5f * Core::System->GetTime());
+        coreVector2       vNewPos = pBoomerang->GetPosition().xy() + vFly * FOREGROUND_AREA * (1.5f * TIME);
         const coreVector2 vNewDir = coreVector2::Direction((1.0f/16.0f) * PI * (vNewPos.x + vNewPos.y) * (vFly.x + vFly.y));
 
         // 
@@ -629,7 +629,7 @@ void cDharukBoss::__MoveOwn()
         // 
         pBoomerang->SetPosition (coreVector3(vNewPos, 0.0f));
         pBoomerang->SetDirection(coreVector3(vNewDir, 0.0f));
-        pBoomerang->SetAlpha    (MIN(pBoomerang->GetAlpha() + 10.0f * Core::System->GetTime(), 1.0f));
+        pBoomerang->SetAlpha    (MIN(pBoomerang->GetAlpha() + 10.0f * TIME, 1.0f));
         pBoomerang->SetTexOffset(coreVector2(0.0f, m_fAnimation));
 
         for(coreUintW j = 0u; j < DHARUK_TRAILS; ++j)
@@ -856,8 +856,8 @@ coreVector2 cDharukBoss::__DecodeDirection(const coreUintW iIndex)
     ASSERT(iIndex < DHARUK_BOOMERANGS)
 
     // 
-    const coreFloat P = CONTAINS_BIT(m_iPackedDir, 0u + 2u*iIndex) ? 1.0f : -1.0f;
-    const coreBool  X = CONTAINS_BIT(m_iPackedDir, 1u + 2u*iIndex);
+    const coreFloat P = HAS_BIT(m_iPackedDir, 0u + 2u*iIndex) ? 1.0f : -1.0f;
+    const coreBool  X = HAS_BIT(m_iPackedDir, 1u + 2u*iIndex);
 
     // 
     return coreVector2((X) ? P : 0.0f, (!X) ? P : 0.0f);

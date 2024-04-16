@@ -85,12 +85,12 @@ void cIntroMission::__SetupOwn()
 
         if(STAGE_CLEARED)
         {
-                 if(STAGE_SUB(1u)) STAGE_RESSURECT(pSquad1,  0u,  5u)
-            else if(STAGE_SUB(2u)) STAGE_RESSURECT(pSquad1,  6u, 11u)
-            else if(STAGE_SUB(3u)) STAGE_RESSURECT(pSquad1, 12u, 17u)
-            else if(STAGE_SUB(4u)) STAGE_RESSURECT(pSquad1, 18u, 23u)
-            else if(STAGE_SUB(5u)) STAGE_RESSURECT(pSquad1, 24u, 29u)
-            else if(STAGE_SUB(6u)) STAGE_RESSURECT(pSquad1, 30u, 35u)
+                 if(STAGE_SUB(1u)) STAGE_RESURRECT(pSquad1,  0u,  5u)
+            else if(STAGE_SUB(2u)) STAGE_RESURRECT(pSquad1,  6u, 11u)
+            else if(STAGE_SUB(3u)) STAGE_RESURRECT(pSquad1, 12u, 17u)
+            else if(STAGE_SUB(4u)) STAGE_RESURRECT(pSquad1, 18u, 23u)
+            else if(STAGE_SUB(5u)) STAGE_RESURRECT(pSquad1, 24u, 29u)
+            else if(STAGE_SUB(6u)) STAGE_RESURRECT(pSquad1, 30u, 35u)
         }
 
         if(g_pGame->GetBulletManagerPlayer()->GetNumBullets())
@@ -142,8 +142,8 @@ void cIntroMission::__SetupOwn()
 
         if(STAGE_CLEARED)
         {
-                 if(STAGE_SUB(1u)) STAGE_RESSURECT(pSquad1,  0u, 11u)
-            else if(STAGE_SUB(2u)) STAGE_RESSURECT(pSquad1, 12u, 29u)
+                 if(STAGE_SUB(1u)) STAGE_RESURRECT(pSquad1,  0u, 11u)
+            else if(STAGE_SUB(2u)) STAGE_RESURRECT(pSquad1, 12u, 29u)
         }
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
@@ -183,12 +183,12 @@ void cIntroMission::__SetupOwn()
 
         if(STAGE_CLEARED)
         {
-                 if(STAGE_SUB(1u)) STAGE_RESSURECT(pSquad1,  0u,  3u)
-            else if(STAGE_SUB(2u)) STAGE_RESSURECT(pSquad1,  4u,  7u)
-            else if(STAGE_SUB(3u)) STAGE_RESSURECT(pSquad1,  8u, 15u)
-            else if(STAGE_SUB(4u)) STAGE_RESSURECT(pSquad1, 16u, 23u)
-            else if(STAGE_SUB(5u)) STAGE_RESSURECT(pSquad1, 24u, 31u)
-            else if(STAGE_SUB(6u)) STAGE_RESSURECT(pSquad1, 32u, 47u)
+                 if(STAGE_SUB(1u)) STAGE_RESURRECT(pSquad1,  0u,  3u)
+            else if(STAGE_SUB(2u)) STAGE_RESURRECT(pSquad1,  4u,  7u)
+            else if(STAGE_SUB(3u)) STAGE_RESURRECT(pSquad1,  8u, 15u)
+            else if(STAGE_SUB(4u)) STAGE_RESURRECT(pSquad1, 16u, 23u)
+            else if(STAGE_SUB(5u)) STAGE_RESURRECT(pSquad1, 24u, 31u)
+            else if(STAGE_SUB(6u)) STAGE_RESURRECT(pSquad1, 32u, 47u)
         }
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
@@ -245,8 +245,8 @@ void cIntroMission::__SetupOwn()
 
         if(STAGE_CLEARED)
         {
-                 if(STAGE_SUB(1u)) STAGE_RESSURECT(pSquad1, 0u, 0u)
-            else if(STAGE_SUB(2u)) STAGE_RESSURECT(pSquad1, 1u, 2u)
+                 if(STAGE_SUB(1u)) STAGE_RESURRECT(pSquad1, 0u, 0u)
+            else if(STAGE_SUB(2u)) STAGE_RESURRECT(pSquad1, 1u, 2u)
         }
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
@@ -301,7 +301,7 @@ void cIntroMission::__SetupOwn()
         {
             const coreUint8 iFrom = m_iStageSub;
             const coreUint8 iTo   = m_iStageSub + ((iFrom == 8u) ? 1u : 0u);
-            if((iTo < pSquad1->GetNumEnemies()) && STAGE_SUB(iTo + 1u)) STAGE_RESSURECT(pSquad1, iFrom, iTo)
+            if((iTo < pSquad1->GetNumEnemies()) && STAGE_SUB(iTo + 1u)) STAGE_RESURRECT(pSquad1, iFrom, iTo)
         }
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)

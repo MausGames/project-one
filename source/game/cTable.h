@@ -22,7 +22,7 @@
 #define TABLE_TIME_TO_UINT(x)   (F_TO_UI((x)  * 1000.0f))
 #define TABLE_TIME_TO_FLOAT(x)  (I_TO_F ((x)) / 1000.0f))
 
-#define __TABLE_SCORE_COMBO(x)  (LERP(50.0f, 1.0f, RCP(1.0f + I_TO_F(x) * 0.0002f)))
+#define __TABLE_SCORE_COMBO(x)  (1.0f + 0.1f * I_TO_F(x))
 #define __TABLE_TIME_CONVERT(x) (I_TO_F(x) * m_fFrameTime)
 
 
@@ -102,8 +102,8 @@ public:
     inline const sCounter&  GetCounterSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {ASSERT(iMissionIndex < TABLE_MISSIONS && iSegmentIndex < TABLE_SEGMENTS) return m_aaCounterSegment[iMissionIndex][iSegmentIndex];}
     inline const coreUint8& GetMedalMission  (const coreUintW iMissionIndex)const                                {ASSERT(iMissionIndex < TABLE_MISSIONS)                                   return m_aiMedalMission  [iMissionIndex];}
     inline const coreUint8& GetMedalSegment  (const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {ASSERT(iMissionIndex < TABLE_MISSIONS && iSegmentIndex < TABLE_SEGMENTS) return m_aaiMedalSegment [iMissionIndex][iSegmentIndex];}
-    inline       coreBool   GetFragment      (const coreUintW iMissionIndex, const coreUintW iBossIndex)const    {ASSERT(iMissionIndex < TABLE_MISSIONS && iBossIndex    < TABLE_BOSSES)   return CONTAINS_BIT(m_aiFragment[iMissionIndex], iBossIndex);}
-    inline       coreBool   GetBadge         (const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {ASSERT(iMissionIndex < TABLE_MISSIONS && iSegmentIndex < TABLE_SEGMENTS) return CONTAINS_BIT(m_aiBadge   [iMissionIndex], iSegmentIndex);}
+    inline       coreBool   GetFragment      (const coreUintW iMissionIndex, const coreUintW iBossIndex)const    {ASSERT(iMissionIndex < TABLE_MISSIONS && iBossIndex    < TABLE_BOSSES)   return HAS_BIT(m_aiFragment[iMissionIndex], iBossIndex);}
+    inline       coreBool   GetBadge         (const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const {ASSERT(iMissionIndex < TABLE_MISSIONS && iSegmentIndex < TABLE_SEGMENTS) return HAS_BIT(m_aiBadge   [iMissionIndex], iSegmentIndex);}
 };
 
 
@@ -118,7 +118,7 @@ private:
 
     coreProtect<coreUint32> m_aiComboValue[2];                                   // absolute values for combo calculations (0 = current value, 1 = max value) 
     coreProtect<coreUint32> m_aiChainValue[2];                                   // 
-    coreProtect<coreFlow>   m_fChainCooldown;                                    // 
+    coreProtect<coreFlow>   m_fComboCooldown;                                    // 
 
     const cPlayer* m_pOwner;                                                     // 
 
@@ -134,14 +134,17 @@ public:
     // 
     void Reset();
 
-    // control scoring stats 
-    void AddScore(const coreUint32 iValue, const coreBool bModified, const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
-    void AddScore(const coreUint32 iValue, const coreBool bModified);
-    void AddCombo(const coreUint32 iValue);
-    void AddChain(const coreUint32 iValue);
+    // control scoring stats   
+    coreUint32 AddScore(const coreUint32 iValue, const coreBool bModified, const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
+    coreUint32 AddScore(const coreUint32 iValue, const coreBool bModified, const coreVector3& vPosition);
+    coreUint32 AddScore(const coreUint32 iValue, const coreBool bModified);
+    void       AddCombo(const coreUint32 iValue);
+    void       AddChain(const coreUint32 iValue);
 
     // 
-    void ReduceCombo  ();
+    void RefreshCombo ();
+    void CancelCombo  ();
+    void TransferCombo();
     void TransferChain();
 
     // 
@@ -155,7 +158,7 @@ public:
     inline coreFloat  GetMaxCombo     ()const                                                             {return __TABLE_SCORE_COMBO(m_aiComboValue[1]);}
     inline coreUint32 GetCurChain     ()const                                                             {return m_aiChainValue[0];}
     inline coreUint32 GetMaxChain     ()const                                                             {return m_aiChainValue[1];}
-    inline coreFloat  GetChainCooldown()const                                                             {return m_fChainCooldown;}
+    inline coreFloat  GetComboCooldown()const                                                             {return m_fComboCooldown;}
 };
 
 

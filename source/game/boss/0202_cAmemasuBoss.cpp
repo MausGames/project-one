@@ -216,7 +216,7 @@ void cAmemasuBoss::__MoveOwn()
 
 
                 //const coreVector2 vDiff = this->GetPosition().xy() - pPlayer->GetPosition().xy();
-                //const coreVector2 vMove = vDiff.Normalized() * (Core::System->GetTime() * fTime * 100.0f * SmoothTowards(vDiff.Length(), 5.0f));
+                //const coreVector2 vMove = vDiff.Normalized() * (TIME * fTime * 100.0f * SmoothTowards(vDiff.Length(), 5.0f));
                 //const coreVector2 vPos  = pPlayer->GetPosition().xy() + vMove;
                 //
                 //pPlayer->SetPosition (coreVector3(vPos, 0.0f));
@@ -300,7 +300,7 @@ void cAmemasuBoss::__MoveOwn()
 
             g_pGame->ForEachPlayer([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
             {
-                const coreVector2 vMove = coreVector2(-pPlayer->GetPosition().x, 1.0f) * (Core::System->GetTime() * 90.0f);
+                const coreVector2 vMove = coreVector2(-pPlayer->GetPosition().x, 1.0f) * (TIME * 90.0f);
                 const coreVector2 vPos  = pPlayer->GetPosition().xy() + vMove;
 
                 pPlayer->SetPosition (coreVector3(vPos, 0.0f));

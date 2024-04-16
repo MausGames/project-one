@@ -30,15 +30,17 @@
 #define BULLET_SET_COUNT        (16u)     // 
 #define BULLET_SPEED_FACTOR     (30.0f)   // 
 #define BULLET_DEPTH_FACTOR     (0.8f)    // 
-#define BULLET_COLLISION_FACTOR (0.9f)//(0.75f)   // (for enemy bullets) TODO: collision bug, spear bullets where hitting player only after they passed
+#define BULLET_COLLISION_FACTOR (1.0f)//(0.75f)   // (for enemy bullets) TODO: collision bug, spear bullets where hitting player only after they passed
 
 #define BULLET_SHADER_ATTRIBUTE_DEPTH (CORE_SHADER_ATTRIBUTE_DIV_TEXPARAM_NUM + 1u)
 
 enum eBulletStatus : coreUint8
 {
-    BULLET_STATUS_READY     = 0x01u,  // bullet is ready to be created
-    BULLET_STATUS_ACTIVE    = 0x02u,  // bullet is currently flying around, doing stuff (no checking required, is managed)
-    BULLET_STATUS_PENETRATE = 0x04u   // 
+    BULLET_STATUS_READY     = 0x01u,   // bullet is ready to be created
+    BULLET_STATUS_ACTIVE    = 0x02u,   // bullet is currently flying around, doing stuff (no checking required, is managed)
+    BULLET_STATUS_PENETRATE = 0x04u,   // 
+    BULLET_STATUS_GHOST     = 0x08u    // 
+            // TODO: penetrate is set in constructor, move to weapon, and create status-reset similar to enemy-manager
 };
 
 
@@ -101,7 +103,7 @@ public:
     inline const coreUint8&   GetElement()const {return m_iElement;}
     inline const coreFloat&   GetFlyTime()const {return m_fFlyTime;}
     inline const coreVector2& GetFlyDir ()const {return m_vFlyDir;}
-    inline       coreVector2  GetFlyMove()const {return m_vFlyDir * (m_fSpeed * Core::System->GetTime());}
+    inline       coreVector2  GetFlyMove()const {return m_vFlyDir * (m_fSpeed * TIME);}
 
     // bullet configuration values
     static inline const coreChar* ConfigProgramInstancedName() {ASSERT(false) return "";}
@@ -162,7 +164,7 @@ private:
     };
     template <typename T> struct sBulletSet final : public sBulletSetGen
     {
-        std::vector<T> aBulletPool;   // semi-dynamic container with all bullets
+        coreList<T> aBulletPool;   // semi-dynamic container with all bullets
 
         explicit sBulletSet(cOutline* pOutline)noexcept;
         ~sBulletSet()final;
@@ -563,7 +565,7 @@ public:
     inline cTriangleBullet* MakeWhite  () {ASSERT(false)             return this;}
     inline cTriangleBullet* MakeYellow () {ASSERT(false)             return this;}
     inline cTriangleBullet* MakeOrange () {ASSERT(false)             return this;}
-    inline cTriangleBullet* MakeRed    () {this->_MakeRed    (1.0f); return this;}
+    inline cTriangleBullet* MakeRed    () {this->_MakeRed    (0.9f); return this;}
     inline cTriangleBullet* MakeMagenta() {ASSERT(false)             return this;}
     inline cTriangleBullet* MakePurple () {this->_MakePurple (1.0f); return this;}
     inline cTriangleBullet* MakeBlue   () {ASSERT(false)             return this;}
@@ -866,7 +868,7 @@ template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt
 
             // check current bullet status
             T* pBullet = &pSet->aBulletPool[pSet->iCurBullet];
-            if(CONTAINS_FLAG(pBullet->GetStatus(), BULLET_STATUS_READY))
+            if(HAS_FLAG(pBullet->GetStatus(), BULLET_STATUS_READY))
             {
                 // prepare bullet and add to active list
                 pBullet->Activate(iDamage, fSpeed, pOwner, vPosition, vDirection, m_iType);
@@ -882,7 +884,7 @@ template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt
 
     // increase list and pool size by 100%
     pSet->oBulletActive.Reallocate(iSize * 2u);
-    pSet->aBulletPool  .resize    (iSize * 2u);   // TODO: high ChangeType impact, think of bullet creating other bullets   
+    pSet->aBulletPool  .resize    (iSize * 2u);
 
     const coreUintW iAfter = P_TO_UI(pSet->aBulletPool.data());
 
@@ -951,7 +953,7 @@ template <typename T> T* cBulletManager::FindBulletTyped(const coreVector2& vPos
 template <typename F> void cBulletManager::ForEachBullet(F&& nFunction)const
 {
     // 
-    const std::vector<coreObject3D*>& oBulletList = Core::Manager::Object->GetObjectList(m_iType);
+    const coreList<coreObject3D*>& oBulletList = Core::Manager::Object->GetObjectList(m_iType);
     FOR_EACH(it, oBulletList)
     {
         cBullet* pBullet = d_cast<cBullet*>(*it);
@@ -976,7 +978,7 @@ template <typename T, typename F> void cBulletManager::ForEachBulletTyped(F&& nF
         FOR_EACH(it, *oBulletActive.List())
         {
             T* pBullet = d_cast<T*>(*it);
-            if(!CONTAINS_FLAG(pBullet->GetStatus(), BULLET_STATUS_ACTIVE)) continue;
+            if(!HAS_FLAG(pBullet->GetStatus(), BULLET_STATUS_ACTIVE)) continue;
 
             // 
             nFunction(pBullet);

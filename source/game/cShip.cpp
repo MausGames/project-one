@@ -55,14 +55,14 @@ coreBool cShip::DefaultMoveTarget(const coreVector2& vTarget, const coreFloat fS
     // 
     const coreVector2 vAim = vDiff.Normalized();
     const coreVector2 vDir = SmoothAim(this->GetDirection().xy(), vAim, fSpeedTurn);
-    const coreVector2 vPos = this->GetPosition().xy() + vDir * (fSpeedMove * Core::System->GetTime());
+    const coreVector2 vPos = this->GetPosition().xy() + vDir * (fSpeedMove * TIME);
 
     // 
     this->SetPosition (coreVector3(vPos, 0.0f));
     this->SetDirection(coreVector3(vDir, 0.0f));
 
     // 
-    return (vDiff.LengthSq() < 0.5f);
+    return (vDiff.LengthSq() < POW2(0.7f));
 }
 
 
@@ -79,7 +79,7 @@ coreBool cShip::DefaultMoveSmooth(const coreVector2& vRawPosition, const coreFlo
     // 
     const coreVector2 vAim = vDiff.Normalized();
     const coreFloat   fLen = SmoothTowards(vDiff.Length(), fDistThreshold);
-    const coreVector2 vPos = this->GetPosition().xy() + vAim * (fLen * fSpeedMove * Core::System->GetTime());
+    const coreVector2 vPos = this->GetPosition().xy() + vAim * (fLen * fSpeedMove * TIME);
 
     // 
     this->SetPosition(coreVector3(vPos, 0.0f));
@@ -94,7 +94,7 @@ coreBool cShip::DefaultMoveSmooth(const coreVector2& vRawPosition, const coreFlo
 void cShip::DefaultMoveForward(const coreVector2& vDirection, const coreFloat fSpeedMove)
 {
     // 
-    const coreVector2 vPosition = this->GetPosition().xy() + vDirection * (fSpeedMove * Core::System->GetTime());
+    const coreVector2 vPosition = this->GetPosition().xy() + vDirection * (fSpeedMove * TIME);
 
     // 
     this->SetPosition (coreVector3(vPosition,  0.0f));
@@ -275,7 +275,7 @@ void cShip::_EnableBlink(const coreProgramPtr& pProgram)const
 
     // 
     pProgram->Enable();
-    pProgram->SendUniform("u_v1Blink", this->GetBlink());
+    pProgram->SendUniform("u_v2Blink", coreVector2(this->GetBlink(), this->GetCurHealthPct()));
 }
 
 void cShip::_EnableBlink()const

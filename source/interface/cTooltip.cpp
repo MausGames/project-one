@@ -166,7 +166,7 @@ void cTooltip::__ShowText(const coreFloat fWidth, const coreChar* pcText)
     fMaxWidth = MAX(fMaxWidth, fCurWidth);
 
     // set background size
-    this->SetSize(coreVector2(fMaxWidth, TOOLTIP_LINE_HEIGHT * I_TO_F(m_iNumLines)) + TOOLTIP_BORDER_SIZE + I_TO_F(2u * TOOLTIP_OUTLINE_SIZE) * fFactor);
+    this->SetSize(coreVector2(fMaxWidth, TOOLTIP_LINE_HEIGHT * I_TO_F(m_iNumLines - 1u) + TOOLTIP_LINE_BOTTOM) + TOOLTIP_BORDER_SIZE + I_TO_F(2u * TOOLTIP_OUTLINE_SIZE) * fFactor);
 
     // set text line position
     const coreVector2 vBase = (this->GetSize() * this->GetAlignment() + (TOOLTIP_BORDER_SIZE - this->GetSize()) * m_aLine[0].GetAlignment()) * 0.5f + TOOLTIP_TARGET_OFFSET;

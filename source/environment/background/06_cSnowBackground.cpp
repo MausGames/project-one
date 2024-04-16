@@ -43,7 +43,7 @@ cSnowBackground::cSnowBackground()noexcept
             // test for valid values
             if((fHeight > -20.0f) && (fHeight < -17.0f) && (F_TO_SI(vPosition.y+160.0f) % 80 < 40))
             {
-                if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 25.0f))
+                if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, POW2(5.0f)))
                 {
                     // create object
                     coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
@@ -94,8 +94,8 @@ cSnowBackground::cSnowBackground()noexcept
                 // test for valid values
                 if((fHeight > -20.0f) && (fHeight < -15.0f) && (F_TO_SI(vPosition.y+176.0f) % 80 < 60))
                 {
-                    if(!cBackground::_CheckIntersectionQuick(pList1,                  vPosition, 25.0f) &&
-                       !cBackground::_CheckIntersection     (m_apGroundObjectList[0], vPosition, 25.0f))
+                    if(!cBackground::_CheckIntersectionQuick(pList1,                  vPosition, POW2(5.0f)) &&
+                       !cBackground::_CheckIntersection     (m_apGroundObjectList[0], vPosition, POW2(5.0f)))
                     {
                         // create object
                         coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
@@ -205,7 +205,7 @@ void cSnowBackground::__MoveOwn()
     // 
     const coreVector2 vMove      = m_vSnowDirection * (-0.35f * g_pEnvironment->GetSpeed());
     const coreVector2 vTexSize   = coreVector2(1.0f,1.0f) * 5.4f;
-    const coreVector2 vTexOffset = m_Snow.GetTexOffset() + (coreVector2(0.0f,0.0f) + vMove) * (0.9f * Core::System->GetTime());
+    const coreVector2 vTexOffset = m_Snow.GetTexOffset() + (coreVector2(0.0f,0.0f) + vMove) * (0.9f * TIME);
 
     // 
     m_Snow.SetDirection(MapToAxisInv(m_vSnowDirection.InvertedX(), g_pEnvironment->GetDirection()));

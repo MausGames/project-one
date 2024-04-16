@@ -25,7 +25,7 @@
 #define INTERFACE_BANNER_ANIMATION        (2.9f)                            // animation duration
 #define INTERFACE_BANNER_DURATION_MISSION (3.0f)                            // 
 #define INTERFACE_BANNER_DURATION_BOSS    (3.0f)                            // display duration (with fading)  
-#define INTERFACE_BANNER_DURATION_SCORE   (2.0f)                            // 
+#define INTERFACE_BANNER_DURATION_SCORE   (2.5f)                            // 
 
 #define INTERFACE_BANNER_TYPE_MISSION     (0u)                              // mission banner type
 #define INTERFACE_BANNER_TYPE_BOSS        (1u)                              // boss banner type
@@ -49,6 +49,9 @@ private:
         cGuiLabel  oShieldValue;             // player shield value
         cGuiLabel  oScoreTotal;              // total score
         cGuiLabel  oScoreMission;            // mission score
+        cGuiObject oComboBar;                // combo bar
+        cGuiLabel  oComboValue;              // combo label
+        cGuiLabel  oChainValue;              // chain value
         coreFlow   fSpin;                    // 
 
         void Construct(const coreUintW iIndex);
@@ -102,6 +105,7 @@ public:
     void ShowWave   (const coreChar*  pcName);
     void ShowScore  (const coreChar*  pcMain, const coreChar* pcSub, const coreUint8 iMedal, const coreUint8 iMedalType);
     void ShowScore  (const coreUint32 iScore,                        const coreUint8 iMedal, const coreUint8 iMedalType);
+    void CancelBanner();
     coreBool IsBannerActive()const;
 
     // 

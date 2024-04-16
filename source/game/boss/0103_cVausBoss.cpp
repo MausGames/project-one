@@ -282,9 +282,9 @@ void cVausBoss::__MoveOwn()
 
 
     // 
-    if(CONTAINS_BIT(pMission->GetBounceState(), 0u)
+    if(HAS_BIT(pMission->GetBounceState(), 0u)
        )//||
-       //CONTAINS_BIT(pMission->GetBounceState(), 7u))
+       //HAS_BIT(pMission->GetBounceState(), 7u))
     {
         coreObject3D* pPaddle = pMission->GetPaddle(0);
 

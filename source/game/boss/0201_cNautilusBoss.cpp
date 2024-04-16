@@ -234,7 +234,7 @@ void cNautilusBoss::__MoveOwn()
         PHASE_CONTROL_TIMER(0u, 0.15f, LERP_LINEAR)
         {
             const cPlayer*  pPlayer = this->NearestPlayerDual(m_aiCounter[DASH_SIDE]);
-            const coreFloat fAim    = (pPlayer->GetPosition().x - this->GetPosition().x) * Core::System->GetTime() * fTime * 3.0f;
+            const coreFloat fAim    = (pPlayer->GetPosition().x - this->GetPosition().x) * TIME * fTime * 3.0f;
 
             this->SetPosition         (coreVector3(this->GetPosition().x + fAim, this->GetPosition().y, 0.0f));
             this->DefaultOrientateLerp(0.0f*PI, 20.0f*PI, LERPB(0.0f, 1.0f, 1.0f - fTime));
@@ -313,7 +313,7 @@ void cNautilusBoss::__MoveOwn()
         {
             PHASE_CONTROL_TIMER(0u, 1.3f, LERP_BREAK_REV)
             {
-                const coreFloat vNewX = m_vLastPosition.x + (CONTAINS_BIT(m_aiCounter[STOMP_COUNT], 8u) ? 0.4f : -0.4f);
+                const coreFloat vNewX = m_vLastPosition.x + (HAS_BIT(m_aiCounter[STOMP_COUNT], 8u) ? 0.4f : -0.4f);
 
                 this->SetPosition(coreVector3(coreVector2(LERP(m_vLastPosition.x, vNewX, fTime), m_vLastPosition.y + -0.4f * this->GetDirection().y * SIN(PI * fTime)) * FOREGROUND_AREA, 0.0f));
 
@@ -381,18 +381,18 @@ void cNautilusBoss::__MoveOwn()
     // ################################################################
     // ################################################################
 
-    if((m_iPhase < 10u) && Core::System->GetTime())
+    if((m_iPhase < 10u) && TIME)
     {
         // 
         m_fMovement.UpdateMod(1.0f, 2.0f*PI);
 
         // 
-        const coreFloat fPrevX = 0.6f * SIN(m_fMovement - Core::System->GetTime());
+        const coreFloat fPrevX = 0.6f * SIN(m_fMovement - TIME);
         const coreFloat fCurX  = 0.6f * SIN(m_fMovement);
 
         // 
         this->SetPosition (coreVector3(fCurX * FOREGROUND_AREA.x, this->GetPosition().yz()));
-        this->SetDirection(coreVector3(fCurX - fPrevX, Core::System->GetTime(), 0.0f).Normalized()); // TODO: not time-portable   
+        this->SetDirection(coreVector3(fCurX - fPrevX, TIME, 0.0f).Normalized()); // TODO: not time-portable   
     }
 
     if(m_aiCounter[CONTAINER_ATTACHED])
@@ -455,7 +455,7 @@ void cNautilusBoss::__MoveOwn()
     {
         const coreVector3 vPos    = m_InkBullet.GetPosition();
         const coreVector3 vDir    = m_InkBullet.GetDirection();
-        const coreVector3 vNewPos = coreVector3(vPos.xy() + vDir.xy() * (40.0f * Core::System->GetTime()), 0.0f);
+        const coreVector3 vNewPos = coreVector3(vPos.xy() + vDir.xy() * (40.0f * TIME), 0.0f);
 
         // 
         m_InkBullet.SetPosition (vNewPos);

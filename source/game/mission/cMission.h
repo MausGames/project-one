@@ -23,16 +23,19 @@
 // TODO: check if TYPE_NEVO_BOMB still needed
 // TODO: do not create objects and load resources of unused game-objects and bosses (e.g. move waves into own classes ? but then ?)
 // TODO: in delay, replace cScoutEnemy with something which does not load any resources (may need to support instancing)
+// TODO: move as much gameplay from gameplay-objects from mission to stages, except for mission-shared stuff, animation stuff, or special-cases requiring before-after update (teleportation)
+// TODO: use mission-RotaCache everywhere applicable (even bullt generation if required)
+// TODO: chain should shatter into pieces on disable, should drag the stone to player on swing-start, boulder should use ice-shader, multiple boulders, clearing/resetting swing and catch attributes etc.
 
 
 // ****************************************************************
 // mission definitions
-#define MISSION_PLAYERS     (PLAYERS)   // 
-#define MISSION_BOSSES      (BOSSES)    // default number of bosses per mission
-#define MISSION_WAVES       (WAVES)     // 
-#define MISSION_NO_BOSS     (0xFFu)     // no boss currently active (error-value)
-#define MISSION_NO_WAVE     (0xFFu)     // 
-#define MISSION_NO_SEGMENT  (0xFFu)     // 
+#define MISSION_PLAYERS    (PLAYERS)   // 
+#define MISSION_BOSSES     (BOSSES)    // default number of bosses per mission
+#define MISSION_WAVES      (WAVES)     // 
+#define MISSION_NO_BOSS    (0xFFu)     // no boss currently active (error-value)
+#define MISSION_NO_WAVE    (0xFFu)     // 
+#define MISSION_NO_SEGMENT (0xFFu)     // 
 
 #define MISSION_SEGMENT_IS_BOSS(i) ((i) % 6u == 5u)
 #define MISSION_BOSS_TO_SEGMENT(i) ((i) * 6u  + 5u)
@@ -71,22 +74,39 @@ STATIC_ASSERT((BOSSES == 3u) && (WAVES == 15u) && (SEGMENTS == 18u))
 #define NEVO_BLOCKS_RAWS            (NEVO_BLOCKS * 2u)                                // 
 #define NEVO_BOMB_SIZE              (4.0f)                                            // 
 
+#define HARENA_SPIKES               (36u)                                             // 
+#define HARENA_SPIKES_RAWS          (HARENA_SPIKES * 2u)                              // 
+#define HARENA_SPIKE_DIMENSION      (6u)                                              // 
+
 #define RUTILUS_TELEPORTER          (2u)                                              // 
 #define RUTILUS_TELEPORTER_COLOR(x) ((x) ? COLOR_ENERGY_BLUE : COLOR_ENERGY_ORANGE)   // 
 #define RUTILUS_PLATES              (5u)                                              // 
 #define RUTILUS_PLATES_RAWS         (RUTILUS_PLATES)                                  // 
+#define RUTILUS_AREAS               (2u)                                              // 
 #define RUTILUS_WAVES               (4u)                                              // 
 #define RUTILUS_WAVES_RAWS          (RUTILUS_WAVES)                                   // 
 
+#define GELU_FANGS                  (25u)                                             // 
+#define GELU_FANGS_RAWS             (GELU_FANGS)                                      // 
+#define GELU_FANGS_DIMENSION        (5u)                                              // 
+#define GELU_WAYS                   (26u)                                             // 
+#define GELU_WAYS_RAWS              (GELU_WAYS * 2u)                                  // 
 #define GELU_ORBS                   (16u)                                             // 
 #define GELU_ORBS_RAWS              (GELU_ORBS)                                       // 
-#define GELU_WEBS                   (24u)                                             // 
-#define GELU_WEBS_RAWS              (GELU_WEBS)                                       // 
+#define GELU_LINES                  (24u)                                             // 
+#define GELU_LINES_RAWS             (GELU_LINES)                                      // 
 
+#define CALOR_LOADS                 (12u)                                             // 
+#define CALOR_LOADS_RAWS            (CALOR_LOADS)                                     // 
 #define CALOR_CHAINS                (16u)                                             // 
 #define CALOR_STARS                 (MISSION_PLAYERS)                                 // 
 #define CALOR_STARS_RAWS            (CALOR_STARS * (CALOR_CHAINS + 1u))               // 
 #define CALOR_CHAIN_CONSTRAINT      (46.0f)                                           // 
+
+#define MUSCUS_GENERATES            (24u)                                             // 
+#define MUSCUS_GENERATES_RAWS       (MUSCUS_GENERATES * 2u)                           // 
+#define MUSCUS_PEARLS               (21u)                                             // 
+#define MUSCUS_PEARLS_RAWS          (MUSCUS_PEARLS * 2u)                              // 
 
 
 // ****************************************************************
@@ -95,17 +115,17 @@ STATIC_ASSERT((BOSSES == 3u) && (WAVES == 15u) && (SEGMENTS == 18u))
 #define STAGE_SUB(i)                           ((m_iStageSub < (i)) && [&]() {m_iStageSub = (i); m_fStageSubTime = 0.0f; m_fStageSubTimeBefore = 0.0f; return true;}())
 
 #define STAGE_FINISH_NOW                       {this->SkipStage();}
-#define STAGE_FINISH_PLAY                      {if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY)) STAGE_FINISH_NOW}
-#define STAGE_FINISH_AFTER(t)                  {if(m_fStageTime >= (t))                                   STAGE_FINISH_NOW}
+#define STAGE_FINISH_PLAY                      {if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY)) STAGE_FINISH_NOW}
+#define STAGE_FINISH_AFTER(t)                  {if(m_fStageTime >= (t))                              STAGE_FINISH_NOW}
 
 #define STAGE_MEDAL_GOAL(...)                  {static constexpr coreFloat A[] = __VA_ARGS__; this->SetMedalGoal(A); STATIC_ASSERT((ARRAY_SIZE(A) == 4u) && (A[0] < A[1]) && (A[1] < A[2]) && (A[2] < A[3]))}
-#define STAGE_BOSS(e,...)                      {if(STAGE_BEGINNING) {STAGE_MEDAL_GOAL(__VA_ARGS__) (e).Resurrect();} if(CONTAINS_FLAG((e).GetStatus(), ENEMY_STATUS_DEAD)) STAGE_FINISH_NOW}
-#define STAGE_WAVE(n,...)                      {if(STAGE_BEGINNING) {STAGE_MEDAL_GOAL(__VA_ARGS__) this->ActivateWave(n);} if(STAGE_CLEARED) {this->DeactivateWave(); m_iStageSub = 0xFFu; if(!g_pGame->GetInterface()->IsBannerActive()) STAGE_FINISH_NOW}}
+#define STAGE_BOSS(e,...)                      {if(STAGE_BEGINNING) {STAGE_MEDAL_GOAL(__VA_ARGS__) (e).Resurrect();} if(HAS_FLAG((e).GetStatus(), ENEMY_STATUS_DEAD)) STAGE_FINISH_NOW}
+#define STAGE_WAVE(n,...)                      {if(STAGE_BEGINNING) {STAGE_MEDAL_GOAL(__VA_ARGS__) this->ActivateWave(n);} if(STAGE_CLEARED) {this->DeactivateWave(); if(this->_UpdateWait()) STAGE_FINISH_NOW}}
 
 #define STAGE_START_HERE                       {m_anStage.clear(); STAGE_MAIN({TAKE_ALWAYS}) {if(STAGE_BEGINNING) g_pGame->StartIntro(); STAGE_FINISH_PLAY});}
 
 #define STAGE_CLEARED                          (std::all_of(m_apSquad.begin(), m_apSquad.end(), [](const cEnemySquad* pSquad) {return pSquad->IsFinished();}))
-#define STAGE_RESSURECT(s,f,t)                 {STAGE_FOREACH_ENEMY_ALL(s, pEnemy, i) {if((coreInt32(i) >= coreInt32(f)) && (coreInt32(i) <= coreInt32(t))) pEnemy->Resurrect();}); ASSERT((coreInt32(f) <= coreInt32(t)) && (coreInt32(t) < coreInt32((s)->GetNumEnemies())))}
+#define STAGE_RESURRECT(s,f,t)                 {STAGE_FOREACH_ENEMY_ALL(s, pEnemy, i) {if((coreInt32(i) >= coreInt32(f)) && (coreInt32(i) <= coreInt32(t))) pEnemy->Resurrect();}); ASSERT((coreInt32(f) <= coreInt32(t)) && (coreInt32(t) < coreInt32((s)->GetNumEnemies())))}
 #define STAGE_BADGE(b,p)                       {this->GiveBadge(b, p);}
 
 #define STAGE_DELAY_START                      {UNUSED STAGE_ADD_SQUAD(pDelay, cScoutEnemy, 1u) {pDelay->GetEnemy(0u)->Configure(1, COLOR_SHIP_GREY); pDelay->GetEnemy(0u)->Resurrect();});}
@@ -149,17 +169,16 @@ STATIC_ASSERT((BOSSES == 3u) && (WAVES == 15u) && (SEGMENTS == 18u))
     UNUSED const coreFloat fLifeTimeBase       = (e)->GetLifeTime()       * fLifeSpeed - fLifeOffset; \
     UNUSED const coreFloat fLifeTimeBeforeBase = (e)->GetLifeTimeBefore() * fLifeSpeed - fLifeOffset; \
     UNUSED coreFloat       fLifeTime           = fLifeTimeBase;                                       \
-    UNUSED coreFloat       fLifeTimeBefore     = fLifeTimeBeforeBase;
+    UNUSED coreFloat       fLifeTimeBefore     = fLifeTimeBeforeBase;                                 \
+    UNUSED const coreBool  bIsDead             = HAS_FLAG((e)->GetStatus(), ENEMY_STATUS_DEAD);
 
 #define STAGE_BRANCH(x,y)                      ((fLifeTime < (x)) || [&]() {fLifeTime = FMOD(fLifeTime - (x), (y)); fLifeTimeBefore = FMOD(fLifeTimeBefore - (x), (y)); if(fLifeTimeBefore > fLifeTime) fLifeTimeBefore -= (y); return false;}())
 #define STAGE_REPEAT(x)                        {if(STAGE_BRANCH(x, x)) {}}
 
-#define STAGE_TICK_FREE(c,o)                   ((m_fStageTimeBefore  >= 0.0f) && ((s_iTick = F_TO_UI(m_fStageTime  * (c) - (o)) - 1u) != coreUint16(F_TO_UI(m_fStageTimeBefore  * (c) - (o)) - 1u)))
-#define STAGE_TICK_TIME(c,o)                   ((fLifeTimeBeforeBase >= 0.0f) && STAGE_TICK_FREE(c, o))
-#define STAGE_TICK_LIFETIME(c,o)               ((fLifeTimeBeforeBase >= 0.0f) && ((s_iTick = F_TO_UI(fLifeTime     * (c) - (o)) - 1u) != coreUint16(F_TO_UI(fLifeTimeBefore     * (c) - (o)) - 1u)))
-#define STAGE_TICK_LIFETIME_BASE(c,o)          ((fLifeTimeBeforeBase >= 0.0f) && ((s_iTick = F_TO_UI(fLifeTimeBase * (c) - (o)) - 1u) != coreUint16(F_TO_UI(fLifeTimeBeforeBase * (c) - (o)) - 1u)))
-// TODO: mit dem tod des letzten gegners werden beim scripten manchmal alle geschosse zerstört, aber weil ein toter gegner noch 1mal iteriert wird schießt er danach noch mal
-// vlt. die ClearAll calls durch eine eigene funktion ersetzen, die neue geschosse bis zum ende verhindert
+#define STAGE_TICK_FREE(c,o)                   ((m_fStageTimeBefore  >= 0.0f) &&             ((s_iTick = F_TO_UI(m_fStageTime  * (c) - (o)) - 1u) != coreUint16(F_TO_UI(m_fStageTimeBefore  * (c) - (o)) - 1u)))
+#define STAGE_TICK_TIME(c,o)                   ((fLifeTimeBeforeBase >= 0.0f) && !bIsDead && STAGE_TICK_FREE(c, o))
+#define STAGE_TICK_LIFETIME(c,o)               ((fLifeTimeBeforeBase >= 0.0f) && !bIsDead && ((s_iTick = F_TO_UI(fLifeTime     * (c) - (o)) - 1u) != coreUint16(F_TO_UI(fLifeTimeBefore     * (c) - (o)) - 1u)))
+#define STAGE_TICK_LIFETIME_BASE(c,o)          ((fLifeTimeBeforeBase >= 0.0f) && !bIsDead && ((s_iTick = F_TO_UI(fLifeTimeBase * (c) - (o)) - 1u) != coreUint16(F_TO_UI(fLifeTimeBeforeBase * (c) - (o)) - 1u)))
 
 #define STAGE_TIME_POINT(t)                    (InBetween((t), m_fStageTimeBefore, m_fStageTime))
 #define STAGE_TIME_BEFORE(t)                   (m_fStageTime <  (t))
@@ -214,47 +233,50 @@ private:
 
 
 protected:
-    cBoss* m_apBoss[MISSION_BOSSES];                           // pointers to all available bosses
+    cBoss* m_apBoss[MISSION_BOSSES];                        // pointers to all available bosses
 
-    cBoss*    m_pCurBoss;                                      // pointer to currently active boss
-    coreUintW m_iCurBossIndex;                                 // index of the active boss (or error-value)
+    cBoss*    m_pCurBoss;                                   // pointer to currently active boss
+    coreUintW m_iCurBossIndex;                              // index of the active boss (or error-value)
 
-    coreUintW m_iCurWaveCount;                                 // 
-    coreUintW m_iCurWaveIndex;                                 // 
+    coreUintW m_iCurWaveCount;                              // 
+    coreUintW m_iCurWaveIndex;                              // 
 
-    coreUintW m_iCurSegmentIndex;                              // 
+    coreUintW m_iCurSegmentIndex;                           // 
 
-    coreLookup<coreUint16, std::function<void()>> m_anStage;   // 
-    coreLookup<coreUint16, coreSpline2*>          m_apPath;    // 
-    coreLookup<coreUint16, cEnemySquad*>          m_apSquad;   // 
+    coreMap<coreUint16, std::function<void()>> m_anStage;   // 
+    coreMap<coreUint16, coreSpline2*>          m_apPath;    // 
+    coreMap<coreUint16, cEnemySquad*>          m_apSquad;   // 
 
-    coreUint32* m_piData;                                      // 
-    coreUint8   m_iDataSize;                                   // 
+    coreUint32* m_piData;                                   // 
+    coreUint8   m_iDataSize;                                // 
 
-    coreUint16 m_iStageNum;                                    // 
-    coreFlow   m_fStageTime;                                   // 
-    coreFloat  m_fStageTimeBefore;                             // 
-    coreUint8  m_iStageSub;                                    // 
-    coreFlow   m_fStageSubTime;                                // 
-    coreFloat  m_fStageSubTimeBefore;                          // 
+    coreUint16 m_iStageNum;                                 // 
+    coreFlow   m_fStageTime;                                // 
+    coreFloat  m_fStageTimeBefore;                          // 
+    coreUint8  m_iStageSub;                                 // 
+    coreFlow   m_fStageSubTime;                             // 
+    coreFloat  m_fStageSubTimeBefore;                       // 
+    coreFlow   m_fStageWait;                                // 
 
-    const coreFloat* m_pfMedalGoal;                            // 
+    const coreFloat* m_pfMedalGoal;                         // 
 
-    coreBool m_bBadgeGiven;                                    // 
+    coreBool m_bBadgeGiven;                                 // 
 
-    uCollPlayerEnemyType  m_nCollPlayerEnemy;                  // 
-    uCollPlayerBulletType m_nCollPlayerBullet;                 // 
-    uCollEnemyBulletType  m_nCollEnemyBullet;                  // 
+    uCollPlayerEnemyType  m_nCollPlayerEnemy;               // 
+    uCollPlayerBulletType m_nCollPlayerBullet;              // 
+    uCollEnemyBulletType  m_nCollEnemyBullet;               // 
 
-    coreUint8 m_iTakeFrom;                                     // 
-    coreUint8 m_iTakeTo;                                       // 
+    coreUint8 m_iTakeFrom;                                  // 
+    coreUint8 m_iTakeTo;                                    // 
 
-    coreBool m_bRepeat;                                        // 
+    coreBool m_bRepeat;                                     // 
 
-    static coreUint16  s_iTick;                                // 
-    static coreFloat   s_fLifeTimePoint;                       // 
-    static coreFloat   s_fHealthPctPoint;                      // 
-    static coreVector2 s_vPositionPoint;                       // 
+    static coreUint16  s_iTick;                             // 
+    static coreFloat   s_fLifeTimePoint;                    // 
+    static coreFloat   s_fHealthPctPoint;                   // 
+    static coreVector2 s_vPositionPoint;                    // 
+
+    static cRotaCache s_RotaCache;                          // 
 
 
 public:
@@ -273,6 +295,7 @@ public:
     void RenderOver  ();
     void RenderTop   ();
     void MoveBefore  ();
+    void MoveMiddle  ();
     void MoveAfter   ();
 
     // 
@@ -313,6 +336,9 @@ protected:
     template <typename T, typename F> cEnemySquad* _AddSquad(const coreUint16 iCodeLine, const coreUint8 iNum, F&& nInitFunc);   // [](cEnemySquad* OUTPUT pSquad) -> void
 
     // 
+    inline coreBool _UpdateWait() {m_fStageWait.UpdateMax(-1.0f, 0.0f); return !m_fStageWait;}
+
+    // 
     static constexpr FUNC_LOCAL coreBool _TakeRange(const coreUint8 iFrom, const coreUint8 iTo, const coreUint8* piIndexList, const coreUintW iSize);
 
 
@@ -324,6 +350,7 @@ private:
     virtual void __RenderOwnOver  () {}
     virtual void __RenderOwnTop   () {}
     virtual void __MoveOwnBefore  () {}
+    virtual void __MoveOwnMiddle  () {}
     virtual void __MoveOwnAfter   () {}
 
     // 
@@ -416,7 +443,7 @@ public:
 
     // 
     inline const coreUint8& GetRealState  ()const {return m_iRealState;}
-    inline coreBool         GetStickyState()const {return CONTAINS_BIT(m_iStickyState, 1u);}
+    inline coreBool         GetStickyState()const {return HAS_BIT(m_iStickyState, 1u);}
     inline const coreUint8& GetBounceState()const {return m_iBounceState;}
 
     // 
@@ -543,21 +570,41 @@ private:
 class cHarenaMission final : public cMission
 {
 private:
-    cUrticaBoss  m_Urtica;    // 
-    cTigerBoss   m_Tiger;     // 
-    cLuciferBoss m_Lucifer;   // 
+    cUrticaBoss  m_Urtica;                             // 
+    cTigerBoss   m_Tiger;                              // 
+    cLuciferBoss m_Lucifer;                            // 
+
+    coreBatchList m_Spike;                             // 
+    coreBatchList m_SpikeBoard;                        // 
+    coreObject3D  m_aSpikeRaw  [HARENA_SPIKES_RAWS];   // 
+    coreFlow      m_afSpikeTime[HARENA_SPIKES];        // 
+    coreFlow      m_afSpikeCur [HARENA_SPIKES];        // 
+    coreFloat     m_afSpikeMax [HARENA_SPIKES];        // 
 
 
 public:
     cHarenaMission()noexcept;
+    ~cHarenaMission()final;
 
     DISABLE_COPY(cHarenaMission)
     ASSIGN_ID(3, "Harena")
 
+    // 
+    void EnableSpike (const coreUintW iIndex);
+    void DisableSpike(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    inline void LaunchSpike(const coreUintW iIndex, const coreFloat fTime) {ASSERT(iIndex < HARENA_SPIKES) m_afSpikeCur[iIndex] = 0.0f; m_afSpikeMax[iIndex] = fTime;}
+
+    // 
+    inline coreBool GetSpikeLaunched(const coreUintW iIndex)const {ASSERT(iIndex < HARENA_SPIKES) return (m_afSpikeMax[iIndex] && InBetween(m_afSpikeCur[iIndex], 1.1f, m_afSpikeMax[iIndex] - 0.5f));}
+
 
 private:
     // execute own routines
-    void __SetupOwn()final;
+    void __SetupOwn       ()final;
+    void __RenderOwnBottom()final;
+    void __MoveOwnAfter   ()final;
 };
 
 
@@ -578,6 +625,9 @@ private:
     coreObject3D  m_aPlateRaw  [RUTILUS_PLATES_RAWS];      // 
     coreFlow      m_afPlateTime[RUTILUS_PLATES];           // 
     coreVector4   m_avPlateData[RUTILUS_PLATES];           // 
+
+    coreObject3D m_aArea[RUTILUS_AREAS];                   // 
+    coreFlow     m_fAreaTime;                              // 
 
     coreBatchList m_Wave;                                  // 
     coreObject3D  m_aWaveRaw  [RUTILUS_WAVES_RAWS];        // 
@@ -604,6 +654,10 @@ public:
     // 
     void EnablePlate (const coreUintW iIndex, const coreFloat fFrom, const coreFloat fTo, const coreFloat fScale);
     void DisablePlate(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void EnableArea ();
+    void DisableArea(const coreBool bAnimated);
 
     // 
     void EnableWave ();
@@ -635,19 +689,28 @@ private:
 class cGeluMission final : public cMission
 {
 private:
-    cTartarusBoss m_Tartarus;                    // 
-    cPhalarisBoss m_Phalaris;                    // 
-    cCholBoss     m_Chol;                        // 
+    cTartarusBoss m_Tartarus;                      // 
+    cPhalarisBoss m_Phalaris;                      // 
+    cCholBoss     m_Chol;                          // 
 
-    coreBatchList m_Orb;                         // 
-    coreObject3D  m_aOrbRaw  [GELU_ORBS_RAWS];   // 
-    coreFlow      m_afOrbTime[GELU_ORBS];        // 
+    coreBatchList m_Fang;                          // 
+    cLodObject    m_aFangRaw[GELU_FANGS_RAWS];     // 
 
-    coreBatchList m_Web;                         // 
-    coreObject3D  m_aWebRaw  [GELU_WEBS_RAWS];   // 
-    coreFlow      m_afWebTime[GELU_WEBS];        // 
+    coreBatchList m_Way;                           // 
+    coreBatchList m_WayArrow;                      // 
+    coreObject3D  m_aWayRaw[GELU_WAYS_RAWS];       // 
+    coreUint32    m_iWayActive;                    // 
+    coreUint32    m_iWayVisible;                   // 
 
-    coreFlow m_fAnimation;                       // animation value
+    coreBatchList m_Orb;                           // 
+    coreObject3D  m_aOrbRaw  [GELU_ORBS_RAWS];     // 
+    coreFlow      m_afOrbTime[GELU_ORBS];          // 
+
+    coreBatchList m_Line;                          // 
+    coreObject3D  m_aLineRaw  [GELU_LINES_RAWS];   // 
+    coreFlow      m_afLineTime[GELU_LINES];        // 
+
+    coreFlow m_fAnimation;                         // animation value
 
 
 public:
@@ -658,18 +721,27 @@ public:
     ASSIGN_ID(5, "Gelu")
 
     // 
+    void EnableFang (const coreUintW iIndex);
+    void DisableFang(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void EnableWay (const coreUintW iIndex, const coreVector2& vPosition, const coreVector2& vDirection);
+    void DisableWay(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
     void EnableOrb (const coreUintW iIndex);
     void DisableOrb(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    void EnableWeb (const coreUintW iIndex);
-    void DisableWeb(const coreUintW iIndex, const coreBool bAnimated);
+    void EnableLine (const coreUintW iIndex);
+    void DisableLine(const coreUintW iIndex, const coreBool bAnimated);
 
 
 private:
     // execute own routines
     void __SetupOwn       ()final;
     void __RenderOwnBottom()final;
+    void __RenderOwnUnder ()final;
     void __MoveOwnAfter   ()final;
 };
 
@@ -685,13 +757,29 @@ private:
 
     cSnow m_Snow;                                    // 
 
+    coreBatchList m_Load;                            // 
+    coreObject3D  m_aLoadRaw[CALOR_LOADS_RAWS];      // 
+    coreObject3D  m_LoadCopy;                        // 
+    const cShip*  m_pLoadOwner;                      // 
+    coreFlow      m_afLoadPower[3];                  // (0 = current | 1 = previous | 2 = bump) 
+
     coreBatchList m_Star;                            // 
     coreBatchList m_StarChain;                       // 
     coreObject3D  m_aStarRaw   [CALOR_STARS_RAWS];   // 
     const cShip*  m_apStarOwner[CALOR_STARS];        // 
     coreUint8     m_iStarState;                      // 
 
-    coreFlow m_fSwing;    
+    coreFlow m_fSwingStart;                          // 
+    coreFlow m_fSwingValue;                          // 
+
+    cEnemy*     m_apCatchObject[CALOR_STARS];        // 
+    coreVector2 m_avCatchPos   [CALOR_STARS];        // 
+    coreVector2 m_avCatchDir   [CALOR_STARS];        // 
+    coreFlow    m_fCatchTransfer;                    // 
+
+    cCustomEnemy m_Boulder;                          // 
+
+    coreFlow m_fAnimation;                           // animation value
 
 
 public:
@@ -702,8 +790,25 @@ public:
     ASSIGN_ID(6, "Calor")
 
     // 
+    void EnableLoad (const cShip* pOwner);
+    void DisableLoad(const coreBool bAnimated);
+
+    // 
     void EnableStar (const coreUintW iIndex, const cShip* pOwner);
     void DisableStar(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    inline void BumpLoad(const coreFloat fValue) {ASSERT(fValue > 0.0f) m_afLoadPower[0] = MIN(m_afLoadPower[0] + fValue, I_TO_F(CALOR_LOADS)); m_afLoadPower[2] = 1.0f;}
+
+    // 
+    inline void StartSwing() {m_iStarState = BITLINE(CALOR_STARS); m_fSwingStart = 0.0f; m_fSwingValue = 0.0f;}
+
+    // 
+    void CatchObject  (const coreUintW iIndex, cEnemy* pObject);
+    void UncatchObject(const coreUintW iIndex);
+
+    // 
+    inline cEnemy* GetCatchObject(const coreUintW iIndex)const {ASSERT(iIndex < CALOR_STARS) return m_apCatchObject[iIndex];}
 
 
 private:
@@ -711,6 +816,9 @@ private:
     void __SetupOwn       ()final;
     void __RenderOwnBottom()final;
     void __RenderOwnUnder ()final;
+    void __RenderOwnOver  ()final;
+    void __RenderOwnTop   ()final;
+    void __MoveOwnMiddle  ()final;
     void __MoveOwnAfter   ()final;
 };
 
@@ -720,21 +828,50 @@ private:
 class cMuscusMission final : public cMission
 {
 private:
-    cOrlacBoss   m_Orlac;     // 
-    cGemingaBoss m_Geminga;   // 
-    cNagualBoss  m_Nagual;    // 
+    cOrlacBoss   m_Orlac;                                    // 
+    cGemingaBoss m_Geminga;                                  // 
+    cNagualBoss  m_Nagual;                                   // 
+
+    coreBatchList m_Generate;                                // 
+    coreBatchList m_GenerateWave;                            // 
+    coreObject3D  m_aGenerateRaw  [MUSCUS_GENERATES_RAWS];   // 
+    coreFlow      m_afGenerateTime[MUSCUS_GENERATES];        // 
+    coreFlow      m_afGenerateBang[MUSCUS_GENERATES];        // 
+    coreFlow      m_afGenerateView[MUSCUS_GENERATES];        // 
+
+    coreBatchList m_Pearl;                                   // 
+    coreBatchList m_PearlWave;                               // 
+    coreObject3D  m_aPearlRaw[MUSCUS_PEARLS_RAWS];           // 
+    coreUint32    m_iPearlActive;                            // 
+
+    coreFlow m_fAnimation;                                   // animation value
 
 
 public:
     cMuscusMission()noexcept;
+    ~cMuscusMission()final;
 
     DISABLE_COPY(cMuscusMission)
     ASSIGN_ID(7, "Muscus")
 
+    // 
+    void EnableGenerate (const coreUintW iIndex);
+    void DisableGenerate(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void EnablePearl (const coreUintW iIndex);
+    void DisablePearl(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    inline void ShowGenerate(const coreUintW iIndex, const coreFloat fTime) {ASSERT(iIndex < MUSCUS_GENERATES) if(m_afGenerateTime[iIndex] >= 0.0f) m_afGenerateTime[iIndex] = fTime;}
+    inline void BangGenerate(const coreUintW iIndex)                        {ASSERT(iIndex < MUSCUS_GENERATES) if(m_afGenerateTime[iIndex] >= 0.0f) m_afGenerateBang[iIndex] = 1.0f;}
+
 
 private:
     // execute own routines
-    void __SetupOwn()final;
+    void __SetupOwn      ()final;
+    void __RenderOwnUnder()final;
+    void __MoveOwnAfter  ()final;
 };
 
 
@@ -800,6 +937,70 @@ public:
 private:
     // execute own routines
     void __SetupOwn()final;
+};
+
+
+// ****************************************************************
+// 
+class cDemoMission final : public cMission
+{
+private:
+    cProjectOneBoss m_ProjectOne;                       // 
+
+    coreBatchList m_Laser;                              // 
+    coreBatchList m_LaserWave;                          // 
+    coreObject3D  m_aLaserRaw   [VIRIDO_LASERS_RAWS];   // 
+    const cShip*  m_apLaserOwner[VIRIDO_LASERS];        // 
+
+    coreBatchList m_Tile;                               // 
+    coreObject3D  m_aTileRaw  [NEVO_TILES_RAWS];        // 
+    coreFlow      m_afTileTime[NEVO_TILES];             // 
+
+    coreBatchList m_Plate;                              // 
+    coreObject3D  m_aPlateRaw  [RUTILUS_PLATES_RAWS];   // 
+    coreFlow      m_afPlateTime[RUTILUS_PLATES];        // 
+    coreVector4   m_avPlateData[RUTILUS_PLATES];        // 
+
+    coreObject3D m_aArea[RUTILUS_AREAS];                // 
+    coreFlow     m_fAreaTime;                           // 
+
+    coreFlow m_fAnimation;                              // animation value
+
+
+public:
+    cDemoMission()noexcept;
+    ~cDemoMission()final;
+
+    DISABLE_COPY(cDemoMission)
+    ASSIGN_ID(101, "Demo")
+
+    // 
+    void EnableLaser (const coreUintW iIndex, const cShip* pOwner);
+    void DisableLaser(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void EnableTile (const coreUintW iIndex, const coreUintW iDimension);
+    void DisableTile(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void EnablePlate (const coreUintW iIndex, const coreFloat fFrom, const coreFloat fTo, const coreFloat fScale);
+    void DisablePlate(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void EnableArea ();
+    void DisableArea(const coreBool bAnimated);
+
+    // 
+    inline void SetPlateOffset(const coreUintW iIndex, const coreFloat fOffset) {ASSERT(iIndex < RUTILUS_PLATES) m_afPlateTime[iIndex] = 0.0f; m_avPlateData[iIndex].xy(coreVector2(m_avPlateData[iIndex].y, fOffset));}
+    inline void SetPlateScale (const coreUintW iIndex, const coreFloat fScale)  {ASSERT(iIndex < RUTILUS_PLATES) m_afPlateTime[iIndex] = 0.0f; m_avPlateData[iIndex].zw(coreVector2(m_avPlateData[iIndex].w, fScale));}
+
+
+private:
+    // execute own routines
+    void __SetupOwn       ()final;
+    void __RenderOwnBottom()final;
+    void __RenderOwnUnder ()final;
+    void __MoveOwnAfter   ()final;
 };
 
 

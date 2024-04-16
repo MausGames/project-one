@@ -19,6 +19,7 @@
 // TODO: remove object_ring.md3 if not required anymore (+file), thought might be required for Messier
 // TODO: remove effect_energy_ring_program if not required anymore (+file)
 // TODO: think about merging *Color and *Dark functions, as they are mostly identical
+// TODO: sinus shake
 
 
 // ****************************************************************
@@ -149,6 +150,8 @@ public:
     // 
     void FreezeScreen(const coreFloat fTime);
     inline const coreFloat& GetFreezeTime()const {return m_fFreezeTime;}
+    
+    // slow time
 
     // 
     void ClearAll();

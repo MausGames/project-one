@@ -48,7 +48,7 @@ struct sGameOptions final
 
 // ****************************************************************
 // 
-static constexpr coreInt32 __GAME_MISSION_LIST_DEFAULT[] =
+static constexpr coreInt32 __GAME_MISSION_LIST_MAIN[] =
 {
     cIntroMission  ::ID,
     cViridoMission ::ID,
@@ -62,22 +62,21 @@ static constexpr coreInt32 __GAME_MISSION_LIST_DEFAULT[] =
     cNoMission     ::ID
 };
 
-static constexpr coreInt32 __GAME_MISSION_LIST_MAIN[] =
-{
-    cIntroMission ::ID,
-    cViridoMission::ID,
-    cNoMission    ::ID
-};
-
 static constexpr coreInt32 __GAME_MISSION_LIST_ERROR[] =
 {
     cErrorMission::ID,
     cNoMission   ::ID
 };
 
-#define GAME_MISSION_LIST_DEFAULT (__GAME_MISSION_LIST_DEFAULT), ARRAY_SIZE(__GAME_MISSION_LIST_DEFAULT)
-#define GAME_MISSION_LIST_MAIN    (__GAME_MISSION_LIST_MAIN),    ARRAY_SIZE(__GAME_MISSION_LIST_MAIN)
-#define GAME_MISSION_LIST_ERROR   (__GAME_MISSION_LIST_ERROR),   ARRAY_SIZE(__GAME_MISSION_LIST_ERROR)
+static constexpr coreInt32 __GAME_MISSION_LIST_DEMO[] =
+{
+    cDemoMission::ID,
+    cNoMission  ::ID
+};
+
+#define GAME_MISSION_LIST_MAIN  (__GAME_MISSION_LIST_MAIN),  ARRAY_SIZE(__GAME_MISSION_LIST_MAIN)
+#define GAME_MISSION_LIST_ERROR (__GAME_MISSION_LIST_ERROR), ARRAY_SIZE(__GAME_MISSION_LIST_ERROR)
+#define GAME_MISSION_LIST_DEMO  (__GAME_MISSION_LIST_DEMO),  ARRAY_SIZE(__GAME_MISSION_LIST_DEMO)
 
 
 // ****************************************************************
@@ -86,11 +85,11 @@ static constexpr coreInt32 __GAME_MISSION_LIST_ERROR[] =
 #define DEPTH_PUSH_DOUBLE    {g_pGame->PushDepthLevel(2u);}
 #define DEPTH_PUSH_SHIP      {g_pGame->PushDepthLevelShip();}
 
-#define __DEPTH_GROUP_SHIP   {this->ChangeDepthLevel(9u, 11u);}
-#define __DEPTH_GROUP_BOTTOM {}
-#define __DEPTH_GROUP_UNDER  {m_iDepthDebug = 11u;     m_iDepthLevel = 20u;}
-#define __DEPTH_GROUP_OVER   {m_iDepthDebug = BIT(7u); m_iDepthLevel = 9u;}
-#define __DEPTH_GROUP_TOP    {m_iDepthDebug = 0u;}
+#define __DEPTH_GROUP_SHIP   {this->ChangeDepthLevel(9u, 11u);}                // 2 levels, static
+#define __DEPTH_GROUP_BOTTOM {m_iDepthDebug = 11u;     m_iDepthLevel = 20u;}   // 9 levels, dynamic, 2 in game
+#define __DEPTH_GROUP_UNDER  {}                                                // shared with DEPTH_GROUP_BOTTOM
+#define __DEPTH_GROUP_OVER   {m_iDepthDebug = BIT(7u); m_iDepthLevel = 9u;}    // 9 levels, dynamic, 3 in game (can use DEPTH_PUSH_SHIP)
+#define __DEPTH_GROUP_TOP    {m_iDepthDebug = 0u;}                             // shared with DEPTH_GROUP_OVER
 #define __DEPTH_RESET        {this->ChangeDepthLevel(0u, 20u);}
 
 
@@ -173,6 +172,8 @@ public:
     void ChangeDepthLevel  (const coreUint8 iLevelNear, const coreUint8 iLevelFar)const;
     void PushDepthLevel    (const coreUint8 iLevels);
     void PushDepthLevelShip();
+    
+    void KillRepairEnemy() {if(m_pRepairEnemy) m_pRepairEnemy->TakeDamage(m_pRepairEnemy->GetCurHealth(), ELEMENT_NEUTRAL, coreVector2(0.0f,0.0f), NULL);}
 
     // 
     RETURN_NONNULL cPlayer* FindPlayerSide(const coreVector2& vPosition);
@@ -235,7 +236,7 @@ template <typename F> void cGame::ForEachPlayer(F&& nFunction)
     for(coreUintW i = 0u, ie = (m_bCoop ? GAME_PLAYERS : 1u); i < ie; ++i)
     {
         cPlayer* pPlayer = &m_aPlayer[i];
-        if(CONTAINS_FLAG(pPlayer->GetStatus(), PLAYER_STATUS_DEAD)) continue;
+        if(HAS_FLAG(pPlayer->GetStatus(), PLAYER_STATUS_DEAD)) continue;
 
         // 
         nFunction(pPlayer, i);

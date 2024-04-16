@@ -8,6 +8,8 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
+// TODO: lava textur zu detailiert
+
 
 // ****************************************************************
 // constructor
@@ -34,13 +36,14 @@ cVolcanoBackground::cVolcanoBackground()noexcept
             // test for valid values
             if((fHeight > -21.0f) && (fHeight < -18.0f) && (F_TO_SI(vPosition.y+160.0f) % 80 < 40))
             {
-                if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 25.0f))
+                if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, POW2(5.0f)))
                 {
                     // create object
                     coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D);
 
                     // set object properties
                     pObject->SetPosition(coreVector3(vPosition, 0.0f));
+                    pObject->SetSize    (coreVector3(0.0f,0.0f,0.0f));
 
                     // add object to the list
                     pList1->BindObject(pObject);
@@ -80,7 +83,7 @@ cVolcanoBackground::cVolcanoBackground()noexcept
                 const coreFloat   fHeight   = Core::Rand->Float(10.0f, 40.0f);
 
                 // test for valid values
-                if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 300.0f))
+                if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, POW2(17.3f)))
                 {
                     // create object
                     coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);

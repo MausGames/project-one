@@ -193,7 +193,7 @@ void cMenu::Move()
         {
             if(STATIC_ISVALID(g_pGame))
             {
-                if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_OUTRO))
+                if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_OUTRO))
                 {
                     // 
                     this->ChangeSurface(SURFACE_SUMMARY, 0.0f);
@@ -203,7 +203,7 @@ void cMenu::Move()
                     else if(g_pGame->GetOutroType() == 1u) m_SummaryMenu.ShowSegment();
                                                       else m_SummaryMenu.ShowBegin();
                 }
-                else if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_DEFEATED))
+                else if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_DEFEATED))
                 {
                     // 
                     this->ChangeSurface(SURFACE_DEFEAT, 0.0f);
@@ -215,7 +215,7 @@ void cMenu::Move()
                     // 
                     Core::Audio->PauseSound();
                 }
-                else if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_FINISHED))
+                else if(HAS_FLAG(g_pGame->GetStatus(), GAME_STATUS_FINISHED))
                 {
                     // 
                     this->ChangeSurface(SURFACE_FINISH, 0.0f);
@@ -501,8 +501,8 @@ void cMenu::Move()
     }
     
     const coreFloat fSpeed = STATIC_ISVALID(g_pGame) ? 1000.0f : 0.5f;
-    if(((this->GetCurSurface() == SURFACE_CONFIG) || (this->GetCurSurface() == SURFACE_PAUSE)) && STATIC_ISVALID(g_pGame)) m_PauseLayer.SetAlpha(MIN(m_PauseLayer.GetAlpha() + fSpeed*Core::System->GetTime(), 0.25f));
-                                                                                           else m_PauseLayer.SetAlpha(MAX(m_PauseLayer.GetAlpha() - fSpeed*Core::System->GetTime(), 0.0f));
+    if(((this->GetCurSurface() == SURFACE_CONFIG) || (this->GetCurSurface() == SURFACE_PAUSE)) && STATIC_ISVALID(g_pGame)) m_PauseLayer.SetAlpha(MIN(m_PauseLayer.GetAlpha() + fSpeed*TIME, 0.25f));
+                                                                                           else m_PauseLayer.SetAlpha(MAX(m_PauseLayer.GetAlpha() - fSpeed*TIME, 0.0f));
 
     // 
     m_Tooltip   .Move();
@@ -586,10 +586,10 @@ void cMenu::UpdateLanguageFont()
 
 // ****************************************************************
 // 
-const coreLookup<std::string, std::string>& cMenu::GetLanguageList()
+const coreMap<coreString, coreString>& cMenu::GetLanguageList()
 {
     // static language list <name, path>
-    static coreLookup<std::string, std::string> s_asLanguage;
+    static coreMap<coreString, coreString> s_asLanguage;
 
     if(s_asLanguage.empty())
     {
@@ -599,7 +599,7 @@ const coreLookup<std::string, std::string>& cMenu::GetLanguageList()
 #if defined(_P1_DEBUG_RANDOM_)
 
         // 
-        const std::string& sRandFile = s_asLanguage.get_valuelist()[CORE_RAND_RUNTIME % s_asLanguage.size()];
+        const coreString& sRandFile = s_asLanguage.get_valuelist()[CORE_RAND_RUNTIME % s_asLanguage.size()];
         Core::Language->Load(sRandFile.c_str());
 
         // 
