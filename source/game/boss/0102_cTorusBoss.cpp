@@ -1,11 +1,11 @@
-//////////////////////////////////////////////////////
-//*------------------------------------------------*//
-//| Part of Project One (http://www.maus-games.at) |//
-//*------------------------------------------------*//
-//| Released under the zlib License                |//
-//| More information available in the readme file  |//
-//*------------------------------------------------*//
-//////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+//*-------------------------------------------------*//
+//| Part of Project One (https://www.maus-games.at) |//
+//*-------------------------------------------------*//
+//| Released under the zlib License                 |//
+//| More information available in the readme file   |//
+//*-------------------------------------------------*//
+///////////////////////////////////////////////////////
 #include "main.h"
 
 
@@ -14,10 +14,8 @@
 #define ROTATION_DIRECTION (0u)
 #define EMIT_STATUS        (1u)
 #define BALL_STATUS        (2u)
-#define TURRETS_ENABLED    (3u)
-#define GUNNERS_ENABLED    (4u)
-#define SKIP_SUMMON        (5u)
-#define SUB_PHASE          (6u)
+#define SKIP_SUMMON        (3u)
+#define SUB_PHASE          (4u)
 
 
 // ****************************************************************
@@ -33,6 +31,8 @@ cTorusBoss::cTorusBoss()noexcept
 , m_fAnimation      (0.0f)
 , m_fRotationBoss   (0.0f)
 , m_fRotationObject (0.0f)
+, m_iTurretActive   (0u)
+, m_iGunnerActive   (0u)
 , m_iGunnerMove     (0u)
 {
     // load models
@@ -77,7 +77,7 @@ cTorusBoss::cTorusBoss()noexcept
         m_aTurret[i].DefineModelHigh("object_cube.md3");
         m_aTurret[i].DefineModelLow ("object_cube.md3");
         m_aTurret[i].DefineTexture  (0u, "effect_energy.png");
-        m_aTurret[i].DefineProgram  ("effect_energy_ship_invert_program");
+        m_aTurret[i].DefineProgram  ("effect_energy_blink_invert_program");
         m_aTurret[i].SetSize        (coreVector3(1.0f,1.0f,1.0f) * 2.85f);
         m_aTurret[i].SetTexSize     (coreVector2(0.8f,0.3f));
         m_aTurret[i].Configure      (100, COLOR_ENERGY_CYAN * 0.7f);
@@ -112,7 +112,7 @@ cTorusBoss::cTorusBoss()noexcept
         m_aGunner[i].DefineModelHigh("object_tetra.md3");
         m_aGunner[i].DefineModelLow ("object_tetra.md3");
         m_aGunner[i].DefineTexture  (0u, "effect_energy.png");
-        m_aGunner[i].DefineProgram  ("effect_energy_ship_invert_program");
+        m_aGunner[i].DefineProgram  ("effect_energy_blink_invert_program");
         m_aGunner[i].SetSize        (coreVector3(1.0f,1.0f,1.0f) * 5.0f);
         m_aGunner[i].SetTexSize     (coreVector2(0.8f,0.3f));
         m_aGunner[i].Configure      (100, COLOR_ENERGY_RED * 0.8f);
@@ -140,6 +140,10 @@ cTorusBoss::cTorusBoss()noexcept
             m_GunnerHull.BindObject(pGunner);
         }
     }
+
+    STATIC_ASSERT(sizeof(m_iTurretActive)*8u >= TORUS_TURRETS)
+    STATIC_ASSERT(sizeof(m_iGunnerActive)*8u >= TORUS_GUNNERS)
+    STATIC_ASSERT(sizeof(m_iGunnerMove)  *8u >= TORUS_GUNNERS)
 }
 
 
@@ -210,11 +214,11 @@ void cTorusBoss::__KillOwn(const coreBool bAnimated)
 void cTorusBoss::__RenderOwnUnder()
 {
     // 
-    if(m_aiCounter[TURRETS_ENABLED])
+    if(m_iTurretActive)
         m_TurretHull.Render();
 
     // 
-    if(m_aiCounter[GUNNERS_ENABLED])
+    if(m_iGunnerActive)
         m_GunnerHull.Render();
 }
 
@@ -303,8 +307,8 @@ void cTorusBoss::__MoveOwn()
             {
                 PHASE_CHANGE_TO(m_iPhase + 10u)
 
-                m_aiCounter[SKIP_SUMMON] = (CONTAINS_BIT(m_aiCounter[GUNNERS_ENABLED], (m_iPhase - 20u) % TORUS_GUNNERS) ||
-                                            CONTAINS_BIT(m_aiCounter[TURRETS_ENABLED], (m_iPhase - 20u) % TORUS_TURRETS)) ? 1 : 0;
+                m_aiCounter[SKIP_SUMMON] = (CONTAINS_BIT(m_iGunnerActive, (m_iPhase - 20u) % TORUS_GUNNERS) ||
+                                            CONTAINS_BIT(m_iTurretActive, (m_iPhase - 20u) % TORUS_TURRETS)) ? 1 : 0;
             }
         });
     }
@@ -515,7 +519,7 @@ void cTorusBoss::__MoveOwn()
     this->SetDirection  (coreVector3(vNewDir.x, -vNewOri.y*vNewDir.y, vNewOri.x*vNewDir.y));
     this->SetOrientation(coreVector3(0.0f,       vNewOri.x,           vNewOri.y));
 
-    if(m_aiCounter[TURRETS_ENABLED] || m_aiCounter[GUNNERS_ENABLED])
+    if(m_iTurretActive || m_iGunnerActive)
     {
         // 
         m_fRotationObject.UpdateMod(TORUS_TURRET_SPEED, 10.0f);
@@ -783,9 +787,8 @@ void cTorusBoss::__EnableTurret(const coreUintW iIndex, const coreVector2& vPosi
     pTurret->Resurrect();
 
     // 
-    ASSERT(!CONTAINS_BIT(m_aiCounter[TURRETS_ENABLED], iIndex))
-    ADD_BIT(m_aiCounter[TURRETS_ENABLED], iIndex)
-    STATIC_ASSERT(sizeof(*m_aiCounter)*8u >= TORUS_TURRETS)
+    ASSERT(!CONTAINS_BIT(m_iTurretActive, iIndex))
+    ADD_BIT(m_iTurretActive, iIndex)
 
     // 
     pTurret->SetPosition(coreVector3(vPosition, 0.0f));
@@ -813,8 +816,8 @@ void cTorusBoss::__DisableTurret(const coreUintW iIndex, const coreBool bAnimate
     pTurret->Kill(false);
 
     // 
-    ASSERT(CONTAINS_BIT(m_aiCounter[TURRETS_ENABLED], iIndex))
-    REMOVE_BIT(m_aiCounter[TURRETS_ENABLED], iIndex)
+    ASSERT(CONTAINS_BIT(m_iTurretActive, iIndex))
+    REMOVE_BIT(m_iTurretActive, iIndex)
 
     // 
     pHull->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
@@ -838,13 +841,11 @@ void cTorusBoss::__EnableGunner(const coreUintW iIndex, const coreVector2& vPosi
     pGunner->Resurrect();
 
     // 
-    ASSERT(!CONTAINS_BIT(m_aiCounter[GUNNERS_ENABLED], iIndex))
-    ADD_BIT(m_aiCounter[GUNNERS_ENABLED], iIndex)
-    STATIC_ASSERT(sizeof(*m_aiCounter)*8u >= TORUS_GUNNERS)
+    ASSERT(!CONTAINS_BIT(m_iGunnerActive, iIndex))
+    ADD_BIT(m_iGunnerActive, iIndex)
 
     // 
     SET_BIT(m_iGunnerMove, iIndex, (iIndex < 2u));
-    STATIC_ASSERT(sizeof(m_iGunnerMove)*8u >= TORUS_GUNNERS)
 
     // 
     pGunner->SetPosition(coreVector3(vPosition, 0.0f));
@@ -872,8 +873,8 @@ void cTorusBoss::__DisableGunner(const coreUintW iIndex, const coreBool bAnimate
     pGunner->Kill(false);
 
     // 
-    ASSERT(CONTAINS_BIT(m_aiCounter[GUNNERS_ENABLED], iIndex))
-    REMOVE_BIT(m_aiCounter[GUNNERS_ENABLED], iIndex)
+    ASSERT(CONTAINS_BIT(m_iGunnerActive, iIndex))
+    REMOVE_BIT(m_iGunnerActive, iIndex)
 
     // 
     pHull->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);

@@ -1,11 +1,11 @@
-//////////////////////////////////////////////////////
-//*------------------------------------------------*//
-//| Part of Project One (http://www.maus-games.at) |//
-//*------------------------------------------------*//
-//| Released under the zlib License                |//
-//| More information available in the readme file  |//
-//*------------------------------------------------*//
-//////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+//*-------------------------------------------------*//
+//| Part of Project One (https://www.maus-games.at) |//
+//*-------------------------------------------------*//
+//| Released under the zlib License                 |//
+//| More information available in the readme file   |//
+//*-------------------------------------------------*//
+///////////////////////////////////////////////////////
 #include "main.h"
 
 
@@ -90,7 +90,7 @@ cGameMenu::cGameMenu()noexcept
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aLabel); ++i) this->BindObject(SURFACE_GAME_DEFAULT, &m_aLabel[i]);
 
     this->BindObject(SURFACE_GAME_DEFAULT, &m_Mode);
-    this->BindObject(SURFACE_GAME_DEFAULT, &m_Difficulty);
+    //this->BindObject(SURFACE_GAME_DEFAULT, &m_Difficulty);
     this->BindObject(SURFACE_GAME_DEFAULT, &m_Players);
 }
 

@@ -1,11 +1,11 @@
-//////////////////////////////////////////////////////
-//*------------------------------------------------*//
-//| Part of Project One (http://www.maus-games.at) |//
-//*------------------------------------------------*//
-//| Released under the zlib License                |//
-//| More information available in the readme file  |//
-//*------------------------------------------------*//
-//////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+//*-------------------------------------------------*//
+//| Part of Project One (https://www.maus-games.at) |//
+//*-------------------------------------------------*//
+//| Released under the zlib License                 |//
+//| More information available in the readme file   |//
+//*-------------------------------------------------*//
+///////////////////////////////////////////////////////
 #include "main.h"
 
 
@@ -21,9 +21,6 @@ cSpecialEffects::cSpecialEffects()noexcept
 , m_iCurLightning    (0u)
 , m_iCurBlast        (0u)
 , m_iCurRing         (0u)
-, m_iCurSplatter     (0u)
-, m_fScreenFade      (0.0f)
-, m_bScreenClear     (false)
 , m_iSoundGuard      (SOUND_FFFF)
 , m_ShakeTimer       (coreTimer(1.0f, 30.0f, 0u))
 , m_fShakeStrength   (0.0f)
@@ -67,15 +64,6 @@ cSpecialEffects::cSpecialEffects()noexcept
         m_aRing[i].DefineProgram("effect_energy_ring_program");
         m_aRing[i].SetAlpha     (0.0f);
         m_aRing[i].SetTexSize   (coreVector2(4.0f,8.0f) * 0.4f);
-    }
-
-    // 
-    for(coreUintW i = 0u; i < SPECIAL_SPLATTERS; ++i)
-    {
-        m_aSplatter[i].DefineTexture(0u, "effect_splatter.png");
-        m_aSplatter[i].DefineProgram("menu_single_program");
-        m_aSplatter[i].SetAlpha     (0.0f);
-        m_aSplatter[i].SetTexSize   (coreVector2(1.0f,1.0f) * (1.0f/3.0f));
     }
 
     // 
@@ -227,19 +215,6 @@ void cSpecialEffects::Move()
         }
     }
 
-    // 
-    for(coreUintW i = 0u; i < SPECIAL_SPLATTERS; ++i)
-    {
-        m_aSplatter[i].Move();
-        //m_aSplatter
-    }
-
-    // 
-    if(m_bScreenClear)
-    {
-
-    }
-
     // reset sound-guard
     m_iSoundGuard = SOUND_FFFF;
 
@@ -253,16 +228,6 @@ void cSpecialEffects::Move()
         g_pPostProcessing->SetPosition(coreVector2::Rand(-0.3f,0.3f, -1.0f,1.0f).Normalized() * (m_fShakeStrength * 0.01f));
         g_pPostProcessing->Move();
     }
-}
-
-
-// ****************************************************************
-// render the overlay separately
-void cSpecialEffects::RenderOverlay()
-{
-    // 
-    for(coreUintW i = 0u; i < SPECIAL_SPLATTERS; ++i)
-        m_aSplatter[i].Render();
 }
 
 
@@ -294,7 +259,7 @@ void cSpecialEffects::CreateSplashDark(const coreVector3& vPosition, const coreF
     });
 }
 
-void cSpecialEffects::CreateSplashSmoke(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum)
+void cSpecialEffects::CreateSplashSmoke(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor)
 {
     // 
     m_ParticleSmoke.GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
@@ -302,7 +267,7 @@ void cSpecialEffects::CreateSplashSmoke(const coreVector3& vPosition, const core
         pParticle->SetPositionRel(vPosition + coreVector3::Rand(1.0f), coreVector3::Rand(-fScale, fScale));
         pParticle->SetScaleAbs   (3.0f,                                12.5f);
         pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),          Core::Rand->Float(-PI*0.1f, PI*0.1f));
-        pParticle->SetColor4Abs  (coreVector4(1.0f,1.0f,1.0f,1.0f),    coreVector4(1.0f,1.0f,1.0f,0.0f));
+        pParticle->SetColor4Abs  (coreVector4(vColor, 1.0f),           coreVector4(vColor, 0.0f));
         pParticle->SetSpeed      (0.7f * Core::Rand->Float(0.9f, 1.1f));
     });
 }
@@ -532,34 +497,6 @@ void cSpecialEffects::CreateRing(const coreVector3& vPosition, const coreVector3
 
 // ****************************************************************
 // 
-void cSpecialEffects::AddScreenSplatter(const coreVector2& vPosition, const coreVector2& vDirection, const coreFloat fScale, const coreUint8 iType)
-{
-    ASSERT(iType < 7u)
-
-    // 
-    if(++m_iCurSplatter >= SPECIAL_SPLATTERS) m_iCurSplatter = 0u;
-    coreObject2D& oSplatter = m_aSplatter[m_iCurSplatter];
-
-    // 
-    oSplatter.SetPosition (vPosition);
-    oSplatter.SetSize     (coreVector2(1.0f,1.0f) * fScale);
-    oSplatter.SetDirection(vDirection);
-    oSplatter.SetColor4   (coreVector4(coreVector3(1.0f,1.0f,1.0f) * 0.07f, 1.0f));
-    oSplatter.SetTexOffset(coreVector2(I_TO_F(iType % 3u), I_TO_F(iType / 3u)) * oSplatter.GetTexSize());
-}
-
-
-// ****************************************************************
-// 
-void cSpecialEffects::ClearScreen()
-{
-    m_fScreenFade  = 0.0f;
-    m_bScreenClear = true;
-}
-
-
-// ****************************************************************
-// 
 void cSpecialEffects::PlaySound(const coreVector3& vPosition, const coreFloat fVolume, const eSoundEffect iSoundIndex)
 {
     ASSERT(fVolume > 0.0f)
@@ -590,7 +527,7 @@ void cSpecialEffects::PlaySound(const coreVector3& vPosition, const coreFloat fV
 // 
 void cSpecialEffects::RumblePlayer(const cPlayer* pPlayer, const coreFloat fStrength, const coreUint32 iLength)
 {
-    ASSERT(g_pGame)
+    if(!g_pGame) return;
 
     // loop through all active players
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pCurPlayer, const coreUintW i)
@@ -602,7 +539,7 @@ void cSpecialEffects::RumblePlayer(const cPlayer* pPlayer, const coreFloat fStre
         const sGameInput* pCurInput   = pCurPlayer->GetInput();
 
         // check for valid configuration
-        if(iRumble && (iJoystickID < Core::Input->GetJoystickNum()))  
+        if(iRumble && (iJoystickID < Core::Input->GetJoystickNum()))
         {
             // check for valid input set
             if((pCurInput == &g_TotalInput) || (P_TO_UI(pCurInput - g_aGameInput) < INPUT_SETS))

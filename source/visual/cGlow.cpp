@@ -1,11 +1,11 @@
-//////////////////////////////////////////////////////
-//*------------------------------------------------*//
-//| Part of Project One (http://www.maus-games.at) |//
-//*------------------------------------------------*//
-//| Released under the zlib License                |//
-//| More information available in the readme file  |//
-//*------------------------------------------------*//
-//////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+//*-------------------------------------------------*//
+//| Part of Project One (https://www.maus-games.at) |//
+//*-------------------------------------------------*//
+//| Released under the zlib License                 |//
+//| More information available in the readme file   |//
+//*-------------------------------------------------*//
+///////////////////////////////////////////////////////
 #include "main.h"
 
 
@@ -24,14 +24,14 @@ void cGlow::Update()
     if(!g_CurConfig.Graphics.iGlow) return;
     if(!Core::System->GetTime())    return;
 
-    // create glow only with active game or special-effects
-    if(g_pGame || g_pSpecialEffects->IsActive())
+    // create glow only with active game or special-effects   
+    if(g_pGame || g_pTheater->IsActive())   // TODO: theater 
     {
         m_Blur.Start();
         {
             // draw single objects
             FOR_EACH(it, this->GetObjectSet())
-                (*it)->Render((*it)->GetProgram());   // # draw low-polygon ships
+                (*it)->Render((*it)->GetProgram());   // # draw low-polygon models
 
             // draw lists with objects
             FOR_EACH(it, this->GetListSet())

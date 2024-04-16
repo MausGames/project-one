@@ -1,11 +1,11 @@
-//////////////////////////////////////////////////////
-//*------------------------------------------------*//
-//| Part of Project One (http://www.maus-games.at) |//
-//*------------------------------------------------*//
-//| Released under the zlib License                |//
-//| More information available in the readme file  |//
-//*------------------------------------------------*//
-//////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+//*-------------------------------------------------*//
+//| Part of Project One (https://www.maus-games.at) |//
+//*-------------------------------------------------*//
+//| Released under the zlib License                 |//
+//| More information available in the readme file   |//
+//*-------------------------------------------------*//
+///////////////////////////////////////////////////////
 #include "main.h"
 
 sConfig    g_CurConfig               = {};
@@ -174,7 +174,7 @@ void SaveConfig()
 void UpdateInput()
 {
     // forward hat input to stick input
-    for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)  
+    for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
         Core::Input->ForwardHatToStick(i);
 
     // reset mapped input values

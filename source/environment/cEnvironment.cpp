@@ -1,11 +1,11 @@
-//////////////////////////////////////////////////////
-//*------------------------------------------------*//
-//| Part of Project One (http://www.maus-games.at) |//
-//*------------------------------------------------*//
-//| Released under the zlib License                |//
-//| More information available in the readme file  |//
-//*------------------------------------------------*//
-//////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+//*-------------------------------------------------*//
+//| Part of Project One (https://www.maus-games.at) |//
+//*-------------------------------------------------*//
+//| Released under the zlib License                 |//
+//| More information available in the readme file   |//
+//*-------------------------------------------------*//
+///////////////////////////////////////////////////////
 #include "main.h"
 
 
@@ -113,7 +113,7 @@ void cEnvironment::Move()
 {
     // update all transformation properties
     m_avDirection[0] = (m_avDirection[0] + (m_avDirection[1] - m_avDirection[0]) * (Core::System->GetTime() *  8.0f)).Normalized();
-    m_avSide     [0] =  m_avSide     [0] + (m_avSide     [1] - m_avSide     [0]) * (Core::System->GetTime() * 1.0f);
+    m_avSide     [0] =  m_avSide     [0] + (m_avSide     [1] - m_avSide     [0]) * (Core::System->GetTime() * 16.0f);
     m_afSpeed    [0] =  m_afSpeed    [0] + (m_afSpeed    [1] - m_afSpeed    [0]) * (Core::System->GetTime() *  1.0f);
     m_afHeight   [0] =  m_afHeight   [0] + (m_afHeight   [1] - m_afHeight   [0]) * (Core::System->GetTime() *  2.0f);
 

@@ -1,11 +1,11 @@
-//////////////////////////////////////////////////////
-//*------------------------------------------------*//
-//| Part of Project One (http://www.maus-games.at) |//
-//*------------------------------------------------*//
-//| Released under the zlib License                |//
-//| More information available in the readme file  |//
-//*------------------------------------------------*//
-//////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+//*-------------------------------------------------*//
+//| Part of Project One (https://www.maus-games.at) |//
+//*-------------------------------------------------*//
+//| Released under the zlib License                 |//
+//| More information available in the readme file   |//
+//*-------------------------------------------------*//
+///////////////////////////////////////////////////////
 #include "main.h"
 
 
@@ -167,8 +167,8 @@ void cViridoMission::EnablePaddle(const coreUintW iIndex, const cShip* pOwner)
     oPaddle.ChangeType(TYPE_VIRIDO_PADDLE);
 
     // 
-    g_pGlow->BindObject(&oPaddle);
     oPaddle.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    g_pGlow->BindObject(&oPaddle);
 }
 
 
@@ -184,8 +184,8 @@ void cViridoMission::DisablePaddle(const coreUintW iIndex, const coreBool bAnima
     oPaddle.ChangeType(0);
 
     // 
-    g_pGlow->UnbindObject(&oPaddle);
     oPaddle.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    g_pGlow->UnbindObject(&oPaddle);
 }
 
 
@@ -516,7 +516,7 @@ void cViridoMission::__SetupOwn()
 void cViridoMission::__RenderOwnUnder()
 {
     // 
-    m_BallTrail.Render();
+    //m_BallTrail.Render();
 }
 
 
@@ -525,6 +525,13 @@ void cViridoMission::__RenderOwnUnder()
 void cViridoMission::__RenderOwnAttack()
 {
     DEPTH_PUSH
+
+    glDisable(GL_DEPTH_TEST);
+    {
+        // 
+        m_BallTrail.Render();
+    }
+    glEnable(GL_DEPTH_TEST);
 
     // 
     m_Ball.Render();

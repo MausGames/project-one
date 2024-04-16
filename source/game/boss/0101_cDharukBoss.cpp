@@ -1,11 +1,11 @@
-//////////////////////////////////////////////////////
-//*------------------------------------------------*//
-//| Part of Project One (http://www.maus-games.at) |//
-//*------------------------------------------------*//
-//| Released under the zlib License                |//
-//| More information available in the readme file  |//
-//*------------------------------------------------*//
-//////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+//*-------------------------------------------------*//
+//| Part of Project One (https://www.maus-games.at) |//
+//*-------------------------------------------------*//
+//| Released under the zlib License                 |//
+//| More information available in the readme file   |//
+//*-------------------------------------------------*//
+///////////////////////////////////////////////////////
 #include "main.h"
 
 
@@ -20,7 +20,6 @@
 
 // ****************************************************************
 // vector identifier
-#define ATTACK_TARGET (0u)
 
 
 // ****************************************************************
@@ -46,7 +45,7 @@ cDharukBoss::cDharukBoss()noexcept
     m_Duplicate.DefineModelHigh("ship_boss_dharuk_high.md3");
     m_Duplicate.DefineModelLow ("ship_boss_dharuk_low.md3");
     m_Duplicate.DefineTexture  (0u, "effect_energy.png");
-    m_Duplicate.DefineProgram  ("effect_energy_ship_invert_program");
+    m_Duplicate.DefineProgram  ("effect_energy_blink_invert_program");
     m_Duplicate.SetSize        (this->GetSize());
     m_Duplicate.Configure      (500, COLOR_ENERGY_RED * 0.8f);
     m_Duplicate.AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_IMMORTAL);
@@ -143,7 +142,7 @@ void cDharukBoss::__RenderOwnUnder()
 {
     // 
     m_DuplicateTrail.Render();
-    m_BoomerangTrail.Render();
+    //m_BoomerangTrail.Render();
 }
 
 
@@ -152,6 +151,13 @@ void cDharukBoss::__RenderOwnUnder()
 void cDharukBoss::__RenderOwnAttack()
 {
     DEPTH_PUSH
+
+    glDisable(GL_DEPTH_TEST);
+    {
+        // 
+        m_BoomerangTrail.Render();
+    }
+    glEnable(GL_DEPTH_TEST);
 
     // 
     m_Boomerang.Render();

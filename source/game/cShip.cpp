@@ -1,53 +1,26 @@
-//////////////////////////////////////////////////////
-//*------------------------------------------------*//
-//| Part of Project One (http://www.maus-games.at) |//
-//*------------------------------------------------*//
-//| Released under the zlib License                |//
-//| More information available in the readme file  |//
-//*------------------------------------------------*//
-//////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+//*-------------------------------------------------*//
+//| Part of Project One (https://www.maus-games.at) |//
+//*-------------------------------------------------*//
+//| Released under the zlib License                 |//
+//| More information available in the readme file   |//
+//*-------------------------------------------------*//
+///////////////////////////////////////////////////////
 #include "main.h"
 
 
 // ****************************************************************
 // constructor
 cShip::cShip()noexcept
-: m_iBaseColor (0u)
-, m_iMaxHealth (0)
+: m_iMaxHealth (0)
 , m_iCurHealth (0)
 , m_iPreHealth (0)
+, m_iBaseColor (0u)
 , m_vOldPos    (coreVector2(0.0f,0.0f))
 , m_fBlink     (0.0f)
 {
     // 
     this->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
-}
-
-
-// ****************************************************************
-// render the ship (low-polygon only)
-void cShip::Render(const coreProgramPtr& pProgram)
-{
-    if(!this->IsEnabled(CORE_OBJECT_ENABLE_RENDER)) return;
-
-    // check for model status
-    ASSERT(m_pModelLow)
-    if(!m_pModelLow.IsUsable()) return;
-
-    // enable the shader-program
-    if(!pProgram.IsUsable()) return;
-    if(!pProgram->Enable())  return;
-
-    // update all object uniforms
-    coreProgram* pLocal = pProgram.GetResource();
-    pLocal->SendUniform(CORE_SHADER_UNIFORM_3D_POSITION, this->GetPosition());
-    pLocal->SendUniform(CORE_SHADER_UNIFORM_3D_SIZE,     this->GetSize());
-    pLocal->SendUniform(CORE_SHADER_UNIFORM_3D_ROTATION, m_vRotation);
-    pLocal->SendUniform(CORE_SHADER_UNIFORM_COLOR,       m_vColor);   // # alpha
-
-    // draw the model
-    m_pModelLow->Enable();
-    m_pModelLow->Draw();
 }
 
 

@@ -1,11 +1,11 @@
-//////////////////////////////////////////////////////
-//*------------------------------------------------*//
-//| Part of Project One (http://www.maus-games.at) |//
-//*------------------------------------------------*//
-//| Released under the zlib License                |//
-//| More information available in the readme file  |//
-//*------------------------------------------------*//
-//////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+//*-------------------------------------------------*//
+//| Part of Project One (https://www.maus-games.at) |//
+//*-------------------------------------------------*//
+//| Released under the zlib License                 |//
+//| More information available in the readme file   |//
+//*-------------------------------------------------*//
+///////////////////////////////////////////////////////
 #include "main.h"
 
 
@@ -297,11 +297,9 @@ coreBool cReplay::LoadFile(const coreChar* pcPath, const coreBool bOnlyHeader)
     }
 
     // 
-    if(!bOnlyHeader)
-    {
-        this->__SetBodyData(pBody->GetData(), pBody->GetSize());
-        Core::Log->Warning("Replay (%s) loaded", pcPath);
-    }
+    if(!bOnlyHeader) this->__SetBodyData(pBody->GetData(), pBody->GetSize());
+
+    Core::Log->Info("Replay (%s) loaded", pcPath);
     return true;
 }
 
@@ -332,7 +330,7 @@ void cReplay::SaveFile(const coreChar* pcName)
     oArchive.AddFile(pBody);
     oArchive.Save(PRINT(REPLAY_FILE_FOLDER "/replay_%s." REPLAY_FILE_EXTENSION, coreData::DateTimePrint("%Y%m%d_%H%M%S")));
 
-    Core::Log->Warning("Replay (%s) saved", oArchive.GetPath());
+    Core::Log->Info("Replay (%s) saved", oArchive.GetPath());
 }
 
 

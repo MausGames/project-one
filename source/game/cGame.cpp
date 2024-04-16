@@ -1,11 +1,11 @@
-//////////////////////////////////////////////////////
-//*------------------------------------------------*//
-//| Part of Project One (http://www.maus-games.at) |//
-//*------------------------------------------------*//
-//| Released under the zlib License                |//
-//| More information available in the readme file  |//
-//*------------------------------------------------*//
-//////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+//*-------------------------------------------------*//
+//| Part of Project One (https://www.maus-games.at) |//
+//*-------------------------------------------------*//
+//| Released under the zlib License                 |//
+//| More information available in the readme file   |//
+//*-------------------------------------------------*//
+///////////////////////////////////////////////////////
 #include "main.h"
 
 
@@ -146,19 +146,15 @@ void cGame::Render()
 
     __DEPTH_LEVEL_OVER
     {
-        glDisable(GL_DEPTH_TEST);
-        {
-            // render overlying effects
-            m_EnemyManager.RenderOver();
-            m_pCurMission->RenderOver();
-        }
-        glEnable(GL_DEPTH_TEST);
-
         // render special-effects
         g_pSpecialEffects->Render(true);
 
         // render high-priority bullet manager
-        m_BulletManagerEnemy.Render();
+        m_BulletManagerEnemy.Render();   // TODO: below attack ? to be consistent with over ? rename all 3 stages ? 
+
+        // render overlying effects
+        m_EnemyManager.RenderOver();
+        m_pCurMission->RenderOver();
     }
 
     __DEPTH_RESET
@@ -203,6 +199,7 @@ void cGame::Move()
 
     // handle default object collisions
     this->__HandleCollisions();
+    // TODO: do all collisions here (virtual funcs), for consistency, e.g. bullet collisions are done before move when handled in mission/boss 
 
     // 
     this->__HandleDefeat();
@@ -233,6 +230,9 @@ void cGame::LoadMissionID(const coreInt32 iID)
     if(m_pCurMission) if(m_pCurMission->GetID() == iID) return;
 
     // 
+    m_EnemyManager.ClearEnemies(true);
+
+    // 
     m_BulletManagerPlayer.ClearBullets(true);
     m_BulletManagerEnemy .ClearBullets(true);
 
@@ -243,7 +243,6 @@ void cGame::LoadMissionID(const coreInt32 iID)
     m_ItemManager.ClearItems(true);
 
     // delete possible old mission
-    m_EnemyManager.ClearEnemies(true);
     SAFE_DELETE(m_pCurMission)
 
     // create new mission
@@ -577,10 +576,6 @@ void cGame::__HandleCollisions()
     Core::Manager::Object->TestCollision(TYPE_ENEMY, TYPE_BULLET_PLAYER, [](cEnemy* OUTPUT pEnemy, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         // 
-        //if((ABS(vIntersection.x) >= FOREGROUND_AREA.x * 1.1f) ||
-        //   (ABS(vIntersection.y) >= FOREGROUND_AREA.y * 1.1f)) return;
-
-        // 
         pEnemy ->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner()));
         pBullet->Deactivate(true, vIntersection.xy());
 
@@ -588,12 +583,12 @@ void cGame::__HandleCollisions()
         g_pSpecialEffects->RumblePlayer(d_cast<cPlayer*>(pBullet->GetOwner()), SPECIAL_RUMBLE_DEFAULT);
 
 
-        const coreVector2 fDiff   = vIntersection.xy() - pBullet->GetPosition().xy();
-        const coreFloat   fOffset = pBullet->GetCollisionRange().y - coreVector2::Dot(fDiff, pBullet->GetDirection().xy());
-        pBullet->SetPosition(pBullet->GetPosition() - fOffset * pBullet->GetDirection());
+        //const coreVector2 fDiff   = vIntersection.xy() - pBullet->GetPosition().xy();
+        //const coreFloat   fOffset = pBullet->GetCollisionRange().y - coreVector2::Dot(fDiff, pBullet->GetDirection().xy());
+        //pBullet->SetPosition(pBullet->GetPosition() - fOffset * pBullet->GetDirection());
+
 
         //g_pGame->GetChromaManager()->AddChroma(vIntersection.xy(), -pBullet->GetDirection().xy(), CHROMA_SCALE_TINY, pEnemy->GetBaseColor());     
-
     });
 
     // 

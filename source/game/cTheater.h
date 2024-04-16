@@ -1,11 +1,11 @@
-//////////////////////////////////////////////////////
-//*------------------------------------------------*//
-//| Part of Project One (http://www.maus-games.at) |//
-//*------------------------------------------------*//
-//| Released under the zlib License                |//
-//| More information available in the readme file  |//
-//*------------------------------------------------*//
-//////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+//*-------------------------------------------------*//
+//| Part of Project One (https://www.maus-games.at) |//
+//*-------------------------------------------------*//
+//| Released under the zlib License                 |//
+//| More information available in the readme file   |//
+//*-------------------------------------------------*//
+///////////////////////////////////////////////////////
 #pragma once
 #ifndef _P1_GUARD_THEATER_H_
 #define _P1_GUARD_THEATER_H_
@@ -15,9 +15,11 @@
 
 // ****************************************************************
 // 
-#define THEATER_AREA_FACTOR (1.6f)   // 
-#define THEATER_SPAWN_TIME  (8.0f)   // 
-#define THEATER_SPAWN_RAND  (3.5f)   // 
+#define THEATER_AREA_FACTOR      (1.6f)   // 
+#define THEATER_SPAWN_TIME       (6.0f)   // 
+#define THEATER_SPAWN_TIME_RAND  (3.5f)   // 
+#define THEATER_SPAWN_COUNT      (3u)     // 
+#define THEATER_SPAWN_COUNT_RAND (1u)     // 
 
 
 // ****************************************************************
@@ -37,8 +39,11 @@ private:
     std::vector<sMute> m_aMute;   // 
 
     coreFlow  m_fSpawnTimer;      // 
-    coreUint8 m_iCurType;         // 
+    coreUint8 m_iSpawnCount;      // 
+
+    coreFloat m_fCurRow;          // 
     coreBool  m_bCurSide;         // 
+    coreUint8 m_iCurType;         // 
 
 
 public:

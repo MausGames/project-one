@@ -1,11 +1,11 @@
-//////////////////////////////////////////////////////
-//*------------------------------------------------*//
-//| Part of Project One (http://www.maus-games.at) |//
-//*------------------------------------------------*//
-//| Released under the zlib License                |//
-//| More information available in the readme file  |//
-//*------------------------------------------------*//
-//////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+//*-------------------------------------------------*//
+//| Part of Project One (https://www.maus-games.at) |//
+//*-------------------------------------------------*//
+//| Released under the zlib License                 |//
+//| More information available in the readme file   |//
+//*-------------------------------------------------*//
+///////////////////////////////////////////////////////
 #include "main.h"
 
 
@@ -15,6 +15,8 @@
 #define DASH_SIDE          (1u)
 #define SPIN_SIDE          (2u)
 #define STOMP_COUNT        (3u)
+#define IMPACT_COUNT       (4u)
+#define INK_INDEX          (5u)
 
 
 // ****************************************************************
@@ -25,9 +27,10 @@
 // constructor
 cNautilusBoss::cNautilusBoss()noexcept
 : m_fClawAngle (0.0f)
+, m_vInkTarget (coreVector2(FLT_MAX,FLT_MAX))
+, m_afInkAlpha {}
 , m_fAnimation (0.0f)
-
-, m_Ink (NAUTILUS_INK_RAWS)   
+, m_fMovement  (0.0f)
 {
     // load models
     this->DefineModelHigh("ship_boss_nautilus_body_high.md3");
@@ -49,116 +52,14 @@ cNautilusBoss::cNautilusBoss()noexcept
         m_aClaw[i].SetParent      (this);
     }
 
-
-
     // 
-    m_Ink.DefineProgram("environment_clouds_inst_program");
-    {
-        for(coreUintW i = 0u; i < NAUTILUS_INK_RAWS; ++i)  
-        {
-            // load object resources
-            coreObject3D* pInk = &m_aInkRaw[i];
-            pInk->DefineModel  (Core::Manager::Object->GetLowQuad());
-            pInk->DefineTexture(0u, "environment_clouds_high.png");
-            pInk->DefineProgram("environment_clouds_program");
-
-            // set object properties
-            pInk->SetSize   (coreVector3(coreVector2(1.0f,1.0f) * 40.0f     *0.7f, 1.0f)); 
-            //pInk->SetColor3 (coreVector3(1.0f,1.0f,1.0f) * 0.1f); 
-            pInk->SetColor3 (coreVector3(1.0f,1.0f,1.0f) * 0.2f); 
-            pInk->SetAlpha  (1.0f);
-            pInk->SetEnabled((i < 1000) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
-
-
-            pInk->SetDirection(coreVector3(coreVector2::Rand(), 0.0f));
-            //pInk->SetDirection(coreVector3(coreVector2::Direction(I_TO_F(i) * 2.0f*PI/I_TO_F(NAUTILUS_INK_RAWS)), 0.0f));
-            pInk->SetTexOffset(coreVector2::Rand(0.0f,10.0f, 0.0f,10.0f));
-
-
-              
-            pInk->SetTexSize(coreVector2(1.0f,1.0f) * 0.6f);
-
-            //pInk->SetPosition(coreVector3(coreVector2::Rand() * Core::Rand->Float(20.0f) + coreVector2(-0.5f,0.5f) * FOREGROUND_AREA, 0.0f));
-            pInk->SetPosition(coreVector3(coreVector2::Rand() * Core::Rand->Float(10.0f) + coreVector2(-0.5f,0.5f) * FOREGROUND_AREA, 0.0f));
-            if(i < (NAUTILUS_INK_RAWS / 2u)) pInk->SetPosition(-pInk->GetPosition());
-
-            pInk->SetPosition(pInk->GetPosition() * coreVector3(1.0f,0.0f,1.0f));
-
-            pInk->SetPosition(coreVector3((I_TO_F(i - NAUTILUS_INK_RAWS/2u) + 0.5f) /I_TO_F(NAUTILUS_INK_RAWS/2u) * FOREGROUND_AREA.x * 1.25f, 0.0f, 0.0f));
-
-
-            // add object to the list
-            m_Ink.BindObject(pInk);
-        }
-    }
-
-    /*
-
-    
-    g_pSpecialEffects->AddScreenSplatter(coreVector2( 0.35f, 0.35f), coreVector2( 0.0f, 1.0f), 0.3f,  1u);
-    g_pSpecialEffects->AddScreenSplatter(coreVector2( 0.15f, 0.29f), coreVector2( 0.0f, 1.0f), 0.25f, 4u);
-    g_pSpecialEffects->AddScreenSplatter(coreVector2( 0.2f,  0.39f), coreVector2( 1.0f, 0.0f), 0.22f, 2u);
-
-    //g_pSpecialEffects->AddScreenSplatter(coreVector2(-0.35f,-0.32f), coreVector2( 1.0f, 0.0f), 0.2f,  4u);
-   // g_pSpecialEffects->AddScreenSplatter(coreVector2(-0.4f,-0.4f), coreVector2( 1.0f, 0.0f), 0.25f, 1u);
-    g_pSpecialEffects->AddScreenSplatter(coreVector2(-0.26f,-0.32f), coreVector2( 0.0f, -1.0f), 0.2f,  4u);
-    g_pSpecialEffects->AddScreenSplatter(coreVector2(-0.38f,-0.4f), coreVector2( 0.0f, -1.0f), 0.25f, 1u);
-
-    //g_pSpecialEffects->AddScreenSplatter(coreVector2(-0.32f,-0.34f), coreVector2( 0.0f,1.0f), 0.36f, 5u);
-    //g_pSpecialEffects->AddScreenSplatter(coreVector2(-0.35f,-0.38f), coreVector2( 0.0f,1.0f), 0.3f,  2u);
-    
-   // g_pSpecialEffects->AddScreenSplatter(coreVector2( 0.39f,-0.34f), coreVector2(-1.0f,0.0f), 0.33f, 0u);
-
-    //for(coreUintW i = 0u; i < 11u; ++i)
-    //    g_pSpecialEffects->AddScreenSplatter(coreVector2::Rand(-0.25f,0.25f, -0.25f,0.25f), coreVector2::Rand(), Core::Rand->Float(0.2f,0.5f), 6u);
-    for(coreUintW i = 0u; i < 4u; ++i)
-        g_pSpecialEffects->AddScreenSplatter(coreVector2::Rand(-0.35f,-0.1f, -0.35f,-0.1f), coreVector2::Rand(), Core::Rand->Float(0.2f,0.5f), 6u);
-    for(coreUintW i = 0u; i < 4u; ++i)
-        g_pSpecialEffects->AddScreenSplatter(coreVector2::Rand(0.1f,0.35f, -0.35f,-0.1f), coreVector2::Rand(), Core::Rand->Float(0.2f,0.5f), 6u);
-    for(coreUintW i = 0u; i < 4u; ++i)
-        g_pSpecialEffects->AddScreenSplatter(coreVector2::Rand(-0.35f,-0.1f, 0.1f,0.35f), coreVector2::Rand(), Core::Rand->Float(0.2f,0.5f), 6u);
-    for(coreUintW i = 0u; i < 4u; ++i)
-        g_pSpecialEffects->AddScreenSplatter(coreVector2::Rand(0.1f,0.35f, 0.1f,0.35f), coreVector2::Rand(), Core::Rand->Float(0.2f,0.5f), 6u);
-    //for(coreUintW i = 0u; i < 4u; ++i)
-    //    g_pSpecialEffects->AddScreenSplatter(coreVector2::Rand(-0.3f,0.3f, -0.3f,0.3f), coreVector2::Rand(), Core::Rand->Float(0.2f,0.4f), 6u);
-
-   // for(coreUintW i = 0u; i < 1u; ++i)
-   //     g_pSpecialEffects->AddScreenSplatter(coreVector2::Rand(-0.45f,-0.35f, -0.25f,0.25f), coreVector2::Rand(), Core::Rand->Float(0.1f,0.2f), 2u);
-   // for(coreUintW i = 0u; i < 1u; ++i)
-   //     g_pSpecialEffects->AddScreenSplatter(coreVector2::Rand(0.35f,0.45f, -0.25f,0.25f), coreVector2::Rand(), Core::Rand->Float(0.1f,0.2f), 2u);
-   // for(coreUintW i = 0u; i < 1u; ++i)
-   //     g_pSpecialEffects->AddScreenSplatter(coreVector2::Rand(-0.25f,0.25f, -0.45f,-0.35f), coreVector2::Rand(), Core::Rand->Float(0.1f,0.2f), 2u);
-   // for(coreUintW i = 0u; i < 1u; ++i)
-   //     g_pSpecialEffects->AddScreenSplatter(coreVector2::Rand(-0.25f,0.25f, 0.35f,0.45f), coreVector2::Rand(), Core::Rand->Float(0.1f,0.2f), 2u);
-    g_pSpecialEffects->AddScreenSplatter(coreVector2(0.200605780f,-0.432354182f), coreVector2(-0.938443184f,0.345431268f), 0.137678146f, 2u);
-
-    g_pSpecialEffects->AddScreenSplatter(coreVector2(0.41f,-0.25f), coreVector2( 0.0f, 1.0f), 0.22f, 2u);
-
-    
-    g_pSpecialEffects->AddScreenSplatter(coreVector2(-0.38f,0.4f) * 0.5f + coreVector2(-0.26f,0.32f) * 0.5f, coreVector2(1.0f,1.0f).Normalized(), 0.25f, 1u);
-
- //  for(coreUintW i = 0u; i < 6u; ++i)
- //      g_pSpecialEffects->AddScreenSplatter(coreVector2::Rand(-0.3f,0.3f, -0.3f,0.3f), coreVector2::Rand(), Core::Rand->Float(0.1f,0.4f), 1u);
- //  for(coreUintW i = 0u; i < 6u; ++i)
- //      g_pSpecialEffects->AddScreenSplatter(coreVector2::Rand(-0.3f,0.3f, -0.3f,0.3f), coreVector2::Rand(), Core::Rand->Float(0.1f,0.4f), 4u);
-
-    //for(coreUintW i = 0u; i < 3u; ++i)
-    //    g_pSpecialEffects->AddScreenSplatter(coreVector2::Rand(-0.3f,0.3f, -0.3f,0.3f), coreVector2::Rand(), Core::Rand->Float(0.2f,0.4f), 2u);
-
-    //g_pSpecialEffects->AddScreenSplatter(coreVector2(-0.25f,-0.25f), coreVector2(1.0f,0.0f), 0.2f,  2u);
- 
-
- */
-  //  constexpr coreFloat A = 0.05f;
-  //  constexpr coreFloat B = 0.4f;
-  //  for(coreUintW i = 0u; i < 4u; ++i)
-  //      g_pSpecialEffects->AddScreenSplatter(coreVector2::Rand(-B,-A, -B,-A), coreVector2::Rand(), Core::Rand->Float(0.15f,0.25f), Core::Rand->Int(1));
-  //  for(coreUintW i = 0u; i < 4u; ++i)
-  //      g_pSpecialEffects->AddScreenSplatter(coreVector2::Rand(A,B, -B,-A), coreVector2::Rand(), Core::Rand->Float(0.15f,0.25f), Core::Rand->Int(1));
-  //  for(coreUintW i = 0u; i < 4u; ++i)
-  //      g_pSpecialEffects->AddScreenSplatter(coreVector2::Rand(-B,-A, A,B), coreVector2::Rand(), Core::Rand->Float(0.15f,0.25f), Core::Rand->Int(1));
-  //  for(coreUintW i = 0u; i < 4u; ++i)
-  //      g_pSpecialEffects->AddScreenSplatter(coreVector2::Rand(A,B, A,B), coreVector2::Rand(), Core::Rand->Float(0.15f,0.25f), Core::Rand->Int(1));
+    m_InkBullet.DefineModel  ("bullet_spear.md3");
+    m_InkBullet.DefineTexture(0u, "effect_energy.png");
+    m_InkBullet.DefineProgram("effect_energy_flat_direct_program");
+    m_InkBullet.SetSize      (coreVector3(1.45f,1.55f,1.45f) * 4.0f);
+    m_InkBullet.SetColor3    (COLOR_ENERGY_CYAN * 0.8f);
+    m_InkBullet.SetTexSize   (coreVector2(0.5f,0.2f));
+    m_InkBullet.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 }
 
 
@@ -174,6 +75,9 @@ void cNautilusBoss::__ResurrectOwn()
     pMission->SetContainerOverdraw(true);
 
     // 
+    g_pWindscreen->EnableInk(0u);
+
+    // 
     m_aiCounter[CONTAINER_ATTACHED] = 1;
 }
 
@@ -183,7 +87,21 @@ void cNautilusBoss::__ResurrectOwn()
 void cNautilusBoss::__KillOwn(const coreBool bAnimated)
 {
     // 
+    g_pWindscreen->DisableInk(bAnimated ? NAUTILUS_INK_SPEED : 0.0f);
+
+    // 
+    this->__DisableBullet(bAnimated);
+
+    // 
     this->_EndBoss(bAnimated);
+}
+
+
+// ****************************************************************
+// 
+void cNautilusBoss::__RenderOwnAttack()
+{
+
 }
 
 
@@ -191,33 +109,11 @@ void cNautilusBoss::__KillOwn(const coreBool bAnimated)
 // 
 void cNautilusBoss::__RenderOwnOver()
 {
-    //const coreMatrix2 mRota = coreMatrix3::Rotation(coreFloat(Core::System->GetTotalTime()) * 0.15f).m12();
+    DEPTH_PUSH
 
-    for(coreUintW i = 0u; i < NAUTILUS_INK_RAWS; ++i)  
-    {
-
-        m_aInkRaw[i].SetPosition(coreVector3((I_TO_F(i - NAUTILUS_INK_RAWS/2u) + 0.5f) /I_TO_F(NAUTILUS_INK_RAWS/2u) * FOREGROUND_AREA.x * 1.1f, (SIN(I_TO_F(i))*0.3f + SIN(I_TO_F(i) / I_TO_F(NAUTILUS_INK_RAWS) * 2.0f * PI + coreFloat(Core::System->GetTotalTime()) * 0.3f)) * FOREGROUND_AREA.y * 0.1f + /*0.8f*/0.0f * FOREGROUND_AREA.y, 0.0f));
-
-       // if(i < (NAUTILUS_INK_RAWS / 2u))  m_aInkRaw[i].SetPosition(m_aInkRaw[i].GetPosition().InvertedY());
-       // if(i < (NAUTILUS_INK_RAWS / 4u))  m_aInkRaw[i].SetPosition(m_aInkRaw[i].GetPosition().InvertedY());
-       // if(i < (NAUTILUS_INK_RAWS * 3u / 4u) && i >= (NAUTILUS_INK_RAWS / 2u))  m_aInkRaw[i].SetPosition(m_aInkRaw[i].GetPosition().InvertedY());
-
-        //m_aInkRaw[i].SetPosition(m_aInkRaw[i].GetPosition() * mRota);
-        //m_aInkRaw[i].SetPosition(m_aInkRaw[i].GetPosition().InvertedY());
-        m_aInkRaw[i].SetPosition(m_aInkRaw[i].GetPosition().RotatedZ90());
-
-
-            //m_aInkRaw[i].SetTexOffset(m_aInkRaw[i].GetTexOffset() + 0.1f * Core::System->GetTime());
-        m_aInkRaw[i].SetTexOffset((m_aInkRaw[i].GetTexOffset() + coreVector2(0.0f,-1.0f) * (0.03f * Core::System->GetTime() * g_pEnvironment->GetSpeed())).Processed(FRACT));
-    }
-
-
-    m_Ink.MoveNormal();
-
-   // glBlendFunc(GL_SRC_ALPHA, GL_SRC_ALPHA);
     // 
-    //m_Ink.Render();
-    //glBlendFunc(FOREGROUND_BLEND_DEFAULT);
+    m_InkBullet.Render();
+    g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_DIRECT)->ApplyObject(&m_InkBullet);
 }
 
 
@@ -227,6 +123,9 @@ void cNautilusBoss::__MoveOwn()
 {
     cNevoMission* pMission   = d_cast<cNevoMission*>(g_pGame->GetCurMission());
     coreObject3D* pContainer = pMission->GetContainer();
+
+    // 
+    m_fAnimation.UpdateMod(1.0f, 10.0f);
 
     // ################################################################
     // 
@@ -262,11 +161,17 @@ void cNautilusBoss::__MoveOwn()
             const coreVector2 vPos  = this->GetPosition ().xy() - vDir * 5.0f;
             const coreVector2 vSide = vDir.Rotated90() * 5.0f;
 
-            if((iTick / 5u) & 0x01u) g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.0f, this, vPos + vSide, -vDir)->ChangeSize(1.2f);
-                                else g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.0f, this, vPos - vSide, -vDir)->ChangeSize(1.2f);
+            //if((iTick / 5u) & 0x01u) g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.0f, this, vPos + vSide, -vDir)->ChangeSize(1.2f);
+            //                    else g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.0f, this, vPos - vSide, -vDir)->ChangeSize(1.2f);
+
+            const coreVector2 vPlayerPos = this->NearestPlayer()->GetPosition().xy();
+            if((iTick / 5u) & 0x01u) g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.0f, this, vPos + vSide, (vPlayerPos - (vPos + vSide)).Normalized())->ChangeSize(1.2f);
+                                else g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.0f, this, vPos - vSide, (vPlayerPos - (vPos - vSide)).Normalized())->ChangeSize(1.2f);
+
+            //g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.0f, this, vPos, (this->NearestPlayer()->GetPosition().xy() - this->GetPosition().xy()).Normalized())->ChangeSize(1.2f);
         });
 
-        PHASE_CONTROL_TICKER(1u, 0u, 1.5f, LERP_LINEAR)
+        PHASE_CONTROL_TICKER(1u, 0u, 0.6f, LERP_LINEAR)
         {
             const coreVector2 vPos = this->GetPosition().xy();
 
@@ -279,11 +184,12 @@ void cNautilusBoss::__MoveOwn()
 
                 const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(i) * 5.0f + 60.0f));
 
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, 1.4f, this, vPos, vDir)->ChangeSize(1.1f);
+               // g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, 1.4f, this, vPos, vDir)->ChangeSize(1.1f);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, 1.2f, this, vPos, vDir)->ChangeSize(1.15f);
             }
         });
 
-        if((this->GetCurHealthPct() <= (1.0f - fHealth)) && coreMath::IsNear(COS(m_fAnimation), 0.0f, 0.01f))
+        if((this->GetCurHealthPct() <= (1.0f - fHealth)) && coreMath::IsNear(COS(m_fMovement), 0.0f, 0.01f))
         {
             PHASE_CHANGE_TO(10u)
 
@@ -307,7 +213,9 @@ void cNautilusBoss::__MoveOwn()
             if(PHASE_TIME_POINT(0.5f))
             {
                 m_aiCounter[CONTAINER_ATTACHED] = 0;
+                m_aiCounter[IMPACT_COUNT]       = 0;
                 pMission->SetContainerForce(coreVector2(fSpinSign * 550.0f, 0.0f));
+                pMission->SetContainerClamp(true);
             }
 
             PHASE_CONTROL_TICKER(1u, 0u, 15.0f, LERP_LINEAR)
@@ -344,7 +252,7 @@ void cNautilusBoss::__MoveOwn()
                 const coreVector2 vDir = this->GetDirection().xy();
                 const coreVector2 vPos = this->GetPosition ().xy() + vDir * 5.0f;
 
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.6f, this, vPos,                                         vDir)->ChangeSize(1.4f);
+                //g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.6f, this, vPos,                                         vDir)->ChangeSize(1.4f);
                 g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.6f, this, vPos - vDir * 3.0f + coreVector2( 3.0f,0.0f), vDir)->ChangeSize(1.4f);
                 g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.6f, this, vPos - vDir * 3.0f + coreVector2(-3.0f,0.0f), vDir)->ChangeSize(1.4f);
             });
@@ -384,6 +292,8 @@ void cNautilusBoss::__MoveOwn()
             {
                 PHASE_CHANGE_INC
 
+                SET_BIT(m_aiCounter[STOMP_COUNT], 8u, (m_vLastPosition.x < 0.0f))
+
                 g_pSpecialEffects->CreateSplashColor(this->GetPosition(), SPECIAL_SPLASH_BIG, COLOR_ENERGY_GREEN);
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_BIG);
             }
@@ -407,13 +317,13 @@ void cNautilusBoss::__MoveOwn()
             g_pSpecialEffects->CreateSplashColor(coreVector3(vPos - vOffset, 0.0f), 25.0f, 5u, COLOR_ENERGY_GREEN);
         });
 
-        if(m_aiCounter[STOMP_COUNT] < 3)
+        if((m_aiCounter[STOMP_COUNT] & 0xFF) < 2)
         {
             PHASE_CONTROL_TIMER(0u, 1.3f, LERP_LINEAR)
             {
-                const coreFloat vNewX = m_vLastPosition.x - 0.4f * SIGN(m_vLastPosition.x);
+                const coreFloat vNewX = m_vLastPosition.x + (CONTAINS_BIT(m_aiCounter[STOMP_COUNT], 8u) ? 0.4f : -0.4f);
 
-                this->SetPosition(coreVector3(coreVector2(LERP(m_vLastPosition.x, vNewX, fTime), m_vLastPosition.y + 0.4f * SIN(PI * fTime)) * FOREGROUND_AREA, 0.0f));
+                this->SetPosition(coreVector3(coreVector2(LERP(m_vLastPosition.x, vNewX, fTime), m_vLastPosition.y + -0.4f * this->GetDirection().y * SIN(PI * fTime)) * FOREGROUND_AREA, 0.0f));
 
                 if(PHASE_FINISHED)
                 {
@@ -438,7 +348,7 @@ void cNautilusBoss::__MoveOwn()
                     const coreFloat fDelayTime = LERPS(0.0f, 1.0f, (fTime - 0.2f) / 0.8f);
 
                     this->DefaultMoveLerp    (m_vLastPosition,                         coreVector2(m_vLastPosition.x, m_aiCounter[DASH_SIDE] ? 0.75f : -0.75f), fDelayTime);
-                    if(!m_aiCounter[DASH_SIDE]) this->DefaultMultiateLerp(m_aiCounter[DASH_SIDE] ? (2.0f*PI) : (1.0f*PI), m_aiCounter[DASH_SIDE] ? (3.0f*PI) : (2.0f*PI),                                 fDelayTime);
+                    if(!m_aiCounter[DASH_SIDE]) this->DefaultMultiateLerp(m_aiCounter[DASH_SIDE] ? (2.0f*PI) : (1.0f*PI), m_aiCounter[DASH_SIDE] ? (3.0f*PI) : (2.0f*PI),                fDelayTime);  
                 }
 
                 if(PHASE_FINISHED && !m_aTimer[1].GetStatus())
@@ -470,6 +380,8 @@ void cNautilusBoss::__MoveOwn()
 
                 m_aiCounter[CONTAINER_ATTACHED] = 1;
                 m_aiCounter[SPIN_SIDE]          = 1 - m_aiCounter[SPIN_SIDE];
+
+                pMission->SetContainerClamp(false);
             }
         });
     }
@@ -480,11 +392,11 @@ void cNautilusBoss::__MoveOwn()
     if((m_iPhase < 10u) && Core::System->GetTime())
     {
         // 
-        m_fAnimation.UpdateMod(1.0f, 2.0f*PI);
+        m_fMovement.UpdateMod(1.0f, 2.0f*PI);
 
         // 
-        const coreFloat fPrevX = 0.6f * SIN(m_fAnimation - Core::System->GetTime());
-        const coreFloat fCurX  = 0.6f * SIN(m_fAnimation);
+        const coreFloat fPrevX = 0.6f * SIN(m_fMovement - Core::System->GetTime());
+        const coreFloat fCurX  = 0.6f * SIN(m_fMovement);
 
         // 
         this->SetPosition (coreVector3(fCurX * FOREGROUND_AREA.x, this->GetPosition().yz()));
@@ -502,6 +414,8 @@ void cNautilusBoss::__MoveOwn()
     const coreVector2& vImpact = pMission->GetContainerImpact();
     if(!vImpact.IsNull())
     {
+        if(++m_aiCounter[IMPACT_COUNT] >= 2) pMission->SetContainerForce(coreVector2(0.0f,0.0f));
+
         for(coreUintW i = 20u; i--; )
         {
             const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(i) * 9.0f));
@@ -527,4 +441,104 @@ void cNautilusBoss::__MoveOwn()
         m_aClaw[i].SetDirection  (this->GetDirection  () * (i ? mRota : mRota.Transposed()));
         m_aClaw[i].SetOrientation(this->GetOrientation() * (i ? -1.0f : 1.0f));
     }
+
+    // 
+    if(m_iPhase != 10u)
+    {
+        PHASE_CONTROL_TICKER(3u, 0u, (2.0f/NAUTILUS_INK_TIME) - 0.03f, LERP_LINEAR)
+        {
+            const coreVector3& vPos = this->GetPosition();
+
+            // 
+            this->__EnableBullet(vPos.xy(), this->NearestPlayer()->GetPosition().xy());
+
+            // 
+            g_pSpecialEffects->CreateSplashSmoke(vPos, SPECIAL_SPLASH_TINY, coreVector3(0.1f,0.1f,0.1f));
+            g_pSpecialEffects->CreateSplashColor(vPos, SPECIAL_SPLASH_TINY, COLOR_ENERGY_CYAN);
+        });
+    }
+
+    // 
+    if(m_InkBullet.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
+    {
+        const coreVector3& vPos    = m_InkBullet.GetPosition();
+        const coreVector3& vDir    = m_InkBullet.GetDirection();
+        const coreVector3  vNewPos = coreVector3(vPos.xy() + vDir.xy() * (40.0f * Core::System->GetTime()), 0.0f);
+
+        // 
+        m_InkBullet.SetPosition (vNewPos);
+        m_InkBullet.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.2f));
+        m_InkBullet.Move();
+
+        // 
+        if(coreVector2::Dot(vNewPos.xy() - m_vInkTarget, vDir.xy()) > 0.0f)
+        {
+            m_aiCounter[INK_INDEX] = 1 - m_aiCounter[INK_INDEX];
+
+            // 
+            this->__DisableBullet(true);
+            this->__CreateInk(m_aiCounter[INK_INDEX], vNewPos.xy());
+
+            // 
+            g_pSpecialEffects->CreateSplashSmoke(vNewPos, SPECIAL_SPLASH_BIG, coreVector3(0.1f,0.1f,0.1f));
+            g_pSpecialEffects->CreateSplashColor(vNewPos, SPECIAL_SPLASH_BIG, COLOR_ENERGY_CYAN);
+        }
+    }
+
+    // 
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_afInkAlpha); ++i)
+    {
+        m_afInkAlpha[i].Update(-1.0f);
+        g_pWindscreen->SetInkAlpha(i, CLAMP(MIN(m_afInkAlpha[i], NAUTILUS_INK_TIME - m_afInkAlpha[i]) * NAUTILUS_INK_SPEED, 0.0f, 1.0f));
+    }
+
+    // TODO: line movement 
+    //const coreVector2 vLinePos = coreVector2(0.0f, 0.1f * SIN(2.0f*PI * 0.08f * coreFloat(Core::System->GetTotalTime()))); 
+}
+
+// ****************************************************************
+// 
+void cNautilusBoss::__CreateInk(const coreUintW iIndex, const coreVector2& vPosition)
+{
+    ASSERT(iIndex < ARRAY_SIZE(m_afInkAlpha))
+
+    // 
+    ASSERT(m_afInkAlpha[iIndex] <= 0.0f)
+    m_afInkAlpha[iIndex] = NAUTILUS_INK_TIME;
+
+    // 
+    g_pWindscreen->SetInkPosition(iIndex, vPosition);
+}
+
+
+// ****************************************************************
+// 
+void cNautilusBoss::__EnableBullet(const coreVector2& vStart, const coreVector2& vEnd)
+{
+    WARN_IF(m_InkBullet.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    const coreVector2 vDir = (vEnd - vStart).Normalized();
+
+    // 
+    m_InkBullet.SetPosition (coreVector3(vStart, 0.0f));
+    m_InkBullet.SetDirection(coreVector3(vDir,   0.0f));
+
+    // 
+    m_InkBullet.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    g_pGlow->BindObject(&m_InkBullet);
+
+    // 
+    m_vInkTarget = vEnd;
+}
+
+
+// ****************************************************************
+// 
+void cNautilusBoss::__DisableBullet(const coreBool bAnimated)
+{
+    if(!m_InkBullet.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    m_InkBullet.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    g_pGlow->UnbindObject(&m_InkBullet);
 }

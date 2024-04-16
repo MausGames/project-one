@@ -1,11 +1,11 @@
-//////////////////////////////////////////////////////
-//*------------------------------------------------*//
-//| Part of Project One (http://www.maus-games.at) |//
-//*------------------------------------------------*//
-//| Released under the zlib License                |//
-//| More information available in the readme file  |//
-//*------------------------------------------------*//
-//////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+//*-------------------------------------------------*//
+//| Part of Project One (https://www.maus-games.at) |//
+//*-------------------------------------------------*//
+//| Released under the zlib License                 |//
+//| More information available in the readme file   |//
+//*-------------------------------------------------*//
+///////////////////////////////////////////////////////
 #pragma once
 #ifndef _P1_GUARD_MISSION_H_
 #define _P1_GUARD_MISSION_H_
@@ -293,15 +293,16 @@ private:
     cAmemasuBoss   m_Amemasu;     // 
     cLeviathanBoss m_Leviathan;   // 
 
-    coreObject3D m_Container;     // 
-    coreVector2  m_vForce;        // 
-    coreVector2  m_vImpact;       // 
-    coreBool     m_bClamp;        // 
-    coreBool     m_bOverdraw;     // 
+    cLodObject  m_Container;      // 
+    coreVector2 m_vForce;         // 
+    coreVector2 m_vImpact;        // 
+    coreBool    m_bClamp;         // 
+    coreBool    m_bOverdraw;      // 
 
 
 public:
     cNevoMission()noexcept;
+    ~cNevoMission();
 
     DISABLE_COPY(cNevoMission)
     ASSIGN_ID(2, "Nevo")
@@ -318,13 +319,12 @@ public:
     inline const coreVector2& GetContainerImpact  ()const                        {return m_vImpact;}
 
     // 
-    inline coreObject3D* GetContainer() {return &m_Container;}
+    inline cLodObject* GetContainer() {return &m_Container;}
 
 
 private:
     // execute own routines
     void __SetupOwn       ()final;
-    void __RenderOwnUnder ()final;
     void __RenderOwnAttack()final;
     void __MoveOwnAfter   ()final;
 };

@@ -1,11 +1,11 @@
-//////////////////////////////////////////////////////
-//*------------------------------------------------*//
-//| Part of Project One (http://www.maus-games.at) |//
-//*------------------------------------------------*//
-//| Released under the zlib License                |//
-//| More information available in the readme file  |//
-//*------------------------------------------------*//
-//////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+//*-------------------------------------------------*//
+//| Part of Project One (https://www.maus-games.at) |//
+//*-------------------------------------------------*//
+//| Released under the zlib License                 |//
+//| More information available in the readme file   |//
+//*-------------------------------------------------*//
+///////////////////////////////////////////////////////
 #include "main.h"
 
 
@@ -22,7 +22,7 @@ cPlayer::cPlayer()noexcept
     // load object resources
     this->DefineTexture(0u, "ship_player.png");
     this->DefineTexture(1u, "menu_background_black.png");
-    this->DefineProgram("object_ship_program");
+    this->DefineProgram("object_ship_blink_program");
 
     // set object properties
     this->SetDirection        (coreVector3(0.0f,1.0f,0.0f));
@@ -620,7 +620,7 @@ coreBool cPlayer::__TestCollisionPrecise(const coreObject3D* pObject, coreVector
         // 
         coreFloat fHitDistance = 0.0f;
         coreUint8 iHitCount    = 1u;
-        if(Core::Manager::Object->TestCollision(pObject, vRayPos, vRayDir, &fHitDistance, &iHitCount) && ((iHitCount & 0x01u) || (POW2(fHitDistance) < vMove.LengthSq())))
+        if(Core::Manager::Object->TestCollision(pObject, vRayPos, vRayDir, &fHitDistance, &iHitCount) && (POW2(fHitDistance) < vMove.LengthSq()))
         {
             // 
             (*pvIntersection) = vRayPos + vRayDir * fHitDistance;

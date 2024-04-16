@@ -1,11 +1,11 @@
-//////////////////////////////////////////////////////
-//*------------------------------------------------*//
-//| Part of Project One (http://www.maus-games.at) |//
-//*------------------------------------------------*//
-//| Released under the zlib License                |//
-//| More information available in the readme file  |//
-//*------------------------------------------------*//
-//////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+//*-------------------------------------------------*//
+//| Part of Project One (https://www.maus-games.at) |//
+//*-------------------------------------------------*//
+//| Released under the zlib License                 |//
+//| More information available in the readme file   |//
+//*-------------------------------------------------*//
+///////////////////////////////////////////////////////
 #include "main.h"
 
 
@@ -13,6 +13,7 @@
 // constructor
 cTitleMenu::cTitleMenu()noexcept
 : coreMenu (1u, SURFACE_TITLE_DEFAULT)
+, m_Effect (g_pSpecialEffects->GetParticleDark())
 {
     // create menu objects
     m_GameLogo.DefineTexture(0u, "game_logo.png");
@@ -42,6 +43,24 @@ cTitleMenu::cTitleMenu()noexcept
     this->BindObject(SURFACE_TITLE_DEFAULT, &m_StartMessage);
     this->BindObject(SURFACE_TITLE_DEFAULT, &m_aVersionInfo[0]);
     this->BindObject(SURFACE_TITLE_DEFAULT, &m_aVersionInfo[1]);
+
+
+    //m_Effect.CreateParticle(10u, [](coreParticle* OUTPUT pParticle)
+    //{
+    //    pParticle->SetScaleStc(3.5f);
+    //    pParticle->SetSpeed   (0.0f);
+    //});
+}
+
+
+// ****************************************************************
+// destructor
+cTitleMenu::~cTitleMenu()
+{
+
+    m_Effect.Clear(); // TODO: race condition
+
+
 }
 
 
@@ -61,6 +80,8 @@ void cTitleMenu::Move()
             // 
             m_StartMessage.SetColor3(coreVector3(1.0f,1.0f,1.0f) * LERP(MENU_LIGHT_IDLE, MENU_LIGHT_ACTIVE, 0.5f + 0.5f * SIN(10.0f * coreFloat(Core::System->GetTotalTime()))));
 
+            //m_GameLogo.SetColor3(coreVector3(1.0f,1.0f,1.0f) * LERP(0.8f, 1.0f, 0.5f + 0.5f * SIN(3.0f * coreFloat(Core::System->GetTotalTime()))));
+
             if(this->GetAlpha() >= 1.0f)
             {
                 if(Core::Input->GetAnyButton(CORE_INPUT_PRESS))
@@ -76,4 +97,15 @@ void cTitleMenu::Move()
         ASSERT(false)
         break;
     }
+
+
+    m_Effect.ForEachParticle([&](coreParticle* OUTPUT pParticle, const coreUintW i)
+    {
+        const coreFloat fTime = FMOD(coreFloat(Core::System->GetTotalTime()) * 0.1f + 0.1f * I_TO_F(i), 1.0f);
+
+        pParticle->SetPositionStc(coreVector3(coreVector2((0.08f + 0.0f * fTime) * SIN((fTime + (I_TO_F(i) / 10.0f)) * 4.0f*PI), 0.27f - 0.54f * fTime) * (FOREGROUND_AREA * 4.5f), 5.0f));
+        pParticle->SetAngleStc   (4.0f*PI * fTime * ((i & 0x01u) ? -1.0f : 1.0f));
+        pParticle->SetColor4Stc  (coreVector4(0.0f, 173.0f/255.0f * 0.6f, 223.0f/255.0f * 0.6f, 0.9f * this->GetAlpha()));
+        // TODO: as ink shader   
+    });
 }

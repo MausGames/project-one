@@ -1,11 +1,11 @@
-//////////////////////////////////////////////////////
-//*------------------------------------------------*//
-//| Part of Project One (http://www.maus-games.at) |//
-//*------------------------------------------------*//
-//| Released under the zlib License                |//
-//| More information available in the readme file  |//
-//*------------------------------------------------*//
-//////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+//*-------------------------------------------------*//
+//| Part of Project One (https://www.maus-games.at) |//
+//*-------------------------------------------------*//
+//| Released under the zlib License                 |//
+//| More information available in the readme file   |//
+//*-------------------------------------------------*//
+///////////////////////////////////////////////////////
 #include "main.h"
 
 
@@ -371,7 +371,7 @@ void cConfigMenu::Move()
                         coreBool bSkip = false;
 
                         // skip joystick/gamepad input sets without available device
-                        if((oInput.oType.GetCurEntry().tValue >= INPUT_SETS_KEYBOARD) && (oInput.oType.GetCurEntry().tValue - INPUT_SETS_KEYBOARD >= Core::Input->GetJoystickNum()))  
+                        if((oInput.oType.GetCurEntry().tValue >= INPUT_SETS_KEYBOARD) && (oInput.oType.GetCurEntry().tValue - INPUT_SETS_KEYBOARD >= Core::Input->GetJoystickNum()))
                             bSkip = true;
 
                         // skip already assigned input sets
@@ -564,7 +564,7 @@ void cConfigMenu::CheckValues()
                            (m_Monitor      .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY))                         ||
                            (m_DisplayMode  .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN))                      ||
                            (m_AntiAliasing .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING))                  ||
-                           (m_TextureFilter.GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREFILTER))                 ||
+                           (m_TextureFilter.GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY))             ||
                            (m_AssetQuality .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_QUALITY))                       ||
                            (m_ShadowQuality.GetCurEntry().tValue != g_OldConfig.Graphics.iShadow)                                             ||
                            (m_OverallVolume.GetCurEntry().tValue != F_TO_UI(Core::Config->GetFloat(CORE_CONFIG_AUDIO_GLOBALVOLUME) * 100.0f)) ||
@@ -605,7 +605,7 @@ void cConfigMenu::LoadValues()
     m_Monitor      .SelectValue(Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY));
     m_DisplayMode  .SelectValue(Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN));
     m_AntiAliasing .SelectValue(Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING));
-    m_TextureFilter.SelectValue(Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREFILTER));
+    m_TextureFilter.SelectValue(Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY));
     m_AssetQuality .SelectValue(Core::Config->GetInt(CORE_CONFIG_GRAPHICS_QUALITY));
     m_ShadowQuality.SelectValue(g_CurConfig.Graphics.iShadow);
 
@@ -653,16 +653,16 @@ void cConfigMenu::SaveValues()
                             (m_Monitor      .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY))        ||
                             (m_DisplayMode  .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN))     ||
                             (m_AntiAliasing .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING)) ||
-                            (m_TextureFilter.GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREFILTER));
+                            (m_TextureFilter.GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY));
 
     // 
-    Core::Config->SetInt(CORE_CONFIG_SYSTEM_WIDTH,           F_TO_SI(vCurResolution.x));
-    Core::Config->SetInt(CORE_CONFIG_SYSTEM_HEIGHT,          F_TO_SI(vCurResolution.y));
-    Core::Config->SetInt(CORE_CONFIG_SYSTEM_DISPLAY,         m_Monitor      .GetCurEntry().tValue);
-    Core::Config->SetInt(CORE_CONFIG_SYSTEM_FULLSCREEN,      m_DisplayMode  .GetCurEntry().tValue);
-    Core::Config->SetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING,  m_AntiAliasing .GetCurEntry().tValue);
-    Core::Config->SetInt(CORE_CONFIG_GRAPHICS_TEXTUREFILTER, m_TextureFilter.GetCurEntry().tValue);
-    Core::Config->SetInt(CORE_CONFIG_GRAPHICS_QUALITY,       m_AssetQuality .GetCurEntry().tValue);
+    Core::Config->SetInt(CORE_CONFIG_SYSTEM_WIDTH,               F_TO_SI(vCurResolution.x));
+    Core::Config->SetInt(CORE_CONFIG_SYSTEM_HEIGHT,              F_TO_SI(vCurResolution.y));
+    Core::Config->SetInt(CORE_CONFIG_SYSTEM_DISPLAY,             m_Monitor      .GetCurEntry().tValue);
+    Core::Config->SetInt(CORE_CONFIG_SYSTEM_FULLSCREEN,          m_DisplayMode  .GetCurEntry().tValue);
+    Core::Config->SetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING,      m_AntiAliasing .GetCurEntry().tValue);
+    Core::Config->SetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY, m_TextureFilter.GetCurEntry().tValue);
+    Core::Config->SetInt(CORE_CONFIG_GRAPHICS_QUALITY,           m_AssetQuality .GetCurEntry().tValue);
     g_CurConfig.Graphics.iShadow = m_ShadowQuality.GetCurEntry().tValue;
 
     // 

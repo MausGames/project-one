@@ -1,11 +1,11 @@
-//////////////////////////////////////////////////////
-//*------------------------------------------------*//
-//| Part of Project One (http://www.maus-games.at) |//
-//*------------------------------------------------*//
-//| Released under the zlib License                |//
-//| More information available in the readme file  |//
-//*------------------------------------------------*//
-//////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+//*-------------------------------------------------*//
+//| Part of Project One (https://www.maus-games.at) |//
+//*-------------------------------------------------*//
+//| Released under the zlib License                 |//
+//| More information available in the readme file   |//
+//*-------------------------------------------------*//
+///////////////////////////////////////////////////////
 #pragma once
 #ifndef _P1_GUARD_SPECIALEFFECTS_H_
 #define _P1_GUARD_SPECIALEFFECTS_H_
@@ -16,7 +16,6 @@
 // TODO: implement pixel-fitting screen-shake ? (currently shaking creates a fullscreen-blur)
 // TODO: don't invoke special-effects out of view (though consider effect-radius)
 // TODO: adjust rumble to be not toooo strong (and not be annoying)
-// TODO: dirt (smaller spray drops, brownish)
 
 
 // ****************************************************************
@@ -24,7 +23,6 @@
 #define SPECIAL_LIGHTNINGS       (32u)     // number of lightning sprites
 #define SPECIAL_BLASTS           (4u)      // number of energy-blasts
 #define SPECIAL_RINGS            (8u)      // number of energy-rings
-#define SPECIAL_SPLATTERS        (64u)     // 
 #define SPECIAL_SOUNDS           (8u)      // number of sound-effect files
 
 #define SPECIAL_LIGHTNING_RESIZE (0.66f)   // 
@@ -82,12 +80,6 @@ private:
     coreObject3D m_aRing[SPECIAL_RINGS];                    // 
     coreUintW    m_iCurRing;                                // 
 
-    coreObject2D m_aSplatter[SPECIAL_SPLATTERS];            // 
-    coreUintW    m_iCurSplatter;                            // 
-
-    coreFlow m_fScreenFade;                                 // 
-    coreBool m_bScreenClear;                                // 
-
     coreSoundPtr m_apSound[SPECIAL_SOUNDS];                 // 
     eSoundEffect m_iSoundGuard;                             // last played sound-effect (to reduce multiple same sound-effects within one frame)
 
@@ -106,16 +98,13 @@ public:
     void Render(const coreBool bForeground);
     void Move();
 
-    // render the overlay separately
-    void RenderOverlay();
-
     // 
     inline const coreBool& IsActive()const {return m_bActive;}
 
     // create centered particle splash
     void CreateSplashColor(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor);
     void CreateSplashDark (const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum);
-    void CreateSplashSmoke(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum);
+    void CreateSplashSmoke(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor);
     void CreateSplashFire (const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor);
 
     // create directional particle blow
@@ -139,10 +128,6 @@ public:
     void CreateRing (const coreVector3& vPosition, const coreVector3& vDirection, const coreVector3& vOrientation, const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor);
 
     // 
-    void AddScreenSplatter(const coreVector2& vPosition, const coreVector2& vDirection, const coreFloat fScale, const coreUint8 iType);
-    void ClearScreen();
-
-    // 
     void PlaySound(const coreVector3& vPosition, const coreFloat fVolume, const eSoundEffect iSoundIndex);
 
     // 
@@ -151,6 +136,12 @@ public:
     // 
     void ShakeScreen(const coreFloat fStrength);
     inline const coreFloat& GetShakeStrength()const {return m_fShakeStrength;}
+
+    // 
+    inline coreParticleSystem* GetParticleColor() {return &m_ParticleColor;}
+    inline coreParticleSystem* GetParticleDark () {return &m_ParticleDark;}
+    inline coreParticleSystem* GetParticleSmoke() {return &m_ParticleSmoke;}
+    inline coreParticleSystem* GetParticleFire () {return &m_ParticleFire;}
 
     // 
     void MacroExplosionColorSmall        (const coreVector3& vPosition, const coreVector3& vColor);

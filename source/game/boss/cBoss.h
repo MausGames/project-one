@@ -1,11 +1,11 @@
-//////////////////////////////////////////////////////
-//*------------------------------------------------*//
-//| Part of Project One (http://www.maus-games.at) |//
-//*------------------------------------------------*//
-//| Released under the zlib License                |//
-//| More information available in the readme file  |//
-//*------------------------------------------------*//
-//////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+//*-------------------------------------------------*//
+//| Part of Project One (https://www.maus-games.at) |//
+//*-------------------------------------------------*//
+//| Released under the zlib License                 |//
+//| More information available in the readme file   |//
+//*-------------------------------------------------*//
+///////////////////////////////////////////////////////
 #pragma once
 #ifndef _P1_GUARD_BOSS_H_
 #define _P1_GUARD_BOSS_H_
@@ -17,6 +17,7 @@
 // TODO: boss0101, definition for 1.5f (and related multiplications)
 // TODO: boss0102, add slight explosion where rays hit the screen
 // TODO: boss0102, separate emitters to three objects, to make them blue
+// TODO: boss0103, remove small hitch when finishing rotation in the middle shortly before beginning laser-phase
 
 
 // ****************************************************************
@@ -36,7 +37,7 @@
 #define DHARUK_HEIGHT             (0.8f)                                       // 
 
 #define TORUS_TURRETS             (4u)                                         // 
-#define TORUS_GUNNERS             (8u)                                         // 
+#define TORUS_GUNNERS             (4u)                                         // 
 #define TORUS_BOSS_ROTATION       (1.2f)                                       // 
 #define TORUS_TURRET_SPEED        (-0.2f)                                      // 
 #define TORUS_GUNNER_SPEED        (0.2f)                                       // 
@@ -47,14 +48,15 @@
 #define VAUS_SHOTS                (10u)                                        //         
 
 #define NAUTILUS_ATTACH_DIST      (-10.0f)                                     // 
-#define NAUTILUS_INK_RAWS         (32u)                                        // // TODO: INKS ? 
+#define NAUTILUS_INK_TIME         (10.0f)                                      // 
+#define NAUTILUS_INK_SPEED        (1.65f)                                      // 
 
 #define LEVIATHAN_PARTS           (5u)                                         // 
 #define LEVIATHAN_PARTS_BODIES    (LEVIATHAN_PARTS - 2u)                       // 
 #define LEVIATHAN_RAYS            (LEVIATHAN_PARTS)                            // 
 #define LEVIATHAN_RAYS_RAWS       (2u * LEVIATHAN_RAYS)                        // 
 #define LEVIATHAN_RADIUS_OUTER    (FOREGROUND_AREA.x * 0.8f)                   // 
-#define LEVIATHAN_RADIUS_INNER    (8.6f)                                       // 
+#define LEVIATHAN_RADIUS_INNER    (9.0f)                                       // 
 #define LEVIATHAN_RAY_OFFSET(i)   ((i) ? 3.0f : 4.0f)                          // 
 #define LEVIATHAN_RAY_HEIGHT      (0.1f)                                       // 
 #define LEVIATHAN_RAY_SIZE        (coreVector3(0.7f,50.0f,0.7f))               // 
@@ -102,7 +104,7 @@ protected:
     coreUint16 m_aiTimerLine[BOSS_TIMERS];    // 
 
     coreInt16   m_aiCounter[BOSS_COUNTERS];   // 
-    coreVector3 m_avVector [BOSS_VECTORS];    // 
+    coreVector4 m_avVector [BOSS_VECTORS];    // 
 
     coreVector2 m_vLastPosition;              // 
     coreFloat   m_fLastDirAngle;              // 
@@ -215,6 +217,8 @@ private:
     coreFlow m_fRotationBoss;                        // 
     coreFlow m_fRotationObject;                      // 
 
+    coreUint8 m_iTurretActive;                       // 
+    coreUint8 m_iGunnerActive;                       // 
     coreUint8 m_iGunnerMove;                         // 
 
 
@@ -280,15 +284,15 @@ private:
 class cNautilusBoss final : public cBoss
 {
 private:
-    cCustomEnemy m_aClaw[2];   //
+    cCustomEnemy m_aClaw[2];        //
+    coreFloat    m_fClawAngle;      // 
 
-    coreFloat m_fClawAngle;    // 
+    coreObject3D m_InkBullet;       // 
+    coreVector2  m_vInkTarget;      // 
+    coreFlow     m_afInkAlpha[2];   // 
 
-    coreFlow m_fAnimation;     // animation value
-
-
-    coreBatchList m_Ink;           // 
-    coreObject3D  m_aInkRaw[NAUTILUS_INK_RAWS];   // 
+    coreFlow m_fAnimation;          // animation value
+    coreFlow m_fMovement;           // 
 
 
 public:
@@ -300,10 +304,18 @@ public:
 
 private:
     // execute own routines
-    void __ResurrectOwn ()final;
-    void __KillOwn      (const coreBool bAnimated)final;
-    void __RenderOwnOver()final;
-    void __MoveOwn      ()final;
+    void __ResurrectOwn   ()final;
+    void __KillOwn        (const coreBool bAnimated)final;
+    void __RenderOwnAttack()final;
+    void __RenderOwnOver  ()final;
+    void __MoveOwn        ()final;
+
+    // 
+    void __CreateInk(const coreUintW iIndex, const coreVector2& vPosition);
+
+    // 
+    void __EnableBullet (const coreVector2& vStart, const coreVector2& vEnd);
+    void __DisableBullet(const coreBool bAnimated);
 };
 
 
@@ -352,7 +364,8 @@ private:
     coreBatchList m_RayWave;                        // 
     coreObject3D  m_aRayRaw[LEVIATHAN_RAYS_RAWS];   // 
 
-    coreUint8 m_iRayActive;                         // 
+    coreFlow   m_afRayTime[LEVIATHAN_RAYS];         // 
+    coreUint16 m_iDecalState;                       // 
 
     coreFlow m_fAnimation;                          // animation value
     coreFlow m_fMovement;                           // 
@@ -373,10 +386,13 @@ private:
     void __MoveOwn        ()final;
 
     // 
-    void __SetRotaAttack  (const coreInt16 iType, const coreBool bAnimated);
     void __EnableRay      (const coreUintW iIndex);
-    void __DisableRay     (const coreUintW iIndex);
+    void __DisableRay     (const coreUintW iIndex, const coreBool bAnimated);
     void __CreateOverdrive(const coreUintW iIndex, const coreVector3& vIntersect, const coreFloat fTime, const coreBool bGround);
+
+    // 
+    void __UpdateHealth();
+    void __RefreshHealth();
 
     // 
     static FUNC_NOALIAS void      __CalcCurvePosDir(const coreVector3& vAxis, const coreFloat fAngle, const coreVector3& vScale, coreVector3* OUTPUT vPosition, coreVector3* OUTPUT vDirection);

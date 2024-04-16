@@ -1,11 +1,11 @@
-//////////////////////////////////////////////////////
-//*------------------------------------------------*//
-//| Part of Project One (http://www.maus-games.at) |//
-//*------------------------------------------------*//
-//| Released under the zlib License                |//
-//| More information available in the readme file  |//
-//*------------------------------------------------*//
-//////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+//*-------------------------------------------------*//
+//| Part of Project One (https://www.maus-games.at) |//
+//*-------------------------------------------------*//
+//| Released under the zlib License                 |//
+//| More information available in the readme file   |//
+//*-------------------------------------------------*//
+///////////////////////////////////////////////////////
 #pragma once
 #ifndef _P1_GUARD_MENU_H_
 #define _P1_GUARD_MENU_H_
@@ -191,9 +191,12 @@ private:
     coreLabel m_StartMessage;      // 
     coreLabel m_aVersionInfo[2];   // hard-coded version info strings
 
+    coreParticleEffect m_Effect;   // 
+
 
 public:
     cTitleMenu()noexcept;
+    ~cTitleMenu()final;
 
     DISABLE_COPY(cTitleMenu)
 

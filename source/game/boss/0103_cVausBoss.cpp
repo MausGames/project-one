@@ -1,11 +1,11 @@
-//////////////////////////////////////////////////////
-//*------------------------------------------------*//
-//| Part of Project One (http://www.maus-games.at) |//
-//*------------------------------------------------*//
-//| Released under the zlib License                |//
-//| More information available in the readme file  |//
-//*------------------------------------------------*//
-//////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+//*-------------------------------------------------*//
+//| Part of Project One (https://www.maus-games.at) |//
+//*-------------------------------------------------*//
+//| Released under the zlib License                 |//
+//| More information available in the readme file   |//
+//*-------------------------------------------------*//
+///////////////////////////////////////////////////////
 #include "main.h"
 
 
@@ -136,7 +136,7 @@ void cVausBoss::__MoveOwn()
                 coreVector2 vNewPos;
                 //switch(m_aiCounter[CURRENT_SIDE] & 0x03u)
                 //{
-                //default: ASSERT(false);
+                //default: ASSERT(false)
                 //case 0u: vNewPos = coreVector2( m_vLastPosition.y, 0.0f); break;
                 //case 1u: vNewPos = coreVector2(0.0f, -m_vLastPosition.x); break;
                 //case 2u: vNewPos = coreVector2( m_vLastPosition.y, 0.0f); break;

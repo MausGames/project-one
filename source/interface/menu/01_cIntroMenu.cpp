@@ -1,11 +1,11 @@
-//////////////////////////////////////////////////////
-//*------------------------------------------------*//
-//| Part of Project One (http://www.maus-games.at) |//
-//*------------------------------------------------*//
-//| Released under the zlib License                |//
-//| More information available in the readme file  |//
-//*------------------------------------------------*//
-//////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+//*-------------------------------------------------*//
+//| Part of Project One (https://www.maus-games.at) |//
+//*-------------------------------------------------*//
+//| Released under the zlib License                 |//
+//| More information available in the readme file   |//
+//*-------------------------------------------------*//
+///////////////////////////////////////////////////////
 #include "main.h"
 
 
@@ -151,7 +151,7 @@ void cIntroMenu::Move()
         {
             // 
             g_pEnvironment->Activate();
-            g_pPostProcessing->SetSideOpacity(1.5f * (fTime2 - 1.75f));
+            g_pPostProcessing->SetSideOpacity(1.35f * (fTime2 - 1.75f));
         }
     }
 }

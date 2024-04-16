@@ -1,11 +1,11 @@
-//////////////////////////////////////////////////////
-//*------------------------------------------------*//
-//| Part of Project One (http://www.maus-games.at) |//
-//*------------------------------------------------*//
-//| Released under the zlib License                |//
-//| More information available in the readme file  |//
-//*------------------------------------------------*//
-//////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+//*-------------------------------------------------*//
+//| Part of Project One (https://www.maus-games.at) |//
+//*-------------------------------------------------*//
+//| Released under the zlib License                 |//
+//| More information available in the readme file   |//
+//*-------------------------------------------------*//
+///////////////////////////////////////////////////////
 #pragma once
 #ifndef _P1_GUARD_PLAYER_H_
 #define _P1_GUARD_PLAYER_H_
@@ -121,8 +121,8 @@ public:
     inline const coreVector2& GetForce()const {return m_vForce;}
 
     // 
-    template <typename F> static void TestCollision(const coreInt32 iType,        F&& nCallback);   // [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit) -> void
-    template <typename F> static void TestCollision(coreObject3D* OUTPUT pObject, F&& nCallback);   // [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit) -> void
+    template <typename F> static FORCE_INLINE void TestCollision(const coreInt32 iType,        F&& nCallback);   // [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit) -> void
+    template <typename F> static FORCE_INLINE void TestCollision(coreObject3D* OUTPUT pObject, F&& nCallback);   // [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit) -> void
 
 
 private:
@@ -135,7 +135,7 @@ private:
 
 // ****************************************************************
 // 
-template <typename F> void cPlayer::TestCollision(const coreInt32 iType, F&& nCallback)
+template <typename F> FORCE_INLINE void cPlayer::TestCollision(const coreInt32 iType, F&& nCallback)
 {
     // 
     Core::Manager::Object->TestCollision(TYPE_PLAYER, iType, [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit)
@@ -150,7 +150,7 @@ template <typename F> void cPlayer::TestCollision(const coreInt32 iType, F&& nCa
     });
 }
 
-template <typename F> void cPlayer::TestCollision(coreObject3D* OUTPUT pObject, F&& nCallback)
+template <typename F> FORCE_INLINE void cPlayer::TestCollision(coreObject3D* OUTPUT pObject, F&& nCallback)
 {
     // 
     Core::Manager::Object->TestCollision(TYPE_PLAYER, pObject, [&](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit)
