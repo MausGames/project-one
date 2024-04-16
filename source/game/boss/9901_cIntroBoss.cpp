@@ -24,7 +24,6 @@
 // counter identifier
 #define SWING_SIDE (0u)
 #define RUSH_COUNT (1u)
-#define ALT_HELPER (2u)
 
 
 // ****************************************************************

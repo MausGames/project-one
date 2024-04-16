@@ -88,7 +88,7 @@ cReplayMenu::cReplayMenu()noexcept
 
     for(coreUintW i = 0u; i < MENU_REPLAY_ENTRIES; ++i)
     {
-        const coreFloat fHeight = m_Background.GetPosition().y + m_Background.GetSize().y*0.5f - (DEFINED(REPLAY_SLOTSYSTEM) ? 0.05f : 0.17f) - 0.05f*I_TO_F(i);
+        const coreFloat fHeight = m_Background.GetPosition().y + m_Background.GetSize().y*0.5f - (REPLAY_SLOTSYSTEM ? 0.05f : 0.17f) - 0.05f*I_TO_F(i);
 
         m_aName[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
         m_aName[i].SetPosition (coreVector2(m_Background.GetPosition().x - m_Background.GetSize().x*0.5f, fHeight) + coreVector2(0.04f,0.0f));
@@ -113,13 +113,16 @@ cReplayMenu::cReplayMenu()noexcept
         m_aLine[i].SetFocusable (true);
     }
 
-#if defined(REPLAY_SLOTSYSTEM)
-    m_ReplayBox.SetPosition(m_Background.GetPosition() + coreVector2(0.0f,0.0f));
-    m_ReplayBox.SetSize    (coreVector2(m_Background.GetSize().x, 0.77f));
-#else
-    m_ReplayBox.SetPosition(m_Background.GetPosition() + coreVector2(0.0f,-0.06f));
-    m_ReplayBox.SetSize    (coreVector2(m_Background.GetSize().x, 0.65f));
-#endif
+    if(REPLAY_SLOTSYSTEM)
+    {
+        m_ReplayBox.SetPosition(m_Background.GetPosition() + coreVector2(0.0f,0.0f));
+        m_ReplayBox.SetSize    (coreVector2(m_Background.GetSize().x, 0.77f));
+    }
+    else
+    {
+        m_ReplayBox.SetPosition(m_Background.GetPosition() + coreVector2(0.0f,-0.06f));
+        m_ReplayBox.SetSize    (coreVector2(m_Background.GetSize().x, 0.65f));
+    }
     for(coreUintW i = 0u; i < MENU_REPLAY_ENTRIES; ++i) m_ReplayBox.BindObject(&m_aLine [i]);
     for(coreUintW i = 0u; i < MENU_REPLAY_ENTRIES; ++i) m_ReplayBox.BindObject(&m_aName [i]);
     for(coreUintW i = 0u; i < MENU_REPLAY_ENTRIES; ++i) m_ReplayBox.BindObject(&m_aTime [i]);
@@ -393,14 +396,13 @@ cReplayMenu::cReplayMenu()noexcept
     m_NavigatorOverview.AssignBack (&m_BackButtonOverview);
     m_NavigatorOverview.AssignMenu (this);
 
-#if !defined(REPLAY_SLOTSYSTEM)
+    if(!REPLAY_SLOTSYSTEM)
+    {
+        m_NavigatorOverview.UseShoulderLeft ([this]() {if(m_iPageMax > 1) {if(--m_iPageOffset >= m_iPageMax) m_iPageOffset = m_iPageMax - 1u; this->__UpdateList(true);} g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SWITCH_ENABLED);});
+        m_NavigatorOverview.UseShoulderRight([this]() {if(m_iPageMax > 1) {if(++m_iPageOffset >= m_iPageMax) m_iPageOffset = 0u;              this->__UpdateList(true);} g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SWITCH_ENABLED);});
 
-    m_NavigatorOverview.UseShoulderLeft ([this]() {if(m_iPageMax > 1) {if(--m_iPageOffset >= m_iPageMax) m_iPageOffset = m_iPageMax - 1u; this->__UpdateList(true);} g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SWITCH_ENABLED);});
-    m_NavigatorOverview.UseShoulderRight([this]() {if(m_iPageMax > 1) {if(++m_iPageOffset >= m_iPageMax) m_iPageOffset = 0u;              this->__UpdateList(true);} g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SWITCH_ENABLED);});
-
-    m_NavigatorOverview.SetShoulder(true);
-
-#endif
+        m_NavigatorOverview.SetShoulder(true);
+    }
 
     for(coreUintW i = 0u; i < MENU_REPLAY_DETAILS; ++i)
     {
@@ -431,10 +433,11 @@ cReplayMenu::cReplayMenu()noexcept
     }
 
     this->BindObject(SURFACE_REPLAY_OVERVIEW, &m_BackButtonOverview);
-#if !defined(REPLAY_SLOTSYSTEM)
-    this->BindObject(SURFACE_REPLAY_OVERVIEW, &m_PageSelection);
-    this->BindObject(SURFACE_REPLAY_OVERVIEW, &m_PageText);
-#endif
+    if(!REPLAY_SLOTSYSTEM)
+    {
+        this->BindObject(SURFACE_REPLAY_OVERVIEW, &m_PageSelection);
+        this->BindObject(SURFACE_REPLAY_OVERVIEW, &m_PageText);
+    }
     this->BindObject(SURFACE_REPLAY_OVERVIEW, &m_Nothing);
     this->BindObject(SURFACE_REPLAY_OVERVIEW, &m_ReplayBox);
     this->BindObject(SURFACE_REPLAY_OVERVIEW, &m_NavigatorOverview);
@@ -532,23 +535,23 @@ void cReplayMenu::Move()
                 m_aTime[i].SetColor3(COLOR_MENU_WHITE * (bValid ? MENU_LIGHT_ACTIVE : MENU_LIGHT_IDLE));
             }
 
-#if !defined(REPLAY_SLOTSYSTEM)
-
-            if(m_iPageMax > 1u)
+            if(!REPLAY_SLOTSYSTEM)
             {
-                const coreBool bLeft  = (!m_bPageChanged && (g_MenuInput.iMove == 2u));
-                const coreBool bRight = (!m_bPageChanged && (g_MenuInput.iMove == 4u));
+                if(m_iPageMax > 1u)
+                {
+                    const coreBool bLeft  = (!m_bPageChanged && (g_MenuInput.iMove == 2u));
+                    const coreBool bRight = (!m_bPageChanged && (g_MenuInput.iMove == 4u));
 
-                if(!g_MenuInput.iMove && TIME) m_bPageChanged = false;
+                    if(!g_MenuInput.iMove && TIME) m_bPageChanged = false;
 
-                     if((m_PageSelection.GetUserSwitch() < 0) || bLeft  || Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LEFT),  CORE_INPUT_PRESS)) {m_bPageChanged = true; if(--m_iPageOffset >= m_iPageMax) m_iPageOffset = m_iPageMax - 1u; this->__UpdateList(true); g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SWITCH_ENABLED);}
-                else if((m_PageSelection.GetUserSwitch() > 0) || bRight || Core::Input->GetKeyboardButton(CORE_INPUT_KEY(RIGHT), CORE_INPUT_PRESS)) {m_bPageChanged = true; if(++m_iPageOffset >= m_iPageMax) m_iPageOffset = 0u;              this->__UpdateList(true); g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SWITCH_ENABLED);}
+                         if((m_PageSelection.GetUserSwitch() < 0) || bLeft  || Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LEFT),  CORE_INPUT_PRESS)) {m_bPageChanged = true; if(--m_iPageOffset >= m_iPageMax) m_iPageOffset = m_iPageMax - 1u; this->__UpdateList(true); g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SWITCH_ENABLED);}
+                    else if((m_PageSelection.GetUserSwitch() > 0) || bRight || Core::Input->GetKeyboardButton(CORE_INPUT_KEY(RIGHT), CORE_INPUT_PRESS)) {m_bPageChanged = true; if(++m_iPageOffset >= m_iPageMax) m_iPageOffset = 0u;              this->__UpdateList(true); g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_SWITCH_ENABLED);}
+                }
+
+                // 
+                cMenu::UpdateButton(m_PageSelection.GetArrow(0u), &m_NavigatorOverview, m_PageSelection.GetArrow(0u)->IsFocused(), g_pMenu->GetButtonColor(), true, false);
+                cMenu::UpdateButton(m_PageSelection.GetArrow(1u), &m_NavigatorOverview, m_PageSelection.GetArrow(1u)->IsFocused(), g_pMenu->GetButtonColor(), true, false);
             }
-
-            // 
-            cMenu::UpdateButton(m_PageSelection.GetArrow(0u), &m_NavigatorOverview, m_PageSelection.GetArrow(0u)->IsFocused(), g_pMenu->GetButtonColor(), true, false);
-            cMenu::UpdateButton(m_PageSelection.GetArrow(1u), &m_NavigatorOverview, m_PageSelection.GetArrow(1u)->IsFocused(), g_pMenu->GetButtonColor(), true, false);
-#endif
 
             // 
             cMenu::UpdateButton(&m_BackButtonOverview, &m_NavigatorOverview, m_BackButtonOverview.IsFocused());
@@ -767,14 +770,17 @@ void cReplayMenu::Move()
                     {
                         if(iAnswer == MSGBOX_ANSWER_YES)
                         {
-                        #if defined(REPLAY_SLOTSYSTEM)
-                            m_bSave = true;
-                        #else
-                            if(g_pReplay->SaveFile(0u))
+                            if(REPLAY_SLOTSYSTEM)
                             {
-                                this->__MarkSaved();
+                                m_bSave = true;
                             }
-                        #endif
+                            else
+                            {
+                                if(g_pReplay->SaveFile(0u))
+                                {
+                                    this->__MarkSaved();
+                                }
+                            }
                         }
                     });
                 }

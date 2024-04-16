@@ -557,13 +557,16 @@ void cSummaryMenu::Move()
                                 {
                                     if(iAnswer == MSGBOX_ANSWER_YES)
                                     {
-                                    #if defined(REPLAY_SLOTSYSTEM)
-                                        m_iStatus = 106;
-                                        return;
-                                    #else
-                                        g_pReplay->SetNameDefault(0u);
-                                        if(!g_pReplay->SaveFile(0u)) return;
-                                    #endif
+                                        if(REPLAY_SLOTSYSTEM)
+                                        {
+                                            m_iStatus = 106;
+                                            return;
+                                        }
+                                        else
+                                        {
+                                            g_pReplay->SetNameDefault(0u);
+                                            if(!g_pReplay->SaveFile(0u)) return;
+                                        }
                                     }
 
                                     m_eState = SUMMARY_OUTRO;

@@ -1011,7 +1011,7 @@ void cNevoMission::__SetupOwn()
                         pEnemy->RemoveStatus(ENEMY_STATUS_INVINCIBLE);
                     }
 
-                    if(pEnemy->ReachedDeath() && !iTileDone)
+                    if(pEnemy->ReachedDeath() && (!iTileDone || !iTileWait))
                     {
                         if(++iFreeCount >= ARRAY_SIZE(aiFree))
                         {

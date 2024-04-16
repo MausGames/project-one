@@ -2903,6 +2903,7 @@ void cRutilusMission::__SetupOwn()
     // 7: groups are not in center, to make movement a bit easier (attacking enemies will not attack player)
     // 8-11: 1-2-2-1 pattern
     // (TODO 1: portale werden am ende zu gegnern, ZeroRanger)
+    // TODO 1: YOU CAN CANCEL BULLETS WITH TELEPORTATION (local or all)
     // TODO 1: badge: in der mitte am anfang
     // TODO 1: on vertical, enemy from below may ram into player
     // TODO 1: if player starts in the center, helper switch places (permanent) and teleport players outside

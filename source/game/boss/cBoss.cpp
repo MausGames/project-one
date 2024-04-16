@@ -312,7 +312,14 @@ void cBoss::_KillHelper(const coreUint8 iElement, const coreBool bAnimated)
     cHelper* pHelper = g_pGame->GetHelper(iElement);
 
     // 
-    pHelper->Kill(bAnimated);
+    pHelper->Kill(false);
+
+    // 
+    if(bAnimated)
+    {
+        g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_SMALL, pHelper->GetColor3());
+        g_pSpecialEffects->PlaySound(pHelper->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_DUST);
+    }
 }
 
 

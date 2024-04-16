@@ -1024,10 +1024,10 @@ void cGeluMission::__SetupOwn()
                     if((fPush < 0.0f) && (afOffTarget[iIndex] < 0.0f)) afOffTarget[iIndex] = -1.0f;   // snap in
                 };
 
-                     if(HAS_BIT(iActive, 0u) && (vPos.x < vAreaFrom.x) && (vDir.x < 0.0f)) {nPushFunc(0); pBullet->Deactivate(true); iOutsideHit += 1u; STAGE_FAILTROPHY}   // TODO 1: add correct impact parameter
-                else if(HAS_BIT(iActive, 1u) && (vPos.x > vAreaTo  .x) && (vDir.x > 0.0f)) {nPushFunc(1); pBullet->Deactivate(true); iOutsideHit += 1u; STAGE_FAILTROPHY}
-                else if(HAS_BIT(iActive, 2u) && (vPos.y < vAreaFrom.y) && (vDir.y < 0.0f)) {nPushFunc(2); pBullet->Deactivate(true); iOutsideHit += 1u; STAGE_FAILTROPHY}
-                else if(HAS_BIT(iActive, 3u) && (vPos.y > vAreaTo  .y) && (vDir.y > 0.0f)) {nPushFunc(3); pBullet->Deactivate(true); iOutsideHit += 1u; STAGE_FAILTROPHY}
+                     if(HAS_BIT(iActive, 0u) && (vPos.x < vAreaFrom.x) && (vDir.x < 0.0f)) {nPushFunc(0); pBullet->Deactivate(true, coreVector2(vAreaFrom.x - 3.0f, vPos.y)); iOutsideHit += 1u; STAGE_FAILTROPHY}
+                else if(HAS_BIT(iActive, 1u) && (vPos.x > vAreaTo  .x) && (vDir.x > 0.0f)) {nPushFunc(1); pBullet->Deactivate(true, coreVector2(vAreaTo  .x + 3.0f, vPos.y)); iOutsideHit += 1u; STAGE_FAILTROPHY}
+                else if(HAS_BIT(iActive, 2u) && (vPos.y < vAreaFrom.y) && (vDir.y < 0.0f)) {nPushFunc(2); pBullet->Deactivate(true, coreVector2(vPos.x, vAreaFrom.y - 3.0f)); iOutsideHit += 1u; STAGE_FAILTROPHY}
+                else if(HAS_BIT(iActive, 3u) && (vPos.y > vAreaTo  .y) && (vDir.y > 0.0f)) {nPushFunc(3); pBullet->Deactivate(true, coreVector2(vPos.x, vAreaTo  .y + 3.0f)); iOutsideHit += 1u; STAGE_FAILTROPHY}
             });
 
             for(coreUintW i = 0u; i < POST_WALLS; ++i)

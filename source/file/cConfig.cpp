@@ -246,6 +246,7 @@ void LoadConfig()
     // 
     g_OldConfig.Legacy.iRotationTurn = Core::Config->GetInt(CONFIG_LEGACY_ROTATION_TURN);
     g_OldConfig.Legacy.iPriorityMove = Core::Config->GetInt(CONFIG_LEGACY_PRIORITY_MOVE);
+    g_OldConfig.Legacy.iSlotSystem   = Core::Config->GetInt(CONFIG_LEGACY_SLOT_SYSTEM);
 
     // check configuration for valid values
     CheckConfig(&g_OldConfig);
@@ -324,6 +325,7 @@ void SaveConfig()
     // 
     Core::Config->SetInt(CONFIG_LEGACY_ROTATION_TURN, g_OldConfig.Legacy.iRotationTurn);
     Core::Config->SetInt(CONFIG_LEGACY_PRIORITY_MOVE, g_OldConfig.Legacy.iPriorityMove);
+    Core::Config->SetInt(CONFIG_LEGACY_SLOT_SYSTEM,   g_OldConfig.Legacy.iSlotSystem);
 
     // 
     Core::Config->SetInt (CORE_CONFIG_GRAPHICS_QUALITY,          g_OldConfig.Graphics.iRender);

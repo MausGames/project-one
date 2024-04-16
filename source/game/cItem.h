@@ -84,7 +84,7 @@ public:
     void LoseItems();
 
     // 
-    inline cItem* GetItem(const coreUintW iIndex)const {ASSERT(iIndex < m_apItemList.size()) return m_apItemList.at(iIndex);}
+    inline cItem* GetItem(const coreUintW iIndex)const {ASSERT(iIndex < m_apItemList.size()) return m_apItemList[iIndex];}
 
     // 
     inline coreUintW GetNumItems      ()const {return m_apItemList.size();}

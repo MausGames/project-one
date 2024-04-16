@@ -422,7 +422,7 @@ constexpr FUNC_CONST coreBool IsHorizontal(const coreVector2 v)   // TODO 1: mig
 constexpr FUNC_CONST coreVector2 AlongCross(const coreVector2 v)   // TODO 1: migrate
 {
     ASSERT(!v.IsNull())
-    return IsHorizontal(v) ? coreVector2(v.x, 0.0f) : coreVector2(0.0f, v.y);
+    return IsHorizontal(v) ? coreVector2(v.x, 0.0f) : coreVector2(0.0f, v.y);   // TODO 1: may be wrong
 }
 
 constexpr FUNC_CONST coreVector2 AlongCrossNormal(const coreVector2 v)   // TODO 1: migrate

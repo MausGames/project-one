@@ -815,11 +815,8 @@ coreBool cReplay::SaveFile(const coreUint8 iSlot)
     oArchive.CreateFile("body",   pBodyData,   iBodySize)      ->Compress();
 
     // 
-    #if defined(REPLAY_SLOTSYSTEM)
-        const coreChar* pcPath = coreData::UserFolderPrivate(PRINT(REPLAY_FILE_FOLDER "replay_%04u." REPLAY_FILE_EXTENSION, iSlot));
-    #else
-        const coreChar* pcPath = coreData::UserFolderPrivate(coreData::DateTimePrint(REPLAY_FILE_FOLDER "replay_%Y%m%d_%H%M%S." REPLAY_FILE_EXTENSION, TIMEMAP_LOCAL(m_Header.iViewTimestamp)));
-    #endif
+    const coreChar* pcPath = REPLAY_SLOTSYSTEM ? coreData::UserFolderPrivate(PRINT(REPLAY_FILE_FOLDER "replay_%04u." REPLAY_FILE_EXTENSION, iSlot)) :
+                                                 coreData::UserFolderPrivate(coreData::DateTimePrint(REPLAY_FILE_FOLDER "replay_%Y%m%d_%H%M%S." REPLAY_FILE_EXTENSION, TIMEMAP_LOCAL(m_Header.iViewTimestamp)));
     WARN_IF(oArchive.Save(pcPath) != CORE_OK)
     {
         coreUint64 iAvailable;
@@ -1002,17 +999,8 @@ void cReplay::SetName(const coreChar* pcName)
 
 void cReplay::SetNameDefault(const coreUint8 iSlot)
 {
-#if defined(_CORE_SWITCH_)
-
     // 
-    this->SetName(PRINT("REPLAY %u", iSlot + 1u));
-
-#else
-
-    // 
-    this->SetName(PRINT("REPLAY-%u", g_pSave->NextReplayFileNum()));
-
-#endif
+    this->SetName(REPLAY_SLOTSYSTEM ? PRINT("REPLAY %u", iSlot + 1u) : PRINT("REPLAY-%u", g_pSave->NextReplayFileNum()));
 }
 
 
@@ -1046,51 +1034,50 @@ void cReplay::LoadInfoList(coreList<sInfo>* OUTPUT paInfoList)
         }
     }
 
-#if defined(REPLAY_SLOTSYSTEM)
-
-    const coreUintW iNum = paInfoList->size();
-
-    for(coreUintW i = 0u; i < REPLAY_SLOTS; ++i)
+    if(REPLAY_SLOTSYSTEM)
     {
-        const coreChar* pcFilename = PRINT("replay_%04zu." REPLAY_FILE_EXTENSION, i);
+        const coreUintW iNum = paInfoList->size();
 
-        coreBool bFound = false;
-        for(coreUintW j = 0u; j < iNum; ++j)
+        for(coreUintW i = 0u; i < REPLAY_SLOTS; ++i)
         {
-            if(!std::strcmp(coreData::StrFilename((*paInfoList)[j].sPath.c_str()), pcFilename))
-            {
-                (*paInfoList)[j].iSlot = i;
+            const coreChar* pcFilename = PRINT("replay_%04zu." REPLAY_FILE_EXTENSION, i);
 
-                bFound = true;
-                break;
+            coreBool bFound = false;
+            for(coreUintW j = 0u; j < iNum; ++j)
+            {
+                if(!std::strcmp(coreData::StrFilename((*paInfoList)[j].sPath.c_str()), pcFilename))
+                {
+                    (*paInfoList)[j].iSlot = i;
+
+                    bFound = true;
+                    break;
+                }
+            }
+
+            if(!bFound)
+            {
+                // 
+                sInfo oInfo;
+                oInfo.sPath   = pcFilename;
+                oInfo.iSlot   = i;
+                oInfo.oHeader = {};
+
+                // 
+                coreData::PrintBase(oInfo.oHeader.acName, REPLAY_NAME_LENGTH, "%s %zu", Core::Language->GetString("REPLAY_SLOT"), i + 1u);
+
+                // 
+                paInfoList->push_back(std::move(oInfo));
             }
         }
 
-        if(!bFound)
-        {
-            // 
-            sInfo oInfo;
-            oInfo.sPath   = pcFilename;
-            oInfo.iSlot   = i;
-            oInfo.oHeader = {};
-
-            // 
-            coreData::PrintBase(oInfo.oHeader.acName, REPLAY_NAME_LENGTH, "%s %zu", Core::Language->GetString("REPLAY_SLOT"), i + 1u);
-
-            // 
-            paInfoList->push_back(std::move(oInfo));
-        }
+        // 
+        std::sort(paInfoList->begin(), paInfoList->end(), [](const sInfo& A, const sInfo& B) {return (A.iSlot < B.iSlot);});
     }
-
-    // 
-    std::sort(paInfoList->begin(), paInfoList->end(), [](const sInfo& A, const sInfo& B) {return (A.iSlot < B.iSlot);});
-
-#else
-
-    // 
-    std::sort(paInfoList->begin(), paInfoList->end(), [](const sInfo& A, const sInfo& B) {return (A.oHeader.iViewTimestamp > B.oHeader.iViewTimestamp);});
-
-#endif
+    else
+    {
+        // 
+        std::sort(paInfoList->begin(), paInfoList->end(), [](const sInfo& A, const sInfo& B) {return (A.oHeader.iViewTimestamp > B.oHeader.iViewTimestamp);});
+    }
 }
 
 

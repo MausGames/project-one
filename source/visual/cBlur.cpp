@@ -86,7 +86,9 @@ void cBlur::__Reset(const coreResourceReset eInit)
 
         // re-create all frame buffers
         for(coreUintW i = 0u; i < ARRAY_SIZE(m_aFrameBuffer); ++i)
+        {
             m_aFrameBuffer[i].Create(vBlurResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+        }
 
         // 
         this->Clear();
@@ -98,6 +100,8 @@ void cBlur::__Reset(const coreResourceReset eInit)
     {
         // delete all frame buffers
         for(coreUintW i = 0u; i < ARRAY_SIZE(m_aFrameBuffer); ++i)
+        {
             m_aFrameBuffer[i].Delete();
+        }
     }
 }

@@ -291,7 +291,7 @@ cConfigMenu::cConfigMenu()noexcept
         __SET_OPTION(m_PureMode,        GAME_PUREMODE,         0.31f)
         __SET_OPTION(m_Leaderboard,     GAME_LEADERBOARD,      0.31f)
         __SET_OPTION(m_Version,         GAME_VERSION,          0.31f)
- 
+
         m_Language     .SetEndless(true);
         m_GameDirection.SetEndless(true);
         m_HudDirection .SetEndless(true);

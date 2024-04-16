@@ -70,6 +70,7 @@
 
 #define CONFIG_LEGACY_ROTATION_TURN  "Legacy",   "RotationTurn",                         (0)
 #define CONFIG_LEGACY_PRIORITY_MOVE  "Legacy",   "PriorityMove",                         (0)
+#define CONFIG_LEGACY_SLOT_SYSTEM    "Legacy",   "SlotSystem",                           (0)
 
 #define INPUT_TYPES         (PLAYERS)                                     // number of input set selections
 #define INPUT_KEYS_MOVE     (4u)                                          // number of move keys per set (left, right, down, up)
@@ -183,6 +184,7 @@ struct sConfig final
     {
         coreUint8 iRotationTurn;   // 
         coreUint8 iPriorityMove;   // 
+        coreUint8 iSlotSystem;     // 
     }
     Legacy;
 };

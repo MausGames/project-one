@@ -64,8 +64,10 @@ STATIC_ASSERT((REPLAY_RUNS + 1u <= BIT(2u)) && (REPLAY_MISSIONS <= BIT(4u)) && (
 #define REPLAY_WRAP_CONFIG_HIT_STOP      ((g_pReplay->GetMode() == REPLAY_MODE_PLAYBACK) ? g_pReplay->GetHeader().iConfigHitStop      : g_CurConfig.Graphics.iHitStop)
 #define REPLAY_WRAP_CONFIG_ROTATION_TURN ((g_pReplay->GetMode() == REPLAY_MODE_PLAYBACK) ? g_pReplay->GetHeader().iConfigRotationTurn : g_CurConfig.Legacy  .iRotationTurn)
 
-#if defined(_CORE_SWITCH_) || 1
-    #define REPLAY_SLOTSYSTEM (1u)
+#if defined(_CORE_SWITCH_)
+    #define REPLAY_SLOTSYSTEM (true)
+#else
+    #define REPLAY_SLOTSYSTEM (g_CurConfig.Legacy.iSlotSystem)
 #endif
 #define REPLAY_SLOTS (20u)
 

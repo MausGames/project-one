@@ -60,7 +60,7 @@ public:
     void ClearCrashes(const coreBool bAnimated);
 
     // 
-    template <typename F> void SetImpactCallback(F&& nCallback) {m_nCallback = nCallback;}   // [](void* pData) -> void
+    template <typename F> void SetImpactCallback(F&& nCallback) {m_nCallback = std::forward<F>(nCallback);}   // [](void* pData) -> void
 
     // 
     inline coreBool IsActive()const {return (m_iActiveObjects > 0u);}

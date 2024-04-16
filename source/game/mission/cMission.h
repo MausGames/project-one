@@ -422,10 +422,10 @@ public:
     inline void CollBulletBullet(cBullet* OUTPUT pPlayerBullet, cBullet* OUTPUT pEnemyBullet, const coreVector3 vIntersection, const coreBool bFirstHit) {if(m_nCollBulletBullet) m_nCollBulletBullet(pPlayerBullet, pEnemyBullet, vIntersection, bFirstHit);}
 
     // 
-    template <typename F> inline void SetCollPlayerEnemy (F&& nCollFunc) {if(!m_nCollPlayerEnemy)  m_nCollPlayerEnemy  = nCollFunc;}   // [](cPlayer* OUTPUT pPlayer,       cEnemy*  OUTPUT pEnemy,       const coreVector3 vIntersection, const coreBool bFirstHit) -> void
-    template <typename F> inline void SetCollPlayerBullet(F&& nCollFunc) {if(!m_nCollPlayerBullet) m_nCollPlayerBullet = nCollFunc;}   // [](cPlayer* OUTPUT pPlayer,       cBullet* OUTPUT pBullet,      const coreVector3 vIntersection, const coreBool bFirstHit) -> void
-    template <typename F> inline void SetCollEnemyBullet (F&& nCollFunc) {if(!m_nCollEnemyBullet)  m_nCollEnemyBullet  = nCollFunc;}   // [](cEnemy*  OUTPUT pEnemy,        cBullet* OUTPUT pBullet,      const coreVector3 vIntersection, const coreBool bFirstHit) -> void
-    template <typename F> inline void SetCollBulletBullet(F&& nCollFunc) {if(!m_nCollBulletBullet) m_nCollBulletBullet = nCollFunc;}   // [](cBullet* OUTPUT pPlayerBullet, cBullet* OUTPUT pEnemyBullet, const coreVector3 vIntersection, const coreBool bFirstHit) -> void
+    template <typename F> inline void SetCollPlayerEnemy (F&& nCollFunc) {if(!m_nCollPlayerEnemy)  m_nCollPlayerEnemy  = std::forward<F>(nCollFunc);}   // [](cPlayer* OUTPUT pPlayer,       cEnemy*  OUTPUT pEnemy,       const coreVector3 vIntersection, const coreBool bFirstHit) -> void
+    template <typename F> inline void SetCollPlayerBullet(F&& nCollFunc) {if(!m_nCollPlayerBullet) m_nCollPlayerBullet = std::forward<F>(nCollFunc);}   // [](cPlayer* OUTPUT pPlayer,       cBullet* OUTPUT pBullet,      const coreVector3 vIntersection, const coreBool bFirstHit) -> void
+    template <typename F> inline void SetCollEnemyBullet (F&& nCollFunc) {if(!m_nCollEnemyBullet)  m_nCollEnemyBullet  = std::forward<F>(nCollFunc);}   // [](cEnemy*  OUTPUT pEnemy,        cBullet* OUTPUT pBullet,      const coreVector3 vIntersection, const coreBool bFirstHit) -> void
+    template <typename F> inline void SetCollBulletBullet(F&& nCollFunc) {if(!m_nCollBulletBullet) m_nCollBulletBullet = std::forward<F>(nCollFunc);}   // [](cBullet* OUTPUT pPlayerBullet, cBullet* OUTPUT pEnemyBullet, const coreVector3 vIntersection, const coreBool bFirstHit) -> void
 
     // 
     inline void ResetCollPlayerEnemy () {m_nCollPlayerEnemy  = NULL;}
@@ -1799,13 +1799,13 @@ template <typename F, typename G> FORCE_INLINE void cMission::_AddStage(const co
     nPreFunc();
 
     // 
-    m_anStage.emplace(iCodeLine, nBodyFunc);
+    m_anStage.emplace(iCodeLine, std::forward<F>(nBodyFunc));
 }
 
 template <typename F> FORCE_INLINE void cMission::_AddStage(const coreUint16 iCodeLine, F&& nBodyFunc)
 {
     // 
-    m_anStage.emplace(iCodeLine, nBodyFunc);
+    m_anStage.emplace(iCodeLine, std::forward<F>(nBodyFunc));
 }
 
 

@@ -510,7 +510,7 @@ void InitFramerate(const coreUint16 iUpdateFreq, const coreUint8 iGameSpeed)
 
         s_fLogicalRate  = coreFloat(dFixedRate);
         s_fLogicalTime  = coreFloat(1.0 / dFixedRate);
-        s_dPhysicalTime = 1.0 / ROUND(dFixedRate * dGameSpeed);   // TODO 1: test ROUND on PC, wenn update frequency 75 oder 144hz
+        s_dPhysicalTime = 1.0 / ROUND(dFixedRate * dGameSpeed);
 
         const coreUint8 iSkip = oMode.refresh_rate ? (F_TO_UI(ROUND(dFixedRate * dGameSpeed)) / oMode.refresh_rate) : 0u;
         Core::Graphics->SetSkipFrame(iSkip ? (iSkip - 1u) : 0u);

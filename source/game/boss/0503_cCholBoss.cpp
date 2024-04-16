@@ -1482,7 +1482,7 @@ void cCholBoss::__MoveOwn()
             const coreVector2 vPos = pBullet->GetPosition().xy();
             const coreVector2 vDir = pBullet->GetFlyDir();
 
-            if((vPos.y < vAreaFrom.y) && (vDir.y < 0.0f)) pBullet->Deactivate(true);
+            if((vPos.y < vAreaFrom.y) && (vDir.y < 0.0f)) pBullet->Deactivate(true, coreVector2(vPos.x, vAreaFrom.y - 3.0f));
         });
     }
 

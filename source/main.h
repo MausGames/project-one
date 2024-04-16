@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 //*----------------------------------------------------------------------------*//
-//| Project One v1.3.2 (https://www.maus-games.at)                             |//
+//| Project One v1.3.3 (https://www.maus-games.at)                             |//
 //*----------------------------------------------------------------------------*//
 //| Copyright (c) 2010 Martin Mauersics                                        |//
 //|                                                                            |//
@@ -224,7 +224,6 @@
 #define SHADER_VIGNETTE      "#define _P1_VIGNETTE_"    " (1) \n"        // grey
 #define SHADER_ROTATED       "#define _P1_ROTATED_"     " (1) \n"        // energy
 
-
 // 
 struct sVersion final
 {
@@ -243,10 +242,10 @@ constexpr sVersion g_aVersion[] =
     {"1.2.7",  8u},
     {"1.3.0",  9u},
     {"1.3.1", 10u},
-    {"1.3.2", 11u}
+    {"1.3.2", 11u},
+    {"1.3.3", 12u}
 };
 constexpr sVersion g_Version = g_aVersion[ARRAY_SIZE(g_aVersion) - 1u];
-
 
 // collision types
 enum eType : coreInt32

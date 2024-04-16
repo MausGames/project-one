@@ -1146,6 +1146,7 @@ void cCalorMission::__SetupOwn()
     // corners in dungeon have double-bullets, but they are important for collision handling
     // collision handling in the dungeon is extremely unstable, and can fail with slightly different parameters, should be fixed or not reused (possible issues: player collision handling, bullet collision range (player needs to touch cluster), global move, bullet test order, cGame callback being called later, ...)
     // background needs to move slower, to improve distinction with the moving bullets (could also be during a sandstorm, rainstorm or other visual distortion to completely remove the background movement)
+    // fullscreen arrow/cone distracts too much from chests and the target arrow
     // TASK: collect hidden treasure-boxes in dungeons (open up when flying over it)
     // TASK: destroy secret enemy at the back of the initial room
     // ACHIEVEMENT: create a prison with a maximum size of 4x4 bullets
@@ -1153,7 +1154,6 @@ void cCalorMission::__SetupOwn()
     // TODO 1: hardmode: moving enemies in dungeon
     // TODO 1: hardmode: additional attacking pseudo-enemy, made of bullet?), or infinity object, even in dungeon (though similar to P1 object)
     // TODO 3: late update: make sure corners in dungeon are visually consistent (depth)
-    // TODO 3: maybe show fullscreen arrow/cone
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -1487,7 +1487,7 @@ void cCalorMission::__SetupOwn()
 
         const coreFloat fGlobalSpeed = g_pGame->IsEasy() ? 20.0f : 30.0f;
 
-        vGlobalMove = iReset ? -vGlobalOffset : (vGlobalDir * (-fGlobalSpeed * TIME * (1.0f - MIN1(fSpeedFix))));
+        vGlobalMove = iReset ? -vGlobalOffset : (vGlobalDir * (-fGlobalSpeed * TIME * (1.0f - (g_pGame->IsVersion(12u) ? fSpeedFix : MIN1(fSpeedFix)))));
         fSpeedFix   = MAX0(fSpeedFix - 1.0f * TIME);
 
         vGlobalOffset += vGlobalMove;
@@ -1711,7 +1711,7 @@ void cCalorMission::__SetupOwn()
                     pPlayer->SetPosition(g_pGame->GetPlayer(1u - i)->GetPosition());
                     STATIC_ASSERT(GAME_PLAYERS == 2u)
 
-                    fSpeedFix = 2.1f;
+                    fSpeedFix = g_pGame->IsVersion(12u) ? 1.6f : 2.1f;
                 }
             });
 
@@ -1739,7 +1739,7 @@ void cCalorMission::__SetupOwn()
 
                     if(SameDirection(vGlobalDir, -vNorm))
                     {
-                        fSpeedFix = 1.1f;
+                        fSpeedFix = g_pGame->IsVersion(12u) ? 1.6f : 1.1f;
                     }
 
                     const coreUintW iIndex = g_pGame->GetPlayerIndex(pPlayer);

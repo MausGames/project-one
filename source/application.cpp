@@ -10,7 +10,7 @@
 // ****************************************************************
 // project settings
 const coreChar* const CoreApp::Settings::Name                          = "Eigengrau";
-const coreChar* const CoreApp::Settings::Version                       = "1.3.2";
+const coreChar* const CoreApp::Settings::Version                       = "1.3.3";
 const coreChar* const CoreApp::Settings::IconPath                      = "data/textures/game_icon.png";
 const coreChar* const CoreApp::Settings::CursorPath                    = "data/textures/default_cursor.png";
 const coreBool        CoreApp::Settings::UserManagement                = true;

@@ -507,7 +507,6 @@ void cCalorMission::EnableAim(const cShip* pOwner)
     };
     nInitFunc(&m_AimArrow);
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aAimSphere); ++i) nInitFunc(&m_aAimSphere[i]);
-
 }
 
 

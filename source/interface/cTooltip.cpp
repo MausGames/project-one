@@ -148,7 +148,7 @@ void cTooltip::__ShowText(const coreFloat fWidth, const coreChar* pcText)
         {
             // get glyph width
             coreInt32 iAdvance = 0;
-            const coreUint8 iBytes   = pFont->RetrieveGlyphMetrics(pcCursor, iHeight, TOOLTIP_OUTLINE_SIZE, NULL, NULL, NULL, NULL, &iAdvance);
+            const coreUint8 iBytes   = pFont->RetrieveGlyphMetrics(pcCursor, iHeight, TOOLTIP_OUTLINE_SIZE, NULL, NULL, NULL, NULL, &iAdvance, NULL);
             const coreFloat fAdvance = I_TO_F(iAdvance) * fFactor;
 
             // check for whitespace character (valid line-end)

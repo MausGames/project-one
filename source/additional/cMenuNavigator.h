@@ -141,12 +141,12 @@ public:
     inline void ResetFirst ()                      {m_pCurObject = NULL; m_iStore = MENUNAVIGATOR_INVALID; m_vCurPos = HIDDEN_POS; m_vCurSize = coreVector2(0.0f,0.0f); FOR_EACH(it, m_aTab) it->iLastEntry = MENUNAVIGATOR_INVALID; m_bActive = true;}
 
     // 
-    template <typename F> inline void UseShoulderLeft (F&& nShoulderFunc) {ASSERT(!m_nShoulderLeft)  m_nShoulderLeft  = nShoulderFunc;}   // [](void) -> void
-    template <typename F> inline void UseShoulderRight(F&& nShoulderFunc) {ASSERT(!m_nShoulderRight) m_nShoulderRight = nShoulderFunc;}   // [](void) -> void
+    template <typename F> inline void UseShoulderLeft (F&& nShoulderFunc) {ASSERT(!m_nShoulderLeft)  m_nShoulderLeft  = std::forward<F>(nShoulderFunc);}   // [](void) -> void
+    template <typename F> inline void UseShoulderRight(F&& nShoulderFunc) {ASSERT(!m_nShoulderRight) m_nShoulderRight = std::forward<F>(nShoulderFunc);}   // [](void) -> void
     inline void SetShoulder(const coreBool bShoulder) {m_bShoulder = bShoulder;}
 
     // 
-    template <typename F> inline void BindDynamic(coreObject2D* pObject, F&& nDynamicFunc) {m_aDynamic.emplace(pObject, nDynamicFunc);}   // [](coreObject2D*, const coreUint8) -> void
+    template <typename F> inline void BindDynamic(coreObject2D* pObject, F&& nDynamicFunc) {m_aDynamic.emplace(pObject, std::forward<F>(nDynamicFunc));}   // [](coreObject2D*, const coreUint8) -> void
     inline void RebindUp   (coreObject2D* pObject, coreObject2D* pNew)                     {m_aObject.at(pObject).iMoveUp    = this->__ToIndex(pNew);}
     inline void RebindLeft (coreObject2D* pObject, coreObject2D* pNew)                     {m_aObject.at(pObject).iMoveLeft  = this->__ToIndex(pNew);}
     inline void RebindDown (coreObject2D* pObject, coreObject2D* pNew)                     {m_aObject.at(pObject).iMoveDown  = this->__ToIndex(pNew);}
@@ -188,7 +188,7 @@ public:
 private:
     // 
     inline coreUint8     __ToIndex (coreObject2D*   pObject)const {ASSERT(m_aObject.count(pObject))  return m_aObject.index(pObject);}
-    inline coreObject2D* __ToObject(const coreUint8 iIndex)const  {ASSERT(iIndex < m_aObject.size()) return m_aObject.get_keylist().at(iIndex);}
+    inline coreObject2D* __ToObject(const coreUint8 iIndex)const  {ASSERT(iIndex < m_aObject.size()) return m_aObject.get_keylist()[iIndex];}
 };
 
 

@@ -109,7 +109,7 @@ template <typename F> void cMsgBox::ShowInformation(const coreChar* pcText, F&& 
 
     // 
     m_iMsgType = MSGBOX_TYPE_INFORMATION;
-    this->__ShowMessage(pcText, [=](const coreInt32 a, const coreInt32 b) {nCallback();});
+    this->__ShowMessage(pcText, [nCallback = std::forward<F>(nCallback)](const coreInt32 a, const coreInt32 b) {nCallback();});
 }
 
 
@@ -127,7 +127,7 @@ template <typename F> void cMsgBox::ShowQuestion(const coreChar* pcText, F&& nCa
 
     // 
     m_iMsgType = MSGBOX_TYPE_QUESTION;
-    this->__ShowMessage(pcText, [=](const coreInt32 a, const coreInt32 b) {nCallback(a);});
+    this->__ShowMessage(pcText, [nCallback = std::forward<F>(nCallback)](const coreInt32 a, const coreInt32 b) {nCallback(a);});
 }
 
 
@@ -148,7 +148,7 @@ template <typename F> void cMsgBox::ShowMapping(const coreChar* pcText, const co
 
     // 
     m_iMsgType = MSGBOX_TYPE_MAPPING;
-    this->__ShowMessage(pcText, [=](const coreInt32 a, const coreInt32 b) {nCallback(a, b);});
+    this->__ShowMessage(pcText, [nCallback = std::forward<F>(nCallback)](const coreInt32 a, const coreInt32 b) {nCallback(a, b);});
 }
 
 
@@ -201,7 +201,7 @@ template <typename F> void cMsgBox::__ShowMessage(const coreChar* pcText, F&& nC
 
     // 
     ASSERT(!m_nCallback)
-    m_nCallback = nCallback;
+    m_nCallback = std::forward<F>(nCallback);
     m_vCurMouse = Core::Input->GetMousePosition();
 
     // 

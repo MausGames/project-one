@@ -392,6 +392,7 @@ void cProjectOneBoss::__ResurrectOwn()
     const coreUint8* piFragment = REPLAY_WRAP_PROGRESS_FRAGMENT;
     m_aiCounter[FRAGMENT_PHASE] = (std::all_of(piFragment, piFragment + PROJECTONE_FRAGMENTS, [](const coreUint8 A) {return A;}) || bOneColorClear) ? 1 : 0;
 
+    // 
     for(coreUintW i = 0u; i < PROJECTONE_FRAGMENTS; ++i)
     {
         constexpr coreUintW aiOrder[] = {3u, 5u, 7u, 4u, 0u, 6u, 2u, 1u};
