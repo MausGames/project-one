@@ -700,6 +700,7 @@ cFinalBullet::cFinalBullet()noexcept
 {
     // load object resources
     this->DefineModel  ("object_cube_top.md3");
+    this->DefineVolume ("bullet_final_volume.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_program");
 }

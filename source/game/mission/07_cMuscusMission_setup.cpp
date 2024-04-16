@@ -2214,7 +2214,7 @@ void cMuscusMission::__SetupOwn()
                         const coreVector2 vDiff = pPlayer->GetPosition().xy() - pEnemy->GetPosition().xy();
                         if(vDiff.LengthSq() < POW2(6.0f))
                         {
-                            g_pGame->GetCombatText()->AttachMarker(i, "X", pEnemy->GetPosition(), COLOR_MENU_INSIDE);
+                            g_pGame->GetCombatText()->AttachMarker(i, "X", pEnemy->GetPosition(), COLOR_MENU_INSIDE, false);
                         }
                     });
                 }
@@ -2871,7 +2871,7 @@ void cMuscusMission::__SetupOwn()
                     {
                         STAGE_BADGE(1u, BADGE_NORMAL, pHelper->GetPosition())
                     }
-                    else g_pGame->GetCombatText()->AttachMarker(0u, PRINT("%.1f", 5.0f - FloorFactor(I_TO_F(iHelperTouch) / 60.0f, 10.0f)), pHelper->GetPosition(), COLOR_MENU_INSIDE);
+                    else g_pGame->GetCombatText()->AttachMarker(0u, PRINT("%.1f", 5.0f - FloorFactor(I_TO_F(iHelperTouch) / 60.0f, 10.0f)), pHelper->GetPosition(), COLOR_MENU_INSIDE, false);
                 }
             }
         }

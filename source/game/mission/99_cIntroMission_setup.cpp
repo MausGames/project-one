@@ -874,7 +874,7 @@ void cIntroMission::__SetupOwn()
 
                         STAGE_BADGE(0u, BADGE_EASY, pEnemy->GetPosition())
                     }
-                    else g_pGame->GetCombatText()->AttachMarker(0u, PRINT("%.0f%%", FLOOR((1.0f - fPercent) * 100.0f)), pEnemy->GetPosition(), COLOR_MENU_INSIDE);
+                    else g_pGame->GetCombatText()->AttachMarker(0u, PRINT("%.0f%%", FLOOR((1.0f - fPercent) * 100.0f)), pEnemy->GetPosition(), COLOR_MENU_INSIDE, false);
                 }
 
                 if(!m_bFirstPlay && STAGE_TICK_LIFETIME(g_pGame->IsEasy() ? 1.5f : 3.0f, 0.0f))

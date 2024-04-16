@@ -10,7 +10,7 @@
 // ****************************************************************
 // project settings
 const coreChar* const CoreApp::Settings::Name                       = "Eigengrau";
-const coreChar* const CoreApp::Settings::Version                    = "1.0.3";
+const coreChar* const CoreApp::Settings::Version                    = "1.0.4";
 const coreChar* const CoreApp::Settings::IconPath                   = "data/textures/game_icon.png";
 const coreChar* const CoreApp::Settings::CursorPath                 = "data/textures/default_cursor.png";
 const coreBool        CoreApp::Settings::UserManagement             = true;
@@ -37,6 +37,7 @@ void CoreApp::Setup()
 {
     Core::Manager::Resource->Load<coreModel>  ("bullet_cone.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_cone.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("bullet_cone_volume.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_cone_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("bullet_final_volume.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_final_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("bullet_flip_volume.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_flip_volume.md3", CORE_MODEL_LOAD_NO_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("bullet_mine.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_mine.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("bullet_pulse.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_pulse.md3");
@@ -294,7 +295,6 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("menu_fragment_plate.png",                CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_fragment_plate.png");
     Core::Manager::Resource->Load<coreTexture>("game_logo.png",                          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/game_logo.png");
     Core::Manager::Resource->Load<coreTexture>("game_logo_demo.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/game_logo_demo.png");
-    Core::Manager::Resource->Load<coreTexture>("game_logo_free.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/game_logo_free.png");
     Core::Manager::Resource->Load<coreTexture>("input_gamepad_luna.png",                 CORE_RESOURCE_UPDATE_AUTO,   "data/textures/input_gamepad_luna.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
     Core::Manager::Resource->Load<coreTexture>("input_gamepad_ps3.png",                  CORE_RESOURCE_UPDATE_AUTO,   "data/textures/input_gamepad_ps3.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
     Core::Manager::Resource->Load<coreTexture>("input_gamepad_ps4.png",                  CORE_RESOURCE_UPDATE_AUTO,   "data/textures/input_gamepad_ps4.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts

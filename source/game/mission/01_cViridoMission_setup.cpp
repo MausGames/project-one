@@ -1018,7 +1018,7 @@ void cViridoMission::__SetupOwn()
                                 pEnemy->AddStatus   (ENEMY_STATUS_CUSTOM);
                             }
 
-                            g_pGame->GetCombatText()->AttachMarker(i % COMBAT_MARKERS, coreData::ToChars(iOrderIndex + 1u), pEnemy->GetPosition(), COLOR_MENU_INSIDE);
+                            g_pGame->GetCombatText()->AttachMarker(i % COMBAT_MARKERS, coreData::ToChars(iOrderIndex + 1u), pEnemy->GetPosition(), COLOR_MENU_INSIDE, false);
                         }
 
                         if(pEnemy->ReachedDeath())
@@ -1139,7 +1139,7 @@ void cViridoMission::__SetupOwn()
             }
             else if(m_fPoleCount > 0.0f)
             {
-                g_pGame->GetCombatText()->AttachMarker(0u, PRINT("%.0f%%", FLOOR((1.0f - m_fPoleCount) * 100.0f)), vPolePos, COLOR_MENU_INSIDE);
+                g_pGame->GetCombatText()->AttachMarker(0u, PRINT("%.0f%%", FLOOR((1.0f - m_fPoleCount) * 100.0f)), vPolePos, COLOR_MENU_INSIDE, false);
             }
         }
 
@@ -2113,7 +2113,7 @@ void cViridoMission::__SetupOwn()
                 m_Target.SetPosition(coreVector3(coreVector2(LERPB(-1.3f, -0.9f, MIN1(fTargetTime * 0.5f)), 0.0f) * mRota * FOREGROUND_AREA, 0.0f));
                 m_Target.SetSize    (coreVector3(1.0f,1.0f,1.0f) * (3.0f + 0.5f * I_TO_F(3u - iTargetHit)));
 
-                g_pGame->GetCombatText()->AttachMarker(1u, coreData::ToChars(3u - iTargetHit), m_Target.GetPosition(), COLOR_MENU_INSIDE);
+                g_pGame->GetCombatText()->AttachMarker(1u, coreData::ToChars(3u - iTargetHit), m_Target.GetPosition(), COLOR_MENU_INSIDE, false);
             }
         }
 
@@ -2190,7 +2190,7 @@ void cViridoMission::__SetupOwn()
 
                             STAGE_BADGE(2u, BADGE_HARD, pEnemy->GetPosition())
                         }
-                        else g_pGame->GetCombatText()->AttachMarker(0u, PRINT("%.0f%%", FLOOR((1.0f - fPercent) * 100.0f)), pEnemy->GetPosition(), COLOR_MENU_INSIDE);
+                        else g_pGame->GetCombatText()->AttachMarker(0u, PRINT("%.0f%%", FLOOR((1.0f - fPercent) * 100.0f)), pEnemy->GetPosition(), COLOR_MENU_INSIDE, false);
                     }
                 }
                 else
@@ -2618,7 +2618,7 @@ void cViridoMission::__SetupOwn()
                             pEnemy->AddStatus   (ENEMY_STATUS_CUSTOM);
                         }
 
-                        g_pGame->GetCombatText()->AttachMarker(i % COMBAT_MARKERS, "X", pEnemy->GetPosition(), COLOR_MENU_INSIDE);
+                        g_pGame->GetCombatText()->AttachMarker(i % COMBAT_MARKERS, "X", pEnemy->GetPosition(), COLOR_MENU_INSIDE, false);
                     }
 
                     if(pEnemy->ReachedDeath())

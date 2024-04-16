@@ -526,14 +526,15 @@ void cSummaryMenu::Move()
                 nAlphaFunc(&m_aArcadeIcon [i], fTime * 0.6f);
                 nAlphaFunc(&m_aArcadeLine [i], fTime, SOUND_MENU_MSGBOX_SHOW);
 
-                const coreUintW iAterOffset = (i == MISSION_ATER) ? (MENU_SUMMARY_MEDALS - ((m_iOtherNumMedal == 59u) ? 2u : 1u)) : 0u;
+                const coreUintW iAterOffset  = (i == MISSION_ATER) ? 5u : 0u;   // ignore segment medals
+                const coreUintW iAterOffset2 = (i == MISSION_ATER) ? 1u : 0u;   // ignore mission medal
 
                 const coreFloat fThreshold = (i * (MENU_SUMMARY_MEDALS + 1u) + MENU_SUMMARY_MEDALS - iAterOffset < m_iOtherNumMedal) ? (fSpinFrom + 0.1f * fNum + 0.05f * I_TO_F(MENU_SUMMARY_MEDALS + i * (MENU_SUMMARY_MEDALS + 1u) - iAterOffset)) : 1000.0f;
                 nBlendMedalFunc(&m_aArcadeMedalMission[i], 0.07f, fThreshold, SOUND_SUMMARY_MEDAL);
 
                 for(coreUintW j = 0u; j < MENU_SUMMARY_MEDALS; ++j)
                 {
-                    const coreFloat fThreshold2 = (i * (MENU_SUMMARY_MEDALS + 1u) + j < m_iOtherNumMedal) ? (fSpinFrom + 0.1f * fNum + 0.05f * I_TO_F(j + i * (MENU_SUMMARY_MEDALS + 1u))) : 1000.0f;
+                    const coreFloat fThreshold2 = (i * (MENU_SUMMARY_MEDALS + 1u) + j + iAterOffset2 < m_iOtherNumMedal) ? (fSpinFrom + 0.1f * fNum + 0.05f * I_TO_F(j + i * (MENU_SUMMARY_MEDALS + 1u))) : 1000.0f;
                     nBlendMedalFunc(&m_aaArcadeMedalSegment[i][j], 0.05f, fThreshold2, SOUND_SUMMARY_MEDAL);
                 }
             }

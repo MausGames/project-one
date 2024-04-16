@@ -841,7 +841,7 @@ void cRutilusMission::__SetupOwn()
 
         if(m_iStageSub == 6u)
         {
-            if(pSquad1->GetNumEnemiesAlive() < 4u)
+            if((pSquad1->GetNumEnemiesAlive() < 4u) || STAGE_SUBTIME_AFTER(5.0f))
             {
                 fCloseTime += 1.0f * TIME;
             }
@@ -1052,7 +1052,7 @@ void cRutilusMission::__SetupOwn()
                             pEnemy->AddStatus   (ENEMY_STATUS_CUSTOM);
                         }
 
-                        g_pGame->GetCombatText()->AttachMarker(i % COMBAT_MARKERS, "X", pEnemy->GetPosition(), COLOR_MENU_INSIDE);
+                        g_pGame->GetCombatText()->AttachMarker(i % COMBAT_MARKERS, "X", pEnemy->GetPosition(), COLOR_MENU_INSIDE, false);
                     }
 
                     if(pEnemy->ReachedDeath())
@@ -1661,7 +1661,7 @@ void cRutilusMission::__SetupOwn()
                 fGrazeValue += 0.2f * TIME;
 
                 if(fGrazeValue >= 1.0f) STAGE_BADGE(1u, BADGE_NORMAL, pHelper->GetPosition())
-                else g_pGame->GetCombatText()->AttachMarker(0u, PRINT("%.0f%%", FLOOR(fGrazeValue * 100.0f)), pHelper->GetPosition(), COLOR_MENU_INSIDE);
+                else g_pGame->GetCombatText()->AttachMarker(0u, PRINT("%.0f%%", FLOOR(fGrazeValue * 100.0f)), pHelper->GetPosition(), COLOR_MENU_INSIDE, true);
             }
         }
 
@@ -2663,7 +2663,7 @@ void cRutilusMission::__SetupOwn()
                         }
                         else
                         {
-                            g_pGame->GetCombatText()->AttachMarker(j, coreData::ToChars(iTargetSub - m_iStageSub), pEnemy->GetPosition(), COLOR_MENU_INSIDE);
+                            g_pGame->GetCombatText()->AttachMarker(j, coreData::ToChars(iTargetSub - m_iStageSub), pEnemy->GetPosition(), COLOR_MENU_INSIDE, false);
                         }
                         break;
                     }

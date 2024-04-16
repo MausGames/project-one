@@ -156,6 +156,8 @@ void cBoss::_UpdateBoss()
             const coreChar* pcName = this->GetMusicName();
             if(pcName && pcName[0])
             {
+                g_pGame->CancelFadeMusic();
+
                 g_MusicPlayer.SelectName(pcName);
                 g_MusicPlayer.Play();
             }

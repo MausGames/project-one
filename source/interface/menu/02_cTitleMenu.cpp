@@ -17,7 +17,7 @@ cTitleMenu::cTitleMenu()noexcept
 , m_fPromptExpand    (-1.0f)
 {
     // create menu objects
-    m_GameLogo.DefineTexture(0u, "game_logo_free.png");
+    m_GameLogo.DefineTexture(0u, "game_logo.png");
     m_GameLogo.DefineProgram("default_2d_program");
     m_GameLogo.SetPosition  (coreVector2(0.0f,0.1f));
     m_GameLogo.SetSize      (coreVector2(1.0f,0.25f) * 0.8f);
@@ -44,7 +44,7 @@ cTitleMenu::cTitleMenu()noexcept
     m_aVersionText[1].SetCenter   (m_aVersionText[0].GetCenter());
     m_aVersionText[1].SetAlignment(m_aVersionText[0].GetAlignment());
     m_aVersionText[1].SetColor3   (COLOR_MENU_INSIDE);
-    m_aVersionText[1].SetText     (PRINT("Project One%s - v1.0.3 third edition - %s %.5s", g_bDemoVersion ? " Demo" : "", __DATE__, __TIME__));
+    m_aVersionText[1].SetText     (PRINT("Project One%s - v1.0.4 third edition - %s %.5s", g_bDemoVersion ? " Demo" : "", __DATE__, __TIME__));
 
     // bind menu objects
     this->BindObject(SURFACE_TITLE_LOGO,  &m_GameLogo);

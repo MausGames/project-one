@@ -16,6 +16,8 @@ cCombatText::cCombatText()noexcept
 , m_aiType        {}
 , m_apOrder       {}
 , m_iOrderNum     (0u)
+, m_afMarkerAlpha {}
+, m_iMarkerFade   (0u)
 , m_iMarkerState  (0u)
 , m_fBadgeTime    (0.0f)
 , m_fTrophyTime   (0.0f)
@@ -222,8 +224,8 @@ void cCombatText::Move()
         if(!HAS_BIT(m_iMarkerState, i))
         {
             // 
-            oMarker.SetAlpha(MAX0(oMarker.GetAlpha() - 5.0f * TIME));
-            if(!oMarker.GetAlpha())
+            m_afMarkerAlpha[i].UpdateMax(-5.0f, 0.0f);
+            if(!m_afMarkerAlpha[i])
             {
                 // 
                 oMarker.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
@@ -231,8 +233,11 @@ void cCombatText::Move()
             }
         }
 
+        const coreFloat fCover = HAS_BIT(m_iMarkerFade, i) ? g_pGame->GetInterface()->CalcGameCover(&oMarker, coreVector2(1.6f,1.6f)) : 1.0f;
+
         // 
-        oMarker.SetScale(coreVector2(1.0f,1.0f) * LERPBR(1.2f, 1.0f, oMarker.GetAlpha()));
+        oMarker.SetAlpha(m_afMarkerAlpha[i] * fCover);
+        oMarker.SetScale(coreVector2(1.0f,1.0f) * LERPBR(1.2f, 1.0f, m_afMarkerAlpha[i]));
         oMarker.Move();
 
         // 
@@ -428,7 +433,7 @@ void cCombatText::DrawTrophy(const coreVector3 vPosition)
 
 // ****************************************************************
 // 
-void cCombatText::AttachMarker(const coreUintW iIndex, const coreChar* pcText, const coreVector3 vPosition, const coreVector3 vColor)
+void cCombatText::AttachMarker(const coreUintW iIndex, const coreChar* pcText, const coreVector3 vPosition, const coreVector3 vColor, const coreBool bFade)
 {
     ASSERT(iIndex < COMBAT_MARKERS)
 
@@ -448,6 +453,12 @@ void cCombatText::AttachMarker(const coreUintW iIndex, const coreChar* pcText, c
     m_aMarkerBack[iIndex].SetCenter (vOnScreen);
     m_aMarkerBack[iIndex].SetAlpha  (1.0f);
     m_aMarkerBack[iIndex].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    
+    m_afMarkerAlpha[iIndex] = 1.0f;
+    
+    // 
+    SET_BIT(m_iMarkerFade, iIndex, bFade)
+    STATIC_ASSERT(COMBAT_MARKERS <= sizeof(m_iMarkerFade)*8u)
 
     // 
     ADD_BIT(m_iMarkerState, iIndex)

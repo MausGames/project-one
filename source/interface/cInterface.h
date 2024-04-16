@@ -156,8 +156,10 @@ private:
     coreFlow  m_fAlphaBadge;                         // 
     coreFlow  m_fAlphaFragment;                      // 
 
-    coreUint8 m_iFakeEnd;                           // 
-    coreBool  m_bBossChange;                        // 
+    coreUint8 m_iFakeEnd;                            // 
+    coreBool  m_bBossChange;                         // 
+    
+    coreMap<const coreObject2D*, coreFlow> m_afCoverMap;   // 
 
 
 public:
@@ -195,6 +197,10 @@ public:
     void UpdateSpacing();
     void UpdateEnabled();
     void MoveTimeless();
+
+    // 
+    coreFloat CalcGameCover(const coreObject2D** ppObject, const coreVector2* pvScale, const coreUintW iCount);
+    coreFloat CalcGameCover(const coreObject2D*  pObject,  const coreVector2  vScale);
 
     // 
     inline void PingImmune(const coreUintW iIndex) {ASSERT(iIndex < INTERFACE_VIEWS) m_aView[iIndex].fImmuneTime = 1.0f;}

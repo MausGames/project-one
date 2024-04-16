@@ -397,7 +397,9 @@ void cMenuNavigator::Update()
                 m_aAutomatic[i].SetValue(CORE_SWITCHBOX_DELAY);
             }
 
-            if((iPack != 8u) && !m_bGrabbed && (m_aAutomatic[i].Update(1.0f) || !m_aAutomatic[i].GetStatus()))
+            const coreBool bAuto = m_aAutomatic[i].Update(1.0f);
+
+            if((iPack != 8u) && !m_bGrabbed && (bAuto || !m_aAutomatic[i].GetStatus()))
             {
                 coreObject2D* pNewObject = NULL;
 
@@ -469,6 +471,23 @@ void cMenuNavigator::Update()
                 //        }
                 //    }
                 //}
+                
+                // prevent automatic exit in scrollbox
+                if(bAuto)
+                {
+                    FOR_EACH(it, m_apScroll)
+                    {
+                        const cScrollBox* pScroll = d_cast<cScrollBox*>(*it);
+                        if(pScroll->IsFocused() && cMenuNavigator::IsValid(pScroll))
+                        {
+                            if(pScroll->ContainsObject(m_pCurObject) && !pScroll->ContainsObject(pNewObject))
+                            {
+                                pNewObject = NULL;
+                                break;
+                            }
+                        }
+                    }
+                }
 
                 if(pNewObject && cMenuNavigator::IsValid(pNewObject))
                 {

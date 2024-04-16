@@ -1272,7 +1272,7 @@ void cGeluMission::__SetupOwn()
                             pEnemy->AddStatus   (ENEMY_STATUS_CUSTOM);
                         }
 
-                        g_pGame->GetCombatText()->AttachMarker(i % COMBAT_MARKERS, "X", pEnemy->GetPosition(), COLOR_MENU_INSIDE);
+                        g_pGame->GetCombatText()->AttachMarker(i % COMBAT_MARKERS, "X", pEnemy->GetPosition(), COLOR_MENU_INSIDE, false);
                     }
 
                     if(pEnemy->ReachedDeath())

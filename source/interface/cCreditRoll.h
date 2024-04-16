@@ -35,6 +35,7 @@ enum eCreditType : coreUint8
 alignas(ALIGNMENT_CACHE) static constexpr const coreChar* g_aapcCreditEntry[][2] =
 {
     {"Benjamin Schaden",                          "$THANKS"},
+    {"Chris Soukup",                              "$THANKS"},
     {"Christoph Lang",                            "$TESTER"},
     {"Claire Deiller (Loc3 Ltd.)",                "$LOCA - Français"},
     {"Damian Hiltebrand",                         "$THANKS"},
@@ -49,7 +50,9 @@ alignas(ALIGNMENT_CACHE) static constexpr const coreChar* g_aapcCreditEntry[][2]
     {"Lara Cecilia Garau (Pinknoise)",            "$LOCA - Español (Latinoamérica)"},
     {"Lukas Meindl",                              "$TESTER"},
     {"Mariano Saab (Pinknoise)",                  "$LOCA - Español (Latinoamérica)"},
+    {"Martin Filipp",                             "$THANKS"},
     {"Martin Mauersics",                          "$DESIGNER, $PROGRAMMER"},
+    {"Michael Hartinger",                         "$THANKS"},
     {"Miho Miyazaki (DICO Co., Ltd.)",            "$LOCA - 日本語"},
     {"Murilo Martins (Locsmiths)",                "$LOCA - Português (Brasil)"},
     {"Oliver Bisztyga",                           "$THANKS"},

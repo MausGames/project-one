@@ -47,33 +47,35 @@ enum eCombatType : coreUint8
 class cCombatText final
 {
 private:
-    cGuiLabel m_aLabel[COMBAT_LABELS];          // label objects to display combat text
-    coreFlow  m_afTime[COMBAT_LABELS];          // animation timers
-    coreUint8 m_aiType[COMBAT_LABELS];          // 
+    cGuiLabel m_aLabel[COMBAT_LABELS];            // label objects to display combat text
+    coreFlow  m_afTime[COMBAT_LABELS];            // animation timers
+    coreUint8 m_aiType[COMBAT_LABELS];            // 
 
-    cGuiLabel* m_apOrder[COMBAT_LABELS];        // 
-    coreUint8  m_iOrderNum;                     // 
+    cGuiLabel* m_apOrder[COMBAT_LABELS];          // 
+    coreUint8  m_iOrderNum;                       // 
 
-    cGuiLabel  m_aMarker    [COMBAT_MARKERS];   // 
-    cGuiObject m_aMarkerBack[COMBAT_MARKERS];   // 
-    coreUint16 m_iMarkerState;                  // 
+    cGuiLabel  m_aMarker      [COMBAT_MARKERS];   // 
+    cGuiObject m_aMarkerBack  [COMBAT_MARKERS];   // 
+    coreFlow   m_afMarkerAlpha[COMBAT_MARKERS];   // 
+    coreUint16 m_iMarkerFade;                     // 
+    coreUint16 m_iMarkerState;                    // 
 
-    cGuiObject m_BadgeIcon;                     // 
-    cGuiObject m_BadgeBack;                     // 
-    cGuiLabel  m_BadgeLabel;                    // 
-    coreFlow   m_fBadgeTime;                    // 
+    cGuiObject m_BadgeIcon;                       // 
+    cGuiObject m_BadgeBack;                       // 
+    cGuiLabel  m_BadgeLabel;                      // 
+    coreFlow   m_fBadgeTime;                      // 
 
-    cGuiObject m_TrophyIcon;                     // 
-    cGuiObject m_TrophyBack;                     // 
-    coreFlow   m_fTrophyTime;                    // 
+    cGuiObject m_TrophyIcon;                      // 
+    cGuiObject m_TrophyBack;                      // 
+    coreFlow   m_fTrophyTime;                     // 
 
-    coreUint8 m_iLastScore;                     // 
+    coreUint8 m_iLastScore;                       // 
 
-    coreVector2 m_vOldDirection;                // 
-    coreFloat   m_fOldSide;                     // 
+    coreVector2 m_vOldDirection;                  // 
+    coreFloat   m_fOldSide;                       // 
 
-    coreBool m_bVisible;                        // visibility status
-    coreFlow m_fAlpha;                          // 
+    coreBool m_bVisible;                          // visibility status
+    coreFlow m_fAlpha;                            // 
 
 
 public:
@@ -97,7 +99,7 @@ public:
     void DrawTrophy   (const coreVector3 vPosition);
 
     // 
-    void AttachMarker(const coreUintW iIndex, const coreChar* pcText, const coreVector3 vPosition, const coreVector3 vColor);
+    void AttachMarker(const coreUintW iIndex, const coreChar* pcText, const coreVector3 vPosition, const coreVector3 vColor, const coreBool bFade);
 
     // 
     void UpdateLayout();

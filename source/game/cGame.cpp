@@ -818,9 +818,21 @@ void cGame::StartOutro(const coreUint8 iType, const coreUint8 iSub)
 // 
 void cGame::FadeMusic(const coreFloat fSpeed)
 {
-    // 
-    m_fMusicFade  = 1.0f;
-    m_fMusicSpeed = fSpeed;
+    if(!m_fMusicFade)
+    {
+        // 
+        m_fMusicFade  = 1.0f;
+        m_fMusicSpeed = fSpeed;
+    }
+}
+
+
+// ****************************************************************
+// 
+void cGame::CancelFadeMusic()
+{
+    //
+    m_fMusicFade = 0.0f;
 }
 
 
@@ -1289,6 +1301,8 @@ coreBool cGame::__HandleIntro()
                 const coreChar* pcName = m_pCurMission->GetMusicName();
                 if(pcName && pcName[0])
                 {
+                    this->CancelFadeMusic();
+
                     g_MusicPlayer.SelectName(pcName);
                     g_MusicPlayer.Play();
                 }

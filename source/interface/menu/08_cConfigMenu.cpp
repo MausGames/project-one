@@ -187,7 +187,8 @@ cConfigMenu::cConfigMenu()noexcept
     m_aCueLock[0].SetPosition(m_aLabel[ENTRY_GAME_BACKROTATION].GetPosition() + coreVector2(0.472f,0.0f));
     m_aCueLock[1].SetPosition(m_aLabel[ENTRY_GAME_BACKSPEED]   .GetPosition() + coreVector2(0.472f,0.0f));
     m_aCueLock[2].SetPosition(m_aLabel[ENTRY_GAME_UPDATEFREQ]  .GetPosition() + coreVector2(0.472f,0.0f));
-    m_aCueLock[3].SetPosition(m_aLabel[ENTRY_GAME_VERSION]     .GetPosition() + coreVector2(0.472f,0.0f));
+    //m_aCueLock[3].SetPosition(m_aLabel[ENTRY_GAME_VERSION]     .GetPosition() + coreVector2(0.472f,0.0f));
+    m_aCueLock[3].SetPosition(HIDDEN_POS);
 
     m_Description.Construct  (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
     m_Description.SetPosition(m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.0f,-0.5f) + coreVector2(0.0f,0.045f));

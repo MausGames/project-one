@@ -1297,6 +1297,14 @@ void cProjectOneBoss::__MoveOwn()
     {
         const coreFloat fNewAngle = this->GetDirection().xy().Angle() - 0.2f * TIME;
         this->SetDirection(coreVector3(coreVector2::Direction(fNewAngle), 0.0f));
+
+        if(m_bActive)
+        {
+            PHASE_CONTROL_TICKER(5u, 60u, 60.0f, LERP_LINEAR)
+            {
+                g_pSpecialEffects->CreateSplashDark(coreVector3(this->GetPosition().xy(), SPECIAL_DEEP), 100.0f * (1.0f - STEP(0.0f, 60.0f, I_TO_F(iTick))), 3u);
+            });
+        }
     }
 
     // 
@@ -2339,7 +2347,7 @@ void cProjectOneBoss::__MoveOrange()
         ++aiIndex[iWall];
     });
 
-    if((aiIndex[0] == 20u) && (this->GetCurHealth() > 0))
+    if((aiIndex[0] == 20u) && ((this->GetCurHealth() > 0) && !m_bDead))
     {
         g_pGame->ForEachPlayer([](cPlayer* OUTPUT pPlayer, const coreUintW i)
         {
@@ -3049,7 +3057,7 @@ void cProjectOneBoss::__MoveMagenta()
     // ################################################################
     // ################################################################
 
-    if(this->GetCurHealth() > 0)
+    if((this->GetCurHealth() > 0) && !m_bDead)
     {
         this->SetDirection(coreVector3(this->AimAtPlayerDual(iAimIndex).Normalized(), 0.0f));   // after, to handle screen rotation
     }
@@ -3863,7 +3871,7 @@ void cProjectOneBoss::__MoveBlue()
         if(pBullet->GetFlyTime() >= 5.0f) pBullet->RemoveStatus(BULLET_STATUS_IMMORTAL);
     });
 
-    if(!pCalor->GetBoulder()->HasStatus(ENEMY_STATUS_DEAD) && (this->GetCurHealth() > 0))
+    if(!pBoulder->HasStatus(ENEMY_STATUS_DEAD) && ((this->GetCurHealth() > 0) && !m_bDead))
     {
         m_avVector[CALOR_ROTA].y  = MIN1(m_avVector[CALOR_ROTA].y + 0.2f * TIME);
         m_avVector[CALOR_ROTA].x += 3.0f * TIME * m_avVector[CALOR_ROTA].y;
@@ -4982,7 +4990,7 @@ void cProjectOneBoss::__MoveIntro()
     // ################################################################
     // ################################################################
 
-    if((m_iPhase > 150u) && (this->GetCurHealth() > 0))
+    if((m_iPhase > 150u) && ((this->GetCurHealth() > 0) && !m_bDead))
     {
         PHASE_CONTROL_TICKER(1u, 0u, 20.0f, LERP_LINEAR)
         {
@@ -5531,6 +5539,8 @@ void cProjectOneBoss::__EndExplosion(const coreBool bClear)
         this->__DisableArrow  ();
         this->__DisableWind   ();
         this->__DisableExhaust();
+
+        this->AddStatus(ENEMY_STATUS_GHOST_PLAYER);
     }
     else
     {

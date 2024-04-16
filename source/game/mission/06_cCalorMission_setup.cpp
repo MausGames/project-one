@@ -2511,7 +2511,7 @@ void cCalorMission::__SetupOwn()
             }
             else if(fPercent >= 0.2f)
             {
-                g_pGame->GetCombatText()->AttachMarker(0u, PRINT("%.0f%%", CEIL((1.0f - fPercent) * 100.0f)), m_Zeroth.GetPosition(), COLOR_MENU_INSIDE);
+                g_pGame->GetCombatText()->AttachMarker(0u, PRINT("%.0f%%", CEIL((1.0f - fPercent) * 100.0f)), m_Zeroth.GetPosition(), COLOR_MENU_INSIDE, false);
             }
         }
 

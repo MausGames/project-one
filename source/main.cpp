@@ -438,10 +438,7 @@ void InitFramerate()
 {
     // get current display mode
     SDL_DisplayMode oMode = {};
-    if(SDL_GetWindowDisplayMode(Core::System->GetWindow(), &oMode) || (oMode.refresh_rate <= 0))
-    {
-        SDL_GetCurrentDisplayMode(Core::System->GetDisplayIndex(), &oMode);
-    }
+    SDL_GetCurrentDisplayMode(Core::System->GetDisplayIndex(), &oMode);
 
     // 
     const coreUint32 iRefreshRate = (oMode.refresh_rate > 0) ? oMode.refresh_rate : 60u;

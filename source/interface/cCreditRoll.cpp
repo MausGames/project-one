@@ -24,7 +24,7 @@ cCreditRoll::cCreditRoll()noexcept
     m_ViewBox.SetSize    (coreVector2(1.0f,1.0f));
 
     // 
-    m_GameLogo.DefineTexture(0u, "game_logo_free.png");
+    m_GameLogo.DefineTexture(0u, "game_logo.png");
     m_GameLogo.DefineProgram("default_2d_program");
     m_GameLogo.SetPosition  (coreVector2(0.0f,-0.7f));
     m_GameLogo.SetSize      (coreVector2(1.0f,0.25f) * 0.7f);
@@ -160,7 +160,7 @@ void cCreditRoll::Move()
     for(coreUintW i = 0u; i < CREDIT_HEADERS; ++i) m_aOtherHeader[i].SetColor3(vColor);
 
     // 
-    const coreFloat fSpeed = (Core::Input->GetMouseButton(CORE_INPUT_LEFT, CORE_INPUT_HOLD) || HAS_BIT(g_TotalInput.iActionHold, PLAYER_ACTION_SHOOT(0u, 0u))) ? 5.0f : 1.0f;
+    const coreFloat fSpeed = (Core::Input->GetMouseButton(CORE_INPUT_LEFT, CORE_INPUT_HOLD) || HAS_BIT(g_TotalInput.iActionHold, PLAYER_ACTION_SHOOT(0u, 0u))) ? 6.0f : 1.0f;
     m_fOffset.Update(0.1f * fSpeed);
 
     // 

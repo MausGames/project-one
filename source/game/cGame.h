@@ -289,6 +289,7 @@ public:
 
     // 
     void FadeMusic(const coreFloat fSpeed);
+    void CancelFadeMusic();
     inline void SetMusicVolume(const coreFloat fVolume) {m_fMusicVolume = fVolume;}
 
     // 

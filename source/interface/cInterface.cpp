@@ -455,6 +455,16 @@ void cInterface::Move()
     {
         sPlayerView& oView   = m_aView[i];
         cPlayer*     pPlayer = g_pGame->GetPlayer(i);
+        
+        
+        const coreObject2D* apObject1[] = {&oView.aShieldBar[0],   &oView.aLife[0],        &oView.aLife[1],        &oView.aLife[2],        &oView.aLife[3],        &oView.aLife[4]}; STATIC_ASSERT(INTERFACE_LIVES == 5u)
+        const coreVector2   avScale1 [] = {coreVector2(1.2f,2.2f), coreVector2(1.4f,1.4f), coreVector2(1.4f,1.4f), coreVector2(1.4f,1.4f), coreVector2(1.4f,1.4f), coreVector2(1.4f,1.4f)};
+        const coreFloat fHealthCover = this->CalcGameCover(apObject1, avScale1, ARRAY_SIZE(apObject1));
+
+        const coreObject2D* apObject2[] = {&oView.oScore,          &oView.oCooldownBar,    &oView.oComboValue,     &oView.oChainValue};
+        const coreVector2   avScale2 [] = {coreVector2(1.2f,1.4f), coreVector2(1.2f,1.2f), coreVector2(1.4f,2.0f), coreVector2(1.4f,2.0f)};
+        const coreFloat fScoreCover = this->CalcGameCover(apObject2, avScale2, ARRAY_SIZE(apObject2));
+        
 
         if(pPlayer->HasStatus(PLAYER_STATUS_SHIELDED))
         {
@@ -517,7 +527,7 @@ void cInterface::Move()
             oView.aLife[j].SetPosition (vNewPos);
             oView.aLife[j].SetSize     (vNewSize);
             oView.aLife[j].SetDirection(vNewDir);
-            oView.aLife[j].SetAlpha    (fAlphaPlayerFull * fCurSpin);
+            oView.aLife[j].SetAlpha    (fAlphaPlayerFull * fCurSpin * fHealthCover);
             oView.aLife[j].SetEnabled  (fCurSpin ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
             oView.aLife[j].Move();
         }
@@ -539,6 +549,9 @@ void cInterface::Move()
         oView.oComboValue.SetText(bShowValue ? PRINT("x%u.%u", iModifier / 10u, iModifier % 10u) : "");
         oView.oChainValue.SetText((bShowValue && pScoreTable->GetCurChain()) ? PRINT("+%u", pScoreTable->GetCurChain()) : "");
 
+        oView.oComboValue.SetEnabled(oView.oComboValue.GetText()[0] ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+        oView.oChainValue.SetEnabled(oView.oChainValue.GetText()[0] ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+
         // 
         oView.fImmuneTime.UpdateMax(-1.0f, 0.0f);
         const coreFloat fImmuneValue = BLENDB(1.0f - oView.fImmuneTime);
@@ -548,15 +561,15 @@ void cInterface::Move()
         oView.oImmune.SetEnabled (oView.fImmuneTime ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
 
         // set player transparency
-        oView.aShieldBar[0].SetAlpha(fAlphaPlayerFull);
-        oView.aShieldBar[1].SetAlpha(fAlphaPlayerFull);
-        oView.aShieldBar[2].SetAlpha(fAlphaPlayerFull);
-        oView.oShieldValue .SetAlpha(fAlphaPlayerFull);
-        oView.oScore       .SetAlpha(fAlphaPlayerFull);
-        oView.oCooldownBar .SetAlpha(fAlphaPlayerFull);
-        oView.oComboValue  .SetAlpha(fAlphaPlayerFull);
-        oView.oChainValue  .SetAlpha(fAlphaPlayerFull);
-        oView.oImmune      .SetAlpha(fAlphaPlayerFull * (1.0f - fImmuneValue));
+        oView.aShieldBar[0].SetAlpha(fAlphaPlayerFull * fHealthCover);
+        oView.aShieldBar[1].SetAlpha(fAlphaPlayerFull * fHealthCover);
+        oView.aShieldBar[2].SetAlpha(fAlphaPlayerFull * fHealthCover);
+        oView.oShieldValue .SetAlpha(fAlphaPlayerFull * fHealthCover);
+        oView.oScore       .SetAlpha(fAlphaPlayerFull * fScoreCover);
+        oView.oCooldownBar .SetAlpha(fAlphaPlayerFull * fScoreCover);
+        oView.oComboValue  .SetAlpha(fAlphaPlayerFull * fScoreCover);
+        oView.oChainValue  .SetAlpha(fAlphaPlayerFull * fScoreCover);
+        oView.oImmune      .SetAlpha(fAlphaPlayerFull * (1.0f - fImmuneValue) * fHealthCover);
 
         // move player
         oView.oShieldValue .Move();
@@ -705,14 +718,22 @@ void cInterface::Move()
         m_aWaveTime[2].SetPosition(coreVector2(fPos + 0.015f, m_aWaveTime[2].GetPosition().y));
     });
 
+    const coreFloat fBossCover    = this->CalcGameCover(&m_aBossHealthBar[0], coreVector2( 1.2f,2.6f));
+    const coreFloat fWaveCover    = this->CalcGameCover(&m_aWaveTime[0],      coreVector2(99.0f,2.2f));
+    
+    
+    const coreObject2D* apObject5[] = {&m_SegmentName,          &m_SegmentBest};
+    const coreVector2   avScale5 [] = {coreVector2(1.2f,1.4f), coreVector2(1.2f,2.0f)};
+    const coreFloat fSegmentCover = this->CalcGameCover(apObject5, avScale5, ARRAY_SIZE(apObject5));
+
     // set boss transparency
-    m_aBossHealthBar[0].SetAlpha(fAlphaBossFull);
-    m_aBossHealthBar[1].SetAlpha(fAlphaBossFull);
-    m_aBossHealthBar[2].SetAlpha(fAlphaBossFull);
-    m_BossHealthValue  .SetAlpha(fAlphaBossFull);
-    m_aBossTime[0]     .SetAlpha(fAlphaBossFull);
-    m_aBossTime[1]     .SetAlpha(fAlphaBossFull);
-    m_aBossTime[2]     .SetAlpha(fAlphaBossFull);
+    m_aBossHealthBar[0].SetAlpha(fAlphaBossFull * fBossCover);
+    m_aBossHealthBar[1].SetAlpha(fAlphaBossFull * fBossCover);
+    m_aBossHealthBar[2].SetAlpha(fAlphaBossFull * fBossCover);
+    m_BossHealthValue  .SetAlpha(fAlphaBossFull * fBossCover);
+    m_aBossTime[0]     .SetAlpha(fAlphaBossFull * fBossCover);
+    m_aBossTime[1]     .SetAlpha(fAlphaBossFull * fBossCover);
+    m_aBossTime[2]     .SetAlpha(fAlphaBossFull * fBossCover);
 
     // move boss
     m_aBossHealthBar[0].Move();
@@ -724,9 +745,9 @@ void cInterface::Move()
     m_aBossTime[2]     .Move();
 
     // set wave transparency
-    m_aWaveTime[0].SetAlpha(fAlphaWaveFull);
-    m_aWaveTime[1].SetAlpha(fAlphaWaveFull);
-    m_aWaveTime[2].SetAlpha(fAlphaWaveFull);
+    m_aWaveTime[0].SetAlpha(fAlphaWaveFull * fWaveCover);
+    m_aWaveTime[1].SetAlpha(fAlphaWaveFull * fWaveCover);
+    m_aWaveTime[2].SetAlpha(fAlphaWaveFull * fWaveCover);
 
     // move wave
     m_aWaveTime[0].Move();
@@ -734,8 +755,8 @@ void cInterface::Move()
     m_aWaveTime[2].Move();
 
     // 
-    m_SegmentName.SetAlpha(fAlphaSegmentFull);
-    m_SegmentBest.SetAlpha(fAlphaSegmentFull);
+    m_SegmentName.SetAlpha(fAlphaSegmentFull * fSegmentCover);
+    m_SegmentBest.SetAlpha(fAlphaSegmentFull * fSegmentCover);
 
     // 
     m_SegmentName.Move();
@@ -792,7 +813,7 @@ void cInterface::Move()
     
     
     // 
-    const coreFloat fAlphaGoalFull = MAX(fAlphaWaveFull, fAlphaBossFull) * BLENDH3(m_fAlphaGoal);
+    const coreFloat fAlphaGoalFull = MAX(fAlphaWaveFull * fWaveCover, fAlphaBossFull * fBossCover) * BLENDH3(m_fAlphaGoal);
     m_GoalMedal.SetAlpha(fAlphaGoalFull);
     m_GoalTime .SetAlpha(fAlphaGoalFull);
 
@@ -801,6 +822,11 @@ void cInterface::Move()
     m_GoalTime .Move();
     
     
+    
+    
+    const coreObject2D* apObject4[] = {&m_aHelper[0],          &m_aHelper[1],          &m_aHelper[2],          &m_aHelper[3],          &m_aHelper[4],          &m_aHelper[5],          &m_aHelper[6],          &m_aHelper[7]}; STATIC_ASSERT(INTERFACE_HELPERS == 8u)
+    const coreVector2   avScale4 [] = {coreVector2(1.8f,1.8f), coreVector2(1.8f,1.8f), coreVector2(1.8f,1.8f), coreVector2(1.8f,1.8f), coreVector2(1.8f,1.8f), coreVector2(1.8f,1.8f), coreVector2(1.8f,1.8f), coreVector2(1.8f,1.8f)};
+    const coreFloat fHelperCover = this->CalcGameCover(apObject4, avScale4, ARRAY_SIZE(apObject4));
 
     for(coreUintW i = 0u; i < INTERFACE_HELPERS; ++i)
     {
@@ -841,7 +867,7 @@ void cInterface::Move()
         m_aHelper[i].SetSize     (coreVector2(1.0f,1.0f) * 0.045f);
         m_aHelper[i].SetDirection(coreVector2::Direction((bRealState ? (m_fRotation + (0.8f*PI) * (I_TO_F(i) / I_TO_F(INTERFACE_HELPERS))) : 0.0f) + fBump * (-1.0f*PI)));
         m_aHelper[i].SetColor3   (bRealState ? vColor : coreVector3(1.0f,1.0f,1.0f));
-        m_aHelper[i].SetAlpha    (fAlphaBossFull * (bRealState ? 1.0f : 0.5f));
+        m_aHelper[i].SetAlpha    (fAlphaBossFull * (bRealState ? 1.0f : 0.5f) * fHelperCover);
         m_aHelper[i].Move();
 
         // 
@@ -849,7 +875,7 @@ void cInterface::Move()
         m_aHelperWave[i].SetSize     (m_aHelper[i].GetSize() * (1.2f + fBump));
         m_aHelperWave[i].SetDirection(coreVector2::Direction(m_fRotation * -0.5f + (0.8f*PI) * (I_TO_F(i) / I_TO_F(INTERFACE_HELPERS)) + fBump * (1.0f*PI)));
         m_aHelperWave[i].SetColor3   (m_aHelper[i].GetColor3());
-        m_aHelperWave[i].SetAlpha    (fAlphaBossFull * (bRealState ? (0.5f * (1.0f - fBump)) : 0.0f));
+        m_aHelperWave[i].SetAlpha    (fAlphaBossFull * (bRealState ? (0.5f * (1.0f - fBump)) : 0.0f) * fHelperCover);
         m_aHelperWave[i].Move();
 
         // 
@@ -873,6 +899,10 @@ void cInterface::Move()
         m_fAlphaBadge.UpdateMax(-2.0f, 0.0f);
     }
     const coreFloat fAlphaBadgeFull = fAlphaPlayerFull * BLENDH3(m_fAlphaBadge);
+    
+    const coreObject2D* apObject3[] = {&m_aBadge[0],           &m_aBadge[1]}; STATIC_ASSERT(INTERFACE_BADGES == 2u)
+    const coreVector2   avScale3 [] = {coreVector2(1.4f,1.4f), coreVector2(1.4f,1.4f)};
+    const coreFloat fBadgeCover = this->CalcGameCover(apObject3, avScale3, ARRAY_SIZE(apObject3));
     
     for(coreUintW i = 0u; i < INTERFACE_BADGES; ++i)
     {
@@ -902,7 +932,7 @@ void cInterface::Move()
         m_aBadge[i].SetSize     (vNewSize);
         m_aBadge[i].SetDirection(coreVector2::Direction(m_fRotation + (2.0f*PI) * fBump + (0.8f*PI) * (I_TO_F(i) / I_TO_F(3u))));
         m_aBadge[i].SetTexOffset(coreVector2(bRealState ? 0.0f : 0.5f, 0.0f));
-        m_aBadge[i].SetAlpha    (fAlphaBadgeFull * (bRealState ? 1.0f : 0.5f));
+        m_aBadge[i].SetAlpha    (fAlphaBadgeFull * (bRealState ? 1.0f : 0.5f) * fBadgeCover);
         m_aBadge[i].Move();
         
         const coreFloat fScale = 0.6f + 0.2f * SIN(m_fRotation * 4.0f);
@@ -1743,6 +1773,67 @@ void cInterface::MoveTimeless()
     {
         this->Move();
     });
+}
+
+
+// ****************************************************************
+// 
+coreFloat cInterface::CalcGameCover(const coreObject2D** ppObject, const coreVector2* pvScale, const coreUintW iCount)
+{
+    ASSERT(STATIC_ISVALID(g_pGame))
+    ASSERT(ppObject && pvScale && iCount)
+
+    const coreVector2 vInvResolution = coreVector2(1.0f,1.0f) / g_vGameResolution;
+
+    coreBool bHidden = false;
+    for(coreUintW i = 0u; i < iCount; ++i)
+    {
+        const coreObject2D* pObject = ppObject[i];
+        const coreVector2   vScale  = pvScale[i];
+
+        if(!pObject->IsEnabled(CORE_OBJECT_ENABLE_RENDER)) continue;
+
+        const coreMatrix3x2 mTransform = pObject->GetTransform();
+
+        const coreVector2 vPosition   = coreVector2(mTransform._31, mTransform._32);
+        const coreVector2 vSize       = coreVector2(coreVector2(mTransform._11, mTransform._21).Length(), coreVector2(mTransform._12, mTransform._22).Length());
+        
+        
+        const coreVector2 vLowerLeftPre  = vPosition - vSize * 0.5f;
+        const coreVector2 vUpperRightPre = vPosition + vSize * 0.5f;
+        if(((vLowerLeftPre .x >  g_vGameResolution.x * 0.5f) || (vLowerLeftPre .y >  g_vGameResolution.y * 0.5f)) ||
+           ((vUpperRightPre.x < -g_vGameResolution.x * 0.5f) || (vUpperRightPre.y < -g_vGameResolution.y * 0.5f))) 
+            continue;
+        
+        
+        const coreVector2 vLowerLeft  = (vPosition - vSize * vScale * 0.5f) * vInvResolution;
+        const coreVector2 vUpperRight = (vPosition + vSize * vScale * 0.5f) * vInvResolution;
+
+        g_pGame->ForEachPlayer([&](const cPlayer* pPlayer, const coreUintW i)
+        {
+            const coreVector2 vReal = g_pForeground->Project2D(pPlayer->GetPosition());
+
+            if(InBetween(vReal, vLowerLeft, vUpperRight))
+            {
+                bHidden = true;
+            }
+        });
+    }
+    
+    coreFlow& fCover = m_afCoverMap[ppObject[0]];
+    
+    if(bHidden) fCover.UpdateMin( 5.0f, 1.0f);
+           else fCover.UpdateMax(-5.0f, 0.0f);
+    
+    return LERPH3(1.0f, 0.2f, fCover);
+}
+
+coreFloat cInterface::CalcGameCover(const coreObject2D* pObject, const coreVector2 vScale)
+{
+    const coreObject2D* apObjectList[] = {pObject};
+    const coreVector2   avScaleList [] = {vScale};
+
+    return this->CalcGameCover(apObjectList, avScaleList, 1u);
 }
 
 

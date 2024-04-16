@@ -503,7 +503,7 @@ void cNevoMission::__SetupOwn()
             const coreFloat fPercent = I_TO_F(iCleanupCount) * (1.0f / (g_pGame->IsEasy() ? 1500.0f : 1700.0f));
 
                  if(fPercent >= 1.0f)  STAGE_BADGE(0u, BADGE_EASY, coreVector3(0.0f,0.0f,0.0f))
-            else if(fPercent >= 0.01f) g_pGame->GetCombatText()->AttachMarker(0u, PRINT("%.0f%%", FLOOR(fPercent * 100.0f)), coreVector3(0.0f,0.0f,0.0f), COLOR_MENU_INSIDE);
+            else if(fPercent >= 0.01f) g_pGame->GetCombatText()->AttachMarker(0u, PRINT("%.0f%%", FLOOR(fPercent * 100.0f)), coreVector3(0.0f,0.0f,0.0f), COLOR_MENU_INSIDE, true);
         }
 
         if(m_iStageSub >= 14u)
@@ -751,7 +751,7 @@ void cNevoMission::__SetupOwn()
                     bPostpone = true;
                 }
 
-                g_pGame->GetCombatText()->AttachMarker(0u, PRINT("%.0f", CEIL(MAX0(fTimeLimit))), coreVector3(0.0f,0.0f,0.0f), COLOR_MENU_INSIDE);
+                g_pGame->GetCombatText()->AttachMarker(0u, PRINT("%.0f", CEIL(MAX0(fTimeLimit))), coreVector3(0.0f,0.0f,0.0f), COLOR_MENU_INSIDE, false);
             }
             else if(m_iStageSub == 7u)
             {
@@ -897,7 +897,7 @@ void cNevoMission::__SetupOwn()
 
                     if((iIndex >= iCurOrder) && (iIndex < ARRAY_SIZE(aiOrder)))
                     {
-                        g_pGame->GetCombatText()->AttachMarker(iIndex + 1u, coreData::ToChars(iIndex + 1u), oTile.GetPosition(), COLOR_MENU_INSIDE);
+                        g_pGame->GetCombatText()->AttachMarker(iIndex + 1u, coreData::ToChars(iIndex + 1u), oTile.GetPosition(), COLOR_MENU_INSIDE, false);
 
                         if(HAS_BIT(iTileState, i) != HAS_BIT(iTileStateOld, i))
                         {
@@ -1872,7 +1872,7 @@ void cNevoMission::__SetupOwn()
                 }
                 else
                 {
-                    g_pGame->GetCombatText()->AttachMarker(0u, PRINT("%.1f", MAX0((fLimit - 0.1f) - FloorFactor(fLockTime, 10.0f))), coreVector3(0.0f,0.0f,0.0f), COLOR_MENU_INSIDE);
+                    g_pGame->GetCombatText()->AttachMarker(0u, PRINT("%.1f", MAX0((fLimit - 0.1f) - FloorFactor(fLockTime, 10.0f))), coreVector3(0.0f,0.0f,0.0f), COLOR_MENU_INSIDE, true);
                 }
             }
         }
@@ -2261,7 +2261,7 @@ void cNevoMission::__SetupOwn()
                     }
                 });
 
-                if(!HAS_BIT(iMarkerMap, i)) g_pGame->GetCombatText()->AttachMarker(i, "X", coreVector3(vMarkerPos, 0.0f), COLOR_MENU_INSIDE);
+                if(!HAS_BIT(iMarkerMap, i)) g_pGame->GetCombatText()->AttachMarker(i, "X", coreVector3(vMarkerPos, 0.0f), COLOR_MENU_INSIDE, false);
 
                 if(iMarkerMap == BITLINE(ARRAY_SIZE(avMarker)))
                 {

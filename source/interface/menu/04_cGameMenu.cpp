@@ -413,7 +413,7 @@ cGameMenu::cGameMenu()noexcept
     m_ArmoryIconBig.SetDirection (coreVector2(1.0f,1.0f).Normalized());
     m_ArmoryIconBig.SetTexSize   (coreVector2(0.25f,0.25f));
 
-    m_ArmoryLogo.DefineTexture(0u, "game_logo_free.png");
+    m_ArmoryLogo.DefineTexture(0u, "game_logo.png");
     m_ArmoryLogo.DefineProgram("default_2d_program");
     m_ArmoryLogo.SetPosition  (m_ArmoryArea.GetPosition() + coreVector2(0.0f,0.123f));
     m_ArmoryLogo.SetSize      (coreVector2(1.0f,0.25f) * 0.5f);
