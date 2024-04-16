@@ -93,7 +93,12 @@ void cDefeatMenu::Move()
             m_fIntroTimer.Update(1.0f);
             if(m_fIntroTimer >= MENU_DEFEAT_BANNER_SPEED_REV)
             {
-                if(HAS_BIT(g_TotalInput.iActionPress, 0u))
+                if(g_MenuInput.bCancel)
+                {
+                    // 
+                    m_fCountdown -= FRACT(m_fCountdown) - CORE_MATH_PRECISION;
+                }
+                else if(g_MenuInput.bAny)
                 {
                     // 
                     if(m_eState < DEFEAT_BURST)
@@ -101,11 +106,6 @@ void cDefeatMenu::Move()
                         m_eState = DEFEAT_BURST;
                         g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_CONTINUE_ACCEPT);
                     }
-                }
-                else if(Core::Input->GetAnyButton(CORE_INPUT_PRESS))
-                {
-                    // 
-                    m_fCountdown -= FRACT(m_fCountdown) - CORE_MATH_PRECISION;
                 }
             }
 
@@ -174,7 +174,7 @@ void cDefeatMenu::Move()
         {
             // 
             m_fIntroTimer.Update(1.0f);
-            if((m_fIntroTimer >= MENU_DEFEAT_BANNER_SPEED_REV) && !this->GetTransition().GetStatus() && Core::Input->GetAnyButton(CORE_INPUT_PRESS))
+            if((m_fIntroTimer >= MENU_DEFEAT_BANNER_SPEED_REV) && !this->GetTransition().GetStatus() && g_MenuInput.bAny)
             {
                 // 
                 m_eState = DEFEAT_OUTRO;

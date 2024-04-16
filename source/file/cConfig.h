@@ -181,6 +181,7 @@ struct sMenuInput final
     coreUint8 iMove;         // 
     coreBool  bAccept;       // 
     coreBool  bCancel;       // 
+    coreBool  bAny;          // 
     coreBool  bPause;        // 
     coreBool  bScreenshot;   // 
 };

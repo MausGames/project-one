@@ -1248,14 +1248,14 @@ void cGemingaBoss::__MoveOwn()
                 pEnemy->AddStatus(ENEMY_STATUS_GHOST);
             }
 
-            const coreVector2 vMove = coreVector2(I_TO_F(i) - 4.5f, 7.5f).Normalized();
-
             if(pEnemy->GetPosition().y < FOREGROUND_AREA.y * 1.05f)
             {
+                const coreVector2 vMove = coreVector2(I_TO_F(i) - 4.5f, 7.5f).Normalized();
+
                 coreVector2       vNewPos = pEnemy->GetPosition().xy() + vMove * (100.0f * TIME);
                 const coreVector2 vNewDir = coreVector2::Direction(pEnemy->GetDirection().xy().Angle() + (10.0f * TIME));
 
-                if((vNewPos.y > FOREGROUND_AREA.y * 1.05f) && (vMove.y > 0.0f)) vNewPos *= FOREGROUND_AREA.y * 1.05f * RCP(vNewPos.y);
+                if((vNewPos.y > FOREGROUND_AREA.y * 1.05f) && (vMove.y > 0.0f)) vNewPos *= FOREGROUND_AREA.y * 1.05f / vNewPos.y;   // # normal division
 
                 pEnemy->SetPosition (coreVector3(vNewPos, 0.0f));
                 pEnemy->SetDirection(coreVector3(vNewDir, 0.0f));
@@ -1843,6 +1843,7 @@ void cGemingaBoss::__MoveOwn()
     pMission->SetCollEnemyBullet([COLL_THIS](cEnemy* OUTPUT pEnemy, cBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         if((pEnemy != &m_InsideTop) && (pEnemy != &m_InsideBottom)) return;
+        if(!this->GetCurHealth()) return;
 
         if(pBullet->HasStatus(BULLET_STATUS_REFLECTED))
         {

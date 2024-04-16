@@ -48,6 +48,7 @@
 // TODO 1: show player separation for arcade summary
 // TODO 3: add auto-scroll for armory-segment-switch, for shoulder-buttons and arrow-keys
 // TODO 1: going into extra menu with mouse and selecting credits, then switching to gamepad accidentally selects the stats-switchbox
+// TODO 2: latam language, text in summary menu is etwas zu nah beinander
 
 // NOTE: only short YES-NO questions: Exit Game ? Return to Menu ?
 // NOTE: every object in menu needs outline: weapons, medals, icons

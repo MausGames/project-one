@@ -16,6 +16,7 @@ cIcon::cIcon()noexcept
 , m_iIndex     (0u)
 , m_fAnimation (0.0f)
 , m_fStorage   (-1.0f)
+, m_bDirty     (true)
 {
     // 
     m_FrameBuffer.AttachTargetBuffer(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGBA8);
@@ -58,6 +59,8 @@ void cIcon::Update()
     if(STATIC_ISVALID(g_pGame))
     {
         const cPlayer* pPlayer = g_pGame->GetPlayer(m_iIndex);
+        
+        if(m_aRangeRaw[0].GetModel().GetHandle() != pPlayer->GetRangeModel().GetHandle()) m_bDirty = true;
 
         // 
         for(coreUintW i = 0u; i < ICON_VARIATIONS; ++i)
@@ -70,6 +73,8 @@ void cIcon::Update()
     }
     else
     {
+        if(m_aRangeRaw[0].GetModel().GetHandle() != m_pDefaultModel.GetHandle()) m_bDirty = true;
+        
         // 
         for(coreUintW i = 0u; i < ICON_VARIATIONS; ++i)
         {
@@ -86,6 +91,14 @@ void cIcon::Update()
     
     // 
     m_fAnimation.UpdateMod(0.1f, 1.0f);
+    
+    if(g_CurConfig.Graphics.iRender == 0u)
+    {
+        if(Core::Manager::Resource->IsLoading()) return;
+        if(!m_bDirty) return;
+        m_bDirty = false;
+    }
+    
 
     // 
     m_FrameBuffer.StartDraw();
@@ -127,6 +140,6 @@ void cIcon::Update()
 // reset with the resource manager
 void cIcon::__Reset(const coreResourceReset eInit)
 {
-    if(eInit) {m_FrameBuffer.Create(g_vGameResolution * ICON_SCALE_VECTOR, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED); m_ResolvedTexture.Create(g_vGameResolution * ICON_SCALE_VECTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);}
+    if(eInit) {m_FrameBuffer.Create(g_vGameResolution * ICON_SCALE_VECTOR, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED); m_ResolvedTexture.Create(g_vGameResolution * ICON_SCALE_VECTOR, CORE_FRAMEBUFFER_CREATE_NORMAL); m_bDirty = true;}
          else {m_FrameBuffer.Delete();                                                                            m_ResolvedTexture.Delete();}
 }

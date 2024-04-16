@@ -1360,15 +1360,21 @@ coreBool cGame::__HandleOutro()
         {
             cHelper* pHelper = this->GetHelper(ELEMENT_WHITE);
 
+            const coreFloat fTime = STEP(2.0f, 4.0f, m_fTimeInOut);
+            if(fTime >= 1.0f) pHelper->Kill(false);
+
             // 
-            pHelper->SetPosition(coreVector3(0.0f, LERP(-1.2f, 1.2f, STEP(2.0f, 4.0f, m_fTimeInOut)), 0.0f) * FOREGROUND_AREA3);
+            pHelper->SetPosition(coreVector3(0.0f, LERP(-1.2f, 1.2f, fTime), 0.0f) * FOREGROUND_AREA3);
         }
         else if(m_iOutroSub == 12u)
         {
             cHelper* pHelper = this->GetHelper(ELEMENT_WHITE);
 
+            const coreFloat fTime = STEP(2.0f, 4.0f, m_fTimeInOut);
+            if(fTime >= 1.0f) pHelper->Kill(false);
+
             // 
-            pHelper->SetPosition(coreVector3(LERP(-1.2f, 1.2f, STEP(2.0f, 4.0f, m_fTimeInOut)), 0.0f, 0.0f) * FOREGROUND_AREA3);
+            pHelper->SetPosition(coreVector3(LERP(-1.2f, 1.2f, fTime), 0.0f, 0.0f) * FOREGROUND_AREA3);
         }
         else if(m_iOutroSub == 13u)
         {
@@ -1386,8 +1392,11 @@ coreBool cGame::__HandleOutro()
                 return oSpline;
             }();
 
+            const coreFloat fTime = STEP(2.0f, 4.5f, m_fTimeInOut);
+            if(fTime >= 1.0f) pHelper->Kill(false);
+
             // 
-            pHelper->SetPosition(coreVector3(s_Spline.CalcPositionLerp(STEP(2.0f, 4.5f, m_fTimeInOut)), 0.0f) * FOREGROUND_AREA3);
+            pHelper->SetPosition(coreVector3(s_Spline.CalcPositionLerp(fTime), 0.0f) * FOREGROUND_AREA3);
         }
         else if(m_iOutroSub == 14u)
         {
@@ -1406,8 +1415,11 @@ coreBool cGame::__HandleOutro()
                 return oSpline;
             }();
 
+            const coreFloat fTime = STEP(2.0f, 5.0f, m_fTimeInOut);
+            if(fTime >= 1.0f) pHelper->Kill(false);
+
             // 
-            pHelper->SetPosition(coreVector3(s_Spline.CalcPositionLerp(STEP(2.0f, 5.0f, m_fTimeInOut)), 0.0f) * FOREGROUND_AREA3);
+            pHelper->SetPosition(coreVector3(s_Spline.CalcPositionLerp(fTime), 0.0f) * FOREGROUND_AREA3);
         }
     }
 

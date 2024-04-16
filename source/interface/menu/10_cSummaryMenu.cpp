@@ -462,7 +462,7 @@ void cSummaryMenu::Move()
             
             
             m_fIntroTimer.Update(1.0f);
-            if((m_fIntroTimer >= fSpinFrom + 0.1f * I_TO_F(m_iOtherNumMission) + 0.05f * I_TO_F(m_iOtherNumMedal) + 1.45f + 1.0f) && (m_eState != SUMMARY_OUTRO) && Core::Input->GetAnyButton(CORE_INPUT_PRESS))
+            if((m_fIntroTimer >= fSpinFrom + 0.1f * I_TO_F(m_iOtherNumMission) + 0.05f * I_TO_F(m_iOtherNumMedal) + 1.45f + 1.0f) && (m_eState != SUMMARY_OUTRO) && g_MenuInput.bAny)
             {
                 m_eState = SUMMARY_OUTRO;
                 g_pSpecialEffects->PlaySound(SPECIAL_RELATIVE, 1.0f, 1.0f, SOUND_MENU_MSGBOX_YES);
@@ -596,7 +596,7 @@ void cSummaryMenu::Move()
 
             // 
             m_fIntroTimer.Update(1.0f);
-            if((m_fIntroTimer >= 1.0f /*MENU_SUMMARY_BANNER_SPEED_REV*/) && Core::Input->GetAnyButton(CORE_INPUT_PRESS))
+            if((m_fIntroTimer >= 1.0f /*MENU_SUMMARY_BANNER_SPEED_REV*/) && g_MenuInput.bAny)
             {
                 const eSummaryState eOld = m_eState;
                 
@@ -785,7 +785,7 @@ void cSummaryMenu::Move()
             constexpr coreFloat fSpinFrom = (2.5f + 0.8f * I_TO_F(MENU_SUMMARY_ENTRIES_SEGMENT));
             constexpr coreFloat fSpinTo   = fSpinFrom + 1.5f;
             
-            const coreBool bAnyButton = Core::Input->GetAnyButton(CORE_INPUT_PRESS) || m_Navigator.GetCurObject();
+            const coreBool bAnyButton = g_MenuInput.bAny || m_Navigator.GetCurObject();
             if(bAnyButton && (m_fIntroTimer < fSpinTo) && m_eState < SUMMARY_SKIPPED) m_eState = SUMMARY_SKIPPED;
 
             // 

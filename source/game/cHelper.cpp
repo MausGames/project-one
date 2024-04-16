@@ -211,6 +211,11 @@ void cHelper::Resurrect(const coreBool bSmooth)
     m_fLifeTimeBefore = 0.0f;
     m_bSmooth         = bSmooth;
     m_fAngleOverride  = FLT_MAX;
+    
+    
+    
+    this->SetAlpha(1.0f);   // alpha wert kann nach kill noch verändert werden
+    // achtung, hidden wird vor resurrect gesetzt
 
     // 
     if(bSmooth)

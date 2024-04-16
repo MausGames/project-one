@@ -141,7 +141,7 @@ void cMsgBox::Move()
         cMenu::UpdateButton(&m_No, this, m_No.IsFocused(), COLOR_MENU_RED);
 
         // 
-        if(m_No.IsClicked())// || g_MenuInput.bCancel)
+        if(m_No.IsClicked()    || ((m_iMsgType == MSGBOX_TYPE_MAPPING) && Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE), CORE_INPUT_PRESS)))// || g_MenuInput.bCancel)
             this->__ExecuteCallback(MSGBOX_ANSWER_NO, 0);
     }
 

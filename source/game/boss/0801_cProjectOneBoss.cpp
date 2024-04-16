@@ -601,7 +601,7 @@ void cProjectOneBoss::__MoveOwn()
         PHASE_CONTROL_PAUSE(0u, 0.7f)
         {
             PHASE_CHANGE_TO(30u)
-            if(DEFINED(_CORE_DEBUG_)) PHASE_CHANGE_TO(40u)                                                                                        
+            //if(DEFINED(_CORE_DEBUG_)) PHASE_CHANGE_TO(40u)                                                                                        
         });
     }
 
@@ -1094,6 +1094,8 @@ void cProjectOneBoss::__MoveOwn()
         if(PHASE_BEGINNING2)
         {
             this->__RequestMission(iIndex);
+
+            g_pGame->GetBulletManagerEnemy()->ClearBullets(true);
 
             g_pSpecialEffects->PlaySound(m_aShield[iIndex].GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_DUST);
         }
@@ -4706,7 +4708,7 @@ void cProjectOneBoss::__MoveWhite()
 
         const coreFloat fAttackSpeed = g_pGame->IsEasy() ? 0.7f : 1.0f;
 
-        const coreFloat fValue = STEP(0.0f, DEFINED(_CORE_DEBUG_) ? 6.0f : 60.0f, m_fFinalValue);
+        const coreFloat fValue = STEP(0.0f, 60.0f, m_fFinalValue);
 
         this->SetCurHealthPct(0.05f + 0.95f * (1.0f - fValue));
 
@@ -4779,7 +4781,7 @@ void cProjectOneBoss::__MoveWhite()
                 const coreVector2 vPos = this->GetPosition().xy();
                 const coreVector2 vDir = coreVector2::Direction(I_TO_F(iTick) * GA);
 
-                this->__AddRainbowBullet((iTick * 5u) % 8u, 5, 1.5f, vPos, vDir)->AddStatus(BULLET_STATUS_IMMORTAL);
+                this->__AddRainbowBullet((iTick * 5u) % 8u, 5, 0.0f, vPos, vDir)->AddStatus(BULLET_STATUS_IMMORTAL);
 
                 g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
             });
@@ -4796,10 +4798,10 @@ void cProjectOneBoss::__MoveWhite()
                 {
                     const coreVector2 vDir = coreVector2::Direction(I_TO_F(j) / 160.0f * (2.0f*PI));
 
-                    this->__AddRainbowBullet(j % 8u, 6, 2.0f, vPos,  vDir)            ->AddStatus(BULLET_STATUS_IMMORTAL);
-                    this->__AddRainbowBullet(j % 8u, 6, 2.0f, vPos, -vDir)            ->AddStatus(BULLET_STATUS_IMMORTAL);
-                    this->__AddRainbowBullet(j % 8u, 6, 2.0f, vPos,  vDir.Rotated90())->AddStatus(BULLET_STATUS_IMMORTAL);
-                    this->__AddRainbowBullet(j % 8u, 6, 2.0f, vPos, -vDir.Rotated90())->AddStatus(BULLET_STATUS_IMMORTAL);
+                    this->__AddRainbowBullet(j % 8u, 6, 0.0f, vPos,  vDir)            ->AddStatus(BULLET_STATUS_IMMORTAL);
+                    this->__AddRainbowBullet(j % 8u, 6, 0.0f, vPos, -vDir)            ->AddStatus(BULLET_STATUS_IMMORTAL);
+                    this->__AddRainbowBullet(j % 8u, 6, 0.0f, vPos,  vDir.Rotated90())->AddStatus(BULLET_STATUS_IMMORTAL);
+                    this->__AddRainbowBullet(j % 8u, 6, 0.0f, vPos, -vDir.Rotated90())->AddStatus(BULLET_STATUS_IMMORTAL);
                 }
 
                 g_pSpecialEffects->PlaySound(coreVector3(vPos, 0.0f), 1.0f, 1.0f, SOUND_WEAPON_ENEMY);
@@ -4834,7 +4836,7 @@ void cProjectOneBoss::__MoveWhite()
                 if((iDamage != 5) && (iDamage != 6)) return;
 
                 const coreVector2 vDiff  = pBullet->GetPosition().xy() - pBullet->GetOwner()->GetPosition().xy();
-                const coreFloat   fSpeed = pBullet->GetSpeed() - ((iDamage == 5) ? 0.4f : 0.75f) * (1.0f / FRAMERATE_MIN);
+                const coreFloat   fSpeed = (iDamage == 5) ? (1.5f - 0.4f * pBullet->GetFlyTime()) : (2.0f - 0.75f * pBullet->GetFlyTime());
 
                 pBullet->SetSpeed(fSpeed);
 

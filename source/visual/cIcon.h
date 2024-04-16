@@ -40,6 +40,8 @@ private:
     coreFlow  m_fAnimation;                       // 
     coreFloat m_fStorage;                         // 
 
+    coreBool m_bDirty;                            // 
+
 
 public:
     cIcon()noexcept;

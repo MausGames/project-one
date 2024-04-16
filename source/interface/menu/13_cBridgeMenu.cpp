@@ -180,7 +180,7 @@ void cBridgeMenu::Move()
                 const coreFloat fOldTime = m_fUnlockTime;
                 m_fUnlockTime.UpdateMin(1.5f, 2.0f);
 
-                if((m_fUnlockTime >= 2.0f) && Core::Input->GetAnyButton(CORE_INPUT_PRESS))
+                if((m_fUnlockTime >= 2.0f) && g_MenuInput.bAny)
                 {
                     m_iUnlockState = 1u;
                 }
