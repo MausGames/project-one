@@ -33,7 +33,7 @@ cWater::cWater(const coreHashString& sSkyTexture)noexcept
     {
         // create depth frame buffer
         m_Depth.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH16);
-        m_Depth.Create(DEFINED(_CORE_GLES_) ? (g_vGameResolution * ENVIRONMENT_SCALE_FACTOR) : vWaterResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);   // TODO 1: only resolution-fix for ice ? instead of increasing resolution, maybe do manual 4-sample filtering
+        m_Depth.Create(vWaterResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
         // create sky-plane object
         m_Sky.DefineTexture(0u, sSkyTexture);
@@ -269,7 +269,7 @@ void cWater::Reshape()
     {
         // create depth frame buffer
         m_Depth.Delete();
-        m_Depth.Create(DEFINED(_CORE_GLES_) ? (g_vGameResolution * ENVIRONMENT_SCALE_FACTOR) : vWaterResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);   // TODO 1: only resolution-fix for ice ? instead of increasing resolution, maybe do manual 4-sample filtering
+        m_Depth.Create(vWaterResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
     }
 
     // 

@@ -52,6 +52,7 @@ public:
 
     // update the distortion-effect
     void Update();
+    void Move();
 
     // create distortion-objects
     void CreateWave  (const coreVector3 vPosition,                               const coreFloat fScale, const coreFloat fSpeed);

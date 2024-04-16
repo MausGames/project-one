@@ -83,10 +83,10 @@ void cDistortion::Update()
 
                     // 
                     const coreFloat fScale = oWave.GetColor4().x;
-                    const coreFloat fSpeed = oWave.GetColor4().y;
+                    //const coreFloat fSpeed = oWave.GetColor4().y;
 
                     // 
-                    oWave.SetAlpha(MAX0(oWave.GetAlpha() - fSpeed * TIME));
+                    //oWave.SetAlpha(MAX0(oWave.GetAlpha() - fSpeed * TIME));
                     oWave.SetSize (coreVector2(0.1f,0.1f) * (ABS(fScale) * ((fScale < 0.0f) ? oWave.GetAlpha() : (1.0f - oWave.GetAlpha()))));
                     oWave.Move();
                     oWave.Render();
@@ -100,10 +100,10 @@ void cDistortion::Update()
 
                     // 
                     const coreFloat fScale = oBurst.GetColor4().x;
-                    const coreFloat fSpeed = oBurst.GetColor4().yz().LengthSq();
+                    //const coreFloat fSpeed = oBurst.GetColor4().yz().LengthSq();
 
                     // 
-                    oBurst.SetAlpha(MAX0(oBurst.GetAlpha() - fSpeed * TIME));
+                    //oBurst.SetAlpha(MAX0(oBurst.GetAlpha() - fSpeed * TIME));
                     oBurst.SetSize (coreVector2(0.1f,0.1f) * (fScale * (1.0f - oBurst.GetAlpha())));
                     oBurst.Move();
                     oBurst.Render();
@@ -131,6 +131,37 @@ void cDistortion::Update()
     // 
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 }
+
+
+void cDistortion::Move()
+{
+    // 
+    for(coreUintW i = 0u; i < DISTORTION_WAVES; ++i)
+    {
+        coreObject2D& oWave = m_aWave[i];
+        if(!oWave.GetAlpha()) continue;
+
+        // 
+        const coreFloat fSpeed = oWave.GetColor4().y;
+
+        // 
+        oWave.SetAlpha(MAX0(oWave.GetAlpha() - fSpeed * TIME));
+    }
+
+    // 
+    for(coreUintW i = 0u; i < DISTORTION_BURSTS; ++i)
+    {
+        coreObject2D& oBurst = m_aBurst[i];
+        if(!oBurst.GetAlpha()) continue;
+
+        // 
+        const coreFloat fSpeed = oBurst.GetColor4().yz().LengthSq();
+
+        // 
+        oBurst.SetAlpha(MAX0(oBurst.GetAlpha() - fSpeed * TIME));
+    }
+}
+
 
 
 // ****************************************************************

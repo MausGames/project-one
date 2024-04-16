@@ -41,12 +41,29 @@ vec3 GetBumpNormal(const in vec2 v2Offset)
     return (coreTexture2D(0, v_av2TexCoord[0] + v2Offset).xyz) * 2.0 - 1.0;
 }
 
+float GetDepthValue(const in vec2 v2ScreenCoord)
+{
+#if defined(GL_ES)
+
+    float A = u_v4Resolution.z;
+    return (coreTextureBase2D(3, v2ScreenCoord + vec2(  A, 0.0)).r +
+            coreTextureBase2D(3, v2ScreenCoord + vec2( -A, 0.0)).r +
+            coreTextureBase2D(3, v2ScreenCoord + vec2(0.0,   A)).r +
+            coreTextureBase2D(3, v2ScreenCoord + vec2(0.0,  -A)).r) * 0.25;
+#else
+
+    // 
+    return coreTextureBase2D(3, v2ScreenCoord).r;
+
+#endif
+}
+
 void FragmentMain()
 {
     vec2 v2ScreenCoord = gl_FragCoord.xy * u_v4Resolution.zw;
 
     // lookup depth map
-    float v1Depth = coreTextureBase2D(3, v2ScreenCoord).r;
+    float v1Depth = GetDepthValue(v2ScreenCoord);
 
     if(v1Depth > c_v1ThreshIgnore)
     {
@@ -82,7 +99,7 @@ void FragmentMain()
             v1Height      += v3Step.z;
 
             // 
-            v1Depth = coreTextureBase2D(3, v2ScreenCoord).r;
+            v1Depth = GetDepthValue(v2ScreenCoord);
 
             if(v1Depth <= c_v1ThreshTrace)
             {

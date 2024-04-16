@@ -38,6 +38,8 @@ static coreProtect<coreUint64> s_iOldPerfTime  = 0u;     // last measured high-p
 static coreProtect<coreFloat>  s_fLogicalRate  = 0.0f;   // logical frame rate
 static coreProtect<coreFloat>  s_fLogicalTime  = 0.0f;   // logical frame time (simulation rate)
 static coreProtect<coreDouble> s_dPhysicalTime = 0.0;    // physical frame time (display rate)
+static coreUint8               s_iSkipMax      = 0u;     // 
+static coreUint8               s_iSkipFrame    = 0u;     // 
 
 static void LockFramerate();                             // lock frame rate
 static void ForceFramerate(const coreBool bFull);        // override frame time
@@ -172,7 +174,6 @@ void CoreApp::Render()
 {
     Core::Debug->MeasureStart("Update Always");
     {
-        
         const coreVector3 vOldCamPos = Core::Graphics->GetCamPosition();
         const coreVector3 vOldCamOri = Core::Graphics->GetCamOrientation();
 
@@ -185,7 +186,10 @@ void CoreApp::Render()
     }
     Core::Debug->MeasureEnd("Update Always");
 
-    if(!g_pMenu->IsPausedWithStep())
+    // 
+    if(++s_iSkipFrame >= s_iSkipMax) s_iSkipFrame = 0u;
+
+    if(!g_pMenu->IsPausedWithStep() && !s_iSkipFrame)
     {
         Core::Debug->MeasureStart("Update");
         {
@@ -234,36 +238,6 @@ void CoreApp::Render()
                 // clear the foreground
                 g_pForeground->Clear();
             }
-            
-            
-
-#if 0
-            static cPlayer s_Player;
-            if(s_Player.HasStatus(PLAYER_STATUS_DEAD))
-            {
-                s_Player.Configure(PLAYER_SHIP_P1);
-                s_Player.Resurrect();
-                s_Player.SetPosition(coreVector3(0.0f,0.0f,0.0f));
-                s_Player.SetDirection(coreVector3(0.0f,-1.0f,0.0f));
-                s_Player.SetScale   (5.0f);
-            }
-            s_Player.Move();
-            g_pForeground->Start();
-                glClearColor(1.0f,0.0f,1.0f,1.0f);
-                glClear(GL_COLOR_BUFFER_BIT);
-                glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-                glDepthRange(0.8f, 1.0f);
-                    s_Player.RenderBefore();
-                glDepthRange(0.6f, 0.8f);
-                    s_Player.Render();
-                    g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(&s_Player);
-                glDepthRange(0.4f, 0.6f);
-                    s_Player.RenderMiddle();
-                glDepthRange(0.2f, 0.4f);
-                    s_Player.RenderAfter();
-                glDepthRange(0.0f, 1.0f);
-            g_pForeground->End();
-#endif
         }
         Core::Debug->MeasureEnd("Foreground");
     }
@@ -351,6 +325,9 @@ void CoreApp::Move()
         g_pMenu->Move();
         if(!g_pMenu->IsPaused())
         {
+            
+                g_pDistortion->Move();
+            
             // 
             g_pReplay->Update();
 
@@ -485,7 +462,7 @@ void InitFramerate()
     SDL_GetCurrentDisplayMode(Core::System->GetDisplayIndex(), &oMode);
 
     // 
-    const coreUint32 iRefreshRate = (oMode.refresh_rate > F_TO_SI(FRAMERATE_MIN)) ? oMode.refresh_rate : SCORE_PURE_UPDATEFREQ;
+    const coreUint32 iRefreshRate = (oMode.refresh_rate >= F_TO_SI(FRAMERATE_MIN)) ? oMode.refresh_rate : SCORE_PURE_UPDATEFREQ;
 
     // calculate logical and physical frame time
     if(!STATIC_ISVALID(g_pGame))
@@ -501,11 +478,14 @@ void InitFramerate()
         s_dPhysicalTime = 1.0 / (dFixedRate * dGameSpeed);
 
         g_fGameRate = s_fLogicalRate;
+
+        s_iSkipMax   = oMode.refresh_rate ? (F_TO_UI(dFixedRate * dGameSpeed) / oMode.refresh_rate) : 0u;
+        s_iSkipFrame = s_iSkipMax;   // trigger render
     }
 
     // override vertical synchronization
     ASSERT(s_dPhysicalTime)
-    if(Core::Config->GetInt(CORE_CONFIG_SYSTEM_VSYNC) && (iRefreshRate == F_TO_UI(1.0 / s_dPhysicalTime)))
+    if(Core::Config->GetInt(CORE_CONFIG_SYSTEM_VSYNC) && (oMode.refresh_rate == F_TO_SI(1.0 / s_dPhysicalTime)))
     {
         SDL_GL_SetSwapInterval(1);
     }
