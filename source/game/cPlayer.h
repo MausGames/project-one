@@ -21,6 +21,7 @@
 // ****************************************************************
 // player definitions
 #define PLAYER_WEAPONS            (1u)                // number of weapons a player can carry
+#define PLAYER_SUPPORTS           (1u)                // 
 #define PLAYER_LIVES              (LIVES)             // 
 #define PLAYER_SHIELD             (SHIELD)            // 
 #define PLAYER_COLLISION_MIN      (0.4f)              // 
@@ -34,6 +35,7 @@
 
 #define PLAYER_SHIP_ATK (0u)        // 
 #define PLAYER_SHIP_DEF (1u)        // 
+#define PLAYER_SHIP_P1  (2u)        // 
 #define PLAYER_NO_ROLL  (0xFFu)     // 
 #define PLAYER_NO_FEEL  (-100.0f)   // 
 
@@ -102,9 +104,10 @@ public:
     DISABLE_COPY(cPlayer)
 
     // configure the player
-    void Configure  (const coreUintW iShipType, const coreVector3& vColor);
-    void EquipWeapon(const coreUintW iIndex, const coreInt32 iID);
-    void GiveShield ();
+    void Configure   (const coreUintW iShipType, const coreVector3& vColor);
+    void EquipWeapon (const coreUintW iIndex, const coreInt32 iID);
+    void EquipSupport(const coreUintW iIndex, const coreInt32 iID);
+    void GiveShield  ();
 
     // render and move the player
     void Render()final;
@@ -151,6 +154,7 @@ public:
 
     // get object properties
     inline const sGameInput*  GetInput   ()const {ASSERT(m_pInput) return m_pInput;}
+    inline const coreVector4& GetArea    ()const {return m_vArea;}
     inline const coreVector2& GetForce   ()const {return m_vForce;}
     inline       coreFloat    GetFeelTime()const {return (m_iFeelType <= 1u) ? m_fFeelTime : 0.0f;}
 

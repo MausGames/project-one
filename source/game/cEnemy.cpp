@@ -833,3 +833,109 @@ cCustomEnemy::~cCustomEnemy()
     // 
     g_pGame->GetEnemyManager()->UnbindEnemy(this);
 }
+
+
+// ****************************************************************
+// constructor
+cRepairEnemy::cRepairEnemy()noexcept
+: m_pPlayer    (NULL)
+, m_vDirection (coreVector2(0.0f,1.0f))
+, m_fAnimation (0.0f)
+{
+    // 
+    this->Configure(50, COLOR_ENERGY_WHITE * 0.6f);
+    this->AddStatus(ENEMY_STATUS_SINGLE);
+    this->AddStatus(ENEMY_STATUS_ENERGY);
+    this->AddStatus(ENEMY_STATUS_IMMORTAL);
+
+    // 
+    g_pGame->GetEnemyManager()->BindEnemy(this);
+
+    // 
+    this->DefineTexture(0u, "effect_energy.png");
+    this->DefineProgram("effect_energy_blink_invert_program");
+
+    // 
+    m_Bubble.DefineModel  ("object_sphere.md3");
+    m_Bubble.DefineTexture(0u, "effect_energy.png");
+    m_Bubble.DefineProgram("effect_energy_flat_spheric_program");
+    m_Bubble.SetColor4    (coreVector4(COLOR_ENERGY_WHITE * 0.5f, 0.0f));
+    m_Bubble.SetTexSize   (coreVector2(5.0f,5.0f));
+}
+
+
+// ****************************************************************
+// destructor
+cRepairEnemy::~cRepairEnemy()
+{
+    // 
+    this->Kill(false);
+
+    // 
+    g_pGame->GetEnemyManager()->UnbindEnemy(this);
+}
+
+
+// ****************************************************************
+// 
+void cRepairEnemy::AssignPlayer(cPlayer* pPlayer)
+{
+    // 
+    m_pPlayer = pPlayer;
+
+    // 
+    m_vDirection = coreVector2(-SIGN(this->GetPosition().x), -SIGN(this->GetPosition().y)).Normalized();
+    m_fAnimation = 0.0f;
+
+    // 
+    this->DefineModelHigh(pPlayer->GetModelHigh());
+    this->DefineModelLow (pPlayer->GetModelLow ());
+    this->SetPosition    (pPlayer->GetPosition());
+
+    // 
+    m_Bubble.SetAlpha(0.0f);
+}
+
+
+// ****************************************************************
+// 
+void cRepairEnemy::__RenderOwnUnder()
+{
+    // 
+    m_Bubble.Render();
+}
+
+
+// ****************************************************************
+// 
+void cRepairEnemy::__MoveOwn()
+{
+    ASSERT(m_pPlayer)
+
+    // 
+    m_fAnimation.UpdateMod(0.2f, 1.0f);
+
+    // 
+    const coreVector2  vNewPos = this->GetPosition().xy() + m_vDirection * (30.0f * Core::System->GetTime());
+    const coreVector4& vArea   = m_pPlayer->GetArea();
+
+    // 
+         if((vNewPos.x < vArea.x) && (m_vDirection.x < 0.0f)) m_vDirection.x =  ABS(m_vDirection.x);
+    else if((vNewPos.x > vArea.z) && (m_vDirection.x > 0.0f)) m_vDirection.x = -ABS(m_vDirection.x);
+         if((vNewPos.y < vArea.y) && (m_vDirection.y < 0.0f)) m_vDirection.y =  ABS(m_vDirection.y);
+    else if((vNewPos.y > vArea.w) && (m_vDirection.y > 0.0f)) m_vDirection.y = -ABS(m_vDirection.y);
+
+    // 
+    this->SetPosition    (coreVector3(vNewPos, 0.0f));
+    this->SetTexOffset   (coreVector2(0.0f, m_fAnimation));
+    this->DefaultMultiate(m_fAnimation * 8.0f*PI);
+
+    // 
+    m_Bubble.SetAlpha(MIN(m_Bubble.GetAlpha() + 4.0f * Core::System->GetTime(), 0.8f));
+
+    // 
+    m_Bubble.SetPosition (coreVector3(vNewPos, 0.0f));
+    m_Bubble.SetSize     (coreVector3(1.0f,1.0f,1.0f) * PLAYER_BUBBLE_SIZE * m_Bubble.GetAlpha());
+    m_Bubble.SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.5f));
+    m_Bubble.Move();
+}

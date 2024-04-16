@@ -142,7 +142,7 @@ void cBullet::Reflect(const coreObject3D* pObject, const coreVector2& vIntersect
             }
         }
     }
-    ASSERT(pObject->GetModel()->GetNumClusters())
+    ASSERT(pObject->GetModel()->GetNumClusters()) // repair-enemy can trigger this, if two bullets hit at the same time   
 
 
 

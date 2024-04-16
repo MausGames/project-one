@@ -12,7 +12,6 @@
 
 // TODO: language and main menu control with keyboard+joystick, cursor gets invisible on these inputs, in game menu only cursor
 // TODO: short YES-no questions: Exit Game ? Return to Menu ?
-// TODO: menue-riss bei start oder seitlicher fade-out, ausserdem bei start im title-menue animation und explosion des logos oder riss in mitte
 // TODO: move mouse to buttons on joystick-input
 // TODO: real-time sound-configuration
 // TODO: score-menu names and all name-inputs MUST support all languages (japanese (keifont), russian (default), arabic (default), ...)
@@ -25,27 +24,34 @@
 // TODO: highlight which joystick is which input set
 // TODO: fix all g_vMenuCenter usages when changing aspect ratio
 // TODO: summary_ add separate total-score for each player
-// TODO: prevent interaction with next menu when doing animate-transition, e.g. focus, enabled_move
 
 
 // ****************************************************************
 // menu definitions
-#define MENU_LIGHT_ACTIVE       (1.0f)     // visible strength of active menu objects
-#define MENU_LIGHT_IDLE         (0.667f)   // visible strength of idle menu objects
-#define MENU_CONTRAST_WHITE     (0.8f)     // white contrast value (to reduce eye strain)
-#define MENU_CONTRAST_BLACK     (0.04f)    // black contrast value
+#define MENU_LIGHT_ACTIVE             (1.0f)     // visible strength of active menu objects
+#define MENU_LIGHT_IDLE               (0.667f)   // visible strength of idle menu objects
+#define MENU_CONTRAST_WHITE           (0.8f)     // white contrast value (to reduce eye strain)
+#define MENU_CONTRAST_BLACK           (0.04f)    // black contrast value
 
-#define MENU_CONFIG_INPUTS      (PLAYERS)
-#define MENU_GAME_MISSIONS      (9u)
-#define MENU_GAME_STAGES        (18u)
-#define MENU_GAME_PLAYERS       (PLAYERS)
-#define MENU_SCORE_ENTRIES      (10u)
-#define MENU_REPLAY_ENTRIES     (5u)
-#define MENU_SUMMARY_ENTRIES    (BOSSES)
-#define MENU_SUMMARY_PARTS      (PLAYERS)
-#define MENU_DEFEAT_DELAY_INTRO (0.5f)
-#define MENU_DEFEAT_DELAY_OUTRO (1.0f)
-#define MENU_DEFEAT_CONTINUES   (CONTINUES)
+#define MENU_GAME_MISSIONS            (9u)
+#define MENU_GAME_STAGES              (STAGES)
+#define MENU_GAME_PLAYERS             (PLAYERS)
+#define MENU_GAME_OPTIONS             (3u)
+#define MENU_SCORE_ENTRIES            (10u)
+#define MENU_REPLAY_ENTRIES           (5u)
+#define MENU_CONFIG_INPUTS            (PLAYERS)
+#define MENU_SUMMARY_MEDALS           (STAGES)
+#define MENU_SUMMARY_ENTRIES          (2u)
+#define MENU_SUMMARY_PARTS            (PLAYERS)
+#define MENU_SUMMARY_BANNER_SPEED     (4.0f)
+#define MENU_SUMMARY_BANNER_SPEED_REV (1.0f / MENU_SUMMARY_BANNER_SPEED)
+#define MENU_SUMMARY_BANNER_ANIMATION (6.8f)
+#define MENU_DEFEAT_DELAY_INTRO       (0.5f)
+#define MENU_DEFEAT_DELAY_OUTRO       (1.0f)
+#define MENU_DEFEAT_CONTINUES         (CONTINUES)
+#define MENU_DEFEAT_BANNER_SPEED      (4.0f)
+#define MENU_DEFEAT_BANNER_SPEED_REV  (1.0f / MENU_DEFEAT_BANNER_SPEED)
+#define MENU_DEFEAT_BANNER_ANIMATION  (2.9f)
 
 #define MENU_BUTTON             "menu_background_black.png", "menu_background_black.png"
 #define MENU_SWITCHBOX          "default_black.png", "default_black.png"
@@ -68,103 +74,110 @@
 
 
 // ****************************************************************
-// menu surface numbers
-#define SURFACE_EMPTY           (0u)
-#define SURFACE_INTRO           (1u)
-#define SURFACE_TITLE           (2u)
-#define SURFACE_MAIN            (3u)
-#define SURFACE_GAME            (4u)
-#define SURFACE_SCORE           (5u)
-#define SURFACE_REPLAY          (6u)
-#define SURFACE_EXTRA           (7u)
-#define SURFACE_CONFIG          (8u)
-#define SURFACE_PAUSE           (9u)
-#define SURFACE_SUMMARY         (10u)
-#define SURFACE_DEFEAT          (11u)
-#define SURFACE_MAX             (12u)
+// menu surface indices
+enum eSurface : coreUint8
+{
+    SURFACE_EMPTY = 0u,
+    SURFACE_INTRO,
+    SURFACE_TITLE,
+    SURFACE_MAIN,
+    SURFACE_GAME,
+    SURFACE_SCORE,
+    SURFACE_REPLAY,
+    SURFACE_EXTRA,
+    SURFACE_CONFIG,
+    SURFACE_PAUSE,
+    SURFACE_SUMMARY,
+    SURFACE_DEFEAT,
+    SURFACE_MAX,
 
-#define SURFACE_INTRO_EMPTY     (0u)
-#define SURFACE_INTRO_MARTIN    (1u)
-#define SURFACE_INTRO_LANGUAGE  (2u)
-#define SURFACE_INTRO_MAX       (3u)
+    SURFACE_INTRO_EMPTY = 0u,
+    SURFACE_INTRO_WELCOME,
+    SURFACE_INTRO_LANGUAGE,
+    SURFACE_INTRO_MAX,
 
-#define SURFACE_TITLE_DEFAULT   (0u)
-#define SURFACE_TITLE_FIRST     (1u)
-#define SURFACE_TITLE_MAX       (2u)
+    SURFACE_TITLE_LOGO = 0u,
+    SURFACE_TITLE_FIRST,
+    SURFACE_TITLE_MAX,
 
-#define SURFACE_MAIN_DEFAULT    (0u)
-#define SURFACE_MAIN_MAX        (1u)
+    SURFACE_MAIN_DEFAULT = 0u,
+    SURFACE_MAIN_MAX,
 
-#define SURFACE_GAME_STANDARD   (0u)
-#define SURFACE_GAME_TRAINING   (1u)
-#define SURFACE_GAME_ARMORY     (2u)
-#define SURFACE_GAME_MAX        (3u)
+    SURFACE_GAME_STANDARD = 0u,
+    SURFACE_GAME_TRAINING,
+    SURFACE_GAME_ARMORY,
+    SURFACE_GAME_MAX,
 
-#define SURFACE_SCORE_DEFAULT   (0u)
-#define SURFACE_SCORE_MAX       (1u)
+    SURFACE_SCORE_DEFAULT = 0u,
+    SURFACE_SCORE_MAX,
 
-#define SURFACE_REPLAY_DEFAULT  (0u)
-#define SURFACE_REPLAY_MAX      (1u)
+    SURFACE_REPLAY_DEFAULT = 0u,
+    SURFACE_REPLAY_MAX,
 
-#define SURFACE_EXTRA_DEFAULT   (0u)
-#define SURFACE_EXTRA_MAX       (1u)
+    SURFACE_EXTRA_DEFAULT = 0u,
+    SURFACE_EXTRA_MAX,
 
-#define SURFACE_CONFIG_VIDEO    (0u)
-#define SURFACE_CONFIG_AUDIO    (1u)
-#define SURFACE_CONFIG_INPUT    (2u)
-#define SURFACE_CONFIG_GAME     (3u)
-#define SURFACE_CONFIG_MAX      (4u)
+    SURFACE_CONFIG_VIDEO = 0u,
+    SURFACE_CONFIG_AUDIO,
+    SURFACE_CONFIG_INPUT,
+    SURFACE_CONFIG_GAME,
+    SURFACE_CONFIG_MAX,
 
-#define SURFACE_PAUSE_DEFAULT   (0u)
-#define SURFACE_PAUSE_MAX       (1u)
+    SURFACE_PAUSE_DEFAULT = 0u,
+    SURFACE_PAUSE_MAX,
 
-#define SURFACE_SUMMARY_NORMAL  (0u)
-#define SURFACE_SUMMARY_BEGIN   (1u)
-#define SURFACE_SUMMARY_MAX     (2u)
+    SURFACE_SUMMARY_NORMAL = 0u,
+    SURFACE_SUMMARY_BEGIN,
+    SURFACE_SUMMARY_TITLE,
+    SURFACE_SUMMARY_MAX,
 
-#define SURFACE_DEFEAT_CONTINUE (0u)
-#define SURFACE_DEFEAT_GAMEOVER (1u)
-#define SURFACE_DEFEAT_MAX      (2u)
+    SURFACE_DEFEAT_CONTINUE = 0u,
+    SURFACE_DEFEAT_GAMEOVER,
+    SURFACE_DEFEAT_MAX
+};
 
 
 // ****************************************************************
 // configuration entry indices
-#define ENTRY_VIDEO_MONITOR       (0u)
-#define ENTRY_VIDEO_RESOLUTION    (1u)
-#define ENTRY_VIDEO_DISPLAYMODE   (2u)
-#define ENTRY_VIDEO_ANTIALIASING  (3u)
-#define ENTRY_VIDEO_TEXTUREFILTER (4u)
-#define ENTRY_VIDEO_RENDERQUALITY (5u)
-#define ENTRY_VIDEO_SHADOWQUALITY (6u)
-#define ENTRY_VIDEO               (7u)
+enum eEntry : coreUint8
+{
+    ENTRY_VIDEO_MONITOR = 0u,
+    ENTRY_VIDEO_RESOLUTION,
+    ENTRY_VIDEO_DISPLAYMODE,
+    ENTRY_VIDEO_ANTIALIASING,
+    ENTRY_VIDEO_TEXTUREFILTER,
+    ENTRY_VIDEO_RENDERQUALITY,
+    ENTRY_VIDEO_SHADOWQUALITY,
+    ENTRY_VIDEO,
 
-#define ENTRY_AUDIO_OVERALLVOLUME (0u  + ENTRY_VIDEO)
-#define ENTRY_AUDIO_MUSICVOLUME   (1u  + ENTRY_VIDEO)
-#define ENTRY_AUDIO_EFFECTVOLUME  (2u  + ENTRY_VIDEO)
-#define ENTRY_AUDIO_AMBIENTSOUND  (3u  + ENTRY_VIDEO)
-#define ENTRY_AUDIO               (4u  + ENTRY_VIDEO)
+    ENTRY_AUDIO_OVERALLVOLUME = ENTRY_VIDEO,
+    ENTRY_AUDIO_MUSICVOLUME,
+    ENTRY_AUDIO_EFFECTVOLUME,
+    ENTRY_AUDIO_AMBIENTSOUND,
+    ENTRY_AUDIO,
 
-#define ENTRY_INPUT_TYPE          (0u  + ENTRY_AUDIO)
-#define ENTRY_INPUT_RUMBLE        (1u  + ENTRY_AUDIO)
-#define ENTRY_INPUT_MOVEUP        (2u  + ENTRY_AUDIO)
-#define ENTRY_INPUT_MOVELEFT      (3u  + ENTRY_AUDIO)
-#define ENTRY_INPUT_MOVEDOWN      (4u  + ENTRY_AUDIO)
-#define ENTRY_INPUT_MOVERIGHT     (5u  + ENTRY_AUDIO)
-#define ENTRY_INPUT_ACTION1       (6u  + ENTRY_AUDIO)
-#define ENTRY_INPUT_ACTION2       (7u  + ENTRY_AUDIO)
-#define ENTRY_INPUT_ACTION3       (8u  + ENTRY_AUDIO)
-#define ENTRY_INPUT_ACTION4       (9u  + ENTRY_AUDIO)
-#define ENTRY_INPUT_ACTION5       (10u + ENTRY_AUDIO)
-#define ENTRY_INPUT               (11u + ENTRY_AUDIO)
+    ENTRY_INPUT_TYPE = ENTRY_AUDIO,
+    ENTRY_INPUT_RUMBLE,
+    ENTRY_INPUT_MOVEUP,
+    ENTRY_INPUT_MOVELEFT,
+    ENTRY_INPUT_MOVEDOWN,
+    ENTRY_INPUT_MOVERIGHT,
+    ENTRY_INPUT_ACTION1,
+    ENTRY_INPUT_ACTION2,
+    ENTRY_INPUT_ACTION3,
+    ENTRY_INPUT_ACTION4,
+    ENTRY_INPUT_ACTION5,
+    ENTRY_INPUT,
 
-#define ENTRY_GAME_LANGUAGE       (0u  + ENTRY_INPUT)
-#define ENTRY_GAME_TEXTSIZE       (1u  + ENTRY_INPUT)
-#define ENTRY_GAME_GAMEROTATION   (2u  + ENTRY_INPUT)
-#define ENTRY_GAME_GAMESCALE      (3u  + ENTRY_INPUT)
-#define ENTRY_GAME_HUDROTATION    (4u  + ENTRY_INPUT)
-#define ENTRY_GAME_HUDSCALE       (5u  + ENTRY_INPUT)
-#define ENTRY_GAME_HUDTYPE        (6u  + ENTRY_INPUT)
-#define ENTRY_MAX                 (7u  + ENTRY_INPUT)
+    ENTRY_GAME_LANGUAGE = ENTRY_INPUT,
+    ENTRY_GAME_TEXTSIZE,
+    ENTRY_GAME_GAMEROTATION,
+    ENTRY_GAME_GAMESCALE,
+    ENTRY_GAME_HUDROTATION,
+    ENTRY_GAME_HUDSCALE,
+    ENTRY_GAME_HUDTYPE,
+    ENTRY_MAX
+};
 
 
 // ****************************************************************
@@ -197,9 +210,10 @@
 class cIntroMenu final : public coreMenu
 {
 private:
-    coreLabel m_MartinMessage;                                 // 
+    coreLabel m_WelcomeText;                                   // 
 
     coreTimer m_IntroTimer;                                    // intro animation 
+    coreUint8 m_iIntroStatus;                                  // 
 
     coreLookup<std::string, coreButton*> m_apLanguageButton;   // list with buttons for valid language files
 
@@ -212,6 +226,9 @@ public:
 
     // move the intro menu
     void Move()final;
+
+    // 
+    void ActivateFirstPlay();
 };
 
 
@@ -220,12 +237,16 @@ public:
 class cTitleMenu final : public coreMenu
 {
 private:
-    coreObject2D m_GameLogo;       // game logo
+    coreObject2D m_GameLogo;        // game logo
 
-    coreLabel m_StartMessage;      // 
-    coreFlow  m_fStartAnimation;   // 
+    coreLabel m_PromptText;         // 
+    coreFlow  m_fPromptAnimation;   // 
 
-    coreLabel m_aVersionInfo[2];   // hard-coded version info strings
+    
+    coreFlow  m_fTest;   // 
+    coreBool m_bTest2;
+
+    coreLabel m_aVersionText[2];    // hard-coded version info strings 
 
 
 public:
@@ -235,6 +256,10 @@ public:
 
     // move the title menu
     void Move()final;
+
+    // 
+    void ActivateFirstPlay();
+    void DeactivateFirstPlay();
 };
 
 
@@ -249,6 +274,8 @@ private:
     coreButton m_ExtraButton;    // extra button
     coreButton m_ConfigButton;   // config button
     coreButton m_ExitButton;     // exit button
+
+    cMenuInput m_MenuInput;  
 
 
 public:
@@ -270,59 +297,51 @@ public:
 class cGameMenu final : public coreMenu
 {
 private:
-    coreObject2D m_Background;      // 
+    coreObject2D m_DirectoryBackground;                  // 
+    coreObject2D m_ArmoryBackground;                     // 
 
-    coreButton m_StandardTab;               // 
-    coreButton m_TrainingTab;               // 
+    coreButton m_StandardTab;                            // 
+    coreButton m_TrainingTab;                            // 
 
-    coreButton m_StartButton;       // start button
-    coreButton m_CancelButton;      // cancel button
-    coreButton m_BackButton;        // back button
+    coreButton m_StartButton;                            // start button
+    coreButton m_CancelButton;                           // cancel button
+    coreButton m_BackButton;                             // back button
 
+    coreLabel m_DirectoryHeader;                         // 
+    coreLabel m_ArmoryHeader;                            // 
 
-    coreObject2D m_ArmoryBackground;
+    cWorldMap m_WorldMap;                                // 
 
-    coreLabel m_MissionHeader;
-    coreLabel m_ArmoryHeader;
+    coreLabel    m_aMissionName[MENU_GAME_MISSIONS];     // 
+    coreObject2D m_aMissionLine[MENU_GAME_MISSIONS];     // 
 
-    cWorldMap m_WorldMap;
+    coreObject2D m_StageArea;                            // 
+    coreButton   m_aStage[MENU_GAME_STAGES];             // 
 
-    
-    coreLabel    m_aMissionName[MENU_GAME_MISSIONS];   // 
-    coreObject2D m_aMissionLine[MENU_GAME_MISSIONS];   // 
+    coreLabel    m_aOptionName[MENU_GAME_OPTIONS];       // 
+    coreObject2D m_aOptionLine[MENU_GAME_OPTIONS];       // 
 
-    coreObject2D m_StageArea;
-    coreButton   m_aStage[MENU_GAME_STAGES];
-
-
-    
-    coreLabel    m_aOptionName[3];   // 
-    coreObject2D m_aOptionLine[3];   // 
-
-
-    coreSwitchBoxU8 m_Players;      // 
-    coreSwitchBoxU8 m_aWeapon [MENU_GAME_PLAYERS];      // 
-    coreSwitchBoxU8 m_aSupport[MENU_GAME_PLAYERS];      // 
-
-    coreObject2D m_aWeaponIcon [MENU_GAME_PLAYERS];      // 
-    coreObject2D m_aSupportIcon[MENU_GAME_PLAYERS];      // 
+    coreSwitchBoxU8 m_Players;                           // 
+    coreSwitchBoxU8 m_aWeapon     [MENU_GAME_PLAYERS];   // 
+    coreSwitchBoxU8 m_aSupport    [MENU_GAME_PLAYERS];   // 
+    coreObject2D    m_aWeaponIcon [MENU_GAME_PLAYERS];   // 
+    coreObject2D    m_aSupportIcon[MENU_GAME_PLAYERS];   // 
 
 
+    cPlayer* m_apShip[2];
+    sGameInput m_aShipInput[2];
 
+    cMenuInput m_MenuInput;  
 
-
-    //coreLabel    m_aLabel[3];       // 
-    //coreObject2D m_aLine [3];       // 
-    //
-    //coreSwitchBoxU8 m_Mode;         // 
-    //coreSwitchBoxU8 m_Difficulty;   // 
-    //coreSwitchBoxU8 m_Players;      // 
 
 
 public:
     cGameMenu()noexcept;
+    ~cGameMenu()final;
 
     DISABLE_COPY(cGameMenu)
+
+        void Render()final;
 
     // move the game menu
     void Move()final;
@@ -332,9 +351,13 @@ public:
     void DeactivateFirstPlay();
 
     // 
-    inline const coreUint8& GetSelectedMode      ()const {return 0u;}
-    inline const coreUint8& GetSelectedDifficulty()const {return 0u;}
-    inline const coreUint8& GetSelectedPlayers   ()const {return m_Players.GetCurEntry().tValue;}
+    void LoadValues();
+    void SaveValues();
+
+    // 
+    inline const coreUint8& GetSelectedPlayers()const                       {return m_Players.GetCurEntry().tValue;}
+    inline const coreUint8& GetSelectedWeapon (const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aWeapon [iIndex].GetCurEntry().tValue;}
+    inline const coreUint8& GetSelectedSupport(const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aSupport[iIndex].GetCurEntry().tValue;}
 };
 
 
@@ -465,9 +488,13 @@ private:
     coreSwitchBoxU8 m_HudRotation;
     coreSwitchBoxU8 m_HudScale;
     coreSwitchBoxU8 m_HudType;
-    sPlayerInput    m_aInput[MENU_CONFIG_INPUTS];
 
-    coreButton m_SwapInput;
+    sPlayerInput m_aInput[MENU_CONFIG_INPUTS];
+    coreButton   m_SwapInput;
+
+
+    
+    cMenuInput m_MenuInput;  
 
 
 public:
@@ -542,13 +569,20 @@ private:
 
 
 private:
-    coreObject2D m_Background;                                      // 
+    coreObject2D m_BackgroundMain;                                  // 
+    coreObject2D m_BackgroundCoop;                                  // 
 
-    coreLabel m_aTitle[MENU_SUMMARY_ENTRIES];                       // 
+    coreLabel m_Title;                                              // 
+
+    coreLabel m_aHeader[2];                                         // 
+
+    coreObject2D m_aMedal[MENU_SUMMARY_MEDALS];                     // 
+
+    coreLabel m_aName [MENU_SUMMARY_ENTRIES];                       // 
     coreLabel m_aValue[MENU_SUMMARY_ENTRIES];                       // 
     coreLabel m_aaPart[MENU_SUMMARY_ENTRIES][MENU_SUMMARY_PARTS];   // 
 
-    coreLabel m_TotalTitle;                                         // 
+    coreLabel m_TotalName;                                          // 
     coreLabel m_TotalValue;                                         // 
     coreLabel m_aTotalPart[MENU_SUMMARY_PARTS];                     // 
 
@@ -571,6 +605,11 @@ public:
     // 
     void ShowNormal();
     void ShowBegin();
+
+
+private:
+    // 
+    void __SetMedal(const coreUintW iIndex, const coreUint8 iType);
 };
 
 
@@ -646,7 +685,7 @@ private:
     coreUint32   m_iPauseFrame;          // 
 
     coreFrameBuffer m_aFrameBuffer[3];   // 
-    coreObject2D    m_MixObject;         // 
+    coreFullscreen  m_MixObject;         // 
 
     coreTimer m_TransitionTime;          // 
     coreUint8 m_iTransitionState;        // 
@@ -673,18 +712,17 @@ public:
     inline void InvokePauseStep() {m_iPauseFrame = Core::System->GetCurFrame();}
 
     // 
-    coreBool IsInTransition(const coreMenu* pMenu)const {return m_TransitionTime.GetStatus() || (pMenu->GetAlpha() < 1.0f) || (pMenu->GetTransition().GetStatus());}    
-    void AnimateSurface(coreMenu* OUTPUT pMenu, const coreUint8 iNewSurface, const coreFloat fSpeed);
+    void ShiftSurface(coreMenu* OUTPUT pMenu, const coreUint8 iNewSurface, const coreFloat fSpeed);
+    inline coreBool IsShifting()const {return m_TransitionTime.GetStatus();}
 
     // 
     static void UpdateLanguageFont();
     static const coreLookup<std::string, std::string>& GetLanguageList();
 
     // menu helper routines
-    static void UpdateButton(coreButton* OUTPUT pButton, const coreBool bFocused, const coreVector3& vFocusColor);
-    static void UpdateButton(coreButton* OUTPUT pButton, const coreBool bFocused);
-    static void UpdateSwitchBox(coreSwitchBoxU8* OUTPUT pSwitchBox);
-    static void UpdateAnimateProgram(coreObject2D* OUTPUT pObject);
+    static void UpdateButton        (coreButton*      OUTPUT pButton, const coreBool bFocused, const coreVector3& vFocusColor = COLOR_MENU_WHITE);
+    static void UpdateSwitchBox     (coreSwitchBoxU8* OUTPUT pSwitchBox);
+    static void UpdateAnimateProgram(coreObject2D*    OUTPUT pObject);
 
 
 private:

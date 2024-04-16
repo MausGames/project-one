@@ -31,7 +31,17 @@ void cReplay::CreateGame()
     ASSERT(!STATIC_ISVALID(g_pGame) && this->__CanStartPlayback())
 
     // 
-    STATIC_NEW(g_pGame, m_Header.iGameDifficulty, (m_Header.iGamePlayers > 1u) ? true : false, m_Header.aiMissionList, m_Header.iNumMissions)
+    sGameConfig oConfig = {};
+    oConfig.iDifficulty =  m_Header.iGameDifficulty;
+    oConfig.bCoop       = (m_Header.iGamePlayers > 1u) ? true : false;
+    for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
+    {
+        oConfig.aaiWeapon [i][0] = 0u;
+        oConfig.aaiSupport[i][0] = 0u;
+    }
+
+    // 
+    STATIC_NEW(g_pGame, oConfig, m_Header.aiMissionList, m_Header.iNumMissions)
     g_pGame->LoadNextMission();
 }
 
@@ -113,10 +123,10 @@ void cReplay::EndRecording()
     {
         const cTimeTable* pTable = g_pGame->GetTimeTable();
 
-        m_Header.fTimeTotal = pTable->GetTimeTotal();
-        for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) m_Header.afTimeMission[j] = pTable->GetTimeMission(j);
-        for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) for(coreUintW i = 0u, ie = m_Header.iNumBosses; i < ie; ++i) m_Header.aafTimeBoss[j][i] = pTable->GetTimeBoss(j, i);
-        for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) for(coreUintW i = 0u, ie = m_Header.iNumWaves;  i < ie; ++i) m_Header.aafTimeWave[j][i] = pTable->GetTimeWave(j, i);
+        m_Header.iTimeTotal = pTable->GetTimeTotalRaw();
+        for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) m_Header.aiTimeMission[j] = pTable->GetTimeMissionRaw(j);
+        for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) for(coreUintW i = 0u, ie = m_Header.iNumBosses; i < ie; ++i) m_Header.aaiTimeBoss[j][i] = pTable->GetTimeBossRaw(j, i);
+        for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) for(coreUintW i = 0u, ie = m_Header.iNumWaves;  i < ie; ++i) m_Header.aaiTimeWave[j][i] = pTable->GetTimeWaveRaw(j, i);
     }
 
     // 
@@ -289,15 +299,15 @@ coreBool cReplay::LoadFile(const coreChar* pcPath, const coreBool bOnlyHeader)
         return false;
     }
 
-
+    // 
     pHeader->Unscramble();
 
-
     // 
-    std::memcpy(&m_Header, pHeader->GetData(), sizeof(sHeader));
-    WARN_IF((m_Header.iMagic    != REPLAY_FILE_MAGIC)   ||
-            (m_Header.iVersion  != REPLAY_FILE_VERSION) ||
-            (pHeader->GetSize() != sizeof(sHeader)))
+    std::memcpy(&m_Header, pHeader->GetData(), MIN(pHeader->GetSize(), sizeof(sHeader)));
+    WARN_IF((m_Header.iMagic    != SAVE_FILE_MAGIC)   ||
+            (m_Header.iVersion  != SAVE_FILE_VERSION) ||
+            (m_Header.iBodySize != pBody->GetSize())  ||
+            (m_Header.iChecksum != cReplay::__GenerateChecksum(m_Header)))
     {
         Core::Log->Warning("Replay (%s) is not a valid replay-file!", pcPath);
         return false;
@@ -318,28 +328,34 @@ void cReplay::SaveFile(const coreChar* pcName)
     ASSERT(m_iStatus == REPLAY_STATUS_DISABLED)
 
     // 
-    coreData::StrCopy(pcName, m_Header.acName, ARRAY_SIZE(m_Header.acName));
-    sHeader* pHeaderData = new sHeader(m_Header);
-
-    // 
     coreByte*  pBodyData = NULL;
     coreUint32 iBodySize = 0;
     this->__GetBodyData(&pBodyData, &iBodySize);
     ASSERT(pBodyData && iBodySize)
 
+    // dont save if nothing to save (assert in compress-func) 
+
     // 
-    coreFile* pHeader = new coreFile("header", r_cast<coreByte*>(pHeaderData), sizeof(sHeader));
-    coreFile* pBody   = new coreFile("body",   pBodyData,                      iBodySize);
+    coreData::StrCopy(pcName, m_Header.acName, ARRAY_SIZE(m_Header.acName));
+    m_Header.iBodySize = iBodySize;
+    m_Header.iChecksum = cReplay::__GenerateChecksum(m_Header);
 
+    // 
+    coreFile* pHeader = new coreFile("header", r_cast<coreByte*>(new sHeader(m_Header)), sizeof(sHeader));
+    coreFile* pBody   = new coreFile("body", pBodyData, iBodySize);
+   // coreFile* pSave   = new coreFile("save", pBodyData, iBodySize);
 
+    // 
     pHeader->Scramble();
 
+    // 
+    coreData::CreateFolder(REPLAY_FILE_FOLDER);
 
     // 
     coreArchive oArchive;
     oArchive.AddFile(pHeader);
     oArchive.AddFile(pBody);
-    oArchive.Save(PRINT(REPLAY_FILE_FOLDER "/replay_%s." REPLAY_FILE_EXTENSION, coreData::DateTimePrint("%Y%m%d_%H%M%S")));
+    oArchive.Save(coreData::DateTimePrint(REPLAY_FILE_FOLDER "/replay_%Y%m%d_%H%M%S." REPLAY_FILE_EXTENSION));
 
     Core::Log->Info("Replay (%s) saved", oArchive.GetPath());
 }
@@ -493,4 +509,14 @@ coreUint32 cReplay::__CalculateReplayHash()const
     }
 
     return iReplayHash;
+}
+
+
+// ****************************************************************
+// 
+coreUint64 cReplay::__GenerateChecksum(const sHeader& oHeader)
+{
+    // 
+    STATIC_ASSERT(offsetof(sHeader, iChecksum) == sizeof(sHeader) - sizeof(sHeader::iChecksum))
+    return coreHashMurmur64A(r_cast<const coreByte*>(&oHeader), sizeof(sHeader) - sizeof(sHeader::iChecksum));
 }

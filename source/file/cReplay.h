@@ -24,24 +24,24 @@
 
 // ****************************************************************
 // 
-#define REPLAY_FILE_FOLDER      "replays"              // 
-#define REPLAY_FILE_EXTENSION   "p1rp"                 // 
-#define REPLAY_FILE_MAGIC       (coreUint32('P1RP'))   // 
-#define REPLAY_FILE_VERSION     (0x00000001u)          // 
+#define REPLAY_FILE_FOLDER      "user/replays"           // 
+#define REPLAY_FILE_EXTENSION   "p1rp"                   // 
+#define REPLAY_FILE_MAGIC       (UINT_LITERAL("P1RP"))   // 
+#define REPLAY_FILE_VERSION     (0x00000001u)            // 
 
-#define REPLAY_NAME_LENTH       (128u)                 // 
-#define REPLAY_STREAMS          (PLAYERS)              // 
-#define REPLAY_MISSIONS         (MISSIONS)             // 
-#define REPLAY_BOSSES           (BOSSES)               // 
-#define REPLAY_WAVES            (WAVES)                // 
+#define REPLAY_NAME_LENTH       (128u)                   // 
+#define REPLAY_STREAMS          (PLAYERS)                // 
+#define REPLAY_MISSIONS         (MISSIONS)               // 
+#define REPLAY_BOSSES           (BOSSES)                 // 
+#define REPLAY_WAVES            (WAVES)                  // 
 
-#define REPLAY_TYPE_MOVE        (0u)                   // 
-#define REPLAY_TYPE_PRESS       (1u)                   // 
-#define REPLAY_TYPE_RELEASE     (2u)                   // 
+#define REPLAY_TYPE_MOVE        (0u)                     // 
+#define REPLAY_TYPE_PRESS       (1u)                     // 
+#define REPLAY_TYPE_RELEASE     (2u)                     // 
 
-#define REPLAY_STATUS_DISABLED  (0u)                   // 
-#define REPLAY_STATUS_RECORDING (1u)                   // 
-#define REPLAY_STATUS_PLAYBACK  (2u)                   // 
+#define REPLAY_STATUS_DISABLED  (0u)                     // 
+#define REPLAY_STATUS_RECORDING (1u)                     // 
+#define REPLAY_STATUS_PLAYBACK  (2u)                     // 
 
 #define REPLAY_KEYFRAME_REGULAR(x)       ((x))
 #define REPLAY_KEYFRAME_MISSION_START(x) ((x) + 40000u)
@@ -61,13 +61,14 @@ public:
     {
         coreUint32 iMagic;                                                              // 
         coreUint32 iVersion;                                                            // 
+
         coreChar   acName[REPLAY_NAME_LENTH];                                           // 
+        coreUint64 iStartTimestamp;                                                     // 
+        coreUint64 iEndTimestamp;                                                       // 
 
         coreUint32 iExecutableHash;                                                     // 
         coreUint32 iReplayHash;                                                         // 
-
-        coreUint64 iStartTimestamp;                                                     // 
-        coreUint64 iEndTimestamp;                                                       // 
+        coreUint32 iBodySize;
 
         coreUint8  iGameMode;                                                           // 
         coreUint8  iGameDifficulty;                                                     // 
@@ -84,10 +85,10 @@ public:
         coreUint32 iKeyFrameCount;                                                      // 
         coreUint32 aiStreamPacketCount[REPLAY_STREAMS];                                 // 
 
-        coreFloat  fTimeTotal;                                                          // 
-        coreFloat  afTimeMission[REPLAY_MISSIONS];                                      // 
-        coreFloat  aafTimeBoss  [REPLAY_MISSIONS][REPLAY_BOSSES];                       // 
-        coreFloat  aafTimeWave  [REPLAY_MISSIONS][REPLAY_WAVES];                        // 
+        coreUint32 iTimeTotal;                                                          // 
+        coreUint32 aiTimeMission[REPLAY_MISSIONS];                                      // 
+        coreUint32 aaiTimeBoss  [REPLAY_MISSIONS][REPLAY_BOSSES];                       // 
+        coreUint32 aaiTimeWave  [REPLAY_MISSIONS][REPLAY_WAVES];                        // 
 
         coreUint32 aiScoreTotal   [REPLAY_STREAMS];                                     // 
         coreUint32 aaiScoreMission[REPLAY_STREAMS][REPLAY_MISSIONS];                    // 
@@ -110,8 +111,8 @@ public:
         coreUint32 iFrame;        // 
         coreUint64 iTimestamp;    // 
 
-        // both player positions and state (roll, feel, lives, continues, scores)
-
+        // both player positions and state (roll, feel, lives, continues, scores, shoot)
+        // bullets
     };
 
     // 
@@ -195,6 +196,9 @@ private:
     // 
     inline coreBool __CanStartRecording()const {return !m_Header.iReplayHash &&  m_aaStreamPacket[0].empty();}
     inline coreBool __CanStartPlayback ()const {return  m_Header.iReplayHash && !m_aaStreamPacket[0].empty();}
+
+    // 
+    static coreUint64 __GenerateChecksum(const sHeader& oHeader);
 
     // 
     friend coreBool ValidateReplay(cReplay* OUTPUT pReplay);

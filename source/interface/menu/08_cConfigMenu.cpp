@@ -18,7 +18,7 @@ cConfigMenu::cConfigMenu()noexcept
     m_Background.DefineTexture(0u, "menu_background_black.png");
     m_Background.DefineProgram("menu_border_program");
     m_Background.SetPosition  (coreVector2(0.0f,0.0f));
-    m_Background.SetSize      (coreVector2(0.8f,0.65f+0.05f));  
+    m_Background.SetSize      (coreVector2(0.8f,0.7f));
 
     m_VideoTab.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_VideoTab.DefineProgram("menu_border_program");
@@ -121,11 +121,8 @@ cConfigMenu::cConfigMenu()noexcept
     m_aArrow[1].SetText(ICON_ARROW_LEFT);
     m_aArrow[2].SetText(ICON_ARROW_DOWN);
     m_aArrow[3].SetText(ICON_ARROW_RIGHT);
-    //m_aArrow[4].SetText(ICON_BURN);
-    //m_aArrow[5].SetText(ICON_SHIELD_ALT);
     m_aArrow[6].SetText(ICON_UNDO_ALT);
     m_aArrow[7].SetText(ICON_REDO_ALT);
-    //m_aArrow[8].SetText(ICON_PAUSE_CIRCLE);
 
     #define __SET_OPTION(x,n,s)                                                  \
     {                                                                            \
@@ -221,14 +218,11 @@ cConfigMenu::cConfigMenu()noexcept
         m_aInput[i].oHeader.SetColor3  (COLOR_MENU_WHITE);
     }
 
-
-
-    m_SwapInput.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
-    m_SwapInput.SetPosition (coreVector2(-0.2f, m_aLabel[ENTRY_INPUT_TYPE].GetPosition().y));
-    m_SwapInput.SetSize     (coreVector2(0.03f,0.03f));
+    m_SwapInput.Construct  (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+    m_SwapInput.SetPosition(LERP(m_aInput[0].oHeader.GetPosition(), m_aInput[1].oHeader.GetPosition(), 0.5f));
+    m_SwapInput.SetSize    (coreVector2(0.03f,0.03f));
     m_SwapInput.GetCaption()->SetText("<>");
-
-
+    STATIC_ASSERT(MENU_CONFIG_INPUTS == 2u)
 
     // fill configuration entries
     const std::vector<std::string>& asLanguageList = cMenu::GetLanguageList().get_keylist();
@@ -272,9 +266,27 @@ cConfigMenu::cConfigMenu()noexcept
     m_HudType      .AddEntryLanguage("HUDTYPE_OUTSIDE",        0u);
     m_HudType      .AddEntryLanguage("HUDTYPE_INSIDE",         1u);
 
+
+
+    m_MenuInput.BindShoulder(SURFACE_CONFIG_VIDEO, &m_VideoTab);
+    m_MenuInput.BindShoulder(SURFACE_CONFIG_AUDIO, &m_AudioTab);
+    m_MenuInput.BindShoulder(SURFACE_CONFIG_INPUT, &m_InputTab);
+    m_MenuInput.BindShoulder(SURFACE_CONFIG_GAME,  &m_GameTab);
+
+    m_MenuInput.BindObject(&m_SaveButton);
+
+    m_MenuInput.BindMenu(this);
+
+
     // bind menu objects
-    for(coreUintW i = 0u, ie = SURFACE_CONFIG_MAX; i < ie; ++i)
+    for(coreUintW i = 0u; i < SURFACE_CONFIG_MAX; ++i)
     {
+
+
+        this->BindObject(i, &m_MenuInput);
+
+
+
         if(i != SURFACE_CONFIG_VIDEO) this->BindObject(i, &m_VideoTab);
         if(i != SURFACE_CONFIG_AUDIO) this->BindObject(i, &m_AudioTab);
         if(i != SURFACE_CONFIG_INPUT) this->BindObject(i, &m_InputTab);
@@ -330,9 +342,6 @@ cConfigMenu::cConfigMenu()noexcept
         for(coreUintW j = 0u; j < INPUT_KEYS; ++j)
             this->BindObject(SURFACE_CONFIG_INPUT, &this->__RetrieveInputButton(i, j));
     }
-
-
-
     this->BindObject(SURFACE_CONFIG_INPUT, &m_SwapInput);
 }
 
@@ -361,14 +370,15 @@ void cConfigMenu::Move()
                 this->__LoadResolutions(m_Monitor.GetCurEntry().tValue);
 
             // 
+            if(m_Resolution.IsClickedArrow())
+            {
+                if(m_Resolution.GetEntry(m_Resolution.GetNumEntries() - 1u).tValue == 0xFFu)
+                    m_Resolution.DeleteEntry(m_Resolution.GetNumEntries() - 1u);
+            }
+
+            // 
             if(m_ShadowQuality.IsClickedArrow())
                 this->__UpdateShadowQuality();
-
-
-            if(m_Resolution.GetArrow(0u)->IsClicked() && m_Resolution.GetEntry(m_Resolution.GetNumEntries() - 1u).tValue == 0xFFu)
-                m_Resolution.DeleteEntry(m_Resolution.GetNumEntries() - 1u);
-
-
 
             // 
             cMenu::UpdateSwitchBox(&m_Monitor);
@@ -408,21 +418,20 @@ void cConfigMenu::Move()
 
     case SURFACE_CONFIG_INPUT:
         {
-
-
+            // 
             if(m_SwapInput.IsClicked())
             {
+                // 
                 std::swap(g_CurConfig.Input.aiType[0], g_CurConfig.Input.aiType[1]);
+                for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oType.SelectValue(g_CurConfig.Input.aiType[i]);
 
-                for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i)
-                    m_aInput[i].oType.SelectValue(g_CurConfig.Input.aiType[i]);
-
+                // 
                 this->__LoadInputs();
             }
+            STATIC_ASSERT(MENU_CONFIG_INPUTS == 2u)
 
+            // 
             cMenu::UpdateButton(&m_SwapInput, m_SwapInput.IsFocused());
-
-
 
             for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i)
             {
@@ -475,10 +484,6 @@ void cConfigMenu::Move()
                     coreButton& oButton   = this->__RetrieveInputButton  (i, j);
                     coreInt16&  iCurValue = this->__RetrieveInputCurValue(i, j);
 
-                    // 
-                    cMenu::UpdateButton(&oButton, oButton.IsFocused());
-                    oButton.SetAlpha(oButton.GetAlpha() * (oButton.IsFocused() ? 1.0f : 0.75f));
-
                     if(oButton.IsClicked())
                     {
                         const coreChar*  pcText = PRINT("%s [%s]", Core::Language->GetString("QUESTION_MAPPING"), m_aLabel[ENTRY_INPUT_MOVEUP + j].GetText());
@@ -527,6 +532,10 @@ void cConfigMenu::Move()
                             this->CheckValues();
                         });
                     }
+
+                    // 
+                    cMenu::UpdateButton(&oButton, oButton.IsFocused());
+                    oButton.SetAlpha(oButton.GetAlpha() * (oButton.IsFocused() ? 1.0f : 0.75f));
                 }
             }
         }
@@ -566,43 +575,40 @@ void cConfigMenu::Move()
         break;
     }
 
-    if(!g_pMenu->IsInTransition(this))
+    if(m_SaveButton.IsClicked())
     {
-        if(m_SaveButton.IsClicked())
+        // 
+        this->SaveValues();
+    }
+    else if(m_DiscardButton.IsClicked())
+    {
+        // 
+        this->LoadValues();
+    }
+    else if(m_BackButton.IsClicked() || g_MenuInput.bCancel)
+    {
+        if(m_SaveButton.GetOverride() >= 0)
         {
             // 
-            this->SaveValues();
-        }
-        else if(m_DiscardButton.IsClicked())
-        {
-            // 
-            this->LoadValues();
-        }
-        else if(m_BackButton.IsClicked() || g_MenuInput.bCancel)
-        {
-            if(m_SaveButton.GetOverride() >= 0)
+            g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_SAVE"), [this](const coreInt32 iAnswer)
             {
                 // 
-                g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_SAVE"), [this](const coreInt32 iAnswer)
-                {
-                    // 
-                    if(iAnswer == MSGBOX_ANSWER_YES)
-                         this->SaveValues();
-                    else this->LoadValues();
+                if(iAnswer == MSGBOX_ANSWER_YES)
+                     this->SaveValues();
+                else this->LoadValues();
 
-                    // 
-                    m_iStatus = 101;
-                });
-            }
-            else
-            {
                 // 
-                m_iStatus = 1;
-            }
+                m_iStatus = 101;
+            });
+        }
+        else
+        {
+            // 
+            m_iStatus = 1;
         }
     }
 
-    // 
+    // (# after interaction, before visual update) 
     if(Core::Input->GetAnyButton(CORE_INPUT_HOLD) || Core::System->GetWinPosChanged() || Core::System->GetWinSizeChanged())
         this->CheckValues();
 
@@ -619,21 +625,6 @@ void cConfigMenu::Move()
 
     // 
     if(m_BackButton.IsFocused()) g_pMenu->GetTooltip()->ShowText(TOOLTIP_ONELINER, Core::Language->GetString("BACK"));
-
-      
-    //for(coreUintW i = 7u; i < ENTRY_MAX; ++i)
-    //{
-    //    m_aLine[i].SetAlpha(m_aLine[i].GetAlpha() * ((m_aLabel[i].IsFocused() || m_aLine[i].IsFocused()) ? 1.0f : 0.6f));
-    //}
-    //m_aLine[0].SetAlpha(m_aLine[0].GetAlpha() * (m_aLabel[0].IsFocused() || m_aLine[0].IsFocused() || m_Monitor      .IsFocused() ? 1.0f : 0.6f));
-    //m_aLine[1].SetAlpha(m_aLine[1].GetAlpha() * (m_aLabel[1].IsFocused() || m_aLine[1].IsFocused() || m_Resolution   .IsFocused() ? 1.0f : 0.6f));
-    //m_aLine[2].SetAlpha(m_aLine[2].GetAlpha() * (m_aLabel[2].IsFocused() || m_aLine[2].IsFocused() || m_DisplayMode  .IsFocused() ? 1.0f : 0.6f));
-    //m_aLine[3].SetAlpha(m_aLine[3].GetAlpha() * (m_aLabel[3].IsFocused() || m_aLine[3].IsFocused() || m_AntiAliasing .IsFocused() ? 1.0f : 0.6f));
-    //m_aLine[4].SetAlpha(m_aLine[4].GetAlpha() * (m_aLabel[4].IsFocused() || m_aLine[4].IsFocused() || m_TextureFilter.IsFocused() ? 1.0f : 0.6f));
-    //m_aLine[5].SetAlpha(m_aLine[5].GetAlpha() * (m_aLabel[5].IsFocused() || m_aLine[5].IsFocused() || m_AssetQuality .IsFocused() ? 1.0f : 0.6f));
-    //m_aLine[6].SetAlpha(m_aLine[6].GetAlpha() * (m_aLabel[6].IsFocused() || m_aLine[6].IsFocused() || m_ShadowQuality.IsFocused() ? 1.0f : 0.6f));
-
-      
 }
 
 

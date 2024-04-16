@@ -46,6 +46,9 @@ private:
     coreUint8 m_iInputType;                                  // 
 
 
+    cMenuInput m_MenuInput;
+
+
 public:
     cMsgBox()noexcept;
 

@@ -14,6 +14,7 @@ coreBool        g_bDebugOutput    = false;
 coreMusicPlayer g_MusicPlayer     = {};
 
 STATIC_MEMORY(cReplay,         g_pReplay)
+STATIC_MEMORY(cSave,           g_pSave)
 STATIC_MEMORY(cOutline,        g_pOutline)
 STATIC_MEMORY(cGlow,           g_pGlow)
 STATIC_MEMORY(cDistortion,     g_pDistortion)
@@ -58,6 +59,7 @@ void CoreApp::Init()
     // create and init main components
     cShadow::GlobalInit();
     STATIC_NEW(g_pReplay)
+    STATIC_NEW(g_pSave)
     STATIC_NEW(g_pOutline)
     STATIC_NEW(g_pGlow)
     STATIC_NEW(g_pDistortion)
@@ -87,6 +89,7 @@ void CoreApp::Exit()
     STATIC_DELETE(g_pDistortion)
     STATIC_DELETE(g_pGlow)
     STATIC_DELETE(g_pOutline)
+    STATIC_DELETE(g_pSave)
     STATIC_DELETE(g_pReplay)
     cShadow::GlobalExit();
 
@@ -328,10 +331,16 @@ static void DebugGame()
     {
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LALT), CORE_INPUT_HOLD))
         {
-            const coreUint8 iDifficulty = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(Z), CORE_INPUT_HOLD) ? 0u : 1u;
-            const coreBool  bCoop       = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(X), CORE_INPUT_HOLD);
+            sGameConfig oConfig = {};
+            oConfig.iDifficulty = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(Z), CORE_INPUT_HOLD) ? 0u : 1u;
+            oConfig.bCoop       = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(X), CORE_INPUT_HOLD);
+            for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
+            {
+                oConfig.aaiWeapon [i][0] = cRayWeapon::ID;
+                oConfig.aaiSupport[i][0] = 0u;
+            }
 
-            #define __LOAD_GAME(x) {STATIC_NEW(g_pGame, iDifficulty, bCoop, GAME_MISSION_LIST_DEFAULT) g_pGame->LoadMissionID(x); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f); g_pPostProcessing->SetWallOpacity(1.0f);}
+            #define __LOAD_GAME(x) {STATIC_NEW(g_pGame, oConfig, GAME_MISSION_LIST_DEFAULT) g_pGame->LoadMissionID(x); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f); g_pPostProcessing->SetWallOpacity(1.0f);}
                  if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1),     CORE_INPUT_PRESS)) __LOAD_GAME(cIntroMission  ::ID)
             else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2),     CORE_INPUT_PRESS)) __LOAD_GAME(cViridoMission ::ID)
             else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(3),     CORE_INPUT_PRESS)) __LOAD_GAME(cNevoMission   ::ID)

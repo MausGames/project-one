@@ -12,16 +12,17 @@
 // ****************************************************************
 // constructor
 cIntroMenu::cIntroMenu()noexcept
-: coreMenu     (SURFACE_INTRO_MAX, SURFACE_INTRO_EMPTY)
-, m_IntroTimer (coreTimer(3.0f, 0.5f, 1u))
+: coreMenu       (SURFACE_INTRO_MAX, SURFACE_INTRO_EMPTY)
+, m_IntroTimer   (coreTimer(3.0f, 0.5f, 1u))
+, m_iIntroStatus (1u)
 {
     // create menu objects
-    m_MartinMessage.Construct      (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
-    m_MartinMessage.SetPosition    (coreVector2(0.0f,0.0f));
-    m_MartinMessage.SetTextLanguage("INTRO_MESSAGE");
+    m_WelcomeText.Construct      (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+    m_WelcomeText.SetPosition    (coreVector2(0.0f,0.0f));
+    m_WelcomeText.SetTextLanguage("WELCOME");
 
     // bind menu objects
-    this->BindObject(SURFACE_INTRO_MARTIN, &m_MartinMessage);
+    this->BindObject(SURFACE_INTRO_WELCOME, &m_WelcomeText);
 
     // 
     const coreBool bSelectLanguage = Core::Language->GetPath()[0] ? false : true;
@@ -56,7 +57,7 @@ cIntroMenu::cIntroMenu()noexcept
 
     // 
     m_IntroTimer.Play(CORE_TIMER_PLAY_RESET);
-    g_pMenu->AnimateSurface(this, bSelectLanguage ? SURFACE_INTRO_LANGUAGE : SURFACE_INTRO_MARTIN, 0.75f);
+    g_pMenu->ShiftSurface(this, bSelectLanguage ? SURFACE_INTRO_LANGUAGE : SURFACE_INTRO_WELCOME, 0.75f);
 }
 
 
@@ -83,10 +84,6 @@ void cIntroMenu::Move()
     {
         // 
         FOR_EACH(it, m_apLanguageButton)
-            cMenu::UpdateButton((*it), (*it)->IsFocused());
-
-        // 
-        FOR_EACH(it, m_apLanguageButton)
         {
             if((*it)->IsClicked())
             {
@@ -105,11 +102,17 @@ void cIntroMenu::Move()
                 break;
             }
         }
+
+        // 
+        FOR_EACH(it, m_apLanguageButton)
+        {
+            cMenu::UpdateButton((*it), (*it)->IsFocused());
+        }
     }
     else if(this->GetOldSurface() == SURFACE_INTRO_LANGUAGE)
     {
         // 
-        if(!this->GetTransition().GetStatus()) g_pMenu->AnimateSurface(this, SURFACE_INTRO_MARTIN, 1.0f);
+        if(!this->GetTransition().GetStatus()) g_pMenu->ShiftSurface(this, SURFACE_INTRO_WELCOME, 1.0f);
     }
     else
     {
@@ -118,7 +121,16 @@ void cIntroMenu::Move()
 
         if(m_IntroTimer.GetStatus())
         {
-            if(Core::Input->GetAnyButton(CORE_INPUT_PRESS))
+            if(m_iIntroStatus == 1u)
+            {
+                // 
+                if(Core::Input->GetAnyButton(CORE_INPUT_PRESS))
+                {
+                    // 
+                    m_iIntroStatus = 2u;
+                }
+            }
+            else if(m_iIntroStatus == 2u)
             {
                 // 
                 const coreFloat fTime1 = m_IntroTimer.GetValue(CORE_TIMER_GET_NORMAL);
@@ -144,8 +156,17 @@ void cIntroMenu::Move()
             if(fTime2 >= 1.0f)
             {
                 // 
-                g_pMenu->AnimateSurface(this, SURFACE_INTRO_EMPTY, 0.75f);
+                g_pMenu->ShiftSurface(this, SURFACE_INTRO_EMPTY, 0.75f);
             }
         }
     }
+}
+
+
+// ****************************************************************
+// 
+void cIntroMenu::ActivateFirstPlay()
+{
+    // 
+    m_iIntroStatus = 0u;
 }

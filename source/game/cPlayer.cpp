@@ -116,6 +116,7 @@ void cPlayer::Configure(const coreUintW iShipType, const coreVector3& vColor)
     default: ASSERT(false)
     case PLAYER_SHIP_ATK: pcModelHigh = "ship_player_atk_high.md3"; pcModelLow = "ship_player_atk_low.md3"; break;
     case PLAYER_SHIP_DEF: pcModelHigh = "ship_player_def_high.md3"; pcModelLow = "ship_player_def_low.md3"; break;
+    case PLAYER_SHIP_P1:  pcModelHigh = "ship_projectone.md3";      pcModelLow = "ship_projectone.md3";     break;
     }
 
     // load models
@@ -159,6 +160,22 @@ void cPlayer::EquipWeapon(const coreUintW iIndex, const coreInt32 iID)
                    (m_apWeapon[i]->GetID() == cNoWeapon::ID))
 
 #endif
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::EquipSupport(const coreUintW iIndex, const coreInt32 iID)
+{
+
+    switch(iID)
+    {
+    default: ASSERT(false)
+    case 0u:                     break;
+    case 1u: this->GiveShield(); break;
+    }
+
+
 }
 
 

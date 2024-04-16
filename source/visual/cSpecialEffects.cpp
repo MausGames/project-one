@@ -741,19 +741,30 @@ void cSpecialEffects::ExplosionTest(const cLodObject* pObject)
 
     const coreVector3 vPos = pObject->GetPosition();
 
-    const coreVector3 vColor = COLOR_RED;
+    const coreVector3 vColor = COLOR_FIRE_ORANGE;
 
     coreUintW i = 0u;
-    m_ParticleColor.GetDefaultEffect()->CreateParticle(pModel->GetNumVertices(), [&](coreParticle* OUTPUT pParticle)
+    m_ParticleColor.GetDefaultEffect()->CreateParticle(pModel->GetNumVertices() / 32u, [&](coreParticle* OUTPUT pParticle)
     {
-        const coreVector3 vVertex = pModel->GetVertexPosition()[i++];
+        
+        const coreVector3 vVertex = pObject->GetRotation().QuatApply(pModel->GetVertexPosition()[i] * pObject->GetSize());
+        i += 32u;
+
 
         const coreVector3 vDir = vVertex.Normalized();
 
-        pParticle->SetPositionRel(vPos + vVertex,           vDir * 50.0f);
+        pParticle->SetPositionRel(vPos + vVertex,           vDir * Core::Rand->Float(50.0f));
         pParticle->SetScaleAbs   (3.5f,                       1.0f);
         pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI), Core::Rand->Float(-PI, PI));
         pParticle->SetColor4Abs  (coreVector4(vColor, 1.0f),  coreVector4(vColor, 0.0f));
         pParticle->SetSpeed      (1.5f * Core::Rand->Float(0.7f, 1.3f));
     });
+
+    g_pDistortion->CreateWave       (vPos, DISTORTION_WAVE_SMALL);
+    //this         ->CreateSplashColor(vPosition, SPECIAL_SPLASH_SMALL,    vColor);
+    this         ->CreateSplashFire (vPos, (5.0f), (10u), vColor);
+    this         ->PlaySound        (vPos, 1.0f, SOUND_EXPLOSION_PHYSICAL_SMALL);
+    this         ->ShakeScreen      (SPECIAL_SHAKE_SMALL);
+
+    // post-transform and pre-transform vertex cache optimization is distributing vertices evenly across the model
 }

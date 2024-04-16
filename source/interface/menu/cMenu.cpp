@@ -62,6 +62,15 @@ cMenu::cMenu()noexcept
     m_MixObject.DefineProgram("full_transition_wipe_program");
     m_MixObject.SetSize      (coreVector2(1.0f,1.0f));
     m_MixObject.Move();
+
+    // 
+    if(g_pSave->GetHeader()->bFirstPlay)
+    {
+        m_pIntroMenu->ActivateFirstPlay();
+        m_pTitleMenu->ActivateFirstPlay();
+        m_MainMenu   .ActivateFirstPlay();
+        m_GameMenu   .ActivateFirstPlay();
+    }
 }
 
 
@@ -137,6 +146,13 @@ void cMenu::Render()
 void cMenu::Move()
 {
     // 
+    m_TransitionTime.Update(1.0f);
+
+    // 
+    if(m_TransitionTime.GetStatus() && (this->GetCurSurface() != SURFACE_INTRO))
+        Core::Input->ClearButtonAll();
+
+    // 
     m_MsgBox.Move();
 
     // move the menu
@@ -152,7 +168,7 @@ void cMenu::Move()
                 if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_OUTRO))
                 {
                     // 
-                    this->AnimateSurface(this, SURFACE_SUMMARY, 3.0f);
+                    this->ChangeSurface(SURFACE_SUMMARY, 3.0f);
 
                     // 
                     if(g_pGame->GetOutroType()) m_SummaryMenu.ShowBegin();
@@ -161,7 +177,7 @@ void cMenu::Move()
                 else if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_DEFEATED))
                 {
                     // 
-                    this->AnimateSurface(this, SURFACE_DEFEAT, 3.0f);
+                    this->ChangeSurface(SURFACE_DEFEAT, 3.0f);
 
                     // 
                     if(g_pGame->GetContinues()) m_DefeatMenu.ShowContinue();
@@ -170,7 +186,7 @@ void cMenu::Move()
                 else if(g_MenuInput.bPause || Core::System->GetWinFocusLost())
                 {
                     // 
-                    this->AnimateSurface(this, SURFACE_PAUSE, 0.0f);
+                    this->ChangeSurface(SURFACE_PAUSE, 0.0f);
 
                     // 
                     this->InvokePauseStep();
@@ -184,7 +200,7 @@ void cMenu::Move()
             if(m_pIntroMenu->GetStatus())
             {
                 // switch to title menu
-                this->AnimateSurface(this, SURFACE_TITLE, 0.75f);
+                this->ShiftSurface(this, SURFACE_TITLE, 0.75f);
             }
         }
         break;
@@ -194,12 +210,12 @@ void cMenu::Move()
             if(m_pTitleMenu->GetStatus())
             {
                 // switch to main menu
-                this->AnimateSurface(this, SURFACE_MAIN, 2.0f);
+                this->ShiftSurface(this, SURFACE_MAIN, 2.0f);
 
                 // unload expendable menu resources
                 Core::Manager::Resource->AttachFunction([this]()
                 {
-                    if((this->GetCurSurface() == SURFACE_MAIN) && !this->GetTransition().GetStatus())
+                    if(!this->GetTransition().GetStatus() && (this->GetCurSurface() == SURFACE_MAIN))
                     {
                         // delete intro and title menu
                         SAFE_DELETE(m_pIntroMenu)
@@ -217,17 +233,21 @@ void cMenu::Move()
             if(m_MainMenu.GetStatus() == 1)
             {
                 // switch to game menu
-                this->AnimateSurface(this, SURFACE_GAME, 3.0f);
+                this->ShiftSurface(this, SURFACE_GAME, 3.0f);
+
+                // 
+                m_GameMenu.ChangeSurface(/*g_pSave->GetHeader()->bFirstPlay*/true ? SURFACE_GAME_ARMORY : SURFACE_GAME_STANDARD, 0.0f);
+                m_GameMenu.LoadValues();
             }
             else if(m_MainMenu.GetStatus() == 2)
             {
                 // switch to score menu
-                this->AnimateSurface(this, SURFACE_SCORE, 3.0f);
+                this->ShiftSurface(this, SURFACE_SCORE, 3.0f);
             }
             else if(m_MainMenu.GetStatus() == 3)
             {
                 // switch to replay menu
-                this->AnimateSurface(this, SURFACE_REPLAY, 3.0f);
+                this->ShiftSurface(this, SURFACE_REPLAY, 3.0f);
 
                 // 
                 m_ReplayMenu.LoadReplays();
@@ -235,12 +255,12 @@ void cMenu::Move()
             else if(m_MainMenu.GetStatus() == 4)
             {
                 // switch to extra menu
-                this->AnimateSurface(this, SURFACE_EXTRA, 3.0f);
+                this->ShiftSurface(this, SURFACE_EXTRA, 3.0f);
             }
             else if(m_MainMenu.GetStatus() == 5)
             {
                 // switch to config menu
-                this->AnimateSurface(this, SURFACE_CONFIG, 3.0f);
+                this->ShiftSurface(this, SURFACE_CONFIG, 3.0f);
 
                 // 
                 m_ConfigMenu.ChangeSurface(SURFACE_CONFIG_VIDEO, 0.0f);
@@ -254,7 +274,10 @@ void cMenu::Move()
             if(m_GameMenu.GetStatus() == 1)
             {
                 // 
-                this->AnimateSurface(this, SURFACE_EMPTY, 1.0f);
+                this->ShiftSurface(this, SURFACE_EMPTY, 1.0f);
+
+                // 
+                g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);
 
                 // 
                 this->__StartGame();
@@ -262,7 +285,7 @@ void cMenu::Move()
             else if(m_GameMenu.GetStatus() == 2)
             {
                 // return to previous menu
-                this->AnimateSurface(this, this->GetOldSurface(), 3.0f);
+                this->ShiftSurface(this, this->GetOldSurface(), 3.0f);
             }
         }
         break;
@@ -272,7 +295,7 @@ void cMenu::Move()
             if(m_ScoreMenu.GetStatus())
             {
                 // return to previous menu
-                this->AnimateSurface(this, this->GetOldSurface(), 3.0f);
+                this->ShiftSurface(this, this->GetOldSurface(), 3.0f);
             }
         }
         break;
@@ -282,7 +305,10 @@ void cMenu::Move()
             if(m_ReplayMenu.GetStatus() == 1)
             {
                 // 
-                this->AnimateSurface(this, SURFACE_EMPTY, 1.0f);
+                this->ShiftSurface(this, SURFACE_EMPTY, 1.0f);
+
+                // 
+                g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);
 
                 // 
                 g_pReplay->CreateGame();
@@ -291,7 +317,7 @@ void cMenu::Move()
             else if(m_ReplayMenu.GetStatus() == 2)
             {
                 // return to previous menu
-                this->AnimateSurface(this, this->GetOldSurface(), 3.0f);
+                this->ShiftSurface(this, this->GetOldSurface(), 3.0f);
             }
         }
         break;
@@ -301,7 +327,7 @@ void cMenu::Move()
             if(m_ExtraMenu.GetStatus())
             {
                 // return to previous menu
-                this->AnimateSurface(this, this->GetOldSurface(), 3.0f);
+                this->ShiftSurface(this, this->GetOldSurface(), 3.0f);
             }
         }
         break;
@@ -311,7 +337,7 @@ void cMenu::Move()
             if(m_ConfigMenu.GetStatus())
             {
                 // return to previous menu
-                this->AnimateSurface(this, this->GetOldSurface(), 3.0f);
+                this->ShiftSurface(this, this->GetOldSurface(), 3.0f);
             }
         }
         break;
@@ -321,12 +347,12 @@ void cMenu::Move()
             if(m_PauseMenu.GetStatus() == 1)
             {
                 // 
-                this->AnimateSurface(this, SURFACE_EMPTY, 0.0f);
+                this->ChangeSurface(SURFACE_EMPTY, 0.0f);
             }
             else if(m_PauseMenu.GetStatus() == 2)
             {
                 // switch to config menu
-                this->AnimateSurface(this, SURFACE_CONFIG, 3.0f);
+                this->ShiftSurface(this, SURFACE_CONFIG, 3.0f);
 
                 // 
                 m_ConfigMenu.ChangeSurface(SURFACE_CONFIG_VIDEO, 0.0f);
@@ -335,7 +361,7 @@ void cMenu::Move()
             else if(m_PauseMenu.GetStatus() == 3)
             {
                 // 
-                this->AnimateSurface(this, SURFACE_MAIN, 1.0f);
+                this->ShiftSurface(this, SURFACE_MAIN, 1.0f);
 
                 // 
                 this->__EndGame();
@@ -345,10 +371,18 @@ void cMenu::Move()
 
     case SURFACE_SUMMARY:
         {
-            if(m_SummaryMenu.GetStatus())
+            if(m_SummaryMenu.GetStatus() == 1)
             {
                 // 
-                this->AnimateSurface(this, SURFACE_EMPTY, 3.0f);
+                this->ChangeSurface(SURFACE_EMPTY, 3.0f);
+
+                // 
+                g_pGame->LoadNextMission();
+            }
+            else if(m_SummaryMenu.GetStatus() == 2)   
+            {
+                // 
+                this->ShiftSurface(this, SURFACE_EMPTY, 0.75f);   
 
                 // 
                 g_pGame->LoadNextMission();
@@ -361,7 +395,7 @@ void cMenu::Move()
             if(m_DefeatMenu.GetStatus() == 1)
             {
                 // 
-                this->AnimateSurface(this, SURFACE_EMPTY, 1.0f);
+                this->ChangeSurface(SURFACE_EMPTY, 1.0f);
 
                 // 
                 g_pGame->UseContinue();
@@ -369,7 +403,7 @@ void cMenu::Move()
             else if(m_DefeatMenu.GetStatus() == 2)
             {
                 // 
-                this->AnimateSurface(this, SURFACE_MAIN, 1.0f);
+                this->ChangeSurface(SURFACE_MAIN, 1.0f);
 
                 // 
                 this->__EndGame();
@@ -383,9 +417,9 @@ void cMenu::Move()
     }
 
     // 
-    Core::Input->ShowCursor((this->GetCurSurface() != SURFACE_EMPTY)   &&
-                            (this->GetCurSurface() != SURFACE_SUMMARY) &&
-                            (this->GetCurSurface() != SURFACE_DEFEAT));
+   // Core::Input->ShowCursor((this->GetCurSurface() != SURFACE_EMPTY)   &&
+   //                         (this->GetCurSurface() != SURFACE_SUMMARY) &&
+   //                         (this->GetCurSurface() != SURFACE_DEFEAT));
 
     // 
     if((this->GetCurSurface() == SURFACE_PAUSE) || (this->GetOldSurface() == SURFACE_PAUSE))
@@ -401,9 +435,6 @@ void cMenu::Move()
 
     // 
     m_Tooltip.Move();
-
-    // 
-    m_TransitionTime.Update(1.0f);
 }
 
 
@@ -424,7 +455,7 @@ coreBool cMenu::IsPausedWithStep()
 
 // ****************************************************************
 // 
-void cMenu::AnimateSurface(coreMenu* OUTPUT pMenu, const coreUint8 iNewSurface, const coreFloat fSpeed)
+void cMenu::ShiftSurface(coreMenu* OUTPUT pMenu, const coreUint8 iNewSurface, const coreFloat fSpeed)
 {
     ASSERT(pMenu)
 
@@ -509,12 +540,6 @@ void cMenu::UpdateButton(coreButton* OUTPUT pButton, const coreBool bFocused, co
     if(pButton->GetOverride() < 0) pButton->SetAlpha(pButton->GetAlpha() * 0.5f);
 }
 
-void cMenu::UpdateButton(coreButton* OUTPUT pButton, const coreBool bFocused)
-{
-    // 
-    cMenu::UpdateButton(pButton, bFocused, COLOR_MENU_WHITE);
-}
-
 
 // ****************************************************************
 // 
@@ -573,8 +598,9 @@ void cMenu::__Reset(const coreResourceReset eInit)
     if(eInit)
     {
         // 
-        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aFrameBuffer); ++i)
-            m_aFrameBuffer[i].Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+        m_aFrameBuffer[0].Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED);
+        m_aFrameBuffer[1].Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+        m_aFrameBuffer[2].Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
         // 
         m_MixObject.DefineTexture(0u, m_aFrameBuffer[2].GetColorTarget(0u).pTexture);
@@ -599,8 +625,18 @@ void cMenu::__Reset(const coreResourceReset eInit)
 void cMenu::__StartGame()
 {
     // 
+    sGameConfig oConfig = {};
+    oConfig.iDifficulty = 0xFFu;
+    oConfig.bCoop       = (m_GameMenu.GetSelectedPlayers() > 1u) ? true : false;
+    for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
+    {
+        oConfig.aaiWeapon [i][0] = m_GameMenu.GetSelectedWeapon (i);
+        oConfig.aaiSupport[i][0] = m_GameMenu.GetSelectedSupport(i);
+    }
+
+    // 
     ASSERT(!STATIC_ISVALID(g_pGame))
-    STATIC_NEW(g_pGame, m_GameMenu.GetSelectedDifficulty(), (m_GameMenu.GetSelectedPlayers() > 1u) ? true : false, GAME_MISSION_LIST_MAIN)
+    STATIC_NEW(g_pGame, oConfig, GAME_MISSION_LIST_MAIN)
     g_pGame->LoadNextMission();
 
     // 
@@ -616,7 +652,7 @@ void cMenu::__EndGame()
     if(g_pReplay->GetStatus() == REPLAY_STATUS_RECORDING)
     {
         g_pReplay->EndRecording();
-        g_pReplay->SaveFile(PRINT("Debug Replay %s", coreData::DateTimePrint("%Y-%m-%d %H:%M:%S")));
+        g_pReplay->SaveFile(coreData::DateTimePrint("Debug Replay %Y-%m-%d %H:%M:%S"));
     }
     else if(g_pReplay->GetStatus() == REPLAY_STATUS_PLAYBACK)
     {
@@ -627,6 +663,15 @@ void cMenu::__EndGame()
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
     STATIC_DELETE(g_pGame)
+
+    // 
+    if(g_pSave->GetHeader()->bFirstPlay)
+    {
+        g_pSave->GetHeader()->bFirstPlay = false;
+
+        m_MainMenu.DeactivateFirstPlay();
+        m_GameMenu.DeactivateFirstPlay();
+    }
 }
 
 

@@ -372,6 +372,40 @@ public:
 
 
 // ****************************************************************
+// repair enemy class
+class cRepairEnemy final : public cEnemy
+{
+private:
+    cPlayer* m_pPlayer;         // 
+
+    coreVector2 m_vDirection;   // 
+    coreFlow    m_fAnimation;   // 
+
+    coreObject3D m_Bubble;      // 
+
+
+public:
+    cRepairEnemy()noexcept;
+    ~cRepairEnemy()final;
+
+    ENABLE_COPY(cRepairEnemy)
+    ASSIGN_ID(1337, "Repair")
+
+    // 
+    void AssignPlayer(cPlayer* pPlayer);
+
+    // 
+    inline cPlayer* GetPlayer()const {return m_pPlayer;}
+
+
+private:
+    // execute own routines
+    void __RenderOwnUnder()final;
+    void __MoveOwn       ()final;
+};
+
+
+// ****************************************************************
 // 
 template <typename T> void cEnemySquad::AllocateEnemies(const coreUint8 iNumEnemies)
 {

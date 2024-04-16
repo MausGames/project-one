@@ -148,7 +148,11 @@ void cTimeTable::Update()
     ASSERT(STATIC_ISVALID(g_pGame))
 
     // 
-    m_fTimeEvent.Update(1.0f);
+    if(!Core::System->GetTime()) return;
+    ASSERT(Core::System->GetTime() == FRAMERATE_TIME)
+
+    // 
+    m_iTimeEvent += 1u;
 
     if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY))
     {
@@ -158,21 +162,21 @@ void cTimeTable::Update()
 
         // update total and mission time
         ASSERT(iMissionIndex < TABLE_MISSIONS)
-        m_fTimeTotal                  .Update(1.0f);
-        m_afTimeMission[iMissionIndex].Update(1.0f);
+        m_iTimeTotal                   += 1u;
+        m_aiTimeMission[iMissionIndex] += 1u;
 
         // update boss time
         if(iBossIndex != MISSION_NO_BOSS)
         {
             ASSERT(iBossIndex < TABLE_BOSSES)
-            m_aafTimeBoss[iMissionIndex][iBossIndex].Update(1.0f);
+            m_aaiTimeBoss[iMissionIndex][iBossIndex] += 1u;
         }
 
         // update wave time
         if(iWaveIndex != MISSION_NO_WAVE)
         {
             ASSERT(iWaveIndex < TABLE_WAVES)
-            m_aafTimeWave[iMissionIndex][iWaveIndex].Update(1.0f);
+            m_aaiTimeWave[iMissionIndex][iWaveIndex] += 1u;
         }
     }
 }
@@ -183,11 +187,11 @@ void cTimeTable::Update()
 void cTimeTable::Reset()
 {
     // reset all time values (# no memset)
-    m_fTimeEvent = 0.0f;
-    m_fTimeTotal = 0.0f;
-    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) m_afTimeMission[j] = 0.0f;
-    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) for(coreUintW i = 0u; i < TABLE_BOSSES; ++i) m_aafTimeBoss[j][i] = -INTERFACE_BANNER_DURATION_BOSS;
-    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) for(coreUintW i = 0u; i < TABLE_WAVES;  ++i) m_aafTimeWave[j][i] = 0.0f;
+    m_iTimeEvent = 0u;
+    m_iTimeTotal = 0u;
+    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) m_aiTimeMission[j] = 0u;
+    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) for(coreUintW i = 0u; i < TABLE_BOSSES; ++i) m_aaiTimeBoss[j][i] = F_TO_UI(-INTERFACE_BANNER_DURATION_BOSS * FRAMERATE_VALUE);
+    for(coreUintW j = 0u; j < TABLE_MISSIONS; ++j) for(coreUintW i = 0u; i < TABLE_WAVES;  ++i) m_aaiTimeWave[j][i] = 0u;
 }
 
 

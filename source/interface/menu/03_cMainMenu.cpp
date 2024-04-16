@@ -48,6 +48,12 @@ cMainMenu::cMainMenu()noexcept
     m_ExitButton.SetSize      (m_StartButton.GetSize());
     m_ExitButton.GetCaption()->SetTextLanguage("EXIT_GAME");
 
+
+    
+    this->BindObject(SURFACE_MAIN_DEFAULT, &m_MenuInput);
+
+
+
     // bind menu objects
     this->BindObject(SURFACE_MAIN_DEFAULT, &m_StartButton);
     this->BindObject(SURFACE_MAIN_DEFAULT, &m_ScoreButton);
@@ -58,6 +64,16 @@ cMainMenu::cMainMenu()noexcept
 
     // 
     this->DeactivateFirstPlay();
+
+
+
+    m_MenuInput.BindObject(&m_StartButton);
+    m_MenuInput.BindObject(&m_ScoreButton);
+    m_MenuInput.BindObject(&m_ReplayButton);
+    m_MenuInput.BindObject(&m_ExtraButton);
+    m_MenuInput.BindObject(&m_ConfigButton);
+    m_MenuInput.BindObject(&m_ExitButton);
+
 }
 
 
@@ -69,11 +85,49 @@ void cMainMenu::Move()
     this->coreMenu::Move();
     m_iStatus = MAX(m_iStatus - 100, 0);
 
+    //m_MenuInput.Move();
+
+
     // 
     switch(this->GetCurSurface())
     {
     case SURFACE_MAIN_DEFAULT:
         {
+            if(m_StartButton.IsClicked())
+            {
+                // 
+                m_iStatus = 1;
+            }
+            else if(m_ScoreButton.IsClicked())
+            {
+                // 
+                m_iStatus = 2;
+            }
+            else if(m_ReplayButton.IsClicked())
+            {
+                // 
+                m_iStatus = 3;
+            }
+            else if(m_ExtraButton.IsClicked())
+            {
+                // 
+                m_iStatus = 4;
+            }
+            else if(m_ConfigButton.IsClicked())
+            {
+                // 
+                m_iStatus = 5;
+            }
+            else if(m_ExitButton.IsClicked())
+            {
+                // 
+                g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_EXIT_GAME"), [](const coreInt32 iAnswer)
+                {
+                    if(iAnswer == MSGBOX_ANSWER_YES)
+                        Core::System->Quit();
+                });
+            }
+
             // 
             cMenu::UpdateButton(&m_StartButton,  m_StartButton .IsFocused());
             cMenu::UpdateButton(&m_ScoreButton,  m_ScoreButton .IsFocused());
@@ -81,44 +135,6 @@ void cMainMenu::Move()
             cMenu::UpdateButton(&m_ExtraButton,  m_ExtraButton .IsFocused());
             cMenu::UpdateButton(&m_ConfigButton, m_ConfigButton.IsFocused());
             cMenu::UpdateButton(&m_ExitButton,   m_ExitButton  .IsFocused());
-
-            if(!g_pMenu->IsInTransition(this))
-            {
-                if(m_StartButton.IsClicked())
-                {
-                    // 
-                    m_iStatus = 1;
-                }
-                else if(m_ScoreButton.IsClicked())
-                {
-                    // 
-                    m_iStatus = 2;
-                }
-                else if(m_ReplayButton.IsClicked())
-                {
-                    // 
-                    m_iStatus = 3;
-                }
-                else if(m_ExtraButton.IsClicked())
-                {
-                    // 
-                    m_iStatus = 4;
-                }
-                else if(m_ConfigButton.IsClicked())
-                {
-                    // 
-                    m_iStatus = 5;
-                }
-                else if(m_ExitButton.IsClicked())
-                {
-                    // 
-                    g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_EXIT_GAME"), [](const coreInt32 iAnswer)
-                    {
-                        if(iAnswer == MSGBOX_ANSWER_YES)
-                            Core::System->Quit();
-                    });
-                }
-            }
         }
         break;
 

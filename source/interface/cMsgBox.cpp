@@ -46,6 +46,10 @@ cMsgBox::cMsgBox()noexcept
     m_No.DefineProgram("menu_border_program");
     m_No.SetSize      (m_Yes.GetSize());
     m_No.GetCaption()->SetText(ICON_TIMES);
+
+
+    m_MenuInput.BindObject(&m_Yes);
+    m_MenuInput.BindObject(&m_No);
 }
 
 
@@ -75,6 +79,10 @@ void cMsgBox::Move()
                else m_fFade.UpdateMax(-10.0f, 0.0f);
 
     if(!m_fFade) return;
+
+
+    m_MenuInput.Move();
+
 
     // 
     if(Core::Input->GetMousePosition() != MSGBOX_IGNORE_MOUSE)
@@ -154,6 +162,11 @@ void cMsgBox::Move()
 
     // 
     Core::Input->SetMousePosition(MSGBOX_IGNORE_MOUSE);
+    for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
+    {
+        Core::Input->SetJoystickRelative(i, 0u, 0.0f);
+        Core::Input->SetJoystickRelative(i, 1u, 0.0f);
+    }
     Core::Input->ClearButtonAll();
 
     // 

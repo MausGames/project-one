@@ -193,7 +193,7 @@ void cMission::DeactivateWave()
     //{
 
         const coreFloat fTime  = MAX(g_pGame->GetTimeTable()->GetTimeWave(g_pGame->GetCurMissionIndex(), m_iCurWaveIndex), 0.0f);
-        const coreFloat fScore = MAX(1000.0f * (1.0f - fTime * RCP(30.0f)), 0.0f);
+        const coreFloat fScore = LERP(10000.0f, 100.0f, MIN(fTime * (1.0f/60.0f), 1.0f));
 
         //const coreVector3 vPos = cEnemy::GetLastDamaged() ? cEnemy::GetLastDamaged()->GetPosition() : coreVector3(0.0f,0.0f,0.0f);
 

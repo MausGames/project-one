@@ -133,6 +133,7 @@ void cWorldMap::Move()
     m_Cursor.Move();
 }
 
+
 // ****************************************************************
 // 
 void cWorldMap::Arrange()
@@ -172,4 +173,21 @@ void cWorldMap::Arrange()
         vOldPos = vNewPos;
     }
     STATIC_ASSERT(WORLDMAP_PINS > WORLDMAP_LINES)
+}
+
+
+// ****************************************************************
+// 
+void cWorldMap::EnablePin(const coreUintW iIndex, const coreBool bEnable)
+{
+    ASSERT(iIndex < WORLDMAP_PINS)
+
+    const coreObjectEnable eEnabled = bEnable ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING;
+
+    m_aPin   [iIndex].SetEnabled(eEnabled);
+    m_aPinDot[iIndex].SetEnabled(eEnabled);
+    if(iIndex)
+    {
+        m_aLine[iIndex - 1u].SetEnabled((m_aPin[iIndex - 1u].IsEnabled(CORE_OBJECT_ENABLE_ALL) && bEnable) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+    }
 }

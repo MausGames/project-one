@@ -49,7 +49,7 @@ cReplayMenu::cReplayMenu()noexcept
     }
 
     // bind menu objects
-    for(coreUintW i = 0u; i < SURFACE_REPLAY_MAX; ++i) // TODO 
+    for(coreUintW i = 0u; i < SURFACE_REPLAY_MAX; ++i)
     {
         this->BindObject(i, &m_Background);
         this->BindObject(i, &m_BackButton);
@@ -74,25 +74,22 @@ void cReplayMenu::Move()
     {
     case SURFACE_REPLAY_DEFAULT:
         {
-
-
-
+            // 
             for(coreUintW i = 0u; i < MENU_REPLAY_ENTRIES; ++i)
             {
-                if(m_aLine[i].IsClicked() || m_aName[i].IsClicked() || m_aTime[i].IsClicked())  
+                if(m_aName[i].IsClicked() || m_aTime[i].IsClicked() || m_aLine[i].IsClicked())
                 {
                     if(i < m_aInfoList.size())
                     {
+                        // 
                         g_pReplay->LoadFile(m_aInfoList[i].sPath.c_str(), false);
-                        m_iStatus = 1;
 
+                        // 
+                        m_iStatus = 1;
                         break;
                     }
                 }
             }
-
-
-
         }
         break;
 
@@ -101,13 +98,10 @@ void cReplayMenu::Move()
         break;
     }
 
-    if(!g_pMenu->IsInTransition(this))
+    if(m_BackButton.IsClicked() || g_MenuInput.bCancel)
     {
-        if(m_BackButton.IsClicked() || g_MenuInput.bCancel)
-        {
-            // 
-            m_iStatus = 2;
-        }
+        // 
+        m_iStatus = 2;
     }
 
     // 

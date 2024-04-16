@@ -53,33 +53,30 @@ void cPauseMenu::Move()
     {
     case SURFACE_PAUSE_DEFAULT:
         {
+            if(m_ResumeButton.IsClicked() || g_MenuInput.bPause)
+            {
+                // 
+                m_iStatus = 1;
+            }
+            else if(m_ConfigButton.IsClicked())
+            {
+                // 
+                m_iStatus = 2;
+            }
+            else if(m_ExitButton.IsClicked())
+            {
+                // 
+                g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_EXIT_GAME"), [this](const coreInt32 iAnswer)
+                {
+                    if(iAnswer == MSGBOX_ANSWER_YES)
+                        m_iStatus = 103;
+                });
+            }
+
             // 
             cMenu::UpdateButton(&m_ResumeButton, m_ResumeButton.IsFocused());
             cMenu::UpdateButton(&m_ConfigButton, m_ConfigButton.IsFocused());
             cMenu::UpdateButton(&m_ExitButton,   m_ExitButton  .IsFocused());
-
-            if(!g_pMenu->IsInTransition(this))
-            {
-                if(m_ResumeButton.IsClicked() || g_MenuInput.bPause)
-                {
-                    // 
-                    m_iStatus = 1;
-                }
-                else if(m_ConfigButton.IsClicked())
-                {
-                    // 
-                    m_iStatus = 2;
-                }
-                else if(m_ExitButton.IsClicked())
-                {
-                    // 
-                    g_pMenu->GetMsgBox()->ShowQuestion(Core::Language->GetString("QUESTION_EXIT_GAME"), [this](const coreInt32 iAnswer)
-                    {
-                        if(iAnswer == MSGBOX_ANSWER_YES)
-                            m_iStatus = 103;
-                    });
-                }
-            }
         }
         break;
 

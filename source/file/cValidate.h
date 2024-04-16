@@ -48,8 +48,8 @@ FORCE_INLINE coreBool ValidateReplay(cReplay* OUTPUT pReplay)
 
     if(!bValid)
     {
-        for(coreUintW i = 0u; i < REPLAY_STREAMS; ++i)
-            coreData::Shuffle(pReplay->m_aaStreamPacket[i].begin(), pReplay->m_aaStreamPacket[i].end(), CORE_RAND_SEED_ALWAYS + i);
+        //for(coreUintW i = 0u; i < REPLAY_STREAMS; ++i)
+        //    coreData::Shuffle(pReplay->m_aaStreamPacket[i].begin(), pReplay->m_aaStreamPacket[i].end(), CORE_RAND_SEED_ALWAYS + i);
     }
 
     return bValid;

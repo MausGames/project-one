@@ -114,17 +114,12 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
     m_BannerBar.DefineTexture(1u, "menu_background_black.png");
     m_BannerBar.DefineProgram("menu_animate_program");
 
-    //m_aBannerText[0].Construct(MENU_FONT_STANDARD_5, MENU_OUTLINE_SMALL);
-    //m_aBannerText[1].Construct(MENU_FONT_STANDARD_5, MENU_OUTLINE_SMALL);
+    m_aBannerText[0].Construct(MENU_FONT_STANDARD_5, MENU_OUTLINE_SMALL);
+    m_aBannerText[1].Construct(MENU_FONT_STANDARD_5, MENU_OUTLINE_SMALL);
     m_aBannerText[2].Construct(MENU_FONT_DYNAMIC_2,  MENU_OUTLINE_SMALL);
 
     m_aStoryText[0].Construct(MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
     m_aStoryText[1].Construct(MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
-
-
-
-    m_aBannerText[0].Construct("keifont.ttf", 70u, MENU_OUTLINE_SMALL);
-    m_aBannerText[1].Construct("keifont.ttf", 70u, MENU_OUTLINE_SMALL);
 }
 
 
@@ -455,8 +450,6 @@ void cInterface::ShowBoss(const coreChar* pcMain, const coreChar* pcSub)
         m_aBannerText[1].SetColor3(COLOR_MENU_WHITE * 0.75f);
         m_aBannerText[2].SetColor3(COLOR_MENU_WHITE * 0.75f);
         m_aBannerText[3].SetColor3(COLOR_MENU_WHITE);
-
-        m_BannerBar     .SetEnabled(CORE_OBJECT_ENABLE_ALL);
     }
 }
 
@@ -506,8 +499,6 @@ void cInterface::ShowMission(const coreChar* pcMain, const coreChar* pcSub)
         m_aBannerText[1].SetColor3(COLOR_MENU_WHITE * 0.75f);
         m_aBannerText[2].SetColor3(COLOR_MENU_WHITE * 0.75f);
         m_aBannerText[3].SetColor3(COLOR_MENU_WHITE);
-
-        m_BannerBar     .SetEnabled(CORE_OBJECT_ENABLE_ALL);
     }
 }
 
@@ -525,8 +516,8 @@ void cInterface::ShowScore(const coreChar* pcMain, const coreChar* pcSub)
     this->__PrepareBanner();
 
     // set banner text
-    m_aBannerText[0].SetText(pcMain);
-    m_aBannerText[1].SetText(pcMain);
+    m_aBannerText[0].SetText(pcSub);
+    m_aBannerText[1].SetText(pcSub);
     m_aBannerText[2].SetText(pcMain);
     m_aBannerText[3].SetText(pcSub);
 
@@ -556,15 +547,7 @@ void cInterface::ShowScore(const coreChar* pcMain, const coreChar* pcSub)
         m_aBannerText[1].SetColor3(coreVector3(1.0f,1.0f,1.0f) * 0.75f);
         m_aBannerText[2].SetColor3(coreVector3(1.0f,1.0f,1.0f) * 0.75f);
         m_aBannerText[3].SetColor3(coreVector3(1.0f,1.0f,1.0f));
-
-        m_BannerBar     .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     }
-
-
-    m_aBannerText[0].SetText(u8"始");
-    m_aBannerText[1].SetText(u8"始");
-
-
 }
 
 void cInterface::ShowScore(const coreUint32 iScore)

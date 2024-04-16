@@ -11,7 +11,6 @@
 #define _P1_GUARD_GAME_H_
 
 // TODO: enemy bullet (and enemy?) cleanup on mission unload
-// TODO: use uint for game-times ?
 // TODO: check for duplicate IDs in mission-lists ? LoadMissionID may behave wrong
 // TODO: show pacifist damage in interface, pulsing and filling up, also show that weapons are disabled
 // TODO: maybe spawn players in flight direction, mission start and continue ?
@@ -33,6 +32,14 @@ enum eGameStatus : coreUint8
     GAME_STATUS_PLAY     = 0x04u,   // 
     GAME_STATUS_LOADING  = 0x08u,   // 
     GAME_STATUS_DEFEATED = 0x10u    // 
+};
+
+struct sGameConfig final
+{
+    coreUint8 iDifficulty;                                 // 
+    coreBool  bCoop;                                       // 
+    coreUint8 aaiWeapon [GAME_PLAYERS][PLAYER_WEAPONS];    // 
+    coreUint8 aaiSupport[GAME_PLAYERS][PLAYER_SUPPORTS];   // 
 };
 
 
@@ -90,6 +97,8 @@ private:
     cCombatText  m_CombatText;              // combat text overlay
     cInterface   m_Interface;               // interface overlay
 
+    cRepairEnemy* m_pRepairEnemy;           // 
+
     const coreInt32* m_piMissionList;       // 
     coreUintW        m_iNumMissions;        // 
 
@@ -113,7 +122,7 @@ private:
 
 
 public:
-    cGame(const coreUint8 iDifficulty, const coreBool bCoop, const coreInt32* piMissionList, const coreUintW iNumMissions)noexcept;
+    cGame(const sGameConfig oConfig, const coreInt32* piMissionList, const coreUintW iNumMissions)noexcept;
     ~cGame();
 
     DISABLE_COPY(cGame)

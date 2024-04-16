@@ -11,10 +11,11 @@
 
 // ****************************************************************
 // constructor
-cGame::cGame(const coreUint8 iDifficulty, const coreBool bCoop, const coreInt32* piMissionList, const coreUintW iNumMissions)noexcept
+cGame::cGame(const sGameConfig oConfig, const coreInt32* piMissionList, const coreUintW iNumMissions)noexcept
 : m_BulletManagerPlayer (TYPE_BULLET_PLAYER)
 , m_BulletManagerEnemy  (TYPE_BULLET_ENEMY)
-, m_Interface           (bCoop ? GAME_PLAYERS : 1u)
+, m_Interface           (oConfig.bCoop ? GAME_PLAYERS : 1u)
+, m_pRepairEnemy        (NULL)
 , m_piMissionList       (piMissionList)
 , m_iNumMissions        (iNumMissions)
 , m_pCurMission         (NULL)
@@ -26,8 +27,8 @@ cGame::cGame(const coreUint8 iDifficulty, const coreBool bCoop, const coreInt32*
 , m_iDepthLevel         (0u)
 , m_iOutroType          (0u)
 , m_iStatus             (0u)
-, m_iDifficulty         (iDifficulty)
-, m_bCoop               (bCoop)
+, m_iDifficulty         (oConfig.iDifficulty)
+, m_bCoop               (oConfig.bCoop)
 {
     ASSERT(m_piMissionList && (m_iNumMissions <= MISSIONS))
 
@@ -41,16 +42,16 @@ cGame::cGame(const coreUint8 iDifficulty, const coreBool bCoop, const coreInt32*
 #endif
 
     // configure first player
-    m_aPlayer[0].Configure  (PLAYER_SHIP_ATK, COLOR_SHIP_RED);
-    m_aPlayer[0].EquipWeapon(0u, cRayWeapon::ID);
-    if(!m_iDifficulty) m_aPlayer[0].GiveShield();
+    m_aPlayer[0].Configure(PLAYER_SHIP_ATK, COLOR_SHIP_RED);
+    for(coreUintW i = 0u; i < PLAYER_WEAPONS;  ++i) m_aPlayer[0].EquipWeapon (i, oConfig.aaiWeapon [0][i]);
+    for(coreUintW i = 0u; i < PLAYER_SUPPORTS; ++i) m_aPlayer[0].EquipSupport(i, oConfig.aaiSupport[0][i]);
 
     if(m_bCoop)
     {
         // configure second player
-        m_aPlayer[1].Configure  (PLAYER_SHIP_DEF, COLOR_SHIP_BLUE);
-        m_aPlayer[1].EquipWeapon(0u, cRayWeapon::ID);
-        if(!m_iDifficulty) m_aPlayer[1].GiveShield();
+        m_aPlayer[1].Configure(PLAYER_SHIP_DEF, COLOR_SHIP_BLUE);
+        for(coreUintW i = 0u; i < PLAYER_WEAPONS;  ++i) m_aPlayer[1].EquipWeapon (i, oConfig.aaiWeapon [1][i]);
+        for(coreUintW i = 0u; i < PLAYER_SUPPORTS; ++i) m_aPlayer[1].EquipSupport(i, oConfig.aaiSupport[1][i]);
 
         // 
         m_aPlayer[0].SetInput(&g_aGameInput[0]);
@@ -128,6 +129,8 @@ void cGame::Render()
 
         // render low-priority bullet manager
         m_BulletManagerPlayer.Render();
+
+        m_BulletManagerEnemy.Render(); // temporary for r-type residue wave   
     }
 
     __DEPTH_LEVEL_SHIP   // # 2
@@ -155,7 +158,7 @@ void cGame::Render()
         g_pSpecialEffects->Render();
 
         // render high-priority bullet manager
-        m_BulletManagerEnemy.Render();   // TODO: below attack ? to be consistent with over ? rename all 3 stages ? 
+        //m_BulletManagerEnemy.Render();   // TODO: below attack ? to be consistent with over ? rename all 3 stages ? 
 
         // render overlying effects
         m_EnemyManager.RenderOver();
@@ -574,14 +577,22 @@ void cGame::__HandleDefeat()
         // 
         for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
         {
-            const cPlayer& oPlayer = m_aPlayer[i];
+            cPlayer* pPlayer = &m_aPlayer[i];
 
             // 
-            const coreBool bDefeated = CONTAINS_FLAG(oPlayer.GetStatus(), PLAYER_STATUS_DEAD);
+            const coreBool bDefeated = CONTAINS_FLAG(pPlayer->GetStatus(), PLAYER_STATUS_DEAD);
             bAllDefeated = bAllDefeated && bDefeated;
 
             // 
-            g_pPostProcessing->SetSaturation(i, bDefeated ? 0.0f : CLAMP(1.0f - oPlayer.GetFeelTime(), 0.0f, 1.0f));
+            g_pPostProcessing->SetSaturation(i, bDefeated ? 0.0f : CLAMP(1.0f - pPlayer->GetFeelTime(), 0.0f, 1.0f));
+
+            if(bDefeated && m_bCoop && !m_pRepairEnemy)
+            {
+                // 
+                m_pRepairEnemy = new cRepairEnemy();
+                m_pRepairEnemy->AssignPlayer(pPlayer);
+                m_pRepairEnemy->Resurrect();
+            }
         }
 
         if(bAllDefeated)
@@ -597,6 +608,29 @@ void cGame::__HandleDefeat()
                 REMOVE_FLAG(m_iStatus, GAME_STATUS_PLAY)
                 ADD_FLAG   (m_iStatus, GAME_STATUS_DEFEATED)
             }
+
+            if(m_pRepairEnemy)
+            {
+                // 
+                g_pSpecialEffects->CreateSplashDark(m_pRepairEnemy->GetPosition(), SPECIAL_SPLASH_TINY);
+                SAFE_DELETE(m_pRepairEnemy)
+            }
+        }
+
+        if(m_pRepairEnemy && m_pRepairEnemy->ReachedDeath())
+        {
+            cPlayer* pPlayer = m_pRepairEnemy->GetPlayer();
+
+            // 
+            pPlayer->Resurrect();
+
+            // 
+            pPlayer->SetPosition    (m_pRepairEnemy->GetPosition());
+            pPlayer->SetCurHealthPct(I_TO_F(1u) / I_TO_F(PLAYER_LIVES));
+            pPlayer->StartFeeling   (PLAYER_FEEL_TIME, 0u);
+
+            // 
+            SAFE_DELETE(m_pRepairEnemy)
         }
     }
 }
@@ -757,4 +791,11 @@ void cGame::__ClearAll(const coreBool bAnimated)
     m_ChromaManager      .ClearChromas(bAnimated);
     m_ItemManager        .ClearItems  (bAnimated);
     m_ShieldManager      .ClearShields(bAnimated);
+
+    // 
+    if(m_pRepairEnemy)
+    {
+        if(bAnimated) g_pSpecialEffects->MacroExplosionDarkSmall(m_pRepairEnemy->GetPosition());
+        SAFE_DELETE(m_pRepairEnemy)
+    }
 }

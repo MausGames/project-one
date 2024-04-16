@@ -28,7 +28,7 @@ cExtraMenu::cExtraMenu()noexcept
     m_BackButton.GetCaption()->SetText(ICON_SHARE);
 
     // bind menu objects
-    for(coreUintW i = 0u; i < SURFACE_EXTRA_MAX; ++i) // TODO 
+    for(coreUintW i = 0u; i < SURFACE_EXTRA_MAX; ++i)
     {
         this->BindObject(i, &m_Background);
         this->BindObject(i, &m_BackButton);
@@ -58,18 +58,15 @@ void cExtraMenu::Move()
         break;
     }
 
-    // 
-    if(m_BackButton.IsFocused()) g_pMenu->GetTooltip()->ShowText(TOOLTIP_ONELINER, Core::Language->GetString("BACK"));
+    if(m_BackButton.IsClicked() || g_MenuInput.bCancel)
+    {
+        // 
+        m_iStatus = 1;
+    }
 
     // 
     cMenu::UpdateButton(&m_BackButton, m_BackButton.IsFocused());
 
-    if(!g_pMenu->IsInTransition(this))
-    {
-        if(m_BackButton.IsClicked() || g_MenuInput.bCancel)
-        {
-            // 
-            m_iStatus = 1;
-        }
-    }
+    // 
+    if(m_BackButton.IsFocused()) g_pMenu->GetTooltip()->ShowText(TOOLTIP_ONELINER, Core::Language->GetString("BACK"));
 }

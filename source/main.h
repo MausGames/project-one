@@ -70,6 +70,7 @@
 // TODO: remove game_icon.png from resource-index if not required anymore
 // TODO: brown bullet, directional
 // TODO: ENABLE_BITWISE when ?
+// TODO: remove multisampling for 2d, though may cause artifacts if the objects are fully shaded and moved
 
 
 // ****************************************************************
@@ -97,10 +98,11 @@
 #define PLAYERS              (2u)
 #define MISSIONS             (9u + 1u)
 #define BOSSES               (3u)
-#define WAVES                (15u + 3u)
+#define WAVES                (15u)
+#define STAGES               (BOSSES + WAVES)
 #define LIVES                (5u)
 #define CONTINUES            (3u)
-#define SHIELD               (100u)
+#define SHIELD               (1u)//(100u)
 #define FRAMERATE_VALUE      (60.0f)
 #define FRAMERATE_TIME       (1.0f / FRAMERATE_VALUE)
 #define CAMERA_POSITION      (coreVector3(0.0f, 0.0f, 110.0f))
@@ -223,6 +225,7 @@ extern coreMusicPlayer g_MusicPlayer;       // central music-player
 
 #include "additional/cUtilities.h"
 #include "additional/cBindContainer.h"
+#include "additional/cMenuInput.h"
 #include "additional/cRotaCache.h"
 #include "additional/cLodObject.h"
 #include "file/cConfig.h"
@@ -241,6 +244,7 @@ extern coreMusicPlayer g_MusicPlayer;       // central music-player
 #include "visual/cPostProcessing.h"
 
 extern cReplay*         const g_pReplay;           // 
+extern cSave*           const g_pSave;             // 
 extern cOutline*        const g_pOutline;          // main outline-layer object
 extern cGlow*           const g_pGlow;             // main glow-effect object
 extern cDistortion*     const g_pDistortion;       // main distortion-effect object
