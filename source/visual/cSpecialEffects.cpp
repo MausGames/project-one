@@ -136,6 +136,7 @@ void cSpecialEffects::RenderBottom()
     if(m_bActive)
     {
         glDisable(GL_DEPTH_TEST);
+        //glDepthMask(false);
         {
             const coreBool bForeground = g_pForeground->IsTarget();
 
@@ -155,6 +156,7 @@ void cSpecialEffects::RenderBottom()
                        else glBlendFunc        (FOREGROUND_BLEND_DEFAULT);
         }
         glEnable(GL_DEPTH_TEST);
+        //glDepthMask(true);
     }
 }
 

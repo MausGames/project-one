@@ -72,6 +72,8 @@ public:
     inline coreFrameBuffer* GetReflection()      {return &m_Reflection;}
     inline coreFrameBuffer* GetRefraction()      {return &m_Refraction;}
     inline coreFrameBuffer* GetDepth     ()      {return &m_Depth;}
+    
+    virtual void Reshape();
 
 
 private:
@@ -138,6 +140,8 @@ public:
     ~cRainWater()final;
 
     DISABLE_COPY(cRainWater)
+
+    void Reshape()final;
 
 
 private:

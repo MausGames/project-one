@@ -47,7 +47,6 @@
 // TODO 1: vielleicht sollte in finaler phase der geschoss-lerp erst bei 50% health starten
 // TODO 1: flammen sound
 // TODO 1: rotierende einzelteile kurz vorm abschuss brauchen einen weiter (glow) effekt, damit mans gscheit sieht
-// TODO 1: die säulen die auf den boden knallen verursachen stotter-bewegungen wenn man dagegen fliegt, und können sogar schaden verursachen, mit spieler-Y ganz unten (aber scheint nicht in wave zu passieren)
 // TODO 1: remove the remaining squishy movement in orb-phase (in sync with wave part)
 // TODO 1: wenn man die teile aus der wand schlägt, sollten sie zur seite fliegen, damit man nicht unabsichtlich glaubt man muss ihnen ausweichen
 // TODO 1: wenn einzelteile rotiert werden (zb. bei explosion) sollten sie geshiftet werden wie bei einzelteil-phase
@@ -579,6 +578,9 @@ void cCholBoss::__MoveOwn()
                 pMission->EnableFang(i);
 
             this->ChangeToBottom();
+
+            pMission->SetCrushFree(true);
+            pMission->SetCrushLong(true);
         }
 
         constexpr coreFloat fDelay = 0.7f;

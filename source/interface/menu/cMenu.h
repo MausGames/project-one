@@ -39,6 +39,7 @@
 // TODO 3: display gamepad/device name in options description
 // TODO 4: locked config input buttons are set with dummy values before getting locked
 // TODO 2: handle plugging in and out gamepad while in config menu, handle plugging out gamepad in general (when controller is currently selected)
+// TODO 2: in emscripten müssen einige optionen geändert werden (disable: monitor, resolution, display mode | change: anti-aliasing [on/off])
 
 
 // ****************************************************************

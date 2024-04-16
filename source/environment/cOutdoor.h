@@ -165,6 +165,7 @@ public:
 private:
     // reset with the resource manager
     void __Reset(const coreResourceReset eInit)final;
+    void __Reshape()final;
 
     // 
     template <typename F> void __Render(const coreProgramPtr& pProgram, F&& nFunction);   // [](void) -> void

@@ -42,14 +42,16 @@ void cBullet::Move()
 
     // call individual move routine
     this->__MoveOwn();
+    
+    const coreBool bVisible = g_pForeground->IsVisibleObject(this);
 
-    // deactivate bullet when leaving the defined area
-    if((m_fFlyTime >= 0.5f) && !HAS_FLAG(m_iStatus, BULLET_STATUS_IMMORTAL) && !g_pForeground->IsVisibleObject(this))
+    // deactivate bullet when leaving the visible area
+    if((m_fFlyTime >= 0.5f) && !HAS_FLAG(m_iStatus, BULLET_STATUS_IMMORTAL) && !bVisible)
         this->Deactivate(false);
     
     if(HAS_FLAG(m_iStatus, BULLET_STATUS_ACTIVE))
     {
-        this->SetEnabled(g_pForeground->IsVisibleObject(this) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE);
+        this->SetEnabled(bVisible ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE);
     }
     
     // move the 3d-object

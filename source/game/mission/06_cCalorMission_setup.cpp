@@ -1535,8 +1535,9 @@ void cCalorMission::__SetupOwn()
     // TODO 1: remove catch-forwarding if separator stays disabled, maybe also make swing-direction identical
     // TODO 1: simple bullet-waves inbetween for the player to overcome
     // TODO 1: vielleicht mini-gegner oder boss-intro (10s) um morning-star zu erhalten
-    // TODO 1: first side enemies on bullet-carpet more to the middle (maybe 50%)
+    // TODO 1: first side enemies on bullet-carpet more to the middle (maybe 50%), or all enemies in the middle
     // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: badge: zerstöre N bullets mit morgenstern (+ anzeige, aber erst am ende)
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         
@@ -1548,7 +1549,7 @@ void cCalorMission::__SetupOwn()
                 m_Boulder.Resurrect();
                 m_Boulder.SetPosition(coreVector3(0.0f,-1.25f,0.0f) * FOREGROUND_AREA3);
 
-                this->StartSwing(7.0f);
+                this->StartSwing(1.0f);
 
                 g_pSpecialEffects->CreateSplashColor(coreVector3(0.0f,-1.1f,0.0f) * FOREGROUND_AREA3, SPECIAL_SPLASH_SMALL, COLOR_ENERGY_WHITE);
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);

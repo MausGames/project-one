@@ -299,9 +299,9 @@ cConfigMenu::cConfigMenu()noexcept
     const coreUint8 iMaxSamples    = Core::Graphics->GetMaxSamples();
     const coreUint8 iMaxAnisotropy = Core::Graphics->GetMaxAnisotropy();
 
-    m_DisplayMode  .AddEntryLanguage("DISPLAYMODE_WINDOW",     0u);
-    m_DisplayMode  .AddEntryLanguage("DISPLAYMODE_BORDERLESS", 1u);
-    m_DisplayMode  .AddEntryLanguage("DISPLAYMODE_FULLSCREEN", 2u);
+    m_DisplayMode  .AddEntryLanguage("DISPLAYMODE_WINDOW",     CORE_SYSTEM_MODE_WINDOWED);
+    m_DisplayMode  .AddEntryLanguage("DISPLAYMODE_BORDERLESS", CORE_SYSTEM_MODE_BORDERLESS);
+    m_DisplayMode  .AddEntryLanguage("DISPLAYMODE_FULLSCREEN", CORE_SYSTEM_MODE_FULLSCREEN);
     m_AntiAliasing .AddEntryLanguage("VALUE_OFF",              0u);
     m_TextureFilter.AddEntryLanguage("VALUE_OFF",              0u);
     for(coreUintW i = 2u, ie = iMaxSamples;    i <= ie; i <<= 1u) m_AntiAliasing .AddEntry(PRINT("%zux", i), i);
@@ -907,12 +907,12 @@ void cConfigMenu::SaveValues()
     const coreVector2 vCurResolution = (iCurValue == 0xFFu) ? Core::System->GetResolution() : ((iCurValue == 0xEEu) ? coreVector2(0.0f,0.0f) : Core::System->GetDisplayData(iCurMonitor).avAvailableRes[iCurValue]);
 
     // 
-    const coreBool bReset = (vCurResolution != coreVector2(I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH)), I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT)))) ||
-                            (m_Monitor      .GetCurValue() != Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY))             ||
-                            (m_DisplayMode  .GetCurValue() != Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN))          ||
-                            (m_AntiAliasing .GetCurValue() != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING))      ||
-                            (m_TextureFilter.GetCurValue() != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY)) ||
-                            (m_RenderQuality.GetCurValue() != g_CurConfig.Graphics.iRender);
+    const coreBool bReset   = (m_AntiAliasing .GetCurValue() != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING));
+    const coreBool bReshape = (vCurResolution != coreVector2(I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH)), I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT)))) ||
+                              (m_Monitor      .GetCurValue() != Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY))             ||
+                              (m_DisplayMode  .GetCurValue() != Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN));
+    const coreBool bManager = (m_TextureFilter.GetCurValue() != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREANISOTROPY)) ||
+                              (m_RenderQuality.GetCurValue() != g_CurConfig.Graphics.iRender);
 
     // 
     Core::Config->SetInt(CORE_CONFIG_SYSTEM_WIDTH,               F_TO_SI(vCurResolution.x));
@@ -957,15 +957,35 @@ void cConfigMenu::SaveValues()
     SaveConfig();
     this->CheckValues();
 
-    if(bReset)
+    if(bReset || bReshape || bManager)
     {
         const coreVector2 vSafeResolution = vCurResolution.IsNull() ? Core::System->GetDisplayData(iCurMonitor).vDesktopRes : vCurResolution;
 
         Core::System->SetWindowResolution(vSafeResolution);
         
         // 
-        InitResolution(Core::System->GetResolution());//vSafeResolution);
-        Core::Reset();
+        InitResolution(Core::System->GetResolution());//vSafeResolution);    damit resolution korrekt geclampt wird
+        
+        
+        if(bReset)
+        {
+            Core::Reset();
+        }
+        else
+        {
+            if(bReshape)
+            {
+                Core::System->SetWindowDisplay(iCurMonitor);
+                Core::System->SetWindowMode(coreSystemMode(m_DisplayMode.GetCurValue()));
+                Core::Reshape();
+            }
+
+            if(bManager)
+            {
+                Core::Manager::Resource->Reset(CORE_RESOURCE_RESET_EXIT);
+                Core::Manager::Resource->Reset(CORE_RESOURCE_RESET_INIT);
+            }
+        }
 
         // 
         this->__LoadMonitors();
@@ -984,7 +1004,7 @@ void cConfigMenu::SaveValues()
 void cConfigMenu::__UpdateRenderQuality()
 {
     // 
-    g_CurConfig.Graphics.iRender = m_RenderQuality.GetCurValue();
+    //g_CurConfig.Graphics.iRender = m_RenderQuality.GetCurValue();
 }
 
 

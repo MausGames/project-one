@@ -55,7 +55,7 @@ cProjectOneBoss::cProjectOneBoss()noexcept
     this->DefineTexture  (0u, "ship_player.png");
 
     // set object properties
-    this->SetSize(coreVector3(1.2f,1.2f,1.2f));
+    this->SetSize(coreVector3(1.0f,1.0f,1.0f) * 1.4f);
 
     // configure the boss
     this->Configure(10000, COLOR_SHIP_GREY);
@@ -179,7 +179,7 @@ void cProjectOneBoss::__MoveOwn()
     {
         PHASE_CONTROL_TIMER(0u, 0.7f, LERP_BREAK)
         {
-            this->DefaultMoveLerp(coreVector2(0.0f,1.2f), coreVector2(0.0f,0.8f), fTime);
+            this->DefaultMoveLerp(coreVector2(0.0f,1.3f), coreVector2(0.0f,0.8f), fTime);
 
             //if(PHASE_TIME_POINT(0.85f))
             //    this->_StartBoss();
@@ -307,7 +307,7 @@ void cProjectOneBoss::__MoveOwn()
     {
         PHASE_CONTROL_TIMER(0u, 0.9f, LERP_BREAK_REV)
         {
-            this->DefaultMoveLerp     (m_vLastPosition, coreVector2(m_vLastPosition.x, -1.2f), fTime);
+            this->DefaultMoveLerp     (m_vLastPosition, coreVector2(m_vLastPosition.x, -1.3f), fTime);
             this->DefaultOrientateLerp(0.0f*PI,         2.0f*PI,                               fTime);
 
             if(PHASE_FINISHED)

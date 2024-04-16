@@ -1058,7 +1058,7 @@ void cViridoMission::__SetupOwn()
 
                         if(i == iBigIndex)
                         {
-                            for(coreUintW j = 80u; j--; )
+                            for(coreUintW j = 20u; j--; )
                             {
                                 const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(j) * 4.5f));
 

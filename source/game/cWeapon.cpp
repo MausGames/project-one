@@ -432,6 +432,6 @@ void cEnemyWeapon::__ShootOwn()
     {
         const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD((I_TO_F(j) - 2.0f) * 5.0f) + fBase);
 
-        this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cViewBullet>(1, 2.4f, m_pOwner, vPos, vDir))->ChangeSize(1.5f);
+        this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cViewBullet>(1, 4.0f, m_pOwner, vPos, vDir))->ChangeSize(1.5f);
     }
 }

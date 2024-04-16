@@ -84,9 +84,9 @@ cMossBackground::cMossBackground()noexcept
                     //if(iType == 2u) pObject->SetOrientation(OriRoundDir(coreVector2::Rand(), pObject->GetDirection().xy()));
 
                     // add object to the list
-                         if(iType == 0u) pList1->BindObject(pObject);
-                    else if(iType == 1u) pList2->BindObject(pObject);
-                    else                 pList3->BindObject(pObject);
+                         if(iType == 0u) cBackground::_BindSorted(pList1, pObject);
+                    else if(iType == 1u) cBackground::_BindSorted(pList2, pObject);
+                    else                 cBackground::_BindSorted(pList3, pObject);
                 }
             }
         }

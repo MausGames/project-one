@@ -93,6 +93,7 @@ void cMuscusMission::__SetupOwn()
     // TODO 1: erster gegner in 6x6 gruppe stirbt zu schnell, wenn spieler grad richtig schießt
     // TODO 1: mehr zwischen-subwave flickern hinzufügen, bei anderen wellen nach 10
     // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: vielleicht wurm-gegner hören nach kurzer zeit oder sobald sie sichtbar sind zu schießen auf
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         constexpr coreUintW iNumData = 36u;
@@ -966,7 +967,7 @@ void cMuscusMission::__SetupOwn()
     // TODO 1: spieler wird am schießen gehindert, interrupt, vielleicht wenn die lampe kaputt geht, von der vorherigen wave (diese gruppe sollte auch im dunkeln starten)
     // TODO 1: background side-movement might be easier for direct attack from top
     // TODO 1: maybe also update strike-spline target tangent in real-time (e.g. when enemy moves into strike the animation gets slower)
-    // TODO 1: enemy verliert tatsächlich lebens-punkte
+    // TODO 1: enemy verliert tatsächlich lebens-punkte !
     // TODO 1: shoot-counter sollte irgendwie resettet werden, damit die wurst-angriffe nicht unterbrochen beginnen (sollten sie am ende unterbrochen werden, isses wurst) (STAGE_TICK_EXTERN ?)
     // TODO 1: striking pearls need a different appearance (color would be good, white?)
     // TODO 1: striking pearls sollten sich strecken (direction anpassen + Y size größer + leichte XY size kleiner)
@@ -1024,14 +1025,6 @@ void cMuscusMission::__SetupOwn()
             STAGE_GET_VEC2_ARRAY (avPearlMove, MUSCUS_PEARLS)
         STAGE_GET_END
 
-        const auto nGetPearlFunc = [this](const coreUintW iIndex)
-        {
-            ASSERT(iIndex < MUSCUS_PEARLS)
-
-            coreObject3D* pPearl = &m_aPearlRaw[iIndex * 2u];
-            return (pPearl->IsEnabled(CORE_OBJECT_ENABLE_MOVE) && HAS_BIT(m_iPearlActive, iIndex) && !m_apStrikeTarget[iIndex]) ? pPearl : NULL;
-        };
-
         const auto nCreatePearlWaveFunc = [this](const coreUintW iCount)
         {
             for(coreUintW i = 0u; i < iCount; ++i)
@@ -1075,8 +1068,8 @@ void cMuscusMission::__SetupOwn()
 
         for(coreUintW i = 0u; i < MUSCUS_PEARLS; ++i)
         {
-            coreObject3D* pPearl = nGetPearlFunc(i);
-            if(!pPearl) continue;
+            coreObject3D* pPearl = this->GetPearl(i);
+            if(!this->IsPearlActive(i)) continue;
 
             coreFloat&   fPearlTime = afPearlTime[i];
             coreVector2& vPearlMove = avPearlMove[i];
@@ -1209,8 +1202,8 @@ void cMuscusMission::__SetupOwn()
         {
             for(coreUintW j = 0u; j < MUSCUS_PEARLS; ++j)
             {
-                coreObject3D* pPearl = nGetPearlFunc(j);
-                if(!pPearl) continue;
+                const coreObject3D* pPearl = this->GetPearl(j);
+                if(!this->IsPearlActive(j)) continue;
 
                 const coreVector2 vDiff = pPlayer->GetPosition().xy() - pPearl->GetPosition().xy();
                 if(vDiff.LengthSq() < POW2(4.5f))
@@ -1437,6 +1430,7 @@ void cMuscusMission::__SetupOwn()
     // TODO 1: gegner anordnung vor zweiter trail/highspeed gruppe sollte so geändert werden, dass man besser in die nächste gruppe startet
     // TODO 1: verwandlung ist sehr kurz, könnte ok sein, muss dann aber bei boss mehrmals verwendet werden
     // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: schräge gegner-bewegungen im finale ?
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreUintW iNumData = 14u;
@@ -2244,7 +2238,7 @@ void cMuscusMission::__SetupOwn()
                     break;
                 }
 
-                if((pBullet->GetPosition().LengthSq() < POW2(2.0f)) || (pBullet->GetFlyTime() >= 10.0f))
+                if((pBullet->GetPosition().xy().LengthSq() < POW2(2.0f)) || (pBullet->GetFlyTime() >= 10.0f))
                     pBullet->Deactivate(true);
             });
         }
@@ -2444,6 +2438,26 @@ void cMuscusMission::__SetupOwn()
     // boss
     STAGE_MAIN({TAKE_ALWAYS, 6u})
     {
+        UNUSED STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, GEMINGA_ENEMIES_TELEPORT)
+        {
+            STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
+            {
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.2f);
+                pEnemy->Configure(4, COLOR_SHIP_PURPLE);
+                pEnemy->AddStatus(ENEMY_STATUS_WORTHLESS);
+            });
+        });
+
+        UNUSED STAGE_ADD_SQUAD(pSquad2, cScoutEnemy, GEMINGA_ENEMIES_LEGION)
+        {
+            STAGE_FOREACH_ENEMY_ALL(pSquad2, pEnemy, i)
+            {
+                pEnemy->SetSize  (coreVector3(1.0f,1.0f,1.0f) * 1.3f);
+                pEnemy->Configure(4, COLOR_SHIP_CYAN);
+                pEnemy->AddStatus(ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_WORTHLESS);
+            });
+        });
+
         STAGE_BOSS(m_Geminga, {60.0f, 120.0f, 180.0, 240.0f})
     });
 

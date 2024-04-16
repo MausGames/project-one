@@ -978,11 +978,17 @@ public:
     inline void BangGenerate(const coreUintW iIndex)                        {ASSERT(iIndex < MUSCUS_GENERATES) if(m_afGenerateTime[iIndex] >= 0.0f) m_afGenerateBang[iIndex] = 1.0f;}
 
     // 
+    inline coreBool IsPearlActive(const coreUintW iIndex)const {ASSERT(iIndex < MUSCUS_PEARLS) return (m_aPearlRaw[iIndex * 2u].IsEnabled(CORE_OBJECT_ENABLE_MOVE) && HAS_BIT(m_iPearlActive, iIndex) && !m_apStrikeTarget[iIndex]);}
+
+    // 
     void StrikeAttack(const coreUintW iIndex, cPlayer* pPlayer, const cShip* pTarget);
 
     // 
     inline cPlayer*          GetStrikePlayer(const coreUintW iIndex)const {ASSERT(iIndex < MUSCUS_PEARLS) return m_apStrikePlayer[iIndex];}
     inline const coreUint32& GetStrikeState ()const                       {return m_iStrikeState;}
+
+    // 
+    inline coreObject3D* GetPearl(const coreUintW iIndex) {ASSERT(iIndex < MUSCUS_PEARLS) return &m_aPearlRaw[iIndex * 2u];}
 
 
 private:

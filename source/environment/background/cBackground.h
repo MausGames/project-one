@@ -190,6 +190,7 @@ protected:
     // 
     static void _FillInfinite   (coreBatchList* OUTPUT pObjectList, const coreUintW iReserve);
     static void _SortBackToFront(coreBatchList* OUTPUT pObjectList);
+    static void _BindSorted     (coreBatchList* OUTPUT pObjectList, coreObject3D* pObject);
 
     // check for intersection with other objects
     static FUNC_PURE coreBool _CheckIntersection     (const coreBatchList* pObjectList, const coreVector2 vNewPos, const coreFloat fDistanceSq);
@@ -200,6 +201,7 @@ protected:
 private:
     // reset with the resource manager
     void __Reset(const coreResourceReset eInit)final;
+    void __Reshape()final;
 
     // own routines for derived classes
     virtual void __InitOwn        () {}

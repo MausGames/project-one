@@ -1340,8 +1340,6 @@ void cGeluMission::__SetupOwn()
             {
                 oFang.SetColor3((m_iStageSub == 19u) ? COLOR_SHIP_BLUE : coreVector3(0.5f,0.5f,0.5f));
             }
-
-            oFang.SetPosition(coreVector3(oFang.GetPosition().xy(), -0.1f));   // make sure player can be inside
         }
 
         if((m_iStageSub >= 9u) && (m_iStageSub < 18u))

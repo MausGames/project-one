@@ -371,6 +371,16 @@ void cGeluMission::__MoveOwnAfter()
     m_fAnimation.UpdateMod(0.2f, 10.0f);
     
     
+    
+    for(coreUintW i = 0u; i < GELU_FANGS; ++i)
+    {
+        cLodObject& oFang = m_aFangRaw[i];
+        if(!oFang.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+        oFang.SetPosition(coreVector3(oFang.GetPosition().xy(), -0.1f));   // make sure player can be inside pyramid geometry
+        // needs to be before collision handling
+    }
+    
     g_pGame->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
         coreVector2 vNewPos = pPlayer->GetPosition().xy();

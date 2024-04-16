@@ -126,6 +126,11 @@
     #endif
 #endif
 
+#if defined(_CORE_DEBUG_)
+#define _P1_VERSION_1_1_0_
+#endif
+#define _P1_DEMO_ // kapsle komplette missions-files
+
 
 // ****************************************************************
 // general definitions

@@ -20,6 +20,7 @@
 // TODO 5: boss0103, remove small hitch when finishing rotation in the middle shortly before beginning laser-phase
 // TODO 3: transformation properties are invalid on start (basically for phase 0), should this be handled ?
 // TODO 1: boss hat mit PHASE_CONTROL_TICKER noch einmal geschossen, nachdem er gestorben ist und alle geschosse zerstört wurden, sollte allgemein verhindert werden, auch bei normalen waves
+// TODO 1: check if PHASE_AGAIN is required on some PHASE_RESET calls (if 1.0f is reached, all calculations will be repeated with 0.0f, for a (nearly) perfect loop (fractions are still not handled))
 
 
 // ****************************************************************
@@ -36,7 +37,8 @@
 #define DHARUK_BOOMERANGS         (4u)                                         // 
 #define DHARUK_BOOMERANGS_RAWS    (DHARUK_BOOMERANGS * (DHARUK_TRAILS + 1u))   // 
 #define DHARUK_WIDTH              (0.5f)                                       // 
-#define DHARUK_HEIGHT             (0.8f)                                       // 
+#define DHARUK_HEIGHT             (0.75f)                                      // 
+#define DHARUK_OUTSIDE            (1.5f)                                       // 
 
 #define TORUS_TURRETS             (2u)                                         // 
 #define TORUS_GUNNERS             (4u)                                         // 
@@ -87,6 +89,16 @@
 #define ZEROTH_ICES               (2u)                                         // 
 #define ZEROTH_LIMB_HEAD          (0u)                                         // 
 #define ZEROTH_LIMB_TAIL          (3u)                                         // 
+#define ZEROTH_RADIUS             (8.0f)                                       // 
+#define ZEROTH_SPEED_SLOW         (8.0f)                                       // 
+#define ZEROTH_SPEED_FAST         (16.0f)                                      // 
+#define ZEROTH_LASER_SIZE         (coreVector3(1.7f,45.0f,1.7f))               // 
+#define ZEROTH_LASER_TEXSIZE      (coreVector2(0.5f,1.0f))                     // 
+#define ZEROTH_LASERWAVE_SIZE     (coreVector3(3.0f,22.5f,3.0f))               // 
+#define ZEROTH_LASERWAVE_TEXSIZE  (coreVector2(0.5f,1.5f))                     // 
+
+#define GEMINGA_ENEMIES_TELEPORT  (8u)                                         // 
+#define GEMINGA_ENEMIES_LEGION    (10u)                                        // 
 
 #define PROJECTONE_SHIELDS        (HELPERS - 1u)                               // 
 
@@ -118,6 +130,7 @@
 #define PHASE_CHANGE_TO(i)              {this->ChangePhase(i);}
 #define PHASE_CHANGE_INC                {this->ChangePhase(m_iPhase + 1u);}
 #define PHASE_RESET(i)                  {m_aTimer[i].Stop(); m_aiTimerLine[i] = 0u;}
+#define PHASE_AGAIN                     {m_bControlAgain = true;}
 #define PHASE_FINISHED                  (__bEnd)
 
 
@@ -150,6 +163,8 @@ protected:
     coreUint8 m_iPhase;                       // 
     coreFlow  m_fPhaseTime;                   // 
     coreFloat m_fPhaseTimeBefore;             // 
+
+    coreBool m_bControlAgain;                 // 
 
     static coreVector2 s_vPositionPoint;      // 
 
@@ -233,6 +248,68 @@ private:
     // 
     void __EnableSummon (const coreVector2 vPosition);
     void __DisableSummon();
+
+    // 
+    coreVector2 __RepeatPosition (const coreVector2 vPosition, const coreFloat fThreshold, coreBool* OUTPUT pbChange);
+    coreVector2 __RepeatPosition (const coreVector2 vPosition, const coreFloat fThreshold);
+    void        __EncodeDirection(const coreUintW iIndex, const coreVector2 vDirection);
+    coreVector2 __DecodeDirection(const coreUintW iIndex);
+};
+
+
+// TODO 1: change sub-boss to boss, and remove original boss
+// ****************************************************************
+// Dharuk sub-boss class
+class cDharukSubBoss final : public cBoss
+{
+private:
+    cCustomEnemy  m_Duplicate;                                  // 
+    coreBatchList m_DuplicateTrail;                             // 
+    coreObject3D  m_aDuplicateRaw[DHARUK_DUPLICATE_RAWS];       // 
+    coreFloat     m_fDuplicateValue;                            // 
+
+    coreBatchList m_Boomerang;                                  // 
+    coreBatchList m_BoomerangTrail;                             // 
+    coreObject3D  m_aBoomerangRaw   [DHARUK_BOOMERANGS_RAWS];   // 
+    coreFloat     m_afBoomerangValue[DHARUK_BOOMERANGS];        // 
+
+    coreObject3D m_Summon;                                      // 
+
+    coreFloat m_fVisibility;                                    // 
+
+    coreUint8 m_iPackedDir;                                     // 
+    coreFlow  m_fAnimation;                                     // animation value
+
+
+public:
+    cDharukSubBoss()noexcept;
+
+    DISABLE_COPY(cDharukSubBoss)
+    ASSIGN_ID_EX(101, "DHARUK", COLOR_MENU_RED)
+
+
+private:
+    // execute own routines
+    void __ResurrectOwn  ()final;
+    void __KillOwn       (const coreBool bAnimated)final;
+    void __RenderOwnUnder()final;
+    void __RenderOwnOver ()final;
+    void __MoveOwn       ()final;
+
+    // 
+    void __EnableDuplicate ();
+    void __DisableDuplicate(const coreBool bAnimated);
+
+    // 
+    void __EnableBoomerang (const coreUintW iIndex, const coreVector2 vPosition, const coreVector2 vDirection);
+    void __DisableBoomerang(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void __EnableSummon (const coreVector2 vPosition);
+    void __DisableSummon();
+
+    // 
+    inline void __BecomeInvisible() {m_fVisibility = -1.0f; this->SetAlpha(0.0f); this->AddStatus(ENEMY_STATUS_HIDDEN);}
 
     // 
     coreVector2 __RepeatPosition (const coreVector2 vPosition, const coreFloat fThreshold, coreBool* OUTPUT pbChange);
@@ -350,7 +427,7 @@ public:
     cVausBoss()noexcept;
 
     DISABLE_COPY(cVausBoss)
-    ASSIGN_ID_EX(103, "VAUS", coreVector3(0.0f,0.0f,0.0f))
+    ASSIGN_ID_EX(103, "VAUS", COLOR_MENU_YELLOW)
 
 
 private:
@@ -464,11 +541,12 @@ public:
 
 private:
     // execute own routines
-    void __ResurrectOwn  ()final;
-    void __KillOwn       (const coreBool bAnimated)final;
-    void __RenderOwnUnder()final;
-    void __RenderOwnOver ()final;
-    void __MoveOwn       ()final;
+    void __ResurrectOwn   ()final;
+    void __KillOwn        (const coreBool bAnimated)final;
+    void __RenderOwnBottom()final;
+    void __RenderOwnUnder ()final;
+    void __RenderOwnOver  ()final;
+    void __MoveOwn        ()final;
 
     // 
     void __EnableRay      (const coreUintW iIndex, const coreBool bAnimated);
@@ -806,8 +884,7 @@ private:
     cCustomEnemy m_Body;                        // 
 
     coreObject3D m_Laser;                       // 
-    coreObject3D m_Laser2;                      // 
-    coreObject3D m_Laser2Wave;                      // 
+    coreObject3D m_LaserWave;                   // 
     coreVector2  m_vLaserDir;                   // 
 
     cCustomEnemy m_aIce[ZEROTH_ICES];           // 
@@ -819,7 +896,7 @@ public:
     cZerothBoss()noexcept;
 
     DISABLE_COPY(cZerothBoss)
-    ASSIGN_ID_EX(603, "???", COLOR_MENU_BLUE)
+    ASSIGN_ID_EX(603, "ZEROTH", COLOR_MENU_BLUE)
 
     // 
     void ResurrectIntro();
@@ -834,15 +911,12 @@ private:
     void __MoveOwn       ()final;
 
     // 
-    void __EnableLaser (const coreVector2 vPosition, const coreVector2 vDirection);
+    void __EnableLaser (const coreUintW iLimb);
     void __DisableLaser(const coreBool bAnimated);
 
     // 
-    void __EnableLaser2 (const coreUintW iLimb);
-    void __DisableLaser2(const coreBool bAnimated);
-
-    // 
-    void __CreateCube(const coreVector2 vPosition, const coreVector2 vDirection);
+    void __CreateCube (const coreVector2 vPosition, const coreVector2 vDirection);
+    void __DestroyCube(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
     void __SetLimbValue(const coreUintW iIndex, const coreFloat fValue);
@@ -877,6 +951,8 @@ private:
     cCustomEnemy m_Bottom;              // 
 
     cCustomEnemy m_Tooth[4];            // 
+    
+    cDharukSubBoss m_Dharuk;            // 
 
     coreFloat m_fMouthAngle;            // 
 
@@ -897,6 +973,9 @@ private:
     void __ResurrectOwn()final;
     void __KillOwn     (const coreBool bAnimated)final;
     void __MoveOwn     ()final;
+
+    // 
+    inline void __DefaultOrientation() {this->SetOrientation(coreVector3(this->GetDirection().xy().Rotated90(), 0.0f));}
 };
 
 
@@ -936,7 +1015,7 @@ public:
     cProjectOneBoss()noexcept;
 
     DISABLE_COPY(cProjectOneBoss)
-    ASSIGN_ID(801, "PROJECT ONE")
+    ASSIGN_ID(801, "???")   // TODO 1: currently saved name, maybe even steam name 
 
     // 
     inline coreVector3 GetColor()const final {return m_vLevelColor;}
@@ -1000,28 +1079,35 @@ private:
 // 
 template <typename F, typename G> void cBoss::_PhaseTimer(const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreFloat fSpeed, G&& nLerpFunc, F&& nUpdateFunc)
 {
-    // 
-    ASSERT(iTimerIndex < BOSS_TIMERS)
-    coreTimer&  oTimer     = m_aTimer     [iTimerIndex];
-    coreUint16& iTimerLine = m_aiTimerLine[iTimerIndex];
-
-    // 
-    if(iTimerLine != iCodeLine)
+    do
     {
-        iTimerLine = iCodeLine;
+        // 
+        m_bControlAgain = false;
 
         // 
-        oTimer.SetMaxLoops(1u);
-        oTimer.Play(CORE_TIMER_PLAY_RESET);
+        ASSERT(iTimerIndex < BOSS_TIMERS)
+        coreTimer&  oTimer     = m_aTimer     [iTimerIndex];
+        coreUint16& iTimerLine = m_aiTimerLine[iTimerIndex];
+
+        // 
+        if(iTimerLine != iCodeLine)
+        {
+            iTimerLine = iCodeLine;
+
+            // 
+            oTimer.SetMaxLoops(1u);
+            oTimer.Play(CORE_TIMER_PLAY_RESET);
+        }
+
+        // 
+        const coreFloat fTimeBefore = nLerpFunc(0.0f, 1.0f, oTimer.GetValue(CORE_TIMER_GET_NORMAL));
+        oTimer.Update(fSpeed);
+        const coreFloat fTimeAfter  = nLerpFunc(0.0f, 1.0f, oTimer.GetValue(CORE_TIMER_GET_NORMAL));
+
+        // 
+        nUpdateFunc(fTimeAfter, fTimeBefore, !oTimer.GetStatus());
     }
-
-    // 
-    const coreFloat fTimeBefore = nLerpFunc(0.0f, 1.0f, oTimer.GetValue(CORE_TIMER_GET_NORMAL));
-    oTimer.Update(fSpeed);
-    const coreFloat fTimeAfter  = nLerpFunc(0.0f, 1.0f, oTimer.GetValue(CORE_TIMER_GET_NORMAL));
-
-    // 
-    nUpdateFunc(fTimeAfter, fTimeBefore, !oTimer.GetStatus());
+    while(m_bControlAgain);
 }
 
 
@@ -1029,39 +1115,46 @@ template <typename F, typename G> void cBoss::_PhaseTimer(const coreUintW iTimer
 // 
 template <typename F, typename G> void cBoss::_PhaseTicker(const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreUint16 iTicks, const coreFloat fRate, G&& nLerpFunc, F&& nUpdateFunc)
 {
-    // 
-    ASSERT(iTimerIndex < BOSS_TIMERS)
-    coreTimer&  oTimer     = m_aTimer     [iTimerIndex];
-    coreUint16& iTimerLine = m_aiTimerLine[iTimerIndex];
-
-    // 
-    if(iTimerLine != iCodeLine)
-    {
-        iTimerLine = iCodeLine;
-
-        // 
-        oTimer.SetMaxLoops(iTicks ? 1u : 0u);
-        oTimer.Play(CORE_TIMER_PLAY_RESET);
-    }
-
-    if(iTicks)
+    do
     {
         // 
-        const coreUint16 iTicksBefore = F_TO_UI(nLerpFunc(0.0f, 1.0f, oTimer.GetValue(CORE_TIMER_GET_NORMAL)) * I_TO_F(iTicks));
-        oTimer.Update(RoundFreq(fRate) * RCP(I_TO_F(iTicks)));
-        const coreUint16 iTicksAfter  = F_TO_UI(nLerpFunc(0.0f, 1.0f, oTimer.GetValue(CORE_TIMER_GET_NORMAL)) * I_TO_F(iTicks));
+        m_bControlAgain = false;
 
         // 
-        if(iTicksBefore != iTicksAfter) nUpdateFunc(iTicksAfter - 1u, (iTicksAfter == iTicks));
-    }
-    else
-    {
-        ASSERT(r_cast<void*>(nLerpFunc) == r_cast<void*>(LERP_LINEAR))
-        ASSERT(fRate <= FRAMERATE_MIN)
+        ASSERT(iTimerIndex < BOSS_TIMERS)
+        coreTimer&  oTimer     = m_aTimer     [iTimerIndex];
+        coreUint16& iTimerLine = m_aiTimerLine[iTimerIndex];
 
         // 
-        if(oTimer.Update(RoundFreq(fRate))) nUpdateFunc(oTimer.GetCurLoops() - 1u, false);
+        if(iTimerLine != iCodeLine)
+        {
+            iTimerLine = iCodeLine;
+
+            // 
+            oTimer.SetMaxLoops(iTicks ? 1u : 0u);
+            oTimer.Play(CORE_TIMER_PLAY_RESET);
+        }
+
+        if(iTicks)
+        {
+            // 
+            const coreUint16 iTicksBefore = F_TO_UI(nLerpFunc(0.0f, 1.0f, oTimer.GetValue(CORE_TIMER_GET_NORMAL)) * I_TO_F(iTicks));
+            oTimer.Update(RoundFreq(fRate) * RCP(I_TO_F(iTicks)));
+            const coreUint16 iTicksAfter  = F_TO_UI(nLerpFunc(0.0f, 1.0f, oTimer.GetValue(CORE_TIMER_GET_NORMAL)) * I_TO_F(iTicks));
+
+            // 
+            if(iTicksBefore != iTicksAfter) nUpdateFunc(iTicksAfter - 1u, (iTicksAfter == iTicks));
+        }
+        else
+        {
+            ASSERT(r_cast<void*>(nLerpFunc) == r_cast<void*>(LERP_LINEAR))
+            ASSERT(fRate <= FRAMERATE_MIN)
+
+            // 
+            if(oTimer.Update(RoundFreq(fRate))) nUpdateFunc(oTimer.GetCurLoops() - 1u, false);
+        }
     }
+    while(m_bControlAgain);
 }
 
 

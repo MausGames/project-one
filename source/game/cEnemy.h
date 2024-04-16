@@ -15,7 +15,7 @@
 // TODO 3: add score-value to cEnemy class, either for base, or for extra score
 // TODO 2: make sure ENEMY_STATUS_DAMAGING is used for damaging contact, and no additional checks and (duplicate) TakeDamage calls are made
 // TODO 4: get rid of ENEMY_SIZE_FACTOR, because lots of places override it directly anyway
-// TODO 4: move parent-child system to custom-enemy, if not elsewhere required
+// TODO 4: move parent-child system to custom-enemy or boss-enemy, if not elsewhere required
 
 
 // ****************************************************************
@@ -60,6 +60,7 @@ protected:
 
     coreUint8 m_iLastAttacker;     // 
     coreBool  m_bWasDamaged;       // 
+    coreInt32 m_iDamageForwarded;   // 
 
     coreSet<cEnemy*> m_apMember;   // 
 
@@ -96,6 +97,9 @@ public:
 
     // 
     inline const coreBool& WasDamaged()const {return m_bWasDamaged;}
+    
+    inline const coreInt32& GetDamageForwarded()const {return m_iDamageForwarded;}
+    inline void ResetDamageForwarded() {m_iDamageForwarded = 0;}
 
     // 
     inline coreBool IsParent()const {return !m_apMember.empty() && !HAS_FLAG(m_iStatus, ENEMY_STATUS_CHILD);}

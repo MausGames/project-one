@@ -38,6 +38,7 @@
 // TODO 1: vielleicht sollt erste bewegung in letzter phase schnell (nach oben) sein, ohne laser, damit man erst mal die geschosse realisiert, und nicht gleichzeitig mit dem rotierenden laser, das würde auch das pacing verbessern
 // TODO 1: laser needs to be below particles on the floor
 // TODO 1: MAIN: fragment, easy, hard (decision), coop, 3 badges, boss health, medal goal, intro, outro, foreshadow
+// TODO 1: bewegt geschosse vielleicht überkreuzt bewegen
 
 // NOTE: never ever use exactly 4 rays, the resulting laser+fire pattern does NOT look good
 
@@ -196,9 +197,38 @@ void cLeviathanBoss::__KillOwn(const coreBool bAnimated)
 
 // ****************************************************************
 // 
+void cLeviathanBoss::__RenderOwnBottom()
+{
+    if(m_Ray.GetCurEnabled())
+    {
+        DEPTH_PUSH
+
+        FOR_EACH(it, *m_Ray.List())
+        {
+            coreObject3D* pRay = (*it);
+
+            if(pRay->GetDirection().z < 0.0f) pRay->Render();
+        }
+        FOR_EACH(it, *m_Ray.List())
+        {
+            coreObject3D* pRay = (*it);
+
+            if(pRay->GetDirection().z < 0.0f) g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(pRay);
+        }
+        FOR_EACH(it, *m_RayWave.List())
+        {
+            coreObject3D* pWave = (*it);
+
+            if(-pWave->GetDirection().z < 0.0f) pWave->Render();
+        }
+    }
+}
+
+
+// ****************************************************************
+// 
 void cLeviathanBoss::__RenderOwnUnder()
 {
-
 }
 
 
@@ -207,6 +237,30 @@ void cLeviathanBoss::__RenderOwnUnder()
 void cLeviathanBoss::__RenderOwnOver()
 {
     if(m_Ray.GetCurEnabled())
+    {
+        DEPTH_PUSH_SHIP
+
+        FOR_EACH(it, *m_Ray.List())
+        {
+            coreObject3D* pRay = (*it);
+
+            if(pRay->GetDirection().z >= 0.0f) pRay->Render();
+        }
+        FOR_EACH(it, *m_Ray.List())
+        {
+            coreObject3D* pRay = (*it);
+
+            if(pRay->GetDirection().z >= 0.0f) g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(pRay);
+        }
+        FOR_EACH(it, *m_RayWave.List())
+        {
+            coreObject3D* pWave = (*it);
+
+            if(-pWave->GetDirection().z >= 0.0f) pWave->Render();
+        }
+    }
+    
+    if(false) if(m_Ray.GetCurEnabled())
     {
         // TODO 1: check if underlying + player-bullets can be moved inside ship depth (e.g. ship: 0.0-0.5, under: 0.2-0.3)
 
@@ -1592,7 +1646,14 @@ void cLeviathanBoss::__UpdateHealth()
     this->SetCurHealth(this->GetMaxHealth() - m_aiCounter[OLD_DAMAGE] - iNewDamage);
     
 
-    if(this->ReachedDeath()) this->Kill(true);   
+    if(this->ReachedDeath())
+    {
+        for(coreUintW i = 0u; i < LEVIATHAN_PARTS; ++i)
+        {
+            g_pSpecialEffects->MacroDestructionDark(this->__GetPart(i));
+        }
+        this->Kill(false);   
+    }
 }
 
 

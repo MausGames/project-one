@@ -63,14 +63,14 @@ void cEnemy::Move()
         m_fLifeTimeBefore = m_fLifeTime;
         m_fLifeTime.Update(1.0f);
 
-        // 
-        m_bWasDamaged = false;
-
         // call individual move routines
         this->__MoveOwn();
 
         // move the 3d-object
         this->coreObject3D::Move();
+
+        // 
+        m_bWasDamaged = false;
 
         // 
         if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_DEAD) && g_pForeground->IsVisibleObject(this))
@@ -125,7 +125,12 @@ coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, 
         m_bWasDamaged = (m_iCurHealth != 0) && (iDamage != 0);
 
         // forward to parent
-        if(this->IsChild()) return m_apMember.front()->TakeDamage(iDamage, iElement, vImpact, pAttacker);
+        if(this->IsChild())
+        {
+            const coreInt32 iTaken = m_apMember.front()->TakeDamage(iDamage, iElement, vImpact, pAttacker);
+            m_iDamageForwarded += iTaken;
+            return iTaken;
+        }
 
         if(iDamage)
         {
@@ -587,43 +592,44 @@ void cEnemyManager::Render()
     }                                                                 \
 } 
 
-void cEnemyManager::RenderBottom() {__RENDER_OWN(__RenderOwnBottom)
+void cEnemyManager::RenderBottom()
+{
+    __RENDER_OWN(__RenderOwnBottom)
 
-DEPTH_PUSH
-    /* */                                                            
-    const auto nRenderFunc = [](cEnemy* OUTPUT pEnemy)               
-    {                                                                
-        if(pEnemy->HasStatus(ENEMY_STATUS_DEAD))                     
-            return;   
-        
+    DEPTH_PUSH
+
+    /* */ 
+    const auto nRenderFunc = [](cEnemy* OUTPUT pEnemy)
+    {
+        if(pEnemy->HasStatus(ENEMY_STATUS_DEAD))
+            return;
+
         if(pEnemy->HasStatus(ENEMY_STATUS_BOTTOM))
         {
             pEnemy->_EnableBlink();
-    
+
             // 
             cLodObject::RenderHighObject(pEnemy);
             g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(pEnemy);
         }
-    };                                                               
-                                                                     
-    /* render all additional enemies */                              
-    FOR_EACH(it, m_apAdditional)                                     
-        nRenderFunc(*it);                                            
-                                                                     
-    /* loop through all enemy sets */                                
-    for(coreUintW i = 0u; i < ENEMY_SET_COUNT; ++i)                  
-    {                                                                
-        if(!m_apEnemySet[i]) continue;                               
+    };
+
+    /* render all additional enemies */
+    FOR_EACH(it, m_apAdditional)
+        nRenderFunc(*it);
+
+    /* loop through all enemy sets */
+    for(coreUintW i = 0u; i < ENEMY_SET_COUNT; ++i)
+    {
+        if(!m_apEnemySet[i]) continue;
         coreBatchList* pEnemyActive = &m_apEnemySet[i]->oEnemyActive;
-                                                                     
-        /* render all active enemies */                              
-        FOR_EACH(it, *pEnemyActive->List())                          
-            nRenderFunc(d_cast<cEnemy*>(*it));                       
-    }                                                                
-    
 
-
+        /* render all active enemies */
+        FOR_EACH(it, *pEnemyActive->List())
+            nRenderFunc(d_cast<cEnemy*>(*it));
+    }
 }
+
 void cEnemyManager::RenderUnder () {__RENDER_OWN(__RenderOwnUnder)}
 void cEnemyManager::RenderOver  () {__RENDER_OWN(__RenderOwnOver)}
 void cEnemyManager::RenderTop   () {__RENDER_OWN(__RenderOwnTop)

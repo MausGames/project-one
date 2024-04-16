@@ -79,6 +79,14 @@ inline FUNC_CONST coreFloat AngleDiff(const coreFloat x, const coreFloat y)
 
 
 // ****************************************************************
+// 
+inline FUNC_CONST coreFloat AnglePos(const coreFloat x)
+{
+    return FmodRange(x, 0.0f*PI, 2.0f*PI);
+}
+
+
+// ****************************************************************
 // value range helper-functions
 template <typename T, typename S, typename R> constexpr FUNC_LOCAL coreBool InBetween(const T& x, const S& a, const R& b)
 {

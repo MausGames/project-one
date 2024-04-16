@@ -17,6 +17,18 @@ void cAterMission::__SetupOwn()
     // 
     STAGE_MAIN({TAKE_ALWAYS})
     {
+        STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
+        {
+            if(pPlayer->IsEnemyLook()) pPlayer->TurnIntoPlayer();
+        });
+
+        STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN({TAKE_ALWAYS})
+    {
         STAGE_FINISH_AFTER(MISSION_WAIT_INTRO)
     });
 

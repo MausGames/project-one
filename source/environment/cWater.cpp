@@ -212,6 +212,36 @@ void cWater::UpdateDepth(cOutdoor* pOutdoor, const coreList<coreBatchList*>& apG
 }
 
 
+
+void cWater::Reshape()
+{
+    const coreVector2 vWaterResolution = g_vGameResolution * WATER_SCALE_FACTOR;
+
+    if(m_Reflection.GetIdentifier())
+    {
+        // 
+        m_Reflection.Delete();
+        m_Reflection.Create(vWaterResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+    }
+
+    // 
+    m_Refraction.Delete();
+    m_Refraction.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+
+    if(m_Depth.GetIdentifier())
+    {
+        // create depth frame buffer
+        m_Depth.Delete();
+        m_Depth.Create(DEFINED(_CORE_GLES_) ? g_vGameResolution : vWaterResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);   // TODO 1: only resolution-fix for ice ? instead of increasing resolution, maybe do manual 4-sample filtering
+    }
+
+    // 
+    this->DefineTexture(1u, m_Reflection.GetColorTarget(0u).pTexture);
+    this->DefineTexture(2u, m_Refraction.GetColorTarget(0u).pTexture);
+    this->DefineTexture(3u, m_Depth     .GetDepthTarget()  .pTexture);
+}
+
+
 // ****************************************************************
 // constructor
 cUnderWater::cUnderWater()noexcept
@@ -319,6 +349,31 @@ cRainWater::~cRainWater()
 }
 
 
+
+void cRainWater::Reshape()
+{
+    this->cWater::Reshape();
+
+    // 
+    m_WaveMap.Delete();
+    m_WaveMap.Create(g_vGameResolution * RAIN_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
+
+    // 
+    glBindTexture  (GL_TEXTURE_2D, m_WaveMap.GetColorTarget(0u).pTexture->GetIdentifier());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    // 
+    m_WaveInjection.SetSize      (m_WaveMap.GetResolution() / g_vGameResolution);
+    m_WaveInjection.DefineTexture(0u, "environment_water_rain.png");
+    m_WaveInjection.DefineProgram("default_2d_program");
+    m_WaveInjection.Move();
+
+    // 
+    this->DefineTexture(0u, m_WaveMap.GetColorTarget(0u).pTexture);
+}
+
+
 // ****************************************************************
 // 
 void cRainWater::__UpdateOwn()
@@ -354,7 +409,8 @@ void cRainWater::__UpdateOwn()
                 {
                     // 
                     m_WaveInjection.Render();
-                    m_WaveInjection.Undefine();
+                    //m_WaveInjection.Undefine();
+                    m_WaveInjection.DefineProgram(NULL);   //    keep at least texture to make reshape faster
                 }
                 glEnable(GL_BLEND);
             }

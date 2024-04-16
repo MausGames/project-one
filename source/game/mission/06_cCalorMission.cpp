@@ -365,7 +365,7 @@ void cCalorMission::__MoveOwnMiddle()
         if(!pStar->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
         // 
-        m_afSwingValue[i].UpdateMod(m_fSwingSpeed * m_fSwingStart, 2.0f*PI);
+        m_afSwingValue[i].UpdateMod(7.0f * m_fSwingSpeed * m_fSwingStart, 2.0f*PI);
 
         // 
         const cShip* pOwner = m_apStarOwner[i];
@@ -389,11 +389,11 @@ void cCalorMission::__MoveOwnMiddle()
                 }
                 else
                 {
-                    const coreVector2 vBase = pPlayer->GetPosition().xy() + MapToAxis(m_avStarOffset[i], pPlayer->GetDirection().xy());
-                    const coreVector2 vDiff = vBase - pStar->GetPosition().xy();
+                    //const coreVector2 vBase = pPlayer->GetPosition().xy() + MapToAxis(m_avStarOffset[i], pPlayer->GetDirection().xy());
+                    //const coreVector2 vDiff = vBase - pStar->GetPosition().xy();
 
                     // 
-                    pPlayer->SetPosition(coreVector3(pStar->GetPosition().xy() + vDiff.Normalized() * MIN(vDiff.Length(), m_afStarLength[i]), 0.0f));
+                    //pPlayer->SetPosition(coreVector3(pStar->GetPosition().xy() + vDiff.Normalized() * MIN(vDiff.Length(), m_afStarLength[i]), 0.0f));
                 }
             }
             else
@@ -436,6 +436,9 @@ void cCalorMission::__MoveOwnMiddle()
                         {
                             // 
                             this->CatchObject(i, pEnemy);
+
+                            // 
+                            //pEnemy->ChangeToTop();
                         }
                     });
                 }
@@ -451,6 +454,7 @@ void cCalorMission::__MoveOwnMiddle()
                     // 
                     Core::Manager::Object->TestCollision(TYPE_BULLET_ENEMY, pCopy, [](cBullet* OUTPUT pBullet, const cEnemy* pObject, const coreVector3 vIntersection, const coreBool bFirstHit)
                     {
+                        if(pBullet->GetID() == cConeBullet::ID) return;   
                         pBullet->Deactivate(true, vIntersection.xy());
                     });
 
@@ -598,7 +602,23 @@ void cCalorMission::__MoveOwnAfter()
         const cShip* pOwner = m_apStarOwner[i];
         if(pOwner)
         {
-            //const cPlayer* pPlayer = g_pGame->GetPlayer(i);
+            cPlayer* pPlayer = g_pGame->GetPlayer(i);
+
+            if(pPlayer == pOwner)
+            {
+                if(HAS_BIT(m_iStarState, i))
+                {
+
+                }
+                else
+                {
+                    const coreVector2 vBase = pPlayer->GetPosition().xy() + MapToAxis(m_avStarOffset[i], pPlayer->GetDirection().xy());
+                    const coreVector2 vDiff = vBase - pStar->GetPosition().xy();
+
+                    // 
+                    pPlayer->SetPosition(coreVector3(pStar->GetPosition().xy() + vDiff.Normalized() * MIN(vDiff.Length(), m_afStarLength[i]), 0.0f));
+                }
+            }
 
             // 
             const coreVector2 vBase    = pOwner->GetPosition().xy() + MapToAxis(m_avStarOffset[i], pOwner->GetDirection().xy());

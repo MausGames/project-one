@@ -439,6 +439,7 @@ void cBackground::_FillInfinite(coreBatchList* OUTPUT pObjectList, const coreUin
     WARN_IF(pContent->size() < 2u) return;
 
     // 
+    ASSERT((pContent->size() < 3u) || (((*pContent)[0]->GetPosition().y > (*pContent)[1]->GetPosition().y) == ((*pContent)[1]->GetPosition().y > (*pContent)[2]->GetPosition().y)))
     if((*pContent)[0]->GetPosition().y > (*pContent)[1]->GetPosition().y)
         std::reverse(pContent->begin(), pContent->end());
 
@@ -482,6 +483,27 @@ void cBackground::_SortBackToFront(coreBatchList* OUTPUT pObjectList)
     {
         return (A->GetPosition().z < B->GetPosition().z);
     });
+}
+
+
+// ****************************************************************
+// 
+void cBackground::_BindSorted(coreBatchList* OUTPUT pObjectList, coreObject3D* pObject)
+{
+    pObjectList->BindObject(pObject);
+    
+    
+    coreSet<coreObject3D*>* pContent = pObjectList->List();
+    if(pContent->size() >= 2u)
+    {
+        coreUintW iIndex = pContent->size() - 1u;
+        
+        while(iIndex && ((*pContent)[iIndex - 1u]->GetPosition().y > (*pContent)[iIndex]->GetPosition().y))
+        {
+            std::swap((*pContent)[iIndex - 1u], (*pContent)[iIndex]);
+            iIndex -= 1;
+        }
+    }
 }
 
 
@@ -574,6 +596,18 @@ void cBackground::__Reset(const coreResourceReset eInit)
         // 
         this->__ExitOwn();
     }
+}
+
+
+void cBackground::__Reshape()
+{
+    m_FrameBuffer    .Delete();
+    m_ResolvedTexture.Delete();
+    
+    m_FrameBuffer    .Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED);
+    m_ResolvedTexture.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+        
+    if(m_pWater) m_pWater->Reshape();
 }
 
 

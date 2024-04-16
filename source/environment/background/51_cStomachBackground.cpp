@@ -44,7 +44,7 @@ cStomachBackground::cStomachBackground()noexcept
             pObject->SetPosition (coreVector3(vPosition, fHeight));
             pObject->SetSize     (coreVector3(coreVector2(2.4f,2.4f) * Core::Rand->Float(15.0f, 21.0f), 1.0f));
             pObject->SetDirection(coreVector3(coreVector2::Rand(), 0.0f));
-            pObject->SetColor4   (coreVector4(LERP(COLOR_MENU_PURPLE, coreVector3(1.0f,1.0f,1.0f), 0.5f) * (0.8f + 0.2f * fHeight/60.0f), 0.65f));
+            pObject->SetColor4   (coreVector4(LERP(COLOR_MENU_RED, coreVector3(1.0f,1.0f,1.0f), 0.5f) * (0.8f + 0.2f * fHeight/60.0f), 0.65f));
             pObject->SetTexOffset(coreVector2::Rand(0.0f,10.0f, 0.0f,10.0f));
 
             // add object to the list
@@ -105,8 +105,6 @@ void cStomachBackground::__RenderOwnAfter()
 // 
 void cStomachBackground::__MoveOwn()
 {
-   // ASSERT(!g_pEnvironment->GetSpeed())   // # no movement
-
     // 
     const coreFloat fMove = TIME * 6.0f;
 

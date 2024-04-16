@@ -170,7 +170,7 @@ void cTigerBoss::__ResurrectOwn()
         WARN_IF(!pData) return;
 
         const coreUint8 iPlayer = GET_BITVALUE(P_TO_UI(pData), 8u, 8u);
-        const coreUint8 iDamage = GET_BITVALUE(P_TO_UI(pData), 8u, 0u) / 2u * g_pGame->GetNumPlayers();
+        const coreUint8 iDamage = GET_BITVALUE(P_TO_UI(pData), 8u, 0u) / GAME_PLAYERS * g_pGame->GetNumPlayers();
 
         this->TakeDamage(iDamage, ELEMENT_NEUTRAL, HIDDEN_POS, g_pGame->GetPlayer(iPlayer));
 

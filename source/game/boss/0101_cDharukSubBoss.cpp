@@ -1,0 +1,951 @@
+///////////////////////////////////////////////////////
+//*-------------------------------------------------*//
+//| Part of Project One (https://www.maus-games.at) |//
+//*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
+//| Released under the zlib License                 |//
+//*-------------------------------------------------*//
+///////////////////////////////////////////////////////
+#include "main.h"
+
+
+// ****************************************************************
+// counter identifier
+#define DUPLICATE_STATUS  (0u)
+#define CURRENT_SIDE      (1u)
+#define CURRENT_ITERATION (2u)
+#define BOOMERANG_TARGET  (3u)
+#define FLIP_SAVE         (4u)
+#define TELEPORT_COUNT    (5u)
+
+
+// ****************************************************************
+// vector identifier
+#define STILL_ROTATION (0u)
+
+
+// ****************************************************************
+// constructor
+cDharukSubBoss::cDharukSubBoss()noexcept
+: m_DuplicateTrail   (DHARUK_DUPLICATE_RAWS)
+, m_fDuplicateValue  (0.0f)
+, m_Boomerang        (DHARUK_BOOMERANGS)
+, m_BoomerangTrail   (DHARUK_BOOMERANGS * DHARUK_TRAILS)
+, m_afBoomerangValue {}
+, m_fVisibility      (1.0f)
+, m_iPackedDir       (0u)
+, m_fAnimation       (0.0f)
+{
+    // load models
+    this->DefineModelHigh("ship_boss_dharuk_high.md3");
+    this->DefineModelLow ("ship_boss_dharuk_low.md3");
+
+    // set object properties
+    this->SetSize(coreVector3(3.4f,3.4f,3.4f));
+
+    // configure the boss
+    this->Configure(3300, COLOR_SHIP_RED);
+    this->AddStatus(ENEMY_STATUS_DAMAGING);
+
+    // create duplicate object
+    m_Duplicate.DefineModelHigh("ship_boss_dharuk_high.md3");
+    m_Duplicate.DefineModelLow ("ship_boss_dharuk_low.md3");
+    m_Duplicate.DefineTexture  (0u, "effect_energy.png");
+    m_Duplicate.DefineProgram  ("effect_energy_blink_invert_program");
+    m_Duplicate.SetSize        (this->GetSize());
+    m_Duplicate.Configure      (1, COLOR_ENERGY_RED * 0.8f);
+    m_Duplicate.AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_DAMAGING | ENEMY_STATUS_GHOST_BULLET);
+
+    // create duplicate trail list
+    m_DuplicateTrail.DefineProgram("effect_energy_invert_inst_program");
+    {
+        for(coreUintW i = 0u; i < DHARUK_DUPLICATE_RAWS; ++i)
+        {
+            // determine object type
+            const coreUintW iType = (i % DHARUK_TRAILS) + 1u;
+
+            // load object resources
+            coreObject3D* pDuplicate = &m_aDuplicateRaw[i];
+            pDuplicate->DefineModel  ("ship_boss_dharuk_low.md3");
+            pDuplicate->DefineTexture(0u, "effect_energy.png");
+            pDuplicate->DefineProgram("effect_energy_invert_program");
+
+            // set object properties
+            pDuplicate->SetSize   (this->GetSize());
+            pDuplicate->SetColor3 (COLOR_ENERGY_RED * (0.15f + 0.15f * I_TO_F(iType)));
+            //pDuplicate->SetAlpha  (0.15f + 0.2f * I_TO_F(iType));
+            pDuplicate->SetTexSize(coreVector2(1.0f,1.0f) * 0.5f);
+            pDuplicate->SetEnabled((i < DHARUK_TRAILS) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+
+            // add object to the list
+            m_DuplicateTrail.BindObject(pDuplicate);
+        }
+    }
+
+    // create boomerang lists
+    m_Boomerang     .DefineProgram("effect_energy_invert_inst_program");
+    m_BoomerangTrail.DefineProgram("effect_energy_invert_inst_program");
+    {
+        for(coreUintW i = 0u; i < DHARUK_BOOMERANGS_RAWS; ++i)
+        {
+            // determine object type
+            const coreUintW iType = i % (DHARUK_TRAILS + 1u);
+
+            // load object resources
+            coreObject3D* pBoomerang = &m_aBoomerangRaw[i];
+            pBoomerang->DefineModel  ("object_boss_dharuk_boomerang.md3");
+            pBoomerang->DefineTexture(0u, "effect_energy.png");
+            pBoomerang->DefineProgram("effect_energy_invert_program");
+
+            // set object properties
+            pBoomerang->SetSize   (coreVector3(1.0f,1.0f,1.0f) * 1.7f);
+            pBoomerang->SetColor3 (COLOR_ENERGY_RED * (iType ? (0.15f + 0.15f * I_TO_F(iType)) : 0.8f));
+            pBoomerang->SetTexSize(coreVector2(1.0f,1.0f) * 0.7f);
+            pBoomerang->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
+            // add object to the list
+            if(iType) m_BoomerangTrail.BindObject(pBoomerang);
+                 else m_Boomerang     .BindObject(pBoomerang);
+        }
+    }
+
+    // 
+    m_Summon.DefineModel  ("object_sphere.md3");
+    m_Summon.DefineTexture(0u, "effect_energy.png");
+    m_Summon.DefineProgram("effect_energy_invert_program");
+    m_Summon.SetColor3    (COLOR_ENERGY_RED * 0.8f);
+    m_Summon.SetTexSize   (coreVector2(4.5f,4.5f));
+    m_Summon.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+}
+
+
+// ****************************************************************
+// 
+void cDharukSubBoss::__ResurrectOwn()
+{
+    // 
+    g_pGlow->BindList(&m_DuplicateTrail);
+    g_pGlow->BindList(&m_Boomerang);
+    g_pGlow->BindList(&m_BoomerangTrail);
+}
+
+
+// ****************************************************************
+// 
+void cDharukSubBoss::__KillOwn(const coreBool bAnimated)
+{
+    // 
+    this->__DisableDuplicate(bAnimated);
+
+    // 
+    for(coreUintW i = 0u; i < DHARUK_BOOMERANGS; ++i)
+        this->__DisableBoomerang(i, bAnimated);
+
+    // 
+    this->__DisableSummon();
+
+    // 
+    g_pGlow->UnbindList(&m_DuplicateTrail);
+    g_pGlow->UnbindList(&m_Boomerang);
+    g_pGlow->UnbindList(&m_BoomerangTrail);
+
+    // 
+    //this->_EndBoss(bAnimated);
+}
+
+
+// ****************************************************************
+// 
+void cDharukSubBoss::__RenderOwnUnder()
+{
+    DEPTH_PUSH
+
+    glDepthMask(false);
+    {
+        // 
+        m_DuplicateTrail.Render();
+        m_BoomerangTrail.Render();
+    }
+    glDepthMask(true);
+}
+
+
+// ****************************************************************
+// 
+void cDharukSubBoss::__RenderOwnOver()
+{
+    DEPTH_PUSH
+
+    // 
+    m_Boomerang.Render();
+    g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyList(&m_Boomerang);
+
+    // 
+    m_Summon.Render();
+}
+
+
+// ****************************************************************
+// 
+void cDharukSubBoss::__MoveOwn()
+{
+    // 
+    this->_UpdateBoss();
+
+    if(this->ReachedDeath()) this->Kill(true);   
+
+    // 
+    const coreVector2 avOldBasePos  [2] = {this->GetPosition   ().xy(),         m_Duplicate.GetPosition   ().xy()};
+    const coreFloat   afOldBaseAngle[2] = {this->GetDirection  ().xy().Angle(), m_Duplicate.GetDirection  ().xy().Angle()};
+    const coreFloat   afOldBaseOri  [2] = {this->GetOrientation().xz().Angle(), m_Duplicate.GetOrientation().xz().Angle()};   // # not y
+
+    // 
+    m_fAnimation.UpdateMod(0.2f, 10.0f);
+
+    // ################################################################
+    // 
+    if(m_iPhase == 0u)
+    {
+        PHASE_CONTROL_TIMER(0u, 0.32f, LERP_LINEAR)
+        {
+            if(PHASE_BEGINNING) this->AddStatus(ENEMY_STATUS_GHOST);
+
+            constexpr coreVector2 vFrom1 = coreVector2(-1.5f, 0.7f);
+            constexpr coreVector2 vFrom2 = coreVector2( 0.9f, 1.5f);
+            constexpr coreVector2 vFrom3 = coreVector2(-0.4f, 1.5f);
+            constexpr coreVector2 vTo1   = coreVector2( 1.5f,-0.2f);
+            constexpr coreVector2 vTo2   = coreVector2(-1.5f,-0.6f);
+            constexpr coreVector2 vTo3   = coreVector2( 0.7f,-1.5f);
+
+            const coreFloat fLen1   = (vTo1 - vFrom1).Length();
+            const coreFloat fLen2   = (vTo2 - vFrom2).Length();
+            const coreFloat fLen3   = (vTo3 - vFrom3).Length();
+            const coreFloat fLenRev = RCP(fLen1 + fLen2 + fLen3);
+
+            const coreFloat fSpeed1  = fLen1 * fLenRev;
+            const coreFloat fSpeed2  = fLen2 * fLenRev;
+            const coreFloat fSpeed3  = fLen3 * fLenRev;
+            const coreFloat fSpeed12 = fSpeed1 + fSpeed2;
+
+                 if(PHASE_TIME_BEFORE(fSpeed1))  this->DefaultMoveLerp(vFrom1, vTo1, (fTime)            * RCP(fSpeed1));
+            else if(PHASE_TIME_BEFORE(fSpeed12)) this->DefaultMoveLerp(vFrom2, vTo2, (fTime - fSpeed1)  * RCP(fSpeed2));
+            else                                 this->DefaultMoveLerp(vFrom3, vTo3, (fTime - fSpeed12) * RCP(fSpeed3));
+
+                 if(PHASE_TIME_POINT(0.0f))     g_pSpecialEffects->CreateBlowColor(this->GetPosition(), coreVector3((vTo1 - vFrom1).Normalized(), 0.0f), SPECIAL_BLOW_BIG, COLOR_ENERGY_RED);
+            else if(PHASE_TIME_POINT(fSpeed1))  g_pSpecialEffects->CreateBlowColor(this->GetPosition(), coreVector3((vTo2 - vFrom2).Normalized(), 0.0f), SPECIAL_BLOW_BIG, COLOR_ENERGY_RED);
+            else if(PHASE_TIME_POINT(fSpeed12)) g_pSpecialEffects->CreateBlowColor(this->GetPosition(), coreVector3((vTo3 - vFrom3).Normalized(), 0.0f), SPECIAL_BLOW_BIG, COLOR_ENERGY_RED);
+
+            this->DefaultRotateLerp(1.0f*PI, 19.0f*PI, fTime);
+
+            if(PHASE_FINISHED)
+                PHASE_CHANGE_INC
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 1u)
+    {
+        PHASE_CONTROL_TIMER(0u, 0.5f, LERP_BREAK)
+        {
+            if(PHASE_BEGINNING) this->RemoveStatus(ENEMY_STATUS_GHOST);
+
+            this->DefaultMoveLerp  (coreVector2(0.0f, DHARUK_OUTSIDE), coreVector2(0.0f, DHARUK_HEIGHT), fTime);
+            this->DefaultRotateLerp(0.0f*PI,                           3.0f*PI,                          fTime);
+
+            if(PHASE_TIME_POINT(0.5f))
+                g_pGame->GetInterface()->ShowBoss(this);
+
+            if(PHASE_FINISHED)
+                PHASE_CHANGE_INC
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 2u)
+    {
+        PHASE_CONTROL_PAUSE(0u, 0.5f)
+        {
+            PHASE_CHANGE_INC
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 3u)
+    {
+        PHASE_CONTROL_TIMER(0u, 0.6f, LERP_BREAK_REV)
+        {
+            this->DefaultMoveLerp  (m_vLastPosition, coreVector2(0.0f,0.0f), fTime);
+            this->DefaultRotateLerp(1.0f*PI,         3.0f*PI,                fTime);
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 100u)
+    {
+        PHASE_CONTROL_TIMER(0u, 0.5f, LERP_BREAK)
+        {
+            this->DefaultMoveLerp  (coreVector2(0.0f, DHARUK_OUTSIDE), coreVector2(0.0f, DHARUK_HEIGHT), fTime);
+            this->DefaultRotateLerp(0.0f*PI,                           3.0f*PI,                          fTime);
+
+            if(PHASE_FINISHED)
+                PHASE_CHANGE_TO(110u)
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 110u)
+    {
+        if(PHASE_BEGINNING2)
+        {
+            m_aiCounter[TELEPORT_COUNT] = 0;
+        }
+
+        PHASE_CONTROL_TIMER(0u, 0.45f, LERP_BREAK_REV)
+        {
+            this->DefaultMoveLerp  (m_vLastPosition, coreVector2(0.0f, -DHARUK_OUTSIDE), fTime);
+            this->DefaultRotateLerp(1.0f*PI,         5.0f*PI,                            fTime);
+
+            if(PHASE_FINISHED)
+                PHASE_CHANGE_INC
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 111u)
+    {
+        PHASE_CONTROL_TIMER(0u, 0.5f * 0.65f, LERP_LINEAR)
+        {
+            coreFloat fSide;
+            switch(m_aiCounter[TELEPORT_COUNT] % 5)
+            {
+            default: ASSERT(false)
+            case 0: fSide = -2.0f; break;
+            case 1: fSide =  1.0f; break;
+            case 2: fSide = -1.0f; break;
+            case 3: fSide =  2.0f; break;
+            case 4: fSide =  0.0f; break;
+            }
+            fSide *= 0.3f;
+            //switch(m_aiCounter[TELEPORT_COUNT] % 3)
+            //{
+            //default: ASSERT(false)
+            //case 0: fSide = -2.0f; break;
+            //case 1: fSide =  2.0f; break;
+            //case 2: fSide =  0.0f; break;
+            //}
+            //fSide *= 0.15f;
+
+            this->DefaultMoveLerp  (coreVector2(fSide, DHARUK_OUTSIDE), coreVector2(fSide, -DHARUK_OUTSIDE), fTime);
+            this->DefaultRotateLerp(5.0f*PI,                            13.0f*PI,                            fTime);
+            
+            //this->ToAxis(StepRotated90(m_aiCounter[TELEPORT_COUNT] % 4));
+            if(m_aiCounter[CURRENT_ITERATION])
+            {
+                constexpr coreBool abFlip[] = {false, false, true, false, true, true};
+                if(abFlip[m_aiCounter[TELEPORT_COUNT] % ARRAY_SIZE(abFlip)]) this->InvertY();
+            }
+
+            if(PHASE_BEGINNING && m_aiCounter[TELEPORT_COUNT] % 2)
+            {
+               // if(!m_aiCounter[CURRENT_ITERATION]) 
+                    this->__BecomeInvisible();
+            }
+            if(PHASE_BEGINNING)
+            //if(PHASE_TIME_POINT(0.5f))
+            {
+                const coreVector2 vTarget = -this->GetPosition().xy();// this->NearestPlayerDual(m_aiCounter[TELEPORT_COUNT] % 2)->GetPosition().xy();
+
+                m_Duplicate.SetPosition(coreVector3(vTarget, 0.0f));
+                
+                m_fDuplicateValue = 5.0f;
+            }
+
+            if(PHASE_FINISHED)
+            {
+                if(!m_aiCounter[CURRENT_ITERATION] && (this->GetCurHealthPct() < 0.75f))
+                {
+                    PHASE_CHANGE_INC
+                }
+                else
+                {
+                    PHASE_RESET(0u)
+                    PHASE_AGAIN
+
+                    m_aiCounter[TELEPORT_COUNT] += 1;
+                }
+            }
+        });
+
+        if(m_fVisibility < -0.5f)
+        if(false)PHASE_CONTROL_TICKER(1u, 0u, 20.0f, LERP_LINEAR)
+        {
+            const coreVector2 vPos = this->GetPosition().xy();
+            const coreVector2 vDir = this->AimAtPlayerDual(m_aiCounter[TELEPORT_COUNT] % 2).Normalized();
+
+            g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.4f, this, vPos, vDir)->ChangeSize(1.7f);
+        });
+        //if(m_fVisibility < -0.5f)
+        if(false)PHASE_CONTROL_TICKER(1u, 0u, 2.0f, LERP_LINEAR)
+        {
+            const coreVector2 vPos = this->GetPosition().xy();
+
+            for(coreUintW j = 6u; j--; )
+            {
+                const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(j) * 30.0f + 15.0f));
+
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 0.7f, this, vPos,  vDir)->ChangeSize(1.7f);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 0.7f, this, vPos, -vDir)->ChangeSize(1.7f);
+            }
+        });
+        PHASE_CONTROL_TICKER(1u, 0u, 12.0f, LERP_LINEAR)
+        {
+            if((iTick % 5u) < 2u) return;
+            
+            const coreVector2 vPos = this->GetPosition().xy();
+            const coreVector2 vDir = coreVector2(1.0f,0.0f);//StepRotated90(m_aiCounter[TELEPORT_COUNT] % 4).Rotated90();//
+            
+            const coreFloat fSpeed = 1.3f;//(iTick % 2u) ? 1.35f : 1.25f;
+
+            g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5, fSpeed, this, vPos,  vDir)->ChangeSize(1.6f);
+            //g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5, 1.35f, this, vPos,  vDir)->ChangeSize(1.6f);
+            g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5, fSpeed, this, vPos, -vDir)->ChangeSize(1.6f);
+            //g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5, 1.35f, this, vPos, -vDir)->ChangeSize(1.6f);
+        });
+
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 112u)
+    {
+        PHASE_CONTROL_TIMER(0u, 0.5f, LERP_BREAK)
+        {
+            this->DefaultMoveLerp  (coreVector2(0.0f, DHARUK_OUTSIDE), coreVector2(0.0f, DHARUK_HEIGHT), fTime);
+            this->DefaultRotateLerp(0.0f*PI,                3.0f*PI,                          fTime);
+
+            if(PHASE_FINISHED)
+                PHASE_CHANGE_TO(120u)
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 120u)
+    {
+        PHASE_CONTROL_TICKER(0u, 4u, m_Boomerang.GetCurEnabled() ? (2.2f/3.0f) : 1.0f, LERP_LINEAR)
+        {
+            const coreFloat fSideSign = m_aiCounter[CURRENT_SIDE] ? -1.0f : 1.0f;
+
+            if((iTick < DHARUK_BOOMERANGS) && ((iTick & 0x01u) || !g_pGame->IsEasy()))
+                this->__EnableBoomerang(iTick, this->GetPosition().xy(), coreVector2((iTick & 0x01u) ? fSideSign : -fSideSign, 0.0f));
+
+            if(PHASE_FINISHED)
+                PHASE_CHANGE_INC
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 121u)
+    {
+        if(this->GetCurHealthPct() < 0.35f)
+        {
+            PHASE_CHANGE_INC
+
+            m_aiCounter[BOOMERANG_TARGET] = 1;
+        }
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 122u)
+    {
+        if(PHASE_BEGINNING2 && !m_aiCounter[CURRENT_ITERATION])
+            this->__EnableSummon(this->GetPosition().xy().InvertedY());
+
+        coreBool bDisabled = true;
+
+        for(coreUintW i = 0u; i < DHARUK_BOOMERANGS; ++i)
+        {
+            const coreObject3D* pBoomerang = (*m_Boomerang.List())[i];
+            if(!pBoomerang->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+            bDisabled = false;
+
+            const coreVector2 vBossPos = m_aiCounter[CURRENT_ITERATION] ? this->GetPosition().xy() : this->GetPosition().xy().InvertedY();
+            const coreVector2 vDiff    = vBossPos - pBoomerang->GetPosition().xy();
+
+            if(coreMath::IsNear(vDiff.x, 0.0f, 1.0f) && coreMath::IsNear(vDiff.y, 0.0f, CORE_MATH_PRECISION))
+            {
+                this->__DisableBoomerang(i, true);
+                m_Summon.SetSize(m_Summon.GetSize() + coreVector3(1.3f,1.3f,1.3f));
+            }
+        }
+
+        if(bDisabled)
+        {
+            PHASE_CHANGE_INC
+
+            m_aiCounter[BOOMERANG_TARGET]  = 0;
+            m_aiCounter[CURRENT_SIDE]      = 1 - m_aiCounter[CURRENT_SIDE];
+            m_aiCounter[CURRENT_ITERATION] = 1 + m_aiCounter[CURRENT_ITERATION];
+        }
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 123u)
+    {
+        PHASE_CONTROL_TIMER(0u, 2.2f/2.0f, LERP_SMOOTH)
+        {
+            if(PHASE_BEGINNING)
+            {
+                this->__EnableDuplicate();
+                this->__DisableSummon();
+            }
+
+            const coreFloat fAlpha = MIN(fTime * 10.0f, 1.0f);
+
+            m_Duplicate.SetSize (fAlpha * this->GetSize());
+            m_Duplicate.SetAlpha(fAlpha);
+
+            for(coreUintW i = DHARUK_TRAILS; i < DHARUK_DUPLICATE_RAWS; ++i)
+            {
+                m_aDuplicateRaw[i].SetSize (m_Duplicate.GetSize());
+                m_aDuplicateRaw[i].SetAlpha(fAlpha * m_aDuplicateRaw[i - DHARUK_TRAILS].GetAlpha());
+            }
+
+            if(PHASE_FINISHED)
+                PHASE_CHANGE_INC
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 124u)
+    {
+        PHASE_CONTROL_PAUSE(0u, 1.0f)
+        {
+            PHASE_CHANGE_TO(110u)
+        });
+    }
+
+    // ################################################################
+    // ################################################################
+    
+    if((m_iPhase >= 120u) && (m_iPhase < 130u))
+    {
+        if((m_iPhase == 120u) || (m_iPhase == 121u))
+        {
+            if((m_iPhase == 120u) && !m_avVector[STILL_ROTATION].y) m_avVector[STILL_ROTATION].y = 1.0f*PI;
+
+            m_avVector[STILL_ROTATION].x  = MIN1(m_avVector[STILL_ROTATION].x + 0.2f * TIME);
+            m_avVector[STILL_ROTATION].y += m_avVector[STILL_ROTATION].x * 6.0f * TIME;
+        }
+        else
+        {
+            const coreFloat fOldAngle = m_avVector[STILL_ROTATION].y;
+
+            if(m_avVector[STILL_ROTATION].x)
+            {
+                m_avVector[STILL_ROTATION].y += m_avVector[STILL_ROTATION].x * 6.0f * TIME;
+
+                if(InBetweenExt(1.0f*PI, AnglePos(fOldAngle), AnglePos(m_avVector[STILL_ROTATION].y)) == 1)
+                {
+                    m_avVector[STILL_ROTATION].x = 0.0f;
+                    m_avVector[STILL_ROTATION].y = 1.0f*PI;
+                }
+            }
+            else
+            {
+                m_avVector[STILL_ROTATION].z = MIN1(m_avVector[STILL_ROTATION].z + 0.65f * TIME);
+                m_avVector[STILL_ROTATION].y = LERPB(1.0f*PI, 3.0f*PI, m_avVector[STILL_ROTATION].z);
+            }
+        }
+
+        const coreVector2 vDir = coreVector2::Direction(-m_avVector[STILL_ROTATION].y);
+
+        this->SetDirection(coreVector3(vDir, 0.0f));
+    }
+    
+
+    // 
+    coreBool bChange = false;
+    this->SetPosition(coreVector3(this->__RepeatPosition(this->GetPosition().xy(), DHARUK_OUTSIDE, &bChange), 0.0f));
+    
+    
+
+    if(m_aiCounter[CURRENT_ITERATION] && ((m_iPhase >= 110u) && (m_iPhase < 120u)))
+    {
+        if(m_fDuplicateValue > -0.5f) m_fDuplicateValue = MAX0(m_fDuplicateValue - 4.0f * TIME);
+
+
+        //const coreFloat   fHeight = FmodRange(this->GetPosition().y / FOREGROUND_AREA.y - DHARUK_HEIGHT * 2.0f, -DHARUK_OUTSIDE, DHARUK_OUTSIDE);
+        const coreVector2   vHeight = -this->GetPosition().xy() / FOREGROUND_AREA;
+        coreVector3 vNewPos = coreVector3(m_Duplicate.GetPosition().xy(), 0.0f);
+        
+        const coreUintW iIndex = 1u;//(m_aiCounter[TELEPORT_COUNT] % 2) ? 0u : 1u;
+        vNewPos.arr(iIndex) = (vHeight * FOREGROUND_AREA).arr(iIndex);
+
+        m_Duplicate.SetPosition(vNewPos);
+
+        m_Duplicate.SetAlpha((m_fDuplicateValue > -0.5f) ? MIN1(m_fDuplicateValue) : 1.0f);
+
+        //m_Duplicate.ToAxis(StepRotated90(m_aiCounter[TELEPORT_COUNT] % 4));
+    }
+
+    // 
+    //m_Duplicate.SetPosition   (-this->GetPosition   ());
+    m_Duplicate.SetDirection  (-this->GetDirection  ());
+    m_Duplicate.SetOrientation( this->GetOrientation().InvertedX());
+    m_Duplicate.SetTexOffset  (coreVector2(0.0f, m_fAnimation * -0.5f));
+    
+    
+    if(m_fVisibility < -0.5f)
+    {
+        if(g_pForeground->IsVisiblePoint(this->GetPosition().xy(), 1.05f))
+        {
+            g_pGame->ForEachPlayer([this](const cPlayer* pPlayer, const coreUintW i)
+            {
+                const coreVector2 vDiff = this->GetPosition().xy() - (pPlayer->GetPosition().xy() + pPlayer->GetDirection().xy() * pPlayer->GetVisualRadius() * -4.0f);
+                const coreFloat   fDot  = coreVector2::Dot(pPlayer->GetDirection().xy(), vDiff.Normalized());
+
+                if(fDot > 0.96f)
+                {
+                    m_fVisibility = 0.0f;
+                }
+            });
+        }
+    }
+    if(m_fVisibility > -0.5f)
+    {
+        m_fVisibility = MIN1(m_fVisibility + 4.0f * TIME);
+        this->SetAlpha(LERPS(0.0f, 1.0f, m_fVisibility));
+        this->RemoveStatus(ENEMY_STATUS_HIDDEN);
+    }
+
+    // 
+    if(TIME)
+    {
+        const coreFloat fRcpTime = RCP(TIME);
+
+        // 
+        const coreVector2 avCurBasePos  [2] = {this->GetPosition   ().xy(),         m_Duplicate.GetPosition   ().xy()};
+        const coreFloat   afCurBaseAngle[2] = {this->GetDirection  ().xy().Angle(), m_Duplicate.GetDirection  ().xy().Angle()};
+        const coreFloat   afCurBaseOri  [2] = {this->GetOrientation().xz().Angle(), m_Duplicate.GetOrientation().xz().Angle()};   // # not y
+        const coreVector2 avOffsetPos   [2] = {         (avCurBasePos  [0] - avOldBasePos  [0]) * fRcpTime * 0.05f,           (avCurBasePos  [1] - avOldBasePos  [1]) * fRcpTime * 0.05f};
+        const coreFloat   afOffsetAngle [2] = {AngleDiff(afCurBaseAngle[0],  afOldBaseAngle[0]) * fRcpTime * 0.055f, AngleDiff(afCurBaseAngle[1],  afOldBaseAngle[1]) * fRcpTime * 0.055f};
+        const coreFloat   afOffsetOri   [2] = {AngleDiff(afCurBaseOri  [0],  afOldBaseOri  [0]) * fRcpTime * 0.06f,  AngleDiff(afCurBaseOri  [1],  afOldBaseOri  [1]) * fRcpTime * 0.06f};
+
+        for(coreUintW i = 0u, ie = (m_aiCounter[DUPLICATE_STATUS] ? DHARUK_DUPLICATE_RAWS : DHARUK_TRAILS); i < ie; ++i)
+        {
+            // 
+            const coreUintW iIndex  = (i < DHARUK_TRAILS) ? 0u : 1u;
+            const coreFloat fFactor = I_TO_F(DHARUK_TRAILS - (i % DHARUK_TRAILS));
+
+            // 
+            const coreVector2 vNewPos =                        avCurBasePos  [iIndex] - avOffsetPos  [iIndex] * fFactor;
+            const coreVector2 vNewDir = coreVector2::Direction(afCurBaseAngle[iIndex] - afOffsetAngle[iIndex] * fFactor);
+            const coreVector2 vNewOri = coreVector2::Direction(afCurBaseOri  [iIndex] - afOffsetOri  [iIndex] * fFactor);
+
+            // 
+            m_aDuplicateRaw[i].SetPosition   (coreVector3(vNewPos,   0.0f));
+            m_aDuplicateRaw[i].SetDirection  (coreVector3(vNewDir,   0.0f));
+            m_aDuplicateRaw[i].SetOrientation(coreVector3(vNewOri.x, 0.0f, vNewOri.y));
+            m_aDuplicateRaw[i].SetTexOffset  (coreVector2(0.0f, m_fAnimation * -0.5f));
+            m_aDuplicateRaw[i].Move();
+        }
+        
+        for(coreUintW i = 0u, ie = (m_aiCounter[DUPLICATE_STATUS] ? DHARUK_DUPLICATE_RAWS : DHARUK_TRAILS); i < ie; ++i)
+        {
+            const coreFloat fAlpha = (i < DHARUK_TRAILS) ? this->GetAlpha() : m_Duplicate.GetAlpha();
+
+            const coreUintW iType = (i % DHARUK_TRAILS) + 1u;
+            m_aDuplicateRaw[i].SetAlpha(fAlpha * (0.15f + 0.2f * I_TO_F(iType)));
+        }
+    }
+
+    // 
+    for(coreUintW i = 0u; i < DHARUK_BOOMERANGS; ++i)
+    {
+        coreObject3D* pBoomerang = (*m_Boomerang.List())[i];
+        if(!pBoomerang->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+        // 
+        const coreVector2 vFly = this->__DecodeDirection(i);
+
+        // 
+        coreVector2       vNewPos = pBoomerang->GetPosition().xy() + vFly * FOREGROUND_AREA * (1.5f * TIME);
+        const coreVector2 vNewDir = coreVector2::Direction((1.0f/16.0f) * PI * (vNewPos.x + vNewPos.y) * (vFly.x + vFly.y));
+
+        // 
+        vNewPos = this->__RepeatPosition(vNewPos, 1.35f, &bChange);
+        if(bChange)
+        {
+            // 
+            const coreVector2 vBossPos   = m_aiCounter[CURRENT_ITERATION] ? this->GetPosition().xy() : this->GetPosition().xy().InvertedY();
+            const coreVector2 vPlayerPos = g_pGame->FindPlayerSide(vNewPos)->GetPosition().xy();
+
+            // 
+            const coreVector2 vTarget = m_aiCounter[BOOMERANG_TARGET] ? vBossPos : vPlayerPos;
+            const coreVector2 vFlyAbs = vFly.Processed(ABS);
+            vNewPos = vNewPos * vFlyAbs + vTarget * vFlyAbs.yx();
+
+            // 
+            m_afBoomerangValue[i] = m_aiCounter[BOOMERANG_TARGET] ? -1.0f : LERP(3.0f, 8.0f, STEP(0.35f, 0.75f, this->GetCurHealthPct()));   // 4.4f
+
+            // 
+            g_pSpecialEffects->CreateBlowColor(coreVector3(vNewPos, 0.0f), coreVector3(vFly, 0.0f), SPECIAL_BLOW_SMALL, COLOR_ENERGY_RED);
+        }
+
+        // 
+        if(m_afBoomerangValue[i] > -0.5f) m_afBoomerangValue[i] = MAX0(m_afBoomerangValue[i] - 6.0f * TIME);
+
+        // 
+        pBoomerang->SetPosition (coreVector3(vNewPos, 0.0f));
+        pBoomerang->SetDirection(coreVector3(vNewDir, 0.0f));
+        pBoomerang->SetAlpha    ((m_afBoomerangValue[i] > -0.5f) ? MIN1(m_afBoomerangValue[i]) : MIN1(pBoomerang->GetAlpha() + 10.0f * TIME));
+        pBoomerang->SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.5f));
+
+        for(coreUintW j = 0u; j < DHARUK_TRAILS; ++j)
+        {
+            coreObject3D* pTrail = (*m_BoomerangTrail.List())[i*DHARUK_TRAILS + j];
+
+            // 
+            const coreVector2 vNewPos2 = pBoomerang->GetPosition().xy() - vFly * FOREGROUND_AREA * (0.06f * I_TO_F(DHARUK_TRAILS - j));
+            const coreVector2 vNewDir2 = coreVector2::Direction((1.0f/16.0f) * PI * (vNewPos2.x + vNewPos2.y) * (vFly.x + vFly.y));
+
+            // 
+            pTrail->SetPosition (coreVector3(vNewPos2, 0.0f));
+            pTrail->SetDirection(coreVector3(vNewDir2, 0.0f));
+            pTrail->SetAlpha    (pBoomerang->GetAlpha() * (0.15f + 0.2f * I_TO_F(j + 1u)));
+            pTrail->SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.5f));
+        }
+    }
+
+    // 
+    m_Boomerang     .MoveNormal();
+    m_BoomerangTrail.MoveNormal();
+
+    // 
+    m_Summon.SetTexOffset(coreVector2(0.0f, -1.5f * m_fAnimation));
+    m_Summon.Move();
+
+    // 
+    cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_DHARUK_BOOMERANG, [this](cPlayer* OUTPUT pPlayer, coreObject3D* pBoomerang, const coreVector3 vIntersection, const coreBool bFirstHit)
+    {
+        if(!bFirstHit) return;
+
+        // 
+        const coreUintW iIndex = m_Boomerang.List()->index(pBoomerang);
+        m_afBoomerangValue[iIndex] = 5.0f;
+
+        // 
+        pPlayer->TakeDamage(5, ELEMENT_RED, vIntersection.xy());
+
+        // 
+        g_pSpecialEffects->MacroExplosionColorSmall(vIntersection, COLOR_ENERGY_RED);
+    });
+}
+
+
+// ****************************************************************
+// 
+void cDharukSubBoss::__EnableDuplicate()
+{
+    // 
+    if(m_aiCounter[DUPLICATE_STATUS] != 0) return;
+    m_aiCounter[DUPLICATE_STATUS] = 1;
+
+    // 
+    m_fDuplicateValue = -1.0f;
+
+    // 
+    m_Duplicate.Resurrect();
+
+    // 
+    m_Duplicate.SetPosition   (-this->GetPosition   ());
+    m_Duplicate.SetDirection  (-this->GetDirection  ());
+    m_Duplicate.SetOrientation( this->GetOrientation().InvertedX());
+    m_Duplicate.SetAlpha      (0.0f);
+
+    // 
+    for(coreUintW i = DHARUK_TRAILS; i < DHARUK_DUPLICATE_RAWS; ++i)
+    {
+        m_aDuplicateRaw[i].SetAlpha  (0.0f);
+        m_aDuplicateRaw[i].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    }
+
+    // 
+    g_pSpecialEffects->MacroExplosionColorBig(m_Duplicate.GetPosition(), COLOR_ENERGY_RED);
+}
+
+
+// ****************************************************************
+// 
+void cDharukSubBoss::__DisableDuplicate(const coreBool bAnimated)
+{
+    // 
+    if(m_aiCounter[DUPLICATE_STATUS] == 0) return;
+    m_aiCounter[DUPLICATE_STATUS] = 0;
+
+    // 
+    m_Duplicate.Kill(false);
+
+    // 
+    for(coreUintW i = DHARUK_TRAILS; i < DHARUK_DUPLICATE_RAWS; ++i)
+        m_aDuplicateRaw[i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
+    // 
+    if(bAnimated) g_pSpecialEffects->MacroExplosionColorBig(m_Duplicate.GetPosition(), COLOR_ENERGY_RED);
+}
+
+
+// ****************************************************************
+// 
+void cDharukSubBoss::__EnableBoomerang(const coreUintW iIndex, const coreVector2 vPosition, const coreVector2 vDirection)
+{
+    ASSERT(iIndex < DHARUK_BOOMERANGS)
+    coreObject3D* pBoomerang = (*m_Boomerang     .List())[iIndex];
+    coreObject3D* pTrail     = (*m_BoomerangTrail.List())[iIndex*DHARUK_TRAILS];
+
+    // 
+    WARN_IF(pBoomerang->IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    pBoomerang->ChangeType(TYPE_DHARUK_BOOMERANG);
+
+    // 
+    m_afBoomerangValue[iIndex] = -1.0f;
+
+    // 
+    this->__EncodeDirection(iIndex, vDirection);
+
+    // 
+    const auto nInitFunc = [&](coreObject3D* OUTPUT pObject)
+    {
+        pObject->SetPosition(coreVector3(vPosition, 0.0f));
+        pObject->SetAlpha   (0.0f);
+        pObject->SetEnabled (CORE_OBJECT_ENABLE_ALL);
+    };
+    nInitFunc(pBoomerang);
+    for(coreUintW i = 0u; i < DHARUK_TRAILS; ++i) nInitFunc(pTrail + i);
+
+    // 
+    g_pSpecialEffects->MacroEruptionColorSmall(coreVector3(vPosition, 0.0f), vDirection, COLOR_ENERGY_RED);
+}
+
+
+// ****************************************************************
+// 
+void cDharukSubBoss::__DisableBoomerang(const coreUintW iIndex, const coreBool bAnimated)
+{
+    ASSERT(iIndex < DHARUK_BOOMERANGS)
+    coreObject3D* pBoomerang = (*m_Boomerang     .List())[iIndex];
+    coreObject3D* pTrail     = (*m_BoomerangTrail.List())[iIndex*DHARUK_TRAILS];
+
+    // 
+    if(!pBoomerang->IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    pBoomerang->ChangeType(0);
+
+    // 
+    const auto nExitFunc = [](coreObject3D* OUTPUT pObject)
+    {
+        pObject->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    };
+    nExitFunc(pBoomerang);
+    for(coreUintW i = 0u; i < DHARUK_TRAILS; ++i) nExitFunc(pTrail + i);
+
+    // 
+    if(bAnimated) g_pSpecialEffects->MacroExplosionColorSmall(pBoomerang->GetPosition(), COLOR_ENERGY_RED);
+}
+
+
+// ****************************************************************
+// 
+void cDharukSubBoss::__EnableSummon(const coreVector2 vPosition)
+{
+    WARN_IF(m_Summon.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    m_Summon.SetPosition(coreVector3(vPosition,0.0f));
+    m_Summon.SetSize    (coreVector3(0.0f,0.0f,0.0f));
+
+    // 
+    m_Summon.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    g_pGlow->BindObject(&m_Summon);
+}
+
+
+// ****************************************************************
+// 
+void cDharukSubBoss::__DisableSummon()
+{
+    if(!m_Summon.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    m_Summon.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    g_pGlow->UnbindObject(&m_Summon);
+}
+
+
+// ****************************************************************
+// 
+coreVector2 cDharukSubBoss::__RepeatPosition(const coreVector2 vPosition, const coreFloat fThreshold, coreBool* OUTPUT pbChange)
+{
+    // 
+    const coreVector2 vThreshVec = fThreshold * FOREGROUND_AREA;
+    const coreVector2 vRepeatPos = coreVector2(FmodRange(vPosition.x, -vThreshVec.x, vThreshVec.x),
+                                               FmodRange(vPosition.y, -vThreshVec.y, vThreshVec.y));
+
+    // 
+    ASSERT(pbChange)
+    (*pbChange) = (vRepeatPos.x != vPosition.x) || (vRepeatPos.y != vPosition.y);
+
+    return vRepeatPos;
+}
+
+coreVector2 cDharukSubBoss::__RepeatPosition(const coreVector2 vPosition, const coreFloat fThreshold)
+{
+    coreBool bChange;
+    return this->__RepeatPosition(vPosition, fThreshold, &bChange);
+}
+
+
+// ****************************************************************
+// 
+void cDharukSubBoss::__EncodeDirection(const coreUintW iIndex, const coreVector2 vDirection)
+{
+    ASSERT(iIndex < DHARUK_BOOMERANGS)
+
+    // 
+    if(vDirection.x + vDirection.y > 0.0f)
+         ADD_BIT   (m_iPackedDir, 0u + 2u*iIndex)
+    else REMOVE_BIT(m_iPackedDir, 0u + 2u*iIndex)
+
+    // 
+    if(coreMath::IsNear(vDirection.y, 0.0f))
+         ADD_BIT   (m_iPackedDir, 1u + 2u*iIndex)
+    else REMOVE_BIT(m_iPackedDir, 1u + 2u*iIndex)
+
+    STATIC_ASSERT(DHARUK_BOOMERANGS*2u <= sizeof(m_iPackedDir)*8u)
+}
+
+
+// ****************************************************************
+// 
+coreVector2 cDharukSubBoss::__DecodeDirection(const coreUintW iIndex)
+{
+    ASSERT(iIndex < DHARUK_BOOMERANGS)
+
+    // 
+    const coreFloat P = HAS_BIT(m_iPackedDir, 0u + 2u*iIndex) ? 1.0f : -1.0f;
+    const coreBool  X = HAS_BIT(m_iPackedDir, 1u + 2u*iIndex);
+
+    // 
+    return coreVector2((X) ? P : 0.0f, (!X) ? P : 0.0f);
+}

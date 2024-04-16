@@ -656,7 +656,7 @@ void cOutdoor::SetTransform(const coreFloat fFlyOffset, const coreFloat fSideOff
 
 
 // ****************************************************************
-// 
+// reset with the resource manager
 void cOutdoor::__Reset(const coreResourceReset eInit)
 {
     if(eInit)
@@ -676,5 +676,15 @@ void cOutdoor::__Reset(const coreResourceReset eInit)
 
         // 
         if(m_LightMap.GetColorTarget(0u).IsValid()) m_LightMap.Delete();
+    }
+}
+
+void cOutdoor::__Reshape()
+{
+    // 
+    if(m_LightMap.GetColorTarget(0u).IsValid())
+    {
+        m_LightMap.Delete();
+        m_LightMap.Create(g_vGameResolution * OUTDOOR_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
     }
 }

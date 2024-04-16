@@ -23,6 +23,7 @@ cBoss::cBoss()noexcept
 , m_iPhase           (0u)
 , m_fPhaseTime       (0.0f)
 , m_fPhaseTimeBefore (0.0f)
+, m_bControlAgain    (false)
 {
     // 
     for(coreUintW i = 0u; i < BOSS_TIMERS; ++i)
@@ -140,6 +141,7 @@ void cBoss::_UpdateBoss()
 // 
 UNITY_BUILD
 #include "0101_cDharukBoss.cpp"
+#include "0101_cDharukSubBoss.cpp"
 #include "0102_cTorusBoss.cpp"
 #include "0103_cVausBoss.cpp"
 #include "0201_cNautilusBoss.cpp"
