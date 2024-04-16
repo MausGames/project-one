@@ -92,6 +92,7 @@ cConfigMenu::cConfigMenu()noexcept
         if(i == ENTRY_GAME_GAMEROTATION)   ++iOffset;
         if(i == ENTRY_GAME_HUDROTATION)    ++iOffset;
         if(i == ENTRY_GAME_UPDATEFREQ)     ++iOffset;
+        if(i == ENTRY_GAME_MIRRORMODE)     ++iOffset;
 
         m_aLabel[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
         m_aLabel[i].SetPosition (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.04f, -0.05f - 0.025f*I_TO_F(iOffset)));
@@ -263,15 +264,15 @@ cConfigMenu::cConfigMenu()noexcept
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oFireMode.AddEntryLanguage("FIREMODE_TOGGLE", 2u);
     for(coreUintW i = 0u; i <= 2u; i += 1u) m_TextSize.AddEntry(PRINT("+%zu", i), i);
     m_GameRotation .AddEntryLanguage("VALUE_OFF",              0u);
-    m_GameRotation .AddEntryLanguage("HUDROTATION_LEFT",       1u);
+    m_GameRotation .AddEntryLanguage("HUDROTATION_RIGHT",      1u);
     m_GameRotation .AddEntryLanguage("HUDROTATION_UPSIDE",     2u);
-    m_GameRotation .AddEntryLanguage("HUDROTATION_RIGHT",      3u);
+    m_GameRotation .AddEntryLanguage("HUDROTATION_LEFT",       3u);
     for(coreUintW i = 50u; i <= 100u; i += 1u) m_GameScale.AddEntry(PRINT("%zu%%", i), i);
     for(coreUintW i = 50u; i <= 200u; i += 5u) m_GameSpeed.AddEntry(PRINT("%zu%%", i), i);
     m_HudRotation  .AddEntryLanguage("VALUE_OFF",              0u);
-    m_HudRotation  .AddEntryLanguage("HUDROTATION_LEFT",       1u);
+    m_HudRotation  .AddEntryLanguage("HUDROTATION_RIGHT",      1u);
     m_HudRotation  .AddEntryLanguage("HUDROTATION_UPSIDE",     2u);
-    m_HudRotation  .AddEntryLanguage("HUDROTATION_RIGHT",      3u);
+    m_HudRotation  .AddEntryLanguage("HUDROTATION_LEFT",       3u);
     for(coreUintW i = 50u; i <= 150u; i += 1u) m_HudScale.AddEntry(PRINT("%zu%%", i), i);
     m_HudType      .AddEntryLanguage("HUDTYPE_OUTSIDE",        0u);
     m_HudType      .AddEntryLanguage("HUDTYPE_INSIDE",         1u);
@@ -659,7 +660,7 @@ void cConfigMenu::Move()
     cMenu::UpdateButton(&m_BackButton,    m_BackButton   .IsFocused());
 
     // 
-    if(m_BackButton.IsFocused()) g_pMenu->GetTooltip()->ShowText(TOOLTIP_ONELINER, Core::Language->GetString("BACK"));
+    if(m_BackButton.IsFocused()) g_pMenu->GetTooltip()->ShowText(TOOLTIP_OBJECT(m_BackButton), TOOLTIP_ONELINER, Core::Language->GetString("BACK"));
 }
 
 

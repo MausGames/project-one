@@ -77,6 +77,8 @@
 // TODO: check all RCP for division by zero
 // TODO: reshape causes some batch-list to be initialized twice
 // TODO: look for hot/cold optimizations, e.g. member-list in enemy can be pointer, write wrapper for that, coreCold<...>, check everything already pointer for switching to wrapper
+// TODO: check for and prevent accumulation of small rounding errors: incremental matrix rotation
+// TODO: check if outlines are correct on all text (multiple font-height, multiple screen-resolutions)
 
 
 // ****************************************************************
@@ -132,7 +134,7 @@
 #define COLOR_MENU_BLACK     (coreVector3(1.000f, 1.000f, 1.000f) * MENU_CONTRAST_BLACK)
 #define COLOR_MENU_YELLOW    (coreVector3(1.000f, 0.824f, 0.392f))   // TODO: improve use Jetbrains Git colors ?
 #define COLOR_MENU_ORANGE    (coreVector3(1.000f, 0.443f, 0.227f))   // TODO: improve 
-#define COLOR_MENU_RED       (coreVector3(1.000f, 0.275f, 0.275f))   // TODO: improve 
+#define COLOR_MENU_RED       (coreVector3(1.000f, 0.275f, 0.275f))   // TODO: improve !! those colors may be used in 3d objects too
 #define COLOR_MENU_PURPLE    (coreVector3(0.710f, 0.333f, 1.000f))   // TODO: improve 
 #define COLOR_MENU_BLUE      (coreVector3(0.102f, 0.702f, 1.000f))   // TODO: improve 
 #define COLOR_MENU_GREEN     (coreVector3(0.118f, 0.745f, 0.353f))   // TODO: improve 
@@ -243,6 +245,14 @@ enum eMedal : coreUint8
     MEDAL_TYPE_BOSS,
     MEDAL_TYPE_MISSION,
     MEDAL_TYPE_MAX
+};
+
+// 
+enum eBadge : coreUint8
+{
+    BADGE_EASY = 1u,
+    BADGE_NORMAL,
+    BADGE_HARD
 };
 
 extern void InitResolution(const coreVector2& vResolution);   // init resolution properties (1:1)

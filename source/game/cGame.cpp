@@ -237,8 +237,11 @@ void cGame::Move()
 void cGame::RenderOverlay()
 {
     // render combat text and interface
-    m_CombatText.Render();
     m_Interface .Render();
+    
+    
+    
+    m_CombatText.Render();
 }
 
 
@@ -261,6 +264,10 @@ void cGame::LoadMissionID(const coreInt32 iID)
     // 
     this->__ClearAll(false);
 
+    // 
+    const coreInt32 iOldID    = m_pCurMission ? m_pCurMission->GetID() : cNoMission::ID;
+    const coreUintW iOldIndex = m_iCurMissionIndex;
+
     // delete possible old mission
     SAFE_DELETE(m_pCurMission)
 
@@ -276,14 +283,39 @@ void cGame::LoadMissionID(const coreInt32 iID)
     case cGeluMission   ::ID: m_pCurMission = new cGeluMission   (); break;
     case cCalorMission  ::ID: m_pCurMission = new cCalorMission  (); break;
     case cMuscusMission ::ID: m_pCurMission = new cMuscusMission (); break;
+    case cAterMission   ::ID: m_pCurMission = new cAterMission   (); break;
     case cIntroMission  ::ID: m_pCurMission = new cIntroMission  (); break;
     case cErrorMission  ::ID: m_pCurMission = new cErrorMission  (); break;
-    case cTinkerMission ::ID: m_pCurMission = new cTinkerMission (); break;
     }
 
     // 
     m_iCurMissionIndex = std::find(m_piMissionList, m_piMissionList + m_iNumMissions, iID) - m_piMissionList;
     ASSERT(m_iCurMissionIndex < m_iNumMissions)
+
+    if(iOldID != cNoMission::ID)
+    {
+        // 
+        g_pSave->EditGlobalStats()->iMissionsDone += 1u;
+
+        for(coreUintW i = 0u, ie = (m_bCoop ? GAME_PLAYERS : 1u); i < ie; ++i)
+        {
+            // 
+            const coreUint32 iScoreFull = m_aPlayer[i].GetScoreTable()->GetScoreMission(iOldIndex);
+            g_pSave->EditLocalStatsMission(iOldIndex)->iScoreBest   = MAX(g_pSave->EditLocalStatsMission(iOldIndex)->iScoreBest,       iScoreFull);
+            g_pSave->EditLocalStatsMission(iOldIndex)->iScoreWorst  = MIN(g_pSave->EditLocalStatsMission(iOldIndex)->iScoreWorst - 1u, iScoreFull - 1u) + 1u;
+            g_pSave->EditLocalStatsMission(iOldIndex)->iScoreTotal += iScoreFull;
+        }
+
+        // 
+        const coreUint32 iTimeUint = TABLE_TIME_TO_UINT(m_TimeTable.GetTimeMission(iOldIndex));
+        g_pSave->EditLocalStatsMission(iOldIndex)->iTimeBest   = MAX(g_pSave->EditLocalStatsMission(iOldIndex)->iTimeBest,       iTimeUint);
+        g_pSave->EditLocalStatsMission(iOldIndex)->iTimeWorst  = MIN(g_pSave->EditLocalStatsMission(iOldIndex)->iTimeWorst - 1u, iTimeUint - 1u) + 1u;
+        g_pSave->EditLocalStatsMission(iOldIndex)->iTimeTotal += iTimeUint;
+        g_pSave->EditLocalStatsMission(iOldIndex)->iCountEnd  += 1u;
+
+        // 
+        g_pSave->SaveFile();
+    }
 
     if(iID != cNoMission::ID)
     {
@@ -292,6 +324,9 @@ void cGame::LoadMissionID(const coreInt32 iID)
 
         // set initial status
         m_iStatus = GAME_STATUS_LOADING;
+
+        // 
+        g_pSave->EditLocalStatsMission()->iCountStart += 1u;
     }
 
     Core::Log->Info("Mission (%s) created", m_pCurMission->GetName());
@@ -371,6 +406,7 @@ void cGame::StartIntro()
 // 
 void cGame::StartOutro(const coreUint8 iType)
 {
+    ASSERT( CONTAINS_FLAG(m_iStatus, GAME_STATUS_PLAY))
     ASSERT(!CONTAINS_FLAG(m_iStatus, GAME_STATUS_INTRO))
 
     // 
@@ -382,7 +418,7 @@ void cGame::StartOutro(const coreUint8 iType)
     m_iOutroType = iType;
 
     // 
-    for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+    for(coreUintW i = 0u, ie = (m_bCoop ? GAME_PLAYERS : 1u); i < ie; ++i)
         m_aPlayer[i].AddStatus(PLAYER_STATUS_NO_INPUT_ALL);
 
     // 
@@ -404,12 +440,24 @@ void cGame::UseContinue()
     this->StartIntro();
 
     // 
-    for(coreUintW i = 0u, ie = (m_bCoop ? GAME_PLAYERS : 1u); i < ie; ++i)
-        m_aPlayer[i].StartFeeling(PLAYER_FEEL_TIME_CONTINUE, 2u);
-
-    // 
     ASSERT(m_iContinues)
     m_iContinues -= 1u;
+
+    for(coreUintW i = 0u, ie = (m_bCoop ? GAME_PLAYERS : 1u); i < ie; ++i)
+    {
+        // 
+        m_aPlayer[i].StartFeeling(PLAYER_FEEL_TIME_CONTINUE, 2u);
+
+        // 
+        m_aPlayer[i].GetDataTable()->EditCounterTotal  ()->iContinuesUsed += 1u;
+        m_aPlayer[i].GetDataTable()->EditCounterMission()->iContinuesUsed += 1u;
+        m_aPlayer[i].GetDataTable()->EditCounterSegment()->iContinuesUsed += 1u;
+    }
+
+    // 
+    g_pSave->EditGlobalStats      ()->iContinuesUsed += 1u;
+    g_pSave->EditLocalStatsMission()->iContinuesUsed += 1u;
+    g_pSave->EditLocalStatsSegment()->iContinuesUsed += 1u;
 }
 
 
@@ -533,6 +581,10 @@ coreUint8 cGame::CalcMedal(const coreFloat fTime, const coreUint32 iDamageTaken,
     // 
     iMedal -= MIN(iDamageTaken, coreUint32(iMedal - MEDAL_BRONZE));
 
+    
+    if(iMedal == MEDAL_PLATINUM) iMedal = MEDAL_GOLD;   // TODO: platinum disabled 
+    
+
     return iMedal;
 }
 
@@ -560,6 +612,21 @@ coreUint32 cGame::CalcBonusMedal(const coreUint8 iMedal)
     case MEDAL_SILVER:   return  2000u;
     case MEDAL_BRONZE:   return  1000u;
     case MEDAL_NONE:     return     0u;
+    }
+}
+
+
+// ****************************************************************
+// 
+coreUint32 cGame::CalcBonusBadge(const coreUint8 iBadge)
+{
+    // 
+    switch(iBadge)
+    {
+    default: ASSERT(false)
+    case BADGE_HARD:   return 3000u;
+    case BADGE_NORMAL: return 2000u;
+    case BADGE_EASY:   return 1000u;
     }
 }
 
@@ -614,7 +681,7 @@ coreBool cGame::__HandleIntro()
             ADD_FLAG   (m_iStatus, GAME_STATUS_PLAY)
 
             // re-enable player controls
-            for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+            for(coreUintW i = 0u, ie = (m_bCoop ? GAME_PLAYERS : 1u); i < ie; ++i)
                 m_aPlayer[i].RemoveStatus(PLAYER_STATUS_NO_INPUT_ALL);
 
             // 
@@ -700,7 +767,7 @@ void cGame::__HandleDefeat()
         coreBool bAllDefeated = true;
 
         // 
-        for(coreUintW i = 0u; i < GAME_PLAYERS; ++i)
+        for(coreUintW i = 0u, ie = (m_bCoop ? GAME_PLAYERS : 1u); i < ie; ++i)
         {
             cPlayer* pPlayer = &m_aPlayer[i];
 
@@ -754,6 +821,16 @@ void cGame::__HandleDefeat()
             pPlayer->SetCurHealthPct(I_TO_F(1u) / I_TO_F(PLAYER_LIVES));
             pPlayer->SetDesaturate  (PLAYER_DESATURATE);
             pPlayer->StartFeeling   (PLAYER_FEEL_TIME_REPAIR, 0u);
+
+            // 
+            pPlayer->GetDataTable()->EditCounterTotal  ()->iRepairsUsed += 1u;
+            pPlayer->GetDataTable()->EditCounterMission()->iRepairsUsed += 1u;
+            pPlayer->GetDataTable()->EditCounterSegment()->iRepairsUsed += 1u;
+
+            // 
+            g_pSave->EditGlobalStats      ()->iRepairsUsed += 1u;
+            g_pSave->EditLocalStatsMission()->iRepairsUsed += 1u;
+            g_pSave->EditLocalStatsSegment()->iRepairsUsed += 1u;
 
             // 
             SAFE_DELETE(m_pRepairEnemy)
@@ -811,7 +888,7 @@ void cGame::__HandleCollisions()
     cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_ENEMY, [this](cPlayer* OUTPUT pPlayer, cEnemy* OUTPUT pEnemy, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         // 
-        if(pEnemy->GetLifeTime() < 0.5f) return;
+        if(pEnemy->GetLifeTime() < 1.0f) return;
 
         // 
         m_pCurMission->CollPlayerEnemy(pPlayer, pEnemy, vIntersection, bFirstHit);
@@ -862,10 +939,24 @@ void cGame::__HandleCollisions()
             if(!CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
             {
                 // 
-                if(pEnemy->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner())))
+                const coreInt32 iTaken = pEnemy->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner()));
+
+                if(iTaken)
                 {
-                    // 
-                    pBullet->Deactivate(true, vIntersection.xy());
+                    if(CONTAINS_FLAG(pBullet->GetStatus(), BULLET_STATUS_PENETRATE))
+                    {
+                        // 
+                        pBullet->SetDamage(pBullet->GetDamage() - iTaken);
+                        ASSERT(pBullet->GetDamage() >= 0)
+
+                        // 
+                        if(!pBullet->GetDamage()) pBullet->Deactivate(true, vIntersection.xy());
+                    }
+                    else
+                    {
+                        // 
+                        pBullet->Deactivate(true, vIntersection.xy());
+                    }
 
                     // 
                     g_pSpecialEffects->RumblePlayer(d_cast<cPlayer*>(pBullet->GetOwner()), SPECIAL_RUMBLE_DEFAULT);
@@ -891,7 +982,20 @@ void cGame::__HandleCollisions()
     cPlayer::TestCollision(PLAYER_TEST_ALL, TYPE_CHROMA, [](cPlayer* OUTPUT pPlayer, cChromaBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         // 
+        pPlayer->GetScoreTable()->AddScore(pBullet->GetDamage(), false);
+
+        // 
         pBullet->Deactivate(true, vIntersection.xy());
+
+        // 
+        pPlayer->GetDataTable()->EditCounterTotal  ()->iChromaCollected += 1u;
+        pPlayer->GetDataTable()->EditCounterMission()->iChromaCollected += 1u;
+        pPlayer->GetDataTable()->EditCounterSegment()->iChromaCollected += 1u;
+
+        // 
+        g_pSave->EditGlobalStats      ()->iChromaCollected += 1u;
+        g_pSave->EditLocalStatsMission()->iChromaCollected += 1u;
+        g_pSave->EditLocalStatsSegment()->iChromaCollected += 1u;
     });
 
     // 
@@ -899,6 +1003,16 @@ void cGame::__HandleCollisions()
     {
         // 
         pItem->Collect(pPlayer);
+
+        // 
+        pPlayer->GetDataTable()->EditCounterTotal  ()->iItemsCollected += 1u;
+        pPlayer->GetDataTable()->EditCounterMission()->iItemsCollected += 1u;
+        pPlayer->GetDataTable()->EditCounterSegment()->iItemsCollected += 1u;
+
+        // 
+        g_pSave->EditGlobalStats      ()->iItemsCollected += 1u;
+        g_pSave->EditLocalStatsMission()->iItemsCollected += 1u;
+        g_pSave->EditLocalStatsSegment()->iItemsCollected += 1u;
     });
 
     // 
@@ -918,7 +1032,7 @@ void cGame::__ClearAll(const coreBool bAnimated)
     m_EnemyManager       .ClearEnemies(bAnimated);
     m_BulletManagerPlayer.ClearBullets(bAnimated);
     m_BulletManagerEnemy .ClearBullets(bAnimated);
-    //m_ChromaManager      .ClearChromas(bAnimated);
+    m_ChromaManager      .ClearChromas(bAnimated);
     m_ItemManager        .ClearItems  (bAnimated);
     m_ShieldManager      .ClearShields(bAnimated);
 

@@ -95,6 +95,7 @@ private:
 
 
 public:
+    cOutdoor()noexcept;
     cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom, const coreUint8 iAlgorithm, const coreFloat fGrade)noexcept;
     ~cOutdoor()final;
 

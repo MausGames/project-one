@@ -19,6 +19,9 @@
 #define TABLE_BOSSES   (BOSSES)     // 
 #define TABLE_SEGMENTS (SEGMENTS)   // 
 
+#define TABLE_TIME_TO_UINT(x)   (F_TO_UI((x)  * 1000.0f))
+#define TABLE_TIME_TO_FLOAT(x)  (I_TO_F ((x)) / 1000.0f))
+
 #define __TABLE_SCORE_COMBO(x)  (LERP(50.0f, 1.0f, RCP(1.0f + I_TO_F(x) * 0.0002f)))
 #define __TABLE_TIME_CONVERT(x) (I_TO_F(x) * m_fFrameTime)
 
@@ -39,8 +42,8 @@ public:
         coreUint32 iTurnsMade;         // 
         coreUint32 iRollsMade;         // 
         coreUint64 iBulletsShot;       // 
-        coreUint32 iItemsCollected;    // 
         coreUint64 iChromaCollected;   // 
+        coreUint32 iItemsCollected;    // 
     };
 
 

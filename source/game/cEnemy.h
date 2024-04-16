@@ -80,9 +80,9 @@ public:
     inline coreBool IsChild ()const {return  CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_CHILD) && !m_apMember.empty();}
 
     // 
-    cPlayer*    NearestPlayer()const;
-    coreVector2 AimAtPlayer  ()const;
-    coreVector2 AimAtPlayer  (const cPlayer* pPlayer)const;
+    cPlayer*    NearestPlayer(const coreUintW iIndex)const;
+    coreVector2 AimAtPlayer  (const coreUintW iIndex)const;
+    coreVector2 AimAtPlayer  (const cPlayer*  pPlayer)const;
 
     // get object properties
     inline const coreFloat& GetLifeTime      ()const {return m_fLifeTime;}

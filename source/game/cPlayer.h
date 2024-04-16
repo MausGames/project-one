@@ -25,6 +25,7 @@
 #define PLAYER_LIVES              (LIVES)           // 
 #define PLAYER_SHIELD             (SHIELD)          // 
 #define PLAYER_COLLISION_MIN      (0.2f)            // 
+#define PLAYER_DOT_SIZE           (0.55f)           // 
 #define PLAYER_WIND_SIZE          (4.5f)            // 
 #define PLAYER_BUBBLE_SIZE        (6.0f)            // 
 #define PLAYER_ROLL_SPEED         (1.0f)            // 

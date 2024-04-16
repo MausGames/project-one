@@ -136,8 +136,9 @@ public:
 
 private:
     // execute own routines
-    void __UpdateOwn(const coreUint8 iShootStatus)final;
-    void __ShootOwn ()final;
+    void __UpdateOwn (const coreUint8 iShootStatus)final;
+    void __TriggerOwn(const coreUint8 iMode)final;
+    void __ShootOwn  ()final;
 };
 
 
@@ -146,10 +147,9 @@ private:
 class cWaveWeapon final : public cWeapon
 {
 private:
-    coreBool m_bSide;              // 
+    coreVector2 m_vTailDirection;   // 
 
-    coreSoundPtr m_pBulletSound;   // 
-    coreSoundPtr m_pChangeSound;   // 
+    coreSoundPtr m_pBulletSound;    // 
 
 
 public:
@@ -166,8 +166,8 @@ public:
 
 private:
     // execute own routines
-    void __TriggerOwn(const coreUint8 iMode)final;
-    void __ShootOwn  ()final;
+    void __UpdateOwn(const coreUint8 iShootStatus)final;
+    void __ShootOwn ()final;
 };
 
 

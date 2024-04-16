@@ -60,7 +60,7 @@ void cProjectOneBoss::__MoveOwn()
     // 
      if(m_iPhase == 0u)
     {
-        PHASE_CONTROL_PAUSE(0u, 0.6f)
+        PHASE_CONTROL_PAUSE(0u, 0.4f)//0.6f)
         {
             /*
             cEnemySquad* pSquad = g_pGame->GetCurMission()->GetEnemySquad(0u);
@@ -105,7 +105,7 @@ void cProjectOneBoss::__MoveOwn()
     {
         PHASE_CONTROL_PAUSE(0u, 0.5f)
         {
-            PHASE_CHANGE_TO(20u)
+            PHASE_CHANGE_TO(30u)
         });
     }
 
@@ -145,7 +145,6 @@ void cProjectOneBoss::__MoveOwn()
                 PHASE_RESET(1u)
             }
         });
-
     }
 
     // ################################################################
@@ -173,11 +172,12 @@ void cProjectOneBoss::__MoveOwn()
                 const coreVector2 vPos = this->GetPosition().xy();
                 const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(Core::Rand->Float(-90.0f, 90.0f) + 180.0f));
 
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, 1.6f, this, vPos, vDir)->MakeWhite()->ChangeSize(1.2f);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, 1.6f, this, vPos,  vDir)->MakeWhite()->ChangeSize(1.3f);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cFlipBullet>(5, 1.6f, this, vPos, -vDir)->MakeWhite()->ChangeSize(1.3f);
             });
 
             const coreVector2 vPlayerPos = this->NearestPlayer()->GetPosition().xy();
-            this->SetPosition(coreVector3(vPlayerPos.x, 0.8f * FOREGROUND_AREA.y, 0.0f));
+            //this->SetPosition(coreVector3(vPlayerPos.x, 0.8f * FOREGROUND_AREA.y, 0.0f));
 
             g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cFlipBullet>([&](cFlipBullet* OUTPUT pBullet)
             {
@@ -195,7 +195,38 @@ void cProjectOneBoss::__MoveOwn()
                 if(pPlayer->IsFeeling() || pPlayer->IsIgnoring()) pPlayer->Kill(false);
             });
         }
+
+        if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_OUTRO))
+            PHASE_CHANGE_TO(30u)
     }
 
-    // startest mit rotation nach links, lädt strahl auf, schießt strahl, sinusbewegung nach rechts bis ende
+    // ################################################################
+    // 
+    else if(m_iPhase == 30u)
+    {
+        PHASE_CONTROL_PAUSE(0u, 1.0f)
+        {
+            PHASE_CHANGE_INC
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 31u)
+    {
+        PHASE_CONTROL_TIMER(0u, 0.9f, LERP_BREAK_REV)
+        {
+            this->DefaultMoveLerp     (m_vLastPosition, coreVector2(m_vLastPosition.x, -1.2f), fTime);
+            this->DefaultOrientateLerp(0.0f*PI,         2.0f*PI,                               fTime);
+
+            if(PHASE_FINISHED)
+                PHASE_CHANGE_INC
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 32u)
+    {
+    }
 }

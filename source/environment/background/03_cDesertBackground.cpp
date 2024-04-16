@@ -38,17 +38,21 @@ cDesertBackground::cDesertBackground()noexcept
             const coreFloat   fHeight   = m_pOutdoor->RetrieveBackHeight(vPosition);
 
             // test for valid values
-            if((fHeight > -23.0f) && (fHeight < -18.0f) && (F_TO_SI(vPosition.y+160.0f) % 80 < 40))
+            if((fHeight > -23.0f) && (fHeight < -18.0f)    )// && (F_TO_SI(vPosition.y+160.0f) % 80 < 40))
             {
                 if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, 25.0f))
                 {
+
+                    const coreVector3 vNormal = (m_pOutdoor->RetrieveBackNormal(vPosition) * coreVector3(1.0f,1.0f,0.5f)).Normalized();
+
+
                     // create object
                     coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
 
                     // set object properties
                     pObject->SetPosition   (coreVector3(vPosition, 0.0f));
                     pObject->SetSize       (coreVector3::Rand(0.85f,1.3f, 0.85f*5.0f,1.3f*5.0f, 0.85f,1.3f) * Core::Rand->Float(2.0f, 2.6f));
-                    pObject->SetDirection  (coreVector3::Rand());
+                    pObject->SetDirection  (vNormal);
                     pObject->SetOrientation(coreVector3::Rand());
                     pObject->SetColor3     (coreVector3(1.0f,1.0f,1.0f) * Core::Rand->Float(0.85f, 1.0f));
 

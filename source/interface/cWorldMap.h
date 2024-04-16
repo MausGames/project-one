@@ -10,6 +10,8 @@
 #ifndef _P1_GUARD_WORLDMAP_H_
 #define _P1_GUARD_WORLDMAP_H_
 
+// TODO: 2 blinking arrow cursors (blinking, not moving, for contrast with rotating pin)
+
 
 // ****************************************************************
 // world map definitions
@@ -29,9 +31,13 @@ private:
     coreObject2D m_aLine  [WORLDMAP_LINES];   // 
     coreObject2D m_Cursor;                    // 
 
+    cTooltip m_Tooltip;                       // 
+
+    coreFlow  m_fMove;                        // 
     coreUint8 m_iOldPin;                      // 
     coreUint8 m_iNewPin;                      // 
-    coreFlow  m_fMove;                        // 
+
+    coreUint16 m_iEnabled;                    // 
 
     coreFlow m_fPinAngle;                     // 
     coreFlow m_fCursorAngle;                  // 
@@ -50,7 +56,8 @@ public:
     void Arrange();
 
     // 
-    void EnablePin(const coreUintW iIndex, const coreBool bEnable);
+    void EnablePin(const coreUintW iIndex, const coreBool bShow, const coreBool bTease);
+    void SelectPin(const coreUintW iIndex);
 
     // 
     inline coreBool         GetSelectionState()const {return m_aPin[m_iNewPin].IsClicked();}

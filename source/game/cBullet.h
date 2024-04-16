@@ -33,8 +33,9 @@
 
 enum eBulletStatus : coreUint8
 {
-    BULLET_STATUS_READY  = 0x01u,      // bullet is ready to be created
-    BULLET_STATUS_ACTIVE = 0x02u       // bullet is currently flying around, doing stuff (no checking required, is managed)
+    BULLET_STATUS_READY     = 0x01u,  // bullet is ready to be created
+    BULLET_STATUS_ACTIVE    = 0x02u,  // bullet is currently flying around, doing stuff (no checking required, is managed)
+    BULLET_STATUS_PENETRATE = 0x04u   // 
 };
 
 
@@ -247,6 +248,10 @@ private:
 // pulse bullet class
 class cPulseBullet final : public cBullet
 {
+private:
+    coreFlow m_fFade;   // 
+
+
 public:
     cPulseBullet()noexcept;
 
@@ -254,7 +259,7 @@ public:
     ASSIGN_ID(2, "Pulse")
 
     // reset base properties
-    inline void ResetProperties() {this->MakePurple(); this->SetSize(coreVector3(2.5f,2.5f,2.5f) * 1.3f); this->SetTexSize(coreVector2(0.4f,0.2f)); m_fAnimation = 0.09f;}
+    inline void ResetProperties() {this->MakePurple(); this->SetSize(coreVector3(1.0f,2.5f,1.0f) * 1.3f); this->SetTexSize(coreVector2(0.2f,0.4f)); m_fAnimation = 0.2f; m_fFade = 0.0f;}
 
     // change default color
     inline cPulseBullet* MakeWhite () {this->_MakeWhite (0.7f); return this;}
@@ -269,6 +274,87 @@ public:
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_DIRECT;}
+    static constexpr coreBool        ConfigShadow              () {return false;}
+
+
+private:
+    // execute own routines
+    void __MoveOwn()final;
+};
+
+
+// ****************************************************************
+// wave2 bullet class
+class cWave2Bullet final : public cBullet
+{
+private:
+    coreFlow m_fFade;   // 
+
+
+public:
+    cWave2Bullet()noexcept;
+
+    ENABLE_COPY(cWave2Bullet)
+    ASSIGN_ID(14, "Wave2")
+
+    // reset base properties
+    inline void ResetProperties() {this->MakeGreen(); this->SetSize(coreVector3(1.5f,1.5f,1.5f) * 1.3f); this->SetTexSize(coreVector2(1.1f,0.25f) * 0.2f); m_fAnimation = 0.2f; m_fFade = 0.0f;}
+
+    // change default color
+    inline cWave2Bullet* MakeWhite () {this->_MakeWhite (0.7f); return this;}
+    inline cWave2Bullet* MakeYellow() {ASSERT(false)            return this;}
+    inline cWave2Bullet* MakeOrange() {ASSERT(false)            return this;}
+    inline cWave2Bullet* MakeRed   () {this->_MakeRed   (1.0f); return this;}
+    inline cWave2Bullet* MakePurple() {ASSERT(false)            return this;}
+    inline cWave2Bullet* MakeBlue  () {ASSERT(false)            return this;}
+    inline cWave2Bullet* MakeCyan  () {ASSERT(false)            return this;}
+    inline cWave2Bullet* MakeGreen () {this->_MakeGreen (1.1f); return this;}
+
+    // bullet configuration values
+    static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
+    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_DIRECT;}
+    static constexpr coreBool        ConfigShadow              () {return false;}
+
+
+private:
+    // execute own routines
+    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ReflectOwn()final;
+    void __MoveOwn   ()final;
+};
+
+
+// ****************************************************************
+// tesla bullet class
+class cTeslaBullet final : public cBullet
+{
+private:
+    coreFlow m_fLightningTime;   // 
+    coreBool m_bLightningSide;   // 
+
+
+public:
+    cTeslaBullet()noexcept;
+
+    ENABLE_COPY(cTeslaBullet)
+    ASSIGN_ID(6, "Tesla")
+
+    // reset base properties
+    inline void ResetProperties() {this->MakeBlue(); this->SetSize(coreVector3(2.5f,2.5f,2.5f)); this->SetTexSize(coreVector2(0.14f,0.14f)); m_fAnimation = 0.09f; m_fLightningTime = 1.0f;}
+
+    // change default color
+    inline cTeslaBullet* MakeWhite () {this->_MakeWhite (0.7f); return this;}
+    inline cTeslaBullet* MakeYellow() {ASSERT(false)            return this;}
+    inline cTeslaBullet* MakeOrange() {ASSERT(false)            return this;}
+    inline cTeslaBullet* MakeRed   () {ASSERT(false)            return this;}
+    inline cTeslaBullet* MakePurple() {ASSERT(false)            return this;}
+    inline cTeslaBullet* MakeBlue  () {this->_MakeBlue  (0.9f); return this;}
+    inline cTeslaBullet* MakeCyan  () {ASSERT(false)            return this;}
+    inline cTeslaBullet* MakeGreen () {ASSERT(false)            return this;}
+
+    // bullet configuration values
+    static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_spheric_inst_program";}
+    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_FULL;}
     static constexpr coreBool        ConfigShadow              () {return false;}
 
 
@@ -377,107 +463,6 @@ public:
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_DIRECT;}
     static constexpr coreBool        ConfigShadow              () {return false;}
-
-
-private:
-    // execute own routines
-    void __ImpactOwn(const coreVector2& vImpact)final;
-    void __MoveOwn  ()final;
-};
-
-
-// ****************************************************************
-// tesla bullet class
-class cTeslaBullet final : public cBullet
-{
-private:
-    coreFlow m_fLightningTime;   // 
-    coreBool m_bLightningSide;   // 
-
-
-public:
-    cTeslaBullet()noexcept;
-
-    ENABLE_COPY(cTeslaBullet)
-    ASSIGN_ID(6, "Tesla")
-
-    // reset base properties
-    inline void ResetProperties() {this->MakeBlue(); this->SetSize(coreVector3(2.5f,2.5f,2.5f)); this->SetTexSize(coreVector2(0.14f,0.14f)); m_fAnimation = 0.09f; m_fLightningTime = 1.0f;}
-
-    // change default color
-    inline cTeslaBullet* MakeWhite () {this->_MakeWhite (0.7f); return this;}
-    inline cTeslaBullet* MakeYellow() {ASSERT(false)            return this;}
-    inline cTeslaBullet* MakeOrange() {ASSERT(false)            return this;}
-    inline cTeslaBullet* MakeRed   () {ASSERT(false)            return this;}
-    inline cTeslaBullet* MakePurple() {ASSERT(false)            return this;}
-    inline cTeslaBullet* MakeBlue  () {this->_MakeBlue  (0.9f); return this;}
-    inline cTeslaBullet* MakeCyan  () {ASSERT(false)            return this;}
-    inline cTeslaBullet* MakeGreen () {ASSERT(false)            return this;}
-
-    // bullet configuration values
-    static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_spheric_inst_program";}
-    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_FULL;}
-    static constexpr coreBool        ConfigShadow              () {return false;}
-
-
-private:
-    // execute own routines
-    void __MoveOwn()final;
-};
-
-
-// ****************************************************************
-// mine bullet class
-class cMineBullet final : public cBullet
-{
-private:
-    static coreObject3D s_Wave;   // 
-
-
-public:
-    cMineBullet()noexcept;
-
-    ENABLE_COPY(cMineBullet)
-    ASSIGN_ID(7, "Mine")
-
-    // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(2.0f,2.0f,2.0f)); m_fAnimation = 0.0f;}
-
-    // bullet configuration values
-    static constexpr const coreChar* ConfigProgramInstancedName() {return "object_ship_glow_inst_program";}
-    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_FULL;}
-    static constexpr coreBool        ConfigShadow              () {return true;}
-
-    // 
-    static void GlobalInit();
-    static void GlobalExit();
-
-
-private:
-    // execute own routines
-    void __ImpactOwn      (const coreVector2& vImpact)final;
-    void __RenderOwnBefore()final;
-    void __MoveOwn        ()final;
-};
-
-
-// ****************************************************************
-// rocket bullet class
-class cRocketBullet final : public cBullet
-{
-public:
-    cRocketBullet()noexcept;
-
-    ENABLE_COPY(cRocketBullet)
-    ASSIGN_ID(8, "Rocket")
-
-    // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(1.7f,1.7f,1.7f)); m_fAnimation = 0.0f;}
-
-    // bullet configuration values
-    static constexpr const coreChar* ConfigProgramInstancedName() {return "object_ship_glow_inst_program";}
-    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_FULL;}
-    static constexpr coreBool        ConfigShadow              () {return true;}
 
 
 private:
@@ -632,9 +617,74 @@ private:
 
 
 // ****************************************************************
+// mine bullet class
+class cMineBullet final : public cBullet
+{
+private:
+    static coreObject3D s_Wave;   // 
+
+
+public:
+    cMineBullet()noexcept;
+
+    ENABLE_COPY(cMineBullet)
+    ASSIGN_ID(7, "Mine")
+
+    // reset base properties
+    inline void ResetProperties() {this->SetSize(coreVector3(2.0f,2.0f,2.0f)); m_fAnimation = 0.0f;}
+
+    // bullet configuration values
+    static constexpr const coreChar* ConfigProgramInstancedName() {return "object_ship_glow_inst_program";}
+    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_FULL;}
+    static constexpr coreBool        ConfigShadow              () {return true;}
+
+    // 
+    static void GlobalInit();
+    static void GlobalExit();
+
+
+private:
+    // execute own routines
+    void __ImpactOwn      (const coreVector2& vImpact)final;
+    void __RenderOwnBefore()final;
+    void __MoveOwn        ()final;
+};
+
+
+// ****************************************************************
+// rocket bullet class
+class cRocketBullet final : public cBullet
+{
+public:
+    cRocketBullet()noexcept;
+
+    ENABLE_COPY(cRocketBullet)
+    ASSIGN_ID(8, "Rocket")
+
+    // reset base properties
+    inline void ResetProperties() {this->SetSize(coreVector3(1.7f,1.7f,1.7f)); m_fAnimation = 0.0f;}
+
+    // bullet configuration values
+    static constexpr const coreChar* ConfigProgramInstancedName() {return "object_ship_glow_inst_program";}
+    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_FULL;}
+    static constexpr coreBool        ConfigShadow              () {return true;}
+
+
+private:
+    // execute own routines
+    void __ImpactOwn(const coreVector2& vImpact)final;
+    void __MoveOwn  ()final;
+};
+
+
+// ****************************************************************
 // 
 class cChromaBullet final : public cBullet
 {
+private:
+    coreFloat m_fScale;   // 
+
+
 public:
     cChromaBullet()noexcept;
 
@@ -642,11 +692,14 @@ public:
     ASSIGN_ID(13, "Chroma")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(1.0f,1.0f,1.0f)); this->SetTexSize(coreVector2(0.5f,0.2f)); m_fAnimation = 0.0f;}
+    inline void ResetProperties() {this->SetSize(coreVector3(1.0f,1.0f,1.0f)); m_fAnimation = 0.0f; m_fScale = 1.0f;}
+
+    // 
+    inline cChromaBullet* ChangeScale(const coreFloat fScale) {m_fScale = fScale; return this;}
 
     // bullet configuration values
-    static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}
-    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_FULL;}
+    static constexpr const coreChar* ConfigProgramInstancedName() {return "object_chroma_inst_program";}
+    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_FULL;}
     static constexpr coreBool        ConfigShadow              () {return false;}
 
 

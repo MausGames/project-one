@@ -492,7 +492,7 @@ FUNC_PURE coreBool cBackground::_CheckIntersectionQuick(const coreBatchList* pOb
     auto et = pObjectList->List()->begin();
 
     // compare only with last few objects
-    for(coreUintW i = 6u; i-- && (it != et); )
+    for(coreUintW i = /*6u*/20u; i-- && (it != et); )
     {
         const coreVector2 vDiff = (*(--it))->GetPosition().xy() - vNewPos;
 

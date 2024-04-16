@@ -182,7 +182,7 @@ void cDharukBoss::__RenderOwnOver()
 // 
 void cDharukBoss::__MoveOwn()
 {
-    if(this->GetCurHealthPct() < 0.9f) this->Kill(true);                
+    if(this->GetCurHealthPct() <= 0.001f) this->Kill(true);                
 
 
     // 
@@ -258,7 +258,7 @@ void cDharukBoss::__MoveOwn()
     {
         PHASE_CONTROL_PAUSE(0u, 2.0f)
         {
-            PHASE_CHANGE_TO(20u)
+            PHASE_CHANGE_TO(12u)
         });
     }
 
@@ -348,7 +348,7 @@ void cDharukBoss::__MoveOwn()
             const coreFloat fSideTime = m_aiCounter[CURRENT_SIDE] ? fVarTime : (1.0f - fVarTime);
             const coreFloat fSideSign = m_aiCounter[CURRENT_SIDE] ? -1.0f    :  1.0f;
 
-            this->DefaultMoveLerp  (coreVector2(fSideSign * DHARUK_WIDTH, DHARUK_HEIGHT), coreVector2(fSideSign * DHARUK_WIDTH, -7.5f), fVarTime);
+            this->DefaultMoveLerp  (coreVector2(fSideSign * DHARUK_WIDTH     *0.5f, DHARUK_HEIGHT), coreVector2(fSideSign * DHARUK_WIDTH     *0.5f, -7.5f), fVarTime);
             this->DefaultRotateLerp(1.0f*PI,                                              19.0f*PI,                                     fSideTime);
 
             if((this->GetPosition().y < -1.5f*FOREGROUND_AREA.y) && (this->GetPosition().y > -4.5f*FOREGROUND_AREA.y))
@@ -359,6 +359,11 @@ void cDharukBoss::__MoveOwn()
             {
                 constexpr coreFloat fLine = 0.05f * FOREGROUND_AREA.y;
 
+                PHASE_CONTROL_TICKER(1u, 0u, 15.0f, LERP_LINEAR)
+                {
+                    //g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.25f, this, this->GetPosition().xy(), coreVector2(-SIGN(this->GetPosition().x),0.0f))->ChangeSize(1.4f);
+                });
+
                 if(!this->WasTeleporting() &&
                    (PHASE_POSITION_POINT(this,  0.7f * FOREGROUND_AREA.y - fLine, y) ||
                     PHASE_POSITION_POINT(this,  0.3f * FOREGROUND_AREA.y - fLine, y) ||
@@ -366,17 +371,17 @@ void cDharukBoss::__MoveOwn()
                     PHASE_POSITION_POINT(this, -0.5f * FOREGROUND_AREA.y - fLine, y) ||
                     PHASE_POSITION_POINT(this, -0.9f * FOREGROUND_AREA.y - fLine, y)))
                 {
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.25f, this, s_vPositionPoint + coreVector2(0.0f,  fLine), coreVector2( 1.0f,0.0f))->ChangeSize(1.4f);
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.35f, this, s_vPositionPoint + coreVector2(0.0f, -fLine), coreVector2( 1.0f,0.0f))->ChangeSize(1.4f);
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.25f, this, s_vPositionPoint + coreVector2(0.0f,  fLine), coreVector2(-1.0f,0.0f))->ChangeSize(1.4f);
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.35f, this, s_vPositionPoint + coreVector2(0.0f, -fLine), coreVector2(-1.0f,0.0f))->ChangeSize(1.4f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.25f, this, s_vPositionPoint + coreVector2(0.0f,  fLine), coreVector2( 1.0f,0.0f))->ChangeSize(1.5f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.35f, this, s_vPositionPoint + coreVector2(0.0f, -fLine), coreVector2( 1.0f,0.0f))->ChangeSize(1.5f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.25f, this, s_vPositionPoint + coreVector2(0.0f,  fLine), coreVector2(-1.0f,0.0f))->ChangeSize(1.5f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.35f, this, s_vPositionPoint + coreVector2(0.0f, -fLine), coreVector2(-1.0f,0.0f))->ChangeSize(1.5f);
 
                     if(m_aiCounter[DUPLICATE_STATUS] && (g_pGame->GetDifficulty() > 0u))
                     {
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.25f, this, -s_vPositionPoint + coreVector2(0.0f, -fLine - 2.0f*fLine), coreVector2( 1.0f,0.0f))->ChangeSize(1.4f);
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.35f, this, -s_vPositionPoint + coreVector2(0.0f,  fLine - 2.0f*fLine), coreVector2( 1.0f,0.0f))->ChangeSize(1.4f);
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.25f, this, -s_vPositionPoint + coreVector2(0.0f, -fLine - 2.0f*fLine), coreVector2(-1.0f,0.0f))->ChangeSize(1.4f);
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.35f, this, -s_vPositionPoint + coreVector2(0.0f,  fLine - 2.0f*fLine), coreVector2(-1.0f,0.0f))->ChangeSize(1.4f);
+                        //g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.25f, this, -s_vPositionPoint + coreVector2(0.0f, -fLine - 2.0f*fLine), coreVector2( 1.0f,0.0f))->ChangeSize(1.5f);
+                        //g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.35f, this, -s_vPositionPoint + coreVector2(0.0f,  fLine - 2.0f*fLine), coreVector2( 1.0f,0.0f))->ChangeSize(1.5f);
+                        //g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.25f, this, -s_vPositionPoint + coreVector2(0.0f, -fLine - 2.0f*fLine), coreVector2(-1.0f,0.0f))->ChangeSize(1.5f);
+                        //g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.35f, this, -s_vPositionPoint + coreVector2(0.0f,  fLine - 2.0f*fLine), coreVector2(-1.0f,0.0f))->ChangeSize(1.5f);
                     }
                 }
             }
@@ -418,12 +423,12 @@ void cDharukBoss::__MoveOwn()
     // 
     else if(m_iPhase == 21u)
     {
-        PHASE_CONTROL_TICKER(0u, 4u, m_Boomerang.GetCurEnabled() ? (2.2f/3.0f) : RCP(Core::System->GetTime()), LERP_LINEAR)
+        PHASE_CONTROL_TICKER(0u, 4u, m_Boomerang.GetCurEnabled() ? ((1.5f/1.35f) * (2.8f/3.0f)) : RCP(Core::System->GetTime()), LERP_LINEAR)
         {
             const coreFloat fSideSign = m_aiCounter[CURRENT_SIDE] ? -1.0f : 1.0f;
 
             if((iTick < DHARUK_BOOMERANGS) && ((iTick & 0x01u) || (g_pGame->GetDifficulty() > 0u)))
-                this->__EnableBoomerang(iTick, this->GetPosition().xy(), coreVector2((iTick & 0x01u) ? fSideSign : -fSideSign, 0.0f));
+                this->__EnableBoomerang(iTick, this->GetPosition().xy(), coreVector2(/*fSideSign*/(iTick & 0x01u) ? fSideSign : -fSideSign, 0.0f));
 
             if(PHASE_FINISHED)
                 PHASE_CHANGE_INC

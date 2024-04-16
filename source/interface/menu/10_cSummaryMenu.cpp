@@ -51,11 +51,12 @@ cSummaryMenu::cSummaryMenu()noexcept
 
     for(coreUintW i = 0u; i < MENU_SUMMARY_MEDALS; ++i)
     {
-        const coreFloat fOffset = MISSION_SEGMENT_IS_BOSS(i) ? 0.004f : -0.008f;
+        //const coreFloat fOffset = MISSION_SEGMENT_IS_BOSS(i) ? 0.004f : -0.008f;
 
         m_aMedalSegment[i].DefineTexture(0u, "menu_medal.png");
         m_aMedalSegment[i].DefineProgram("default_2d_program");
-        m_aMedalSegment[i].SetPosition  (coreVector2((I_TO_F(i % 6u) - 2.5f) * 0.055f + fOffset, I_TO_F(i / 6u) * -0.065f + 0.24f));
+        //m_aMedalSegment[i].SetPosition  (coreVector2((I_TO_F(i % 6u) - 2.5f) * 0.055f + fOffset, I_TO_F(i / 6u) * -0.065f + 0.24f));
+        m_aMedalSegment[i].SetPosition  (coreVector2((I_TO_F(i % 6u) - 2.0f) * 0.055f, I_TO_F(i / 6u) * -0.065f + 0.24f));   // TODO: while bosses are disabled   
         m_aMedalSegment[i].SetTexSize   (coreVector2(0.25f,0.25f));
     }
 
@@ -369,7 +370,7 @@ void cSummaryMenu::ShowNormal()
         for(coreUintW j = 0u; j < MENU_SUMMARY_MEDALS; ++j)
         {
             const coreUint8 iMedalSegment = pPlayer->GetDataTable()->GetMedalSegment(iMissionIndex, j);
-            const coreBool  bValid        = (iMedalSegment != MEDAL_NONE) ? true : false;
+            const coreBool  bValid        = (iMedalSegment != MEDAL_NONE);
 
             // 
             iBonusMedal += cGame::CalcBonusMedal(iMedalSegment);
@@ -404,7 +405,8 @@ void cSummaryMenu::ShowNormal()
     m_iFinalValue = iSumScore;
 
     // 
-    const coreUint8 iMedalMission = (iMedalCount == MENU_SUMMARY_MEDALS) ? (iMedalTotal / MENU_SUMMARY_MEDALS) : MEDAL_NONE;   // round down
+    //const coreUint8 iMedalMission = (iMedalCount == MENU_SUMMARY_MEDALS) ? (iMedalTotal / MENU_SUMMARY_MEDALS) : MEDAL_NONE;   // round down
+    const coreUint8 iMedalMission = (iMedalCount == 15u) ? (iMedalTotal / 15u) : MEDAL_NONE;   // TODO: while bosses are disabled   
     this->__SetMedalMission(iMedalMission);
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i) {m_aiApplyMedal[i] = iMedalMission;});
 

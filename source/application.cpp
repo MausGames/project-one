@@ -25,6 +25,7 @@ void CoreApp::Setup()
 {
     Core::Manager::Resource->Load<coreModel>  ("bullet_cone.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_cone.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_mine.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_mine.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("bullet_pulse.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_pulse.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_ray.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_ray.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_orb.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_orb.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("bullet_quad.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_quad.md3");
@@ -48,6 +49,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("object_boss_vaus_companion_low.md3",     CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_vaus_companion_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_container_high.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_container_high.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("object_container_low.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_container_low.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_chroma.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_chroma.md3", false);
     Core::Manager::Resource->Load<coreModel>  ("object_cube.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_cube.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_dot.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_dot.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_paddle.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_paddle.md3", false);
@@ -140,6 +142,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("environment_sea_norm.png",               CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_sea_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_snow_diff.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_snow_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_snow_norm.png",              CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_snow_norm.png", false);
+    Core::Manager::Resource->Load<coreTexture>("environment_space.png",                  CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_space.png");
     Core::Manager::Resource->Load<coreTexture>("environment_stone_diff.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_stone_diff.png");
     Core::Manager::Resource->Load<coreTexture>("environment_stone_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_stone_norm.png", false);
     Core::Manager::Resource->Load<coreTexture>("environment_water_norm.png",             CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_water_norm.png", false);
@@ -153,7 +156,9 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("menu_detail_03.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_detail_03.png");
     Core::Manager::Resource->Load<coreTexture>("menu_medal.png",                         CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_medal.png");
     Core::Manager::Resource->Load<coreTexture>("menu_mission.png",                       CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_mission.png", false);
+    Core::Manager::Resource->Load<coreTexture>("menu_star.png",                          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_star.png");
     Core::Manager::Resource->Load<coreTexture>("menu_weapon.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_weapon.png");
+    Core::Manager::Resource->Load<coreTexture>("menu_worldmap.png",                      CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_worldmap.png");
     Core::Manager::Resource->Load<coreTexture>("ship_enemy.png",                         CORE_RESOURCE_UPDATE_AUTO,   "data/textures/ship_enemy.png");
     Core::Manager::Resource->Load<coreTexture>("ship_player.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/ship_player.png");
 
@@ -163,12 +168,14 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("effect_decal_spheric.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", SHADER_SPHERIC);
     Core::Manager::Resource->Load<coreShader> ("effect_decal_light.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", SHADER_LIGHT);
     Core::Manager::Resource->Load<coreShader> ("effect_decal_light_single.frag",         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", SHADER_LIGHT SHADER_SINGLE);
+    Core::Manager::Resource->Load<coreShader> ("effect_decal_color.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_particle_color.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_decal_inst.vert",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.vert", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("effect_decal_inst.frag",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("effect_decal_single_inst.frag",          CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", CORE_SHADER_OPTION_INSTANCING SHADER_SINGLE);
     Core::Manager::Resource->Load<coreShader> ("effect_decal_spheric_inst.frag",         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", CORE_SHADER_OPTION_INSTANCING SHADER_SPHERIC);
     Core::Manager::Resource->Load<coreShader> ("effect_decal_light_inst.frag",           CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", CORE_SHADER_OPTION_INSTANCING SHADER_LIGHT);
     Core::Manager::Resource->Load<coreShader> ("effect_decal_light_single_inst.frag",    CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_decal.frag", CORE_SHADER_OPTION_INSTANCING SHADER_LIGHT SHADER_SINGLE);
+    Core::Manager::Resource->Load<coreShader> ("effect_decal_color_inst.frag",           CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_particle_color.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("effect_distortion.vert",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_distortion.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("effect_distortion.frag",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_distortion.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_distortion_direct.frag",          CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_distortion.frag", SHADER_DIRECT);
@@ -285,10 +292,13 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("menu_grey.frag",                         CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_grey.frag");
     Core::Manager::Resource->Load<coreShader> ("menu_inner.vert",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_inner.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("menu_inner.frag",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_inner.frag");
-    Core::Manager::Resource->Load<coreShader> ("menu_sharp.frag",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_sharp.frag");
+    //Core::Manager::Resource->Load<coreShader> ("menu_sharp.frag",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_sharp.frag");
     Core::Manager::Resource->Load<coreShader> ("menu_single.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_single.frag");
+    Core::Manager::Resource->Load<coreShader> ("menu_worldmap.vert",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_worldmap.vert", CORE_SHADER_OPTION_NO_ROTATION);
+    Core::Manager::Resource->Load<coreShader> ("menu_worldmap.frag",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_worldmap.frag");
     Core::Manager::Resource->Load<coreShader> ("object.vert",                            CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert");
     Core::Manager::Resource->Load<coreShader> ("object_wave.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert", SHADER_WAVE);
+    Core::Manager::Resource->Load<coreShader> ("object_chroma.frag",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_chroma.frag");
     Core::Manager::Resource->Load<coreShader> ("object_ground.frag",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ground.frag");
     Core::Manager::Resource->Load<coreShader> ("object_ship.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag");
     Core::Manager::Resource->Load<coreShader> ("object_ship_glow.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", SHADER_GLOW);
@@ -296,6 +306,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("object_ship_darkness.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", SHADER_DARKNESS);
     Core::Manager::Resource->Load<coreShader> ("object_inst.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("object_wave_inst.vert",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert", CORE_SHADER_OPTION_INSTANCING SHADER_WAVE);
+    Core::Manager::Resource->Load<coreShader> ("object_chroma_inst.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_chroma.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("object_ground_inst.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ground.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("object_ship_inst.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("object_ship_glow_inst.frag",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", CORE_SHADER_OPTION_INSTANCING SHADER_GLOW);
@@ -360,6 +371,11 @@ void CoreApp::Setup()
         ->AttachShader("effect_decal_light_single.frag")
         ->Finish();
 
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_decal_color_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("effect_decal.vert")
+        ->AttachShader("effect_decal_color.frag")
+        ->Finish();
+
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_decal_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("effect_decal_inst.vert")
         ->AttachShader("effect_decal_inst.frag")
@@ -383,6 +399,11 @@ void CoreApp::Setup()
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_decal_light_single_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("effect_decal_inst.vert")
         ->AttachShader("effect_decal_light_single_inst.frag")
+        ->Finish();
+
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_decal_color_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("effect_decal_inst.vert")
+        ->AttachShader("effect_decal_color_inst.frag")
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_distortion_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
@@ -824,14 +845,24 @@ void CoreApp::Setup()
         ->AttachShader("menu_inner.frag")
         ->Finish();
 
-    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_sharp_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
-        ->AttachShader("default_2d.vert")
-        ->AttachShader("menu_sharp.frag")
-        ->Finish();
+    //d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_sharp_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+    //    ->AttachShader("default_2d.vert")
+    //    ->AttachShader("menu_sharp.frag")
+    //    ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_single_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("default_2d.vert")
         ->AttachShader("menu_single.frag")
+        ->Finish();
+
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_worldmap_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("menu_worldmap.vert")
+        ->AttachShader("menu_worldmap.frag")
+        ->Finish();
+
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_chroma_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("object.vert")
+        ->AttachShader("object_chroma.frag")
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ground_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
@@ -862,6 +893,11 @@ void CoreApp::Setup()
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ship_darkness_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("object.vert")
         ->AttachShader("object_ship_darkness.frag")
+        ->Finish();
+
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_chroma_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("object_inst.vert")
+        ->AttachShader("object_chroma_inst.frag")
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ground_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())

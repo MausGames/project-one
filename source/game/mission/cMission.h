@@ -17,6 +17,7 @@
 // TODO: STAGE_FLYPAST with dot-product or simpler per-axis
 // TODO: there seems to be a bug in STAGE_TICK_TIME, which sometimes gives early or late ticks with 30.0f speed, compared with STAGE_TICK_LIFETIME
 // TODO: wrap m_piData in function with RETURN_RESTRICT
+// TODO: set progress when finishing segment, not when starting, but consider mission-wrapping
 
 
 // ****************************************************************
@@ -63,6 +64,7 @@
 
 #define STAGE_CLEARED                          (std::all_of(m_apSquad.begin(), m_apSquad.end(), [](const cEnemySquad* pSquad) {return pSquad->IsFinished();}))
 #define STAGE_RESSURECT(s,f,t)                 {STAGE_FOREACH_ENEMY_ALL(s, pEnemy, i) {if((coreInt32(i) >= coreInt32(f)) && (coreInt32(i) <= coreInt32(t))) pEnemy->Resurrect();});}
+#define STAGE_BADGE(b,p)                       {const coreUint32 A = cGame::CalcBonusBadge(b); STAGE_FOREACH_PLAYER(pPlayer, i) {pPlayer->GetDataTable()->GiveBadge(); pPlayer->GetScoreTable()->AddScore(A, false);}); g_pGame->GetCombatText()->AddBadge(A, (p));}
 
 #define STAGE_ADD_PATH(n)                      const auto n = this->_AddPath    (__LINE__,      [](coreSpline2* OUTPUT n)
 #define STAGE_ADD_SQUAD(n,t,c)                 const auto n = this->_AddSquad<t>(__LINE__, (c), [](cEnemySquad* OUTPUT n)
@@ -254,6 +256,7 @@ private:
     virtual void __MoveOwnAfter  () {}
 
     // 
+    void __OpenSegment ();
     void __CloseSegment();
 };
 
@@ -579,28 +582,7 @@ public:
     cErrorMission()noexcept;
 
     DISABLE_COPY(cErrorMission)
-    ASSIGN_ID(-1, "Error")
-
-
-private:
-    // execute own routines
-    void __SetupOwn()final;
-};
-
-
-// ****************************************************************
-// 
-class cTinkerMission final : public cMission
-{
-private:
-    cProjectOneBoss m_ProjectOne;   // 
-
-
-public:
-    cTinkerMission()noexcept;
-
-    DISABLE_COPY(cTinkerMission)
-    ASSIGN_ID(-2, "Tinker")
+    ASSIGN_ID(100, "Error")
 
 
 private:

@@ -10,19 +10,8 @@
 
 
 // ****************************************************************
-// constructor
-cErrorMission::cErrorMission()noexcept
-{
-    // 
-    m_apBoss[0] = &m_ProjectOne;
-    m_apBoss[1] = &m_ProjectOne;
-    m_apBoss[2] = &m_ProjectOne;
-}
-
-
-// ****************************************************************
-// setup the Error mission
-void cErrorMission::__SetupOwn()
+// setup the Ater mission
+void cAterMission::__SetupOwn()
 {
     // ################################################################
     // 
@@ -30,10 +19,28 @@ void cErrorMission::__SetupOwn()
     {
         if(STAGE_BEGINNING)
         {
+            g_pEnvironment->ChangeBackground(cDarkBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);
+
+            g_pGame->GetInterface()->ShowMission(this);
             g_pGame->StartIntro();
         }
 
-        STAGE_FINISH_AFTER(1.0f)
+        if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY))
+            STAGE_FINISH_NOW
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN
+    {
+        STAGE_BOSS(m_ProjectOne, {60.0f, 120.0f, 180.0, 240.0f})
+    });
+
+    // ################################################################
+    // 
+    STAGE_MAIN
+    {
+        STAGE_BOSS(m_Eigengrau, {60.0f, 120.0f, 180.0, 240.0f})
     });
 
     // ################################################################

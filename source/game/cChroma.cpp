@@ -33,6 +33,17 @@ void cChromaManager::Render()
 void cChromaManager::Move()
 {
     // 
+    m_BulletManager.ForEachBulletTyped<cChromaBullet>([](cChromaBullet* OUTPUT pBullet)
+    {
+        const coreVector2 vPos  = pBullet->GetPosition().xy();
+        const coreVector2 vMove = coreVector2(MIN(CHROMA_AREA.x - ABS(vPos.x), 0.0f) * SIGN(vPos.x),
+                                              MIN(CHROMA_AREA.y - ABS(vPos.y), 0.0f) * SIGN(vPos.y));
+
+        // 
+        if(!vMove.IsNull()) pBullet->SetPosition(pBullet->GetPosition() + coreVector3(vMove * (3.0f * Core::System->GetTime()), 0.0f));
+    });
+
+    // 
     g_pGame->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
         const coreBool  bRolling = pPlayer->IsRolling();
@@ -57,14 +68,10 @@ void cChromaManager::Move()
 
 // ****************************************************************
 // 
-void cChromaManager::AddChroma(const coreVector2& vPosition, const coreVector2& vDirection, const coreFloat fScale, const coreVector3& vColor)
+void cChromaManager::AddChroma(const coreVector2& vPosition, const coreVector2& vDirection, const coreFloat fScale)
 {
     // 
-    cChromaBullet* pBullet = m_BulletManager.AddBullet<cChromaBullet>(1, 0.0f, NULL, vPosition + coreVector2::Rand(2.0f), vDirection);
-
-    // 
-    pBullet->SetSize  (coreVector3(1.0f,1.0f,1.0f) * fScale);
-    pBullet->SetColor3(vColor * Core::Rand->Float(0.5f, 1.0f));
+    m_BulletManager.AddBullet<cChromaBullet>(1, 0.0f, NULL, vPosition, vDirection)->ChangeScale(fScale);
 }
 
 

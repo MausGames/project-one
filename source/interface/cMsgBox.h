@@ -27,6 +27,8 @@
 #define MSGBOX_ANSWER_NO        (2)                        // 
 #define MSGBOX_ANSWER_KEY       (3)                        // 
 
+#define MSGBOX_NO_CALLBACK      ([](coreInt32) {})         // 
+
 
 // ****************************************************************
 // message box class

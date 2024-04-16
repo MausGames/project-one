@@ -17,6 +17,8 @@
 #define CHROMA_SCALE_SMALL (2.0f)   // 
 #define CHROMA_SCALE_BIG   (3.0f)   // 
 
+#define CHROMA_AREA (FOREGROUND_AREA * 0.95f)
+
 
 // ****************************************************************
 // 
@@ -36,7 +38,7 @@ public:
     void Move();
 
     // 
-    void AddChroma(const coreVector2& vPosition, const coreVector2& vDirection, const coreFloat fScale, const coreVector3& vColor);
+    void AddChroma(const coreVector2& vPosition, const coreVector2& vDirection, const coreFloat fScale);
     void ClearChromas(const coreBool bAnimated);
 };
 

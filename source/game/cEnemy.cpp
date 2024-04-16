@@ -107,7 +107,6 @@ coreInt32 cEnemy::TakeDamage(coreInt32 iDamage, const coreUint8 iElement, const 
     // forward to parent
     if(this->IsChild()) return m_apMember.front()->TakeDamage(iDamage, iElement, vImpact, pAttacker);
 
-    // 
     if(!CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_INVINCIBLE))
     {
         // 
@@ -116,17 +115,11 @@ coreInt32 cEnemy::TakeDamage(coreInt32 iDamage, const coreUint8 iElement, const 
 
         // 
         if(STATIC_ISVALID(g_pGame)) g_pGame->GetShieldManager()->AbsorbDamage(this, &iDamage, iElement);
+
         if(iDamage > 0)
         {
             // 
-            if(pAttacker)
-            {
-                const coreUint32 iValue = ABS(CLAMP(iDamage, this->GetCurHealth() - this->GetMaxHealth(), this->GetCurHealth()));
-                pAttacker->GetScoreTable()->AddScore(iValue, false);
-            }
-
-            // 
-            const coreInt32 iTaken = this->_TakeDamage(iDamage, iElement, vImpact);
+            const coreInt32 iTaken = this->_TakeDamage(iDamage, iElement, vImpact) / iPower;
 
             if(iTaken)
             {
@@ -142,6 +135,22 @@ coreInt32 cEnemy::TakeDamage(coreInt32 iDamage, const coreUint8 iElement, const 
                         (*it)->RefreshColor(this->GetCurHealthPct());
                         (*it)->InvokeBlink();
                     }
+                }
+
+                if(pAttacker)
+                {
+                    // 
+                    pAttacker->GetScoreTable()->AddScore(iTaken, false);
+
+                    // 
+                    pAttacker->GetDataTable()->EditCounterTotal  ()->iDamageGiven += iTaken;
+                    pAttacker->GetDataTable()->EditCounterMission()->iDamageGiven += iTaken;
+                    pAttacker->GetDataTable()->EditCounterSegment()->iDamageGiven += iTaken;
+
+                    // 
+                    g_pSave->EditGlobalStats      ()->iDamageGiven += iTaken;
+                    g_pSave->EditLocalStatsMission()->iDamageGiven += iTaken;
+                    g_pSave->EditLocalStatsSegment()->iDamageGiven += iTaken;
                 }
             }
 
@@ -219,7 +228,7 @@ void cEnemy::Kill(const coreBool bAnimated)
     
     
     
-        g_pGame->GetChromaManager()->AddChroma(this->GetPosition().xy(), coreVector2(0.0f,1.0f), CHROMA_SCALE_SMALL, coreVector3(1.0f,1.0f,1.0f));     
+        g_pGame->GetChromaManager()->AddChroma(this->GetPosition().xy(), coreVector2(0.0f,1.0f), CHROMA_SCALE_SMALL);     
         
 
     // 
@@ -281,20 +290,20 @@ void cEnemy::ResetProperties()
 
 // ****************************************************************
 // 
-cPlayer* cEnemy::NearestPlayer()const
+cPlayer* cEnemy::NearestPlayer(const coreUintW iIndex)const
 {
     // 
     ASSERT(STATIC_ISVALID(g_pGame))
-    return g_pGame->FindPlayerSide(this->GetPosition().xy());
+    return g_pGame->FindPlayerDual(iIndex);
 }
 
 
 // ****************************************************************
 // 
-coreVector2 cEnemy::AimAtPlayer()const
+coreVector2 cEnemy::AimAtPlayer(const coreUintW iIndex)const
 {
     // 
-    return this->AimAtPlayer(this->NearestPlayer());
+    return this->AimAtPlayer(this->NearestPlayer(iIndex));
 }
 
 coreVector2 cEnemy::AimAtPlayer(const cPlayer* pPlayer)const

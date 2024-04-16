@@ -342,6 +342,9 @@ void cTorusBoss::__RenderOwnOver()
 // 
 void cTorusBoss::__MoveOwn()
 {
+    if(this->GetCurHealthPct() <= 0.001f) this->Kill(true);                
+    
+    
     cViridoMission* pMission = d_cast<cViridoMission*>(g_pGame->GetCurMission());
 
     // 
@@ -1066,7 +1069,7 @@ void cTorusBoss::__MoveOwn()
 
         for(coreUintW i = 0u; i < TORUS_TURRETS; ++i)
         {
-            cCustomEnemy* pTurret = &m_aTurret       [i];
+            cCustomEnemy* pTurret = &m_aGunner[i];// &m_aTurret       [i];
             //coreObject3D* pHull   = &m_aTurretHullRaw[i];
             if(!pTurret->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
             
@@ -1092,7 +1095,7 @@ void cTorusBoss::__MoveOwn()
         }
         
         
-        g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cQuadBullet>([&](cQuadBullet* OUTPUT pBullet)
+        g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cTriangleBullet>([&](cTriangleBullet* OUTPUT pBullet)
         {
             const coreVector2 vPos = pBullet->GetPosition().xy();
             const coreFloat   fLen = vPos.Length();

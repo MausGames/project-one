@@ -27,6 +27,7 @@
 // TODO: double initial languages by switching to two columns (on demand?)
 // TODO: stages in GameMenu should be called segments
 // TODO: upper white border in settings menu "moves" during transition on 1760x990, check all menus for moving during transition in common resolutions
+// TODO: every object in menu needs outline: weapon icons
 
 
 // ****************************************************************
@@ -77,7 +78,7 @@
 #define MENU_FONT_ICON_1        "fontawesome.otf", (20u)
 #define MENU_FONT_ICON_2        "fontawesome.otf", (24u)
 #define MENU_FONT_ICON_3        "fontawesome.otf", (40u)
-#define MENU_OUTLINE_SMALL      (1u)
+#define MENU_OUTLINE_SMALL      (2u)
 #define MENU_OUTLINE_BIG        (4u)
 
 
@@ -376,6 +377,7 @@ public:
     void SaveValues();
 
     // 
+    inline const coreUint8& GetMissionIndex   ()const                       {return m_WorldMap.GetSelectionIndex();}
     inline const coreUint8& GetSelectedPlayers()const                       {return m_Players.GetCurEntry().tValue;}
     inline const coreUint8& GetSelectedWeapon (const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aWeapon [iIndex].GetCurEntry().tValue;}
     inline const coreUint8& GetSelectedSupport(const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aSupport[iIndex].GetCurEntry().tValue;}
@@ -766,6 +768,9 @@ private:
 
     coreFrameBuffer m_aFrameBuffer[3];   // 
     coreObject2D    m_MixObject;         // 
+    
+    coreUint8 iForceA;
+    coreUint8 iForceB;
 
     coreTimer m_TransitionTime;          // 
     coreUint8 m_iTransitionState;        // 
@@ -792,7 +797,7 @@ public:
     inline void InvokePauseStep() {m_iPauseFrame = Core::System->GetCurFrame();}
 
     // 
-    void ShiftSurface(coreMenu* OUTPUT pMenu, const coreUint8 iNewSurface, const coreFloat fSpeed);
+    void ShiftSurface(coreMenu* OUTPUT pMenu, const coreUint8 iNewSurface, const coreFloat fSpeed, const coreBool bUpdateFrom = false, const coreBool bUpdateTo = false);
     inline coreBool IsShifting()const {return m_TransitionTime.GetStatus();}
 
     // 

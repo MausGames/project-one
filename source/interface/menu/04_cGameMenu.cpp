@@ -236,6 +236,10 @@ cGameMenu::cGameMenu()noexcept
     // 
     this->DeactivateFirstPlay();
 
+
+    
+    m_TrainingTab.SetOverride(-1);   // TODO
+    
     m_aShipInput[0] = {};
     m_aShipInput[1] = {};
 
@@ -322,10 +326,13 @@ void cGameMenu::Move()
             if(m_WorldMap.GetSelectionState())
             {
                 // 
-                g_pMenu->ShiftSurface(this, SURFACE_GAME_ARMORY, 3.0f);
+                g_pMenu->ShiftSurface(this, SURFACE_GAME_ARMORY, 3.0f, true, false);
             }
             else if(m_BackButton.IsClicked() || g_MenuInput.bCancel)
             {
+                // 
+                this->SaveValues();
+
                 // 
                 m_iStatus = 2;
             }
@@ -337,6 +344,9 @@ void cGameMenu::Move()
             if(m_BackButton.IsClicked() || g_MenuInput.bCancel)
             {
                 // 
+                this->SaveValues();
+
+                // 
                 m_iStatus = 2;
             }
         }
@@ -347,6 +357,9 @@ void cGameMenu::Move()
             if(m_StartButton.IsClicked())
             {
                 // 
+                this->SaveValues();
+
+                // 
                 m_iStatus = 1;
             }
             else if(m_CancelButton.IsClicked() || g_MenuInput.bCancel)
@@ -354,10 +367,10 @@ void cGameMenu::Move()
                 // 
                 this->SaveValues();
 
-                if(/*m_aWeapon[0].GetOverride() >= 0*/false)
+                if(m_aWeapon[0].GetOverride() >= 0)
                 {
                     // 
-                    g_pMenu->ShiftSurface(this, this->GetOldSurface(), 3.0f);
+                    g_pMenu->ShiftSurface(this, this->GetOldSurface(), 3.0f, false, true);
                 }
                 else
                 {
@@ -440,8 +453,8 @@ void cGameMenu::Move()
     cMenu::UpdateButton(&m_BackButton,   m_BackButton  .IsFocused());
 
     // 
-    if(m_CancelButton.IsFocused()) g_pMenu->GetTooltip()->ShowText(TOOLTIP_ONELINER, Core::Language->GetString("BACK"));
-    if(m_BackButton  .IsFocused()) g_pMenu->GetTooltip()->ShowText(TOOLTIP_ONELINER, Core::Language->GetString("BACK"));
+    if(m_CancelButton.IsFocused()) g_pMenu->GetTooltip()->ShowText(TOOLTIP_OBJECT(m_CancelButton), TOOLTIP_ONELINER, Core::Language->GetString("BACK"));
+    if(m_BackButton  .IsFocused()) g_pMenu->GetTooltip()->ShowText(TOOLTIP_OBJECT(m_BackButton  ), TOOLTIP_ONELINER, Core::Language->GetString("BACK"));
 }
 
 
@@ -478,8 +491,11 @@ void cGameMenu::LoadValues()
     // 
     for(coreUintW i = 0u; i < WORLDMAP_PINS; ++i)
     {
-        m_WorldMap.EnablePin(i, g_pSave->GetHeader().oProgress.aiAdvance[i] ? true : false);
+        m_WorldMap.EnablePin(i, (g_pSave->GetHeader().oProgress.aiAdvance[i] != 0u), (i == WORLDMAP_PINS - 1u));
     }
+
+    // 
+    m_WorldMap.SelectPin(g_pSave->GetHeader().oOptions.iStandard);
 
     // 
     m_Players.SelectValue(g_pSave->GetHeader().oOptions.iPlayers);
@@ -497,6 +513,9 @@ void cGameMenu::LoadValues()
 // 
 void cGameMenu::SaveValues()
 {
+    // 
+    g_pSave->EditOptions()->iStandard = m_WorldMap.GetSelectionIndex();
+
     // 
     g_pSave->EditOptions()->iPlayers = m_Players.GetCurEntry().tValue;
 

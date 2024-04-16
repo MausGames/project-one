@@ -15,6 +15,7 @@
 // TODO: show pacifist damage in interface, pulsing and filling up, also show that weapons are disabled
 // TODO: maybe spawn players in flight direction, mission start and continue ?
 // TODO: FindPlayer may find player outside of area (during resurrection)
+// TODO: check "hold old mission (to keep resources valid)" for loadmission/nextmission
 
 
 // ****************************************************************
@@ -67,8 +68,15 @@ static constexpr coreInt32 __GAME_MISSION_LIST_MAIN[] =
     cNoMission    ::ID
 };
 
+static constexpr coreInt32 __GAME_MISSION_LIST_ERROR[] =
+{
+    cErrorMission::ID,
+    cNoMission   ::ID
+};
+
 #define GAME_MISSION_LIST_DEFAULT (__GAME_MISSION_LIST_DEFAULT), ARRAY_SIZE(__GAME_MISSION_LIST_DEFAULT)
 #define GAME_MISSION_LIST_MAIN    (__GAME_MISSION_LIST_MAIN),    ARRAY_SIZE(__GAME_MISSION_LIST_MAIN)
+#define GAME_MISSION_LIST_ERROR   (__GAME_MISSION_LIST_ERROR),   ARRAY_SIZE(__GAME_MISSION_LIST_ERROR)
 
 
 // ****************************************************************
@@ -199,6 +207,7 @@ public:
     static coreUint8  CalcMedal       (const coreFloat fTime, const coreUint32 iDamageTaken, const coreFloat* pfMedalGoal);
     static coreUint32 CalcBonusTime   (const coreFloat fTime);
     static coreUint32 CalcBonusMedal  (const coreUint8 iMedal);
+    static coreUint32 CalcBonusBadge  (const coreUint8 iBadge);
     static coreUint32 CalcBonusSurvive(const coreUint32 iDamageTaken, const coreBool bWasDead);
 
 

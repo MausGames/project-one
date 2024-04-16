@@ -11,10 +11,8 @@
 
 // ****************************************************************
 // constructor
-cMuscusMission::cMuscusMission()noexcept
+cErrorMission::cErrorMission()noexcept
 {
     // 
-    m_apBoss[0] = &m_Orlac;
-    m_apBoss[1] = &m_Geminga;
-    m_apBoss[2] = &m_Nagual;
+    m_apBoss[0] = &m_ProjectOne;
 }

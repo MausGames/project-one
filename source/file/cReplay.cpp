@@ -42,7 +42,7 @@ void cReplay::CreateGame()
 
     // 
     STATIC_NEW(g_pGame, oOptions, m_Header.aiMissionList, m_Header.iNumMissions)
-    g_pGame->LoadNextMission();
+    g_pGame->LoadMissionIndex(m_Header.iMissionStartIndex);
 }
 
 
@@ -77,6 +77,7 @@ void cReplay::StartRecording()
     m_Header.iConfigVersion    = 1u;   // TODO
 
     // 
+    m_Header.iMissionStartIndex = g_pGame->GetCurMissionIndex();
     std::memcpy(m_Header.aiMissionList, g_pGame->GetMissionList(), sizeof(coreInt32) * g_pGame->GetNumMissions());
 
     // 
@@ -318,8 +319,8 @@ coreBool cReplay::LoadFile(const coreChar* pcPath, const coreBool bOnlyHeader)
 
     // 
     std::memcpy(&m_Header, pHeaderFile->GetData(), MIN(pHeaderFile->GetSize(), sizeof(sHeader)));
-    WARN_IF((m_Header.iMagic    != SAVE_FILE_MAGIC)      ||
-            (m_Header.iVersion  != SAVE_FILE_VERSION)    ||
+    WARN_IF((m_Header.iMagic    != REPLAY_FILE_MAGIC)    ||
+            (m_Header.iVersion  != REPLAY_FILE_VERSION)  ||
             (m_Header.iBodySize != pBodyFile->GetSize()) ||
             (m_Header.iChecksum != cReplay::__GenerateChecksum(m_Header)))
     {
@@ -411,7 +412,7 @@ void cReplay::LoadInfoList(std::vector<sInfo>* OUTPUT paInfoList)
 
     // 
     std::vector<std::string> asFile;
-    coreData::ScanFolder(REPLAY_FILE_FOLDER, "*." REPLAY_FILE_EXTENSION, &asFile);
+    coreData::ScanFolder(coreData::UserFolder(REPLAY_FILE_FOLDER), "*." REPLAY_FILE_EXTENSION, &asFile);
 
     // 
     paInfoList->reserve(asFile.size());
@@ -554,7 +555,7 @@ cReplay::sPacketRaw cReplay::__Unpack(const sPacket& oPacket)
 void cReplay::__CheckHeader(sHeader* OUTPUT pHeader)
 {
     // 
-    pHeader->acName[REPLAY_NAME_LENTH - 1u] = '\0';
+    pHeader->acName[REPLAY_NAME_LENGTH - 1u] = '\0';
 
     // 
     pHeader->iSnapshotCount = CLAMP(pHeader->iSnapshotCount, 0u, 10u * 1024u);   // # heuristic
@@ -564,9 +565,9 @@ void cReplay::__CheckHeader(sHeader* OUTPUT pHeader)
     }
 
     // 
-    pHeader->iNumPlayers  = CLAMP(pHeader->iNumPlayers,  0u, REPLAY_PLAYERS -1u);
-    pHeader->iNumMissions = CLAMP(pHeader->iNumMissions, 0u, REPLAY_MISSIONS-1u);
-    pHeader->iNumSegments = CLAMP(pHeader->iNumSegments, 0u, REPLAY_SEGMENTS-1u);
+    pHeader->iNumPlayers  = CLAMP(pHeader->iNumPlayers,  1u, REPLAY_PLAYERS);
+    pHeader->iNumMissions = CLAMP(pHeader->iNumMissions, 1u, REPLAY_MISSIONS);
+    pHeader->iNumSegments = CLAMP(pHeader->iNumSegments, 1u, REPLAY_SEGMENTS);
 
     // 
     for(coreUintW i = 0u; i < REPLAY_PLAYERS; ++i)
@@ -578,6 +579,9 @@ void cReplay::__CheckHeader(sHeader* OUTPUT pHeader)
     // 
     pHeader->iConfigUpdateFreq = CLAMP(pHeader->iConfigUpdateFreq, FRAMERATE_MIN, FRAMERATE_MAX);
     pHeader->iConfigVersion    = CLAMP(pHeader->iConfigVersion,    1u,            1u);   // TODO
+
+    // 
+    pHeader->iMissionStartIndex = CLAMP(pHeader->iMissionStartIndex, 0u, REPLAY_MISSIONS-1u);
 }
 
 

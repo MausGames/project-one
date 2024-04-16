@@ -14,6 +14,12 @@
 cMenu::cMenu()noexcept
 : coreMenu           (SURFACE_MAX, SURFACE_INTRO)
 , m_iPauseFrame      (0u)
+
+
+, iForceA (0xFFu)
+, iForceB (0xFFu)
+
+
 , m_TransitionTime   (coreTimer(1.3f, 0.0f, 1u))
 , m_iTransitionState (0u)
 , m_pTransitionMenu  (NULL)
@@ -90,7 +96,7 @@ void cMenu::Render()
 
     if(m_TransitionTime.GetStatus())
     {
-        if((m_iTransitionState == 2u) || ((m_iTransitionState == 1u) && !m_pTransitionMenu->GetTransition().GetStatus()))
+        const auto nRenderFunc = [this](const coreUintW iSurface, coreMenu* pMenu)
         {
             // 
             m_aFrameBuffer[0].StartDraw();
@@ -99,17 +105,39 @@ void cMenu::Render()
                 glBlendFuncSeparate(FOREGROUND_BLEND_DEFAULT, FOREGROUND_BLEND_ALPHA);
                 {
                     // 
-                    this->coreMenu::Render();
+                    pMenu->coreMenu::Render();
                 }
                 glBlendFunc(FOREGROUND_BLEND_DEFAULT);
             }
 
             // resolve frame buffer to texture
-            m_aFrameBuffer[0].Blit      (CORE_FRAMEBUFFER_TARGET_COLOR, &m_aFrameBuffer[m_iTransitionState]);
+            m_aFrameBuffer[0].Blit      (CORE_FRAMEBUFFER_TARGET_COLOR, &m_aFrameBuffer[iSurface]);
             m_aFrameBuffer[0].Invalidate(CORE_FRAMEBUFFER_TARGET_COLOR);
+            
+            
+            coreFrameBuffer::EndDraw();
+        };
+        
+        //if(((m_iTransitionState <= 1u) && !m_pTransitionMenu->GetTransition().GetStatus()) && iForceA != 0xFFu)
+        //{
+        //    const coreUint8 iPrev = m_pTransitionMenu->GetCurSurface();
+        //    m_pTransitionMenu->ChangeSurface(iForceA, 0.0f);
+        //    //m_pTransitionMenu->coreMenu::Move();
+        //    nRenderFunc(2u, m_pTransitionMenu);
+        //    m_pTransitionMenu->ChangeSurface(iPrev, 0.0f);
+        //}
+        if(m_iTransitionState < 1u && iForceB != 0xFFu)
+        {
+            nRenderFunc(1u, this);
+        }
+
+        if((m_iTransitionState == 2u) || ((m_iTransitionState == 1u) && !m_pTransitionMenu->GetTransition().GetStatus()))
+        {
+            // 
+            nRenderFunc(m_iTransitionState, this);
 
             // 
-            coreFrameBuffer::EndDraw();
+            //coreFrameBuffer::EndDraw();
 
             // 
             m_iTransitionState -= 1u;
@@ -181,6 +209,7 @@ void cMenu::Move()
                     if(g_pGame->GetContinues()) m_DefeatMenu.ShowContinue();
                                            else m_DefeatMenu.ShowGameOver();
 
+                    // 
                     Core::Audio->PauseSound();
                 }
                 else if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_FINISHED))
@@ -198,7 +227,8 @@ void cMenu::Move()
 
                     // 
                     this->InvokePauseStep();
-                    
+
+                    // 
                     Core::Audio->PauseSound();
                 }
             }
@@ -235,10 +265,10 @@ void cMenu::Move()
             if(m_MainMenu.GetStatus() == 1)
             {
                 // switch to game menu
-                this->ShiftSurface(this, SURFACE_GAME, 3.0f);
+                this->ShiftSurface(this, SURFACE_GAME, 3.0f, false, true);
 
                 // 
-                m_GameMenu.ChangeSurface(/*g_pSave->GetHeader().oProgress.bFirstPlay*/true ? SURFACE_GAME_ARMORY : SURFACE_GAME_STANDARD, 0.0f);
+                m_GameMenu.ChangeSurface(g_pSave->GetHeader().oProgress.bFirstPlay ? SURFACE_GAME_ARMORY : SURFACE_GAME_STANDARD, 0.0f);
                 m_GameMenu.LoadValues();
             }
             else if(m_MainMenu.GetStatus() == 2)
@@ -287,7 +317,7 @@ void cMenu::Move()
             else if(m_GameMenu.GetStatus() == 2)
             {
                 // return to previous menu
-                this->ShiftSurface(this, this->GetOldSurface(), 3.0f);
+                this->ShiftSurface(this, this->GetOldSurface(), 3.0f, true, false);
             }
         }
         break;
@@ -350,7 +380,8 @@ void cMenu::Move()
             {
                 // 
                 this->ChangeSurface(SURFACE_EMPTY, 0.0f);
-                
+
+                // 
                 Core::Audio->ResumeSound();
             }
             else if(m_PauseMenu.GetStatus() == 2)
@@ -369,7 +400,8 @@ void cMenu::Move()
 
                 // 
                 m_TitleMenu.ChangeSurface(SURFACE_TITLE_RETURN, 0.0f);
-                
+
+                // 
                 Core::Audio->CancelSound();
             }
         }
@@ -397,7 +429,8 @@ void cMenu::Move()
 
                 // 
                 g_pGame->UseContinue();
-                
+
+                // 
                 Core::Audio->ResumeSound();
             }
             else if(m_DefeatMenu.GetStatus() == 2)
@@ -407,8 +440,8 @@ void cMenu::Move()
 
                 // 
                 m_TitleMenu.ChangeSurface(SURFACE_TITLE_RETURN, 0.0f);
-                
-                
+
+                // 
                 Core::Audio->CancelSound();
             }
         }
@@ -482,7 +515,7 @@ coreBool cMenu::IsPausedWithStep()
 
 // ****************************************************************
 // 
-void cMenu::ShiftSurface(coreMenu* OUTPUT pMenu, const coreUint8 iNewSurface, const coreFloat fSpeed)
+void cMenu::ShiftSurface(coreMenu* OUTPUT pMenu, const coreUint8 iNewSurface, const coreFloat fSpeed, const coreBool bUpdateFrom, const coreBool bUpdateTo)
 {
     ASSERT(pMenu)
 
@@ -492,6 +525,9 @@ void cMenu::ShiftSurface(coreMenu* OUTPUT pMenu, const coreUint8 iNewSurface, co
         pMenu->ChangeSurface(iNewSurface, 0.0f);
         return;
     }
+    
+    iForceA = bUpdateFrom ? pMenu->GetCurSurface() : 0xFFu;
+    iForceB = bUpdateTo ? iNewSurface            : 0xFFu;
 
     if(pMenu->ChangeSurface(iNewSurface, 1.0e06f))
     {
@@ -639,7 +675,7 @@ void cMenu::__Reset(const coreResourceReset eInit)
 {
     if(eInit)
     {
-        // 
+        // --setopt=install_weak_deps=never
         m_aFrameBuffer[0].Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED);
         m_aFrameBuffer[1].Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
         m_aFrameBuffer[2].Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
@@ -679,7 +715,7 @@ void cMenu::__StartGame()
     // 
     ASSERT(!STATIC_ISVALID(g_pGame))
     STATIC_NEW(g_pGame, oOptions, GAME_MISSION_LIST_MAIN)
-    g_pGame->LoadNextMission();
+    g_pGame->LoadMissionIndex(m_GameMenu.GetMissionIndex());
 
     // 
     g_pReplay->StartRecording();
@@ -695,6 +731,7 @@ void cMenu::__EndGame()
     {
         g_pReplay->EndRecording();
         g_pReplay->SaveFile(coreData::DateTimePrint("Debug Replay %Y-%m-%d %H:%M:%S"));
+        g_pReplay->Clear();
     }
     else if(g_pReplay->GetStatus() == REPLAY_STATUS_PLAYBACK)
     {

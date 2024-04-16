@@ -101,5 +101,5 @@ void cScoreMenu::Move()
     cMenu::UpdateButton(&m_BackButton, m_BackButton.IsFocused());
 
     // 
-    if(m_BackButton.IsFocused()) g_pMenu->GetTooltip()->ShowText(TOOLTIP_ONELINER, Core::Language->GetString("BACK"));
+    if(m_BackButton.IsFocused()) g_pMenu->GetTooltip()->ShowText(TOOLTIP_OBJECT(m_BackButton), TOOLTIP_ONELINER, Core::Language->GetString("BACK"));
 }

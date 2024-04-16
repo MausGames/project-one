@@ -68,8 +68,6 @@ cPlayer::cPlayer()noexcept
     m_Dot.DefineModel  ("object_sphere.md3");
     m_Dot.DefineTexture(0u, "default_white.png");
     m_Dot.DefineProgram("effect_energy_flat_spheric_program");
-    m_Dot.SetSize      (coreVector3(1.0f,1.0f,1.0f) * 0.55f);
-    m_Dot.SetColor4    (coreVector4(coreVector3(1.0f,1.0f,1.0f) * 0.35f, 1.0f));
 
     // 
     m_Wind.DefineModel  ("object_sphere.md3");
@@ -242,7 +240,7 @@ void cPlayer::RenderAfter()
 
         // 
         //g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Dot);
-        //m_Dot .Render();
+        //m_Dot.Render();
     }
 }
 
@@ -357,8 +355,19 @@ void cPlayer::Move()
         m_Range.SetPosition(this->GetPosition());
         m_Range.Move();
 
+        
+        if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE)) m_Dot.SetAlpha(MIN(m_Dot.GetAlpha() + 4.0f*Core::System->GetTime(), 1.0f));
+                                                              else m_Dot.SetAlpha(MAX(m_Dot.GetAlpha() - 4.0f*Core::System->GetTime(), 0.0f));
+        
+        m_Dot.SetColor3    (COLOR_ENERGY_YELLOW * 0.45f * (1.0f + 0.2f * SIN(8.0f*PI * coreFloat(Core::System->GetTotalTime()))));
+        //m_Dot.SetColor3    (/*coreVector3(1.0f,1.0f,1.0f)*/COLOR_ENERGY_PURPLE * 0.85f * (1.0f + 0.25f * SIN(8.0f*PI * coreFloat(Core::System->GetTotalTime()))));
+        //m_Dot.SetColor3    (/*coreVector3(1.0f,1.0f,1.0f)*/COLOR_ENERGY_BLUE * 0.85f * (1.0f + 0.25f * SIN(8.0f*PI * coreFloat(Core::System->GetTotalTime()))));
+        //m_Dot.SetColor3    (coreVector3(1.0f,1.0f,1.0f) * 0.45f * (1.0f + 0.2f * SIN(8.0f*PI * coreFloat(Core::System->GetTotalTime()))));
+        
+
         // 
         m_Dot.SetPosition(this->GetPosition());
+        m_Dot.SetSize    (coreVector3(1.0f,1.0f,1.0f) * PLAYER_DOT_SIZE * m_Dot.GetAlpha()   * 1.1f);
         m_Dot.Move();
 
         if(m_Wind.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
@@ -452,7 +461,6 @@ void cPlayer::Move()
 // reduce current health
 coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact)
 {
-    // 
     if(iDamage > 0)
     {
         // 
@@ -467,19 +475,30 @@ coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement,
             // 
             if(!this->IsDarkShading()) this->RefreshColor();
 
-            // 
             if(CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_SHIELDED))
             {
+                // 
                 this->StartIgnoring((m_iCurHealth == 1) ? 1u : 0u);
             }
             else
             {
+                // 
                 this->SetDesaturate(PLAYER_DESATURATE);
                 this->StartFeeling (PLAYER_FEEL_TIME, 0u);
             }
 
             // 
             m_fInterrupt = 0.0f;
+
+            // 
+            m_DataTable.EditCounterTotal  ()->iDamageTaken += iTaken;
+            m_DataTable.EditCounterMission()->iDamageTaken += iTaken;
+            m_DataTable.EditCounterSegment()->iDamageTaken += iTaken;
+
+            // 
+            g_pSave->EditGlobalStats      ()->iDamageTaken += iTaken;
+            g_pSave->EditLocalStatsMission()->iDamageTaken += iTaken;
+            g_pSave->EditLocalStatsSegment()->iDamageTaken += iTaken;
         }
         else
         {

@@ -11,10 +11,16 @@
 
 // ****************************************************************
 // constructor
-cOutdoor::cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom, const coreUint8 iAlgorithm, const coreFloat fGrade)noexcept
-: m_iVertexOffset (0u)
+cOutdoor::cOutdoor()noexcept
+: 
+
+ m_aiHeight {},
+m_iVertexOffset (0u)
 , m_iIndexOffset  (0u)
 , m_fFlyOffset    (0.0f)
+
+, m_iHandleIndex (0u)
+
 , m_iAlgorithm    (0u)
 , m_fGrade        (0.0f)
 , m_afLerpMul     {}
@@ -22,12 +28,25 @@ cOutdoor::cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom
 , m_aiLerpRange   {}
 , m_afLerpData    {}
 {
+
+    const coreTextureSpec oSpec = CORE_GL_SUPPORT(ARB_texture_rg) ? CORE_TEXTURE_SPEC_R8 : CORE_TEXTURE_SPEC_RGB8;
+    // 
+    m_LightMap.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, oSpec);
+    m_LightMap.Create(coreVector2(4.0f,4.0f), CORE_FRAMEBUFFER_CREATE_NORMAL);
+}
+
+cOutdoor::cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom, const coreUint8 iAlgorithm, const coreFloat fGrade)noexcept
+: cOutdoor ()
+{
     const coreTextureSpec oSpec = CORE_GL_SUPPORT(ARB_texture_rg) ? CORE_TEXTURE_SPEC_R8 : CORE_TEXTURE_SPEC_RGB8;
 
     // set object properties
     this->SetPosition(coreVector3(0.0f,0.0f,0.0f));
     this->LerpHeightNow(1.0f, 0.0f);
 
+    m_LightMap.Delete();
+    m_LightMap.DetachTargets();
+    
     // 
     m_LightMap.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, oSpec);
     m_LightMap.Create(g_vGameResolution * OUTDOOR_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);

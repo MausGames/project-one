@@ -180,7 +180,10 @@ void cMsgBox::__ExecuteCallback(const coreInt32 a, const coreInt32 b)
 {
     if(!m_nCallback) return;
 
-    // 
-    m_nCallback(a, b);
+    // (to allow chaining message boxes)   
+    const auto nLocal = std::move(m_nCallback);
     m_nCallback = NULL;
+
+    // 
+    nLocal(a, b);
 }

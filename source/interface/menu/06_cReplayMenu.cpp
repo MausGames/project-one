@@ -81,16 +81,22 @@ void cReplayMenu::Move()
                     if(i < m_aInfoList.size())
                     {
                         // 
-                        if(g_pReplay->LoadFile(m_aInfoList[i].sPath.c_str(), false))
+                        g_pMenu->GetMsgBox()->ShowQuestion(PRINT("%s [%s] ?", Core::Language->GetString("QUESTION_LOAD"), m_aInfoList[i].oHeader.acName), [=](const coreInt32 iAnswer)
                         {
-                            // 
-                            m_iStatus = 1;
-                        }
-                        else
-                        {
-                            // 
-                            g_pMenu->GetMsgBox()->ShowInformation(Core::Language->GetString("INFORMATION_REPLAY_CORRUPT"), [](const coreInt32 iAnswer) {});
-                        }
+                            if(iAnswer == MSGBOX_ANSWER_YES)
+                            {
+                                if(g_pReplay->LoadFile(m_aInfoList[i].sPath.c_str(), false))
+                                {
+                                    // 
+                                    m_iStatus = 101;
+                                }
+                                else
+                                {
+                                    // 
+                                    g_pMenu->GetMsgBox()->ShowInformation(Core::Language->GetString("INFORMATION_REPLAY_CORRUPT"), MSGBOX_NO_CALLBACK);
+                                }
+                            }
+                        });
                         break;
                     }
                 }
@@ -113,7 +119,7 @@ void cReplayMenu::Move()
     cMenu::UpdateButton(&m_BackButton, m_BackButton.IsFocused());
 
     // 
-    if(m_BackButton.IsFocused()) g_pMenu->GetTooltip()->ShowText(TOOLTIP_ONELINER, Core::Language->GetString("BACK"));
+    if(m_BackButton.IsFocused()) g_pMenu->GetTooltip()->ShowText(TOOLTIP_OBJECT(m_BackButton), TOOLTIP_ONELINER, Core::Language->GetString("BACK"));
 }
 
 

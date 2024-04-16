@@ -10,19 +10,8 @@
 
 
 // ****************************************************************
-// constructor
-cTinkerMission::cTinkerMission()noexcept
-{
-    // 
-    m_apBoss[0] = &m_ProjectOne;
-    m_apBoss[1] = &m_ProjectOne;
-    m_apBoss[2] = &m_ProjectOne;
-}
-
-
-// ****************************************************************
-// setup the Tinker mission
-void cTinkerMission::__SetupOwn()
+// setup the Error mission
+void cErrorMission::__SetupOwn()
 {
     // ################################################################
     // 
@@ -30,12 +19,20 @@ void cTinkerMission::__SetupOwn()
     {
         if(STAGE_BEGINNING)
         {
-            g_pEnvironment->SetTargetSpeed(4.0f);
+            g_pEnvironment->ChangeBackground(cNoBackground::ID, ENVIRONMENT_MIX_FADE, 1.0f);
+
+            g_pGame->GetInterface()->ShowMission(this);
             g_pGame->StartIntro();
         }
 
-        STAGE_FINISH_AFTER(GAME_INTRO_DURATION)
+        if(CONTAINS_FLAG(g_pGame->GetStatus(), GAME_STATUS_PLAY))
+            STAGE_FINISH_NOW
     });
+
+    // ################################################################
+    // ################################################################
+
+
 
     /*
     // ################################################################

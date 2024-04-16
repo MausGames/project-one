@@ -26,7 +26,7 @@
 #define REPLAY_FILE_MAGIC       (UINT_LITERAL("P1RP"))   // 
 #define REPLAY_FILE_VERSION     (0x00000001u)            // 
 
-#define REPLAY_NAME_LENTH       (128u)                   // 
+#define REPLAY_NAME_LENGTH      (128u)                   // 
 #define REPLAY_PLAYERS          (PLAYERS)                // 
 #define REPLAY_MISSIONS         (MISSIONS)               // 
 #define REPLAY_SEGMENTS         (SEGMENTS)               // 
@@ -65,7 +65,7 @@ public:
         coreUint32 iMagic;                                                                 // 
         coreUint32 iVersion;                                                               // 
 
-        coreChar   acName[REPLAY_NAME_LENTH];                                              // 
+        coreChar   acName[REPLAY_NAME_LENGTH];                                             // 
         coreUint64 iStartTimestamp;                                                        // 
         coreUint64 iEndTimestamp;                                                          // 
 
@@ -83,8 +83,9 @@ public:
         coreUint8  aaiOptionSupport[REPLAY_PLAYERS][REPLAY_EQUIP_SUPPORTS];                // 
 
         coreUint8  iConfigUpdateFreq;                                                      // 
-        coreUint32 iConfigVersion;                                                         // 
+        coreUint8  iConfigVersion;                                                         // 
 
+        coreUint8  iMissionStartIndex;                                                     // 
         coreInt32  aiMissionList[REPLAY_MISSIONS];                                         // 
 
         coreUint32 iTimeTotal;                                                             // 
