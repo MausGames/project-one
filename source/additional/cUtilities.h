@@ -10,7 +10,7 @@
 #ifndef _P1_GUARD_UTILITIES_H_
 #define _P1_GUARD_UTILITIES_H_
 
-// TODO: optimize AlongStar
+// TODO: optimize AlongStar and AlongStarNormal
 
 
 // ****************************************************************

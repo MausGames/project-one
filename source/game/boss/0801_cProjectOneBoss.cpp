@@ -186,7 +186,7 @@ void cProjectOneBoss::__MoveOwn()
                 const coreVector2 vAim = (vPlayerPos - pBullet->GetPosition().xy()).Normalized();
                 const coreVector2 vDir = (pBullet->GetFlyDir() + vAim * (2.0f * Core::System->GetTime())).Normalized();
 
-                pBullet->SetSpeed (pBullet->GetSpeed() + 2.0f * BULLET_SPEED_FACTOR * Core::System->GetTime());   
+                pBullet->SetSpeed (pBullet->GetSpeed() + 2.0f * Core::System->GetTime());   
                 pBullet->SetFlyDir(vDir);
             });
 

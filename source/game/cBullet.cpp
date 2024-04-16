@@ -326,7 +326,6 @@ cRayBullet::cRayBullet()noexcept
     this->DefineProgram("effect_energy_bullet_direct_program");
 
     // set object properties
-    this->SetTexSize          (coreVector2(0.4f,0.2f) * 0.7f);
     this->SetCollisionModifier(coreVector3(1.0f,0.333f,1.0f));   // model with offset
 }
 
@@ -391,7 +390,6 @@ cPulseBullet::cPulseBullet()noexcept
     this->DefineProgram("effect_energy_bullet_direct_program");
 
     // set object properties
-    this->SetTexSize          (coreVector2(0.4f,0.2f));
     this->SetCollisionModifier(coreVector3(1.0f,0.333f,1.0f));   // model with offset
 }
 
@@ -421,9 +419,6 @@ cOrbBullet::cOrbBullet()noexcept
     this->DefineModel  ("bullet_orb.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_program");
-
-    // set object properties
-    this->SetTexSize(coreVector2(0.4f,0.4f));
 }
 
 
@@ -445,7 +440,7 @@ void cOrbBullet::__MoveOwn()
     this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
     // update animation
-    m_fAnimation.Update(-0.2f);
+    m_fAnimation.Update(0.2f);
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
 }
 
@@ -458,9 +453,6 @@ cConeBullet::cConeBullet()noexcept
     this->DefineModel  ("bullet_cone.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_program");
-
-    // set object properties
-    this->SetTexSize(coreVector2(0.5f,0.2f) * 1.8f);
 }
 
 
@@ -495,9 +487,6 @@ cWaveBullet::cWaveBullet()noexcept
     this->DefineModel  ("bullet_wave.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_direct_program");
-
-    // set object properties
-    this->SetTexSize(coreVector2(1.1f,0.25f) * 0.2f);
 }
 
 
@@ -534,9 +523,6 @@ cTeslaBullet::cTeslaBullet()noexcept
     this->DefineModel  ("bullet_orb.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_spheric_program");
-
-    // set object properties
-    this->SetTexSize(coreVector2(0.45f,0.45f));
 }
 
 
@@ -710,9 +696,6 @@ cSpearBullet::cSpearBullet()noexcept
     this->DefineModel  ("bullet_spear.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_direct_program");
-
-    // set object properties
-    this->SetTexSize(coreVector2(0.5f,0.2f));
 }
 
 
@@ -747,9 +730,6 @@ cTriangleBullet::cTriangleBullet()noexcept
     this->DefineModel  ("bullet_triangle.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_direct_program");
-
-    // set object properties
-    this->SetTexSize(coreVector2(0.5f,0.2f));
 }
 
 
@@ -784,9 +764,6 @@ cFlipBullet::cFlipBullet()noexcept
     this->DefineModel  ("bullet_spear.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_program");
-
-    // set object properties
-    this->SetTexSize(coreVector2(0.4f,0.2f));
 }
 
 
@@ -821,9 +798,6 @@ cQuadBullet::cQuadBullet()noexcept
     this->DefineModel  ("bullet_quad.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_direct_program");
-
-    // set object properties
-    this->SetTexSize(coreVector2(0.5f,0.2f));
 }
 
 
@@ -858,9 +832,6 @@ cChromaBullet::cChromaBullet()noexcept
     this->DefineModel  ("bullet_quad.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_direct_program");
-
-    // set object properties
-    this->SetTexSize(coreVector2(0.5f,0.2f));
 }
 
 

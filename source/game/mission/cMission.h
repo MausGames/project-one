@@ -34,6 +34,8 @@
 #define VIRIDO_PADDLES       (3u)                                    // 
 #define VIRIDO_BARRIERS      (14u)                                   // 
 #define VIRIDO_BARRIERS_RAWS (VIRIDO_BARRIERS)                       // 
+#define VIRIDO_SHADOWS       (8u)                                    // 
+#define VIRIDO_SHADOWS_RAWS  (VIRIDO_SHADOWS)                        // 
 #define VIRIDO_BALL_SPEED    (1.5f)                                  // 
 
 
@@ -272,6 +274,14 @@ private:
     const cShip*  m_apBarrierOwner[VIRIDO_BARRIERS];        // 
     coreUint8     m_aiBarrierDir  [VIRIDO_BARRIERS];        // 
 
+
+
+    coreBatchList m_Shadow;                              // 
+    coreObject3D  m_aShadowRaw   [VIRIDO_SHADOWS_RAWS];   // 
+    const cShip*  m_apShadowOwner[VIRIDO_SHADOWS];        // 
+
+
+
     coreUint8 m_iRealState;                                 // 
     coreUint8 m_iStickyState;                               // (only between first ball and first paddle) 
     coreUint8 m_iBounceState;                               // 
@@ -297,6 +307,10 @@ public:
     // 
     void EnableBarrier (const coreUintW iIndex, const cShip* pOwner, const coreVector2& vDirection);
     void DisableBarrier(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void EnableShadow (const coreUintW iIndex, const cShip* pOwner, const coreVector2& vPosition);
+    void DisableShadow(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
     inline void             MakeReal      (const coreUintW iIndex)        {ADD_BIT(m_iRealState, iIndex)}

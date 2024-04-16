@@ -470,6 +470,11 @@ FUNC_PURE coreBool cBackground::_CheckIntersection(const coreBatchList* pObjectL
         // check for quadratic distance
         if(((*it)->GetPosition().xy() - vNewPos).LengthSq() < fDistanceSq)
             return true;
+
+        // 
+        // infinity ?   
+        //if()
+        //    return false;
     }
     return false;
 }
@@ -478,6 +483,8 @@ FUNC_PURE coreBool cBackground::_CheckIntersectionQuick(const coreBatchList* pOb
 {
     auto it = pObjectList->List()->end();
     auto et = pObjectList->List()->begin();
+
+
 
     // compare only with last few objects
     for(coreUintW i = 6u; i-- && (it != et); )

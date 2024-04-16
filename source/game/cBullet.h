@@ -78,18 +78,21 @@ public:
     void Reflect(const coreObject3D* pObject, const coreVector2& vIntersection, const coreVector2& vForceNormal = coreVector2(0.0f,0.0f));
 
     // 
-    inline cBullet* ChangeSize (const coreFloat fFactor) {this->SetSize (this->GetSize () * fFactor); return this;}
-    inline cBullet* ChangeAlpha(const coreFloat fFactor) {this->SetAlpha(this->GetAlpha() * fFactor); return this;}
+    inline cBullet* ChangeSize   (const coreFloat fFactor) {this->SetSize   (this->GetSize   () * fFactor); 
+    //this->ChangeTexSize(fFactor); 
+    return this;}
+    inline cBullet* ChangeAlpha  (const coreFloat fFactor) {this->SetAlpha  (this->GetAlpha  () * fFactor); return this;}
+    inline cBullet* ChangeTexSize(const coreFloat fFactor) {this->SetTexSize(this->GetTexSize() * fFactor); return this;}
 
      
     inline void SetDamage(const coreInt32    iDamage) {m_iDamage = iDamage;}
-    inline void SetSpeed (const coreFloat    fSpeed)  {m_fSpeed  = fSpeed;} //  * BULLET_SPEED_FACTOR  
+    inline void SetSpeed (const coreFloat    fSpeed)  {m_fSpeed  = fSpeed * BULLET_SPEED_FACTOR;}
     inline void SetFlyDir(const coreVector2& vFlyDir) {m_vFlyDir = vFlyDir;}
      
 
     // get object properties
     inline const coreInt32&   GetDamage ()const {return m_iDamage;}
-    inline const coreFloat&   GetSpeed  ()const {return m_fSpeed;} //  * BULLET_SPEED_FACTOR  
+    inline       coreFloat    GetSpeed  ()const {return m_fSpeed / BULLET_SPEED_FACTOR;}
     inline       cShip*       GetOwner  ()const {return m_pOwner;}
     inline const coreUint8&   GetElement()const {return m_iElement;}
     inline const coreFloat&   GetFlyTime()const {return m_fFlyTime;}
@@ -208,7 +211,7 @@ public:
     ASSIGN_ID(1, "Ray")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeYellow(); this->SetSize(coreVector3(3.7f,0.0f,3.7f) * 0.5f); m_fAnimation = 0.09f; m_fFade = 0.0f;}
+    inline void ResetProperties() {this->MakeYellow(); this->SetSize(coreVector3(3.7f,0.0f,3.7f) * 0.5f); this->SetTexSize(coreVector2(0.4f,0.2f) * 0.7f); m_fAnimation = 0.09f; m_fFade = 0.0f;}
 
     // change default color
     inline cRayBullet* MakeWhite () {this->_MakeWhite (0.7f); return this;}
@@ -245,7 +248,7 @@ public:
     ASSIGN_ID(2, "Pulse")
 
     // reset base properties
-    inline void ResetProperties() {this->MakePurple(); this->SetSize(coreVector3(2.5f,2.5f,2.5f) * 1.3f); m_fAnimation = 0.09f;}
+    inline void ResetProperties() {this->MakePurple(); this->SetSize(coreVector3(2.5f,2.5f,2.5f) * 1.3f); this->SetTexSize(coreVector2(0.4f,0.2f)); m_fAnimation = 0.09f;}
 
     // change default color
     inline cPulseBullet* MakeWhite () {this->_MakeWhite (0.7f); return this;}
@@ -280,7 +283,7 @@ public:
     ASSIGN_ID(3, "Orb")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeBlue(); this->SetSize(coreVector3(1.6f,1.6f,1.6f) * 1.1f); m_fAnimation = 0.0f;}
+    inline void ResetProperties() {this->MakeBlue(); this->SetSize(coreVector3(1.6f,1.6f,1.6f) * 1.1f); this->SetTexSize(coreVector2(0.12f,0.12f)); m_fAnimation = 0.0f;}
 
     // change default color
     inline cOrbBullet* MakeWhite () {this->_MakeWhite (0.6f); return this;}
@@ -316,7 +319,7 @@ public:
     ASSIGN_ID(4, "Cone")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeOrange(); this->SetSize(coreVector3(1.35f,1.55f,1.35f) * 1.05f); m_fAnimation = 0.3f;}
+    inline void ResetProperties() {this->MakeOrange(); this->SetSize(coreVector3(1.35f,1.55f,1.35f) * 1.05f); this->SetTexSize(coreVector2(0.5f,0.2f) * 1.8f); m_fAnimation = 0.3f;}
 
     // change default color
     inline cConeBullet* MakeWhite () {this->_MakeWhite (0.6f); return this;}
@@ -352,7 +355,7 @@ public:
     ASSIGN_ID(5, "Wave")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeGreen(); this->SetSize(coreVector3(1.5f,1.5f,1.5f) * 1.3f); m_fAnimation = 0.2f;}
+    inline void ResetProperties() {this->MakeGreen(); this->SetSize(coreVector3(1.5f,1.5f,1.5f) * 1.3f); this->SetTexSize(coreVector2(1.1f,0.25f) * 0.2f); m_fAnimation = 0.2f;}
 
     // change default color
     inline cWaveBullet* MakeWhite () {this->_MakeWhite (0.7f); return this;}
@@ -393,7 +396,7 @@ public:
     ASSIGN_ID(6, "Tesla")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeBlue(); this->SetSize(coreVector3(2.5f,2.5f,2.5f)); m_fAnimation = 0.09f; m_fLightningTime = 1.0f;}
+    inline void ResetProperties() {this->MakeBlue(); this->SetSize(coreVector3(2.5f,2.5f,2.5f)); this->SetTexSize(coreVector2(0.14f,0.14f)); m_fAnimation = 0.09f; m_fLightningTime = 1.0f;}
 
     // change default color
     inline cTeslaBullet* MakeWhite () {this->_MakeWhite (0.7f); return this;}
@@ -489,7 +492,7 @@ public:
     ASSIGN_ID(9, "Spear")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeYellow(); this->SetSize(coreVector3(1.45f,1.55f,1.45f) * 2.1f); m_fAnimation = 0.15f;}
+    inline void ResetProperties() {this->MakeYellow(); this->SetSize(coreVector3(1.45f,1.55f,1.45f) * 2.1f); this->SetTexSize(coreVector2(0.5f,0.2f)); m_fAnimation = 0.15f;}
 
     // change default color
     inline cSpearBullet* MakeWhite () {this->_MakeWhite (0.8f); return this;}
@@ -525,7 +528,7 @@ public:
     ASSIGN_ID(10, "Triangle")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeRed(); this->SetSize(coreVector3(1.5f,1.5f,1.5f)); m_fAnimation = 0.0f;}
+    inline void ResetProperties() {this->MakeRed(); this->SetSize(coreVector3(1.5f,1.5f,1.5f)); this->SetTexSize(coreVector2(0.5f,0.2f)); m_fAnimation = 0.0f;}
 
     // change default color
     inline cTriangleBullet* MakeWhite () {ASSERT(false)            return this;}
@@ -561,7 +564,7 @@ public:
     ASSIGN_ID(11, "Flip")
 
     // reset base properties
-    inline void ResetProperties() {this->MakePurple(); this->SetSize(coreVector3(2.6f,2.0f,2.6f)); m_fAnimation = 0.0f;}
+    inline void ResetProperties() {this->MakePurple(); this->SetSize(coreVector3(2.6f,2.0f,2.6f)); this->SetTexSize(coreVector2(0.4f,0.2f)); m_fAnimation = 0.0f;}
 
     // change default color
     inline cFlipBullet* MakeWhite () {this->_MakeWhite (0.6f); return this;}
@@ -597,7 +600,7 @@ public:
     ASSIGN_ID(12, "Quad")
 
     // reset base properties
-    inline void ResetProperties() {this->MakeCyan(); this->SetSize(coreVector3(1.5f,1.5f,1.5f)); m_fAnimation = 0.0f;}
+    inline void ResetProperties() {this->MakeCyan(); this->SetSize(coreVector3(1.5f,1.5f,1.5f)); this->SetTexSize(coreVector2(0.5f,0.2f)); m_fAnimation = 0.0f;}
 
     // change default color
     inline cQuadBullet* MakeWhite () {ASSERT(false)            return this;}
@@ -633,7 +636,7 @@ public:
     ASSIGN_ID(13, "Chroma")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(1.0f,1.0f,1.0f)); m_fAnimation = 0.0f;}
+    inline void ResetProperties() {this->SetSize(coreVector3(1.0f,1.0f,1.0f)); this->SetTexSize(coreVector2(0.5f,0.2f)); m_fAnimation = 0.0f;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_direct_inst_program";}

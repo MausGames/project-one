@@ -690,7 +690,8 @@ void cGame::__HandleCollisions()
         if(!bFirstHit) return;
 
         // 
-        const coreVector2 vDir = (pPlayer->GetPosition().xy() - pEnemy->GetPosition().xy()).Normalized();
+        const coreVector2 vDiff = pPlayer->GetPosition().xy() - pEnemy->GetPosition().xy();
+        const coreVector2 vDir  = (vDiff.IsNull() ? coreVector2(1.0f,0.0f) : vDiff.Normalized());
         pPlayer->SetForce    (vDir * 100.0f);
         pPlayer->SetInterrupt(PLAYER_INTERRUPT);
 
