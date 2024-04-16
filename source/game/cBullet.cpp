@@ -29,6 +29,9 @@ cBullet::cBullet()noexcept
 
     // set initial status
     m_iStatus = BULLET_STATUS_READY;
+    
+    
+    this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * 0.8f);
 }
 
 
@@ -201,10 +204,14 @@ cBulletManager::sBulletSetGen::sBulletSetGen()noexcept
 cBulletManager::cBulletManager(const coreInt32 iType)noexcept
 : m_apBulletSet {}
 , m_iType       (iType)
+, m_aiOrder     {}
 {
     // 
-    Core::Manager::Object->TestCollision(m_iType, [](coreObject3D*, coreObject3D*, coreVector3, coreBool) {});
     // TODO   
+    Core::Manager::Object->TestCollision(m_iType, [](coreObject3D*, coreObject3D*, coreVector3, coreBool) {});
+
+    // 
+    this->ResetOrder();
 }
 
 
@@ -228,8 +235,8 @@ void cBulletManager::Render()
     // loop through all bullet sets
     for(coreUintW i = 0u; i < BULLET_SET_COUNT; ++i)
     {
-        if(!m_apBulletSet[i]) continue;
-        coreBatchList* pBulletActive = &m_apBulletSet[i]->oBulletActive;
+        if(!m_apBulletSet[m_aiOrder[i]]) continue;
+        coreBatchList* pBulletActive = &m_apBulletSet[m_aiOrder[i]]->oBulletActive;
 
         // call individual preceding render routines
         FOR_EACH(it, *pBulletActive->List())
@@ -259,8 +266,8 @@ void cBulletManager::Move()
     // loop through all bullet sets
     for(coreUintW i = 0u; i < BULLET_SET_COUNT; ++i)
     {
-        if(!m_apBulletSet[i]) continue;
-        coreBatchList* pBulletActive = &m_apBulletSet[i]->oBulletActive;
+        if(!m_apBulletSet[m_aiOrder[i]]) continue;
+        coreBatchList* pBulletActive = &m_apBulletSet[m_aiOrder[i]]->oBulletActive;
 
         // loop through all bullets
         FOR_EACH_DYN(it, *pBulletActive->List())
@@ -311,6 +318,47 @@ void cBulletManager::ClearBullets(const coreBool bAnimated)
         FOR_EACH(it, *pBulletActive->List())
             d_cast<cBullet*>(*it)->Deactivate(bAnimated);
     }
+
+    // 
+    this->ResetOrder();
+}
+
+
+// ****************************************************************
+// 
+void cBulletManager::OverrideOrder(const coreUint8* piNewOrder, const coreUintW iSize)
+{
+    ASSERT(piNewOrder && (iSize < BULLET_SET_COUNT))
+
+#if defined(_CORE_DEBUG_)
+
+    // 
+    for(coreUintW i = 0u; i < iSize; ++i)
+        for(coreUintW j = i+1u; j < iSize; ++j)
+            ASSERT((piNewOrder[i] != piNewOrder[j]) &&
+                   (piNewOrder[i] < BULLET_SET_COUNT))
+
+#endif
+
+    // 
+    for(coreUintW i = 0u, j = 0u; i < BULLET_SET_COUNT; ++i)
+        if(!std::memchr(piNewOrder, i, iSize)) m_aiOrder[j++] = i;
+
+    // 
+    for(coreUintW i = 0u; i < iSize; ++i)
+        m_aiOrder[BULLET_SET_COUNT - 1u - i] = piNewOrder[i];
+
+    STATIC_ASSERT(sizeof(*piNewOrder) == 1u)
+}
+
+
+// ****************************************************************
+// 
+void cBulletManager::ResetOrder()
+{
+    // 
+    for(coreUintW i = 0u; i < BULLET_SET_COUNT; ++i)
+        m_aiOrder[i] = i;
 }
 
 

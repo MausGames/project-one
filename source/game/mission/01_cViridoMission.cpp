@@ -49,7 +49,7 @@ cViridoMission::cViridoMission()noexcept
             pBall->DefineProgram("effect_energy_invert_program");
 
             // set object properties
-            pBall->SetSize   (coreVector3(3.0f,3.0f,3.0f));
+            pBall->SetSize   (coreVector3(3.1f,3.1f,3.1f));
             pBall->SetColor3 (COLOR_ENERGY_GREEN * 0.8f);
             pBall->SetTexSize(coreVector2(4.5f,4.5f));
             pBall->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
@@ -646,7 +646,7 @@ void cViridoMission::__MoveOwnAfter()
         Core::Manager::Object->TestCollision(TYPE_VIRIDO_PADDLE, TYPE_VIRIDO_BALL, [this](coreObject3D* OUTPUT pPaddle, coreObject3D* OUTPUT pBall, const coreVector3& vIntersection, const coreBool bFirstHit)
         {
             // 
-            if(!bFirstHit || (coreVector2::Dot(pPaddle->GetDirection().xy(), pBall->GetDirection().xy()) >= 0.0f))
+            if(coreVector2::Dot(pPaddle->GetDirection().xy(), pBall->GetDirection().xy()) >= 0.0f)
                 return;
 
             // 
@@ -700,7 +700,7 @@ void cViridoMission::__MoveOwnAfter()
         coreObject3D& oPaddle = m_aPaddle [0];
 
         // 
-        oBall.SetPosition(oPaddle.GetPosition() + oPaddle.GetDirection() * (oPaddle.GetCollisionRange().y * 2.0f - 0.3f)); // TODO: adjust distance (ball size 2.7f -> 3.0f)
+        oBall.SetPosition(oPaddle.GetPosition() + oPaddle.GetDirection() * (oPaddle.GetCollisionRange().y * 2.0f - 0.3f)); // TODO: adjust distance (ball size 2.7f -> 3.1f)
         oBall.Move();
     }
 
@@ -783,8 +783,7 @@ void cViridoMission::__MoveOwnAfter()
         // 
         Core::Manager::Object->TestCollision(TYPE_ENEMY, &oBall, [&](cEnemy* OUTPUT pEnemy, coreObject3D* OUTPUT pBall, const coreVector3& vIntersection, const coreBool bFirstHit)
         {
-            // 
-            if(!bFirstHit || (pEnemy->GetID() != cCinderEnemy::ID)) return;
+            if(!bFirstHit) return;
 
             // 
             const coreFloat fNewLenSq = (pEnemy->GetPosition().xy() - vOldBallPos).LengthSq();
@@ -814,7 +813,7 @@ void cViridoMission::__MoveOwnAfter()
             oBall.SetDirection(coreVector3(vNewDir, 0.0f));
 
             // 
-            pCurEnemy->Kill(true);
+            //pCurEnemy->Kill(true);
 
             // 
             cViridoMission::__BounceEffect(vCurImpact);

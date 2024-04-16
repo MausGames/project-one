@@ -82,6 +82,7 @@ public:
 
 // ****************************************************************
 // fragment item class
+// TODO: richtiges fragment einer tafel mit dicke
 class cFragmentItem final : public cItem
 {
 private:

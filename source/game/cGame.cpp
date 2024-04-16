@@ -113,6 +113,7 @@ void cGame::Render()
 
         // render all enemies
         m_EnemyManager.Render();
+        // TODO: enemies z>=0.0f
     }
 
     __DEPTH_GROUP_UNDER
@@ -130,9 +131,16 @@ void cGame::Render()
         // render low-priority bullet manager
         m_BulletManagerPlayer.Render();
 
+        // 
+        m_ChromaManager.Render();
+        m_ItemManager  .Render();
+        m_ShieldManager.Render();
+
         // render underlying objects
         m_EnemyManager.RenderUnder();
         m_pCurMission->RenderUnder();
+
+        // TODO: enemies z<0.0f or above renderunder ?
     }
 
     __DEPTH_GROUP_SHIP   // # 2
@@ -143,13 +151,6 @@ void cGame::Render()
 
     __DEPTH_GROUP_OVER
     {
-        DEPTH_PUSH
-
-        // 
-        m_ChromaManager.Render();
-        m_ItemManager  .Render();
-        m_ShieldManager.Render();
-
         // render overlying objects
         m_EnemyManager.RenderOver();
         m_pCurMission->RenderOver();
@@ -810,16 +811,12 @@ void cGame::__HandleCollisions()
     {
         if(!bFirstHit) return;
 
-        if(!CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
+        if(!CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST) && (pEnemy->GetLifeTime() >= 0.5f))
         {
             // 
             const coreVector2 vDiff = pPlayer->GetOldPos() - pEnemy->GetPosition().xy();
-            pPlayer->ApplyForce(vDiff.Normalized() * 100.0f);
-
-
-            if(pEnemy->GetLifeTime() >= 0.5f) pPlayer->SetInterrupt(PLAYER_INTERRUPT);
-
-
+            pPlayer->ApplyForce  (vDiff.Normalized() * 100.0f);
+            pPlayer->SetInterrupt(PLAYER_INTERRUPT);
 
             // 
             g_pSpecialEffects->CreateSplashColor(pPlayer->GetPosition(), 50.0f, 10u, coreVector3(1.0f,1.0f,1.0f));
@@ -921,7 +918,7 @@ void cGame::__ClearAll(const coreBool bAnimated)
     m_EnemyManager       .ClearEnemies(bAnimated);
     m_BulletManagerPlayer.ClearBullets(bAnimated);
     m_BulletManagerEnemy .ClearBullets(bAnimated);
-    m_ChromaManager      .ClearChromas(bAnimated);
+    //m_ChromaManager      .ClearChromas(bAnimated);
     m_ItemManager        .ClearItems  (bAnimated);
     m_ShieldManager      .ClearShields(bAnimated);
 

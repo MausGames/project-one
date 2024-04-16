@@ -60,7 +60,7 @@ void cChromaManager::Move()
 void cChromaManager::AddChroma(const coreVector2& vPosition, const coreVector2& vDirection, const coreFloat fScale, const coreVector3& vColor)
 {
     // 
-    cChromaBullet* pBullet = m_BulletManager.AddBullet<cChromaBullet>(1, 1.0f, NULL, vPosition + coreVector2::Rand(2.0f), vDirection);
+    cChromaBullet* pBullet = m_BulletManager.AddBullet<cChromaBullet>(1, 0.0f, NULL, vPosition + coreVector2::Rand(2.0f), vDirection);
 
     // 
     pBullet->SetSize  (coreVector3(1.0f,1.0f,1.0f) * fScale);

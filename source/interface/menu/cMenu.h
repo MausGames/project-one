@@ -26,6 +26,7 @@
 // TODO: update texture filter and render quality in realtime
 // TODO: double initial languages by switching to two columns (on demand?)
 // TODO: stages in GameMenu should be called segments
+// TODO: upper white border in settings menu "moves" during transition on 1760x990, check all menus for moving during transition in common resolutions
 
 
 // ****************************************************************
@@ -62,17 +63,17 @@
 
 #define MENU_BUTTON             "menu_background_black.png", "menu_background_black.png"
 #define MENU_SWITCHBOX          "default_black.png", "default_black.png"
-#define MENU_FONT_DEFAULT       "ethnocentric.ttf"
-#define MENU_FONT_DYNAMIC_1     "dynamic_font",     (14u)//(13u)
-#define MENU_FONT_DYNAMIC_2     "dynamic_font",     (20u)
-#define MENU_FONT_DYNAMIC_3     "dynamic_font",     (30u)
-#define MENU_FONT_DYNAMIC_4     "dynamic_font",     (40u)
-#define MENU_FONT_DYNAMIC_5     "dynamic_font",     (70u)
-#define MENU_FONT_STANDARD_1    "ethnocentric.ttf", (14u)//(13u)
-#define MENU_FONT_STANDARD_2    "ethnocentric.ttf", (20u)
-#define MENU_FONT_STANDARD_3    "ethnocentric.ttf", (30u)
-#define MENU_FONT_STANDARD_4    "ethnocentric.ttf", (40u)
-#define MENU_FONT_STANDARD_5    "ethnocentric.ttf", (70u)
+#define MENU_FONT_DEFAULT       "freesans.ttf"
+#define MENU_FONT_DYNAMIC_1     "dynamic_font",     (15u)//(14u)//(13u)
+#define MENU_FONT_DYNAMIC_2     "dynamic_font",     (21u)//(20u)
+#define MENU_FONT_DYNAMIC_3     "dynamic_font",     (31u)//(30u)
+#define MENU_FONT_DYNAMIC_4     "dynamic_font",     (41u)//(40u)
+#define MENU_FONT_DYNAMIC_5     "dynamic_font",     (71u)//(70u)
+#define MENU_FONT_STANDARD_1    "default.ttf", (15u)//(14u)//(13u)
+#define MENU_FONT_STANDARD_2    "default.ttf", (21u)//(20u)
+#define MENU_FONT_STANDARD_3    "default.ttf", (31u)//(30u)
+#define MENU_FONT_STANDARD_4    "default.ttf", (41u)//(40u)
+#define MENU_FONT_STANDARD_5    "default.ttf", (71u)//(70u)
 #define MENU_FONT_ICON_1        "fontawesome.otf",  (20u)
 #define MENU_FONT_ICON_2        "fontawesome.otf",  (24u)
 #define MENU_FONT_ICON_3        "fontawesome.otf",  (40u)

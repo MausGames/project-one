@@ -101,6 +101,14 @@ cDharukBoss::cDharukBoss()noexcept
                  else m_Boomerang     .BindObject(pBoomerang);
         }
     }
+
+    // 
+    m_Summon.DefineModel  ("object_sphere.md3");
+    m_Summon.DefineTexture(0u, "effect_energy.png");
+    m_Summon.DefineProgram("effect_energy_invert_program");
+    m_Summon.SetColor3    (COLOR_ENERGY_RED * 0.8f);
+    m_Summon.SetTexSize   (coreVector2(4.5f,4.5f));
+    m_Summon.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 }
 
 
@@ -125,6 +133,9 @@ void cDharukBoss::__KillOwn(const coreBool bAnimated)
     // 
     for(coreUintW i = 0u; i < DHARUK_BOOMERANGS; ++i)
         this->__DisableBoomerang(i, bAnimated);
+
+    // 
+    this->__DisableSummon();
 
     // 
     g_pGlow->UnbindList(&m_DuplicateTrail);
@@ -161,6 +172,9 @@ void cDharukBoss::__RenderOwnOver()
     // 
     m_Boomerang.Render();
     g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyList(&m_Boomerang);
+
+    // 
+    m_Summon.Render();
 }
 
 
@@ -168,6 +182,9 @@ void cDharukBoss::__RenderOwnOver()
 // 
 void cDharukBoss::__MoveOwn()
 {
+    if(this->GetCurHealthPct() < 0.9f) this->Kill(true);                
+
+
     // 
     const coreVector2 vOldBasePos   = this->GetPosition   ().xy();
     const coreFloat   fOldBaseAngle = this->GetDirection  ().xy().Angle();
@@ -180,15 +197,38 @@ void cDharukBoss::__MoveOwn()
     // 
     if(m_iPhase == 0u)
     {
-        PHASE_CONTROL_TIMER(0u, 0.16f, LERP_LINEAR)
+        PHASE_CONTROL_TIMER(0u, 0.32f, LERP_LINEAR)
         {
-            this->DefaultMoveLerp  (coreVector2(-DHARUK_WIDTH, 1.5f), coreVector2(-DHARUK_WIDTH, -7.5f), fTime);
-            this->DefaultRotateLerp(1.0f*PI,                          19.0f*PI,                          fTime);
+            if(PHASE_BEGINNING) this->AddStatus(ENEMY_STATUS_GHOST);
 
-            if((this->GetPosition().y < -1.5f*FOREGROUND_AREA.y) && (this->GetPosition().y > -4.5f*FOREGROUND_AREA.y))
-                this->SetPosition(this->GetPosition().InvertedX());
+            constexpr coreVector2 vFrom1 = coreVector2(-1.5f, 0.7f);
+            constexpr coreVector2 vFrom2 = coreVector2( 0.9f, 1.5f);
+            constexpr coreVector2 vFrom3 = coreVector2(-0.4f, 1.5f);
+            constexpr coreVector2 vTo1   = coreVector2( 1.5f,-0.2f);
+            constexpr coreVector2 vTo2   = coreVector2(-1.5f,-0.6f);
+            constexpr coreVector2 vTo3   = coreVector2( 0.7f,-1.5f);
 
-            if(PHASE_FINISHED || (this->GetPosition().y < -7.4f*FOREGROUND_AREA.y))   // # end phase early
+            const coreFloat fLen1   = (vTo1 - vFrom1).Length();
+            const coreFloat fLen2   = (vTo2 - vFrom2).Length();
+            const coreFloat fLen3   = (vTo3 - vFrom3).Length();
+            const coreFloat fLenRev = RCP(fLen1 + fLen2 + fLen3);
+
+            const coreFloat fSpeed1 = fLen1 * fLenRev;
+            const coreFloat fSpeed2 = fLen2 * fLenRev;
+            const coreFloat fSpeed3 = fLen3 * fLenRev;
+            const coreFloat fSpeed12 = fSpeed1 + fSpeed2;
+
+                 if(PHASE_TIME_BEFORE(fSpeed1))  this->DefaultMoveLerp(vFrom1, vTo1, (fTime)            * RCP(fSpeed1));
+            else if(PHASE_TIME_BEFORE(fSpeed12)) this->DefaultMoveLerp(vFrom2, vTo2, (fTime - fSpeed1)  * RCP(fSpeed2));
+            else                                 this->DefaultMoveLerp(vFrom3, vTo3, (fTime - fSpeed12) * RCP(fSpeed3));
+
+                 if(PHASE_TIME_POINT(0.0f))     g_pSpecialEffects->CreateBlowColor(this->GetPosition(), coreVector3((vTo1 - vFrom1).Normalized(), 0.0f), SPECIAL_BLOW_BIG, COLOR_ENERGY_RED);
+            else if(PHASE_TIME_POINT(fSpeed1))  g_pSpecialEffects->CreateBlowColor(this->GetPosition(), coreVector3((vTo2 - vFrom2).Normalized(), 0.0f), SPECIAL_BLOW_BIG, COLOR_ENERGY_RED);
+            else if(PHASE_TIME_POINT(fSpeed12)) g_pSpecialEffects->CreateBlowColor(this->GetPosition(), coreVector3((vTo3 - vFrom3).Normalized(), 0.0f), SPECIAL_BLOW_BIG, COLOR_ENERGY_RED);
+
+            this->DefaultRotateLerp(1.0f*PI, 19.0f*PI, fTime);
+
+            if(PHASE_FINISHED)
                 PHASE_CHANGE_INC
         });
     }
@@ -199,6 +239,8 @@ void cDharukBoss::__MoveOwn()
     {
         PHASE_CONTROL_TIMER(0u, 0.5f, LERP_BREAK)
         {
+            if(PHASE_BEGINNING) this->RemoveStatus(ENEMY_STATUS_GHOST);
+
             this->DefaultMoveLerp  (coreVector2(0.0f,1.5f), coreVector2(0.0f, DHARUK_HEIGHT), fTime);
             this->DefaultRotateLerp(0.0f*PI,                3.0f*PI,                          fTime);
 
@@ -216,7 +258,7 @@ void cDharukBoss::__MoveOwn()
     {
         PHASE_CONTROL_PAUSE(0u, 2.0f)
         {
-            PHASE_CHANGE_TO(10u)
+            PHASE_CHANGE_TO(20u)
         });
     }
 
@@ -226,7 +268,7 @@ void cDharukBoss::__MoveOwn()
     {
         PHASE_CONTROL_TIMER(0u, 0.2f, LERP_SMOOTH)
         {
-            const coreBool  bSecond   = (m_iPhase == 11u) ? true : false;
+            const coreBool  bSecond   = (m_iPhase == 11u);
             const coreFloat fSideTime = m_aiCounter[CURRENT_SIDE] ? fTime : (1.0f - fTime);
             const coreFloat fSideSign = m_aiCounter[CURRENT_SIDE] ? -1.0f :  1.0f;
 
@@ -394,7 +436,8 @@ void cDharukBoss::__MoveOwn()
     {
         PHASE_CONTROL_PAUSE(0u, 1.0f)
         {
-            PHASE_CHANGE_INC
+            PHASE_CHANGE_TO(12u)
+            //PHASE_CHANGE_INC
         });
     }
 
@@ -424,6 +467,9 @@ void cDharukBoss::__MoveOwn()
     {
         PHASE_CONTROL_TIMER(0u, 1.0f, LERP_LINEAR)
         {
+            if(PHASE_BEGINNING && !m_aiCounter[CURRENT_ITERATION])
+                this->__EnableSummon(this->GetPosition().xy().InvertedY());
+
             coreBool bDisabled = true;
 
             for(coreUintW i = 0u; i < DHARUK_BOOMERANGS; ++i)
@@ -437,7 +483,10 @@ void cDharukBoss::__MoveOwn()
                 const coreVector2 vDiff    = vBossPos - pBoomerang->GetPosition().xy();
 
                 if(coreMath::IsNear(vDiff.x, 0.0f, 1.0f) && coreMath::IsNear(vDiff.y, 0.0f, CORE_MATH_PRECISION))
+                {
                     this->__DisableBoomerang(i, true);
+                    m_Summon.SetSize(m_Summon.GetSize() + coreVector3(1.3f,1.3f,1.3f));
+                }
             }
 
             if(PHASE_FINISHED && bDisabled)
@@ -470,6 +519,7 @@ void cDharukBoss::__MoveOwn()
             if(PHASE_BEGINNING)
             {
                 this->__EnableDuplicate();
+                this->__DisableSummon();
             }
 
             const coreFloat fAlpha = MIN(fTime*10.0f, 1.0f);
@@ -598,6 +648,10 @@ void cDharukBoss::__MoveOwn()
     m_BoomerangTrail.MoveNormal();
 
     // 
+    m_Summon.SetTexOffset(coreVector2(0.0f, -1.5f * m_fAnimation));
+    m_Summon.Move();
+
+    // 
     cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_DHARUK_BOOMERANG, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBoomerang, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
@@ -719,6 +773,34 @@ void cDharukBoss::__DisableBoomerang(const coreUintW iIndex, const coreBool bAni
 
 // ****************************************************************
 // 
+void cDharukBoss::__EnableSummon(const coreVector2& vPosition)
+{
+    WARN_IF(m_Summon.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    m_Summon.SetPosition(coreVector3(vPosition,0.0f));
+    m_Summon.SetSize    (coreVector3(0.0f,0.0f,0.0f));
+
+    // 
+    m_Summon.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    g_pGlow->BindObject(&m_Summon);
+}
+
+
+// ****************************************************************
+// 
+void cDharukBoss::__DisableSummon()
+{
+    if(!m_Summon.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
+    // 
+    m_Summon.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    g_pGlow->UnbindObject(&m_Summon);
+}
+
+
+// ****************************************************************
+// 
 coreVector2 cDharukBoss::__RepeatPosition(const coreVector2& vPosition, const coreFloat fThreshold, coreBool* OUTPUT pbChange)
 {
     const coreVector2 vThreshVec = fThreshold * FOREGROUND_AREA;
@@ -772,7 +854,7 @@ coreVector2 cDharukBoss::__DecodeDirection(const coreUintW iIndex)
 
     // 
     const coreFloat P = CONTAINS_BIT(m_iPackedDir, 0u + 2u*iIndex) ? 1.0f : -1.0f;
-    const coreBool  X = CONTAINS_BIT(m_iPackedDir, 1u + 2u*iIndex) ? true : false;
+    const coreBool  X = CONTAINS_BIT(m_iPackedDir, 1u + 2u*iIndex);
 
     // 
     return coreVector2((X) ? P : 0.0f, (!X) ? P : 0.0f);

@@ -54,7 +54,6 @@ void CoreApp::Init()
 
     // load available music files
     g_MusicPlayer.AddMusicFolder("data/music", "*.ogg");
-    g_MusicPlayer.Control()->Play();
 
     // init system properties
     InitResolution(Core::System->GetResolution());
@@ -378,7 +377,7 @@ static void DebugGame()
                 oConfig.aaiSupport[i][0] = 0u;
             }
 
-            #define __LOAD_GAME(x) {static constexpr coreInt32 aiMission[] = {x}; STATIC_NEW(g_pGame, oConfig, aiMission, 1u) g_pGame->LoadNextMission(); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f); g_pPostProcessing->SetWallOpacity(1.0f);}
+            #define __LOAD_GAME(x) {STATIC_NEW(g_pGame, oConfig, GAME_MISSION_LIST_MAIN) g_pGame->LoadMissionID(x); g_pMenu->ChangeSurface(SURFACE_EMPTY, 0.0f); g_pPostProcessing->SetWallOpacity(1.0f);}
                  if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(1),     CORE_INPUT_PRESS)) __LOAD_GAME(cIntroMission  ::ID)
             else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(2),     CORE_INPUT_PRESS)) __LOAD_GAME(cViridoMission ::ID)
             else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(3),     CORE_INPUT_PRESS)) __LOAD_GAME(cNevoMission   ::ID)
@@ -456,9 +455,23 @@ static void DebugGame()
     // set background interpolation
     if(g_pEnvironment->GetBackground()->GetOutdoor())
     {
-             if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(COMMA), CORE_INPUT_PRESS)) g_pEnvironment->GetBackground()->GetOutdoor()->LerpHeight(1.0f,   0.0f);
-        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(M),     CORE_INPUT_PRESS)) g_pEnvironment->GetBackground()->GetOutdoor()->LerpHeight(0.0f, -15.0f);
-        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(N),     CORE_INPUT_PRESS)) g_pEnvironment->GetBackground()->GetOutdoor()->LerpHeight(0.0f, -25.0f);
+        static coreFloat s_fMul = 1.0f;
+        static coreFloat s_fAdd = 0.0f;
+
+        coreBool bChange = false;
+
+             if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(M),      CORE_INPUT_HOLD)) {s_fMul += 0.05f * Core::System->GetTime(); bChange = true;}
+        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(N),      CORE_INPUT_HOLD)) {s_fMul -= 0.05f * Core::System->GetTime(); bChange = true;}
+             if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(PERIOD), CORE_INPUT_HOLD)) {s_fAdd += 1.0f  * Core::System->GetTime(); bChange = true;}
+        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(COMMA),  CORE_INPUT_HOLD)) {s_fAdd -= 1.0f  * Core::System->GetTime(); bChange = true;}
+
+        if(bChange)
+        {
+            g_pEnvironment->GetBackground()->GetOutdoor()->LerpHeightNow(s_fMul, s_fAdd);
+
+            Core::Debug->InspectValue("Env Mul", s_fMul);
+            Core::Debug->InspectValue("Env Add", s_fAdd);
+        }
     }
 
     // equip weapon

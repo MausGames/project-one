@@ -82,10 +82,10 @@ void cEnemy::Move()
         this->coreObject3D::Move();
 
         // 
-        if(g_pForeground->IsVisibleObject(this))
+        if(g_pForeground->IsVisibleObject(this) && !CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_DEAD))
         {
             this->SetEnabled(CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_HIDDEN) ? CORE_OBJECT_ENABLE_MOVE : CORE_OBJECT_ENABLE_ALL);
-            this->ChangeType(TYPE_ENEMY);   // # makes it available in cEnemyManager::ForEachEnemy
+            this->ChangeType(TYPE_ENEMY);   // # make it available in cEnemyManager::ForEachEnemy
         }
         else
         {
@@ -93,8 +93,8 @@ void cEnemy::Move()
         }
 
 
-        this->SetTexSize  (coreVector2(1.2f,1.2f));
-        this->SetTexOffset(coreVector2(0.0f, FMOD(coreFloat(Core::System->GetTotalTime()) * -0.25f, -1.0f)));
+        //this->SetTexSize  (coreVector2(1.2f,1.2f));
+        //this->SetTexOffset(coreVector2(0.0f, FMOD(coreFloat(Core::System->GetTotalTime()) * -0.25f, -1.0f)));
     }
 
     // 
@@ -218,6 +218,11 @@ void cEnemy::Kill(const coreBool bAnimated)
 
     // 
     if(STATIC_ISVALID(g_pGame)) g_pGame->GetShieldManager()->UnbindEnemy(this);
+    
+    
+    
+        g_pGame->GetChromaManager()->AddChroma(this->GetPosition().xy(), coreVector2(0.0f,1.0f), CHROMA_SCALE_SMALL, coreVector3(1.0f,1.0f,1.0f));     
+        
 
     // 
     if(bAnimated && this->IsEnabled(CORE_OBJECT_ENABLE_RENDER))

@@ -19,7 +19,7 @@
 // TODO: sort bullet classes (color, enemy<>player, normal<>special), improve array indexing and caching
 // TODO: shift spear-bullet collision like ray-bullet
 // TODO: bullet -> to POD-type with single parent object
-// TODO: reorder bullets either yellow->green or green->yellow, so they are overlapping consistently
+// TODO: reorder bullets either yellow->green or green->yellow, so they are overlapping consistently (in default order)
 
 
 // ****************************************************************
@@ -166,6 +166,8 @@ private:
     cOutline  m_Outline;                              // 
     coreInt32 m_iType;                                // 
 
+    coreUint8 m_aiOrder[BULLET_SET_COUNT];            // 
+
 
 public:
     explicit cBulletManager(const coreInt32 iType)noexcept;
@@ -189,6 +191,10 @@ public:
 
     // 
     template <typename T> void PrefetchBullet();
+
+    // 
+    void OverrideOrder(const coreUint8* piNewOrder, const coreUintW iSize);
+    void ResetOrder();
 
     // 
     inline coreUintW                       GetNumBullets     ()const {coreUintW iNum = 0u; this->ForEachBullet        ([&](void*) {++iNum;}); return iNum;}
@@ -663,13 +669,13 @@ template <typename T> cBulletManager::sBulletSet<T>::sBulletSet(cOutline* pOutli
     {
         pBuffer->DefineAttribute(BULLET_SHADER_ATTRIBUTE_DEPTH, 1u, GL_FLOAT, false, 0u);
     },
-    [](coreFloat* OUTPUT pData, const cBullet* pBullet)
+    [](coreByte* OUTPUT pData, const coreObject3D* pBullet)
     {
-        (*pData) = pBullet->m_fDepth;
+        (*r_cast<coreFloat*>(pData)) = d_cast<const cBullet*>(pBullet)->m_fDepth;
     },
-    [](const coreProgramPtr& pProgram, const cBullet* pBullet)
+    [](const coreProgramPtr& pProgram, const coreObject3D* pBullet)
     {
-        pBullet->_EnableDepth(pProgram);
+        d_cast<const cBullet*>(pBullet)->_EnableDepth(pProgram);
     });
 
     // 

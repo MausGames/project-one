@@ -596,7 +596,7 @@ void cInterface::ShowScore(const coreChar* pcMain, const coreChar* pcSub, const 
 void cInterface::ShowScore(const coreUint32 iScore, const coreUint8 iMedal, const coreUint8 iMedalType)
 {
     // show default score banner
-    this->ShowScore(Core::Language->GetString("SCORE_BONUS"), PRINT("%u", iScore), iMedal, iMedalType);
+    this->ShowScore(Core::Language->GetString("BONUS_TIME"), PRINT("%u", iScore), iMedal, iMedalType);
 }
 
 

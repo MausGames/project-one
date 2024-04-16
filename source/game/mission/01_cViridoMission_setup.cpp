@@ -12,51 +12,55 @@
 // setup the Virido mission
 void cViridoMission::__SetupOwn()
 {
-    const auto nBallMoveFunc = [this](const coreVector2& vBallPos, const coreVector2& vBallDir, const coreVector2& vSyncFrom, const coreVector2& vSyncTo)
-    {
-        STAGE_GET_START(4u)
-            STAGE_GET_UINT (iMoveState)
-            STAGE_GET_VEC2 (vMoveBegin)
-            STAGE_GET_FLOAT(fMoveTime)
-        STAGE_GET_END
-
-        coreObject3D*     pBall = this->GetBall(0u);
-        const coreVector2 vPos  = pBall->GetPosition().xy();
-
-        if(!iMoveState && CONTAINS_BIT(this->GetBounceState(), 7u) &&
-           ((vPos.x >= vSyncFrom.x * FOREGROUND_AREA.x) && (vPos.x <= vSyncTo.x * FOREGROUND_AREA.x) &&
-            (vPos.y >= vSyncFrom.y * FOREGROUND_AREA.y) && (vPos.y <= vSyncTo.y * FOREGROUND_AREA.y)))
-        {
-            iMoveState = 1u;
-            vMoveBegin = vPos;
-        }
-
-        if(iMoveState)
-        {
-            fMoveTime += 0.5f * Core::System->GetTime();
-
-            pBall->SetPosition(coreVector3(LERPS(vMoveBegin, vBallPos, MIN(fMoveTime, 1.0f)), 0.0f));
-
-            if(fMoveTime >= 1.0f)
-            {
-                pBall->SetDirection(coreVector3(vBallDir, 0.0f));
-                STAGE_FINISH_NOW
-            }
-        }
-    };
-
-    const auto nBallSyncFunc = [this](const coreVector2& vBallPos, const coreVector2& vBallDir, const coreVector2& vSyncFrom, const coreVector2& vSyncTo)
+    const auto nBallSyncFunc = [this](const coreVector2& vBallPos, const coreVector2& vBallDir)
     {
         coreObject3D* pBall = this->GetBall(0u);
-        const coreVector2   vPos  = pBall->GetPosition().xy();
 
         if(STAGE_BEGINNING && !pBall->GetType())
+        {
             this->EnableBall(0u, vBallPos, vBallDir);
-
-        if(CONTAINS_BIT(this->GetBounceState(), 7u) &&
-           ((vPos.x >= vSyncFrom.x * FOREGROUND_AREA.x) && (vPos.x <= vSyncTo.x * FOREGROUND_AREA.x) &&
-            (vPos.y >= vSyncFrom.y * FOREGROUND_AREA.y) && (vPos.y <= vSyncTo.y * FOREGROUND_AREA.y)))
             STAGE_FINISH_NOW
+        }
+        else
+        {
+            STAGE_GET_START(5u)
+                STAGE_GET_UINT (iMoveState)
+                STAGE_GET_FLOAT(fMoveBegin)
+                STAGE_GET_FLOAT(fMoveEnd)
+                STAGE_GET_FLOAT(fMoveLength)
+                STAGE_GET_FLOAT(fMoveTime)
+            STAGE_GET_END
+
+            if(!iMoveState && CONTAINS_BIT(this->GetBounceState(), 7u))
+            {
+                iMoveState  = 1u;
+                fMoveBegin  = pBall->GetPosition().xy().Angle();
+                fMoveEnd    = fMoveBegin + AngleDiff(vBallPos.Angle(), fMoveBegin);
+                fMoveLength = vBallPos.Processed(ABS).Max();
+            }
+
+            if(iMoveState)
+            {
+                fMoveTime += 0.5f * Core::System->GetTime();
+
+                if(fMoveTime >= 1.0f)
+                {
+                    g_pSpecialEffects->MacroEruptionColorSmall(coreVector3(vBallPos, 0.0f), vBallDir, COLOR_ENERGY_GREEN);
+
+                    pBall->SetPosition (coreVector3(vBallPos, 0.0f));
+                    pBall->SetDirection(coreVector3(vBallDir, 0.0f));
+                    STAGE_FINISH_NOW
+                }
+                else
+                {
+                    const coreFloat   fAngle = LERPS(fMoveBegin, fMoveEnd, fMoveTime);
+                    const coreVector2 vDir   = coreVector2::Direction(fAngle);
+                    const coreVector2 vPos   = vDir * (RCP(vDir.Processed(ABS).Max()) * fMoveLength);
+
+                    pBall->SetPosition(coreVector3(vPos, 0.0f));
+                }
+            }
+        }
     };
 
     // ################################################################
@@ -169,7 +173,7 @@ void cViridoMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("eins", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("EINS", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
     // ################################################################
@@ -301,7 +305,7 @@ void cViridoMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("zwei", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("ZWEI", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
     // ################################################################
@@ -453,7 +457,7 @@ void cViridoMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("drei", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("DREI", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
     // ################################################################
@@ -581,7 +585,7 @@ void cViridoMission::__SetupOwn()
             iLastEnemy = P_TO_UI(pEnemy);
         });
 
-        STAGE_WAVE("vier", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("VIER", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
     // ################################################################
@@ -689,9 +693,10 @@ void cViridoMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("fünf", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("FÜNF", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
+STAGE_START_HERE
     // ################################################################
     // boss 1
     STAGE_MAIN
@@ -846,6 +851,8 @@ void cViridoMission::__SetupOwn()
 
         STAGE_COLL_ENEMY_BULLET(pEnemy, pBullet, vIntersection, COLL_VAL(pSquad1), COLL_VAL(pSquad2), COLL_VAL(afTarget), COLL_VAL(afSign), COLL_VAL(aiFreeState), COLL_VAL(aiFreeMove))
         {
+            if(pEnemy->GetID() != cCinderEnemy::ID) return; // TODO: better check for pSquad2 ownership
+
             const coreUintW i          = pSquad2->GetIndex(pEnemy);
             const coreFloat fNewTarget = AlongCrossNormal(pBullet->GetFlyDir()).Angle() + CORE_MATH_PRECISION;
 
@@ -868,7 +875,7 @@ void cViridoMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("sechs", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("SECHS", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
     // ################################################################
@@ -946,7 +953,7 @@ void cViridoMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("sieben", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("SIEBEN", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
     // ################################################################
@@ -1076,7 +1083,7 @@ void cViridoMission::__SetupOwn()
             pBulletEnemy->Deactivate(true, vIntersection.xy());
         });
 
-        STAGE_WAVE("acht", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("ACHT", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
     // ################################################################
@@ -1206,7 +1213,7 @@ void cViridoMission::__SetupOwn()
             });
         });
 
-        STAGE_WAVE("neun", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("NEUN", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
     // ################################################################
@@ -1367,7 +1374,7 @@ void cViridoMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE("zehn", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("ZEHN", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
     // ################################################################
@@ -1379,21 +1386,24 @@ void cViridoMission::__SetupOwn()
 
         STAGE_FINISH_NOW
     });
-
+//STAGE_START_HERE
     // ################################################################
     // boss 2
     STAGE_MAIN
     {
+        if(STAGE_BEGINNING)
+        {
+           g_pEnvironment->SetTargetSpeed(0.0f);
+        }
+
         STAGE_BOSS(m_Torus, {60.0f, 120.0f, 180.0, 240.0f})
     });
 
-STAGE_START_HERE
-
     // ################################################################
-    // ball start 1
+    // ball sync 1
     m_anStage.emplace(__LINE__, [=]()
     {
-        nBallSyncFunc(coreVector2(0.0f,0.0f), coreVector2(-0.5f,1.0f).Normalized(), coreVector2(-2.0f,-2.0f), coreVector2(0.0f,-0.5f));
+        nBallSyncFunc(coreVector2(-20.8792858f,41.7585716f), coreVector2(-0.5f,-1.0f).Normalized());
     });
 
     // ################################################################
@@ -1498,21 +1508,15 @@ STAGE_START_HERE
             }
         });
 
-        STAGE_WAVE("elf", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("ELF", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
     // ################################################################
-    // ball move 1
+    // ball sync 2
     m_anStage.emplace(__LINE__, [=]()
     {
-        nBallMoveFunc(coreVector2(41.8878708f,-41.7585716f), coreVector2(-0.5f,1.0f).Normalized(), coreVector2(-2.0f,-2.0f), coreVector2(2.0f,-0.5f));
-    });
-
-    // ################################################################
-    // ball start 2
-    m_anStage.emplace(__LINE__, [=]()
-    {
-        nBallSyncFunc(coreVector2(41.8878708f,-41.7585716f), coreVector2(-0.5f,1.0f).Normalized(), coreVector2(-2.0f,-2.0f), coreVector2(-0.5f,-0.5f));
+        //nBallSyncFunc(coreVector2(41.8878708f,-41.7585716f), coreVector2(-0.5f,1.0f).Normalized());
+        nBallSyncFunc(coreVector2(-20.8792858f,41.7585716f), coreVector2(-0.5f,-1.0f).Normalized());
     });
 
     // ################################################################
@@ -1646,21 +1650,15 @@ STAGE_START_HERE
             }
         });
 
-        STAGE_WAVE("zwölf", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("ZWÖLF", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
     // ################################################################
-    // ball move 2
+    // ball sync 3
     m_anStage.emplace(__LINE__, [=]()
     {
-        nBallMoveFunc(coreVector2(-42.0250816f,-0.525078177f), coreVector2(1.0f,1.0f).Normalized(), coreVector2(-2.0f,-2.0f), coreVector2(-0.5f,-0.5f));
-    });
-
-    // ################################################################
-    // ball start 3
-    m_anStage.emplace(__LINE__, [=]()
-    {
-        nBallSyncFunc(coreVector2(-42.0250816f,-0.525078177f), coreVector2(1.0f,1.0f).Normalized(), coreVector2(-2.0f,-2.0f), coreVector2(2.0f,-0.5f));
+        //nBallSyncFunc(coreVector2(-42.0250816f,-0.525078177f), coreVector2(1.0f,1.0f).Normalized());
+        nBallSyncFunc(coreVector2(-20.8792858f,41.7585716f), coreVector2(-0.5f,-1.0f).Normalized());
     });
 
     // ################################################################
@@ -1783,21 +1781,15 @@ STAGE_START_HERE
             }
         });
 
-        STAGE_WAVE("dreizehn", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("DREIZEHN", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
     // ################################################################
-    // ball move 3
+    // ball sync 4
     m_anStage.emplace(__LINE__, [=]()
     {
-        nBallMoveFunc(coreVector2(-1.0f,1.0f) * FOREGROUND_AREA, coreVector2(1.0f,-1.0f).Normalized(), coreVector2(-2.0f,0.5f), coreVector2(2.0f,2.0f));
-    });
-
-    // ################################################################
-    // ball start 4
-    m_anStage.emplace(__LINE__, [=]()
-    {
-        nBallSyncFunc(coreVector2(-1.0f,1.0f) * FOREGROUND_AREA, coreVector2(1.0f,-1.0f).Normalized(), coreVector2(-2.0f,0.5f), coreVector2(-0.5f,2.0f));
+        //nBallSyncFunc(coreVector2(-1.0f,1.0f) * FOREGROUND_AREA, coreVector2(1.0f,-1.0f).Normalized());
+        nBallSyncFunc(coreVector2(-20.8792858f,41.7585716f), coreVector2(-0.5f,-1.0f).Normalized());
     });
 
     // ################################################################
@@ -1893,21 +1885,15 @@ STAGE_START_HERE
             }
         });
 
-        STAGE_WAVE("vierzehn", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("VIERZEHN", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
     // ################################################################
-    // ball move 4
+    // ball sync 5
     m_anStage.emplace(__LINE__, [=]()
     {
-        nBallMoveFunc(coreVector2(1.0f,1.0f) * FOREGROUND_AREA, coreVector2(-1.0f,-1.0f).Normalized(), coreVector2(0.5f,-2.0f), coreVector2(2.0f,-0.5f));
-    });
-
-    // ################################################################
-    // ball start 5
-    m_anStage.emplace(__LINE__, [=]()
-    {
-        nBallSyncFunc(coreVector2(1.0f,1.0f) * FOREGROUND_AREA, coreVector2(-1.0f,-1.0f).Normalized(), coreVector2(0.5f,0.5f), coreVector2(2.0f,2.0f));
+        //nBallSyncFunc(coreVector2(1.0f,1.0f) * FOREGROUND_AREA, coreVector2(-1.0f,-1.0f).Normalized());
+        nBallSyncFunc(coreVector2(-20.8792858f,41.7585716f), coreVector2(-0.5f,-1.0f).Normalized());
     });
 
     // ################################################################
@@ -2123,16 +2109,16 @@ STAGE_START_HERE
             }
         });
 
-        STAGE_WAVE("fünfzehn", {20.0f, 30.0f, 40.0f, 50.0f})
+        STAGE_WAVE("FÜNFZEHN", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
     // ################################################################
-    // ball move 5
+    // ball sync 6
     m_anStage.emplace(__LINE__, [=]()
     {
-        nBallMoveFunc(coreVector2(0.0f,-1.0f) * FOREGROUND_AREA, coreVector2(0.0f,1.0f), coreVector2(-2.0f,-2.0f), coreVector2(-0.5f,-0.5f));
+        //nBallSyncFunc(coreVector2(0.0f,-1.0f) * FOREGROUND_AREA, coreVector2(0.0f,1.0f));
     });
-
+STAGE_START_HERE
     // ################################################################
     // boss 3
     STAGE_MAIN
