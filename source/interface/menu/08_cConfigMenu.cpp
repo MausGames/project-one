@@ -277,7 +277,7 @@ cConfigMenu::cConfigMenu()noexcept
     m_HudType      .AddEntryLanguage("HUDTYPE_OUTSIDE",        0u);
     m_HudType      .AddEntryLanguage("HUDTYPE_INSIDE",         1u);
     m_HudType      .AddEntryLanguage("HUDTYPE_BORDER",         2u);
-    for(coreUintW i = 60u; i <= 240u; i += 30u) m_UpdateFreq.AddEntry(PRINT("%zu", i), i);
+    for(coreUintW i = 60u; i <= 240u; i += 30u) m_UpdateFreq.AddEntry(coreData::ToChars(i), i);
     m_Version      .AddEntry        ("1.0",                    1u);
     m_Version      .AddEntryLanguage("VERSION_LATEST",         0u);
     m_MirrorMode   .AddEntryLanguage("VALUE_OFF",              0u);

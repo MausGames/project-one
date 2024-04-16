@@ -262,14 +262,14 @@ void cPlayer::Move()
                 vNewDir =  vNewDir.Rotated90();
 
             // set new direction
-            this->SetDirection(coreVector3(AlongCrossNormal(vNewDir), 0.0f));
+            this->SetDirection(coreVector3(vNewDir, 0.0f)); 
         }
 
         if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_ROLL))
         {
             // 
-            if(CONTAINS_BIT(m_pInput->iActionPress, PLAYER_EQUIP_WEAPONS * WEAPON_MODES))
-                if(m_fRollTime <= 0.0f) this->StartRolling(m_pInput->vMove);
+            //if(CONTAINS_BIT(m_pInput->iActionPress, PLAYER_EQUIP_WEAPONS * WEAPON_MODES))
+            //    if(m_fRollTime <= 0.0f) this->StartRolling(m_pInput->vMove);
         }
 
         if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
@@ -782,13 +782,21 @@ coreVector2 cPlayer::CalcMove()const
     return coreVector2(0.0f,0.0f);
 }
 
-
+static coreFloat fBoost = 0.0f;
 // ****************************************************************
 // 
 coreFloat cPlayer::CalcMoveSpeed()const
 {
+    if(
+            CONTAINS_BIT(m_pInput->iActionPress, 0u) 
+    || 
+    CONTAINS_BIT(m_pInput->iActionRelease, 0u)
+    ) fBoost = 1.0f;
+    else 
+        fBoost = MAX(fBoost - 10.0f * TIME, 0.0f);
+    
     // 
-    const coreFloat fModifier = this->IsRolling() ? (50.0f + LERPB(25.0f, 0.0f, m_fRollTime)) : (CONTAINS_BIT(m_pInput->iActionHold, 0u) ? 20.0f : 50.0f);
+    const coreFloat fModifier = this->IsRolling() ? (50.0f + LERPB(25.0f, 0.0f, m_fRollTime)) : (CONTAINS_BIT(m_pInput->iActionHold, 0u) ? LERPH3(20.0f, 40.0f, fBoost) : LERPH3(50.0f, 70.0f, fBoost));
     return m_fSpeed * fModifier;
 }
 

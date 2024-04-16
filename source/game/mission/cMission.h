@@ -22,6 +22,7 @@
 // TODO: change all missions to STATIC_MEMORY (check memory, it would put all missions always in memory)
 // TODO: check if TYPE_NEVO_BOMB still needed
 // TODO: do not create objects and load resources of unused game-objects and bosses (e.g. move waves into own classes ? but then ?)
+// TODO: in delay, replace cScoutEnemy with something which does not load any resources (may need to support instancing)
 
 
 // ****************************************************************
@@ -72,6 +73,8 @@ STATIC_ASSERT((BOSSES == 3u) && (WAVES == 15u) && (SEGMENTS == 18u))
 
 #define RUTILUS_TELEPORTER          (2u)                                              // 
 #define RUTILUS_TELEPORTER_COLOR(x) ((x) ? COLOR_ENERGY_BLUE : COLOR_ENERGY_ORANGE)   // 
+#define RUTILUS_PLATES              (5u)                                              // 
+#define RUTILUS_PLATES_RAWS         (RUTILUS_PLATES)                                  // 
 #define RUTILUS_WAVES               (4u)                                              // 
 #define RUTILUS_WAVES_RAWS          (RUTILUS_WAVES)                                   // 
 
@@ -92,13 +95,16 @@ STATIC_ASSERT((BOSSES == 3u) && (WAVES == 15u) && (SEGMENTS == 18u))
 
 #define STAGE_MEDAL_GOAL(...)                  {static constexpr coreFloat A[] = __VA_ARGS__; this->SetMedalGoal(A); STATIC_ASSERT((ARRAY_SIZE(A) == 4u) && (A[0] < A[1]) && (A[1] < A[2]) && (A[2] < A[3]))}
 #define STAGE_BOSS(e,...)                      {if(STAGE_BEGINNING) {STAGE_MEDAL_GOAL(__VA_ARGS__) (e).Resurrect();} if(CONTAINS_FLAG((e).GetStatus(), ENEMY_STATUS_DEAD)) STAGE_FINISH_NOW}
-#define STAGE_WAVE(n,...)                      {if(STAGE_BEGINNING) {STAGE_MEDAL_GOAL(__VA_ARGS__) this->ActivateWave(n);} if(STAGE_CLEARED) {this->DeactivateWave(); if(!g_pGame->GetInterface()->IsBannerActive()) STAGE_FINISH_NOW}}
+#define STAGE_WAVE(n,...)                      {if(STAGE_BEGINNING) {STAGE_MEDAL_GOAL(__VA_ARGS__) this->ActivateWave(n);} if(STAGE_CLEARED) {this->DeactivateWave(); m_iStageSub = 0xFFu; if(!g_pGame->GetInterface()->IsBannerActive()) STAGE_FINISH_NOW}}
 
 #define STAGE_START_HERE                       {m_anStage.clear(); STAGE_MAIN({TAKE_ALWAYS}) {if(STAGE_BEGINNING) g_pGame->StartIntro(); STAGE_FINISH_PLAY});}
 
 #define STAGE_CLEARED                          (std::all_of(m_apSquad.begin(), m_apSquad.end(), [](const cEnemySquad* pSquad) {return pSquad->IsFinished();}))
 #define STAGE_RESSURECT(s,f,t)                 {STAGE_FOREACH_ENEMY_ALL(s, pEnemy, i) {if((coreInt32(i) >= coreInt32(f)) && (coreInt32(i) <= coreInt32(t))) pEnemy->Resurrect();}); ASSERT((coreInt32(f) <= coreInt32(t)) && (coreInt32(t) < coreInt32((s)->GetNumEnemies())))}
 #define STAGE_BADGE(b,p)                       {this->GiveBadge(b, p);}
+
+#define STAGE_DELAY_START                      {UNUSED STAGE_ADD_SQUAD(pDelay, cScoutEnemy, 1u) {pDelay->GetEnemy(0u)->Configure(1, COLOR_SHIP_GREY); pDelay->GetEnemy(0u)->Resurrect();});}
+#define STAGE_DELAY_END                        {m_apSquad.back()->GetEnemy(0u)->Kill(false);}
 
 #define STAGE_ADD_PATH(n)                      const auto n = this->_AddPath    (__LINE__,      [](coreSpline2* OUTPUT n)
 #define STAGE_ADD_SQUAD(n,t,c)                 const auto n = this->_AddSquad<t>(__LINE__, (c), [](cEnemySquad* OUTPUT n)
@@ -147,6 +153,7 @@ STATIC_ASSERT((BOSSES == 3u) && (WAVES == 15u) && (SEGMENTS == 18u))
 #define STAGE_TICK_TIME(c,o)                   ((fLifeTimeBeforeBase >= 0.0f) && STAGE_TICK_FREE(c, o))
 #define STAGE_TICK_LIFETIME(c,o)               ((fLifeTimeBeforeBase >= 0.0f) && ((s_iTick = F_TO_UI(fLifeTime     * (c) - (o))) != (F_TO_UI(fLifeTimeBefore     * (c) - (o)))))
 #define STAGE_TICK_LIFETIME_BASE(c,o)          ((fLifeTimeBeforeBase >= 0.0f) && ((s_iTick = F_TO_UI(fLifeTimeBase * (c) - (o))) != (F_TO_UI(fLifeTimeBeforeBase * (c) - (o)))))
+// TODO: mit dem tod des letzten gegners werden beim scripten manchmal alle geschosse zerstört, aber weil ein toter gegner noch 1mal iteriert wird schießt er danach noch mal
 
 #define STAGE_TIME_POINT(t)                    (InBetween((t), m_fStageTimeBefore, m_fStageTime))
 #define STAGE_TIME_BEFORE(t)                   (m_fStageTime <  (t))
@@ -561,6 +568,11 @@ private:
     coreVector2  m_avTeleporterPrev[RUTILUS_TELEPORTER];   // 
     coreUint8    m_iTeleporterActive;                      // 
 
+    coreBatchList m_Plate;                                 // 
+    coreObject3D  m_aPlateRaw  [RUTILUS_PLATES_RAWS];      // 
+    coreFlow      m_afPlateTime[RUTILUS_PLATES];           // 
+    coreVector4   m_avPlateData[RUTILUS_PLATES];           // 
+
     coreBatchList m_Wave;                                  // 
     coreObject3D  m_aWaveRaw  [RUTILUS_WAVES_RAWS];        // 
     coreFlow      m_afWaveTime[RUTILUS_WAVES];             // 
@@ -584,11 +596,19 @@ public:
     void DisableTeleporter(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
+    void EnablePlate (const coreUintW iIndex, const coreFloat fFrom, const coreFloat fTo, const coreFloat fScale);
+    void DisablePlate(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
     void EnableWave ();
     void DisableWave(const coreBool bAnimated);
 
     // 
     inline void SetTeleporterActive(const coreUint8 iActive) {m_iTeleporterActive = iActive;}
+
+    // 
+    inline void SetPlateOffset(const coreUintW iIndex, const coreFloat fOffset) {ASSERT(iIndex < RUTILUS_PLATES) m_afPlateTime[iIndex] = 0.0f; m_avPlateData[iIndex].xy(coreVector2(m_avPlateData[iIndex].y, fOffset));}
+    inline void SetPlateScale (const coreUintW iIndex, const coreFloat fScale)  {ASSERT(iIndex < RUTILUS_PLATES) m_afPlateTime[iIndex] = 0.0f; m_avPlateData[iIndex].zw(coreVector2(m_avPlateData[iIndex].w, fScale));}
 
 
 private:

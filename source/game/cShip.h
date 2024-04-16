@@ -68,6 +68,7 @@ public:
     inline cShip* Rotate90 () {this->SetPosition( this->GetPosition().RotatedZ90()); this->SetDirection( this->GetDirection().RotatedZ90()); return this;}
     inline cShip* Rotate180() {this->SetPosition(-this->GetPosition());              this->SetDirection(-this->GetDirection());              return this;}
     inline cShip* Rotate270() {this->SetPosition(-this->GetPosition().RotatedZ90()); this->SetDirection(-this->GetDirection().RotatedZ90()); return this;}
+    inline cShip* MapToAxis(const coreVector2& vAxis) {this->SetPosition(coreVector3(::MapToAxis(this->GetPosition().xy(), vAxis), 0.0f)); this->SetDirection(coreVector3(::MapToAxis(this->GetDirection().xy(), vAxis), 0.0f)); return this;}
 
 
     // 

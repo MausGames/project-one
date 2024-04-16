@@ -288,6 +288,9 @@ public:
     DISABLE_COPY(cSpaceBackground)
     ASSIGN_ID_EX(4, "Space", COLOR_MENU_MAGENTA)
 
+    // 
+    inline void SetCoverColor(const coreVector3& vColor) {m_Cover.SetColor3(LERP(vColor, coreVector3(1.0f,1.0f,1.0f), 0.5f));}
+
 
 private:
     // execute own routines

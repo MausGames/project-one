@@ -146,7 +146,7 @@ void cCombatText::AddText(const coreChar* pcText, const coreVector3& vPosition, 
 void cCombatText::AddValue(const coreInt32 iValue, const coreVector3& vPosition, const coreVector3& vColor)
 {
     // 
-    this->AddText(PRINT("%d", iValue), vPosition, vColor);
+    this->AddText(coreData::ToChars(iValue), vPosition, vColor);
 }
 
 
@@ -160,7 +160,7 @@ void cCombatText::AddBadge(const coreUint32 iValue, const coreVector3& vPosition
     m_BadgeIcon.SetCenter(vOnScreen);
 
     // 
-    m_BadgeLabel.SetText  (PRINT("%d", iValue));
+    m_BadgeLabel.SetText  (coreData::ToChars(iValue));
     m_BadgeLabel.SetCenter(vOnScreen);
 
     // 

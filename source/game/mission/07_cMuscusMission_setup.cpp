@@ -293,6 +293,7 @@ void cMuscusMission::__SetupOwn()
     // geschosse von beiden seiten der gegner, gehen mit gegner mit um "wand" zu bauen
     // pacifist ? -> attack on old position when spawning ?   ODER MITTE
     // shared damage ?
+    // TODO: general solution to properly override direction
     STAGE_MAIN({TAKE_ALWAYS, 6u})
     {
         STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 32u)

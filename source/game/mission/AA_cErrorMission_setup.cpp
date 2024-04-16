@@ -50,7 +50,7 @@ void cErrorMission::__SetupOwn()
             });
         });
 
-        //STAGE_GET_START(1u)
+        //STAGE_GET_START(u)
         //STAGE_GET_END
 
         if(STAGE_CLEARED)

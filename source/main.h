@@ -99,10 +99,8 @@
 #endif
 
 #if defined(_CORE_GCC_) || defined(_CORE_CLANG_)
-
     #pragma GCC diagnostic ignored "-Winconsistent-missing-override"
     #pragma GCC diagnostic ignored "-Woverloaded-virtual"
-
 #endif
 
 

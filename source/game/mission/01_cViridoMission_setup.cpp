@@ -1608,7 +1608,7 @@ void cViridoMission::__SetupOwn()
             const coreVector2 vEnemyMove = pEnemy->GetMove()          * mTransformRev;
 
             coreVector2 vWrap = vTarget * FOREGROUND_AREA;
-            if(vWrap    .y < 0.0f)    vWrap.y = FMOD(vWrap.y - 1.2f * FOREGROUND_AREA.y, -2.4f * FOREGROUND_AREA.y) + 1.2f * FOREGROUND_AREA.y;
+            if(vWrap    .y < 0.0f)    vWrap.y = FmodRange(vWrap.y, -1.2f * FOREGROUND_AREA.y, 1.2f * FOREGROUND_AREA.y);
             if(vEnemyPos.y < vWrap.y) vWrap.y = vWrap.y - 2.4f * FOREGROUND_AREA.y;
 
             pEnemy->SetBaseColor(COLOR_SHIP_GREY);
@@ -1660,7 +1660,7 @@ void cViridoMission::__SetupOwn()
             coreVector2 vCurPos = pEnemy->GetPosition().xy() * mTransformRev;
 
                                  vCurPos.x = CLAMP(vCurPos.x, -1.08f * FOREGROUND_AREA.x, 1.08f * FOREGROUND_AREA.x);
-            if(vCurPos.y < 0.0f) vCurPos.y = FMOD(vCurPos.y - 1.2f * FOREGROUND_AREA.y, -2.4f * FOREGROUND_AREA.y) + 1.2f * FOREGROUND_AREA.y;
+            if(vCurPos.y < 0.0f) vCurPos.y = FmodRange(vCurPos.y, -1.2f * FOREGROUND_AREA.y, 1.2f * FOREGROUND_AREA.y);
 
             pEnemy->SetPosition(coreVector3(vCurPos * mTransform, 0.0f));
 

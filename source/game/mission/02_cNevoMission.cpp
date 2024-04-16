@@ -25,6 +25,7 @@ cNevoMission::cNevoMission()noexcept
 , m_Block        (NEVO_BLOCKS)
 , m_BlockWave    (NEVO_BLOCKS)
 , m_apBlockOwner {}
+, m_afBlockScale {}
 , m_vForce       (coreVector2(0.0f,0.0f))
 , m_vImpact      (coreVector2(0.0f,0.0f))
 , m_bClamp       (false)

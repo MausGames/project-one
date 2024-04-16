@@ -405,11 +405,82 @@ void cHarenaMission::__SetupOwn()
     {
         STAGE_WAVE("SIEBENUNDDREISSIG", {20.0f, 30.0f, 40.0f, 50.0f})
     });
-
+STAGE_START_HERE
     // ################################################################
-    // <REPLACE>                                                       
+    // whac-a-mole
+    // 4 - 6 - 8 (max 2 on one side)
+    // holes <> enemies
+    // cloud/smoke movement like Okami (but not with shitty randomness)
+    // visible "holes" (jump ring), but generally movement through sand-storm
+    // 
     STAGE_MAIN({TAKE_ALWAYS, 8u})
     {
+        STAGE_ADD_PATH(pPath1)
+        {
+            pPath1->Reserve(2u);
+            pPath1->AddNode(coreVector2(0.0f, 1.2f), coreVector2(0.0f,-1.0f));
+            pPath1->AddNode(coreVector2(0.0f,-1.2f), coreVector2(0.0f,-1.0f));
+            pPath1->Refine();
+        });
+
+        STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 2u)
+        {
+            STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
+            {
+                pEnemy->Configure(1000, COLOR_SHIP_GREY);
+                pEnemy->AddStatus(ENEMY_STATUS_IMMORTAL | ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
+            });
+
+            pSquad1->GetEnemy(0u)->SetSize(coreVector3(1.0f,1.0f,1.0f) * 1.5f);
+            pSquad1->GetEnemy(0u)->SetBaseColor(COLOR_SHIP_BLUE);
+        });
+
+        STAGE_GET_START(2u)
+            STAGE_GET_UINT(iVisible)
+            STAGE_GET_UINT(iVisibleCopy)
+        STAGE_GET_END
+
+        if(STAGE_CLEARED)
+        {
+                 if(STAGE_SUB(1u)) STAGE_RESSURECT(pSquad1, 0u, 0u)
+            else if(STAGE_SUB(2u)) STAGE_RESSURECT(pSquad1, 1u, 1u)
+        }
+
+        STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
+        {
+            STAGE_LIFETIME(pEnemy, 0.5f, 0.2f * I_TO_F(i))
+
+            STAGE_REPEAT(pPath1->GetTotalDistance())
+
+            const coreVector2 vFactor = coreVector2(1.0f,1.0f);
+            const coreVector2 vOffset = coreVector2(0.0f,0.0f);
+
+            pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
+            
+            
+            if(!CONTAINS_BIT(iVisible, i) && !pEnemy->GetMove().IsNull() && STAGE_TICK_TIME(10.0f, 0.0f))
+            {
+                const coreVector3 vColor = i ? COLOR_ENERGY_WHITE : COLOR_ENERGY_BLUE;
+
+                g_pSpecialEffects->CreateSplashSmoke(pEnemy->GetPosition(),  3.0f, 3u, vColor);
+                g_pSpecialEffects->CreateSplashColor(pEnemy->GetPosition(), 10.0f, 5u, vColor);
+            }
+            
+            
+            
+            
+            if(CONTAINS_BIT(iVisible, i) && !CONTAINS_BIT(iVisibleCopy, i))
+            {
+                pEnemy->RemoveStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
+            }
+            else if(!CONTAINS_BIT(iVisible, i) && CONTAINS_BIT(iVisibleCopy, i))
+            {
+                pEnemy->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
+            }
+        });
+
+        iVisibleCopy = iVisible;
+
         STAGE_WAVE("ACHTUNDDREISSIG", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 

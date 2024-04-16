@@ -143,7 +143,7 @@ void cRayWeapon::__ShootOwn()
     // 
     const coreVector2 vPos = m_pOwner->GetPosition ().xy();
     const coreVector2 vDir = m_pOwner->GetDirection().xy();
-    const coreVector2 vTan = vDir.Rotated90() * ((m_pOwner->GetMove().IsNull() || m_pOwner->GetInput()->vMove.IsNull()) ? 1.0f : 0.5f);
+    const coreVector2 vTan = vDir.Rotated90();// * ((m_pOwner->GetMove().IsNull() || m_pOwner->GetInput()->vMove.IsNull()) ? 1.0f : 0.5f);
 
     // 
     this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(1, 6.0f, m_pOwner, vPos + vTan*1.5f, vDir));
