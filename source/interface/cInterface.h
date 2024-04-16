@@ -14,7 +14,6 @@
 // TODO 3: MENU_INSIDE_ALPHA should only be used with inside-hud
 // TODO 4: merge wave time and boss time if possible
 // TODO 3: add animation to combo bar, combo value, score (consider sustained fire on boss, e.g. on Eigengrau)
-// TODO 1: [MF] [HIGH] ausblende algorithmus einbauen (+ also for combat-text marker)
 
 
 // ****************************************************************
@@ -199,8 +198,8 @@ public:
     void MoveTimeless();
 
     // 
-    coreFloat CalcGameCover(const coreObject2D** ppObject, const coreVector2* pvScale, const coreUintW iCount);
-    coreFloat CalcGameCover(const coreObject2D*  pObject,  const coreVector2  vScale);
+    coreFloat CalcGameCover(const coreObject2D** ppObject, const coreVector2* pvScale, const coreUintW iCount, const coreBool bStretch);
+    coreFloat CalcGameCover(const coreObject2D*  pObject,  const coreVector2  vScale, const coreBool bStretch);
 
     // 
     inline void PingImmune(const coreUintW iIndex) {ASSERT(iIndex < INTERFACE_VIEWS) m_aView[iIndex].fImmuneTime = 1.0f;}

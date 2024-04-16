@@ -149,7 +149,7 @@ void cEnvironment::Move()
     m_fSideOffset             = 0.65f * coreVector2::Dot(m_avDirection[0].Rotated90(), m_avSide[0]) * (vAbsDir.Max() - vAbsDir.Min());
 
     // calculate camera and light values
-    m_vCameraPos = coreVector3(m_fSideOffset, m_fFlyOffset * OUTDOOR_DETAIL, CAMERA_POSITION.z - m_afHeight[0]);
+    m_vCameraPos = CAMERA_POSITION + coreVector3(m_fSideOffset, m_fFlyOffset * OUTDOOR_DETAIL, -m_afHeight[0]);
     m_vLightDir  = LIGHT_DIRECTION * coreMatrix3::Rotation(m_avDirection[0]);
 
     // move current background

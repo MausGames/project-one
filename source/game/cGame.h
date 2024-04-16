@@ -325,7 +325,7 @@ public:
     // 
     inline void HideHelpers    () {for(coreUintW i = 0u; i < GAME_HELPERS; ++i) if(m_aHelper[i].HasStatus(HELPER_STATUS_DEAD)) m_aHelper[i].SetPosition(coreVector3(HIDDEN_POS, 0.0f));}
     inline void KillHelpers    () {for(coreUintW i = 0u; i < GAME_HELPERS; ++i) m_aHelper[i].Kill(false);}
-    //inline void KillRepairEnemy() {if(m_pRepairEnemy) m_pRepairEnemy->TakeDamage(m_pRepairEnemy->GetCurHealth(), ELEMENT_NEUTRAL, coreVector2(0.0f,0.0f), NULL);}
+    //inline void KillRepairEnemy() {if(m_pRepairEnemy->GetPlayer()) m_pRepairEnemy->TakeDamage(m_pRepairEnemy->GetCurHealth(), ELEMENT_NEUTRAL, coreVector2(0.0f,0.0f), NULL);}
 
     // 
     void PrefetchBoss();
@@ -366,8 +366,8 @@ public:
     inline cExhaustManager* GetExhaustManager     ()                         {return &m_ExhaustManager;}
     inline cInterface*      GetInterface          ()                         {return &m_Interface;}
     inline cCombatText*     GetCombatText         ()                         {return &m_CombatText;}
-    inline cRepairEnemy*    GetRepairEnemy        ()const                    {return m_pRepairEnemy;}
-    inline cMission*        GetCurMission         ()const                    {ASSERT(m_pCurMission) return m_pCurMission;}
+    inline cRepairEnemy*    GetRepairEnemy        ()const                    {ASSERT(m_pRepairEnemy) return m_pRepairEnemy;}
+    inline cMission*        GetCurMission         ()const                    {ASSERT(m_pCurMission)  return m_pCurMission;}
     inline const coreUintW& GetCurMissionIndex    ()const                    {return m_iCurMissionIndex;}
     inline cTimeTable*      GetTimeTable          ()                         {return &m_TimeTable;}
     

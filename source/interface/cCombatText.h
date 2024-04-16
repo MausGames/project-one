@@ -57,7 +57,7 @@ private:
     cGuiLabel  m_aMarker      [COMBAT_MARKERS];   // 
     cGuiObject m_aMarkerBack  [COMBAT_MARKERS];   // 
     coreFlow   m_afMarkerAlpha[COMBAT_MARKERS];   // 
-    coreUint16 m_iMarkerFade;                     // 
+    coreUint16 m_iMarkerCover;                    // 
     coreUint16 m_iMarkerState;                    // 
 
     cGuiObject m_BadgeIcon;                       // 
@@ -99,7 +99,7 @@ public:
     void DrawTrophy   (const coreVector3 vPosition);
 
     // 
-    void AttachMarker(const coreUintW iIndex, const coreChar* pcText, const coreVector3 vPosition, const coreVector3 vColor, const coreBool bFade);
+    void AttachMarker(const coreUintW iIndex, const coreChar* pcText, const coreVector3 vPosition, const coreVector3 vColor, const coreBool bCover);
 
     // 
     void UpdateLayout();

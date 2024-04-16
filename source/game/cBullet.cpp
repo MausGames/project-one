@@ -521,7 +521,7 @@ cPulseBullet::cPulseBullet()noexcept
 void cPulseBullet::__ImpactOwn(const coreVector2 vImpact, const coreVector2 vForce)
 {
     // 
-    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 10.0f, 3u, this->GetColor3());
+    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 20.0f, 3u, this->GetColor3());
 }
 
 
@@ -537,6 +537,9 @@ void cPulseBullet::__ReflectOwn()
     m_fFade = 0.0f;
     this->SetSize (coreVector3(0.0f,0.0f,0.0f));
     this->SetAlpha(0.0f);
+
+    // 
+    g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 10.0f, 3u, this->GetColor3());
 }
 
 
@@ -551,16 +554,21 @@ void cPulseBullet::__MoveOwn()
     this->SetPosition (coreVector3(this->GetPosition().xy() + this->GetFlyMove(), this->GetPosition().z));
     this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
 
-    const coreFloat fRelSpeed = m_fSpeed / (3.0f*BULLET_SPEED_FACTOR);
+    const coreFloat fRelSpeed = m_fSpeed / (6.0f*BULLET_SPEED_FACTOR);
     
     // update animation
-    m_fAnimation.UpdateMod(0.4f * fRelSpeed * m_fAnimSpeed, 1.0f);
-    this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
+    //m_fAnimation.UpdateMod(0.4f * fRelSpeed * m_fAnimSpeed, 1.0f);
+    //this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
 
     // update fade
-    m_fFade.Update(1.0f * fRelSpeed);
-    this->SetSize (coreVector3(1.0f, 2.5f * MIN1(12.0f * m_fFade)     * fRelSpeed, 1.0f) * 1.3f * m_fScale);
+    m_fFade.Update(1.5f * fRelSpeed);
+    const coreFloat fLen = MIN1(12.0f * m_fFade) * (0.3f + 0.7f * fRelSpeed);
+    const coreFloat fWave = 1.0f + 0.25f * SIN(m_fFade * 30.0f + 1.5f*PI);
+    this->SetSize (coreVector3(1.0f * fWave, 3.5f * fLen * fRelSpeed, 1.0f * fWave) * 1.6f * m_fScale);
     this->SetAlpha(MIN1(15.0f * m_fFade));
+    
+    
+    this->SetTexSize(coreVector2(0.2f, 0.4f * fLen) * 0.01f);
 }
 
 

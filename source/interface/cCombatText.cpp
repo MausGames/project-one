@@ -17,7 +17,7 @@ cCombatText::cCombatText()noexcept
 , m_apOrder       {}
 , m_iOrderNum     (0u)
 , m_afMarkerAlpha {}
-, m_iMarkerFade   (0u)
+, m_iMarkerCover  (0u)
 , m_iMarkerState  (0u)
 , m_fBadgeTime    (0.0f)
 , m_fTrophyTime   (0.0f)
@@ -233,7 +233,8 @@ void cCombatText::Move()
             }
         }
 
-        const coreFloat fCover = HAS_BIT(m_iMarkerFade, i) ? g_pGame->GetInterface()->CalcGameCover(&oMarker, coreVector2(1.6f,1.6f)) : 1.0f;
+        // 
+        const coreFloat fCover = HAS_BIT(m_iMarkerCover, i) ? g_pGame->GetInterface()->CalcGameCover(&oMarker, coreVector2(1.6f,1.6f), false) : 1.0f;
 
         // 
         oMarker.SetAlpha(m_afMarkerAlpha[i] * fCover);
@@ -433,7 +434,7 @@ void cCombatText::DrawTrophy(const coreVector3 vPosition)
 
 // ****************************************************************
 // 
-void cCombatText::AttachMarker(const coreUintW iIndex, const coreChar* pcText, const coreVector3 vPosition, const coreVector3 vColor, const coreBool bFade)
+void cCombatText::AttachMarker(const coreUintW iIndex, const coreChar* pcText, const coreVector3 vPosition, const coreVector3 vColor, const coreBool bCover)
 {
     ASSERT(iIndex < COMBAT_MARKERS)
 
@@ -457,8 +458,8 @@ void cCombatText::AttachMarker(const coreUintW iIndex, const coreChar* pcText, c
     m_afMarkerAlpha[iIndex] = 1.0f;
     
     // 
-    SET_BIT(m_iMarkerFade, iIndex, bFade)
-    STATIC_ASSERT(COMBAT_MARKERS <= sizeof(m_iMarkerFade)*8u)
+    SET_BIT(m_iMarkerCover, iIndex, bCover)
+    STATIC_ASSERT(COMBAT_MARKERS <= sizeof(m_iMarkerCover)*8u)
 
     // 
     ADD_BIT(m_iMarkerState, iIndex)

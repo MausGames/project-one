@@ -94,6 +94,9 @@ void cExhaustManager::Move()
         const coreFloat fOffset = I_TO_F((P_TO_UI(pObject) / sizeof(coreObject3D) % 10u)) * 0.1f;
 
         // 
+        pObject->SetEnabled(pEnemy->GetEnabled());
+
+        // 
         switch(it->eType)
         {
         default: ASSERT(false)

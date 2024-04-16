@@ -22,6 +22,7 @@
 // TODO 3: weitere optionen: particle effects (%)
 // TODO 3: EMSCRIPTEN: gamepad calibration feature required, buttons on different gamepads are always different -> man muss aber alle buttons sehn können, damit man fire-up, fire-down etc. versteht  (or warning: gamepads might not work properly, due to browser limitations, for better support, please download the desktop versions for Windows, Linux, or macOS
 // TODO 3: on very first startup, lowest resampler is selected, even when high sound quality is default
+// TODO 1: [MF] [HIGH] new options (need loca): dynamic fade-out
 
 
 // ****************************************************************

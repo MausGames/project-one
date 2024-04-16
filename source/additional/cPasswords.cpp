@@ -8,6 +8,8 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
+coreBool g_bCheatP1 = false;
+
 
 // ****************************************************************
 // 
@@ -59,8 +61,8 @@ coreBool ApplyPassword(const coreChar* pcText)
         }
         break;
 
-    // CELADON green
-    case 9262066068920926272u:
+    // SEPIA brown
+    case 4083581750562567063u:
         {
             ADD_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_GAMESPEEDUP)
         }
@@ -70,6 +72,13 @@ coreBool ApplyPassword(const coreChar* pcText)
     case 4594381807352121855u:
         {
             ADD_BIT_EX(g_pSave->EditProgress()->aiUnlock, UNLOCK_POWERSHIELD)
+        }
+        break;
+
+    // CELADON green
+    case 9262066068920926272u:
+        {
+            g_bCheatP1 = true;
         }
         break;
 

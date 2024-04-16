@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 //*----------------------------------------------------------------------------*//
-//| Project One v1.0.4 (https://www.maus-games.at)                             |//
+//| Project One v1.0.5 (https://www.maus-games.at)                             |//
 //*----------------------------------------------------------------------------*//
 //| Copyright (c) 2010 Martin Mauersics                                        |//
 //|                                                                            |//
@@ -98,7 +98,6 @@
 // TODO 3: multiplicative rotation for bullet-waves, to create better interleaving (orb-bullets in geminga) -> only where it makes sense or improves the visuals
 // TODO 3: sphere model kann ungenau sein, vor allem bei der area-bubble bei P1 magenta phase
 // TODO 3: pfeile der switch-boxen sind leicht vertikal verschoben bei 1920x1080
-// TODO 1: in-game achievements menu, bei credits+passwort, freifliegendes menü zum scrollen, links icons (steam-icons, stage von stage-textur, rest von neuer gemergter textur (0 + 1 together)), rechts description und check
 // TODO 1: [MF] [HIGH] [ULTRA] swap visuals for task objects (not all of them are used anymore, so show the best looking first)
 // TODO 3: rogue like mode (grey mode), with negative or positive+negative (combined) effects to select
 // TODO 1: [MF] [HIGH] [ULTRA] add more coop special cases (like residue and ghosts), at least one per mission, not bosses except if something cool comes to mind
@@ -130,7 +129,6 @@
 // TODO 3: add more details to cloud background (transparent enemy ships far in the back ? like Ikagura and RSG)
 // TODO 3: einen anderen bottom-background im wolken-level ? stadt, andere textur, outdoor ?
 // TODO 3: emscripten demo für v0.2.0
-// TODO 1: [MF] final fantasy ending screen (objekt in mitte (fragment, Sonic) darüber text THE END ?), "thank you for playing" beim tod von P1, in normalem playthorugh kommen credits über alle backgrounds, die grau werden und verrotten (turf brennt sich langsam ein), beim echten playthrough sind sie bunt
 // TODO 3: etwas muss gemacht werden, wenn sich die player hitboxen überlappen (vielleicht nicht möglich, schieben ?)
 // TODO 3: gegner und geschosse am rand müssen gut sichtbar bleiben, wenn interface im inneren ist
 

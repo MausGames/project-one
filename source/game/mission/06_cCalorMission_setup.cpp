@@ -464,7 +464,7 @@ void cCalorMission::__SetupOwn()
 
             if(pEnemy->ReachedDeath())
             {
-                if(!g_pGame->GetRepairEnemy()) iUnrepaired += 1u;
+                if(!g_pGame->GetRepairEnemy()->GetPlayer()) iUnrepaired += 1u;
             }
         });
 

@@ -53,7 +53,7 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
 #endif
 
     // configure first player
-    m_aPlayer[0].Configure  (PLAYER_SHIP_ATK);
+    m_aPlayer[0].Configure  (g_bCheatP1 ? PLAYER_SHIP_P1 : PLAYER_SHIP_ATK);
     m_aPlayer[0].EquipShield(oOptions.aiShield[0]);
     for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS;  ++i) m_aPlayer[0].EquipWeapon (i, oOptions.aaiWeapon [0][i]);
     for(coreUintW i = 0u; i < PLAYER_EQUIP_SUPPORTS; ++i) m_aPlayer[0].EquipSupport(i, oOptions.aaiSupport[0][i]);
@@ -81,6 +81,9 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
     m_Interface .UpdateLayout();
     m_Interface .UpdateEnabled();
     m_CombatText.UpdateLayout();
+
+    // 
+    m_pRepairEnemy = new cRepairEnemy();   // # because of enemy-registration
 
     // load first mission
     m_pCurMission = new cNoMission();
@@ -112,6 +115,9 @@ cGame::~cGame()
 
     // delete last mission
     SAFE_DELETE(m_pCurMission)
+
+    // 
+    SAFE_DELETE(m_pRepairEnemy)
 
     // 
     g_pWindscreen->ClearAdds(true);
@@ -950,7 +956,7 @@ void cGame::RepairPlayer()
 {
     if(HAS_FLAG(m_iStatus, GAME_STATUS_DEFEATED)) return;
 
-    if(m_pRepairEnemy)
+    if(m_pRepairEnemy->GetPlayer())
     {
         cPlayer* pPlayer = m_pRepairEnemy->GetPlayer();
 
@@ -982,7 +988,7 @@ void cGame::RepairPlayer()
         g_pSave->EditLocalStatsSegment()->iRepairsUsed += 1u;
 
         // 
-        SAFE_DELETE(m_pRepairEnemy)
+        m_pRepairEnemy->Kill(false);
     }
 
     // 
@@ -1453,11 +1459,11 @@ void cGame::__HandleDefeat()
             REMOVE_FLAG(m_iStatus, GAME_STATUS_PLAY)
             ADD_FLAG   (m_iStatus, GAME_STATUS_DEFEATED)
 
-            if(m_pRepairEnemy)
+            if(m_pRepairEnemy->GetPlayer())
             {
                 // 
                 g_pSpecialEffects->CreateSplashDark(m_pRepairEnemy->GetPosition(), SPECIAL_SPLASH_TINY);
-                SAFE_DELETE(m_pRepairEnemy)
+                m_pRepairEnemy->Kill(false);
             }
 
             // 
@@ -1479,10 +1485,9 @@ void cGame::__HandleDefeat()
                 // 
                 g_pPostProcessing->SetSaturation(i, bDefeated ? 0.0f : (1.0f - MIN(pPlayer->GetDesaturate(), 1.0f)));
 
-                if(this->IsMulti() && bDefeated && !m_pRepairEnemy)
+                if(this->IsMulti() && bDefeated && !m_pRepairEnemy->GetPlayer())
                 {
                     // 
-                    m_pRepairEnemy = new cRepairEnemy();
                     m_pRepairEnemy->AssignPlayer(pPlayer);
                     m_pRepairEnemy->Resurrect();
                 }
@@ -1499,7 +1504,7 @@ void cGame::__HandleDefeat()
                 m_BulletManagerPlayerTop.ClearBullets(true);
             }
 
-            if(m_pRepairEnemy && m_pRepairEnemy->ReachedDeath())
+            if(m_pRepairEnemy->GetPlayer() && m_pRepairEnemy->ReachedDeath())
             {
                 this->RepairPlayer();
             }
@@ -1720,9 +1725,9 @@ void cGame::__ClearAll(const coreBool bAnimated)
     this->HideHelpers();
 
     // 
-    if(m_pRepairEnemy)
+    if(m_pRepairEnemy->GetPlayer())
     {
         if(bAnimated) g_pSpecialEffects->MacroExplosionDarkSmall(m_pRepairEnemy->GetPosition());
-        SAFE_DELETE(m_pRepairEnemy)
+        m_pRepairEnemy->Kill(false);
     }
 }

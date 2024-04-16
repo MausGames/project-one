@@ -12,7 +12,6 @@
 
 // TODO 4: cleanup, even header members and functions
 // TODO 3: allow selecting the current tab when going below bottom, instead of skipping it
-// TODO 1: allow hiding cursor (e.g. for world-map)
 // TODO 1: correctly handle button-remapping feature
 // TODO 3: when changing input for keyboard+mouse, you can use the joystick to map the left mouse-button
 

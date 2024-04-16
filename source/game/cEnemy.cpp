@@ -1423,6 +1423,9 @@ void cRepairEnemy::__KillOwn(const coreBool bAnimated)
     // 
     g_pGlow->UnbindObject(&m_Bubble);
     g_pGlow->UnbindObject(&m_Ship);
+
+    // 
+    m_pPlayer = NULL;
 }
 
 
