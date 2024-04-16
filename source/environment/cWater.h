@@ -54,7 +54,7 @@ protected:
 
 
 public:
-    cWater(const coreChar* pcSkyTexture)noexcept;
+    explicit cWater(const coreHashString& sSkyTexture)noexcept;
     virtual ~cWater()override;
 
     DISABLE_COPY(cWater)
@@ -109,7 +109,7 @@ private:
 
 
 public:
-    cIceWater(const coreChar* pcSkyTexture)noexcept;
+    explicit cIceWater(const coreHashString& sSkyTexture)noexcept;
 
     DISABLE_COPY(cIceWater)
 
@@ -137,7 +137,7 @@ private:
 
 
 public:
-    cRainWater(const coreChar* pcSkyTexture)noexcept;
+    explicit cRainWater(const coreHashString& sSkyTexture)noexcept;
     ~cRainWater()final;
 
     DISABLE_COPY(cRainWater)

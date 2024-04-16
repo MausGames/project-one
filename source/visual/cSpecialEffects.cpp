@@ -15,12 +15,15 @@ cSpecialEffects::cSpecialEffects()noexcept
 : m_ParticleColor    (1024u)
 , m_ParticleDark     (256u)
 , m_ParticleSmoke    (512u)
-, m_ParticleFire     (512u)
+, m_ParticleFire     (1024u)
 , m_apLightningOwner {}
 , m_LightningList    (SPECIAL_LIGHTNINGS)
 , m_iCurLightning    (0u)
 , m_iCurBlast        (0u)
 , m_iCurRing         (0u)
+, m_iCurSplatter     (0u)
+, m_fScreenFade      (0.0f)
+, m_bScreenClear     (false)
 , m_iSoundGuard      (SOUND_FFFF)
 , m_ShakeTimer       (coreTimer(1.0f, 30.0f, 0u))
 , m_fShakeStrength   (0.0f)
@@ -67,7 +70,16 @@ cSpecialEffects::cSpecialEffects()noexcept
     }
 
     // 
-    auto nLoadSoundFunc = [this](const eSoundEffect iSoundIndex, const coreChar* pcName)
+    for(coreUintW i = 0u; i < SPECIAL_SPLATTERS; ++i)
+    {
+        m_aSplatter[i].DefineTexture(0u, "effect_splatter.png");
+        m_aSplatter[i].DefineProgram("menu_single_program");
+        m_aSplatter[i].SetAlpha     (0.0f);
+        m_aSplatter[i].SetTexSize   (coreVector2(1.0f,1.0f) * (1.0f/3.0f));
+    }
+
+    // 
+    const auto nLoadSoundFunc = [this](const eSoundEffect iSoundIndex, const coreChar* pcName)
     {
         coreSoundPtr& pSoundPtr = m_apSound[iSoundIndex & 0xFFu];
 
@@ -101,6 +113,7 @@ void cSpecialEffects::Render(const coreBool bForeground)
 
             // enable additive blending (keep alpha aggregation)
             if(bForeground) glBlendFuncSeparate(FOREGROUND_BLEND_SUM, FOREGROUND_BLEND_ALPHA);
+                       else glBlendFunc        (FOREGROUND_BLEND_SUM);
             {
                 // render fire particle system
                 m_ParticleFire.Render();
@@ -109,9 +122,10 @@ void cSpecialEffects::Render(const coreBool bForeground)
                 m_LightningList.Render();
             }
             if(bForeground) glBlendFuncSeparate(FOREGROUND_BLEND_DEFAULT, FOREGROUND_BLEND_ALPHA);
+                       else glBlendFunc        (FOREGROUND_BLEND_DEFAULT);
 
             // render all blast and ring objects
-            auto nRenderFunc = [](coreObject3D* OUTPUT pArray, const coreUintW iSize)
+            const auto nRenderFunc = [](coreObject3D* OUTPUT pArray, const coreUintW iSize)
             {
                 for(coreUintW i = 0u; i < iSize; ++i)
                 {
@@ -124,10 +138,10 @@ void cSpecialEffects::Render(const coreBool bForeground)
                 }
             };
             nRenderFunc(m_aBlast, SPECIAL_BLASTS);
-            glCullFace(GL_FRONT);
-            nRenderFunc(m_aRing,  SPECIAL_RINGS);   // # 1
-            glCullFace(GL_BACK);
-            nRenderFunc(m_aRing,  SPECIAL_RINGS);   // # 2
+            //glCullFace(GL_FRONT);  water reflection 
+            //nRenderFunc(m_aRing,  SPECIAL_RINGS);   // # 1
+            //glCullFace(GL_BACK);
+            //nRenderFunc(m_aRing,  SPECIAL_RINGS);   // # 2
         }
         glDepthMask(true);
     }
@@ -180,8 +194,8 @@ void cSpecialEffects::Move()
             if(!oBlast.GetAlpha()) continue;
 
             // 
-            const coreFloat& fScale = oBlast.GetCollisionModifier().x;
-            const coreFloat& fSpeed = oBlast.GetCollisionModifier().y;
+            const coreFloat fScale = oBlast.GetCollisionModifier().x;
+            const coreFloat fSpeed = oBlast.GetCollisionModifier().y;
 
             // 
             oBlast.SetAlpha    (MAX(oBlast.GetAlpha() - fSpeed * Core::System->GetTime(), 0.0f));
@@ -197,9 +211,9 @@ void cSpecialEffects::Move()
             if(!oRing.GetAlpha()) continue;
 
             // 
-            const coreFloat& fScale = oRing.GetCollisionModifier().x;
-            const coreFloat& fSpeed = oRing.GetCollisionModifier().y;
-            const coreFloat& fTime  = oRing.GetCollisionModifier().z;
+            const coreFloat fScale = oRing.GetCollisionModifier().x;
+            const coreFloat fSpeed = oRing.GetCollisionModifier().y;
+            const coreFloat fTime  = oRing.GetCollisionModifier().z;
 
             // 
             c_cast<coreFloat&>(fTime) = MAX(fTime - fSpeed * Core::System->GetTime(), 0.0f);
@@ -211,6 +225,19 @@ void cSpecialEffects::Move()
             oRing.SetTexOffset(coreVector2(0.1f,0.2f) * fValue);
             oRing.Move();
         }
+    }
+
+    // 
+    for(coreUintW i = 0u; i < SPECIAL_SPLATTERS; ++i)
+    {
+        m_aSplatter[i].Move();
+        //m_aSplatter
+    }
+
+    // 
+    if(m_bScreenClear)
+    {
+
     }
 
     // reset sound-guard
@@ -230,16 +257,26 @@ void cSpecialEffects::Move()
 
 
 // ****************************************************************
+// render the overlay separately
+void cSpecialEffects::RenderOverlay()
+{
+    // 
+    for(coreUintW i = 0u; i < SPECIAL_SPLATTERS; ++i)
+        m_aSplatter[i].Render();
+}
+
+
+// ****************************************************************
 // create centered particle splash
 void cSpecialEffects::CreateSplashColor(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor)
 {
     // 
     m_ParticleColor.GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
     {
-        pParticle->SetPositionRel(vPosition+coreVector3::Rand(1.0f), coreVector3::Rand(-fScale, fScale));
-        pParticle->SetScaleAbs   (3.5f,                              1.0f);
-        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),        Core::Rand->Float(-PI, PI));
-        pParticle->SetColor4Abs  (coreVector4(vColor, 1.0f),         coreVector4(vColor, 0.0f));
+        pParticle->SetPositionRel(vPosition + coreVector3::Rand(1.0f), coreVector3::Rand(-fScale, fScale));
+        pParticle->SetScaleAbs   (3.5f,                                1.0f);
+        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),          Core::Rand->Float(-PI, PI));
+        pParticle->SetColor4Abs  (coreVector4(vColor, 1.0f),           coreVector4(vColor, 0.0f));
         pParticle->SetSpeed      (1.5f * Core::Rand->Float(0.7f, 1.3f));
     });
 }
@@ -249,10 +286,10 @@ void cSpecialEffects::CreateSplashDark(const coreVector3& vPosition, const coreF
     // 
     m_ParticleDark.GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
     {
-        pParticle->SetPositionRel(vPosition+coreVector3::Rand(1.0f), coreVector3::Rand(-fScale, fScale));
-        pParticle->SetScaleAbs   (3.5f,                              1.0f);
-        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),        Core::Rand->Float(-PI, PI));
-        pParticle->SetColor4Abs  (coreVector4(0.0f,0.0f,0.0f,1.0f),  coreVector4(0.0f,0.0f,0.0f,0.0f));
+        pParticle->SetPositionRel(vPosition + coreVector3::Rand(1.0f), coreVector3::Rand(-fScale, fScale));
+        pParticle->SetScaleAbs   (3.5f,                                1.0f);
+        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),          Core::Rand->Float(-PI, PI));
+        pParticle->SetColor4Abs  (coreVector4(0.0f,0.0f,0.0f,1.0f),    coreVector4(0.0f,0.0f,0.0f,0.0f));
         pParticle->SetSpeed      (1.5f * Core::Rand->Float(0.7f, 1.3f));
     });
 }
@@ -262,23 +299,23 @@ void cSpecialEffects::CreateSplashSmoke(const coreVector3& vPosition, const core
     // 
     m_ParticleSmoke.GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
     {
-        pParticle->SetPositionRel(vPosition+coreVector3::Rand(1.0f), coreVector3::Rand(-fScale, fScale));
-        pParticle->SetScaleAbs   (3.0f,                              12.5f);
-        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),        Core::Rand->Float(-PI*0.1f, PI*0.1f));
-        pParticle->SetColor4Abs  (coreVector4(1.0f,1.0f,1.0f,1.0f),  coreVector4(1.0f,1.0f,1.0f,0.0f));
+        pParticle->SetPositionRel(vPosition + coreVector3::Rand(1.0f), coreVector3::Rand(-fScale, fScale));
+        pParticle->SetScaleAbs   (3.0f,                                12.5f);
+        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),          Core::Rand->Float(-PI*0.1f, PI*0.1f));
+        pParticle->SetColor4Abs  (coreVector4(1.0f,1.0f,1.0f,1.0f),    coreVector4(1.0f,1.0f,1.0f,0.0f));
         pParticle->SetSpeed      (0.7f * Core::Rand->Float(0.9f, 1.1f));
     });
 }
 
-void cSpecialEffects::CreateSplashFire(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum)
+void cSpecialEffects::CreateSplashFire(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor)
 {
     // 
     m_ParticleFire.GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
     {
-        pParticle->SetPositionRel(vPosition+coreVector3::Rand(3.0f), coreVector3::Rand(-fScale, fScale));
-        pParticle->SetScaleAbs   (4.5f,                              11.5f);
-        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),        Core::Rand->Float(-PI*0.5f, PI*0.5f));
-        pParticle->SetColor4Abs  (coreVector4(0.0f,0.0f,0.0f,1.0f),  coreVector4(0.0f,0.0f,0.0f,0.0f));
+        pParticle->SetPositionRel(vPosition + coreVector3::Rand(3.0f), coreVector3::Rand(-fScale, fScale));
+        pParticle->SetScaleAbs   (4.5f,                                11.5f);
+        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),          Core::Rand->Float(-PI*0.5f, PI*0.5f));
+        pParticle->SetColor4Abs  (coreVector4(vColor*0.926f, 1.0f),    coreVector4(vColor*0.926f, 0.0f));
         pParticle->SetSpeed      (1.4f * Core::Rand->Float(0.9f, 1.1f));
     });
 }
@@ -293,10 +330,10 @@ void cSpecialEffects::CreateBlowColor(const coreVector3& vPosition, const coreVe
     // 
     m_ParticleColor.GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
     {
-        pParticle->SetPositionRel(vPosition+coreVector3::Rand(1.0f), coreVector3::Rand(-fScale, fScale) * 0.25f + vDirection * (Core::Rand->Float(fScale) * 0.75f));
-        pParticle->SetScaleAbs   (3.5f,                              1.0f);
-        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),        Core::Rand->Float(-PI, PI));
-        pParticle->SetColor4Abs  (coreVector4(vColor, 1.0f),         coreVector4(vColor, 0.0f));
+        pParticle->SetPositionRel(vPosition + coreVector3::Rand(1.0f), coreVector3::Rand(-fScale, fScale) * 0.25f + vDirection * (Core::Rand->Float(fScale) * 0.75f));
+        pParticle->SetScaleAbs   (3.5f,                                1.0f);
+        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),          Core::Rand->Float(-PI, PI));
+        pParticle->SetColor4Abs  (coreVector4(vColor, 1.0f),           coreVector4(vColor, 0.0f));
         pParticle->SetSpeed      (1.5f * Core::Rand->Float(0.7f, 1.3f));
     });
 }
@@ -308,21 +345,50 @@ void cSpecialEffects::CreateBlowDark(const coreVector3& vPosition, const coreVec
     // 
     m_ParticleDark.GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
     {
-        pParticle->SetPositionRel(vPosition+coreVector3::Rand(1.0f), coreVector3::Rand(-fScale, fScale) * 0.25f + vDirection * (Core::Rand->Float(fScale) * 0.75f));
-        pParticle->SetScaleAbs   (3.5f,                              1.0f);
-        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),        Core::Rand->Float(-PI, PI));
-        pParticle->SetColor4Abs  (coreVector4(0.0f,0.0f,0.0f,1.0f),  coreVector4(0.0f,0.0f,0.0f,0.0f));
+        pParticle->SetPositionRel(vPosition + coreVector3::Rand(1.0f), coreVector3::Rand(-fScale, fScale) * 0.25f + vDirection * (Core::Rand->Float(fScale) * 0.75f));
+        pParticle->SetScaleAbs   (3.5f,                                1.0f);
+        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),          Core::Rand->Float(-PI, PI));
+        pParticle->SetColor4Abs  (coreVector4(0.0f,0.0f,0.0f,1.0f),    coreVector4(0.0f,0.0f,0.0f,0.0f));
         pParticle->SetSpeed      (1.5f * Core::Rand->Float(0.7f, 1.3f));
     });
 }
 
 
 // ****************************************************************
-// create whirling particle charge
+// 
 void cSpecialEffects::CreateChargeColor(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor)
 {
     // 
+    m_ParticleColor.GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
+    {
+        pParticle->SetPositionAbs(vPosition + coreVector3::Rand(-fScale, fScale), vPosition + coreVector3::Rand(1.0f));
+        pParticle->SetScaleAbs   (3.5f,                                           1.0f);
+        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),                     Core::Rand->Float(-PI, PI));
+        pParticle->SetColor4Abs  (coreVector4(vColor, 1.0f),                      coreVector4(vColor, 0.0f));
+        pParticle->SetSpeed      (1.5f * Core::Rand->Float(0.7f, 1.3f));
+    });
+}
+
+void cSpecialEffects::CreateChargeDark(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum)
+{
+    // 
     m_ParticleDark.GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
+    {
+        pParticle->SetPositionAbs(vPosition + coreVector3::Rand(-fScale, fScale), vPosition + coreVector3::Rand(1.0f));
+        pParticle->SetScaleAbs   (3.5f,                                           1.0f);
+        pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),                     Core::Rand->Float(-PI, PI));
+        pParticle->SetColor4Abs  (coreVector4(0.0f,0.0f,0.0f,1.0f),               coreVector4(0.0f,0.0f,0.0f,0.0f));
+        pParticle->SetSpeed      (1.5f * Core::Rand->Float(0.7f, 1.3f));
+    });
+}
+
+
+// ****************************************************************
+// 
+void cSpecialEffects::CreateWhirlColor(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor)
+{
+    // 
+    m_ParticleColor.GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
     {
         const coreVector3 vDir  = coreVector3::Rand();
         const coreFloat   fRand = Core::Rand->Float(fScale);
@@ -335,7 +401,7 @@ void cSpecialEffects::CreateChargeColor(const coreVector3& vPosition, const core
     });
 }
 
-void cSpecialEffects::CreateChargeDark(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum)
+void cSpecialEffects::CreateWhirlDark(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum)
 {
     // 
     m_ParticleDark.GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
@@ -466,6 +532,34 @@ void cSpecialEffects::CreateRing(const coreVector3& vPosition, const coreVector3
 
 // ****************************************************************
 // 
+void cSpecialEffects::AddScreenSplatter(const coreVector2& vPosition, const coreVector2& vDirection, const coreFloat fScale, const coreUint8 iType)
+{
+    ASSERT(iType < 7u)
+
+    // 
+    if(++m_iCurSplatter >= SPECIAL_SPLATTERS) m_iCurSplatter = 0u;
+    coreObject2D& oSplatter = m_aSplatter[m_iCurSplatter];
+
+    // 
+    oSplatter.SetPosition (vPosition);
+    oSplatter.SetSize     (coreVector2(1.0f,1.0f) * fScale);
+    oSplatter.SetDirection(vDirection);
+    oSplatter.SetColor4   (coreVector4(coreVector3(1.0f,1.0f,1.0f) * 0.07f, 1.0f));
+    oSplatter.SetTexOffset(coreVector2(I_TO_F(iType % 3u), I_TO_F(iType / 3u)) * oSplatter.GetTexSize());
+}
+
+
+// ****************************************************************
+// 
+void cSpecialEffects::ClearScreen()
+{
+    m_fScreenFade  = 0.0f;
+    m_bScreenClear = true;
+}
+
+
+// ****************************************************************
+// 
 void cSpecialEffects::PlaySound(const coreVector3& vPosition, const coreFloat fVolume, const eSoundEffect iSoundIndex)
 {
     ASSERT(fVolume > 0.0f)
@@ -503,12 +597,12 @@ void cSpecialEffects::RumblePlayer(const cPlayer* pPlayer, const coreFloat fStre
     {
         if((pPlayer != pCurPlayer) && (pPlayer != NULL)) return;
 
-        const coreUint8&  iRumble     = g_CurConfig.Input.aiRumble[i];
+        const coreUint8   iRumble     = g_CurConfig.Input.aiRumble[i];
         const coreUintW   iJoystickID = g_CurConfig.Input.aiType  [i] - INPUT_SETS_KEYBOARD;
         const sGameInput* pCurInput   = pCurPlayer->GetInput();
 
         // check for valid configuration
-        if(iRumble && (iJoystickID < Core::Input->GetJoystickNum()))
+        if(iRumble && (iJoystickID < Core::Input->GetJoystickNum()))  
         {
             // check for valid input set
             if((pCurInput == &g_TotalInput) || (P_TO_UI(pCurInput - g_aGameInput) < INPUT_SETS))
@@ -575,22 +669,42 @@ void cSpecialEffects::MacroExplosionDarkBig(const coreVector3& vPosition)
     this         ->ShakeScreen     (SPECIAL_SHAKE_BIG);
 }
 
-void cSpecialEffects::MacroExplosionPhysicalSmall(const coreVector3& vPosition)
+void cSpecialEffects::MacroExplosionPhysicalColorSmall(const coreVector3& vPosition, const coreVector3& vColor)
 {
     // 
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_SMALL);
-    this         ->CreateSplashColor(vPosition, SPECIAL_SPLASH_SMALL, COLOR_FIRE_ORANGE);
-    this         ->CreateSplashFire (vPosition, SPECIAL_EXPLOSION_SMALL);
+    this         ->CreateSplashColor(vPosition, SPECIAL_SPLASH_SMALL,    vColor);
+    this         ->CreateSplashFire (vPosition, SPECIAL_EXPLOSION_SMALL, vColor);
     this         ->PlaySound        (vPosition, 1.0f, SOUND_EXPLOSION_PHYSICAL_SMALL);
     this         ->ShakeScreen      (SPECIAL_SHAKE_SMALL);
 }
 
-void cSpecialEffects::MacroExplosionPhysicalBig(const coreVector3& vPosition)
+void cSpecialEffects::MacroExplosionPhysicalColorBig(const coreVector3& vPosition, const coreVector3& vColor)
 {
     // 
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_BIG);
-    this         ->CreateSplashColor(vPosition, SPECIAL_SPLASH_BIG, COLOR_FIRE_ORANGE);
-    this         ->CreateSplashFire (vPosition, SPECIAL_EXPLOSION_BIG);
+    this         ->CreateSplashColor(vPosition, SPECIAL_SPLASH_BIG,    vColor);
+    this         ->CreateSplashFire (vPosition, SPECIAL_EXPLOSION_BIG, vColor);
+    this         ->PlaySound        (vPosition, 1.0f, SOUND_EXPLOSION_PHYSICAL_BIG);
+    this         ->ShakeScreen      (SPECIAL_SHAKE_BIG);
+}
+
+void cSpecialEffects::MacroExplosionPhysicalDarkSmall(const coreVector3& vPosition)
+{
+    // 
+    g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_SMALL);
+    this         ->CreateSplashDark (vPosition, SPECIAL_SPLASH_SMALL);
+    this         ->CreateSplashFire (vPosition, SPECIAL_EXPLOSION_SMALL, coreVector3(0.22f,0.22f,0.22f));
+    this         ->PlaySound        (vPosition, 1.0f, SOUND_EXPLOSION_PHYSICAL_SMALL);
+    this         ->ShakeScreen      (SPECIAL_SHAKE_SMALL);
+}
+
+void cSpecialEffects::MacroExplosionPhysicalDarkBig(const coreVector3& vPosition)
+{
+    // 
+    g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_BIG);
+    this         ->CreateSplashDark (vPosition, SPECIAL_SPLASH_BIG);
+    this         ->CreateSplashFire (vPosition, SPECIAL_EXPLOSION_BIG, coreVector3(0.22f,0.22f,0.22f));
     this         ->PlaySound        (vPosition, 1.0f, SOUND_EXPLOSION_PHYSICAL_BIG);
     this         ->ShakeScreen      (SPECIAL_SHAKE_BIG);
 }

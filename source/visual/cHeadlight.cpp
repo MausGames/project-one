@@ -124,10 +124,10 @@ void cHeadlight::UpdateDefault()
         {
             this->DrawPoint(pPlayer);
         });
-        g_pGame->GetEnemyManager()->ForEachEnemy([this](const cEnemy* pEnemy)
-        {
-            this->DrawPoint(pEnemy);
-        });
+        //g_pGame->GetEnemyManager()->ForEachEnemy([this](const cEnemy* pEnemy)
+        //{
+        //    this->DrawPoint(pEnemy);
+        //});
     }
 
     // 
@@ -141,8 +141,8 @@ void cHeadlight::DrawSpot(const coreVector3& vPosition, const coreVector2& vSize
 {
     // 
     sSpotCommand oCommand;
-    oCommand.vPosition  = g_pForeground->Project(vPosition)                * HEADLIGHT_SCALE_FACTOR;
-    oCommand.vSize      = g_pForeground->Project(coreVector3(vSize, 0.0f)) * HEADLIGHT_SCALE_FACTOR;
+    oCommand.vPosition  = g_pForeground->Project2D(vPosition)                * HEADLIGHT_SCALE_FACTOR;
+    oCommand.vSize      = g_pForeground->Project2D(coreVector3(vSize, 0.0f)) * HEADLIGHT_SCALE_FACTOR;
     oCommand.vDirection = vDirection.InvertedX();
 
     // 
@@ -156,8 +156,8 @@ void cHeadlight::DrawPoint(const coreVector3& vPosition, const coreVector2& vSiz
 {
     // 
     sPointCommand oCommand;
-    oCommand.vPosition = g_pForeground->Project(vPosition)                * HEADLIGHT_SCALE_FACTOR;
-    oCommand.vSize     = g_pForeground->Project(coreVector3(vSize, 0.0f)) * HEADLIGHT_SCALE_FACTOR;
+    oCommand.vPosition = g_pForeground->Project2D(vPosition)                * HEADLIGHT_SCALE_FACTOR;
+    oCommand.vSize     = g_pForeground->Project2D(coreVector3(vSize, 0.0f)) * HEADLIGHT_SCALE_FACTOR;
 
     // 
     m_aPointCommand.push_back(oCommand);

@@ -12,11 +12,14 @@
 // ****************************************************************
 // constructor
 cForeground::cForeground()noexcept
-: m_mViewProj (Core::Graphics->GetCamera() * coreMatrix4::Perspective(g_vGameResolution, Core::Graphics->GetFOV(), Core::Graphics->GetNearClip(), Core::Graphics->GetFarClip()))
+: m_mViewProj (coreMatrix4::Identity())
 {
     // create foreground frame buffer (texture with alpha)
     m_FrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGBA8);
     m_FrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+
+    // 
+    this->__CalculateViewProj();
 }
 
 
@@ -70,6 +73,14 @@ void cForeground::End()
 // reset with the resource manager
 void cForeground::__Reset(const coreResourceReset bInit)
 {
-    if(bInit) m_FrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
-         else m_FrameBuffer.Delete();
+    if(bInit) {m_FrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL); this->__CalculateViewProj();}
+         else {m_FrameBuffer.Delete();}
+}
+
+
+// ****************************************************************
+// 
+void cForeground::__CalculateViewProj()
+{
+    m_mViewProj = Core::Graphics->GetCamera() * coreMatrix4::Perspective(g_vGameResolution, Core::Graphics->GetFOV(), Core::Graphics->GetNearClip(), Core::Graphics->GetFarClip());
 }

@@ -170,7 +170,7 @@ void cIntroMission::__SetupOwn()
                     const coreVector2 vPos = pEnemy->GetPosition().xy();
                     const coreVector2 vDir = pEnemy->AimAtPlayer(oData.Get<cPlayer*>()).Normalized();
 
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 2.0f, pEnemy, vPos, vDir)->MakeBlue();
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 2.0f, pEnemy, vPos, vDir);
                 });
             }
         });
@@ -241,13 +241,13 @@ void cIntroMission::__SetupOwn()
 
             if(STAGE_LIFETIME_BETWEEN(0.2f, fStop + 5.0f) && STAGE_TICK(30u))
             {
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.2f, pEnemy, vPos + vTan * (CONTAINS_BIT(iSide, i) ? -3.0f : 3.0f), vDir)->MakeGreen();
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.2f, pEnemy, vPos + vTan * (CONTAINS_BIT(iSide, i) ? -3.0f : 3.0f), vDir);
                 TOGGLE_BIT(iSide, i)
             }
             else if(STAGE_LIFETIME_AFTER(fStop + 5.0f) && STAGE_TICK(15u))
             {
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.2f, pEnemy, vPos,  vTan)->MakeGreen();
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.2f, pEnemy, vPos, -vTan)->MakeGreen();
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.2f, pEnemy, vPos,  vTan);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.2f, pEnemy, vPos, -vTan);
             }
         });
 

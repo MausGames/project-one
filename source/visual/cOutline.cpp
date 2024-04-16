@@ -11,11 +11,11 @@
 
 // ****************************************************************
 // 
-void cOutlineStyle::Construct(const coreChar* pcProgramSingleName, const coreChar* pcProgramInstancedName)
+void cOutlineStyle::Construct(const coreHashString& sProgramSingleName, const coreHashString& sProgramInstancedName)
 {
     // load shader-programs for outlined objects
-    s_pProgramSingle    = Core::Manager::Resource->Get<coreProgram>(pcProgramSingleName);
-    s_pProgramInstanced = Core::Manager::Resource->Get<coreProgram>(pcProgramInstancedName);
+    s_pProgramSingle    = Core::Manager::Resource->Get<coreProgram>(sProgramSingleName);
+    s_pProgramInstanced = Core::Manager::Resource->Get<coreProgram>(sProgramInstancedName);
 }
 
 
@@ -56,6 +56,8 @@ cOutline::cOutline()noexcept
     // 
     m_aOutlineStyle[OUTLINE_STYLE_FULL]         .Construct("effect_outline_program",               "effect_outline_inst_program");
     m_aOutlineStyle[OUTLINE_STYLE_DIRECT]       .Construct("effect_outline_direct_program",        "effect_outline_direct_inst_program");
+    m_aOutlineStyle[OUTLINE_STYLE_FLAT_FULL]    .Construct("effect_outline_flat_program",          "effect_outline_flat_inst_program");
+    m_aOutlineStyle[OUTLINE_STYLE_FLAT_DIRECT]  .Construct("effect_outline_flat_direct_program",   "effect_outline_flat_direct_inst_program");
     m_aOutlineStyle[OUTLINE_STYLE_BULLET_FULL]  .Construct("effect_outline_bullet_program",        "effect_outline_bullet_inst_program");
     m_aOutlineStyle[OUTLINE_STYLE_BULLET_DIRECT].Construct("effect_outline_bullet_direct_program", "effect_outline_bullet_direct_inst_program");
 }

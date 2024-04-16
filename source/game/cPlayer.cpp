@@ -25,9 +25,10 @@ cPlayer::cPlayer()noexcept
     this->DefineProgram("object_ship_program");
 
     // set object properties
-    this->SetDirection  (coreVector3(0.0f,1.0f,0.0f));
-    this->SetOrientation(coreVector3(0.0f,0.0f,1.0f));
-    this->SetTexSize    (coreVector2(1.2f,1.2f));
+    this->SetDirection        (coreVector3(0.0f,1.0f,0.0f));
+    this->SetOrientation      (coreVector3(0.0f,0.0f,1.0f));
+    this->SetCollisionModifier(coreVector3(0.0f,0.0f,0.0f));
+    this->SetTexSize          (coreVector2(1.2f,1.2f));
 
     // set initial status
     m_iStatus = PLAYER_STATUS_DEAD;
@@ -45,12 +46,20 @@ cPlayer::cPlayer()noexcept
 
     // 
     m_pDarkProgram = Core::Manager::Resource->Get<coreProgram>("object_ship_darkness_program");
-    //std::swap(m_pDarkProgram, m_pProgram);     
+    std::swap(m_pDarkProgram, m_pProgram);
+
+    // 
+    m_Dot.DefineModel  ("object_dot.md3");
+    m_Dot.DefineTexture(0u, "effect_energy.png");
+    m_Dot.DefineProgram("effect_energy_flat_invert_program");
+    m_Dot.SetSize      (coreVector3(1.0f,1.0f,1.0f) * PLAYER_COLLISION_MIN);
+    m_Dot.SetColor4    (coreVector4(COLOR_ENERGY_RED * 0.7f, 1.0f));
 
     // 
     m_Wind.DefineModel  ("object_sphere.md3");
     m_Wind.DefineTexture(0u, "effect_energy.png");
     m_Wind.DefineProgram("effect_energy_direct_program");
+    m_Wind.SetSize      (coreVector3(1.0f,1.08f,1.0f) * PLAYER_WIND_SIZE);
     m_Wind.SetColor4    (coreVector4(COLOR_ENERGY_BLUE * 1.6f, 0.0f));
     m_Wind.SetTexSize   (coreVector2(1.0f,5.0f));
     m_Wind.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
@@ -58,7 +67,7 @@ cPlayer::cPlayer()noexcept
     // 
     m_Bubble.DefineModel  ("object_sphere.md3");
     m_Bubble.DefineTexture(0u, "effect_energy.png");
-    m_Bubble.DefineProgram("effect_energy_bullet_spheric_program");
+    m_Bubble.DefineProgram("effect_energy_flat_spheric_program");
     m_Bubble.SetColor4    (coreVector4(COLOR_ENERGY_WHITE * 0.5f, 0.0f));
     m_Bubble.SetTexSize   (coreVector2(5.0f,5.0f));
     m_Bubble.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
@@ -104,11 +113,6 @@ void cPlayer::Configure(const coreUintW iShipType, const coreVector3& vColor)
     // load models
     this->DefineModelHigh(pcModelHigh);
     this->DefineModelLow (pcModelLow);
-    this->GetModel().OnUsableOnce([this]()
-    {
-        // normalize collision size of different ship models
-        this->SetCollisionModifier((coreVector3(1.0f,1.0f,1.0f) * PLAYER_COLLISION_SIZE) / this->GetModel()->GetBoundingRange());
-    });
 
     // save color value
     this->SetBaseColor(vColor);
@@ -180,6 +184,16 @@ void cPlayer::Render()
             g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(this);
             m_Wind.Render();
         }
+
+        if(g_bDebugOutput)
+        {
+            glDepthFunc(GL_ALWAYS);
+            {
+                // 
+                m_Dot.Render();
+            }
+            glDepthFunc(GL_LEQUAL);
+        }
     }
 }
 
@@ -193,19 +207,26 @@ void cPlayer::Move()
 
     if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
     {
+        if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_TURN))
+        {
+            coreVector2 vNewDir = this->GetDirection().xy();
+
+            // 
+            if(CONTAINS_BIT(m_pInput->iActionPress, PLAYER_WEAPONS * WEAPON_MODES + 1u))
+                vNewDir = -vNewDir.Rotated90();
+            if(CONTAINS_BIT(m_pInput->iActionPress, PLAYER_WEAPONS * WEAPON_MODES + 2u))
+                vNewDir =  vNewDir.Rotated90();
+
+            // set new direction
+            this->SetDirection(coreVector3(AlongCross(vNewDir), 0.0f));
+        }
+
         if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_ROLL))
         {
             // 
-            //if(CONTAINS_BIT(m_pInput->iActionPress, PLAYER_WEAPONS * WEAPON_MODES))
-            //    if(m_fRollTime <= 0.0f) this->StartRolling(m_pInput->vMove);
+            if(CONTAINS_BIT(m_pInput->iActionPress, PLAYER_WEAPONS * WEAPON_MODES))
+                if(m_fRollTime <= 0.0f) this->StartRolling(m_pInput->vMove);
         }
-
-         
-        if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(Q), CORE_INPUT_PRESS) || Core::Input->GetJoystickButton(0u, 9u, CORE_INPUT_PRESS))
-            this->SetDirection(-this->GetDirection().RotatedZ90());
-        else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(E), CORE_INPUT_PRESS) || Core::Input->GetJoystickButton(0u, 10u, CORE_INPUT_PRESS))
-            this->SetDirection(this->GetDirection().RotatedZ90());
-         
 
         // 
         if(m_fRollTime >= 1.0f) this->EndRolling();
@@ -216,18 +237,25 @@ void cPlayer::Move()
 
         if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_MOVE))
         {
-            // 
             coreVector2 vNewPos = this->GetPosition().xy();
+
+            // 
             if(this->IsRolling())
             {
                 // roll the ship
                 const coreFloat fSpeed = 50.0f + 80.0f * SIN(PI * m_fRollTime);
                 vNewPos += UnpackDirection(m_iRollDir) * (Core::System->GetTime() * fSpeed);
+
+
+                
+                //vNewPos += m_pInput->vMove * (Core::System->GetTime() * fSpeed);
+
+
             }
             else
             {
                 // move the ship
-                const coreFloat fSpeed = (!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && CONTAINS_BIT(m_pInput->iActionHold, 0u)) ? 20.0f : 60.0f;
+                const coreFloat fSpeed = (!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && CONTAINS_BIT(m_pInput->iActionHold, 0u)) ? 20.0f : 50.0f;
                 vNewPos += m_pInput->vMove * (Core::System->GetTime() * fSpeed);
             }
 
@@ -246,18 +274,26 @@ void cPlayer::Move()
 
             // 
             const coreVector2 vDiff = vNewPos - this->GetPosition().xy();
-            coreVector2 vOri = coreVector2(CLAMP(vDiff.x, -0.6f, 0.6f), 1.0f).Normalized();
+            coreVector3 vOri = coreVector3(CLAMP(vDiff.x, -0.6f, 0.6f), CLAMP(vDiff.y, -0.6f, 0.6f), 1.0f).Normalized();
 
             // 
             if(this->IsRolling())
             {
                 const coreFloat fAngle = LERPS(0.0f, 2.0f*PI, m_fRollTime);
-                vOri *= coreMatrix3::Rotation(fAngle * ((m_iRollDir & 0x04u) ? 1.0f : -1.0f)).m12();
+                const coreFloat fSide  = -SIGN(coreVector2::Dot(-this->GetDirection().xy().Rotated90(), UnpackDirection(m_iRollDir)));
+                vOri *= coreMatrix4::RotationAxis(fAngle * fSide, this->GetDirection()).m123();
             }
 
             // set new position and orientation
             this->SetPosition   (coreVector3(vNewPos, 0.0f));
-            this->SetOrientation(coreVector3(vOri.x, 0.0f, vOri.y));
+            this->SetOrientation(vOri);
+        }
+
+        // normalize collision size
+        if(this->GetModel().IsUsable())
+        {
+            const coreFloat fRadius = MAX(this->GetMove().Length(), PLAYER_COLLISION_MIN);
+            this->SetCollisionModifier((coreVector3(1.0f,1.0f,1.0f) * fRadius) / this->GetModel()->GetBoundingRange());
         }
 
         // move the 3d-object
@@ -271,11 +307,12 @@ void cPlayer::Move()
         }
 
         // 
-        m_ScoreTable.Update();
-
-        // 
         m_fAnimation.UpdateMod(1.0f, 20.0f);
         this->SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.25f));
+
+        // 
+        m_Dot.SetPosition(this->GetPosition());
+        m_Dot.Move();
 
         if(m_Wind.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
         {
@@ -284,8 +321,7 @@ void cPlayer::Move()
 
             // 
             m_Wind.SetPosition (this->GetPosition());
-            m_Wind.SetSize     (coreVector3(1.0f,1.08f,1.0f) * PLAYER_WIND_SIZE);
-            m_Wind.SetTexOffset(coreVector2(0.0f, m_fAnimation * ((m_iRollDir & 0x04u) ? 0.4f : -0.4f)));
+            m_Wind.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.4f));
             m_Wind.Move();
         }
 
@@ -307,6 +343,12 @@ void cPlayer::Move()
             m_Bubble.Move();
         }
     }
+
+    // 
+    m_ScoreTable.Update();
+
+    // 
+    this->__UpdateCollisions();
 
     // 
     this->_UpdateAlwaysAfter();
@@ -343,9 +385,12 @@ void cPlayer::Resurrect(const coreVector2& vPosition)
     if(!CONTAINS_FLAG(m_iStatus, PLAYER_STATUS_DEAD)) return;
     REMOVE_FLAG(m_iStatus, PLAYER_STATUS_DEAD)
 
-    // add ship to the game
-    this->_Resurrect(true, vPosition, coreVector2(0.0f,1.0f), TYPE_PLAYER);
+    // add ship to global shadow and outline
+    cShadow::GetGlobalContainer()->BindObject(this);
+    g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->BindObject(this);
 
+    // add ship to the game
+    this->_Resurrect(vPosition, coreVector2(0.0f,1.0f), TYPE_PLAYER);
 
 
     //this->EnableBubble();   
@@ -374,10 +419,17 @@ void cPlayer::Kill(const coreBool bAnimated)
     this->UpdateExhaust(0.0f);
 
     // 
-    if(bAnimated) g_pSpecialEffects->MacroExplosionPhysicalBig(this->GetPosition());
+    if(bAnimated && this->IsEnabled(CORE_OBJECT_ENABLE_RENDER))
+    {
+        g_pSpecialEffects->MacroExplosionPhysicalDarkBig(this->GetPosition());
+    }
+
+    // remove ship from global shadow and outline
+    cShadow::GetGlobalContainer()->UnbindObject(this);
+    g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->UnbindObject(this);
 
     // remove ship from the game
-    this->_Kill(true, bAnimated);
+    this->_Kill(bAnimated);
 }
 
 
@@ -393,7 +445,7 @@ void cPlayer::StartRolling(const coreVector2& vDirection)
 
     // 
     this->ChangeType(TYPE_PLAYER_ROLL);
-    this->EnableWind();
+    this->EnableWind(vDirection);
 }
 
 
@@ -451,12 +503,16 @@ void cPlayer::TransformDark(const coreUint8 iStatus)
 
 // ****************************************************************
 // 
-void cPlayer::EnableWind()
+void cPlayer::EnableWind(const coreVector2& vDirection)
 {
     WARN_IF(m_Wind.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
 
     // 
-    m_Wind.SetAlpha(-1.0f);
+    const coreFloat fSide = -SIGN(coreVector2::Dot(-this->GetDirection().xy().Rotated90(), vDirection));
+
+    // 
+    m_Wind.SetDirection(this->GetDirection() * fSide);
+    m_Wind.SetAlpha    (-1.0f);
 
     // 
     m_Wind.SetEnabled(CORE_OBJECT_ENABLE_ALL);
@@ -518,4 +574,92 @@ void cPlayer::UpdateExhaust(const coreFloat fStrength)
     m_Exhaust.SetPosition (coreVector3(0.0f, -(m_Exhaust.GetSize().y + 4.0f), 0.0f) + this->GetPosition());
     m_Exhaust.SetEnabled  (fStrength ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
     m_Exhaust.Move();
+}
+
+
+// ****************************************************************
+// 
+coreBool cPlayer::__TestCollisionPrecise(const coreObject3D* pObject, coreVector3* OUTPUT pvIntersection, coreBool* OUTPUT pbFirstHit)
+{
+    ASSERT(pObject && pvIntersection && pbFirstHit)
+
+    // 
+    if(Core::Manager::Object->TestCollision(&m_Dot, pObject, pvIntersection))
+    {
+        // 
+        (*pvIntersection) = this->GetPosition();
+        (*pbFirstHit)     = this->__NewCollision(pObject);
+        return true;
+    }
+
+    // 
+    const coreVector2 vMove = this->GetMove();
+    if(vMove.IsNull())
+    {
+        // 
+        const coreVector3& vRayPos = this->GetPosition();
+        const coreVector3  vRayDir = coreVector3(0.0f,0.0f,1.0f);
+
+        // 
+        coreFloat fHitDistance = 0.0f;
+        coreUint8 iHitCount    = 1u;
+        if(Core::Manager::Object->TestCollision(pObject, vRayPos, vRayDir, &fHitDistance, &iHitCount) && (iHitCount & 0x01u))
+        {
+            // 
+            (*pvIntersection) = this->GetPosition();
+            (*pbFirstHit)     = this->__NewCollision(pObject);
+            return true;
+        }
+    }
+    else
+    {
+        // 
+        const coreVector3& vRayPos = this->GetPosition();
+        const coreVector3  vRayDir = coreVector3(-vMove.Normalized(), 0.0f);
+
+        // 
+        coreFloat fHitDistance = 0.0f;
+        coreUint8 iHitCount    = 1u;
+        if(Core::Manager::Object->TestCollision(pObject, vRayPos, vRayDir, &fHitDistance, &iHitCount) && ((iHitCount & 0x01u) || (POW2(fHitDistance) < vMove.LengthSq())))
+        {
+            // 
+            (*pvIntersection) = vRayPos + vRayDir * fHitDistance;
+            (*pbFirstHit)     = this->__NewCollision(pObject);
+            return true;
+        }
+    }
+    return false;
+}
+
+
+// ****************************************************************
+// 
+coreBool cPlayer::__NewCollision(const coreObject3D* pObject)
+{
+    // find existing collision
+    if(m_aCollision.count(pObject))
+    {
+        // update frame number
+        m_aCollision.at(pObject) = Core::System->GetCurFrame();
+        return false;
+    }
+
+    // add collision to list
+    m_aCollision.emplace(pObject, Core::System->GetCurFrame());
+    return true;
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::__UpdateCollisions()
+{
+    // loop through all collisions
+    const coreUint32 iCurFrame = Core::System->GetCurFrame() - 1u;
+    FOR_EACH_DYN(it, m_aCollision)
+    {
+        // check for old entries and remove them
+        if((*it) == iCurFrame) DYN_KEEP  (it)
+                          else DYN_REMOVE(it, m_aCollision)
+    }
 }

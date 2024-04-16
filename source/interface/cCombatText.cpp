@@ -82,7 +82,7 @@ void cCombatText::Move()
                        (vRange.y > ABS(vDiff.y)))
                     {
                         // 
-                        const coreFloat& fOffset = (vRange.x - ABS(vDiff.x)) * SIGN(vDiff.x) * 0.5f;
+                        const coreFloat fOffset = (vRange.x - ABS(vDiff.x)) * SIGN(vDiff.x) * 0.5f;
 
                         // 
                         A.SetCenter(A.GetCenter() + coreVector2(fOffset, 0.0f));
@@ -110,7 +110,7 @@ void cCombatText::AddText(const coreChar* pcText, const coreVector3& vPosition, 
     // create new text data
     sData oNewData;
     oNewData.sText     = pcText;
-    oNewData.vPosition = g_pForeground->Project(vPosition);
+    oNewData.vPosition = g_pForeground->Project2D(vPosition);
     oNewData.iColor    = coreVector4(vColor, 1.0f).PackUnorm4x8();
 
     // add data to the list

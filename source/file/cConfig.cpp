@@ -81,7 +81,7 @@ void LoadConfig()
     std::memset(&g_MenuInput,  0, sizeof(g_MenuInput));
 
     // load configuration file
-    Core::Config->Load();
+    Core::Config->Load(true);
 
     // read game values
     g_OldConfig.Game.iTransparent    = Core::Config->GetInt(CONFIG_GAME_TRANSPARENT);
@@ -173,9 +173,9 @@ void SaveConfig()
 // update input interface
 void UpdateInput()
 {
-    // forward d-pad input to stick input
-    for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)
-        Core::Input->ForwardDpadToStick(i);
+    // forward hat input to stick input
+    for(coreUintW i = 0u, ie = Core::Input->GetJoystickNum(); i < ie; ++i)  
+        Core::Input->ForwardHatToStick(i);
 
     // reset mapped input values
     std::memset(&g_aGameInput, 0, sizeof(g_aGameInput));
@@ -191,7 +191,7 @@ void UpdateInput()
         if(i < INPUT_SETS_KEYBOARD)   // # keyboard and mouse
         {
             // check key depending on its value
-            auto nCheckKeyFunc = [](const coreInt16 iKey, const coreInputType iType)
+            const auto nCheckKeyFunc = [](const coreInt16 iKey, const coreInputType iType)
             {
                 if(iKey <= 0) return Core::Input->GetMouseButton   (coreUint8   (-iKey), iType);
                          else return Core::Input->GetKeyboardButton(coreInputKey( iKey), iType);
@@ -219,7 +219,7 @@ void UpdateInput()
             oMap.vMove = Core::Input->GetJoystickRelative(iJoystickID);
 
             // restrict movement input to the 8 base directions
-            if(!oMap.vMove.IsNull()) oMap.vMove = UnpackDirection(PackDirection(oMap.vMove));
+            if(!oMap.vMove.IsNull()) oMap.vMove = AlongStar(oMap.vMove);
 
             // map action input
             for(coreUintW j = 0u; j < INPUT_KEYS_ACTION; ++j)
@@ -252,9 +252,9 @@ void UpdateInput()
         // 
         if(i >= INPUT_SETS_KEYBOARD)
         {
-            if(CONTAINS_BIT(oMap.iActionPress, 0u)) g_MenuInput.bAccept = true;
-            if(CONTAINS_BIT(oMap.iActionPress, 1u)) g_MenuInput.bCancel = true;
-            if(CONTAINS_BIT(oMap.iActionPress, 3u)) g_MenuInput.bPause  = true;
+            if(CONTAINS_BIT(oMap.iActionPress, 0u))                     g_MenuInput.bAccept = true;
+            if(CONTAINS_BIT(oMap.iActionPress, 1u))                     g_MenuInput.bCancel = true;
+            if(CONTAINS_BIT(oMap.iActionPress, INPUT_KEYS_ACTION - 1u)) g_MenuInput.bPause  = true;
         }
     }
 

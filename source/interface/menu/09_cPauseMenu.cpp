@@ -33,7 +33,7 @@ cPauseMenu::cPauseMenu()noexcept
     m_RestartButton.SetPosition  (m_ResumeButton.GetPosition() + m_ResumeButton.GetSize()*coreVector2(-0.5f,0.0f) + coreVector2(0.03f,-0.18f));
     m_RestartButton.SetSize      (coreVector2(1.0f,1.0f) * m_ResumeButton.GetSize().y);
     m_RestartButton.SetAlignment (coreVector2(1.0f,0.0f));
-    m_RestartButton.GetCaption()->SetText(ICON_REFRESH);
+    m_RestartButton.GetCaption()->SetText(ICON_REFRESH_ALT);
 
     m_ExitButton.Construct    (MENU_BUTTON, MENU_FONT_ICON_2, MENU_OUTLINE_SMALL);
     m_ExitButton.DefineProgram("menu_border_program");

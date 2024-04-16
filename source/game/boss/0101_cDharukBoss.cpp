@@ -46,10 +46,10 @@ cDharukBoss::cDharukBoss()noexcept
     m_Duplicate.DefineModelHigh("ship_boss_dharuk_high.md3");
     m_Duplicate.DefineModelLow ("ship_boss_dharuk_low.md3");
     m_Duplicate.DefineTexture  (0u, "effect_energy.png");
-    m_Duplicate.DefineProgram  ("effect_energy_invert_program");
+    m_Duplicate.DefineProgram  ("effect_energy_ship_invert_program");
     m_Duplicate.SetSize        (this->GetSize());
     m_Duplicate.Configure      (500, COLOR_ENERGY_RED * 0.8f);
-    m_Duplicate.AddStatus      (ENEMY_STATUS_IMMORTAL);
+    m_Duplicate.AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_IMMORTAL);
 
     // create duplicate trail list
     m_DuplicateTrail.DefineProgram("effect_energy_invert_inst_program");
@@ -67,7 +67,7 @@ cDharukBoss::cDharukBoss()noexcept
 
             // set object properties
             pDuplicate->SetSize   (this->GetSize());
-            pDuplicate->SetColor3 (COLOR_ENERGY_RED * (0.15 + 0.15f * I_TO_F(iType)));
+            pDuplicate->SetColor3 (COLOR_ENERGY_RED * (0.15f + 0.15f * I_TO_F(iType)));
             pDuplicate->SetAlpha  (0.15f + 0.2f * I_TO_F(iType));
             pDuplicate->SetEnabled((i < DHARUK_TRAILS) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
 
@@ -93,7 +93,7 @@ cDharukBoss::cDharukBoss()noexcept
 
             // set object properties
             pBoomerang->SetSize   (coreVector3(1.4f,1.4f,1.4f) * 1.1f);
-            pBoomerang->SetColor3 (COLOR_ENERGY_RED * (iType ? (0.15 + 0.15f * I_TO_F(iType)) : 0.8f));
+            pBoomerang->SetColor3 (COLOR_ENERGY_RED * (iType ? (0.15f + 0.15f * I_TO_F(iType)) : 0.8f));
             pBoomerang->SetTexSize(coreVector2(1.5f,1.5f));
             pBoomerang->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
@@ -110,10 +110,9 @@ cDharukBoss::cDharukBoss()noexcept
 void cDharukBoss::__ResurrectOwn()
 {
     // 
-    g_pGlow->BindObject(&m_Duplicate);
-    g_pGlow->BindList  (&m_DuplicateTrail);
-    g_pGlow->BindList  (&m_Boomerang);
-    g_pGlow->BindList  (&m_BoomerangTrail);
+    g_pGlow->BindList(&m_DuplicateTrail);
+    g_pGlow->BindList(&m_Boomerang);
+    g_pGlow->BindList(&m_BoomerangTrail);
 }
 
 
@@ -129,15 +128,12 @@ void cDharukBoss::__KillOwn(const coreBool bAnimated)
         this->__DisableBoomerang(i, bAnimated);
 
     // 
-    g_pGlow->UnbindObject(&m_Duplicate);
-    g_pGlow->UnbindList  (&m_DuplicateTrail);
-    g_pGlow->UnbindList  (&m_Boomerang);
-    g_pGlow->UnbindList  (&m_BoomerangTrail);
+    g_pGlow->UnbindList(&m_DuplicateTrail);
+    g_pGlow->UnbindList(&m_Boomerang);
+    g_pGlow->UnbindList(&m_BoomerangTrail);
 
     // 
     this->_EndBoss(bAnimated);
-
-    [](void){{}},[]()->void{}();
 }
 
 
@@ -196,16 +192,6 @@ void cDharukBoss::__MoveOwn()
     // 
     else if(m_iPhase == 1u)
     {
-        PHASE_CONTROL_PAUSE(0u, FRAMERATE_VALUE)
-        {
-            PHASE_CHANGE_INC
-        });
-    }
-
-    // ################################################################
-    // 
-    else if(m_iPhase == 2u)
-    {
         PHASE_CONTROL_TIMER(0u, 0.5f, LERP_BREAK)
         {
             this->DefaultMoveLerp  (coreVector2(0.0f,1.5f), coreVector2(0.0f, DHARUK_HEIGHT), fTime);
@@ -221,27 +207,11 @@ void cDharukBoss::__MoveOwn()
 
     // ################################################################
     // 
-    //else if(m_iPhase == 3u)
-    //{
-    //    PHASE_CONTROL_TICKER(0u, 4u, m_Boomerang.GetCurEnabled() ? (2.2f/3.0f) : FRAMERATE_VALUE)
-    //    {
-    //        const coreFloat fSideSign = m_aiCounter[CURRENT_SIDE] ? -1.0f : 1.0f;
-    //
-    //        if(iTick < DHARUK_BOOMERANGS /*&& iTick & 1*/)
-    //            this->__EnableBoomerang(iTick, this->GetPosition().xy(), coreVector2((iTick & 0x01u) ? fSideSign : -fSideSign, 0.0f));
-    //
-    //        if(PHASE_FINISHED)
-    //        {PHASE_CHANGE_INC this->__EnableDuplicate(); m_Duplicate.SetAlpha(1.0f);}
-    //    });
-    //}
-
-    // ################################################################
-    // 
-    else if(m_iPhase == 3u)
+    else if(m_iPhase == 2u)
     {
         PHASE_CONTROL_PAUSE(0u, 2.0f)
         {
-           PHASE_CHANGE_TO(10u)
+            PHASE_CHANGE_TO(10u)
         });
     }
 
@@ -259,10 +229,13 @@ void cDharukBoss::__MoveOwn()
                                   coreVector2(           fSideSign * -(3.0f + DHARUK_WIDTH),         DHARUK_HEIGHT), fTime);
             this->DefaultRotateLerp(1.0f*PI, bSecond ? (15.0f*PI) : (11.0f*PI), fSideTime);
 
-            if(m_aiCounter[DUPLICATE_STATUS] || m_aiCounter[FLIP_SAVE])
+            if(m_aiCounter[CURRENT_ITERATION])
             {
                 g_pEnvironment->SetTargetDirection(coreVector2::Direction(fSideSign * -2.0f*PI * fTime));
+            }
 
+            if(m_aiCounter[DUPLICATE_STATUS] || m_aiCounter[FLIP_SAVE])
+            {
                 if(bSecond && (ABS(this->GetPosition().x) < 1.5f*FOREGROUND_AREA.x))
                 {
                     this->SetPosition(this->GetPosition().InvertedY());
@@ -274,24 +247,12 @@ void cDharukBoss::__MoveOwn()
                 }
             }
 
-            //if(PHASE_BEGINNING)
-            //{
-            //    const coreVector2 vPos = this->__RepeatPosition(m_vLastPosition * FOREGROUND_AREA, 1.5f);
-            //
-            //    for(coreUintW i = 0u; i < 11u; ++i)
-            //    {
-            //        const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(i - 5u) * 9.0f + 180.0f));
-            //
-            //        g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.2f, this, vPos, vDir)->MakeBlue()->ChangeSize(1.3f);
-            //    }
-            //}
-
             const coreVector3 vStorePos = this->GetPosition();
             this->SetPosition(coreVector3(this->__RepeatPosition(this->GetPosition().xy(), 1.5f), 0.0f));
             {
                 const coreFloat fMirror = (m_aiCounter[CURRENT_ITERATION] & 0x01) ? -1.0f : 1.0f;
 
-                if((ABS(this->GetOldPos().x - this->GetPosition().x) < FOREGROUND_AREA.x) &&
+                if(!this->WasTeleporting() &&
                    (PHASE_POSITION_POINT(this,  0.7f   * FOREGROUND_AREA.x * fMirror, x) ||
                     PHASE_POSITION_POINT(this,  0.3f   * FOREGROUND_AREA.x * fMirror, x) ||
                     PHASE_POSITION_POINT(this, -0.1f   * FOREGROUND_AREA.x * fMirror, x) ||
@@ -300,21 +261,21 @@ void cDharukBoss::__MoveOwn()
                 {
                     constexpr coreFloat fSpread = 0.055f;
 
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.5f, this, s_vPositionPoint, coreVector2( fSpread, 1.0f).Normalized())->MakeGreen()->ChangeSize(1.4f);
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.4f, this, s_vPositionPoint, coreVector2( 0.0f,    1.0f).Normalized())->MakeGreen()->ChangeSize(1.4f);
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.3f, this, s_vPositionPoint, coreVector2(-fSpread, 1.0f).Normalized())->MakeGreen()->ChangeSize(1.4f);
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.5f, this, s_vPositionPoint, coreVector2( fSpread,-1.0f).Normalized())->MakeGreen()->ChangeSize(1.4f);
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.4f, this, s_vPositionPoint, coreVector2( 0.0f,   -1.0f).Normalized())->MakeGreen()->ChangeSize(1.4f);
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.3f, this, s_vPositionPoint, coreVector2(-fSpread,-1.0f).Normalized())->MakeGreen()->ChangeSize(1.4f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.5f, this, s_vPositionPoint, coreVector2( fSpread, 1.0f).Normalized())->ChangeSize(1.4f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.4f, this, s_vPositionPoint, coreVector2( 0.0f,    1.0f))             ->ChangeSize(1.4f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.3f, this, s_vPositionPoint, coreVector2(-fSpread, 1.0f).Normalized())->ChangeSize(1.4f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.5f, this, s_vPositionPoint, coreVector2( fSpread,-1.0f).Normalized())->ChangeSize(1.4f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.4f, this, s_vPositionPoint, coreVector2( 0.0f,   -1.0f))             ->ChangeSize(1.4f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.3f, this, s_vPositionPoint, coreVector2(-fSpread,-1.0f).Normalized())->ChangeSize(1.4f);
 
                     if(m_aiCounter[DUPLICATE_STATUS] && (g_pGame->GetDifficulty() > 0u))
                     {
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.5f, this, -s_vPositionPoint, coreVector2(-fSpread, 1.0f).Normalized())->MakeGreen()->ChangeSize(1.4f);
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.4f, this, -s_vPositionPoint, coreVector2( 0.0f,    1.0f).Normalized())->MakeGreen()->ChangeSize(1.4f);
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.3f, this, -s_vPositionPoint, coreVector2( fSpread, 1.0f).Normalized())->MakeGreen()->ChangeSize(1.4f);
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.5f, this, -s_vPositionPoint, coreVector2(-fSpread,-1.0f).Normalized())->MakeGreen()->ChangeSize(1.4f);
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.4f, this, -s_vPositionPoint, coreVector2( 0.0f,   -1.0f).Normalized())->MakeGreen()->ChangeSize(1.4f);
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.3f, this, -s_vPositionPoint, coreVector2( fSpread,-1.0f).Normalized())->MakeGreen()->ChangeSize(1.4f);
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.5f, this, -s_vPositionPoint, coreVector2(-fSpread, 1.0f).Normalized())->ChangeSize(1.4f);
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.4f, this, -s_vPositionPoint, coreVector2( 0.0f,    1.0f))             ->ChangeSize(1.4f);
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.3f, this, -s_vPositionPoint, coreVector2( fSpread, 1.0f).Normalized())->ChangeSize(1.4f);
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.5f, this, -s_vPositionPoint, coreVector2(-fSpread,-1.0f).Normalized())->ChangeSize(1.4f);
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.4f, this, -s_vPositionPoint, coreVector2( 0.0f,   -1.0f))             ->ChangeSize(1.4f);
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.3f, this, -s_vPositionPoint, coreVector2( fSpread,-1.0f).Normalized())->ChangeSize(1.4f);
                     }
                 }
             }
@@ -336,15 +297,13 @@ void cDharukBoss::__MoveOwn()
     {
         PHASE_CONTROL_TIMER(0u, 0.15f, LERP_LINEAR)
         {
-            const coreFloat fVarTime = (fTime < 0.4f) ? LERP_BREAK(0.3f, 0.0f, 1.0f - fTime / 0.4f) : ((fTime - 0.4f) * 1.2f + 0.3f);
-
+            const coreFloat fVarTime  = (fTime < 0.4f) ? LERP_BREAK(0.3f, 0.0f, 1.0f - fTime / 0.4f) : ((fTime - 0.4f) * 1.2f + 0.3f);
             const coreFloat fSideTime = m_aiCounter[CURRENT_SIDE] ? fVarTime : (1.0f - fVarTime);
             const coreFloat fSideSign = m_aiCounter[CURRENT_SIDE] ? -1.0f    :  1.0f;
 
             this->DefaultMoveLerp  (coreVector2(fSideSign * DHARUK_WIDTH, DHARUK_HEIGHT), coreVector2(fSideSign * DHARUK_WIDTH, -7.5f), fVarTime);
             this->DefaultRotateLerp(1.0f*PI,                                              19.0f*PI,                                     fSideTime);
 
-            //if(this->GetPosition().y < -4.5f*FOREGROUND_AREA.y)
             if((this->GetPosition().y < -1.5f*FOREGROUND_AREA.y) && (this->GetPosition().y > -4.5f*FOREGROUND_AREA.y))
                 this->SetPosition(this->GetPosition().InvertedX());
 
@@ -353,24 +312,24 @@ void cDharukBoss::__MoveOwn()
             {
                 constexpr coreFloat fLine = 0.05f * FOREGROUND_AREA.y;
 
-                if((ABS(this->GetOldPos().y - this->GetPosition().y) < FOREGROUND_AREA.y) &&
+                if(!this->WasTeleporting() &&
                    (PHASE_POSITION_POINT(this,  0.7f * FOREGROUND_AREA.y - fLine, y) ||
                     PHASE_POSITION_POINT(this,  0.3f * FOREGROUND_AREA.y - fLine, y) ||
                     PHASE_POSITION_POINT(this, -0.1f * FOREGROUND_AREA.y - fLine, y) ||
                     PHASE_POSITION_POINT(this, -0.5f * FOREGROUND_AREA.y - fLine, y) ||
                     PHASE_POSITION_POINT(this, -0.9f * FOREGROUND_AREA.y - fLine, y)))
                 {
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.25f, this, s_vPositionPoint + coreVector2(0.0f,  fLine), coreVector2( 1.0f,0.0f))->MakeOrange()->ChangeSize(1.4f);
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.35f, this, s_vPositionPoint + coreVector2(0.0f, -fLine), coreVector2( 1.0f,0.0f))->MakeOrange()->ChangeSize(1.4f);
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.25f, this, s_vPositionPoint + coreVector2(0.0f,  fLine), coreVector2(-1.0f,0.0f))->MakeOrange()->ChangeSize(1.4f);
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.35f, this, s_vPositionPoint + coreVector2(0.0f, -fLine), coreVector2(-1.0f,0.0f))->MakeOrange()->ChangeSize(1.4f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.25f, this, s_vPositionPoint + coreVector2(0.0f,  fLine), coreVector2( 1.0f,0.0f))->ChangeSize(1.4f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.35f, this, s_vPositionPoint + coreVector2(0.0f, -fLine), coreVector2( 1.0f,0.0f))->ChangeSize(1.4f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.25f, this, s_vPositionPoint + coreVector2(0.0f,  fLine), coreVector2(-1.0f,0.0f))->ChangeSize(1.4f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.35f, this, s_vPositionPoint + coreVector2(0.0f, -fLine), coreVector2(-1.0f,0.0f))->ChangeSize(1.4f);
 
                     if(m_aiCounter[DUPLICATE_STATUS] && (g_pGame->GetDifficulty() > 0u))
                     {
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.25f, this, -s_vPositionPoint + coreVector2(0.0f, -fLine - 2.0f*fLine), coreVector2( 1.0f,0.0f))->MakeOrange()->ChangeSize(1.4f);
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.35f, this, -s_vPositionPoint + coreVector2(0.0f,  fLine - 2.0f*fLine), coreVector2( 1.0f,0.0f))->MakeOrange()->ChangeSize(1.4f);
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.25f, this, -s_vPositionPoint + coreVector2(0.0f, -fLine - 2.0f*fLine), coreVector2(-1.0f,0.0f))->MakeOrange()->ChangeSize(1.4f);
-                        g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.35f, this, -s_vPositionPoint + coreVector2(0.0f,  fLine - 2.0f*fLine), coreVector2(-1.0f,0.0f))->MakeOrange()->ChangeSize(1.4f);
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.25f, this, -s_vPositionPoint + coreVector2(0.0f, -fLine - 2.0f*fLine), coreVector2( 1.0f,0.0f))->ChangeSize(1.4f);
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.35f, this, -s_vPositionPoint + coreVector2(0.0f,  fLine - 2.0f*fLine), coreVector2( 1.0f,0.0f))->ChangeSize(1.4f);
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.25f, this, -s_vPositionPoint + coreVector2(0.0f, -fLine - 2.0f*fLine), coreVector2(-1.0f,0.0f))->ChangeSize(1.4f);
+                        g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.35f, this, -s_vPositionPoint + coreVector2(0.0f,  fLine - 2.0f*fLine), coreVector2(-1.0f,0.0f))->ChangeSize(1.4f);
                     }
                 }
             }
@@ -412,12 +371,12 @@ void cDharukBoss::__MoveOwn()
     // 
     else if(m_iPhase == 21u)
     {
-        PHASE_CONTROL_TICKER(0u, 4u, m_Boomerang.GetCurEnabled() ? (2.2f/3.0f) : FRAMERATE_VALUE)
+        PHASE_CONTROL_TICKER(0u, 4u, m_Boomerang.GetCurEnabled() ? (2.2f/3.0f) : FRAMERATE_VALUE, LERP_LINEAR)
         {
             const coreFloat fSideSign = m_aiCounter[CURRENT_SIDE] ? -1.0f : 1.0f;
 
-            if(iTick < DHARUK_BOOMERANGS && ((g_pGame->GetDifficulty() > 0u) || (iTick & 0x01u)))            
-                this->__EnableBoomerang(iTick, this->GetPosition().xy(), coreVector2((iTick & 0x01u) ? fSideSign : -fSideSign, 0.0f));             
+            if((iTick < DHARUK_BOOMERANGS) && ((iTick & 0x01u) || (g_pGame->GetDifficulty() > 0u)))
+                this->__EnableBoomerang(iTick, this->GetPosition().xy(), coreVector2((iTick & 0x01u) ? fSideSign : -fSideSign, 0.0f));
 
             if(PHASE_FINISHED)
                 PHASE_CHANGE_INC
@@ -442,7 +401,7 @@ void cDharukBoss::__MoveOwn()
         {
             const coreFloat fSideSign = m_aiCounter[CURRENT_SIDE] ? -1.0f : 1.0f;
 
-            this->SetPosition      (coreVector3(coreVector2::Direction(LERP(0.0f*PI, fSideSign * -4.0f*PI, fTime)) * FOREGROUND_AREA * DHARUK_HEIGHT, 0.0f));
+            this->SetPosition      (coreVector3(coreVector2::Direction(LERP(0.0f*PI, fSideSign * -4.0f*PI, fTime)) * (FOREGROUND_AREA * DHARUK_HEIGHT), 0.0f));
             this->DefaultRotateLerp(1.0f*PI, fSideSign * 21.0f*PI, fTime);
 
             if(PHASE_FINISHED)
@@ -501,20 +460,13 @@ void cDharukBoss::__MoveOwn()
     // 
     else if(m_iPhase == 31u)
     {
-        PHASE_CONTROL_PAUSE(0u, FRAMERATE_VALUE)
-        {
-            PHASE_CHANGE_INC
-
-            this->__EnableDuplicate();
-        });
-    }
-
-    // ################################################################
-    // 
-    else if(m_iPhase == 32u)
-    {
         PHASE_CONTROL_TIMER(0u, 2.2f/2.0f, LERP_SMOOTH)
         {
+            if(PHASE_BEGINNING)
+            {
+                this->__EnableDuplicate();
+            }
+
             const coreFloat fAlpha = MIN(fTime*10.0f, 1.0f);
 
             m_Duplicate.SetSize (fAlpha * this->GetSize());
@@ -543,7 +495,13 @@ void cDharukBoss::__MoveOwn()
     m_Duplicate.SetDirection  (-this->GetDirection  ());
     m_Duplicate.SetOrientation( this->GetOrientation().InvertedX());
     m_Duplicate.SetTexOffset  (coreVector2(0.0f, m_fAnimation));
-    m_Duplicate.coreObject3D::Move();   // # for own collision handling
+
+    // 
+    if(m_Duplicate.ReachedDeath())
+    {
+        g_pGame->GetItemManager()->AddItem<cFragmentItem>(m_Duplicate.GetPosition().xy());
+        this->__DisableDuplicate(true);
+    }
 
     // 
     if(Core::System->GetTime())
@@ -635,50 +593,122 @@ void cDharukBoss::__MoveOwn()
     m_BoomerangTrail.MoveNormal();
 
     // 
-    m_Duplicate.ActivateModelLowOnly();
-
-    // 
-    auto nPlayerBoomerangFunc = [this](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBoomerang, const coreVector3& vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(TYPE_DHARUK_BOOMERANG, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBoomerang, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
 
         // 
-        pPlayer->TakeDamage((pBoomerang == &m_Duplicate) ? 10 : 5, ELEMENT_RED, vIntersection.xy());
+        pPlayer->TakeDamage(5, ELEMENT_RED, vIntersection.xy());
 
         // 
         g_pSpecialEffects->MacroExplosionColorSmall(vIntersection, COLOR_ENERGY_RED);
-    };
-    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_OBJECT(0), nPlayerBoomerangFunc);
-    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_OBJECT(4), nPlayerBoomerangFunc);
-
-    // 
-    Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, TYPE_OBJECT(4), [](cBullet* OUTPUT pBullet, cEnemy* OUTPUT pEnemy, const coreVector3& vIntersection, const coreBool bFirstHit)
-    {
-
-         
-        // 
-        if((ABS(vIntersection.x) >= FOREGROUND_AREA.x * 1.1f) ||
-           (ABS(vIntersection.y) >= FOREGROUND_AREA.y * 1.1f)) return;
-
-        // 
-        pEnemy ->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), s_cast<cPlayer*>(pBullet->GetOwner()));
-        pBullet->Deactivate(true, vIntersection.xy());
-
-        // 
-        g_pSpecialEffects->RumblePlayer(s_cast<cPlayer*>(pBullet->GetOwner()), SPECIAL_RUMBLE_DEFAULT);
-         
-
     });
+}
+
+
+// ****************************************************************
+// 
+void cDharukBoss::__EnableDuplicate()
+{
+    // 
+    if(m_aiCounter[DUPLICATE_STATUS] != 0) return;
+    m_aiCounter[DUPLICATE_STATUS] = 1;
 
     // 
-    if(m_Duplicate.ReachedDeath())
+    m_Duplicate.Resurrect();
+
+    // 
+    m_Duplicate.SetPosition   (-this->GetPosition   ());
+    m_Duplicate.SetDirection  (-this->GetDirection  ());
+    m_Duplicate.SetOrientation( this->GetOrientation().InvertedX());
+    m_Duplicate.SetAlpha      (0.0f);
+
+    // 
+    for(coreUintW i = DHARUK_TRAILS; i < DHARUK_DUPLICATE_RAWS; ++i)
     {
-        g_pGame->GetItemManager()->AddItem<cFragmentItem>(m_Duplicate.GetPosition().xy());
-        this->__DisableDuplicate(true);
+        m_aDuplicateRaw[i].SetAlpha  (0.0f);
+        m_aDuplicateRaw[i].SetEnabled(CORE_OBJECT_ENABLE_ALL);
     }
 
     // 
-    m_Duplicate.ActivateModelDefault();
+    g_pSpecialEffects->MacroExplosionColorBig(m_Duplicate.GetPosition(), COLOR_ENERGY_RED);
+}
+
+
+// ****************************************************************
+// 
+void cDharukBoss::__DisableDuplicate(const coreBool bAnimated)
+{
+    // 
+    if(m_aiCounter[DUPLICATE_STATUS] == 0) return;
+    m_aiCounter[DUPLICATE_STATUS] = 0;
+
+    // 
+    m_Duplicate.Kill(false);
+
+    // 
+    for(coreUintW i = DHARUK_TRAILS; i < DHARUK_DUPLICATE_RAWS; ++i)
+        m_aDuplicateRaw[i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
+    // 
+    if(bAnimated) g_pSpecialEffects->MacroExplosionColorBig(m_Duplicate.GetPosition(), COLOR_ENERGY_RED);
+}
+
+
+// ****************************************************************
+// 
+void cDharukBoss::__EnableBoomerang(const coreUintW iIndex, const coreVector2& vPosition, const coreVector2& vDirection)
+{
+    // 
+    ASSERT(iIndex < DHARUK_BOOMERANGS)
+    coreObject3D* pBoomerang = (*m_Boomerang     .List())[iIndex];
+    coreObject3D* pTrail     = (*m_BoomerangTrail.List())[iIndex*DHARUK_TRAILS];
+
+    // 
+    if(pBoomerang->GetType()) return;
+    pBoomerang->ChangeType(TYPE_DHARUK_BOOMERANG);
+
+    // 
+    this->__EncodeDirection(iIndex, vDirection);
+
+    // 
+    const auto nInitFunc = [&](coreObject3D* OUTPUT pObject)
+    {
+        pObject->SetPosition(coreVector3(vPosition, 0.0f));
+        pObject->SetAlpha   (0.0f);
+        pObject->SetEnabled (CORE_OBJECT_ENABLE_ALL);
+    };
+    nInitFunc(pBoomerang);
+    for(coreUintW i = 0u; i < DHARUK_TRAILS; ++i) nInitFunc(pTrail + i);
+
+    // 
+    g_pSpecialEffects->MacroEruptionColorSmall(coreVector3(vPosition, 0.0f), vDirection, COLOR_ENERGY_RED);
+}
+
+
+// ****************************************************************
+// 
+void cDharukBoss::__DisableBoomerang(const coreUintW iIndex, const coreBool bAnimated)
+{
+    // 
+    ASSERT(iIndex < DHARUK_BOOMERANGS)
+    coreObject3D* pBoomerang = (*m_Boomerang     .List())[iIndex];
+    coreObject3D* pTrail     = (*m_BoomerangTrail.List())[iIndex*DHARUK_TRAILS];
+
+    // 
+    if(!pBoomerang->GetType()) return;
+    pBoomerang->ChangeType(0);
+
+    // 
+    const auto nExitFunc = [](coreObject3D* OUTPUT pObject)
+    {
+        pObject->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    };
+    nExitFunc(pBoomerang);
+    for(coreUintW i = 0u; i < DHARUK_TRAILS; ++i) nExitFunc(pTrail + i);
+
+    // 
+    if(bAnimated) g_pSpecialEffects->MacroExplosionColorSmall(pBoomerang->GetPosition(), COLOR_ENERGY_RED);
 }
 
 
@@ -741,119 +771,4 @@ coreVector2 cDharukBoss::__DecodeDirection(const coreUintW iIndex)
 
     // 
     return coreVector2((X) ? P : 0.0f, (!X) ? P : 0.0f);
-}
-
-
-// ****************************************************************
-// 
-void cDharukBoss::__EnableDuplicate()
-{
-    // 
-    if(m_aiCounter[DUPLICATE_STATUS] != 0) return;
-    m_aiCounter[DUPLICATE_STATUS] = 1;
-
-    // 
-    m_Duplicate.Resurrect ();
-    m_Duplicate.ChangeType(TYPE_OBJECT(4));
-
-    // 
-    cShadow::GetGlobalContainer()->UnbindObject(&m_Duplicate);
-
-    // 
-    m_Duplicate.SetPosition   (-this->GetPosition   ());
-    m_Duplicate.SetDirection  (-this->GetDirection  ());
-    m_Duplicate.SetOrientation( this->GetOrientation().InvertedX());
-    m_Duplicate.SetAlpha      (0.0f);
-
-    // 
-    for(coreUintW i = DHARUK_TRAILS; i < DHARUK_DUPLICATE_RAWS; ++i)
-    {
-        m_aDuplicateRaw[i].SetAlpha(0.0f);
-        m_aDuplicateRaw[i].SetEnabled(CORE_OBJECT_ENABLE_ALL);
-    }
-
-    // 
-    g_pSpecialEffects->MacroExplosionColorBig(m_Duplicate.GetPosition(), COLOR_ENERGY_RED);
-}
-
-
-// ****************************************************************
-// 
-void cDharukBoss::__DisableDuplicate(const coreBool bAnimated)
-{
-    // 
-    if(m_aiCounter[DUPLICATE_STATUS] == 0) return;
-    m_aiCounter[DUPLICATE_STATUS] = 0;
-
-    // 
-    cShadow::GetGlobalContainer()->BindObject(&m_Duplicate);
-
-    // 
-    m_Duplicate.Kill(false);
-
-    // 
-    for(coreUintW i = DHARUK_TRAILS; i < DHARUK_DUPLICATE_RAWS; ++i)
-        m_aDuplicateRaw[i].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
-
-    // 
-    if(bAnimated) g_pSpecialEffects->MacroExplosionColorBig(m_Duplicate.GetPosition(), COLOR_ENERGY_RED);
-}
-
-
-// ****************************************************************
-// 
-void cDharukBoss::__EnableBoomerang(const coreUintW iIndex, const coreVector2& vPosition, const coreVector2& vDirection)
-{
-    // 
-    ASSERT(iIndex < DHARUK_BOOMERANGS)
-    coreObject3D* pBoomerang = (*m_Boomerang     .List())[iIndex];
-    coreObject3D* pTrail     = (*m_BoomerangTrail.List())[iIndex*DHARUK_TRAILS];
-
-    // 
-    if(pBoomerang->GetType()) return;
-    pBoomerang->ChangeType(TYPE_OBJECT(0));
-
-    // 
-    this->__EncodeDirection(iIndex, vDirection);
-
-    // 
-    auto nInitFunc = [&](coreObject3D* OUTPUT pObject)
-    {
-        pObject->SetPosition(coreVector3(vPosition, 0.0f));
-        pObject->SetAlpha   (0.0f);
-        pObject->SetEnabled (CORE_OBJECT_ENABLE_ALL);
-    };
-    nInitFunc(pBoomerang);
-    for(coreUintW i = 0u; i < DHARUK_TRAILS; ++i) nInitFunc(pTrail + i);
-
-    // 
-    g_pSpecialEffects->MacroEruptionColorSmall(coreVector3(vPosition, 0.0f), vDirection, COLOR_ENERGY_RED);
-}
-
-
-// ****************************************************************
-// 
-void cDharukBoss::__DisableBoomerang(const coreUintW iIndex, const coreBool bAnimated)
-{
-    if(m_Boomerang.List()->empty()) return;
-
-    // 
-    ASSERT(iIndex < DHARUK_BOOMERANGS)
-    coreObject3D* pBoomerang = (*m_Boomerang     .List())[iIndex];
-    coreObject3D* pTrail     = (*m_BoomerangTrail.List())[iIndex*DHARUK_TRAILS];
-
-    // 
-    if(!pBoomerang->GetType()) return;
-    pBoomerang->ChangeType(0);
-
-    // 
-    auto nExitFunc = [](coreObject3D* OUTPUT pObject)
-    {
-        pObject->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
-    };
-    nExitFunc(pBoomerang);
-    for(coreUintW i = 0u; i < DHARUK_TRAILS; ++i) nExitFunc(pTrail + i);
-
-    // 
-    if(bAnimated) g_pSpecialEffects->MacroExplosionColorSmall(pBoomerang->GetPosition(), COLOR_ENERGY_RED);
 }

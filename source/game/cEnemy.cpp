@@ -166,13 +166,28 @@ void cEnemy::Resurrect(const coreVector2& vPosition, const coreVector2& vDirecti
     // 
     const coreBool bBoss   = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_BOSS);
     const coreBool bSingle = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_SINGLE);
+    const coreBool bEnergy = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_ENERGY);
+    ASSERT(!bEnergy || (bEnergy && bSingle))
 
     // 
     m_fLifeTime       = 0.0f;
     m_fLifeTimeBefore = 0.0f;
 
+    if(bEnergy)
+    {
+        // add ship to glow and outline
+        g_pGlow->BindObject(this);
+        g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->BindObject(this);
+    }
+    else if(bSingle)
+    {
+        // add ship to global shadow and outline
+        cShadow::GetGlobalContainer()->BindObject(this);
+        g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->BindObject(this);
+    }
+
     // add ship to the game
-    this->_Resurrect(bSingle, vPosition, vDirection, TYPE_ENEMY);
+    this->_Resurrect(vPosition, vDirection, TYPE_ENEMY);
 
     // 
     this->__ResurrectOwn();
@@ -193,6 +208,8 @@ void cEnemy::Kill(const coreBool bAnimated)
     // 
     const coreBool bBoss   = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_BOSS);
     const coreBool bSingle = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_SINGLE);
+    const coreBool bEnergy = CONTAINS_FLAG(m_iStatus, ENEMY_STATUS_ENERGY);
+    ASSERT(!bEnergy || (bEnergy && bSingle))
 
     // 
     g_pGame->GetShieldManager()->UnbindEnemy(this);
@@ -200,12 +217,25 @@ void cEnemy::Kill(const coreBool bAnimated)
     // 
     if(bAnimated && this->IsEnabled(CORE_OBJECT_ENABLE_RENDER))
     {
-        if(bBoss) g_pSpecialEffects->MacroExplosionPhysicalBig  (this->GetPosition());
-             else g_pSpecialEffects->MacroExplosionPhysicalSmall(this->GetPosition());
+        if(bBoss) g_pSpecialEffects->MacroExplosionPhysicalDarkBig  (this->GetPosition());
+             else g_pSpecialEffects->MacroExplosionPhysicalDarkSmall(this->GetPosition());
+    }
+
+    if(bEnergy)
+    {
+        // remove ship from glow and outline
+        g_pGlow->UnbindObject(this);
+        g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->UnbindObject(this);
+    }
+    else if(bSingle)
+    {
+        // remove ship from global shadow and outline
+        cShadow::GetGlobalContainer()->UnbindObject(this);
+        g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->UnbindObject(this);
     }
 
     // remove ship from the game
-    this->_Kill(bSingle, bAnimated);
+    this->_Kill(bAnimated);
 
     // 
     this->__KillOwn(bAnimated);
@@ -372,19 +402,12 @@ void cEnemyManager::Render()
         if(!pEnemyActive->GetCurEnabled()) continue;
 
         // 
-        FOR_EACH(it, *pEnemyActive->List()) s_cast<cEnemy*>(*it)->ActivateModelDefault();
+        FOR_EACH(it, *pEnemyActive->List()) d_cast<cEnemy*>(*it)->ActivateModelDefault();
         {
             // 
-            pEnemyActive->RenderCustom([](coreFloat* OUTPUT pData, const cEnemy* pObject)
-            {
-                (*pData) = pObject->GetBlink();
-            },
-            [](cEnemy* OUTPUT pObject)
-            {
-                pObject->_EnableBlink();
-            });
+            pEnemyActive->Render();
         }
-        FOR_EACH(it, *pEnemyActive->List()) s_cast<cEnemy*>(*it)->ActivateModelLowOnly();
+        FOR_EACH(it, *pEnemyActive->List()) d_cast<cEnemy*>(*it)->ActivateModelLowOnly();
     }
 
     // render all additional enemies
@@ -400,7 +423,7 @@ void cEnemyManager::Render()
 #define __RENDER_OWN(f)                                               \
 {                                                                     \
     /* */                                                             \
-    auto nRenderFunc = [](cEnemy* OUTPUT pEnemy)                      \
+    const auto nRenderFunc = [](cEnemy* OUTPUT pEnemy)                \
     {                                                                 \
         if(CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD))     \
             return;                                                   \
@@ -416,7 +439,7 @@ void cEnemyManager::Render()
                                                                       \
         /* render all active enemies */                               \
         FOR_EACH(it, *pEnemyActive->List())                           \
-            nRenderFunc(s_cast<cEnemy*>(*it));                        \
+            nRenderFunc(d_cast<cEnemy*>(*it));                        \
     }                                                                 \
                                                                       \
     /* render all additional enemies */                               \
@@ -435,6 +458,10 @@ void cEnemyManager::RenderOver  () {__RENDER_OWN(__RenderOwnOver)}
 // move the enemy manager
 void cEnemyManager::Move()
 {
+    // 
+    FOR_EACH(it, m_apAdditional)
+        (*it)->Move();
+
     // loop through all enemy sets
     for(coreUintW i = 0u; i < ENEMY_SET_COUNT; ++i)
     {
@@ -444,10 +471,6 @@ void cEnemyManager::Move()
         // move the enemy set
         pEnemyActive->MoveNormal();
     }
-
-    // 
-    FOR_EACH(it, m_apAdditional)
-        (*it)->Move();
 
     // 
     FOR_EACH_DYN(it, m_aRepeatEntry)
@@ -515,7 +538,7 @@ void cEnemyManager::ClearEnemies(const coreBool bAnimated)
 
         // deactivate all active enemies
         FOR_EACH(it, *pEnemyActive->List())
-            s_cast<cEnemy*>(*it)->Kill(bAnimated);
+            d_cast<cEnemy*>(*it)->Kill(bAnimated);
     }
 
     // deactivate all additional enemies

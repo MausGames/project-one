@@ -16,6 +16,7 @@
 // TODO: implement pixel-fitting screen-shake ? (currently shaking creates a fullscreen-blur)
 // TODO: don't invoke special-effects out of view (though consider effect-radius)
 // TODO: adjust rumble to be not toooo strong (and not be annoying)
+// TODO: dirt (smaller spray drops, brownish)
 
 
 // ****************************************************************
@@ -23,6 +24,7 @@
 #define SPECIAL_LIGHTNINGS       (32u)     // number of lightning sprites
 #define SPECIAL_BLASTS           (4u)      // number of energy-blasts
 #define SPECIAL_RINGS            (8u)      // number of energy-rings
+#define SPECIAL_SPLATTERS        (64u)     // 
 #define SPECIAL_SOUNDS           (8u)      // number of sound-effect files
 
 #define SPECIAL_LIGHTNING_RESIZE (0.66f)   // 
@@ -33,7 +35,8 @@
 #define SPECIAL_SPLASH_BIG      (100.0f), (50u)
 #define SPECIAL_BLOW_SMALL       (50.0f), (25u)
 #define SPECIAL_BLOW_BIG        (100.0f), (50u)
-#define SPECIAL_CHARGE_BIG       (35.0f), (40u)
+#define SPECIAL_CHARGE_BIG       (50.0f), (50u)
+#define SPECIAL_WHIRL_BIG        (35.0f), (40u)
 #define SPECIAL_EXPLOSION_SMALL  (10.0f), (40u)
 #define SPECIAL_EXPLOSION_BIG    (20.0f), (80u)
 #define SPECIAL_LIGHTNING_SMALL  (11.0f)
@@ -79,6 +82,12 @@ private:
     coreObject3D m_aRing[SPECIAL_RINGS];                    // 
     coreUintW    m_iCurRing;                                // 
 
+    coreObject2D m_aSplatter[SPECIAL_SPLATTERS];            // 
+    coreUintW    m_iCurSplatter;                            // 
+
+    coreFlow m_fScreenFade;                                 // 
+    coreBool m_bScreenClear;                                // 
+
     coreSoundPtr m_apSound[SPECIAL_SOUNDS];                 // 
     eSoundEffect m_iSoundGuard;                             // last played sound-effect (to reduce multiple same sound-effects within one frame)
 
@@ -97,6 +106,9 @@ public:
     void Render(const coreBool bForeground);
     void Move();
 
+    // render the overlay separately
+    void RenderOverlay();
+
     // 
     inline const coreBool& IsActive()const {return m_bActive;}
 
@@ -104,15 +116,19 @@ public:
     void CreateSplashColor(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor);
     void CreateSplashDark (const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum);
     void CreateSplashSmoke(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum);
-    void CreateSplashFire (const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum);
+    void CreateSplashFire (const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor);
 
     // create directional particle blow
     void CreateBlowColor(const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor);
     void CreateBlowDark (const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat fScale, const coreUintW iNum);
 
-    // create whirling particle charge
+    // 
     void CreateChargeColor(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor);
     void CreateChargeDark (const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum);
+
+    // 
+    void CreateWhirlColor(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor);
+    void CreateWhirlDark (const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum);
 
     // 
     coreFloat CreateLightning(const coreVector2& vPosFrom, const coreVector2& vPosTo,                              const coreFloat fWidth, const coreVector3& vColor, const coreVector2& vTexSizeFactor, const coreFloat fTexOffset);
@@ -121,6 +137,10 @@ public:
     // 
     void CreateBlast(const coreVector3& vPosition,                                                                 const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor);
     void CreateRing (const coreVector3& vPosition, const coreVector3& vDirection, const coreVector3& vOrientation, const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor);
+
+    // 
+    void AddScreenSplatter(const coreVector2& vPosition, const coreVector2& vDirection, const coreFloat fScale, const coreUint8 iType);
+    void ClearScreen();
 
     // 
     void PlaySound(const coreVector3& vPosition, const coreFloat fVolume, const eSoundEffect iSoundIndex);
@@ -133,18 +153,18 @@ public:
     inline const coreFloat& GetShakeStrength()const {return m_fShakeStrength;}
 
     // 
-    void MacroExplosionColorSmall   (const coreVector3& vPosition, const coreVector3& vColor);
-    void MacroExplosionColorBig     (const coreVector3& vPosition, const coreVector3& vColor);
-    void MacroExplosionDarkSmall    (const coreVector3& vPosition);
-    void MacroExplosionDarkBig      (const coreVector3& vPosition);
-    void MacroExplosionPhysicalSmall(const coreVector3& vPosition);
-    void MacroExplosionPhysicalBig  (const coreVector3& vPosition);
-    void MacroEruptionColorSmall    (const coreVector3& vPosition, const coreVector2& vDirection, const coreVector3& vColor);
-    void MacroEruptionColorBig      (const coreVector3& vPosition, const coreVector2& vDirection, const coreVector3& vColor);
-    void MacroEruptionDarkSmall     (const coreVector3& vPosition, const coreVector2& vDirection);
-    void MacroEruptionDarkBig       (const coreVector3& vPosition, const coreVector2& vDirection);
-    void MacroEruptionPhysicalSmall (const coreVector3& vPosition, const coreVector2& vDirection) {ASSERT(false)} 
-    void MacroEruptionPhysicalBig   (const coreVector3& vPosition, const coreVector2& vDirection) {ASSERT(false)} 
+    void MacroExplosionColorSmall        (const coreVector3& vPosition, const coreVector3& vColor);
+    void MacroExplosionColorBig          (const coreVector3& vPosition, const coreVector3& vColor);
+    void MacroExplosionDarkSmall         (const coreVector3& vPosition);
+    void MacroExplosionDarkBig           (const coreVector3& vPosition);
+    void MacroExplosionPhysicalColorSmall(const coreVector3& vPosition, const coreVector3& vColor);
+    void MacroExplosionPhysicalColorBig  (const coreVector3& vPosition, const coreVector3& vColor);
+    void MacroExplosionPhysicalDarkSmall (const coreVector3& vPosition);
+    void MacroExplosionPhysicalDarkBig   (const coreVector3& vPosition);
+    void MacroEruptionColorSmall         (const coreVector3& vPosition, const coreVector2& vDirection, const coreVector3& vColor);
+    void MacroEruptionColorBig           (const coreVector3& vPosition, const coreVector2& vDirection, const coreVector3& vColor);
+    void MacroEruptionDarkSmall          (const coreVector3& vPosition, const coreVector2& vDirection);
+    void MacroEruptionDarkBig            (const coreVector3& vPosition, const coreVector2& vDirection);
 };
 
 

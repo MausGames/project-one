@@ -204,8 +204,11 @@ void cShadow::Recompile()
     }
 
     // finish now
-    coreSync::Finish();
-    Core::Manager::Resource->UpdateResources();
+    if(Core::System->GetCurFrame())
+    {
+        coreSync::Finish();
+        Core::Manager::Resource->UpdateResources();
+    }
 }
 
 
@@ -265,7 +268,7 @@ void cShadow::EnableShadowRead(const coreUintW iHandleIndex)
 void cShadow::__Reset(const coreResourceReset bInit)
 {
     if(bInit) {m_iLevel = 0xFFu; this->Reconfigure();}
-         else m_FrameBuffer.Delete();
+         else {m_FrameBuffer.Delete();}
 }
 
 

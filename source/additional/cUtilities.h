@@ -10,6 +10,34 @@
 #ifndef _P1_GUARD_UTILITIES_H_
 #define _P1_GUARD_UTILITIES_H_
 
+// TODO: optimize AlongStar
+
+
+// ****************************************************************
+// 
+#if defined(_CORE_MSVC_)
+    #define UNITY_BUILD __pragma(warning(disable : 4005))
+#else
+    #define UNITY_BUILD _Pragma("GCC diagnostic ignored \"-Wno-macro-redefined\"")
+#endif
+
+// sub-class type information macros
+#define ENABLE_ID                                           \
+    virtual       coreInt32 GetID  ()const = 0;             \
+    virtual const coreChar* GetName()const = 0;
+#define ASSIGN_ID(i,n)                                      \
+    static constexpr const coreInt32 ID   = i;              \
+    static constexpr const coreChar* Name = n;              \
+    inline       coreInt32 GetID  ()const final {return i;} \
+    inline const coreChar* GetName()const final {return n;}
+
+// 
+#define EXECUTE_ONCE(c)                              \
+{                                                    \
+    static coreBool s_bWasExecuted = false;          \
+    if(!s_bWasExecuted) {{c} s_bWasExecuted = true;} \
+}
+
 
 // ****************************************************************
 // angle difference helper-function
@@ -34,10 +62,8 @@ inline FUNC_CONST coreFloat SmoothTowards(const coreFloat fLength, const coreFlo
 // 
 inline FUNC_CONST coreFloat LerpSmoothRev(const coreFloat x, const coreFloat y, const coreFloat s)
 {
-    // TODO 
-    ASSERT(false)
-    return (s >= 0.5f) ? LERP(y, (x + y) / 2.0f, SIN(s*PI)) :
-                         LERP(x, (x + y) / 2.0f, SIN(s*PI));
+    return (s >= 0.5f) ? LERPB(y, (x + y) * 0.5f, 2.0f - s * 2.0f) :
+                         LERPB(x, (x + y) * 0.5f,        s * 2.0f);
 }
 
 inline FUNC_CONST coreFloat LerpBreakRev(const coreFloat x, const coreFloat y, const coreFloat s)
@@ -78,6 +104,9 @@ inline FUNC_LOCAL coreUint8 PackDirection(const coreVector2& vDirection)
 
 inline FUNC_CONST coreVector2 UnpackDirection(const coreUint8 iPack)
 {
+    // 1 0 7
+    // 2 8 6
+    // 3 4 5
     switch(iPack)
     {
     default: ASSERT(false)
@@ -91,6 +120,27 @@ inline FUNC_CONST coreVector2 UnpackDirection(const coreUint8 iPack)
     case 7u: return coreVector2( 1.0f, 1.0f) * (1.0f/SQRT2);
     case 8u: return coreVector2( 0.0f, 0.0f);
     }
+}
+
+
+// ****************************************************************
+// 
+inline FUNC_LOCAL coreBool IsHorizontal(const coreVector2& v)
+{
+    ASSERT(!v.IsNull())
+    return ABS(v.x) > ABS(v.y);
+}
+
+inline FUNC_LOCAL coreVector2 AlongCross(const coreVector2& v)
+{
+    ASSERT(!v.IsNull())
+    return IsHorizontal(v) ? coreVector2(SIGN(v.x), 0.0f) : coreVector2(0.0f, SIGN(v.y));
+}
+
+inline FUNC_LOCAL coreVector2 AlongStar(const coreVector2& v)
+{
+    ASSERT(!v.IsNull())
+    return UnpackDirection(PackDirection(v));
 }
 
 

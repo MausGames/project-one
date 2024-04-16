@@ -259,7 +259,7 @@ coreBool cShip::_TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, c
 
 // ****************************************************************
 // add ship to the game
-void cShip::_Resurrect(const coreBool bSingle, const coreVector2& vPosition, const coreVector2& vDirection, const coreInt32 iType)
+void cShip::_Resurrect(const coreVector2& vPosition, const coreVector2& vDirection, const coreInt32 iType)
 {
     ASSERT(m_iMaxHealth > 0)
 
@@ -271,13 +271,6 @@ void cShip::_Resurrect(const coreBool bSingle, const coreVector2& vPosition, con
     this->SetDirection(coreVector3(vDirection, 0.0f));
     this->SetColor3   (this->GetBaseColor());
 
-    // add ship to global shadow and outline
-    if(bSingle)
-    {
-        cShadow::GetGlobalContainer()->BindObject(this);
-        g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->BindObject(this);
-    }
-
     // 
     this->SetEnabled(CORE_OBJECT_ENABLE_ALL);
 
@@ -288,15 +281,8 @@ void cShip::_Resurrect(const coreBool bSingle, const coreVector2& vPosition, con
 
 // ****************************************************************
 // remove ship from the game
-void cShip::_Kill(const coreBool bSingle, const coreBool bAnimated)
+void cShip::_Kill(const coreBool bAnimated)
 {
-    // remove ship from global shadow and outline
-    if(bSingle)
-    {
-        cShadow::GetGlobalContainer()->UnbindObject(this);
-        g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->UnbindObject(this);
-    }
-
     // 
     this->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
@@ -307,13 +293,19 @@ void cShip::_Kill(const coreBool bSingle, const coreBool bAnimated)
 
 // ****************************************************************
 // 
-void cShip::_EnableBlink()
+void cShip::_EnableBlink(const coreProgramPtr& pProgram)const
 {
-    if(!this->GetProgram().IsUsable()) return;
+    if(!pProgram.IsUsable()) return;
 
     // 
-    this->GetProgram()->Enable();
-    this->GetProgram()->SendUniform("u_v1Blink", this->GetBlink());
+    pProgram->Enable();
+    pProgram->SendUniform("u_v1Blink", this->GetBlink());
+}
+
+void cShip::_EnableBlink()const
+{
+    // 
+    this->_EnableBlink(this->GetProgram());
 }
 
 

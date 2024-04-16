@@ -66,7 +66,7 @@ public:
     // adjust to current configuration
     void Reconfigure();
 
-    // access frame buffer object
+    // access frame buffer
     inline coreFrameBuffer* GetFrameBuffer() {return &m_FrameBuffer;}
 
     // control the shadow map class

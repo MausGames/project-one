@@ -94,6 +94,7 @@ void cScoreMenu::Move()
     {
     case SURFACE_SCORE_DEFAULT:
         {
+
         }
         break;
 

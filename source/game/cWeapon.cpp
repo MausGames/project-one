@@ -89,7 +89,7 @@ cRayWeapon::cRayWeapon()noexcept
 // 
 void cRayWeapon::__TriggerOwn(const coreUint8 iMode)
 {
-    const coreFloat fAlpha = g_CurConfig.Game.iTransparent ? 0.5f : 1.0f;
+    //const coreFloat fAlpha = g_CurConfig.Game.iTransparent ? 0.5f : 1.0f;
 
     // 
     const coreVector2 vPos = m_pOwner->GetPosition ().xy();
@@ -102,7 +102,7 @@ void cRayWeapon::__TriggerOwn(const coreUint8 iMode)
         if(m_CooldownTimer.GetStatus()) return;
 
         // 
-        g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(8, 5.0f, m_pOwner, vPos + vDir*6.0f, vDir)->MakeWhite()->ChangeSize(1.3f)->ChangeAlpha(fAlpha);
+        g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(8, 5.0f, m_pOwner, vPos + vDir*6.0f, vDir)->ChangeSize(1.3f)->ChangeAlpha(fAlpha);
 
         // 
         m_CooldownTimer.SetValue(-1.1f);
@@ -150,8 +150,8 @@ void cRayWeapon::__ShootOwn()
     const coreVector2 vTan = vDir.Rotated90();
 
     // 
-    g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(2, 5.0f, m_pOwner, vPos + vDir*6.0f + vTan*1.5f, vDir)->MakeWhite()->ChangeSize(1.0f)->ChangeAlpha(fAlpha);
-    g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(2, 5.0f, m_pOwner, vPos + vDir*6.0f - vTan*1.5f, vDir)->MakeWhite()->ChangeSize(1.0f)->ChangeAlpha(fAlpha);
+    g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(2, 5.0f, m_pOwner, vPos + vDir*6.0f + vTan*1.5f, vDir)->ChangeSize(1.0f)->ChangeAlpha(fAlpha);
+    g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(2, 5.0f, m_pOwner, vPos + vDir*6.0f - vTan*1.5f, vDir)->ChangeSize(1.0f)->ChangeAlpha(fAlpha);
 
     // play bullet sound-effect
     m_pBulletSound->PlayPosition(NULL, 1.0f, 0.5f, 0.0f, false, m_pOwner->GetPosition());
@@ -196,16 +196,18 @@ void cPulseWeapon::__ShootOwn()
     switch(F_TO_UI(m_fCharge))
     {
     case 2:
-        g_pGame->GetBulletManagerPlayer()->AddBullet<cPulseBullet>(12, 1.3f, m_pOwner, vPos + vDir*6.0f + vTan*4.1f, (vDir + vTan*0.025f*6.0f).Normalized())->MakePurple()->ChangeSize(1.25f)->ChangeAlpha(fAlpha);
-        g_pGame->GetBulletManagerPlayer()->AddBullet<cPulseBullet>(12, 1.3f, m_pOwner, vPos + vDir*6.0f - vTan*4.1f, (vDir - vTan*0.025f*6.0f).Normalized())->MakePurple()->ChangeSize(1.25f)->ChangeAlpha(fAlpha);
+        g_pGame->GetBulletManagerPlayer()->AddBullet<cPulseBullet>(12, 1.3f, m_pOwner, vPos + vDir*6.0f + vTan*4.1f, (vDir + vTan*0.025f*6.0f).Normalized())->ChangeSize(1.25f)->ChangeAlpha(fAlpha);
+        g_pGame->GetBulletManagerPlayer()->AddBullet<cPulseBullet>(12, 1.3f, m_pOwner, vPos + vDir*6.0f - vTan*4.1f, (vDir - vTan*0.025f*6.0f).Normalized())->ChangeSize(1.25f)->ChangeAlpha(fAlpha);
+        FALLTHROUGH
 
     case 1:
-        g_pGame->GetBulletManagerPlayer()->AddBullet<cPulseBullet>(12, 1.4f, m_pOwner, vPos + vDir*6.0f + vTan*2.6f, (vDir + vTan*0.025f*4.0f).Normalized())->MakePurple()->ChangeSize(1.25f)->ChangeAlpha(fAlpha);
-        g_pGame->GetBulletManagerPlayer()->AddBullet<cPulseBullet>(12, 1.4f, m_pOwner, vPos + vDir*6.0f - vTan*2.6f, (vDir - vTan*0.025f*4.0f).Normalized())->MakePurple()->ChangeSize(1.25f)->ChangeAlpha(fAlpha);
+        g_pGame->GetBulletManagerPlayer()->AddBullet<cPulseBullet>(12, 1.4f, m_pOwner, vPos + vDir*6.0f + vTan*2.6f, (vDir + vTan*0.025f*4.0f).Normalized())->ChangeSize(1.25f)->ChangeAlpha(fAlpha);
+        g_pGame->GetBulletManagerPlayer()->AddBullet<cPulseBullet>(12, 1.4f, m_pOwner, vPos + vDir*6.0f - vTan*2.6f, (vDir - vTan*0.025f*4.0f).Normalized())->ChangeSize(1.25f)->ChangeAlpha(fAlpha);
+        FALLTHROUGH
 
     default:
-        g_pGame->GetBulletManagerPlayer()->AddBullet<cPulseBullet>(12, 1.5f, m_pOwner, vPos + vDir*6.0f + vTan*1.1f, (vDir + vTan*0.025f*2.0f).Normalized())->MakePurple()->ChangeSize(1.25f)->ChangeAlpha(fAlpha);
-        g_pGame->GetBulletManagerPlayer()->AddBullet<cPulseBullet>(12, 1.5f, m_pOwner, vPos + vDir*6.0f - vTan*1.1f, (vDir - vTan*0.025f*2.0f).Normalized())->MakePurple()->ChangeSize(1.25f)->ChangeAlpha(fAlpha);
+        g_pGame->GetBulletManagerPlayer()->AddBullet<cPulseBullet>(12, 1.5f, m_pOwner, vPos + vDir*6.0f + vTan*1.1f, (vDir + vTan*0.025f*2.0f).Normalized())->ChangeSize(1.25f)->ChangeAlpha(fAlpha);
+        g_pGame->GetBulletManagerPlayer()->AddBullet<cPulseBullet>(12, 1.5f, m_pOwner, vPos + vDir*6.0f - vTan*1.1f, (vDir - vTan*0.025f*2.0f).Normalized())->ChangeSize(1.25f)->ChangeAlpha(fAlpha);
         break;
     }
 
@@ -262,8 +264,8 @@ void cWaveWeapon::__ShootOwn()
     const coreVector2 vDir = m_bSide ? coreVector2(1.0f,0.0f) : coreVector2(0.0f,1.0f);
 
     // 
-    g_pGame->GetBulletManagerPlayer()->AddBullet<cWaveBullet>(4, 3.5f, m_pOwner, vPos + vDir*6.0f,  vDir)->MakeGreen()->ChangeSize(1.8f)->ChangeAlpha(fAlpha);
-    g_pGame->GetBulletManagerPlayer()->AddBullet<cWaveBullet>(4, 3.5f, m_pOwner, vPos - vDir*6.0f, -vDir)->MakeGreen()->ChangeSize(1.8f)->ChangeAlpha(fAlpha);
+    g_pGame->GetBulletManagerPlayer()->AddBullet<cWaveBullet>(4, 3.5f, m_pOwner, vPos + vDir*6.0f,  vDir)->ChangeSize(1.8f)->ChangeAlpha(fAlpha);
+    g_pGame->GetBulletManagerPlayer()->AddBullet<cWaveBullet>(4, 3.5f, m_pOwner, vPos - vDir*6.0f, -vDir)->ChangeSize(1.8f)->ChangeAlpha(fAlpha);
 
     // play bullet sound-effect
     m_pBulletSound->PlayPosition(NULL, 1.0f, 1.0f, 0.0f, false, m_pOwner->GetPosition());
@@ -275,7 +277,7 @@ void cWaveWeapon::__ShootOwn()
 void cWaveWeapon::__RenderOverlayOwn()
 {
     // 
-    const coreVector2 vPos = g_pForeground->Project(m_pOwner->GetPosition()) * g_vMenuCenter;
+    const coreVector2 vPos = g_pForeground->Project2D(m_pOwner->GetPosition()) * g_vMenuCenter;
     const coreVector2 vDir = m_bSide ? coreVector2(1.0f,0.0f) : coreVector2(0.0f,1.0f);
 
     // 
@@ -433,7 +435,7 @@ void cTeslaWeapon::__ShootOwn()
     const coreVector2 vTan = coreVector2((m_iShotType < 3) ? (0.04f * I_TO_F(m_iShotType-1)) : 0.0f, 0.0f);
 
     // 
-    g_pGame->GetBulletManagerPlayer()->AddBullet<cTeslaBullet>(12, 3.0f, m_pOwner, vPos + vDir*6.0f, (vDir + vTan).Normalized())->MakeBlue()->ChangeAlpha(fAlpha);
+    g_pGame->GetBulletManagerPlayer()->AddBullet<cTeslaBullet>(12, 3.0f, m_pOwner, vPos + vDir*6.0f, (vDir + vTan).Normalized())->ChangeAlpha(fAlpha);
 
     // play bullet sound-effect
     m_pBulletSound->PlayPosition(NULL, 1.0f, 1.0f, 0.0f, false, m_pOwner->GetPosition());

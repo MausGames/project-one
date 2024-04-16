@@ -149,7 +149,7 @@ cFragmentItem::cFragmentItem()noexcept
     // 
     m_Hull.DefineModel  ("object_sphere.md3");
     m_Hull.DefineTexture(0u, "effect_energy.png");
-    m_Hull.DefineProgram("effect_energy_bullet_program");
+    m_Hull.DefineProgram("effect_energy_flat_program");
     m_Hull.SetColor3    (COLOR_ENERGY_WHITE * 0.1f);
     m_Hull.SetTexSize   (coreVector2(4.0f,4.0f));
 

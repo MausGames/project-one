@@ -22,11 +22,11 @@ cConfigMenu::cConfigMenu()noexcept
 
     m_VideoTab.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_VideoTab.DefineProgram("menu_border_program");
-    m_VideoTab.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.115f,-0.012f));
+    m_VideoTab.SetPosition  (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.115f,-0.0115f));
     m_VideoTab.SetSize      (coreVector2(0.17f,0.07f));
     m_VideoTab.SetAlignment (coreVector2(0.0f, 1.0f));
     m_VideoTab.SetTexSize   (coreVector2(1.0f,-1.0f));
-    m_VideoTab.SetTexOffset (m_VideoTab.GetSize()*coreVector2(-0.5f,-1.0f) + coreVector2(0.115f,0.012f));
+    m_VideoTab.SetTexOffset (m_VideoTab.GetSize()*coreVector2(-0.5f,-1.0f) + coreVector2(0.115f,0.0115f));
     m_VideoTab.GetCaption()->SetTextLanguage("CONFIG_VIDEO");
 
     m_AudioTab.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
@@ -109,7 +109,7 @@ cConfigMenu::cConfigMenu()noexcept
         m_aLine[i].SetTexOffset (coreVector2(I_TO_F(i)*0.09f, 0.0f));
     }
 
-    for(coreUintW i = 0u; i < INPUT_KEYS_MOVE; ++i)
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aArrow); ++i)
     {
         m_aArrow[i].Construct  (MENU_FONT_ICON_1, MENU_OUTLINE_SMALL);
         m_aArrow[i].SetPosition(m_aLabel[ENTRY_INPUT_MOVEUP + i].GetPosition() + coreVector2(0.21f,0.0f));
@@ -119,6 +119,11 @@ cConfigMenu::cConfigMenu()noexcept
     m_aArrow[1].SetText(ICON_ARROW_LEFT);
     m_aArrow[2].SetText(ICON_ARROW_DOWN);
     m_aArrow[3].SetText(ICON_ARROW_RIGHT);
+    m_aArrow[4].SetText(ICON_BURN);
+    m_aArrow[5].SetText(ICON_FEATHER_ALT);
+    m_aArrow[6].SetText(ICON_UNDO_ALT);
+    m_aArrow[7].SetText(ICON_REDO_ALT);
+    m_aArrow[8].SetText(ICON_PAUSE_CIRCLE);
 
     #define __SET_OPTION(x,n,s)                                                  \
     {                                                                            \
@@ -181,6 +186,7 @@ cConfigMenu::cConfigMenu()noexcept
             __SET_INPUT(aAction[1], INPUT_ACTION2,   0.22f)
             __SET_INPUT(aAction[2], INPUT_ACTION3,   0.22f)
             __SET_INPUT(aAction[3], INPUT_ACTION4,   0.22f)
+            __SET_INPUT(aAction[4], INPUT_ACTION5,   0.22f)
 
             m_aInput[i].oType  .SetAutomatic(0.0f);   // # because of realtime-update
             m_aInput[i].oType  .SetEndless(true);
@@ -204,8 +210,8 @@ cConfigMenu::cConfigMenu()noexcept
     for(coreUintW i = 0u, ie = asLanguageList.size(); i < ie; i++)
         m_Language.AddEntry(asLanguageList[i].c_str(), i);
 
-    const coreUint8& iMaxSamples    = Core::Graphics->GetMaxSamples();
-    const coreUint8& iMaxAnisotropy = Core::Graphics->GetMaxAnisotropy();
+    const coreUint8 iMaxSamples    = Core::Graphics->GetMaxSamples();
+    const coreUint8 iMaxAnisotropy = Core::Graphics->GetMaxAnisotropy();
 
     m_DisplayMode  .AddEntryLanguage("DISPLAYMODE_WINDOW",     0u);
     m_DisplayMode  .AddEntryLanguage("DISPLAYMODE_BORDERLESS", 1u);
@@ -217,7 +223,6 @@ cConfigMenu::cConfigMenu()noexcept
     if(m_AntiAliasing.GetEntry(m_AntiAliasing.GetNumEntries() - 1u).tValue != iMaxSamples) m_AntiAliasing.AddEntry(PRINT("%ux", iMaxSamples), iMaxSamples);   // possible 6x
     m_AssetQuality .AddEntryLanguage("VALUE_LOW",  0u);
     m_AssetQuality .AddEntryLanguage("VALUE_HIGH", 1u);
-    m_ShadowQuality.AddEntryLanguage("VALUE_OFF",  0u);
     m_ShadowQuality.AddEntryLanguage("VALUE_LOW",  1u);
     m_ShadowQuality.AddEntryLanguage("VALUE_HIGH", 2u);
     for(coreUintW i = 0u; i <= 100u; i += 10u) m_OverallVolume.AddEntry(PRINT("%zu%%", i), i);
@@ -271,11 +276,11 @@ cConfigMenu::cConfigMenu()noexcept
     this->BindObject(SURFACE_CONFIG_AUDIO, &m_AmbientSound);
     this->BindObject(SURFACE_CONFIG_GAME,  &m_Language);
 
-    for(coreUintW i = 0u; i < INPUT_KEYS_MOVE;    ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aArrow[i]);
-    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aInput[i].oHeader);
-    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aInput[i].oType);
-    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aInput[i].oRumble);
-    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i)
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aArrow); ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aArrow[i]);
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;   ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aInput[i].oHeader);
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;   ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aInput[i].oType);
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;   ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aInput[i].oRumble);
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;   ++i)
     {
         for(coreUintW j = 0u; j < INPUT_KEYS; ++j)
             this->BindObject(SURFACE_CONFIG_INPUT, &this->__RetrieveInputButton(i, j));
@@ -310,6 +315,12 @@ void cConfigMenu::Move()
             if(m_ShadowQuality.IsClickedArrow())
                 this->__UpdateShadowQuality();
 
+
+            if(m_Resolution.GetArrow(0u)->IsClicked() && m_Resolution.GetEntry(m_Resolution.GetNumEntries() - 1u).tValue == 0xFFu)
+                m_Resolution.DeleteEntry(m_Resolution.GetNumEntries() - 1u);
+
+
+
             // 
             cMenu::UpdateSwitchBox(&m_Monitor);
             cMenu::UpdateSwitchBox(&m_Resolution);
@@ -320,11 +331,10 @@ void cConfigMenu::Move()
             cMenu::UpdateSwitchBox(&m_ShadowQuality);
 
             // 
-                 if(m_AssetQuality .GetCurIndex() == 0u) m_AssetQuality .GetCaption()->SetColor3(COLOR_MENU_YELLOW);
-            else if(m_AssetQuality .GetCurIndex() == 1u) m_AssetQuality .GetCaption()->SetColor3(COLOR_MENU_GREEN);
-                 if(m_ShadowQuality.GetCurIndex() == 0u) m_ShadowQuality.GetCaption()->SetColor3(COLOR_MENU_WHITE);
-            else if(m_ShadowQuality.GetCurIndex() == 1u) m_ShadowQuality.GetCaption()->SetColor3(COLOR_MENU_YELLOW);
-            else if(m_ShadowQuality.GetCurIndex() == 2u) m_ShadowQuality.GetCaption()->SetColor3(COLOR_MENU_GREEN);
+                 if(m_AssetQuality .GetCurEntry().tValue == 0u) m_AssetQuality .GetCaption()->SetColor3(COLOR_MENU_YELLOW);
+            else if(m_AssetQuality .GetCurEntry().tValue == 1u) m_AssetQuality .GetCaption()->SetColor3(COLOR_MENU_GREEN);
+                 if(m_ShadowQuality.GetCurEntry().tValue == 1u) m_ShadowQuality.GetCaption()->SetColor3(COLOR_MENU_YELLOW);
+            else if(m_ShadowQuality.GetCurEntry().tValue == 2u) m_ShadowQuality.GetCaption()->SetColor3(COLOR_MENU_GREEN);
         }
         break;
 
@@ -361,7 +371,7 @@ void cConfigMenu::Move()
                         coreBool bSkip = false;
 
                         // skip joystick/gamepad input sets without available device
-                        if((oInput.oType.GetCurEntry().tValue >= INPUT_SETS_KEYBOARD) && (oInput.oType.GetCurEntry().tValue - INPUT_SETS_KEYBOARD >= Core::Input->GetJoystickNum()))
+                        if((oInput.oType.GetCurEntry().tValue >= INPUT_SETS_KEYBOARD) && (oInput.oType.GetCurEntry().tValue - INPUT_SETS_KEYBOARD >= Core::Input->GetJoystickNum()))  
                             bSkip = true;
 
                         // skip already assigned input sets
@@ -403,8 +413,8 @@ void cConfigMenu::Move()
 
                     if(oButton.IsClicked())
                     {
-                        const coreChar*  pcText = PRINT("%s [%s]", Core::Language->GetString("QUESTION_MAPPING"), m_aLabel[ENTRY_INPUT_MOVEUP + j].GetText());
-                        const coreUint8& iType  = oInput.oType.GetCurEntry().tValue;
+                        const coreChar* pcText = PRINT("%s [%s]", Core::Language->GetString("QUESTION_MAPPING"), m_aLabel[ENTRY_INPUT_MOVEUP + j].GetText());
+                        const coreUint8 iType  = oInput.oType.GetCurEntry().tValue;
 
                         // 
                         g_pMenu->GetMsgBox()->ShowMapping(pcText, iType, [&](const coreInt32 iAnswer, const coreInt16 iKey)
@@ -419,7 +429,7 @@ void cConfigMenu::Move()
                                     coreInt16& iOtherCurValue = this->__RetrieveInputDirValue(k, m);
 
                                     // find same value and same input set type
-                                    if((iOtherCurValue == iKey) && ((k < INPUT_SETS_KEYBOARD) == (iType < INPUT_SETS_KEYBOARD)) && (&iOtherCurValue != &iCurValue))
+                                    if((iOtherCurValue == iKey) && (((k < INPUT_SETS_KEYBOARD) && (iType < INPUT_SETS_KEYBOARD)) || (k == iType)) && (&iOtherCurValue != &iCurValue))
                                     {
                                         // replace with old key
                                         iOtherCurValue = iCurValue;
@@ -507,7 +517,7 @@ void cConfigMenu::Move()
     }
 
     // 
-    if(Core::Input->GetAnyButton(CORE_INPUT_HOLD))
+    if(Core::Input->GetAnyButton(CORE_INPUT_HOLD) || Core::System->GetWinPosChanged() || Core::System->GetWinSizeChanged())
         this->CheckValues();
 
     // 
@@ -524,11 +534,20 @@ void cConfigMenu::Move()
     // 
     if(m_BackButton.IsFocused()) g_pMenu->GetTooltip()->ShowText(TOOLTIP_ONELINER, Core::Language->GetString("BACK"));
 
-
-    //for(coreUintW i = 0u; i < ENTRY_MAX; ++i)
+      
+    //for(coreUintW i = 7u; i < ENTRY_MAX; ++i)
     //{
-    //    m_aLine[i].SetAlpha(m_aLine[i].GetAlpha() * ((m_aLabel[i].IsFocused() || m_aLine[i].IsFocused()) ? 1.0f : 0.7f));
+    //    m_aLine[i].SetAlpha(m_aLine[i].GetAlpha() * ((m_aLabel[i].IsFocused() || m_aLine[i].IsFocused()) ? 1.0f : 0.6f));
     //}
+    //m_aLine[0].SetAlpha(m_aLine[0].GetAlpha() * (m_aLabel[0].IsFocused() || m_aLine[0].IsFocused() || m_Monitor      .IsFocused() ? 1.0f : 0.6f));
+    //m_aLine[1].SetAlpha(m_aLine[1].GetAlpha() * (m_aLabel[1].IsFocused() || m_aLine[1].IsFocused() || m_Resolution   .IsFocused() ? 1.0f : 0.6f));
+    //m_aLine[2].SetAlpha(m_aLine[2].GetAlpha() * (m_aLabel[2].IsFocused() || m_aLine[2].IsFocused() || m_DisplayMode  .IsFocused() ? 1.0f : 0.6f));
+    //m_aLine[3].SetAlpha(m_aLine[3].GetAlpha() * (m_aLabel[3].IsFocused() || m_aLine[3].IsFocused() || m_AntiAliasing .IsFocused() ? 1.0f : 0.6f));
+    //m_aLine[4].SetAlpha(m_aLine[4].GetAlpha() * (m_aLabel[4].IsFocused() || m_aLine[4].IsFocused() || m_TextureFilter.IsFocused() ? 1.0f : 0.6f));
+    //m_aLine[5].SetAlpha(m_aLine[5].GetAlpha() * (m_aLabel[5].IsFocused() || m_aLine[5].IsFocused() || m_AssetQuality .IsFocused() ? 1.0f : 0.6f));
+    //m_aLine[6].SetAlpha(m_aLine[6].GetAlpha() * (m_aLabel[6].IsFocused() || m_aLine[6].IsFocused() || m_ShadowQuality.IsFocused() ? 1.0f : 0.6f));
+
+      
 }
 
 
@@ -536,28 +555,28 @@ void cConfigMenu::Move()
 // 
 void cConfigMenu::CheckValues()
 {
-    const coreUint8&   iCurMonitor    = m_Monitor   .GetCurEntry().tValue;
-    const coreUint8&   iCurValue      = m_Resolution.GetCurEntry().tValue;
-    const coreVector2& vCurResolution = Core::System->GetDisplayData(iCurMonitor).avAvailableRes[iCurValue];
+    const coreUint8    iCurMonitor    = m_Monitor   .GetCurEntry().tValue;
+    const coreUint8    iCurValue      = m_Resolution.GetCurEntry().tValue;
+    const coreVector2& vCurResolution = (iCurValue == 0xFFu) ? Core::System->GetResolution() : Core::System->GetDisplayData(iCurMonitor).avAvailableRes[iCurValue];
 
     // 
-    const coreBool bReset = (vCurResolution != coreVector2(I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH)), I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT)))) ||
-                            (m_Monitor      .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY))                         ||
-                            (m_DisplayMode  .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN))                      ||
-                            (m_AntiAliasing .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING))                  ||
-                            (m_TextureFilter.GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREFILTER))                 ||
-                            (m_AssetQuality .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_QUALITY))                       ||
-                            (m_ShadowQuality.GetCurEntry().tValue != g_OldConfig.Graphics.iShadow)                                             ||
-                            (m_OverallVolume.GetCurEntry().tValue != F_TO_UI(Core::Config->GetFloat(CORE_CONFIG_AUDIO_GLOBALVOLUME) * 100.0f)) ||
-                            (m_MusicVolume  .GetCurEntry().tValue != F_TO_UI(Core::Config->GetFloat(CORE_CONFIG_AUDIO_MUSICVOLUME)  * 100.0f)) ||
-                            (m_EffectVolume .GetCurEntry().tValue != F_TO_UI(Core::Config->GetFloat(CORE_CONFIG_AUDIO_SOUNDVOLUME)  * 100.0f)) ||
-                            (m_AmbientSound .GetCurEntry().tValue != g_OldConfig.Audio.iAmbient)                                               ||
-                            (std::strcmp(Core::Language->GetPath(), Core::Config->GetString(CORE_CONFIG_BASE_LANGUAGE)))                       ||
-                            (std::memcmp(&g_CurConfig.Input, &g_OldConfig.Input, sizeof(sConfig::Input)));
+    const coreBool bSave = (vCurResolution != coreVector2(I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH)), I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT)))) ||
+                           (m_Monitor      .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY))                         ||
+                           (m_DisplayMode  .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_SYSTEM_FULLSCREEN))                      ||
+                           (m_AntiAliasing .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_ANTIALIASING))                  ||
+                           (m_TextureFilter.GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_TEXTUREFILTER))                 ||
+                           (m_AssetQuality .GetCurEntry().tValue != Core::Config->GetInt(CORE_CONFIG_GRAPHICS_QUALITY))                       ||
+                           (m_ShadowQuality.GetCurEntry().tValue != g_OldConfig.Graphics.iShadow)                                             ||
+                           (m_OverallVolume.GetCurEntry().tValue != F_TO_UI(Core::Config->GetFloat(CORE_CONFIG_AUDIO_GLOBALVOLUME) * 100.0f)) ||
+                           (m_MusicVolume  .GetCurEntry().tValue != F_TO_UI(Core::Config->GetFloat(CORE_CONFIG_AUDIO_MUSICVOLUME)  * 100.0f)) ||
+                           (m_EffectVolume .GetCurEntry().tValue != F_TO_UI(Core::Config->GetFloat(CORE_CONFIG_AUDIO_SOUNDVOLUME)  * 100.0f)) ||
+                           (m_AmbientSound .GetCurEntry().tValue != g_OldConfig.Audio.iAmbient)                                               ||
+                           (std::strcmp(Core::Language->GetPath(), Core::Config->GetString(CORE_CONFIG_BASE_LANGUAGE)))                       ||
+                           (std::memcmp(&g_CurConfig.Input, &g_OldConfig.Input, sizeof(sConfig::Input)));
 
     // 
-    m_SaveButton   .SetOverride(bReset ? 0 : -1);
-    m_DiscardButton.SetOverride(bReset ? 0 : -1);
+    m_SaveButton   .SetOverride(bSave ? 0 : -1);
+    m_DiscardButton.SetOverride(bSave ? 0 : -1);
 }
 
 
@@ -577,7 +596,10 @@ void cConfigMenu::LoadValues()
 
     // 
     if(!m_Resolution.SelectText(PRINT("%d x %d", Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH), Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT))))
+    {
+        m_Resolution.AddEntry("Other", 0xFFu);
         m_Resolution.SelectLast();
+    }
 
     // 
     m_Monitor      .SelectValue(Core::Config->GetInt(CORE_CONFIG_SYSTEM_DISPLAY));
@@ -594,7 +616,7 @@ void cConfigMenu::LoadValues()
     m_AmbientSound .SelectValue(g_CurConfig.Audio.iAmbient);
 
     // 
-    const coreLookup<std::string, std::string>& asLanguageList = cMenu::GetLanguageList();
+    const std::vector<std::string>& asLanguageList = cMenu::GetLanguageList().get_valuelist();
     m_Language.SelectIndex(std::find(asLanguageList.begin(), asLanguageList.end(), Core::Config->GetString(CORE_CONFIG_BASE_LANGUAGE)) - asLanguageList.begin());
 
     // 
@@ -622,9 +644,9 @@ void cConfigMenu::LoadValues()
 // 
 void cConfigMenu::SaveValues()
 {
-    const coreUint8&   iCurMonitor    = m_Monitor   .GetCurEntry().tValue;
-    const coreUint8&   iCurValue      = m_Resolution.GetCurEntry().tValue;
-    const coreVector2& vCurResolution = Core::System->GetDisplayData(iCurMonitor).avAvailableRes[iCurValue];
+    const coreUint8    iCurMonitor    = m_Monitor   .GetCurEntry().tValue;
+    const coreUint8    iCurValue      = m_Resolution.GetCurEntry().tValue;
+    const coreVector2& vCurResolution = (iCurValue == 0xFFu) ? Core::System->GetResolution() : Core::System->GetDisplayData(iCurMonitor).avAvailableRes[iCurValue];
 
     // 
     const coreBool bReset = (vCurResolution != coreVector2(I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_WIDTH)), I_TO_F(Core::Config->GetInt(CORE_CONFIG_SYSTEM_HEIGHT)))) ||
@@ -709,8 +731,8 @@ void cConfigMenu::__UpdateOverallVolume()
 void cConfigMenu::__UpdateLanguage()
 {
     // 
-    const coreLookup<std::string, std::string>& asLanguageList = cMenu::GetLanguageList();
-    Core::Language->Load(asLanguageList.at(m_Language.GetCurEntry().psText->c_str()).c_str());
+    const std::vector<std::string>& asLanguageList = cMenu::GetLanguageList().get_valuelist();
+    Core::Language->Load(asLanguageList[m_Language.GetCurIndex()].c_str());
 
     // 
     cMenu::UpdateLanguageFont();
@@ -756,7 +778,7 @@ void cConfigMenu::__LoadResolutions(const coreUintW iMonitorIndex)
     m_Resolution.ClearEntries();
 
     // 
-    const std::vector<coreVector2>& avResolutionList = Core::System->GetDisplayData(iMonitorIndex).avAvailableRes;
+    const coreSet<coreVector2>& avResolutionList = Core::System->GetDisplayData(iMonitorIndex).avAvailableRes;
     for(coreUintW i = avResolutionList.size(); i--; ) m_Resolution.AddEntry(PRINT("%.0f x %.0f", avResolutionList[i].x, avResolutionList[i].y), i);
 
     // 
@@ -794,7 +816,7 @@ void cConfigMenu::__LoadInputs()
         }
 
         // 
-        auto nLockFunc = [](const coreBool bLock, coreButton* OUTPUT pButton, const coreChar* pcText)
+        const auto nLockFunc = [](const coreBool bLock, coreButton* OUTPUT pButton, const coreChar* pcText)
         {
             pButton->SetOverride(bLock ? -1 : 0);
             if(bLock) pButton->GetCaption()->SetText(pcText);

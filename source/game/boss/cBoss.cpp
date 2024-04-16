@@ -53,13 +53,39 @@ cBoss::~cBoss()
 void cBoss::ChangePhase(const coreUint8 iPhase)
 {
     // 
-    m_vLastPosition = (this->GetPosition   ().xy() / FOREGROUND_AREA);
-    m_fLastDirAngle = (this->GetDirection  ().xy().Angle());
-    m_fLastOriAngle = (this->GetOrientation().yz() * coreVector2(this->GetDirection().x ? RCP(this->GetDirection().x) : 0.0f, 1.0f)).Angle();
+    this->StorePosition();
+    this->StoreRotation();
 
     // 
     ASSERT(m_iPhase != iPhase)
     m_iPhase = iPhase;
+}
+
+
+// ****************************************************************
+// 
+void cBoss::StorePosition(const coreVector2& vPos)
+{
+    m_vLastPosition = vPos / FOREGROUND_AREA;
+}
+
+void cBoss::StorePosition()
+{
+    this->StorePosition(this->GetPosition().xy());
+}
+
+
+// ****************************************************************
+// 
+void cBoss::StoreRotation(const coreVector3& vDir, const coreVector3& vOri)
+{
+    m_fLastDirAngle = (vDir.xy())                                                 .Angle();
+    m_fLastOriAngle = (vOri.yz() * coreVector2(vDir.x ? RCP(vDir.x) : 0.0f, 1.0f)).Angle();
+}
+
+void cBoss::StoreRotation()
+{
+    this->StoreRotation(this->GetDirection(), this->GetOrientation());
 }
 
 
@@ -90,6 +116,7 @@ void cBoss::_EndBoss(const coreBool bAnimated)
 
 // ****************************************************************
 // 
+UNITY_BUILD
 #include "0101_cDharukBoss.cpp"
 #include "0102_cTorusBoss.cpp"
 #include "0103_cVausBoss.cpp"

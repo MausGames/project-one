@@ -12,6 +12,8 @@
 
 // TODO: make darkness configurable
 // TODO: reduce black (0,0,0) area in light textures
+// TODO: up and down flickering
+// TODO: old flickering effect and sound
 
 
 // ****************************************************************

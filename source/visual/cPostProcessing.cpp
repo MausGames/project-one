@@ -12,7 +12,6 @@
 // ****************************************************************
 // constructor
 cPostProcessing::cPostProcessing()noexcept
-: m_bDebugMode (false)
 {
     // load post-processing shader-programs
     m_pProgramSimple    = Core::Manager::Resource->Get<coreProgram>("full_post_program");
@@ -53,7 +52,7 @@ void cPostProcessing::Apply()
     coreFrameBuffer::EndDraw();
 
     // select between debug, distorted or simple shader-program
-                      if(m_bDebugMode) this->DefineProgram(m_pProgramDebug);
+                    if(g_bDebugOutput) this->DefineProgram(m_pProgramDebug);
     else if(g_pDistortion->IsActive()) this->DefineProgram(m_pProgramDistorted);
                                   else this->DefineProgram(m_pProgramSimple);
 
@@ -103,9 +102,9 @@ void cPostProcessing::Recompile()
     const coreChar* pcConfig3 = PRINT("%s%s",                                    SHADER_DEBUG,           pcConfig2);
 
     // change configuration of post-processing shaders
-    s_cast<coreShader*>(Core::Manager::Resource->Get<coreShader>("full_post.frag")          ->GetRawResource())->SetCustomCode(pcConfig1);
-    s_cast<coreShader*>(Core::Manager::Resource->Get<coreShader>("full_post_distorted.frag")->GetRawResource())->SetCustomCode(pcConfig2);
-    s_cast<coreShader*>(Core::Manager::Resource->Get<coreShader>("full_post_debug.frag")    ->GetRawResource())->SetCustomCode(pcConfig3);
+    d_cast<coreShader*>(Core::Manager::Resource->Get<coreShader>("full_post.frag")          ->GetRawResource())->SetCustomCode(pcConfig1);
+    d_cast<coreShader*>(Core::Manager::Resource->Get<coreShader>("full_post_distorted.frag")->GetRawResource())->SetCustomCode(pcConfig2);
+    d_cast<coreShader*>(Core::Manager::Resource->Get<coreShader>("full_post_debug.frag")    ->GetRawResource())->SetCustomCode(pcConfig3);
 
     // recompile and relink
     m_pProgramSimple   .GetHandle()->Reload();
@@ -113,8 +112,11 @@ void cPostProcessing::Recompile()
     m_pProgramDebug    .GetHandle()->Reload();
 
     // finish now
-    coreSync::Finish();
-    Core::Manager::Resource->UpdateResources();
+    if(Core::System->GetCurFrame())
+    {
+        coreSync::Finish();
+        Core::Manager::Resource->UpdateResources();
+    }
 
 #endif
 }
@@ -148,12 +150,14 @@ void cPostProcessing::__Reset(const coreResourceReset bInit)
             const coreFloat fSide = (i ? 1.0f : -1.0f);
 
             // create side-objects
-            m_aSideArea[i].DefineProgram("menu_border_program");
+            m_aSideArea[i].DefineProgram("menu_border_direct_program");
             m_aSideArea[i].DefineTexture(0u, "menu_background_black.png");
             m_aSideArea[i].SetPosition  (vFlip * (fSide *  0.1f));
-            m_aSideArea[i].SetSize      ((vResolution - g_vGameResolution) / vResolution.yx() * 0.5f + vFlip.yx() + 0.1f);
+            m_aSideArea[i].SetSize      (coreVector2(1.0f, ((vResolution - g_vGameResolution) / vResolution.yx()).Max() * 0.5f) + 0.1f);
+            m_aSideArea[i].SetDirection (vFlip * (fSide *  coreVector2(-1.0f,1.0f)));
             m_aSideArea[i].SetCenter    (vFlip * (fSide *  0.5f));
             m_aSideArea[i].SetAlignment (vFlip * (fSide * -1.0f));
+            m_aSideArea[i].SetTexOffset (coreVector2(0.1f, 0.0f));
             m_aSideArea[i].Move();
         }
     }

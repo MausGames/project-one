@@ -12,6 +12,7 @@
 
 // TODO: disable texture filtering for enemy texture (only mip, + default black and white)
 // TODO: manager: Find, ForEach, ForEachAll -> typed 
+// TODO: implement own enemy-types for custom-enemies which would require instancing
 
 
 // ****************************************************************
@@ -21,16 +22,17 @@
 #define ENEMY_AREA_FACTOR (1.2f)    // 
 #define ENEMY_SIZE_FACTOR (1.05f)   // 
 
-enum eEnemyStatus : coreUint8
+enum eEnemyStatus : coreUint16
 {
-    ENEMY_STATUS_DEAD        = 0x01u,   // completely removed from the game
-    ENEMY_STATUS_ASSIGNED    = 0x02u,   // enemy is currently assigned to something
-    ENEMY_STATUS_BOSS        = 0x04u,   // 
-    ENEMY_STATUS_SINGLE      = 0x08u,   // 
-    ENEMY_STATUS_CHILD       = 0x10u,   // 
-    ENEMY_STATUS_SHIELDED    = 0x20u,   // 
-    ENEMY_STATUS_INVINCIBLE  = 0x40u,   // 
-    ENEMY_STATUS_IMMORTAL    = 0x80u    // 
+    ENEMY_STATUS_DEAD        = 0x0001u,   // completely removed from the game
+    ENEMY_STATUS_ASSIGNED    = 0x0002u,   // enemy is currently assigned to something
+    ENEMY_STATUS_BOSS        = 0x0004u,   // 
+    ENEMY_STATUS_SINGLE      = 0x0008u,   // 
+    ENEMY_STATUS_ENERGY      = 0x0010u,   // 
+    ENEMY_STATUS_CHILD       = 0x0020u,   // 
+    ENEMY_STATUS_SHIELDED    = 0x0040u,   // 
+    ENEMY_STATUS_INVINCIBLE  = 0x0080u,   // 
+    ENEMY_STATUS_IMMORTAL    = 0x0100u    // 
 };
 
 
@@ -129,9 +131,10 @@ public:
     inline cEnemy* GetEnemy(const coreUintW iIndex)const {ASSERT(iIndex < m_apEnemy.size()) return m_apEnemy[iIndex];}
 
     // 
-    inline coreUintW GetNumEnemies     ()const {return m_apEnemy.size();}
-    inline coreUintW GetNumEnemiesAlive()const {return std::count_if(m_apEnemy.begin(), m_apEnemy.end(), [](const cEnemy* pEnemy) {return !CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD);});}
-    inline coreBool  IsFinished        ()const {return std::none_of (m_apEnemy.begin(), m_apEnemy.end(), [](const cEnemy* pEnemy) {return !CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD);});}
+    inline coreUintW GetNumEnemies        ()const {return m_apEnemy.size();}
+    inline coreUintW GetNumEnemiesAlive   ()const {return std::count_if(m_apEnemy.begin(), m_apEnemy.end(), [](const cEnemy* pEnemy) {return !CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD);});}
+    inline coreFloat GetNumEnemiesAlivePct()const {return I_TO_F(this->GetNumEnemiesAlive()) * RCP(I_TO_F(this->GetNumEnemies()));}
+    inline coreBool  IsFinished           ()const {return std::none_of (m_apEnemy.begin(), m_apEnemy.end(), [](const cEnemy* pEnemy) {return !CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD);});}
 };
 
 
@@ -328,6 +331,9 @@ public:
     ENABLE_COPY(cCinderEnemy)
     ASSIGN_ID(7, "Cinder")
 
+    // 
+    inline void SetAngle(const coreFloat fAngle) {m_fAngle = fAngle;}
+
 
 private:
     // execute own routines
@@ -405,6 +411,14 @@ template <typename T> cEnemyManager::sEnemySet<T>::sEnemySet()noexcept
     oEnemyActive.CreateCustom(sizeof(coreFloat), [](coreVertexBuffer* OUTPUT pBuffer)
     {
         pBuffer->DefineAttribute(SHIP_SHADER_ATTRIBUTE_BLINK, 1u, GL_FLOAT, false, 0u);
+    },
+    [](coreFloat* OUTPUT pData, const cEnemy* pEnemy)
+    {
+        (*pData) = pEnemy->GetBlink();
+    },
+    [](const coreProgramPtr& pProgram, const cEnemy* pEnemy)
+    {
+        pEnemy->_EnableBlink(pProgram);
     });
 
     // add enemy set to global shadow and outline
@@ -440,7 +454,7 @@ template <typename T> RETURN_RESTRICT T* cEnemyManager::AllocateEnemy()
 {
     // get requested enemy set
     this->PrefetchEnemy<T>();
-    sEnemySet<T>* pSet = s_cast<sEnemySet<T>*>(m_apEnemySet[T::ID]);
+    sEnemySet<T>* pSet = d_cast<sEnemySet<T>*>(m_apEnemySet[T::ID]);
 
     // save current pool size
     const coreUintW iSize = pSet->apEnemyPool.size();
@@ -478,7 +492,7 @@ template <typename F> void cEnemyManager::ForEachEnemy(F&& nFunction)
     const std::vector<coreObject3D*>& oEnemyList = Core::Manager::Object->GetObjectList(TYPE_ENEMY);
     FOR_EACH(it, oEnemyList)
     {
-        cEnemy* pEnemy = s_cast<cEnemy*>(*it);
+        cEnemy* pEnemy = d_cast<cEnemy*>(*it);
         if(!pEnemy) continue;
 
         // 

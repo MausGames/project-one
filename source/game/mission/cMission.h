@@ -28,7 +28,7 @@
 // mission specific definitions
 #define VIRIDO_BALLS      (2u)                                    // 
 #define VIRIDO_TRAILS     (4u)                                    // 
-#define VIRIDO_RAWS       (VIRIDO_BALLS * (VIRIDO_TRAILS + 1u))   // 
+#define VIRIDO_BALLS_RAWS (VIRIDO_BALLS * (VIRIDO_TRAILS + 1u))   // 
 #define VIRIDO_PADDLES    (3u)                                    // 
 #define VIRIDO_BALL_SPEED (1.5f)                                  // 
 
@@ -47,8 +47,8 @@
 
 #define STAGE_BOSS(e,p,d)               {if(STAGE_BEGINNING) (e).Resurrect((p) * FOREGROUND_AREA, (d)); if(CONTAINS_FLAG((e).GetStatus(), ENEMY_STATUS_DEAD)) STAGE_FINISH_NOW}
 
-#define STAGE_ADD_PATH(n)               auto n = this->_AddPath    (__LINE__,      [this](coreSpline2* OUTPUT n)
-#define STAGE_ADD_SQUAD(n,t,c)          auto n = this->_AddSquad<t>(__LINE__, (c), [this](cEnemySquad* OUTPUT n)
+#define STAGE_ADD_PATH(n)               const auto n = this->_AddPath    (__LINE__,      [](coreSpline2* OUTPUT n)
+#define STAGE_ADD_SQUAD(n,t,c)          const auto n = this->_AddSquad<t>(__LINE__, (c), [](cEnemySquad* OUTPUT n)
 
 #define STAGE_FOREACH_PLAYER(e,i)       g_pGame->ForEachPlayer   ([&](cPlayer* OUTPUT e, const coreUintW i)
 #define STAGE_FOREACH_PLAYER_ALL(e,i)   g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT e, const coreUintW i)
@@ -84,7 +84,7 @@
     if(!CONTAINS_FLAG(e->GetStatus(), ENEMY_STATUS_DEAD)) e->SetEnabled((fLifeTime >= 0.0f) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE);
 
 #define __STAGE_ROUND(x)                (I_TO_F(F_TO_UI((x) * FRAMERATE_VALUE * RCP(fLifeSpeed))) / FRAMERATE_VALUE * fLifeSpeed)
-#define STAGE_BRANCH(x,y)               ((fLifeTime < (x)) || [&](){const coreFloat fRound = /*__STAGE_ROUND*/(y); fLifeTime = FMOD(fLifeTime - (x), fRound); fLifeTimeBefore = FMOD(fLifeTimeBefore - (x), fRound); bEnablePosition &= (fLifeTime >= fLifeTimeBefore); return false;}())
+#define STAGE_BRANCH(x,y)               ((fLifeTime < (x)) || [&]() {const coreFloat fRound = /*__STAGE_ROUND*/(y); fLifeTime = FMOD(fLifeTime - (x), fRound); fLifeTimeBefore = FMOD(fLifeTimeBefore - (x), fRound); bEnablePosition &= (fLifeTime >= fLifeTimeBefore); return false;}())
 #define STAGE_TICK(c)                   (!(F_TO_UI(fLifeTime * FRAMERATE_VALUE * RCP(fLifeSpeed)) % (c)))
 #define STAGE_TICK_OFFSET(c,o)          (!((F_TO_UI(fLifeTime * FRAMERATE_VALUE * RCP(fLifeSpeed)) + (o)) % (c)))
 #define STAGE_WAIT(t)                   {m_fStageWait = (t);}
@@ -106,18 +106,18 @@
 #define STAGE_TIME_BETWEEN(t,u)         (InBetween(m_fStageTime, (t), (u)))
 #define STAGE_BEGINNING                 (STAGE_TIME_POINT(0.0f))
 
-#define STAGE_LIFETIME_POINT(t)         (InBetween((t), fLifeTimeBefore, fLifeTime) && [&](){fLifeTimePoint = (t); return true;}())
+#define STAGE_LIFETIME_POINT(t)         (InBetween((t), fLifeTimeBefore, fLifeTime) && [&]() {fLifeTimePoint = (t); return true;}())
 #define STAGE_LIFETIME_BEFORE(t)        (fLifeTime <  (t))
 #define STAGE_LIFETIME_AFTER(t)         (fLifeTime >= (t))
 #define STAGE_LIFETIME_BETWEEN(t,u)     (InBetween(fLifeTime, __STAGE_ROUND(t), __STAGE_ROUND(u)))
 
-#define STAGE_HEALTHPCT_POINT(e,t)      ((e)->ReachedHealthPct(t) && [&](){fHealthPctPoint = (t); return true;}())
+#define STAGE_HEALTHPCT_POINT(e,t)      ((e)->ReachedHealthPct(t) && [&]() {fHealthPctPoint = (t); return true;}())
 #define STAGE_HEALTHPCT_BEFORE(e,t)     ((e)->GetCurHealthPct() <  (t))
 #define STAGE_HEALTHPCT_AFTER(e,t)      ((e)->GetCurHealthPct() >= (t))
 #define STAGE_HEALTHPCT_BETWEEN(e,t,u)  (InBetween((e)->GetCurHealthPct(), (t), (u)))
 #define STAGE_DIED(e)                   ((e)->ReachedDeath())
 
-#define STAGE_POSITION_POINT(e,t,v)     (bEnablePosition && InBetweenExt((t), (e)->GetOldPos(). v, (e)->GetPosition(). v) && [&](){vPositionPoint = (e)->GetPosition().xy(); vPositionPoint. v = (t); return true;}())
+#define STAGE_POSITION_POINT(e,t,v)     (bEnablePosition && InBetweenExt((t), (e)->GetOldPos(). v, (e)->GetPosition(). v) && [&]() {vPositionPoint = (e)->GetPosition().xy(); vPositionPoint. v = (t); return true;}())
 #define STAGE_POSITION_BEFORE(e,t,v)    ((e)->GetPosition(). v <  (t))
 #define STAGE_POSITION_AFTER(e,t,v)     ((e)->GetPosition(). v >= (t))
 #define STAGE_POSITION_BETWEEN(e,t,u,v) (InBetweenExt((e)->GetPosition(). v, (t), (u)))
@@ -230,11 +230,11 @@ private:
 
     coreBatchList m_Ball;                           // 
     coreBatchList m_BallTrail;                      // 
-    coreObject3D  m_aBallRaw[VIRIDO_RAWS];          // 
+    coreObject3D  m_aBallRaw[VIRIDO_BALLS_RAWS];    // 
 
     coreObject3D m_aPaddle      [VIRIDO_PADDLES];   // 
     coreObject3D m_aPaddleSphere[VIRIDO_PADDLES];   // 
-    cShip*       m_apOwner      [VIRIDO_PADDLES];   // 
+    const cShip* m_apOwner      [VIRIDO_PADDLES];   // 
 
     coreUint8 m_iRealState;                         // 
     coreUint8 m_iStickyState;                       // (only between first ball and first paddle) 
@@ -255,16 +255,16 @@ public:
     void DisableBall(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    void EnablePaddle (const coreUintW iIndex, cShip* pOwner);
+    void EnablePaddle (const coreUintW iIndex, const cShip* pOwner);
     void DisablePaddle(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    inline void      MakeReal      (const coreUintW iIndex)        {ADD_BIT(m_iRealState, iIndex)}
-    inline void      MakeSticky    ()                              {ADD_BIT(m_iStickyState, 0u)}
-    inline void      UnmakeSticky  (const coreVector2& vDirection) {m_iStickyState = 0; m_aBallRaw[0].SetDirection(coreVector3(vDirection, 0.0f));}
-    inline coreUint8 GetRealState  ()const                         {return m_iRealState;}
-    inline coreBool  GetStickyState()const                         {return CONTAINS_BIT(m_iStickyState, 1u);}
-    inline coreUint8 GetBounceState()const                         {return m_iBounceState;}
+    inline void             MakeReal      (const coreUintW iIndex)        {ADD_BIT(m_iRealState, iIndex)}
+    inline void             MakeSticky    ()                              {ADD_BIT(m_iStickyState, 0u)}
+    inline void             UnmakeSticky  (const coreVector2& vDirection) {m_iStickyState = 0; m_aBallRaw[0].SetDirection(coreVector3(vDirection, 0.0f));}
+    inline const coreUint8& GetRealState  ()const                         {return m_iRealState;}
+    inline coreBool         GetStickyState()const                         {return CONTAINS_BIT(m_iStickyState, 1u);}
+    inline const coreUint8& GetBounceState()const                         {return m_iBounceState;}
 
     // 
     inline coreObject3D* GetBall  (const coreUintW iIndex) {ASSERT(iIndex < VIRIDO_BALLS)   return &m_aBallRaw[iIndex * (VIRIDO_TRAILS + 1u)];}
@@ -296,6 +296,8 @@ private:
     coreObject3D m_Container;     // 
     coreVector2  m_vForce;        // 
     coreVector2  m_vImpact;       // 
+    coreBool     m_bClamp;        // 
+    coreBool     m_bOverdraw;     // 
 
 
 public:
@@ -309,9 +311,11 @@ public:
     void DisableContainer(const coreBool bAnimated);
 
     // 
-    inline void SetContainerForce(const coreVector2& vForce) {m_vForce = vForce;}
-    inline const coreVector2& GetContainerForce ()const      {return m_vForce;}
-    inline const coreVector2& GetContainerImpact()const      {return m_vImpact;}
+    inline void               SetContainerForce   (const coreVector2& vForce)    {m_vForce    = vForce;}
+    inline void               SetContainerClamp   (const coreBool     bClamp)    {m_bClamp    = bClamp;}
+    inline void               SetContainerOverdraw(const coreBool     bOverdraw) {m_bOverdraw = bOverdraw;}
+    inline const coreVector2& GetContainerForce   ()const                        {return m_vForce;}
+    inline const coreVector2& GetContainerImpact  ()const                        {return m_vImpact;}
 
     // 
     inline coreObject3D* GetContainer() {return &m_Container;}
@@ -482,6 +486,18 @@ private:
     // execute own routines
     void __SetupOwn     ()final;
     void __MoveOwnBefore()final;
+};
+
+
+// ****************************************************************
+// 
+class cErrorMission final : public cMission
+{
+public:
+    cErrorMission()noexcept;
+
+    DISABLE_COPY(cErrorMission)
+    ASSIGN_ID(-1, "Error")
 };
 
 

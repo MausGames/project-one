@@ -34,8 +34,6 @@ private:
     coreObject2D m_aSideArea[2];          // objects outside of the game area
     coreLabel    m_Watermark;             // temporary Twitter watermark
 
-    coreBool m_bDebugMode;                // 
-
 
 public:
     cPostProcessing()noexcept;
@@ -52,7 +50,6 @@ public:
     void SetSideOpacity(const coreFloat fValue);
 
     // 
-    inline void SetDebugMode (const coreBool  bDebugMode)  {m_bDebugMode = bDebugMode;}
     inline void SetSaturation(const coreFloat fSaturation) {ASSERT((fSaturation >= 0.0f) && (fSaturation <= 1.0f)) this->SetColor3(coreVector3(0.06f + 0.94f * (1.0f - fSaturation), this->GetColor3().yz()));}
     inline void SetValue     (const coreFloat fValue)      {ASSERT((fValue      >= 0.0f) && (fValue      <= 1.0f)) this->SetColor3(coreVector3(this->GetColor3().x, fValue, this->GetColor3().z));}
 

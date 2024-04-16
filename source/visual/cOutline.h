@@ -18,9 +18,11 @@
 // outline definitions
 #define OUTLINE_STYLE_FULL          (0u)   // full outlining style
 #define OUTLINE_STYLE_DIRECT        (1u)   // directional interpolated outlining style
-#define OUTLINE_STYLE_BULLET_FULL   (2u)   // 
-#define OUTLINE_STYLE_BULLET_DIRECT (3u)   // 
-#define OUTLINE_STYLES              (4u)   // 
+#define OUTLINE_STYLE_FLAT_FULL     (2u)   // 
+#define OUTLINE_STYLE_FLAT_DIRECT   (3u)   // 
+#define OUTLINE_STYLE_BULLET_FULL   (4u)   // 
+#define OUTLINE_STYLE_BULLET_DIRECT (5u)   // 
+#define OUTLINE_STYLES              (6u)   // 
 
 
 // ****************************************************************
@@ -38,7 +40,7 @@ public:
     DISABLE_COPY(cOutlineStyle)
 
     // 
-    void Construct(const coreChar* pcProgramSingleName, const coreChar* pcProgramInstancedName);
+    void Construct(const coreHashString& sProgramSingleName, const coreHashString& sProgramInstancedName);
 
     // apply deferred outline-style
     void Apply();

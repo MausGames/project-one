@@ -12,8 +12,7 @@
 // ****************************************************************
 // constructor
 cMainMenu::cMainMenu()noexcept
-: coreMenu    (1u, SURFACE_MAIN_DEFAULT)
-, m_iSelected (0u)
+: coreMenu (1u, SURFACE_MAIN_DEFAULT)
 {
     // create menu objects
     m_StartButton.Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
@@ -76,20 +75,12 @@ void cMainMenu::Move()
     case SURFACE_MAIN_DEFAULT:
         {
             // 
-                 if(m_StartButton .IsFocused()) m_iSelected = 0u;
-            else if(m_ScoreButton .IsFocused()) m_iSelected = 1u;
-            else if(m_ReplayButton.IsFocused()) m_iSelected = 2u;
-            else if(m_ConfigButton.IsFocused()) m_iSelected = 3u;
-            else if(m_ExtraButton .IsFocused()) m_iSelected = 4u;
-            else if(m_ExitButton  .IsFocused()) m_iSelected = 5u;
-
-            // 
-            cMenu::UpdateButton(&m_StartButton,  m_iSelected == 0u);
-            cMenu::UpdateButton(&m_ScoreButton,  m_iSelected == 1u);
-            cMenu::UpdateButton(&m_ReplayButton, m_iSelected == 2u);
-            cMenu::UpdateButton(&m_ConfigButton, m_iSelected == 3u);
-            cMenu::UpdateButton(&m_ExtraButton,  m_iSelected == 4u);
-            cMenu::UpdateButton(&m_ExitButton,   m_iSelected == 5u);
+            cMenu::UpdateButton(&m_StartButton,  m_StartButton .IsFocused());
+            cMenu::UpdateButton(&m_ScoreButton,  m_ScoreButton .IsFocused());
+            cMenu::UpdateButton(&m_ReplayButton, m_ReplayButton.IsFocused());
+            cMenu::UpdateButton(&m_ConfigButton, m_ConfigButton.IsFocused());
+            cMenu::UpdateButton(&m_ExtraButton,  m_ExtraButton .IsFocused());
+            cMenu::UpdateButton(&m_ExitButton,   m_ExitButton  .IsFocused());
 
             if(this->GetAlpha() >= 1.0f)
             {

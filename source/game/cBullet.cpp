@@ -18,8 +18,9 @@ cBullet::cBullet()noexcept
 : m_iDamage    (0)
 , m_fSpeed     (0.0f)
 , m_pOwner     (NULL)
-, m_iElement   (ELEMENT_NEUTRAL)
+, m_fDepth     (0.0f)
 , m_fAnimation (0.0f)
+, m_iElement   (ELEMENT_NEUTRAL)
 {
     // set initial status
     m_iStatus = BULLET_STATUS_READY;
@@ -92,6 +93,24 @@ void cBullet::Deactivate(const coreBool bAnimated)
 
 
 // ****************************************************************
+// 
+void cBullet::_EnableDepth(const coreProgramPtr& pProgram)const
+{
+    if(!pProgram.IsUsable()) return;
+
+    // 
+    pProgram->Enable();
+    pProgram->SendUniform("u_v1Depth", m_fDepth);
+}
+
+void cBullet::_EnableDepth()const
+{
+    // 
+    this->_EnableDepth(this->GetProgram());
+}
+
+
+// ****************************************************************
 // constructor
 cBulletManager::sBulletSetGen::sBulletSetGen()noexcept
 : oBulletActive (BULLET_SET_INIT)
@@ -136,14 +155,14 @@ void cBulletManager::Render()
 
         // call individual preceding render routines
         FOR_EACH(it, *pBulletActive->List())
-            s_cast<cBullet*>(*it)->__RenderOwnBefore();
+            d_cast<cBullet*>(*it)->__RenderOwnBefore();
 
         // render bullet set
         pBulletActive->Render();
 
         // call individual subsequent render routines
         FOR_EACH(it, *pBulletActive->List())
-            s_cast<cBullet*>(*it)->__RenderOwnAfter();
+            d_cast<cBullet*>(*it)->__RenderOwnAfter();
     }
 
     // 
@@ -155,7 +174,7 @@ void cBulletManager::Render()
 // move the bullet manager
 void cBulletManager::Move()
 {
-    coreVector2 vPrevPos    = coreVector2(0.0f,0.0f);
+    coreVector2 vPrevPos    = coreVector2(1000.0f,1000.0f);
     coreFloat   fPrevRadius = 0.0f;
     coreFloat   fDepth      = 0.0f;
 
@@ -168,7 +187,7 @@ void cBulletManager::Move()
         // loop through all bullets
         FOR_EACH_DYN(it, *pBulletActive->List())
         {
-            coreObject3D* pBullet = (*it);
+            cBullet* pBullet = d_cast<cBullet*>(*it);
 
             // check current bullet status
             if(!CONTAINS_FLAG(pBullet->GetStatus(), BULLET_STATUS_ACTIVE))
@@ -189,8 +208,7 @@ void cBulletManager::Move()
                 fDepth += BULLET_DEPTH_FACTOR * ((fLengthSq < POW2(fFullRadius)) ? 1.0f : 0.5f);
 
                 // 
-                pBullet->SetSize             (coreVector3(pBullet->GetSize             ().xy(),     fDepth));
-                pBullet->SetCollisionModifier(coreVector3(pBullet->GetCollisionModifier().xy(), RCP(fDepth)));
+                pBullet->m_fDepth = fDepth;
                 DYN_KEEP(it)
             }
         }
@@ -213,7 +231,7 @@ void cBulletManager::ClearBullets(const coreBool bAnimated)
 
         // deactivate all active bullets
         FOR_EACH(it, *pBulletActive->List())
-            s_cast<cBullet*>(*it)->Deactivate(bAnimated);
+            d_cast<cBullet*>(*it)->Deactivate(bAnimated);
     }
 }
 
@@ -240,7 +258,8 @@ void cRayBullet::__ImpactOwn(const coreVector2& vImpact)
     // 
     if(m_iElement == ELEMENT_WHITE)
     {
-        g_pSpecialEffects->CreateSplashDark(coreVector3(vImpact, 0.0f),                        25.0f, 2u);  
+        g_pSpecialEffects->CreateSplashDark(coreVector3(vImpact, 0.0f),                        5.0f, 1u);  
+        //g_pSpecialEffects->CreateSplashDark(coreVector3(vImpact, 0.0f),                        25.0f, 2u);
         //g_pSpecialEffects->CreateBlowDark  (coreVector3(vImpact, 0.0f), -this->GetDirection(), 50.0f, 1u);
     }
     else
@@ -501,7 +520,7 @@ void cMineBullet::GlobalExit()
 void cMineBullet::__ImpactOwn(const coreVector2& vImpact)
 {
     // 
-    g_pSpecialEffects->MacroExplosionPhysicalSmall(this->GetPosition());
+    g_pSpecialEffects->MacroExplosionPhysicalColorSmall(this->GetPosition(), COLOR_FIRE_ORANGE);
 }
 
 
@@ -560,7 +579,7 @@ cRocketBullet::cRocketBullet()noexcept
 void cRocketBullet::__ImpactOwn(const coreVector2& vImpact)
 {
     // 
-    g_pSpecialEffects->MacroExplosionPhysicalSmall(this->GetPosition());
+    g_pSpecialEffects->MacroExplosionPhysicalColorSmall(this->GetPosition(), COLOR_FIRE_ORANGE);
 }
 
 

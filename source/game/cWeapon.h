@@ -11,11 +11,12 @@
 #define _P1_GUARD_WEAPON_H_
 
 // TODO: weapons may have to share their cooldown (not relevant on single-weapon setup)
+// TODO: remove render functions if not required
 
 
 // ****************************************************************
 // weapon definitions
-#define WEAPON_MODES         (2u)   // 
+#define WEAPON_MODES         (1u)   // 
 #define WEAPON_TESLA_TARGETS (3u)   // 
 
 
@@ -42,7 +43,7 @@ public:
 
     // 
     void Render();
-    void RenderOverlay();
+    void RenderOverlay();  
 
     // set object properties
     inline void SetOwner(cPlayer* pOwner) {m_pOwner = pOwner;}

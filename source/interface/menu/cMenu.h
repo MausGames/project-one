@@ -22,6 +22,7 @@
 // TODO: rumble when changing rumble-option
 // TODO: display unattached joysticks and joystick names somehow
 // TODO: highlight which joystick is which input set
+// TODO: fix all g_vMenuCenter usages when changing aspect ratio
 
 
 // ****************************************************************
@@ -49,9 +50,9 @@
 #define MENU_FONT_STANDARD_3 "ethnocentric.ttf", (30u)
 #define MENU_FONT_STANDARD_4 "ethnocentric.ttf", (40u)
 #define MENU_FONT_STANDARD_5 "ethnocentric.ttf", (70u)
-#define MENU_FONT_ICON_1     "fontawesome.ttf",  (20u)
-#define MENU_FONT_ICON_2     "fontawesome.ttf",  (24u)
-#define MENU_FONT_ICON_3     "fontawesome.ttf",  (40u)
+#define MENU_FONT_ICON_1     "fontawesome.otf",  (20u)
+#define MENU_FONT_ICON_2     "fontawesome.otf",  (24u)
+#define MENU_FONT_ICON_3     "fontawesome.otf",  (40u)
 #define MENU_OUTLINE_SMALL   (1u)
 #define MENU_OUTLINE_BIG     (4u)
 
@@ -123,7 +124,8 @@
 #define ENTRY_INPUT_ACTION2       (7u  + ENTRY_AUDIO)
 #define ENTRY_INPUT_ACTION3       (8u  + ENTRY_AUDIO)
 #define ENTRY_INPUT_ACTION4       (9u  + ENTRY_AUDIO)
-#define ENTRY_INPUT               (10u + ENTRY_AUDIO)
+#define ENTRY_INPUT_ACTION5       (10u + ENTRY_AUDIO)
+#define ENTRY_INPUT               (11u + ENTRY_AUDIO)
 
 #define ENTRY_GAME_LANGUAGE       (0u  + ENTRY_INPUT)
 #define ENTRY_MAX                 (1u  + ENTRY_INPUT)
@@ -131,20 +133,27 @@
 
 // ****************************************************************
 // icon codes (UTF-8)
-#define ICON_CHECK       u8"\uF00C"
-#define ICON_TIMES       u8"\uF00D"
-#define ICON_POWER_OFF   u8"\uF011"
-#define ICON_REFRESH     u8"\uF021"
-#define ICON_ARROW_LEFT  u8"\uF060"
-#define ICON_ARROW_RIGHT u8"\uF061"
-#define ICON_ARROW_UP    u8"\uF062"
-#define ICON_ARROW_DOWN  u8"\uF063"
-#define ICON_SHARE       u8"\uF064"
-#define ICON_COGS        u8"\uF085"
-#define ICON_CARET_DOWN  u8"\uF0D7"
-#define ICON_CARET_UP    u8"\uF0D8"
-#define ICON_CARET_LEFT  u8"\uF0D9"
-#define ICON_CARET_RIGHT u8"\uF0DA"
+#define ICON_CHECK        u8"\uF00C"
+#define ICON_TIMES        u8"\uF00D"
+#define ICON_POWER_OFF    u8"\uF011"
+#define ICON_REFRESH      u8"\uF021"
+#define ICON_ARROW_LEFT   u8"\uF060"
+#define ICON_ARROW_RIGHT  u8"\uF061"
+#define ICON_ARROW_UP     u8"\uF062"
+#define ICON_ARROW_DOWN   u8"\uF063"
+#define ICON_SHARE        u8"\uF064"
+#define ICON_COGS         u8"\uF085"
+#define ICON_CARET_DOWN   u8"\uF0D7"
+#define ICON_CARET_UP     u8"\uF0D8"
+#define ICON_CARET_LEFT   u8"\uF0D9"
+#define ICON_CARET_RIGHT  u8"\uF0DA"
+#define ICON_PAUSE_CIRCLE u8"\uF28B"
+#define ICON_UNDO_ALT     u8"\uF2EA"
+#define ICON_REFRESH_ALT  u8"\uF2F1"
+#define ICON_REDO_ALT     u8"\uF2F9"
+#define ICON_SHIELD_ALT   u8"\uF3ED"
+#define ICON_BURN         u8"\uF46A"
+#define ICON_FEATHER_ALT  u8"\uF56B"
 
 
 // ****************************************************************
@@ -204,8 +213,6 @@ private:
     coreButton m_ConfigButton;   // config button
     coreButton m_ExtraButton;    // extra button
     coreButton m_ExitButton;     // exit button
-
-    coreUint8 m_iSelected;       // current selected menu button
 
 
 public:
@@ -325,20 +332,20 @@ private:
 
 
 private:
-    coreObject2D m_Background;                // 
+    coreObject2D m_Background;           // 
 
-    coreButton m_VideoTab;                    // 
-    coreButton m_AudioTab;                    // 
-    coreButton m_InputTab;                    // 
-    coreButton m_GameTab;                     // 
+    coreButton m_VideoTab;               // 
+    coreButton m_AudioTab;               // 
+    coreButton m_InputTab;               // 
+    coreButton m_GameTab;                // 
 
-    coreButton m_SaveButton;                  // save button
-    coreButton m_DiscardButton;               // discard button
-    coreButton m_BackButton;                  // back button
+    coreButton m_SaveButton;             // save button
+    coreButton m_DiscardButton;          // discard button
+    coreButton m_BackButton;             // back button
 
-    coreLabel    m_aLabel[ENTRY_MAX];         // 
-    coreObject2D m_aLine [ENTRY_MAX];         // 
-    coreLabel    m_aArrow[INPUT_KEYS_MOVE];   // 
+    coreLabel    m_aLabel[ENTRY_MAX];    // 
+    coreObject2D m_aLine [ENTRY_MAX];    // 
+    coreLabel    m_aArrow[INPUT_KEYS];   // 
 
     coreSwitchBoxU8 m_Monitor;
     coreSwitchBoxU8 m_Resolution;

@@ -10,6 +10,10 @@
 #ifndef _P1_GUARD_DISTORTION_H_
 #define _P1_GUARD_DISTORTION_H_
 
+// TODO: rain (Metroid Prime)
+// TODO: cracks (star, lightning)
+// TODO: strong breaks (across screen), left and right are strongly shifted
+
 
 // ****************************************************************
 // distortion definitions

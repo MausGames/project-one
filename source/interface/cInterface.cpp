@@ -153,22 +153,35 @@ void cInterface::Render()
         {
             sPlayerView& oView = m_aView[i];
 
-            // render player
-            //oView.aHealthBar[0]  .Render();
-            //oView.aHealthBar[1]  .Render();
-            //oView.aHealthValue[0].Render();
-            //oView.aHealthValue[1].Render();
-            oView.oScore         .Render();
-            oView.oCombo         .Render();
-            oView.oChainValue    .Render();   // # swapped
-            oView.oChainBar      .Render();   // # swapped
+            // render player bars
+            //oView.aHealthBar[0].Render();
+            //oView.aHealthBar[1].Render();
+            oView.oChainBar    .Render();
         }
 
         if(m_fAlphaBoss)
         {
-            // render boss
-            m_aBossHealthBar[0]  .Render();
-            m_aBossHealthBar[1]  .Render();
+            // render boss bars
+            m_aBossHealthBar[0].Render();
+            m_aBossHealthBar[1].Render();
+        }
+
+        // loop through all player views
+        for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i)
+        {
+            sPlayerView& oView = m_aView[i];
+
+            // render player text
+            //oView.aHealthValue[0].Render();
+            //oView.aHealthValue[1].Render();
+            oView.oScore         .Render();
+            oView.oCombo         .Render();
+            oView.oChainValue    .Render();
+        }
+
+        if(m_fAlphaBoss)
+        {
+            // render boss text
             m_aBossHealthValue[0].Render();
             m_aBossHealthValue[1].Render();
             //m_aBossTime[0]       .Render();

@@ -102,6 +102,7 @@ void cEnvironment::Render()
             m_pOldBackground->GetResolvedTexture()->GetColorTarget(0u).pTexture->Invalidate(0u);
             m_pBackground   ->GetResolvedTexture()->GetColorTarget(0u).pTexture->Invalidate(0u);
         }
+        else m_FrameBuffer.Clear(CORE_FRAMEBUFFER_TARGET_COLOR);
     }
 }
 
@@ -163,7 +164,7 @@ void cEnvironment::ChangeBackground(const coreInt32 iID, const coreUintW iTransi
     // create new background
     switch(ABS(iID))
     {
-    default:
+    default: WARN_IF(true) {}
     case cNoBackground     ::ID: m_pBackground = new cNoBackground     (); break;
     case cGrassBackground  ::ID: m_pBackground = new cGrassBackground  (); break;
     case cSeaBackground    ::ID: m_pBackground = new cSeaBackground    (); break;
@@ -208,20 +209,14 @@ FUNC_LOCAL coreFloat cEnvironment::RetrieveTransitionBlend(const cBackground* pB
 
 // ****************************************************************
 // retrieve safe height value
-FUNC_PURE coreFloat cEnvironment::RetrieveSafeHeight(const coreVector2& vPosition)const
+FUNC_PURE coreFloat cEnvironment::RetrieveSafeHeight(const coreVector2& vPosition, const coreFloat fFallback)const
 {
     // check for available outdoor-surface
     const cOutdoor* pOutdoor = m_pBackground->GetOutdoor();
-    if(!pOutdoor) return 0.0f;
+    if(!pOutdoor) return fFallback;
 
     // retrieve height value
-    const coreFloat fHeight = pOutdoor->RetrieveHeight(vPosition);
-
-    // check for available water-surface
-    const cWater* pWater = m_pBackground->GetWater();
-    if(pWater) return MAX(fHeight, WATER_HEIGHT);
-
-    return fHeight;
+    return pOutdoor->RetrieveHeight(vPosition);
 }
 
 
@@ -257,6 +252,6 @@ void cEnvironment::__Reset(const coreResourceReset bInit)
         m_FrameBuffer.Delete();
 
         // save background ID
-        m_pBackground = r_cast<cBackground*>(I_TO_P(iID));
+        m_pBackground = s_cast<cBackground*>(I_TO_P(iID));
     }
 }

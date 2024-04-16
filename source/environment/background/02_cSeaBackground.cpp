@@ -280,7 +280,6 @@ void cSeaBackground::__UpdateOwn()
     if(!pProgram->Enable())  return;
 
     // 
-    pProgram->Enable();
     pProgram->SendUniform("u_v1Time", m_fWaveTime);
 }
 

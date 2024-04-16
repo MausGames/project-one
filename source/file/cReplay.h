@@ -17,6 +17,8 @@
 // TODO: get central timestamp (server ?)
 // TODO: uInfo loadfile
 // TODO: replay and save files strings have to run an explicit '\0' check, use get and set function with max value (both read and write)
+// TODO: manual bitpacking, as this is written to file
+// TODO: current frame is reset on engine-reset ?
 
 
 // ****************************************************************
@@ -106,11 +108,11 @@ public:
     {
         coreUint32 iFrame    : 22;   // (up to 19.4 hours with 60 FPS) 
         coreUint32 iType     : 2;    // 
-        coreUint32 iValue    : 4;    // 
-        coreUint32 iReserved : 4;    // 
+        coreUint32 iValue    : 5;    // 
+        coreUint32 iReserved : 3;    // 
     };
     STATIC_ASSERT(sizeof(sStreamPacket) == 4u)
-    STATIC_ASSERT(INPUT_KEYS_ACTION     <= 4u)
+    STATIC_ASSERT(INPUT_KEYS_ACTION     <= 5u)
 
     // 
     struct sInfo final

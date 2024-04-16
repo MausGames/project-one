@@ -21,40 +21,53 @@
 
 // ****************************************************************
 // boss definitions
-#define BOSS_TIMERS   (4u)   // 
+#define BOSS_TIMERS   (6u)   // 
 #define BOSS_COUNTERS (8u)   // 
 #define BOSS_VECTORS  (8u)   // 
 
 
 // ****************************************************************
 // boss specific definitions
-#define DHARUK_TRAILS          (3u)                                         // 
-#define DHARUK_DUPLICATE_RAWS  (2u * DHARUK_TRAILS)                         // 
-#define DHARUK_BOOMERANGS      (4u)                                         // 
-#define DHARUK_BOOMERANGS_RAWS (DHARUK_BOOMERANGS * (DHARUK_TRAILS + 1u))   // 
-#define DHARUK_WIDTH           (0.5f)                                       // 
-#define DHARUK_HEIGHT          (0.8f)                                       // 
+#define DHARUK_TRAILS             (3u)                                         // 
+#define DHARUK_DUPLICATE_RAWS     (2u * DHARUK_TRAILS)                         // 
+#define DHARUK_BOOMERANGS         (4u)                                         // 
+#define DHARUK_BOOMERANGS_RAWS    (DHARUK_BOOMERANGS * (DHARUK_TRAILS + 1u))   // 
+#define DHARUK_WIDTH              (0.5f)                                       // 
+#define DHARUK_HEIGHT             (0.8f)                                       // 
 
-#define TORUS_RAY_SIZE         (coreVector3(0.7f,50.0f,0.7f))               // 
-#define TORUS_RAY_TEXSIZE      (coreVector2(0.5f,1.5f))                     // 
-#define TORUS_RAY_OFFSET       (8.0f)                                       // 
-#define TORUS_RAYWAVE_SIZE     (coreVector3(1.6f,5.0f,1.3f))                // 
+#define TORUS_TURRETS             (4u)                                         // 
+#define TORUS_GUNNERS             (8u)                                         // 
+#define TORUS_BOSS_ROTATION       (1.2f)                                       // 
+#define TORUS_TURRET_SPEED        (-0.2f)                                      // 
+#define TORUS_GUNNER_SPEED        (0.2f)                                       // 
 
-#define VAUS_SCOUTS_TOTAL      (DEFINED(_CORE_DEBUG_) ? 16 : 80)            // 
-#define VAUS_SCOUTS_X          (8u)                                         // 
-#define VAUS_SCOUTS_Y          (2u)                                         // 
-#define VAUS_SHOTS             (10u)                                        // 
+#define VAUS_SCOUTS_TOTAL         (DEFINED(_CORE_DEBUG_) ? 16 : 80)            //         
+#define VAUS_SCOUTS_X             (8u)                                         //         
+#define VAUS_SCOUTS_Y             (2u)                                         //         
+#define VAUS_SHOTS                (10u)                                        //         
 
-#define NAUTILUS_ATTACH_DIST   (-10.0f)                                     // 
+#define NAUTILUS_ATTACH_DIST      (-10.0f)                                     // 
+#define NAUTILUS_INK_RAWS         (32u)                                        // // TODO: INKS ? 
 
-#define LEVIATHAN_PARTS        (5u)                                         // 
+#define LEVIATHAN_PARTS           (5u)                                         // 
+#define LEVIATHAN_PARTS_BODIES    (LEVIATHAN_PARTS - 2u)                       // 
+#define LEVIATHAN_RAYS            (LEVIATHAN_PARTS)                            // 
+#define LEVIATHAN_RAYS_RAWS       (2u * LEVIATHAN_RAYS)                        // 
+#define LEVIATHAN_RADIUS_OUTER    (FOREGROUND_AREA.x * 0.8f)                   // 
+#define LEVIATHAN_RADIUS_INNER    (8.6f)                                       // 
+#define LEVIATHAN_RAY_OFFSET(i)   ((i) ? 3.0f : 4.0f)                          // 
+#define LEVIATHAN_RAY_HEIGHT      (0.1f)                                       // 
+#define LEVIATHAN_RAY_SIZE        (coreVector3(0.7f,50.0f,0.7f))               // 
+#define LEVIATHAN_RAY_TEXSIZE     (coreVector2(0.5f,1.5f))                     // 
+#define LEVIATHAN_RAYWAVE_SIZE    (coreVector3(1.6f,5.0f,1.3f))                // 
+#define LEVIATHAN_RAYWAVE_TEXSIZE (coreVector2(0.5f,0.5f))                     // 
 
 
 // ****************************************************************
 // phase management macros
-#define PHASE_CONTROL_TIMER(a,b,c)      this->_PhaseTimer (a, __LINE__, b, c, [&](const coreFloat  fTime, const coreFloat fTimeBefore, const coreBool __bEnd)
-#define PHASE_CONTROL_TICKER(a,b,c)     this->_PhaseTicker(a, __LINE__, b, c, [&](const coreUint16 iTick,                              const coreBool __bEnd)
-#define PHASE_CONTROL_PAUSE(a,b)        PHASE_CONTROL_TICKER(a, 1u, b)
+#define PHASE_CONTROL_TIMER(a,b,c)      this->_PhaseTimer (a, __LINE__, b, c,    [&](const coreFloat  fTime, const coreFloat fTimeBefore, const coreBool __bEnd)
+#define PHASE_CONTROL_TICKER(a,b,c,d)   this->_PhaseTicker(a, __LINE__, b, c, d, [&](const coreUint16 iTick,                              const coreBool __bEnd)
+#define PHASE_CONTROL_PAUSE(a,b)        PHASE_CONTROL_TICKER(a, 1u, b, LERP_LINEAR)
 
 #define PHASE_TIME_POINT(t)             (InBetween((t), fTimeBefore, fTime))
 #define PHASE_TIME_BEFORE(t)            (fTime <  (t))
@@ -62,7 +75,7 @@
 #define PHASE_TIME_BETWEEN(t,u)         (InBetween(fTime, (t), (u)))
 #define PHASE_BEGINNING                 (PHASE_TIME_POINT(0.0f))
 
-#define PHASE_POSITION_POINT(e,t,v)     (InBetweenExt((t), (e)->GetOldPos().v, (e)->GetPosition().v) && [&](){s_vPositionPoint = (e)->GetPosition().xy(); s_vPositionPoint.v = (t); return true;}())
+#define PHASE_POSITION_POINT(e,t,v)     (InBetweenExt((t), (e)->GetOldPos().v, (e)->GetPosition().v) && [&]() {s_vPositionPoint = (e)->GetPosition().xy(); s_vPositionPoint.v = (t); return true;}())
 #define PHASE_POSITION_BEFORE(e,t,v)    (STAGE_POSITION_BEFORE (e, t, v))
 #define PHASE_POSITION_AFTER(e,t,v)     (STAGE_POSITION_AFTER  (e, t, v))
 #define PHASE_POSITION_BETWEEN(e,t,u,v) (STAGE_POSITION_BETWEEN(e, t, u, v))
@@ -112,6 +125,12 @@ public:
     void ChangePhase(const coreUint8 iPhase);
 
     // 
+    void StorePosition(const coreVector2& vPos);
+    void StorePosition();
+    void StoreRotation(const coreVector3& vDir, const coreVector3& vOri);
+    void StoreRotation();
+
+    // 
     inline const coreUint8& GetPhase()const {return m_iPhase;}
     inline const coreUint8& GetLevel()const {return m_iLevel;}
 
@@ -122,8 +141,8 @@ protected:
     void _EndBoss(const coreBool bAnimated);
 
     // 
-    template <typename F, typename G> void _PhaseTimer (const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreFloat  fSpeed, G&& nLerpFunc,         F&& nUpdateFunc);   // [](const coreFloat fTime, const coreFloat fTimeBefore, const coreBool __bEnd) -> void, [](const coreFloat x, const coreFloat y, const coreFloat s) -> coreFloat
-    template <typename F>             void _PhaseTicker(const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreUint16 iTicks, const coreFloat fRate, F&& nUpdateFunc);   // [](const coreUint16 iTick, const coreBool __bEnd) -> void
+    template <typename F, typename G> void _PhaseTimer (const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreFloat  fSpeed,                        G&& nLerpFunc, F&& nUpdateFunc);   // [](const coreFloat x, const coreFloat y, const coreFloat s) -> coreFloat, [](const coreFloat  fTime, const coreFloat fTimeBefore, const coreBool __bEnd) -> void
+    template <typename F, typename G> void _PhaseTicker(const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreUint16 iTicks, const coreFloat fRate, G&& nLerpFunc, F&& nUpdateFunc);   // [](const coreFloat x, const coreFloat y, const coreFloat s) -> coreFloat, [](const coreUint16 iTick,                              const coreBool __bEnd) -> void
 };
 
 
@@ -160,14 +179,18 @@ private:
     void __MoveOwn        ()final;
 
     // 
-    coreVector2 __RepeatPosition  (const coreVector2& vPosition, const coreFloat fThreshold, coreBool* OUTPUT pbChange);
-    coreVector2 __RepeatPosition  (const coreVector2& vPosition, const coreFloat fThreshold);
-    void        __EncodeDirection (const coreUintW iIndex, const coreVector2& vDirection);
-    coreVector2 __DecodeDirection (const coreUintW iIndex);
-    void        __EnableDuplicate ();
-    void        __DisableDuplicate(const coreBool bAnimated);
-    void        __EnableBoomerang (const coreUintW iIndex, const coreVector2& vPosition, const coreVector2& vDirection);
-    void        __DisableBoomerang(const coreUintW iIndex, const coreBool bAnimated);
+    void __EnableDuplicate ();
+    void __DisableDuplicate(const coreBool bAnimated);
+
+    // 
+    void __EnableBoomerang (const coreUintW iIndex, const coreVector2& vPosition, const coreVector2& vDirection);
+    void __DisableBoomerang(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    coreVector2 __RepeatPosition (const coreVector2& vPosition, const coreFloat fThreshold, coreBool* OUTPUT pbChange);
+    coreVector2 __RepeatPosition (const coreVector2& vPosition, const coreFloat fThreshold);
+    void        __EncodeDirection(const coreUintW iIndex, const coreVector2& vDirection);
+    coreVector2 __DecodeDirection(const coreUintW iIndex);
 };
 
 
@@ -176,14 +199,23 @@ private:
 class cTorusBoss final : public cBoss
 {
 private:
-    coreObject3D m_aRay    [3];   // 
-    coreObject3D m_aRayWave[3];   // 
+    coreObject3D m_Emitter;                          // 
+    coreObject3D m_aCircle[2];                       // 
+    coreObject3D m_Summon;                           // 
 
-    coreObject3D m_Emitter;       // 
-    coreObject3D m_aCircle[2];    // 
+    cCustomEnemy  m_aTurret[TORUS_TURRETS];          // 
+    coreBatchList m_TurretHull;                      // 
+    coreObject3D  m_aTurretHullRaw[TORUS_TURRETS];   // 
 
-    coreFlow m_fAnimation;        // animation value
-    coreFlow m_fRotation;         // 
+    cCustomEnemy  m_aGunner[TORUS_GUNNERS];          // 
+    coreBatchList m_GunnerHull;                      // 
+    coreObject3D  m_aGunnerHullRaw[TORUS_GUNNERS];   // 
+
+    coreFlow m_fAnimation;                           // animation value
+    coreFlow m_fRotationBoss;                        // 
+    coreFlow m_fRotationObject;                      // 
+
+    coreUint8 m_iGunnerMove;                         // 
 
 
 public:
@@ -192,23 +224,26 @@ public:
     DISABLE_COPY(cTorusBoss)
     ASSIGN_ID(102, "Torus")
 
-    // 
-    void Render()final;
-
 
 private:
     // execute own routines
     void __ResurrectOwn   ()final;
     void __KillOwn        (const coreBool bAnimated)final;
+    void __RenderOwnUnder ()final;
     void __RenderOwnAttack()final;
     void __MoveOwn        ()final;
 
     // 
-    coreVector3 __GetRotaDirection(const coreFloat fBaseAngle);
-    void        __SetRotaAttack   (const coreInt16 iType, const coreBool bAnimated);
-    void        __EnableRay       (const coreUintW iIndex);
-    void        __DisableRay      (const coreUintW iIndex);
-    void        __CreateOverdrive (const coreUintW iIndex, const coreVector3& vIntersect, const coreFloat fTime, const coreBool bGround);
+    void __EnableSummon (const coreVector2& vPosition, const coreVector3& vColor);
+    void __DisableSummon();
+
+    // 
+    void __EnableTurret (const coreUintW iIndex, const coreVector2& vPosition);
+    void __DisableTurret(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void __EnableGunner (const coreUintW iIndex, const coreVector2& vPosition);
+    void __DisableGunner(const coreUintW iIndex, const coreBool bAnimated);
 };
 
 
@@ -217,8 +252,6 @@ private:
 class cVausBoss final : public cBoss
 {
 private:
-    coreObject3D m_aRay[3];         // 
-
     cCustomEnemy m_aCompanion[2];   // 
     coreUint8    m_iScoutOrder;     // 
 
@@ -238,7 +271,7 @@ private:
     void __MoveOwn        ()final;
 
     // 
-    coreBool __ExecuteCompanionAttack(const coreUintW iType, const coreFloat fTime);
+    void __UpdateBreakout();
 };
 
 
@@ -254,6 +287,10 @@ private:
     coreFlow m_fAnimation;     // animation value
 
 
+    coreBatchList m_Ink;           // 
+    coreObject3D  m_aInkRaw[NAUTILUS_INK_RAWS];   // 
+
+
 public:
     cNautilusBoss()noexcept;
 
@@ -263,9 +300,10 @@ public:
 
 private:
     // execute own routines
-    void __ResurrectOwn()final;
-    void __KillOwn     (const coreBool bAnimated)final;
-    void __MoveOwn     ()final;
+    void __ResurrectOwn ()final;
+    void __KillOwn      (const coreBool bAnimated)final;
+    void __RenderOwnOver()final;
+    void __MoveOwn      ()final;
 };
 
 
@@ -276,6 +314,8 @@ class cAmemasuBoss final : public cBoss
 private:
     cCustomEnemy m_Top;                 // 
     cCustomEnemy m_Bottom;              // 
+
+    cCustomEnemy m_Tooth[4];            // 
 
     coreFloat m_fMouthAngle;            // 
 
@@ -304,13 +344,18 @@ private:
 class cLeviathanBoss final : public cBoss
 {
 private:
-    cCustomEnemy m_aBody[3];      // 
-    cCustomEnemy m_Tail;          // 
+    cCustomEnemy m_Head;                            // 
+    cCustomEnemy m_aBody[LEVIATHAN_PARTS_BODIES];   // 
+    cCustomEnemy m_Tail;                            // 
 
-    coreObject3D m_aRay    [5];   // 
-    coreObject3D m_aRayWave[5];   // 
+    coreBatchList m_Ray;                            // 
+    coreBatchList m_RayWave;                        // 
+    coreObject3D  m_aRayRaw[LEVIATHAN_RAYS_RAWS];   // 
 
-    coreFlow m_fAnimation;        // animation value
+    coreUint8 m_iRayActive;                         // 
+
+    coreFlow m_fAnimation;                          // animation value
+    coreFlow m_fMovement;                           // 
 
 
 public:
@@ -318,9 +363,6 @@ public:
 
     DISABLE_COPY(cLeviathanBoss)
     ASSIGN_ID(203, "Leviathan")
-
-    // 
-    void Render()final;
 
 
 private:
@@ -331,15 +373,18 @@ private:
     void __MoveOwn        ()final;
 
     // 
-    void __SetRotaAttack(const coreInt16 iType, const coreBool bAnimated);
-    void __EnableRay    (const coreUintW iIndex);
-    void __DisableRay   (const coreUintW iIndex);
+    void __SetRotaAttack  (const coreInt16 iType, const coreBool bAnimated);
+    void __EnableRay      (const coreUintW iIndex);
+    void __DisableRay     (const coreUintW iIndex);
+    void __CreateOverdrive(const coreUintW iIndex, const coreVector3& vIntersect, const coreFloat fTime, const coreBool bGround);
 
     // 
-    static FUNC_NOALIAS void __CalcCurvePosDir(const coreVector3& vAxis, const coreFloat fAngle, const coreVector3& vScale, coreVector3* OUTPUT vPosition, coreVector3* OUTPUT vDirection);
+    static FUNC_NOALIAS void      __CalcCurvePosDir(const coreVector3& vAxis, const coreFloat fAngle, const coreVector3& vScale, coreVector3* OUTPUT vPosition, coreVector3* OUTPUT vDirection);
+    static FUNC_CONST   coreFloat __CalcAngle      (const coreFloat fDistance, const coreFloat fRadius);
 
     // 
-    cEnemy* __GetPart(const coreUintW iIndex);
+    cEnemy*                     __GetPart        (const coreUintW iIndex);
+    static FUNC_CONST coreFloat __GetPartDistance(const coreUintW iIndex);
 };
 
 
@@ -656,16 +701,16 @@ template <typename F, typename G> void cBoss::_PhaseTimer(const coreUintW iTimer
     // 
     const coreFloat fTimeBefore = nLerpFunc(0.0f, 1.0f, oTimer.GetValue(CORE_TIMER_GET_NORMAL));
     oTimer.Update(fSpeed);
-    const coreFloat fTime       = nLerpFunc(0.0f, 1.0f, oTimer.GetValue(CORE_TIMER_GET_NORMAL));
+    const coreFloat fTimeAfter  = nLerpFunc(0.0f, 1.0f, oTimer.GetValue(CORE_TIMER_GET_NORMAL));
 
     // 
-    nUpdateFunc(fTime, fTimeBefore, !oTimer.GetStatus());
+    nUpdateFunc(fTimeAfter, fTimeBefore, !oTimer.GetStatus());
 }
 
 
 // ****************************************************************
 // 
-template <typename F> void cBoss::_PhaseTicker(const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreUint16 iTicks, const coreFloat fRate, F&& nUpdateFunc)
+template <typename F, typename G> void cBoss::_PhaseTicker(const coreUintW iTimerIndex, const coreUint16 iCodeLine, const coreUint16 iTicks, const coreFloat fRate, G&& nLerpFunc, F&& nUpdateFunc)
 {
     // 
     ASSERT(iTimerIndex < BOSS_TIMERS)
@@ -678,19 +723,26 @@ template <typename F> void cBoss::_PhaseTicker(const coreUintW iTimerIndex, cons
         iTimerLine = iCodeLine;
 
         // 
-        oTimer.SetMaxLoops(0u);
+        oTimer.SetMaxLoops(iTicks ? 1u : 0u);
         oTimer.Play(CORE_TIMER_PLAY_RESET);
     }
 
-    // 
-    if(oTimer.Update(fRate))
+    if(iTicks)
     {
         // 
-        if((oTimer.GetCurLoops() >= iTicks) && iTicks)
-            oTimer.Pause();
+        const coreUint16 iTicksBefore = F_TO_UI(nLerpFunc(0.0f, 1.0f, oTimer.GetValue(CORE_TIMER_GET_NORMAL)) * I_TO_F(iTicks));
+        oTimer.Update(fRate * RCP(I_TO_F(iTicks)));
+        const coreUint16 iTicksAfter  = F_TO_UI(nLerpFunc(0.0f, 1.0f, oTimer.GetValue(CORE_TIMER_GET_NORMAL)) * I_TO_F(iTicks));
 
         // 
-        nUpdateFunc(oTimer.GetCurLoops()-1u, !oTimer.GetStatus());
+        if(iTicksBefore != iTicksAfter) nUpdateFunc(iTicksAfter - 1u, (iTicksAfter == iTicks));
+    }
+    else
+    {
+        ASSERT(s_cast<void*>(nLerpFunc) == s_cast<void*>(LERP_LINEAR))
+
+        // 
+        if(oTimer.Update(fRate)) nUpdateFunc(oTimer.GetCurLoops() - 1u, false);
     }
 }
 

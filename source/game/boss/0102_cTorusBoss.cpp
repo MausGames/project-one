@@ -12,21 +12,28 @@
 // ****************************************************************
 // counter identifier
 #define ROTATION_DIRECTION (0u)
-#define ATTACK_STATUS      (1u)
+#define EMIT_STATUS        (1u)
 #define BALL_STATUS        (2u)
-#define RENDER_TYPE        (3u)
+#define TURRETS_ENABLED    (3u)
+#define GUNNERS_ENABLED    (4u)
+#define SKIP_SUMMON        (5u)
+#define SUB_PHASE          (6u)
 
 
 // ****************************************************************
 // vector identifier
-#define OVERDRIVE_HIT (0u)
+#define TUMBLE_DIRECTION (0u)
 
 
 // ****************************************************************
 // constructor
 cTorusBoss::cTorusBoss()noexcept
-: m_fAnimation (0.0f)
-, m_fRotation  (0.0f)
+: m_TurretHull      (TORUS_TURRETS)
+, m_GunnerHull      (TORUS_GUNNERS)
+, m_fAnimation      (0.0f)
+, m_fRotationBoss   (0.0f)
+, m_fRotationObject (0.0f)
+, m_iGunnerMove     (0u)
 {
     // load models
     this->DefineModelHigh("ship_boss_torus_high.md3");
@@ -36,29 +43,7 @@ cTorusBoss::cTorusBoss()noexcept
     this->SetSize(coreVector3(1.7f,1.7f,1.7f));
 
     // configure the boss
-    this->Configure(2800, COLOR_SHIP_GREEN);
-
-    // 
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRay); ++i)
-    {
-        m_aRay[i].DefineModel  ("object_tube.md3");
-        m_aRay[i].DefineTexture(0u, "effect_energy.png");
-        m_aRay[i].DefineProgram("effect_energy_invert_program");
-        m_aRay[i].SetColor3    (COLOR_ENERGY_YELLOW * 0.8f);
-        m_aRay[i].SetTexSize   (TORUS_RAY_TEXSIZE);
-        m_aRay[i].SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
-    }
-
-    // 
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRayWave); ++i)
-    {
-        m_aRayWave[i].DefineModel  ("object_tube.md3");
-        m_aRayWave[i].DefineTexture(0u, "effect_energy.png");
-        m_aRayWave[i].DefineProgram("effect_energy_direct_program");
-        m_aRayWave[i].SetColor3    (COLOR_ENERGY_YELLOW * 0.8f);
-        m_aRayWave[i].SetTexSize   (coreVector2(0.5f,0.5f));
-        m_aRayWave[i].SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
-    }
+    this->Configure(4000, COLOR_SHIP_GREY);
 
     // 
     m_Emitter.DefineModel  ("object_boss_torus_emitter.md3");
@@ -67,7 +52,6 @@ cTorusBoss::cTorusBoss()noexcept
     m_Emitter.SetSize      (this->GetSize());
     m_Emitter.SetColor3    (COLOR_ENERGY_YELLOW * 0.8f);
     m_Emitter.SetTexSize   (coreVector2(1.25f,1.25f));
-    m_Emitter.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 
     // 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCircle); ++i)
@@ -76,21 +60,86 @@ cTorusBoss::cTorusBoss()noexcept
         m_aCircle[i].DefineTexture(0u, "effect_energy.png");
         m_aCircle[i].DefineProgram("effect_energy_invert_program");
         m_aCircle[i].SetSize      (this->GetSize());
-        m_aCircle[i].SetColor3    (COLOR_ENERGY_GREEN * 0.8f);
+        m_aCircle[i].SetColor3    (COLOR_ENERGY_CYAN * 0.8f);
         m_aCircle[i].SetTexSize   (coreVector2(1.25f,1.25f));
     }
 
-    STATIC_ASSERT(ARRAY_SIZE(m_aRay) == ARRAY_SIZE(m_aRayWave))
-}
-
-
-// ****************************************************************
-// 
-void cTorusBoss::Render()
-{
     // 
-    if(!m_aiCounter[RENDER_TYPE])
-        this->cEnemy::Render();
+    m_Summon.DefineModel  ("object_sphere.md3");
+    m_Summon.DefineTexture(0u, "effect_energy.png");
+    m_Summon.DefineProgram("effect_energy_invert_program");
+    m_Summon.SetTexSize   (coreVector2(4.5f,4.5f));
+    m_Summon.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+
+    // 
+    for(coreUintW i = 0u; i < TORUS_TURRETS; ++i)
+    {
+        m_aTurret[i].DefineModelHigh("object_cube.md3");
+        m_aTurret[i].DefineModelLow ("object_cube.md3");
+        m_aTurret[i].DefineTexture  (0u, "effect_energy.png");
+        m_aTurret[i].DefineProgram  ("effect_energy_ship_invert_program");
+        m_aTurret[i].SetSize        (coreVector3(1.0f,1.0f,1.0f) * 2.85f);
+        m_aTurret[i].SetTexSize     (coreVector2(0.8f,0.3f));
+        m_aTurret[i].Configure      (100, COLOR_ENERGY_CYAN * 0.7f);
+        m_aTurret[i].AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_IMMORTAL);
+    }
+
+    // 
+    m_TurretHull.DefineProgram("effect_energy_invert_inst_program");
+    {
+        for(coreUintW i = 0u; i < TORUS_TURRETS; ++i)
+        {
+            // load object resources
+            coreObject3D* pTurret = &m_aTurretHullRaw[i];
+            pTurret->DefineModel  ("object_cube.md3");
+            pTurret->DefineTexture(0u, "effect_energy.png");
+            pTurret->DefineProgram("effect_energy_invert_program");
+
+            // set object properties
+            pTurret->SetSize   (m_aTurret[i].GetSize   ());
+            pTurret->SetColor3 (m_aTurret[i].GetColor3 ());
+            pTurret->SetTexSize(m_aTurret[i].GetTexSize());
+            pTurret->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
+            // add object to the list
+            m_TurretHull.BindObject(pTurret);
+        }
+    }
+
+    // 
+    for(coreUintW i = 0u; i < TORUS_GUNNERS; ++i)
+    {
+        m_aGunner[i].DefineModelHigh("object_tetra.md3");
+        m_aGunner[i].DefineModelLow ("object_tetra.md3");
+        m_aGunner[i].DefineTexture  (0u, "effect_energy.png");
+        m_aGunner[i].DefineProgram  ("effect_energy_ship_invert_program");
+        m_aGunner[i].SetSize        (coreVector3(1.0f,1.0f,1.0f) * 5.0f);
+        m_aGunner[i].SetTexSize     (coreVector2(0.8f,0.3f));
+        m_aGunner[i].Configure      (100, COLOR_ENERGY_RED * 0.8f);
+        m_aGunner[i].AddStatus      (ENEMY_STATUS_ENERGY | ENEMY_STATUS_IMMORTAL);
+    }
+
+    // 
+    m_GunnerHull.DefineProgram("effect_energy_invert_inst_program");
+    {
+        for(coreUintW i = 0u; i < TORUS_GUNNERS; ++i)
+        {
+            // load object resources
+            coreObject3D* pGunner = &m_aGunnerHullRaw[i];
+            pGunner->DefineModel  ("object_tetra.md3");
+            pGunner->DefineTexture(0u, "effect_energy.png");
+            pGunner->DefineProgram("effect_energy_invert_program");
+
+            // set object properties
+            pGunner->SetSize   (m_aGunner[i].GetSize   ());
+            pGunner->SetColor3 (m_aGunner[i].GetColor3 ());
+            pGunner->SetTexSize(m_aGunner[i].GetTexSize());
+            pGunner->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
+            // add object to the list
+            m_GunnerHull.BindObject(pGunner);
+        }
+    }
 }
 
 
@@ -99,8 +148,15 @@ void cTorusBoss::Render()
 void cTorusBoss::__ResurrectOwn()
 {
     // 
+    g_pGlow->BindObject(&m_Emitter);
+
+    // 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCircle); ++i)
         g_pGlow->BindObject(&m_aCircle[i]);
+
+    // 
+    g_pGlow->BindList(&m_TurretHull);
+    g_pGlow->BindList(&m_GunnerHull);
 }
 
 
@@ -108,7 +164,7 @@ void cTorusBoss::__ResurrectOwn()
 // 
 void cTorusBoss::__KillOwn(const coreBool bAnimated)
 {
-    cViridoMission* pMission = s_cast<cViridoMission*>(g_pGame->GetCurMission());
+    cViridoMission* pMission = d_cast<cViridoMission*>(g_pGame->GetCurMission());
 
     if(!m_aiCounter[BALL_STATUS])
     {
@@ -123,14 +179,43 @@ void cTorusBoss::__KillOwn(const coreBool bAnimated)
     }
 
     // 
-    this->__SetRotaAttack(0, bAnimated);
+    this->__DisableSummon();
+
+    // 
+    for(coreUintW i = 0u; i < TORUS_TURRETS; ++i)
+        this->__DisableTurret(i, bAnimated);
+
+    // 
+    for(coreUintW i = 0u; i < TORUS_GUNNERS; ++i)
+        this->__DisableGunner(i, bAnimated);
+
+    // 
+    g_pGlow->UnbindObject(&m_Emitter);
 
     // 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCircle); ++i)
         g_pGlow->UnbindObject(&m_aCircle[i]);
 
     // 
+    g_pGlow->UnbindList(&m_TurretHull);
+    g_pGlow->UnbindList(&m_GunnerHull);
+
+    // 
     this->_EndBoss(bAnimated);
+}
+
+
+// ****************************************************************
+// 
+void cTorusBoss::__RenderOwnUnder()
+{
+    // 
+    if(m_aiCounter[TURRETS_ENABLED])
+        m_TurretHull.Render();
+
+    // 
+    if(m_aiCounter[GUNNERS_ENABLED])
+        m_GunnerHull.Render();
 }
 
 
@@ -140,42 +225,19 @@ void cTorusBoss::__RenderOwnAttack()
 {
     DEPTH_PUSH
 
-    if(m_aiCounter[RENDER_TYPE])
+    glDisable(GL_DEPTH_TEST);
     {
-        // 
-        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRay); ++i)
-            m_aRay[i].Render();
-        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRay); ++i)
-            g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(&m_aRay[i]);
-
-        glDisable(GL_DEPTH_TEST);
-        {
-            // 
-            for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRayWave); ++i)
-                m_aRayWave[i].Render();
-        }
-        glEnable(GL_DEPTH_TEST);
-
-        // 
-        this->cEnemy::Render();
-
         // 
         m_Emitter.Render();
 
         // 
         for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCircle); ++i)
             m_aCircle[i].Render();
+
+        // 
+        m_Summon.Render();
     }
-    else
-    {
-        glDisable(GL_DEPTH_TEST);
-        {
-            // 
-            for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCircle); ++i)
-                m_aCircle[i].Render();
-        }
-        glEnable(GL_DEPTH_TEST);
-    }
+    glEnable(GL_DEPTH_TEST);
 }
 
 
@@ -183,12 +245,14 @@ void cTorusBoss::__RenderOwnAttack()
 // 
 void cTorusBoss::__MoveOwn()
 {
+    cViridoMission* pMission = d_cast<cViridoMission*>(g_pGame->GetCurMission());
+
     // 
     coreVector2 vNewOri = coreVector2(0.0f, m_aiCounter[ROTATION_DIRECTION] ? -1.0f : 1.0f);
 
     // 
-    m_fAnimation.UpdateMod(-1.0f, 10.0f);
-    m_fRotation .UpdateMod(-1.2f, 2.0f*PI);
+    m_fAnimation   .UpdateMod(-1.0f,               10.0f);
+    m_fRotationBoss.UpdateMod(TORUS_BOSS_ROTATION, 2.0f*PI);
 
     // ################################################################
     // 
@@ -199,314 +263,246 @@ void cTorusBoss::__MoveOwn()
             this->DefaultMoveLerp(coreVector2(0.0f,2.0f), coreVector2(0.0f,0.75f), fTime);
 
             if(PHASE_TIME_POINT(0.85f))
-            {
                 this->_StartBoss();
-                g_pEnvironment->GetBackground()->AddList(0u, 128u, "effect_decal_single_inst_program");
-            }
 
             if(PHASE_FINISHED && !g_pGame->GetInterface()->IsBannerActive())
-                ++m_iPhase;
+                PHASE_CHANGE_TO(10u)
         });
     }
 
     // ################################################################
     // 
-    else if(m_iPhase == 1u)
+    else if(m_iPhase >= 10u && m_iPhase <= 19u)
     {
-        PHASE_CONTROL_TIMER(0u, 0.6f, LERP_SMOOTH)
+        PHASE_CONTROL_TIMER(0u, 0.5f, LERP_SMOOTH)
         {
-            this->DefaultMoveLerp(coreVector2(0.0f,0.75f), coreVector2(0.0f,0.0f), fTime);
-
-            if(PHASE_FINISHED)
-                m_iPhase = 40u;
-        });
-    }
-
-    // ################################################################
-    // 
-    else if(m_iPhase >= 10u && m_iPhase <= 13u)
-    {
-        const coreBool bCurve = (m_iPhase == 11u);
-
-        PHASE_CONTROL_TIMER(0u, bCurve ? 0.2f : 0.35f, LERP_SMOOTH)
-        {
-            
-
-
-            if(bCurve)
+            coreVector2 vPosFrom, vPosTo;
+            coreFloat   fAngFrom, fAngTo;
+            switch(m_iPhase)
             {
-                const coreFloat fSideTime = m_aiCounter[ROTATION_DIRECTION] ? (1.0f - fTime) : fTime;
+            default: ASSERT(false)
+            case 10u: vPosFrom = m_vLastPosition;                               vPosTo = coreVector2( 1.0f, 1.0f).Normalized() * 0.65f; fAngFrom =  0.00f*PI; fAngTo = -0.25f*PI; break;
+            case 11u: vPosFrom = coreVector2( 1.0f, 1.0f).Normalized() * 0.65f; vPosTo = coreVector2(-1.0f,-1.0f).Normalized() * 0.65f; fAngFrom = -0.25f*PI; fAngTo = -1.25f*PI; break;
+            case 12u: vPosFrom = coreVector2(-1.0f,-1.0f).Normalized() * 0.65f; vPosTo = coreVector2(-1.0f, 1.0f).Normalized() * 0.65f; fAngFrom = -1.25f*PI; fAngTo = -1.75f*PI; break;
+            case 13u: vPosFrom = coreVector2(-1.0f, 1.0f).Normalized() * 0.65f; vPosTo = coreVector2( 1.0f,-1.0f).Normalized() * 0.65f; fAngFrom = -1.75f*PI; fAngTo = -0.75f*PI; break;
+            case 14u: vPosFrom = coreVector2( 1.0f,-1.0f).Normalized() * 0.65f; vPosTo = coreVector2( 1.0f, 1.0f).Normalized() * 0.65f; fAngFrom = -0.75f*PI; fAngTo = -0.25f*PI; break;
+            }
 
-                const coreVector2 vDirection = coreVector2::Direction(LERP(1.75f*PI, 0.25f*PI, fSideTime));
-
-                this->SetPosition(coreVector3(vDirection * (0.65f * FOREGROUND_AREA), 0.0f));
-                g_pEnvironment->SetTargetDirection(coreVector2::Direction(LERP(-0.25f*PI, -1.75f*PI, fSideTime)));
+            if(m_aiCounter[ROTATION_DIRECTION])
+            {
+                this->DefaultMoveLerp(vPosFrom.InvertedX(), vPosTo.InvertedX(), fTime);
+                g_pEnvironment->SetTargetDirection(coreVector2::Direction(-LERP(fAngFrom, fAngTo, fTime)));
             }
             else
             {
-                coreVector2 vPosFrom, vPosTo;
-                coreFloat   fAngFrom, fAngTo;
-                switch(m_iPhase)
-                {
-                default: ASSERT(false)
-                case 10u: vPosFrom = coreVector2( 0.0f, 0.75f); vPosTo = coreVector2(0.65f,0.65f).Normalized() * 0.65f; fAngFrom = 0.0f*PI; fAngTo = -0.25f*PI; break;
-                case 12u: vPosFrom = coreVector2(-0.65f,0.65f).Normalized() * 0.65f; vPosTo = coreVector2(0.0f, 0.0f);  fAngFrom = 0.25f*PI; fAngTo =  0.0f*PI; break;
-                case 13u: vPosFrom = coreVector2( 0.0f, 0.0f);  vPosTo = coreVector2(0.65f,0.65f).Normalized() * 0.65f; fAngFrom = 0.0f*PI; fAngTo = -0.25f*PI; break;
-                }
-
-                if(m_aiCounter[ROTATION_DIRECTION])
-                {
-                    this->DefaultMoveLerp(vPosFrom.InvertedX(), vPosTo.InvertedX(), fTime);
-                    g_pEnvironment->SetTargetDirection(coreVector2::Direction(-LERP(fAngFrom, fAngTo, fTime)));
-                }
-                else
-                {
-                    this->DefaultMoveLerp(vPosFrom, vPosTo, fTime);
-                    g_pEnvironment->SetTargetDirection(coreVector2::Direction(LERP(fAngFrom, fAngTo, fTime)));
-                }
-
-
+                this->DefaultMoveLerp(vPosFrom, vPosTo, fTime);
+                g_pEnvironment->SetTargetDirection(coreVector2::Direction(LERP(fAngFrom, fAngTo, fTime)));
             }
 
             if(PHASE_FINISHED)
-                m_iPhase += 10u;
+            {
+                PHASE_CHANGE_TO(m_iPhase + 10u)
+
+                m_aiCounter[SKIP_SUMMON] = (CONTAINS_BIT(m_aiCounter[GUNNERS_ENABLED], (m_iPhase - 20u) % TORUS_GUNNERS) ||
+                                            CONTAINS_BIT(m_aiCounter[TURRETS_ENABLED], (m_iPhase - 20u) % TORUS_TURRETS)) ? 1 : 0;
+            }
         });
     }
 
     // ################################################################
     // 
-    else if(m_iPhase >= 20u && m_iPhase <= 23u)
+    else if(m_iPhase >= 20u && m_iPhase <= 29u)
     {
-        PHASE_CONTROL_TICKER(0u, 36u, 12.0f)
+        constexpr coreFloat  fDelay = 3.0f;
+        constexpr coreUint16 iCount = 72u;
+        constexpr coreUint16 iStop  = F_TO_UI(0.73f * I_TO_F(iCount));
+
+        if(m_aiCounter[SKIP_SUMMON])
         {
-            const coreFloat fAngle = I_TO_F(iTick) * (m_aiCounter[ROTATION_DIRECTION] ? 12.0f : -12.0f);
+            PHASE_CONTROL_PAUSE(0u, 1.0f/fDelay)
+            {
+                PHASE_CHANGE_TO((m_iPhase == 24u) ? 11u : (m_iPhase - 9u))
+            });
+        }
+        else
+        {
+            PHASE_CONTROL_TIMER(1u, 1.0f/fDelay, LERP_LINEAR)
+            {
+                if(PHASE_BEGINNING) this->__EnableSummon(m_aCircle[0].GetPosition().xy(), m_aCircle[0].GetColor3());
+
+                m_Summon.SetSize(coreVector3(2.5f,2.5f,2.5f) * LERPB(0.0f, 1.0f, MAX((fTime - 0.5f) / 0.5f, 0.0f)));
+            });
+
+            PHASE_CONTROL_TICKER(0u, iCount, I_TO_F(iCount)/fDelay, LERP_BREAK_REV)
+            {
+                if(iTick < iStop) g_pSpecialEffects->CreateChargeColor(this->GetPosition(), 50.0f, 2u, m_aiCounter[SUB_PHASE] ? COLOR_ENERGY_RED : COLOR_ENERGY_CYAN);
+
+                if(PHASE_FINISHED)
+                {
+                    PHASE_CHANGE_TO((m_iPhase == 24u) ? 11u : (m_iPhase - 9u))
+                    PHASE_RESET(1u)
+
+                    this->__DisableSummon();
+
+                    if(m_aiCounter[SUB_PHASE]) this->__EnableGunner((m_iPhase - 11u) % TORUS_GUNNERS, this->GetPosition().xy());
+                                          else this->__EnableTurret((m_iPhase - 11u) % TORUS_TURRETS, this->GetPosition().xy());
+                }
+            });
+        }
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 50u)
+    {
+        PHASE_CONTROL_TIMER(0u, 0.5f, LERP_SMOOTH)
+        {
+            this->DefaultMoveLerp(m_vLastPosition, coreVector2(0.0f,0.0f), fTime);
+
+            if(PHASE_FINISHED)
+                PHASE_CHANGE_INC
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 51u)
+    {
+        constexpr coreFloat  fDelay = 4.0f;
+        constexpr coreUint16 iCount = 100u;
+        constexpr coreUint16 iStop  = F_TO_UI(0.73f * I_TO_F(iCount));
+
+        PHASE_CONTROL_TIMER(1u, 1.0f/fDelay, LERP_LINEAR)
+        {
+            if(PHASE_BEGINNING) this->__EnableSummon(m_aCircle[0].GetPosition().xy(), m_aCircle[0].GetColor3());
+
+            m_Summon.SetSize(coreVector3(2.5f,2.5f,2.5f) * LERPB(0.0f, 1.0f, MAX((fTime - 0.5f) / 0.5f, 0.0f)));
+        });
+
+        PHASE_CONTROL_TICKER(0u, iCount, I_TO_F(iCount)/fDelay, LERP_BREAK_REV)
+        {
+            if(iTick < iStop) g_pSpecialEffects->CreateChargeColor(this->GetPosition(), 50.0f, 2u, COLOR_ENERGY_GREEN);
+
+            if(PHASE_FINISHED)
+            {
+                PHASE_CHANGE_INC
+
+                this->__DisableSummon();
+
+                for(coreUintW i = 0u, ie = ((g_pGame->GetDifficulty() > 0) ? 2u : 1u); i < ie; ++i)
+                {
+                    const coreVector2 vDir = (i ? coreVector2(1.0f,0.5f) : coreVector2(-0.5f,1.0f)).Normalized();
+                    pMission->EnableBall(i, this->GetPosition().xy(), vDir);
+
+                    m_aiCounter[BALL_STATUS] += 1;
+                }
+
+                g_pSpecialEffects->MacroExplosionColorSmall(this->GetPosition(), COLOR_ENERGY_GREEN);
+            }
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 52u)
+    {
+        PHASE_CONTROL_PAUSE(0u, 2.0f)
+        {
+            PHASE_CHANGE_INC
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase == 53u)
+    {
+        PHASE_CONTROL_TIMER(0u, 0.6f, LERP_SMOOTH)
+        {
+            this->DefaultMoveLerp(m_vLastPosition, coreVector2(0.0f,0.65f), fTime);
+
+            if(PHASE_FINISHED)
+                PHASE_CHANGE_TO(60u)
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase >= 60u && m_iPhase <= 63u)
+    {
+        PHASE_CONTROL_TIMER(0u, 0.25f, LERP_SMOOTH)
+        {
+            coreFloat fAngFrom, fAngTo;
+            switch(m_iPhase)
+            {
+            default: ASSERT(false)
+            case 60u: fAngFrom =  0.0f*PI; fAngTo = 1.5f*PI; break;
+            case 61u: fAngFrom = -0.5f*PI; fAngTo = 1.0f*PI; break;
+            case 62u: fAngFrom = -1.0f*PI; fAngTo = 0.5f*PI; break;
+            case 63u: fAngFrom = -1.5f*PI; fAngTo = 0.0f*PI; break;
+            }
+
+            const coreVector2 vDirection = coreVector2::Direction(LERP(fAngFrom, fAngTo, fTime));
+
+            this->SetPosition(coreVector3(vDirection * (0.65f * FOREGROUND_AREA), 0.0f));
+            g_pEnvironment->SetTargetDirection(vDirection);
+
+            if(PHASE_FINISHED)
+                PHASE_CHANGE_TO(m_iPhase + 4u)
+        });
+    }
+
+    // ################################################################
+    // 
+    else if(m_iPhase >= 64u && m_iPhase <= 67u)
+    {
+        PHASE_CONTROL_TICKER(0u, 36u, 12.0f, LERP_LINEAR)
+        {
+            const coreFloat fAngle = I_TO_F(iTick) * 12.0f;
 
             for(coreUintW i = 4u; i--; )
             {
                 const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(i) * 90.0f + fAngle));
-                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.2f, this, this->GetPosition().xy(), vDir)->MakeBlue();
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.2f, this, this->GetPosition().xy(), vDir)->ChangeSize(1.1f);
             }
 
             g_pSpecialEffects->CreateSplashColor(this->GetPosition(), 5.0f, 1u, COLOR_ENERGY_BLUE);
 
             if(PHASE_FINISHED)
-            {
-                switch(m_iPhase)
-                {
-                default:  m_iPhase -=  9u; break;   // next move
-                case 22u: m_iPhase  = 30u; break;   // ray attack
-                case 23u: m_iPhase  = 11u; break;   // first move
-                }
-            }
+                PHASE_CHANGE_TO((m_iPhase == 67u) ? 60u : (m_iPhase - 3u))
         });
     }
 
     // ################################################################
     // 
-    else if(m_iPhase == 30u)
+    else if(m_iPhase == 70u)
     {
-        PHASE_CONTROL_PAUSE(0u, 1.0f)
+        PHASE_CONTROL_TIMER(0u, 0.5f, LERP_LINEAR)
         {
-            ++m_iPhase;
+            const coreFloat fBreakTime  = LERPB(0.0f, 1.0f, fTime);
+            const coreFloat fSmoothTime = LERPS(0.0f, 1.0f, fTime);
 
-            this->__SetRotaAttack(1, true);
-            this->SetPosition(coreVector3(0.0f,0.0f,0.0f));
-        });
-    }
+            vNewOri = coreVector2::Direction((5.0f*PI) * fBreakTime + (m_aiCounter[ROTATION_DIRECTION] ? PI : 0.0f));
 
-    // ################################################################
-    // 
-    else if(m_iPhase == 31u)
-    {
-        PHASE_CONTROL_TIMER(0u, 0.8f, LERP_LINEAR)
-        {
-            const coreFloat fAlpha = 0.6f * (1.0f-fTime);
+            this->DefaultMoveLerp(m_vLastPosition, m_vLastPosition + m_avVector[TUMBLE_DIRECTION].xy() * 0.5f, fBreakTime);
+            g_pEnvironment->SetTargetDirection(coreVector2::Direction(LERP(m_avVector[TUMBLE_DIRECTION].z, 0.0f*PI, fBreakTime)));
 
-            for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRay); ++i)
+            coreVector3 vNewColor;
+            switch(m_aiCounter[SUB_PHASE])
             {
-                m_aRay    [i].SetAlpha(fAlpha);
-                m_aRayWave[i].SetAlpha(fAlpha);
+            default: ASSERT(false)
+            case 1: vNewColor = TernaryLerp(COLOR_ENERGY_CYAN * 0.8f, COLOR_ENERGY_WHITE * 0.3f, COLOR_ENERGY_RED   * 0.7f, fSmoothTime); break;
+            case 2: vNewColor = TernaryLerp(COLOR_ENERGY_RED  * 0.7f, COLOR_ENERGY_WHITE * 0.3f, COLOR_ENERGY_GREEN * 0.8f, fSmoothTime); break;
             }
 
-            m_Emitter.SetAlpha(fTime);
+            for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCircle); ++i)
+                m_aCircle[i].SetColor3(vNewColor);
 
             if(PHASE_FINISHED)
             {
-                ++m_iPhase;
-
-                this->__SetRotaAttack(2, true);
-            }
-        });
-    }
-
-    // ################################################################
-    // 
-    else if(m_iPhase == 32u)
-    {
-        PHASE_CONTROL_TIMER(0u, 4.0f, LERP_LINEAR)
-        {
-            const coreFloat& fLength = fTime;
-            const coreFloat  fWidth  = 1.0f + (1.0f-fTime);
-
-            for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRay); ++i)
-            {
-                m_aRay    [i].SetSize(TORUS_RAY_SIZE     * coreVector3(fWidth, fLength, fWidth));
-                m_aRayWave[i].SetSize(TORUS_RAYWAVE_SIZE * coreVector3(fWidth, fLength, fWidth));
-            }
-
-            if(PHASE_FINISHED)
-                ++m_iPhase;
-        });
-    }
-
-    // ################################################################
-    // 
-    else if(m_iPhase == 33u)
-    {
-        PHASE_CONTROL_PAUSE(0u, 1.0f/4.0f)
-        {
-            ++m_iPhase;
-        });
-    }
-
-    // ################################################################
-    // 
-    else if(m_iPhase == 34u)
-    {
-        PHASE_CONTROL_TIMER(0u, 1.0f/12.0f, LERP_SMOOTH)
-        {
-            vNewOri = coreVector2::Direction(PI * fTime + (m_aiCounter[ROTATION_DIRECTION] ? PI : 0.0f));
-
-            cOutdoor* pOutdoor = g_pEnvironment->GetBackground()->GetOutdoor();
-            if(pOutdoor)
-            {
-                for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRay); ++i)
-                {
-                    coreObject3D& oRay = m_aRay[i];
-                    WARN_IF(!oRay.IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue;
-
-                    const coreVector3& vRayDir   = oRay.GetDirection();
-                    const coreVector3  vRayStart = oRay.GetPosition () - oRay.GetSize().y * vRayDir;
-                    coreFloat          fRayLen   = TORUS_RAY_SIZE.y;
-
-                    if(vRayDir.z < -0.15f)
-                    {
-                        const coreVector3 vIntersect = pOutdoor->RetrieveIntersect(vRayStart, vRayDir);
-                        this->__CreateOverdrive(i, vIntersect, fTime, true);
-
-                        fRayLen = (vIntersect - vRayStart).Length() * 0.5f;
-                    }
-                    else if(vRayDir.z > 0.48f)
-                    {
-                        fRayLen = TORUS_RAY_SIZE.y * (1.0f - (vRayDir.z-0.48f));
-
-                        const coreVector3 vIntersect = vRayStart + vRayDir * (fRayLen * 2.0f);
-                        this->__CreateOverdrive(i, vIntersect, fTime, false);
-                    }
-                    else m_avVector[OVERDRIVE_HIT + i] = coreVector3(0.0f,0.0f,0.0f);
-
-                    oRay.SetSize   (coreVector3(TORUS_RAY_SIZE.x, fRayLen, TORUS_RAY_SIZE.z));
-                    oRay.SetTexSize(coreVector2(TORUS_RAY_TEXSIZE.x, TORUS_RAY_TEXSIZE.y * (fRayLen / TORUS_RAY_SIZE.y)));
-                }
-            }
-
-            if(PHASE_FINISHED)
-            {
-                ++m_iPhase;
+                PHASE_CHANGE_TO((m_aiCounter[SUB_PHASE] == 2u) ? 50u : 10u)
 
                 m_aiCounter[ROTATION_DIRECTION] = 1 - m_aiCounter[ROTATION_DIRECTION];
-            }
-        });
-    }
-
-    // ################################################################
-    // 
-    else if(m_iPhase == 35u)
-    {
-        PHASE_CONTROL_PAUSE(0u, 1.0f/4.0f)
-        {
-            m_iPhase = (m_aiCounter[BALL_STATUS] < coreInt16(VIRIDO_BALLS)) ? 40u : 13u;
-
-            this->__SetRotaAttack(0, true);
-        });
-    }
-
-    // ################################################################
-    // 
-    else if(m_iPhase == 40u)
-    {
-        PHASE_CONTROL_PAUSE(0u, 1.0f)
-        {
-            ++m_iPhase;
-
-            const coreVector2 vDir = (m_aiCounter[BALL_STATUS] ? coreVector2(1.0f,0.5f) : coreVector2(-0.5f,1.0f)).Normalized();
-            s_cast<cViridoMission*>(g_pGame->GetCurMission())->EnableBall(m_aiCounter[BALL_STATUS], this->GetPosition().xy(), vDir);
-
-            ++m_aiCounter[BALL_STATUS];
-        });
-    }
-
-    // ################################################################
-    // 
-    else if(m_iPhase == 41u)
-    {
-        PHASE_CONTROL_PAUSE(0u, 1.0f)
-        {
-            m_iPhase = 13u;
-        });
-    }
-
-    // ################################################################
-    // 
-    else if(m_iPhase == 0u)
-    {
-        PHASE_CONTROL_TIMER(0u, 0.01f, LERP_LINEAR)
-        {
-            cEnemySquad* pSquad = g_pGame->GetCurMission()->GetEnemySquad(0u);
-
-            PHASE_CONTROL_TICKER(1u, 0u, 6.0f)
-            {
-                if((iTick % 10u) < 5u) return;
-
-                coreBool bFound = false;
-                pSquad->ForEachEnemyAll([&](cEnemy* OUTPUT pEnemy, const coreUintW i)
-                {
-                    if(!bFound && CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_DEAD))
-                    {
-                        bFound = true;
-                        pEnemy->Resurrect(this->GetPosition().xy(), coreVector2(0.0f,-1.0f));
-                    }
-                });
-
-                ASSERT(bFound)
-            });
-
-            pSquad->ForEachEnemy([](cEnemy* OUTPUT pEnemy, const coreUintW i)
-            {
-                const coreFloat fSpeed = 30.0f * (1.0f + pEnemy->GetLifeTime());
-                pEnemy->DefaultMoveForward(pEnemy->GetDirection().xy(), fSpeed);
-
-                if(PHASE_POSITION_POINT(pEnemy, -0.8f * FOREGROUND_AREA.y, y))
-                {
-                    const coreVector2 vPos = pEnemy->GetPosition().xy();
-                    const coreVector2 vDir = pEnemy->AimAtPlayer().Normalized();
-
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.0f, pEnemy, vPos, vDir)->MakeBlue();
-                }
-            });
-
-            //vNewOri = coreVector2::Direction(0.5f*PI);
-
-            const coreFloat test = SIN((30.0f*PI) * fTime) * (FOREGROUND_AREA.x * 0.65f);
-            this->SetPosition(coreVector3(test,30.0f,0.0f));
-
-            m_aiCounter[RENDER_TYPE] = 1;
-
-            if(PHASE_FINISHED)
-            {
-                m_iPhase = 1u;
-
-                m_aiCounter[RENDER_TYPE] = 0;
+                if(m_aiCounter[ROTATION_DIRECTION]) this->StorePosition(this->GetPosition().xy().InvertedX());
             }
         });
     }
@@ -514,78 +510,194 @@ void cTorusBoss::__MoveOwn()
     // ################################################################
     // ################################################################
 
-    // constantly shoot into all directions
-    PHASE_CONTROL_TICKER(2u, 0u, 0.5f)
-    {
-        for(coreUintW i = 5u; i--; )
-        {
-            const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(i) * 36.0f));
-
-            // 
-            g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.1f, this, this->GetPosition().xy(),  vDir)->MakeGreen();
-            g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.0f, this, this->GetPosition().xy(),  vDir)->MakeGreen();
-            g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.1f, this, this->GetPosition().xy(), -vDir)->MakeGreen();
-            g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.0f, this, this->GetPosition().xy(), -vDir)->MakeGreen();
-        }
-
-        // 
-        g_pSpecialEffects->CreateSplashColor(this->GetPosition(), SPECIAL_SPLASH_TINY, COLOR_ENERGY_GREEN);
-    });
-
     // 
-    const coreVector2 vNewDir = coreVector2::Direction(m_fRotation);
+    const coreVector2 vNewDir = coreVector2::Direction(m_fRotationBoss);
     this->SetDirection  (coreVector3(vNewDir.x, -vNewOri.y*vNewDir.y, vNewOri.x*vNewDir.y));
     this->SetOrientation(coreVector3(0.0f,       vNewOri.x,           vNewOri.y));
 
-    // pre-calculate rotation quaternion
-    this->coreObject3D::Move();
-
-    // 
-    if(m_aiCounter[ATTACK_STATUS])
+    if(m_aiCounter[TURRETS_ENABLED] || m_aiCounter[GUNNERS_ENABLED])
     {
-        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRay); ++i)
+        // 
+        m_fRotationObject.UpdateMod(TORUS_TURRET_SPEED, 10.0f);
+
+        // 
+        const coreVector3 vDir  = coreVector3(coreVector2::Direction(m_fRotationObject * PI), 0.0f);
+        const coreVector3 vOri  = coreVector3(-vDir.x*vDir.y, vDir.x*vDir.x, vDir.y);
+        const coreVector2 vTex  = coreVector2(0.2f,1.0f) * m_fRotationObject;
+        const coreFloat   fTime = FMOD(m_fRotationObject * -5.0f, 2.0f);
+
+        // 
+        for(coreUintW i = 0u; i < TORUS_TURRETS; ++i)
         {
-            const coreVector3 vDir   = this->__GetRotaDirection(DEG_TO_RAD(I_TO_F(i) * 120.0f));
-            coreVector3       vColor = coreMath::IsNear(vDir.z, 0.0f, 0.15f) ? (COLOR_ENERGY_YELLOW * (0.8f)) :
-                                                                               (COLOR_ENERGY_BLUE   * (0.8f - 0.4f * ABS(vDir.z)));
+            cCustomEnemy* pTurret = &m_aTurret       [i];
+            coreObject3D* pHull   = &m_aTurretHullRaw[i];
+            if(!pTurret->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
             // 
-            vColor = LERP(m_aRay[i].GetColor3(), vColor, 0.3f);
-            STATIC_ASSERT(FRAMERATE_VALUE == 60.0f)
+            pTurret->SetDirection  (vDir);
+            pTurret->SetOrientation(vOri);
+            pTurret->SetTexOffset  (vTex);
 
             // 
-            m_aRay[i].SetPosition   (this->GetPosition() + vDir * (m_aRay[i].GetSize().y + TORUS_RAY_OFFSET));
-            m_aRay[i].SetDirection  (vDir);
-            m_aRay[i].SetOrientation(this->GetOrientation());
-            m_aRay[i].SetColor3     (vColor);
-            m_aRay[i].SetTexOffset  (coreVector2(0.4f,0.3f) * m_fAnimation);
-            m_aRay[i].Move();
+            pHull->SetSize       (pTurret->GetSize       () * (1.0f + 0.25f*fTime));
+            pHull->SetDirection  (pTurret->GetDirection  ());
+            pHull->SetOrientation(pTurret->GetOrientation());
+            pHull->SetAlpha      (pTurret->GetAlpha      () * (1.0f - 0.5f*fTime));
+            pHull->SetTexOffset  (pTurret->GetTexOffset  ());
 
             // 
-            m_aRayWave[i].SetPosition   (this->GetPosition() + vDir * (m_aRayWave[i].GetSize().y + TORUS_RAY_OFFSET));
-            m_aRayWave[i].SetDirection  (-vDir);
-            m_aRayWave[i].SetOrientation(this->GetOrientation());
-            m_aRayWave[i].SetColor3     (vColor);
-            m_aRayWave[i].SetTexOffset  (coreVector2(-0.3f,-0.6f) * m_fAnimation);
-            m_aRayWave[i].Move();
+            if(pTurret->ReachedDeath()) this->__DisableTurret(i, true);
         }
 
         // 
-        m_Emitter.SetPosition   (this->GetPosition   ());
-        m_Emitter.SetDirection  (this->GetDirection  ());
-        m_Emitter.SetOrientation(this->GetOrientation());
-        m_Emitter.SetTexOffset  (coreVector2(-0.1f,-0.4f) * m_fAnimation);
-        m_Emitter.Move();
+        for(coreUintW i = 0u; i < TORUS_GUNNERS; ++i)
+        {
+            cCustomEnemy* pGunner = &m_aGunner       [i];
+            coreObject3D* pHull   = &m_aGunnerHullRaw[i];
+            if(!pGunner->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+            const coreVector3& vSize = pGunner->GetSize();
+
+            // 
+            const coreFloat   fMoveSide = CONTAINS_BIT(m_iGunnerMove, i) ? -1.0f : 1.0f;
+            const coreVector2 vMoveDir  = coreVector2(fMoveSide * FOREGROUND_AREA.x * TORUS_GUNNER_SPEED * Core::System->GetTime(), 0.0f);
+            const coreVector2 vNewPos   = pGunner->GetPosition().xy() + ((i & 0x02u) ? vMoveDir.yx() : vMoveDir);
+
+            // 
+            const auto nBounceEffect = [](const coreVector2& vEffectPos)
+            {
+                g_pSpecialEffects->CreateSplashColor(coreVector3(vEffectPos, 0.0f), SPECIAL_SPLASH_TINY, COLOR_ENERGY_RED);
+                g_pSpecialEffects->PlaySound        (coreVector3(vEffectPos, 0.0f), 1.0f, SOUND_EXPLOSION_ENERGY_SMALL);
+            };
+
+            // 
+                 if((vNewPos.x < -FOREGROUND_AREA.x) && (fMoveSide < 0.0f)) {nBounceEffect(vNewPos + coreVector2(-vSize.x, 0.0f)); REMOVE_BIT(m_iGunnerMove, i)}
+            else if((vNewPos.x >  FOREGROUND_AREA.x) && (fMoveSide > 0.0f)) {nBounceEffect(vNewPos + coreVector2( vSize.x, 0.0f)); ADD_BIT   (m_iGunnerMove, i)}
+                 if((vNewPos.y < -FOREGROUND_AREA.y) && (fMoveSide < 0.0f)) {nBounceEffect(vNewPos + coreVector2(0.0f, -vSize.y)); REMOVE_BIT(m_iGunnerMove, i)}
+            else if((vNewPos.y >  FOREGROUND_AREA.y) && (fMoveSide > 0.0f)) {nBounceEffect(vNewPos + coreVector2(0.0f,  vSize.y)); ADD_BIT   (m_iGunnerMove, i)}
+
+            // 
+            pGunner->SetPosition   (coreVector3(vNewPos, 0.0f));
+            pGunner->SetDirection  (vDir);
+            pGunner->SetOrientation(vOri);
+            pGunner->SetTexOffset  (vTex);
+
+            // 
+            pHull->SetPosition   (pGunner->GetPosition   ());
+            pHull->SetSize       (pGunner->GetSize       () * 1.2f);
+            pHull->SetDirection  (pGunner->GetDirection  ().InvertedX());
+            pHull->SetOrientation(pGunner->GetOrientation());
+            pHull->SetAlpha      (pGunner->GetAlpha      () * 0.5f);
+            pHull->SetTexOffset  (pGunner->GetTexOffset  ());
+
+            // 
+            if(pGunner->ReachedDeath()) this->__DisableGunner(i, true);
+        }
+
+        // 
+        m_TurretHull.MoveNormal();
+        m_GunnerHull.MoveNormal();
+
+        // 
+        PHASE_CONTROL_TICKER(2u, 0u, 10.0f, LERP_LINEAR)
+        {
+            // 
+            for(coreUintW i = 0u; i < TORUS_TURRETS; ++i)
+            {
+                cCustomEnemy* pTurret = &m_aTurret[i];
+                if(!pTurret->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+                const coreVector2 vPos = pTurret->GetPosition ().xy();
+                const coreVector2 vDir = pTurret->GetDirection().xy();
+
+                // 
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cQuadBullet>(5, 1.1f, this, vPos,  vDir)->ChangeSize(1.15f);
+
+                // 
+                g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 10.0f, 1u, COLOR_ENERGY_CYAN);
+            }
+        });
+
+        // 
+        PHASE_CONTROL_TICKER(3u, 0u, 10.0f, LERP_LINEAR)
+        {
+            // 
+            for(coreUintW i = 0u; i < TORUS_GUNNERS; ++i)
+            {
+                cCustomEnemy* pGunner = &m_aGunner[i];
+                if(!pGunner->IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+                const coreVector2 vPos = pGunner->GetPosition().xy();
+                const coreVector2 vDir = (i & 0x02u) ? coreVector2(1.0f,0.0f) : coreVector2(0.0f,1.0f);
+
+                // 
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, 1.1f, this, vPos,  vDir)->ChangeSize(1.15f);
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, 1.1f, this, vPos, -vDir)->ChangeSize(1.15f);
+
+                // 
+                g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 10.0f, 1u, COLOR_ENERGY_RED);
+            }
+        });
     }
+
+    // constantly shoot into three directions
+    PHASE_CONTROL_TICKER(4u, 0u, TORUS_BOSS_ROTATION * (2.0f / PI), LERP_LINEAR)
+    {
+        // 
+        if(!m_aiCounter[EMIT_STATUS])
+        {
+            m_aiCounter[EMIT_STATUS] = 1;
+            return;
+        }
+
+        // 
+        const coreMatrix2 vMain = coreMatrix3::Rotation(DEG_TO_RAD(270.0f + I_TO_F(iTick & 0x03u) * (m_aiCounter[ROTATION_DIRECTION] ? -90.0f : 90.0f))).m12();
+        const coreMatrix2 vSub  = coreMatrix3::Rotation(DEG_TO_RAD(120.0f)).m12();
+
+        for(coreUintW i = 5u; i--; )
+        {
+            coreVector2 avDir[3];
+
+            // 
+            avDir[0] = coreVector2::Direction(DEG_TO_RAD(I_TO_F(i-2u) * 7.0f)) * vMain;
+            avDir[1] = avDir[0] * vSub;
+            avDir[2] = avDir[1] * vSub;
+
+            for(coreUintW j = 0u; j < 3u; ++j)
+            {
+                const coreVector2& vDir = avDir[j];
+                const coreVector2  vPos = this->GetPosition().xy() + vDir * 8.0f;
+
+                // 
+                g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.1f, this, vPos, vDir)->ChangeSize(1.2f);
+
+                // 
+                g_pSpecialEffects->CreateSplashColor(coreVector3(vPos, 0.0f), 5.0f, 1u, COLOR_ENERGY_YELLOW);
+            }
+        }
+    });
+
+    // 
+    if(!coreMath::IsNear(ABS(vNewOri.y), 1.0f))
+        m_aiCounter[EMIT_STATUS] = 0;
+
+    // 
+    m_Emitter.SetPosition   (this->GetPosition   ());
+    m_Emitter.SetDirection  (this->GetDirection  ());
+    m_Emitter.SetOrientation(this->GetOrientation());
+    m_Emitter.SetAlpha      (MAX(m_aTimer[4].GetValue(CORE_TIMER_GET_NORMAL) * 2.0f - 1.0f, 0.0f));
+    m_Emitter.SetTexOffset  (coreVector2(-0.1f,-0.4f) * m_fAnimation);
+    m_Emitter.SetEnabled    (m_aiCounter[EMIT_STATUS] ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+    m_Emitter.Move();
 
     // 
     const coreFloat fFade  = 1.0f - FRACT(ABS(m_fAnimation));
     m_aCircle[1].SetSize(this->GetSize() * (0.5f + 0.5f*fFade));
     m_aCircle[1].SetAlpha(fFade);
 
+    // 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCircle); ++i)
     {
-        // 
         m_aCircle[i].SetPosition   (this->GetPosition   ());
         m_aCircle[i].SetDirection  (this->GetDirection  ());
         m_aCircle[i].SetOrientation(this->GetOrientation());
@@ -594,267 +706,178 @@ void cTorusBoss::__MoveOwn()
     }
 
     // 
-    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_OBJECT(1), [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pRay, const coreVector3& vIntersection, const coreBool bFirstHit)
+    m_Summon.SetTexOffset(coreVector2(0.0f, 0.3f * m_fAnimation));
+    m_Summon.Move();
+
+    // 
+    if(this->ReachedHealthPct(0.7f) || this->ReachedHealthPct(0.4f))
     {
-        if(!bFirstHit) return;
-        // TODO: Ray-Ray collision (to account for movement), make it general  
-        // TODO: never collide if ray is blue (even near of boss, where it's more likely)   
-    });
+        // 
+        m_aiCounter[SUB_PHASE] += 1;
 
+        // 
+        this->__DisableSummon();
 
-         
-    if(m_aiCounter[ATTACK_STATUS] == 2)
-    {
-        PHASE_CONTROL_TICKER(3u, 0u, 30.0f)
-        {
-            for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRay); ++i)
-            {
-                coreObject3D& oRay = m_aRay[i];
-                WARN_IF(!oRay.IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue;
+        // 
+        for(coreUintW i = 0u; i < TORUS_TURRETS; ++i)
+            this->__DisableTurret(i, true);
 
-                const coreVector3& vRayDir = oRay.GetDirection();
-                const coreFloat&   fRayLen = oRay.GetSize().y;
+        // 
+        for(coreUintW i = 0u; i < TORUS_GUNNERS; ++i)
+            this->__DisableGunner(i, true);
 
-                // vRayDir 
-                const coreVector2 vNorm      = vRayDir.xy().Normalized();
-                const coreVector2 vEffectPos = vNorm * RCP(vNorm.Processed(ABS).Max()) * (FOREGROUND_AREA * 1.1f);
-                const coreVector3 vTestPos   = vRayDir * (fRayLen * 2.0f);
+        // 
+        const coreVector2 vMove = this->GetMove();
+        m_avVector[TUMBLE_DIRECTION].xy(vMove.IsNull() ? vMove : vMove.Normalized());
+        m_avVector[TUMBLE_DIRECTION].z = g_pEnvironment->GetDirection().Angle();
 
-                const coreVector2 vTest = g_pForeground->Project(vTestPos).Processed(ABS);
-                if(vTest.x > 0.5f || vTest.y > 0.5f)
-                //if(vEffectPos.LengthSq() < vTestPos.LengthSq())
-                {
-                    g_pSpecialEffects->CreateSplashFire (coreVector3(vEffectPos, 0.0f),  5.0f, 3u);
-                    g_pSpecialEffects->CreateSplashColor(coreVector3(vEffectPos, 0.0f), 25.0f, 2u, COLOR_FIRE_ORANGE);
-                }
-            }
-        });
+        // 
+        PHASE_CHANGE_TO(70u)
+        PHASE_RESET(0u)
+        PHASE_RESET(1u)
+        PHASE_RESET(2u)
     }
 }
 
 
 // ****************************************************************
 // 
-coreVector3 cTorusBoss::__GetRotaDirection(const coreFloat fBaseAngle)
+void cTorusBoss::__EnableSummon(const coreVector2& vPosition, const coreVector3& vColor)
 {
+    WARN_IF(m_Summon.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+
     // 
-    return m_vRotation.QuatApply(coreVector3(coreVector2::Direction(fBaseAngle), 0.0f)).Normalized();
+    m_Summon.SetPosition(coreVector3(vPosition, 0.0f));
+    m_Summon.SetSize    (coreVector3(0.0f,0.0f,0.0f));
+    m_Summon.SetColor3  (vColor);
+
+    // 
+    m_Summon.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    g_pGlow->BindObject(&m_Summon);
 }
 
 
 // ****************************************************************
 // 
-void cTorusBoss::__SetRotaAttack(const coreInt16 iType, const coreBool bAnimated)
+void cTorusBoss::__DisableSummon()
 {
-    if(m_aiCounter[ATTACK_STATUS] == iType) return;
-    m_aiCounter[ATTACK_STATUS] = iType;
-    m_aiCounter[RENDER_TYPE]   = iType;
+    if(!m_Summon.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
 
     // 
-    switch(iType)
-    {
-    // 
-    case 1:
-    {
-        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRay); ++i)
-        {
-            // 
-            g_pGlow->BindObject(&m_aRay[i]);   // # batch
-            m_aRay[i].SetSize   (TORUS_RAY_SIZE);
-            m_aRay[i].SetAlpha  (0.0f);
-            m_aRay[i].SetEnabled(CORE_OBJECT_ENABLE_ALL);
-        }
-
-        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRayWave); ++i)
-        {
-            // 
-            g_pGlow->BindObject(&m_aRayWave[i]);   // # batch
-            m_aRayWave[i].SetSize   (TORUS_RAYWAVE_SIZE);
-            m_aRayWave[i].SetAlpha  (0.0f);
-            m_aRayWave[i].SetEnabled(CORE_OBJECT_ENABLE_ALL);
-        }
-
-        // 
-        g_pGlow->BindObject(&m_Emitter);
-        m_Emitter.SetAlpha  (0.0f);
-        m_Emitter.SetEnabled(CORE_OBJECT_ENABLE_ALL);
-
-        // 
-        if(bAnimated)
-        {
-            for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRay); ++i)
-            {
-                // 
-                const coreVector3 vDir = this->__GetRotaDirection(DEG_TO_RAD(I_TO_F(i) * 120.0f));
-                g_pSpecialEffects->CreateSplashColor(vDir * TORUS_RAY_OFFSET, SPECIAL_SPLASH_TINY, COLOR_ENERGY_YELLOW);
-            }
-        }
-        break;
-    }
-
-    // 
-    case 2:
-    {
-        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRay); ++i)
-        {
-            // 
-            m_aRay    [i].SetSize (coreVector3(0.0f,0.0f,0.0f));
-            m_aRay    [i].SetAlpha(1.0f);
-            m_aRayWave[i].SetSize (coreVector3(0.0f,0.0f,0.0f));
-            m_aRayWave[i].SetAlpha(0.85f);
-        }
-
-        // 
-        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRay); ++i)
-            this->__EnableRay(i);
-
-        // 
-        if(bAnimated)
-        {
-            for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRay); ++i)
-            {
-                // 
-                const coreVector3& vDir = m_aRay[i].GetDirection();
-                g_pSpecialEffects->MacroEruptionColorBig(vDir * TORUS_RAY_OFFSET, vDir.xy(), COLOR_ENERGY_YELLOW);
-            }
-        }
-        break;
-    }
-
-    // 
-    case 0:
-    {
-        // 
-        auto nDisableFunc = [](coreObject3D* OUTPUT pObject)
-        {
-            // 
-            if(pObject->IsEnabled(CORE_OBJECT_ENABLE_ALL)) g_pGlow->UnbindObject(pObject);
-            pObject->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
-        };
-        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRay);     ++i) nDisableFunc(&m_aRay    [i]);
-        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRayWave); ++i) nDisableFunc(&m_aRayWave[i]);
-        nDisableFunc(&m_Emitter);
-
-        // 
-        for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRay); ++i)
-            this->__DisableRay(i);
-
-        // 
-        if(bAnimated)
-        {
-            for(coreUintW i = 0u; i < ARRAY_SIZE(m_aRay); ++i)
-            {
-                // 
-                const coreVector3& vDir = m_aRay[i].GetDirection();
-                for(coreUintW j = 25u; j--; ) g_pSpecialEffects->CreateSplashColor(vDir * (TORUS_RAY_OFFSET + 2.0f*I_TO_F(j)), 10.0f, 1u, COLOR_ENERGY_YELLOW);
-            }
-        }
-        break;
-    }
-
-    default:
-        ASSERT(false)
-        break;
-    }
+    m_Summon.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    g_pGlow->UnbindObject(&m_Summon);
 }
 
 
 // ****************************************************************
 // 
-void cTorusBoss::__EnableRay(const coreUintW iIndex)
+void cTorusBoss::__EnableTurret(const coreUintW iIndex, const coreVector2& vPosition)
 {
-    ASSERT(iIndex < ARRAY_SIZE(m_aRay))
-    coreObject3D& oRay = m_aRay[iIndex];
+    // 
+    ASSERT(iIndex < TORUS_TURRETS)
+    cCustomEnemy* pTurret = &m_aTurret       [iIndex];
+    coreObject3D* pHull   = &m_aTurretHullRaw[iIndex];
 
     // 
-    if(oRay.GetType()) return;
-    oRay.ChangeType(TYPE_OBJECT(1));
+    if(!CONTAINS_FLAG(pTurret->GetStatus(), ENEMY_STATUS_DEAD)) return;
+    pTurret->Resurrect();
+
+    // 
+    ASSERT(!CONTAINS_BIT(m_aiCounter[TURRETS_ENABLED], iIndex))
+    ADD_BIT(m_aiCounter[TURRETS_ENABLED], iIndex)
+    STATIC_ASSERT(sizeof(*m_aiCounter)*8u >= TORUS_TURRETS)
+
+    // 
+    pTurret->SetPosition(coreVector3(vPosition, 0.0f));
+
+    // 
+    pHull->SetPosition(coreVector3(vPosition, 0.0f));
+    pHull->SetEnabled (CORE_OBJECT_ENABLE_ALL);
+
+    // 
+    g_pSpecialEffects->MacroExplosionColorSmall(coreVector3(vPosition, 0.0f), COLOR_ENERGY_CYAN);
 }
 
 
 // ****************************************************************
 // 
-void cTorusBoss::__DisableRay(const coreUintW iIndex)
+void cTorusBoss::__DisableTurret(const coreUintW iIndex, const coreBool bAnimated)
 {
-    ASSERT(iIndex < ARRAY_SIZE(m_aRay))
-    coreObject3D& oRay = m_aRay[iIndex];
+    // 
+    ASSERT(iIndex < TORUS_TURRETS)
+    cCustomEnemy* pTurret = &m_aTurret       [iIndex];
+    coreObject3D* pHull   = &m_aTurretHullRaw[iIndex];
 
     // 
-    if(!oRay.GetType()) return;
-    oRay.ChangeType(0);
+    if(CONTAINS_FLAG(pTurret->GetStatus(), ENEMY_STATUS_DEAD)) return;
+    pTurret->Kill(false);
+
+    // 
+    ASSERT(CONTAINS_BIT(m_aiCounter[TURRETS_ENABLED], iIndex))
+    REMOVE_BIT(m_aiCounter[TURRETS_ENABLED], iIndex)
+
+    // 
+    pHull->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
+    // 
+    if(bAnimated) g_pSpecialEffects->MacroExplosionColorSmall(pTurret->GetPosition(), COLOR_ENERGY_CYAN);
 }
 
 
 // ****************************************************************
 // 
-void cTorusBoss::__CreateOverdrive(const coreUintW iIndex, const coreVector3& vIntersect, const coreFloat fTime, const coreBool bGround)
+void cTorusBoss::__EnableGunner(const coreUintW iIndex, const coreVector2& vPosition)
 {
-    ASSERT(iIndex < ARRAY_SIZE(m_aRay))
+    // 
+    ASSERT(iIndex < TORUS_GUNNERS)
+    cCustomEnemy* pGunner = &m_aGunner       [iIndex];
+    coreObject3D* pHull   = &m_aGunnerHullRaw[iIndex];
 
     // 
-    constexpr coreFloat fMin = 2.5f;
-    constexpr coreFloat fMax = 5.0f;
-    coreVector3& vOldHit = m_avVector[OVERDRIVE_HIT + iIndex];
+    if(!CONTAINS_FLAG(pGunner->GetStatus(), ENEMY_STATUS_DEAD)) return;
+    pGunner->Resurrect();
 
     // 
-    if(vOldHit.IsNull()) vOldHit = vIntersect;
-    else
-    {
-    gtScrewYou:
-
-        // 
-        const coreVector3 vDiff = vIntersect - vOldHit;
-        const coreFloat   fLen  = vDiff.Length();
-
-        // 
-        if(fLen > fMin)
-        {
-            // 
-            const coreVector3 vNewHit   = (fLen > fMax) ? LERP(vOldHit, vIntersect, fMax*RCP(fLen)) : vIntersect;
-            const coreVector2 vOnScreen = g_pForeground->Project(vNewHit);
-
-            // 
-            if((ABS(vOnScreen.x) < 0.55f) && (ABS(vOnScreen.y) < 0.55f))
-            {
-                if(bGround)
-                {
-                    const coreBool    bRotated   = Core::Rand->Bool();
-                    const coreVector3 vDecalPos  = (vOldHit + vNewHit) * 0.5f;
-                    const coreVector2 vDecalSize = coreVector2(Core::Rand->Float(5.0f, 6.5f), MIN(fLen, fMax)*1.8f);
-                    const coreVector2 vDecalDir  = vDiff.xy().Normalized();
-
-                    // load object resources
-                    coreObject3D* pObject = MANAGED_NEW(coreObject3D);
-                    pObject->DefineModel  (Core::Manager::Object->GetLowQuad());
-                    pObject->DefineTexture(0u, "effect_soot.png");
-                    pObject->DefineProgram("effect_decal_single_program");
-
-                    // set object properties
-                    pObject->SetSize     (coreVector3(bRotated ? vDecalSize.yx()       : vDecalSize, 1.0f));
-                    pObject->SetDirection(coreVector3(bRotated ? vDecalDir.Rotated90() : vDecalDir,  0.0f));
-                    pObject->SetColor3   (coreVector3(0.0f,0.0f,0.0f));
-
-                    // add object to the background
-                    g_pEnvironment->GetBackground()->AddObject(pObject, vDecalPos, 0u);
-                }
-
-                // 
-                g_pSpecialEffects->CreateSplashFire (vNewHit,  5.0f, bGround ? 3u : 6u);
-                g_pSpecialEffects->CreateSplashColor(vNewHit, 25.0f, bGround ? 2u : 4u, COLOR_FIRE_ORANGE);
-            }
-
-            // 
-            g_pSpecialEffects->ShakeScreen(0.1f + 0.55f * SIN(PI * fTime));
-
-            // 
-            vOldHit = vNewHit;
-            goto gtScrewYou;
-        }
-    }
+    ASSERT(!CONTAINS_BIT(m_aiCounter[GUNNERS_ENABLED], iIndex))
+    ADD_BIT(m_aiCounter[GUNNERS_ENABLED], iIndex)
+    STATIC_ASSERT(sizeof(*m_aiCounter)*8u >= TORUS_GUNNERS)
 
     // 
-    vOldHit.y -= g_pEnvironment->GetSpeed() * Core::System->GetTime() * OUTDOOR_DETAIL;
+    SET_BIT(m_iGunnerMove, iIndex, (iIndex < 2u));
+    STATIC_ASSERT(sizeof(m_iGunnerMove)*8u >= TORUS_GUNNERS)
+
+    // 
+    pGunner->SetPosition(coreVector3(vPosition, 0.0f));
+
+    // 
+    pHull->SetPosition(coreVector3(vPosition, 0.0f));
+    pHull->SetEnabled (CORE_OBJECT_ENABLE_ALL);
+
+    // 
+    g_pSpecialEffects->MacroExplosionColorSmall(coreVector3(vPosition, 0.0f), COLOR_ENERGY_RED);
 }
 
 
-// wärend erstem boss seitlich werden, diesen boss komplett seitlich?
+// ****************************************************************
+// 
+void cTorusBoss::__DisableGunner(const coreUintW iIndex, const coreBool bAnimated)
+{
+    // 
+    ASSERT(iIndex < TORUS_GUNNERS)
+    cCustomEnemy* pGunner = &m_aGunner       [iIndex];
+    coreObject3D* pHull   = &m_aGunnerHullRaw[iIndex];
+
+    // 
+    if(CONTAINS_FLAG(pGunner->GetStatus(), ENEMY_STATUS_DEAD)) return;
+    pGunner->Kill(false);
+
+    // 
+    ASSERT(CONTAINS_BIT(m_aiCounter[GUNNERS_ENABLED], iIndex))
+    REMOVE_BIT(m_aiCounter[GUNNERS_ENABLED], iIndex)
+
+    // 
+    pHull->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+
+    // 
+    if(bAnimated) g_pSpecialEffects->MacroExplosionColorSmall(pGunner->GetPosition(), COLOR_ENERGY_RED);
+}

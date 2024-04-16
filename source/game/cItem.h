@@ -112,6 +112,33 @@ private:
 
 // ****************************************************************
 // 
+class cCubeItem final : public cItem
+{
+private:
+    coreObject3D m_Hull;   // 
+
+
+public:
+    cCubeItem()noexcept;
+
+    DISABLE_COPY(cCubeItem)
+    ASSIGN_ID(2, "Cube")
+
+    // 
+    void Render()final;
+    void Move  ()final;
+
+
+private:
+    // execute own routines
+    void __CollectOwn(cPlayer* OUTPUT pPlayer)final;
+    void __LoseOwn   ()final;
+    void __DestroyOwn(const coreBool bAnimated)final;
+};
+
+
+// ****************************************************************
+// 
 template <typename T> RETURN_RESTRICT T* cItemManager::AddItem(const coreVector2& vPosition)
 {
     // 

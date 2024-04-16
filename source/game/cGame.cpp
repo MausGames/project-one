@@ -166,19 +166,6 @@ void cGame::Render()
 
 
 // ****************************************************************
-// render the overlay separately
-void cGame::RenderOverlay()
-{
-    // apply combat stats
-    m_CombatStats.Apply();
-
-    // render combat text and interface
-    m_CombatText.Render();
-    m_Interface .Render();
-}
-
-
-// ****************************************************************
 // move the game
 void cGame::Move()
 {
@@ -223,6 +210,19 @@ void cGame::Move()
     // move all overlay objects
     m_CombatText.Move();
     m_Interface .Move();
+}
+
+
+// ****************************************************************
+// render the overlay separately
+void cGame::RenderOverlay()
+{
+    // apply combat stats
+    m_CombatStats.Apply();
+
+    // render combat text and interface
+    m_CombatText.Render();
+    m_Interface .Render();
 }
 
 
@@ -553,39 +553,21 @@ void cGame::__HandleCollisions()
     });
 
     // 
-    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_ENEMY, [](cPlayer* OUTPUT pPlayer, cEnemy* OUTPUT pEnemy, const coreVector3& vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(TYPE_ENEMY, [](cPlayer* OUTPUT pPlayer, cEnemy* OUTPUT pEnemy, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
-
-
-        //coreFloat fDistance = 0.0f; 
-        //const coreVector3 vPos =  pPlayer->GetPosition(); 
-        //const coreVector3 vDir = (pPlayer->GetPosition() - coreVector3(pPlayer->GetOldPos(), 0.0f)).Normalized(); 
-        //if(!Core::Manager::Object->TestCollision(pEnemy, vPos, vDir, &fDistance)) return; 
-
 
         // 
         pPlayer->TakeDamage(15, ELEMENT_NEUTRAL, vIntersection.xy());
         pEnemy ->TakeDamage(50, ELEMENT_NEUTRAL, vIntersection.xy(), pPlayer);
 
         // 
-        g_pSpecialEffects->MacroExplosionPhysicalSmall(vIntersection);
+        g_pSpecialEffects->MacroExplosionPhysicalDarkSmall(vIntersection);
     });
 
     // 
-    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_BULLET_ENEMY, [](cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(TYPE_BULLET_ENEMY, [](cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
-        constexpr coreFloat fCorrection = 50.0f;
-
-        const coreVector3 vPos =  pPlayer->GetPosition(); 
-        const coreVector3 vDir = (pBullet->GetPosition() - pPlayer->GetPosition()).Normalized(); 
-
-        coreFloat fDistance = 0.0f; 
-        if(!Core::Manager::Object->TestCollision(pBullet, vPos - vDir * fCorrection, vDir, &fDistance) || ((fDistance - fCorrection) > pPlayer->GetCollisionRadius())) return; 
-
-
-
-
         // 
         pPlayer->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy());
         pBullet->Deactivate(true, vIntersection.xy());
@@ -595,33 +577,34 @@ void cGame::__HandleCollisions()
     Core::Manager::Object->TestCollision(TYPE_ENEMY, TYPE_BULLET_PLAYER, [](cEnemy* OUTPUT pEnemy, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         // 
-        if((ABS(vIntersection.x) >= FOREGROUND_AREA.x * 1.1f) ||
-           (ABS(vIntersection.y) >= FOREGROUND_AREA.y * 1.1f)) return;
+        //if((ABS(vIntersection.x) >= FOREGROUND_AREA.x * 1.1f) ||
+        //   (ABS(vIntersection.y) >= FOREGROUND_AREA.y * 1.1f)) return;
 
         // 
-        pEnemy ->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), s_cast<cPlayer*>(pBullet->GetOwner()));
+        pEnemy ->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner()));
         pBullet->Deactivate(true, vIntersection.xy());
 
         // 
-        g_pSpecialEffects->RumblePlayer(s_cast<cPlayer*>(pBullet->GetOwner()), SPECIAL_RUMBLE_DEFAULT);
+        g_pSpecialEffects->RumblePlayer(d_cast<cPlayer*>(pBullet->GetOwner()), SPECIAL_RUMBLE_DEFAULT);
 
 
+        const coreVector2 fDiff   = vIntersection.xy() - pBullet->GetPosition().xy();
+        const coreFloat   fOffset = pBullet->GetCollisionRange().y - coreVector2::Dot(fDiff, pBullet->GetDirection().xy());
+        pBullet->SetPosition(pBullet->GetPosition() - fOffset * pBullet->GetDirection());
 
         //g_pGame->GetChromaManager()->AddChroma(vIntersection.xy(), -pBullet->GetDirection().xy(), CHROMA_SCALE_TINY, pEnemy->GetBaseColor());     
 
     });
 
     // 
-    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_CHROMA, [](cPlayer* OUTPUT pPlayer, cChromaBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(TYPE_CHROMA, [](cPlayer* OUTPUT pPlayer, cChromaBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
-        // TODO: line 
-
         // 
         pBullet->Deactivate(true, vIntersection.xy());
     });
 
     // 
-    Core::Manager::Object->TestCollision(TYPE_PLAYER, TYPE_ITEM, [](cPlayer* OUTPUT pPlayer, cItem* OUTPUT pItem, const coreVector3& vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(TYPE_ITEM, [](cPlayer* OUTPUT pPlayer, cItem* OUTPUT pItem, const coreVector3& vIntersection, const coreBool bFirstHit)
     {
         // 
         pItem->Collect(pPlayer);

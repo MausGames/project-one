@@ -79,13 +79,14 @@ public:
     inline void ActivateModelLowOnly() {this->DefineModel(m_pModelLow);}
 
     // 
-    inline void RefreshColor(const coreFloat& fFactor) {this->SetColor3(LERP(coreVector3(0.5f,0.5f,0.5f), this->GetBaseColor(), 1.25f * CLAMP(fFactor, 0.0f, 0.8f)));}
-    inline void InvokeBlink ()                         {m_fBlink = 1.2f;}
+    inline void RefreshColor(const coreFloat fFactor) {this->SetColor3(LERP(/*coreVector3(0.4f,0.4f,0.4f)*/COLOR_SHIP_GREY, this->GetBaseColor(), CLAMP((fFactor - 0.4f) * (1.0f/0.6f) * (0.6f/0.2f), 0.0f, 1.0f)));}
+    inline void InvokeBlink ()                        {m_fBlink = 1.2f;}
 
     // 
-    inline coreBool ReachedHealth   (const coreInt32 iHealth)    {return InBetween(iHealth,                                    m_iCurHealth, m_iPreHealth);}
-    inline coreBool ReachedHealthPct(const coreFloat fHealthPct) {return InBetween(F_TO_SI(fHealthPct * I_TO_F(m_iMaxHealth)), m_iCurHealth, m_iPreHealth);}
-    inline coreBool ReachedDeath    ()                           {return ((m_iCurHealth == 0) && (m_iPreHealth != 0));}
+    inline coreBool ReachedHealth   (const coreInt32 iHealth)const    {return InBetween(iHealth,                                    m_iCurHealth, m_iPreHealth);}
+    inline coreBool ReachedHealthPct(const coreFloat fHealthPct)const {return InBetween(F_TO_SI(fHealthPct * I_TO_F(m_iMaxHealth)), m_iCurHealth, m_iPreHealth);}
+    inline coreBool ReachedDeath    ()const                           {return ((m_iCurHealth == 0) && (m_iPreHealth != 0));}
+    inline coreBool WasTeleporting  ()const                           {return (this->GetMove().LengthSq() > (0.125f * FOREGROUND_AREA.x * FOREGROUND_AREA.y));}
 
     // add or remove status values
     inline void AddStatus   (const coreInt32 iStatus) {ADD_FLAG   (m_iStatus, iStatus)}
@@ -107,6 +108,7 @@ public:
     inline       coreInt32     GetPreHealth   ()const {return m_iPreHealth;}
     inline       coreFloat     GetPreHealthPct()const {return I_TO_F(m_iPreHealth) * RCP(I_TO_F(m_iMaxHealth));}
     inline const coreVector2&  GetOldPos      ()const {return m_vOldPos;}
+    inline       coreVector2   GetMove        ()const {return this->GetPosition().xy() - m_vOldPos;}
     inline       coreFloat     GetBlink       ()const {return MIN(m_fBlink, 1.0f);}
 
 
@@ -115,11 +117,12 @@ protected:
     coreBool _TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact);
 
     // 
-    void _Resurrect(const coreBool bSingle, const coreVector2& vPosition, const coreVector2& vDirection, const coreInt32 iType);
-    void _Kill     (const coreBool bSingle, const coreBool     bAnimated);
+    void _Resurrect(const coreVector2& vPosition, const coreVector2& vDirection, const coreInt32 iType);
+    void _Kill     (const coreBool     bAnimated);
 
     // 
-    void _EnableBlink();
+    void _EnableBlink(const coreProgramPtr& pProgram)const;
+    void _EnableBlink()const;
 
     // 
     void _UpdateAlwaysBefore();

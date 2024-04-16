@@ -11,7 +11,7 @@
 
 // ****************************************************************
 // constructor
-cWater::cWater(const coreChar* pcSkyTexture)noexcept
+cWater::cWater(const coreHashString& sSkyTexture)noexcept
 : m_fAnimation (0.0f)
 , m_fFlyOffset (0.0f)
 {
@@ -31,7 +31,7 @@ cWater::cWater(const coreChar* pcSkyTexture)noexcept
     m_Depth.Create(vWaterResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     // create sky-plane object
-    m_Sky.DefineTexture(0u, pcSkyTexture);
+    m_Sky.DefineTexture(0u, sSkyTexture);
     m_Sky.SetSize      (coreVector2(WATER_SCALE_FACTOR, WATER_SCALE_FACTOR) * SQRT2);
     m_Sky.SetTexSize   (coreVector2(WATER_SKY_SIZE,     WATER_SKY_SIZE));
 
@@ -215,8 +215,8 @@ cUnderWater::cUnderWater()noexcept
 
 // ****************************************************************
 // constructor
-cIceWater::cIceWater(const coreChar* pcSkyTexture)noexcept
-: cWater (pcSkyTexture)
+cIceWater::cIceWater(const coreHashString& sSkyTexture)noexcept
+: cWater (sSkyTexture)
 {
     // 
     m_Ice = (*this);
@@ -254,8 +254,8 @@ void cIceWater::__MoveOwn()
 
 // ****************************************************************
 // constructor
-cRainWater::cRainWater(const coreChar* pcSkyTexture)noexcept
-: cWater       (pcSkyTexture)
+cRainWater::cRainWater(const coreHashString& sSkyTexture)noexcept
+: cWater       (sSkyTexture)
 , m_DropList   (RAIN_DROPS)
 , m_iCurDrop   (0u)
 , m_fFallDelay (0.0f)
@@ -317,7 +317,7 @@ cRainWater::~cRainWater()
 void cRainWater::__UpdateOwn()
 {
     // 
-    const coreFloat& fMapSize = m_WaveMap.GetResolution().x;
+    const coreFloat fMapSize = m_WaveMap.GetResolution().x;
 
     // 
     m_fFallDelay.Update(RAIN_DROP_SPEED * I_TO_F(RAIN_DROPS));

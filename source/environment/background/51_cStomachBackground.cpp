@@ -76,7 +76,7 @@ void cStomachBackground::__RenderOwnAfter()
 // 
 void cStomachBackground::__MoveOwn()
 {
-    ASSERT(!g_pEnvironment->GetSpeed())   // # no movement
+   // ASSERT(!g_pEnvironment->GetSpeed())   // # no movement
 
     // 
     const coreFloat fMove = Core::System->GetTime() * 6.0f;

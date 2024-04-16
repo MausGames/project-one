@@ -11,7 +11,6 @@
 #define _P1_GUARD_INTERFACE_H_
 
 // TODO: re-position everything after resolution-change
-// TODO: re-order rendering to reduce shader/texture changes
 
 
 // ****************************************************************

@@ -21,7 +21,7 @@
 #define GAME_INTRO_DELAY    (0.2f)      // 
 #define GAME_INTRO_DURATION (3.5f)      // 
 
-enum cGameStatus : coreUint8
+enum eGameStatus : coreUint8
 {
     GAME_STATUS_INTRO   = 0x01u,   // 
     GAME_STATUS_OUTRO   = 0x02u,   // 
@@ -50,7 +50,7 @@ static constexpr coreInt32 __GAME_MISSION_LIST_DEFAULT[] =
 // ****************************************************************
 // depth-level management
 #define DEPTH_PUSH           {g_pGame->PushDepthLevel();}
-#define DEPTH_PUSH_IGNORE    {}
+#define DEPTH_PUSH_IGNORE    {__DEPTH_LEVEL_SHIP}
 #define __DEPTH_LEVEL_UNDER  {glDepthRange(0.9f, 1.0f);}
 #define __DEPTH_LEVEL_SHIP   {glDepthRange(0.8f, 0.9f);}
 #define __DEPTH_LEVEL_ATTACK {m_iDepthLevel = 9u;}

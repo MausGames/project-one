@@ -182,7 +182,7 @@ void cReplay::Update()
 
     if(m_iStatus == REPLAY_STATUS_RECORDING)
     {
-        auto nNewPacketFunc = [this](const coreUintW iIndex, const coreUint32 iType, const coreUint32 iValue)
+        const auto nNewPacketFunc = [this](const coreUintW iIndex, const coreUint32 iType, const coreUint32 iValue)
         {
             ASSERT((m_iCurFrame <= BITLINE(22u)) && (iType <= BITLINE(2u)) && (iValue <= BITLINE(4u)))
 
@@ -297,7 +297,11 @@ coreBool cReplay::LoadFile(const coreChar* pcPath, const coreBool bOnlyHeader)
     }
 
     // 
-    if(!bOnlyHeader) this->__SetBodyData(pBody->GetData(), pBody->GetSize());
+    if(!bOnlyHeader)
+    {
+        this->__SetBodyData(pBody->GetData(), pBody->GetSize());
+        Core::Log->Warning("Replay (%s) loaded", pcPath);
+    }
     return true;
 }
 
@@ -327,6 +331,8 @@ void cReplay::SaveFile(const coreChar* pcName)
     oArchive.AddFile(pHeader);
     oArchive.AddFile(pBody);
     oArchive.Save(PRINT(REPLAY_FILE_FOLDER "/replay_%s." REPLAY_FILE_EXTENSION, coreData::DateTimePrint("%Y%m%d_%H%M%S")));
+
+    Core::Log->Warning("Replay (%s) saved", oArchive.GetPath());
 }
 
 

@@ -45,12 +45,16 @@ public:
     inline coreFrameBuffer* GetFrameBuffer() {return &m_FrameBuffer;}
 
     // project world-position into screen-space
-    inline FUNC_LOCAL coreVector2 Project(const coreVector3& vPosition)const {const coreVector4 A = coreVector4(vPosition, 1.0f) * m_mViewProj; return A.xy() * (RCP(A.w) * 0.5f);}
+    inline FUNC_LOCAL coreVector2 Project3D(const coreVector3& vPosition)const {return vPosition.xy() * (CAMERA_POSITION.z * RCP(CAMERA_POSITION.z - vPosition.z));}
+    inline FUNC_LOCAL coreVector2 Project2D(const coreVector3& vPosition)const {const coreVector4 A = coreVector4(vPosition, 1.0f) * m_mViewProj; return A.xy() * (RCP(A.w) * 0.5f);}
 
 
 private:
     // reset with the resource manager
     void __Reset(const coreResourceReset bInit)final;
+
+    // 
+    void __CalculateViewProj();
 };
 
 
