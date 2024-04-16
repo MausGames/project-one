@@ -25,6 +25,7 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
 , m_iDepthLevel         (0u)
 , m_iDepthDebug         (0u)
 , m_iOutroType          (0u)
+, m_bVisibleCheck       (false)
 , m_Options             (oOptions)
 , m_iVersion            (0u)
 , m_iStatus             (0u)
@@ -525,6 +526,16 @@ void cGame::PushDepthLevelShip()
     __DEPTH_GROUP_SHIP
 }
 
+//void cGame::PopDepthLevel(const coreUint8 iLevels)
+//{
+//    // 
+//    ASSERT()
+//    m_iDepthLevel += iLevels;
+//
+//    // 
+//    this->ChangeDepthLevel(m_iDepthLevel, m_iDepthLevel + iLevels);
+//}
+
 
 // ****************************************************************
 // 
@@ -856,22 +867,24 @@ void cGame::__HandleCollisions()
 
         if(bFirstHit)
         {
-            if(!pPlayer->HasStatus(PLAYER_STATUS_GHOST) && !pEnemy->HasStatus(ENEMY_STATUS_GHOST))
+            if(!pPlayer->HasStatus(PLAYER_STATUS_GHOST) && !pEnemy->HasStatus(ENEMY_STATUS_GHOST_PLAYER))
             {
                 if(pEnemy->HasStatus(ENEMY_STATUS_DAMAGING))
                 {
                     // 
                     pPlayer->TakeDamage(15, ELEMENT_NEUTRAL, vIntersection.xy());
                 }
+                else
+                {
+                    // 
+                    const coreVector2 vDiff = pPlayer->GetOldPos() - pEnemy->GetPosition().xy();
+                    pPlayer->ApplyForce  (vDiff.Normalized() * 100.0f);
+                    pPlayer->SetInterrupt(PLAYER_INTERRUPT);
 
-                // 
-                const coreVector2 vDiff = pPlayer->GetOldPos() - pEnemy->GetPosition().xy();
-                pPlayer->ApplyForce  (vDiff.Normalized() * 100.0f);
-                pPlayer->SetInterrupt(PLAYER_INTERRUPT);
-
-                // 
-                g_pSpecialEffects->CreateSplashColor(pPlayer->GetPosition(), 50.0f, 10u, coreVector3(1.0f,1.0f,1.0f));
-                g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+                    // 
+                    g_pSpecialEffects->CreateSplashColor(pPlayer->GetPosition(), 50.0f, 10u, coreVector3(1.0f,1.0f,1.0f));
+                    g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+                }
             }
         }
     });
@@ -898,14 +911,14 @@ void cGame::__HandleCollisions()
     Core::Manager::Object->TestCollision(TYPE_ENEMY, TYPE_BULLET_PLAYER, [this](cEnemy* OUTPUT pEnemy, cBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         // 
-        if(!g_pForeground->IsVisiblePoint(vIntersection.xy())) return;
+        if(m_bVisibleCheck && !g_pForeground->IsVisiblePoint(vIntersection.xy())) return;
 
         // 
         if(pEnemy->GetID() != cRepairEnemy::ID) m_pCurMission->CollEnemyBullet(pEnemy, pBullet, vIntersection, bFirstHit);
 
         if(bFirstHit)
         {
-            if(!pEnemy->HasStatus(ENEMY_STATUS_GHOST) && !pBullet->HasStatus(BULLET_STATUS_GHOST))
+            if(!pEnemy->HasStatus(ENEMY_STATUS_GHOST_BULLET) && !pBullet->HasStatus(BULLET_STATUS_GHOST))
             {
                 // 
                 const coreInt32 iTaken = pEnemy->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner()));

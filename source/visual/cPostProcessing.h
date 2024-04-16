@@ -16,6 +16,7 @@
 // TODO 3: also clamp fullscreen distortion similar to water distortion ?
 // TODO 1: changing game size (option) should add fixed wallpaper offset (related to gameplay stage)
 // TODO 3: try to reduce overdraw when all walls are active
+// TODO 3: remove overdraw when rendering border object
 
 
 // ****************************************************************
@@ -43,6 +44,7 @@ private:
     coreObject2D m_aInterior[POST_INTERIORS];   // 
     coreObject2D m_aWall    [POST_WALLS];       // wallpapers outside of the game area
     coreObject2D m_Separator;                   // separator for split-screen
+    coreObject2D m_Border;                      // 
 
     coreFlow m_fSplitScreenValue;               // 
     coreBool m_bSplitScreen;                    // 

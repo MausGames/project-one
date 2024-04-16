@@ -27,12 +27,12 @@ cVolcanoBackground::cVolcanoBackground()noexcept
 
     // allocate smoke list
     pList1 = new coreBatchList(VOLCANO_SMOKE_RESERVE);
-    pList1->DefineProgram("object_ground_inst_program");
+    pList1->DefineProgram("effect_decal_inst_program");
     {
         // load object resources
         coreObject3D oBase;
         oBase.DefineModel  (Core::Manager::Object->GetLowQuad());
-        oBase.DefineProgram("object_ground_program");
+        oBase.DefineProgram("effect_decal_program");
 
         for(coreUintW i = 0u; i < VOLCANO_SMOKE_NUM; ++i)
         {
@@ -50,7 +50,7 @@ cVolcanoBackground::cVolcanoBackground()noexcept
 
                     // set object properties
                     pObject->SetPosition(coreVector3(vPosition,0.0f));
-                    pObject->SetSize    (coreVector3(0.0f,0.0f,0.0f));
+                    pObject->SetSize    (coreVector3(0.0f,0.0f,0.0f));   // invisible
 
                     // add object to the list
                     pList1->BindObject(pObject);

@@ -11,13 +11,13 @@
 
 // ****************************************************************
 // update the weapon
-coreBool cWeapon::Update(const coreUint8 iShootStatus)
+coreBool cWeapon::Update(const coreUint8 iShootStatus, const coreFloat fShootSpeed)
 {
     ASSERT(m_pOwner)
     STATIC_ASSERT(WEAPON_MODES <= sizeof(iShootStatus)*8u)
 
     // call individual update routine
-    this->__UpdateOwn(iShootStatus);
+    this->__UpdateOwn(iShootStatus, fShootSpeed);
 
     // check firing-modes and call trigger or release routine
     for(coreUintW i = 0u; i < WEAPON_MODES; ++i)
@@ -29,7 +29,7 @@ coreBool cWeapon::Update(const coreUint8 iShootStatus)
     m_iLastStatus = iShootStatus;
 
     // always update the primary cooldown timer
-    if(m_CooldownTimer.Update(1.0f))
+    if(m_CooldownTimer.Update(fShootSpeed))
     {
         if(HAS_BIT(iShootStatus, 0u))
              m_CooldownTimer.Pause();   // preserve fractional part
@@ -194,10 +194,10 @@ cPulseWeapon::cPulseWeapon()noexcept
 
 // ****************************************************************
 // 
-void cPulseWeapon::__UpdateOwn(const coreUint8 iShootStatus)
+void cPulseWeapon::__UpdateOwn(const coreUint8 iShootStatus, const coreFloat fShootSpeed)
 {
     // 
-    if(!m_CooldownTimer.GetStatus()) m_fCharge.UpdateMin(m_CooldownTimer.GetSpeed(), 2.0f);
+    if(!m_CooldownTimer.GetStatus()) m_fCharge.UpdateMin(m_CooldownTimer.GetSpeed() * fShootSpeed, 2.0f);
 }
 
 

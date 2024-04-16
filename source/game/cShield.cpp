@@ -18,7 +18,7 @@ cShieldEffect::cShieldEffect()noexcept
 {
 #if !defined(_P1_VIDEO_)
     // 
-    //g_pGlow->BindList(&m_ShieldList);
+    g_pGlow->BindList(&m_ShieldList);
 #endif
 }
 
@@ -29,7 +29,7 @@ cShieldEffect::~cShieldEffect()
 {
 #if !defined(_P1_VIDEO_)
     // 
-    //g_pGlow->UnbindList(&m_ShieldList);
+    g_pGlow->UnbindList(&m_ShieldList);
 #endif
 }
 
@@ -59,7 +59,7 @@ void cShieldEffect::Construct(const coreHashString& sProgramSingleName, const co
 void cShieldEffect::Render()
 {
     // 
-    //m_ShieldList.Render();
+    m_ShieldList.Render();
 }
 
 

@@ -71,7 +71,7 @@ private:
     static coreFloat __GetMapValue(const coreUintW iIndex);
 
     // 
-    static coreVector2 __ClampPosition(const coreVector2 vPosition);
+    static coreVector2 __SnapPosition(const coreVector2 vPosition);
 };
 
 

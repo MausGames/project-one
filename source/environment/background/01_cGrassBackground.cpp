@@ -341,12 +341,13 @@ void cGrassBackground::__MoveOwn()
         const coreFloat   fOffset = I_TO_F(POW2(i) % m_iLeafNum);
         const coreFloat   fTime   = m_fLeafTime * ((i % 2u) ? 1.0f : -1.0f) + fOffset;
         const coreFloat   fPos    = SIN(fTime * 0.05f + fOffset) * (I_TO_F(OUTDOOR_WIDTH) * OUTDOOR_DETAIL * 0.2f);
-        const coreVector2 vDir    = coreVector2::Direction(fTime);
+        const coreVector2 vOri    = coreVector2::Direction(fTime);
+        const coreVector2 vDir    = MapStepRotated45(vOri, i % 8u);
 
         // 
         pLeaf->SetPosition   (coreVector3(fPos, pLeaf->GetPosition().yz()));
         pLeaf->SetDirection  (coreVector3(vDir, 0.0f));
-        pLeaf->SetOrientation(OriRoundDir(vDir, vDir));
+        pLeaf->SetOrientation(OriRoundDir(vOri, vDir));
 
         // get currently visible polygon side
         const coreBool bSide = (coreVector3::Dot(g_pEnvironment->GetCameraPos() - pLeaf->GetPosition(), pLeaf->GetOrientation()) >= 0.0f);

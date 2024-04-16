@@ -33,7 +33,7 @@ cWater::cWater(const coreHashString& sSkyTexture)noexcept
     {
         // create depth frame buffer
         m_Depth.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH16);
-        m_Depth.Create(vWaterResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
+        m_Depth.Create(DEFINED(_CORE_GLES_) ? g_vGameResolution : vWaterResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);   // TODO 1: only resolution-fix for ice ? instead of increasing resolution, maybe do manual 4-sample filtering
 
         // create sky-plane object
         m_Sky.DefineTexture(0u, sSkyTexture);
@@ -136,7 +136,7 @@ void cWater::UpdateReflection()
         // flip projection left-right (also culling!, after StartDraw())
         c_cast<coreMatrix4&>(Core::Graphics->GetPerspective())._11 *= -1.0f;
 
-        glDepthFunc(GL_ALWAYS);   // better performance than clear
+        glDepthFunc(GL_ALWAYS);   // better performance than clear TODO 1: emscripten/GLES
         glDisable  (GL_BLEND);
         {
             // move and render the sky-plane
@@ -198,7 +198,7 @@ void cWater::UpdateDepth(cOutdoor* pOutdoor, const coreList<coreBatchList*>& apG
         // fill depth frame buffer
         m_Depth.StartDraw();
         {
-            glDepthFunc(GL_ALWAYS);   // better performance than clear
+            glDepthFunc(GL_ALWAYS);   // better performance than clear TODO 1: emscripten/GLES
             {
                 // render the outdoor-surface
                 pOutdoor->RenderDepth();
@@ -268,7 +268,7 @@ cRainWater::cRainWater(const coreHashString& sSkyTexture)noexcept
 , m_fFallDelay (0.0f)
 {
     // 
-    m_WaveMap.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, DEFINED(_CORE_GLES_) ? CORE_TEXTURE_SPEC_RGBA8 : CORE_TEXTURE_SPEC_RGBA16);
+    m_WaveMap.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_GL_SUPPORT(EXT_texture_norm16) ? CORE_TEXTURE_SPEC_RGBA16 : CORE_TEXTURE_SPEC_RGBA8);
     m_WaveMap.Create(g_vGameResolution * RAIN_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     // 

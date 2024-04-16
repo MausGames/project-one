@@ -47,9 +47,11 @@ void cBullet::Move()
     if((m_fFlyTime >= 0.5f) && !HAS_FLAG(m_iStatus, BULLET_STATUS_IMMORTAL) && !g_pForeground->IsVisibleObject(this))
         this->Deactivate(false);
     
-    if(g_pForeground->IsVisibleObject(this)) this->SetEnabled(CORE_OBJECT_ENABLE_ALL);
-                                        else this->SetEnabled(CORE_OBJECT_ENABLE_MOVE);
-
+    if(HAS_FLAG(m_iStatus, BULLET_STATUS_ACTIVE))
+    {
+        this->SetEnabled(g_pForeground->IsVisibleObject(this) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_MOVE);
+    }
+    
     // move the 3d-object
     this->coreObject3D::Move();
 }
@@ -664,7 +666,7 @@ void cOrbBullet::__MoveOwn()
     // update fade
     m_fFade.Update(1.0f);
     this->SetAlpha(MIN(20.0f * m_fFade, 1.0f));
-    this->SetAlpha(1.0f);
+    //this->SetAlpha(1.0f);
 }
 
 

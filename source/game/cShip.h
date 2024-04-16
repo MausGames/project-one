@@ -20,7 +20,8 @@
 // ship definitions
 #define SHIP_INVERTED_BIT (24u)   // for inverted base color interpolation
 
-#define SHIP_SHADER_ATTRIBUTE_BLINK (CORE_SHADER_ATTRIBUTE_DIV_TEXPARAM_NUM + 1u)
+#define SHIP_SHADER_ATTRIBUTE_BLINK     "a_v1Blink"
+#define SHIP_SHADER_ATTRIBUTE_BLINK_NUM (CORE_SHADER_ATTRIBUTE_USER_NUM + 0u)
 
 
 // ****************************************************************
@@ -71,7 +72,12 @@ public:
     inline cShip* Rotate90 () {this->SetPosition(this->GetPosition().RotatedZ90());                                 this->SetDirection(this->GetDirection().RotatedZ90());                                 this->SetOrientation(this->GetOrientation().RotatedZ90());                                 return this;}
     inline cShip* Rotate180() {this->SetPosition(this->GetPosition()              * coreVector3(-1.0f,-1.0f,1.0f)); this->SetDirection(this->GetDirection()              * coreVector3(-1.0f,-1.0f,1.0f)); this->SetOrientation(this->GetOrientation()              * coreVector3(-1.0f,-1.0f,1.0f)); return this;}
     inline cShip* Rotate270() {this->SetPosition(this->GetPosition().RotatedZ90() * coreVector3(-1.0f,-1.0f,1.0f)); this->SetDirection(this->GetDirection().RotatedZ90() * coreVector3(-1.0f,-1.0f,1.0f)); this->SetOrientation(this->GetOrientation().RotatedZ90() * coreVector3(-1.0f,-1.0f,1.0f)); return this;}
-
+    inline cShip* ToAxis(const coreVector2 vAxis)
+    {
+        this->SetPosition   (coreVector3(MapToAxis(this->GetPosition   ().xy(), vAxis), this->GetPosition   ().z));
+        this->SetDirection  (coreVector3(MapToAxis(this->GetDirection  ().xy(), vAxis), this->GetDirection  ().z));
+        this->SetOrientation(coreVector3(MapToAxis(this->GetOrientation().xy(), vAxis), this->GetOrientation().z)); return this;}
+    
     // 
     inline void RefreshColor(const coreFloat fFactor) {const coreFloat fRealFactor = cShip::TransformColorFactor(fFactor); this->SetColor3(LERP(COLOR_SHIP_GREY, this->GetBaseColor(), HAS_BIT(m_iBaseColor, SHIP_INVERTED_BIT) ? (1.0f - fRealFactor) : fRealFactor));}
     inline void RefreshColor()                        {this->RefreshColor(this->GetCurHealthPct());}

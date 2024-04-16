@@ -13,7 +13,7 @@
 // TODO 3: pre-allocate bullets (at least for player) at the beginning to improve resource loading
 // TODO 3: use prefetch with more precise numbers (also in enemy-manager) (maybe with per-class config)
 // TODO 3: align bullet memory ? (also check other possible locations (e.g. enemies))
-// TODO 3: add memory pool object for bullets ? also for enemy
+// TODO 3: add memory pool for bullets, instead of always reallocating
 // TODO 3: remove tons of template instantiations (also enemies ? other templates ?) (CreateBullet and AllocateEnemy create tons of symbols)
 // TODO 3: sort bullet classes (color, enemy<>player, normal<>special), improve array indexing and caching
 // TODO 2: lots of bullets with direction-outlines can create holes in outlines by nearly-invisible backsides (can this even be fixed ?)
@@ -33,7 +33,8 @@
 #define BULLET_DEPTH_FACTOR     (0.8f)    // 
 #define BULLET_COLLISION_FACTOR (0.75f)   // (for enemy bullets) 
 
-#define BULLET_SHADER_ATTRIBUTE_DEPTH (CORE_SHADER_ATTRIBUTE_DIV_TEXPARAM_NUM + 1u)
+#define BULLET_SHADER_ATTRIBUTE_DEPTH     "a_v1Depth"
+#define BULLET_SHADER_ATTRIBUTE_DEPTH_NUM (CORE_SHADER_ATTRIBUTE_USER_NUM + 0u)
 
 enum eBulletStatus : coreUint8
 {
@@ -779,7 +780,7 @@ template <typename T> cBulletManager::sBulletSet<T>::sBulletSet(cOutline* pOutli
     // 
     oBulletActive.CreateCustom(sizeof(coreFloat), [](coreVertexBuffer* OUTPUT pBuffer)
     {
-        pBuffer->DefineAttribute(BULLET_SHADER_ATTRIBUTE_DEPTH, 1u, GL_FLOAT, false, 0u);
+        pBuffer->DefineAttribute(BULLET_SHADER_ATTRIBUTE_DEPTH_NUM, 1u, GL_FLOAT, false, 0u);
     },
     [](coreByte* OUTPUT pData, const coreObject3D* pBullet)
     {

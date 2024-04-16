@@ -93,8 +93,9 @@ void cShadow::Reconfigure()
         m_FrameBuffer.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH16);
         m_FrameBuffer.Create(vRes, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
+        // TODO 1: can crash if shadow texture not supported, though is minimum GL_WEBGL_depth_texture
         // enable depth value comparison
-        m_FrameBuffer.GetDepthTarget().pTexture->ShadowSampling(true);
+        m_FrameBuffer.GetDepthTarget().pTexture->EnableShadowSampling();
 
         // set polygon fill properties (to reduce projective aliasing, not in GlobalInit, because of easier engine-reset)
         glPolygonOffset(3.3f, 12.0f);

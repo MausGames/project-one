@@ -19,7 +19,7 @@
 #define SHIELD_EFFECT_DAMAGING   (1u)   // 
 #define SHIELD_EFFECTS           (2u)   // 
 
-#define SHIELD_SHIELDS (128u)   // 
+#define SHIELD_SHIELDS (128u + 30u)   // 
 
 
 // ****************************************************************

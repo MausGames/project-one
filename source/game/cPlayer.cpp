@@ -16,9 +16,10 @@ cPlayer::cPlayer()noexcept
 , m_pInput          (&g_TotalInput)
 , m_vArea           (PLAYER_AREA_DEFAULT)
 , m_vForce          (coreVector2(0.0f,0.0f))
-, m_fSpeed          (1.0f)
 , m_fScale          (1.0f)
 , m_fTilt           (0.0f)
+, m_fMoveSpeed      (1.0f)
+, m_fShootSpeed     (1.0f)
 , m_fRollTime       (0.0f)
 , m_fFeelTime       (PLAYER_NO_FEEL)
 , m_fIgnoreTime     (PLAYER_NO_IGNORE)
@@ -94,7 +95,7 @@ cPlayer::cPlayer()noexcept
     // 
     m_Wind.DefineModel  ("object_sphere.md3");
     m_Wind.DefineTexture(0u, "effect_energy.png");
-    m_Wind.DefineProgram("effect_energy_direct_program");
+    m_Wind.DefineProgram("effect_energy_flat_direct_program");
     m_Wind.SetAlpha     (0.0f);
     m_Wind.SetTexSize   (coreVector2(1.0f,5.0f));
     m_Wind.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
@@ -420,7 +421,7 @@ void cPlayer::Move()
         for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
         {
             const coreUint8 iShoot = (/*!this->IsRolling() && */!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_SHOOT) && !m_fInterrupt) ? ((m_pInput->iActionHold & (BITLINE(WEAPON_MODES) << (i*WEAPON_MODES))) >> (i*WEAPON_MODES)) : 0u;
-            m_apWeapon[i]->Update(iShoot);
+            m_apWeapon[i]->Update(iShoot, m_fShootSpeed);
         }
 
         // 
@@ -440,9 +441,7 @@ void cPlayer::Move()
            !coreMath::IsNear(m_vOldDir.y, this->GetDirection().y))
         {
             m_vOldDir = this->GetDirection().xy();
-
-            if(m_fArrowValue <= 0.0f) this->EnableArrow();
-            m_fArrowValue = 1.0f;
+            this->ShowArrow();
         }
 
         // 
@@ -693,7 +692,7 @@ void cPlayer::Kill(const coreBool bAnimated)
 
     // reset weapon shoot status
     for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
-        m_apWeapon[i]->Update(0u);
+        m_apWeapon[i]->Update(0u, 1.0f);
 
     // 
     this->EndRolling();
@@ -731,6 +730,16 @@ void cPlayer::Kill(const coreBool bAnimated)
 
     // remove ship from the game
     this->_Kill(bAnimated);
+}
+
+
+// ****************************************************************
+// 
+void cPlayer::ShowArrow()
+{
+    // 
+    if(m_fArrowValue <= 0.0f) this->EnableArrow();
+    m_fArrowValue = 1.0f;
 }
 
 
@@ -1153,7 +1162,7 @@ coreFloat cPlayer::CalcMoveSpeed()const
     // 
     //const coreFloat fModifier = this->IsRolling() ? (50.0f + LERPB(25.0f, 0.0f, m_fRollTime)) : (HAS_BIT(m_pInput->iActionHold, 0u) ? LERPH3(20.0f, 40.0f, s_fBoost) : LERPH3(50.0f, 70.0f, s_fBoost));
     const coreFloat fModifier = HAS_BIT(m_pInput->iActionHold, 0u) ? LERPH3(20.0f, 40.0f, s_fBoost) : LERPH3(50.0f, 70.0f, s_fBoost);
-    return m_fSpeed * fModifier;
+    return m_fMoveSpeed * fModifier;
 }
 
 

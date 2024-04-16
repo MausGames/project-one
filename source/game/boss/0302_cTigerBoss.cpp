@@ -451,7 +451,7 @@ void cTigerBoss::__MoveOwn()
                 const coreVector3 vDiff  = coreVector3(vHit, 0.0f) - vStart;
                 const coreUintW   iNum   = F_TO_UI(vDiff.Length() / 1.9f);
 
-                for(coreUintW j = iNum; j--; ) g_pSpecialEffects->CreateSplashColor(vStart + vDiff * (I_TO_F(j) * RCP(I_TO_F(iNum))), 10.0f, 1u, COLOR_ENERGY_WHITE);
+                for(coreUintW j = iNum; j--; ) g_pSpecialEffects->CreateSplashColor(vStart + vDiff * (I_TO_F(j) * RCP(I_TO_F(iNum - 1u))), 10.0f, 1u, COLOR_ENERGY_WHITE);
 
                 g_pSpecialEffects->CreateSplashColor(coreVector3(vHit, 0.0f), SPECIAL_SPLASH_TINY, COLOR_ENERGY_WHITE);
                 g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);

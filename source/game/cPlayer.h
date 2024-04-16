@@ -58,12 +58,12 @@ enum ePlayerStatus : coreUint8
 {
     PLAYER_STATUS_DEAD           = 0x01u,   // completely removed from the game
     PLAYER_STATUS_SHIELDED       = 0x02u,   // 
-    PLAYER_STATUS_NO_INPUT_MOVE  = 0x04u,   // disable player movement (user controls only)
-    PLAYER_STATUS_NO_INPUT_SHOOT = 0x08u,   // disable player weapons
-    PLAYER_STATUS_NO_INPUT_ROLL  = 0x10u,   // 
-    PLAYER_STATUS_NO_INPUT_TURN  = 0x20u,   // 
-    PLAYER_STATUS_NO_INPUT_ALL   = PLAYER_STATUS_NO_INPUT_MOVE | PLAYER_STATUS_NO_INPUT_SHOOT | PLAYER_STATUS_NO_INPUT_ROLL | PLAYER_STATUS_NO_INPUT_TURN,
-    PLAYER_STATUS_GHOST          = 0x40u
+    PLAYER_STATUS_GHOST          = 0x04u,   // 
+    PLAYER_STATUS_NO_INPUT_MOVE  = 0x08u,   // disable player movement (user controls only)
+    PLAYER_STATUS_NO_INPUT_SHOOT = 0x10u,   // disable player weapons
+    PLAYER_STATUS_NO_INPUT_ROLL  = 0x20u,   // 
+    PLAYER_STATUS_NO_INPUT_TURN  = 0x40u,   // 
+    PLAYER_STATUS_NO_INPUT_ALL   = PLAYER_STATUS_NO_INPUT_MOVE | PLAYER_STATUS_NO_INPUT_SHOOT | PLAYER_STATUS_NO_INPUT_ROLL | PLAYER_STATUS_NO_INPUT_TURN
 };
 
 enum ePlayerTest : coreUint8
@@ -98,9 +98,11 @@ private:
     coreVector4       m_vArea;                               // 
 
     coreVector2 m_vForce;                                    // 
-    coreFloat   m_fSpeed;                                    // 
     coreFloat   m_fScale;                                    // 
     coreFloat   m_fTilt;                                     // 
+
+    coreProtect<coreFloat> m_fMoveSpeed;                     // 
+    coreProtect<coreFloat> m_fShootSpeed;                    // 
 
     coreFlow  m_fRollTime;                                   // 
     coreFlow  m_fFeelTime;                                   // 
@@ -175,6 +177,9 @@ public:
     void Kill     (const coreBool bAnimated);
 
     // 
+    void ShowArrow();
+
+    // 
     void StartRolling (const coreVector2 vDirection);
     void EndRolling   ();
     void StartFeeling (const coreFloat fTime, const coreUint8 iType);
@@ -233,7 +238,8 @@ public:
     inline void SetInput     (const sGameInput* pInput)      {m_pInput      = pInput;}
     inline void SetArea      (const coreVector4 vArea)       {m_vArea       = vArea; ASSERT(vArea.xy() < vArea.zw())}
     inline void SetForce     (const coreVector2 vForce)      {m_vForce      = vForce;}
-    inline void SetSpeed     (const coreFloat   fSpeed)      {m_fSpeed      = fSpeed;}
+    inline void SetMoveSpeed (const coreFloat   fMoveSpeed)  {m_fMoveSpeed  = fMoveSpeed;}
+    inline void SetShootSpeed(const coreFloat   fShootSpeed) {m_fShootSpeed = fShootSpeed;}
     inline void SetScale     (const coreFloat   fScale)      {m_fScale      = fScale;}
     inline void SetTilt      (const coreFloat   fTilt)       {m_fTilt       = fTilt;}
     inline void SetInterrupt (const coreFloat   fInterrupt)  {m_fInterrupt  = fInterrupt;}
@@ -244,7 +250,8 @@ public:
     inline const sGameInput*  GetInput       ()const {ASSERT(m_pInput) return m_pInput;}
     inline const coreVector4& GetArea        ()const {return m_vArea;}
     inline const coreVector2& GetForce       ()const {return m_vForce;}
-    inline const coreFloat&   GetSpeed       ()const {return m_fSpeed;}
+    inline       coreFloat    GetMoveSpeed   ()const {return m_fMoveSpeed;}
+    inline       coreFloat    GetShootSpeed  ()const {return m_fShootSpeed;}
     inline const coreFloat&   GetScale       ()const {return m_fScale;}
     inline const coreFloat&   GetTilt        ()const {return m_fTilt;}
     inline const coreFloat&   GetInterrupt   ()const {return m_fInterrupt;}

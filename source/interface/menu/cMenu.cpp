@@ -67,7 +67,7 @@ cMenu::cMenu()noexcept
     m_MixObject.Move();
 
     // 
-    m_IntroMenu.StartIntro();
+    //m_IntroMenu.StartIntro();
 
     // 
     if(g_pSave->GetHeader().oProgress.bFirstPlay)
@@ -193,6 +193,15 @@ void cMenu::Move()
 
     // move the menu
     this->coreMenu::Move();
+    
+    
+    static coreBool bStarted = false;
+    if(!bStarted && !Core::Manager::Resource->IsLoading())   // after coreMenu::Move()
+    {
+        bStarted = true;
+        m_IntroMenu.StartIntro();
+    }
+    
 
     // 
     switch(this->GetCurSurface())

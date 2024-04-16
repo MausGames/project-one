@@ -143,12 +143,14 @@ void cHeadlight::UpdateDefault()
         // 
         g_pGame->ForEachPlayer([this](const cPlayer* pPlayer, const coreUintW i)
         {
-            this->DrawSpot(pPlayer->GetPosition() + 49.0f * pPlayer->GetDirection(), coreVector2(60.0f,100.0f), pPlayer->GetDirection().xy());
+            this->DrawSpot(pPlayer->GetPosition() + 49.0f * pPlayer->GetDirection() * 1.15f, coreVector2(60.0f,100.0f) * 1.2f, pPlayer->GetDirection().xy());
         });
     }
 
     // 
     this->Update();
+    
+    g_pPostProcessing->SetBorderAll(0.0f);
 }
 
 

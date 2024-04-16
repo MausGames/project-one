@@ -371,7 +371,7 @@ void cCalorMission::__MoveOwnMiddle()
                     pStar->SetDirection(coreVector3(vDir, 0.0f));
 
                     // 
-                    pPlayer->SetSpeed(m_fSwingStart);
+                    pPlayer->SetMoveSpeed(m_fSwingStart);
                 }
                 else
                 {

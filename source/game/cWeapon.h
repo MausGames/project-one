@@ -40,7 +40,7 @@ public:
     ENABLE_ID
 
     // update the weapon
-    coreBool Update(const coreUint8 iShootStatus);
+    coreBool Update(const coreUint8 iShootStatus, const coreFloat fShootSpeed);
 
     // 
     void Render();
@@ -64,11 +64,11 @@ protected:
 
 private:
     // own routines for derived classes
-    virtual void __UpdateOwn (const coreUint8 iShootStatus) {}
-    virtual void __TriggerOwn(const coreUint8 iMode)        {}
-    virtual void __ReleaseOwn(const coreUint8 iMode)        {}
-    virtual void __ShootOwn  ()                             {}
-    virtual void __RenderOwn ()                             {}
+    virtual void __UpdateOwn (const coreUint8 iShootStatus, const coreFloat fShootSpeed) {}
+    virtual void __TriggerOwn(const coreUint8 iMode)                                     {}
+    virtual void __ReleaseOwn(const coreUint8 iMode)                                     {}
+    virtual void __ShootOwn  ()                                                          {}
+    virtual void __RenderOwn ()                                                          {}
 };
 
 
@@ -140,7 +140,7 @@ public:
 
 private:
     // execute own routines
-    void __UpdateOwn(const coreUint8 iShootStatus)final;
+    void __UpdateOwn(const coreUint8 iShootStatus, const coreFloat fShootSpeed)final;
     void __ShootOwn ()final;
 };
 

@@ -489,7 +489,7 @@ void cErrorMission::__SetupOwn()
             }
             else
             {
-                if(STAGE_TICK_FREE(20.0f, 0.0f))
+                if(STAGE_TICK_FREE(20.0f, 0.0f))   // TODO 1: sub-time, STAGE_TICK_FREE2 ?
                 {
                     const coreFloat fCurValue = (i < 20u) ? pEnemy->GetPosition().arr((i < 10u) ? 1u : 0u) : pEnemy->GetPosition().xy().LengthSq();
                     if(fCurValue < fTargetVal)
@@ -501,7 +501,7 @@ void cErrorMission::__SetupOwn()
             }
         });
 
-        if(STAGE_TICK_FREE(2.0f, 0.0f))
+        if(STAGE_TICK_FREE(2.0f, 0.0f))   // TODO 1: sub-time, STAGE_TICK_FREE2 ?
         {
             cEnemy*     pEnemy;
             coreVector2 vPos;
@@ -937,7 +937,7 @@ void cErrorMission::__SetupOwn()
             pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
         });
 
-        if(STAGE_TICK_FREE(10.0f, 0.0f))
+        if(STAGE_TICK_FREE(10.0f, 0.0f))   // TODO 1: sub-time, STAGE_TICK_FREE2 ?
         {
             const coreFloat fHeight = 1.1f * (1.0f - 2.0f * (I_TO_F(s_iTick % 41u) / 40.0f));
 
@@ -2310,6 +2310,7 @@ void UnusedWaves()
     // TODO 1: too similar to meteor wave
     // TODO 1: spawn small enemies from all sides
     // TODO 1: create a lot more containers (3 each side ?)
+    // TODO 1: after 1-2 waves, enemies spawn only from other enemies
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -2718,7 +2719,7 @@ void UnusedWaves()
     
     // direct homing-worm attack
     #if 0
-            if(false && (iSnakeNum < 8u) && STAGE_TICK_FREE(9.0f, 0.0f))
+            if(false && (iSnakeNum < 8u) && STAGE_TICK_FREE(9.0f, 0.0f))   // TODO 1: sub-time, STAGE_TICK_FREE2 ?
             {
                 const coreVector2 vPos = coreVector2(0.0f,0.0f);
                 const coreVector2 vDir = coreVector2(1.0f,0.0f);
@@ -2770,4 +2771,14 @@ void UnusedWaves()
                 pBullet->SetFlyDir   (vDir);
             });
     #endif
+    
+    // Gradius V intro enemy movement
+    STAGE_ADD_PATH(pPath3)
+    {
+        pPath3->Reserve(4u);
+        pPath3->AddNode (coreVector2(-0.65f, 1.3f), coreVector2(0.0f,-1.0f));
+        pPath3->AddNodes(coreVector2(-0.65f,-0.5f), coreVector2(0.0f,-1.0f), coreVector2(1.0f,2.0f).Normalized() * 1.6f);
+        pPath3->AddNode (coreVector2( 1.7f, -1.3f), coreVector2(1.0f,-1.0f).Normalized());
+        pPath3->Refine();
+    });
 */

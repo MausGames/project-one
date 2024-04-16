@@ -406,7 +406,7 @@ void cGeluMission::__SetupOwn()
         {
             constexpr coreUintW iTotalBullets = POST_WALLS * 20u;
 
-            if((iWallBullets < iTotalBullets) && STAGE_TICK_FREE(15.0f, 0.0f))
+            if((iWallBullets < iTotalBullets) && STAGE_TICK_FREE(15.0f, 0.0f))   // TODO 1: sub-time, STAGE_TICK_FREE2 ?
             {
                 for(coreUintW i = 0u; i < POST_WALLS; ++i)
                 {
@@ -1250,7 +1250,7 @@ void cGeluMission::__SetupOwn()
             STAGE_GET_UINT (iCreateStart)
         STAGE_GET_END
 
-        const auto nCreateWay = [&](const coreVector2 vPosition, const coreVector2 vDirection)
+        const auto nCreateWayFunc = [&](const coreVector2 vPosition, const coreVector2 vDirection)
         {
             for(coreUintW i = iCreateStart; i < GELU_WAYS; ++i)
             {
@@ -1321,9 +1321,9 @@ void cGeluMission::__SetupOwn()
                 {
                     const coreUint8 iTick = iPatternCount % 4u;
 
-                         if(m_iStageSub == 1u) nCreateWay(coreVector2(-1.3f,0.0f) * FOREGROUND_AREA, StepRotated90((iTick == 2u) ? 0u : iTick));
-                    else if(m_iStageSub <= 3u) nCreateWay(coreVector2(-1.3f,0.0f) * FOREGROUND_AREA, (iTick % 2u) ? coreVector2(1.0f,0.0f) : coreVector2(-1.0f,0.0f));
-                    else if(m_iStageSub <= 5u) nCreateWay(coreVector2(-1.3f,0.0f) * FOREGROUND_AREA, coreVector2(0.0f,1.0f));
+                         if(m_iStageSub == 1u) nCreateWayFunc(coreVector2(-1.3f,0.0f) * FOREGROUND_AREA, StepRotated90((iTick == 2u) ? 0u : iTick));
+                    else if(m_iStageSub <= 3u) nCreateWayFunc(coreVector2(-1.3f,0.0f) * FOREGROUND_AREA, (iTick % 2u) ? coreVector2(1.0f,0.0f) : coreVector2(-1.0f,0.0f));
+                    else if(m_iStageSub <= 5u) nCreateWayFunc(coreVector2(-1.3f,0.0f) * FOREGROUND_AREA, coreVector2(0.0f,1.0f));
                 }
                 else
                 {
@@ -1335,7 +1335,7 @@ void cGeluMission::__SetupOwn()
                         {
                             if((iTick % 2u) == (i % 2u)) continue;
 
-                            nCreateWay(coreVector2(-1.3f, (I_TO_F(i) - 2.5f) * fStep) * FOREGROUND_AREA, StepRotated90(((iTick / 2u) * 2u + i) % 4u));
+                            nCreateWayFunc(coreVector2(-1.3f, (I_TO_F(i) - 2.5f) * fStep) * FOREGROUND_AREA, StepRotated90(((iTick / 2u) * 2u + i) % 4u));
                         }
                     }
                 }
@@ -1355,7 +1355,7 @@ void cGeluMission::__SetupOwn()
 
                         for(coreUintW i = 0u; i < 6u; ++i)
                         {
-                            nCreateWay(coreVector2((I_TO_F(i) - 2.5f) * fStep, 1.3f) * FOREGROUND_AREA, StepRotated90(((iTick + i) * 2u + iTick) % 4u));
+                            nCreateWayFunc(coreVector2((I_TO_F(i) - 2.5f) * fStep, 1.3f) * FOREGROUND_AREA, StepRotated90(((iTick + i) * 2u + iTick) % 4u));
                         }
                     }
                 }
@@ -1367,7 +1367,7 @@ void cGeluMission::__SetupOwn()
                         {
                             if(((iPatternCount / 2u) % 2u) == ((i / 2u) % 2u)) continue;
 
-                            nCreateWay(coreVector2((I_TO_F(i) - 2.5f) * fStep, 1.3f) * FOREGROUND_AREA, StepRotated90(((iPatternCount / 2u) + (iPatternCount / 4u) + (i / 4u)) % 4u));
+                            nCreateWayFunc(coreVector2((I_TO_F(i) - 2.5f) * fStep, 1.3f) * FOREGROUND_AREA, StepRotated90(((iPatternCount / 2u) + (iPatternCount / 4u) + (i / 4u)) % 4u));
                         }
                     }
                 }
@@ -1391,7 +1391,7 @@ void cGeluMission::__SetupOwn()
                             case 4u: case  6u: case 11u: case 16u: case 18u: vDir = coreVector2( 0.0f,-1.0f); break;
                             }
 
-                            nCreateWay(coreVector2((I_TO_F(i) - 2.5f) * fStep, 1.3f) * FOREGROUND_AREA, vDir);
+                            nCreateWayFunc(coreVector2((I_TO_F(i) - 2.5f) * fStep, 1.3f) * FOREGROUND_AREA, vDir);
                         }
                     }
                 }
@@ -1627,13 +1627,13 @@ void cGeluMission::__SetupOwn()
         // 12  13  14  15
         // ()00()01()02()
 
-        const auto nPosFrom = [](const coreUintW iIndex)
+        const auto nPosFromFunc = [](const coreUintW iIndex)
         {
             ASSERT(iIndex < GELU_ORBS)
             return coreVector2::Direction(I_TO_F(iIndex) / I_TO_F(GELU_ORBS - 1u) * (9.0f*PI)) * FOREGROUND_AREA * 2.0f;   // -1u looks better
         };
 
-        const auto nPosTo = [](const coreUintW iIndex)
+        const auto nPosToFunc = [](const coreUintW iIndex)
         {
             ASSERT(iIndex < GELU_ORBS)
             return coreVector2(I_TO_F(iIndex % 4u) - 1.5f, I_TO_F(iIndex / 4u) - 1.5f) * FOREGROUND_AREA * fOrbLen;
@@ -1772,7 +1772,7 @@ void cGeluMission::__SetupOwn()
                 const coreFloat fValue = LERPS(1.0f, 4.0f, MIN(m_fStageSubTime * 0.5f, 1.0f));
                 for(coreUintW i = 0u; i < ARRAY_SIZE(aiExpand); ++i)
                 {
-                    m_aOrbRaw[aiExpand[i]].SetPosition(coreVector3(nPosTo(aiExpand[i]) * coreVector2(fValue, 1.0f), 0.0f));
+                    m_aOrbRaw[aiExpand[i]].SetPosition(coreVector3(nPosToFunc(aiExpand[i]) * coreVector2(fValue, 1.0f), 0.0f));
                 }
 
                 vFactor = m_aOrbRaw[aiExpand[0]].GetPosition().xy() / vOldPos;
@@ -1782,7 +1782,7 @@ void cGeluMission::__SetupOwn()
                 const coreFloat fValue = LERPS(0.0f, -1.5f, MIN(m_fStageSubTime * 0.5f, 1.0f)) * fOrbLen * FOREGROUND_AREA.y;
                 for(coreUintW i = 0u; i < ARRAY_SIZE(aiExpand); ++i)
                 {
-                    m_aOrbRaw[aiExpand[i]].SetPosition(coreVector3(nPosTo(aiExpand[i]) * coreVector2(4.0f,1.0f) + coreVector2(0.0f, fValue), 0.0f));
+                    m_aOrbRaw[aiExpand[i]].SetPosition(coreVector3(nPosToFunc(aiExpand[i]) * coreVector2(4.0f,1.0f) + coreVector2(0.0f, fValue), 0.0f));
                 }
 
                 vOffset = m_aOrbRaw[aiExpand[0]].GetPosition().xy() - vOldPos;
@@ -1803,7 +1803,7 @@ void cGeluMission::__SetupOwn()
         if(STAGE_TIME_BEFORE(3.0f))
         {
             for(coreUintW i = 0u; i < GELU_ORBS; ++i)
-                m_aOrbRaw[i].SetPosition(coreVector3(LERPB(nPosFrom(i), nPosTo(i), CLAMP(m_fStageTime - 2.0f * (1.0f - (I_TO_F(i) / I_TO_F(GELU_ORBS - 1u))), 0.0f, 1.0f)), 0.0f));
+                m_aOrbRaw[i].SetPosition(coreVector3(LERPB(nPosFromFunc(i), nPosToFunc(i), CLAMP(m_fStageTime - 2.0f * (1.0f - (I_TO_F(i) / I_TO_F(GELU_ORBS - 1u))), 0.0f, 1.0f)), 0.0f));
         }
         else if(STAGE_TIME_POINT(3.0f))
         {
@@ -1811,7 +1811,7 @@ void cGeluMission::__SetupOwn()
                 this->EnableLine(i);
 
             for(coreUintW i = 0u; i < GELU_ORBS; ++i)
-                m_aOrbRaw[i].SetPosition(coreVector3(nPosTo(i), 0.0f));
+                m_aOrbRaw[i].SetPosition(coreVector3(nPosToFunc(i), 0.0f));
 
             STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
             {
@@ -1823,7 +1823,7 @@ void cGeluMission::__SetupOwn()
         }
         else
         {
-            const auto nChangeTarget = [&](const coreUintW iIndex, const coreUint32 iNewTarget)
+            const auto nChangeTargetFunc = [&](const coreUintW iIndex, const coreUint32 iNewTarget)
             {
                 ASSERT(iNewTarget < GELU_ORBS)
 
@@ -1850,13 +1850,13 @@ void cGeluMission::__SetupOwn()
 
                 if(SIGNUM(avOldMove[i].x) != SIGNUM(pInput->vMove.x))
                 {
-                         if((x > 0u) && (pInput->vMove.x < 0.0f)) nChangeTarget(i, aiTarget[i] - 1u);
-                    else if((x < 3u) && (pInput->vMove.x > 0.0f)) nChangeTarget(i, aiTarget[i] + 1u);
+                         if((x > 0u) && (pInput->vMove.x < 0.0f)) nChangeTargetFunc(i, aiTarget[i] - 1u);
+                    else if((x < 3u) && (pInput->vMove.x > 0.0f)) nChangeTargetFunc(i, aiTarget[i] + 1u);
                 }
                 if(SIGNUM(avOldMove[i].y) != SIGNUM(pInput->vMove.y))
                 {
-                         if((y > 0u) && (pInput->vMove.y < 0.0f)) nChangeTarget(i, aiTarget[i] - 4u);
-                    else if((y < 3u) && (pInput->vMove.y > 0.0f)) nChangeTarget(i, aiTarget[i] + 4u);
+                         if((y > 0u) && (pInput->vMove.y < 0.0f)) nChangeTargetFunc(i, aiTarget[i] - 4u);
+                    else if((y < 3u) && (pInput->vMove.y > 0.0f)) nChangeTargetFunc(i, aiTarget[i] + 4u);
                 }
 
                 avOldMove[i] = pInput->vMove;
@@ -1949,7 +1949,7 @@ void cGeluMission::__SetupOwn()
 
         if(STAGE_TIME_AFTER(3.5f))
         {
-            if(STAGE_TICK_FREE(9.0f/4.0f, 0.0f))
+            if(STAGE_TICK_FREE(9.0f/4.0f, 0.0f))   // TODO 1: sub-time, STAGE_TICK_FREE2 ?
             {
                 const auto nShootFunc = [&](const coreVector2 vPos, const coreVector2 vDir)
                 {
@@ -1966,7 +1966,7 @@ void cGeluMission::__SetupOwn()
                         constexpr coreUintW A[] = {0u, 2u, 1u, 3u};
 
                         const coreVector2 vDir = coreVector2(0.0f,-1.0f);
-                        const coreVector2 vPos = coreVector2(nPosTo(A[(s_iTick / 2u) % 4u]).x, 1.2f * FOREGROUND_AREA.y);
+                        const coreVector2 vPos = coreVector2(nPosToFunc(A[(s_iTick / 2u) % 4u]).x, 1.2f * FOREGROUND_AREA.y);
 
                         nShootFunc(vPos, vDir);
                     }
@@ -1976,7 +1976,7 @@ void cGeluMission::__SetupOwn()
                     if(s_iTick % 2u)
                     {
                         const coreVector2 vDir = coreVector2(((s_iTick / 2u) % 2u) ? -1.0f : 1.0f, 0.0f);
-                        const coreVector2 vPos = coreVector2(vDir.x * (-1.2f * FOREGROUND_AREA.x), nPosTo((3u - (s_iTick / 2u) % 4u) * 4u).y);
+                        const coreVector2 vPos = coreVector2(vDir.x * (-1.2f * FOREGROUND_AREA.x), nPosToFunc((3u - (s_iTick / 2u) % 4u) * 4u).y);
 
                         nShootFunc(vPos, vDir);
                     }

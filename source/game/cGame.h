@@ -170,6 +170,8 @@ private:
 
     coreUint8 m_iOutroType;                 // 
 
+    coreBool m_bVisibleCheck;               // 
+
     sGameOptions m_Options;                 // 
     coreUint16   m_iVersion;                // 
 
@@ -207,6 +209,10 @@ public:
     void ChangeDepthLevel  (const coreUint8 iLevelNear, const coreUint8 iLevelFar)const;
     void PushDepthLevel    (const coreUint8 iLevels);
     void PushDepthLevelShip();
+    //void PopDepthLevel    (const coreUint8 iLevels);
+
+    // 
+    inline void SetVisibleCheck(const coreBool bCheck) {m_bVisibleCheck = bCheck;}
 
     // 
     inline void HideHelpers    () {for(coreUintW i = 0u; i < GAME_HELPERS; ++i) if(m_aHelper[i].HasStatus(HELPER_STATUS_DEAD)) m_aHelper[i].SetPosition(coreVector3(HIDDEN_POS, 0.0f));}

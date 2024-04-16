@@ -12,7 +12,6 @@
 
 // TODO 4: manager: Find, ForEach, ForEachAll -> typed
 // TODO 3: implement own enemy-types for custom-enemies which would require instancing
-// TODO 3: memory-pool for each enemy-set (if single allocations still used)
 // TODO 3: add score-value to cEnemy class, either for base, or for extra score
 // TODO 2: make sure ENEMY_STATUS_DAMAGING is used for damaging contact, and no additional checks and (duplicate) TakeDamage calls are made
 // TODO 4: get rid of ENEMY_SIZE_FACTOR, because lots of places override it directly anyway
@@ -28,21 +27,23 @@
 
 enum eEnemyStatus : coreUint16
 {
-    ENEMY_STATUS_DEAD        = 0x0001u,   // completely removed from the game
-    ENEMY_STATUS_ASSIGNED    = 0x0002u,   // enemy is currently assigned to something
-    ENEMY_STATUS_CHILD       = 0x0004u,   // 
-    ENEMY_STATUS_SHIELDED    = 0x0008u,   // TODO 1: currently not used, needs to be automatic ? 
-    ENEMY_STATUS_BOSS        = 0x0010u,   // 
-    ENEMY_STATUS_SINGLE      = 0x0020u,   // 
-    ENEMY_STATUS_ENERGY      = 0x0040u,   // 
-    ENEMY_STATUS_BOTTOM      = 0x0080u,   // 
-    ENEMY_STATUS_TOP         = 0x0100u,   //       
-    ENEMY_STATUS_INVINCIBLE  = 0x0200u,   // 
-    ENEMY_STATUS_DAMAGING    = 0x0400u,   // 
-    ENEMY_STATUS_IMMORTAL    = 0x0800u,   // 
-    ENEMY_STATUS_GHOST       = 0x1000u,   // 
-    ENEMY_STATUS_HIDDEN      = 0x2000u,   // 
-    ENEMY_STATUS_WORTHLESS   = 0x4000u    // TODO 1: should be changed to explicit score value ?
+    ENEMY_STATUS_DEAD         = 0x0001u,   // completely removed from the game
+    ENEMY_STATUS_ASSIGNED     = 0x0002u,   // enemy is currently assigned to something
+    ENEMY_STATUS_CHILD        = 0x0004u,   // 
+    ENEMY_STATUS_SHIELDED     = 0x0008u,   // TODO 1: currently not used, needs to be automatic ? 
+    ENEMY_STATUS_BOSS         = 0x0010u,   // 
+    ENEMY_STATUS_SINGLE       = 0x0020u,   // 
+    ENEMY_STATUS_ENERGY       = 0x0040u,   // 
+    ENEMY_STATUS_BOTTOM       = 0x0080u,   // 
+    ENEMY_STATUS_TOP          = 0x0100u,   //       
+    ENEMY_STATUS_INVINCIBLE   = 0x0200u,   // 
+    ENEMY_STATUS_DAMAGING     = 0x0400u,   // 
+    ENEMY_STATUS_IMMORTAL     = 0x0800u,   // 
+    ENEMY_STATUS_GHOST_PLAYER = 0x1000u,   // 
+    ENEMY_STATUS_GHOST_BULLET = 0x2000u,   // 
+    ENEMY_STATUS_GHOST        = ENEMY_STATUS_GHOST_PLAYER | ENEMY_STATUS_GHOST_BULLET,
+    ENEMY_STATUS_HIDDEN       = 0x4000u,   // 
+    ENEMY_STATUS_WORTHLESS    = 0x8000u    // TODO 1: should be changed to explicit score value ?
 };
 
     //ENEMY_STATUS_INVINCIBLE  = 0x0100u,   //    ### geschosse werden reflektiert (bubble)  
@@ -142,7 +143,8 @@ private:
     };
     template <typename T> struct sEnemySet final : public sEnemySetGen
     {
-        coreList<T*> apEnemyPool;   // semi-dynamic container with all enemies
+        coreMemoryPool oMemoryPool;   // 
+        coreList<T*>   apEnemyPool;   // semi-dynamic container with all enemies
 
         sEnemySet()noexcept;
         ~sEnemySet()final;
@@ -286,6 +288,9 @@ public:
     ASSIGN_ID(3, "Star")
 
     // 
+    void ResetProperties() {cEnemy::ResetProperties(); m_fAngle = 0.0f;}
+
+    // 
     inline void SetAngle(const coreFloat fAngle) {m_fAngle = fAngle;}
 
     // 
@@ -311,6 +316,9 @@ public:
 
     ENABLE_COPY(cArrowEnemy)
     ASSIGN_ID(4, "Arrow")
+
+    // 
+    void ResetProperties() {cEnemy::ResetProperties(); m_fAngle = 0.0f;}
 
     // 
     inline void SetAngle(const coreFloat fAngle) {m_fAngle = fAngle;}
@@ -352,6 +360,9 @@ public:
     ASSIGN_ID(6, "Freezer")
 
     // 
+    void ResetProperties() {cEnemy::ResetProperties(); m_fAngle = 0.0f;}
+
+    // 
     inline void SetAngle(const coreFloat fAngle) {m_fAngle = fAngle;}
 
     // 
@@ -377,6 +388,9 @@ public:
 
     ENABLE_COPY(cCinderEnemy)
     ASSIGN_ID(7, "Cinder")
+
+    // 
+    void ResetProperties() {cEnemy::ResetProperties(); m_fAngle = 0.0f;}
 
     // 
     inline void SetAngle(const coreFloat fAngle) {m_fAngle = fAngle;}
@@ -471,7 +485,7 @@ template <typename T> cEnemyManager::sEnemySet<T>::sEnemySet()noexcept
     // 
     oEnemyActive.CreateCustom(sizeof(coreFloat), [](coreVertexBuffer* OUTPUT pBuffer)
     {
-        pBuffer->DefineAttribute(SHIP_SHADER_ATTRIBUTE_BLINK, 1u, GL_FLOAT, false, 0u);
+        pBuffer->DefineAttribute(SHIP_SHADER_ATTRIBUTE_BLINK_NUM, 1u, GL_FLOAT, false, 0u);
     },
     [](coreByte* OUTPUT pData, const coreObject3D* pEnemy)
     {
@@ -486,9 +500,12 @@ template <typename T> cEnemyManager::sEnemySet<T>::sEnemySet()noexcept
     cShadow::GetGlobalContainer()->BindList(&oEnemyActive);
     g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->BindList(&oEnemyActive);
 
+    // 
+    oMemoryPool.Configure(sizeof(T), ENEMY_SET_INIT);
+
     // set enemy pool to initial size
     apEnemyPool.resize(ENEMY_SET_INIT);
-    apEnemyPool[0] = new T();   // already request resources
+    apEnemyPool[0] = POOLED_NEW(oMemoryPool, T);   // already request resources
 }
 
 
@@ -497,8 +514,7 @@ template <typename T> cEnemyManager::sEnemySet<T>::sEnemySet()noexcept
 template <typename T> cEnemyManager::sEnemySet<T>::sEnemySet::~sEnemySet()
 {
     // 
-    FOR_EACH(it, apEnemyPool)
-        SAFE_DELETE(*it)
+    FOR_EACH(it, apEnemyPool) POOLED_DELETE(oMemoryPool, *it)
 
     // remove enemy set from global shadow and outline
     cShadow::GetGlobalContainer()->UnbindList(&oEnemyActive);
@@ -525,7 +541,7 @@ template <typename T> RETURN_RESTRICT T* cEnemyManager::AllocateEnemy()
     {
         // check current enemy status
         T*& pEnemy = pSet->apEnemyPool[pSet->iTopEnemy++];
-        if(!pEnemy) pEnemy = new T();
+        if(!pEnemy) pEnemy = POOLED_NEW(pSet->oMemoryPool, T);
         if(!pEnemy->HasStatus(ENEMY_STATUS_ASSIGNED))
         {
             // prepare enemy and add to active list

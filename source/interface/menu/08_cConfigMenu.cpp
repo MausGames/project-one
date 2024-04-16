@@ -337,7 +337,7 @@ cConfigMenu::cConfigMenu()noexcept
     m_HudType      .AddEntryLanguage("HUDTYPE_BORDER",         2u);
     for(coreUintW i = 60u; i <= 240u; i += 30u) m_UpdateFreq.AddEntry(coreData::ToChars(i), i);
     m_Version      .AddEntry        ("1.0.0",                  1u);
-    m_Version      .AddEntryLanguage("VERSION_LATEST",         0u);
+    m_Version      .AddEntryLanguage("VERSION_LATEST",         0u);   // "Latest (v1.2)"
     m_MirrorMode   .AddEntryLanguage("VALUE_OFF",              0u);
     m_MirrorMode   .AddEntryLanguage("VALUE_LOW",              1u);
     m_MirrorMode   .AddEntryLanguage("VALUE_HIGH",             2u);

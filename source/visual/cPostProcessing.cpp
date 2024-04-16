@@ -44,6 +44,11 @@ cPostProcessing::cPostProcessing()noexcept
     m_Separator.SetColor4    (coreVector4(0.05f,0.05f,0.05f,0.0f));
 
     // 
+    m_Border.DefineProgram("default_2d_program");
+    m_Border.DefineTexture(0u, "default_white.png");
+    m_Border.SetColor3    (coreVector3(1.0f,1.0f,1.0f) * 0.4f);
+
+    // 
     this->SetWallOpacity  (0.0f);
     this->SetSaturationAll(1.0f);
     this->SetValueAll     (1.0f);
@@ -80,6 +85,10 @@ void cPostProcessing::Render()
 
     if(bDisableBlend) glDisable(GL_BLEND);
     {
+        // 
+        if(!this->GetDirection().IsAligned())
+            m_Border.Render();
+
         // render interiors (post-process)
         for(coreUintW i = 0u; i < POST_INTERIORS; ++i)
             m_aInterior[i].Render(this->GetProgram());
@@ -256,6 +265,12 @@ void cPostProcessing::__UpdateInterior()
         m_aInterior[0].SetTexOffset(coreVector2(0.0f,0.0f));
         m_aInterior[0].Move();
     }
+
+    // 
+    m_Border.SetPosition (this->GetPosition ());
+    m_Border.SetSize     (this->GetSize     () + 0.02f);
+    m_Border.SetDirection(this->GetDirection());
+    m_Border.Move();
 }
 
 

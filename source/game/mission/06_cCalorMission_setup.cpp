@@ -83,6 +83,7 @@ void cCalorMission::__SetupOwn()
     // TODO 1: multi-jumper gets attackable before moving to last position, which might be wrong
     // TODO 1: reichweite der bullet-berührung vielleicht (dynamisch, oder sub-gruppen abhängig) erhöhen (e.g. in sternen gruppe, pfad gruppe)
     // TODO 1: SQRT2 not necessary ? (oh wait, 0.7071 on corner)
+    // TODO 1: gegner sollen leuchten, wenn sie getriggert sind (für interpoliertes movement)
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         constexpr coreUintW iNumEnemiesAll  = 63u;
@@ -671,7 +672,7 @@ void cCalorMission::__SetupOwn()
 
         STAGE_FOREACH_PLAYER(pPlayer, i)
         {
-            pPlayer->SetSpeed((!pPlayer->IsRolling() && m_Snow.IsActive() && m_Snow.TestCollision(pPlayer->GetPosition().xy())) ? 0.2f : 1.0f);
+            pPlayer->SetMoveSpeed((!pPlayer->IsRolling() && m_Snow.IsActive() && m_Snow.TestCollision(pPlayer->GetPosition().xy())) ? 0.2f : 1.0f);
         });
 
         STAGE_WAVE("ZWEIUNDDREISSIG", {20.0f, 30.0f, 40.0f, 50.0f})
@@ -687,7 +688,7 @@ void cCalorMission::__SetupOwn()
 
         STAGE_FOREACH_PLAYER(pPlayer, i)
         {
-            pPlayer->SetSpeed(1.0f);
+            pPlayer->SetMoveSpeed(1.0f);
         });
 
         STAGE_FINISH_NOW
@@ -1032,7 +1033,7 @@ void cCalorMission::__SetupOwn()
 
                 STAGE_FOREACH_PLAYER(pPlayer, i)
                 {
-                    pPlayer->ApplyForce(coreVector2(0.0f,3700.0f));
+                    pPlayer->ApplyForce(coreVector2(0.0f,1000.0f));
                     avTurn[i] = pPlayer->GetDirection().xy();
                 });
             }
@@ -1177,7 +1178,7 @@ void cCalorMission::__SetupOwn()
             if(pEnemy->ReachedDeath()) STAGE_BADGE(0u, BADGE_EASY, pEnemy->GetPosition())
         });
 
-        if((((m_iStageSub >= 1u) && (m_iStageSub < 4u)) || (m_iStageSub == 5u)) && STAGE_TIME_AFTER(2.0f) && STAGE_TICK_FREE(3.5f, 0.0f))   
+        if((((m_iStageSub >= 1u) && (m_iStageSub < 4u)) || (m_iStageSub == 5u)) && STAGE_TIME_AFTER(2.0f) && STAGE_TICK_FREE(3.5f, 0.0f))   // TODO 1: sub-time, STAGE_TICK_FREE2 ?
         {
             const coreUintW iNumEnemies = pSquad1->GetNumEnemiesAlive();
             if(iNumEnemies)
@@ -1855,7 +1856,7 @@ void cCalorMission::__SetupOwn()
             }
         });
 
-        if((m_iStageSub >= 8u) && (m_iStageSub <= 11u) && STAGE_TICK_FREE(2.0f, 0.0f))
+        if((m_iStageSub >= 8u) && (m_iStageSub <= 11u) && STAGE_TICK_FREE(2.0f, 0.0f))   // TODO 1: sub-time, STAGE_TICK_FREE2 ?
         {
             cEnemy* pDummy = pSquad1->GetEnemy(0u);
 

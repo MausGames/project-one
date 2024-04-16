@@ -12,6 +12,8 @@
 
 // TODO 1: design gamepad navigation (free movement?, fixed direction? (arbritrary, left-right), improve pin-order)
 // TODO 1: 2 blinking arrow cursors, to highlight navigation (blinking, not moving, for contrast with rotating pin)
+// TODO 1: add mission names directly on worldmap (permanent color and greyed ifn ot focused, or color only on focus)
+// TODO 1: jedes gebiet hat eigenes symbol, welches auch im intro erscheint, leaderboard, replay, fragment, etc. (auch erwähnt in design document)
 
 
 // ****************************************************************

@@ -696,6 +696,7 @@ void cNevoMission::__SetupOwn()
     // TODO 1: vielleicht noch eine gruppe in der freien stelle
     // TODO 1: add more enemies (einfach gegner-blöcke und linien verlängern), irgendwas um die niedrige geschwindigkeit auszugleichen
     // TODO 1: letzte große gruppe vielleicht shiften oder aufteilen (um sie von der kleinen davor zu unterscheiden!), oder rotiert infinity nach rechts, oder chess-aufteilung
+    // TODO 1: schauen ob gegner und pfeile groß genug sind, sollten schön groß sein
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -1075,6 +1076,7 @@ void cNevoMission::__SetupOwn()
     // TODO 1: vielleicht rotierende bomben als vorletztes (würde einiges vereinfachen)
     // TODO 1: spieler sollte nicht mit gegner kollidieren können ?
     // TODO 1: gegner sollte sich nicht so linear und roboter-haft bewegen, vielleicht sinus (mittig langsam) ?
+    // TODO 1: letzte phase is ziemlich brutal, vielleicht 2 linien ohne strahl
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         STAGE_ADD_SQUAD(pSquad1, cWarriorEnemy, 58u)
@@ -1236,7 +1238,7 @@ void cNevoMission::__SetupOwn()
 
             if(m_iStageSub == 6u)
             {
-                if(STAGE_TICK_FREE(0.5f, 0.0f))
+                if(STAGE_TICK_FREE(0.5f, 0.0f))   // TODO 1: sub-time, STAGE_TICK_FREE2 ?
                 {
                     iWallCount += 1u;
 
@@ -1264,7 +1266,7 @@ void cNevoMission::__SetupOwn()
             }
             else if(m_iStageSub == 10u)
             {
-                if(STAGE_TICK_FREE(0.25f, 0.0f))
+                if(STAGE_TICK_FREE(0.25f, 0.0f))   // TODO 1: sub-time, STAGE_TICK_FREE2 ?
                 {
                     iWallCount += 1u;
 
@@ -1308,7 +1310,7 @@ void cNevoMission::__SetupOwn()
             }
             else
             {
-                if(STAGE_TICK_FREE(0.75f, 0.0f) && (iRotaCount || ((s_iTick % 2u) == 0u)))
+                if(STAGE_TICK_FREE(0.75f, 0.0f) && (iRotaCount || ((s_iTick % 2u) == 0u)))   // TODO 1: sub-time, STAGE_TICK_FREE2 ?
                 {
                     const cPlayer*    pPlayer = g_pGame->FindPlayerDual(((s_iTick % 8u) < 4u) ? 0u : 1u);
                     const coreBool    bType   = (m_iStageSub <= 2u) ? true : ((m_iStageSub <= 4u) ? false : !((iRotaCount++) % 2u));
@@ -1396,6 +1398,7 @@ void cNevoMission::__SetupOwn()
     // TODO 1: movement only from right to left
     // TODO 1: (previously bullet shrink+grow, mentioned in bottom of Waves page)
     // TODO 1: gegner versuchen dich in mustern zu berühren, schlange,
+    // TODO 1: frei gewordene objekte fliegen auf spieler zu oder in kreiselbewegung nach außen
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -1601,7 +1604,7 @@ void cNevoMission::__SetupOwn()
 
         if(m_iStageSub == 5u)
         {
-            if(STAGE_TICK_FREE(1.5f, 0.0f))
+            if(STAGE_TICK_FREE(1.5f, 0.0f))   // TODO 1: sub-time, STAGE_TICK_FREE2 ?
             {
                 const coreVector2 vPos = coreVector2(0.4f, 1.2f) * FOREGROUND_AREA;
                 const coreVector2 vDir = coreVector2(0.0f,-1.0f);
@@ -1612,7 +1615,7 @@ void cNevoMission::__SetupOwn()
         }
         else if(m_iStageSub == 6u)
         {
-            if(STAGE_TICK_FREE(1.3f, 0.0f))
+            if(STAGE_TICK_FREE(1.3f, 0.0f))   // TODO 1: sub-time, STAGE_TICK_FREE2 ?
             {
                 for(coreUintW i = 0u; i < 10u; ++i)
                 {

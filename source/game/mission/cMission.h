@@ -75,6 +75,8 @@
 #define NEVO_BLOCKS_RAWS            (NEVO_BLOCKS * 2u)                                // 
 #define NEVO_BOMB_SIZE              (4.0f)                                            // 
 
+#define HARENA_FLOORS               (10u)                                             // 
+#define HARENA_FLOORS_RAWS          (HARENA_FLOORS)                                   // 
 #define HARENA_SPIKES               (36u)                                             // 
 #define HARENA_SPIKES_RAWS          (HARENA_SPIKES * 2u)                              // 
 #define HARENA_SPIKE_DIMENSION      (6u)                                              //    
@@ -86,6 +88,9 @@
 #define RUTILUS_AREAS               (2u)                                              // 
 #define RUTILUS_WAVES               (4u)                                              // 
 #define RUTILUS_WAVES_RAWS          (RUTILUS_WAVES)                                   // 
+#define RUTILUS_PLATE_SPEED         (1.0f)                                            // 
+#define RUTILUS_AREA_SIZE           (20.0f)                                           // 
+#define RUTILUS_SAFE_SIZE           (20.0f)                                           // 
 
 #define GELU_FANGS                  (25u)                                             // 
 #define GELU_FANGS_RAWS             (GELU_FANGS)                                      // 
@@ -179,10 +184,11 @@
 #define STAGE_REPEAT(x)                        {if(STAGE_BRANCH(x, x)) {}}
 
 #define STAGE_TICK_EXTERN(a,b,c,o)             ((s_iTick = F_TO_UI((a) * (c) - (o)) - 1u) != coreUint16(F_TO_UI((b) * (c) - (o)) - 1u))
-#define STAGE_TICK_FREE(c,o)                   ((m_fStageTimeBefore  >= 0.0f) &&             STAGE_TICK_EXTERN(m_fStageTime,  m_fStageTimeBefore,  c, o))
-#define STAGE_TICK_TIME(c,o)                   ((fLifeTimeBeforeBase >= 0.0f) && !bIsDead && STAGE_TICK_FREE(c, o))
-#define STAGE_TICK_LIFETIME(c,o)               ((fLifeTimeBeforeBase >= 0.0f) && !bIsDead && STAGE_TICK_EXTERN(fLifeTime,     fLifeTimeBefore,     c, o))
-#define STAGE_TICK_LIFETIME_BASE(c,o)          ((fLifeTimeBeforeBase >= 0.0f) && !bIsDead && STAGE_TICK_EXTERN(fLifeTimeBase, fLifeTimeBeforeBase, c, o))
+#define STAGE_TICK_FREE(c,o)                   ((m_fStageTimeBefore    >= 0.0f) &&             STAGE_TICK_EXTERN(m_fStageTime,    m_fStageTimeBefore,    c, o))
+#define STAGE_TICK_FREE2(c,o)                  ((m_fStageSubTimeBefore >= 0.0f) &&             STAGE_TICK_EXTERN(m_fStageSubTime, m_fStageSubTimeBefore, c, o))
+#define STAGE_TICK_TIME(c,o)                   ((fLifeTimeBeforeBase   >= 0.0f) && !bIsDead && STAGE_TICK_FREE(c, o))
+#define STAGE_TICK_LIFETIME(c,o)               ((fLifeTimeBeforeBase   >= 0.0f) && !bIsDead && STAGE_TICK_EXTERN(fLifeTime,       fLifeTimeBefore,       c, o))
+#define STAGE_TICK_LIFETIME_BASE(c,o)          ((fLifeTimeBeforeBase   >= 0.0f) && !bIsDead && STAGE_TICK_EXTERN(fLifeTimeBase,   fLifeTimeBeforeBase,   c, o))
 
 #define STAGE_TIME_POINT(t)                    (InBetween((t), m_fStageTimeBefore, m_fStageTime))
 #define STAGE_TIME_BEFORE(t)                   (m_fStageTime <  (t))
@@ -194,7 +200,7 @@
 #define STAGE_SUBTIME_BEFORE(t)                (m_fStageSubTime <  (t))
 #define STAGE_SUBTIME_AFTER(t)                 (m_fStageSubTime >= (t))
 #define STAGE_SUBTIME_BETWEEN(t,u)             (InBetween(m_fStageSubTime, (t), (u)))
-#define STAGE_BEGINNING2                       (STAGE_SUBTIME_POINT(0.0f))
+#define STAGE_BEGINNING2                       ((STAGE_SUBTIME_POINT(0.0f) && (m_fStageSubTimeBefore != 0.0f)) || (m_fStageSubTime == 0.0f))
 
 #define STAGE_LIFETIME_POINT(t)                (InBetween((t), fLifeTimeBefore, fLifeTime) && [&]() {s_fLifeTimePoint = (t); return true;}())
 #define STAGE_LIFETIME_BEFORE(t)               (fLifeTime     <  (t) && fLifeTime     >= 0.0f)
@@ -202,7 +208,7 @@
 #define STAGE_LIFETIME_AFTER(t)                (fLifeTime     >= (t))
 #define STAGE_LIFETIME_AFTER_BASE(t)           (fLifeTimeBase >= (t))
 #define STAGE_LIFETIME_BETWEEN(t,u)            (InBetween(fLifeTime, (t), (u)))
-#define STAGE_TAKEOFF                          ((InBetween(0.0f, fLifeTimeBeforeBase, fLifeTimeBase) && (fLifeTimeBeforeBase != 0.0f)) || (fLifeTimeBase == 0.0f))
+#define STAGE_TAKEOFF                          ((InBetween(0.0f, fLifeTimeBeforeBase, fLifeTimeBase) && (fLifeTimeBeforeBase != 0.0f)) || (fLifeTimeBase == 0.0f))   // TODO 1: negative fLifeOffset can break this (will never be true)
 
 #define STAGE_HEALTHPCT_POINT(e,t)             ((e)->ReachedHealthPct(t) && [&]() {s_fHealthPctPoint = (t); return true;}())
 #define STAGE_HEALTHPCT_BEFORE(e,t)            ((e)->GetCurHealthPct() <  (t))
@@ -571,14 +577,18 @@ private:
 class cHarenaMission final : public cMission
 {
 private:
-    cTigerBoss m_Tiger;                                // 
+    cTigerBoss m_Tiger;                                 // 
 
-    coreBatchList m_Spike;                             // 
-    coreBatchList m_SpikeBoard;                        // 
-    coreObject3D  m_aSpikeRaw  [HARENA_SPIKES_RAWS];   // 
-    coreFlow      m_afSpikeTime[HARENA_SPIKES];        // 
-    coreFlow      m_afSpikeCur [HARENA_SPIKES];        // 
-    coreFloat     m_afSpikeMax [HARENA_SPIKES];        // 
+    coreBatchList m_Floor;                              // 
+    coreObject3D  m_aFloorRaw   [HARENA_FLOORS_RAWS];   // 
+    const cShip*  m_apFloorOwner[HARENA_FLOORS];        // 
+
+    coreBatchList m_Spike;                              // 
+    coreBatchList m_SpikeBoard;                         // 
+    coreObject3D  m_aSpikeRaw  [HARENA_SPIKES_RAWS];    // 
+    coreFlow      m_afSpikeTime[HARENA_SPIKES];         // 
+    coreFlow      m_afSpikeCur [HARENA_SPIKES];         // 
+    coreFloat     m_afSpikeMax [HARENA_SPIKES];         // 
 
 
 public:
@@ -587,6 +597,10 @@ public:
 
     DISABLE_COPY(cHarenaMission)
     ASSIGN_ID(3, "HARENA")
+
+    // 
+    void EnableFloor (const coreUintW iIndex, const cShip* pOwner);
+    void DisableFloor(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
     void EnableSpike (const coreUintW iIndex);
@@ -616,21 +630,29 @@ private:
 
     coreObject3D m_aTeleporter     [RUTILUS_TELEPORTER];   // 
     coreVector2  m_avTeleporterPrev[RUTILUS_TELEPORTER];   // 
+    coreVector2  m_avTeleporterRota[RUTILUS_TELEPORTER];   // 
     coreUint8    m_iTeleporterActive;                      // 
 
     coreBatchList m_Plate;                                 // 
     coreObject3D  m_aPlateRaw  [RUTILUS_PLATES_RAWS];      // 
     coreFlow      m_afPlateTime[RUTILUS_PLATES];           // 
     coreVector4   m_avPlateData[RUTILUS_PLATES];           // 
+    coreUint8     m_iPlateRotated;                         // 
 
     coreObject3D m_aArea[RUTILUS_AREAS];                   // 
     coreFlow     m_fAreaTime;                              // 
+    coreFloat    m_fAreaScale;                             // 
+
+    coreObject3D m_Safe;                                   // 
+    coreFlow     m_fSafeTime;                              // 
 
     coreBatchList m_Wave;                                  // 
     coreObject3D  m_aWaveRaw  [RUTILUS_WAVES_RAWS];        // 
     coreFlow      m_afWaveTime[RUTILUS_WAVES];             // 
     coreUint8     m_iWaveActive;                           // 
     coreUint8     m_iWaveDir;                              // 
+    coreUint8     m_iWaveType;                             // 
+    coreModelPtr  m_apWaveModel[2];                        // 
 
     coreUint8 m_aiMoveFlip[MISSION_PLAYERS];               // 
 
@@ -649,7 +671,7 @@ public:
     void DisableTeleporter(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    void EnablePlate (const coreUintW iIndex, const coreFloat fFrom, const coreFloat fTo, const coreFloat fScale);
+    void EnablePlate (const coreUintW iIndex, const coreFloat fOffsetFrom, const coreFloat fOffsetTo, const coreFloat fScaleFrom, const coreFloat fScaleTo);
     void DisablePlate(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
@@ -657,15 +679,20 @@ public:
     void DisableArea(const coreBool bAnimated);
 
     // 
-    void EnableWave ();
+    void EnableSafe ();
+    void DisableSafe(const coreBool bAnimated);
+
+    // 
+    void EnableWave (const coreUint8 iType);
     void DisableWave(const coreBool bAnimated);
 
     // 
     inline void SetTeleporterActive(const coreUint8 iActive) {m_iTeleporterActive = iActive;}
 
     // 
-    inline void SetPlateOffset(const coreUintW iIndex, const coreFloat fOffset) {ASSERT(iIndex < RUTILUS_PLATES) m_afPlateTime[iIndex] = 0.0f; m_avPlateData[iIndex].xy(coreVector2(m_avPlateData[iIndex].y, fOffset));}
-    inline void SetPlateScale (const coreUintW iIndex, const coreFloat fScale)  {ASSERT(iIndex < RUTILUS_PLATES) m_afPlateTime[iIndex] = 0.0f; m_avPlateData[iIndex].zw(coreVector2(m_avPlateData[iIndex].w, fScale));}
+    inline void SetPlateOffset (const coreUintW iIndex, const coreFloat fOffset)  {ASSERT(iIndex < RUTILUS_PLATES) m_afPlateTime[iIndex] = 0.0f; m_avPlateData[iIndex].xy(coreVector2(m_avPlateData[iIndex].y, fOffset));}
+    inline void SetPlateScale  (const coreUintW iIndex, const coreFloat fScale)   {ASSERT(iIndex < RUTILUS_PLATES) m_afPlateTime[iIndex] = 0.0f; m_avPlateData[iIndex].zw(coreVector2(m_avPlateData[iIndex].w, fScale));}
+    inline void SetPlateRotated(const coreUintW iIndex, const coreBool  bRotated) {ASSERT(iIndex < RUTILUS_PLATES) SET_BIT(m_iPlateRotated, iIndex, bRotated)}
 
 
 private:

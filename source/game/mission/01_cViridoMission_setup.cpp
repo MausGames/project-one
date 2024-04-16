@@ -101,6 +101,7 @@ void cViridoMission::__SetupOwn()
     // TODO 1: dungeon with or without extra-walls ?
     // TODO 1: maybe spinning enemies should move faster into the middle, but what about their shooting ?
     // TODO 1: wave-pattern needs better fly-in
+    // TODO 1: maybe two shields for first long-shield group, there are some issues with reflected bullets (not sure if it solves this) (entweder bei der wave, oder bei der zweiten large-shield wave)
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         constexpr coreFloat fWidth = 0.38f;
@@ -1531,7 +1532,7 @@ void cViridoMission::__SetupOwn()
 
             if(pEnemy->ReachedDeath())
             {
-                pEnemy->AddStatus(ENEMY_STATUS_DAMAGING | ENEMY_STATUS_GHOST);
+                pEnemy->AddStatus(ENEMY_STATUS_DAMAGING | ENEMY_STATUS_GHOST_BULLET);
             }
 
             if(pEnemy->GetCurHealth() == 0)

@@ -577,7 +577,7 @@ void cDemoMission::__SetupOwn()
         STATIC_ASSERT(sizeof(coreUint32) * iNumTypes >= iNumEnemies)
         coreUint8* aiByteType = r_cast<coreUint8*>(aiType);
 
-        const auto nTakeChild = [&](const coreUint8 iType)
+        const auto nTakeChildFunc = [&](const coreUint8 iType)
         {
             for(coreUintW i = iTakeStart, ie = pSquad2->GetNumEnemies(); i < ie; ++i)
             {
@@ -602,7 +602,7 @@ void cDemoMission::__SetupOwn()
             return pSquad2->GetEnemy(0u);
         };
 
-        const auto nDropShield = [&](const coreUint8 iType)
+        const auto nDropShieldFunc = [&](const coreUint8 iType)
         {
             ASSERT(iType >= 4u)
             STAGE_FOREACH_ENEMY(pSquad2, pEnemy, i)
@@ -626,9 +626,9 @@ void cDemoMission::__SetupOwn()
 
         if(m_fStageTime <= 3.0f)
         {
-            if(STAGE_TICK_FREE(10.0f, 0.0f))
+            if(STAGE_TICK_FREE(10.0f, 0.0f))   // TODO 1: sub-time, STAGE_TICK_FREE2 ?
             {
-                cEnemy*         pChild = nTakeChild(0u);
+                cEnemy*         pChild = nTakeChildFunc(0u);
                 const coreUintW iIndex = pSquad2->GetIndex(pChild);
 
                 const coreFloat   fOff = ((s_iTick % 30u) < 15u) ? 1.0f : -1.0f;
@@ -643,9 +643,9 @@ void cDemoMission::__SetupOwn()
         }
         else if(m_iStageSub == 4u || m_iStageSub == 5u)
         {
-            if(STAGE_TICK_FREE(10.0f, 0.0f))
+            if(STAGE_TICK_FREE(10.0f, 0.0f))   // TODO 1: sub-time, STAGE_TICK_FREE2 ?
             {
-                cEnemy*         pChild = nTakeChild(0u);
+                cEnemy*         pChild = nTakeChildFunc(0u);
                 const coreUintW iIndex = pSquad2->GetIndex(pChild);
 
                 const coreFloat   fOff = g_pGame->FindPlayerDual((m_iStageSub == 4u) ? 0u : 1u)->GetPosition().y;
@@ -658,11 +658,11 @@ void cDemoMission::__SetupOwn()
         }
         else if(m_iStageSub == 7u)
         {
-            if(STAGE_TICK_FREE(1.0f, 0.0f))
+            if(STAGE_TICK_FREE(1.0f, 0.0f))   // TODO 1: sub-time, STAGE_TICK_FREE2 ?
             {
                 for(coreUintW j = 0u; j < 16u; ++j)
                 {
-                    cEnemy*         pChild = nTakeChild(0u);
+                    cEnemy*         pChild = nTakeChildFunc(0u);
                     const coreUintW iIndex = pSquad2->GetIndex(pChild);
 
                     const coreFloat   fOff = (I_TO_F(j) - 7.5f) * 0.1375f;
@@ -690,7 +690,7 @@ void cDemoMission::__SetupOwn()
             {
                 if(STAGE_TICK_LIFETIME(10.0f, 0.0f) && InBetween(s_iTick % 30u, 5u, 20u))
                 {
-                    cEnemy*         pChild = nTakeChild(0u);
+                    cEnemy*         pChild = nTakeChildFunc(0u);
                     const coreUintW iIndex = pSquad2->GetIndex(pChild);
 
                     const coreVector2 vAim = pEnemy->AimAtPlayerDual(((s_iTick % 60u) < 30u) ? 0u : 1u).Normalized();   // TODO 1: coop, abwechslung
@@ -707,7 +707,7 @@ void cDemoMission::__SetupOwn()
                 {
                     for(coreUintW j = 0u; j < 20u; ++j)
                     {
-                        cEnemy*         pChild = nTakeChild(1u);
+                        cEnemy*         pChild = nTakeChildFunc(1u);
                         const coreUintW iIndex = pSquad2->GetIndex(pChild);
 
                         pChild->SetPosition(pEnemy->GetPosition());
@@ -723,7 +723,7 @@ void cDemoMission::__SetupOwn()
                 {
                     for(coreUintW j = 0u; j < 10u; ++j)
                     {
-                        cEnemy*         pChild = nTakeChild(i << 2u);
+                        cEnemy*         pChild = nTakeChildFunc(i << 2u);
                         const coreUintW iIndex = pSquad2->GetIndex(pChild);
 
                         pChild->SetPosition(pEnemy->GetPosition());
@@ -734,7 +734,7 @@ void cDemoMission::__SetupOwn()
 
                 if(pEnemy->ReachedDeath())
                 {
-                    nDropShield(i << 2u);
+                    nDropShieldFunc(i << 2u);
                 }
             }
         });
@@ -1637,7 +1637,7 @@ void cDemoMission::__SetupOwn()
         const coreFloat   fSpeedSlow  = 0.2f;
         const coreFloat   fSpeedFast  = 1.0f;
 
-        const auto nCalcSpeed = [&](const coreVector2 vPosition)
+        const auto nCalcSpeedFunc = [&](const coreVector2 vPosition)
         {
             const coreVector2 vDiff = vPosition - vTestPos;
             return LERP(fSpeedSlow, fSpeedFast, STEPH3(fTestFromSq, fTestToSq, vDiff.LengthSq()));
@@ -1647,7 +1647,7 @@ void cDemoMission::__SetupOwn()
         {
             STAGE_FOREACH_PLAYER(pPlayer, i)
             {
-                pPlayer->SetSpeed(nCalcSpeed(pPlayer->GetPosition().xy()));
+                pPlayer->SetMoveSpeed(nCalcSpeedFunc(pPlayer->GetPosition().xy()));
             });
 
             const auto nBulletSlowFunc = [&](cBullet* OUTPUT pBullet)
@@ -1668,7 +1668,7 @@ void cDemoMission::__SetupOwn()
                 }
                 ASSERT(fBase)
 
-                pBullet->SetSpeed(fBase * nCalcSpeed(pBullet->GetPosition().xy()));
+                pBullet->SetSpeed(fBase * nCalcSpeedFunc(pBullet->GetPosition().xy()));
             };
             g_pGame->GetBulletManagerPlayer()->ForEachBullet(nBulletSlowFunc);
             g_pGame->GetBulletManagerEnemy ()->ForEachBullet(nBulletSlowFunc);
@@ -1680,7 +1680,7 @@ void cDemoMission::__SetupOwn()
 
             if(i < 10u)
             {
-                if(STAGE_LIFETIME_AFTER(0.0f)) pEnemy->DefaultMoveForward(pEnemy->GetDirection().xy(), 25.0f * nCalcSpeed(pEnemy->GetPosition().xy()));
+                if(STAGE_LIFETIME_AFTER(0.0f)) pEnemy->DefaultMoveForward(pEnemy->GetDirection().xy(), 25.0f * nCalcSpeedFunc(pEnemy->GetPosition().xy()));
 
                 coreVector2       vCurPos = pEnemy->GetPosition ().xy();
                 const coreVector2 vCurDir = pEnemy->GetDirection().xy();

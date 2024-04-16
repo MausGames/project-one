@@ -336,7 +336,7 @@ void InitFramerate()
         SDL_GetWindowDisplayMode(Core::System->GetWindow(), &oMode);
 
         // override vertical synchronization
-        if(oMode.refresh_rate == F_TO_SI(1.0 / s_dPhysicalTime))
+        if(oMode.refresh_rate == F_TO_SI(1.0 / s_dPhysicalTime))   // TODO 1: emscripten
         {
             if(SDL_GL_SetSwapInterval(-1)) SDL_GL_SetSwapInterval(1);
         }

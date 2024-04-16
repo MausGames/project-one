@@ -10,6 +10,8 @@
 #ifndef _P1_GUARD_TURF_H_
 #define _P1_GUARD_TURF_H_
 
+// TODO 1: use snow as base instead, the functionality there is quite advanced, if necessary as new base (cCanvas)
+
 
 // ****************************************************************
 // 
