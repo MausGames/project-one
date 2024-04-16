@@ -48,6 +48,7 @@ private:
         coreUint8 iMoveLeft;    // 
         coreUint8 iMoveDown;    // 
         coreUint8 iMoveRight;   // 
+        coreUint8 iFallback;    // 
         eMenuType eType;        // 
         coreUint8 iSurface;     // 
     };
@@ -123,6 +124,7 @@ public:
     void Update();
 
     // 
+    void BindObject (coreObject2D* pObject, coreObject2D* pUp, coreObject2D* pLeft, coreObject2D* pDown, coreObject2D* pRight, coreObject2D* pFallback, const eMenuType eType, const coreUint8 iSurface = 0u);
     void BindObject (coreObject2D* pObject, coreObject2D* pUp, coreObject2D* pLeft, coreObject2D* pDown, coreObject2D* pRight, const eMenuType eType, const coreUint8 iSurface = 0u);
     void BindSurface(coreObject2D* pTab, const coreUint8 iSurface, coreObject2D* pUp, coreObject2D* pLeft, coreObject2D* pDown, coreObject2D* pRight);
     void BindScroll (coreObject2D* pScroll);

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 //*----------------------------------------------------------------------------*//
-//| Project One v1.0.0 (https://www.maus-games.at)                             |//
+//| Project One v1.0.1 (https://www.maus-games.at)                             |//
 //*----------------------------------------------------------------------------*//
 //| Copyright (c) 2010 Martin Mauersics                                        |//
 //|                                                                            |//
@@ -103,7 +103,7 @@
 // TODO 3: rogue like mode (grey mode), with negative or positive+negative (combined) effects to select
 // TODO 1: [MF] [HIGH] [ULTRA] add more coop special cases (like residue and ghosts), at least one per mission, not bosses except if something cool comes to mind
 // TODO 3: health-bars für stärkere gegner (>= 30 or 50 hp), blenden sich ein bei schaden (und wieder aus nach cooldown ?)
-// TODO 1: [MF] [HIGH] [ULTRA] misc: japanes names, pulse, passwords, mehr striche bei eigengrau
+// TODO 1: [MF] [HIGH] [ULTRA] misc: japanes names, pulse, passwords
 
 // Small Task List:
 // TODO 3: better player bullet creation effect (muzzle flash)
@@ -133,7 +133,6 @@
 // TODO 1: [MF] final fantasy ending screen (objekt in mitte (fragment, Sonic) darüber text THE END ?), "thank you for playing" beim tod von P1, in normalem playthorugh kommen credits über alle backgrounds, die grau werden und verrotten (turf brennt sich langsam ein), beim echten playthrough sind sie bunt
 // TODO 3: etwas muss gemacht werden, wenn sich die player hitboxen überlappen (vielleicht nicht möglich, schieben ?)
 // TODO 3: gegner und geschosse am rand müssen gut sichtbar bleiben, wenn interface im inneren ist
-// TODO 1: [MF] [HIGH] [ULTRA] P1 flies fast across summary screen after you, when you finish a mission for the first time (+ weißer helfer)
 
 // Cleanup Task List:
 // TODO 4: more cleanup surrounding Eigengrau: game, postprocessing (cpp + shader), camera, player, weapon, bullet

@@ -4818,7 +4818,7 @@ void cProjectOneBoss::__MoveWhite()
             const coreMatrix2 mRota = (iDamage == 2) ? mRota1 : ((iDamage == 3) ? mRota2 : mRota3);
             const coreVector2 vDiff = pBullet->GetPosition().xy() - pBullet->GetOwner()->GetPosition().xy();
             const coreVector2 vPos  = pBullet->GetOwner()->GetPosition().xy() + vDiff * mRota;
-            const coreVector2 vDir  = pBullet->GetFlyDir() * mRota;
+            const coreVector2 vDir  = (pBullet->GetFlyDir() * mRota).Normalized();
 
             pBullet->SetPosition(coreVector3(vPos, 0.0f));
             pBullet->SetFlyDir  (vDir);

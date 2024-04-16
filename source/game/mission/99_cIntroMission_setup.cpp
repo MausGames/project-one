@@ -62,7 +62,7 @@ void cIntroMission::__SetupOwn()
 
             if(STAGE_TIME_POINT(1.0f))
             {
-                g_pGame->GetInterface()->ShowStory(Core::Language->GetString("WELCOME"));
+                g_pGame->GetInterface()->ShowStory(Core::Language->GetString("WELCOME"), "", 4.0f, 1.0f);
             }
 
             if(STAGE_TIME_AFTER(9.0f))

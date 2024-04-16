@@ -18,7 +18,6 @@
 // ACHIEVEMENT: destroy the same player-ship two times by the same laser
 // TODO 1: hard-mode: alle laser-einschläge erzeugen zusätzliche geschosse (betrifft alle phasen außer grow-bullet und arrow)
 // TODO 1: quad-bullet teppich verdeckt laser-einschlag
-// TODO 1: [MF] [HIGH] [ULTRA] improve plate phase
 
 // NOTE: never ever use exactly 4 rays with equal distribution, the resulting laser+fire pattern does NOT look good
 

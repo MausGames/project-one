@@ -575,6 +575,23 @@ void cGeluMission::__SetupOwn()
                 vPos += pSquad1->GetEnemy(iIndex + i)->GetPosition().xy() / 8.0f;
             }
 
+            // TODO 1: clean this all up here      
+            {
+            const auto nBounceFunc = [&]()
+            {
+                for(coreUintW i = 1u; i < 8u; ++i)
+                {
+                    //vPos += pSquad1->GetEnemy(iIndex + i)->GetPosition().xy() / 8.0f;
+                    avForce[iIndex + i] = avForce[iIndex];
+                }
+            };
+
+                 if((vPos.x < -FOREGROUND_AREA.x * 1.1f) && (avForce[iIndex].x < 0.0f)) {vPos.x -= 2.0f * (vPos.x + FOREGROUND_AREA.x * 1.1f); avForce[iIndex].x =  ABS(avForce[iIndex].x); nBounceFunc(); for(coreUintW i = 0u; i < 8u; ++i) {coreVector3 A = pSquad1->GetEnemy(iIndex + i)->GetPosition(); A.x -= 2.0f * (A.x + FOREGROUND_AREA.x * 1.1f); pSquad1->GetEnemy(iIndex + i)->SetPosition(A);}}
+            else if((vPos.x >  FOREGROUND_AREA.x * 1.1f) && (avForce[iIndex].x > 0.0f)) {vPos.x -= 2.0f * (vPos.x - FOREGROUND_AREA.x * 1.1f); avForce[iIndex].x = -ABS(avForce[iIndex].x); nBounceFunc(); for(coreUintW i = 0u; i < 8u; ++i) {coreVector3 A = pSquad1->GetEnemy(iIndex + i)->GetPosition(); A.x -= 2.0f * (A.x - FOREGROUND_AREA.x * 1.1f); pSquad1->GetEnemy(iIndex + i)->SetPosition(A);}}
+                 if((vPos.y < -FOREGROUND_AREA.y * 1.1f) && (avForce[iIndex].y < 0.0f)) {vPos.y -= 2.0f * (vPos.y + FOREGROUND_AREA.y * 1.1f); avForce[iIndex].y =  ABS(avForce[iIndex].y); nBounceFunc(); for(coreUintW i = 0u; i < 8u; ++i) {coreVector3 A = pSquad1->GetEnemy(iIndex + i)->GetPosition(); A.y -= 2.0f * (A.y + FOREGROUND_AREA.y * 1.1f); pSquad1->GetEnemy(iIndex + i)->SetPosition(A);}}
+            else if((vPos.y >  FOREGROUND_AREA.y * 1.1f) && (avForce[iIndex].y > 0.0f)) {vPos.y -= 2.0f * (vPos.y - FOREGROUND_AREA.y * 1.1f); avForce[iIndex].y = -ABS(avForce[iIndex].y); nBounceFunc(); for(coreUintW i = 0u; i < 8u; ++i) {coreVector3 A = pSquad1->GetEnemy(iIndex + i)->GetPosition(); A.y -= 2.0f * (A.y - FOREGROUND_AREA.y * 1.1f); pSquad1->GetEnemy(iIndex + i)->SetPosition(A);}}
+            }
+
             pHelper->SetPosition(coreVector3(vPos, 0.0f));
 
             if(pSquad1->GetEnemy(iIndex)->ReachedDeath())
@@ -2126,7 +2143,6 @@ void cGeluMission::__SetupOwn()
     // TODO 5: badge: move along a marked line after another
     // TODO 5: badge: guitar hero
     // TODO 5: badge: items in finaler phase einsammeln die von oben herunterfliegen
-    // TODO 1: [MF] [HIGH] [ULTRA] improve surfer visuals (add wave) (look at globe) (color?)
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreFloat fOrbLen = 0.5f;

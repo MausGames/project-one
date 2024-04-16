@@ -714,8 +714,8 @@ void cTigerBoss::__MoveOwn()
             const coreFloat fHeight = m_avVector[JUMP_DATA].x + 70.0f * SIN(fTime * PI);
 
             this->SetPosition   (coreVector3(this->GetPosition().xy(), fHeight));
-            this->SetDirection  (this->GetDirection  () * mRota1);
-            this->SetOrientation(this->GetOrientation() * mRota1);
+            this->SetDirection  ((this->GetDirection  () * mRota1).Normalized());
+            this->SetOrientation((this->GetOrientation() * mRota1).Normalized());
 
             if(fHeight >= 0.0f) this->ChangeToTop();
                            else this->ChangeToBottom();
@@ -723,8 +723,8 @@ void cTigerBoss::__MoveOwn()
             for(coreUintW i = 0u; i < ARRAY_SIZE(m_aTrack); ++i)
             {
                 m_aTrack[i].SetPosition   (this->GetPosition() + coreVector3(vSide * (fTime * 150.0f * (i ? 1.0f : -1.0f)), 0.0f));
-                m_aTrack[i].SetDirection  (m_aTrack[i].GetDirection  () * mRota2);
-                m_aTrack[i].SetOrientation(m_aTrack[i].GetOrientation() * mRota2);
+                m_aTrack[i].SetDirection  ((m_aTrack[i].GetDirection  () * mRota2).Normalized());
+                m_aTrack[i].SetOrientation((m_aTrack[i].GetOrientation() * mRota2).Normalized());
             }
 
             if(PHASE_FINISHED)
@@ -1191,8 +1191,8 @@ void cTigerBoss::__MoveOwn()
         const coreMatrix3 mRota = coreMatrix4::RotationZ(-15.0f * TIME).m123();
 
         m_aWeaponOld[0].SetPosition   (vPos);
-        m_aWeaponOld[0].SetDirection  (m_aWeaponOld[0].GetDirection  () * mRota);
-        m_aWeaponOld[0].SetOrientation(m_aWeaponOld[0].GetOrientation() * mRota);
+        m_aWeaponOld[0].SetDirection  ((m_aWeaponOld[0].GetDirection  () * mRota).Normalized());
+        m_aWeaponOld[0].SetOrientation((m_aWeaponOld[0].GetOrientation() * mRota).Normalized());
 
         m_aWeaponOld[0].RemoveStatus(ENEMY_STATUS_HIDDEN);
     }

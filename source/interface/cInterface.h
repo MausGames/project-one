@@ -42,9 +42,6 @@
 #define INTERFACE_BANNER_TYPE_SCORE       (3u)             // 
 #define INTERFACE_BANNER_TYPE_ALERT       (4u)             // 
 
-#define INTERFACE_STORY_SPEED             (0.5f)           // 
-#define INTERFACE_STORY_DURATION          (9.0f)           // 
-
 #define INTERFACE_FRAGMENT_SPEED          (1.5f)           // 
 #define INTERFACE_FRAGMENT_DURATION       (5.0f)           // 
 #define INTERFACE_FRAGMENT_DURATION_2     (6.0f)           // 
@@ -126,6 +123,8 @@ private:
 
     cGuiLabel m_aStoryText[2];                      // 
     coreFloat m_fStoryStart;                        // 
+    coreFloat m_fStoryDuration;                     // 
+    coreFloat m_fStorySpeed;                        // 
 
     cGuiLabel m_aDialogText[INTERFACE_DIALOGS];     // 
 
@@ -183,7 +182,7 @@ public:
     coreBool IsBannerActive()const;
 
     // 
-    void ShowStory(const coreChar* pcRow1, const coreChar* pcRow2 = "");
+    void ShowStory(const coreChar* pcRow1, const coreChar* pcRow2, const coreFloat fDuration, const coreFloat fSpeed);
     coreBool IsStoryActive()const;
 
     // 

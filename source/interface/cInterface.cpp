@@ -75,10 +75,12 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
 , m_iBadgeState       (0u)
 , m_fBannerStart      (INTERFACE_INVALID_START)
 , m_fBannerDuration   (0.0f)
-, m_fBannerSpeed      (0.0f)
+, m_fBannerSpeed      (1.0f)
 , m_iBannerType       (0u)
 , m_bBannerEigengrau  (false)
 , m_fStoryStart       (INTERFACE_INVALID_START)
+, m_fStoryDuration    (0.0f)
+, m_fStorySpeed       (1.0f)
 , m_fFragmentStart    (INTERFACE_INVALID_START)
 , m_fFragmentDuration (0.0f)
 , m_iFragmentNew      (0u)
@@ -1025,10 +1027,10 @@ void cInterface::Move()
 
     // check for active story
     const coreFloat fStory = g_pGame->GetTimeTable()->GetTimeEvent() - m_fStoryStart;
-    if((fStory <= INTERFACE_STORY_DURATION) && (fStory >= 0.0f))
+    if((fStory <= m_fStoryDuration) && (fStory >= 0.0f))
     {
         // 
-        const coreFloat fVisibility = MIN(fStory, INTERFACE_STORY_DURATION - fStory, 1.0f / INTERFACE_STORY_SPEED) * INTERFACE_STORY_SPEED;
+        const coreFloat fVisibility = MIN(fStory, m_fStoryDuration - fStory, RCP(m_fStorySpeed)) * m_fStorySpeed;
 
         // set story transparency
         const coreFloat fStoryAlpha = BLENDH3(fVisibility) * MENU_INSIDE_ALPHA;
@@ -1488,10 +1490,14 @@ coreBool cInterface::IsBannerActive()const
 
 // ****************************************************************
 // 
-void cInterface::ShowStory(const coreChar* pcRow1, const coreChar* pcRow2)
+void cInterface::ShowStory(const coreChar* pcRow1, const coreChar* pcRow2, const coreFloat fDuration, const coreFloat fSpeed)
 {
     ASSERT(pcRow1 && pcRow2)
     const coreFloat fHeight = (pcRow2[0] ? 0.02f : 0.0f);
+
+    // 
+    m_fStoryDuration = fDuration;
+    m_fStorySpeed    = fSpeed;
 
     // 
     m_aStoryText[0].SetText(pcRow1);
@@ -1511,7 +1517,7 @@ void cInterface::ShowStory(const coreChar* pcRow1, const coreChar* pcRow2)
 coreBool cInterface::IsStoryActive()const
 {
     // 
-    return ((g_pGame->GetTimeTable()->GetTimeEvent() - m_fStoryStart) <= INTERFACE_STORY_DURATION);
+    return ((g_pGame->GetTimeTable()->GetTimeEvent() - m_fStoryStart) <= m_fStoryDuration);
 }
 
 

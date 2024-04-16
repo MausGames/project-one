@@ -1564,8 +1564,8 @@ void cGemingaBoss::__MoveOwn()
             const coreMatrix3 mRota = coreMatrix4::RotationAxis((8.0f*PI) * fTime + (0.0f*PI), coreVector3(vBase, 0.0f)).m123();
             const coreVector2 vDir  = (m_aiCounter[SMASH_COUNT] % 2) ? -vBase : vBase;
 
-            m_Top   .SetDirection(coreVector3(vDir.Rotated90(), 0.0f) * mRota);
-            m_Bottom.SetDirection(coreVector3(vDir.Rotated90(), 0.0f) * mRota.Transposed());
+            m_Top   .SetDirection((coreVector3(vDir.Rotated90(), 0.0f) * mRota)             .Normalized());
+            m_Bottom.SetDirection((coreVector3(vDir.Rotated90(), 0.0f) * mRota.Transposed()).Normalized());
 
             g_pEnvironment->SetTargetDirectionNow(vBase.Rotated90());
 
@@ -1741,8 +1741,8 @@ void cGemingaBoss::__MoveOwn()
 
         // 
         const coreMatrix3 mRota = coreMatrix4::RotationAxis(0.2f*PI * fFinalAngle, coreVector3::Cross(this->GetDirection(), this->GetOrientation()).Normalized()).m123();
-        const coreVector3 vDir1 = this->GetDirection() * mRota;
-        const coreVector3 vDir2 = this->GetDirection() * mRota.Transposed();
+        const coreVector3 vDir1 = (this->GetDirection() * mRota)             .Normalized();
+        const coreVector3 vDir2 = (this->GetDirection() * mRota.Transposed()).Normalized();
         const coreVector3 vPos1 = this->GetPosition () + (vDir1 - this->GetDirection()) * (m_Top   .GetSize().x * 3.5f);
         const coreVector3 vPos2 = this->GetPosition () + (vDir2 - this->GetDirection()) * (m_Bottom.GetSize().x * 3.5f);
 

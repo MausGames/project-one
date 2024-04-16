@@ -709,8 +709,8 @@ void cNevoMission::__SetupOwn()
 
                 for(coreUintW i = 0u; i < 16u; ++i)
                 {
-                    m_aTileRaw[i].SetPosition (coreVector3(m_aTileRaw[i].GetPosition ().xy() * mRota, 0.0f));
-                    m_aTileRaw[i].SetDirection(coreVector3(m_aTileRaw[i].GetDirection().xy() * mRota, 0.0f));
+                    m_aTileRaw[i].SetPosition (coreVector3( m_aTileRaw[i].GetPosition ().xy() * mRota,               0.0f));
+                    m_aTileRaw[i].SetDirection(coreVector3((m_aTileRaw[i].GetDirection().xy() * mRota).Normalized(), 0.0f));
                 }
             }
         }

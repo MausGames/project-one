@@ -434,13 +434,26 @@ void cMenuNavigator::Update()
                 for(coreUintW j = 0u, je = m_aObject.size(); (j < je) && pNewObject && !cMenuNavigator::IsValid(pNewObject); ++j)
                 {
                     coreObject2D* A;
-                    switch(iPack)
+
+                    A = this->__ToObject(m_aObject.at(pNewObject).iFallback);
+                    if(A && (A != m_pCurObject))
                     {
-                    default: ASSERT(false)
-                    case 0u: A = this->__ToObject(m_aObject.at(pNewObject).iMoveUp);    break;
-                    case 2u: A = this->__ToObject(m_aObject.at(pNewObject).iMoveLeft);  break;
-                    case 4u: A = this->__ToObject(m_aObject.at(pNewObject).iMoveDown);  break;
-                    case 6u: A = this->__ToObject(m_aObject.at(pNewObject).iMoveRight); break;
+                        for(coreUintW k = 0u, ke = m_aObject.size(); (k < ke) && A && !cMenuNavigator::IsValid(A); ++k)
+                        {
+                            A = this->__ToObject(m_aObject.at(A).iFallback);
+                        }
+                    }
+                    
+                    if(!A || A == m_pCurObject)
+                    {
+                        switch(iPack)
+                        {
+                        default: ASSERT(false)
+                        case 0u: A = this->__ToObject(m_aObject.at(pNewObject).iMoveUp);    break;
+                        case 2u: A = this->__ToObject(m_aObject.at(pNewObject).iMoveLeft);  break;
+                        case 4u: A = this->__ToObject(m_aObject.at(pNewObject).iMoveDown);  break;
+                        case 6u: A = this->__ToObject(m_aObject.at(pNewObject).iMoveRight); break;
+                        }
                     }
                     pNewObject = A;
                 }
@@ -537,22 +550,24 @@ void cMenuNavigator::Update()
 
 // ****************************************************************
 // 
-void cMenuNavigator::BindObject(coreObject2D* pObject, coreObject2D* pUp, coreObject2D* pLeft, coreObject2D* pDown, coreObject2D* pRight, const eMenuType eType, const coreUint8 iSurface)
+void cMenuNavigator::BindObject(coreObject2D* pObject, coreObject2D* pUp, coreObject2D* pLeft, coreObject2D* pDown, coreObject2D* pRight, coreObject2D* pFallback, const eMenuType eType, const coreUint8 iSurface)
 {
     // 
-    if(!m_aObject.count(pUp))    m_aObject.emplace(pUp);
-    if(!m_aObject.count(pLeft))  m_aObject.emplace(pLeft);
-    if(!m_aObject.count(pDown))  m_aObject.emplace(pDown);
-    if(!m_aObject.count(pRight)) m_aObject.emplace(pRight);
+    if(!m_aObject.count(pUp))      m_aObject.emplace(pUp);
+    if(!m_aObject.count(pLeft))    m_aObject.emplace(pLeft);
+    if(!m_aObject.count(pDown))    m_aObject.emplace(pDown);
+    if(!m_aObject.count(pRight))   m_aObject.emplace(pRight);
+    if(!m_aObject.count(pFallback)) m_aObject.emplace(pFallback);
 
     // 
     sMenuEntry oEntry;
-    oEntry.iMoveUp       = this->__ToIndex(pUp);
-    oEntry.iMoveLeft     = this->__ToIndex(pLeft);
-    oEntry.iMoveDown     = this->__ToIndex(pDown);
-    oEntry.iMoveRight    = this->__ToIndex(pRight);
-    oEntry.eType         = eType;
-    oEntry.iSurface      = iSurface;
+    oEntry.iMoveUp    = this->__ToIndex(pUp);
+    oEntry.iMoveLeft  = this->__ToIndex(pLeft);
+    oEntry.iMoveDown  = this->__ToIndex(pDown);
+    oEntry.iMoveRight = this->__ToIndex(pRight);
+    oEntry.iFallback  = this->__ToIndex(pFallback);
+    oEntry.eType      = eType;
+    oEntry.iSurface   = iSurface;
 
     // 
     m_aObject[pObject] = oEntry;
@@ -565,6 +580,12 @@ void cMenuNavigator::BindObject(coreObject2D* pObject, coreObject2D* pUp, coreOb
     }
     
     if(pObject) pObject->SetAlpha(0.0f);
+}
+
+
+void cMenuNavigator::BindObject(coreObject2D* pObject, coreObject2D* pUp, coreObject2D* pLeft, coreObject2D* pDown, coreObject2D* pRight, const eMenuType eType, const coreUint8 iSurface)
+{
+    this->BindObject(pObject, pUp, pLeft, pDown, pRight, NULL, eType, iSurface);
 }
 
 

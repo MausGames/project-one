@@ -1042,7 +1042,7 @@ void cSummaryMenu::Move()
             
             if(InBetween(3.0f, fOldTime, m_fIntroTimer))
             {
-                g_pGame->GetInterface()->ShowStory(Core::Language->GetString("ENDING_NORMAL"));
+                g_pGame->GetInterface()->ShowStory(Core::Language->GetString("ENDING_NORMAL"), "", 9.0f, 0.5f);
             }
 
             if(m_fIntroTimer >= 13.0f)

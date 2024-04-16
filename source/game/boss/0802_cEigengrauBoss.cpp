@@ -1300,12 +1300,12 @@ void cEigengrauBoss::__MoveOwn()
         if(pBullet->GetDamage() == 6)
         {
             pBullet->SetPosition(coreVector3(pBullet->GetPosition().xy() * mRota, pBullet->GetPosition().z));
-            pBullet->SetFlyDir3D(coreVector3(pBullet->GetFlyDir3D().xy() * mRota, pBullet->GetFlyDir3D().z));
+            pBullet->SetFlyDir3D(coreVector3(pBullet->GetFlyDir3D().xy() * mRota, pBullet->GetFlyDir3D().z).Normalized());
         }
         else if(pBullet->GetDamage() == 7)
         {
             pBullet->SetPosition(coreVector3(pBullet->GetPosition().xy() * mRotaRev, pBullet->GetPosition().z));
-            pBullet->SetFlyDir3D(coreVector3(pBullet->GetFlyDir3D().xy() * mRotaRev, pBullet->GetFlyDir3D().z));
+            pBullet->SetFlyDir3D(coreVector3(pBullet->GetFlyDir3D().xy() * mRotaRev, pBullet->GetFlyDir3D().z).Normalized());
         }
     });
 

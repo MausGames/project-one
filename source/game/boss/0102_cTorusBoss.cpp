@@ -1413,7 +1413,7 @@ void cTorusBoss::__MoveOwn()
         {
             const coreMatrix3 mRota   = coreMatrix4::RotationAxis(m_fRotationBoss, vNewOri).m123();
             const coreVector3 vNewDir = coreVector3::Cross(vNewOri, coreVector3::Cross(vNewOri, coreVector3(0.0f,0.0f,-1.0f)).Normalized(coreVector3(0.0f,1.0f,0.0f)));
-            this->SetDirection(vNewDir * mRota);
+            this->SetDirection((vNewDir * mRota).Normalized());
         }
         this->SetOrientation(vNewOri);
     }
@@ -1732,7 +1732,7 @@ void cTorusBoss::__MoveOwn()
             coreVector2 avDir[3];
 
             // 
-            avDir[0] = coreVector2::Direction(DEG_TO_RAD(I_TO_F(i - 2u) * 9.0f)) * mRota;
+            avDir[0] = (coreVector2::Direction(DEG_TO_RAD(I_TO_F(i - 2u) * 9.0f)) * mRota).Normalized();
             avDir[1] = avDir[0].Rotated120();
             avDir[2] = avDir[1].Rotated120();
 

@@ -1755,7 +1755,7 @@ void cViridoMission::__SetupOwn()
             STAGE_FOREACH_PLAYER(pPlayer, i)
             {
                 pPlayer->SetPosition (coreVector3(pPlayer->GetPosition ().xy(), fHeight));
-                pPlayer->SetDirection(coreVector3(pPlayer->GetDirection().xy() * mRota, pPlayer->GetDirection().z));
+                pPlayer->SetDirection(coreVector3(pPlayer->GetDirection().xy() * mRota, pPlayer->GetDirection().z).Normalized());
 
                 const coreUintW iShadowIndex = VIRIDO_SHADOWS_ENEMY + i;
 

@@ -102,7 +102,6 @@ void cCalorMission::__SetupOwn()
     // TODO 1: hardmode: enemies return after some time
     // TODO 1: hardmode: enemy splits up, the original location attacks, the other keeps moving
     // TODO 1: implement own task-objects instead of re-using hails, also adjust count again (CALOR_HAILS) (name: flake?)
-    // TODO 1: [MF] [HIGH] [ULTRA] improve hail visuals
     // TODO 1: enemies move smooth, flakes move flat
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {

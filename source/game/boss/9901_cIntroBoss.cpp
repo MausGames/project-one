@@ -789,9 +789,9 @@ void cIntroBoss::__MoveOwn()
         {
             const coreMatrix3 mRota = coreMatrix4::RotationAxis(this->GetOrientation().xz().InvertedX().Angle(), this->GetDirection()).m123();
 
-            pSkewer->SetPosition   (this->GetPosition   () + this->GetDirection() * 12.0f);
-            pSkewer->SetDirection  (this->GetDirection  ().RotatedZ45() * mRota);
-            pSkewer->SetOrientation(this->GetOrientation());
+            pSkewer->SetPosition   ( this->GetPosition   () + this->GetDirection() * 12.0f);
+            pSkewer->SetDirection  ((this->GetDirection  ().RotatedZ45() * mRota).Normalized());
+            pSkewer->SetOrientation( this->GetOrientation());
         }
     }
 
