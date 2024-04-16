@@ -10,7 +10,7 @@
 #ifndef _P1_GUARD_TABLE_H_
 #define _P1_GUARD_TABLE_H_
 
-// TODO: handle -INTERFACE_BANNER_DURATION_BOSS differently (also remove MAX(this->GetTimeSegment(iMissionIndex, iSegmentIndex), 0.0f))
+// TODO 4: handle -INTERFACE_BANNER_DURATION_BOSS differently (also remove MAX(this->GetTimeSegment(iMissionIndex, iSegmentIndex), 0.0f))
 
 
 // ****************************************************************
@@ -136,7 +136,7 @@ public:
 
     // control scoring stats   
     coreUint32 AddScore(const coreUint32 iValue, const coreBool bModified, const coreUintW iMissionIndex, const coreUintW iSegmentIndex);
-    coreUint32 AddScore(const coreUint32 iValue, const coreBool bModified, const coreVector3& vPosition);
+    coreUint32 AddScore(const coreUint32 iValue, const coreBool bModified, const coreVector3 vPosition);
     coreUint32 AddScore(const coreUint32 iValue, const coreBool bModified);
     void       AddCombo(const coreUint32 iValue);
     void       AddChain(const coreUint32 iValue);

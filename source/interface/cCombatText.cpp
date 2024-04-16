@@ -21,7 +21,6 @@ cCombatText::cCombatText()noexcept
     for(coreUintW i = 0u; i < COMBAT_LABELS; ++i)
     {
         m_aLabel[i].Construct(MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
-        m_aLabel[i].SetRectify(false);
     }
 
     // 
@@ -32,7 +31,6 @@ cCombatText::cCombatText()noexcept
 
     // 
     m_BadgeLabel.Construct   (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
-    m_BadgeLabel.SetRectify  (false);
     m_BadgeLabel.SetAlignment(coreVector2(1.0f,0.0f));
 }
 
@@ -41,16 +39,16 @@ cCombatText::cCombatText()noexcept
 // render the combat text
 void cCombatText::Render()
 {
+    // render active label objects
+    for(coreUintW i = 0u; i < COMBAT_LABELS; ++i)
+        if(m_afTimer[i]) m_aLabel[i].Render();
+
     // 
     if(m_fBadgeTimer)
     {
         m_BadgeIcon .Render();
         m_BadgeLabel.Render();
     }
-
-    // render active label objects
-    for(coreUintW i = 0u; i < COMBAT_LABELS; ++i)
-        if(m_afTimer[i]) m_aLabel[i].Render();
 }
 
 
@@ -115,12 +113,24 @@ void cCombatText::Move()
             {
                 // 
                 const coreFloat fOffset = (vRange.y - ABS(vDiff.y)) * SIGN(vDiff.y) * 0.5f * (TIME * 15.0f);
-
-                // 
-                A.SetCenter(A.GetCenter() + coreVector2(0.0f, fOffset));
-                B.SetCenter(B.GetCenter() - coreVector2(0.0f, fOffset));
+                
+                     if(m_iCurLabel == i) B.SetCenter(B.GetCenter() - coreVector2(0.0f, fOffset));
+                else if(m_iCurLabel == j) A.SetCenter(A.GetCenter() + coreVector2(0.0f, fOffset));
+                else
+                {
+                    // 
+                    A.SetCenter(A.GetCenter() + coreVector2(0.0f, fOffset));
+                    B.SetCenter(B.GetCenter() - coreVector2(0.0f, fOffset));
+                }
             }
         }
+    }
+    
+    for(coreUintW i = 0u; i < COMBAT_LABELS; ++i)
+    {
+        const coreVector4 vRange = coreVector4(-0.48f - m_aLabel[i].GetPosition().x, 0.48f - m_aLabel[i].GetPosition().x,
+                                               -0.48f - m_aLabel[i].GetPosition().y, 0.48f - m_aLabel[i].GetPosition().y);
+        m_aLabel[i].SetCenter(coreVector2(CLAMP(m_aLabel[i].GetCenter().x, vRange.x, vRange.y), CLAMP(m_aLabel[i].GetCenter().y, vRange.z, vRange.w)));
     }
 
     // move active label objects
@@ -131,11 +141,13 @@ void cCombatText::Move()
 
 // ****************************************************************
 // add new active label object
-void cCombatText::AddText(const coreChar* pcText, const coreVector3& vPosition, const coreVector3& vColor, const coreUint8 iType)
+void cCombatText::AddText(const coreChar* pcText, const coreVector3 vPosition, const coreVector3 vColor, const coreUint8 iType)
 {
     ASSERT(pcText)
     
-    // TODO: combat text outside needs to be handled (maybe in move -> because of "away from each other")
+    // TODO 1: combat text outside needs to be handled (maybe in move -> because of "away from each other")
+    
+    const coreVector2 vOnScreen = MapToAxis(g_pForeground->Project2D(vPosition), g_vHudDirection);//.Processed(CLAMP, -0.45f, 0.45f);
 
     // 
     if(++m_iCurLabel >= COMBAT_LABELS) m_iCurLabel = 0u;
@@ -144,7 +156,7 @@ void cCombatText::AddText(const coreChar* pcText, const coreVector3& vPosition, 
 
     // init label object
     oLabel.SetText  (pcText);
-    oLabel.SetCenter(MapToAxis(g_pForeground->Project2D(vPosition), g_vHudDirection));
+    oLabel.SetCenter(vOnScreen);
     oLabel.SetColor4(coreVector4(vColor, 0.0f));
 
     // start animation timer
@@ -152,7 +164,7 @@ void cCombatText::AddText(const coreChar* pcText, const coreVector3& vPosition, 
     fTimer = 1.0f;
 }
 
-void cCombatText::AddScore(const coreInt32 iValue, const coreVector3& vPosition)
+void cCombatText::AddScore(const coreInt32 iValue, const coreVector3 vPosition)
 {
     // 
          if(iValue > 0) this->AddText(PRINT("+%d",      iValue), vPosition, coreVector3(1.0f,1.0f,1.0f), 0u);
@@ -162,11 +174,11 @@ void cCombatText::AddScore(const coreInt32 iValue, const coreVector3& vPosition)
 
 // ****************************************************************
 // 
-void cCombatText::AddBadge(const coreUint32 iValue, const coreVector3& vPosition)
+void cCombatText::AddBadge(const coreUint32 iValue, const coreVector3 vPosition)
 {
-    // TODO: combat text outside needs to be handled (maybe in move)
+    // TODO 1: combat text outside needs to be handled (maybe in move)
     
-    const coreVector2 vOnScreen = MapToAxis(g_pForeground->Project2D(vPosition), g_vHudDirection);
+    const coreVector2 vOnScreen = MapToAxis(g_pForeground->Project2D(vPosition), g_vHudDirection).Processed(CLAMP, -0.45f, 0.45f);
 
     // 
     m_BadgeIcon.SetCenter(vOnScreen);
@@ -185,8 +197,8 @@ void cCombatText::AddBadge(const coreUint32 iValue, const coreVector3& vPosition
 // 
 void cCombatText::UpdateLayout()
 {
-    // TODO: rotate position if game rotates
-    // TODO: rotate direction (without position) if interface rotates
+    // TODO 1: rotate position if game rotates
+    // TODO 1: rotate direction (without position) if interface rotates
 }
 
 

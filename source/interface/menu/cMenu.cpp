@@ -173,7 +173,7 @@ void cMenu::Render()
 void cMenu::Move()
 {
     // 
-    if(!Core::Manager::Resource->IsLoading())   // TODO: hier wegen sync mit environment-change   
+    if(!Core::Manager::Resource->IsLoading())   // TODO 1: hier wegen sync mit environment-change   
         m_TransitionTime.Update(1.0f);
 
     // 
@@ -558,7 +558,7 @@ void cMenu::ShiftSurface(coreMenu* OUTPUT pMenu, const coreUint8 iNewSurface, co
 
 // ****************************************************************
 // 
-void cMenu::SetHighlightColor(const coreVector3& vColor)
+void cMenu::SetHighlightColor(const coreVector3 vColor)
 {
     // 
     if(m_vHighlightColor == vColor) return;
@@ -614,7 +614,7 @@ const coreMap<coreString, coreString>& cMenu::GetLanguageList()
 
 // ****************************************************************
 // default button update routine
-void cMenu::UpdateButton(cGuiButton* OUTPUT pButton, const coreBool bFocused, const coreVector3& vFocusColor)
+void cMenu::UpdateButton(cGuiButton* OUTPUT pButton, const coreBool bFocused, const coreVector3 vFocusColor)
 {
     ASSERT(pButton)
 
@@ -710,6 +710,7 @@ void cMenu::__Reset(const coreResourceReset eInit)
         // 
         m_MixObject.DefineTexture(0u, m_aFrameBuffer[2].GetColorTarget(0u).pTexture);
         m_MixObject.DefineTexture(1u, m_aFrameBuffer[1].GetColorTarget(0u).pTexture);
+        m_MixObject.Move();
     }
     else
     {
@@ -731,8 +732,8 @@ void cMenu::__StartGame()
 {
     // 
     sGameOptions oOptions = {};
-    oOptions.iPlayers     = m_GameMenu.GetSelectedPlayers();
-    oOptions.iDifficulty  = 0xFFu;
+    oOptions.iPlayers     = m_GameMenu.GetSelectedPlayers   ();
+    oOptions.iDifficulty  = m_GameMenu.GetSelectedDifficulty();
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
     {
         oOptions.aaiWeapon [i][0] = m_GameMenu.GetSelectedWeapon (i);

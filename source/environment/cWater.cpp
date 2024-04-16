@@ -27,7 +27,7 @@ cWater::cWater(const coreHashString& sSkyTexture)noexcept
     m_Refraction.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     // create depth frame buffer
-    m_Depth.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH16);
+    m_Depth.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH24); // TODO 1: only 24 for ice
     m_Depth.Create(vWaterResolution, CORE_FRAMEBUFFER_CREATE_NORMAL);
 
     // create sky-plane object
@@ -253,7 +253,7 @@ cRainWater::cRainWater(const coreHashString& sSkyTexture)noexcept
 , m_iCurDrop   (0u)
 , m_fFallDelay (0.0f)
 {
-    const coreVector2 vRes = coreVector2(1.0f,1.0f) * (g_CurConfig.Graphics.iRender ? RAIN_WAVE_RES_HIGH : RAIN_WAVE_RES_LOW);   // TODO: make sure this is always correctly updated   
+    const coreVector2 vRes = coreVector2(1.0f,1.0f) * (g_CurConfig.Graphics.iRender ? RAIN_WAVE_RES_HIGH : RAIN_WAVE_RES_LOW);   // TODO 1: make sure this is always correctly updated   
 
     // 
     m_WaveMap.AttachTargetTexture(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGBA16);

@@ -136,7 +136,7 @@ cPlayer::~cPlayer()
 
 // ****************************************************************
 // configure the player
-void cPlayer::Configure(const coreUintW iShipType, const coreVector3& vColor)
+void cPlayer::Configure(const coreUintW iShipType, const coreVector3 vColor)
 {
     // select appearance type
     coreHashString sModelHigh;
@@ -229,8 +229,8 @@ void cPlayer::Render()
         m_Wind2.Render();
         glEnable(GL_DEPTH_TEST);
         
-        // render the 3d-object
-        this->coreObject3D::Render();
+        // 
+        cLodObject::RenderHighObject(this);
     }
 }
 
@@ -338,10 +338,10 @@ void cPlayer::Move()
         }
 
         // normalize collision size
-        if(this->GetModel().IsUsable())
+        if(this->GetVolume().IsUsable())
         {
             const coreFloat fRadius = MAX(this->GetMove().Length(), PLAYER_COLLISION_MIN);
-            this->SetCollisionModifier((coreVector3(1.0f,1.0f,1.0f) * fRadius) / this->GetModel()->GetBoundingRange());
+            this->SetCollisionModifier((coreVector3(1.0f,1.0f,1.0f) * fRadius) / this->GetVolume()->GetBoundingRange());
         }
 
         // 
@@ -462,7 +462,7 @@ void cPlayer::Move()
 
 // ****************************************************************
 // reduce current health
-coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact)
+coreInt32 cPlayer::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2 vImpact)
 {
     if(iDamage > 0)
     {
@@ -585,7 +585,7 @@ void cPlayer::Kill(const coreBool bAnimated)
 
 // ****************************************************************
 // 
-void cPlayer::StartRolling(const coreVector2& vDirection)
+void cPlayer::StartRolling(const coreVector2 vDirection)
 {
     WARN_IF(this->IsRolling()) return;
 
@@ -724,7 +724,7 @@ void cPlayer::TurnIntoPlayer()
 
 // ****************************************************************
 // 
-void cPlayer::EnableWind(const coreVector2& vDirection)
+void cPlayer::EnableWind(const coreVector2 vDirection)
 {
     WARN_IF(m_Wind.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
 

@@ -10,9 +10,9 @@
 #ifndef _P1_GUARD_WEAPON_H_
 #define _P1_GUARD_WEAPON_H_
 
-// TODO: weapons may have to share their cooldown (not relevant on single-weapon setup)
-// TODO: remove render functions if not required
-// TODO: sound and visual effect for charging pulse
+// TODO 3: weapons may have to share their cooldown (not relevant on single-weapon setup)
+// TODO 4: remove render functions if not required
+// TODO 1: sound and visual effect for charging pulse
 
 
 // ****************************************************************
@@ -89,6 +89,8 @@ public:
 class cRayWeapon final : public cWeapon
 {
 private:
+    coreBool m_bBurst;             // 
+
     coreSoundPtr m_pBulletSound;   // 
     coreSoundPtr m_pRocketSound;   // 
     coreSoundPtr m_pMineSound;     // 
@@ -109,6 +111,7 @@ public:
 private:
     // execute own routines
     void __TriggerOwn(const coreUint8 iMode)final;
+    void __ReleaseOwn(const coreUint8 iMode)final;
     void __ShootOwn  ()final;
 };
 

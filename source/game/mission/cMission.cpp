@@ -229,7 +229,7 @@ void cMission::ActivateWave(const coreChar* pcName)
     ASSERT(m_iCurWaveCount < MISSION_WAVES)
     m_iCurWaveIndex    = m_iCurWaveCount++;
     m_iCurSegmentIndex = MISSION_WAVE_TO_SEGMENT(m_iCurWaveIndex);
-    // TODO: m_iCurWaveCount must be able to skip empty waves (4, 5), and start related to m_iTakeFrom, intro should be ok (bosses are already skipped)  
+    // TODO 1: m_iCurWaveCount must be able to skip empty waves (4, 5), and start related to m_iTakeFrom, intro should be ok (bosses are already skipped)  
 
     // 
     this->__OpenSegment();
@@ -265,7 +265,7 @@ void cMission::DeactivateWave()
 
 // ****************************************************************
 // 
-void cMission::GiveBadge(const coreUint8 iBadge, const coreVector3& vPosition)
+void cMission::GiveBadge(const coreUint8 iBadge, const coreVector3 vPosition)
 {
     if(m_bBadgeGiven) return;
     m_bBadgeGiven = true;

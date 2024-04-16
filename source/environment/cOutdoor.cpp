@@ -236,18 +236,18 @@ void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade)
     }
 
     GLuint iNormFormat;
-    coreUint32 (*nPackFunc) (const coreVector4& vVector);
+    coreUint32 (*nPackFunc) (const coreVector4 vVector);
     if(CORE_GL_SUPPORT(ARB_vertex_type_2_10_10_10_rev))
     {
         // use high-quality packed format
         iNormFormat = GL_INT_2_10_10_10_REV;
-        nPackFunc   = [](const coreVector4& vVector) {return vVector.PackSnorm210();};
+        nPackFunc   = [](const coreVector4 vVector) {return vVector.PackSnorm210();};
     }
     else
     {
         // use low-quality byte format
         iNormFormat = GL_BYTE;
-        nPackFunc   = [](const coreVector4& vVector) {return vVector.PackSnorm4x8();};
+        nPackFunc   = [](const coreVector4 vVector) {return vVector.PackSnorm4x8();};
     }
 
     // reduce total vertex size
@@ -344,10 +344,10 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
             ASSERT((xz1 <= 255.0f) && (yz1 <= 255.0f) &&
                    (xz2 <= 255.0f) && (yz2 <= 255.0f))
 
-            const coreByte aPixel[] = {coreByte(xz1), coreByte(yz1),
-                                       coreByte(xz2), coreByte(yz2)};
+            const coreUint8 aiPixel[] = {coreUint8(xz1), coreUint8(yz1),
+                                         coreUint8(xz2), coreUint8(yz2)};
 
-            std::memcpy(pOutput + i, aPixel, sizeof(aPixel));
+            std::memcpy(pOutput + i, aiPixel, sizeof(aiPixel));
         }
 
         // create final normal map
@@ -378,14 +378,14 @@ void cOutdoor::LoadProgram(const coreBool bGlow)
 
 // ****************************************************************
 // retrieve height value
-FUNC_PURE coreFloat cOutdoor::RetrieveHeight(const coreVector2& vPosition)const
+FUNC_PURE coreFloat cOutdoor::RetrieveHeight(const coreVector2 vPosition)const
 {
     // 
     const coreMatrix2 mRota = coreMatrix3::Rotation(this->GetDirection().xy()).m12();
     return this->RetrieveBackHeight(vPosition * mRota - this->GetPosition().xy());
 }
 
-FUNC_PURE coreFloat cOutdoor::RetrieveBackHeight(const coreVector2& vPosition)const
+FUNC_PURE coreFloat cOutdoor::RetrieveBackHeight(const coreVector2 vPosition)const
 {
     // convert real position to block position
     const coreFloat fX = vPosition.x / OUTDOOR_DETAIL + I_TO_F(OUTDOOR_WIDTH / 2u);
@@ -418,14 +418,14 @@ FUNC_PURE coreFloat cOutdoor::RetrieveBackHeight(const coreVector2& vPosition)co
 
 // ****************************************************************
 // 
-FUNC_PURE coreVector3 cOutdoor::RetrieveNormal(const coreVector2& vPosition)const
+FUNC_PURE coreVector3 cOutdoor::RetrieveNormal(const coreVector2 vPosition)const
 {
     // 
     const coreMatrix2 mRota = coreMatrix3::Rotation(this->GetDirection().xy()).m12();
     return this->RetrieveBackNormal(vPosition * mRota - this->GetPosition().xy());
 }
 
-FUNC_PURE coreVector3 cOutdoor::RetrieveBackNormal(const coreVector2& vPosition)const
+FUNC_PURE coreVector3 cOutdoor::RetrieveBackNormal(const coreVector2 vPosition)const
 {
     constexpr coreFloat fWidth = OUTDOOR_DETAIL * 0.35f;
 
@@ -443,7 +443,7 @@ FUNC_PURE coreVector3 cOutdoor::RetrieveBackNormal(const coreVector2& vPosition)
 
 // ****************************************************************
 // retrieve ray intersection point
-FUNC_PURE coreVector3 cOutdoor::RetrieveIntersect(const coreVector3& vRayPosition, const coreVector3& vRayDirection)const
+FUNC_PURE coreVector3 cOutdoor::RetrieveIntersect(const coreVector3 vRayPosition, const coreVector3 vRayDirection)const
 {
     ASSERT(vRayDirection.z < 0.0f)
     coreVector3 vOutput = vRayPosition;
@@ -613,7 +613,7 @@ void cOutdoor::SetFlyOffset(const coreFloat fFlyOffset)
 
 // ****************************************************************
 // 
-void cOutdoor::SetTransform(const coreFloat fFlyOffset, const coreFloat fSideOffset, const coreVector2& vDirection)
+void cOutdoor::SetTransform(const coreFloat fFlyOffset, const coreFloat fSideOffset, const coreVector2 vDirection)
 {
     // (only used for height-calculations, not for shading) 
     this->SetPosition (coreVector3(-fSideOffset, fFlyOffset * -OUTDOOR_DETAIL, 0.0f));

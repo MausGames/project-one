@@ -9,117 +9,153 @@
 
 // ****************************************************************
 // project settings
-const coreChar* const CoreApp::Settings::Name                       = "Eigengrau";
-const coreChar* const CoreApp::Settings::IconPath                   = "data/textures/game_icon.png";
-const coreChar* const CoreApp::Settings::CursorPath                 = "data/textures/default_cursor.png";
-const coreUint8       CoreApp::Settings::RenderBuffer::DepthSize    = 16u;
-const coreUint8       CoreApp::Settings::RenderBuffer::StencilSize  = 0u;
-const coreBool        CoreApp::Settings::RenderBuffer::AlphaChannel = false;
-const coreBool        CoreApp::Settings::RenderBuffer::DoubleBuffer = true;
-const coreBool        CoreApp::Settings::RenderBuffer::StereoRender = false;
-const coreUint32      CoreApp::Settings::Platform::SteamAppID       = 1624320u;
+const coreChar* const CoreApp::Settings::Name                   = "Eigengrau";
+const coreChar* const CoreApp::Settings::IconPath               = "data/textures/game_icon.png";
+const coreChar* const CoreApp::Settings::CursorPath             = "data/textures/default_cursor.png";
+const coreUint8       CoreApp::Settings::Graphics::DepthSize    = 16u;
+const coreUint8       CoreApp::Settings::Graphics::StencilSize  = 0u;
+const coreBool        CoreApp::Settings::Graphics::AlphaChannel = false;
+const coreBool        CoreApp::Settings::Graphics::DoubleBuffer = true;
+const coreBool        CoreApp::Settings::Graphics::StereoRender = false;
+const coreUint32      CoreApp::Settings::Platform::SteamAppID   = 1624320u;
 
 
 // ****************************************************************
 // setup the application
 void CoreApp::Setup()
 {
-    Core::Platform->DefineAchievement("start_game", corePlatformAchievement("START_GAME"));
+    Core::Platform->DefineAchievement("test", "TEST_ACHIEVEMENT");
 
     Core::Manager::Resource->Load<coreModel>  ("bullet_cone.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_cone.md3");
-    Core::Manager::Resource->Load<coreModel>  ("bullet_mine.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_mine.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("bullet_mine.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_mine.md3", CORE_MODEL_LOAD_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("bullet_pulse.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_pulse.md3");
-    Core::Manager::Resource->Load<coreModel>  ("bullet_ray.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_ray.md3");
-    Core::Manager::Resource->Load<coreModel>  ("bullet_orb.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_orb.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("bullet_ray.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_ray.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("bullet_ray_volume.md3",                  CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_ray_volume.md3", CORE_MODEL_LOAD_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("bullet_orb.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_orb.md3", CORE_MODEL_LOAD_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("bullet_quad.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_quad.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_rocket.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_rocket.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_spear.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_spear.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_triangle.md3",                    CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_triangle.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_view.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_view.md3");
     Core::Manager::Resource->Load<coreModel>  ("bullet_wave.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/bullet_wave.md3");
-    Core::Manager::Resource->Load<coreModel>  ("effect_shield.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/effect_shield.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("environment_reed_01.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_reed_01.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("environment_reed_02.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_reed_02.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("environment_seashell.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_seashell.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("environment_starfish.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_starfish.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("environment_stone_01.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_stone_01.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("environment_weed.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_weed.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("object_arrow.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_arrow.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("effect_shield.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/effect_shield.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("environment_reed_01.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_reed_01.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("environment_reed_02.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_reed_02.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("environment_seashell.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_seashell.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("environment_starfish.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_starfish.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("environment_stone_01.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_stone_01.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("environment_weed.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_weed.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("object_arrow.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_arrow.md3", CORE_MODEL_LOAD_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("object_barrier.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_barrier.md3");
-    Core::Manager::Resource->Load<coreModel>  ("object_bomb_high.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_bomb_high.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("object_bomb_high.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_bomb_high.md3", CORE_MODEL_LOAD_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("object_bomb_low.md3",                    CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_bomb_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_boss_amemasu_tooth.md3",          CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_amemasu_tooth.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_boss_chol_fire.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_chol_fire.md3", CORE_MODEL_LOAD_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("object_boss_dharuk_boomerang.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_dharuk_boomerang.md3");
-    Core::Manager::Resource->Load<coreModel>  ("object_boss_torus_circle.md3",           CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_torus_circle.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("object_boss_torus_emitter.md3",          CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_torus_emitter.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("object_boss_vaus_companion_high.md3",    CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_vaus_companion_high.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("object_boss_torus_circle.md3",           CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_torus_circle.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("object_boss_torus_emitter.md3",          CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_torus_emitter.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("object_boss_vaus_companion_high.md3",    CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_vaus_companion_high.md3", CORE_MODEL_LOAD_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("object_boss_vaus_companion_low.md3",     CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_boss_vaus_companion_low.md3");
-    Core::Manager::Resource->Load<coreModel>  ("object_container_high.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_container_high.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("object_container_high.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_container_high.md3", CORE_MODEL_LOAD_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("object_container_low.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_container_low.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_cube_ice.md3",                    CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_cube_ice.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_cube_normal.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_cube_normal.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_cube_rota.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_cube_rota.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_cube_top.md3",                    CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_cube_top.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_dot.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_dot.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_fang.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_fang.md3");
-    Core::Manager::Resource->Load<coreModel>  ("object_paddle.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_paddle.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("object_ring.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_ring.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("object_paddle.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_paddle.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("object_ring.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_ring.md3", CORE_MODEL_LOAD_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("object_sphere.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_sphere.md3");
-    Core::Manager::Resource->Load<coreModel>  ("object_spike.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_spike.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("object_spike.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_spike.md3", CORE_MODEL_LOAD_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("object_star.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_star.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_sting.md3",                       CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_sting.md3", CORE_MODEL_LOAD_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("object_teleporter.md3",                  CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_teleporter.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_tetra_rota.md3",                  CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tetra_rota.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_tetra_top.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tetra_top.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_tube_closed.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tube_closed.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_tube_open.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_tube_open.md3");
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_bottom_high.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_bottom_high.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_bottom_low.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_bottom_low.md3");
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_top_high.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_top_high.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_top_low.md3",          CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_top_low.md3");
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_dharuk_high.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_dharuk_high.md3", false);
+        Core::Manager::Resource->Load<coreModel>  ("object_chroma.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_chroma.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_bottom_high.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_bottom_high.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_bottom_low.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_bottom_low.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_bottom_inside.md3",    CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_bottom_inside.md3", CORE_MODEL_LOAD_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_bottom_volume.md3",    CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_bottom_volume.md3", CORE_MODEL_LOAD_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_top_high.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_top_high.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_top_low.md3",          CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_top_low.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_top_inside.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_top_inside.md3", CORE_MODEL_LOAD_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_amemasu_top_volume.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_amemasu_top_volume.md3", CORE_MODEL_LOAD_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_chol_body_high.md3",           CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_chol_body_high.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_chol_body_low.md3",            CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_chol_body_low.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_chol_wing_high.md3",           CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_chol_wing_high.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_chol_wing_low.md3",            CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_chol_wing_low.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_dharuk_high.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_dharuk_high.md3", CORE_MODEL_LOAD_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_dharuk_low.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_dharuk_low.md3");
-        Core::Manager::Resource->Load<coreModel>  ("object_chroma.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_chroma.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_leviathan_body_high.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_leviathan_body_high.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_body_high.md3",          CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_body_high.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_body_low.md3",           CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_body_low.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_track_high.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_track_high.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_track_low.md3",          CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_track_low.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_01_high.md3",     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_01_high.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_01_low.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_01_low.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_02_high.md3",     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_02_high.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_02_low.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_02_low.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_03_high.md3",     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_03_high.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_03_low.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_03_low.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_04_high.md3",     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_04_high.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_04_low.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_04_low.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_leviathan_body_high.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_leviathan_body_high.md3", CORE_MODEL_LOAD_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_leviathan_body_low.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_leviathan_body_low.md3");
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_leviathan_head_high.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_leviathan_head_high.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_leviathan_head_high.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_leviathan_head_high.md3", CORE_MODEL_LOAD_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_leviathan_head_low.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_leviathan_head_low.md3");
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_leviathan_tail_high.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_leviathan_tail_high.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_leviathan_tail_high.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_leviathan_tail_high.md3", CORE_MODEL_LOAD_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_leviathan_tail_low.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_leviathan_tail_low.md3");
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_nautilus_body_high.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_nautilus_body_high.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_messier_high.md3",             CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_messier_high.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_messier_low.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_messier_low.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_nautilus_body_high.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_nautilus_body_high.md3", CORE_MODEL_LOAD_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_nautilus_body_low.md3",        CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_nautilus_body_low.md3");
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_nautilus_claw_high.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_nautilus_claw_high.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_nautilus_claw_high.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_nautilus_claw_high.md3", CORE_MODEL_LOAD_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_nautilus_claw_low.md3",        CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_nautilus_claw_low.md3");
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_torus_high.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_torus_high.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_torus_high.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_torus_high.md3", CORE_MODEL_LOAD_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_torus_low.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_torus_low.md3");
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_vaus_high.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_vaus_high.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_vaus_high.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_vaus_high.md3", CORE_MODEL_LOAD_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_vaus_low.md3",                 CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_vaus_low.md3");
-    Core::Manager::Resource->Load<coreModel>  ("ship_enemy_arrow_high.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_arrow_high.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_zeroth_body_high.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_zeroth_body_high.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_zeroth_body_low.md3",          CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_zeroth_body_low.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_zeroth_body_volume.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_zeroth_body_volume.md3", CORE_MODEL_LOAD_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_zeroth_head_high.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_zeroth_head_high.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_zeroth_head_low.md3",          CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_zeroth_head_low.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_zeroth_head_volume.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_zeroth_head_volume.md3", CORE_MODEL_LOAD_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_zeroth_leg.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_zeroth_leg.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_zeroth_leg_volume.md3",        CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_zeroth_leg_volume.md3", CORE_MODEL_LOAD_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_zeroth_tail.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_zeroth_tail.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_zeroth_tail_volume.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_zeroth_tail_volume.md3", CORE_MODEL_LOAD_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_enemy_arrow_high.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_arrow_high.md3", CORE_MODEL_LOAD_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_enemy_arrow_low.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_arrow_low.md3");
-    Core::Manager::Resource->Load<coreModel>  ("ship_enemy_cinder_high.md3",             CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_cinder_high.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_enemy_cinder_high.md3",             CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_cinder_high.md3", CORE_MODEL_LOAD_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_enemy_cinder_low.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_cinder_low.md3");
-    Core::Manager::Resource->Load<coreModel>  ("ship_enemy_freezer_high.md3",            CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_freezer_high.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_enemy_freezer_high.md3",            CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_freezer_high.md3", CORE_MODEL_LOAD_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_enemy_freezer_low.md3",             CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_freezer_low.md3");
-    Core::Manager::Resource->Load<coreModel>  ("ship_enemy_miner_high.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_miner_high.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_enemy_miner_high.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_miner_high.md3", CORE_MODEL_LOAD_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_enemy_miner_low.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_miner_low.md3");
-    Core::Manager::Resource->Load<coreModel>  ("ship_enemy_scout_high.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_scout_high.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_enemy_scout_high.md3",              CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_scout_high.md3", CORE_MODEL_LOAD_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_enemy_scout_low.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_scout_low.md3");
-    Core::Manager::Resource->Load<coreModel>  ("ship_enemy_star_high.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_star_high.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_enemy_star_high.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_star_high.md3", CORE_MODEL_LOAD_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_enemy_star_low.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_star_low.md3");
-    Core::Manager::Resource->Load<coreModel>  ("ship_enemy_warrior_high.md3",            CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_warrior_high.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_enemy_warrior_high.md3",            CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_warrior_high.md3", CORE_MODEL_LOAD_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_enemy_warrior_low.md3",             CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_enemy_warrior_low.md3");
-    Core::Manager::Resource->Load<coreModel>  ("ship_helper_01.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_01.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("ship_helper_02.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_02.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("ship_helper_03.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_03.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("ship_helper_04.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_04.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("ship_helper_05.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_05.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("ship_helper_06.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_06.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("ship_helper_07.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_07.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("ship_helper_08.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_08.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("ship_helper_09.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_09.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_helper_01.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_01.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_helper_02.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_02.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_helper_03.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_03.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_helper_04.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_04.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_helper_05.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_05.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_helper_06.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_06.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_helper_07.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_07.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_helper_08.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_08.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_helper_09.md3",                     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_helper_09.md3", CORE_MODEL_LOAD_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_meteor.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/environment_stone_01.md3");
-    Core::Manager::Resource->Load<coreModel>  ("ship_player_def_high.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_def_high.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("ship_player_def_low.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_def_low.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("ship_player_atk_high.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_atk_high.md3", false);
-    Core::Manager::Resource->Load<coreModel>  ("ship_player_atk_low.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_atk_low.md3", false);
+    Core::Manager::Resource->Load<coreModel>  ("ship_player_def_high.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_def_high.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_player_def_low.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_def_low.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_player_atk_high.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_atk_high.md3", CORE_MODEL_LOAD_BUFFERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_player_atk_low.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_player_atk_low.md3", CORE_MODEL_LOAD_BUFFERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_projectone.md3",                    CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_projectone.md3");
 
     Core::Manager::Resource->Load<coreTexture>("effect_arrow.png",                       CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_arrow.png");
@@ -133,6 +169,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("effect_sand.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_sand.png");
     Core::Manager::Resource->Load<coreTexture>("effect_snow.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_snow.png");
     Core::Manager::Resource->Load<coreTexture>("effect_soot.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_soot.png");
+    Core::Manager::Resource->Load<coreTexture>("effect_track.png",                       CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_track.png", false);
     Core::Manager::Resource->Load<coreTexture>("effect_wave.png",                        CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_wave.png");
     Core::Manager::Resource->Load<coreTexture>("effect_wave_norm.png",                   CORE_RESOURCE_UPDATE_AUTO,   "data/textures/effect_wave_norm.png", false);
     //Core::Manager::Resource->Load<coreTexture>("environment_algae.png",                  CORE_RESOURCE_UPDATE_AUTO,   "data/textures/environment_algae.png");
@@ -273,6 +310,8 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("effect_shield_inst.frag",                CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_shield.frag", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("effect_snow.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_snow.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("effect_snow.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_snow.frag");
+    Core::Manager::Resource->Load<coreShader> ("effect_track.vert",                      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_track.vert");
+    Core::Manager::Resource->Load<coreShader> ("effect_track.frag",                      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_track.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_weather_rain.vert",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_weather.vert", PRINT(SHADER_OVERLAYS(%u) SHADER_SINGLE, MOSS_RAIN_NUM));
     Core::Manager::Resource->Load<coreShader> ("effect_weather_rain.frag",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_weather.frag", PRINT(SHADER_OVERLAYS(%u) SHADER_SINGLE, MOSS_RAIN_NUM));
     Core::Manager::Resource->Load<coreShader> ("effect_weather_sand.vert",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_weather.vert", PRINT(SHADER_OVERLAYS(%u) SHADER_SINGLE, DESERT_SAND_NUM));
@@ -329,6 +368,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("object_ship_glow.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", SHADER_GLOW);
     Core::Manager::Resource->Load<coreShader> ("object_ship_blink.frag",                 CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", SHADER_BLINK);
     Core::Manager::Resource->Load<coreShader> ("object_ship_darkness.frag",              CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ship.frag", SHADER_DARKNESS);
+    Core::Manager::Resource->Load<coreShader> ("object_ice.frag",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ice.frag");
     Core::Manager::Resource->Load<coreShader> ("object_meteor_blink.frag",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_meteor.frag", SHADER_BLINK);
     Core::Manager::Resource->Load<coreShader> ("object_inst.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert", CORE_SHADER_OPTION_INSTANCING);
     Core::Manager::Resource->Load<coreShader> ("object_wave_inst.vert",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert", CORE_SHADER_OPTION_INSTANCING SHADER_WAVE);
@@ -728,6 +768,11 @@ void CoreApp::Setup()
         ->AttachShader("effect_snow.frag")
         ->Finish();
 
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_track_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("effect_track.vert")
+        ->AttachShader("effect_track.frag")
+        ->Finish();
+
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_weather_rain_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("effect_weather_rain.vert")
         ->AttachShader("effect_weather_rain.frag")
@@ -931,6 +976,11 @@ void CoreApp::Setup()
         ->AttachShader("object_ship_darkness.frag")
         ->Finish();
 
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ice_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("object.vert")
+        ->AttachShader("object_ice.frag")
+        ->Finish();
+
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_meteor_blink_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("object.vert")
         ->AttachShader("object_meteor_blink.frag")
@@ -959,13 +1009,13 @@ void CoreApp::Setup()
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ship_blink_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader ("object_inst.vert")
         ->AttachShader ("object_ship_blink_inst.frag")
-        ->BindAttribute("a_v2Blink", SHIP_SHADER_ATTRIBUTE_BLINK)
+        ->BindAttribute("a_v1Blink", SHIP_SHADER_ATTRIBUTE_BLINK)
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_meteor_blink_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader ("object_inst.vert")
         ->AttachShader ("object_meteor_blink_inst.frag")
-        ->BindAttribute("a_v2Blink", SHIP_SHADER_ATTRIBUTE_BLINK)
+        ->BindAttribute("a_v1Blink", SHIP_SHADER_ATTRIBUTE_BLINK)
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_plate_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())

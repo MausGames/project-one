@@ -18,7 +18,7 @@ cBackground::cBackground()noexcept
 , m_pWater   (NULL)
 {
     // create background frame buffer
-    m_FrameBuffer.AttachTargetBuffer(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB8);
+    m_FrameBuffer.AttachTargetBuffer(CORE_FRAMEBUFFER_TARGET_COLOR, 0u, CORE_TEXTURE_SPEC_RGB8);   // TODO 1: RGB might not be supported for render targets, Create needs to return state, then configuration needs to change, or maybe transparent mechanism in Create -> is a TODO 
     m_FrameBuffer.AttachTargetBuffer(CORE_FRAMEBUFFER_TARGET_DEPTH, 0u, CORE_TEXTURE_SPEC_DEPTH16);
     m_FrameBuffer.Create(g_vGameResolution, CORE_FRAMEBUFFER_CREATE_MULTISAMPLED);
 
@@ -295,9 +295,9 @@ void cBackground::Move()
     (x).at(sListKey)->BindObject(pObject);                                                         \
 }
 
-void cBackground::AddGround(coreObject3D* pObject, const coreVector3& vRelativePos, const coreUint32 iCapacity, const coreHashString& sProgramInstancedName, const coreHashString& sListKey) {__ADD_OBJECT(m_apGroundAddList)}
-void cBackground::AddDecal (coreObject3D* pObject, const coreVector3& vRelativePos, const coreUint32 iCapacity, const coreHashString& sProgramInstancedName, const coreHashString& sListKey) {__ADD_OBJECT(m_apDecalAddList)}
-void cBackground::AddAir   (coreObject3D* pObject, const coreVector3& vRelativePos, const coreUint32 iCapacity, const coreHashString& sProgramInstancedName, const coreHashString& sListKey) {__ADD_OBJECT(m_apAirAddList)}
+void cBackground::AddGround(coreObject3D* pObject, const coreVector3 vRelativePos, const coreUint32 iCapacity, const coreHashString& sProgramInstancedName, const coreHashString& sListKey) {__ADD_OBJECT(m_apGroundAddList)}
+void cBackground::AddDecal (coreObject3D* pObject, const coreVector3 vRelativePos, const coreUint32 iCapacity, const coreHashString& sProgramInstancedName, const coreHashString& sListKey) {__ADD_OBJECT(m_apDecalAddList)}
+void cBackground::AddAir   (coreObject3D* pObject, const coreVector3 vRelativePos, const coreUint32 iCapacity, const coreHashString& sProgramInstancedName, const coreHashString& sListKey) {__ADD_OBJECT(m_apAirAddList)}
 
 #undef __ADD_OBJECT
 
@@ -402,7 +402,7 @@ void cBackground::_StoreNormalList(const coreBatchList* pObjectList)
     // 
     FOR_EACH(it, *pObjectList->List()) oNew.push_back((*it)->GetDirection().PackSnorm011());
 
-    // TODO: may needs change later, what is normal, direction or orientation or both (store quaternion? (already available)) 
+    // TODO 1: may needs change later, what is normal, direction or orientation or both (store quaternion? (already available)) 
 }
 
 
@@ -462,7 +462,7 @@ void cBackground::_SortBackToFront(coreBatchList* OUTPUT pObjectList)
 
 // ****************************************************************
 // check for intersection with other objects
-FUNC_PURE coreBool cBackground::_CheckIntersection(const coreBatchList* pObjectList, const coreVector2& vNewPos, const coreFloat fDistanceSq)
+FUNC_PURE coreBool cBackground::_CheckIntersection(const coreBatchList* pObjectList, const coreVector2 vNewPos, const coreFloat fDistanceSq)
 {
     const coreSet<coreObject3D*>* pList = pObjectList->List();
 
@@ -486,7 +486,7 @@ FUNC_PURE coreBool cBackground::_CheckIntersection(const coreBatchList* pObjectL
     return false;
 }
 
-FUNC_PURE coreBool cBackground::_CheckIntersectionQuick(const coreBatchList* pObjectList, const coreVector2& vNewPos, const coreFloat fDistanceSq)
+FUNC_PURE coreBool cBackground::_CheckIntersectionQuick(const coreBatchList* pObjectList, const coreVector2 vNewPos, const coreFloat fDistanceSq)
 {
     const coreSet<coreObject3D*>* pList = pObjectList->List();
 

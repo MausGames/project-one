@@ -56,7 +56,7 @@ cSummaryMenu::cSummaryMenu()noexcept
         m_aMedalSegment[i].DefineTexture(0u, "menu_medal.png");
         m_aMedalSegment[i].DefineProgram("default_2d_program");
         //m_aMedalSegment[i].SetPosition  (coreVector2((I_TO_F(i % 6u) - 2.5f) * 0.055f + fOffset, I_TO_F(i / 6u) * -0.065f + 0.24f));
-        m_aMedalSegment[i].SetPosition  (coreVector2((I_TO_F(i % 6u) - 2.0f) * 0.055f, I_TO_F(i / 6u) * -0.065f + 0.24f));   // TODO: while bosses are disabled   
+        m_aMedalSegment[i].SetPosition  (coreVector2((I_TO_F(i % 6u) - 2.0f) * 0.055f, I_TO_F(i / 6u) * -0.065f + 0.24f));   // TODO 1: while bosses are disabled   
         m_aMedalSegment[i].SetTexSize   (coreVector2(0.25f,0.25f));
     }
 
@@ -407,7 +407,7 @@ void cSummaryMenu::ShowMission()
 
     // 
     //const coreUint8 iMedalMission = (iMedalCount == MENU_SUMMARY_MEDALS) ? (iMedalTotal / MENU_SUMMARY_MEDALS) : MEDAL_NONE;   // round down
-    const coreUint8 iMedalMission = (iMedalCount == 15u) ? (iMedalTotal / 15u) : MEDAL_NONE;   // TODO: while bosses are disabled   
+    const coreUint8 iMedalMission = (iMedalCount == 15u) ? (iMedalTotal / 15u) : MEDAL_NONE;   // TODO 1: while bosses are disabled   
     this->__SetMedalMission(iMedalMission);
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i) {m_aiApplyMedal[i] = iMedalMission;});
 
@@ -450,7 +450,7 @@ void cSummaryMenu::ShowBegin()
 
 // ****************************************************************
 // 
-void cSummaryMenu::SetHighlightColor(const coreVector3& vColor)
+void cSummaryMenu::SetHighlightColor(const coreVector3 vColor)
 {
     // 
     m_aHeader[1].SetColor3(vColor);

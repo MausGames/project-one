@@ -257,7 +257,7 @@ coreUint32 cScoreTable::AddScore(const coreUint32 iValue, const coreBool bModifi
     return iFinalValue;
 }
 
-coreUint32 cScoreTable::AddScore(const coreUint32 iValue, const coreBool bModified, const coreVector3& vPosition)
+coreUint32 cScoreTable::AddScore(const coreUint32 iValue, const coreBool bModified, const coreVector3 vPosition)
 {
     // 
     ASSERT(STATIC_ISVALID(g_pGame))

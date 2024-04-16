@@ -392,7 +392,7 @@ void cNautilusBoss::__MoveOwn()
 
         // 
         this->SetPosition (coreVector3(fCurX * FOREGROUND_AREA.x, this->GetPosition().yz()));
-        this->SetDirection(coreVector3(fCurX - fPrevX, TIME, 0.0f).Normalized()); // TODO: not time-portable   
+        this->SetDirection(coreVector3(fCurX - fPrevX, TIME, 0.0f).Normalized()); // TODO 1: not time-portable   
     }
 
     if(m_aiCounter[CONTAINER_ATTACHED])
@@ -403,7 +403,7 @@ void cNautilusBoss::__MoveOwn()
     }
 
     // 
-    const coreVector2& vImpact = pMission->GetContainerImpact();
+    const coreVector2 vImpact = pMission->GetContainerImpact();
     if(!vImpact.IsNull())
     {
         if(++m_aiCounter[IMPACT_COUNT] >= 2) pMission->SetContainerForce(coreVector2(0.0f,0.0f));
@@ -415,7 +415,7 @@ void cNautilusBoss::__MoveOwn()
             // 
             g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 0.7f, this, vImpact,  vDir)->ChangeSize(1.3f);
             g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 0.7f, this, vImpact, -vDir)->ChangeSize(1.3f);
-            // TODO: lower blue balls get overlapped   
+            // TODO 1: lower blue balls get overlapped   
         }
 
         // 
@@ -484,13 +484,13 @@ void cNautilusBoss::__MoveOwn()
         g_pWindscreen->GetInk()->SetBlotAlpha(i, CLAMP(MIN(m_afInkAlpha[i], NAUTILUS_INK_TIME - m_afInkAlpha[i]) * NAUTILUS_INK_SPEED, 0.0f, 1.0f));
     }
 
-    // TODO: line movement 
+    // TODO 1: line movement 
     //const coreVector2 vLinePos = coreVector2(0.0f, 0.1f * SIN(2.0f*PI * 0.08f * coreFloat(Core::System->GetTotalTime()))); 
 }
 
 // ****************************************************************
 // 
-void cNautilusBoss::__CreateInk(const coreUintW iIndex, const coreVector2& vPosition)
+void cNautilusBoss::__CreateInk(const coreUintW iIndex, const coreVector2 vPosition)
 {
     ASSERT(iIndex < ARRAY_SIZE(m_afInkAlpha))
 
@@ -505,7 +505,7 @@ void cNautilusBoss::__CreateInk(const coreUintW iIndex, const coreVector2& vPosi
 
 // ****************************************************************
 // 
-void cNautilusBoss::__EnableBullet(const coreVector2& vStart, const coreVector2& vEnd)
+void cNautilusBoss::__EnableBullet(const coreVector2 vStart, const coreVector2 vEnd)
 {
     WARN_IF(m_InkBullet.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
 

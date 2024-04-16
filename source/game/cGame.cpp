@@ -102,9 +102,9 @@ cGame::~cGame()
     g_pWindscreen->ClearAdds(true);
 
     // 
-    for(coreUintW i = 0u; i < POST_WALLS; ++i) g_pPostProcessing->SetWallOffset(i, 0.0f);   // TODO: make transition smoother
+    for(coreUintW i = 0u; i < POST_WALLS; ++i) g_pPostProcessing->SetWallOffset(i, 0.0f);   // TODO 1: make transition smoother
     g_pPostProcessing->SetSplitScreen  (false);
-    g_pPostProcessing->SetDirectionGame(coreVector2(0.0f,1.0f));   // TODO: make transition smoother
+    g_pPostProcessing->SetDirectionGame(coreVector2(0.0f,1.0f));   // TODO 1: make transition smoother
     g_pPostProcessing->SetSaturationAll(1.0f);
 
     // 
@@ -126,6 +126,11 @@ void cGame::Render()
         // 
         m_EnemyManager.RenderBottom();
         m_pCurMission->RenderBottom();
+
+        // 
+        m_CrashManager.Render();
+        
+        g_pSpecialEffects->RenderBottom();
     }
 
     __DEPTH_GROUP_SHIP   // # 1
@@ -255,8 +260,11 @@ void cGame::Move()
     m_ItemManager  .Move();
     m_ShieldManager.Move();
 
+    // 
+    m_CrashManager.Move();
+
     // handle default object collisions
-    this->__HandleCollisions();   // TODO: do all collisions here (virtual funcs), for consistency, e.g. bullet collisions are done before move when handled in mission/boss 
+    this->__HandleCollisions();   // TODO 1: do all collisions here (virtual funcs), for consistency, e.g. bullet collisions are done before move when handled in mission/boss 
 
     // 
     this->__HandleDefeat();
@@ -535,7 +543,7 @@ void cGame::PushDepthLevelShip()
 
 // ****************************************************************
 // 
-RETURN_NONNULL cPlayer* cGame::FindPlayerSide(const coreVector2& vPosition)
+RETURN_NONNULL cPlayer* cGame::FindPlayerSide(const coreVector2 vPosition)
 {
     STATIC_ASSERT(GAME_PLAYERS == 2u)
 
@@ -879,10 +887,7 @@ void cGame::__HandlePacifist()
 void cGame::__HandleCollisions()
 {
     // 
-    m_EnemyManager.ForEachEnemy([](cEnemy* OUTPUT pEnemy) {pEnemy->ActivateModelLowOnly();});
-
-    // 
-    cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_ENEMY, [this](cPlayer* OUTPUT pPlayer, cEnemy* OUTPUT pEnemy, const coreVector3& vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_ENEMY, [this](cPlayer* OUTPUT pPlayer, cEnemy* OUTPUT pEnemy, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         // 
         //if(pEnemy->GetLifeTime() < 1.0f) return;
@@ -916,14 +921,15 @@ void cGame::__HandleCollisions()
     });
 
     // 
-    cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_BULLET_ENEMY, [this](cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_BULLET_ENEMY, [this](cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         // 
         m_pCurMission->CollPlayerBullet(pPlayer, pBullet, vIntersection, bFirstHit);
         
         
         const coreVector2 vDiff = pPlayer->GetPosition().xy() - pBullet->GetPosition().xy();
-        if(coreVector2::Dot(vDiff, pBullet->GetFlyDir()) < 0.0f) return; // issues with moving "into" back of spearbullet (maybe also viewbullet), after evasion maneuver
+        if(pBullet->GetSpeed() && coreVector2::Dot(vDiff, pBullet->GetFlyDir()) < 0.0f) return; // issues with moving "into" back of spearbullet (maybe also viewbullet), after evasion maneuver
+        // mine-bullets cause issues
         
 
         if(bFirstHit)
@@ -938,7 +944,7 @@ void cGame::__HandleCollisions()
     });
 
     // 
-    Core::Manager::Object->TestCollision(TYPE_ENEMY, TYPE_BULLET_PLAYER, [this](cEnemy* OUTPUT pEnemy, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
+    Core::Manager::Object->TestCollision(TYPE_ENEMY, TYPE_BULLET_PLAYER, [this](cEnemy* OUTPUT pEnemy, cBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         // 
         if(!g_pForeground->IsVisiblePoint(vIntersection.xy())) return;
@@ -988,7 +994,7 @@ void cGame::__HandleCollisions()
     });
 
     // 
-    if(m_pRepairEnemy) Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, m_pRepairEnemy, [](cBullet* OUTPUT pBullet, cEnemy* OUTPUT pEnemy, const coreVector3& vIntersection, const coreBool bFirstHit)
+    if(m_pRepairEnemy) Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, m_pRepairEnemy, [](cBullet* OUTPUT pBullet, cEnemy* OUTPUT pEnemy, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         // 
         if(!g_pForeground->IsVisiblePoint(vIntersection.xy())) return;
@@ -1023,7 +1029,7 @@ void cGame::__HandleCollisions()
     });
 
     // 
-    cPlayer::TestCollision(PLAYER_TEST_ALL, TYPE_CHROMA, [](cPlayer* OUTPUT pPlayer, cChromaBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(PLAYER_TEST_ALL, TYPE_CHROMA, [](cPlayer* OUTPUT pPlayer, cChromaBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         // 
         pPlayer->GetScoreTable()->AddScore(pBullet->GetDamage(), false);
@@ -1043,7 +1049,7 @@ void cGame::__HandleCollisions()
     });
 
     // 
-    cPlayer::TestCollision(PLAYER_TEST_ALL, TYPE_ITEM, [](cPlayer* OUTPUT pPlayer, cItem* OUTPUT pItem, const coreVector3& vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(PLAYER_TEST_ALL, TYPE_ITEM, [](cPlayer* OUTPUT pPlayer, cItem* OUTPUT pItem, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         // 
         pItem->Collect(pPlayer);
@@ -1060,14 +1066,11 @@ void cGame::__HandleCollisions()
     });
 
     // 
-    Core::Manager::Object->TestCollision(TYPE_SHIELD, TYPE_BULLET_PLAYER, [](coreObject3D* OUTPUT pShield, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit)
+    Core::Manager::Object->TestCollision(TYPE_SHIELD, TYPE_BULLET_PLAYER, [](coreObject3D* OUTPUT pShield, cBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         // 
         pBullet->Reflect(pShield, vIntersection.xy(), 3.0f);
     });
-
-    // 
-    m_EnemyManager.ForEachEnemy([](cEnemy* OUTPUT pEnemy) {pEnemy->ActivateModelDefault();});
 }
 
 
@@ -1090,6 +1093,7 @@ void cGame::__ClearAll(const coreBool bAnimated)
     m_ChromaManager      .ClearChromas(bAnimated);
     m_ItemManager        .ClearItems  (bAnimated);
     m_ShieldManager      .ClearShields(bAnimated);
+    m_CrashManager       .ClearCrashes(bAnimated);
 
     // 
     if(m_pRepairEnemy)

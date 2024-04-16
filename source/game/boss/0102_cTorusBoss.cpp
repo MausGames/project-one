@@ -8,6 +8,8 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
+// TODO 1: bottom state during intro
+
 
 // ****************************************************************
 // counter identifier
@@ -25,7 +27,7 @@
 
 
 
-void __TorusCreateOverdrive(const coreUintW iIndex, const coreVector3& vIntersect, const coreFloat fTime, const coreBool bGround)
+void __TorusCreateOverdrive(const coreUintW iIndex, const coreVector3 vIntersect, const coreFloat fTime, const coreBool bGround)
 {
     
 static coreVector3 vOldHit = coreVector3(0.0f,0.0f,0.0f);
@@ -43,15 +45,15 @@ static coreUint16 m_iDecalState = 0u;
     if(vOldHit.IsNull()) vOldHit = vIntersect;
     else
     {
-    gtAgain:
-
-        // 
-        const coreVector3 vDiff = vIntersect - vOldHit;
-        const coreFloat   fLen  = vDiff.Length();
-
-        // 
-        if(fLen > fMin)
+        while(true)
         {
+            // 
+            const coreVector3 vDiff = vIntersect - vOldHit;
+            const coreFloat   fLen  = vDiff.Length();
+
+            // 
+            if(fLen < fMin) break;
+
             // 
             const coreVector3 vNewHit      = (fLen > fMax) ? LERP(vOldHit, vIntersect, fMax*RCP(fLen)) : vIntersect;
             const coreVector2 vOldOnScreen = g_pForeground->Project2D(vOldHit);
@@ -90,16 +92,16 @@ static coreUint16 m_iDecalState = 0u;
                        else g_pWindscreen                  ->AddObject(pObject, vDecalPos, 3.0f, 128u, "effect_decal_single_inst_program", LIST_KEY);
 
                 // 
-                //g_pSpecialEffects->CreateSplashFire (vNewHit,  5.0f, bGround ? 3u : 6u, COLOR_FIRE_ORANGE);
-                //g_pSpecialEffects->CreateSplashColor(vNewHit, 25.0f, bGround ? 2u : 4u, COLOR_FIRE_ORANGE);
+                g_pSpecialEffects->CreateSplashFire (vNewHit,  5.0f, bGround ? 3u : 6u, COLOR_FIRE_ORANGE);
+                g_pSpecialEffects->CreateSplashColor(vNewHit, 25.0f, bGround ? 2u : 4u, COLOR_FIRE_ORANGE);
             }
 
             // 
             //g_pSpecialEffects->ShakeScreen(0.1f + 0.55f * SIN(PI * fTime));
+            g_pSpecialEffects->ShakeScreen(0.3f);
 
             // 
             vOldHit = vNewHit;
-            goto gtAgain;
         }
     }
 
@@ -342,7 +344,7 @@ void cTorusBoss::__RenderOwnOver()
 // 
 void cTorusBoss::__MoveOwn()
 {
-    if(this->GetCurHealthPct() <= 0.001f) this->Kill(true);                
+    if(this->ReachedDeath()) this->Kill(true);   
     
     
     cViridoMission* pMission = d_cast<cViridoMission*>(g_pGame->GetCurMission());
@@ -382,7 +384,7 @@ void cTorusBoss::__MoveOwn()
         {
             if(PHASE_BEGINNING) this->AddStatus(ENEMY_STATUS_GHOST);
             
-            // TODO: spin faster at the end, like a real coin
+            // TODO 1: spin faster at the end, like a real coin
             
             if(fTime < 0.85f)
             {            
@@ -761,7 +763,7 @@ void cTorusBoss::__MoveOwn()
 
         // 
         const coreVector3 vDir  = coreVector3(coreVector2::Direction(m_fRotationObject * PI), 0.0f);
-        const coreVector3 vOri  = coreVector3(-vDir.x*vDir.y, vDir.x*vDir.x, vDir.y);
+        const coreVector3 vOri  = OriRoundDir(vDir.xy(), vDir.xy());
         const coreVector2 vTex  = coreVector2(0.2f,1.0f) * m_fRotationObject;
         const coreFloat   fTime = FMOD(m_fRotationObject * -5.0f, 2.0f);
 
@@ -804,7 +806,7 @@ void cTorusBoss::__MoveOwn()
             const coreVector2 vNewPos   = pGunner->GetPosition().xy() + ((i & 0x02u) ? vMoveDir.yx() : vMoveDir);
 
             // 
-            const auto nBounceEffect = [](const coreVector2& vEffectPos)
+            const auto nBounceEffect = [](const coreVector2 vEffectPos)
             {
                 g_pSpecialEffects->CreateSplashColor(coreVector3(vEffectPos, 0.0f), SPECIAL_SPLASH_TINY, COLOR_ENERGY_RED);
                 g_pSpecialEffects->PlaySound        (coreVector3(vEffectPos, 0.0f), 1.0f, SOUND_EXPLOSION_ENERGY_SMALL);
@@ -1048,7 +1050,7 @@ void cTorusBoss::__MoveOwn()
 
             g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 0.7f, this, vPos,  vDir)->ChangeSize(1.4f);
             g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 0.7f, this, vPos, -vDir)->ChangeSize(1.4f);
-            // TODO: lower purple balls get overlapped   
+            // TODO 1: lower purple balls get overlapped   
         }
          */
         
@@ -1114,7 +1116,7 @@ void cTorusBoss::__MoveOwn()
 
 // ****************************************************************
 // 
-void cTorusBoss::__EnableSummon(const coreVector2& vPosition, const coreVector3& vColor)
+void cTorusBoss::__EnableSummon(const coreVector2 vPosition, const coreVector3 vColor)
 {
     WARN_IF(m_Summon.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
 
@@ -1143,7 +1145,7 @@ void cTorusBoss::__DisableSummon()
 
 // ****************************************************************
 // 
-void cTorusBoss::__EnableTurret(const coreUintW iIndex, const coreVector2& vPosition)
+void cTorusBoss::__EnableTurret(const coreUintW iIndex, const coreVector2 vPosition)
 {
     ASSERT(iIndex < TORUS_TURRETS)
     cCustomEnemy* pTurret = &m_aTurret       [iIndex];
@@ -1196,7 +1198,7 @@ void cTorusBoss::__DisableTurret(const coreUintW iIndex, const coreBool bAnimate
 
 // ****************************************************************
 // 
-void cTorusBoss::__EnableGunner(const coreUintW iIndex, const coreVector2& vPosition)
+void cTorusBoss::__EnableGunner(const coreUintW iIndex, const coreVector2 vPosition)
 {
     ASSERT(iIndex < TORUS_GUNNERS)
     cCustomEnemy* pGunner = &m_aGunner       [iIndex];

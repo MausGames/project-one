@@ -10,22 +10,21 @@
 #ifndef _P1_GUARD_MISSION_H_
 #define _P1_GUARD_MISSION_H_
 
-// TODO: reuse paths (beware of reserve assertion, and resize on refine) and squads over stages
-// TODO: add visible debug-spline
-// TODO: prevent multiple calculations in script-commands (because of macro variables), also boss
-// TODO: assertion for "active boss should be alive"
-// TODO: STAGE_FLYPAST with dot-product or simpler per-axis
-// TODO: there seems to be a bug in STAGE_TICK_TIME, which sometimes gives early or late ticks with 30.0f speed, compared with STAGE_TICK_LIFETIME
-// TODO: wrap m_piData in function with RETURN_RESTRICT
-// TODO: set progress when finishing segment, not when starting, but consider mission-wrapping
-// TODO: low-resolution object_sphere for small sphere objects (what about bullet_orb) ?
-// TODO: change all missions to STATIC_MEMORY (check memory, it would put all missions always in memory)
-// TODO: check if TYPE_NEVO_BOMB still needed
-// TODO: do not create objects and load resources of unused game-objects and bosses (e.g. move waves into own classes ? but then ?)
-// TODO: in delay, replace cScoutEnemy with something which does not load any resources (may need to support instancing)
-// TODO: move as much gameplay from gameplay-objects from mission to stages, except for mission-shared stuff, animation stuff, or special-cases requiring before-after update (teleportation)
-// TODO: use mission-RotaCache everywhere applicable (even bullt generation if required)
-// TODO: chain should shatter into pieces on disable, should drag the stone to player on swing-start, boulder should use ice-shader, multiple boulders, clearing/resetting swing and catch attributes etc.
+// TODO 3: reuse paths (beware of reserve assertion, and resize on refine) and squads over stages
+// TODO 3: prevent multiple calculations in script-commands (because of macro variables), also boss
+// TODO 3: assertion for "active boss should be alive"
+// TODO 3: STAGE_FLYPAST with dot-product or simpler per-axis
+// TODO 2: there seems to be a bug in STAGE_TICK_TIME, which sometimes gives early or late ticks with 30.0f speed, compared with STAGE_TICK_LIFETIME
+// TODO 3: wrap m_piData in function with RETURN_RESTRICT
+// TODO 3: set progress when finishing segment, not when starting, but consider mission-wrapping
+// TODO 3: low-resolution object_sphere for small sphere objects (what about bullet_orb) ?
+// TODO 3: change all missions to STATIC_MEMORY (check memory, it would put all missions always in memory)
+// TODO 4: check if TYPE_NEVO_BOMB still needed
+// TODO 3: do not create objects and load resources of unused game-objects and bosses (e.g. move waves into own classes ? but then ?)
+// TODO 3: in delay, replace cScoutEnemy with something which does not load any resources (may need to support instancing)
+// TODO 4: move as much gameplay from gameplay-objects from mission to stages, except for mission-shared stuff, animation stuff, or special-cases requiring before-after update (teleportation)
+// TODO 1: chain should shatter into pieces on disable, should drag the stone to player on swing-start, boulder should use ice-shader, multiple boulders, clearing/resetting swing and catch attributes etc.
+// TODO 3: use mission-RotaCache everywhere applicable (even bullet generation if required)
 
 
 // ****************************************************************
@@ -37,11 +36,11 @@
 #define MISSION_NO_WAVE    (0xFFu)     // 
 #define MISSION_NO_SEGMENT (0xFFu)     // 
 
-#define MISSION_SEGMENT_IS_BOSS(i) ((i) % 6u == 5u)
-#define MISSION_BOSS_TO_SEGMENT(i) ((i) * 6u  + 5u)
-#define MISSION_WAVE_TO_SEGMENT(i) ((i) + (i) / 5u)
+#define MISSION_SEGMENT_IS_BOSS(i) ((i) >= MISSION_WAVES)
+#define MISSION_BOSS_TO_SEGMENT(i) ((i) +  MISSION_WAVES)
+#define MISSION_WAVE_TO_SEGMENT(i) ((i))
 
-STATIC_ASSERT((BOSSES == 3u) && (WAVES == 15u) && (SEGMENTS == 18u))
+STATIC_ASSERT((MISSION_BOSSES == 2u) && (MISSION_WAVES == 10u))
 
 #define TAKE_ALWAYS  (0x00u)
 #define TAKE_MISSION (0xFFu)
@@ -72,12 +71,11 @@ STATIC_ASSERT((BOSSES == 3u) && (WAVES == 15u) && (SEGMENTS == 18u))
 #define NEVO_ARROWS_RAWS            (NEVO_ARROWS)                                     // 
 #define NEVO_BLOCKS                 (12u)                                             // 
 #define NEVO_BLOCKS_RAWS            (NEVO_BLOCKS * 2u)                                // 
-#define NEVO_SHELTERS               (2u)                                              // 
 #define NEVO_BOMB_SIZE              (4.0f)                                            // 
 
 #define HARENA_SPIKES               (36u)                                             // 
 #define HARENA_SPIKES_RAWS          (HARENA_SPIKES * 2u)                              // 
-#define HARENA_SPIKE_DIMENSION      (6u)                                              // 
+#define HARENA_SPIKE_DIMENSION      (6u)                                              //    
 
 #define RUTILUS_TELEPORTER          (2u)                                              // 
 #define RUTILUS_TELEPORTER_COLOR(x) ((x) ? COLOR_ENERGY_BLUE : COLOR_ENERGY_ORANGE)   // 
@@ -89,7 +87,7 @@ STATIC_ASSERT((BOSSES == 3u) && (WAVES == 15u) && (SEGMENTS == 18u))
 
 #define GELU_FANGS                  (25u)                                             // 
 #define GELU_FANGS_RAWS             (GELU_FANGS)                                      // 
-#define GELU_FANGS_DIMENSION        (5u)                                              // 
+#define GELU_FANGS_DIMENSION        (5u)                                              //    
 #define GELU_WAYS                   (26u)                                             // 
 #define GELU_WAYS_RAWS              (GELU_WAYS * 2u)                                  // 
 #define GELU_ORBS                   (16u)                                             // 
@@ -135,9 +133,9 @@ STATIC_ASSERT((BOSSES == 3u) && (WAVES == 15u) && (SEGMENTS == 18u))
 #define STAGE_ADD_PATH(n)                      const auto n = this->_AddPath    (__LINE__,      [](coreSpline2* OUTPUT n)
 #define STAGE_ADD_SQUAD(n,t,c)                 const auto n = this->_AddSquad<t>(__LINE__, (c), [](cEnemySquad* OUTPUT n)
 
-#define STAGE_COLL_PLAYER_ENEMY(a,b,i,f,...)   if(!m_nCollPlayerEnemy)  m_nCollPlayerEnemy  = ([__VA_ARGS__](cPlayer* OUTPUT a, cEnemy*  OUTPUT b, const coreVector3& i, const coreBool f)   // NOLINT
-#define STAGE_COLL_PLAYER_BULLET(a,b,i,f,...)  if(!m_nCollPlayerBullet) m_nCollPlayerBullet = ([__VA_ARGS__](cPlayer* OUTPUT a, cBullet* OUTPUT b, const coreVector3& i, const coreBool f)   // NOLINT
-#define STAGE_COLL_ENEMY_BULLET(a,b,i,f,...)   if(!m_nCollEnemyBullet)  m_nCollEnemyBullet  = ([__VA_ARGS__](cEnemy*  OUTPUT a, cBullet* OUTPUT b, const coreVector3& i, const coreBool f)   // NOLINT
+#define STAGE_COLL_PLAYER_ENEMY(a,b,i,f,...)   if(!m_nCollPlayerEnemy)  m_nCollPlayerEnemy  = ([__VA_ARGS__](cPlayer* OUTPUT a, cEnemy*  OUTPUT b, const coreVector3 i, const coreBool f)   // NOLINT
+#define STAGE_COLL_PLAYER_BULLET(a,b,i,f,...)  if(!m_nCollPlayerBullet) m_nCollPlayerBullet = ([__VA_ARGS__](cPlayer* OUTPUT a, cBullet* OUTPUT b, const coreVector3 i, const coreBool f)   // NOLINT
+#define STAGE_COLL_ENEMY_BULLET(a,b,i,f,...)   if(!m_nCollEnemyBullet)  m_nCollEnemyBullet  = ([__VA_ARGS__](cEnemy*  OUTPUT a, cBullet* OUTPUT b, const coreVector3 i, const coreBool f)   // NOLINT
 #define COLL_VAL(x)                             x = s_cast<typename std::conditional<!std::is_reference<decltype(x)>::value, decltype(x), void>::type>(x)
 #define COLL_REF(x)                            &x = s_cast<typename std::conditional< std::is_reference<decltype(x)>::value, decltype(x), void>::type>(x)
 #define COLL_THIS                              this
@@ -228,9 +226,9 @@ class INTERFACE cMission
 {
 private:
     // 
-    using uCollPlayerEnemyType  = std::function<void(cPlayer* OUTPUT, cEnemy*  OUTPUT, const coreVector3&, const coreBool)>;
-    using uCollPlayerBulletType = std::function<void(cPlayer* OUTPUT, cBullet* OUTPUT, const coreVector3&, const coreBool)>;
-    using uCollEnemyBulletType  = std::function<void(cEnemy*  OUTPUT, cBullet* OUTPUT, const coreVector3&, const coreBool)>;
+    using uCollPlayerEnemyType  = std::function<void(cPlayer* OUTPUT, cEnemy*  OUTPUT, const coreVector3, const coreBool)>;
+    using uCollPlayerBulletType = std::function<void(cPlayer* OUTPUT, cBullet* OUTPUT, const coreVector3, const coreBool)>;
+    using uCollEnemyBulletType  = std::function<void(cEnemy*  OUTPUT, cBullet* OUTPUT, const coreVector3, const coreBool)>;
 
 
 protected:
@@ -315,12 +313,12 @@ public:
     inline void SetMedalGoal(const coreFloat* pfMedalGoal) {m_pfMedalGoal = pfMedalGoal; ASSERT(pfMedalGoal)}
 
     // 
-    void GiveBadge(const coreUint8 iBadge, const coreVector3& vPosition);
+    void GiveBadge(const coreUint8 iBadge, const coreVector3 vPosition);
 
     // 
-    inline void CollPlayerEnemy (cPlayer* OUTPUT pPlayer, cEnemy*  OUTPUT pEnemy,  const coreVector3& vIntersection, const coreBool bFirstHit) {if(m_nCollPlayerEnemy)  m_nCollPlayerEnemy (pPlayer, pEnemy,  vIntersection, bFirstHit);}
-    inline void CollPlayerBullet(cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit) {if(m_nCollPlayerBullet) m_nCollPlayerBullet(pPlayer, pBullet, vIntersection, bFirstHit);}
-    inline void CollEnemyBullet (cEnemy*  OUTPUT pEnemy,  cBullet* OUTPUT pBullet, const coreVector3& vIntersection, const coreBool bFirstHit) {if(m_nCollEnemyBullet)  m_nCollEnemyBullet (pEnemy,  pBullet, vIntersection, bFirstHit);}
+    inline void CollPlayerEnemy (cPlayer* OUTPUT pPlayer, cEnemy*  OUTPUT pEnemy,  const coreVector3 vIntersection, const coreBool bFirstHit) {if(m_nCollPlayerEnemy)  m_nCollPlayerEnemy (pPlayer, pEnemy,  vIntersection, bFirstHit);}
+    inline void CollPlayerBullet(cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit) {if(m_nCollPlayerBullet) m_nCollPlayerBullet(pPlayer, pBullet, vIntersection, bFirstHit);}
+    inline void CollEnemyBullet (cEnemy*  OUTPUT pEnemy,  cBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit) {if(m_nCollEnemyBullet)  m_nCollEnemyBullet (pEnemy,  pBullet, vIntersection, bFirstHit);}
 
     // access mission objects
     inline cBoss*           GetBoss           (const coreUintW iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_apBoss[iIndex];}
@@ -377,9 +375,7 @@ public:
 class cViridoMission final : public cMission
 {
 private:
-    cDharukBoss m_Dharuk;                                   // 
-    cTorusBoss  m_Torus;                                    // 
-    cVausBoss   m_Vaus;                                     // 
+    cTorusBoss m_Torus;                                     // 
 
     coreBatchList m_Ball;                                   // 
     coreBatchList m_BallTrail;                              // 
@@ -418,7 +414,7 @@ public:
     ASSIGN_ID(1, "Virido")
 
     // 
-    void EnableBall (const coreUintW iIndex, const coreVector2& vPosition, const coreVector2& vDirection);
+    void EnableBall (const coreUintW iIndex, const coreVector2 vPosition, const coreVector2 vDirection);
     void DisableBall(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
@@ -426,7 +422,7 @@ public:
     void DisablePaddle(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    void EnableBarrier (const coreUintW iIndex, const cShip* pOwner, const coreVector2& vDirection, const coreFloat fSize);
+    void EnableBarrier (const coreUintW iIndex, const cShip* pOwner, const coreVector2 vDirection, const coreFloat fSize);
     void DisableBarrier(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
@@ -434,13 +430,13 @@ public:
     void DisableLaser(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    void EnableShadow (const coreUintW iIndex, const cShip* pOwner, const coreVector2& vPosition);
+    void EnableShadow (const coreUintW iIndex, const cShip* pOwner, const coreVector2 vPosition);
     void DisableShadow(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    inline void MakeReal    (const coreUintW iIndex)        {ADD_BIT(m_iRealState, iIndex)}
-    inline void MakeSticky  ()                              {ADD_BIT(m_iStickyState, 0u)}
-    inline void UnmakeSticky(const coreVector2& vDirection) {m_iStickyState = 0; m_aBallRaw[0].SetDirection(coreVector3(vDirection, 0.0f));}
+    inline void MakeReal    (const coreUintW iIndex)       {ADD_BIT(m_iRealState, iIndex)}
+    inline void MakeSticky  ()                             {ADD_BIT(m_iStickyState, 0u)}
+    inline void UnmakeSticky(const coreVector2 vDirection) {m_iStickyState = 0; m_aBallRaw[0].SetDirection(coreVector3(vDirection, 0.0f));}
 
     // 
     inline const coreUint8& GetRealState  ()const {return m_iRealState;}
@@ -462,7 +458,7 @@ private:
     void __MoveOwnAfter  ()final;
 
     // 
-    static void __BounceEffect(const coreVector2& vEffectPos);
+    static void __BounceEffect(const coreVector2 vEffectPos);
 };
 
 
@@ -471,8 +467,6 @@ private:
 class cNevoMission final : public cMission
 {
 private:
-    cNautilusBoss  m_Nautilus;                        // 
-    cAmemasuBoss   m_Amemasu;                         // 
     cLeviathanBoss m_Leviathan;                       // 
 
     coreBatchList m_Bomb;                             // 
@@ -498,16 +492,6 @@ private:
     coreObject3D  m_aBlockRaw   [NEVO_BLOCKS_RAWS];   // 
     const cShip*  m_apBlockOwner[NEVO_BLOCKS];        // 
     coreFloat     m_afBlockScale[NEVO_BLOCKS];        // 
-
-    cLodObject   m_aShelter    [NEVO_SHELTERS];       // 
-    coreObject3D m_aShelterBack[NEVO_SHELTERS];       // 
-
-    coreObject3D m_Beam;                              // 
-    coreVector2  m_vBeamPos;                          // 
-    coreVector2  m_vBeamDir;                          // 
-    coreFloat    m_fBeamWidth;                        // 
-    coreFloat    m_fBeamSpeed;
-    coreFlow     m_fBeamTime;                         // 
 
     cLodObject  m_Container;                          // 
     coreVector2 m_vForce;                             // 
@@ -538,7 +522,7 @@ public:
     void DisableTile(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    void EnableArrow (const coreUintW iIndex, const cShip* pOwner, const coreVector2& vDirection);
+    void EnableArrow (const coreUintW iIndex, const cShip* pOwner, const coreVector2 vDirection);
     void DisableArrow(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
@@ -546,24 +530,13 @@ public:
     void DisableBlock(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    void EnableShelter (const coreUintW iIndex);
-    void DisableShelter(const coreUintW iIndex, const coreBool bAnimated);
-
-    // 
-    void EnableBeam();
-    void DisableBeam(const coreBool bAnimated);
-
-    // 
-    void EnableContainer (const coreVector2& vPosition);
+    void EnableContainer (const coreVector2 vPosition);
     void DisableContainer(const coreBool bAnimated);
 
     // 
-    void FadeBeam(const coreBool bEnable, const coreFloat fTime);
-
-    // 
-    inline void SetContainerForce   (const coreVector2& vForce)    {m_vForce    = vForce;}
-    inline void SetContainerClamp   (const coreBool     bClamp)    {m_bClamp    = bClamp;}
-    inline void SetContainerOverdraw(const coreBool     bOverdraw) {m_bOverdraw = bOverdraw;}
+    inline void SetContainerForce   (const coreVector2 vForce)    {m_vForce    = vForce;}
+    inline void SetContainerClamp   (const coreBool    bClamp)    {m_bClamp    = bClamp;}
+    inline void SetContainerOverdraw(const coreBool    bOverdraw) {m_bOverdraw = bOverdraw;}
 
     // 
     inline const coreBool&    GetBombGone       (const coreUintW iIndex)const {ASSERT(iIndex < NEVO_BOMBS) return m_abBombGone[iIndex];}
@@ -589,9 +562,7 @@ private:
 class cHarenaMission final : public cMission
 {
 private:
-    cUrticaBoss  m_Urtica;                             // 
-    cTigerBoss   m_Tiger;                              // 
-    cLuciferBoss m_Lucifer;                            // 
+    cTigerBoss m_Tiger;                                // 
 
     coreBatchList m_Spike;                             // 
     coreBatchList m_SpikeBoard;                        // 
@@ -632,9 +603,7 @@ private:
 class cRutilusMission final : public cMission
 {
 private:
-    cQuaternionBoss m_Quaternion;                          // 
-    cSarosBoss      m_Saros;                               // 
-    cMessierBoss    m_Messier;                             // 
+    cMessierBoss m_Messier;                                // 
 
     coreObject3D m_aTeleporter     [RUTILUS_TELEPORTER];   // 
     coreVector2  m_avTeleporterPrev[RUTILUS_TELEPORTER];   // 
@@ -708,9 +677,7 @@ private:
 class cGeluMission final : public cMission
 {
 private:
-    cTartarusBoss m_Tartarus;                      // 
-    cPhalarisBoss m_Phalaris;                      // 
-    cCholBoss     m_Chol;                          // 
+    cCholBoss m_Chol;                              // 
 
     coreBatchList m_Fang;                          // 
     cLodObject    m_aFangRaw[GELU_FANGS_RAWS];     // 
@@ -744,7 +711,7 @@ public:
     void DisableFang(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    void EnableWay (const coreUintW iIndex, const coreVector2& vPosition, const coreVector2& vDirection);
+    void EnableWay (const coreUintW iIndex, const coreVector2 vPosition, const coreVector2 vDirection);
     void DisableWay(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
@@ -770,8 +737,6 @@ private:
 class cCalorMission final : public cMission
 {
 private:
-    cFenrirBoss m_Fenrir;                            // 
-    cShelobBoss m_Shelob;                            // 
     cZerothBoss m_Zeroth;                            // 
 
     cSnow m_Snow;                                    // 
@@ -847,9 +812,7 @@ private:
 class cMuscusMission final : public cMission
 {
 private:
-    cOrlacBoss   m_Orlac;                                    // 
     cGemingaBoss m_Geminga;                                  // 
-    cNagualBoss  m_Nagual;                                   // 
 
     coreBatchList m_Generate;                                // 
     coreBatchList m_GenerateWave;                            // 

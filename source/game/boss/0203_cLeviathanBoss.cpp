@@ -46,6 +46,7 @@ cLeviathanBoss::cLeviathanBoss()noexcept
 
     // configure the boss
     this->Configure(400, COLOR_SHIP_BLUE);
+    this->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
 
     // 
     m_Head.DefineModelHigh("ship_boss_leviathan_head_high.md3");
@@ -151,9 +152,9 @@ void cLeviathanBoss::__RenderOwnOver()
 {
     if(m_Ray.GetCurEnabled())
     {
-        // TODO: check if underlying + player-bullets can be moved inside ship depth (e.g. ship: 0.0-0.5, under: 0.2-0.3)
+        // TODO 1: check if underlying + player-bullets can be moved inside ship depth (e.g. ship: 0.0-0.5, under: 0.2-0.3)
 
-        // TODO: DEPTH_PUSH even even lasers, DEPTH_PUSH_SHIP when spinning
+        // TODO 1: DEPTH_PUSH even even lasers, DEPTH_PUSH_SHIP when spinning
         DEPTH_PUSH
         //DEPTH_PUSH_SHIP
 
@@ -161,7 +162,7 @@ void cLeviathanBoss::__RenderOwnOver()
         m_Ray.Render();
         g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyList(&m_Ray);
 
-        // TODO: look if visuals change with and without depth, if possible remove those gl-calls
+        // TODO 1: look if visuals change with and without depth, if possible remove those gl-calls
         //glDisable(GL_DEPTH_TEST);
         {
             // 
@@ -403,36 +404,32 @@ void cLeviathanBoss::__MoveOwn()
             vNewOri    = coreVector2::Direction(PI*fTime + PI);
             bOverdrive = true;
 
-            const cOutdoor* pOutdoor = g_pEnvironment->GetBackground()->GetOutdoor();
-            if(pOutdoor)
+            for(coreUintW i = 0u; i < LEVIATHAN_RAYS; ++i)
             {
-                for(coreUintW i = 0u; i < LEVIATHAN_RAYS; ++i)
+                coreObject3D* pRay = (*m_Ray.List())[i];
+                if(!pRay->IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue;
+
+                const coreVector3 vRayDir   = pRay->GetDirection();
+                const coreVector3 vRayStart = pRay->GetPosition () - pRay->GetSize().y * vRayDir;
+                coreFloat         fRayLen   = LEVIATHAN_RAY_SIZE.y;
+
+                if(vRayDir.z < -0.15f)
                 {
-                    coreObject3D* pRay = (*m_Ray.List())[i];
-                    if(!pRay->IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue;
+                    const coreVector3 vIntersect = g_pEnvironment->RetrieveSafeIntersect(vRayStart, vRayDir);
+                    this->__CreateOverdrive(i, vIntersect, fTime, true);
 
-                    const coreVector3 vRayDir   = pRay->GetDirection();
-                    const coreVector3 vRayStart = pRay->GetPosition () - pRay->GetSize().y * vRayDir;
-                    coreFloat         fRayLen   = LEVIATHAN_RAY_SIZE.y;
-
-                    if(vRayDir.z < -0.15f)
-                    {
-                        const coreVector3 vIntersect = pOutdoor->RetrieveIntersect(vRayStart, vRayDir);
-                        this->__CreateOverdrive(i, vIntersect, fTime, true);
-
-                        fRayLen = (vIntersect - vRayStart).Length() * 0.5f;
-                    }
-                    else if(vRayDir.z > 0.45f)
-                    {
-                        fRayLen = LEVIATHAN_RAY_SIZE.y * (1.0f - (vRayDir.z-0.45f));
-
-                        const coreVector3 vIntersect = vRayStart + vRayDir * (fRayLen * 2.0f);
-                        this->__CreateOverdrive(i, vIntersect, fTime, false);
-                    }
-                    else m_avVector[OVERDRIVE_HIT + i].xyz(coreVector3(0.0f,0.0f,0.0f));
-
-                    pRay->SetSize(coreVector3(LEVIATHAN_RAY_SIZE.x, fRayLen, LEVIATHAN_RAY_SIZE.z));
+                    fRayLen = (vIntersect - vRayStart).Length() * 0.5f;
                 }
+                else if(vRayDir.z > 0.45f)
+                {
+                    fRayLen = LEVIATHAN_RAY_SIZE.y * (1.0f - (vRayDir.z-0.45f));
+
+                    const coreVector3 vIntersect = vRayStart + vRayDir * (fRayLen * 2.0f);
+                    this->__CreateOverdrive(i, vIntersect, fTime, false);
+                }
+                else m_avVector[OVERDRIVE_HIT + i].xyz(coreVector3(0.0f,0.0f,0.0f));
+
+                pRay->SetSize(coreVector3(LEVIATHAN_RAY_SIZE.x, fRayLen, LEVIATHAN_RAY_SIZE.z));
             }
 
             if(PHASE_FINISHED)
@@ -657,7 +654,7 @@ void cLeviathanBoss::__MoveOwn()
         });
 
         // 
-        cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_LEVIATHAN_RAY, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pRay, const coreVector3& vIntersection, const coreBool bFirstHit)
+        cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_LEVIATHAN_RAY, [](cPlayer* OUTPUT pPlayer, const coreObject3D* pRay, const coreVector3 vIntersection, const coreBool bFirstHit)
         {
             if(!bFirstHit) return;
 
@@ -853,7 +850,7 @@ void cLeviathanBoss::__DisableRay(const coreUintW iIndex, const coreBool bAnimat
 
 // ****************************************************************
 // 
-void cLeviathanBoss::__CreateOverdrive(const coreUintW iIndex, const coreVector3& vIntersect, const coreFloat fTime, const coreBool bGround)
+void cLeviathanBoss::__CreateOverdrive(const coreUintW iIndex, const coreVector3 vIntersect, const coreFloat fTime, const coreBool bGround)
 {
     ASSERT(iIndex < LEVIATHAN_RAYS)
 
@@ -866,15 +863,15 @@ void cLeviathanBoss::__CreateOverdrive(const coreUintW iIndex, const coreVector3
     if(vOldHit.IsNull()) vOldHit = vIntersect;
     else
     {
-    gtAgain:
-
-        // 
-        const coreVector3 vDiff = vIntersect - vOldHit;
-        const coreFloat   fLen  = vDiff.Length();
-
-        // 
-        if(fLen > fMin)
+        while(true)
         {
+            // 
+            const coreVector3 vDiff = vIntersect - vOldHit;
+            const coreFloat   fLen  = vDiff.Length();
+
+            // 
+            if(fLen < fMin) break;
+
             // 
             const coreVector3 vNewHit      = (fLen > fMax) ? LERP(vOldHit, vIntersect, fMax*RCP(fLen)) : vIntersect;
             const coreVector2 vOldOnScreen = g_pForeground->Project2D(vOldHit);
@@ -922,7 +919,6 @@ void cLeviathanBoss::__CreateOverdrive(const coreUintW iIndex, const coreVector3
 
             // 
             vOldHit = vNewHit;
-            goto gtAgain;
         }
     }
 
@@ -996,14 +992,14 @@ void cLeviathanBoss::__RefreshHealth()
 
 // ****************************************************************
 // 
-FUNC_NOALIAS void cLeviathanBoss::__CalcCurvePosDir(const coreVector3& vAxis, const coreFloat fAngle, const coreVector3& vScale, coreVector3* OUTPUT vPosition, coreVector3* OUTPUT vDirection)
+FUNC_NOALIAS void cLeviathanBoss::__CalcCurvePosDir(const coreVector3 vAxis, const coreFloat fAngle, const coreVector3 vScale, coreVector3* OUTPUT vPosition, coreVector3* OUTPUT vDirection)
 {
     ASSERT(vAxis.IsNormalized() && vPosition && vDirection)
 
     // 
     const coreMatrix3 mRota = coreMatrix4::RotationAxis(fAngle, vAxis).m123();
     const coreVector3 vDir  = coreVector3(vAxis.xy().Normalized().Rotated90(), 0.0f);
-    const coreVector3 vPos  = vDir * mRota; // TODO: why was that normalized ?  
+    const coreVector3 vPos  = vDir * mRota; // TODO 1: why was that normalized ?  
 
     // 
     (*vPosition)  = vPos * vScale;

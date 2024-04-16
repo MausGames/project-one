@@ -10,26 +10,28 @@
 #ifndef _P1_GUARD_MENU_H_
 #define _P1_GUARD_MENU_H_
 
-// TODO: language and main menu control with keyboard+joystick, cursor gets invisible on these inputs, in game menu only cursor
-// TODO: short YES-no questions: Exit Game ? Return to Menu ?
-// TODO: move mouse to buttons on joystick-input
-// TODO: real-time sound-configuration
-// TODO: score-menu names and all name-inputs MUST support all languages (japanese (keifont), russian (default), arabic (default), ...)
-// TODO: score-menu names must be sanitized
-// TODO: unload fonts currently not used (e.g. from score-menu)
-// TODO: options menu: ask if values should be discarded, ask if want to exit instead of saving
-// TODO: options menu: 15 second on video change, yes, no
-// TODO: rumble when changing rumble-option
-// TODO: display unattached joysticks and joystick names somehow
-// TODO: highlight which joystick is which input set
-// TODO: summary_ add separate total-score for each player
-// TODO: update texture filter and render quality in realtime
-// TODO: double initial languages by switching to two columns (on demand?)
-// TODO: stages in GameMenu should be called segments
-// TODO: upper white border in settings menu "moves" during transition on 1760x990, check all menus for moving during transition in common resolutions
-// TODO: every object in menu needs outline: weapon icons
-// TODO: custom resolution should be stored when switching monitors
-// TODO: show target FPS in config menu (speed x update rate)
+// TODO 1: menu control with keyboard+joystick, cursor gets invisible on these inputs
+// TODO 1: short YES-no questions: Exit Game ? Return to Menu ?
+// TODO 5: move mouse to buttons on joystick-input
+// TODO 1: real-time sound-configuration
+// TODO 1: score-menu names are restricted to characters from the text-board
+// TODO 3: score-menu names must be sanitized
+// TODO 3: unload fonts currently not used (e.g. from score-menu)
+// TODO 1: options menu: ask if values should be discarded, ask if want to exit instead of saving
+// TODO 3: options menu: 15 second on video change, yes, no
+// TODO 3: rumble when changing rumble-option
+// TODO 5: display unattached joysticks and joystick names somehow
+// TODO 3: highlight which joystick is which input set
+// TODO 3: summary_ add separate total-score for each player
+// TODO 3: update texture filter and render quality in realtime
+// TODO 3: double initial languages by switching to two columns (on demand?)
+// TODO 5: stages in GameMenu should be called segments
+// TODO 2: upper white border in settings menu "moves" during transition on 1760x990, check all menus for moving during transition in common resolutions
+// TODO 3: every object in menu needs outline: weapon icons
+// TODO 3: custom resolution should be stored when switching monitors
+// TODO 3: show target FPS in config menu (speed x update rate)
+// TODO 3: when switching resolution, and confirming by returning, the transition is broken
+// TODO 3: when switching resolution, the next mouse click is not recognized (no press even is coming from SDL, only the release event)
 
 
 // ****************************************************************
@@ -43,7 +45,7 @@
 #define MENU_GAME_MISSIONS            (9u)
 #define MENU_GAME_STAGES              (7u)//SEGMENTS)
 #define MENU_GAME_PLAYERS             (PLAYERS)
-#define MENU_GAME_OPTIONS             (3u)
+#define MENU_GAME_OPTIONS             (4u)
 #define MENU_SCORE_ENTRIES            (10u)
 #define MENU_REPLAY_ENTRIES           (5u)
 #define MENU_CONFIG_INPUTS            (PLAYERS)
@@ -350,6 +352,7 @@ private:
     cGuiObject m_aOptionLine[MENU_GAME_OPTIONS];       // 
 
     cGuiSwitchBox m_Players;                           // 
+    cGuiSwitchBox m_Difficulty;                        // 
     cGuiSwitchBox m_aWeapon     [MENU_GAME_PLAYERS];   // 
     cGuiSwitchBox m_aSupport    [MENU_GAME_PLAYERS];   // 
     cGuiObject    m_aWeaponIcon [MENU_GAME_PLAYERS];   // 
@@ -375,10 +378,11 @@ public:
     void SaveValues();
 
     // 
-    inline const coreInt32& GetMissionID      ()const                       {return m_WorldMap.GetSelectionID();}
-    inline const coreUint8& GetSelectedPlayers()const                       {return m_Players.GetCurEntry().tValue;}
-    inline const coreUint8& GetSelectedWeapon (const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aWeapon [iIndex].GetCurEntry().tValue;}
-    inline const coreUint8& GetSelectedSupport(const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aSupport[iIndex].GetCurEntry().tValue;}
+    inline const coreInt32& GetMissionID         ()const                       {return m_WorldMap.GetSelectionID();}
+    inline const coreUint8& GetSelectedPlayers   ()const                       {return m_Players   .GetCurEntry().tValue;}
+    inline const coreUint8& GetSelectedDifficulty()const                       {return m_Difficulty.GetCurEntry().tValue;}
+    inline const coreUint8& GetSelectedWeapon    (const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aWeapon [iIndex].GetCurEntry().tValue;}
+    inline const coreUint8& GetSelectedSupport   (const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aSupport[iIndex].GetCurEntry().tValue;}
 };
 
 
@@ -557,6 +561,10 @@ private:
     inline coreInt16&  __RetrieveInputCurValue(const coreUintW iPlayerIndex, const coreUintW iKeyIndex) {ASSERT((iPlayerIndex < INPUT_TYPES)        && (iKeyIndex < INPUT_KEYS)) return *((&g_CurConfig.Input.aSet[g_CurConfig.Input.aiType[iPlayerIndex]].iMoveUp) + iKeyIndex);}
     inline coreInt16&  __RetrieveInputDirValue(const coreUintW iType,        const coreUintW iKeyIndex) {ASSERT((iType        < INPUT_SETS)         && (iKeyIndex < INPUT_KEYS)) return *((&g_CurConfig.Input.aSet[iType].iMoveUp)                                  + iKeyIndex);}
 
+    // 
+    static inline coreFloat __VolumeToFloat(const coreUint8 iVolume) {return I_TO_F(iVolume) * 0.01f;}
+    static inline coreUint8 __VolumeToUint8(const coreFloat fVolume) {return F_TO_UI(ROUND(CLAMP(fVolume, 0.0f, 1.0f) * 20.0f) * 5.0f);}
+
     // convert input key to readable string
     static const coreChar* __PrintKey(const coreUint8 iType, const coreInt16 iKey);
 };
@@ -642,7 +650,7 @@ public:
     void ShowBegin();
 
     // 
-    void SetHighlightColor(const coreVector3& vColor);
+    void SetHighlightColor(const coreVector3 vColor);
 
 
 private:
@@ -741,7 +749,7 @@ public:
     void ShowThankYou();
 
     // 
-    void SetHighlightColor(const coreVector3& vColor);
+    void SetHighlightColor(const coreVector3 vColor);
     // this menu is handling score and replay saving
 };
 
@@ -838,14 +846,14 @@ public:
     inline coreBool IsShifting()const {return m_TransitionTime.GetStatus();}
 
     // 
-    void SetHighlightColor(const coreVector3& vColor);
+    void SetHighlightColor(const coreVector3 vColor);
 
     // 
     static void UpdateLanguageFont();
     static const coreMap<coreString, coreString>& GetLanguageList();
 
     // menu helper routines
-    static void UpdateButton        (cGuiButton*    OUTPUT pButton, const coreBool bFocused, const coreVector3& vFocusColor = COLOR_MENU_WHITE);
+    static void UpdateButton        (cGuiButton*    OUTPUT pButton, const coreBool bFocused, const coreVector3 vFocusColor = COLOR_MENU_WHITE);
     static void UpdateSwitchBox     (cGuiSwitchBox* OUTPUT pSwitchBox);
     static void UpdateAnimateProgram(cGuiObject*    OUTPUT pObject);
     static void ApplyMedalTexture   (cGuiObject*    OUTPUT pObject, const coreUint8 iMedal, const coreUint8 iMedalType);

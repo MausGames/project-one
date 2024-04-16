@@ -106,7 +106,7 @@ void cWindscreen::Move()
 
 // ****************************************************************
 // add temporary object
-void cWindscreen::AddObject(coreObject3D* pObject, const coreVector3& vRelativePos, const coreFloat fLifeTime, const coreUint32 iCapacity, const coreHashString& sProgramInstancedName, const coreHashString& sListKey)
+void cWindscreen::AddObject(coreObject3D* pObject, const coreVector3 vRelativePos, const coreFloat fLifeTime, const coreUint32 iCapacity, const coreHashString& sProgramInstancedName, const coreHashString& sListKey)
 {
     ASSERT(pObject && (fLifeTime > 0.0f))
 

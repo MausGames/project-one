@@ -8,7 +8,7 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
-// TODO: nearest player dauerhaft oder jedesmal neu ?
+// TODO 1: nearest player dauerhaft oder jedesmal neu ?
 
 
 // ****************************************************************
@@ -453,7 +453,7 @@ void cAmemasuBoss::__MoveOwn()
                     // 
                     g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 0.7f, this, this->GetPosition().xy(),  vDir)->ChangeSize(1.3f);
                     g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 0.7f, this, this->GetPosition().xy(), -vDir)->ChangeSize(1.3f);
-                    // TODO: lower blue balls get overlapped   
+                    // TODO 1: lower blue balls get overlapped   
                 }
             }
         });
@@ -609,7 +609,7 @@ void cAmemasuBoss::__MoveOwn()
         PHASE_CONTROL_TICKER(1u, 0u, 1.0f, LERP_LINEAR)
         {
             const coreVector2 vPos = coreVector2(0.0f/*FMOD(I_TO_F(iTick) * 0.7f, 2.0f) - 1.0f*/, 1.2f) * FOREGROUND_AREA;
-            const coreVector2 vDir = (g_pGame->FindPlayerSide(vPos)->GetPosition().xy() - vPos).Normalized(); // TODO: FindPlayer 
+            const coreVector2 vDir = (g_pGame->FindPlayerSide(vPos)->GetPosition().xy() - vPos).Normalized(); // TODO 1: FindPlayer 
 
             g_pGame->GetBulletManagerEnemy()->AddBullet<cTriangleBullet>(5, 1.3f, this, vPos, vDir)->ChangeSize(1.2f);
         });

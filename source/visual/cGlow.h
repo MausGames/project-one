@@ -10,8 +10,8 @@
 #ifndef _P1_GUARD_GLOW_H_
 #define _P1_GUARD_GLOW_H_
 
-// TODO: glow is cleared abruptly when getting inactive, should afterglow instead
-// TODO: remove exposed clear function (location where this is called should use a different way)
+// TODO 2: glow is cleared abruptly when getting inactive, should afterglow instead
+// TODO 4: remove exposed clear function (location where this is called should use a different way)
 
 
 // ****************************************************************

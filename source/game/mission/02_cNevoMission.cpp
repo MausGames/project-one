@@ -26,11 +26,6 @@ cNevoMission::cNevoMission()noexcept
 , m_BlockWave    (NEVO_BLOCKS)
 , m_apBlockOwner {}
 , m_afBlockScale {}
-, m_vBeamPos     (coreVector2(0.0f,0.0f))
-, m_vBeamDir     (coreVector2(0.0f,0.0f))
-, m_fBeamWidth   (0.0f)
-, m_fBeamSpeed   (1.0f)
-, m_fBeamTime    (0.0f)
 , m_vForce       (coreVector2(0.0f,0.0f))
 , m_vImpact      (coreVector2(0.0f,0.0f))
 , m_bClamp       (false)
@@ -38,9 +33,7 @@ cNevoMission::cNevoMission()noexcept
 , m_fAnimation   (0.0f)
 {
     // 
-    m_apBoss[0] = &m_Nautilus;
-    m_apBoss[1] = &m_Amemasu;
-    m_apBoss[2] = &m_Leviathan;
+    m_apBoss[0] = &m_Leviathan;
 
     // 
     m_Bomb.DefineProgram("object_ship_glow_inst_program");
@@ -159,38 +152,6 @@ cNevoMission::cNevoMission()noexcept
     }
 
     // 
-    for(coreUintW i = 0u; i < NEVO_SHELTERS; ++i)
-    {
-        // 
-        m_aShelter[i].DefineModelHigh(i ? "ship_boss_amemasu_bottom_high.md3" : "ship_boss_amemasu_top_high.md3");
-        m_aShelter[i].DefineModelLow (i ? "ship_boss_amemasu_bottom_low.md3"  : "ship_boss_amemasu_top_low.md3");
-        m_aShelter[i].DefineTexture  (0u, "ship_enemy.png");
-        m_aShelter[i].DefineProgram  ("object_ship_program");
-        m_aShelter[i].SetSize        (coreVector3(2.5f,2.5f,2.5f));
-        m_aShelter[i].SetOrientation (coreVector3(0.0f,0.0f,1.0f) * (i ? -1.0f : 1.0f));
-        m_aShelter[i].SetColor3      (COLOR_ENERGY_CYAN);
-        m_aShelter[i].SetEnabled     (CORE_OBJECT_ENABLE_NOTHING);
-
-        // 
-        m_aShelterBack[i].DefineModel         ("object_cube_normal.md3");
-        m_aShelterBack[i].DefineTexture       (0u, "ship_enemy.png");
-        m_aShelterBack[i].DefineProgram       ("effect_energy_program");
-        m_aShelterBack[i].SetSize             (coreVector3(0.0f,50.0f,0.5f));
-        m_aShelterBack[i].SetCollisionModifier(coreVector3(1.1f, 1.1f,1.1f));
-        m_aShelterBack[i].SetColor3           (coreVector3(0.0f, 0.0f,0.0f));
-        m_aShelterBack[i].SetEnabled          (CORE_OBJECT_ENABLE_NOTHING);
-    }
-
-    // 
-    m_Beam.DefineModel         ("object_tube_open.md3");
-    m_Beam.DefineTexture       (0u, "effect_energy.png");
-    m_Beam.DefineProgram       ("effect_energy_flat_program");
-    m_Beam.SetSize             (coreVector3(0.0f,0.0f,0.0f));
-    m_Beam.SetCollisionModifier(coreVector3(0.8f,1.0f,0.8f));
-    m_Beam.SetColor3           (COLOR_ENERGY_MAGENTA * 0.8f);
-    m_Beam.SetEnabled          (CORE_OBJECT_ENABLE_NOTHING);
-
-    // 
     m_Container.DefineModelHigh("object_container_high.md3");
     m_Container.DefineModelLow ("object_container_low.md3");
     m_Container.DefineTexture  (0u, "ship_enemy.png");
@@ -222,13 +183,11 @@ cNevoMission::~cNevoMission()
     g_pGlow->UnbindList(&m_BlockWave);
 
     // 
-    for(coreUintW i = 0u; i < NEVO_BOMBS;    ++i) this->DisableBomb   (i, false);
-    for(coreUintW i = 0u; i < NEVO_BLASTS;   ++i) this->DisableBlast  (i, false);
-    for(coreUintW i = 0u; i < NEVO_TILES;    ++i) this->DisableTile   (i, false);
-    for(coreUintW i = 0u; i < NEVO_ARROWS;   ++i) this->DisableArrow  (i, false);
-    for(coreUintW i = 0u; i < NEVO_BLOCKS;   ++i) this->DisableBlock  (i, false);
-    for(coreUintW i = 0u; i < NEVO_SHELTERS; ++i) this->DisableShelter(i, false);
-    this->DisableBeam     (false);
+    for(coreUintW i = 0u; i < NEVO_BOMBS;  ++i) this->DisableBomb (i, false);
+    for(coreUintW i = 0u; i < NEVO_BLASTS; ++i) this->DisableBlast(i, false);
+    for(coreUintW i = 0u; i < NEVO_TILES;  ++i) this->DisableTile (i, false);
+    for(coreUintW i = 0u; i < NEVO_ARROWS; ++i) this->DisableArrow(i, false);
+    for(coreUintW i = 0u; i < NEVO_BLOCKS; ++i) this->DisableBlock(i, false);
     this->DisableContainer(false);
 }
 
@@ -365,7 +324,7 @@ void cNevoMission::DisableTile(const coreUintW iIndex, const coreBool bAnimated)
 
 // ****************************************************************
 // 
-void cNevoMission::EnableArrow(const coreUintW iIndex, const cShip* pOwner, const coreVector2& vDirection)
+void cNevoMission::EnableArrow(const coreUintW iIndex, const cShip* pOwner, const coreVector2 vDirection)
 {
     ASSERT(iIndex < NEVO_ARROWS)
     coreObject3D& oArrow = m_aArrowRaw[iIndex];
@@ -452,87 +411,7 @@ void cNevoMission::DisableBlock(const coreUintW iIndex, const coreBool bAnimated
 
 // ****************************************************************
 // 
-void cNevoMission::EnableShelter(const coreUintW iIndex)
-{
-    ASSERT(iIndex < NEVO_SHELTERS)
-    cLodObject&   oShelter = m_aShelter    [iIndex];
-    coreObject3D& oBack    = m_aShelterBack[iIndex];
-
-    // 
-    WARN_IF(oShelter.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
-
-    // 
-    ASSERT(m_Beam.IsEnabled(CORE_OBJECT_ENABLE_ALL))
-    g_pGlow->BindObject(&oBack);
-
-    // 
-    oShelter.SetEnabled(CORE_OBJECT_ENABLE_ALL);
-    oBack   .SetEnabled(CORE_OBJECT_ENABLE_ALL);
-}
-
-
-// ****************************************************************
-// 
-void cNevoMission::DisableShelter(const coreUintW iIndex, const coreBool bAnimated)
-{
-    ASSERT(iIndex < NEVO_SHELTERS)
-    cLodObject&   oShelter = m_aShelter    [iIndex];
-    coreObject3D& oBack    = m_aShelterBack[iIndex];
-
-    // 
-    if(!oShelter.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
-
-    // 
-    g_pGlow->UnbindObject(&oBack);
-
-    // 
-    //if(!bAnimated)
-    {
-        oShelter.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
-        oBack   .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
-    }
-}
-
-
-// ****************************************************************
-// 
-void cNevoMission::EnableBeam()
-{
-    // 
-    WARN_IF(m_Beam.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
-
-    // 
-    m_vBeamPos   = HIDDEN_POS;
-    m_vBeamDir   = coreVector2(0.0f,1.0f);
-    m_fBeamWidth = 10.0f;
-    m_fBeamTime  = -2.0f;
-
-    // 
-    m_Beam.SetPosition(coreVector3(HIDDEN_POS, 0.0f));
-    m_Beam.SetEnabled (CORE_OBJECT_ENABLE_ALL);
-    g_pGlow->BindObject(&m_Beam);
-}
-
-
-// ****************************************************************
-// 
-void cNevoMission::DisableBeam(const coreBool bAnimated)
-{
-    // 
-    if(!m_Beam.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
-
-    // 
-    //if(!bAnimated)
-    {
-        m_Beam.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
-        g_pGlow->UnbindObject(&m_Beam);
-    }
-}
-
-
-// ****************************************************************
-// 
-void cNevoMission::EnableContainer(const coreVector2& vPosition)
+void cNevoMission::EnableContainer(const coreVector2 vPosition)
 {
     // 
     WARN_IF(m_Container.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
@@ -568,22 +447,6 @@ void cNevoMission::DisableContainer(const coreBool bAnimated)
 
 // ****************************************************************
 // 
-void cNevoMission::FadeBeam(const coreBool bEnable, const coreFloat fTime)
-{
-    if(bEnable)
-    {
-        m_fBeamTime = 1.0f;
-    }
-    else
-    {
-        m_fBeamTime = -1.0f;
-    }
-    m_fBeamSpeed = RCP(fTime);
-}
-
-
-// ****************************************************************
-// 
 void cNevoMission::__RenderOwnBottom()
 {
     DEPTH_PUSH
@@ -613,22 +476,6 @@ void cNevoMission::__RenderOwnUnder()
     // 
     m_Block.Render();
     g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyList(&m_Block);
-
-    // 
-    glColorMask(false, false, false, false);
-    {
-        for(coreUintW i = 0u; i < NEVO_SHELTERS; ++i) m_aShelterBack[i].Render();
-    }
-    glColorMask(true, true, true, true);
-
-    // 
-    m_Beam.Render();
-
-    DEPTH_PUSH
-
-    // 
-    for(coreUintW i = 0u; i < NEVO_SHELTERS; ++i) m_aShelter[i].Render();
-    for(coreUintW i = 0u; i < NEVO_SHELTERS; ++i) g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(&m_aShelter[i]);
 }
 
 
@@ -647,14 +494,7 @@ void cNevoMission::__RenderOwnOver()
     glEnable(GL_DEPTH_TEST);
 
     // 
-    FOR_EACH(it, *m_Bomb.List()) d_cast<cLodObject*>(*it)->ActivateModelDefault();
-    {
-        // 
-        m_Bomb.Render();
-    }
-    FOR_EACH(it, *m_Bomb.List()) d_cast<cLodObject*>(*it)->ActivateModelLowOnly();
-
-    // 
+    cLodObject::RenderHighList(&m_Bomb);
     g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyList(&m_Bomb);
 
     // 
@@ -666,7 +506,7 @@ void cNevoMission::__RenderOwnOver()
                else DEPTH_PUSH_SHIP
 
     // 
-    m_Container.Render();
+    cLodObject::RenderHighObject(&m_Container);
     g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(&m_Container);
 }
 
@@ -854,7 +694,7 @@ void cNevoMission::__MoveOwnAfter()
     m_BlockWave.MoveNormal();
 
     // 
-    cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_NEVO_BLOCK, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBlock, const coreVector3& vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(PLAYER_TEST_NORMAL, TYPE_NEVO_BLOCK, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pBlock, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
 
@@ -864,83 +704,6 @@ void cNevoMission::__MoveOwnAfter()
         // 
         g_pSpecialEffects->MacroExplosionColorSmall(vIntersection, COLOR_ENERGY_ORANGE);
     });
-
-    // 
-    for(coreUintW i = 0u; i < NEVO_SHELTERS; ++i)
-    {
-        cLodObject&   oShelter = m_aShelter    [i];
-        coreObject3D& oBack    = m_aShelterBack[i];
-        if(!oShelter.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
-
-        // 
-        const coreVector2 vPos  = oShelter.GetPosition().xy() + m_vBeamDir * oBack.GetSize().y;
-        const coreFloat   fSize = oShelter.GetSize().x * 3.95f * (0.99f + 0.01f * SIN(10.0f*PI * m_fAnimation + I_TO_F(i)));
-
-        // 
-        oShelter.Move();
-
-        // 
-        oBack.SetPosition (coreVector3(vPos,       0.0f));
-        oBack.SetSize     (coreVector3(fSize,      oBack.GetSize().yz()));
-        oBack.SetDirection(coreVector3(m_vBeamDir, 0.0f));
-        oBack.Move();
-    }
-
-    // 
-    if(m_Beam.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
-    {
-        
-        
-
-        if(m_fBeamTime > 0.0f) m_fBeamTime.UpdateMin( m_fBeamSpeed,  3.0f);
-                          else m_fBeamTime.UpdateMax(-m_fBeamSpeed, -2.0f);
-
-        coreFloat fAlpha = 0.0f;
-        coreFloat fScale = 1.0f;
-        coreFloat fScale2 = 1.0f;
-        coreFloat fSign  = 1.0f;
-        if(m_fBeamTime >= 2.0f)
-        {
-            fAlpha = 1.0f;
-            fScale = 1.0f;//LERP(0.0f, 1.0f, MIN((m_fBeamTime - 2.0f) * 5.0f, 1.0f));
-            fScale2 = LERP(1.0f, 1.0f, MIN((m_fBeamTime - 2.0f) * 6.0f / m_fBeamSpeed, 1.0f));
-            fSign  = 1.0f;
-        }
-        else if(m_fBeamTime >= 1.0f)
-        {
-            fAlpha =  LERPH3(0.5f, 0.0f, m_fBeamTime - 1.0f);
-            fScale =  1.0f;
-            fScale2 = LERP(1.0f, 0.5f, m_fBeamTime - 1.0f);
-            fSign  = LERP(-0.6f, -0.4f, m_fBeamTime - 1.0f);
-        }
-        else if(m_fBeamTime <= -1.0f)
-        {
-            fAlpha =  1.0f;//LERP(1.0f, 0.5f, MIN(-m_fBeamTime - 1.0f, 1.0f));
-            fScale2 =  LERP(1.0f, 0.0f, MIN(-m_fBeamTime - 1.0f, 1.0f));
-            //fAlpha =  LERP(1.0f, 0.0f, MIN((-m_fBeamTime - 1.0f) * 5.0f, 1.0f));
-            //fScale2 =  1.0f;
-            fSign  = 1.0f;
-        }
-        
-        
-        
-        m_Beam.SetAlpha(fAlpha);
-        
-        
-        const coreFloat fLen = 75.0f * fScale;
-        
-        const coreVector2 vPos = m_vBeamPos + m_vBeamDir * fLen;
-        
-        const coreFloat fTexScale = fLen / 65.0f + CORE_MATH_PRECISION;
-
-        // 
-        m_Beam.SetPosition (coreVector3(vPos,   0.0f));
-        m_Beam.SetSize     (coreVector3(m_fBeamWidth * fScale2, fLen, 1.0f));
-        m_Beam.SetDirection(coreVector3(m_vBeamDir, 0.0f));
-        m_Beam.SetTexSize  (coreVector2(m_fBeamWidth * fScale2 * 0.2f, fTexScale * 2.0f));
-        m_Beam.SetTexOffset(coreVector2(0.0f, FRACT(m_Beam.GetTexOffset().y - 2.0f * TIME * fSign * RCP(fTexScale))));
-        m_Beam.Move();
-    }
 
     if(m_Container.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
     {
@@ -970,31 +733,26 @@ void cNevoMission::__MoveOwnAfter()
         m_Container.Move();
 
         // 
-        m_Container.ActivateModelLowOnly();
+        cPlayer::TestCollision(PLAYER_TEST_NORMAL | PLAYER_TEST_FEEL | PLAYER_TEST_IGNORE, &m_Container, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pContainer, const coreVector3 vIntersection, const coreBool bFirstHit)
         {
-            // 
-            cPlayer::TestCollision(PLAYER_TEST_NORMAL | PLAYER_TEST_FEEL | PLAYER_TEST_IGNORE, &m_Container, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pContainer, const coreVector3& vIntersection, const coreBool bFirstHit)
-            {
-                if(!bFirstHit) return;
-
-                // 
-                const coreVector2 vDiff = pPlayer->GetOldPos() - pContainer->GetPosition().xy();
-                pPlayer->ApplyForce(vDiff.Normalized() * 100.0f);
-
-                // 
-                g_pSpecialEffects->CreateSplashColor(vIntersection, 5.0f, 3u, COLOR_ENERGY_WHITE);
-                g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
-            });
+            if(!bFirstHit) return;
 
             // 
-            Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, &m_Container, [](cBullet* OUTPUT pBullet, coreObject3D* OUTPUT pContainer, const coreVector3& vIntersection, const coreBool bFirstHit)
-            {
-                if(!bFirstHit) return;
+            const coreVector2 vDiff = pPlayer->GetOldPos() - pContainer->GetPosition().xy();
+            pPlayer->ApplyForce(vDiff.Normalized() * 100.0f);
 
-                // 
-                pBullet->Reflect(pContainer, vIntersection.xy(), 3.0f);
-            });
-        }
-        m_Container.ActivateModelDefault();
+            // 
+            g_pSpecialEffects->CreateSplashColor(vIntersection, 5.0f, 3u, COLOR_ENERGY_WHITE);
+            g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+        });
+
+        // 
+        Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, &m_Container, [](cBullet* OUTPUT pBullet, coreObject3D* OUTPUT pContainer, const coreVector3 vIntersection, const coreBool bFirstHit)
+        {
+            if(!bFirstHit) return;
+
+            // 
+            pBullet->Reflect(pContainer, vIntersection.xy(), 3.0f);
+        });
     }
 }

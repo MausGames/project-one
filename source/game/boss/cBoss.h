@@ -10,21 +10,21 @@
 #ifndef _P1_GUARD_BOSS_H_
 #define _P1_GUARD_BOSS_H_
 
-// TODO: boss0101, boomerangs may generate double-hits because of rotating box collision (when moving away from it), bitfield with reset (player-num)
-// TODO: boss0101, energy direction in front-part of main-model should be inverted
-// TODO: boss0101, something should grow when small boomerangs begin to create the duplicate
-// TODO: boss0101, shadow and type rebinding for duplicate
-// TODO: boss0101, definition for 1.5f (and related multiplications)
-// TODO: boss0102, add slight explosion where rays hit the screen
-// TODO: boss0102, separate emitters to three objects, to make them blue
-// TODO: boss0103, remove small hitch when finishing rotation in the middle shortly before beginning laser-phase
+// TODO 5: boss0101, boomerangs may generate double-hits because of rotating box collision (when moving away from it), bitfield with reset (player-num)
+// TODO 5: boss0101, energy direction in front-part of main-model should be inverted
+// TODO 5: boss0101, something should grow when small boomerangs begin to create the duplicate
+// TODO 5: boss0101, shadow and type rebinding for duplicate
+// TODO 5: boss0101, definition for 1.5f (and related multiplications)
+// TODO 5: boss0102, add slight explosion where rays hit the screen
+// TODO 5: boss0102, separate emitters to three objects, to make them blue
+// TODO 5: boss0103, remove small hitch when finishing rotation in the middle shortly before beginning laser-phase
 
 
 // ****************************************************************
 // boss definitions
-#define BOSS_TIMERS   (6u)   // 
-#define BOSS_COUNTERS (8u)   // 
-#define BOSS_VECTORS  (8u)   // 
+#define BOSS_TIMERS   (6u)    // 
+#define BOSS_COUNTERS (8u)    // 
+#define BOSS_VECTORS  (10u)   // 
 
 
 // ****************************************************************
@@ -58,6 +58,20 @@
 #define LEVIATHAN_RAY_TEXSIZE     (coreVector2(0.5f,1.5f))                     // 
 #define LEVIATHAN_RAYWAVE_SIZE    (coreVector3(1.6f,5.0f,1.3f))                // 
 #define LEVIATHAN_RAYWAVE_TEXSIZE (coreVector2(0.5f,0.5f))                     // 
+
+#define TIGER_SIDES               (4u)                                         // 
+#define TIGER_STINGS              (32u * TIGER_SIDES)                          // 
+#define TIGER_STINGS_SIDE         (32u)                                        // 
+#define TIGER_WEAPONS             (4u)                                         // 
+#define TIGER_ENEMIES             (50u)                                        // 
+
+#define MESSIER_RINGS             (3u)                                         // 
+#define MESSIER_ENEMIES           (8u)                                         // 
+
+#define CHOL_WINGS                (4u)                                         // 
+
+#define ZEROTH_LIMBS              (6u)                                         // 
+#define ZEROTH_ICES               (2u)                                         // 
 
 
 // ****************************************************************
@@ -105,8 +119,8 @@ protected:
     coreVector4 m_avVector [BOSS_VECTORS];    // 
 
     coreVector2 m_vLastPosition;              // 
-    coreFloat   m_fLastDirAngle;              // 
-    coreFloat   m_fLastOriAngle;              // 
+    coreVector3 m_vLastDirection;             // 
+    coreVector3 m_vLastOrientation;           // 
 
     coreUint8 m_iPhase;                       // 
     coreUint8 m_iLevel;                       // 
@@ -125,9 +139,9 @@ public:
     void ChangePhase(const coreUint8 iPhase);
 
     // 
-    void StorePosition(const coreVector2& vPos);
+    void StorePosition(const coreVector2 vPos);
     void StorePosition();
-    void StoreRotation(const coreVector3& vDir, const coreVector3& vOri);
+    void StoreRotation(const coreVector3 vDir, const coreVector3 vOri);
     void StoreRotation();
 
     // 
@@ -185,17 +199,17 @@ private:
     void __DisableDuplicate(const coreBool bAnimated);
 
     // 
-    void __EnableBoomerang (const coreUintW iIndex, const coreVector2& vPosition, const coreVector2& vDirection);
+    void __EnableBoomerang (const coreUintW iIndex, const coreVector2 vPosition, const coreVector2 vDirection);
     void __DisableBoomerang(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    void __EnableSummon (const coreVector2& vPosition);
+    void __EnableSummon (const coreVector2 vPosition);
     void __DisableSummon();
 
     // 
-    coreVector2 __RepeatPosition (const coreVector2& vPosition, const coreFloat fThreshold, coreBool* OUTPUT pbChange);
-    coreVector2 __RepeatPosition (const coreVector2& vPosition, const coreFloat fThreshold);
-    void        __EncodeDirection(const coreUintW iIndex, const coreVector2& vDirection);
+    coreVector2 __RepeatPosition (const coreVector2 vPosition, const coreFloat fThreshold, coreBool* OUTPUT pbChange);
+    coreVector2 __RepeatPosition (const coreVector2 vPosition, const coreFloat fThreshold);
+    void        __EncodeDirection(const coreUintW iIndex, const coreVector2 vDirection);
     coreVector2 __DecodeDirection(const coreUintW iIndex);
 };
 
@@ -242,15 +256,15 @@ private:
     void __MoveOwn       ()final;
 
     // 
-    void __EnableSummon (const coreVector2& vPosition, const coreVector3& vColor);
+    void __EnableSummon (const coreVector2 vPosition, const coreVector3 vColor);
     void __DisableSummon();
 
     // 
-    void __EnableTurret (const coreUintW iIndex, const coreVector2& vPosition);
+    void __EnableTurret (const coreUintW iIndex, const coreVector2 vPosition);
     void __DisableTurret(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    void __EnableGunner (const coreUintW iIndex, const coreVector2& vPosition);
+    void __EnableGunner (const coreUintW iIndex, const coreVector2 vPosition);
     void __DisableGunner(const coreUintW iIndex, const coreBool bAnimated);
 };
 
@@ -309,10 +323,10 @@ private:
     void __MoveOwn      ()final;
 
     // 
-    void __CreateInk(const coreUintW iIndex, const coreVector2& vPosition);
+    void __CreateInk(const coreUintW iIndex, const coreVector2 vPosition);
 
     // 
-    void __EnableBullet (const coreVector2& vStart, const coreVector2& vEnd);
+    void __EnableBullet (const coreVector2 vStart, const coreVector2 vEnd);
     void __DisableBullet(const coreBool bAnimated);
 };
 
@@ -386,14 +400,14 @@ private:
     // 
     void __EnableRay      (const coreUintW iIndex);
     void __DisableRay     (const coreUintW iIndex, const coreBool bAnimated);
-    void __CreateOverdrive(const coreUintW iIndex, const coreVector3& vIntersect, const coreFloat fTime, const coreBool bGround);
+    void __CreateOverdrive(const coreUintW iIndex, const coreVector3 vIntersect, const coreFloat fTime, const coreBool bGround);
 
     // 
     void __UpdateHealth();
     void __RefreshHealth();
 
     // 
-    static FUNC_NOALIAS void      __CalcCurvePosDir(const coreVector3& vAxis, const coreFloat fAngle, const coreVector3& vScale, coreVector3* OUTPUT vPosition, coreVector3* OUTPUT vDirection);
+    static FUNC_NOALIAS void      __CalcCurvePosDir(const coreVector3 vAxis, const coreFloat fAngle, const coreVector3 vScale, coreVector3* OUTPUT vPosition, coreVector3* OUTPUT vDirection);
     static FUNC_CONST   coreFloat __CalcAngle      (const coreFloat fDistance, const coreFloat fRadius);
 
     // 
@@ -423,6 +437,45 @@ private:
 // 
 class cTigerBoss final : public cBoss
 {
+private:
+    // 
+    struct sEnemyData final
+    {
+        coreUint8   iType;         // 
+        coreUint8   iRota;         // 
+        coreFloat   fTimeFactor;   // 
+        coreFloat   fTimeOffset;   // 
+        coreVector2 vPosFactor;    // 
+        coreVector2 vPosOffset;    // 
+    };
+
+
+private:
+    cCustomEnemy m_Track;                        // 
+    cCustomEnemy m_Weapon;                       // 
+    cCustomEnemy m_WeaponOld;                    // 
+
+    coreBatchList m_Sting;                       // 
+    coreObject3D  m_aStingRaw  [TIGER_STINGS];   // 
+    coreFlow      m_afStingTime[TIGER_SIDES];    // 
+
+    coreVector2 m_avPushDir[2];                  // (0 = current | 1 = target) 
+    coreFlow    m_fPushPower;                    // 
+    coreBool    m_bPushState;                    // 
+
+    coreModelPtr m_apModelHigh[TIGER_WEAPONS];   // 
+    coreModelPtr m_apModelLow [TIGER_WEAPONS];   // 
+    coreUint8    m_iWeaponType;                  // 
+    coreFlow     m_fWeaponChange;                // 
+
+    coreSpline2 m_aEnemyPath[4];                 // 
+    sEnemyData  m_aEnemyData[TIGER_ENEMIES];     // 
+
+    coreVector2 m_vGroundPos;                    // 
+
+    coreFlow m_fAnimation;                       // 
+
+
 public:
     cTigerBoss()noexcept;
 
@@ -432,7 +485,28 @@ public:
 
 private:
     // execute own routines
-    void __MoveOwn()final;
+    void __ResurrectOwn ()final;
+    void __KillOwn      (const coreBool bAnimated)final;
+    void __RenderOwnOver()final;
+    void __MoveOwn      ()final;
+
+    // 
+    void __EnableStings (const coreUintW iIndex);
+    void __DisableStings(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void __EnableWind (const coreVector2 vDir);
+    void __DisableWind();
+
+    // 
+    void __SwitchWeapon(const coreUintW iType);
+
+    // 
+    void __AddEnemy   (const coreUint8 iType, const coreUint8 iRota, const coreFloat fTimeFactor, const coreFloat fTimeOffset, const coreVector2 vPosFactor, const coreVector2 vPosOffset);
+    void __DeleteEnemy(const coreUintW iIndex, const coreBool bCrash);
+
+    // 
+    void __CreateTrail(const coreUintW iIndex, const coreVector3 vIntersect);
 };
 
 
@@ -491,6 +565,18 @@ private:
 // 
 class cMessierBoss final : public cBoss
 {
+private:
+    coreObject3D m_aRing[MESSIER_RINGS];   // 
+    coreFlow     m_fRingTime;              // 
+
+    coreFloat m_fTimeFactor;               // 
+
+    coreFlow m_fShootTime;                 // 
+
+    coreFlow m_fAnimation;                 // 
+    coreFlow m_fRotation;                  // 
+
+
 public:
     cMessierBoss()noexcept;
 
@@ -500,7 +586,18 @@ public:
 
 private:
     // execute own routines
-    void __MoveOwn()final;
+    void __ResurrectOwn ()final;
+    void __KillOwn      (const coreBool bAnimated)final;
+    void __RenderOwnOver()final;
+    void __MoveOwn      ()final;
+
+    // 
+    void __EnableRings ();
+    void __DisableRings(const coreBool bAnimated);
+
+    // 
+    void     __AddBullet  (const coreFloat fSpeed, const coreVector2 vPosition, const coreVector2 vDirection);
+    coreBool __PhaseTicker(const coreFloat fRate);
 };
 
 
@@ -542,6 +639,21 @@ private:
 // 
 class cCholBoss final : public cBoss
 {
+private:
+    cCustomEnemy m_aWing[CHOL_WINGS];         // 
+    coreObject3D m_Fire;                      // 
+
+    coreUint8   m_aiWingState [CHOL_WINGS];   // 
+    coreFlow    m_afWingThrow [CHOL_WINGS];   // 
+    coreVector3 m_avWingReturn[CHOL_WINGS];   // 
+
+    coreFloat m_fTilt;                        // 
+    coreFloat m_fFlap;                        // 
+
+    coreFlow m_fAnimation;                    // 
+    coreFlow m_fResurrection;                 // 
+
+
 public:
     cCholBoss()noexcept;
 
@@ -551,7 +663,24 @@ public:
 
 private:
     // execute own routines
-    void __MoveOwn()final;
+    void __ResurrectOwn  ()final;
+    void __KillOwn       (const coreBool bAnimated)final;
+    void __RenderOwnUnder()final;
+    void __MoveOwn       ()final;
+
+    // 
+    void __EnableFire ();
+    void __DisableFire(const coreBool bAnimated);
+
+    // 
+    inline void __ChangeWing      (const coreUintW iIndex, const coreUint8 iState) {ASSERT(iIndex < CHOL_WINGS) m_aiWingState[iIndex] = iState; m_afWingThrow[iIndex] = 0.0f;}
+    inline void __ChangeWingThrow (const coreUintW iIndex)                         {this->__ChangeWing(iIndex,  1u);}
+    inline void __ChangeWingReturn(const coreUintW iIndex)                         {this->__ChangeWing(iIndex, 11u);}
+    inline void __ChangeWingIntro (const coreUintW iIndex)                         {this->__ChangeWing(iIndex, 21u);}
+
+    // 
+    void __ResurrectFake();
+    void __KillFake();
 };
 
 
@@ -593,6 +722,19 @@ private:
 // 
 class cZerothBoss final : public cBoss
 {
+private:
+    cCustomEnemy m_aLimb      [ZEROTH_LIMBS];   // 
+    coreFloat    m_afLimbValue[ZEROTH_LIMBS];   // 
+
+    cCustomEnemy m_Body;                        // 
+
+    coreObject3D m_Laser;                       // 
+
+    cCustomEnemy m_aIce[ZEROTH_ICES];           // 
+
+    coreFlow m_fAnimation;                      // 
+
+
 public:
     cZerothBoss()noexcept;
 
@@ -602,7 +744,20 @@ public:
 
 private:
     // execute own routines
-    void __MoveOwn()final;
+    void __ResurrectOwn ()final;
+    void __KillOwn      (const coreBool bAnimated)final;
+    void __RenderOwnOver()final;
+    void __MoveOwn      ()final;
+
+    // 
+    void __EnableLaser (const coreVector2 vPosition, const coreVector2 vDirection);
+    void __DisableLaser(const coreBool bAnimated);
+
+    // 
+    void __CreateCube(const coreVector2 vPosition, const coreVector2 vDirection);
+
+    // 
+    void __SetLimbValue(const coreUintW iIndex, const coreFloat fValue);
 };
 
 
@@ -627,6 +782,21 @@ private:
 // 
 class cGemingaBoss final : public cBoss
 {
+private:
+    cCustomEnemy m_InsideTop;           // 
+    cCustomEnemy m_InsideBottom;        // 
+    cCustomEnemy m_Top;                 // 
+    cCustomEnemy m_Bottom;              // 
+
+    cCustomEnemy m_Tooth[4];            // 
+
+    coreFloat m_fMouthAngle;            // 
+
+    coreSpline2 m_ChangePath;           // 
+
+    coreTexturePtr m_apStomachTex[4];   // 
+
+
 public:
     cGemingaBoss()noexcept;
 
@@ -636,7 +806,9 @@ public:
 
 private:
     // execute own routines
-    void __MoveOwn()final;
+    void __ResurrectOwn()final;
+    void __KillOwn     (const coreBool bAnimated)final;
+    void __MoveOwn     ()final;
 };
 
 

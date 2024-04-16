@@ -468,7 +468,7 @@ void cDemoMission::__MoveOwnAfter()
     STATIC_ASSERT(RUTILUS_AREAS == 2u)
 
     // 
-    cPlayer::TestCollision(PLAYER_TEST_NORMAL | PLAYER_TEST_FEEL | PLAYER_TEST_IGNORE, TYPE_VIRIDO_LASER, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pLaser, const coreVector3& vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(PLAYER_TEST_NORMAL | PLAYER_TEST_FEEL | PLAYER_TEST_IGNORE, TYPE_VIRIDO_LASER, [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pLaser, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
 

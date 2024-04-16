@@ -43,7 +43,7 @@ void cUrticaBoss::__MoveOwn()
     
     
     
-    cPlayer::TestCollision(PLAYER_TEST_NORMAL, this, [](cPlayer* OUTPUT pPlayer, cEnemy* OUTPUT pEnemy, const coreVector3& vIntersection, const coreBool bFirstHit)
+    cPlayer::TestCollision(PLAYER_TEST_NORMAL, this, [](cPlayer* OUTPUT pPlayer, cEnemy* OUTPUT pEnemy, const coreVector3 vIntersection, const coreBool bFirstHit)
     {
         if(!bFirstHit) return;
 

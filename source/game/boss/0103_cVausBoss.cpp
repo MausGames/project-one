@@ -132,11 +132,12 @@ void cVausBoss::__MoveOwn()
                 }
                 else
                 {
-                    const coreVector2 vNewPos = coreVector2(0.0f, -m_vLastPosition.y);
-                    const coreFloat fNewAngle = m_fLastDirAngle + 1.0f*PI;// + 1.5f*PI;
+                    const coreVector2 vNewPos   = coreVector2(0.0f, -m_vLastPosition.y);
+                    const coreFloat   fOldAngle = m_vLastDirection.xy().Angle();
+                    const coreFloat   fNewAngle = fOldAngle + 1.0f*PI;// + 1.5f*PI;
     
                     this->DefaultMoveLerp  (m_vLastPosition, vNewPos,   (fTime - 0.46f) / 0.54f);
-                    this->DefaultRotateLerp(m_fLastDirAngle, fNewAngle, (fTime - 0.46f) / 0.54f);
+                    this->DefaultRotateLerp(fOldAngle,       fNewAngle, (fTime - 0.46f) / 0.54f);
                 }
 
                 if(PHASE_FINISHED)
@@ -192,7 +193,7 @@ void cVausBoss::__MoveOwn()
                 m_avVector[0].z = pBall->GetDirection().x;
             }
 
-            const coreFloat fDrop   = (fSpeed / FRAMERATE_MIN) * RCP(LERPB(0.0f, 1.0f, (fSpeed / FRAMERATE_MIN))) * 0.5f / fSpeed; // TODO: wtf, get rid of time value if necessary  
+            const coreFloat fDrop   = (fSpeed / FRAMERATE_MIN) * RCP(LERPB(0.0f, 1.0f, (fSpeed / FRAMERATE_MIN))) * 0.5f / fSpeed; // TODO 1: wtf, get rid of time value if necessary  
             const coreFloat fNewPos = m_avVector[0].x + pBall->GetDirection().x * VIRIDO_BALL_SPEED * fDrop;
 
             this->DefaultMoveLerp(m_avVector[0].xy(), coreVector2(fNewPos, -0.95f), fTime);
@@ -282,11 +283,11 @@ void cVausBoss::__MoveOwn()
 
 
     // 
-    if(HAS_BIT(pMission->GetBounceState(), 0u)
-       )//||
-       //HAS_BIT(pMission->GetBounceState(), 7u))
+    if(HAS_BIT(pMission->GetBounceState(), 0u))
     {
-        coreObject3D* pPaddle = pMission->GetPaddle(0);
+       //||
+       //HAS_BIT(pMission->GetBounceState(), 7u))
+        const coreObject3D* pPaddle = pMission->GetPaddle(0);
 
         const coreVector2 vPos   = pPaddle->GetPosition ().xy();
         const coreFloat   fAngle = pPaddle->GetDirection().xy().Angle();

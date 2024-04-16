@@ -12,7 +12,7 @@
 // ****************************************************************
 // constructor
 cMossBackground::cMossBackground()noexcept
-: m_vRainDirection   (coreVector2(0.0f,1.0f))
+: m_vRainMove        (coreVector2(0.0f,-1.2f))
 , m_fLightningDelay  (Core::Rand->Float(15.0f, 30.0f))
 , m_LightningTicker  (coreTimer(1.0f, 1.0f, 1u))
 , m_fThunderDelay    (0.0f)
@@ -114,12 +114,13 @@ void cMossBackground::__RenderOwnAfter()
     if(!m_Rain.GetProgram()->Enable())  return;
 
     // 
-    for(coreUintW i = 0u; i < SNOW_SNOW_NUM; ++i)
+    coreProgram* pLocal = m_Rain.GetProgram().GetResource();
+    for(coreUintW i = 0u; i < MOSS_RAIN_NUM; ++i)
     {
-        const coreVector2 vNewTexOffset = m_Rain.GetTexOffset() + coreVector2(0.56f,0.36f) * I_TO_F(i*i);
+        const coreVector2 vNewTexOffset = m_Rain.GetTexOffset() + coreVector2(0.56f,0.36f) * I_TO_F(POW2(i));
         const coreFloat   fNewScale     = 1.0f - 0.15f * I_TO_F(i);
 
-        m_Rain.GetProgram()->SendUniform(PRINT("u_av3OverlayTransform[%zu]", i), coreVector3(vNewTexOffset.Processed(FRACT), fNewScale));
+        pLocal->SendUniform(PRINT("u_av3OverlayTransform[%zu]", i), coreVector3(vNewTexOffset.Processed(FRACT), fNewScale));
     }
 
     glDisable(GL_DEPTH_TEST);
@@ -140,12 +141,12 @@ void cMossBackground::__RenderOwnAfter()
 void cMossBackground::__MoveOwn()
 {
     // 
-    const coreVector2 vMove      = m_vRainDirection * (-0.35f * g_pEnvironment->GetSpeed());
+    const coreVector2 vEnvMove   = coreVector2(0.0f,1.0f) * (-0.35f * g_pEnvironment->GetSpeed());
     const coreVector2 vTexSize   = coreVector2(1.0f,1.0f) * 6.0f;
-    const coreVector2 vTexOffset = m_Rain.GetTexOffset() + (coreVector2(0.0f,-1.2f) + vMove) * (1.0f * TIME);
+    const coreVector2 vTexOffset = m_Rain.GetTexOffset() + (m_vRainMove.InvertedX() + vEnvMove) * (1.0f * TIME);
 
     // 
-    m_Rain.SetDirection(MapToAxisInv(m_vRainDirection.InvertedX(), g_pEnvironment->GetDirection()));
+    m_Rain.SetDirection(g_pEnvironment->GetDirection().InvertedX());
     m_Rain.SetTexSize  (vTexSize);
     m_Rain.SetTexOffset(vTexOffset.Processed(FRACT));
     m_Rain.Move();

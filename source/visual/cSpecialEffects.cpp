@@ -12,10 +12,10 @@
 // ****************************************************************
 // constructor
 cSpecialEffects::cSpecialEffects()noexcept
-: m_ParticleColor    (2048u)
-, m_ParticleDark     (1024u)
-, m_ParticleSmoke    (1024u)
-, m_ParticleFire     (1024u)
+: m_aParticleColor   {coreParticleSystem(2048u), coreParticleSystem(1024u)}
+, m_aParticleDark    {coreParticleSystem(1024u), coreParticleSystem(512u)}
+, m_aParticleSmoke   {coreParticleSystem(1024u), coreParticleSystem(512u)}
+, m_aParticleFire    {coreParticleSystem(1024u), coreParticleSystem(512u)}
 , m_apLightningOwner {}
 , m_LightningList    (SPECIAL_LIGHTNINGS)
 , m_iCurLightning    (0u)
@@ -29,14 +29,17 @@ cSpecialEffects::cSpecialEffects()noexcept
 , m_bActive          (false)
 {
     // 
-    m_ParticleColor.DefineProgram("effect_particle_color_program");
-    m_ParticleColor.DefineTexture(0u, "effect_particle_32.png");
-    m_ParticleDark .DefineProgram("effect_particle_dark_program");
-    m_ParticleDark .DefineTexture(0u, "effect_particle_32.png");
-    m_ParticleSmoke.DefineProgram("effect_particle_smoke_program");
-    m_ParticleSmoke.DefineTexture(0u, "effect_particle_128.png");
-    m_ParticleFire .DefineProgram("effect_particle_fire_program");
-    m_ParticleFire .DefineTexture(0u, "effect_particle_128.png");
+    for(coreUintW i = 0u; i < 2u; ++i)
+    {
+        m_aParticleColor[i].DefineProgram("effect_particle_color_program");
+        m_aParticleColor[i].DefineTexture(0u, "effect_particle_32.png");
+        m_aParticleDark [i].DefineProgram("effect_particle_dark_program");
+        m_aParticleDark [i].DefineTexture(0u, "effect_particle_32.png");
+        m_aParticleSmoke[i].DefineProgram("effect_particle_smoke_program");
+        m_aParticleSmoke[i].DefineTexture(0u, "effect_particle_128.png");
+        m_aParticleFire [i].DefineProgram("effect_particle_fire_program");
+        m_aParticleFire [i].DefineTexture(0u, "effect_particle_128.png");
+    }
 
     // 
     for(coreUintW i = 0u; i < SPECIAL_LIGHTNINGS; ++i)
@@ -90,16 +93,16 @@ void cSpecialEffects::Render()
             const coreBool bForeground = g_pForeground->IsTarget();
 
             // render particle systems
-            m_ParticleColor.Render();
-            m_ParticleDark .Render();
-            m_ParticleSmoke.Render();
+            m_aParticleColor[0].Render();
+            m_aParticleDark [0].Render();
+            m_aParticleSmoke[0].Render();
 
             // enable additive blending (keep alpha aggregation)
             if(bForeground) glBlendFuncSeparate(FOREGROUND_BLEND_SUM, FOREGROUND_BLEND_ALPHA);
                        else glBlendFunc        (FOREGROUND_BLEND_SUM);
             {
                 // render fire particle system
-                m_ParticleFire.Render();
+                m_aParticleFire[0].Render();
 
                 // render lightning sprites
                 m_LightningList.Render();
@@ -127,24 +130,55 @@ void cSpecialEffects::Render()
 }
 
 
+void cSpecialEffects::RenderBottom()
+{
+    if(m_bActive)
+    {
+        glDisable(GL_DEPTH_TEST);
+        {
+            const coreBool bForeground = g_pForeground->IsTarget();
+
+            // render particle systems
+            m_aParticleColor[1].Render();
+            m_aParticleDark [1].Render();
+            m_aParticleSmoke[1].Render();
+
+            // enable additive blending (keep alpha aggregation)
+            if(bForeground) glBlendFuncSeparate(FOREGROUND_BLEND_SUM, FOREGROUND_BLEND_ALPHA);
+                       else glBlendFunc        (FOREGROUND_BLEND_SUM);
+            {
+                // render fire particle system
+                m_aParticleFire[1].Render();
+            }
+            if(bForeground) glBlendFuncSeparate(FOREGROUND_BLEND_DEFAULT, FOREGROUND_BLEND_ALPHA);
+                       else glBlendFunc        (FOREGROUND_BLEND_DEFAULT);
+        }
+        glEnable(GL_DEPTH_TEST);
+    }
+}
+
+
 // ****************************************************************
 // move special-effects
 void cSpecialEffects::Move()
 {
     // 
-    m_bActive = m_ParticleColor.GetNumActiveParticles() ||
-                m_ParticleDark .GetNumActiveParticles() ||
-                m_ParticleSmoke.GetNumActiveParticles() ||
-                m_ParticleFire .GetNumActiveParticles() ||
-                m_LightningList.List()->size()          ||
+    m_bActive = m_aParticleColor[0].GetNumActiveParticles() || m_aParticleColor[1].GetNumActiveParticles() ||
+                m_aParticleDark [0].GetNumActiveParticles() || m_aParticleDark [1].GetNumActiveParticles() ||
+                m_aParticleSmoke[0].GetNumActiveParticles() || m_aParticleSmoke[1].GetNumActiveParticles() ||
+                m_aParticleFire [0].GetNumActiveParticles() || m_aParticleFire [1].GetNumActiveParticles() ||
+                m_LightningList.List()->size()              ||
                 std::any_of(m_aBlast, m_aBlast + SPECIAL_BLASTS, [](const coreObject3D& oBlast) {return oBlast.GetAlpha() ? true : false;});
     if(m_bActive)
     {
         // move particle systems
-        m_ParticleColor.Move();
-        m_ParticleDark .Move();
-        m_ParticleSmoke.Move();
-        m_ParticleFire .Move();
+        for(coreUintW i = 0u; i < 2u; ++i)
+        {
+            m_aParticleColor[i].Move();
+            m_aParticleDark [i].Move();
+            m_aParticleSmoke[i].Move();
+            m_aParticleFire [i].Move();
+        }
 
         // 
         FOR_EACH_DYN(it, *m_LightningList.List())
@@ -201,7 +235,7 @@ void cSpecialEffects::Move()
 
 // ****************************************************************
 // create centered particle splash
-void cSpecialEffects::CreateSplashColor(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor)
+void cSpecialEffects::CreateSplashColor(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor)
 {
     // 
     const coreFloat fBase = Core::Rand->Float(-PI, PI);
@@ -209,7 +243,7 @@ void cSpecialEffects::CreateSplashColor(const coreVector3& vPosition, const core
 
     // 
     coreUintW i = 0u;
-    m_ParticleColor.GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
+    m_aParticleColor[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
     {
         const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i++)), 0.0f);
 
@@ -221,7 +255,7 @@ void cSpecialEffects::CreateSplashColor(const coreVector3& vPosition, const core
     });
 }
 
-void cSpecialEffects::CreateSplashDark(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum)
+void cSpecialEffects::CreateSplashDark(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum)
 {
     // 
     const coreFloat fBase = Core::Rand->Float(-PI, PI);
@@ -229,7 +263,7 @@ void cSpecialEffects::CreateSplashDark(const coreVector3& vPosition, const coreF
 
     // 
     coreUintW i = 0u;
-    m_ParticleDark.GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
+    m_aParticleDark[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
     {
         const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i++)), 0.0f);
 
@@ -241,7 +275,7 @@ void cSpecialEffects::CreateSplashDark(const coreVector3& vPosition, const coreF
     });
 }
 
-void cSpecialEffects::CreateSplashSmoke(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor)
+void cSpecialEffects::CreateSplashSmoke(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor)
 {
     // 
     const coreFloat fBase = Core::Rand->Float(-PI, PI);
@@ -249,7 +283,7 @@ void cSpecialEffects::CreateSplashSmoke(const coreVector3& vPosition, const core
 
     // 
     coreUintW i = 0u;
-    m_ParticleSmoke.GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
+    m_aParticleSmoke[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
     {
         const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i++)), 0.0f);
 
@@ -261,7 +295,7 @@ void cSpecialEffects::CreateSplashSmoke(const coreVector3& vPosition, const core
     });
 }
 
-void cSpecialEffects::CreateSplashFire(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor)
+void cSpecialEffects::CreateSplashFire(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor)
 {
     // 
     const coreFloat fBase = Core::Rand->Float(-PI, PI);
@@ -269,7 +303,7 @@ void cSpecialEffects::CreateSplashFire(const coreVector3& vPosition, const coreF
 
     // 
     coreUintW i = 0u;
-    m_ParticleFire.GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
+    m_aParticleFire[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
     {
         const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i++)), 0.0f);
 
@@ -284,7 +318,7 @@ void cSpecialEffects::CreateSplashFire(const coreVector3& vPosition, const coreF
 
 // ****************************************************************
 // create directional particle blow
-void cSpecialEffects::CreateBlowColor(const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor)
+void cSpecialEffects::CreateBlowColor(const coreVector3 vPosition, const coreVector3 vDirection, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor)
 {
     ASSERT(vDirection.IsNormalized())
 
@@ -294,7 +328,7 @@ void cSpecialEffects::CreateBlowColor(const coreVector3& vPosition, const coreVe
 
     // 
     coreUintW i = 0u;
-    m_ParticleColor.GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
+    m_aParticleColor[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
     {
         const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i++)), 0.0f);
 
@@ -306,7 +340,7 @@ void cSpecialEffects::CreateBlowColor(const coreVector3& vPosition, const coreVe
     });
 }
 
-void cSpecialEffects::CreateBlowDark(const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat fScale, const coreUintW iNum)
+void cSpecialEffects::CreateBlowDark(const coreVector3 vPosition, const coreVector3 vDirection, const coreFloat fScale, const coreUintW iNum)
 {
     ASSERT(vDirection.IsNormalized())
 
@@ -316,7 +350,7 @@ void cSpecialEffects::CreateBlowDark(const coreVector3& vPosition, const coreVec
 
     // 
     coreUintW i = 0u;
-    m_ParticleDark.GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
+    m_aParticleDark[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
     {
         const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i++)), 0.0f);
 
@@ -331,7 +365,7 @@ void cSpecialEffects::CreateBlowDark(const coreVector3& vPosition, const coreVec
 
 // ****************************************************************
 // 
-void cSpecialEffects::CreateChargeColor(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor)
+void cSpecialEffects::CreateChargeColor(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor)
 {
     // 
     const coreFloat fBase = Core::Rand->Float(-PI, PI);
@@ -339,7 +373,7 @@ void cSpecialEffects::CreateChargeColor(const coreVector3& vPosition, const core
 
     // 
     coreUintW i = 0u;
-    m_ParticleColor.GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
+    m_aParticleColor[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
     {
         const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i++)), 0.0f);
 
@@ -351,7 +385,7 @@ void cSpecialEffects::CreateChargeColor(const coreVector3& vPosition, const core
     });
 }
 
-void cSpecialEffects::CreateChargeDark(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum)
+void cSpecialEffects::CreateChargeDark(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum)
 {
     // 
     const coreFloat fBase = Core::Rand->Float(-PI, PI);
@@ -359,7 +393,7 @@ void cSpecialEffects::CreateChargeDark(const coreVector3& vPosition, const coreF
 
     // 
     coreUintW i = 0u;
-    m_ParticleDark.GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
+    m_aParticleDark[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
     {
         const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i++)), 0.0f);
 
@@ -374,7 +408,7 @@ void cSpecialEffects::CreateChargeDark(const coreVector3& vPosition, const coreF
 
 // ****************************************************************
 // 
-void cSpecialEffects::CreateWhirlColor(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3& vColor)
+void cSpecialEffects::CreateWhirlColor(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum, const coreVector3 vColor)
 {
     // 
     const coreFloat fBase = Core::Rand->Float(-PI, PI);
@@ -382,7 +416,7 @@ void cSpecialEffects::CreateWhirlColor(const coreVector3& vPosition, const coreF
 
     // 
     coreUintW i = 0u;
-    m_ParticleColor.GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
+    m_aParticleColor[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
     {
         const coreVector3 vDir  = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i++)), 0.0f);
         const coreFloat   fRand = Core::Rand->Float(fScale);
@@ -395,7 +429,7 @@ void cSpecialEffects::CreateWhirlColor(const coreVector3& vPosition, const coreF
     });
 }
 
-void cSpecialEffects::CreateWhirlDark(const coreVector3& vPosition, const coreFloat fScale, const coreUintW iNum)
+void cSpecialEffects::CreateWhirlDark(const coreVector3 vPosition, const coreFloat fScale, const coreUintW iNum)
 {
     // 
     const coreFloat fBase = Core::Rand->Float(-PI, PI);
@@ -403,7 +437,7 @@ void cSpecialEffects::CreateWhirlDark(const coreVector3& vPosition, const coreFl
 
     // 
     coreUintW i = 0u;
-    m_ParticleDark.GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
+    m_aParticleDark[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(iNum, [&](coreParticle* OUTPUT pParticle)
     {
         const coreVector3 vDir  = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i++)), 0.0f);
         const coreFloat   fRand = Core::Rand->Float(fScale);
@@ -419,12 +453,14 @@ void cSpecialEffects::CreateWhirlDark(const coreVector3& vPosition, const coreFl
 
 // ****************************************************************
 // 
-void cSpecialEffects::CreateBreakupColor(const cLodObject* pObject, const coreFloat fScale, const coreUintW iStep, const coreVector3& vColor)
+void cSpecialEffects::CreateBreakupColor(const coreObject3D* pObject, const coreFloat fScale, const coreUintW iStep, const coreVector3 vColor)
 {
     ASSERT(pObject)
 
+    if(!pObject->GetModel().IsUsable()) return;
+
     // 
-    const coreModel*   pModel           = pObject->GetModelLow().GetResource();
+    const coreModel*   pModel           = pObject->GetModel().GetResource();
     const coreVector3* pvVertexPosition = pModel->GetVertexPosition();
     ASSERT(pModel->GetNumClusters())
 
@@ -437,7 +473,7 @@ void cSpecialEffects::CreateBreakupColor(const cLodObject* pObject, const coreFl
 
     // 
     coreUintW i = 0u;
-    m_ParticleColor.GetDefaultEffect()->CreateParticle(pModel->GetNumVertices() / iStep, [&](coreParticle* OUTPUT pParticle)
+    m_aParticleColor[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(pModel->GetNumVertices() / iStep, [&](coreParticle* OUTPUT pParticle)
     {
         const coreVector3 vVertex = vRotation.QuatApply(pvVertexPosition[i] * vSize);
         const coreVector3 vDir    = coreVector3(vSide * SIGN(coreVector2::Dot(vVertex.xy() - vCenter, vSide)), 0.0f);
@@ -451,12 +487,14 @@ void cSpecialEffects::CreateBreakupColor(const cLodObject* pObject, const coreFl
     });
 }
 
-void cSpecialEffects::CreateBreakupDark(const cLodObject* pObject, const coreFloat fScale, const coreUintW iStep)
+void cSpecialEffects::CreateBreakupDark(const coreObject3D* pObject, const coreFloat fScale, const coreUintW iStep)
 {
     ASSERT(pObject)
 
+    if(!pObject->GetModel().IsUsable()) return;
+
     // 
-    const coreModel*   pModel           = pObject->GetModelLow().GetResource();
+    const coreModel*   pModel           = pObject->GetModel().GetResource();
     const coreVector3* pvVertexPosition = pModel->GetVertexPosition();
     ASSERT(pModel->GetNumClusters())
 
@@ -469,7 +507,7 @@ void cSpecialEffects::CreateBreakupDark(const cLodObject* pObject, const coreFlo
 
     // 
     coreUintW i = 0u;
-    m_ParticleDark.GetDefaultEffect()->CreateParticle(pModel->GetNumVertices() / iStep, [&](coreParticle* OUTPUT pParticle)
+    m_aParticleDark[SPECIAL_DEPTH(vPosition)].GetDefaultEffect()->CreateParticle(pModel->GetNumVertices() / iStep, [&](coreParticle* OUTPUT pParticle)
     {
         const coreVector3 vVertex = vRotation.QuatApply(pvVertexPosition[i] * vSize);
         const coreVector3 vDir    = coreVector3(vSide * SIGN(coreVector2::Dot(vVertex.xy() - vCenter, vSide)), 0.0f);
@@ -486,7 +524,7 @@ void cSpecialEffects::CreateBreakupDark(const cLodObject* pObject, const coreFlo
 
 // ****************************************************************
 // 
-coreFloat cSpecialEffects::CreateLightning(const coreVector2& vPosFrom, const coreVector2& vPosTo, const coreFloat fWidth, const coreVector3& vColor, const coreVector2& vTexSizeFactor, const coreFloat fTexOffset)
+coreFloat cSpecialEffects::CreateLightning(const coreVector2 vPosFrom, const coreVector2 vPosTo, const coreFloat fWidth, const coreVector3 vColor, const coreVector2 vTexSizeFactor, const coreFloat fTexOffset)
 {
     // 
     if(++m_iCurLightning >= SPECIAL_LIGHTNINGS) m_iCurLightning = 0u;
@@ -534,7 +572,7 @@ coreFloat cSpecialEffects::CreateLightning(const coreVector2& vPosFrom, const co
     return fTexLen + fTexOffset;
 }
 
-void cSpecialEffects::CreateLightning(coreObject3D* pOwner, const coreVector2& vDirection, const coreFloat fLength, const coreFloat fWidth, const coreVector3& vColor, const coreVector2& vTexSizeFactor, const coreFloat fTexOffset)
+void cSpecialEffects::CreateLightning(coreObject3D* pOwner, const coreVector2 vDirection, const coreFloat fLength, const coreFloat fWidth, const coreVector3 vColor, const coreVector2 vTexSizeFactor, const coreFloat fTexOffset)
 {
     // 
     if(++m_iCurLightning >= SPECIAL_LIGHTNINGS) m_iCurLightning = 0u;
@@ -563,7 +601,7 @@ void cSpecialEffects::CreateLightning(coreObject3D* pOwner, const coreVector2& v
 
 // ****************************************************************
 // 
-void cSpecialEffects::CreateBlastSphere(const coreVector3& vPosition, const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor)
+void cSpecialEffects::CreateBlastSphere(const coreVector3 vPosition, const coreFloat fScale, const coreFloat fSpeed, const coreVector3 vColor)
 {
     // 
     if(++m_iCurBlast >= SPECIAL_BLASTS) m_iCurBlast = 0u;
@@ -581,7 +619,7 @@ void cSpecialEffects::CreateBlastSphere(const coreVector3& vPosition, const core
     oBlast.SetTexSize          (coreVector2(12.0f,12.0f));
 }
 
-void cSpecialEffects::CreateBlastCube(const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor)
+void cSpecialEffects::CreateBlastCube(const coreVector3 vPosition, const coreVector3 vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3 vColor)
 {
     // 
     if(++m_iCurBlast >= SPECIAL_BLASTS) m_iCurBlast = 0u;
@@ -599,7 +637,7 @@ void cSpecialEffects::CreateBlastCube(const coreVector3& vPosition, const coreVe
     oBlast.SetTexSize          (coreVector2(3.0f,1.2f));
 }
 
-void cSpecialEffects::CreateBlastTetra(const coreVector3& vPosition, const coreVector3& vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3& vColor)
+void cSpecialEffects::CreateBlastTetra(const coreVector3 vPosition, const coreVector3 vDirection, const coreFloat fScale, const coreFloat fSpeed, const coreVector3 vColor)
 {
     // 
     if(++m_iCurBlast >= SPECIAL_BLASTS) m_iCurBlast = 0u;
@@ -620,12 +658,12 @@ void cSpecialEffects::CreateBlastTetra(const coreVector3& vPosition, const coreV
 
 // ****************************************************************
 // 
-void cSpecialEffects::PlaySound(const coreVector3& vPosition, const coreFloat fVolume, const eSoundEffect eSoundIndex)
+void cSpecialEffects::PlaySound(const coreVector3 vPosition, const coreFloat fVolume, const eSoundEffect eSoundIndex)
 {
     ASSERT(fVolume > 0.0f)
 
     // 
-    if(m_eSoundGuard == eSoundIndex) return; // TODO: what about different position? maybe left<>right locking, or moving the sound, or deferring execution     
+    if(m_eSoundGuard == eSoundIndex) return; // TODO 1: what about different position? maybe left<>right locking, or moving the sound, or deferring execution     
     m_eSoundGuard = eSoundIndex;
 
     // 
@@ -683,15 +721,11 @@ void cSpecialEffects::RumblePlayer(const cPlayer* pPlayer, const coreFloat fStre
 // 
 void cSpecialEffects::ShakeScreen(const coreFloat fStrength)
 {
-    if(m_fShakeStrength < fStrength)
-    {
-        // 
-        m_fShakeStrength = fStrength;
-        m_iShakeCount    = 0u;
+    // 
+    m_fShakeStrength = fStrength;
 
-        // 
-        this->RumblePlayer(NULL, fStrength * 0.5f, 250u);
-    }
+    // 
+    this->RumblePlayer(NULL, fStrength * 0.5f, 250u);
 }
 
 
@@ -708,18 +742,21 @@ void cSpecialEffects::FreezeScreen(const coreFloat fTime)
 void cSpecialEffects::ClearAll()
 {
     // 
-    m_ParticleColor.ClearAll();
-    m_ParticleDark .ClearAll();
-    m_ParticleSmoke.ClearAll();
-    m_ParticleFire .ClearAll();
+    for(coreUintW i = 0u; i < 2u; ++i)
+    {
+        m_aParticleColor[i].ClearAll();
+        m_aParticleDark [i].ClearAll();
+        m_aParticleSmoke[i].ClearAll();
+        m_aParticleFire [i].ClearAll();
+    }
 
-    // TODO: clear other stuff here   
+    // TODO 1: clear other stuff here   
 }
 
 
 // ****************************************************************
 // 
-void cSpecialEffects::MacroExplosionColorSmall(const coreVector3& vPosition, const coreVector3& vColor)
+void cSpecialEffects::MacroExplosionColorSmall(const coreVector3 vPosition, const coreVector3 vColor)
 {
     // 
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_SMALL);
@@ -729,7 +766,7 @@ void cSpecialEffects::MacroExplosionColorSmall(const coreVector3& vPosition, con
     this         ->ShakeScreen      (SPECIAL_SHAKE_SMALL);
 }
 
-void cSpecialEffects::MacroExplosionColorBig(const coreVector3& vPosition, const coreVector3& vColor)
+void cSpecialEffects::MacroExplosionColorBig(const coreVector3 vPosition, const coreVector3 vColor)
 {
     // 
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_BIG);
@@ -739,7 +776,7 @@ void cSpecialEffects::MacroExplosionColorBig(const coreVector3& vPosition, const
     this         ->ShakeScreen      (SPECIAL_SHAKE_BIG);
 }
 
-void cSpecialEffects::MacroExplosionDarkSmall(const coreVector3& vPosition)
+void cSpecialEffects::MacroExplosionDarkSmall(const coreVector3 vPosition)
 {
     // 
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_SMALL);
@@ -749,7 +786,7 @@ void cSpecialEffects::MacroExplosionDarkSmall(const coreVector3& vPosition)
     this         ->ShakeScreen      (SPECIAL_SHAKE_SMALL);
 }
 
-void cSpecialEffects::MacroExplosionDarkBig(const coreVector3& vPosition)
+void cSpecialEffects::MacroExplosionDarkBig(const coreVector3 vPosition)
 {
     // 
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_BIG);
@@ -759,7 +796,7 @@ void cSpecialEffects::MacroExplosionDarkBig(const coreVector3& vPosition)
     this         ->ShakeScreen      (SPECIAL_SHAKE_BIG);
 }
 
-void cSpecialEffects::MacroExplosionPhysicalColorSmall(const coreVector3& vPosition, const coreVector3& vColor)
+void cSpecialEffects::MacroExplosionPhysicalColorSmall(const coreVector3 vPosition, const coreVector3 vColor)
 {
     // 
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_SMALL);
@@ -769,7 +806,7 @@ void cSpecialEffects::MacroExplosionPhysicalColorSmall(const coreVector3& vPosit
     this         ->ShakeScreen      (SPECIAL_SHAKE_SMALL);
 }
 
-void cSpecialEffects::MacroExplosionPhysicalColorBig(const coreVector3& vPosition, const coreVector3& vColor)
+void cSpecialEffects::MacroExplosionPhysicalColorBig(const coreVector3 vPosition, const coreVector3 vColor)
 {
     // 
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_BIG);
@@ -779,7 +816,7 @@ void cSpecialEffects::MacroExplosionPhysicalColorBig(const coreVector3& vPositio
     this         ->ShakeScreen      (SPECIAL_SHAKE_BIG);
 }
 
-void cSpecialEffects::MacroExplosionPhysicalDarkSmall(const coreVector3& vPosition)
+void cSpecialEffects::MacroExplosionPhysicalDarkSmall(const coreVector3 vPosition)
 {
     // 
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_SMALL);
@@ -789,7 +826,7 @@ void cSpecialEffects::MacroExplosionPhysicalDarkSmall(const coreVector3& vPositi
     this         ->ShakeScreen      (SPECIAL_SHAKE_SMALL);
 }
 
-void cSpecialEffects::MacroExplosionPhysicalDarkBig(const coreVector3& vPosition)
+void cSpecialEffects::MacroExplosionPhysicalDarkBig(const coreVector3 vPosition)
 {
     // 
     g_pDistortion->CreateWave       (vPosition, DISTORTION_WAVE_BIG);
@@ -799,7 +836,7 @@ void cSpecialEffects::MacroExplosionPhysicalDarkBig(const coreVector3& vPosition
     this         ->ShakeScreen      (SPECIAL_SHAKE_BIG);
 }
 
-void cSpecialEffects::MacroEruptionColorSmall(const coreVector3& vPosition, const coreVector2& vDirection, const coreVector3& vColor)
+void cSpecialEffects::MacroEruptionColorSmall(const coreVector3 vPosition, const coreVector2 vDirection, const coreVector3 vColor)
 {
     // 
     g_pDistortion->CreateBurst    (vPosition,             vDirection,        DISTORTION_BURST_SMALL);
@@ -807,7 +844,7 @@ void cSpecialEffects::MacroEruptionColorSmall(const coreVector3& vPosition, cons
     this         ->PlaySound      (vPosition, 1.0f, SOUND_EXPLOSION_ENERGY_SMALL);
 }
 
-void cSpecialEffects::MacroEruptionColorBig(const coreVector3& vPosition, const coreVector2& vDirection, const coreVector3& vColor)
+void cSpecialEffects::MacroEruptionColorBig(const coreVector3 vPosition, const coreVector2 vDirection, const coreVector3 vColor)
 {
     // 
     g_pDistortion->CreateBurst    (vPosition,             vDirection,        DISTORTION_BURST_BIG);
@@ -815,7 +852,7 @@ void cSpecialEffects::MacroEruptionColorBig(const coreVector3& vPosition, const 
     this         ->PlaySound      (vPosition, 1.0f, SOUND_EXPLOSION_ENERGY_BIG);
 }
 
-void cSpecialEffects::MacroEruptionDarkSmall(const coreVector3& vPosition, const coreVector2& vDirection)
+void cSpecialEffects::MacroEruptionDarkSmall(const coreVector3 vPosition, const coreVector2 vDirection)
 {
     // 
     g_pDistortion->CreateBurst   (vPosition,             vDirection,        DISTORTION_BURST_SMALL);
@@ -823,7 +860,7 @@ void cSpecialEffects::MacroEruptionDarkSmall(const coreVector3& vPosition, const
     this         ->PlaySound     (vPosition, 1.0f, SOUND_EXPLOSION_ENERGY_SMALL);
 }
 
-void cSpecialEffects::MacroEruptionDarkBig(const coreVector3& vPosition, const coreVector2& vDirection)
+void cSpecialEffects::MacroEruptionDarkBig(const coreVector3 vPosition, const coreVector2 vDirection)
 {
     // 
     g_pDistortion->CreateBurst   (vPosition,             vDirection,        DISTORTION_BURST_BIG);
@@ -834,7 +871,7 @@ void cSpecialEffects::MacroEruptionDarkBig(const coreVector3& vPosition, const c
 
 // ****************************************************************
 // 
-void cSpecialEffects::MacroDestructionColor(const cLodObject* pObject, const coreVector3& vColor)
+void cSpecialEffects::MacroDestructionColor(const coreObject3D* pObject, const coreVector3 vColor)
 {
     ASSERT(pObject)
 
@@ -850,7 +887,7 @@ void cSpecialEffects::MacroDestructionColor(const cLodObject* pObject, const cor
     this         ->ShakeScreen       (SPECIAL_SHAKE_TINY * fPower);
 }
 
-void cSpecialEffects::MacroDestructionDark(const cLodObject* pObject)
+void cSpecialEffects::MacroDestructionDark(const coreObject3D* pObject)
 {
     ASSERT(pObject)
 
@@ -872,6 +909,6 @@ void cSpecialEffects::MacroDestructionDark(const cLodObject* pObject)
 coreVector2 cSpecialEffects::__GetBreakupSide()
 {
     // 
-    if(++m_iBreakupCount >= 12u) m_iBreakupCount = 0u;
+    if(++m_iBreakupCount >= 8u) m_iBreakupCount = 0u;
     return coreVector2::Direction(0.25f*PI * (I_TO_F(m_iBreakupCount) + 0.5f));
 }

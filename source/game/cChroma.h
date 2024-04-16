@@ -38,7 +38,7 @@ public:
     void Move();
 
     // 
-    void AddChroma(const coreVector2& vPosition, const coreVector2& vDirection, const coreFloat fScale);
+    void AddChroma(const coreVector2 vPosition, const coreVector2 vDirection, const coreFloat fScale);
     void ClearChromas(const coreBool bAnimated);
 };
 

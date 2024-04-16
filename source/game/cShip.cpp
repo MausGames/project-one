@@ -26,7 +26,7 @@ cShip::cShip()noexcept
 
 // ****************************************************************
 // 
-coreBool cShip::DefaultMovePath(const coreSpline2* pRawPath, const coreVector2& vFactor, const coreVector2& vRawOffset, const coreFloat fDistance)
+coreBool cShip::DefaultMovePath(const coreSpline2* pRawPath, const coreVector2 vFactor, const coreVector2 vRawOffset, const coreFloat fDistance)
 {
     // 
     coreVector2 vPosition;
@@ -44,7 +44,7 @@ coreBool cShip::DefaultMovePath(const coreSpline2* pRawPath, const coreVector2& 
 
 // ****************************************************************
 // 
-coreBool cShip::DefaultMoveTarget(const coreVector2& vTarget, const coreFloat fSpeedMove, const coreFloat fSpeedTurn)
+coreBool cShip::DefaultMoveTarget(const coreVector2 vTarget, const coreFloat fSpeedMove, const coreFloat fSpeedTurn)
 {
     ASSERT((fSpeedMove >= 0.0f) && (fSpeedTurn >= 0.0f))
 
@@ -68,7 +68,7 @@ coreBool cShip::DefaultMoveTarget(const coreVector2& vTarget, const coreFloat fS
 
 // ****************************************************************
 // 
-coreBool cShip::DefaultMoveSmooth(const coreVector2& vRawPosition, const coreFloat fSpeedMove, const coreFloat fDistThreshold)
+coreBool cShip::DefaultMoveSmooth(const coreVector2 vRawPosition, const coreFloat fSpeedMove, const coreFloat fDistThreshold)
 {
     ASSERT((fSpeedMove >= 0.0f) && (fDistThreshold >= 0.0f))
 
@@ -91,7 +91,7 @@ coreBool cShip::DefaultMoveSmooth(const coreVector2& vRawPosition, const coreFlo
 
 // ****************************************************************
 // 
-void cShip::DefaultMoveForward(const coreVector2& vDirection, const coreFloat fSpeedMove)
+void cShip::DefaultMoveForward(const coreVector2 vDirection, const coreFloat fSpeedMove)
 {
     // 
     const coreVector2 vPosition = this->GetPosition().xy() + vDirection * (fSpeedMove * TIME);
@@ -104,7 +104,7 @@ void cShip::DefaultMoveForward(const coreVector2& vDirection, const coreFloat fS
 
 // ****************************************************************
 // 
-void cShip::DefaultMoveLerp(const coreVector2& vFromRawPos, const coreVector2& vToRawPos, const coreFloat fTime)
+void cShip::DefaultMoveLerp(const coreVector2 vFromRawPos, const coreVector2 vToRawPos, const coreFloat fTime)
 {
     // 
     this->SetPosition(coreVector3(LERP(vFromRawPos, vToRawPos, fTime) * FOREGROUND_AREA, 0.0f));
@@ -123,7 +123,7 @@ void cShip::DefaultRotate(const coreFloat fAngle)
 
 // ****************************************************************
 // 
-coreBool cShip::DefaultRotateSmooth(const coreVector2& vDirection, const coreFloat fSpeedTurn, const coreFloat fDistThreshold)
+coreBool cShip::DefaultRotateSmooth(const coreVector2 vDirection, const coreFloat fSpeedTurn, const coreFloat fDistThreshold)
 {
     ASSERT(vDirection.IsNormalized() && (fSpeedTurn >= 0.0f) && (fDistThreshold >= 0.0f))
 
@@ -158,9 +158,9 @@ void cShip::DefaultRotateLerp(const coreFloat fFromAngle, const coreFloat fToAng
 void cShip::DefaultOrientate(const coreFloat fAngle)
 {
     // rotate around direction axis
-    const coreVector3 vDir = this->GetDirection();
+    const coreVector2 vDir = this->GetDirection().xy();
     const coreVector2 vOri = coreVector2::Direction(fAngle);
-    this->SetOrientation(coreVector3(-vOri.x*vDir.y, vOri.x*vDir.x, vOri.y));
+    this->SetOrientation(OriRoundDir(vOri, vDir));
 }
 
 
@@ -201,7 +201,7 @@ void cShip::DefaultMultiate(const coreFloat fAngle)
     // rotate around the rotating direction axis
     const coreVector2 vDir = coreVector2::Direction(fAngle);
     this->SetDirection  (coreVector3(vDir, 0.0f));
-    this->SetOrientation(coreVector3(-vDir.x*vDir.y, vDir.x*vDir.x, vDir.y));
+    this->SetOrientation(OriRoundDir(vDir, vDir));
 }
 
 
@@ -216,7 +216,7 @@ void cShip::DefaultMultiateLerp(const coreFloat fFromAngle, const coreFloat fToA
 
 // ****************************************************************
 // 
-void cShip::SetBaseColor(const coreVector3& vColor, const coreBool bInverted)
+void cShip::SetBaseColor(const coreVector3 vColor, const coreBool bInverted)
 {
     // 
     m_iBaseColor = coreVector4(vColor, 0.0f).PackUnorm4x8();
@@ -230,7 +230,7 @@ void cShip::SetBaseColor(const coreVector3& vColor, const coreBool bInverted)
 
 // ****************************************************************
 // 
-coreInt32 cShip::_TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact)
+coreInt32 cShip::_TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2 vImpact)
 {
     // 
     const coreInt32 iClamped = CLAMP(iDamage, m_iCurHealth - m_iMaxHealth, m_iCurHealth);
@@ -275,7 +275,7 @@ void cShip::_EnableBlink(const coreProgramPtr& pProgram)const
 
     // 
     pProgram->Enable();
-    pProgram->SendUniform("u_v2Blink", coreVector2(this->GetBlink(), this->GetCurHealthPct()));
+    pProgram->SendUniform("u_v1Blink", this->GetBlink());
 }
 
 void cShip::_EnableBlink()const

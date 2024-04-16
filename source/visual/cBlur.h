@@ -10,7 +10,7 @@
 #ifndef _P1_GUARD_BLUR_H_
 #define _P1_GUARD_BLUR_H_
 
-// TODO: use shader subroutines
+// TODO 3: use shader subroutines
 
 
 // ****************************************************************

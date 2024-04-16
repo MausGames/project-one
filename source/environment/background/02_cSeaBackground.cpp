@@ -14,7 +14,7 @@
 cSeaBackground::cSeaBackground()noexcept
 : m_fWaveTime (0.0f)
 {
-    // TODO: bubbles ?    
+    // TODO 1: bubbles ?    
 
     coreBatchList* pList1;
     coreBatchList* pList2;
@@ -76,7 +76,7 @@ cSeaBackground::cSeaBackground()noexcept
 
     // allocate weed lists
     pList1 = new coreBatchList(SEA_WEED_RESERVE);
-    pList1->DefineProgram("object_wave_inst_program");   // TODO: add to shadow-class!    
+    pList1->DefineProgram("object_wave_inst_program");   // TODO 1: add to shadow-class!    
     {
         // load object resources
         coreObject3D oBase;

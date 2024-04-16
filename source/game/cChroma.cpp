@@ -68,7 +68,7 @@ void cChromaManager::Move()
 
 // ****************************************************************
 // 
-void cChromaManager::AddChroma(const coreVector2& vPosition, const coreVector2& vDirection, const coreFloat fScale)
+void cChromaManager::AddChroma(const coreVector2 vPosition, const coreVector2 vDirection, const coreFloat fScale)
 {
     // 
     m_BulletManager.AddBullet<cChromaBullet>(1, 0.0f, NULL, vPosition, vDirection)->ChangeScale(fScale);

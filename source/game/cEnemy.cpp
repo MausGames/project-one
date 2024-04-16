@@ -27,7 +27,7 @@ cEnemy::cEnemy()noexcept
 
 // ****************************************************************
 // configure the enemy
-void cEnemy::Configure(const coreInt32 iHealth, const coreVector3& vColor, const coreBool bInverted)
+void cEnemy::Configure(const coreInt32 iHealth, const coreVector3 vColor, const coreBool bInverted)
 {
     // set health and color
     this->SetMaxHealth(iHealth);
@@ -39,13 +39,14 @@ void cEnemy::Configure(const coreInt32 iHealth, const coreVector3& vColor, const
 // render the enemy
 void cEnemy::Render()
 {
+        if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_BOTTOM))
     if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_DEAD))
     {
         // 
         this->_EnableBlink();
 
-        // render the 3d-object
-        this->coreObject3D::Render();
+        // 
+        cLodObject::RenderHighObject(this);
     }
 }
 
@@ -77,7 +78,7 @@ void cEnemy::Move()
             this->SetEnabled(CORE_OBJECT_ENABLE_MOVE);
         }
 
-        // TODO: better would be a shield which is only visible on bullet-hits (and tighter, maybe around silhouette)
+        // TODO 1: better would be a shield which is only visible on bullet-hits (and tighter, maybe around silhouette)
         //if(STATIC_ISVALID(g_pGame)) 
         //{
         //    if(HAS_FLAG(m_iStatus, ENEMY_STATUS_INVINCIBLE))
@@ -98,17 +99,17 @@ void cEnemy::Move()
 
 // ****************************************************************
 // reduce current health
-coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact, cPlayer* pAttacker)
+coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2 vImpact, cPlayer* pAttacker)
 {
     // 
     const coreBool bCoop = (pAttacker && STATIC_ISVALID(g_pGame) && g_pGame->GetCoop());
     m_iLastAttacker = bCoop ? (pAttacker - g_pGame->GetPlayer(0u)) : 0u;
 
-    // forward to parent
-    if(this->IsChild()) return m_apMember.front()->TakeDamage(iDamage, iElement, vImpact, pAttacker);
-
-    if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_INVINCIBLE))
+    if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_INVINCIBLE))   // also allow creating children which do not forward to parent
     {
+        // forward to parent
+        if(this->IsChild()) return m_apMember.front()->TakeDamage(iDamage, iElement, vImpact, pAttacker);
+
         if(iDamage > 0)
         {
             // 
@@ -196,7 +197,9 @@ void cEnemy::Resurrect()
     // 
     const coreBool bSingle = HAS_FLAG(m_iStatus, ENEMY_STATUS_SINGLE);
     const coreBool bEnergy = HAS_FLAG(m_iStatus, ENEMY_STATUS_ENERGY);
-    ASSERT(!bEnergy || (bEnergy && bSingle))
+    const coreBool bBottom = HAS_FLAG(m_iStatus, ENEMY_STATUS_BOTTOM);
+    ASSERT(!bEnergy || (bEnergy && bSingle))   
+    ASSERT(!bBottom || (bBottom && bSingle))   
 
     // 
     m_fLifeTime       = 0.0f;
@@ -206,13 +209,20 @@ void cEnemy::Resurrect()
     {
         // add ship to glow and outline
         g_pGlow->BindObject(this);
-        g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->BindObject(this);
+        if(!bBottom) g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->BindObject(this);
     }
     else if(bSingle)
     {
         // add ship to global shadow and outline
         cShadow::GetGlobalContainer()->BindObject(this);
-        g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->BindObject(this);
+        if(!bBottom) g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->BindObject(this);
+    }
+
+    if(HAS_FLAG(m_iStatus, ENEMY_STATUS_BOSS))
+    {
+        // 
+        if(this->IsParent()) FOR_EACH(it, m_apMember) (*it)->ChangeType(TYPE_ENEMY);
+        this->ChangeType(TYPE_ENEMY);
     }
 
     // add ship to the game
@@ -237,7 +247,9 @@ void cEnemy::Kill(const coreBool bAnimated)
     // 
     const coreBool bSingle = HAS_FLAG(m_iStatus, ENEMY_STATUS_SINGLE);
     const coreBool bEnergy = HAS_FLAG(m_iStatus, ENEMY_STATUS_ENERGY);
+    const coreBool bBottom = HAS_FLAG(m_iStatus, ENEMY_STATUS_BOTTOM);
     ASSERT(!bEnergy || (bEnergy && bSingle))
+    ASSERT(!bBottom || (bBottom && bSingle))
 
     // 
     if(STATIC_ISVALID(g_pGame)) g_pGame->GetShieldManager()->UnbindEnemy(this);
@@ -255,19 +267,25 @@ void cEnemy::Kill(const coreBool bAnimated)
         {
             g_pSpecialEffects->MacroDestructionDark(this);
         }
+
+        // 
+        if(STATIC_ISVALID(g_pGame) && (g_pGame->GetEnemyManager()->GetNumEnemiesAlive() <= 1u))
+        {
+            g_pGame->GetCrashManager()->AddCrash(*this, this->GetPosition().xy() - this->GetPosition().xy().Normalized() * 10.0f, NULL);
+        }
     }
 
     if(bEnergy)
     {
         // remove ship from glow and outline
         g_pGlow->UnbindObject(this);
-        g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->UnbindObject(this);
+        if(!bBottom) g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->UnbindObject(this);
     }
     else if(bSingle)
     {
         // remove ship from global shadow and outline
         cShadow::GetGlobalContainer()->UnbindObject(this);
-        g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->UnbindObject(this);
+        if(!bBottom) g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->UnbindObject(this);
     }
 
     // disable collision
@@ -436,13 +454,8 @@ void cEnemyManager::Render()
         // 
         if(!pEnemyActive->GetCurEnabled()) continue;
 
-        // 
-        FOR_EACH(it, *pEnemyActive->List()) d_cast<cEnemy*>(*it)->ActivateModelDefault();
-        {
-            // render all active enemies
-            pEnemyActive->Render();
-        }
-        FOR_EACH(it, *pEnemyActive->List()) d_cast<cEnemy*>(*it)->ActivateModelLowOnly();
+        // render all active enemies
+        cLodObject::RenderHighList(pEnemyActive);
     }
 }
 
@@ -473,7 +486,31 @@ void cEnemyManager::Render()
     }                                                                 \
 } 
 
-void cEnemyManager::RenderBottom() {__RENDER_OWN(__RenderOwnBottom)}
+void cEnemyManager::RenderBottom() {__RENDER_OWN(__RenderOwnBottom)
+
+DEPTH_PUSH
+//glDisable(GL_DEPTH_TEST);
+    FOR_EACH(it, m_apAdditional)
+    {
+        if((*it)->HasStatus(ENEMY_STATUS_DEAD))
+            continue;
+
+            if((*it)->HasStatus(ENEMY_STATUS_BOTTOM))
+        if(!(*it)->HasStatus(ENEMY_STATUS_DEAD))
+        {
+            // 
+            (*it)->_EnableBlink();
+    
+            // 
+            cLodObject::RenderHighObject(*it);
+            g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(*it);
+        }
+    }
+    
+//glEnable(GL_DEPTH_TEST);
+
+
+}
 void cEnemyManager::RenderUnder () {__RENDER_OWN(__RenderOwnUnder)}
 void cEnemyManager::RenderOver  () {__RENDER_OWN(__RenderOwnOver)}
 void cEnemyManager::RenderTop   () {__RENDER_OWN(__RenderOwnTop)}
@@ -569,7 +606,7 @@ void cEnemyManager::ClearEnemies(const coreBool bAnimated)
 
 // ****************************************************************
 // 
-cEnemy* cEnemyManager::FindEnemy(const coreVector2& vPosition)const
+cEnemy* cEnemyManager::FindEnemy(const coreVector2 vPosition)const
 {
     // 
     cEnemy*   pEnemy = NULL;
@@ -594,7 +631,7 @@ cEnemy* cEnemyManager::FindEnemy(const coreVector2& vPosition)const
 
 // ****************************************************************
 // 
-cEnemy* cEnemyManager::FindEnemyRev(const coreVector2& vPosition)const
+cEnemy* cEnemyManager::FindEnemyRev(const coreVector2 vPosition)const
 {
     // 
     cEnemy*   pEnemy = NULL;
@@ -651,7 +688,7 @@ void cEnemySquad::ClearEnemies(const coreBool bAnimated)
 
 // ****************************************************************
 // 
-cEnemy* cEnemySquad::FindEnemy(const coreVector2& vPosition)const
+cEnemy* cEnemySquad::FindEnemy(const coreVector2 vPosition)const
 {
     // 
     cEnemy*   pEnemy = NULL;
@@ -676,7 +713,7 @@ cEnemy* cEnemySquad::FindEnemy(const coreVector2& vPosition)const
 
 // ****************************************************************
 // 
-cEnemy* cEnemySquad::FindEnemyRev(const coreVector2& vPosition)const
+cEnemy* cEnemySquad::FindEnemyRev(const coreVector2 vPosition)const
 {
     // 
     cEnemy*   pEnemy = NULL;

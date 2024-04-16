@@ -10,18 +10,18 @@
 #ifndef _P1_GUARD_BULLET_H_
 #define _P1_GUARD_BULLET_H_
 
-// TODO: pre-allocate bullets (at least for player) at the beginning to improve resource loading
-// TODO: use prefetch with more precise numbers (also in enemy-manager)
-// TODO: align bullet memory ? (also check other possible locations (e.g. enemies))
-// TODO: remove tons of template instantiations (also enemies ? other templates ?) (CreateBullet and AllocateEnemy create tons of symbols)
-// TODO: add memory pool object for bullets ? also for enemy
-// TODO: make ray bullet smoother geometrically (front round)
-// TODO: sort bullet classes (color, enemy<>player, normal<>special), improve array indexing and caching
-// TODO: shift spear-bullet collision like ray-bullet
-// TODO: bullet -> to POD-type with single parent object
-// TODO: reorder bullets either yellow->green or green->yellow, so they are overlapping consistently (in default order)
-// TODO: surge-bullets to wave-weapon, rename one of it (probably wave-weapon to surge-weapon, code-only anyway)
-// TODO: dynamic depth needs to consider outline when calculating distance
+// TODO 3: pre-allocate bullets (at least for player) at the beginning to improve resource loading
+// TODO 3: use prefetch with more precise numbers (also in enemy-manager)
+// TODO 3: align bullet memory ? (also check other possible locations (e.g. enemies))
+// TODO 3: add memory pool object for bullets ? also for enemy
+// TODO 3: remove tons of template instantiations (also enemies ? other templates ?) (CreateBullet and AllocateEnemy create tons of symbols)
+// TODO 3: make ray bullet smoother geometrically (front round)
+// TODO 3: sort bullet classes (color, enemy<>player, normal<>special), improve array indexing and caching
+// TODO 3: shift spear-bullet collision like ray-bullet
+// TODO 5: bullet -> to POD-type with single parent object
+// TODO 3: reorder bullets either yellow->green or green->yellow, so they are overlapping consistently (in default order)
+// TODO 4: surge-bullets to wave-weapon, rename one of it (probably wave-weapon to surge-weapon, code-only anyway)
+// TODO 2: dynamic depth needs to consider outline when calculating distance
 
 
 // ****************************************************************
@@ -30,7 +30,7 @@
 #define BULLET_SET_COUNT        (16u)     // 
 #define BULLET_SPEED_FACTOR     (30.0f)   // 
 #define BULLET_DEPTH_FACTOR     (0.8f)    // 
-#define BULLET_COLLISION_FACTOR (0.9f)//(0.75f)   // (for enemy bullets) TODO: collision bug, spear bullets where hitting player only after they passed
+#define BULLET_COLLISION_FACTOR (0.9f)//(0.75f)   // (for enemy bullets) TODO 1: collision bug, spear bullets where hitting player only after they passed
 
 #define BULLET_SHADER_ATTRIBUTE_DEPTH (CORE_SHADER_ATTRIBUTE_DIV_TEXPARAM_NUM + 1u)
 
@@ -41,8 +41,6 @@ enum eBulletStatus : coreUint8
     BULLET_STATUS_PENETRATE = 0x04u,   // 
     BULLET_STATUS_IMMORTAL  = 0x08u,   // 
     BULLET_STATUS_GHOST     = 0x10u    // 
-    
-            // TODO: penetrate is set in constructor, move to weapon, and create status-reset similar to enemy-manager
 };
 
 
@@ -79,13 +77,13 @@ public:
     void Move()final;
 
     // control status
-    void Activate  (const coreInt32 iDamage, const coreFloat fSpeed, cShip* pOwner, const coreVector2& vPosition, const coreVector2& vDirection, const coreInt32 iType);
-    void Deactivate(const coreBool bAnimated, const coreVector2& vImpact);
+    void Activate  (const coreInt32 iDamage, const coreFloat fSpeed, cShip* pOwner, const coreVector2 vPosition, const coreVector2 vDirection, const coreInt32 iType);
+    void Deactivate(const coreBool bAnimated, const coreVector2 vImpact);
     void Deactivate(const coreBool bAnimated);
 
     // 
-    void Reflect(const coreObject3D* pObject, const coreVector2& vIntersection, const coreVector2& vForceNormal);
-    void Reflect(const coreObject3D* pObject, const coreVector2& vIntersection, const coreFloat    fSharpness);
+    void Reflect(const coreObject3D* pObject, const coreVector2 vIntersection, const coreVector2 vForceNormal);
+    void Reflect(const coreObject3D* pObject, const coreVector2 vIntersection, const coreFloat   fSharpness);
 
     // 
     inline cBullet* ChangeSize   (const coreFloat fFactor) {this->SetSize   (this->GetSize   () * fFactor); return this;}
@@ -97,11 +95,11 @@ public:
     inline coreBool HasStatus   (const coreInt32 iStatus)const {return HAS_FLAG(m_iStatus, iStatus);}
 
     // set object properties
-    inline void SetDamage (const coreInt32    iDamage)  {m_iDamage  = iDamage;}
-    inline void SetSpeed  (const coreFloat    fSpeed)   {m_fSpeed   = fSpeed * BULLET_SPEED_FACTOR;}
-    inline void SetFade   (const coreFloat    fFade)    {m_fFade    = fFade;}
-    inline void SetFlyTime(const coreFloat    fFlyTime) {m_fFlyTime = fFlyTime;}
-    inline void SetFlyDir (const coreVector2& vFlyDir)  {m_vFlyDir  = vFlyDir;}
+    inline void SetDamage (const coreInt32   iDamage)  {m_iDamage  = iDamage;}
+    inline void SetSpeed  (const coreFloat   fSpeed)   {m_fSpeed   = fSpeed * BULLET_SPEED_FACTOR;}
+    inline void SetFade   (const coreFloat   fFade)    {m_fFade    = fFade;}
+    inline void SetFlyTime(const coreFloat   fFlyTime) {m_fFlyTime = fFlyTime;}
+    inline void SetFlyDir (const coreVector2 vFlyDir)  {m_vFlyDir  = vFlyDir;}
 
     // get object properties
     inline const coreInt32&   GetDamage ()const {return m_iDamage;}
@@ -141,17 +139,17 @@ protected:
 
 private:
     // own routines for derived classes (render functions executed by manager)
-    virtual void __ImpactOwn      (const coreVector2& vImpact) {}
-    virtual void __ReflectOwn     ()                           {}
-    virtual void __RenderOwnBefore()                           {}
-    virtual void __RenderOwnAfter ()                           {}
-    virtual void __MoveOwn        ()                           {}
+    virtual void __ImpactOwn      (const coreVector2 vImpact) {}
+    virtual void __ReflectOwn     ()                          {}
+    virtual void __RenderOwnBefore()                          {}
+    virtual void __RenderOwnAfter ()                          {}
+    virtual void __MoveOwn        ()                          {}
 
     // 
-    inline void __SetColorRand(const coreVector3& vColor) {this->SetColor3(vColor * Core::Rand->Float(0.8f, 1.0f));}
+    inline void __SetColorRand(const coreVector3 vColor) {this->SetColor3(vColor * Core::Rand->Float(0.8f, 1.0f));}
 
     // 
-    void __Reflect(const coreObject3D* pObject, const coreVector2& vIntersection, const coreVector2& vForceNormal, const coreFloat fSharpness);
+    void __Reflect(const coreObject3D* pObject, const coreVector2 vIntersection, const coreVector2 vForceNormal, const coreFloat fSharpness);
 };
 
 
@@ -198,12 +196,12 @@ public:
     void Move();
 
     // add and remove bullets
-    template <typename T> RETURN_RESTRICT T* AddBullet(const coreInt32 iDamage, const coreFloat fSpeed, cShip* pOwner, const coreVector2& vPosition, const coreVector2& vDirection);
+    template <typename T> RETURN_RESTRICT T* AddBullet(const coreInt32 iDamage, const coreFloat fSpeed, cShip* pOwner, const coreVector2 vPosition, const coreVector2 vDirection);
     void ClearBullets(const coreBool bAnimated);
 
     // 
-    inline cBullet*          FindBullet     (const coreVector2& vPosition)const;
-    template <typename T> T* FindBulletTyped(const coreVector2& vPosition)const;
+    inline cBullet*          FindBullet     (const coreVector2 vPosition)const;
+    template <typename T> T* FindBulletTyped(const coreVector2 vPosition)const;
     template <typename F> void             ForEachBullet     (F&& nFunction)const;   // [](cBullet* OUTPUT pBullet) -> void
     template <typename T, typename F> void ForEachBulletTyped(F&& nFunction)const;   // [](T*       OUTPUT pBullet) -> void
 
@@ -259,7 +257,7 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ImpactOwn (const coreVector2 vImpact)final;
     void __ReflectOwn()final;
     void __MoveOwn   ()final;
 };
@@ -304,7 +302,7 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ImpactOwn (const coreVector2 vImpact)final;
     void __ReflectOwn()final;
     void __MoveOwn   ()final;
 };
@@ -349,7 +347,7 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ImpactOwn (const coreVector2 vImpact)final;
     void __ReflectOwn()final;
     void __MoveOwn   ()final;
 };
@@ -397,7 +395,7 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ImpactOwn (const coreVector2 vImpact)final;
     void __ReflectOwn()final;
     void __MoveOwn   ()final;
 };
@@ -435,7 +433,7 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ImpactOwn (const coreVector2 vImpact)final;
     void __ReflectOwn()final;
     void __MoveOwn   ()final;
 };
@@ -473,7 +471,7 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ImpactOwn (const coreVector2 vImpact)final;
     void __ReflectOwn()final;
     void __MoveOwn   ()final;
 };
@@ -511,7 +509,7 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ImpactOwn (const coreVector2 vImpact)final;
     void __ReflectOwn()final;
     void __MoveOwn   ()final;
 };
@@ -549,7 +547,7 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ImpactOwn (const coreVector2 vImpact)final;
     void __ReflectOwn()final;
     void __MoveOwn   ()final;
 };
@@ -587,7 +585,7 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ImpactOwn (const coreVector2 vImpact)final;
     void __ReflectOwn()final;
     void __MoveOwn   ()final;
 };
@@ -625,7 +623,7 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ImpactOwn (const coreVector2 vImpact)final;
     void __ReflectOwn()final;
     void __MoveOwn   ()final;
 };
@@ -663,7 +661,7 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ImpactOwn (const coreVector2 vImpact)final;
     void __ReflectOwn()final;
     void __MoveOwn   ()final;
 };
@@ -683,7 +681,7 @@ public:
     inline void ResetProperties() {this->MakeMagenta(); this->SetSize(coreVector3(1.0f,3.0f,1.0f)); this->SetTexSize(coreVector2(0.2f,0.2f)); m_fAnimation = 0.0f; m_fFade = 0.0f;}
 
     // change default color
-    inline cViewBullet* MakeWhite  () {ASSERT(false)             return this;}
+    inline cViewBullet* MakeWhite  () {this->_MakeWhite  (0.7f); return this;}
     inline cViewBullet* MakeYellow () {ASSERT(false)             return this;}
     inline cViewBullet* MakeOrange () {ASSERT(false)             return this;}
     inline cViewBullet* MakeRed    () {ASSERT(false)             return this;}
@@ -701,7 +699,7 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ImpactOwn (const coreVector2 vImpact)final;
     void __ReflectOwn()final;
     void __MoveOwn   ()final;
 };
@@ -722,7 +720,7 @@ public:
     ASSIGN_ID(13, "Mine")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(2.0f,2.0f,2.0f)); m_fAnimation = 0.0f; m_fFade = 0.0f;}
+    inline void ResetProperties() {this->SetSize(coreVector3(2.4f,2.4f,2.4f)); m_fAnimation = 0.0f; m_fFade = 0.0f;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "object_ship_glow_inst_program";}
@@ -736,7 +734,7 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn      (const coreVector2& vImpact)final;
+    void __ImpactOwn      (const coreVector2 vImpact)final;
     void __ReflectOwn     ()final;
     void __RenderOwnBefore()final;
     void __MoveOwn        ()final;
@@ -764,7 +762,7 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ImpactOwn (const coreVector2 vImpact)final;
     void __ReflectOwn()final;
     void __MoveOwn   ()final;
 };
@@ -798,7 +796,7 @@ public:
 
 private:
     // execute own routines
-    void __ImpactOwn (const coreVector2& vImpact)final;
+    void __ImpactOwn (const coreVector2 vImpact)final;
     void __ReflectOwn()final;
     void __MoveOwn   ()final;
 };
@@ -858,7 +856,7 @@ template <typename T> cBulletManager::sBulletSet<T>::~sBulletSet()
 
 // ****************************************************************
 // add bullet to the game
-template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt32 iDamage, const coreFloat fSpeed, cShip* pOwner, const coreVector2& vPosition, const coreVector2& vDirection)
+template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt32 iDamage, const coreFloat fSpeed, cShip* pOwner, const coreVector2 vPosition, const coreVector2 vDirection)
 {
     // get requested bullet set
     this->PrefetchBullet<T>();
@@ -907,7 +905,7 @@ template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt
 
 // ****************************************************************
 // 
-inline cBullet* cBulletManager::FindBullet(const coreVector2& vPosition)const
+inline cBullet* cBulletManager::FindBullet(const coreVector2 vPosition)const
 {
     // 
     cBullet*  pBullet = NULL;
@@ -932,7 +930,7 @@ inline cBullet* cBulletManager::FindBullet(const coreVector2& vPosition)const
 
 // ****************************************************************
 // 
-template <typename T> T* cBulletManager::FindBulletTyped(const coreVector2& vPosition)const
+template <typename T> T* cBulletManager::FindBulletTyped(const coreVector2 vPosition)const
 {
     // 
     T*        pBullet = NULL;

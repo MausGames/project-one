@@ -10,9 +10,9 @@
 #ifndef _P1_GUARD_SHADOW_H_
 #define _P1_GUARD_SHADOW_H_
 
-// TODO: change projection to perfectly fit the screen
-// TODO: check if reusing the center of the shadow-map is feasible
-// TODO: poisson sampling
+// TODO 3: change projection to perfectly fit the screen
+// TODO 3: check if reusing the center of the shadow-map is feasible
+// TODO 5: poisson sampling
 
 // NOTE: shadow map binds local objects (per frame buffer) and global objects (on all frame buffers, for transitions)
 // NOTE: all global objects are on the foreground

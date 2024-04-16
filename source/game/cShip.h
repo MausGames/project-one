@@ -10,10 +10,9 @@
 #ifndef _P1_GUARD_SHIP_H_
 #define _P1_GUARD_SHIP_H_
 
-// TODO: change high-resolution models with pre-baked normal-maps or tessellation ?
-// TODO: reduce ship health and all damage values to 16-bit (also reorder for better packing if possible)
-// TODO: do not create explosions if ship is far outside of view-port (just ships or in general special-effects ?)
-// TODO: ReachedHealthPct, GetCurHealthPct -> ReachedHealthPct(0.7f) was triggered while interface was showing 71%
+// TODO 3: reduce ship health and all damage values to 16-bit (also reorder for better packing if possible)
+// TODO 3: do not create explosions if ship is far outside of view-port (just ships or in general special-effects ?)
+// TODO 2: ReachedHealthPct, GetCurHealthPct -> ReachedHealthPct(0.7f) was triggered while interface was showing 71%
 
 
 // ****************************************************************
@@ -47,13 +46,13 @@ public:
     ENABLE_COPY(cShip)
 
     // transformation functions (raw parameters are multiplied with FOREGROUND_AREA)
-    coreBool DefaultMovePath     (const coreSpline2* pRawPath, const coreVector2& vFactor, const coreVector2& vRawOffset, const coreFloat fDistance);
-    coreBool DefaultMoveTarget   (const coreVector2& vTarget, const coreFloat fSpeedMove, const coreFloat fSpeedTurn);
-    coreBool DefaultMoveSmooth   (const coreVector2& vRawPosition, const coreFloat fSpeedMove, const coreFloat fDistThreshold);
-    void     DefaultMoveForward  (const coreVector2& vDirection, const coreFloat fSpeedMove);
-    void     DefaultMoveLerp     (const coreVector2& vFromRawPos, const coreVector2& vToRawPos, const coreFloat fTime);
+    coreBool DefaultMovePath     (const coreSpline2* pRawPath, const coreVector2 vFactor, const coreVector2 vRawOffset, const coreFloat fDistance);
+    coreBool DefaultMoveTarget   (const coreVector2 vTarget, const coreFloat fSpeedMove, const coreFloat fSpeedTurn);
+    coreBool DefaultMoveSmooth   (const coreVector2 vRawPosition, const coreFloat fSpeedMove, const coreFloat fDistThreshold);
+    void     DefaultMoveForward  (const coreVector2 vDirection, const coreFloat fSpeedMove);
+    void     DefaultMoveLerp     (const coreVector2 vFromRawPos, const coreVector2 vToRawPos, const coreFloat fTime);
     void     DefaultRotate       (const coreFloat fAngle);
-    coreBool DefaultRotateSmooth (const coreVector2& vDirection, const coreFloat fSpeedTurn, const coreFloat fDistThreshold);
+    coreBool DefaultRotateSmooth (const coreVector2 vDirection, const coreFloat fSpeedTurn, const coreFloat fDistThreshold);
     void     DefaultRotateLerp   (const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime);
     void     DefaultOrientate    (const coreFloat fAngle);
     void     DefaultOrientateLerp(const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime);
@@ -68,15 +67,14 @@ public:
     inline cShip* Rotate90 () {this->SetPosition( this->GetPosition().RotatedZ90()); this->SetDirection( this->GetDirection().RotatedZ90()); return this;}
     inline cShip* Rotate180() {this->SetPosition(-this->GetPosition());              this->SetDirection(-this->GetDirection());              return this;}
     inline cShip* Rotate270() {this->SetPosition(-this->GetPosition().RotatedZ90()); this->SetDirection(-this->GetDirection().RotatedZ90()); return this;}
-    inline cShip* MapToAxis(const coreVector2& vAxis) {this->SetPosition(coreVector3(::MapToAxis(this->GetPosition().xy(), vAxis), 0.0f)); this->SetDirection(coreVector3(::MapToAxis(this->GetDirection().xy(), vAxis), 0.0f)); return this;}
 
 
     // 
-    void SetBaseColor(const coreVector3& vColor, const coreBool bInverted = false);
+    void SetBaseColor(const coreVector3 vColor, const coreBool bInverted = false);
 
     // 
     //inline void RefreshColor(const coreFloat fFactor) {const coreFloat fNewFactor = CLAMP((fFactor - 0.2f) * (1.0f/0.8f) * (0.8f/0.6f), 0.0f, 1.0f); this->SetColor3(LERP(COLOR_SHIP_GREY * 0.5f, this->GetBaseColor(), HAS_BIT(m_iBaseColor, SHIP_INVERTED_BIT) ? (1.0f - fNewFactor) : fNewFactor));}
-    inline void RefreshColor(const coreFloat fFactor) {const coreFloat fNewFactor = CLAMP((fFactor - 0.2f) * (1.0f/0.8f) * (0.8f/0.6f), 0.0f, 1.0f); this->SetColor3(LERP(COLOR_SHIP_GREY * 1.0f, this->GetBaseColor(), HAS_BIT(m_iBaseColor, SHIP_INVERTED_BIT) ? (1.0f - fNewFactor) : fNewFactor));}
+    inline void RefreshColor(const coreFloat fFactor) {const coreFloat fNewFactor = CLAMP((fFactor - 0.2f) * (1.0f/0.8f) * (0.8f/0.6f), 0.0f, 1.0f); this->SetColor3(LERP(COLOR_SHIP_GREY, this->GetBaseColor(), HAS_BIT(m_iBaseColor, SHIP_INVERTED_BIT) ? (1.0f - fNewFactor) : fNewFactor));}
     //inline void RefreshColor(const coreFloat fFactor) {this->SetColor3(this->GetBaseColor());}
     inline void RefreshColor()                        {this->RefreshColor(this->GetCurHealthPct());}
     inline void InvokeBlink ()                        {if(m_fBlink < 0.2f) m_fBlink = 1.2f;}
@@ -112,7 +110,7 @@ public:
 
 protected:
     // 
-    coreInt32 _TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact);
+    coreInt32 _TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2 vImpact);
 
     // 
     void _Resurrect();

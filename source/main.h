@@ -27,61 +27,58 @@
 #ifndef _P1_GUARD_MAIN_H_
 #define _P1_GUARD_MAIN_H_
 
-// TODO: create timer and int-value as tick-multiplier for sustained damage
-// TODO: remove magic numbers (regularly)
-// TODO: test framerate-lock for g-sync stuff, also test for 144hz displays if render x144 but move x60 is better
-// TODO: clean up shader modifiers and shaders, also try to look at unused uniforms, varyings and attributes (shadow-matrix is used in ship-shader !? a_v1Blink/a_v2Blink used in ground-shader but only when instancing), and reduce passing data across shader stages
-// TODO: implement static/coherent branching interface instead of many shader-permutations ? (maybe only in situations with frequent switching)
-// TODO: use single-channel texture where possible
-// TODO: menu optimization by caching into framebuffer (general class for leaderboard, options, etc.)
-// TODO: protect main (LockFramerate)
-// TODO: check all shaders if alpha is required
-// TODO: full initializer lists everywhere
-// TODO: clean mixing shader defines (x >= y) and (defined(x)) checks (also in engine)
-// TODO: check for 16-bit float shader usage
-// TODO: program enable has to be checked (if(x.Enable()){}) everywhere
-// TODO: change 0.5 FB factors from 0.5 to 0.4 (-36% pixel) if CORE_GL_SUPPORT(ARB_texture_rg) not available ?
-// TODO: unify "forward" and "transform" comments in shaders
-// TODO: add own coreRand for various random things which may affect feeling (screen shake), and reset on boss-start
-// TODO: check issues with all the F&& functions (especially in boss.h and mission.h), also check Core engine, use force_inline on small functions
-// TODO: RETURN_NONNULL to everything which should never be null (and other attributes, both FUNC and RETURN)
-// TODO: check all vert shader for CORE_SHADER_OPTION_NO_ROTATION
-// TODO: control flow guard and buffer security check
-// TODO: _CORE_SSE_ try to just remove the coreMath low-precision functions
-// TODO: reduce number of shader-lights with static_assert
-// TODO: check if hole in object_sphere causes reflection issues, also check if other objects have a hole
-// TODO: on bosses and missions: don't move or render or test objects outside their phases (e.g. boomerangs)
-// TODO: make sure everything with at least 5 copies uses batch-lists
-// TODO: change SendUniform(PRINT("u_av3OverlayTransform[%zu]", i) to cached hashstrings like in coreShader
-// TODO: replace / with RCP where possible
-// TODO: "pro" shortcut for types (e.g. proEnemy, proGame), dr too
-// TODO: remove game_icon.png from resource-index if not required anymore
-// TODO: ENABLE_BITWISE when ?
-// TODO: remove multisampling for 2d, though may cause artifacts if the objects are fully shaded and moved
-// TODO: transition shader only needs alpha for menu, but not for background -> create permutations
-// TODO: default_black and default_white only 4x4
-// TODO: check all normalization calls if requires default or context-specific fallback, also check for more unsafe calls
-// TODO: check all RCP for division by zero
-// TODO: reshape causes some batch-list to be initialized twice
-// TODO: look for hot/cold optimizations, e.g. member-list in enemy can be pointer, write wrapper for that, coreCold<...>, check everything already pointer for switching to wrapper
-// TODO: check for and prevent accumulation of small rounding errors: incremental matrix rotation
-// TODO: check if outlines are correct on all text (multiple font-height, multiple screen-resolutions)
-// TODO: return boolean to cancel iteration on ForEachBullet, *Player, *Enemy (do I need this?)
-// TODO: make sure shaders use 0.5,0.5 for pixel centers
-// TODO: check for single-channel menu_background_black
-// TODO: make energy texture sharper (offline upsampling)
-// TODO: implement custom identifier for game, for replay, save, other compatibility
-// TODO: check for merging varyings with component = # and layoutEx (or merge manually)
-// TODO: use only 6 (or 8) pixel texture with nearest filtering for enemies
-// TODO: indicator when controls are enabled again (blinking und peeping sound)
-// TODO: find (manual) interpolations and try to use smoothstep for it (engine, application and shader)
-// TODO: re-export all models which are still in the old MD3 format (24.01.18 21:19) (+ update default)
-// TODO: search and remove unused resources from application.cpp (+ folder)
-// TODO: convert bigger sound-effects (ambient) to music ?
-// TODO: change all linear interpolation with at least LERPH3 to improve quality, where possible
-// TODO: check all collision callbacks if OUTPUT can be replaced with const
-// TODO: make sure enemy bullet ClearAll is called on STAGE_DELAY
-// TODO: create animation offset for all gameplay objects (const coreFloat fOffset = I_TO_F(i) * (1.0f/7.0f);), try to use num-per-line + 1, what about bullets ?
+// TODO 4: remove magic numbers (regularly)
+// TODO 3: test framerate-lock for g-sync stuff, also test for 144hz displays if render x144 but move x60 is better
+// TODO 3: clean up shader modifiers and shaders, also try to look at unused uniforms, varyings and attributes (shadow-matrix is used in ship-shader !? a_v1Blink used in ground-shader but only when instancing), and reduce passing data across shader stages
+// TODO 5: implement static/coherent branching interface instead of many shader-permutations ? (maybe only in situations with frequent switching)
+// TODO 3: use single-channel texture where possible
+// TODO 5: menu optimization by caching into framebuffer (general class for leaderboard, options, etc.)
+// TODO 3: protect main (LockFramerate)
+// TODO 3: check all shaders if alpha is required
+// TODO 4: full initializer lists everywhere (don't forget parent classes)
+// TODO 3: clean mixing shader defines (x >= y) and (defined(x)) checks (also in engine)
+// TODO 3: check for 16-bit float shader usage
+// TODO 2: program enable has to be checked (if(x.Enable()){}) everywhere
+// TODO 3: change 0.5 FB factors from 0.5 to 0.4 (-36% pixel) if CORE_GL_SUPPORT(ARB_texture_rg) not available ?
+// TODO 4: unify "forward" and "transform" comments in shaders
+// TODO 3: add own coreRand for various random things which may affect feeling (screen shake), and reset on boss-start
+// TODO 3: check issues with all the F&& functions (especially in boss.h and mission.h), also check Core engine, use force_inline on small functions
+// TODO 4: RETURN_NONNULL to everything which should never be null (and other attributes, both FUNC and RETURN)
+// TODO 3: check all vert shader for CORE_SHADER_OPTION_NO_ROTATION
+// TODO 5: control flow guard and buffer security check
+// TODO 1: _CORE_SSE_ try to just remove the coreMath low-precision functions
+// TODO 3: reduce number of shader-lights with static_assert
+// TODO 3: check if hole in object_sphere causes reflection issues, also check if other objects have a hole
+// TODO 3: on bosses and missions: don't move or render or test objects outside their phases (e.g. boomerangs active)
+// TODO 3: make sure everything with at least 5 copies uses batch-lists
+// TODO 4: replace / with RCP where possible
+// TODO 5: "pro" shortcut for types (e.g. proEnemy, proGame), dr too
+// TODO 4: ENABLE_BITWISE when ?
+// TODO 5: remove multisampling for 2d, though may cause artifacts if the objects are fully shaded and moved
+// TODO 3: transition shader only needs alpha for menu, but not for background -> create permutations
+// TODO 3: check all normalization calls if requires default or context-specific fallback, also check for more unsafe calls
+// TODO 3: check all RCP for division by zero
+// TODO 2: reshape causes some batch-list to be initialized twice
+// TODO 5: look for hot/cold optimizations, e.g. member-list in enemy can be pointer, write wrapper for that, coreCold<...>, check everything already pointer for switching to wrapper
+// TODO 3: check for and prevent accumulation of small rounding errors: incremental matrix rotation
+// TODO 3: check if outlines are correct on all text (multiple font-height, multiple screen-resolutions)
+// TODO 3: return boolean to cancel iteration on ForEachBullet, *Player, *Enemy (do I need this?)
+// TODO 3: make sure shaders use 0.5,0.5 for pixel centers
+// TODO 3: check for single-channel menu_background_black
+// TODO 3: make energy texture sharper (offline upsampling)
+// TODO 5: check for merging varyings with component = # and layoutEx (or merge manually)
+// TODO 3: use only 6 (or 8) pixel texture with nearest filtering for enemies
+// TODO 1: indicator when controls are enabled again (blinking und peeping sound)
+// TODO 3: search and remove unused resources from application.cpp (+ folder)
+// TODO 3: remove game_icon.png from resource-index if not required anymore
+// TODO 5: convert bigger sound-effects (ambient) to music ?
+// TODO 3: change all linear interpolation with at least LERPH3 to improve quality, where possible
+// TODO 3: find (manual) interpolations and try to use smoothstep for it (engine, application and shader)
+// TODO 4: check all collision callbacks if OUTPUT can be replaced with const
+// TODO 3: make sure enemy bullet ClearAll is called on STAGE_DELAY
+// TODO 3: create animation offset for all gameplay objects (const coreFloat fOffset = I_TO_F(i) * (1.0f/7.0f);), try to use num-per-line + 1, what about bullets ?
+// TODO 1: make sure user folder is correctly handled for multi-user (-> corePlatform)
+// TODO 3: every boss, enemy, player-bullet-interacting object needs a volume
 
 
 // ****************************************************************
@@ -107,9 +104,9 @@
 // ****************************************************************
 // general definitions
 #define PLAYERS              (2u)
-#define MISSIONS             (9u + 1u)
-#define BOSSES               (3u)
-#define WAVES                (15u)
+#define MISSIONS             (9u + 1u + 2u)
+#define BOSSES               (2u)
+#define WAVES                (10u)
 #define SEGMENTS             (BOSSES + WAVES)
 #define LIVES                (5u)
 #define CONTINUES            (3u)
@@ -128,14 +125,14 @@
 // color values
 #define COLOR_MENU_WHITE     (coreVector3(1.000f, 1.000f, 1.000f) * MENU_CONTRAST_WHITE)
 #define COLOR_MENU_BLACK     (coreVector3(1.000f, 1.000f, 1.000f) * MENU_CONTRAST_BLACK)
-#define COLOR_MENU_YELLOW    (coreVector3(1.000f, 0.824f, 0.392f))   // TODO: improve use Jetbrains Git colors ?
-#define COLOR_MENU_ORANGE    (coreVector3(1.000f, 0.443f, 0.227f))   // TODO: improve 
-#define COLOR_MENU_RED       (coreVector3(1.000f, 0.225f, 0.225f))   // TODO: improve !! those colors may be used in 3d objects too
-#define COLOR_MENU_MAGENTA   (coreVector3(1.000f, 0.310f, 0.720f))   // TODO: improve 
-#define COLOR_MENU_PURPLE    (coreVector3(0.710f, 0.333f, 1.000f))   // TODO: improve 
-#define COLOR_MENU_BLUE      (coreVector3(0.102f, 0.702f, 1.000f))   // TODO: improve 
-#define COLOR_MENU_CYAN      (coreVector3(0.000f, 0.789f, 0.876f))   // TODO: improve 
-#define COLOR_MENU_GREEN     (coreVector3(0.118f, 0.745f, 0.353f))   // TODO: improve 
+#define COLOR_MENU_YELLOW    (coreVector3(1.000f, 0.824f, 0.392f))   // TODO 1: improve use Jetbrains Git colors ?
+#define COLOR_MENU_ORANGE    (coreVector3(1.000f, 0.443f, 0.227f))   // TODO 1: improve 
+#define COLOR_MENU_RED       (coreVector3(1.000f, 0.225f, 0.225f))   // TODO 1: improve !! those colors may be used in 3d objects too
+#define COLOR_MENU_MAGENTA   (coreVector3(1.000f, 0.310f, 0.720f))   // TODO 1: improve 
+#define COLOR_MENU_PURPLE    (coreVector3(0.710f, 0.333f, 1.000f))   // TODO 1: improve 
+#define COLOR_MENU_BLUE      (coreVector3(0.102f, 0.702f, 1.000f))   // TODO 1: improve 
+#define COLOR_MENU_CYAN      (coreVector3(0.000f, 0.789f, 0.876f))   // TODO 1: improve 
+#define COLOR_MENU_GREEN     (coreVector3(0.118f, 0.745f, 0.353f))   // TODO 1: improve 
 #define COLOR_ENERGY_WHITE   (coreVector3(1.000f, 1.000f, 1.000f))
 #define COLOR_ENERGY_YELLOW  (coreVector3(0.950f, 0.800f, 0.280f))
 #define COLOR_ENERGY_ORANGE  (coreVector3(1.000f, 0.420f, 0.000f))
@@ -256,9 +253,9 @@ enum eBadge : coreUint8
     BADGE_HARD
 };
 
-extern void InitResolution(const coreVector2& vResolution);   // init resolution properties (1:1)
-extern void InitDirection();                                  // 
-extern void InitFramerate();                                  // init frame rate properties (lock)
+extern void InitResolution(const coreVector2 vResolution);   // init resolution properties (1:1)
+extern void InitDirection();                                 // 
+extern void InitFramerate();                                 // init frame rate properties (lock)
 
 
 // ****************************************************************
@@ -327,6 +324,7 @@ extern cPostProcessing* const g_pPostProcessing;   // main post-processing objec
 #include "game/cChroma.h"
 #include "game/cItem.h"
 #include "game/cShield.h"
+#include "game/cCrash.h"
 #include "game/boss/cBoss.h"
 #include "game/mission/cMission.h"
 #include "game/cPlayer.h"

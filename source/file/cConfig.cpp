@@ -68,6 +68,10 @@ static void CheckConfig(sConfig* OUTPUT pConfig)
             }
         }
     }
+
+    // 
+    pConfig->Audio.fEffectVolume  = MAX(pConfig->Audio.fEffectVolume,  0.0f);
+    pConfig->Audio.fAmbientVolume = MAX(pConfig->Audio.fAmbientVolume, 0.0f);
 }
 
 
@@ -128,13 +132,13 @@ void LoadConfig()
         }
     }
 
+    // check configuration for valid values
+    CheckConfig(&g_OldConfig);
+
     // 
     Core::Audio->SetSoundVolume(1.0f);
     Core::Audio->SetTypeVolume(g_OldConfig.Audio.fEffectVolume,  SOUND_EFFECT);
     Core::Audio->SetTypeVolume(g_OldConfig.Audio.fAmbientVolume, SOUND_AMBIENT);
-
-    // check configuration for valid values
-    CheckConfig(&g_OldConfig);
 
     // forward values to the current structure
     g_CurConfig = g_OldConfig;
@@ -355,9 +359,6 @@ void UpdateInput()
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE),      CORE_INPUT_PRESS) ||
        Core::Input->GetKeyboardButton(CORE_INPUT_KEY(BACKSPACE),   CORE_INPUT_PRESS) ||
        Core::Input->GetMouseButton   (CORE_INPUT_RIGHT,            CORE_INPUT_PRESS)) g_MenuInput.bCancel     = true;
-    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE),      CORE_INPUT_PRESS)// ||
-       //Core::Input->GetKeyboardButton(CORE_INPUT_KEY(PAUSE),       CORE_INPUT_PRESS)
-       ) 
-        g_MenuInput.bPause      = true;
+    if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(ESCAPE),      CORE_INPUT_PRESS)) g_MenuInput.bPause      = true;
     if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(PRINTSCREEN), CORE_INPUT_PRESS)) g_MenuInput.bScreenshot = true;
 }

@@ -349,7 +349,7 @@ void cInterface::Move()
         m_aBossHealthBar[1].SetColor3(vColor * 0.9f);
 
         // display health value
-        m_BossHealthValue.SetText(PRINT("%.0f%%", CEIL(fPercent * 100.0f)));
+        m_BossHealthValue.SetText(PRINT("%.0f%%", CEIL(fPercent * 100.0f)));   // TODO 1: ceil may cause wrong rounding upwards, but still need to handle 0%
     }
 
     // display time
@@ -363,7 +363,7 @@ void cInterface::Move()
     }
 
     // adjust time position (# only required if alignment is centered)
-    (m_fAlphaBoss ? m_aBossTime[0] : m_aWaveTime[0]).RetrieveDesiredSize([this](const coreVector2& vSize)
+    (m_fAlphaBoss ? m_aBossTime[0] : m_aWaveTime[0]).RetrieveDesiredSize([this](const coreVector2 vSize)
     {
         const coreFloat fPos = (vSize.x - 0.022f) * 0.5f;
         const coreFloat fOff = m_BossHealthValue.GetPosition().x;
@@ -580,7 +580,7 @@ void cInterface::ShowWave(const coreChar* pcName)
 {
 
     //if(pcName && pcName[0]) this->ShowStory(pcName);   
-    // TODO: story-text font is still dynamic
+    // TODO 1: story-text font is still dynamic
 
 
     //m_WaveName.SetText(pcName);
@@ -659,6 +659,17 @@ coreBool cInterface::IsBannerActive()const
 {
     // compare with game-time offset
     return ((g_pGame->GetTimeTable()->GetTimeEvent() - m_fBannerStart) <= m_fBannerDuration) ? true : false;
+}
+
+
+// ****************************************************************
+// 
+void cInterface::ChangeBossName(const coreChar* pcMain)
+{
+    // 
+    m_aBannerText[0].SetText(pcMain);
+    m_aBannerText[1].SetText(pcMain);
+    m_aBannerText[3].SetText(pcMain);
 }
 
 

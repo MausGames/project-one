@@ -24,9 +24,7 @@ cGeluMission::cGeluMission()noexcept
 , m_fAnimation  (0.0f)
 {
     // 
-    m_apBoss[0] = &m_Tartarus;
-    m_apBoss[1] = &m_Phalaris;
-    m_apBoss[2] = &m_Chol;
+    m_apBoss[0] = &m_Chol;
 
     // 
     m_Fang.DefineProgram("object_ship_glow_inst_program");
@@ -181,7 +179,7 @@ void cGeluMission::DisableFang(const coreUintW iIndex, const coreBool bAnimated)
 
 // ****************************************************************
 // 
-void cGeluMission::EnableWay(const coreUintW iIndex, const coreVector2& vPosition, const coreVector2& vDirection)
+void cGeluMission::EnableWay(const coreUintW iIndex, const coreVector2 vPosition, const coreVector2 vDirection)
 {
     ASSERT(iIndex < GELU_WAYS)
     coreObject3D* pWay   = (*m_Way     .List())[iIndex];
@@ -329,7 +327,7 @@ void cGeluMission::__RenderOwnUnder()
     DEPTH_PUSH
 
     // 
-    m_Fang.Render();
+    cLodObject::RenderHighList(&m_Fang);
     g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyList(&m_Fang);
 
     // 

@@ -74,6 +74,7 @@ coreBool cWeapon::_IsOwnerDarkShading()const
 // ****************************************************************
 // constructor
 cRayWeapon::cRayWeapon()noexcept
+: m_bBurst (false)
 {
     // set base fire-rate
     m_CooldownTimer.SetSpeed(15.0f);
@@ -100,7 +101,7 @@ void cRayWeapon::__TriggerOwn(const coreUint8 iMode)
         if(m_CooldownTimer.GetStatus()) return;
 
         // 
-        this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(4, 5.0f, m_pOwner, vPos, vDir))->ChangeScale(1.3f);
+        this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(4, 6.0f, m_pOwner, vPos, vDir))->ChangeScale(1.3f);
 
         // 
         m_CooldownTimer.SetValue(-1.1f);
@@ -137,6 +138,15 @@ void cRayWeapon::__TriggerOwn(const coreUint8 iMode)
 
 
 // ****************************************************************
+// 
+void cRayWeapon::__ReleaseOwn(const coreUint8 iMode)
+{
+    // 
+    m_bBurst = false;
+}
+
+
+// ****************************************************************
 // shoot with the ray weapon
 void cRayWeapon::__ShootOwn()
 {
@@ -146,12 +156,26 @@ void cRayWeapon::__ShootOwn()
     const coreVector2 vTan = vDir.Rotated90();// * ((m_pOwner->GetMove().IsNull() || m_pOwner->GetInput()->vMove.IsNull()) ? 1.0f : 0.5f);
 
     // 
-    this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(1, 6.0f, m_pOwner, vPos + vTan*1.5f, vDir));
-    this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(1, 6.0f, m_pOwner, vPos - vTan*1.5f, vDir));
+    if(!m_bBurst)
+    {
+        m_bBurst = true;
 
-    // play bullet sound-effect
-    if(m_pBulletSound.IsUsable()) m_pBulletSound->PlayPosition(NULL, 1.0f, 0.5f, false, SOUND_EFFECT, m_pOwner->GetPosition());
-    // TODO: all sounds checks
+        // 
+        this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(4, 6.0f, m_pOwner, vPos, vDir))->ChangeScale(1.3f);
+
+        // 
+        m_CooldownTimer.SetValue(m_CooldownTimer.GetValue(CORE_TIMER_GET_NORMAL) - 1.0f);
+    }
+    else
+    {
+        // 
+        this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(1, 6.0f, m_pOwner, vPos + vTan*1.5f, vDir));
+        this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cRayBullet>(1, 6.0f, m_pOwner, vPos - vTan*1.5f, vDir));
+
+        // play bullet sound-effect
+        if(m_pBulletSound.IsUsable()) m_pBulletSound->PlayPosition(NULL, 1.0f, 0.5f, false, SOUND_EFFECT, m_pOwner->GetPosition());
+        // TODO 1: all sounds need IsUsable checks
+    }
 }
 
 
@@ -193,7 +217,7 @@ void cPulseWeapon::__ShootOwn()
     const coreVector2 vDir = m_pOwner->GetDirection().xy();
 
     // 
-    this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cPulseBullet>(5 + 10 * F_TO_SI(m_fCharge), 3.0f, m_pOwner, vPos, vDir))->ChangeScale(1.2f + 0.4f * FLOOR(m_fCharge));
+    this->_MakeWhite(g_pGame->GetBulletManagerPlayer()->AddBullet<cPulseBullet>(5 + 10 * F_TO_SI(m_fCharge), 3.0f, m_pOwner, vPos, vDir))->ChangeScale(1.2f + 0.4f * FLOOR(m_fCharge))->AddStatus(BULLET_STATUS_PENETRATE);
 
     // 
     m_fCharge = 0.0f;

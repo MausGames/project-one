@@ -12,6 +12,10 @@
 // ****************************************************************
 // constructor
 cSpaceBackground::cSpaceBackground()noexcept
+: m_vCoverDir    (coreVector2(0.0f,1.0f))
+, m_fMeteorSpeed (1.0f)
+, m_iCopyLower   (0u)
+, m_iCopyUpper   (0u)
 {
     coreBatchList* pList1;
 
@@ -53,9 +57,15 @@ cSpaceBackground::cSpaceBackground()noexcept
             }
         }
 
+        // 
+        m_iCopyUpper = pList1->List()->size();
+
         // post-process list and add it to the ground
         cBackground::_FillInfinite(pList1, SPACE_METEOR_RESERVE);
         m_apGroundObjectList.push_back(pList1);
+
+        // 
+        m_iCopyLower = pList1->List()->size() - m_iCopyUpper;
 
         // 
         m_pOutdoor->GetShadowMap()->BindList(pList1);
@@ -90,18 +100,18 @@ void cSpaceBackground::__RenderOwnBefore()
 void cSpaceBackground::__MoveOwn()
 {
     // 
-    const coreMatrix3 mRota = coreMatrix4::RotationY(TIME * -0.7f).m123();
+    const coreMatrix3 mRota = coreMatrix4::RotationY(TIME * -0.7f * m_fMeteorSpeed).m123();
 
     // 
     coreBatchList* pList = m_apGroundObjectList[0];
     for(coreUintW i = 0u, ie = pList->List()->size(); i < ie; ++i)
     {
-        coreObject3D* pStone = (*pList->List())[i];
-        //if(!pStone->IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue; // TODO: because of infinity scrolling, check if copy and move 
+        coreObject3D* pMeteor = (*pList->List())[i];
+        if((i >= m_iCopyLower) && (i < m_iCopyUpper) && !pMeteor->IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue;
 
         // 
-        pStone->SetDirection  ((pStone->GetDirection  () * mRota).Normalized());
-        pStone->SetOrientation((pStone->GetOrientation() * mRota).Normalized());
+        pMeteor->SetDirection  ((pMeteor->GetDirection  () * mRota).Normalized());
+        pMeteor->SetOrientation((pMeteor->GetOrientation() * mRota).Normalized());
     }
     pList->MoveNormal();
 
@@ -110,7 +120,7 @@ void cSpaceBackground::__MoveOwn()
     const coreVector2 vTexOffset = m_Cover.GetTexOffset() + (coreVector2(0.0f,0.0f) + vMove) * (0.05f * TIME);
 
     // 
-    m_Cover.SetDirection(g_pEnvironment->GetDirection().InvertedX());
+    m_Cover.SetDirection(MapToAxis(g_pEnvironment->GetDirection().InvertedX(), m_vCoverDir));
     m_Cover.SetTexOffset(vTexOffset.Processed(FRACT));
     m_Cover.Move();
 }

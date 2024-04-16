@@ -82,8 +82,8 @@ void cHelper::Render()
 {
     if(!HAS_FLAG(m_iStatus, HELPER_STATUS_DEAD))
     {
-        // render the 3d-object
-        this->coreObject3D::Render();
+        // 
+        cLodObject::RenderHighObject(this);
     }
 }
 

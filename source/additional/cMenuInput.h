@@ -10,7 +10,7 @@
 #ifndef _P1_GUARD_MENUINPUT_H_
 #define _P1_GUARD_MENUINPUT_H_
 
-// TODO: cGui
+// TODO 1: cGui
 
 
 // ****************************************************************
@@ -44,7 +44,7 @@ public:
     // 
     inline void BindObject  (coreObject2D* pObject) {ASSERT(!m_apObject  .count(pObject)) m_apObject  .insert(pObject);}
     inline void BindShoulder(const coreUint8 iSurface, coreObject2D* pObject) {ASSERT(!m_aiShoulder.count(iSurface)) m_aiShoulder.emplace(iSurface, pObject);}
-    // TODO: _bs ?   
+    // TODO 1: _bs ?   
 
     static inline const coreBool& GetJoystick() {return s_bJoystick;}
     static void OnlyWithJoystick(coreObject2D* OUTPUT pObject)

@@ -72,7 +72,7 @@ public:
     void Move();
 
     // add and remove items
-    template <typename T> RETURN_RESTRICT T* AddItem(const coreVector2& vPosition);
+    template <typename T> RETURN_RESTRICT T* AddItem(const coreVector2 vPosition);
     void ClearItems(const coreBool bAnimated);
 
     // 
@@ -82,7 +82,7 @@ public:
 
 // ****************************************************************
 // fragment item class
-// TODO: richtiges fragment einer tafel mit dicke
+// TODO 1: richtiges fragment einer tafel mit dicke
 class cFragmentItem final : public cItem
 {
 private:
@@ -113,7 +113,7 @@ private:
 
 // ****************************************************************
 // 
-// TODO: ineinander verschachtelter rotierender wuerfel  
+// TODO 1: ineinander verschachtelter rotierender wuerfel  
 class cCubeItem final : public cItem
 {
 private:
@@ -141,7 +141,7 @@ private:
 
 // ****************************************************************
 // 
-template <typename T> RETURN_RESTRICT T* cItemManager::AddItem(const coreVector2& vPosition)
+template <typename T> RETURN_RESTRICT T* cItemManager::AddItem(const coreVector2 vPosition)
 {
     // 
     const coreVector2 vClampPos = coreVector2(CLAMP(vPosition.x, -FOREGROUND_AREA.x, FOREGROUND_AREA.x),

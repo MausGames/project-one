@@ -10,7 +10,7 @@
 #ifndef _P1_GUARD_ROTACACHE_H_
 #define _P1_GUARD_ROTACACHE_H_
 
-// TODO: wrap angle
+// TODO 2: wrap angle
 
 
 // ****************************************************************
@@ -28,8 +28,8 @@ public:
     ENABLE_COPY(cRotaCache)
 
     // convert between angle and direction
-    inline FUNC_NOALIAS coreFloat   Angle    (const coreVector2& vDirection);
-    inline FUNC_NOALIAS coreVector2 Direction(const coreFloat    fAngle);
+    inline FUNC_NOALIAS coreFloat   Angle    (const coreVector2 vDirection);
+    inline FUNC_NOALIAS coreVector2 Direction(const coreFloat   fAngle);
 };
 
 
@@ -44,7 +44,7 @@ constexpr cRotaCache::cRotaCache()noexcept
 
 // ****************************************************************
 // convert direction to angle
-inline FUNC_NOALIAS coreFloat cRotaCache::Angle(const coreVector2& vDirection)
+inline FUNC_NOALIAS coreFloat cRotaCache::Angle(const coreVector2 vDirection)
 {
     // refresh cached angle if required
     if(!coreMath::IsNear(vDirection.x, m_vDirection.x) ||

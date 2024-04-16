@@ -244,7 +244,7 @@ void CoreApp::Move()
 
 // ****************************************************************
 // init resolution properties
-void InitResolution(const coreVector2& vResolution)
+void InitResolution(const coreVector2 vResolution)
 {
     // calculate biggest possible 1:1 resolution
     g_vGameResolution = coreVector2(1.0f,1.0f) * vResolution.Min();
@@ -546,8 +546,7 @@ static void DebugGame()
     {
         if(STATIC_ISVALID(g_pGame) &&
            (!g_pGame->GetCurMission()->GetBoss(0u) || g_pGame->GetCurMission()->GetBoss(0u)->HasStatus(ENEMY_STATUS_DEAD)) &&
-           (!g_pGame->GetCurMission()->GetBoss(1u) || g_pGame->GetCurMission()->GetBoss(1u)->HasStatus(ENEMY_STATUS_DEAD)) &&
-           (!g_pGame->GetCurMission()->GetBoss(2u) || g_pGame->GetCurMission()->GetBoss(2u)->HasStatus(ENEMY_STATUS_DEAD)))
+           (!g_pGame->GetCurMission()->GetBoss(1u) || g_pGame->GetCurMission()->GetBoss(1u)->HasStatus(ENEMY_STATUS_DEAD)))
         {
             c_cast<coreUintW&>(g_pGame->GetCurMission()->GetCurSegmentIndex()) = MISSION_NO_SEGMENT;
             g_pGame->GetCurMission()->SkipStage();
@@ -569,7 +568,7 @@ static void DebugGame()
 
         if(s_sCode.size() >= 4u)
         {
-            // TODO 
+            // TODO 3 
             s_sCode.clear();
         }
     }

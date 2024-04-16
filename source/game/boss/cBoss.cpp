@@ -14,14 +14,14 @@ coreVector2 cBoss::s_vPositionPoint = coreVector2(0.0f,0.0f);
 // ****************************************************************
 // constructor
 cBoss::cBoss()noexcept
-: m_aiTimerLine   {}
-, m_aiCounter     {}
-, m_avVector      {}
-, m_vLastPosition (coreVector2(FLT_MAX,FLT_MAX))
-, m_fLastDirAngle (0.0f)
-, m_fLastOriAngle (0.0f)
-, m_iPhase        (0u)
-, m_iLevel        (0u)
+: m_aiTimerLine      {}
+, m_aiCounter        {}
+, m_avVector         {}
+, m_vLastPosition    (coreVector2(FLT_MAX,FLT_MAX))
+, m_vLastDirection   (coreVector3(0.0f,0.0f,0.0f))
+, m_vLastOrientation (coreVector3(0.0f,0.0f,0.0f))
+, m_iPhase           (0u)
+, m_iLevel           (0u)
 {
     // 
     for(coreUintW i = 0u; i < BOSS_TIMERS; ++i)
@@ -65,7 +65,7 @@ void cBoss::ChangePhase(const coreUint8 iPhase)
 
 // ****************************************************************
 // 
-void cBoss::StorePosition(const coreVector2& vPos)
+void cBoss::StorePosition(const coreVector2 vPos)
 {
     m_vLastPosition = vPos / FOREGROUND_AREA;
 }
@@ -78,10 +78,12 @@ void cBoss::StorePosition()
 
 // ****************************************************************
 // 
-void cBoss::StoreRotation(const coreVector3& vDir, const coreVector3& vOri)
+void cBoss::StoreRotation(const coreVector3 vDir, const coreVector3 vOri)
 {
-    m_fLastDirAngle = (vDir.xy())                                                 .Angle();
-    m_fLastOriAngle = (vOri.yz() * coreVector2(vDir.x ? RCP(vDir.x) : 0.0f, 1.0f)).Angle();
+    ASSERT(vDir.IsNormalized() && vOri.IsNormalized())
+
+    m_vLastDirection   = vDir;
+    m_vLastOrientation = vOri;
 }
 
 void cBoss::StoreRotation()

@@ -10,12 +10,12 @@
 #ifndef _P1_GUARD_GAME_H_
 #define _P1_GUARD_GAME_H_
 
-// TODO: enemy bullet (and enemy?) cleanup on mission unload
-// TODO: check for duplicate IDs in mission-lists ? LoadMissionID may behave wrong
-// TODO: show pacifist damage in interface, pulsing and filling up, also show that weapons are disabled
-// TODO: maybe spawn players in flight direction, mission start and continue ?
-// TODO: FindPlayer may find player outside of area (during resurrection)
-// TODO: check "hold old mission (to keep resources valid)" for loadmission/nextmission
+// TODO 3: enemy bullet (and enemy?) cleanup on mission unload
+// TODO 2: check for duplicate IDs in mission-lists ? LoadMissionID may behave wrong
+// TODO 3: show pacifist damage in interface, pulsing and filling up, also show that weapons are disabled
+// TODO 5: maybe spawn players in flight direction, mission start and continue ?
+// TODO 2: FindPlayer may find player outside of area (during resurrection)
+// TODO 3: check "hold old mission (to keep resources valid)" for loadmission/nextmission
 
 
 // ****************************************************************
@@ -60,6 +60,18 @@ static constexpr coreInt32 __GAME_MISSION_LIST_MAIN[] =
     cMuscusMission ::ID,
     cAterMission   ::ID,
     cNoMission     ::ID
+};
+
+static constexpr coreInt32 __GAME_MISSION_LIST_ADDON1[] =
+{
+    cNoMission::ID,
+    cNoMission::ID
+};
+
+static constexpr coreInt32 __GAME_MISSION_LIST_ADDON2[] =
+{
+    cNoMission::ID,
+    cNoMission::ID
 };
 
 static constexpr coreInt32 __GAME_MISSION_LIST_ERROR[] =
@@ -107,6 +119,7 @@ private:
     cChromaManager m_ChromaManager;         // 
     cItemManager   m_ItemManager;           // 
     cShieldManager m_ShieldManager;         // 
+    cCrashManager  m_CrashManager;          // 
 
     cInterface  m_Interface;                // interface overlay
     cCombatText m_CombatText;               // combat text overlay
@@ -176,8 +189,8 @@ public:
     void KillRepairEnemy() {if(m_pRepairEnemy) m_pRepairEnemy->TakeDamage(m_pRepairEnemy->GetCurHealth(), ELEMENT_NEUTRAL, coreVector2(0.0f,0.0f), NULL);}
 
     // 
-    RETURN_NONNULL cPlayer* FindPlayerSide(const coreVector2& vPosition);
-    RETURN_NONNULL cPlayer* FindPlayerDual(const coreUintW    iIndex);
+    RETURN_NONNULL cPlayer* FindPlayerSide(const coreVector2 vPosition);
+    RETURN_NONNULL cPlayer* FindPlayerDual(const coreUintW   iIndex);
     template <typename F> void ForEachPlayer   (F&& nFunction);   // [](cPlayer* OUTPUT pPlayer, const coreUintW i) -> void
     template <typename F> void ForEachPlayerAll(F&& nFunction);   // [](cPlayer* OUTPUT pPlayer, const coreUintW i) -> void
 
@@ -190,6 +203,7 @@ public:
     inline cChromaManager*  GetChromaManager      ()                         {return &m_ChromaManager;}
     inline cItemManager*    GetItemManager        ()                         {return &m_ItemManager;}
     inline cShieldManager*  GetShieldManager      ()                         {return &m_ShieldManager;}
+    inline cCrashManager*   GetCrashManager       ()                         {return &m_CrashManager;}
     inline cInterface*      GetInterface          ()                         {return &m_Interface;}
     inline cCombatText*     GetCombatText         ()                         {return &m_CombatText;}
     inline cMission*        GetCurMission         ()const                    {ASSERT(m_pCurMission) return m_pCurMission;}

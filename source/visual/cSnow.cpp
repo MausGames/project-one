@@ -111,7 +111,7 @@ void cSnow::Disable(const coreFloat fDelay)
 
 // ****************************************************************
 // 
-coreUintW cSnow::DrawPoint(const coreVector2& vPosition, const coreFloat fSize, const coreUint8 iType)
+coreUintW cSnow::DrawPoint(const coreVector2 vPosition, const coreFloat fSize, const coreUint8 iType)
 {
     coreUintW iHit = 0u;
 
@@ -152,7 +152,7 @@ coreUintW cSnow::DrawPoint(const coreVector2& vPosition, const coreFloat fSize, 
 
 // ****************************************************************
 // 
-coreUintW cSnow::DrawLine(const coreVector2& vPosition, const coreFloat fSize, const coreBool bHorizontal, const coreUint8 iType)
+coreUintW cSnow::DrawLine(const coreVector2 vPosition, const coreFloat fSize, const coreBool bHorizontal, const coreUint8 iType)
 {
     coreUintW iHit = 0u;
 
@@ -195,7 +195,7 @@ void cSnow::DrawAll(const coreUint8 iType)
 
 // ****************************************************************
 // 
-coreBool cSnow::TestCollision(const coreVector2& vPosition)const
+coreBool cSnow::TestCollision(const coreVector2 vPosition)const
 {
     ASSERT(m_fVisibility)
 

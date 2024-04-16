@@ -10,8 +10,8 @@
 #ifndef _P1_GUARD_INTERFACE_H_
 #define _P1_GUARD_INTERFACE_H_
 
-// TODO: re-position everything after resolution-change (also menu)
-// TODO: realtime language update (other locations as well ?), boss-titles and wave-names
+// TODO 1: re-position everything after resolution-change (also menu)
+// TODO 3: realtime language update (other locations as well ?), boss-titles and wave-names
 
 
 // ****************************************************************
@@ -107,6 +107,8 @@ public:
     void ShowScore  (const coreUint32 iScore,                        const coreUint8 iMedal, const coreUint8 iMedalType);
     void CancelBanner();
     coreBool IsBannerActive()const;
+    
+    void ChangeBossName(const coreChar* pcMain);
 
     // 
     void ShowStory(const coreChar* pcRow1, const coreChar* pcRow2 = "");

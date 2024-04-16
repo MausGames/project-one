@@ -44,7 +44,7 @@ void cIntroMission::__SetupOwn()
         if(STAGE_TIME_POINT(0.6f))
         {
             g_pEnvironment->ChangeBackground(cCloudBackground::ID, ENVIRONMENT_MIX_CURTAIN, 1.0f, coreVector2(1.0f,0.0f));
-            g_pEnvironment->SetTargetSpeed(4.0f);   // TODO: set earlier, because of acceleration delay   
+            g_pEnvironment->SetTargetSpeed(4.0f);   // TODO 1: set earlier, because of acceleration delay   
         }
 
         STAGE_FINISH_PLAY

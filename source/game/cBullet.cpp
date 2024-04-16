@@ -54,12 +54,11 @@ void cBullet::Move()
 
 // ****************************************************************
 // prepare and start up bullet
-void cBullet::Activate(const coreInt32 iDamage, const coreFloat fSpeed, cShip* pOwner, const coreVector2& vPosition, const coreVector2& vDirection, const coreInt32 iType)
+void cBullet::Activate(const coreInt32 iDamage, const coreFloat fSpeed, cShip* pOwner, const coreVector2 vPosition, const coreVector2 vDirection, const coreInt32 iType)
 {
     // activate bullet and remove readiness
     if(HAS_FLAG(m_iStatus, BULLET_STATUS_ACTIVE)) return;
-    ADD_FLAG   (m_iStatus, BULLET_STATUS_ACTIVE)
-    REMOVE_FLAG(m_iStatus, BULLET_STATUS_READY)
+    m_iStatus = BULLET_STATUS_ACTIVE;   // # reset status
 
     // save damage, speed and owner
     m_iDamage = iDamage;
@@ -85,7 +84,7 @@ void cBullet::Activate(const coreInt32 iDamage, const coreFloat fSpeed, cShip* p
 
 // ****************************************************************
 // shut down bullet
-void cBullet::Deactivate(const coreBool bAnimated, const coreVector2& vImpact)
+void cBullet::Deactivate(const coreBool bAnimated, const coreVector2 vImpact)
 {
     // deactivate bullet (will be cleaned up by bullet manager)
     if(!HAS_FLAG(m_iStatus, BULLET_STATUS_ACTIVE)) return;
@@ -111,14 +110,18 @@ void cBullet::Deactivate(const coreBool bAnimated)
 
 // ****************************************************************
 // 
-void cBullet::Reflect(const coreObject3D* pObject, const coreVector2& vIntersection, const coreVector2& vForceNormal)
+void cBullet::Reflect(const coreObject3D* pObject, const coreVector2 vIntersection, const coreVector2 vForceNormal)
 {
+    this->Deactivate(false);
+    
     if(coreVector2::Dot(m_vFlyDir, vForceNormal) >= 0.0f) return;
     this->__Reflect(pObject, vIntersection, vForceNormal, 0.0f);
 }
 
-void cBullet::Reflect(const coreObject3D* pObject, const coreVector2& vIntersection, const coreFloat fSharpness)
+void cBullet::Reflect(const coreObject3D* pObject, const coreVector2 vIntersection, const coreFloat fSharpness)
 {
+    this->Deactivate(false);
+    
     if(coreVector2::Dot(m_vFlyDir, this->GetPosition().xy() - vIntersection - m_vFlyDir * MAX(this->GetCollisionRadius(), m_fSpeed * TIME)) >= 0.0f) return;
     this->__Reflect(pObject, vIntersection, coreVector2(0.0f,0.0f), fSharpness);
 }
@@ -144,9 +147,9 @@ void cBullet::_EnableDepth()const
 
 // ****************************************************************
 // 
-void cBullet::__Reflect(const coreObject3D* pObject, const coreVector2& vIntersection, const coreVector2& vForceNormal, const coreFloat fSharpness)
+void cBullet::__Reflect(const coreObject3D* pObject, const coreVector2 vIntersection, const coreVector2 vForceNormal, const coreFloat fSharpness)
 {
-    ASSERT(pObject )//&& pObject->GetModel()->GetNumClusters())
+    ASSERT(pObject )//&& pObject->GetVolume()->GetNumClusters())
 
     // increase intersection precision
     coreVector2 vHit = vIntersection;
@@ -380,17 +383,15 @@ cRayBullet::cRayBullet()noexcept
 {
     // load object resources
     this->DefineModel  ("bullet_ray.md3");
+    this->DefineVolume ("bullet_ray_volume.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_direct_program");
-
-    // set object properties
-    this->SetCollisionModifier(coreVector3(1.0f,0.333f,1.0f));   // model with offset
 }
 
 
 // ****************************************************************
 // 
-void cRayBullet::__ImpactOwn(const coreVector2& vImpact)
+void cRayBullet::__ImpactOwn(const coreVector2 vImpact)
 {
     // 
     g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 1u, this->GetColor3());
@@ -440,15 +441,12 @@ cPulseBullet::cPulseBullet()noexcept
     this->DefineModel  ("bullet_pulse.md3");
     this->DefineTexture(0u, "effect_energy.png");
     this->DefineProgram("effect_energy_bullet_direct_program");
-
-    // 
-    ADD_FLAG(m_iStatus, BULLET_STATUS_PENETRATE)
 }
 
 
 // ****************************************************************
 // 
-void cPulseBullet::__ImpactOwn(const coreVector2& vImpact)
+void cPulseBullet::__ImpactOwn(const coreVector2 vImpact)
 {
     // 
     g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
@@ -506,7 +504,7 @@ cSurgeBullet::cSurgeBullet()noexcept
 
 // ****************************************************************
 // 
-void cSurgeBullet::__ImpactOwn(const coreVector2& vImpact)
+void cSurgeBullet::__ImpactOwn(const coreVector2 vImpact)
 {
     // 
     g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
@@ -563,7 +561,7 @@ cTeslaBullet::cTeslaBullet()noexcept
 
 // ****************************************************************
 // 
-void cTeslaBullet::__ImpactOwn(const coreVector2& vImpact)
+void cTeslaBullet::__ImpactOwn(const coreVector2 vImpact)
 {
     // 
     g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
@@ -631,7 +629,7 @@ cOrbBullet::cOrbBullet()noexcept
 
 // ****************************************************************
 // 
-void cOrbBullet::__ImpactOwn(const coreVector2& vImpact)
+void cOrbBullet::__ImpactOwn(const coreVector2 vImpact)
 {
     // 
     g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
@@ -679,7 +677,7 @@ cConeBullet::cConeBullet()noexcept
 
 // ****************************************************************
 // 
-void cConeBullet::__ImpactOwn(const coreVector2& vImpact)
+void cConeBullet::__ImpactOwn(const coreVector2 vImpact)
 {
     // 
     g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
@@ -729,7 +727,7 @@ cWaveBullet::cWaveBullet()noexcept
 
 // ****************************************************************
 // 
-void cWaveBullet::__ImpactOwn(const coreVector2& vImpact)
+void cWaveBullet::__ImpactOwn(const coreVector2 vImpact)
 {
     // 
     g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
@@ -774,13 +772,13 @@ cSpearBullet::cSpearBullet()noexcept
 
     // set object properties
     this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * BULLET_COLLISION_FACTOR);
-    // TODO: make sure the player cannot be hit by the transparent rear of the bullet (e.g. when he moves into it)
+    // TODO 1: make sure the player cannot be hit by the transparent rear of the bullet (e.g. when he moves into it)
 }
 
 
 // ****************************************************************
 // 
-void cSpearBullet::__ImpactOwn(const coreVector2& vImpact)
+void cSpearBullet::__ImpactOwn(const coreVector2 vImpact)
 {
     // 
     g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
@@ -830,7 +828,7 @@ cTriangleBullet::cTriangleBullet()noexcept
 
 // ****************************************************************
 // 
-void cTriangleBullet::__ImpactOwn(const coreVector2& vImpact)
+void cTriangleBullet::__ImpactOwn(const coreVector2 vImpact)
 {
     // 
     g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
@@ -878,7 +876,7 @@ cFlipBullet::cFlipBullet()noexcept
 
 // ****************************************************************
 // 
-void cFlipBullet::__ImpactOwn(const coreVector2& vImpact)
+void cFlipBullet::__ImpactOwn(const coreVector2 vImpact)
 {
     // 
     g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
@@ -926,7 +924,7 @@ cQuadBullet::cQuadBullet()noexcept
 
 // ****************************************************************
 // 
-void cQuadBullet::__ImpactOwn(const coreVector2& vImpact)
+void cQuadBullet::__ImpactOwn(const coreVector2 vImpact)
 {
     // 
     g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
@@ -969,13 +967,13 @@ cViewBullet::cViewBullet()noexcept
 
     // set object properties
     this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * BULLET_COLLISION_FACTOR);
-    // TODO: make sure the player cannot be hit by the transparent rear of the bullet (e.g. when he moves into it) (does the view-bullet also has this problem ?)
+    // TODO 1: make sure the player cannot be hit by the transparent rear of the bullet (e.g. when he moves into it) (does the view-bullet also has this problem ?)
 }
 
 
 // ****************************************************************
 // 
-void cViewBullet::__ImpactOwn(const coreVector2& vImpact)
+void cViewBullet::__ImpactOwn(const coreVector2 vImpact)
 {
     // 
     g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
@@ -1046,10 +1044,11 @@ void cMineBullet::GlobalExit()
 
 // ****************************************************************
 // 
-void cMineBullet::__ImpactOwn(const coreVector2& vImpact)
+void cMineBullet::__ImpactOwn(const coreVector2 vImpact)
 {
     // 
-    g_pSpecialEffects->MacroExplosionPhysicalColorSmall(this->GetPosition(), COLOR_FIRE_ORANGE);
+    if(this->GetSize().x >= 3.0f) g_pSpecialEffects->MacroExplosionPhysicalColorBig  (this->GetPosition(), COLOR_FIRE_ORANGE);
+                             else g_pSpecialEffects->MacroExplosionPhysicalColorSmall(this->GetPosition(), COLOR_FIRE_ORANGE);
 }
 
 
@@ -1070,7 +1069,7 @@ void cMineBullet::__RenderOwnBefore()
 
         // 
         s_Wave.SetPosition(this->GetPosition());
-        s_Wave.SetSize    (coreVector3(coreVector2(15.0f,15.0f) * (0.25f + 0.75f*fValue), 1.0f));
+        s_Wave.SetSize    (coreVector3(coreVector2(7.5f,7.5f) * (0.25f + 0.75f*fValue) * this->GetSize().x, 1.0f));
         s_Wave.SetAlpha   (1.0f - fValue);
         s_Wave.Move();
         s_Wave.Render();
@@ -1117,7 +1116,7 @@ cRocketBullet::cRocketBullet()noexcept
 
 // ****************************************************************
 // 
-void cRocketBullet::__ImpactOwn(const coreVector2& vImpact)
+void cRocketBullet::__ImpactOwn(const coreVector2 vImpact)
 {
     // 
     g_pSpecialEffects->MacroExplosionPhysicalColorSmall(this->GetPosition(), COLOR_FIRE_ORANGE);
@@ -1165,6 +1164,7 @@ void cRocketBullet::__MoveOwn()
 
     // 
     if(TIME) g_pSpecialEffects->CreateSplashSmoke(this->GetPosition() - this->GetDirection() * 4.5f, 5.0f, 1u, coreVector3(1.0f,1.0f,1.0f));
+    // TODO 1: timer 
 }
 
 
@@ -1182,7 +1182,7 @@ cChromaBullet::cChromaBullet()noexcept
 
 // ****************************************************************
 // 
-void cChromaBullet::__ImpactOwn(const coreVector2& vImpact)
+void cChromaBullet::__ImpactOwn(const coreVector2 vImpact)
 {
     // 
     //g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 2.0f, 1u, this->GetColor3());
@@ -1207,10 +1207,10 @@ void cChromaBullet::__MoveOwn()
     this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
 
     // update animation
-    m_fAnimation.Update(1.0f); // TODO: mod
+    m_fAnimation.Update(1.0f);   // TODO 4: mod 
 
     // update fade
-    m_fFade.Update(1.0f);   // TODO   
+    m_fFade.Update(1.0f);   // TODO 4 
     
     const coreFloat fValue = m_fAnimation + 1.0f * MAX(m_fAnimation - 3.0f, 0.0f);
     const coreVector2 vDir = s_RotaCache.Direction(fValue * 5.0f);

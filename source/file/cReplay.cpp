@@ -74,7 +74,7 @@ void cReplay::StartRecording()
 
     // 
     m_Header.iConfigUpdateFreq = g_CurConfig.Game.iUpdateFreq;
-    m_Header.iConfigVersion    = 1u;   // TODO
+    m_Header.iConfigVersion    = 1u;   // TODO 1 
 
     // 
     m_Header.iMissionStartIndex = g_pGame->GetCurMissionIndex();
@@ -358,7 +358,7 @@ void cReplay::SaveFile(const coreChar* pcName)
     if(!this->__GetBodyData(&pBodyData, &iBodySize) || !pBodyData || !iBodySize) return;
 
     // 
-    coreData::StrCopy(pcName, m_Header.acName, ARRAY_SIZE(m_Header.acName));
+    coreData::StrCopy(m_Header.acName, ARRAY_SIZE(m_Header.acName), pcName);
     m_Header.iBodySize = iBodySize;
     m_Header.iChecksum = cReplay::__GenerateChecksum(m_Header);
 
@@ -446,7 +446,7 @@ coreBool cReplay::__SetBodyData(const coreByte* pData, const coreUint32 iSize)
     // 
     coreByte*  pPlainData;
     coreUint32 iPlainSize;
-    coreData::Decompress(pData, iSize, &pPlainData, &iPlainSize);
+    if(coreData::Decompress(pData, iSize, &pPlainData, &iPlainSize) != CORE_OK) return false;
 
     // 
     if(iPlainSize != iTargetSize)
@@ -509,7 +509,11 @@ coreBool cReplay::__GetBodyData(coreByte** OUTPUT ppData, coreUint32* OUTPUT piS
     }
 
     // 
-    coreData::Compress(pPlainData, iPlainSize, ppData, piSize);
+    if(coreData::Compress(pPlainData, iPlainSize, ppData, piSize) != CORE_OK)
+    {
+        SAFE_DELETE_ARRAY(pPlainData)
+        return false;
+    }
 
     // 
     SAFE_DELETE_ARRAY(pPlainData)
@@ -573,7 +577,7 @@ void cReplay::__CheckHeader(sHeader* OUTPUT pHeader)
 
     // 
     pHeader->iConfigUpdateFreq = CLAMP(pHeader->iConfigUpdateFreq, F_TO_UI(FRAMERATE_MIN), F_TO_UI(FRAMERATE_MAX));
-    pHeader->iConfigVersion    = CLAMP(pHeader->iConfigVersion,    1u,                     1u);   // TODO
+    pHeader->iConfigVersion    = CLAMP(pHeader->iConfigVersion,    1u,                     1u);   // TODO 1 
 
     // 
     pHeader->iMissionStartIndex = CLAMP(pHeader->iMissionStartIndex, 0u, REPLAY_MISSIONS-1u);

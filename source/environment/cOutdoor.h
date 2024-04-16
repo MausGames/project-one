@@ -10,14 +10,14 @@
 #ifndef _P1_GUARD_OUTDOOR_H_
 #define _P1_GUARD_OUTDOOR_H_
 
-// TODO: definitions for algorithms (background names ?)
-// TODO: add F16C SSE to RetrieveBackHeight (put values into an uint64 and convert to vec4 ?)
-// TODO: check out jcgt_Duff2017Basis to inline tangent calculations into shader (less bandwidth, but more ALU + reg ?)
-// TODO: outdoor parameters are reset on engine-reset !!!    
-// TODO: fix file getting unloaded while others are reading (in reource-manager), maybe make copies of the file -> also affects shader-permutations when loading from two threads
-// TODO: get max height of outdoor model and use for first step in RetrieveIntersect
-// TODO: attach function, then calling destructor will crash, implement detach function (>engine)
-// TODO: increase normal map sharpness, if quality improves (raise depth-value in generator until it throws an assertion)
+// TODO 4: definitions for algorithms (background names ?)
+// TODO 3: add F16C SSE to RetrieveBackHeight (put values into an uint64 and convert to vec4 ?)
+// TODO 5: check out jcgt_Duff2017Basis to inline tangent calculations into shader (less bandwidth, but more ALU + reg ?)
+// TODO 1: outdoor parameters are reset on engine-reset
+// TODO 1: fix file getting unloaded while others are reading (in reource-manager), maybe make copies of the file -> also affects shader-permutations when loading from two threads
+// TODO 3: get max height of outdoor model and use for first step in RetrieveIntersect
+// TODO 2: attach function, then calling destructor will crash, implement detach function (>engine)
+// TODO 5: increase normal map sharpness, if quality improves (raise depth-value in generator until it throws an assertion)
 
 
 // ****************************************************************
@@ -114,11 +114,11 @@ public:
     void LoadProgram (const coreBool bGlow);
 
     // retrieve geometric data
-    FUNC_PURE coreFloat   RetrieveHeight    (const coreVector2& vPosition)const;
-    FUNC_PURE coreFloat   RetrieveBackHeight(const coreVector2& vPosition)const;
-    FUNC_PURE coreVector3 RetrieveNormal    (const coreVector2& vPosition)const;
-    FUNC_PURE coreVector3 RetrieveBackNormal(const coreVector2& vPosition)const;
-    FUNC_PURE coreVector3 RetrieveIntersect (const coreVector3& vRayPosition, const coreVector3& vRayDirection)const;
+    FUNC_PURE coreFloat   RetrieveHeight    (const coreVector2 vPosition)const;
+    FUNC_PURE coreFloat   RetrieveBackHeight(const coreVector2 vPosition)const;
+    FUNC_PURE coreVector3 RetrieveNormal    (const coreVector2 vPosition)const;
+    FUNC_PURE coreVector3 RetrieveBackNormal(const coreVector2 vPosition)const;
+    FUNC_PURE coreVector3 RetrieveIntersect (const coreVector3 vRayPosition, const coreVector3 vRayDirection)const;
 
     // 
     void                   LerpHeight    (const coreFloat fMul, const coreFloat fAdd, const coreUint16 iRange = 0u);
@@ -134,7 +134,7 @@ public:
 
     // set object properties
     void SetFlyOffset(const coreFloat fFlyOffset);
-    void SetTransform(const coreFloat fFlyOffset, const coreFloat fSideOffset, const coreVector2& vDirection);
+    void SetTransform(const coreFloat fFlyOffset, const coreFloat fSideOffset, const coreVector2 vDirection);
 
     // get object properties
     inline const coreUint32& GetVertexOffset()const {return m_iVertexOffset;}
@@ -172,7 +172,7 @@ template <typename F> void cOutdoor::__Render(const coreProgramPtr& pProgram, F&
 
     // draw the model
     m_pModel->Enable();
-    glDrawRangeElements(m_pModel->GetPrimitiveType(), m_iVertexOffset, m_iVertexOffset + OUTDOOR_RANGE, OUTDOOR_COUNT, m_pModel->GetIndexType(), I_TO_P(m_iIndexOffset));
+    glDrawRangeElements(m_pModel->GetPrimitiveType(), m_iVertexOffset, m_iVertexOffset + OUTDOOR_RANGE - 1u, OUTDOOR_COUNT, m_pModel->GetIndexType(), I_TO_P(m_iIndexOffset));
 }
 
 

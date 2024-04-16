@@ -23,9 +23,7 @@ cMuscusMission::cMuscusMission()noexcept
 , m_fAnimation     (0.0f)
 {
     // 
-    m_apBoss[0] = &m_Orlac;
-    m_apBoss[1] = &m_Geminga;
-    m_apBoss[2] = &m_Nagual;
+    m_apBoss[0] = &m_Geminga;
 
     // 
     m_Generate    .DefineProgram("effect_energy_flat_invert_inst_program");

@@ -10,11 +10,10 @@
 #ifndef _P1_GUARD_ENEMY_H_
 #define _P1_GUARD_ENEMY_H_
 
-// TODO: disable texture filtering for enemy texture (NEAREST, also default_black and default_white)
-// TODO: manager: Find, ForEach, ForEachAll -> typed 
-// TODO: implement own enemy-types for custom-enemies which would require instancing
-// TODO: virtual void Render()override; -> final
-// TODO: memory-pool for each enemy-set (if single allocations still used)
+// TODO 3: disable texture filtering for enemy texture (NEAREST, also default_black and default_white)
+// TODO 4: manager: Find, ForEach, ForEachAll -> typed 
+// TODO 3: implement own enemy-types for custom-enemies which would require instancing
+// TODO 3: memory-pool for each enemy-set (if single allocations still used)
 
 
 // ****************************************************************
@@ -28,17 +27,18 @@ enum eEnemyStatus : coreUint16
     ENEMY_STATUS_DEAD        = 0x0001u,   // completely removed from the game
     ENEMY_STATUS_ASSIGNED    = 0x0002u,   // enemy is currently assigned to something
     ENEMY_STATUS_CHILD       = 0x0004u,   // 
-    ENEMY_STATUS_SHIELDED    = 0x0008u,   // TODO
+    ENEMY_STATUS_SHIELDED    = 0x0008u,   // TODO 1 
     ENEMY_STATUS_BOSS        = 0x0010u,   // 
     ENEMY_STATUS_SINGLE      = 0x0020u,   // 
     ENEMY_STATUS_ENERGY      = 0x0040u,   // 
     ENEMY_STATUS_INVINCIBLE  = 0x0080u,   //    ### geschosse werden reflektiert (bubble)  
     ENEMY_STATUS_DAMAGING    = 0x0100u,   //    ### kollision verursacht schaden (spikes)  
     ENEMY_STATUS_IMMORTAL    = 0x0200u,   //    ### soll nicht sterben, geschosse gehen hindurch  
-    ENEMY_STATUS_GHOST       = 0x0400u,   // 
+    ENEMY_STATUS_GHOST       = 0x0400u,   //    ### keine kollisionen mit spieler oder geschosse mehr    
     ENEMY_STATUS_HIDDEN      = 0x0800u,   // 
-    ENEMY_STATUS_WORTHLESS   = 0x1000u    // 
-};   // ### keine kollisionen mit spieler mehr    
+    ENEMY_STATUS_WORTHLESS   = 0x1000u,   // 
+    ENEMY_STATUS_BOTTOM      = 0x2000u    // 
+};
 
 
 // ****************************************************************
@@ -63,14 +63,14 @@ public:
     ENABLE_ID
 
     // configure the enemy
-    void Configure(const coreInt32 iHealth, const coreVector3& vColor, const coreBool bInverted = false);
+    void Configure(const coreInt32 iHealth, const coreVector3 vColor, const coreBool bInverted = false);
 
     // render and move the enemy
-    virtual void Render()override;
-    void         Move  ()final;
+    void Render()final;
+    void Move  ()final;
 
     // reduce current health
-    coreInt32 TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2& vImpact, cPlayer* pAttacker);
+    coreInt32 TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2 vImpact, cPlayer* pAttacker);
 
     // control life and death
     void Resurrect();
@@ -167,8 +167,8 @@ public:
     void ClearEnemies(const coreBool bAnimated);
 
     // 
-    cEnemy* FindEnemy   (const coreVector2& vPosition)const;
-    cEnemy* FindEnemyRev(const coreVector2& vPosition)const;
+    cEnemy* FindEnemy   (const coreVector2 vPosition)const;
+    cEnemy* FindEnemyRev(const coreVector2 vPosition)const;
     template <typename F> void ForEachEnemy(F&& nFunction)const;   // [](cEnemy* OUTPUT pEnemy) -> void
 
     // 
@@ -204,8 +204,8 @@ public:
     void ClearEnemies(const coreBool bAnimated);
 
     // 
-    cEnemy* FindEnemy   (const coreVector2& vPosition)const;
-    cEnemy* FindEnemyRev(const coreVector2& vPosition)const;
+    cEnemy* FindEnemy   (const coreVector2 vPosition)const;
+    cEnemy* FindEnemyRev(const coreVector2 vPosition)const;
     template <typename F> void ForEachEnemy   (F&& nFunction)const;   // [](cEnemy* OUTPUT pEnemy, const coreUintW i) -> void
     template <typename F> void ForEachEnemyAll(F&& nFunction)const;   // [](cEnemy* OUTPUT pEnemy, const coreUintW i) -> void
 
@@ -435,12 +435,11 @@ template <typename T> cEnemyManager::sEnemySet<T>::sEnemySet()noexcept
     // 
     oEnemyActive.CreateCustom(sizeof(coreFloat), [](coreVertexBuffer* OUTPUT pBuffer)
     {
-        pBuffer->DefineAttribute(SHIP_SHADER_ATTRIBUTE_BLINK, 2u, GL_FLOAT, false, 0u);
+        pBuffer->DefineAttribute(SHIP_SHADER_ATTRIBUTE_BLINK, 1u, GL_FLOAT, false, 0u);
     },
     [](coreByte* OUTPUT pData, const coreObject3D* pEnemy)
     {
-        const cEnemy* A = d_cast<const cEnemy*>(pEnemy);
-        (*r_cast<coreVector2*>(pData)) = coreVector2(A->GetBlink(), A->GetCurHealthPct());
+        (*r_cast<coreFloat*>(pData)) = d_cast<const cEnemy*>(pEnemy)->GetBlink();
     },
     [](const coreProgramPtr& pProgram, const coreObject3D* pEnemy)
     {

@@ -166,9 +166,9 @@ void cMainMenu::DeactivateFirstPlay()
 #if !defined(_CORE_DEBUG_)
 
     // 
-    m_ScoreButton .SetOverride(-1);   // TODO 
-    m_ReplayButton.SetOverride(-1);   // TODO 
-    m_ExtraButton .SetOverride(-1);   // TODO 
+    m_ScoreButton .SetOverride(-1);   // TODO 1 
+    m_ReplayButton.SetOverride(-1);   // TODO 1 
+    m_ExtraButton .SetOverride(-1);   // TODO 1 
 
 #endif
 

@@ -10,9 +10,7 @@
 #ifndef _P1_GUARD_FOREGROUND_H_
 #define _P1_GUARD_FOREGROUND_H_
 
-// TODO: #define FOREGROUND_AREA_FULL (FOREGROUND_AREA * 1.1f)
-// TODO: FOREGROUND_AREA_REV without RCP
-// TODO: IsVisibleObject takes the max axis, but what if the diagonal is visible
+// TODO 2: IsVisibleObject takes the max axis, but what if the diagonal is visible
 
 
 // ****************************************************************
@@ -57,15 +55,15 @@ public:
     inline const coreBool& IsTarget()const {return m_bTarget;}
 
     // project world-position into screen-space
-    inline FUNC_LOCAL coreVector2 Project3D(const coreVector3& vPosition)const {ASSERT(vPosition.z < CAMERA_POSITION.z) return vPosition.xy() * (CAMERA_POSITION.z * RCP(CAMERA_POSITION.z - vPosition.z));}
-    inline FUNC_LOCAL coreVector2 Project2D(const coreVector3& vPosition)const {const coreVector4 A = coreVector4(vPosition, 1.0f) * m_mViewProj; return A.xy() * (RCP(A.w) * 0.5f);}
+    inline FUNC_LOCAL coreVector2 Project3D(const coreVector3 vPosition)const {ASSERT(vPosition.z < CAMERA_POSITION.z) return vPosition.xy() * (CAMERA_POSITION.z * RCP(CAMERA_POSITION.z - vPosition.z));}
+    inline FUNC_LOCAL coreVector2 Project2D(const coreVector3 vPosition)const {const coreVector4 A = coreVector4(vPosition, 1.0f) * m_mViewProj; return A.xy() * (RCP(A.w) * 0.5f);}
 
     // 
-    coreBool IsVisiblePoint (const coreVector2& vPosition, const coreFloat fFactor = 1.1f)const;
+    coreBool IsVisiblePoint (const coreVector2 vPosition, const coreFloat fFactor = 1.1f)const;
     coreBool IsVisibleObject(const coreObject3D* pObject)const;
 
     // 
-    coreFloat RayIntersection(const coreVector2& vPosition, const coreVector2& vDirection, const coreFloat fFactor = 1.1f)const;
+    coreFloat RayIntersection(const coreVector2 vPosition, const coreVector2 vDirection, const coreFloat fFactor = 1.1f)const;
 
 
 private:

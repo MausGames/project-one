@@ -114,7 +114,7 @@ void cBridgeMenu::ReturnMenu(const coreUint8 iTarget, const coreBool bPaused)
     m_bPaused      = bPaused;
 
     // 
-    g_pGame->GetInterface()->SetVisible(false);   // TODO: interface does not move during pause   
+    g_pGame->GetInterface()->SetVisible(false);   // TODO 1: interface does not move during pause   
     g_pGame->GetInterface()->Reset();
 
     // 

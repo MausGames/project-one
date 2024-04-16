@@ -10,8 +10,9 @@
 #ifndef _P1_GUARD_OUTLINE_H_
 #define _P1_GUARD_OUTLINE_H_
 
-// TODO: check that bullet-styles are only used by objects with bullet-shaders
-// TODO: bullets on top of each other have their outline multiplied
+// TODO 3: check that bullet-styles are only used by objects with bullet-shaders
+// TODO 3: bullets on top of each other have their outline multiplied
+// TODO 1: improve outlining on top of each other (e.g. tiger body + weapon)
 
 
 // ****************************************************************

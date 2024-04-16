@@ -8,7 +8,7 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
-// TODO: lava textur zu detailiert
+// TODO 1: lava texture too detailed
 
 
 // ****************************************************************
@@ -271,7 +271,7 @@ void cVolcanoBackground::__MoveOwn()
     m_Smoke.Move();
 
 
-    // TODO: no smoke at all in area where we rewind
+    // TODO 1: no smoke at all in area where we rewind, particles need to be shifted
 
     // 
     m_fSparkTime.Update(1.0f);
@@ -285,7 +285,7 @@ void cVolcanoBackground::__MoveOwn()
         if(!pSpark->IsEnabled(CORE_OBJECT_ENABLE_ALL)) continue;
 
         // 
-        const coreFloat   fOffset = I_TO_F((i*i) % m_iSparkNum);
+        const coreFloat   fOffset = I_TO_F(POW2(i) % m_iSparkNum);
         const coreFloat   fTime   = m_fSparkTime * ((i % 2u) ? 1.0f : -1.0f) + fOffset;
         const coreFloat   fPos    = SIN(fTime * 0.1f + fOffset) * (I_TO_F(OUTDOOR_WIDTH) * OUTDOOR_DETAIL * 0.2f);
         const coreVector2 vDir    = coreVector2::Direction(fTime);

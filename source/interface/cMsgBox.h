@@ -10,9 +10,9 @@
 #ifndef _P1_GUARD_MSGBOX_H_
 #define _P1_GUARD_MSGBOX_H_
 
-// TODO: transfer to Core Engine
-// TODO: fix controller support (mouse gets warped because of input-lock)
-// TODO: X character is off some pixels (font problem)
+// TODO 1: transfer to Core Engine
+// TODO 2: fix controller support (mouse gets warped because of input-lock)
+// TODO 3: X character is off some pixels (font problem)
 
 
 // ****************************************************************
@@ -129,7 +129,7 @@ template <typename F> void cMsgBox::__ShowMessage(const coreChar* pcText, F&& nC
 
     // 
     m_Box.SetSize(coreVector2(0.0f,0.0f));
-    m_Msg.RetrieveDesiredSize([this](const coreVector2& vSize)
+    m_Msg.RetrieveDesiredSize([this](const coreVector2 vSize)
     {
         m_Box.SetSize(coreVector2(MAX(vSize.x + 0.1f, 0.55f), 0.25f));
     });

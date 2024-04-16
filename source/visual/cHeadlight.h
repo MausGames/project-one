@@ -10,12 +10,11 @@
 #ifndef _P1_GUARD_HEADLIGHT_H_
 #define _P1_GUARD_HEADLIGHT_H_
 
-// TODO: make darkness configurable
-// TODO: reduce black/transparent (0,0,0) color-areas in light-textures
-// TODO: slow up and down glowing
-// TODO: old flickering effect and sound
-// TODO: activation-animation (e.g. for player or boss spot-lights)
-// TODO: use simpler shader for light (single-channel only)
+// TODO 3: make darkness configurable
+// TODO 3: reduce black/transparent (0,0,0) color-areas in light-textures
+// TODO 3: slow up-and-down glowing
+// TODO 5: activation-animation (e.g. for player or boss spot-lights)
+// TODO 3: use simpler shader for light (single-channel only)
 
 
 // ****************************************************************
@@ -75,8 +74,8 @@ public:
     void UpdateDefault();
 
     // 
-    void DrawSpot (const coreVector3& vPosition, const coreVector2& vSize, const coreVector2& vDirection);
-    void DrawPoint(const coreVector3& vPosition, const coreVector2& vSize);
+    void DrawSpot (const coreVector3 vPosition, const coreVector2 vSize, const coreVector2 vDirection);
+    void DrawPoint(const coreVector3 vPosition, const coreVector2 vSize);
     void DrawPoint(const coreObject3D* pObject);
 
     // 

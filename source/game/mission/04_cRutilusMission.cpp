@@ -26,9 +26,7 @@ cRutilusMission::cRutilusMission()noexcept
 , m_fAnimation        (0.0f)
 {
     // 
-    m_apBoss[0] = &m_Quaternion;
-    m_apBoss[1] = &m_Saros;
-    m_apBoss[2] = &m_Messier;
+    m_apBoss[0] = &m_Messier;
 
     // 
     for(coreUintW i = 0u; i < RUTILUS_TELEPORTER; ++i)
@@ -357,7 +355,7 @@ void cRutilusMission::__MoveOwnBefore()
 void cRutilusMission::__MoveOwnAfter()
 {
     // 
-    m_fAnimation.UpdateMod(1.0f, 10.0f);
+    m_fAnimation.UpdateMod(0.2f, 10.0f);
 
     // 
     for(coreUintW i = 0u; i < RUTILUS_TELEPORTER; ++i)
@@ -368,7 +366,7 @@ void cRutilusMission::__MoveOwnAfter()
         // 
         oTeleporter.SetAlpha    (m_iTeleporterActive ? 1.0f : 0.5f);
         oTeleporter.SetTexSize  (coreVector2(0.075f,0.125f) * oTeleporter.GetSize().xy());
-        oTeleporter.SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.6f));
+        oTeleporter.SetTexOffset(coreVector2(0.0f, m_fAnimation * -3.0f));
         oTeleporter.Move();
     }
 
@@ -394,7 +392,7 @@ void cRutilusMission::__MoveOwnAfter()
         oPlate.SetPosition (coreVector3(0.0f, fOffset, 0.0f) * (FOREGROUND_AREA.y * 2.2f));
         oPlate.SetSize     (coreVector3(vReal,         1.0f) * (FOREGROUND_AREA.y * 2.2f));
         oPlate.SetTexSize  (vReal * 4.0f);
-        oPlate.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.4f) - vReal * 2.0f);
+        oPlate.SetTexOffset(coreVector2(0.0f, m_fAnimation * 2.0f) - vReal * 2.0f);
     }
 
     // 
@@ -422,7 +420,7 @@ void cRutilusMission::__MoveOwnAfter()
 
         // 
         m_aArea[0].SetSize     (coreVector3(20.0f,20.0f,20.0f) * fScale);
-        m_aArea[0].SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.1f));
+        m_aArea[0].SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.5f));
         m_aArea[0].Move();
     }
 
@@ -432,7 +430,7 @@ void cRutilusMission::__MoveOwnAfter()
         // 
         m_aArea[1].SetPosition (m_aArea[0].GetPosition());
         m_aArea[1].SetSize     (m_aArea[0].GetSize    () * 0.8f);
-        m_aArea[1].SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.1f));
+        m_aArea[1].SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.5f));
         m_aArea[1].Move();
     }
     STATIC_ASSERT(RUTILUS_AREAS == 2u)
@@ -473,7 +471,7 @@ void cRutilusMission::__MoveOwnAfter()
     if(m_iTeleporterActive == 1u)
     {
         // 
-        const auto nTeleportFunc = [this](const coreObject3D* pObject, const coreVector2& vMove, coreVector2* OUTPUT vNewPos, coreVector2* OUTPUT vNewDir, coreVector2* OUTPUT vNewMoveDir)
+        const auto nTeleportFunc = [this](const coreObject3D* pObject, const coreVector2 vMove, coreVector2* OUTPUT vNewPos, coreVector2* OUTPUT vNewDir, coreVector2* OUTPUT vNewMoveDir)
         {
             ASSERT(pObject && vNewPos && vNewDir && vNewMoveDir)
 

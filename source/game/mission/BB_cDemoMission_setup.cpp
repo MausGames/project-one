@@ -506,7 +506,7 @@ void cDemoMission::__SetupOwn()
             });
         }
 
-        Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, TYPE_BULLET_ENEMY, [](cBullet* OUTPUT pBulletPlayer, cBullet* OUTPUT pBulletEnemy, const coreVector3& vIntersection, const coreBool bFirstHit)
+        Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, TYPE_BULLET_ENEMY, [](cBullet* OUTPUT pBulletPlayer, cBullet* OUTPUT pBulletEnemy, const coreVector3 vIntersection, const coreBool bFirstHit)
         {
             pBulletEnemy->Deactivate(true, vIntersection.xy());
         });
@@ -685,7 +685,7 @@ void cDemoMission::__SetupOwn()
                     cEnemy*         pChild = nTakeChild(0u);
                     const coreUintW iIndex = pSquad2->GetIndex(pChild);
 
-                    const coreVector2 vAim = pEnemy->AimAtPlayerDual(((s_iTick % 60u) < 30u) ? 0u : 1u).Normalized();   // TODO: coop, abwechslung
+                    const coreVector2 vAim = pEnemy->AimAtPlayerDual(((s_iTick % 60u) < 30u) ? 0u : 1u).Normalized();   // TODO 1: coop, abwechslung
                     const coreVector2 vDir = (vAim + vAim.Rotated90() * (0.05f * ((s_iTick % 2u) ? -1.0f : 1.0f))).Normalized();
 
                     pChild->SetPosition(pEnemy->GetPosition());
