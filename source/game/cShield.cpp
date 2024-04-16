@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -11,41 +11,52 @@
 
 // ****************************************************************
 // constructor
-cShieldManager::cShieldManager()noexcept
+cShieldEffect::cShieldEffect()noexcept
 : m_ShieldList (SHIELD_SHIELDS)
 , m_apOwner    {}
-, m_afExtent   {}
 , m_fAnimation (0.0f)
 {
-    // 
-    for(coreUintW i = 0u; i < SHIELD_SHIELDS; ++i)
-    {
-        m_aShield[i].DefineModel  ("effect_shield.md3");
-        m_aShield[i].DefineTexture(0u, "effect_shield.png");
-        m_aShield[i].DefineProgram("effect_shield_program");
-        m_aShield[i].SetColor4    (coreVector4(1.0f,1.0f,1.0f,0.0f));
-    }
-
-    // 
-    m_ShieldList.DefineProgram("effect_shield_inst_program");
-
+#if !defined(_P1_VIDEO_)
     // 
     g_pGlow->BindList(&m_ShieldList);
+#endif
 }
 
 
 // ****************************************************************
 // destructor
-cShieldManager::~cShieldManager()
+cShieldEffect::~cShieldEffect()
 {
+#if !defined(_P1_VIDEO_)
     // 
     g_pGlow->UnbindList(&m_ShieldList);
+#endif
 }
 
 
 // ****************************************************************
-// render the shield manager
-void cShieldManager::Render()
+// 
+void cShieldEffect::Construct(const coreHashString& sProgramSingleName, const coreHashString& sProgramInstancedName, const coreVector3 vColor)
+{
+    // 
+    for(coreUintW i = 0u; i < SHIELD_SHIELDS; ++i)
+    {
+        m_aShield[i].DefineModel  ("object_sphere.md3");
+        m_aShield[i].DefineTexture(0u, "effect_energy.png");
+        m_aShield[i].DefineProgram(sProgramSingleName);
+        m_aShield[i].SetColor3    (vColor);
+        m_aShield[i].SetAlpha     (0.0f);
+        m_aShield[i].SetTexSize   (coreVector2(4.0f,4.0f));
+    }
+
+    // 
+    m_ShieldList.DefineProgram(sProgramInstancedName);
+}
+
+
+// ****************************************************************
+// render the shield effect
+void cShieldEffect::Render()
 {
     // 
     m_ShieldList.Render();
@@ -53,45 +64,21 @@ void cShieldManager::Render()
 
 
 // ****************************************************************
-// move the shield manager
-void cShieldManager::Move()
+// move the shield effect
+void cShieldEffect::Move()
 {
     if(m_ShieldList.List()->empty()) return;
 
     // 
     m_fAnimation.Update(1.0f);
-    //const coreVector2 vDir  = coreVector2::Direction(m_fAnimation);
-    const coreFloat   fWave = 0.25f ;//+ 0.05f * SIN(2.0f * m_fAnimation);
 
     // 
     for(coreUintW i = 0u; i < SHIELD_SHIELDS; ++i)
     {
-        if(!m_afExtent[i]) continue;
+        if(!m_apOwner[i]) continue;
 
-        coreObject3D& oShield = m_aShield [i];
-        cEnemy*       pOwner  = m_apOwner [i];
-        coreFlow&     fExtent = m_afExtent[i];
-
-        // 
-        //if(iHealth <= 0)
-        //{
-        //    // 
-        //    fExtent.Update(-2.0f);
-        //    if(fExtent < 0.0f)
-        //    {
-        //        fExtent = 0.0f;
-//
-        //        // 
-        //        if(pOwner) this->UnbindEnemy(pOwner);
-        //        m_ShieldList.UnbindObject(&oShield);
-        //        continue;
-        //    }
-        //}
-
-        // 
-        const coreFloat fExtent2 = fExtent * fExtent;
-        const coreFloat fExtent3 = fExtent * fExtent2;
-        coreFloat fBlink = 0.0f;
+        coreObject3D& oShield = m_aShield[i];
+        cEnemy*       pOwner  = m_apOwner[i];
 
         // 
         if(pOwner)
@@ -99,17 +86,11 @@ void cShieldManager::Move()
             // 
             oShield.SetPosition(pOwner->GetPosition());
             oShield.SetSize    (coreVector3(1.1f,1.1f,1.1f) * pOwner->GetVisualRadius());
-
-            // 
-            //if(iHealth > 0) fBlink = pOwner->GetBlink() * 0.8f;
         }
 
         // 
-        //oShield.SetOrientation(coreVector3(vDir.x, 0.0f, vDir.y));
-        oShield.SetTexOffset  (coreVector2((1.0f - fExtent3) * 1.5f + fWave, fBlink));
-        oShield.SetAlpha      (MIN(fExtent2 * 1.4f, 1.0f));
-        
-        oShield.SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * (1.0f + oShield.GetTexOffset().x));
+        oShield.SetAlpha    (1.0f);
+        oShield.SetTexOffset(coreVector2(m_fAnimation * 0.3f, 0.0f));
     }
 
     // 
@@ -119,12 +100,12 @@ void cShieldManager::Move()
 
 // ****************************************************************
 // 
-void cShieldManager::ClearShields(const coreBool bAnimated)
+void cShieldEffect::ClearShields(const coreBool bAnimated)
 {
     if(!bAnimated)
     {
         // 
-        std::memset(m_afExtent, 0, sizeof(m_afExtent));
+        std::memset(m_apOwner, 0, sizeof(m_apOwner));
         m_ShieldList.Clear();
     }
 }
@@ -132,9 +113,9 @@ void cShieldManager::ClearShields(const coreBool bAnimated)
 
 // ****************************************************************
 // 
-void cShieldManager::BindEnemy(cEnemy* pEnemy)
+void cShieldEffect::BindEnemy(cEnemy* pEnemy)
 {
-    ASSERT(!pEnemy->HasStatus(ENEMY_STATUS_SHIELDED))
+    if(pEnemy->HasStatus(ENEMY_STATUS_SHIELDED)) return;
 
     // 
     coreUintW i = 0u;
@@ -145,23 +126,19 @@ void cShieldManager::BindEnemy(cEnemy* pEnemy)
     ASSERT(i < SHIELD_SHIELDS)
 
     // 
-    m_apOwner [i] = pEnemy;
-    m_afExtent[i] = 1.0f;
+    m_apOwner[i] = pEnemy;
 
     // 
     pEnemy->AddStatus(ENEMY_STATUS_SHIELDED);
 
     // 
     m_ShieldList.BindObject(&m_aShield[i]);
-    
-    
-    m_aShield[i].ChangeType(TYPE_SHIELD);
 }
 
 
 // ****************************************************************
 // 
-void cShieldManager::UnbindEnemy(cEnemy* pEnemy)
+void cShieldEffect::UnbindEnemy(cEnemy* pEnemy)
 {
     if(!pEnemy->HasStatus(ENEMY_STATUS_SHIELDED)) return;
 
@@ -172,16 +149,58 @@ void cShieldManager::UnbindEnemy(cEnemy* pEnemy)
         {
             // 
             m_apOwner[i] = NULL;
+
+            // 
             pEnemy->RemoveStatus(ENEMY_STATUS_SHIELDED);
-            
-            
-            
-                m_ShieldList.UnbindObject(&m_aShield[i]);
-                m_aShield[i].ChangeType(0);
-            
+
+            // 
+            m_ShieldList.UnbindObject(&m_aShield[i]);
+
             return;
         }
     }
 
-    ASSERT(false)
+    //ASSERT(false)
+}
+
+
+// ****************************************************************
+// constructor
+cShieldManager::cShieldManager()noexcept
+{
+    // 
+    m_aShieldEffect[SHIELD_EFFECT_INVINCIBLE].Construct("effect_energy_spheric_program", "effect_energy_spheric_inst_program", COLOR_ENERGY_CYAN);
+    m_aShieldEffect[SHIELD_EFFECT_DAMAGING]  .Construct("effect_energy_program",         "effect_energy_inst_program",         COLOR_ENERGY_RED);
+}
+
+
+// ****************************************************************
+// render the shield manager
+void cShieldManager::Render()
+{
+#if !defined(_P1_VIDEO_)
+    // 
+    for(coreUintW i = 0u; i < SHIELD_EFFECTS; ++i)
+        m_aShieldEffect[i].Render();
+#endif
+}
+
+
+// ****************************************************************
+// move the shield manager
+void cShieldManager::Move()
+{
+    // 
+    for(coreUintW i = 0u; i < SHIELD_EFFECTS; ++i)
+        m_aShieldEffect[i].Move();
+}
+
+
+// ****************************************************************
+// 
+void cShieldManager::ClearShields(const coreBool bAnimated)
+{
+    // 
+    for(coreUintW i = 0u; i < SHIELD_EFFECTS; ++i)
+        m_aShieldEffect[i].ClearShields(bAnimated);
 }

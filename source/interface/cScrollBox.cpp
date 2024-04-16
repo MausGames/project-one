@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -34,11 +34,6 @@ cScrollBox::cScrollBox()noexcept
 
     // 
     this->SetStyle(CORE_OBJECT2D_STYLE_VIEWDIR | CORE_OBJECT2D_STYLE_ALTCENTER);
-    
-    
-    // TODO 1: same issue in arcade-input
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aArrow); ++i) m_aArrow[i].SetAlpha(0.0f);
-    m_Cursor.SetAlpha(0.0f);
 }
 
 
@@ -47,7 +42,14 @@ cScrollBox::cScrollBox()noexcept
 void cScrollBox::Render()
 {
     // 
-    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aArrow); ++i) m_aArrow[i].Render();
+    for(coreUintW i = 0u; i < ARRAY_SIZE(m_aArrow); ++i)
+    {
+        m_aArrow[i].SetAlpha(this->GetAlpha());
+        m_aArrow[i].Render();
+    }
+
+    // 
+    m_Cursor.SetAlpha(this->GetAlpha());
     m_Cursor.Render();
 
     // 
@@ -59,6 +61,8 @@ void cScrollBox::Render()
 // 
 void cScrollBox::Move()
 {
+    ASSERT(this->GetSize().y > m_aArrow[0].GetSize().y + m_aArrow[1].GetSize().y + m_Cursor.GetSize().y)
+
     // 
     m_aArrow[0].Interact();
     m_aArrow[1].Interact();
@@ -70,7 +74,6 @@ void cScrollBox::Move()
 
         // 
         m_aArrow[i].SetPosition(this->GetPosition() + this->GetSize() * coreVector2(0.5f, fSide) + SCROLL_WIDTH * coreVector2(0.5f, -fSide));
-        m_aArrow[i].SetAlpha   (this->GetAlpha());
         m_aArrow[i].Move();
 
         // 
@@ -137,7 +140,6 @@ void cScrollBox::Move()
 
     // 
     m_Cursor.SetPosition(coreVector2(m_aArrow[0].GetPosition().x, LERP(fPosUp, fPosDown, this->GetOffset().y * RCP(m_fMaxOffset))));
-    m_Cursor.SetAlpha   (this->GetAlpha());
     m_Cursor.Move();
 
     // 

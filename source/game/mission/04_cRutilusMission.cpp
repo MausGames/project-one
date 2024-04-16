@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -392,7 +392,7 @@ void cRutilusMission::__MoveOwnAfter()
         oPlate.SetPosition (coreVector3(0.0f, fOffset, 0.0f) * (FOREGROUND_AREA.y * 2.2f));
         oPlate.SetSize     (coreVector3(vReal,         1.0f) * (FOREGROUND_AREA.y * 2.2f));
         oPlate.SetTexSize  (vReal * 4.0f);
-        oPlate.SetTexOffset((coreVector2(0.0f, m_fAnimation * 2.0f) - vReal * 2.0f).Processed(FRACT));
+        oPlate.SetTexOffset((coreVector2(0.0f, FRACT(m_fAnimation * 2.0f)) - vReal * 2.0f));
     }
 
     // 

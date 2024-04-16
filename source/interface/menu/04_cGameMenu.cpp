@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -67,7 +67,7 @@ cGameMenu::cGameMenu()noexcept
     m_OptionState.SetSize      (m_OptionButton.GetSize());
     m_OptionState.SetAlignment (m_OptionButton.GetAlignment());
     m_OptionState.SetColor3    (COLOR_MENU_WHITE);
-    m_OptionState.SetText("Original | Solo | Normal");                                   
+    m_OptionState.SetText("Solo | Original | Normal");                                   
 
     m_StandardHeader.Construct      (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_StandardHeader.SetPosition    (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(0.0f,0.5f) + coreVector2(-0.13f,-0.045f));
@@ -149,15 +149,15 @@ cGameMenu::cGameMenu()noexcept
 
         iOffset += (i == 6u) ? 3u : 2u;
     }
-    m_aMissionName[0].SetText(coreData::StrUpper(cViridoMission ::Name));
-    m_aMissionName[1].SetText(coreData::StrUpper(cNevoMission   ::Name));
-    m_aMissionName[2].SetText(coreData::StrUpper(cHarenaMission ::Name));
-    m_aMissionName[3].SetText(coreData::StrUpper(cRutilusMission::Name));
-    m_aMissionName[4].SetText(coreData::StrUpper(cGeluMission   ::Name));
-    m_aMissionName[5].SetText(coreData::StrUpper(cCalorMission  ::Name));
-    m_aMissionName[6].SetText(coreData::StrUpper(cMuscusMission ::Name));
-    m_aMissionName[7].SetText(coreData::StrUpper(cBonus1Mission ::Name));
-    m_aMissionName[8].SetText(coreData::StrUpper(cBonus2Mission ::Name));
+    m_aMissionName[0].SetText(cViridoMission ::Name);
+    m_aMissionName[1].SetText(cNevoMission   ::Name);
+    m_aMissionName[2].SetText(cHarenaMission ::Name);
+    m_aMissionName[3].SetText(cRutilusMission::Name);
+    m_aMissionName[4].SetText(cGeluMission   ::Name);
+    m_aMissionName[5].SetText(cCalorMission  ::Name);
+    m_aMissionName[6].SetText(cMuscusMission ::Name);
+    m_aMissionName[7].SetText(cBonus1Mission ::Name);
+    m_aMissionName[8].SetText(cBonus2Mission ::Name);
 
     for(coreUintW i = 0u; i < MENU_GAME_MISSIONS; ++i)
     {
@@ -253,28 +253,29 @@ cGameMenu::cGameMenu()noexcept
         m_aOptionLine[i].SetSize      (coreVector2(m_Background.GetSize().x, 0.05f));
         m_aOptionLine[i].SetTexOffset (coreVector2(I_TO_F(i)*0.09f, 0.0f));
     }
-    m_aOptionName[0].SetTextLanguage("GAME_MODE");
-    m_aOptionName[1].SetTextLanguage("GAME_TYPE");
+    m_aOptionName[0].SetTextLanguage("GAME_TYPE");
+    m_aOptionName[1].SetTextLanguage("GAME_MODE");
     m_aOptionName[2].SetTextLanguage("GAME_DIFFICULTY");
 
-    m_Mode.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
-    m_Mode.SetPosition (coreVector2(-1.00f,1.00f) * m_aOptionName[0].GetPosition());
-    m_Mode.SetSize     (coreVector2( 0.47f,0.03f));
-    m_Mode.SetAlignment(coreVector2(-1.00f,0.00f));
-    m_Mode.SetEndless  (true);
-    m_Mode.GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
     m_Type.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
-    m_Type.SetPosition (coreVector2(-1.00f,1.00f) * m_aOptionName[1].GetPosition());
-    m_Type.SetSize     (m_Mode.GetSize());
-    m_Type.SetAlignment(m_Mode.GetAlignment());
+    m_Type.SetPosition (coreVector2(-1.00f,1.00f) * m_aOptionName[0].GetPosition());
+    m_Type.SetSize     (coreVector2( 0.47f,0.03f));
+    m_Type.SetAlignment(coreVector2(-1.00f,0.00f));
     m_Type.SetEndless  (true);
     m_Type.GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
+    m_Mode.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+    m_Mode.SetPosition (coreVector2(-1.00f,1.00f) * m_aOptionName[1].GetPosition());
+    m_Mode.SetSize     (m_Type.GetSize());
+    m_Mode.SetAlignment(m_Type.GetAlignment());
+    m_Mode.SetEndless  (true);
+    m_Mode.GetCaption()->SetColor3(COLOR_MENU_WHITE);
+
     m_Difficulty.Construct   (MENU_SWITCHBOX, MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
     m_Difficulty.SetPosition (coreVector2(-1.00f,1.00f) * m_aOptionName[2].GetPosition());
-    m_Difficulty.SetSize     (m_Mode.GetSize());
-    m_Difficulty.SetAlignment(m_Mode.GetAlignment());
+    m_Difficulty.SetSize     (m_Type.GetSize());
+    m_Difficulty.SetAlignment(m_Type.GetAlignment());
     m_Difficulty.SetEndless  (true);
     m_Difficulty.GetCaption()->SetColor3(COLOR_MENU_WHITE);
 
@@ -327,12 +328,12 @@ cGameMenu::cGameMenu()noexcept
     }
 
     // fill option entries
-    m_Mode      .AddEntryLanguage("GAME_MODE_STANDARD",     GAME_MODE_STANDARD);
-    m_Mode      .AddEntryLanguage("GAME_MODE_PACIFIST",     GAME_MODE_PACIFIST);
-    m_Mode      .AddEntryLanguage("GAME_MODE_MASOCHIST",    GAME_MODE_MASOCHIST);
     m_Type      .AddEntryLanguage("GAME_TYPE_SOLO",         GAME_TYPE_SOLO);
     m_Type      .AddEntryLanguage("GAME_TYPE_COOP",         GAME_TYPE_COOP);
     m_Type      .AddEntryLanguage("GAME_TYPE_DUEL",         GAME_TYPE_DUEL);
+    m_Mode      .AddEntryLanguage("GAME_MODE_STANDARD",     GAME_MODE_STANDARD);
+    m_Mode      .AddEntryLanguage("GAME_MODE_PACIFIST",     GAME_MODE_PACIFIST);
+    m_Mode      .AddEntryLanguage("GAME_MODE_MASOCHIST",    GAME_MODE_MASOCHIST);
     m_Difficulty.AddEntryLanguage("GAME_DIFFICULTY_EASY",   GAME_DIFFICULTY_EASY);
     m_Difficulty.AddEntryLanguage("GAME_DIFFICULTY_NORMAL", GAME_DIFFICULTY_NORMAL);
     m_Difficulty.AddEntryLanguage("GAME_DIFFICULTY_HARD",   GAME_DIFFICULTY_HARD);
@@ -419,8 +420,8 @@ cGameMenu::cGameMenu()noexcept
     for(coreUintW i = 0u; i < MENU_GAME_OPTIONS; ++i) this->BindObject(SURFACE_GAME_OPTIONS, &m_aOptionLine[i]);
     for(coreUintW i = 0u; i < MENU_GAME_OPTIONS; ++i) this->BindObject(SURFACE_GAME_OPTIONS, &m_aOptionName[i]);
 
-    this->BindObject(SURFACE_GAME_OPTIONS, &m_Mode);
     this->BindObject(SURFACE_GAME_OPTIONS, &m_Type);
+    this->BindObject(SURFACE_GAME_OPTIONS, &m_Mode);
     this->BindObject(SURFACE_GAME_OPTIONS, &m_Difficulty);
 
     this->BindObject(SURFACE_GAME_ARMORY, &m_Background);
@@ -622,8 +623,8 @@ void cGameMenu::Move()
             }
 
             // 
-            cMenu::UpdateSwitchBox(&m_Mode);
             cMenu::UpdateSwitchBox(&m_Type);
+            cMenu::UpdateSwitchBox(&m_Mode);
             cMenu::UpdateSwitchBox(&m_Difficulty);
 
             for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
@@ -633,24 +634,24 @@ void cGameMenu::Move()
                 cMenu::UpdateSwitchBox(&m_aSupport[i]);
 
                 // 
-                     if(m_aWeapon [i].GetCurEntry().tValue == cNoWeapon   ::ID) m_aWeapon [i].GetCaption()->SetColor3(COLOR_MENU_WHITE);
-                else if(m_aWeapon [i].GetCurEntry().tValue == cRayWeapon  ::ID) m_aWeapon [i].GetCaption()->SetColor3(COLOR_MENU_YELLOW);
-                else if(m_aWeapon [i].GetCurEntry().tValue == cPulseWeapon::ID) m_aWeapon [i].GetCaption()->SetColor3(COLOR_MENU_PURPLE);
-                else if(m_aWeapon [i].GetCurEntry().tValue == cWaveWeapon ::ID) m_aWeapon [i].GetCaption()->SetColor3(COLOR_MENU_GREEN);
-                else if(m_aWeapon [i].GetCurEntry().tValue == cTeslaWeapon::ID) m_aWeapon [i].GetCaption()->SetColor3(COLOR_MENU_BLUE);
-                else if(m_aWeapon [i].GetCurEntry().tValue == cAntiWeapon ::ID) m_aWeapon [i].GetCaption()->SetColor3(COLOR_MENU_RED);
-                     if(m_aSupport[i].GetCurEntry().tValue == 0u)               m_aSupport[i].GetCaption()->SetColor3(COLOR_MENU_WHITE);
-                else if(m_aSupport[i].GetCurEntry().tValue == 1u)               m_aSupport[i].GetCaption()->SetColor3(COLOR_MENU_BLUE);
+                     if(m_aWeapon [i].GetCurValue() == cNoWeapon   ::ID) m_aWeapon [i].GetCaption()->SetColor3(COLOR_MENU_WHITE);
+                else if(m_aWeapon [i].GetCurValue() == cRayWeapon  ::ID) m_aWeapon [i].GetCaption()->SetColor3(COLOR_MENU_YELLOW);
+                else if(m_aWeapon [i].GetCurValue() == cPulseWeapon::ID) m_aWeapon [i].GetCaption()->SetColor3(COLOR_MENU_PURPLE);
+                else if(m_aWeapon [i].GetCurValue() == cWaveWeapon ::ID) m_aWeapon [i].GetCaption()->SetColor3(COLOR_MENU_GREEN);
+                else if(m_aWeapon [i].GetCurValue() == cTeslaWeapon::ID) m_aWeapon [i].GetCaption()->SetColor3(COLOR_MENU_BLUE);
+                else if(m_aWeapon [i].GetCurValue() == cAntiWeapon ::ID) m_aWeapon [i].GetCaption()->SetColor3(COLOR_MENU_RED);
+                     if(m_aSupport[i].GetCurValue() == 0u)               m_aSupport[i].GetCaption()->SetColor3(COLOR_MENU_WHITE);
+                else if(m_aSupport[i].GetCurValue() == 1u)               m_aSupport[i].GetCaption()->SetColor3(COLOR_MENU_BLUE);
 
                 // 
-                     if(m_aWeapon [i].GetCurEntry().tValue == cNoWeapon   ::ID) m_aWeaponIcon [i].SetTexOffset(coreVector2(0.25f,0.5f));
-                else if(m_aWeapon [i].GetCurEntry().tValue == cRayWeapon  ::ID) m_aWeaponIcon [i].SetTexOffset(coreVector2(0.0f, 0.0f));
-                else if(m_aWeapon [i].GetCurEntry().tValue == cPulseWeapon::ID) m_aWeaponIcon [i].SetTexOffset(coreVector2(0.25f,0.0f));
-                else if(m_aWeapon [i].GetCurEntry().tValue == cWaveWeapon ::ID) m_aWeaponIcon [i].SetTexOffset(coreVector2(0.5f, 0.0f));
-                else if(m_aWeapon [i].GetCurEntry().tValue == cTeslaWeapon::ID) m_aWeaponIcon [i].SetTexOffset(coreVector2(0.75f,0.0f));
-                else if(m_aWeapon [i].GetCurEntry().tValue == cAntiWeapon ::ID) m_aWeaponIcon [i].SetTexOffset(coreVector2(0.0f, 0.5f));
-                     if(m_aSupport[i].GetCurEntry().tValue == 0u)               m_aSupportIcon[i].SetTexOffset(coreVector2(0.25f,0.5f));
-                else if(m_aSupport[i].GetCurEntry().tValue == 1u)               m_aSupportIcon[i].SetTexOffset(coreVector2(0.5f, 0.5f));
+                     if(m_aWeapon [i].GetCurValue() == cNoWeapon   ::ID) m_aWeaponIcon [i].SetTexOffset(coreVector2(0.25f,0.5f));
+                else if(m_aWeapon [i].GetCurValue() == cRayWeapon  ::ID) m_aWeaponIcon [i].SetTexOffset(coreVector2(0.0f, 0.0f));
+                else if(m_aWeapon [i].GetCurValue() == cPulseWeapon::ID) m_aWeaponIcon [i].SetTexOffset(coreVector2(0.25f,0.0f));
+                else if(m_aWeapon [i].GetCurValue() == cWaveWeapon ::ID) m_aWeaponIcon [i].SetTexOffset(coreVector2(0.5f, 0.0f));
+                else if(m_aWeapon [i].GetCurValue() == cTeslaWeapon::ID) m_aWeaponIcon [i].SetTexOffset(coreVector2(0.75f,0.0f));
+                else if(m_aWeapon [i].GetCurValue() == cAntiWeapon ::ID) m_aWeaponIcon [i].SetTexOffset(coreVector2(0.0f, 0.5f));
+                     if(m_aSupport[i].GetCurValue() == 0u)               m_aSupportIcon[i].SetTexOffset(coreVector2(0.25f,0.5f));
+                else if(m_aSupport[i].GetCurValue() == 1u)               m_aSupportIcon[i].SetTexOffset(coreVector2(0.5f, 0.5f));
 
                 // 
                 m_aWeaponIcon [i].SetColor3(m_aWeapon [i].GetCaption()->GetColor3());
@@ -658,7 +659,7 @@ void cGameMenu::Move()
             }
 
 
-            const coreBool bMulti = (m_Type.GetCurEntry().tValue != GAME_TYPE_SOLO);
+            const coreBool bMulti = (m_Type.GetCurValue() != GAME_TYPE_SOLO);
             m_aWeapon [1].SetOverride(bMulti ? 0 : -1);
             m_aSupport[1].SetOverride(bMulti ? 0 : -1);
 
@@ -749,8 +750,8 @@ void cGameMenu::LoadValues()
     m_aiStageSelection[1] = g_pSave->GetHeader().oOptions.iTraining % MENU_GAME_STAGES;
 
     // 
-    m_Mode      .SelectValue(g_pSave->GetHeader().oOptions.iMode);
     m_Type      .SelectValue(g_pSave->GetHeader().oOptions.iType);
+    m_Mode      .SelectValue(g_pSave->GetHeader().oOptions.iMode);
     m_Difficulty.SelectValue(g_pSave->GetHeader().oOptions.iDifficulty);
 
     // 
@@ -771,15 +772,15 @@ void cGameMenu::SaveValues()
     g_pSave->EditOptions()->iTraining = m_aiStageSelection[0] * MENU_GAME_STAGES + m_aiStageSelection[1];
 
     // 
-    g_pSave->EditOptions()->iMode       = m_Mode      .GetCurEntry().tValue;
-    g_pSave->EditOptions()->iType       = m_Type      .GetCurEntry().tValue;
-    g_pSave->EditOptions()->iDifficulty = m_Difficulty.GetCurEntry().tValue;
+    g_pSave->EditOptions()->iType       = m_Type      .GetCurValue();
+    g_pSave->EditOptions()->iMode       = m_Mode      .GetCurValue();
+    g_pSave->EditOptions()->iDifficulty = m_Difficulty.GetCurValue();
 
     // 
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
     {
-        g_pSave->EditOptions()->aaiWeapon [i][0] = m_aWeapon [i].GetCurEntry().tValue;
-        g_pSave->EditOptions()->aaiSupport[i][0] = m_aSupport[i].GetCurEntry().tValue;
+        g_pSave->EditOptions()->aaiWeapon [i][0] = m_aWeapon [i].GetCurValue();
+        g_pSave->EditOptions()->aaiSupport[i][0] = m_aSupport[i].GetCurValue();
     }
 }
 
@@ -825,9 +826,9 @@ void cGameMenu::__SelectStandard(const coreUintW iMissionIndex)
     m_aStandardTime [0].SetColor3(oData.vColor);
 
     // 
-    m_aStandardName [0].SetText(coreData::StrUpper(oData.pcName));
+    m_aStandardName [0].SetText(oData.pcName);
     m_aStandardName [1].SetText(PRINT("%s %zu", Core::Language->GetString("MISSION"), iMissionIndex));
-    m_aStandardScore[1].SetText(coreData::ToChars(Core::Rand->Uint(9999u) * Core::Rand->Uint(100u)));   // TODO 1: read real data
+    m_aStandardScore[1].SetText(coreData::ToChars(Core::Rand->Uint(999999u)));   // TODO 1: read real data
     m_aStandardTime [1].SetText(PRINT("%.1f", Core::Rand->Float(99.9f)));   // TODO 1: read real data
 
     // 
@@ -868,9 +869,9 @@ void cGameMenu::__SelectTraining(const coreUintW iMissionIndex, const coreUintW 
     m_aTrainingTime [0].SetColor3(oData.vColor);
 
     // 
-    m_aTrainingName [0].SetText(coreData::StrUpper(oData.pcName));
+    m_aTrainingName [0].SetText(oData.pcName);
     m_aTrainingName [1].SetText(PRINT("%s %s-%s", Core::Language->GetString("MISSION"), pcMissionLetter, pcSegmentLetter));
-    m_aTrainingScore[1].SetText(coreData::ToChars(Core::Rand->Uint(9999u) * Core::Rand->Uint(100u)));   // TODO 1: read real data
+    m_aTrainingScore[1].SetText(coreData::ToChars(Core::Rand->Uint(999999u)));   // TODO 1: read real data
     m_aTrainingTime [1].SetText(PRINT("%.1f", Core::Rand->Float(99.9f)));   // TODO 1: read real data
 
     // 

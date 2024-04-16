@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #pragma once
@@ -13,7 +13,7 @@
 // TODO 1: transfer to Core Engine (and bake those height transformations into the glyph function)
 // TODO 3: does not handle kerning (relevant ?)
 // TODO 3: (this + __LINE__) may not handle implementation-split between cpp and h file
-// TODO 2: text not readable in vertical window
+// TODO 2: text not readable in vertical window (pushed into right or left side)
 
 
 // ****************************************************************

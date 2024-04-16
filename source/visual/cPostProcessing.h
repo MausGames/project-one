@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #pragma once
@@ -15,9 +15,7 @@
 // TODO 3: don't render wallpapers on 1:1 (and without offsets)
 // TODO 3: also clamp fullscreen distortion similar to water distortion ?
 // TODO 1: changing game size (option) should add fixed wallpaper offset (related to gameplay stage)
-// TODO 1: pause (or other) overlays should adapt to offsets
 // TODO 3: try to reduce overdraw when all walls are active
-// TODO 1: rotating screen with offset does not update wall calculations
 
 
 // ****************************************************************

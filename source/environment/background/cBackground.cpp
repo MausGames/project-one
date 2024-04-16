@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -26,7 +26,7 @@ template <const coreChar* pcString, coreUintW iLength, coreUintW iNum> struct sS
     extern const coreChar v ## __a[] = s; \
     static const sStringList<v ## __a, ARRAY_SIZE(v ## __a), n> v;
 
-__STRING_LIST("u_av3OverlayTransform[%zu]", MAX(DESERT_SAND_NUM, SNOW_SNOW_NUM, MOSS_RAIN_NUM), s_asOverlayTransform)
+__STRING_LIST("u_av3OverlayTransform[%zu]", MAX(DESERT_SAND_NUM, SPACE_NEBULA_NUM, SNOW_SNOW_NUM, MOSS_RAIN_NUM), s_asOverlayTransform)
 
 
 // ****************************************************************
@@ -144,6 +144,7 @@ void cBackground::Render()
         // call individual render routine (before air)
         this->__RenderOwnBefore();
 
+        //glBlendFunc        (FOREGROUND_BLEND_SUM);
         glDisable(GL_DEPTH_TEST);
         {
             // render all air objects
@@ -151,6 +152,7 @@ void cBackground::Render()
             FOR_EACH(it, m_apAirAddList)    (*it)->Render();
         }
         glEnable(GL_DEPTH_TEST);
+        //glBlendFunc        (FOREGROUND_BLEND_DEFAULT);
 
         // call individual render routine (after air)
         this->__RenderOwnAfter();
@@ -529,6 +531,26 @@ FUNC_PURE coreBool cBackground::_CheckIntersectionQuick(const coreBatchList* pOb
     return false;
 }
 
+FUNC_PURE coreBool cBackground::_CheckIntersectionQuick3(const coreBatchList* pObjectList, const coreVector3 vNewPos, const coreFloat fDistanceSq)
+{
+    const coreSet<coreObject3D*>* pList = pObjectList->List();
+
+    // compare only with last few objects
+    FOR_EACH_REV(it, *pList)
+    {
+        const coreVector3 vDiff = (*it)->GetPosition() - vNewPos;
+
+        // check for going too far
+        if(POW2(vDiff.y) > fDistanceSq)
+            return false;
+
+        // check for quadratic distance
+        if(vDiff.LengthSq() < fDistanceSq)
+            return true;
+    }
+    return false;
+}
+
 
 // ****************************************************************
 // reset with the resource manager
@@ -550,7 +572,7 @@ void cBackground::__Reset(const coreResourceReset eInit)
         m_ResolvedTexture.Delete();
 
         // 
-        SAFE_DELETE(m_pWater)
+        this->__ExitOwn();
     }
 }
 

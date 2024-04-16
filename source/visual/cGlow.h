@@ -2,15 +2,17 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #pragma once
 #ifndef _P1_GUARD_GLOW_H_
 #define _P1_GUARD_GLOW_H_
 
+// TODO 3: glow is cleared abruptly when getting inactive, should afterglow instead
 // TODO 4: remove exposed clear function (location where this is called should use a different way)
+// TODO 3: sort bound objects and lists by shaders, then by models (not textures), handle index/address
 
 
 // ****************************************************************

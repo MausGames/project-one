@@ -36,7 +36,7 @@
 // TODO 3: check all shaders if alpha is required
 // TODO 4: full initializer lists everywhere (don't forget parent classes)
 // TODO 3: clean mixing shader defines (x >= y) and (defined(x)) checks (also in engine)
-// TODO 3: check for 16-bit float shader usage
+// TODO 3: check for 16-bit half float shader usage
 // TODO 2: program enable has to be checked (if(x.Enable()){}) everywhere
 // TODO 4: unify "forward" and "transform" comments in shaders
 // TODO 3: add own coreRand for various random things which may affect feeling (screen shake), and reset on boss-start
@@ -86,7 +86,8 @@
 // TODO 1: clarify and simplify upper-case handling (for all texts, but especially for boss and mission names)
 // TODO 3: expose HRTF option (Headphones: No, Yes, Auto)
 // TODO 2: d-pad is for movement, but and can also be used for button mapping
-// TODO 1: improve looping in environment sound
+// TODO 4: if font awesome will be used in the end, remove all unused icons in font-file
+// TODO 3: make sure bullet->disable has correct positioned impact-effect everywhere, especially with fast ray-bullets going deep into other objects (manual correction or ray-cast)
 
 
 // ****************************************************************
@@ -111,6 +112,9 @@
         #pragma message("Warning: Debug randomization enabled!")
     #endif
 #endif
+
+
+//#define _P1_VIDEO_ (1)
 
 
 // ****************************************************************
@@ -216,7 +220,6 @@ enum eType : coreInt32
     TYPE_BULLET_ENEMY,
 
     TYPE_ITEM,
-    TYPE_SHIELD,
 
     TYPE_VIRIDO_BALL,
     TYPE_VIRIDO_PADDLE,

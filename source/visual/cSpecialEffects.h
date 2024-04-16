@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #pragma once
@@ -32,7 +32,11 @@
 #define SPECIAL_LIGHTNING_RESIZE (0.66f)   // 
 #define SPECIAL_LIGHTNING_CUTOUT (0.5f)    // 
 
+#if defined(_P1_VIDEO_)
+#define SPECIAL_DEPTH(x)         (0u)
+#else
 #define SPECIAL_DEPTH(x)         (((x).z < -1.0f) ? 1u : 0u)
+#endif
 
 #define SPECIAL_SPLASH_TINY      (25.0f), (13u)
 #define SPECIAL_SPLASH_SMALL     (50.0f), (25u)

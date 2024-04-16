@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -12,11 +12,12 @@
 // ****************************************************************
 // constructor
 cArcadeInput::cArcadeInput()noexcept
-: m_iTextLength (0u)
-, m_fMove       (0.0f)
-, m_iOldGlyph   (0u)
-, m_iNewGlyph   (0u)
-, m_bFinished   (false)
+: m_iTextLength  (0u)
+, m_fMove        (0.0f)
+, m_iOldGlyph    (0u)
+, m_iNewGlyph    (0u)
+, m_fCursorAngle (0.0f)
+, m_bFinished    (false)
 {
     // 
     for(coreUintW i = 0u; i < ARCADE_GLYPHS; ++i)
@@ -72,13 +73,6 @@ cArcadeInput::cArcadeInput()noexcept
     m_Text.Construct  (MENU_FONT_STANDARD_4, MENU_OUTLINE_SMALL);
     m_Text.SetPosition(coreVector2(0.0f,0.2f));
     m_Text.SetColor3  (COLOR_MENU_WHITE);
-    
-    
-    // TODO 1: same issue in scroll-box
-    for(coreUintW i = 0u; i < ARCADE_GLYPHS; ++i) m_aButton[i].SetAlpha(0.0f);
-    for(coreUintW i = 0u; i < ARCADE_GLYPHS; ++i) m_aGlyph [i].SetAlpha(0.0f);
-    m_Text  .SetAlpha(0.0f);
-    m_Cursor.SetAlpha(0.0f);
 }
 
 
@@ -87,9 +81,25 @@ cArcadeInput::cArcadeInput()noexcept
 void cArcadeInput::Render()
 {
     // 
-    for(coreUintW i = 0u; i < ARCADE_GLYPHS; ++i) m_aButton[i].Render();
-    for(coreUintW i = 0u; i < ARCADE_GLYPHS; ++i) m_aGlyph [i].Render();
-    m_Text  .Render();   // # swapped
+    for(coreUintW i = 0u; i < ARCADE_GLYPHS; ++i)
+    {
+        m_aButton[i].SetAlpha(this->GetAlpha());
+        m_aButton[i].Render();
+    }
+
+    // 
+    for(coreUintW i = 0u; i < ARCADE_GLYPHS; ++i)
+    {
+        m_aGlyph[i].SetAlpha(this->GetAlpha());
+        m_aGlyph[i].Render();
+    }
+
+    // 
+    m_Text.SetAlpha(this->GetAlpha());   // # swapped
+    m_Text.Render();
+
+    // 
+    m_Cursor.SetAlpha(this->GetAlpha());
     m_Cursor.Render();
 }
 
@@ -168,26 +178,14 @@ void cArcadeInput::Move()
     }
 
     // 
-    for(coreUintW i = 0u; i < ARCADE_GLYPHS; ++i)
-    {
-        m_aButton[i].SetAlpha(this->GetAlpha());
-        m_aButton[i].Move();
-    }
+    m_fCursorAngle.UpdateMod(2.0f, 2.0f*PI);
+    m_Cursor.SetDirection(coreVector2::Direction(m_fCursorAngle));
 
     // 
-    for(coreUintW i = 0u; i < ARCADE_GLYPHS; ++i)
-    {
-        m_aGlyph[i].SetAlpha(this->GetAlpha());
-        m_aGlyph[i].Move();
-    }
-
-    // 
-    m_Cursor.SetAlpha(this->GetAlpha());
+    for(coreUintW i = 0u; i < ARCADE_GLYPHS; ++i) m_aButton[i].Move();
+    for(coreUintW i = 0u; i < ARCADE_GLYPHS; ++i) m_aGlyph [i].Move();
     m_Cursor.Move();
-
-    // 
-    m_Text.SetAlpha(this->GetAlpha());
-    m_Text.Move();
+    m_Text  .Move();
 }
 
 
@@ -211,7 +209,6 @@ void cArcadeInput::Start(const coreChar* pcTemplate, const coreUint8 iLength)
 
     // 
     m_Cursor.SetPosition(m_aGlyph[m_iNewGlyph].GetPosition());
-    m_Cursor.Move();      // TODO 1: nicht in worldmap ?
 }
 
 

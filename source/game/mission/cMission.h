@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #pragma once
@@ -23,6 +23,7 @@
 // TODO 3: do not create objects and load resources of unused game-objects and bosses (e.g. move waves into own classes ? but then ?)
 // TODO 4: move as much gameplay from gameplay-objects from mission to stages, except for mission-shared stuff, animation stuff, or special-cases requiring before-after update (teleportation)
 // TODO 1: chain should shatter into pieces on disable, should drag the stone to player on swing-start, boulder should use ice-shader, multiple boulders, clearing/resetting swing and catch attributes etc.
+// TODO 1: morningstar sticks to boss and throws player around instead
 
 
 // ****************************************************************
@@ -124,7 +125,7 @@
 #define STAGE_START_HERE                       {m_anStage.clear(); STAGE_MAIN({TAKE_ALWAYS}) {if(STAGE_BEGINNING) g_pGame->StartIntro(); STAGE_FINISH_PLAY});}
 
 #define STAGE_CLEARED                          (std::all_of(m_apSquad.begin(), m_apSquad.end(), [](const cEnemySquad* pSquad) {return pSquad->IsFinished();}))
-#define STAGE_RESURRECT(s,f,t)                 {STAGE_FOREACH_ENEMY_ALL(s, pEnemy, i) {if((coreInt32(i) >= coreInt32(f)) && (coreInt32(i) <= coreInt32(t))) pEnemy->Resurrect();}); ASSERT((coreInt32(f) <= coreInt32(t)) && (coreInt32(t) < coreInt32((s)->GetNumEnemies())))}
+#define STAGE_RESURRECT(s,f,t)                 {STAGE_FOREACH_ENEMY_ALL(s, pEnemy, i) {if((coreIntW(i) >= coreIntW(f)) && (coreIntW(i) <= coreIntW(t))) pEnemy->Resurrect();}); ASSERT((coreIntW(f) <= coreIntW(t)) && (coreIntW(t) < coreIntW((s)->GetNumEnemies())))}
 #define STAGE_BADGE(i,b,p)                     {this->GiveBadge(i, b, p);}
 
 #define STAGE_DELAY_START                      {UNUSED STAGE_ADD_SQUAD(pDelay, cDummyEnemy, 1u) {pDelay->GetEnemy(0u)->Configure(1, COLOR_SHIP_GREY); pDelay->GetEnemy(0u)->Resurrect();});}
@@ -365,7 +366,7 @@ public:
     cNoMission() = default;
 
     DISABLE_COPY(cNoMission)
-    ASSIGN_ID(0, "Nothing")
+    ASSIGN_ID(0, "NOTHING")
 };
 
 
@@ -410,7 +411,7 @@ public:
     ~cViridoMission()final;
 
     DISABLE_COPY(cViridoMission)
-    ASSIGN_ID(1, "Virido")
+    ASSIGN_ID(1, "VIRIDO")
 
     // 
     void EnableBall (const coreUintW iIndex, const coreVector2 vPosition, const coreVector2 vDirection);
@@ -506,7 +507,7 @@ public:
     ~cNevoMission()final;
 
     DISABLE_COPY(cNevoMission)
-    ASSIGN_ID(2, "Nevo")
+    ASSIGN_ID(2, "NEVO")
 
     // 
     void EnableBomb (const coreUintW iIndex, const coreBool bGrow);
@@ -576,7 +577,7 @@ public:
     ~cHarenaMission()final;
 
     DISABLE_COPY(cHarenaMission)
-    ASSIGN_ID(3, "Harena")
+    ASSIGN_ID(3, "HARENA")
 
     // 
     void EnableSpike (const coreUintW iIndex);
@@ -632,7 +633,7 @@ public:
     ~cRutilusMission()final;
 
     DISABLE_COPY(cRutilusMission)
-    ASSIGN_ID(4, "Rutilus")
+    ASSIGN_ID(4, "RUTILUS")
 
     // 
     void EnableTeleporter (const coreUintW iIndex);
@@ -680,6 +681,7 @@ private:
 
     coreBatchList m_Fang;                          // 
     cLodObject    m_aFangRaw[GELU_FANGS_RAWS];     // 
+    coreVector2 m_avFangOldPos[GELU_FANGS];
 
     coreBatchList m_Way;                           // 
     coreBatchList m_WayArrow;                      // 
@@ -695,6 +697,9 @@ private:
     coreObject3D  m_aLineRaw  [GELU_LINES_RAWS];   // 
     coreFlow      m_afLineTime[GELU_LINES];        // 
 
+    coreBool  m_abCrushImmune[MISSION_PLAYERS];    // 
+    coreUint8 m_iCrushState;                       // 
+
     coreFlow m_fAnimation;                         // animation value
 
 
@@ -703,7 +708,7 @@ public:
     ~cGeluMission()final;
 
     DISABLE_COPY(cGeluMission)
-    ASSIGN_ID(5, "Gelu")
+    ASSIGN_ID(5, "GELU")
 
     // 
     void EnableFang (const coreUintW iIndex);
@@ -720,6 +725,10 @@ public:
     // 
     void EnableLine (const coreUintW iIndex);
     void DisableLine(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    inline void SetCrushFree(const coreBool bCrushFree) {SET_BIT(m_iCrushState, 0u, bCrushFree)}   // move through blocks after crush
+    inline void SetCrushLong(const coreBool bCrushLong) {SET_BIT(m_iCrushState, 1u, bCrushLong)}   // move in-and-out of blocks after crush
 
 
 private:
@@ -770,7 +779,7 @@ public:
     ~cCalorMission()final;
 
     DISABLE_COPY(cCalorMission)
-    ASSIGN_ID(6, "Calor")
+    ASSIGN_ID(6, "CALOR")
 
     // 
     void EnableLoad (const cShip* pOwner);
@@ -839,7 +848,7 @@ public:
     ~cMuscusMission()final;
 
     DISABLE_COPY(cMuscusMission)
-    ASSIGN_ID(7, "Muscus")
+    ASSIGN_ID(7, "MUSCUS")
 
     // 
     void EnableGenerate (const coreUintW iIndex);
@@ -882,7 +891,7 @@ public:
     cAterMission()noexcept;
 
     DISABLE_COPY(cAterMission)
-    ASSIGN_ID(8, "Ater")
+    ASSIGN_ID(8, "ATER")
 
 
 private:
@@ -908,7 +917,7 @@ public:
     cIntroMission()noexcept;
 
     DISABLE_COPY(cIntroMission)
-    ASSIGN_ID(99, "Intro")
+    ASSIGN_ID(99, "INTRO")
 
 
 private:
@@ -931,7 +940,7 @@ public:
     cBonus1Mission()noexcept;
 
     DISABLE_COPY(cBonus1Mission)
-    ASSIGN_ID(101, "Bonus 1")
+    ASSIGN_ID(101, "BONUS 1")
 
 
 private:
@@ -952,7 +961,7 @@ public:
     cBonus2Mission()noexcept;
 
     DISABLE_COPY(cBonus2Mission)
-    ASSIGN_ID(102, "Bonus 2")
+    ASSIGN_ID(102, "BONUS 2")
 
 
 private:
@@ -973,7 +982,7 @@ public:
     cErrorMission()noexcept;
 
     DISABLE_COPY(cErrorMission)
-    ASSIGN_ID(201, "Error")
+    ASSIGN_ID(201, "ERROR")
 
 
 private:
@@ -1014,7 +1023,7 @@ public:
     ~cDemoMission()final;
 
     DISABLE_COPY(cDemoMission)
-    ASSIGN_ID(202, "Demo")
+    ASSIGN_ID(202, "DEMO")
 
     // 
     void EnableLaser (const coreUintW iIndex, const cShip* pOwner);
@@ -1088,7 +1097,7 @@ template <typename T, typename F> cEnemySquad* cMission::_AddSquad(const coreUin
 // 
 constexpr FUNC_LOCAL coreBool cMission::_TakeRange(const coreUint8 iFrom, const coreUint8 iTo, const coreUint8* piIndexList, const coreUintW iSize)
 {
-    ASSERT(piIndexList && iSize)
+    ASSERT((iFrom <= iTo) && piIndexList && iSize)
 
     // 
     if(((piIndexList[0] == TAKE_MISSION)  && (iTo != TAKE_MISSION)) ||

@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #pragma once
@@ -114,8 +114,8 @@ struct sConfig final
         coreUint8  iHudRotation;    // 
         coreUint8  iHudScale;       // 
         coreUint8  iHudType;        // 
-        coreUint16 iUpdateFreq;     // 
-        coreUint16 iVersion;        // 
+        coreUint16 iUpdateFreq;     //   TODO 1: cannot be handled by switchbox8 (make sure to handle cMenu::UpdateSwitchBox)
+        coreUint16 iVersion;        //   TODO 1: cannot be handled by switchbox8
         coreUint8  iMirrorMode;     // 
     }
     Game;

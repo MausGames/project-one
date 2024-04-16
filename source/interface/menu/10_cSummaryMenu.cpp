@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -36,11 +36,11 @@ cSummaryMenu::cSummaryMenu()noexcept
     m_Title.SetPosition(coreVector2(0.0f,0.0f));
     m_Title.SetText    (Core::Application->Settings.Name);
 
-    m_aHeader[0].Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
+    m_aHeader[0].Construct  (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
     m_aHeader[0].SetPosition(coreVector2(0.0f,0.39f));
     m_aHeader[0].SetColor3  (COLOR_MENU_WHITE);
 
-    m_aHeader[1].Construct  (MENU_FONT_STANDARD_5, MENU_OUTLINE_SMALL);
+    m_aHeader[1].Construct  (MENU_FONT_STANDARD_4, MENU_OUTLINE_SMALL);
     m_aHeader[1].SetPosition(coreVector2(0.0f, m_aHeader[0].GetPosition().y - 0.05f));
     m_aHeader[1].SetColor3  (COLOR_MENU_WHITE);
 
@@ -61,11 +61,11 @@ cSummaryMenu::cSummaryMenu()noexcept
 
     for(coreUintW i = 0u; i < MENU_SUMMARY_ENTRIES; ++i)
     {
-        m_aName[i].Construct  (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
+        m_aName[i].Construct  (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
         m_aName[i].SetPosition(coreVector2(0.0f, -0.01f - 0.1f*I_TO_F(i)));
         m_aName[i].SetColor3  (COLOR_MENU_WHITE);
 
-        m_aValue[i].Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
+        m_aValue[i].Construct  (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
         m_aValue[i].SetPosition(coreVector2(0.0f, m_aName[i].GetPosition().y - 0.03f));
         m_aValue[i].SetColor3  (COLOR_MENU_WHITE);
 
@@ -73,7 +73,7 @@ cSummaryMenu::cSummaryMenu()noexcept
         {
             const coreFloat fSide = j ? 1.0f : -1.0f;
 
-            m_aaPart[i][j].Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
+            m_aaPart[i][j].Construct  (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
             m_aaPart[i][j].SetPosition(m_aValue[i].GetPosition() + coreVector2(fSide * 0.36f, 0.0f));
             m_aaPart[i][j].SetColor3  (COLOR_MENU_WHITE);
         }
@@ -81,12 +81,12 @@ cSummaryMenu::cSummaryMenu()noexcept
     m_aName[0].SetTextLanguage("BONUS_MEDAL");
     m_aName[1].SetTextLanguage("BONUS_SURVIVE");
 
-    m_TotalName.Construct      (MENU_FONT_DYNAMIC_4, MENU_OUTLINE_SMALL);
+    m_TotalName.Construct      (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
     m_TotalName.SetPosition    (coreVector2(0.0f,-0.245f));
     m_TotalName.SetColor3      (COLOR_MENU_WHITE);
     m_TotalName.SetTextLanguage("SUMMARY_TOTAL");
 
-    m_TotalValue.Construct  (MENU_FONT_STANDARD_4, MENU_OUTLINE_SMALL);
+    m_TotalValue.Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
     m_TotalValue.SetPosition(coreVector2(0.0f, m_TotalName.GetPosition().y - 0.045f));
     m_TotalValue.SetColor3  (COLOR_MENU_WHITE);
 
@@ -94,7 +94,7 @@ cSummaryMenu::cSummaryMenu()noexcept
     {
         const coreFloat fSide = j ? 1.0f : -1.0f;
 
-        m_aTotalPart[j].Construct  (MENU_FONT_STANDARD_4, MENU_OUTLINE_SMALL);
+        m_aTotalPart[j].Construct  (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
         m_aTotalPart[j].SetPosition(m_TotalValue.GetPosition() + coreVector2(fSide * 0.36f, 0.0f));
         m_aTotalPart[j].SetColor3  (COLOR_MENU_WHITE);
     }
@@ -348,7 +348,7 @@ void cSummaryMenu::ShowMission()
 
     // 
     m_aHeader[0].SetText(PRINT("%s %d", Core::Language->GetString("MISSION"), g_pGame->GetCurMission()->GetID()));
-    m_aHeader[1].SetText(coreData::StrUpper(g_pGame->GetCurMission()->GetName()));
+    m_aHeader[1].SetText(g_pGame->GetCurMission()->GetName());
 
     // 
     const coreUintW iMissionIndex = g_pGame->GetCurMissionIndex();

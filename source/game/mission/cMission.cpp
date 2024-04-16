@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -375,6 +375,13 @@ void cMission::__CloseSegment()
 
     // 
     g_pSave->SaveFile();
+
+#if defined(_P1_VIDEO_)
+
+    static coreUint8 iDir = 0u;
+    g_pEnvironment->SetTargetDirectionNow(StepRotated90((++iDir) % 4u));
+
+#endif
 }
 
 

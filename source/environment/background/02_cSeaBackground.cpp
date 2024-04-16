@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -20,11 +20,11 @@ cSeaBackground::cSeaBackground()noexcept
     coreBatchList* pList2;
     coreBatchList* pList3;
 
-    // create outdoor-surface object
-    m_pOutdoor = new cOutdoor("dust", "earth", 6u, 4.0f);
-
     // 
     this->__InitOwn();
+
+    // create outdoor-surface object
+    m_pOutdoor = new cOutdoor("dust", "earth", 6u, 4.0f);
 
     // allocate animal lists
     pList1 = new coreBatchList(SEA_ANIMAL_1_RESERVE);
@@ -239,13 +239,6 @@ cSeaBackground::cSeaBackground()noexcept
         cBackground::_FillInfinite(pList1, SEA_ALGAE_RESERVE);
         m_apDecalObjectList.push_back(pList1);
     }
-
-    // 
-    m_pUnderSound = Core::Manager::Resource->Get<coreSound>("environment_under.wav");
-    m_pUnderSound.OnUsableOnce([this, pResource = m_pUnderSound]()
-    {
-        pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
-    });
 }
 
 
@@ -254,8 +247,7 @@ cSeaBackground::cSeaBackground()noexcept
 cSeaBackground::~cSeaBackground()
 {
     // 
-    if(m_pUnderSound->EnableRef(this))
-        m_pUnderSound->Stop();
+    this->__ExitOwn();
 }
 
 
@@ -265,6 +257,29 @@ void cSeaBackground::__InitOwn()
 {
     // create underwater-surface object
     m_pWater = new cUnderWater();
+
+    // load base sound-effect
+    m_pBaseSound = Core::Manager::Resource->Get<coreSound>("environment_sea.wav");
+    m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+    {
+        pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
+    });
+}
+
+
+// ****************************************************************
+// 
+void cSeaBackground::__ExitOwn()
+{
+    // 
+    SAFE_DELETE(m_pWater)
+
+    // stop base sound-effect
+    m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+    {
+        if(pResource->EnableRef(this))
+            pResource->Stop();
+    });
 }
 
 
@@ -302,9 +317,9 @@ void cSeaBackground::__MoveOwn()
     // 
     m_fWaveTime.Update(1.4f);
 
-    // 
-    if(m_pUnderSound->EnableRef(this))
-        m_pUnderSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
+    // adjust volume of the base sound-effect
+    if(m_pBaseSound->EnableRef(this))
+        m_pBaseSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
 }
 
 

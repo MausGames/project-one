@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -21,6 +21,9 @@ cShip::cShip()noexcept
 {
     // 
     this->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    
+    
+    this->DefineTexture(1u, "menu_background_black.png");
 }
 
 

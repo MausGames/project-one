@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -146,7 +146,7 @@ void cWorldMap::Move()
 
     // 
     m_Tooltip.SetAlpha(this->GetAlpha());
-    m_Tooltip.ShowText(TOOLTIP_OBJECT(m_Cursor), TOOLTIP_ONELINER, I_TO_P(m_iNewPin), "%s %u\n%s", Core::Language->GetString("MISSION"), m_iNewPin, coreData::StrUpper(g_aMissionData[m_iNewPin].pcName));
+    m_Tooltip.ShowText(TOOLTIP_OBJECT(m_Cursor), TOOLTIP_ONELINER, I_TO_P(m_iNewPin), "%s %u\n%s", Core::Language->GetString("MISSION"), m_iNewPin, g_aMissionData[m_iNewPin].pcName);
     m_Tooltip.UseColor(1u, g_aMissionData[m_iNewPin].vColor);
     m_Tooltip.Move();
 }

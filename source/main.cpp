@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -271,10 +271,10 @@ void CoreApp::Move()
 
             // move special-effects
             g_pSpecialEffects->Move();
-
-            // move post-processing
-            g_pPostProcessing->Move();
         }
+
+        // move post-processing
+        g_pPostProcessing->Move();   // TODO 1: splitscreen value should not be updated outside of pause, but rest should
 
         // update the music-player
         g_MusicPlayer.Update();
@@ -420,6 +420,9 @@ static void ReshapeGame()
 
     // reshape engine
     Core::Reshape();
+
+    // 
+    g_pMenu->InvokePauseStep();
 }
 
 
@@ -435,8 +438,8 @@ static void DebugGame()
         if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(LALT), CORE_INPUT_HOLD))
         {
             sGameOptions oOptions = {};
-            oOptions.iMode       = GAME_MODE_STANDARD;
             oOptions.iType       = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(X), CORE_INPUT_HOLD) ? GAME_TYPE_COOP : GAME_TYPE_SOLO;
+            oOptions.iMode       = GAME_MODE_STANDARD;
             oOptions.iDifficulty = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(V), CORE_INPUT_HOLD) ? GAME_DIFFICULTY_HARD : GAME_DIFFICULTY_NORMAL;
             for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
             {
@@ -461,8 +464,8 @@ static void DebugGame()
         else if(Core::Input->GetKeyboardButton(CORE_INPUT_KEY(RALT), CORE_INPUT_HOLD))
         {
             sGameOptions oOptions = {};
-            oOptions.iMode       = GAME_MODE_STANDARD;
             oOptions.iType       = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(X), CORE_INPUT_HOLD) ? GAME_TYPE_COOP : GAME_TYPE_SOLO;
+            oOptions.iMode       = GAME_MODE_STANDARD;
             oOptions.iDifficulty = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(V), CORE_INPUT_HOLD) ? GAME_DIFFICULTY_HARD : GAME_DIFFICULTY_NORMAL;
             for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
             {
@@ -615,6 +618,7 @@ static void DebugGame()
         {
             c_cast<coreUintW&>(g_pGame->GetCurMission()->GetCurSegmentIndex()) = MISSION_NO_SEGMENT;
             g_pGame->GetCurMission()->SkipStage();
+            g_pGame->GetBulletManagerEnemy()->ClearBullets(false);
         }
     }
 

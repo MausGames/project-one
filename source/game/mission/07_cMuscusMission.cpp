@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -199,6 +199,9 @@ void cMuscusMission::DisablePearl(const coreUintW iIndex, const coreBool bAnimat
 
     // 
     REMOVE_BIT(m_iPearlActive, iIndex)
+
+    // 
+    m_apStrikeTarget[iIndex] = NULL;   // only
 
     // 
     if(!bAnimated)

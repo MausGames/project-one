@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -155,12 +155,15 @@ coreUintW cSnow::DrawPoint(const coreVector2 vPosition, const coreFloat fSize, c
 coreUintW cSnow::DrawLine(const coreVector2 vPosition, const coreFloat fSize, const coreBool bHorizontal, const coreUint8 iType)
 {
     coreUintW iHit = 0u;
+    
+    // TODO 1: fsize needs to generate same width regardless of offset, same for dot ?
+    const coreFloat fRealSize = fSize;// / (FOREGROUND_AREA.x * 1.1f); I_TO_F(SNOW_SIZE)
 
     // 
-    const coreUintW iFromX =  bHorizontal ? (0u)             : cSnow::__GetMapIndex(vPosition.x - fSize);
-    const coreUintW iToX   =  bHorizontal ? (SNOW_SIZE - 1u) : cSnow::__GetMapIndex(vPosition.x + fSize);
-    const coreUintW iFromY = !bHorizontal ? (0u)             : cSnow::__GetMapIndex(vPosition.y - fSize);
-    const coreUintW iToY   = !bHorizontal ? (SNOW_SIZE - 1u) : cSnow::__GetMapIndex(vPosition.y + fSize);
+    const coreUintW iFromX =  bHorizontal ? (0u)             : cSnow::__GetMapIndex(vPosition.x - fRealSize);
+    const coreUintW iToX   =  bHorizontal ? (SNOW_SIZE - 1u) : cSnow::__GetMapIndex(vPosition.x + fRealSize);
+    const coreUintW iFromY = !bHorizontal ? (0u)             : cSnow::__GetMapIndex(vPosition.y - fRealSize);
+    const coreUintW iToY   = !bHorizontal ? (SNOW_SIZE - 1u) : cSnow::__GetMapIndex(vPosition.y + fRealSize);
 
     // 
     for(coreUintW j = iFromY; j <= iToY; ++j)

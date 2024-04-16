@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -35,6 +35,8 @@ cPlayer::cPlayer()noexcept
 , m_vOldDir         (coreVector2(0.0f,1.0f))
 , m_fRangeValue     (0.0f)
 , m_fArrowValue     (0.0f)
+
+, vTest (coreVector2(0.0f,0.0f))
 {
     // load object resources
     this->DefineTexture(0u, "ship_player.png");
@@ -42,7 +44,7 @@ cPlayer::cPlayer()noexcept
 
     // set object properties
     this->SetSize             (coreVector3(1.0f,1.0f,1.0f) * PLAYER_SIZE_FACTOR);
-    this->SetDirection        (coreVector3(0.0f,1.0f,0.0f));
+    this->coreObject3D::SetDirection        (coreVector3(0.0f,1.0f,0.0f));
     this->SetOrientation      (coreVector3(0.0f,0.0f,1.0f));
     this->SetCollisionModifier(coreVector3(0.0f,0.0f,0.0f));
     this->SetTexSize          (coreVector2(1.2f,1.2f));
@@ -52,7 +54,7 @@ cPlayer::cPlayer()noexcept
 
     // 
     this->SetMaxHealth(PLAYER_LIVES);
-    this->SetBaseColor(COLOR_SHIP_GREY * 0.5f);
+    this->SetBaseColor(COLOR_SHIP_GREY * 0.6f);
 
     // load first weapons
     for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
@@ -94,7 +96,7 @@ cPlayer::cPlayer()noexcept
     m_Wind.DefineModel  ("object_sphere.md3");
     m_Wind.DefineTexture(0u, "effect_energy.png");
     m_Wind.DefineProgram("effect_energy_direct_program");
-    m_Wind.SetColor4    (coreVector4(COLOR_ENERGY_BLUE * 1.6f, 0.0f));
+    m_Wind.SetAlpha     (0.0f);
     m_Wind.SetTexSize   (coreVector2(1.0f,5.0f));
     m_Wind.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 
@@ -168,6 +170,7 @@ void cPlayer::Configure(const coreUintW iShipType)
     // 
     m_Range     .SetColor3(vEnergy);
     m_Arrow     .SetColor3(vEnergy * (0.9f/1.1f));
+    m_Wind      .SetColor3(vEnergy * (1.6f/1.1f));
     m_aShield[0].SetColor3(vEnergy * (1.0f/1.1f));
     m_aShield[1].SetColor3(vEnergy * (1.0f/1.1f));
     m_Exhaust   .SetColor3(vEnergy);
@@ -242,6 +245,23 @@ void cPlayer::Render()
     {
         // 
         cLodObject::RenderHighObject(this);
+
+#if defined(_P1_VIDEO_)
+        glDepthFunc(GL_ALWAYS);
+        // 
+        for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
+            m_apWeapon[i]->Render();
+
+        // 
+        g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Range);
+        g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Arrow);
+
+        // 
+        m_Arrow.Render();   // # swapped
+        m_Range.Render();
+        //m_Wind .Render();
+    glDepthFunc(GL_LEQUAL);
+#endif
     }
 }
 
@@ -256,6 +276,7 @@ void cPlayer::RenderBefore()
         m_Bubble    .Render();
         m_aShield[1].Render();
         m_Exhaust   .Render();
+        m_Wind .Render();
     }
 }
 
@@ -272,6 +293,7 @@ void cPlayer::RenderAfter()
 {
     if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_DEAD))
     {
+#if !defined(_P1_VIDEO_)
         // 
         for(coreUintW i = 0u; i < PLAYER_EQUIP_WEAPONS; ++i)
             m_apWeapon[i]->Render();
@@ -283,7 +305,8 @@ void cPlayer::RenderAfter()
         // 
         m_Arrow.Render();   // # swapped
         m_Range.Render();
-        m_Wind .Render();
+        //m_Wind .Render();
+#endif
     }
 }
 
@@ -311,7 +334,7 @@ void cPlayer::Move()
                 vNewDir =  vNewDir.Rotated90();
 
             // set new direction
-            this->SetDirection(coreVector3(vNewDir, 0.0f));
+            this->coreObject3D::SetDirection(coreVector3(vNewDir, 0.0f));
         }
 
         if(!HAS_FLAG(m_iStatus, PLAYER_STATUS_NO_INPUT_ROLL))
@@ -326,16 +349,19 @@ void cPlayer::Move()
             // move the ship
             vNewPos += (m_pInput->vMove * this->CalcMoveSpeed() + m_vForce) * TIME;
 
+            // 
+            const coreVector2 vDiff = (vNewPos - this->GetPosition().xy()) * RCP(MAX(TIME * FRAMERATE_MIN, CORE_MATH_PRECISION));
+            const coreVector2 vDiff2 = vDiff - vTest;
+            if(!vDiff2.IsNull()) vTest = vTest + vDiff2.Normalized() * (30.0f * TIME * SmoothTowards(vDiff2.Length(), 1.0f));
+            vNewOri = coreVector3(CLAMP(vTest.x, -0.8f, 0.8f), CLAMP(vTest.y, -0.8f, 0.8f), 1.0f).NormalizedUnsafe();
+
             // restrict movement to the foreground area
                  if(vNewPos.x < m_vArea.x) {vNewPos.x = m_vArea.x; m_vForce.x =  ABS(m_vForce.x);}
             else if(vNewPos.x > m_vArea.z) {vNewPos.x = m_vArea.z; m_vForce.x = -ABS(m_vForce.x);}
                  if(vNewPos.y < m_vArea.y) {vNewPos.y = m_vArea.y; m_vForce.y =  ABS(m_vForce.y);}
             else if(vNewPos.y > m_vArea.w) {vNewPos.y = m_vArea.w; m_vForce.y = -ABS(m_vForce.y);}
-
-            // 
-            const coreVector2 vDiff = (vNewPos - this->GetPosition().xy()) * RCP(MAX(TIME * FRAMERATE_MIN, CORE_MATH_PRECISION));
-            vNewOri = coreVector3(CLAMP(vDiff.x, -0.6f, 0.6f), CLAMP(vDiff.y, -0.6f, 0.6f), 1.0f).NormalizedUnsafe();
         }
+        else vTest = coreVector2(0.0f,0.0f);
 
         // 
         if(m_fRollTime >= 1.0f) this->EndRolling();
@@ -358,7 +384,7 @@ void cPlayer::Move()
             }
 
             // set new position and orientation
-            this->SetPosition   (coreVector3(vNewPos, 0.0f));
+            this->coreObject3D::SetPosition   (coreVector3(vNewPos, 0.0f));
             this->SetOrientation(vNewOri);
         }
 
@@ -379,14 +405,14 @@ void cPlayer::Move()
         const coreVector3 vOldOri  = this->GetOrientation();
 
         // 
-        this->SetDirection  (vOldDir * mTiltMat);
+        this->coreObject3D::SetDirection  (vOldDir * mTiltMat);
         this->SetOrientation(vOldOri * mTiltMat);
 
         // move the 3d-object
         this->coreObject3D::Move();
 
         // 
-        this->SetDirection  (vOldDir);
+        this->coreObject3D::SetDirection  (vOldDir);
         this->SetOrientation(vOldOri);
 
         // update all weapons (shooting and stuff)
@@ -462,7 +488,7 @@ void cPlayer::Move()
             // 
             m_Wind.SetPosition (this->GetPosition());
             m_Wind.SetSize     (coreVector3(1.0f,1.08f,1.0f) * PLAYER_WIND_SIZE * PLAYER_SIZE_FACTOR * LERP(1.0f, 1.5f, POW3(m_fRollTime)));
-            m_Wind.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.4f));
+            m_Wind.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.3f));
             m_Wind.Move();
         }
 
@@ -485,7 +511,8 @@ void cPlayer::Move()
             m_Bubble.SetPosition (this->GetPosition());
             m_Bubble.SetSize     (coreVector3(1.0f,1.0f,1.0f) * PLAYER_BUBBLE_SIZE * PLAYER_SIZE_FACTOR * m_Bubble.GetAlpha());
             m_Bubble.SetDirection(coreVector3(vDir, 0.0f));
-            m_Bubble.SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.2f));
+            //m_Bubble.SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.2f));
+                            m_Bubble.SetTexOffset(m_Bubble.GetTexOffset() - 0.2f * TIME * m_Bubble.GetDirection().xy());
             m_Bubble.Move();
         }
 
@@ -647,6 +674,8 @@ void cPlayer::Resurrect()
 
     // add ship to the game
     this->_Resurrect();
+    
+    this->EnableWind(this->GetDirection().xy());
 }
 
 
@@ -830,7 +859,7 @@ void cPlayer::TurnIntoPlayer()
     this->Configure(GET_BITVALUE(m_iLook, 4u, 0u));//, coreVector4::UnpackUnorm4x8(GET_BITVALUE(m_iLook, 8u, 4u)).xyz());
     this->EquipWeapon(0u, GET_BITVALUE(m_iLook, 4u, 12u));
     this->ActivateDarkShading();
-    // TODO: color
+    // TODO 1: color
 }
 
 
@@ -1007,7 +1036,7 @@ coreBool cPlayer::TestCollisionPrecise(const coreObject3D* pObject, coreVector3*
 {
     ASSERT(pObject && pvIntersection && pbFirstHit)
 
-#if 0
+#if 0   // # disable volume collision
 
     // 
     if(Core::Manager::Object->TestCollision(&m_Dot, pObject, pvIntersection))

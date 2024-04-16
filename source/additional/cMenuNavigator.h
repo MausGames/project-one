@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #pragma once
@@ -16,6 +16,7 @@
 // TODO 3: allow selecting the current tab when going below bottom, instead of skipping it
 // TODO 1: allow hiding cursor (e.g. for world-map)
 // TODO 1: correctly handle button-remapping feature
+// TODO 1: auto-move bei gedrückt-halten, aber mit niedrigerer geschwindigkeit
 
 
 // ****************************************************************

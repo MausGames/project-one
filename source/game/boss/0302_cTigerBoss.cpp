@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -14,6 +14,7 @@
 // TODO 1: make sure to disable wind on boss-death (hard if necessary)
 // TODO 1: for bounce-bullets, change fly time or position, to make sure whole line disappears together (or switch to bounce count)
 // TODO 1: sting calculations only for enabled stings
+// TODO 1: raupen-spuren im sand bei einigen gegner-welle ndavor schon (foreshadowing)
 // dying enemies flying towards boss doesn't feel right when you yourself are flying above boss
 // all together: wind, mines, enemies, haubitze ... is just too much
 
@@ -214,10 +215,24 @@ void cTigerBoss::__MoveOwn()
     // 
     if(m_iPhase == 0u)
     {
+#if defined(_P1_VIDEO_)
+        PHASE_CONTROL_TIMER(0u, 0.1f, LERP_LINEAR)
+#else
         PHASE_CONTROL_TIMER(0u, 1.0f, LERP_LINEAR)
+#endif
         {
             if(PHASE_BEGINNING)
                 this->_StartBoss();
+
+#if defined(_P1_VIDEO_)
+            if(PHASE_TIME_POINT(0.1f))
+            {
+                this->__EnableStings(0u);
+                this->__EnableStings(1u);
+                this->__EnableStings(2u);
+                this->__EnableStings(3u);
+            }
+#endif
 
             if(PHASE_FINISHED)
                 PHASE_CHANGE_TO(10u)
@@ -505,6 +520,10 @@ void cTigerBoss::__MoveOwn()
         m_WeaponOld.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     }
 
+#if defined(_P1_VIDEO_)
+    m_Weapon.SetAlpha(0.0f);
+    m_WeaponOld.SetAlpha(0.0f);
+#endif
 
 
 
@@ -537,6 +556,8 @@ void cTigerBoss::__MoveOwn()
         m_aStingRaw[i].SetEnabled    (fExtend ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
 
         if((fPrevExtend < 0.3f) && (fExtend >= 0.3f)) g_pSpecialEffects->CreateSplashColor(coreVector3(vBase + vDir * 2.0f, 0.0f), 5.0f, 3u, COLOR_ENERGY_WHITE);
+        
+        if((fPrevExtend < 0.3f) && (fExtend >= 0.3f)) g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_TINY);
     }
 
     // 
@@ -554,7 +575,7 @@ void cTigerBoss::__MoveOwn()
                ((vPos.y <= -FOREGROUND_AREA.y + CORE_MATH_PRECISION) && (m_afStingTime[2] >= 30.0f)) ||
                ((vPos.y >=  FOREGROUND_AREA.y - CORE_MATH_PRECISION) && (m_afStingTime[3] >= 30.0f)))
             {
-                pPlayer->TakeDamage(5u, ELEMENT_NEUTRAL, vPos);
+                pPlayer->TakeDamage(5, ELEMENT_NEUTRAL, vPos);
             }
         }
     });

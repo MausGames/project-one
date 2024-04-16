@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -71,6 +71,7 @@ void cHarenaMission::__SetupOwn()
     // TODO 1: chess board pattern quick 1-2-1-2
     // TODO 1: sandsturm
     // TODO 1: low FPS movement
+    // TODO 1: erste gruppe bei linie sollte oben sein und horizontal, dann normal weiter
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -323,6 +324,7 @@ void cHarenaMission::__SetupOwn()
     // TODO 1: ganz letzter gegner verfolgt einem länger und direkt
     // TODO 1: erstes pattern vielleicht im quadrat statt diamant
     // TODO 1: sandsturm
+    // TODO 1: rotate enemies in circle (either here, or in order-wave)
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         constexpr coreUintW iNumEnemies = 6u;
@@ -549,6 +551,8 @@ void cHarenaMission::__SetupOwn()
     // TODO 1: give central effect to highlight damaging touch   
     // TODO 1: check for and fix shadow artifacts, when jumping behind near clipping plane of shadow viewport (maybe fade out near plane)
     // TODO 1: enemies come from bottom out of sand (no movement)
+    // TODO 1: infinitely flying enemy(s) which needs to be destroyed
+    // TODO 1: the whole tower moves along with everything
     // add effect to highlight bottom enemies
     // if the last enemy is invincible, he should just die when starting to move
     // 
@@ -1299,7 +1303,7 @@ void cHarenaMission::__SetupOwn()
                         if((ABS(vDiff.x) < pBoard->GetCollisionRange().x) &&
                            (ABS(vDiff.y) < pBoard->GetCollisionRange().y))
                         {
-                            if(bIsActive &&  pPlayer->IsNormal ()) pPlayer->TakeDamage(10u, ELEMENT_NEUTRAL, pPlayer->GetPosition().xy());
+                            if(bIsActive &&  pPlayer->IsNormal ()) pPlayer->TakeDamage(10, ELEMENT_NEUTRAL, pPlayer->GetPosition().xy());
                             if(bIsQuiet  && !pPlayer->IsRolling()) this->LaunchSpike(i, 6.0f * RCP(I_TO_F(g_pGame->GetNumPlayers())));
                         }
                     });
@@ -1406,12 +1410,14 @@ void cHarenaMission::__SetupOwn()
     {
         if(STAGE_BEGINNING)
         {
+#if !defined(_P1_VIDEO_)
             //g_pEnvironment->GetBackground()->GetOutdoor()->LerpHeightNow(0.4583f, -13.83f);
             g_pEnvironment->GetBackground()->SetGroundDensity(0u, 0.0f);
             g_pEnvironment->GetBackground()->SetGroundDensity(1u, 0.0f);
             g_pEnvironment->GetBackground()->SetGroundDensity(2u, 0.0f);
             g_pEnvironment->GetBackground()->SetGroundDensity(3u, 0.0f);
             g_pEnvironment->SetTargetSpeed(4.0f, 1.0f);
+#endif
         }
 
         UNUSED STAGE_ADD_SQUAD(pSquad1, cArrowEnemy, TIGER_ENEMIES)

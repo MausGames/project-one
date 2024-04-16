@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -20,7 +20,7 @@ cTitleMenu::cTitleMenu()noexcept
     m_GameLogo.DefineTexture(0u, "game_logo.png");
     m_GameLogo.DefineProgram("default_2d_program");
     m_GameLogo.SetPosition  (coreVector2(0.0f,0.1f));
-    m_GameLogo.SetSize      (coreVector2(1.0f,0.25f) * 0.9f);
+    m_GameLogo.SetSize      (coreVector2(1.0f,0.25f) * 0.85f);
     m_GameLogo.SetColor3    (coreVector3(1.0f,1.0f,1.0f) * 1.05f);
 
     m_PromptText.Construct      (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);

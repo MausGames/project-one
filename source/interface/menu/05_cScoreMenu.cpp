@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -179,7 +179,7 @@ void cScoreMenu::LoadMissions()
 
     // 
     m_Mission.AddEntry("Global", 0u);   // TODO 1: language
-    for(coreUintW i = 0u, ie = ARRAY_SIZE(g_aMissionData); i < ie; ++i) m_Mission.AddEntry(coreData::StrUpper(g_aMissionData[i].pcName), 0u);
+    for(coreUintW i = 0u, ie = ARRAY_SIZE(g_aMissionData); i < ie; ++i) m_Mission.AddEntry(g_aMissionData[i].pcName, 0u);
 
     // 
     m_Mission.SelectIndex((iOldEntry < m_Mission.GetNumEntries()) ? iOldEntry : 0u);

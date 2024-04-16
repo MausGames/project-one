@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #pragma once
@@ -78,7 +78,7 @@ private:
     coreUint8  m_iHandleIndex;                       // 
     coreUint8  m_iAlgorithm;                         // geometry algorithm ID
     coreFloat  m_fGrade;                             // randomness grade
-    coreUint32 m_iSeed;                              // 
+    coreUint64 m_iSeed;                              // 
 
     const coreChar* m_pcTop;                         // 
     const coreChar* m_pcBottom;                      // 
@@ -101,7 +101,7 @@ private:
 
 public:
     cOutdoor()noexcept;
-    cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom, const coreUint8 iAlgorithm, const coreFloat fGrade, const coreUint32 iSeed = CORE_RAND_SEED)noexcept;
+    cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom, const coreUint8 iAlgorithm, const coreFloat fGrade, const coreUint64 iSeed = CORE_RAND_SEED)noexcept;
     ~cOutdoor()final;
 
     DISABLE_COPY(cOutdoor)
@@ -112,7 +112,7 @@ public:
     void RenderDepth();
 
     // load outdoor resources
-    void LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade, const coreUint32 iSeed);
+    void LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade, const coreUint64 iSeed);
     void LoadTextures(const coreChar* pcTextureTop, const coreChar* pcTextureBottom);
     void LoadProgram (const coreBool bGlow);
 

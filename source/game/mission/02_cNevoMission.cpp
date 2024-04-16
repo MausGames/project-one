@@ -2,13 +2,13 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
 
-
+// TODO 3: render-reihenfolge der blasts is statisch, manchmal überlagern sie sich, nicht konsistent
 // ****************************************************************
 // constructor
 cNevoMission::cNevoMission()noexcept
@@ -110,14 +110,17 @@ cNevoMission::cNevoMission()noexcept
         {
             // load object resources
             coreObject3D* pArrow = &m_aArrowRaw[i];
-            pArrow->DefineModel  ("bullet_cone.md3");
+            //pArrow->DefineModel  ("bullet_cone.md3");
+            pArrow->DefineModel  ("object_arrow.md3");
             pArrow->DefineTexture(0u, "effect_energy.png");
             pArrow->DefineProgram("effect_energy_flat_invert_program");
 
             // set object properties
-            pArrow->SetSize   (coreVector3(1.35f,1.55f,1.35f) * 1.3f);
-            pArrow->SetColor3 (COLOR_ENERGY_GREEN * 0.6f);
-            pArrow->SetTexSize(coreVector2(0.5f,0.2f) * 1.3f);
+            //pArrow->SetSize   (coreVector3(1.35f,1.55f,1.35f) * 1.3f);
+            pArrow->SetSize   (coreVector3(1.0f,1.0f,1.0f) * 1.3f * 1.0f);
+            pArrow->SetColor3 (COLOR_ENERGY_GREEN * 0.8f);
+            //pArrow->SetTexSize(coreVector2(0.5f,0.2f) * 1.3f);
+            pArrow->SetTexSize(coreVector2(0.5f,0.2f) * 1.2f);
             pArrow->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
@@ -141,7 +144,11 @@ cNevoMission::cNevoMission()noexcept
             pBlock->DefineProgram("effect_energy_flat_spheric_program");
 
             // set object properties
+#if defined(_P1_VIDEO_)
+            pBlock->SetColor3 (COLOR_ENERGY_YELLOW);
+#else
             pBlock->SetColor3 (COLOR_ENERGY_ORANGE);
+#endif
             pBlock->SetTexSize(coreVector2(3.0f,1.2f) * 0.55f);
             pBlock->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
@@ -423,8 +430,10 @@ void cNevoMission::EnableContainer(const coreVector2 vPosition)
 
     // 
     m_Container.SetPosition(coreVector3(vPosition, 0.0f));
+#if !defined(_P1_VIDEO_)
     m_Container.SetEnabled (CORE_OBJECT_ENABLE_ALL);
     cShadow::GetGlobalContainer()->BindObject(&m_Container);
+#endif
 }
 
 
@@ -436,9 +445,11 @@ void cNevoMission::DisableContainer(const coreBool bAnimated)
     if(!m_Container.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
     m_Container.ChangeType(0);
 
+#if !defined(_P1_VIDEO_)
     // 
     m_Container.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     cShadow::GetGlobalContainer()->UnbindObject(&m_Container);
+#endif
 
     // 
     if(bAnimated) g_pSpecialEffects->MacroExplosionPhysicalDarkBig(m_Container.GetPosition());
@@ -499,8 +510,9 @@ void cNevoMission::__RenderOwnOver()
 
     // 
     m_Arrow.Render();
-    g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_DIRECT)->ApplyList(&m_Arrow);
+    g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyList(&m_Arrow);
 
+#if !defined(_P1_VIDEO_)
     // 
     if(m_bOverdraw) DEPTH_PUSH
                else DEPTH_PUSH_SHIP
@@ -508,6 +520,7 @@ void cNevoMission::__RenderOwnOver()
     // 
     cLodObject::RenderHighObject(&m_Container);
     g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(&m_Container);
+#endif
 }
 
 

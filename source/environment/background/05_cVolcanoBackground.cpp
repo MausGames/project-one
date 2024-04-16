@@ -2,13 +2,11 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
-
-// TODO 1: lava texture too detailed
 
 
 // ****************************************************************
@@ -19,6 +17,9 @@ cVolcanoBackground::cVolcanoBackground()noexcept
 {
     coreBatchList* pList1;
     coreBatchList* pList2;
+
+    // 
+    this->__InitOwn();
 
     // create outdoor-surface object
     m_pOutdoor = new cOutdoor("rock", "lava", 7u, 4.0f);
@@ -311,14 +312,6 @@ cVolcanoBackground::cVolcanoBackground()noexcept
         m_aSmokeEffect.emplace_back(&m_Smoke); 
         m_aSmokeEffect.back().SetOrigin(*it); 
     }
-
-
-    // 
-    m_pLavaSound = Core::Manager::Resource->Get<coreSound>("environment_lava.wav");
-    m_pLavaSound.OnUsableOnce([this, pResource = m_pLavaSound]()
-    {
-        pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
-    });
 }
 
 
@@ -331,11 +324,35 @@ cVolcanoBackground::~cVolcanoBackground()
     m_Smoke.ClearAll();  
 
     m_aSmokeEffect.clear();
-
-
+    
     // 
-    if(m_pLavaSound->EnableRef(this))
-        m_pLavaSound->Stop();
+    this->__ExitOwn();
+}
+
+
+// ****************************************************************
+// 
+void cVolcanoBackground::__InitOwn()
+{
+    // load base sound-effect
+    m_pBaseSound = Core::Manager::Resource->Get<coreSound>("environment_volcano.wav");
+    m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+    {
+        pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
+    });
+}
+
+
+// ****************************************************************
+// 
+void cVolcanoBackground::__ExitOwn()
+{
+    // stop base sound-effect
+    m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+    {
+        if(pResource->EnableRef(this))
+            pResource->Stop();
+    });
 }
 
 
@@ -433,7 +450,7 @@ void cVolcanoBackground::__MoveOwn()
     pList->MoveNormal();
 
 
-    // 
-    if(m_pLavaSound->EnableRef(this))
-        m_pLavaSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
+    // adjust volume of the base sound-effect
+    if(m_pBaseSound->EnableRef(this))
+        m_pBaseSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
 }

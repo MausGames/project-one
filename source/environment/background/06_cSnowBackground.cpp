@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -18,11 +18,11 @@ cSnowBackground::cSnowBackground()noexcept
     coreBatchList* pList1;
     coreBatchList* pList2;
 
-    // create outdoor-surface object
-    m_pOutdoor = new cOutdoor("snow", "snow", 1u, 4.0f);
-
     // 
     this->__InitOwn();
+
+    // create outdoor-surface object
+    m_pOutdoor = new cOutdoor("snow", "snow", 1u, 4.0f);
 /*
     // allocate stone list
     pList1 = new coreBatchList(SNOW_STONE_RESERVE);
@@ -296,11 +296,43 @@ cSnowBackground::cSnowBackground()noexcept
 
 
 // ****************************************************************
+// destructor
+cSnowBackground::~cSnowBackground()
+{
+    // 
+    this->__ExitOwn();
+}
+
+
+// ****************************************************************
 // 
 void cSnowBackground::__InitOwn()
 {
     // 
     m_pWater = new cIceWater("environment_clouds_blue.png");
+
+    // load base sound-effect
+    m_pBaseSound = Core::Manager::Resource->Get<coreSound>("environment_snow.wav");
+    m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+    {
+        pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
+    });
+}
+
+
+// ****************************************************************
+// 
+void cSnowBackground::__ExitOwn()
+{
+    // 
+    SAFE_DELETE(m_pWater)
+
+    // stop base sound-effect
+    m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+    {
+        if(pResource->EnableRef(this))
+            pResource->Stop();
+    });
 }
 
 
@@ -348,4 +380,8 @@ void cSnowBackground::__MoveOwn()
 
     // 
     m_fSnowWave.UpdateMod(SQRT(MAX(ABS(g_pEnvironment->GetSpeed()), 1.0f)), 16.0f);
+
+    // adjust volume of the base sound-effect
+    if(m_pBaseSound->EnableRef(this))
+        m_pBaseSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
 }

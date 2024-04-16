@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -106,7 +106,7 @@ void cMenuNavigator::Update()
 
             if(HAS_FLAG(m_aObject.at(m_pCurObject).eType, MENU_TYPE_SWITCH_PRESS))
             {
-                coreSwitchBoxU8* pSwitchBox = d_cast<coreSwitchBoxU8*>(m_pCurObject);
+                coreSwitchBoxU16* pSwitchBox = d_cast<coreSwitchBoxU16*>(m_pCurObject);
 
                      if(Core::Input->GetJoystickButton(i, 1u, CORE_INPUT_HOLD)) {m_vMouseOffset = GetTranslation(*pSwitchBox->GetArrow(0u)) - GetTranslation(*pSwitchBox); nPressFunc();}
                 else if(Core::Input->GetJoystickButton(i, 0u, CORE_INPUT_HOLD)) {m_vMouseOffset = GetTranslation(*pSwitchBox->GetArrow(1u)) - GetTranslation(*pSwitchBox); nPressFunc();}
@@ -164,7 +164,7 @@ void cMenuNavigator::Update()
 
                 if(HAS_FLAG(oEntry.eType, MENU_TYPE_SWITCH_MOVE))
                 {
-                    coreSwitchBoxU8* pSwitchBox = d_cast<coreSwitchBoxU8*>(m_pCurObject);
+                    coreSwitchBoxU16* pSwitchBox = d_cast<coreSwitchBoxU16*>(m_pCurObject);
 
                          if(iPack == 2u) {m_vMouseOffset = GetTranslation(*pSwitchBox->GetArrow(0u)) - GetTranslation(*pSwitchBox); nPressFunc();}
                     else if(iPack == 6u) {m_vMouseOffset = GetTranslation(*pSwitchBox->GetArrow(1u)) - GetTranslation(*pSwitchBox); nPressFunc();}

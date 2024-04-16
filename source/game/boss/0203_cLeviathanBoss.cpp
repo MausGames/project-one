@@ -2,13 +2,14 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
 
 // TODO 1: there could be a wave-mechanik while boss is circling
+// TODO 1: strahlen-spuren am boden bei einigen gruppen davor (foreshadowing)
 
 
 // ****************************************************************
@@ -157,8 +158,8 @@ void cLeviathanBoss::__RenderOwnOver()
         // TODO 1: check if underlying + player-bullets can be moved inside ship depth (e.g. ship: 0.0-0.5, under: 0.2-0.3)
 
         // TODO 1: DEPTH_PUSH even even lasers, DEPTH_PUSH_SHIP when spinning
-        DEPTH_PUSH
-        //DEPTH_PUSH_SHIP
+        //DEPTH_PUSH
+        DEPTH_PUSH_SHIP
 
         // 
         m_Ray.Render();
@@ -581,7 +582,11 @@ void cLeviathanBoss::__MoveOwn()
         const coreVector3 vDir  = pPart->GetDirection();
 
         // 
+#if defined(_P1_VIDEO_)
+        const coreVector3 vColor = COLOR_ENERGY_YELLOW * 0.8f;
+#else
         const coreVector3 vColor = LERP(coreMath::IsNear(vDir.z, 0.0f, LEVIATHAN_RAY_HEIGHT) ? (COLOR_ENERGY_YELLOW * 0.8f) : (COLOR_ENERGY_BLUE * (0.8f - 0.4f * ABS(vDir.z))), pRay->GetColor3(), FrictionFactor(18.0f));
+#endif
         const coreFloat   fAlpha = (fNewTime < 1.0f) ? (0.6f * (1.0f - fNewTime)) : 1.0f;
 
         if(!bOverdrive)

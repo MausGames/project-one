@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -15,11 +15,11 @@ cStomachBackground::cStomachBackground()noexcept
 {
     coreBatchList* pList1;
 
-    // create outdoor-surface object
-    m_pOutdoor = new cOutdoor("mars", "rock", 9u, 4.0f);
-
     // 
     this->__InitOwn();
+
+    // create outdoor-surface object
+    m_pOutdoor = new cOutdoor("mars", "rock", 9u, 4.0f);
 
     // allocate cloud list
     pList1 = new coreBatchList(STOMACH_CLOUD_RESERVE);
@@ -62,11 +62,29 @@ cStomachBackground::cStomachBackground()noexcept
 
 
 // ****************************************************************
+// destructor
+cStomachBackground::~cStomachBackground()
+{
+    // 
+    this->__ExitOwn();
+}
+
+
+// ****************************************************************
 // 
 void cStomachBackground::__InitOwn()
 {
     // create water-surface object
     m_pWater = new cWater("environment_mars_diff.png");
+}
+
+
+// ****************************************************************
+// 
+void cStomachBackground::__ExitOwn()
+{
+    // 
+    SAFE_DELETE(m_pWater)
 }
 
 

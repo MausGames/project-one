@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -134,16 +134,18 @@ void cMessierBoss::__MoveOwn()
             {
                 this->_StartBoss();
 
-                //this->__EnableRings();
+                this->__EnableRings();
 
+#if !defined(_P1_VIDEO_)
                 for(coreUintW i = 0u; i < MESSIER_ENEMIES; ++i)
                 {
                     pSquad1->GetEnemy(i)->Resurrect();
                 }
+#endif
             }
 
             if(PHASE_FINISHED)
-                PHASE_CHANGE_TO(10u)
+                PHASE_CHANGE_TO(20u)
         });
     }
 
@@ -188,6 +190,7 @@ void cMessierBoss::__MoveOwn()
             }
         });
 #endif
+#if 0
         PHASE_CONTROL_TICKER(0u, 0u, 10.0f, LERP_LINEAR)
         {
             const coreVector2 vPos = this->GetPosition().xy();
@@ -198,6 +201,7 @@ void cMessierBoss::__MoveOwn()
             g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.0f, this, vPos,  vDir.Rotated90())->ChangeSize(1.4f);
             g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.0f, this, vPos, -vDir.Rotated90())->ChangeSize(1.4f);
         });
+#endif
     }
 
     // ################################################################

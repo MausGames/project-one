@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -17,6 +17,9 @@ cDarkBackground::cDarkBackground()noexcept
 , m_fDissolve  (-1.0f)
 , m_afFade     {}
 {
+    // 
+    this->__InitOwn();
+
     // 
     m_pOutdoor = new cOutdoor();
     m_pOutdoor->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
@@ -58,6 +61,9 @@ cDarkBackground::~cDarkBackground()
 {
     // 
     m_pOutdoor->GetShadowMap()->UnbindList(&m_Block);
+
+    // 
+    this->__ExitOwn();
 }
 
 
@@ -67,6 +73,32 @@ void cDarkBackground::Dissolve()
 {
     ASSERT(coreMath::IsNear(g_pEnvironment->GetSpeed(), 0.0f))
     m_fDissolve = 2.0f;
+}
+
+
+// ****************************************************************
+// 
+void cDarkBackground::__InitOwn()
+{
+    // load base sound-effect
+    m_pBaseSound = Core::Manager::Resource->Get<coreSound>("environment_dark.wav");
+    m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+    {
+        pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
+    });
+}
+
+
+// ****************************************************************
+// 
+void cDarkBackground::__ExitOwn()
+{
+    // stop base sound-effect
+    m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+    {
+        if(pResource->EnableRef(this))
+            pResource->Stop();
+    });
 }
 
 
@@ -142,6 +174,10 @@ void cDarkBackground::__MoveOwn()
 
     // 
     m_Block.MoveNormal();
+
+    // adjust volume of the base sound-effect
+    if(m_pBaseSound->EnableRef(this))
+        m_pBaseSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
 }
 
 

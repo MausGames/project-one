@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -145,6 +145,9 @@ void cGame::Render()
         // render low-priority bullet manager
         m_BulletManagerPlayer.Render();
 
+        // 
+        m_ShieldManager.Render();
+
         // render underlying objects
         m_EnemyManager.RenderUnder();
         m_pCurMission->RenderUnder();
@@ -170,8 +173,7 @@ void cGame::Render()
         DEPTH_PUSH
 
         // 
-        m_ItemManager  .Render();
-        m_ShieldManager.Render();
+        m_ItemManager.Render();
 
         // render overlying objects
         m_EnemyManager.RenderOver();
@@ -683,7 +685,7 @@ coreBool cGame::__HandleIntro()
         else
         {
             // create spline for intro animation (YZ)
-            static coreSpline2 s_Spline = []()
+            static const coreSpline2 s_Spline = []()
             {
                 coreSpline2 oSpline(3u);
 
@@ -715,6 +717,10 @@ coreBool cGame::__HandleIntro()
                 pPlayer->SetOrientation(coreVector3(vDir.x, 0.0f, vDir.y));
                 pPlayer->UpdateExhaust (LERPB(1.0f, 0.0f, fTime));
             });
+
+#if defined(_P1_VIDEO_)
+            g_pPostProcessing->SetWallOpacity(CLAMP(1.35f * (m_fTimeInOut-GAME_INTRO_OFFSET), 0.0f, 1.0f));
+#endif
         }
     }
 
@@ -931,7 +937,8 @@ void cGame::__HandleCollisions()
                     if(!pEnemy->ReachedDeath())
                     {
                         // 
-                        pBullet->Reflect(pEnemy, vIntersection.xy(), -pBullet->GetFlyDir());
+                        const coreVector2 vDiff = (vIntersection.xy() - pBullet->GetFlyDir() * MAX(pBullet->GetCollisionRadius() * 2.0f, pBullet->GetSpeed() * TIME)) - pEnemy->GetPosition().xy();
+                        pBullet->Reflect(pEnemy, vIntersection.xy(), vDiff.Normalized());
                     }
                 }
             }
@@ -953,13 +960,6 @@ void cGame::__HandleCollisions()
         g_pSave->EditGlobalStats      ()->iItemsCollected += 1u;
         g_pSave->EditLocalStatsMission()->iItemsCollected += 1u;
         g_pSave->EditLocalStatsSegment()->iItemsCollected += 1u;
-    });
-
-    // 
-    Core::Manager::Object->TestCollision(TYPE_SHIELD, TYPE_BULLET_PLAYER, [](coreObject3D* OUTPUT pShield, cBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit)
-    {
-        // 
-        pBullet->Reflect(pShield, vIntersection.xy());
     });
 }
 

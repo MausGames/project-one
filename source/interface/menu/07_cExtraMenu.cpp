@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -281,13 +281,15 @@ void cExtraMenu::Move()
                 this->LoadSegments(m_Mission.GetCurIndex());
 
             const coreUint64 iTimePlayed = g_pSave->GetHeader().oGlobalStats.iTimePlayed / 1000u;
+
+            #define PRINT_EXT(...)   (coreData::Print(__VA_ARGS__))
             
             // 
-            m_aStatsValue[0].SetText(PRINT("%llud %lluh %llum %llus", (iTimePlayed / 86400u), (iTimePlayed / 3600u) % 24u, (iTimePlayed / 60u) % 60u, iTimePlayed % 60u));
-            m_aStatsValue[1].SetText(PRINT("%'llu", g_pSave->GetHeader().oGlobalStats.iScoreGained));
-            m_aStatsValue[2].SetText(PRINT("%'u",  g_pSave->GetHeader().oGlobalStats.iMissionsDone));
-            m_aStatsValue[3].SetText(PRINT("%'u",  g_pSave->GetHeader().oGlobalStats.iBossesDone));
-            m_aStatsValue[4].SetText(PRINT("%'u",  g_pSave->GetHeader().oGlobalStats.iWavesDone));
+            m_aStatsValue[0].SetText(PRINT_EXT("%llud %lluh %llum %llus", (iTimePlayed / 86400u), (iTimePlayed / 3600u) % 24u, (iTimePlayed / 60u) % 60u, iTimePlayed % 60u));
+            m_aStatsValue[1].SetText(PRINT_EXT("%'llu", g_pSave->GetHeader().oGlobalStats.iScoreGained));
+            m_aStatsValue[2].SetText(PRINT_EXT("%'u",  g_pSave->GetHeader().oGlobalStats.iMissionsDone));
+            m_aStatsValue[3].SetText(PRINT_EXT("%'u",  g_pSave->GetHeader().oGlobalStats.iBossesDone));
+            m_aStatsValue[4].SetText(PRINT_EXT("%'u",  g_pSave->GetHeader().oGlobalStats.iWavesDone));
 
             // 
             cMenu::UpdateSwitchBox(&m_Mission);
@@ -369,7 +371,7 @@ void cExtraMenu::LoadMissions()
 
     // 
     m_Mission.AddEntry("Global", 0u);   // TODO 1: language
-    for(coreUintW i = 0u, ie = ARRAY_SIZE(g_aMissionData); i < ie; ++i) m_Mission.AddEntry(coreData::StrUpper(g_aMissionData[i].pcName), 0u);
+    for(coreUintW i = 0u, ie = ARRAY_SIZE(g_aMissionData); i < ie; ++i) m_Mission.AddEntry(g_aMissionData[i].pcName, 0u);
 
     // 
     m_Mission.SelectIndex((iOldEntry < m_Mission.GetNumEntries()) ? iOldEntry : 0u);

@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #pragma once
@@ -35,7 +35,6 @@
 // TODO 3: remove draw-call for volcano smoke base-objects
 // TODO 3: adding temporary objects can/should implicitly rotate the position ?
 // TODO 3: use __Reset in water class, instead of __OwnInit
-// TODO 1: sound (e.g. on cloud background) seems to be broken on resize
 
 
 // ****************************************************************
@@ -74,12 +73,13 @@
 #define DESERT_PILLAR_RESERVE (192u)
 #define DESERT_STONE_NUM      (1536u)
 #define DESERT_STONE_RESERVE  (192u)
-#define GRASS_SHIP_NUM        (1024u)
-#define GRASS_SHIP_RESERVE    (256u)
+#define GRASS_SHIP_NUM        (1024u)    
+#define GRASS_SHIP_RESERVE    (256u)    
 #define DESERT_SAND_NUM       (7u)
 
 #define SPACE_METEOR_NUM      (1536u)
 #define SPACE_METEOR_RESERVE  (1024u)
+#define SPACE_NEBULA_NUM      (4u)
 
 #define VOLCANO_SMOKE_NUM     (512u)
 #define VOLCANO_SMOKE_RESERVE (64u)
@@ -145,12 +145,13 @@ protected:
 
     static coreMemoryPool s_MemoryPool;              // 
 
-
-public:
     static coreRand       s_Rand;                    // 
     // TODO 3: rand für background, outdoor (andere location für dieses coreRand object?) (oder eigentlich nur ein stack-object in Outdoor und Background)
+
+
+public:
     cBackground()noexcept;
-    virtual ~cBackground();
+    virtual ~cBackground()override;
 
     DISABLE_COPY(cBackground)
     ENABLE_ID_EX
@@ -192,6 +193,7 @@ protected:
     // check for intersection with other objects
     static FUNC_PURE coreBool _CheckIntersection     (const coreBatchList* pObjectList, const coreVector2 vNewPos, const coreFloat fDistanceSq);
     static FUNC_PURE coreBool _CheckIntersectionQuick(const coreBatchList* pObjectList, const coreVector2 vNewPos, const coreFloat fDistanceSq);
+    static FUNC_PURE coreBool _CheckIntersectionQuick3(const coreBatchList* pObjectList, const coreVector3 vNewPos, const coreFloat fDistanceSq);
 
 
 private:
@@ -200,6 +202,7 @@ private:
 
     // own routines for derived classes
     virtual void __InitOwn        () {}
+    virtual void __ExitOwn        () {}
     virtual void __RenderOwnBefore() {}
     virtual void __RenderOwnAfter () {}
     virtual void __MoveOwn        () {}
@@ -229,10 +232,10 @@ private:
 class cGrassBackground final : public cBackground
 {
 private:
-    coreFlow  m_fLeafTime;         // 
-    coreUintW m_iLeafNum;          // 
+    coreFlow  m_fLeafTime;        // 
+    coreUintW m_iLeafNum;         // 
 
-    coreSoundPtr m_pNatureSound;   // nature sound-effect
+    coreSoundPtr m_pBaseSound;   // base sound-effect
 
 
 public:
@@ -246,6 +249,7 @@ public:
 protected:
     // execute own routines
     void __InitOwn()final;
+    void __ExitOwn()final;
     void __MoveOwn()final;
 };
 
@@ -255,9 +259,9 @@ protected:
 class cSeaBackground final : public cBackground
 {
 private:
-    coreFlow m_fWaveTime;         // 
+    coreFlow m_fWaveTime;        // 
 
-    coreSoundPtr m_pUnderSound;   // 
+    coreSoundPtr m_pBaseSound;   // base sound-effect
 
 
 public:
@@ -271,6 +275,7 @@ public:
 protected:
     // execute own routines
     void __InitOwn  ()final;
+    void __ExitOwn  ()final;
     void __MoveOwn  ()final;
     void __UpdateOwn()final;
 };
@@ -285,7 +290,7 @@ private:
     coreVector2    m_vSandMove;   // 
     coreFlow       m_fSandWave;   // 
 
-    coreSoundPtr m_pWindSound;    // wind sound-effect
+    coreSoundPtr m_pBaseSound;    // base sound-effect
 
 
 public:
@@ -304,6 +309,8 @@ public:
 
 private:
     // execute own routines
+    void __InitOwn       ()final;
+    void __ExitOwn       ()final;
     void __RenderOwnAfter()final;
     void __MoveOwn       ()final;
 };
@@ -314,16 +321,22 @@ private:
 class cSpaceBackground final : public cBackground
 {
 private:
-    coreFullscreen m_Cover;       // 
-    coreVector2    m_vCoverDir;   // 
+    coreFullscreen m_Cover;         // 
+    coreVector2    m_vCoverDir;     // 
 
-    coreFloat  m_fMeteorSpeed;    // 
-    coreUint16 m_iCopyLower;      // 
-    coreUint16 m_iCopyUpper;      // 
+    coreFloat  m_fMeteorSpeed;      // 
+    coreUint16 m_iCopyLower;        // 
+    coreUint16 m_iCopyUpper;        // 
+
+    coreFullscreen m_Nebula;        // 
+    coreVector2    m_vNebulaMove;   // 
+
+    coreSoundPtr m_pBaseSound;      // base sound-effect
 
 
 public:
     cSpaceBackground()noexcept;
+    ~cSpaceBackground()final;
 
     DISABLE_COPY(cSpaceBackground)
     ASSIGN_ID_EX(4, "Space", COLOR_MENU_MAGENTA)
@@ -339,7 +352,10 @@ public:
 
 private:
     // execute own routines
+    void __InitOwn        ()final;
+    void __ExitOwn        ()final;
     void __RenderOwnBefore()final;
+    void __RenderOwnAfter ()final;
     void __MoveOwn        ()final;
 };
 
@@ -354,7 +370,7 @@ private:
     //coreObject3D       m_aSmokeObject[2];   // 
     //coreParticleEffect m_aSmokeEffect[2];   // 
 
-    coreSoundPtr m_pLavaSound;              // 
+    coreSoundPtr m_pBaseSound;              // base sound-effect
 
     coreParticleSystem m_Smoke;
     coreList<coreParticleEffect> m_aSmokeEffect;
@@ -373,6 +389,8 @@ public:
 
 protected:
     // execute own routines
+    void __InitOwn        ()final;
+    void __ExitOwn        ()final;
     void __RenderOwnBefore()final;
     void __MoveOwn        ()final;
 };
@@ -387,9 +405,12 @@ private:
     coreVector2    m_vSnowMove;   // 
     coreFlow       m_fSnowWave;   // 
 
+    coreSoundPtr m_pBaseSound;    // base sound-effect
+
 
 public:
     cSnowBackground()noexcept;
+    ~cSnowBackground()final;
 
     DISABLE_COPY(cSnowBackground)
     ASSIGN_ID_EX(6, "Snow", COLOR_MENU_BLUE)
@@ -401,6 +422,7 @@ public:
 private:
     // execute own routines
     void __InitOwn       ()final;
+    void __ExitOwn       ()final;
     void __RenderOwnAfter()final;
     void __MoveOwn       ()final;
 };
@@ -422,7 +444,7 @@ private:
     coreFlow     m_fThunderDelay;       // 
     coreUint8    m_iThunderIndex;       // 
 
-    coreSoundPtr m_pRainSound;          // 
+    coreSoundPtr m_pBaseSound;          // base sound-effect
 
     cHeadlight m_Headlight;             // 
 
@@ -449,6 +471,7 @@ public:
 private:
     // execute own routines
     void __InitOwn       ()final;
+    void __ExitOwn       ()final;
     void __RenderOwnAfter()final;
     void __MoveOwn       ()final;
     void __UpdateOwn     ()final;
@@ -467,6 +490,8 @@ private:
 
     coreFlow m_fDissolve;                     // 
     coreFlow m_afFade[DARK_BLOCKS];           // 
+
+    coreSoundPtr m_pBaseSound;                // base sound-effect
 
 
 public:
@@ -491,6 +516,8 @@ public:
 
 private:
     // execute own routines
+    void __InitOwn        ()final;
+    void __ExitOwn        ()final;
     void __RenderOwnBefore()final;
     void __MoveOwn        ()final;
 
@@ -509,6 +536,7 @@ private:
 
 public:
     cStomachBackground()noexcept;
+    ~cStomachBackground()final;
 
     DISABLE_COPY(cStomachBackground)
     ASSIGN_ID_EX(51, "Stomach", coreVector3(0.5f,0.5f,0.5f))
@@ -517,6 +545,7 @@ public:
 private:
     // execute own routines
     void __InitOwn       ()final;
+    void __ExitOwn       ()final;
     void __RenderOwnAfter()final;
     void __MoveOwn       ()final;
     void __UpdateOwn     ()final;
@@ -531,7 +560,7 @@ private:
     coreFullscreen m_Cover;      // 
     coreFlow       m_fOffset;    // 
 
-    coreSoundPtr m_pWindSound;   // wind sound-effect
+    coreSoundPtr m_pBaseSound;   // base sound-effect
 
 
 public:
@@ -544,6 +573,8 @@ public:
 
 private:
     // execute own routines
+    void __InitOwn        ()final;
+    void __ExitOwn        ()final;
     void __RenderOwnBefore()final;
     void __MoveOwn        ()final;
 };

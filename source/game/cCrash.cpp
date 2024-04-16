@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -71,6 +71,8 @@ void cCrashManager::Move()
 
         if(oObject.IsEnabled(CORE_OBJECT_ENABLE_ALL))
         {
+            ASSERT(pOutdoor)
+
             // 
             oStatus.fTime.Update(1.0f);
 
@@ -137,6 +139,8 @@ void cCrashManager::AddCrash(const cLodObject& oBase, const coreVector2 vTarget,
 
         if(!oObject.IsEnabled(CORE_OBJECT_ENABLE_ALL))
         {
+            ASSERT(pOutdoor)
+
             // 
             oObject.DefineModelHigh(oBase.GetModelHigh());
             oObject.DefineModelLow (oBase.GetModelLow ());

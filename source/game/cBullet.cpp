@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -422,9 +422,10 @@ void cRayBullet::__MoveOwn()
     
     // update fade
     m_fFade.Update(1.5f * fRelSpeed);
-    const coreFloat fWave = 1.0f + 0.25f * SIN(m_fFade * 40.0f);
+    const coreFloat fWave = 1.0f + 0.25f * SIN(m_fFade * 40.0f + 1.5f*PI);
     this->SetSize (coreVector3(3.7f * fWave, 3.7f * MIN(12.0f * m_fFade, 1.0f) * fRelSpeed * 1.0f, 3.7f * fWave) * 0.5f * m_fScale);
     this->SetAlpha(MIN(15.0f * m_fFade, 1.0f));
+    this->SetAlpha(1.0f);
     
     
     this->SetTexSize(coreVector2(0.4f,0.2f * MIN(12.0f * m_fFade, 1.0f) * fRelSpeed * 1.0f) * 0.7f);
@@ -659,6 +660,7 @@ void cOrbBullet::__MoveOwn()
     // update fade
     m_fFade.Update(1.0f);
     this->SetAlpha(MIN(20.0f * m_fFade, 1.0f));
+    this->SetAlpha(1.0f);
 }
 
 
@@ -710,6 +712,7 @@ void cConeBullet::__MoveOwn()
     // update fade
     m_fFade.Update(1.0f);
     this->SetAlpha(MIN(20.0f * m_fFade, 1.0f));
+    this->SetAlpha(1.0f);
 }
 
 
@@ -760,6 +763,7 @@ void cWaveBullet::__MoveOwn()
     // update fade
     m_fFade.Update(1.0f);
     this->SetAlpha(MIN(20.0f * m_fFade, 1.0f));
+    this->SetAlpha(1.0f);
 }
 
 
@@ -811,6 +815,7 @@ void cSpearBullet::__MoveOwn()
     // update fade
     m_fFade.Update(1.0f);
     this->SetAlpha(MIN(20.0f * m_fFade, 1.0f));
+    this->SetAlpha(1.0f);
 }
 
 
@@ -859,6 +864,7 @@ void cTriangleBullet::__MoveOwn()
     // update fade
     m_fFade.Update(1.0f);
     this->SetAlpha(MIN(20.0f * m_fFade, 1.0f));
+    this->SetAlpha(1.0f);
 }
 
 
@@ -908,6 +914,7 @@ void cFlipBullet::__MoveOwn()
     // update fade
     m_fFade.Update(1.0f);
     this->SetAlpha(MIN(20.0f * m_fFade, 1.0f));
+    this->SetAlpha(1.0f);
 }
 
 
@@ -956,6 +963,7 @@ void cQuadBullet::__MoveOwn()
     // update fade
     m_fFade.Update(1.0f);
     this->SetAlpha(MIN(20.0f * m_fFade, 1.0f));
+    this->SetAlpha(1.0f);
 }
 
 
@@ -1007,6 +1015,7 @@ void cViewBullet::__MoveOwn()
     // update fade
     m_fFade.Update(1.0f);
     this->SetAlpha(MIN(20.0f * m_fFade, 1.0f));
+    this->SetAlpha(1.0f);
 }
 
 

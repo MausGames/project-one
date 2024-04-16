@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -29,7 +29,6 @@ cMenu::cMenu()noexcept
     // 
     m_PauseLayer.DefineTexture(0u, "menu_background_black.png");
     m_PauseLayer.DefineProgram("menu_grey_program");
-    m_PauseLayer.SetSize      (coreVector2(1.0f,1.0f));
     m_PauseLayer.SetColor4    (coreVector4(0.6f,0.6f,0.6f,0.0f));
     m_PauseLayer.SetTexSize   (coreVector2(1.2f,1.2f));
 
@@ -238,7 +237,7 @@ void cMenu::Move()
                     this->ChangeSurface(SURFACE_PAUSE, 0.0f);
 
                     // 
-                    this->InvokePauseStep();
+                    this->InvokePauseStep();   // TODO 1: why is this here ???
 
                     // 
                     Core::Audio->PauseSound();
@@ -504,6 +503,11 @@ void cMenu::Move()
     //                        (this->GetCurSurface() != SURFACE_DEFEAT)  &&
     //                        (this->GetCurSurface() != SURFACE_FINISH)  &&
     //                        (this->GetCurSurface() != SURFACE_BRIDGE));
+    
+    const coreFloat fSpeed = STATIC_ISVALID(g_pGame) ? 1000.0f : 0.5f;
+    if(((this->GetCurSurface() == SURFACE_CONFIG) || (this->GetCurSurface() == SURFACE_PAUSE)) && STATIC_ISVALID(g_pGame))
+         m_PauseLayer.SetAlpha(MIN(m_PauseLayer.GetAlpha() + fSpeed*TIME, 0.25f));
+    else m_PauseLayer.SetAlpha(MAX(m_PauseLayer.GetAlpha() - fSpeed*TIME, 0.0f));
 
     // 
     if(((this->GetCurSurface() == SURFACE_CONFIG) || (this->GetCurSurface() == SURFACE_PAUSE)) && STATIC_ISVALID(g_pGame))
@@ -516,10 +520,9 @@ void cMenu::Move()
     {
         //m_PauseLayer.SetEnabled(CORE_OBJECT_ENABLE_MOVE);
     }
-    
-    const coreFloat fSpeed = STATIC_ISVALID(g_pGame) ? 1000.0f : 0.5f;
-    if(((this->GetCurSurface() == SURFACE_CONFIG) || (this->GetCurSurface() == SURFACE_PAUSE)) && STATIC_ISVALID(g_pGame)) m_PauseLayer.SetAlpha(MIN(m_PauseLayer.GetAlpha() + fSpeed*TIME, 0.25f));
-                                                                                           else m_PauseLayer.SetAlpha(MAX(m_PauseLayer.GetAlpha() - fSpeed*TIME, 0.0f));
+
+    // 
+    m_PauseLayer.SetSize(Core::System->GetResolution() * RCP(Core::System->GetResolution().Min()));
 
     // 
     m_Tooltip   .Move();
@@ -759,8 +762,8 @@ void cMenu::__StartGame()
 {
     // 
     sGameOptions oOptions = {};
-    oOptions.iMode        = m_GameMenu.GetSelectedMode      ();
     oOptions.iType        = m_GameMenu.GetSelectedType      ();
+    oOptions.iMode        = m_GameMenu.GetSelectedMode      ();
     oOptions.iDifficulty  = m_GameMenu.GetSelectedDifficulty();
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
     {

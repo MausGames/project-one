@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -650,6 +650,7 @@ void cMuscusMission::__SetupOwn()
     // TODO 1: big pearl cluster at the end
     // TODO 1: fix 7-pearl loops
     // TODO 1: if chroma-enemies come, spawn them in delay phase
+    // TODO 1: how to communicate that pills need to be collected ? >O< 2 or 4 arrows ? blink blink blink, always arrow ? for badge
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -1044,7 +1045,7 @@ void cMuscusMission::__SetupOwn()
     // vor zweiter highspeed-gruppe, gegner müssen so angeordnet sein, dass man in einer guten ecke startet
     // last two shooting enemies are near each other, to make first teleport risky
     // TODO 1: interface icons ersetzen sich auch (+ continue) -> general icon implementation
-    // TODO 1: different teleport-colors for each player ? (yellow + orange ? or ship colors, or weapon colors)
+    // TODO 1: different teleport-colors for each player ? (yellow + orange ? or ship colors, or weapon colors) !blue and yellow of course
     // TODO 1: badge: follow all paths correctly -> auf COOP achten
     // TODO 1: transformed player should not kill other (transforming) enemy for coop -> IMMORTAL and do custom handling
     // TODO 1: in the bullet-wave phase, maybe move enemies more far away, to force player rotation (same distance like first groups ?)
@@ -1069,11 +1070,19 @@ void cMuscusMission::__SetupOwn()
             pPath2->Refine();
         });
 
+#if defined(_P1_VIDEO_)
+        STAGE_ADD_SQUAD(pSquad1, cMinerEnemy, 96u)
+#else
         STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 96u)
+#endif
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
+#if defined(_P1_VIDEO_)
+                pEnemy->Configure(4, COLOR_SHIP_YELLOW);
+#else
                 pEnemy->Configure(4, COLOR_SHIP_PURPLE);
+#endif
             });
         });
 
@@ -1301,6 +1310,7 @@ void cMuscusMission::__SetupOwn()
             }
         });
 
+#if !defined(_P1_VIDEO_)
         if((m_iStageSub < 5u) && STAGE_TICK_FREE(6.0f, 0.0f))
         {
             cEnemy* pDummy = pSquad1->GetEnemy(0u);
@@ -1310,6 +1320,7 @@ void cMuscusMission::__SetupOwn()
 
             g_pGame->GetBulletManagerEnemy()->AddBullet<cViewBullet>(5, 1.2f, pDummy, vPos.Rotated90(), vDir.Rotated90())->ChangeSize(1.5f);
         }
+#endif
 
         if(STAGE_CLEARED) nReturnFunc();
 

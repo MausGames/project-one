@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -422,7 +422,7 @@ void cCalorMission::__MoveOwnMiddle()
                     // 
                     const auto nBulletCollFunc = [](cBullet* OUTPUT pBullet, const coreObject3D* pObject, const coreVector3 vIntersection, const coreBool bFirstHit)
                     {
-                        pBullet->Deactivate(true);
+                        pBullet->Deactivate(true, vIntersection.xy());
                     };
                     //Core::Manager::Object->TestCollision(TYPE_BULLET_PLAYER, pCopy, nBulletCollFunc);   // TODO 1: still required ?
                     Core::Manager::Object->TestCollision(TYPE_BULLET_ENEMY,  pCopy, nBulletCollFunc);
@@ -442,7 +442,7 @@ void cCalorMission::__MoveOwnMiddle()
 
                             // 
                             pEnemy->RemoveStatus(ENEMY_STATUS_INVINCIBLE);
-                            pEnemy->TakeDamage  (1000u, ELEMENT_NEUTRAL, vIntersection.xy(), bOther ? g_pGame->GetPlayer(1u - i) : pPlayer);
+                            pEnemy->TakeDamage  (1000, ELEMENT_NEUTRAL, vIntersection.xy(), bOther ? g_pGame->GetPlayer(1u - i) : pPlayer);
 
                             // 
                             if(bOther) this->UncatchObject(1u - i);
@@ -452,7 +452,7 @@ void cCalorMission::__MoveOwnMiddle()
                         {
                             // 
                             pObject->RemoveStatus(ENEMY_STATUS_INVINCIBLE);
-                            pObject->TakeDamage  (1000u, ELEMENT_NEUTRAL, vIntersection.xy(), pPlayer);
+                            pObject->TakeDamage  (1000, ELEMENT_NEUTRAL, vIntersection.xy(), pPlayer);
 
                             // 
                             this->UncatchObject(i);

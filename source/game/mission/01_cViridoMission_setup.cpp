@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -48,12 +48,14 @@ void cViridoMission::__SetupOwn()
     // change background appearance (split)
     STAGE_MAIN({TAKE_ALWAYS, 0u, 1u})
     {
+#if !defined(_P1_VIDEO_)
         g_pEnvironment->GetBackground()->GetOutdoor()->LerpHeightNow(0.4583f, -13.83f);
         g_pEnvironment->GetBackground()->SetGroundDensity(0u, 0.0f);
         g_pEnvironment->GetBackground()->SetGroundDensity(1u, 0.0f);
         g_pEnvironment->GetBackground()->SetGroundDensity(2u, 0.0f);
         g_pEnvironment->GetBackground()->SetDecalDensity (0u, 0.0f);
         g_pEnvironment->GetBackground()->SetAirDensity   (0u, 0.0f);
+#endif
 
         STAGE_FINISH_NOW
     });
@@ -84,6 +86,7 @@ void cViridoMission::__SetupOwn()
     // - 5: arranged to allow only one kill per turn, and to improve coop gameplay
     // TODO 1: barriers have cut-off outline in maze-group   
     // TODO 1: bullets (even single, like pulse) should be reflected with offset to highlight reflection (not 180 degree)
+    // TODO 1: huge shield, diagonal shield, moving enemies
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -649,6 +652,7 @@ void cViridoMission::__SetupOwn()
     // TODO 1: huge enemy causing a stomp (shake, throwing everything up) on landing, target player, player also fly into the air and rotate around Z (disable rotation control) (but quick, to make bullet evasion meaningful
     // TODO 1: chess jump movement
     // TODO 1: create impact-wave when landing (especially the bigger)
+    // TODO 1: use side-jumping (from same-kill group) ?
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         STAGE_ADD_SQUAD(pSquad1, cScoutEnemy, 20u)

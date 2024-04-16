@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -12,7 +12,7 @@
 // ****************************************************************
 // constructor
 cMossBackground::cMossBackground()noexcept
-: m_vRainMove        (coreVector2(0.0f,-1.2f))
+: m_vRainMove        (coreVector2(-0.5f,-1.2f))
 , m_fLightningDelay  (Core::Rand->Float(15.0f, 30.0f))
 , m_LightningTicker  (coreTimer(1.0f, 1.0f, 1u))
 , m_fThunderDelay    (0.0f)
@@ -24,11 +24,11 @@ cMossBackground::cMossBackground()noexcept
     coreBatchList* pList2;
     coreBatchList* pList3;
 
-    // create outdoor-surface object
-    m_pOutdoor = new cOutdoor("moss", "blood", 5u, 4.5f);
-
     // 
     this->__InitOwn();
+
+    // create outdoor-surface object
+    m_pOutdoor = new cOutdoor("moss", "blood", 5u, 4.5f);
 
     // 
     pList1 = new coreBatchList(MOSS_TREE_RESERVE);
@@ -219,13 +219,6 @@ cMossBackground::cMossBackground()noexcept
     m_apThunder[0] = Core::Manager::Resource->Get<coreSound>("environment_thunder_01.wav");
     m_apThunder[1] = Core::Manager::Resource->Get<coreSound>("environment_thunder_02.wav");
     m_apThunder[2] = Core::Manager::Resource->Get<coreSound>("environment_thunder_03.wav");
-
-    // 
-    m_pRainSound = Core::Manager::Resource->Get<coreSound>("environment_rain.wav");
-    m_pRainSound.OnUsableOnce([this, pResource = m_pRainSound]()
-    {
-        pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
-    });
 }
 
 
@@ -234,8 +227,7 @@ cMossBackground::cMossBackground()noexcept
 cMossBackground::~cMossBackground()
 {
     // 
-    if(m_pRainSound->EnableRef(this))
-        m_pRainSound->Stop();
+    this->__ExitOwn();
 }
 
 
@@ -245,6 +237,29 @@ void cMossBackground::__InitOwn()
 {
     // 
     m_pWater = new cRainWater("environment_clouds_grey.png");
+
+    // load base sound-effect
+    m_pBaseSound = Core::Manager::Resource->Get<coreSound>("environment_moss.wav");
+    m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+    {
+        pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
+    });
+}
+
+
+// ****************************************************************
+// 
+void cMossBackground::__ExitOwn()
+{
+    // 
+    SAFE_DELETE(m_pWater)
+
+    // stop base sound-effect
+    m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+    {
+        if(pResource->EnableRef(this))
+            pResource->Stop();
+    });
 }
 
 
@@ -285,15 +300,21 @@ void cMossBackground::__RenderOwnAfter()
 // move the moss background
 void cMossBackground::__MoveOwn()
 {
+    static coreVector2 TEST = coreVector2(0.1f,0.1f);   // TIME = 0 on start, normalize assert
+    
     // 
     const coreVector2 vEnvMove   = coreVector2(0.0f,1.0f) * (-0.35f * g_pEnvironment->GetSpeed());
     const coreVector2 vTexSize   = coreVector2(1.0f,1.0f) * 6.0f;
-    const coreVector2 vTexOffset = m_Rain.GetTexOffset() + (m_vRainMove.InvertedX() + vEnvMove) * (1.0f * TIME);
+    //const coreVector2 vTexOffset = m_Rain.GetTexOffset() + (m_vRainMove.InvertedX() + vEnvMove) * (1.0f * TIME);
+    const coreVector2 vTexOffset = TEST + (m_vRainMove.InvertedX() + vEnvMove) * (1.0f * TIME);
+    TEST = vTexOffset;//.Processed(FRACT);
 
     // 
-    m_Rain.SetDirection(g_pEnvironment->GetDirection().InvertedX());
+    //m_Rain.SetDirection(g_pEnvironment->GetDirection().InvertedX());
+    m_Rain.SetDirection(MapToAxis(-vTexOffset.Normalized(), g_pEnvironment->GetDirection().InvertedX()));
     m_Rain.SetTexSize  (vTexSize);
-    m_Rain.SetTexOffset(vTexOffset.Processed(FRACT));
+    //m_Rain.SetTexOffset(vTexOffset.Processed(FRACT));
+    m_Rain.SetTexOffset(coreVector2(0.0f,1.0f) * -vTexOffset.Length());
     m_Rain.Move();
 
     if(m_bEnableLightning)
@@ -341,9 +362,9 @@ void cMossBackground::__MoveOwn()
             m_apThunder[i]->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
     }
 
-    // 
-    if(m_pRainSound->EnableRef(this))
-        m_pRainSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
+    // adjust volume of the base sound-effect
+    if(m_pBaseSound->EnableRef(this))
+        m_pBaseSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
 }
 
 

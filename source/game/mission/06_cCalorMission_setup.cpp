@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -545,7 +545,7 @@ void cCalorMission::__SetupOwn()
 
             this->BumpLoad(I_TO_F(pBullet->GetDamage()) * 0.04f * RCP(I_TO_F(g_pGame->GetNumPlayers())));
 
-            pBullet->Deactivate(true);
+            pBullet->Deactivate(true, vIntersection.xy());
         });
 
         STAGE_WAVE("DREIUNDDREISSIG", {20.0f, 30.0f, 40.0f, 50.0f})
@@ -874,6 +874,7 @@ void cCalorMission::__SetupOwn()
     // TODO 1: infinity bullets für nicht-star patterns sollten früher sein
     // TODO 1: player respawn! coop! (alles friert ein, helfer bewegt spieler an alte stelle, langsame beschleunigung)
     // TODO 1: attack an enemy at the top before starting with bullets
+    // TODO 1: one way would be to turn player 180 degree when colliding with wall (but not with obstacles in middle)
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -1191,6 +1192,7 @@ void cCalorMission::__SetupOwn()
     // TODO 1: attacks should be more front-shield-like, more mass basically, like in die recorded video
     // TODO 1: linien im bullet-teppich sollten abwechselnd geshiftet sein (oder 1/3 ?)
     // TODO 1: remove catch-forwarding if separator stays disabled, maybe also make swing-direction identical
+    // TODO 1: simple bullet-waves inbetween for the player to overcome
     STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         // TODO 1: remove    

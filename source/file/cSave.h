@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #pragma once
@@ -22,7 +22,7 @@
 
 // ****************************************************************
 // 
-#define SAVE_FILE_FOLDER    ""                       // 
+#define SAVE_FILE_FOLDER    "files"                  // 
 #define SAVE_FILE_EXTENSION "p1sv"                   // 
 #define SAVE_FILE_MAGIC     (UINT_LITERAL("P1SV"))   // 
 #define SAVE_FILE_VERSION   (0x00000001u)            // 
@@ -99,8 +99,8 @@ public:
         coreChar  acName[SAVE_NAME_LENGTH];                        // 
         coreUint8 iStandard;                                       // 
         coreUint8 iTraining;                                       // 
-        coreUint8 iMode;                                           // 
         coreUint8 iType;                                           // 
+        coreUint8 iMode;                                           // 
         coreUint8 iDifficulty;                                     // 
         coreUint8 aaiWeapon [SAVE_PLAYERS][SAVE_EQUIP_WEAPONS];    // 
         coreUint8 aaiSupport[SAVE_PLAYERS][SAVE_EQUIP_SUPPORTS];   // 

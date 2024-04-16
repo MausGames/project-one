@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -16,8 +16,12 @@ cSpaceBackground::cSpaceBackground()noexcept
 , m_fMeteorSpeed (1.0f)
 , m_iCopyLower   (0u)
 , m_iCopyUpper   (0u)
+, m_vNebulaMove  (coreVector2(0.0f,0.0f))
 {
     coreBatchList* pList1;
+
+    // 
+    this->__InitOwn();
 
     // 
     m_pOutdoor = new cOutdoor();
@@ -40,7 +44,8 @@ cSpaceBackground::cSpaceBackground()noexcept
             const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, SPACE_METEOR_NUM);
             const coreFloat   fHeight   = Core::Rand->Float(-30.0f, -5.0f);   // # shadow issues below -30.0f
 
-            if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, POW2(8.0f)))
+            if(!cBackground::_CheckIntersectionQuick3(pList1, coreVector3(vPosition, fHeight), POW2(11.5f)))
+            //if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, POW2(8.0f)))
             {
                 // create object
                 coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
@@ -51,6 +56,7 @@ cSpaceBackground::cSpaceBackground()noexcept
                 pObject->SetDirection  (coreVector3::Rand());
                 pObject->SetOrientation(coreVector3::Rand());
                 pObject->SetColor3     (coreVector3(1.0f,1.0f,1.0f) * Core::Rand->Float(0.85f, 1.0f) * (Core::Rand->Bool() ? 0.5f : 1.0f));
+                //pObject->SetColor3     (coreVector3(1.0f,1.0f,1.0f) * Core::Rand->Float(0.85f, 1.0f) * MIN(1.0f - 0.6f * (fHeight+5.0f)/-25.0f, 1.0f));
 
                 // add object to the list
                 pList1->BindObject(pObject);
@@ -77,6 +83,48 @@ cSpaceBackground::cSpaceBackground()noexcept
     m_Cover.SetPosition  (coreVector2(0.0f,0.0f));
     m_Cover.SetSize      (coreVector2(1.0f,1.0f) * SQRT2);
     m_Cover.SetColor3    (LERP(COLOR_MENU_MAGENTA, coreVector3(1.0f,1.0f,1.0f), 0.35f) * 1.3f);
+
+    // 
+    m_Nebula.DefineTexture(0u, "environment_clouds_low.png");
+    m_Nebula.DefineProgram("effect_weather_nebula_program");
+    m_Nebula.SetPosition  (coreVector2(0.0f,0.0f));
+    m_Nebula.SetSize      (coreVector2(1.0f,1.0f) * SQRT2);
+    m_Nebula.SetAlpha     (0.2f);
+}
+
+
+// ****************************************************************
+// destructor
+cSpaceBackground::~cSpaceBackground()
+{
+    // 
+    this->__ExitOwn();
+}
+
+
+// ****************************************************************
+// 
+void cSpaceBackground::__InitOwn()
+{
+    // load base sound-effect
+    m_pBaseSound = Core::Manager::Resource->Get<coreSound>("environment_space.wav");
+    m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+    {
+        pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
+    });
+}
+
+
+// ****************************************************************
+// 
+void cSpaceBackground::__ExitOwn()
+{
+    // stop base sound-effect
+    m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+    {
+        if(pResource->EnableRef(this))
+            pResource->Stop();
+    });
 }
 
 
@@ -92,6 +140,36 @@ void cSpaceBackground::__RenderOwnBefore()
     }
     glDepthMask(true);
     glEnable(GL_BLEND);
+}
+
+
+// ****************************************************************
+// 
+void cSpaceBackground::__RenderOwnAfter()
+{
+    // enable the shader-program
+    if(!m_Nebula.GetProgram().IsUsable()) return;
+    if(!m_Nebula.GetProgram()->Enable())  return;
+
+    coreRand oRand(1u);
+    
+    // 
+    coreProgram* pLocal = m_Nebula.GetProgram().GetResource();
+    for(coreUintW i = 0u; i < SPACE_NEBULA_NUM; ++i)
+    {
+        //const coreVector2 vNewTexOffset = m_Snow.GetTexOffset() + coreVector2(0.36f,0.36f) * I_TO_F(POW2(i));
+        const coreVector2 vNewTexOffset = m_Nebula.GetTexOffset() + coreVector2::Rand(0.0f,1.0f, 0.0f,1.0f, &oRand);
+        const coreFloat   fNewScale     = 1.0f - 0.15f * I_TO_F(i);
+
+        pLocal->SendUniform(s_asOverlayTransform[i], coreVector3(vNewTexOffset.Processed(FRACT), fNewScale * 0.3f));
+    }
+
+    glDisable(GL_DEPTH_TEST);
+    {
+        // 
+        m_Nebula.Render();
+    }
+    glEnable(GL_DEPTH_TEST);
 }
 
 
@@ -123,4 +201,24 @@ void cSpaceBackground::__MoveOwn()
     m_Cover.SetDirection(MapToAxis(g_pEnvironment->GetDirection().InvertedX(), m_vCoverDir));
     m_Cover.SetTexOffset(vTexOffset.Processed(FRACT));
     m_Cover.Move();
+    
+    
+    
+    
+    // 
+    const coreVector2 vEnvMove   = coreVector2(0.0f,1.0f) * (-0.15f * g_pEnvironment->GetSpeed());
+    const coreVector2 vTexSize   = coreVector2(1.0f,1.0f) * 5.4f;
+    const coreVector2 vTexOffset2 = m_Nebula.GetTexOffset() + (m_vNebulaMove.InvertedX() + vEnvMove) * (0.5f * TIME);         
+
+    // 
+    m_Nebula.SetDirection(m_Cover.GetDirection());
+    m_Nebula.SetDirection(MapToAxis(g_pEnvironment->GetDirection().InvertedX(), m_vCoverDir.InvertedX()));
+    m_Nebula.SetColor3   (m_Cover.GetColor3() * RCP(m_Cover.GetColor3().Max()));
+    m_Nebula.SetTexSize  (vTexSize);
+    m_Nebula.SetTexOffset(vTexOffset2.Processed(FRACT));
+    m_Nebula.Move();
+
+    // adjust volume of the base sound-effect
+    if(m_pBaseSound->EnableRef(this))
+        m_pBaseSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
 }

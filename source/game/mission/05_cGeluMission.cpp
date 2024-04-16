@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -12,16 +12,19 @@
 // ****************************************************************
 // constructor
 cGeluMission::cGeluMission()noexcept
-: m_Fang        (GELU_FANGS)
-, m_Way         (GELU_WAYS)
-, m_WayArrow    (GELU_WAYS)
-, m_iWayActive  (0u)
-, m_iWayVisible (0u)
-, m_Orb         (GELU_ORBS)
-, m_afOrbTime   {}
-, m_Line        (GELU_LINES)
-, m_afLineTime  {}
-, m_fAnimation  (0.0f)
+: m_Fang          (GELU_FANGS)
+, m_avFangOldPos  {}
+, m_Way           (GELU_WAYS)
+, m_WayArrow      (GELU_WAYS)
+, m_iWayActive    (0u)
+, m_iWayVisible   (0u)
+, m_Orb           (GELU_ORBS)
+, m_afOrbTime     {}
+, m_Line          (GELU_LINES)
+, m_afLineTime    {}
+, m_abCrushImmune {}
+, m_iCrushState   (0u)
+, m_fAnimation    (0.0f)
 {
     // 
     m_apBoss[0] = &m_Chol;
@@ -39,9 +42,10 @@ cGeluMission::cGeluMission()noexcept
             pFang->DefineProgram  ("object_ship_glow_program");
 
             // set object properties
-            pFang->SetSize   (coreVector3(1.0f,1.0f,1.0f) * 9.0f);
-            pFang->SetColor3 (coreVector3(0.5f,0.5f,0.5f));
-            pFang->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+            pFang->SetSize             (coreVector3(1.0f,1.0f,1.0f) * 9.0f);
+            pFang->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * 1.05f);
+            pFang->SetColor3           (coreVector3(0.5f,0.5f,0.5f));
+            pFang->SetEnabled          (CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
             m_Fang.BindObject(pFang);
@@ -64,10 +68,11 @@ cGeluMission::cGeluMission()noexcept
             pWay->DefineProgram(iType ? "effect_energy_flat_invert_program" : "effect_energy_flat_spheric_program");
 
             // set object properties
-            pWay->SetSize   (coreVector3(1.0f,1.0f,1.0f) * (iType ? 2.0f : 7.0f));
-            pWay->SetColor3 (COLOR_ENERGY_MAGENTA * 0.8f);
-            pWay->SetTexSize(coreVector2(1.0f,1.0f) * (iType ? 0.4f : 0.7f));
-            pWay->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+            pWay->SetSize             (coreVector3(1.0f,1.0f,1.0f) * (iType ? 2.0f : 7.0f));
+            pWay->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * 1.1f);
+            pWay->SetColor3           (COLOR_ENERGY_MAGENTA * 0.9f);
+            pWay->SetTexSize          (coreVector2(1.0f,1.0f) * (iType ? 0.4f : 0.7f));
+            pWay->SetEnabled          (CORE_OBJECT_ENABLE_NOTHING);
 
             // add object to the list
             if(iType) m_WayArrow.BindObject(pWay);
@@ -152,6 +157,8 @@ void cGeluMission::EnableFang(const coreUintW iIndex)
 
     // 
     WARN_IF(oFang.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
+    
+    m_avFangOldPos[iIndex] = coreVector2(0.0f,0.0f);
 
     // 
     oFang.SetPosition(coreVector3(HIDDEN_POS, 0.0f));
@@ -348,14 +355,116 @@ void cGeluMission::__MoveOwnAfter()
 {
     // 
     m_fAnimation.UpdateMod(0.2f, 10.0f);
+    
+    
+    g_pGame->ForEachPlayer([this](cPlayer* OUTPUT pPlayer, const coreUintW i)
+    {
+        coreVector2 vNewPos = pPlayer->GetPosition().xy();
+
+        const coreVector2 vFangRange = m_aFangRaw[0].GetCollisionRange().xy();
+        if(vFangRange.IsNull()) return;
+
+        coreFloat afDistance[4] = {};
+        coreUint8 iHitIndex     = 255u;
+
+        for(coreUintW j = 0u; j < GELU_FANGS; ++j)
+        {
+            const cLodObject& oFang = m_aFangRaw[j];
+            if(!oFang.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+            const coreVector2 vFangPos = oFang.GetPosition().xy();
+            const coreVector2 vShift   = (pPlayer->GetOldPos() - vFangPos) / vFangRange * 0.02f;
+
+            coreVector2 vFangMove = vFangPos - m_avFangOldPos[j];
+            if(vFangMove.LengthSq() > vFangRange.LengthSq()) vFangMove = coreVector2(0.0f,0.0f);   // handle teleportation
+
+            const coreVector2 vRayPos = pPlayer->GetOldPos() + vFangMove + vShift;
+
+            for(coreUintW k = 0u; k < 4u; ++k)
+            {
+                const coreVector2 vRayDir = StepRotated90(k);
+
+                coreFloat fHitDistance = 0.0f;
+                coreUint8 iHitCount    = 1u;
+                if(Core::Manager::Object->TestCollision(&oFang, coreVector3(vRayPos, 0.0f), coreVector3(vRayDir, 0.0f), &fHitDistance, &iHitCount))
+                {
+                    if(iHitCount & 0x01u)
+                    {
+                        iHitIndex = j;
+
+                        const coreVector2 vDiff = pPlayer->GetPosition().xy() - vFangPos;
+                        if(IsHorizontal(vDiff)) vNewPos.x = vFangPos.x + SIGN(vDiff.x) * vFangRange.x;
+                                           else vNewPos.y = vFangPos.y + SIGN(vDiff.y) * vFangRange.y;
+
+                        ASSERT(k == 0u)
+                        break;
+                    }
+                    else
+                    {
+                        const coreFloat fNewDistance = fHitDistance + coreVector2::Dot(vFangMove + vShift - pPlayer->GetMove(), vRayDir) - CORE_MATH_PRECISION;
+                        if(fNewDistance < afDistance[k])
+                        {
+                            afDistance[k] = fNewDistance;
+                        }
+                    }
+                }
+            }
+        }
+
+        coreBool bIntersect = false;
+        coreBool bCrush     = false;
+        for(coreUintW j = 0u; j < GELU_FANGS; ++j)
+        {
+            const cLodObject& oFang = m_aFangRaw[j];
+            if(!oFang.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
+
+            if(InBetween(pPlayer->GetPosition().xy(), oFang.GetPosition().xy() - vFangRange, oFang.GetPosition().xy() + vFangRange))
+            {
+                bIntersect = true;
+                if((iHitIndex != 255u) && (iHitIndex != j)) bCrush = true;
+            }
+        }
+
+        if(pPlayer->HasStatus(PLAYER_STATUS_NO_INPUT_MOVE)) m_abCrushImmune[i] = true;
+
+        if(bIntersect && !m_abCrushImmune[i])
+        {
+            vNewPos.y += afDistance[0];
+            vNewPos.x -= afDistance[1];
+            vNewPos.y -= afDistance[2];
+            vNewPos.x += afDistance[3];
+
+            pPlayer->SetPosition(coreVector3(vNewPos, 0.0f));
+
+            if(bCrush || !InBetween(vNewPos, pPlayer->GetArea().xy() * 1.01f, pPlayer->GetArea().zw() * 1.01f))
+            {
+                if(pPlayer->IsNormal())
+                {
+                    pPlayer->TakeDamage(5, ELEMENT_NEUTRAL, vNewPos);
+                    if(HAS_BIT(m_iCrushState, 0u)) m_abCrushImmune[i] = true;
+                }
+            }
+        }
+        else if(!bIntersect && m_abCrushImmune[i])
+        {
+            if(pPlayer->IsNormal() || !HAS_BIT(m_iCrushState, 1u))
+            {
+                m_abCrushImmune[i] = false;
+            }
+        }
+    });
+    
+    
+    
 
     // 
     for(coreUintW i = 0u; i < GELU_FANGS; ++i)
     {
-        cLodObject& oFang = m_aFangRaw[i];
+        const cLodObject& oFang = m_aFangRaw[i];
         if(!oFang.IsEnabled(CORE_OBJECT_ENABLE_MOVE)) continue;
 
-        // nothing
+        // 
+        m_avFangOldPos[i] = oFang.GetPosition().xy();
     }
 
     // 

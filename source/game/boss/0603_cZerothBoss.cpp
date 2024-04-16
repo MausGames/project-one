@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -163,7 +163,7 @@ void cZerothBoss::__MoveOwn()
         //g_pGame->GetInterface()->ChangeBossName(PRINT("%02XZE%02XRO%02XTH%02X", coreUint8(P_TO_UI(this) >> 24u), coreUint8(P_TO_UI(this) >> 16u), coreUint8(P_TO_UI(this) >> 8u), coreUint8(P_TO_UI(this))));
 
         coreRand oRand(F_TO_UI(m_fLifeTime * 10.0f));oRand.Raw();
-        g_pGame->GetInterface()->ChangeBannerText(PRINT("%02XZE%02XRO%02XTH%02X", coreUint8(oRand.Raw() >> 8u), coreUint8(oRand.Raw() >> 8u), coreUint8(oRand.Raw() >> 8u), coreUint8(oRand.Raw() >> 8u)), NULL);
+        g_pGame->GetInterface()->ChangeBannerText(PRINT("%02XZE%02XRO%02XTH%02X", coreUint8(oRand.Raw()), coreUint8(oRand.Raw()), coreUint8(oRand.Raw()), coreUint8(oRand.Raw())), NULL);
     }
 
     // ################################################################

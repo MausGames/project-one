@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -31,7 +31,7 @@ cOutdoor::cOutdoor()noexcept
 {
 }
 
-cOutdoor::cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom, const coreUint8 iAlgorithm, const coreFloat fGrade, const coreUint32 iSeed)noexcept
+cOutdoor::cOutdoor(const coreChar* pcTextureTop, const coreChar* pcTextureBottom, const coreUint8 iAlgorithm, const coreFloat fGrade, const coreUint64 iSeed)noexcept
 : cOutdoor ()
 {
     const coreTextureSpec oSpec = CORE_GL_SUPPORT(ARB_texture_rg) ? CORE_TEXTURE_SPEC_R8 : CORE_TEXTURE_SPEC_RGB8;
@@ -108,7 +108,7 @@ void cOutdoor::RenderDepth()
 
 // ****************************************************************
 // load outdoor geometry
-void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade, const coreUint32 iSeed)
+void cOutdoor::LoadGeometry(const coreUint8 iAlgorithm, const coreFloat fGrade, const coreUint64 iSeed)
 {
     BIG_STATIC sVertex     s_aVertexData[OUTDOOR_TOTAL_VERTICES];
     BIG_STATIC coreUint16  s_aiIndexData[OUTDOOR_TOTAL_INDICES];
@@ -343,10 +343,10 @@ void cOutdoor::LoadTextures(const coreChar* pcTextureTop, const coreChar* pcText
         WARN_IF(!pSurface2 || (pSurface2->format->BitsPerPixel != 24u)) return CORE_OK;
 
         // allocate required memory
-        const coreUintW iSize = pSurface1->w * pSurface1->h * 4u;
-        coreByte* pOutput = new coreByte[iSize];
-        coreByte* pInput1 = s_cast<coreByte*>(pSurface1->pixels);
-        coreByte* pInput2 = s_cast<coreByte*>(pSurface2->pixels);
+        const coreUintW iSize   = pSurface1->w * pSurface1->h * 4u;
+        coreByte*       pOutput = new coreByte[iSize];
+        const coreByte* pInput1 = s_cast<coreByte*>(pSurface1->pixels);
+        const coreByte* pInput2 = s_cast<coreByte*>(pSurface2->pixels);
 
         // merge XY components of both normal maps (divided by Z, partial-derivative)
         for(coreUintW i = 0u, j = 0u; i < iSize; i += 4u, j += 3u)
@@ -655,8 +655,8 @@ void cOutdoor::__Reset(const coreResourceReset eInit)
     if(eInit)
     {
         // 
-        this->LoadGeometry(m_iAlgorithm, m_fGrade, m_iSeed);
-        this->LoadTextures(m_pcTop, m_pcBottom);
+        if(m_pModel)     this->LoadGeometry(m_iAlgorithm, m_fGrade, m_iSeed);
+        if(m_pNormalMap) this->LoadTextures(m_pcTop, m_pcBottom);
 
         // 
         if(m_LightMap.GetColorTarget(0u).IsValid()) m_LightMap.Create(g_vGameResolution * OUTDOOR_SCALE_FACTOR, CORE_FRAMEBUFFER_CREATE_NORMAL);

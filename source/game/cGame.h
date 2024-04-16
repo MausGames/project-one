@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #pragma once
@@ -34,20 +34,20 @@ enum eGameStatus : coreUint8
     GAME_STATUS_FINISHED = 0x20u    // 
 };
 
-enum eGameMode : coreUint8
-{
-    GAME_MODE_STANDARD = 0u,   // 
-    GAME_MODE_PACIFIST,        // 
-    GAME_MODE_MASOCHIST,       // 
-    GAME_MODE_MAX              // 
-};
-
 enum eGameType : coreUint8
 {
     GAME_TYPE_SOLO = 0u,   // (opposite of MULTI) 
     GAME_TYPE_COOP,        // 
     GAME_TYPE_DUEL,        // 
     GAME_TYPE_MAX          // 
+};
+
+enum eGameMode : coreUint8
+{
+    GAME_MODE_STANDARD = 0u,   // 
+    GAME_MODE_PACIFIST,        // 
+    GAME_MODE_MASOCHIST,       // 
+    GAME_MODE_MAX              // 
 };
 
 enum eGameDifficulty : coreUint8
@@ -60,8 +60,8 @@ enum eGameDifficulty : coreUint8
 
 struct sGameOptions final
 {
-    coreUint8 iMode;                                             // 
     coreUint8 iType;                                             // 
+    coreUint8 iMode;                                             // 
     coreUint8 iDifficulty;                                       // 
     coreUint8 aaiWeapon [GAME_PLAYERS][PLAYER_EQUIP_WEAPONS];    // 
     coreUint8 aaiSupport[GAME_PLAYERS][PLAYER_EQUIP_SUPPORTS];   // 
@@ -218,11 +218,11 @@ public:
     template <typename F> void ForEachPlayerAll(F&& nFunction);   // [](cPlayer* OUTPUT pPlayer, const coreUintW i) -> void
 
     // 
-    inline coreBool IsPacifist ()const                          {return (this->GetMode      () == GAME_MODE_PACIFIST);}
-    inline coreBool IsMasochist()const                          {return (this->GetMode      () == GAME_MODE_MASOCHIST);}
     inline coreBool IsMulti    ()const                          {return (this->GetType      () != GAME_TYPE_SOLO);}
     inline coreBool IsCoop     ()const                          {return (this->GetType      () == GAME_TYPE_COOP);}
     inline coreBool IsDuel     ()const                          {return (this->GetType      () == GAME_TYPE_DUEL);}
+    inline coreBool IsPacifist ()const                          {return (this->GetMode      () == GAME_MODE_PACIFIST);}
+    inline coreBool IsMasochist()const                          {return (this->GetMode      () == GAME_MODE_MASOCHIST);}
     inline coreBool IsEasy     ()const                          {return (this->GetDifficulty() == GAME_DIFFICULTY_EASY);}
     inline coreBool IsHard     ()const                          {return (this->GetDifficulty() == GAME_DIFFICULTY_HARD);}
     inline coreBool IsVersion  (const coreUint16 iVersion)const {return (this->GetVersion   () >= iVersion);}
@@ -249,8 +249,8 @@ public:
     inline const coreUint8&    GetContinues  ()const {return m_iContinues;}
     inline const coreUint8&    GetOutroType  ()const {return m_iOutroType;}
     inline const sGameOptions& GetOptions    ()const {return m_Options;}
-    inline const coreUint8&    GetMode       ()const {return m_Options.iMode;}
     inline const coreUint8&    GetType       ()const {return m_Options.iType;}
+    inline const coreUint8&    GetMode       ()const {return m_Options.iMode;}
     inline const coreUint8&    GetDifficulty ()const {return m_Options.iDifficulty;}
     inline const coreUint16&   GetVersion    ()const {return m_iVersion;}
     inline const coreUint8&    GetStatus     ()const {return m_iStatus;}

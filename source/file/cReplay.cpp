@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -32,8 +32,8 @@ void cReplay::CreateGame()
 
     // 
     sGameOptions oOptions = {};
-    oOptions.iMode        = m_Header.iOptionMode;
     oOptions.iType        = m_Header.iOptionType;
+    oOptions.iMode        = m_Header.iOptionMode;
     oOptions.iDifficulty  = m_Header.iOptionDifficulty;
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
     {
@@ -66,8 +66,8 @@ void cReplay::StartRecording()
     m_Header.iNumSegments    = REPLAY_SEGMENTS;
 
     // 
-    m_Header.iOptionMode       = g_pGame->GetOptions().iMode;
     m_Header.iOptionType       = g_pGame->GetOptions().iType;
+    m_Header.iOptionMode       = g_pGame->GetOptions().iMode;
     m_Header.iOptionDifficulty = g_pGame->GetOptions().iDifficulty;
     for(coreUintW i = 0u; i < REPLAY_PLAYERS; ++i)
     {
@@ -560,8 +560,8 @@ void cReplay::__CheckHeader(sHeader* OUTPUT pHeader)
 
     // 
     // TODO 1: force solo if players == 1
-    pHeader->iOptionMode       = CLAMP(pHeader->iOptionMode,       0u, GAME_MODE_MAX      -1u);
     pHeader->iOptionType       = CLAMP(pHeader->iOptionType,       0u, GAME_TYPE_MAX      -1u);
+    pHeader->iOptionMode       = CLAMP(pHeader->iOptionMode,       0u, GAME_MODE_MAX      -1u);
     pHeader->iOptionDifficulty = CLAMP(pHeader->iOptionDifficulty, 0u, GAME_DIFFICULTY_MAX-1u);
     for(coreUintW i = 0u; i < REPLAY_PLAYERS; ++i)
     {

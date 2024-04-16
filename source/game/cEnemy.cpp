@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -78,7 +78,7 @@ void cEnemy::Move()
             this->SetEnabled(CORE_OBJECT_ENABLE_MOVE);
         }
 
-        // 
+        // reduce collision overhead for ghost enemies without bounding volume
         const coreModelPtr& pLowQuad = Core::Manager::Object->GetLowQuad();
         if(HAS_FLAG(m_iStatus, ENEMY_STATUS_GHOST))
         {
@@ -89,18 +89,14 @@ void cEnemy::Move()
             if(m_pVolume.GetHandle() == pLowQuad.GetHandle()) this->DefineVolume(NULL);
         }
 
-        // TODO 1: better would be a shield which is only visible on bullet-hits (and tighter, maybe around silhouette)
-        //if(STATIC_ISVALID(g_pGame)) 
-        //{
-        //    if(HAS_FLAG(m_iStatus, ENEMY_STATUS_INVINCIBLE))
-        //    {
-        //        if(!HAS_FLAG(m_iStatus, ENEMY_STATUS_SHIELDED)) g_pGame->GetShieldManager()->BindEnemy(this);
-        //    }
-        //    else
-        //    {
-        //        if(HAS_FLAG(m_iStatus, ENEMY_STATUS_SHIELDED)) g_pGame->GetShieldManager()->UnbindEnemy(this);
-        //    }
-        //}
+        // 
+        if(STATIC_ISVALID(g_pGame))
+        {
+            if(HAS_FLAG(m_iStatus, ENEMY_STATUS_INVINCIBLE)) g_pGame->GetShieldManager()->GetEffect(SHIELD_EFFECT_INVINCIBLE)->BindEnemy  (this);
+            else                                             g_pGame->GetShieldManager()->GetEffect(SHIELD_EFFECT_INVINCIBLE)->UnbindEnemy(this);
+            if(HAS_FLAG(m_iStatus, ENEMY_STATUS_DAMAGING))   g_pGame->GetShieldManager()->GetEffect(SHIELD_EFFECT_DAMAGING)  ->BindEnemy  (this);
+            else                                             g_pGame->GetShieldManager()->GetEffect(SHIELD_EFFECT_DAMAGING)  ->UnbindEnemy(this);
+        }
     }
 
     // 
@@ -268,7 +264,11 @@ void cEnemy::Kill(const coreBool bAnimated)
     ASSERT(!bBottom || (bBottom && bSingle))
 
     // 
-    if(STATIC_ISVALID(g_pGame)) g_pGame->GetShieldManager()->UnbindEnemy(this);
+    if(STATIC_ISVALID(g_pGame))
+    {
+        g_pGame->GetShieldManager()->GetEffect(SHIELD_EFFECT_INVINCIBLE)->UnbindEnemy(this);
+        g_pGame->GetShieldManager()->GetEffect(SHIELD_EFFECT_DAMAGING)  ->UnbindEnemy(this);
+    }
 
     // 
     if(bAnimated && this->GetType())
@@ -327,6 +327,7 @@ void cEnemy::ResetProperties()
     this->SetSize       (coreVector3(1.0f, 1.0f,1.0f) * ENEMY_SIZE_FACTOR);
     this->SetDirection  (coreVector3(0.0f,-1.0f,0.0f));
     this->SetOrientation(coreVector3(0.0f, 0.0f,1.0f));
+    this->SetColor4     (coreVector4(1.0f, 1.0f,1.0f,1.0f));
 
     // set initial status
     m_iStatus = ENEMY_STATUS_DEAD;
@@ -950,7 +951,7 @@ cRepairEnemy::cRepairEnemy()noexcept
     // 
     this->DefineModelHigh("object_sphere.md3");
     this->DefineModelLow ("object_sphere.md3");
-    this->SetSize        (coreVector3(1.0f,1.0f,1.0f) * 5.0f);
+    this->SetSize        (coreVector3(1.0f,1.0f,1.0f) * 5.0f * PLAYER_SIZE_FACTOR);
 
     // 
     m_Bubble.DefineModel  ("object_sphere.md3");
@@ -1079,7 +1080,7 @@ void cRepairEnemy::__MoveOwn()
     // 
     m_Bubble.SetPosition (coreVector3(vNewPos, 0.0f));
     m_Bubble.SetDirection(coreVector3(vNewDir, 0.0f));
-    m_Bubble.SetSize     (fAlpha * this->GetSize() * PLAYER_SIZE_FACTOR);
+    m_Bubble.SetSize     (fAlpha * this->GetSize());
     m_Bubble.SetAlpha    (fAlpha);
     m_Bubble.SetTexOffset(coreVector2(0.0f, m_fAnimation * -0.5f));
     m_Bubble.Move();
@@ -1087,7 +1088,7 @@ void cRepairEnemy::__MoveOwn()
     // 
     m_Ship.SetPosition (coreVector3(vNewPos, 0.0f));
     m_Ship.SetDirection(coreVector3(vNewDir, 0.0f));
-    m_Ship.SetSize     (fAlpha * coreVector3(1.0f,1.0f,1.0f) * PLAYER_SIZE_FACTOR);
+    m_Ship.SetSize     (fAlpha * m_pPlayer->GetSize());
     m_Ship.SetAlpha    (fAlpha);
     m_Ship.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.5f));
     m_Ship.Move();

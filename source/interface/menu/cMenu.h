@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #pragma once
@@ -393,8 +393,8 @@ private:
     cGuiLabel  m_aOptionName[MENU_GAME_OPTIONS];                  // 
     cGuiObject m_aOptionLine[MENU_GAME_OPTIONS];                  // 
 
-    cGuiSwitchBox m_Mode;                                         // 
     cGuiSwitchBox m_Type;                                         // 
+    cGuiSwitchBox m_Mode;                                         // 
     cGuiSwitchBox m_Difficulty;                                   // 
 
     cGuiLabel  m_aEquipName[MENU_GAME_EQUIPS];                    // 
@@ -431,11 +431,11 @@ public:
     void RetrieveStartData(coreInt32* OUTPUT piMissionID, coreUint8* OUTPUT piTakeFrom, coreUint8* OUTPUT piTakeTo)const;
 
     // 
-    inline const coreUint8& GetSelectedMode      ()const                       {return m_Mode      .GetCurEntry().tValue;}
-    inline const coreUint8& GetSelectedType      ()const                       {return m_Type      .GetCurEntry().tValue;}
-    inline const coreUint8& GetSelectedDifficulty()const                       {return m_Difficulty.GetCurEntry().tValue;}
-    inline const coreUint8& GetSelectedWeapon    (const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aWeapon [iIndex].GetCurEntry().tValue;}
-    inline const coreUint8& GetSelectedSupport   (const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aSupport[iIndex].GetCurEntry().tValue;}
+    inline const coreUint8& GetSelectedType      ()const                       {return m_Type      .GetCurValue();}
+    inline const coreUint8& GetSelectedMode      ()const                       {return m_Mode      .GetCurValue();}
+    inline const coreUint8& GetSelectedDifficulty()const                       {return m_Difficulty.GetCurValue();}
+    inline const coreUint8& GetSelectedWeapon    (const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aWeapon [iIndex].GetCurValue();}
+    inline const coreUint8& GetSelectedSupport   (const coreUintW iIndex)const {ASSERT(iIndex < MENU_GAME_PLAYERS) return m_aSupport[iIndex].GetCurValue();}
 
 
 private:

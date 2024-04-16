@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -69,6 +69,8 @@ void cNevoMission::__SetupOwn()
     // bit-matrix or clearing on contact is bad 
     // start direction against whirl direction to not clutter the bullets and show the whirl effect   
     // TODO 1: handle dodge and enemy inside   
+    // TODO 1: bullet movement rains down into infinity
+    // TODO 1: multiple enemies with fixed movement, forming a curtain or other patterns
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         STAGE_ADD_SQUAD(pSquad1, cMinerEnemy, 16u)
@@ -481,7 +483,8 @@ void cNevoMission::__SetupOwn()
     // TODO 1: enemies with 4 arrows
     // TODO 1: 4x4 (or more) box puzzle
     // TODO 1: big enemy with changing arrow
-    // TODO 1: eine gruppe mit super-vielen
+    // TODO 1: eine gruppe mit super-vielen (gegnern)
+    // TODO 1: after clearing arrows, invincibility is broken, but bullet might make less damage than health, keeping enemy alive
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -675,7 +678,7 @@ void cNevoMission::__SetupOwn()
 
                 iEntry = 0u;
 
-                coreUint32& iEntryAll = r_cast<coreUint32&>(aiArrowMap[(i * 4) % (iMapSize * 4u)]);
+                const coreUint32& iEntryAll = r_cast<const coreUint32&>(aiArrowMap[(i * 4) % (iMapSize * 4u)]);
                 if(!iEntryAll)
                 {
                     pEnemy->RemoveStatus(ENEMY_STATUS_INVINCIBLE);
@@ -721,6 +724,7 @@ void cNevoMission::__SetupOwn()
     // TODO 1: smaller mines
     // TODO 1: super-huge bomb
     // TODO 1: highlight current enemy rotation
+    // TODO 1: abwechselnd + und x
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         STAGE_ADD_SQUAD(pSquad1, cWarriorEnemy, 24u)
@@ -932,11 +936,19 @@ void cNevoMission::__SetupOwn()
             pPath1->Refine();
         });
 
+#if defined(_P1_VIDEO_)
+        STAGE_ADD_SQUAD(pSquad1, cMinerEnemy, 24u)
+#else
         STAGE_ADD_SQUAD(pSquad1, cArrowEnemy, 24u)
+#endif
         {
             STAGE_FOREACH_ENEMY_ALL(pSquad1, pEnemy, i)
             {
+#if defined(_P1_VIDEO_)
+                pEnemy->Configure(4, COLOR_SHIP_YELLOW);
+#else
                 pEnemy->Configure(4, COLOR_SHIP_ORANGE);
+#endif
             });
         });
 

@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #pragma once
@@ -127,6 +127,9 @@ private:
     coreObject3D m_Exhaust;                                  // 
 
     coreMap<const coreObject3D*, coreUint32> m_aCollision;   // 
+    
+    
+            coreVector2 vTest;
 
 
 public:
@@ -238,21 +241,29 @@ public:
     template <typename F> static FORCE_INLINE void TestCollision(const ePlayerTest eTest, coreObject3D* OUTPUT pObject, F&& nCallback);   // [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3 vIntersection, const coreBool bFirstHit) -> void
 
     
-    /*
+
     void SetPosition(const coreVector3 vPosition)
     {
         this->coreObject3D::SetPosition(vPosition);
 
-        m_Range  .SetPosition(vPosition);
-        m_Dot    .SetPosition(vPosition);
-        m_Wind   .SetPosition(vPosition);
-        m_Bubble .SetPosition(vPosition);
-        m_Shield .SetPosition(vPosition);
-        m_Exhaust.SetPosition(vPosition);
+        m_Dot       .SetPosition(vPosition);
+        m_Range     .SetPosition(vPosition);
+        m_Arrow     .SetPosition(vPosition + this->GetDirection() * 6.2f * PLAYER_SIZE_FACTOR);
+        m_Wind      .SetPosition(vPosition);
+        m_Bubble    .SetPosition(vPosition);
+        m_aShield[0].SetPosition(vPosition);
+        m_aShield[1].SetPosition(vPosition);
+        m_Exhaust   .SetPosition(vPosition - this->GetDirection() * (m_Exhaust.GetSize().y + 4.0f * PLAYER_SIZE_FACTOR));
     }
-     direction sollte auch aktualisiert werden können
-     coreObject3D::Move in teleport
-    */
+    void SetDirection(const coreVector3 vDirection)
+    {
+        this->coreObject3D::SetDirection(vDirection);
+
+        m_Arrow  .SetDirection(vDirection);
+        m_Exhaust.SetDirection(vDirection);
+    }
+    // coreObject3D::Move in teleport
+
     
 
 private:

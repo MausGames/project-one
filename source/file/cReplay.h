@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #pragma once
@@ -77,8 +77,8 @@ public:
         coreUint8  iNumMissions;                                                           // 
         coreUint8  iNumSegments;                                                           // 
 
-        coreUint8  iOptionMode;                                                            // 
         coreUint8  iOptionType;                                                            // 
+        coreUint8  iOptionMode;                                                            // 
         coreUint8  iOptionDifficulty;                                                      // 
         coreUint8  aaiOptionWeapon [REPLAY_PLAYERS][REPLAY_EQUIP_WEAPONS];                 // 
         coreUint8  aaiOptionSupport[REPLAY_PLAYERS][REPLAY_EQUIP_SUPPORTS];                // 

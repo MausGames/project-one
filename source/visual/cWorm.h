@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #pragma once
@@ -21,11 +21,11 @@
 class cWorm final
 {
 private:
-    coreVector3 m_avAnchor[WORM_ANCHORS];
-    coreFlow m_fTick;
-
-    coreFloat m_fSpeed; // tick speed
-    coreUint8 m_iCount; // used anchors
+//    coreVector3 m_avAnchor[WORM_ANCHORS];
+//    coreFlow m_fTick;
+//
+//    coreFloat m_fSpeed; // tick speed
+//    coreUint8 m_iCount; // used anchors
 
 
 public:

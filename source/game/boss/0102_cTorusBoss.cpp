@@ -2,14 +2,15 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
 
 // TODO 1: bottom state during intro
 // TODO 1: yellow bullets and current rotation need to align, or bullets are disabled when rotation gets out of control
+// TODO 1: boss steckt im boden (nur 1x) bei einer gruppe davor (foreshadowing)
 
 
 // ****************************************************************

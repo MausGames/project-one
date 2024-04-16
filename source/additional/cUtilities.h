@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #pragma once
@@ -138,7 +138,7 @@ inline FUNC_PURE coreVector2 SmoothAim(const coreVector2 vOldDir, const coreVect
 constexpr FUNC_CONST coreFloat SmoothTowards(const coreFloat fDistance, const coreFloat fThreshold)
 {
     ASSERT((fDistance >= 0.0f) && (fThreshold > 0.0f))
-    return (fDistance >= fThreshold) ? 1.0f : (fDistance * RCP(fThreshold));
+    return (fDistance >= fThreshold) ? 1.0f : (fDistance * RCP(fThreshold));   // nicht framerate unabhängig (innerhalb des thresholds), je höher die FPS, desto langsamer (sanfter) ist die bewegung innerhalb des thresholds
 }
 
 

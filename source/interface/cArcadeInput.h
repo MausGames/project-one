@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #pragma once
@@ -15,6 +15,7 @@
 // TODO 3: require two enter presses to confirm with keyboard input
 // TODO 3: cancel feature CORE_INPUT_CHAR(ESCAPE) (check coreTextBox issues) (with message box "do you really want to ...", but makes only sense in volatile situations)
 // TODO 3: add blinking label-cursor (also to engine textbox)
+// TODO 3: cursor might not be centered on character, because text is pixel-aligned and cursor not, maybe offset cursor instead
 
 
 // ****************************************************************
@@ -56,6 +57,8 @@ private:
     coreFlow  m_fMove;                     // 
     coreUint8 m_iOldGlyph;                 // 
     coreUint8 m_iNewGlyph;                 // 
+
+    coreFlow m_fCursorAngle;               // 
 
     coreBool m_bFinished;                  // 
 

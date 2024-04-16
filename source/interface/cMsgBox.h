@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #pragma once
@@ -13,6 +13,7 @@
 // TODO 1: transfer to Core Engine
 // TODO 2: fix controller support (mouse gets warped because of input-lock)
 // TODO 3: X character is off some pixels (font problem)
+// TODO 4: why do I use coreInt32+coreInt32 for the internal callback ?
 
 
 // ****************************************************************

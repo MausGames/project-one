@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -13,6 +13,7 @@
 // TODO 1: show boss banner with each resurrection ?
 // TODO 1: ram von boss und wings braucht flammen-wellen-effekt
 // TODO 1: outline vom body is dünner als von flügeln (wegen shape)
+// TODO 1: wing-parts crushing into the screen get a timer, and explode if not attacked
 // wave with heat areas und temperaturanzeige über spieler is hidden phase
 // tod: gegner wird von seinen eigenen flügeln aufgespießt, tak-tak-tak-tak-boom
 // 3 verschiedene death animations, die letzte is offensichtlicher
@@ -413,6 +414,7 @@ void cCholBoss::__EnableFire()
     g_pGlow->BindObject(&m_Fire);
     
 
+#if !defined(_P1_VIDEO_)
     const coreVector2 vPos = this->GetPosition().xy();
 
     for(coreUintW i = 20u; i--; )
@@ -421,7 +423,7 @@ void cCholBoss::__EnableFire()
 
         g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.1f, this, vPos,  vDir)->ChangeSize(1.4f);
     }
-    
+#endif
     
     for(coreUintW i = 0u; i < CHOL_WINGS; ++i)
     {

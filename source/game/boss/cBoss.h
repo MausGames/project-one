@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #pragma once
@@ -195,7 +195,7 @@ public:
     cDharukBoss()noexcept;
 
     DISABLE_COPY(cDharukBoss)
-    ASSIGN_ID_EX(101, "Dharuk", coreVector3(0.0f,0.0f,0.0f))
+    ASSIGN_ID_EX(101, "DHARUK", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -256,7 +256,7 @@ public:
     cTorusBoss()noexcept;
 
     DISABLE_COPY(cTorusBoss)
-    ASSIGN_ID_EX(102, "Torus", COLOR_MENU_GREEN)
+    ASSIGN_ID_EX(102, "TORUS", COLOR_MENU_GREEN)
 
 
 private:
@@ -298,7 +298,7 @@ public:
     cVausBoss()noexcept;
 
     DISABLE_COPY(cVausBoss)
-    ASSIGN_ID_EX(103, "Vaus", coreVector3(0.0f,0.0f,0.0f))
+    ASSIGN_ID_EX(103, "VAUS", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -329,7 +329,7 @@ public:
     cNautilusBoss()noexcept;
 
     DISABLE_COPY(cNautilusBoss)
-    ASSIGN_ID_EX(201, "Nautilus", coreVector3(0.0f,0.0f,0.0f))
+    ASSIGN_ID_EX(201, "NAUTILUS", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -369,7 +369,7 @@ public:
     cAmemasuBoss()noexcept;
 
     DISABLE_COPY(cAmemasuBoss)
-    ASSIGN_ID_EX(202, "Amemasu", coreVector3(0.0f,0.0f,0.0f))
+    ASSIGN_ID_EX(202, "AMEMASU", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -404,7 +404,7 @@ public:
     cLeviathanBoss()noexcept;
 
     DISABLE_COPY(cLeviathanBoss)
-    ASSIGN_ID_EX(203, "Leviathan", COLOR_MENU_CYAN)
+    ASSIGN_ID_EX(203, "LEVIATHAN", COLOR_MENU_CYAN)
 
 
 private:
@@ -441,7 +441,7 @@ public:
     cUrticaBoss()noexcept;
 
     DISABLE_COPY(cUrticaBoss)
-    ASSIGN_ID_EX(301, "Urtica", coreVector3(0.0f,0.0f,0.0f))
+    ASSIGN_ID_EX(301, "URTICA", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -497,7 +497,7 @@ public:
     cTigerBoss()noexcept;
 
     DISABLE_COPY(cTigerBoss)
-    ASSIGN_ID_EX(302, "Tiger MK-III", COLOR_MENU_YELLOW)
+    ASSIGN_ID_EX(302, "TIGER MK-III", COLOR_MENU_YELLOW)
 
 
 private:
@@ -552,7 +552,7 @@ public:
     cQuaternionBoss()noexcept;
 
     DISABLE_COPY(cQuaternionBoss)
-    ASSIGN_ID_EX(401, "Quaternion", coreVector3(0.0f,0.0f,0.0f))
+    ASSIGN_ID_EX(401, "QUATERNION", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -569,7 +569,7 @@ public:
     cSarosBoss()noexcept;
 
     DISABLE_COPY(cSarosBoss)
-    ASSIGN_ID_EX(402, "Saros", coreVector3(0.0f,0.0f,0.0f))
+    ASSIGN_ID_EX(402, "SAROS", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -598,7 +598,7 @@ public:
     cMessierBoss()noexcept;
 
     DISABLE_COPY(cMessierBoss)
-    ASSIGN_ID_EX(403, "Messier 87", COLOR_MENU_MAGENTA)
+    ASSIGN_ID_EX(403, "MESSIER 87", COLOR_MENU_MAGENTA)
 
 
 private:
@@ -626,7 +626,7 @@ public:
     cTartarusBoss()noexcept;
 
     DISABLE_COPY(cTartarusBoss)
-    ASSIGN_ID_EX(501, "Tartarus", coreVector3(0.0f,0.0f,0.0f))
+    ASSIGN_ID_EX(501, "TARTARUS", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -643,7 +643,7 @@ public:
     cPhalarisBoss()noexcept;
 
     DISABLE_COPY(cPhalarisBoss)
-    ASSIGN_ID_EX(502, "Phalaris", coreVector3(0.0f,0.0f,0.0f))
+    ASSIGN_ID_EX(502, "PHALARIS", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -675,7 +675,7 @@ public:
     cCholBoss()noexcept;
 
     DISABLE_COPY(cCholBoss)
-    ASSIGN_ID_EX(503, "Chol", COLOR_MENU_ORANGE)
+    ASSIGN_ID_EX(503, "CHOL", COLOR_MENU_ORANGE)
 
 
 private:
@@ -709,7 +709,7 @@ public:
     cFenrirBoss()noexcept;
 
     DISABLE_COPY(cFenrirBoss)
-    ASSIGN_ID_EX(601, "Fenrir", coreVector3(0.0f,0.0f,0.0f))
+    ASSIGN_ID_EX(601, "FENRIR", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -726,7 +726,7 @@ public:
     cShelobBoss()noexcept;
 
     DISABLE_COPY(cShelobBoss)
-    ASSIGN_ID_EX(602, "Shelob", coreVector3(0.0f,0.0f,0.0f))
+    ASSIGN_ID_EX(602, "SHELOB", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -786,7 +786,7 @@ public:
     cOrlacBoss()noexcept;
 
     DISABLE_COPY(cOrlacBoss)
-    ASSIGN_ID_EX(701, "Orlac", coreVector3(0.0f,0.0f,0.0f))
+    ASSIGN_ID_EX(701, "ORLAC", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -818,7 +818,7 @@ public:
     cGemingaBoss()noexcept;
 
     DISABLE_COPY(cGemingaBoss)
-    ASSIGN_ID_EX(702, "Geminga", COLOR_MENU_RED)
+    ASSIGN_ID_EX(702, "GEMINGA", COLOR_MENU_RED)
 
 
 private:
@@ -837,7 +837,7 @@ public:
     cNagualBoss()noexcept;
 
     DISABLE_COPY(cNagualBoss)
-    ASSIGN_ID_EX(703, "Nagual", coreVector3(0.0f,0.0f,0.0f))
+    ASSIGN_ID_EX(703, "NAGUAL", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:
@@ -865,7 +865,7 @@ public:
     cProjectOneBoss()noexcept;
 
     DISABLE_COPY(cProjectOneBoss)
-    ASSIGN_ID(801, "Project One")
+    ASSIGN_ID(801, "PROJECT ONE")
 
     // 
     inline coreVector3 GetColor()const final {return m_vLevelColor;}
@@ -889,7 +889,7 @@ public:
     cEigengrauBoss()noexcept;
 
     DISABLE_COPY(cEigengrauBoss)
-    ASSIGN_ID_EX(802, "Eigengrau", coreVector3(0.0f,0.0f,0.0f))
+    ASSIGN_ID_EX(802, "EIGENGRAU", coreVector3(0.0f,0.0f,0.0f))
 
 
 private:

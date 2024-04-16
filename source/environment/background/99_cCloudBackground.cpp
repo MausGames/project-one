@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -15,6 +15,9 @@ cCloudBackground::cCloudBackground()noexcept
 : m_fOffset (0.0f)
 {
     coreBatchList* pList1;
+
+    // 
+    this->__InitOwn();
 
     // allocate cloud list
     pList1 = new coreBatchList(CLOUD_CLOUD_RESERVE);
@@ -61,13 +64,6 @@ cCloudBackground::cCloudBackground()noexcept
     m_Cover.SetSize      (coreVector2(1.0f,1.0f) * SQRT2);
     m_Cover.SetColor3    (LERP(COLOR_MENU_PURPLE, coreVector3(1.0f,1.0f,1.0f), 0.45f) * 0.5f);
     m_Cover.SetTexSize   (coreVector2(1.0f,1.0f) * SQRT2 * 1.2f);
-
-    // load wind sound-effect
-    m_pWindSound = Core::Manager::Resource->Get<coreSound>("environment_wind.wav");
-    m_pWindSound.OnUsableOnce([this, pResource = m_pWindSound]()
-    {
-        pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
-    });
 }
 
 
@@ -75,9 +71,34 @@ cCloudBackground::cCloudBackground()noexcept
 // destructor
 cCloudBackground::~cCloudBackground()
 {
-    // stop wind sound-effect
-    if(m_pWindSound->EnableRef(this))
-        m_pWindSound->Stop();
+    // 
+    this->__ExitOwn();
+}
+
+
+// ****************************************************************
+// 
+void cCloudBackground::__InitOwn()
+{
+    // load base sound-effect
+    m_pBaseSound = Core::Manager::Resource->Get<coreSound>("environment_cloud.wav");
+    m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+    {
+        pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
+    });
+}
+
+
+// ****************************************************************
+// 
+void cCloudBackground::__ExitOwn()
+{
+    // stop base sound-effect
+    m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
+    {
+        if(pResource->EnableRef(this))
+            pResource->Stop();
+    });
 }
 
 
@@ -108,7 +129,7 @@ void cCloudBackground::__MoveOwn()
     m_Cover.SetTexOffset(coreVector2(0.005f * g_pEnvironment->GetSideOffset(), FRACT(m_fOffset)));
     m_Cover.Move();
 
-    // 
-    if(m_pWindSound->EnableRef(this))
-        m_pWindSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
+    // adjust volume of the base sound-effect
+    if(m_pBaseSound->EnableRef(this))
+        m_pBaseSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
 }

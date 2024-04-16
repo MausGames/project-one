@@ -2,15 +2,15 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #pragma once
 #ifndef _P1_GUARD_CREDITROLL_H_
 #define _P1_GUARD_CREDITROLL_H_
 
-// TODO 3: rotate entries and make them rotatable
+// TODO 5: rotate entries and make them rotatable
 
 
 // ****************************************************************
@@ -20,21 +20,6 @@
 // 
 alignas(ALIGNMENT_CACHE) static constexpr const coreChar* g_aapcCreditEntry[][2] =
 {
-    {"Horst Fuchs", "Programmer, Game Designer, AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"},
-    {"Horst Fuchs", "Programmer, Game Designer"},
-    {"Horst Fuchs", "Programmer, Game Designer"},
-    {"Horst Fuchs", "Programmer, Game Designer"},
-    {"Horst Fuchs", "Programmer, Game Designer"},
-    {"Horst Fuchs", "Programmer, Game Designer"},
-    {"Horst Fuchs", "Programmer, Game Designer"},
-    {"Horst Fuchs", "Programmer, Game Designer"},
-    {"Horst Fuchs", "Programmer, Game Designer"},
-    {"Horst Fuchs", "Programmer, Game Designer"},
-    {"Horst Fuchs", "Programmer, Game Designer"},
-    {"Horst Fuchs", "Programmer, Game Designer"},
-    {"Horst Fuchs", "Programmer, Game Designer"},
-    {"Horst Fuchs", "Programmer, Game Designer"},
-    {"Horst Fuchs", "Programmer, Game Designer"},
     {"Horst Fuchs", "Programmer, Game Designer"}
 };
 

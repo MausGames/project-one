@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -181,6 +181,7 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
 // render the interface
 void cInterface::Render()
 {
+#if !defined(_P1_VIDEO_) || 1
     if(this->IsBannerActive())
     {
         // 
@@ -251,6 +252,7 @@ void cInterface::Render()
         m_aStoryText[0].Render();
         m_aStoryText[1].Render();
     }
+#endif
 }
 
 
@@ -416,7 +418,7 @@ void cInterface::Move()
         //m_aBossHealthBar[1].SetColor3(vColor * 0.9f + 0.9f * ((fPercent <= 0.2f) ? fDanger : 0.0f));
         //const coreVector3 vColor = LERP(coreVector3(1.0f,1.0f,1.0f), pBoss->GetColor(), fPercent) + ((fPercent <= 0.2f) ? fDanger : 0.0f);//fPercent);
         //const coreVector3 vColor = LERP(coreVector3(1.0f,1.0f,1.0f), pBoss->GetColor(), CLAMP((fPercent - 0.2f) * (1.0f/0.8f) * (0.8f/0.6f), 0.0f, 1.0f)) + ((fPercent <= 0.2f) ? fDanger : 0.0f);
-        const coreVector3 vColor = LERP(coreVector3(1.0f,1.0f,1.0f), pBoss->GetColor(), cShip::CalcColorFactor(pBoss->GetCurHealthPct())) + ((fPercent <= 0.2f) ? (fDanger * 0.5f) : 0.0f);
+        const coreVector3 vColor = LERP(coreVector3(1.0f,1.0f,1.0f), pBoss->GetColor(), cShip::TransformColorFactor(pBoss->GetCurHealthPct())) + ((fPercent <= 0.2f) ? (fDanger * 0.5f) : 0.0f);
         m_aBossHealthBar[1].SetColor3(vColor * 1.0f);
         m_aBossHealthBar[2].SetColor3(vColor * 0.3f);
 
@@ -595,7 +597,7 @@ void cInterface::ShowMission(const coreChar* pcMain, const coreChar* pcSub)
 void cInterface::ShowMission(const cMission* pMission)
 {
     // show default mission banner
-    this->ShowMission(coreData::StrUpper(pMission->GetName()), PRINT("%s %d", Core::Language->GetString("MISSION"), pMission->GetID()));
+    this->ShowMission(pMission->GetName(), PRINT("%s %d", Core::Language->GetString("MISSION"), pMission->GetID()));
 }
 
 
@@ -645,7 +647,7 @@ void cInterface::ShowBoss(const coreChar* pcMain, const coreChar* pcSub)
 void cInterface::ShowBoss(const cBoss* pBoss)
 {
     // show default boss banner
-    this->ShowBoss(coreData::StrUpper(pBoss->GetName()), Core::Language->GetString(PRINT("BOSS_TITLE_%04d", pBoss->GetID())));
+    this->ShowBoss(pBoss->GetName(), Core::Language->GetString(PRINT("BOSS_TITLE_%04d", pBoss->GetID())));
 }
 
 

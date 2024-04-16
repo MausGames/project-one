@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -210,8 +210,8 @@ void cSave::__CheckHeader(sHeader* OUTPUT pHeader)
     // 
     pHeader->oOptions.iStandard   = CLAMP(pHeader->oOptions.iStandard,   0u, SAVE_MISSIONS      -1u);
     pHeader->oOptions.iTraining   = CLAMP(pHeader->oOptions.iTraining,   0u, (SAVE_MISSIONS      -3u) * (SAVE_SEGMENTS-1u));   // TODO 1: fix
-    pHeader->oOptions.iMode       = CLAMP(pHeader->oOptions.iMode,       0u, GAME_MODE_MAX      -1u);
     pHeader->oOptions.iType       = CLAMP(pHeader->oOptions.iType,       0u, GAME_TYPE_MAX      -1u);
+    pHeader->oOptions.iMode       = CLAMP(pHeader->oOptions.iMode,       0u, GAME_MODE_MAX      -1u);
     pHeader->oOptions.iDifficulty = CLAMP(pHeader->oOptions.iDifficulty, 0u, GAME_DIFFICULTY_MAX-1u);
     for(coreUintW i = 0u; i < SAVE_PLAYERS; ++i)
     {

@@ -103,7 +103,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("object_cube_rota.md3",                   CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_cube_rota.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_cube_top.md3",                    CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_cube_top.md3");
     Core::Manager::Resource->Load<coreModel>  ("object_dot.md3",                         CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_dot.md3", CORE_MODEL_LOAD_NO_BUFFERS);
-    Core::Manager::Resource->Load<coreModel>  ("object_fang.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_fang.md3");
+    Core::Manager::Resource->Load<coreModel>  ("object_fang.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_fang.md3"); // CORE_MODEL_LOAD_NO_CLUSTERS
     Core::Manager::Resource->Load<coreModel>  ("object_paddle.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_paddle.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("object_ring.md3",                        CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_ring.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("object_sphere.md3",                      CORE_RESOURCE_UPDATE_AUTO,   "data/models/object_sphere.md3");
@@ -385,6 +385,8 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("effect_track.vert",                      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_track.vert");
     Core::Manager::Resource->Load<coreShader> ("effect_track.frag",                      CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_track.frag");
     Core::Manager::Resource->Load<coreShader> ("effect_turf.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_turf.frag");
+    Core::Manager::Resource->Load<coreShader> ("effect_weather_nebula.vert",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_weather.vert", PRINT(SHADER_OVERLAYS(%u) SHADER_SINGLE, SPACE_NEBULA_NUM));
+    Core::Manager::Resource->Load<coreShader> ("effect_weather_nebula.frag",             CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_weather.frag", PRINT(SHADER_OVERLAYS(%u) SHADER_SINGLE, SPACE_NEBULA_NUM));
     Core::Manager::Resource->Load<coreShader> ("effect_weather_rain.vert",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_weather.vert", PRINT(SHADER_OVERLAYS(%u) SHADER_SINGLE, MOSS_RAIN_NUM));
     Core::Manager::Resource->Load<coreShader> ("effect_weather_rain.frag",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_weather.frag", PRINT(SHADER_OVERLAYS(%u) SHADER_SINGLE, MOSS_RAIN_NUM));
     Core::Manager::Resource->Load<coreShader> ("effect_weather_sand.vert",               CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/effect_weather.vert", PRINT(SHADER_OVERLAYS(%u) SHADER_SINGLE, DESERT_SAND_NUM));
@@ -470,14 +472,18 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreSound>  ("effect_launch.wav",                      CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/effect_launch.wav");
     Core::Manager::Resource->Load<coreSound>  ("effect_rush.wav",                        CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/effect_rush.wav");
     Core::Manager::Resource->Load<coreSound>  ("effect_shatter.wav",                     CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/effect_shatter.wav");
-    Core::Manager::Resource->Load<coreSound>  ("environment_lava.wav",                   CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_lava.wav");
-    Core::Manager::Resource->Load<coreSound>  ("environment_nature.wav",                 CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_nature.wav");
-    Core::Manager::Resource->Load<coreSound>  ("environment_rain.wav",                   CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_rain.wav");
+    Core::Manager::Resource->Load<coreSound>  ("environment_cloud.wav",                  CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_cloud.wav");
+    Core::Manager::Resource->Load<coreSound>  ("environment_dark.wav",                   CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_dark.wav");
+    Core::Manager::Resource->Load<coreSound>  ("environment_desert.wav",                 CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_desert.wav");
+    Core::Manager::Resource->Load<coreSound>  ("environment_grass.wav",                  CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_grass.wav");
+    Core::Manager::Resource->Load<coreSound>  ("environment_moss.wav",                   CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_moss.wav");
+    Core::Manager::Resource->Load<coreSound>  ("environment_sea.wav",                    CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_sea.wav");
+    Core::Manager::Resource->Load<coreSound>  ("environment_snow.wav",                   CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_snow.wav");
+    Core::Manager::Resource->Load<coreSound>  ("environment_space.wav",                  CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_space.wav");
     Core::Manager::Resource->Load<coreSound>  ("environment_thunder_01.wav",             CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_thunder_01.wav");
     Core::Manager::Resource->Load<coreSound>  ("environment_thunder_02.wav",             CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_thunder_02.wav");
     Core::Manager::Resource->Load<coreSound>  ("environment_thunder_03.wav",             CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_thunder_03.wav");
-    Core::Manager::Resource->Load<coreSound>  ("environment_under.wav",                  CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_under.wav");
-    Core::Manager::Resource->Load<coreSound>  ("environment_wind.wav",                   CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_wind.wav");
+    Core::Manager::Resource->Load<coreSound>  ("environment_volcano.wav",                CORE_RESOURCE_UPDATE_AUTO,   "data/sounds/environment_volcano.wav");
 
     coreList<coreString> asPath;
     coreData::FolderScan("data/fonts", "*.ttf", &asPath);
@@ -869,6 +875,11 @@ void CoreApp::Setup()
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_turf_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("effect_snow.vert")
         ->AttachShader("effect_turf.frag")
+        ->Finish();
+
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_weather_nebula_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("effect_weather_nebula.vert")
+        ->AttachShader("effect_weather_nebula.frag")
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_weather_rain_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())

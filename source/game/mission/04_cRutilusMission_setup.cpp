@@ -2,8 +2,8 @@
 //*-------------------------------------------------*//
 //| Part of Project One (https://www.maus-games.at) |//
 //*-------------------------------------------------*//
+//| Copyright (c) 2010 Martin Mauersics             |//
 //| Released under the zlib License                 |//
-//| More information available in the readme file   |//
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
@@ -39,7 +39,7 @@ void cRutilusMission::__SetupOwn()
         cSpaceBackground* pBackground = d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground());
 
         pBackground->SetGroundDensity(0u, 0.0f);
-        pBackground->SetCoverColor(COLOR_MENU_BLUE);
+        //pBackground->SetCoverColor(COLOR_MENU_BLUE);
 
         STAGE_FINISH_NOW
     });
@@ -75,6 +75,8 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: effect und noise wenn man versucht sich zu drehen (död död, XX)
     // TODO 1: helfer fliegt am anfang casually vorbei (an mittelpunkt) und dropt die erste plate (schräg, e.g. von oben-links ? quer zu background bewegung)
     // TODO 1: badge, another plate flies across the screen with a certain enemy in sight, killing from the plate gives badge
+    // TODO 1: make wave from the right longer, to highlight forcing the direction like in a classic side-scroller
+    // TODO 1: plate left shooting to right, plate right shooting to left, plate left disappears then, and remaining plate needs to be adjusted for transition
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -531,7 +533,7 @@ void cRutilusMission::__SetupOwn()
     // 
     STAGE_MAIN({TAKE_MISSION, 1u})
     {
-        d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground())->SetCoverColor(LERP(COLOR_MENU_BLUE, COLOR_MENU_MAGENTA, m_fStageTime));
+        //d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground())->SetCoverColor(LERP(COLOR_MENU_BLUE, COLOR_MENU_MAGENTA, m_fStageTime));
 
         STAGE_FINISH_AFTER(1.0f)
     });
@@ -542,7 +544,7 @@ void cRutilusMission::__SetupOwn()
     {
         if(STAGE_BEGINNING)
         {
-            d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground())->SetCoverColor(COLOR_MENU_MAGENTA);
+            //d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground())->SetCoverColor(COLOR_MENU_MAGENTA);
         }
 
         STAGE_FINISH_PLAY
@@ -818,6 +820,8 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: multiple smaller bubbles are created from center (like bubbles) and move around slightly
     // TODO 1: change intro helper movement
     // TODO 1: shift time-bubble to the side on disable ?
+    // TODO 1: huge filled bubble draws across screen (adjust text-coords), and helper bubble uses spheric shader
+    // TODO 1: bubbles teilen sich in mehrere auf und bewegen sich systematisch herum (unterschiedlich groß ?), bubble wird einmal riesig und deckt den halben bildschirm ein (spieler wird gezwungen sich in zeitlupe durch viele bullets zu bewegen)
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreUintW iRegisterSize = GAME_PLAYERS + 1u;
@@ -1081,7 +1085,7 @@ void cRutilusMission::__SetupOwn()
     // 
     STAGE_MAIN({TAKE_MISSION, 3u})
     {
-        d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground())->SetCoverColor(LERP(COLOR_MENU_MAGENTA, COLOR_MENU_RED, m_fStageTime));
+        //d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground())->SetCoverColor(LERP(COLOR_MENU_MAGENTA, COLOR_MENU_RED, m_fStageTime));
 
         STAGE_FINISH_AFTER(1.0f)
     });
@@ -1092,7 +1096,7 @@ void cRutilusMission::__SetupOwn()
     {
         if(STAGE_BEGINNING)
         {
-            d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground())->SetCoverColor(COLOR_MENU_RED);
+            //d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground())->SetCoverColor(COLOR_MENU_RED);
         }
 
         STAGE_FINISH_PLAY
@@ -1114,6 +1118,7 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: something where the gravitation at the bottom forces objects down like in moonlander, accelerating metroids maybe
     // TODO 1: at the bottom, gravitation changes to line
     // TODO 1: for player bullets maybe reduce gravity with fly-time
+    // TODO 1: pulse, flip gravitation, doch wieder (auch) lineare gravitation (mittig, beid-seitlich, rotierend, hin-und-her bewegend (auch sphere?))
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -1572,7 +1577,7 @@ void cRutilusMission::__SetupOwn()
     {
         if(STAGE_BEGINNING)
         {
-            d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground())->SetCoverColor(COLOR_MENU_MAGENTA);
+            //d_cast<cSpaceBackground*>(g_pEnvironment->GetBackground())->SetCoverColor(COLOR_MENU_MAGENTA);
             g_pEnvironment->SetTargetSpeed(0.0f, 1.0f);
         }
 
