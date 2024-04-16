@@ -48,7 +48,7 @@ cEnvironment::cEnvironment()noexcept
 
     // load first background
     m_pBackground = new cNoBackground();
-    this->ChangeBackground(Core::Config->GetInt("Game", "Background", cCloudBackground::ID), ENVIRONMENT_MIX_CURTAIN, 0.75f, coreVector2(1.0f,0.0f));
+    this->ChangeBackground(g_pSave->GetHeader().oProgress.bFirstPlay ? cCloudBackground::ID : Core::Config->GetInt("Game", "Background", cCloudBackground::ID), ENVIRONMENT_MIX_CURTAIN, 0.75f, coreVector2(1.0f,0.0f));
 }
 
 
@@ -180,6 +180,7 @@ void cEnvironment::ChangeBackground(const coreInt32 iID, const coreUintW iTransi
     switch(iID)
     {
     default: WARN_IF(true) {}
+    case cCloudBackground  ::ID: m_pBackground = new cCloudBackground  (); break;   // fallback for invalid IDs
     case cNoBackground     ::ID: m_pBackground = new cNoBackground     (); break;
     case cGrassBackground  ::ID: m_pBackground = new cGrassBackground  (); break;
     case cSeaBackground    ::ID: m_pBackground = new cSeaBackground    (); break;
@@ -190,7 +191,6 @@ void cEnvironment::ChangeBackground(const coreInt32 iID, const coreUintW iTransi
     case cMossBackground   ::ID: m_pBackground = new cMossBackground   (); break;
     case cDarkBackground   ::ID: m_pBackground = new cDarkBackground   (); break;
     case cStomachBackground::ID: m_pBackground = new cStomachBackground(); break;
-    case cCloudBackground  ::ID: m_pBackground = new cCloudBackground  (); break;
     }
 
     // 

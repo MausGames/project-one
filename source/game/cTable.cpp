@@ -176,7 +176,7 @@ void cDataTable::GiveBadge(const coreUintW iBadgeIndex, const coreUintW iMission
     ASSERT(iBadgeIndex   < BADGES)
     ASSERT(iMissionIndex < TABLE_MISSIONS)
     ASSERT(iSegmentIndex < TABLE_SEGMENTS)
-    ADD_BIT(m_aiBadge[iMissionIndex], iSegmentIndex)
+    ADD_BIT(m_aiBadge[iMissionIndex], iBadgeIndex + BADGES * iSegmentIndex)
 
     // 
     g_pSave->EditGlobalStats      ()                            ->iBadgesEarned += 1u;

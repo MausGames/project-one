@@ -114,6 +114,7 @@ void LoadConfig()
     // read audio values
     g_OldConfig.Audio.fEffectVolume  = Core::Config->GetFloat(CONFIG_AUDIO_EFFECT_VOLUME);
     g_OldConfig.Audio.fAmbientVolume = Core::Config->GetFloat(CONFIG_AUDIO_AMBIENT_VOLUME);
+    g_OldConfig.Audio.i3DSound       = Core::Config->GetFloat(CONFIG_AUDIO_3D_SOUND);
 
     // read input values
     for(coreUintW i = 0u; i < INPUT_TYPES; ++i)
@@ -124,13 +125,13 @@ void LoadConfig()
     }
     for(coreUintW i = 0u; i < INPUT_SETS;  ++i)
     {
-        g_OldConfig.Input.aSet[i].iMoveUp    = Core::Config->GetInt(CONFIG_INPUT_MOVE_UP   (i));
-        g_OldConfig.Input.aSet[i].iMoveLeft  = Core::Config->GetInt(CONFIG_INPUT_MOVE_LEFT (i));
-        g_OldConfig.Input.aSet[i].iMoveDown  = Core::Config->GetInt(CONFIG_INPUT_MOVE_DOWN (i));
-        g_OldConfig.Input.aSet[i].iMoveRight = Core::Config->GetInt(CONFIG_INPUT_MOVE_RIGHT(i));
+        g_OldConfig.Input.aSet[i].iMoveUp    = Core::Config->GetInt(CONFIG_INPUT_MOVE_UP   (i), DEFAULT_KEYBOARD_1_MOVE_UP);
+        g_OldConfig.Input.aSet[i].iMoveLeft  = Core::Config->GetInt(CONFIG_INPUT_MOVE_LEFT (i), DEFAULT_KEYBOARD_1_MOVE_LEFT);
+        g_OldConfig.Input.aSet[i].iMoveDown  = Core::Config->GetInt(CONFIG_INPUT_MOVE_DOWN (i), DEFAULT_KEYBOARD_1_MOVE_DOWN);
+        g_OldConfig.Input.aSet[i].iMoveRight = Core::Config->GetInt(CONFIG_INPUT_MOVE_RIGHT(i), DEFAULT_KEYBOARD_1_MOVE_RIGHT);
         for(coreUintW j = 0u; j < INPUT_KEYS_ACTION; ++j)
         {
-            g_OldConfig.Input.aSet[i].aiAction[j] = Core::Config->GetInt(CONFIG_INPUT_ACTION(i, j));
+            g_OldConfig.Input.aSet[i].aiAction[j] = Core::Config->GetInt(CONFIG_INPUT_ACTION(i, j), DEFAULT_KEYBOARD_1_ACTION(j));
         }
     }
 
@@ -178,6 +179,7 @@ void SaveConfig()
     // write audio values
     Core::Config->SetFloat(CONFIG_AUDIO_EFFECT_VOLUME,  g_OldConfig.Audio.fEffectVolume);
     Core::Config->SetFloat(CONFIG_AUDIO_AMBIENT_VOLUME, g_OldConfig.Audio.fAmbientVolume);
+    Core::Config->SetFloat(CONFIG_AUDIO_3D_SOUND,       g_OldConfig.Audio.i3DSound);
 
     // write input values
     for(coreUintW i = 0u; i < INPUT_TYPES; ++i)

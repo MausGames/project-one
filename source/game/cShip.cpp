@@ -194,11 +194,11 @@ void cShip::DefaultOrientateLerp(const coreFloat fFromAngle, const coreFloat fTo
 
 // ****************************************************************
 // 
-void cShip::DefaultAxiate(const coreFloat fAngle)
+void cShip::DefaultAxiate(const coreFloat fAngle, const coreVector3 vBaseOri)
 {
     // 
     const coreVector3 vDir  = this->GetDirection();
-    const coreVector3 vOri  = coreVector3::Cross(vDir, coreVector3::Cross(vDir, coreVector3(0.0f,0.0f,1.0f)).Normalized());
+    const coreVector3 vOri  = coreVector3::Cross(vDir, coreVector3::Cross(vDir, vBaseOri).Normalized());
     const coreMatrix3 mRota = coreMatrix4::RotationAxis(fAngle, vDir).m123();
     this->SetOrientation(vOri * mRota);
 }

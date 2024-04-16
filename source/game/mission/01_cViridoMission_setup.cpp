@@ -107,6 +107,9 @@ void cViridoMission::__SetupOwn()
     // TODO 1: (riesige) schilde sind angreifbar obwohl noch nicht sichtbar, eigentlich alle
     // TODO 1: letzter gegner sollte einen breiteren angriff haben, um ihn bedrohlicher zu machen
     // TODO 1: vielleicht shield texture offset abhängig vom owner machen (selber owner hat selben offset, mit pointer wert, aber was wenn owner tot ?)
+    // TODO 1: vielleicht rauf-runter-rauf-runter statt sinus-welle
+    // TODO 1: transparent back-side of shield rectangle should not cause collision
+    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         constexpr coreFloat fWidth = 0.38f;
@@ -423,7 +426,8 @@ void cViridoMission::__SetupOwn()
     // enemies in 3 need to be positioned to easily kill them (to reduce pressure, which is reserved for later)
     // TODO 1: purple helper visible at border of one laser
     // TODO 1: fix laser collision
-    // TODO 1: invert rotation of cross, or of 5-eck ?
+    // TODO 1: invert rotation of cross, or of 5-eck ? (eher 5-eck)
+    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         constexpr coreUintW iNumData = 8u;
@@ -760,6 +764,8 @@ void cViridoMission::__SetupOwn()
     // TODO 1: player sollte auch ein _TOP attribute bekommen, und einen eigenen shadow (wie die gegner)
     // TODO 1: 2x2 blöcke sollten mehr in die mitte um am rand platz zu geben, schachmuster sollte mehr verteilt sein um in der mitte mehr platz zu geben
     // TODO 1: easy: only middle 2 bullets
+    // TODO 1: position-reduction also for player ?
+    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         constexpr coreUintW iNumData  = 12u;
@@ -953,7 +959,7 @@ void cViridoMission::__SetupOwn()
             }
 
             
-            if(i == iBigIndex)
+            if(i == iBigIndex)   // TODO 1
             {
                 const coreBool bPillar = ((fWait < 1.0f) && !pEnemy->ReachedDeath());
 
@@ -1168,6 +1174,7 @@ void cViridoMission::__SetupOwn()
     // TODO 1: hard-mode: every enemy bounces once (what about bouncy enemy?), oder 1 infinity move (and bouncy enemy just moves N times infinitely)
     // TODO 1: letzte 3 gruppen (player-aim) bisschen variabler von positionierung machen (e.g. (infinity) side-movement ?)
     // TODO 1: wenn nicht problematisch, geschosse könnten auch in fixe richtung fliegen (oder an fixen punkt), außer bei den letzten wellen (wo der spieler anvisiert wird)
+    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreUintW iNumData     = 16u;
@@ -1424,6 +1431,7 @@ void cViridoMission::__SetupOwn()
     // TODO 1: vor wall-gruppe könnte sich spieler oben beim spawn-punkt befinden
     // TODO 1: crosshair gruppe könnte hin und zurück fliegen, man kann nur angreifen wenn weiter weg
     // TODO 1: enemies need an arrow like the player (but permanent)
+    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         STAGE_ADD_SQUAD(pSquad1, cWarriorEnemy, 58u)
@@ -1604,6 +1612,7 @@ void cViridoMission::__SetupOwn()
     // TODO 1: player gets bigger and smaller when hitting a certain enemy, should not affect collision or gameplay, but movement speed? or gets bigger over time, and gets smaller again by spinning and shooting around
     // TODO 1: shrinking enemies have different attack (single dense wave)
     // TODO 1: multiple enemies are attached to each other and will grow independently
+    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         STAGE_ADD_SQUAD(pSquad1, cStarEnemy, 90u)                       

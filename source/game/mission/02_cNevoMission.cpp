@@ -13,7 +13,7 @@
 // constructor
 cNevoMission::cNevoMission()noexcept
 : m_Bomb         (NEVO_BOMBS)
-, m_abBombGone   {}
+, m_iBombGone    (0u)
 , m_Blast        (NEVO_BLASTS)
 , m_BlastLine    (NEVO_BLASTS * NEVO_LINES)
 , m_afBlastTime  {}
@@ -119,8 +119,8 @@ cNevoMission::cNevoMission()noexcept
             pArrow->DefineProgram("effect_energy_flat_invert_program");
 
             // set object properties
-            pArrow->SetSize   (coreVector3(1.0f,1.0f,1.0f) * 1.5f);
-            pArrow->SetColor3 (COLOR_ENERGY_GREEN * 0.8f);
+            pArrow->SetSize   (coreVector3(1.0f,1.0f,1.0f) * 2.0f);
+            pArrow->SetColor3 (COLOR_ENERGY_GREEN * 0.5f);
             pArrow->SetTexSize(coreVector2(0.5f,0.2f) * 1.2f);
             pArrow->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
@@ -226,7 +226,8 @@ void cNevoMission::DisableBomb(const coreUintW iIndex, const coreBool bAnimated)
     oBomb.ChangeType(0);
 
     // 
-    m_abBombGone[iIndex] = true;
+    ADD_BIT(m_iBombGone, iIndex)
+    STATIC_ASSERT(NEVO_BOMBS <= sizeof(m_iBombGone)*8u)
 
     // 
     oBomb.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
@@ -434,10 +435,8 @@ void cNevoMission::EnableContainer(const coreVector2 vPosition)
 
     // 
     m_Container.SetPosition(coreVector3(vPosition, 0.0f));
-#if !defined(_P1_VIDEO_)
     m_Container.SetEnabled (CORE_OBJECT_ENABLE_ALL);
     cShadow::GetGlobalContainer()->BindObject(&m_Container);
-#endif
 }
 
 
@@ -449,14 +448,44 @@ void cNevoMission::DisableContainer(const coreBool bAnimated)
     if(!m_Container.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
     m_Container.ChangeType(0);
 
-#if !defined(_P1_VIDEO_)
     // 
     m_Container.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     cShadow::GetGlobalContainer()->UnbindObject(&m_Container);
-#endif
 
     // 
     if(bAnimated) g_pSpecialEffects->MacroExplosionPhysicalDarkBig(m_Container.GetPosition());
+}
+
+
+// ****************************************************************
+// 
+void cNevoMission::SetTileStyle(const coreUintW iIndex, const coreUint8 iStyle)
+{
+    ASSERT(iIndex < NEVO_TILES)
+    coreObject3D& oTile = m_aTileRaw[iIndex];
+
+    switch(iStyle)
+    {
+    default: ASSERT(false)
+
+    // 
+    case 0u:
+        oTile.SetColor3 (COLOR_ENERGY_BLUE);
+        oTile.SetTexSize(coreVector2(1.0f,1.0f) * 0.0f);
+        break;
+
+    // 
+    case 1u:
+        oTile.SetColor3 (COLOR_ENERGY_YELLOW);
+        oTile.SetTexSize(coreVector2(1.0f,1.0f) * 1.0f);
+        break;
+
+    // 
+    case 2u:
+        oTile.SetColor3 (COLOR_ENERGY_GREEN);
+        oTile.SetTexSize(coreVector2(1.0f,1.0f) * 1.0f);
+        break;
+    }
 }
 
 
@@ -504,7 +533,6 @@ void cNevoMission::__RenderOwnOver()
     m_Block.Render();
     g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyList(&m_Block);
 
-#if !defined(_P1_VIDEO_)
     // 
     if(m_bOverdraw) DEPTH_PUSH
                else DEPTH_PUSH_SHIP
@@ -512,7 +540,6 @@ void cNevoMission::__RenderOwnOver()
     // 
     cLodObject::RenderHighObject(&m_Container);
     g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(&m_Container);
-#endif
 }
 
 
@@ -524,7 +551,7 @@ void cNevoMission::__MoveOwnAfter()
     m_fAnimation.UpdateMod(0.2f, 10.0f);
 
     // 
-    std::memset(m_abBombGone, 0, sizeof(m_abBombGone));
+    m_iBombGone = 0u;
 
     // 
     for(coreUintW i = 0u; i < NEVO_BOMBS; ++i)
@@ -635,7 +662,14 @@ void cNevoMission::__MoveOwnAfter()
     m_Tile.MoveNormal();
 
     // 
-    const coreFloat fArrowMove = 0.7f * SIN(m_fAnimation * (10.0f*PI));
+    const coreVector2 vArrowOri = coreVector2::Direction(m_fAnimation * (6.0f*PI));
+
+    // 
+    m_iArrowActive = 0u;
+    g_pGame->ForEachPlayer([this](const cPlayer* pPlayer, const coreUintW i)
+    {
+        ADD_BIT(m_iArrowActive, PackDirection(-pPlayer->GetDirection().xy()))
+    });
 
     // 
     for(coreUintW i = 0u; i < NEVO_ARROWS; ++i)
@@ -649,8 +683,9 @@ void cNevoMission::__MoveOwnAfter()
         {
             const coreVector2 vDir = UnpackDirection(m_aiArrowDir[i]);
 
-            oArrow.SetPosition (coreVector3(pOwner->GetPosition().xy() + vDir * fArrowMove, 0.0f));
-            oArrow.SetDirection(coreVector3(-vDir, 0.0f));
+            oArrow.SetPosition   (pOwner->GetPosition());
+            oArrow.SetDirection  (coreVector3(-vDir, 0.0f));
+            oArrow.SetOrientation(OriRoundDir(vArrowOri, vDir));
         }
 
         // 

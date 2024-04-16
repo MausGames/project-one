@@ -70,7 +70,7 @@
 // TODO 5: convert bigger sound-effects (ambient) to music ?
 // TODO 3: change all linear interpolation with at least LERPH3 to improve quality, where possible
 // TODO 3: find (manual) interpolations and try to use smoothstep for it (engine, application and shader)
-// TODO 4: check all lambdas if OUTPUT can be replaced with const
+// TODO 4: check all lambdas if OUTPUT can be replaced with const (maybe check everything for it, engine + p1)
 // TODO 3: create animation offset for all gameplay objects (const coreFloat fOffset = I_TO_F(i) * (1.0f/7.0f);), try to use num-per-line + 1, what about bullets ?
 // TODO 1: make sure user folder is correctly handled for multi-user (-> corePlatform)
 // TODO 3: every boss, enemy, gameplay-objects, player-bullet-interacting object needs a volume (including all enemy-bullet types)
@@ -94,6 +94,9 @@
 // TODO 1: check for importing save-game from demo (if on Steam and no main save-game found)
 // TODO 1: make frequency rounding corrections: boss ticker, player weapon
 // TODO 1: remove unused waves and associated objects from default missions, if not required anymore at the end
+// TODO 1: all health-based boss-transitions need to take affect on specific % -> create own % and value check-functions with rounding
+// TODO 1: should bullets create particles when shot ? especially for bosses
+// TODO 1: GL_DEPTH_CLAMP
 
 
 // ****************************************************************
@@ -104,11 +107,14 @@
     #pragma GCC diagnostic ignored "-Winconsistent-missing-override"
 #endif
 
+#pragma warning(disable : 4189) // 'fBulletSpeed': local variable is initialized but not referenced
+
+
 #define _P1_DEBUG_INPUT_ (1)
 //#define _P1_DEBUG_RANDOM_ (1)
 
 #if !defined(_CORE_DEBUG_)
-    #if defined(_CORE_SSE_)
+    #if defined(_CORE_SSE_) || defined(_CORE_NEON_)
         #pragma message("Warning: Precision reduced!")
     #endif
     #if defined(_P1_DEBUG_INPUT_)

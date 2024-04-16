@@ -180,6 +180,8 @@ private:
     sHeader    m_Header;   // 
     coreString m_sPath;    // 
 
+    coreUint32 m_iToken;   // 
+
 
 public:
     cSave()noexcept;

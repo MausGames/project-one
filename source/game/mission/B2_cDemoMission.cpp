@@ -358,7 +358,7 @@ void cDemoMission::__MoveOwnAfter()
         const coreFloat fValue = FRACT(2.0f * m_fAnimation);
 
         // 
-        pLaser->SetTexOffset(coreVector2(3.0f,4.0f) * FRACT(0.8f * 0.2 * m_fAnimation));
+        pLaser->SetTexOffset(coreVector2(3.0f,4.0f) * FRACT(0.8f * 0.2f * m_fAnimation));
 
         // 
         pWave->SetPosition (pLaser->GetPosition ());

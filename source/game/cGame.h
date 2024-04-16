@@ -10,11 +10,10 @@
 #ifndef _P1_GUARD_GAME_H_
 #define _P1_GUARD_GAME_H_
 
-// TODO 3: enemy bullet (and enemy?) cleanup on mission unload
-// TODO 2: check for duplicate IDs in mission-lists ? LoadMissionID may behave wrong
+// TODO 3: enemy bullet (and enemy?) cleanup on mission unload (probably not really necessary, can be re-used for next mission)
 // TODO 5: maybe spawn players in flight direction, mission start and continue ?
 // TODO 2: FindPlayer may find player outside of area (during resurrection)
-// TODO 2: removing ghost status (player, enemy, bullet) should reset firsthit property on collision somehow
+// TODO 2: removing ghost status (player, enemy, bullet) should reset firsthit property on collision somehow (but needs separation between sub-ghost states, maybe add own collision-tracker and merge with the one in player-class)
 // TODO 3: repair enemy only in coop ? (not duel)
 
 

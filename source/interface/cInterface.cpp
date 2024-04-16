@@ -49,8 +49,8 @@ void cInterface::sPlayerView::Construct(const coreUintW iIndex)
     oShieldValue.SetColor3   (COLOR_MENU_INSIDE);
 
     oScoreTotal.Construct   (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
-    oScoreTotal.SetPosition (coreVector2(0.01f,-0.035f) * vSide);
-    oScoreTotal.SetAlignment(coreVector2(1.0f, -1.0f)   * vSide);
+    oScoreTotal.SetPosition (coreVector2(0.01f, 0.0f) * vSide);
+    oScoreTotal.SetAlignment(coreVector2(1.0f, -1.0f) * vSide);
     oScoreTotal.SetColor3   (COLOR_MENU_INSIDE);
 
     oScoreMission.Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
@@ -139,9 +139,9 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
     m_aBossTime[2].SetAlignment(coreVector2(1.0f,-1.0f));
     m_aBossTime[2].SetColor3   (COLOR_MENU_INSIDE * 0.75f);
 
-    m_WaveName.Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
-    m_WaveName.SetPosition (coreVector2(0.0f,0.005f));
-    m_WaveName.SetAlignment(coreVector2(0.0f,1.0f));
+    m_WaveName.Construct   (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
+    m_WaveName.SetPosition (coreVector2(-0.01f,-0.005f));
+    m_WaveName.SetAlignment(coreVector2(-1.0f, -1.0f));
     m_WaveName.SetColor3   (COLOR_MENU_INSIDE);
 
     m_aWaveTime[0].Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
@@ -167,6 +167,14 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
     m_GoalTime.Construct   (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
     m_GoalTime.SetAlignment(coreVector2(-1.0f,-1.0f));
     m_GoalTime.SetColor3   (COLOR_MENU_INSIDE * 0.75f);
+
+    for(coreUintW i = 0u; i < INTERFACE_BADGES; ++i)
+    {
+        m_aBadge[i].DefineTexture(0u, "menu_star.png");
+        m_aBadge[i].DefineProgram("default_2d_program");
+        m_aBadge[i].SetAlignment (coreVector2(-1.0f,1.0f));
+        m_aBadge[i].SetTexSize   (coreVector2( 0.5f,1.0f));
+    }
 
     m_BannerBar.DefineTexture(0u, "menu_detail_04.png");
     m_BannerBar.DefineTexture(1u, "menu_background_black.png");
@@ -246,6 +254,9 @@ void cInterface::Render()
         // 
         m_GoalMedal.Render();
 
+        // 
+        for(coreUintW j = 0u; j < INTERFACE_BADGES; ++j) m_aBadge[j].Render();
+
         for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i)
         {
             // render player labels
@@ -265,10 +276,11 @@ void cInterface::Render()
             m_aBossTime[2]   .Render();
         }
 
+            m_WaveName    .Render();   // TODO 1: nur in coop weg
+
         if(m_fAlphaBoss != 1.0f)
         {
             // render wave labels
-            //m_WaveName    .Render();   // TODO 1: der nervt
             m_aWaveTime[0].Render();
             m_aWaveTime[1].Render();
             m_aWaveTime[2].Render();
@@ -511,7 +523,7 @@ void cInterface::Move()
     m_aBossTime[2]     .Move();
 
     // set wave transparency
-    m_WaveName    .SetAlpha(fAlphaWaveFull);
+    m_WaveName    .SetAlpha(fAlphaPlayerFull);
     m_aWaveTime[0].SetAlpha(fAlphaWaveFull);
     m_aWaveTime[1].SetAlpha(fAlphaWaveFull);
     m_aWaveTime[2].SetAlpha(fAlphaWaveFull);
@@ -552,6 +564,20 @@ void cInterface::Move()
     // 
     m_GoalMedal.Move();
     m_GoalTime .Move();
+    
+    
+    for(coreUintW i = 0u; i < INTERFACE_BADGES; ++i)
+    {
+        const coreBool bState = (g_pGame->GetCurMission()->GetCurSegmentIndex() != MISSION_NO_SEGMENT) && g_pGame->GetPlayer(0u)->GetDataTable()->GetBadge(i, g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
+        
+        m_aBadge[i].SetDirection(coreVector2::Direction(coreFloat(Core::System->GetTotalTime()) + (0.8f*PI) * (I_TO_F(i) / I_TO_F(INTERFACE_BADGES))));
+        
+        m_aBadge[i].SetPosition(coreVector2((0.007f + I_TO_F(INTERFACE_BADGES - i - 1u) * 0.055f) * -1.0f, 0.005f));
+        m_aBadge[i].SetSize(coreVector2(1.0f,1.0f) * 0.058f);
+        m_aBadge[i].SetTexOffset (coreVector2(bState ? 0.0f : 0.5f, 0.0f));
+        m_aBadge[i].Move();
+    }
+    
 
     // check for active banner
     const coreFloat fBanner = g_pGame->GetTimeTable()->GetTimeEvent() - m_fBannerStart;
@@ -722,6 +748,9 @@ void cInterface::ShowBoss(const coreChar* pcMain, const coreChar* pcSub)
 
     // 
     m_Medal.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    
+    
+    m_WaveName.SetText(pcMain);
 }
 
 void cInterface::ShowBoss(const cBoss* pBoss)
@@ -945,7 +974,7 @@ void cInterface::UpdateLayout()
     nUpdateFunc(&m_aBossTime[2],      vTop);
 
     // 
-    nUpdateFunc(&m_WaveName,     vBottom);
+    nUpdateFunc(&m_WaveName,     vCenter);     
     nUpdateFunc(&m_aWaveTime[0], vTop);
     nUpdateFunc(&m_aWaveTime[1], vTop);
     nUpdateFunc(&m_aWaveTime[2], vTop);
@@ -953,6 +982,9 @@ void cInterface::UpdateLayout()
     // 
     nUpdateFunc(&m_GoalMedal, vTop);
     nUpdateFunc(&m_GoalTime,  vTop);
+
+    // 
+    for(coreUintW j = 0u; j < INTERFACE_BADGES; ++j) nUpdateFunc(&m_aBadge[j], vCenter.InvertedY());     
 }
 
 

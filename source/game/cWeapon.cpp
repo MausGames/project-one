@@ -67,7 +67,7 @@ void cWeapon::Render()
 coreBool cWeapon::_IsOwnerDarkShading()const
 {
     // 
-    return true;//m_pOwner->IsDarkShading();
+    return true;//(g_pGame->GetCurMission()->GetID() != cIntroMission::ID);//m_pOwner->IsDarkShading();
 }
 
 

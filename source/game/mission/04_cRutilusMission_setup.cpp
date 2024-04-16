@@ -86,6 +86,7 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: maybe replace left-right enemy waves (coming from top and bottom) with something else, though spawning still from left and right did not feel that interesting)
     // TODO 1: maybe also move left-right! (plates can disappear by moving up and down) (maybe shrink center-plate when switching to left-right, or just begin rotating) (maybe also just skip top-bottom with 2 plates, and go straight to 4)
     // TODO 1: boss: spieler wird herumgedreht (mit gravitation und geschosse drehen sich auch), und beim verwenden der platte wird er in richtung forciert (eigentlich orsch)
+    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -465,6 +466,7 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: badge: shoot at helper
     // TODO 1: whole border gets particle effect on helper impact (delayed)
     // TODO 1: player bullets should not get deleted for final phase (in bullet-class, currently not fixed), and hit should be recognized (in game-class, handled with visibility-check bool)
+    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -805,6 +807,7 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: gegner links und rechts nach matrix phase, sollten vielleicht von 4+4 auf 2+2+4 geändert werden
     // TODO 1: wenn in bubble, musik wird langsamer
     // TODO 1: vielleicht sollten gegner geschosse langsamer sein als derzeit, wenn sie in die "normale" bubble kommen am ende
+    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         constexpr coreUintW iRegisterSize = GAME_PLAYERS + 1u;
@@ -1194,6 +1197,7 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: vielleicht die 3 unteren bei der 4x3 gruppe weggeben, vielleicht zu 3x4 machen, naaa diese gruppe muss sich aber von den linien-gruppen unterscheiden, so wie die eck-gruppe
     // TODO 1: vielleicht anderer helper outro, der nicht so subtil ist
     // TODO 1: die ganzen geraden gruppen könnten leichten shift in flug-richtung haben (zick-zack, oder 4+4)
+    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreUintW iNumTargets = 16u;
@@ -1515,6 +1519,8 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: meteor rotation affects enemy ships spawning from it, but the offset is currently based on index which might be different each time (due to pooling) (marked with TODOs)
     // TODO 1: kleine meteoriten (vielleicht auch mittlere) kommen mir zu klein vor
     // TODO 1: bei der links-rechts-links-... gruppe konnte ich ganz unten durchschlüpfen
+    // TODO 1: badge: 1 ganz spezieller gegner in nem meteor, verschwindet aber nach 1 bounce
+    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         constexpr coreUintW iNumMeteors = 21u;   // including big meteor
@@ -1976,6 +1982,7 @@ void cRutilusMission::__SetupOwn()
     // TODO 1: !!!! vielleicht teleportation mit rechenfehler (InvertedX wieder entfernen)
     // TODO 1: !!!! gegner sollten sich nicht bewegen, sie spawnen aus portalen (unsichtbar, bis erswter teleportation)
     // TODO 1: !!!! wenn portale als hindernisse wahrgenommen werden, sollten sie auch als solche funktionieren
+    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         STAGE_ADD_PATH(pPath1)

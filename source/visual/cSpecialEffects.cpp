@@ -12,10 +12,10 @@
 // ****************************************************************
 // constructor
 cSpecialEffects::cSpecialEffects()noexcept
-: m_aParticleColor   {coreParticleSystem(2048u), coreParticleSystem(1024u)}
-, m_aParticleDark    {coreParticleSystem(1024u), coreParticleSystem(512u)}
-, m_aParticleSmoke   {coreParticleSystem(1024u), coreParticleSystem(512u)}
-, m_aParticleFire    {coreParticleSystem(1024u), coreParticleSystem(512u)}
+: m_aParticleColor   {coreParticleSystem(1024u), coreParticleSystem(1024u)}
+, m_aParticleDark    {coreParticleSystem(512u), coreParticleSystem(512u)}
+, m_aParticleSmoke   {coreParticleSystem(512u), coreParticleSystem(512u)}
+, m_aParticleFire    {coreParticleSystem(512u), coreParticleSystem(512u)}
 , m_apLightningOwner {}
 , m_LightningList    (SPECIAL_LIGHTNINGS)
 , m_iCurLightning    (0u)
@@ -288,7 +288,7 @@ void cSpecialEffects::CreateSplashSmoke(const coreVector3 vPosition, const coreF
     {
         const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i++)), 0.0f);
 
-        pParticle->SetPositionRel(vPosition + vDir,           vDir * Core::Rand->Float(fScale));
+        pParticle->SetPositionRel(vPosition + vDir*0.0f,           vDir * Core::Rand->Float(fScale));
         pParticle->SetScaleAbs   (3.0f,                       12.5f);
         pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI), PI*0.1f);
         pParticle->SetColor4Abs  (coreVector4(vColor, 1.0f),  coreVector4(vColor, 0.0f));
@@ -308,7 +308,7 @@ void cSpecialEffects::CreateSplashFire(const coreVector3 vPosition, const coreFl
     {
         const coreVector3 vDir = coreVector3(coreVector2::Direction(fBase + fStep * I_TO_F(i++)), 0.0f);
 
-        pParticle->SetPositionRel(vPosition + vDir,                 vDir * Core::Rand->Float(fScale));
+        pParticle->SetPositionRel(vPosition + vDir*0.0f,                 vDir * Core::Rand->Float(fScale));
         pParticle->SetScaleAbs   (4.5f,                             11.5f);
         pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),       PI*0.5f);
         pParticle->SetColor4Abs  (coreVector4(vColor*0.926f, 1.0f), coreVector4(vColor*0.926f, 0.0f));
@@ -726,7 +726,7 @@ void cSpecialEffects::ShakeScreen(const coreFloat fStrength)
     m_fShakeStrength = fStrength;
 
     // 
-    this->RumblePlayer(NULL, fStrength * 0.5f, 250u);
+    if(fStrength) this->RumblePlayer(NULL, fStrength * 0.5f, 250u);
 }
 
 

@@ -23,8 +23,8 @@
 
 // ****************************************************************
 // boss definitions
-#define BOSS_TIMERS   (6u)    // 
-#define BOSS_COUNTERS (8u)    // 
+#define BOSS_TIMERS   (8u)    // 
+#define BOSS_COUNTERS (10u)   // 
 #define BOSS_VECTORS  (10u)   // 
 
 
@@ -37,8 +37,11 @@
 #define DHARUK_WIDTH              (0.5f)                                       // 
 #define DHARUK_HEIGHT             (0.8f)                                       // 
 
-#define TORUS_TURRETS             (4u)                                         // 
-#define TORUS_GUNNERS             (4u)                                         // 
+#define TORUS_TURRETS             (6u)                                         // 
+#define TORUS_GUNNERS             (6u)                                         // 
+#define TORUS_CHARGERS            (4u)                                         // 
+#define TORUS_DRIVERS             (6u)                                         // 
+#define TORUS_WAVERS              (4u)                                         // 
 #define TORUS_BOSS_ROTATION       (1.2f)                                       // 
 #define TORUS_TURRET_SPEED        (-0.2f)                                      // 
 #define TORUS_GUNNER_SPEED        (0.2f)                                       // 
@@ -52,19 +55,21 @@
 #define LEVIATHAN_RAYS            (LEVIATHAN_PARTS)                            // 
 #define LEVIATHAN_RAYS_RAWS       (2u * LEVIATHAN_RAYS)                        // 
 #define LEVIATHAN_RADIUS_OUTER    (FOREGROUND_AREA.x * 0.8f)                   // 
-#define LEVIATHAN_RADIUS_INNER    (9.0f)                                       // 
-#define LEVIATHAN_RAY_OFFSET(i)   ((i) ? 3.0f : 4.0f)                          // 
-#define LEVIATHAN_RAY_HEIGHT      (0.1f)                                       // 
-#define LEVIATHAN_RAY_SIZE        (coreVector3(0.7f,50.0f,0.7f))               // 
+#define LEVIATHAN_RADIUS_INNER    (10.0f)                                      // 
+#define LEVIATHAN_RAY_OFFSET(i)   ((i) ? 3.6f : 4.8f)                          // 
+#define LEVIATHAN_RAY_HEIGHT      (0.2f)                                       // 
+#define LEVIATHAN_RAY_SIZE        (coreVector3(0.9f,50.0f,0.9f))               // 
 #define LEVIATHAN_RAY_TEXSIZE     (coreVector2(0.5f,1.5f))                     // 
-#define LEVIATHAN_RAYWAVE_SIZE    (coreVector3(1.6f,5.0f,1.3f))                // 
+#define LEVIATHAN_RAYWAVE_SIZE    (coreVector3(2.0f,7.0f,2.0f))                // 
 #define LEVIATHAN_RAYWAVE_TEXSIZE (coreVector2(0.5f,0.5f))                     // 
+#define LEVIATHAN_TILES           (20u)                                        // 
 
 #define TIGER_SIDES               (4u)                                         // 
 #define TIGER_STINGS              (32u * TIGER_SIDES)                          // 
 #define TIGER_STINGS_SIDE         (32u)                                        // 
-#define TIGER_WEAPONS             (4u)                                         // 
-#define TIGER_ENEMIES             (50u)                                        // 
+#define TIGER_WEAPONS             (5u)                                         // 
+#define TIGER_SUBS                (3u)                                         // 
+#define TIGER_DAMAGE              (70)                                         // 
 
 #define MESSIER_RINGS             (3u)                                         // 
 #define MESSIER_ENEMIES           (8u)                                         // 
@@ -233,25 +238,42 @@ private:
 class cTorusBoss final : public cBoss
 {
 private:
-    coreObject3D m_Emitter;                          // 
-    coreObject3D m_aCircle[2];                       // 
-    coreObject3D m_Summon;                           // 
+    coreObject3D m_Emitter;                            // 
+    coreObject3D m_aCircle[2];                         // 
+    coreObject3D m_Summon;                             // 
 
-    cCustomEnemy  m_aTurret[TORUS_TURRETS];          // 
-    coreBatchList m_TurretHull;                      // 
-    coreObject3D  m_aTurretHullRaw[TORUS_TURRETS];   // 
+    cCustomEnemy  m_aTurret[TORUS_TURRETS];            // 
+    coreBatchList m_TurretHull;                        // 
+    coreObject3D  m_aTurretHullRaw[TORUS_TURRETS];     // 
 
-    cCustomEnemy  m_aGunner[TORUS_GUNNERS];          // 
-    coreBatchList m_GunnerHull;                      // 
-    coreObject3D  m_aGunnerHullRaw[TORUS_GUNNERS];   // 
+    cCustomEnemy  m_aGunner[TORUS_GUNNERS];            // 
+    coreBatchList m_GunnerHull;                        // 
+    coreObject3D  m_aGunnerHullRaw[TORUS_GUNNERS];     // 
 
-    coreFlow m_fAnimation;                           // animation value
-    coreFlow m_fRotationBoss;                        // 
-    coreFlow m_fRotationObject;                      // 
+    cCustomEnemy  m_aCharger[TORUS_CHARGERS];          // 
+    coreBatchList m_ChargerHull;                       // 
+    coreObject3D  m_aChargerHullRaw[TORUS_CHARGERS];   // 
 
-    coreUint8 m_iTurretActive;                       // 
-    coreUint8 m_iGunnerActive;                       // 
-    coreUint8 m_iGunnerMove;                         // 
+    cCustomEnemy  m_aDriver[TORUS_DRIVERS];            // 
+    coreBatchList m_DriverHull;                        // 
+    coreObject3D  m_aDriverHullRaw[TORUS_DRIVERS];     // 
+
+    cCustomEnemy  m_aWaver[TORUS_WAVERS];              // 
+    coreBatchList m_WaverHull;                         // 
+    coreObject3D  m_aWaverHullRaw[TORUS_WAVERS];       // 
+
+    coreFlow m_fAnimation;                             // animation value
+    coreFlow m_fRotationBoss;                          // 
+    coreFlow m_fRotationObject;                        // 
+
+    coreUint8 m_iTurretActive;                         // 
+    coreUint8 m_iGunnerActive;                         // 
+    coreUint8 m_iGunnerMove;                           // 
+    coreUint8 m_iChargerActive;                        // 
+    coreUint8 m_iDriverActive;                         // 
+    coreUint8 m_iWaverActive;                          // 
+
+    coreUint8 m_iDecalState;                           // 
 
 
 public:
@@ -282,9 +304,28 @@ private:
     void __DisableGunner(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    static coreFloat   __PositionToGrind(const coreVector2 vPosition);
-    static coreVector2 __GrindToPosition(const coreFloat   fGrind);
+    void __EnableCharger (const coreUintW iIndex, const coreVector2 vPosition, const coreVector2 vDirection);
+    void __DisableCharger(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void __EnableDriver (const coreUintW iIndex, const coreVector2 vPosition, const coreVector2 vDirection);
+    void __DisableDriver(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void __EnableWaver (const coreUintW iIndex, const coreVector2 vPosition);
+    void __DisableWaver(const coreUintW iIndex, const coreBool bAnimated);
+
+    // 
+    void __CreateOverdrive(const coreVector3 vIntersect);
+
+    // 
+    void __ChangeColor(const coreUint8 iType);
+
+    // 
+    static coreFloat   __PositionToGrind (const coreVector2 vPosition);
+    static coreVector2 __GrindToPosition (const coreFloat   fGrind);
     static coreVector2 __GrindToPosition2(const coreFloat   fGrind);
+    static coreVector2 __GrindToPosition3(const coreFloat   fGrind);
 };
 
 
@@ -398,6 +439,9 @@ private:
     coreFlow   m_afRayTime[LEVIATHAN_RAYS];         // 
     coreUint16 m_iDecalState;                       // 
 
+    coreVector2 m_avSwimDir  [LEVIATHAN_PARTS];     // 
+    coreUint8   m_aiSwimCount[LEVIATHAN_PARTS];     // 
+
     coreFlow m_fAnimation;                          // animation value
     coreFlow m_fMovement;                           // 
 
@@ -411,19 +455,20 @@ public:
 
 private:
     // execute own routines
-    void __ResurrectOwn ()final;
-    void __KillOwn      (const coreBool bAnimated)final;
-    void __RenderOwnOver()final;
-    void __MoveOwn      ()final;
+    void __ResurrectOwn  ()final;
+    void __KillOwn       (const coreBool bAnimated)final;
+    void __RenderOwnUnder()final;
+    void __RenderOwnOver ()final;
+    void __MoveOwn       ()final;
 
     // 
-    void __EnableRay      (const coreUintW iIndex);
+    void __EnableRay      (const coreUintW iIndex, const coreBool bAnimated);
     void __DisableRay     (const coreUintW iIndex, const coreBool bAnimated);
     void __CreateOverdrive(const coreUintW iIndex, const coreVector3 vIntersect, const coreFloat fTime, const coreBool bGround);
 
     // 
     void __UpdateHealth();
-    void __RefreshHealth();
+    void __RefreshHealth(const coreInt32 iHead, const coreInt32 iBody, const coreInt32 iTail);
 
     // 
     static FUNC_NOALIAS void      __CalcCurvePosDir(const coreVector3 vAxis, const coreFloat fAngle, const coreVector3 vScale, coreVector3* OUTPUT vPosition, coreVector3* OUTPUT vDirection);
@@ -457,22 +502,9 @@ private:
 class cTigerBoss final : public cBoss
 {
 private:
-    // 
-    struct sEnemyData final
-    {
-        coreUint8   iType;         // 
-        coreUint8   iRota;         // 
-        coreFloat   fTimeFactor;   // 
-        coreFloat   fTimeOffset;   // 
-        coreVector2 vPosFactor;    // 
-        coreVector2 vPosOffset;    // 
-    };
-
-
-private:
     cCustomEnemy m_Track;                        // 
-    cCustomEnemy m_Weapon;                       // 
-    cCustomEnemy m_WeaponOld;                    // 
+    cCustomEnemy m_aWeapon   [TIGER_SUBS];       // 
+    cCustomEnemy m_aWeaponOld[TIGER_SUBS];       // 
 
     coreBatchList m_Sting;                       // 
     coreObject3D  m_aStingRaw  [TIGER_STINGS];   // 
@@ -482,13 +514,11 @@ private:
     coreFlow    m_fPushPower;                    // 
     coreBool    m_bPushState;                    // 
 
-    coreModelPtr m_apModelHigh[TIGER_WEAPONS];   // 
-    coreModelPtr m_apModelLow [TIGER_WEAPONS];   // 
+    coreModelPtr m_aapModelHigh[TIGER_WEAPONS][TIGER_SUBS];   // 
+    coreModelPtr m_aapModelLow [TIGER_WEAPONS][TIGER_SUBS];   // 
     coreUint8    m_iWeaponType;                  // 
+    coreUint8    m_iWeaponTypeOld;               // 
     coreFlow     m_fWeaponChange;                // 
-
-    coreSpline2 m_aEnemyPath[4];                 // 
-    sEnemyData  m_aEnemyData[TIGER_ENEMIES];     // 
 
     coreVector2 m_vGroundPos;                    // 
 
@@ -519,10 +549,6 @@ private:
 
     // 
     void __SwitchWeapon(const coreUintW iType);
-
-    // 
-    void __AddEnemy   (const coreUint8 iType, const coreUint8 iRota, const coreFloat fTimeFactor, const coreFloat fTimeOffset, const coreVector2 vPosFactor, const coreVector2 vPosOffset);
-    void __DeleteEnemy(const coreUintW iIndex, const coreBool bCrash);
 
     // 
     void __CreateTrail(const coreUintW iIndex, const coreVector3 vIntersect);
@@ -910,6 +936,8 @@ private:
 class cIntroBoss final : public cBoss
 {
 private:
+    cCustomEnemy m_Blade;    // 
+    cCustomEnemy m_Hilt;     // 
     cCustomEnemy m_Shield;   // 
 
 
@@ -917,7 +945,7 @@ public:
     cIntroBoss()noexcept;
 
     DISABLE_COPY(cIntroBoss)
-    ASSIGN_ID_EX(9901, "BALMUNG", COLOR_MENU_PURPLE)
+    ASSIGN_ID_EX(9901, "SHINAI", COLOR_MENU_PURPLE)
 
 
 private:

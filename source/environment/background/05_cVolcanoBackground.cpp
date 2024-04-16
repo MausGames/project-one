@@ -12,7 +12,7 @@
 // ****************************************************************
 // constructor
 cVolcanoBackground::cVolcanoBackground()noexcept
-: m_Smoke      (512u)
+: m_Smoke      (256u)
 , m_fSparkTime (Core::Rand->Float(10.0f))
 {
     coreBatchList* pList1;
@@ -22,7 +22,7 @@ cVolcanoBackground::cVolcanoBackground()noexcept
     this->__InitOwn();
 
     // create outdoor-surface object
-    m_pOutdoor = new cOutdoor("rock", "lava", 7u, 4.0f);
+    m_pOutdoor = new cOutdoor("rock", "lava", OUTDOOR_ALGORITHM_VOLCANO, 4.0f, false);
     m_pOutdoor->LoadProgram(true);
 
     // allocate smoke list
@@ -415,7 +415,7 @@ void cVolcanoBackground::__MoveOwn()
         m_aSmokeEffect[i].CreateParticle(1, 6.0f, [](coreParticle* OUTPUT pParticle)
         {
             constexpr coreFloat fScale = 10.0f;
-            pParticle->SetPositionRel(coreVector3::Rand(0.0f), coreVector3::Rand(1.0f) + coreVector3::Rand(-fScale, fScale) + coreVector3(0.0f,20.0f,10.0f) * 2.0f);
+            pParticle->SetPositionRel(coreVector3(0.0f,0.0f,0.0f), coreVector3::Rand(1.0f) + coreVector3::Rand(-fScale, fScale) + coreVector3(0.0f,20.0f,10.0f) * 2.0f);
             pParticle->SetScaleAbs   (4.5f,                              11.5f * 2.0f);
             pParticle->SetAngleRel   (Core::Rand->Float(-PI, PI),        PI*0.5f);
             pParticle->SetColor4Abs  (coreVector4(COLOR_FIRE_ORANGE*0.926f, 0.8f), coreVector4(COLOR_FIRE_ORANGE*0.926f, 0.0f));

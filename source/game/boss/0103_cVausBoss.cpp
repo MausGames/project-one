@@ -8,6 +8,8 @@
 ///////////////////////////////////////////////////////
 #include "main.h"
 
+// TODO 1: torus erzeugt am anfang den ball (mit charge und rückstoß-spin effekt), kann abgeschossen werden, bringt sich aber nix (?)
+
 
 // ****************************************************************
 // counter identifier

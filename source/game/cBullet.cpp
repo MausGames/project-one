@@ -317,9 +317,6 @@ void cBulletManager::ClearBullets(const coreBool bAnimated)
         FOR_EACH(it, *pBulletActive->List())
             d_cast<cBullet*>(*it)->Deactivate(bAnimated);
     }
-
-    // 
-    this->ResetOrder();
 }
 
 
@@ -1113,6 +1110,7 @@ void cMineBullet::__MoveOwn()
 // ****************************************************************
 // constructor
 cRocketBullet::cRocketBullet()noexcept
+: m_pTarget (NULL)
 {
     // load object resources
     this->DefineModel  ("bullet_rocket.md3");
@@ -1120,7 +1118,7 @@ cRocketBullet::cRocketBullet()noexcept
     this->DefineProgram("object_ship_glow_program");
 
     // set object properties
-    this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * BULLET_COLLISION_FACTOR);
+    //this->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * BULLET_COLLISION_FACTOR);
     this->SetColor3           (coreVector3(0.0f,1.0f,0.0f));
 }
 
@@ -1148,18 +1146,38 @@ void cRocketBullet::__ReflectOwn()
 void cRocketBullet::__MoveOwn()
 {
     // 
-    m_fSpeed += 2.0f * BULLET_SPEED_FACTOR * TIME;
-    if(m_fSpeed > 300.0f) this->Deactivate(true);
+    //m_fSpeed += 2.0f * BULLET_SPEED_FACTOR * TIME;
+    //if(m_fSpeed > 300.0f) this->Deactivate(true);
 
     // 
-    const cEnemy* pEnemy = g_pGame->GetEnemyManager()->FindEnemy(this->GetPosition().xy());
-    if(pEnemy)
-    {
-        const coreVector2 vAim    = (pEnemy->GetPosition().xy() - this->GetPosition().xy()).Normalized();
-        const coreVector2 vNewDir = SmoothAim(m_vFlyDir, vAim, 0.05f * m_fSpeed);
+    //const cEnemy* pEnemy = g_pGame->GetEnemyManager()->FindEnemy(this->GetPosition().xy());
+    //if(pEnemy)
+    //{
+    //    const coreVector2 vAim    = (pEnemy->GetPosition().xy() - this->GetPosition().xy()).Normalized();
+    //    const coreVector2 vNewDir = SmoothAim(m_vFlyDir, vAim, 0.05f * m_fSpeed);
+//
+    //    m_vFlyDir = vNewDir;
+    //}
 
-        m_vFlyDir = vNewDir;
+    // 
+    if(m_pTarget)
+    {
+        if(m_fFlyTime < 3.0f)
+        {
+            const coreVector2 vAim    = (m_pTarget->GetPosition().xy() - this->GetPosition().xy()).Normalized();
+            const coreVector2 vNewDir = SmoothAim(m_vFlyDir, vAim, 0.06f * m_fSpeed);
+
+            m_vFlyDir = vNewDir;
+            
+            this->AddStatus(BULLET_STATUS_IMMORTAL);
+        }
+        else
+        {
+            this->RemoveStatus(BULLET_STATUS_IMMORTAL);
+        }
     }
+
+    const coreFloat fFadePrev = m_fFade;
 
     // fly around
     this->SetPosition (coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
@@ -1174,6 +1192,54 @@ void cRocketBullet::__MoveOwn()
     this->SetAlpha(MIN(20.0f * m_fFade, 1.0f));
 
     // 
-    if(TIME) g_pSpecialEffects->CreateSplashSmoke(this->GetPosition() - this->GetDirection() * 4.5f, 5.0f, 1u, coreVector3(1.0f,1.0f,1.0f));
-    // TODO 1: timer 
+    if(F_TO_UI(fFadePrev * 60.0f) != F_TO_UI(m_fFade * 60.0f))
+    {
+        g_pSpecialEffects->CreateSplashSmoke(this->GetPosition() - this->GetDirection() * 4.5f, 5.0f, 1u, coreVector3(1.0f,1.0f,1.0f));
+    }
+}
+
+
+// ****************************************************************
+// constructor
+cGrowBullet::cGrowBullet()noexcept
+{
+    // load object resources
+    this->DefineModel  ("bullet_orb.md3");
+    this->DefineTexture(0u, "effect_energy.png");
+    this->DefineProgram("effect_energy_bullet_program");
+}
+
+
+// ****************************************************************
+// 
+void cGrowBullet::__ImpactOwn(const coreVector2 vImpact)
+{
+    // 
+    g_pSpecialEffects->CreateSplashColor(coreVector3(vImpact, 0.0f), 5.0f, 3u, this->GetColor3());
+    // TODO 1: better explosion for big bullets
+}
+
+
+// ****************************************************************
+// 
+void cGrowBullet::__ReflectOwn()
+{
+}
+
+
+// ****************************************************************
+// move the grow bullet
+void cGrowBullet::__MoveOwn()
+{
+    // fly around
+    this->SetPosition (coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
+    this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
+
+    // update animation
+    m_fAnimation.UpdateMod(0.2f, 1.0f);
+    this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
+
+    // update fade
+    m_fFade.Update(1.0f);
+    this->SetAlpha(MIN(20.0f * m_fFade, 1.0f));
 }

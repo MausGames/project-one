@@ -22,6 +22,7 @@
 // hand can drag game screen into side
 // Eigengrau -> Eye gengrau / Auge ngrau -> Auge sieht farben und formen (vierecke, dreiecke, kreise)
 // gegner-welle von links/rechts die oben/unten startet, man muss rotieren um sie abzuwehren
+// TODO 1: MAIN: fragment, easy, hard (decision), coop, 3 badges, boss health, medal goal, intro, outro, foreshadow
 
 // der tunnel und alle objekte werden gegen flug-richtung geshiftet, wodurch bewegungen mehr impact haben, außerdem kann man den rand des tunnels mit dem verschwundenen rand des spiel-felds gleichsetzen
 // boss hat mehrere health-bars, erster healthbar ist approach zum boss, wenn healthbar weg ändert sich musik das auge geht auf und boss-name erscheint, welches auch als tutorial fürs drehen (dinge kommen von links und recht) dient

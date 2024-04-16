@@ -14,6 +14,7 @@
 cSave::cSave()noexcept
 : m_Header {}
 , m_sPath  (coreData::UserFolder(SAVE_FILE_FOLDER "/save." SAVE_FILE_EXTENSION))
+, m_iToken (0u)
 {
     // 
     this->LoadFile();
@@ -126,7 +127,10 @@ void cSave::SaveFile()
     coreByte* pHeaderData = new coreByte[sizeof(sHeader)];
     std::memcpy(pHeaderData, &m_Header, sizeof(sHeader));
 
-    Core::Manager::Resource->AttachFunction([=, this]()
+    // 
+    Core::Manager::Resource->DetachFunction(m_iToken);
+
+    m_iToken = Core::Manager::Resource->AttachFunction([=, this]()
     {
         // 
         coreData::FileMove(m_sPath.c_str(), PRINT("%s.backup", m_sPath.c_str()));

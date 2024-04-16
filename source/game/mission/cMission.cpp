@@ -316,7 +316,6 @@ void cMission::__CloseSegment()
 
     // 
     g_pGame->GetBulletManagerEnemy()->ClearBullets(true);
-    g_pGame->GetItemManager       ()->LoseItems();
     g_pGame->GetShieldManager     ()->ClearShields(true);
 
     // 

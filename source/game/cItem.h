@@ -80,6 +80,10 @@ public:
 
     // 
     void LoseItems();
+
+    // 
+    inline coreUintW GetNumItems      ()const {return m_apItemList.size();}
+    inline coreUintW GetNumItemsActive()const {coreUintW iNum = 0u; FOR_EACH(it, m_apItemList) if(!HAS_FLAG((*it)->GetStatus(), ITEM_STATUS_FINISHED)) ++iNum; return iNum;}
 };
 
 

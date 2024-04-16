@@ -316,7 +316,7 @@ void cBackground::Move()
     }                                                                                              \
                                                                                                    \
     /* set position and add object to optimized list */                                            \
-    pObject->SetPosition(vRelativePos + coreVector3(g_pEnvironment->GetCameraPos().xy(), 0.0f));   \
+    pObject->SetPosition(MapToAxisInv(vRelativePos, g_pEnvironment->GetDirection()) + coreVector3(g_pEnvironment->GetCameraPos().xy(), 0.0f)); \
     (x).at(sListKey)->BindObject(pObject);                                                         \
 }
 

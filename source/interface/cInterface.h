@@ -17,12 +17,14 @@
 // TODO 1: aktuelles level anzeigen mit wave 01-03, 03-BOSS (e.g. oben rechts im single-player)
 // TODO 1: health icons should be different, when the player has color (+ transformed to enemy)
 // TODO 4: merge wave time and boss time if possible
+// TODO 1: wave-name FÜNF is getting shifted down
 
 
 // ****************************************************************
 // interface definitions
 #define INTERFACE_VIEWS                   (PLAYERS)                         // number of player views
 #define INTERFACE_LIVES                   (LIVES)                           // 
+#define INTERFACE_BADGES                  (BADGES)                          // 
 #define INTERFACE_BOSS_DELAY              (1.5f)                            // 
 
 #define INTERFACE_BANNER_SPEED            (4.0f)                            // fade-in and fade-out speed
@@ -68,38 +70,40 @@ private:
 
 
 private:
-    sPlayerView m_aView[INTERFACE_VIEWS];   // player views
-    coreUint8   m_iNumViews;                // number of constructed player views
+    sPlayerView m_aView[INTERFACE_VIEWS];    // player views
+    coreUint8   m_iNumViews;                 // number of constructed player views
 
-    cGuiObject m_aBossHealthBar[3];         // boss health bar (0 = background, 1 = foreground, 2 = empty)
-    cGuiLabel  m_BossHealthValue;           // boss health value
-    cGuiLabel  m_aBossTime[3];              // boss time (0 = seconds, 1 = deci-seconds, 2 = shift)
-    coreFlow   m_fBossSpin;                 // 
+    cGuiObject m_aBossHealthBar[3];          // boss health bar (0 = background, 1 = foreground, 2 = empty)
+    cGuiLabel  m_BossHealthValue;            // boss health value
+    cGuiLabel  m_aBossTime[3];               // boss time (0 = seconds, 1 = deci-seconds, 2 = shift)
+    coreFlow   m_fBossSpin;                  // 
 
-    cGuiLabel m_WaveName;                   // wave name
-    cGuiLabel m_aWaveTime[3];               // wave time (0 = seconds, 1 = deci-seconds, 2 = shift)
+    cGuiLabel m_WaveName;                    // wave name
+    cGuiLabel m_aWaveTime[3];                // wave time (0 = seconds, 1 = deci-seconds, 2 = shift)
 
-    cGuiObject m_GoalMedal;                 // 
-    cGuiLabel  m_GoalTime;                  // 
+    cGuiObject m_GoalMedal;                  // 
+    cGuiLabel  m_GoalTime;                   // 
 
-    cGuiObject m_BannerBar;                 // banner background
-    cGuiObject m_BannerShadow;              // 
-    cGuiLabel  m_aBannerText[4];            // banner labels
-    coreFloat  m_fBannerStart;              // animation start time
-    coreFloat  m_fBannerDuration;           // 
-    coreFloat  m_fBannerSpeed;              // 
-    coreUint8  m_iBannerType;               // animation type (boss, mission, wave, score, alert)
+    cGuiObject m_aBadge[INTERFACE_BADGES];   // 
 
-    cGuiLabel m_aStoryText[2];              // 
-    coreFloat m_fStoryStart;                // 
+    cGuiObject m_BannerBar;                  // banner background
+    cGuiObject m_BannerShadow;               // 
+    cGuiLabel  m_aBannerText[4];             // banner labels
+    coreFloat  m_fBannerStart;               // animation start time
+    coreFloat  m_fBannerDuration;            // 
+    coreFloat  m_fBannerSpeed;               // 
+    coreUint8  m_iBannerType;                // animation type (boss, mission, wave, score, alert)
 
-    cGuiObject m_Medal;                     // 
+    cGuiLabel m_aStoryText[2];               // 
+    coreFloat m_fStoryStart;                 // 
 
-    coreFlow m_fAnimation;                  // 
+    cGuiObject m_Medal;                      // 
 
-    coreBool m_bVisible;                    // visibility status
-    coreFlow m_fAlphaAll;                   // overall alpha value (except for banner)
-    coreFlow m_fAlphaBoss;                  // boss alpha value
+    coreFlow m_fAnimation;                   // 
+
+    coreBool m_bVisible;                     // visibility status
+    coreFlow m_fAlphaAll;                    // overall alpha value (except for banner)
+    coreFlow m_fAlphaBoss;                   // boss alpha value
 
 
 public:

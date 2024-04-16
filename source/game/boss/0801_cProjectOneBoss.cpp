@@ -12,6 +12,7 @@
 // different phases should map to the general feeling and behavior of the same-colored bosses
 // background sind weiß-schwarz-graue blöcke, und farbe ändert sich je nach phase (breitet sich wie ne welle aus)
 // TODO 1: final endboss, ship jumps into z dimension, while side blocks move away, star fox (either looping or dive animation), rotation around z
+// TODO 1: MAIN: fragment, easy, hard (decision), coop, 3 badges, boss health, medal goal, intro, outro, foreshadow
 
 // cDarkBackground:
 // - jede boss phase hat eine andere animation

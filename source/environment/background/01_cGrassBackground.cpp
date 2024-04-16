@@ -21,7 +21,7 @@ cGrassBackground::cGrassBackground()noexcept
     this->__InitOwn();
 
     // create outdoor-surface object
-    m_pOutdoor = new cOutdoor("grass", "dust", 2u, 4.0f);
+    m_pOutdoor = new cOutdoor("grass", "dust", OUTDOOR_ALGORITHM_GRASS, 4.0f, true);
 
     // allocate stone list
     pList1 = new coreBatchList(GRASS_STONE_RESERVE);

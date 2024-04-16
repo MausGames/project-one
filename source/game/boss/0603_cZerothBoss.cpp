@@ -15,6 +15,7 @@
 // TODO 1: stone outside of boss should also be ice cube
 // TODO 1: sollte sich mehr bewegen, so wie andere bosse
 // nur extremitäten können angegriffen werden, ziehen sich zurück
+// TODO 1: MAIN: fragment, easy, hard (decision), coop, 3 badges, boss health, medal goal, intro, outro, foreshadow
 
 
 // ****************************************************************

@@ -11,7 +11,7 @@
 #define _P1_GUARD_WATER_H_
 
 // TODO 5: reduce reflection-framebuffer without reflection enabled
-// TODO 5: alpha mapping water (no distortion) for very bad hardware
+// TODO 5: alpha mapping water (no distortion) for very bad hardware (maybe just remove dependent texture-lookups)
 // TODO 3: water-surface clipping for refraction
 // TODO 5: flying should create strong/fast water ripples
 // TODO 3: specular contribution should be reduced by shadow (object shadow and environment darkening)

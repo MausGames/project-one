@@ -12,6 +12,7 @@
 // TODO 1: mund soll im offenen zustand leicht auf und ab flattern, wie bei Chol
 // pillen und pacman aussehen passen sehr gut zusammen
 // TODO 1: im inneren (der secret phase) kämpft man gegen den gefressenen boss
+// TODO 1: MAIN: fragment, easy, hard (decision), coop, 3 badges, boss health, medal goal, intro, outro, foreshadow
 
 
 // ****************************************************************

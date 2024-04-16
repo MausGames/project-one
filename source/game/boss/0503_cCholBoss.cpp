@@ -22,6 +22,8 @@
 // intro: boss fliegt wie meteoriten auf den boden (bam-bam-bam-bam-BAM) (von selber richtung), und baut sich dann zusammen, glüht ab nachm einschlag (energy overlay), + trail
 // death 1: fliegt in lava, kommt wieder raus
 // feuer baut sich auf mit partikeln von vorne nach hinten, kann sich mit flügel-bewegung strecken
+// TODO 1: MAIN: fragment, easy, hard (decision), coop, 3 badges, boss health, medal goal, intro, outro, foreshadow
+// TODO 1: mehrere einzelne einschläge schon während der background sich noch bewegt, dann bleibt erstehen und alle 5 schlagen nochmal ein
 
 
 // ****************************************************************

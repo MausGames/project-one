@@ -132,8 +132,10 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_dharuk_low.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_dharuk_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_intro_shield_high.md3",        CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_intro_shield_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_intro_shield_low.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_intro_shield_low.md3");
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_intro_sword_high.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_intro_sword_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_intro_sword_low.md3",          CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_intro_sword_low.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_intro_sword_blade_high.md3",   CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_intro_sword_blade_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_intro_sword_blade_low.md3",    CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_intro_sword_blade_low.md3");
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_intro_sword_hilt_high.md3",    CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_intro_sword_hilt_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_intro_sword_hilt_low.md3",     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_intro_sword_hilt_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_leviathan_body_high.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_leviathan_body_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_leviathan_body_low.md3",       CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_leviathan_body_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_leviathan_head_high.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_leviathan_head_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
@@ -150,14 +152,22 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_body_low.md3",           CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_body_low.md3");   // TODO 1: clusters currently for explosion, still required ?
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_track_high.md3",         CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_track_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_track_low.md3",          CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_track_low.md3");   // TODO 1: clusters currently for explosion, still required ?
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_01_high.md3",     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_01_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_01_low.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_01_low.md3");   // TODO 1: clusters currently for explosion, still required ?
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_02_high.md3",     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_02_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_02_low.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_02_low.md3");   // TODO 1: clusters currently for explosion, still required ?
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_03_high.md3",     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_03_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_03_low.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_03_low.md3");   // TODO 1: clusters currently for explosion, still required ?
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_04_high.md3",     CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_04_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
-    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_04_low.md3",      CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_04_low.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_01_01_high.md3",  CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_01_01_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_01_01_low.md3",   CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_01_01_low.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_01_02_high.md3",  CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_01_02_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_01_02_low.md3",   CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_01_02_low.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_02_01_high.md3",  CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_02_01_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_02_01_low.md3",   CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_02_01_low.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_02_02_high.md3",  CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_02_02_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_02_02_low.md3",   CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_02_02_low.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_03_01_high.md3",  CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_03_01_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_03_01_low.md3",   CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_03_01_low.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_04_01_high.md3",  CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_04_01_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_04_01_low.md3",   CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_04_01_low.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_04_02_high.md3",  CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_04_02_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_04_02_low.md3",   CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_04_02_low.md3");   // TODO 1: clusters currently for explosion, still required ?
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_05_01_high.md3",  CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_05_01_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
+    Core::Manager::Resource->Load<coreModel>  ("ship_boss_tiger_weapon_05_01_low.md3",   CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_tiger_weapon_05_01_low.md3");   // TODO 1: clusters currently for explosion, still required ?
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_torus_high.md3",               CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_torus_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_torus_low.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_torus_low.md3");
     Core::Manager::Resource->Load<coreModel>  ("ship_boss_vaus_high.md3",                CORE_RESOURCE_UPDATE_AUTO,   "data/models/ship_boss_vaus_high.md3", CORE_MODEL_LOAD_NO_CLUSTERS);
@@ -670,6 +680,11 @@ void CoreApp::Setup()
         ->AttachShader("effect_energy_flat_spheric.vert")
         ->AttachShader("effect_energy_blink.frag")
         ->Finish();
+
+    //d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_blink_flat_invert_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+    //    ->AttachShader("effect_energy_flat_invert.vert")
+    //    ->AttachShader("effect_energy_blink.frag")
+    //    ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("effect_energy_inst_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("effect_energy_inst.vert")

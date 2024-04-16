@@ -14,6 +14,7 @@
 // TODO 5: should low quality option also affect ship models, or vegetation density, or sprite density, or FB resolution ?
 // TODO 5: don't input-check inactive input-sets in multiplayer
 // TODO 1: default input should differ between keyboard and joystick, and between sets
+// TODO 1: controller input mapping should use gamepad-actions instead of button-IDs
 // TODO 3: SDL_JoystickCurrentPowerLevel (will it disconnect automatically if empty (triggering focus-loss event), or is manual checking required ?)
 // TODO 3: AnyButton should not get triggered by g_MenuInput.bScreenshot (in engine ?)
 
@@ -32,15 +33,17 @@
 
 #define CONFIG_AUDIO_EFFECT_VOLUME  "Audio",    "EffectVolume",                         (1.0f)
 #define CONFIG_AUDIO_AMBIENT_VOLUME "Audio",    "AmbientVolume",                        (1.0f)
+#define CONFIG_AUDIO_3D_SOUND       "Audio",    "3DSound",                              (1)
+// HRTF from core-config
 
 #define CONFIG_INPUT_TYPE(p)        "Input",    PRINT("P%zu_Type",      (p)),           (p)
 #define CONFIG_INPUT_RUMBLE(p)      "Input",    PRINT("P%zu_Rumble",    (p)),           (0)
 #define CONFIG_INPUT_FIRE_MODE(p)   "Input",    PRINT("P%zu_FireMode",  (p)),           (0)
-#define CONFIG_INPUT_MOVE_UP(s)     "Input",    PRINT("S%zu_MoveUp",    (s)),           (CORE_INPUT_KEY(W))
-#define CONFIG_INPUT_MOVE_LEFT(s)   "Input",    PRINT("S%zu_MoveLeft",  (s)),           (CORE_INPUT_KEY(A))
-#define CONFIG_INPUT_MOVE_DOWN(s)   "Input",    PRINT("S%zu_MoveDown",  (s)),           (CORE_INPUT_KEY(S))
-#define CONFIG_INPUT_MOVE_RIGHT(s)  "Input",    PRINT("S%zu_MoveRight", (s)),           (CORE_INPUT_KEY(D))
-#define CONFIG_INPUT_ACTION(s,n)    "Input",    PRINT("S%zu_Action%zu", (s), (n) + 1u), ((n) + coreUintW(CORE_INPUT_KEY(1)))
+#define CONFIG_INPUT_MOVE_UP(s)     "Input",    PRINT("S%zu_MoveUp",    (s))
+#define CONFIG_INPUT_MOVE_LEFT(s)   "Input",    PRINT("S%zu_MoveLeft",  (s))
+#define CONFIG_INPUT_MOVE_DOWN(s)   "Input",    PRINT("S%zu_MoveDown",  (s))
+#define CONFIG_INPUT_MOVE_RIGHT(s)  "Input",    PRINT("S%zu_MoveRight", (s))
+#define CONFIG_INPUT_ACTION(s,n)    "Input",    PRINT("S%zu_Action%zu", (s), (n) + 1u)
 
 #define CONFIG_GAME_TEXT_SIZE       "Game",     "TextSize",                             (0)
 #define CONFIG_GAME_GAME_ROTATION   "Game",     "GameRotation",                         (0)
@@ -64,6 +67,30 @@
 STATIC_ASSERT(INPUT_TYPES       <= INPUT_SETS)
 STATIC_ASSERT(INPUT_KEYS_ACTION <= sizeof(coreUint8)*8u)
 
+#define DEFAULT_KEYBOARD_1_MOVE_UP    (CORE_INPUT_KEY(W))
+#define DEFAULT_KEYBOARD_1_MOVE_LEFT  (CORE_INPUT_KEY(A))
+#define DEFAULT_KEYBOARD_1_MOVE_DOWN  (CORE_INPUT_KEY(S))
+#define DEFAULT_KEYBOARD_1_MOVE_RIGHT (CORE_INPUT_KEY(D))
+#define DEFAULT_KEYBOARD_1_ACTION(n)  ((n) + coreUintW(CORE_INPUT_KEY(1)))
+
+#define DEFAULT_KEYBOARD_2_MOVE_UP    (CORE_INPUT_KEY(W))
+#define DEFAULT_KEYBOARD_2_MOVE_LEFT  (CORE_INPUT_KEY(A))
+#define DEFAULT_KEYBOARD_2_MOVE_DOWN  (CORE_INPUT_KEY(S))
+#define DEFAULT_KEYBOARD_2_MOVE_RIGHT (CORE_INPUT_KEY(D))
+#define DEFAULT_KEYBOARD_2_ACTION(n)  ((n) + coreUintW(CORE_INPUT_KEY(1)))
+
+#define DEFAULT_JOYSTICK_1_MOVE_UP    (CORE_INPUT_KEY(W))
+#define DEFAULT_JOYSTICK_1_MOVE_LEFT  (CORE_INPUT_KEY(A))
+#define DEFAULT_JOYSTICK_1_MOVE_DOWN  (CORE_INPUT_KEY(S))
+#define DEFAULT_JOYSTICK_1_MOVE_RIGHT (CORE_INPUT_KEY(D))
+#define DEFAULT_JOYSTICK_1_ACTION(n)  ((n) + coreUintW(CORE_INPUT_KEY(1)))
+
+#define DEFAULT_JOYSTICK_2_MOVE_UP    (CORE_INPUT_KEY(W))
+#define DEFAULT_JOYSTICK_2_MOVE_LEFT  (CORE_INPUT_KEY(A))
+#define DEFAULT_JOYSTICK_2_MOVE_DOWN  (CORE_INPUT_KEY(S))
+#define DEFAULT_JOYSTICK_2_MOVE_RIGHT (CORE_INPUT_KEY(D))
+#define DEFAULT_JOYSTICK_2_ACTION(n)  ((n) + coreUintW(CORE_INPUT_KEY(1)))
+
 
 // ****************************************************************
 // configuration variables
@@ -85,6 +112,7 @@ struct sConfig final
     {
         coreFloat fEffectVolume;    // effect sound volume
         coreFloat fAmbientVolume;   // ambient sound volume
+        coreUint8 i3DSound;         // 
     }
     Audio;
 

@@ -17,7 +17,7 @@
 // TODO 3: remove tons of template instantiations (also enemies ? other templates ?) (CreateBullet and AllocateEnemy create tons of symbols)
 // TODO 3: sort bullet classes (color, enemy<>player, normal<>special), improve array indexing and caching
 // TODO 2: lots of bullets with direction-outlines can create holes in outlines by nearly-invisible backsides (can this even be fixed ?)
-// TODO 3: bullets (ray) spawning directly in front of a hollow object fly inside
+// TODO 2: bullets (ray) spawning directly in front of a hollow object fly inside
 // TODO 5: bullet -> to POD-type with single parent object
 // TODO 3: reorder bullets either yellow->green or green->yellow, so they are overlapping consistently (in default order)
 // TODO 4: surge-bullets to wave-weapon, rename one of it (probably wave-weapon to surge-weapon, code-only anyway)
@@ -226,6 +226,7 @@ class cRayBullet final : public cBullet
 private:
     coreFloat m_fScale;   // 
     coreFloat m_fTilt;    // 
+
 
 public:
     cRayBullet()noexcept;
@@ -569,7 +570,7 @@ public:
     inline void ResetProperties() {this->MakeRed(); this->SetSize(coreVector3(1.5f,1.5f,1.5f)); this->SetTexSize(coreVector2(0.5f,0.2f)); m_fAnimation = 0.0f; m_fFade = 0.0f;}
 
     // change default color
-    inline cTriangleBullet* MakeWhite  () {ASSERT(false)             return this;}
+    inline cTriangleBullet* MakeWhite  () {this->_MakeWhite  (0.7f); return this;}
     inline cTriangleBullet* MakeYellow () {ASSERT(false)             return this;}
     inline cTriangleBullet* MakeOrange () {ASSERT(false)             return this;}
     inline cTriangleBullet* MakeRed    () {this->_MakeRed    (1.0f); return this;}
@@ -747,6 +748,10 @@ private:
 // rocket bullet class
 class cRocketBullet final : public cBullet
 {
+private:
+    cShip* m_pTarget;   // 
+
+
 public:
     cRocketBullet()noexcept;
 
@@ -754,12 +759,53 @@ public:
     ASSIGN_ID(14, "Rocket")
 
     // reset base properties
-    inline void ResetProperties() {this->SetSize(coreVector3(1.7f,1.7f,1.7f)); m_fAnimation = 0.0f; m_fFade = 0.0f;}
+    inline void ResetProperties() {this->SetSize(coreVector3(1.7f,1.7f,1.7f)); m_fAnimation = 0.0f; m_fFade = 0.0f; m_pTarget = NULL;}
+
+    // 
+    inline cRocketBullet* SetTarget(cShip* pTarget) {m_pTarget = pTarget; return this;}
 
     // bullet configuration values
     static constexpr const coreChar* ConfigProgramInstancedName() {return "object_ship_glow_inst_program";}
     static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_FULL;}
     static constexpr coreBool        ConfigShadow              () {return true;}
+
+
+private:
+    // execute own routines
+    void __ImpactOwn (const coreVector2 vImpact)final;
+    void __ReflectOwn()final;
+    void __MoveOwn   ()final;
+};
+
+
+// ****************************************************************
+// grow bullet class
+class cGrowBullet final : public cBullet
+{
+public:
+    cGrowBullet()noexcept;
+
+    ENABLE_COPY(cGrowBullet)
+    ASSIGN_ID(15, "Grow")
+
+    // reset base properties
+    inline void ResetProperties() {this->MakeBlue(); this->SetSize(coreVector3(1.6f,1.6f,1.6f) * 1.1f); this->SetTexSize(coreVector2(0.12f,0.12f) * 3.0f); m_fAnimation = 0.0f; m_fFade = 0.0f;}
+
+    // change default color
+    inline cGrowBullet* MakeWhite  () {ASSERT(false)             return this;}
+    inline cGrowBullet* MakeYellow () {ASSERT(false)             return this;}
+    inline cGrowBullet* MakeOrange () {ASSERT(false)             return this;}
+    inline cGrowBullet* MakeRed    () {ASSERT(false)             return this;}
+    inline cGrowBullet* MakeMagenta() {ASSERT(false)             return this;}
+    inline cGrowBullet* MakePurple () {ASSERT(false)             return this;}
+    inline cGrowBullet* MakeBlue   () {this->_MakeBlue   (1.0f); return this;}
+    inline cGrowBullet* MakeCyan   () {ASSERT(false)             return this;}
+    inline cGrowBullet* MakeGreen  () {ASSERT(false)             return this;}
+
+    // bullet configuration values
+    static constexpr const coreChar* ConfigProgramInstancedName() {return "effect_energy_bullet_inst_program";}
+    static constexpr coreUintW       ConfigOutlineStyle        () {return OUTLINE_STYLE_BULLET_FULL;}
+    static constexpr coreBool        ConfigShadow              () {return false;}
 
 
 private:
@@ -863,7 +909,9 @@ template <typename T> RETURN_RESTRICT T* cBulletManager::AddBullet(const coreInt
 
     // fix addresses for all active bullets
     FOR_EACH(it, *pSet->oBulletActive.List())
+    {
         (*it) = s_cast<coreObject3D*>(I_TO_P(P_TO_UI(*it) - iBefore + iAfter));
+    }
 
     // execute again with first new bullet
     pSet->iCurBullet = iSize - 1u;

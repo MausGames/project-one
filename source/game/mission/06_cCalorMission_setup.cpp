@@ -84,6 +84,7 @@ void cCalorMission::__SetupOwn()
     // TODO 1: reichweite der bullet-berührung vielleicht (dynamisch, oder sub-gruppen abhängig) erhöhen (e.g. in sternen gruppe, pfad gruppe)
     // TODO 1: SQRT2 not necessary ? (oh wait, 0.7071 on corner)
     // TODO 1: gegner sollen leuchten, wenn sie getriggert sind (für interpoliertes movement)
+    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         constexpr coreUintW iNumEnemiesAll  = 63u;
@@ -398,6 +399,7 @@ void cCalorMission::__SetupOwn()
     // TODO 1: final enemy needs better integration (blitze, rauch, ramp-up, soll er zerstört werden, soll es helfer sein)
     // TODO 1: improve pacing/add pause before "final enemy"
     // TODO 1: schnee hat weiterhin bullets geschluckt nach punkte-vergabe, sollte nicht sein
+    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -743,6 +745,7 @@ void cCalorMission::__SetupOwn()
     // TODO 1: press-wände müssen verschwinden, wenn spieler sie berührt (auch bei feel)
     // TODO 1: bullets in walls brauchen 100% collision range (handle BULLET_COLLISION_FACTOR in), vielleicht auch bei vielen andere waves, implement API
     // TODO 1: helper sollte pfeil + wellen haben, um den spieler dorthin zu locken
+    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -1183,6 +1186,7 @@ void cCalorMission::__SetupOwn()
     // TODO 1: die links-rechts wurm gruppe is zu schnell oder viel, vielleicht von 4 auf 3, oder beschleunigen
     // TODO 1: der ruck am ende is zu stark, kA warum
     // TODO 1: ganz am anfang wird man nach unten gedrückt, aber wenn man nicht schießt kann man entkommen, geschosse am unteren rand
+    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -1533,6 +1537,7 @@ void cCalorMission::__SetupOwn()
     // TODO 1: simple bullet-waves inbetween for the player to overcome
     // TODO 1: vielleicht mini-gegner oder boss-intro (10s) um morning-star zu erhalten
     // TODO 1: first side enemies on bullet-carpet more to the middle (maybe 50%)
+    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         
@@ -1732,6 +1737,7 @@ void cCalorMission::__SetupOwn()
     // TODO 1: do not remove energy-effect on king after resurrection ?
     // TODO 1: maybe he is caught in an ice block
     // TODO 1: rotate (all balls) helper around enemy to highlight state
+    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         STAGE_ADD_PATH(pPath1)

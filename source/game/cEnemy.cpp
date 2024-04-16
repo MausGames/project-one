@@ -107,7 +107,7 @@ void cEnemy::Move()
 
 // ****************************************************************
 // reduce current health
-coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2 vImpact, cPlayer* pAttacker)
+coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2 vImpact, cPlayer* OUTPUT pAttacker)
 {
     ASSERT(STATIC_ISVALID(g_pGame))
 
@@ -274,7 +274,7 @@ void cEnemy::Kill(const coreBool bAnimated)
     }
 
     // 
-    if(bAnimated && this->GetType())
+    if(bAnimated)// && this->IsEnabled(CORE_OBJECT_ENABLE_RENDER)) sollten am rand explodieren // this->GetType())   
     {
         // 
         if(HAS_BIT(m_iBaseColor, SHIP_INVERTED_BIT))

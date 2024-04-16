@@ -19,6 +19,7 @@ cHarenaMission::cHarenaMission()noexcept
 , m_afSpikeTime  {}
 , m_afSpikeCur   {}
 , m_afSpikeMax   {}
+, m_iInsanity    (0u)
 {
     // 
     m_apBoss[0] = &m_Tiger;
@@ -122,7 +123,7 @@ void cHarenaMission::DisableFloor(const coreUintW iIndex, const coreBool bAnimat
 
 // ****************************************************************
 // 
-void cHarenaMission::EnableSpike(const coreUintW iIndex)
+void cHarenaMission::EnableSpike(const coreUintW iIndex, const coreBool bDelayed)
 {
     ASSERT(iIndex < HARENA_SPIKES)
     coreObject3D* pSpike = (*m_Spike     .List())[iIndex];
@@ -132,7 +133,7 @@ void cHarenaMission::EnableSpike(const coreUintW iIndex)
     WARN_IF(pSpike->IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
 
     // 
-    m_afSpikeTime[iIndex] = 1.0f - 0.022f * I_TO_F(iIndex);
+    m_afSpikeTime[iIndex] = bDelayed ? (1.0f - 0.022f * I_TO_F(iIndex)) : 1.0f;
     m_afSpikeCur [iIndex] = 0.0f;
     m_afSpikeMax [iIndex] = 0.0f;
 
@@ -169,6 +170,56 @@ void cHarenaMission::DisableSpike(const coreUintW iIndex, const coreBool bAnimat
     {
         pSpike->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
         pBoard->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    }
+}
+
+
+// ****************************************************************
+// 
+void cHarenaMission::ChangeInsanity(const coreUint8 iInsanity)
+{
+    // 
+    WARN_IF(m_iInsanity >= iInsanity) return;
+    m_iInsanity = iInsanity;
+
+    // 
+    FOR_EACH(it, m_apPath)  SAFE_DELETE(*it)
+    FOR_EACH(it, m_apSquad) SAFE_DELETE(*it)
+
+    // 
+    m_apPath .clear();
+    m_apSquad.clear();
+
+    // 
+    if(m_piData) std::memset(m_piData, 0, sizeof(coreUint32) * m_iDataSize);
+
+    // 
+    m_fStageTime          = 0.0f;
+    m_fStageTimeBefore    = 0.0f;
+    m_iStageSub           = 0u;
+    m_fStageSubTime       = 0.0f;
+    m_fStageSubTimeBefore = 0.0f;
+    m_fStageWait          = 0.0f;
+}
+
+
+// ****************************************************************
+// 
+void cHarenaMission::CrashEnemy(cEnemy* OUTPUT pEnemy)const
+{
+    if(!m_iInsanity) return;
+
+    // 
+    pEnemy->AddStatus(ENEMY_STATUS_IMMORTAL);
+    if(pEnemy->ReachedDeath()) pEnemy->Kill(true);
+
+    // 
+    if(pEnemy->HasStatus(ENEMY_STATUS_DEAD))
+    {
+        const coreUint8 iPlayer = pEnemy->LastAttacker() - g_pGame->GetPlayer(0u);
+        const coreUint8 iDamage = TIGER_DAMAGE;
+
+        g_pGame->GetCrashManager()->AddCrash(*pEnemy, m_Tiger.GetPosition().xy(), I_TO_P(BITVALUE(8u, 8u, iPlayer) | BITVALUE(8u, 0u, iDamage)));
     }
 }
 
@@ -274,7 +325,7 @@ void cHarenaMission::__MoveOwnAfter()
         const coreVector2 vDir   = coreVector2::Direction(LERP(-1.0f*PI, 0.0f*PI, fBlend));
 
         // 
-        pSpike->SetPosition(coreVector3(pSpike->GetPosition().xy(), fHeight));
+        pSpike->SetPosition(coreVector3(pBoard->GetPosition().xy(), fHeight));
         pSpike->SetSize    (coreVector3(fScale, fScale, 1.0f) * pSpike->GetSize().z);
         pSpike->SetColor3  (LERP(coreVector3(1.0f,1.0f,1.0f) * 0.5f, vColor, 0.4f));
         pSpike->SetAlpha   (STEPH3(0.8f, 1.0f, fBlend));

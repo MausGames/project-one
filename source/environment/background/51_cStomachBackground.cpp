@@ -19,7 +19,7 @@ cStomachBackground::cStomachBackground()noexcept
     this->__InitOwn();
 
     // create outdoor-surface object
-    m_pOutdoor = new cOutdoor("mars", "rock", 9u, 4.0f);
+    m_pOutdoor = new cOutdoor("mars", "rock", OUTDOOR_ALGORITHM_STOMACH, 4.0f, false);
 
     // allocate cloud list
     pList1 = new coreBatchList(STOMACH_CLOUD_RESERVE);

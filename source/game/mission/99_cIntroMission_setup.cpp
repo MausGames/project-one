@@ -189,6 +189,7 @@ void cIntroMission::__SetupOwn()
     // TODO 1: badge sollte über letzter kill-position erscheinen
     // TODO 1: control intro should be separate for each player
     // TODO 1: GetNumEnemiesAlive should only check for the bottom 12 enemies
+    // TODO 1: remove area-change on successful turn
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -290,7 +291,7 @@ void cIntroMission::__SetupOwn()
                     const coreVector2 vPos = pEnemy->GetPosition ().xy();
                     const coreVector2 vDir = pEnemy->GetDirection().xy();
 
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.5f, pEnemy, vPos, vDir)->MakeWhite()->ChangeSize(1.4f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.5f, pEnemy, vPos, vDir)->ChangeSize(1.4f);
                 }
             }
         });
@@ -408,7 +409,7 @@ void cIntroMission::__SetupOwn()
                     const coreVector2 vPos = pEnemy->GetPosition().xy();
                     const coreVector2 vDir = pEnemy->AimAtPlayerDual((i / 4u) % 2u).Normalized();
 
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.6f, pEnemy, vPos, vDir)->MakeWhite()->ChangeSize(1.5f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cSpearBullet>(5, 1.6f, pEnemy, vPos, vDir)->ChangeSize(1.5f);
                 }
             }
             else
@@ -519,8 +520,8 @@ void cIntroMission::__SetupOwn()
                     const coreVector2 vPos = pEnemy->GetPosition().xy();
                     const coreVector2 vDir = coreVector2::Direction(I_TO_F(s_iTick) * DEG_TO_RAD(27.0f));
 
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.1f, pEnemy, vPos,  vDir)->MakeWhite()->ChangeSize(1.5f);
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.1f, pEnemy, vPos, -vDir)->MakeWhite()->ChangeSize(1.5f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.1f, pEnemy, vPos,  vDir)->ChangeSize(1.5f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cWaveBullet>(5, 1.1f, pEnemy, vPos, -vDir)->ChangeSize(1.5f);
                 }
             }
             else
@@ -627,8 +628,8 @@ void cIntroMission::__SetupOwn()
                     const coreVector2 vPos = (vDir * -1.3f - vDir.Rotated90() * fSide) * FOREGROUND_AREA;
                     const coreVector2 vTan = vDir.Rotated90() * (I_TO_F(i) * 0.06f + 0.3f) * FOREGROUND_AREA;
 
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.1f, pSquad1->GetEnemy(0u), vPos + vTan, vDir)->MakeWhite()->ChangeSize(1.7f);
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.1f, pSquad1->GetEnemy(0u), vPos - vTan, vDir)->MakeWhite()->ChangeSize(1.7f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.1f, pSquad1->GetEnemy(0u), vPos + vTan, vDir)->ChangeSize(1.7f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.1f, pSquad1->GetEnemy(0u), vPos - vTan, vDir)->ChangeSize(1.7f);
                 }
             }
         }
@@ -642,7 +643,7 @@ void cIntroMission::__SetupOwn()
                 {
                     const coreVector2 vPos = (vDir * -1.3f - vDir.Rotated90() * ((I_TO_F(i) - 18.5f) * 0.06f)) * FOREGROUND_AREA;
 
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.1f, pSquad1->GetEnemy(0u), vPos, vDir)->MakeWhite()->ChangeSize(1.7f);
+                    g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.1f, pSquad1->GetEnemy(0u), vPos, vDir)->ChangeSize(1.7f);
                 }
             }
 
@@ -696,6 +697,21 @@ void cIntroMission::__SetupOwn()
     });
 
     // ################################################################
+    // 
+    STAGE_MAIN({TAKE_ALWAYS, 6u})
+    {
+        if(!g_pGame->GetItemManager()->GetNumItems())
+        {
+            STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
+            {
+                pPlayer->SetBaseColor(COLOR_SHIP_GREY * 0.6f);
+            });
+
+            STAGE_FINISH_NOW
+        }
+    });
+
+    // ################################################################
     // end
     STAGE_MAIN({TAKE_MISSION})
     {
@@ -706,14 +722,13 @@ void cIntroMission::__SetupOwn()
     // 
     STAGE_MAIN({TAKE_MISSION})
     {
-        if(STAGE_BEGINNING)
+        if(m_bFirstPlay)
         {
-            g_pGame->StartOutro(2u);
-
-            STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
-            {
-                pPlayer->SetBaseColor(COLOR_SHIP_GREY * 0.6f);
-            });
+            if(STAGE_BEGINNING) g_pGame->StartOutro(2u);
+        }
+        else
+        {
+            STAGE_FINISH_NOW
         }
     });
 

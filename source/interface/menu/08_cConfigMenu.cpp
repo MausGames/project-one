@@ -89,6 +89,7 @@ cConfigMenu::cConfigMenu()noexcept
         if(i == ENTRY_VIDEO_RENDERQUALITY) ++iOffset;
         if(i == ENTRY_VIDEO_SHAKEEFFECTS)  ++iOffset;
         if(i == ENTRY_AUDIO_MUSICVOLUME)   ++iOffset;
+        if(i == ENTRY_AUDIO_3DSOUND)       ++iOffset;
         if(i == ENTRY_INPUT_MOVEUP)        ++iOffset;
         if(i == ENTRY_INPUT_ACTION1)       ++iOffset;
         if(i == ENTRY_GAME_GAMEROTATION)   ++iOffset;
@@ -175,6 +176,7 @@ cConfigMenu::cConfigMenu()noexcept
         __SET_OPTION(m_MusicVolume,   AUDIO_MUSICVOLUME,   0.26f)
         __SET_OPTION(m_EffectVolume,  AUDIO_EFFECTVOLUME,  0.26f)
         __SET_OPTION(m_AmbientVolume, AUDIO_AMBIENTVOLUME, 0.26f)
+        __SET_OPTION(m_3DSound,       AUDIO_3DSOUND,       0.26f)
         __SET_OPTION(m_Language,      GAME_LANGUAGE,       0.26f)
         __SET_OPTION(m_TextSize,      GAME_TEXTSIZE,       0.26f)
         __SET_OPTION(m_GameRotation,  GAME_GAMEROTATION,   0.26f)
@@ -201,11 +203,12 @@ cConfigMenu::cConfigMenu()noexcept
         m_Navigator.BindObject(&m_RenderQuality, &m_TextureFilter, NULL, &m_ShadowQuality,  NULL, NULL,                    MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
         m_Navigator.BindObject(&m_ShadowQuality, &m_RenderQuality, NULL, &m_ShakeEffects,   NULL, NULL,                    MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
         m_Navigator.BindObject(&m_ShakeEffects,  &m_ShadowQuality, NULL, &m_FlashEffects,   NULL, NULL,                    MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
-        m_Navigator.BindObject(&m_FlashEffects,  &m_ShakeEffects,  NULL, &m_SaveButton,     NULL, &m_AmbientVolume,        MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
+        m_Navigator.BindObject(&m_FlashEffects,  &m_ShakeEffects,  NULL, &m_SaveButton,     NULL, &m_3DSound,              MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
         m_Navigator.BindObject(&m_GlobalVolume,  &m_AudioTab,      NULL, &m_MusicVolume,    NULL, &m_aInput[0].oType,      MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
         m_Navigator.BindObject(&m_MusicVolume,   &m_GlobalVolume,  NULL, &m_EffectVolume,   NULL, NULL,                    MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
         m_Navigator.BindObject(&m_EffectVolume,  &m_MusicVolume,   NULL, &m_AmbientVolume,  NULL, NULL,                    MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
-        m_Navigator.BindObject(&m_AmbientVolume, &m_EffectVolume,  NULL, &m_SaveButton,     NULL, &m_aInput[0].aAction[3], MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
+        m_Navigator.BindObject(&m_AmbientVolume, &m_EffectVolume,  NULL, &m_3DSound,        NULL, NULL,                    MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
+        m_Navigator.BindObject(&m_3DSound,       &m_AmbientVolume, NULL, &m_SaveButton,     NULL, &m_aInput[0].aAction[3], MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
         m_Navigator.BindObject(&m_Language,      &m_GameTab,       NULL, &m_TextSize,       NULL, &m_Monitor,              MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
         m_Navigator.BindObject(&m_TextSize,      &m_Language,      NULL, &m_GameRotation,   NULL, NULL,                    MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
         m_Navigator.BindObject(&m_GameRotation,  &m_TextSize,      NULL, &m_GameScale,      NULL, NULL,                    MENU_TYPE_TAB_NODE | MENU_TYPE_SWITCH_PRESS | MENU_TYPE_SWITCH_MOVE);
@@ -315,6 +318,8 @@ cConfigMenu::cConfigMenu()noexcept
     for(coreUintW i = 0u; i <= 100u; i += 5u) m_MusicVolume  .AddEntry(PRINT("%zu%%", i), i);
     for(coreUintW i = 0u; i <= 100u; i += 5u) m_EffectVolume .AddEntry(PRINT("%zu%%", i), i);
     for(coreUintW i = 0u; i <= 100u; i += 5u) m_AmbientVolume.AddEntry(PRINT("%zu%%", i), i);
+    m_3DSound      .AddEntryLanguage("VALUE_OFF",              0u);
+    m_3DSound      .AddEntryLanguage("VALUE_ON",               1u);
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oRumble  .AddEntryLanguage("VALUE_OFF",       0u);
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oRumble  .AddEntryLanguage("VALUE_ON",        10u);
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oFireMode.AddEntryLanguage("FIREMODE_NORMAL", 0u);
@@ -414,6 +419,7 @@ cConfigMenu::cConfigMenu()noexcept
     this->BindObject(SURFACE_CONFIG_AUDIO, &m_MusicVolume);
     this->BindObject(SURFACE_CONFIG_AUDIO, &m_EffectVolume);
     this->BindObject(SURFACE_CONFIG_AUDIO, &m_AmbientVolume);
+    this->BindObject(SURFACE_CONFIG_AUDIO, &m_3DSound);
     this->BindObject(SURFACE_CONFIG_GAME,  &m_Language);
     this->BindObject(SURFACE_CONFIG_GAME,  &m_TextSize);
     this->BindObject(SURFACE_CONFIG_GAME,  &m_GameRotation);
@@ -511,6 +517,7 @@ void cConfigMenu::Move()
             cMenu::UpdateSwitchBox(&m_MusicVolume);
             cMenu::UpdateSwitchBox(&m_EffectVolume);
             cMenu::UpdateSwitchBox(&m_AmbientVolume);
+            cMenu::UpdateSwitchBox(&m_3DSound);
 
             // 
             m_GlobalVolume .GetCaption()->SetColor3(COLOR_HEALTH(I_TO_F(m_GlobalVolume .GetCurValue()) * 0.01f));
@@ -790,6 +797,7 @@ void cConfigMenu::CheckValues()
                            (m_MusicVolume  .GetCurValue() != cConfigMenu::__VolumeToUint8(Core::Config->GetFloat(CORE_CONFIG_AUDIO_MUSICVOLUME)))  ||
                            (m_EffectVolume .GetCurValue() != cConfigMenu::__VolumeToUint8(g_OldConfig.Audio.fEffectVolume))                        ||
                            (m_AmbientVolume.GetCurValue() != cConfigMenu::__VolumeToUint8(g_OldConfig.Audio.fAmbientVolume))                       ||
+                           (m_3DSound      .GetCurValue() != g_OldConfig.Audio.i3DSound)                                                           ||
                            (std::strcmp(Core::Language->GetPath(), Core::Config->GetString(CORE_CONFIG_BASE_LANGUAGE)))                            ||
                            (m_TextSize     .GetCurValue() != g_OldConfig.Game.iTextSize)                                                           ||
                            (m_GameRotation .GetCurValue() != g_OldConfig.Game.iGameRotation)                                                       ||
@@ -848,6 +856,7 @@ void cConfigMenu::LoadValues()
     m_MusicVolume  .SelectValue(cConfigMenu::__VolumeToUint8(Core::Config->GetFloat(CORE_CONFIG_AUDIO_MUSICVOLUME)));
     m_EffectVolume .SelectValue(cConfigMenu::__VolumeToUint8(g_CurConfig.Audio.fEffectVolume));
     m_AmbientVolume.SelectValue(cConfigMenu::__VolumeToUint8(g_CurConfig.Audio.fAmbientVolume));
+    m_3DSound      .SelectValue(g_CurConfig.Audio.i3DSound);
 
     // 
     const coreList<coreString>& asLanguageList = cMenu::GetLanguageList().get_valuelist();
@@ -922,6 +931,7 @@ void cConfigMenu::SaveValues()
     Core::Config->SetFloat(CORE_CONFIG_AUDIO_MUSICVOLUME,  cConfigMenu::__VolumeToFloat(m_MusicVolume .GetCurValue()));
     g_CurConfig.Audio.fEffectVolume  = cConfigMenu::__VolumeToFloat(m_EffectVolume .GetCurValue());
     g_CurConfig.Audio.fAmbientVolume = cConfigMenu::__VolumeToFloat(m_AmbientVolume.GetCurValue());
+    g_CurConfig.Audio.i3DSound       = m_3DSound.GetCurValue();
 
     // 
     Core::Config->SetString(CORE_CONFIG_BASE_LANGUAGE, Core::Language->GetPath());

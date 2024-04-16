@@ -15,7 +15,7 @@
 // TODO 5: cracks (star, lightning)
 // TODO 5: strong breaks (across screen), left and right are strongly shifted
 // TODO 5: move weather-effects here, but make them controllable from the background ?
-// TODO 3: try to keep optimized lists longer, instead of only for one frame
+// TODO 3: try to keep optimized lists longer, instead of only for one frame (maybe keep for mission segment)
 
 
 // ****************************************************************
@@ -27,7 +27,7 @@ private:
 
     cInk m_Ink;                               // 
 
-    bool m_bActive;                           // 
+    coreBool m_bActive;                       // 
 
 
 public:

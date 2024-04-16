@@ -11,7 +11,7 @@
 #define _P1_GUARD_SHIP_H_
 
 // TODO 4: reduce ship health (and player shield) and all damage values to 16-bit (also reorder for better packing if possible)
-// TODO 3: do not create explosions if ship is far outside of view-port (just ships or in general special-effects ?)
+// TODO 3: do not create explosions if ship is far outside of view-port (just ships or in general special-effects ?) (but needs to be far, because explosions with sound on borders are still important)
 // TODO 2: ReachedHealthPct, GetCurHealthPct -> ReachedHealthPct(0.7f) was triggered while interface was showing 71%
 // TODO 4: check and cleanup transformation functions
 
@@ -61,7 +61,7 @@ public:
     void     DefaultRotateLerp   (const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime);
     void     DefaultOrientate    (const coreFloat fAngle);
     void     DefaultOrientateLerp(const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime);
-    void     DefaultAxiate       (const coreFloat fAngle);
+    void     DefaultAxiate       (const coreFloat fAngle, const coreVector3 vBaseOri = coreVector3(0.0f,0.0f,1.0f));
     void     DefaultAxiateLerp   (const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime);
     void     DefaultMultiate     (const coreFloat fAngle);
     void     DefaultMultiateLerp (const coreFloat fFromAngle, const coreFloat fToAngle, const coreFloat fTime);
@@ -74,9 +74,9 @@ public:
     inline cShip* Rotate270() {this->SetPosition(this->GetPosition().RotatedZ90() * coreVector3(-1.0f,-1.0f,1.0f)); this->SetDirection(this->GetDirection().RotatedZ90() * coreVector3(-1.0f,-1.0f,1.0f)); this->SetOrientation(this->GetOrientation().RotatedZ90() * coreVector3(-1.0f,-1.0f,1.0f)); return this;}
     inline cShip* ToAxis(const coreVector2 vAxis)
     {
-        this->SetPosition   (coreVector3(MapToAxis(this->GetPosition   ().xy(), vAxis), this->GetPosition   ().z));
-        this->SetDirection  (coreVector3(MapToAxis(this->GetDirection  ().xy(), vAxis), this->GetDirection  ().z));
-        this->SetOrientation(coreVector3(MapToAxis(this->GetOrientation().xy(), vAxis), this->GetOrientation().z)); return this;}
+        this->SetPosition   (MapToAxis(this->GetPosition   (), vAxis));
+        this->SetDirection  (MapToAxis(this->GetDirection  (), vAxis));
+        this->SetOrientation(MapToAxis(this->GetOrientation(), vAxis)); return this;}
     
     // 
     inline void RefreshColor(const coreFloat fFactor) {const coreFloat fRealFactor = cShip::TransformColorFactor(fFactor); this->SetColor3(LERP(COLOR_SHIP_GREY, this->GetBaseColor(), HAS_BIT(m_iBaseColor, SHIP_INVERTED_BIT) ? (1.0f - fRealFactor) : fRealFactor));}

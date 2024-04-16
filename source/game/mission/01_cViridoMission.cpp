@@ -570,7 +570,7 @@ void cViridoMission::__MoveOwnAfter()
                 vDir = MapToAxis(vDir, vRota);
             }
 
-            oBarrier.SetPosition (coreVector3(pOwner->GetPosition().xy() + vDir * 7.0f, 0.0f));
+            oBarrier.SetPosition (coreVector3(pOwner->GetPosition().xy() + vDir * (pOwner->HasStatus(ENEMY_STATUS_BOSS) ? (14.0f * I_TO_F(2u - (i / 2u))) : 7.0f), 0.0f));        
             oBarrier.SetDirection(coreVector3(vDir, 0.0f));
         }
 
@@ -794,7 +794,7 @@ void cViridoMission::__MoveOwnAfter()
         const coreVector2 vOldBallPos = vBallPos - vBallDir * FOREGROUND_AREA * (HAS_BIT(m_iStickyState, 1u) ? 0.0f : (VIRIDO_BALL_SPEED * TIME));
 
         // 
-        Core::Manager::Object->TestCollision(TYPE_ENEMY, &oBall, [&](cEnemy* OUTPUT pEnemy, coreObject3D* OUTPUT pBall, const coreVector3 vIntersection, const coreBool bFirstHit)
+        Core::Manager::Object->TestCollision(TYPE_ENEMY, &oBall, [&](cEnemy* OUTPUT pEnemy, const coreObject3D* pBall, const coreVector3 vIntersection, const coreBool bFirstHit)
         {
             // 
             if(!bFirstHit || (pEnemy->GetID() != cCinderEnemy::ID)) return;

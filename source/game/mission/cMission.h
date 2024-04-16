@@ -27,6 +27,7 @@
 // TODO 1: check if all allocated enemy numbers are correct
 // TODO 2: generate objects are preventing each others outlines while being alpha 0 (especially on diagonal movement)
 // TODO 3: nevo: render-reihenfolge der blasts is statisch, manchmal überlagern sie sich, nicht konsistent
+// TODO 4: mission code sometimes accesses variables directly without wrapper-functions (mixed), bosses always need wrapper functions, should this be handled consistently ?
 
 
 // ****************************************************************
@@ -69,7 +70,7 @@
 #define NEVO_LINES                  (4u)                                              // 
 #define NEVO_BLASTS                 (NEVO_BOMBS)                                      // 
 #define NEVO_BLASTS_RAWS            (NEVO_BLASTS * (NEVO_LINES + 1u))                 // 
-#define NEVO_TILES                  (16u)                                             // 
+#define NEVO_TILES                  (20u)//(16u)                                             // 
 #define NEVO_TILES_RAWS             (NEVO_TILES)                                      // 
 #define NEVO_ARROWS                 (38u)                                             // 
 #define NEVO_ARROWS_RAWS            (NEVO_ARROWS)                                     // 
@@ -332,6 +333,16 @@ public:
     inline void CollPlayerBullet(cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit) {if(m_nCollPlayerBullet) m_nCollPlayerBullet(pPlayer, pBullet, vIntersection, bFirstHit);}
     inline void CollEnemyBullet (cEnemy*  OUTPUT pEnemy,  cBullet* OUTPUT pBullet, const coreVector3 vIntersection, const coreBool bFirstHit) {if(m_nCollEnemyBullet)  m_nCollEnemyBullet (pEnemy,  pBullet, vIntersection, bFirstHit);}
 
+    // 
+    template <typename F> inline void SetCollPlayerEnemy (F&& nCollFunc) {if(!m_nCollPlayerEnemy)  m_nCollPlayerEnemy  = nCollFunc;}
+    template <typename F> inline void SetCollPlayerBullet(F&& nCollFunc) {if(!m_nCollPlayerBullet) m_nCollPlayerBullet = nCollFunc;}
+    template <typename F> inline void SetCollEnemyBullet (F&& nCollFunc) {if(!m_nCollEnemyBullet)  m_nCollEnemyBullet  = nCollFunc;}
+
+    // 
+    inline void ResetCollPlayerEnemy () {m_nCollPlayerEnemy  = NULL;}
+    inline void ResetCollPlayerBullet() {m_nCollPlayerBullet = NULL;}
+    inline void ResetCollEnemyBullet () {m_nCollEnemyBullet  = NULL;}
+
     // access mission objects
     inline cBoss*           GetBoss           (const coreUintW iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_apBoss[iIndex];}
     inline cBoss*           GetCurBoss        ()const                       {return m_pCurBoss;}
@@ -339,6 +350,7 @@ public:
     inline const coreUintW& GetCurWaveIndex   ()const                       {return m_iCurWaveIndex;}
     inline const coreUintW& GetCurSegmentIndex()const                       {return m_iCurSegmentIndex;}
     inline cEnemySquad*     GetEnemySquad     (const coreUintW iIndex)const {ASSERT(iIndex < m_apSquad.size()) return m_apSquad.get_valuelist()[iIndex];}
+    inline const coreUint8& GetStageSub       ()const                       {return m_iStageSub;}
     inline const coreFloat* GetMedalGoal      ()const                       {return m_pfMedalGoal;}
 
 
@@ -458,8 +470,9 @@ public:
     inline const coreUint8& GetBounceState()const {return m_iBounceState;}
 
     // 
-    inline coreObject3D* GetBall  (const coreUintW iIndex) {ASSERT(iIndex < VIRIDO_BALLS)   return &m_aBallRaw[iIndex * (VIRIDO_TRAILS + 1u)];}
-    inline coreObject3D* GetPaddle(const coreUintW iIndex) {ASSERT(iIndex < VIRIDO_PADDLES) return &m_aPaddle [iIndex];}
+    inline coreObject3D* GetBall  (const coreUintW iIndex) {ASSERT(iIndex < VIRIDO_BALLS)   return &m_aBallRaw [iIndex * (VIRIDO_TRAILS + 1u)];}
+    inline coreObject3D* GetPaddle(const coreUintW iIndex) {ASSERT(iIndex < VIRIDO_PADDLES) return &m_aPaddle  [iIndex];}
+    inline coreObject3D* GetLaser (const coreUintW iIndex) {ASSERT(iIndex < VIRIDO_LASERS)  return &m_aLaserRaw[iIndex * 2u];}
 
 
 private:
@@ -484,8 +497,8 @@ private:
     cLeviathanBoss m_Leviathan;                       // 
 
     coreBatchList m_Bomb;                             // 
-    cLodObject    m_aBombRaw  [NEVO_BOMBS_RAWS];      // 
-    coreBool      m_abBombGone[NEVO_BOMBS];           // 
+    cLodObject    m_aBombRaw[NEVO_BOMBS_RAWS];        // 
+    coreUint32    m_iBombGone;                        // 
 
     coreBatchList m_Blast;                            // 
     coreBatchList m_BlastLine;                        // 
@@ -551,7 +564,7 @@ public:
     void DisableContainer(const coreBool bAnimated);
 
     // 
-    inline void SetArrowActive(const coreUint8 iActive) {m_iArrowActive = iActive;}
+    void SetTileStyle(const coreUintW iIndex, const coreUint8 iStyle);
 
     // 
     inline void SetContainerForce   (const coreVector2 vForce)    {m_vForce    = vForce;}
@@ -559,12 +572,14 @@ public:
     inline void SetContainerOverdraw(const coreBool    bOverdraw) {m_bOverdraw = bOverdraw;}
 
     // 
-    inline const coreBool&    GetBombGone       (const coreUintW iIndex)const {ASSERT(iIndex < NEVO_BOMBS) return m_abBombGone[iIndex];}
+    inline       coreBool     GetBombGone       (const coreUintW iIndex)const {ASSERT(iIndex < NEVO_BOMBS)  return HAS_BIT(m_iBombGone, iIndex);}
+    inline const coreUint8&   GetArrowDir       (const coreUintW iIndex)const {ASSERT(iIndex < NEVO_ARROWS) return m_aiArrowDir[iIndex];}
     inline const coreVector2& GetContainerForce ()const                       {return m_vForce;}
     inline const coreVector2& GetContainerImpact()const                       {return m_vImpact;}
 
     // 
-    inline cLodObject* GetContainer() {return &m_Container;}
+    inline coreObject3D* GetTile     (const coreUintW iIndex) {ASSERT(iIndex < NEVO_TILES) return &m_aTileRaw[iIndex];}
+    inline cLodObject*   GetContainer()                       {return &m_Container;}
 
 
 private:
@@ -594,6 +609,9 @@ private:
     coreFlow      m_afSpikeCur [HARENA_SPIKES];         // 
     coreFloat     m_afSpikeMax [HARENA_SPIKES];         // 
 
+    std::function<void()> m_aInsanityStage[5];          // 
+    coreUint8             m_iInsanity;                  // 
+
 
 public:
     cHarenaMission()noexcept;
@@ -607,14 +625,21 @@ public:
     void DisableFloor(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
-    void EnableSpike (const coreUintW iIndex);
+    void EnableSpike (const coreUintW iIndex, const coreBool bDelayed);
     void DisableSpike(const coreUintW iIndex, const coreBool bAnimated);
 
     // 
     inline void LaunchSpike(const coreUintW iIndex, const coreFloat fTime) {ASSERT(iIndex < HARENA_SPIKES) m_afSpikeCur[iIndex] = 0.0f; m_afSpikeMax[iIndex] = fTime;}
 
     // 
+    void ChangeInsanity(const coreUint8 iInsanity);
+    void CrashEnemy(cEnemy* OUTPUT pEnemy)const;
+
+    // 
     inline coreBool GetSpikeLaunched(const coreUintW iIndex)const {ASSERT(iIndex < HARENA_SPIKES) return (m_afSpikeMax[iIndex] && InBetween(m_afSpikeCur[iIndex], 1.1f, m_afSpikeMax[iIndex] - 0.5f));}
+
+    // 
+    inline coreObject3D* GetSpikeBoard(const coreUintW iIndex) {ASSERT(iIndex < HARENA_SPIKES) return &m_aSpikeRaw[iIndex * 2u + 1u];}
 
 
 private:

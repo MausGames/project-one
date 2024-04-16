@@ -23,6 +23,7 @@
 // TODO 3: effect on player when loosing combo or chain (and on UI, and combat text)
 // TODO 1: PLAYER_SHIELD_INTRO always for intro
 // TODO 3: all player bullets get destroyed with death
+// TODO 1: make sure player receives final combo or chain at the end of segment
 
 
 // ****************************************************************
@@ -31,7 +32,7 @@
 #define PLAYER_EQUIP_SUPPORTS     (EQUIP_SUPPORTS)     // 
 #define PLAYER_LIVES              (LIVES)              // 
 #define PLAYER_SHIELD             (SHIELD)             // 
-#define PLAYER_SHIELD_INTRO       (1000u)              // 
+#define PLAYER_SHIELD_INTRO       (100u)               // 
 #define PLAYER_COLLISION_MIN      (0.15f)              // 
 #define PLAYER_SIZE_FACTOR        (1.15f * m_fScale)   // 
 #define PLAYER_AREA_FACTOR        (1.06f)              // 

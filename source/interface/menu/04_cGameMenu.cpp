@@ -172,6 +172,7 @@ cGameMenu::cGameMenu()noexcept
             //m_aaStage[i][j].SetPosition     (vPos + coreVector2(0.225f,0.0f));
             m_aaStage[i][j].SetPosition     (vPos + coreVector2(0.05f,0.0f));
             m_aaStage[i][j].SetSize         (vSize * 0.8f);
+            m_aaStage[i][j].SetColor3       (COLOR_MENU_WHITE);
             m_aaStage[i][j].SetFocusable    (true);
             m_aaStage[i][j].SetFocusModifier(coreVector2(1.25f,1.25f));
         }

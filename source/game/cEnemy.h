@@ -80,7 +80,7 @@ public:
     void Move  ()final;
 
     // reduce current health
-    coreInt32 TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2 vImpact, cPlayer* pAttacker);
+    coreInt32 TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, const coreVector2 vImpact, cPlayer* OUTPUT pAttacker);
 
     // control life and death
     void Resurrect();

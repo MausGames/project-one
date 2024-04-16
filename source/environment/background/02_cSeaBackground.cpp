@@ -26,7 +26,7 @@ cSeaBackground::cSeaBackground()noexcept
     this->__InitOwn();
 
     // create outdoor-surface object
-    m_pOutdoor = new cOutdoor("dust", "earth", 6u, 4.0f);
+    m_pOutdoor = new cOutdoor("dust", "earth", OUTDOOR_ALGORITHM_SEA, 4.0f, false);
 
     // allocate animal lists
     pList1 = new coreBatchList(SEA_ANIMAL_1_RESERVE);

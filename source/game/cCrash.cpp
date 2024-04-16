@@ -78,16 +78,15 @@ void cCrashManager::Move()
 
             // 
             const coreVector3 vPos = oObject.GetPosition() + oStatus.vAim * (40.0f * (oStatus.fTime + 1.0f) * TIME);
-            const coreVector2 vDir = coreVector2::Direction(2.0f*PI * oStatus.fTime);
+            const coreVector3 vDir = MapToAxis(oStatus.vDir, coreVector2::Direction(2.0f*PI * oStatus.fTime));
 
             // 
-            oObject.SetPosition   (vPos);
-            oObject.SetDirection  (coreVector3(vDir, 0.0f));
-            oObject.SetOrientation(OriRoundDir(vDir, vDir));
+            oObject.SetPosition (vPos);
+            oObject.SetDirection(vDir);
             oObject.Move();
 
             // 
-            if(bSmokeTick) g_pSpecialEffects->CreateSplashSmoke(vPos, 5.0f, 1u, coreVector3(1.0f,1.0f,1.0f));
+            //if(bSmokeTick) g_pSpecialEffects->CreateSplashSmoke(vPos, 5.0f, 1u, coreVector3(1.0f,1.0f,1.0f));
 
             if(vPos.z < pOutdoor->RetrieveHeight(vPos.xy()))
             {
@@ -95,7 +94,7 @@ void cCrashManager::Move()
                 if(m_nCallback) m_nCallback(oStatus.pData);
 
                 // 
-                const coreVector3 vDecalPos  = coreVector3(MapToAxisInv(vPos.xy(), g_pEnvironment->GetDirection()), vPos.z);
+                const coreVector3 vDecalPos  = vPos;
                 const coreVector2 vDecalSize = coreVector2(1.0f,1.0f) * 12.0f;
                 const coreVector2 vDecalDir  = coreVector2::Rand();
 
@@ -126,8 +125,6 @@ void cCrashManager::Move()
 // 
 void cCrashManager::AddCrash(const cLodObject& oBase, const coreVector2 vTarget, void* pData)
 {
-    return;
-
     // 
     const cOutdoor* pOutdoor = g_pEnvironment->GetBackground()->GetOutdoor();
     if(!pOutdoor || !pOutdoor->IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
@@ -151,9 +148,10 @@ void cCrashManager::AddCrash(const cLodObject& oBase, const coreVector2 vTarget,
             oObject.SetSize       (oBase.GetSize       ());
             oObject.SetDirection  (oBase.GetDirection  ());
             oObject.SetOrientation(oBase.GetOrientation());
-            oObject.SetColor3     (oBase.GetColor3     ());
+            oObject.SetColor3     (COLOR_SHIP_GREY * 0.4f);
 
             // 
+            oStatus.vDir  = oBase.GetDirection();
             oStatus.vAim  = (coreVector3(vTarget, pOutdoor->RetrieveHeight(vTarget)) - oBase.GetPosition()).Normalized();
             oStatus.fTime = 0.0f;
             oStatus.pData = pData;

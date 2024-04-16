@@ -77,11 +77,6 @@ inline FUNC_CONST coreFloat AngleDiff(const coreFloat x, const coreFloat y)
     return FmodRange(x - y, -PI, PI);
 }
 
-inline FUNC_CONST coreFloat AngleAbs(const coreFloat x)
-{
-    return FmodRange(x, 0.0f*PI, 2.0f*PI);
-}
-
 
 // ****************************************************************
 // value range helper-functions
@@ -137,21 +132,15 @@ inline FUNC_PURE coreFloat FrictionFactor(const coreFloat fStrength)
 // 
 inline FUNC_PURE coreFloat SmoothAimAngle(const coreFloat vOldAngle, const coreFloat vNewAngle, const coreFloat fStrength)
 {
-    const coreFloat fDiff = AngleDiff(vNewAngle, vOldAngle);
-
-    return vOldAngle + fDiff * (1.0f - FrictionFactor(fStrength));
+    return vOldAngle + AngleDiff(vNewAngle, vOldAngle) * (1.0f - FrictionFactor(fStrength));
 }
 
 inline FUNC_PURE coreVector2 SmoothAim(const coreVector2 vOldDir, const coreVector2 vNewDir, const coreFloat fStrength)
 {
     ASSERT(vOldDir.IsNormalized() && vNewDir.IsNormalized())
-
-    const coreFloat fFrom = vOldDir.Angle();
-    const coreFloat fTo   = vNewDir.Angle();
-    const coreFloat fDiff = AngleDiff(fTo, fFrom);
-
-    return coreVector2::Direction(fFrom + fDiff * (1.0f - FrictionFactor(fStrength)));
+    return coreVector2::Direction(SmoothAimAngle(vOldDir.Angle(), vNewDir.Angle(), fStrength));
 }
+// gegen ende der kurve isses so langsam, dass es nie sein ziel trifft
 
 
 // ****************************************************************
@@ -253,6 +242,21 @@ constexpr FUNC_CONST coreVector2 MapStepRotated90X(const coreVector2 vDirection,
     return -MapStepRotated90(vDirection, iStep).Rotated135();
 }
 
+constexpr FUNC_CONST coreVector2 MapStepRotatedInv45(const coreVector2 vDirection, const coreUint8 iStep)
+{
+    return MapStepRotated45(vDirection, (8u - iStep) % 8u);
+}
+
+constexpr FUNC_CONST coreVector2 MapStepRotatedInv90(const coreVector2 vDirection, const coreUint8 iStep)
+{
+    return MapStepRotated90(vDirection, (4u - iStep) % 4u);
+}
+
+constexpr FUNC_CONST coreVector2 MapStepRotatedInv90X(const coreVector2 vDirection, const coreUint8 iStep)
+{
+    return MapStepRotated90X(vDirection, (4u - iStep) % 4u);
+}
+
 
 // ****************************************************************
 // 
@@ -319,6 +323,16 @@ constexpr FUNC_CONST coreVector2 MapToAxis(const coreVector2 vVector, const core
 constexpr FUNC_CONST coreVector2 MapToAxisInv(const coreVector2 vVector, const coreVector2 vAxis)
 {
     return MapToAxis(vVector, vAxis.InvertedX());
+}
+
+constexpr FUNC_CONST coreVector3 MapToAxis(const coreVector3 vVector, const coreVector2 vAxis)
+{
+    return coreVector3(MapToAxis(vVector.xy(), vAxis), vVector.z);
+}
+
+constexpr FUNC_CONST coreVector3 MapToAxisInv(const coreVector3 vVector, const coreVector2 vAxis)
+{
+    return coreVector3(MapToAxisInv(vVector.xy(), vAxis), vVector.z);
 }
 
 

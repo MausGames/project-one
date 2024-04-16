@@ -22,7 +22,7 @@ cDesertBackground::cDesertBackground()noexcept
     this->__InitOwn();
 
     // create outdoor-surface object
-    m_pOutdoor = new cOutdoor("dust", "crack", 3u, 4.0f);
+    m_pOutdoor = new cOutdoor("dust", "crack", OUTDOOR_ALGORITHM_DESERT, 4.0f, false);
 
     coreBool bBlack = false;
 
@@ -379,12 +379,12 @@ cDesertBackground::cDesertBackground()noexcept
         oBase.DefineTexture(0u, "effect_soot.png");
         oBase.DefineProgram("effect_decal_single_program");
 
-        for(coreUintW i = 0u; i < GRASS_FLOWER_NUM; ++i)
+        for(coreUintW i = 0u; i < GRASS_FLOWER_NUM / 8u; ++i)
         {
             for(coreUintW j = 20u; j--; )   // tries
             {
                 // calculate position and height
-                const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, GRASS_FLOWER_NUM);
+                const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, GRASS_FLOWER_NUM / 8u);
                 const coreFloat   fHeight   = m_pOutdoor->RetrieveBackHeight(vPosition);
 
                 // test for valid values
@@ -400,7 +400,7 @@ cDesertBackground::cDesertBackground()noexcept
                         pObject->SetSize     (coreVector3(coreVector2(1.0f,1.0f) * Core::Rand->Float(9.0f, 10.0f), 1.0f) * 1.3f);
                         pObject->SetDirection(coreVector3(coreVector2::Rand(), 0.0f));
                         pObject->SetColor3   (coreVector3(0.0f,0.0f,0.0f));
-                        pObject->SetAlpha    (0.98f);
+                        pObject->SetAlpha    (0.98f * 0.75f);
 
                         // add object to the list
                         pList1->BindObject(pObject);

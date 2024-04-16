@@ -15,6 +15,7 @@
 // meteoriten-rotations angriff in mittel phase vor gravitation, meteoriten werden weggeschossen und dann geht gravitation los
 // links und rechts teleporter, meteoriten kommen raus in unendlichkeit, sind manchmal so arranged (seitlich und von oben-schräg), dass man durch teleporter durch muss
 // intro: meteoriten kommen zusammen, kurze drehung und wartezeit, dann bumm, und messier bricht raus schon mit schild
+// TODO 1: MAIN: fragment, easy, hard (decision), coop, 3 badges, boss health, medal goal, intro, outro, foreshadow
 
 
 // ****************************************************************

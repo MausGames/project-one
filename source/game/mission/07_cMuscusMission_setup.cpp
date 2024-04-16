@@ -92,6 +92,7 @@ void cMuscusMission::__SetupOwn()
     // TODO 1: die beiden 4er wellen entfernen, wenn die fürn orsch sind
     // TODO 1: erster gegner in 6x6 gruppe stirbt zu schnell, wenn spieler grad richtig schießt
     // TODO 1: mehr zwischen-subwave flickern hinzufügen, bei anderen wellen nach 10
+    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         constexpr coreUintW iNumData = 36u;
@@ -463,6 +464,7 @@ void cMuscusMission::__SetupOwn()
     // TODO 1: gegner in 12 12 12 pattern anders (siehe notizen) (achtung, die gegner sind im code 01237654)
     // TODO 1: TOP, bei 12 12 12 pattern, gegner eigentlich ganz oben mit abstand platzieren, nicht folgen lassen
     // TODO 1: die ersten 4 gruppen sind noch etwas fishy, vor allem die rauf-runter gruppe, adden die value ? diese 4 gruppen sollten die mechanik introducen
+    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         constexpr coreFloat fStep        = 0.275f;
@@ -973,6 +975,8 @@ void cMuscusMission::__SetupOwn()
     // TODO 1: größere explosion am ende, allgemein größerer impact effect der pearls (direktional ?) + screenshake
     // TODO 1: auch größerer effekt beim einsammeln der pearls (e.g. wave effect)
     // TODO 1: die 3 linien fühlen sich noch nicht so perfekt an, sollten aber nicht zu schwer sein (ruhe vor dem sturm)
+    // TODO 1: attack pattern in end-wave changes after collecting half the pearls
+    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         STAGE_ADD_PATH(pPath1)
@@ -1432,6 +1436,7 @@ void cMuscusMission::__SetupOwn()
     // TODO 1: first (few?) enemies should fly further into center, to show teleportation better
     // TODO 1: gegner anordnung vor zweiter trail/highspeed gruppe sollte so geändert werden, dass man besser in die nächste gruppe startet
     // TODO 1: verwandlung ist sehr kurz, könnte ok sein, muss dann aber bei boss mehrmals verwendet werden
+    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreUintW iNumData = 14u;
@@ -1801,6 +1806,7 @@ void cMuscusMission::__SetupOwn()
     // TODO 1: bei "quads with different speed" vielleicht die löcher bei letzter stufe etwas breiter machen
     // TODO 1: nochmal alle timings anschauen und anpassen (zeit zwischen mini-stages, länge der mini-stages, länge der steigerungen pro mini-stage)
     // TODO 1: fix rotating and crashing enemies having unintended symmetric direction
+    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         constexpr coreUintW iNumEnemies = 40u;
@@ -2267,6 +2273,7 @@ void cMuscusMission::__SetupOwn()
     // TODO 1: weakpoint rolls around border with high speed, flies like ZeroRanger fast enemies across screen, are like a wall with enemy at center
     // TODO 1: weakpoint dies faster, whole wave needs to be faster
     // TODO 1: actually damage and blink other enemy
+    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         STAGE_ADD_PATH(pPath1)

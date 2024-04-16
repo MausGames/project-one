@@ -28,7 +28,7 @@ cMossBackground::cMossBackground()noexcept
     this->__InitOwn();
 
     // create outdoor-surface object
-    m_pOutdoor = new cOutdoor("moss", "blood", 5u, 4.5f);
+    m_pOutdoor = new cOutdoor("moss", "blood", OUTDOOR_ALGORITHM_MOSS, 4.5f, false);
 
     // 
     pList1 = new coreBatchList(MOSS_TREE_RESERVE);

@@ -75,6 +75,7 @@ void cGeluMission::__SetupOwn()
     // TODO 1: pEnemy->AimAtPlayerDual((i < 16u || (i >= 80u && i < 96u)) ? ((i / 4u) % 2u) : ((i < 32u || (i >= 40u && i < 72u)) ? ((i / 8u) % 2u) : (i % 2u))).Normalized();
     // TODO 1: what about SetAngle, especially for dungeon ?
     // TODO 1: SQRT2 not necessary ? (both cases) (oh wait, 0.7071 on corner)
+    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     STAGE_MAIN({TAKE_ALWAYS, 0u})
     {
         constexpr coreFloat fDungeonFactor  = 0.095f;
@@ -394,6 +395,8 @@ void cGeluMission::__SetupOwn()
     // TODO 1: handle assert in SetArea (both single and coop)
     // TODO 1: etwas muss blinken oder reagieren bei treffern (e.g. die stacheln ?, eine unsichtbare linie am rand (im spielfield))
     // TODO 1: boss schießt die 4 flügel in den boden und zieht ihn nach oben mit seinen spitzen, spieler muss ihn nach unten schießen, beim rausziehen der flügel werden die spitzen rausgeschossen, X0X0, in zwei wellen
+    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
+    // TODO 1: hard mode: attacking the border creates attacks (stings fly away, and respawn a second later ?)
     STAGE_MAIN({TAKE_ALWAYS, 1u})
     {
         constexpr coreFloat fOffMin = 0.0f;
@@ -931,6 +934,7 @@ void cGeluMission::__SetupOwn()
     // TODO 1: blöcke müssen besser explodieren, e.g. schrumpfen während explosion
     // TODO 1: blöcke müssen besser aussehen (form und farbe) (create better fang model with low-detail version)
     // TODO 1: in tunnel 2. teil, gegner können eh nur zerstört werden wenn man sich in die blauen wellen wagt
+    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     STAGE_MAIN({TAKE_ALWAYS, 2u})
     {
         constexpr coreFloat fStep = 0.44f;
@@ -1399,7 +1403,7 @@ void cGeluMission::__SetupOwn()
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
         {
-            STAGE_LIFETIME(pEnemy, (i == 50u) ? 0.4f : ((i == 51u) ? 0.6f : ((i < 50u) ? 1.0f : 0.8)), (i < 50u) ? (0.25f * I_TO_F(i % 5u) + ((i < 5u) ? 7.0f : 0.0f)) : ((i < 60u) ? ((i == 50u) ? 3.0f : 0.0f) : ((i < 80u) ? (0.4f * I_TO_F(i - 60u)) : 0.0f)))
+            STAGE_LIFETIME(pEnemy, (i == 50u) ? 0.4f : ((i == 51u) ? 0.6f : ((i < 50u) ? 1.0f : 0.8f)), (i < 50u) ? (0.25f * I_TO_F(i % 5u) + ((i < 5u) ? 7.0f : 0.0f)) : ((i < 60u) ? ((i == 50u) ? 3.0f : 0.0f) : ((i < 80u) ? (0.4f * I_TO_F(i - 60u)) : 0.0f)))
 
             const coreSpline2* pPath = (i < 10u) ? pPath3 : ((i < 30u) ? pPath2 : ((i < 50u) ? pPath4 : ((i < 60u) ? pPath5 : pPath1)));
 
@@ -1505,6 +1509,7 @@ void cGeluMission::__SetupOwn()
     // TODO 1: effekt, wenn spieler eine linie entlang-rast
     // TODO 1: in 3. grid, 2/2+2/3 (X/Y, start 0, oben links) is ne todesfalle
     // TODO 1: grüne geschosse kamen nach punktevergabe am ende noch
+    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreFloat fOrbLen = 0.5f;
@@ -1992,6 +1997,7 @@ void cGeluMission::__SetupOwn()
     // TODO 1: sollte nicht über lava sein wegen kontrast der blöcke
     // TWIST: (boss?) line of blocks fom left and right at the same time, but with different direction, can crush player
     // TWIST: lines from the bottom
+    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
         constexpr coreFloat fStep      = 0.36f;
@@ -2379,6 +2385,7 @@ void cGeluMission::__SetupOwn()
     // TODO 1: SCHAU ob man eine andere mechanik von der liste rein-mergen kann ####################################################
     // TODO 1: fixe position, wie minenfeld, ferne gegner greifen an
     // TODO 1: add bouncy ball, which enemies evade
+    // TODO 1: MAIN: helper, easy, hard (decision), coop, [extra], 3 badges, enemy health, medal goal
     if(false) STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         STAGE_ADD_SQUAD(pSquad1, cStarEnemy, 100u)

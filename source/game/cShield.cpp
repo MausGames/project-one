@@ -18,7 +18,7 @@ cShieldEffect::cShieldEffect()noexcept
 {
 #if !defined(_P1_VIDEO_)
     // 
-    g_pGlow->BindList(&m_ShieldList);
+    //g_pGlow->BindList(&m_ShieldList);
 #endif
 }
 
@@ -29,7 +29,7 @@ cShieldEffect::~cShieldEffect()
 {
 #if !defined(_P1_VIDEO_)
     // 
-    g_pGlow->UnbindList(&m_ShieldList);
+    //g_pGlow->UnbindList(&m_ShieldList);
 #endif
 }
 
@@ -179,9 +179,9 @@ cShieldManager::cShieldManager()noexcept
 void cShieldManager::Render()
 {
 #if !defined(_P1_VIDEO_)
-    // 
-    for(coreUintW i = 0u; i < SHIELD_EFFECTS; ++i)
-        m_aShieldEffect[i].Render();
+    //
+    //for(coreUintW i = 0u; i < SHIELD_EFFECTS; ++i)
+    //    m_aShieldEffect[i].Render();
 #endif
 }
 
@@ -190,7 +190,7 @@ void cShieldManager::Render()
 // move the shield manager
 void cShieldManager::Move()
 {
-    // 
+    //
     for(coreUintW i = 0u; i < SHIELD_EFFECTS; ++i)
         m_aShieldEffect[i].Move();
 }

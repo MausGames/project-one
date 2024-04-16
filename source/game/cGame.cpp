@@ -77,6 +77,16 @@ cGame::cGame(const sGameOptions oOptions, const coreInt32* piMissionList, const 
 
     // 
     g_pSave->SaveFile();
+
+#if defined(_CORE_DEBUG_)
+
+    // 
+    for(coreUintW i = 0u; i < iNumMissions; ++i)
+        for(coreUintW j = i+1u; j < iNumMissions; ++j)
+            ASSERT((m_piMissionList[i] != m_piMissionList[j]) ||
+                   (m_piMissionList[i] == cNoMission::ID))
+
+#endif
 }
 
 

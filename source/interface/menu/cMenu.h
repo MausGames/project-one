@@ -13,7 +13,7 @@
 // TODO 1: menu control with keyboard+joystick, cursor gets invisible on these inputs
 // TODO 1: short YES-no questions: Exit Game ? Return to Menu ?
 // TODO 5: move mouse to buttons on joystick-input
-// TODO 1: real-time sound-configuration
+// TODO 1: real-time sound-configuration (also quick left-right sound effect on 3d-sound option)
 // TODO 1: score-menu names are restricted to characters from the text-board
 // TODO 3: score-menu names must be sanitized
 // TODO 3: unload fonts currently not used (e.g. from score-menu)
@@ -202,6 +202,7 @@ enum eEntry : coreUint8
     ENTRY_AUDIO_MUSICVOLUME,
     ENTRY_AUDIO_EFFECTVOLUME,
     ENTRY_AUDIO_AMBIENTVOLUME,
+    ENTRY_AUDIO_3DSOUND,
     ENTRY_AUDIO,
 
     ENTRY_INPUT_TYPE = ENTRY_AUDIO,
@@ -635,6 +636,7 @@ private:
     cGuiSwitchBox m_MusicVolume;
     cGuiSwitchBox m_EffectVolume;
     cGuiSwitchBox m_AmbientVolume;
+    cGuiSwitchBox m_3DSound;
     cGuiSwitchBox m_Language;
     cGuiSwitchBox m_TextSize;
     cGuiSwitchBox m_GameRotation;
