@@ -34,6 +34,16 @@ cCreditRoll::cCreditRoll()noexcept
     m_ViewBox.BindObject(&m_GameLogo);
 
     // 
+    m_GameLogoKana.DefineTexture(0u, "game_logo_kana.png");
+    m_GameLogoKana.DefineProgram("default_2d_program");
+    m_GameLogoKana.SetPosition  (m_GameLogo.GetPosition() + coreVector2(0.0f,-0.1f) * (0.7f/0.8f));
+    m_GameLogoKana.SetSize      (coreVector2(2.0f,0.25f) * 0.3f * (0.7f/0.8f));
+    m_GameLogoKana.SetColor3    (COLOR_MENU_INSIDE);
+    m_GameLogoKana.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
+
+    m_ViewBox.BindObject(&m_GameLogoKana);
+
+    // 
     for(coreUintW i = 0u; i < CREDIT_ENTRIES; ++i)
     {
         const coreFloat fHeight = I_TO_F(i) * -0.15f - fWait + 0.05f;
@@ -160,8 +170,8 @@ void cCreditRoll::Move()
     for(coreUintW i = 0u; i < CREDIT_HEADERS; ++i) m_aOtherHeader[i].SetColor3(vColor);
 
     // 
-    const coreFloat fSpeed = (Core::Input->GetMouseButton(CORE_INPUT_LEFT, CORE_INPUT_HOLD) || HAS_BIT(g_TotalInput.iActionHold, PLAYER_ACTION_SHOOT(0u, 0u))) ? 6.0f : 1.0f;
-    m_fOffset.Update(0.1f * fSpeed);
+    const coreFloat fSpeed = (Core::Input->GetMouseButton(CORE_INPUT_LEFT, CORE_INPUT_HOLD) || HAS_BIT(g_TotalInput.iActionHold, PLAYER_ACTION_SHOOT(0u, 0u)) || (!g_TotalInput.vMove.IsNull() && SameDirection90(g_TotalInput.vMove, coreVector2(0.0f,-1.0f)))) ? 6.0f : 1.0f;
+    m_fOffset.Update(0.105f * fSpeed);
 
     // 
     m_bFinished = (m_fOffset >= m_fMaxOffset) && (m_eType == CREDIT_TYPE_MENU);
@@ -181,6 +191,7 @@ void cCreditRoll::Move()
         for(coreUintW i = 0u; i < iNum; ++i) nCullFunc(&pLabel[i], fRange);
     };
     nCullFunc    (&m_GameLogo,       1.3f);
+    nCullFunc    (&m_GameLogoKana,   1.3f);
     nCullListFunc(m_aName,           1.1f, CREDIT_ENTRIES);
     nCullListFunc(m_aDescription,    1.1f, CREDIT_ENTRIES);
     nCullListFunc(m_aSupportText,    1.1f, ARRAY_SIZE(m_aSupportText));
@@ -348,4 +359,11 @@ void cCreditRoll::Start(const eCreditType eType)
     // 
     m_ViewBox.SetOffset(coreVector2(0.0f,0.0f));
     m_ViewBox.Move();
+}
+
+
+// ****************************************************************
+// 
+void cCreditRoll::End()
+{
 }

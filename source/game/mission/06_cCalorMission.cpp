@@ -244,6 +244,7 @@ cCalorMission::cCalorMission()noexcept
             "environment_block_norm.png",
             "environment_clouds_blue.png",
             "environment_clouds_high.png",
+            "environment_clouds_mid.png",
             "environment_plant.png",
             "environment_snow_diff.png",
             "environment_water_norm.png",
@@ -1172,7 +1173,7 @@ void cCalorMission::__MoveOwnAfter()
 
         // 
         const coreVector2 vDir    = coreVector2::Direction((I_TO_F(i) / I_TO_F(CALOR_LOADS)) * (2.0f*PI)).InvertedX();
-        const coreFloat   fScale  = CLAMP(m_afLoadPower[0] - I_TO_F(i), 0.0f, 1.0f);
+        const coreFloat   fScale  = CLAMP01(m_afLoadPower[0] - I_TO_F(i));
         const coreFloat   fOffset = I_TO_F(i) * (1.0f/12.0f);
 
         // 
@@ -1345,7 +1346,7 @@ void cCalorMission::__MoveOwnAfter()
             // 
             m_aAimSphere[i].SetSize     (coreVector3(1.0f,1.0f,1.0f) * 7.0f * LERP(2.0f, 0.0f, fTime));
             m_aAimSphere[i].SetTexOffset(coreVector2(0.0f, m_fAnimation + fOffset));
-            m_aAimSphere[i].SetAlpha    (BLENDH3(m_fAimAlpha) * LERP(0.0f, 1.0f, fTime));
+            m_aAimSphere[i].SetAlpha    (BLENDH3(m_fAimAlpha) * fTime);
             m_aAimSphere[i].Move();
         }
     }

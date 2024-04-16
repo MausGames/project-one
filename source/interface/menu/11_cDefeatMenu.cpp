@@ -130,7 +130,7 @@ void cDefeatMenu::Move()
                 }
 
                 // 
-                m_ContinueTimer.SetText(PRINT("%.0f", MAX(FLOOR(m_fCountdown.ToFloat()), 0.0f)));
+                m_ContinueTimer.SetText(PRINT("%.0f", MAX0(FLOOR(m_fCountdown.ToFloat()))));
 
                 // 
                 if((fOldCountdown >= 0.0f) && (fOldCountdown < 11.0f) && (F_TO_SI(fOldCountdown) != F_TO_SI(m_fCountdown)))
@@ -162,7 +162,7 @@ void cDefeatMenu::Move()
                     // 
                     cGuiObject&       oTarget = m_ContinueImage[iContinues - 1u];
                     const cGuiObject& oSource = m_ContinueImage[iContinues % MENU_DEFEAT_CONTINUES];
-                    oTarget.SetPosition(coreVector2(oTarget.GetPosition().x, oSource.GetPosition().y + s_Spline.CalcPositionLerp(LERPBR(0.0f, 1.0f, MIN(m_fBurst, 1.0f))).y));
+                    oTarget.SetPosition(coreVector2(oTarget.GetPosition().x, oSource.GetPosition().y + s_Spline.CalcPositionLerp(BLENDBR(MIN1(m_fBurst))).y));
 
                     STATIC_ASSERT(MENU_DEFEAT_CONTINUES > 1u)
                 }
@@ -230,7 +230,7 @@ void cDefeatMenu::Move()
     }
 
     // 
-    g_pPostProcessing->SetSaturationAll(MIN(m_fOutroTimer * MENU_DEFEAT_BANNER_SPEED, 1.0f));
+    g_pPostProcessing->SetSaturationAll(MIN1(m_fOutroTimer * MENU_DEFEAT_BANNER_SPEED));
 }
 
 

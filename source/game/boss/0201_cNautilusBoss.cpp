@@ -209,10 +209,10 @@ void cNautilusBoss::__MoveOwn()
         {
             const coreFloat fSpinSign = m_aiCounter[SPIN_SIDE] ? -1.0f : 1.0f;
 
-            if(PHASE_TIME_BEFORE(0.5f)) this->DefaultMoveLerp(m_vLastPosition,        coreVector2(0.0f,0.0f),  LERPS(0.0f, 1.0f, (fTime)      * 2.0f));
-                                   else this->DefaultMoveLerp(coreVector2(0.0f,0.0f), coreVector2(0.0f,0.75f), LERPS(0.0f, 1.0f, (fTime-0.5f) * 2.0f));
+            if(PHASE_TIME_BEFORE(0.5f)) this->DefaultMoveLerp(m_vLastPosition,        coreVector2(0.0f,0.0f),  BLENDS((fTime)      * 2.0f));
+                                   else this->DefaultMoveLerp(coreVector2(0.0f,0.0f), coreVector2(0.0f,0.75f), BLENDS((fTime-0.5f) * 2.0f));
 
-            this->DefaultRotateLerp(0.0f*PI, fSpinSign * 31.0f*PI, LERPS(0.0f, 1.0f, fTime));
+            this->DefaultRotateLerp(0.0f*PI, fSpinSign * 31.0f*PI, BLENDS(fTime));
 
             if(PHASE_TIME_POINT(0.5f))
             {
@@ -349,7 +349,7 @@ void cNautilusBoss::__MoveOwn()
             {
                 if(PHASE_TIME_AFTER(0.2f))
                 {
-                    const coreFloat fDelayTime = LERPS(0.0f, 1.0f, (fTime - 0.2f) / 0.8f);
+                    const coreFloat fDelayTime = BLENDS((fTime - 0.2f) / 0.8f);
 
                     this->DefaultMoveLerp    (m_vLastPosition,                         coreVector2(m_vLastPosition.x, m_aiCounter[DASH_SIDE] ? 0.75f : -0.75f), fDelayTime);
                     if(!m_aiCounter[DASH_SIDE]) this->DefaultMultiateLerp(m_aiCounter[DASH_SIDE] ? (2.0f*PI) : (1.0f*PI), m_aiCounter[DASH_SIDE] ? (3.0f*PI) : (2.0f*PI),                fDelayTime);  
@@ -374,7 +374,7 @@ void cNautilusBoss::__MoveOwn()
         PHASE_CONTROL_TIMER(0u, 0.7f, LERP_LINEAR)
         {
             this->DefaultMoveLerp    (m_vLastPosition, (pContainer->GetPosition().xy() - NAUTILUS_ATTACH_DIST * this->GetDirection().xy()) / FOREGROUND_AREA, BLENDB(fTime));
-            //this->DefaultRotateLerp(1.0f*PI,               0.0f*PI, LERPS(0.0f, 1.0f, fTime));
+            //this->DefaultRotateLerp(1.0f*PI,               0.0f*PI, BLENDS(fTime));
 
             m_fClawAngle = SIN(PI * fTime);
 
@@ -493,7 +493,7 @@ void cNautilusBoss::__MoveOwn()
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_afInkAlpha); ++i)
     {
         m_afInkAlpha[i].Update(-1.0f);
-        g_pWindscreen->GetInk()->SetBlotAlpha(i, CLAMP(MIN(m_afInkAlpha[i], NAUTILUS_INK_TIME - m_afInkAlpha[i]) * NAUTILUS_INK_SPEED, 0.0f, 1.0f));
+        g_pWindscreen->GetInk()->SetBlotAlpha(i, CLAMP01(MIN(m_afInkAlpha[i], NAUTILUS_INK_TIME - m_afInkAlpha[i]) * NAUTILUS_INK_SPEED));
     }
 
     // TODO 1: line movement 

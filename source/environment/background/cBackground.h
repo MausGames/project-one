@@ -22,7 +22,7 @@
 // TODO 3: provide own memory pool for temporary additional objects (remove MANAGED_), also WindScreen
 // TODO 3: expose pool-allocator for additional objects (AddList), also WindScreen
 // TODO 2: popping artifacts with shadow in sea-background (configurable view-range ? per list ? auto per height ?)
-// TODO 3: calls to pList->MoveNormal(); may be redundant
+// TODO 3: calls to pList->MoveNormal(); may be redundant, or can be replaced with normal move if not changing enabled
 // TODO 3: stomach should not create all vertices
 // TODO 3: EnableShadowRead only if appropriate ground objects would be rendered (IsInstanced)
 // TODO 5: grass+blood and sand+snow (norm) textures are duplicated (especially normal maps), proxies are not possible, because files are loaded directly
@@ -63,8 +63,10 @@
 #define GRASS_FLOWER_RESERVE    (1024u)
 #define GRASS_LEAF_NUM          (2048u)
 #define GRASS_LEAF_RESERVE      (512u)
-#define GRASS_CLOUD_NUM         (64u * 10u)
-#define GRASS_CLOUD_RESERVE     (76u * 10u)   // # exact
+#define GRASS_CLOUD_1_NUM       (64u)
+#define GRASS_CLOUD_1_RESERVE   (76u)   // # exact
+#define GRASS_CLOUD_2_NUM       (64u * 10u)
+#define GRASS_CLOUD_2_RESERVE   (76u * 10u)   // # exact
 
 #define SEA_CORAL_NUM           (2048u)
 #define SEA_CORAL_1_RESERVE     (256u)
@@ -110,8 +112,10 @@
 #define SNOW_STING_2_NUM        (3072u)
 #define SNOW_STING_1_RESERVE    (768u)
 #define SNOW_STING_2_RESERVE    (768u)
-#define SNOW_CLOUD_NUM          (128u)
-#define SNOW_CLOUD_RESERVE      (152u)   // # exact
+#define SNOW_CLOUD_1_NUM        (128u)
+#define SNOW_CLOUD_1_RESERVE    (152u)   // # exact
+#define SNOW_CLOUD_2_NUM        (64u)
+#define SNOW_CLOUD_2_RESERVE    (76u)   // # exact
 #define SNOW_SNOW_NUM           (12u)
 
 #define MOSS_TREE_NUM           (1536u)
@@ -135,8 +139,8 @@
 #define STOMACH_CLOUD_NUM       (256u)
 #define STOMACH_CLOUD_RESERVE   (304u)   // # exact
 
-#define CLOUD_CLOUD_NUM         (1024u)
-#define CLOUD_CLOUD_RESERVE     (1216u)   // # exact
+#define CLOUD_CLOUD_NUM         (1280u)
+#define CLOUD_CLOUD_RESERVE     (1520u)   // # exact
 #define CLOUD_RAIN_NUM          (6u)
 
 
@@ -268,8 +272,11 @@ private:
     coreFlow  m_fLeafTime;       // 
     coreUintW m_iLeafNum;        // 
 
+    coreFullscreen m_Cover;       // 
+    coreFlow       m_fOffset;     // 
+
     coreSoundPtr m_pBaseSound;   // base sound-effect
-    coreSpinLock m_Loaded;       // 
+    coreAtomic<coreUint8> m_Loaded;       // 
 
 
 public:
@@ -279,12 +286,16 @@ public:
     DISABLE_COPY(cGrassBackground)
     ASSIGN_ID_EX(1, "Grass", COLOR_MENU_GREEN, COLOR_MENU_GREEN, coreVector2(0.75f,0.25f))
 
+    // 
+    inline void SetCoverAlpha(const coreFloat fAlpha) {m_Cover.SetAlpha(fAlpha);}
+
 
 protected:
     // execute own routines
-    void __InitOwn()final;
-    void __ExitOwn()final;
-    void __MoveOwn()final;
+    void __InitOwn        ()final;
+    void __ExitOwn        ()final;
+    void __RenderOwnBefore()final;
+    void __MoveOwn        ()final;
     
     
     void __UpdateOwn()final;
@@ -306,7 +317,7 @@ private:
     coreBool  m_bOverdrive;      // 
 
     coreSoundPtr m_pBaseSound;   // base sound-effect
-    coreSpinLock m_Loaded;       // 
+    coreAtomic<coreUint8> m_Loaded;       // 
 
 
 public:
@@ -349,7 +360,7 @@ private:
     coreVector2 m_vGroundPos;
 
     coreSoundPtr m_pBaseSound;    // base sound-effect
-    coreSpinLock m_Loaded;        // 
+    coreAtomic<coreUint8> m_Loaded;        // 
 
 
 public:
@@ -398,7 +409,7 @@ private:
     coreVector2  m_vNebulaMove;   // 
 
     coreSoundPtr m_pBaseSound;    // base sound-effect
-    coreSpinLock m_Loaded;        // 
+    coreAtomic<coreUint8> m_Loaded;        // 
 
 
 public:
@@ -442,7 +453,7 @@ private:
     coreUintW m_iSparkNum;          // 
 
     coreSoundPtr m_pBaseSound;   // base sound-effect
-    coreSpinLock m_Loaded;       // 
+    coreAtomic<coreUint8> m_Loaded;       // 
 
 
 public:
@@ -472,7 +483,7 @@ private:
     coreFlow       m_fSnowWave;   // 
 
     coreSoundPtr m_pBaseSound;    // base sound-effect
-    coreSpinLock m_Loaded;        // 
+    coreAtomic<coreUint8> m_Loaded;        // 
 
 
 public:
@@ -513,7 +524,7 @@ private:
     coreUint8    m_iThunderIndex;       // 
 
     coreSoundPtr m_pBaseSound;          // base sound-effect
-    coreSpinLock m_Loaded;              // 
+    coreAtomic<coreUint8> m_Loaded;              // 
 
     cHeadlight m_Headlight;             // 
 
@@ -585,7 +596,7 @@ private:
     coreVector3 m_vColor2;                    // 
 
     coreSoundPtr m_pBaseSound;                // base sound-effect
-    coreSpinLock m_Loaded;                    // 
+    coreAtomic<coreUint8> m_Loaded;                    // 
 
     coreFullscreen m_Lightning;               // 
     coreFlow       m_fLightningFlash;         // 
@@ -653,7 +664,7 @@ private:
     cHeadlight m_Headlight;      // 
 
     coreSoundPtr m_pBaseSound;   // base sound-effect
-    coreSpinLock m_Loaded;       // 
+    coreAtomic<coreUint8> m_Loaded;       // 
 
 
 public:
@@ -689,7 +700,7 @@ private:
     coreFlow       m_fOffset;     // 
 
     coreSoundPtr m_pBaseSound;    // base sound-effect
-    coreSpinLock m_Loaded;        // 
+    coreAtomic<coreUint8> m_Loaded;        // 
 
 
 public:

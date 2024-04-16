@@ -1100,8 +1100,8 @@ void cNevoMission::__MoveOwnAfter()
         }
 
         // 
-        if(pOwner) m_afArrowAlpha[i] = MIN(m_afArrowAlpha[i] + 5.0f*TIME, 1.0f);
-              else m_afArrowAlpha[i] = MAX(m_afArrowAlpha[i] - 5.0f*TIME, 0.0f);
+        if(pOwner) m_afArrowAlpha[i] = MIN1(m_afArrowAlpha[i] + 5.0f*TIME);
+              else m_afArrowAlpha[i] = MAX0(m_afArrowAlpha[i] - 5.0f*TIME);
 
         // 
         if(!m_afArrowAlpha[i]) this->DisableArrow(i, false);
@@ -1147,13 +1147,13 @@ void cNevoMission::__MoveOwnAfter()
 
         // 
         const coreFloat   fValue = FRACT(2.0f * m_fAnimation);
-        const coreFloat   fSize  = m_afBlockScale[i] * (LERPB(0.0f, 1.0f, MIN(fFade, 1.0f)) + LERPB(0.0f, 1.0f, MAX(fFade - 1.0f, 0.0f)));
+        const coreFloat   fSize  = m_afBlockScale[i] * (BLENDB(MIN1(fFade)) + BLENDB(MAX0(fFade - 1.0f)));
         const coreVector2 vDir   = coreVector2::Direction(m_afBlockRota[i]);
 
         // 
         pBlock->SetSize     (coreVector3(fSize, fSize, fFade));
         pBlock->SetDirection(coreVector3(vDir, 0.0f));
-        pBlock->SetAlpha    (MIN(2.0f - fFade, 1.0f));
+        pBlock->SetAlpha    (MIN1(2.0f - fFade));
         pBlock->SetTexOffset(coreVector2(0.0f, FRACT(0.8f * m_fAnimation + 0.15f * I_TO_F(i))));
 
         // 

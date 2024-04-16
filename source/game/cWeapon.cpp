@@ -636,17 +636,18 @@ void cWaveWeapon::__ShootOwn()
     // 
     const coreVector2 vPos = m_pOwner->GetPosition ().xy();
     const coreVector2 vDir = m_pOwner->GetDirection().xy();
+    const coreVector2 vTan = vDir.Rotated90();
 
     // 
     const coreInt32 iSign = m_pOwner->HasStatus(PLAYER_STATUS_HEALER) ? -1 : 1;
     
     cBulletManager* pManager = m_pOwner->HasStatus(PLAYER_STATUS_TOP) ? g_pGame->GetBulletManagerPlayerTop() : g_pGame->GetBulletManagerPlayer();
     
-    const coreVector2 vOffset = vDir * (3.5f * BULLET_SPEED_FACTOR * m_CooldownTimer.GetValue(CORE_TIMER_GET_NORMAL) * RCP(m_CooldownTimer.GetSpeed() * m_pOwner->GetShootSpeed()));
+    const coreVector2 vOffset = vTan * (3.5f * BULLET_SPEED_FACTOR * m_CooldownTimer.GetValue(CORE_TIMER_GET_NORMAL) * RCP(m_CooldownTimer.GetSpeed() * m_pOwner->GetShootSpeed()));
 
     // 
-    this->_MakeWhite(pManager->AddBullet<cSurgeBullet>(1 * iSign, 3.5f, m_pOwner, vPos + vOffset,  vDir))->ChangeScale(0.9f)->ChangeHeight(m_pOwner->GetPosition().z);
-    this->_MakeWhite(pManager->AddBullet<cSurgeBullet>(2 * iSign, 3.5f, m_pOwner, vPos + vOffset, -vDir))->ChangeScale(1.8f)->ChangeHeight(m_pOwner->GetPosition().z);
+    this->_MakeWhite(pManager->AddBullet<cSurgeBullet>(2 * iSign, 3.5f, m_pOwner, vPos + vOffset,  vTan))->ChangeScale(1.8f)->ChangeHeight(m_pOwner->GetPosition().z);
+    this->_MakeWhite(pManager->AddBullet<cSurgeBullet>(2 * iSign, 3.5f, m_pOwner, vPos - vOffset, -vTan))->ChangeScale(1.8f)->ChangeHeight(m_pOwner->GetPosition().z);
 
     // play bullet sound-effect
     g_pSpecialEffects->PlaySound(m_pOwner->GetPosition(), 1.0f, 1.0f, SOUND_WEAPON_RAY);

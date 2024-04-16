@@ -251,6 +251,7 @@ private:
     coreBool   m_bIgnore;                // 
 
     coreAtomic<eSaveStatus> m_eStatus;   // 
+    coreAtomic<coreUint8>   m_iActive;   // 
 
 
 public:
@@ -279,6 +280,7 @@ public:
 
     // 
     inline void ResetStatus() {m_eStatus = SAVE_STATUS_OK;}
+    inline void ResetActive() {if(m_iActive == 2u) m_iActive = 0u;}
 
     // 
     inline void SetIgnore(const coreBool bIgnore) {m_bIgnore = bIgnore;}
@@ -286,6 +288,7 @@ public:
     // 
     inline const sHeader& GetHeader()const {return m_Header;}
     inline eSaveStatus    GetStatus()const {return m_eStatus;}
+    inline coreUint8      GetActive()const {return m_iActive;}
 
 
 private:

@@ -46,6 +46,11 @@
     inline coreVector3 GetColor ()const final {return c;}   \
     inline coreVector3 GetColor2()const final {return d;}   \
     inline coreVector2 GetIcon  ()const final {return o;}
+#define ENABLE_EXTRA                                        \
+    virtual const coreChar* GetExtra()const = 0;
+#define ASSIGN_EXTRA(e)                                     \
+    static constexpr const coreChar* Extra = e;             \
+    inline const coreChar* GetExtra()const final {return e;}
 
 // 
 #define LIST_KEY (CORE_MEMORY_SHARED)
@@ -437,7 +442,7 @@ constexpr FUNC_CONST coreBool SameDirection90(const coreVector2 x, const coreVec
 // 
 constexpr FUNC_CONST coreFloat DelayTime(const coreFloat fTime, const coreFloat fOffset, const coreFloat fLength)
 {
-    return MIN(fTime, fOffset) + MAX(fTime - fOffset - fLength, 0.0f);
+    return MIN(fTime, fOffset) + MAX0(fTime - fOffset - fLength);
 }
 
 

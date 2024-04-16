@@ -1168,7 +1168,7 @@ coreUint32 cGame::CalcBonusTime(const coreFloat fTime, const coreFloat* pfMedalG
     ASSERT(pfMedalGoal && (pfMedalGoal[0] < pfMedalGoal[1]) && (pfMedalGoal[1] < pfMedalGoal[2]) && (pfMedalGoal[2] < pfMedalGoal[3]) && (pfMedalGoal[3] < pfMedalGoal[4]))
 
     // 
-    return F_TO_UI(LERP(20000.0f, 1000.0f, MIN(fTime * RCP(pfMedalGoal[4]), 1.0f)));
+    return F_TO_UI(LERP(20000.0f, 1000.0f, MIN1(fTime * RCP(pfMedalGoal[4]))));
 }
 
 
@@ -1489,7 +1489,7 @@ void cGame::__HandleDefeat()
                 bAllDefeated = bAllDefeated && bDefeated;
 
                 // 
-                g_pPostProcessing->SetSaturation(i, bDefeated ? 0.0f : (1.0f - MIN(pPlayer->GetDesaturate(), 1.0f)));
+                g_pPostProcessing->SetSaturation(i, bDefeated ? 0.0f : (1.0f - MIN1(pPlayer->GetDesaturate())));
 
                 if(this->IsMulti() && bDefeated && !m_pRepairEnemy->GetPlayer())
                 {

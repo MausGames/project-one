@@ -284,8 +284,8 @@ void cBonus1Mission::__MoveOwnAfter()
         if(m_fBeamTime >= 2.0f)
         {
             fAlpha = 1.0f;
-            fScale = 1.0f;//LERP(0.0f, 1.0f, MIN((m_fBeamTime - 2.0f) * 5.0f, 1.0f));
-            fScale2 = LERP(1.0f, 1.0f, MIN((m_fBeamTime - 2.0f) * 6.0f / m_fBeamSpeed, 1.0f));
+            fScale = 1.0f;//LERP(0.0f, 1.0f, MIN1((m_fBeamTime - 2.0f) * 5.0f));
+            fScale2 = 1.0f;//LERP(1.0f, 1.0f, MIN1((m_fBeamTime - 2.0f) * 6.0f / m_fBeamSpeed));
             fSign  = 1.0f;
         }
         else if(m_fBeamTime >= 1.0f)
@@ -297,9 +297,9 @@ void cBonus1Mission::__MoveOwnAfter()
         }
         else if(m_fBeamTime <= -1.0f)
         {
-            fAlpha =  1.0f;//LERP(1.0f, 0.5f, MIN(-m_fBeamTime - 1.0f, 1.0f));
-            fScale2 =  LERP(1.0f, 0.0f, MIN(-m_fBeamTime - 1.0f, 1.0f));
-            //fAlpha =  LERP(1.0f, 0.0f, MIN((-m_fBeamTime - 1.0f) * 5.0f, 1.0f));
+            fAlpha =  1.0f;//LERP(1.0f, 0.5f, MIN1(-m_fBeamTime - 1.0f));
+            fScale2 =  LERP(1.0f, 0.0f, MIN1(-m_fBeamTime - 1.0f));
+            //fAlpha =  LERP(1.0f, 0.0f, MIN1((-m_fBeamTime - 1.0f) * 5.0f));
             //fScale2 =  1.0f;
             fSign  = 1.0f;
         }

@@ -121,8 +121,8 @@
 #define PROJECTONE_COLL_SCALE     (1.1f)                                       // 
 
 #define EIGENGRAU_LAYERS          (4u)                                         // 
-#define EIGENGRAU_PARASITES       (18u)                                        // 
-#define EIGENGRAU_FOLLOWERS       (52u)                                        // 
+#define EIGENGRAU_PARASITES       (1u)//18u)                                        // 
+#define EIGENGRAU_FOLLOWERS       (1u)//52u)                                        // 
 #define EIGENGRAU_DEPTH           (-340.0f)                                    // 
 
 
@@ -204,6 +204,7 @@ public:
 
     DISABLE_COPY(cBoss)
     ENABLE_ID_EX
+    ENABLE_EXTRA
 
     // 
     void ChangePhase(const coreUint8 iPhase);
@@ -278,6 +279,7 @@ public:
 
     DISABLE_COPY(cDharukBoss)
     ASSIGN_ID_EX(101, "DHARUK", COLOR_MENU_RED, COLOR_MENU_RED, coreVector2(-1.0f,-1.0f))
+    ASSIGN_EXTRA("ダルク")
 
     // 
     inline const coreBool& GetHelperEvent()const {return m_bHelperEvent;}
@@ -367,6 +369,7 @@ public:
 
     DISABLE_COPY(cTorusBoss)
     ASSIGN_ID_EX(102, "TORUS", COLOR_MENU_GREEN, COLOR_MENU_GREEN, coreVector2(0.75f,0.25f))
+    ASSIGN_EXTRA("トーラス")
 
     // get object properties
     inline const coreChar* GetMusicName()const final {return "boss_01.ogg";}
@@ -433,6 +436,7 @@ public:
 
     DISABLE_COPY(cVausBoss)
     ASSIGN_ID_EX(103, "VAUS", COLOR_MENU_YELLOW, COLOR_MENU_YELLOW, coreVector2(-1.0f,-1.0f))
+    ASSIGN_EXTRA("バウス")
 
 
 private:
@@ -465,6 +469,7 @@ public:
 
     DISABLE_COPY(cNautilusBoss)
     ASSIGN_ID_EX(201, "NAUTILUS", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
+    ASSIGN_EXTRA("")
 
 
 private:
@@ -493,6 +498,7 @@ public:
 
     DISABLE_COPY(cAmemasuBoss)
     ASSIGN_ID_EX(202, "AMEMASU", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
+    ASSIGN_EXTRA("")
 
 
 private:
@@ -538,6 +544,7 @@ public:
 
     DISABLE_COPY(cLeviathanBoss)
     ASSIGN_ID_EX(203, "LEVIATHAN", COLOR_MENU_CYAN, COLOR_MENU_CYAN, coreVector2(0.5f,0.25f))
+    ASSIGN_EXTRA("レヴィアタン")
 
     // 
     void ResurrectDemo();
@@ -589,6 +596,7 @@ public:
 
     DISABLE_COPY(cUrticaBoss)
     ASSIGN_ID_EX(301, "URTICA", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
+    ASSIGN_EXTRA("")
 
 
 private:
@@ -642,6 +650,7 @@ public:
 
     DISABLE_COPY(cTigerBoss)
     ASSIGN_ID_EX(302, "TIGER MK-III", COLOR_MENU_YELLOW, COLOR_MENU_YELLOW, coreVector2(0.0f,0.0f))
+    ASSIGN_EXTRA("タイガーマーク III")
 
     // 
     inline coreBool ResurrectHelper(const coreUint8 iElement, const coreBool bSmooth)   {return this->_ResurrectHelper(iElement, bSmooth);}
@@ -700,6 +709,7 @@ public:
 
     DISABLE_COPY(cLuciferBoss)
     ASSIGN_ID_EX(303, "L.U.C.I.F.E.R.", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
+    ASSIGN_EXTRA("")
 
 
 private:
@@ -718,6 +728,7 @@ public:
 
     DISABLE_COPY(cQuaternionBoss)
     ASSIGN_ID_EX(401, "QUATERNION", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
+    ASSIGN_EXTRA("")
 
 
 private:
@@ -736,6 +747,7 @@ public:
 
     DISABLE_COPY(cSarosBoss)
     ASSIGN_ID_EX(402, "SAROS", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
+    ASSIGN_EXTRA("")
 
 
 private:
@@ -791,6 +803,7 @@ public:
 
     DISABLE_COPY(cMessierBoss)
     ASSIGN_ID_EX(403, "MESSIER 87", COLOR_MENU_MAGENTA, COLOR_MENU_MAGENTA, coreVector2(0.75f,0.0f))
+    ASSIGN_EXTRA("メシエ 87")
 
     // get object properties
     inline const coreChar* GetMusicName   ()const final {return "boss_04.ogg";}
@@ -841,6 +854,7 @@ public:
 
     DISABLE_COPY(cTartarusBoss)
     ASSIGN_ID_EX(501, "TARTARUS", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
+    ASSIGN_EXTRA("")
 
 
 private:
@@ -859,6 +873,7 @@ public:
 
     DISABLE_COPY(cPhalarisBoss)
     ASSIGN_ID_EX(502, "PHALARIS", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
+    ASSIGN_EXTRA("")
 
 
 private:
@@ -904,6 +919,7 @@ public:
 
     DISABLE_COPY(cCholBoss)
     ASSIGN_ID_EX(503, "CHOL", COLOR_MENU_ORANGE, COLOR_MENU_ORANGE, coreVector2(0.25f,0.0f))
+    ASSIGN_EXTRA("コール")
 
     // 
     void ResurrectIntro(const coreUint8 iSub);
@@ -960,6 +976,7 @@ public:
 
     DISABLE_COPY(cFenrirBoss)
     ASSIGN_ID_EX(601, "FENRIR", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
+    ASSIGN_EXTRA("")
 
 
 private:
@@ -978,6 +995,7 @@ public:
 
     DISABLE_COPY(cShelobBoss)
     ASSIGN_ID_EX(602, "SHELOB", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
+    ASSIGN_EXTRA("")
 
 
 private:
@@ -1021,6 +1039,7 @@ public:
 
     DISABLE_COPY(cZerothBoss)
     ASSIGN_ID_EX(603, "ZEROTH", COLOR_MENU_BLUE, COLOR_MENU_BLUE, coreVector2(0.25f,0.25f))
+    ASSIGN_EXTRA("ゼロフ")
 
     // 
     void ResurrectIntro();
@@ -1067,6 +1086,7 @@ public:
 
     DISABLE_COPY(cOrlacBoss)
     ASSIGN_ID_EX(701, "ORLAC", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
+    ASSIGN_EXTRA("")
 
 
 private:
@@ -1106,6 +1126,7 @@ public:
 
     DISABLE_COPY(cGemingaBoss)
     ASSIGN_ID_EX(702, "NAGUAL"/*"GEMINGA"*/, COLOR_MENU_RED, COLOR_MENU_RED, coreVector2(0.5f,0.0f))
+    ASSIGN_EXTRA("ナワル")
 
     // 
     void ResurrectIntro();
@@ -1135,6 +1156,7 @@ public:
 
     DISABLE_COPY(cNagualBoss)
     ASSIGN_ID_EX(703, "NAGUAL", coreVector3(0.0f,0.0f,0.0f), coreVector3(0.0f,0.0f,0.0f), coreVector2(-1.0f,-1.0f))
+    ASSIGN_EXTRA("")
 
 
 private:
@@ -1234,6 +1256,7 @@ public:
 
     DISABLE_COPY(cProjectOneBoss)
     ASSIGN_ID(801, "P1")
+    ASSIGN_EXTRA("")
 
     // get object properties
     inline coreVector3     GetColor    ()const final {return m_vLevelColor;}
@@ -1298,7 +1321,7 @@ private:
 
     // 
     void __SwitchHealth(const coreUintW iIndex);
-    void __SwitchColor (const coreUintW iIndex, const coreBool bWave);
+    void __SwitchColor (const coreUintW iIndex, const coreBool bWave, const coreBool bMenu);
 
     // 
     void __RequestMission(const coreUintW iIndex);
@@ -1363,6 +1386,7 @@ public:
 
     DISABLE_COPY(cEigengrauBoss)
     ASSIGN_ID_EX(802, "EIGENGRAU", COLOR_MENU_WHITE, COLOR_MENU_WHITE, coreVector2(0.0f,0.5f))
+    ASSIGN_EXTRA("アイゲングラウ")
 
     // get object properties
     inline const coreChar* GetMusicName()const final {return "boss_99.ogg";}
@@ -1413,6 +1437,7 @@ public:
 
     DISABLE_COPY(cIntroBoss)
     ASSIGN_ID_EX(9901, "SHINAI", COLOR_MENU_PURPLE, COLOR_MENU_PURPLE, coreVector2(0.0f,0.25f))
+    ASSIGN_EXTRA("シナイ")
 
     // 
     void ResurrectIntro();

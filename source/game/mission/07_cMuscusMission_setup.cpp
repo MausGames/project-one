@@ -806,7 +806,7 @@ void cMuscusMission::__SetupOwn()
 
         const auto nMoveGenerateFunc = [](const coreSpline2* pRawPath, const coreVector2 vFactor, const coreVector2 vRawOffset, const coreFloat fTime)
         {
-            const coreVector2 vPos = pRawPath->CalcPosition(FMOD(MAX(fTime, 0.0f), pRawPath->GetTotalDistance()));
+            const coreVector2 vPos = pRawPath->CalcPosition(FMOD(MAX0(fTime), pRawPath->GetTotalDistance()));
             return coreVector3(((vPos * vFactor) + vRawOffset) * FOREGROUND_AREA, 0.0f);
         };
 
@@ -1405,7 +1405,7 @@ void cMuscusMission::__SetupOwn()
 
         const auto nMovePearlFunc = [](const coreSpline2* pRawPath, const coreVector2 vFactor, const coreVector2 vRawOffset, const coreFloat fTime)
         {
-            const coreVector2 vPos = pRawPath->CalcPosition(FMOD(MAX(fTime, 0.0f), pRawPath->GetTotalDistance()));
+            const coreVector2 vPos = pRawPath->CalcPosition(FMOD(MAX0(fTime), pRawPath->GetTotalDistance()));
             return coreVector3(((vPos * vFactor) + vRawOffset) * FOREGROUND_AREA, 0.0f);
         };
 
@@ -1524,7 +1524,7 @@ void cMuscusMission::__SetupOwn()
 
             if(m_iStageSub == 1u)
             {
-                const coreVector2 vPos = coreVector2((I_TO_F(i) - 6.5f) * 0.15f, SIN(fPearlTime * 1.3f + I_TO_F(i) * 0.15f) + LERPB(1.2f, 0.0f, MIN(fPearlTime * 0.5f, 1.0f)));
+                const coreVector2 vPos = coreVector2((I_TO_F(i) - 6.5f) * 0.15f, SIN(fPearlTime * 1.3f + I_TO_F(i) * 0.15f) + LERPB(1.2f, 0.0f, MIN1(fPearlTime * 0.5f)));
 
                 pPearl->SetPosition(coreVector3(vPos * FOREGROUND_AREA, 0.0f));
             }
@@ -1716,7 +1716,7 @@ void cMuscusMission::__SetupOwn()
         {
             STAGE_LIFETIME(pEnemy, 1.0f, 0.0f)
 
-            fEnemyTime = MIN(fEnemyTime + 0.6f * TIME, 1.0f);
+            fEnemyTime = MIN1(fEnemyTime + 0.6f * TIME);
 
             if(m_iStageSub == 1u)
             {
@@ -2843,7 +2843,7 @@ void cMuscusMission::__SetupOwn()
                 iLegionCount += 1u;
             }
 
-            vLegionTarget = LERPH3(vLegionPos.xy(), vLegionPos.zw(), CLAMP(2.0f - fLegionTime, 0.0f, 1.0f));
+            vLegionTarget = LERPH3(vLegionPos.xy(), vLegionPos.zw(), CLAMP01(2.0f - fLegionTime));
         }
 
         cHelper* pHelper = g_pGame->GetHelper(ELEMENT_RED);

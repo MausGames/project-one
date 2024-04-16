@@ -2366,6 +2366,16 @@ void cHarenaMission::__SetupOwn()
                      if(i ==  3u) pEnemy->Rotate90 ();
                 else if(i == 12u) pEnemy->Rotate270();
                 else if(i == 13u) pEnemy->Rotate180();
+
+                if(i < 3u)
+                {
+                    pEnemy->SetDirection(coreVector3(pEnemy->AimAtPlayerDual((i % 2u) ? 0u : 1u).Normalized(), 0.0f));
+                }
+                else
+                {
+                    const coreFloat fBase = pEnemy->GetDirection().xy().Angle();
+                    pEnemy->DefaultRotateLerp(fBase + (0.0f*PI), fBase + (2.0f*PI), BLENDB(CLAMP01(fLifeTime * RCP(pPath1->GetTotalDistance()))));
+                }
             }
             else
             {
@@ -2379,7 +2389,7 @@ void cHarenaMission::__SetupOwn()
                     cEnemy*         pChild = nTakeChildFunc(0u);
                     const coreUintW iIndex = pSquad2->GetIndex(pChild);
 
-                    const coreVector2 vAim = pEnemy->AimAtPlayerDual((i % 2u) ? 0u : 1u).Normalized();
+                    const coreVector2 vAim = pEnemy->GetDirection().xy();
                     const coreVector2 vDir = (vAim + vAim.Rotated90() * (0.05f * ((s_iTick % 2u) ? -1.0f : 1.0f))).Normalized();
 
                     pChild->SetPosition(pEnemy->GetPosition());
@@ -2502,7 +2512,7 @@ void cHarenaMission::__SetupOwn()
             else if(iType >= 4u)   // shield
             {
                 const coreVector2 vCenter = pSquad1->GetEnemy(iType >> 2u)->GetPosition().xy();
-                const coreFloat   fLen    = LERPB(0.0f, vRaw.y, MIN(fLifeTime * (((m_iStageSub == 8u) || (m_iStageSub == 10u)) ? 0.45f : 1.0f), 1.0f));
+                const coreFloat   fLen    = LERPB(0.0f, vRaw.y, MIN1(fLifeTime * (((m_iStageSub == 8u) || (m_iStageSub == 10u)) ? 0.45f : 1.0f)));
 
                 vRaw.x = FMOD(vRaw.x + 1.0f * TIME * SIGN(vRaw.x), 2.0f*PI);
 

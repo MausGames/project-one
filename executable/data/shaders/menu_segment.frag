@@ -11,7 +11,7 @@
 void FragmentMain()
 {
     // 
-    float v1Intensity = 1.03 - coreLengthSq(v_av2TexCoord[1]) * 0.06;
+    float v1Intensity = 1.04 - coreLengthSq(v_av2TexCoord[1]) * 0.08;
 
     // draw only single channel (as color)
     float v1Value = coreTexture2D(0, v_av2TexCoord[0]).r;

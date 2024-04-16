@@ -575,7 +575,7 @@ void cTimeTable::StartBoss()
 coreFloat cTimeTable::GetTimeSegmentSafe(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)const
 {
     // 
-    return (iSegmentIndex != MISSION_NO_SEGMENT) ? MAX(this->GetTimeSegment(iMissionIndex, iSegmentIndex), 0.0f) : 0.0f;
+    return (iSegmentIndex != MISSION_NO_SEGMENT) ? MAX0(this->GetTimeSegment(iMissionIndex, iSegmentIndex)) : 0.0f;
 }
 
 coreFloat cTimeTable::GetTimeSegmentSafe()const

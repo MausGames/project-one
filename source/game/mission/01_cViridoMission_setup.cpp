@@ -48,12 +48,14 @@ void cViridoMission::__SetupOwn()
     {
         cGrassBackground* pBackground = d_cast<cGrassBackground*>(g_pEnvironment->GetBackground());
 
-        pBackground->GetOutdoor()->LerpHeightNow(0.4583f, -13.83f);
+        pBackground->SetCoverAlpha(1.0f);
+
         pBackground->SetGroundDensity(0u, 0.0f);
         pBackground->SetGroundDensity(1u, 0.0f);
+        pBackground->SetGroundDensity(2u, 0.0f);
         pBackground->SetGroundDensity(3u, 1.0f);
         pBackground->SetDecalDensity (0u, 0.0f);
-        pBackground->SetAirDensity   (1u, 1.0f);
+        pBackground->SetAirDensity   (2u, 1.0f);
 
         STAGE_FINISH_NOW
     });
@@ -616,6 +618,8 @@ void cViridoMission::__SetupOwn()
 
         cGrassBackground* pBackground = d_cast<cGrassBackground*>(g_pEnvironment->GetBackground());
 
+        pBackground->SetCoverAlpha(1.0f - STEPH3(0.5f, 3.5f, m_fStageTime));
+
         if(STAGE_BEGINNING)
         {
             pBackground->GetOutdoor()->LerpHeight(1.0f, 0.0f, 50u);
@@ -623,11 +627,12 @@ void cViridoMission::__SetupOwn()
 
         const coreFloat fEnvLerp = pBackground->GetOutdoor()->GetLerp();
 
-        pBackground->SetGroundDensity(0u, STEP(0.5f, 1.0f, fEnvLerp));
-        pBackground->SetGroundDensity(1u, STEP(0.5f, 1.0f, fEnvLerp));
-        pBackground->SetGroundDensity(3u, STEP(0.5f, 1.0f, 1.0f - fEnvLerp));
-        pBackground->SetDecalDensity (0u, STEP(0.5f, 1.0f, fEnvLerp));
-        pBackground->SetAirDensity   (1u, LERP(1.0f, 0.1f, STEP(0.5f, 1.0f, fEnvLerp)));
+        pBackground->SetGroundDensity(0u, STEP(0.0f, 0.1f, fEnvLerp));
+        pBackground->SetGroundDensity(1u, STEP(0.0f, 0.1f, fEnvLerp));
+        pBackground->SetGroundDensity(2u, STEP(0.0f, 0.1f, fEnvLerp));
+        pBackground->SetGroundDensity(3u, STEP(0.0f, 0.5f, 1.0f - fEnvLerp));
+        pBackground->SetDecalDensity (0u, STEP(0.0f, 0.1f, fEnvLerp));
+        pBackground->SetAirDensity   (2u, STEP(0.9f, 1.0f, 1.0f - fEnvLerp));
 
         STAGE_WAVE(0u, "1-1", {35.0f, 50.0f, 70.0f, 85.0f, 170.0f})   // EINS
     },
@@ -657,12 +662,15 @@ void cViridoMission::__SetupOwn()
     {
         cGrassBackground* pBackground = d_cast<cGrassBackground*>(g_pEnvironment->GetBackground());
 
+        pBackground->SetCoverAlpha(0.0f);
+
         pBackground->GetOutdoor()->LerpHeightNow(1.0f, 0.0f);
         pBackground->SetGroundDensity(0u, 1.0f);
         pBackground->SetGroundDensity(1u, 1.0f);
+        pBackground->SetGroundDensity(2u, 1.0f);
         pBackground->SetGroundDensity(3u, 0.0f);
         pBackground->SetDecalDensity (0u, 1.0f);
-        pBackground->SetAirDensity   (1u, 0.1f);
+        pBackground->SetAirDensity   (2u, 0.0f);
 
         STAGE_FINISH_NOW
     });
@@ -2593,8 +2601,8 @@ void cViridoMission::__SetupOwn()
             vNewPos = LERPB(vNewRefPos, vNewPos, MIN1(fLifeTime * 0.5f));
 
                  if(i >= 28u && i < 36u) vNewPos.x = FmodRange(vNewPos.x, -1.2f, 1.2f);
-            else if(i >= 36u && i < 42u) vNewPos.y = LERP(1.25f, -1.25f, FRACT(MAX(fLifeTime * 0.5f,                           0.0f)));
-            else if(i >= 42u && i < 46u) vNewPos.x = LERP(1.25f, -1.25f, FRACT(MAX(fLifeTime * 0.6f - I_TO_F(i - 42u) * 0.25f, 0.0f)));
+            else if(i >= 36u && i < 42u) vNewPos.y = LERP(1.25f, -1.25f, FRACT(MAX0(fLifeTime * 0.5f)));
+            else if(i >= 42u && i < 46u) vNewPos.x = LERP(1.25f, -1.25f, FRACT(MAX0(fLifeTime * 0.6f - I_TO_F(i - 42u) * 0.25f)));
 
             pEnemy->SetPosition (coreVector3(vNewPos * FOREGROUND_AREA, 0.0f));
             pEnemy->SetDirection(coreVector3(vNewDir * -1.0f,           0.0f));
@@ -2753,6 +2761,7 @@ void cViridoMission::__SetupOwn()
     // TODO 1: shrinking enemies have different attack (single dense wave)
     // TODO 1: multiple enemies are attached to each other and will grow independently
     // TODO 1: MAIN: task-check, helper, easy, hard idea, coop, regular score, extra score, badges, medal goal, juiciness (move, rota, muzzle, effects), auf boss übertragen (general, easy, coop), sound, attack size/count/speed, enemy size, object size, background rota/speed
+    // TODO 1: enemies are big player small, then enemis are small player big
     STAGE_MAIN({TAKE_ALWAYS, 5u})
     {
         STAGE_ADD_SQUAD(pSquad1, cStarEnemy, 90u)                       

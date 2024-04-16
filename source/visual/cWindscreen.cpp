@@ -64,7 +64,7 @@ void cWindscreen::Move()
                 if(fNewLifeTime > 0.0f)
                 {
                     // 
-                    (*it)->SetAlpha (MIN(fNewLifeTime, 1.0f));
+                    (*it)->SetAlpha (MIN1(fNewLifeTime));
                     (*it)->SetStatus(coreMath::FloatToBits(fNewLifeTime));
                     DYN_KEEP(it, *papObject)
                 }
@@ -137,7 +137,7 @@ void cWindscreen::ClearAdds(const coreBool bAnimated)
         // 
         FOR_EACH(it, m_apAddList)
         {
-            FOR_EACH(et, *(*it)->List()) (*et)->SetStatus(coreMath::FloatToBits(MIN(coreMath::BitsToFloat((*et)->GetStatus()), 1.0f)));
+            FOR_EACH(et, *(*it)->List()) (*et)->SetStatus(coreMath::FloatToBits(MIN1(coreMath::BitsToFloat((*et)->GetStatus()))));
         }
     }
     else

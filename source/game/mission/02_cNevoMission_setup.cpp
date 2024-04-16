@@ -440,7 +440,7 @@ void cNevoMission::__SetupOwn()
         }
         else if(m_iStageSub >= 14u)
         {
-            fWhirlSpeed = MIN(fWhirlSpeed + 0.3f * TIME, 1.0f);
+            fWhirlSpeed = MIN1(fWhirlSpeed + 0.3f * TIME);
 
             const coreMatrix2 mRota    = coreMatrix3::Rotation(LERPS(0.0f, 0.7f, fWhirlSpeed) * TIME).m12();
             const coreMatrix2 mRotaRev = mRota.Transposed();

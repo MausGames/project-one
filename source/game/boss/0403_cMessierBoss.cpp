@@ -610,10 +610,10 @@ void cMessierBoss::__MoveOwn()
             this->_ResurrectHelper(ELEMENT_YELLOW, false);
         }
 
-        const coreFloat fAngle = LERPBR(0.05f, 1.0f, STEP(3500.0f, 4700.0f, I_TO_F(this->GetCurHealth()))) * 24.0f;
-
         PHASE_CONTROL_TICKER(1u, 0u, g_pGame->IsEasy() ? 0.7f : 1.3f, LERP_LINEAR)
         {
+            const coreFloat fAngle = ((((iTick % 3u) == 2u) || (this->GetCurHealth() < 4000)) ? 0.05f : 0.7f) * 24.0f;
+
             const coreVector2 vPos  = this->GetPosition().xy();
             const coreFloat   fBase = this->AimAtPlayerDual((iTick / 2u) % 2u).Angle();
 
@@ -813,7 +813,7 @@ void cMessierBoss::__MoveOwn()
         }
 
         const coreFloat A = 1.3f;
-        pMission->SetAreaScale(ParaLerp(1.0f, 0.8f, 4.2f * A, BLENDH3(MIN(m_fPhaseTime * 0.85f / A, 1.0f))));
+        pMission->SetAreaScale(ParaLerp(1.0f, 0.8f, 4.2f * A, BLENDH3(MIN1(m_fPhaseTime * 0.85f / A))));
 
         if(PHASE_MAINTIME_POINT(10.0f))
         {
@@ -1142,14 +1142,14 @@ void cMessierBoss::__MoveOwn()
     {
         PHASE_CONTROL_TIMER(4u, 0.3f, LERP_LINEAR)
         {
-            m_fTimeFactor = LERPH3(1.0f, -1.0f, CLAMP(fTime, 0.0f, 1.0f));
+            m_fTimeFactor = LERPH3(1.0f, -1.0f, fTime);
         });
     }
     else if(m_iTimeRevert == 2u)
     {
         PHASE_CONTROL_TIMER(4u, 1.0f, LERP_LINEAR)
         {
-            m_fTimeFactor = LERPH3(-1.0f, 0.0f, CLAMP(fTime, 0.0f, 1.0f));
+            m_fTimeFactor = LERPH3(-1.0f, 0.0f, fTime);
         });
     }
     else

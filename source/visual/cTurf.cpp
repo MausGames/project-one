@@ -40,7 +40,7 @@ void cTurf::Move()
 {
     if(!m_fVisibility) return;
     
-    this->SetColor3(coreVector3(LERPH3(0.0f, 1.0f, MIN(m_fFlash * 1.3f, 1.0f)), 0.0f, 0.0f));
+    this->SetColor3(coreVector3(LERPH3(0.0f, 1.0f, MIN1(m_fFlash * 1.3f)), 0.0f, 0.0f));
     m_fFlash.UpdateMax(-1.0f, 0.0f);
 
     // 

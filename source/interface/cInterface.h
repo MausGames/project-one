@@ -10,7 +10,7 @@
 #ifndef _P1_GUARD_INTERFACE_H_
 #define _P1_GUARD_INTERFACE_H_
 
-// TODO 2: realtime language update (also combat text, LUCKY, HIT, etc.), boss-titles, mission-titles, time-bonus
+// TODO 2: realtime language update (also combat text, LUCKY, HIT, etc.), boss-titles, mission-titles, time-bonus, japanese text
 // TODO 3: MENU_INSIDE_ALPHA should only be used with inside-hud
 // TODO 4: merge wave time and boss time if possible
 // TODO 3: add animation to combo bar, combo value, score (consider sustained fire on boss, e.g. on Eigengrau)
@@ -34,6 +34,7 @@
 #define INTERFACE_BANNER_DURATION_BOSS    (3.7f)           // display duration (with fading)  
 #define INTERFACE_BANNER_DURATION_SCORE   (5.0f)           // 
 #define INTERFACE_BANNER_DURATION_ALERT   (3.5f)           // 
+#define INTERFACE_BANNER_HEIGHT           (0.03f)          // 
 
 #define INTERFACE_BANNER_TYPE_MISSION     (0u)             // mission banner type
 #define INTERFACE_BANNER_TYPE_BOSS        (1u)             // boss banner type
@@ -114,6 +115,7 @@ private:
     cGuiObject m_aBannerIcon[2];                    // 
     cGuiLabel  m_aBannerText[4];                    // banner labels
     cGuiLabel  m_BannerExtra;                       // 
+    cGuiObject m_aBannerLogo[2];                    // 
     coreFloat  m_fBannerStart;                      // animation start time
     coreFloat  m_fBannerDuration;                   // 
     coreFloat  m_fBannerSpeed;                      // 
@@ -172,9 +174,9 @@ public:
     void Move();
 
     // control banner animation
-    void ShowMission(const coreChar*  pcMain, const coreChar* pcSub);
+    void ShowMission(const coreChar*  pcMain, const coreChar* pcSub, const coreChar* pcExtra);
     void ShowMission(const cMission*  pMission);
-    void ShowBoss   (const coreChar*  pcMain, const coreChar* pcSub);
+    void ShowBoss   (const coreChar*  pcMain, const coreChar* pcSub, const coreChar* pcExtra);
     void ShowBoss   (const cBoss*     pBoss, const coreBool bSilent = false);
     void ShowWave   (const coreChar*  pcName);
     void ShowScore  (const coreChar*  pcMain, const coreChar* pcSub, const coreUint8 iMedal, const coreUint8 iMedalType);

@@ -530,7 +530,7 @@ void cDharukBoss::__MoveOwn()
                 g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_SMALL, 250u);
             }
 
-            const coreFloat fAlpha = MIN(fTime * 10.0f, 1.0f);
+            const coreFloat fAlpha = MIN1(fTime * 10.0f);
 
             m_Duplicate.SetSize (fAlpha * this->GetSize());
             m_Duplicate.SetAlpha(fAlpha);

@@ -299,7 +299,7 @@ void cFragmentItem::Move()
 
     // 
     this->SetPosition   (coreVector3(this->GetPosition().xy() - vMove * (2.0f * TIME), 0.0f));
-    this->SetSize       (coreVector3(1.0f,1.0f,1.0f) * fScale * MAX(1.0f - m_fChange * 4.0f, 0.0f));
+    this->SetSize       (coreVector3(1.0f,1.0f,1.0f) * fScale * MAX0(1.0f - m_fChange * 4.0f));
     this->SetDirection  (coreVector3(vDir, 0.0f));
     this->SetOrientation(OriRoundDir(vDir, vDir));
     this->SetEnabled    (this->GetSize().x ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
@@ -307,14 +307,14 @@ void cFragmentItem::Move()
 
     // 
     m_aHull[0].SetPosition (this->GetPosition());
-    m_aHull[0].SetSize     (coreVector3(2.0f,2.0f,2.0f) * fScale * MAX(1.0f - m_fChange * 2.0f, 0.0f));
+    m_aHull[0].SetSize     (coreVector3(2.0f,2.0f,2.0f) * fScale * MAX0(1.0f - m_fChange * 2.0f));
     m_aHull[0].SetTexOffset(-vTexOffset);
     m_aHull[0].SetEnabled  (m_aHull[0].GetSize().x ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
     m_aHull[0].Move();
 
     // 
     m_aHull[1].SetPosition (this->GetPosition());
-    m_aHull[1].SetSize     (coreVector3(1.6f,1.6f,1.6f) * fScale * MAX(1.0f - m_fChange * 2.0f, 0.0f));
+    m_aHull[1].SetSize     (coreVector3(1.6f,1.6f,1.6f) * fScale * MAX0(1.0f - m_fChange * 2.0f));
     m_aHull[1].SetTexOffset(vTexOffset);
     m_aHull[1].SetEnabled  (m_aHull[1].GetSize().x ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
     m_aHull[1].Move();

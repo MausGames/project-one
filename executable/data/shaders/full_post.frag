@@ -83,7 +83,7 @@ void FragmentMain()
 
 #endif
 
-    gl_FragColor.rgb = coreSaturate(gl_FragColor.rgb + vec3(coreDither() / 100.0));
+    gl_FragColor.rgb = coreSaturate(gl_FragColor.rgb + vec3(coreDither() / 50.0));
 
 #if defined(_P1_DEBUG_)
 

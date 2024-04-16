@@ -26,6 +26,7 @@ coreMap<const void*, cMenu::sButtonData> cMenu::s_aButtonData = {};
 cMenu::cMenu()noexcept
 : coreMenu           (SURFACE_MAX, SURFACE_INTRO)
 , m_iPauseFrame      (0u)
+, m_fNoticeSaveTime  (0.0f)
 
 
 , iForceA (0xFFu)
@@ -44,6 +45,15 @@ cMenu::cMenu()noexcept
     m_PauseLayer.DefineProgram("menu_grey_program");
     m_PauseLayer.SetColor4    (coreVector4(0.6f,0.6f,0.6f,0.0f));
     m_PauseLayer.SetTexSize   (coreVector2(1.2f,1.2f));
+
+    // 
+    m_NoticeSave.Construct      (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
+    m_NoticeSave.SetPosition    (coreVector2(-0.02f, 0.015f));
+    m_NoticeSave.SetCenter      (coreVector2( 0.5f, -0.5f));
+    m_NoticeSave.SetAlignment   (coreVector2(-1.0f,  1.0f));
+    m_NoticeSave.SetColor3      (COLOR_MENU_INSIDE);
+    m_NoticeSave.SetStyle       (m_NoticeSave.GetStyle() & ~CORE_OBJECT2D_STYLE_ALTCENTER);
+    m_NoticeSave.SetTextLanguage("SAVING");
 
     // bind menu objects
     this->BindObject(SURFACE_INTRO,   &m_IntroMenu);
@@ -228,6 +238,9 @@ void cMenu::Render()
     // 
     m_MsgBox .Render();
     m_Tooltip.Render();
+
+    // 
+    if(m_fNoticeSaveTime) m_NoticeSave.Render();
 }
 
 
@@ -756,6 +769,9 @@ void cMenu::Move()
 
             if(m_CreditRoll.GetFinished() || (bInMenu && g_MenuInput.bCancel))
             {
+                // 
+                m_CreditRoll.End();
+
                 if(bInMenu)
                 {
                     // return to previous menu
@@ -813,6 +829,15 @@ void cMenu::Move()
     // 
     m_Tooltip   .Move();
     m_PauseLayer.Move();
+
+    // 
+    if(g_pSave->GetActive()) {m_fNoticeSaveTime = 1.0f; g_pSave->ResetActive();}
+    else                     {m_fNoticeSaveTime.UpdateMax(-1.0f, 0.0f);}
+
+    // 
+    m_NoticeSave.SetPosition(coreVector2(-0.033f - 0.02f * BLENDB(1.0f - m_fNoticeSaveTime), 0.023f));
+    m_NoticeSave.SetAlpha   (BLENDBR(m_fNoticeSaveTime));
+    m_NoticeSave.Move();
     
     if((this->GetCurSurface() == SURFACE_SUMMARY) && ((m_SummaryMenu.GetCurSurface() == SURFACE_SUMMARY_SEGMENT_SOLO) || (m_SummaryMenu.GetCurSurface() == SURFACE_SUMMARY_SEGMENT_COOP)) && (!STATIC_ISVALID(g_pGame) || (g_pGame->GetCurMission()->GetID() != cAterMission::ID)))
     {

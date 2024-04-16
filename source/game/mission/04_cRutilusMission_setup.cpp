@@ -240,7 +240,7 @@ void cRutilusMission::__SetupOwn()
             g_pEnvironment->SetTargetDirectionNow(vDir);
 
             this->SetPlateDirection(0u, vDir);
-            m_avPlateData[0].zw(coreVector2(1.0f,1.0f) * LERPB(0.5f, 0.75f, MIN(fTransitionTime, 1.0f)));
+            m_avPlateData[0].zw(coreVector2(1.0f,1.0f) * LERPB(0.5f, 0.75f, MIN1(fTransitionTime)));
         }
         else if(m_iStageSub == 3u)
         {
@@ -249,7 +249,7 @@ void cRutilusMission::__SetupOwn()
             g_pEnvironment->SetTargetDirectionNow(vDir);
 
             this->SetPlateDirection(0u, vDir);
-            m_avPlateData[0].zw(coreVector2(1.0f,1.0f) * LERPB(0.75f, 1.0f, MIN(fTransitionTime, 1.0f)));
+            m_avPlateData[0].zw(coreVector2(1.0f,1.0f) * LERPB(0.75f, 1.0f, MIN1(fTransitionTime)));
         }
         else if(m_iStageSub == 4u)
         {
@@ -1311,7 +1311,7 @@ void cRutilusMission::__SetupOwn()
         {
             if(iTransitionState == 0u)
             {
-                const coreFloat   fTime = MIN(fTransitionTime * 0.5f, 1.0f);
+                const coreFloat   fTime = MIN1(fTransitionTime * 0.5f);
                 const coreVector2 vDir  = coreVector2::Direction(LERP(1.5f*PI, -0.5f*PI, fTime));
 
                 pHelper->SetPosition(coreVector3(vDir * LERP(-1.2f, 0.0f, fTime) * FOREGROUND_AREA.x, 0.0f));
@@ -1362,7 +1362,7 @@ void cRutilusMission::__SetupOwn()
                 g_pSpecialEffects->CreateSplashColor(pHelper->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_PURPLE);
             }
 
-            this->SetAreaScale(ParaLerp(1.0f, 0.8f, 4.2f, BLENDH3(MIN(m_fStageSubTime * 0.85f, 1.0f))));
+            this->SetAreaScale(ParaLerp(1.0f, 0.8f, 4.2f, BLENDH3(MIN1(m_fStageSubTime * 0.85f))));
         }
         else if(m_iStageSub == 17u)
         {
@@ -1880,7 +1880,7 @@ void cRutilusMission::__SetupOwn()
         {
             if(iTransitionState == 0u)
             {
-                pHelper->SetPosition(coreVector3(0.0f, LERPB(-1.2f, 0.0f, MIN(fTransitionTime, 1.0f)) * FOREGROUND_AREA.y, 0.0f));
+                pHelper->SetPosition(coreVector3(0.0f, LERPB(-1.2f, 0.0f, MIN1(fTransitionTime)) * FOREGROUND_AREA.y, 0.0f));
 
                 if(fTransitionTime >= 1.0f)
                 {
@@ -3078,7 +3078,7 @@ void cRutilusMission::__SetupOwn()
 
         fTransitionTime += 1.0f * TIME;
 
-        fMoveSpeed = MIN(fMoveSpeed + 1.0f * TIME, 1.0f);
+        fMoveSpeed = MIN1(fMoveSpeed + 1.0f * TIME);
         fMoveTime  = fMoveTime + fMoveSpeed * TIME;
 
         if(m_iStageSub == 1u)
@@ -3177,7 +3177,7 @@ void cRutilusMission::__SetupOwn()
             }
             else if(iTransitionState == 1u)
             {
-                const coreFloat   fTime = LERPS(0.0f, 1.0f, CLAMP((fTransitionTime - 1.0f) * 0.5f, 0.0f, 1.0f));
+                const coreFloat   fTime = BLENDS(CLAMP01((fTransitionTime - 1.0f) * 0.5f));
                 //const coreVector2 vPos  = LERP(coreVector2(0.0f,0.3f), coreVector2(0.7f,0.0f), fTime) * FOREGROUND_AREA;
                 const coreVector2 vDir  = coreVector2::Direction(fTime * -1.5f*PI);
 
@@ -3234,7 +3234,7 @@ void cRutilusMission::__SetupOwn()
             }
             else if(iTransitionState == 1u)
             {
-                const coreFloat   fTime = LERPS(0.0f, 1.0f, CLAMP((fTransitionTime - 1.0f) * 0.5f, 0.0f, 1.0f));
+                const coreFloat   fTime = BLENDS(CLAMP01((fTransitionTime - 1.0f) * 0.5f));
                 //const coreVector2 vPos  = LERP(coreVector2(0.0f,0.3f), coreVector2(0.7f,0.0f), fTime) * FOREGROUND_AREA;
                 //const coreVector2 vDir  = coreVector2::Direction(fTime * 0.5f*PI);
 

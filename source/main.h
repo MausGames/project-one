@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 //*----------------------------------------------------------------------------*//
-//| Project One v1.1.1 (https://www.maus-games.at)                             |//
+//| Project One v1.1.2 (https://www.maus-games.at)                             |//
 //*----------------------------------------------------------------------------*//
 //| Copyright (c) 2010 Martin Mauersics                                        |//
 //|                                                                            |//
@@ -83,17 +83,15 @@
 // TODO 1: check for coreVector2::Direction and .Angle() and .Length() calls in loops with more than N iterations and replace them if possible (e.g. relative rotation)
 // TODO 3: object_tetra_top und object_cube_top brauchen gute outline
 // TODO 3: FORCE_INLINE for various callback-wrappern (eg. ForeachEnemy)
-// TODO 4: MIN1, MAX0, CLAMP01, BLEND* everywhere possible
 // TODO 3: menu outlines kaputt in transition bei 1759x990 (allgemein bei ungeradeXgerade), menü-line-objekte verschieben ihre textur -> resolution muss gleich bleiben X=Y, also sollte position shift eingebaut werden (aber ALLE 2d-objekte dann auch ?)
 // TODO 4: wenn möglich sollten statische variablen in funktionen raus-gezogen werden, damit nicht ständig ein init-check gemacht wird
 // TODO 3: multiplicative rotation for bullet-waves, to create better interleaving (orb-bullets in geminga) -> only where it makes sense or improves the visuals
-// TODO 3: sphere model kann ungenau sein, vor allem bei der area-bubble bei P1 magenta phase
+// TODO 3: sphere model kann ungenau sein (visual), vor allem bei der area-bubble bei P1 magenta phase
 // TODO 3: pfeile der switch-boxen sind leicht vertikal verschoben bei 1920x1080
 // TODO 1: [MF] [HIGH] [ULTRA] swap visuals for task objects (not all of them are used anymore, so show the best looking first)
 // TODO 3: rogue like mode (grey mode), with negative or positive+negative (combined) effects to select
 // TODO 1: [MF] [HIGH] [ULTRA] add more coop special cases (like residue and ghosts), at least one per mission, not bosses except if something cool comes to mind
 // TODO 3: health-bars für stärkere gegner (>= 30 or 50 hp), blenden sich ein bei schaden (und wieder aus nach cooldown ?)
-// TODO 1: [MF] [HIGH] [ULTRA] misc: japanes names, pulse, passwords
 // TODO 3: GetCollisionRange().xy().Length() inefficient in some places (bullets), hab aber teils wieder auf GetCollisionRadius() geswechselt, weils richtiger is
 // TODO 3: in arcade summary: display 1CC, difficulty, number of hits, number of continues, other?
 // TODO 1: [MF] [HIGH] [ULTRA] new localization: weapons, vaus, console specific, difficulty, new achievements, import save-game, vsync description (others as well?)
@@ -106,7 +104,6 @@
 // TODO 3: bei Torus, rückseite von spear bullets zerstören outline von orb bullets
 // TODO 3: improve big boss explosion: Sakurai https://www.youtube.com/watch?v=ZDopYzDX-Jg   https://youtu.be/D-4RsUI3ZNI?t=246   energy line explosion: https://youtu.be/j56eUNx4sZk?t=1311
 // TODO 1: [MF] fixup update frequency (allow less than 60?, how to communicate increases? (on low speed))
-// TODO 1: improve stage icons
 // TODO 1: [MF] praise the player ! https://www.youtube.com/watch?v=fryDyXROp8A
 
 // Public Feedback and Suggestions:
@@ -117,11 +114,9 @@
 
 // Merged List:
 // TODO 4: MAX SERIES überall entfernen (im frontend)   überall nach maxseries suchen und ausbessern, außerdem nur relevant auf segment-ebene
-// TODO 3: ich könnte sterne im game-menü anzeigen
 // TODO 3: add more details to cloud background (transparent enemy ships far in the back ? like Ikagura and RSG)
 // TODO 3: einen anderen bottom-background im wolken-level ? stadt, andere textur, outdoor ?
 // TODO 3: etwas muss gemacht werden, wenn sich die player hitboxen überlappen (vielleicht nicht möglich, schieben ?)
-// TODO 3: gegner und geschosse am rand müssen gut sichtbar bleiben, wenn interface im inneren ist
 
 // Cleanup Task List:
 // TODO 4: more cleanup surrounding Eigengrau: game, postprocessing (cpp + shader), camera, player, weapon, bullet
@@ -258,6 +253,7 @@
 #define SHADER_CHROMA        "#define _P1_CHROMA_"      " (1) \n"        // post
 #define SHADER_DEBUG         "#define _P1_DEBUG_"       " (1) \n"        // post
 #define SHADER_OBJECT3D      "#define _P1_OBJECT3D_"    " (1) \n"        // distortion
+#define SHADER_LABEL         "#define _P1_LABEL_"       " (1) \n"        // swipe
 #define SHADER_SINGLE        "#define _P1_SINGLE_"      " (1) \n"        // decal, weather
 #define SHADER_LIGHT         "#define _P1_LIGHT_"       " (1) \n"        // outdoor, decal, outline
 #define SHADER_DARKNESS      "#define _P1_DARKNESS_"    " (1) \n"        // object_ship

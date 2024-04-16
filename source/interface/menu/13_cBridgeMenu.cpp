@@ -511,6 +511,23 @@ coreBool cBridgeMenu::HasUnlocks()
     else if(nApplyUnlockFunc(UNLOCK_GAMESPEEDUP)  && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[6][3];}))                 return true;
     else if(nApplyUnlockFunc(UNLOCK_POWERSHIELD)  && HAS_BIT_EX(g_pSave->GetHeader().oProgress.aiState, STATE_AFTER_FIRST)) return true;
     else if(nApplyUnlockFunc(UNLOCK_WEAPON_PULSE) && ALL_MEDAL_SEGMENT(aaiMedal) {return aaiMedal[8][5];}))                 return true;
+#if defined(_CORE_DEBUG_)
+    else if(nApplyUnlockFunc(UNLOCK_WEAPON_WAVE)  && []()
+    {
+        for(coreUintW i = 0u; i < MISSION_BASE - 1u; ++i)
+        {
+            for(coreUintW j = 0u; j < 5u; ++j)
+            {
+                if(!HAS_BIT(g_pSave->GetHeader().oProgress.aaiBadge[i][j], 0u))      return false;
+                if(!HAS_BIT(g_pSave->GetHeader().oProgress.aaiBadge[i][j], 1u) && i) return false;
+            }
+        }
+        return true;
+    }())
+    {
+        return true;
+    }
+#endif
 
     return false;
 }

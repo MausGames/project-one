@@ -148,12 +148,12 @@ void CheckAchievements()
 
             if([]()
             {
-                for(coreUintW i = 1u; i < MISSION_BASE - 1u; ++i)
+                for(coreUintW i = 0u; i < MISSION_BASE - 1u; ++i)
                 {
                     for(coreUintW j = 0u; j < 5u; ++j)
                     {
-                        if(!HAS_BIT(g_pSave->GetHeader().oProgress.aaiBadge[i][j], 0u)) return false;
-                        if(!HAS_BIT(g_pSave->GetHeader().oProgress.aaiBadge[i][j], 1u)) return false;
+                        if(!HAS_BIT(g_pSave->GetHeader().oProgress.aaiBadge[i][j], 0u))      return false;
+                        if(!HAS_BIT(g_pSave->GetHeader().oProgress.aaiBadge[i][j], 1u) && i) return false;
                     }
                 }
                 return true;

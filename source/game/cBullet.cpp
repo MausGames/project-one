@@ -1300,7 +1300,7 @@ void cMineBullet::__RenderOwnBefore()
 void cMineBullet::__MoveOwn()
 {
     // 
-    m_fSpeed = MAX(m_fSpeed * FrictionFactor(3.5f), 0.0f);
+    m_fSpeed = MAX0(m_fSpeed * FrictionFactor(3.5f));
 
     // fly around
     this->SetPosition(coreVector3(this->GetPosition().xy() + this->GetFlyMove(), 0.0f));
@@ -1491,9 +1491,10 @@ void cTiltBullet::__RenderOwnAfter()
         const coreFloat fHeight = this->GetPosition().z;
         
        // this->SetPosition(coreVector3(this->GetPosition().xy(), 0.0f));
-        
+       
+
         this->SetSize(coreVector3(1.6f,1.6f,1.6f) * 1.1f * 4.0f);// * (1.0f - STEPH3(0.0f, 60.0f, fHeight)));
-        this->SetAlpha(1.0f - STEPH3((m_vFlyDir3D.z > 0.0f) ? 0.0f : 50.0f, 100.0f, fHeight));
+        this->SetAlpha(1.0f - STEPH3(0.0f, 100.0f, fHeight));
         
         this->_EnableDepth();
         this->Render();
@@ -1502,7 +1503,7 @@ void cTiltBullet::__RenderOwnAfter()
                 this->_EnableDepth(g_pOutline->GetStyle(OUTLINE_STYLE_LIGHT_BULLET_THICK)->GetProgramSingle());
                 g_pOutline->GetStyle(OUTLINE_STYLE_LIGHT_BULLET_THICK)->ApplyObject(this);
         
-        this->SetPosition(coreVector3(this->GetPosition().xy(), fHeight));
+        //this->SetPosition(coreVector3(this->GetPosition().xy(), fHeight));
 
         this->SetSize(coreVector3(0.0f,0.0f,0.0f));
         this->SetAlpha(0.0f);
@@ -1514,6 +1515,8 @@ void cTiltBullet::__RenderOwnAfter()
 // move the tilt bullet
 void cTiltBullet::__MoveOwn()
 {
+    ASSERT(m_vFlyDir3D.z > 0.0f)
+
     // fly around
     this->SetPosition (this->GetPosition() + m_vFlyDir3D * (m_fSpeed * TIME));
     //this->SetDirection(coreVector3(m_vFlyDir, 0.0f));
@@ -1524,25 +1527,30 @@ void cTiltBullet::__MoveOwn()
     this->SetTexOffset(coreVector2(0.0f, m_fAnimation));
 
     // update fade
-    m_fFade.Update(1.0f);
     //this->SetAlpha(MIN1(20.0f * m_fFade));
 
-    const coreVector2 vDiff = (this->GetPosition() + ABS(this->GetPosition().z) * m_vFlyDir3D / ABS(m_vFlyDir3D.z)).xy() - g_pGame->GetPlayer(0u)->GetPosition().xy();
-    
-    const coreFloat fNear = MAX0((1.0f - STEPH3(6.0f, 8.0f, vDiff.Length())) - ((m_vFlyDir3D.z > 0.0f) ? STEPH3(0.0f, 10.0f, this->GetPosition().z) : (1.0f - STEPH3(-10.0f, 0.0f, this->GetPosition().z))));
-    //const coreFloat fNear2 = 1.0f - STEPH3(6.0f, 50.0f, (this->GetPosition() - g_pGame->GetPlayer(0u)->GetPosition()).Length());
+    const coreVector2 vTrace = (this->GetPosition() + ABS(this->GetPosition().z) * m_vFlyDir3D / m_vFlyDir3D.z).xy();
+    const coreFloat   fBlend = STEPH3(0.0f, 10.0f, this->GetPosition().z);
+
+    const coreVector2 vDiff  = vTrace - g_pGame->GetPlayer(0u)->GetPosition().xy();
+    const coreFloat   fNear  = MAX0((1.0f - STEPH3(6.0f, 8.0f, vDiff.Length())) - fBlend);
 
     this->SetColor3(LERP(COLOR_ENERGY_WHITE * 0.1f, COLOR_ENERGY_GREEN, fNear));
-    
+
     if(g_pGame->IsMulti())
     {
-        const coreVector2 vDiff2 = (this->GetPosition() + ABS(this->GetPosition().z) * m_vFlyDir3D / ABS(m_vFlyDir3D.z)).xy() - g_pGame->GetPlayer(1u)->GetPosition().xy();
-        const coreFloat   fNear2 = MAX0((1.0f - STEPH3(6.0f, 8.0f, vDiff2.Length())) - ((m_vFlyDir3D.z > 0.0f) ? STEPH3(0.0f, 10.0f, this->GetPosition().z) : (1.0f - STEPH3(-10.0f, 0.0f, this->GetPosition().z))));
+        const coreVector2 vDiff2 = vTrace - g_pGame->GetPlayer(1u)->GetPosition().xy();
+        const coreFloat   fNear2 = MAX0((1.0f - STEPH3(6.0f, 8.0f, vDiff2.Length())) - fBlend);
 
         this->SetColor3(LERP(this->GetColor3(), COLOR_ENERGY_YELLOW, fNear2));
     }
     
+    
+    
     if(this->GetPosition().z > 100.0f) this->Deactivate(false);
+    
+    //const coreVector2 vDiff2 = this->GetPosition().xy() - Core::Graphics->GetCamPosition().xy();
+    //this->SetPosition (this->GetPosition() + coreVector3((vDiff2.IsNull() ? coreVector2(0.0f,1.0f) : vDiff2.Normalized()), 0.0f) * (m_fSpeed * STEP(0.0f, 100.0f, this->GetPosition().z) * TIME));
 
     if(this->GetPosition().z > 5.0f)
     {
@@ -1551,6 +1559,8 @@ void cTiltBullet::__MoveOwn()
     }
     else
     {
+        m_fFade.Update(1.0f);
+
         this->SetSize(coreVector3(1.6f,1.6f,1.6f) * 1.1f * 4.0f);
         this->SetAlpha(MIN1(8.0f * m_fFade) * STEPH3(EIGENGRAU_DEPTH, EIGENGRAU_DEPTH + 40.0f, this->GetPosition().z));
     }

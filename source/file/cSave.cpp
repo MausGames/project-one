@@ -7,6 +7,7 @@
 //*-------------------------------------------------*//
 ///////////////////////////////////////////////////////
 #include "main.h"
+#include "additional/switch/sdl.h"
 
 
 // ****************************************************************
@@ -17,6 +18,7 @@ cSave::cSave()noexcept
 , m_iToken  (0u)
 , m_bIgnore (false)
 , m_eStatus (SAVE_STATUS_OK)
+, m_iActive (0u)
 {
     // 
     this->LoadFile();
@@ -199,6 +201,7 @@ void cSave::SaveFile()
 {
     // 
     this->ResetStatus();
+    m_iActive = 1u;
 
     // 
     m_Header.iSaveTimestamp = std::time(NULL);
@@ -246,6 +249,9 @@ void cSave::SaveFile()
             Core::Log->Warning("Save (%s) could not be saved (status %u)", m_sPath.c_str(), coreUint32(m_eStatus));
             return CORE_OK;
         }
+
+        // 
+        m_iActive = 2u;
 
         Core::Log->Info("Save (%s) saved", m_sPath.c_str());
         return CORE_OK;
@@ -423,6 +429,7 @@ void cSave::__CheckHeader(sHeader* OUTPUT pHeader)
     if(!HAS_BIT_EX(pHeader->oProgress.aiUnlock, UNLOCK_GAMESPEEDUP))  g_CurConfig.Game.iGameSpeed  = MIN(g_CurConfig.Game.iGameSpeed, 100u);
     if(!HAS_BIT_EX(pHeader->oProgress.aiUnlock, UNLOCK_POWERSHIELD))  for(coreUintW i = 0u; i < SAVE_PLAYERS; ++i) pHeader->oOptions.aiShield [i]    = MIN(pHeader->oOptions.aiShield [i],    SHIELD_DEFAULT);
     if(!HAS_BIT_EX(pHeader->oProgress.aiUnlock, UNLOCK_WEAPON_PULSE)) for(coreUintW i = 0u; i < SAVE_PLAYERS; ++i) pHeader->oOptions.aaiWeapon[i][0] = MIN(pHeader->oOptions.aaiWeapon[i][0], 1u);
+    if(!HAS_BIT_EX(pHeader->oProgress.aiUnlock, UNLOCK_WEAPON_WAVE))  for(coreUintW i = 0u; i < SAVE_PLAYERS; ++i) pHeader->oOptions.aaiWeapon[i][0] = MIN(pHeader->oOptions.aaiWeapon[i][0], 2u);
 }
 
 

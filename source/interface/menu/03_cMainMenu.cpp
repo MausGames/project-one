@@ -103,7 +103,7 @@ cMainMenu::cMainMenu()noexcept
         this->BindObject(SURFACE_MAIN_DEFAULT, &m_ConfigButton);
     }
 
-    #if !defined(_CORE_EMSCRIPTEN_)
+    #if !defined(_CORE_EMSCRIPTEN_) && !defined(_CORE_SWITCH_)
         this->BindObject(SURFACE_MAIN_DEFAULT, &m_ExitButton);
     #endif
 

@@ -304,7 +304,7 @@ cSeaBackground::~cSeaBackground()
 // 
 void cSeaBackground::__InitOwn()
 {
-    m_Loaded.Unlock();
+    m_Loaded.Release();
     
     // create underwater-surface object
     m_pWater = new cUnderWater();
@@ -314,7 +314,7 @@ void cSeaBackground::__InitOwn()
     m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
         pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
-        m_Loaded.Lock();
+        m_Loaded.Acquire();
     });
 }
 
@@ -329,7 +329,7 @@ void cSeaBackground::__ExitOwn()
     // stop base sound-effect
     m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
-        if(m_Loaded.IsLocked() && pResource->EnableRef(this))
+        if(m_Loaded && pResource->EnableRef(this))
             pResource->Stop();
     });
 }
@@ -379,7 +379,7 @@ void cSeaBackground::__MoveOwn()
     m_fWaveTime.Update(1.4f);
 
     // adjust volume of the base sound-effect
-    if(m_Loaded.IsLocked() && m_pBaseSound->EnableRef(this))
+    if(m_Loaded && m_pBaseSound->EnableRef(this))
     {
         m_pBaseSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
     }

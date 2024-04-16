@@ -10,7 +10,7 @@
 // ****************************************************************
 // project settings
 const coreChar* const CoreApp::Settings::Name                          = "Eigengrau";
-const coreChar* const CoreApp::Settings::Version                       = "1.1.1";
+const coreChar* const CoreApp::Settings::Version                       = "1.1.2";
 const coreChar* const CoreApp::Settings::IconPath                      = "data/textures/game_icon.png";
 const coreChar* const CoreApp::Settings::CursorPath                    = "data/textures/default_cursor.png";
 const coreBool        CoreApp::Settings::UserManagement                = true;
@@ -299,6 +299,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreTexture>("menu_fragment_plate.png",                CORE_RESOURCE_UPDATE_AUTO,   "data/textures/menu_fragment_plate.png");
     Core::Manager::Resource->Load<coreTexture>("game_logo.png",                          CORE_RESOURCE_UPDATE_AUTO,   "data/textures/game_logo.png");
     Core::Manager::Resource->Load<coreTexture>("game_logo_demo.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/game_logo_demo.png");
+    Core::Manager::Resource->Load<coreTexture>("game_logo_kana.png",                     CORE_RESOURCE_UPDATE_AUTO,   "data/textures/game_logo_kana.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
     Core::Manager::Resource->Load<coreTexture>("input_gamepad_luna.png",                 CORE_RESOURCE_UPDATE_AUTO,   "data/textures/input_gamepad_luna.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
     Core::Manager::Resource->Load<coreTexture>("input_gamepad_ps3.png",                  CORE_RESOURCE_UPDATE_AUTO,   "data/textures/input_gamepad_ps3.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
     Core::Manager::Resource->Load<coreTexture>("input_gamepad_ps4.png",                  CORE_RESOURCE_UPDATE_AUTO,   "data/textures/input_gamepad_ps4.png", CORE_TEXTURE_LOAD_NO_COMPRESS);   // # visual artifacts
@@ -486,6 +487,7 @@ void CoreApp::Setup()
     Core::Manager::Resource->Load<coreShader> ("menu_single.frag",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_single.frag");
     Core::Manager::Resource->Load<coreShader> ("menu_swipe.vert",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_swipe.vert", CORE_SHADER_OPTION_NO_ROTATION);
     Core::Manager::Resource->Load<coreShader> ("menu_swipe.frag",                        CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_swipe.frag");
+    Core::Manager::Resource->Load<coreShader> ("menu_swipe_label.frag",                  CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/menu_swipe.frag", SHADER_LABEL);
     Core::Manager::Resource->Load<coreShader> ("object.vert",                            CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert");
     Core::Manager::Resource->Load<coreShader> ("object_wave.vert",                       CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object.vert", SHADER_WAVE);
     Core::Manager::Resource->Load<coreShader> ("object_ground.frag",                     CORE_RESOURCE_UPDATE_MANUAL, "data/shaders/object_ground.frag");
@@ -1217,6 +1219,11 @@ void CoreApp::Setup()
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_swipe_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
         ->AttachShader("menu_swipe.vert")
         ->AttachShader("menu_swipe.frag")
+        ->Finish();
+
+    d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("menu_swipe_label_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())
+        ->AttachShader("menu_swipe.vert")
+        ->AttachShader("menu_swipe_label.frag")
         ->Finish();
 
     d_cast<coreProgram*>(Core::Manager::Resource->Load<coreProgram>("object_ground_program", CORE_RESOURCE_UPDATE_AUTO, NULL)->GetRawResource())

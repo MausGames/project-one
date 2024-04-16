@@ -184,7 +184,7 @@ cSnowBackground::cSnowBackground()noexcept
     }
 
     // allocate cloud list
-    pList1 = new coreBatchList(SNOW_CLOUD_RESERVE);
+    pList1 = new coreBatchList(SNOW_CLOUD_1_RESERVE);
     pList1->DefineProgram("environment_clouds_inst_program");
     {
         // load object resources
@@ -193,10 +193,10 @@ cSnowBackground::cSnowBackground()noexcept
         oBase.DefineTexture(0u, "environment_clouds_high.png");
         oBase.DefineProgram("environment_clouds_program");
 
-        for(coreUintW i = 0u; i < SNOW_CLOUD_NUM; ++i)
+        for(coreUintW i = 0u; i < SNOW_CLOUD_1_NUM; ++i)
         {
             // calculate position and height
-            const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(0.1f, 0.25f) * ((i % 2u) ? 1.0f : -1.0f), i, SNOW_CLOUD_NUM);
+            const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(0.1f, 0.25f) * ((i % 2u) ? 1.0f : -1.0f), i, SNOW_CLOUD_1_NUM);
             const coreFloat   fHeight   = Core::Rand->Float(20.0f, 60.0f);
 
             // create object
@@ -215,71 +215,51 @@ cSnowBackground::cSnowBackground()noexcept
         }
 
         // post-process list and add to the air
-        cBackground::_FillInfinite   (pList1, SNOW_CLOUD_RESERVE);
+        cBackground::_FillInfinite   (pList1, SNOW_CLOUD_1_RESERVE);
         cBackground::_SortBackToFront(pList1);
         m_apAirObjectList.push_back(pList1);
 
-        ASSERT(pList1->GetCurCapacity() == SNOW_CLOUD_RESERVE)
+        ASSERT(pList1->GetCurCapacity() == SNOW_CLOUD_1_RESERVE)
     }
 
-
-#if 0
-    // allocate stone list
-    pList1 = new coreBatchList(GRASS_STONE_RESERVE);
-    pList1->DefineProgram("object_ground_inst_program");
+    // allocate cloud list
+    pList1 = new coreBatchList(SNOW_CLOUD_2_RESERVE);
+    pList1->DefineProgram("environment_clouds_inst_program");
     {
         // load object resources
         coreObject3D oBase;
-        oBase.DefineModel  ("environment_stone_01.md3");
-        oBase.DefineTexture(0u, "environment_stone_diff.png");
-        oBase.DefineTexture(1u, "environment_stone_norm.png");
-        oBase.DefineProgram("object_ground_program");
+        oBase.DefineModel  (Core::Manager::Object->GetLowQuad());
+        oBase.DefineTexture(0u, "environment_clouds_mid.png");
+        oBase.DefineProgram("environment_clouds_program");
 
-        for(coreUintW i = 0u; i < GRASS_STONE_NUM; ++i)
+        for(coreUintW i = 0u; i < SNOW_CLOUD_2_NUM; ++i)
         {
             // calculate position and height
-            const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(-0.45f, 0.45f), i, GRASS_STONE_NUM);
-            const coreFloat   fHeight   = m_pOutdoor->RetrieveBackHeight(vPosition);
+            const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(0.05f, 0.25f) * ((i % 2u) ? 1.0f : -1.0f), i, SNOW_CLOUD_2_NUM);
+            const coreFloat   fHeight   = Core::Rand->Float(20.0f, 60.0f);
 
-            // test for valid values
-            if((fHeight > -200.0f) && (fHeight < 18.0f) && (F_TO_SI(vPosition.y+160.0f) % 80 < 40))
-            {
-                if(!cBackground::_CheckIntersectionQuick(pList1, vPosition, POW2(5.0f)) &&
-                   !cBackground::_CheckIntersection     (m_apGroundObjectList[1], vPosition, POW2(8.0f)) &&
-                   !cBackground::_CheckIntersection     (m_apGroundObjectList[2], vPosition, POW2(8.0f)))
-                {
-                    // create object
-                    coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
+            // create object
+            coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
 
-                    // set object properties
-                    pObject->SetPosition   (coreVector3(vPosition, 0.0f));
-                    pObject->SetSize       (coreVector3::Rand(0.85f,1.3f, 0.85f,1.3f, 0.85f,1.3f) * Core::Rand->Float(2.0f, 2.6f) * 1.3f);
-                    pObject->SetDirection  (coreVector3::Rand());
-                    pObject->SetOrientation(coreVector3::Rand());
-                    pObject->SetColor3     (coreVector3(1.0f,1.0f,1.0f) * Core::Rand->Float(0.85f, 1.0f));
+            // set object properties
+            pObject->SetPosition (coreVector3(vPosition, fHeight));
+            pObject->SetSize     (coreVector3(coreVector2(2.4f,2.4f) * Core::Rand->Float(15.0f, 21.0f), 1.0f));
+            pObject->SetDirection(coreVector3(coreVector2::Rand(), 0.0f));
+            pObject->SetColor3   (coreVector3(1.0f,1.0f,1.0f) * (0.8f + 0.2f * fHeight/60.0f));
+            pObject->SetAlpha    (0.85f);
+            pObject->SetTexOffset(coreVector2::Rand(0.0f,4.0f, 0.0f,4.0f));
 
-                    // add object to the list
-                    pList1->BindObject(pObject);
-                }
-            }
+            // add object to the list
+            pList1->BindObject(pObject);
         }
 
-        // 
-        this->_StoreHeight(pList1, 0.2f);
+        // post-process list and add to the air
+        cBackground::_FillInfinite   (pList1, SNOW_CLOUD_2_RESERVE);
+        cBackground::_SortBackToFront(pList1);
+        m_apAirObjectList.push_back(pList1);
 
-        // post-process list and add to the ground
-        cBackground::_FillInfinite(pList1, GRASS_STONE_RESERVE);
-        m_apGroundObjectList.push_back(pList1);
-
-        // bind list to shadow map
-        m_pOutdoor->GetShadowMap()->BindList(pList1);
-
-        // 
-        //m_apWaterRefList.push_back(pList1);
+        ASSERT(pList1->GetCurCapacity() == SNOW_CLOUD_2_RESERVE)
     }
-#endif
-    
-    
 
     // 
     m_Snow.DefineTexture(0u, "effect_snow.png");
@@ -290,6 +270,7 @@ cSnowBackground::cSnowBackground()noexcept
 
     // 
     this->SetGroundDensity(0u, 0.0f);
+    this->SetAirDensity   (1u, 0.0f);
 }
 
 
@@ -306,7 +287,7 @@ cSnowBackground::~cSnowBackground()
 // 
 void cSnowBackground::__InitOwn()
 {
-    m_Loaded.Unlock();
+    m_Loaded.Release();
     
     // 
     m_pWater = new cIceWater("environment_clouds_blue.png");
@@ -316,7 +297,7 @@ void cSnowBackground::__InitOwn()
     m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
         pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
-        m_Loaded.Lock();
+        m_Loaded.Acquire();
     });
 }
 
@@ -331,7 +312,7 @@ void cSnowBackground::__ExitOwn()
     // stop base sound-effect
     m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
-        if(m_Loaded.IsLocked() && pResource->EnableRef(this))
+        if(m_Loaded && pResource->EnableRef(this))
             pResource->Stop();
     });
 }
@@ -383,20 +364,31 @@ void cSnowBackground::__MoveOwn()
     m_fSnowWave.UpdateMod(SQRT(MAX(ABS(g_pEnvironment->GetSpeed()), 1.0f)), 16.0f);
 
     // adjust volume of the base sound-effect
-    if(m_Loaded.IsLocked() && m_pBaseSound->EnableRef(this))
+    if(m_Loaded && m_pBaseSound->EnableRef(this))
     {
         m_pBaseSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
     }
     
     
     
-    const coreFloat fCloudMove = 0.0016f * (1.0f + ABS(g_pEnvironment->GetSpeed())) * TIME;
+    const coreFloat fCloudMove = 0.0018f * (1.0f + ABS(g_pEnvironment->GetSpeed())) * TIME;
 
     coreBatchList* pList = m_apAirObjectList[0];
     for(coreUintW i = 0u, ie = pList->List()->size(); i < ie; ++i)
     {
         coreObject3D* pCloud = (*pList->List())[i];
-        pCloud->SetTexOffset((pCloud->GetTexOffset() + MapToAxis(coreVector2(fCloudMove * ((FRACT(pCloud->GetPosition().z) < 0.5f) ? -1.0f : 1.0f), 0.0f), pCloud->GetDirection().xy())).Processed(FRACT));
+        pCloud->SetTexOffset((pCloud->GetTexOffset() + MapToAxis(coreVector2(fCloudMove * ((pCloud->GetDirection().x < 0.0f) ? -1.0f : 1.0f), 0.0f), pCloud->GetDirection().xy())).Processed(FRACT));
     }
     pList->MoveNormal();
+
+    pList = m_apAirObjectList[1];
+    if(pList->GetCurEnabled())
+    {
+        for(coreUintW i = 0u, ie = pList->List()->size(); i < ie; ++i)
+        {
+            coreObject3D* pCloud = (*pList->List())[i];
+            pCloud->SetTexOffset((pCloud->GetTexOffset() + MapToAxis(coreVector2(fCloudMove * ((pCloud->GetDirection().x < 0.0f) ? -1.0f : 1.0f), 0.0f), pCloud->GetDirection().xy())).Processed(FRACT));
+        }
+        pList->MoveNormal();
+    }
 }

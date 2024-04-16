@@ -410,7 +410,7 @@ void cErrorMission::__SetupOwn()
 
             if(HAS_BIT(aiType[2], i))
             {
-                afFlySpeed[i] = MIN(afFlySpeed[i] + 3.0f * TIME, 1.0f);
+                afFlySpeed[i] = MIN1(afFlySpeed[i] + 3.0f * TIME);
 
                 if(afFlySpeed[i] >= 0.0f) // do other calculation in the meantime   
                 {
@@ -516,7 +516,7 @@ void cErrorMission::__SetupOwn()
                 else
                 {
                     const coreFloat fValue = FMOD(fLifeTime + ((i < 10u) ? 1.0f : 0.0f) + 1.0f, 4.0f);
-                    const coreFloat fPosY  = (fValue < 2.0f) ? LERPS(-1.0f, 1.0f, MIN(fValue, 1.0f)) : (LERPS(1.0f, -1.0f, MIN(fValue-2.0f, 1.0f)));
+                    const coreFloat fPosY  = (fValue < 2.0f) ? LERPS(-1.0f, 1.0f, MIN1(fValue)) : (LERPS(1.0f, -1.0f, MIN1(fValue-2.0f)));
 
                     pEnemy->SetPosition(coreVector3(fPosX, fPosY, 0.0f) * FOREGROUND_AREA3);
                 }
@@ -525,12 +525,12 @@ void cErrorMission::__SetupOwn()
             }
             else
             {
-                STAGE_LIFETIME(pEnemy, 0.5f, 0.2f * I_TO_F((i-20u) % 12u) - LERPB(0.0f, 2.0f, MIN(pEnemy->GetLifeTime() * 0.5f, 1.0f)))
+                STAGE_LIFETIME(pEnemy, 0.5f, 0.2f * I_TO_F((i-20u) % 12u) - LERPB(0.0f, 2.0f, MIN1(pEnemy->GetLifeTime() * 0.5f)))
 
                 STAGE_REPEAT(pPath2->GetTotalDistance())
 
                 const coreVector2 vFactor = coreVector2(1.0f, ((i-20u) < 12u) ? -1.0f : 1.0f);
-                const coreVector2 vOffset = coreVector2((((i-20u) < 12u) ? -1.0f : 1.0f) * (0.1f + LERPB(1.0f, 0.0f, MIN(pEnemy->GetLifeTime() * 0.5f, 1.0f))), 0.0f);
+                const coreVector2 vOffset = coreVector2((((i-20u) < 12u) ? -1.0f : 1.0f) * (0.1f + LERPB(1.0f, 0.0f, MIN1(pEnemy->GetLifeTime() * 0.5f))), 0.0f);
 
                 pEnemy->DefaultMovePath(pPath2, vFactor, vOffset * vFactor, fLifeTime);
             }
@@ -1631,7 +1631,7 @@ void UnusedWaves()
 
             // sudden turn of enemy after moving to a certain threshold is bad, either use it as wall, or constantly rotate  
 
-            vShootDir = coreVector2::Direction(vShootDir.Angle() + MIN(ABS(fPower) * 5.0f, 1.0f) * SIGN(fSign) * 2.0f * TIME);
+            vShootDir = coreVector2::Direction(vShootDir.Angle() + MIN1(ABS(fPower) * 5.0f) * SIGN(fSign) * 2.0f * TIME);
 
             if(STAGE_TICK_TIME(12.0f, 0.0f))
             {
@@ -1864,7 +1864,7 @@ void UnusedWaves()
             const coreVector2 vFrom = (i ? coreVector2(1.3f,1.2f) : coreVector2(1.2f,1.3f));
             const coreVector2 vTo   = (i ? coreVector2(1.3f,0.0f) : coreVector2(0.0f,1.3f));
 
-            pEnemy->DefaultMoveLerp(vFrom, vTo, LERP(0.0f, 1.0f, MIN(fLifeTime * 0.6f, 1.0f)));
+            pEnemy->DefaultMoveLerp(vFrom, vTo, MIN1(fLifeTime * 0.6f));
 
             if(STAGE_TICK_LIFETIME(10.0f, 0.0f))
             {
@@ -2441,7 +2441,7 @@ void UnusedWaves()
         {
             STAGE_LIFETIME(pEnemy, 1.0f, 0.0f)
 
-            pEnemy->DefaultMoveTarget(pEnemy->NearestPlayerDual(i % 2u)->GetPosition().xy(), LERPB(50.0f, 20.0f, MIN(pEnemy->GetLifeTime(), 1.0f)), 2.0f);
+            pEnemy->DefaultMoveTarget(pEnemy->NearestPlayerDual(i % 2u)->GetPosition().xy(), LERPB(50.0f, 20.0f, MIN1(pEnemy->GetLifeTime())), 2.0f);
 
             if(STAGE_LIFETIME_AFTER(0.4f) && STAGE_TICK_LIFETIME(6.0f, 0.0f))
             {

@@ -139,7 +139,7 @@ void cVausBoss::__MoveOwn()
 
                 if(fTime < 0.46f)
                 {
-                    this->DefaultMoveLerp(m_vLastPosition, m_vLastPosition + coreVector2(0.0f,0.3f), SIN(PI * LERPBR(0.0f, 1.0f, fTime / 0.46f)));
+                    this->DefaultMoveLerp(m_vLastPosition, m_vLastPosition + coreVector2(0.0f,0.3f), SIN(PI * BLENDBR(fTime / 0.46f)));
                 }
                 else
                 {

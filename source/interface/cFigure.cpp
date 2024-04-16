@@ -159,20 +159,31 @@ void cFigure::GlobalUpdate()
 // 
 coreHashString cFigure::DetermineTexture(const coreUint8 iBase)
 {
+#if defined(_CORE_SWITCH_)
+
+    return "input_gamepad_switch.png";
+
+#else
+
     switch(iBase)
     {
-    case FIGURE_BASE_KEYBOARD:                    return "input_keyboard.png";
-    case SDL_CONTROLLER_TYPE_XBOX360:             return "input_gamepad_xbox360.png";
-    case SDL_CONTROLLER_TYPE_XBOXONE:             return "input_gamepad_xboxone.png";
-    case SDL_CONTROLLER_TYPE_PS3:                 return "input_gamepad_ps3.png";
-    case SDL_CONTROLLER_TYPE_PS4:                 return "input_gamepad_ps4.png";
-    case SDL_CONTROLLER_TYPE_PS5:                 return "input_gamepad_ps5.png";
-    case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_PRO: return "input_gamepad_switch.png";
-    case SDL_CONTROLLER_TYPE_AMAZON_LUNA:         return "input_gamepad_luna.png";
-    case SDL_CONTROLLER_TYPE_GOOGLE_STADIA:       return "input_gamepad_stadia.png";
-    case CORE_INPUT_TYPE_STEAM:                   return "input_gamepad_steamdeck.png";
-    default:                                      return "input_gamepad_xboxone.png";
+    case FIGURE_BASE_KEYBOARD:                             return "input_keyboard.png";
+    case SDL_CONTROLLER_TYPE_XBOX360:                      return "input_gamepad_xbox360.png";
+    case SDL_CONTROLLER_TYPE_XBOXONE:                      return "input_gamepad_xboxone.png";
+    case SDL_CONTROLLER_TYPE_PS3:                          return "input_gamepad_ps3.png";
+    case SDL_CONTROLLER_TYPE_PS4:                          return "input_gamepad_ps4.png";
+    case SDL_CONTROLLER_TYPE_PS5:                          return "input_gamepad_ps5.png";
+    case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_PRO:          return "input_gamepad_switch.png";
+    case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_JOYCON_LEFT:  return "input_gamepad_switch.png";
+    case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_JOYCON_RIGHT: return "input_gamepad_switch.png";
+    case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_JOYCON_PAIR:  return "input_gamepad_switch.png";
+    case SDL_CONTROLLER_TYPE_AMAZON_LUNA:                  return "input_gamepad_luna.png";
+    case SDL_CONTROLLER_TYPE_GOOGLE_STADIA:                return "input_gamepad_stadia.png";
+    case CORE_INPUT_TYPE_STEAM:                            return "input_gamepad_steamdeck.png";
+    default:                                               return "input_gamepad_xboxone.png";
     }
+
+#endif
 }
 
 

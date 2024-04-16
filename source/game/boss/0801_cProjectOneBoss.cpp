@@ -368,7 +368,7 @@ void cProjectOneBoss::__ResurrectOwn()
 {
     // 
     this->__SwitchHealth(9u);
-    this->__SwitchColor (7u, false);
+    this->__SwitchColor (7u, false, false);
 
     // 
     this->_ResurrectBoss();
@@ -601,7 +601,7 @@ void cProjectOneBoss::__MoveOwn()
         PHASE_CONTROL_PAUSE(0u, 0.7f)
         {
             PHASE_CHANGE_TO(30u)
-            //if(DEFINED(_CORE_DEBUG_)) PHASE_CHANGE_TO(40u)                                                                                        
+            if(DEFINED(_CORE_DEBUG_)) PHASE_CHANGE_TO(40u)                                                                                        
         });
     }
 
@@ -870,7 +870,7 @@ void cProjectOneBoss::__MoveOwn()
             
             g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_BIG, 250u);
 
-            //this->__SwitchColor(9u, true);
+            //this->__SwitchColor(9u, true, true);
             //m_vColorFrom = m_vColorTo;   // was overridden
 
             d_cast<cAterMission*>(g_pGame->GetCurMission())->TransformPlayers();
@@ -1142,7 +1142,7 @@ void cProjectOneBoss::__MoveOwn()
             ADD_BIT(m_iHelperState, iIndex)
 
             this->__SwitchHealth(iIndex);
-            this->__SwitchColor (iIndex, true);
+            this->__SwitchColor (iIndex, true, true);
             this->__StartMission(iIndex);
 
             for(coreUintW i = 0u; i < PROJECTONE_SHIELDS; ++i)
@@ -1222,7 +1222,7 @@ void cProjectOneBoss::__MoveOwn()
             this->__RequestMission(8u);
 
             this->__SwitchHealth(8u);
-            this->__SwitchColor (8u, true);
+            this->__SwitchColor (8u, true, true);
             this->__StartMission(8u);
 
             this->__StartFeeling();
@@ -4647,6 +4647,17 @@ void cProjectOneBoss::__MoveGreen()
         this->__EndExplosion(true);
     }
 
+    for(coreUintW i = 0u; i < VIRIDO_HINTS; ++i)
+    {
+        // 4 1 6
+        // 7   3
+        // 2 5 8
+        constexpr coreUint16 aiHintActive[] = {BIT(8u), BIT(0u), BIT(10u) | BIT(11u), BIT(4u), BIT(9u), BIT(5u), BIT(6u) | BIT(7u), BIT(1u)};
+        constexpr coreUint16 iHintZero      = (BIT(2u) | BIT(3u));
+
+        pVirido->SetHintActive(i, HAS_BIT(m_aiCounter[JUMP_COUNT] ? (aiHintActive[(m_aiCounter[JUMP_COUNT] - 1u) % ARRAY_SIZE(aiHintActive)]) : iHintZero, i));
+    }
+
     const coreVector2 vMove = this->NearestPlayerDual(1u)->GetMove() * -0.5f;
 
     g_pGame->GetBulletManagerEnemy()->ForEachBulletTyped<cQuadBullet>([&](cQuadBullet* OUTPUT pBullet)
@@ -4866,7 +4877,7 @@ void cProjectOneBoss::__MoveWhite()
             {
                 PHASE_CHANGE_TO(11u)
 
-                this->__SwitchColor(9u, false);
+                this->__SwitchColor(9u, false, true);
 
                 g_pSpecialEffects->MacroExplosionDarkBig(this->GetPosition());
                 g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_09);
@@ -5316,7 +5327,7 @@ void cProjectOneBoss::__SwitchHealth(const coreUintW iIndex)
 
 // ****************************************************************
 // 
-void cProjectOneBoss::__SwitchColor(const coreUintW iIndex, const coreBool bWave)
+void cProjectOneBoss::__SwitchColor(const coreUintW iIndex, const coreBool bWave, const coreBool bMenu)
 {
     coreVector3 vEnergyColor, vBlockColor, vLevelColor, vBackColor, vLedColor;
     cProjectOneBoss::CalcColor(iIndex, &vEnergyColor, &vBlockColor, &vLevelColor, &vBackColor, &vLedColor);
@@ -5324,12 +5335,8 @@ void cProjectOneBoss::__SwitchColor(const coreUintW iIndex, const coreBool bWave
     // 
     this->__SetEnergyColor(vEnergyColor);
 
-    // 
-    m_vLevelColor = vLevelColor;
 
     // 
-    d_cast<cDarkBackground*>(g_pEnvironment->GetBackground())->SetColor(vBackColor, vLevelColor);
-
     if(bWave)
     {
         m_fWaveValue = 0.05f;
@@ -5339,6 +5346,14 @@ void cProjectOneBoss::__SwitchColor(const coreUintW iIndex, const coreBool bWave
 
         m_fPatternValue = 0.0f;
         m_iPatternType  = iIndex + 1u;
+    }
+
+    // 
+    if(bMenu)
+    {
+        m_vLevelColor = vLevelColor;
+
+        d_cast<cDarkBackground*>(g_pEnvironment->GetBackground())->SetColor(vBackColor, vLevelColor);
     }
 }
 
@@ -5533,7 +5548,7 @@ void cProjectOneBoss::__EndExplosion(const coreBool bClear)
     if(coreMath::PopCount(m_iHelperState) == (g_pGame->IsEasy() ? 4u : 6u))
     {
         this->__SwitchHealth(10u);
-        this->__SwitchColor (9u, false);
+        this->__SwitchColor (9u, false, true);
 
         m_bDead = true;
 

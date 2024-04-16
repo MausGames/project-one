@@ -39,6 +39,7 @@ cViridoMission::cViridoMission()noexcept
 , m_iShadowType     (0u)
 , m_Hint            (VIRIDO_HINTS)
 , m_aiHintBarrier   {}
+, m_iHintActive     (0u)
 , m_Bean            (VIRIDO_BEANS)
 , m_BeanWave        (VIRIDO_BEANS)
 , m_aiDrumCount     {}
@@ -183,7 +184,6 @@ cViridoMission::cViridoMission()noexcept
             pHint->DefineProgram("effect_energy_flat_invert_program");
 
             // set object properties
-            pHint->SetSize   (coreVector3(1.0f,1.0f,1.0f) * 2.0f);
             pHint->SetColor3 (COLOR_ENERGY_BLUE);
             pHint->SetTexSize(coreVector2(0.5f,0.2f) * 1.2f);
             pHint->SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
@@ -562,6 +562,10 @@ void cViridoMission::EnableHint(const coreUintW iIndex, const coreUintW iBarrier
 
     // 
     m_aiHintBarrier[iIndex] = iBarrier;
+
+    // 
+    REMOVE_BIT(m_iHintActive, iIndex)
+    STATIC_ASSERT(VIRIDO_HINTS <= sizeof(m_iHintActive)*8u)
 
     // 
     oHint.SetAlpha  (0.0f);
@@ -1350,12 +1354,14 @@ void cViridoMission::__MoveOwnAfter()
         if(!m_aBarrierRaw[iIndex].IsEnabled(CORE_OBJECT_ENABLE_MOVE)) this->DisableHint(i, false);
 
         // 
-        const coreFloat fOffset = I_TO_F(i) * (1.0f/8.0f);
+        const coreFloat fOffset = I_TO_F(i) * (1.0f/12.0f);
+        const coreBool  bActive = HAS_BIT(m_iHintActive, i);
 
         // 
         oHint.SetPosition (coreVector3(vBasePos - vBaseDir * 7.0f, 0.0f));
         oHint.SetDirection(coreVector3(vBaseDir,                   0.0f));
-        oHint.SetAlpha    (fBaseAlpha * 0.5f);
+        oHint.SetSize     (coreVector3(1.0f,1.0f,1.0f) * (bActive ? 2.5f : 1.9f));
+        oHint.SetAlpha    (fBaseAlpha                  * (bActive ? 1.0f : 0.5f));
         oHint.SetTexOffset(coreVector2(FRACT(0.6f * m_fAnimation + fOffset), 0.0f));
     }
 

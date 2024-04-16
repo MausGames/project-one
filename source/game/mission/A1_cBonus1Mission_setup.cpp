@@ -170,7 +170,7 @@ void cBonus1Mission::__SetupOwn()
 
         if(fBeamDuration)
         {
-            fBeamDuration = MAX(fBeamDuration - 1.0f * TIME, 0.0f);
+            fBeamDuration = MAX0(fBeamDuration - 1.0f * TIME);
             if(!fBeamDuration)
             {
                 this->FadeBeam(false, fBeamFade);
@@ -210,7 +210,7 @@ void cBonus1Mission::__SetupOwn()
 
         if(m_iStageSub >= 2u)
         {
-            fShelterTime = MIN(fShelterTime + 0.3f * TIME, 1.0f);
+            fShelterTime = MIN1(fShelterTime + 0.3f * TIME);
         }
         
         const coreFloat fOffset = 1.0f * SIN(m_fStageTime * (0.2f*PI));

@@ -1494,7 +1494,7 @@ void cRepairEnemy::__MoveOwn()
     this->SetDirection(coreVector3(vNewDir, 0.0f));
 
     // 
-    const coreFloat fAlpha = MIN(m_Bubble.GetAlpha() + 4.0f * TIME, 1.0f);
+    const coreFloat fAlpha = MIN1(m_Bubble.GetAlpha() + 4.0f * TIME);
 
     // 
     m_Bubble.SetPosition (coreVector3(vNewPos, 0.0f));

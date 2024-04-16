@@ -1005,7 +1005,7 @@ void cGeluMission::__MoveOwnAfter()
         // 
         oGap.SetSize     (coreVector3(1.0f,1.0f,1.0f) * 6.0f * LERP(1.2f, 1.0f, m_afGapTime[i]));
         oGap.SetDirection(coreVector3(coreVector2::Direction(m_fAnimation * (-4.0f*PI) + fOffset * (2.0f*PI)), 0.0f));
-        oGap.SetAlpha    (LERPH3(0.0f, 1.0f, m_afGapTime[i]));
+        oGap.SetAlpha    (BLENDH3(m_afGapTime[i]));
         oGap.SetTexOffset(coreVector2(0.0f, FRACT(-0.3f * m_fAnimation + fOffset)));
     }
 
@@ -1033,7 +1033,7 @@ void cGeluMission::__MoveOwnAfter()
         oShine.SetPosition (m_aOrbRaw[i].GetPosition());
         oShine.SetSize     (coreVector3(1.0f,1.0f,1.0f) * 3.5f * LERP(1.5f, 1.0f, m_afShineTime[i]));
         oShine.SetDirection(coreVector3(vDir, 0.0f));
-        oShine.SetAlpha    (LERPH3(0.0f, 1.0f, m_afShineTime[i]));
+        oShine.SetAlpha    (BLENDH3(m_afShineTime[i]));
         oShine.SetTexOffset(coreVector2(0.0f, FRACT(0.2f * m_fAnimation + fOffset)));
 
         STATIC_ASSERT(GELU_SHINES <= GELU_ORBS)

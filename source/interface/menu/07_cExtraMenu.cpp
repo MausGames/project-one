@@ -486,6 +486,9 @@ void cExtraMenu::Move()
             if(pCreditRoll->GetFinished() || g_MenuInput.bCancel)
             {
                 // 
+                pCreditRoll->End();
+
+                // 
                 g_pMenu->ShiftSurface(this, SURFACE_EXTRA_OTHER, 3.0f, 2u);
             }
         }

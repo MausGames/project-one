@@ -13,6 +13,7 @@
 // constructor
 cGrassBackground::cGrassBackground()noexcept
 : m_fLeafTime (Core::Rand->Float(10.0f))
+, m_fOffset   (0.0f)
 , m_Loaded    ()
 {
     coreBatchList* pList1;
@@ -355,7 +356,7 @@ cGrassBackground::cGrassBackground()noexcept
     }
 
     // allocate cloud list
-    pList1 = new coreBatchList(GRASS_CLOUD_RESERVE);
+    pList1 = new coreBatchList(GRASS_CLOUD_1_RESERVE);
     pList1->DefineProgram("environment_clouds_inst_program");
     {
         // load object resources
@@ -364,10 +365,10 @@ cGrassBackground::cGrassBackground()noexcept
         oBase.DefineTexture(0u, "environment_clouds_mid.png");
         oBase.DefineProgram("environment_clouds_program");
 
-        for(coreUintW i = 0u; i < GRASS_CLOUD_NUM; ++i)
+        for(coreUintW i = 0u; i < GRASS_CLOUD_1_NUM; ++i)
         {
             // calculate position and height
-            const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(0.1f, 0.25f) * ((i % 2u) ? 1.0f : -1.0f), i, GRASS_CLOUD_NUM);
+            const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(0.05f, 0.25f) * ((i % 2u) ? 1.0f : -1.0f), i, GRASS_CLOUD_1_NUM);
             const coreFloat   fHeight   = Core::Rand->Float(20.0f, 60.0f);
 
             // create object
@@ -386,17 +387,65 @@ cGrassBackground::cGrassBackground()noexcept
         }
 
         // post-process list and add to the air
-        cBackground::_FillInfinite   (pList1, GRASS_CLOUD_RESERVE);
+        cBackground::_FillInfinite   (pList1, GRASS_CLOUD_1_RESERVE);
         cBackground::_SortBackToFront(pList1);
         m_apAirObjectList.push_back(pList1);
 
-        ASSERT(pList1->GetCurCapacity() == GRASS_CLOUD_RESERVE)
+        ASSERT(pList1->GetCurCapacity() == GRASS_CLOUD_1_RESERVE)
     }
+
+    // allocate cloud list
+    pList1 = new coreBatchList(GRASS_CLOUD_2_RESERVE);
+    pList1->DefineProgram("environment_clouds_inst_program");
+    {
+        // load object resources
+        coreObject3D oBase;
+        oBase.DefineModel  (Core::Manager::Object->GetLowQuad());
+        oBase.DefineTexture(0u, "environment_clouds_mid.png");
+        oBase.DefineProgram("environment_clouds_program");
+
+        for(coreUintW i = 0u; i < GRASS_CLOUD_2_NUM; ++i)
+        {
+            // calculate position and height
+            const coreVector2 vPosition = __BACKGROUND_SCANLINE(Core::Rand->Float(0.0f, 0.2f) * ((i % 2u) ? 1.0f : -1.0f), i, GRASS_CLOUD_2_NUM);
+            const coreFloat   fHeight   = Core::Rand->Float(20.0f, 60.0f);
+
+            // create object
+            coreObject3D* pObject = POOLED_NEW(s_MemoryPool, coreObject3D, oBase);
+
+            // set object properties
+            pObject->SetPosition (coreVector3(vPosition, fHeight));
+            pObject->SetSize     (coreVector3(coreVector2(2.4f,2.4f) * Core::Rand->Float(15.0f, 21.0f), 1.0f));
+            pObject->SetDirection(coreVector3(coreVector2::Rand(), 0.0f));
+            pObject->SetColor3   (coreVector3(1.0f,1.0f,1.0f) * MIN1(0.0f + 1.0f * fHeight/50.0f));
+            pObject->SetAlpha    (0.85f);
+            pObject->SetTexOffset(coreVector2::Rand(0.0f,4.0f, 0.0f,4.0f));
+
+            // add object to the list
+            pList1->BindObject(pObject);
+        }
+
+        // post-process list and add to the air
+        cBackground::_FillInfinite   (pList1, GRASS_CLOUD_2_RESERVE);
+        cBackground::_SortBackToFront(pList1);
+        m_apAirObjectList.push_back(pList1);
+
+        ASSERT(pList1->GetCurCapacity() == GRASS_CLOUD_2_RESERVE)
+    }
+
+    // 
+    m_Cover.DefineTexture(0u, "environment_clouds_grey.png");
+    m_Cover.DefineProgram("menu_grey_program");
+    m_Cover.SetPosition  (coreVector2(0.0f,0.0f));
+    m_Cover.SetSize      (coreVector2(1.0f,1.0f) * SQRT2);
+    m_Cover.SetTexSize   (coreVector2(1.0f,1.0f) * SQRT2 * 1.2f);
+    m_Cover.SetAlpha     (0.0f);
+    m_Cover.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 
     // 
     this->SetGroundDensity(3u, 0.0f);
     this->SetGroundDensity(4u, 0.0f);
-    this->SetAirDensity   (1u, 0.1f);
+    this->SetAirDensity   (2u, 0.0f);
 }
 
 
@@ -413,7 +462,7 @@ cGrassBackground::~cGrassBackground()
 // 
 void cGrassBackground::__InitOwn()
 {
-    m_Loaded.Unlock();
+    m_Loaded.Release();
     
     // create water-surface object
     m_pWater = new cWater("environment_clouds_blue.png");
@@ -423,7 +472,7 @@ void cGrassBackground::__InitOwn()
     m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
         pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
-        m_Loaded.Lock();
+        m_Loaded.Acquire();
     });
 }
 
@@ -438,9 +487,25 @@ void cGrassBackground::__ExitOwn()
     // stop base sound-effect
     m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
-        if(m_Loaded.IsLocked() && pResource->EnableRef(this))
+        if(m_Loaded && pResource->EnableRef(this))
             pResource->Stop();
     });
+}
+
+
+// ****************************************************************
+// 
+void cGrassBackground::__RenderOwnBefore()
+{
+    if(m_Cover.IsEnabled(CORE_OBJECT_ENABLE_RENDER))
+    {
+        glDisable(GL_DEPTH_TEST);
+        {
+            // 
+            m_Cover.Render();
+        }
+        glEnable(GL_DEPTH_TEST);
+    }
 }
 
 
@@ -459,7 +524,7 @@ void cGrassBackground::__MoveOwn()
 
         // 
         const coreFloat fOffset = I_TO_F(POW2(i) % m_iLeafNum);
-        const coreFloat fTime   = m_fLeafTime * ((i % 2u) ? 1.0f : -1.0f) + fOffset;
+        const coreFloat fTime   = m_fLeafTime * ((i % 2u) ? 1.1f : -0.8f) + fOffset;
         const coreFloat fPos    = SIN(fTime * 0.05f + fOffset) * (I_TO_F(OUTDOOR_WIDTH) * OUTDOOR_DETAIL * 0.2f);
 
         // 
@@ -485,23 +550,44 @@ void cGrassBackground::__MoveOwn()
     }
     pList->MoveNormal();
 
+    // 
+    m_fOffset.Update(-0.08f * g_pEnvironment->GetSpeed());
+
+    // 
+    m_Cover.SetDirection(g_pEnvironment->GetDirection().InvertedX());
+    m_Cover.SetColor3   (coreVector3(1.0f,1.0f,1.0f) * LERP(0.9f, 0.5f, m_Cover.GetAlpha()));
+    m_Cover.SetTexOffset(coreVector2(0.005f * g_pEnvironment->GetSideOffset(), FRACT(m_fOffset)));
+    m_Cover.SetEnabled  (m_Cover.GetAlpha() ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+    m_Cover.Move();
+
     // adjust volume of the base sound-effect
-    if(m_Loaded.IsLocked() && m_pBaseSound->EnableRef(this))
+    if(m_Loaded && m_pBaseSound->EnableRef(this))
     {
         m_pBaseSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this));
     }
     
     
     
-    const coreFloat fCloudMove = 0.0016f * (1.0f + ABS(g_pEnvironment->GetSpeed())) * TIME;
+    const coreFloat fCloudMove = 0.0018f * (1.0f + ABS(g_pEnvironment->GetSpeed())) * TIME;
 
     pList = m_apAirObjectList[1];
     for(coreUintW i = 0u, ie = pList->List()->size(); i < ie; ++i)
     {
         coreObject3D* pCloud = (*pList->List())[i];
-        pCloud->SetTexOffset((pCloud->GetTexOffset() + MapToAxis(coreVector2(fCloudMove * ((FRACT(pCloud->GetPosition().z) < 0.5f) ? -1.0f : 1.0f), 0.0f), pCloud->GetDirection().xy())).Processed(FRACT));
+        pCloud->SetTexOffset((pCloud->GetTexOffset() + MapToAxis(coreVector2(fCloudMove * ((pCloud->GetDirection().x < 0.0f) ? -1.0f : 1.0f), 0.0f), pCloud->GetDirection().xy())).Processed(FRACT));
     }
     pList->MoveNormal();
+
+    pList = m_apAirObjectList[2];
+    if(pList->GetCurEnabled())
+    {
+        for(coreUintW i = 0u, ie = pList->List()->size(); i < ie; ++i)
+        {
+            coreObject3D* pCloud = (*pList->List())[i];
+            pCloud->SetTexOffset((pCloud->GetTexOffset() + MapToAxis(coreVector2(fCloudMove * ((pCloud->GetDirection().x < 0.0f) ? -1.0f : 1.0f), 0.0f), pCloud->GetDirection().xy())).Processed(FRACT));
+        }
+        pList->MoveNormal();
+    }
 }
 
 

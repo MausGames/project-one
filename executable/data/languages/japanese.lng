@@ -31,6 +31,9 @@ $UNLOCKED = アンロック
 $NEW = NEW
 $UNKNOWN = ???
 
+$LOADING = ロード中 ...
+$SAVING = セーブ中 ...
+
 $PLAYER = プレイヤー
 $MISSION = エリア
 $SEGMENT = ステージ

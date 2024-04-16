@@ -473,7 +473,7 @@ void cGeluMission::__SetupOwn()
                             g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_BIG, 250u);
                         }
 
-                        vNewPos.y = MAX(vNewPos.y, 0.0f);
+                        vNewPos.y = MAX0(vNewPos.y);
                     }
 
                     if(vNewPos.y < -1.3f * FOREGROUND_AREA.y)
@@ -858,23 +858,23 @@ void cGeluMission::__SetupOwn()
             }
             else if(m_iStageSub == 2u)
             {
-                afOffTarget[0] = LERPBR(0.0f, fBase * 2.0f, CLAMP(m_fStageSubTime / 1.5f, 0.0f, 1.0f));
+                afOffTarget[0] = LERPBR(0.0f, fBase * 2.0f, CLAMP01(m_fStageSubTime / 1.5f));
 
                 if(STAGE_SUBTIME_POINT(0.0f)) nFlashFunc(BIT(0u));
                 if(STAGE_SUBTIME_POINT(1.5f)) nShakeFunc();
             }
             else if(m_iStageSub == 3u)
             {
-                afOffTarget[0] = LERPBR(fBase * 2.0f, 0.0f,         CLAMP((m_fStageSubTime),               0.0f, 1.0f));
-                afOffTarget[1] = LERPBR(0.0f,         fBase * 2.0f, CLAMP((m_fStageSubTime - 1.0f) / 1.5f, 0.0f, 1.0f));
+                afOffTarget[0] = LERPBR(fBase * 2.0f, 0.0f,         CLAMP01((m_fStageSubTime)));
+                afOffTarget[1] = LERPBR(0.0f,         fBase * 2.0f, CLAMP01((m_fStageSubTime - 1.0f) / 1.5f));
 
                 if(STAGE_SUBTIME_POINT(1.0f)) nFlashFunc(BIT(1u));
                 if(STAGE_SUBTIME_POINT(1.0f) || STAGE_SUBTIME_POINT(2.5f)) nShakeFunc();
             }
             else if(m_iStageSub == 4u)
             {
-                afOffTarget[1] = LERPBR(fBase * 2.0f, 0.0f,         CLAMP((m_fStageSubTime),               0.0f, 1.0f));
-                afOffTarget[2] = LERPBR(0.0f,         fBase * 1.0f, CLAMP((m_fStageSubTime - 1.0f) / 1.5f, 0.0f, 1.0f));
+                afOffTarget[1] = LERPBR(fBase * 2.0f, 0.0f,         CLAMP01((m_fStageSubTime)));
+                afOffTarget[2] = LERPBR(0.0f,         fBase * 1.0f, CLAMP01((m_fStageSubTime - 1.0f) / 1.5f));
                 afOffTarget[3] = afOffTarget[2];
 
                 if(STAGE_SUBTIME_POINT(1.0f)) nFlashFunc(BIT(2u) + BIT(3u));
@@ -916,7 +916,7 @@ void cGeluMission::__SetupOwn()
                     }
                     else if(STAGE_SUBTIME_BEFORE(3.0f))
                     {
-                        afOffTarget[0] = LERPBR(0.0f, fBase, CLAMP((m_fStageSubTime - 1.5f) / 1.5f, 0.0f, 1.0f));
+                        afOffTarget[0] = LERPBR(0.0f, fBase, CLAMP01((m_fStageSubTime - 1.5f) / 1.5f));
                         afOffTarget[1] = afOffTarget[0];
                     }
                     else if(STAGE_SUBTIME_BEFORE(12.0f))
@@ -943,7 +943,7 @@ void cGeluMission::__SetupOwn()
                     }
                     else
                     {
-                        afOffTarget[0] = LERPBR(fBase + 0.1f, 0.0f, CLAMP(m_fStageSubTime - 12.0f, 0.0f, 1.0f));
+                        afOffTarget[0] = LERPBR(fBase + 0.1f, 0.0f, CLAMP01(m_fStageSubTime - 12.0f));
                         afOffTarget[1] = afOffTarget[0];
                         afOffTarget[2] = afOffTarget[0];
                         afOffTarget[3] = afOffTarget[0];
@@ -3414,8 +3414,8 @@ void cGeluMission::__SetupOwn()
                 const coreVector2 vDiff = vEnemyPos - vPlayerPos;
                 const coreVector2 vDir  = vDiff.Normalized();
                 const coreFloat   fLen  = vDiff.Length();
-                const coreFloat   fStr  = MAX(24.0f - fLen, 0.0f) / 24.0f;
-                const coreFloat   fDot  = vEnemyMove.IsNull() ? 0.5f : MAX(coreVector2::Dot(vDir, -vEnemyMove.Normalized()), 0.0f);
+                const coreFloat   fStr  = MAX0(24.0f - fLen) / 24.0f;
+                const coreFloat   fDot  = vEnemyMove.IsNull() ? 0.5f : MAX0(coreVector2::Dot(vDir, -vEnemyMove.Normalized()));
 
                 const coreVector2 vRealTarget = LERP(vWrap, vEnemyPos + vDir * 35.0f, fStr*0.0f);
                 const coreVector2 vChange     = vRealTarget - vEnemyPos;

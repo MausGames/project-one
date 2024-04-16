@@ -1219,8 +1219,8 @@ void cTigerBoss::__MoveOwn()
         const coreFloat   fShift = I_TO_F(i % TIGER_STINGS_SIDE) - I_TO_F(TIGER_STINGS_SIDE - 1u) * 0.5f;
 
         const coreUintW iIndex      = i / TIGER_STINGS_SIDE;
-        const coreFloat fPrevExtend = CLAMP((afPrevStingTime[iIndex] - ABS(fShift) - 1.0f) * 0.3f, 0.0f, 1.0f);
-        const coreFloat fExtend     = CLAMP((m_afStingTime  [iIndex] - ABS(fShift) - 1.0f) * 0.3f, 0.0f, 1.0f);
+        const coreFloat fPrevExtend = CLAMP01((afPrevStingTime[iIndex] - ABS(fShift) - 1.0f) * 0.3f);
+        const coreFloat fExtend     = CLAMP01((m_afStingTime  [iIndex] - ABS(fShift) - 1.0f) * 0.3f);
 
         const coreVector2 vBase = (vSide.Rotated90() * (fShift * 0.062f) + vSide) * FOREGROUND_AREA * 1.15f;
         const coreVector2 vDir  = (-vBase.Normalized() + 0.5f * coreVector2(oStingRand.Float(-1.0f, 1.0f), oStingRand.Float(-1.0f, 1.0f)).Normalized()).Normalized();
@@ -1268,7 +1268,7 @@ void cTigerBoss::__MoveOwn()
     if(m_fPushPower)
     {
         // 
-        const coreFloat fPower = LERPH3(0.0f, 1.0f, m_fPushPower);
+        const coreFloat fPower = BLENDH3(m_fPushPower);
 
         // 
         const coreVector2 vRealPushDir = MapToAxis(m_avPushDir[1], vEnvDirection);

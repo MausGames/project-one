@@ -53,9 +53,11 @@ alignas(ALIGNMENT_CACHE) static constexpr const coreChar* g_aapcCreditEntry[][2]
     {"Martin Filipp",                             "$THANKS"},
     {"Martin Mauersics",                          "$DESIGNER, $PROGRAMMER"},
     {"Michael Hartinger",                         "$THANKS"},
+    {"Michaela Orfandl",                          "$THANKS"},
     {"Miho Miyazaki (DICO Co., Ltd.)",            "$LOCA - 日本語"},
     {"Murilo Martins (Locsmiths)",                "$LOCA - Português (Brasil)"},
     {"Neil Doppelmayr",                           "$THANKS"},
+    {"Nikmik aka Mirko",                          "$THANKS"},
     {"Oliver Bisztyga",                           "$THANKS"},
     {"Rainer Petermann",                          "$THANKS"},
     {"Ricardo Nakaoka (Locsmiths)",               "$LOCA - Português (Brasil)"},
@@ -155,6 +157,7 @@ private:
     coreViewBox m_ViewBox;                                   // 
 
     cGuiObject m_GameLogo;                                   // 
+    cGuiObject m_GameLogoKana;                               // 
 
     cGuiLabel m_aName       [CREDIT_ENTRIES];                // 
     cGuiLabel m_aDescription[CREDIT_ENTRIES];                // 
@@ -190,6 +193,7 @@ public:
 
     // 
     void Start(const eCreditType eType);
+    void End();
 
     // 
     inline const eCreditType& GetType    ()const {return m_eType;}

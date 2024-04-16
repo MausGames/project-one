@@ -19,10 +19,9 @@
 // TODO 3: last-used input type might get disconnected, without reset
 // TODO 3: how to properly go back to the correct last-input keyboard, if player just uses mouse, currently it's initialized to 0, but gets set to the set with the mouse-button when navigating menu with mouse
 // TODO 3: HRTF from core-config (improves spatial acuity with headphones, makes only sense with 3D sound)
-// TODO 3: weitere optionen: particle effects (%)
 // TODO 3: EMSCRIPTEN: gamepad calibration feature required, buttons on different gamepads are always different -> man muss aber alle buttons sehn können, damit man fire-up, fire-down etc. versteht  (or warning: gamepads might not work properly, due to browser limitations, for better support, please download the desktop versions for Windows, Linux, or macOS
 // TODO 3: on very first startup, lowest resampler is selected, even when high sound quality is default
-// TODO 1: [MF] [HIGH] new options (need loca): dynamic fade-out
+// TODO 1: [MF] [HIGH] new options (need loca): particle effects (%)
 
 
 // ****************************************************************
@@ -95,7 +94,11 @@ STATIC_ASSERT(INPUT_KEYS_ACTION <= sizeof(coreUint8)*8u)
 #define DEFAULT_JOYSTICK_MOVE_LEFT    (0)
 #define DEFAULT_JOYSTICK_MOVE_DOWN    (0)
 #define DEFAULT_JOYSTICK_MOVE_RIGHT   (0)
+#if defined(_CORE_SWITCH_)
+#define DEFAULT_JOYSTICK_ACTION(n)    (((n) == 0u) ? SDL_CONTROLLER_BUTTON_A : (((n) == 1u) ? SDL_CONTROLLER_BUTTON_LEFTSHOULDER : (((n) == 2u) ? SDL_CONTROLLER_BUTTON_RIGHTSHOULDER : ((n) == 3u) ? SDL_CONTROLLER_BUTTON_X : ((n) == 4u) ? SDL_CONTROLLER_BUTTON_Y : ((n) == 5u) ? SDL_CONTROLLER_BUTTON_B : ((n) == 6u) ? SDL_CONTROLLER_BUTTON_A : SDL_CONTROLLER_BUTTON_START)))
+#else
 #define DEFAULT_JOYSTICK_ACTION(n)    (((n) == 0u) ? SDL_CONTROLLER_BUTTON_A : (((n) == 1u) ? SDL_CONTROLLER_BUTTON_LEFTSHOULDER : (((n) == 2u) ? SDL_CONTROLLER_BUTTON_RIGHTSHOULDER : ((n) == 3u) ? SDL_CONTROLLER_BUTTON_Y : ((n) == 4u) ? SDL_CONTROLLER_BUTTON_X : ((n) == 5u) ? SDL_CONTROLLER_BUTTON_A : ((n) == 6u) ? SDL_CONTROLLER_BUTTON_B : SDL_CONTROLLER_BUTTON_START)))
+#endif
 
 #define DEFAULT_MOVE_UP(x)            (((x) == 0u) ? DEFAULT_KEYBOARD_1_MOVE_UP    : ((x) == 1u) ? DEFAULT_KEYBOARD_2_MOVE_UP    : DEFAULT_JOYSTICK_MOVE_UP)
 #define DEFAULT_MOVE_LEFT(x)          (((x) == 0u) ? DEFAULT_KEYBOARD_1_MOVE_LEFT  : ((x) == 1u) ? DEFAULT_KEYBOARD_2_MOVE_LEFT  : DEFAULT_JOYSTICK_MOVE_LEFT)

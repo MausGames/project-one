@@ -367,6 +367,7 @@ public:
 
     DISABLE_COPY(cMission)
     ENABLE_ID
+    ENABLE_EXTRA
 
     // setup the mission
     void Setup(const coreUint8 iTakeFrom, const coreUint8 iTakeTo);
@@ -486,6 +487,7 @@ public:
 
     DISABLE_COPY(cNoMission)
     ASSIGN_ID(0, "NOTHING")
+    ASSIGN_EXTRA("")
 };
 
 
@@ -535,6 +537,7 @@ private:
     coreBatchList m_Hint;                                   // 
     coreObject3D  m_aHintRaw     [VIRIDO_HINTS_RAWS];       // 
     coreUint8     m_aiHintBarrier[VIRIDO_HINTS_RAWS];       // 
+    coreUint16    m_iHintActive;                            // 
 
     coreBatchList m_Bean;                                   // 
     coreBatchList m_BeanWave;                               // 
@@ -567,6 +570,7 @@ public:
 
     DISABLE_COPY(cViridoMission)
     ASSIGN_ID(1, "VIRIDO")
+    ASSIGN_EXTRA("ビリッド")
 
     // 
     void EnableBall (const coreUintW iIndex, const coreVector2 vPosition, const coreVector2 vDirection);
@@ -622,6 +626,9 @@ public:
     // 
     inline void SetLaserIgnore(const coreUint8 iIgnore) {m_iLaserIgnore = iIgnore;}
     inline void SetLaserCross (const coreBool  bCross)  {m_bLaserCross  = bCross;}
+
+    // 
+    inline void SetHintActive(const coreUintW iIndex, const coreBool bActive) {ASSERT(iIndex < VIRIDO_HINTS) SET_BIT(m_iHintActive, iIndex, bActive)}
 
     // 
     inline void MakeReal    (const coreUintW iIndex)       {ADD_BIT(m_iRealState, iIndex)}
@@ -730,6 +737,7 @@ public:
 
     DISABLE_COPY(cNevoMission)
     ASSIGN_ID(2, "NEVO")
+    ASSIGN_EXTRA("ネボ")
 
     // 
     void EnableBomb (const coreUintW iIndex, const coreBool bGrow);
@@ -876,6 +884,7 @@ public:
 
     DISABLE_COPY(cHarenaMission)
     ASSIGN_ID(3, "HARENA")
+    ASSIGN_EXTRA("ハレーナ")
 
     // 
     void EnableFloor (const coreUintW iIndex, const cShip* pOwner, const coreFloat fScale);
@@ -1008,6 +1017,7 @@ public:
 
     DISABLE_COPY(cRutilusMission)
     ASSIGN_ID(4, "RUTILUS")
+    ASSIGN_EXTRA("ルーティルズ")
 
     // 
     void EnableTeleporter (const coreUintW iIndex);
@@ -1166,6 +1176,7 @@ public:
 
     DISABLE_COPY(cGeluMission)
     ASSIGN_ID(5, "GELU")
+    ASSIGN_EXTRA("ゲル")
 
     // 
     void EnableFang (const coreUintW iIndex);
@@ -1315,7 +1326,7 @@ private:
     coreObject3D m_aStoryRange[2];                    // 
     coreFlow     m_fStoryRangeAnim;                   // 
 
-    coreDummyPtr m_apResCache[19];                    // 
+    coreDummyPtr m_apResCache[20];                    // 
     coreSoundPtr m_pNightmareSound;                   // 
 
     coreFlow m_fAnimation;                            // animation value
@@ -1329,6 +1340,7 @@ public:
 
     DISABLE_COPY(cCalorMission)
     ASSIGN_ID(6, "CALOR")
+    ASSIGN_EXTRA("カーロル")
 
     // 
     void EnableSnow ();
@@ -1464,6 +1476,7 @@ public:
 
     DISABLE_COPY(cMuscusMission)
     ASSIGN_ID(7, "MUSCUS")
+    ASSIGN_EXTRA("マスカズ")
 
     // 
     void EnableGenerate (const coreUintW iIndex);
@@ -1553,6 +1566,7 @@ public:
 
     DISABLE_COPY(cAterMission)
     ASSIGN_ID(8, "ATER")
+    ASSIGN_EXTRA("アータ")
 
     // 
     void RequestInnerMission(const coreInt32 iID);
@@ -1604,6 +1618,7 @@ public:
 
     DISABLE_COPY(cIntroMission)
     ASSIGN_ID(99, "INTRO")
+    ASSIGN_EXTRA("イントロ")
 
     // 
     inline void EnableManual(const coreUintW iPlayerIndex, const coreUintW iManualIndex) {ASSERT(iPlayerIndex < MISSION_PLAYERS) ASSERT(iManualIndex < INTRO_MANUALS) m_aafManualTime[iPlayerIndex][iManualIndex] = 3.0f;}
@@ -1654,6 +1669,7 @@ public:
 
     DISABLE_COPY(cBonus1Mission)
     ASSIGN_ID(101, "BONUS 1")
+    ASSIGN_EXTRA("")
 
     // 
     void EnableShelter (const coreUintW iIndex);
@@ -1691,6 +1707,7 @@ public:
 
     DISABLE_COPY(cBonus2Mission)
     ASSIGN_ID(102, "BONUS 2")
+    ASSIGN_EXTRA("")
 
     // get object properties
     inline const coreChar* GetMusicName()const final {return "mission_10.ogg";}
@@ -1715,6 +1732,7 @@ public:
 
     DISABLE_COPY(cErrorMission)
     ASSIGN_ID(201, "ERROR")
+    ASSIGN_EXTRA("")
 
 
 private:
@@ -1737,6 +1755,7 @@ public:
 
     DISABLE_COPY(cDemoMission)
     ASSIGN_ID(202, "DEMO")
+    ASSIGN_EXTRA("")
 
 
 private:

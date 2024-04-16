@@ -317,6 +317,7 @@ void cCholBoss::__MoveOwn()
         PHASE_CONTROL_PAUSE(0u, 1.0f)
         {
             PHASE_CHANGE_TO(20u)
+            if(DEFINED(_CORE_DEBUG_)) PHASE_CHANGE_TO(70u)                                                              
         });
     }
 
@@ -1559,7 +1560,7 @@ void cCholBoss::__MoveOwn()
                     const coreVector2 vAim    = (vTarget - oWing.GetPosition().xy()).Normalized();
 
                     const coreVector2 vNewDir = SmoothAim(oWing.GetDirection().xy(), vAim, bThrow2 ? 1.0f : 5.0f);   // # no rota
-                    const coreVector2 vNewOri = coreVector2::Direction(LERPBR(0.0f*PI, 10.0f*PI, MIN(m_afWingTime[i] * (1.0f/3.0f), 1.0f)));
+                    const coreVector2 vNewOri = coreVector2::Direction(LERPBR(0.0f*PI, 10.0f*PI, MIN1(m_afWingTime[i] * (1.0f/3.0f))));
 
                     oWing.SetDirection  (coreVector3(vNewDir, 0.0f));
                     oWing.SetOrientation(OriRoundDir(vNewOri, vNewDir));
@@ -1649,7 +1650,7 @@ void cCholBoss::__MoveOwn()
 
             case 32u:
                 {
-                    const coreVector3 vNewPos = LERPH3(coreVector3(m_avWingReturn[i].xy(), 0.0f), vPos3, MIN(m_afWingTime[i], 1.0f));
+                    const coreVector3 vNewPos = LERPH3(coreVector3(m_avWingReturn[i].xy(), 0.0f), vPos3, MIN1(m_afWingTime[i]));
                     const coreVector3 vNewDir = coreVector3(MapToAxis(coreVector2::Direction(LERPH3(m_avWingReturn[i].z, fAngle3, MIN1(m_afWingTime[i]))), vBodyDirNorm), 0.0f);   // # no rota
 
                     oWing.SetPosition (vNewPos);
@@ -1691,8 +1692,8 @@ void cCholBoss::__MoveOwn()
             // spike
             case 51u:
                 {
-                    const coreVector3 vNewPos = LERPH3(vPos3, coreVector3((I_TO_F(i % 2u) + 0.5f) * 0.5f * fSide, -0.7f, 0.0f) * FOREGROUND_AREA3, MIN(m_afWingTime[i], 1.0f));
-                    const coreVector3 vNewDir = coreVector3(MapToAxis(coreVector2::Direction(LERPH3(fAngle3, 0.0f*PI, MIN(m_afWingTime[i], 1.0f))), vBodyDirNorm), 0.0f);   // # no rota
+                    const coreVector3 vNewPos = LERPH3(vPos3, coreVector3((I_TO_F(i % 2u) + 0.5f) * 0.5f * fSide, -0.7f, 0.0f) * FOREGROUND_AREA3, MIN1(m_afWingTime[i]));
+                    const coreVector3 vNewDir = coreVector3(MapToAxis(coreVector2::Direction(LERPH3(fAngle3, 0.0f*PI, MIN1(m_afWingTime[i]))), vBodyDirNorm), 0.0f);   // # no rota
 
                     oWing.SetPosition (vNewPos);
                     oWing.SetDirection(vNewDir);

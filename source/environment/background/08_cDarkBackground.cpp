@@ -114,14 +114,14 @@ void cDarkBackground::Dissolve()
 // 
 void cDarkBackground::__InitOwn()
 {
-    m_Loaded.Unlock();
+    m_Loaded.Release();
     
     // load base sound-effect
     m_pBaseSound = Core::Manager::Resource->Get<coreSound>("environment_dark.wav");
     m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
         pResource->PlayRelative(this, 0.0f, 1.0f, true, SOUND_AMBIENT);
-        m_Loaded.Lock();
+        m_Loaded.Acquire();
     });
 }
 
@@ -133,7 +133,7 @@ void cDarkBackground::__ExitOwn()
     // stop base sound-effect
     m_pBaseSound.OnUsableOnce([this, pResource = m_pBaseSound]()
     {
-        if(m_Loaded.IsLocked() && pResource->EnableRef(this))
+        if(m_Loaded && pResource->EnableRef(this))
             pResource->Stop();
     });
 }
@@ -257,7 +257,7 @@ void cDarkBackground::__MoveOwn()
     }
 
     // adjust volume of the base sound-effect
-    if(m_Loaded.IsLocked() && m_pBaseSound->EnableRef(this))
+    if(m_Loaded && m_pBaseSound->EnableRef(this))
     {
         m_pBaseSound->SetVolume(g_pEnvironment->RetrieveTransitionBlend(this) * (1.0f - STEP(0.0f, 10.0f, m_fDissolve)));
     }

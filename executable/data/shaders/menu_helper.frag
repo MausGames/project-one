@@ -23,7 +23,7 @@ void FragmentMain()
     float v1Alpha    = smoothstep(v_v1Threshold - v1Width, v_v1Threshold, v1Distance);
 
     // 
-    float v1Intensity = 1.05 - coreLengthSq(v_av2TexCoord[1]) * 0.1;
+    float v1Intensity = 1.06 - coreLengthSq(v_av2TexCoord[1]) * 0.12;
 
     // 
     gl_FragColor = vec4(vec3(v1Value * v1Intensity), v1Alpha) * u_v4Color;

@@ -227,6 +227,36 @@ void CoreApp::Render()
                 // clear the foreground
                 g_pForeground->Clear();
             }
+            
+            
+
+#if 0
+            static cPlayer s_Player;
+            if(s_Player.HasStatus(PLAYER_STATUS_DEAD))
+            {
+                s_Player.Configure(PLAYER_SHIP_P1);
+                s_Player.Resurrect();
+                s_Player.SetPosition(coreVector3(0.0f,0.0f,0.0f));
+                s_Player.SetDirection(coreVector3(0.0f,-1.0f,0.0f));
+                s_Player.SetScale   (5.0f);
+            }
+            s_Player.Move();
+            g_pForeground->Start();
+                glClearColor(1.0f,0.0f,1.0f,1.0f);
+                glClear(GL_COLOR_BUFFER_BIT);
+                glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+                glDepthRange(0.8f, 1.0f);
+                    s_Player.RenderBefore();
+                glDepthRange(0.6f, 0.8f);
+                    s_Player.Render();
+                    g_pOutline->GetStyle(OUTLINE_STYLE_FULL)->ApplyObject(&s_Player);
+                glDepthRange(0.4f, 0.6f);
+                    s_Player.RenderMiddle();
+                glDepthRange(0.2f, 0.4f);
+                    s_Player.RenderAfter();
+                glDepthRange(0.0f, 1.0f);
+            g_pForeground->End();
+#endif
         }
         Core::Debug->MeasureEnd("Foreground");
     }
@@ -646,7 +676,7 @@ static void DebugGame()
             for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
             {
                 oOptions.aiShield  [i]    = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(C), CORE_INPUT_HOLD) ? 20u : 0u;
-                oOptions.aaiWeapon [i][0] = cPulseWeapon::ID;
+                oOptions.aaiWeapon [i][0] = cRayWeapon::ID;
                 oOptions.aaiSupport[i][0] = 0u;
             }
 

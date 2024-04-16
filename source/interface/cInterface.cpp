@@ -210,7 +210,7 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
         m_aBannerIcon[i].DefineTexture(0u, "menu_helper.png");
         m_aBannerIcon[i].DefineProgram("menu_helper_program");
         m_aBannerIcon[i].SetPosition  (coreVector2(0.0f, 0.0f));
-        m_aBannerIcon[i].SetCenter    (coreVector2(0.0f, 0.02f));
+        m_aBannerIcon[i].SetCenter    (coreVector2(0.0f, INTERFACE_BANNER_HEIGHT));
         m_aBannerIcon[i].SetTexSize   (coreVector2(0.25f,0.25f));
     }
 
@@ -222,8 +222,22 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
     m_aBannerText[3].DefineTexture(2u, "menu_background_black.png");
 
     m_BannerExtra.Construct    (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
-    m_BannerExtra.DefineProgram("menu_swipe_program");
+    m_BannerExtra.DefineProgram("menu_swipe_label_program");
     m_BannerExtra.DefineTexture(2u, "menu_background_black.png");
+
+    m_aBannerLogo[0].DefineTexture(0u, "game_logo.png");
+    m_aBannerLogo[0].DefineTexture(2u, "menu_background_black.png");
+    m_aBannerLogo[0].DefineProgram("menu_swipe_program");
+    m_aBannerLogo[0].SetPosition  (coreVector2(0.0f,0.065f) * (0.8f/1.0f));
+    m_aBannerLogo[0].SetSize      (coreVector2(1.0f,0.25f) * 0.8f * (0.8f/1.0f));
+    m_aBannerLogo[0].SetColor3    (COLOR_MENU_INSIDE);
+
+    m_aBannerLogo[1].DefineTexture(0u, "game_logo_kana.png");
+    m_aBannerLogo[1].DefineTexture(2u, "menu_background_black.png");
+    m_aBannerLogo[1].DefineProgram("menu_swipe_program");
+    m_aBannerLogo[1].SetPosition  (m_aBannerLogo[0].GetPosition() + coreVector2(0.0f,-0.1f) * (0.8f/1.0f));
+    m_aBannerLogo[1].SetSize      (coreVector2(2.0f, 0.25f) * 0.3f * (0.8f/1.0f));
+    m_aBannerLogo[1].SetColor3    (COLOR_MENU_INSIDE);
 
     m_aStoryText[0].Construct(MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
     m_aStoryText[0].SetColor3(COLOR_MENU_INSIDE);
@@ -301,6 +315,8 @@ void cInterface::Render()
         m_aBannerIcon[0].Render();
         m_aBannerIcon[1].Render();
         m_BannerShadow  .Render();
+        m_aBannerLogo[0].Render();
+        m_aBannerLogo[1].Render();
         m_aBannerText[0].Render();
         m_aBannerText[1].Render();
         m_aBannerText[2].Render();
@@ -542,7 +558,7 @@ void cInterface::Move()
         const coreBool   bShowBar   = bShowValue && (!pScoreTable->HasOverride() || pScoreTable->GetCurChain());
 
         // 
-        oView.oCooldownBar.SetSize  (coreVector2(bShowBar ? (0.15f * MIN(pScoreTable->GetCooldown() * 1.1f, 1.0f)) : 0.0f, 0.013f));
+        oView.oCooldownBar.SetSize  (coreVector2(bShowBar ? (0.15f * MIN1(pScoreTable->GetCooldown() * 1.1f)) : 0.0f, 0.013f));
         oView.oCooldownBar.SetColor3((pScoreTable->GetCooldown() > 0.5f) ? pPlayer->GetMenuColor() : COLOR_MENU_RED);
 
         // 
@@ -992,6 +1008,9 @@ void cInterface::Move()
             m_aBannerText[3].SetTexOffset(bLeftRight ? coreVector2(-1.0f,0.0f) : coreVector2(1.0f,0.0f));
             
             m_BannerExtra.SetTexOffset(bLeftRight ? coreVector2(-1.0f,0.0f) : coreVector2(1.0f,0.0f));
+            
+            m_aBannerLogo[0].SetTexOffset(bLeftRight ? coreVector2(-1.0f,0.0f) : coreVector2(1.0f,0.0f));
+            m_aBannerLogo[1].SetTexOffset(bLeftRight ? coreVector2(-1.0f,0.0f) : coreVector2(1.0f,0.0f));
         }
 
         // 
@@ -1011,37 +1030,12 @@ void cInterface::Move()
         m_aBannerIcon[1].SetAlpha(fBannerAlpha * 0.8f);
         m_aBannerText[0].SetAlpha(fBannerAlpha * 0.2f);
         m_aBannerText[1].SetAlpha(fBannerAlpha * 0.2f);
-        m_aBannerText[2].SetAlpha(fBannerAlpha);   // TODO 1: MENU_INSIDE_ALPHA is falsch für BOSS und MISSION banner animation
-        m_aBannerText[3].SetAlpha(fBannerAlpha);   // TODO 1: - || -
-        m_BannerExtra   .SetAlpha(fBannerAlpha);   // TODO 1: - || -  ??
+        m_aBannerText[2].SetAlpha(fBannerAlpha / MENU_INSIDE_ALPHA);
+        m_aBannerText[3].SetAlpha(fBannerAlpha / MENU_INSIDE_ALPHA);
+        m_BannerExtra   .SetAlpha(fBannerAlpha / MENU_INSIDE_ALPHA);
+        m_aBannerLogo[0].SetAlpha(fBannerAlpha / MENU_INSIDE_ALPHA);
+        m_aBannerLogo[1].SetAlpha(fBannerAlpha / MENU_INSIDE_ALPHA);
         m_Medal         .SetAlpha(fBannerAlpha);
-        
-
-        if(m_bBannerEigengrau)
-        {
-            m_aBannerText[2].RetrieveDesiredSize([&](const coreVector2 vSize1)
-            {
-                m_aBannerText[3].RetrieveDesiredSize([&](const coreVector2 vSize2)
-                {
-                    const coreFloat fDiff = vSize1.x - vSize2.x;
-
-                    m_aBannerText[2].SetPosition(coreVector2(fDiff * 0.5f + 0.002f, m_aBannerText[2].GetPosition().y));
-                    m_aBannerText[3].SetPosition(coreVector2(fDiff * 0.5f - 0.002f, m_aBannerText[3].GetPosition().y));
-
-                    const coreFloat fValue = BLENDH3(fVisibility) * (vSize1.x + vSize2.x);
-                    if(bLeftRight)
-                    {
-                        m_aBannerText[2].SetAlpha(STEP(vSize2.x, vSize1.x + vSize2.x, fValue));
-                        m_aBannerText[3].SetAlpha(STEP(0.0f,     vSize2.x + 0.09f,    fValue));
-                    }
-                    else
-                    {
-                        m_aBannerText[2].SetAlpha(STEP(0.0f,             vSize1.x,            fValue));
-                        m_aBannerText[3].SetAlpha(STEP(vSize1.x - 0.09f, vSize1.x + vSize2.x, fValue));
-                    }
-                });
-            });
-        }
 
         // move banner
         m_BannerBar     .Move();
@@ -1053,6 +1047,8 @@ void cInterface::Move()
         m_aBannerText[2].Move();
         m_aBannerText[3].Move();
         m_BannerExtra   .Move();
+        m_aBannerLogo[0].Move();
+        m_aBannerLogo[1].Move();
         m_Medal         .Move();
     }
 
@@ -1185,7 +1181,7 @@ void cInterface::Move()
 
 // ****************************************************************
 // show mission banner
-void cInterface::ShowMission(const coreChar* pcMain, const coreChar* pcSub)
+void cInterface::ShowMission(const coreChar* pcMain, const coreChar* pcSub, const coreChar* pcExtra)
 {
     // 
     this->__PrepareBanner();
@@ -1204,13 +1200,13 @@ void cInterface::ShowMission(const coreChar* pcMain, const coreChar* pcSub)
         // realign objects as mission banner
         m_aBannerText[2].Construct(MENU_FONT_DYNAMIC_3,  MENU_OUTLINE_SMALL);
         m_aBannerText[3].Construct(MENU_FONT_STANDARD_5, MENU_OUTLINE_SMALL);
-        m_aBannerText[2].DefineProgram("menu_swipe_program");
-        m_aBannerText[3].DefineProgram("menu_swipe_program");
+        m_aBannerText[2].DefineProgram("menu_swipe_label_program");
+        m_aBannerText[3].DefineProgram("menu_swipe_label_program");
 
-        m_aBannerText[2].SetPosition(coreVector2(0.0f, 0.06f));
-        m_aBannerText[3].SetPosition(coreVector2(0.0f,-0.01f));
+        m_aBannerText[2].SetPosition(coreVector2(0.0f,0.07f));
+        m_aBannerText[3].SetPosition(coreVector2(0.0f,0.0f));
 
-        m_aBannerText[2].SetCenter(coreVector2(0.0f,0.02f));
+        m_aBannerText[2].SetCenter(coreVector2(0.0f, INTERFACE_BANNER_HEIGHT));
         m_aBannerText[3].SetCenter(m_aBannerText[2].GetCenter());
 
         m_aBannerText[2].SetColor3(COLOR_MENU_INSIDE);
@@ -1232,9 +1228,12 @@ void cInterface::ShowMission(const coreChar* pcMain, const coreChar* pcSub)
     m_aBannerText[1].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     m_aBannerText[2].SetEnabled(CORE_OBJECT_ENABLE_ALL);
     m_aBannerText[3].SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    m_BannerExtra   .SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    m_aBannerLogo[0].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    m_aBannerLogo[1].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     
-    m_BannerExtra.SetText    ("");//("エクストラ");
-    m_BannerExtra.SetPosition(coreVector2(0.0f,-0.09f));
+    m_BannerExtra.SetText    (pcExtra);
+    m_BannerExtra.SetPosition(coreVector2(0.0f,-0.07f));
     m_BannerExtra.SetCenter  (m_aBannerText[3].GetCenter());
     m_BannerExtra.SetColor3  (m_aBannerText[3].GetColor3());
 
@@ -1247,13 +1246,13 @@ void cInterface::ShowMission(const cMission* pMission)
     ASSERT(pMission && (pMission == g_pGame->GetCurMission()))
 
     // show default mission banner
-    this->ShowMission(pMission->GetName(), PRINT("%s %s", Core::Language->GetString("MISSION"), cMenu::GetMissionLetters(g_pGame->GetCurMissionIndex())));
+    this->ShowMission(pMission->GetName(), PRINT("%s %s", Core::Language->GetString("MISSION"), cMenu::GetMissionLetters(g_pGame->GetCurMissionIndex())), pMission->GetExtra());
 }
 
 
 // ****************************************************************
 // show boss banner
-void cInterface::ShowBoss(const coreChar* pcMain, const coreChar* pcSub)
+void cInterface::ShowBoss(const coreChar* pcMain, const coreChar* pcSub, const coreChar* pcExtra)
 {
     // 
     this->__PrepareBanner();
@@ -1275,41 +1274,17 @@ void cInterface::ShowBoss(const coreChar* pcMain, const coreChar* pcSub)
         // realign objects as boss banner
         m_aBannerText[2].Construct(MENU_FONT_DYNAMIC_3,  MENU_OUTLINE_SMALL);
         m_aBannerText[3].Construct(MENU_FONT_STANDARD_5, MENU_OUTLINE_SMALL);
-        m_aBannerText[2].DefineProgram("menu_swipe_program");
-        m_aBannerText[3].DefineProgram("menu_swipe_program");
+        m_aBannerText[2].DefineProgram("menu_swipe_label_program");
+        m_aBannerText[3].DefineProgram("menu_swipe_label_program");
 
-        if(m_bBannerEigengrau)
-        {
-            m_aBannerText[2].SetPosition(coreVector2(0.0f,0.0f));
-            m_aBannerText[3].SetPosition(coreVector2(0.0f,0.0f));
+        m_aBannerText[2].SetPosition(coreVector2(0.0f,0.07f));
+        m_aBannerText[3].SetPosition(coreVector2(0.0f,0.0f));
 
-            m_aBannerText[2].SetCenter(coreVector2(0.0f,0.0f));
-            m_aBannerText[3].SetCenter(coreVector2(0.0f,0.0f));
+        m_aBannerText[2].SetCenter(coreVector2(0.0f, INTERFACE_BANNER_HEIGHT));
+        m_aBannerText[3].SetCenter(m_aBannerText[2].GetCenter());
 
-            m_aBannerText[2].SetColor3(COLOR_MENU_INSIDE);
-            m_aBannerText[3].SetColor3(COLOR_MENU_INSIDE * 0.6f);
-            
-            
-            m_aBannerText[2].SetAlignment(coreVector2(-1.0f,0.0f));
-            m_aBannerText[3].SetAlignment(coreVector2( 1.0f,0.0f));
-            m_aBannerText[2].Construct(MENU_FONT_STANDARD_5,  MENU_OUTLINE_SMALL);
-            m_aBannerText[2].DefineProgram("menu_swipe_program");
-            m_aBannerText[2].SetText("EIGEN");
-            m_aBannerText[3].SetText("GRAU");
-
-            m_BannerShadow.SetCenter(coreVector2(0.0f,0.0f));
-        }
-        else
-        {
-            m_aBannerText[2].SetPosition(coreVector2(0.0f, 0.06f));
-            m_aBannerText[3].SetPosition(coreVector2(0.0f,-0.01f));
-
-            m_aBannerText[2].SetCenter(coreVector2(0.0f,0.02f));
-            m_aBannerText[3].SetCenter(m_aBannerText[2].GetCenter());
-
-            m_aBannerText[2].SetColor3(COLOR_MENU_INSIDE);
-            m_aBannerText[3].SetColor3(g_pEnvironment->GetBackground()->GetColor());
-        }
+        m_aBannerText[2].SetColor3(COLOR_MENU_INSIDE);
+        m_aBannerText[3].SetColor3(g_pEnvironment->GetBackground()->GetColor());
     }
 
     // 
@@ -1319,11 +1294,14 @@ void cInterface::ShowBoss(const coreChar* pcMain, const coreChar* pcSub)
     m_aBannerIcon[1].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     m_aBannerText[0].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     m_aBannerText[1].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
-    m_aBannerText[2].SetEnabled(CORE_OBJECT_ENABLE_ALL);
-    m_aBannerText[3].SetEnabled(CORE_OBJECT_ENABLE_ALL);
-    
-    m_BannerExtra.SetText    ("");//("レヴィアタン");
-    m_BannerExtra.SetPosition(coreVector2(0.0f,-0.09f));
+    m_aBannerText[2].SetEnabled(m_bBannerEigengrau ? CORE_OBJECT_ENABLE_NOTHING : CORE_OBJECT_ENABLE_ALL);
+    m_aBannerText[3].SetEnabled(m_bBannerEigengrau ? CORE_OBJECT_ENABLE_NOTHING : CORE_OBJECT_ENABLE_ALL);
+    m_BannerExtra   .SetEnabled(m_bBannerEigengrau ? CORE_OBJECT_ENABLE_NOTHING : CORE_OBJECT_ENABLE_ALL);
+    m_aBannerLogo[0].SetEnabled(m_bBannerEigengrau ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+    m_aBannerLogo[1].SetEnabled(m_bBannerEigengrau ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+
+    m_BannerExtra.SetText    (pcExtra);
+    m_BannerExtra.SetPosition(coreVector2(0.0f,-0.07f));
     m_BannerExtra.SetCenter  (m_aBannerText[3].GetCenter());
     m_BannerExtra.SetColor3  (m_aBannerText[3].GetColor3());
 
@@ -1358,7 +1336,7 @@ void cInterface::ShowBoss(const cBoss* pBoss, const coreBool bSilent)
      */
 
     // show default boss banner
-    this->ShowBoss(pBoss->GetName(), Core::Language->GetString(PRINT("BOSS_TITLE_%04d", pBoss->GetID())));
+    this->ShowBoss(pBoss->GetName(), Core::Language->GetString(PRINT("BOSS_TITLE_%04d", pBoss->GetID())), pBoss->GetExtra());
     
     
     
@@ -1380,6 +1358,8 @@ void cInterface::ShowBoss(const cBoss* pBoss, const coreBool bSilent)
         m_aBannerText[2].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
         m_aBannerText[3].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
         m_BannerExtra   .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        m_aBannerLogo[0].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        m_aBannerLogo[1].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     }
 }
 
@@ -1418,7 +1398,7 @@ void cInterface::ShowScore(const coreChar* pcMain, const coreChar* pcSub, const 
         m_aBannerText[2].Construct(MENU_FONT_DYNAMIC_2,  MENU_OUTLINE_SMALL);
         m_aBannerText[3].Construct(MENU_FONT_STANDARD_4, MENU_OUTLINE_SMALL);
 
-        m_aBannerText[2].SetPosition(coreVector2(0.0f, 0.032f));
+        m_aBannerText[2].SetPosition(coreVector2(0.0f, 0.036f));
         m_aBannerText[3].SetPosition(coreVector2(0.0f,-0.01f));
 
         m_BannerBar     .SetDirection(coreVector2(-1.0f,0.0f));
@@ -1440,8 +1420,9 @@ void cInterface::ShowScore(const coreChar* pcMain, const coreChar* pcSub, const 
     m_aBannerText[1].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     m_aBannerText[2].SetEnabled(CORE_OBJECT_ENABLE_ALL);
     m_aBannerText[3].SetEnabled(CORE_OBJECT_ENABLE_ALL);
-    
-    m_BannerExtra.SetText("");
+    m_BannerExtra   .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    m_aBannerLogo[0].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    m_aBannerLogo[1].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
     // 
     ASSERT(iMedal != MEDAL_NONE)
@@ -1498,8 +1479,9 @@ void cInterface::ShowAlert()
     m_aBannerText[1].SetEnabled(CORE_OBJECT_ENABLE_ALL);
     m_aBannerText[2].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     m_aBannerText[3].SetEnabled(CORE_OBJECT_ENABLE_ALL);
-    
-    m_BannerExtra.SetText("");
+    m_BannerExtra   .SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    m_aBannerLogo[0].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+    m_aBannerLogo[1].SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
 
     // 
     m_Medal.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
@@ -1908,6 +1890,8 @@ void cInterface::__PrepareBanner()
     m_aBannerText[2].SetAlpha(0.0f);
     m_aBannerText[3].SetAlpha(0.0f);
     m_BannerExtra   .SetAlpha(0.0f);
+    m_aBannerLogo[0].SetAlpha(0.0f);
+    m_aBannerLogo[1].SetAlpha(0.0f);
 
     // also hide banner bar (but has no transparency)
     m_BannerBar.SetSize(coreVector2(0.0f,0.0f));
@@ -1917,5 +1901,7 @@ void cInterface::__PrepareBanner()
     m_aBannerText[2].SetAlignment(coreVector2(0.0f,0.0f));
     m_aBannerText[3].SetAlignment(coreVector2(0.0f,0.0f));
     m_BannerExtra   .SetAlignment(coreVector2(0.0f,0.0f));
-    m_BannerShadow.SetCenter    (coreVector2(0.0f,0.02f));
+    m_aBannerLogo[0].SetAlignment(coreVector2(0.0f,0.0f));
+    m_aBannerLogo[1].SetAlignment(coreVector2(0.0f,0.0f));
+    m_BannerShadow  .SetCenter   (coreVector2(0.0f,0.02f));
 }

@@ -339,6 +339,7 @@ class cTitleMenu final : public coreMenu
 private:
     cGuiObject m_GameLogo;          // game logo
     cGuiObject m_GameLogoDemo;      // 
+    cGuiObject m_GameLogoKana;      // 
     cGuiObject m_Shadow;            // 
 
     cGuiLabel m_PromptText;         // 
@@ -521,6 +522,7 @@ private:
     coreBool m_bFirstPlay;
 
     coreTexturePtr m_apFragment[FRAGMENTS];
+    coreTexturePtr m_apSegment[2];
 
     cNewIndicator m_SpeedNew;
     cNewIndicator m_ShieldNew;
@@ -902,7 +904,7 @@ private:
 
     // 
     static inline coreFloat __VolumeToFloat(const coreUint8 iVolume) {return I_TO_F(iVolume) * 0.01f;}
-    static inline coreUint8 __VolumeToUint8(const coreFloat fVolume) {return F_TO_UI(ROUND(CLAMP(fVolume, 0.0f, 1.0f) * 20.0f) * 5.0f);}
+    static inline coreUint8 __VolumeToUint8(const coreFloat fVolume) {return F_TO_UI(ROUND(CLAMP01(fVolume) * 20.0f) * 5.0f);}
 };
 
 
@@ -1279,6 +1281,9 @@ private:
 
     coreFullscreen m_PauseLayer;         // 
     coreUint32     m_iPauseFrame;        // 
+
+    cGuiLabel m_NoticeSave;              // 
+    coreFlow  m_fNoticeSaveTime;         // 
 
     coreFrameBuffer m_aFrameBuffer[3];   // 
     coreObject2D    m_MixObject;         // 

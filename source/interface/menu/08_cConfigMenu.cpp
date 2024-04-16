@@ -91,6 +91,18 @@ cConfigMenu::cConfigMenu()noexcept
         aiSkip.insert(ENTRY_VIDEO_ANTIALIASING);
         aiSkip.insert(ENTRY_AUDIO_QUALITY);
         aiSkip.insert(ENTRY_AUDIO_MODE);
+    #elif defined(_CORE_SWITCH_)
+        aiSkip.insert(ENTRY_VIDEO_MONITOR);
+        aiSkip.insert(ENTRY_VIDEO_RESOLUTION);
+        aiSkip.insert(ENTRY_VIDEO_DISPLAYMODE);
+        aiSkip.insert(ENTRY_VIDEO_VSYNC);
+        aiSkip.insert(ENTRY_VIDEO_ANTIALIASING);
+        aiSkip.insert(ENTRY_VIDEO_TEXTUREFILTER);
+        aiSkip.insert(ENTRY_VIDEO_RENDERQUALITY);
+        aiSkip.insert(ENTRY_VIDEO_SHADOWQUALITY);
+        aiSkip.insert(ENTRY_AUDIO_QUALITY);
+        aiSkip.insert(ENTRY_INPUT_TYPE);
+        aiSkip.insert(ENTRY_GAME_UPDATEFREQ);
     #endif
     #if !defined(_CORE_DEBUG_)
         aiSkip.insert(ENTRY_GAME_VERSION);
@@ -102,13 +114,23 @@ cConfigMenu::cConfigMenu()noexcept
         if(aiSkip.count(i)) continue;
 
         if(i == ENTRY_VIDEO || i == ENTRY_AUDIO || i == ENTRY_INPUT) iOffset = 0u;
+#if defined(_CORE_SWITCH_)
+        if(i == ENTRY_INPUT_RUMBLE) iOffset = 0u;
+#endif
         if(i == ENTRY_VIDEO_ANTIALIASING)  ++iOffset;   // # new paragraph
         if(i == ENTRY_VIDEO_RENDERQUALITY) ++iOffset;
+#if !defined(_CORE_SWITCH_)
         if(i == ENTRY_VIDEO_SHAKEEFFECTS)  ++iOffset;
+#endif
         if(i == ENTRY_AUDIO_MUSICVOLUME)   ++iOffset;
         if(i == ENTRY_AUDIO_QUALITY)       ++iOffset;
+#if defined(_CORE_SWITCH_)
+        if(i == ENTRY_AUDIO_MODE)       ++iOffset;
+#endif
         if(i == ENTRY_AUDIO_3DSOUND)       ++iOffset;
+#if !defined(_CORE_SWITCH_)
         if(i == ENTRY_INPUT_RUMBLE)        ++iOffset;
+#endif
         if(i == ENTRY_INPUT_MOVEUP)        ++iOffset;
         if(i == ENTRY_INPUT_ACTION1)       ++iOffset;
         if(i == ENTRY_INPUT_ACTION4)       ++iOffset;
@@ -393,7 +415,9 @@ cConfigMenu::cConfigMenu()noexcept
 
     m_VideoBox.SetPosition(m_Background.GetPosition() + coreVector2(0.0f,0.025f));
     m_VideoBox.SetSize    (coreVector2(m_Background.GetSize().x, 0.65f));
-    m_VideoBox.SetMaxOffset(DEFINED(_CORE_EMSCRIPTEN_) ? 0.0f : (0.05f * 13.5f - m_VideoBox.GetSize().y));
+#if !defined(_CORE_EMSCRIPTEN_) && !defined(_CORE_SWITCH_)
+    m_VideoBox.SetMaxOffset(0.05f * 13.5f - m_VideoBox.GetSize().y);
+#endif
     for(coreUintW i = 0u; i < ENTRY_VIDEO; ++i) {if(!aiSkip.count(i)) m_VideoBox.BindObject(&m_aLine [i]);}
     for(coreUintW i = 0u; i < ENTRY_VIDEO; ++i) {if(!aiSkip.count(i)) m_VideoBox.BindObject(&m_aLabel[i]);}
     if(!m_Monitor       .GetStatus()) m_VideoBox.BindObject(&m_Monitor);
@@ -411,7 +435,11 @@ cConfigMenu::cConfigMenu()noexcept
 
     m_InputBox.SetPosition(m_Background.GetPosition() + coreVector2(0.0f,0.025f));
     m_InputBox.SetSize    (coreVector2(m_Background.GetSize().x, 0.65f));
+#if defined(_CORE_SWITCH_)
+    m_InputBox.SetMaxOffset(0.05f * 17.0f - m_InputBox.GetSize().y);
+#else
     m_InputBox.SetMaxOffset(0.05f * 18.5f - m_InputBox.GetSize().y);
+#endif
     for(coreUintW i = ENTRY_AUDIO; i < ENTRY_INPUT; ++i) {if(!aiSkip.count(i)) m_InputBox.BindObject(&m_aLine [i]);}
     for(coreUintW i = ENTRY_AUDIO; i < ENTRY_INPUT; ++i) {if(!aiSkip.count(i)) m_InputBox.BindObject(&m_aLabel[i]);}
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aCueInput); ++i) m_InputBox.BindObject(&m_aCueInput[i]);
@@ -526,7 +554,7 @@ cConfigMenu::cConfigMenu()noexcept
     m_Navigator.BindScroll(&m_VideoBox);
     m_Navigator.BindScroll(&m_InputBox);
 
-    m_Navigator.AssignFirst(!m_Monitor.GetStatus() ? &m_Monitor : &m_TextureFilter);
+    m_Navigator.AssignFirst(DEFINED(_CORE_EMSCRIPTEN_) ? &m_TextureFilter : (DEFINED(_CORE_SWITCH_) ? &m_ShakeEffects : &m_Monitor));
     m_Navigator.AssignBack (&m_BackButton);
     m_Navigator.AssignMenu (this);
 

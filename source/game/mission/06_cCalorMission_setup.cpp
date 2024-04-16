@@ -52,6 +52,7 @@ void cCalorMission::__SetupOwn()
         pBackground->SetGroundDensity(0u, 1.0f);
         pBackground->SetGroundDensity(1u, 0.0f);
         pBackground->SetGroundDensity(2u, 0.0f);
+        pBackground->SetAirDensity   (1u, 1.0f);
 
         STAGE_FINISH_NOW
     });
@@ -942,6 +943,7 @@ void cCalorMission::__SetupOwn()
                             pBackground->SetGroundDensity(0u, 0.0f, true);
                             pBackground->SetGroundDensity(1u, 1.0f, true);
                             pBackground->SetGroundDensity(2u, 1.0f, true);
+                            pBackground->SetAirDensity   (1u, 0.0f, true);
 
                             g_pEnvironment->SetTargetDirectionNow(coreVector2(0.0f,-1.0f));
                         }
@@ -1111,6 +1113,7 @@ void cCalorMission::__SetupOwn()
         pBackground->SetGroundDensity(0u, 0.0f);
         pBackground->SetGroundDensity(1u, 1.0f);
         pBackground->SetGroundDensity(2u, 1.0f);
+        pBackground->SetAirDensity   (1u, 0.0f);
 
         STAGE_FINISH_NOW
     });
@@ -2128,7 +2131,7 @@ void cCalorMission::__SetupOwn()
 
                 if(pEnemy->DefaultMovePath(pPath, vFactor, vOffset * vFactor, fLifeTime))
                 {
-                    const coreFloat   fTime = MIN((fLifeTime - pPath->GetTotalDistance()) * 1.5f, 1.0f);
+                    const coreFloat   fTime = MIN1((fLifeTime - pPath->GetTotalDistance()) * 1.5f);
                     const coreVector2 vMove = coreVector2(0.2f * SIN(m_fStageSubTime * (0.5f*PI)), 0.0f);
                     const coreVector2 vFrom = pEnemy->GetPosition().xy();
                     const coreVector2 vTo   = (coreVector2(I_TO_F(((i - 20u) % 4u) + (((i >= 36u) && (((i - 20u) / 2u) % 2u)) ? 2u : 1u)) * 0.15f, (((i - 20u) % 8u) < 4u) ? 0.6f : 0.4f) * vFactor.InvertedX() + vMove) * FOREGROUND_AREA;

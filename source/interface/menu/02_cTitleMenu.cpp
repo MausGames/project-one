@@ -19,15 +19,21 @@ cTitleMenu::cTitleMenu()noexcept
     // create menu objects
     m_GameLogo.DefineTexture(0u, "game_logo.png");
     m_GameLogo.DefineProgram("default_2d_program");
-    m_GameLogo.SetPosition  (coreVector2(0.0f,0.1f));
+    m_GameLogo.SetPosition  (coreVector2(0.0f,0.13f));
     m_GameLogo.SetSize      (coreVector2(1.0f,0.25f) * 0.8f);
     m_GameLogo.SetColor3    (COLOR_MENU_INSIDE);
 
     m_GameLogoDemo.DefineTexture(0u, "game_logo_demo.png");
     m_GameLogoDemo.DefineProgram("default_2d_program");
     m_GameLogoDemo.SetPosition  (m_GameLogo.GetPosition() + coreVector2(0.0f,-0.1f));
-    m_GameLogoDemo.SetSize      (coreVector2(1.0f,0.25f) * 0.23f);
+    m_GameLogoDemo.SetSize      (coreVector2(1.0f,0.25f) * 0.3f);
     m_GameLogoDemo.SetColor3    (COLOR_MENU_INSIDE);
+
+    m_GameLogoKana.DefineTexture(0u, "game_logo_kana.png");
+    m_GameLogoKana.DefineProgram("default_2d_program");
+    m_GameLogoKana.SetPosition  (m_GameLogo.GetPosition() + coreVector2(0.0f,-0.1f));
+    m_GameLogoKana.SetSize      (coreVector2(2.0f,0.25f) * 0.3f);
+    m_GameLogoKana.SetColor3    (COLOR_MENU_INSIDE);
 
     m_Shadow.DefineTexture(0u, "effect_headlight_point.png");
     m_Shadow.DefineProgram("menu_single_program");
@@ -35,27 +41,28 @@ cTitleMenu::cTitleMenu()noexcept
     m_Shadow.SetSize      (m_GameLogo.GetSize() * coreVector2(1.4f,1.2f));
     m_Shadow.SetColor3    (coreVector3(0.0f,0.0f,0.0f));
 
-    m_PromptText.Construct      (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
+    m_PromptText.Construct      (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_BIG);
     m_PromptText.SetTextLanguage("PROMPT");
 
-    m_aVersionText[0].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
+    m_aVersionText[0].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_BIG);
     m_aVersionText[0].SetPosition (coreVector2(0.0f, 0.045f));
     m_aVersionText[0].SetCenter   (coreVector2(0.0f,-0.5f));
     m_aVersionText[0].SetAlignment(coreVector2(0.0f, 1.0f));
     m_aVersionText[0].SetColor3   (COLOR_MENU_INSIDE);
     m_aVersionText[0].SetText     ("(c) 2010, 2023 Martin Mauersics (www.maus-games.at)");
 
-    m_aVersionText[1].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
+    m_aVersionText[1].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_BIG);
     m_aVersionText[1].SetPosition (m_aVersionText[0].GetPosition() + coreVector2(0.0f,-0.03f));
     m_aVersionText[1].SetCenter   (m_aVersionText[0].GetCenter());
     m_aVersionText[1].SetAlignment(m_aVersionText[0].GetAlignment());
     m_aVersionText[1].SetColor3   (COLOR_MENU_INSIDE);
-    m_aVersionText[1].SetText     (PRINT("Project One%s (%s) - v1.1.1 third edition - %s %.5s", g_bDemoVersion ? " Demo" : "", Core::Platform->GetIdentifier(), __DATE__, __TIME__));
+    m_aVersionText[1].SetText     (PRINT("Project One%s (%s) - v1.1.2 third edition - %s %.5s", g_bDemoVersion ? " Demo" : "", Core::Platform->GetIdentifier(), __DATE__, __TIME__));
 
     // bind menu objects
     this->BindObject(SURFACE_TITLE_LOGO,  &m_Shadow);
     this->BindObject(SURFACE_TITLE_LOGO,  &m_GameLogo);
     if(g_bDemoVersion) this->BindObject(SURFACE_TITLE_LOGO, &m_GameLogoDemo);
+    else               this->BindObject(SURFACE_TITLE_LOGO, &m_GameLogoKana);
     this->BindObject(SURFACE_TITLE_LOGO,  &m_PromptText);
     this->BindObject(SURFACE_TITLE_LOGO,  &m_aVersionText[0]);
     this->BindObject(SURFACE_TITLE_LOGO,  &m_aVersionText[1]);
@@ -110,9 +117,9 @@ void cTitleMenu::Move()
             }
 
             // 
-            m_PromptText.SetScale (coreVector2(1.0f,1.0f) * LERPB(1.0f, 1.1f, MAX(m_fPromptExpand, 0.0f)));
+            m_PromptText.SetScale (coreVector2(1.0f,1.0f) * LERPB(1.0f, 1.1f, MAX0(m_fPromptExpand)));
             m_PromptText.SetColor3(COLOR_MENU_INSIDE * LERP(MENU_LIGHT_IDLE, MENU_LIGHT_ACTIVE, 0.5f + 0.5f * SIN(10.0f * m_fPromptAnimation)));
-            m_PromptText.SetAlpha (m_PromptText.GetAlpha() * MIN(m_fPromptAnimation + 1.0f, 1.0f) * LERPB(1.0f, 0.0f, MAX(m_fPromptExpand, 0.0f)));
+            m_PromptText.SetAlpha (m_PromptText.GetAlpha() * MIN1(m_fPromptAnimation + 1.0f) * LERPB(1.0f, 0.0f, MAX0(m_fPromptExpand)));
         }
         break;
 

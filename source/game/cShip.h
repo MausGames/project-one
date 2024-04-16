@@ -117,7 +117,7 @@ public:
     inline const coreVector2& GetOldPos       ()const {return m_vOldPos;}
     inline       coreVector2  GetMove         ()const {return this->GetPosition().xy() - m_vOldPos;}
     inline       coreVector3  GetBaseColor    ()const {return coreVector4::UnpackUnorm4x8(m_iBaseColor).xyz();}
-    inline       coreFloat    GetBlink        ()const {return MIN(m_fBlink, 1.0f);}
+    inline       coreFloat    GetBlink        ()const {return MIN1(m_fBlink);}
 
     // 
     static constexpr coreFloat TransformColorFactor(const coreFloat fFactor) {return (fFactor < (1.0f/3.0f)) ? 0.0f : ((fFactor < (2.0f/3.0f)) ? 0.5f : 1.0f);}
