@@ -2116,6 +2116,8 @@ void cHarenaMission::__SetupOwn()
                 iTakeStart = MIN(iTakeStart, i);
                 iLoopKill  = iLoopKill + 1u;
 
+                if(!m_iInsanity) STAGE_FAILTROPHY
+
                 if(g_pGame->IsTask())
                 {
                     const coreUint8 iState = nGetState(i);
@@ -2648,6 +2650,8 @@ void cHarenaMission::__SetupOwn()
                     pEnemy->Configure(10, 0u, COLOR_SHIP_CYAN);
                     pEnemy->AddStatus(ENEMY_STATUS_GHOST | ENEMY_STATUS_HIDDEN);
                 }
+
+                pEnemy->SetCollisionModifier(coreVector3(1.0f,1.0f,1.0f) * 1.1f);
             });
         });
 
@@ -2691,7 +2695,7 @@ void cHarenaMission::__SetupOwn()
                 else if(STAGE_SUB( 2u)) {STAGE_RESURRECT(pSquad1,  4u,  9u) fEnemyDelay = g_pGame->IsEasy() ? 2.5f : 2.0f;}
                 else if(STAGE_SUB( 3u)) {STAGE_RESURRECT(pSquad1, 10u, 15u) fEnemyDelay = g_pGame->IsEasy() ? 6.0f : 5.0f;}
                 else if(STAGE_SUB( 4u)) {STAGE_RESURRECT(pSquad1, 16u, 23u) fEnemyDelay = g_pGame->IsEasy() ? 5.5f : 5.0f;}
-                else if(STAGE_SUB( 5u)) {STAGE_RESURRECT(pSquad1, 24u, 29u) fEnemyDelay = g_pGame->IsEasy() ? 5.0f : 4.0f;}
+                else if(STAGE_SUB( 5u)) {STAGE_RESURRECT(pSquad1, 24u, 29u) fEnemyDelay = g_pGame->IsEasy() ? 4.7f : 4.0f;}
                 else if(STAGE_SUB( 6u)) {STAGE_RESURRECT(pSquad1, 58u, 58u) fEnemyDelay = g_pGame->IsEasy() ? 0.0f : 0.0f;}
                 else if(STAGE_SUB( 7u)) {STAGE_RESURRECT(pSquad1, 30u, 37u) fEnemyDelay = g_pGame->IsEasy() ? 5.5f : 5.0f;}
                 else if(STAGE_SUB( 8u)) {STAGE_RESURRECT(pSquad1, 38u, 41u) fEnemyDelay = g_pGame->IsEasy() ? 2.0f : 2.0f; if(!iMiddleState) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, g_pGame->FindPlayerDual(0u)->GetPosition())}
@@ -2984,7 +2988,11 @@ void cHarenaMission::__SetupOwn()
 
         STAGE_FOREACH_PLAYER(pPlayer, i)
         {
-            if(!coreMath::IsNear(pPlayer->GetPosition().x, 0.0f)) iMiddleState = true;
+            if(!coreMath::IsNear(pPlayer->GetPosition().x, 0.0f))
+            {
+                iMiddleState = true;
+                STAGE_FAILTROPHY
+            }
         });
 
         coreBool bPostpone = false;
@@ -3121,7 +3129,11 @@ void cHarenaMission::__SetupOwn()
                 g_pEnvironment->SetTargetDirectionLerp(coreVector2(0.0f,1.0f), 30.0f);
             }
 
-            if(!bPostpone) STAGE_WAVE(4u, "3-5", {65.0f, 95.0f, 130.0f, 160.0f, 320.0f})   // SIEBZEHN
+            if(!bPostpone)
+            {
+                if(g_pGame->IsEasy()) STAGE_WAVE(4u, "3-5", {75.0f, 110.0f, 150.0f, 185.0f, 370.0f})   // SIEBZEHN
+                                 else STAGE_WAVE(4u, "3-5", {65.0f,  95.0f, 130.0f, 160.0f, 320.0f})
+            }
         }
     };
     STAGE_MAIN({TAKE_ALWAYS, 4u})

@@ -1413,6 +1413,10 @@ void cTigerBoss::__MoveOwn()
         {
             g_pGame->GetCurMission()->GiveBadge(3u, BADGE_ACHIEVEMENT, pPlayer->GetPosition());
         }
+        else if(std::any_of(m_aiBulletHit, m_aiBulletHit + TIGER_WEAPONS, [](const coreUint16 A) {return (A > 1u);}))
+        {
+            g_pGame->GetCurMission()->FailTrophy();
+        }
     });
     
     
@@ -1717,6 +1721,16 @@ void cTigerBoss::__SwitchWeapon(const coreUintW iType)
     {
         g_pSpecialEffects->MacroExplosionPhysicalColorSmall(this->GetPosition(), COLOR_FIRE_ORANGE);
         g_pSpecialEffects->PlaySound(this->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_03);
+    }
+
+    // 
+    if(((m_iWeaponTypeOld == 0u) && !m_aiBulletHit[0]) ||
+       ((m_iWeaponTypeOld == 1u) && !m_aiBulletHit[3]) ||
+       ((m_iWeaponTypeOld == 2u) && !m_aiBulletHit[1]) ||
+       ((m_iWeaponTypeOld == 3u) && !m_aiBulletHit[2]) ||
+       ((m_iWeaponTypeOld == 4u) && !m_aiBulletHit[4]))
+    {
+        g_pGame->GetCurMission()->FailTrophy();
     }
 
     // 

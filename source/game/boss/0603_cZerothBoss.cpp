@@ -2168,6 +2168,7 @@ void cZerothBoss::__DestroyCube(const coreUintW iIndex, const coreBool bAnimated
         if(!HAS_BIT(m_aiCounter[ICE_TOUCH], 0u))
         {
             ADD_BIT(m_aiCounter[ICE_TOUCH], 1u)
+            pMission->FailTrophy();
         }
     }
 

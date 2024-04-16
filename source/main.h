@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 //*----------------------------------------------------------------------------*//
-//| Project One v1.2.5 (https://www.maus-games.at)                             |//
+//| Project One v1.2.6 (https://www.maus-games.at)                             |//
 //*----------------------------------------------------------------------------*//
 //| Copyright (c) 2010 Martin Mauersics                                        |//
 //|                                                                            |//
@@ -258,7 +258,8 @@ constexpr sVersion g_aVersion[] =
     {"1.2.2", 3u},
     {"1.2.3", 4u},
     {"1.2.4", 5u},
-    {"1.2.5", 6u}
+    {"1.2.5", 6u},
+    {"1.2.6", 7u}
 };
 constexpr sVersion g_Version = g_aVersion[ARRAY_SIZE(g_aVersion) - 1u];
 
@@ -322,7 +323,10 @@ enum eMedal : coreUint8
     MEDAL_TYPE_BOSS,
     MEDAL_TYPE_MISSION,
     MEDAL_TYPE_ARCADE = MEDAL_TYPE_MISSION,
-    MEDAL_TYPE_MAX
+    MEDAL_TYPE_MAX,
+
+    MEDAL_MARGIN_MISSION = 3u,
+    MEDAL_MARGIN_ARCADE  = 25u
 };
 
 // 
@@ -363,7 +367,6 @@ extern coreBool        g_bDemoVersion;      //
 extern coreBool        g_bLeaderboards;     // 
 extern coreBool        g_bSteamDeck;        // 
 extern coreBool        g_bHandheld;         // 
-extern coreBool        g_bNoInstancing;     // 
 extern coreBool        g_bDebugOutput;      // 
 extern coreMusicPlayer g_MusicPlayer;       // central music-player
 

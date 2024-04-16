@@ -76,7 +76,7 @@ protected:
     coreUint8 m_iLastAttacker;     // 
     coreBool  m_bWasDamaged;       // 
     coreUint16 m_iScore;
-    coreInt8  m_iExtraDamage;
+    coreInt16  m_iExtraDamage;
     coreInt32 m_iDamageForwarded;   // 
 
     coreSet<cEnemy*> m_apMember;   // 

@@ -114,6 +114,13 @@ private:
     coreFlow   m_afBadgeBump[INTERFACE_BADGES];     // 
     coreUint8  m_iBadgeState;                       // 
 
+    cGuiLabel  m_Trophy;                            // 
+    cGuiLabel  m_TrophyMark;                        // 
+    cGuiObject m_TrophyWave;                        // 
+    coreFlow   m_fTrophyBump;                       // 
+    coreUint8  m_iTrophySegment;                    // 
+    coreBool   m_bTrophyState;                      // 
+
     cGuiObject m_BannerBar;                         // banner background
     cGuiObject m_BannerShadow;                      // 
     cGuiObject m_aBannerIcon[2];                    // 

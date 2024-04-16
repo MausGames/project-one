@@ -79,6 +79,9 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
 , m_iHelperState      (0u)
 , m_afBadgeBump       {}
 , m_iBadgeState       (0u)
+, m_fTrophyBump       (0.0f)
+, m_iTrophySegment    (0u)
+, m_bTrophyState      (false)
 , m_fBannerStart      (INTERFACE_INVALID_START)
 , m_fBannerDuration   (0.0f)
 , m_fBannerSpeed      (1.0f)
@@ -200,6 +203,17 @@ cInterface::cInterface(const coreUint8 iNumViews)noexcept
         m_aBadgeWave[i].DefineTexture(0u, "effect_headlight_point.png");
         m_aBadgeWave[i].DefineProgram("menu_single_program");
     }
+
+    m_Trophy.Construct(MENU_FONT_ICON_2, MENU_OUTLINE_SMALL);
+    m_Trophy.SetColor3(COLOR_MENU_WHITE);
+    m_Trophy.SetText  (ICON_TROPHY);
+
+    m_TrophyMark.Construct  (MENU_FONT_ICON_2, MENU_OUTLINE_SMALL);
+    m_TrophyMark.SetRectifyX(false);
+
+    m_TrophyWave.DefineTexture(0u, "effect_headlight_point.png");
+    m_TrophyWave.DefineProgram("menu_single_program");
+    m_TrophyWave.SetSize(coreVector2(1.0f,1.0f) * 0.043f);
 
     m_BannerBar.DefineTexture(0u, "menu_detail_04.png");
     m_BannerBar.DefineTexture(1u, "menu_background_black.png");
@@ -382,6 +396,9 @@ void cInterface::Render()
             for(coreUintW i = 0u; i < INTERFACE_BADGES; ++i) m_aBadge    [i].Render();
         }
 
+        // 
+        m_TrophyWave.Render();
+
         for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i)
         {
             // render player labels
@@ -422,6 +439,10 @@ void cInterface::Render()
 
         // 
         m_GoalTime.Render();
+
+        // 
+        m_Trophy    .Render();
+        m_TrophyMark.Render();
     }
 
     if(this->IsStoryActive())
@@ -472,6 +493,8 @@ void cInterface::Move()
         return coreVector2(vAlign.x ? ((ABS(vBasePos.x) + vAdd.x) * vAlign.x) : vBasePos.x,
                            vAlign.y ? ((ABS(vBasePos.y) + vAdd.y) * vAlign.y) : vBasePos.y);
     };
+    
+    coreFloat fTrophyCover = 1.0f;
 
     // loop through all player views
     for(coreUintW i = 0u, ie = m_iNumViews; i < ie; ++i)
@@ -479,14 +502,15 @@ void cInterface::Move()
         sPlayerView& oView   = m_aView[i];
         cPlayer*     pPlayer = g_pGame->GetPlayer(i);
         
-        
-        const coreObject2D* apObject1[] = {&oView.aShieldBar[0],   &oView.aLife[0],        &oView.aLife[1],        &oView.aLife[2],        &oView.aLife[3],        &oView.aLife[4]}; STATIC_ASSERT(INTERFACE_LIVES == 5u)
-        const coreVector2   avScale1 [] = {coreVector2(1.2f,2.2f), coreVector2(1.4f,1.4f), coreVector2(1.4f,1.4f), coreVector2(1.4f,1.4f), coreVector2(1.4f,1.4f), coreVector2(1.4f,1.4f)};
-        const coreFloat fHealthCover = this->CalcGameCover(apObject1, avScale1, ARRAY_SIZE(apObject1), true);
+        const coreObject2D* apObject1[] = {&oView.aShieldBar[0],   &oView.aLife[0],        &oView.aLife[1],        &oView.aLife[2],        &oView.aLife[3],        &oView.aLife[4],        &m_Trophy}; STATIC_ASSERT(INTERFACE_LIVES == 5u)
+        const coreVector2   avScale1 [] = {coreVector2(1.2f,2.2f), coreVector2(1.4f,1.4f), coreVector2(1.4f,1.4f), coreVector2(1.4f,1.4f), coreVector2(1.4f,1.4f), coreVector2(1.4f,1.4f), coreVector2(2.0f,2.0f)};
+        const coreFloat fHealthCover = this->CalcGameCover(apObject1, avScale1, ARRAY_SIZE(apObject1) + ((i == 1u) ? 0 : -1), true);
 
         const coreObject2D* apObject2[] = {&oView.oScore,          &oView.oCooldownBar,    &oView.oComboValue,     &oView.oChainValue};
         const coreVector2   avScale2 [] = {coreVector2(1.2f,1.4f), coreVector2(1.2f,1.2f), coreVector2(1.4f,2.0f), coreVector2(1.4f,2.0f)};
         const coreFloat fScoreCover = this->CalcGameCover(apObject2, avScale2, ARRAY_SIZE(apObject2), true);
+        
+        if(i == 1u) fTrophyCover = fHealthCover;
         
         if(!bInGame)
         {
@@ -773,9 +797,9 @@ void cInterface::Move()
     const coreFloat fWaveCover    = this->CalcGameCover(&m_aWaveTime[0],      coreVector2(99.0f,2.2f), true);
     
     
-    const coreObject2D* apObject5[] = {&m_SegmentName,          &m_SegmentBest};
-    const coreVector2   avScale5 [] = {coreVector2(1.2f,1.4f), coreVector2(1.2f,2.0f)};
-    const coreFloat fSegmentCover = this->CalcGameCover(apObject5, avScale5, ARRAY_SIZE(apObject5), true);
+    const coreObject2D* apObject5[] = {&m_SegmentName,         &m_SegmentBest,         &m_Trophy};
+    const coreVector2   avScale5 [] = {coreVector2(1.2f,1.4f), coreVector2(1.2f,2.0f), coreVector2(2.0f,2.0f)};
+    const coreFloat fSegmentCover = this->CalcGameCover(apObject5, avScale5, ARRAY_SIZE(apObject5) + ((bInGame && g_pGame->IsMulti()) ? -1 : 0), true);
 
     // set boss transparency
     m_aBossHealthBar[0].SetAlpha(fAlphaBossFull * fBossCover);
@@ -831,7 +855,7 @@ void cInterface::Move()
 
     const coreFloat* pfMedalGoal  = bInGame ? g_pGame->GetCurMission()->GetMedalGoal()              : afDummyGoal;
     const coreFloat  fTimeShifted = bInGame ? g_pGame->GetTimeTable ()->GetTimeShiftedSegmentSafe() : 0.0f;
-    if(pfMedalGoal && fTime && !m_iFakeEnd    && (!bInGame || (g_pGame->GetCurMission()->GetCurSegmentIndex() != MISSION_NO_SEGMENT)))
+    if(pfMedalGoal && fTime && !m_iFakeEnd    && (!bInGame || (iSegmentIndex != MISSION_NO_SEGMENT)))
     {
         const coreUint8 iNewMedal = cGame::CalcMedal(fTimeShifted, pfMedalGoal);
 
@@ -849,7 +873,7 @@ void cInterface::Move()
         m_fAlphaGoal.UpdateMax(-2.0f, 0.0f);
     }
 
-    if(fTime    && (!bInGame || (g_pGame->GetCurMission()->GetCurSegmentIndex() != MISSION_NO_SEGMENT)))
+    if(fTime    && (!bInGame || (iSegmentIndex != MISSION_NO_SEGMENT)))
     {
         m_fGoalBump.UpdateMax(-4.0f, 0.0f);
         m_GoalMedal.SetSize(coreVector2(1.0f,1.0f) * LERPBR(0.04f, 0.06f, m_fGoalBump));
@@ -871,9 +895,6 @@ void cInterface::Move()
     // 
     m_GoalMedal.Move();
     m_GoalTime .Move();
-    
-    
-    
     
     const coreObject2D* apObject4[] = {&m_aHelper[0],          &m_aHelper[1],          &m_aHelper[2],          &m_aHelper[3],          &m_aHelper[4],          &m_aHelper[5],          &m_aHelper[6],          &m_aHelper[7]}; STATIC_ASSERT(INTERFACE_HELPERS == 8u)
     const coreVector2   avScale4 [] = {coreVector2(1.8f,1.8f), coreVector2(1.8f,1.8f), coreVector2(1.8f,1.8f), coreVector2(1.8f,1.8f), coreVector2(1.8f,1.8f), coreVector2(1.8f,1.8f), coreVector2(1.8f,1.8f), coreVector2(1.8f,1.8f)};
@@ -955,6 +976,9 @@ void cInterface::Move()
     const coreVector2   avScale3 [] = {coreVector2(1.4f,1.4f), coreVector2(1.4f,1.4f)};
     const coreFloat fBadgeCover = this->CalcGameCover(apObject3, avScale3, ARRAY_SIZE(apObject3), true);
     
+    
+    const coreFloat fWaveScale = 0.6f + 0.2f * SIN(m_fRotation * 4.0f);
+    
     for(coreUintW i = 0u; i < INTERFACE_BADGES; ++i)
     {
         const coreBool bState = (iSegmentIndex != MISSION_NO_SEGMENT) && (!bInGame || g_pGame->GetPlayer(0u)->GetDataTable()->GetBadge(i, iMissionIndex, iSegmentIndex));
@@ -985,12 +1009,10 @@ void cInterface::Move()
         m_aBadge[i].SetTexOffset(coreVector2(bRealState ? 0.0f : 0.5f, 0.0f));
         m_aBadge[i].SetAlpha    (fAlphaBadgeFull * (bRealState ? 1.0f : 0.5f) * fBadgeCover);
         m_aBadge[i].Move();
-        
-        const coreFloat fScale = 0.6f + 0.2f * SIN(m_fRotation * 4.0f);
 
         m_aBadgeWave[i].SetPosition(m_aBadge[i].GetPosition() - m_aBadgeWave[i].GetAlignment() * vNewSize * ((0.7f - 1.0f) * 0.5f));
         m_aBadgeWave[i].SetSize    (m_aBadge[i].GetSize() * 0.7f);
-        m_aBadgeWave[i].SetAlpha   (m_aBadge[i].GetAlpha() * (bRealState ? (1.0f * (1.0f - fBump) * fScale) : 0.0f));
+        m_aBadgeWave[i].SetAlpha   (m_aBadge[i].GetAlpha() * (bRealState ? (1.0f * (1.0f - fBump) * fWaveScale) : 0.0f));
         m_aBadgeWave[i].Move();
 
         
@@ -998,6 +1020,69 @@ void cInterface::Move()
         m_aBadge    [i].SetEnabled((bIntroShow || bRealState) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
         m_aBadgeWave[i].SetEnabled((bIntroShow || bRealState) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
     }
+    
+    
+    
+
+    // 
+    if(bInGame && (pBoss ? fAlphaBossFull : fAlphaWaveFull))
+    {
+        if(iSegmentIndex != MISSION_NO_SEGMENT) m_iTrophySegment = iSegmentIndex;
+
+        m_bTrophyState = HAS_BIT(g_pSave->GetHeader().oProgress.aaiBadge[iMissionIndex][m_iTrophySegment], 3u);
+
+        const coreBool bTrophyReceived = g_pGame->GetPlayer(0u)->GetDataTable()->GetBadge(3u, iMissionIndex, m_iTrophySegment);
+        const coreBool bTrophyFailed   = g_pGame->GetCurMission()->GetTrophyFailed();
+
+        // 
+        if(bTrophyReceived)
+        {
+            m_TrophyMark.SetColor3(COLOR_MENU_BLUE);
+            m_TrophyMark.SetText  (ICON_CHECK);
+        }
+        else if(bTrophyFailed)
+        {
+            m_TrophyMark.SetColor3(COLOR_MENU_RED);
+            m_TrophyMark.SetText  (ICON_TIMES);
+        }
+        else m_fTrophyBump = 0.0f;
+
+        const coreBool bShowTrophy = (g_pSave->GetHeader().oProgress.aiAdvance[iMissionIndex] > m_iTrophySegment + 1u) && (iMissionIndex < MISSION_ATER) && !g_bDemoVersion;
+
+        m_Trophy    .SetEnabled((bShowTrophy)                                       ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+        m_TrophyMark.SetEnabled((bShowTrophy && (bTrophyReceived || bTrophyFailed)) ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+        m_TrophyWave.SetEnabled((bShowTrophy && m_bTrophyState)                     ? CORE_OBJECT_ENABLE_ALL : CORE_OBJECT_ENABLE_NOTHING);
+    }
+    else if(!bInGame)
+    {
+        m_fTrophyBump    = 0.0f;
+        m_iTrophySegment = 0u;
+        m_bTrophyState   = true;
+
+        m_Trophy    .SetEnabled(CORE_OBJECT_ENABLE_ALL);
+        m_TrophyMark.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
+        m_TrophyWave.SetEnabled(CORE_OBJECT_ENABLE_ALL);
+    }
+    
+    m_fTrophyBump.UpdateMin(6.0, 1.0f);
+    const coreFloat fTrophyLerp = BLENDB(m_fTrophyBump);
+    
+    const coreBool  bHasShield       = (bInGame && g_pGame->GetPlayer(1u)->HasStatus(PLAYER_STATUS_SHIELDED));
+    const coreFloat fAlphaTrophyFull = fAlphaSegmentFull * ((bInGame && g_pGame->IsMulti()) ? fTrophyCover : fSegmentCover);
+
+    m_Trophy.SetPosition(nFlipFunc((bInGame && g_pGame->IsMulti()) ? coreVector2(-0.016f,0.08f + (bHasShield ? 0.03f : 0.0f)) : coreVector2(-0.016f, -0.105f + (m_bSegmentSmall ? 0.013f : 0.0f) + (m_SegmentBest.IsEnabled(CORE_OBJECT_ENABLE_ALL) ? 0.0f : 0.04f)), &m_Trophy));
+    m_Trophy.SetAlpha   (fAlphaTrophyFull * (m_bTrophyState ? 1.0f : 0.5f));
+    m_Trophy.Move();
+
+    m_TrophyMark.SetPosition(MapToAxis(GetTranslationArea(m_Trophy), g_vHudDirection));
+    m_TrophyMark.SetScale   (coreVector2(1.0f,1.0f) * LERP(0.5f, 1.0f, fTrophyLerp));
+    m_TrophyMark.SetAlpha   (fAlphaTrophyFull * fTrophyLerp);
+    m_TrophyMark.Move();
+
+    m_TrophyWave.SetPosition(m_TrophyMark.GetPosition());
+    m_TrophyWave.SetAlpha   (fAlphaTrophyFull * fWaveScale * 0.8f);
+    m_TrophyWave.Move();
+    
 
     // check for active banner
     const coreFloat fBanner = bInGame ? (g_pGame->GetTimeTable()->GetTimeEvent() - m_fBannerStart) : -1.0f;
@@ -1703,8 +1788,8 @@ void cInterface::UpdateLayout(const coreBool bForce)
     m_aWaveTime[0]     .SetPosition(coreVector2(0.0f,-0.005f));
     m_aWaveTime[1]     .SetPosition(m_aWaveTime[0].GetPosition());
     m_aWaveTime[2]     .SetPosition(m_aWaveTime[0].GetPosition() + coreVector2(0.06f,0.0f));
-    m_SegmentName      .SetPosition(coreVector2(-0.01f,-0.005f));
-    m_SegmentBest      .SetPosition(coreVector2(-0.01f,-0.055f));
+    m_SegmentName      .SetPosition(coreVector2(-0.01f, -0.005f));
+    m_SegmentBest      .SetPosition(coreVector2(-0.011f,-0.055f));
     m_aTurfBar[0]      .SetPosition(coreVector2(0.0f,0.005f));
     m_aTurfBar[1]      .SetPosition(m_aTurfBar[0].GetPosition() + coreVector2(0.00f,0.01f) * 0.5f);
     m_aTurfBar[2]      .SetPosition(m_aTurfBar[1].GetPosition());
@@ -1749,9 +1834,9 @@ void cInterface::UpdateLayout(const coreBool bForce)
     for(coreUintW j = 0u; j < INTERFACE_HELPERS; ++j) nUpdateFunc(&m_aHelperWave[j], bMulti ? vRight  : vCenter.InvertedY(), (bMulti ? coreVector2(-1.0f,0.0f) : coreVector2(-1.0f,1.0f)) * vFlip);     
     
     
-    
-    
-    
+
+    // 
+    nUpdateFunc(&m_Trophy, bMulti ? vCenter.InvertedY() : vCenter, (bMulti ? (coreVector2(-1.0f,1.0f) * vFlip) : (coreVector2(-1.0f,-1.0f) * vFlip)));
 }
 
 

@@ -2812,7 +2812,7 @@ void cProjectOneBoss::__MoveMagenta()
     cRutilusMission* pRutilus = d_cast<cRutilusMission*>(pAter->GetInnerMission());
 
     // 
-    const cEnemySquad* pSquad1 = g_pGame->GetCurMission()->GetEnemySquad(0u);
+    const cEnemySquad* pSquad1 = pAter->GetEnemySquad(0u);
     ASSERT(pSquad1->GetNumEnemies() == PROJECTONE_ENEMIES_METEOR)
 
     const coreFloat fBackSpeed = (GetCurBackRotation() ? 1.0f : 0.5f);

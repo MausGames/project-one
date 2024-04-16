@@ -711,7 +711,7 @@ void cScoreMenu::__SetMedalIconArcade(cGuiObject* OUTPUT pObject, const coreUint
     }
 
     // 
-    const coreUint8 iMedal = iMedalCount ? (iMedalTotal / iMedalCount) : MEDAL_NONE;
+    const coreUint8 iMedal = iMedalCount ? ((iMedalTotal + MEDAL_MARGIN_ARCADE) / iMedalCount) : MEDAL_NONE;
 
     // 
     cMenu::ApplyMedalTexture(pObject, iMedal, MEDAL_TYPE_ARCADE, true);

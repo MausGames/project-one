@@ -14,6 +14,8 @@ varying vec2 v_v2CenterCoord;   //
 
 void FragmentMain()
 {
+    vec4 v4Intermediate;
+
 #if defined(_P1_CHROMA_)
 
     for(int i = 0; i < 3; ++i)
@@ -32,7 +34,14 @@ void FragmentMain()
     vec2 v2Distortion = coreTextureBase2D(3, v_av2TexCoord[1]).rg;   // # low-res
 
     // move texture coordinates
-    if(any(bvec4(lessThan(v2Distortion, vec2(127.35/255.0)), greaterThan(v2Distortion, vec2(127.65/255.0)))))
+    #if (CORE_GL_VERSION >= 110) || (CORE_GL_ES_VERSION >= 300)
+        const float v1From = 127.35/255.0;
+        const float v1To   = 127.65/255.0;
+    #else
+        const float v1From = 127.0/255.0;
+        const float v1To   = 128.0/255.0;
+    #endif
+    if(any(bvec4(lessThan(v2Distortion, vec2(v1From)), greaterThan(v2Distortion, vec2(v1To)))))
         v2TexCoord += (v2Distortion * 2.0 - 1.0) * vec2(-0.4, 0.4);
 
 #endif
@@ -52,10 +61,6 @@ void FragmentMain()
     // vignetting 
     float v1Intensity = 1.0 - u_v4Color.b * coreLengthSq(v_v2CenterCoord);
 
-
-
-//v3Environment = vec3(0.05); // [A1]
-
     // draw blend between all textures (glow only on environment for high contrast)
     vec3 v3Blend = ((max((v3Environment - vec3(0.06)) * v1Intensity - vec3(coreLuminance(v3Glow) * 1.5), 0.0) + v3Glow) * (1.0 - v4Foreground.a) + v4Foreground.rgb * 1.05);
 
@@ -72,18 +77,19 @@ void FragmentMain()
 
 #if defined(_P1_CHROMA_)
 
-    gl_FragColor[i] = v3Final[i];
-    gl_FragColor.a  = v1Alpha;
+    v4Intermediate[i] = v3Final[i];
+    v4Intermediate.a  = v1Alpha;
     }
 
 #else
 
-    gl_FragColor.rgb = v3Final;
-    gl_FragColor.a   = v1Alpha;
+    v4Intermediate.rgb = v3Final;
+    v4Intermediate.a   = v1Alpha;
 
 #endif
 
-    gl_FragColor.rgb = coreSaturate(gl_FragColor.rgb + vec3(coreDither() / 50.0));
+    gl_FragColor.rgb = coreSaturate(v4Intermediate.rgb + vec3(coreDither() / 50.0));
+    gl_FragColor.a   = v4Intermediate.a;
 
 #if defined(_P1_DEBUG_)
 

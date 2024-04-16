@@ -150,12 +150,12 @@ coreInt32 cEnemy::TakeDamage(const coreInt32 iDamage, const coreUint8 iElement, 
             // 
             const coreInt32 iPower = (bMulti || bNeutral || (this->GetCurHealth() == 1)) ? 1 : GAME_PLAYERS;
             
-            const coreInt32 iTotal = m_iExtraDamage + iDamage * iPower * ((g_pGame->IsEasy() && !bNeutral) ? 110 : 100);
+            const coreInt32 iTotal = m_iExtraDamage + iDamage * iPower * ((g_pGame->IsEasy() && !bNeutral) ? 110 : 100) * ((g_pGame->IsMulti() && !bNeutral) ? 110 : 100);
             
-            const coreInt32 iTaken = ABS(this->_TakeDamage(iTotal / 100, iElement, vImpact) / iPower);
+            const coreInt32 iTaken = ABS(this->_TakeDamage(iTotal / 10000, iElement, vImpact) / iPower);
             ASSERT(coreMath::IsAligned(this->GetMaxHealth(), iPower))   // ???
             
-            m_iExtraDamage = iTotal % 100;
+            m_iExtraDamage = iTotal % 10000;
 
             if(iTaken)
             {
@@ -350,12 +350,12 @@ void cEnemy::Kill(const coreBool bAnimated)
 void cEnemy::ResetProperties()
 {
     // set object properties
-    this->SetPosition         (coreVector3(HIDDEN_POS,0.0f));
-    this->SetSize             (coreVector3(1.0f, 1.0f,1.0f) * ENEMY_SIZE_FACTOR);
-    this->SetDirection        (coreVector3(0.0f,-1.0f,0.0f));
-    this->SetOrientation      (coreVector3(0.0f, 0.0f,1.0f));
-    this->SetCollisionModifier(coreVector3(1.0f, 1.0f,1.0f));
-    this->SetColor4           (coreVector4(1.0f, 1.0f,1.0f,1.0f));
+    this->SetPosition         (coreVector3(HIDDEN_POS, 0.0f));
+    this->SetSize             (coreVector3(1.0f, 1.0f, 1.0f) * ENEMY_SIZE_FACTOR);
+    this->SetDirection        (coreVector3(0.0f,-1.0f, 0.0f));
+    this->SetOrientation      (coreVector3(0.0f, 0.0f, 1.0f));
+    this->SetCollisionModifier(coreVector3(1.0f, 1.0f, 1.0f));
+    this->SetColor4           (coreVector4(1.0f, 1.0f, 1.0f, 1.0f));
 
     // set initial status
     m_iStatus = ENEMY_STATUS_DEAD;

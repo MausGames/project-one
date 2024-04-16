@@ -20,7 +20,6 @@
 // TODO 4: PLAYER_FEEL_TIME_SHIELD still used ?
 // TODO 3: ein großer teil aller sub-objekte wird ständig bei glow ge-added und removed, sollte permanent sein (resurrect<>kill), und mit setenabled gesteuert werden, auch bei tracker und P1
 // TODO 3: m_vOldDir (direction) sollte bei resurrection/repair zurückgesetzt werden
-// TODO 3: (gyro aktualisiert sich nicht bei HUD rotation (auch bei game rotation ?))
 
 
 // ****************************************************************
@@ -165,7 +164,6 @@ private:
     coreFloat   m_fSmoothTilt;                                // 
     coreFlow    m_fRangeValue;                                // 
     coreFlow    m_fArrowValue;                                // 
-    coreFlow    m_fGyroValue;                                 // 
     coreFlow    m_fBubbleValue;                               // 
     coreFlow    m_fCircleValue;                               // 
     coreFlow    m_fBoost;                                     // 
@@ -176,7 +174,6 @@ private:
     coreObject3D m_Dot;                                       // 
     coreObject3D m_Range;                                     // 
     coreObject3D m_Arrow;                                     // 
-    coreObject3D m_Gyro;                                      // 
     coreObject3D m_Wind;                                      // 
     coreObject3D m_Bubble;                                    // 
     coreObject3D m_aShield[2];                                // 
@@ -256,8 +253,6 @@ public:
     void DisableRange  ();
     void EnableArrow   ();
     void DisableArrow  ();
-    void EnableGyro    ();
-    void DisableGyro   ();
     void EnableWind    (const coreVector2 vDirection = coreVector2(0.0f,0.0f));
     void DisableWind   ();
     void EnableBubble  ();

@@ -47,7 +47,6 @@ cPlayer::cPlayer()noexcept
 , m_fSmoothTilt     (0.0f)
 , m_fRangeValue     (0.0f)
 , m_fArrowValue     (0.0f)
-, m_fGyroValue      (0.0f)
 , m_fBubbleValue    (0.0f)
 , m_fCircleValue    (0.0f)
 , m_fBoost          (0.0f)
@@ -109,14 +108,6 @@ cPlayer::cPlayer()noexcept
     m_Arrow.SetAlpha     (0.0f);
     m_Arrow.SetTexSize   (coreVector2(4.0f,1.0f) * 0.2f);
     m_Arrow.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
-
-    // 
-    m_Gyro.DefineModel  ("bullet_orb.md3");
-    m_Gyro.DefineTexture(0u, "effect_energy.png");
-    m_Gyro.DefineProgram("effect_energy_flat_invert_program");
-    m_Gyro.SetAlpha     (0.0f);
-    m_Gyro.SetTexSize   (coreVector2(0.1f,0.1f));
-    m_Gyro.SetEnabled   (CORE_OBJECT_ENABLE_NOTHING);
 
     // 
     m_Wind.DefineModel  ("object_sphere.md3");
@@ -203,7 +194,6 @@ void cPlayer::Configure(const coreUintW iShipType)
     // 
     m_Range     .SetColor3(vEnergy);
     m_Arrow     .SetColor3(vEnergy * (0.9f/1.1f));
-    m_Gyro      .SetColor3(vEnergy * (0.9f/1.1f));
     m_Wind      .SetColor3(vEnergy * (1.6f/1.1f));
     m_aShield[0].SetColor3(vEnergy * (1.0f/1.1f));
     m_aShield[1].SetColor3(vEnergy * (1.0f/1.1f));
@@ -377,10 +367,6 @@ void cPlayer::RenderAfter()
             }
             this->AddStatus(PLAYER_STATUS_TOP);
         }
-        
-        // 
-        //g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Gyro);
-        //m_Gyro.Render();
 
         // 
         g_pOutline->GetStyle(OUTLINE_STYLE_FLAT_FULL)->ApplyObject(&m_Range);
@@ -713,18 +699,6 @@ void cPlayer::Move()
         }
 
         // 
-        if(HAS_FLAG(m_iStatus, PLAYER_STATUS_GYRO) && ((iMode == 1u) || (iMode == 2u)))
-        {
-            if(!m_fGyroValue) this->EnableGyro();
-            m_fGyroValue.UpdateMin(2.0f, 1.0f);
-        }
-        else
-        {
-            m_fGyroValue.UpdateMax(-2.0f, 0.0f);
-            if(!m_fGyroValue) this->DisableGyro();
-        }
-
-        // 
         const coreFloat fFullThrust = MAX(m_fThrust, MAX0(m_fSmoothThrust) * 0.055f);
              if( fFullThrust && !m_Exhaust.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->EnableExhaust();
         else if(!fFullThrust &&  m_Exhaust.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableExhaust();
@@ -763,24 +737,6 @@ void cPlayer::Move()
             m_Arrow.SetAlpha    (BLENDH3(m_fArrowValue));
             m_Arrow.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.15f));
             m_Arrow.Move();
-        }
-
-        if(m_Gyro.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
-        {
-            // 
-            //const coreFloat   fSide  = (g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f;
-            //const coreVector2 vFinal = CalcFinalDirection() * coreVector2(fSide, 1.0f);
-
-            //coreVector2 vAlong = vRealDir.xy();
-            //while(!SameDirection90(vAlong, vFinal)) vAlong = vAlong.Rotated90();   might hang, change to for-loop
-
-            // 
-            //m_Gyro.SetPosition (this->GetPosition() + coreVector3(vAlong, 0.0f) * 5.2f * PLAYER_SIZE_FACTOR_EXT);
-            m_Gyro.SetSize     (coreVector3(1.0f,1.0f,1.0f) * 2.0f * PLAYER_SIZE_FACTOR_EXT);
-            m_Gyro.SetDirection(vRealDir.RotatedZ45());   // TODO 1: is this correct ?
-            m_Gyro.SetAlpha    (BLENDH3(m_fGyroValue));
-            m_Gyro.SetTexOffset(coreVector2(0.0f, m_fAnimation * 0.15f));
-            m_Gyro.Move();
         }
 
         if(m_Wind.IsEnabled(CORE_OBJECT_ENABLE_MOVE))
@@ -926,7 +882,6 @@ void cPlayer::Move()
         
         m_Range     .SetColor3(vEnergyColor);
         m_Arrow     .SetColor3(vEnergyColor * (0.9f/1.1f));
-        m_Gyro      .SetColor3(vEnergyColor * (0.9f/1.1f));
         m_Wind      .SetColor3(vEnergyColor * (1.6f/1.1f));
         m_aShield[0].SetColor3(vEnergyColor * (1.0f/1.1f));
         m_aShield[1].SetColor3(vEnergyColor * (1.0f/1.1f));
@@ -1143,7 +1098,6 @@ void cPlayer::Kill(const coreBool bAnimated)
     // 
     this->DisableRange();
     this->DisableArrow();
-    this->DisableGyro();
     this->DisableWind();
     this->DisableBubble();
     this->DisableShield();
@@ -1172,7 +1126,6 @@ void cPlayer::Kill(const coreBool bAnimated)
     m_fSmoothTilt   = 0.0f;
     m_fRangeValue   = 0.0f;
     m_fArrowValue   = 0.0f;
-    m_fGyroValue    = 0.0f;
     m_fBubbleValue  = 0.0f;
     m_fCircleValue  = 0.0f;
     m_fBoost        = 0.0f;
@@ -1435,33 +1388,6 @@ void cPlayer::DisableArrow()
     // 
     m_Arrow.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
     g_pGlow->UnbindObject(&m_Arrow);
-}
-
-
-// ****************************************************************
-// 
-void cPlayer::EnableGyro()
-{
-    WARN_IF(m_Gyro.IsEnabled(CORE_OBJECT_ENABLE_ALL)) this->DisableArrow();
-
-    // 
-    m_Gyro.SetAlpha(0.0f);
-
-    // 
-    m_Gyro.SetEnabled(CORE_OBJECT_ENABLE_ALL);
-    //g_pGlow->BindObject(&m_Gyro);
-}
-
-
-// ****************************************************************
-// 
-void cPlayer::DisableGyro()
-{
-    if(!m_Gyro.IsEnabled(CORE_OBJECT_ENABLE_ALL)) return;
-
-    // 
-    m_Gyro.SetEnabled(CORE_OBJECT_ENABLE_NOTHING);
-    //g_pGlow->UnbindObject(&m_Gyro);
 }
 
 
@@ -1737,23 +1663,12 @@ void cPlayer::SetPosition(const coreVector3 vPosition)
     m_Dot       .SetPosition(vPosition);
     m_Range     .SetPosition(vPosition);
     m_Arrow     .SetPosition(vPosition + this->GetDirection() * 6.2f * PLAYER_SIZE_FACTOR_EXT);
-    m_Gyro      .SetPosition(vPosition);
     m_Wind      .SetPosition(vPosition);
     m_Bubble    .SetPosition(vPosition);
     m_aShield[0].SetPosition(vPosition);
     m_aShield[1].SetPosition(vPosition);
     m_Exhaust   .SetPosition(vPosition - this->GetDirection() * (m_Exhaust.GetSize().y + 4.0f * PLAYER_SIZE_FACTOR_EXT));
 
-    
-    // 
-    //const coreFloat   fSide  = (g_CurConfig.Game.iMirrorMode == 1u) ? -1.0f : 1.0f;
-    //const coreVector2 vFinal = CalcFinalDirection() * coreVector2(fSide, 1.0f);
-    
-    //coreVector2 vAlong = this->GetDirection().xy();
-    //while(!SameDirection90(vAlong, vFinal)) vAlong = vAlong.Rotated90();   might hang, change to for-loop
-
-    // 
-    //m_Gyro.SetPosition (this->GetPosition() + coreVector3(vAlong, 0.0f) * 5.2f * PLAYER_SIZE_FACTOR_EXT);
     
     Timeless([this]()
     {

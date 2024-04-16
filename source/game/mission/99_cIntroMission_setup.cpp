@@ -206,6 +206,8 @@ void cIntroMission::__SetupOwn()
             iAnyButton = 1u;   // never show this trophy in a replay, even when genuine
         }
 
+        if(iAnyButton) STAGE_FAILTROPHY
+
         STAGE_FOREACH_PLAYER(pPlayer, i)
         {
             coreUint32& iInputState = aiInputState[i];
@@ -480,7 +482,15 @@ void cIntroMission::__SetupOwn()
                 {
                     const coreUint8 iNewPack = PackDirection(pPlayer->GetDirection().xy()) + 1u;
 
-                    aiLastPack[iIndex] = (aiLastPack[iIndex] == iNewPack) ? 0xFFu : iNewPack;
+                    if(aiLastPack[iIndex] == iNewPack)
+                    {
+                        aiLastPack[iIndex] = 0xFFu;
+                        STAGE_FAILTROPHY
+                    }
+                    else
+                    {
+                        aiLastPack[iIndex] = iNewPack;
+                    }
                 }
             }
         });
@@ -967,6 +977,7 @@ void cIntroMission::__SetupOwn()
                 if(bOdd != HAS_BIT(iTimeState, 1u))
                 {
                     ADD_BIT(iTimeState, 2u)
+                    STAGE_FAILTROPHY
                 }
             }
         });
@@ -1203,6 +1214,7 @@ void cIntroMission::__SetupOwn()
             if(pEnemy->WasDamaged())
             {
                 iDamageState += 1u;
+                STAGE_FAILTROPHY
             }
         });
 
@@ -1211,6 +1223,7 @@ void cIntroMission::__SetupOwn()
             if(pPlayer->WasDamaged())
             {
                 iDamageState += 1u;
+                STAGE_FAILTROPHY
             }
         });
 

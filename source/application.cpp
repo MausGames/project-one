@@ -10,7 +10,7 @@
 // ****************************************************************
 // project settings
 const coreChar* const CoreApp::Settings::Name                          = "Eigengrau";
-const coreChar* const CoreApp::Settings::Version                       = "1.2.5";
+const coreChar* const CoreApp::Settings::Version                       = "1.2.6";
 const coreChar* const CoreApp::Settings::IconPath                      = "data/textures/game_icon.png";
 const coreChar* const CoreApp::Settings::CursorPath                    = "data/textures/default_cursor.png";
 const coreBool        CoreApp::Settings::UserManagement                = true;
@@ -19,7 +19,7 @@ const coreUint8       CoreApp::Settings::Graphics::StencilSize         = 0u;
 const coreBool        CoreApp::Settings::Graphics::AlphaChannel        = false;
 const coreBool        CoreApp::Settings::Graphics::DoubleBuffer        = true;
 const coreBool        CoreApp::Settings::Graphics::StereoRender        = false;
-/*const*/ coreUint32  CoreApp::Settings::Platform::SteamAppID          = 1624320u;
+const coreUint32      CoreApp::Settings::Platform::SteamAppID[2]       = {1624320u, 2089690u};
 const coreChar* const CoreApp::Settings::Platform::EpicProductID       = "7dd83e44b6984bd0b92c5b6a1850a9cb";
 const coreChar* const CoreApp::Settings::Platform::EpicSandboxID   [3] = {"p-5qg8r3hlhjcsbgl4s4jp4xrauvd6wa", "p-n4dztts5qfau4wa27ccdc5yabx6vvp", "d683ed3004f1479abdf2fc4bcfdc615d"};
 const coreChar* const CoreApp::Settings::Platform::EpicDeploymentID[3] = {"2914ec61294d4649b13521053c4dfb11", "c5ca5a6eacc74bfdbd8471d4dd75a78f", "64c112ed4c9d4151a814a6cc93b98070"};

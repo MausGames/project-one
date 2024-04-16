@@ -1970,6 +1970,7 @@ void cCholBoss::__MoveOwn()
         if(!pPlayer->GetInput()->vMove.IsNull())
         {
             ADD_BIT(m_aiCounter[PLAYER_MOVE], i)
+            pMission->FailTrophy();
         }
     });
 

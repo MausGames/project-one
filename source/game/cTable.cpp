@@ -240,7 +240,7 @@ void cDataTable::GiveBadge(const coreUintW iBadgeIndex, const coreUintW iMission
 
     if(STATIC_ISVALID(g_pGame))
     {
-        if(g_pGame->GetPlayerIndex(m_pOwner) == 0u)
+        if((g_pGame->GetPlayerIndex(m_pOwner) == 0u) && (iBadgeIndex != 3u))
         {
             // 
             g_pSave->EditGlobalStats      ()                            ->iBadgesEarned += 1u;

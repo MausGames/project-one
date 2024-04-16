@@ -301,7 +301,7 @@ void cGeluMission::__SetupOwn()
             if(!HAS_BIT(iHitField, i % (sizeof(iHitField)*8u)))
             {
                 ADD_BIT(iHitField, i % (sizeof(iHitField)*8u))
-                if(++iHitCount >= 96u + /*iDungeonTotal*/55u) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, g_pGame->FindPlayerDual(0u)->GetPosition())   // TODO 1: MSVC wants to capture this constexpr (async lambda)
+                if(++iHitCount >= 96u + /*iDungeonTotal*/55u) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, g_pGame->FindPlayerDual(0u)->GetPosition())   // TODO 1: MSVC wants to capture this constexpr variable (async lambda)
             }
 
             if(g_pGame->IsTask() && nIsMarkFunc(i) && !HAS_BIT(iMarkState, nGetMarkIndex(i)))
@@ -322,6 +322,15 @@ void cGeluMission::__SetupOwn()
 
                 g_pSpecialEffects->CreateSplashColor(pEnemy->GetPosition(), SPECIAL_SPLASH_SMALL, COLOR_ENERGY_RED);
                 g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, 1.0f, SOUND_EFFECT_DUST);
+            }
+        });
+
+        STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
+        {
+            if(pEnemy->ReachedDeath())
+            {
+                if(!HAS_BIT(iHitField, i % (sizeof(iHitField)*8u)))
+                    STAGE_FAILTROPHY
             }
         });
 
@@ -1013,10 +1022,10 @@ void cGeluMission::__SetupOwn()
                     if((fPush < 0.0f) && (afOffTarget[iIndex] < 0.0f)) afOffTarget[iIndex] = -1.0f;   // snap in
                 };
 
-                     if(HAS_BIT(iActive, 0u) && (vPos.x < vAreaFrom.x) && (vDir.x < 0.0f)) {nPushFunc(0); pBullet->Deactivate(true); iOutsideHit += 1u;}   // TODO 1: add correct impact parameter
-                else if(HAS_BIT(iActive, 1u) && (vPos.x > vAreaTo  .x) && (vDir.x > 0.0f)) {nPushFunc(1); pBullet->Deactivate(true); iOutsideHit += 1u;}
-                else if(HAS_BIT(iActive, 2u) && (vPos.y < vAreaFrom.y) && (vDir.y < 0.0f)) {nPushFunc(2); pBullet->Deactivate(true); iOutsideHit += 1u;}
-                else if(HAS_BIT(iActive, 3u) && (vPos.y > vAreaTo  .y) && (vDir.y > 0.0f)) {nPushFunc(3); pBullet->Deactivate(true); iOutsideHit += 1u;}
+                     if(HAS_BIT(iActive, 0u) && (vPos.x < vAreaFrom.x) && (vDir.x < 0.0f)) {nPushFunc(0); pBullet->Deactivate(true); iOutsideHit += 1u; STAGE_FAILTROPHY}   // TODO 1: add correct impact parameter
+                else if(HAS_BIT(iActive, 1u) && (vPos.x > vAreaTo  .x) && (vDir.x > 0.0f)) {nPushFunc(1); pBullet->Deactivate(true); iOutsideHit += 1u; STAGE_FAILTROPHY}
+                else if(HAS_BIT(iActive, 2u) && (vPos.y < vAreaFrom.y) && (vDir.y < 0.0f)) {nPushFunc(2); pBullet->Deactivate(true); iOutsideHit += 1u; STAGE_FAILTROPHY}
+                else if(HAS_BIT(iActive, 3u) && (vPos.y > vAreaTo  .y) && (vDir.y > 0.0f)) {nPushFunc(3); pBullet->Deactivate(true); iOutsideHit += 1u; STAGE_FAILTROPHY}
             });
 
             for(coreUintW i = 0u; i < POST_WALLS; ++i)
@@ -2157,7 +2166,9 @@ void cGeluMission::__SetupOwn()
         constexpr coreUintW iOrbNum = 16u;
         STATIC_ASSERT(iOrbNum <= GELU_ORBS)
 
-        constexpr coreUint8 aiSurf[] = {11u, 22u, 33u, 44u, 55u};
+        constexpr coreUint8 aiSurf    [] = {11u, 22u, 33u, 44u, 55u};
+        constexpr coreUint8 aiSurfEasy[] = { 5u, 10u, 15u, 20u, 25u};
+        STATIC_ASSERT(ARRAY_SIZE(aiSurf) == ARRAY_SIZE(aiSurfEasy))
 
         STAGE_ADD_PATH(pPath1)
         {
@@ -2184,11 +2195,12 @@ void cGeluMission::__SetupOwn()
             });
         });
 
-        STAGE_GET_START(3u * GAME_PLAYERS + 6u)
+        STAGE_GET_START(3u * GAME_PLAYERS + 7u)
             STAGE_GET_UINT_ARRAY(aiTarget,  GAME_PLAYERS)
             STAGE_GET_VEC2_ARRAY(avOldMove, GAME_PLAYERS)
             STAGE_GET_VEC2      (vSurferMove)
-            STAGE_GET_UINT      (iSurferCount)
+            STAGE_GET_UINT      (iSurferHit)
+            STAGE_GET_UINT      (iSurferNum)
             STAGE_GET_UINT      (iShineCollected)
             STAGE_GET_UINT      (iBulletTick)
             STAGE_GET_UINT      (iBulletCount)
@@ -2658,12 +2670,15 @@ void cGeluMission::__SetupOwn()
 
                     if(g_pGame->IsTask())
                     {
-                        if((++iBulletCount < 256u) && std::memchr(aiSurf, iBulletCount, ARRAY_SIZE(aiSurf)))
+                        iBulletCount += 1u;
+
+                        if((iSurferNum < ARRAY_SIZE(aiSurf)) && m_Surfer.HasStatus(ENEMY_STATUS_DEAD) && ((m_iStageSub >= 38u) || ((g_pGame->IsEasy() ? aiSurfEasy : aiSurf)[iSurferNum] == iBulletCount)))
                         {
                             this->EnableSurfer();
                             m_Surfer.SetPosition(coreVector3(vPos - vDir * 14.0f, 0.0f));
 
                             vSurferMove = vDir * (1.0f * BULLET_SPEED_FACTOR);
+                            iSurferNum += 1u;
                         }
                     }
                 };
@@ -2730,14 +2745,14 @@ void cGeluMission::__SetupOwn()
             {
                 this->DisableSurfer(false);
 
-                if(++iSurferCount == ARRAY_SIZE(aiSurf))
+                if(++iSurferHit == ARRAY_SIZE(aiSurf))
                 {
                     STAGE_BADGE(1u, BADGE_NORMAL, m_Surfer.GetPosition())
                 }
                 else
                 {
-                    g_pGame->GetCombatText()->DrawProgress(iSurferCount, ARRAY_SIZE(aiSurf), m_Surfer.GetPosition());
-                    g_pSpecialEffects->PlaySound(m_Surfer.GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iSurferCount, ARRAY_SIZE(aiSurf)), SOUND_ITEM_02);
+                    g_pGame->GetCombatText()->DrawProgress(iSurferHit, ARRAY_SIZE(aiSurf), m_Surfer.GetPosition());
+                    g_pSpecialEffects->PlaySound(m_Surfer.GetPosition(), 1.0f, SPECIAL_SOUND_PROGRESS(iSurferHit, ARRAY_SIZE(aiSurf)), SOUND_ITEM_02);
                 }
 
                 g_pSpecialEffects->MacroExplosionColorSmall(m_Surfer.GetPosition(), COLOR_ENERGY_YELLOW);
@@ -3182,7 +3197,11 @@ void cGeluMission::__SetupOwn()
 
         STAGE_FOREACH_PLAYER(pPlayer, j)
         {
-            if(m_abCrushInside[j]) ADD_BIT(iTouchState, j)
+            if(m_abCrushInside[j])
+            {
+                ADD_BIT(iTouchState, j)
+                STAGE_FAILTROPHY
+            }
         });
 
         if(!pHelper->HasStatus(HELPER_STATUS_DEAD))

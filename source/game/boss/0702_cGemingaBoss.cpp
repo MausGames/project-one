@@ -300,8 +300,8 @@ void cGemingaBoss::__MoveOwn()
     this->_UpdateBoss();
 
     // 
-    const cEnemySquad* pSquad1 = (m_iPhase == 200u) ? NULL : g_pGame->GetCurMission()->GetEnemySquad(0u);
-    const cEnemySquad* pSquad2 = (m_iPhase == 200u) ? NULL : g_pGame->GetCurMission()->GetEnemySquad(1u);
+    const cEnemySquad* pSquad1 = (m_iPhase == 200u) ? NULL : pMission->GetEnemySquad(0u);
+    const cEnemySquad* pSquad2 = (m_iPhase == 200u) ? NULL : pMission->GetEnemySquad(1u);
     ASSERT(!pSquad1 || (pSquad1->GetNumEnemies() == GEMINGA_ENEMIES_TELEPORT))
     ASSERT(!pSquad2 || (pSquad2->GetNumEnemies() == GEMINGA_ENEMIES_LEGION))
 
@@ -1949,7 +1949,10 @@ void cGemingaBoss::__MoveOwn()
         g_pGame->GetBulletManagerPlayer()->ForEachBullet([&](cBullet* OUTPUT pBullet)
         {
             if(pBullet->HasStatus(BULLET_STATUS_REFLECTED))
+            {
                 m_aiCounter[BULLET_REFLECT] = 1;
+                pMission->FailTrophy();
+            }
         });
     }
 

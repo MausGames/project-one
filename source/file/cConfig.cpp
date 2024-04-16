@@ -67,6 +67,14 @@ static void UpgradeConfig()
                 Core::Reset();
             }
         }
+
+        if(__UPGRADE(3))
+        {
+            if(Core::Config->GetInt(CORE_CONFIG_INPUT_JOYSTICKDEAD) == 0x2000)
+            {
+                Core::Config->SetInt(CORE_CONFIG_INPUT_JOYSTICKDEAD);
+            }
+        }
     }
     #undef __UPGRADE
 

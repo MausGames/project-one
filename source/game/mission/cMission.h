@@ -197,6 +197,7 @@
 #define STAGE_CLEARED                          (std::all_of(m_aSquad.begin(), m_aSquad.end(), [](const cEnemySquad& oSquad) {return oSquad.IsFinished();}))
 #define STAGE_RESURRECT(s,f,t)                 {STAGE_FOREACH_ENEMY_ALL(s, pEnemy, __i) {if((coreIntW(__i) >= coreIntW(f)) && (coreIntW(__i) <= coreIntW(t))) pEnemy->Resurrect();}); ASSERT((coreIntW(f) <= coreIntW(t)) && (coreIntW(t) < coreIntW((s)->GetNumEnemies())))}
 #define STAGE_BADGE(i,b,p)                     {this->GiveBadge(i, b, p);}
+#define STAGE_FAILTROPHY                       {this->FailTrophy();}
 
 #define STAGE_DELAY_START                      {UNUSED STAGE_ADD_SQUAD(pDelay, cDummyEnemy, 1u) {pDelay->GetEnemy(0u)->Configure(1, 0u, COLOR_SHIP_GREY); pDelay->GetEnemy(0u)->Resurrect(); this->SetDelay(true);});}
 #define STAGE_DELAY_START_CLEAR                {STAGE_DELAY_START g_pGame->GetBulletManagerEnemy()->ClearBullets(true);}
@@ -337,6 +338,7 @@ protected:
     const coreFloat* m_pfMedalGoal;                         // 
 
     coreUint8 m_iBadgeGiven;                                // 
+    coreBool  m_bTrophyFailed;                              // 
 
     coreUint8 m_iRecordBroken;                              // 
 
@@ -404,6 +406,9 @@ public:
     void GiveBadge(const coreUintW iIndex, const coreUint8 iBadge, const coreVector3 vPosition);
 
     // 
+    inline void FailTrophy() {m_bTrophyFailed = true;}
+
+    // 
     void AddExtraScore(cPlayer* OUTPUT pPlayer, const coreUint32 iScore, const coreVector3 vPosition);
 
     // 
@@ -434,6 +439,7 @@ public:
     inline cEnemySquad*     GetEnemySquad      (const coreUintW iIndex)      {ASSERT(iIndex < m_aSquad.size()) return &(*(m_aSquad.begin() + iIndex));}   // TODO 1: besseres indexieren
     inline const coreUint8& GetStageSub        ()const                       {return m_iStageSub;}
     inline const coreFloat* GetMedalGoal       ()const                       {return m_pfMedalGoal;}
+    inline const coreBool&  GetTrophyFailed    ()const                       {return m_bTrophyFailed;}
     inline const coreUint8& GetRecordBroken    ()const                       {return m_iRecordBroken;}
     inline const coreUint8& GetTakeFrom        ()const                       {return m_iTakeFrom;}
     inline const coreUint8& GetTakeTo          ()const                       {return m_iTakeTo;}

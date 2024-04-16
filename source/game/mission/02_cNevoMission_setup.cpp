@@ -924,7 +924,11 @@ void cNevoMission::__SetupOwn()
 
             if(m_iStageSub == 5u)
             {
-                if(iTileStateOld > iTileState) iSingleTouch = 1u;
+                if(iTileStateOld > iTileState)
+                {
+                    iSingleTouch = 1u;
+                    STAGE_FAILTROPHY
+                }
                 if(bComplete && !iSingleTouch) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, g_pGame->FindPlayerDual(0u)->GetPosition())
             }
         }
@@ -1150,10 +1154,14 @@ void cNevoMission::__SetupOwn()
             else if(STAGE_SUB(10u)) STAGE_RESURRECT(pSquad1, 50u, 57u)   //   8
             else
             {
+                coreBool bBadge = true;
+
                 STAGE_FOREACH_PLAYER_ALL(pPlayer, i)
                 {
-                    if(afStill[i] < 1.0f) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, pPlayer->GetPosition())
+                    if(afStill[i] >= 1.0f) bBadge = false;
                 });
+
+                if(bBadge) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, g_pGame->FindPlayerDual(0u)->GetPosition())
             }
 
             iWallCount = 0u;
@@ -1501,7 +1509,11 @@ void cNevoMission::__SetupOwn()
             if(pPlayer->GetMove().IsNull() || !pPlayer->GetWeapon(0u)->GetCooldown())
             {
                 afStill[i] += 1.0f * TIME;
-                if(afStill[i] >= 0.3f) afStill[i] = 2.0f;
+                if(afStill[i] >= 0.3f)
+                {
+                    afStill[i] = 2.0f;
+                    STAGE_FAILTROPHY
+                }
             }
             else
             {
@@ -1882,6 +1894,8 @@ void cNevoMission::__SetupOwn()
         {
             iTurnRef    = m_iArrowActive;
             iTurnCount += 1u;
+
+            if(iTurnCount > 20u + 1u) STAGE_FAILTROPHY
         }
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)

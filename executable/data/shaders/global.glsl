@@ -128,8 +128,6 @@
     #if defined(_CORE_FRAGMENT_SHADER_)
         #define varying in
     #endif
-#else
-    #undef _CORE_OPTION_INSTANCING_
 #endif
 #if !defined(CORE_GL_gpu_shader4)
     #define flat
@@ -560,35 +558,23 @@ uniform mediump sampler2DShadow u_as2TextureShadow[CORE_NUM_TEXTURES_SHADOW];
 // ****************************************************************
 #if defined(_CORE_VERTEX_SHADER_)
 
-    #if (CORE_GL_VERSION >= 130) || (CORE_GL_ES_VERSION >= 300)
+    // vertex attributes
+    attribute vec3 a_v3RawPosition;
+    attribute vec2 a_v2RawTexCoord;
+    attribute vec3 a_v3RawNormal;
+    attribute vec4 a_v4RawTangent;
 
-        // vertex attributes
-        in vec3 a_v3RawPosition;
-        in vec2 a_v2RawTexCoord;
-        in vec3 a_v3RawNormal;
-        in vec4 a_v4RawTangent;
+    // instancing attributes
+    attribute vec3 a_v3DivPosition;
+    attribute vec3 a_v3DivSize;
+    attribute vec4 a_v4DivRotation;
+    attribute vec3 a_v3DivData;
+    attribute vec4 a_v4DivColor;
+    attribute vec4 a_v4DivTexParam;
 
-        // instancing attributes
-        in vec3 a_v3DivPosition;
-        in vec3 a_v3DivSize;
-        in vec4 a_v4DivRotation;
-        in vec3 a_v3DivData;
-        in vec4 a_v4DivColor;
-        in vec4 a_v4DivTexParam;
-
-    #else
-
-        // vertex attributes
-        attribute vec3 a_v3RawPosition;
-        attribute vec2 a_v2RawTexCoord;
-        attribute vec3 a_v3RawNormal;
-        attribute vec4 a_v4RawTangent;
-
-        // instancing uniforms
-        uniform highp   vec3 a_v3DivPosition;
-        uniform mediump vec3 a_v3DivData;
-
-    #endif
+    // instancing uniforms
+    uniform highp   vec3 u_v3DivPosition;
+    uniform mediump vec3 u_v3DivData;
 
     #if defined(CORE_GL_shader_io_blocks)
 
@@ -621,15 +607,17 @@ uniform mediump sampler2DShadow u_as2TextureShadow[CORE_NUM_TEXTURES_SHADOW];
 
     // remapped variables
     #if defined(_CORE_OPTION_INSTANCING_)
-        #define u_v3Position  (a_v3DivPosition)
-        #define u_v3Size      (a_v3DivSize)
-        #define u_v4Rotation  (a_v4DivRotation)
-        #define u_v4Color     (a_v4DivColor)
-        #define u_v2TexSize   (a_v4DivTexParam.xy)
-        #define u_v2TexOffset (a_v4DivTexParam.zw)
+        #define u_v3Position    (a_v3DivPosition)
+        #define u_v3Size        (a_v3DivSize)
+        #define u_v4Rotation    (a_v4DivRotation)
+        #define u_v4Color       (a_v4DivColor)
+        #define u_v2TexSize     (a_v4DivTexParam.xy)
+        #define u_v2TexOffset   (a_v4DivTexParam.zw)
     #else
-        #define u_v2TexSize   (u_v4TexParam.xy)
-        #define u_v2TexOffset (u_v4TexParam.zw)
+        #define a_v3DivPosition (u_v3DivPosition)
+        #define a_v3DivData     (u_v3DivData)
+        #define u_v2TexSize     (u_v4TexParam.xy)
+        #define u_v2TexOffset   (u_v4TexParam.zw)
     #endif
     #define a_v1DivScale (a_v3DivData.x)
     #define a_v1DivAngle (a_v3DivData.y)
@@ -639,17 +627,17 @@ uniform mediump sampler2DShadow u_as2TextureShadow[CORE_NUM_TEXTURES_SHADOW];
     void VertexMain();
     void ShaderMain()
     {
+        #if defined(GL_ES)
+            #define CORE_OVERFLOW_GUARD(i, n) (i)
+        #else
+            #define CORE_OVERFLOW_GUARD(i, n) (min(i, (n) - 1))
+        #endif
+
         // compatibility for Intel and macOS
         v_v4VarColor   = vec4(0.0);
-        #if defined(GL_ES)
-            for(int i = 0; i < CORE_NUM_TEXTURES_2D; ++i) v_av2TexCoord[i] = vec2(0.0);
-            for(int i = 0; i < CORE_NUM_LIGHTS;      ++i) v_av4LightPos[i] = vec4(0.0);
-            for(int i = 0; i < CORE_NUM_LIGHTS;      ++i) v_av4LightDir[i] = vec4(0.0);
-        #else
-            for(int i = 0; i < CORE_NUM_TEXTURES_2D; ++i) v_av2TexCoord[min(i, CORE_NUM_TEXTURES_2D - 1)] = vec2(0.0);
-            for(int i = 0; i < CORE_NUM_LIGHTS;      ++i) v_av4LightPos[min(i, CORE_NUM_LIGHTS      - 1)] = vec4(0.0);
-            for(int i = 0; i < CORE_NUM_LIGHTS;      ++i) v_av4LightDir[min(i, CORE_NUM_LIGHTS      - 1)] = vec4(0.0);
-        #endif
+        for(int i = 0; i < CORE_NUM_TEXTURES_2D; ++i) v_av2TexCoord[CORE_OVERFLOW_GUARD(i, CORE_NUM_TEXTURES_2D)] = vec2(0.0);
+        for(int i = 0; i < CORE_NUM_LIGHTS;      ++i) v_av4LightPos[CORE_OVERFLOW_GUARD(i, CORE_NUM_LIGHTS)]      = vec4(0.0);
+        for(int i = 0; i < CORE_NUM_LIGHTS;      ++i) v_av4LightDir[CORE_OVERFLOW_GUARD(i, CORE_NUM_LIGHTS)]      = vec4(0.0);
         v_v3TangentPos = vec3(0.0);
         v_v3TangentCam = vec3(0.0);
 
@@ -660,6 +648,10 @@ uniform mediump sampler2DShadow u_as2TextureShadow[CORE_NUM_TEXTURES_SHADOW];
         a_v2LowPosition = a_v3RawPosition.xy;
         a_v2LowTexCoord = vec2(0.5 + a_v3RawPosition.x, 0.5 - a_v3RawPosition.y);
         VertexMain();
+
+        #if !((CORE_GL_VERSION >= 110) || (CORE_GL_ES_VERSION >= 300))
+            v_v3TangentPos = v_v3TangentCam - v_v3TangentPos;
+        #endif
     }
 
 #endif // _CORE_VERTEX_SHADER_
@@ -784,7 +776,11 @@ uniform mediump sampler2DShadow u_as2TextureShadow[CORE_NUM_TEXTURES_SHADOW];
     void ShaderMain()
     {
     #if defined(_CORE_OPTION_VIEWDIR_)
-        v_v3ViewDir = v_v3TangentCam - v_v3TangentPos;
+        #if (CORE_GL_VERSION >= 110) || (CORE_GL_ES_VERSION >= 300)
+            v_v3ViewDir = v_v3TangentCam - v_v3TangentPos;
+        #else
+            v_v3ViewDir = v_v3TangentPos;
+        #endif
     #endif
 
         FragmentMain();

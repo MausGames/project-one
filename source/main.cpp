@@ -18,7 +18,6 @@ coreBool        g_bDemoVersion    = false;
 coreBool        g_bLeaderboards   = false;
 coreBool        g_bSteamDeck      = false;
 coreBool        g_bHandheld       = false;
-coreBool        g_bNoInstancing   = false;
 coreBool        g_bDebugOutput    = false;
 coreMusicPlayer g_MusicPlayer     = {};
 
@@ -66,12 +65,10 @@ void CoreApp::Init()
     LoadConfig();
 
     // check for demo version (game would crash otherwise anyway)
-    g_bDemoVersion = !coreData::FileExists("data/archives/pack2.cfa");
+    g_bDemoVersion = CoreApp::IsDemo();
 
     // 
     g_bLeaderboards = !std::strcmp(Core::Platform->GetIdentifier(), "Steam");
-
-    g_bNoInstancing = CORE_GL_SUPPORT(ES2_restriction); 
 
     // 
     InitAchievements();
@@ -424,6 +421,15 @@ void CoreApp::Move()
 
 
 // ****************************************************************
+// 
+coreBool CoreApp::IsDemo()
+{
+    static const coreBool s_bIsDemo = !coreData::FileExists("data/archives/pack2.cfa");
+    return s_bIsDemo;
+}
+
+
+// ****************************************************************
 // init resolution properties
 void InitResolution(const coreVector2 vResolution)
 {
@@ -684,7 +690,7 @@ static void DebugGame()
             for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
             {
                 oOptions.aiShield  [i]    = Core::Input->GetKeyboardButton(CORE_INPUT_KEY(C), CORE_INPUT_HOLD) ? 20u : 0u;
-                oOptions.aaiWeapon [i][0] = cWaveWeapon::ID;
+                oOptions.aaiWeapon [i][0] = cRayWeapon::ID;
                 oOptions.aaiSupport[i][0] = 0u;
             }
 

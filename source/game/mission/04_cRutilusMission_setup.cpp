@@ -520,7 +520,10 @@ void cRutilusMission::__SetupOwn()
         g_pGame->GetBulletManagerPlayer()->ForEachBullet([&](const cBullet* pBullet)
         {
             if(SameDirection90(pBullet->GetFlyDir(), bRotated ? coreVector2(0.0f,1.0f) : coreVector2(-1.0f,0.0f)))
+            {
                 iLeftShots += 1u;
+                STAGE_FAILTROPHY
+            }
         });
 
         if(!bPostpone) STAGE_WAVE(0u, "4-1", {50.0f, 75.0f, 100.0f, 125.0f, 250.0f})   // NEUNZEHN
@@ -980,7 +983,11 @@ void cRutilusMission::__SetupOwn()
             const coreUint8 iPack = PackDirection(pPlayer->GetDirection().xy());
 
             if(STAGE_BEGINNING) aiDirSave[i] = iPack;
-            if(aiDirSave[i] != iPack) ADD_BIT(iDirChange, i)
+            if(aiDirSave[i] != iPack)
+            {
+                ADD_BIT(iDirChange, i)
+                STAGE_FAILTROPHY
+            }
         });
 
         STAGE_FOREACH_ENEMY(pSquad1, pEnemy, i)
@@ -1584,7 +1591,11 @@ void cRutilusMission::__SetupOwn()
             if(pEnemy->ReachedDeath())
             {
                 const cPlayer* pPlayer = pEnemy->LastAttacker();
-                if(pPlayer->GetMoveSpeed() >= 1.0f) iFastKills += 1u;
+                if(pPlayer->GetMoveSpeed() >= 1.0f)
+                {
+                    iFastKills += 1u;
+                    STAGE_FAILTROPHY
+                }
             }
         });
 
@@ -2165,6 +2176,7 @@ void cRutilusMission::__SetupOwn()
                 if(pPlayer->TestCollisionPrecise(pBullet, &vNewIntersection, &bNewFirstHit))
                 {
                     iSelfHits += 1u;
+                    STAGE_FAILTROPHY
                 }
             }
         });
@@ -2749,6 +2761,8 @@ void cRutilusMission::__SetupOwn()
                 pEnemy->SetDirection  (pParent->GetDirection  ());
                 pEnemy->SetOrientation(pParent->GetOrientation());
             }
+
+            if(pEnemy->ReachedDeath()) STAGE_FAILTROPHY
         });
 
         if(iActiveCount >= pSquad2->GetNumEnemies()) STAGE_BADGE(3u, BADGE_ACHIEVEMENT, g_pGame->FindPlayerDual(0u)->GetPosition())

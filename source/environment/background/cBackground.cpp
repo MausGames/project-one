@@ -224,7 +224,7 @@ void cBackground::Move()
             coreBool bUpdate = false;
 
             // 
-            const coreFloat             fDensity      = (*it)->List()->front()->GetCollisionModifier().x * (g_bNoInstancing ? 0.7f : 1.0f);
+            const coreFloat             fDensity      = (*it)->List()->front()->GetCollisionModifier().x;
             const coreList<coreUint16>* paiBaseHeight = m_aaiBaseHeight.count(*it) ? &m_aaiBaseHeight.at(*it) : NULL;
             const coreList<coreUint32>* paiBaseNormal = m_aaiBaseNormal.count(*it) ? &m_aaiBaseNormal.at(*it) : NULL;
 

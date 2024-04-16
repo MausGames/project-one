@@ -35,6 +35,7 @@ cMission::cMission()noexcept
 , m_fStageWait          (0.0f)
 , m_pfMedalGoal         (NULL)
 , m_iBadgeGiven         (0u)
+, m_bTrophyFailed       (false)
 , m_iRecordBroken       (0u)
 , m_iTakeFrom           (0u)
 , m_iTakeTo             (TAKE_MISSION)
@@ -266,6 +267,9 @@ void cMission::SkipStage()
     STATIC_ASSERT(BADGES <= sizeof(m_iBadgeGiven)*8u)
 
     // 
+    m_bTrophyFailed = false;
+
+    // 
     m_nCollPlayerEnemy  = NULL;
     m_nCollPlayerBullet = NULL;
     m_nCollEnemyBullet  = NULL;
@@ -417,7 +421,7 @@ void cMission::GiveBadge(const coreUintW iIndex, const coreUint8 iBadge, const c
     // 
     g_pGame->ForEachPlayerAll([&](cPlayer* OUTPUT pPlayer, const coreUintW i)
     {
-        if(!bAchievement) pPlayer->GetDataTable()->GiveBadge(iIndex);
+        pPlayer->GetDataTable()->GiveBadge(iIndex);
         pPlayer->StartRolling();   // # also for achievements
     });
 

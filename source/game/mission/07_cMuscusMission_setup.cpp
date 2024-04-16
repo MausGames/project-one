@@ -1228,6 +1228,7 @@ void cMuscusMission::__SetupOwn()
             if(g_pForeground->IsVisiblePoint(pGenerate->GetPosition().xy()) && !this->IsGenerateVisible(i))
             {
                 iDisableState = 1u;
+                STAGE_FAILTROPHY
             }
 
             if(!iDisableState)
@@ -1898,7 +1899,11 @@ void cMuscusMission::__SetupOwn()
                         this->AddExtraScore(this->GetStrikePlayer(j), 40u, pEnemy->GetPosition());
                         vHitForce += this->GetStrikeDir(j) * 3.0f;
 
-                        if(fShieldDown) iUnshielded += 1u;
+                        if(fShieldDown)
+                        {
+                            iUnshielded += 1u;
+                            STAGE_FAILTROPHY
+                        }
 
                         g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.2f, 1.0f, SOUND_EFFECT_DUST);
                     }
@@ -2621,6 +2626,7 @@ void cMuscusMission::__SetupOwn()
     // TASK: destroy all zombies
     // TASK: touch the helper for N seconds
     // TASK EXTRA: never touch any of the enemies
+    // ACHIEVEMENT: destroy all enemies in reverse order
     // TODO 1: hard-mode: geschoss-linie die im kreis rotiert, bei allen stages!, auch bei legion, gegen legion rotation (andere bullet-farbe)
     STAGE_MAIN({TAKE_ALWAYS, 4u})
     {
@@ -2907,6 +2913,7 @@ void cMuscusMission::__SetupOwn()
                     else
                     {
                         iReverseState = 0xFFu;
+                        STAGE_FAILTROPHY
                     }
                 }
 

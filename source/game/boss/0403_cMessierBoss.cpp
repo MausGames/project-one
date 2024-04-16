@@ -304,8 +304,8 @@ void cMessierBoss::__MoveOwn()
     this->_UpdateBoss();
 
     // 
-    const cEnemySquad* pSquad1 = g_pGame->GetCurMission()->GetEnemySquad(0u);
-    const cEnemySquad* pSquad2 = g_pGame->GetCurMission()->GetEnemySquad(1u);
+    const cEnemySquad* pSquad1 = pMission->GetEnemySquad(0u);
+    const cEnemySquad* pSquad2 = pMission->GetEnemySquad(1u);
     ASSERT(pSquad1->GetNumEnemies() == MESSIER_ENEMIES_SMALL)
     ASSERT(pSquad2->GetNumEnemies() == MESSIER_ENEMIES_BIG)
     
@@ -1428,11 +1428,12 @@ void cMessierBoss::__MoveOwn()
         });
     }
 
-    g_pGame->ForEachPlayerAll([this](const cPlayer* pPlayer, const coreUintW i)
+    g_pGame->ForEachPlayerAll([&](const cPlayer* pPlayer, const coreUintW i)
     {
         if(pPlayer->WasDamaged())
         {
             ADD_BIT(m_aiCounter[BADGE_INVALID], i)
+            pMission->FailTrophy();
         }
     });
 

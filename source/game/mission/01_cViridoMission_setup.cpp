@@ -1136,6 +1136,14 @@ void cViridoMission::__SetupOwn()
                     pHelper->Kill(true);
                 }
             }
+
+            if(pEnemy->ReachedDeath())
+            {
+                if(!HAS_BIT(iLineTouch, MIN(i, iSharedIndex)))
+                {
+                    STAGE_FAILTROPHY
+                }
+            }
         });
 
         if(m_iLaserTouch)
@@ -1763,7 +1771,11 @@ void cViridoMission::__SetupOwn()
                 {
                     STAGE_FOREACH_PLAYER(pPlayer, i)
                     {
-                        if(!pPlayer->GetMove().IsNull()) ADD_BIT(iPlayerMove, i)
+                        if(!pPlayer->GetMove().IsNull())
+                        {
+                            ADD_BIT(iPlayerMove, i)
+                            STAGE_FAILTROPHY
+                        }
                     });
                 }
             }
@@ -1908,6 +1920,7 @@ void cViridoMission::__SetupOwn()
     // ACHIEVEMENT: intercept the big enemy 7 times while it rushes around
     // TODO 1: hard-mode: enemies which charge infinitely (teleport, N-times)
     // TODO 1: hard-mode: every enemy bounces once (what about bouncy enemy?), oder 1 infinity move (and bouncy enemy just moves N times infinitely)
+    // TODO 1: hard-mode: enemies explode into near attack
     STAGE_MAIN({TAKE_ALWAYS, 3u})
     {
         constexpr coreUintW iNumData     = 16u;
@@ -1922,7 +1935,7 @@ void cViridoMission::__SetupOwn()
         STAGE_ADD_PATH(pPath1)
         {
             pPath1->Reserve(2u);
-            pPath1->AddNode(coreVector2(0.0f,1.2f * SQRT2), coreVector2(0.0f,-1.0f));
+            pPath1->AddNode(coreVector2(0.0f,1.3f * SQRT2), coreVector2(0.0f,-1.0f));
             pPath1->AddStop(coreVector2(0.0f,0.7f),         coreVector2(0.0f,-1.0f));
             pPath1->Refine();
         });
@@ -2048,6 +2061,8 @@ void cViridoMission::__SetupOwn()
                                 g_pSpecialEffects->CreateSplashColor(pEnemy->GetPosition(), 100.0f, 40u, COLOR_ENERGY_RED);
                                 g_pSpecialEffects->PlaySound(pEnemy->GetPosition(), 1.0f, 1.0f, SOUND_ENEMY_EXPLOSION_09);
                                 g_pSpecialEffects->RumblePlayer(NULL, SPECIAL_RUMBLE_BIG, 250u);
+
+                                STAGE_FAILTROPHY
                             }
                             else
                             {
@@ -2724,7 +2739,10 @@ void cViridoMission::__SetupOwn()
         g_pGame->GetBulletManagerPlayer()->ForEachBullet([&](const cBullet* pBullet)
         {
             if(!SameDirection90(pBullet->GetFlyDir(), coreVector2(1.0f,0.0f)))
+            {
                 iNonRightShot += 1u;
+                STAGE_FAILTROPHY
+            }
         });
 
         if(STAGE_BEGINNING)

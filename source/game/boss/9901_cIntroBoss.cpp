@@ -795,6 +795,7 @@ void cIntroBoss::__MoveOwn()
             pSkewer->SetDirection  ((this->GetDirection  ().RotatedZ45() * mRota).Normalized());
             pSkewer->SetOrientation( this->GetOrientation());
         }
+        else g_pGame->GetCurMission()->FailTrophy();
     }
 
     // 

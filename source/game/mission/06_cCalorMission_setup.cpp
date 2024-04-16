@@ -465,7 +465,11 @@ void cCalorMission::__SetupOwn()
 
             if(pEnemy->ReachedDeath())
             {
-                if(!g_pGame->GetRepairEnemy()->GetPlayer()) iUnrepaired += 1u;
+                if(!g_pGame->GetRepairEnemy()->GetPlayer())
+                {
+                    iUnrepaired += 1u;
+                    STAGE_FAILTROPHY
+                }
             }
         });
 
@@ -2255,10 +2259,13 @@ void cCalorMission::__SetupOwn()
             }
         }
 
-        STAGE_COLL_ENEMY_BULLET(pEnemy, pBullet, vIntersection, bFirstHit, COLL_REF(iFrontShot))
+        STAGE_COLL_ENEMY_BULLET(pEnemy, pBullet, vIntersection, bFirstHit, COLL_THIS, COLL_REF(iFrontShot))
         {
             if(!SameDirection90(pBullet->GetFlyDir(), coreVector2(0.0f,-1.0f)))
+            {
                 iFrontShot += 1u;
+                STAGE_FAILTROPHY
+            }
         });
 
         STAGE_WAVE(3u, "6-4", {80.0f, 120.0f, 160.0f, 200.0f, 400.0f})   // VIERUNDDREISSIG
@@ -2394,6 +2401,8 @@ void cCalorMission::__SetupOwn()
 
         if(pCatchObject1 && (pCatchObject1 != g_pGame->GetPlayer(0u))) ADD_BIT(iAnyCatch, 0u)
         if(pCatchObject2 && (pCatchObject2 != g_pGame->GetPlayer(1u))) ADD_BIT(iAnyCatch, 1u)
+
+        if(!g_pGame->IsMulti() || (coreMath::PopCount(iAnyCatch) > 1u)) STAGE_FAILTROPHY
 
         coreBool bLastCatch = false;
         if(pSquad1->IsFinished() && (pSquad2->GetNumEnemiesAlive() == 1u) && m_Boulder.HasStatus(ENEMY_STATUS_DEAD))
