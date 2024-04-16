@@ -130,7 +130,7 @@ void cGame::Render()
         // render low-priority bullet manager
         m_BulletManagerPlayer.Render();
 
-        m_BulletManagerEnemy.Render(); // temporary for r-type residue wave   
+        //m_BulletManagerEnemy.Render(); // temporary for r-type residue wave   
     }
 
     __DEPTH_LEVEL_SHIP   // # 2
@@ -158,7 +158,7 @@ void cGame::Render()
         g_pSpecialEffects->Render();
 
         // render high-priority bullet manager
-        //m_BulletManagerEnemy.Render();   // TODO: below attack ? to be consistent with over ? rename all 3 stages ? 
+        m_BulletManagerEnemy.Render();   // TODO: below attack ? to be consistent with over ? rename all 3 stages ? 
 
         // render overlying effects
         m_EnemyManager.RenderOver();
@@ -293,15 +293,17 @@ void cGame::LoadMissionIndex(const coreUintW iIndex)
 // 
 void cGame::LoadNextMission()
 {
-    if(m_iCurMissionIndex == m_iNumMissions - 1u)
+    // 
+    this->LoadMissionIndex(m_iCurMissionIndex + 1u);
+
+    // 
+    if(m_pCurMission->GetID() == cNoMission::ID)
     {
-        // TODO
-        ASSERT(false)
-    }
-    else
-    {
+        ASSERT(CONTAINS_FLAG(m_iStatus, GAME_STATUS_OUTRO))
+
         // 
-        this->LoadMissionIndex(m_iCurMissionIndex + 1u);
+        REMOVE_FLAG(m_iStatus, GAME_STATUS_OUTRO)
+        ADD_FLAG   (m_iStatus, GAME_STATUS_FINISHED)
     }
 }
 
@@ -435,7 +437,7 @@ void cGame::OffsetDepthLevel(const coreFloat fOffset)const
 
 // ****************************************************************
 // 
-cPlayer* cGame::FindPlayer(const coreVector2& vPosition)
+RETURN_NONNULL cPlayer* cGame::FindPlayer(const coreVector2& vPosition)
 {
     // TODO: should use side for target, not nearest   
 
@@ -461,6 +463,79 @@ cPlayer* cGame::FindPlayer(const coreVector2& vPosition)
 
     ASSERT(pPlayer)
     return pPlayer;
+}
+
+
+// ****************************************************************
+// 
+coreUint8 cGame::CalcMedal(const coreFloat fTime, const coreUint32 iDamageTaken, const coreFloat* pfMedalGoal)
+{
+    ASSERT(pfMedalGoal && (pfMedalGoal[0] < pfMedalGoal[1]) && (pfMedalGoal[1] < pfMedalGoal[2]) && (pfMedalGoal[2] < pfMedalGoal[3]))
+
+    // 
+    coreUint8 iMedal;
+         if(fTime <= pfMedalGoal[0]) iMedal = MEDAL_DARK;
+    else if(fTime <= pfMedalGoal[1]) iMedal = MEDAL_PLATINUM;
+    else if(fTime <= pfMedalGoal[2]) iMedal = MEDAL_GOLD;
+    else if(fTime <= pfMedalGoal[3]) iMedal = MEDAL_SILVER;
+    else                             iMedal = MEDAL_BRONZE;
+
+    // 
+    iMedal -= MIN(iDamageTaken, coreUint32(iMedal - MEDAL_BRONZE));
+
+    return iMedal;
+}
+
+
+// ****************************************************************
+// 
+coreUint32 cGame::CalcBonusTime(const coreFloat fTime)
+{
+    // 
+    return F_TO_UI(LERP(20000.0f, 100.0f, MIN(fTime * (1.0f/60.0f), 1.0f)));
+}
+
+
+// ****************************************************************
+// 
+coreUint32 cGame::CalcBonusMedal(const coreUint8 iMedal)
+{
+    // 
+    switch(iMedal)
+    {
+    default: ASSERT(false)
+    case MEDAL_DARK:     return 10000u;
+    case MEDAL_PLATINUM: return  5000u;
+    case MEDAL_GOLD:     return  3000u;
+    case MEDAL_SILVER:   return  2000u;
+    case MEDAL_BRONZE:   return  1000u;
+    case MEDAL_NONE:     return     0u;
+    }
+}
+
+
+// ****************************************************************
+// 
+coreUint32 cGame::CalcBonusSurvive(const coreUint32 iDamageTaken, const coreBool bWasDead)
+{
+    // 
+    if(!bWasDead)
+    {
+        // 
+        switch(iDamageTaken)
+        {
+        case 0u: return 200000u;
+        case 1u: return 100000u;
+        case 2u: return  50000u;
+        case 3u: return  30000u;
+        case 4u: return  20000u;
+        default: return  10000u - MIN(50u * (iDamageTaken - LIVES), 9999u);
+        }
+
+        STATIC_ASSERT(LIVES == 5u)
+    }
+
+    return 0u;
 }
 
 
@@ -689,15 +764,18 @@ void cGame::__HandleCollisions()
     {
         if(!bFirstHit) return;
 
-        // 
-        const coreVector2 vDiff = pPlayer->GetPosition().xy() - pEnemy->GetPosition().xy();
-        const coreVector2 vDir  = (vDiff.IsNull() ? coreVector2(1.0f,0.0f) : vDiff.Normalized());
-        pPlayer->SetForce    (vDir * 100.0f);
-        pPlayer->SetInterrupt(PLAYER_INTERRUPT);
+        if(!CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
+        {
+            // 
+            const coreVector2 vDiff = pPlayer->GetPosition().xy() - pEnemy->GetPosition().xy();
+            const coreVector2 vDir  = (vDiff.IsNull() ? coreVector2(1.0f,0.0f) : vDiff.Normalized());
+            pPlayer->SetForce    (vDir * 100.0f);
+            pPlayer->SetInterrupt(PLAYER_INTERRUPT);
 
-        // 
-        g_pSpecialEffects->CreateSplashColor(pPlayer->GetPosition(), 50.0f, 10u, coreVector3(1.0f,1.0f,1.0f));
-        g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+            // 
+            g_pSpecialEffects->CreateSplashColor(pPlayer->GetPosition(), 50.0f, 10u, coreVector3(1.0f,1.0f,1.0f));
+            g_pSpecialEffects->ShakeScreen(SPECIAL_SHAKE_SMALL);
+        }
 
 
         m_pCurMission->CollPlayerEnemy(pPlayer, pEnemy, vIntersection);
@@ -726,23 +804,26 @@ void cGame::__HandleCollisions()
         if(!g_pForeground->IsVisiblePoint(vIntersection.xy())) return;
 
         // 
-        if(pEnemy->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner())))
+        if(!CONTAINS_FLAG(pEnemy->GetStatus(), ENEMY_STATUS_GHOST))
         {
             // 
-            pBullet->Deactivate(true, vIntersection.xy());
+            if(pEnemy->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner())))
+            {
+                // 
+                pBullet->Deactivate(true, vIntersection.xy());
 
-            // 
-            g_pSpecialEffects->RumblePlayer(d_cast<cPlayer*>(pBullet->GetOwner()), SPECIAL_RUMBLE_DEFAULT);
+                // 
+                g_pSpecialEffects->RumblePlayer(d_cast<cPlayer*>(pBullet->GetOwner()), SPECIAL_RUMBLE_DEFAULT);
+            }
+            else
+            {
+                const coreVector2 vDiff   = pBullet->GetPosition().xy() - pEnemy->GetPosition().xy();
+                const coreVector2 vNormal = (vDiff.Normalized() - pBullet->GetFlyDir() * 10.0f).Normalized();
+
+                // 
+                pBullet->Reflect(pEnemy, vIntersection.xy(), vNormal);
+            }
         }
-        else
-        {
-            const coreVector2 vDiff   = pBullet->GetPosition().xy() - pEnemy->GetPosition().xy();
-            const coreVector2 vNormal = (vDiff.Normalized() - pBullet->GetFlyDir() * 10.0f).Normalized();
-
-            // 
-            pBullet->Reflect(pEnemy, vIntersection.xy(), vNormal);
-        }
-
 
         //const coreVector2 vDiff   = vIntersection.xy() - pBullet->GetPosition().xy();
         //const coreFloat   fOffset = pBullet->GetCollisionRange().y - coreVector2::Dot(vDiff, pBullet->GetDirection().xy());

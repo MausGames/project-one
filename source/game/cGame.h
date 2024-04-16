@@ -31,7 +31,8 @@ enum eGameStatus : coreUint8
     GAME_STATUS_OUTRO    = 0x02u,   // 
     GAME_STATUS_PLAY     = 0x04u,   // 
     GAME_STATUS_LOADING  = 0x08u,   // 
-    GAME_STATUS_DEFEATED = 0x10u    // 
+    GAME_STATUS_DEFEATED = 0x10u,   // 
+    GAME_STATUS_FINISHED = 0x20u    // 
 };
 
 struct sGameConfig final
@@ -49,19 +50,21 @@ static constexpr coreInt32 __GAME_MISSION_LIST_DEFAULT[] =
 {
     cIntroMission  ::ID,
     cViridoMission ::ID,
-    cNevoMission   ::ID,
-    cHarenaMission ::ID,
-    cRutilusMission::ID,
-    cGeluMission   ::ID,
-    cCalorMission  ::ID,
-    cMuscusMission ::ID,
-    cAterMission   ::ID
+    //cNevoMission   ::ID,
+    //cHarenaMission ::ID,
+    //cRutilusMission::ID,
+    //cGeluMission   ::ID,
+    //cCalorMission  ::ID,
+    //cMuscusMission ::ID,
+    //cAterMission   ::ID,
+    cNoMission     ::ID
 };
 
 static constexpr coreInt32 __GAME_MISSION_LIST_MAIN[] =
 {
     cIntroMission ::ID,
-    cViridoMission::ID
+    cViridoMission::ID,
+    cNoMission    ::ID
 };
 
 #define GAME_MISSION_LIST_DEFAULT (__GAME_MISSION_LIST_DEFAULT), ARRAY_SIZE(__GAME_MISSION_LIST_DEFAULT)
@@ -108,7 +111,7 @@ private:
     cTimeTable m_TimeTable;                 // 
     coreFlow   m_fTimeInOut;                // 
 
-    coreProtect<coreUint8> m_iContinues;    // 
+    coreUint8 m_iContinues;                 // 
 
     coreFlow m_fPacifistDamage;             // 
     coreBool m_bPacifist;                   // 
@@ -155,7 +158,7 @@ public:
     void OffsetDepthLevel(const coreFloat fOffset)const;
 
     // 
-    cPlayer* FindPlayer(const coreVector2& vPosition);
+    RETURN_NONNULL cPlayer* FindPlayer(const coreVector2& vPosition);
     template <typename F> void ForEachPlayer   (F&& nFunction);   // [](cPlayer* OUTPUT pPlayer, const coreUintW i) -> void
     template <typename F> void ForEachPlayerAll(F&& nFunction);   // [](cPlayer* OUTPUT pPlayer, const coreUintW i) -> void
 
@@ -177,12 +180,18 @@ public:
     // get object properties
     inline const coreInt32* GetMissionList()const {return m_piMissionList;}
     inline const coreUintW& GetNumMissions()const {return m_iNumMissions;}
-    inline       coreUint8  GetContinues  ()const {return m_iContinues;}
+    inline const coreUint8& GetContinues  ()const {return m_iContinues;}
     inline const coreBool&  GetPacifist   ()const {return m_bPacifist;}
     inline const coreUint8& GetOutroType  ()const {return m_iOutroType;}
     inline const coreUint8& GetStatus     ()const {return m_iStatus;}
     inline const coreUint8& GetDifficulty ()const {return m_iDifficulty;}
     inline const coreBool&  GetCoop       ()const {return m_bCoop;}
+
+    // 
+    static coreUint8  CalcMedal       (const coreFloat fTime, const coreUint32 iDamageTaken, const coreFloat* pfMedalGoal);
+    static coreUint32 CalcBonusTime   (const coreFloat fTime);
+    static coreUint32 CalcBonusMedal  (const coreUint8 iMedal);
+    static coreUint32 CalcBonusSurvive(const coreUint32 iDamageTaken, const coreBool bWasDead);
 
 
 private:

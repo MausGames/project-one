@@ -87,9 +87,11 @@ void LoadConfig()
     g_OldConfig.Game.iTextSize       = Core::Config->GetInt(CONFIG_GAME_TEXT_SIZE);
     g_OldConfig.Game.iGameRotation   = Core::Config->GetInt(CONFIG_GAME_GAME_ROTATION);
     g_OldConfig.Game.iGameScale      = Core::Config->GetInt(CONFIG_GAME_GAME_SCALE);
+    g_OldConfig.Game.iGameSpeed      = Core::Config->GetInt(CONFIG_GAME_GAME_SPEED);
     g_OldConfig.Game.iHudRotation    = Core::Config->GetInt(CONFIG_GAME_HUD_ROTATION);
     g_OldConfig.Game.iHudScale       = Core::Config->GetInt(CONFIG_GAME_HUD_SCALE);
     g_OldConfig.Game.iHudType        = Core::Config->GetInt(CONFIG_GAME_HUD_TYPE);
+    g_OldConfig.Game.iMirrorMode     = Core::Config->GetInt(CONFIG_GAME_MIRROR_MODE);
 
     // read graphics values
     g_OldConfig.Graphics.iShadow     = Core::Config->GetInt(CONFIG_GRAPHICS_SHADOW);
@@ -103,8 +105,9 @@ void LoadConfig()
     // read input values
     for(coreUintW i = 0u; i < INPUT_TYPES; ++i)
     {
-        g_OldConfig.Input.aiType  [i] = Core::Config->GetInt(CONFIG_INPUT_TYPE  (i));
-        g_OldConfig.Input.aiRumble[i] = Core::Config->GetInt(CONFIG_INPUT_RUMBLE(i));
+        g_OldConfig.Input.aiType    [i] = Core::Config->GetInt(CONFIG_INPUT_TYPE     (i));
+        g_OldConfig.Input.aiRumble  [i] = Core::Config->GetInt(CONFIG_INPUT_RUMBLE   (i));
+        g_OldConfig.Input.aiFireMode[i] = Core::Config->GetInt(CONFIG_INPUT_FIRE_MODE(i));
     }
     for(coreUintW i = 0u; i < INPUT_SETS;  ++i)
     {
@@ -137,9 +140,11 @@ void SaveConfig()
     Core::Config->SetInt(CONFIG_GAME_TEXT_SIZE,      g_OldConfig.Game.iTextSize);
     Core::Config->SetInt(CONFIG_GAME_GAME_ROTATION,  g_OldConfig.Game.iGameRotation);
     Core::Config->SetInt(CONFIG_GAME_GAME_SCALE,     g_OldConfig.Game.iGameScale);
+    Core::Config->SetInt(CONFIG_GAME_GAME_SPEED,     g_OldConfig.Game.iGameSpeed);
     Core::Config->SetInt(CONFIG_GAME_HUD_ROTATION,   g_OldConfig.Game.iHudRotation);
     Core::Config->SetInt(CONFIG_GAME_HUD_SCALE,      g_OldConfig.Game.iHudScale);
     Core::Config->SetInt(CONFIG_GAME_HUD_TYPE,       g_OldConfig.Game.iHudType);
+    Core::Config->SetInt(CONFIG_GAME_MIRROR_MODE,    g_OldConfig.Game.iMirrorMode);
 
     // write graphics values
     Core::Config->SetInt(CONFIG_GRAPHICS_SHADOW,     g_OldConfig.Graphics.iShadow);
@@ -153,8 +158,9 @@ void SaveConfig()
     // write input values
     for(coreUintW i = 0u; i < INPUT_TYPES; ++i)
     {
-        Core::Config->SetInt(CONFIG_INPUT_TYPE  (i), g_OldConfig.Input.aiType  [i]);
-        Core::Config->SetInt(CONFIG_INPUT_RUMBLE(i), g_OldConfig.Input.aiRumble[i]);
+        Core::Config->SetInt(CONFIG_INPUT_TYPE     (i), g_OldConfig.Input.aiType    [i]);
+        Core::Config->SetInt(CONFIG_INPUT_RUMBLE   (i), g_OldConfig.Input.aiRumble  [i]);
+        Core::Config->SetInt(CONFIG_INPUT_FIRE_MODE(i), g_OldConfig.Input.aiFireMode[i]);
     }
     for(coreUintW i = 0u; i < INPUT_SETS;  ++i)
     {

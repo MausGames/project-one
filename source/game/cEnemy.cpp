@@ -880,6 +880,8 @@ cRepairEnemy::~cRepairEnemy()
 // 
 void cRepairEnemy::AssignPlayer(cPlayer* pPlayer)
 {
+    ASSERT(pPlayer)
+
     // 
     m_pPlayer = pPlayer;
 
@@ -890,7 +892,7 @@ void cRepairEnemy::AssignPlayer(cPlayer* pPlayer)
     // 
     this->DefineModelHigh(pPlayer->GetModelHigh());
     this->DefineModelLow (pPlayer->GetModelLow ());
-    this->SetPosition    (pPlayer->GetPosition());
+    this->SetPosition    (pPlayer->GetPosition ());
 
     // 
     m_Bubble.SetAlpha(0.0f);
@@ -928,7 +930,7 @@ void cRepairEnemy::__MoveOwn()
     // 
     this->SetPosition    (coreVector3(vNewPos, 0.0f));
     this->SetTexOffset   (coreVector2(0.0f, m_fAnimation));
-    this->DefaultMultiate(m_fAnimation * 8.0f*PI);
+    this->DefaultMultiate(m_fAnimation * (8.0f*PI));
 
     // 
     m_Bubble.SetAlpha(MIN(m_Bubble.GetAlpha() + 4.0f * Core::System->GetTime(), 0.8f));

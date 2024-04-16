@@ -32,7 +32,8 @@ enum eEnemyStatus : coreUint16
     ENEMY_STATUS_CHILD       = 0x0020u,   // 
     ENEMY_STATUS_SHIELDED    = 0x0040u,   // 
     ENEMY_STATUS_INVINCIBLE  = 0x0080u,   // 
-    ENEMY_STATUS_IMMORTAL    = 0x0100u    // 
+    ENEMY_STATUS_IMMORTAL    = 0x0100u,   // 
+    ENEMY_STATUS_GHOST       = 0x0200u    // 
 };
 
 
@@ -130,7 +131,8 @@ public:
     template <typename F> void ForEachEnemyAll(F&& nFunction)const;   // [](cEnemy* OUTPUT pEnemy, const coreUintW i) -> void
 
     // 
-    inline cEnemy* GetEnemy(const coreUintW iIndex)const {ASSERT(iIndex < m_apEnemy.size()) return m_apEnemy[iIndex];}
+    inline cEnemy*   GetEnemy(const coreUintW iIndex)const {ASSERT(iIndex < m_apEnemy.size()) return m_apEnemy[iIndex];}
+    inline coreUintW GetIndex(const cEnemy*   pEnemy)const {const coreUintW iIndex = std::find(m_apEnemy.begin(), m_apEnemy.end(), pEnemy) - m_apEnemy.begin(); ASSERT(iIndex < m_apEnemy.size()) return iIndex;}
 
     // 
     inline coreUintW GetNumEnemies        ()const {return m_apEnemy.size();}

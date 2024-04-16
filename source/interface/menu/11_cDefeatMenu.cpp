@@ -227,6 +227,7 @@ void cDefeatMenu::ShowContinue()
 
     // 
     m_Background.SetSize(coreVector2(0.0f,0.0f));
+    m_Background.Move();
 
     // 
     const coreUint8 iContinues = g_pGame->GetContinues();
@@ -262,6 +263,7 @@ void cDefeatMenu::ShowGameOver()
 
     // 
     m_Background.SetSize(coreVector2(0.0f,0.0f));
+    m_Background.Move();
 
     // 
     this->ChangeSurface(SURFACE_DEFEAT_GAMEOVER, 0.0f);

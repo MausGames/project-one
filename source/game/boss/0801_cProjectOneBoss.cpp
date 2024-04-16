@@ -31,7 +31,7 @@ cProjectOneBoss::cProjectOneBoss()noexcept
 
     // configure the boss
     this->Configure(10000, COLOR_SHIP_GREY);
-    this->AddStatus(ENEMY_STATUS_IMMORTAL);
+    this->AddStatus(ENEMY_STATUS_IMMORTAL);   // TODO: every boss is immortal ? -> assert    
 }
 
 

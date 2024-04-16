@@ -49,14 +49,14 @@
 // TODO: check all shaders if alpha is required
 // TODO: full initializer lists everywhere
 // TODO: clean mixing shader defines (x >= y) and (defined(x)) checks (also in engine)
-// TODO: check for 16-bit shader usage
+// TODO: check for 16-bit float shader usage
 // TODO: program enable has to be checked (if(x.Enable()){}) everywhere
 // TODO: check if "if(!CORE_GL_SUPPORT(ARB_texture_rg)) glColorMask(true, true, false, false);" reduces or improves performance on related hardware, it is recommended to remove it for compression purposes, but always test to be sure
 // TODO: change 0.5 FB factors from 0.5 to 0.4 (-36% pixel) if CORE_GL_SUPPORT(ARB_texture_rg) not available ?
 // TODO: unify "forward" and "transform" comments in shaders
 // TODO: add own coreRand for various random things which may affect feeling (screen shake), and reset on boss-start
 // TODO: check issues with all the F&& functions (especially in boss.h and mission.h), also check Core engine, use force_inline on small functions
-// TODO: RETURN_NONNULL to everything which should never be null
+// TODO: RETURN_NONNULL to everything which should never be null (and other attributes, both FUNC and RETURN)
 // TODO: check all vert shader for CORE_SHADER_OPTION_NO_ROTATION
 // TODO: control flow guard and buffer security check
 // TODO: _CORE_SSE_ try to just remove the coreMath low-precision functions
@@ -71,6 +71,8 @@
 // TODO: brown bullet, directional
 // TODO: ENABLE_BITWISE when ?
 // TODO: remove multisampling for 2d, though may cause artifacts if the objects are fully shaded and moved
+// TODO: transition shader only needs alpha for menu, but not for background -> create permutations
+// TODO: default_black and default_white only 4x4
 
 
 // ****************************************************************
@@ -99,7 +101,7 @@
 #define MISSIONS             (9u + 1u)
 #define BOSSES               (3u)
 #define WAVES                (15u)
-#define STAGES               (BOSSES + WAVES)
+#define SEGMENTS             (BOSSES + WAVES)
 #define LIVES                (5u)
 #define CONTINUES            (3u)
 #define SHIELD               (1u)//(100u)
@@ -201,6 +203,23 @@ enum eElement : coreUint8
     ELEMENT_CYAN,
     ELEMENT_GREEN,
     ELEMENT_NEUTRAL
+};
+
+// 
+enum eMedal : coreUint8
+{
+    MEDAL_NONE = 0u,
+    MEDAL_BRONZE,
+    MEDAL_SILVER,
+    MEDAL_GOLD,
+    MEDAL_PLATINUM,
+    MEDAL_DARK,
+    MEDAL_MAX,
+
+    MEDAL_TYPE_WAVE = 0u,
+    MEDAL_TYPE_BOSS,
+    MEDAL_TYPE_MISSION,
+    MEDAL_TYPE_MAX
 };
 
 extern void InitResolution(const coreVector2& vResolution);   // init resolution properties (1:1)

@@ -23,13 +23,14 @@
 #define INTERFACE_BANNER_SPEED            (4.0f)                            // fade-in and fade-out speed
 #define INTERFACE_BANNER_SPEED_REV        (1.0f / INTERFACE_BANNER_SPEED)   // 
 #define INTERFACE_BANNER_ANIMATION        (2.9f)                            // animation duration
-#define INTERFACE_BANNER_DURATION_BOSS    (3.0f)                            // display duration (with fading)  
 #define INTERFACE_BANNER_DURATION_MISSION (3.0f)                            // 
+#define INTERFACE_BANNER_DURATION_BOSS    (3.0f)                            // display duration (with fading)  
 #define INTERFACE_BANNER_DURATION_SCORE   (2.0f)                            // 
 
-#define INTERFACE_BANNER_TYPE_BOSS        (0u)                              // boss banner type
-#define INTERFACE_BANNER_TYPE_MISSION     (1u)                              // mission banner type
-#define INTERFACE_BANNER_TYPE_SCORE       (2u)                              // 
+#define INTERFACE_BANNER_TYPE_MISSION     (0u)                              // mission banner type
+#define INTERFACE_BANNER_TYPE_BOSS        (1u)                              // boss banner type
+#define INTERFACE_BANNER_TYPE_WAVE        (2u)                              // 
+#define INTERFACE_BANNER_TYPE_SCORE       (3u)                              // 
 
 #define INTERFACE_STORY_SPEED             (1.0f)                            // 
 #define INTERFACE_STORY_DURATION          (4.0f)                            // 
@@ -75,6 +76,8 @@ private:
     coreLabel m_aStoryText[2];              // 
     coreFloat m_fStoryStart;                // 
 
+    coreObject2D m_Medal;                   // 
+
     coreFlow m_fAnimation;                  // 
 
     coreBool m_bVisible;                    // visibility status
@@ -92,12 +95,13 @@ public:
     void Move();
 
     // control banner animation
-    void ShowBoss   (const coreChar*  pcMain, const coreChar* pcSub);
-    void ShowBoss   (const cBoss*     pBoss);
     void ShowMission(const coreChar*  pcMain, const coreChar* pcSub);
     void ShowMission(const cMission*  pMission);
-    void ShowScore  (const coreChar*  pcMain, const coreChar* pcSub);
-    void ShowScore  (const coreUint32 iScore);
+    void ShowBoss   (const coreChar*  pcMain, const coreChar* pcSub);
+    void ShowBoss   (const cBoss*     pBoss);
+    void ShowWave   (const coreChar*  pcName);
+    void ShowScore  (const coreChar*  pcMain, const coreChar* pcSub, const coreUint8 iMedal, const coreUint8 iMedalType);
+    void ShowScore  (const coreUint32 iScore,                        const coreUint8 iMedal, const coreUint8 iMedalType);
     coreBool IsBannerActive()const;
 
     // 

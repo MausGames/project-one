@@ -66,6 +66,7 @@ public:
     inline cShip* InvertY  () {this->SetPosition( this->GetPosition().InvertedY ()); this->SetDirection( this->GetDirection().InvertedY ()); return this;}
     inline cShip* Rotate90 () {this->SetPosition( this->GetPosition().RotatedZ90()); this->SetDirection( this->GetDirection().RotatedZ90()); return this;}
     inline cShip* Rotate180() {this->SetPosition(-this->GetPosition());              this->SetDirection(-this->GetDirection());              return this;}
+    inline cShip* Rotate270() {this->SetPosition(-this->GetPosition().RotatedZ90()); this->SetDirection(-this->GetDirection().RotatedZ90()); return this;}
 
 
     // 

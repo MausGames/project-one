@@ -374,9 +374,9 @@ void cRayBullet::__MoveOwn()
     this->SetTexOffset(coreVector2(0.35f, m_fAnimation));
 
     // 
-    m_fFade.UpdateMin(1.0f, 1.0f);
-    this->SetSize (coreVector3(3.7f, 3.7f * MIN(m_fFade * 12.0f, 1.0f), 3.7f) * 0.5f);
-    this->SetAlpha(MIN(m_fFade * 15.0f, 1.0f));
+    m_fFade.Update(1.0f);
+    this->SetSize (coreVector3(3.7f, 3.7f * MIN(12.0f * m_fFade, 1.0f), 3.7f) * 0.5f);
+    this->SetAlpha(MIN(15.0f * m_fFade, 1.0f));
 }
 
 

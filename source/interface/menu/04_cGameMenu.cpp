@@ -80,7 +80,7 @@ cGameMenu::cGameMenu()noexcept
 
     for(coreUintW i = 0u; i < MENU_GAME_MISSIONS; ++i)
     {
-        m_aMissionName[i].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
+        m_aMissionName[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
         m_aMissionName[i].SetPosition (m_DirectoryBackground.GetPosition() + m_DirectoryBackground.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.04f, -0.1f - 0.05f*I_TO_F(i)));
         m_aMissionName[i].SetAlignment(coreVector2(1.0f,0.0f));
         m_aMissionName[i].SetColor3   (COLOR_MENU_WHITE);
@@ -114,7 +114,7 @@ cGameMenu::cGameMenu()noexcept
         const coreVector2 vPos  = bBoss ? coreVector2(0.0f, -0.07f * (I_TO_F(i / 6u) * 2.0f - 1.5f)) : coreVector2(0.07f * (I_TO_F(i % 6u) - 2.0f), -0.07f * (I_TO_F(i / 6u) * 2.0f - 2.5f));
         const coreVector2 vSize = bBoss ? coreVector2(0.35f,0.07f)                                   : coreVector2(0.07f,0.07f);
 
-        m_aStage[i].Construct    (MENU_BUTTON, MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+        m_aStage[i].Construct    (MENU_BUTTON, MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
         m_aStage[i].DefineProgram("menu_border_program");
         m_aStage[i].SetPosition  (vPos + m_StageArea.GetPosition());
         m_aStage[i].SetSize      (vSize);
@@ -122,7 +122,7 @@ cGameMenu::cGameMenu()noexcept
 
     for(coreUintW i = 0u; i < MENU_GAME_OPTIONS; ++i)
     {
-        m_aOptionName[i].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
+        m_aOptionName[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
         m_aOptionName[i].SetPosition (m_ArmoryBackground.GetPosition() + m_ArmoryBackground.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.04f, -0.1f - 0.05f*I_TO_F(i * 2u)));
         m_aOptionName[i].SetAlignment(coreVector2(1.0f,0.0f));
         m_aOptionName[i].SetColor3   (COLOR_MENU_WHITE);
@@ -434,17 +434,17 @@ void cGameMenu::LoadValues()
     // 
     for(coreUintW i = 0u; i < WORLDMAP_PINS; ++i)
     {
-        m_WorldMap.EnablePin(i, g_pSave->GetHeader()->aiMission[i]);
+        m_WorldMap.EnablePin(i, g_pSave->GetHeader().oProgress.aiDisclosure[i]);
     }
 
     // 
-    m_Players.SelectValue(g_pSave->GetHeader()->iOptionPlayers);
+    m_Players.SelectValue(g_pSave->GetHeader().oOptions.iPlayers);
 
     // 
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
     {
-        m_aWeapon [i].SelectValue(g_pSave->GetHeader()->aiOptionWeapon [i]);
-        m_aSupport[i].SelectValue(g_pSave->GetHeader()->aiOptionSupport[i]);
+        m_aWeapon [i].SelectValue(g_pSave->GetHeader().oOptions.aiWeapon [i]);
+        m_aSupport[i].SelectValue(g_pSave->GetHeader().oOptions.aiSupport[i]);
     }
 }
 
@@ -454,12 +454,12 @@ void cGameMenu::LoadValues()
 void cGameMenu::SaveValues()
 {
     // 
-    g_pSave->GetHeader()->iOptionPlayers = m_Players.GetCurEntry().tValue;
+    g_pSave->EditOptions()->iPlayers = m_Players.GetCurEntry().tValue;
 
     // 
     for(coreUintW i = 0u; i < MENU_GAME_PLAYERS; ++i)
     {
-        g_pSave->GetHeader()->aiOptionWeapon [i] = m_aWeapon [i].GetCurEntry().tValue;
-        g_pSave->GetHeader()->aiOptionSupport[i] = m_aSupport[i].GetCurEntry().tValue;
+        g_pSave->EditOptions()->aiWeapon [i] = m_aWeapon [i].GetCurEntry().tValue;
+        g_pSave->EditOptions()->aiSupport[i] = m_aSupport[i].GetCurEntry().tValue;
     }
 }

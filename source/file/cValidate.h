@@ -15,6 +15,8 @@
 // TODO: check sums of boss/mission scores and times with total and boss with mission
 // TODO: check if num of streams and keyframes and sizes per stream would exceed anything
 
+// NOTE: coreProtect only on ship health, score table and time table
+
 
 #if defined(_CORE_DEBUG_) && 0
 
@@ -35,7 +37,7 @@ FORCE_INLINE coreBool ValidateReplay(cReplay* OUTPUT pReplay)
     cReplay::sHeader& oHeader = pReplay->m_Header;
 
     const coreBool bValid = (oHeader.iReplayHash == pReplay->__CalculateReplayHash()) &&
-                            ((oHeader.iNumStreams >= 1u) && (oHeader.iNumStreams <= 2u));
+                            ((oHeader.iNumPlayers >= 1u) && (oHeader.iNumPlayers <= 2u));
 
     /*
         after loading header, before setting data

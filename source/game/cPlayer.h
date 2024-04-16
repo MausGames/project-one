@@ -83,6 +83,7 @@ private:
     coreFlow  m_fLightningTime;                                 // 
     coreFloat m_fLightningAngle;                                // 
 
+    cDataTable  m_DataTable;                                    // 
     cScoreTable m_ScoreTable;                                   // 
 
     coreProgramPtr m_pNormalProgram;                            // 
@@ -144,6 +145,7 @@ public:
 
     // 
     inline cWeapon*     GetWeapon    (const coreUintW iIndex)const {ASSERT((iIndex < PLAYER_WEAPONS) && m_apWeapon[iIndex]) return m_apWeapon[iIndex];}
+    inline cDataTable*  GetDataTable ()                            {return &m_DataTable;}
     inline cScoreTable* GetScoreTable()                            {return &m_ScoreTable;}
 
     // set object properties
@@ -153,10 +155,11 @@ public:
     inline void SetInterrupt(const coreFloat    fInterrupt) {m_fInterrupt = fInterrupt;}
 
     // get object properties
-    inline const sGameInput*  GetInput   ()const {ASSERT(m_pInput) return m_pInput;}
-    inline const coreVector4& GetArea    ()const {return m_vArea;}
-    inline const coreVector2& GetForce   ()const {return m_vForce;}
-    inline       coreFloat    GetFeelTime()const {return (m_iFeelType <= 1u) ? m_fFeelTime : 0.0f;}
+    inline const sGameInput*  GetInput    ()const {ASSERT(m_pInput) return m_pInput;}
+    inline const coreVector4& GetArea     ()const {return m_vArea;}
+    inline const coreVector2& GetForce    ()const {return m_vForce;}
+    inline const coreFloat&   GetInterrupt()const {return m_fInterrupt;}
+    inline       coreFloat    GetFeelTime ()const {return (m_iFeelType <= 1u) ? m_fFeelTime : 0.0f;}
 
     // 
     template <typename F> static FORCE_INLINE void TestCollision(const ePlayerTest eTest, const coreInt32 iType,        F&& nCallback);   // [](cPlayer* OUTPUT pPlayer, coreObject3D* OUTPUT pObject, const coreVector3& vIntersection, const coreBool bFirstHit) -> void

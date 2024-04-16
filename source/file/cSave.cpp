@@ -31,6 +31,56 @@ cSave::~cSave()
 
 // ****************************************************************
 // 
+cSave::sGlobalStats* cSave::EditGlobalStats()
+{
+    // 
+    return &m_Header.oGlobalStats;
+}
+
+cSave::sLocalStats* cSave::EditLocalStatsMission(const coreUintW iMissionIndex)
+{
+    // 
+    ASSERT(iMissionIndex < REPLAY_MISSIONS)
+    return &m_Header.aLocalStatsMission[iMissionIndex];
+}
+
+cSave::sLocalStats* cSave::EditLocalStatsMission()
+{
+    // 
+    ASSERT(STATIC_ISVALID(g_pGame))
+    return this->EditLocalStatsMission(g_pGame->GetCurMissionIndex());
+}
+
+cSave::sLocalStats* cSave::EditLocalStatsSegment(const coreUintW iMissionIndex, const coreUintW iSegmentIndex)
+{
+    // 
+    ASSERT(iMissionIndex < REPLAY_MISSIONS)
+    ASSERT(iSegmentIndex < REPLAY_SEGMENTS)
+    return &m_Header.aaLocalStatsSegment[iMissionIndex][iSegmentIndex];
+}
+
+cSave::sLocalStats* cSave::EditLocalStatsSegment()
+{
+    // 
+    ASSERT(STATIC_ISVALID(g_pGame))
+    return this->EditLocalStatsSegment(g_pGame->GetCurMissionIndex(), g_pGame->GetCurMission()->GetCurSegmentIndex());
+}
+
+cSave::sOptions* cSave::EditOptions()
+{
+    // 
+    return &m_Header.oOptions;
+}
+
+cSave::sProgress* cSave::EditProgress()
+{
+    // 
+    return &m_Header.oProgress;
+}
+
+
+// ****************************************************************
+// 
 coreBool cSave::LoadFile()
 {
     // 
@@ -102,15 +152,15 @@ void cSave::Clear()
     std::memset(&m_Header, 0, sizeof(m_Header));
 
     // 
-    m_Header.iMagic     = SAVE_FILE_MAGIC;
-    m_Header.iVersion   = SAVE_FILE_VERSION;
-    m_Header.bFirstPlay = true;
+    m_Header.iMagic               = SAVE_FILE_MAGIC;
+    m_Header.iVersion             = SAVE_FILE_VERSION;
+    m_Header.oProgress.bFirstPlay = true;
 
     // 
     for(coreUintW i = 0u; i < SAVE_PLAYERS; ++i)
     {
-        m_Header.aiOptionWeapon [i] = 1u;
-        m_Header.aiOptionSupport[i] = 1u;
+        m_Header.oOptions.aiWeapon [i] = 1u;
+        m_Header.oOptions.aiSupport[i] = 1u;
     }
 }
 

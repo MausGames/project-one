@@ -88,7 +88,7 @@ void cTinkerMission::__SetupOwn()
 
         
 
-        STAGE_WAVE
+        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
 
         // der ausweichende gegner weicht aus sobald er getroffen wird
     });
@@ -140,7 +140,7 @@ void cTinkerMission::__SetupOwn()
             pEnemy->SetPosition (coreVector3(vNewPos, 0.0f));
         });
 
-        STAGE_WAVE
+        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
 
         // pushing enemies are on left and right side and shooting on them will move them to the other side, they die when reaching the other side (is only second wave?)
     });
@@ -221,7 +221,7 @@ void cTinkerMission::__SetupOwn()
                               else pBullet->SetPosition(coreVector3(pOwner ->GetPosition().x, pBullet->GetPosition().y, pBullet->GetPosition().z));
         });
 
-        STAGE_WAVE
+        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
     // ################################################################
@@ -259,7 +259,7 @@ void cTinkerMission::__SetupOwn()
             pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
         });
 
-        STAGE_WAVE
+        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
     // ################################################################
@@ -329,7 +329,7 @@ void cTinkerMission::__SetupOwn()
                         else pBulletEnemy->SetDamage(iDamage - 1);
         });
 
-        STAGE_WAVE
+        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
     // ################################################################
@@ -380,7 +380,7 @@ void cTinkerMission::__SetupOwn()
             pBullet->SetPosition(pBullet->GetPosition() + coreVector3(0.0f, Core::System->GetTime() * FOREGROUND_AREA.y * -1.5f, 0.0f));
         });
 
-        STAGE_WAVE
+        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
     // ################################################################
@@ -421,7 +421,7 @@ void cTinkerMission::__SetupOwn()
             //if(pEnemy->ReachedDeath()) pEnemy->AddStatus(ENEMY_STATUS_INVINCIBLE);
         });
 
-        STAGE_WAVE
+        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
     // ################################################################
@@ -473,7 +473,7 @@ void cTinkerMission::__SetupOwn()
             g_pGame->GetBulletManagerEnemy()->AddBullet<cConeBullet>(5, 1.0f, NULL, -vPos,  vDir)->ChangeSize(1.2f); 
         }
 
-        STAGE_WAVE
+        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
     // ################################################################
@@ -522,7 +522,7 @@ void cTinkerMission::__SetupOwn()
             pEnemy->DefaultMoveForward(pEnemy->GetDirection().xy(), 30.0f);
         });
 
-        STAGE_WAVE
+        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
     // ################################################################
@@ -581,7 +581,7 @@ void cTinkerMission::__SetupOwn()
 
         });
 
-        STAGE_WAVE
+        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
     // ################################################################
@@ -664,7 +664,7 @@ void cTinkerMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE
+        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
     // ################################################################
@@ -764,7 +764,7 @@ void cTinkerMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE
+        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
     // ################################################################
@@ -812,7 +812,7 @@ void cTinkerMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE
+        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
     // ################################################################
@@ -1238,16 +1238,16 @@ void UnusedWaves()
 #endif
 
 /*
-                const coreVector2 vPos = pEnemy->GetPosition().xy();
+        const coreVector2 vPos = pEnemy->GetPosition().xy();
 
-                for(coreUintW j = 20u; j--; )
-                {
-                    const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(j) * 9.0f));
+        for(coreUintW j = 20u; j--; )
+        {
+            const coreVector2 vDir = coreVector2::Direction(DEG_TO_RAD(I_TO_F(j) * 9.0f));
 
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, (j & 0x01u) ? 0.6f : 0.7f, pEnemy, vPos,  vDir)->ChangeSize(1.3f);
-                    g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, (j & 0x01u) ? 0.6f : 0.7f, pEnemy, vPos, -vDir)->ChangeSize(1.3f);
-                    // TODO: lower blue balls get overlapped 
-                }
+            g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, (j & 0x01u) ? 0.6f : 0.7f, pEnemy, vPos,  vDir)->ChangeSize(1.3f);
+            g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, (j & 0x01u) ? 0.6f : 0.7f, pEnemy, vPos, -vDir)->ChangeSize(1.3f);
+            // TODO: lower blue balls get overlapped 
+        }
 */
 
 /*
@@ -1261,5 +1261,52 @@ void UnusedWaves()
             const coreInt32 iDamage = pBulletEnemy->GetDamage();
             if(iDamage == 1) pBulletEnemy->Deactivate(true, vIntersection.xy());
                         else pBulletEnemy->SetDamage(iDamage - 1);
+        });
+*/
+
+/*
+        // perpendicular explosion on border
+        const auto nExplode = [&](const coreVector2& vDirection)
+        {
+            const coreVector2 vPos = pEnemy->GetPosition().xy();
+            const coreVector2 vDir = vDirection;
+            const coreVector2 vTan = vDirection.Rotated90();
+
+            //g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.2f, pEnemy, vPos + vTan *  4.0f, vDir)->ChangeSize(1.7f);
+            //g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.2f, pEnemy, vPos + vTan * -4.0f, vDir)->ChangeSize(1.7f);
+            //g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.4f, pEnemy, vPos + vTan *  2.0f, vDir)->ChangeSize(1.7f);
+            //g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.4f, pEnemy, vPos + vTan * -2.0f, vDir)->ChangeSize(1.7f);
+            //g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.6f, pEnemy, vPos + vTan *  0.0f, vDir)->ChangeSize(1.7f);
+
+            //g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.2f, pEnemy, vPos, vDir)->ChangeSize(1.7f);
+            //g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.3f, pEnemy, vPos, vDir)->ChangeSize(1.7f);
+            //g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.4f, pEnemy, vPos, vDir)->ChangeSize(1.7f);
+            //g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.5f, pEnemy, vPos, vDir)->ChangeSize(1.7f);
+            //g_pGame->GetBulletManagerEnemy()->AddBullet<cOrbBullet>(5, 1.6f, pEnemy, vPos, vDir)->ChangeSize(1.7f);
+        };
+
+        const coreVector2 vCurPos = pEnemy->GetPosition ().xy();
+        coreVector2       vCurDir = pEnemy->GetDirection().xy();
+
+                if((vCurPos.x < -FOREGROUND_AREA.x * 1.1f) && (vCurDir.x < 0.0f)) {pEnemy->Kill(true); nExplode(coreVector2( 1.0f, 0.0f));}//vCurDir.x =  ABS(vCurDir.x);
+        else if((vCurPos.x >  FOREGROUND_AREA.x * 1.1f) && (vCurDir.x > 0.0f)) {pEnemy->Kill(true); nExplode(coreVector2(-1.0f, 0.0f));}//vCurDir.x = -ABS(vCurDir.x);
+                if((vCurPos.y < -FOREGROUND_AREA.y * 1.1f) && (vCurDir.y < 0.0f)) {pEnemy->Kill(true); nExplode(coreVector2( 0.0f, 1.0f));}//vCurDir.y =  ABS(vCurDir.y);
+        else if((vCurPos.y >  FOREGROUND_AREA.y * 1.1f) && (vCurDir.y > 0.0f)) {pEnemy->Kill(true); nExplode(coreVector2( 0.0f,-1.0f));}//vCurDir.y = -ABS(vCurDir.y);
+
+        pEnemy->SetDirection(coreVector3(vCurDir, 0.0f));
+*/
+
+/*
+        // damage multiple enemies at once
+        STAGE_COLL_ENEMY_BULLET(pEnemy, pBullet, vIntersection, COLL_VAL(pSquad1))
+        {
+            const coreUintW iIndex = pSquad1->GetIndex(pEnemy);
+
+            for(coreUintW i = coreMath::FloorAlign(iIndex, 8u), ie = coreMath::CeilAlign(iIndex + 1u, 8u); i < ie; ++i)
+            {
+                if(i == iIndex) continue;
+
+                //pSquad1->GetEnemy(i)->TakeDamage(pBullet->GetDamage(), pBullet->GetElement(), vIntersection.xy(), d_cast<cPlayer*>(pBullet->GetOwner()));
+            }
         });
 */

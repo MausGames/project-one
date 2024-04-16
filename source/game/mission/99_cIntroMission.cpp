@@ -15,8 +15,6 @@ cIntroMission::cIntroMission()noexcept
 {
     // 
     m_apBoss[0] = &m_ProjectOne;
-    m_apBoss[1] = &m_ProjectOne;
-    m_apBoss[2] = &m_ProjectOne;
 }
 
 
@@ -133,7 +131,7 @@ void cIntroMission::__SetupOwn()
             pEnemy->DefaultMovePath(pPath, vFactor, vOffset * vFactor, fLifeTime);
         });
 
-        STAGE_WAVE
+        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
     // ################################################################
@@ -175,7 +173,7 @@ void cIntroMission::__SetupOwn()
             pEnemy->DefaultMovePath(pPath1, vFactor, vOffset * vFactor, fLifeTime);
         });
 
-        STAGE_WAVE
+        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
     // ################################################################
@@ -228,7 +226,7 @@ void cIntroMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE
+        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
     // ################################################################
@@ -291,7 +289,7 @@ void cIntroMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE
+        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
     // ################################################################
@@ -358,7 +356,7 @@ void cIntroMission::__SetupOwn()
             }
         });
 
-        STAGE_WAVE
+        STAGE_WAVE("", {20.0f, 30.0f, 40.0f, 50.0f})
     });
 
     // ################################################################
@@ -400,7 +398,7 @@ void cIntroMission::__SetupOwn()
             if(STAGE_LIFETIME_AFTER(pPath1->GetTotalDistance())) pEnemy->Kill(false);
         });
 
-        STAGE_BOSS(m_ProjectOne)
+        STAGE_BOSS(m_ProjectOne, {1.0f, 2.0f, 3.0, 4.0f})
     });
 
     // ################################################################

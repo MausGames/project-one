@@ -17,7 +17,7 @@ cIntroMenu::cIntroMenu()noexcept
 , m_iIntroStatus (1u)
 {
     // create menu objects
-    m_WelcomeText.Construct      (MENU_FONT_STANDARD_2, MENU_OUTLINE_SMALL);
+    m_WelcomeText.Construct      (MENU_FONT_DYNAMIC_2, MENU_OUTLINE_SMALL);
     m_WelcomeText.SetPosition    (coreVector2(0.0f,0.0f));
     m_WelcomeText.SetTextLanguage("WELCOME");
 

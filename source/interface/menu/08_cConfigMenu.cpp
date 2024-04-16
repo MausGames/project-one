@@ -92,6 +92,7 @@ cConfigMenu::cConfigMenu()noexcept
         if(i == ENTRY_INPUT_ACTION1)       ++iOffset;
         if(i == ENTRY_GAME_GAMEROTATION)   ++iOffset;
         if(i == ENTRY_GAME_HUDROTATION)    ++iOffset;
+        if(i == ENTRY_GAME_MIRRORMODE)     ++iOffset;
 
         m_aLabel[i].Construct   (MENU_FONT_DYNAMIC_1, MENU_OUTLINE_SMALL);
         m_aLabel[i].SetPosition (m_Background.GetPosition() + m_Background.GetSize()*coreVector2(-0.5f,0.5f) + coreVector2(0.04f, -0.05f - 0.025f*I_TO_F(iOffset)));
@@ -152,9 +153,11 @@ cConfigMenu::cConfigMenu()noexcept
         __SET_OPTION(m_TextSize,      GAME_TEXTSIZE,       0.26f)
         __SET_OPTION(m_GameRotation,  GAME_GAMEROTATION,   0.26f)
         __SET_OPTION(m_GameScale,     GAME_GAMESCALE,      0.26f)
+        __SET_OPTION(m_GameSpeed,     GAME_GAMESPEED,      0.26f)
         __SET_OPTION(m_HudRotation,   GAME_HUDROTATION,    0.26f)
         __SET_OPTION(m_HudScale,      GAME_HUDSCALE,       0.26f)
         __SET_OPTION(m_HudType,       GAME_HUDTYPE,        0.26f)
+        __SET_OPTION(m_MirrorMode,    GAME_MIRRORMODE,     0.26f)
 
         m_Monitor      .SetAutomatic(0.0f);   // # because of realtime-update
         m_ShadowQuality.SetAutomatic(0.0f);
@@ -162,14 +165,17 @@ cConfigMenu::cConfigMenu()noexcept
         m_TextSize     .SetAutomatic(0.0f);
         m_GameRotation .SetAutomatic(0.0f);
         m_GameScale    .SetAutomatic(0.0f);
+        m_GameSpeed    .SetAutomatic(0.0f);
         m_HudRotation  .SetAutomatic(0.0f);
         m_HudScale     .SetAutomatic(0.0f);
         m_HudType      .SetAutomatic(0.0f);
+        m_MirrorMode   .SetAutomatic(0.0f);
         m_AmbientSound .SetEndless(true);
         m_Language     .SetEndless(true);
         m_GameRotation .SetEndless(true);
         m_HudRotation  .SetEndless(true);
         m_HudType      .SetEndless(true);
+        m_MirrorMode   .SetEndless(true);
     }
     #undef __SET_OPTION
 
@@ -192,6 +198,7 @@ cConfigMenu::cConfigMenu()noexcept
 
             __SET_INPUT(oType,      INPUT_TYPE,      0.22f)
             __SET_INPUT(oRumble,    INPUT_RUMBLE,    0.22f)
+            __SET_INPUT(oFireMode,  INPUT_FIREMODE,  0.22f)
             __SET_INPUT(oMoveUp,    INPUT_MOVEUP,    0.22f)
             __SET_INPUT(oMoveLeft,  INPUT_MOVELEFT,  0.22f)
             __SET_INPUT(oMoveDown,  INPUT_MOVEDOWN,  0.22f)
@@ -250,14 +257,18 @@ cConfigMenu::cConfigMenu()noexcept
     for(coreUintW i = 0u; i <= 100u; i += 10u) m_EffectVolume .AddEntry(PRINT("%zu%%", i), i);
     m_AmbientSound .AddEntryLanguage("VALUE_OFF",              0u);
     m_AmbientSound .AddEntryLanguage("VALUE_ON",               1u);
-    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oRumble.AddEntryLanguage("VALUE_OFF", 0u);
-    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oRumble.AddEntryLanguage("VALUE_ON", 10u);
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oRumble  .AddEntryLanguage("VALUE_OFF",       0u);
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oRumble  .AddEntryLanguage("VALUE_ON",        10u);
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oFireMode.AddEntryLanguage("FIREMODE_NORMAL", 0u);
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oFireMode.AddEntryLanguage("FIREMODE_INVERT", 1u);
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i) m_aInput[i].oFireMode.AddEntryLanguage("FIREMODE_TOGGLE", 2u);
     for(coreUintW i = 0u; i <= 2u; i += 1u) m_TextSize.AddEntry(PRINT("+%zu", i), i);
     m_GameRotation .AddEntryLanguage("VALUE_OFF",              0u);
     m_GameRotation .AddEntryLanguage("HUDROTATION_LEFT",       1u);
     m_GameRotation .AddEntryLanguage("HUDROTATION_UPSIDE",     2u);
     m_GameRotation .AddEntryLanguage("HUDROTATION_RIGHT",      3u);
-    for(coreUintW i = 50u; i <= 100u; i += 1u) m_GameScale.AddEntry(PRINT("%zu%%", i), i);
+    for(coreUintW i = 50u; i <= 100u; i += 1u)  m_GameScale.AddEntry(PRINT("%zu%%", i), i);
+    for(coreUintW i = 50u; i <= 200u; i += 10u) m_GameSpeed.AddEntry(PRINT("%zu%%", i), i);
     m_HudRotation  .AddEntryLanguage("VALUE_OFF",              0u);
     m_HudRotation  .AddEntryLanguage("HUDROTATION_LEFT",       1u);
     m_HudRotation  .AddEntryLanguage("HUDROTATION_UPSIDE",     2u);
@@ -265,6 +276,8 @@ cConfigMenu::cConfigMenu()noexcept
     for(coreUintW i = 50u; i <= 150u; i += 1u) m_HudScale.AddEntry(PRINT("%zu%%", i), i);
     m_HudType      .AddEntryLanguage("HUDTYPE_OUTSIDE",        0u);
     m_HudType      .AddEntryLanguage("HUDTYPE_INSIDE",         1u);
+    m_MirrorMode   .AddEntryLanguage("VALUE_OFF",              0u);
+    m_MirrorMode   .AddEntryLanguage("VALUE_ON",               1u);
 
 
 
@@ -329,14 +342,17 @@ cConfigMenu::cConfigMenu()noexcept
     this->BindObject(SURFACE_CONFIG_GAME,  &m_TextSize);
     this->BindObject(SURFACE_CONFIG_GAME,  &m_GameRotation);
     this->BindObject(SURFACE_CONFIG_GAME,  &m_GameScale);
+    this->BindObject(SURFACE_CONFIG_GAME,  &m_GameSpeed);
     this->BindObject(SURFACE_CONFIG_GAME,  &m_HudRotation);
     this->BindObject(SURFACE_CONFIG_GAME,  &m_HudScale);
     this->BindObject(SURFACE_CONFIG_GAME,  &m_HudType);
+    this->BindObject(SURFACE_CONFIG_GAME,  &m_MirrorMode);
 
     for(coreUintW i = 0u; i < ARRAY_SIZE(m_aArrow); ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aArrow[i]);
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;   ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aInput[i].oHeader);
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;   ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aInput[i].oType);
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;   ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aInput[i].oRumble);
+    for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;   ++i) this->BindObject(SURFACE_CONFIG_INPUT, &m_aInput[i].oFireMode);
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS;   ++i)
     {
         for(coreUintW j = 0u; j < INPUT_KEYS; ++j)
@@ -478,6 +494,7 @@ void cConfigMenu::Move()
                 // 
                 cMenu::UpdateSwitchBox(&oInput.oType);
                 cMenu::UpdateSwitchBox(&oInput.oRumble);
+                cMenu::UpdateSwitchBox(&oInput.oFireMode);
 
                 for(coreUintW j = 0u; j < INPUT_KEYS; ++j)
                 {
@@ -564,9 +581,11 @@ void cConfigMenu::Move()
             cMenu::UpdateSwitchBox(&m_TextSize);
             cMenu::UpdateSwitchBox(&m_GameRotation);
             cMenu::UpdateSwitchBox(&m_GameScale);
+            cMenu::UpdateSwitchBox(&m_GameSpeed);
             cMenu::UpdateSwitchBox(&m_HudRotation);
             cMenu::UpdateSwitchBox(&m_HudScale);
             cMenu::UpdateSwitchBox(&m_HudType);
+            cMenu::UpdateSwitchBox(&m_MirrorMode);
         }
         break;
 
@@ -652,9 +671,11 @@ void cConfigMenu::CheckValues()
                            (m_TextSize     .GetCurEntry().tValue != g_OldConfig.Game.iTextSize)                                               ||
                            (m_GameRotation .GetCurEntry().tValue != g_OldConfig.Game.iGameRotation)                                           ||
                            (m_GameScale    .GetCurEntry().tValue != g_OldConfig.Game.iGameScale)                                              ||
+                           (m_GameSpeed    .GetCurEntry().tValue != g_OldConfig.Game.iGameSpeed)                                              ||
                            (m_HudRotation  .GetCurEntry().tValue != g_OldConfig.Game.iHudRotation)                                            ||
                            (m_HudScale     .GetCurEntry().tValue != g_OldConfig.Game.iHudScale)                                               ||
                            (m_HudType      .GetCurEntry().tValue != g_OldConfig.Game.iHudType)                                                ||
+                           (m_MirrorMode   .GetCurEntry().tValue != g_OldConfig.Game.iMirrorMode)                                             ||
                            (std::memcmp(&g_CurConfig.Input, &g_OldConfig.Input, sizeof(sConfig::Input)));
 
     // 
@@ -704,15 +725,18 @@ void cConfigMenu::LoadValues()
     m_TextSize    .SelectValue(g_CurConfig.Game.iTextSize);
     m_GameRotation.SelectValue(g_CurConfig.Game.iGameRotation);
     m_GameScale   .SelectValue(g_CurConfig.Game.iGameScale);
+    m_GameSpeed   .SelectValue(g_CurConfig.Game.iGameSpeed);
     m_HudRotation .SelectValue(g_CurConfig.Game.iHudRotation);
     m_HudScale    .SelectValue(g_CurConfig.Game.iHudScale);
     m_HudType     .SelectValue(g_CurConfig.Game.iHudType);
+    m_MirrorMode  .SelectValue(g_CurConfig.Game.iMirrorMode);
 
     // 
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i)
     {
-        m_aInput[i].oType  .SelectValue(g_CurConfig.Input.aiType  [i]);
-        m_aInput[i].oRumble.SelectValue(g_CurConfig.Input.aiRumble[i]);
+        m_aInput[i].oType    .SelectValue(g_CurConfig.Input.aiType    [i]);
+        m_aInput[i].oRumble  .SelectValue(g_CurConfig.Input.aiRumble  [i]);
+        m_aInput[i].oFireMode.SelectValue(g_CurConfig.Input.aiFireMode[i]);
     }
 
     // 
@@ -767,15 +791,18 @@ void cConfigMenu::SaveValues()
     Core::Config->SetString(CORE_CONFIG_BASE_LANGUAGE, Core::Language->GetPath());
     g_CurConfig.Game.iGameRotation = m_GameRotation.GetCurEntry().tValue;
     g_CurConfig.Game.iGameScale    = m_GameScale   .GetCurEntry().tValue;
+    g_CurConfig.Game.iGameSpeed    = m_GameSpeed   .GetCurEntry().tValue;
     g_CurConfig.Game.iHudRotation  = m_HudRotation .GetCurEntry().tValue;
     g_CurConfig.Game.iHudScale     = m_HudScale    .GetCurEntry().tValue;
     g_CurConfig.Game.iHudType      = m_HudType     .GetCurEntry().tValue;
+    g_CurConfig.Game.iMirrorMode   = m_MirrorMode  .GetCurEntry().tValue;
 
     // 
     for(coreUintW i = 0u; i < MENU_CONFIG_INPUTS; ++i)
     {
-        g_CurConfig.Input.aiType  [i] = m_aInput[i].oType  .GetCurEntry().tValue;
-        g_CurConfig.Input.aiRumble[i] = m_aInput[i].oRumble.GetCurEntry().tValue;
+        g_CurConfig.Input.aiType    [i] = m_aInput[i].oType    .GetCurEntry().tValue;
+        g_CurConfig.Input.aiRumble  [i] = m_aInput[i].oRumble  .GetCurEntry().tValue;
+        g_CurConfig.Input.aiFireMode[i] = m_aInput[i].oFireMode.GetCurEntry().tValue;
     }
 
     // 

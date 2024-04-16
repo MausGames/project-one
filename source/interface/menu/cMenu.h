@@ -34,13 +34,13 @@
 #define MENU_CONTRAST_BLACK           (0.04f)    // black contrast value
 
 #define MENU_GAME_MISSIONS            (9u)
-#define MENU_GAME_STAGES              (STAGES)
+#define MENU_GAME_STAGES              (SEGMENTS)
 #define MENU_GAME_PLAYERS             (PLAYERS)
 #define MENU_GAME_OPTIONS             (3u)
 #define MENU_SCORE_ENTRIES            (10u)
 #define MENU_REPLAY_ENTRIES           (5u)
 #define MENU_CONFIG_INPUTS            (PLAYERS)
-#define MENU_SUMMARY_MEDALS           (STAGES)
+#define MENU_SUMMARY_MEDALS           (SEGMENTS)
 #define MENU_SUMMARY_ENTRIES          (2u)
 #define MENU_SUMMARY_PARTS            (PLAYERS)
 #define MENU_SUMMARY_BANNER_SPEED     (4.0f)
@@ -52,6 +52,11 @@
 #define MENU_DEFEAT_BANNER_SPEED      (4.0f)
 #define MENU_DEFEAT_BANNER_SPEED_REV  (1.0f / MENU_DEFEAT_BANNER_SPEED)
 #define MENU_DEFEAT_BANNER_ANIMATION  (2.9f)
+#define MENU_FINISH_DELAY_INTRO       (1.0f)
+#define MENU_FINISH_PARTS             (PLAYERS)
+#define MENU_FINISH_BANNER_SPEED      (4.0f)
+#define MENU_FINISH_BANNER_SPEED_REV  (1.0f / MENU_FINISH_BANNER_SPEED)
+#define MENU_FINISH_BANNER_ANIMATION  (2.9f)
 
 #define MENU_BUTTON             "menu_background_black.png", "menu_background_black.png"
 #define MENU_SWITCHBOX          "default_black.png", "default_black.png"
@@ -89,6 +94,7 @@ enum eSurface : coreUint8
     SURFACE_PAUSE,
     SURFACE_SUMMARY,
     SURFACE_DEFEAT,
+    SURFACE_FINISH,
     SURFACE_MAX,
 
     SURFACE_INTRO_EMPTY = 0u,
@@ -126,14 +132,18 @@ enum eSurface : coreUint8
     SURFACE_PAUSE_DEFAULT = 0u,
     SURFACE_PAUSE_MAX,
 
-    SURFACE_SUMMARY_NORMAL = 0u,
+    SURFACE_SUMMARY_SOLO = 0u,
+    SURFACE_SUMMARY_COOP,
     SURFACE_SUMMARY_BEGIN,
     SURFACE_SUMMARY_TITLE,
     SURFACE_SUMMARY_MAX,
 
     SURFACE_DEFEAT_CONTINUE = 0u,
     SURFACE_DEFEAT_GAMEOVER,
-    SURFACE_DEFEAT_MAX
+    SURFACE_DEFEAT_MAX,
+
+    SURFACE_FINISH_DEFAULT = 0u,
+    SURFACE_FINISH_MAX
 };
 
 
@@ -158,6 +168,7 @@ enum eEntry : coreUint8
 
     ENTRY_INPUT_TYPE = ENTRY_AUDIO,
     ENTRY_INPUT_RUMBLE,
+    ENTRY_INPUT_FIREMODE,
     ENTRY_INPUT_MOVEUP,
     ENTRY_INPUT_MOVELEFT,
     ENTRY_INPUT_MOVEDOWN,
@@ -173,9 +184,11 @@ enum eEntry : coreUint8
     ENTRY_GAME_TEXTSIZE,
     ENTRY_GAME_GAMEROTATION,
     ENTRY_GAME_GAMESCALE,
+    ENTRY_GAME_GAMESPEED,
     ENTRY_GAME_HUDROTATION,
     ENTRY_GAME_HUDSCALE,
     ENTRY_GAME_HUDTYPE,
+    ENTRY_GAME_MIRRORMODE,
     ENTRY_MAX
 };
 
@@ -446,6 +459,7 @@ private:
         coreLabel       oHeader;
         coreSwitchBoxU8 oType;
         coreSwitchBoxU8 oRumble;
+        coreSwitchBoxU8 oFireMode;
         coreButton      oMoveUp;
         coreButton      oMoveLeft;
         coreButton      oMoveDown;
@@ -485,9 +499,11 @@ private:
     coreSwitchBoxU8 m_TextSize;
     coreSwitchBoxU8 m_GameRotation;
     coreSwitchBoxU8 m_GameScale;
+    coreSwitchBoxU8 m_GameSpeed;
     coreSwitchBoxU8 m_HudRotation;
     coreSwitchBoxU8 m_HudScale;
     coreSwitchBoxU8 m_HudType;
+    coreSwitchBoxU8 m_MirrorMode;
 
     sPlayerInput m_aInput[MENU_CONFIG_INPUTS];
     coreButton   m_SwapInput;
@@ -576,7 +592,8 @@ private:
 
     coreLabel m_aHeader[2];                                         // 
 
-    coreObject2D m_aMedal[MENU_SUMMARY_MEDALS];                     // 
+    coreObject2D m_MedalMission;                                    // 
+    coreObject2D m_aMedalSegment[MENU_SUMMARY_MEDALS];              // 
 
     coreLabel m_aName [MENU_SUMMARY_ENTRIES];                       // 
     coreLabel m_aValue[MENU_SUMMARY_ENTRIES];                       // 
@@ -586,9 +603,13 @@ private:
     coreLabel m_TotalValue;                                         // 
     coreLabel m_aTotalPart[MENU_SUMMARY_PARTS];                     // 
 
-    coreUint32 m_iFinalScore;                                       // (just for display) 
-    coreFlow   m_fIntroTimer;                                       // 
-    coreFlow   m_fOutroTimer;                                       // 
+    coreUint32 m_iFinalValue;                                       // (just for display) 
+    coreUint32 m_aiFinalPart [MENU_SUMMARY_PARTS];                  // (just for display) 
+    coreUint32 m_aiApplyBonus[MENU_SUMMARY_PARTS];                  // 
+    coreUint8  m_aiApplyMedal[MENU_SUMMARY_PARTS];                  // 
+
+    coreFlow m_fIntroTimer;                                         // 
+    coreFlow m_fOutroTimer;                                         // 
 
     eSummaryState m_eState;                                         // 
 
@@ -609,7 +630,8 @@ public:
 
 private:
     // 
-    void __SetMedal(const coreUintW iIndex, const coreUint8 iType);
+    void __SetMedalMission(const coreUint8 iMedal);
+    void __SetMedalSegment(const coreUintW iIndex, const coreUint8 iMedal);
 };
 
 
@@ -661,6 +683,49 @@ public:
 
 
 // ****************************************************************
+// finish menu class
+class cFinishMenu final : public coreMenu
+{
+private:
+    // 
+    enum eFinishState : coreUint8
+    {
+        FINISH_INTRO = 0u,
+        FINISH_WAIT  = 1u,
+        FINISH_OUTRO = 2u
+    };
+
+
+private:
+    coreObject2D m_Background;                   // 
+
+    coreLabel m_ThankYouText;                    // 
+
+    coreLabel m_TotalName;                       // 
+    coreLabel m_TotalValue;                      // 
+    coreLabel m_aTotalPart[MENU_FINISH_PARTS];   // 
+
+    coreFlow m_fIntroTimer;                      // 
+    coreFlow m_fOutroTimer;                      // 
+
+    eFinishState m_eState;                       // 
+
+
+public:
+    cFinishMenu()noexcept;
+
+    DISABLE_COPY(cFinishMenu)
+
+    // render and move the finish menu
+    void Render()final;
+    void Move  ()final;
+
+    // 
+    void ShowThankYou();
+};
+
+
+// ****************************************************************
 // master menu class
 class cMenu final : public coreMenu, public coreResourceRelation
 {
@@ -677,6 +742,7 @@ private:
     cPauseMenu   m_PauseMenu;            // pause menu object
     cSummaryMenu m_SummaryMenu;          // summary menu object
     cDefeatMenu  m_DefeatMenu;           // defeat menu object
+    cFinishMenu  m_FinishMenu;           // finish menu object
 
     cMsgBox  m_MsgBox;                   // message box overlay
     cTooltip m_Tooltip;                  // tooltip overlay
@@ -723,6 +789,7 @@ public:
     static void UpdateButton        (coreButton*      OUTPUT pButton, const coreBool bFocused, const coreVector3& vFocusColor = COLOR_MENU_WHITE);
     static void UpdateSwitchBox     (coreSwitchBoxU8* OUTPUT pSwitchBox);
     static void UpdateAnimateProgram(coreObject2D*    OUTPUT pObject);
+    static void ApplyMedalTexture   (coreObject2D*    OUTPUT pObject, const coreUint8 iMedal, const coreUint8 iMedalType);
 
 
 private:

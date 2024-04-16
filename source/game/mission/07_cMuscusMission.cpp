@@ -44,21 +44,21 @@ void cMuscusMission::__SetupOwn()
     // 
     STAGE_MAIN
     {
-        STAGE_BOSS(m_Orlac)
+        STAGE_BOSS(m_Orlac, {60.0f, 120.0f, 180.0, 240.0f})
     });
 
     // ################################################################
     // 
     STAGE_MAIN
     {
-        STAGE_BOSS(m_Geminga)
+        STAGE_BOSS(m_Geminga, {60.0f, 120.0f, 180.0, 240.0f})
     });
 
     // ################################################################
     // 
     STAGE_MAIN
     {
-        STAGE_BOSS(m_Nagual)
+        STAGE_BOSS(m_Nagual, {60.0f, 120.0f, 180.0, 240.0f})
     });
 
     // ################################################################

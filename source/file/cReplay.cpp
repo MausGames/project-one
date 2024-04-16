@@ -65,11 +65,10 @@ void cReplay::StartRecording()
     m_Header.iGameDifficulty = g_pGame->GetDifficulty();
     m_Header.iGamePlayers    = g_pGame->GetCoop() ? GAME_PLAYERS : 1u;
     m_Header.iPacifist       = g_pGame->GetPacifist();
-    m_Header.iNumStreams     = g_pGame->GetCoop() ? GAME_PLAYERS : 1u;
+    m_Header.iNumPlayers     = g_pGame->GetCoop() ? GAME_PLAYERS : 1u;
     m_Header.iNumMissions    = g_pGame->GetNumMissions();
-    m_Header.iNumBosses      = REPLAY_BOSSES;
-    m_Header.iNumWaves       = REPLAY_WAVES;
-    ASSERT(m_Header.iNumStreams <= REPLAY_STREAMS)
+    m_Header.iNumSegments    = REPLAY_SEGMENTS;
+    ASSERT(m_Header.iNumPlayers <= REPLAY_PLAYERS)
 
     // 
     std::memcpy(m_Header.aiMissionList, g_pGame->GetMissionList(), sizeof(coreInt32) * g_pGame->GetNumMissions());
@@ -90,7 +89,7 @@ void cReplay::StartPlayback()
     ASSERT(STATIC_ISVALID(g_pGame) && this->__CanStartPlayback())
 
     // 
-    for(coreUintW i = 0u, ie = m_Header.iNumStreams; i < ie; ++i)
+    for(coreUintW i = 0u, ie = m_Header.iNumPlayers; i < ie; ++i)
     {
         g_pGame->GetPlayer(i)->SetInput(&m_aInput[i]);
     }
@@ -114,7 +113,7 @@ void cReplay::EndRecording()
     m_Header.iReplayHash    = this->__CalculateReplayHash();
     m_Header.iEndTimestamp  = std::time(NULL);
     m_Header.iKeyFrameCount = m_aKeyFrame.size();
-    for(coreUintW i = 0u, ie = m_Header.iNumStreams; i < ie; ++i)
+    for(coreUintW i = 0u, ie = m_Header.iNumPlayers; i < ie; ++i)
     {
         m_Header.aiStreamPacketCount[i] = m_aaStreamPacket[i].size();
     }
@@ -125,26 +124,23 @@ void cReplay::EndRecording()
 
         m_Header.iTimeTotal = pTable->GetTimeTotalRaw();
         for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) m_Header.aiTimeMission[j] = pTable->GetTimeMissionRaw(j);
-        for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) for(coreUintW i = 0u, ie = m_Header.iNumBosses; i < ie; ++i) m_Header.aaiTimeBoss[j][i] = pTable->GetTimeBossRaw(j, i);
-        for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) for(coreUintW i = 0u, ie = m_Header.iNumWaves;  i < ie; ++i) m_Header.aaiTimeWave[j][i] = pTable->GetTimeWaveRaw(j, i);
+        for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) for(coreUintW i = 0u, ie = m_Header.iNumSegments; i < ie; ++i) m_Header.aaiTimeSegment[j][i] = pTable->GetTimeSegmentRaw(j, i);
     }
 
     // 
-    for(coreUintW k = 0u, ke = m_Header.iNumStreams; k < ke; ++k)
+    for(coreUintW k = 0u, ke = m_Header.iNumPlayers; k < ke; ++k)
     {
         const cScoreTable* pTable = g_pGame->GetPlayer(k)->GetScoreTable();
 
         m_Header.aiScoreTotal[k] = pTable->GetScoreTotal();
         for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) m_Header.aaiScoreMission[k][j] = pTable->GetScoreMission(j);
-        for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) for(coreUintW i = 0u, ie = m_Header.iNumBosses; i < ie; ++i) m_Header.aaaiScoreBoss[k][j][i] = pTable->GetScoreBoss(j, i);
-        for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) for(coreUintW i = 0u, ie = m_Header.iNumWaves;  i < ie; ++i) m_Header.aaaiScoreWave[k][j][i] = pTable->GetScoreWave(j, i);
+        for(coreUintW j = 0u, je = m_Header.iNumMissions; j < je; ++j) for(coreUintW i = 0u, ie = m_Header.iNumSegments; i < ie; ++i) m_Header.aaaiScoreSegment[k][j][i] = pTable->GetScoreSegment(j, i);
     }
 
     // 
-    std::memset(m_Header.aiActionsTotal,    0, sizeof(m_Header.aiActionsTotal));
-    std::memset(m_Header.aaiActionsMission, 0, sizeof(m_Header.aaiActionsMission));
-    std::memset(m_Header.aaaiActionsBoss,   0, sizeof(m_Header.aaaiActionsBoss));
-    std::memset(m_Header.aaaiActionsWave,   0, sizeof(m_Header.aaaiActionsWave));
+    std::memset(m_Header.aiActionsTotal,     0, sizeof(m_Header.aiActionsTotal));
+    std::memset(m_Header.aaiActionsMission,  0, sizeof(m_Header.aaiActionsMission));
+    std::memset(m_Header.aaaiActionsSegment, 0, sizeof(m_Header.aaaiActionsSegment));
 
     // 
     m_iStatus = REPLAY_STATUS_DISABLED;
@@ -198,21 +194,21 @@ void cReplay::Update()
     {
         const auto nNewPacketFunc = [this](const coreUintW iIndex, const coreUint32 iType, const coreUint32 iValue)
         {
-            ASSERT((m_iCurFrame <= BITLINE(22u)) && (iType <= BITLINE(2u)) && (iValue <= BITLINE(4u)))
+            // 
+            sStreamPacketRaw oNewPacketRaw = {};
+            oNewPacketRaw.iFrame = m_iCurFrame;
+            oNewPacketRaw.iType  = iType;
+            oNewPacketRaw.iValue = iValue;
 
             // 
-            sStreamPacket oNewPacket;
-            oNewPacket.iFrame    = m_iCurFrame;
-            oNewPacket.iType     = iType;
-            oNewPacket.iValue    = iValue;
-            oNewPacket.iReserved = 0u;
+            const sStreamPacket oNewPacket = cReplay::__Pack(oNewPacketRaw);
 
             // 
             ASSERT(m_aaStreamPacket[iIndex].empty() || std::memcmp(&m_aaStreamPacket[iIndex].back(), &oNewPacket, sizeof(sStreamPacket)))
             m_aaStreamPacket[iIndex].push_back(oNewPacket);
         };
 
-        for(coreUintW i = 0u, ie = m_Header.iNumStreams; i < ie; ++i)
+        for(coreUintW i = 0u, ie = m_Header.iNumPlayers; i < ie; ++i)
         {
             const sGameInput* pNewInput = g_pGame->GetPlayer(i)->GetInput();
 
@@ -233,7 +229,7 @@ void cReplay::Update()
     }
     else if(m_iStatus == REPLAY_STATUS_PLAYBACK)
     {
-        for(coreUintW i = 0u, ie = m_Header.iNumStreams; i < ie; ++i)
+        for(coreUintW i = 0u, ie = m_Header.iNumPlayers; i < ie; ++i)
         {
             sGameInput& oCurInput = m_aInput[i];
 
@@ -243,24 +239,24 @@ void cReplay::Update()
 
             for(coreUintW j = m_aiCurPacket[i], je = m_aaStreamPacket[i].size(); j < je; ++j)
             {
-                const sStreamPacket& oPacket = m_aaStreamPacket[i][j];
-                if(oPacket.iFrame == m_iCurFrame)
+                const sStreamPacketRaw oPacketRaw = cReplay::__Unpack(m_aaStreamPacket[i][j]);
+                if(oPacketRaw.iFrame == m_iCurFrame)
                 {
                     // 
-                    switch(oPacket.iType)
+                    switch(oPacketRaw.iType)
                     {
                     case REPLAY_TYPE_MOVE:
-                        oCurInput.vMove = UnpackDirection(oPacket.iValue);
+                        oCurInput.vMove = UnpackDirection(oPacketRaw.iValue);
                         break;
 
                     case REPLAY_TYPE_PRESS:
-                        oCurInput.iActionPress = oPacket.iValue;
-                        oCurInput.iActionHold |= oPacket.iValue;
+                        oCurInput.iActionPress = oPacketRaw.iValue;
+                        oCurInput.iActionHold |= oPacketRaw.iValue;
                         break;
 
                     case REPLAY_TYPE_RELEASE:
-                        oCurInput.iActionRelease =  oPacket.iValue;
-                        oCurInput.iActionHold   &= ~oPacket.iValue;
+                        oCurInput.iActionRelease =  oPacketRaw.iValue;
+                        oCurInput.iActionHold   &= ~oPacketRaw.iValue;
                         break;
 
                     default: ASSERT(false)
@@ -268,7 +264,7 @@ void cReplay::Update()
                 }
                 else
                 {
-                    //ASSERT(oPacket.iFrame > m_iCurFrame)   // TODO: triggers also at the end of stream 
+                    //ASSERT(oPacketRaw.iFrame > m_iCurFrame)   // TODO: triggers also at the end of stream 
 
                     // 
                     m_aiCurPacket[i] = j;
@@ -374,7 +370,7 @@ void cReplay::Clear()
 
     // 
     m_aKeyFrame.clear();
-    for(coreUintW i = 0u; i < REPLAY_STREAMS; ++i)
+    for(coreUintW i = 0u; i < REPLAY_PLAYERS; ++i)
     {
         m_aaStreamPacket[i].clear();
         m_aaStreamPacket[i].reserve(0xFFFFu / sizeof(sStreamPacket));
@@ -429,7 +425,7 @@ void cReplay::__SetBodyData(const coreByte* pData, const coreUint32 iSize)
     std::memcpy(m_aKeyFrame.data(), pCursor, sizeof(sKeyFrame) * m_Header.iKeyFrameCount);
     pCursor += sizeof(sKeyFrame) * m_Header.iKeyFrameCount;
 
-    for(coreUintW i = 0u, ie = m_Header.iNumStreams; i < ie; ++i)
+    for(coreUintW i = 0u, ie = m_Header.iNumPlayers; i < ie; ++i)
     {
         // 
         m_aaStreamPacket[i].resize(m_Header.aiStreamPacketCount[i]);
@@ -450,7 +446,7 @@ void cReplay::__GetBodyData(coreByte** OUTPUT ppData, coreUint32* OUTPUT piSize)
 
     // 
     iPlainSize += sizeof(sKeyFrame) * m_aKeyFrame.size();
-    for(coreUintW i = 0u; i < REPLAY_STREAMS; ++i)
+    for(coreUintW i = 0u; i < REPLAY_PLAYERS; ++i)
     {
         iPlainSize += sizeof(sStreamPacket) * m_aaStreamPacket[i].size();
     }
@@ -463,7 +459,7 @@ void cReplay::__GetBodyData(coreByte** OUTPUT ppData, coreUint32* OUTPUT piSize)
     std::memcpy(pCursor, m_aKeyFrame.data(), sizeof(sKeyFrame) * m_aKeyFrame.size());
     pCursor += sizeof(sKeyFrame) * m_aKeyFrame.size();
 
-    for(coreUintW i = 0u; i < REPLAY_STREAMS; ++i)
+    for(coreUintW i = 0u; i < REPLAY_PLAYERS; ++i)
     {
         // 
         std::memcpy(pCursor, m_aaStreamPacket[i].data(), sizeof(sStreamPacket) * m_aaStreamPacket[i].size());
@@ -503,12 +499,40 @@ coreUint32 cReplay::__CalculateReplayHash()const
 
     // 
     iReplayHash ^= coreHashMurmur2(r_cast<const coreByte*>(m_aKeyFrame.data()), sizeof(sKeyFrame) * m_aKeyFrame.size());
-    for(coreUintW i = 0u; i < REPLAY_STREAMS; ++i)
+    for(coreUintW i = 0u; i < REPLAY_PLAYERS; ++i)
     {
         iReplayHash ^= coreHashMurmur2(r_cast<const coreByte*>(m_aaStreamPacket[i].data()), sizeof(sStreamPacket) * m_aaStreamPacket[i].size());
     }
 
     return iReplayHash;
+}
+
+
+// ****************************************************************
+// 
+cReplay::sStreamPacket cReplay::__Pack(const sStreamPacketRaw& oPacket)
+{
+    ASSERT((oPacket.iFrame <= BITLINE(22u)) && (oPacket.iType <= BITLINE(2u)) && (oPacket.iValue <= BITLINE(5u)))
+    STATIC_ASSERT(INPUT_KEYS_ACTION <= 5u)
+
+    // 
+    sStreamPacket oOutput = {};
+    oOutput.iData = (coreUint32(oPacket.iFrame & BITLINE(22u)) << 7u) |
+                    (coreUint32(oPacket.iType  & BITLINE(2u))  << 5u) |
+                    (coreUint32(oPacket.iValue & BITLINE(5u)));
+
+    return oOutput;
+}
+
+cReplay::sStreamPacketRaw cReplay::__Unpack(const sStreamPacket& oPacket)
+{
+    // 
+    sStreamPacketRaw oOutput = {};
+    oOutput.iFrame = (oPacket.iData >> 7u) & BITLINE(22u);
+    oOutput.iType  = (oPacket.iData >> 5u) & BITLINE(2u);
+    oOutput.iValue = (oPacket.iData)       & BITLINE(5u);
+
+    return oOutput;
 }
 
 

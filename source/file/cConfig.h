@@ -20,7 +20,7 @@
 
 // ****************************************************************
 // configuration definitions
-#define CONFIG_FORCE   // # force specific settings (to increase fairness)
+#define CONFIG_FORCE   // # force specific settings (for fairness)
 
 #define CONFIG_GRAPHICS_SHADOW     "Graphics", "Shadow",                               (1)
 #define CONFIG_GRAPHICS_REFLECTION "Graphics", "Reflection",                           (1)
@@ -31,6 +31,7 @@
 
 #define CONFIG_INPUT_TYPE(p)       "Input",    PRINT("P%zu_Type",      (p)),           (p)
 #define CONFIG_INPUT_RUMBLE(p)     "Input",    PRINT("P%zu_Rumble",    (p)),           (0)
+#define CONFIG_INPUT_FIRE_MODE(p)  "Input",    PRINT("P%zu_FireMode",  (p)),           (0)
 #define CONFIG_INPUT_MOVE_UP(s)    "Input",    PRINT("S%zu_MoveUp",    (s)),           (CORE_INPUT_KEY(W))
 #define CONFIG_INPUT_MOVE_LEFT(s)  "Input",    PRINT("S%zu_MoveLeft",  (s)),           (CORE_INPUT_KEY(A))
 #define CONFIG_INPUT_MOVE_DOWN(s)  "Input",    PRINT("S%zu_MoveDown",  (s)),           (CORE_INPUT_KEY(S))
@@ -40,9 +41,11 @@
 #define CONFIG_GAME_TEXT_SIZE      "Game",     "TextSize",                             (0)
 #define CONFIG_GAME_GAME_ROTATION  "Game",     "GameRotation",                         (0)
 #define CONFIG_GAME_GAME_SCALE     "Game",     "GameScale",                            (100)
+#define CONFIG_GAME_GAME_SPEED     "Game",     "GameSpeed",                            (100)
 #define CONFIG_GAME_HUD_ROTATION   "Game",     "HudRotation",                          (0)
 #define CONFIG_GAME_HUD_SCALE      "Game",     "HudScale",                             (100)
 #define CONFIG_GAME_HUD_TYPE       "Game",     "HudType",                              (0)
+#define CONFIG_GAME_MIRROR_MODE    "Game",     "MirrorMode",                           (0)
 
 #define INPUT_TYPES         (PLAYERS)                                     // number of input set selections
 #define INPUT_KEYS_MOVE     (4u)                                          // number of move keys per set (left, right, down, up)
@@ -77,8 +80,9 @@ struct sConfig final
 
     struct
     {
-        coreUint8 aiType  [INPUT_TYPES];             // selected input set (each element should have a different value)
-        coreUint8 aiRumble[INPUT_TYPES];             // 
+        coreUint8 aiType    [INPUT_TYPES];           // selected input set (each element should have a different value)
+        coreUint8 aiRumble  [INPUT_TYPES];           // 
+        coreUint8 aiFireMode[INPUT_TYPES];           // 
         struct
         {
             coreInt16 iMoveUp;                       // key for moving up (ignored on joystick/gamepad)
@@ -96,9 +100,11 @@ struct sConfig final
         coreUint8 iTextSize;       // 
         coreUint8 iGameRotation;   // 
         coreUint8 iGameScale;      // 
+        coreUint8 iGameSpeed;      // 
         coreUint8 iHudRotation;    // 
         coreUint8 iHudScale;       // 
         coreUint8 iHudType;        // 
+        coreUint8 iMirrorMode;     // 
     }
     Game;
 };

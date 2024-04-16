@@ -555,7 +555,7 @@ void cSpecialEffects::PlaySound(const coreVector3& vPosition, const coreFloat fV
     ASSERT(fVolume > 0.0f)
 
     // 
-    if(m_eSoundGuard == eSoundIndex) return;
+    if(m_eSoundGuard == eSoundIndex) return; // TODO: what about different position? maybe left<>right locking, or moving the sound, or deferring execution     
     m_eSoundGuard = eSoundIndex;
 
     // 

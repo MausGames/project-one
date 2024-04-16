@@ -25,7 +25,7 @@ cTitleMenu::cTitleMenu()noexcept
     m_GameLogo.SetSize      (coreVector2(1.0f,0.25f) * 0.9f);
     m_GameLogo.SetColor3    (coreVector3(1.0f,1.0f,1.0f) * 1.05f);
 
-    m_PromptText.Construct      (MENU_FONT_STANDARD_3, MENU_OUTLINE_SMALL);
+    m_PromptText.Construct      (MENU_FONT_DYNAMIC_3, MENU_OUTLINE_SMALL);
     m_PromptText.SetTextLanguage("PROMPT");
 
     m_aVersionText[0].Construct   (MENU_FONT_STANDARD_1, MENU_OUTLINE_SMALL);
@@ -102,7 +102,7 @@ void cTitleMenu::Move()
         m_fTest.UpdateMin(5.0f, 1.0f);
 
         m_PromptText.SetScale(LERPB(1.0f, 1.1f, m_fTest));
-        m_PromptText.SetAlpha (LERPB(m_PromptText.GetAlpha(), 0.0f, MIN(m_fTest, 1.0f)));
+        m_PromptText.SetAlpha(LERPB(m_PromptText.GetAlpha(), 0.0f, MIN(m_fTest, 1.0f)));
 
         if(m_fTest >= 1.0f)
         {

@@ -16,7 +16,6 @@ cAterMission::cAterMission()noexcept
     // 
     m_apBoss[0] = &m_ProjectOne;
     m_apBoss[1] = &m_Eigengrau;
-    m_apBoss[2] = &m_Eigengrau;
 }
 
 
@@ -44,14 +43,14 @@ void cAterMission::__SetupOwn()
     // 
     STAGE_MAIN
     {
-        STAGE_BOSS(m_ProjectOne)
+        STAGE_BOSS(m_ProjectOne, {60.0f, 120.0f, 180.0, 240.0f})
     });
 
     // ################################################################
     // 
     STAGE_MAIN
     {
-        STAGE_BOSS(m_Eigengrau)
+        STAGE_BOSS(m_Eigengrau, {60.0f, 120.0f, 180.0, 240.0f})
     });
 
     // ################################################################

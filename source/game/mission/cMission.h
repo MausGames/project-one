@@ -15,6 +15,8 @@
 // TODO: prevent multiple calculations in script-commands (because of macro variables), also boss
 // TODO: assertion for "active boss should be alive"
 // TODO: STAGE_FLYPAST with dot-product or simpler per-axis
+// TODO: there seems to be a bug in STAGE_TICK_TIME, which sometimes gives early or late ticks with 30.0f speed, compared with STAGE_TICK_LIFETIME
+// TODO: wrap m_piData in function with RETURN_RESTRICT
 
 
 // ****************************************************************
@@ -23,7 +25,12 @@
 #define MISSION_WAVES       (WAVES)                                    // 
 #define MISSION_NO_BOSS     (0xFFu)                                    // no boss currently active (error-value)
 #define MISSION_NO_WAVE     (0xFFu)                                    // 
+#define MISSION_NO_SEGMENT  (0xFFu)                                    // 
 #define MISSION_STAGE_DELAY (INTERFACE_BANNER_DURATION_SCORE - 0.5f)   // 
+
+#define MISSION_SEGMENT_IS_BOSS(i) ((i) % 6u == 5u)
+#define MISSION_BOSS_TO_SEGMENT(i) ((i) * 6u  + 5u)
+#define MISSION_WAVE_TO_SEGMENT(i) ((i) + (i) / 5u)
 
 
 // ****************************************************************
@@ -34,7 +41,7 @@
 #define VIRIDO_PADDLES       (3u)                                    // 
 #define VIRIDO_BARRIERS      (14u)                                   // 
 #define VIRIDO_BARRIERS_RAWS (VIRIDO_BARRIERS)                       // 
-#define VIRIDO_SHADOWS       (8u)                                    // 
+#define VIRIDO_SHADOWS       (16u)                                   // 
 #define VIRIDO_SHADOWS_RAWS  (VIRIDO_SHADOWS)                        // 
 #define VIRIDO_BALL_SPEED    (1.5f)                                  // 
 
@@ -46,8 +53,10 @@
 
 #define STAGE_FINISH_NOW                {this->SkipStage();}
 #define STAGE_FINISH_AFTER(t)           {if(m_fStageTime >= (t)) STAGE_FINISH_NOW}
-#define STAGE_BOSS(e)                   {if(STAGE_BEGINNING) (e).Resurrect(); if(CONTAINS_FLAG((e).GetStatus(), ENEMY_STATUS_DEAD)) STAGE_FINISH_NOW}
-#define STAGE_WAVE                      {if(STAGE_BEGINNING) this->ActivateWave(); if(STAGE_CLEARED) {this->DeactivateWave(); STAGE_FINISH_NOW}}
+
+#define STAGE_MEDAL_GOAL(...)           {static constexpr coreFloat A[] = __VA_ARGS__; this->SetMedalGoal(A); STATIC_ASSERT((ARRAY_SIZE(A) == 4u) && (A[0] < A[1]) && (A[1] < A[2]) && (A[2] < A[3]))}
+#define STAGE_BOSS(e,...)               {if(STAGE_BEGINNING) {STAGE_MEDAL_GOAL(__VA_ARGS__) (e).Resurrect();} if(CONTAINS_FLAG((e).GetStatus(), ENEMY_STATUS_DEAD)) STAGE_FINISH_NOW}
+#define STAGE_WAVE(n,...)               {if(STAGE_BEGINNING) {STAGE_MEDAL_GOAL(__VA_ARGS__) this->ActivateWave(n);} if(STAGE_CLEARED) {this->DeactivateWave(); STAGE_FINISH_NOW}}
 
 #define STAGE_RESSURECT(s,f,t)          {STAGE_FOREACH_ENEMY_ALL(s, pEnemy, i) {if((coreInt32(i) >= coreInt32(f)) && (coreInt32(i) <= coreInt32(t))) pEnemy->Resurrect();});}
 #define STAGE_CLEARED                   (std::all_of(m_apSquad.begin(), m_apSquad.end(), [](const cEnemySquad* pSquad) {return pSquad->IsFinished();}))
@@ -73,16 +82,18 @@
 #define STAGE_FOREACH_ENEMY(s,e,i)      (s)->ForEachEnemy        ([&](cEnemy*  OUTPUT e, const coreUintW i)
 #define STAGE_FOREACH_ENEMY_ALL(s,e,i)  (s)->ForEachEnemyAll     ([&](cEnemy*  OUTPUT e, const coreUintW i)
 
-#define STAGE_GET_START(c)              {if((c) > m_iDataSize) {ZERO_DELETE(m_piData) m_iDataSize = (c); m_piData = ZERO_NEW(coreUint32, m_iDataSize);}} coreUintW iDataIndex = 0u; constexpr coreUintW iCurDataSize = (c);
+#define STAGE_GET_START(c)              {if((c) > m_iDataSize) {ZERO_DELETE(m_piData) STATIC_ASSERT((c) < 0xFFu) m_iDataSize = (c); m_piData = ZERO_NEW(coreUint32, m_iDataSize);}} coreUintW iDataIndex = 0u; constexpr coreUintW iCurDataSize = (c);
 #define STAGE_GET_END                   {ASSERT(iDataIndex == iCurDataSize)}
 #define STAGE_GET_INT(n,...)            coreInt32&                n = r_cast<coreInt32&>  ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 #define STAGE_GET_UINT(n,...)           coreUint32&               n = r_cast<coreUint32&> ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_UINT64(n,...)         coreUint64&               n = r_cast<coreUint64&> ( m_piData[iDataIndex]); iDataIndex += 2u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 #define STAGE_GET_FLOAT(n,...)          coreFloat&                n = r_cast<coreFloat&>  ( m_piData[iDataIndex]); iDataIndex += 1u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 #define STAGE_GET_VEC2(n,...)           coreVector2&              n = r_cast<coreVector2&>( m_piData[iDataIndex]); iDataIndex += 2u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 #define STAGE_GET_VEC3(n,...)           coreVector3&              n = r_cast<coreVector3&>( m_piData[iDataIndex]); iDataIndex += 3u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 #define STAGE_GET_VEC4(n,...)           coreVector4&              n = r_cast<coreVector4&>( m_piData[iDataIndex]); iDataIndex += 4u;       {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 #define STAGE_GET_INT_ARRAY(n,c,...)    coreInt32*   const OUTPUT n = r_cast<coreInt32*>  (&m_piData[iDataIndex]); iDataIndex += 1u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 #define STAGE_GET_UINT_ARRAY(n,c,...)   coreUint32*  const OUTPUT n = r_cast<coreUint32*> (&m_piData[iDataIndex]); iDataIndex += 1u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
+#define STAGE_GET_UINT64_ARRAY(n,c,...) coreUint64*  const OUTPUT n = r_cast<coreUint64*> (&m_piData[iDataIndex]); iDataIndex += 2u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 #define STAGE_GET_FLOAT_ARRAY(n,c,...)  coreFloat*   const OUTPUT n = r_cast<coreFloat*>  (&m_piData[iDataIndex]); iDataIndex += 1u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 #define STAGE_GET_VEC2_ARRAY(n,c,...)   coreVector2* const OUTPUT n = r_cast<coreVector2*>(&m_piData[iDataIndex]); iDataIndex += 2u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
 #define STAGE_GET_VEC3_ARRAY(n,c,...)   coreVector3* const OUTPUT n = r_cast<coreVector3*>(&m_piData[iDataIndex]); iDataIndex += 3u * (c); {if(STAGE_BEGINNING) {__VA_ARGS__;}}
@@ -150,6 +161,8 @@ protected:
     coreUintW m_iCurWaveCount;                                 // 
     coreUintW m_iCurWaveIndex;                                 // 
 
+    coreUintW m_iCurSegmentIndex;                              // 
+
     coreLookup<coreUint16, std::function<void()>> m_anStage;   // 
     coreLookup<coreUint16, coreSpline2*>          m_apPath;    // 
     coreLookup<coreUint16, cEnemySquad*>          m_apSquad;   // 
@@ -161,6 +174,8 @@ protected:
     coreFlow   m_fStageTime;                                   // 
     coreFloat  m_fStageTimeBefore;                             // 
     coreUint8  m_iStageSub;                                    // 
+
+    const coreFloat* m_pfMedalGoal;                            // 
 
     static coreUint16  s_iTick;                                // 
     static coreFloat   s_fLifeTimePoint;                       // 
@@ -198,18 +213,23 @@ public:
     void DeactivateBoss();
 
     // 
-    void ActivateWave  ();
+    void ActivateWave  (const coreChar* pcName);
     void DeactivateWave();
 
+    // 
+    inline void SetMedalGoal(const coreFloat* pfMedalGoal) {m_pfMedalGoal = pfMedalGoal; ASSERT(pfMedalGoal)}
+
     // access mission objects
-    inline cBoss*           GetBoss        (const coreUintW iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_apBoss[iIndex];}
-    inline cBoss*           GetCurBoss     ()const                       {return m_pCurBoss;}
-    inline const coreUintW& GetCurBossIndex()const                       {return m_iCurBossIndex;}
-    inline const coreUintW& GetCurWaveIndex()const                       {return m_iCurWaveIndex;}
-    inline cEnemySquad*     GetEnemySquad  (const coreUintW iIndex)const {ASSERT(iIndex < m_apSquad.size()) return m_apSquad.get_valuelist()[iIndex];}
+    inline cBoss*           GetBoss           (const coreUintW iIndex)const {ASSERT(iIndex < MISSION_BOSSES) return m_apBoss[iIndex];}
+    inline cBoss*           GetCurBoss        ()const                       {return m_pCurBoss;}
+    inline const coreUintW& GetCurBossIndex   ()const                       {return m_iCurBossIndex;}
+    inline const coreUintW& GetCurWaveIndex   ()const                       {return m_iCurWaveIndex;}
+    inline const coreUintW& GetCurSegmentIndex()const                       {return m_iCurSegmentIndex;}
+    inline cEnemySquad*     GetEnemySquad     (const coreUintW iIndex)const {ASSERT(iIndex < m_apSquad.size()) return m_apSquad.get_valuelist()[iIndex];}
 
 
 
+     
     inline void CollPlayerEnemy (cPlayer* OUTPUT pPlayer, cEnemy*  OUTPUT pEnemy,  const coreVector3& vIntersection) {if(m_nCollPlayerEnemy)  m_nCollPlayerEnemy (pPlayer, pEnemy,  vIntersection);}
     inline void CollPlayerBullet(cPlayer* OUTPUT pPlayer, cBullet* OUTPUT pBullet, const coreVector3& vIntersection) {if(m_nCollPlayerBullet) m_nCollPlayerBullet(pPlayer, pBullet, vIntersection);}
     inline void CollEnemyBullet (cEnemy*  OUTPUT pEnemy,  cBullet* OUTPUT pBullet, const coreVector3& vIntersection) {if(m_nCollEnemyBullet)  m_nCollEnemyBullet (pEnemy,  pBullet, vIntersection);}
@@ -237,6 +257,9 @@ private:
     virtual void __RenderOwnOver  () {}
     virtual void __MoveOwnBefore  () {}
     virtual void __MoveOwnAfter   () {}
+
+    // 
+    void __CloseSegment();
 };
 
 
@@ -274,13 +297,9 @@ private:
     const cShip*  m_apBarrierOwner[VIRIDO_BARRIERS];        // 
     coreUint8     m_aiBarrierDir  [VIRIDO_BARRIERS];        // 
 
-
-
-    coreBatchList m_Shadow;                              // 
-    coreObject3D  m_aShadowRaw   [VIRIDO_SHADOWS_RAWS];   // 
-    const cShip*  m_apShadowOwner[VIRIDO_SHADOWS];        // 
-
-
+    coreBatchList m_Shadow;                                 // 
+    coreObject3D  m_aShadowRaw   [VIRIDO_SHADOWS_RAWS];     // 
+    const cShip*  m_apShadowOwner[VIRIDO_SHADOWS];          // 
 
     coreUint8 m_iRealState;                                 // 
     coreUint8 m_iStickyState;                               // (only between first ball and first paddle) 
@@ -594,6 +613,7 @@ template <typename F> coreSpline2* cMission::_AddPath(const coreUint16 iCodeLine
         // 
         coreSpline2* pNewPath = new coreSpline2();
         nInitFunc(pNewPath);
+        ASSERT(pNewPath->GetNumNodes() == pNewPath->GetCapacity())
 
         // 
         m_apPath.emplace(iCodeLine, pNewPath);

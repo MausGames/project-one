@@ -63,7 +63,7 @@ void cMenuInput::Move()
 
         if(s_bJoystick && m_pMenu && Core::Input->GetJoystickButton(i, 10u, CORE_INPUT_PRESS))
         {
-            coreObject2D* pCurTarget = NULL;
+            //coreObject2D* pCurTarget = NULL;
 
             const coreUint8 iCurSurface = m_pMenu->GetCurSurface();
 

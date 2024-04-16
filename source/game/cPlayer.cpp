@@ -49,6 +49,7 @@ cPlayer::cPlayer()noexcept
     }
 
     // 
+    m_DataTable .SetOwner(this);
     m_ScoreTable.SetOwner(this);
 
     // 
@@ -394,6 +395,7 @@ void cPlayer::Move()
     }
 
     // 
+    m_DataTable .Update();
     m_ScoreTable.Update();
 
     // 
